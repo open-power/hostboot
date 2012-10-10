@@ -1,25 +1,25 @@
-//  IBM_PROLOG_BEGIN_TAG
-//  This is an automatically generated prolog.
-//
-//  $Source: src/usr/trace/tracedaemon.C $
-//
-//  IBM CONFIDENTIAL
-//
-//  COPYRIGHT International Business Machines Corp. 2012
-//
-//  p1
-//
-//  Object Code Only (OCO) source materials
-//  Licensed Internal Code Source Materials
-//  IBM HostBoot Licensed Internal Code
-//
-//  The source code for this program is not published or other-
-//  wise divested of its trade secrets, irrespective of what has
-//  been deposited with the U.S. Copyright Office.
-//
-//  Origin: 30
-//
-//  IBM_PROLOG_END
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/usr/trace/tracedaemon.C $                                 */
+/*                                                                        */
+/* IBM CONFIDENTIAL                                                       */
+/*                                                                        */
+/* COPYRIGHT International Business Machines Corp. 2012                   */
+/*                                                                        */
+/* p1                                                                     */
+/*                                                                        */
+/* Object Code Only (OCO) source materials                                */
+/* Licensed Internal Code Source Materials                                */
+/* IBM HostBoot Licensed Internal Code                                    */
+/*                                                                        */
+/* The source code for this program is not published or otherwise         */
+/* divested of its trade secrets, irrespective of what has been           */
+/* deposited with the U.S. Copyright Office.                              */
+/*                                                                        */
+/* Origin: 30                                                             */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
 #include "tracedaemon.H"
 #include <sys/task.h>
 #include <targeting/common/commontargeting.H>
@@ -50,9 +50,10 @@ TraceDaemon::~TraceDaemon()
     msg_q_destroy(iv_msgQ);
 }
 
-void TraceDaemon::start(void* i_self)
+void* TraceDaemon::start(void* i_self)
 {
     reinterpret_cast<TraceDaemon *>(i_self)->run();
+    return NULL;
 };
 
 void TraceDaemon::run()
@@ -80,8 +81,7 @@ void TraceDaemon::run()
             case DAEMON_SHUTDOWN:
                     // Respond to message and exit.
                 msg_respond(iv_msgQ, l_msg);
-                task_end();
-                break;
+                return;
         };
 
         if (msg_is_async(l_msg))

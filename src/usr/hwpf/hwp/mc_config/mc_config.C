@@ -80,7 +80,7 @@ using   namespace   fapi;
 //
 //  Wrapper function to call 12.1 : host_collect_dimm_spd
 //
-void    call_host_collect_dimm_spd( void *io_pArgs )
+void*    call_host_collect_dimm_spd( void *io_pArgs )
 {
     errlHndl_t l_err = NULL;
 
@@ -132,7 +132,7 @@ void    call_host_collect_dimm_spd( void *io_pArgs )
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_host_collect_dimm_spd exit" );
 
-    task_end2( l_err );
+    return l_err;
 }
 
 
@@ -140,7 +140,7 @@ void    call_host_collect_dimm_spd( void *io_pArgs )
 //
 //  Wrapper function to call 12.2 : mss_volt
 //
-void    call_mss_volt( void *io_pArgs )
+void*    call_mss_volt( void *io_pArgs )
 {
     errlHndl_t l_err = NULL;
 
@@ -193,13 +193,13 @@ void    call_mss_volt( void *io_pArgs )
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mss_volt exit" );
 
-    task_end2( l_err );
+    return l_err;
 }
 
 //
 //  Wrapper function to call 12.3 : mss_freq
 //
-void    call_mss_freq( void *io_pArgs )
+void*    call_mss_freq( void *io_pArgs )
 {
     errlHndl_t l_err = NULL;
 
@@ -246,7 +246,7 @@ void    call_mss_freq( void *io_pArgs )
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mss_freq exit" );
 
-    task_end2( NULL );
+    return l_err;
 }
 
 errlHndl_t call_mss_eff_grouping()
@@ -319,7 +319,7 @@ errlHndl_t call_mss_eff_grouping()
 //
 //  Wrapper function to call 12.4 : mss_eff_config
 //
-void    call_mss_eff_config( void *io_pArgs )
+void*    call_mss_eff_config( void *io_pArgs )
 {
     errlHndl_t l_err = NULL;
 
@@ -381,7 +381,7 @@ void    call_mss_eff_config( void *io_pArgs )
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mss_eff_config exit" );
 
-    task_end2( NULL );
+    return l_err;
 }
 
 

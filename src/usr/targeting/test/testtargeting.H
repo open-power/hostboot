@@ -1,25 +1,25 @@
-//  IBM_PROLOG_BEGIN_TAG
-//  This is an automatically generated prolog.
-//
-//  $Source: src/usr/targeting/test/testtargeting.H $
-//
-//  IBM CONFIDENTIAL
-//
-//  COPYRIGHT International Business Machines Corp. 2012
-//
-//  p1
-//
-//  Object Code Only (OCO) source materials
-//  Licensed Internal Code Source Materials
-//  IBM HostBoot Licensed Internal Code
-//
-//  The source code for this program is not published or other-
-//  wise divested of its trade secrets, irrespective of what has
-//  been deposited with the U.S. Copyright Office.
-//
-//  Origin: 30
-//
-//  IBM_PROLOG_END
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/usr/targeting/test/testtargeting.H $                      */
+/*                                                                        */
+/* IBM CONFIDENTIAL                                                       */
+/*                                                                        */
+/* COPYRIGHT International Business Machines Corp. 2012                   */
+/*                                                                        */
+/* p1                                                                     */
+/*                                                                        */
+/* Object Code Only (OCO) source materials                                */
+/* Licensed Internal Code Source Materials                                */
+/* IBM HostBoot Licensed Internal Code                                    */
+/*                                                                        */
+/* The source code for this program is not published or otherwise         */
+/* divested of its trade secrets, irrespective of what has been           */
+/* deposited with the U.S. Copyright Office.                              */
+/*                                                                        */
+/* Origin: 30                                                             */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
 
 #ifndef __TARGETING_TESTTARGETING_H
 #define __TARGETING_TESTTARGETING_H
@@ -77,9 +77,9 @@ struct MutexTestData_t
  *
  *  @param[in] i_pData Pointer to mutex pointer/value pointer structure
  *
- *  @return N/A
+ *  @return NULL
  */
-void funcTestMutex(void* i_pData)
+void* funcTestMutex(void* i_pData)
 {
     MutexTestData_t* l_pData = static_cast<MutexTestData_t*>(i_pData);
     barrier_wait(l_pData->pBarrier);
@@ -87,7 +87,7 @@ void funcTestMutex(void* i_pData)
     *(l_pData->pVar) = 1;
     mutex_unlock(l_pData->pMutex);
     barrier_wait(l_pData->pBarrier);
-    task_end();
+    return NULL;
 }
 
 class TargetingTestSuite : public CxxTest::TestSuite

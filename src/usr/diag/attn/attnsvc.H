@@ -92,7 +92,7 @@ class Service
          *
          * @param[in] i_svc service object associated with task
          */
-        static void intrTask(void * i_svc);
+        static void* intrTask(void * i_svc);
 
         /**
          * @brief prdTask infinite wait-for-attention loop
@@ -101,7 +101,7 @@ class Service
          *
          * @param[in] i_svc service object associated with task
          */
-        static void prdTask(void * i_svc);
+        static void* prdTask(void * i_svc);
 
         /**
          * @brief startIntrTask start task helper function

@@ -35,7 +35,7 @@
 
 using namespace Systemcalls;
 
-void TaskManager::idleTaskLoop(void* unused)
+void* TaskManager::idleTaskLoop(void* unused)
 {
     while(1)
     {
@@ -48,4 +48,5 @@ void TaskManager::idleTaskLoop(void* unused)
         // Execute nap.
         nap();
     }
+   return NULL;
 }

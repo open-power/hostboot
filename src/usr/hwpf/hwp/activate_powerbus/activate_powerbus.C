@@ -73,7 +73,7 @@ using   namespace   fapi;
 //  Wrapper function to call 09.1 :
 //      proc_build_smp
 //
-void    call_proc_build_smp( void    *io_pArgs )
+void*    call_proc_build_smp( void    *io_pArgs )
 {
     errlHndl_t  l_errl  =   NULL;
 
@@ -197,7 +197,7 @@ void    call_proc_build_smp( void    *io_pArgs )
                "call_proc_build_smp exit" );
 
     // end task, returning any errorlogs to IStepDisp 
-    task_end2( l_errl );
+    return l_errl;
 }
 
 

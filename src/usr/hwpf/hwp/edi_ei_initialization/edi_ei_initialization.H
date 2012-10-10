@@ -114,10 +114,10 @@ namespace   EDI_EI_INITIALIZATION
  *
  *  param[in,out]   -   pointer to any arguments, usually NULL
  *
- *  return  none
+ *  return any errlogs to istep 
  *
  */
-void    call_fabric_erepair( void    *io_pArgs );
+void*    call_fabric_erepair( void    *io_pArgs );
 
 
 
@@ -128,10 +128,10 @@ void    call_fabric_erepair( void    *io_pArgs );
  *
  *  param[in,out]   -   pointer to any arguments, usually NULL
  *
- *  return  none
+ *  return  any errlogs to istep 
  *
  */
-void    call_fabric_io_dccal( void    *io_pArgs );
+void*    call_fabric_io_dccal( void    *io_pArgs );
 
 
 
@@ -142,10 +142,10 @@ void    call_fabric_io_dccal( void    *io_pArgs );
  *
  *  param[in,out]   -   pointer to any arguments, usually NULL
  *
- *  return  none
+ *  return  any errlogs to istep 
  *
  */
-void    call_fabric_pre_trainadv( void    *io_pArgs );
+void*    call_fabric_pre_trainadv( void    *io_pArgs );
 
 
 
@@ -156,10 +156,10 @@ void    call_fabric_pre_trainadv( void    *io_pArgs );
  *
  *  param[in,out]   -   pointer to any arguments, usually NULL
  *
- *  return  none
+ *  return  any errlogs to istep 
  *
  */
-void    call_fabric_io_run_training( void    *io_pArgs );
+void*    call_fabric_io_run_training( void    *io_pArgs );
 
 
 
@@ -170,10 +170,10 @@ void    call_fabric_io_run_training( void    *io_pArgs );
  *
  *  param[in,out]   -   pointer to any arguments, usually NULL
  *
- *  return  none
+ *  return  any errlogs to istep 
  *
  */
-void    call_fabric_post_trainadv( void    *io_pArgs );
+void*    call_fabric_post_trainadv( void    *io_pArgs );
 
 
 
@@ -184,10 +184,10 @@ void    call_fabric_post_trainadv( void    *io_pArgs );
  *
  *  param[in,out]   -   pointer to any arguments, usually NULL
  *
- *  return  none
+ *  return  any errlogs to istep 
  *
  */
-void    call_host_startPRD_pbus( void    *io_pArgs );
+void*    call_host_startPRD_pbus( void    *io_pArgs );
 
 
 
@@ -198,10 +198,10 @@ void    call_host_startPRD_pbus( void    *io_pArgs );
  *
  *  param[in,out]   -   pointer to any arguments, usually NULL
  *
- *  return  none
+ *  return  any errlogs to istep 
  *
  */
-void    call_host_attnlisten_proc( void    *io_pArgs );
+void*    call_host_attnlisten_proc( void    *io_pArgs );
 
 
 
@@ -212,10 +212,10 @@ void    call_host_attnlisten_proc( void    *io_pArgs );
  *
  *  param[in,out]   -   pointer to any arguments, usually NULL
  *
- *  return  none
+ *  return  any errlogs to istep 
  *
  */
-void    call_proc_fab_iovalid( void    *io_pArgs );
+void*    call_proc_fab_iovalid( void    *io_pArgs );
 
 
 };   // end namespace

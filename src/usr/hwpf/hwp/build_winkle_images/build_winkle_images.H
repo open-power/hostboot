@@ -78,10 +78,10 @@ namespace   BUILD_WINKLE_IMAGES
  *
  *  param[in,out]   -   pointer to any arguments, usually NULL
  *
- *  return  none
+ *  return  any error logs to istep
  *
  */
-void    call_host_build_winkle( void    *io_pArgs );
+void*    call_host_build_winkle( void    *io_pArgs );
 
 
 
@@ -92,10 +92,11 @@ void    call_host_build_winkle( void    *io_pArgs );
  *
  *  param[in,out]   -   pointer to any arguments, usually NULL
  *
- *  return  none
+ *  return  any error logs to istep
+ *
  *
  */
-void    call_proc_set_pore_bar( void    *io_pArgs );
+void*    call_proc_set_pore_bar( void    *io_pArgs );
 
 
 };   // end namespace

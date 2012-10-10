@@ -1,25 +1,25 @@
-//  IBM_PROLOG_BEGIN_TAG
-//  This is an automatically generated prolog.
-//
-//  $Source: src/include/sys/task.h $
-//
-//  IBM CONFIDENTIAL
-//
-//  COPYRIGHT International Business Machines Corp. 2010 - 2011
-//
-//  p1
-//
-//  Object Code Only (OCO) source materials
-//  Licensed Internal Code Source Materials
-//  IBM HostBoot Licensed Internal Code
-//
-//  The source code for this program is not published or other-
-//  wise divested of its trade secrets, irrespective of what has
-//  been deposited with the U.S. Copyright Office.
-//
-//  Origin: 30
-//
-//  IBM_PROLOG_END
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/include/sys/task.h $                                      */
+/*                                                                        */
+/* IBM CONFIDENTIAL                                                       */
+/*                                                                        */
+/* COPYRIGHT International Business Machines Corp. 2010,2012              */
+/*                                                                        */
+/* p1                                                                     */
+/*                                                                        */
+/* Object Code Only (OCO) source materials                                */
+/* Licensed Internal Code Source Materials                                */
+/* IBM HostBoot Licensed Internal Code                                    */
+/*                                                                        */
+/* The source code for this program is not published or otherwise         */
+/* divested of its trade secrets, irrespective of what has been           */
+/* deposited with the U.S. Copyright Office.                              */
+/*                                                                        */
+/* Origin: 30                                                             */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
 /** @file task.h
  *  @brief Contains the prototypes for system calls related to tasking.
  */
@@ -52,23 +52,27 @@ void task_yield();
  *
  *  See POSIX pthread_create.
  */
-tid_t task_create(void(*start_routine)(void*), void* arg);
+tid_t task_create(void*(*start_routine)(void*), void* arg);
 
 /** @fn task_end
  *  @brief End the calling task.
  *
  *  See POSIX pthread_exit.
  *
- *  @note A task must call task_end when it wishes to exit.  If a task were
- *        to simply return from its entry point function, the kernel sets up
+ *  @note A task could call task_end when it wishes to exit. But it will likely 
+ *        cause a memory leak. It is better for a task to 
+ *        simply return from its entry point function, the kernel sets up
  *        the initial task structure with the link-register pointing to this
- *        function.  Therefore, returning from the entry point function will
- *        also cause the task to end cleanly using this function.
+ *        function. The "NO_RETURN" does not call the destructors to clean up. 
+ *        Might be used in case of task needing to be terminated due to 
+ *        unknown cause.
  */
 void task_end() NO_RETURN;
 
 /** @fn task_end2
  *  @brief End the calling task with a return value.
+ *        Will likely cause a memory leak. Better to return the value on the 
+ *        return to the entry point. See comments on task_end. 
  *
  *  See POSIX pthread_exit.
  *

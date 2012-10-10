@@ -1,25 +1,25 @@
-//  IBM_PROLOG_BEGIN_TAG
-//  This is an automatically generated prolog.
-//
-//  $Source: src/usr/testcore/kernel/tasktest.H $
-//
-//  IBM CONFIDENTIAL
-//
-//  COPYRIGHT International Business Machines Corp. 2011
-//
-//  p1
-//
-//  Object Code Only (OCO) source materials
-//  Licensed Internal Code Source Materials
-//  IBM HostBoot Licensed Internal Code
-//
-//  The source code for this program is not published or other-
-//  wise divested of its trade secrets, irrespective of what has
-//  been deposited with the U.S. Copyright Office.
-//
-//  Origin: 30
-//
-//  IBM_PROLOG_END
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/usr/testcore/kernel/taskwaittest.H $                      */
+/*                                                                        */
+/* IBM CONFIDENTIAL                                                       */
+/*                                                                        */
+/* COPYRIGHT International Business Machines Corp. 2011,2012              */
+/*                                                                        */
+/* p1                                                                     */
+/*                                                                        */
+/* Object Code Only (OCO) source materials                                */
+/* Licensed Internal Code Source Materials                                */
+/* IBM HostBoot Licensed Internal Code                                    */
+/*                                                                        */
+/* The source code for this program is not published or otherwise         */
+/* divested of its trade secrets, irrespective of what has been           */
+/* deposited with the U.S. Copyright Office.                              */
+/*                                                                        */
+/* Origin: 30                                                             */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
 /** @file tasktest.H
  *  @brief Test cases for task interfaces.
  */
@@ -148,27 +148,28 @@ class TaskWaitTest : public CxxTest::TestSuite
             }
         }
 
-        static void WaitSomeTime(void* retval)
+        static void* WaitSomeTime(void* retval)
         {
             nanosleep(0,TEN_CTX_SWITCHES_NS);
-            if (retval) task_end2(retval);
+            return retval;
         }
 
-        static void WaitSomeLongerTime(void* retval)
+        static void* WaitSomeLongerTime(void* retval)
         {
             nanosleep(0, 2*TEN_CTX_SWITCHES_NS);
-            if (retval) task_end2(retval);
+            return retval;
         }
 
-        static void TaskWithChild(void* unused)
+        static void* TaskWithChild(void* unused)
         {
             tid_t child = task_create(&WaitSomeTime, NULL);
-            task_end2(reinterpret_cast<void*>(child));
+            return reinterpret_cast<void*>(child);
         }
 
-        static void TaskThatCrashes(void* unused)
+        static void* TaskThatCrashes(void* unused)
         {
             printk("Test case: Expect to see uncaught exception! ");
             *(int64_t*)(0) = 0xDEADC0DE;
+            return NULL;
         }
 };

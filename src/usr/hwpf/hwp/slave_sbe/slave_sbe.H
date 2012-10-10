@@ -65,9 +65,9 @@ namespace SLAVE_SBE
  *
  *  param[in,out]   -   pointer to any arguments, usually NULL
  *
- *  return none
+ *  return any error logs to istep 
  */
-void call_proc_revert_sbe_mcs_setup(void *io_pArgs);
+void* call_proc_revert_sbe_mcs_setup(void *io_pArgs);
 
 };   // end namespace
 

@@ -57,7 +57,7 @@ namespace SLAVE_SBE
 //  Wrapper function to call 6.8 :
 //      proc_revert_sbe_mcs_setup
 //
-void call_proc_revert_sbe_mcs_setup(void *io_pArgs)
+void* call_proc_revert_sbe_mcs_setup(void *io_pArgs)
 {
     errlHndl_t  l_errl = NULL;
 
@@ -87,7 +87,7 @@ void call_proc_revert_sbe_mcs_setup(void *io_pArgs)
               "call_proc_revert_sbe_mcs_setup exit");
 
     // end task, returning any errorlogs to IStepDisp
-    task_end2(l_errl);
+    return l_errl;
 }
 
 }

@@ -94,7 +94,7 @@ class RandSource
          *
          * @param[in] i_source The source on which to call run.
          */
-        static void main(void * i_source);
+        static void* main(void * i_source);
 
         /**
          * @brief run Execute the testcase.

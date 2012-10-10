@@ -188,7 +188,7 @@ bool FakePresenter::wait(msg_q_t i_q)
     return shutdown;
 }
 
-void FakePresenter::main(void * i_properties)
+void* FakePresenter::main(void * i_properties)
 {
     PresenterProperties * properties
         = static_cast<PresenterProperties *>(i_properties);
@@ -204,6 +204,7 @@ void FakePresenter::main(void * i_properties)
     }
 
     delete properties;
+    return NULL;
 }
 
 FakePresenter::FakePresenter()

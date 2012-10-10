@@ -72,10 +72,10 @@ namespace   ACTIVATE_POWERBUS
  *
  *  param[in,out]   -   pointer to any arguments, usually NULL
  *
- *  return  none
+ *  return  any error logs to istep
  *
  */
-void    call_proc_build_smp( void    *io_pArgs );
+void*    call_proc_build_smp( void    *io_pArgs );
 
 
 };   // end namespace

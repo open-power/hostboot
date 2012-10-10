@@ -68,7 +68,7 @@ static const uint32_t MAX_TEST_COUNT    = 0x000001FF;
  * @brief repeated Scom access and Attrubute access through Fapi until
  *        MAX_TEST_COUNT accesses has been done or an error occurs.
  */
-void testHwpScomAcc( void *i_phwpTestArgs )
+void* testHwpScomAcc( void *i_phwpTestArgs )
 {
     fapi::ReturnCode l_rc = fapi::FAPI_RC_SUCCESS;
     ecmdDataBufferBase l_ScomData(64);
@@ -145,6 +145,7 @@ void testHwpScomAcc( void *i_phwpTestArgs )
             }
         }
     }
+    return NULL;
 }
 
 class HwpfTest: public CxxTest::TestSuite

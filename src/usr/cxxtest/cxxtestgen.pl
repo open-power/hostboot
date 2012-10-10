@@ -1,26 +1,26 @@
 #!/usr/bin/perl -w
-#  IBM_PROLOG_BEGIN_TAG
-#  This is an automatically generated prolog.
+# IBM_PROLOG_BEGIN_TAG
+# This is an automatically generated prolog.
 #
-#  $Source: src/usr/cxxtest/cxxtestgen.pl $
+# $Source: src/usr/cxxtest/cxxtestgen.pl $
 #
-#  IBM CONFIDENTIAL
+# IBM CONFIDENTIAL
 #
-#  COPYRIGHT International Business Machines Corp. 2011
+# COPYRIGHT International Business Machines Corp. 2011,2012
 #
-#  p1
+# p1
 #
-#  Object Code Only (OCO) source materials
-#  Licensed Internal Code Source Materials
-#  IBM HostBoot Licensed Internal Code
+# Object Code Only (OCO) source materials
+# Licensed Internal Code Source Materials
+# IBM HostBoot Licensed Internal Code
 #
-#  The source code for this program is not published or other-
-#  wise divested of its trade secrets, irrespective of what has
-#  been deposited with the U.S. Copyright Office.
+# The source code for this program is not published or otherwise
+# divested of its trade secrets, irrespective of what has been
+# deposited with the U.S. Copyright Office.
 #
-#  Origin: 30
+# Origin: 30
 #
-#  IBM_PROLOG_END
+# IBM_PROLOG_END_TAG
 
 #
 #       Change History:
@@ -734,7 +734,7 @@ sub write_start() {
 
   print   "\n\n";
   print   "extern \"C\"\n";
-  print   "void _start(void *ptr) ";
+  print   "void* _start(void *ptr) ";
   print   "{\n";
 
 
@@ -744,7 +744,7 @@ sub write_start() {
   print   "\n";
   print "\t__sync_add_and_fetch(&CxxTest::g_ModulesCompleted, 1);\n";
   print "\n";
-  print   "\ttask_end2( NULL );\n";
+  print   "\treturn NULL;\n";
   print   "}\n";
 
 }

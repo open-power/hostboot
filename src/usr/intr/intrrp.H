@@ -75,7 +75,7 @@ namespace INTR
             /**
              * Start message handler
              */
-            static void msg_handler(void * unused);
+            static void* msg_handler(void * unused);
 
         private:        //Data
 

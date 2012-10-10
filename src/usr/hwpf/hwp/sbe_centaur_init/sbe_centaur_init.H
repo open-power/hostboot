@@ -63,10 +63,10 @@ namespace   SBE_CENTAUR_INIT
      *
      *  param[in,out] io_pArgs  -   (normally) a pointer to args,
      *                              or NULL.
-     *  return  none
+     *  return  any errlors to istep
      *
      */
-    void    call_sbe_centaur_init( void * io_pArgs );
+    void*    call_sbe_centaur_init( void * io_pArgs );
 
 };   // end namespace
 

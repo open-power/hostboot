@@ -103,7 +103,7 @@ errlHndl_t notifyFsp ( bool i_istepModeFlag,
 //  Wrapper function to call 21.1 :
 //      host_start_payload
 //
-void    call_host_start_payload( void    *io_pArgs )
+void*    call_host_start_payload( void    *io_pArgs )
 {
     errlHndl_t  l_errl  =   NULL;
 
@@ -170,7 +170,7 @@ void    call_host_start_payload( void    *io_pArgs )
                "call_host_start_payload exit" );
 
     // end task, returning any errorlogs to IStepDisp
-    task_end2( l_errl );
+    return l_errl;
 }
 
 

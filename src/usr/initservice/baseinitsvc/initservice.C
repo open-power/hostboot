@@ -1,25 +1,25 @@
-//  IBM_PROLOG_BEGIN_TAG
-//  This is an automatically generated prolog.
-//
-//  $Source: src/usr/initservice/baseinitsvc/initservice.C $
-//
-//  IBM CONFIDENTIAL
-//
-//  COPYRIGHT International Business Machines Corp. 2011
-//
-//  p1
-//
-//  Object Code Only (OCO) source materials
-//  Licensed Internal Code Source Materials
-//  IBM HostBoot Licensed Internal Code
-//
-//  The source code for this program is not published or other-
-//  wise divested of its trade secrets, irrespective of what has
-//  been deposited with the U.S. Copyright Office.
-//
-//  Origin: 30
-//
-//  IBM_PROLOG_END
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/usr/initservice/baseinitsvc/initservice.C $               */
+/*                                                                        */
+/* IBM CONFIDENTIAL                                                       */
+/*                                                                        */
+/* COPYRIGHT International Business Machines Corp. 2011,2012              */
+/*                                                                        */
+/* p1                                                                     */
+/*                                                                        */
+/* Object Code Only (OCO) source materials                                */
+/* Licensed Internal Code Source Materials                                */
+/* IBM HostBoot Licensed Internal Code                                    */
+/*                                                                        */
+/* The source code for this program is not published or otherwise         */
+/* divested of its trade secrets, irrespective of what has been           */
+/* deposited with the U.S. Copyright Office.                              */
+/*                                                                        */
+/* Origin: 30                                                             */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
 
 /**
  * @file    initservice.C
@@ -74,7 +74,7 @@ TRAC_INIT(&g_trac_initsvc, "INITSVC", 2048 );
  *  This one is "special" since we do not return anything to the kernel/vfs
  */
 extern "C"
-void _start(void *ptr)
+void* _start(void *ptr)
 {
     TRACFCOMP( g_trac_initsvc,
             "Executing Initialization Service module." );
@@ -85,7 +85,7 @@ void _start(void *ptr)
     TRACFCOMP( g_trac_initsvc,
             "return from Initialization Service module." );
 
-    task_end();
+    return NULL;
 }
 
 
@@ -236,7 +236,7 @@ errlHndl_t InitService::startTask(
         //  wait here for the task to end.
         //  status of the task ( OK or Crashed ) is returned in l_childsts
         //  if the task returns an errorlog, it will be returned
-        //      (via task_end2) in l_childerrl
+        //  in l_childerrl
         l_tidretrc  =   task_wait_tid(
                                 l_tidlnchrc,
                                 &l_childsts,
@@ -354,7 +354,7 @@ errlHndl_t InitService::executeFn(
         //  wait here for the task to end.
         //  status of the task ( OK or Crashed ) is returned in l_childsts
         //  if the task returns an errorlog, it will be returned
-        //      (via task_end2) in l_childerrl
+        //  in l_childerrl
         l_tidretrc  =   task_wait_tid(
                                 l_tidlnchrc,
                                 &l_childsts,

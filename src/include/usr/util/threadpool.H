@@ -1,25 +1,25 @@
-//  IBM_PROLOG_BEGIN_TAG
-//  This is an automatically generated prolog.
-//
-//  $Source: src/include/usr/util/threadpool.H $
-//
-//  IBM CONFIDENTIAL
-//
-//  COPYRIGHT International Business Machines Corp. 2012
-//
-//  p1
-//
-//  Object Code Only (OCO) source materials
-//  Licensed Internal Code Source Materials
-//  IBM HostBoot Licensed Internal Code
-//
-//  The source code for this program is not published or other-
-//  wise divested of its trade secrets, irrespective of what has
-//  been deposited with the U.S. Copyright Office.
-//
-//  Origin: 30
-//
-//  IBM_PROLOG_END
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/include/usr/util/threadpool.H $                           */
+/*                                                                        */
+/* IBM CONFIDENTIAL                                                       */
+/*                                                                        */
+/* COPYRIGHT International Business Machines Corp. 2012                   */
+/*                                                                        */
+/* p1                                                                     */
+/*                                                                        */
+/* Object Code Only (OCO) source materials                                */
+/* Licensed Internal Code Source Materials                                */
+/* IBM HostBoot Licensed Internal Code                                    */
+/*                                                                        */
+/* The source code for this program is not published or otherwise         */
+/* divested of its trade secrets, irrespective of what has been           */
+/* deposited with the U.S. Copyright Office.                              */
+/*                                                                        */
+/* Origin: 30                                                             */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
 #ifndef __UTIL_THREADPOOL_H
 #define __UTIL_THREADPOOL_H
 
@@ -116,7 +116,7 @@ class ThreadPool : public Util::__Util_ThreadPool_Impl::ThreadPoolImpl
 
     private:
             /** Entry point for worker thread. */
-        static void run(ThreadPool*);
+        static void* run(ThreadPool*);
             /** Useful constant to determine FIFO vs non-FIFO behavior. */
         static const bool has_comparison =
                 Util::Traits::has_lessthan<WorkItem>::value;
@@ -145,7 +145,7 @@ class ThreadPoolManager
 
 // Implementation of the worker-thread run function.
 template <typename WorkItem>
-void ThreadPool<WorkItem>::run(
+void* ThreadPool<WorkItem>::run(
         ThreadPool<WorkItem>* self)
 {
     while(1)
@@ -168,9 +168,10 @@ void ThreadPool<WorkItem>::run(
         }
         else // No work item was given, we must be done.
         {
-            return; // task_end() called automatically by returning.
+            return NULL; // task_end() called automatically by returning.
         }
     }
+    return NULL;
 }
 
 };

@@ -88,10 +88,10 @@ namespace   MC_CONFIG
  *
  *  param[in,out] io_pArgs  -   (normally) a pointer to a TaskArgs struct,
  *                              or NULL.
- *  return  none
+ *  return  any error logs to istep
  *
  */
-void    call_host_collect_dimm_spd( void * io_pArgs );
+void*    call_host_collect_dimm_spd( void * io_pArgs );
 
 
 
@@ -102,10 +102,10 @@ void    call_host_collect_dimm_spd( void * io_pArgs );
  *
  *  param[in,out] io_pArgs  -   (normally) a pointer to a TaskArgs struct,
  *                              or NULL.
- *  return  none
+ *  return  any error logs to istep
  *
  */
-void    call_mss_volt( void * io_pArgs );
+void*    call_mss_volt( void * io_pArgs );
 
 
 
@@ -116,10 +116,10 @@ void    call_mss_volt( void * io_pArgs );
  *
  *  param[in,out] io_pArgs  -   (normally) a pointer to a TaskArgs struct,
  *                              or NULL.
- *  return  none
+ *  return  any error logs to istep
  *
  */
-void    call_mss_freq( void * io_pArgs );
+void*    call_mss_freq( void * io_pArgs );
 
 
 
@@ -130,10 +130,10 @@ void    call_mss_freq( void * io_pArgs );
  *
  *  param[in,out] io_pArgs  -   (normally) a pointer to a TaskArgs struct,
  *                              or NULL.
- *  return  none
+ *  return  any error logs to istep
  *
  */
-void    call_mss_eff_config( void * io_pArgs );
+void*    call_mss_eff_config( void * io_pArgs );
 
 
 };   // end namespace

@@ -217,7 +217,7 @@ void IStepDispatcher::init ( errlHndl_t &io_rtaskRetErrl )
     TRACFCOMP( g_trac_initsvc,
                "IStepDispatcher finished.");
     printk( "IStepDispatcher exit.\n" );
-    task_end2( err );
+    io_rtaskRetErrl= err;
 }
 
 

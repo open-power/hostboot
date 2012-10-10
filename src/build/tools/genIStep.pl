@@ -359,7 +359,7 @@ my $templateCFileSubStep =
 //  Wrapper function to call \@istepnum.\@substepnum :
 //      \@substepname
 //
-void    call_\@substepname( void    *io_pArgs )
+void*    call_\@substepname( void    *io_pArgs )
 {
     errlHndl_t  l_errl  =   NULL;
 
@@ -404,7 +404,7 @@ void    call_\@substepname( void    *io_pArgs )
                \"call_\@substepname exit\" );
 
     // end task, returning any errorlogs to IStepDisp
-    task_end2( l_errl );
+    return  l_errl ;
 }
 ";
 #####   end templateCFileSubStep    #################################

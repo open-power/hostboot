@@ -96,10 +96,10 @@ namespace   NEST_CHIPLETS
  *
  *  param[in,out]   -   pointer to any arguments, usually NULL
  *                    
- *  return  none
+ *  return  any error logs to istep
  *
  */
-void    call_proc_a_x_pci_dmi_pll_setup( void    *io_pArgs );
+void*    call_proc_a_x_pci_dmi_pll_setup( void    *io_pArgs );
 
 
 
@@ -110,10 +110,10 @@ void    call_proc_a_x_pci_dmi_pll_setup( void    *io_pArgs );
  *
  *  param[in,out]   -   pointer to any arguments, usually NULL
  *                    
- *  return  none
+ *  return  any error logs to istep
  *
  */
-void    call_proc_startclock_chiplets( void    *io_pArgs );
+void*    call_proc_startclock_chiplets( void    *io_pArgs );
 
 
 
@@ -124,10 +124,10 @@ void    call_proc_startclock_chiplets( void    *io_pArgs );
  *
  *  param[in,out]   -   pointer to any arguments, usually NULL
  *                    
- *  return  none
+ *  return  any error logs to istep
  *
  */
-void    call_proc_chiplet_scominit( void    *io_pArgs );
+void*    call_proc_chiplet_scominit( void    *io_pArgs );
 
 
 
@@ -138,10 +138,10 @@ void    call_proc_chiplet_scominit( void    *io_pArgs );
  *
  *  param[in,out]   -   pointer to any arguments, usually NULL
  *
- *  return  none
+ *  return  any error logs to istep
  *
  */
-void    call_proc_pcie_scominit( void    *io_pArgs );
+void*    call_proc_pcie_scominit( void    *io_pArgs );
 
 
 
@@ -152,10 +152,10 @@ void    call_proc_pcie_scominit( void    *io_pArgs );
  *
  *  param[in,out]   -   pointer to any arguments, usually NULL
  *                    
- *  return  none
+ *  return  any error logs to istep
  *
  */
-void    call_proc_scomoverride_chiplets( void    *io_pArgs );
+void*    call_proc_scomoverride_chiplets( void    *io_pArgs );
 
 
 };   // end namespace

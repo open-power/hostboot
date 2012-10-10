@@ -46,9 +46,9 @@ namespace   INITSERVICE
 * @param[in/out] io_args - This is a void pointer, but the code expects that
 *       this will be the msg queue to communicate with the main thread.
 *
-* @return NONE.
+* @return NULL
 */
-void startIStepWorkerThread ( void * io_args );
+void* startIStepWorkerThread ( void * io_args );
 
 /**
 * @brief This function is the main loop for the Istep dispatcher worker
@@ -56,7 +56,7 @@ void startIStepWorkerThread ( void * io_args );
 *
 * @param[in] i_msgQ - The message queue to talk to the main thread.
 *
-* @return NONE.
+* @return any errlogs 
  */
 void iStepWorkerThread ( void * i_msgQ );
 

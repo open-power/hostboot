@@ -74,7 +74,7 @@ using   namespace   fapi;
 //
 //  Wrapper function to call 11.1   dmi_scominit
 //
-void    call_dmi_scominit( void *io_pArgs )
+void*    call_dmi_scominit( void *io_pArgs )
 {
     errlHndl_t l_errl = NULL;
 
@@ -149,14 +149,14 @@ void    call_dmi_scominit( void *io_pArgs )
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_dmi_scominit exit" );
 
     // end task, returning any errorlogs to IStepDisp
-    task_end2( l_errl );
+    return l_errl;
 }
 
 
 //
 //  Wrapper function to call 11.2 :  dmi_erepair
 //
-void    call_dmi_erepair( void *io_pArgs )
+void*    call_dmi_erepair( void *io_pArgs )
 {
     errlHndl_t l_err = NULL;
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_dmi_erepair entry" );
@@ -164,13 +164,13 @@ void    call_dmi_erepair( void *io_pArgs )
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_dmi_erepair exit" );
 
-    task_end2( l_err );
+    return l_err;
 }
 
 //
 //  Wrapper function to call 11.3 : dmi_io_dccal
 //
-void    call_dmi_io_dccal( void *io_pArgs )
+void*    call_dmi_io_dccal( void *io_pArgs )
 {
     errlHndl_t l_err = NULL;
 
@@ -179,14 +179,14 @@ void    call_dmi_io_dccal( void *io_pArgs )
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_dmi_io_dccal exit" );
 
-    task_end2( l_err );
+    return l_err;
 }
 
 
 //
 //  Wrapper function to call 11.4 : dmi_pre_trainadv
 //
-void    call_dmi_pre_trainadv( void *io_pArgs )
+void*    call_dmi_pre_trainadv( void *io_pArgs )
 {
     errlHndl_t l_err = NULL;
 
@@ -195,14 +195,14 @@ void    call_dmi_pre_trainadv( void *io_pArgs )
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_dmi_pre_trainadv exit" );
 
-    task_end2( l_err );
+    return l_err;
 }
 
 
 //
 //  Wrapper function to call 11.5 : dmi_io_run_training
 //
-void    call_dmi_io_run_training( void *io_pArgs )
+void*    call_dmi_io_run_training( void *io_pArgs )
 {
     errlHndl_t l_err = NULL;
 
@@ -307,13 +307,13 @@ void    call_dmi_io_run_training( void *io_pArgs )
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_dmi_io_run_training exit" );
 
-    task_end2( l_err );
+    return l_err;
 }
 
 //
 //  Wrapper function to call 11.6 : dmi_post_trainadv
 //
-void    call_dmi_post_trainadv( void *io_pArgs )
+void*    call_dmi_post_trainadv( void *io_pArgs )
 {
     errlHndl_t l_err = NULL;
 
@@ -322,14 +322,14 @@ void    call_dmi_post_trainadv( void *io_pArgs )
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_dmi_post_trainadv exit" );
 
-    task_end2( l_err );
+    return l_err;
 }
 
 
 //
 //  Wrapper function to call 11.7 : proc_cen_framelock
 //
-void    call_proc_cen_framelock( void *io_pArgs )
+void*    call_proc_cen_framelock( void *io_pArgs )
 {
     errlHndl_t l_err = NULL;
     proc_cen_framelock_args     l_args;
@@ -409,13 +409,13 @@ void    call_proc_cen_framelock( void *io_pArgs )
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_proc_cen_framework exit" );
 
-    task_end2( l_err );
+    return l_err;
 }
 
 //
 //  Wrapper function to call 11.8 : host_startPRD_dmi
 //
-void    call_host_startPRD_dmi( void *io_pArgs )
+void*    call_host_startPRD_dmi( void *io_pArgs )
 {
     errlHndl_t l_err = NULL;
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_host_startPRD_dmi entry" );
@@ -423,13 +423,13 @@ void    call_host_startPRD_dmi( void *io_pArgs )
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_host_startPRD_dmi exit" );
 
-    task_end2( l_err );
+    return l_err;
 }
 
 //
 //  Wrapper function to call 11.9 : host_attnlisten_cen
 //
-void    call_host_attnlisten_cen( void *io_pArgs )
+void*    call_host_attnlisten_cen( void *io_pArgs )
 {
 
     errlHndl_t l_err = NULL;
@@ -439,13 +439,13 @@ void    call_host_attnlisten_cen( void *io_pArgs )
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_host_attnlisten_cen exit" );
 
-    task_end2( l_err );
+    return l_err;
 }
 
 //
 //  Wrapper function to call 11.10 : cen_set_inband_addr
 //
-void    call_cen_set_inband_addr( void *io_pArgs )
+void*    call_cen_set_inband_addr( void *io_pArgs )
 {
     errlHndl_t l_err = NULL;
 
@@ -454,7 +454,7 @@ void    call_cen_set_inband_addr( void *io_pArgs )
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_cen_set_inband_addr exit" );
 
-    task_end2( l_err );
+    return l_err;
 }
 
 

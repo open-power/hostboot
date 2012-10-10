@@ -1,26 +1,25 @@
-/*  IBM_PROLOG_BEGIN_TAG
- *  This is an automatically generated prolog.
- *
- *  $Source: src/usr/testcore/kernel/vmmbasetest.H $
- *
- *  IBM CONFIDENTIAL
- *
- *  COPYRIGHT International Business Machines Corp. 2011-2012
- *
- *  p1
- *
- *  Object Code Only (OCO) source materials
- *  Licensed Internal Code Source Materials
- *  IBM HostBoot Licensed Internal Code
- *
- *  The source code for this program is not published or other-
- *  wise divested of its trade secrets, irrespective of what has
- *  been deposited with the U.S. Copyright Office.
- *
- *  Origin: 30
- *
- *  IBM_PROLOG_END_TAG
- */
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/usr/testcore/kernel/vmmbasetest.H $                       */
+/*                                                                        */
+/* IBM CONFIDENTIAL                                                       */
+/*                                                                        */
+/* COPYRIGHT International Business Machines Corp. 2011,2012              */
+/*                                                                        */
+/* p1                                                                     */
+/*                                                                        */
+/* Object Code Only (OCO) source materials                                */
+/* Licensed Internal Code Source Materials                                */
+/* IBM HostBoot Licensed Internal Code                                    */
+/*                                                                        */
+/* The source code for this program is not published or otherwise         */
+/* divested of its trade secrets, irrespective of what has been           */
+/* deposited with the U.S. Copyright Office.                              */
+/*                                                                        */
+/* Origin: 30                                                             */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
 /** @file vmmbasetest.H
  *  @brief Test cases for permission settings on the base block of the VMM.
  */
@@ -132,25 +131,25 @@ class VmmBaseTest : public CxxTest::TestSuite
 
     private:
 
-        static void readFromNULL(void* unused)
+        static void* readFromNULL(void* unused)
         {
             printk("%lx", (*(uint64_t*)NULL));
-            task_end();
+            return NULL;
         }
 
-        static void writeToNULL(void* unused)
+        static void* writeToNULL(void* unused)
         {
             (*(uint64_t*)NULL) = 0x12345678;
-            task_end();
+            return NULL;
         }
 
-        static void writeToKernelCode(void* unused)
+        static void* writeToKernelCode(void* unused)
         {
             (*(*(uint64_t**)&printk)) = 0x12345678;
-            task_end();
+            return NULL;
         }
 
-        static void msgDaemon(void* unused)
+        static void* msgDaemon(void* unused)
         {
             msg_t* message = NULL;
             uint64_t ea = 0;
@@ -166,6 +165,7 @@ class VmmBaseTest : public CxxTest::TestSuite
                     msg_respond(iv_mq, message);
                 }
             }
+            return NULL;
         }
 
 };

@@ -1,26 +1,25 @@
-/*  IBM_PROLOG_BEGIN_TAG
- *  This is an automatically generated prolog.
- *
- *  $Source: src/usr/vfs/vfsrp.C $
- *
- *  IBM CONFIDENTIAL
- *
- *  COPYRIGHT International Business Machines Corp. 2011-2012
- *
- *  p1
- *
- *  Object Code Only (OCO) source materials
- *  Licensed Internal Code Source Materials
- *  IBM HostBoot Licensed Internal Code
- *
- *  The source code for this program is not published or other-
- *  wise divested of its trade secrets, irrespective of what has
- *  been deposited with the U.S. Copyright Office.
- *
- *  Origin: 30
- *
- *  IBM_PROLOG_END_TAG
- */
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/usr/vfs/vfsrp.C $                                         */
+/*                                                                        */
+/* IBM CONFIDENTIAL                                                       */
+/*                                                                        */
+/* COPYRIGHT International Business Machines Corp. 2011,2012              */
+/*                                                                        */
+/* p1                                                                     */
+/*                                                                        */
+/* Object Code Only (OCO) source materials                                */
+/* Licensed Internal Code Source Materials                                */
+/* IBM HostBoot Licensed Internal Code                                    */
+/*                                                                        */
+/* The source code for this program is not published or otherwise         */
+/* divested of its trade secrets, irrespective of what has been           */
+/* deposited with the U.S. Copyright Office.                              */
+/*                                                                        */
+/* Origin: 30                                                             */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
 /**
  * @file vfsrp.C
  * @brief Virtual File system Extended image support
@@ -72,34 +71,35 @@ void VfsRp::init( errlHndl_t &io_taskRetErrl )
     err = Singleton<VfsRp>::instance()._init();
 
 
-    task_end2( err );
+    io_taskRetErrl= err ;
 }
 // ----------------------------------------------------------------------------
 
 /**
  * Helper function to start vfs messge handler
  */
-void VfsRp::msg_handler(void * unused)
+void* VfsRp::msg_handler(void * unused)
 {
     Singleton<VfsRp>::instance().msgHandler();
+    return NULL;
 }
 
 // ----------------------------------------------------------------------------
 
-void VfsRp::load_unload(void * i_msg)
+void* VfsRp::load_unload(void * i_msg)
 {
     task_detach();
     Singleton<VfsRp>::instance()._load_unload((msg_t*)i_msg);
-    task_end();
+    return NULL;
 }
 
 // ----------------------------------------------------------------------------
 
-void VfsRp::exec(void * i_msg)
+void* VfsRp::exec(void * i_msg)
 {
     task_detach();
     Singleton<VfsRp>::instance()._exec((msg_t*)i_msg);
-    task_end();
+    return NULL;
 }
 
 // ----------------------------------------------------------------------------

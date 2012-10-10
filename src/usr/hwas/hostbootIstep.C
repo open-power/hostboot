@@ -45,20 +45,21 @@ namespace HWAS
 //******************************************************************************
 // host_init_fsi function
 //******************************************************************************
-void host_init_fsi( void *io_pArgs )
+void* host_init_fsi( void *io_pArgs )
 {
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "host_init_fsi entry" );
 
     errlHndl_t errl = FSI::initializeHardware( );
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "host_init_fsi exit" );
-    task_end2(errl);
+
+    return errl;
 }
 
 //******************************************************************************
 // host_set_ipl_parms function
 //******************************************************************************
-void host_set_ipl_parms( void *io_pArgs )
+void* host_set_ipl_parms( void *io_pArgs )
 {
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "host_set_ipl_parms entry" );
     errlHndl_t errl = NULL;
@@ -66,13 +67,14 @@ void host_set_ipl_parms( void *io_pArgs )
     // stub -- nothing here currently
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "host_set_ipl_parms exit" );
-    task_end2(errl);
+
+    return errl;
 }
 
 //******************************************************************************
 // host_discover_targets function
 //******************************************************************************
-void host_discover_targets( void *io_pArgs )
+void* host_discover_targets( void *io_pArgs )
 {
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                 "host_discover_targets entry" );
@@ -81,26 +83,28 @@ void host_discover_targets( void *io_pArgs )
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                 "host_discover_targets exit" );
-    task_end2(errl);
+
+    return errl;
 }
 
 //******************************************************************************
 // host_gard function
 //******************************************************************************
-void host_gard( void *io_pArgs )
+void* host_gard( void *io_pArgs )
 {
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "host_gard entry" );
 
     errlHndl_t errl = collectGard();
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "host_gard exit" );
-    task_end2(errl);
+
+    return errl;
 }
 
 //******************************************************************************
 // host_cancontinue_clear function
 //******************************************************************************
-void host_cancontinue_clear( void *io_pArgs )
+void* host_cancontinue_clear( void *io_pArgs )
 {
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                 "host_cancontinue_clear entry" );
@@ -110,13 +114,14 @@ void host_cancontinue_clear( void *io_pArgs )
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                 "host_cancontinue_clear exit" );
-    task_end2(errl);
+
+    return errl;
 }
 
 //******************************************************************************
 // proc_check_slave_sbe_seeprom_complete function
 //******************************************************************************
-void proc_check_slave_sbe_seeprom_complete( void *io_pArgs )
+void* proc_check_slave_sbe_seeprom_complete( void *io_pArgs )
 {
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                 "proc_check_slave_sbe_seeprom_complete entry" );
@@ -126,13 +131,14 @@ void proc_check_slave_sbe_seeprom_complete( void *io_pArgs )
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                 "proc_check_slave_sbe_seeprom_complete exit" );
-    task_end2(errl);
+
+    return errl;
 }
 
 //******************************************************************************
 // proc_xmit_sbe function
 //******************************************************************************
-void proc_xmit_sbe( void *io_pArgs )
+void* proc_xmit_sbe( void *io_pArgs )
 {
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "proc_xmit_sbe entry" );
     errlHndl_t errl = NULL;
@@ -140,7 +146,8 @@ void proc_xmit_sbe( void *io_pArgs )
     // stub -- nothing here currently
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "proc_xmit_sbe exit" );
-    task_end2(errl);
+
+    return errl;
 }
 
 } // namespace HWAS

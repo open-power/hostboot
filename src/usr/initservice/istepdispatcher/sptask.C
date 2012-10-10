@@ -269,7 +269,7 @@ void    userConsoleComm( void *  io_msgQ )
     // return to main to end task
 }
 
-void spTask( void    *io_pArgs )
+void* spTask( void    *io_pArgs )
 {
 
     TRACFCOMP( g_trac_initsvc,
@@ -286,7 +286,7 @@ void spTask( void    *io_pArgs )
             "spTask exit." );
 
     // End the task.
-    task_end();
+    return NULL;
 }
 
 

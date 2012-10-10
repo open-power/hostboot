@@ -44,7 +44,7 @@ using namespace ERRORLOG;
 namespace ATTN
 {
 
-void Service::intrTask(void * i_svc)
+void* Service::intrTask(void * i_svc)
 {
     // interrupt task loop
 
@@ -67,6 +67,7 @@ void Service::intrTask(void * i_svc)
 
         svc.processIntrQMsg(*msg);
     }
+    return NULL;
 }
 
 bool Service::intrTaskWait(msg_t * & o_msg)
@@ -206,7 +207,7 @@ void Service::processIntrQMsg(msg_t & i_msg)
     }
 }
 
-void Service::prdTask(void * i_svc)
+void* Service::prdTask(void * i_svc)
 {
     // prd task loop
 
@@ -232,6 +233,7 @@ void Service::prdTask(void * i_svc)
 
         svc.processAttentions(attentions);
     }
+    return NULL;
 }
 
 bool Service::prdTaskWait(AttentionList & o_attentions)

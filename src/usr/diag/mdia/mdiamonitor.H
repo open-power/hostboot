@@ -122,7 +122,7 @@ class CommandMonitor
         /**
          * @brief main thread function
          */
-        static void staticMain(void *);
+        static void* staticMain(void *);
 
         /**
          * @brief main thread function

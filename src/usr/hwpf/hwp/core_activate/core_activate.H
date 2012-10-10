@@ -84,10 +84,10 @@ namespace   CORE_ACTIVATE
  *
  *  param[in,out]   -   pointer to any arguments, usually NULL
  *
- *  return  none
+ *  return  any error logs to istep
  *
  */
-void    call_host_activate_master( void    *io_pArgs );
+void*    call_host_activate_master( void    *io_pArgs );
 
 
 
@@ -98,10 +98,10 @@ void    call_host_activate_master( void    *io_pArgs );
  *
  *  param[in,out]   -   pointer to any arguments, usually NULL
  *
- *  return  none
+ *  return  any error logs to istep
  *
  */
-void    call_host_activate_slave_cores( void    *io_pArgs );
+void*    call_host_activate_slave_cores( void    *io_pArgs );
 
 
 
@@ -112,10 +112,10 @@ void    call_host_activate_slave_cores( void    *io_pArgs );
  *
  *  param[in,out]   -   pointer to any arguments, usually NULL
  *
- *  return  none
+ *  return  any error logs to istep
  *
  */
-void    call_host_ipl_complete( void    *io_pArgs );
+void*    call_host_ipl_complete( void    *io_pArgs );
 
 };   // end namespace
 

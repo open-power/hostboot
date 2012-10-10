@@ -1,26 +1,25 @@
-/*  IBM_PROLOG_BEGIN_TAG
- *  This is an automatically generated prolog.
- *
- *  $Source: src/usr/initservice/extinitsvc/extinitsvc.C $
- *
- *  IBM CONFIDENTIAL
- *
- *  COPYRIGHT International Business Machines Corp. 2011-2012
- *
- *  p1
- *
- *  Object Code Only (OCO) source materials
- *  Licensed Internal Code Source Materials
- *  IBM HostBoot Licensed Internal Code
- *
- *  The source code for this program is not published or other-
- *  wise divested of its trade secrets, irrespective of what has
- *  been deposited with the U.S. Copyright Office.
- *
- *  Origin: 30
- *
- *  IBM_PROLOG_END_TAG
- */
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/usr/initservice/extinitsvc/extinitsvc.C $                 */
+/*                                                                        */
+/* IBM CONFIDENTIAL                                                       */
+/*                                                                        */
+/* COPYRIGHT International Business Machines Corp. 2011,2012              */
+/*                                                                        */
+/* p1                                                                     */
+/*                                                                        */
+/* Object Code Only (OCO) source materials                                */
+/* Licensed Internal Code Source Materials                                */
+/* IBM HostBoot Licensed Internal Code                                    */
+/*                                                                        */
+/* The source code for this program is not published or otherwise         */
+/* divested of its trade secrets, irrespective of what has been           */
+/* deposited with the U.S. Copyright Office.                              */
+/*                                                                        */
+/* Origin: 30                                                             */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
 /**
  * @file    extinitsvc.C
  *
@@ -108,7 +107,7 @@ void ExtInitSvc::init( errlHndl_t   &io_rtaskRetErrl )
     {
 
 #if 0
-        //  @todo   detach this task and just do task_end()
+        //  @todo   detach this task and just terminate task
         //  Commit the errorlog here.
         TRACFCOMP( g_trac_initsvc,
                 "ExtInitSvc ERROR: Committing errorlog %p & shutdown",
@@ -121,7 +120,8 @@ void ExtInitSvc::init( errlHndl_t   &io_rtaskRetErrl )
                                       SHUTDOWN_STATUS_EXTINITSVC_FAILED);
 
         //  end the task.
-        end_task();
+        io_rtaskRetErrl=NULL;
+        return; 
 #endif
 
         //  end the task and pass the errorlog to initservice to be committed.
@@ -130,7 +130,8 @@ void ExtInitSvc::init( errlHndl_t   &io_rtaskRetErrl )
                 "ExtInitSvc: ERROR: return to initsvc with errlog %p",
                 l_errl );
 
-        task_end2( l_errl );
+        io_rtaskRetErrl=l_errl;
+        return; 
     }
 
     //  finish things up, return to initservice with goodness.
@@ -139,7 +140,7 @@ void ExtInitSvc::init( errlHndl_t   &io_rtaskRetErrl )
 
     printk( "ExtInitSvc exit.\n" );
 
-    task_end2( NULL );
+    io_rtaskRetErrl=NULL;
 }
 
 

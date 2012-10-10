@@ -124,10 +124,10 @@ namespace   DRAM_TRAINING
  *
  *  param[in,out] io_pArgs  -   (normally) a pointer to a TaskArgs struct,
  *                              or NULL.
- *  return  none
+ *  return any errlogs to istep 
  *
  */
-void    call_host_disable_vddr( void * io_pArgs );
+void*    call_host_disable_vddr( void * io_pArgs );
 
 
 
@@ -138,10 +138,10 @@ void    call_host_disable_vddr( void * io_pArgs );
  *
  *  param[in,out] io_pArgs  -   (normally) a pointer to a TaskArgs struct,
  *                              or NULL.
- *  return  none
+ *  return  any errlogs to istep 
  *
  */
-void    call_mem_pll_setup( void * io_pArgs );
+void*    call_mem_pll_setup( void * io_pArgs );
 
 
 
@@ -152,10 +152,10 @@ void    call_mem_pll_setup( void * io_pArgs );
  *
  *  param[in,out] io_pArgs  -   (normally) a pointer to a TaskArgs struct,
  *                              or NULL.
- *  return  none
+ *  return  any errlogs to istep 
  *
  */
-void    call_mem_startclocks( void * io_pArgs );
+void*    call_mem_startclocks( void * io_pArgs );
 
 
 
@@ -166,10 +166,11 @@ void    call_mem_startclocks( void * io_pArgs );
  *
  *  param[in,out] io_pArgs  -   (normally) a pointer to a TaskArgs struct,
  *                              or NULL.
- *  return  none
+ *  return  any errlogs to istep 
+
  *
  */
-void    call_host_enable_vddr( void * io_pArgs );
+void*    call_host_enable_vddr( void * io_pArgs );
 
 
 
@@ -180,10 +181,10 @@ void    call_host_enable_vddr( void * io_pArgs );
  *
  *  param[in,out] io_pArgs  -   (normally) a pointer to a TaskArgs struct,
  *                              or NULL.
- *  return  none
+ *  return  any errlogs to istep 
  *
  */
-void    call_mss_scominit( void * io_pArgs );
+void*    call_mss_scominit( void * io_pArgs );
 
 
 
@@ -194,10 +195,10 @@ void    call_mss_scominit( void * io_pArgs );
  *
  *  param[in,out] io_pArgs  -   (normally) a pointer to a TaskArgs struct,
  *                              or NULL.
- *  return  none
+ *  return  any errlogs to istep 
  *
  */
-void    call_mss_ddr_phy_reset( void * io_pArgs );
+void*    call_mss_ddr_phy_reset( void * io_pArgs );
 
 
 
@@ -208,10 +209,10 @@ void    call_mss_ddr_phy_reset( void * io_pArgs );
  *
  *  param[in,out] io_pArgs  -   (normally) a pointer to a TaskArgs struct,
  *                              or NULL.
- *  return  none
+ *  return  any errlogs to istep 
  *
  */
-void    call_mss_draminit( void * io_pArgs );
+void*    call_mss_draminit( void * io_pArgs );
 
 
 /**
@@ -221,10 +222,10 @@ void    call_mss_draminit( void * io_pArgs );
  *
  *  param[in,out] io_pArgs  -   (normally) a pointer to a TaskArgs struct,
  *                              or NULL.
- *  return  none
+ *  return  any errlogs to istep 
  *
  */
-void    call_mss_draminit_training( void * io_pArgs );
+void*    call_mss_draminit_training( void * io_pArgs );
 
 
 
@@ -235,10 +236,10 @@ void    call_mss_draminit_training( void * io_pArgs );
  *
  *  param[in,out] io_pArgs  -   (normally) a pointer to a TaskArgs struct,
  *                              or NULL.
- *  return  none
+ *  return  any errlogs to istep 
  *
  */
-void    call_mss_draminit_trainadv( void * io_pArgs );
+void*    call_mss_draminit_trainadv( void * io_pArgs );
 
 
 
@@ -249,10 +250,10 @@ void    call_mss_draminit_trainadv( void * io_pArgs );
  *
  *  param[in,out] io_pArgs  -   (normally) a pointer to a TaskArgs struct,
  *                              or NULL.
- *  return  none
+ *  return  any errlogs to istep 
  *
  */
-void    call_mss_draminit_mc( void * io_pArgs );
+void*    call_mss_draminit_mc( void * io_pArgs );
 
 
 };   // end namespace

@@ -296,7 +296,7 @@ errlHndl_t  applyPoreGenCpuRegs(   TARGETING::Target *i_cpuTarget,
 //  Wrapper function to call 15.1 :
 //      host_build_winkle
 //
-void    call_host_build_winkle( void    *io_pArgs )
+void*    call_host_build_winkle( void    *io_pArgs )
 {
     errlHndl_t  l_errl  =   NULL;
 
@@ -412,7 +412,7 @@ void    call_host_build_winkle( void    *io_pArgs )
                "call_host_build_winkle exit" );
 
     // end task, returning any errorlogs to IStepDisp
-    task_end2( l_errl );
+    return l_errl;
 }
 
 
@@ -421,7 +421,7 @@ void    call_host_build_winkle( void    *io_pArgs )
 //  Wrapper function to call 15.2 :
 //      proc_set_pore_bar
 //
-void    call_proc_set_pore_bar( void    *io_pArgs )
+void*    call_proc_set_pore_bar( void    *io_pArgs )
 {
     errlHndl_t  l_errl      =   NULL;
 
@@ -512,7 +512,7 @@ void    call_proc_set_pore_bar( void    *io_pArgs )
                "call_proc_set_pore_bar exit" );
 
     // end task, returning any errorlogs to IStepDisp
-    task_end2( l_errl );
+    return l_errl;
 }
 
 

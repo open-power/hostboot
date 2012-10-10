@@ -58,9 +58,10 @@ class MdiaSmTest : public CxxTest::TestSuite
             }
         }
 
-        static void startSm(void * i_sm)
+        static void* startSm(void * i_sm)
         {
             static_cast<MDIA::StateMachine *>(i_sm)->start();
+            return NULL;
         }
 
     public:

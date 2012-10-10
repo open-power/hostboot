@@ -84,9 +84,10 @@ void MailboxSp::init(errlHndl_t& o_errl)
 }
 
 // helper function to start mailbox message handler
-void MailboxSp::msg_handler(void * unused)
+void* MailboxSp::msg_handler(void * unused)
 {
     Singleton<MailboxSp>::instance().msgHandler();
+    return NULL;
 }
 
 

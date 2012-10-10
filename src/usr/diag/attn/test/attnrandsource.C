@@ -73,11 +73,12 @@ bool RandSource::wait()
     return true;
 }
 
-void RandSource::main(void * i_source)
+void* RandSource::main(void * i_source)
 {
     RandSource * src = static_cast<RandSource *>(i_source);
 
     src->run();
+    return NULL;
 }
 
 void RandSource::run()

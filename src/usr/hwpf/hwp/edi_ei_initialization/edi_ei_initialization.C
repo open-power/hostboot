@@ -83,7 +83,7 @@ using   namespace   fapi;
 //  Wrapper function to call 08.1 :
 //      fabric_erepair
 //
-void    call_fabric_erepair( void    *io_pArgs )
+void*    call_fabric_erepair( void    *io_pArgs )
 {
     errlHndl_t  l_errl  =   NULL;
 
@@ -127,7 +127,7 @@ void    call_fabric_erepair( void    *io_pArgs )
                "call_fabric_erepair exit" );
 
     // end task, returning any errorlogs to IStepDisp
-    task_end2( l_errl );
+    return l_errl;
 }
 
 
@@ -136,7 +136,7 @@ void    call_fabric_erepair( void    *io_pArgs )
 //  Wrapper function to call 08.2 :
 //      fabric_io_dccal
 //
-void    call_fabric_io_dccal( void    *io_pArgs )
+void*    call_fabric_io_dccal( void    *io_pArgs )
 {
     errlHndl_t  l_errl  =   NULL;
 
@@ -180,7 +180,7 @@ void    call_fabric_io_dccal( void    *io_pArgs )
                "call_fabric_io_dccal exit" );
 
     // end task, returning any errorlogs to IStepDisp
-    task_end2( l_errl );
+    return l_errl;
 }
 
 
@@ -189,7 +189,7 @@ void    call_fabric_io_dccal( void    *io_pArgs )
 //  Wrapper function to call 08.3 :
 //      fabric_pre_trainadv
 //
-void    call_fabric_pre_trainadv( void    *io_pArgs )
+void*    call_fabric_pre_trainadv( void    *io_pArgs )
 {
     errlHndl_t  l_errl  =   NULL;
 
@@ -233,7 +233,7 @@ void    call_fabric_pre_trainadv( void    *io_pArgs )
                "call_fabric_pre_trainadv exit" );
 
     // end task, returning any errorlogs to IStepDisp
-    task_end2( l_errl );
+    return l_errl;
 }
 
 
@@ -242,7 +242,7 @@ void    call_fabric_pre_trainadv( void    *io_pArgs )
 //  Wrapper function to call 08.4 :
 //      fabric_io_run_training
 //
-void    call_fabric_io_run_training( void    *io_pArgs )
+void*    call_fabric_io_run_training( void    *io_pArgs )
 {
     errlHndl_t  l_errl  =   NULL;
 
@@ -292,7 +292,7 @@ void    call_fabric_io_run_training( void    *io_pArgs )
                "call_fabric_io_run_training exit" );
 
     // end task, returning any errorlogs to IStepDisp
-    task_end2( l_errl );
+    return l_errl;
 }
 
 
@@ -301,7 +301,7 @@ void    call_fabric_io_run_training( void    *io_pArgs )
 //  Wrapper function to call 08.5 :
 //      fabric_post_trainadv
 //
-void    call_fabric_post_trainadv( void    *io_pArgs )
+void*    call_fabric_post_trainadv( void    *io_pArgs )
 {
     errlHndl_t  l_errl  =   NULL;
 
@@ -345,7 +345,7 @@ void    call_fabric_post_trainadv( void    *io_pArgs )
                "call_fabric_post_trainadv exit" );
 
     // end task, returning any errorlogs to IStepDisp
-    task_end2( l_errl );
+    return l_errl;
 }
 
 
@@ -354,7 +354,7 @@ void    call_fabric_post_trainadv( void    *io_pArgs )
 //  Wrapper function to call 08.6 :
 //      host_startPRD_pbus
 //
-void    call_host_startPRD_pbus( void    *io_pArgs )
+void*    call_host_startPRD_pbus( void    *io_pArgs )
 {
     errlHndl_t  l_errl  =   NULL;
 
@@ -398,7 +398,7 @@ void    call_host_startPRD_pbus( void    *io_pArgs )
                "call_host_startPRD_pbus exit" );
 
     // end task, returning any errorlogs to IStepDisp
-    task_end2( l_errl );
+    return l_errl;
 }
 
 
@@ -407,7 +407,7 @@ void    call_host_startPRD_pbus( void    *io_pArgs )
 //  Wrapper function to call 08.7 :
 //      host_attnlisten_proc
 //
-void    call_host_attnlisten_proc( void    *io_pArgs )
+void*    call_host_attnlisten_proc( void    *io_pArgs )
 {
     errlHndl_t  l_errl  =   NULL;
 
@@ -451,7 +451,7 @@ void    call_host_attnlisten_proc( void    *io_pArgs )
                "call_host_attnlisten_proc exit" );
 
     // end task, returning any errorlogs to IStepDisp
-    task_end2( l_errl );
+    return l_errl;
 }
 
 
@@ -460,7 +460,7 @@ void    call_host_attnlisten_proc( void    *io_pArgs )
 //  Wrapper function to call 08.8 :
 //      proc_fab_iovalid
 //
-void    call_proc_fab_iovalid( void    *io_pArgs )
+void*    call_proc_fab_iovalid( void    *io_pArgs )
 {
     ReturnCode l_rc;
     errlHndl_t l_errl = NULL;
@@ -566,7 +566,7 @@ void    call_proc_fab_iovalid( void    *io_pArgs )
                "call_proc_fab_iovalid exit" );
 
     // end task, returning any errorlogs to IStepDisp
-    task_end2( l_errl );
+    return l_errl;
 }
 
 

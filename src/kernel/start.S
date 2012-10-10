@@ -768,8 +768,8 @@ userspace_task_entry:
     ;// inserts garbage code into the task_end C function.
 .global task_end_stub
 task_end_stub:
+    mr r4, r3 ;// Move current rc (r3) to status value (r4)
     li r3, 2  ;// TASK_END -> r3 (syscall number)
-    li r4, 0  ;// NULL -> r4 (status value)
     sc
 
 

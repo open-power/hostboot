@@ -70,7 +70,7 @@ using   namespace   vsbe;
 //
 //  Wrapper function to call step 10 : sbe_centaur_init
 //
-void    call_sbe_centaur_init( void *io_pArgs )
+void*    call_sbe_centaur_init( void *io_pArgs )
 {
 
     TRACDCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
@@ -234,7 +234,7 @@ void    call_sbe_centaur_init( void *io_pArgs )
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                "call_sbe_centaur_init exit" );
 
-    task_end2( l_errl );
+    return l_errl;
 }
 
 };   // end namespace

@@ -60,7 +60,7 @@ extern trace_desc_t *g_trac_initsvc;
 // ----------------------------------------------------------------------------
 // startIStepWorkerThread
 // ----------------------------------------------------------------------------
-void startIStepWorkerThread ( void * io_args )
+void* startIStepWorkerThread ( void * io_args )
 {
     TRACFCOMP( g_trac_initsvc,
                ENTER_MRK"startIStepWorkerThread()" );
@@ -75,7 +75,7 @@ void startIStepWorkerThread ( void * io_args )
                EXIT_MRK"startIStepWorkerThread()" );
 
     // Shutdown.
-    task_end();
+    return NULL;
 }
 
 

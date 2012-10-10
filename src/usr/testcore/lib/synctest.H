@@ -1,25 +1,25 @@
-//  IBM_PROLOG_BEGIN_TAG
-//  This is an automatically generated prolog.
-//
-//  $Source: src/usr/testcore/lib/synctest.H $
-//
-//  IBM CONFIDENTIAL
-//
-//  COPYRIGHT International Business Machines Corp. 2011
-//
-//  p1
-//
-//  Object Code Only (OCO) source materials
-//  Licensed Internal Code Source Materials
-//  IBM HostBoot Licensed Internal Code
-//
-//  The source code for this program is not published or other-
-//  wise divested of its trade secrets, irrespective of what has
-//  been deposited with the U.S. Copyright Office.
-//
-//  Origin: 30
-//
-//  IBM_PROLOG_END
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/usr/testcore/lib/synctest.H $                             */
+/*                                                                        */
+/* IBM CONFIDENTIAL                                                       */
+/*                                                                        */
+/* COPYRIGHT International Business Machines Corp. 2011,2012              */
+/*                                                                        */
+/* p1                                                                     */
+/*                                                                        */
+/* Object Code Only (OCO) source materials                                */
+/* Licensed Internal Code Source Materials                                */
+/* IBM HostBoot Licensed Internal Code                                    */
+/*                                                                        */
+/* The source code for this program is not published or otherwise         */
+/* divested of its trade secrets, irrespective of what has been           */
+/* deposited with the U.S. Copyright Office.                              */
+/*                                                                        */
+/* Origin: 30                                                             */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
 #ifndef __SYNCTEST_H
 #define __SYNCTEST_H
 /**
@@ -163,7 +163,7 @@ class SyncTest: public CxxTest::TestSuite
         size_t counter;
 
 
-        static void func1(void * i_p)
+        static void* func1(void * i_p)
         {
             SyncTest * my = (SyncTest *) i_p;
             mutex_t * mutex = &(my->mutex);
@@ -174,10 +174,10 @@ class SyncTest: public CxxTest::TestSuite
             TS_TRACE("ME FIRST");
             mutex_unlock(mutex);
             barrier_wait(barrier);
-            task_end();
+            return NULL;
         }
 
-        static void func2(void * i_p)
+        static void* func2(void * i_p)
         {
             SyncTest * my = (SyncTest *) i_p;
             mutex_t * mutex = &(my->mutex);
@@ -187,25 +187,25 @@ class SyncTest: public CxxTest::TestSuite
             TS_TRACE("ME NEXT");
             mutex_unlock(mutex);
             barrier_wait(barrier);
-            task_end();
+            return NULL;
         }
 
-        static void func3(void * i_p)
+        static void* func3(void * i_p)
         {
             barrier_t * barrier = (barrier_t *) i_p;
             barrier_wait(barrier);
             TS_TRACE("B1");
-            task_end();
+            return NULL;
         }
-        static void func4(void * i_p)
+        static void* func4(void * i_p)
         {
             barrier_t * barrier = (barrier_t *) i_p;
             barrier_wait(barrier);
             TS_TRACE("B2");
-            task_end();
+            return NULL;
         }
 
-        static void watch_counter(void * i_p)
+        static void* watch_counter(void * i_p)
         {
             TASK_INFO * info = (TASK_INFO *) i_p;
             SyncTest * my = info->testobj;
@@ -222,10 +222,11 @@ class SyncTest: public CxxTest::TestSuite
             }
             mutex_unlock(&(my->mutex));
             barrier_wait(&(my->barrier));
+            return NULL;
         }
 
 
-        static void increment(void * i_p)
+        static void* increment(void * i_p)
         {
             TASK_INFO * info = (TASK_INFO *) i_p;
             SyncTest * my = info->testobj;
@@ -247,9 +248,10 @@ class SyncTest: public CxxTest::TestSuite
                 nanosleep(0,TEN_CTX_SWITCHES_NS);
             }
             barrier_wait(&(my->barrier));
+            return NULL;
         }
 
-        static void increment1(void * i_p)
+        static void* increment1(void * i_p)
         {
             TASK_INFO * info = (TASK_INFO *) i_p;
             SyncTest * my = info->testobj;
@@ -271,6 +273,7 @@ class SyncTest: public CxxTest::TestSuite
                 nanosleep(0,TEN_CTX_SWITCHES_NS);
             }
             barrier_wait(&(my->barrier));
+            return NULL;
         }
 
 };

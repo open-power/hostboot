@@ -1,25 +1,25 @@
-//  IBM_PROLOG_BEGIN_TAG
-//  This is an automatically generated prolog.
-//
-//  $Source: src/kernel/idebug.C $
-//
-//  IBM CONFIDENTIAL
-//
-//  COPYRIGHT International Business Machines Corp. 2011
-//
-//  p1
-//
-//  Object Code Only (OCO) source materials
-//  Licensed Internal Code Source Materials
-//  IBM HostBoot Licensed Internal Code
-//
-//  The source code for this program is not published or other-
-//  wise divested of its trade secrets, irrespective of what has
-//  been deposited with the U.S. Copyright Office.
-//
-//  Origin: 30
-//
-//  IBM_PROLOG_END
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/kernel/idebug.C $                                         */
+/*                                                                        */
+/* IBM CONFIDENTIAL                                                       */
+/*                                                                        */
+/* COPYRIGHT International Business Machines Corp. 2011,2012              */
+/*                                                                        */
+/* p1                                                                     */
+/*                                                                        */
+/* Object Code Only (OCO) source materials                                */
+/* Licensed Internal Code Source Materials                                */
+/* IBM HostBoot Licensed Internal Code                                    */
+/*                                                                        */
+/* The source code for this program is not published or otherwise         */
+/* divested of its trade secrets, irrespective of what has been           */
+/* deposited with the U.S. Copyright Office.                              */
+/*                                                                        */
+/* Origin: 30                                                             */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
 #include <kernel/idebug.H>
 #include <kernel/console.H>
 #include <kernel/cpumgr.H>
@@ -44,7 +44,7 @@ void InteractiveDebug::startDebugTask()
     return;
 }
 
-void InteractiveDebug::debugEntryPoint(void* i_idObject)
+void* InteractiveDebug::debugEntryPoint(void* i_idObject)
 {
     // Detach task so it is cleaned up properly once it exits.
     task_detach();
@@ -84,6 +84,6 @@ void InteractiveDebug::debugEntryPoint(void* i_idObject)
     __sync_lock_test_and_set(&interactiveDebug->state_value,
                              IDEBUG_COMPLETE_STATE);
 
-    task_end();
+    return NULL;
 }
 

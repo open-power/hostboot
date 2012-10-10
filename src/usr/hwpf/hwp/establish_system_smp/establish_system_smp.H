@@ -72,10 +72,10 @@ namespace   ESTABLISH_SYSTEM_SMP
  *
  *  param[in,out]   -   pointer to any arguments, usually NULL
  *
- *  return  none
+ *  return any errlogs to istep
  *
  */
-void    call_host_coalesce_host( void    *io_pArgs );
+void*    call_host_coalesce_host( void    *io_pArgs );
 
 
 

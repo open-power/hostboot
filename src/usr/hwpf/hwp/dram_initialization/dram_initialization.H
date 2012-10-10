@@ -109,10 +109,10 @@ namespace   DRAM_INITIALIZATION
  *
  *  param[in,out]   -   pointer to any arguments, usually NULL
  *
- *  return  none
+ *  return  pointer to any errlogs
  *
  */
-void    call_host_startPRD_dram( void    *io_pArgs );
+void*    call_host_startPRD_dram( void    *io_pArgs );
 
 
 
@@ -123,10 +123,10 @@ void    call_host_startPRD_dram( void    *io_pArgs );
  *
  *  param[in,out]   -   pointer to any arguments, usually NULL
  *
- *  return  none
+ *  return  pointer to any errlogs
  *
  */
-void    call_mss_extent_setup( void    *io_pArgs );
+void*    call_mss_extent_setup( void    *io_pArgs );
 
 
 
@@ -137,10 +137,10 @@ void    call_mss_extent_setup( void    *io_pArgs );
  *
  *  param[in,out]   -   pointer to any arguments, usually NULL
  *
- *  return  none
+ *  return  pointer to any errlogs
  *
  */
-void    call_mss_memdiag( void    *io_pArgs );
+void*    call_mss_memdiag( void    *io_pArgs );
 
 
 
@@ -151,10 +151,10 @@ void    call_mss_memdiag( void    *io_pArgs );
  *
  *  param[in,out]   -   pointer to any arguments, usually NULL
  *
- *  return  none
+ *  return  pointer to any errlogs
  *
  */
-void    call_mss_scrub( void    *io_pArgs );
+void*    call_mss_scrub( void    *io_pArgs );
 
 
 
@@ -165,10 +165,10 @@ void    call_mss_scrub( void    *io_pArgs );
  *
  *  param[in,out]   -   pointer to any arguments, usually NULL
  *
- *  return  none
+ *  return  pointer to any errlogs
  *
  */
-void    call_mss_thermal_init( void    *io_pArgs );
+void*    call_mss_thermal_init( void    *io_pArgs );
 
 
 
@@ -179,10 +179,10 @@ void    call_mss_thermal_init( void    *io_pArgs );
  *
  *  param[in,out]   -   pointer to any arguments, usually NULL
  *
- *  return  none
+ *  return  pointer to any errlogs
  *
  */
-void    call_proc_setup_bars( void    *io_pArgs );
+void*    call_proc_setup_bars( void    *io_pArgs );
 
 
 
@@ -193,10 +193,10 @@ void    call_proc_setup_bars( void    *io_pArgs );
  *
  *  param[in,out]   -   pointer to any arguments, usually NULL
  *
- *  return  none
+ *  return  pointer to any errlogs
  *
  */
-void    call_proc_pcie_config( void    *io_pArgs );
+void*    call_proc_pcie_config( void    *io_pArgs );
 
 
 
@@ -207,10 +207,10 @@ void    call_proc_pcie_config( void    *io_pArgs );
  *
  *  param[in,out]   -   pointer to any arguments, usually NULL
  *
- *  return  none
+ *  return  pointer to any errlogs
  *
  */
-void    call_proc_exit_cache_contained( void    *io_pArgs );
+void*    call_proc_exit_cache_contained( void    *io_pArgs );
 
 
 };   // end namespace

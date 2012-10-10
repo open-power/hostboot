@@ -68,10 +68,10 @@ namespace   START_PAYLOAD
  *
  *  param[in,out]   -   pointer to any arguments, usually NULL
  *
- *  return  none
+ *  return  any error logs to istep
  *
  */
-void    call_host_start_payload( void    *io_pArgs );
+void*    call_host_start_payload( void    *io_pArgs );
 
 
 };   // end namespace

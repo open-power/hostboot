@@ -54,7 +54,7 @@ void platTaskEntry(errlHndl_t &io_errl)
 {
     FAPI_IMP("Starting platTaskEntry");
     g_attrOverride.iv_overrideVal = 0;
-    task_end();
+    io_errl=NULL;
 }
 
 // Macro that creates the _start function

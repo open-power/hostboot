@@ -70,7 +70,7 @@ using   namespace   fapi;
 //  Wrapper function to call 18.8 :
 //      host_coalesce_host
 //
-void    call_host_coalesce_host( void    *io_pArgs )
+void*    call_host_coalesce_host( void    *io_pArgs )
 {
     errlHndl_t  l_errl  =   NULL;
 
@@ -114,7 +114,7 @@ void    call_host_coalesce_host( void    *io_pArgs )
                "call_host_coalesce_host exit" );
 
     // end task, returning any errorlogs to IStepDisp 
-    task_end2( l_errl );
+    return l_errl;
 }
 
 

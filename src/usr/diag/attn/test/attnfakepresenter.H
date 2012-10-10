@@ -116,7 +116,7 @@ class FakePresenter
          *
          * @param[in] i_properties The presenter on which to call wait.
          */
-        static void main(void * i_properties);
+        static void* main(void * i_properties);
 
         /**
          * @brief iv_mutex Shared data access serialization.

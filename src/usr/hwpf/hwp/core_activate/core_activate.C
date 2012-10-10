@@ -81,7 +81,7 @@ using   namespace   ISTEP;
 //  Wrapper function to call 16.1 :
 //      host_activate_master
 //
-    void    call_host_activate_master( void    *io_pArgs )
+    void*    call_host_activate_master( void    *io_pArgs )
     {
         errlHndl_t  l_errl  =   NULL;
 
@@ -202,7 +202,7 @@ using   namespace   ISTEP;
                    "call_host_activate_master exit" );
 
         // end task, returning any errorlogs to IStepDisp
-        task_end2( l_errl );
+        return l_errl;
 
     }
 
@@ -212,7 +212,7 @@ using   namespace   ISTEP;
 //  Wrapper function to call 16.2 :
 //      host_activate_slave_cores
 //
-void    call_host_activate_slave_cores( void    *io_pArgs )
+void*    call_host_activate_slave_cores( void    *io_pArgs )
 {
     errlHndl_t  l_errl  =   NULL;
 
@@ -289,7 +289,7 @@ void    call_host_activate_slave_cores( void    *io_pArgs )
                "call_host_activate_slave_cores exit" );
 
     // end task, returning any errorlogs to IStepDisp
-    task_end2( l_errl );
+    return l_errl;
 }
 
 
@@ -298,7 +298,7 @@ void    call_host_activate_slave_cores( void    *io_pArgs )
 //  Wrapper function to call 16.3 :
 //      host_ipl_complete
 //
-void    call_host_ipl_complete( void    *io_pArgs )
+void*    call_host_ipl_complete( void    *io_pArgs )
 {
     errlHndl_t  l_errl  =   NULL;
 
@@ -361,7 +361,7 @@ void    call_host_ipl_complete( void    *io_pArgs )
 
 
     // end task, returning any errorlogs to IStepDisp
-    task_end2( l_errl );
+    return l_errl;
 }
 
 

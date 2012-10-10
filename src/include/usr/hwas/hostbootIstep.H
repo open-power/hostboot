@@ -45,9 +45,9 @@ namespace HWAS
  *
  *  param[in,out] io_pArgs  -   (normally) a pointer to a TaskArgs struct,
  *                              or NULL.
- *  return  none
+ *  return  any error logs to istep
  */
-void host_init_fsi( void *io_pArgs );
+void* host_init_fsi( void *io_pArgs );
 
 /**
  * @brief   host_set_ipl_parms  Build ipl parameters
@@ -56,9 +56,9 @@ void host_init_fsi( void *io_pArgs );
  *
  *  param[in,out] io_pArgs  -   (normally) a pointer to a TaskArgs struct,
  *                              or NULL.
- *  return  none
+ *  return  any error logs to istep
  */
-void host_set_ipl_parms( void *io_pArgs );
+void* host_set_ipl_parms( void *io_pArgs );
 
 /**
  * @brief   host_discover_targets   Builds targeting
@@ -73,9 +73,9 @@ void host_set_ipl_parms( void *io_pArgs );
  *
  *  param[in,out] io_pArgs  -   (normally) a pointer to a TaskArgs struct,
  *                              or NULL.
- *  return  none
+ *  return  any error logs to istep
  */
-void host_discover_targets( void *io_pArgs );
+void* host_discover_targets( void *io_pArgs );
 
 /**
  * @brief   host_gard   Do Gard
@@ -84,9 +84,9 @@ void host_discover_targets( void *io_pArgs );
  *
  *  param[in,out] io_pArgs  -   (normally) a pointer to a TaskArgs struct,
  *                              or NULL.
- *  return  none
+ *  return  any error logs to istep
  */
-void host_gard( void *io_pArgs );
+void* host_gard( void *io_pArgs );
 
 /**
  * @brief   host_cancontinue_clear  Clear deconfigured status
@@ -95,9 +95,9 @@ void host_gard( void *io_pArgs );
  *
  *  param[in,out] io_pArgs  -   (normally) a pointer to a TaskArgs struct,
  *                              or NULL.
- *  return  none
+ *  return  any error logs to istep
  */
-void host_cancontinue_clear( void *io_pArgs );
+void* host_cancontinue_clear( void *io_pArgs );
 
 /**
  * @brief   proc_check_slave_sbe_seeprom_complete   Check Slave SBE Complete
@@ -106,9 +106,9 @@ void host_cancontinue_clear( void *io_pArgs );
  *
  *  param[in,out] io_pArgs  -   (normally) a pointer to a TaskArgs struct,
  *                              or NULL.
- *  return  none
+ *  return  any error logs to istep
  */
-void proc_check_slave_sbe_seeprom_complete( void *io_pArgs );
+void* proc_check_slave_sbe_seeprom_complete( void *io_pArgs );
 
 /**
  * @brief   proc_xmit_sbe   vSBE Init of Slave Chips
@@ -117,9 +117,9 @@ void proc_check_slave_sbe_seeprom_complete( void *io_pArgs );
  *
  *  param[in,out] io_pArgs  -   (normally) a pointer to a TaskArgs struct,
  *                              or NULL.
- *  return  none
+ *  return  any error logs to istep
  */
-void proc_xmit_sbe( void *io_pArgs );
+void* proc_xmit_sbe( void *io_pArgs );
 
 } // namespace HWAS
 #endif // HOSTBOOTISTEP_H_

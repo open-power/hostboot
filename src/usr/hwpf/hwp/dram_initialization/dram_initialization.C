@@ -88,7 +88,7 @@ using   namespace   fapi;
 //  Wrapper function to call 14.1 :
 //      host_startPRD_dram
 //
-void    call_host_startPRD_dram( void    *io_pArgs )
+void*    call_host_startPRD_dram( void    *io_pArgs )
 {
     errlHndl_t  l_errl  =   NULL;
 
@@ -132,14 +132,14 @@ void    call_host_startPRD_dram( void    *io_pArgs )
                "call_host_startPRD_dram exit" );
 
     // end task, returning any errorlogs to IStepDisp
-    task_end2( l_errl );
+    return l_errl;
 }
 
 //
 //  Wrapper function to call 14.2 :
 //      mss_extent_setup
 //
-void    call_mss_extent_setup( void    *io_pArgs )
+void*    call_mss_extent_setup( void    *io_pArgs )
 {
     errlHndl_t  l_errl  =   NULL;
 
@@ -164,14 +164,14 @@ void    call_mss_extent_setup( void    *io_pArgs )
             "call_mss_extent_setup exit" );
 
     // end task, returning any errorlogs to IStepDisp
-    task_end2( l_errl );
+    return l_errl;
 }
 
 //
 //  Wrapper function to call 14.3 :
 //      mss_memdiag
 //
-void    call_mss_memdiag( void    *io_pArgs )
+void*    call_mss_memdiag( void    *io_pArgs )
 {
     using namespace MDIA;
 
@@ -213,7 +213,7 @@ void    call_mss_memdiag( void    *io_pArgs )
                "call_mss_memdiag exit" );
 
     // end task, returning any errorlogs to IStepDisp
-    task_end2( l_errl );
+    return l_errl;
 }
 
 
@@ -222,7 +222,7 @@ void    call_mss_memdiag( void    *io_pArgs )
 //  Wrapper function to call 14.4 :
 //      mss_scrub
 //
-void    call_mss_scrub( void    *io_pArgs )
+void*    call_mss_scrub( void    *io_pArgs )
 {
     errlHndl_t  l_errl  =   NULL;
 
@@ -266,7 +266,7 @@ void    call_mss_scrub( void    *io_pArgs )
                "call_mss_scrub exit" );
 
     // end task, returning any errorlogs to IStepDisp
-    task_end2( l_errl );
+    return l_errl;
 }
 
 
@@ -275,7 +275,7 @@ void    call_mss_scrub( void    *io_pArgs )
 //  Wrapper function to call 14.5 :
 //      mss_thermal_init
 //
-void    call_mss_thermal_init( void    *io_pArgs )
+void*    call_mss_thermal_init( void    *io_pArgs )
 {
     errlHndl_t  l_errl  =   NULL;
 
@@ -319,7 +319,7 @@ void    call_mss_thermal_init( void    *io_pArgs )
                "call_mss_thermal_init exit" );
 
     // end task, returning any errorlogs to IStepDisp
-    task_end2( l_errl );
+    return l_errl;
 }
 
 
@@ -328,7 +328,7 @@ void    call_mss_thermal_init( void    *io_pArgs )
 //  Wrapper function to call 14.6 :
 //      proc_setup_bars
 //
-void    call_proc_setup_bars( void    *io_pArgs )
+void*    call_proc_setup_bars( void    *io_pArgs )
 {
     errlHndl_t  l_errl  =   NULL;
 
@@ -487,7 +487,7 @@ void    call_proc_setup_bars( void    *io_pArgs )
                "call_proc_setup_bars exit" );
 
     // end task, returning any errorlogs to IStepDisp
-    task_end2( l_errl );
+    return l_errl;
 }
 
 
@@ -496,7 +496,7 @@ void    call_proc_setup_bars( void    *io_pArgs )
 //  Wrapper function to call 14.7 :
 //      proc_pcie_config
 //
-void    call_proc_pcie_config( void    *io_pArgs )
+void*    call_proc_pcie_config( void    *io_pArgs )
 {
     errlHndl_t  l_errl  =   NULL;
 
@@ -540,7 +540,7 @@ void    call_proc_pcie_config( void    *io_pArgs )
                "call_proc_pcie_config exit" );
 
     // end task, returning any errorlogs to IStepDisp
-    task_end2( l_errl );
+    return l_errl;
 }
 
 
@@ -549,7 +549,7 @@ void    call_proc_pcie_config( void    *io_pArgs )
 //  Wrapper function to call 14.8 :
 //      proc_exit_cache_contained
 //
-void    call_proc_exit_cache_contained( void    *io_pArgs )
+void*    call_proc_exit_cache_contained( void    *io_pArgs )
 {
     errlHndl_t  l_errl  =   NULL;
 
@@ -611,7 +611,7 @@ void    call_proc_exit_cache_contained( void    *io_pArgs )
     // @@@@@    END CUSTOM BLOCK:   @@@@@
 
     // end task, returning any errorlogs to IStepDisp
-    task_end2( l_errl );
+    return l_errl;
 }
 
 

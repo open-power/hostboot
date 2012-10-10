@@ -77,7 +77,7 @@ using   namespace   fapi;
 //  Wrapper function to call 07.1 :
 //      proc_a_x_pci_dmi_pll_setup
 //
-void    call_proc_a_x_pci_dmi_pll_setup( void    *io_pArgs )
+void*    call_proc_a_x_pci_dmi_pll_setup( void    *io_pArgs )
 {
     errlHndl_t l_err = NULL;
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_proc_a_x_pci_dmi_pll_setup entry" );
@@ -89,7 +89,7 @@ void    call_proc_a_x_pci_dmi_pll_setup( void    *io_pArgs )
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                             "WARNING: proc_a_x_pci_dmi_pll_setup HWP is disabled in SIMICS run!");
         // end task
-        task_end2( l_err );
+        return  l_err ;
     }
 
     uint8_t l_cpuNum = 0;
@@ -156,7 +156,7 @@ void    call_proc_a_x_pci_dmi_pll_setup( void    *io_pArgs )
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_proc_a_x_pci_dmi_pll_setup exit" );
 
     // end task, returning any errorlogs to IStepDisp 
-    task_end2( l_err );
+    return l_err;
 }
 
 
@@ -165,7 +165,7 @@ void    call_proc_a_x_pci_dmi_pll_setup( void    *io_pArgs )
 //  Wrapper function to call 07.2 :
 //      proc_startclock_chiplets
 //
-void    call_proc_startclock_chiplets( void    *io_pArgs )
+void*    call_proc_startclock_chiplets( void    *io_pArgs )
 {
     errlHndl_t l_err =   NULL;
 
@@ -212,7 +212,7 @@ void    call_proc_startclock_chiplets( void    *io_pArgs )
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_proc_startclock_chiplets exit" );
 
     // end task, returning any errorlogs to IStepDisp 
-    task_end2( l_err );
+    return l_err;
 }
 
 
@@ -220,7 +220,7 @@ void    call_proc_startclock_chiplets( void    *io_pArgs )
 //  Wrapper function to call 07.3 :
 //      proc_chiplet_scominit
 //
-void    call_proc_chiplet_scominit( void    *io_pArgs )
+void*    call_proc_chiplet_scominit( void    *io_pArgs )
 {
     errlHndl_t l_err = NULL;
 
@@ -230,7 +230,7 @@ void    call_proc_chiplet_scominit( void    *io_pArgs )
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_proc_chiplet_scominit exit" );
 
-    task_end2( l_err );
+    return l_err;
 }
 
 
@@ -238,7 +238,7 @@ void    call_proc_chiplet_scominit( void    *io_pArgs )
 //  Wrapper function to call 07.4 :
 //      proc_pcie_scominit
 //
-void    call_proc_pcie_scominit( void    *io_pArgs )
+void*    call_proc_pcie_scominit( void    *io_pArgs )
 {
     errlHndl_t          l_errl      =   NULL;  
 
@@ -292,7 +292,7 @@ void    call_proc_pcie_scominit( void    *io_pArgs )
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_proc_pcie_scominit exit" );
 
     // end task, returning any errorlogs to IStepDisp 
-    task_end2( l_errl );
+    return l_errl;
 }
 
 
@@ -301,7 +301,7 @@ void    call_proc_pcie_scominit( void    *io_pArgs )
 //  Wrapper function to call 07.5 :
 //      proc_scomoverride_chiplets
 //
-void    call_proc_scomoverride_chiplets( void    *io_pArgs )
+void*    call_proc_scomoverride_chiplets( void    *io_pArgs )
 {
     errlHndl_t          l_errl      =   NULL;  
 
@@ -323,7 +323,7 @@ void    call_proc_scomoverride_chiplets( void    *io_pArgs )
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_proc_scomoverride_chiplets exit" );
 
     // end task, returning any errorlogs to IStepDisp 
-    task_end2( l_errl );
+    return l_errl;
 }
 
 

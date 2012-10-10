@@ -120,10 +120,10 @@ namespace   DMI_TRAINING
  *
  *  param[in,out] io_pArgs  -   (normally) a pointer to a TaskArgs struct,
  *                               or NULL.
- *  return  none
+ *  return  any error logs to istep
  *
  */
-void    call_dmi_scominit( void * io_pArgs );
+void*    call_dmi_scominit( void * io_pArgs );
 
 
 /**
@@ -133,10 +133,10 @@ void    call_dmi_scominit( void * io_pArgs );
  *
  *  param[in,out] io_pArgs  -   (normally) a pointer to a TaskArgs struct,
  *                               or NULL.
- *  return  none
+ *  return  any error logs to istep
  *
  */
-void    call_dmi_erepair( void * io_pArgs );
+void*    call_dmi_erepair( void * io_pArgs );
 
 
 /**
@@ -146,10 +146,10 @@ void    call_dmi_erepair( void * io_pArgs );
  *
  *  param[in,out] io_pArgs  -   (normally) a pointer to a TaskArgs struct,
  *                               or NULL.
- *  return  none
+ *  return  any error logs to istep
  *
  */
-void    call_dmi_io_dccal( void * io_pArgs );
+void*    call_dmi_io_dccal( void * io_pArgs );
 
 
 /**
@@ -159,10 +159,10 @@ void    call_dmi_io_dccal( void * io_pArgs );
  *
  *  param[in,out] io_pArgs  -   (normally) a pointer to a TaskArgs struct,
  *                               or NULL.
- *  return  none
+ *  return  any error logs to istep
  *
  */
-void    call_dmi_pre_trainadv( void * io_pArgs );
+void*    call_dmi_pre_trainadv( void * io_pArgs );
 
 
 /**
@@ -172,10 +172,10 @@ void    call_dmi_pre_trainadv( void * io_pArgs );
  *
  *  param[in,out] io_pArgs  -   (normally) a pointer to a TaskArgs struct,
  *                               or NULL.
- *  return  none
+ *  return  any error logs to istep
  *
  */
-void    call_dmi_io_run_training( void * io_pArgs );
+void*    call_dmi_io_run_training( void * io_pArgs );
 
 
 /**
@@ -185,10 +185,10 @@ void    call_dmi_io_run_training( void * io_pArgs );
  *
  *  param[in,out] io_pArgs  -   (normally) a pointer to a TaskArgs struct,
  *                               or NULL.
- *  return  none
+ *  return  any error logs to istep
  *
  */
-void    call_dmi_post_trainadv( void * io_pArgs );
+void*    call_dmi_post_trainadv( void * io_pArgs );
 
 
 /**
@@ -198,10 +198,10 @@ void    call_dmi_post_trainadv( void * io_pArgs );
  *
  *  param[in,out] io_pArgs  -   (normally) a pointer to a TaskArgs struct,
  *                               or NULL.
- *  return  none
+ *  return  any error logs to istep
  *
  */
-void    call_proc_cen_framelock( void *io_pArgs );
+void*    call_proc_cen_framelock( void *io_pArgs );
 
 
 /**
@@ -211,10 +211,10 @@ void    call_proc_cen_framelock( void *io_pArgs );
  *
  *  param[in,out] io_pArgs  -   (normally) a pointer to a TaskArgs struct,
  *                               or NULL.
- *  return  none
+ *  return  any error logs to istep
  *
  */
-void    call_host_startPRD_dmi( void * io_pArgs );
+void*    call_host_startPRD_dmi( void * io_pArgs );
 
 
 /**
@@ -224,10 +224,10 @@ void    call_host_startPRD_dmi( void * io_pArgs );
  *
  *  param[in,out] io_pArgs  -   (normally) a pointer to a TaskArgs struct,
  *                               or NULL.
- *  return  none
+ *  return  any error logs to istep
  *
  */
-void    call_host_attnlisten_cen( void * io_pArgs );
+void*    call_host_attnlisten_cen( void * io_pArgs );
 
 
 /**
@@ -237,10 +237,10 @@ void    call_host_attnlisten_cen( void * io_pArgs );
  *
  *  param[in,out] io_pArgs  -   (normally) a pointer to a TaskArgs struct,
  *                               or NULL.
- *  return  none
+ *  return  any error logs to istep
  *
  */
-void    call_cen_set_inband_addr( void * io_pArgs );
+void*    call_cen_set_inband_addr( void * io_pArgs );
 
 
 };   // end namespace
