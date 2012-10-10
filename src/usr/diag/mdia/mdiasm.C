@@ -49,7 +49,7 @@ void StateMachine::running(bool & o_running)
 {
     mutex_lock(&iv_mutex);
 
-    o_running = !iv_done;
+    o_running = !(iv_done || iv_shutdown);
 
     mutex_unlock(&iv_mutex);
 }
@@ -61,27 +61,30 @@ void StateMachine::processCommandTimeout(const MonitorIDs & i_monitorIDs)
 
     mutex_lock(&iv_mutex);
 
-    for(MonitorIDs::const_iterator monitorIt = i_monitorIDs.begin();
-        monitorIt != i_monitorIDs.end();
-        ++monitorIt)
+    if(!iv_shutdown)
     {
-        for(WorkFlowPropertiesIterator wit = iv_workFlowProperties.begin();
-            wit != iv_workFlowProperties.end();
-            ++wit)
+        for(MonitorIDs::const_iterator monitorIt = i_monitorIDs.begin();
+                monitorIt != i_monitorIDs.end();
+                ++monitorIt)
         {
-            if((*wit)->timer == *monitorIt)
+            for(WorkFlowPropertiesIterator wit = iv_workFlowProperties.begin();
+                    wit != iv_workFlowProperties.end();
+                    ++wit)
             {
-                (*wit)->status = COMMAND_TIMED_OUT;
-                wkflprop = *wit;
-                break;
+                if((*wit)->timer == *monitorIt)
+                {
+                    (*wit)->status = COMMAND_TIMED_OUT;
+                    wkflprop = *wit;
+                    break;
+                }
             }
         }
-    }
 
-    //Satisfies last/one target remaining to run maint cmds.
-    //If no match found, implies SM has already processed event(s).
-    if(wkflprop)
-        scheduleWorkItem(*wkflprop);
+        //Satisfies last/one target remaining to run maint cmds.
+        //If no match found, implies SM has already processed event(s).
+        if(wkflprop)
+            scheduleWorkItem(*wkflprop);
+    }
 
     mutex_unlock(&iv_mutex);
 }
@@ -174,7 +177,7 @@ void StateMachine::wait()
 
     // wait for everything to finish
 
-    while(!iv_done)
+    while(!iv_done && !iv_shutdown)
     {
         sync_cond_wait(&iv_cond, &iv_mutex);
     }
@@ -187,6 +190,8 @@ void StateMachine::start()
     mutex_lock(&iv_mutex);
 
     MDIA_FAST("sm: starting up");
+
+    iv_shutdown = false;
 
     // schedule the first work items for all target / workFlow associations
 
@@ -296,65 +301,67 @@ bool StateMachine::executeWorkItem(WorkFlowProperties * i_wfp)
 
     // ensure this thread sees the most recent state
 
-    bool async = workItemIsAsync(*i_wfp);
-
-    uint64_t workItem = *i_wfp->workItem;
-
-    MDIA_FAST("sm: executing work item %d for: %p",
-            workItem, getTarget(*i_wfp));
-
-    mutex_unlock(&iv_mutex);
-
-    errlHndl_t err = 0;
-
-    switch(workItem)
+    if(!iv_shutdown)
     {
-        // do the appropriate thing based on the phase for this target
+        bool async = workItemIsAsync(*i_wfp);
 
-        case START_PATTERN_0:
-        case START_PATTERN_1:
-        case START_PATTERN_2:
-        case START_PATTERN_3:
-        case START_PATTERN_4:
-        case START_PATTERN_5:
-        case START_PATTERN_6:
-        case START_PATTERN_7:
-        case START_RANDOM_PATTERN:
-        case START_SCRUB:
+        uint64_t workItem = *i_wfp->workItem;
 
-            err = doMaintCommand(*i_wfp);
+        MDIA_FAST("sm: executing work item %d for: %p",
+                workItem, getTarget(*i_wfp));
 
-            break;
+        mutex_unlock(&iv_mutex);
 
-        default:
-            break;
+        errlHndl_t err = 0;
+
+        switch(workItem)
+        {
+            // do the appropriate thing based on the phase for this target
+
+            case START_PATTERN_0:
+            case START_PATTERN_1:
+            case START_PATTERN_2:
+            case START_PATTERN_3:
+            case START_PATTERN_4:
+            case START_PATTERN_5:
+            case START_PATTERN_6:
+            case START_PATTERN_7:
+            case START_RANDOM_PATTERN:
+            case START_SCRUB:
+
+                err = doMaintCommand(*i_wfp);
+
+                break;
+
+            default:
+                break;
+        }
+
+        mutex_lock(&iv_mutex);
+
+        if(err)
+        {
+            // stop the workFlow for this target
+
+            i_wfp->status = FAILED;
+            i_wfp->log = err;
+        }
+
+        else if(!async)
+        {
+            // sync work item -
+            // move the workFlow pointer to the next phase
+            ++i_wfp->workItem;
+        }
+
+        if(err || !async)
+        {
+            // check to see if this was the last workFlow
+            // in progress (if there was an error), or for sync
+            // work items, schedule the next work item
+            dispatched = scheduleWorkItem(*i_wfp);
+        }
     }
-
-    mutex_lock(&iv_mutex);
-
-    if(err)
-    {
-        // stop the workFlow for this target
-
-        i_wfp->status = FAILED;
-        i_wfp->log = err;
-    }
-
-    else if(!async)
-    {
-        // sync work item -
-        // move the workFlow pointer to the next phase
-        ++i_wfp->workItem;
-    }
-
-    if(err || !async)
-    {
-        // check to see if this was the last workFlow
-        // in progress (if there was an error), or for sync
-        // work items, schedule the next work item
-        dispatched = scheduleWorkItem(*i_wfp);
-    }
-
     mutex_unlock(&iv_mutex);
 
     return dispatched;
@@ -374,15 +381,17 @@ errlHndl_t StateMachine::doMaintCommand(WorkFlowProperties & i_wfp)
     ecmdDataBufferBase startAddr(64), endAddr(64);
     mss_MaintCmd * cmd = NULL;
 
+    mutex_lock(&iv_mutex);
+
     // starting a maint cmd ...  register a timeout monitor
     uint64_t monitorId = getMonitor().addMonitor(timeout);
-
-    mutex_lock(&iv_mutex);
 
     i_wfp.timer = monitorId;
     workItem = *i_wfp.workItem;
     restart = i_wfp.restartCommand;
     targetMba = getTarget(i_wfp);
+
+    mutex_unlock(&iv_mutex);
 
     fapi::Target fapiMba(TARGET_TYPE_MBA_CHIPLET, targetMba);
 
@@ -478,6 +487,8 @@ errlHndl_t StateMachine::doMaintCommand(WorkFlowProperties & i_wfp)
 
     } while(0);
 
+    mutex_lock(&iv_mutex);
+
     if(err)
     {
         MDIA_FAST("sm: Running Maint Cmd failed");
@@ -514,6 +525,8 @@ CommandMonitor & StateMachine::getMonitor()
 
 bool StateMachine::processMaintCommandEvent(const MaintCommandEvent & i_event)
 {
+    bool resume = true, dispatched = false;
+
     mutex_lock(&iv_mutex);
 
     WorkFlowPropertiesIterator wit = iv_workFlowProperties.begin();
@@ -529,63 +542,61 @@ bool StateMachine::processMaintCommandEvent(const MaintCommandEvent & i_event)
     if(wit == iv_workFlowProperties.end())
     {
         MDIA_ERR("sm: did not find target");
-
-        return false;
     }
-
-    bool resume = true, dispatched = false;
-
-    WorkFlowProperties & wfp = **wit;
-
-    // always unregister any existing maint cmd monitor
-
-    getMonitor().removeMonitor(wfp.timer);
-
-    MDIA_FAST("sm: processing event for: %p", getTarget(wfp));
-
-    switch(i_event.type)
+    else if(!iv_shutdown)
     {
-        case COMMAND_COMPLETE:
+        WorkFlowProperties & wfp = **wit;
 
-            // command stopped or complete at end of last rank
+        // always unregister any existing maint cmd monitor
 
-            wfp.restartCommand = false;
+        getMonitor().removeMonitor(wfp.timer);
 
-            // move to the next command
+        MDIA_FAST("sm: processing event for: %p", getTarget(wfp));
 
-            ++wfp.workItem;
+        switch(i_event.type)
+        {
+            case COMMAND_COMPLETE:
 
-            break;
+                // command stopped or complete at end of last rank
 
-        case COMMAND_STOPPED:
+                wfp.restartCommand = false;
 
-            // command stopped at end of some other rank
+                // move to the next command
 
-            wfp.restartCommand = true;
+                ++wfp.workItem;
 
-            break;
+                break;
 
-        case SKIP_MBA:
+            case COMMAND_STOPPED:
 
-            // stop testing on this mba
+                // command stopped at end of some other rank
 
-            wfp.status = COMPLETE;
+                wfp.restartCommand = true;
 
-            break;
+                break;
 
-        case RESET_TIMER:
+            case SKIP_MBA:
 
-            // fall through
-        default:
+                // stop testing on this mba
 
-            resume = false;
-            break;
+                wfp.status = COMPLETE;
+
+                break;
+
+            case RESET_TIMER:
+
+                // fall through
+            default:
+
+                resume = false;
+                break;
+        }
+
+        // schedule the next work item
+
+        if(resume)
+            dispatched = scheduleWorkItem(wfp);
     }
-
-    // schedule the next work item
-
-    if(resume)
-        dispatched = scheduleWorkItem(wfp);
 
     mutex_unlock(&iv_mutex);
 
@@ -637,27 +648,31 @@ void StateMachine::shutdown()
 {
     mutex_lock(&iv_mutex);
 
-    MDIA_FAST("sm: shutting down...");
+    Util::ThreadPool<WorkItem> * tp = iv_tp;
+    CommandMonitor * monitor = iv_monitor;
 
-    if(iv_tp)
-    {
-        MDIA_FAST("Stopping threadPool...");
-        iv_tp->shutdown();
-        delete iv_tp;
-        iv_tp = 0;
-    }
+    iv_tp = 0;
+    iv_monitor = 0;
 
-    if(iv_monitor)
-    {
-        MDIA_FAST("Stopping monitor...");
-        iv_monitor->shutdown();
-        delete iv_monitor;
-        iv_monitor = 0;
-    }
+    iv_shutdown = true;
 
     mutex_unlock(&iv_mutex);
 
-    reset();
+    MDIA_FAST("sm: shutting down...");
+
+    if(tp)
+    {
+        MDIA_FAST("Stopping threadPool...");
+        tp->shutdown();
+        delete tp;
+    }
+
+    if(monitor)
+    {
+        MDIA_FAST("Stopping monitor...");
+        monitor->shutdown();
+        delete monitor;
+    }
 
     MDIA_FAST("sm: ...shutdown complete");
 }
@@ -670,7 +685,8 @@ StateMachine::~StateMachine()
     mutex_destroy(&iv_mutex);
 }
 
-StateMachine::StateMachine() : iv_monitor(0), iv_done(true), iv_tp(0)
+StateMachine::StateMachine() : iv_monitor(0), iv_done(true), iv_shutdown(false),
+    iv_tp(0)
 {
     mutex_init(&iv_mutex);
     sync_cond_init(&iv_cond);

@@ -231,6 +231,11 @@ class StateMachine
         bool iv_done;
 
         /**
+         * @brief shutdown indicator
+         */
+        bool iv_shutdown;
+
+        /**
          * @brief thread pool
          */
         Util::ThreadPool<WorkItem> * iv_tp;
