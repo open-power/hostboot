@@ -66,7 +66,7 @@
 #include    "proc_prep_master_winkle.H"
 #include    "proc_stop_deadman_timer.H"
 // #include    "host_activate_slave_cores/host_activate_slave_cores.H"
-// #include    "host_ipl_complete/host_ipl_complete.H"
+#include    "proc_switch_cfsim.H"
 
 namespace   CORE_ACTIVATE
 {
@@ -300,50 +300,62 @@ void*    call_host_activate_slave_cores( void    *io_pArgs )
 //
 void*    call_host_ipl_complete( void    *io_pArgs )
 {
-    errlHndl_t  l_errl  =   NULL;
+    errlHndl_t  l_err  =   NULL;
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                "call_host_ipl_complete entry" );
     do
     {
-
-#if 0
-        // @@@@@    CUSTOM BLOCK:   @@@@@
-        //  figure out what targets we need
-        //  customize any other inputs
-        //  set up loops to go through all targets (if parallel, spin off a task)
-
-        //  dump physical path to targets
-        EntityPath l_path;
-        l_path  =   l_@targetN_target->getAttr<ATTR_PHYS_PATH>();
-        l_path.dump();
-
-        // cast OUR type of target to a FAPI type of target.
-        const fapi::Target l_fapi_@targetN_target(
-                                                  TARGET_TYPE_MEMBUF_CHIP,
-                                                  reinterpret_cast<void *>
-                                                  (const_cast<TARGETING::Target*>(l_@targetN_target)) );
-
-        //  call the HWP with each fapi::Target
-        FAPI_INVOKE_HWP( l_errl, host_ipl_complete, _args_...);
-        if ( l_errl )
+        uint8_t l_cpuNum = 0;
+        TARGETING::TargetHandleList l_cpuTargetList;
+        getAllChips(l_cpuTargetList, TYPE_PROC);
+        for ( l_cpuNum=0; l_cpuNum < l_cpuTargetList.size(); l_cpuNum++ )
         {
-            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                      "ERROR : .........." );
-            errlCommit( l_errl, HWPF_COMP_ID );
-        }
-        else
-        {
+            const TARGETING::Target*  l_cpu_target = l_cpuTargetList[l_cpuNum];
+            const fapi::Target l_fapi_proc_target(
+                    TARGET_TYPE_PROC_CHIP,
+                    reinterpret_cast<void *>
+                    ( const_cast<TARGETING::Target*>(l_cpu_target) ) );
+
             TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                       "SUCCESS : .........." );
+                        "Running proc_switch_cfsim HWP on...");
+            EntityPath l_path;
+            l_path  =   l_cpu_target->getAttr<ATTR_PHYS_PATH>();
+            l_path.dump();
+
+            //  call proc_switch_cfsim
+            FAPI_INVOKE_HWP(l_err, proc_switch_cfsim, l_fapi_proc_target,
+                            true, // RESET
+                            true, // RESET_OPB_SWITCH
+                            true, // FENCE_FSI0
+                            true, // FENCE_PIB_NH
+                            true, // FENCE_PIB_H
+                            true, // FENCE_FSI1
+                            true); // FENCE_PIB_SW1
+            if (l_err)
+            {
+                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                          "ERROR 0x%.8X: proc_switch_cfsim HWP returns error",
+                          l_err->reasonCode());
+                break;
+            }
+            else
+            {
+                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                           "SUCCESS: proc_switch_cfsim HWP( )" );
+            }
         }
-        // @@@@@    END CUSTOM BLOCK:   @@@@@
-#endif
+
+        if( l_err )
+        {
+            break;
+        }
+
 
         // Sync attributes to Fsp
-        l_errl = syncAllAttributesToFsp();
+        l_err = syncAllAttributesToFsp();
 
-        if( l_errl )
+        if( l_err )
         {
             break;
         }
@@ -351,17 +363,16 @@ void*    call_host_ipl_complete( void    *io_pArgs )
         // Send Sync Point to Fsp
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                    INFO_MRK"Send SYNC_POINT_REACHED msg to Fsp" );
-        l_errl = INITSERVICE::sendSyncPoint();
-
+        l_err = INITSERVICE::sendSyncPoint();
 
     } while( 0 );
 
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-               "call_host_ipl_complete exit elog ptr = %p", l_errl );
+               "call_host_ipl_complete exit elog ptr = %p", l_err );
 
 
     // end task, returning any errorlogs to IStepDisp
-    return l_errl;
+    return l_err;
 }
 
 

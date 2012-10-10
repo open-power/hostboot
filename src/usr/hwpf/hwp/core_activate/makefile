@@ -42,14 +42,15 @@ EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/core_activate
 ##  EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/core_activate/<HWP_dir>
 EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/core_activate/proc_prep_master_winkle
 EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/core_activate/proc_stop_deadman_timer
-
+EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/core_activate/proc_switch_cfsim
 
 
 ##  NOTE: add new object files when you add a new HWP
 OBJS =  core_activate.o \
         proc_prep_master_winkle.o   \
         proc_sbe_ffdc.o             \
-        proc_stop_deadman_timer.o
+        proc_stop_deadman_timer.o \
+        proc_switch_cfsim.o
 
 
 ##  NOTE: add a new directory onto the vpaths when you add a new HWP
@@ -57,6 +58,7 @@ OBJS =  core_activate.o \
 #   VPATH += ${ROOTPATH}/src/usr/hwpf/hwp/core_activate/<HWP_dir>
 VPATH += ${ROOTPATH}/src/usr/hwpf/hwp/core_activate/proc_prep_master_winkle
 VPATH += ${ROOTPATH}/src/usr/hwpf/hwp/core_activate/proc_stop_deadman_timer
+VPATH += ${ROOTPATH}/src/usr/hwpf/hwp/core_activate/proc_switch_cfsim
 
 
 include ${ROOTPATH}/config.mk
