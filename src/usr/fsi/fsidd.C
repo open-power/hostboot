@@ -706,11 +706,9 @@ errlHndl_t FsiDD::read(const FsiAddrInfo_t& i_addrInfo,
             break;
         }
 
-        //@todo - need to check for FSI errors (Story 4128)
+        //@todo - need to check for FSI errors (Story 35287)
 
         // atomic section <<
-        need_unlock = false;
-        mutex_unlock(l_mutex);
 
         TRACDCOMP(g_trac_fsir, "FSI READ  : %.6X = %.8X", i_addrInfo.absAddr, *o_buffer );
     } while(0);
@@ -781,11 +779,9 @@ errlHndl_t FsiDD::write(const FsiAddrInfo_t& i_addrInfo,
             break;
         }
 
-        //@todo - need to check for FSI errors (Story 4128)
+        //@todo - need to check for FSI errors (Story 35287)
 
         // atomic section <<
-        need_unlock = false;
-        mutex_unlock(l_mutex);
 
     } while(0);
 
@@ -830,7 +826,7 @@ errlHndl_t FsiDD::handleOpbErrors(const FsiAddrInfo_t& i_addrInfo,
                                         TWO_UINT32_TO_UINT64(i_opbStatReg,0));
 
         // Collect some FFDC but avoid an infinite loop
-        if( iv_ffdcTask != 0 )
+        if( iv_ffdcTask == 0 )
         {
             iv_ffdcTask = task_gettid();
 
@@ -886,7 +882,7 @@ errlHndl_t FsiDD::handleOpbErrors(const FsiAddrInfo_t& i_addrInfo,
         l_err->collectTrace("FSIR");
         //@todo - figure out best data to log
 
-        //@todo - implement recovery and callout code (Task 3832)        
+        //@todo - implement recovery and callout code (Story 35287)        
 
     }
 
@@ -1161,7 +1157,7 @@ errlHndl_t FsiDD::genFullFsiAddr(FsiAddrInfo_t& io_addrInfo)
 uint64_t FsiDD::genOpbScomAddr(const FsiAddrInfo_t& i_addrInfo,
                                uint64_t i_opbOffset)
 {
-    //@todo: handle redundant FSI ports, always using zero for now (Story 3853)
+    //@todo: handle redundant FSI ports, always using zero for now (Story 35041)
     //       this might be needed to handle multi-chip config in simics because
     //       proc2 is connected to port B
     uint64_t opbaddr = FSI2OPB_OFFSET_0 | i_opbOffset;
@@ -1458,7 +1454,7 @@ errlHndl_t FsiDD::initMasterControl(const TARGETING::Target* i_master,
 
     if( l_err )
     {
-        TRACFCOMP( g_trac_fsi, "FsiDD::initMasterControl> Error during initialization of Target %.8X : RC=%llX", TARGETING::get_huid(iv_master), l_err->reasonCode() );
+        TRACFCOMP( g_trac_fsi, "FsiDD::initMasterControl> Error during initialization of Target %.8X : RC=%llX", TARGETING::get_huid(i_master), l_err->reasonCode() );
         uint64_t slave_index = getSlaveEnableIndex(i_master,i_type);
         iv_slaves[slave_index] = 0;
     }

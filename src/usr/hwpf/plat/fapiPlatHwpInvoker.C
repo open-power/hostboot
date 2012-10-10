@@ -141,11 +141,14 @@ errlHndl_t fapiRcToErrl(ReturnCode & io_rc)
              * @errortype
              * @moduleid     MOD_HWP_RC_TO_ERRL
              * @reasoncode   RC_HWP_GENERATED_ERROR
+             * @userdata1    RC value from HWP
+             * @userdata2    <unused>
              * @devdesc      HW Procedure generated error. See User Data.
              */
             l_pError = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                                MOD_HWP_RC_TO_ERRL,
-                                               RC_HWP_GENERATED_ERROR);
+                                               RC_HWP_GENERATED_ERROR,
+                                               TO_UINT64(l_rcValue));
 
             // Add the rcValue as FFDC. This will explain what the error was
             l_pError->addFFDC(HWPF_COMP_ID, &l_rcValue, sizeof(l_rcValue), 1,
