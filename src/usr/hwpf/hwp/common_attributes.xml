@@ -44,4 +44,35 @@
     <enum>NON_FUNCTIONAL = 0, FUNCTIONAL = 1</enum>
     <platInit/>
   </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_POS</id>
+    <targetType>
+        TARGET_TYPE_PROC_CHIP, TARGET_TYPE_MEMBUF_CHIP, TARGET_TYPE_DIMM
+    </targetType>
+    <description>
+        Position of chip/dimm within drawer
+        This data is from the MRW
+        TARGET_TYPE_PROC_CHIP:
+            0, 1, 2, 3...
+        TARGET_TYPE_MEMBUF_CHIP:
+            (attached PROC_CHIP->ATTR_POS * 8) +
+                (attached MCS_CHIPLET->ATTR_CHIP_UNIT_POS)
+        TARGET_TYPE_DIMM:
+            (attached PROC_CHIP->ATTR_POS * 64) +
+                (attached MCS_CHIPLET->ATTR_CHIP_UNIT_POS * 8) +
+                    DIMM-NUMBER
+            where DIMM-NUMBER:
+                0: MBA0, port0, dimm0
+                1: MBA0, port0, dimm1
+                2: MBA0, port1, dimm0
+                3: MBA0, port1, dimm1
+                4: MBA1, port0, dimm0
+                5: MBA1, port0, dimm1
+                6: MBA1, port1, dimm0
+                7: MBA1, port1, dimm1
+    </description>
+    <valueType>uint32</valueType>
+    <platInit/>
+  </attribute>
 </attributes>
