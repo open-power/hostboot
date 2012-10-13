@@ -104,7 +104,7 @@ close (FH);
 
 my $pnorPath = XMLin("$mrwdir/${sysname}-lpc2spi.xml",forcearray=>['proc-to-pnor-connection']);
 
-# Capture all pnor attributes into the @pnorBlock array
+# Capture all pnor attributes into the @unsortedPnorTargets array
 use constant PNOR_MTD_CHAR_FIELD => 0;
 use constant PNOR_BLOCK_DEV_FIELD => 1;
 use constant PNOR_POS_FIELD  => 2;
@@ -154,11 +154,16 @@ use constant POS_FIELD  => 2;
 use constant UNIT_FIELD => 3;
 use constant PATH_FIELD => 4;
 use constant LOC_FIELD  => 5;
+use constant ORDINAL_FIELD  => 6; 
+use constant PLUG_POS => 7; 
 my @Targets;
 foreach my $i (@{$eTargets->{target}}) 
 {
+    my $plugPosition = $i->{'plug-xpath'};
+    $plugPosition =~ s/.*mrw:position\/text\(\)=\'(.*)\'\]$/$1/;
     push @Targets, [ $i->{'ecmd-common-name'}, $i->{node}, $i->{position},
-                     $i->{'chip-unit'}, $i->{'instance-path'}, $i->{location} ];
+                     $i->{'chip-unit'}, $i->{'instance-path'}, $i->{location},
+                      0, $plugPosition ];
 }
 
 open (FH, "<$mrwdir/${sysname}-fsi-busses.xml") ||
@@ -178,6 +183,51 @@ foreach my $i (@{$fsiBus->{'fsi-bus'}})
         "n$i->{slave}->{target}->{node}:p$i->{slave}->{target}->{position}" ];
 }
 
+open (FH, "<$mrwdir/${sysname}-psi-busses.xml") ||
+    die "ERROR: unable to open $mrwdir/${sysname}-psi-busses.xml\n";
+close (FH);
+
+my $psiBus = XMLin("$mrwdir/${sysname}-psi-busses.xml");
+
+# Capture all PSI connections into the @PSIs array
+use constant PSI_FSP_INSTANCE_PATH_FIELD     => 0;
+use constant PSI_MASTER_NODE_FIELD           => 1;
+use constant PSI_MASTER_POS_FIELD            => 2;
+use constant PSI_MASTER_CHIP_UNIT_FIELD      => 3;
+use constant PSI_PROC_NODE_FIELD             => 4;
+use constant PSI_PROC_POS_FIELD              => 5;
+use constant PSI_SLAVE_CHIP_UNIT_FIELD       => 6;
+use constant PSI_MASTER_DEV_PATH             => 7;
+use constant PSI_ORDINAL_ID                  => 8;
+
+
+my @PSIs;
+foreach my $i (@{$psiBus->{'psi-bus'}})
+{
+    push @PSIs, [
+                  $i->{fsp}->{'instance-path'},
+                  $i->{fsp}->{'psi-unit'}->{target}->{node},
+                  $i->{fsp}->{'psi-unit'}->{target}->{position},
+                  $i->{fsp}->{'psi-unit'}->{target}->{chipUnit},
+                  $i->{processor}->{target}->{node},
+                  $i->{processor}->{target}->{position},
+                  $i->{processor}->{'psi-unit'}->{target}->{chipUnit},
+                  $i->{fsp}->{'psi-dev-path'},
+                  "",
+                ];
+}
+
+#Sort PSI array based on Node,Position & Chip Unit.
+my @SPSIs = sort byPSINodePosChpUnit @PSIs;
+
+my $PSIOrdinal = 0;
+# Increment the Ordinal ID in sequential order for PSI.
+for my $i ( 0 .. $#SPSIs )
+{
+    $SPSIs[$i] [PSI_ORDINAL_ID] = $PSIOrdinal;
+    $PSIOrdinal += 2; #Leave the immediate next one for peer (proc) PSI target.
+}
+
 open (FH, "<$mrwdir/${sysname}-memory-busses.xml") ||
     die "ERROR: unable to open $mrwdir/${sysname}-memory-busses.xml\n";
 close (FH);
@@ -190,6 +240,10 @@ use constant CENTAUR_TARGET_FIELD => 1;
 use constant DIMM_TARGET_FIELD    => 2;
 use constant DIMM_PATH_FIELD      => 3;
 use constant CFSI_LINK_FIELD      => 4;
+use constant BUS_NODE_FIELD       => 5; 
+use constant BUS_POS_FIELD        => 6; 
+use constant BUS_ORDINAL_FIELD    => 7; 
+
 my @Membuses;
 foreach my $i (@{$memBus->{'memory-bus'}}) 
 {
@@ -199,11 +253,21 @@ foreach my $i (@{$memBus->{'memory-bus'}})
          "n$i->{mba}->{target}->{node}:p$i->{mba}->{target}->{position}:mba" .
          $i->{mba}->{target}->{chipUnit},
          "n$i->{dimm}->{target}->{node}:p$i->{dimm}->{target}->{position}",
-         $i->{dimm}->{'instance-path'}, $i->{'fsi-link'} ];
+         $i->{dimm}->{'instance-path'}, $i->{'fsi-link'},
+         $i->{mcs}->{target}->{node},
+         $i->{mcs}->{target}->{position}, 0 ];
 }
 
-# Sort the memory busses, based on their instance paths
-my @SMembuses = sort byDimmInstancePath @Membuses;
+# Sort the memory busses, based on their Node, Pos & instance paths
+my @SMembuses = sort byDimmNodePos @Membuses;
+my $BOrdinal_ID = 0;
+
+# Increment the Ordinal ID in sequential order for dimms.
+for my $i ( 0 .. $#SMembuses )
+{
+    $SMembuses[$i] [BUS_ORDINAL_FIELD] = $BOrdinal_ID;
+    $BOrdinal_ID += 1;
+}
 
 # Rewrite each DIMM instance path's DIMM instance to be indexed from 0
 for my $i ( 0 .. $#SMembuses )
@@ -240,41 +304,58 @@ for my $i ( 0 .. $#Fsis )
 #   (Repeat for remaining membuf)
 #
 
+# Sort the target array based on Target Type,Node,Position and Chip-Unit.
+my @SortedTargets = sort byTargetTypeNodePosChipunit @Targets;
+my $Type = $SortedTargets[0][NAME_FIELD];
+my $ordinal_ID = 0;
+
+# Increment the Ordinal ID in sequential order for same family Type.
+for my $i ( 0 .. $#SortedTargets )
+{
+    if($SortedTargets[$i][NAME_FIELD] ne $Type)
+    {
+       $ordinal_ID = 0;
+    }
+    $SortedTargets[$i] [ORDINAL_FIELD] = $ordinal_ID;
+    $Type = $SortedTargets[$i][NAME_FIELD];
+    $ordinal_ID += 1;
+}
+
 my @fields;
 my @STargets;
-for my $i ( 0 .. $#Targets )
+for my $i ( 0 .. $#SortedTargets )
 {
-    if ($Targets[$i][NAME_FIELD] eq "pu")
+    if ($SortedTargets[$i][NAME_FIELD] eq "pu")
     {
-        for my $k ( 0 .. LOC_FIELD )
+        for my $k ( 0 .. PLUG_POS )
         {
-            $fields[$k] = $Targets[$i][$k];
+            $fields[$k] = $SortedTargets[$i][$k];
         }
         push @STargets, [ @fields ];
 
-        my $position = $Targets[$i][POS_FIELD];
+        my $position = $SortedTargets[$i][POS_FIELD];
 
-        for my $j ( 0 .. $#Targets )
+        for my $j ( 0 .. $#SortedTargets )
         {
-            if (($Targets[$j][NAME_FIELD] eq "ex") &&
-                ($Targets[$j][POS_FIELD] eq $position))
+            if (($SortedTargets[$j][NAME_FIELD] eq "ex") &&
+                ($SortedTargets[$j][POS_FIELD] eq $position))
             {
-                for my $k ( 0 .. LOC_FIELD )
+                for my $k ( 0 .. PLUG_POS )
                 {
-                    $fields[$k] = $Targets[$j][$k];
+                    $fields[$k] = $SortedTargets[$j][$k];
                 }
                 push @STargets, [ @fields ];
             }
         }
 
-        for my $j ( 0 .. $#Targets )
+        for my $j ( 0 .. $#SortedTargets )
         {
-            if (($Targets[$j][NAME_FIELD] eq "mcs") &&
-                ($Targets[$j][POS_FIELD] eq $position))
+            if (($SortedTargets[$j][NAME_FIELD] eq "mcs") &&
+                ($SortedTargets[$j][POS_FIELD] eq $position))
             {
-                for my $k ( 0 .. LOC_FIELD )
+                for my $k ( 0 .. PLUG_POS )
                 {
-                    $fields[$k] = $Targets[$j][$k];
+                    $fields[$k] = $SortedTargets[$j][$k];
                 }
                 push @STargets, [ @fields ];
             }
@@ -282,26 +363,26 @@ for my $i ( 0 .. $#Targets )
     }
 }
 
-for my $i ( 0 .. $#Targets )
+for my $i ( 0 .. $#SortedTargets )
 {
-    if ($Targets[$i][NAME_FIELD] eq "memb")
+    if ($SortedTargets[$i][NAME_FIELD] eq "memb")
     {
-        for my $k ( 0 .. LOC_FIELD )
+        for my $k ( 0 .. PLUG_POS )
         {
-            $fields[$k] = $Targets[$i][$k];
+            $fields[$k] = $SortedTargets[$i][$k];
         }
         push @STargets, [ @fields ];
 
-        my $position = $Targets[$i][POS_FIELD];
+        my $position = $SortedTargets[$i][POS_FIELD];
 
-        for my $j ( 0 .. $#Targets )
+        for my $j ( 0 .. $#SortedTargets )
         {
-            if (($Targets[$j][NAME_FIELD] eq "mba") &&
-                ($Targets[$j][POS_FIELD] eq $position))
+            if (($SortedTargets[$j][NAME_FIELD] eq "mba") &&
+                ($SortedTargets[$j][POS_FIELD] eq $position))
             {
-                for my $k ( 0 .. LOC_FIELD )
+                for my $k ( 0 .. PLUG_POS )
                 {
-                    $fields[$k] = $Targets[$j][$k];
+                    $fields[$k] = $SortedTargets[$j][$k];
                 }
                 push @STargets, [ @fields ];
             }
@@ -321,22 +402,49 @@ generate_sys();
 # Second, generate system node using the master processor's node
 generate_system_node();
 
-# Third, generate the proc, occ, ex-chiplet, mcs-chiplet
+# Third generate the FSP chip
+if ($build eq "fsp")
+{
+    generate_system_fsp();
+}
+
+# Fourth, generate the proc, occ, ex-chiplet, mcs-chiplet
 # unit-tp (if on fsp), pcie bus and A/X-bus.
 my $ex_count = 0;
 my $mcs_count = 0;
+my $proc_ordinal_id =0;
 for (my $do_core = 0, my $i = 0; $i <= $#STargets; $i++)
 {
     if ($STargets[$i][NAME_FIELD] eq "pu")
     {
         my $proc = $STargets[$i][POS_FIELD];
         my $ipath = $STargets[$i][PATH_FIELD];
+        $proc_ordinal_id = $STargets[$i][ORDINAL_FIELD];
         if ($proc eq $Mproc)
         {
-            generate_master_proc($proc, $ipath);
+            generate_master_proc($proc, $ipath,$STargets[$i][ORDINAL_FIELD]);
             if ($build eq "fsp")
             {
                 generate_occ($proc);
+                for my $psi ( 0 .. $#SPSIs )
+                {
+                    if(($STargets[$i][NODE_FIELD] eq $SPSIs[$psi][PSI_PROC_NODE_FIELD])  &&
+                       ($STargets[$i][POS_FIELD] eq $SPSIs[$psi][PSI_PROC_POS_FIELD] ))
+                    {
+                        my $fsp = 0;
+                        if(chop($SPSIs[$psi][PSI_FSP_INSTANCE_PATH_FIELD]) eq '1')
+                        {
+                           $fsp = 1;
+                        }
+                        generate_proc_psi($SPSIs[$psi][PSI_PROC_NODE_FIELD],
+                                          $SPSIs[$psi][PSI_PROC_POS_FIELD],
+                                          $SPSIs[$psi][PSI_SLAVE_CHIP_UNIT_FIELD],
+                                          $SPSIs[$psi][PSI_MASTER_NODE_FIELD],
+                                          $SPSIs[$psi][PSI_MASTER_CHIP_UNIT_FIELD],
+                                          $SPSIs[$psi][PSI_ORDINAL_ID],
+                                          $fsp);
+                    }
+                }
             }
         }
         else
@@ -350,10 +458,29 @@ for (my $do_core = 0, my $i = 0; $i <= $#STargets; $i++)
                     last;
                 }
             }
-            generate_slave_proc($proc, $fsi, $ipath);
+            generate_slave_proc($proc, $fsi, $ipath,$STargets[$i][ORDINAL_FIELD]);
             if ($build eq "fsp")
             {
                 generate_occ($proc);
+                for my $psi ( 0 .. $#SPSIs )
+                {
+                    if(($STargets[$i][NODE_FIELD] eq $SPSIs[$psi][PSI_PROC_NODE_FIELD])  &&
+                       ($STargets[$i][POS_FIELD] eq $SPSIs[$psi][PSI_PROC_POS_FIELD] ))
+                    {
+                        my $fsp = 0;
+                        if(chop($SPSIs[$psi][PSI_FSP_INSTANCE_PATH_FIELD]) eq '1')
+                        {
+                           $fsp = 1;
+                        }
+                        generate_proc_psi($SPSIs[$psi][PSI_PROC_NODE_FIELD],
+                                          $SPSIs[$psi][PSI_PROC_POS_FIELD],
+                                          $SPSIs[$psi][PSI_SLAVE_CHIP_UNIT_FIELD],
+                                          $SPSIs[$psi][PSI_MASTER_NODE_FIELD],
+                                          $SPSIs[$psi][PSI_MASTER_CHIP_UNIT_FIELD],
+                                          $SPSIs[$psi][PSI_ORDINAL_ID],
+                                          $fsp);
+                    }
+                }
             }
         }
     }
@@ -367,7 +494,7 @@ for (my $do_core = 0, my $i = 0; $i <= $#STargets; $i++)
             {
                 print "\n<!-- $SYSNAME n${node}p$proc EX units -->\n";
             }
-            generate_ex($proc, $ex);
+            generate_ex($proc, $ex, $STargets[$i][ORDINAL_FIELD]);
             $ex_count++;
             if ($STargets[$i+1][NAME_FIELD] eq "mcs")
             {
@@ -382,7 +509,7 @@ for (my $do_core = 0, my $i = 0; $i <= $#STargets; $i++)
             {
                 print "\n<!-- $SYSNAME n${node}p$proc core units -->\n";
             }
-            generate_ex_core($proc,$ex);
+            generate_ex_core($proc,$ex,$STargets[$i][ORDINAL_FIELD]);
             $ex_count++;
             if ($STargets[$i+1][NAME_FIELD] eq "mcs")
             {
@@ -399,24 +526,20 @@ for (my $do_core = 0, my $i = 0; $i <= $#STargets; $i++)
         {
             print "\n<!-- $SYSNAME n${node}p$proc MCS units -->\n";
         }
-        generate_mcs($proc,$mcs);
+        generate_mcs($proc,$mcs, $STargets[$i][ORDINAL_FIELD]);
         $mcs_count++;
         if (($STargets[$i+1][NAME_FIELD] eq "pu") ||
             ($STargets[$i+1][NAME_FIELD] eq "memb"))
         {
             $mcs_count = 0;
-            if ($build eq "fsp")
-            {
-                 generate_unit_tp($proc);
-            }
-            generate_pcies($proc);
-            generate_ax_buses($proc, "A");
-            generate_ax_buses($proc, "X");
+            generate_pcies($proc,$proc_ordinal_id);
+            generate_ax_buses($proc, "A",$proc_ordinal_id);
+            generate_ax_buses($proc, "X",$proc_ordinal_id);
         }
     }
 }
 
-# Fourth, generate the Centaur, MBS, and MBA
+# Fifth, generate the Centaur, MBS, and MBA
 
 my $memb;
 my $membMcs;
@@ -447,7 +570,9 @@ for my $i ( 0 .. $#STargets )
         {
             die "ERROR. Can't locate Centaur from memory bus table\n";
         }
-        generate_centaur( $memb, $membMcs, $cfsi, $ipath );
+        my $relativeCentaurRid = $STargets[$i][PLUG_POS];
+        generate_centaur( $memb, $membMcs, $cfsi, $ipath, 
+                                $STargets[$i][ORDINAL_FIELD],$relativeCentaurRid);
     }
     elsif ($STargets[$i][NAME_FIELD] eq "mba")
     {
@@ -458,7 +583,7 @@ for my $i ( 0 .. $#STargets )
             print "\n";
         }
         my $mba = $STargets[$i][UNIT_FIELD];
-        generate_mba( $memb, $membMcs, $mba );
+        generate_mba( $memb, $membMcs, $mba, $STargets[$i][ORDINAL_FIELD] );
         $mba_count += 1;
         if ($mba_count == 2)
         {
@@ -468,7 +593,7 @@ for my $i ( 0 .. $#STargets )
     }
 }
 
-# Fifth, generate DIMM targets
+# Sixth, generate DIMM targets
 
 print "\n<!-- $SYSNAME Centaur DIMMs -->\n";
 
@@ -486,6 +611,7 @@ for my $i ( 0 .. $#SMembuses )
     $pos =~ s/.*:p(.*)/$1/;
     my $dimm = $SMembuses[$i][DIMM_PATH_FIELD];
     $dimm =~ s/.*dimm-(.*)/$1/;
+    my $relativeDimmRid = $dimm;
     print "\n<!-- C-DIMM n${node}:p${pos} -->\n";
     for my $id ( 0 .. 7 )
     {
@@ -493,7 +619,9 @@ for my $i ( 0 .. $#SMembuses )
         $dimmid <<= 3;
         $dimmid |= $id;
         $dimmid = sprintf ("%d", $dimmid);
-        generate_dimm( $proc, $mcs, $ctaur, $pos, $dimmid, $id );
+        generate_dimm( $proc, $mcs, $ctaur, $pos, $dimmid, $id,
+                             ($SMembuses[$i][BUS_ORDINAL_FIELD]*8)+$id,
+                              $relativeDimmRid);
     }
 }
 
@@ -504,7 +632,6 @@ if ($build eq "fsp")
     {
         generate_pnor($sys,$SortedPnor[$i][PNOR_NODE_FIELD],$SortedPnor[$i][PNOR_POS_FIELD],$SortedPnor[$i][PNOR_MTD_CHAR_FIELD],$SortedPnor[$i][PNOR_BLOCK_DEV_FIELD],
             $SortedPnor[$i][PNOR_PROC_FIELD],$i);
-
     }
 }
 
@@ -515,6 +642,135 @@ print "\n</attributes>\n";
 exit 0;
 
 ##########   Subroutines    ##############
+
+################################################################################
+# Compares two MRW Targets based on the Type,Node,Position & Chip-Unit #
+################################################################################
+
+sub byTargetTypeNodePosChipunit ($$)
+{
+    # Operates on two Targets, based on the following parameters Targets will
+    # get sorted,
+    # 1.Type of the Target.Ex; pu , ex , mcs ,mba etc.
+    # 2.Node of the Target.Node instance number, integer 0,1,2 etc.
+    # 3.Position of the Target, integer 0,1,2 etc.
+    # 4.ChipUnit of the Target , integer 0,1,2 etc.
+    # Note the above order is sequential & comparison are made in the same order.
+
+    #Assume always $lhsInstance < $rhsInstance, will reduce redundant coding.
+    my $retVal = -1;
+
+    # Get just the instance path for each supplied memory bus
+    my $lhsInstance_Type = $_[0][NAME_FIELD];
+    my $rhsInstance_Type = $_[1][NAME_FIELD];
+
+    if($lhsInstance_Type eq $rhsInstance_Type)
+    {
+       my $lhsInstance_Node = $_[0][NODE_FIELD];
+       my $rhsInstance_Node = $_[1][NODE_FIELD];
+
+       if(int($lhsInstance_Node) eq int($rhsInstance_Node))
+       {
+           my $lhsInstance_Pos = $_[0][POS_FIELD];
+           my $rhsInstance_Pos = $_[1][POS_FIELD];
+
+           if(int($lhsInstance_Pos) eq int($rhsInstance_Pos))
+           {
+               my $lhsInstance_ChipUnit = $_[0][UNIT_FIELD];
+               my $rhsInstance_ChipUnit = $_[1][UNIT_FIELD];
+
+               if(int($lhsInstance_ChipUnit) eq int($rhsInstance_ChipUnit))
+               {
+                   die "ERROR: Duplicate Targets: 2 Targets with same \
+                    TYPE: $lhsInstance_Type NODE: $lhsInstance_Node \ 
+                    POSITION: $lhsInstance_Pos \
+                    & CHIP-UNIT: $lhsInstance_ChipUnit\n";
+               }
+               elsif(int($lhsInstance_ChipUnit) > int($rhsInstance_ChipUnit))
+               {
+                   $retVal = 1;
+               }
+           }
+           elsif(int($lhsInstance_Pos) > int($rhsInstance_Pos))
+           {
+               $retVal = 1;
+           }
+         }
+         elsif(int($lhsInstance_Node) > int($rhsInstance_Node))
+         {
+            $retVal = 1;
+         }
+    }
+    elsif($lhsInstance_Type gt $rhsInstance_Type)
+    {
+        $retVal = 1;
+    }
+    return $retVal;
+}
+
+################################################################################
+# Compares two MRW DIMMs based on the Node,Position & DIMM instance #
+################################################################################
+
+sub byDimmNodePos($$)
+{
+    # Operates on two Targets, based on the following parameters Targets will
+    # get sorted,
+    # 1.Node of the Target.Node instance number, integer 0,1,2 etc.
+    # 2.Position of the Target, integer 0,1,2 etc.
+    # 3.On two DIMM instance paths, each in the form of:
+    #     assembly-0/shilin-0/dimm-X
+    #
+    # Assumes that "X is always a decimal number, and that every DIMM in the
+    # system has a unique value of "X", including for multi-node systems and for
+    # systems whose DIMMs are contained on different parts of the system
+    # topology
+    #
+    # Note, in the path example above, the parts leading up to the dimm-X could
+    # be arbitrarily deep and have different types/instance values
+    #
+    # Note the above order is sequential & comparison are made in the same order.
+
+    #Assume always $lhsInstance < $rhsInstance, will reduce redundant coding.
+    my $retVal = -1;
+
+    my $lhsInstance_node = $_[0][BUS_NODE_FIELD];
+    my $rhsInstance_node = $_[1][BUS_NODE_FIELD];
+    if(int($lhsInstance_node) eq int($rhsInstance_node))
+    {
+         my $lhsInstance_pos = $_[0][BUS_POS_FIELD];
+         my $rhsInstance_pos = $_[1][BUS_POS_FIELD];
+         if(int($lhsInstance_pos) eq int($rhsInstance_pos))
+         {
+            # Get just the instance path for each supplied memory bus
+            my $lhsInstance = $_[0][DIMM_PATH_FIELD];
+            my $rhsInstance = $_[1][DIMM_PATH_FIELD];
+            # Replace each with just its DIMM instance value (a string)
+            $lhsInstance =~ s/.*-([0-9]*)$/$1/;
+            $rhsInstance =~ s/.*-([0-9]*)$/$1/;
+
+            if(int($lhsInstance) eq int($rhsInstance))
+            {
+                die "ERROR: Duplicate Dimms: 2 Dimms with same TYPE, \
+                    NODE: $lhsInstance_node POSITION: $lhsInstance_pos & \
+                    PATH FIELD: $lhsInstance\n";
+            }
+            elsif(int($lhsInstance) > int($rhsInstance))
+            {
+               $retVal = 1;
+            }
+         }
+         elsif(int($lhsInstance_pos) > int($rhsInstance_pos))
+         {
+             $retVal = 1;
+         }
+    }
+    elsif(int($lhsInstance_node) > int($rhsInstance_node))
+    {
+        $retVal = 1;
+    }
+    return $retVal;
+}
 
 ################################################################################
 # Compares two MRW DIMM instance paths based only on the DIMM instance #
@@ -563,6 +819,48 @@ sub byPnorNodePos($$)
                 die "ERROR: Duplicate pnor positions: 2 pnors with same
                     node and position, \
                     NODE: $lhsInstance_node POSITION: $lhsInstance_pos\n";
+         }
+         elsif(int($lhsInstance_pos) > int($rhsInstance_pos))
+         {
+             $retVal = 1;
+         }
+    }
+    elsif(int($lhsInstance_node) > int($rhsInstance_node))
+    {
+        $retVal = 1;
+    }
+    return $retVal;
+}
+
+################################################################################
+# Compares two PSI Units instances based on the node, position & chip unit #
+################################################################################
+sub byPSINodePosChpUnit($$)
+{
+    my $retVal = -1;
+
+    my $lhsInstance_node = $_[0][PSI_MASTER_NODE_FIELD];
+    my $rhsInstance_node = $_[1][PSI_MASTER_NODE_FIELD];
+    if(int($lhsInstance_node) eq int($rhsInstance_node))
+    {
+         my $lhsInstance_pos = $_[0][PSI_MASTER_POS_FIELD];
+         my $rhsInstance_pos = $_[1][PSI_MASTER_POS_FIELD];
+         if(int($lhsInstance_pos) eq int($rhsInstance_pos))
+         {
+              my $lhsInstance_chip_unit = $_[0][PSI_MASTER_CHIP_UNIT_FIELD];
+              my $rhsInstance_chip_unit = $_[1][PSI_MASTER_CHIP_UNIT_FIELD];
+              if(int($lhsInstance_chip_unit) eq int($rhsInstance_chip_unit))
+              {
+                  die "ERROR: Duplicate psi master units : 2 psi units with \
+                      same node, position and chip unit \
+                      NODE: $lhsInstance_node POSITION: $lhsInstance_pos \
+                      CHIP UNIT: $lhsInstance_chip_unit \n";
+              }
+              elsif(int($lhsInstance_chip_unit) > int($rhsInstance_chip_unit))
+              {
+                   $retVal = 1;
+
+              }
          }
          elsif(int($lhsInstance_pos) > int($rhsInstance_pos))
          {
@@ -660,11 +958,80 @@ sub generate_sys
     <attribute>
         <id>MSS_CLEANER_ENABLE</id>
         <default>1</default>
-    </attribute>
+    </attribute>";
+
+    if($build eq "fsp")
+    {
+        print "
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>0</default>
+    </attribute>";
+    }
+
+print "
 </targetInstance>
 
 ";
 }
+
+# TODO via RTC:49504
+# Need to support RFSP and dynamically generate HUID,RID and ORDINALID.
+sub generate_system_fsp
+{
+    print "
+<!-- $SYSNAME System fsp0 -->
+
+<targetInstance>
+    <id>sys${sys}node${node}fsp0</id>
+    <type>chip-fsp-power8</type>
+    <attribute>
+        <id>HUID</id>
+        <default>0x00190000</default>
+    </attribute>
+    <attribute>
+        <id>POSITION</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-${sys}/node-${node}/fsp-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-${sys}/node-${node}/fsp-0</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_ID</id>
+        <default>0xF0F1</default>
+    </attribute>
+    <attribute>
+        <id>EC</id>
+        <default>0x10</default>
+    </attribute>";
+
+    if ($build eq "fsp")
+    {
+        print "
+    <attribute>
+        <id>RID</id>
+        <default>0x0200</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>0</default>
+    </attribute>";
+    }
+
+    print "
+</targetInstance>
+";
+
+#Create the corresponding the fsp-psi targets.
+generate_fsp_psi();
+
+}
+
 
 sub generate_system_node
 {
@@ -682,7 +1049,18 @@ sub generate_system_node
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-$sys/node-$node</default>
-    </attribute>
+    </attribute>";
+
+    if($build eq "fsp")
+    {
+        print "
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>$node</default>
+    </attribute>";
+    }
+
+    print "
 </targetInstance>
 ";
 
@@ -695,6 +1073,7 @@ sub generate_system_node
     <id>sys0node0apss0</id>
     <type>apss</type>
     <attribute><id>HUID</id><default>0x001B0000</default></attribute>
+    <attribute><id>ORDINAL_ID</id><default>$node</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-$sys/node-$node/apss-$node</default>
@@ -711,6 +1090,7 @@ sub generate_system_node
     <id>sys0node0dpss0</id>
     <type>dpss</type>
     <attribute><id>HUID</id><default>0x001A0000</default></attribute>
+    <attribute><id>ORDINAL_ID</id><default>$node</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-$sys/node-$node/dpss-$node</default>
@@ -727,7 +1107,7 @@ sub generate_system_node
 
 sub generate_master_proc
 {
-    my ($proc, $ipath) = @_;
+    my ($proc, $ipath, $ordinalId) = @_;
     my $scompath = $devpath->{chip}->{$ipath}->{'scom-path'};
     my $scanpath = $devpath->{chip}->{$ipath}->{'scan-path'};
     my $scomsize = length($scompath) + 1;
@@ -778,6 +1158,10 @@ sub generate_master_proc
     {
         print "
     <attribute>
+        <id>ORDINAL_ID</id>
+        <default>$ordinalId</default>
+    </attribute>
+    <attribute>
         <id>FSP_SCOM_DEVICE_PATH</id>
         <default>$scompath</default>
         <sizeInclNull>$scomsize</sizeInclNull>
@@ -810,30 +1194,30 @@ sub generate_master_proc
     # Starts at 1024TB - 128GB, 4GB per proc
     printf( "    <attribute><id>FSP_BASE_ADDR</id>\n" );
     printf( "        <default>0x%016X</default>\n",
-	   0x0003FFE000000000 + 0x1000000000*$proc );
+      0x0003FFE000000000 + 0x1000000000*$proc );
     printf( "    </attribute>\n" );
 
     # Starts at 1024TB - 6GB, 1MB per link/proc
     printf( "    <attribute><id>PSI_BRIDGE_BASE_ADDR</id>\n" );
     printf( "        <default>0x%016X</default>\n",
-	   0x0003FFFE80000000 + 0x100000*$proc );
+       0x0003FFFE80000000 + 0x100000*$proc );
     printf( "    </attribute>\n" );
 
     # Starts at 1024TB - 2GB, 1MB per proc
     printf( "    <attribute><id>INTP_BASE_ADDR</id>\n" );
     printf( "        <default>0x%016X</default>\n",
-	   0x0003FFFF80000000 + 0x100000*$proc );
+       0x0003FFFF80000000 + 0x100000*$proc );
     printf( "    </attribute>\n" );
 
     # Starts at 1024TB - 7GB, 1MB per PHB (=4MB per proc)
     printf( "    <attribute><id>PHB_BASE_ADDRS</id>\n" );
     printf( "        <default>\n" );
     printf( "            0x%016X,0x%016X,\n",
-	   0x0003FFFE40000000 + 0x400000*$proc + 0x100000*0,
-	     0x0003FFFE40000000 + 0x400000*$proc + 0x100000*1 );
+       0x0003FFFE40000000 + 0x400000*$proc + 0x100000*0,
+         0x0003FFFE40000000 + 0x400000*$proc + 0x100000*1 );
     printf( "            0x%016X,0x%016X\n",
-	   0x0003FFFE40000000 + 0x400000*$proc + 0x100000*2,
-	     0x0003FFFE40000000 + 0x400000*$proc + 0x100000*3 );
+       0x0003FFFE40000000 + 0x400000*$proc + 0x100000*2,
+         0x0003FFFE40000000 + 0x400000*$proc + 0x100000*3 );
     printf( "        </default>\n" );
     printf( "    </attribute>\n" );
 
@@ -841,11 +1225,11 @@ sub generate_master_proc
     printf( "    <attribute><id>PCI_BASE_ADDRS</id>\n" );
     printf( "        <default>\n" );
     printf( "            0x%016X,0x%016X,\n",
-	   0x0003D00000000000 + 0x4000000000*$proc + 0x1000000000*0,
-	     0x0003D00000000000 + 0x4000000000*$proc + 0x1000000000*1 );
+       0x0003D00000000000 + 0x4000000000*$proc + 0x1000000000*0,
+         0x0003D00000000000 + 0x4000000000*$proc + 0x1000000000*1 );
     printf( "            0x%016X,0x%016X\n",
-	   0x0003D00000000000 + 0x4000000000*$proc + 0x1000000000*2,
-	     0x0003D00000000000 + 0x4000000000*$proc + 0x1000000000*3 );
+       0x0003D00000000000 + 0x4000000000*$proc + 0x1000000000*2,
+         0x0003D00000000000 + 0x4000000000*$proc + 0x1000000000*3 );
     printf( "        </default>\n" );
     printf( "    </attribute>\n" );
 
@@ -857,13 +1241,13 @@ sub generate_master_proc
     # Starts at 512TB, 2TB per proc
     printf( "    <attribute><id>MIRROR_BASE</id>\n" );
     printf( "        <default>0x%016X</default>\n",
-	   0x0002000000000000 + 0x20000000000*$proc );
+       0x0002000000000000 + 0x20000000000*$proc );
     printf( "    </attribute>\n" );
 
     # Starts at 1024TB - 3GB
     printf( "    <attribute><id>RNG_BASE_ADDR</id>\n" );
     printf( "        <default>0x%016X</default>\n",
-	   0x0003FFFF40000000 + 0x1000*$proc );
+       0x0003FFFF40000000 + 0x1000*$proc );
     printf( "    </attribute>\n" );
 
     print "    <!-- End PHYP Memory Map -->\n";
@@ -877,7 +1261,13 @@ sub generate_occ
 {
     my ($proc) = @_;
 
+    # RTC: 49574
+    # The calculations for HUID and ordinal ID are not correct for multi-node
+    # configurations, since HUID doesn't take into account the node value, and
+    # the oridinal ID repeats on every node.  Fix these with the multi-node
+    # story
     my $uidstr = sprintf("0x001C000%01X",$proc);
+    my $ordinalId = $proc;
 
         print "
 <!-- $SYSNAME n${node}p${proc} OCC units -->
@@ -886,6 +1276,7 @@ sub generate_occ
     <id>sys${sys}node${node}proc${proc}occ$proc</id>
     <type>occ</type>
         <attribute><id>HUID</id><default>${uidstr}</default></attribute>
+        <attribute><id>ORDINAL_ID</id><default>$ordinalId</default></attribute>
         <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-$sys/node-$node/proc-$proc/occ-$proc</default>
@@ -898,9 +1289,149 @@ sub generate_occ
 
 }
 
+sub generate_fsp_psi
+{
+  my $fsp = 0;
+  my $old_fsp = -1;
+
+    for my $psi ( 0 .. $#SPSIs )
+    {
+       $fsp = (chop($SPSIs[$psi][PSI_FSP_INSTANCE_PATH_FIELD]) eq '0') ? 0 : 1;
+       if($fsp ne $old_fsp)
+       {
+          print "
+<!-- $SYSNAME n${node}fsp${fsp} PSI units -->";
+       }
+
+       generate_fsp_psi_units( $SPSIs[$psi][PSI_PROC_NODE_FIELD],
+                               $SPSIs[$psi][PSI_PROC_POS_FIELD],
+                               $SPSIs[$psi][PSI_SLAVE_CHIP_UNIT_FIELD],
+                               $SPSIs[$psi][PSI_MASTER_NODE_FIELD],
+                               $SPSIs[$psi][PSI_MASTER_CHIP_UNIT_FIELD],
+                               $SPSIs[$psi][PSI_MASTER_DEV_PATH],
+                               $SPSIs[$psi][PSI_ORDINAL_ID],
+                               $fsp );
+      $old_fsp = $fsp;
+    }
+}
+
+sub generate_fsp_psi_units
+{
+    my (  $proc_node, $proc_pos,  $proc_chip_unit,
+          $fsp_node, $fsp_chip_unit, $dev_path,$psi_ordinal, $fsp ) = @_;
+
+    # RTC: 49574
+    # The calculation for HUID is not correct for multi-node
+    # configurations, since ordinal ID should not be used in HUID calculations.
+    # Instead, the lower byte should repeat for every node.
+    # Fix this with the multi-node story
+    my $uidstr = sprintf("0x%02X20%04X",${node},$psi_ordinal);
+
+    print "
+<targetInstance>
+    <id>sys${sys}node${fsp_node}fsp${fsp}psi${fsp_chip_unit}</id>
+    <type>unit-psi-power8</type>
+    <attribute>
+        <id>HUID</id>
+        <default>${uidstr}</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>${psi_ordinal}</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>${fsp_chip_unit}</default>
+    </attribute>
+    <attribute>
+        <id>PSI_DEVICE_PATH</id>
+        <default>${dev_path}</default>
+    </attribute>
+    <attribute>
+        <id>PRIMARY_CAPABILITIES</id>
+        <default>
+             <field><id>supportsFsiScom</id><value>0</value></field>
+             <field><id>supportsXscom</id><value>0</value></field>
+             <field><id>supportsInbandScom</id><value>0</value></field>
+             <field><id>reserved</id><value>0</value></field>
+        </default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-${sys}/node-${fsp_node}/fsp-${fsp}/psi-${fsp_chip_unit}</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-${sys}/node-${fsp_node}/fsp-${fsp}/psi-${fsp_chip_unit}</default>
+    </attribute>
+    <attribute>
+        <id>PEER_TARGET</id>
+        <default>physical:sys-${sys}/node-${proc_node}/proc-${proc_pos}/psi-${proc_chip_unit}</default>
+    </attribute>";
+if($fsp_chip_unit eq 0)
+{
+print"
+    <attribute>
+        <id>PSI_LINK_STATE</id>
+        <default>ACTIVE</default>
+    </attribute>";
+}
+print"
+</targetInstance>\n";
+}
+
+sub generate_proc_psi
+{
+    my ($proc_node,$proc_pos,$proc_chip_unit,
+        $fsp_node,$fsp_chip_unit, $psi_ordinal, $fsp) = @_;
+    $psi_ordinal += 1;
+
+    my $uidstr = sprintf("0x%02X20%04X",${node},$psi_ordinal);
+        print "
+<!-- $SYSNAME n${proc_node}p${proc_pos} PSI units -->
+
+<targetInstance>
+    <id>sys${sys}node${proc_node}proc${proc_pos}psi${proc_chip_unit}</id>
+    <type>unit-psi-power8</type>
+    <attribute>
+        <id>HUID</id>
+        <default>${uidstr}</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>${psi_ordinal}</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>${proc_chip_unit}</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-${sys}/node-${proc_node}/proc-${proc_pos}/psi-${proc_chip_unit}</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-${sys}/node-${proc_node}/proc-${proc_pos}/psi-${proc_chip_unit}</default>
+    </attribute>
+    <attribute>
+        <id>PEER_TARGET</id>
+        <default>physical:sys-${sys}/node-${fsp_node}/fsp-${fsp}/psi-${fsp_chip_unit}</default>
+    </attribute>";
+if($fsp_chip_unit eq 0)
+{
+print"
+    <attribute>
+        <id>PSI_LINK_STATE</id>
+        <default>ACTIVE</default>
+    </attribute>";
+}
+print"
+</targetInstance>\n";
+}
+
 sub generate_slave_proc
 {
-    my ($proc, $fsi, $ipath) = @_;
+    my ($proc, $fsi, $ipath, $ordinalId) = @_;
     my $uidstr = sprintf("0x%02X07%04X",${node},$proc+${node}*8);
     my $scompath = $devpath->{chip}->{$ipath}->{'scom-path'};
     my $scanpath = $devpath->{chip}->{$ipath}->{'scan-path'};
@@ -972,6 +1503,10 @@ sub generate_slave_proc
     {
         print "
     <attribute>
+        <id>ORDINAL_ID</id>
+        <default>$ordinalId</default>
+    </attribute>
+    <attribute>
         <id>FSP_SCOM_DEVICE_PATH</id>
         <default>$scompath</default>
         <sizeInclNull>$scomsize</sizeInclNull>
@@ -999,19 +1534,19 @@ sub generate_slave_proc
     printf( "\n" );
     printf( "    <attribute><id>FSP_BASE_ADDR</id>\n" );
     printf( "        <default>0x%016X</default>\n",
-	   0x0003FFE000000000 + 0x1000000000*$proc );
+       0x0003FFE000000000 + 0x1000000000*$proc );
     printf( "    </attribute>\n" );
 
     # Starts at 1024TB - 6GB, 1MB per link/proc
     printf( "    <attribute><id>PSI_BRIDGE_BASE_ADDR</id>\n" );
     printf( "        <default>0x%016X</default>\n",
-	   0x0003FFFE80000000 + 0x100000*$proc );
+       0x0003FFFE80000000 + 0x100000*$proc );
     printf( "    </attribute>\n" );
 
     # Starts at 1024TB - 2GB, 1MB per proc
     printf( "    <attribute><id>INTP_BASE_ADDR</id>\n" );
     printf( "        <default>0x%016X</default>\n",
-	   0x0003FFFF80000000 + 0x100000*$proc );
+       0x0003FFFF80000000 + 0x100000*$proc );
     printf( "    </attribute>\n" );
 
     # Starts at 1024TB - 7GB, 1MB per PHB (=4MB per proc)
@@ -1046,13 +1581,13 @@ sub generate_slave_proc
     # Starts at 512TB, 2TB per proc
     printf( "    <attribute><id>MIRROR_BASE</id>\n" );
     printf( "        <default>0x%016X</default>\n",
-	   0x0002000000000000 + 0x20000000000*$proc );
+       0x0002000000000000 + 0x20000000000*$proc );
     printf( "    </attribute>\n" );
 
     # Starts at 1024TB - 3GB
     printf( "    <attribute><id>RNG_BASE_ADDR</id>\n" );
     printf( "        <default>0x%016X</default>\n",
-	   0x0003FFFF40000000 + 0x1000*$proc );
+       0x0003FFFF40000000 + 0x1000*$proc );
     printf( "    </attribute>\n" );
 
     # end PHYP Memory Map
@@ -1073,7 +1608,7 @@ sub generate_slave_proc
 
 sub generate_ex
 {
-    my ($proc, $ex) = @_;
+    my ($proc, $ex, $ordinalId) = @_;
     my $uidstr = sprintf("0x%02X0A%04X",${node},$ex+$proc*16+${node}*8*16);
     print "
 <targetInstance>
@@ -1091,14 +1626,25 @@ sub generate_ex
     <attribute>
         <id>CHIP_UNIT</id>
         <default>$ex</default>
-    </attribute>
+    </attribute>";
+
+    if($build eq "fsp")
+    {
+        print "
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>$ordinalId</default>
+    </attribute>";
+    }
+
+    print "
 </targetInstance>
 ";
 }
 
 sub generate_ex_core
 {
-    my ($proc, $ex) = @_;
+    my ($proc, $ex, $ordinalId) = @_;
     my $uidstr = sprintf("0x%02X0B%04X",${node},$ex+$proc*16+${node}*8*16);
     print "
 <targetInstance>
@@ -1116,14 +1662,25 @@ sub generate_ex_core
     <attribute>
         <id>CHIP_UNIT</id>
         <default>$ex</default>
-    </attribute>
+    </attribute>";
+    
+    if($build eq "fsp")
+    {
+        print "
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>$ordinalId</default>
+    </attribute>";
+    }
+
+    print "
 </targetInstance>
 ";
 }
 
 sub generate_mcs
 {
-    my ($proc, $mcs) = @_;
+    my ($proc, $mcs, $ordinalId) = @_;
     my $uidstr = sprintf("0x%02X0F%04X",${node},$mcs+$proc*8+${node}*8*8);
     print "
 <targetInstance>
@@ -1152,48 +1709,36 @@ sub generate_mcs
         <id>EI_BUS_TX_MSB_LSB_SWAP</id>
         <default>X</default>
     </attribute>
-    -->
-</targetInstance>
-";
-}
+    -->";
 
-sub generate_unit_tp
-{
-    my $proc = shift;
-    my $uidstr = sprintf("0x%02X18%04X",${node},$proc+${node}*8);
+    if($build eq "fsp")
+    {
+        print "
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>$ordinalId</default>
+    </attribute>";
+    }
+
     print "
-<!-- $SYSNAME n${node}p$proc tp unit -->
-
-<targetInstance>
-    <id>sys${sys}node${node}proc${proc}tp0</id>
-    <type>unit-tp-murano</type>
-    <attribute><id>HUID</id><default>${uidstr}</default></attribute>
-    <attribute>
-        <id>PHYS_PATH</id>
-        <default>physical:sys-$sys/node-$node/proc-$proc/tp-0</default>
-    </attribute>
-    <attribute>
-        <id>AFFINITY_PATH</id>
-        <default>affinity:sys-$sys/node-$node/proc-$proc/tp-0</default>
-    </attribute>
 </targetInstance>
 ";
 }
 
 sub generate_pcies
 {
-    my $proc = shift;
+    my ($proc,$ordinalId) = @_;
     my $proc_name = "n${node}:p${proc}";
     print "\n<!-- $SYSNAME n${node}p${proc} PCI units -->\n";
     for my $i ( 0 .. 2 )
     {
-        generate_a_pcie( $proc, $i );
+        generate_a_pcie( $proc, $i, ($ordinalId*3)+$i );
     }
 }
 
 sub generate_a_pcie
 {
-    my ($proc, $phb) = @_;
+    my ($proc, $phb, $ordinalId) = @_;
     my $uidstr = sprintf("0x%02X17%04X",${node},$phb+$proc*3+${node}*8*3);
     print "
 <targetInstance>
@@ -1211,14 +1756,25 @@ sub generate_a_pcie
     <attribute>
         <id>CHIP_UNIT</id>
         <default>$phb</default>
-    </attribute>
+    </attribute>";
+
+    if($build eq "fsp")
+    {
+        print "
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>$ordinalId</default>
+    </attribute>";
+    }
+
+    print "
 </targetInstance>
 ";
 }
 
 sub generate_ax_buses
 {
-    my ($proc, $type) = @_;
+    my ($proc, $type, $ordinalId) = @_;
 
     my $proc_name = "n${node}p${proc}";
     print "\n<!-- $SYSNAME $proc_name ${type}BUS units -->\n";
@@ -1229,10 +1785,12 @@ sub generate_ax_buses
     $type = lc( $type );
     for my $i ( $minbus .. $maxbus )
     {
-	my $uidstr = sprintf( "0x%02X%02X%04X",
-			     ${node},
-			       $typenum,
-                   $i+$proc*($numperchip)+${node}*8*($numperchip));
+        my $uidstr = sprintf( "0x%02X%02X%04X",
+            ${node},
+            $typenum,
+            $i+$proc*($numperchip)+${node}*8*($numperchip));
+        $ordinalId = $i+($ordinalId*($numperchip));
+    
         my $peer = 0;
         my $p_proc = 0;
         my $p_port = 0;
@@ -1273,13 +1831,23 @@ sub generate_ax_buses
         <default>physical:sys-$sys/node-$node/proc-$p_proc/${type}bus-$p_port</default>
     </attribute>";
         }
+
+        if($build eq "fsp")
+        {
+            print "
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>$ordinalId</default>
+    </attribute>";
+        }
+
         print "\n</targetInstance>\n";
     }
 }
 
 sub generate_centaur
 {
-    my ($ctaur, $mcs, $cfsi, $ipath) = @_;
+    my ($ctaur, $mcs, $cfsi, $ipath, $ordinalId, $relativeCentaurRid) = @_;
     my $scompath = $devpath->{chip}->{$ipath}->{'scom-path'};
     my $scanpath = $devpath->{chip}->{$ipath}->{'scan-path'};
     my $scomsize = length($scompath) + 1;
@@ -1342,6 +1910,7 @@ sub generate_centaur
 
     if ($build eq "fsp")
     {
+        my $ridHex=sprintf("0xD0%02X",$relativeCentaurRid);
         print "
     <attribute>
         <id>FSP_SCOM_DEVICE_PATH</id>
@@ -1352,6 +1921,14 @@ sub generate_centaur
         <id>FSP_SCAN_DEVICE_PATH</id>
         <default>$scanpath</default>
         <sizeInclNull>$scansize</sizeInclNull>
+    </attribute>
+    <attribute>
+        <id>RID</id>
+        <default>$ridHex</default>
+    </attribute>  
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>$ordinalId</default>
     </attribute>";
     }
     print "\n</targetInstance>\n";
@@ -1371,17 +1948,33 @@ sub generate_centaur
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-$sys/node-$node/proc-$proc/mcs-$mcs/membuf-$ctaur/mbs-0</default>
-    </attribute>
+    </attribute>";
+
+    if($build eq "fsp")
+    {
+        print "
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>$ordinalId</default>
+    </attribute>";
+    }
+
+    print "
 </targetInstance>
 ";
 }
 
 sub generate_mba
 {
-    my ($ctaur, $mcs, $mba) = @_;
+    my ($ctaur, $mcs, $mba, $ordinalId) = @_;
     my $proc = $mcs;
     $proc =~ s/.*:p(.*):.*/$1/g;
     $mcs =~ s/.*:.*:mcs(.*)/$1/g;
+
+    if ($mba == 0)
+    {
+        print "\n<!-- $SYSNAME Centaur MBAs affiliated with membuf$ctaur -->\n";
+    }
 
     my $uidstr = sprintf("0x%02X11%04X",${node},$mba+$mcs*2+$proc*8*2+${node}*8*8*2);
 
@@ -1401,7 +1994,18 @@ sub generate_mba
     <attribute>
         <id>CHIP_UNIT</id>
         <default>$mba</default>
-    </attribute>
+    </attribute>";
+    
+    if($build eq "fsp")
+    {
+        print "
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>$ordinalId</default>
+    </attribute>";
+    }
+
+    print "
 </targetInstance>
 ";
 }
@@ -1410,7 +2014,7 @@ sub generate_mba
 # of the MBA0 chiplet.
 sub generate_dimm
 {
-    my ($proc, $mcs, $ctaur, $pos, $dimm, $id) = @_;
+    my ($proc, $mcs, $ctaur, $pos, $dimm, $id, $ordinalId, $relativeDimmRid) = @_;
 
     my $x = $id;
     $x = int ($x / 4);
@@ -1450,8 +2054,7 @@ sub generate_dimm
     # Adjust offset basedon processor value
     $vpdRec = ($proc * 64) + $vpdRec;
 
-    my $dimmNum=($dimm - ($dimm%8))/8;
-    my $dimmHex=sprintf("0xD00%01X",$dimmNum);
+    my $dimmHex=sprintf("0xD0%02X",$relativeDimmRid);
     print "
 <targetInstance>
     <id>sys${sys}node${node}dimm$dimm</id>
@@ -1479,7 +2082,14 @@ sub generate_dimm
     if ($build eq "fsp")
     {
          print"
-    <attribute><id>RID</id><default>$dimmHex</default></attribute>";
+    <attribute>
+        <id>RID</id>
+        <default>$dimmHex</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>$ordinalId</default>
+    </attribute>";
     }
 
 print "\n</targetInstance>\n";
@@ -1502,7 +2112,6 @@ sub generate_pnor
     <id>sys${sys}node${node}pnor${pnor}</id>
     <type>chip-pnor-power8</type>
     <attribute><id>HUID</id><default>${uidstr}</default></attribute>
-    <attribute><id>ORDINAL_ID</id><default>$count</default></attribute>
     <attribute>
         <id>POSITION</id>
         <default>$pnor</default>
@@ -1525,10 +2134,6 @@ sub generate_pnor
         </default>
     </attribute>
     <attribute>
-        <id>RID</id>
-        <default>0x800</default>
-    </attribute>
-     <attribute>
         <id>FSP_A_MTD_DEVICE_PATH</id>
         <default>$charPath</default>
     </attribute>
@@ -1537,10 +2142,21 @@ sub generate_pnor
         <default>$blockPath</default>
     </attribute>";
 
+    if($build eq "fsp")
+    {
+        print "
+    <attribute>
+        <id>RID</id>
+        <default>0x800</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>$count</default>
+    </attribute>";
+    }
 
     print "\n</targetInstance>\n";
 }
-
 
 sub display_help
 {
