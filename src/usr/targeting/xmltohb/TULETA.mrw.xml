@@ -2436,7 +2436,7 @@
         <default>X</default>
     </attribute>
     <attribute>
-        <id>EI_BUS_TX_MSB_LSB_SWAP</id>
+            <id>EI_BUS_TX_MSB_LSB_SWAP</id>
         <default>X</default>
     </attribute>
     -->
