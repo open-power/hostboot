@@ -2362,6 +2362,18 @@ sub sizeBlockAligned {
 }
 
 ################################################################################
+# Strips off leading and trailing whitespace from a string and returns it
+################################################################################
+
+sub stripLeadingAndTrailingWhitespace {
+    my($string) = @_;
+
+    $string =~ s/^\s+|\s+$//g;
+
+    return $string;
+}
+
+################################################################################
 # Optimize white space for C++/doxygen documentation
 ################################################################################
 
@@ -3180,6 +3192,8 @@ sub packSingleSimpleTypeAttribute {
 sub packAttribute {
     my($attributes,$attribute,$value) = @_;
 
+    $value = stripLeadingAndTrailingWhitespace($value);
+
     my $binaryData;
 
     my $alignment = 1;
@@ -3219,8 +3233,10 @@ sub packAttribute {
                     {
                         if ($i < $valueArraySize)
                         {
-                            # Get the value from the value array
-                            $val = $values[$i];
+                            # Get the value from the value array and strip any
+                            # remaining leading/trailing whitespace that
+                            # surrounded the value after the original split
+                            $val = stripLeadingAndTrailingWhitespace($values[$i]);
                         }
                         # else use the last value
 
