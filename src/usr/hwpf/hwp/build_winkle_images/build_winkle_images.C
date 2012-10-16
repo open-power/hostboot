@@ -43,6 +43,9 @@
 #include    <initservice/taskargs.H>
 #include    <errl/errlentry.H>
 
+#include    <hwpisteperror.H>
+#include    <errl/errludtarget.H>
+
 #include    <initservice/isteps_trace.H>
 #include    <initservice/initsvcreasoncodes.H>
 
@@ -68,6 +71,9 @@
 namespace   BUILD_WINKLE_IMAGES
 {
 
+using   namespace   ISTEP;
+using   namespace   ISTEP_ERROR;
+using   namespace   ERRORLOG;
 using   namespace   TARGETING;
 using   namespace   fapi;
 using   namespace   DeviceFW;
@@ -305,6 +311,8 @@ void*    call_host_build_winkle( void    *io_pArgs )
     void                        *l_pImageOut    =   NULL;
     uint32_t                    l_sizeImageOut  =   MAX_OUTPUT_PORE_IMG_SIZE;
 
+    ISTEP_ERROR::IStepError     l_StepError;
+
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                "call_host_build_winkle entry" );
 
@@ -335,6 +343,12 @@ void*    call_host_build_winkle( void    *io_pArgs )
             TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
                       "host_build_winkle ERROR : Returning errorlog, PLID=0x%x",
                       l_errl->plid() );
+
+            ErrlUserDetailsTarget myDetails(l_cpu_target);
+
+            // capture the target data in the elog
+            myDetails.addToLog(l_errl);
+
             // drop out of loop and return errlog to fail.
             break;
         }
@@ -376,6 +390,12 @@ void*    call_host_build_winkle( void    *io_pArgs )
             TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
                       "host_build_winkle ERROR : Returning errorlog, PLID=0x%x",
                       l_errl->plid() );
+
+            ErrlUserDetailsTarget myDetails(l_cpu_target);
+
+            // capture the target data in the elog
+            myDetails.addToLog(l_errl);
+
             //  drop out if we hit an error and quit.
             break;
         }
@@ -399,6 +419,12 @@ void*    call_host_build_winkle( void    *io_pArgs )
             TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
                       "applyPoreGenCpuRegs ERROR : Returning errorlog, PLID=0x%x",
                       l_errl->plid() );
+
+            ErrlUserDetailsTarget myDetails(l_cpu_target);
+
+            // capture the target data in the elog
+            myDetails.addToLog(l_errl);
+
             //  drop out if we hit an error and quit.
             break;
         }
@@ -407,12 +433,32 @@ void*    call_host_build_winkle( void    *io_pArgs )
 
     // @@@@@    END CUSTOM BLOCK:   @@@@@
 
+    if(l_errl)
+    {
+        /*@
+         * @errortype
+         * @reasoncode  ISTEP_BUILD_WINKLE_IMAGES_FAILED
+         * @severity    ERRORLOG::ERRL_SEV_UNRECOVERABLE
+         * @moduleid    ISTEP_HOST_BUILD_WINKLE
+         * @userdata1   bytes 0-1: plid identifying first error
+         *              bytes 2-3: reason code of first error
+         * @userdata2   bytes 0-1: total number of elogs included
+         *              bytes 2-3: N/A
+         * @devdesc     call to host_build_winkle has failed
+         *
+         */
+        l_StepError.addErrorDetails(ISTEP_BUILD_WINKLE_IMAGES_FAILED,
+                                    ISTEP_HOST_BUILD_WINKLE,
+                                    l_errl);
+
+        errlCommit( l_errl, HWPF_COMP_ID );
+    }
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                "call_host_build_winkle exit" );
 
     // end task, returning any errorlogs to IStepDisp
-    return l_errl;
+    return l_StepError.getErrorHandle();
 }
 
 
@@ -424,6 +470,8 @@ void*    call_host_build_winkle( void    *io_pArgs )
 void*    call_proc_set_pore_bar( void    *io_pArgs )
 {
     errlHndl_t  l_errl      =   NULL;
+
+    ISTEP_ERROR::IStepError     l_stepError;
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                "call_proc_set_pore_bar entry" );
@@ -496,6 +544,21 @@ void*    call_proc_set_pore_bar( void    *io_pArgs )
             TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
                       "ERROR : p8_set_pore_bar, PLID=0x%x",
                       l_errl->plid()  );
+            /*@
+             * @errortype
+             * @reasoncode       ISTEP_BUILD_WINKLE_IMAGES_FAILED
+             * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE
+             * @moduleid         ISTEP_PROC_SET_PORE_BAR
+             * @devdesc          call to proc_set_porebar has failed, see
+             *                   error log identified by the plid in user
+             *                   data section.
+             */
+            l_stepError.addErrorDetails(ISTEP_BUILD_WINKLE_IMAGES_FAILED,
+                                        ISTEP_PROC_SET_PORE_BAR,
+                                        l_errl );
+
+            errlCommit( l_errl, HWPF_COMP_ID );
+
         }
         else
         {
@@ -512,7 +575,7 @@ void*    call_proc_set_pore_bar( void    *io_pArgs )
                "call_proc_set_pore_bar exit" );
 
     // end task, returning any errorlogs to IStepDisp
-    return l_errl;
+    return l_stepError.getErrorHandle();
 }
 
 

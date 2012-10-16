@@ -51,6 +51,9 @@
 #include <targeting/common/util.H>
 #include <targeting/common/utilFilter.H>
 
+#include    <hwpisteperror.H>
+#include    <errl/errludtarget.H>
+
 //  fapi support
 #include    <fapi.H>
 #include    <fapiPlatHwpInvoker.H>
@@ -84,6 +87,9 @@ const uint8_t VPO_NUM_OF_MEMBUF_TO_RUN = UNLIMITED_RUN;
 namespace   DRAM_TRAINING
 {
 
+using   namespace   ISTEP;
+using   namespace   ISTEP_ERROR;
+using   namespace   ERRORLOG;
 using   namespace   TARGETING;
 using   namespace   fapi;
 
@@ -154,6 +160,9 @@ void*    call_host_disable_vddr( void *io_pArgs )
 void*    call_mem_pll_setup( void *io_pArgs )
 {
     errlHndl_t l_err = NULL;
+
+    IStepError l_StepError;
+
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mem_pll_setup entry" );
 
     //TODO - Enable this procedure in SIMICs when RTC 46643 is done.
@@ -164,7 +173,7 @@ void*    call_mem_pll_setup( void *io_pArgs )
                             "WARNING: mem_pll_setup HWP is disabled in SIMICS run!");
         // end task
         return l_err;
-       
+
     }
 
 
@@ -196,6 +205,12 @@ void*    call_mem_pll_setup( void *io_pArgs )
             TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
                       "ERROR 0x%.8X: mem_pll_initf HWP returns error",
                       l_err->reasonCode());
+
+            ErrlUserDetailsTarget myDetails(l_pCentaur);
+
+            // capture the target data in the elog
+            myDetails.addToLog(l_err );
+
             break;
         }
         else
@@ -212,6 +227,12 @@ void*    call_mem_pll_setup( void *io_pArgs )
             TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
                       "ERROR 0x%.8X: mem_pll_setup HWP returns error",
                       l_err->reasonCode());
+
+            ErrlUserDetailsTarget myDetails(l_pCentaur);
+
+            // capture the target data in the elog
+            myDetails.addToLog(l_err );
+
             break;
         }
         else
@@ -219,6 +240,26 @@ void*    call_mem_pll_setup( void *io_pArgs )
             TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                        "SUCCESS: mem_pll_setup HWP( )" );
         }
+    }
+
+    if( l_err )
+    {
+        /*@
+         * @errortype
+         * @reasoncode  ISTEP_DRAM_TRAINING_FAILED
+         * @severity    ERRORLOG::ERRL_SEV_UNRECOVERABLE
+         * @moduleid    ISTEP_MEM_PLL_SETUP
+         * @userdata1   bytes 0-1: plid identifying first error
+         *              bytes 2-3: reason code of first error
+         * @userdata2   bytes 0-1: total number of elogs included
+         *              bytes 2-3: N/A
+         * @devdesc     call to cen_mem_pll_setup has failed
+         */
+        l_StepError.addErrorDetails(ISTEP_DRAM_TRAINING_FAILED,
+                                    ISTEP_MEM_PLL_SETUP,
+                                    l_err);
+
+        errlCommit( l_err, HWPF_COMP_ID );
     }
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mem_pll_setup exit" );
@@ -234,6 +275,8 @@ void*    call_mem_pll_setup( void *io_pArgs )
 void*    call_mem_startclocks( void *io_pArgs )
 {
     errlHndl_t l_err = NULL;
+
+    IStepError l_StepError;
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mem_startclocks entry" );
 
@@ -267,6 +310,30 @@ void*    call_mem_startclocks( void *io_pArgs )
             TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
                       "ERROR 0x%.8X: cen_mem_startclocks HWP returns error",
                       l_err->reasonCode());
+
+            ErrlUserDetailsTarget myDetails(l_pCentaur);
+
+            // capture the target data in the elog
+            myDetails.addToLog(l_err );
+
+            /*@
+             * @errortype
+             * @reasoncode  ISTEP_DRAM_TRAINING_FAILED
+             * @severity    ERRORLOG::ERRL_SEV_UNRECOVERABLE
+             * @moduleid    ISTEP_MEM_STARTCLOCKS
+             * @userdata1   bytes 0-1: plid identifying first error
+             *              bytes 2-3: reason code of first error
+             * @userdata2   bytes 0-1: total number of elogs included
+             *              bytes 2-3: N/A
+             * @devdesc     call to cen_mem_startclocks has failed
+             */
+            l_StepError.addErrorDetails(ISTEP_DRAM_TRAINING_FAILED,
+                                        ISTEP_MEM_STARTCLOCKS,
+                                        l_err);
+
+            errlCommit( l_err, HWPF_COMP_ID );
+
+
             break;
         }
         else
@@ -278,7 +345,7 @@ void*    call_mem_startclocks( void *io_pArgs )
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mem_startclocks exit" );
 
-    return l_err;
+    return l_StepError.getErrorHandle();
 }
 
 
@@ -351,6 +418,8 @@ void*    call_mss_scominit( void *io_pArgs )
 {
     errlHndl_t l_err = NULL;
 
+    IStepError l_stepError;
+
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mss_scominit entry" );
 
     // Get all Centaur targets
@@ -365,7 +434,7 @@ void*    call_mss_scominit( void *io_pArgs )
         // Dump current run on target
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                    "Running mss_scominit HWP on..." );
-        
+
         EntityPath l_path;
         l_path  =   l_pCentaur->getAttr<ATTR_PHYS_PATH>();
         l_path.dump();
@@ -384,6 +453,25 @@ void*    call_mss_scominit( void *io_pArgs )
             TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
                       "ERROR 0x%.8X: mss_scominit HWP returns error",
                       l_err->reasonCode());
+            /*@
+             * @errortype
+             * @reasoncode  ISTEP_DRAM_TRAINING_FAILED
+             * @severity    ERRORLOG::ERRL_SEV_UNRECOVERABLE
+             * @moduleid    ISTEP_MSS_SCOMINIT
+             * @userdata1   bytes 0-1: plid identifying first error
+             *              bytes 2-3: reason code of first error
+             * @userdata2   bytes 0-1: total number of elogs included
+             *              bytes 2-3: N/A
+             * @devdesc     call to mss_scominit has failed
+             *              see error log in the user details section for
+             *              additional details.
+             */
+            l_stepError.addErrorDetails(ISTEP_DRAM_TRAINING_FAILED,
+                                        ISTEP_MSS_SCOMINIT,
+                                        l_err );
+
+            errlCommit( l_err, HWPF_COMP_ID );
+
             break;
         }
         else
@@ -395,7 +483,7 @@ void*    call_mss_scominit( void *io_pArgs )
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mss_scominit exit" );
 
-    return l_err;
+    return l_stepError.getErrorHandle();
 }
 
 //
@@ -404,6 +492,8 @@ void*    call_mss_scominit( void *io_pArgs )
 void*  call_mss_ddr_phy_reset( void *io_pArgs )
 {
     errlHndl_t l_err = NULL;
+
+    IStepError l_stepError;
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mss_ddr_phy_reset entry" );
 
@@ -444,6 +534,29 @@ void*  call_mss_ddr_phy_reset( void *io_pArgs )
         {
             TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, "ERROR 0x%.8X: mss_ddr_phy_reset HWP returns error",
                     l_err->reasonCode());
+
+            ErrlUserDetailsTarget myDetails(l_mba_target);
+
+            // capture the target data in the elog
+            myDetails.addToLog(l_err );
+
+            /*@
+             * @errortype
+             * @reasoncode  ISTEP_DRAM_TRAINING_FAILED
+             * @severity    ERRORLOG::ERRL_SEV_UNRECOVERABLE
+             * @moduleid    ISTEP_MSS_DDR_PHY_RESET
+             * @userdata1   bytes 0-1: plid identifying first error
+             *              bytes 2-3: reason code of first error
+             * @userdata2   bytes 0-1: total number of elogs included
+             *              bytes 2-3: N/A
+             * @devdesc     call to mss_ddr_phy_reset has failed
+             */
+            l_stepError.addErrorDetails(ISTEP_DRAM_TRAINING_FAILED,
+                             ISTEP_MSS_DDR_PHY_RESET,
+                             l_err );
+
+            errlCommit( l_err, HWPF_COMP_ID );
+
             break; // break out of mba loop
         }
         else
@@ -454,7 +567,7 @@ void*  call_mss_ddr_phy_reset( void *io_pArgs )
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mss_ddr_phy_reset exit" );
 
-    return l_err;
+    return l_stepError.getErrorHandle();
 }
 
 
@@ -464,6 +577,8 @@ void*  call_mss_ddr_phy_reset( void *io_pArgs )
 void*    call_mss_draminit( void *io_pArgs )
 {
     errlHndl_t l_err = NULL;
+
+    IStepError l_stepError;
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mss_draminit entry" );
 
@@ -504,6 +619,30 @@ void*    call_mss_draminit( void *io_pArgs )
         {
             TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, "ERROR 0x%.8X : mss_draminit HWP returns error",
                     l_err->reasonCode());
+
+            ErrlUserDetailsTarget myDetails(l_mba_target);
+
+            // capture the target data in the elog
+            myDetails.addToLog(l_err );
+
+            /*@
+             *
+             * @errortype
+             * @reasoncode  ISTEP_DRAM_TRAINING_FAILED
+             * @severity    ERRORLOG::ERRL_SEV_UNRECOVERABLE
+             * @moduleid    ISTEP_MSS_DRAMINIT
+             * @userdata1   bytes 0-1: plid identifying first error
+             *              bytes 2-3: reason code of first error
+             * @userdata2   bytes 0-1: total number of elogs included
+             *              bytes 2-3: N/A
+             * @devdesc     call to mss_dram_init has failed
+             */
+            l_stepError.addErrorDetails( ISTEP_DRAM_TRAINING_FAILED,
+                              ISTEP_MSS_DRAMINIT,
+                              l_err );
+
+            errlCommit( l_err, HWPF_COMP_ID );
+
             break; // Break out of mba loop
         }
         else
@@ -515,7 +654,7 @@ void*    call_mss_draminit( void *io_pArgs )
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mss_draminit exit" );
 
-    return l_err;
+    return l_stepError.getErrorHandle();
 }
 
 
@@ -525,6 +664,8 @@ void*    call_mss_draminit( void *io_pArgs )
 void*    call_mss_draminit_training( void *io_pArgs )
 {
     errlHndl_t l_err = NULL;
+
+    IStepError l_stepError;
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mss_draminit_training entry" );
 
@@ -566,6 +707,30 @@ void*    call_mss_draminit_training( void *io_pArgs )
         {
             TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, "ERROR 0x%.8X : mss_draminit_training HWP returns error",
                     l_err->reasonCode());
+
+            ErrlUserDetailsTarget myDetails(l_mba_target);
+
+            // capture the target data in the elog
+            myDetails.addToLog(l_err );
+
+            /*@
+             *
+             * @errortype
+             * @reasoncode  ISTEP_DRAM_TRAINING_FAILED
+             * @severity    ERRORLOG::ERRL_SEV_UNRECOVERABLE
+             * @moduleid    ISTEP_MSS_DRAMINIT_TRAINING
+             * @userdata1   bytes 0-1: plid identifying first error
+             *              bytes 2-3: reason code of first error
+             * @userdata2   bytes 0-1: total number of elogs included
+             *              bytes 2-3: N/A
+             * @devdesc     call to mss_dram_init_training has failed
+             */
+            l_stepError.addErrorDetails( ISTEP_DRAM_TRAINING_FAILED,
+                              ISTEP_MSS_DRAMINIT_TRAINING,
+                              l_err );
+
+            errlCommit( l_err, HWPF_COMP_ID );
+
             break; // break out of mba loop
         }
         else
@@ -577,7 +742,7 @@ void*    call_mss_draminit_training( void *io_pArgs )
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mss_draminit_training exit" );
 
-    return l_err;
+    return l_stepError.getErrorHandle();
 }
 
 //
@@ -646,6 +811,8 @@ void*    call_mss_draminit_mc( void *io_pArgs )
 {
     errlHndl_t l_err = NULL;
 
+    IStepError l_stepError;
+
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mss_draminit_mc entry" );
 
     // Get all centaur targets
@@ -685,6 +852,31 @@ void*    call_mss_draminit_mc( void *io_pArgs )
         {
             TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, "ERROR 0x%.8X : mss_draminit_mc HWP returns error",
                     l_err->reasonCode());
+
+            ErrlUserDetailsTarget myDetails(l_membuf_target);
+
+            // capture the target data in the elog
+            myDetails.addToLog(l_err );
+
+            /*@
+             *
+             * @errortype
+             * @reasoncode  ISTEP_DRAM_TRAINING_FAILED
+             * @severity    ERRORLOG::ERRL_SEV_UNRECOVERABLE
+             * @moduleid    ISTEP_MSS_DRAMINIT_MC
+             * @userdata1   bytes 0-1: plid identifying first error
+             *              bytes 2-3: reason code of first error
+             * @userdata2   bytes 0-1: total number of elogs included
+             *              bytes 2-3: N/A
+             * @devdesc     call to mss_dram_init_mc has failed
+             *
+             */
+            l_stepError.addErrorDetails(ISTEP_DRAM_TRAINING_FAILED,
+                                        ISTEP_MSS_DRAMINIT_MC,
+                                        l_err );
+
+            errlCommit( l_err, HWPF_COMP_ID );
+
             break; // break out of memBuf loop
         }
         else
@@ -696,7 +888,7 @@ void*    call_mss_draminit_mc( void *io_pArgs )
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mss_draminit_mc exit" );
 
-    return l_err;
+    return l_stepError.getErrorHandle();
 }
 
 

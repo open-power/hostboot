@@ -22,7 +22,7 @@
  *  IBM_PROLOG_END_TAG
  */
 /**
- *  @file nest_chiplets.C                                                
+   @file nest_chiplets.C                                                
  *
  *  Support file for IStep: nest_chiplets                                                    
  *   Nest Chiplets
@@ -43,6 +43,9 @@
 #include    <trace/interface.H>
 #include    <initservice/taskargs.H>
 #include    <errl/errlentry.H>
+
+#include    <hwpisteperror.H>
+#include    <errl/errludtarget.H>
 
 #include    <initservice/isteps_trace.H>
 
@@ -65,9 +68,12 @@
 #include    "proc_a_x_pci_dmi_pll_setup/proc_a_x_pci_dmi_pll_setup.H"
 #include    "proc_a_x_pci_dmi_pll_setup/proc_a_x_pci_dmi_pll_initf.H"
 
-namespace   NEST_CHIPLETS                                              
+namespace   NEST_CHIPLETS
 {
 
+using   namespace   ISTEP;
+using   namespace   ISTEP_ERROR;
+using   namespace   ERRORLOG;
 using   namespace   TARGETING;
 using   namespace   fapi;
 
@@ -80,6 +86,9 @@ using   namespace   fapi;
 void*    call_proc_a_x_pci_dmi_pll_setup( void    *io_pArgs )
 {
     errlHndl_t l_err = NULL;
+
+    IStepError l_StepError;
+
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_proc_a_x_pci_dmi_pll_setup entry" );
 
     //TODO - Enable this procedure in SIMICs when RTC 46643 is done.
@@ -123,6 +132,29 @@ void*    call_proc_a_x_pci_dmi_pll_setup( void    *io_pArgs )
             TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
                       "ERROR 0x%.8X: proc_a_x_pci_dmi_pll_initf HWP returns error",
                       l_err->reasonCode());
+
+            ErrlUserDetailsTarget myDetails(l_cpu_target);
+
+            // capture the target data in the elog
+            myDetails.addToLog(l_err );
+
+            /*@
+             * @errortype
+             * @reasoncode  ISTEP_NEST_CHIPLETS_FAILED
+             * @severity    ERRORLOG::ERRL_SEV_UNRECOVERABLE
+             * @moduleid    ISTEP_PROC_A_X_PCI_DMI_PLL_INITF
+             * @userdata1   bytes 0-1: plid identifying first error
+             *              bytes 2-3: reason code of first error
+             * @userdata2   bytes 0-1: total number of elogs included
+             *              bytes 2-3: N/A
+             * @devdesc     call to proc_a_x_pci_dmi_pll_initf has failed
+             */
+            l_StepError.addErrorDetails(ISTEP_NEST_CHIPLETS_FAILED,
+                                        ISTEP_PROC_A_X_PCI_DMI_PLL_INITF,
+                                        l_err);
+
+            errlCommit( l_err, HWPF_COMP_ID );
+
             break;
         }
         else
@@ -142,8 +174,32 @@ void*    call_proc_a_x_pci_dmi_pll_setup( void    *io_pArgs )
         if (l_err)
         {
             TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                      "ERROR 0x%.8X: proc_a_x_pci_dmi_pll_setup HWP returns error",
+                      "ERROR 0x%.8X: proc_a_x_pci_dmi_pll_setup \
+                      HWP returns error",
                       l_err->reasonCode());
+
+            ErrlUserDetailsTarget myDetails(l_cpu_target);
+
+            // capture the target data in the elog
+            myDetails.addToLog(l_err );
+
+            /*@
+             * @errortype
+             * @reasoncode  ISTEP_NEST_CHIPLETS_FAILED
+             * @severity    ERRORLOG::ERRL_SEV_UNRECOVERABLE
+             * @moduleid    ISTEP_PROC_A_X_PCI_DMI_PLL_SETUP
+             * @userdata1   bytes 0-1: plid identifying first error
+             *              bytes 2-3: reason code of first error
+             * @userdata2   bytes 0-1: total number of elogs included
+             *              bytes 2-3: N/A
+             * @devdesc     call to proc_a_x_pci_dmi_pll_setup has failed
+             */
+            l_StepError.addErrorDetails(ISTEP_NEST_CHIPLETS_FAILED,
+                                        ISTEP_PROC_A_X_PCI_DMI_PLL_SETUP,
+                                        l_err);
+
+            errlCommit( l_err, HWPF_COMP_ID );
+
             break;
         }
         else
@@ -155,8 +211,8 @@ void*    call_proc_a_x_pci_dmi_pll_setup( void    *io_pArgs )
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_proc_a_x_pci_dmi_pll_setup exit" );
 
-    // end task, returning any errorlogs to IStepDisp 
-    return l_err;
+    // end task, returning any errorlogs to IStepDisp
+    return l_StepError.getErrorHandle();
 }
 
 
@@ -169,8 +225,10 @@ void*    call_proc_startclock_chiplets( void    *io_pArgs )
 {
     errlHndl_t l_err =   NULL;
 
+    IStepError l_StepError;
+
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_proc_startclock_chiplets entry" );
-        
+
     uint8_t l_cpuNum = 0;
 
     TARGETING::TargetHandleList l_cpuTargetList;
@@ -200,7 +258,30 @@ void*    call_proc_startclock_chiplets( void    *io_pArgs )
         if (l_err)
         {
             TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, "ERROR 0x%.8X : proc_startclock_chiplets HWP returns error",
-                    l_err->reasonCode());
+                        l_err->reasonCode());
+
+            ErrlUserDetailsTarget myDetails(l_cpu_target);
+
+            // capture the target data in the elog
+            myDetails.addToLog(l_err );
+
+            /*@
+             * @errortype
+             * @reasoncode  ISTEP_NEST_CHIPLETS_FAILED
+             * @severity    ERRORLOG::ERRL_SEV_UNRECOVERABLE
+             * @moduleid    ISTEP_PROC_STARTCLOCK_CHIPLETS
+             * @userdata1   bytes 0-1: plid identifying first error
+             *              bytes 2-3: reason code of first error
+             * @userdata2   bytes 0-1: total number of elogs included
+             *              bytes 2-3: N/A
+             * @devdesc     call to proc_start_clocks_chiplets has failed
+             */
+            l_StepError.addErrorDetails(ISTEP_NEST_CHIPLETS_FAILED,
+                                        ISTEP_PROC_STARTCLOCK_CHIPLETS,
+                                        l_err);
+
+            errlCommit( l_err, HWPF_COMP_ID );
+
             break; // break out of cpuNum
         }
         else
@@ -212,7 +293,7 @@ void*    call_proc_startclock_chiplets( void    *io_pArgs )
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_proc_startclock_chiplets exit" );
 
     // end task, returning any errorlogs to IStepDisp 
-    return l_err;
+    return l_StepError.getErrorHandle();
 }
 
 
@@ -240,16 +321,16 @@ void*    call_proc_chiplet_scominit( void    *io_pArgs )
 //
 void*    call_proc_pcie_scominit( void    *io_pArgs )
 {
-    errlHndl_t          l_errl      =   NULL;  
+    errlHndl_t          l_errl      =   NULL;
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_proc_pcie_scominit entry" );
-        
+
 #if 0
-    // @@@@@    CUSTOM BLOCK:   @@@@@    
+    // @@@@@    CUSTOM BLOCK:   @@@@@
     //  figure out what targets we need
     //  customize any other inputs
     //  set up loops to go through all targets (if parallel, spin off a task)
-    
+
     //  print call to hwp and dump physical path of the target(s)
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                     "=====  proc_pcie_scominit HWP(? ? ? )",
@@ -260,14 +341,14 @@ void*    call_proc_pcie_scominit( void    *io_pArgs )
     EntityPath l_path;
     l_path  =   l_@targetN_target->getAttr<ATTR_PHYS_PATH>();
     l_path.dump();
-    TRACFCOMP( g_trac_mc_init, "===== " );   
+    TRACFCOMP( g_trac_mc_init, "===== " );
 
-    // cast OUR type of target to a FAPI type of target.                         
+    // cast OUR type of target to a FAPI type of target.
     const fapi::Target l_fapi_@targetN_target(
                     TARGET_TYPE_MEMBUF_CHIP,
                     reinterpret_cast<void *>
                         (const_cast<TARGETING::Target*>(l_@targetN_target)) );
-                    
+
     //  call the HWP with each fapi::Target
     l_fapirc  =   proc_pcie_scominit( ? , ?, ? );
 
@@ -286,7 +367,7 @@ void*    call_proc_pcie_scominit( void    *io_pArgs )
                 "ERROR 0x%.8X:  proc_pcie_scominit HWP(? ? ?) ",
                 static_cast<uint32_t>(l_fapirc) );
     }
-    // @@@@@    END CUSTOM BLOCK:   @@@@@    
+    // @@@@@    END CUSTOM BLOCK:   @@@@@
 #endif
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_proc_pcie_scominit exit" );
@@ -303,16 +384,36 @@ void*    call_proc_pcie_scominit( void    *io_pArgs )
 //
 void*    call_proc_scomoverride_chiplets( void    *io_pArgs )
 {
-    errlHndl_t          l_errl      =   NULL;  
+    errlHndl_t          l_errl      =   NULL;
 
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_proc_scomoverride_chiplets entry" );
+    IStepError          l_StepError;
+
+    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                    "call_proc_scomoverride_chiplets entry" );
 
     FAPI_INVOKE_HWP(l_errl, proc_scomoverride_chiplets);
 
     if (l_errl)
     {
-        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, "ERROR 0x%.8X : proc_scomoverride_chiplets HWP returns error",
+        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, 
+                  "ERROR 0x%.8X : proc_scomoverride_chiplets HWP returns error",
                   l_errl->reasonCode());
+            /*@
+             * @errortype
+             * @reasoncode  ISTEP_NEST_CHIPLETS_FAILED
+             * @severity    ERRORLOG::ERRL_SEV_UNRECOVERABLE
+             * @moduleid    ISTEP_PROC_SCOMOVERRIDE_CHIPLETS
+             * @userdata1   bytes 0-1: plid identifying first error
+             *              bytes 2-3: reason code of first error
+             * @userdata2   bytes 0-1: total number of elogs included
+             *              bytes 2-3: N/A
+             * @devdesc     call to proc_scomoverride_chiplets has failed
+             */
+            l_StepError.addErrorDetails(ISTEP_NEST_CHIPLETS_FAILED,
+                                        ISTEP_PROC_SCOMOVERRIDE_CHIPLETS,
+                                        l_errl);
+
+            errlCommit( l_errl, HWPF_COMP_ID );
     }
     else
     {
@@ -322,8 +423,8 @@ void*    call_proc_scomoverride_chiplets( void    *io_pArgs )
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_proc_scomoverride_chiplets exit" );
 
-    // end task, returning any errorlogs to IStepDisp 
-    return l_errl;
+    // end task, returning any errorlogs to IStepDisp
+    return l_StepError.getErrorHandle();
 }
 
 

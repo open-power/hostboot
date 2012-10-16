@@ -46,6 +46,8 @@
 
 #include    <initservice/isteps_trace.H>
 
+#include    <hwpisteperror.H>
+
 //  targeting support
 #include    <targeting/common/commontargeting.H>
 
@@ -61,6 +63,8 @@
 namespace   ESTABLISH_SYSTEM_SMP
 {
 
+using   namespace   ISTEP;
+using   namespace   ISTEP_ERROR;
 using   namespace   TARGETING;
 using   namespace   fapi;
 
@@ -74,7 +78,7 @@ void*    call_host_coalesce_host( void    *io_pArgs )
 {
     errlHndl_t  l_errl  =   NULL;
 
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, 
+    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                "call_host_coalesce_host entry" );
 
 #if 0
@@ -98,19 +102,19 @@ void*    call_host_coalesce_host( void    *io_pArgs )
     FAPI_INVOKE_HWP( l_errl, host_coalesce_host, _args_...);
     if ( l_errl )
     {
-        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, 
+        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
                   "ERROR : .........." );
         errlCommit( l_errl, HWPF_COMP_ID );
     }
     else
     {
-        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, 
+        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                    "SUCCESS : .........." );
     }
     // @@@@@    END CUSTOM BLOCK:   @@@@@
 #endif
 
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, 
+    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                "call_host_coalesce_host exit" );
 
     // end task, returning any errorlogs to IStepDisp 

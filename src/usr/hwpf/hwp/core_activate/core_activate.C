@@ -47,6 +47,8 @@
 #include    <initservice/isteps_trace.H>
 #include    <initservice/istepdispatcherif.H>
 
+#include    <hwpisteperror.H>
+
 //  targeting support
 #include    <targeting/common/commontargeting.H>
 #include    <targeting/common/utilFilter.H>
@@ -74,6 +76,7 @@ namespace   CORE_ACTIVATE
 using   namespace   TARGETING;
 using   namespace   fapi;
 using   namespace   ISTEP;
+using   namespace   ISTEP_ERROR;
 
 
 
@@ -83,10 +86,12 @@ using   namespace   ISTEP;
 //
     void*    call_host_activate_master( void    *io_pArgs )
     {
-        errlHndl_t  l_errl  =   NULL;
 
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                    "call_host_activate_master entry" );
+
+        errlHndl_t  l_errl  =   NULL;
+        IStepError  l_stepError;
 
         // @@@@@    CUSTOM BLOCK:   @@@@@
 
@@ -153,7 +158,7 @@ using   namespace   ISTEP;
                  * @errortype
                  * @reasoncode  ISTEP_FAIL_MASTER_WINKLE_RC
                  * @severity    ERRORLOG::ERRL_SEV_UNRECOVERABLE
-                 * @moduleid    ISTEP_CORE_ACTIVATE
+                 * @moduleid    ISTEP_HOST_ACTIVATE_MASTER
                  * @userdata1   return code from cpu_master_winkle
                  *
                  * @devdesc p8_pore_gen_cpureg returned an error when
@@ -161,7 +166,7 @@ using   namespace   ISTEP;
                  */
                 l_errl =
                 new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                        ISTEP_CORE_ACTIVATE,
+                                        ISTEP_HOST_ACTIVATE_MASTER,
                                         ISTEP_FAIL_MASTER_WINKLE_RC,
                                         l_rc  );
                 break;
@@ -196,13 +201,33 @@ using   namespace   ISTEP;
         }   while ( 0 );
 
         // @@@@@    END CUSTOM BLOCK:   @@@@@
+        if( l_errl )
+        {
+            /*@
+             * @errortype
+             * @reasoncode      ISTEP_CORE_ACTIVATE_FAILED
+             * @severity        ERRORLOG::ERRL_SEV_UNRECOVERABLE
+             * @moduleid        ISTEP_HOST_ACTIVATE_MASTER
+             * @userdata1       bytes 0-1: plid identifying first error
+             *                  bytes 2-3: reason code of first error
+             * @userdata2       bytes 0-1: total number of elogs included
+             *                  bytes 2-3: N/A
+             * @devdesc         call to host_activate_master failed see
+             *                  error identified by the plid in user data
+             *                  field.
+             */
+            l_stepError.addErrorDetails(ISTEP_CORE_ACTIVATE_FAILED,
+                             ISTEP_HOST_ACTIVATE_MASTER,
+                             l_errl );
 
+            errlCommit( l_errl, HWPF_COMP_ID );
+        }
 
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                    "call_host_activate_master exit" );
 
         // end task, returning any errorlogs to IStepDisp
-        return l_errl;
+        return l_stepError.getErrorHandle();
 
     }
 
@@ -215,6 +240,8 @@ using   namespace   ISTEP;
 void*    call_host_activate_slave_cores( void    *io_pArgs )
 {
     errlHndl_t  l_errl  =   NULL;
+
+    IStepError  l_stepError;
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                "call_host_activate_slave_cores entry" );
@@ -285,11 +312,34 @@ void*    call_host_activate_slave_cores( void    *io_pArgs )
 #endif
     // @@@@@    END CUSTOM BLOCK:   @@@@@
 
+    if( l_errl )
+    {
+        /*@
+         * @errortype
+         * @reasoncode      ISTEP_CORE_ACTIVATE_FAILED
+         * @severity        ERRORLOG::ERRL_SEV_UNRECOVERABLE
+         * @moduleid        ISTEP_HOST_ACTIVATE_SLAVE_CORES
+         * @userdata1       bytes 0-1: plid identifying first error
+         *                  bytes 2-3: reason code of first error
+         * @userdata2       bytes 0-1: total number of elogs included
+         *                  bytes 2-3: N/A
+         *
+         * @devdesc         call to host_activate_master failed see
+         *                  error identified by the plid in user data
+         *                  field.
+         */
+        l_stepError.addErrorDetails(ISTEP_CORE_ACTIVATE_FAILED,
+                                    ISTEP_HOST_ACTIVATE_SLAVE_CORES,
+                                    l_errl );
+
+        errlCommit( l_errl, HWPF_COMP_ID );
+    }
+
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                "call_host_activate_slave_cores exit" );
 
     // end task, returning any errorlogs to IStepDisp
-    return l_errl;
+    return l_stepError.getErrorHandle();
 }
 
 
@@ -301,6 +351,8 @@ void*    call_host_activate_slave_cores( void    *io_pArgs )
 void*    call_host_ipl_complete( void    *io_pArgs )
 {
     errlHndl_t  l_err  =   NULL;
+
+    IStepError  l_stepError;
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                "call_host_ipl_complete entry" );
@@ -367,12 +419,34 @@ void*    call_host_ipl_complete( void    *io_pArgs )
 
     } while( 0 );
 
+    if( l_err )
+    {
+        /*@
+         * @errortype
+         * @reasoncode      ISTEP_CORE_ACTIVATE_FAILED
+         * @severity        ERRORLOG::ERRL_SEV_UNRECOVERABLE
+         * @moduleid        ISTEP_HOST_IPL_COMPLETE
+         * @userdata1       bytes 0-1: plid identifying first error
+         *                  bytes 2-3: reason code of first error
+         * @userdata2       bytes 0-1: total number of elogs included
+         *                  bytes 2-3: N/A
+         * @devdesc         call to host_ipl_complete failed see
+         *                  error identified by the plid in user data
+         *                  field.
+         */
+        l_stepError.addErrorDetails(ISTEP_CORE_ACTIVATE_FAILED,
+                                    ISTEP_HOST_IPL_COMPLETE,
+                                    l_err );
+
+        errlCommit( l_err, HWPF_COMP_ID );
+    }
+
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-               "call_host_ipl_complete exit elog ptr = %p", l_err );
+               "call_host_ipl_complete exit ");
 
 
     // end task, returning any errorlogs to IStepDisp
-    return l_err;
+    return l_stepError.getErrorHandle();
 }
 
 

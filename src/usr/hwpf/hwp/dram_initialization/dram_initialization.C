@@ -46,6 +46,7 @@
 #include    <diag/mdia/mdia.H>
 #include    <diag/attn/attn.H>
 #include    <initservice/isteps_trace.H>
+#include    <hwpisteperror.H>
 
 //  targeting support
 #include    <targeting/common/commontargeting.H>
@@ -80,6 +81,8 @@
 namespace   DRAM_INITIALIZATION
 {
 
+using   namespace   ISTEP;
+using   namespace   ISTEP_ERROR;
 using   namespace   TARGETING;
 using   namespace   EDI_EI_INITIALIZATION;
 using   namespace   fapi;
@@ -145,6 +148,8 @@ void*    call_mss_extent_setup( void    *io_pArgs )
 {
     errlHndl_t  l_errl  =   NULL;
 
+    IStepError  l_stepError;
+
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
             "call_mss_extent_setup entry" );
 
@@ -155,6 +160,24 @@ void*    call_mss_extent_setup( void    *io_pArgs )
     {
         TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
                 "ERROR : failed executing mss_extent_setup returning error" );
+        /*@
+         * @errortype
+         * @reasoncode      ISTEP_DRAM_INITIALIZATION_FAILED
+         * @severity        ERRORLOG::ERRL_SEV_UNRECOVERABLE
+         * @moduleid        ISTEP_MSS_EXTENT_SETUP
+         * @userdata1       bytes 0-1: plid identifying first error
+         *                  bytes 2-3: reason code of first error
+         * @userdata2       bytes 0-1: total number of elogs included
+         *                  bytes 2-3: N/A
+         * @devdesc         call to mss_extent_setup has failed, see error log
+         *                  identified by the plid in user data
+         */
+        l_stepError.addErrorDetails(ISTEP_DRAM_INITIALIZATION_FAILED,
+                                    ISTEP_MSS_EXTENT_SETUP,
+                                    l_errl );
+
+        errlCommit( l_errl, HWPF_COMP_ID );
+
     }
     else
     {
@@ -166,7 +189,7 @@ void*    call_mss_extent_setup( void    *io_pArgs )
             "call_mss_extent_setup exit" );
 
     // end task, returning any errorlogs to IStepDisp
-    return l_errl;
+    return l_stepError.getErrorHandle();
 }
 
 //
@@ -178,6 +201,8 @@ void*    call_mss_memdiag( void    *io_pArgs )
     using namespace MDIA;
 
     errlHndl_t  l_errl  =   NULL;
+
+    IStepError l_stepError;
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                "call_mss_memdiag entry" );
@@ -211,11 +236,32 @@ void*    call_mss_memdiag( void    *io_pArgs )
 
     } while (0);
 
+    if( l_errl )
+    {
+        /*@
+         * @errortype
+         * @reasoncode       ISTEP_DRAM_INITIALIZATION_FAILED
+         * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE
+         * @moduleid         ISTEP_MSS_MEMDIAG
+         * @userdata1        bytes 0-1: plid identifying first error
+         *                   bytes 2-3: reason code of first error
+         * @userdata2        bytes 0-1: total number of elogs included
+         *                   bytes 2-3: N/A
+         * @devdesc          call to mss_memdiag has failed, see error log
+         *                   identified by the plid in user data
+         */
+        l_stepError.addErrorDetails(ISTEP_DRAM_INITIALIZATION_FAILED,
+                                    ISTEP_MSS_MEMDIAG,
+                                    l_errl );
+
+        errlCommit( l_errl, HWPF_COMP_ID );
+    }
+
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                "call_mss_memdiag exit" );
 
     // end task, returning any errorlogs to IStepDisp
-    return l_errl;
+    return l_stepError.getErrorHandle();
 }
 
 
@@ -334,6 +380,7 @@ void*    call_proc_setup_bars( void    *io_pArgs )
 {
     errlHndl_t  l_errl  =   NULL;
 
+    IStepError  l_stepError;
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                "call_proc_setup_bars entry" );
@@ -374,6 +421,24 @@ void*    call_proc_setup_bars( void    *io_pArgs )
 
         if ( l_errl )
         {
+            /*@
+             * @errortype
+             * @reasoncode      ISTEP_DRAM_INITIALIZATION_FAILED
+             * @severity        ERRORLOG::ERRL_SEV_UNRECOVERABLE
+             * @moduleid        ISTEP_MSS_SETUP_BARS
+             * @userdata1       bytes 0-1: plid identifying first error
+             *                  bytes 2-3: reason code of first error
+             * @userdata2       bytes 0-1: total number of elogs included
+             *                  bytes 2-3: N/A
+             * @devdesc         call to mss_setup_bars failed, see error log
+             *                  identified by the plid in user data 1.
+             */
+            l_stepError.addErrorDetails(ISTEP_DRAM_INITIALIZATION_FAILED,
+                                        ISTEP_MSS_SETUP_BARS,
+                                        l_errl );
+
+            errlCommit( l_errl, HWPF_COMP_ID );
+
             TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
                       "ERROR : mss_setup_bars" );
             // break and return with error
@@ -394,7 +459,7 @@ void*    call_proc_setup_bars( void    *io_pArgs )
     if ( !TARGETING::is_vpo() )
     {
         //Now need to scom the L3 bar on my EX to trigger Simics cache contained exit
-        if (!l_errl)
+        if (l_stepError.isNull())
         {
             TARGETING::Target* procTarget = NULL;
             TARGETING::targetService().masterProcChipTargetHandle( procTarget );
@@ -421,7 +486,7 @@ void*    call_proc_setup_bars( void    *io_pArgs )
         // @@@@@    end TEMPORARY SIMICS HACK for PHYP 6/1 milestone @@@@@
     }
 
-    if ( ! l_errl )
+    if ( l_stepError.isNull() )
     {
         //  -----------------------------------------------------------------------
         //  run proc_setup_bars on all CPUs
@@ -495,18 +560,41 @@ void*    call_proc_setup_bars( void    *io_pArgs )
             else
             {
                 TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                           "SUCCESS : proc_setup-bars" );
+                           "SUCCESS : proc_setup_bars" );
             }
         }
     }   // end if !l_errl
 
     // @@@@@    END CUSTOM BLOCK:   @@@@@
 
+    if ( l_errl )
+    {
+        /*@
+         * @errortype
+         * @reasoncode       ISTEP_DRAM_INITIALIZATION_FAILED
+         * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE
+         * @moduleid         ISTEP_PROC_SETUP_BARS
+         * @userdata1        bytes 0-1: plid identifying first error
+         *                   bytes 2-3: reason code of first error
+         * @userdata2        bytes 0-1: total number of elogs included
+         *                   bytes 2-3: N/A
+         * @devdesc          call to proc_setup_bars has failed, see error log
+         *                   identified by the plid in user data section.
+         */
+
+        l_stepError.addErrorDetails(ISTEP_DRAM_INITIALIZATION_FAILED,
+                                    ISTEP_PROC_SETUP_BARS,
+                                    l_errl);
+
+        errlCommit( l_errl, HWPF_COMP_ID );
+
+    }
+
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                "call_proc_setup_bars exit" );
 
     // end task, returning any errorlogs to IStepDisp
-    return l_errl;
+    return l_stepError.getErrorHandle();
 }
 
 
@@ -572,6 +660,8 @@ void*    call_proc_exit_cache_contained( void    *io_pArgs )
 {
     errlHndl_t  l_errl  =   NULL;
 
+    IStepError  l_stepError;
+
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                "call_proc_exit_cache_contained entry" );
 
@@ -624,13 +714,36 @@ void*    call_proc_exit_cache_contained( void    *io_pArgs )
                   rc );
     }
 
+    if ( l_errl )
+    {
+        /*@
+         * @errortype
+         * @reasoncode       ISTEP_DRAM_INITIALIZATION_FAILED
+         * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE
+         * @moduleid         ISTEP_PROC_EXIT_CACHE_CONTAINED
+         * @userdata1        bytes 0-1: plid identifying first error
+         *                   bytes 2-3: reason code of first error
+         * @userdata2        bytes 0-1: total number of elogs included
+         *                   bytes 2-3: N/A
+         * @devdesc          call to proc_exit_cache_contained has failed
+         *                   see error log in the user details section for
+         *                   additional details.
+         */
+        l_stepError.addErrorDetails(ISTEP_DRAM_INITIALIZATION_FAILED,
+                                    ISTEP_PROC_EXIT_CACHE_CONTAINED,
+                                    l_errl);
+
+        errlCommit( l_errl, HWPF_COMP_ID );
+
+    }
+
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                "call_proc_exit_cache_contained exit" );
 
     // @@@@@    END CUSTOM BLOCK:   @@@@@
 
     // end task, returning any errorlogs to IStepDisp
-    return l_errl;
+   return l_stepError.getErrorHandle();
 }
 
 

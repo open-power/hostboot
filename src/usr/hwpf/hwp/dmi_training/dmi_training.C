@@ -50,6 +50,9 @@
 
 #include    <initservice/isteps_trace.H>
 
+#include    <hwpisteperror.H>
+#include    <errl/errludtarget.H>
+
 //  targeting support.
 #include    <targeting/common/commontargeting.H>
 #include    <targeting/common/utilFilter.H>
@@ -67,7 +70,9 @@
 namespace   DMI_TRAINING
 {
 
-
+using   namespace   ISTEP;
+using   namespace   ISTEP_ERROR;
+using   namespace   ERRORLOG;
 using   namespace   TARGETING;
 using   namespace   fapi;
 
@@ -78,13 +83,15 @@ void*    call_dmi_scominit( void *io_pArgs )
 {
     errlHndl_t l_errl = NULL;
 
+    IStepError l_StepError;
+
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_dmi_scominit entry" );
     uint8_t l_num = 0;
-   
+
     // Get all functional MCS chiplets
     TARGETING::TargetHandleList l_mcsTargetList;
     getAllChiplets(l_mcsTargetList, TYPE_MCS);
-   
+
     // Invoke dmi_scominit on each one
     for (l_num = 0; l_num < l_mcsTargetList.size(); l_num++)
     {
@@ -94,7 +101,8 @@ void*    call_dmi_scominit( void *io_pArgs )
             reinterpret_cast<void *>
                 (const_cast<TARGETING::Target*>(l_pTarget)));
 
-        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, "Running dmi_scominit HWP on...");
+        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                    "Running dmi_scominit HWP on...");
         EntityPath l_path;
         l_path = l_pTarget->getAttr<ATTR_PHYS_PATH>();
         l_path.dump();
@@ -102,8 +110,15 @@ void*    call_dmi_scominit( void *io_pArgs )
         FAPI_INVOKE_HWP(l_errl, dmi_scominit, l_fapi_target);
         if (l_errl)
         {
-            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, "ERROR 0x%.8X : dmi_scominit HWP returns error",
-                      l_errl->reasonCode());
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                        "ERROR 0x%.8X : dmi_scominit HWP returns error",
+                        l_errl->reasonCode());
+
+            ErrlUserDetailsTarget myDetails(l_pTarget);
+
+            // capture the target data in the elog
+            myDetails.addToLog( l_errl );
+
             break;
         }
         else
@@ -112,7 +127,7 @@ void*    call_dmi_scominit( void *io_pArgs )
         }
     }
 
-    if (!l_errl)
+    if ( l_StepError.isNull() )
     {
         // Get all functional membuf chips
         TARGETING::TargetHandleList l_membufTargetList;
@@ -137,6 +152,12 @@ void*    call_dmi_scominit( void *io_pArgs )
             {
                 TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, "ERROR 0x%.8X : dmi_scominit HWP returns error",
                           l_errl->reasonCode());
+
+                ErrlUserDetailsTarget myDetails(l_pTarget);
+
+                // capture the target data in the elog
+                myDetails.addToLog( l_errl );
+
                 break;
             }
             else
@@ -146,10 +167,33 @@ void*    call_dmi_scominit( void *io_pArgs )
         }
     }
 
+    if( l_errl )
+    {
+        /*@
+         * @errortype
+         * @reasoncode  ISTEP_DMI_TRAINING_FAILED
+         * @severity    ERRORLOG::ERRL_SEV_UNRECOVERABLE
+         * @moduleid    ISTEP_DMI_SCOMINIT
+         * @userdata1   bytes 0-1: plid identifying first error
+         *              bytes 2-3: reason code of first error
+         * @userdata2   bytes 0-1: total number of elogs included
+         *              bytes 2-3: N/A
+         * @devdesc     call to dmi_scominit has failed, target data
+         *              is included in the error logs listed in the
+         *              user data section of this error log.
+         *
+         */
+        l_StepError.addErrorDetails(ISTEP_DMI_TRAINING_FAILED,
+                                    ISTEP_DMI_SCOMINIT,
+                                    l_errl);
+
+        errlCommit( l_errl, HWPF_COMP_ID );
+    }
+
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_dmi_scominit exit" );
 
     // end task, returning any errorlogs to IStepDisp
-    return l_errl;
+    return l_StepError.getErrorHandle();
 }
 
 
@@ -205,6 +249,8 @@ void*    call_dmi_pre_trainadv( void *io_pArgs )
 void*    call_dmi_io_run_training( void *io_pArgs )
 {
     errlHndl_t l_err = NULL;
+
+    ISTEP_ERROR::IStepError l_StepError;
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_dmi_io_run_training entry" );
 
@@ -276,6 +322,29 @@ void*    call_dmi_io_run_training( void *io_pArgs )
                             l_cpuNum,
                             l_mcsNum,
                             k );
+
+                    ErrlUserDetailsTarget myDetails( l_mem_target );
+
+                    // capture the target data in the elog
+                    myDetails.addToLog( l_err );
+
+                    /*@
+                     * @errortype
+                     * @reasoncode  ISTEP_DMI_TRAINING_FAILED
+                     * @severity    ERRORLOG::ERRL_SEV_UNRECOVERABLE
+                     * @moduleid    ISTEP_DMI_IO_RUN_TRAINING
+                     * @userdata1   bytes 0-1: plid identifying first error
+                     *              bytes 2-3: reason code of first error
+                     * @userdata2   bytes 0-1: total number of elogs included
+                     *              bytes 2-3: N/A
+                     * @devdesc     call to dmi_io_run_training has failed
+                     */
+                    l_StepError.addErrorDetails(ISTEP_DMI_TRAINING_FAILED,
+                                                ISTEP_DMI_IO_RUN_TRAINING,
+                                                l_err);
+
+                    errlCommit( l_err, HWPF_COMP_ID );
+
                     break; // Break out mem target loop
                 }
                 else
@@ -290,24 +359,24 @@ void*    call_dmi_io_run_training( void *io_pArgs )
 
             }  //end for l_mem_target
 
-            if (l_err)
+            // if there is an error bail out
+            if ( !l_StepError.isNull() )
             {
                 break; // Break out l_mcs_target
             }
 
         }   // end for l_mcs_target
 
-        if (l_err)
+        if ( !l_StepError.isNull() )
         {
             break; // Break out l_cpu_target
         }
 
     }   // end for l_cpu_target
 
-
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_dmi_io_run_training exit" );
 
-    return l_err;
+    return l_StepError.getErrorHandle();
 }
 
 //
@@ -333,6 +402,8 @@ void*    call_proc_cen_framelock( void *io_pArgs )
 {
     errlHndl_t l_err = NULL;
     proc_cen_framelock_args     l_args;
+
+    IStepError l_StepError;
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_proc_cen_framework entry" );
 
@@ -389,6 +460,25 @@ void*    call_proc_cen_framelock( void *io_pArgs )
                 TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                  "ERROR 0x%.8X : proc_cen_framelock HWP( mem %d )",
                 l_err->reasonCode(), l_memNum );
+
+                /*@
+                 * @errortype
+                 * @reasoncode  ISTEP_DMI_TRAINING_FAILED
+                 * @severity    ERRORLOG::ERRL_SEV_UNRECOVERABLE
+                 * @moduleid    ISTEP_PROC_CEN_FRAMELOCK
+                 * @userdata1   bytes 0-1: plid identifying first error
+                 *              bytes 2-3: reason code of first error
+                 * @userdata2   bytes 0-1: total number of elogs included
+                 *              bytes 2-3: N/A
+                 * @devdesc     call to proc_cen_framelock has failed
+                 *
+                 */
+                l_StepError.addErrorDetails(ISTEP_DMI_TRAINING_FAILED,
+                                            ISTEP_PROC_CEN_FRAMELOCK,
+                                            l_err);
+
+                errlCommit( l_err, HWPF_COMP_ID );
+
                 break; // break out of mem num loop
             }
             else
@@ -400,7 +490,8 @@ void*    call_proc_cen_framelock( void *io_pArgs )
 
         }   // end mem
 
-        if (l_err)
+        // if there is already an error, bail out.
+        if ( !l_StepError.isNull() )
         {
             break; // break out of mcs loop
         }
@@ -409,7 +500,7 @@ void*    call_proc_cen_framelock( void *io_pArgs )
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_proc_cen_framework exit" );
 
-    return l_err;
+    return l_StepError.getErrorHandle();
 }
 
 //

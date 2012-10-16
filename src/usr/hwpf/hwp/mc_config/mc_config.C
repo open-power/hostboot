@@ -44,6 +44,9 @@
 #include    <initservice/taskargs.H>
 #include    <errl/errlentry.H>
 
+#include    <hwpisteperror.H>
+#include    <errl/errludtarget.H>
+
 #include    <initservice/isteps_trace.H>
 
 //  targeting support
@@ -72,6 +75,9 @@
 namespace   MC_CONFIG
 {
 
+using   namespace   ISTEP;
+using   namespace   ISTEP_ERROR;
+using   namespace   ERRORLOG;
 using   namespace   TARGETING;
 using   namespace   fapi;
 
@@ -144,6 +150,8 @@ void*    call_mss_volt( void *io_pArgs )
 {
     errlHndl_t l_err = NULL;
 
+    IStepError l_StepError;
+
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mss_volt entry" );
 
     TARGETING::TargetHandleList l_membufTargetList;
@@ -184,6 +192,24 @@ void*    call_mss_volt( void *io_pArgs )
     {
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                 "ERROR 0x%.8X:  mss_volt HWP( ) ", l_err->reasonCode());
+        /*@
+         * @errortype
+         * @reasoncode       ISTEP_MC_CONFIG_FAILED
+         * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE
+         * @moduleid         ISTEP_MSS_VOLT
+         * @userdata1        bytes 0-1: plid identifying first error
+         *                   bytes 2-3: reason code of first error
+         * @userdata2        bytes 0-1: total number of elogs included
+         *                   bytes 2-3: N/A
+         * @devdesc          call to mss_volt has failed
+         *
+         */
+        l_StepError.addErrorDetails(ISTEP_MC_CONFIG_FAILED,
+                                    ISTEP_MSS_VOLT,
+                                    l_err );
+
+        errlCommit( l_err, HWPF_COMP_ID );
+
     }
     else
     {
@@ -193,7 +219,7 @@ void*    call_mss_volt( void *io_pArgs )
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mss_volt exit" );
 
-    return l_err;
+    return l_StepError.getErrorHandle();
 }
 
 //
@@ -202,6 +228,8 @@ void*    call_mss_volt( void *io_pArgs )
 void*    call_mss_freq( void *io_pArgs )
 {
     errlHndl_t l_err = NULL;
+
+    IStepError l_StepError;
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mss_freq entry" );
 
@@ -235,6 +263,30 @@ void*    call_mss_freq( void *io_pArgs )
                      "ERROR 0x%.8X:  mss_freq HWP( %d ) ",
                      l_err->reasonCode(),
                      i );
+
+            ErrlUserDetailsTarget myDetails(l_membuf_target);
+
+            // capture the target data in the elog
+            myDetails.addToLog(l_err );
+
+            /*@
+             * @errortype
+             * @reasoncode  ISTEP_MC_CONFIG_FAILED
+             * @severity    ERRORLOG::ERRL_SEV_UNRECOVERABLE
+             * @moduleid    ISTEP_MSS_FREQ
+             * @userdata1   bytes 0-1: plid identifying first error
+             *              bytes 2-3: reason code of first error
+             * @userdata2   bytes 0-1: total number of elogs included
+             *              bytes 2-3: N/A
+             * @devdesc     call to mss_freq has failed
+             *
+             */
+            l_StepError.addErrorDetails(ISTEP_MC_CONFIG_FAILED,
+                                        ISTEP_MSS_FREQ,
+                                        l_err );
+
+            errlCommit( l_err, HWPF_COMP_ID );
+
             break; // break out memBuf loop
          }
         else
@@ -246,7 +298,7 @@ void*    call_mss_freq( void *io_pArgs )
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mss_freq exit" );
 
-    return l_err;
+    return l_StepError.getErrorHandle();
 }
 
 errlHndl_t call_mss_eff_grouping()
@@ -255,7 +307,7 @@ errlHndl_t call_mss_eff_grouping()
 
     TARGETING::TargetHandleList l_procsList;
     getAllChips(l_procsList, TYPE_PROC);
- 
+
     for ( size_t i = 0; i < l_procsList.size(); i++ )
     {
         //  make a local copy of the target for ease of use
@@ -294,7 +346,7 @@ errlHndl_t call_mss_eff_grouping()
 
             l_associated_centaurs.push_back(l_fapi_centaur_target);
         }
-   
+
         FAPI_INVOKE_HWP(l_err, mss_eff_grouping,
                         l_fapi_cpu_target, l_associated_centaurs);
 
@@ -302,8 +354,14 @@ errlHndl_t call_mss_eff_grouping()
         if ( l_err )
         {
             TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                "ERROR 0x%.8X:  mss_eff_grouping HWP( cpu %d centaur %d ) ",
-                l_err->reasonCode(), i, j );
+                       "ERROR 0x%.8X:  mss_eff_grouping HWP( cpu %d centaur %d ) ",
+                        l_err->reasonCode(), i, j );
+
+            ErrlUserDetailsTarget myDetails(l_cpu_target);
+
+            // capture the target data in the elog
+            myDetails.addToLog(l_err );
+
             break; // break out mba loop
         }
         else
@@ -322,6 +380,8 @@ errlHndl_t call_mss_eff_grouping()
 void*    call_mss_eff_config( void *io_pArgs )
 {
     errlHndl_t l_err = NULL;
+
+    IStepError l_StepError;
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mss_eff_config entry" );
 
@@ -357,6 +417,12 @@ void*    call_mss_eff_config( void *io_pArgs )
             TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                     "ERROR 0x%.8X:  mss_eff_config HWP( mba %d ) ",
                     l_err->reasonCode(), i );
+
+            ErrlUserDetailsTarget myDetails(l_mba_target);
+
+            // capture the target data in the elog
+            myDetails.addToLog( l_err );
+
             break; // break out mba loop
         }
         else
@@ -372,16 +438,38 @@ void*    call_mss_eff_config( void *io_pArgs )
     }
 
     // When opt_memmap HWP is available, it will be called
-    // here between the two call_mss_eff_grouping()
+    // here between the two call_mss_eff_grouping() 
+    //
 
-    if (!l_err)
+    if(!l_err)
     {
         l_err = call_mss_eff_grouping();
     }
 
+    if(l_err)
+    {
+        /*@
+         * @errortype
+         * @reasoncode  ISTEP_MC_CONFIG_FAILED
+         * @severity    ERRORLOG::ERRL_SEV_UNRECOVERABLE
+         * @moduleid    ISTEP_MSS_EFF_CONFIG
+         * @userdata1   bytes 0-1: plid identifying first error
+         *              bytes 2-3: reason code of first error
+         * @userdata2   bytes 0-1: total number of elogs included
+         *              bytes 2-3: N/A
+         * @devdesc     call to mss_eff_grouping has failed
+         *
+         */
+        l_StepError.addErrorDetails(ISTEP_MC_CONFIG_FAILED,
+                                    ISTEP_MSS_EFF_CONFIG,
+                                    l_err );
+
+        errlCommit( l_err, HWPF_COMP_ID );
+    }
+
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mss_eff_config exit" );
 
-    return l_err;
+    return l_StepError.getErrorHandle();
 }
 
 

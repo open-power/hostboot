@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/hwpf/plugins/hwpfParse.C $                            */
+/* $Source: src/include/usr/hwpf/hwp/hwpistepudparserfactory.H $          */
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
@@ -20,15 +20,49 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+#ifndef __ISTEP_UDPARSERFACTORY_H
+#define __ISTEP_UDPARSERFACTORY_H
+
+#ifdef PARSER
+
 /**
- *  @file hwpfParse.C
+ *  @file initsvcudparserfactory.H
  *
- *  HWPF user data parser
- */
-#include <errl/errludparser.H>
-#include <hwpf/plat/fapiPlatUdParserFactory.H>
-#include <hwpf/hwp/hwpistepudparserfactory.H>
+ *  Defines the IStepUserDetailsParserFactory.H class
+*/
+#include <hwpf/istepvcreasoncodes.H>
+#include <errl/errludparserfactory.H>
 
-ERRL_MAKE_UD_PARSER(fapi::PlatUserDetailsParserFactory, HWPF_COMP_ID)
-ERRL_MAKE_UD_PARSER(ISTEP_ERROR::HwpIstepUserDetailsParserFactory, HWPF_COMP_ID)
+namespace INITSERVICE
+{
 
+/**
+ * @class IStepUserDetailsParserFactory
+ *
+ * This factory produces ErrlUserDetailsParser objects to parse the specified
+ * InitService user detail data.
+*/
+class IStepUserDetailsParserFactory : public ERRORLOG::ErrlUserDetailsParserFactory
+{
+public:
+
+    /**
+     *  @brief Constructor
+     */
+    IStepUserDetailsParserFactory()
+    {
+        registerParser<IStepUserDetailsParserIstep>( ISTEP_UDT_PLID );
+    }
+
+private:
+
+    // Disabled
+    IStepUserDetailsParserFactory(const IStepUserDetailsParserFactory &);
+    IStepUserDetailsParserFactory & operator=(
+        const IStepUserDetailsParserFactory &);
+};
+
+}
+
+#endif
+#endif

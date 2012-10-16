@@ -1,25 +1,25 @@
-//  IBM_PROLOG_BEGIN_TAG
-//  This is an automatically generated prolog.
-//
-//  $Source: src/usr/errl/parser/errlparser.C $
-//
-//  IBM CONFIDENTIAL
-//
-//  COPYRIGHT International Business Machines Corp. 2011
-//
-//  p1
-//
-//  Object Code Only (OCO) source materials
-//  Licensed Internal Code Source Materials
-//  IBM HostBoot Licensed Internal Code
-//
-//  The source code for this program is not published or other-
-//  wise divested of its trade secrets, irrespective of what has
-//  been deposited with the U.S. Copyright Office.
-//
-//  Origin: 30
-//
-//  IBM_PROLOG_END
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/usr/errl/parser/errlparser.C $                            */
+/*                                                                        */
+/* IBM CONFIDENTIAL                                                       */
+/*                                                                        */
+/* COPYRIGHT International Business Machines Corp. 2011,2012              */
+/*                                                                        */
+/* p1                                                                     */
+/*                                                                        */
+/* Object Code Only (OCO) source materials                                */
+/* Licensed Internal Code Source Materials                                */
+/* IBM HostBoot Licensed Internal Code                                    */
+/*                                                                        */
+/* The source code for this program is not published or otherwise         */
+/* divested of its trade secrets, irrespective of what has been           */
+/* deposited with the U.S. Copyright Office.                              */
+/*                                                                        */
+/* Origin: 30                                                             */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
 
 
 /**
@@ -895,13 +895,13 @@ int main( int argc,  char *argv[] )
             }
             printf( "%-16s %8d\n",
                     FindComp(pPrivateHdr->sectionheader.compId),
-                    pPrivateHdr->plid );
+                    pPrivateHdr->eid );
         }
-        else if(( fDetail ) && (( pPrivateHdr->plid == ulLogId ) || (fAll)))
+        else if(( fDetail ) && (( pPrivateHdr->eid == ulLogId ) || (fAll)))
         {
             // Write the native PEL to a temporary file
             // for x86 errl tool to display.
-            sprintf( szTmpFilename, "/tmp/pel%d.bin", pPrivateHdr->plid );
+            sprintf( szTmpFilename, "/tmp/pel%d.bin", pPrivateHdr->eid );
 
             int fd = open( szTmpFilename,  O_RDWR | O_CREAT , 0664 );
             if( -1 == fd )
@@ -974,7 +974,7 @@ int main( int argc,  char *argv[] )
         if( fExtractPEL )
         {
             // Write the native PEL to a temporary file for debug later.
-            sprintf( szTmpFilename, "%s/pel%d.bin", pszOutputDir, pPrivateHdr->plid );
+            sprintf( szTmpFilename, "%s/pel%d.bin", pszOutputDir, pPrivateHdr->eid );
 
             int fd = open( szTmpFilename,  O_RDWR | O_CREAT , 0664 );
             if( -1 == fd )

@@ -1,25 +1,25 @@
-//  IBM_PROLOG_BEGIN_TAG
-//  This is an automatically generated prolog.
-//
-//  $Source: src/usr/errl/errlprvt.C $
-//
-//  IBM CONFIDENTIAL
-//
-//  COPYRIGHT International Business Machines Corp. 2011
-//
-//  p1
-//
-//  Object Code Only (OCO) source materials
-//  Licensed Internal Code Source Materials
-//  IBM HostBoot Licensed Internal Code
-//
-//  The source code for this program is not published or other-
-//  wise divested of its trade secrets, irrespective of what has
-//  been deposited with the U.S. Copyright Office.
-//
-//  Origin: 30
-//
-//  IBM_PROLOG_END
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/usr/errl/errlprvt.C $                                     */
+/*                                                                        */
+/* IBM CONFIDENTIAL                                                       */
+/*                                                                        */
+/* COPYRIGHT International Business Machines Corp. 2011,2012              */
+/*                                                                        */
+/* p1                                                                     */
+/*                                                                        */
+/* Object Code Only (OCO) source materials                                */
+/* Licensed Internal Code Source Materials                                */
+/* IBM HostBoot Licensed Internal Code                                    */
+/*                                                                        */
+/* The source code for this program is not published or otherwise         */
+/* divested of its trade secrets, irrespective of what has been           */
+/* deposited with the U.S. Copyright Office.                              */
+/*                                                                        */
+/* Origin: 30                                                             */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
 /**
  *  @file errlprvt.C
  *
@@ -63,7 +63,7 @@ ErrlPrvt::ErrlPrvt( compId_t  i_CreatorCompId ) :
     iv_sctns( 0 )
 {
     // Ask the errl manager for the next ID to assign.
-    iv_plid = ERRORLOG::theErrlManager::instance().getUniqueErrId();
+    iv_plid = iv_eid = ERRORLOG::theErrlManager::instance().getUniqueErrId();
 
     // Set the time of creation.
     // TODO The field iv_created and iv_committed expect an 8-byte
@@ -118,9 +118,7 @@ uint64_t ErrlPrvt::flatten( void * o_pBuffer, const uint64_t i_cbBuffer )
         p->creatorId      = iv_cid;
         p->sectionCount   = iv_sctns;
         p->plid           = iv_plid;
-
-        // TODO In the future, eid may be different than PLID
-        p->eid            = iv_plid;
+        p->eid            = iv_eid;
 
         // return amount of bytes flattened
         l_rc = iv_header.iv_slen;

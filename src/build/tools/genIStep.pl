@@ -329,6 +329,8 @@ my  $templateCFileHdr   =
 #include    <fapi.H>
 #include    <fapiPlatHwpInvoker.H>
 
+#include    <hwpisteperror.H>
+
 #include    \"\@istepname.H\"
 
 //  Uncomment these files as they become available:
@@ -345,6 +347,7 @@ namespace   \@\@istepname
 {
 
 using   namespace   TARGETING;
+using   namespace   ISTEP_ERROR;
 using   namespace   fapi;
 ";
 #####   end templateCFileNSHdr    #####################################
@@ -361,12 +364,14 @@ my $templateCFileSubStep =
 //
 void*    call_\@substepname( void    *io_pArgs )
 {
-    errlHndl_t  l_errl  =   NULL;
+
+    IStepError  l_StepError;
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                \"call_\@substepname entry\" );
 
 #if 0
+    errlHndl_t  l_errl  =   NULL;
     // \@\@\@\@\@    CUSTOM BLOCK:   \@\@\@\@\@
     //  figure out what targets we need
     //  customize any other inputs
@@ -390,6 +395,9 @@ void*    call_\@substepname( void    *io_pArgs )
         TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
                   \"ERROR : \@substepname, errorlog PLID=0x%x\",
                   lerrl->plid()  );
+
+        l_StepError.addErrorDetails( __REASON_CODE__, __MODULE_ID__, l_errl);
+
         errlCommit( l_errl, HWPF_COMP_ID );
     }
     else
@@ -404,7 +412,7 @@ void*    call_\@substepname( void    *io_pArgs )
                \"call_\@substepname exit\" );
 
     // end task, returning any errorlogs to IStepDisp
-    return  l_errl ;
+    return  l_StepError.getErrorHandle();
 }
 ";
 #####   end templateCFileSubStep    #################################

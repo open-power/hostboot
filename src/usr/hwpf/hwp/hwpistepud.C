@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/hwpf/plugins/hwpfParse.C $                            */
+/* $Source: src/usr/hwpf/hwp/hwpistepud.C $                               */
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
@@ -21,14 +21,37 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 /**
- *  @file hwpfParse.C
+ *  @file hwpudistep.C
  *
- *  HWPF user data parser
+ *  @brief Implementation of HwpSvcUserDetailsIstep
  */
-#include <errl/errludparser.H>
-#include <hwpf/plat/fapiPlatUdParserFactory.H>
-#include <hwpf/hwp/hwpistepudparserfactory.H>
+#include <hbotcompid.H>
+#include <hwpistepud.H>
+#include <hwpf/istepreasoncodes.H>
 
-ERRL_MAKE_UD_PARSER(fapi::PlatUserDetailsParserFactory, HWPF_COMP_ID)
-ERRL_MAKE_UD_PARSER(ISTEP_ERROR::HwpIstepUserDetailsParserFactory, HWPF_COMP_ID)
+using namespace ISTEP_ERROR;
+
+//------------------------------------------------------------------------------
+HwpUserDetailsIstep::HwpUserDetailsIstep( errlHndl_t i_err )
+{
+    HwpUserDetailsIstepErrorData * l_pBuf =
+        reinterpret_cast<HwpUserDetailsIstepErrorData *>(
+                reallocUsrBuf(sizeof(HwpUserDetailsIstepErrorData)));
+
+    l_pBuf->eid = i_err->eid();
+
+    l_pBuf->reasoncode = i_err->reasonCode();
+
+    // Set up ErrlUserDetails instance variables
+    iv_CompId = HWPF_COMP_ID;
+    iv_Version = 1;
+    iv_SubSection = HWP_UDT_STEP_ERROR_DETAILS;
+}
+
+//------------------------------------------------------------------------------
+HwpUserDetailsIstep::~HwpUserDetailsIstep()
+{
+
+}
+
 

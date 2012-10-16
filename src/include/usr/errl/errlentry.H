@@ -198,19 +198,28 @@ public:
      */
     void setModuleId( const uint8_t i_moduleId );
 
+    /**
+     *  @brief Get the unique error log identifier (EID) of the error log.
+     *
+     *  @return The error log ID of the error log.
+     */
+    uint32_t eid() const;
 
     /**
-     *  @brief Get the unique platform log identifier (PLID) of the error log.
-     *  In legacy FSP, you could have one platform log ID such that a
-     *  of entry IDs (EIDs) related to a single PLID. So far in Hostboot,
-     *  PLID == EID. As such, there is no setter in the ErrlEntry interface
-     *  for EID. When flattened as PEL for export, EID will be set to PLID.
+     *  @brief Get the platform log identifier (PLID) of the error log.
+     *  In legacy FSP, you could have one platform log ID such that a series
+     *  of entry IDs (EIDs) related to a single PLID.
      *
      *  @return The platform log ID of the error log.
      */
     uint32_t plid() const;
 
-
+    /**
+     *  @brief Set the platform log id for this error log.
+     *
+     *  @return The platform log ID of the error log.
+     */
+    void plid( uint32_t i_plid);
 
     /**
      *  @brief Get the event type of the error log.
@@ -291,7 +300,40 @@ public:
      */
     void setTermState(const errlTermState_t i_termState);
 
+    /**
+     *  @brief Add data to the iv_Src user data words.
+     *
+     *  @param[in] i_data - information to add to the user data word 1.
+     *
+     *  @return void
+     *
+     */
+    void addUserData1( const uint64_t i_data );
+    /**
+     *  @brief Add data to the iv_Src user data words.
+     *
+     *  @param[in] i_data - information to add to the user data word 2.
+     *
+     *  @return void
+     *
+     */
+    void addUserData2( const uint64_t i_data );
 
+    /**
+     *  @brief Return iv_Src user data words.
+     *
+     *  @return data1 word from SRC
+     *
+     */
+    uint64_t getUserData1() const;
+
+    /**
+     *  @brief Return iv_Src user data words.
+     *
+     *  @return data2 word from SRC
+     *
+     */
+    uint64_t getUserData2() const;
 
    /**
      * @brief Allows the caller to add a chunk of FFDC data in a log
@@ -498,11 +540,21 @@ private:
 ////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////
 
+inline uint32_t ErrlEntry::eid() const
+{
+    return iv_Private.iv_eid;
+}
+
 inline uint32_t ErrlEntry::plid() const
 {
     return iv_Private.iv_plid;
 }
-
+////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////
+inline void ErrlEntry::plid( uint32_t i_plid)
+{
+    iv_Private.iv_plid = i_plid;
+}
 
 
 ////////////////////////////////////////////////////////////////////////////
@@ -545,6 +597,32 @@ inline void ErrlEntry::setReasonCode( const uint16_t i_reasonCode )
 {
     iv_Src.iv_reasonCode = i_reasonCode;
     return;
+}
+
+////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////
+inline void ErrlEntry::addUserData1( const uint64_t i_data )
+{
+    iv_Src.iv_user1 = i_data;
+}
+
+////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////
+inline void ErrlEntry::addUserData2( const uint64_t i_data )
+{
+    iv_Src.iv_user2 = i_data;
+}
+////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////
+inline uint64_t ErrlEntry::getUserData1() const
+{
+    return iv_Src.iv_user1;
+}
+////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////
+inline uint64_t ErrlEntry::getUserData2() const
+{
+    return iv_Src.iv_user2;
 }
 
 ////////////////////////////////////////////////////////////////////////////

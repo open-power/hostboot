@@ -45,6 +45,7 @@
 #include    <errl/errlentry.H>
 
 #include    <initservice/isteps_trace.H>
+#include    <hwpisteperror.H>
 
 //  targeting support
 #include    <targeting/common/commontargeting.H>
@@ -63,6 +64,8 @@
 namespace   ACTIVATE_POWERBUS
 {
 
+using   namespace   ISTEP_ERROR;
+using   namespace   ISTEP;
 using   namespace   TARGETING;
 using   namespace   EDI_EI_INITIALIZATION;
 using   namespace   fapi;
@@ -75,9 +78,11 @@ using   namespace   fapi;
 //
 void*    call_proc_build_smp( void    *io_pArgs )
 {
-    errlHndl_t  l_errl  =   NULL;
 
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, 
+    errlHndl_t  l_errl  =   NULL;
+    IStepError l_StepError;
+
+    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                "call_proc_build_smp entry" );
 
     // Get all functional proc chip targets
@@ -178,26 +183,45 @@ void*    call_proc_build_smp( void    *io_pArgs )
         l_procChips.push_back( l_procEntry );
     }
 
-    //  call the HWP with each fapi::Target
-    FAPI_INVOKE_HWP( l_errl, proc_build_smp, 
-                     l_procChips, SMP_ACTIVATE_PHASE1 );
-
-    if ( l_errl )
+    if(!l_errl)
     {
-        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, 
+        //  call the HWP with each fapi::Target
+        FAPI_INVOKE_HWP( l_errl, proc_build_smp,
+                         l_procChips, SMP_ACTIVATE_PHASE1 );
+    }
+
+    if(l_errl)
+    {
+        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
                   "ERROR : proc_build_smp" );
+        /*@
+         * @errortype
+         * @reasoncode       ISTEP_ACTIVATE_POWER_BUS_FAILED
+         * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE
+         * @moduleid         ISTEP_PROC_BUILD_SMP
+         * @userdata1        bytes 0-1: plid identifying first error
+         *                   bytes 2-3: reason code of first error
+         * @userdata2        bytes 0-1: total number of elogs included
+         *                   bytes 2-3: N/A
+         * @devdesc          call to proc_build_smp has failed
+         */
+        l_StepError.addErrorDetails(ISTEP_ACTIVATE_POWER_BUS_FAILED,
+                                    ISTEP_PROC_BUILD_SMP,
+                                    l_errl);
+
+        errlCommit( l_errl, HWPF_COMP_ID );
     }
     else
     {
-        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, 
-                   "SUCCESS : proc_build_smp" );
+        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                  "SUCCESS : proc_build_smp" );
     }
 
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, 
-               "call_proc_build_smp exit" );
+    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+            "call_proc_build_smp exit" );
 
-    // end task, returning any errorlogs to IStepDisp 
-    return l_errl;
+    // end task, returning any errorlogs to IStepDisp
+    return l_StepError.getErrorHandle();
 }
 
 

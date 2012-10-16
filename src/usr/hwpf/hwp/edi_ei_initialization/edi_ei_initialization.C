@@ -47,6 +47,8 @@
 #include    <initservice/taskargs.H>
 #include    <errl/errlentry.H>
 
+#include    <hwpisteperror.H>
+
 #include    <initservice/isteps_trace.H>
 
 //  targeting support
@@ -75,6 +77,8 @@ namespace   EDI_EI_INITIALIZATION
 {
 
 
+using   namespace   ISTEP;
+using   namespace   ISTEP_ERROR;
 using   namespace   TARGETING;
 using   namespace   fapi;
 
@@ -246,6 +250,8 @@ void*    call_fabric_io_run_training( void    *io_pArgs )
 {
     errlHndl_t  l_errl  =   NULL;
 
+    IStepError  l_StepError;
+
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                "call_fabric_io_run_training entry" );
 
@@ -285,6 +291,28 @@ void*    call_fabric_io_run_training( void    *io_pArgs )
                        "%s : %cbus connection io_run_training",
                        (l_errl ? "ERROR" : "SUCCESS"),
                        (i ? 'X' : 'A') );
+
+            if ( l_errl )
+            {
+                /*@
+                 * @errortype
+                 * @reasoncode  ISTEP_EDI_EI_INITIALIZATION_FAILED
+                 * @severity    ERRORLOG::ERRL_SEV_UNRECOVERABLE
+                 * @moduleid    ISTEP_FABRIC_IO_RUN_TRAINING
+                 * @userdata1   bytes 0-1: plid identifying first error
+                 *              bytes 2-3: reason code of first error
+                 * @userdata2   bytes 0-1: total number of elogs included
+                 *              bytes 2-3: N/A
+                 * @devdesc     call to fabric_io_run_training has failed
+                 *              see error log in the user details seciton for
+                 *              additional details.
+                 */
+                l_StepError.addErrorDetails(ISTEP_EDI_EI_INITIALIZATION_FAILED,
+                                            ISTEP_FABRIC_IO_RUN_TRAINING,
+                                            l_errl );
+
+                errlCommit( l_errl, HWPF_COMP_ID );
+            }
         }
     }
 
@@ -292,7 +320,7 @@ void*    call_fabric_io_run_training( void    *io_pArgs )
                "call_fabric_io_run_training exit" );
 
     // end task, returning any errorlogs to IStepDisp
-    return l_errl;
+    return l_StepError.getErrorHandle();
 }
 
 
@@ -465,6 +493,8 @@ void*    call_proc_fab_iovalid( void    *io_pArgs )
     ReturnCode l_rc;
     errlHndl_t l_errl = NULL;
 
+    IStepError l_StepError;
+
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                "call_proc_fab_iovalid entry" );
 
@@ -548,25 +578,43 @@ void*    call_proc_fab_iovalid( void    *io_pArgs )
         l_smp.push_back(l_procEntry);
     }
 
-    if (l_errl)
-    {
-        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                   "ERROR : call_proc_fab_iovalid encountered an error");
-    }
-    else
+    if (!l_errl)
     {
         FAPI_INVOKE_HWP( l_errl, proc_fab_iovalid, l_smp, true );
 
         TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                  "%s : proc_fab_iovalid HWP.",
-                  (l_errl ? "ERROR" : "SUCCESS"));
+                "%s : proc_fab_iovalid HWP.",
+                (l_errl ? "ERROR" : "SUCCESS"));
+    }
+
+    if (l_errl)
+    {
+        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                "ERROR : call_proc_fab_iovalid encountered an error");
+        /*@
+         * @errortype
+         * @reasoncode       ISTEP_EDI_EI_INITIALIZATION_FAILED
+         * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE
+         * @moduleid         ISTEP_PROC_FAB_IOVALID
+         * @userdata1        bytes 0-1: plid identifying first error
+         *                   bytes 2-3: reason code of first error
+         * @userdata2        bytes 0-1: total number of elogs included
+         *                   bytes 2-3: N/A
+         * @devdesc          call to proc_fab_iovalid has failed
+         */
+        l_StepError.addErrorDetails(ISTEP_EDI_EI_INITIALIZATION_FAILED,
+                                    ISTEP_PROC_FAB_IOVALID,
+                                    l_errl );
+
+        errlCommit( l_errl, HWPF_COMP_ID );
+
     }
 
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                "call_proc_fab_iovalid exit" );
 
     // end task, returning any errorlogs to IStepDisp
-    return l_errl;
+    return l_StepError.getErrorHandle();
 }
 
 
