@@ -312,13 +312,7 @@ errlHndl_t discoverTargets()
                             pDesc->getAttr<ATTR_HUID>(), indexEX,
                             VPD_CP00_PG_EX0_INDEX + indexEX,
                             VPD_CP00_PG_EX0_GOOD);
-////////////////////////////////////////////////////////////////////////////////
-                        // RTC: 49991 for now, return true because the VPD in
-                        // hostboot is broken (has 0xF200 instead of 0xF300,
-                        // and has the last 6 cores in the incorrect place)
-                        descFunctional = true;
-                        //descFunctional = false;
-////////////////////////////////////////////////////////////////////////////////
+                        descFunctional = false;
                       }
                     }
                 } // chipFunctional
