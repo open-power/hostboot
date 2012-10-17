@@ -22,18 +22,18 @@
 #
 # IBM_PROLOG_END_TAG
 #
-# Purpose:  This perl script works in concert with do_sprint to
-#           implement isteps on AWAN.
+# Purpose:  This perl script implements isteps on AWAN.
 #
-# Description:
-#	The do_sprint script will run first to set up the AWAN environment,
-#	Then call hb_Istep twice:
+# Procedure:
+#	Call hb_Istep twice:
 #	1) hb_Istep [--]istepmode
 #	    called after loading but before starting HostBoot
 #	    this will check to see if the user has set istep mode, if so
 #	    it will write the Istep_mode signature to L3 memory to put
-#       HostBoot mode into single-step mode (spless or FSP).
+#       HostBoot mode into single-step mode (spless).
+#       Then it will boot HostBoot until it is ready to receive commands.
 #	2) hb_Istep [--]command
+#       Submit a istep/substep command for hostboot to run.
 #	    Periodically call ::executeInstrCycles() to step through HostBoot.
 #	    Checks for status from previous Isteps, and reports status.
 #
@@ -68,7 +68,6 @@ our @EXPORT_OK = ('main');
 #------------------------------------------------------------------------------
 ##  @todo   extract these from splesscommon.H
 use constant    SPLESS_MODE_SIGNATURE     =>  0x4057b0074057b007;
-use constant    FSP_MODE_SIGNATURE        =>  0x700b7504700b7504;
 use constant    RUN_ALL_MODE_SIGNATURE    =>  0xBADC0FFEE0DDF00D;
 
 use constant    SPLESS_SINGLE_ISTEP_CMD     =>  0x00;
@@ -79,10 +78,10 @@ use constant    MAX_ISTEPS                  =>  25;
 use constant    MAX_SUBSTEPS                =>  25;
 
 ##  Mailbox Scratchpad regs
-use constant    MBOX_SCRATCH0               =>  0x00050038;
-use constant    MBOX_SCRATCH1               =>  0x00050039;
-use constant    MBOX_SCRATCH2               =>  0x0005003a;
-use constant    MBOX_SCRATCH3               =>  0x0005003b;
+use constant    MBOX_SCRATCH0               =>  0x00050038;     ## contTrace
+use constant    MBOX_SCRATCH1               =>  0x00050039;     ## sts LO
+use constant    MBOX_SCRATCH2               =>  0x0005003a;     ## sts HI
+use constant    MBOX_SCRATCH3               =>  0x0005003b;     ## cmd reg
 
 ##  extra parm for ::executeInstrCycles
 use constant    NOSHOW                      =>  1;
@@ -152,7 +151,7 @@ sub main
         ::userDisplay "args: $k => $v\n";
     }
 
-    ::userDisplay   "Welcome to hb-Istep 3.33 .\n";
+    ::userDisplay   "Welcome to hb-Istep 3.34 .\n";
     ::userDisplay   "Note that in simics, multiple options must be in quotes,";
     ::userDisplay   "separated by spaces\n\n";
 
@@ -180,11 +179,11 @@ sub main
     ##  fetch the istep list
     get_istep_list();
 
-    ## $$  debug, dump all the environment vars that we are interested in
-    dumpEnvVar( "HB_TOOLS" );
-    dumpEnvVar( "HB_IMGDIR" );
-    dumpEnvVar( "HB_VBUTOOLS" );
-    dumpEnvVar( "HB_COUNT" );
+    ##  debug, dump all the environment vars that we are interested in
+    ## dumpEnvVar( "HB_TOOLS" );
+    ## dumpEnvVar( "HB_IMGDIR" );
+    ## dumpEnvVar( "HB_VBUTOOLS" );
+    ## dumpEnvVar( "HB_COUNT" );
 
     ##--------------------------------------------------------------------------
     ##  Start processing options
@@ -292,7 +291,7 @@ sub main
     if ( $opt_debug )   {   ::userDisplay   "=== check ShutDown Status...\n";  }
     if ( isShutDown() )
     {
-        ::userDisplay   "Cannot run hb-Istep.\n";
+        ::userDisplay   "Shutdown detected: cannot run HostBoot.\n";
         exit;
     }
 
@@ -309,7 +308,7 @@ sub main
 
     if ( $opt_istepmode )
     {
-        ::userDisplay "istepmode no longer used - use splessmode, or fspmode\n";
+        ::userDisplay "istepmode no longer used - use splessmode\n";
         exit;
     }
 
@@ -323,16 +322,14 @@ sub main
 
     if ( $opt_fspmode )
     {
-        ::userDisplay   "ENable fspmode\n";
-        setMode( "fsp" );
-        ::userDisplay   "Done.\n";
+        ::userDisplay "istepmode no longer used - use splessmode\n";
         exit;
     }
 
     ##  don't do any other commands unless ready bit is on.
     if ( ! isReadyBitOn() )
     {
-        ::userDisplay   "Ready bit is off, must run splessmode or fspmode first.\n";
+        ::userDisplay   "Ready bit is off, must run splessmode first.\n";
         exit;
     }
 
@@ -374,7 +371,6 @@ sub helpInfo
         intro => ["Executes isteps."],
         options => {    "list"          =>  [" list out all supported isteps "],
                         "splessmode"    =>  ["enable istep mode"],
-                        "fspmode"       =>  ["enable istep mode"],
                         "resume"        =>  ["resume an istep that is at a break point"],
                         "clear-trace"   =>  ["clear trace buffers before starting"],
                         "sN"            =>  ["run istep N"],
@@ -394,6 +390,8 @@ sub bumpSeqNum()
     $g_SeqNum++;
 
     $g_SeqNum   %=  64;
+
+    $g_SeqNum += ($g_SeqNum == 0) ? 1 : 0;
 
     return  $g_SeqNum;
 }
@@ -897,7 +895,7 @@ sub process_command( $ )
 ##  write to mem to set istep or normal mode, check return status
 ##
 ##  Note that this only happens once at the beginning, when "splessmode"
-##  or "fsplessmode" is run.
+##  is run.
 ##
 sub setMode( $ )
 {
@@ -910,11 +908,6 @@ sub setMode( $ )
     if ( $cmd eq "spless" )
     {
         writeIstepModeReg( SPLESS_MODE_SIGNATURE );
-        $expected    =   1;
-    }
-    elsif   ( $cmd eq "fsp" )
-    {
-        writeIstepModeReg( FSP_MODE_SIGNATURE );
         $expected    =   1;
     }
     else
@@ -930,6 +923,13 @@ sub setMode( $ )
         ::userDisplay   "=== IstepModeReg readback: ", sprintf("0x%x", $result), "\n" ;
     }
 
+    ##  Clear status reg(s) before we start.  If the status reg is initialized
+    ##      to garbage, there is a chance that it will mistaken for the readybit
+    ::writeScom( MBOX_SCRATCH2, 8, 0 );             ## clear hi
+    ::writeScom( MBOX_SCRATCH1, 8, 0 );             ## clear lo
+
+    ##  Clear command reg as well.
+    ::writeScom( MBOX_SCRATCH3, 8, 0 );             ## clear cmd.
 
     ##  Loop, advancing clock, and wait for readybit
     $count  =   $hbCount ;
@@ -949,7 +949,7 @@ sub setMode( $ )
         ## check for system crash
         if ( isShutDown( ) )
         {
-            ::userDisplay  "Cannot run HostBoot.\n";
+            ::userDisplay  "Shutdown detected: cannot run HostBoot.\n";
             return -1;
         }
 

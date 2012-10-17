@@ -1,39 +1,39 @@
 #!/usr/bin/perl
-# IBM_PROLOG_BEGIN_TAG 
-# This is an automatically generated prolog. 
-#  
-# $Source: src/build/vpo/hb-istep $ 
-#  
-# IBM CONFIDENTIAL 
-#  
-# COPYRIGHT International Business Machines Corp. 2011,2012 
-#  
-# p1 
-#  
-# Object Code Only (OCO) source materials 
-# Licensed Internal Code Source Materials 
-# IBM HostBoot Licensed Internal Code 
-#  
-# The source code for this program is not published or otherwise 
-# divested of its trade secrets, irrespective of what has been 
-# deposited with the U.S. Copyright Office. 
-#  
-# Origin: 30 
-#  
-# IBM_PROLOG_END_TAG 
+# IBM_PROLOG_BEGIN_TAG
+# This is an automatically generated prolog.
 #
-# Purpose:  This perl script works in concert with do_sprint to
-#           implement isteps on AWAN.
+# $Source: src/build/vpo/hb-istep $
 #
-# Description:
-#       The do_sprint script will run first to set up the AWAN environment,
-#       Then call hb_istep twice:
+# IBM CONFIDENTIAL
+#
+# COPYRIGHT International Business Machines Corp. 2011,2012
+#
+# p1
+#
+# Object Code Only (OCO) source materials
+# Licensed Internal Code Source Materials
+# IBM HostBoot Licensed Internal Code
+#
+# The source code for this program is not published or otherwise
+# divested of its trade secrets, irrespective of what has been
+# deposited with the U.S. Copyright Office.
+#
+# Origin: 30
+#
+# IBM_PROLOG_END_TAG
+#
+# Purpose:  This perl script implements isteps on AWAN.
+#
+# How to run this program:
+#       Call hb_istep twice:
 #       1) hb_istep [--]istepmode
-#           called after loading but before starting HostBoot
+#           Called after loading but before starting HostBoot
 #           this will check to see if the user has set istep mode, if so
 #           it will write the Istep_mode signature to L3 memory to put
-#       HostBoot mode into single-step mode (spless or FSP).
+#           HostBoot mode into single-step mode (spless ).
+#           Then it will boot HostBoot until it is ready to recieve commands.
 #       2) hb_istep [--]command
+#           Submit a istep/substep command for hostboot to run.
 #           Periodically call RunClocks() to step through HostBoot.
 #           Checks for status from previous Isteps, and reports status.
 #
@@ -91,7 +91,6 @@ my  $CORE       =   "-cft";
 
 ##  @todo   extract these from splesscommon.H
 use constant    SPLESS_MODE_SIGNATURE     =>  "0x4057b0074057b007";
-use constant    FSP_MODE_SIGNATURE        =>  "0x700b7504700b7504";
 use constant    RUN_ALL_MODE_SIGNATURE    =>  "0xBADC0FFEE0DDF00D";
 
 use constant    SPLESS_SINGLE_ISTEP_CMD     =>  0x00;
@@ -184,7 +183,7 @@ if ( ! -e "$hbSymsFile" )  { die "Can't find symbols file $hbSymsFile\n";   }
 if ( ! -e "$CSVfile" )  { die "Can't find isteplist file $hbSymsFile\n";   }
 
 
-print   STDOUT  "Welcome to hb-istep 3.03 .\n";
+print   STDOUT  "Welcome to hb-istep 3.04 .\n";
 
 
 ## exit if no args
@@ -370,7 +369,12 @@ sub main()
 
     if ( $opt_istepmode )
     {
-        print   STDOUT "istepmode no longer used - use splessmode, or fspmode\n";
+        print   STDOUT "istepmode no longer used - use splessmode\n";
+        exit;
+    }
+    if  ( $opt_fspmode ==  1 )
+    {
+        print STDOUT  "fspmode no longer used - use splessmode \n";
         exit;
     }
 
@@ -386,41 +390,16 @@ sub main()
     }
 
 
-    if (    ( $opt_splessmode ==  1   )
-         || ( $opt_fspmode == 1 )
-       )
-    {
-        my $result = VBU_Cacheline::CLread( sprintf( "%x", $IstepModeReg ) );
-
-        if ( $opt_debug )
-        {
-            printf STDERR "=== Entry:   IStep Mode Reg = 0x%x\n", $result;
-        }
-
-        if  ( $result =~ /^.*RUN_ALL_MODE_SIGNATURE/ )
-        {
-            print STDOUT "HostBoot has already started in automatic mode.  Please restart and then try again.\n";
-            exit;
-        }
-    }
-
-
     ##
     ##  process --Istep Mode command
     ##
     if ( $opt_splessmode ==  1   )
     {
-        print STDOUT  "ENable splessmode\n";
+        print STDOUT  "ENable splessmode...\n";
         setMode( "spless" );
         exit;
     }
 
-    if  ( $opt_fspmode ==  1 )
-    {
-        print STDOUT  "ENable fspmode\n";
-        setMode( "fsp" );
-        exit;
-    }
 
     if ( $opt_clear_trace )
     {
@@ -472,13 +451,12 @@ sub printUsage()
 {
     print STDOUT "\nUsage: hb-istep   [--help]\n";
     print STDOUT "    [--splessmode]            (enable spless mode)\n" ;
-    print STDOUT "    [--fspmode]               (enable fsp mode)\n" ;
     print STDOUT "    [--command sN]            (run istep N)\n" ;
     print STDOUT "    [--command sN..M]         (run isteps N through M)\n" ;
     print STDOUT "    [--command <foo>]         (run named istep \"foo\")\n" ;
     print STDOUT "    [--command <foo>..<bar>]  (run named isteps \"foo\" through \"bar\")\n" ;
     print STDOUT "    [--resume]                (resume an istep that is at a break point)\n" ;
-    print STDOUT "    [--clock]                 (spless mode -- poll for istep, fspmode -- clock indefinately))\n" ;
+    print STDOUT "    [--clock]                 (spless mode -- poll for istep ))\n" ;
     print STDOUT "    [--clear-trace]           (clear trace buffers before starting)\n";
     print STDOUT "\n" ;
 
@@ -982,7 +960,7 @@ sub parse_command( $ )
 }
 
 ##
-##  write IStepModeReg in memory to set istep or fsp mode, check return status
+##  write IStepModeReg in memory to set istep or check return status
 ##  This does not write to a scom reg, I don't have one to write to.
 ##
 sub setMode( $ )
@@ -1006,11 +984,6 @@ sub setMode( $ )
         VBU_Cacheline::CLwrite( $hexstr, SPLESS_MODE_SIGNATURE );
         $expected    =   1;
     }
-    elsif   ( $cmd eq "fsp" )
-    {
-        VBU_Cacheline::CLwrite( $hexstr,  FSP_MODE_SIGNATURE );
-        $expected    =   1;
-    }
     else
     {
         print "invalid setMode command: %s\n", $cmd ;
@@ -1023,6 +996,28 @@ sub setMode( $ )
         $result = VBU_Cacheline::CLread( $hexstr );
         printf STDERR "===  istepmodereg readback:  0x%lx\n", $result ;
     }
+
+    ##  Clear status reg(s) before we start.  If the status reg is initialized
+    ##      to garbage, there is a chance that it will mistaken for the readybit
+
+    $cmd = "putscom pu 05003a -p0 -quiet 0" ;       ## hi reg
+
+    if ( $opt_debug )   {   print STDERR __LINE__,  "-- run $cmd ...\n";    }
+    ( system( $cmd ) == 0 )
+        or die "$cmd failed, $? : $! \n";
+
+    $cmd = "putscom pu 050039 -p0 -quiet 0" ;       ##  lo reg
+
+    if ( $opt_debug )   {   print STDERR __LINE__,  "-- run $cmd ...\n";    }
+    ( system( $cmd ) == 0 )
+        or die "$cmd failed, $? : $! \n";
+
+    ##  clear command reg as well.
+    $cmd = "putscom pu 05003b -p0 -quiet 0" ;       ##  cmd reg
+
+    if ( $opt_debug )   {   print STDERR __LINE__,  "-- run $cmd ...\n";    }
+    ( system( $cmd ) == 0 )
+        or die "$cmd failed, $? : $! \n";
 
 
     ##  Loop, advancing clock, and wait for readybit
@@ -1070,23 +1065,6 @@ sub setMode( $ )
         {
             $result =   getStatus( );
             $readybit    =   ( ( $result & 0x4000000000000000 ) >> 62 );
-        }
-        else  # fsp mode
-        {
-            $cmd = "getscom pu 050033 -p0 -quiet";
-
-            if ( $opt_debug )   {   print STDERR __LINE__,  "-- run $cmd ...\n";    }
-            $resultRaw = `$cmd` ;
-            if ( $opt_debug )   {   printf STDERR "=== resultRaw=$resultRaw ...\n"; }
-            $resultRaw =~ s/.*0x/0x/g;
-            $resultRaw =~ s/\n//g;
-            $result = hex $resultRaw;
-
-            if ( $opt_debug )   {   printf STDERR "=== result=0x%lx ...\n", $result; }
-            if (($result & 0x0000000300000000) eq 0x0000000300000000)
-            {
-                $readybit = 1;
-            }
         }
 
         if ($opt_debug)
