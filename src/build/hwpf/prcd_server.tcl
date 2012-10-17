@@ -1,25 +1,25 @@
-#  IBM_PROLOG_BEGIN_TAG
-#  This is an automatically generated prolog.
+# IBM_PROLOG_BEGIN_TAG
+# This is an automatically generated prolog.
 #
-#  $Source: src/build/hwpf/prcd_server.tcl $
+# $Source: src/build/hwpf/prcd_server.tcl $
 #
-#  IBM CONFIDENTIAL
+# IBM CONFIDENTIAL
 #
-#  COPYRIGHT International Business Machines Corp. 2011-2012
+# COPYRIGHT International Business Machines Corp. 2011,2012
 #
-#  p1
+# p1
 #
-#  Object Code Only (OCO) source materials
-#  Licensed Internal Code Source Materials
-#  IBM HostBoot Licensed Internal Code
+# Object Code Only (OCO) source materials
+# Licensed Internal Code Source Materials
+# IBM HostBoot Licensed Internal Code
 #
-#  The source code for this program is not published or other-
-#  wise divested of its trade secrets, irrespective of what has
-#  been deposited with the U.S. Copyright Office.
+# The source code for this program is not published or otherwise
+# divested of its trade secrets, irrespective of what has been
+# deposited with the U.S. Copyright Office.
 #
-#  Origin: 30
+# Origin: 30
 #
-#  IBM_PROLOG_END_TAG
+# IBM_PROLOG_END_TAG
 # the next line restarts using tclsh\
 exec tclsh "$0" "$@"
 
@@ -29,7 +29,7 @@ exec tclsh "$0" "$@"
 # Based on if_server.tcl by Doug Gilbert
 
 
-set version "1.2"
+set version "1.3"
 
 ############################################################################
 # Accept is called when a new client request comes in
@@ -65,6 +65,7 @@ proc AquireData { sock } {
     global running
     global driver
     global keepsandbox
+    global fulldirectory
 
     if { [eof $sock] || [catch {gets $sock line}] } {
         puts "ERROR: Client closed unexpectedly"
@@ -113,8 +114,8 @@ proc AquireData { sock } {
             ################################################################
             # Open the hw procedure file in the hw procedure directory
             ################################################################
-            puts $log "$sock: Input File $b $c"
-            flush $log
+            #puts $log "$sock: Input File $b $c"
+            #flush $log
 
             if { ![info exists sbname($sock)] } {
                 puts $sock "ERROR: No sandbox found"
@@ -132,30 +133,81 @@ proc AquireData { sock } {
 
             set src_path $sb_dir/$sbname($sock)/src/usr/hwpf/hwp
             set inc_path $sb_dir/$sbname($sock)/src/include/usr/hwpf/hwp
-            # we can't just find -name $b because that won't find path/filename. -wholename does
-            #  that, but we need the $b to not have any ./ prefix if the user included that.
+            if { $fulldirectory == 1 } {
+              set filename [file tail $b]
+            } else {
+              set filename $b
+            }
+            # we can't just find -name $filename because that won't find path/filename. -wholename does
+            #  that, but we need the $filename to not have any ./ prefix if the user included that.
             # additionally, find usually outputs the file(s) separated by a newline. if there
             #  is a filename that's not unique, we need to flag that as an erorr, so we use the
             #  -printf to force them all onto 1 line.
-            set filen [ exec find $src_path $inc_path -type f -wholename */[ string trimleft $b "./" ] -printf "%p\t" ] 
+            set filen [ exec find $src_path $inc_path -type f -wholename */[ string trimleft $filename "./" ] -printf "%p\t" ] 
             # and then truncate the last \t. yeah, hackish..
             set filen [ string trimright $filen "\t" ]
-            #puts $log "$sock: find found in sandbox: \"$filen\""
+            #puts $log "$sock: find found in hostboot sandbox: \"$filen\""
             # error if filen is not just 1 file
             set filesfound [regexp -all {[^\t]+} $filen ]
             if { $filesfound == 0 } {
-                puts $sock "ERROR: Invalid Input File - $b - file not found in sandbox"
-                puts $log "$sock: Invalid Input File - $b - file not found in sandbox"
+              if { $fulldirectory == 1 } {
+                # do nothing..
+                puts $log "$sock: Ignoring Input File - $filename - file not found in hostboot sandbox"
+                puts $sock "Ignoring Input File - $filename - file not found in hostboot sandbox"
+                # read the file and just throw it away
+                if {[catch {set devnull [open "/dev/null" w] } res ] } {
+                    puts $sock "ERROR: Server can't open /dev/null"
+                    puts $log "$sock: Server can't open /dev/null"
+                    CloseOut $sock
+                } else {
+                    fconfigure $devnull -translation binary
+                    fconfigure $sock -translation binary
+                    fcopy $sock $devnull -size $c
+                    close $devnull
+                    fconfigure $sock -translation auto
+                    puts $sock ":DONE"
+                    puts $log "$sock: DONE"
+                    flush $log
+                }
+                return
+              } else {
+                puts $sock "ERROR: Invalid Input File - $filename - file not found in hostboot sandbox"
+                puts $log "$sock: Invalid Input File - $filename - file not found in hostboot  sandbox"
                 CloseOut $sock
                 return
+              }
             }
             if { $filesfound > 1 } {
-                puts $sock "ERROR: Invalid Input File - $b - filename NOT unique in sandbox"
-                puts $log "$sock: Invalid Input File - $b - filename NOT unique in sandbox"
+              if { $fulldirectory == 1 } {
+                # do nothing..
+                puts $log "$sock: Ignoring Input File - $filename - file not unique in hostboot sandbox"
+                puts $sock "Ignoring Input File - $filename - file not unique in hostboot sandbox"
+                # read the file and just throw it away
+                if {[catch {set devnull [open "/dev/null" w] } res ] } {
+                    puts $sock "ERROR: Server can't open /dev/null"
+                    puts $log "$sock: Server can't open /dev/null"
+                    CloseOut $sock
+                } else {
+                    fconfigure $devnull -translation binary
+                    fconfigure $sock -translation binary
+                    fcopy $sock $devnull -size $c
+                    close $devnull
+                    fconfigure $sock -translation auto
+                    puts $sock ":DONE"
+                    puts $log "$sock: DONE"
+                    flush $log
+                }
+                return
+              } else {
+                puts $sock "ERROR: Invalid Input File - $filename - filename NOT unique in hostboot sandbox"
+                puts $log "$sock: Invalid Input File - $filename - filename NOT unique in hostboot sandbox"
                 CloseOut $sock
                 return
+              }
             }
 
+            puts $sock "INFO: Input File - $filename - found in hostboot sandbox"
+            puts $log "$sock: INFO: Input File - $filename - found in hostboot sandbox"
             # Open with create/overwrite option
             if {[catch {set hwpfile($sock) [open "$filen" w+] } res ] } {
                 puts $sock "ERROR: Server can't open $filen"
@@ -186,8 +238,8 @@ proc AquireData { sock } {
             ################################################################
             # Open the hw procedure file in the hw procedure directory
             ################################################################
-            puts $log "$sock: Input New File $b $c"
-            flush $log
+            #puts $log "$sock: Input New File $b $c"
+            #flush $log
 
             if { ![info exists sbname($sock)] } {
                 puts $sock "ERROR: No sandbox found"
@@ -200,13 +252,15 @@ proc AquireData { sock } {
             # determine the path to the file in the git sandbox
             ################################################################
             set newdir $sb_dir/$sbname($sock)/src/usr/hwpf/hwp/mss_new
-            set filen $newdir/$b
+            set basename [file tail $b]
+            set filen $newdir/$basename
             if {![file exists $newdir]} {
                 #puts $log "$sock: mkdir \"$newdir\""; flush $log
                 eval {exec} "mkdir -p $newdir"
             }
 
-            #puts $log "$sock: writing filen: \"$filen\""; flush $log
+            puts $sock "INFO: Using File - $b"
+            puts $log "$sock: INFO: Using File - $b"
             # Open with create/overwrite option
             if {[catch {set hwpfile($sock) [open "$filen" w+] } res ] } {
                 puts $sock "ERROR: Server can't open $filen"
@@ -263,6 +317,13 @@ proc AquireData { sock } {
                 puts $log "$sock: DONE"
                 flush $sock
             }
+        } elseif {[string compare $line ":HWP_FULL_DIRECTORY"] == 0} {
+            puts $log "$sock: HWP_FULL_DIRECTORY"
+            puts $log "$sock: DONE"
+            puts $sock ":DONE"
+            flush $log
+            flush $sock
+            set fulldirectory 1
         } elseif {[string compare $line ":HWP_DONE"] == 0} {
             puts $sock ":DONE"
             puts $log "$sock: DONE"
@@ -644,9 +705,11 @@ proc SendFiles { sock files } {
 set forever 1
 #set base_dir "./"
 set base_dir "/tmp"
-set logfile "$base_dir/prcd_server.log"
+set home_dir $::env(HOME)
+set logfile "$home_dir/prcd_server.log"
 set log {}
 set keepsandbox 0
+set fulldirectory 0
 
 # Where are we running?
 foreach {host site c d} [split [exec hostname] .]  break
@@ -664,8 +727,6 @@ array set sandbox {
 }
 
 array set backing {}
-
-puts "Logfile: $logfile"
 
 if { [file exists $logfile] } {
     set log [open "$logfile" a]

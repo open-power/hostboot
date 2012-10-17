@@ -1,26 +1,26 @@
 #!/bin/sh
-#  IBM_PROLOG_BEGIN_TAG
-#  This is an automatically generated prolog.
+# IBM_PROLOG_BEGIN_TAG
+# This is an automatically generated prolog.
 #
-#  $Source: src/build/hwpf/prcd_compile.tcl $
+# $Source: src/build/hwpf/prcd_compile.tcl $
 #
-#  IBM CONFIDENTIAL
+# IBM CONFIDENTIAL
 #
-#  COPYRIGHT International Business Machines Corp. 2011-2012
+# COPYRIGHT International Business Machines Corp. 2011,2012
 #
-#  p1
+# p1
 #
-#  Object Code Only (OCO) source materials
-#  Licensed Internal Code Source Materials
-#  IBM HostBoot Licensed Internal Code
+# Object Code Only (OCO) source materials
+# Licensed Internal Code Source Materials
+# IBM HostBoot Licensed Internal Code
 #
-#  The source code for this program is not published or other-
-#  wise divested of its trade secrets, irrespective of what has
-#  been deposited with the U.S. Copyright Office.
+# The source code for this program is not published or otherwise
+# divested of its trade secrets, irrespective of what has been
+# deposited with the U.S. Copyright Office.
 #
-#  Origin: 30
+# Origin: 30
 #
-#  IBM_PROLOG_END_TAG
+# IBM_PROLOG_END_TAG
 # The next line is executed by /bin/sh, but not tcl \
 exec tclsh "$0" "$@" 
 
@@ -263,9 +263,10 @@ proc start_patch_server_on_fsp { fspip fsppassword } {
 set userid $::env(USER)
 set home $::env(HOME)
 set domain [exec hostname -d]
-set version "1.2"
+set version "1.3"
 
 set files [list]
+set directories [list]
 set cmds  [list]
 set servers [list gfw160.austin.ibm.com]
 
@@ -279,6 +280,7 @@ foreach arg $argv {
         flag {
             switch -glob -- $arg {
                 -quit { set cmds [list quit] }
+                -D    { set state directory }
                 -d    { set state driverflag }
 # NOT SUPPORTED -s    { set state fspflag }
 # NOT SUPPORTED -p    { set state portflag }
@@ -286,9 +288,9 @@ foreach arg $argv {
                 -o    { set state outputflag }
                 -n    { set newfiles 1 }
                 -k    { set keepsandbox 1 }
-                -*h* { puts {prcd_compile.tcl [--help] [-d <drivername>] [-o <ouput dir> ] [-n] <filename> }
+                -*h* { puts {prcd_compile.tcl [--help] [-d <drivername>] [-o <ouput dir> ] [-n] [ <filename> | -D <directory] }
                        puts {}
-                       puts {Note this tool only supports *.{c,C,h,H,initfile,xml} files in the following hostboot directory trees: }
+                       puts {For existing files, this only supports *.{c,C,h,H,initfile,xml} files in the following hostboot directory trees: }
                        puts {    src/usr/hwpf/hwp }
                        puts {    src/include/usr/hwpf/hwp }
                        puts {}
@@ -299,7 +301,7 @@ foreach arg $argv {
                        puts {> prcd_compile.tcl -d b0218a_2012_Sprint9 -o ./output/ proc_cen_framelock.C }
                        puts {> prcd_compile.tcl -d b0218a_2012_Sprint9 -o output dmi_training/proc_cen_framelock/proc_cen_framelock.H }
                        puts {}
-                       puts {Without the -n parameter, the file MUST be existing files in the hostboot sandbox.}
+                       puts {Without the -n parameter, the file MUST be an existing files in the hostboot sandbox.}
                        puts {If they are not found in the sandbox, an error will be returned.}
                        puts {}
                        puts {On success, files from the img/ directory (*.bin *.syms and hbotStringFile) }
@@ -307,8 +309,13 @@ foreach arg $argv {
                        puts {}
                        puts {With the -n parameter, the files are assumed to be for a NEW HWP and will be checked to see}
                        puts {if they compile - no binary image files will be returned.}
-                       puts {examples }
+                       puts {example }
                        puts {> prcd_compile.tcl -n mss_l3.C mss_l3.H}
+                       puts {}
+                       puts {With the -D parameter, all files in all sub-directories are built.}
+                       puts {Without the -n, any files that do not exist in the hostboot sandbox are ignored.}
+                       puts {example }
+                       puts {> prcd_compile.tcl -D centaur/working/procedues/ -D p8/working/procedures}
                        puts {}
                        puts {The -d and -o parameters are optional.  Default for -d is the master level of code }
                        puts {and default for -o is the current working directory }
@@ -328,8 +335,12 @@ foreach arg $argv {
             }
         }
         driverflag {
-            #lappend cmds ":DRIVER $arg"
             set driver $arg
+            set state flag
+        }
+        directory {
+            lappend directories $arg
+            set directory 1
             set state flag
         }
         fspflag {
@@ -411,38 +422,46 @@ if {[info exists keepsandbox]}  {
 lappend cmds ":DRIVER $driver"
 
 if {[info exists newfiles]}  {
+  set hwp_file_cmd ":HWP_FILE_NEW"
+} else {
+  set hwp_file_cmd ":HWP_FILE"
+}
 
-  # NEW HWP file(s)
+if {[info exists directory]}  {
+  # all valid files in directories
+  lappend cmds ":HWP_FULL_DIRECTORY"
+
+  ##########################################################
+  # Generate command to send each input file
+  ##########################################################
+  foreach dirn $directories {
+    set filelist [ exec find $dirn \( -name CVS -prune \) , -type f -name "*\.xml" -o -name "*\.initfile" -o -iname "*\.C" -o -iname "*\.H" ] 
+    foreach filen $filelist {
+       set file_size [file size $filen]
+       set filesource($filen) $filen
+       lappend cmds "$hwp_file_cmd $filen $file_size"
+    }
+  }
+
+} else {
 
   ##########################################################
   # Generate command to send each input file
   ##########################################################
   foreach filen $files {
-
        set file_size [file size $filen]
        set filesource($filen) $filen
-       lappend cmds ":HWP_FILE_NEW $filen $file_size"
+       lappend cmds "$hwp_file_cmd $filen $file_size"
   }
+}
 
+if {[info exists newfiles]}  {
   ##########################################################
   # Generate compile and complete directives
   ##########################################################
   lappend cmds ":HWP_COMPILE_NEW"
   lappend cmds ":HWP_DONE"
-
 } else {
-
-  # existing file(s)
-
-  ##########################################################
-  # Generate command to send each input file
-  ##########################################################
-  foreach filen $files {
-
-       set file_size [file size $filen]
-       set filesource($filen) $filen
-       lappend cmds ":HWP_FILE $filen $file_size"
-  }
 
   ##########################################################
   # Generate compile, retrieve, and complete directives
@@ -519,6 +538,8 @@ if {[llength $cmds] > 0 } {
                     fcopy $sockid $fp -size $c
                     close $fp
                     fconfigure $sockid -translation auto
+                } elseif {[regexp {.*INFO: .*} $line ->] } {
+                    puts "$line"
                 } elseif {[regexp {.*ERROR:.*} $line ->] } {
                     puts stderr "Error in server script - $line"
                     set error 1
