@@ -351,7 +351,9 @@ PnorDD::PnorDD( PnorMode_t i_mode,
 : iv_mode(i_mode)
 {
     iv_erasesize_bytes = ERASESIZE_BYTES_DEFAULT;
-    iv_erases = NULL;
+
+    //Zero out erase counter
+    memset(iv_erases, 0xff, sizeof(iv_erases));
 
     //Use real PNOR for everything except VPO
     if(0 == iv_vpoMode)
@@ -403,10 +405,7 @@ PnorDD::PnorDD( PnorMode_t i_mode,
  */
 PnorDD::~PnorDD()
 {
-    if(iv_erases)
-    {
-        delete iv_erases;
-    }
+
 }
 
 bool PnorDD::cv_sfcInitDone = false;  //Static flag to ensure we only init the SFC one time.
@@ -484,15 +483,15 @@ void PnorDD::sfcInit( )
                                     iv_erasesize_bytes);
                 if(l_err) { break; }
 
-                //create array to count erases.
-                iv_erases = new uint8_t[PNORSIZE/iv_erasesize_bytes];
-                for( uint64_t x=0; x < (PNORSIZE/iv_erasesize_bytes); x++ )
-                {
-                    iv_erases[x] = 0;
-                }
+                //Enable 4-byte addressing for Macronix-type device
+                SfcCmdReg_t sfc_cmd;
+                sfc_cmd.opcode = SPI_START4BA;
+                sfc_cmd.length = 0;
 
+                l_err = writeRegSfc(SFC_CMD_SPACE,
+                                    SFC_REG_CMD,
+                                    sfc_cmd.data32);
                 if(l_err) { break; }
-
 
             }
             else if(VPO_NOR_ID == cv_nor_chipid)
@@ -1361,11 +1360,29 @@ errlHndl_t PnorDD::eraseFlash(uint32_t i_address)
             break;
         }
 
-        if(iv_erases)
+        for(uint32_t idx = 0; idx < ERASE_COUNT_MAX; idx++ )
         {
-            // log the erase of this block
-            iv_erases[i_address/iv_erasesize_bytes]++;
-            TRACFCOMP(g_trac_pnor, "PnorDD::eraseFlash> Block 0x%.8X has %d erasures", i_address, iv_erases[i_address/iv_erasesize_bytes] );
+            if(iv_erases[idx].addr == i_address)
+            {
+                iv_erases[idx].count++;
+                TRACFCOMP(g_trac_pnor, "PnorDD::eraseFlash> Block 0x%.8X has %d erasures", i_address, iv_erases[idx].count );
+                break;
+
+            }
+            //iv_erases is init to all 0xff,
+            //  so can use ~0 to check for an unused position
+            else if(iv_erases[idx].addr == ~0u)
+            {
+                iv_erases[idx].addr = i_address;
+                iv_erases[idx].count = 1;
+                TRACFCOMP(g_trac_pnor, "PnorDD::eraseFlash> Block 0x%.8X has %d erasures", i_address, iv_erases[idx].count );
+                break;
+            }
+            else if( idx == (ERASE_COUNT_MAX - 1))
+            {
+                TRACFCOMP(g_trac_pnor, "PnorDD::eraseFlash> Erase counter full!  Block 0x%.8X Erased", i_address );
+                break;
+            }
         }
 
         if( (MODEL_MEMCPY == iv_mode) ||  (MODEL_LPC_MEM == iv_mode))

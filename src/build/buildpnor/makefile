@@ -42,23 +42,10 @@ $${IMGDIR}/$(1).pnor: $${IMGDIR}/hbicore_extended.bin $${IMGDIR}/$(1)_targeting.
 	    --binFile_HBI $${IMGDIR}/hbicore_extended.bin \
 	    --binFile_HBD $${IMGDIR}/$(1)_targeting.bin
 endef
-define PNOR_vbu_test_template
-$${IMGDIR}/$(1)_test.pnor: $${IMGDIR}/hbicore_extended.bin $${IMGDIR}/$(1)_targeting.bin
-	./buildpnorOld.pl --pnorLayout ./pnorLayoutVpo.xml --test \
-	    --genToc \
-	    --pnorOutBin $${IMGDIR}/$(1)_test.pnor \
-	    --binFile_part $${IMGDIR}/$(1)_test_pnor.toc \
-	    --binFile_HBI $${IMGDIR}/hbicore_test_extended.bin \
-	    --binFile_HBD $${IMGDIR}/$(1)_targeting.bin
-endef
-
-PNOR_IMAGES = $(addsuffix .pnor, $(addprefix $(IMGDIR)/, ${PNOR_TARGETS})) \
-              $(addsuffix _test.pnor, $(addprefix $(IMGDIR)/, ${PNOR_TARGETS}))
 
 PNOR_VBU_IMAGES =  $(addsuffix .pnor, $(addprefix $(IMGDIR)/, ${PNOR_VBU_TARGETS})) \
-		   $(addsuffix _test.pnor, $(addprefix $(IMGDIR)/, ${PNOR_VBU_TARGETS})) \
 
-EXTRA_CLEAN = ${PNOR_IMAGES} ${PNOR_IMAGES:.pnor=_pnor.toc} ${PNOR_VBU_IMAGES} ${PNOR_VBU_IMAGES:.pnor=_pnor.toc}
+EXTRA_CLEAN = ${PNOR_VBU_IMAGES} ${PNOR_VBU_IMAGES:.pnor=_pnor.toc}
 
 include ${ROOTPATH}/config.mk
 
@@ -68,4 +55,3 @@ buildpnor: ${PNOR_VBU_IMAGES}
 
 #VBU Specific images
 $(foreach pnor,$(PNOR_VBU_TARGETS),$(eval $(call PNOR_vbu_template,$(pnor))))
-$(foreach pnor,$(PNOR_VBU_TARGETS),$(eval $(call PNOR_vbu_test_template,$(pnor))))

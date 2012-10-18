@@ -19,3 +19,10 @@ try {
         }            
     }
 } except { echo "ERROR: Failed to load tools in combined.simics." }
+
+# 4-byte PNOR addressing workaround for Defect SW170513.
+# Only needed in combined configs to enable FSP communication.  Hostboot
+# PNOR DD covers hostboot access.  Remove with RTC: 51500
+try {
+    fpga0.sfc_master->state_three_bytes=0
+} except { echo "ERROR: Failed to run 4-byte PNOR address workaround in combined.simics." }

@@ -76,9 +76,9 @@ class PnorDD
     enum PnorMode_t {
         MODEL_UNKNOWN,   /**< Invalid */
         MODEL_MEMCPY,    /**< No LPC logic, just do memcpy into cache area */
-        MODEL_LPC_MEM,   /**< Break into 32-bit LPC ops but use memcpy into cache area */
-        MODEL_REAL_CMD,  /**< Code for real hardware or complete sim model using Commands based reads */
-        MODEL_REAL_MMIO, /**< Code for real hardware or complete sim model using MMIO reads-Not currently implemented */
+        MODEL_LPC_MEM,   /**< Break into 32-bit LPC ops but use fake-PNOR */
+        MODEL_REAL_CMD,  /**< Code for real HW using Command based reads */
+        MODEL_REAL_MMIO, /**< Code for real hardware using MMIO reads */
     };
 
     /**
@@ -96,6 +96,11 @@ class PnorDD
 
   protected:
 
+    struct EraseInfo_t
+    {
+        uint32_t addr;  /**< Address of the erase block */
+        uint32_t count;  /**< Num Erases of block */
+    };
 
     /**
      * @brief LPC HC Registers
@@ -114,6 +119,7 @@ class PnorDD
      */
     enum SpiConfigInfo {
         SPI_GET_CHIPID_OP   = 0x9F, /**< Default Op code for getting NOR ChipID */
+        SPI_START4BA        = 0x37, /**< Enable Macronix 4-Byte addressing */
 
         SPI_SIM_SM_ERASE_OP = 0x00000020, /**< Simics Op Code for Small Erase */
         SPI_SIM_SM_ERASE_SZ = 0x1000, /**< Simics Small Erase Size */
@@ -350,9 +356,9 @@ class PnorDD
         LPCHC_REG_SPACE = 0xC0012000, /**< LPC Host Ctlr Register Space */
 
         LPC_DIRECT_READ_OFFSET = 0xFC000000,
-        LPC_SFC_CMDREG_OFFSET = 0xF0000C00,  /** LPC Offest to SFC Command Registers */
-        LPC_SFC_CMDBUF_OFFSET = 0xF0000D00,  /** LPC Offest to SFC Command Buffer space */
-        LPC_SFC_MMIO_OFFSET   = 0xF4000000,  /** LPC Offset into SFC MMIO Direct Read space */
+        LPC_SFC_CMDREG_OFFSET = 0xF0000C00, /** LPC Offest to SFC Cmd Regs */
+        LPC_SFC_CMDBUF_OFFSET = 0xF0000D00, /** LPC Off to SFC Cmd Buf space */
+        LPC_SFC_MMIO_OFFSET = 0xF4000000, /** LPC Off to SFC Direct Read space*/
         LPC_TOP_OF_FLASH_OFFSET = 0xFFFFFFFF,
 
         ECCB_CTL_REG  = 0x000B0020, /**< ECCB Control Reg (FW) */
@@ -365,8 +371,8 @@ class PnorDD
 
         LPC_STAT_REG_ERROR_MASK = 0xFC0000000007F700, /**< Error Bits */
 
-        PNORSIZE = 16 * MEGABYTE, //@fixme - read from TOC instead  (RTC: 42252)
-        ERASESIZE_BYTES_DEFAULT = 4 * KILOBYTE, /**< Minimum Erase Block (bytes) */
+        ERASE_COUNT_MAX = 64,  /**<Max number of tracked erase blocks */
+        ERASESIZE_BYTES_DEFAULT = 4 * KILOBYTE, /**< Min Erase Block (bytes) */
         ECCB_POLL_TIME_NS = 400000, /**< max time from Manfred Walz is 400ms */
         ECCB_POLL_INCR_NS = 10, /**< minimum increment during poll */
     };
@@ -537,13 +543,10 @@ class PnorDD
      */
     static mutex_t cv_mutex;
 
-    //TODO: Make this dynamically sized.
     /**
      * @brief Track PNOR erases for wear monitoring
-     *    (making this static so tools can find it easier)
-     *    track writes by page (=erase block)
      */
-    uint8_t* iv_erases;
+    EraseInfo_t iv_erases[ERASE_COUNT_MAX];
 
     /**
      * @brief Determine how much of the PNOR logic to use,

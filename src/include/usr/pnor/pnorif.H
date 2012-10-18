@@ -38,19 +38,20 @@ enum SectionId
     TOC,            /**< Table of Contents */
             // Value of HB_EXT_CODE must be 1 for debug framework.
     HB_EXT_CODE,    /**< Hostboot Extended Image */
+    GLOBAL_DATA,    /**< Global Data */
+    HB_BASE_CODE,   /**< Hostboot Base Image */
+    CENTAUR_SBE,    /**< Centaur Self-Boot Engine image */
+    SBE_IPL,        /**< Self-Boot Engine IPL image */
+    WINK,           /**< Sleep Winkle Reference image */
+    PAYLOAD,        /**< HAL/OPAL */
     HB_DATA,        /**< Hostboot Data */
+    GUARD_DATA,     /**< Guard Data */
+    HB_ERRLOGS,     /**< Hostboot Error log Repository */
     DIMM_JEDEC_VPD, /**< DIMM JEDEC VPD */
     MODULE_VPD,     /**< Module VPD */
-    HB_BASE_CODE,   /**< Hostboot Base Image */
+    CENTAUR_VPD,     /**< Centaur VPD */
     TEST,           /**< Scratch space for PNOR test cases */
     NUM_SECTIONS,   /**< Number of defined sections */
-
-    //Not currently used
-//    GLOBAL_DATA,    /**< Global Data */
-//    SBE_IPL,        /**< Self-Boot Engine IPL image */
-//    PAYLOAD,        /**< HAL/OPAL */
-//    HB_RUNTIME,     /**< Hostboot Runtime Image */
-//    HB_ERRLOGS,     /**< Hostboot Error log Repository */
 
     FIRST_SECTION = TOC,  /**< First section (for looping) */
     LAST_SECTION = TEST,  /**< Last section (for looping) */

@@ -51,19 +51,21 @@ TRAC_INIT(&g_trac_pnor, "PNOR", 4096); //4K
 const char* cv_EYECATCHER[] = {  //@todo - convert there to uint64_t
     "part",   /**< PNOR::TOC           : Table of Contents */
     "HBI",    /**< PNOR::HB_EXT_CODE   : Hostboot Extended Image */
+    "GLOBAL", /**< PNOR::GLOBAL_DATA   : Global Data */
+    "HBB",    /**< PNOR::HB_BASE_CODE  : Hostboot Base Image */
+    "SBEC",   /**< PNOR::CENTAUR_SBE   : Centaur Self-Boot Engine image */
+    "SBE",    /**< PNOR::SBE_IPL       : Self-Boot Enginer IPL image */
+    "WINK",   /**< PNOR::WINK          : Sleep Winkle Reference image */
+    "PAYLOAD",/**< PNOR::PAYLOAD       : HAL/OPAL */
     "HBD",    /**< PNOR::HB_DATA       : Hostboot Data */
+    "GUARD",  /**< PNOR::GUARD_DATA    : Hostboot Data */
+    "HBEL",   /**< PNOR::HB_ERRLOGS    : Hostboot Error log Repository */
     "DJVPD",  /**< PNOR::DIMM_JEDEC_VPD: Dimm JEDEC VPD */
     "MVPD",   /**< PNOR::MODULE_VPD    : Module VPD */
-    "HBB",    /**< PNOR::HB_BASE_CODE  : Hostboot Base Image */
+    "CVPD",   /**< PNOR::CENTAUR_VPD   : Centaur VPD */
     "TEST",   /**< PNOR::TEST          : Test space for PNOR*/
 
     //Not currently used
-//    "GLOBAL", /**< PNOR::GLOBAL_DATA   : Global Data */
-//    "SBE",    /**< PNOR::SBE_IPL       : Self-Boot Enginer IPL image */
-//    "XXX",    /**< PNOR::HB_ERRLOGS    : Hostboot Error log Repository */
-//    "HBR",    /**< PNOR::HB_RUNTIME    : Hostboot Runtime Image */
-//    "PART",   /**< PNOR::KVM_PART_INFO : KVM Partition Information */
-//    "XXX",    /**< PNOR::CODE_UPDATE   : Code Update Overhead */
 //    "XXX",    /**< NUM_SECTIONS       : Used as invalid entry */
 };
 

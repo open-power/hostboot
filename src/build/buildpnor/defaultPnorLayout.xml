@@ -22,7 +22,7 @@
      IBM_PROLOG_END_TAG -->
 <pnor>
     <metadata>
-        <imageSize>0x800000</imageSize>
+        <imageSize>0x4000000</imageSize>
         <blockSize>0x1000</blockSize>
         <partTableSize>0x1</partTableSize>
 	<sideAOffset>0x0</sideAOffset>
@@ -37,63 +37,130 @@
         <sideless>no</sideless>
     </section>
     <section>
-        <description>Hostboot Extended image (2.5MB)</description>
+        <description>Hostboot Extended image (5MB)</description>
         <eyeCatch>HBI</eyeCatch>
-        <physicalOffset>0x1000</physicalOffset>
-        <physicalRegionSize>0x280000</physicalRegionSize>
+        <physicalOffset>0x10000</physicalOffset>
+        <physicalRegionSize>0x500000</physicalRegionSize>
         <ecc>no</ecc>
         <source>File</source>
         <sideless>no</sideless>
     </section>
     <section>
-        <description>Module VPD (512K)</description>
-        <eyeCatch>MVPD</eyeCatch>
-        <physicalOffset>0x281000</physicalOffset>
+        <description>Centaur SBE (512K)</description>
+        <eyeCatch>SBEC</eyeCatch>
+        <physicalOffset>0xA10000</physicalOffset>
         <physicalRegionSize>0x80000</physicalRegionSize>
-        <actualRegionSize>0x80000</actualRegionSize>
         <ecc>no</ecc>
         <source>Blank</source>
-        <sideless>yes</sideless>
+        <sideless>no</sideless>
     </section>
     <section>
-        <description>DIMM JEDEC (256K)</description>
-        <eyeCatch>DJVPD</eyeCatch>
-        <physicalOffset>0x301000</physicalOffset>
+        <description>SBE-IPL (Staging Area) (256K)</description>
+        <eyeCatch>SBE</eyeCatch>
+        <physicalOffset>0xB10000</physicalOffset>
         <physicalRegionSize>0x40000</physicalRegionSize>
-        <actualRegionSize>0x40000</actualRegionSize>
         <ecc>no</ecc>
         <source>Blank</source>
-        <sideless>yes</sideless>
-    </section>
-    <section>
-        <description>Hostboot Data (512K)</description>
-        <eyeCatch>HBD</eyeCatch>
-        <physicalOffset>0x341000</physicalOffset>
-        <physicalRegionSize>0x80000</physicalRegionSize>
-        <ecc>no</ecc>
-        <source>File</source>
         <sideless>no</sideless>
     </section>
     <section>
-        <description>Hostboot Base (512K)</description>
-        <eyeCatch>HBB</eyeCatch>
-        <physicalOffset>0x3C1000</physicalOffset>
-        <physicalRegionSize>0x80000</physicalRegionSize>
-        <actualRegionSize>0x80000</actualRegionSize>
+        <description>Sleep Winkle Ref Image (1MB)</description>
+        <eyeCatch>WINK</eyeCatch>
+        <physicalOffset>0xB90000</physicalOffset>
+        <physicalRegionSize>0x100000</physicalRegionSize>
         <ecc>no</ecc>
-        <source>File</source>
+        <source>Blank</source>
+        <sideless>no</sideless>
+    </section>
+    <section>
+        <description>Payload (20MB)</description>
+        <eyeCatch>PAYLOAD</eyeCatch>
+        <physicalOffset>0xD90000</physicalOffset>
+        <physicalRegionSize>0x1400000</physicalRegionSize>
+        <ecc>no</ecc>
+        <source>Blank</source>
         <sideless>no</sideless>
     </section>
     <section>
         <description>Special PNOR Test Space (32K)</description>
         <eyeCatch>TEST</eyeCatch>
-        <physicalOffset>0x441000</physicalOffset>
+        <physicalOffset>0x3590000</physicalOffset>
         <physicalRegionSize>0x8000</physicalRegionSize>
-        <actualRegionSize>0x8000</actualRegionSize>
         <ecc>no</ecc>
         <source>Blank</source>
         <sideless>no</sideless>
         <testonly>yes</testonly>
     </section>
-
+    <section>
+        <description>Hostboot Data (1M)</description>
+        <eyeCatch>HBD</eyeCatch>
+        <physicalOffset>0x3B82000</physicalOffset>
+        <physicalRegionSize>0x100000</physicalRegionSize>
+        <ecc>no</ecc>
+        <source>File</source>
+        <sideless>no</sideless>
+    </section>
+    <section>
+        <description>Guard Data (16K)</description>
+        <eyeCatch>GUARD</eyeCatch>
+        <physicalOffset>0x3D82000</physicalOffset>
+        <physicalRegionSize>0x4000</physicalRegionSize>
+        <ecc>no</ecc>
+        <source>Blank</source>
+        <sideless>no</sideless>
+    </section>
+    <section>
+        <description>Hostboot Error Logs (128K)</description>
+        <eyeCatch>HBEL</eyeCatch>
+        <physicalOffset>0x3D8A000</physicalOffset>
+        <physicalRegionSize>0x20000</physicalRegionSize>
+        <ecc>no</ecc>
+        <source>Blank</source>
+        <sideless>no</sideless>
+    </section>
+    <section>
+        <description>DIMM JEDEC (256K)</description>
+        <eyeCatch>DJVPD</eyeCatch>
+        <physicalOffset>0x3DCA000</physicalOffset>
+        <physicalRegionSize>0x40000</physicalRegionSize>
+        <ecc>no</ecc>
+        <source>Blank</source>
+        <sideless>yes</sideless>
+    </section>
+    <section>
+        <description>Module VPD (512K)</description>
+        <eyeCatch>MVPD</eyeCatch>
+        <physicalOffset>0x3E0A000</physicalOffset>
+        <physicalRegionSize>0x80000</physicalRegionSize>
+        <ecc>no</ecc>
+        <source>Blank</source>
+        <sideless>yes</sideless>
+    </section>
+    <section>
+        <description>Centaur VPD (256K)</description>
+        <eyeCatch>CVPD</eyeCatch>
+        <physicalOffset>0x3E8A000</physicalOffset>
+        <physicalRegionSize>0x40000</physicalRegionSize>
+        <ecc>no</ecc>
+        <source>Blank</source>
+        <sideless>yes</sideless>
+    </section>
+    <section>
+        <description>Hostboot Base (576K)</description>
+        <eyeCatch>HBB</eyeCatch>
+        <physicalOffset>0x3ECA000</physicalOffset>
+        <physicalRegionSize>0x90000</physicalRegionSize>
+        <ecc>no</ecc>
+        <source>File</source>
+        <sideless>no</sideless>
+    </section>
+    <section>
+        <description>Global Data (36K)</description>
+        <eyeCatch>GLOBAL</eyeCatch>
+        <physicalOffset>0x3FEA000</physicalOffset>
+        <physicalRegionSize>0x9000</physicalRegionSize>
+        <ecc>no</ecc>
+        <source>Blank</source>
+        <sideless>no</sideless>
+    </section>
 </pnor>
