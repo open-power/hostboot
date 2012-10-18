@@ -43,7 +43,10 @@ EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/core_activate
 EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/core_activate/proc_prep_master_winkle
 EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/core_activate/proc_stop_deadman_timer
 EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/core_activate/proc_switch_cfsim
-
+##  @todo   RTC Story 51709 and Story 51711 : revisit this later -
+##  proc_set_pore_bar is used by multiple isteps, so it should be in its own
+##  "utility" library
+EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/build_winkle_images/p8_set_pore_bar
 
 ##  NOTE: add new object files when you add a new HWP
 OBJS =  core_activate.o \

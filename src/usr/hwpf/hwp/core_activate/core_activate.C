@@ -67,6 +67,7 @@
 //  Uncomment these files as they become available:
 #include    "proc_prep_master_winkle.H"
 #include    "proc_stop_deadman_timer.H"
+#include    "p8_set_pore_bar.H"
 // #include    "host_activate_slave_cores/host_activate_slave_cores.H"
 #include    "proc_switch_cfsim.H"
 
@@ -84,241 +85,242 @@ using   namespace   ISTEP_ERROR;
 //  Wrapper function to call 16.1 :
 //      host_activate_master
 //
-    void*    call_host_activate_master( void    *io_pArgs )
-    {
+void*    call_host_activate_master( void    *io_pArgs )
+{
 
-        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                   "call_host_activate_master entry" );
+    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+               "call_host_activate_master entry" );
 
-        errlHndl_t  l_errl  =   NULL;
-        IStepError  l_stepError;
+    errlHndl_t  l_errl  =   NULL;
+    IStepError  l_stepError;
 
-        // @@@@@    CUSTOM BLOCK:   @@@@@
+    // @@@@@    CUSTOM BLOCK:   @@@@@
 
-        do  {
+    do  {
 
-            // find the master core, i.e. the one we are running on
-            TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                       "call_host_activate_master: Find master core: " );
+        // find the master core, i.e. the one we are running on
+        TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                   "call_host_activate_master: Find master core: " );
 
-            const TARGETING::Target*  l_masterCore  = getMasterCore( );
-            assert( l_masterCore != NULL );
+        const TARGETING::Target*  l_masterCore  = getMasterCore( );
+        assert( l_masterCore != NULL );
 
-            TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                       "call_host_activate_master: Find master chip: " );
-            TARGETING::Target* l_cpu_target = const_cast<TARGETING::Target *>
-                                              ( getParentChip( l_masterCore ) );
+        TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                   "call_host_activate_master: Find master chip: " );
+        TARGETING::Target* l_cpu_target = const_cast<TARGETING::Target *>
+                                          ( getParentChip( l_masterCore ) );
 
-            //  dump physical path to target
-            EntityPath l_path;
-            l_path  =   l_cpu_target->getAttr<ATTR_PHYS_PATH>();
-            l_path.dump();
+        //  dump physical path to target
+        EntityPath l_path;
+        l_path  =   l_cpu_target->getAttr<ATTR_PHYS_PATH>();
+        l_path.dump();
 
-            // cast OUR type of target to a FAPI type of target.
-            const fapi::Target l_fapi_cpu_target(
-                                                TARGET_TYPE_PROC_CHIP,
-                                                reinterpret_cast<void *>
-                                                (const_cast<TARGETING::Target*>
-                                                            (l_cpu_target)) );
+        // cast OUR type of target to a FAPI type of target.
+        const fapi::Target l_fapi_cpu_target(
+                                            TARGET_TYPE_PROC_CHIP,
+                                            reinterpret_cast<void *>
+                                            (const_cast<TARGETING::Target*>
+                                                        (l_cpu_target)) );
+
 
 #if 1
-            //  SIMICS HACK - The values written by simics are not correct -
-            //  Write them here until we can get the actions files fixed.
-            //  @todo RTC 41384
-            const  uint64_t PORE_SBE_CONTROL_0x000E0001 =   0x00000000000E0001 ;
-            const  uint64_t MBOX_SBEVITAL_0x0005001C    =   0x000000000005001C ;
-            fapi::ReturnCode    rc;
-            ecmdDataBufferBase data(64);
-            uint32_t    sbe_code    =   0;
+        //  SIMICS HACK - The values written by simics are not correct -
+        //  Write them here until we can get the actions files fixed.
+        //  @todo RTC 41384
+        const  uint64_t PORE_SBE_CONTROL_0x000E0001 =   0x00000000000E0001 ;
+        const  uint64_t MBOX_SBEVITAL_0x0005001C    =   0x000000000005001C ;
+        fapi::ReturnCode    rc;
+        ecmdDataBufferBase data(64);
+        uint32_t    sbe_code    =   0;
 
-            rc = fapiGetScom(   l_fapi_cpu_target,
+        rc = fapiGetScom(   l_fapi_cpu_target,
+                            PORE_SBE_CONTROL_0x000E0001,
+                            data );
+        if(!rc.ok()) { TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,"ERROR: reading scom" ); }
+
+        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                   "DEBUG: PORE_SBE_CONTROL_0x000E0001  =   0x%lx",
+                   data.getDoubleWord( 0 ) );
+
+        if ( !is_vpo() )
+        {
+            //  proc_prep_master_winkle expects bit 0 to be off (SBE running)
+            data.clearBit(0);
+            rc = fapiPutScom(   l_fapi_cpu_target,
                                 PORE_SBE_CONTROL_0x000E0001,
                                 data );
-            if(!rc.ok()) { TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,"ERROR: reading scom" ); }
-
-            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                       "DEBUG: PORE_SBE_CONTROL_0x000E0001  =   0x%lx",
-                       data.getDoubleWord( 0 ) );
-
-            if ( !is_vpo() )
-            {
-                //  proc_prep_master_winkle expects bit 0 to be off (SBE running)
-                data.clearBit(0);
-                rc = fapiPutScom(   l_fapi_cpu_target,
-                                    PORE_SBE_CONTROL_0x000E0001,
-                                    data );
-            }
-
-            rc = fapiGetScom(   l_fapi_cpu_target,
-                                MBOX_SBEVITAL_0x0005001C,
-                                data );
-            if(!rc.ok()) { TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,"ERROR: reading scom" ); }
-
-            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                       "DEBUG: MBOX_SBEVITAL_0x0005001C =   0x%lx",
-                       data.getDoubleWord( 0 ) );
-
-
-            if ( !is_vpo() )
-            {
-                //  prop_prep_master_winkle expects the SBE to write F011 to
-                //  SBE_VITAL   before we get here.
-                sbe_code    =   0xF011;
-                data.insertFromRight( &sbe_code,
-                                      16,           // ISTEP_NUM_BIT_POSITION
-                                      16 );         // number of bits
-                rc = fapiPutScom(   l_fapi_cpu_target,
-                                    MBOX_SBEVITAL_0x0005001C,
-                                    data );
-                if(!rc.ok()) { TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,"ERROR: writing scom" ); }
-            }
-#else
-            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                       "Simics has been fixed..." );
-#endif
-
-            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                   "call_host_activate_master: call proc_prep_master_winkle." );
-
-            //  call the HWP with each fapi::Target
-            FAPI_INVOKE_HWP( l_errl,
-                             proc_prep_master_winkle,
-                             l_fapi_cpu_target,
-                             true  );
-            if ( l_errl )
-            {
-                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                "proc_prep_master_winkle ERROR : Returning errorlog, PLID=0x%x",
-                    l_errl->plid() );
-                break;
-            }
-            else
-            {
-                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                           "proc_prep_master_winkle SUCCESS"  );
-            }
-
-
-            //  put the master into winkle.
-            //  Simics should work after build b0815a_1233.810 .
-            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                       "call_host_activate_master: put master into winkle..." );
-
-            int l_rc    =   cpu_master_winkle( );
-            if ( l_rc )
-            {
-                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                          "ERROR : failed to winkle master, rc=0x%x",
-                          l_rc  );
-                /*@
-                 * @errortype
-                 * @reasoncode  ISTEP_FAIL_MASTER_WINKLE_RC
-                 * @severity    ERRORLOG::ERRL_SEV_UNRECOVERABLE
-                 * @moduleid    ISTEP_HOST_ACTIVATE_MASTER
-                 * @userdata1   return code from cpu_master_winkle
-                 *
-                 * @devdesc p8_pore_gen_cpureg returned an error when
-                 *          attempting to change a reg value in the PORE image.
-                 */
-                l_errl =
-                new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                        ISTEP_HOST_ACTIVATE_MASTER,
-                                        ISTEP_FAIL_MASTER_WINKLE_RC,
-                                        l_rc  );
-                break;
-            }
-
-            //  --------------------------------------------------------
-            //  should return from Winkle at this point
-            //  --------------------------------------------------------
-            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                       "Returned from Winkle." );
-
-#if 1
-            //  SIMICS HACK - The values written by simics are not correct -
-            //  Write them here until we can get the actions files fixed.
-
-            rc = fapiGetScom(   l_fapi_cpu_target,
-                                MBOX_SBEVITAL_0x0005001C,
-                                data );
-            if(!rc.ok()) { TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,"ERROR: reading scom" ); }
-
-            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                       "DEBUG: MBOX_SBEVITAL_0x0005001C =   0x%lx",
-                       data.getDoubleWord( 0 ) );
-
-            if ( !is_vpo() )
-            {
-                //  prop_stop_deadman_timer expects the SBE to write F015 to
-                //  SBE_VITAL   before we get here.
-                sbe_code    =   0xF015;
-                data.insertFromRight( &sbe_code,
-                                  16,           // ISTEP_NUM_BIT_POSITION
-                                  16 );         // number of bits
-                rc = fapiPutScom(   l_fapi_cpu_target,
-                                    MBOX_SBEVITAL_0x0005001C,
-                                    data );
-                if(!rc.ok()) { TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,"ERROR: writing scom" ); }
-            }
-
-#else
-            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                       "Simics has been fixed..." );
-#endif
-
-
-            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                       "Call proc_stop_deadman_timer..." );
-
-            //  call the HWP with each fapi::Target
-            FAPI_INVOKE_HWP( l_errl,
-                             proc_stop_deadman_timer,
-                             l_fapi_cpu_target  );
-            if ( l_errl )
-            {
-                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                           "proc_stop_deadman_timer ERROR : Returning errorlog, PLID=0x%x",
-                           l_errl->plid() );
-                break;
-            }
-            else
-            {
-                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                           "proc_stop_deadman_timer SUCCESS"  );
-            }
-
-        }   while ( 0 );
-
-        // @@@@@    END CUSTOM BLOCK:   @@@@@
-        if( l_errl )
-        {
-            /*@
-             * @errortype
-             * @reasoncode      ISTEP_CORE_ACTIVATE_FAILED
-             * @severity        ERRORLOG::ERRL_SEV_UNRECOVERABLE
-             * @moduleid        ISTEP_HOST_ACTIVATE_MASTER
-             * @userdata1       bytes 0-1: plid identifying first error
-             *                  bytes 2-3: reason code of first error
-             * @userdata2       bytes 0-1: total number of elogs included
-             *                  bytes 2-3: N/A
-             * @devdesc         call to host_activate_master failed see
-             *                  error identified by the plid in user data
-             *                  field.
-             */
-            l_stepError.addErrorDetails(ISTEP_CORE_ACTIVATE_FAILED,
-                             ISTEP_HOST_ACTIVATE_MASTER,
-                             l_errl );
-
-            errlCommit( l_errl, HWPF_COMP_ID );
         }
 
+        rc = fapiGetScom(   l_fapi_cpu_target,
+                            MBOX_SBEVITAL_0x0005001C,
+                            data );
+        if(!rc.ok()) { TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,"ERROR: reading scom" ); }
+
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                   "call_host_activate_master exit" );
+                   "DEBUG: MBOX_SBEVITAL_0x0005001C =   0x%lx",
+                   data.getDoubleWord( 0 ) );
 
-        // end task, returning any errorlogs to IStepDisp
-        return l_stepError.getErrorHandle();
 
+        if ( !is_vpo() )
+        {
+            //  prop_prep_master_winkle expects the SBE to write F011 to
+            //  SBE_VITAL   before we get here.
+            sbe_code    =   0xF011;
+            data.insertFromRight( &sbe_code,
+                                  16,           // ISTEP_NUM_BIT_POSITION
+                                  16 );         // number of bits
+            rc = fapiPutScom(   l_fapi_cpu_target,
+                                MBOX_SBEVITAL_0x0005001C,
+                                data );
+            if(!rc.ok()) { TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,"ERROR: writing scom" ); }
+        }
+#else
+        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                   "Simics has been fixed..." );
+#endif
+
+        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+               "call_host_activate_master: call proc_prep_master_winkle." );
+
+
+        //  call the HWP with each fapi::Target
+        FAPI_INVOKE_HWP( l_errl,
+                         proc_prep_master_winkle,
+                         l_fapi_cpu_target,
+                         true  );
+        if ( l_errl )
+        {
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+            "proc_prep_master_winkle ERROR : Returning errorlog, PLID=0x%x",
+                l_errl->plid() );
+            break;
+        }
+        else
+        {
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                       "proc_prep_master_winkle SUCCESS"  );
+        }
+
+
+        //  put the master into winkle.
+        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                   "call_host_activate_master: put master into winkle..." );
+
+        int l_rc    =   cpu_master_winkle( );
+        if ( l_rc )
+        {
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                      "ERROR : failed to winkle master, rc=0x%x",
+                      l_rc  );
+            /*@
+             * @errortype
+             * @reasoncode  ISTEP_FAIL_MASTER_WINKLE_RC
+             * @severity    ERRORLOG::ERRL_SEV_UNRECOVERABLE
+             * @moduleid    ISTEP_HOST_ACTIVATE_MASTER
+             * @userdata1   return code from cpu_master_winkle
+             *
+             * @devdesc p8_pore_gen_cpureg returned an error when
+             *          attempting to change a reg value in the PORE image.
+             */
+            l_errl =
+            new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                    ISTEP_HOST_ACTIVATE_MASTER,
+                                    ISTEP_FAIL_MASTER_WINKLE_RC,
+                                    l_rc  );
+            break;
+        }
+
+
+        //  --------------------------------------------------------
+        //  should return from Winkle at this point
+        //  --------------------------------------------------------
+        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                   "Returned from Winkle." );
+
+#if 1
+        //  SIMICS HACK - The values written by simics are not correct -
+        //  Write them here until we can get the actions files fixed.
+
+        rc = fapiGetScom(   l_fapi_cpu_target,
+                            MBOX_SBEVITAL_0x0005001C,
+                            data );
+        if(!rc.ok()) { TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,"ERROR: reading scom" ); }
+
+        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                   "DEBUG: MBOX_SBEVITAL_0x0005001C =   0x%lx",
+                   data.getDoubleWord( 0 ) );
+
+        if ( !is_vpo() )
+        {
+            //  prop_stop_deadman_timer expects the SBE to write F015 to
+            //  SBE_VITAL   before we get here.
+            sbe_code    =   0xF015;
+            data.insertFromRight( &sbe_code,
+                              16,           // ISTEP_NUM_BIT_POSITION
+                              16 );         // number of bits
+            rc = fapiPutScom(   l_fapi_cpu_target,
+                                MBOX_SBEVITAL_0x0005001C,
+                                data );
+            if(!rc.ok()) { TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,"ERROR: writing scom" ); }
+        }
+
+#else
+        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                   "Simics has been fixed..." );
+#endif
+
+        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                   "Call proc_stop_deadman_timer..." );
+
+        //  call the HWP with each fapi::Target
+        FAPI_INVOKE_HWP( l_errl,
+                         proc_stop_deadman_timer,
+                         l_fapi_cpu_target  );
+        if ( l_errl )
+        {
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                       "proc_stop_deadman_timer ERROR : Returning errorlog, PLID=0x%x",
+                       l_errl->plid() );
+            break;
+        }
+        else
+        {
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                       "proc_prep_master_winkle SUCCESS"  );
+        }
+
+    }   while ( 0 );
+
+    // @@@@@    END CUSTOM BLOCK:   @@@@@
+    if( l_errl )
+    {
+        /*@
+         * @errortype
+         * @reasoncode      ISTEP_CORE_ACTIVATE_FAILED
+         * @severity        ERRORLOG::ERRL_SEV_UNRECOVERABLE
+         * @moduleid        ISTEP_HOST_ACTIVATE_MASTER
+         * @userdata1       bytes 0-1: plid identifying first error
+         *                  bytes 2-3: reason code of first error
+         * @userdata2       bytes 0-1: total number of elogs included
+         *                  bytes 2-3: N/A
+         * @devdesc         call to host_activate_master failed see
+         *                  error identified by the plid in user data
+         *                  field.
+         */
+        l_stepError.addErrorDetails(ISTEP_CORE_ACTIVATE_FAILED,
+                         ISTEP_HOST_ACTIVATE_MASTER,
+                         l_errl );
+
+        errlCommit( l_errl, HWPF_COMP_ID );
     }
+
+    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+               "call_host_activate_master exit" );
+
+    // end task, returning any errorlogs to IStepDisp
+    return l_stepError.getErrorHandle();
+
+}
 
 
 
@@ -399,30 +401,81 @@ void*    call_host_activate_slave_cores( void    *io_pArgs )
     }
 
 #endif
-    // @@@@@    END CUSTOM BLOCK:   @@@@@
 
-    if( l_errl )
+    if ( ! l_errl )
     {
-        /*@
-         * @errortype
-         * @reasoncode      ISTEP_CORE_ACTIVATE_FAILED
-         * @severity        ERRORLOG::ERRL_SEV_UNRECOVERABLE
-         * @moduleid        ISTEP_HOST_ACTIVATE_SLAVE_CORES
-         * @userdata1       bytes 0-1: plid identifying first error
-         *                  bytes 2-3: reason code of first error
-         * @userdata2       bytes 0-1: total number of elogs included
-         *                  bytes 2-3: N/A
-         *
-         * @devdesc         call to host_activate_master failed see
-         *                  error identified by the plid in user data
-         *                  field.
-         */
-        l_stepError.addErrorDetails(ISTEP_CORE_ACTIVATE_FAILED,
-                                    ISTEP_HOST_ACTIVATE_SLAVE_CORES,
-                                    l_errl );
+        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                   "set PORE bars back to 0" );
 
-        errlCommit( l_errl, HWPF_COMP_ID );
-    }
+        //  @todo   see RTC 51264 -
+        //  This has to be modified if we are loading other AVP's instead
+        //  of PHYP
+        TARGETING::TargetHandleList l_procTargetList;
+        getAllChips(l_procTargetList, TYPE_PROC);
+
+        // loop thru all the cpu's
+        for ( uint8_t l_procNum=0; l_procNum < l_procTargetList.size(); l_procNum++)
+        {
+            //  make a local copy of the CPU target
+            TARGETING::Target*  l_proc_target = l_procTargetList[l_procNum];
+
+            //  dump physical path to target
+            EntityPath l_path;
+            l_path  =   l_proc_target->getAttr<ATTR_PHYS_PATH>();
+            l_path.dump();
+
+            // cast OUR type of target to a FAPI type of target.
+            fapi::Target l_fapi_proc_target(
+                                           TARGET_TYPE_PROC_CHIP,
+                                           reinterpret_cast<void *>
+                                           (const_cast<TARGETING::Target*>(l_proc_target)) );
+
+            //  reset pore bar notes:
+            //  A mem_size of 0 means to ignore the image address
+            //  This image should have been moved to memory after winkle
+
+            //  call the HWP with each fapi::Target
+            FAPI_INVOKE_HWP( l_errl,
+                             p8_set_pore_bar,
+                             l_fapi_proc_target,
+                             0,
+                             0,
+                             0,
+                             SLW_MEMORY
+                           );
+            if ( l_errl )
+            {
+                /*@
+                 * @errortype
+                 * @reasoncode      ISTEP_RESET_PORE_BARS_FAILED
+                 * @severity        ERRORLOG::ERRL_SEV_UNRECOVERABLE
+                 * @moduleid        ISTEP_HOST_ACTIVATE_SLAVE_CORES
+                 * @userdata1       0
+                 * @userdata2       0
+                 * @devdesc         call to set_pore_bars failed.
+                 *                  see error identified by the plid in
+                 *                  user data field.
+                 */
+                l_stepError.addErrorDetails(ISTEP_RESET_PORE_BARS_FAILED,
+                                            ISTEP_HOST_ACTIVATE_SLAVE_CORES,
+                                            l_errl );
+
+                errlCommit( l_errl, HWPF_COMP_ID );
+
+                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                          "ERROR : p8_set_pore_bar, PLID=0x%x",
+                          l_errl->plid()  );
+            }
+            else
+            {
+                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                           "SUCCESS : p8_set_pore_bar" );
+            }
+
+        }   // end for
+    }   // end if
+
+    // @@@@@    END CUSTOM BLOCK:   @@@@@
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                "call_host_activate_slave_cores exit" );
@@ -447,51 +500,43 @@ void*    call_host_ipl_complete( void    *io_pArgs )
                "call_host_ipl_complete entry" );
     do
     {
-        uint8_t l_cpuNum = 0;
-        TARGETING::TargetHandleList l_cpuTargetList;
-        getAllChips(l_cpuTargetList, TYPE_PROC);
-        for ( l_cpuNum=0; l_cpuNum < l_cpuTargetList.size(); l_cpuNum++ )
+        // We only need to do this to the master Processor.
+
+        TARGETING::Target * l_masterProc =   NULL;
+        (void)TARGETING::targetService().masterProcChipTargetHandle( l_masterProc );
+
+        const fapi::Target l_fapi_proc_target(
+                TARGET_TYPE_PROC_CHIP,
+                reinterpret_cast<void *>
+                ( const_cast<TARGETING::Target*>(l_masterProc) ) );
+
+        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                    "Running proc_switch_cfsim HWP on ...");
+        EntityPath l_path;
+        l_path  =   l_masterProc->getAttr<ATTR_PHYS_PATH>();
+        l_path.dump();
+
+        //  call proc_switch_cfsim
+        FAPI_INVOKE_HWP(l_err, proc_switch_cfsim, l_fapi_proc_target,
+                        true, // RESET
+                        true, // RESET_OPB_SWITCH
+                        true, // FENCE_FSI0
+                        true, // FENCE_PIB_NH
+                        true, // FENCE_PIB_H
+                        true, // FENCE_FSI1
+                        true); // FENCE_PIB_SW1
+        if (l_err)
         {
-            const TARGETING::Target*  l_cpu_target = l_cpuTargetList[l_cpuNum];
-            const fapi::Target l_fapi_proc_target(
-                    TARGET_TYPE_PROC_CHIP,
-                    reinterpret_cast<void *>
-                    ( const_cast<TARGETING::Target*>(l_cpu_target) ) );
-
-            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                        "Running proc_switch_cfsim HWP on...");
-            EntityPath l_path;
-            l_path  =   l_cpu_target->getAttr<ATTR_PHYS_PATH>();
-            l_path.dump();
-
-            //  call proc_switch_cfsim
-            FAPI_INVOKE_HWP(l_err, proc_switch_cfsim, l_fapi_proc_target,
-                            true, // RESET
-                            true, // RESET_OPB_SWITCH
-                            true, // FENCE_FSI0
-                            true, // FENCE_PIB_NH
-                            true, // FENCE_PIB_H
-                            true, // FENCE_FSI1
-                            true); // FENCE_PIB_SW1
-            if (l_err)
-            {
-                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                          "ERROR 0x%.8X: proc_switch_cfsim HWP returns error",
-                          l_err->reasonCode());
-                break;
-            }
-            else
-            {
-                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                           "SUCCESS: proc_switch_cfsim HWP( )" );
-            }
-        }
-
-        if( l_err )
-        {
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                      "ERROR 0x%.8X: proc_switch_cfsim HWP returns error",
+                      l_err->reasonCode());
             break;
         }
-
+        else
+        {
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                       "SUCCESS: proc_switch_cfsim HWP( )" );
+        }
 
         // Sync attributes to Fsp
         l_err = syncAllAttributesToFsp();

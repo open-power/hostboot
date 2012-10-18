@@ -40,6 +40,15 @@
   </hwpError>
   <!-- ********************************************************************* -->
   <hwpError>
+    <rc>RC_PROC_PBA_ADDR_ALIGNMENT_ERROR</rc>
+    <description>pba BAR must be on a 1MB boundary</description>
+  </hwpError>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_PROC_PBA_BAR_SIZE_INVALID</rc>
+    <description>Non-zero PBA BAR defined with region size of 0. Size must be 1MB or greater</description>
+  </hwpError>
+  <hwpError>
     <rc>RC_PROC_THREAD_CONTROL_START_FAIL</rc>
     <description>Sreset command failed: RAS STAT instruction completed bit was not set after start command.</description>
   </hwpError>

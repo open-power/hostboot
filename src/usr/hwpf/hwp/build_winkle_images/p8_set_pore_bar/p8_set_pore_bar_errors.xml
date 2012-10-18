@@ -45,8 +45,12 @@
   <!-- *********************************************************************** -->
   <hwpError>
     <rc>RC_PROCPM_POREBAR_IMAGE_SIZE_ERROR</rc>
-    <description>XIP access to size value failed in p8_set_pore_bar</description>
     <description>Image address plus image size overflows PBA region in p8_set_pore_bar</description>
+  </hwpError>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_PROCPM_POREBAR_SIZE0_ERROR</rc>
+    <description>An image  size of 0 was specified to p8_set_pore_bar but the BAR was not 0</description>
   </hwpError>
   <!-- *********************************************************************** -->
   <hwpError>
