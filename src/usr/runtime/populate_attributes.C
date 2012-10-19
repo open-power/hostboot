@@ -36,7 +36,7 @@
 #include <targeting/common/targetservice.H>
 #include <targeting/common/utilFilter.H>
 #include <runtime/runtime_reasoncodes.H>
-#include <sys/mm.h> //@fixme RTC:49509 - remove if no longer needed.
+#include <runtime/runtime.H>
 #include "common/hsvc_attribute_structs.H"
 //#include <arch/ppc.H> //for MAGIC_INSTRUCTION
 
@@ -183,12 +183,6 @@ struct node_data_t
 };
 
 
-//@fixme  RTC:49509
-// Steal the unused fake pnor space until we have mainstore
-#define SYSTEM_DATA_POINTER (64*MEGABYTE)
-#define NODE_DATA_POINTER (SYSTEM_DATA_POINTER+512*KILOBYTE)
-
-
 /**
  * @brief Populate system attributes for HostServices
  */
@@ -203,12 +197,40 @@ errlHndl_t populate_system_attributes( void )
     do {
         TRACDCOMP( g_trac_runtime, "-SYSTEM-" );
 
-        // allocate memory and fill it with some junk data
-        // @fixme RTC:49509 - remove mm_linear_map and put in real HDAT.
-        mm_linear_map(reinterpret_cast<void*>(SYSTEM_DATA_POINTER), 4*MEGABYTE);
-        system_data_t* sys_data =
-          reinterpret_cast<system_data_t*>(SYSTEM_DATA_POINTER);
+        // find our memory range and fill it with some junk data
+        uint64_t sys_data_addr = 0;
+        uint64_t sys_data_size = 0;
+        errhdl = RUNTIME::get_host_data_section(RUNTIME::HSVC_SYSTEM_DATA,
+                                                0,
+                                                sys_data_addr,
+                                                sys_data_size );
+        if( errhdl )
+        {
+            TRACFCOMP( g_trac_runtime, "Could not find a space for the system data" );
+            break;
+        }
+        if( (sys_data_addr == 0) || (sys_data_size == 0) )
+        {
+            TRACFCOMP( g_trac_runtime, "Invalid memory values for HSVC_SYSTEM_DATA" );
+            /*@
+             * @errortype
+             * @reasoncode       RUNTIME::RC_INVALID_SECTION
+             * @moduleid         RUNTIME::MOD_RUNTIME_POP_SYS_ATTR
+             * @userdata1        Returned address: sys_data_addr
+             * @userdata2        Returned size: sys_data_size
+             * @devdesc          Invalid memory values for HSVC_SYSTEM_DATA
+             */
+            errhdl = new ERRORLOG::ErrlEntry(
+                                          ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                          RUNTIME::MOD_RUNTIME_POP_SYS_ATTR,
+                                          RUNTIME::RC_INVALID_SECTION,
+                                          sys_data_addr,
+                                          sys_data_size );
+            break;
+        }
+        system_data_t* sys_data = reinterpret_cast<system_data_t*>(sys_data_addr);
         memset( sys_data, 'A', sizeof(system_data_t) );
+        //@fixme - Should test that we aren't going out of bounds
 
         // These variables are used by the HSVC_LOAD_ATTR macros directly
         uint64_t* _num_attr = NULL; //pointer to numAttr in struct
@@ -293,9 +315,40 @@ errlHndl_t populate_node_attributes( uint64_t i_nodeNum )
         TRACDCOMP( g_trac_runtime, "-NODE-" );
 
         // allocate memory and fill it with some junk data
-        node_data_t* node_data =
-          reinterpret_cast<node_data_t*>(NODE_DATA_POINTER);
+        uint64_t node_data_addr = 0;
+        size_t node_data_size = 0;
+        errhdl = RUNTIME::get_host_data_section(
+                                    RUNTIME::HSVC_NODE_DATA,
+                                    0,
+                                    node_data_addr,
+                                    node_data_size );
+        if( errhdl )
+        {
+            TRACFCOMP( g_trac_runtime, "Could not find a space for the node data" );
+            break;
+        }
+        if( (node_data_addr == 0) || (node_data_size == 0) )
+        {
+            TRACFCOMP( g_trac_runtime, "Invalid memory values for HSVC_NODE_DATA" );
+            /*@
+             * @errortype
+             * @reasoncode       RUNTIME::RC_INVALID_SECTION
+             * @moduleid         RUNTIME::MOD_RUNTIME_POP_NODE_ATTR
+             * @userdata1        Returned address: node_data_addr
+             * @userdata2        Returned size: node_data_size
+             * @devdesc          Invalid memory values for HSVC_NODE_DATA
+             */
+            errhdl = new ERRORLOG::ErrlEntry(
+                                          ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                          RUNTIME::MOD_RUNTIME_POP_NODE_ATTR,
+                                          RUNTIME::RC_INVALID_SECTION,
+                                          node_data_addr,
+                                          node_data_size );
+            break;
+        }
+        node_data_t* node_data = reinterpret_cast<node_data_t*>(node_data_addr);
         memset( node_data, 'A', sizeof(node_data) );
+        //@fixme - Should test that we aren't going out of bounds
 
         // These variables are used by the HSVC_LOAD_ATTR macros directly
         uint64_t* _num_attr = NULL; //pointer to numAttr in struct
@@ -314,7 +367,7 @@ errlHndl_t populate_node_attributes( uint64_t i_nodeNum )
         size_t next_proc = 0;
         size_t next_ex = 0;
 
-        // Fill in the metadat
+        // Fill in the metadata
         node_data->hsvc.numTargets = 0;
         node_data->hsvc.procOffset =
           reinterpret_cast<uint64_t>(node_data->procs)
@@ -470,6 +523,13 @@ errlHndl_t populate_attributes( void )
 
     do {
         TRACFCOMP( g_trac_runtime, "Running populate_attributes" );
+
+        // Map the Host Data into the VMM
+        errhdl = RUNTIME::load_host_data();
+        if( errhdl )
+        {
+            break;
+        }
 
         //@todo : Remove this before RTC:49137 is merged, fix with RTC:49509
         // Skip this in VPO

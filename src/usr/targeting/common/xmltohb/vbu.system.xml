@@ -125,6 +125,10 @@
         <default>0x100</default>
     </attribute>
     <attribute>
+        <id>PAYLOAD_KIND</id>
+        <default>AVP</default>
+    </attribute>
+    <attribute>
         <id>MSS_MCA_HASH_MODE</id>
         <default>0</default>
     </attribute>

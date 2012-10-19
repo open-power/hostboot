@@ -109,6 +109,10 @@
         <default>0x0</default>
     </attribute>
     <attribute>
+        <id>PAYLOAD_KIND</id>
+        <default>NONE</default>
+    </attribute>
+    <attribute>
         <id>MSS_MCA_HASH_MODE</id>
         <default>0</default>
     </attribute>

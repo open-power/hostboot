@@ -38,6 +38,43 @@ namespace RUNTIME
  */
 errlHndl_t populate_attributes( void );
 
+/**
+ * @brief  Add the host data mainstore location to VMM
+ */
+errlHndl_t load_host_data( void );
+
+/**
+ * HDAT Sections
+ */
+enum SectionId
+{
+    HSVC_NODE_DATA,       //< HostServices Node Attributes
+    HSVC_SYSTEM_DATA,     //< HostServices System Attributes
+    IPLPARMS_SYSTEM,      //< IPL Parms
+    MS_DUMP_SRC_TBL,      //< MDST: Memory Dump Source Table
+    MS_DUMP_DST_TBL,      //< MDDT: Memory Dump Destination Table
+    MS_DUMP_RESULTS_TBL,  //< MDRT: Memory Dump Results Table
+};
+
+/**
+ * @brief  Get a pointer to the beginning of a particular section of
+ *         the host data memory.
+ *
+ * @description  The returned pointer will not include any header hdat header
+ *     information.  
+ *
+ * @param[in] i_section  Chunk of data to find
+ * @param[in] i_instance  Instance of section when there are multiple entries
+ * @param[out] o_dataAddr  Physical memory address of data
+ * @param[out] o_dataSize  Size of data in bytes, 0 on error, DATA_SIZE_UNKNOWN if unknown
+ *
+ * @return errlHndl_t  NULL on success
+ */
+errlHndl_t get_host_data_section( SectionId i_section,
+                                  uint64_t i_instance,
+                                  uint64_t& o_dataAddr,
+                                  size_t& o_dataSize );
+const size_t DATA_SIZE_UNKNOWN = 0xFFFFFFFFFFFFFFFF;
 
 }
 

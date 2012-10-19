@@ -1275,6 +1275,39 @@ sub generate_sys
             <field><id>fsiMasterInit</id><value>1</value></field>
             <field><id>reserved</id><value>0</value></field>
         </default>
+    </attribute>
+    <attribute>
+        <id>PAYLOAD_KIND</id>
+        <default>PHYP</default>
+    </attribute>
+    <!-- TODO. These must be from MRW. Hardcoded for now -->
+    <attribute>
+        <id>PAYLOAD_BASE</id>
+        <default>256</default>
+    </attribute>
+    <attribute>
+        <id>PAYLOAD_ENTRY</id>
+        <default>0x180</default>
+    </attribute>
+    <attribute>
+        <id>MSS_MCA_HASH_MODE</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>MSS_MBA_ADDR_INTERLEAVE_BIT</id>
+        <default>24</default>
+    </attribute>
+    <attribute>
+        <id>MSS_MBA_CACHELINE_INTERLEAVE_MODE</id>
+        <default>1</default>
+    </attribute>
+    <attribute>
+        <id>MSS_PREFETCH_ENABLE</id>
+        <default>1</default>
+    </attribute>
+    <attribute>
+        <id>MSS_CLEANER_ENABLE</id>
+        <default>1</default>
     </attribute>";
 
     if($build eq "fsp")

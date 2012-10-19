@@ -3310,6 +3310,45 @@
     <writeable/>
 </attribute>
 
+<enumerationType>
+    <id>PAYLOAD_KIND</id>
+    <description>
+        Enumeration indicating what kind of payload is to be started
+    </description>
+    <enumerator>
+        <name>UNKNOWN</name>
+        <value>0</value>
+    </enumerator>
+    <enumerator>
+        <name>PHYP</name>
+        <value>1</value>
+    </enumerator>
+    <enumerator>
+        <name>AVP</name>
+        <value>2</value>
+    </enumerator>
+    <enumerator>
+        <name>NONE</name>
+        <value>3</value>
+    </enumerator>
+    <default>UNKNOWN</default>
+</enumerationType>
+
+<attribute>
+    <id>PAYLOAD_KIND</id>
+    <description>
+        Attribute indicating what kind of payload is to be started.
+    </description>
+    <simpleType>
+        <enumeration>
+            <id>PAYLOAD_KIND</id>
+        </enumeration>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <hasStringConversion/>
+</attribute>
+
 <attribute>
     <id>EFF_DRAM_BANKS</id>
     <description>Number of DRAM banks. Initialized and used by HWPs.</description>

@@ -20,11 +20,11 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-#ifndef __TEST_RUNTIMETEST_H
-#define __TEST_RUNTIMETEST_H
+#ifndef __TEST_RUNTIMEATTRSTEST_H
+#define __TEST_RUNTIMEATTRSTEST_H
 
 /**
- *  @file runtimetest.H
+ *  @file runtimeattrstest.H
  *
  */
 
@@ -45,7 +45,7 @@ extern trace_desc_t* g_trac_runtime;
 
 using namespace fapi;
 
-class RuntimeTest: public CxxTest::TestSuite
+class RuntimeAttrsTest: public CxxTest::TestSuite
 {
   public:
     void testVerifySystemAttributes(void)
@@ -302,7 +302,7 @@ class RuntimeTest: public CxxTest::TestSuite
             {
                 TS_FAIL("Error getting fapi::ATTR_CHIP_UNIT_POS");
                 errlHndl_t errhdl = fapiRcToErrl(l_rc);
-                errlCommit(errhdl,CXXTEST_COMP_ID);
+                errlCommit(errhdl,RUNTIME_COMP_ID);
             }
 
             fapi::ATTR_FUNCTIONAL_Type tmp2 = 0;
@@ -311,7 +311,7 @@ class RuntimeTest: public CxxTest::TestSuite
             {
                 TS_FAIL("Error getting fapi::ATTR_FUNCTIONAL");
                 errlHndl_t errhdl = fapiRcToErrl(l_rc);
-                errlCommit(errhdl,CXXTEST_COMP_ID);
+                errlCommit(errhdl,RUNTIME_COMP_ID);
             }
 
             uint64_t attr = 0;
@@ -373,14 +373,27 @@ class RuntimeTest: public CxxTest::TestSuite
     }
 
   private:
-    //@fixme  RTC:49509
     hsvc_system_data_t* getSysPtr(void)
     {
-        return( (hsvc_system_data_t*)(64*MEGABYTE) );
+        errlHndl_t errhdl = NULL;
+        uint64_t sys_data_addr = 0;
+        size_t sys_data_size = 0;
+        errhdl = RUNTIME::get_host_data_section(RUNTIME::HSVC_SYSTEM_DATA,
+                                                0,
+                                                sys_data_addr,
+                                                sys_data_size );
+        return( (hsvc_system_data_t*)(sys_data_addr) );
     };
     hsvc_node_data_t* getNodePtr(void)
     {
-        return( (hsvc_node_data_t*)(64*MEGABYTE+512*KILOBYTE) );
+        errlHndl_t errhdl = NULL;
+        uint64_t node_data_addr = 0;
+        size_t node_data_size = 0;
+        errhdl = RUNTIME::get_host_data_section(RUNTIME::HSVC_NODE_DATA,
+                                                0,
+                                                node_data_addr,
+                                                node_data_size );
+        return( (hsvc_node_data_t*)(node_data_addr) );
     };
 
     //utility to fetch a proc target based on a procid

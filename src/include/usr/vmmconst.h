@@ -58,13 +58,17 @@
 #define VMM_ADDR_BASE_BLOCK 0
 
 /** Base Segment Base Block size */
-#define VMM_BASE_BLOCK_SIZE 8*MEGABYTE
+#define VMM_BASE_BLOCK_SIZE (8*MEGABYTE)
 
 /** Base Segment Extended Memory Block Base Address */
-#define VMM_ADDR_EXTEND_BLOCK VMM_ADDR_BASE_BLOCK + VMM_BASE_BLOCK_SIZE
+#define VMM_ADDR_EXTEND_BLOCK (VMM_ADDR_BASE_BLOCK + VMM_BASE_BLOCK_SIZE)
+
+/** Maximize size of Base Segment Memory after expansion */
+#define VMM_MEMORY_SIZE (32*MEGABYTE)
 
 /** Base Segment Extended Memory Block Size */
-#define VMM_EXTEND_BLOCK_SIZE (32*MEGABYTE)-VMM_BASE_BLOCK_SIZE
+#define VMM_EXTEND_BLOCK_SIZE (VMM_MEMORY_SIZE-VMM_BASE_BLOCK_SIZE)
+
 /**
  * Resource Providers
  */
@@ -113,11 +117,16 @@ enum BlockPriority
 /**
  * Test Constants
  */
+
 /** Base virtual address used in remove pages test */
 #define VMM_VADDR_RMVPAGE_TEST (700 * GIGABYTE)
 
 /** Block size used in remove pages test */
 #define VMM_SIZE_RMVPAGE_TEST (8 * PAGESIZE)
+
+/** Chunk of physical memory to use for HostServices Attributes */
+#define HSVC_TEST_MEMORY_ADDR  (VMM_MEMORY_SIZE + 32*MEGABYTE)
+#define HSVC_TEST_MEMORY_SIZE  (2*MEGABYTE)
 
 
 #endif /* _VMMCONST_H */

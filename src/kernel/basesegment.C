@@ -117,12 +117,14 @@ int BaseSegment::_mmAllocBlock(MessageQueue* i_mq,void* i_va,uint64_t i_size,
     uint64_t l_vaddr = reinterpret_cast<uint64_t>(i_va);
     uint64_t l_blockSizeTotal = 0;
     iv_block->totalBlocksAlloc(l_blockSizeTotal);
+
     //Verify input address and size falls within this segment's address range
     if (l_vaddr < this->getBaseAddress() ||
         l_vaddr >= (this->getBaseAddress() + (1ull << SLBE_s)) ||
         (l_blockSizeTotal + ALIGN_PAGE(i_size)) >= (1ull << SLBE_s) ||
         (l_vaddr != ALIGN_PAGE_DOWN(l_vaddr)))
     {
+        printkd("_mmAllocBlock: Address %lX is not part of BaseSegment : baseaddr=%lX, totalblocks=%ld\n", l_vaddr, this->getBaseAddress(), l_blockSizeTotal);
         return -EINVAL;
     }
 
@@ -135,8 +137,8 @@ int BaseSegment::_mmAllocBlock(MessageQueue* i_mq,void* i_va,uint64_t i_size,
         // block.. if so return error
         if  (temp_block->isContained(l_vaddr))
         {
-            printk("mmAllocBlock Address = %lx is already in a block\n",l_vaddr);
-            return -EINVAL;
+            printkd("_mmAllocBlock Address = %lx is already in a block\n",l_vaddr);
+            return -EALREADY;
         }
 
         temp_block = temp_block->iv_nextBlock;
