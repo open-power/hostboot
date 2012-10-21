@@ -1327,7 +1327,7 @@ errlHndl_t FsiDD::initPort(FsiChipInfo_t i_fsiInfo,
 /**
  * @brief Initializes the FSI master control registers
  */
-errlHndl_t FsiDD::initMasterControl(const TARGETING::Target* i_master,
+errlHndl_t FsiDD::initMasterControl(TARGETING::Target* i_master,
                                     TARGETING::FSI_MASTER_TYPE i_type)
 {
     errlHndl_t l_err = NULL;
@@ -1390,11 +1390,46 @@ errlHndl_t FsiDD::initMasterControl(const TARGETING::Target* i_master,
             //Hardware Bug HW204566 on Murano DD1.0 requires legacy
             //  mode to be enabled
             if( (i_master->getAttr<TARGETING::ATTR_MODEL>()
-                                      == TARGETING::MODEL_MURANO) &&
-                (i_master->getAttr<TARGETING::ATTR_EC>() == 0x10) )
+                                      == TARGETING::MODEL_MURANO) )
             {
-                // 25=clock/4 mode 
-                databuf |= 0x00000040;
+                uint32_t ec_level = 0x00;
+                uint32_t idec = 0;
+                if( i_master != iv_master )
+                {
+                    // get the data via FSI (scom engine)
+                    FsiAddrInfo_t addr_info( i_master, 0x1028 );
+                    l_err = genFullFsiAddr( addr_info );
+                    if( l_err ) { break; }
+
+                    // perform the read operation
+                    l_err = read( addr_info, &idec );
+                    if( l_err ) { break; }
+                    TRACFCOMP( g_trac_fsi, "FSI=%X", idec );
+                }
+                else
+                {
+                    // have to use the scom version on the master chip
+                    uint32_t scom_data[2];
+                    size_t scom_size = sizeof(scom_data);
+                    l_err = deviceOp( DeviceFW::READ,
+                                      TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL,
+                                      scom_data,
+                                      scom_size,
+                                      DEVICE_XSCOM_ADDRESS(0x000F000F) );
+                    if( l_err ) { break; }
+
+                    scom_data[0] = 0x1f0fffff;
+                    idec = scom_data[0];
+                }
+                ec_level = (idec & 0xF0000000) >> 24;
+                ec_level |= ((idec & 0x00F00000) >> 20);
+
+                TRACFCOMP( g_trac_fsi, "EC=%X", ec_level );
+                if( ec_level == 0x10 )
+                {
+                    // 25=clock/4 mode 
+                    databuf |= 0x00000040;
+                }
             }
             l_err = write( ctl_reg|FSI_MMODE_000, &databuf );
             if( l_err ) { break; }
