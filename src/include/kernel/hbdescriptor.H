@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/kernel.ld $                                               */
+/* $Source: src/include/kernel/hbdescriptor.H $                           */
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2010,2012              */
+/* COPYRIGHT International Business Machines Corp. 2012                   */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,60 +20,19 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-base_load_address = 0x00000000;
-text_load_address = 0x00002000;
 
-SECTIONS
+/** @file hbdescriptor.H
+ *  @brief Defines hostboot data area
+ */
+
+#ifndef __KERNEL_HBDESCRIPTOR_H
+#define __KERNEL_HBDESCRIPTOR_H
+
+struct HB_TI_DataArea;
+
+struct HB_Descriptor
 {
-    . = base_load_address;
+     HB_TI_DataArea *TI_DataAreaPtr;  // ptr to the TI data area structure
+};
 
-    .text ALIGN(0x1000): {
-	*(.text.intvects)
-	. = text_load_address;
-        *(.text.kernelasm)
-	*(.text)
-	*(.text._*)
-	*(.rodata)
-	*(.rodata.*)
-	. = ALIGN(0x8);
-	ctor_start_address = .;
-	*(.ctors)
-	ctor_end_address = .;
-    }
-    
-    .data ALIGN(0x1000): {
-	data_load_address = .;
-	*(.data)
-	*(.data.*)
-	*(.branch_lt)
-
-	toc_load_address = .;
-	*(.toc)
-	*(.opd)
-	*(.got)
-
-	*(.bss)
-	*(.bss.*)
-
-    }
-
-    end_load_address = .;
-    
-    .dynstr : {
-	*(.dynstr)
-    }
-
-    .rela : {
-	*(.rela.*)
-    }
- 
-
-    /DISCARD/ : {
-	*(.comment)
-	*(.gnu.attributes)
-	*(.dtors)
-	*(.interp)
-    }
-}
-
-
+#endif /* __KERNEL_HBDESCRIPTOR_H */

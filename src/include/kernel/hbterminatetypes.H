@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/kernel.ld $                                               */
+/* $Source: src/include/kernel/terminatetypes.H $                         */
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2010,2012              */
+/* COPYRIGHT International Business Machines Corp. 2012                   */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,60 +20,49 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-base_load_address = 0x00000000;
-text_load_address = 0x00002000;
+/** @file terminate.H
+ *  @brief Defines kernel information about the TI data area
+ */
+#ifndef __KERNEL_HBTERMINATETYPES_H
+#define __KERNEL_HBTERMINATETYPES_H
+#include <stdint.h>
 
-SECTIONS
+
+
+/** @struct TI_DataArea
+ *  @brief Defines the data space used to store the src or PLID regarding a
+ *     Terminate Immediate request
+ */
+struct HB_TI_DataArea
 {
-    . = base_load_address;
 
-    .text ALIGN(0x1000): {
-	*(.text.intvects)
-	. = text_load_address;
-        *(.text.kernelasm)
-	*(.text)
-	*(.text._*)
-	*(.rodata)
-	*(.rodata.*)
-	. = ALIGN(0x8);
-	ctor_start_address = .;
-	*(.ctors)
-	ctor_end_address = .;
-    }
-    
-    .data ALIGN(0x1000): {
-	data_load_address = .;
-	*(.data)
-	*(.data.*)
-	*(.branch_lt)
+    union{
+        struct {
+            uint64_t type:16;       /**< indicates either plid or src  */
+            uint64_t source:16;     /**< Caller of the TI  */
+            uint64_t reserved2:16;  /**< Reserved space */
+            uint64_t reserved3:16;  /**< Reserved space  */
+        };
+        uint64_t flag;  /**< Full Dword0 */
+    };
+    uint64_t src[4];
+    uint64_t plid;
+};
 
-	toc_load_address = .;
-	*(.toc)
-	*(.opd)
-	*(.got)
+// Enum indicating whether a SRC or PLID is stored
+enum hb_terminate_type
+{
+    TI_WITH_PLID = 0x0001,
+    TI_WITH_SRC =  0x0002,
+};
 
-	*(.bss)
-	*(.bss.*)
-
-    }
-
-    end_load_address = .;
-    
-    .dynstr : {
-	*(.dynstr)
-    }
-
-    .rela : {
-	*(.rela.*)
-    }
- 
-
-    /DISCARD/ : {
-	*(.comment)
-	*(.gnu.attributes)
-	*(.dtors)
-	*(.interp)
-    }
-}
+// Enum used in the flag indicating who initiated the TI 
+enum hb_terminate_source
+{
+    TI_KERNAL_ASSERT = 0x0001,
+    TI_CRIT_ASSERT =   0x0002,
+    TI_SHUTDOWN =      0x0003,
+};
 
 
+#endif

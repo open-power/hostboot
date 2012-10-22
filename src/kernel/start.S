@@ -243,6 +243,16 @@ softpatch_stub:
 STD_INTERRUPT_NOADDR(softpatch)
 
 .section .text.kernelasm
+
+;// Hostboot descriptor pointer.
+;//
+;// This must be the first entry in the .text.kernelasm section so that it
+;// ends up at 0x2000 in our kernel image.
+kernel_descriptor:
+    .byte 'H', 'O', 'S', 'T', 'B', 'O', 'O', 'T'
+    .quad kernel_hbDescriptor
+
+
 ;// _main:
 ;//	Set up stack and TOC and call kernel's main.
 _main:

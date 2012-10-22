@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/kernel.ld $                                               */
+/* $Source: src/kernel/forceattn_p8.S $                                   */
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2010,2012              */
+/* COPYRIGHT International Business Machines Corp. 2011,2012              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,60 +20,22 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-base_load_address = 0x00000000;
-text_load_address = 0x00002000;
-
-SECTIONS
-{
-    . = base_load_address;
-
-    .text ALIGN(0x1000): {
-	*(.text.intvects)
-	. = text_load_address;
-        *(.text.kernelasm)
-	*(.text)
-	*(.text._*)
-	*(.rodata)
-	*(.rodata.*)
-	. = ALIGN(0x8);
-	ctor_start_address = .;
-	*(.ctors)
-	ctor_end_address = .;
-    }
-    
-    .data ALIGN(0x1000): {
-	data_load_address = .;
-	*(.data)
-	*(.data.*)
-	*(.branch_lt)
-
-	toc_load_address = .;
-	*(.toc)
-	*(.opd)
-	*(.got)
-
-	*(.bss)
-	*(.bss.*)
-
-    }
-
-    end_load_address = .;
-    
-    .dynstr : {
-	*(.dynstr)
-    }
-
-    .rela : {
-	*(.rela.*)
-    }
- 
-
-    /DISCARD/ : {
-	*(.comment)
-	*(.gnu.attributes)
-	*(.dtors)
-	*(.interp)
-    }
-}
+.include "kernel/ppcconsts.S"
 
 
+.global p8_force_attn
+p8_force_attn:
+    li r0, 1
+    mfspr r9, HID0
+    insrdi r9,r0,1,31 	/* Turn on bit 31. */
+    sync
+    mtspr HID0,r9	/* Enable attentions */
+    mfspr r9, HID0
+    mfspr r9, HID0
+    mfspr r9, HID0
+    mfspr r9, HID0
+    mfspr r9, HID0
+    mfspr r9, HID0
+    isync
+    attn
+    b 0

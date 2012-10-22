@@ -171,7 +171,9 @@ fsp.tar_CONTENTS = \
     $(addsuffix :hwas/,\
 	$(call ROOTPATH_WILDCARD_RECURSIVE,src/include/usr/hwas/common)) \
     $(addsuffix :pnor/,\
-	$(call ROOTPATH_WILDCARD_RECURSIVE,src/usr/pnor/common))
+	$(call ROOTPATH_WILDCARD_RECURSIVE,src/usr/pnor/common)) \
+    src/include/kernel/hbdescriptor.H \
+    src/include/kernel/hbterminatetypes.H \
 
 #
 # Portions of the FSP sandbox which must be rebuilt based on file changes.

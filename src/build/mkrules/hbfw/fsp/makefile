@@ -39,6 +39,9 @@ EXPSHLIB_SUBDIRS += targeting
 STANDARD_SUBDIRS += targeting
 RUNBVT_SUBDIRS   += 
 
+INCLUDES = hbdescriptor.H \
+           hbterminatetypes.H \
+
 .elseif(${CONTEXT} == "x86.nfp")
 
 .include "makefile.nfp"

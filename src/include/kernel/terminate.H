@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/kernel.ld $                                               */
+/* $Source: src/include/kernel/terminate.H $                              */
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2010,2012              */
+/* COPYRIGHT International Business Machines Corp. 2012                   */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,60 +20,26 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-base_load_address = 0x00000000;
-text_load_address = 0x00002000;
+/** @file terminate.H
+ *  @brief Defines kernel information about the TI data area
+ */
+#ifndef __KERNEL_TERMINATE_H
+#define __KERNEL_TERMINATE_H
 
-SECTIONS
-{
-    . = base_load_address;
+#include <kernel/types.h>
 
-    .text ALIGN(0x1000): {
-	*(.text.intvects)
-	. = text_load_address;
-        *(.text.kernelasm)
-	*(.text)
-	*(.text._*)
-	*(.rodata)
-	*(.rodata.*)
-	. = ALIGN(0x8);
-	ctor_start_address = .;
-	*(.ctors)
-	ctor_end_address = .;
-    }
-    
-    .data ALIGN(0x1000): {
-	data_load_address = .;
-	*(.data)
-	*(.data.*)
-	*(.branch_lt)
+/** @fn terminateAndUpdateSaveArea
+ *  Update TI data area with src or PLID and force a TI
+ *  @param[in] i_type :   indicates if an src or plid is stored
+ *  @param[in] i_source:  indicates what type of fail forced the TI
+ *  @param[in] *i_src:    SRC to be stored
+ *  @param[in] i_plid:    plid to be stored
+ *  @param[out] NONE:
+ */
+void terminateAndUpdateSaveArea(uint16_t i_type,
+                                    uint16_t i_source,
+                                    uint64_t *i_src,
+                                    uint64_t plid = 0);
+  
 
-	toc_load_address = .;
-	*(.toc)
-	*(.opd)
-	*(.got)
-
-	*(.bss)
-	*(.bss.*)
-
-    }
-
-    end_load_address = .;
-    
-    .dynstr : {
-	*(.dynstr)
-    }
-
-    .rela : {
-	*(.rela.*)
-    }
- 
-
-    /DISCARD/ : {
-	*(.comment)
-	*(.gnu.attributes)
-	*(.dtors)
-	*(.interp)
-    }
-}
-
-
+#endif
