@@ -39,10 +39,14 @@
 // errlHndl_t pointers around and check for NULL
 #include <errl/errlmanager.H>
 
+#include <hbotcompid.H>
+#include <errl/errlentry.H>
+
 namespace HWAS
 {
 
 namespace COMMON
+
 {
 /**
 * @brief Import the ::ERRORLOG namespace into the ::HWAS:COMMON
@@ -52,7 +56,7 @@ namespace COMMON
 * no danger of a namespace collision.
 */
 using namespace ::ERRORLOG;
-
+ 
 } // End namespace COMMON
 
 } // End namespace HWAS

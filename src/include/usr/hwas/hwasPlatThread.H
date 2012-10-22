@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/include/usr/hwas/common/hwas_reasoncodes.H $              */
+/* $Source: src/include/usr/hwas/hwasPlatThread.H $                       */
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2012              */
+/* COPYRIGHT International Business Machines Corp. 2012                   */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,28 +20,32 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-#ifndef HWAS_REASONCODES_H
-#define HWAS_REASONCODES_H
+#ifndef __HWAS_PLAT_THREAD_H
+#define __HWAS_PLAT_THREAD_H
 
-namespace HWAS
-{
-    enum HwasModuleID
-    {
-        MOD_DECONFIG_GARD    = 0x01,
-        MOD_PROCESS_CALLOUT  = 0x02,
-    };
+/**
+* @file hwas/hwasPlatThread.H
+*
+* @brief Adapts platform neutral thread functions.
+*/
 
-    enum HwasReasonCode
-    {
-        // these are HWAS Common specific, and will get mapped into 'correct'
-        //  codes by the appropriate platform-specific function
-        RC_TARGET_NOT_DECONFIGURABLE        = 0x01,
-        RC_TARGET_NOT_GARDABLE              = 0x02,
-        RC_GARD_REPOSITORY_FULL             = 0x03,
-        RC_TARGET_NOT_FOUND_FOR_GARD_RECORD = 0x04,
-        RC_INVALID_TARGET                   = 0x05,
-        // if more are added, modify each hwasPlatError.C file as appropriate.
-    };
-};
+//******************************************************************************
+// Includes
+//******************************************************************************
 
-#endif
+#define HWAS_MUTEX_TYPE \
+mutable mutex_t
+
+#define HWAS_MUTEX_INIT(_t) \
+ mutex_init(_t)
+
+#define HWAS_MUTEX_DESTROY(_t) \
+ mutex_destroy(_t)
+
+#define HWAS_MUTEX_LOCK(_t) \
+ mutex_lock(_t)
+
+#define HWAS_MUTEX_UNLOCK(_t) \
+ mutex_unlock(_t)
+
+#endif // __HWAS_PLAT_THREAD_H

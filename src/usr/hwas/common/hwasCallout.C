@@ -34,12 +34,11 @@
 /******************************************************************************/
 #include <stdint.h>
 
-#include <hwas/common/hwasCallout.H>
 #include <hwas/common/hwasCommon.H>
+#include <hwas/common/deconfigGard.H>
+#include <hwas/common/hwasCallout.H>
 #include <hwas/common/hwas_reasoncodes.H>
-#include <hwas/deconfigGard.H>
 #include <targeting/common/attributes.H>
-#include <errl/errlmanager.H>
 
 namespace HWAS
 {
@@ -99,9 +98,9 @@ void processCallout(const uint32_t i_errlPlid,
                  * @reasoncode   HWAS::RC_INVALID_TARGET
                  * @devdesc      Invalid Target encountered into processCallout
                  */
-                errl = new ERRORLOG::ErrlEntry(
+                errl = hwasError(
                     ERRORLOG::ERRL_SEV_INFORMATIONAL,
-                    MOD_PROCESS_CALLOUT,
+                    HWAS::MOD_PROCESS_CALLOUT,
                     HWAS::RC_INVALID_TARGET);
                 errlCommit(errl, HWAS_COMP_ID);
                 break;

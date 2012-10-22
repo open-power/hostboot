@@ -31,7 +31,7 @@
 #include <hwas/common/hwasCommon.H>
 
 #include <hwas/hostbootIstep.H>
-#include <hwas/deconfigGard.H>
+#include <hwas/common/deconfigGard.H>
 
 #include <fsi/fsiif.H>
 #include <initservice/taskargs.H>

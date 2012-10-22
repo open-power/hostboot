@@ -35,6 +35,7 @@
 #include <stdint.h>
 #include <targeting/common/target.H>
 #include <targeting/common/targetservice.H>
+#include <hwas/common/hwasError.H>
 
 // platform specific headers
 
@@ -115,6 +116,31 @@ const uint32_t VPD_CP00_PG_PCIE_GOOD        = 0xF700;
 
 const uint32_t VPD_CP00_PG_EX0_INDEX        = 16;
 const uint32_t VPD_CP00_PG_EX0_GOOD         = 0xF300;
+
+/**
+ * @brief platform specific code to get the address in PNOR to read
+ *  and write GARD data
+ *
+ * @param[out] o_addr       pointer to where GARD data is in PNOR
+ * @param[out] o_size       size (in bytes) of GARD data section in PNOR
+ *
+ * @return errlHndl_t       valid errlHndl_t handle if there was an error
+ *                          NULL if no errors;
+ */
+errlHndl_t platGetGardPnorAddr(void *& o_addr,
+                               uint64_t &o_size);
+
+const uint32_t EMPTY_GARD_RECORDID=0xFFFFFFFF;
+const uint32_t EMPTY_GARD_VALUE=0xFF;
+
+/**
+ * @brief wrapper function to create new errlog in platform-specific manner.
+ */
+errlHndl_t hwasError(const uint8_t i_sev,
+              const uint8_t i_modId,
+              const uint16_t i_reasonCode,
+              const uint64_t i_user1 = 0,
+              const uint64_t i_user2 = 0);
 
 
 } // namespace HWAS

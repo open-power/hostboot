@@ -41,7 +41,7 @@
 #include <targeting/common/iterators/rangefilter.H>
 #include <targeting/common/predicates/predicates.H>
 #include <hwas/common/hwasCallout.H>
-#include <hwas/deconfigGard.H>
+#include <hwas/common/deconfigGard.H>
 
 
 #define TEST_SEVERITY       ERRORLOG::ERRL_SEV_INFORMATIONAL

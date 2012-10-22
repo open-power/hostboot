@@ -44,7 +44,7 @@
 #include <targeting/common/iterators/rangefilter.H>
 #include <targeting/common/predicates/predicates.H>
 #include <targeting/common/util.H>
-#include <hwas/deconfigGard.H>
+#include <hwas/common/deconfigGard.H>
 
 #include <devicefw/driverif.H>
 

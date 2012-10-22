@@ -29,12 +29,14 @@
 
 #include <hwas/common/hwas.H>
 #include <hwas/common/hwasCommon.H>
-#include <hwas/common/hwasError.H>
+#include <hwas/common/deconfigGard.H>
 
 #include <devicefw/driverif.H>
 #include <initservice/taskargs.H>
 #include <mvpd/mvpdenums.H>
 #include <stdio.h>
+
+#include <pnor/pnorif.H>
 
 namespace HWAS
 {
@@ -217,5 +219,44 @@ errlHndl_t platPresenceDetect(TargetHandleList &io_targets)
 
     return errl;
 } // platPresenceDetect
+
+
+
+
+//******************************************************************************
+// platGetGardPnorAddr function
+//******************************************************************************
+errlHndl_t platGetGardPnorAddr(void *& o_addr,uint64_t &o_size)
+{
+    errlHndl_t errl = NULL;
+
+    do
+    {
+#if 0
+        //TODO: RTC 37739
+        PNOR::SectionInfo_t l_section;
+        errl = PNOR::getSectionInfo(PNOR::GUARD_DATA, PNOR::CURRENT_SIDE,
+                l_section);
+        if (errl)
+        {
+            // TODO: do the malloc and store it locally?
+            break;
+        }
+
+        o_addr = reinterpret_cast<void *>(l_section.vaddr);
+        o_size = l_section.size;
+#else
+        // just use a buffer instead of PNOR
+        o_size = 20 * sizeof(DeconfigGard::GardRecord);
+        o_addr = malloc(o_size);
+        memset(o_addr, EMPTY_GARD_VALUE, o_size);
+#endif
+
+        HWAS_INF("GARD in PNOR: addr=%p, size=%d", o_addr, o_size);
+    }
+    while (0);
+
+    return errl;
+} // platGetGardPnorAddr
 
 } // namespace HWAS
