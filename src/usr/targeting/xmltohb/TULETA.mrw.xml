@@ -20,7 +20,7 @@
 <!-- Origin: 30                                                             -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
-<!-- Source path = /esw/fips810/Builds/b0906a_1237.810/obj/ppc/mrw/xml/data -->
+<!-- Source path = /esw/fips810/Builds/b1019a_1243.810/obj/ppc/mrw/xml/data -->
 <attributes>
 
 <!-- TULETA System with new values-->
@@ -60,9 +60,43 @@
         <id>FREQ_MEM_REFCLOCK</id>
         <default>266</default>
     </attribute>
+    <!-- TODO: The frequency attributes below will need to be obtained -->
+    <!-- from the MRW. RTC 51209 will implement this when MRW is ready -->
+    <!-- to supply the values of these attributes                      -->
     <attribute>
         <id>FREQ_CORE_FLOOR</id>
-        <default>2500</default>
+        <default>0x2580</default>
+    </attribute>
+    <attribute>
+        <id>FREQ_PB</id>
+        <default>0x960</default>
+    </attribute>
+    <attribute>
+        <id>FREQ_X</id>
+        <default>0x12C0</default>
+    </attribute>
+    <attribute>
+        <id>FREQ_A</id>
+        <default>0x1900</default>
+    </attribute>
+    <attribute>
+        <id>FREQ_PCIE</id>
+        <default>0x3E8</default>
+    </attribute>
+    <!-- The default value of the following three attributes are written  -->
+    <!-- by the HWP using them. The default values are not from MRW. They -->
+    <!-- are included here FYI.                                           -->
+    <attribute>
+        <id>PROC_EPS_GB_DIRECTION</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>PROC_EPS_GB_PERCENTAGE</id>
+        <default>0x14</default>
+    </attribute>
+    <attribute>
+        <id>PROC_FABRIC_ASYNC_SAFE_MODE</id>
+        <default>0</default>
     </attribute>
     <attribute>
         <id>SP_FUNCTIONS</id>
@@ -89,11 +123,11 @@
     <attribute>
         <id>MSS_MBA_ADDR_INTERLEAVE_BIT</id>
         <default>24</default>
-    </attribute> 
+    </attribute>
     <attribute>
         <id>MSS_MBA_CACHELINE_INTERLEAVE_MODE</id>
         <default>1</default>
-    </attribute> 
+    </attribute>
     <attribute>
         <id>MSS_PREFETCH_ENABLE</id>
         <default>1</default>
@@ -649,28 +683,6 @@
 <!-- TULETA n0p0 XBUS units -->
 
 <targetInstance>
-    <id>sys0node0proc0xbus0</id>
-    <type>unit-xbus-murano</type>
-    <attribute><id>HUID</id><default>0x00150000</default></attribute>
-    <attribute>
-        <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/proc-0/xbus-0</default>
-    </attribute>
-    <attribute>
-        <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-0/xbus-0</default>
-    </attribute>
-    <attribute>
-        <id>CHIP_UNIT</id>
-        <default>0</default>
-    </attribute>
-    <attribute>
-        <id>PEER_TARGET</id>
-        <default>physical:sys-0/node-0/proc-1/xbus-0</default>
-    </attribute>
-</targetInstance>
-
-<targetInstance>
     <id>sys0node0proc0xbus1</id>
     <type>unit-xbus-murano</type>
     <attribute><id>HUID</id><default>0x00150001</default></attribute>
@@ -686,41 +698,9 @@
         <id>CHIP_UNIT</id>
         <default>1</default>
     </attribute>
-</targetInstance>
-
-<targetInstance>
-    <id>sys0node0proc0xbus2</id>
-    <type>unit-xbus-murano</type>
-    <attribute><id>HUID</id><default>0x00150002</default></attribute>
     <attribute>
-        <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/proc-0/xbus-2</default>
-    </attribute>
-    <attribute>
-        <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-0/xbus-2</default>
-    </attribute>
-    <attribute>
-        <id>CHIP_UNIT</id>
-        <default>2</default>
-    </attribute>
-</targetInstance>
-
-<targetInstance>
-    <id>sys0node0proc0xbus3</id>
-    <type>unit-xbus-murano</type>
-    <attribute><id>HUID</id><default>0x00150003</default></attribute>
-    <attribute>
-        <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/proc-0/xbus-3</default>
-    </attribute>
-    <attribute>
-        <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-0/xbus-3</default>
-    </attribute>
-    <attribute>
-        <id>CHIP_UNIT</id>
-        <default>3</default>
+        <id>PEER_TARGET</id>
+        <default>physical:sys-0/node-0/proc-1/xbus-1</default>
     </attribute>
 </targetInstance>
 
@@ -747,6 +727,15 @@
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-1</default>
     </attribute>
+    <attribute>
+        <id>FABRIC_NODE_ID</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>FABRIC_CHIP_ID</id>
+        <default>1</default>
+    </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>1</default></attribute>
     <!-- FSI is connected via proc0:MFSI-0 -->
     <attribute>
         <id>FSI_MASTER_CHIP</id>
@@ -768,17 +757,9 @@
         <id>FSI_OPTION_FLAGS</id>
         <default>0</default>
     </attribute>
-    <attribute>
-        <id>FABRIC_NODE_ID</id>
-        <default>0</default>
-    </attribute>
-    <attribute>
-        <id>FABRIC_CHIP_ID</id>
-        <default>1</default>
-    </attribute>
-    <attribute><id>VPD_REC_NUM</id><default>1</default></attribute>
+    <!-- Data from PHYP Memory Map -->
     <attribute><id>FSP_BASE_ADDR</id>
-        <default>0x0003FFF000000000</default>
+        <default>0x0003FFE100000000</default>
     </attribute>
     <attribute><id>PSI_BRIDGE_BASE_ADDR</id>
         <default>0x0003FFFE80100000</default>
@@ -807,6 +788,7 @@
     <attribute><id>RNG_BASE_ADDR</id>
         <default>0x0003FFFF40001000</default>
     </attribute>
+    <!-- End PHYP Memory Map -->
 
 </targetInstance>
 
@@ -1271,28 +1253,6 @@
 <!-- TULETA n0p1 XBUS units -->
 
 <targetInstance>
-    <id>sys0node0proc1xbus0</id>
-    <type>unit-xbus-murano</type>
-    <attribute><id>HUID</id><default>0x00150004</default></attribute>
-    <attribute>
-        <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/proc-1/xbus-0</default>
-    </attribute>
-    <attribute>
-        <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-1/xbus-0</default>
-    </attribute>
-    <attribute>
-        <id>CHIP_UNIT</id>
-        <default>0</default>
-    </attribute>
-    <attribute>
-        <id>PEER_TARGET</id>
-        <default>physical:sys-0/node-0/proc-0/xbus-0</default>
-    </attribute>
-</targetInstance>
-
-<targetInstance>
     <id>sys0node0proc1xbus1</id>
     <type>unit-xbus-murano</type>
     <attribute><id>HUID</id><default>0x00150005</default></attribute>
@@ -1308,41 +1268,9 @@
         <id>CHIP_UNIT</id>
         <default>1</default>
     </attribute>
-</targetInstance>
-
-<targetInstance>
-    <id>sys0node0proc1xbus2</id>
-    <type>unit-xbus-murano</type>
-    <attribute><id>HUID</id><default>0x00150006</default></attribute>
     <attribute>
-        <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/proc-1/xbus-2</default>
-    </attribute>
-    <attribute>
-        <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-1/xbus-2</default>
-    </attribute>
-    <attribute>
-        <id>CHIP_UNIT</id>
-        <default>2</default>
-    </attribute>
-</targetInstance>
-
-<targetInstance>
-    <id>sys0node0proc1xbus3</id>
-    <type>unit-xbus-murano</type>
-    <attribute><id>HUID</id><default>0x00150007</default></attribute>
-    <attribute>
-        <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/proc-1/xbus-3</default>
-    </attribute>
-    <attribute>
-        <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-1/xbus-3</default>
-    </attribute>
-    <attribute>
-        <id>CHIP_UNIT</id>
-        <default>3</default>
+        <id>PEER_TARGET</id>
+        <default>physical:sys-0/node-0/proc-0/xbus-1</default>
     </attribute>
 </targetInstance>
 
@@ -1369,6 +1297,15 @@
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-2</default>
     </attribute>
+    <attribute>
+        <id>FABRIC_NODE_ID</id>
+        <default>1</default>
+    </attribute>
+    <attribute>
+        <id>FABRIC_CHIP_ID</id>
+        <default>0</default>
+    </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>2</default></attribute>
     <!-- FSI is connected via proc0:MFSI-1 -->
     <attribute>
         <id>FSI_MASTER_CHIP</id>
@@ -1390,17 +1327,9 @@
         <id>FSI_OPTION_FLAGS</id>
         <default>0</default>
     </attribute>
-    <attribute>
-        <id>FABRIC_NODE_ID</id>
-        <default>0</default>
-    </attribute>
-    <attribute>
-        <id>FABRIC_CHIP_ID</id>
-        <default>2</default>
-    </attribute>
-    <attribute><id>VPD_REC_NUM</id><default>2</default></attribute>
+    <!-- Data from PHYP Memory Map -->
     <attribute><id>FSP_BASE_ADDR</id>
-        <default>0x0004000000000000</default>
+        <default>0x0003FFE200000000</default>
     </attribute>
     <attribute><id>PSI_BRIDGE_BASE_ADDR</id>
         <default>0x0003FFFE80200000</default>
@@ -1429,6 +1358,7 @@
     <attribute><id>RNG_BASE_ADDR</id>
         <default>0x0003FFFF40002000</default>
     </attribute>
+    <!-- End PHYP Memory Map -->
 
 </targetInstance>
 
@@ -1893,28 +1823,6 @@
 <!-- TULETA n0p2 XBUS units -->
 
 <targetInstance>
-    <id>sys0node0proc2xbus0</id>
-    <type>unit-xbus-murano</type>
-    <attribute><id>HUID</id><default>0x00150008</default></attribute>
-    <attribute>
-        <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/proc-2/xbus-0</default>
-    </attribute>
-    <attribute>
-        <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-2/xbus-0</default>
-    </attribute>
-    <attribute>
-        <id>CHIP_UNIT</id>
-        <default>0</default>
-    </attribute>
-    <attribute>
-        <id>PEER_TARGET</id>
-        <default>physical:sys-0/node-0/proc-3/xbus-0</default>
-    </attribute>
-</targetInstance>
-
-<targetInstance>
     <id>sys0node0proc2xbus1</id>
     <type>unit-xbus-murano</type>
     <attribute><id>HUID</id><default>0x00150009</default></attribute>
@@ -1930,41 +1838,9 @@
         <id>CHIP_UNIT</id>
         <default>1</default>
     </attribute>
-</targetInstance>
-
-<targetInstance>
-    <id>sys0node0proc2xbus2</id>
-    <type>unit-xbus-murano</type>
-    <attribute><id>HUID</id><default>0x0015000A</default></attribute>
     <attribute>
-        <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/proc-2/xbus-2</default>
-    </attribute>
-    <attribute>
-        <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-2/xbus-2</default>
-    </attribute>
-    <attribute>
-        <id>CHIP_UNIT</id>
-        <default>2</default>
-    </attribute>
-</targetInstance>
-
-<targetInstance>
-    <id>sys0node0proc2xbus3</id>
-    <type>unit-xbus-murano</type>
-    <attribute><id>HUID</id><default>0x0015000B</default></attribute>
-    <attribute>
-        <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/proc-2/xbus-3</default>
-    </attribute>
-    <attribute>
-        <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-2/xbus-3</default>
-    </attribute>
-    <attribute>
-        <id>CHIP_UNIT</id>
-        <default>3</default>
+        <id>PEER_TARGET</id>
+        <default>physical:sys-0/node-0/proc-3/xbus-1</default>
     </attribute>
 </targetInstance>
 
@@ -1991,6 +1867,15 @@
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-3</default>
     </attribute>
+    <attribute>
+        <id>FABRIC_NODE_ID</id>
+        <default>1</default>
+    </attribute>
+    <attribute>
+        <id>FABRIC_CHIP_ID</id>
+        <default>1</default>
+    </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>3</default></attribute>
     <!-- FSI is connected via proc0:MFSI-2 -->
     <attribute>
         <id>FSI_MASTER_CHIP</id>
@@ -2012,17 +1897,9 @@
         <id>FSI_OPTION_FLAGS</id>
         <default>0</default>
     </attribute>
-    <attribute>
-        <id>FABRIC_NODE_ID</id>
-        <default>0</default>
-    </attribute>
-    <attribute>
-        <id>FABRIC_CHIP_ID</id>
-        <default>3</default>
-    </attribute>
-    <attribute><id>VPD_REC_NUM</id><default>3</default></attribute>
+    <!-- Data from PHYP Memory Map -->
     <attribute><id>FSP_BASE_ADDR</id>
-        <default>0x0004001000000000</default>
+        <default>0x0003FFE300000000</default>
     </attribute>
     <attribute><id>PSI_BRIDGE_BASE_ADDR</id>
         <default>0x0003FFFE80300000</default>
@@ -2051,6 +1928,7 @@
     <attribute><id>RNG_BASE_ADDR</id>
         <default>0x0003FFFF40003000</default>
     </attribute>
+    <!-- End PHYP Memory Map -->
 
 </targetInstance>
 
@@ -2515,28 +2393,6 @@
 <!-- TULETA n0p3 XBUS units -->
 
 <targetInstance>
-    <id>sys0node0proc3xbus0</id>
-    <type>unit-xbus-murano</type>
-    <attribute><id>HUID</id><default>0x0015000C</default></attribute>
-    <attribute>
-        <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/proc-3/xbus-0</default>
-    </attribute>
-    <attribute>
-        <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-3/xbus-0</default>
-    </attribute>
-    <attribute>
-        <id>CHIP_UNIT</id>
-        <default>0</default>
-    </attribute>
-    <attribute>
-        <id>PEER_TARGET</id>
-        <default>physical:sys-0/node-0/proc-2/xbus-0</default>
-    </attribute>
-</targetInstance>
-
-<targetInstance>
     <id>sys0node0proc3xbus1</id>
     <type>unit-xbus-murano</type>
     <attribute><id>HUID</id><default>0x0015000D</default></attribute>
@@ -2552,41 +2408,9 @@
         <id>CHIP_UNIT</id>
         <default>1</default>
     </attribute>
-</targetInstance>
-
-<targetInstance>
-    <id>sys0node0proc3xbus2</id>
-    <type>unit-xbus-murano</type>
-    <attribute><id>HUID</id><default>0x0015000E</default></attribute>
     <attribute>
-        <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/proc-3/xbus-2</default>
-    </attribute>
-    <attribute>
-        <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-3/xbus-2</default>
-    </attribute>
-    <attribute>
-        <id>CHIP_UNIT</id>
-        <default>2</default>
-    </attribute>
-</targetInstance>
-
-<targetInstance>
-    <id>sys0node0proc3xbus3</id>
-    <type>unit-xbus-murano</type>
-    <attribute><id>HUID</id><default>0x0015000F</default></attribute>
-    <attribute>
-        <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/proc-3/xbus-3</default>
-    </attribute>
-    <attribute>
-        <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-3/xbus-3</default>
-    </attribute>
-    <attribute>
-        <id>CHIP_UNIT</id>
-        <default>3</default>
+        <id>PEER_TARGET</id>
+        <default>physical:sys-0/node-0/proc-2/xbus-1</default>
     </attribute>
 </targetInstance>
 
@@ -2659,24 +2483,6 @@
 <!-- TULETA Centaur MBAs affiliated with membuf4 -->
 
 <targetInstance>
-    <id>sys0node0membuf4mbs0mba1</id>
-    <type>unit-mba-centaur</type>
-    <attribute><id>HUID</id><default>0x00110009</default></attribute>
-    <attribute>
-        <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/membuf-4/mbs-0/mba-1</default>
-    </attribute>
-    <attribute>
-        <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-0/mcs-4/membuf-4/mbs-0/mba-1</default>
-    </attribute>
-    <attribute>
-        <id>CHIP_UNIT</id>
-        <default>1</default>
-    </attribute>
-</targetInstance>
-
-<targetInstance>
     <id>sys0node0membuf4mbs0mba0</id>
     <type>unit-mba-centaur</type>
     <attribute><id>HUID</id><default>0x00110008</default></attribute>
@@ -2691,6 +2497,24 @@
     <attribute>
         <id>CHIP_UNIT</id>
         <default>0</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0membuf4mbs0mba1</id>
+    <type>unit-mba-centaur</type>
+    <attribute><id>HUID</id><default>0x00110009</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/membuf-4/mbs-0/mba-1</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mcs-4/membuf-4/mbs-0/mba-1</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>1</default>
     </attribute>
 </targetInstance>
 
@@ -2765,24 +2589,6 @@
 <!-- TULETA Centaur MBAs affiliated with membuf5 -->
 
 <targetInstance>
-    <id>sys0node0membuf5mbs0mba1</id>
-    <type>unit-mba-centaur</type>
-    <attribute><id>HUID</id><default>0x0011000B</default></attribute>
-    <attribute>
-        <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/membuf-5/mbs-0/mba-1</default>
-    </attribute>
-    <attribute>
-        <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-0/mcs-5/membuf-5/mbs-0/mba-1</default>
-    </attribute>
-    <attribute>
-        <id>CHIP_UNIT</id>
-        <default>1</default>
-    </attribute>
-</targetInstance>
-
-<targetInstance>
     <id>sys0node0membuf5mbs0mba0</id>
     <type>unit-mba-centaur</type>
     <attribute><id>HUID</id><default>0x0011000A</default></attribute>
@@ -2797,6 +2603,24 @@
     <attribute>
         <id>CHIP_UNIT</id>
         <default>0</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0membuf5mbs0mba1</id>
+    <type>unit-mba-centaur</type>
+    <attribute><id>HUID</id><default>0x0011000B</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/membuf-5/mbs-0/mba-1</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mcs-5/membuf-5/mbs-0/mba-1</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>1</default>
     </attribute>
 </targetInstance>
 
@@ -2871,24 +2695,6 @@
 <!-- TULETA Centaur MBAs affiliated with membuf6 -->
 
 <targetInstance>
-    <id>sys0node0membuf6mbs0mba1</id>
-    <type>unit-mba-centaur</type>
-    <attribute><id>HUID</id><default>0x0011000D</default></attribute>
-    <attribute>
-        <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/membuf-6/mbs-0/mba-1</default>
-    </attribute>
-    <attribute>
-        <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-0/mcs-6/membuf-6/mbs-0/mba-1</default>
-    </attribute>
-    <attribute>
-        <id>CHIP_UNIT</id>
-        <default>1</default>
-    </attribute>
-</targetInstance>
-
-<targetInstance>
     <id>sys0node0membuf6mbs0mba0</id>
     <type>unit-mba-centaur</type>
     <attribute><id>HUID</id><default>0x0011000C</default></attribute>
@@ -2903,6 +2709,24 @@
     <attribute>
         <id>CHIP_UNIT</id>
         <default>0</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0membuf6mbs0mba1</id>
+    <type>unit-mba-centaur</type>
+    <attribute><id>HUID</id><default>0x0011000D</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/membuf-6/mbs-0/mba-1</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mcs-6/membuf-6/mbs-0/mba-1</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>1</default>
     </attribute>
 </targetInstance>
 
@@ -2977,24 +2801,6 @@
 <!-- TULETA Centaur MBAs affiliated with membuf7 -->
 
 <targetInstance>
-    <id>sys0node0membuf7mbs0mba1</id>
-    <type>unit-mba-centaur</type>
-    <attribute><id>HUID</id><default>0x0011000F</default></attribute>
-    <attribute>
-        <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/membuf-7/mbs-0/mba-1</default>
-    </attribute>
-    <attribute>
-        <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-0/mcs-7/membuf-7/mbs-0/mba-1</default>
-    </attribute>
-    <attribute>
-        <id>CHIP_UNIT</id>
-        <default>1</default>
-    </attribute>
-</targetInstance>
-
-<targetInstance>
     <id>sys0node0membuf7mbs0mba0</id>
     <type>unit-mba-centaur</type>
     <attribute><id>HUID</id><default>0x0011000E</default></attribute>
@@ -3009,6 +2815,24 @@
     <attribute>
         <id>CHIP_UNIT</id>
         <default>0</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0membuf7mbs0mba1</id>
+    <type>unit-mba-centaur</type>
+    <attribute><id>HUID</id><default>0x0011000F</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/membuf-7/mbs-0/mba-1</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mcs-7/membuf-7/mbs-0/mba-1</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>1</default>
     </attribute>
 </targetInstance>
 
@@ -3083,24 +2907,6 @@
 <!-- TULETA Centaur MBAs affiliated with membuf12 -->
 
 <targetInstance>
-    <id>sys0node0membuf12mbs0mba1</id>
-    <type>unit-mba-centaur</type>
-    <attribute><id>HUID</id><default>0x00110019</default></attribute>
-    <attribute>
-        <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/membuf-12/mbs-0/mba-1</default>
-    </attribute>
-    <attribute>
-        <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-1/mcs-4/membuf-12/mbs-0/mba-1</default>
-    </attribute>
-    <attribute>
-        <id>CHIP_UNIT</id>
-        <default>1</default>
-    </attribute>
-</targetInstance>
-
-<targetInstance>
     <id>sys0node0membuf12mbs0mba0</id>
     <type>unit-mba-centaur</type>
     <attribute><id>HUID</id><default>0x00110018</default></attribute>
@@ -3115,6 +2921,24 @@
     <attribute>
         <id>CHIP_UNIT</id>
         <default>0</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0membuf12mbs0mba1</id>
+    <type>unit-mba-centaur</type>
+    <attribute><id>HUID</id><default>0x00110019</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/membuf-12/mbs-0/mba-1</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-1/mcs-4/membuf-12/mbs-0/mba-1</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>1</default>
     </attribute>
 </targetInstance>
 
@@ -3189,24 +3013,6 @@
 <!-- TULETA Centaur MBAs affiliated with membuf13 -->
 
 <targetInstance>
-    <id>sys0node0membuf13mbs0mba1</id>
-    <type>unit-mba-centaur</type>
-    <attribute><id>HUID</id><default>0x0011001B</default></attribute>
-    <attribute>
-        <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/membuf-13/mbs-0/mba-1</default>
-    </attribute>
-    <attribute>
-        <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-1/mcs-5/membuf-13/mbs-0/mba-1</default>
-    </attribute>
-    <attribute>
-        <id>CHIP_UNIT</id>
-        <default>1</default>
-    </attribute>
-</targetInstance>
-
-<targetInstance>
     <id>sys0node0membuf13mbs0mba0</id>
     <type>unit-mba-centaur</type>
     <attribute><id>HUID</id><default>0x0011001A</default></attribute>
@@ -3221,6 +3027,24 @@
     <attribute>
         <id>CHIP_UNIT</id>
         <default>0</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0membuf13mbs0mba1</id>
+    <type>unit-mba-centaur</type>
+    <attribute><id>HUID</id><default>0x0011001B</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/membuf-13/mbs-0/mba-1</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-1/mcs-5/membuf-13/mbs-0/mba-1</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>1</default>
     </attribute>
 </targetInstance>
 
@@ -3295,24 +3119,6 @@
 <!-- TULETA Centaur MBAs affiliated with membuf14 -->
 
 <targetInstance>
-    <id>sys0node0membuf14mbs0mba1</id>
-    <type>unit-mba-centaur</type>
-    <attribute><id>HUID</id><default>0x0011001D</default></attribute>
-    <attribute>
-        <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/membuf-14/mbs-0/mba-1</default>
-    </attribute>
-    <attribute>
-        <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-1/mcs-6/membuf-14/mbs-0/mba-1</default>
-    </attribute>
-    <attribute>
-        <id>CHIP_UNIT</id>
-        <default>1</default>
-    </attribute>
-</targetInstance>
-
-<targetInstance>
     <id>sys0node0membuf14mbs0mba0</id>
     <type>unit-mba-centaur</type>
     <attribute><id>HUID</id><default>0x0011001C</default></attribute>
@@ -3327,6 +3133,24 @@
     <attribute>
         <id>CHIP_UNIT</id>
         <default>0</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0membuf14mbs0mba1</id>
+    <type>unit-mba-centaur</type>
+    <attribute><id>HUID</id><default>0x0011001D</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/membuf-14/mbs-0/mba-1</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-1/mcs-6/membuf-14/mbs-0/mba-1</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>1</default>
     </attribute>
 </targetInstance>
 
@@ -3401,24 +3225,6 @@
 <!-- TULETA Centaur MBAs affiliated with membuf15 -->
 
 <targetInstance>
-    <id>sys0node0membuf15mbs0mba1</id>
-    <type>unit-mba-centaur</type>
-    <attribute><id>HUID</id><default>0x0011001F</default></attribute>
-    <attribute>
-        <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/membuf-15/mbs-0/mba-1</default>
-    </attribute>
-    <attribute>
-        <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-1/mcs-7/membuf-15/mbs-0/mba-1</default>
-    </attribute>
-    <attribute>
-        <id>CHIP_UNIT</id>
-        <default>1</default>
-    </attribute>
-</targetInstance>
-
-<targetInstance>
     <id>sys0node0membuf15mbs0mba0</id>
     <type>unit-mba-centaur</type>
     <attribute><id>HUID</id><default>0x0011001E</default></attribute>
@@ -3433,6 +3239,24 @@
     <attribute>
         <id>CHIP_UNIT</id>
         <default>0</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0membuf15mbs0mba1</id>
+    <type>unit-mba-centaur</type>
+    <attribute><id>HUID</id><default>0x0011001F</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/membuf-15/mbs-0/mba-1</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-1/mcs-7/membuf-15/mbs-0/mba-1</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>1</default>
     </attribute>
 </targetInstance>
 
@@ -3507,24 +3331,6 @@
 <!-- TULETA Centaur MBAs affiliated with membuf20 -->
 
 <targetInstance>
-    <id>sys0node0membuf20mbs0mba1</id>
-    <type>unit-mba-centaur</type>
-    <attribute><id>HUID</id><default>0x00110029</default></attribute>
-    <attribute>
-        <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/membuf-20/mbs-0/mba-1</default>
-    </attribute>
-    <attribute>
-        <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-2/mcs-4/membuf-20/mbs-0/mba-1</default>
-    </attribute>
-    <attribute>
-        <id>CHIP_UNIT</id>
-        <default>1</default>
-    </attribute>
-</targetInstance>
-
-<targetInstance>
     <id>sys0node0membuf20mbs0mba0</id>
     <type>unit-mba-centaur</type>
     <attribute><id>HUID</id><default>0x00110028</default></attribute>
@@ -3539,6 +3345,24 @@
     <attribute>
         <id>CHIP_UNIT</id>
         <default>0</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0membuf20mbs0mba1</id>
+    <type>unit-mba-centaur</type>
+    <attribute><id>HUID</id><default>0x00110029</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/membuf-20/mbs-0/mba-1</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-2/mcs-4/membuf-20/mbs-0/mba-1</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>1</default>
     </attribute>
 </targetInstance>
 
@@ -3613,24 +3437,6 @@
 <!-- TULETA Centaur MBAs affiliated with membuf21 -->
 
 <targetInstance>
-    <id>sys0node0membuf21mbs0mba1</id>
-    <type>unit-mba-centaur</type>
-    <attribute><id>HUID</id><default>0x0011002B</default></attribute>
-    <attribute>
-        <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/membuf-21/mbs-0/mba-1</default>
-    </attribute>
-    <attribute>
-        <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-2/mcs-5/membuf-21/mbs-0/mba-1</default>
-    </attribute>
-    <attribute>
-        <id>CHIP_UNIT</id>
-        <default>1</default>
-    </attribute>
-</targetInstance>
-
-<targetInstance>
     <id>sys0node0membuf21mbs0mba0</id>
     <type>unit-mba-centaur</type>
     <attribute><id>HUID</id><default>0x0011002A</default></attribute>
@@ -3645,6 +3451,24 @@
     <attribute>
         <id>CHIP_UNIT</id>
         <default>0</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0membuf21mbs0mba1</id>
+    <type>unit-mba-centaur</type>
+    <attribute><id>HUID</id><default>0x0011002B</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/membuf-21/mbs-0/mba-1</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-2/mcs-5/membuf-21/mbs-0/mba-1</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>1</default>
     </attribute>
 </targetInstance>
 
@@ -3719,24 +3543,6 @@
 <!-- TULETA Centaur MBAs affiliated with membuf22 -->
 
 <targetInstance>
-    <id>sys0node0membuf22mbs0mba1</id>
-    <type>unit-mba-centaur</type>
-    <attribute><id>HUID</id><default>0x0011002D</default></attribute>
-    <attribute>
-        <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/membuf-22/mbs-0/mba-1</default>
-    </attribute>
-    <attribute>
-        <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-2/mcs-6/membuf-22/mbs-0/mba-1</default>
-    </attribute>
-    <attribute>
-        <id>CHIP_UNIT</id>
-        <default>1</default>
-    </attribute>
-</targetInstance>
-
-<targetInstance>
     <id>sys0node0membuf22mbs0mba0</id>
     <type>unit-mba-centaur</type>
     <attribute><id>HUID</id><default>0x0011002C</default></attribute>
@@ -3751,6 +3557,24 @@
     <attribute>
         <id>CHIP_UNIT</id>
         <default>0</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0membuf22mbs0mba1</id>
+    <type>unit-mba-centaur</type>
+    <attribute><id>HUID</id><default>0x0011002D</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/membuf-22/mbs-0/mba-1</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-2/mcs-6/membuf-22/mbs-0/mba-1</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>1</default>
     </attribute>
 </targetInstance>
 
@@ -3825,24 +3649,6 @@
 <!-- TULETA Centaur MBAs affiliated with membuf23 -->
 
 <targetInstance>
-    <id>sys0node0membuf23mbs0mba1</id>
-    <type>unit-mba-centaur</type>
-    <attribute><id>HUID</id><default>0x0011002F</default></attribute>
-    <attribute>
-        <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/membuf-23/mbs-0/mba-1</default>
-    </attribute>
-    <attribute>
-        <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-2/mcs-7/membuf-23/mbs-0/mba-1</default>
-    </attribute>
-    <attribute>
-        <id>CHIP_UNIT</id>
-        <default>1</default>
-    </attribute>
-</targetInstance>
-
-<targetInstance>
     <id>sys0node0membuf23mbs0mba0</id>
     <type>unit-mba-centaur</type>
     <attribute><id>HUID</id><default>0x0011002E</default></attribute>
@@ -3857,6 +3663,24 @@
     <attribute>
         <id>CHIP_UNIT</id>
         <default>0</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0membuf23mbs0mba1</id>
+    <type>unit-mba-centaur</type>
+    <attribute><id>HUID</id><default>0x0011002F</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/membuf-23/mbs-0/mba-1</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-2/mcs-7/membuf-23/mbs-0/mba-1</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>1</default>
     </attribute>
 </targetInstance>
 
@@ -3931,24 +3755,6 @@
 <!-- TULETA Centaur MBAs affiliated with membuf28 -->
 
 <targetInstance>
-    <id>sys0node0membuf28mbs0mba1</id>
-    <type>unit-mba-centaur</type>
-    <attribute><id>HUID</id><default>0x00110039</default></attribute>
-    <attribute>
-        <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/membuf-28/mbs-0/mba-1</default>
-    </attribute>
-    <attribute>
-        <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-3/mcs-4/membuf-28/mbs-0/mba-1</default>
-    </attribute>
-    <attribute>
-        <id>CHIP_UNIT</id>
-        <default>1</default>
-    </attribute>
-</targetInstance>
-
-<targetInstance>
     <id>sys0node0membuf28mbs0mba0</id>
     <type>unit-mba-centaur</type>
     <attribute><id>HUID</id><default>0x00110038</default></attribute>
@@ -3963,6 +3769,24 @@
     <attribute>
         <id>CHIP_UNIT</id>
         <default>0</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0membuf28mbs0mba1</id>
+    <type>unit-mba-centaur</type>
+    <attribute><id>HUID</id><default>0x00110039</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/membuf-28/mbs-0/mba-1</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-3/mcs-4/membuf-28/mbs-0/mba-1</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>1</default>
     </attribute>
 </targetInstance>
 
@@ -4037,24 +3861,6 @@
 <!-- TULETA Centaur MBAs affiliated with membuf29 -->
 
 <targetInstance>
-    <id>sys0node0membuf29mbs0mba1</id>
-    <type>unit-mba-centaur</type>
-    <attribute><id>HUID</id><default>0x0011003B</default></attribute>
-    <attribute>
-        <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/membuf-29/mbs-0/mba-1</default>
-    </attribute>
-    <attribute>
-        <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-3/mcs-5/membuf-29/mbs-0/mba-1</default>
-    </attribute>
-    <attribute>
-        <id>CHIP_UNIT</id>
-        <default>1</default>
-    </attribute>
-</targetInstance>
-
-<targetInstance>
     <id>sys0node0membuf29mbs0mba0</id>
     <type>unit-mba-centaur</type>
     <attribute><id>HUID</id><default>0x0011003A</default></attribute>
@@ -4069,6 +3875,24 @@
     <attribute>
         <id>CHIP_UNIT</id>
         <default>0</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0membuf29mbs0mba1</id>
+    <type>unit-mba-centaur</type>
+    <attribute><id>HUID</id><default>0x0011003B</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/membuf-29/mbs-0/mba-1</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-3/mcs-5/membuf-29/mbs-0/mba-1</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>1</default>
     </attribute>
 </targetInstance>
 
@@ -4143,24 +3967,6 @@
 <!-- TULETA Centaur MBAs affiliated with membuf30 -->
 
 <targetInstance>
-    <id>sys0node0membuf30mbs0mba1</id>
-    <type>unit-mba-centaur</type>
-    <attribute><id>HUID</id><default>0x0011003D</default></attribute>
-    <attribute>
-        <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/membuf-30/mbs-0/mba-1</default>
-    </attribute>
-    <attribute>
-        <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-3/mcs-6/membuf-30/mbs-0/mba-1</default>
-    </attribute>
-    <attribute>
-        <id>CHIP_UNIT</id>
-        <default>1</default>
-    </attribute>
-</targetInstance>
-
-<targetInstance>
     <id>sys0node0membuf30mbs0mba0</id>
     <type>unit-mba-centaur</type>
     <attribute><id>HUID</id><default>0x0011003C</default></attribute>
@@ -4175,6 +3981,24 @@
     <attribute>
         <id>CHIP_UNIT</id>
         <default>0</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0membuf30mbs0mba1</id>
+    <type>unit-mba-centaur</type>
+    <attribute><id>HUID</id><default>0x0011003D</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/membuf-30/mbs-0/mba-1</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-3/mcs-6/membuf-30/mbs-0/mba-1</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>1</default>
     </attribute>
 </targetInstance>
 
@@ -4249,24 +4073,6 @@
 <!-- TULETA Centaur MBAs affiliated with membuf31 -->
 
 <targetInstance>
-    <id>sys0node0membuf31mbs0mba1</id>
-    <type>unit-mba-centaur</type>
-    <attribute><id>HUID</id><default>0x0011003F</default></attribute>
-    <attribute>
-        <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/membuf-31/mbs-0/mba-1</default>
-    </attribute>
-    <attribute>
-        <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-3/mcs-7/membuf-31/mbs-0/mba-1</default>
-    </attribute>
-    <attribute>
-        <id>CHIP_UNIT</id>
-        <default>1</default>
-    </attribute>
-</targetInstance>
-
-<targetInstance>
     <id>sys0node0membuf31mbs0mba0</id>
     <type>unit-mba-centaur</type>
     <attribute><id>HUID</id><default>0x0011003E</default></attribute>
@@ -4281,6 +4087,24 @@
     <attribute>
         <id>CHIP_UNIT</id>
         <default>0</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0membuf31mbs0mba1</id>
+    <type>unit-mba-centaur</type>
+    <attribute><id>HUID</id><default>0x0011003F</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/membuf-31/mbs-0/mba-1</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-3/mcs-7/membuf-31/mbs-0/mba-1</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>1</default>
     </attribute>
 </targetInstance>
 

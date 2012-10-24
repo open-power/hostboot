@@ -57,6 +57,7 @@
 #include    <fapiPlatHwpInvoker.H>
 
 #include    "dram_initialization.H"
+#include    <pbusLinkSvc.H>
 
 //  Uncomment these files as they become available:
 // #include    "host_startPRD_dram/host_startPRD_dram.H"
@@ -80,6 +81,7 @@ namespace   DRAM_INITIALIZATION
 {
 
 using   namespace   TARGETING;
+using   namespace   EDI_EI_INITIALIZATION;
 using   namespace   fapi;
 
 
@@ -426,59 +428,76 @@ void*    call_proc_setup_bars( void    *io_pArgs )
         //  -----------------------------------------------------------------------
         std::vector<proc_setup_bars_proc_chip> l_proc_chips;
 
-        for ( size_t i = 0; i < l_cpuTargetList.size(); i++ )
+        TargetPairs_t l_abusLinks;
+        l_errl = PbusLinkSvc::getTheInstance().getPbusConnections(
+                                    l_abusLinks, TYPE_ABUS, false );
+
+        for ( size_t i = 0; i < l_cpuTargetList.size() && !l_errl; i++ )
         {
             //  make a local copy of the target for ease of use
             const TARGETING::Target*  l_pCpuTarget = l_cpuTargetList[i];
 
-            TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                       "proc_setup_bars: proc %d", i );
-            //  dump physical path to targets
-            EntityPath l_path;
-            l_path  =   l_pCpuTarget->getAttr<ATTR_PHYS_PATH>();
-            l_path.dump();
-
             // cast OUR type of target to a FAPI type of target.
-            const fapi::Target l_fapi_pCpuTarget(
-                                                TARGET_TYPE_MEMBUF_CHIP,
-                                                reinterpret_cast<void *>
-                                                (const_cast<TARGETING::Target*>
-                                                 (l_pCpuTarget)) );
-            //  @todo Create dummy aX targets
-            const fapi::Target  l_a0_chip;
-            const fapi::Target  l_a1_chip;
-            const fapi::Target  l_a2_chip;
-
+            const fapi::Target l_fapi_pCpuTarget( TARGET_TYPE_PROC_CHIP,
+                   reinterpret_cast<void *> (const_cast<TARGETING::Target*>
+                                                             (l_pCpuTarget)) );
 
             proc_setup_bars_proc_chip l_proc_chip ;
-            l_proc_chip.this_chip  =   l_fapi_pCpuTarget;
-            l_proc_chip.a0_chip    =    l_a0_chip;
-            l_proc_chip.a1_chip    =    l_a1_chip;
-            l_proc_chip.a2_chip    =    l_a2_chip;
-            l_proc_chip.process_f0 =    true;
-            l_proc_chip.process_f1 =    true;
+            l_proc_chip.this_chip  = l_fapi_pCpuTarget;
+            l_proc_chip.process_f0 = true;
+            l_proc_chip.process_f1 = true;
+
+            TARGETING::TargetHandleList l_abuses;
+            getChildChiplets( l_abuses, l_pCpuTarget, TYPE_ABUS );
+
+            for (size_t j = 0; j < l_abuses.size(); j++)
+            {
+                TARGETING::Target * l_target = l_abuses[j];
+                uint8_t l_srcID = l_target->getAttr<ATTR_CHIP_UNIT>();
+                TargetPairs_t::iterator l_itr = l_abusLinks.find(l_target);
+                if ( l_itr == l_abusLinks.end() )
+                {
+                    continue;
+                }
+
+                const TARGETING::Target *l_pParent = NULL;
+                l_pParent = getParentChip(
+                              (const_cast<TARGETING::Target*>(l_itr->second)));
+                fapi::Target l_fapiproc_parent( TARGET_TYPE_PROC_CHIP,
+                                             (void *)l_pParent );
+
+                switch (l_srcID)
+                {
+                    case 0: l_proc_chip.a0_chip = l_fapiproc_parent; break;
+                    case 1: l_proc_chip.a1_chip = l_fapiproc_parent; break;
+                    case 2: l_proc_chip.a2_chip = l_fapiproc_parent; break;
+                   default: break; 
+                }
+            }
 
             l_proc_chips.push_back( l_proc_chip );
 
+        }   // endfor
+
+        if (!l_errl)
+        {
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                       "call proc_setup_bars");
+
             //  call the HWP with each fapi::Target
-            FAPI_INVOKE_HWP( l_errl,
-                             proc_setup_bars,
-                             l_proc_chips,
-                             true );
+            FAPI_INVOKE_HWP( l_errl, proc_setup_bars, l_proc_chips, true );
 
             if ( l_errl )
             {
                 TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
                           "ERROR : proc_setup_bars" );
-                //  break out with error
-                break;
             }
             else
             {
                 TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                            "SUCCESS : proc_setup-bars" );
             }
-        }   // endfor
+        }
     }   // end if !l_errl
 
     // @@@@@    END CUSTOM BLOCK:   @@@@@

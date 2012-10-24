@@ -32,6 +32,7 @@ EXTRAINCDIR += ${ROOTPATH}/src/include/usr/hwpf/hwp
 
 ## pointer to common HWP files
 EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/include
+EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/bus_training
 
 ##  NOTE: add the base istep dir here.
 EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/dram_initialization

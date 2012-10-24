@@ -1,27 +1,26 @@
-/*  IBM_PROLOG_BEGIN_TAG
- *  This is an automatically generated prolog.
- *
- *  $Source: src/usr/hwpf/hwp/dram_initialization/proc_setup_bars/proc_setup_bars.C $
- *
- *  IBM CONFIDENTIAL
- *
- *  COPYRIGHT International Business Machines Corp. 2012
- *
- *  p1
- *
- *  Object Code Only (OCO) source materials
- *  Licensed Internal Code Source Materials
- *  IBM HostBoot Licensed Internal Code
- *
- *  The source code for this program is not published or other-
- *  wise divested of its trade secrets, irrespective of what has
- *  been deposited with the U.S. Copyright Office.
- *
- *  Origin: 30
- *
- *  IBM_PROLOG_END_TAG
- */
-// $Id: proc_setup_bars.C,v 1.5 2012/07/23 17:47:05 jmcgill Exp $
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/usr/hwpf/hwp/dram_initialization/proc_setup_bars/proc_setup_bars.C $ */
+/*                                                                        */
+/* IBM CONFIDENTIAL                                                       */
+/*                                                                        */
+/* COPYRIGHT International Business Machines Corp. 2012                   */
+/*                                                                        */
+/* p1                                                                     */
+/*                                                                        */
+/* Object Code Only (OCO) source materials                                */
+/* Licensed Internal Code Source Materials                                */
+/* IBM HostBoot Licensed Internal Code                                    */
+/*                                                                        */
+/* The source code for this program is not published or otherwise         */
+/* divested of its trade secrets, irrespective of what has been           */
+/* deposited with the U.S. Copyright Office.                              */
+/*                                                                        */
+/* Origin: 30                                                             */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
+// $Id: proc_setup_bars.C,v 1.7 2012/10/09 15:31:38 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_setup_bars.C,v $
 //------------------------------------------------------------------------------
 // *|
@@ -876,7 +875,7 @@ fapi::ReturnCode proc_setup_bars_nx_get_mmio_bar_attrs(
                            io_addr_range.size);
         if (!rc.ok())
         {
-            FAPI_ERR("proc_setup_bars_fsp_get_bar_attrs: Error querying ATTR_PROC_NX_MMIO_BAR_SIZE");
+            FAPI_ERR("proc_setup_bars_nx_get_mmio_bar_attrs: Error querying ATTR_PROC_NX_MMIO_BAR_SIZE");
             break;
         }
 
@@ -1358,32 +1357,69 @@ fapi::ReturnCode proc_setup_bars_process_chips(
     // mark function entry
     FAPI_DBG("proc_setup_bars_process_chips: Start");
 
-    // loop over all chips passed from platform to HWP
-    std::vector<proc_setup_bars_proc_chip>::iterator iter;
-    for (iter = i_proc_chips.begin();
-         iter != i_proc_chips.end();
-         iter++)
+    do
     {
-        // process platform provided data in chip argument,
-        // query chip specific attributes
-        proc_setup_bars_smp_chip smp_chip;
-        rc = proc_setup_bars_process_chip(&(*iter),
-                                          smp_chip);
+        // loop over all chips passed from platform to HWP
+        std::vector<proc_setup_bars_proc_chip>::iterator c_iter;
+        for (c_iter = i_proc_chips.begin();
+             c_iter != i_proc_chips.end();
+             c_iter++)
+        {
+            // process platform provided data in chip argument,
+            // query chip specific attributes
+            proc_setup_bars_smp_chip smp_chip;
+            rc = proc_setup_bars_process_chip(&(*c_iter),
+                                              smp_chip);
+            if (!rc.ok())
+            {
+                FAPI_ERR("proc_setup_bars_process_chips: Error from proc_setup_bars_process_chip");
+                break;
+            }
+
+            // insert chip into SMP data structure given node & chip ID
+            rc = proc_setup_bars_insert_chip(smp_chip,
+                                             io_smp);
+            if (!rc.ok())
+            {
+                FAPI_ERR("proc_setup_bars_process_chips: Error from proc_setup_bars_insert_chip");
+                break;
+            }
+        }
         if (!rc.ok())
         {
-            FAPI_ERR("proc_setup_bars_process_chips: Error from proc_setup_bars_process_chip");
             break;
         }
 
-        // insert chip into SMP data structure given node & chip ID
-        rc = proc_setup_bars_insert_chip(smp_chip,
-                                         io_smp);
+        // perform final power of two adjustment on node specific resources once
+        // all chips have been processed
+        std::map<proc_fab_smp_node_id, proc_setup_bars_smp_node>::iterator n_iter;
+        for (n_iter = io_smp.nodes.begin();
+             n_iter != io_smp.nodes.end();
+             n_iter++)
+        {
+            // update node address ranges (non-mirrored & mirrored)
+            FAPI_DBG("proc_setup_bars_process_chips: Node %d ranges after power of two alignment:",
+                     n_iter->first);
+            // ensure range is power of 2 aligned
+            if (n_iter->second.non_mirrored_range.enabled &&
+                !n_iter->second.non_mirrored_range.is_power_of_2())
+            {
+                n_iter->second.non_mirrored_range.round_next_power_of_2();
+            }
+            n_iter->second.non_mirrored_range.print();
+
+            if (n_iter->second.mirrored_range.enabled &&
+                !n_iter->second.mirrored_range.is_power_of_2())
+            {
+                n_iter->second.mirrored_range.round_next_power_of_2();
+            }
+            n_iter->second.mirrored_range.print();
+        }
         if (!rc.ok())
         {
-            FAPI_ERR("proc_setup_bars_process_chips: Error from proc_setup_bars_insert_chip");
             break;
         }
-    }
+    } while(0);
 
     // mark function exit
     FAPI_DBG("proc_setup_bars_process_chips: End");

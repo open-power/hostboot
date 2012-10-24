@@ -67,7 +67,7 @@ define MBA1 = TGT2;
 #--******************************************************************************
 #-- Basic SCOM
 #--******************************************************************************
-scom 0x0000000013010002              {
+scom 0x0000000014010002              {
   scom_data                 ;
   0xAABBC00000000000        ;
 }
@@ -76,7 +76,7 @@ scom 0x0000000013010002              {
 #-- Basic SCOM with Expression and Attribute
 #--******************************************************************************
 
-scom 0x0000000013030007              {
+scom 0x0000000014030007              {
   scom_data,            expr                 ;
   0x00000CDE00000000,   SYS.ATTR_SCRATCH_UINT8_1 == SYS.ATTR_SCRATCH_UINT8_2    ;
 }
@@ -139,7 +139,7 @@ scom 0x000000000006800c              {
 #--******************************************************************************
 #-- Basic SCOM with bits
 #--******************************************************************************
-scom 0x0000000013013283              {
+scom 0x0000000014013283              {
     bits ,                    scom_data        ;
     0:11 ,                    0b001111001001   ;
     12   ,                    0b1              ;
@@ -152,7 +152,7 @@ scom 0x0000000013013283              {
 #-- Complext SCOM with Bit Support, define, and attributes
 #--******************************************************************************
 
-scom 0x0000000013013284              {
+scom 0x0000000014013284              {
     bits ,                    scom_data,        expr                                  ;
     0:11 ,                    0b001111001001,   ANY                                   ;
     12   ,                    0b1,              def_equal_test                        ;
@@ -165,7 +165,7 @@ scom 0x0000000013013284              {
 #-- Complex SCOM with Bit Support, and logical operators
 #--******************************************************************************
 
-scom 0x0000000013013285              {
+scom 0x0000000014013285              {
     bits ,                    scom_data,        expr                                  ;
     12   ,                    0b1,              def_equal_test && def_not_equal_test  ;
     12   ,                    0b0,              def_equal_test || def_not_equal_test  ;
@@ -183,7 +183,7 @@ scom 0x0000000013013285              {
 #-- SCOM with 'ec' column - Use scratch for now since all attributes work
 #--******************************************************************************
 
-scom 0x0000000013013286              {
+scom 0x0000000014013286              {
   scom_data,            SYS.ATTR_SCRATCH_UINT32_1,  SYS.ATTR_SCRATCH_UINT32_2        ;
   0x0000000000000192,   != 0,                       >= ENUM_ATTR_SCRATCH_UINT64_ARRAY_2_VAL_B       ;
 }
@@ -191,7 +191,7 @@ scom 0x0000000013013286              {
 #--******************************************************************************
 #-- Basic SCOM with an array
 #--******************************************************************************
-scom 0x0000000013013287              {
+scom 0x0000000014013287              {
   scom_data,            expr                 ;
   0x0000000000000182,   SYS.ATTR_SCRATCH_UINT8_ARRAY_1[2] == SYS.ATTR_SCRATCH_UINT8_1    ;
 }
@@ -199,7 +199,7 @@ scom 0x0000000013013287              {
 #--******************************************************************************
 #-- SCOM with 'ec' & expr column - Use scratch for now since all attributes work
 #--******************************************************************************
-scom 0x0000000013013288              {
+scom 0x0000000014013288              {
   scom_data,            SYS.ATTR_SCRATCH_UINT32_1,   expr;
   0x0000000000000192,   3,                           SYS.ATTR_SCRATCH_UINT8_ARRAY_2[1][2][3] == 0x00000000000000BE;
 }
@@ -207,7 +207,7 @@ scom 0x0000000013013288              {
 #--******************************************************************************
 #-- Complex SCOM with Bit Support, associated attributes and logical operators
 #--******************************************************************************
-scom 0x0000000013013289              {
+scom 0x0000000014013289              {
   bits,  scom_data,               MBA1.ATTR_CHIP_UNIT_POS, expr;
   23,    0b0,                     1,                       MBA0.ATTR_CHIP_UNIT_POS == 1;
   23,    MBA1.ATTR_CHIP_UNIT_POS, 1,                       MBA0.ATTR_CHIP_UNIT_POS == 0;

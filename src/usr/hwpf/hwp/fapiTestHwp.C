@@ -73,7 +73,7 @@ fapi::ReturnCode hwpInitialTest(const std::vector<fapi::Target> & i_target)
     do
     {
         // Use this SCOM register for testing
-        const uint64_t l_addr = 0x13010002;
+        const uint64_t l_addr = 0x14010002;
         ecmdDataBufferBase l_ScomData(64);
         uint64_t l_originalScomData = 0;
 

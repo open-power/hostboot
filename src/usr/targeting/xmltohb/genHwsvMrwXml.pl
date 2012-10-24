@@ -81,6 +81,22 @@ if ($outFile ne "")
 
 my $SYSNAME = uc($sysname);
 
+open (FH, "<$mrwdir/${sysname}-chip-ids.xml") ||
+    die "ERROR: unable to open $mrwdir/${sysname}-chip-ids.xml\n";
+close (FH);
+
+my $chipIds = XMLin("$mrwdir/${sysname}-chip-ids.xml");
+
+use constant CHIP_ID_NODE => 0;
+use constant CHIP_ID_POS  => 1;
+use constant CHIP_ID_PATH => 2;
+
+my @chipIDs;
+foreach my $i (@{$chipIds->{'chip-id'}})
+{
+    push @chipIDs, [ $i->{node}, $i->{position}, $i->{'instance-path'} ];
+}
+
 open (FH, "<$mrwdir/${sysname}-power-busses.xml") ||
     die "ERROR: unable to open $mrwdir/${sysname}-power-busses.xml\n";
 close (FH);
@@ -420,9 +436,21 @@ for (my $do_core = 0, my $i = 0; $i <= $#STargets; $i++)
         my $proc = $STargets[$i][POS_FIELD];
         my $ipath = $STargets[$i][PATH_FIELD];
         $proc_ordinal_id = $STargets[$i][ORDINAL_FIELD];
+        my $lognode;
+        my $logid;
+        for (my $j = 0; $j <= $#chipIDs; $j++)
+        {
+            if ($chipIDs[$j][CHIP_ID_PATH] eq $ipath)
+            {
+                $lognode = $chipIDs[$j][CHIP_ID_NODE];
+                $logid = $chipIDs[$j][CHIP_ID_POS];
+                last;
+            }
+        }
         if ($proc eq $Mproc)
         {
-            generate_master_proc($proc, $ipath,$STargets[$i][ORDINAL_FIELD]);
+            generate_proc($proc, $ipath, $lognode, $logid,
+                                         $proc_ordinal_id, 1, 0, 0);
             if ($build eq "fsp")
             {
                 generate_occ($proc);
@@ -458,7 +486,8 @@ for (my $do_core = 0, my $i = 0; $i <= $#STargets; $i++)
                     last;
                 }
             }
-            generate_slave_proc($proc, $fsi, $ipath,$STargets[$i][ORDINAL_FIELD]);
+            generate_proc($proc, $ipath, $lognode, $logid,
+                                         $proc_ordinal_id,  0, 1, $fsi);
             if ($build eq "fsp")
             {
                 generate_occ($proc);
@@ -917,9 +946,43 @@ sub generate_sys
         <id>FREQ_MEM_REFCLOCK</id>
         <default>$mem_refclk</default>
     </attribute>
+    <!-- TODO: The frequency attributes below will need to be obtained -->
+    <!-- from the MRW. RTC 51209 will implement this when MRW is ready -->
+    <!-- to supply the values of these attributes                      -->
     <attribute>
         <id>FREQ_CORE_FLOOR</id>
-        <default>2500</default>
+        <default>0x2580</default>
+    </attribute>
+    <attribute>
+        <id>FREQ_PB</id>
+        <default>0x960</default>
+    </attribute>
+    <attribute>
+        <id>FREQ_X</id>
+        <default>0x12C0</default>
+    </attribute>
+    <attribute>
+        <id>FREQ_A</id>
+        <default>0x1900</default>
+    </attribute>
+    <attribute>
+        <id>FREQ_PCIE</id>
+        <default>0x3E8</default>
+    </attribute>
+    <!-- The default value of the following three attributes are written  -->
+    <!-- by the HWP using them. The default values are not from MRW. They -->
+    <!-- are included here FYI.                                           -->
+    <attribute>
+        <id>PROC_EPS_GB_DIRECTION</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>PROC_EPS_GB_PERCENTAGE</id>
+        <default>0x14</default>
+    </attribute>
+    <attribute>
+        <id>PROC_FABRIC_ASYNC_SAFE_MODE</id>
+        <default>0</default>
     </attribute>
     <attribute>
         <id>SP_FUNCTIONS</id>
@@ -946,11 +1009,11 @@ sub generate_sys
     <attribute>
         <id>MSS_MBA_ADDR_INTERLEAVE_BIT</id>
         <default>24</default>
-    </attribute> 
+    </attribute>
     <attribute>
         <id>MSS_MBA_CACHELINE_INTERLEAVE_MODE</id>
         <default>1</default>
-    </attribute> 
+    </attribute>
     <attribute>
         <id>MSS_PREFETCH_ENABLE</id>
         <default>1</default>
@@ -1105,9 +1168,10 @@ sub generate_system_node
     }
 }
 
-sub generate_master_proc
+sub generate_proc
 {
-    my ($proc, $ipath, $ordinalId) = @_;
+    my ($proc, $ipath, $lognode, $logid, $ordinalId, $master, $slave, $fsi) = @_;
+    my $uidstr = sprintf("0x%02X07%04X",${node},${proc}+${node}*8);
     my $scompath = $devpath->{chip}->{$ipath}->{'scom-path'};
     my $scanpath = $devpath->{chip}->{$ipath}->{'scan-path'};
     my $scomsize = length($scompath) + 1;
@@ -1119,7 +1183,6 @@ sub generate_master_proc
         $mboxpath = $devpath->{chip}->{$ipath}->{'mailbox-path'};
         $mboxsize = length($mboxpath) + 1;
     }
-    my $uidstr = sprintf("0x%02X07%04X",${node},${proc}+${node}*8);
     print "
 <!-- $SYSNAME n${node}p${proc} processor chip -->
 
@@ -1130,8 +1193,8 @@ sub generate_master_proc
     <attribute><id>POSITION</id><default>${proc}</default></attribute>
     <attribute><id>SCOM_SWITCHES</id>
         <default>
-            <field><id>useFsiScom</id><value>0</value></field>
-            <field><id>useXscom</id><value>1</value></field>
+            <field><id>useFsiScom</id><value>$slave</value></field>
+            <field><id>useXscom</id><value>$master</value></field>
             <field><id>useInbandScom</id><value>0</value></field>
             <field><id>reserved</id><value>0</value></field>
         </default>
@@ -1146,13 +1209,39 @@ sub generate_master_proc
     </attribute>
     <attribute>
         <id>FABRIC_NODE_ID</id>
-        <default>$node</default>
+        <default>$lognode</default>
     </attribute>
     <attribute>
         <id>FABRIC_CHIP_ID</id>
-        <default>$proc</default>
+        <default>$logid</default>
     </attribute>
     <attribute><id>VPD_REC_NUM</id><default>$proc</default></attribute>";
+
+    if ($slave)
+    {
+        print "
+    <!-- FSI is connected via proc${Mproc}:MFSI-$fsi -->
+    <attribute>
+        <id>FSI_MASTER_CHIP</id>
+        <default>physical:sys-$sys/node-$node/proc-$Mproc</default>
+    </attribute>
+    <attribute>
+        <id>FSI_MASTER_TYPE</id>
+        <default>MFSI</default>
+    </attribute>
+    <attribute>
+        <id>FSI_MASTER_PORT</id>
+        <default>$fsi</default>
+    </attribute>
+    <attribute>
+        <id>FSI_SLAVE_CASCADE</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>FSI_OPTION_FLAGS</id>
+        <default>0</default>
+    </attribute>";
+    }
 
     if ($build eq "fsp")
     {
@@ -1194,7 +1283,7 @@ sub generate_master_proc
     # Starts at 1024TB - 128GB, 4GB per proc
     printf( "    <attribute><id>FSP_BASE_ADDR</id>\n" );
     printf( "        <default>0x%016X</default>\n",
-      0x0003FFE000000000 + 0x1000000000*$proc );
+	   0x0003FFE000000000 + 0x100000000*$proc );
     printf( "    </attribute>\n" );
 
     # Starts at 1024TB - 6GB, 1MB per link/proc
@@ -1427,183 +1516,6 @@ print"
 }
 print"
 </targetInstance>\n";
-}
-
-sub generate_slave_proc
-{
-    my ($proc, $fsi, $ipath, $ordinalId) = @_;
-    my $uidstr = sprintf("0x%02X07%04X",${node},$proc+${node}*8);
-    my $scompath = $devpath->{chip}->{$ipath}->{'scom-path'};
-    my $scanpath = $devpath->{chip}->{$ipath}->{'scan-path'};
-    my $scomsize = length($scompath) + 1;
-    my $scansize = length($scanpath) + 1;
-    my $mboxpath = "";
-    my $mboxsize = 0;
-    if (exists $devpath->{chip}->{$ipath}->{'mailbox-path'})
-    {
-        $mboxpath = $devpath->{chip}->{$ipath}->{'mailbox-path'};
-        $mboxsize = length($mboxpath) + 1;
-    }
-    print "
-<!-- $SYSNAME n${node}p$proc processor chip -->
-
-<targetInstance>
-    <id>sys${sys}node${node}proc$proc</id>
-    <type>chip-processor-murano</type>
-    <attribute><id>HUID</id><default>${uidstr}</default></attribute>
-    <attribute><id>POSITION</id><default>$proc</default></attribute>
-    <attribute><id>SCOM_SWITCHES</id>
-        <default>
-            <field><id>useFsiScom</id><value>1</value></field>
-            <field><id>useXscom</id><value>0</value></field>
-            <field><id>useInbandScom</id><value>0</value></field>
-            <field><id>reserved</id><value>0</value></field>
-        </default>
-    </attribute>
-    <attribute>
-        <id>PHYS_PATH</id>
-        <default>physical:sys-$sys/node-$node/proc-$proc</default>
-    </attribute>
-    <attribute>
-        <id>AFFINITY_PATH</id>
-        <default>affinity:sys-$sys/node-$node/proc-$proc</default>
-    </attribute>
-    <!-- FSI is connected via proc${Mproc}:MFSI-$fsi -->
-    <attribute>
-        <id>FSI_MASTER_CHIP</id>
-        <default>physical:sys-$sys/node-$node/proc-$Mproc</default>
-    </attribute>
-    <attribute>
-        <id>FSI_MASTER_TYPE</id>
-        <default>MFSI</default>
-    </attribute>
-    <attribute>
-        <id>FSI_MASTER_PORT</id>
-        <default>$fsi</default>
-    </attribute>
-    <attribute>
-        <id>FSI_SLAVE_CASCADE</id>
-        <default>0</default>
-    </attribute>
-    <attribute>
-        <id>FSI_OPTION_FLAGS</id>
-        <default>0</default>
-    </attribute>
-    <attribute>
-        <id>FABRIC_NODE_ID</id>
-        <default>$node</default>
-    </attribute>
-    <attribute>
-        <id>FABRIC_CHIP_ID</id>
-        <default>$proc</default>
-    </attribute>
-    <attribute><id>VPD_REC_NUM</id><default>$proc</default></attribute>";
-
-    if ($build eq "fsp")
-    {
-        print "
-    <attribute>
-        <id>ORDINAL_ID</id>
-        <default>$ordinalId</default>
-    </attribute>
-    <attribute>
-        <id>FSP_SCOM_DEVICE_PATH</id>
-        <default>$scompath</default>
-        <sizeInclNull>$scomsize</sizeInclNull>
-    </attribute>
-    <attribute>
-        <id>FSP_SCAN_DEVICE_PATH</id>
-        <default>$scanpath</default>
-        <sizeInclNull>$scansize</sizeInclNull>
-    </attribute>";
-    }
-
-    if (($mboxsize != 0) && ($build eq "fsp"))
-    {
-        print "
-    <attribute>
-        <id>FSP_MBOX_DEVICE_PATH</id>
-        <default>$mboxpath</default>
-        <sizeInclNull>$mboxsize</sizeInclNull>
-    </attribute>";
-    }
-
-    # Data from PHYP Memory Map
-
-    # Starts at 1024TB - 128GB, 4GB per proc
-    printf( "\n" );
-    printf( "    <attribute><id>FSP_BASE_ADDR</id>\n" );
-    printf( "        <default>0x%016X</default>\n",
-       0x0003FFE000000000 + 0x1000000000*$proc );
-    printf( "    </attribute>\n" );
-
-    # Starts at 1024TB - 6GB, 1MB per link/proc
-    printf( "    <attribute><id>PSI_BRIDGE_BASE_ADDR</id>\n" );
-    printf( "        <default>0x%016X</default>\n",
-       0x0003FFFE80000000 + 0x100000*$proc );
-    printf( "    </attribute>\n" );
-
-    # Starts at 1024TB - 2GB, 1MB per proc
-    printf( "    <attribute><id>INTP_BASE_ADDR</id>\n" );
-    printf( "        <default>0x%016X</default>\n",
-       0x0003FFFF80000000 + 0x100000*$proc );
-    printf( "    </attribute>\n" );
-
-    # Starts at 1024TB - 7GB, 1MB per PHB (=4MB per proc)
-    printf( "    <attribute><id>PHB_BASE_ADDRS</id>\n" );
-    printf( "        <default>\n" );
-    printf( "            0x%016X,0x%016X,\n",
-	   0x0003FFFE40000000 + 0x400000*$proc + 0x100000*0,
-	     0x0003FFFE40000000 + 0x400000*$proc + 0x100000*1 );
-    printf( "            0x%016X,0x%016X\n",
-	   0x0003FFFE40000000 + 0x400000*$proc + 0x100000*2,
-	     0x0003FFFE40000000 + 0x400000*$proc + 0x100000*3 );
-    printf( "        </default>\n" );
-    printf( "    </attribute>\n" );
-
-    # Starts at 976TB, 64GB per PHB (=256GB per proc)
-    printf( "    <attribute><id>PCI_BASE_ADDRS</id>\n" );
-    printf( "        <default>\n" );
-    printf( "            0x%016X,0x%016X,\n",
-	   0x0003D00000000000 + 0x4000000000*$proc + 0x1000000000*0,
-	     0x0003D00000000000 + 0x4000000000*$proc + 0x1000000000*1 );
-    printf( "            0x%016X,0x%016X\n",
-	   0x0003D00000000000 + 0x4000000000*$proc + 0x1000000000*2,
-	     0x0003D00000000000 + 0x4000000000*$proc + 0x1000000000*3 );
-    printf( "        </default>\n" );
-    printf( "    </attribute>\n" );
-
-    # Starts at 0, 2TB per proc
-    printf( "    <attribute><id>MEM_BASE</id>\n" );
-    printf( "        <default>0x%016X</default>\n", 0x20000000000*$proc );
-    printf( "    </attribute>\n" );
-
-    # Starts at 512TB, 2TB per proc
-    printf( "    <attribute><id>MIRROR_BASE</id>\n" );
-    printf( "        <default>0x%016X</default>\n",
-       0x0002000000000000 + 0x20000000000*$proc );
-    printf( "    </attribute>\n" );
-
-    # Starts at 1024TB - 3GB
-    printf( "    <attribute><id>RNG_BASE_ADDR</id>\n" );
-    printf( "        <default>0x%016X</default>\n",
-       0x0003FFFF40000000 + 0x1000*$proc );
-    printf( "    </attribute>\n" );
-
-    # end PHYP Memory Map
-
-
-    if ($build eq "fsp")
-    {
-        print "
-    <attribute>
-        <id>RID</id>
-        <default>0x100$proc</default>
-    </attribute>";
-    }
-
-    print "\n</targetInstance>\n";
-
 }
 
 sub generate_ex
@@ -1970,11 +1882,6 @@ sub generate_mba
     my $proc = $mcs;
     $proc =~ s/.*:p(.*):.*/$1/g;
     $mcs =~ s/.*:.*:mcs(.*)/$1/g;
-
-    if ($mba == 0)
-    {
-        print "\n<!-- $SYSNAME Centaur MBAs affiliated with membuf$ctaur -->\n";
-    }
 
     my $uidstr = sprintf("0x%02X11%04X",${node},$mba+$mcs*2+$proc*8*2+${node}*8*8*2);
 

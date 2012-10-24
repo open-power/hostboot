@@ -1472,23 +1472,6 @@ fapi::ReturnCode fapiPlatGetProcPcieBarSize (
             break;
         }
 
-        //  Just support proc 0 , 1 for now.
-        if ( l_procNum > 1 )
-        {
-            /*@
-             *  @errortype
-             *  @moduleid   MOD_ATTR_PROC_PCIE_BAR_SIZE_GET
-             *  @reasoncode RC_ATTR_UNSUPPORTED_PROC_NUM
-             *  @devdesc    Null FAPI Target passed to ATTR_GET
-             */
-            errlHndl_t l_pError = new ERRORLOG::ErrlEntry(
-                ERRORLOG::ERRL_SEV_INFORMATIONAL,
-                fapi::MOD_ATTR_PROC_PCIE_BAR_SIZE_GET,
-                fapi::RC_ATTR_UNSUPPORTED_PROC_NUM );
-            l_fapirc.setPlatError(reinterpret_cast<void *> (l_pError));
-            break;
-        }
-
         //  NOTE: supported BAR0/1 sizes are from 64KB-1PB
         //  NOTE: BAR1 is disabled, set to 0
         //  NOTE: only supported BAR2 size is 4KB

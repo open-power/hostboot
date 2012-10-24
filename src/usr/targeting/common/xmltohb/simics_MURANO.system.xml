@@ -237,7 +237,7 @@
     <id>sys0node0proc0ex4</id>
     <type>unit-ex-murano</type>
     <attribute><id>HUID</id><default>0x000A0004</default></attribute>
-        <attribute>
+    <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/ex-4</default>
     </attribute>
@@ -255,7 +255,7 @@
     <id>sys0node0proc0ex5</id>
     <type>unit-ex-murano</type>
     <attribute><id>HUID</id><default>0x000A0005</default></attribute>
-        <attribute>
+    <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/ex-5</default>
     </attribute>
@@ -273,7 +273,7 @@
     <id>sys0node0proc0ex6</id>
     <type>unit-ex-murano</type>
     <attribute><id>HUID</id><default>0x000A0006</default></attribute>
-        <attribute>
+    <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/ex-6</default>
     </attribute>
@@ -291,7 +291,7 @@
     <id>sys0node0proc0ex12</id>
     <type>unit-ex-murano</type>
     <attribute><id>HUID</id><default>0x000A000C</default></attribute>
-        <attribute>
+    <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/ex-12</default>
     </attribute>
@@ -309,7 +309,7 @@
     <id>sys0node0proc0ex13</id>
     <type>unit-ex-murano</type>
     <attribute><id>HUID</id><default>0x000A000D</default></attribute>
-        <attribute>
+    <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/ex-13</default>
     </attribute>
@@ -587,7 +587,7 @@
     <id>sys0node0proc0abus0</id>
     <type>unit-abus-murano</type>
     <attribute><id>HUID</id><default>0x00160000</default></attribute>
-        <attribute>
+    <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/abus-0</default>
     </attribute>
@@ -598,14 +598,14 @@
     <attribute>
         <id>CHIP_UNIT</id>
         <default>0</default>
-    </attribute>  
+    </attribute>
 </targetInstance>
 
 <targetInstance>
     <id>sys0node0proc0abus1</id>
     <type>unit-abus-murano</type>
     <attribute><id>HUID</id><default>0x00160001</default></attribute>
-        <attribute>
+    <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/abus-1</default>
     </attribute>
@@ -616,7 +616,7 @@
     <attribute>
         <id>CHIP_UNIT</id>
         <default>1</default>
-    </attribute>  
+    </attribute>
     <attribute>
         <id>PEER_TARGET</id>
         <default>physical:sys-0/node-0/proc-2/abus-1</default>
@@ -627,14 +627,14 @@
     <id>sys0node0proc0abus2</id>
     <type>unit-abus-murano</type>
     <attribute><id>HUID</id><default>0x00160002</default></attribute>
-        <attribute>
+    <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/abus-2</default>
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/abus-2</default>
-    </attribute> 
+    </attribute>
     <attribute>
         <id>CHIP_UNIT</id>
         <default>2</default>
@@ -651,7 +651,7 @@
     <id>sys0node0proc0xbus1</id>
     <type>unit-xbus-murano</type>
     <attribute><id>HUID</id><default>0x00150001</default></attribute>
-        <attribute>
+    <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/xbus-1</default>
     </attribute>
@@ -724,7 +724,7 @@
     </attribute>
     <attribute><id>VPD_REC_NUM</id><default>1</default></attribute>
     <attribute><id>FSP_BASE_ADDR</id>
-        <default>0x0003FFF000000000</default>
+        <default>0x0003FFE100000000</default>
     </attribute>
     <attribute><id>PSI_BRIDGE_BASE_ADDR</id>
         <default>0x0003FFFE80100000</default>
@@ -761,7 +761,7 @@
     <id>sys0node0proc1ex4</id>
     <type>unit-ex-murano</type>
     <attribute><id>HUID</id><default>0x000A0014</default></attribute>
-        <attribute>
+    <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-1/ex-4</default>
     </attribute>
@@ -779,7 +779,7 @@
     <id>sys0node0proc1ex5</id>
     <type>unit-ex-murano</type>
     <attribute><id>HUID</id><default>0x000A0015</default></attribute>
-        <attribute>
+    <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-1/ex-5</default>
     </attribute>
@@ -797,7 +797,7 @@
     <id>sys0node0proc1ex6</id>
     <type>unit-ex-murano</type>
     <attribute><id>HUID</id><default>0x000A0016</default></attribute>
-        <attribute>
+    <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-1/ex-6</default>
     </attribute>
@@ -815,7 +815,7 @@
     <id>sys0node0proc1ex12</id>
     <type>unit-ex-murano</type>
     <attribute><id>HUID</id><default>0x000A001C</default></attribute>
-        <attribute>
+    <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-1/ex-12</default>
     </attribute>
@@ -833,7 +833,7 @@
     <id>sys0node0proc1ex13</id>
     <type>unit-ex-murano</type>
     <attribute><id>HUID</id><default>0x000A001D</default></attribute>
-        <attribute>
+    <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-1/ex-13</default>
     </attribute>
@@ -1112,7 +1112,7 @@
     <id>sys0node0proc1abus0</id>
     <type>unit-abus-murano</type>
     <attribute><id>HUID</id><default>0x00160003</default></attribute>
-        <attribute>
+    <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-1/abus-0</default>
     </attribute>
@@ -1130,14 +1130,14 @@
     <id>sys0node0proc1abus1</id>
     <type>unit-abus-murano</type>
     <attribute><id>HUID</id><default>0x00160004</default></attribute>
-        <attribute>
+    <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-1/abus-1</default>
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-1/abus-1</default>
-    </attribute> 
+    </attribute>
     <attribute>
         <id>CHIP_UNIT</id>
         <default>1</default>
@@ -1152,7 +1152,7 @@
     <id>sys0node0proc1abus2</id>
     <type>unit-abus-murano</type>
     <attribute><id>HUID</id><default>0x00160005</default></attribute>
-        <attribute>
+    <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-1/abus-2</default>
     </attribute>
@@ -1176,7 +1176,7 @@
     <id>sys0node0proc1xbus1</id>
     <type>unit-xbus-murano</type>
     <attribute><id>HUID</id><default>0x00150005</default></attribute>
-        <attribute>
+    <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-1/xbus-1</default>
     </attribute>
@@ -1241,15 +1241,15 @@
     </attribute>
     <attribute>
         <id>FABRIC_NODE_ID</id>
-        <default>0</default>
+        <default>1</default>
     </attribute>
     <attribute>
         <id>FABRIC_CHIP_ID</id>
-        <default>2</default>
+        <default>0</default>
     </attribute>
     <attribute><id>VPD_REC_NUM</id><default>2</default></attribute>
     <attribute><id>FSP_BASE_ADDR</id>
-        <default>0x0004000000000000</default>
+        <default>0x0003FFE200000000</default>
     </attribute>
     <attribute><id>PSI_BRIDGE_BASE_ADDR</id>
         <default>0x0003FFFE80200000</default>
@@ -1638,7 +1638,7 @@
     <id>sys0node0proc2abus0</id>
     <type>unit-abus-murano</type>
     <attribute><id>HUID</id><default>0x00160006</default></attribute>
-        <attribute>
+    <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-2/abus-0</default>
     </attribute>
@@ -1656,14 +1656,14 @@
     <id>sys0node0proc2abus1</id>
     <type>unit-abus-murano</type>
     <attribute><id>HUID</id><default>0x00160007</default></attribute>
-        <attribute>
+    <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-2/abus-1</default>
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-2/abus-1</default>
-    </attribute> 
+    </attribute>
     <attribute>
         <id>CHIP_UNIT</id>
         <default>1</default>
@@ -1678,7 +1678,7 @@
     <id>sys0node0proc2abus2</id>
     <type>unit-abus-murano</type>
     <attribute><id>HUID</id><default>0x00160008</default></attribute>
-        <attribute>
+    <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-2/abus-2</default>
     </attribute>
@@ -1702,14 +1702,14 @@
     <id>sys0node0proc2xbus1</id>
     <type>unit-xbus-murano</type>
     <attribute><id>HUID</id><default>0x00150009</default></attribute>
-        <attribute>
+    <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-2/xbus-1</default>
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-2/xbus-1</default>
-    </attribute> 
+    </attribute>
     <attribute>
         <id>CHIP_UNIT</id>
         <default>1</default>
@@ -1767,15 +1767,15 @@
     </attribute>
     <attribute>
         <id>FABRIC_NODE_ID</id>
-        <default>0</default>
+        <default>1</default>
     </attribute>
     <attribute>
         <id>FABRIC_CHIP_ID</id>
-        <default>3</default>
+        <default>1</default>
     </attribute>
     <attribute><id>VPD_REC_NUM</id><default>3</default></attribute>
     <attribute><id>FSP_BASE_ADDR</id>
-        <default>0x0004001000000000</default>
+        <default>0x0003FFE300000000</default>
     </attribute>
     <attribute><id>PSI_BRIDGE_BASE_ADDR</id>
         <default>0x0003FFFE80300000</default>
@@ -2163,14 +2163,14 @@
     <id>sys0node0proc3abus0</id>
     <type>unit-abus-murano</type>
     <attribute><id>HUID</id><default>0x00160009</default></attribute>
-        <attribute>
+    <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-3/abus-0</default>
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-3/abus-0</default>
-    </attribute> 
+    </attribute>
     <attribute>
         <id>CHIP_UNIT</id>
         <default>0</default>
@@ -2181,7 +2181,7 @@
     <id>sys0node0proc3abus1</id>
     <type>unit-abus-murano</type>
     <attribute><id>HUID</id><default>0x0016000A</default></attribute>
-        <attribute>
+    <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-3/abus-1</default>
     </attribute>
@@ -2203,7 +2203,7 @@
     <id>sys0node0proc3abus2</id>
     <type>unit-abus-murano</type>
     <attribute><id>HUID</id><default>0x0016000B</default></attribute>
-        <attribute>
+    <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-3/abus-2</default>
     </attribute>
@@ -2227,7 +2227,7 @@
     <id>sys0node0proc3xbus1</id>
     <type>unit-xbus-murano</type>
     <attribute><id>HUID</id><default>0x0015000D</default></attribute>
-        <attribute>
+    <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-3/xbus-1</default>
     </attribute>
