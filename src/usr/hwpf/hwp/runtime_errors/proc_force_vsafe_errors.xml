@@ -1,0 +1,62 @@
+<!-- IBM_PROLOG_BEGIN_TAG                                                   -->
+<!-- This is an automatically generated prolog.                             -->
+<!--                                                                        -->
+<!-- $Source: src/usr/hwpf/hwp/runtime_errors/proc_force_vsafe_errors.xml $ -->
+<!--                                                                        -->
+<!-- IBM CONFIDENTIAL                                                       -->
+<!--                                                                        -->
+<!-- COPYRIGHT International Business Machines Corp. 2012                   -->
+<!--                                                                        -->
+<!-- p1                                                                     -->
+<!--                                                                        -->
+<!-- Object Code Only (OCO) source materials                                -->
+<!-- Licensed Internal Code Source Materials                                -->
+<!-- IBM HostBoot Licensed Internal Code                                    -->
+<!--                                                                        -->
+<!-- The source code for this program is not published or otherwise         -->
+<!-- divested of its trade secrets, irrespective of what has been           -->
+<!-- deposited with the U.S. Copyright Office.                              -->
+<!--                                                                        -->
+<!-- Origin: 30                                                             -->
+<!--                                                                        -->
+<!-- IBM_PROLOG_END_TAG                                                     -->
+<!-- Error definitions for proc_pmc_force_vsage procedure -->
+<hwpErrors>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_PROCPM_VLT_TIMEOUT</rc>
+    <description>voltage change timeout for the ongoing operation completion.</description>
+  </hwpError>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_PROCPM_VLT_ERROR</rc>
+    <description>voltage change not done because of  errors on the status register.</description>
+  </hwpError>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_PROCPM_PSTATE_MONITOR_ERR</rc>
+    <description>voltage change done but expected pstate didnot match after completion.</description>
+  </hwpError>
+  <!-- *********************************************************************** -->
+ <hwpError>
+    <rc>RC_PROCPM_VOLTAGE_CHAGE_MODE_ERR</rc>
+    <description>PMC is disabled for Voltage changes.</description>
+  </hwpError>
+  <!-- *********************************************************************** -->
+ <hwpError>
+    <rc>RC_PROCPM_INITAL_AUCTION_MODE_ERR</rc>
+    <description>PMC is not in HARDWARE or FIRMWARE AUCTION MODE.</description>
+  </hwpError>
+  <!-- *********************************************************************** -->
+ <hwpError>
+    <rc>RC_PROCPM_MST_SEQUENCER_STATE_ERR</rc>
+    <description>PMC is disabled PMC_MASTER_SEQUENCER.</description>
+  </hwpError>
+  <!-- *********************************************************************** -->
+
+
+
+
+
+
+</hwpErrors>

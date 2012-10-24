@@ -57,7 +57,19 @@ HWP_ERROR_XML_FILES = hwp/fapiHwpErrorInfo.xml   \
     hwp/slave_sbe/proc_check_slave_sbe_seeprom_complete/proc_extract_sbe_rc_errors.xml \
     hwp/slave_sbe/proc_check_slave_sbe_seeprom_complete/proc_read_seeprom_errors.xml    \
     hwp/slave_sbe/proc_check_slave_sbe_seeprom_complete/proc_sbe_error_errors.xml   \
-    hwp/proc_sbe_registers.xml
+    hwp/proc_sbe_registers.xml \
+    hwp/runtime_errors/p8_ocb_init_errors.xml \
+    hwp/runtime_errors/p8_occ_control_errors.xml \
+    hwp/runtime_errors/p8_occ_sram_init_errors.xml \
+    hwp/runtime_errors/p8_oha_init_errors.xml \
+    hwp/runtime_errors/p8_pcbs_init_errors.xml \
+    hwp/runtime_errors/p8_pm_prep_for_reset_errors.xml \
+    hwp/runtime_errors/proc_force_vsafe_errors.xml \
+    hwp/runtime_errors/p8_pmc_errors.xml \
+    hwp/runtime_errors/proc_pss_errors.xml \
+    hwp/runtime_errors/proc_cpu_special_wakeup_errors.xml \
+    hwp/runtime_errors/p8_poregpe_errors.xml \
+    hwp/runtime_errors/p8_pba_init_errors.xml
 
 
 ## these get generated into obj/genfiles/AttributeIds.H

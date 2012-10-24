@@ -1,0 +1,41 @@
+<!-- IBM_PROLOG_BEGIN_TAG                                                   -->
+<!-- This is an automatically generated prolog.                             -->
+<!--                                                                        -->
+<!-- $Source: src/usr/hwpf/hwp/runtime_errors/p8_oha_init_errors.xml $      -->
+<!--                                                                        -->
+<!-- IBM CONFIDENTIAL                                                       -->
+<!--                                                                        -->
+<!-- COPYRIGHT International Business Machines Corp. 2012                   -->
+<!--                                                                        -->
+<!-- p1                                                                     -->
+<!--                                                                        -->
+<!-- Object Code Only (OCO) source materials                                -->
+<!-- Licensed Internal Code Source Materials                                -->
+<!-- IBM HostBoot Licensed Internal Code                                    -->
+<!--                                                                        -->
+<!-- The source code for this program is not published or otherwise         -->
+<!-- divested of its trade secrets, irrespective of what has been           -->
+<!-- deposited with the U.S. Copyright Office.                              -->
+<!--                                                                        -->
+<!-- Origin: 30                                                             -->
+<!--                                                                        -->
+<!-- IBM_PROLOG_END_TAG                                                     -->
+<!-- Error definitions for proc_oha_init procedure -->
+<hwpErrors>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_PROC_OHA_CODE_PUTGETSCOM_FAILED</rc>
+    <description>Register read/write failed in proc_oha_init.</description>
+  </hwpError>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_PROC_OHA_CODE_BAD_MODE</rc>
+    <description>Unknown mode passed to proc_oha_init.</description>
+  </hwpError>
+  <!-- *********************************************************************** -->  
+  <hwpError>
+    <rc>RC_PROC_OHA_CODE_BITOP_FAILED</rc>
+    <description>Bit operation failed in proc_oha_init.</description>
+  </hwpError>
+  <!-- *********************************************************************** -->
+</hwpErrors>

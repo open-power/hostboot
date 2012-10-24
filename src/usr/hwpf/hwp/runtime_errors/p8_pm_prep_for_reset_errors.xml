@@ -1,0 +1,82 @@
+<!-- IBM_PROLOG_BEGIN_TAG                                                   -->
+<!-- This is an automatically generated prolog.                             -->
+<!--                                                                        -->
+<!-- $Source: src/usr/hwpf/hwp/runtime_errors/p8_pm_prep_for_reset_errors.xml $ -->
+<!--                                                                        -->
+<!-- IBM CONFIDENTIAL                                                       -->
+<!--                                                                        -->
+<!-- COPYRIGHT International Business Machines Corp. 2012                   -->
+<!--                                                                        -->
+<!-- p1                                                                     -->
+<!--                                                                        -->
+<!-- Object Code Only (OCO) source materials                                -->
+<!-- Licensed Internal Code Source Materials                                -->
+<!-- IBM HostBoot Licensed Internal Code                                    -->
+<!--                                                                        -->
+<!-- The source code for this program is not published or otherwise         -->
+<!-- divested of its trade secrets, irrespective of what has been           -->
+<!-- deposited with the U.S. Copyright Office.                              -->
+<!--                                                                        -->
+<!-- Origin: 30                                                             -->
+<!--                                                                        -->
+<!-- IBM_PROLOG_END_TAG                                                     -->
+<!-- Error definitions for proc_pcbs_init procedure -->
+<hwpErrors>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_PROCPM_PREP_CODE_PROC_OCC</rc>
+    <description>Errors in proc_occ_control.C  -- PM_RESET-MODE</description>
+  </hwpError>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_PROCPM_PREP_CODE_PROC_CPU</rc>
+    <description>Errors in proc_cpu_special_wakeup.C  -- PM_RESET-MODE</description>
+  </hwpError>
+    <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_PROCPM_PREP_CODE_PROC_PMC_FORCE</rc>
+    <description>Errors in proc_pmc_force_vsafe.C  -- PM_RESET-MODE</description>
+  </hwpError>
+    <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_PROCPM_PREP_CODE_PROC_PCBS</rc>
+    <description>Errors in proc__pcbs_init.C  -- PM_RESET-MODE</description>
+  </hwpError>
+    <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_PROCPM_PREP_CODE_PROC_PMC_INIT</rc>
+    <description>Errors in proc_pmc_init.C  -- PM_RESET-MODE</description>
+  </hwpError>
+    <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_PROCPM_PREP_CODE_PROC_PORESW</rc>
+    <description>Errors in proc_poresw_init.C  -- PM_RESET-MODE</description>
+  </hwpError>
+    <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_PROCPM_PREP_CODE_PROC_POREGPE</rc>
+    <description>Errors in proc_poregpe_init.C  -- PM_RESET-MODE</description>
+  </hwpError>
+    <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_PROCPM_PREP_CODE_PROC_OHA</rc>
+    <description>Errors in proc_oha_init.C  -- PM_RESET-MODE</description>
+  </hwpError>
+    <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_PROCPM_PREP_CODE_PROC_PBA</rc>
+    <description>Errors in proc_pba_init.C  -- PM_RESET-MODE</description>
+  </hwpError> 
+      <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_PROCPM_PREP_CODE_PROC_OCC_SRAM</rc>
+    <description>Errors in proc_occ_sram_init.C  -- PM_RESET-MODE</description>
+  </hwpError>
+      <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_PROCPM_PREP_CODE_PROC_OCB</rc>
+    <description>Errors in proc_ocb_init.C  -- PM_RESET-MODE</description>
+  </hwpError>
+  <!-- *********************************************************************** -->  
+</hwpErrors>
+
