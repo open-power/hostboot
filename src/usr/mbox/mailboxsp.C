@@ -319,11 +319,14 @@ void MailboxSp::handleNewMessage(msg_t * i_msg)
     mbox_msg.msg_queue_id = static_cast<uint32_t>(i_msg->data[0]);
     msg_t * payload = reinterpret_cast<msg_t*>(i_msg->extra_data);
     mbox_msg.msg_payload = *payload;  //copy in payload
+    bool i_msg_is_async = msg_is_async(i_msg);
 
-    if(msg_is_async(i_msg))
+    if(i_msg_is_async)
     {
         msg_free(payload);
         msg_free(i_msg);
+        payload = NULL;
+        i_msg = NULL;
     }
 
     if(iv_disabled)
@@ -334,7 +337,7 @@ void MailboxSp::handleNewMessage(msg_t * i_msg)
                   mbox_msg.msg_queue_id,
                   mbox_msg.msg_payload.type);
 
-        if(!msg_is_async(i_msg)) // synchronous
+        if(!i_msg_is_async) // synchronous
         {
             /*@ errorlog tag
              * @errortype       ERRL_SEV_INFORMATIONAL
@@ -374,7 +377,7 @@ void MailboxSp::handleNewMessage(msg_t * i_msg)
     else
     {
 
-        if(!msg_is_async(i_msg))  //synchronous
+        if(!i_msg_is_async)  //synchronous
         {
             i_msg->data[1] = 0;  // used later for return value
 
@@ -391,6 +394,7 @@ void MailboxSp::handleNewMessage(msg_t * i_msg)
 
         send_msg(&mbox_msg);
     }
+
 }
 
 // Note: When called due to an ACK or retry, iv_rts should be true.
