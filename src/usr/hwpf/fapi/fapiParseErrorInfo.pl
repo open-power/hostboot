@@ -50,6 +50,7 @@
 #                  mjjones   06/27/12  Add assembler output for SBE usage
 #                  mjjones   09/19/12  Generate FFDC ID enumeration
 #                                      Generate fapiCollectRegFfdc.C file
+#                  mjjones   10/23/12  Minor fix for Cronus compile failure
 #
 # End Change Log ******************************************************
 
@@ -265,7 +266,8 @@ print CRFILE "#include <ecmdDataBufferBase.H>\n";
 print CRFILE "#include <fapiCollectRegFfdc.H>\n";
 print CRFILE "#include <fapiTarget.H>\n";
 print CRFILE "#include <fapiReturnCode.H>\n";
-print CRFILE "#include <fapiHwAccess.H>\n\n";
+print CRFILE "#include <fapiHwAccess.H>\n";
+print CRFILE "#include <fapiPlatTrace.H>\n\n";
 print CRFILE "namespace fapi\n";
 print CRFILE "{\n";
 print CRFILE "void fapiCollectRegFfdc(const fapi::Target & i_target,\n";
@@ -607,9 +609,9 @@ print CRFILE "    {\n";
 print CRFILE "        l_rc = fapiGetScom(i_target, l_scomAddresses[i], l_buf);\n";
 print CRFILE "        if (l_rc)\n";
 print CRFILE "        {\n";
-print CRFILE "            FAPI_ERR(\"fapiCollectRegFfdc.C: SCOM error for 0x%x\",";
+print CRFILE "            FAPI_ERR(\"fapiCollectRegFfdc.C: SCOM error for 0x%llx\",";
 print CRFILE                     "l_scomAddresses[i]);\n";
-print CRFILE "            l_scomData = 0xbaddbaddbaddbadd;\n";
+print CRFILE "            l_scomData = 0xbaddbaddbaddbaddULL;\n";
 print CRFILE "        }\n";
 print CRFILE "        else\n";
 print CRFILE "        {\n";
