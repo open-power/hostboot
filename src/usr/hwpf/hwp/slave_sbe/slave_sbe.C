@@ -61,10 +61,10 @@ using namespace ERRORLOG;
 
 namespace SLAVE_SBE
 {
-//
-//  Wrapper function to call 6.8 :
-//      proc_revert_sbe_mcs_setup
-//
+
+//******************************************************************************
+// call_proc_revert_sbe_mcs_setup function (step 6.08)
+//******************************************************************************
 void* call_proc_revert_sbe_mcs_setup(void *io_pArgs)
 {
     errlHndl_t  l_errl = NULL;
@@ -110,7 +110,6 @@ void* call_proc_revert_sbe_mcs_setup(void *io_pArgs)
                                     l_errl );
 
         errlCommit( l_errl, HWPF_COMP_ID );
-
     }
     else
     {
@@ -126,11 +125,45 @@ void* call_proc_revert_sbe_mcs_setup(void *io_pArgs)
 }
 
 
-//
-//  Wrapper function to call 6.9 :
-//      proc_check_slave_sbe_seeprom_complete
-//
-void* call_proc_check_slave_sbe_seeprom_complete(void *io_pArgs)
+//******************************************************************************
+// call_host_slave_sbe function (step 6.09)
+//******************************************************************************
+void* call_host_slave_sbe_config(void *io_pArgs)
+{
+    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+               "call_host_slave_sbe_config entry" );
+
+    errlHndl_t l_err = NULL;
+
+    // $TODO RTC: Story 41184 implement slave_sbe_config 
+    // call proc_read_nest_freq.C
+    // call proc_setup_sbe_config.C
+
+    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+               "call_host_slave_sbe_config exit" );
+
+    return l_err;
+
+}
+
+//******************************************************************************
+// call_host_sbe_start function (step 6.10)
+//******************************************************************************
+void* call_host_sbe_start( void *io_pArgs )
+{
+    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_host_sbe_start entry" );
+    errlHndl_t errl = NULL;
+
+    // call proc_sbe_start.C
+
+    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_host_sbe_start exit" );
+
+    return errl;
+}
+//******************************************************************************
+// call_proc_check_slave_sbe_seeprom_complete function  (step 6.11)
+//******************************************************************************
+void* call_proc_check_slave_sbe_seeprom_complete( void *io_pArgs )
 {
     errlHndl_t  l_errl = NULL;
 
@@ -229,6 +262,24 @@ void* call_proc_check_slave_sbe_seeprom_complete(void *io_pArgs)
 
     // end task, returning any errorlogs to IStepDisp
     return  l_errl ;
+}
+
+//******************************************************************************
+// call_proc_xmit_sbe (step 6.12)
+//******************************************************************************
+void* call_proc_xmit_sbe(void *io_pArgs )
+{
+    errlHndl_t  l_errl = NULL;
+
+    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+               "call_proc_xmit_sbe entry" );
+
+    // call proc_xmit_sbe.C
+
+    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+               "call_proc_xmit_sbe exit" );
+
+    return l_errl;
 }
 
 

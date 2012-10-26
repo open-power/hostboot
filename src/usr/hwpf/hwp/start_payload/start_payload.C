@@ -53,6 +53,7 @@
 #include    <mbox/mboxif.H>
 
 #include    <initservice/isteps_trace.H>
+#include    <hwpisteperror.H>
 
 //  targeting support
 #include    <targeting/common/commontargeting.H>
@@ -73,6 +74,7 @@ namespace   START_PAYLOAD
 using   namespace   TARGETING;
 using   namespace   fapi;
 using   namespace   ISTEP;
+using   namespace   ISTEP_ERROR;
 
 /**
  * @brief This function will call the Initservice interface to shutdown
@@ -98,61 +100,107 @@ errlHndl_t callShutdown ( void );
 errlHndl_t notifyFsp ( bool i_istepModeFlag,
                        TARGETING::SpFunctions i_spFuncs );
 
-
 //
 //  Wrapper function to call 21.1 :
+//      host_runtime_setup
+//
+void*    call_host_runtime_setup( void    *io_pArgs )
+{
+
+    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+            "call_host_runtime_setup entry" );
+
+    errlHndl_t l_err = NULL;
+
+    IStepError l_StepError;
+
+    // Need to wait here until Fsp tells us go
+    INITSERVICE::waitForSyncPoint();
+
+    do
+    {
+        // Need to load up the runtime module if it isn't already loaded
+        if (  !VFS::module_is_loaded( "libruntime.so" ) )
+        {
+            l_err = VFS::module_load( "libruntime.so" );
+
+            if ( l_err )
+            {
+                //  load module returned with errl set
+                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                        "Could not load runtime module" );
+                // break from do loop if error occured
+                break;
+            }
+        }
+
+        // Write the HostServices attributes into mainstore
+        l_err = RUNTIME::populate_attributes();
+
+        //  - Update HDAT with tpmd logs 
+
+    } while(0);
+
+    if( l_err )
+    {
+        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                "istep start_payload_failed see plid 0x%x", l_err->plid());
+
+        l_StepError.addErrorDetails(ISTEP_START_PAYLOAD_FAILED,
+                ISTEP_HOST_RUNTIME_SETUP, l_err );
+
+        errlCommit(l_err, ISTEP_COMP_ID);
+
+    }
+
+    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+            "call_host_runtime_setup exit" );
+
+    return l_StepError.getErrorHandle();
+}
+
+//
+//  Wrapper function to call 21.2 :
+//      host_start_payload
+//
+void*    call_host_verify_hdat( void    *io_pArgs )
+{
+    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+               "call_host_verify_hdat entry" );
+
+    errlHndl_t l_err = NULL;
+
+    // Host Start Payload procedure, per documentation from Patrick.
+    //  - Verify target image
+    //      - TODO - Done via call to Secure Boot ROM.
+    //      - Will be done in future sprints
+
+    // stub for now..
+
+    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+               "call_host_verify_hdat exit" );
+
+    return l_err;
+}
+//
+//  Wrapper function to call 21.3 :
 //      host_start_payload
 //
 void*    call_host_start_payload( void    *io_pArgs )
 {
     errlHndl_t  l_errl  =   NULL;
 
+    IStepError l_StepError;
+
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-               "call_host_start_payload entry" );
+            "call_host_start_payload entry" );
 
-    do
+
+    //  - Run CXX testcases
+    l_errl = INITSERVICE::executeUnitTests();
+
+    if( l_errl == NULL )
     {
-        // Need to wait here until Fsp tells us go
-        INITSERVICE::waitForSyncPoint();
-
-        // Need to load up the runtime module if it isn't already loaded
-        if (  !VFS::module_is_loaded( "libruntime.so" ) )
-        {
-            l_errl = VFS::module_load( "libruntime.so" );
-            if ( l_errl )
-            {
-                //  load module returned with errl set
-                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                           "Could not load runtime module" );
-
-                //  break out of do block
-                break;
-            }
-        }
-
-        // Host Start Payload procedure, per documentation from Patrick.
-        //  - Verify target image
-        //      - TODO - Done via call to Secure Boot ROM.
-        //      - Will be done in future sprints
-
-        //  - Update HDAT with updated SLW images
-        //      - TODO - Once we know where they go in the HDAT
-
-        //@todo : Move this to new sub-step with RTC:49501
-        // Write the HostServices attributes into mainstore
-        l_errl = RUNTIME::populate_attributes();
-        if( l_errl )
-        {
-            break;
-        }
-
-        //  - Run CXX testcases
-        l_errl = INITSERVICE::executeUnitTests();
-
-        if( l_errl )
-        {
-            break;
-        }
 
         //  - Call shutdown using payload base, and payload entry.
         //      - base/entry will be from system attributes
@@ -160,17 +208,25 @@ void*    call_host_start_payload( void    *io_pArgs )
         // NOTE: this call will not return if successful.
         l_errl = callShutdown();
 
-        if( l_errl )
-        {
-            break;
-        }
-    } while( 0 );
+    };
+
+    if( l_errl )
+    {
+        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                "istep start_payload_failed see plid 0x%x", l_errl->plid());
+
+        l_StepError.addErrorDetails(ISTEP_START_PAYLOAD_FAILED,
+                                    ISTEP_HOST_START_PAYLOAD, l_errl );
+
+        errlCommit(l_errl, ISTEP_COMP_ID);
+
+    }
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-               "call_host_start_payload exit" );
+            "call_host_start_payload exit" );
 
     // end task, returning any errorlogs to IStepDisp
-    return l_errl;
+    return l_StepError.getErrorHandle();
 }
 
 

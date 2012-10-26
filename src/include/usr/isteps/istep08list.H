@@ -28,7 +28,7 @@
  * @file    istep08list.H
  *
  *  IStep 08    EDI, EI Initialization
- *  IPL FLow Doc        v1.08 (08/13/12)
+ *  IPL FLow Doc        v1.18 (10/18/12)
  *
  *    08.1    fabric_erepair
  *          : Restore Fabric/EDI Bus eRepair data

@@ -24,6 +24,8 @@
 #ifndef  __DRAM_INITIALIZATION_DRAM_INITIALIZATION_H
 #define  __DRAM_INITIALIZATION_DRAM_INITIALIZATION_H
 
+#include <errl/errlentry.H>
+
 /**
  *  @file dram_initialization.H
  *
@@ -101,7 +103,6 @@ namespace   DRAM_INITIALIZATION
 {
 
 
-
 /**
  *  @brief   host_startPRD_dram
  *
@@ -113,7 +114,6 @@ namespace   DRAM_INITIALIZATION
  *
  */
 void*    call_host_startPRD_dram( void    *io_pArgs );
-
 
 
 /**
@@ -128,26 +128,22 @@ void*    call_host_startPRD_dram( void    *io_pArgs );
  */
 void*    call_mss_extent_setup( void    *io_pArgs );
 
-
-
 /**
  *  @brief   mss_memdiag
  *
- *  14.3 : Mainstore Pattern Testing
+ *  Mainstore Pattern Testing
  *
  *  param[in,out]   -   pointer to any arguments, usually NULL
  *
  *  return  pointer to any errlogs
  *
  */
-void*    call_mss_memdiag( void    *io_pArgs );
-
-
+errlHndl_t call_mss_memdiag( void    *io_pArgs );
 
 /**
  *  @brief   mss_scrub
  *
- *  14.4 : : Start background scrub
+ *  14.3 : : Start background scrub
  *
  *  param[in,out]   -   pointer to any arguments, usually NULL
  *
@@ -161,7 +157,7 @@ void*    call_mss_scrub( void    *io_pArgs );
 /**
  *  @brief   mss_thermal_init
  *
- *  14.5 : : Initialize the thermal sensor
+ *  14.4 : : Initialize the thermal sensor
  *
  *  param[in,out]   -   pointer to any arguments, usually NULL
  *
@@ -175,7 +171,7 @@ void*    call_mss_thermal_init( void    *io_pArgs );
 /**
  *  @brief   proc_setup_bars
  *
- *  14.6 : : Setup Memory BARs
+ *  14.5 : : Setup Memory BARs
  *
  *  param[in,out]   -   pointer to any arguments, usually NULL
  *
@@ -189,7 +185,7 @@ void*    call_proc_setup_bars( void    *io_pArgs );
 /**
  *  @brief   proc_pcie_config
  *
- *  14.7 : : Configure the PHBs
+ *  14.6 : : Configure the PHBs
  *
  *  param[in,out]   -   pointer to any arguments, usually NULL
  *
@@ -203,7 +199,7 @@ void*    call_proc_pcie_config( void    *io_pArgs );
 /**
  *  @brief   proc_exit_cache_contained
  *
- *  14.8 : : Allow execution from memory
+ *  14.7 : : Allow execution from memory
  *
  *  param[in,out]   -   pointer to any arguments, usually NULL
  *
@@ -212,6 +208,18 @@ void*    call_proc_pcie_config( void    *io_pArgs );
  */
 void*    call_proc_exit_cache_contained( void    *io_pArgs );
 
+
+/**
+ *  @brief   host_mpipl_service
+ *
+ *  14.8 : : Perform MPIPL tasks
+ *
+ *  param[in,out]   -   pointer to any arguments, usually NULL
+ *
+ *  return  pointer to any errlogs
+ *
+ */
+void*   call_host_mpipl_service( void   *io_pArgs);
 
 };   // end namespace
 

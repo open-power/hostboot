@@ -115,8 +115,6 @@
 namespace   DRAM_TRAINING
 {
 
-
-
 /**
  *  @brief   host_disable_vddr
  *
@@ -129,12 +127,22 @@ namespace   DRAM_TRAINING
  */
 void*    call_host_disable_vddr( void * io_pArgs );
 
-
+/**
+ *  @brief   mem_pll_pll_initf
+ *
+ *  13.2 : : PLL init file for MBAs
+ *
+ *  param[in,out] io_pArgs  -   (normally) a pointer to a TaskArgs struct,
+ *                              or NULL.
+ *  return  any errlogs to istep 
+ *
+ */
+void*    call_mem_pll_initf( void * io_pArgs );
 
 /**
  *  @brief   mem_pll_setup
  *
- *  13.2 : : Setup PLL for MBAs
+ *  13.3 : : Setup PLL for MBAs
  *
  *  param[in,out] io_pArgs  -   (normally) a pointer to a TaskArgs struct,
  *                              or NULL.
@@ -148,7 +156,7 @@ void*    call_mem_pll_setup( void * io_pArgs );
 /**
  *  @brief   mem_startclocks
  *
- *  13.3 : : Start clocks on MBAs
+ *  13.4 : : Start clocks on MBAs
  *
  *  param[in,out] io_pArgs  -   (normally) a pointer to a TaskArgs struct,
  *                              or NULL.
@@ -162,7 +170,7 @@ void*    call_mem_startclocks( void * io_pArgs );
 /**
  *  @brief   host_enable_vddr
  *
- *  13.4 : : Enable the VDDR3 Voltage Rail
+ *  13.5 : : Enable the VDDR3 Voltage Rail
  *
  *  param[in,out] io_pArgs  -   (normally) a pointer to a TaskArgs struct,
  *                              or NULL.
@@ -177,7 +185,7 @@ void*    call_host_enable_vddr( void * io_pArgs );
 /**
  *  @brief   mss_scominit
  *
- *  13.5 : : Perform scom inits to MC and PHY
+ *  13.6 : : Perform scom inits to MC and PHY
  *
  *  param[in,out] io_pArgs  -   (normally) a pointer to a TaskArgs struct,
  *                              or NULL.
@@ -191,7 +199,7 @@ void*    call_mss_scominit( void * io_pArgs );
 /**
  *  @brief   mss_ddr_phy_reset
  *
- *  13.6 : : Soft reset of DDR PHY macros
+ *  13.7 : : Soft reset of DDR PHY macros
  *
  *  param[in,out] io_pArgs  -   (normally) a pointer to a TaskArgs struct,
  *                              or NULL.
@@ -205,7 +213,7 @@ void*    call_mss_ddr_phy_reset( void * io_pArgs );
 /**
  *  @brief   mss_draminit
  *
- *  13.7 : : Dram initialize
+ *  13.8 : : Dram initialize
  *
  *  param[in,out] io_pArgs  -   (normally) a pointer to a TaskArgs struct,
  *                              or NULL.
@@ -218,7 +226,7 @@ void*    call_mss_draminit( void * io_pArgs );
 /**
  *  @brief   mss_draminit_training
  *
- *  13.8 : : Dram training
+ *  13.9 : : Dram training
  *
  *  param[in,out] io_pArgs  -   (normally) a pointer to a TaskArgs struct,
  *                              or NULL.
@@ -232,7 +240,7 @@ void*    call_mss_draminit_training( void * io_pArgs );
 /**
  *  @brief   mss_draminit_trainadv
  *
- *  13.9 : : Advanced dram training
+ *  13.10 : : Advanced dram training
  *
  *  param[in,out] io_pArgs  -   (normally) a pointer to a TaskArgs struct,
  *                              or NULL.
@@ -246,7 +254,7 @@ void*    call_mss_draminit_trainadv( void * io_pArgs );
 /**
  *  @brief   mss_draminit_mc
  *
- *  13.10 : : Hand off control to MC
+ *  13.11 : : Hand off control to MC
  *
  *  param[in,out] io_pArgs  -   (normally) a pointer to a TaskArgs struct,
  *                              or NULL.

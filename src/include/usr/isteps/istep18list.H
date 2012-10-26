@@ -28,9 +28,9 @@
  * @file    istep18list.H
  *
  *  IStep 18    Establish System SMP
- *  IPL FLow Doc        v1.08 (08/13/12)
+ *  IPL FLow Doc        v1.18 (10/18/12)
  *
- *    18.8    host_coalesce_host
+ *    18.10    host_coalesce_host
  *          : Create single host image
  *
  *  *****************************************************************
@@ -125,9 +125,26 @@ namespace   INITSERVICE
                         EXT_IMAGE,
                 }
         },
-
         {
-                ISTEPNAME(18,08,"host_coalesce_host"),
+
+                ISTEPNAME(18,08,""),
+                NULL,
+                {
+                        NONE,
+                        EXT_IMAGE,
+                }
+        },
+        {
+
+                ISTEPNAME(18,09,""),
+                NULL,
+                {
+                        NONE,
+                        EXT_IMAGE,
+                }
+        },
+        {
+                ISTEPNAME(18,10,"host_coalesce_host"),
                 ESTABLISH_SYSTEM_SMP::call_host_coalesce_host,
                 {
                         START_FN,

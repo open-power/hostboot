@@ -28,27 +28,29 @@
  * @file    istep13list.H
  *
  *  IStep 13    Step 13 DRAM Training
- *  IPL FLow Doc        v1.08 (08/13/12)
+ *  IPL FLow Doc        v1.18 (10/18/12)
  *
  *  13.1      host_disable_vddr
  *      : Disable VDDR on CanContinue loops
- *  13.2      mem_pll_setup
+ *  13.2      mem_pll_initf
+ *      : PLL Initfile for MBAs
+ *  13.3      mem_pll_setup
  *      : Setup PLL for MBAs
- *  13.3      mem_startclocks
+ *  13.4      mem_startclocks
  *      : Start clocks on MBAs
- *  13.4      host_enable_vddr
+ *  13.5      host_enable_vddr
  *      : Enable the VDDR3 Voltage Rail
- *  13.5      mss_scominit
+ *  13.6      mss_scominit
  *      : Perform scom inits to MC and PHY
- *  13.6      mss_ddr_phy_reset
+ *  13.7      mss_ddr_phy_reset
  *      : Soft reset of DDR PHY macros
- *  13.7      mss_draminit
+ *  13.8      mss_draminit
  *      : Dram initialize
- *  13.8      mss_draminit_training
+ *  13.9      mss_draminit_training
  *      : Dram training
- *  13.9      mss_draminit_trainadv
+ *  13.10     mss_draminit_trainadv
  *      : Advanced dram training
- *  13.10     mss_draminit_mc
+ *  13.11     mss_draminit_mc
  *      : Hand off control to MC
  *
  *  *****************************************************************
@@ -88,7 +90,15 @@ const   TaskInfo    g_istep13[]  =   {
                 }
         },
         {
-                ISTEPNAME(13,02,"mem_pll_setup"),
+                ISTEPNAME(13,02,"mem_pll_initf"),
+                DRAM_TRAINING::call_mem_pll_initf,
+                {
+                        START_FN,
+                        EXT_IMAGE,
+                }
+        },
+        {
+                ISTEPNAME(13,03,"mem_pll_setup"),
                 DRAM_TRAINING::call_mem_pll_setup,
                 {
                         START_FN,
@@ -96,7 +106,7 @@ const   TaskInfo    g_istep13[]  =   {
                 }
         },
         {
-                ISTEPNAME(13,03,"mem_startclocks"),
+                ISTEPNAME(13,04,"mem_startclocks"),
                 DRAM_TRAINING::call_mem_startclocks,
                 {
                         START_FN,
@@ -104,7 +114,7 @@ const   TaskInfo    g_istep13[]  =   {
                 }
         },
         {
-                ISTEPNAME(13,04,"host_enable_vddr"),
+                ISTEPNAME(13,05,"host_enable_vddr"),
                 DRAM_TRAINING::call_host_enable_vddr,
                 {
                         START_FN,
@@ -112,7 +122,7 @@ const   TaskInfo    g_istep13[]  =   {
                 }
         },
         {
-                ISTEPNAME(13,05,"mss_scominit"),
+                ISTEPNAME(13,06,"mss_scominit"),
                 DRAM_TRAINING::call_mss_scominit,
                 {
                         START_FN,
@@ -120,7 +130,7 @@ const   TaskInfo    g_istep13[]  =   {
                 }
         },
         {
-                ISTEPNAME(13,06,"mss_ddr_phy_reset"),
+                ISTEPNAME(13,07,"mss_ddr_phy_reset"),
                 DRAM_TRAINING::call_mss_ddr_phy_reset,
                 {
                         START_FN,
@@ -128,7 +138,7 @@ const   TaskInfo    g_istep13[]  =   {
                 }
         },
         {
-                ISTEPNAME(13,07,"mss_draminit"),
+                ISTEPNAME(13,08,"mss_draminit"),
                 DRAM_TRAINING::call_mss_draminit,
                 {
                         START_FN,
@@ -136,7 +146,7 @@ const   TaskInfo    g_istep13[]  =   {
                 }
         },
         {
-                ISTEPNAME(13,08,"mss_draminit_training"),
+                ISTEPNAME(13,09,"mss_draminit_training"),
                 DRAM_TRAINING::call_mss_draminit_training,
                 {
                         START_FN,
@@ -144,7 +154,7 @@ const   TaskInfo    g_istep13[]  =   {
                 }
         },
         {
-                ISTEPNAME(13,09,"mss_draminit_trainadv"),
+                ISTEPNAME(13,10,"mss_draminit_trainadv"),
                 DRAM_TRAINING::call_mss_draminit_trainadv,
                 {
                         START_FN,
@@ -152,7 +162,7 @@ const   TaskInfo    g_istep13[]  =   {
                 }
         },
         {
-                ISTEPNAME(13,10,"mss_draminit_mc"),
+                ISTEPNAME(13,11,"mss_draminit_mc"),
                 DRAM_TRAINING::call_mss_draminit_mc,
                 {
                         START_FN,

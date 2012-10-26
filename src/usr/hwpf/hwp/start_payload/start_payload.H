@@ -59,12 +59,34 @@
 namespace   START_PAYLOAD
 {
 
+/**
+ *  @brief   host_runtime_setup
+ *
+ *  21.1 : :  Host Runtime Setup
+ *
+ *  param[in,out]   -   pointer to any arguments, usually NULL
+ *
+ *  return  any error logs to istep
+ *
+ */
+void*    call_host_runtime_setup( void    *io_pArgs );
 
+/**
+ *  @brief   host_verify_hdat
+ *
+ *  21.2 : : Secureboot verification of PHYP/AVP image load
+ *
+ *  param[in,out]   -   pointer to any arguments, usually NULL
+ *
+ *  return  any error logs to istep
+ *
+ */
+void*    call_host_verify_hdat( void    *io_pArgs );
 
 /**
  *  @brief   host_start_payload
  *
- *  21.1 : :  Start Payload
+ *  21.3 : :  Start Payload
  *
  *  param[in,out]   -   pointer to any arguments, usually NULL
  *
@@ -72,6 +94,7 @@ namespace   START_PAYLOAD
  *
  */
 void*    call_host_start_payload( void    *io_pArgs );
+
 
 
 };   // end namespace

@@ -76,7 +76,7 @@ enum istepModuleId
     ISTEP_MSS_DRAMINIT                                  = 0x1b,
     ISTEP_MSS_DRAMINIT_TRAINING                         = 0x1c,
     ISTEP_MSS_DRAMINIT_MC                               = 0x1d,
-    ISTEP_MSS_VOLT                                      = 0x1e,
+    ISTEP_HOST_COLLECT_DIMM_SPD                         = 0x1e,
     ISTEP_MSS_FREQ                                      = 0x1f,
     ISTEP_MSS_EFF_CONFIG                                = 0x20,
     ISTEP_SBE_CENTAUR_INIT                              = 0x21,
@@ -95,6 +95,9 @@ enum istepModuleId
     ISTEP_LOAD_PORE_IMAGE                               = 0x2e,
     ISTEP_APPLY_PORE_GEN_CPU_REGS                       = 0x2f,
     ISTEP_PROC_PORESLW_INIT                             = 0x30,
+    ISTEP_HOST_RUNTIME_SETUP                            = 0x31,
+    ISTEP_HOST_VERIFY_HDAT                              = 0x32,
+    ISTEP_HOST_START_PAYLOAD                            = 0x33,
 };
 
 /**

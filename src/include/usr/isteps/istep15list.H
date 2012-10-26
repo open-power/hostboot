@@ -28,7 +28,7 @@
  * @file    istep15list.H
  *
  *  IStep 15    Build Winkle Images
- *  IPL FLow Doc        v1.08 (08/13/12)
+ *  IPL FLow Doc        v1.18 (10/18/12)
  *
  *    15.1    host_build_winkle
  *          : Build runtime winkle images
@@ -74,8 +74,6 @@ namespace   INITSERVICE
                         EXT_IMAGE,
                 }
         },
-
-
         {
                 ISTEPNAME(15,02,"proc_set_pore_bar"),
                 BUILD_WINKLE_IMAGES::call_proc_set_pore_bar,
@@ -84,10 +82,9 @@ namespace   INITSERVICE
                         EXT_IMAGE,
                 }
         },
-
         {
-                ISTEPNAME(15,03,"proc_poreslw_init"),
-                BUILD_WINKLE_IMAGES::call_proc_poreslw_init,
+                ISTEPNAME(15,03,"p8_poreslw_init"),
+                BUILD_WINKLE_IMAGES::call_p8_poreslw_init,
                 {
                         START_FN,
                         EXT_IMAGE,

@@ -88,11 +88,22 @@ namespace   NEST_CHIPLETS
 {
 
 
+/**
+ *  @brief   proc_a_x_pci_dmi_pll_initf
+ *
+ *  07.1 : : PLL init file for A, X, PCIe, DMI
+ *
+ *  param[in,out]   -   pointer to any arguments, usually NULL
+ *                    
+ *  return  any error logs to istep
+ *
+ */
+void*    call_proc_a_x_pci_dmi_pll_initf( void    *io_pArgs );
 
 /**
  *  @brief   proc_a_x_pci_dmi_pll_setup
  *
- *  07.1 : : Setup PLL for A, X, PCIe, DMI
+ *  07.2 : : Setup PLL for A, X, PCIe, DMI
  *
  *  param[in,out]   -   pointer to any arguments, usually NULL
  *                    
@@ -106,7 +117,7 @@ void*    call_proc_a_x_pci_dmi_pll_setup( void    *io_pArgs );
 /**
  *  @brief   proc_startclock_chiplets
  *
- *  07.2 : : Start clocks on A, X, PCIe chiplets
+ *  07.3 : : Start clocks on A, X, PCIe chiplets
  *
  *  param[in,out]   -   pointer to any arguments, usually NULL
  *                    
@@ -134,7 +145,7 @@ void*    call_proc_chiplet_scominit( void    *io_pArgs );
 /**
  *  @brief   proc_pcie_scominit
  *
- *  07.4 : : Apply scom inits to PCIe chiplets
+ *  07.5 : : Apply scom inits to PCIe chiplets
  *
  *  param[in,out]   -   pointer to any arguments, usually NULL
  *
@@ -148,7 +159,7 @@ void*    call_proc_pcie_scominit( void    *io_pArgs );
 /**
  *  @brief   proc_scomoverride_chiplets
  *
- *  07.5 : : Apply sequenced scom inits
+ *  07.6 : : Apply sequenced scom inits
  *
  *  param[in,out]   -   pointer to any arguments, usually NULL
  *                    

@@ -33,6 +33,18 @@
 
 namespace HWAS
 {
+/**
+ * @brief   host_stub empty function  returning success
+ *
+ *  stub function to be called for un-implemented host steps
+ *
+ *  param[in,out] io_pArgs  -   (normally) a pointer to a TaskArgs struct,
+ *                              or NULL.
+ *  return  any error logs to istep
+ */
+void* host_stub( void *io_pArgs );
+
+
 
 // hostboot only functions that are called by the istep dispatcher
 //  and then call the HWAS common functions
@@ -100,7 +112,7 @@ void* host_gard( void *io_pArgs );
 void* host_cancontinue_clear( void *io_pArgs );
 
 /**
- * @brief   proc_xmit_sbe   vSBE Init of Slave Chips
+ * @brief   host_PRD_hwreconfig  Hook for PRD to handle reconfigure
  *
  *  TBD
  *
@@ -108,7 +120,7 @@ void* host_cancontinue_clear( void *io_pArgs );
  *                              or NULL.
  *  return  any error logs to istep
  */
-void* proc_xmit_sbe( void *io_pArgs );
+void* host_PRD_hwreconfig( void *io_pArgs );
 
 } // namespace HWAS
 #endif // HOSTBOOTISTEP_H_

@@ -70,12 +70,9 @@ using   namespace   TARGETING;
 using   namespace   EDI_EI_INITIALIZATION;
 using   namespace   fapi;
 
-
-
-//
-//  Wrapper function to call 09.1 :
-//      proc_build_smp
-//
+//******************************************************************************
+// wrapper funciton to call step 9.01 - proc_build_smp
+//******************************************************************************
 void*    call_proc_build_smp( void    *io_pArgs )
 {
 
@@ -224,5 +221,22 @@ void*    call_proc_build_smp( void    *io_pArgs )
     return l_StepError.getErrorHandle();
 }
 
+//******************************************************************************
+// wrapper function to call step 9.02 - host_slave_sbe_update
+//******************************************************************************
+void * call_host_slave_sbe_update( void * io_pArgs )
+{
+    errlHndl_t  l_errl  =   NULL;
+
+    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, 
+               "call_host_slave_sbe_update entry" );
+
+    // call p8_customize_image.C
+
+    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, 
+               "call_host_slave_sbe_update exit" );
+
+    return l_errl;
+}
 
 };   // end namespace

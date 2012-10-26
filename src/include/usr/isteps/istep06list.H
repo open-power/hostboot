@@ -27,6 +27,7 @@
  * @file    istep6list.H
  *
  *  list of functions called by HWAS (ISTEP 6) - "named isteps"
+ *  IPL FLow Doc        v1.18 (10/18/12)
  *
  *  Please see the note in initsvcstructs.H for description of
  *      the ISTEPNAME macro.
@@ -53,8 +54,10 @@ namespace   INITSERVICE
  *  6.  host_gard : Do Gard
  *  7.  host_cancontinue_clear : Clear deconfigured states
  *  8.  proc_revert_sbe_mcs_setup : Clean up MCS extent regs
- *  9.  proc_check_slave_sbe_seeprom_complete : Check Slave SBE Complete
- * 10.  proc_xmit_sbe : vSBE Init of Slave Chips
+ *  9.  host_slave_sbe_config
+ * 10.  host_sbe_start
+ * 11.  proc_check_slave_sbe_seeprom_complete : Check Slave SBE Complete
+ * 12.  proc_xmit_sbe : vSBE Init of Slave Chips
  *
  */
 const   TaskInfo    g_istep06[]  =   {
@@ -132,7 +135,25 @@ const   TaskInfo    g_istep06[]  =   {
                 }
         },
         {
-                ISTEPNAME(06,09,"proc_check_slave_sbe_seeprom_complete"),
+                ISTEPNAME(06,09,"host_slave_sbe_config"),
+                SLAVE_SBE::call_host_slave_sbe_config,
+                {
+                        START_FN,
+                        EXT_IMAGE,
+                }
+        },
+
+        {
+                ISTEPNAME(06,10,"host_sbe_start"),
+                SLAVE_SBE::call_host_sbe_start,
+                {
+                        START_FN,
+                        EXT_IMAGE,
+                }
+        },
+
+        {
+                ISTEPNAME(06,11,"proc_check_slave_sbe_seeprom_complete"),
                 SLAVE_SBE::call_proc_check_slave_sbe_seeprom_complete,
                 {
                         START_FN,
@@ -140,8 +161,8 @@ const   TaskInfo    g_istep06[]  =   {
                 }
         },
         {
-                ISTEPNAME(06,10,"proc_xmit_sbe"),
-                HWAS::proc_xmit_sbe,
+                ISTEPNAME(06,12,"proc_xmit_sbe"),
+                SLAVE_SBE::call_proc_xmit_sbe,
                 {
                         START_FN,
                         EXT_IMAGE,

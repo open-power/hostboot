@@ -82,6 +82,7 @@ using   namespace   TARGETING;
 using   namespace   fapi;
 using   namespace   DeviceFW;
 
+
 // @@@@@    CUSTOM BLOCK:   @@@@@
 
 /**
@@ -603,19 +604,18 @@ void*    call_proc_set_pore_bar( void    *io_pArgs )
     return l_stepError.getErrorHandle();
 }
 
-
 //
 //  Wrapper function to call 15.3 :
-//      proc_poreslw_init
+//      p8_poreslw_init
 //
-void*    call_proc_poreslw_init( void    *io_pArgs )
+void*    call_p8_poreslw_init( void    *io_pArgs )
 {
     errlHndl_t  l_errl      =   NULL;
 
     ISTEP_ERROR::IStepError     l_stepError;
 
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-               "call_proc_poreslw_init entry" );
+               "call_p8_poreslw_init entry" );
 
     // @@@@@    CUSTOM BLOCK:   @@@@@
 
@@ -681,7 +681,7 @@ void*    call_proc_poreslw_init( void    *io_pArgs )
 
 
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-               "call_proc_poreslw_init exit" );
+               "call_p8_poreslw_init exit" );
 
     // end task, returning any errorlogs to IStepDisp
     return l_stepError.getErrorHandle();

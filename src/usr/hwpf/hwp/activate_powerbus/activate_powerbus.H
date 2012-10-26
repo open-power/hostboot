@@ -75,8 +75,20 @@ namespace   ACTIVATE_POWERBUS
  *  return  any error logs to istep
  *
  */
-void*    call_proc_build_smp( void    *io_pArgs );
+void*   call_proc_build_smp( void    *io_pArgs );
 
+/**
+ *  @brief  host_slave_sbe_update 
+ *
+ *  09.2 : : Placeholder for secureboot where Hostboot must update
+ *           SEEPROM because FSP cannot.
+ *
+ *  param[in,out]   -   pointer to any arguments, usually NULL
+ *
+ *  return  any error logs to istep
+ *
+ */
+void*   call_host_slave_sbe_update( void * io_pArgs );
 
 };   // end namespace
 

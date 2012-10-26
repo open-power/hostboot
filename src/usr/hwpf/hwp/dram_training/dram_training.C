@@ -152,10 +152,24 @@ void*    call_host_disable_vddr( void *io_pArgs )
     return l_err;
 }
 
+//
+//  Wrapper function to call 13.2 : mem_pll_initf
+//
+void*    call_mem_pll_initf( void *io_pArgs )
+{
+    errlHndl_t l_err = NULL;
+    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mem_pll_initf entry" );
+
+    // call cen_mem_pll_initf.C
+
+    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mem_pll_initf exit" );
+
+    return l_err;
+}
 
 
 //
-//  Wrapper function to call 13.2 : mem_pll_setup
+//  Wrapper function to call 13.3 : mem_pll_setup
 //
 void*    call_mem_pll_setup( void *io_pArgs )
 {
@@ -267,10 +281,8 @@ void*    call_mem_pll_setup( void *io_pArgs )
     return l_err;
 }
 
-
-
 //
-//  Wrapper function to call 13.3 : mem_startclocks
+//  Wrapper function to call 13.4 : mem_startclocks
 //
 void*    call_mem_startclocks( void *io_pArgs )
 {
@@ -351,7 +363,7 @@ void*    call_mem_startclocks( void *io_pArgs )
 
 
 //
-//  Wrapper function to call 13.4 : host_enable_vddr
+//  Wrapper function to call 13.5 : host_enable_vddr
 //
 void*    call_host_enable_vddr( void *io_pArgs )
 {
@@ -412,7 +424,7 @@ void*    call_host_enable_vddr( void *io_pArgs )
 
 
 //
-//  Wrapper function to call 13.5 : mss_scominit
+//  Wrapper function to call 13.6 : mss_scominit
 //
 void*    call_mss_scominit( void *io_pArgs )
 {
@@ -487,7 +499,7 @@ void*    call_mss_scominit( void *io_pArgs )
 }
 
 //
-//  Wrapper function to call 13.6 : mss_ddr_phy_reset
+//  Wrapper function to call 13.7 : mss_ddr_phy_reset
 //
 void*  call_mss_ddr_phy_reset( void *io_pArgs )
 {
@@ -572,7 +584,7 @@ void*  call_mss_ddr_phy_reset( void *io_pArgs )
 
 
 //
-//  Wrapper function to call 13.7 : mss_draminit
+//  Wrapper function to call 13.8 : mss_draminit
 //
 void*    call_mss_draminit( void *io_pArgs )
 {
@@ -659,7 +671,7 @@ void*    call_mss_draminit( void *io_pArgs )
 
 
 //
-//  Wrapper function to call 13.8 : mss_draminit_training
+//  Wrapper function to call 13.9 : mss_draminit_training
 //
 void*    call_mss_draminit_training( void *io_pArgs )
 {
@@ -746,7 +758,7 @@ void*    call_mss_draminit_training( void *io_pArgs )
 }
 
 //
-//  Wrapper function to call 13.9 : mss_draminit_trainadv
+//  Wrapper function to call 13.10 : mss_draminit_trainadv
 //
 void*    call_mss_draminit_trainadv( void *io_pArgs )
 {
@@ -805,7 +817,7 @@ void*    call_mss_draminit_trainadv( void *io_pArgs )
 }
 
 //
-//  Wrapper function to call 13.10 : mss_draminit_mc
+//  Wrapper function to call 13.11 : mss_draminit_mc
 //
 void*    call_mss_draminit_mc( void *io_pArgs )
 {

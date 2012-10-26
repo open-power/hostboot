@@ -76,7 +76,6 @@ namespace   BUILD_WINKLE_IMAGES
 {
 
 
-
 /**
  *  @brief   host_build_winkle
  *
@@ -106,7 +105,7 @@ void*    call_proc_set_pore_bar( void    *io_pArgs );
 
 
 /**
- *  @brief   proc_poreslw_init
+ *  @brief   p8_poreslw_init
  *
  *  15.3 : : Initialize the PORE-SLW engine
  *
@@ -115,8 +114,7 @@ void*    call_proc_set_pore_bar( void    *io_pArgs );
  *  return  any error logs to istep
  *
  */
-void*    call_proc_poreslw_init( void    *io_pArgs );
-
+void*    call_p8_poreslw_init( void    *io_pArgs );
 
 };   // end namespace
 

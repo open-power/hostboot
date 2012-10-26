@@ -59,7 +59,8 @@
 
 //  --  prototype   includes    --
 //  Add any customized routines that you don't want overwritten into
-//      "start_clocks_on_nest_chiplets_custom.C" and include the prototypes here.
+//      "start_clocks_on_nest_chiplets_custom.C" and include 
+//      the prototypes here.
 //  #include    "nest_chiplets_custom.H"
 #include    "nest_chiplets.H"
 #include    "proc_start_clocks_chiplets/proc_start_clocks_chiplets.H"
@@ -77,44 +78,45 @@ using   namespace   ERRORLOG;
 using   namespace   TARGETING;
 using   namespace   fapi;
 
-
-
-//
-//  Wrapper function to call 07.1 :
-//      proc_a_x_pci_dmi_pll_setup
-//
-void*    call_proc_a_x_pci_dmi_pll_setup( void    *io_pArgs )
+//*****************************************************************************
+// wrapper function to call step 7.01 - proc_a_x_pci_dmi_pll_initf
+//*****************************************************************************
+void*    call_proc_a_x_pci_dmi_pll_initf( void    *io_pArgs )
 {
     errlHndl_t l_err = NULL;
 
     IStepError l_StepError;
 
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_proc_a_x_pci_dmi_pll_setup entry" );
+    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, 
+            "call_proc_a_x_pci_dmi_pll_initf entry" );
 
     //TODO - Enable this procedure in SIMICs when RTC 46643 is done.
     //       For now, only run this procedure in VPO.
     if ( !(TARGETING::is_vpo()) )
     {
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                            "WARNING: proc_a_x_pci_dmi_pll_setup HWP is disabled in SIMICS run!");
+                   "WARNING: proc_a_x_pci_dmi_pll_initf HWP"
+                   " is disabled in SIMICS run!");
         // end task
         return  l_err ;
     }
 
     uint8_t l_cpuNum = 0;
+
     TARGETING::TargetHandleList l_cpuTargetList;
+
     getAllChips(l_cpuTargetList, TYPE_PROC);
 
     for ( l_cpuNum=0; l_cpuNum < l_cpuTargetList.size(); l_cpuNum++ )
     {
         const TARGETING::Target*  l_cpu_target = l_cpuTargetList[l_cpuNum];
         const fapi::Target l_fapi_proc_target(
-                TARGET_TYPE_PROC_CHIP,
-                reinterpret_cast<void *>
-                ( const_cast<TARGETING::Target*>(l_cpu_target) ) );
+                            TARGET_TYPE_PROC_CHIP,
+                            reinterpret_cast<void *>
+                            ( const_cast<TARGETING::Target*>(l_cpu_target) ) );
 
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                    "Running proc_a_x_pci_dmi_pll_setup HWP on...");
+                   "Running proc_a_x_pci_dmi_pll_initf HWP");
         EntityPath l_path;
         l_path  =   l_cpu_target->getAttr<ATTR_PHYS_PATH>();
         l_path.dump();
@@ -130,7 +132,8 @@ void*    call_proc_a_x_pci_dmi_pll_setup( void    *io_pArgs )
         if (l_err)
         {
             TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                      "ERROR 0x%.8X: proc_a_x_pci_dmi_pll_initf HWP returns error",
+                      "ERROR 0x%.8X: proc_a_x_pci_dmi_pll_initf"
+                      " HWP returns error",
                       l_err->reasonCode());
 
             ErrlUserDetailsTarget myDetails(l_cpu_target);
@@ -155,13 +158,60 @@ void*    call_proc_a_x_pci_dmi_pll_setup( void    *io_pArgs )
 
             errlCommit( l_err, HWPF_COMP_ID );
 
-            break;
+           break;
         }
         else
         {
             TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                        "SUCCESS: proc_a_x_pci_dmi_pll_initf HWP( )" );
         }
+    }
+
+    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+               "call_proc_a_x_pci_dmi_pll_initf exit" );
+    return l_err;
+}
+
+//*****************************************************************************
+// wrapper function to call step 7.02 - proc_a_x_pci_dmi_pll_setup
+//*****************************************************************************
+void*    call_proc_a_x_pci_dmi_pll_setup( void    *io_pArgs )
+{
+    errlHndl_t l_err = NULL;
+
+    IStepError l_StepError;
+
+    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, 
+            "call_proc_a_x_pci_dmi_pll_setup entry" );
+
+    //TODO - Enable this procedure in SIMICs when RTC 46643 is done.
+    //       For now, only run this procedure in VPO.
+    if ( !(TARGETING::is_vpo()) )
+    {
+        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                   "WARNING: proc_a_x_pci_dmi_pll_setup HWP "
+                   "is disabled in SIMICS run!");
+        // end task
+        return  l_err ;
+    }
+
+    uint8_t l_procNum = 0;
+    TARGETING::TargetHandleList l_procTargetList;
+    getAllChips(l_procTargetList, TYPE_PROC);
+
+    for ( l_procNum=0; l_procNum < l_procTargetList.size(); l_procNum++ )
+    {
+        const TARGETING::Target*  l_proc_target = l_procTargetList[l_procNum];
+        const fapi::Target l_fapi_proc_target(
+                TARGET_TYPE_PROC_CHIP,
+                reinterpret_cast<void *>
+                ( const_cast<TARGETING::Target*>(l_proc_target) ) );
+
+        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                    "Running proc_a_x_pci_dmi_pll_setup HWP on...");
+        EntityPath l_path;
+        l_path  =   l_proc_target->getAttr<ATTR_PHYS_PATH>();
+        l_path.dump();
 
         //  call proc_a_x_pci_dmi_pll_setup
         FAPI_INVOKE_HWP(l_err, proc_a_x_pci_dmi_pll_setup,
@@ -178,7 +228,7 @@ void*    call_proc_a_x_pci_dmi_pll_setup( void    *io_pArgs )
                       HWP returns error",
                       l_err->reasonCode());
 
-            ErrlUserDetailsTarget myDetails(l_cpu_target);
+            ErrlUserDetailsTarget myDetails(l_proc_target);
 
             // capture the target data in the elog
             myDetails.addToLog(l_err );
@@ -209,25 +259,24 @@ void*    call_proc_a_x_pci_dmi_pll_setup( void    *io_pArgs )
         }
     }
 
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_proc_a_x_pci_dmi_pll_setup exit" );
+    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, 
+               "call_proc_a_x_pci_dmi_pll_setup exit" );
 
     // end task, returning any errorlogs to IStepDisp
     return l_StepError.getErrorHandle();
 }
 
-
-
-//
-//  Wrapper function to call 07.2 :
-//      proc_startclock_chiplets
-//
+//*****************************************************************************
+// wrapper function to call step 7.03 - proc_startclock_chiplets
+//*****************************************************************************
 void*    call_proc_startclock_chiplets( void    *io_pArgs )
 {
     errlHndl_t l_err =   NULL;
 
     IStepError l_StepError;
 
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_proc_startclock_chiplets entry" );
+    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, 
+               "call_proc_startclock_chiplets entry" );
 
     uint8_t l_cpuNum = 0;
 
@@ -243,7 +292,8 @@ void*    call_proc_startclock_chiplets( void    *io_pArgs )
                 ( const_cast<TARGETING::Target*>(l_cpu_target) )
         );
 
-        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "Running proc_startclock_chiplets HWP on..." );
+        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, 
+                   "Running proc_startclock_chiplets HWP on..." );
         //  dump physical path to targets
         EntityPath l_path;
         l_path  =   l_cpu_target->getAttr<ATTR_PHYS_PATH>();
@@ -257,8 +307,10 @@ void*    call_proc_startclock_chiplets( void    *io_pArgs )
                         true);  // pcie
         if (l_err)
         {
-            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, "ERROR 0x%.8X : proc_startclock_chiplets HWP returns error",
-                        l_err->reasonCode());
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                      "ERROR 0x%.8X : proc_startclock_chiplets HWP "
+                      "returns error",
+                       l_err->reasonCode());
 
             ErrlUserDetailsTarget myDetails(l_cpu_target);
 
@@ -286,44 +338,45 @@ void*    call_proc_startclock_chiplets( void    *io_pArgs )
         }
         else
         {
-            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "SUCCESS :  proc_startclock_chiplets HWP( )" );
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, 
+                       "SUCCESS :  proc_startclock_chiplets HWP( )" );
         }
     }
 
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_proc_startclock_chiplets exit" );
+    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, 
+               "call_proc_startclock_chiplets exit" );
 
     // end task, returning any errorlogs to IStepDisp 
     return l_StepError.getErrorHandle();
 }
 
-
-//
-//  Wrapper function to call 07.3 :
-//      proc_chiplet_scominit
-//
+//******************************************************************************
+// wrapper function ito call step 7.04 - proc_chiplet_scominit
+//******************************************************************************
 void*    call_proc_chiplet_scominit( void    *io_pArgs )
 {
     errlHndl_t l_err = NULL;
 
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_proc_chiplet_scominit entry" );
+    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, 
+               "call_proc_chiplet_scominit entry" );
 
     // proc_chiplet_scominit will be called when there are initfiles to execute
 
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_proc_chiplet_scominit exit" );
+    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, 
+               "call_proc_chiplet_scominit exit" );
 
     return l_err;
 }
 
-
-//
-//  Wrapper function to call 07.4 :
-//      proc_pcie_scominit
-//
+//*****************************************************************************
+// wrapper function to call step 7.05 - proc_pcie_scominit
+//******************************************************************************
 void*    call_proc_pcie_scominit( void    *io_pArgs )
 {
     errlHndl_t          l_errl      =   NULL;
 
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_proc_pcie_scominit entry" );
+    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, 
+               "call_proc_pcie_scominit entry" );
 
 #if 0
     // @@@@@    CUSTOM BLOCK:   @@@@@
@@ -370,18 +423,16 @@ void*    call_proc_pcie_scominit( void    *io_pArgs )
     // @@@@@    END CUSTOM BLOCK:   @@@@@
 #endif
 
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_proc_pcie_scominit exit" );
+    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, 
+               "call_proc_pcie_scominit exit" );
 
     // end task, returning any errorlogs to IStepDisp 
     return l_errl;
 }
 
-
-
-//
-//  Wrapper function to call 07.5 :
-//      proc_scomoverride_chiplets
-//
+//*****************************************************************************
+// wrapper function to call step 7.06 - proc_scomoverride_chiplets
+//*****************************************************************************
 void*    call_proc_scomoverride_chiplets( void    *io_pArgs )
 {
     errlHndl_t          l_errl      =   NULL;
@@ -396,7 +447,8 @@ void*    call_proc_scomoverride_chiplets( void    *io_pArgs )
     if (l_errl)
     {
         TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, 
-                  "ERROR 0x%.8X : proc_scomoverride_chiplets HWP returns error",
+                  "ERROR 0x%.8X : proc_scomoverride_chiplets "
+                  "HWP returns error",
                   l_errl->reasonCode());
             /*@
              * @errortype
@@ -417,11 +469,12 @@ void*    call_proc_scomoverride_chiplets( void    *io_pArgs )
     }
     else
     {
-        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, "SUCCESS :  proc_scomoverride_chiplets HWP");
+        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, 
+                  "SUCCESS :  proc_scomoverride_chiplets HWP");
     }
 
-
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_proc_scomoverride_chiplets exit" );
+    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, 
+               "call_proc_scomoverride_chiplets exit" );
 
     // end task, returning any errorlogs to IStepDisp
     return l_StepError.getErrorHandle();

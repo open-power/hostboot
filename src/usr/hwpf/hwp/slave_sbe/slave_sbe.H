@@ -69,17 +69,50 @@ namespace SLAVE_SBE
  */
 void* call_proc_revert_sbe_mcs_setup(void *io_pArgs);
 
-
 /**
- *  brief  proc_check_slave_sbe_seeprom_complete
+ *  @brief host_slave_sbe_config
  *
- *  6.9 :   Check Slave SBE Complete
+ *  6.9 : : 
  *
  *  param[in,out]   -   pointer to any arguments, usually NULL
  *
- *  return any error logs to istep
+ *  return any error logs to istep 
+ */
+void* call_host_slave_sbe_config(void *io_pArgs);
+
+/**
+ *  @brief host_sbe_start
+ *
+ *  6.10 : : 
+ *
+ *  param[in,out]   -   pointer to any arguments, usually NULL
+ *
+ *  return any error logs to istep 
+ */
+void* call_host_sbe_start(void *io_pArgs);
+
+/**
+ *  @brief proc_check_slave_sbe_seeprom_complete
+ *
+ *  6.11 : : 
+ *
+ *  param[in,out]   -   pointer to any arguments, usually NULL
+ *
+ *  return any error logs to istep 
  */
 void* call_proc_check_slave_sbe_seeprom_complete(void *io_pArgs);
+
+/**
+ *  @brief proc_xmit_sbe
+ *
+ *  6.12 : : 
+ *
+ *  param[in,out]   -   pointer to any arguments, usually NULL
+ *
+ *  return any error logs to istep 
+ */
+void* call_proc_xmit_sbe(void *io_pArgs);
+
 
 };   // end namespace
 

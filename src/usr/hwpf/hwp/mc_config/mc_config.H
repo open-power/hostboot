@@ -75,7 +75,7 @@
 // Includes
 /******************************************************************************/
 #include    <stdint.h>
-
+#include    <errl/errlentry.H>
 namespace   MC_CONFIG
 {
 
@@ -98,21 +98,21 @@ void*    call_host_collect_dimm_spd( void * io_pArgs );
 /**
  *  @brief   mss_volt
  *
- *  12.2 : : Calc dimm voltage
+ *            Calc dimm voltage
  *
  *  param[in,out] io_pArgs  -   (normally) a pointer to a TaskArgs struct,
  *                              or NULL.
  *  return  any error logs to istep
  *
  */
-void*    call_mss_volt( void * io_pArgs );
+errlHndl_t call_mss_volt( void * io_pArgs );
 
 
 
 /**
  *  @brief   mss_freq
  *
- *  12.3 : : Calc dimm frequency
+ *  12.2 : : Calc dimm frequency
  *
  *  param[in,out] io_pArgs  -   (normally) a pointer to a TaskArgs struct,
  *                              or NULL.
@@ -126,7 +126,7 @@ void*    call_mss_freq( void * io_pArgs );
 /**
  *  @brief   mss_eff_config
  *
- *  12.4 : : Determine effective config
+ *  12.3 : : Determine effective config
  *
  *  param[in,out] io_pArgs  -   (normally) a pointer to a TaskArgs struct,
  *                              or NULL.
