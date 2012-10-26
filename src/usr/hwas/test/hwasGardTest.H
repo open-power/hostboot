@@ -1,26 +1,25 @@
-/*  IBM_PROLOG_BEGIN_TAG
- *  This is an automatically generated prolog.
- *
- *  $Source: src/usr/hwas/test/hwasGardTest.H $
- *
- *  IBM CONFIDENTIAL
- *
- *  COPYRIGHT International Business Machines Corp. 2011-2012
- *
- *  p1
- *
- *  Object Code Only (OCO) source materials
- *  Licensed Internal Code Source Materials
- *  IBM HostBoot Licensed Internal Code
- *
- *  The source code for this program is not published or other-
- *  wise divested of its trade secrets, irrespective of what has
- *  been deposited with the U.S. Copyright Office.
- *
- *  Origin: 30
- *
- *  IBM_PROLOG_END_TAG
- */
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/usr/hwas/test/hwasGardTest.H $                            */
+/*                                                                        */
+/* IBM CONFIDENTIAL                                                       */
+/*                                                                        */
+/* COPYRIGHT International Business Machines Corp. 2011,2012              */
+/*                                                                        */
+/* p1                                                                     */
+/*                                                                        */
+/* Object Code Only (OCO) source materials                                */
+/* Licensed Internal Code Source Materials                                */
+/* IBM HostBoot Licensed Internal Code                                    */
+/*                                                                        */
+/* The source code for this program is not published or otherwise         */
+/* divested of its trade secrets, irrespective of what has been           */
+/* deposited with the U.S. Copyright Office.                              */
+/*                                                                        */
+/* Origin: 30                                                             */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
 #ifndef _HWASGARDTEST_H
 #define _HWASGARDTEST_H
 
@@ -117,6 +116,17 @@ public:
     void testDeconfigure3()
     {
         TS_TRACE(INFO_MRK "testDeconfigure3: Started");
+#if 1
+        // these tests deconfigure and gard targets. and even tho they
+        //  restore their state after the tests, since the cxxtests are
+        //  all run in parallel, during the time that a target is non-
+        //  functional due to this test, another test may be running that
+        //  might be adversly affected.
+        // tests are left in the code so that a developer can enable them
+        //  to test these specific functions - just keep in mind that there
+        //  could be side effects in other cxxtests.
+        TS_TRACE( " - SKIPPING -- other tests could be adversly affected");
+#else
         
         errlHndl_t l_pErr = NULL;
         HWAS::DeconfigGard::DeconfigureRecords_t l_records;
@@ -218,6 +228,7 @@ public:
         {
             errlCommit(l_pErr,HWAS_COMP_ID);
         }
+#endif
     }
     
     /**
@@ -226,6 +237,17 @@ public:
     void testDeconfigure4()
     {
         TS_TRACE(INFO_MRK "testDeconfigure4: Started");
+#if 1
+        // these tests deconfigure and gard targets. and even tho they
+        //  restore their state after the tests, since the cxxtests are
+        //  all run in parallel, during the time that a target is non-
+        //  functional due to this test, another test may be running that
+        //  might be adversly affected.
+        // tests are left in the code so that a developer can enable them
+        //  to test these specific functions - just keep in mind that there
+        //  could be side effects in other cxxtests.
+        TS_TRACE( " - SKIPPING -- other tests could be adversly affected");
+#else
         
         errlHndl_t l_pErr = NULL;
         HWAS::DeconfigGard::DeconfigureRecords_t l_records;
@@ -318,6 +340,7 @@ public:
         {
             errlCommit(l_pErr,HWAS_COMP_ID);
         }
+#endif
     }
 
     /**
@@ -414,6 +437,17 @@ public:
     void testGard4()
     {
         TS_TRACE(INFO_MRK "testGard4: Started");
+#if 1
+        // these tests deconfigure and gard targets. and even tho they
+        //  restore their state after the tests, since the cxxtests are
+        //  all run in parallel, during the time that a target is non-
+        //  functional due to this test, another test may be running that
+        //  might be adversly affected.
+        // tests are left in the code so that a developer can enable them
+        //  to test these specific functions - just keep in mind that there
+        //  could be side effects in other cxxtests.
+        TS_TRACE( " - SKIPPING -- other tests could be adversly affected");
+#else
         
         errlHndl_t l_pErr = NULL;
         HWAS::DeconfigGard::GardRecords_t l_records;
@@ -513,6 +547,7 @@ public:
         {
             errlCommit(l_pErr,HWAS_COMP_ID);
         }
+#endif
     }
     
     /**
@@ -521,6 +556,17 @@ public:
     void testGard5()
     {
         TS_TRACE(INFO_MRK "testGard5: Started");
+#if 1
+        // these tests deconfigure and gard targets. and even tho they
+        //  restore their state after the tests, since the cxxtests are
+        //  all run in parallel, during the time that a target is non-
+        //  functional due to this test, another test may be running that
+        //  might be adversly affected.
+        // tests are left in the code so that a developer can enable them
+        //  to test these specific functions - just keep in mind that there
+        //  could be side effects in other cxxtests.
+        TS_TRACE( " - SKIPPING -- other tests could be adversly affected");
+#else
         
         errlHndl_t l_pErr = NULL;
         HWAS::DeconfigGard::GardRecords_t l_records;
@@ -623,6 +669,7 @@ public:
         {
             errlCommit(l_pErr,HWAS_COMP_ID);
         }
+#endif
     }
     
     /**
@@ -631,6 +678,17 @@ public:
     void testGard6()
     {
         TS_TRACE(INFO_MRK "testGard6: Started");
+#if 1
+        // these tests deconfigure and gard targets. and even tho they
+        //  restore their state after the tests, since the cxxtests are
+        //  all run in parallel, during the time that a target is non-
+        //  functional due to this test, another test may be running that
+        //  might be adversly affected.
+        // tests are left in the code so that a developer can enable them
+        //  to test these specific functions - just keep in mind that there
+        //  could be side effects in other cxxtests.
+        TS_TRACE( " - SKIPPING -- other tests could be adversly affected");
+#else
         
         errlHndl_t l_pErr = NULL;
         HWAS::DeconfigGard::GardRecords_t l_records;
@@ -762,6 +820,7 @@ public:
         {
             errlCommit(l_pErr,HWAS_COMP_ID);
         }
+#endif
     }
     
     /**
@@ -770,6 +829,17 @@ public:
     void testGard7()
     {
         TS_TRACE(INFO_MRK "testGard7: Started");
+#if 1
+        // these tests deconfigure and gard targets. and even tho they
+        //  restore their state after the tests, since the cxxtests are
+        //  all run in parallel, during the time that a target is non-
+        //  functional due to this test, another test may be running that
+        //  might be adversly affected.
+        // tests are left in the code so that a developer can enable them
+        //  to test these specific functions - just keep in mind that there
+        //  could be side effects in other cxxtests.
+        TS_TRACE( " - SKIPPING -- other tests could be adversly affected");
+#else
         
         errlHndl_t l_pErr = NULL;
         HWAS::DeconfigGard::GardRecords_t l_records;
@@ -856,6 +926,7 @@ public:
         {
             errlCommit(l_pErr,HWAS_COMP_ID);
         }
+#endif
     }
 };
 

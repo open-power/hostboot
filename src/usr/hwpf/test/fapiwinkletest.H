@@ -138,6 +138,7 @@ public:
      */
     void testRepairRings()
     {
+#if 0 // RTC 50971
         fapi::ReturnCode    l_fapirc        =   fapi::FAPI_RC_SUCCESS;
         uint8_t             *l_pRingBuf     =   NULL;
         uint32_t            l_ringBufsize   =   0;
@@ -462,7 +463,7 @@ public:
             delete[]    l_pRingBuf;
         }
 
-
+#endif
         TS_TRACE( "testRepairRings exit" );
     }
 

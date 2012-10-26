@@ -1,26 +1,25 @@
-/*  IBM_PROLOG_BEGIN_TAG
- *  This is an automatically generated prolog.
- *
- *  $Source: src/usr/errl/test/errltest.H $
- *
- *  IBM CONFIDENTIAL
- *
- *  COPYRIGHT International Business Machines Corp. 2011-2012
- *
- *  p1
- *
- *  Object Code Only (OCO) source materials
- *  Licensed Internal Code Source Materials
- *  IBM HostBoot Licensed Internal Code
- *
- *  The source code for this program is not published or other-
- *  wise divested of its trade secrets, irrespective of what has
- *  been deposited with the U.S. Copyright Office.
- *
- *  Origin: 30
- *
- *  IBM_PROLOG_END_TAG
- */
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/usr/errl/test/errltest.H $                                */
+/*                                                                        */
+/* IBM CONFIDENTIAL                                                       */
+/*                                                                        */
+/* COPYRIGHT International Business Machines Corp. 2011,2012              */
+/*                                                                        */
+/* p1                                                                     */
+/*                                                                        */
+/* Object Code Only (OCO) source materials                                */
+/* Licensed Internal Code Source Materials                                */
+/* IBM HostBoot Licensed Internal Code                                    */
+/*                                                                        */
+/* The source code for this program is not published or otherwise         */
+/* divested of its trade secrets, irrespective of what has been           */
+/* deposited with the U.S. Copyright Office.                              */
+/*                                                                        */
+/* Origin: 30                                                             */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
 #ifndef __ERRLTEST_H
 #define __ERRLTEST_H
 
@@ -42,6 +41,7 @@
 #include <targeting/common/iterators/rangefilter.H>
 #include <targeting/common/predicates/predicates.H>
 #include <hwas/common/hwasCallout.H>
+#include <hwas/deconfigGard.H>
 
 
 #define TEST_SEVERITY       ERRORLOG::ERRL_SEV_INFORMATIONAL
@@ -116,15 +116,6 @@ public:
                                     HBERRL_TEST_REASON_CODE,
                                     l_userData1,
                                     l_userData2);
-
-
-            // Make sure log is created
-            if (l_err == NULL)
-            {
-                TS_FAIL("testErrl1: createErrlLog() outputs NULL pointer!");
-                break;
-            }
-
 
             // These addFFDC() calls return a pointer to class ERRORLOG::ErrlFFDC
             // but errlffdc.H is not publicly includable to give me the definition
@@ -297,46 +288,37 @@ public:
                                 l_userData1,
                                 l_userData2);
 
-        // Make sure log is created
-        if (l_err == NULL)
+        // Set and verify log data
+        l_err->setSev(ERRORLOG::ERRL_SEV_UNKNOWN);
+        l_err->setEventType(ERRORLOG::ERRL_ETYPE_CAPACITY_UPGRADE);
+        l_err->setSubSys(ERRORLOG::EPUB_UNKNOWN);
+        l_err->setSrcType(ERRORLOG::SRC_ERR_INFO);
+        l_err->setTermState(ERRORLOG::TERM_STATE_NO_FLAGS);
+
+        if (l_err->sev() != ERRORLOG::ERRL_SEV_UNKNOWN)
         {
-            TS_FAIL("testErrl2: createErrlLog() returns NULL pointer!");
+            TS_FAIL("testErrl2: setSev() fails!");
         }
-        else
+        else if (l_err->eventType() != ERRORLOG::ERRL_ETYPE_CAPACITY_UPGRADE)
         {
-            // Set and verify log data
-            l_err->setSev(ERRORLOG::ERRL_SEV_UNKNOWN);
-            l_err->setEventType(ERRORLOG::ERRL_ETYPE_CAPACITY_UPGRADE);
-            l_err->setSubSys(ERRORLOG::EPUB_UNKNOWN);
-            l_err->setSrcType(ERRORLOG::SRC_ERR_INFO);
-            l_err->setTermState(ERRORLOG::TERM_STATE_NO_FLAGS);
-
-            if (l_err->sev() != ERRORLOG::ERRL_SEV_UNKNOWN)
-            {
-                TS_FAIL("testErrl2: setSev() fails!");
-            }
-            else if (l_err->eventType() != ERRORLOG::ERRL_ETYPE_CAPACITY_UPGRADE)
-            {
-                TS_FAIL("testErrl2: setEventType() fails!");
-            }
-            else if (l_err->subSys() != ERRORLOG::EPUB_UNKNOWN)
-            {
-                TS_FAIL("testErrl2: setSubSys() fails!");
-            }
-            else if (l_err->srcType() != ERRORLOG::SRC_ERR_INFO)
-            {
-                TS_FAIL("testErrl2: setSrcType() fails!");
-            }
-            else if (l_err->termState() != ERRORLOG::TERM_STATE_NO_FLAGS)
-            {
-                 TS_FAIL("testErrl2: setTermState() fails!");
-            }
-
-            // Delete the log
-            delete l_err;
-            l_err = NULL;
-
+            TS_FAIL("testErrl2: setEventType() fails!");
         }
+        else if (l_err->subSys() != ERRORLOG::EPUB_UNKNOWN)
+        {
+            TS_FAIL("testErrl2: setSubSys() fails!");
+        }
+        else if (l_err->srcType() != ERRORLOG::SRC_ERR_INFO)
+        {
+            TS_FAIL("testErrl2: setSrcType() fails!");
+        }
+        else if (l_err->termState() != ERRORLOG::TERM_STATE_NO_FLAGS)
+        {
+             TS_FAIL("testErrl2: setTermState() fails!");
+        }
+
+        // Delete the log
+        delete l_err;
+        l_err = NULL;
     }
 
     /**
@@ -345,23 +327,19 @@ public:
     void testErrl3(void)
     {
         TS_TRACE( "test testErrl3");
+#if 1
+        // these tests deconfigure and gard targets. and even tho they
+        //  restore their state after the tests, since the cxxtests are
+        //  all run in parallel, during the time that a target is non-
+        //  functional due to this test, another test may be running that
+        //  might be adversly affected.
+        // tests are left in the code so that a developer can enable them
+        //  to test these specific functions - just keep in mind that there
+        //  could be side effects in other cxxtests.
+        TS_TRACE( " - SKIPPING -- other tests could be adversly affected");
+#else
         do
         {
-            // Create an error log
-            errlHndl_t errl = new ERRORLOG::ErrlEntry(
-                                    ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                    HBERRL_TEST_MOD_ID,
-                                    HBERRL_TEST_REASON_CODE);
-
-            // Make sure log is created
-            if (errl == NULL)
-            {
-                TS_FAIL("testErrl3: createErrlLog() returns NULL pointer!");
-                break;
-            }
-
-            // test the different callout types
-
             // find a proc target
             TARGETING::PredicateCTM procChipFilter(
                     TARGETING::CLASS_CHIP, TARGETING::TYPE_PROC);
@@ -378,6 +356,49 @@ public:
                     TARGETING::targetService().end(),
                     &membufChipFilter);
 
+            errlHndl_t gard_errl = NULL;
+            HWAS::DeconfigGard::DeconfigureRecords_t l_deconfigRecords;
+            HWAS::DeconfigGard::GardRecords_t l_gardRecords;
+            uint32_t deconfigCount = 0;
+            uint32_t gardCount = 0;
+
+            // make sure there aren't any existing deconfigure or gard records
+            gard_errl = HWAS::theDeconfigGard().getDeconfigureRecords(NULL,
+                    l_deconfigRecords);
+            if (gard_errl)
+            {
+                TS_FAIL("testErrl3: Error from getDeconfigureRecords");
+                errlCommit(gard_errl,HWAS_COMP_ID);
+                break;
+            }
+            if (l_deconfigRecords.size() != 0)
+            {
+                TS_TRACE("testErrl3: %d existing Deconfigure Records, "
+                            "skipping test", l_deconfigRecords.size());
+                break;
+            }
+
+            gard_errl = HWAS::theDeconfigGard().getGardRecords(0, l_gardRecords);
+            if (gard_errl)
+            {
+                TS_FAIL("testErrl3: Error from getGardRecords");
+                errlCommit(gard_errl,HWAS_COMP_ID);
+                break;
+            }
+            if (l_gardRecords.size() != 0)
+            {
+                TS_TRACE("testErrl3: %d existing GARD Records, "
+                            "skipping test", l_gardRecords.size());
+                break;
+            }
+
+            // Create an error log
+            errlHndl_t errl = new ERRORLOG::ErrlEntry(
+                                    ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                    HBERRL_TEST_MOD_ID,
+                                    HBERRL_TEST_REASON_CODE);
+
+            // test the different callout types
             TS_TRACE( "test callout pProc %p", *pProc);
             ERRORLOG::ErrlUserDetailsTarget(*pProc).addToLog(errl);
 
@@ -385,31 +406,75 @@ public:
                     HWAS::SRCI_PRIORITY_LOW,
                     HWAS::DECONFIG,
                     HWAS::GARD_Fatal);
+            deconfigCount++;
+            gardCount++;
 
             errl->addHwCallout(*pMembuf,
                     HWAS::SRCI_PRIORITY_MED,
                     HWAS::DECONFIG,
                     HWAS::GARD_NULL);
+            deconfigCount++;
 
             errl->addHwCallout(TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL,
                     HWAS::SRCI_PRIORITY_LOW,
                     HWAS::DECONFIG,
                     HWAS::GARD_PoreError);
+            // TODO: RTC 45780
+            // SENTINEL not logged properly // deconfigCount++;
+            // SENTINEL not logged properly // gardCount++;
 
             errl->addHwCallout(TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL,
                     HWAS::SRCI_PRIORITY_MED,
                     HWAS::DECONFIG,
                     HWAS::GARD_NULL);
+            // TODO: RTC 45780
+            // SENTINEL not logged properly // deconfigCount++;
 
             errl->addProcedureCallout(
                     HWAS::EPUB_PRC_MEMORY_UE,
                     HWAS::SRCI_PRIORITY_HIGH);
 
             errlCommit(errl, CXXTEST_COMP_ID);
-            TS_TRACE( "test callout done");
+
+            // confirm there are the correct number of deconfig and gard records
+            gard_errl = HWAS::theDeconfigGard().getGardRecords(0, l_gardRecords);
+            if (gard_errl)
+            {
+                TS_FAIL("testCallout: Error from getGardRecords");
+                errlCommit(gard_errl,HWAS_COMP_ID);
+            }
+            else if (l_gardRecords.size() != gardCount)
+            {
+                TS_FAIL("testCallout: %d GARD Records, expected %d",
+                            l_gardRecords.size(), gardCount);
+            }
+
+            gard_errl = HWAS::theDeconfigGard().getDeconfigureRecords(NULL,
+                    l_deconfigRecords);
+            if (gard_errl)
+            {
+                TS_FAIL("testCallout: Error from getDeconfigureRecords");
+                errlCommit(gard_errl,HWAS_COMP_ID);
+            }
+            else if (l_deconfigRecords.size() != deconfigCount)
+            {
+                TS_FAIL("testCallout: %d Deconfigure Records, expected %d",
+                            l_deconfigRecords.size(), deconfigCount);
+            }
+
+            // delete these deconfigure and gard records
+            HWAS::theDeconfigGard()._clearDeconfigureRecords(NULL);
+            gard_errl = HWAS::theDeconfigGard().clearGardRecords(0);
+            if (gard_errl)
+            {
+                errlCommit(gard_errl,HWAS_COMP_ID);
+                TS_FAIL("testCallout: Error from clearGardRecords");
+            }
+            TS_TRACE( "testErrl3 done");
 
         }
         while(0);
+#endif
     }
 };
 

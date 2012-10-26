@@ -1,26 +1,25 @@
-/*  IBM_PROLOG_BEGIN_TAG
- *  This is an automatically generated prolog.
- *
- *  $Source: src/usr/errl/test/errluserdetailtest.H $
- *
- *  IBM CONFIDENTIAL
- *
- *  COPYRIGHT International Business Machines Corp. 2011-2012
- *
- *  p1
- *
- *  Object Code Only (OCO) source materials
- *  Licensed Internal Code Source Materials
- *  IBM HostBoot Licensed Internal Code
- *
- *  The source code for this program is not published or other-
- *  wise divested of its trade secrets, irrespective of what has
- *  been deposited with the U.S. Copyright Office.
- *
- *  Origin: 30
- *
- *  IBM_PROLOG_END_TAG
- */
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/usr/errl/test/errluserdetailtest.H $                      */
+/*                                                                        */
+/* IBM CONFIDENTIAL                                                       */
+/*                                                                        */
+/* COPYRIGHT International Business Machines Corp. 2011,2012              */
+/*                                                                        */
+/* p1                                                                     */
+/*                                                                        */
+/* Object Code Only (OCO) source materials                                */
+/* Licensed Internal Code Source Materials                                */
+/* IBM HostBoot Licensed Internal Code                                    */
+/*                                                                        */
+/* The source code for this program is not published or otherwise         */
+/* divested of its trade secrets, irrespective of what has been           */
+/* deposited with the U.S. Copyright Office.                              */
+/*                                                                        */
+/* Origin: 30                                                             */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
 #ifndef __TEST_ERRLUSERDETAILSTEST_H
 #define __TEST_USERUSERDETAILSTEST_H
 
@@ -45,6 +44,7 @@
 #include <targeting/common/iterators/rangefilter.H>
 #include <targeting/common/predicates/predicates.H>
 #include <targeting/common/util.H>
+#include <hwas/deconfigGard.H>
 
 #include <devicefw/driverif.H>
 
@@ -452,64 +452,159 @@ public:
      */
     void testCallout(void)
     {
-        errlHndl_t errl = NULL;
+        do
+        {
+            TS_TRACE( "testCallout errorlog user detail data");
+#if 1
+            // these tests deconfigure and gard targets. and even tho they
+            //  restore their state after the tests, since the cxxtests are
+            //  all run in parallel, during the time that a target is non-
+            //  functional due to this test, another test may be running that
+            //  might be adversly affected.
+            // tests are left in the code so that a developer can enable them
+            //  to test these specific functions - just keep in mind that there
+            //  could be side effects in other cxxtests.
+            TS_TRACE( " - SKIPPING -- other tests could be adversly affected");
+#else
+            errlHndl_t errl = NULL;
+            errlHndl_t gard_errl = NULL;
+            HWAS::DeconfigGard::DeconfigureRecords_t l_deconfigRecords;
+            HWAS::DeconfigGard::GardRecords_t l_gardRecords;
+            uint32_t deconfigCount = 0;
+            uint32_t gardCount = 0;
 
-        TS_TRACE( "testCallout errorlog user detail data");
-        /*@
-        * @errortype
-        * @severity ERRORLOG_SEV_INFORMATIONAL
-        * @moduleid HBERRL_USERDATA_TEST_MOD_ID
-        * @reasoncode HBERRL_TEST_CALLOUT_UD
-        * @userdata1 Test data 1
-        * @userdata2 Test data 2
-        * @devdesc User Details unit test - create callout user detail data
-        */
-        errl = new ERRORLOG::ErrlEntry(
-                ERRORLOG::ERRL_SEV_INFORMATIONAL,
-                HBERRL_USERDATA_TEST_MOD_ID,
-                HBERRL_TEST_CALLOUT_UD,
-                0x0001002300450067,                   //  user1
-                0x008900AB00CD00EF );                 //  user2
 
-        using namespace TARGETING;
-        ErrlUserDetailsString("Callout test").addToLog(errl);
+            // make sure there aren't any existing deconfigure or gard records
+            gard_errl = HWAS::theDeconfigGard().getDeconfigureRecords(NULL,
+                    l_deconfigRecords);
+            if (gard_errl)
+            {
+                TS_FAIL("testCallout: Error from getDeconfigureRecords");
+                errlCommit(gard_errl,HWAS_COMP_ID);
+                break;
+            }
+            if (l_deconfigRecords.size() != 0)
+            {
+                TS_TRACE("testCallout: %d existing Deconfigure Records, "
+                            "skipping test", l_deconfigRecords.size());
+                break;
+            }
 
-        // first test with Master
-        ErrlUserDetailsCallout(
-                    &HWAS::TARGET_IS_SENTINEL,
-                    sizeof(HWAS::TARGET_IS_SENTINEL),
-                    HWAS::SRCI_PRIORITY_LOW,
-                    HWAS::DECONFIG,
-                    HWAS::GARD_PoreError).addToLog(errl);
+            gard_errl = HWAS::theDeconfigGard().getGardRecords(0, l_gardRecords);
+            if (gard_errl)
+            {
+                TS_FAIL("testCallout: Error from getGardRecords");
+                errlCommit(gard_errl,HWAS_COMP_ID);
+                break;
+            }
+            if (l_gardRecords.size() != 0)
+            {
+                TS_TRACE("testCallout: %d existing GARD Records, "
+                            "skipping test", l_gardRecords.size());
+                break;
+            }
 
-        ErrlUserDetailsCallout(
-                    &HWAS::TARGET_IS_SENTINEL,
-                    sizeof(HWAS::TARGET_IS_SENTINEL),
-                    HWAS::SRCI_PRIORITY_MED,
-                    HWAS::DECONFIG,
-                    HWAS::GARD_NULL).addToLog(errl);
+            /*@
+            * @errortype
+            * @severity ERRORLOG_SEV_INFORMATIONAL
+            * @moduleid HBERRL_USERDATA_TEST_MOD_ID
+            * @reasoncode HBERRL_TEST_CALLOUT_UD
+            * @userdata1 Test data 1
+            * @userdata2 Test data 2
+            * @devdesc User Details unit test - create callout user detail data
+            */
+            errl = new ERRORLOG::ErrlEntry(
+                    ERRORLOG::ERRL_SEV_INFORMATIONAL,
+                    HBERRL_USERDATA_TEST_MOD_ID,
+                    HBERRL_TEST_CALLOUT_UD,
+                    0x0001002300450067,                   //  user1
+                    0x008900AB00CD00EF );                 //  user2
 
-        // find a proc target
-        PredicateCTM procChipFilter(CLASS_CHIP,TYPE_PROC);
-        TargetRangeFilter pProc(
-            targetService().begin(), targetService().end(),
-            &procChipFilter);
-        TARGETING::EntityPath ep;
-        ep = pProc->getAttr<TARGETING::ATTR_PHYS_PATH>();
+            using namespace TARGETING;
+            ErrlUserDetailsString("Callout test").addToLog(errl);
 
-        ErrlUserDetailsCallout(
-                    &ep,
-                    sizeof(ep),
-                    HWAS::SRCI_PRIORITY_LOW,
-                    HWAS::DECONFIG,
-                    HWAS::GARD_Fatal).addToLog(errl);
+            // first test with Master
+            ErrlUserDetailsCallout(
+                        &HWAS::TARGET_IS_SENTINEL,
+                        sizeof(HWAS::TARGET_IS_SENTINEL),
+                        HWAS::SRCI_PRIORITY_LOW,
+                        HWAS::DECONFIG,
+                        HWAS::GARD_PoreError).addToLog(errl);
+            // TODO: RTC 45780
+            // SENTINEL not logged properly // deconfigCount++;
+            // SENTINEL not logged properly // gardCount++;
 
-        ErrlUserDetailsCallout(
-                    HWAS::EPUB_PRC_MEMORY_UE,
-                    HWAS::SRCI_PRIORITY_HIGH).addToLog(errl);
+            ErrlUserDetailsCallout(
+                        &HWAS::TARGET_IS_SENTINEL,
+                        sizeof(HWAS::TARGET_IS_SENTINEL),
+                        HWAS::SRCI_PRIORITY_MED,
+                        HWAS::DECONFIG,
+                        HWAS::GARD_NULL).addToLog(errl);
+            // TODO: RTC 45780
+            // SENTINEL not logged properly // deconfigCount++;
 
-        // commit the errorlog
-        errlCommit(errl, CXXTEST_COMP_ID);
+            // find a proc target
+            PredicateCTM procChipFilter(CLASS_CHIP,TYPE_PROC);
+            TargetRangeFilter pProc(
+                targetService().begin(), targetService().end(),
+                &procChipFilter);
+            TARGETING::EntityPath ep;
+            ep = pProc->getAttr<TARGETING::ATTR_PHYS_PATH>();
+
+            ErrlUserDetailsCallout(
+                        &ep,
+                        sizeof(ep),
+                        HWAS::SRCI_PRIORITY_LOW,
+                        HWAS::DECONFIG,
+                        HWAS::GARD_Fatal).addToLog(errl);
+            deconfigCount++;
+            gardCount++;
+
+            ErrlUserDetailsCallout(
+                        HWAS::EPUB_PRC_MEMORY_UE,
+                        HWAS::SRCI_PRIORITY_HIGH).addToLog(errl);
+
+            // commit the errorlog
+            errlCommit(errl, CXXTEST_COMP_ID);
+
+            // confirm there are the correct number of deconfig and gard records
+            gard_errl = HWAS::theDeconfigGard().getGardRecords(0, l_gardRecords);
+            if (gard_errl)
+            {
+                TS_FAIL("testCallout: Error from getGardRecords");
+                errlCommit(gard_errl,HWAS_COMP_ID);
+            }
+            else if (l_gardRecords.size() != gardCount)
+            {
+                TS_FAIL("testCallout: %d GARD Records, expected %d",
+                            l_gardRecords.size(), gardCount);
+            }
+
+            gard_errl = HWAS::theDeconfigGard().getDeconfigureRecords(NULL,
+                    l_deconfigRecords);
+            if (gard_errl)
+            {
+                TS_FAIL("testCallout: Error from getDeconfigureRecords");
+                errlCommit(gard_errl,HWAS_COMP_ID);
+            }
+            else if (l_deconfigRecords.size() != deconfigCount)
+            {
+                TS_FAIL("testCallout: %d Deconfigure Records, expected %d",
+                            l_deconfigRecords.size(), deconfigCount);
+            }
+
+            // delete these deconfigure and gard records
+            HWAS::theDeconfigGard()._clearDeconfigureRecords(NULL);
+            gard_errl = HWAS::theDeconfigGard().clearGardRecords(0);
+            if (gard_errl)
+            {
+                errlCommit(gard_errl,HWAS_COMP_ID);
+                TS_FAIL("testCallout: Error from clearGardRecords");
+            }
+#endif
+        }
+        while(0);
+
         TS_TRACE( "testCallout done");
 
     } // testCallout

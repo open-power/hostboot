@@ -211,45 +211,6 @@ public:
         TS_TRACE( "testHWASplatReadPartialGood exit" );
     }
 
-    /**
-     * @brief   test platPresenceDetect
-     */
-    void testHWASplatPresenceDetect()
-    {
-        using namespace TARGETING;
-        using namespace HWAS;
-
-        TS_TRACE( "testHWASplatPresenceDetect entry" );
-
-        // call platPresenceDetect with target that won't return PRESENT
-        errlHndl_t l_errl;
-
-        TargetHandleList pCheckPres;
-        Target* pSys;
-        targetService().getTopLevelTarget(pSys);
-        pCheckPres.push_back(pSys);
-
-        l_errl = HWAS::platPresenceDetect(pCheckPres);
-
-        if (l_errl)
-        {
-            TS_FAIL("testHWASplatPresenceDetect>"
-                    "Error from platPresenceDetect.");
-        }
-        else
-        {
-            // check to make sure list returned is now empty
-            if (pCheckPres.size() != 0)
-            {
-                TS_FAIL("testHWASplatPresenceDetect>"
-                        "platPresenceDetect didn't return empty list");
-            }
-        }
-
-        TS_TRACE( "testHWASplatPresenceDetect exit" );
-    }
-
-
 };
 
 #endif //

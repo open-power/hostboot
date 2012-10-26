@@ -67,7 +67,7 @@ mvpdTestData mvpdData[] =
     { CRP0, ED },
     { CRP0, TE },
     { CRP0, DD },
-//    { CRP1, pdP }, // TODO - no #P in test data. pull for now RTC 51716
+//    { CRP0, pdP }, // TODO - no #P in test data, pull for now RTC 51716
     { CRP0, ST },
 //    { CRP0, DN,     0x03 }, // TODO - This doesn't match documentation,
 //                                      pulling out for now
