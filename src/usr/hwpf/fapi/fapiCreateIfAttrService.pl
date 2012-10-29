@@ -39,6 +39,7 @@
 #                  mjjones   02/08/12  Handle attribute files with 1 entry
 #                  mjjones   06/12/12  Handle privileged attributes
 #                  mjjones   09/28/12  Minor change to add FFDC on error
+#                  mjjones   10/26/12  Output attrId/targType on error
 #
 # End Change Log ******************************************************
 
@@ -281,13 +282,22 @@ if ($attCount > 0)
     print ASFILE "    else\n";
 }
 print ASFILE "    {\n";
-print ASFILE "        FAPI_ERR(\"fapiGetInitFileAttr: Unrecognized attr: %d\", i_id);\n";
+print ASFILE "        FAPI_ERR(\"fapiGetInitFileAttr: Unrecognized attr ID: 0x%x\", i_id);\n";
 print ASFILE "        l_rc.setFapiError(FAPI_RC_INVALID_ATTR_GET);\n";
 print ASFILE "        l_rc.addEIFfdc(0, &i_id, sizeof(i_id));\n";
 print ASFILE "    }\n\n";
 print ASFILE "    if (l_rc)\n";
 print ASFILE "    {\n";
-print ASFILE "        FAPI_ERR(\"fapiGetInitFileAttr: Error getting attr\");\n";
+print ASFILE "        if (i_pTarget)\n";
+print ASFILE "        {\n";
+print ASFILE "            FAPI_ERR(\"fapiGetInitFileAttr: Error getting attr ID 0x%x from targType 0x%x\",\n";
+print ASFILE "                     i_id, i_pTarget->getType());\n";
+print ASFILE "        }\n";
+print ASFILE "        else\n";
+print ASFILE "        {\n";
+print ASFILE "            FAPI_ERR(\"fapiGetInitFileAttr: Error getting attr ID 0x%x from system target\",\n";
+print ASFILE "                     i_id);\n";
+print ASFILE "        }\n";
 print ASFILE "    }\n\n";
 print ASFILE "    return l_rc;\n";
 print ASFILE "}\n\n";
