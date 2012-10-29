@@ -547,10 +547,12 @@ void InitService::init( void *io_ptr )
         TRACFCOMP( g_trac_initsvc,
                 "InitService: Committing errorlog %p",
                 l_errl );
-        errlCommit( l_errl, INITSVC_COMP_ID );
 
-        //  post bad shutdown status
-        l_shutdownStatus   = SHUTDOWN_STATUS_INITSVC_FAILED;
+        // Set the shutdown status to be the plid to force a TI
+        l_shutdownStatus = l_errl->plid();
+
+        errlCommit( l_errl, INITSVC_COMP_ID ); 
+
     }
 
     //  =====================================================================
@@ -671,6 +673,7 @@ void InitService::doShutdown(uint64_t i_status,
         }
         l_rb_iter++;
     }
+    
     shutdown(i_status, i_payload_base, i_payload_entry);
 }
 

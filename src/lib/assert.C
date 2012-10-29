@@ -32,6 +32,8 @@
 
 #include <kernel/hbterminatetypes.H>
 #include <kernel/terminate.H>
+#include <sys/misc.h>
+#include <kernel/kernel_reasoncodes.H>
 
 /** Hook location for trace module to set up when loaded. */
 namespace TRACE { void (*traceCallback)(void*, size_t) = NULL; };
@@ -58,18 +60,23 @@ extern "C" void __assert(AssertBehavior i_assertb, int i_line)
             break;
 
         case ASSERT_CRITICAL:  // Critical task, trace not available.
-            printk("Assertion failed @%p on line %d.\n",
+            printk("Assertion failed @%p on line %d.(Crit_Assert)\n",
                    linkRegister(), i_line);
-            task_crash();
+
+            // Need to call the external CritAssert system call
+            cpu_crit_assert(reinterpret_cast<uint64_t>(linkRegister()));
             break;
 
         case ASSERT_KERNEL:  // Kernel assert called.
-            printk("Assertion failed @%p on line %d.\n",
+            printk("Assertion failed @%p on line %d. (kassert)\n",
                    linkRegister(), i_line);
 
-            // Create and src
-            // Call function to save SRC and perform a TI
-            //terminateAndUpdateSaveArea(TI_WITH_SRC, TI_KERNAL_ASSERT, NULL);
+            // Call function to create SRC and update TI Data area
+            termWriteSRC(TI_KERNEL_ASSERT, RC_ASSERT,
+                         reinterpret_cast<uint64_t>(linkRegister()));
+
+            // Call to force TI
+            terminateExecuteTI();
             break;
     }
 

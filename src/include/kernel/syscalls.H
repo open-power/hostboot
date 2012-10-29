@@ -116,6 +116,9 @@ namespace Systemcalls
             /** mm_linear_map() */
         MM_LINEAR_MAP,
 
+            /** critassert() */
+        MISC_CRITASSERT,
+
 	SYSCALL_MAX
     };
 

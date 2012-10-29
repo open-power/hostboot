@@ -27,6 +27,47 @@
 #define __KERNEL_HBTERMINATETYPES_H
 #include <stdint.h>
 
+/** @struct HB_T_SRC_DataAreaw
+ *  @brief Defines the data space recreating an SRC needed for a TI from kernel
+ *  space
+ */
+struct HB_T_SRC_DataArea
+{
+
+    union{
+        struct {
+            uint32_t ID:8;          /**< B1 or what we are using now*/
+            uint32_t subsystem:8;   /**< Caller of the TI  */
+            uint32_t reasoncode:16; /**< reasoncode */
+        };
+        uint32_t SRCword0;          /**< Full SRC word0 */
+    };
+    uint32_t SRCword1;              /**< Full SRC word2 */
+    union{
+        struct {
+            uint32_t bpCCIN:16;     /**< BP CCIN*/
+            uint32_t moduleID:8;    /**< Module ID  */
+            uint32_t FSP:8;         /**< subsystem */
+        };
+        uint32_t SRCword2;          /**< Full SRC word1 */
+    };
+
+    uint32_t SRCword3;              /**< Full SRC word3 */
+    uint32_t SRCword4;              /**< Full SRC word4 */
+    /* Word 5-8 - user data */
+    union{
+        struct {
+            uint32_t iType:16;     /**< SRC of PLID failure*/
+            uint32_t iSource:16;   /**< Source of the src */
+        };
+        uint32_t SRCword5;         /**< Full Dword5 */
+    };
+    uint32_t word6;                /**< Full Dword6 */
+
+    uint32_t word7;                /**< Full Dword7 */
+    uint32_t word8;                /**< Full Dword8 */
+
+};
 
 
 /** @struct TI_DataArea
@@ -43,10 +84,10 @@ struct HB_TI_DataArea
             uint64_t reserved2:16;  /**< Reserved space */
             uint64_t reserved3:16;  /**< Reserved space  */
         };
-        uint64_t flag;  /**< Full Dword0 */
-    };
-    uint64_t src[4];
-    uint64_t plid;
+        uint64_t flag;              /**< Full word - flag */
+    }; 
+    uint64_t plid;                  /**< Plid  */
+    HB_T_SRC_DataArea src;          /**< SRC  */
 };
 
 // Enum indicating whether a SRC or PLID is stored
@@ -59,7 +100,7 @@ enum hb_terminate_type
 // Enum used in the flag indicating who initiated the TI 
 enum hb_terminate_source
 {
-    TI_KERNAL_ASSERT = 0x0001,
+    TI_KERNEL_ASSERT = 0x0001,
     TI_CRIT_ASSERT =   0x0002,
     TI_SHUTDOWN =      0x0003,
 };

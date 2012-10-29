@@ -142,6 +142,15 @@ uint64_t cpu_spr_value(CpuSprNames spr);
  */
 int cpu_master_winkle();
 
+/** @fn cpu_crit_assert
+ *  @brief Forces a Terminate Immediate after a crit-assert is issued
+ *  @param[in] i_failAddr - value in the linkRegister of the address
+ *           of where the fail ocured.
+ *
+ *  @return none
+ */
+void cpu_crit_assert(uint64_t i_failAddr);
+
 #ifdef __cplusplus
 }
 #endif

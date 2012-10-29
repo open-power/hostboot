@@ -95,6 +95,7 @@ namespace Systemcalls
     void MmVirtToPhys(task_t *t);
     void MmExtend(task_t *t);
     void MmLinearMap(task_t *t);
+    void CritAssert(task_t *t);
 
 
     syscall syscalls[] =
@@ -136,6 +137,8 @@ namespace Systemcalls
         &MmVirtToPhys,    // MM_VIRT_TO_PHYS
         &MmExtend,        // MM_EXTEND
         &MmLinearMap,     // MM_LINEAR_MAP
+        &CritAssert,  // MISC_CRITASSERT
+
         };
 };
 
@@ -821,6 +824,18 @@ namespace Systemcalls
 
         TASK_SETRTN(t, VmmManager::mmLinearMap(paddr,size));
     }
+
+    /**
+     * Call Crit assert to perform the terminate Immediate
+     * @param[in] t: the task calling the critical assert
+     */
+    void CritAssert(task_t* t)
+    {
+        uint64_t i_failAddr = (uint64_t)(TASK_GETARG0(t));
+
+        CpuManager::critAssert(i_failAddr);
+    }
+
 
 };
 

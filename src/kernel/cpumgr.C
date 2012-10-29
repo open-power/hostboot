@@ -39,6 +39,9 @@
 #include <errno.h>
 #include <kernel/deferred.H>
 #include <kernel/misc.H>
+#include <kernel/terminate.H>
+#include <kernel/hbterminatetypes.H>
+#include <kernel/kernel_reasoncodes.H>
 
 cpu_t** CpuManager::cv_cpus[KERNEL_MAX_SUPPORTED_NODES];
 bool CpuManager::cv_shutdown_requested = false;
@@ -107,6 +110,16 @@ void CpuManager::requestShutdown(uint64_t i_status)
     __sync_synchronize();
     cv_shutdown_requested = true;
 
+    // If the shutdown was not called with a Good shutdown status
+    // then we know we are shutting down due to error and the
+    // status passed back is instead a PLID
+    if (i_status != SHUTDOWN_STATUS_GOOD)
+    {
+        termWritePlid(TI_SHUTDOWN, i_status);
+
+        printk("TI initiated on all threads (shutdown)\n");
+    }
+
     class ExecuteShutdown : public DeferredWork
     {
         public:
@@ -118,6 +131,8 @@ void CpuManager::requestShutdown(uint64_t i_status)
                 if(c->master)
                     HeapManager::stats();
                 #endif
+
+              
             }
 
             void activeMainWork()
@@ -394,4 +409,43 @@ size_t CpuManager::getThreadCount()
 void CpuManager::forceMemoryPeriodic()
 {
     cv_forcedMemPeriodic = true;
+}
+
+
+void CpuManager::critAssert(uint64_t i_failAddr)
+{
+    /* create SRC amd call terminate immediate*/
+
+    termWriteSRC(TI_CRIT_ASSERT,RC_SHUTDOWN, i_failAddr);
+
+    class ExecuteCritAssert : public DeferredWork
+    {
+      public:
+        void masterPreWork()
+        {
+            // print status to the console.
+            printk("TI initiated on all threads (crit_assert)\n");
+
+        }
+
+        void activeMainWork()
+        {
+            // Call the function to perform the TI
+            terminateExecuteTI();
+        }
+
+        void nonactiveMainWork()
+        {
+            // Something wasn't synchronized correctly if we got to here.
+            // Should not have CPUs coming online while trying to execute
+            // a shutdown.
+            terminateExecuteTI();
+        }
+    };
+
+    DeferredQueue::insert(new ExecuteCritAssert());
+
+    // Force executeion of the deferred queue.
+    DeferredQueue::execute();
+
 }

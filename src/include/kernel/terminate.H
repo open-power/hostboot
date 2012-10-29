@@ -28,18 +28,30 @@
 
 #include <kernel/types.h>
 
-/** @fn terminateAndUpdateSaveArea
- *  Update TI data area with src or PLID and force a TI
- *  @param[in] i_type :   indicates if an src or plid is stored
+
+/** @fn terminateExecuteTI
+ *  @brief Sequence to execute a TI attn
+ */
+void terminateExecuteTI();
+
+/** @fn termWritePlid
+ *  Update TI data area with a PLID.
  *  @param[in] i_source:  indicates what type of fail forced the TI
- *  @param[in] *i_src:    SRC to be stored
  *  @param[in] i_plid:    plid to be stored
  *  @param[out] NONE:
  */
-void terminateAndUpdateSaveArea(uint16_t i_type,
-                                    uint16_t i_source,
-                                    uint64_t *i_src,
-                                    uint64_t plid = 0);
-  
+void termWritePlid(uint16_t i_source, uint64_t plid);
+
+/** @fn termWriteSRC
+ *  Create an SRC and Update the TI data area with the src created
+ *  @param[in] i_source:  indicates what type of fail forced the TI
+ *  @param[in] i_reasoncode: reasoncode for the failure(assert or shutdown)
+ *  @param[in] i_failAddr: i_linkRegister() value (address of failure)
+ *  @param[out] NONE:
+ */
+void termWriteSRC(uint16_t i_source,
+                    uint16_t i_reasoncode,
+                    uint64_t i_failAddr = 0);
+
 
 #endif

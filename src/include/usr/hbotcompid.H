@@ -257,6 +257,14 @@ const compId_t RUNTIME_COMP_ID = 0x1A00;
 const char RUNTIME_COMP_NAME[] = "runtime";
 //@}
 
+/** @name KERNEL
+ *  KERNEL component
+ */
+//@{
+const compId_t KERNEL_COMP_ID = 0x1B00;
+const char KERNEL_COMP_NAME[] = "kernel";
+//@}
+
 /** @name HSVC
  * Host Services component
  * For the code running under PHYP
@@ -264,7 +272,7 @@ const char RUNTIME_COMP_NAME[] = "runtime";
 //@{
 const compId_t HSVC_COMP_ID = 0x2000;
 const char HSVC_COMP_NAME[] = "hsvc";
-//@}
+
 
 /** @name RESERVED
  *  Reserved component ID. x3100 is the component ID

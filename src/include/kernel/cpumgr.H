@@ -145,6 +145,13 @@ class CpuManager
          */
         static void forceMemoryPeriodic();
 
+
+        /** @fn critAssert()
+         * Functional call to force terminate immediate on all threads
+         * @param[in] i_failAddr - Address from where the assert was called
+         */
+        static void critAssert(uint64_t i_failAddr);
+
         /** Desired value for MSR after wakeup.
          *
          *  bit 0 - 64 bit mode.

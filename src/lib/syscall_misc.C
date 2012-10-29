@@ -90,3 +90,8 @@ int cpu_master_winkle()
     return rc;
 }
 
+
+void cpu_crit_assert(uint64_t i_failAddr)
+{
+   _syscall1(MISC_CRITASSERT, reinterpret_cast<void*>(i_failAddr));
+}

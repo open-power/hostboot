@@ -27,6 +27,8 @@
 #include <kernel/barrier.H>
 #include <kernel/scheduler.H>
 #include <assert.h>
+#include <kernel/terminate.H>
+#include <kernel/hbterminatetypes.H>
 
 extern "C"
     void kernel_shutdown(size_t, uint64_t, uint64_t, uint64_t) NO_RETURN;
@@ -42,19 +44,31 @@ namespace KernelMisc
     {
         // Update scratch SPR for shutdown status.
         cpu_t* c = CpuManager::getCurrentCPU();
+        register uint64_t status = CpuManager::getShutdownStatus();
+
         if (c->master)
         {
-            register uint64_t status = CpuManager::getShutdownStatus();
-            printk("Shutdown Requested. Status = 0x%lx\n", status);
+            // If good shutdown requested print out status
+            if(status == SHUTDOWN_STATUS_GOOD)
+            {
+                printk("Shutdown Requested. Status = 0x%lx\n", status);
+            }
+            // Shtudown was called due to error.. print out plid of the
+            // errorlog that caused the failure
+            else
+            {
+                printk("Shutdown Requested. PLID = %ld (due to failure)\n",
+                       status);
+            }
 
             register uint64_t scratch_address = 0; // Values from PervSpec
             switch(CpuID::getCpuType())
             {
-                case CORE_POWER8_MURANO:
-                case CORE_POWER8_VENICE:
-                case CORE_UNKNOWN:
-                    scratch_address = 0x40;
-                    break;
+              case CORE_POWER8_MURANO:
+              case CORE_POWER8_VENICE:
+              case CORE_UNKNOWN:
+                scratch_address = 0x40;
+                break;
             }
 
             asm volatile("mtspr 276, %0\n"
@@ -63,69 +77,83 @@ namespace KernelMisc
                          :: "r" (scratch_address), "r" (status));
         }
 
-        // dump whatever is left in g_tracBinary
-        MAGIC_INSTRUCTION(MAGIC_CONTINUOUS_TRACE);
-
-        // See magic_instruction_callback() in
-        // src/build/debug/simics-debug-framework.py
-        // for exactly how this is handled.
-        MAGIC_INSTRUCTION(MAGIC_SHUTDOWN);
-
-        // Check for a valid payload address.
-        if ((0 == g_payload_base) && (0 == g_payload_entry))
+        // If the Shutdown was called with a status of GOOD then
+        // perform a regular shutdown, otherwise assume we have an
+        // error with a status value of the plid and perform a TI.
+        if(status == SHUTDOWN_STATUS_GOOD)
         {
-            // We really don't know what we're suppose to do now, so just
-            // sleep all the processors.
 
-            if (c->master)
+            // dump whatever is left in g_tracBinary
+            MAGIC_INSTRUCTION(MAGIC_CONTINUOUS_TRACE);
+
+            // See magic_instruction_callback() in
+            // src/build/debug/simics-debug-framework.py
+            // for exactly how this is handled.
+            MAGIC_INSTRUCTION(MAGIC_SHUTDOWN);
+
+            // Check for a valid payload address.
+            if ((0 == g_payload_base) && (0 == g_payload_entry))
             {
-                printk("No payload... nap'ing all threads.\n");
+                // We really don't know what we're suppose to do now, so just
+                // sleep all the processors.
+
+                if (c->master)
+                {
+                    printk("No payload... nap'ing all threads.\n");
+                }
+
+                // Clear LPCR values that wakes up from nap.  LPCR[49, 50, 51]
+                setLPCR(getLPCR() & (~0x0000000000007000));
+
+                while(1)
+                {
+                    nap();
+                }
             }
-
-            // Clear LPCR values that wakes up from nap.  LPCR[49, 50, 51]
-            setLPCR(getLPCR() & (~0x0000000000007000));
-
-            while(1)
+            else
             {
-                nap();
+                static Barrier* l_barrier = new Barrier(CpuManager::getCpuCount());
+                static uint64_t l_lowestPIR = 0xffffffffffffffffull;
+
+                if (c->master)
+                {
+                    printk("Preparing to enter payload...%lx:%lx\n",
+                           g_payload_base, g_payload_entry);
+                }
+
+                // Need to identify the thread with the lowest PIR because it needs
+                // to be the last one to jump to PHYP.
+                uint64_t l_pir = getPIR();
+                do
+                {
+                    uint64_t currentPIR = l_lowestPIR;
+                    if (l_pir > currentPIR)
+                    {
+                        break;
+                    }
+
+                    if (__sync_bool_compare_and_swap(&l_lowestPIR,
+                                                     currentPIR, l_pir))
+                    {
+                        break;
+                    }
+
+                } while(1);
+
+                l_barrier->wait();
+
+                kernel_shutdown(CpuManager::getCpuCount(),
+                                g_payload_base,
+                                g_payload_entry,
+                                l_lowestPIR);
             }
         }
         else
         {
-            static Barrier* l_barrier = new Barrier(CpuManager::getCpuCount());
-            static uint64_t l_lowestPIR = 0xffffffffffffffffull;
-
-            if (c->master)
-            {
-                printk("Preparing to enter payload...%lx:%lx\n",
-                       g_payload_base, g_payload_entry);
-            }
-
-            // Need to identify the thread with the lowest PIR because it needs
-            // to be the last one to jump to PHYP.
-            uint64_t l_pir = getPIR();
-            do
-            {
-                uint64_t currentPIR = l_lowestPIR;
-                if (l_pir > currentPIR)
-                {
-                    break;
-                }
-
-                if (__sync_bool_compare_and_swap(&l_lowestPIR,
-                                                 currentPIR, l_pir))
-                {
-                    break;
-                }
-
-            } while(1);
-
-            l_barrier->wait();
-
-            kernel_shutdown(CpuManager::getCpuCount(),
-                            g_payload_base,
-                            g_payload_entry,
-                            l_lowestPIR);
+            // Got a nonzero status value indicating we had a shutdown request
+            // with a PLID and there force need to do  TI.  The plid info was
+            // written to the data area earlier in CpuManager::requestShutdown
+            terminateExecuteTI();
         }
     }
 
