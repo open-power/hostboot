@@ -1,26 +1,25 @@
-/*  IBM_PROLOG_BEGIN_TAG
- *  This is an automatically generated prolog.
- *
- *  $Source: src/usr/scom/test/scomtest.H $
- *
- *  IBM CONFIDENTIAL
- *
- *  COPYRIGHT International Business Machines Corp. 2011-2012
- *
- *  p1
- *
- *  Object Code Only (OCO) source materials
- *  Licensed Internal Code Source Materials
- *  IBM HostBoot Licensed Internal Code
- *
- *  The source code for this program is not published or other-
- *  wise divested of its trade secrets, irrespective of what has
- *  been deposited with the U.S. Copyright Office.
- *
- *  Origin: 30
- *
- *  IBM_PROLOG_END_TAG
- */
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/usr/scom/test/scomtest.H $                                */
+/*                                                                        */
+/* IBM CONFIDENTIAL                                                       */
+/*                                                                        */
+/* COPYRIGHT International Business Machines Corp. 2011,2012              */
+/*                                                                        */
+/* p1                                                                     */
+/*                                                                        */
+/* Object Code Only (OCO) source materials                                */
+/* Licensed Internal Code Source Materials                                */
+/* IBM HostBoot Licensed Internal Code                                    */
+/*                                                                        */
+/* The source code for this program is not published or otherwise         */
+/* divested of its trade secrets, irrespective of what has been           */
+/* deposited with the U.S. Copyright Office.                              */
+/*                                                                        */
+/* Origin: 30                                                             */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
 #ifndef __SCOMTEST_H
 #define __SCOMTEST_H
 
@@ -1342,9 +1341,9 @@ public:
       } test_data[] = {
 
           { scom_targets[myABUS0], 0x800C4C0008010C3F ,0x1111111101010101},
-          { scom_targets[myABUS1], 0x800C4C0008010C3F, 0x3333333311111111},
+          { scom_targets[myABUS1], 0x8000B00108010C3F, 0x3333333311111111},
           { scom_targets[myABUS2], 0x800C4C0008010C3F, 0x5555555521212121},
-	  { scom_targets[myABUS0], 0x800C4C0208010C3F, 0x0101010101010101},  // invalid address range - non zero
+	  { scom_targets[myABUS0], 0x800C4C2008010C3F, 0x0101010101010101},  // invalid address range - non zero
 	  { scom_targets[myABUS2], 0x800C4C0004010C3F, 0x2323232323232323},  // Invalid address range for target
       };
       const uint64_t NUM_ADDRS = sizeof(test_data)/sizeof(test_data[0]);
