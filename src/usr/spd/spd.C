@@ -1096,6 +1096,9 @@ errlHndl_t readPNOR ( uint64_t i_byteAddr,
                    INFO_MRK"Address to read: 0x%08x",
                    addr );
 
+        //TODO: Validate write is within bounds of appropriate PNOR
+        //   partition/section.   RTC: 51807
+
         // Pull the data
         readAddr = reinterpret_cast<const char*>( addr );
         memcpy( o_data,
@@ -1160,6 +1163,9 @@ errlHndl_t writePNOR ( uint64_t i_byteAddr,
         // Now offset into that chunk of data by i_byteAddr
         addr += i_byteAddr;
 
+        //TODO: Validate write is within bounds of appropriate PNOR
+        //   partition/section.   RTC: 51807
+
         TRACUCOMP( g_trac_spd,
                    INFO_MRK"Address to write: 0x%08x",
                    addr );
@@ -1200,37 +1206,6 @@ errlHndl_t getPnorAddr ( pnorInformation & i_pnorInfo,
 
         if( err )
         {
-            break;
-        }
-
-        // Check the Size
-        uint32_t expectedSize = i_pnorInfo.segmentSize * i_pnorInfo.maxSegments;
-        if( expectedSize != info.size )
-        {
-            TRACFCOMP( g_trac_spd,
-                       ERR_MRK"PNOR section actual size (0x%08x) is not "
-                       "equal to expected size (0x%08x)!",
-                       info.size,
-                       expectedSize );
-
-            /*@
-             * @errortype
-             * @reasoncode       SPD_SIZE_MISMATCH
-             * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE
-             * @moduleid         SPD_GET_PNOR_ADDR
-             * @userdata1[0:31]  PNOR RP provided size
-             * @userdata1[32:63] Expected Size
-             * @userdata2[0:31]  PNOR Section enum
-             * @userdata2[32:63] PNOR Side enum
-             * @devdesc
-             */
-            err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                           SPD_GET_PNOR_ADDR,
-                                           SPD_SIZE_MISMATCH,
-                                           TWO_UINT32_TO_UINT64( info.size,
-                                                                 expectedSize ),
-                                           TWO_UINT32_TO_UINT64( i_pnorInfo.pnorSection,
-                                                                 i_pnorInfo.pnorSide) );
             break;
         }
 

@@ -36,28 +36,10 @@
         <sideless>no</sideless>
     </section>
     <section>
-        <description>Hostboot Extended image (2.5MB)</description>
-        <eyeCatch>HBI</eyeCatch>
-        <physicalOffset>0x1000</physicalOffset>
-        <physicalRegionSize>0x280000</physicalRegionSize>
-        <ecc>no</ecc>
-        <source>File</source>
-        <sideless>no</sideless>
-    </section>
-    <section>
-        <description>Module VPD</description>
+        <!-- NOTE: smaller that official layout  for fake-PNOR  -->
+        <description>Module VPD (256K) -only supports 4 processors</description>
         <eyeCatch>MVPD</eyeCatch>
-        <physicalOffset>0x281000</physicalOffset>
-        <physicalRegionSize>0x80000</physicalRegionSize>
-        <actualRegionSize>0x80000</actualRegionSize>
-        <ecc>no</ecc>
-        <source>Blank</source>
-        <sideless>yes</sideless>
-    </section>
-    <section>
-        <description>DIMM JEDEC</description>
-        <eyeCatch>DJVPD</eyeCatch>
-        <physicalOffset>0x301000</physicalOffset>
+        <physicalOffset>0x1000</physicalOffset>
         <physicalRegionSize>0x40000</physicalRegionSize>
         <actualRegionSize>0x40000</actualRegionSize>
         <ecc>no</ecc>
@@ -65,9 +47,51 @@
         <sideless>yes</sideless>
     </section>
     <section>
+        <!-- NOTE: smaller that official layout  for fake-PNOR  -->
+        <description>DIMM JEDEC (128K) -only supports 4 processors</description>
+        <eyeCatch>DJVPD</eyeCatch>
+        <physicalOffset>0x41000</physicalOffset>
+        <physicalRegionSize>0x20000</physicalRegionSize>
+        <actualRegionSize>0x20000</actualRegionSize>
+        <ecc>no</ecc>
+        <source>Blank</source>
+        <sideless>yes</sideless>
+    </section>
+    <section>
+        <description>Hostboot Extended image (2.5MB)</description>
+        <eyeCatch>HBI</eyeCatch>
+        <physicalOffset>0x61000</physicalOffset>
+        <physicalRegionSize>0x280000</physicalRegionSize>
+        <ecc>no</ecc>
+        <source>File</source>
+        <sideless>no</sideless>
+    </section>
+    <section>
+        <!-- NOTE: smaller that official layout  for fake-PNOR  -->
+        <description>Sleep Winkle Ref Image (196K) </description>
+        <eyeCatch>WINK</eyeCatch>
+        <physicalOffset>0x2E1000</physicalOffset>
+        <physicalRegionSize>0x30000</physicalRegionSize>
+        <actualRegionSize>0x30000</actualRegionSize>
+        <ecc>no</ecc>
+        <source>Blank</source>
+        <sideless>no</sideless>
+    </section>
+    <section>
+        <!-- NOTE: smaller that official layout  for fake-PNOR  -->
+        <description>Hostboot Error Logs (64K)</description>
+        <eyeCatch>HBEL</eyeCatch>
+        <physicalOffset>0x311000</physicalOffset>
+        <physicalRegionSize>0x10000</physicalRegionSize>
+        <actualRegionSize>0x10000</actualRegionSize>
+        <ecc>no</ecc>
+        <source>Blank</source>
+        <sideless>no</sideless>
+    </section>
+    <section>
         <description>Attribute Data (256K)</description>
         <eyeCatch>HBD</eyeCatch>
-        <physicalOffset>0x341000</physicalOffset>
+        <physicalOffset>0x321000</physicalOffset>
         <physicalRegionSize>0x40000</physicalRegionSize>
         <ecc>no</ecc>
         <source>File</source>

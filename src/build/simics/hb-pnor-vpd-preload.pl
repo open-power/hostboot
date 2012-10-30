@@ -31,6 +31,8 @@ my $numCentPerProc;
 my $dataPath = ".";
 my $outputPath = ".";
 my $machine = "MURANO";
+my $procConfig = "uninit";
+my $maxProcs = 8;
 
 # Create temp file for MVPD
 my $emptyMVPDfh;
@@ -47,7 +49,6 @@ my $spdFile = "dimmspd.dat";
 my $sysMVPD = "sysmvpd.dat";
 my $sysSPD = "sysspd.dat";
 
-my $MAX_PROCS = 8;
 my $MAX_CENT_PER_PROC = 8;
 my $MAX_DIMMS_PER_CENT = 8;
 my $MAX_MCS = 8;
@@ -60,6 +61,11 @@ while( $ARGV = shift )
     {
         $numProcs = shift;
         debugMsg( "Num Procs: $numProcs" );
+    }
+    elsif( $ARGV =~ m/--maxProcs/ ||
+           $ARGV =~ m/-mp/ )
+    {
+        $maxProcs = shift;
     }
     elsif( $ARGV =~ m/--numCentPerProc/ ||
            $ARGV =~ m/-ncpp/ )
@@ -84,10 +90,38 @@ while( $ARGV = shift )
     {
         $outputPath = shift;
     }
+    elsif( $ARGV =~ m/--forceProc/ ||
+           $ARGV =~ m/-fp/ )
+    {
+        $procConfig = shift;
+    }
     else
     {
         usage();
     }
+}
+
+#figure out default procConfig if one was not specified.
+#if procConfig was specified, validate it's length.
+if( $procConfig =~ m/uninit/ )
+{
+    $procConfig = "";
+    for( my $proc = 0; $proc < $maxProcs; $proc++ )
+    {
+        if( $proc < $numProcs )
+        {
+            $procConfig = $procConfig."1";
+        }
+        else
+        {
+            $procConfig = $procConfig."0";
+        }
+    }
+}
+elsif(length($procConfig) != $maxProcs)
+{
+    print "ERROR: forceProc arg must specify presence of same number of procs as indicated by maxProcs($maxProcs)\n";
+    exit 1;
 }
 
 createMVPDData();
@@ -106,14 +140,18 @@ exit 0;
 #====================================================================
 sub usage
 {
-    print "Usage: $0 -numProcs <value> -numCentPerProc <value> [-dataPath]\n";
-    print "         [-m | --machine <value>] [-h | --help]\n";
+    print "Usage: $0 --numProcs <value> --numCentPerProc <value>\n";
+    print "         [--dataPath <path> ] [-m | --machine <value>]\n";
+    print "         [-mp | --maxProcs <value>\n";
+    print "         [-fp | --forceProc <value ] [-h | --help]\n";
     print "\n";
     print "  -np    --numProcs        Number of Processors in the drawer.\n";
+    print "  -mp    --maxProcs        Max number of Proc records created.\n";
+    print "  -fp    --forceProc       Force specific procs to be present.\n";
     print "  -ncpp  --numCentPerProc  Number of Centaurs per Processor.\n";
     print "  -m     --machine         Text machine to build data for.\n";
     print "                              Default: MURANO\n";
-    print "  -dp    --dataPath        Path to where VPD data files are located.\n";
+    print "  -dp    --dataPath        Path to VPD data files.\n";
     print "  -op    --outputPath      Path where VPD files should end up.\n";
     print "                              Default: ./\n";
     print "  -h  --help               Help/Usage.\n";
@@ -171,9 +209,9 @@ sub createMVPDData
     $cmd = "echo \"00FFFF: 00\" \| xxd -r \> $emptyMVPD";
     system( $cmd ) == 0 or die "Creating $emptyMVPD failed!";
 
-    for( my $proc = 0; $proc < $MAX_PROCS; $proc++ )
+    for( my $proc = 0; $proc < $maxProcs; $proc++ )
     {
-        if( $proc < $numProcs )
+        if( substr($procConfig,$proc,1) =~ /1/ )
         {
             # Use real data to the full image.
             $sourceFile = "$dataPath/$mvpdFile";
@@ -297,14 +335,14 @@ sub createSPDData
     }
 
     debugMsg( "@mcsArray" );
-    for( my $proc = 0; $proc < $MAX_PROCS; $proc++ )
+    for( my $proc = 0; $proc < $maxProcs; $proc++ )
     {
         for( my $cent = 0; $cent < $MAX_CENT_PER_PROC; $cent++ )
         {
             for( my $dimm = 0; $dimm < $MAX_DIMMS_PER_CENT; $dimm++ )
             {
                 if( ($mcsArray[$cent] == 1) &&
-                    ($proc < $numProcs) )
+                    substr($procConfig,$proc,1) =~ /1/ )
                 {
                     debugMsg( "$machine( $proc, $cent, $dimm ): Real File" );
                     # Use the real data to the full image

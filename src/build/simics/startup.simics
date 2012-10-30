@@ -9,7 +9,7 @@ python "os.environ['HB_MACHINE'] = \""+$hb_machine+"\""
 
 # Preload VPD in PNOR
 try {
-    run-python-file (lookup-file hbfw/hb-pnor-mvpd-preload.py)
+    run-python-file (lookup-file hbfw/hb-pnor-vpd-preload.py)
     fpga0.sfc_master_mem.load-file ./sysmvpd.dat 0x3E0A000
     fpga0.sfc_master_mem.load-file ./sysspd.dat 0x3DCA000
 } except { echo "ERROR: Failed to preload VPD into PNOR." }

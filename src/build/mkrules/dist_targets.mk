@@ -53,6 +53,8 @@ COPY_FILES = \
     src/build/vpo/hb-istep:vpo \
     src/build/vpo/hb-virtdebug.pl:vpo \
     src/build/vpo/VBU_Cacheline.pm:vpo \
+    src/build/simics/hb-pnor-vpd-preload.pl:vpo \
+    src/build/buildpnor/pnorLayoutVpo.xml:vpo \
     img/errlparser:tools,vpo \
     img/hbotStringFile:tools,vpo \
     img/isteplist.csv:tools,vpo \
@@ -143,8 +145,8 @@ simics.tar_CONTENTS = \
     img/errlparser \
     img/isteplist.csv \
     img/hbotStringFile \
-    src/build/simics/hb-pnor-mvpd-preload.py \
-    src/build/simics/hb-pnor-mvpd-preload.pl \
+    src/build/simics/hb-pnor-vpd-preload.py \
+    src/build/simics/hb-pnor-vpd-preload.pl \
     img/dimmspd.dat \
     img/procmvpd.dat \
     obj/genfiles/fapiAttributeIds.H \
