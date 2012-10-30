@@ -58,6 +58,7 @@
         The repair ring specified was not found.
     </description>
     <ffdc>RING_MODIFIER</ffdc>
+    <ffdc>CHIPLET_ID</ffdc>
   </hwpError>
   <!-- *********************************************************************** -->
 </hwpErrors>

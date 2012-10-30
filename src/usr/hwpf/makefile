@@ -37,7 +37,7 @@ HWP_ERROR_XML_FILES = hwp/fapiHwpErrorInfo.xml   \
     hwp/dram_training/memory_errors.xml \
     hwp/nest_chiplets/proc_start_clocks_chiplets/proc_start_clocks_chiplets_errors.xml \
     hwp/edi_ei_initialization/proc_fab_iovalid/proc_fab_smp_errors.xml  \
-    hwp/mvpd_errors.xml \
+    hwp/mvpd_accessors/mvpd_errors.xml \
     ../pore/fapiporeve/fapiPoreVe_errors.xml \
     hwp/dram_initialization/proc_setup_bars/proc_setup_bars_errors.xml  \
     hwp/nest_chiplets/proc_chiplet_scominit/proc_chiplet_scominit_errors.xml \

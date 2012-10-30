@@ -67,18 +67,19 @@ mvpdTestData mvpdData[] =
     { CRP0, ED },
     { CRP0, TE },
     { CRP0, DD },
-    { CRP0, pdP },
+//    { CRP1, pdP }, // TODO - no #P in test data. pull for now RTC 51716
     { CRP0, ST },
 //    { CRP0, DN,     0x03 }, // TODO - This doesn't match documentation,
 //                                      pulling out for now
     { CP00, VD },
     { CP00, PG },
-    { CP00, PK },
+//    { CP00, PK }, // TODO - no PK in test data. pull for now RTC 51716
     { CP00, pdR },
     { CP00, pdV },
     { CP00, pdH },
-    { CP00, pdP },
+//    { CP00, pdP }, // TODO - no #P in test data, pull for now RTC 51716
     { CP00, SB },
+/*                   // TODO no LRP0,LRP1,LRP2,LRP3 in test data, pull for now RTC 51716
     { LRP0, VD },
     { LRP0, pdV },
     { LRP0, pdP },
@@ -95,6 +96,7 @@ mvpdTestData mvpdData[] =
     { LRP3, pdV },
     { LRP3, pdP },
     { LRP3, pdM },
+*/
     { LRP4, VD },
     { LRP4, pdV },
     { LRP4, pdP },
@@ -107,6 +109,7 @@ mvpdTestData mvpdData[] =
     { LRP6, pdV },
     { LRP6, pdP },
     { LRP6, pdM },
+/*                   // TODO no LRP7,LRP8,LRP9,LRPA,LRPB,LWPO,LWP1,LWP2,LWP3 in test data, pull for now RTC 51716
     { LRP7, VD },
     { LRP7, pdV },
     { LRP7, pdP },
@@ -143,6 +146,7 @@ mvpdTestData mvpdData[] =
     { LWP3, pd2 },
     { LWP3, pd3 },
     { LWP3, IN },
+*/
     { LWP4, VD },
     { LWP4, pd2 },
     { LWP4, pd3 },
@@ -155,6 +159,7 @@ mvpdTestData mvpdData[] =
     { LWP6, pd2 },
     { LWP6, pd3 },
     { LWP6, IN },
+/*                 // TODO no LWP7,LWP8,LWP9,LWPA,LWPB in test data, pull for now RTC 51716
     { LWP7, VD },
     { LWP7, pd2 },
     { LWP7, pd3 },
@@ -175,6 +180,7 @@ mvpdTestData mvpdData[] =
     { LWPB, pd2 },
     { LWPB, pd3 },
     { LWPB, IN },
+*/
     { VINI, DR },
     { VINI, VZ },
     { VINI, CC },

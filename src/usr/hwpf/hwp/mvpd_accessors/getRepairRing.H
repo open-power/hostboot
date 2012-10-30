@@ -1,7 +1,7 @@
  /*  IBM_PROLOG_BEGIN_TAG
  *  This is an automatically generated prolog.
  *
- *  $Source: src/include/usr/hwpf/hwp/RepairRingFunc.H $
+ *  $Source: src/include/usr/hwpf/hwp/getRepairRing.H $
  *
  *  IBM CONFIDENTIAL
  *
@@ -23,21 +23,23 @@
  */
 // $Id: RepairRingFunc.H,v 1.1 2012/07/19 22:00:38 mjjones Exp $
 /**
- *  @file RepairRingFunc.H
+ *  @file getRepairRing.H
  *
  *  @brief Prototype for getRepairRing() -
  *          get a repair ring from the MVPD #R record
  */
 
- #ifndef    _HWP_REPAIRRINGFUNC_
- #define    _HWP_REPAIRRINGFUNC_
+ #ifndef    _HWP_GETREPAIRRING_
+ #define    _HWP_GETREPAIRRING_
 
  #include   <fapi.H>
+
+// function pointer typedef definition for HWP call support
+typedef fapi::ReturnCode (*getRepairRing_FP_t) (const fapi::Target &, const uint8_t, const uint8_t, uint8_t *, uint32_t &);
 
 
 extern "C"
 {
-
 /**
  * @brief   get specified repair ring from MVPD #R record for the specified
  *          target CPU.
@@ -46,6 +48,8 @@ extern "C"
  * @param i_chipletId       -   Chiplet ID
  * @param i_ringId          -   Ring ID
  * @param io_pRingBuf       -   pointer to a buffer allocated by the caller
+ *                              if NULL, the size of the buffer required will
+ *                              be returned with FAPI_RC_SUCCESS.
  * @param io_rRingBufsize   -   in:     size of ring buffer that caller has
  *                                      allocated
  *                              out:    number of BYTES that were copied to the

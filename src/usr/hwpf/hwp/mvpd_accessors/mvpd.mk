@@ -1,11 +1,11 @@
 # IBM_PROLOG_BEGIN_TAG
 # This is an automatically generated prolog.
 #
-# $Source: src/usr/hwpf/test/makefile $
+# $Source: src/usr/hwpf/hwp/mvpd_accessors/mvpd.mk $
 #
 # IBM CONFIDENTIAL
 #
-# COPYRIGHT International Business Machines Corp. 2011,2012
+# COPYRIGHT International Business Machines Corp. 2012
 #
 # p1
 #
@@ -20,16 +20,11 @@
 # Origin: 30
 #
 # IBM_PROLOG_END_TAG
-ROOTPATH = ../../../..
-
-EXTRAINCDIR += ${ROOTPATH}/src/include/usr/ecmddatabuffer
-EXTRAINCDIR += ${ROOTPATH}/src/include/usr/hwpf/fapi
-EXTRAINCDIR += ${ROOTPATH}/src/include/usr/hwpf/plat
-EXTRAINCDIR += ${ROOTPATH}/src/include/usr/hwpf/hwp
 EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/mvpd_accessors
 
-MODULE = testhwpf
-TESTS = *.H
+VPATH += mvpd_accessors
 
-include ${ROOTPATH}/config.mk
+OBJS += getRepairRing.o \
+        setRepairRing.o \
+        mvpdRingFuncs.o
 
