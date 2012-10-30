@@ -352,6 +352,17 @@ chip Ex
         capture     group default;
     };
 
+    ############################################################################
+    # EX Chiplet Other Registers
+    ############################################################################
+
+    register COREHMEER
+    {
+        name        "Core HMEER";
+        scomaddr    0x1001329B;
+        capture     type secondary;
+        capture     group default;
+    };
 };
 
  ##############################################################################
@@ -369,40 +380,45 @@ chip Ex
 # EX Chiplet Registers
 ################################################################################
 
-rule ExChipetFir
+rule ExChipletFir
 {
   CHECK_STOP:
      (EX_CHIPLET_CS_FIR       & `1F00000000000000`) & ~EX_CHIPLET_FIR_MASK;
   RECOVERABLE:
-    ((EX_CHIPLET_RE_FIR >> 2) & `1F00000000000000`) & ~EX_CHIPLET_FIR_MASK;
+    ((EX_CHIPLET_RE_FIR >> 2) & `3F00000000000000`) & ~EX_CHIPLET_FIR_MASK;
 };
 
-group gExChipetFir attntype CHECK_STOP, RECOVERABLE filter singlebit
+group gExChipletFir attntype CHECK_STOP, RECOVERABLE filter priority(3,5,6,7,4,2)
 {
+    /** EX_CHIPLET_FIR[2]
+     *  Unit Checkstop from Core Local FIR (bit0 in RER)
+     */
+    (ExChipletFir, bit(2))? analyzeCoreUnitCheckstop;
+
     /** EX_CHIPLET_FIR[3]
      *  Attention from LFIR
      */
-    (ExChipetFir, bit(3))? analyze(gExLFir);
+    (ExChipletFir, bit(3))? analyze(gExLFir);
 
     /** EX_CHIPLET_FIR[4]
      *  Attention from COREFIR
      */
-    (ExChipetFir, bit(4)) ? analyze(gCoreFir);
+    (ExChipletFir, bit(4)) ? analyzeCore;
 
     /** EX_CHIPLET_FIR[5]
      *  Attention from L2FIR
      */
-    (ExChipetFir, bit(5)) ? analyze(gL2Fir);
+    (ExChipletFir, bit(5)) ? analyze(gL2Fir);
 
     /** EX_CHIPLET_FIR[6]
      *  Attention from L3FIR
      */
-    (ExChipetFir, bit(6)) ? analyze(gL3Fir);
+    (ExChipletFir, bit(6)) ? analyze(gL3Fir);
 
     /** EX_CHIPLET_FIR[7]
      *  Attention from NCUFIR
      */
-    (ExChipetFir, bit(7)) ? analyze(gNcuFir);
+    (ExChipletFir, bit(7)) ? analyze(gNcuFir);
 };
 
 ################################################################################
@@ -475,10 +491,21 @@ group gExLFir filter singlebit
 rule CoreFir
 {
     CHECK_STOP:  COREFIR & ~COREFIR_MASK & ~COREFIR_ACT0 & ~COREFIR_ACT1;
+    PROC_CS:     COREFIR & ~COREFIR_MASK &  COREFIR_ACT0 & ~COREFIR_ACT1;
     RECOVERABLE: COREFIR & ~COREFIR_MASK & ~COREFIR_ACT0 &  COREFIR_ACT1;
 };
 
-group gCoreFir filter singlebit
+group gCoreFir filter priority(0,1,2,3,4,5,6,7,8,9,
+                               10,11,12,13,14,15,16,17,18,19,
+                               20,21,22,23,24,25,26,27,28,29,
+                               30,31,32,33,34,35,36,37,38,39,
+                               40,41,42,43,44,   46,47,48,49,
+                               50,51,52,53,54,55,56,57,58,59,
+                               60,61,62,63)
+    # (I assume this is still true...pay attention to this in FIR reviews)
+    # Bit 45 should be a low priority bit but isn't at the end. It is used in
+    # a workaround for core checkstops and can come one with other core
+    # checkstop errors.
 {
     /** COREFIR[0]
      *  IFU_SRAM_PARITY_ERR: SRAM recoverable error (ICACHE parity error, etc.)
@@ -1304,3 +1331,20 @@ group gNcuFir filter singlebit
 # Include the common action set.
 .include "CommonActions.rule"
 
+# When analyzing CoreFir, check for/handle core checkstop
+actionclass analyzeCore
+{
+    funccall("CheckCoreCheckstop");
+    analyze(gCoreFir);
+    funccall("MaskIfCoreCheckstop");
+};
+
+# Chiplet recoverable FIR indicated Core checkstop, so take actions for
+# handling core checkstop. Analyze CoreFir.
+actionclass analyzeCoreUnitCheckstop
+{
+    funccall("CheckCoreCheckstop");
+    funccall("SetCoreCheckstopCause");
+    analyze(gCoreFir);
+    funccall("MaskIfCoreCheckstop");
+};

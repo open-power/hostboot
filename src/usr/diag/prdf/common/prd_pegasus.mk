@@ -24,6 +24,7 @@
 # Object files for prdf rule plugins for pegasus
 PRDF_RULE_PLUGINS_PEGASUS = \
     prdfP8Proc.o \
+    prdfP8Ex.o \
     prdfP8Mcs.o \
     prdfP8Pll.o \
     prdfCenMba.o \
