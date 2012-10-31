@@ -421,7 +421,20 @@ generate_system_node();
 # Third generate the FSP chip
 if ($build eq "fsp")
 {
-    generate_system_fsp();
+
+    #check if fsp xml is present
+    open (FH, "<$mrwdir/${sysname}-fsp.xml") ||
+        die "ERROR: unable to open $mrwdir/${sysname}-fsp.xml\n";
+    close (FH);
+
+    my $fspXml = XMLin("$mrwdir/${sysname}-fsp.xml");
+
+    #TODO Via 48545
+    #IN RFSP scenario, there will be more than one FSP in system XML.
+    #Verify it during RFSP design
+
+    # Get MBX dev path from XML and send it as an argument
+    generate_system_fsp( $fspXml->{'host-mailbox-dev-path'});
 }
 
 # Fourth, generate the proc, occ, ex-chiplet, mcs-chiplet
@@ -1042,6 +1055,8 @@ print "
 # Need to support RFSP and dynamically generate HUID,RID and ORDINALID.
 sub generate_system_fsp
 {
+    #get the mailbox dev path
+    my ($fspMbxPath) = @_;
     print "
 <!-- $SYSNAME System fsp0 -->
 
@@ -1071,6 +1086,10 @@ sub generate_system_fsp
     <attribute>
         <id>EC</id>
         <default>0x10</default>
+    </attribute>
+    <attribute>
+        <id>HOST_MAILBOX_DEV_PATH</id>
+        <default>${fspMbxPath}</default>
     </attribute>";
 
     if ($build eq "fsp")
