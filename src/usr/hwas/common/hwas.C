@@ -174,6 +174,8 @@ errlHndl_t discoverTargets()
 
                 if (errl)
                 {   // read of ID/EC failed even tho we were present..
+                    HWAS_INF("pTarget %.8X - read IDEC failed - bad",
+                        pTarget->getAttr<ATTR_HUID>());
                     chipFunctional = false;
 
                     // commit the error but keep going
@@ -188,6 +190,8 @@ errlHndl_t discoverTargets()
 
                     if (errl)
                     {   // read of PG failed even tho we were present..
+                        HWAS_INF("pTarget %.8X - read PG failed - bad",
+                            pTarget->getAttr<ATTR_HUID>());
                         chipFunctional = false;
 
                         // commit the error but keep going
@@ -200,7 +204,7 @@ errlHndl_t discoverTargets()
                     if (pgData[VPD_CP00_PG_PIB_INDEX] !=
                                     VPD_CP00_PG_PIB_GOOD)
                     {
-                        HWAS_DBG("pTarget %.8X - PIB bad. "
+                        HWAS_INF("pTarget %.8X - PIB "
                                     "pgPdata[%d]: expected 0x%04X - bad",
                             pTarget->getAttr<ATTR_HUID>(),
                             VPD_CP00_PG_PIB_INDEX,
@@ -211,7 +215,7 @@ errlHndl_t discoverTargets()
                     if (pgData[VPD_CP00_PG_PERVASIVE_INDEX] !=
                                     VPD_CP00_PG_PERVASIVE_GOOD)
                     {
-                        HWAS_DBG("pTarget %.8X - Pervasive bad. "
+                        HWAS_INF("pTarget %.8X - Pervasive "
                                     "pgPdata[%d]: expected 0x%04X - bad",
                             pTarget->getAttr<ATTR_HUID>(),
                             VPD_CP00_PG_PERVASIVE_INDEX,
@@ -222,7 +226,7 @@ errlHndl_t discoverTargets()
                     if (pgData[VPD_CP00_PG_POWERBUS_INDEX] !=
                                     VPD_CP00_PG_POWERBUS_GOOD)
                     {
-                        HWAS_DBG("pTarget %.8X - PowerBus bad. "
+                        HWAS_INF("pTarget %.8X - PowerBus "
                                     "pgPdata[%d]: expected 0x%04X - bad",
                             pTarget->getAttr<ATTR_HUID>(),
                             VPD_CP00_PG_POWERBUS_INDEX,
@@ -266,7 +270,7 @@ errlHndl_t discoverTargets()
                         (pgData[VPD_CP00_PG_XBUS_INDEX] !=
                             VPD_CP00_PG_XBUS_GOOD))
                     {
-                        HWAS_DBG("pDesc %.8X - XBUS bad. "
+                        HWAS_INF("pDesc %.8X - XBUS  "
                                     "pgPdata[%d]: expected 0x%04X - bad",
                             pDesc->getAttr<ATTR_HUID>(),
                             VPD_CP00_PG_XBUS_INDEX,
@@ -278,7 +282,7 @@ errlHndl_t discoverTargets()
                         (pgData[VPD_CP00_PG_ABUS_INDEX] !=
                             VPD_CP00_PG_ABUS_GOOD))
                     {
-                        HWAS_DBG("pDesc %.8X - ABUS "
+                        HWAS_INF("pDesc %.8X - ABUS "
                                     "pgPdata[%d]: expected 0x%04X - bad",
                             pDesc->getAttr<ATTR_HUID>(),
                             VPD_CP00_PG_ABUS_INDEX,
@@ -290,7 +294,7 @@ errlHndl_t discoverTargets()
                         (pgData[VPD_CP00_PG_PCIE_INDEX] !=
                             VPD_CP00_PG_PCIE_GOOD))
                     {
-                        HWAS_DBG("pDesc %.8X - PCIe "
+                        HWAS_INF("pDesc %.8X - PCIe "
                                     "pgPdata[%d]: expected 0x%04X - bad",
                             pDesc->getAttr<ATTR_HUID>(),
                             VPD_CP00_PG_PCIE_INDEX,
@@ -307,7 +311,7 @@ errlHndl_t discoverTargets()
                       if (pgData[VPD_CP00_PG_EX0_INDEX + indexEX] !=
                             VPD_CP00_PG_EX0_GOOD)
                       {
-                        HWAS_DBG("pDesc %.8X - EX%d "
+                        HWAS_INF("pDesc %.8X - CORE/EX%d "
                                     "pgPdata[%d]: expected 0x%04X - bad",
                             pDesc->getAttr<ATTR_HUID>(), indexEX,
                             VPD_CP00_PG_EX0_INDEX + indexEX,
