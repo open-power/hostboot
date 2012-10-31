@@ -257,6 +257,15 @@ const compId_t RUNTIME_COMP_ID = 0x1A00;
 const char RUNTIME_COMP_NAME[] = "runtime";
 //@}
 
+/** @name HSVC
+ * Host Services component
+ * For the code running under PHYP
+ */
+//@{
+const compId_t HSVC_COMP_ID = 0x2000;
+const char HSVC_COMP_NAME[] = "hsvc";
+//@}
+
 /** @name RESERVED
  *  Reserved component ID. x3100 is the component ID
  *  of FipS ERRL component. Due to our use of
