@@ -759,10 +759,10 @@
     </attribute>
     <!-- Data from PHYP Memory Map -->
     <attribute><id>FSP_BASE_ADDR</id>
-        <default>0x0003FFE100000000</default>
+        <default>0x0000000000000000</default>
     </attribute>
     <attribute><id>PSI_BRIDGE_BASE_ADDR</id>
-        <default>0x0003FFFE80100000</default>
+        <default>0x0000000000000000</default>
     </attribute>
     <attribute><id>INTP_BASE_ADDR</id>
         <default>0x0003FFFF80100000</default>
@@ -1899,10 +1899,10 @@
     </attribute>
     <!-- Data from PHYP Memory Map -->
     <attribute><id>FSP_BASE_ADDR</id>
-        <default>0x0003FFE300000000</default>
+        <default>0x0000000000000000</default>
     </attribute>
     <attribute><id>PSI_BRIDGE_BASE_ADDR</id>
-        <default>0x0003FFFE80300000</default>
+        <default>0x0000000000000000</default>
     </attribute>
     <attribute><id>INTP_BASE_ADDR</id>
         <default>0x0003FFFF80300000</default>

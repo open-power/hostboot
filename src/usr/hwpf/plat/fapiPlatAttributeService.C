@@ -1168,31 +1168,36 @@ fapi::ReturnCode fapiPlatGetProcPsiBridgeBarEnable (
                                     uint8_t     &o_psiBridgeBarEnable )
 {
     fapi::ReturnCode l_fapirc( fapi::FAPI_RC_SUCCESS );
-    uint64_t    l_procNum       =   0;
-    uint8_t     l_isEnabled     =   PROC_BARS_DISABLE;
+    o_psiBridgeBarEnable =   PROC_BARS_DISABLE;
 
     do  {
-        /*@
-         *  @errortype
-         *  @moduleid   MOD_ATTR_PROC_PSI_BRIDGE_BAR_ENABLE_GET
-         *  @reasoncode RC_ATTR_BAD_TARGET_PARAM
-         *  @devdesc    Null FAPI Target passed to ATTR_GET
-         */
-        l_fapirc    =   barsPreCheck(
-                                  i_pTarget,
-                                  fapi::MOD_ATTR_PROC_PSI_BRIDGE_BAR_ENABLE_GET,
-                                  l_procNum,
-                                  l_isEnabled );
-        if ( l_fapirc )
+        if (i_pTarget == NULL)
         {
-            FAPI_ERR("ERROR : NULL FAPI Target");
+            FAPI_ERR("Error: NULL FAPI Target passed");
+            /*@
+             *  @errortype
+             *  @moduleid   MOD_ATTR_PROC_PSI_BRIDGE_BAR_ENABLE_GET
+             *  @reasoncode RC_ATTR_BAD_TARGET_PARAM
+             *  @devdesc    Null FAPI Target passed to ATTR_GET
+             */
+            errlHndl_t l_pError = new ERRORLOG::ErrlEntry(
+                ERRORLOG::ERRL_SEV_INFORMATIONAL,
+                fapi::MOD_ATTR_PROC_PSI_BRIDGE_BAR_ENABLE_GET,
+                fapi::RC_ATTR_BAD_TARGET_PARAM );
+            l_fapirc.setPlatError(reinterpret_cast<void *> (l_pError));
             break;
         }
 
-        //  return
-        o_psiBridgeBarEnable    =   l_isEnabled;
+        const TARGETING::Target* l_pProcTarget =
+            reinterpret_cast<const TARGETING::Target*>(i_pTarget->get());
 
+        uint64_t bar = l_pProcTarget->getAttr<TARGETING::ATTR_PSI_BRIDGE_BASE_ADDR>();
 
+        //  if bar is not zero
+        if ( bar )
+        {
+            o_psiBridgeBarEnable =   PROC_BARS_ENABLE;
+        }
     }   while(0);
 
     return  l_fapirc;
@@ -1203,27 +1208,37 @@ fapi::ReturnCode fapiPlatGetProcFspBarEnable (
                                     uint8_t     &o_fspBarEnable )
 {
     fapi::ReturnCode l_fapirc( fapi::FAPI_RC_SUCCESS );
-    uint64_t    l_procNum       =   0;
-    uint8_t     l_isEnabled     =   PROC_BARS_DISABLE;
+    o_fspBarEnable =   PROC_BARS_DISABLE;
 
     do  {
-        /*@
-         *  @errortype
-         *  @moduleid   MOD_ATTR_PROC_FSP_BAR_ENABLE_GET
-         *  @reasoncode RC_ATTR_BAD_TARGET_PARAM
-         *  @devdesc    Null FAPI Target passed to ATTR_GET
-         */
-        l_fapirc    =   barsPreCheck( i_pTarget,
-                                      fapi::MOD_ATTR_PROC_FSP_BAR_ENABLE_GET,
-                                      l_procNum,
-                                      l_isEnabled );
-        if ( l_fapirc )
+        if (i_pTarget == NULL)
         {
-            FAPI_ERR("ERROR : NULL FAPI Target");
+            FAPI_ERR("Error: NULL FAPI Target passed");
+            /*@
+             *  @errortype
+             *  @moduleid   MOD_ATTR_PROC_FSP_BAR_ENABLE_GET
+             *  @reasoncode RC_ATTR_BAD_TARGET_PARAM
+             *  @devdesc    Null FAPI Target passed to ATTR_GET
+             */
+            errlHndl_t l_pError = new ERRORLOG::ErrlEntry(
+                ERRORLOG::ERRL_SEV_INFORMATIONAL,
+                fapi::MOD_ATTR_PROC_FSP_BAR_ENABLE_GET,
+                fapi::RC_ATTR_BAD_TARGET_PARAM );
+            l_fapirc.setPlatError(reinterpret_cast<void *> (l_pError));
             break;
         }
 
-        o_fspBarEnable  =   l_isEnabled;
+        const TARGETING::Target* l_pProcTarget =
+            reinterpret_cast<const TARGETING::Target*>(i_pTarget->get());
+
+        uint64_t bar = l_pProcTarget->getAttr<TARGETING::ATTR_FSP_BASE_ADDR>();
+
+        //  if bar is not zero
+        if ( bar )
+        {
+            o_fspBarEnable =   PROC_BARS_ENABLE;
+
+        }
 
     }   while(0);
 

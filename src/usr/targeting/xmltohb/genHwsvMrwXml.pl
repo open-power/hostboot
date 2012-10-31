@@ -1299,16 +1299,27 @@ sub generate_proc
     print "\n";
     print "    <!-- Data from PHYP Memory Map -->\n";
 
+    # Calculate the FSP and PSI BRIGDE BASE ADDR
+    my $fspBase = 0;
+    my $psiBase = 0;
+    foreach my $i (@{$psiBus->{'psi-bus'}})
+    {
+        if ( $i->{'processor'}->{target}->{position} eq $proc )
+        {
+            $fspBase = 0x0003FFE000000000 + 0x100000000*$proc;
+            $psiBase = 0x0003FFFE80000000 + 0x100000*$proc;
+            last;
+        }
+    }
+
     # Starts at 1024TB - 128GB, 4GB per proc
     printf( "    <attribute><id>FSP_BASE_ADDR</id>\n" );
-    printf( "        <default>0x%016X</default>\n",
-	   0x0003FFE000000000 + 0x100000000*$proc );
+    printf( "        <default>0x%016X</default>\n", $fspBase );
     printf( "    </attribute>\n" );
 
     # Starts at 1024TB - 6GB, 1MB per link/proc
     printf( "    <attribute><id>PSI_BRIDGE_BASE_ADDR</id>\n" );
-    printf( "        <default>0x%016X</default>\n",
-       0x0003FFFE80000000 + 0x100000*$proc );
+    printf( "        <default>0x%016X</default>\n", $psiBase );
     printf( "    </attribute>\n" );
 
     # Starts at 1024TB - 2GB, 1MB per proc

@@ -1132,10 +1132,10 @@
     </attribute>
     <attribute><id>VPD_REC_NUM</id><default>1</default></attribute>
     <attribute><id>FSP_BASE_ADDR</id>
-        <default>0x0003FFF000000000</default>
+        <default>0x0000000000000000</default>
     </attribute>
     <attribute><id>PSI_BRIDGE_BASE_ADDR</id>
-        <default>0x0003FFFE80100000</default>
+        <default>0x0000000000000000</default>
     </attribute>
     <attribute><id>INTP_BASE_ADDR</id>
         <default>0x0003FFFF80100000</default>
@@ -2068,10 +2068,10 @@
     </attribute>
     <attribute><id>VPD_REC_NUM</id><default>2</default></attribute>
     <attribute><id>FSP_BASE_ADDR</id>
-        <default>0x0004000000000000</default>
+        <default>0x0000000000000000</default>
     </attribute>
     <attribute><id>PSI_BRIDGE_BASE_ADDR</id>
-        <default>0x0003FFFE80200000</default>
+        <default>0x0000000000000000</default>
     </attribute>
     <attribute><id>INTP_BASE_ADDR</id>
         <default>0x0003FFFF80200000</default>
@@ -3004,10 +3004,10 @@
     </attribute>
     <attribute><id>VPD_REC_NUM</id><default>3</default></attribute>
     <attribute><id>FSP_BASE_ADDR</id>
-        <default>0x0004001000000000</default>
+        <default>0x0000000000000000</default>
     </attribute>
     <attribute><id>PSI_BRIDGE_BASE_ADDR</id>
-        <default>0x0003FFFE80300000</default>
+        <default>0x0000000000000000</default>
     </attribute>
     <attribute><id>INTP_BASE_ADDR</id>
         <default>0x0003FFFF80300000</default>
@@ -3938,10 +3938,10 @@
     </attribute>
     <attribute><id>VPD_REC_NUM</id><default>4</default></attribute>
     <attribute><id>FSP_BASE_ADDR</id>
-        <default>0x0004002000000000</default>
+        <default>0x0000000000000000</default>
     </attribute>
     <attribute><id>PSI_BRIDGE_BASE_ADDR</id>
-        <default>0x0003FFFE80400000</default>
+        <default>0x0000000000000000</default>
     </attribute>
     <attribute><id>INTP_BASE_ADDR</id>
         <default>0x0003FFFF80400000</default>
@@ -4874,10 +4874,10 @@
     </attribute>
     <attribute><id>VPD_REC_NUM</id><default>5</default></attribute>
     <attribute><id>FSP_BASE_ADDR</id>
-        <default>0x0004003000000000</default>
+        <default>0x0000000000000000</default>
     </attribute>
     <attribute><id>PSI_BRIDGE_BASE_ADDR</id>
-        <default>0x0003FFFE80500000</default>
+        <default>0x0000000000000000</default>
     </attribute>
     <attribute><id>INTP_BASE_ADDR</id>
         <default>0x0003FFFF80500000</default>
@@ -5808,10 +5808,10 @@
     </attribute>
     <attribute><id>VPD_REC_NUM</id><default>6</default></attribute>
     <attribute><id>FSP_BASE_ADDR</id>
-        <default>0x0004004000000000</default>
+        <default>0x0000000000000000</default>
     </attribute>
     <attribute><id>PSI_BRIDGE_BASE_ADDR</id>
-        <default>0x0003FFFE80600000</default>
+        <default>0x0000000000000000</default>
     </attribute>
     <attribute><id>INTP_BASE_ADDR</id>
         <default>0x0003FFFF80600000</default>
@@ -6743,10 +6743,10 @@
     </attribute>
     <attribute><id>VPD_REC_NUM</id><default>7</default></attribute>
     <attribute><id>FSP_BASE_ADDR</id>
-        <default>0x0004005000000000</default>
+        <default>0x0000000000000000</default>
     </attribute>
     <attribute><id>PSI_BRIDGE_BASE_ADDR</id>
-        <default>0x0003FFFE80700000</default>
+        <default>0x0000000000000000</default>
     </attribute>
     <attribute><id>INTP_BASE_ADDR</id>
         <default>0x0003FFFF80700000</default>
