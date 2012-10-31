@@ -43,6 +43,7 @@
 #include <hwas/common/hwasCallout.H>
 #include <hwas/common/deconfigGard.H>
 
+#include "../../trace/entry.H"
 
 #define TEST_SEVERITY       ERRORLOG::ERRL_SEV_INFORMATIONAL
 
@@ -160,7 +161,8 @@ public:
                 break;
             }
 
-            fOK = l_err->collectTrace( "TARG", sizeof(trace_buf_head_t)-2);
+            fOK = l_err->collectTrace("TARG",
+                                      sizeof(TRACE::trace_buf_head_t)-2);
             if( fOK )
             {
                 // expect an error, buffer not big enough
@@ -168,7 +170,8 @@ public:
                 break;
             }
 
-            fOK = l_err->collectTrace(  "TARG", sizeof( trace_buf_head_t ));
+            fOK = l_err->collectTrace("TARG",
+                                      sizeof(TRACE::trace_buf_head_t));
             if( !fOK )
             {
                 // Buffer is big enough for the header only. It is
@@ -179,7 +182,8 @@ public:
 
             // sizeof( trace_buf_head_t ) + n bytes such that a single trace
             // entry cannot fit into.
-            uint64_t l_cb = sizeof(trace_buf_head_t) + (sizeof(trace_bin_entry_t)/2);
+            uint64_t l_cb = sizeof(TRACE::trace_buf_head_t) +
+                            (sizeof(TRACE::trace_bin_entry_t)/2);
             fOK = l_err->collectTrace( "TARG", l_cb );
             if( !fOK )
             {

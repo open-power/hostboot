@@ -1,25 +1,25 @@
-//  IBM_PROLOG_BEGIN_TAG
-//  This is an automatically generated prolog.
-//
-//  $Source: src/include/sys/sync.h $
-//
-//  IBM CONFIDENTIAL
-//
-//  COPYRIGHT International Business Machines Corp. 2011
-//
-//  p1
-//
-//  Object Code Only (OCO) source materials
-//  Licensed Internal Code Source Materials
-//  IBM HostBoot Licensed Internal Code
-//
-//  The source code for this program is not published or other-
-//  wise divested of its trade secrets, irrespective of what has
-//  been deposited with the U.S. Copyright Office.
-//
-//  Origin: 30
-//
-//  IBM_PROLOG_END
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/include/sys/sync.h $                                      */
+/*                                                                        */
+/* IBM CONFIDENTIAL                                                       */
+/*                                                                        */
+/* COPYRIGHT International Business Machines Corp. 2011,2012              */
+/*                                                                        */
+/* p1                                                                     */
+/*                                                                        */
+/* Object Code Only (OCO) source materials                                */
+/* Licensed Internal Code Source Materials                                */
+/* IBM HostBoot Licensed Internal Code                                    */
+/*                                                                        */
+/* The source code for this program is not published or otherwise         */
+/* divested of its trade secrets, irrespective of what has been           */
+/* deposited with the U.S. Copyright Office.                              */
+/*                                                                        */
+/* Origin: 30                                                             */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
 #ifndef SYNC
 #define SYNC
 
@@ -33,7 +33,7 @@ struct _futex_imp_t
     uint64_t iv_val;
 };
 
-typedef _futex_imp_t mutex_t; 
+typedef _futex_imp_t mutex_t;
 
 /**
  * Barrier object type
@@ -53,7 +53,7 @@ typedef _barrier_imp_t barrier_t;
 /**
  * Conditional variable types
  */
-struct _cond_imp_t 
+struct _cond_imp_t
 {
     mutex_t * mutex;
     uint64_t sequence;
@@ -83,7 +83,7 @@ void barrier_init (barrier_t * o_barrier, uint64_t i_count);
 
 
 /**
- * @fn barrier_destroy 
+ * @fn barrier_destroy
  * @brief Destroy a barrier
  * @param[in] i_barrier  The barrier
  */
@@ -167,7 +167,7 @@ int sync_cond_wait(sync_cond_t * i_cond, mutex_t * i_mutex);
  * @pre This task must hold the lock on the mutex used in sync_cond_wait()
  * @pre sync_cond_wait() must have been called for conditional variable
  * @note failing to unlock the mutex after this call may cause the waiting
- * task to remain blocked. If there is more than one task waiting on the 
+ * task to remain blocked. If there is more than one task waiting on the
  * conditional variable then sync_cond_broadcast() should be used instead.
  */
 void sync_cond_signal(sync_cond_t * i_cond);
@@ -182,5 +182,43 @@ void sync_cond_signal(sync_cond_t * i_cond);
  * when this task unlocks the mutex.
  */
 void sync_cond_broadcast(sync_cond_t * i_cond);
+
+/** @fn futex_wait
+ *  @brief Perform a futex-wait operation.
+ *
+ *  This system call is modeled after 'futex' under Linux.
+ *
+ *  Will block the user space application until an address is signaled
+ *  for waking.  In order to prevent deadlock conditions where the address
+ *  has already changed while the system-call is being processed, the
+ *  address is checked against the currently known value.  If the value has
+ *  already changed then the function immediately returns.
+ *
+ *  @param[in] i_addr - Address to wait for signal on.
+ *  @param[in] i_val - Current value at that address.
+ *
+ *  @return SUCCESS or EWOULDBLOCK.
+ *
+ *  A return of EWOULDBLOCK indicates that *i_addr != i_val.
+ */
+int futex_wait(uint64_t * i_addr, uint64_t i_val);
+
+/** @fn futex_wake
+ *  @brief Peform a futex-wake operation.
+ *
+ *  This system call is modeled after 'futex' under Linux.
+ *
+ *  Will awaken a number of tasks currently waiting to be signalled for an
+ *  address.
+ *
+ *  @param[in] i_addr - The address to signal.
+ *  @param[in] i_count - The maximum number of tasks to awaken.
+ *
+ *  @return SUCCESS.
+ *
+ *  If less tasks than i_count are currently blocked, all blocked tasks will
+ *  be awoken.
+ */
+int futex_wake(uint64_t * i_addr, uint64_t i_count);
 
 #endif

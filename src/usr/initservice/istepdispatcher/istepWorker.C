@@ -200,7 +200,7 @@ void iStepWorkerThread ( void * i_msgQ )
         }
 
         //  flush contTrace after each istep/substep  returns
-        TRACE::Trace::getTheInstance().flushContBuffers();
+        TRAC_FLUSH_BUFFERS();
 
         msg_free( theMsg );
         theMsg = NULL;

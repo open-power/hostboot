@@ -3183,10 +3183,21 @@
             <default>1</default>
         </field>
         <field>
+            <name>traceContinuous</name>
+            <description>
+            Enable / Disable continuous trace.
+                0b0: Continuous trace is disabled.
+                0b1: Continuous trace is enabled.
+            </description>
+            <type>uint8_t</type>
+            <bits>1</bits>
+            <default>0</default>
+        </field>
+        <field>
             <name>reserved</name>
             <description>Reserved for future use</description>
             <type>uint8_t</type>
-            <bits>5</bits>
+            <bits>4</bits>
             <default>0</default>
         </field>
         </complexType>

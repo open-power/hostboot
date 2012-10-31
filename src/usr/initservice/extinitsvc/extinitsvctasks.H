@@ -90,6 +90,20 @@ const TaskInfo g_exttaskinfolist[]   =   {
         },
 
         /**
+         * @brief Trace daemon
+         */
+        {
+            "libtracedaemon.so",                        // taskname
+            NULL,                                       // no ptr to fnct
+            {
+
+                START_TASK,                             // task type
+                EXT_IMAGE,                              // Extended Module
+            }
+        },
+
+
+        /**
          * @brief   FSI Device Driver
          */
 

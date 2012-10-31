@@ -486,8 +486,6 @@ def magic_instruction_callback(user_arg, cpu, arg):
     if arg == 7006:   # MAGIC_SHUTDOWN
         # KernelMisc::shutdown()
         print "KernelMisc::shutdown() called."
-        os.system( "fsp-trace ./ -s "+os.environ['HB_TOOLPATH']+
-                   "/hbotStringFile >>tracMERG  2>/dev/null" )
         # Could break/stop/pause the simics run, but presently
         # shutdown() is called four times. --Monte Jan 2012
         # SIM_break_simulation( "Shutdown. Simulation stopped." )
@@ -500,57 +498,21 @@ def magic_instruction_callback(user_arg, cpu, arg):
         magic_memoryleak_function(cpu)
 
     if arg == 7055:   # MAGIC_CONTINUOUS_TRACE
-        # Set execution environment flag to 0
-        writeLongLong(contTraceTrigInfo+32,0)
-        # Continuous trace.
-        # Residing at tracBinaryInfoAddr is the pointer to the tracBinary buffer
-        pTracBinaryBuffer = readLongLong(tracBinaryInfoAddr)
-        # Read the count of bytes used in the tracBinary buffer
-        cbUsed = readLongLong(tracBinaryInfoAddr+8)
-        if cbUsed == 1:
-            pTracBinaryBuffer = readLongLong(tracBinaryInfoAddr+24)
-            cbUsed = readLongLong(tracBinaryInfoAddr+32)
-            writeLong(tracBinaryInfoAddr+40,0)
-            # Reset the buffer byte count in Simics memory to 1, preserving
-            # the byte at offset 0 of the buffer which contains a 0x02 in
-            # fsp-trace style.
-            writeLongLong(tracBinaryInfoAddr+32,1)
-        else:
-            writeLong(tracBinaryInfoAddr+16,0)
-            # Reset the buffer byte count in Simics memory to 1, preserving
-            # the byte at offset 0 of the buffer which contains a 0x02 in
-            # fsp-trace style.
-            writeLongLong(tracBinaryInfoAddr+8,1)
+        hb_tracBinaryBuffer = cpu.r4
+        hb_tracBinaryBufferSz = cpu.r5
         # Figure out if we are running out of the cache or mainstore
         runStr = "(system_cmp0.phys_mem)->map[0][1]"
         ( result, out )  =   quiet_run_command( runStr, output_modes.regular )
         # Add the HRMOR if we're running from memory
         if 'cache' not in result:
-            pTracBinaryBuffer = pTracBinaryBuffer + getHRMOR()
+            hb_tracBinaryBuffer = hb_tracBinaryBuffer + getHRMOR()
         # Save the tracBinary buffer to a file named tracBINARY in current dir
-        saveCommand = "(system_cmp0.phys_mem)->map[0][1]->image.save tracBINARY 0x%x %d"%(pTracBinaryBuffer,cbUsed)
+        # and run fsp-trace on tracBINARY file (implied), append output to
+        # tracMERG.  Once we extract the trace buffer, we need to reset
+        # mailbox scratch 1 (to 0) so that the trace daemon knows it can
+        # continue.
+        saveCommand = "(system_cmp0.phys_mem)->map[0][1]->image.save tracBINARY 0x%x %d ; (shell \"fsp-trace ./ -s %s/hbotStringFile >> tracMERG 2>/dev/null\"); p8Proc0.proc_fsi2host_mbox->regs[95][1] = 0"%(hb_tracBinaryBuffer,hb_tracBinaryBufferSz,os.environ['HB_TOOLPATH'])
         SIM_run_alone(run_command, saveCommand )
-        # Run fsp-trace on tracBINARY file (implied), append output to tracMERG
-        os.system( "fsp-trace ./ -s "+os.environ['HB_TOOLPATH']+
-                   "/hbotStringFile >>tracMERG  2>/dev/null" )
-
-# Continuous trace:  Open the symbols and find the address for
-# "g_tracBinaryInfo"  Convert to a number and save in tracBinaryInfoAddr
-# The layout of g_tracBinaryInfo is a 64-bit pointer to the mixed buffer
-# followed by a 64-bit count of bytes used in the buffer.  See
-# src/usr/trace/trace.C and mixed_trace_info_t.
-for line in open(os.environ['HB_TOOLPATH']+'/hbicore.syms'):
-    if "g_tracBinaryInfo" in line:
-        words=line.split(",")
-        tracBinaryInfoAddr=int(words[1],16)
-        break
-# Find the address of the g_cont_trace_trigger_info and save it in
-# contTraceTrigInfo
-for line in open(os.environ['HB_TOOLPATH']+'/hbicore.syms'):
-    if "g_cont_trace_trigger_info" in line:
-        words=line.split(",")
-        contTraceTrigInfo=int(words[1],16)
-        break
 
 # Continuous trace: Clear these files.
 rc = os.system( "rm -f tracMERG" )

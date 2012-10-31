@@ -121,10 +121,6 @@ int mm_extend(MM_EXTEND_SIZE i_size = MM_EXTEND_REAL_MEMORY);
  */
 int mm_linear_map(void *i_paddr, uint64_t i_size);
 
-#ifdef __cplusplus
-}
-#endif
-
 /** @fs mm_icache_invalidate()
  *  @brief Invalidate the ICACHE for the given memory
  *
@@ -144,5 +140,8 @@ void mm_icache_invalidate(void * i_addr, size_t i_cpu_word_count);
  */
 uint64_t mm_virt_to_phys( void* i_vaddr );
 
+#ifdef __cplusplus
+}
+#endif
 
 #endif

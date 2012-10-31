@@ -1,25 +1,25 @@
-//  IBM_PROLOG_BEGIN_TAG
-//  This is an automatically generated prolog.
-//
-//  $Source: src/include/usr/tracinterface.H $
-//
-//  IBM CONFIDENTIAL
-//
-//  COPYRIGHT International Business Machines Corp. 2011
-//
-//  p1
-//
-//  Object Code Only (OCO) source materials
-//  Licensed Internal Code Source Materials
-//  IBM HostBoot Licensed Internal Code
-//
-//  The source code for this program is not published or other-
-//  wise divested of its trade secrets, irrespective of what has
-//  been deposited with the U.S. Copyright Office.
-//
-//  Origin: 30
-//
-//  IBM_PROLOG_END
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/include/usr/trace/interface.H $                           */
+/*                                                                        */
+/* IBM CONFIDENTIAL                                                       */
+/*                                                                        */
+/* COPYRIGHT International Business Machines Corp. 2011,2012              */
+/*                                                                        */
+/* p1                                                                     */
+/*                                                                        */
+/* Object Code Only (OCO) source materials                                */
+/* Licensed Internal Code Source Materials                                */
+/* IBM HostBoot Licensed Internal Code                                    */
+/*                                                                        */
+/* The source code for this program is not published or otherwise         */
+/* divested of its trade secrets, irrespective of what has been           */
+/* deposited with the U.S. Copyright Office.                              */
+/*                                                                        */
+/* Origin: 30                                                             */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
 
 #ifndef __TRACE_INTERFACE_H
 #define __TRACE_INTERFACE_H
@@ -121,7 +121,11 @@ const uint32_t TRACE_FIELD   = 0;       //Indicates trace is field
 
 /* a macro w/o the param number suffix. number is calculated from printf string */
 #define TRACDCOMP(des,printf_string,args...) \
-        TRACE::Trace::trace_adal_write_all((des),__ALL_HASH(printf_string,-1),__LINE__,TRACE_DEBUG, ##args)
+        TRACE::trace_adal_write_all((des), \
+                                    __ALL_HASH(printf_string,-1), \
+                                    __LINE__, \
+                                    TRACE_DEBUG, \
+                                    ##args)
 
 
 /**
@@ -140,11 +144,12 @@ const uint32_t TRACE_FIELD   = 0;       //Indicates trace is field
 
 */
 #define TRACDBIN(des,printf_string,address,len)                    \
-        TRACE::Trace::trace_adal_write_bin(des,__ALL_HASH(printf_string,0),      \
-                             __LINE__,                             \
-                             address,                              \
-                             len,                                  \
-                             TRACE_DEBUG)
+        TRACE::trace_adal_write_bin((des), \
+                                    __ALL_HASH(printf_string,0),      \
+                                    __LINE__,                             \
+                                    address,                              \
+                                    len,                                  \
+                                    TRACE_DEBUG)
 #endif /* HOSTBOOT_DEBUG */
 #endif /* TRAC_DEBUG_OUT */
 
@@ -165,7 +170,11 @@ const uint32_t TRACE_FIELD   = 0;       //Indicates trace is field
 
 /* a macro w/o the param number suffix. number is calculated from printf string */
 #define TRACFCOMP(des,printf_string,args...) \
-        TRACE::Trace::trace_adal_write_all((des),__ALL_HASH(printf_string,-1),__LINE__,TRACE_FIELD, ##args)
+        TRACE::trace_adal_write_all((des), \
+                                    __ALL_HASH(printf_string,-1), \
+                                    __LINE__, \
+                                    TRACE_FIELD, \
+                                    ##args)
 
 
 /**
@@ -183,11 +192,12 @@ const uint32_t TRACE_FIELD   = 0;       //Indicates trace is field
  * @return void
 */
 #define TRACFBIN(des,printf_string,address,len) \
-        TRACE::Trace::trace_adal_write_bin(des,__ALL_HASH(printf_string,0),      \
-                             __LINE__,                             \
-                             address,                              \
-                             len,                                  \
-                             TRACE_FIELD)
+        TRACE::trace_adal_write_bin((des), \
+                                    __ALL_HASH(printf_string,0),      \
+                                    __LINE__,                             \
+                                    address,                              \
+                                    len,                                  \
+                                    TRACE_FIELD)
 
 
 /**
@@ -211,7 +221,11 @@ tracepp replaces trace_adal_hash() with hash value and reduced format string
 
 /* a macro w/o the param number suffix. number is calculated from printf string */
 #define TRACSCOMP(des,printf_string,args...) \
-     TRACE::Trace::trace_adal_write_all((des),__ALL_HASH(printf_string,-1),__LINE__,TRACE_DEBUG, ##args)
+     TRACE::trace_adal_write_all((des), \
+                                 __ALL_HASH(printf_string,-1), \
+                                 __LINE__, \
+                                 TRACE_DEBUG, \
+                                 ##args)
 
 
 /**
@@ -269,7 +283,7 @@ tracepp replaces trace_adal_hash() with hash value and reduced format string
         TRACSCOMP(__COMP_TD__, EXIT_MRK __COMP_NAMESPACE__ "::" __COMP_CLASS__ "::" __COMP_FN__ " " args)
 
 /**
- * @fn void TRAC_INIT_BUFFER(des,comp_name, bufferSize)
+ * @fn void TRAC_INIT_BUFFER(des,comp_name, bufferSize, bufferType)
  * @brief Initializes trace buffer for component
  *
  * This function must be called before any other trace calls.  It
@@ -280,12 +294,27 @@ tracepp replaces trace_adal_hash() with hash value and reduced format string
  * @param des       A trac_desc_t * initialized to null by the using code.
  * @param comp_name This is the 15 character name of the component requesting
  *                  the trace buffer. Will be stored internally in upper case.
- * @param bufferSize Requested length of the buffer, if 0 is entered the user will
- *                   get default buffer size. Subject to maximum allowable size.
+ * @param bufferSize Requested length of the buffer, if 0 is entered the user
+ *                   will get default buffer size. Subject to maximum
+ *                   allowable size.
+ * @param bufferType Type (speed) of buffer.  Defaults to BUFFER_FAST.
  * @return void
+ *
+ * @note The Hostboot implementation of trace does not have individual
+ *       "buffers" to hold the trace entries, but does keep information to
+ *       separately account for trace sizes.  The bufferSize becomes a
+ *       lower-bound on how much data the implementation will keep for the
+ *       component.
+ *
 */
-#define TRAC_INIT_BUFFER(des,comp_name, bufferSize) \
-        TRACE::Trace::getTheInstance().initBuffer((des), (comp_name), (bufferSize))
+#define TRAC_INIT_BUFFER(des,comp_name, bufferSize, bufferType...) \
+        TRACE::initBuffer((des), (comp_name), (bufferSize), ## bufferType)
+
+/**
+ * @fn void TRAC_FLUSH_BUFFERS()
+ * @brief Flushes the traces to the continuous trace buffers.
+ */
+#define TRAC_FLUSH_BUFFERS() TRACE::flushBuffers()
 
 
 #ifdef __HIDDEN_TRACEIF_CLEARBUFFER
@@ -296,7 +325,7 @@ tracepp replaces trace_adal_hash() with hash value and reduced format string
  * @return void
 */
 #define TRAC_CLEAR_BUFFERS() TRACE::Trace::getTheInstance().clearAllBuffers()
-#endif 
+#endif
 
 
 /*******************************************************************************
@@ -311,9 +340,12 @@ tracepp replaces trace_adal_hash() with hash value and reduced format string
     			append number in variable name.
 *******************************************************************************/
 
-#define TRAC_INIT_UNIQ(des, name, sz, ln) TRACE::TracInit static g_trac_##ln(des, name, sz)
-#define TRAC_INIT_LINE(des, name, sz, ln) TRAC_INIT_UNIQ(des, name, sz, ln)
-#define TRAC_INIT(des, name, sz)	 TRAC_INIT_LINE(des, name, sz, __LINE__)
+#define TRAC_INIT_UNIQ(des, name, sz, ln, type...) \
+                TRACE::TracInit static g_trac_##ln(des, name, sz, ## type)
+#define TRAC_INIT_LINE(des, name, sz, ln, type...) \
+                TRAC_INIT_UNIQ(des, name, sz, ln, ## type)
+#define TRAC_INIT(des, name, sz, type...) \
+                TRAC_INIT_LINE(des, name, sz, __LINE__, ## type)
 
 namespace TRACE
 {
@@ -328,7 +360,8 @@ class TracInit
     /* Constructor                                                            */
     /*------------------------------------------------------------------------*/
 
-    TracInit(trace_desc_t **o_td, const char *i_comp,const size_t i_size);
+    TracInit(trace_desc_t **o_td, const char *i_comp,
+             const size_t i_size, uint8_t i_bufferType = TRACE::BUFFER_FAST);
 
     ~TracInit();
 

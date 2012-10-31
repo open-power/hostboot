@@ -1,39 +1,50 @@
 #!/usr/bin/perl
-#  IBM_PROLOG_BEGIN_TAG
-#  This is an automatically generated prolog.
+# IBM_PROLOG_BEGIN_TAG
+# This is an automatically generated prolog.
 #
-#  $Source: src/build/debug/Hostboot/Trace.pm $
+# $Source: src/build/debug/Hostboot/Trace.pm $
 #
-#  IBM CONFIDENTIAL
+# IBM CONFIDENTIAL
 #
-#  COPYRIGHT International Business Machines Corp. 2011-2012
+# COPYRIGHT International Business Machines Corp. 2011,2012
 #
-#  p1
+# p1
 #
-#  Object Code Only (OCO) source materials
-#  Licensed Internal Code Source Materials
-#  IBM HostBoot Licensed Internal Code
+# Object Code Only (OCO) source materials
+# Licensed Internal Code Source Materials
+# IBM HostBoot Licensed Internal Code
 #
-#  The source code for this program is not published or other-
-#  wise divested of its trade secrets, irrespective of what has
-#  been deposited with the U.S. Copyright Office.
+# The source code for this program is not published or otherwise
+# divested of its trade secrets, irrespective of what has been
+# deposited with the U.S. Copyright Office.
 #
-#  Origin: 30
+# Origin: 30
 #
-#  IBM_PROLOG_END_TAG
+# IBM_PROLOG_END_TAG
 use strict;
 
 package Hostboot::Trace;
+use Hostboot::_DebugFrameworkVMM qw(NotFound NotPresent getPhysicalAddr);
+
 use Exporter;
 our @EXPORT_OK = ('main');
 
-use constant MAX_NUM_TRACE_BUFFERS => 48;
-use constant DESC_ARRAY_ENTRY_SIZE => 24;
-use constant OFFSET_TRAC_BUFFER_SIZE => 20;
-use constant OFFSET_BUFFER_ADDRESS => 16;
-use constant BUFFER_ADDRESS_SIZE => 8;
+use constant TRACE_BUFFER_COUNT => 2;
+use constant DAEMON_FIRST_BUFFER_PAGE_OFFSET => 8;
+use constant DAEMON_FIRST_TEMP_BUFFER_PAGE_OFFSET =>
+                    DAEMON_FIRST_BUFFER_PAGE_OFFSET + 16;
+use constant BUFFER_FIRST_PAGE_OFFSET => 16;
+use constant BUFFER_PAGE_NEXT_OFFSET => 0;
+use constant BUFFER_PAGE_PREV_OFFSET => BUFFER_PAGE_NEXT_OFFSET + 8;
+use constant BUFFER_PAGE_SIZE_OFFSET => BUFFER_PAGE_PREV_OFFSET + 12;
+use constant BUFFER_PAGE_DATA_OFFSET => BUFFER_PAGE_SIZE_OFFSET + 4;
+use constant ENTRY_COMP_OFFSET => 0;
+use constant ENTRY_SIZE_OFFSET => 26;
+use constant ENTRY_SIZE => 28;
+use constant BIN_ENTRY_SIZE_OFFSET => 12;
+use constant BIN_ENTRY_SIZE => 24;
 
-use File::Temp ('tempfile');
+use File::Temp qw(tempfile tempdir);
 
 sub main
 {
@@ -51,48 +62,106 @@ sub main
     }
 
     my $traceBuffers = $args->{"components"};
-
-    my ($symAddr, $symSize) = ::findSymbolAddress("TRACE::g_desc_array");
-    if (not defined $symAddr) { ::userDisplay "Cannot find symbol.\n"; die; }
-
-    my ($fh,$fname) = tempfile();
-    binmode($fh);
-
-    # read the entire g_desc_array instead of reading each entry which is much slower in VBU
-    my $result = ::readData($symAddr, $symSize);
-
-    $symAddr = 0;
-    my $foundBuffer = 0;
-
-    for (my $i = 0; $i < MAX_NUM_TRACE_BUFFERS; $i++)
+    if (defined $traceBuffers)
     {
-        # component name is first in g_desc_array[$i]
-        my $compName = substr $result, $symAddr, OFFSET_BUFFER_ADDRESS;
-        # strip off null paddings
-        $compName = unpack('A*', $compName);
-        last if ($compName eq "");
+        $traceBuffers = uc $traceBuffers;
+    }
 
-        if ((not defined $traceBuffers) or (uc($traceBuffers) =~ m/$compName/))
+    my $tmpdir = tempdir(CLEANUP => 1);
+    open (my $fh, ">", $tmpdir."/tracBINARY");
+    binmode($fh);
+    my $foundBuffer = 0;
+    print $fh "\2";
+
+    my ($daemonAddr, $daemonSize) =
+        ::findSymbolAddress("Singleton<TRACEDAEMON::Daemon>::instance()::instance");
+
+    my ($serviceAddr, $serviceSize) =
+        ::findSymbolAddress("Singleton<TRACE::Service>::instance()::instance");
+
+    if ((not defined $daemonAddr) || (not defined $serviceAddr))
+    {
+        ::userDisplay "Cannot find trace daemon and/or service.\n";
+        die;
+    }
+
+    my @bufferPages = ();
+    my %components = ();
+
+
+    $daemonAddr = getPhysicalAddr($daemonAddr);
+    unless (($daemonAddr eq NotFound) || ($daemonAddr eq NotPresent))
+    {
+        my $firstPage = ::read64($daemonAddr + DAEMON_FIRST_BUFFER_PAGE_OFFSET);
+        readPage($firstPage, BUFFER_PAGE_PREV_OFFSET, \@bufferPages);
+
+        for(my $i = 0; $i < TRACE_BUFFER_COUNT; $i++)
         {
-            # get the pointer to its trace buffer
-            my $buffAddr = substr $result, $symAddr + OFFSET_BUFFER_ADDRESS, BUFFER_ADDRESS_SIZE;
-            $buffAddr= hex (unpack('H*',$buffAddr));
+            my $page =
+                ::read64($daemonAddr + DAEMON_FIRST_TEMP_BUFFER_PAGE_OFFSET +
+                         8*$i);
 
-            # get the size of this trace buffer
-            my $buffSize = ::read32($buffAddr + OFFSET_TRAC_BUFFER_SIZE);
+            readPage($page, BUFFER_PAGE_PREV_OFFSET, \@bufferPages);
+        }
+    }
 
-            $foundBuffer = 1;
-            print $fh (::readData($buffAddr, $buffSize ));
+    for(my $i = 0; $i < TRACE_BUFFER_COUNT; $i++)
+    {
+        my $buffer = ::read64($serviceAddr + 8*$i);
+        my $page = ::read64($buffer + BUFFER_FIRST_PAGE_OFFSET);
+
+        readPage($page, BUFFER_PAGE_NEXT_OFFSET, \@bufferPages);
+    }
+
+    while(@bufferPages)
+    {
+        my $page = shift @bufferPages;
+
+        my $size = readBuf32($page, BUFFER_PAGE_SIZE_OFFSET) +
+                        BUFFER_PAGE_DATA_OFFSET;
+        my $offset = BUFFER_PAGE_DATA_OFFSET;
+
+        # Read each entry.
+        while($offset < $size)
+        {
+            my $entry_size = readBuf16($page, ENTRY_SIZE_OFFSET + $offset);
+            my $compAddr = readBuf64($page, ENTRY_COMP_OFFSET + $offset);
+
+            if (0 ne $compAddr)
+            {
+                my $component = lookupComponent($compAddr,
+                        \%components);
+
+                if ((not defined $traceBuffers) ||
+                    ($traceBuffers =~ m/$component/))
+                {
+                    $foundBuffer = 1;
+
+                    print $fh $component;
+                    print $fh "\0";
+
+                    my $entry_data =
+                        substr $page, ENTRY_SIZE + $offset, $entry_size;
+
+                    my $bin_entry_size = BIN_ENTRY_SIZE +
+                        readBuf16($entry_data, BIN_ENTRY_SIZE_OFFSET);
+
+                    $entry_data = substr $entry_data, 0, $bin_entry_size;
+
+                    print $fh $entry_data;
+                }
+            }
+
+            $offset += $entry_size + ENTRY_SIZE;
+            $offset = round8($offset);
         }
 
-        # increment to next item in g_desc_array[]
-        $symAddr += DESC_ARRAY_ENTRY_SIZE;
     }
 
     if ($foundBuffer)
     {
-        open TRACE, ($args->{"fsp-trace"}." -s ".
-                    ::getImgPath()."hbotStringFile $fsptrace_options $fname |");
+        open TRACE, ($args->{"fsp-trace"}." $tmpdir -s ".
+                    ::getImgPath()."hbotStringFile $fsptrace_options |");
         while (my $line = <TRACE>)
         {
             ::userDisplay $line;
@@ -102,8 +171,75 @@ sub main
     {
         ::userDisplay("No matching buffers found.\n");
     }
+}
 
-    unlink($fname);
+sub readPage
+{
+    my ($addr, $offset, $pageArray) = @_;
+    return if (0 == $addr);
+
+    my $buffer = ::readData($addr, 4096);
+
+    my $pointer = readBuf64($buffer, $offset);
+
+    push @{$pageArray}, $buffer;
+
+    readPage($pointer, $offset, $pageArray);
+}
+
+sub readBuf64
+{
+    my ($buffer, $offset) = @_;
+
+    my $data = substr $buffer, $offset, 8;
+    if (::littleendian()) { $data = reverse($data); }
+
+    return unpack("Q", $data);
+}
+
+sub readBuf32
+{
+    my ($buffer, $offset) = @_;
+
+    my $data = substr $buffer, $offset, 4;
+    if (::littleendian()) { $data = reverse($data); }
+
+    return unpack("L", $data);
+
+}
+
+sub readBuf16
+{
+    my ($buffer, $offset) = @_;
+
+    my $data = substr $buffer, $offset, 2;
+    if (::littleendian()) { $data = reverse($data); }
+
+    return unpack("S", $data);
+
+}
+
+sub round8
+{
+    my ($val) = @_;
+
+    if ($val % 8)
+    {
+        $val += (8 - ($val % 8));
+    }
+
+    return $val;
+}
+
+sub lookupComponent
+{
+    my ($ptr, $hash) = @_;
+
+    if (not defined $hash->{$ptr})
+    {
+        $hash->{$ptr} = ::readStr($ptr);
+    }
+    return $hash->{$ptr};
 }
 
 sub helpInfo

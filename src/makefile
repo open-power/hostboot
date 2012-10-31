@@ -51,7 +51,7 @@ BASE_MODULES = trace errl devicefw scom xscom initservice \
 
 EXTENDED_MODULES = targeting ecmddatabuffer fapi hwp plat	\
                    extinitsvc istepdisp hwas fsi fsiscom i2c intr scan \
-                   spd dmi_training fapiporeve poreve util	\
+                   spd dmi_training fapiporeve poreve util tracedaemon	\
                    sbe_centaur_init mc_config dram_training \
                    mdia mbox mvpd prdf bus_training \
                    activate_powerbus build_winkle_images \
@@ -60,7 +60,7 @@ EXTENDED_MODULES = targeting ecmddatabuffer fapi hwp plat	\
                    nest_chiplets start_payload thread_activate slave_sbe \
                    attn runtime ibscom
 
-TESTCASE_MODULES = cxxtest testerrl testdevicefw testsyslib \
+TESTCASE_MODULES = cxxtest testtrace testerrl testdevicefw testsyslib \
                    testscom testxscom testtargeting testinitservice testkernel \
                    testhwpf testecmddatabuffer initsvctesttask testcxxtest \
                    testpnor testi2c testfsi testvfs testhwas testintr testspd \

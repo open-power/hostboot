@@ -84,7 +84,7 @@ function    runtraceHB()
     #    exit 1
     #fi
     
-    autosim $NOWIN --simcmd   "hb-trace" --timeout 120
+    autosim $NOWIN --simcmd   "hb-trace" --timeout 300
     if [ $? -ne 0 ] ; then
         echo "ERROR 4 : Unable to run $?"
         stopsim

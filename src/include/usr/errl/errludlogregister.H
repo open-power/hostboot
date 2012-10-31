@@ -36,6 +36,7 @@
 */
 
 #include <errl/errluserdetails.H>
+#include <stdarg.h>
 
 #ifndef PARSER
 

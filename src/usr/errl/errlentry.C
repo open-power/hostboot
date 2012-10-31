@@ -178,9 +178,7 @@ bool ErrlEntry::collectTrace(const char i_name[], const uint64_t i_max)
     {
         // By passing nil arguments 2 and 3, obtain the size of the buffer.
         // Besides getting buffer size, it validates i_name.
-        uint64_t l_cbFull = TRACE::Trace::getTheInstance().getBuffer( i_name,
-                                                                      NULL,
-                                                                      0 );
+        uint64_t l_cbFull = TRACE::getBuffer( i_name, NULL,0 );
         if( 0 == l_cbFull )
         {
             // Problem, likely unknown trace buffer name.
@@ -204,10 +202,7 @@ bool ErrlEntry::collectTrace(const char i_name[], const uint64_t i_max)
         l_pBuffer = new char[ l_cbBuffer ];
 
         // Get the data into the buffer.
-        l_cbOutput =
-        TRACE::Trace::getTheInstance().getBuffer( i_name,
-                                                  l_pBuffer,
-                                                  l_cbBuffer );
+        l_cbOutput = TRACE::getBuffer( i_name, l_pBuffer, l_cbBuffer );
 
         if( 0 == l_cbOutput )
         {
