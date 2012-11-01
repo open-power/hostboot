@@ -701,6 +701,9 @@ errlHndl_t PnorDD::getNORChipId(uint32_t& o_chipId,
             break;
         }
 
+        // Only look at a portion of the data that is returned
+        o_chipId &= ID_MASK;
+
     }while(0);
 
     return l_err;

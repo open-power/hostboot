@@ -132,7 +132,9 @@ class PnorDD
     enum NorChipIDs
     {
         SIMICS_NOR_ID     = 0x20ba2000,  /**< CHIP ID returned by Simics NOR chip */
-        VPO_NOR_ID        = 0x20201820,  /**< CHIP ID returned by VPO NOR chip */
+        VPO_NOR_ID        = 0x20201800,  /**< CHIP ID returned by VPO NOR chip */
+
+        ID_MASK           = 0xFFFFFF00,  /**< Only look at 3 bytes */
     };
 
 
