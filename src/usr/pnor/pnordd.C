@@ -200,14 +200,6 @@ errlHndl_t PnorDD::readFlash(void* o_buffer,
             break;
         }
 
-        //trace each page when running in VPO to show we're making progress.
-        //TODO: Remove after we get more PNOR runtime in VPO.  RTC: 45885
-        if(0 != iv_vpoMode) 
-        {
-            TRACFCOMP(g_trac_pnor,"PNOR read of address %.8X, size=0x%X", i_address, io_buflen);
-        }
-
-
         //If we get here we're doing either MODEL_LPC_MEM, MODEL_REAL_CMD, or MODEL_REAL_MMIO
         mutex_lock(&cv_mutex);
         l_err = bufferedSfcRead(i_address, io_buflen, o_buffer);
@@ -250,8 +242,6 @@ errlHndl_t PnorDD::writeFlash(void* i_buffer,
         if(0 != iv_vpoMode)
         {
             mutex_lock(&cv_mutex);
-            //TODO: Remove trace after we get more PNOR runtime in VPO.  RTC: 45885
-            TRACFCOMP(g_trac_pnor,"PNOR write %.8X, skipping right to bufferedSfcWrite to improve performance", i_address);
             l_err = bufferedSfcWrite(static_cast<uint32_t>(l_address),
                                      8,
                                      i_buffer);
