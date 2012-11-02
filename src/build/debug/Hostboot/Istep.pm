@@ -434,6 +434,10 @@ sub get_istep_list()
 
     my  @isteplist  =   ::getIstepList();
 
+    ##  DEBUG:  Comment in to test invalid minor and invalid major isteps
+    ## $inList[7][8]   =   "invalid_minor";
+    ## $inList[0][17]  =   "invalid_major";
+
     foreach( @isteplist )
     {
         chomp;

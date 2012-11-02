@@ -166,9 +166,29 @@ void iStepWorkerThread ( void * i_msgQ )
         }
         else
         {
-            // Nothing to do for this step.
-            TRACDCOMP( g_trac_initsvc,
-                       INFO_MRK"Empty Istep, nothing to do!" );
+
+            //  This istep should have not been sent here to run, make up
+            //  an errorlog and return it.
+            /*@
+             * @errortype
+             * @reasoncode       ISTEP_INVALID_ISTEP
+             * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE
+             * @moduleid         ISTEP_INITSVC_MOD_ID
+             * @userdata1        Current Istep
+             * @userdata2        Current SubStep
+             * @devdesc          An invalid istep or substep was passed.
+             */
+            err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                           ISTEP_INITSVC_MOD_ID,
+                                           ISTEP_INVALID_ISTEP,
+                                           istep,
+                                           substep  );
+
+            TRACFCOMP( g_trac_initsvc,
+                       ERR_MRK"Invalid Istep %d.%d, return errlog plid=0x%x",
+                       istep,
+                       substep,
+                       err->plid()  );
         }
 
         //  flush contTrace after each istep/substep  returns
@@ -193,18 +213,6 @@ const TaskInfo * findTaskInfo( const uint32_t i_IStep,
 {
     //  default return is NULL
     const TaskInfo *l_pistep = NULL;
-    /**
-     * @todo
-     *  everything calling this should feed into the "real" istep/substep
-     *  numbers ( starting at 1 ) - this routine should translate to index into
-     *  the isteplists ( starting at 0 )
-     *
-     *      int32_t     l_istepIndex    =   i_IStep-1;
-     *      int32_t     l_substepIndex  =   i_SubStep-1;
-     *
-     *      assert( l_istepIndex >= 0 );
-     *      assert( l_substepIndex >= 0 );
-     */
 
     //  apply filters
     do

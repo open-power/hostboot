@@ -248,6 +248,15 @@ errlHndl_t IStepDispatcher::executeAllISteps ( void )
                  substep < (g_isteps[istep].numitems + 1);
                  substep++ )
             {
+                //  If the istep/substep doesn't exist, skip it.
+                if ( findTaskInfo( istep, substep ) ==  NULL )
+                {
+                    TRACFCOMP( g_trac_initsvc,
+                               INFO_MRK"Empty istep %d.%d, continuing...",
+                               istep,
+                               substep  );
+                    continue;
+                }
                 // Before we can do anything, we need to be sure the worker thread is
                 // ready to start
                 theMsg = msg_wait( iv_msgQ );
