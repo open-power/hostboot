@@ -29,23 +29,26 @@
 #include <iipscr.h>
 #include <prdrCommon.H>
 
-class PrdfNotRegister : public SCAN_COMM_REGISTER_CLASS
+namespace PRDF
+{
+
+class NotRegister : public SCAN_COMM_REGISTER_CLASS
 {
   public:
-    PrdfNotRegister() :
+    NotRegister() :
         SCAN_COMM_REGISTER_CLASS(0), iv_child(NULL), iv_iBS(0)
     {
         iv_bs = &iv_iBS;
     }
 
-    PrdfNotRegister(SCAN_COMM_REGISTER_CLASS & i_arg) :
+    NotRegister(SCAN_COMM_REGISTER_CLASS & i_arg) :
         SCAN_COMM_REGISTER_CLASS(0), iv_child(&i_arg),
         iv_iBS(i_arg.GetBitString()->GetLength())
     {
         iv_bs = &iv_iBS;
     }
 
-    PrdfNotRegister & operator=(const PrdfNotRegister & r)
+    NotRegister & operator=(const NotRegister & r)
     {
         iv_child = r.iv_child;
         iv_iBS = r.iv_iBS;
@@ -57,7 +60,7 @@ class PrdfNotRegister : public SCAN_COMM_REGISTER_CLASS
     virtual uint32_t Write() { return iv_child->Write(); }
 
     const BIT_STRING_CLASS * GetBitString(
-                    ATTENTION_TYPE i_type = PRDF::INVALID_ATTENTION_TYPE) const
+                    ATTENTION_TYPE i_type = INVALID_ATTENTION_TYPE) const
     {
         (*iv_bs) = ~(*iv_child->GetBitString(i_type));
         return iv_bs;
@@ -66,13 +69,13 @@ class PrdfNotRegister : public SCAN_COMM_REGISTER_CLASS
     virtual uint16_t GetId() const { return iv_child->GetId(); }
     virtual void SetId(uint16_t i_id) {}
 
-    bool operator==(const PrdfNotRegister & r) const
+    bool operator==(const NotRegister & r) const
     { return r.iv_child == iv_child; }
 
-    bool operator<(const PrdfNotRegister & r) const
+    bool operator<(const NotRegister & r) const
     { return iv_child < r.iv_child; }
 
-    bool operator>=(const PrdfNotRegister & r) const
+    bool operator>=(const NotRegister & r) const
     { return iv_child >= r.iv_child; }
 
   protected:
@@ -82,27 +85,27 @@ class PrdfNotRegister : public SCAN_COMM_REGISTER_CLASS
   private:
     SCAN_COMM_REGISTER_CLASS * iv_child;
 
-    prdfBitStringBuffer * iv_bs;
-    prdfBitStringBuffer iv_iBS;
+    BitStringBuffer * iv_bs;
+    BitStringBuffer iv_iBS;
 };
 
-class PrdfLeftShiftRegister : public SCAN_COMM_REGISTER_CLASS
+class LeftShiftRegister : public SCAN_COMM_REGISTER_CLASS
 {
   public:
-    PrdfLeftShiftRegister() :
+    LeftShiftRegister() :
         SCAN_COMM_REGISTER_CLASS(0), iv_child(NULL), iv_amount(0), iv_iBS(0)
     {
         iv_bs = &iv_iBS;
     }
 
-    PrdfLeftShiftRegister(SCAN_COMM_REGISTER_CLASS & i_arg, uint16_t i_amount) :
+    LeftShiftRegister(SCAN_COMM_REGISTER_CLASS & i_arg, uint16_t i_amount) :
         SCAN_COMM_REGISTER_CLASS(0), iv_child(&i_arg), iv_amount(i_amount),
         iv_iBS(i_arg.GetBitString()->GetLength())
     {
         iv_bs = &iv_iBS;
     }
 
-    PrdfLeftShiftRegister & operator=(const PrdfLeftShiftRegister & r)
+    LeftShiftRegister & operator=(const LeftShiftRegister & r)
     {
         iv_child = r.iv_child;
         iv_amount = r.iv_amount;
@@ -115,7 +118,7 @@ class PrdfLeftShiftRegister : public SCAN_COMM_REGISTER_CLASS
     virtual uint32_t Write() { return iv_child->Write(); }
 
     const BIT_STRING_CLASS * GetBitString(
-                    ATTENTION_TYPE i_type = PRDF::INVALID_ATTENTION_TYPE) const
+                    ATTENTION_TYPE i_type = INVALID_ATTENTION_TYPE) const
     {
         (*iv_bs) = (*iv_child->GetBitString(i_type)) << iv_amount;
         return iv_bs;
@@ -124,17 +127,17 @@ class PrdfLeftShiftRegister : public SCAN_COMM_REGISTER_CLASS
     virtual uint16_t GetId() const { return iv_child->GetId(); }
     virtual void SetId(uint16_t i_id) {}
 
-    bool operator==(const PrdfLeftShiftRegister & r) const
+    bool operator==(const LeftShiftRegister & r) const
     { return (r.iv_child == iv_child) && (r.iv_amount == iv_amount); }
 
-    bool operator<(const PrdfLeftShiftRegister & r) const
+    bool operator<(const LeftShiftRegister & r) const
     {
         if (iv_child == r.iv_child)
             return iv_amount < r.iv_amount;
         return iv_child < r.iv_child;
     }
 
-    bool operator>=(const PrdfLeftShiftRegister & r) const
+    bool operator>=(const LeftShiftRegister & r) const
     {
         if (iv_child == r.iv_child)
             return iv_amount >= r.iv_amount;
@@ -149,28 +152,27 @@ class PrdfLeftShiftRegister : public SCAN_COMM_REGISTER_CLASS
     SCAN_COMM_REGISTER_CLASS * iv_child;
     uint16_t iv_amount;
 
-    prdfBitStringBuffer * iv_bs;
-    prdfBitStringBuffer iv_iBS;
+    BitStringBuffer * iv_bs;
+    BitStringBuffer iv_iBS;
 };
 
-class PrdfRightShiftRegister : public SCAN_COMM_REGISTER_CLASS
+class RightShiftRegister : public SCAN_COMM_REGISTER_CLASS
 {
   public:
-    PrdfRightShiftRegister() :
+    RightShiftRegister() :
         SCAN_COMM_REGISTER_CLASS(0), iv_child(NULL), iv_amount(0), iv_iBS(0)
     {
         iv_bs = &iv_iBS;
     }
 
-    PrdfRightShiftRegister(SCAN_COMM_REGISTER_CLASS & i_arg,
-                           uint16_t i_amount) :
+    RightShiftRegister(SCAN_COMM_REGISTER_CLASS & i_arg, uint16_t i_amount) :
         SCAN_COMM_REGISTER_CLASS(0), iv_child(&i_arg), iv_amount(i_amount),
         iv_iBS(i_arg.GetBitString()->GetLength())
     {
         iv_bs = &iv_iBS;
     }
 
-    PrdfRightShiftRegister & operator=(const PrdfRightShiftRegister & r)
+    RightShiftRegister & operator=(const RightShiftRegister & r)
     {
         iv_child = r.iv_child;
         iv_amount = r.iv_amount;
@@ -183,7 +185,7 @@ class PrdfRightShiftRegister : public SCAN_COMM_REGISTER_CLASS
     virtual uint32_t Write() { return iv_child->Write(); }
 
     const BIT_STRING_CLASS * GetBitString(
-                    ATTENTION_TYPE i_type = PRDF::INVALID_ATTENTION_TYPE) const
+                    ATTENTION_TYPE i_type = INVALID_ATTENTION_TYPE) const
     {
         (*iv_bs) = (*iv_child->GetBitString(i_type)) >> iv_amount;
         return iv_bs;
@@ -192,17 +194,17 @@ class PrdfRightShiftRegister : public SCAN_COMM_REGISTER_CLASS
     virtual uint16_t GetId() const { return iv_child->GetId(); }
     virtual void SetId(uint16_t i_id) {}
 
-    bool operator==(const PrdfRightShiftRegister & r) const
+    bool operator==(const RightShiftRegister & r) const
     { return (r.iv_child == iv_child) && (r.iv_amount == iv_amount); }
 
-    bool operator<(const PrdfRightShiftRegister & r) const
+    bool operator<(const RightShiftRegister & r) const
     {
         if (iv_child == r.iv_child)
             return iv_amount < r.iv_amount;
         return iv_child < r.iv_child;
     }
 
-    bool operator>=(const PrdfRightShiftRegister & r) const
+    bool operator>=(const RightShiftRegister & r) const
     {
         if (iv_child == r.iv_child)
             return iv_amount >= r.iv_amount;
@@ -217,22 +219,22 @@ class PrdfRightShiftRegister : public SCAN_COMM_REGISTER_CLASS
     SCAN_COMM_REGISTER_CLASS * iv_child;
     uint16_t iv_amount;
 
-    prdfBitStringBuffer * iv_bs;
-    prdfBitStringBuffer iv_iBS;
+    BitStringBuffer * iv_bs;
+    BitStringBuffer iv_iBS;
 };
 
 
-class PrdfAndRegister : public SCAN_COMM_REGISTER_CLASS
+class AndRegister : public SCAN_COMM_REGISTER_CLASS
 {
   public:
-    PrdfAndRegister() :
+    AndRegister() :
         SCAN_COMM_REGISTER_CLASS(0), iv_left(NULL), iv_right(NULL), iv_iBS(0)
     {
         iv_bs = &iv_iBS;
     }
 
-    PrdfAndRegister(SCAN_COMM_REGISTER_CLASS & i_left,
-                    SCAN_COMM_REGISTER_CLASS & i_right) :
+    AndRegister( SCAN_COMM_REGISTER_CLASS & i_left,
+                 SCAN_COMM_REGISTER_CLASS & i_right ) :
         SCAN_COMM_REGISTER_CLASS(0), iv_left(&i_left), iv_right(&i_right),
         iv_iBS(std::min(i_left.GetBitString()->GetLength(),
                         i_right.GetBitString()->GetLength()))
@@ -240,7 +242,7 @@ class PrdfAndRegister : public SCAN_COMM_REGISTER_CLASS
         iv_bs = &iv_iBS;
     }
 
-    PrdfAndRegister & operator=(const PrdfAndRegister & r)
+    AndRegister & operator=(const AndRegister & r)
     {
         iv_left = r.iv_left;
         iv_right = r.iv_right;
@@ -259,7 +261,7 @@ class PrdfAndRegister : public SCAN_COMM_REGISTER_CLASS
     }
 
     const BIT_STRING_CLASS * GetBitString(
-                    ATTENTION_TYPE i_type = PRDF::INVALID_ATTENTION_TYPE) const
+                    ATTENTION_TYPE i_type = INVALID_ATTENTION_TYPE) const
     {
         (*iv_bs) = *iv_left->GetBitString(i_type);
         (*iv_bs) = (*iv_bs) & (*iv_right->GetBitString(i_type));
@@ -268,23 +270,23 @@ class PrdfAndRegister : public SCAN_COMM_REGISTER_CLASS
 
     virtual uint16_t GetId() const
     {
-        return Prdr::PrdrSignatureOp::combineSig(iv_left->GetId(),
-                                                 iv_right->GetId());
+        return Prdr::SignatureOp::combineSig(iv_left->GetId(),
+                                             iv_right->GetId());
     }
 
     virtual void SetId(uint16_t i_id) {}
 
-    bool operator==(const PrdfAndRegister & r) const
+    bool operator==(const AndRegister & r) const
     { return (r.iv_left == iv_left) && (r.iv_right == iv_right); }
 
-    bool operator<(const PrdfAndRegister & r) const
+    bool operator<(const AndRegister & r) const
     {
         if (iv_left == r.iv_left)
             return iv_right < r.iv_right;
         return iv_left < r.iv_left;
     }
 
-    bool operator>=(const PrdfAndRegister & r) const
+    bool operator>=(const AndRegister & r) const
     {
         if (iv_left == r.iv_left)
             return iv_right >= r.iv_right;
@@ -299,21 +301,22 @@ class PrdfAndRegister : public SCAN_COMM_REGISTER_CLASS
     SCAN_COMM_REGISTER_CLASS * iv_left;
     SCAN_COMM_REGISTER_CLASS * iv_right;
 
-    prdfBitStringBuffer * iv_bs;
-    prdfBitStringBuffer iv_iBS;
+    BitStringBuffer * iv_bs;
+    BitStringBuffer iv_iBS;
 };
 
-class PrdfOrRegister : public SCAN_COMM_REGISTER_CLASS
+class OrRegister : public SCAN_COMM_REGISTER_CLASS
 {
   public:
-    PrdfOrRegister() :
+
+    OrRegister() :
         SCAN_COMM_REGISTER_CLASS(0), iv_left(NULL), iv_right(NULL), iv_iBS(0)
     {
         iv_bs = &iv_iBS;
     }
 
-    PrdfOrRegister(SCAN_COMM_REGISTER_CLASS & i_left,
-                   SCAN_COMM_REGISTER_CLASS & i_right) :
+    OrRegister( SCAN_COMM_REGISTER_CLASS & i_left,
+                SCAN_COMM_REGISTER_CLASS & i_right ) :
         SCAN_COMM_REGISTER_CLASS(0), iv_left(&i_left), iv_right(&i_right),
         iv_iBS(std::min(i_left.GetBitString()->GetLength(),
                         i_right.GetBitString()->GetLength()))
@@ -321,7 +324,7 @@ class PrdfOrRegister : public SCAN_COMM_REGISTER_CLASS
         iv_bs = &iv_iBS;
     }
 
-    PrdfOrRegister & operator=(const PrdfOrRegister & r)
+    OrRegister & operator=(const OrRegister & r)
     {
         iv_left = r.iv_left;
         iv_right = r.iv_right;
@@ -334,13 +337,14 @@ class PrdfOrRegister : public SCAN_COMM_REGISTER_CLASS
     {
         return iv_left->Read() | iv_right->Read();
     }
+
     virtual uint32_t Write()
     {
         return iv_left->Write() | iv_right->Write();
     }
 
     const BIT_STRING_CLASS * GetBitString(
-                    ATTENTION_TYPE i_type = PRDF::INVALID_ATTENTION_TYPE) const
+                    ATTENTION_TYPE i_type = INVALID_ATTENTION_TYPE ) const
     {
         (*iv_bs) = *iv_left->GetBitString(i_type);
         (*iv_bs) = (*iv_bs) | (*iv_right->GetBitString(i_type));
@@ -349,23 +353,23 @@ class PrdfOrRegister : public SCAN_COMM_REGISTER_CLASS
 
     virtual uint16_t GetId() const
     {
-        return Prdr::PrdrSignatureOp::combineSig(iv_left->GetId(),
-                                                 iv_right->GetId());
+        return Prdr::SignatureOp::combineSig( iv_left->GetId(),
+                                              iv_right->GetId() );
     }
 
     virtual void SetId(uint16_t i_id) {}
 
-    bool operator==(const PrdfOrRegister & r) const
+    bool operator==(const OrRegister & r) const
     { return (r.iv_left == iv_left) && (r.iv_right == iv_right); }
 
-    bool operator<(const PrdfOrRegister & r) const
+    bool operator<(const OrRegister & r) const
     {
         if (iv_left == r.iv_left)
             return iv_right < r.iv_right;
         return iv_left < r.iv_left;
     }
 
-    bool operator>=(const PrdfOrRegister & r) const
+    bool operator>=(const OrRegister & r) const
     {
         if (iv_left == r.iv_left)
             return iv_right >= r.iv_right;
@@ -380,18 +384,18 @@ class PrdfOrRegister : public SCAN_COMM_REGISTER_CLASS
     SCAN_COMM_REGISTER_CLASS * iv_left;
     SCAN_COMM_REGISTER_CLASS * iv_right;
 
-    prdfBitStringBuffer * iv_bs;
-    prdfBitStringBuffer iv_iBS;
+    BitStringBuffer * iv_bs;
+    BitStringBuffer iv_iBS;
 };
 
-class PrdfNullRegister : public SCAN_COMM_REGISTER_CLASS
+class NullRegister : public SCAN_COMM_REGISTER_CLASS
 {
   public:
-    PrdfNullRegister(int size) :
+    NullRegister(int size) :
         SCAN_COMM_REGISTER_CLASS(0), iv_iBS(size)
     {}
 
-    PrdfNullRegister & operator=(const PrdfNullRegister & r)
+    NullRegister & operator=(const NullRegister & r)
     {
         iv_iBS = r.iv_iBS;
         return *this;
@@ -401,7 +405,7 @@ class PrdfNullRegister : public SCAN_COMM_REGISTER_CLASS
     virtual uint32_t Write() { return 0; }
 
     const BIT_STRING_CLASS * GetBitString(
-                    ATTENTION_TYPE i_type = PRDF::INVALID_ATTENTION_TYPE) const
+                    ATTENTION_TYPE i_type = INVALID_ATTENTION_TYPE) const
     {
         return &iv_iBS;
     }
@@ -411,29 +415,29 @@ class PrdfNullRegister : public SCAN_COMM_REGISTER_CLASS
     void SetBitString(const BIT_STRING_CLASS *) {}
 
   private:
-    prdfBitStringBuffer iv_iBS;
+    BitStringBuffer iv_iBS;
 
     virtual uint16_t GetId() const
-    { return Prdr::PrdrSignatureOp::DEFAULT_SIGNATURE; }
+    { return Prdr::SignatureOp::DEFAULT_SIGNATURE; }
 
     virtual void SetId(uint16_t i_id) {}
 
 };
 
-class PrdfAttnTypeRegister : public SCAN_COMM_REGISTER_CLASS
+class AttnTypeRegister : public SCAN_COMM_REGISTER_CLASS
 {
   public:
-    PrdfAttnTypeRegister() :
+    AttnTypeRegister() :
         SCAN_COMM_REGISTER_CLASS(0), iv_check(&cv_null), iv_recov(&cv_null),
         iv_special(&cv_null), iv_proccs(&cv_null), iv_iBS(0)
     {
         iv_bs = &iv_iBS;
     }
 
-    PrdfAttnTypeRegister( SCAN_COMM_REGISTER_CLASS & i_check,
-                          SCAN_COMM_REGISTER_CLASS & i_recov,
-                          SCAN_COMM_REGISTER_CLASS & i_special,
-                          SCAN_COMM_REGISTER_CLASS & i_proccs ) :
+    AttnTypeRegister( SCAN_COMM_REGISTER_CLASS & i_check,
+                      SCAN_COMM_REGISTER_CLASS & i_recov,
+                      SCAN_COMM_REGISTER_CLASS & i_special,
+                      SCAN_COMM_REGISTER_CLASS & i_proccs ) :
         SCAN_COMM_REGISTER_CLASS(0),
         iv_check(  NULL == &i_check   ? &cv_null : &i_check),
         iv_recov(  NULL == &i_recov   ? &cv_null : &i_recov),
@@ -446,17 +450,17 @@ class PrdfAttnTypeRegister : public SCAN_COMM_REGISTER_CLASS
         l_length = std::min(l_length, iv_recov->GetBitString()->GetLength());
         l_length = std::min(l_length, iv_special->GetBitString()->GetLength());
         l_length = std::min(l_length, iv_proccs->GetBitString()->GetLength());
-        iv_iBS = prdfBitStringBuffer(l_length);
+        iv_iBS = BitStringBuffer(l_length);
         iv_bs = &iv_iBS;
     }
 
-    PrdfAttnTypeRegister & operator=(const PrdfAttnTypeRegister & r)
+    AttnTypeRegister & operator=(const AttnTypeRegister & r)
     {
         //iv_null = r.iv_null; <-- don't do this!
-        iv_check =   (r.iv_check   == &r.cv_null ? &cv_null : r.iv_check);
-        iv_recov =   (r.iv_recov   == &r.cv_null ? &cv_null : r.iv_recov);
+        iv_check   = (r.iv_check   == &r.cv_null ? &cv_null : r.iv_check);
+        iv_recov   = (r.iv_recov   == &r.cv_null ? &cv_null : r.iv_recov);
         iv_special = (r.iv_special == &r.cv_null ? &cv_null : r.iv_special);
-        iv_proccs =  (r.iv_proccs  == &r.cv_null ? &cv_null : r.iv_proccs);
+        iv_proccs  = (r.iv_proccs  == &r.cv_null ? &cv_null : r.iv_proccs);
         iv_iBS = r.iv_iBS;
         //iv_bs = r.iv_bs; <-- don't do this!
         return *this;
@@ -475,9 +479,8 @@ class PrdfAttnTypeRegister : public SCAN_COMM_REGISTER_CLASS
     }
 
     const BIT_STRING_CLASS * GetBitString(
-                    ATTENTION_TYPE i_type = PRDF::INVALID_ATTENTION_TYPE) const
+                    ATTENTION_TYPE i_type = INVALID_ATTENTION_TYPE) const
     {
-        using namespace PRDF;
         switch (i_type)
         {
             case CHECK_STOP:
@@ -506,20 +509,19 @@ class PrdfAttnTypeRegister : public SCAN_COMM_REGISTER_CLASS
 
     virtual uint16_t GetId() const
     {
-        using Prdr::PrdrSignatureOp;
-        uint16_t l_rc = PrdrSignatureOp::DEFAULT_SIGNATURE;
-        l_rc = PrdrSignatureOp::combineSig(l_rc, iv_check->GetId());
-        l_rc = PrdrSignatureOp::combineSig(l_rc, iv_recov->GetId());
-        l_rc = PrdrSignatureOp::combineSig(l_rc, iv_special->GetId());
-        l_rc = PrdrSignatureOp::combineSig(l_rc, iv_proccs->GetId());
+        uint16_t l_rc = Prdr::SignatureOp::DEFAULT_SIGNATURE;
+        l_rc = Prdr::SignatureOp::combineSig(l_rc, iv_check->GetId());
+        l_rc = Prdr::SignatureOp::combineSig(l_rc, iv_recov->GetId());
+        l_rc = Prdr::SignatureOp::combineSig(l_rc, iv_special->GetId());
+        l_rc = Prdr::SignatureOp::combineSig(l_rc, iv_proccs->GetId());
         return l_rc;
     }
 
     virtual void SetId(uint16_t i_id) {}
 
-    bool operator==(const PrdfAttnTypeRegister & r) const
+    bool operator==(const AttnTypeRegister & r) const
     {
-        return (r.iv_check == iv_check)     && (r.iv_recov == iv_recov) &&
+        return (r.iv_check   == iv_check)   && (r.iv_recov  == iv_recov) &&
                (r.iv_special == iv_special) && (r.iv_proccs == iv_proccs);
     }
 
@@ -528,29 +530,29 @@ class PrdfAttnTypeRegister : public SCAN_COMM_REGISTER_CLASS
     void SetBitString(const BIT_STRING_CLASS *) {}
 
   private:
-    static PrdfNullRegister cv_null;
+    static NullRegister cv_null;
 
     SCAN_COMM_REGISTER_CLASS * iv_check;
     SCAN_COMM_REGISTER_CLASS * iv_recov;
     SCAN_COMM_REGISTER_CLASS * iv_special;
     SCAN_COMM_REGISTER_CLASS * iv_proccs;
 
-    prdfBitStringBuffer * iv_bs;
-    prdfBitStringBuffer iv_iBS;
+    BitStringBuffer * iv_bs;
+    BitStringBuffer iv_iBS;
 };
 
-class PrdfConstantRegister : public SCAN_COMM_REGISTER_CLASS
+class ConstantRegister : public SCAN_COMM_REGISTER_CLASS
 {
   public:
-    PrdfConstantRegister() :
+    ConstantRegister() :
         SCAN_COMM_REGISTER_CLASS(0), iv_iBS(0)
     {}
 
-    PrdfConstantRegister(BIT_STRING_CLASS i_arg) :
+    ConstantRegister(BIT_STRING_CLASS i_arg) :
         SCAN_COMM_REGISTER_CLASS(0), iv_iBS(i_arg)
     {}
 
-    PrdfConstantRegister & operator=(const PrdfConstantRegister & r)
+    ConstantRegister & operator=(const ConstantRegister & r)
     {
         iv_iBS = r.iv_iBS;
         return *this;
@@ -560,17 +562,17 @@ class PrdfConstantRegister : public SCAN_COMM_REGISTER_CLASS
     virtual uint32_t Write() { return SUCCESS; }
 
     const BIT_STRING_CLASS * GetBitString(
-                    ATTENTION_TYPE i_type = PRDF::INVALID_ATTENTION_TYPE) const
+                    ATTENTION_TYPE i_type = INVALID_ATTENTION_TYPE) const
     {
         return &iv_iBS;
     }
 
     virtual uint16_t GetId() const
-    { return Prdr::PrdrSignatureOp::DEFAULT_SIGNATURE; }
+    { return Prdr::SignatureOp::DEFAULT_SIGNATURE; }
 
     virtual void SetId(uint16_t i_id) {}
 
-    bool operator==(const PrdfConstantRegister & r) const
+    bool operator==(const ConstantRegister & r) const
     { return r.iv_iBS == iv_iBS; }
 
   protected:
@@ -578,7 +580,9 @@ class PrdfConstantRegister : public SCAN_COMM_REGISTER_CLASS
     void SetBitString(const BIT_STRING_CLASS *) {}
 
   private:
-    prdfBitStringBuffer iv_iBS;
+    BitStringBuffer iv_iBS;
 };
+
+} // end namespace PRDF
 
 #endif

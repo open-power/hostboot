@@ -49,6 +49,9 @@
 /*  Forward References                                                */
 /*--------------------------------------------------------------------*/
 
+namespace PRDF
+{
+
 class STEP_CODE_DATA_STRUCT;
 class CaptureData;
 
@@ -181,7 +184,7 @@ class CHIP_CLASS
      <br><b>Notes:       </b> default is to do nothing
      </ul><br>
      */
-    PRDF::HUID GetId() const;
+    HUID GetId() const;
 
   protected:
 
@@ -238,5 +241,7 @@ class CHIP_CLASS
     TARGETING::TargetHandle_t iv_pchipHandle;
 
 };
+
+} // end namespace PRDF
 
 #endif

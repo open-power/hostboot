@@ -52,7 +52,6 @@ namespace PRDF
     // FIXME - These may be replaced by something that is globally available.
     typedef uint32_t HUID;
     enum { INVALID_HUID = 0 };
-} // end namespace PRDF
 
 /*--------------------------------------------------------------------*/
 /*  Constants                                                         */
@@ -85,6 +84,6 @@ enum DOMAIN_ID
   END_DOMAIN_ID
 };
 
-
+} // end namespace PRDF
 
 #endif

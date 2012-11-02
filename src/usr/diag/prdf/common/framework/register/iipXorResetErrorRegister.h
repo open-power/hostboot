@@ -51,6 +51,8 @@
 #include <iipErrorRegisterMask.h>
 #endif
 
+namespace PRDF
+{
 
 //--------------------------------------------------------------------
 //  Forward References
@@ -130,14 +132,7 @@ XorResetErrorRegister::XorResetErrorRegister(SCAN_COMM_REGISTER_CLASS & r,
 : ErrorRegisterMask(r,rm,f)
 {}
 
+} // end namespace PRDF
 
 #endif /* iipXorResetErrorRegister_h */
 
-// Change Log *********************************************************
-//
-//  Flag Reason    Vers  Date    Coder Description
-//  ---- --------- ---- -------- ----- -------------------------------
-//       D49127.12 v4r1 02/13/97 DRG   Initial Creation
-//       p4902214  v4r1 05/09/97 DRG   Added service data parm to Reset
-//
-// End Change Log *****************************************************

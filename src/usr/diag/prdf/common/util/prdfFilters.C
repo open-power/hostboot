@@ -39,6 +39,9 @@
 //#include <xspprdFilterLink.h>
 
 #undef iipFilters_C
+
+namespace PRDF
+{
 //----------------------------------------------------------------------
 //  User Types
 //----------------------------------------------------------------------
@@ -63,12 +66,12 @@
 // Member Function Specifications
 //----------------------------------------------------------------------
 
-prdfFilter::~prdfFilter(void)
+FilterClass::~FilterClass(void)
 {}
 
 //-------------------------------------------------------------------------------------------------
 
-bool prdfFilterPriority::Apply(prdfBitKey & ioBitList)
+bool FilterPriority::Apply(BitKey & ioBitList)
 {
   bool modified = false;
   if(ioBitList.isSubset(ivBitKey))
@@ -82,7 +85,7 @@ bool prdfFilterPriority::Apply(prdfBitKey & ioBitList)
 
 //-------------------------------------------------------------------------------------------------
 
-bool SingleBitFilter::Apply(prdfBitKey & bit_list)
+bool SingleBitFilter::Apply(BitKey & bit_list)
 {
   bool rc = false;
   uint32_t list_length = bit_list.size();
@@ -100,14 +103,14 @@ bool SingleBitFilter::Apply(prdfBitKey & bit_list)
 
 //-------------------------------------------------------------------------------------------------
 
-bool PrioritySingleBitFilter::Apply(prdfBitKey & bit_list)
+bool PrioritySingleBitFilter::Apply(BitKey & bit_list)
 {
     bool l_modified = false;
 
     // Do priority bit.
     for (size_t i = 0; i < iv_bitList.size(); i++)
     {
-        prdfBitKey l_key = iv_bitList[i];
+        BitKey l_key = iv_bitList[i];
         if (bit_list.isSubset(l_key))
         {
             l_modified = true;
@@ -129,22 +132,22 @@ bool PrioritySingleBitFilter::Apply(prdfBitKey & bit_list)
 
 //-------------------------------------------------------------------------------------------------
 
-bool prdfFilterTranspose::Apply(prdfBitKey & iBitList)
+bool FilterTranspose::Apply(BitKey & iBitList)
 {
   bool result = false;
   if(iBitList == ivBitKey)
   {
-    prdfBitKey bk(ivSingleBitPos);
+    BitKey bk(ivSingleBitPos);
     iBitList = bk;
     result = true;
   }
   return result;
 }
 
-bool prdfFilterTranspose::Undo(prdfBitKey & iBitList)
+bool FilterTranspose::Undo(BitKey & iBitList)
 {
   bool result = false;
-  prdfBitKey testbl(ivSingleBitPos);
+  BitKey testbl(ivSingleBitPos);
   if(iBitList.isSubset(testbl))
   {
     iBitList = ivBitKey;
@@ -156,14 +159,14 @@ bool prdfFilterTranspose::Undo(prdfBitKey & iBitList)
 
 //-------------------------------------------------------------------------------------------------
 
-bool FilterLink::Apply(prdfBitKey & bit_list)
+bool FilterLink::Apply(BitKey & bit_list)
 {
   bool rc = xFilter1.Apply(bit_list);
   rc = rc || xFilter2.Apply(bit_list);
   return rc;
 }
 
-bool FilterLink::Undo(prdfBitKey & bit_list)
+bool FilterLink::Undo(BitKey & bit_list)
 {
   bool rc = xFilter1.Undo(bit_list);
   rc = rc || xFilter2.Undo(bit_list);
@@ -172,14 +175,14 @@ bool FilterLink::Undo(prdfBitKey & bit_list)
 
 //-------------------------------------------------------------------------------------------------
 
-bool ScanCommFilter::Apply(prdfBitKey & bitList)
+bool ScanCommFilter::Apply(BitKey & bitList)
 {
   // Read HW register
   scr.Read();
 
   // local copy of bit string from scan comm register
   BIT_STRING_BUFFER_CLASS bsb(*scr.GetBitString());
-  prdfBitKey bl;
+  BitKey bl;
   bool rc = false;
 
   // Invert if necessary
@@ -199,6 +202,7 @@ bool ScanCommFilter::Apply(prdfBitKey & bitList)
 
   return(rc);
 }
+} //End namespace PRDF
 
 // Change Log *************************************************************************************
 //
@@ -210,8 +214,8 @@ bool ScanCommFilter::Apply(prdfBitKey & bitList)
 //  mk01 P4904712 v4r5    10/21/99 mkobler  really fix PrioritySingleBitFilter
 //       490420.x v5r2    07/06/00 mkobler  Add ScanCommFilter
 //       490420.x v5r2    07/06/00 dgilbert added FilterLink
-//                fips    03/19/04 dgilbert rename to prdfFilters.C;rewrote PrioritySingleBitFilter
-//                                          changed to use prdfBitKey
+//                fips    03/19/04 dgilbert rename to Filters.C;rewrote PrioritySingleBitFilter
+//                                          changed to use BitKey
 //       558003   fips310 06/21/06 dgilbert Add Undo()
 //       582595          fips310 12/12/06 iawillia Update priority sb filter to maintain bit order.
 //

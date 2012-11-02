@@ -37,6 +37,9 @@
 
 #undef xspprdDumpResolution_C
 
+namespace PRDF
+{
+
 //---------------------------------------------------------------------
 // Member Function Specifications
 //---------------------------------------------------------------------
@@ -53,3 +56,5 @@ int32_t DumpResolution::Resolve(STEP_CODE_DATA_STRUCT & error)
 
   return rc;
 }
+
+} // end namespace PRDF

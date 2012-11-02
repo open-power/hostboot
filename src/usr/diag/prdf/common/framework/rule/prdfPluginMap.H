@@ -29,13 +29,16 @@
 #include <string.h>
 #include <functional>
 
-class PrdfExtensibleChip;
+namespace PRDF
+{
+
+class ExtensibleChip;
 
 /**
   * @brief custom comparison functor to pass to a map container
   *        that uses char* as the key
   */
-struct PrdfStrCompare : public std::binary_function<const char*, const char*, bool>
+struct StrCompare : public std::binary_function<const char*, const char*, bool>
 {
     public:
       bool operator() (const char* str1, const char* str2) const
@@ -44,32 +47,34 @@ struct PrdfStrCompare : public std::binary_function<const char*, const char*, bo
       }
 };
 
-typedef std::map<const char *, PrdfExtensibleFunctionType *, PrdfStrCompare> PrdfPluginMap;
+typedef std::map<const char *, ExtensibleFunctionType *, StrCompare> PluginMap;
 
-class PrdfPluginGlobalMap;
-PrdfPluginGlobalMap & prdfGetPluginGlobalMap();
+class PluginGlobalMap;
+PluginGlobalMap & getPluginGlobalMap();
 
-class PrdfPluginGlobalMap
+class PluginGlobalMap
 {
     private:
-        std::map<const char *, PrdfPluginMap, PrdfStrCompare> cv_globalMap;
+        std::map<const char *, PluginMap, StrCompare> cv_globalMap;
 
     public:
-        PrdfPluginGlobalMap() : cv_globalMap() {};
+        PluginGlobalMap() : cv_globalMap() {};
 
         void registerPlugin(const char *   i_chipName,
                             const char *   i_pluginName,
-                            PrdfExtensibleFunctionType * i_plugin);
+                            ExtensibleFunctionType * i_plugin);
 
-        PrdfPluginMap & getPlugins(const char * i_chipName);
+        PluginMap & getPlugins(const char * i_chipName);
 };
 
-class PrdfPluginRegisterClass
+class PluginRegisterClass
 {
     public:
-        PrdfPluginRegisterClass(const char * i_chipName,
+        PluginRegisterClass(const char * i_chipName,
                                 const char * i_pluginName,
-                                PrdfExtensibleFunctionType * i_plugin);
+                                ExtensibleFunctionType * i_plugin);
 };
+
+} // end namespace PRDF
 
 #endif

@@ -79,7 +79,8 @@ class DumpResolutionFW;        // dg06a
 class GardResolutionFW;        // dg06a
 */
 
-using namespace PRDF;
+namespace PRDF
+{
 
 //---------------------------------------------------------------------
 // Member Function Specifications
@@ -137,7 +138,7 @@ MaskResolution & ResolutionFactory::GetThresholdResolution( uint32_t maskId,
                         const ThresholdResolution::ThresholdPolicy & mfgPolicy )
 {
   MaskResolution * r = NULL;
-  if ( !PRDF::PlatServices::mfgMode() )
+  if ( !PlatServices::mfgMode() )
   {
     r = &iv_thresholdResolutions.get(ThresholdResolution(maskId,policy));
   }
@@ -152,7 +153,7 @@ MaskResolution & ResolutionFactory::GetThresholdResolution( uint32_t maskId,
                         const ThresholdResolution::ThresholdPolicy & policy )
 {
   MaskResolution * r = NULL;
-  if ( !PRDF::PlatServices::mfgMode() &&
+  if ( !PlatServices::mfgMode() &&
        !(policy == ThresholdResolution::cv_mnfgDefault) )
   {
     r = &iv_thresholdResolutions.get(ThresholdResolution(maskId,policy));
@@ -168,7 +169,7 @@ MaskResolution & ResolutionFactory::GetThresholdResolution( uint32_t maskId,
 MaskResolution & ResolutionFactory::GetThresholdResolution(uint32_t maskId)
 {
   MaskResolution * r = NULL;
-  if ( !PRDF::PlatServices::mfgMode() )
+  if ( !PlatServices::mfgMode() )
   {
     r = &iv_thresholdResolutions.get(
                     ThresholdResolution(maskId,
@@ -189,7 +190,7 @@ Resolution & ResolutionFactory::GetConnectedCalloutResolution(
                                     PRDpriority i_priority,
                                     Resolution * i_altResolution )
 {
-    prdfCalloutConnected key( i_psourceHandle,
+    CalloutConnected key( i_psourceHandle,
                               i_targetType,
                               i_idx,
                               i_priority,
@@ -203,15 +204,15 @@ Resolution & ResolutionFactory::GetAnalyzeConnectedResolution(
                                     TARGETING::TYPE i_targetType,
                                     uint32_t i_idx )
 {
-    PrdfAnalyzeConnected key( i_psourceHandle, i_targetType, i_idx );
+    AnalyzeConnected key( i_psourceHandle, i_targetType, i_idx );
 
     return iv_analyzeConnected.get(key);
 }
 
 Resolution & ResolutionFactory::GetPluginCallResolution(
-        PrdfExtensibleChip * i_chip, PrdfExtensibleChipFunction * i_function)
+        ExtensibleChip * i_chip, ExtensibleChipFunction * i_function)
 {
-    return iv_pluginCallFW.get(PrdfPluginCallResolution(i_chip,i_function));
+    return iv_pluginCallFW.get(PluginCallResolution(i_chip,i_function));
 }
 
 Resolution & ResolutionFactory::GetThresholdSigResolution(
@@ -258,17 +259,17 @@ Resolution & ResolutionFactory::GetGardResolution(GardResolution::ErrorType et)
 }
 
 Resolution & ResolutionFactory::GetCaptureResolution
-    (PrdfExtensibleChip * i_chip,
+    (ExtensibleChip * i_chip,
      uint32_t i_group)
 {
-    return iv_captureResolutionFW.get(PrdfCaptureResolution(i_chip,i_group));
+    return iv_captureResolutionFW.get(CaptureResolution(i_chip,i_group));
 }
 
 Resolution & ResolutionFactory::GetClockResolution(
                                     TARGETING::TargetHandle_t i_pClockHandle,
                                     TARGETING::TYPE i_targetType )
 {
-    return iv_clockResolutionFW.get( PrdfClockResolution(i_pClockHandle,
+    return iv_clockResolutionFW.get( ClockResolution(i_pClockHandle,
                                                          i_targetType) );
 }
 
@@ -287,27 +288,6 @@ void ResolutionFactory::Reset()
   iv_clockResolutionFW.clear(); //jl01a
 
 }
-// dg03a end
-// Change Log *************************************************************************************
-//
-//  Flag Reason    Vers Date     Coder    Description
-//  ---- --------- ---- -------- -------- ---------------------------------------------------------
-//                      02/28/97 DGILBERT Initial Creation
-//       D49274.11 v4r5 01/20/99 SERAFIN  Increased MAX_CALLOUT_RESOLUTIONS and MAX_LINKS
-//       D49420.1  v5r2 07/17/00 mkobler  Add interface which uses ChipEnums
-//       d49420.2  v5r2 09/20/00 dgilbert increase link vector size
-//       d49420.7  v5r2 11/10/00 dgilbert move GetCalloutResolution(CHIP_ID...)
-//                                        to xspprdCondorOnly.C
-//       d49420.7  v5r2 11/20/00 mkobler  change default list/link size
-//       d49420.10 v5r2 01/16/00 mkobler  change default callout list size
-//  dg00 p4907689  v5r2 02/22/01 dgilbert link/list size += 1000
-//                 csp  07/11/01 dgilbert rewrite to solve size problem
-//  dg01           fips 08/09/02 dgilbert rewrite using FlyWeight template
-//  dg02 400647    fips 03/24/03 dgilbert add GetThresholdResolution()
-//  dg04 493306    235  03/01/05 dgilbert Add prdfCalloutConnected
-//       497866    235  03/29/05 dgilbert add idx & priority to prdfCalloutConnected
-//  dg05 498293    310  04/06/05 dgilbert add analyzeConnected
-//  pw01 F527129   f300 10/31/05 iawillia Move inlined code to .C so it compiles.
-//  ecdf F550548   f300 05/04/06 iawillia eClipz DUMP flags support.
-//  dg05           f310 05/18/07 dgilbert Clear iv_captureResolutoinFW to prevent memory leak.
-// End Change Log *********************************************************************************
+
+} // end namespace PRDF
+

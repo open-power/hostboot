@@ -27,6 +27,8 @@
 #include <prdfRuleChip.H>
 #include <vector>
 
+namespace PRDF
+{
 /**
  Template class that Define a domain Parent that contain other domains as children.
  @par
@@ -125,5 +127,7 @@ private:
    VectorOfDomainPointerType iv_childrenDomains;
 
 };
+
+} // end namespace PRDF
 
 #endif

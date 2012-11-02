@@ -76,6 +76,9 @@
 
 // Includes
 
+namespace PRDF
+{
+
 template <class T>
 class CcAutoDeletePointer
   {
@@ -293,15 +296,10 @@ class CcAutoDeletePointerVector
     T *                            pointer;
 
   };
-#include <CcAutoDeletePointer.inl>
 
-// Change Log **********************************************************
-//
-//  Flag  PTR/DCR#  Userid    Date      Description
-//  ----  --------  --------  --------  -----------
-//  n/a   n/a       JST       09/12/95  Created.
-//
-// End Change Log ******************************************************
+} // end namespace PRDF
+
+#include <CcAutoDeletePointer.inl>
 
 #endif
 

@@ -25,15 +25,10 @@
 #include <iipDomainContainer.C>
 #include <prdfRuleChip.H>
 
-template class DomainContainer<PrdfRuleChip>;
+namespace PRDF
+{
 
-// Change Log *********************************************************
-//
-//  Flag Reason   Vers Date     Coder    Description
-//  ---- -------- ---- -------- -------- ------------------------------
-//                              DGILBERT Initial Creation
-//       F429488  fips 12/16/03 mkobler  Added prdfMcChip template
-//         F494911  f310 03/04/05 iawillia Added PrdfRuleChip template.
-//  dg01          f300 04/05/06 dgilbert Added Domain of prdfExtensibleChip
-//  dg02 F557969  f310 07/05/06 dgilbert Remove obsolite parts
-// End Change Log *****************************************************
+template class DomainContainer<RuleChip>;
+
+} // end namespace PRDF
+

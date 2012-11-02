@@ -45,7 +45,7 @@ namespace Mcs
  * @param  i_mcsChip An MCS chip.
  * @return SUCCESS
  */
-int32_t Initialize( PrdfExtensibleChip * i_mcsChip )
+int32_t Initialize( ExtensibleChip * i_mcsChip )
 {
     // FIXME: Add proper initialization as per requirement
     return SUCCESS;

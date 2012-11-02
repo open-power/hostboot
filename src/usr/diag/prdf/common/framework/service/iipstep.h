@@ -57,6 +57,10 @@
 /*--------------------------------------------------------------------*/
 
 //class ERROR_OBJECT_CLASS;
+
+namespace PRDF
+{
+
 class ServiceDataCollector;
 
 /*--------------------------------------------------------------------*/
@@ -108,7 +112,6 @@ struct STEP_CODE_DATA_STRUCT
 
 };
 
-
-
+} // end namespace PRDF
 
 #endif

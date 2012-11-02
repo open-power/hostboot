@@ -30,6 +30,9 @@
 
 #include <functional>
 
+namespace PRDF
+{
+
 namespace Util
 {
     /**
@@ -141,13 +144,7 @@ namespace Util
 
 };
 
+} // end namespace PRDF
 
 #endif
-
-// Change Log *********************************************************
-//
-//  Flag Reason   Vers Date     Coder    Description
-//  ---- -------- ---- -------- -------- -------------------------------
-//         F510901  f300 07/15/05 iawillia Initial file creation.
-// End Change Log *****************************************************
 

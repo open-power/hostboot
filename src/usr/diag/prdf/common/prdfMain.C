@@ -74,7 +74,7 @@ namespace PRDF
 //------------------------------------------------------------------------------
 
 System * systemPtr = NULL;
-PrdfErrlSmartPtr g_prd_errlHndl; // inited to NULL in ctor.
+ErrlSmartPtr g_prd_errlHndl; // inited to NULL in ctor.
 bool g_initialized = false;
 
 //------------------------------------------------------------------------------
@@ -93,7 +93,7 @@ void unInitialize(void)
 
 #ifndef __HOSTBOOT_MODULE
     // clear the MfgThresholdMgr
-    PrdfMfgThresholdMgr::getInstance()->reset();
+    MfgThresholdMgr::getInstance()->reset();
 #endif
 
     PRDF_EXIT( "PRDF::unInitialize()" );
@@ -145,27 +145,27 @@ errlHndl_t initialize()
 
         // Clear out old chip persistency (for CCM).
         TARGETING::TargetHandleList l_oldChips;
-        for(PrdfChipPersist::iterator i = PrdfChipPersist::getInstance()->begin();
-            i != PrdfChipPersist::getInstance()->end();
+        for(ChipPersist::iterator i = ChipPersist::getInstance()->begin();
+            i != ChipPersist::getInstance()->end();
             ++i)
         {
             if (!PlatServices::isFunctional(*i))
                 l_oldChips.push_back(*i);
         }
         // This must be done afterwards otherwise the delete operation destroys
-        // the PrdfChipPersist::iterator.
+        // the ChipPersist::iterator.
         for(TARGETING::TargetHandleList::iterator i = l_oldChips.begin();
             i != l_oldChips.end();
             ++i)
         {
-            PrdfChipPersist::getInstance()->deleteEntry(*i);
+            ChipPersist::getInstance()->deleteEntry(*i);
         };
         // -- finished clearing out old chip persistency (for CCM).
 
 #endif
 
         CcAutoDeletePointer<Configurator> configuratorPtr
-            (PrdfSystemSpecific::getConfiguratorPtr());
+            (SystemSpecific::getConfiguratorPtr());
 
         systemPtr = configuratorPtr->build();   // build PRD system model
         if(systemPtr != NULL)
@@ -204,7 +204,7 @@ errlHndl_t main(ATTENTION_VALUE_TYPE i_attentionType, const AttnList & i_attnLis
         if(g_prd_errlHndl != NULL) rc = PRD_NOT_INITIALIZED;
     }
     //FIXME enterCCMMode ,isInCCM  function not available in wrapper
-    //    if (PrdfSystemData::getInstance()->isInCCM())
+    //    if (SystemData::getInstance()->isInCCM())
     //        PlatServices::enterCCMMode();
 
     bool latent_check_stop = false;
@@ -264,7 +264,7 @@ errlHndl_t main(ATTENTION_VALUE_TYPE i_attentionType, const AttnList & i_attnLis
         if (!latent_check_stop)
         {
             int32_t analyzeRc = systemPtr->Analyze(sdc, i_attentionType);
-            PrdfSystemSpecific::postAnalysisWorkarounds(sdc);
+            SystemSpecific::postAnalysisWorkarounds(sdc);
             if(analyzeRc != SUCCESS && g_prd_errlHndl == NULL)
             {
                 // We have a bad RC, but no error log - Fill out SDC and have service generator make one
@@ -314,7 +314,7 @@ void iplCleanup()
 
 #ifndef __HOSTBOOT_MODULE
 
-    PrdfChipPersist::getInstance()->clearData();
+    ChipPersist::getInstance()->clearData();
 
     if(PlatServices::isMasterFSP()) //only write registry key on primary
     {

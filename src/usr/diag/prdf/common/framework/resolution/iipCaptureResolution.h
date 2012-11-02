@@ -37,6 +37,9 @@
 #include <iipCaptureData.h>
 #endif
 
+namespace PRDF
+{
+
 //--------------------------------------------------------------------
 //  Forward References
 //--------------------------------------------------------------------
@@ -120,19 +123,7 @@ xScr(scr),
 pos(p)
 {}
 
+} // end namespace PRDF
 
 #endif /* iipCaptureResolution_h */
 
-// Change Log *********************************************************
-//
-//  Flag Reason   Vers   Date     Coder Description
-//  ---- -------- ------ -------- ----- -------------------------------
-//       d24758.1 v4r1m0 05/14/96 DRG   Initial Creation
-//       d24758.1 v4r1m0 05/28/96 DRG   Added new constructor for single scr
-//       d24758.1 v4r1m0 05/30/96 DRG   Changed base class to Resolution
-//                                      Now only capture 1 reg/CaputureResolution
-//       d48127.9 v4r1m0 10/20/97 DRG   Add interface for chipId + Address
-//  dg01          V4r3m0 05/13/99 DRG   Add place to capture (FRONT or BACK)
-//       359182   fips1  03/07/02 dgilbert fix up for FSP
-//
-// End Change Log *****************************************************

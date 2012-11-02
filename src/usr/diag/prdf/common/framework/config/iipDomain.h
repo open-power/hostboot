@@ -31,6 +31,9 @@
 #include <iipsdbug.h>    // Include file for ATTENTION_TYPE
 #endif
 
+namespace PRDF
+{
+
 // Forward References
 struct STEP_CODE_DATA_STRUCT;
 
@@ -122,5 +125,6 @@ private:
 
 };
 
+} // end namespace PRDF
 
 #endif

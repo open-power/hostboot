@@ -26,6 +26,9 @@
 
 // Includes
 
+namespace PRDF
+{
+
 template <class STEP_TYPE, class ID>
 inline
 void CcSynch<STEP_TYPE, ID>::Advance(void)
@@ -50,13 +53,7 @@ bool CcSynch<STEP_TYPE, ID>::IsCurrent(void)
   return(rc);
   }
 
-// Change Log **********************************************************
-//
-//  Flag  PTR/DCR#  Userid    Date      Description
-//  ----  --------  --------  --------  -----------
-//  n/a   n/a       JST       04/06/95  Created.
-//
-// End Change Log ******************************************************
+} // end namespace PRDF
 
 #endif
 

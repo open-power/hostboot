@@ -35,10 +35,15 @@
 
 #include <iipstep.h>
 
+namespace PRDF
+{
+
 /**
- * @fn prdfPostAnalysisWorkarounds
+ * @fn PostAnalysisWorkarounds
  * @brief Apply workarounds after "system" analysis, but prior to RAS Services.
  */
-void prdfPostAnalysisWorkarounds(STEP_CODE_DATA_STRUCT & i_sdc);
+void PostAnalysisWorkarounds(STEP_CODE_DATA_STRUCT & i_sdc);
+
+} // end namespace PRDF
 
 #endif

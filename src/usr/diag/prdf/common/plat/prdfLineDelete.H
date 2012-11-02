@@ -34,16 +34,19 @@
 #include <iipstep.h>
 #include <iipCaptureData.h>
 
-/** @namespace PrdfLineDelete
- *  Namespace to encapsulate all of the LineDelete specific classes and enums.
- */
-namespace PrdfLineDelete
+namespace PRDF
 {
 
-    /** @enum PrdfCacheType
+/** @namespace LineDelete
+ *  Namespace to encapsulate all of the LineDelete specific classes and enums.
+ */
+namespace LineDelete
+{
+
+    /** @enum CacheType
      *  Used to express where a cache error occured.
      */
-    enum PrdfCacheType
+    enum CacheType
     {
         L3 = 0,
         L3_DIR = 1,
@@ -56,10 +59,10 @@ namespace PrdfLineDelete
         SLICE_MASK = SLICE_A | SLICE_B
     };
 
-    /** @enum PrdfCacheErrorType
+    /** @enum CacheErrorType
      *  Used to express the types of cache errors that can occur.
      */
-    enum PrdfCacheErrorType
+    enum CacheErrorType
     {
         UE, CE
     };
@@ -168,24 +171,15 @@ namespace PrdfLineDelete
 
         const ThresholdResolution::ThresholdPolicy  iv_thPolicy;
         PrdfCacheAddressTable cv_ceTable;
-        PrdTimer cv_flushTimer;
+        Timer cv_flushTimer;
         bool cv_flushTimerInited;
         uint32_t cv_total;        //zs01
 
     };
 
 };
+
+} // end namespace PRDF
+
 #endif
 
-// Change Log *********************************************************
-//
-//  Flag Reason   Vers Date     Coder    Description
-//  ---- -------- ---- -------- -------- -------------------------------
-//       F522128  f300 09/22/05 iawillia Initial File Creation
-//  zs01 F565934  f310 09/06/06 zshelle         Adding getTotalCount()
-//  zs02 d573288  f310 10/05/06 zshelle         Adding addToCaptureData()
-//  zs03 588751   f310 03/12/07 zshelle  Adding getLargestEntry()
-//  zs04 633659   f340 04/11/08 zshelle  Add getEntryCount() and getTableSize()
-//  mp26 F750906  f720          plute    Add getCRCAnalysisEntries
-//
-// End Change Log *****************************************************

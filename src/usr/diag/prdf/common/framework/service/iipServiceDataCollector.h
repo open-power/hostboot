@@ -84,13 +84,15 @@
 
 #endif
 
-// dg07 start
+namespace PRDF
+{
+
 struct SdcCallout {
   PRDF::PRDcallout callout;
   PRDF::PRDpriority priority;
   //bool gard;
-  SdcCallout() : callout(NULL), priority(PRDF::MRU_LOW) {}
-  SdcCallout(PRDF::PRDcallout & mru, PRDF::PRDpriority p)
+  SdcCallout() : callout(NULL), priority(MRU_LOW) {}
+  SdcCallout(PRDcallout & mru, PRDpriority p)
     : callout(mru), priority(p)
   {}
   SdcCallout(TARGETING::TargetHandle_t i_pcalloutHandle , PRDF::PRDpriority p)
@@ -102,28 +104,28 @@ typedef std::vector<SdcCallout> SDC_MRU_LIST;
 
 #ifndef __HOSTBOOT_MODULE
 
-struct PrdfHcdbChangeItem {
+struct HcdbChangeItem {
   TARGETING::TargetHandle_t iv_phcdbtargetHandle ;
   hcdb::comp_subtype_t iv_compSubType;
   comp_id_t            iv_compType;
-  PrdfHcdbChangeItem() : iv_phcdbtargetHandle(NULL), iv_compSubType(hcdb::LBST_ABIST) {}
-  PrdfHcdbChangeItem(TARGETING::TargetHandle_t i_pTargetHandle, hcdb::comp_subtype_t i_compSubType, comp_id_t i_compType)
+  HcdbChangeItem() : iv_phcdbtargetHandle(NULL), iv_compSubType(hcdb::LBST_ABIST) {}
+  HcdbChangeItem(TARGETING::TargetHandle_t i_pTargetHandle, hcdb::comp_subtype_t i_compSubType, comp_id_t i_compType)
       : iv_phcdbtargetHandle(i_pTargetHandle), iv_compSubType(i_compSubType), iv_compType(i_compType){}
 };
 
-typedef std::vector<PrdfHcdbChangeItem> HCDB_CHANGE_LIST;
+typedef std::vector<HcdbChangeItem> HCDB_CHANGE_LIST;
 
 #endif
 
-struct PrdfSignatureList {
+struct SignatureList {
   TARGETING::TargetHandle_t           iv_pSignatureHandle;
   uint32_t                            iv_signature;
-  PrdfSignatureList() : iv_pSignatureHandle(NULL), iv_signature(0) {}
-  PrdfSignatureList(TARGETING::TargetHandle_t i_pTargetHandle , uint32_t i_signature)
+  SignatureList() : iv_pSignatureHandle(NULL), iv_signature(0) {}
+  SignatureList(TARGETING::TargetHandle_t i_pTargetHandle , uint32_t i_signature)
       : iv_pSignatureHandle(i_pTargetHandle), iv_signature(i_signature){}
 };
 
-typedef std::vector<PrdfSignatureList> PRDF_SIGNATURES;
+typedef std::vector<SignatureList> PRDF_SIGNATURES;
 
 //--------------------------------------------------------------------
 //  Forward References
@@ -245,8 +247,7 @@ public:
    <br><b>Notes:       </b> No implementation for Apache or Northstar
    </ul><br>
    */
-  void SetCallout( PRDF::PRDcallout mru,
-                   PRDF::PRDpriority priority = PRDF::MRU_MED );
+  void SetCallout( PRDcallout mru, PRDpriority priority = MRU_MED );
 
   /**
    Add a change to the prd signature List
@@ -797,20 +798,20 @@ public:
    Get a PRD timer value based on the time of this error
    <ul>
    <br><b>Paramter:    </b> None
-   <br><b>Returns:     </b> PrdTimer
+   <br><b>Returns:     </b> Timer
    <br><b>Requirments: </b> None.
    <br><b>Promises:    </b> None.
    <br><b>Exceptions:  </b> None.
    </ul><br>
    */
-  PrdTimer GetTOE(void) { return ivCurrentEventTime; }
+  Timer GetTOE(void) { return ivCurrentEventTime; }
 
   /**
    Set Time of Error
    @parm set PRD timer value
    @returns nothing
    */
-  void SetTOE(PrdTimer& theTime) { ivCurrentEventTime = theTime; }
+  void SetTOE(Timer& theTime) { ivCurrentEventTime = theTime; }
 
   /**
    Is this an MP Fatal error
@@ -933,7 +934,7 @@ private:  // Data
   TARGETING::TargetHandle_t   startingPoint;
 // dg12d  BIT_STRING_BUFFER_CLASS rbsVpd;
   GardResolution::ErrorType errorType;
-  PrdTimer ivCurrentEventTime;
+  Timer ivCurrentEventTime;
   TARGETING::TargetHandle_t ivpDumpRequestChipHandle;
   ATTENTION_TYPE causeAttentionType;    // MCK,REC,SPCL
 
@@ -1034,6 +1035,8 @@ public:
 // --------------------------------------
 
 };
+
+} // end namespace PRDF
 
 #include "iipServiceDataCollector.inl"
 

@@ -31,20 +31,23 @@
 
 #include <prdrRegister.H>
 
-class PrdrExtraSignature
+namespace PRDR_COMPILER
+{
+
+class ExtraSignature
 {
     public:
         uint32_t iv_sig;
         std::string * iv_sname;
         std::string * iv_desc;
 
-        PrdrExtraSignature(uint32_t i_sig,
+        ExtraSignature(uint32_t i_sig,
                            std::string * i_sname,
                            std::string * i_desc) : iv_sig(i_sig),
                                                    iv_sname(i_sname),
                                                    iv_desc(i_desc) {};
 
-        PrdrExtraSignature & operator=(const PrdrExtraSignature & l_rhs)
+        ExtraSignature & operator=(const ExtraSignature & l_rhs)
             {
                 this->iv_sig = l_rhs.iv_sig;
                 this->iv_sname = l_rhs.iv_sname;
@@ -54,7 +57,7 @@ class PrdrExtraSignature
             };
 };
 
-class PrdrChip
+class Chip
 {
     public:
         std::string * cv_sname;
@@ -63,14 +66,14 @@ class PrdrChip
         uint32_t cv_targetType;
         uint32_t cv_signatureOffset;
         uint32_t cv_dumptype;  //@ecdf
-        PrdrRegisterList cv_reglist;
-        std::list<PrdrExtraSignature> cv_sigExtras;
+        RegisterList cv_reglist;
+        std::list<ExtraSignature> cv_sigExtras;
 
         uint16_t cv_scomlen; // Default Scom Address.
 
         std::string cv_name_default;
 
-        PrdrChip() : cv_sname(NULL),
+        Chip() : cv_sname(NULL),
                      cv_name(&cv_name_default),
                      cv_chipid(0),
                      cv_targetType(0),
@@ -80,7 +83,7 @@ class PrdrChip
                      cv_sigExtras(),
                      cv_scomlen(0) {};
 
-        static void merge(PrdrChip * i_l, PrdrChip * i_r)
+        static void merge(Chip * i_l, Chip * i_r)
         {
             if (NULL != i_r->cv_sname)
                 i_l->cv_sname = i_r->cv_sname;
@@ -117,7 +120,7 @@ class PrdrChip
             cout << "\tDefault Dumptype: " << cv_dumptype << endl;  //@ecdf
             cout << "\tDefault ScomLen: " << cv_scomlen << endl;
             cout << "\tRegisters: (" << cv_reglist.size() << ")" << endl;
-            for (PrdrRegisterList::iterator i = cv_reglist.begin();
+            for (RegisterList::iterator i = cv_reglist.begin();
                  i != cv_reglist.end();
                  i++)
             {
@@ -152,7 +155,7 @@ class PrdrChip
             l_temp16 = htons(cv_reglist.size());
             fwrite(&l_temp16, sizeof(l_temp16), 1, l_file);
 
-            for (PrdrRegisterList::iterator i = cv_reglist.begin();
+            for (RegisterList::iterator i = cv_reglist.begin();
                  i != cv_reglist.end();
                  i++)
             {
@@ -167,7 +170,7 @@ class PrdrChip
             o_file << "( 0x" << std::hex << cv_targetType << ", 0x" << std::hex
                    << cv_signatureOffset << " )" << std::endl;
 
-            for (PrdrRegisterList::iterator i = cv_reglist.begin();
+            for (RegisterList::iterator i = cv_reglist.begin();
                  i != cv_reglist.end();
                  i++)
             {
@@ -177,13 +180,7 @@ class PrdrChip
         };
 };
 
+} // end namespace PRDR_COMPILER
+
 #endif
 
-// Change Log *********************************************************
-//
-//  Flag Reason   Vers Date     Coder    Description
-//  ---- -------- ---- -------- -------- -------------------------------
-//       F494911  f310 03/04/05 iawillia Initial File Creation
-//  ecdf F550548  f300 05/04/06 iawillia eClipz DUMP flags support.
-//           D586213  f310 02/19/07 iawillia Add extra signature support.
-// End Change Log *****************************************************

@@ -34,7 +34,7 @@
 
 #ifndef __HOSTBOOT_MODULE
   #include <tmgt.H>
-  #include <prdfPfa5Data.h>   //for prdfPfaCalloutListStruct
+  #include <prdfPfa5Data.h>   //for PfaCalloutListStruct
 #endif
 
 namespace PRDF

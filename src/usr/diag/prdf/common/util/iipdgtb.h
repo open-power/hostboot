@@ -52,6 +52,8 @@
 
 #include <iipdigit.h>
 
+namespace PRDF
+{
 /*--------------------------------------------------------------------*/
 /*  Forward References                                                */
 /*--------------------------------------------------------------------*/
@@ -320,5 +322,5 @@ class DIGIT_STRING_BYTE_CLASS : public DIGIT_STRING_CLASS
 
   };
 
-
+} //End namespace PRDF
 #endif

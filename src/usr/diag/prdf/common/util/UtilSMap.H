@@ -32,6 +32,9 @@
 #include <stddef.h>
 #include <stdlib.h>
 
+namespace PRDF
+{
+
 template <typename _First, typename _Second> class UtilSMap_Iterator;
 template <typename _First, typename _Second> UtilSMap_Iterator<_First, _Second>
         operator+(UtilSMap_Iterator<_First,_Second>& l, size_t i);
@@ -177,5 +180,6 @@ UtilSMap_Iterator<_First,_Second>
                                 UtilSMap<_First,_Second>::cv_blockSize * i]);
         };
 
+} // end namespace PRDF
 
 #endif

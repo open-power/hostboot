@@ -52,6 +52,9 @@
 #include <iipErrorRegisterMask.h>
 #endif
 
+namespace PRDF
+{
+
 //--------------------------------------------------------------------
 //  Forward References
 //--------------------------------------------------------------------
@@ -169,13 +172,7 @@ inline AndResetErrorRegister::AndResetErrorRegister
 : ErrorRegisterMask(r,rm,scrId,r1), xAndResetScr(resetScr)
 {}
 
+} // end namespace PRDF
+
 #endif /* xspprdAndResetErrorRegister_h */
 
-// Change Log *********************************************************
-//
-//  Flag Reason   Vers Date     Coder    Description
-//  ---- -------- ---- -------- -------- -------------------------------
-//                v5r2 12/21/00 dgilbert Initial Creation
-//       423599   fsp  10/27/03 dgilbert make scrid a bit16
-//
-// End Change Log *****************************************************

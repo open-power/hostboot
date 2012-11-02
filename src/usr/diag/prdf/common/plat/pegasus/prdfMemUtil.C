@@ -39,7 +39,7 @@ namespace MemUtil
 
 #ifdef __HOSTBOOT_MODULE
 
-int32_t clearHostAttns( PrdfExtensibleChip * i_memChip,
+int32_t clearHostAttns( ExtensibleChip * i_memChip,
                         STEP_CODE_DATA_STRUCT & i_sc )
 {
     using namespace TARGETING;
@@ -51,13 +51,13 @@ int32_t clearHostAttns( PrdfExtensibleChip * i_memChip,
     do
     {
         // Get the attached MCS chip.
-        PrdfExtensibleChip * mcsChip = i_memChip;
+        ExtensibleChip * mcsChip = i_memChip;
         if ( TYPE_MCS != PlatServices::getTargetType(memHandle) )
         {
             TargetHandleList list = PlatServices::getConnected( memHandle,
                                                                 TYPE_MCS );
             if ( 1 == list.size() )
-                mcsChip = (PrdfExtensibleChip *)systemPtr->GetChip( list[0] );
+                mcsChip = (ExtensibleChip *)systemPtr->GetChip( list[0] );
             else
             {
                 PRDF_ERR( "[MemUtil::clearHostAttns] getConnected() failed" );

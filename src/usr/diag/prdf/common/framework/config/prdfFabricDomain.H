@@ -42,7 +42,11 @@
  @brief Fabric Domain, contains Fabric Chips
  @author Mike Kobler
 */
-class FabricDomain : public PrdfRuleChipDomain
+
+namespace PRDF
+{
+
+class FabricDomain : public RuleChipDomain
 {
   public:
 
@@ -52,7 +56,7 @@ class FabricDomain : public PrdfRuleChipDomain
      * @param i_size The projected size of the domain
      */
     FabricDomain( DOMAIN_ID i_did, uint32_t i_size = PROC_DOMAIN_SIZE ) :
-        PrdfRuleChipDomain( i_did, i_size )
+        RuleChipDomain( i_did, i_size )
     {}
 
   /*
@@ -113,8 +117,8 @@ class FabricDomain : public PrdfRuleChipDomain
      * @param  i_chips       List of chips in the domain to analyze.
      * @return SUCCESS
      */
-   virtual PrdfRuleChip * FindChipInTheseChips( TARGETING::TargetHandle_t i_chipId,
-                                                TARGETING::TargetHandleList & i_chips );
+    virtual RuleChip * FindChipInTheseChips( TARGETING::TargetHandle_t i_chipId,
+                                             TARGETING::TargetHandleList & i_chips );
 
     /**
      * @brief  Moves the chip in question to the front of the list of chips.
@@ -159,5 +163,7 @@ private:  // functions
 private:  // Data
 
 };
+
+} // end namespace PRDF
 
 #endif /* prdfFabricDomain_H */

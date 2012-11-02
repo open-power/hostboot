@@ -24,8 +24,8 @@
 /*! /file prdfResolutionMap.H
  *  /brief Map Bit List encodings to Resolutions
  */
-#ifndef prdfResolutionMap_h
-#define prdfResolutionMap_h
+#ifndef ResolutionMap_h
+#define ResolutionMap_h
 //--------------------------------------------------------------------
 // Includes
 //--------------------------------------------------------------------
@@ -35,11 +35,14 @@
 #include <prdfResolutionList.H>
 #include <prdfFilters.H>
 
+namespace PRDF
+{
+
 //--------------------------------------------------------------------
 //  Forward References
 //--------------------------------------------------------------------
 struct STEP_CODE_DATA_STRUCT;   //dg04c
-//! prdfResolutionMap
+//! ResolutionMap
 /*!
  This class prvodes mapping of a bitList key to a resolution list
  @code
@@ -58,7 +61,7 @@ struct STEP_CODE_DATA_STRUCT;   //dg04c
  }
  @endcode
 */
-class prdfResolutionMap
+class ResolutionMap
 {
 public:
   /**
@@ -69,12 +72,12 @@ public:
    @pre None
    @post Object created & space reserved
    */
-  prdfResolutionMap(int32_t entryCount, prdfResolution &defaultResolution, prdfFilter * i_fltr = NULL);
+  ResolutionMap(int32_t entryCount, Resolution &defaultResolution, FilterClass * i_fltr = NULL);
 
   /*
    Destructor - compiler default is ok
    */
-  //~prdfprdfResolutionMap();
+  //~ResolutionMap();
 
   // DRGDRG - Should we be returning a ResolutionList? or get rid of Default & use no bits on key???
   /**
@@ -83,13 +86,13 @@ public:
    @pre None
    @post None
    */
-  prdfResolution & GetDefault(void) const;
+  Resolution & GetDefault(void) const;
 
   /**
    Replace the default Resolution
    @param Reference to new default resolution
    */
-  void ReplaceDefaultWith(prdfResolution & r);
+  void ReplaceDefaultWith(Resolution & r);
 
   /**
    Add a key,Resolution pair
@@ -97,106 +100,107 @@ public:
    @param 1 to 6 Resolutions
    */
   void Add(uint8_t i_bitPos,
-           prdfResolution * i_res );
+           Resolution * i_res );
   void Add(uint8_t i_bitPos,
-           prdfResolution * i_r1, prdfResolution * i_r2);
+           Resolution * i_r1, Resolution * i_r2);
   void Add(uint8_t i_bitPos,
-           prdfResolution * i_r1, prdfResolution * i_r2, prdfResolution * i_r3);
+           Resolution * i_r1, Resolution * i_r2, Resolution * i_r3);
   void Add(uint8_t i_bitPos,
-           prdfResolution * i_r1, prdfResolution * i_r2, prdfResolution * i_r3,
-           prdfResolution * i_r4);
+           Resolution * i_r1, Resolution * i_r2, Resolution * i_r3,
+           Resolution * i_r4);
   void Add(uint8_t i_bitPos,
-           prdfResolution * i_r1, prdfResolution * i_r2, prdfResolution * i_r3,
-           prdfResolution * i_r4, prdfResolution * i_r5);
+           Resolution * i_r1, Resolution * i_r2, Resolution * i_r3,
+           Resolution * i_r4, Resolution * i_r5);
   void Add(uint8_t i_bitPos,
-           prdfResolution * i_r1, prdfResolution * i_r2, prdfResolution * i_r3,
-           prdfResolution * i_r4, prdfResolution * i_r5, prdfResolution * i_r6);
+           Resolution * i_r1, Resolution * i_r2, Resolution * i_r3,
+           Resolution * i_r4, Resolution * i_r5, Resolution * i_r6);
   void Add(uint8_t i_bitPos,
-           prdfResolution * i_r1, prdfResolution * i_r2, prdfResolution * i_r3,
-           prdfResolution * i_r4, prdfResolution * i_r5, prdfResolution * i_r6,
-           prdfResolution * i_r7);
+           Resolution * i_r1, Resolution * i_r2, Resolution * i_r3,
+           Resolution * i_r4, Resolution * i_r5, Resolution * i_r6,
+           Resolution * i_r7);
 
   /**
-   Add a key,prdfResolution pair
+   Add a key,Resolution pair
    @param i_ble - bit list encoding  (array of bitPos)
    @param i_bleLen length of bit list
-   @param 1 to 6 prdfResolutions
+   @param 1 to 6 Resolutions
    */
   void Add(const uint8_t *i_ble, uint8_t i_bleLen,
-                prdfResolution * res );
+                Resolution * res );
   void Add(const uint8_t *i_ble, uint8_t i_bleLen,
-                prdfResolution * r1, prdfResolution * r2);
+                Resolution * r1, Resolution * r2);
   void Add(const uint8_t *i_ble, uint8_t i_bleLen,
-                prdfResolution * r1, prdfResolution * r2, prdfResolution * r3);
+                Resolution * r1, Resolution * r2, Resolution * r3);
   void Add(const uint8_t *i_ble, uint8_t i_bleLen,
-                prdfResolution * r1, prdfResolution * r2, prdfResolution * r3,
-                prdfResolution * r4);
+                Resolution * r1, Resolution * r2, Resolution * r3,
+                Resolution * r4);
   void Add(const uint8_t *i_ble, uint8_t i_bleLen,
-                prdfResolution * r1, prdfResolution * r2, prdfResolution * r3,
-                prdfResolution * r4, prdfResolution * r5);
+                Resolution * r1, Resolution * r2, Resolution * r3,
+                Resolution * r4, Resolution * r5);
   void Add(const uint8_t *i_ble, uint8_t i_bleLen,
-                prdfResolution * r1, prdfResolution * r2, prdfResolution * r3,
-                prdfResolution * r4, prdfResolution * r5, prdfResolution * r6);
+                Resolution * r1, Resolution * r2, Resolution * r3,
+                Resolution * r4, Resolution * r5, Resolution * r6);
 
 
   //! Old Add interface
   /*!
    */
   void Add(const char *i_ble,
-           prdfResolution * res );
+           Resolution * res );
   void Add(const char *i_ble,
-           prdfResolution * r1, prdfResolution * r2);
+           Resolution * r1, Resolution * r2);
   void Add(const char *i_ble,
-           prdfResolution * r1, prdfResolution * r2, prdfResolution * r3);
+           Resolution * r1, Resolution * r2, Resolution * r3);
   void Add(const char *i_ble,
-           prdfResolution * r1, prdfResolution * r2, prdfResolution * r3,
-           prdfResolution * r4);
+           Resolution * r1, Resolution * r2, Resolution * r3,
+           Resolution * r4);
   void Add(const char *i_ble,
-           prdfResolution * r1, prdfResolution * r2, prdfResolution * r3,
-           prdfResolution * r4, prdfResolution * r5);
+           Resolution * r1, Resolution * r2, Resolution * r3,
+           Resolution * r4, Resolution * r5);
   void Add(const char *i_ble,
-           prdfResolution * r1, prdfResolution * r2, prdfResolution * r3,
-           prdfResolution * r4, prdfResolution * r5, prdfResolution * r6);
+           Resolution * r1, Resolution * r2, Resolution * r3,
+           Resolution * r4, Resolution * r5, Resolution * r6);
   void Add(const char *i_ble,
-           prdfResolution * r1, prdfResolution * r2, prdfResolution * r3,
-           prdfResolution * r4, prdfResolution * r5, prdfResolution * r6,
-           prdfResolution * r7);
+           Resolution * r1, Resolution * r2, Resolution * r3,
+           Resolution * r4, Resolution * r5, Resolution * r6,
+           Resolution * r7);
 
-  void AddRange(const char *i_ble,prdfResolution * res ) { Add(i_ble,res); }
-  void AddRange(const char *i_ble,prdfResolution * r1, prdfResolution * r2) { Add(i_ble,r1,r2); }
+  void AddRange(const char *i_ble,Resolution * res ) { Add(i_ble,res); }
+  void AddRange(const char *i_ble,Resolution * r1, Resolution * r2) { Add(i_ble,r1,r2); }
   void AddRange(const char *i_ble,
-                prdfResolution * r1, prdfResolution * r2, prdfResolution * r3) { Add(i_ble,r1,r2,r3); }
+                Resolution * r1, Resolution * r2, Resolution * r3) { Add(i_ble,r1,r2,r3); }
   void AddRange(const char *i_ble,
-                prdfResolution * r1, prdfResolution * r2, prdfResolution * r3,
-                prdfResolution * r4) { Add(i_ble,r1,r2,r3,r4); }
+                Resolution * r1, Resolution * r2, Resolution * r3,
+                Resolution * r4) { Add(i_ble,r1,r2,r3,r4); }
   void AddRange(const char *i_ble,
-                prdfResolution * r1, prdfResolution * r2, prdfResolution * r3,
-                prdfResolution * r4, prdfResolution * r5) { Add(i_ble,r1,r2,r3,r4,r5); }
+                Resolution * r1, Resolution * r2, Resolution * r3,
+                Resolution * r4, Resolution * r5) { Add(i_ble,r1,r2,r3,r4,r5); }
   void AddRange(const char *i_ble,
-                prdfResolution * r1, prdfResolution * r2, prdfResolution * r3,
-                prdfResolution * r4, prdfResolution * r5, prdfResolution * r6) { Add(i_ble,r1,r2,r3,r4,r5,r6); }
+                Resolution * r1, Resolution * r2, Resolution * r3,
+                Resolution * r4, Resolution * r5, Resolution * r6) { Add(i_ble,r1,r2,r3,r4,r5,r6); }
   /**
-   Look up a prdfResolution for a bitlist
+   Look up a Resolution for a bitlist
    @param bitList
-   @returns List of all prdfResolutions that match
+   @returns List of all Resolutions that match
    @pre none
-   @post prdfResolution returned is only valid until the next call to LookUp or this object is destroyed.
+   @post Resolution returned is only valid until the next call to LookUp or this object is destroyed.
    i_bitList may be modified
-   @notes if the bitList does not have a match then the defaultprdfResolution is returned.
+   @notes if the bitList does not have a match then the defaultResolution is returned.
    */
-  void LookUp(prdfResolutionList & o_list, prdfBitKey & io_bitList, STEP_CODE_DATA_STRUCT & scd); //dg04c
+    void LookUp( ResolutionList & o_list, BitKey & io_bitList,
+                 STEP_CODE_DATA_STRUCT & scd );
 
   /**
    * @brief Get the stored filter associated with this resolution map.
    * @returns Currently assigned filter.
    */
-  prdfFilter * getFilter() { return iv_filter; };
+  FilterClass * getFilter() { return iv_filter; };
 
   /**
    * @brief Store a new filter with this resolution map.
    * @param i - Filter to store.
    */
-  void setFilter(prdfFilter * i) { iv_filter = i; };
+  void setFilter(FilterClass * i) { iv_filter = i; };
 
 protected:  // functions
 
@@ -205,54 +209,45 @@ private: // functions
   /*!
    Copy prohibited
    */
-  prdfResolutionMap(const prdfResolutionMap &);   // Don't allow copy - No defn
+  ResolutionMap(const ResolutionMap &);   // Don't allow copy - No defn
 
   /*!
    Assignment prohibited
    */
-  const prdfResolutionMap &operator=(const prdfResolutionMap &); // Don't allow - no defn
+  const ResolutionMap &operator=(const ResolutionMap &); // Don't allow - no defn
 
 private: // Data
 
   struct RmPair
   {
-    prdfBitKey iv_blist;
-    prdfResolution * iv_res;
-    RmPair(uint8_t i_bitPos, prdfResolution *res) : iv_blist(i_bitPos), iv_res(res) {}
+    BitKey iv_blist;
+    Resolution * iv_res;
+    RmPair(uint8_t i_bitPos, Resolution *res) : iv_blist(i_bitPos), iv_res(res) {}
     RmPair(void) : iv_blist(), iv_res(NULL) {}
   };
 
   typedef std::vector<RmPair> MapList;
 
-  prdfResolution * defaultRes;
-  prdfFilter     * iv_filter;
+  Resolution  * defaultRes;
+  FilterClass * iv_filter;
 
   MapList iv_list;
 //  MapList iv_rangeList;
 
 };
 
-inline prdfResolutionMap::prdfResolutionMap(int32_t entryCount,
-                                            prdfResolution & defaultResolution,
-                                            prdfFilter * i_fltr)
-: defaultRes(&defaultResolution), iv_filter(i_fltr), iv_list()
+inline ResolutionMap::ResolutionMap( int32_t entryCount,
+                                     Resolution & defaultResolution,
+                                     FilterClass * i_fltr ) :
+    defaultRes(&defaultResolution), iv_filter(i_fltr), iv_list()
 {
-  iv_list.reserve(entryCount);
+    iv_list.reserve(entryCount);
 }
 
-inline  prdfResolution & prdfResolutionMap::GetDefault(void) const {return *defaultRes; }
-inline  void prdfResolutionMap::ReplaceDefaultWith(prdfResolution & r) { defaultRes = &r; }
+inline  Resolution & ResolutionMap::GetDefault(void) const {return *defaultRes; }
+inline  void ResolutionMap::ReplaceDefaultWith(Resolution & r) { defaultRes = &r; }
 
-#endif /* prdfResolutionMap_h */
+} // end namespace PRDF
 
-// Change Log *************************************************************************************
-//
-//  Flag Reason   Vers    Date     Coder     Description
-//  ---- -------- ------- -------- -------- -------------------------------------------------------
-//              v4r1mo    05/02/96  DRG      Initial Creation
-//       D49203.5 v4r3    07/30/97  DRG      Add Add() for multiple resolutions
-//                fips    03/02/04 dgilbert  Changes the way lookups are done
-//       482244   fips225 11/04/04 dgilbert  Add filter
-//         F544848  f300    04/03/06 iawillia  Add multi-bit support for rule code
-//  dg04 568068   f310    08/29/06 dgilbert  Add STEP_CODE_DATA_STRUCT to LookUp
-// End Change Log *********************************************************************************
+#endif /* ResolutionMap_h */
+

@@ -62,6 +62,9 @@
 #include <iipstep.h>
 #endif
 
+namespace PRDF
+{
+
 //--------------------------------------------------------------------
 //  Forward References
 //--------------------------------------------------------------------
@@ -148,14 +151,7 @@ private:  // Data
 
 };
 
+} // end namespace PRDF
 
 #endif /* iipResolution_h */
 
-// Change Log *********************************************************
-//
-//  Flag Reason    Vers Date     Coder    Description
-//  ---- --------- ---- -------- -------- -------------------------------
-//                 v4r1 05/01/96 dgilbert Replaces ACTION_CLASS
-//  dg00 d49420.07 v5r2 11/09/00 dgilbert Add support for operator==
-//
-// End Change Log *****************************************************

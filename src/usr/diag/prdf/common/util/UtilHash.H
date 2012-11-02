@@ -26,6 +26,9 @@
 
 #include <stdint.h>
 
+namespace PRDF
+{
+
 namespace Util
 {
     inline uint32_t hashString(const char * i_str)
@@ -94,6 +97,8 @@ namespace Util
         return ((sumB << 16) | sumA) & 0x7FFFFFFF;
     };
 };
+
+} // end namespace PRDF
 
 #endif
 

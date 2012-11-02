@@ -56,8 +56,10 @@
 // Member Function Specifications
 //---------------------------------------------------------------------
 
-inline
-MopRegisterAccess::~MopRegisterAccess(void)
-  {
-  }
+namespace PRDF
+{
 
+inline
+MopRegisterAccess::~MopRegisterAccess() {}
+
+} // end namespace PRDF

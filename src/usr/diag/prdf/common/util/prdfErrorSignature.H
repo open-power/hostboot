@@ -31,8 +31,8 @@
 #include <iipconst.h>
 #include <prdfTrace.H>
 
-// FIXME - Should this class be scoped in PRDF namspace?
-
+namespace PRDF
+{
 /** @class ErrorSignature
  *
  *  A complete error signature is a 64-bit number where:
@@ -170,6 +170,6 @@ class ErrorSignature
     uint16_t iv_regId;   ///< 16-bit register ID
     uint16_t iv_errCode; ///< 16-bit error code
 };
-
+} //End namespace PRDF
 #endif
 

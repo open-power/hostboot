@@ -49,10 +49,13 @@
   #include <utilendian.H>
 #endif
 
+namespace PRDR_COMPILER
+{
+
 extern Prdr::HashCollisionMap g_regsHashCollision;
 extern bool g_hadError;
 
-struct PrdrResetOrMaskStruct
+struct ResetOrMaskStruct
 {
     uint8_t type;
     uint64_t addr_r;
@@ -72,7 +75,7 @@ struct PrdrResetOrMaskStruct
     }
 };
 
-struct PrdrCaptureReqStruct
+struct CaptureReqStruct
 {
     uint8_t type;
     uint32_t data[2];
@@ -123,7 +126,7 @@ struct PrdrCaptureReqStruct
     };
 };
 
-class PrdrRegister
+class Register
 {
   public:
 
@@ -137,12 +140,12 @@ class PrdrRegister
 
     std::string cv_name_default;
 
-    std::list<PrdrResetOrMaskStruct> cv_resets;
-    std::list<PrdrResetOrMaskStruct> cv_masks;
+    std::list<ResetOrMaskStruct> cv_resets;
+    std::list<ResetOrMaskStruct> cv_masks;
 
-    std::list<PrdrCaptureReqStruct> cv_captures;
+    std::list<CaptureReqStruct> cv_captures;
 
-    PrdrRegister() :
+    Register() :
         cv_sname(NULL),
         cv_name(&cv_name_default),
         cv_flags(0),
@@ -151,7 +154,7 @@ class PrdrRegister
         cv_resets(0), cv_masks(0), cv_captures(0)
     {};
 
-    static void merge(PrdrRegister * i_l, PrdrRegister * i_r)
+    static void merge(Register * i_l, Register * i_r)
     {
         if (NULL != i_r->cv_sname)
             i_l->cv_sname = i_r->cv_sname;
@@ -196,7 +199,7 @@ class PrdrRegister
     int output( FILE * l_file, uint16_t i_sigOff )
     {
         // Check for hash collisions
-        uint16_t hash = Util::hashString( cv_sname->c_str() ) ^ i_sigOff;
+        uint16_t hash = PRDF::Util::hashString( cv_sname->c_str() ) ^ i_sigOff;
         Prdr::HashCollisionMap::iterator i = g_regsHashCollision.find(hash);
         if ( g_regsHashCollision.end() != i )
         {
@@ -228,7 +231,7 @@ class PrdrRegister
         uint32_t l_temp;
         uint16_t l_temp16;
 
-        l_temp16 = htons(Util::hashString( cv_sname->c_str() ));
+        l_temp16 = htons(PRDF::Util::hashString( cv_sname->c_str() ));
         fwrite(&l_temp16, sizeof(l_temp16), 1, l_file);
 
         l_temp = htonl(cv_flags);
@@ -250,7 +253,7 @@ class PrdrRegister
 
             std::for_each( cv_resets.begin(), cv_resets.end(),
                            std::bind2nd(
-                               std::mem_fun_ref(&PrdrResetOrMaskStruct::output),
+                               std::mem_fun_ref(&ResetOrMaskStruct::output),
                                l_file) );
         }
 
@@ -261,7 +264,7 @@ class PrdrRegister
 
             std::for_each( cv_masks.begin(), cv_masks.end(),
                            std::bind2nd(
-                               std::mem_fun_ref(&PrdrResetOrMaskStruct::output),
+                               std::mem_fun_ref(&ResetOrMaskStruct::output),
                                l_file) );
         }
 
@@ -272,7 +275,7 @@ class PrdrRegister
 
             std::for_each( cv_captures.begin(), cv_captures.end(),
                            std::bind2nd(
-                                std::mem_fun_ref(&PrdrCaptureReqStruct::output),
+                                std::mem_fun_ref(&CaptureReqStruct::output),
                                 l_file) );
         }
 
@@ -281,7 +284,7 @@ class PrdrRegister
 
     void outputRegisterFile(std::ostream & o_file, uint16_t i_sigOff)
     {
-        uint16_t hash = Util::hashString( cv_sname->c_str() ) ^ i_sigOff;
+        uint16_t hash = PRDF::Util::hashString( cv_sname->c_str() ) ^ i_sigOff;
 
         o_file << "\tPRDR_REGISTER_ID ( "
                << std::hex
@@ -294,7 +297,9 @@ class PrdrRegister
     };
 };
 
-typedef std::list<PrdrRegister *> PrdrRegisterList;
+typedef std::list<Register *> RegisterList;
+
+} // end namespace PRDR_COMPILER
 
 #endif
 

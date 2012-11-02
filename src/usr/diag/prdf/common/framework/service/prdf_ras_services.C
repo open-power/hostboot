@@ -94,10 +94,10 @@ char  * ThermalFilename = NULL;
 
 #endif
 
-prdfPfaData PfaData;
+PfaData pfaData;
 bool ErrDataService::terminateOnCheckstop = true;
 bool previousWasRecovered = false;
-PrdTimer previousEventTime;
+Timer previousEventTime;
 const double LATENT_MCK_WINDOW = 2;   // two seconds to determin latency
 RasServices thisServiceGenerator;
 
@@ -168,7 +168,7 @@ void ErrDataService::SetErrorTod(ATTENTION_TYPE the_attention,
   *is_latent = false;
   latentMachineCheck = false;
 
-  PrdTimer l_curEventTime;
+  Timer l_curEventTime;
   PlatServices::getCurrentTime(l_curEventTime);
 
   if(previousWasRecovered && (MACHINE_CHECK == the_attention))
@@ -602,7 +602,7 @@ errlHndl_t ErrDataService::GenerateSrcPfa(ATTENTION_TYPE attn_type,
             PrdfMemoryMru memMru = thiscallout.getMemMru();
             SrcWord9 = memMru.toUint32(); // Get MemMru value
 
-/* FIXME: Add support after refactoring PrdfMemoryMru
+/* FIXME: RTC 47288 Add support after refactoring PrdfMemoryMru
 
             TargetHandleList partList = memMru.getCalloutList();
             uint32_t partCount = partList.size();
@@ -670,25 +670,27 @@ errlHndl_t ErrDataService::GenerateSrcPfa(ATTENTION_TYPE attn_type,
     //Set the PRD Reason Code based on the flags set in the above callout loop.
     ////////////////////////////////////////////////////////////////
     uint16_t SDC_Reason_Code = sdc.GetReasonCode();
-    if (SDC_Reason_Code == 0) //If the analysis code has not set its own Reason Code.
+    if (SDC_Reason_Code == 0) // If the analysis code has not set its own
+                              // Reason Code.
     {
         if (HW == true && SW == true)
         {
-           if (SW_High == true)
-               PRD_Reason_Code = PRDF_DETECTED_FAIL_SOFTWARE_PROBABLE;
-           else
-              PRD_Reason_Code = PRDF_DETECTED_FAIL_HARDWARE_PROBABLE;
+            if (SW_High == true)
+                PRD_Reason_Code = PRDF_DETECTED_FAIL_SOFTWARE_PROBABLE;
+            else
+                PRD_Reason_Code = PRDF_DETECTED_FAIL_HARDWARE_PROBABLE;
         }
         else if (HW == true && SW == false && SecondLevel == true)
-           PRD_Reason_Code = PRDF_DETECTED_FAIL_HARDWARE_PROBABLE;
+            PRD_Reason_Code = PRDF_DETECTED_FAIL_HARDWARE_PROBABLE;
         else if (HW == true && SW == false && SecondLevel == false)
-           PRD_Reason_Code = PRDF_DETECTED_FAIL_HARDWARE;
+            PRD_Reason_Code = PRDF_DETECTED_FAIL_HARDWARE;
         else if (HW == false && SW == true)
-           PRD_Reason_Code = PRDF_DETECTED_FAIL_SOFTWARE;
+            PRD_Reason_Code = PRDF_DETECTED_FAIL_SOFTWARE;
         else
         {
-            //If we get here both HW and SW flags were false. Callout may be Second Level
-            //Support only, or a procedure not checked in the SW flag code.
+            // If we get here both HW and SW flags were false. Callout may be
+            // Second Level Support only, or a procedure not checked in the SW
+            // flag code.
             PRD_Reason_Code = PRDF_DETECTED_FAIL_HARDWARE_PROBABLE;
         }
     }
@@ -748,7 +750,7 @@ errlHndl_t ErrDataService::GenerateSrcPfa(ATTENTION_TYPE attn_type,
     //**************************************************************
     //  Add SDC Capture data to Error Log User Data here only if
     //    there are 4 or more callouts,
-    //    (including Dimm callouts in the MemoryMru).
+    //    (including Dimm callouts in the PrdfMemoryMru).
     //**************************************************************
     bool capDataAdded = false;
     if (calloutsPlusDimms > 3)
@@ -810,7 +812,7 @@ errlHndl_t ErrDataService::GenerateSrcPfa(ATTENTION_TYPE attn_type,
         }
         else if ( PRDcallout::TYPE_MEMMRU == thiscallout.getType() )
         {
-            // FIXME: PrdfMemoryMru will need refactor later
+            // FIXME: RTC 47288 PrdfMemoryMru will need refactor later
             PrdfMemoryMru memMru = thiscallout.getMemMru();
 
             PRDF_HW_ADD_MEMMRU_CALLOUT(ForceTerminate,
@@ -895,8 +897,8 @@ errlHndl_t ErrDataService::GenerateSrcPfa(ATTENTION_TYPE attn_type,
     // Build Dump Flags and PFA5 data
     //**************************************************************
     //MP01 a Start
-    PfaData.MsDumpLabel[0] = 0x4D532020;                //start of MS Dump flags
-    PfaData.MsDumpLabel[1] = 0x44554D50;                // 'MS  DUMP'
+    pfaData.MsDumpLabel[0] = 0x4D532020;                //start of MS Dump flags
+    pfaData.MsDumpLabel[1] = 0x44554D50;                // 'MS  DUMP'
 
     TargetHandle_t l_dumpHandle = NULL;
 #ifdef  __HOSTBOOT_MODULE
@@ -906,70 +908,70 @@ errlHndl_t ErrDataService::GenerateSrcPfa(ATTENTION_TYPE attn_type,
     sdc.GetDumpRequest( l_dumpRequestContent, l_dumpHandle );
 #endif
 
-    PfaData.MsDumpInfo.DumpId = PlatServices::getHuid(l_dumpHandle);
+    pfaData.MsDumpInfo.DumpId = PlatServices::getHuid(l_dumpHandle);
     TYPE l_targetType = PlatServices::getTargetType(l_dumpHandle);
 
     if (i_sdc.IsMpDumpReq())
     {
-        PfaData.MP_DUMP_REQ = 1;
+        pfaData.MP_DUMP_REQ = 1;
     }
     else
     {
-        PfaData.MP_DUMP_REQ = 0;
+        pfaData.MP_DUMP_REQ = 0;
     }
     if (i_sdc.IsMpResetReq())
     {
-        PfaData.MP_RESET_REQ = 1;
+        pfaData.MP_RESET_REQ = 1;
     }
     else
     {
-        PfaData.MP_RESET_REQ = 0;
+        pfaData.MP_RESET_REQ = 0;
     }
     //Pass Error Log Action Flag to attn handling, so it know what actions to commit
 
-    PfaData.MP_FATAL = (i_sdc.IsMpFatal()==true)? 1:0;
+    pfaData.MP_FATAL = (i_sdc.IsMpFatal()==true)? 1:0;
 
-    PfaData.PFA_errlActions = actionFlag;
-    PfaData.PFA_errlSeverity = severityParm;
+    pfaData.PFA_errlActions = actionFlag;
+    pfaData.PFA_errlSeverity = severityParm;
 
-    PfaData.REBOOT_MSG = 0; //  Not supported??
-    PfaData.DUMP = (sdc.IsDump()==true)? 1:0;
-    PfaData.UERE = (sdc.IsUERE()==true)? 1:0;
-    PfaData.SUE = (sdc.IsSUE()==true)? 1:0;
-    PfaData.CRUMB = (sdc.MaybeCrumb()==true)? 1:0;
-    PfaData.AT_THRESHOLD = (sdc.IsAtThreshold()==true)? 1:0;
-    PfaData.DEGRADED = (sdc.IsDegraded()==true)? 1:0;
-    PfaData.SERVICE_CALL = (sdc.IsServiceCall()==true)? 1:0;
-    PfaData.TRACKIT = (sdc.IsMfgTracking()==true)? 1:0;
-    PfaData.TERMINATE = (sdc.Terminate()==true)? 1:0;
-    PfaData.LOGIT = (sdc.IsLogging()==true)? 1:0;
-    PfaData.MEMORY_STEERED = (sdc.IsMemorySteered()==true)? 1:0;
-    PfaData.FLOODING = (sdc.IsFlooding()==true)? 1:0;
+    pfaData.REBOOT_MSG = 0; //  Not supported??
+    pfaData.DUMP = (sdc.IsDump()==true)? 1:0;
+    pfaData.UERE = (sdc.IsUERE()==true)? 1:0;
+    pfaData.SUE = (sdc.IsSUE()==true)? 1:0;
+    pfaData.CRUMB = (sdc.MaybeCrumb()==true)? 1:0;
+    pfaData.AT_THRESHOLD = (sdc.IsAtThreshold()==true)? 1:0;
+    pfaData.DEGRADED = (sdc.IsDegraded()==true)? 1:0;
+    pfaData.SERVICE_CALL = (sdc.IsServiceCall()==true)? 1:0;
+    pfaData.TRACKIT = (sdc.IsMfgTracking()==true)? 1:0;
+    pfaData.TERMINATE = (sdc.Terminate()==true)? 1:0;
+    pfaData.LOGIT = (sdc.IsLogging()==true)? 1:0;
+    pfaData.MEMORY_STEERED = (sdc.IsMemorySteered()==true)? 1:0;
+    pfaData.FLOODING = (sdc.IsFlooding()==true)? 1:0;
 
-    PfaData.ErrorCount = sdc.GetHits();
-    PfaData.PRDServiceActionCounter = serviceActionCounter;
-    PfaData.Threshold = sdc.GetThreshold();
-    PfaData.ErrorType = prdGardErrType;
-    PfaData.homGardState = gardState;
-    PfaData.PRD_AttnTypes = attn_type;
-    PfaData.PRD_SecondAttnTypes = i_sdc.GetCauseAttentionType();
-    PfaData.THERMAL_EVENT = (sdc.IsThermalEvent()==true)? 1:0;
-    PfaData.UNIT_CHECKSTOP = (sdc.IsUnitCS()==true)? 1:0;
-    PfaData.USING_SAVED_SDC = (sdc.IsUsingSavedSdc()==true)? 1:0;
-    PfaData.FORCE_LATENT_CS = (i_sdc.IsForceLatentCS()==true)? 1:0;
-    PfaData.DEFER_DECONFIG_MASTER = (iplDiagMode==true)? 1:0;
-    PfaData.DEFER_DECONFIG = (deferDeconfig==true)? 1:0;
-    PfaData.CM_MODE = 0; //FIXME  Need to change this initialization
-    PfaData.TERMINATE_ON_CS = (terminateOnCheckstop==true)? 1:0;
-    PfaData.reasonCode = sdc.GetReasonCode();
-    PfaData.PfaCalloutCount = calloutcount;
+    pfaData.ErrorCount = sdc.GetHits();
+    pfaData.PRDServiceActionCounter = serviceActionCounter;
+    pfaData.Threshold = sdc.GetThreshold();
+    pfaData.ErrorType = prdGardErrType;
+    pfaData.homGardState = gardState;
+    pfaData.PRD_AttnTypes = attn_type;
+    pfaData.PRD_SecondAttnTypes = i_sdc.GetCauseAttentionType();
+    pfaData.THERMAL_EVENT = (sdc.IsThermalEvent()==true)? 1:0;
+    pfaData.UNIT_CHECKSTOP = (sdc.IsUnitCS()==true)? 1:0;
+    pfaData.USING_SAVED_SDC = (sdc.IsUsingSavedSdc()==true)? 1:0;
+    pfaData.FORCE_LATENT_CS = (i_sdc.IsForceLatentCS()==true)? 1:0;
+    pfaData.DEFER_DECONFIG_MASTER = (iplDiagMode==true)? 1:0;
+    pfaData.DEFER_DECONFIG = (deferDeconfig==true)? 1:0;
+    pfaData.CM_MODE = 0; //FIXME  Need to change this initialization
+    pfaData.TERMINATE_ON_CS = (terminateOnCheckstop==true)? 1:0;
+    pfaData.reasonCode = sdc.GetReasonCode();
+    pfaData.PfaCalloutCount = calloutcount;
 
     // First clear out the PFA Callout list from previous SRC
-    for (uint32_t j = 0; j < prdfMruListLIMIT; ++j)
+    for (uint32_t j = 0; j < MruListLIMIT; ++j)
     {
-        PfaData.PfaCalloutList[j].Callout = 0;
-        PfaData.PfaCalloutList[j].MRUtype = 0;
-        PfaData.PfaCalloutList[j].MRUpriority = 0;
+        pfaData.PfaCalloutList[j].Callout = 0;
+        pfaData.PfaCalloutList[j].MRUtype = 0;
+        pfaData.PfaCalloutList[j].MRUpriority = 0;
     }
 
     // Build the mru list into PFA data Callout list
@@ -978,11 +980,11 @@ errlHndl_t ErrDataService::GenerateSrcPfa(ATTENTION_TYPE attn_type,
     for ( SDC_MRU_LIST::iterator i = fspmrulist.begin();
           i < fspmrulist.end(); ++i )
     {
-        if ( n < prdfMruListLIMIT )
+        if ( n < MruListLIMIT )
         {
-            PfaData.PfaCalloutList[n].MRUpriority = (uint8_t)(*i).priority;
-            PfaData.PfaCalloutList[n].Callout = i->callout.flatten();
-            PfaData.PfaCalloutList[n].MRUtype = i->callout.getType();
+            pfaData.PfaCalloutList[n].MRUpriority = (uint8_t)(*i).priority;
+            pfaData.PfaCalloutList[n].Callout = i->callout.flatten();
+            pfaData.PfaCalloutList[n].MRUtype = i->callout.getType();
 
             ++n;
         }
@@ -991,83 +993,83 @@ errlHndl_t ErrDataService::GenerateSrcPfa(ATTENTION_TYPE attn_type,
 #ifndef __HOSTBOOT_MODULE
     // FIXME: need to investigate whether or not we need to add HCDB support in Hostboot
     // First clear out the HCDB from previous SRC
-    for (uint32_t j = 0; j < prdfHcdbListLIMIT; ++j)
+    for (uint32_t j = 0; j < HcdbListLIMIT; ++j)
     {
-        PfaData.PfaHcdbList[j].hcdbId = 0;//Resetting entity path
-        PfaData.PfaHcdbList[j].compSubType = 0;
-        PfaData.PfaHcdbList[j].compType = 0;
-        PfaData.PfaHcdbList[j].hcdbReserved1 = 0;
-        PfaData.PfaHcdbList[j].hcdbReserved2 = 0;
+        pfaData.PfaHcdbList[j].hcdbId = 0;//Resetting entity path
+        pfaData.PfaHcdbList[j].compSubType = 0;
+        pfaData.PfaHcdbList[j].compType = 0;
+        pfaData.PfaHcdbList[j].hcdbReserved1 = 0;
+        pfaData.PfaHcdbList[j].hcdbReserved2 = 0;
     }
 
     // Build the HCDB list into PFA data
     n = 0;
     hcdbList = sdc.GetHcdbList();
-    PfaData.hcdbListCount = hcdbList.size();
+    pfaData.hcdbListCount = hcdbList.size();
     for (HCDB_CHANGE_LIST::iterator i = hcdbList.begin(); i < hcdbList.end(); ++i)
     {
-        if (n < prdfHcdbListLIMIT)
+        if (n < HcdbListLIMIT)
         {
-            PfaData.PfaHcdbList[n].hcdbId = PlatServices::getHuid((*i).iv_phcdbtargetHandle);
-            PfaData.PfaHcdbList[n].compSubType = (*i).iv_compSubType;
-            PfaData.PfaHcdbList[n].compType = (*i).iv_compType;
+            pfaData.PfaHcdbList[n].hcdbId = PlatServices::getHuid((*i).iv_phcdbtargetHandle);
+            pfaData.PfaHcdbList[n].compSubType = (*i).iv_compSubType;
+            pfaData.PfaHcdbList[n].compType = (*i).iv_compType;
             ++n;
         }
         else
             break;
     }
     // Set flag so we know to parse the hcdb data
-    PfaData.HCDB_SUPPORT = 1;
+    pfaData.HCDB_SUPPORT = 1;
 #endif // if not __HOSTBOOT_MODULE
 
     PRDF_SIGNATURES signatureList = sdc.GetSignatureList();
     // First clear out the HCDB from previous SRC
-    for (uint32_t j = 0; j < prdfSignatureListLIMIT; ++j)
+    for (uint32_t j = 0; j < SignatureListLIMIT; ++j)
     {
-        PfaData.PfaSignatureList[j].chipId = 0;//Resetting the chipPath
-        PfaData.PfaSignatureList[j].signature = 0;
+        pfaData.PfaSignatureList[j].chipId = 0;//Resetting the chipPath
+        pfaData.PfaSignatureList[j].signature = 0;
     }
 
     // Build the signature list into PFA data
     n = 0;
     signatureList = sdc.GetSignatureList();
-    PfaData.signatureCount = signatureList.size();
+    pfaData.signatureCount = signatureList.size();
     for (PRDF_SIGNATURES::iterator i = signatureList.begin(); i < signatureList.end(); ++i)
     {
-        if (n < prdfSignatureListLIMIT)
+        if (n < SignatureListLIMIT)
         {
-            PfaData.PfaSignatureList[n].chipId = PlatServices::getHuid((*i).iv_pSignatureHandle);
-            PfaData.PfaSignatureList[n].signature = (*i).iv_signature;
+            pfaData.PfaSignatureList[n].chipId = PlatServices::getHuid((*i).iv_pSignatureHandle);
+            pfaData.PfaSignatureList[n].signature = (*i).iv_signature;
             ++n;
         }
         else
             break;
     }
     // Set flag so we know to parse the hcdb data
-    PfaData.SIGNATURE_SUPPORT = 1;
+    pfaData.SIGNATURE_SUPPORT = 1;
 
     //**************************************************************
     // Check for Unit CheckStop.
     // Check for Last Functional Core.
     // PFA data updates for these item.
     //**************************************************************
-    PfaData.LAST_CORE_TERMINATE = false;
+    pfaData.LAST_CORE_TERMINATE = false;
     // Now the check is for Unit Check Stop and Dump ID for Processor
     // Skip the termination on Last Core if this is a Saved SDC
     if (sdc.IsUnitCS()  && (!sdc.IsUsingSavedSdc() ) )
     {
         PRDF_TRAC( PRDF_FUNC"Unit CS, Func HUID: %x, TargetType: %x",
-                   PfaData.MsDumpInfo.DumpId, l_targetType );
-        if (TYPE_CORE ==l_targetType)
+                   pfaData.MsDumpInfo.DumpId, l_targetType );
+        if (TYPE_CORE == l_targetType)
         {
             //Check if this is last functional core
             if ( PlatServices::checkLastFuncCore(l_dumpHandle) )
             {
                 PRDF_TRAC( PRDF_FUNC"Last Func Core from Gard was true." );
                 ForceTerminate = true;
-                PfaData.LAST_CORE_TERMINATE = true;
+                pfaData.LAST_CORE_TERMINATE = true;
                 errLog->setSev(ERRL_SEV_UNRECOVERABLE);  //Update Errl Severity
-                PfaData.PFA_errlSeverity = ERRL_SEV_UNRECOVERABLE; //Update PFA data
+                pfaData.PFA_errlSeverity = ERRL_SEV_UNRECOVERABLE; //Update PFA data
             }
         }
     }
@@ -1119,7 +1121,7 @@ errlHndl_t ErrDataService::GenerateSrcPfa(ATTENTION_TYPE attn_type,
         {  //For Manufacturing Mode terminate, change the action flags for Thermal Event.
             actionFlag = (ERRL_ACTION_SA | ERRL_ACTION_REPORT | ERRL_ACTION_CALL_HOME);
         }
-        PfaData.PFA_errlActions = actionFlag;
+        pfaData.PFA_errlActions = actionFlag;
     }
 
 
@@ -1130,9 +1132,9 @@ errlHndl_t ErrDataService::GenerateSrcPfa(ATTENTION_TYPE attn_type,
     // Add the PFA data to Error Log User Data
     //**************************************************************
     UtilMem l_membuf;
-    l_membuf << PfaData;
+    l_membuf << pfaData;
     PRDF_ADD_FFDC( errLog, (const char*)l_membuf.base(), l_membuf.size(),
-                   prdfErrlVer1, prdfErrlSectPFA5_1 );
+                   ErrlVer1, ErrlSectPFA5_1 );
 
     //**************************************************************
     // Check for Manufacturing AVP mode
@@ -1160,7 +1162,7 @@ will also be removed. Need to confirm if this code is required anymore.
             //Add Test Case Number to Error Log User Data
             UtilMem l_membuf;
             l_membuf << avpTCNumber;
-            errLog->addUsrDtls(l_membuf.base(),l_membuf.size(),PRDF_COMP_ID,prdfErrlVer1,prdfErrlAVPData_1);
+            errLog->addUsrDtls(l_membuf.base(),l_membuf.size(),PRDF_COMP_ID,ErrlVer1,ErrlAVPData_1);
         }
     }
 */
@@ -1189,7 +1191,7 @@ will also be removed. Need to confirm if this code is required anymore.
             memcpy(&usrDtlsTCData[8], &avpTCData[37], 1);
             memcpy(&usrDtlsTCData[9], &avpTCData[44], 20);
             PRDF_ADD_FFDC( errLog, (const char*)usrDtlsTCData, sz_usrDtlsTCData,
-                           prdfErrlVer1, prdfErrlAVPData_2 );
+                           ErrlVer1, ErrlAVPData_2 );
         }
     }
 #endif // if not __HOSTBOOT_MODULE
@@ -1254,7 +1256,7 @@ will also be removed. Need to confirm if this code is required anymore.
                 else
                 {
                     PRDF_HWUDUMP(dumpErrl, errLog, CONTENT_HWNXLCL,
-                                 PfaData.MsDumpInfo.DumpId);
+                                 pfaData.MsDumpInfo.DumpId);
                     if  (dumpErrl != NULL)
                     {
                         PRDF_COMMIT_ERRL(dumpErrl, ERRL_ACTION_REPORT);
@@ -1274,7 +1276,7 @@ will also be removed. Need to confirm if this code is required anymore.
                     if (TYPE_CORE == l_targetType)
                     {
                          PRDF_HWUDUMP(dumpErrl, errLog, CONTENT_SINGLE_CORE_CHECKSTOP,
-                                      PfaData.MsDumpInfo.DumpId);
+                                      pfaData.MsDumpInfo.DumpId);
                     }
                     // remove dump CONTENT_HWGAL2LCL since no IOHUB dump
                     // is supported in P8
@@ -1282,7 +1284,7 @@ will also be removed. Need to confirm if this code is required anymore.
                     else
                     {  //This is not Proc ..ie. it is Galaxy 2
                         PRDF_ERR( PRDF_FUNC"Unsupported dump for DumpId: %x, TargetType: %x",
-                                       PfaData.MsDumpInfo.DumpId, l_targetType );
+                                       pfaData.MsDumpInfo.DumpId, l_targetType );
                     }
                 }
                 if  (dumpErrl != NULL)
@@ -1525,16 +1527,16 @@ void RasServices::MnfgTrace(ErrorSignature * l_esig )
 
             // Write chip ECID data
             char ecidString[1024];
-            l_ptempHandle = PlatServices::getTarget(PfaData.PfaCalloutList[0].Callout);
+            l_ptempHandle = PlatServices::getTarget(pfaData.PfaCalloutList[0].Callout);
             //TODO TargetHandle conversion - not sure we need it now
             PlatServices::getECIDString(l_ptempHandle , ecidString);
             l_mfgFile.write(ecidString, strlen(ecidString));
 
             // Write MRU list
             uint32_t n = 0;
-            while ( (n < prdfMruListLIMIT )  && (n < PfaData.PfaCalloutCount) )
+            while ( (n < MruListLIMIT )  && (n < pfaData.PfaCalloutCount) )
             {
-                snprintf(l_array2, 16, ", %08x", PfaData.PfaCalloutList[n].Callout);
+                snprintf(l_array2, 16, ", %08x", pfaData.PfaCalloutList[n].Callout);
                 l_mfgFile.write(l_array2, 9);
                 ++n;
             }
@@ -1569,7 +1571,7 @@ void ErrDataService::AddCapData(ServiceDataCollector & i_sdc, errlHndl_t i_errHd
     //       plugins.  If that behavior changes, we must use htonl()
     //       to fix the endianness on them.
 
-    prdfCaptureData * l_CapDataBuf = new prdfCaptureData;
+    CaptureDataClass * l_CapDataBuf = new CaptureDataClass;
 
     for(uint32_t ii = 0; ii < CaptureDataSize; ++ii)
     {
@@ -1589,7 +1591,7 @@ void ErrDataService::AddCapData(ServiceDataCollector & i_sdc, errlHndl_t i_errHd
 
     //Compress the Capture data
     size_t l_compressBufSize =
-      PrdfCompressBuffer::compressedBufferMax(thisCapDataSize);
+                PrdfCompressBuffer::compressedBufferMax(thisCapDataSize);
     const size_t sz_compressCapBuf = l_compressBufSize + 4;
     uint8_t * l_compressCapBuf = new uint8_t[sz_compressCapBuf];
 
@@ -1601,7 +1603,7 @@ void ErrDataService::AddCapData(ServiceDataCollector & i_sdc, errlHndl_t i_errHd
 
     //Add the Compressed Capture data to Error Log User Data
     PRDF_ADD_FFDC( i_errHdl, (const char*)l_compressCapBuf,
-                   sz_compressCapBuf, prdfErrlVer2, prdfErrlCapData_1 );
+                   sz_compressCapBuf, ErrlVer2, ErrlCapData_1 );
     delete [] l_compressCapBuf;
     delete l_CapDataBuf;
 }
@@ -1742,43 +1744,6 @@ bool ErrDataService::SdcRetrieve(sdcSaveFlagsEnum i_saveFlag, void * o_buffer)
 // Servicability tags for PRDF Ras Services.
 // They are located here because their position in the code is not relevant.
 /******************************************************************************/
-
-    /*@
-      * @errortype
-      * @reasoncode PRDF_HARDWARE_FAIL
-      * @subsys EPUB_PROCESSOR_SUBSYS
-      * @subsys EPUB_PROCESSOR_FRU
-      * @subsys EPUB_PROCESSOR_CHIP_CACHE
-      * @subsys EPUB_PROCESSOR_UNIT
-      * @subsys EPUB_PROCESSOR_BUS_CTL
-      * @subsys EPUB_MEMORY_SUBSYS
-      * @subsys EPUB_MEMORY_CONTROLLER
-      * @subsys EPUB_MEMORY_DIMM
-      * @subsys EPUB_MEMORY_FRU
-      * @subsys EPUB_EXTERNAL_CACHE
-      * @subsys EPUB_CEC_HDW_SUBSYS
-      * @subsys EPUB_CEC_HDW_CLK_CTL
-      * @subsys EPUB_CEC_HDW_TOD_HDW
-      * @subsys EPUB_CEC_HDW_SP_PHYP_INTF
-      * @subsys EPUB_MISC_SUBSYS
-      * @subsys EPUB_MISC_UNKNOWN
-      * @subsys EPUB_MISC_INFORMATIONAL
-      * @subsys EPUB_FIRMWARE_SUBSYS
-      * @subsys EPUB_FIRMWARE_SP
-      * @subsys EPUB_FIRMWARE_PHYP
-      * @subsys EPUB_FIRMWARE_HMC
-      * @subsys EPUB_EXT_ENVIRO_USER
-      * @moduleid PRDF_MAIN
-      * @userdata1  PRD Chip Signature
-      * @userdata2  PRD Attention Type and Cause Attention Type
-      * @userdata3  PRD Signature
-      * @devdesc CEC hardware failure detected
-      * @procedure EPUB_PRC_SP_CODE
-      * @procedure  EPUB_PRC_PHYP_CODE
-      * @procedure  EPUB_PRC_LVL_SUPP
-      * @procedure  EPUB_PRC_ALL_PROCS
-      * @procedure  EPUB_PRC_REBOOT
-      */
 
     /*@
       * @errortype

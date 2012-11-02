@@ -46,7 +46,7 @@
 #include <iipEregResolution.h> // for EregResolution
 #include <xspprdDumpResolution.h> // for DumpResolution
 #include <xspprdTryResolution.h> // for TryResolution
-#include <prdfPluginCallResolution.H> // for PrdfPluginCallResolution
+#include <prdfPluginCallResolution.H> // for PluginCallResolution
 #include <prdfAnalyzeConnected.H> // for prdfAnalyzeConnected
 #include <iipSystem.h> // for System
 #include <xspprdFlagResolution.h>
@@ -61,9 +61,12 @@
 #include <prdfResetOperators.H>
 #include <algorithm>
 
+namespace PRDF
+{
+
 template <bool Type>
 struct ResetAndMaskTransformer
-    : public std::unary_function<Prdr::PrdrRegister::ResetOrMaskStruct,
+    : public std::unary_function<Prdr::Register::ResetOrMaskStruct,
                                  ResetAndMaskErrorRegister::ResetRegisterStruct>
 {
     ResetAndMaskTransformer(ScanFacility & i_scanFactory,
@@ -77,7 +80,7 @@ struct ResetAndMaskTransformer
     virtual ~ResetAndMaskTransformer() {};  // zs01
 
     virtual ResetAndMaskErrorRegister::ResetRegisterStruct
-        operator()(const Prdr::PrdrRegister::ResetOrMaskStruct & i)
+        operator()(const Prdr::Register::ResetOrMaskStruct & i)
     {
         ResetAndMaskErrorRegister::ResetRegisterStruct o;
 
@@ -121,14 +124,12 @@ struct ResetAndMaskTransformer
 };
 
 
-void PrdfRuleChip::loadRuleFile(ScanFacility & i_scanFactory,
+void RuleChip::loadRuleFile(ScanFacility & i_scanFactory,
                                 ResolutionFactory & i_reslFactory)
 {
-    using namespace PRDF;
-
     RegMap_t l_regMap;
     Reset_t l_resetMap;
-    PrdfResetAndMaskPair l_currentResets;
+    ResetAndMaskPair l_currentResets;
     uint32_t l_regMax = 0;
     uint32_t l_vregMax = 0;
     GroupMap_t l_groupMap;
@@ -139,7 +140,7 @@ void PrdfRuleChip::loadRuleFile(ScanFacility & i_scanFactory,
 
     SharedThreshold_t l_sharedThresholds;
 
-    Prdr::PrdrChip * l_chip;
+    Prdr::Chip * l_chip;
 
     /* Initialize local data struct to pass to sub-functions */
     RuleFileData l_localData = { l_regMap, l_groupMap, l_actionMap,
@@ -204,10 +205,10 @@ void PrdfRuleChip::loadRuleFile(ScanFacility & i_scanFactory,
         //  there is a capture type or requirement without a group statement in the rule file.
         bool l_group_is_created = false;
         // Copy into capture groups.
-        std::vector<Prdr::PrdrRegister::CaptureInfoStruct>::const_iterator
+        std::vector<Prdr::Register::CaptureInfoStruct>::const_iterator
             l_capturesEnd = l_chip->cv_registers[i].cv_captures.end();
         //For each capture in this register save a Group Type or Requirement.
-        for(std::vector<Prdr::PrdrRegister::CaptureInfoStruct>::const_iterator
+        for(std::vector<Prdr::Register::CaptureInfoStruct>::const_iterator
                 j = l_chip->cv_registers[i].cv_captures.begin();
             j != l_capturesEnd;
             ++j)
@@ -223,22 +224,22 @@ void PrdfRuleChip::loadRuleFile(ScanFacility & i_scanFactory,
             //   i_group of 2 which is not called.
             else if('T' == (*j).op)
             {
-                //@jl06. d Deleted temporary declaration of PrdfCaptureType in
+                //@jl06. d Deleted temporary declaration of CaptureType in
                 //         favor of an anonymous declaration.  Calls ctor twice.
                 cv_hwCaptureType[l_regMap[l_id]] =
-                 PrdfCaptureType((RegType)(*j).data[0]); //@jl06 c.
+                 CaptureType((RegType)(*j).data[0]); //@jl06 c.
             }
             // @jl04 a Stop.
             else if ('f' == (*j).op)
             {
-                PrdfCaptureRequirement req;
+                CaptureRequirement req;
                 req.cv_func = this->getExtensibleFunction(j->func);
 
                 cv_hwCaptureReq[l_regMap[l_id]] = req;
             }
             else // 'C'
             {
-                PrdfCaptureRequirement req;
+                CaptureRequirement req;
                 req.cv_TargetType = (*j).data[0];
                 req.cv_TargetIndex = (*j).data[1];
                 req.cv_func = NULL;
@@ -264,7 +265,7 @@ void PrdfRuleChip::loadRuleFile(ScanFacility & i_scanFactory,
             continue;
         }
 
-        l_currentResets = PrdfResetAndMaskPair();
+        l_currentResets = ResetAndMaskPair();
 
         SCAN_COMM_REGISTER_CLASS * l_tmp =
             this->createVirtualRegister(&l_chip->cv_rules[i], l_localData);
@@ -281,7 +282,7 @@ void PrdfRuleChip::loadRuleFile(ScanFacility & i_scanFactory,
                                                         MRU_MED );
     for (int i = 0; i < l_chip->cv_groupCount; i++)
     {
-        PrdfGroup * l_tmp = new PrdfGroup(l_defaultResolution);
+        Group * l_tmp = new Group(l_defaultResolution);
         l_groupMap[l_id] = l_tmp;
         l_groupMax = l_id++;
     };
@@ -302,27 +303,27 @@ void PrdfRuleChip::loadRuleFile(ScanFacility & i_scanFactory,
 
     for (int i = 0; i < l_chip->cv_groupCount; i++)
     {
-        this->createGroup((PrdfGroup *) l_groupMap[i+l_vregMax+1],
+        this->createGroup((Group *) l_groupMap[i+l_vregMax+1],
                           i,
                           l_localData);
     }
-    for (int i = 0; i < NUM_GROUP_ATTN; i++)  // @jl02 UNIT_CS Changes. JL
+    for (int i = 0; i < Prdr::NUM_GROUP_ATTN; i++)
         cv_groupAttn[i] = l_groupMap[l_chip->cv_groupAttn[i]];
 
     // Call initialize plugin.
-    PrdfExtensibleChipFunction * l_init = getExtensibleFunction("Initialize", true);
+    ExtensibleChipFunction * l_init = getExtensibleFunction("Initialize", true);
     if (NULL != l_init)
     {
         (*l_init)
             (this,
-             PrdfPluginDef::bindParm<void*>(NULL)
+             PluginDef::bindParm<void*>(NULL)
             );
     }
 
     return;
 };
 
-PrdfRuleChip::~PrdfRuleChip()
+RuleChip::~RuleChip()
 {
     if (NULL != cv_dataBundle)
     {
@@ -331,10 +332,9 @@ PrdfRuleChip::~PrdfRuleChip()
 };
 
 
-int32_t PrdfRuleChip::Analyze(STEP_CODE_DATA_STRUCT & i_serviceData,
+int32_t RuleChip::Analyze(STEP_CODE_DATA_STRUCT & i_serviceData,
                               ATTENTION_TYPE i_attnType)
 {
-    using namespace PRDF;
     ServiceDataCollector & i_sdc = *(i_serviceData.service_data);
     ErrorSignature & l_errSig = *(i_sdc.GetErrorSignature());
     CaptureData & capture = i_serviceData.service_data->GetCaptureData();  // @jl04 a Add this for Drop call.
@@ -357,12 +357,12 @@ int32_t PrdfRuleChip::Analyze(STEP_CODE_DATA_STRUCT & i_serviceData,
     #endif
 
     // Get capture data for this chip.  Allow override.
-    PrdfExtensibleChipFunction * l_ignoreCapture =
+    ExtensibleChipFunction * l_ignoreCapture =
             getExtensibleFunction("PreventDefaultCapture", true);
     bool l_shouldPreventDefaultCapture = false;
 
     (*l_ignoreCapture)
-        (this, PrdfPluginDef::bindParm<STEP_CODE_DATA_STRUCT&, bool&>
+        (this, PluginDef::bindParm<STEP_CODE_DATA_STRUCT&, bool&>
                  (i_serviceData, l_shouldPreventDefaultCapture));
 
     if (!l_shouldPreventDefaultCapture)
@@ -398,11 +398,11 @@ int32_t PrdfRuleChip::Analyze(STEP_CODE_DATA_STRUCT & i_serviceData,
     if (NULL != l_errReg)
     {  //mp02 a Start
         //Call any pre analysis functions
-        PrdfExtensibleChipFunction * l_preAnalysis =
+        ExtensibleChipFunction * l_preAnalysis =
                 getExtensibleFunction("PreAnalysis", true);
         bool analyzed = false;
         (*l_preAnalysis)(this,
-                 PrdfPluginDef::bindParm<STEP_CODE_DATA_STRUCT&,bool&>
+                 PluginDef::bindParm<STEP_CODE_DATA_STRUCT&,bool&>
                  (i_serviceData,analyzed));
         if ( !analyzed)
             l_rc = l_errReg->Analyze(i_serviceData);
@@ -420,37 +420,36 @@ int32_t PrdfRuleChip::Analyze(STEP_CODE_DATA_STRUCT & i_serviceData,
         // Call mask plugin.
         if (i_serviceData.service_data->IsAtThreshold())
         {
-            PrdfExtensibleChipFunction * l_mask =
+            ExtensibleChipFunction * l_mask =
                     getExtensibleFunction("MaskError", true);
             (*l_mask)(this,
-                 PrdfPluginDef::bindParm<STEP_CODE_DATA_STRUCT&>(i_serviceData)
+                 PluginDef::bindParm<STEP_CODE_DATA_STRUCT&>(i_serviceData)
                 ); //@pw01
         }
 
         // Call reset plugin.
-        PrdfExtensibleChipFunction * l_reset =
+        ExtensibleChipFunction * l_reset =
                 getExtensibleFunction("ResetError", true);
         (*l_reset)(this,
-             PrdfPluginDef::bindParm<STEP_CODE_DATA_STRUCT&>(i_serviceData)
+             PluginDef::bindParm<STEP_CODE_DATA_STRUCT&>(i_serviceData)
             ); //@pw01
     }
 
     // Call postanalysis plugin.
     // @jl02 JL Adding PostAnalysis plugin call.
-    PrdfExtensibleChipFunction * l_postanalysis =
+    ExtensibleChipFunction * l_postanalysis =
             getExtensibleFunction("PostAnalysis", true);
     // @jl02 the true above means that a plugin may not exist for this call.
     // @jl02 JL Adding call for post analysis.
     (*l_postanalysis)(this,
-              PrdfPluginDef::bindParm<STEP_CODE_DATA_STRUCT&>(i_serviceData));
+              PluginDef::bindParm<STEP_CODE_DATA_STRUCT&>(i_serviceData));
 
     return l_rc;
 };
 
-int32_t PrdfRuleChip::CaptureErrorData(CaptureData & i_cap, int i_group)
+int32_t RuleChip::CaptureErrorData(CaptureData & i_cap, int i_group)
 {
     using namespace TARGETING;
-    using namespace PRDF;
 
     std::vector<SCAN_COMM_REGISTER_CLASS *>::const_iterator l_hwCaptureEnd =
         cv_hwCaptureGroups[i_group].end();
@@ -460,13 +459,13 @@ int32_t PrdfRuleChip::CaptureErrorData(CaptureData & i_cap, int i_group)
          ++i)
     {
         // Check that requirements are satisfied.
-        if (PrdfCaptureRequirement() != cv_hwCaptureReq[*i])
+        if (CaptureRequirement() != cv_hwCaptureReq[*i])
         {
-            PrdfCaptureRequirement req = cv_hwCaptureReq[*i];
+            CaptureRequirement req = cv_hwCaptureReq[*i];
             if (NULL != req.cv_func)
             {
                 bool l_cap = true;
-                (*req.cv_func)(this, PrdfPluginDef::bindParm<bool &>(l_cap));
+                (*req.cv_func)(this, PluginDef::bindParm<bool &>(l_cap));
                 if (!l_cap)
                     continue;
             }
@@ -500,20 +499,20 @@ int32_t PrdfRuleChip::CaptureErrorData(CaptureData & i_cap, int i_group)
     }
 
     // Call "PostCapture" plugin
-    PrdfExtensibleChipFunction * l_postCapture =
+    ExtensibleChipFunction * l_postCapture =
             getExtensibleFunction("PostCapture", true);
 
     (*l_postCapture)
         (this,
-         PrdfPluginDef::bindParm<CaptureData &, int>(i_cap, i_group)
+         PluginDef::bindParm<CaptureData &, int>(i_cap, i_group)
         );
 
     return SUCCESS;
 }
 
 SCAN_COMM_REGISTER_CLASS *
-PrdfRuleChip::createVirtualRegister(
-        Prdr::PrdrExpr * i_vReg,
+RuleChip::createVirtualRegister(
+        Prdr::Expr * i_vReg,
         RuleFileData & i_data
     )
 {
@@ -618,9 +617,8 @@ PrdfRuleChip::createVirtualRegister(
     return l_rc;
 };
 
-Resolution *
-PrdfRuleChip::createActionClass(uint32_t i_action,
-                                PrdfRuleChip::RuleFileData & i_data)
+Resolution * RuleChip::createActionClass( uint32_t i_action,
+                                          RuleChip::RuleFileData & i_data )
 {
     if (NULL != i_data.cv_actionMap[i_action])
         return i_data.cv_actionMap[i_action];
@@ -659,12 +657,9 @@ PrdfRuleChip::createActionClass(uint32_t i_action,
     return l_retRes;
 };
 
-Resolution *
-PrdfRuleChip::createResolution(Prdr::PrdrExpr * i_action,
-                               PrdfRuleChip::RuleFileData & i_data)
+Resolution * RuleChip::createResolution( Prdr::Expr * i_action,
+                                         RuleChip::RuleFileData & i_data )
 {
-    using namespace PRDF;
-
     Resolution * l_rc = NULL;
 
     switch (i_action->cv_op)
@@ -721,10 +716,10 @@ PrdfRuleChip::createResolution(Prdr::PrdrExpr * i_action,
                 }
                 else if(i_action->cv_value[4].i)
                 {
-                    // FIXME : need to uncomment PrdfMfgThresholdMgr after we figure it out
+                    // FIXME : need to uncomment MfgThresholdMgr after we figure it out
                     #ifndef __HOSTBOOT_MODULE
                     l_rc = &i_data.cv_reslFactory.GetThresholdSigResolution(
-                                    *(PrdfMfgThresholdMgr::getInstance()->
+                                    *(MfgThresholdMgr::getInstance()->
                                             getThresholdP(i_action->cv_value[3].i)));
                     #endif
                 }
@@ -738,7 +733,7 @@ PrdfRuleChip::createResolution(Prdr::PrdrExpr * i_action,
             else
                 if (NULL == i_data.cv_sharedThresholds[i_action->cv_value[5].i])
                 {
-                    if ( !PRDF::PlatServices::mfgMode() )
+                    if ( !PlatServices::mfgMode() )
                     {
                         l_rc = &i_data.cv_reslFactory.
                                    GetThresholdResolution(i_action->cv_value[5].i,
@@ -746,11 +741,11 @@ PrdfRuleChip::createResolution(Prdr::PrdrExpr * i_action,
                     }
                     else if(i_action->cv_value[4].i)
                     {
-                        // FIXME : need to uncomment PrdfMfgThresholdMgr after we figure it out
+                        // FIXME : need to uncomment MfgThresholdMgr after we figure it out
                         #ifndef __HOSTBOOT_MODULE
                         l_rc = &i_data.cv_reslFactory.
                                 GetThresholdResolution(i_action->cv_value[5].i,
-                                    *(PrdfMfgThresholdMgr::getInstance()->
+                                    *(MfgThresholdMgr::getInstance()->
                                         getThresholdP(i_action->cv_value[3].i)));
                         #endif
                     }
@@ -836,16 +831,16 @@ PrdfRuleChip::createResolution(Prdr::PrdrExpr * i_action,
     return l_rc;
 };
 
-void PrdfRuleChip::createGroup(PrdfGroup * i_group,
+void RuleChip::createGroup(Group * i_group,
                                uint32_t i_groupId,
-                               PrdfRuleChip::RuleFileData & i_data)
+                               RuleChip::RuleFileData & i_data)
 {
     // Internal class to collapse the bit string.
     class CreateBitString
     {
         public:
             static void execute(std::vector<uint8_t> & i_bits,
-                    Prdr::PrdrExpr * i_expr)
+                    Prdr::Expr * i_expr)
             {
                 if (NULL == i_expr)
                     return;
@@ -870,7 +865,7 @@ void PrdfRuleChip::createGroup(PrdfGroup * i_group,
         // TODO : handle & transformations.
 
         // Get expression for group's line.
-        Prdr::PrdrExpr * l_expr = &i_data.cv_loadChip->cv_groups[i_groupId][i];
+        Prdr::Expr * l_expr = &i_data.cv_loadChip->cv_groups[i_groupId][i];
 
         // Execute internal (recursive) class to generate bit string.
         CreateBitString::execute(l_bits, l_expr->cv_value[1].p);
@@ -898,7 +893,7 @@ void PrdfRuleChip::createGroup(PrdfGroup * i_group,
         CreateBitString::execute(l_bits,
                 i_data.cv_loadChip->cv_groupPriorityBits[i_groupId]);
 
-        prdfFilter * l_filter = new PrioritySingleBitFilter(l_bits);
+        FilterClass * l_filter = new PrioritySingleBitFilter(l_bits);
         i_group->AddFilter(l_filter);
     }
 
@@ -906,19 +901,19 @@ void PrdfRuleChip::createGroup(PrdfGroup * i_group,
     if (i_data.cv_loadChip->cv_groupFlags[i_groupId] &
             Prdr::PRDR_GROUP_FILTER_SINGLE_BIT)
     {
-        prdfFilter * l_filter = new SingleBitFilter();
+        FilterClass * l_filter = new SingleBitFilter();
         i_group->AddFilter(l_filter);
     }
 }
 
-PrdfExtensibleChipFunction *
-    PrdfRuleChip::getExtensibleFunction(const char * i_func, bool i_expectNull)
+ExtensibleChipFunction *
+    RuleChip::getExtensibleFunction(const char * i_func, bool i_expectNull)
 {
-    PrdfExtensibleFunctionType * plugin =
-        prdfGetPluginGlobalMap().getPlugins(cv_fileName)[i_func];
+    ExtensibleFunctionType * plugin =
+        getPluginGlobalMap().getPlugins(cv_fileName)[i_func];
     if (NULL == plugin)
     {
-        static PrdfPlugin<PrdfExtensibleChip> l_nullPlugin(NULL);
+        static Plugin<ExtensibleChip> l_nullPlugin(NULL);
         plugin = &l_nullPlugin;
 
         if (!i_expectNull)
@@ -930,7 +925,7 @@ PrdfExtensibleChipFunction *
                              ERRL_ETYPE_NOT_APPLICABLE,
                              SRCI_ERR_INFO,
                              SRCI_NO_ATTR,
-                             PRDF_PRDFRULECHIP,
+                             PRDF_RULECHIP,
                              LIC_REFCODE,
                              PRDF_CODE_FAIL,
                              __LINE__,
@@ -939,24 +934,24 @@ PrdfExtensibleChipFunction *
             PRDF_ADD_FFDC(l_errl,
                           cv_fileName,
                           strlen(cv_fileName),
-                          prdfErrlVer1,
-                          prdfErrlString);
+                          ErrlVer1,
+                          ErrlString);
 
             PRDF_ADD_FFDC(l_errl,
                           i_func,
                           strlen(i_func),
-                          prdfErrlVer1,
-                          prdfErrlString);
+                          ErrlVer1,
+                          ErrlString);
 
             PRDF_COMMIT_ERRL(l_errl, ERRL_ACTION_REPORT);
         }
 
     }
-    return (PrdfExtensibleChipFunction *) plugin;
+    return (ExtensibleChipFunction *) plugin;
 
 }
 
-SCAN_COMM_REGISTER_CLASS * PrdfRuleChip::getRegister(const char * i_reg,
+SCAN_COMM_REGISTER_CLASS * RuleChip::getRegister(const char * i_reg,
                                                      bool i_expectNull)
 {
     uint16_t hashId = Util::hashString( i_reg );
@@ -965,7 +960,7 @@ SCAN_COMM_REGISTER_CLASS * PrdfRuleChip::getRegister(const char * i_reg,
 
     if (NULL == l_register)
     {
-        static PrdfNullRegister l_nullRegister(1024);
+        static NullRegister l_nullRegister(1024);
         l_register = &l_nullRegister;
 
         if (!i_expectNull)
@@ -976,7 +971,7 @@ SCAN_COMM_REGISTER_CLASS * PrdfRuleChip::getRegister(const char * i_reg,
                              ERRL_ETYPE_NOT_APPLICABLE,
                              SRCI_ERR_INFO,
                              SRCI_NO_ATTR,
-                             PRDF_PRDFRULECHIP,
+                             PRDF_RULECHIP,
                              LIC_REFCODE,
                              PRDF_CODE_FAIL,
                              __LINE__,
@@ -985,15 +980,15 @@ SCAN_COMM_REGISTER_CLASS * PrdfRuleChip::getRegister(const char * i_reg,
             PRDF_ADD_FFDC(l_errl,
                           cv_fileName,
                           strlen(cv_fileName),
-                          prdfErrlVer1,
-                          prdfErrlString);
+                          ErrlVer1,
+                          ErrlString);
 
 
             PRDF_ADD_FFDC(l_errl,
                           i_reg,
                           strlen(i_reg),
-                          prdfErrlVer1,
-                          prdfErrlString);
+                          ErrlVer1,
+                          ErrlString);
 
             PRDF_COMMIT_ERRL(l_errl, ERRL_ACTION_REPORT);
         }
@@ -1001,3 +996,6 @@ SCAN_COMM_REGISTER_CLASS * PrdfRuleChip::getRegister(const char * i_reg,
     }
     return l_register;
 }
+
+} // end namespace PRDF
+

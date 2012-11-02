@@ -60,6 +60,9 @@
 #include <iipchip.h>
 #include <prdfPlatServices.H>
 
+namespace PRDF
+{
+
 /*--------------------------------------------------------------------*/
 /*  Forward References                                                */
 /*--------------------------------------------------------------------*/
@@ -138,9 +141,11 @@ int32_t CHIP_CLASS::Initialize
   return(SUCCESS);
 }
 
-PRDF::HUID CHIP_CLASS::GetId() const
+HUID CHIP_CLASS::GetId() const
 {
-    return(PRDF::PlatServices::getHuid(iv_pchipHandle));
+    return(PlatServices::getHuid(iv_pchipHandle));
 }
+
+} // end namespace PRDF
 
 #undef IIPCHIP_CPP

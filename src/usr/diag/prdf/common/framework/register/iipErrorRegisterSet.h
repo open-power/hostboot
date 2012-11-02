@@ -50,6 +50,9 @@
 #include <iipErrorRegisterMask.h>
 #endif
 
+namespace PRDF
+{
+
 //--------------------------------------------------------------------
 //  Forward References
 //--------------------------------------------------------------------
@@ -113,12 +116,7 @@ private:  // Data
 
 };
 
+} // end namespace PRDF
+
 #endif /* iipErrorRegisterSet_h */
 
-// Change Log *********************************************************
-//
-//  Flag Reason   Vers Date     Coder    Description
-//  ---- -------- ---- -------- -------- -------------------------------
-//       p4901848 v4r1 02/20/97 DGILBERT   Initial Creation
-//
-// End Change Log *****************************************************

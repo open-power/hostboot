@@ -193,6 +193,6 @@ class PRDcallout
 
 };
 
-}; // end namespace PRDF
+} // end namespace PRDF
 
 #endif /* prdfCallouts_H */

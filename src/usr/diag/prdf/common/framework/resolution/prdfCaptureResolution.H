@@ -24,22 +24,25 @@
 #include <iipResolution.h>
 #include <prdfExtensibleChip.H>
 
+namespace PRDF
+{
+
 /**
- * @class PrdfCaptureResolution
+ * @class CaptureResolution
  * @brief Adds a capture-group to the capture data when hitting an error.
  */
-class PrdfCaptureResolution : public Resolution
+class CaptureResolution : public Resolution
 {
     public:
-        PrdfCaptureResolution() : iv_chip(NULL), iv_captureGroup(0) {};
+        CaptureResolution() : iv_chip(NULL), iv_captureGroup(0) {};
 
-        /** @fn PrdfCaptureResolution
+        /** @fn CaptureResolution
          *  @brief Typical constructor.
          *
          *  @param i_chip - Extensible chip object to capture from.
          *  @param i_group - Capture-group to gather.
          */
-        PrdfCaptureResolution(PrdfExtensibleChip * i_chip,
+        CaptureResolution(ExtensibleChip * i_chip,
                               uint32_t i_captureGroup)
                                     : iv_chip(i_chip),
                                       iv_captureGroup(i_captureGroup) {};
@@ -52,22 +55,18 @@ class PrdfCaptureResolution : public Resolution
         /**
          *  Comparison operator to aid in ResolutionFactory.
          */
-        bool operator==(const PrdfCaptureResolution & i_rhs)
+        bool operator==(const CaptureResolution & i_rhs)
                 { return ((iv_chip == i_rhs.iv_chip) &&
                           (iv_captureGroup == i_rhs.iv_captureGroup));
                 };
     private:
 
             /** The chip to capture from */
-        PrdfExtensibleChip * iv_chip;
+        ExtensibleChip * iv_chip;
             /** The group id to capture */
         uint32_t iv_captureGroup;
 
 };
 
-// Change Log *********************************************************
-//
-//  Flag Reason   Vers Date     Coder    Description
-//  ---- -------- ---- -------- -------- -------------------------------
-//                f310 08/31/06 iawillia Initial File Creation
-// End Change Log *****************************************************
+} // end namespace PRDF
+

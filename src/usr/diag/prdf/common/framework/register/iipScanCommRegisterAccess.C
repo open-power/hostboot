@@ -57,6 +57,9 @@
 //  Internal Function Prototypes
 //----------------------------------------------------------------------
 
+namespace PRDF
+{
+
 //----------------------------------------------------------------------
 //  Global Variables
 //----------------------------------------------------------------------
@@ -134,7 +137,7 @@ uint32_t ScanCommRegisterAccess::Write(void)
 
 //    bs.SetBits(*bit_string_ptr);
 
-  rc = Access(bs, GetAddress(),MopRegisterAccess::WRITE);
+  rc = Access(bs, GetAddress(), MopRegisterAccess::WRITE);
 //  }
 
   return(rc);
@@ -148,8 +151,6 @@ uint32_t ScanCommRegisterAccess::Write(void)
 uint32_t ScanCommRegisterAccess::Access(BIT_STRING_CLASS & bs, uint64_t registerId,
                                      MopRegisterAccess::Operation op) const
 {
-  using namespace PRDF;
-
   uint32_t rc = SCR_ACCESS_FAILED;
   if(hops != NULL)
   {
@@ -196,20 +197,5 @@ uint32_t ScanCommRegisterAccess::Access(BIT_STRING_CLASS & bs, uint64_t register
 
 // #endif
 
-// Change Log **********************************************************
-//
-//  Flag  PTR/DCR#  Userid    Date      Description
-//  ----  --------  --------  --------  -----------
-//  n/a   n/a       JST       ??/??/95  Created.
-//        D24747.4  JFP       02/23/95  Added #include <CuLib.h>
-//                  DGILBERT  05/23/97  Access()/Read()/Write() change
-//  dg01  aix343882 dgilbert  07/16/01  Make out of synch if Read fails
-//
-// End Change Log ******************************************************
-
-
-
-
-
-
+} //end namespace PRDF
 

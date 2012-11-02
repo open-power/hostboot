@@ -30,11 +30,12 @@
 
 #include <iipconst.h>
 
-class PrdfExtensibleChip;
-struct STEP_CODE_DATA_STRUCT;
-
 namespace PRDF
 {
+
+class ExtensibleChip;
+struct STEP_CODE_DATA_STRUCT;
+
 namespace MemUtil
 {
 
@@ -47,7 +48,7 @@ namespace MemUtil
  * @param  i_sc      The step code data struct.
  * @return Non-SUCCESS for internal errors, SUCCESS otherwise.
  */
-int32_t clearHostAttns( PrdfExtensibleChip * i_memChip,
+int32_t clearHostAttns( ExtensibleChip * i_memChip,
                         STEP_CODE_DATA_STRUCT & i_sc );
 
 //#endif // __HOSTBOOT_MODULE

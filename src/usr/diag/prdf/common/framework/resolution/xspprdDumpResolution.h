@@ -48,6 +48,9 @@
 
 #include <prdfPlatServices.H>
 
+namespace PRDF
+{
+
 //--------------------------------------------------------------------
 //  Forward References
 //--------------------------------------------------------------------
@@ -132,6 +135,7 @@ private:  // Data
   TARGETING:: TargetHandle_t iv_pdumpHandle;
 };
 
+} // end namespace PRDF
 
 #endif /* xspprdDumpResolution_h */
 

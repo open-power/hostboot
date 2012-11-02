@@ -23,15 +23,17 @@
 
 #include <prdfRegisterData.H>
 
-PrdrRegIdTable & prdfGetRegisterIdTable()
+namespace PRDF
+{
+PrdrRegIdTable & GetRegisterIdTable()
 {
     static PrdrRegIdTable l_idTable = PrdrRegIdTable();
     return l_idTable;
 }
 
-PrdrErrSigTable & prdfGetErrorSigTable()
+PrdrErrSigTable & GetErrorSigTable()
 {
     static PrdrErrSigTable l_sigTable = PrdrErrSigTable();
     return l_sigTable;
 }
-
+} //End namespace PRDF

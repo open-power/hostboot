@@ -45,10 +45,15 @@
 #include <iipConfigurator.h>
 #include <iipstep.h>
 
-namespace PrdfSystemSpecific
+namespace PRDF
+{
+
+namespace SystemSpecific
 {
     PRDF::Configurator * getConfiguratorPtr();
     void postAnalysisWorkarounds(STEP_CODE_DATA_STRUCT & i_sdc);
 };
+
+} // end namespace PRDF
 
 #endif

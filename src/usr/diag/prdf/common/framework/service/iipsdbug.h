@@ -54,6 +54,9 @@
 #include <prdfMain.H>
 #include <targeting/common/target.H>
 
+namespace PRDF
+{
+
 /*--------------------------------------------------------------------*/
 /*  Forward References                                                */
 /*--------------------------------------------------------------------*/
@@ -134,7 +137,7 @@ public:
    <br><b>Exceptions:  </b> None.
    </ul><br>
    */
-  uint32_t Reinitialize(const PRDF::AttnList & i_attnList);
+  uint32_t Reinitialize(const AttnList & i_attnList);
 
   /**
    Indicates if an attention is active for a particular chip
@@ -276,7 +279,8 @@ public:
    <br><b>Notes:       </b> Available in PRD simulator only
    </ul><br>
    */
-  void SetAttentionType(TARGETING::TargetHandle_t i_pTargetHandle ,PRDF::ATTENTION_VALUE_TYPE i_eAttentionType);
+  void SetAttentionType( TARGETING::TargetHandle_t i_pTargetHandle,
+                         ATTENTION_VALUE_TYPE i_eAttentionType );
 
   // SetGlobalAttentionType(uint8_t ga); // FIXME : remove this function when merge, no longer used
 
@@ -288,11 +292,8 @@ private:
     SRCFILL_GROUP = 7
   };
 };
+
+} // end namespace PRDF
+
 #endif //IIPSDBUG_H
 
-// Change Log *************************************************************************************
-//
-//  Flag Reason  Vers  Date     Coder    Description
-//  ---- ------- ----- -------- -------- ----------------------------------------------------------
-//  jl02 605874 fips330 07/31/07 lukas    Add functions to PRD framework/Galaxy 2 code for unit CS
-// End Change Log *********************************************************************************

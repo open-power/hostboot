@@ -43,6 +43,9 @@
 #include <iipResolution.h>
 #endif
 
+namespace PRDF
+{
+
 //--------------------------------------------------------------------
 //  Forward References
 //--------------------------------------------------------------------
@@ -125,17 +128,7 @@ private:  // Data
 
 };
 
+} // end namespace PRDF
 
 #endif /* xspprdGardResolution_h */
 
-// Change Log *********************************************************
-//
-//  Flag Reason   Vers Date     Coder Description
-//  ---- -------- ---- -------- ----- -------------------------------
-//                     02/18/99 DRG   Initial Creation
-//       D49420.8 v5r2 12/05/00 mak   Change to use PRDcallout
-//                     05/18/07 drg   add operator==() to prevent memory leak
-//  mp01 D672610  f320 08/28/08 plute Add CheckStopOnlyGard
-//  mp02          f710 08/06/08 plute Add DeconfigNoGard
-//
-// End Change Log *****************************************************

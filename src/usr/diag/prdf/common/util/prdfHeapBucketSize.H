@@ -24,7 +24,8 @@
 #ifndef PRDFHEAPBUCKETSIZE_H
 #define PRDFHEAPBUCKETSIZE_H
 
-
+namespace PRDF
+{
 //--------------------------------------------------------------------
 // Includes
 //--------------------------------------------------------------------
@@ -77,5 +78,5 @@ struct RoundBucketSize
 };
 #endif
 
-
+} //End namespace PRDF
 #endif // define PRDFHEAPBUCKETSIZE_H

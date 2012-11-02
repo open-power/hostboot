@@ -24,6 +24,12 @@
 #ifndef __PRDRERRLPLUGINSUPT_H
 #define __PRDRERRLPLUGINSUPT_H
 
+#include <map>
+#include <stdint.h>
+
+namespace PRDF
+{
+
 #define __PRDR_PLUGIN_HOMTYPE uint32_t
 #define __PRDR_PLUGIN_IDTYPE  uint32_t
 
@@ -56,9 +62,9 @@
             __table_struct * l_tablePtr = cv_table; \
             while (NULL != l_tablePtr->name) \
             { \
-                prdfGetRegisterIdTable()[l_homtype][l_tablePtr->id].name = \
+                GetRegisterIdTable()[l_homtype][l_tablePtr->id].name = \
                     l_tablePtr->name;  \
-                prdfGetRegisterIdTable()[l_homtype][l_tablePtr->id].addr = \
+                GetRegisterIdTable()[l_homtype][l_tablePtr->id].addr = \
                     l_tablePtr->address; \
                 l_tablePtr++; \
             } \
@@ -77,21 +83,20 @@
             };
 #endif
 
-#include <map>
-#include <stdint.h>
-
 typedef std::map<__PRDR_PLUGIN_IDTYPE, const char *> PrdrErrSigEntries;
 typedef std::map<__PRDR_PLUGIN_HOMTYPE, PrdrErrSigEntries> PrdrErrSigTable;
 
-struct PrdrRegIdStruct
+struct RegIdStruct
 {
     const char * name;
     uint32_t addr;
 };
 
-typedef std::map<__PRDR_PLUGIN_IDTYPE, PrdrRegIdStruct> PrdrRegIdEntries;
+typedef std::map<__PRDR_PLUGIN_IDTYPE, RegIdStruct> PrdrRegIdEntries;
 typedef std::map<__PRDR_PLUGIN_HOMTYPE, PrdrRegIdEntries> PrdrRegIdTable;
 
-PrdrRegIdTable & prdfGetRegisterIdTable();
+PrdrRegIdTable & GetRegisterIdTable();
+
+} // end namespace PRDF
 
 #endif

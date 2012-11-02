@@ -30,6 +30,9 @@
 
 #include <vector>
 
+namespace PRDF
+{
+
 // Forward References
 struct STEP_CODE_DATA_STRUCT;
 
@@ -255,6 +258,8 @@ private:
 
 
 };
+
+} // end namespace PRDF
 
 #include "iipDomainContainer.inl"
 

@@ -41,6 +41,9 @@
 #include <iipResolution.h>
 #endif
 
+namespace PRDF
+{
+
 //--------------------------------------------------------------------
 //  Forward References
 //--------------------------------------------------------------------
@@ -106,12 +109,7 @@ private:  // Data
 //{
 //}
 
+} // end namespace PRDF
+
 #endif /* iipCallAttnResolution_h */
 
-// Change Log *********************************************************
-//
-//  Flag Reason   Vers Date     Coder Description
-//  ---- -------- ---- -------- ----- -------------------------------
-//                              DRG   Initial Creation
-//
-// End Change Log *****************************************************

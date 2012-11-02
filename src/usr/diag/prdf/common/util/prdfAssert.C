@@ -43,8 +43,8 @@
 
 #undef prdfAssert_C
 
-using namespace PRDF;
-
+namespace PRDF
+{
 //---------------------------------------------------------------------
 // Member Function Specifications
 //---------------------------------------------------------------------
@@ -101,3 +101,6 @@ void prdfAssert( const char * i_exp, const char * i_file, int i_line )
 
     #endif
 }
+
+} // end namespace PRDF
+

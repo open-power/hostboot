@@ -37,6 +37,9 @@
 #include <prdfPlatServices.H>
 #include <prdfCallouts.H>
 
+namespace PRDF
+{
+
 //--------------------------------------------------------------------
 //  Forward References
 //--------------------------------------------------------------------
@@ -50,20 +53,20 @@ struct STEP_CODE_DATA_STRUCT;
       to determine whats connected.  This allows for runtime GARD, dynamic failover and concurrent
       maintainance - without having to call PRD to re-build itself.
     @code
-     prdfCalloutConnected iv_callout(PROC, TYPE_MCS ....);
+     CalloutConnected iv_callout(PROC, TYPE_MCS ....);
      // ......
      // This will add the MCSs thats connected to this PROC to the callout list
      iv_callout.Resolve(serviceData);
     @endcode
     @note Don't use this class to callout clocks - use prdfClockResolution
 */
-class prdfCalloutConnected : public Resolution
+class CalloutConnected : public Resolution
 {
 public:
   /**
    default ctor
    */
-  prdfCalloutConnected(void);
+  CalloutConnected(void);
 
   /**
    Constructor
@@ -76,13 +79,13 @@ public:
                                             If NULL than source is called out
    @note Don't use this class to callout clocks - use prdfClockResolution
    */
-  prdfCalloutConnected(TARGETING::TargetHandle_t i_psourceHandle,
+  CalloutConnected(TARGETING::TargetHandle_t i_psourceHandle,
                        TARGETING::TYPE i_targetType,
                        uint32_t i_idx =0xffffffff ,
-                       PRDF::PRDpriority i_priority = PRDF::MRU_MED,
+                       PRDpriority i_priority = MRU_MED,
                        Resolution * i_altResolution = NULL);
 
-  // ~prdfCalloutConnected(); default dtor is sufficient
+  // ~CalloutConnected(); default dtor is sufficient
 
   /**
    Determine callout for current connected unit and add to the service data
@@ -95,7 +98,7 @@ public:
    */
   virtual int32_t Resolve(STEP_CODE_DATA_STRUCT & io_service_data);
 
-  virtual bool operator==(const prdfCalloutConnected & r) const;
+  virtual bool operator==(const CalloutConnected & r) const;
 
 private:  // functions
 private:  // Data
@@ -107,15 +110,15 @@ private:  // Data
   Resolution * iv_altResolution;
 };
 
-inline prdfCalloutConnected::prdfCalloutConnected(void)
+inline CalloutConnected::CalloutConnected(void)
 : iv_psourceHandle(NULL),
   iv_targetType(TARGETING::TYPE_NA),
   iv_idx(0xffffffff ),
-  iv_priority(PRDF::MRU_LOW),
+  iv_priority(MRU_LOW),
   iv_altResolution(NULL)
 {}
 
-inline prdfCalloutConnected::prdfCalloutConnected(TARGETING::TargetHandle_t i_psourceHandle,
+inline CalloutConnected::CalloutConnected(TARGETING::TargetHandle_t i_psourceHandle,
                                                   TARGETING::TYPE i_targetType,
                                                   uint32_t i_idx,
                                                   PRDF::PRDpriority i_priority,
@@ -127,7 +130,7 @@ inline prdfCalloutConnected::prdfCalloutConnected(TARGETING::TargetHandle_t i_ps
   iv_altResolution(i_altResolution)
 {}
 
-inline bool prdfCalloutConnected::operator==(const prdfCalloutConnected & r) const
+inline bool CalloutConnected::operator==(const CalloutConnected & r) const
 {
   return (iv_psourceHandle == r.iv_psourceHandle &&
           iv_targetType == r.iv_targetType &&
@@ -135,5 +138,7 @@ inline bool prdfCalloutConnected::operator==(const prdfCalloutConnected & r) con
           iv_priority == r.iv_priority &&
           (iv_altResolution == r.iv_altResolution || &iv_altResolution == &r.iv_altResolution));
 }
+
+} // end namespace PRDF
 
 #endif /* PRDFCALLOUTCONNECTED_H */

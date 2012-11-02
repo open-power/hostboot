@@ -25,7 +25,7 @@
 #define PRDFBITSTRING_H
 
 /** @file prdBitString.H
- *  @brief prdfBitString and prdfBitStringBuffer class declarations
+ *  @brief BitString and BitStringBuffer class declarations
  */
 
 /*--------------------------------------------------------------------*/
@@ -93,26 +93,30 @@ typedef uint32_t CPU_WORD;
 //--------------------------------------------------------------------
 //  Forward References
 //--------------------------------------------------------------------
-class prdfBitStringBuffer;
+
+namespace PRDF
+{
+
+class BitStringBuffer;
 
 /*--------------------------------------------------------------------*/
 /*  Function Prototypes                                               */
 /*--------------------------------------------------------------------*/
 
-//! prdfBitString
+//! BitString
 /*!
- prdfBitString is general purpose class providing access to a bit string in memory.
+ BitString is general purpose class providing access to a bit string in memory.
  \remarks
  The Bit String models a contiguous sequence of bits in memory from 0 to n.
- In the prdfBitString class the start of the string is aligned with the memory
- address provided. The prdfBitStringOffset class allows the starting bit string
+ In the BitString class the start of the string is aligned with the memory
+ address provided. The BitStringOffset class allows the starting bit string
  to occur on any bit in memory. The length of the bit string may be any length up to
- the value a uint32_t can hold. ( the prdfBitStringOffset limits the length such that
+ the value a uint32_t can hold. ( the BitStringOffset limits the length such that
  the start bit offset + length must not exceed the max value of a uint32_t).
 
- The prdfBitString and prdfBitStringOffset classes do not own the memory storage used to hold
+ The BitString and BitStringOffset classes do not own the memory storage used to hold
  the bitstring data, it only accesses and manipulate the bits in the range specified.
- The prdfBitStringBuffer is a version of the bits string class that manages its' own storage.
+ The BitStringBuffer is a version of the bits string class that manages its' own storage.
  Operations are performed on the Bit String using either a single bit or a field.
 
  The CPU_WORD type is used internally to reference memory
@@ -168,7 +172,7 @@ class prdfBitStringBuffer;
  of memory that contains the bits and the representation
  of length (16-bits).
 */
-class prdfBitString
+class BitString
 {
 public:
 
@@ -179,7 +183,7 @@ public:
    \pre   None.
    \post  None.
    */
-  prdfBitString(uint32_t i_length, CPU_WORD * i_address)
+  BitString(uint32_t i_length, CPU_WORD * i_address)
   :
   ivLength(i_length),
   ivBuffer(i_address)
@@ -191,13 +195,13 @@ public:
    \notes This destructor does nothing. It is requred for proper desctruction
    of derived classes.
    */
-  virtual ~prdfBitString(void);
+  virtual ~BitString(void);
 
   /*!
    Comparison
    \remarks The bitstrings must be the same length and have the same bits set to be equal
    */
-  int operator==(const prdfBitString & string) const
+  int operator==(const BitString & string) const
   {
     return(IsEqual(string));
   }
@@ -281,7 +285,7 @@ public:
           if source len < this len than extra bits in this are uneffected
           Bit strings may specify overlapping memory
    */
-  void SetBits(const prdfBitString & string);
+  void SetBits(const BitString & string);
 
   /*!
    Set bits in this string based on provided string
@@ -294,7 +298,7 @@ public:
           given than space in this string than the extra source bit are ignored.
           Bit strings may specify overlapping memory.
    */
-  void SetBits(const prdfBitString & string,
+  void SetBits(const BitString & string,
                unsigned int pos,
                unsigned int len,
                unsigned int dpos = 0);
@@ -370,7 +374,7 @@ public:
    \returns [true | false]
    \notes Both strings must be of equal length and have same values to be equal
    */
-  bool IsEqual( const prdfBitString & string) const;
+  bool IsEqual( const BitString & string) const;
 
   /*!
    Query state of no bits set(1)
@@ -400,7 +404,7 @@ public:
 
    \endverbatim
    */
-  void Mask(const prdfBitString & string);
+  void Mask(const BitString & string);
 
   /*!
    Utility to Right justify a "Left-justified" value
@@ -425,9 +429,9 @@ public:
    \returns a bit-wise inverted copy of the specified bit string
    */
 
-  friend prdfBitStringBuffer operator~(const prdfBitString & bs);
-  prdfBitStringBuffer operator&(const prdfBitString & bs) const;
-  prdfBitStringBuffer operator|(const prdfBitString & bs) const;
+  friend BitStringBuffer operator~(const BitString & bs);
+  BitStringBuffer operator&(const BitString & bs) const;
+  BitStringBuffer operator|(const BitString & bs) const;
 
   /*!
    Left shift
@@ -449,7 +453,7 @@ public:
 
    \endverbatim
    */
-  prdfBitStringBuffer operator>>(uint32_t count) const;
+  BitStringBuffer operator>>(uint32_t count) const;
 
   /*!
    Right shift
@@ -470,7 +474,7 @@ public:
 
    \endverbatim
    */
-  prdfBitStringBuffer operator<<(uint32_t count) const;
+  BitStringBuffer operator<<(uint32_t count) const;
 
 
 protected:
@@ -479,7 +483,7 @@ protected:
    Assignment operator
    \param string Reference bit string
    */
-  virtual prdfBitString & operator=(const prdfBitString & string);
+  virtual BitString & operator=(const BitString & string);
 
   /*!
    Gets the CPU_WORD bounded memory address and the relative bit offset within the CPU_WORD
@@ -526,9 +530,9 @@ private:
 };
 
 
-//! prdfBitStringBuffer
+//! BitStringBuffer
 /*!
- prdfBitStringBuffer provides a Bit String in an associated buffer in memory.
+ BitStringBuffer provides a Bit String in an associated buffer in memory.
  \remarks
  The Bit String Buffer provides all of the functionality
  of the base class along with the maintenance of memory
@@ -540,7 +544,7 @@ private:
  necessary for the assignment. A byte capacity value is also maintained.
  The internal buffer is always guaranteed to have this capacity of bytes.
 */
-class prdfBitStringBuffer : public prdfBitString
+class BitStringBuffer : public BitString
 {
 public:
 
@@ -551,37 +555,37 @@ public:
    \notes If iByteCapcity is zero or too small than the storage size is calculated
           from iLen, rounded up to the nearest CPU_WORD.
    */
-  prdfBitStringBuffer(uint32_t iLen,
+  BitStringBuffer(uint32_t iLen,
                       unsigned int iByteCapacity = 0);
 
   /*!
    Copy Constructor
    \param reference bits string
    */
-  prdfBitStringBuffer(const prdfBitString & string);
+  BitStringBuffer(const BitString & string);
 
   /*!
    Copy Constructor
    \param reference bits string
    */
-  prdfBitStringBuffer (const prdfBitStringBuffer & string);
+  BitStringBuffer (const BitStringBuffer & string);
 
   /*!
    Destructor
    */
-  virtual ~prdfBitStringBuffer(void);
+  virtual ~BitStringBuffer(void);
 
   /*!
    Assignment
    \param reference bit string
    */
-  prdfBitStringBuffer & operator=(const prdfBitStringBuffer & string);
+  BitStringBuffer & operator=(const BitStringBuffer & string);
 
   /*!
    Assignment
    \param reference bit string
    */
-  virtual prdfBitStringBuffer & operator=(const prdfBitString & string);
+  virtual BitStringBuffer & operator=(const BitString & string);
 
 protected: // functions  dg02a
 
@@ -600,16 +604,16 @@ private: // data
 
 };
 
-//! prdfBitStringOffset
+//! BitStringOffset
 /*!
- prdfBitStringOffset provides a Bit String that allows a starting position that
+ BitStringOffset provides a Bit String that allows a starting position that
  is not limited to a memory alligned boundary.
  \remarks
  The Bit String Offset provides the ability to specify a start bit offset from the
  address provided as the start position of the bit string. The class will
  not modify memory outside the bit string range.
 */
-class prdfBitStringOffset:public prdfBitString
+class BitStringOffset:public BitString
 {
 public:
   /*!
@@ -618,28 +622,28 @@ public:
    \param i_len The number of bits in the bitstring
    \param i_address The memory address to base the bitstring on
    */
-  prdfBitStringOffset(uint32_t i_offset, uint32_t i_len, CPU_WORD * i_address)
-  : prdfBitString(i_len,i_address), ivOffset(i_offset) {}
+  BitStringOffset(uint32_t i_offset, uint32_t i_len, CPU_WORD * i_address)
+  : BitString(i_len,i_address), ivOffset(i_offset) {}
 
   /*!
    Destructor - this class does not own it's storage
    */
-  virtual ~prdfBitStringOffset(void);
+  virtual ~BitStringOffset(void);
 
   /*!
    Copy Constructor
    */
-   prdfBitStringOffset(const prdfBitStringOffset &i_bs);
+   BitStringOffset(const BitStringOffset &i_bs);
 
    /*!
     Assignment
     */
-   prdfBitStringOffset & operator=(const prdfBitStringOffset & i_bs);
+   BitStringOffset & operator=(const BitStringOffset & i_bs);
 
    /*!
     Assignment
     */
-   virtual prdfBitStringOffset & operator=(const prdfBitString & i_bs);
+   virtual BitStringOffset & operator=(const BitString & i_bs);
 
 
 protected:  // functions
@@ -667,7 +671,7 @@ private:  // data
 
 
 std::ostream & operator<<( std::ostream & out,
-                      const prdfBitString & bit_string);
+                      const BitString & bit_string);
 
 #endif
 
@@ -692,7 +696,7 @@ std::ostream & operator<<( std::ostream & out,
 // End Function Specification //////////////////////////////////////
 
 inline
-CPU_WORD prdfBitString::RIGHT_SHIFT
+CPU_WORD BitString::RIGHT_SHIFT
 (
  uint32_t l,
  /*!i Length of bit field                                         */
@@ -723,7 +727,7 @@ CPU_WORD prdfBitString::RIGHT_SHIFT
 // End Function Specification //////////////////////////////////////
 
 inline
-CPU_WORD prdfBitString::LEFT_SHIFT
+CPU_WORD BitString::LEFT_SHIFT
 (
  uint32_t l,
  CPU_WORD value
@@ -733,9 +737,9 @@ CPU_WORD prdfBitString::LEFT_SHIFT
 }
 
 inline
-prdfBitString & prdfBitString::operator=
+BitString & BitString::operator=
 (
- const prdfBitString & string
+ const BitString & string
  )
 {
   ivLength = string.ivLength;
@@ -744,9 +748,9 @@ prdfBitString & prdfBitString::operator=
 }
 
 inline
-CPU_WORD * prdfBitString::GetRelativePositionAlloc(uint32_t & oBitOffset, uint32_t iBitPos)
+CPU_WORD * BitString::GetRelativePositionAlloc(uint32_t & oBitOffset, uint32_t iBitPos)
 {
-  return prdfBitString::GetRelativePosition(oBitOffset,iBitPos);
+  return BitString::GetRelativePosition(oBitOffset,iBitPos);
 }
 
 // Function Specification //////////////////////////////////////////
@@ -769,28 +773,29 @@ CPU_WORD * prdfBitString::GetRelativePositionAlloc(uint32_t & oBitOffset, uint32
 // End Function Specification //////////////////////////////////////
 
 inline
-void prdfBitString::Pattern(CPU_WORD pattern,uint32_t pattern_bit_length)
+void BitString::Pattern(CPU_WORD pattern,uint32_t pattern_bit_length)
 {
   Pattern(0, GetLength(), pattern, pattern_bit_length);
 }
 
 
 inline
-void prdfBitString::Pattern(CPU_WORD pattern)
+void BitString::Pattern(CPU_WORD pattern)
 {
   Pattern(0, GetLength(), pattern, sizeof(CPU_WORD));
 }
 
 
-inline uint32_t prdfBitString::GetSetCount(void) const
+inline uint32_t BitString::GetSetCount(void) const
 {
   return(GetSetCount(0, GetLength()));
 }
 
-inline void prdfBitString::SetBits(const prdfBitString & string)
+inline void BitString::SetBits(const BitString & string)
 {
   SetBits(string, 0, string.GetLength());
 }
 
+} // end namespace PRDF
 
 #endif

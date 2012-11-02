@@ -131,6 +131,8 @@ const PRD_FRU_AND_RC_LIMIT = 12;
 
 //#define MruCalloutDCL UINT16     /* How big a mru is in bits.         */
 
+namespace PRDF
+{
 
 typedef enum {
 
@@ -160,8 +162,7 @@ typedef enum {
   LAST_MRU,
   PRD_MAXMRUNUM = 0x7FFFFFFF}   MruCallout;
 
-
-
+} // end namespace PRDF
 
 #endif /* iipCallout_h */
 

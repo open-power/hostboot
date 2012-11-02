@@ -30,15 +30,17 @@
 #include <prdfPlatServices.H>
 #undef prdfClockResolution_C
 
+namespace PRDF
+{
+
 //------------------------------------------------------------------------------
 // Member Function Specifications
 //------------------------------------------------------------------------------
 
 // Find the active clock source and blame it
-int32_t PrdfClockResolution::Resolve(STEP_CODE_DATA_STRUCT & serviceData)
+int32_t ClockResolution::Resolve(STEP_CODE_DATA_STRUCT & serviceData)
 {
     using namespace TARGETING;
-    using namespace PRDF;
 
     uint32_t l_rc = SUCCESS;
     // Use clock routines for CLOCK_CARD types.
@@ -86,3 +88,4 @@ int32_t PrdfClockResolution::Resolve(STEP_CODE_DATA_STRUCT & serviceData)
     return(l_rc);
 }
 
+} // end namespace PRDF

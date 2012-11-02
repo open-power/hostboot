@@ -46,7 +46,7 @@
 //   ErrorRegister * er1 = new ResetErrorRegister(scr1,rm,scr2);
 //
 //     *** Using a Filter ****
-//  Filter * f =  new PriorityFileter(...);
+//  FilterClass * f =  new PriorityFilter(...);
 //  ErrorRegister * er = new ResetErrorRegister(scr1,rm,f);
 //  ErrorRegister *er1 = new ResetErrorRegister(scr1,rm,scr2,f);
 //
@@ -69,6 +69,9 @@
 
 #include <vector>
 #include <prdfResetOperators.H>
+
+namespace PRDF
+{
 
 //--------------------------------------------------------------------
 //  Forward References
@@ -311,6 +314,6 @@ class ResetAndMaskErrorRegister : public ErrorRegisterMask
         ResetRegisterVector cv_masks;
 };
 
-
+} // end namespace PRDF
 
 #endif /* iipResetErrorRegister_h */

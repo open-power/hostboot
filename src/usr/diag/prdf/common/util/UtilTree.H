@@ -31,6 +31,9 @@
 
 #include <iostream>
 
+namespace PRDF
+{
+
 namespace UtilTreeSTD
 {
     template <class _A, class _B>
@@ -170,12 +173,7 @@ class UtilTree
         iterator begin() const;
 };
 
+} // end namespace PRDF
+
 #endif
 
-// Change Log *********************************************************
-//
-//  Flag Reason   Vers Date     Coder    Description
-//  ---- -------- ---- -------- -------- -------------------------------
-//       F494911  f310 03/04/05 iawillia Initial File Creation
-//
-// End Change Log *****************************************************

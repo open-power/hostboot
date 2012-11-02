@@ -29,16 +29,19 @@
 
 #include <prdfPluginDef.H>
 
-class PrdfDataBundle;
+namespace PRDF
+{
 
-class PrdfExtensibleChip : public CHIP_CLASS
+class DataBundle;
+
+class ExtensibleChip : public CHIP_CLASS
 {
   public:
-    PrdfExtensibleChip( TARGETING::TargetHandle_t i_target ) :
+    ExtensibleChip( TARGETING::TargetHandle_t i_target ) :
         CHIP_CLASS(i_target)
     {}
 
-    virtual PrdfExtensibleChipFunction * getExtensibleFunction(
+    virtual ExtensibleChipFunction * getExtensibleFunction(
                                             const char * i_func,
                                             bool i_expectNull = false ) = 0;
 
@@ -46,7 +49,7 @@ class PrdfExtensibleChip : public CHIP_CLASS
                                             const char * i_reg,
                                             bool i_expectNull = false ) = 0;
 
-    virtual PrdfDataBundle *& getDataBundle() = 0;
+    virtual DataBundle *& getDataBundle() = 0;
 
     /**
      * Add Capture data to the Capture Data object
@@ -58,11 +61,13 @@ class PrdfExtensibleChip : public CHIP_CLASS
     virtual uint32_t getSignatureOffset() const = 0;
 };
 
-class PrdfDataBundle
+class DataBundle
 {
   public:
-    virtual ~PrdfDataBundle() {};
+    virtual ~DataBundle() {};
 };
+
+} // end namespace PRDF
 
 #endif
 

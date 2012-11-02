@@ -55,6 +55,9 @@
 //  Forward References
 //--------------------------------------------------------------------
 
+namespace PRDF
+{
+
 /**
  Convert a chipid to a mru callout
  @author Douglas R. Gilbert
@@ -137,6 +140,7 @@ private:  // Data
 
 };
 
+} // end namespace PRDF
 
 #endif /* iipCalloutMap_h */
 

@@ -53,6 +53,9 @@
 #include <iipMopRegisterAccess.h>
 #endif
 
+namespace PRDF
+{
+
 // Forward References
 class MopRegisterAccessScanComm : public MopRegisterAccess
 {
@@ -148,17 +151,6 @@ private: // DATA
 
 };
 
-//#include <iipMopRegisterAccessScanComm.inl>  // dg00
-
-// Change Log **********************************************************
-//
-//  Flag  PTR/DCR#  Userid    Date      Description
-//  ----  --------  --------  --------  -----------
-//  n/a   n/a       JST       09/08/95  Created.
-//        v4r3      DGILBERT  05/19/96  Modified Access()
-//  dg00  365764    dgilbert  04/19/02  remove inlines
-//
-// End Change Log ******************************************************
-
+} // end namespace PRDF
 
 #endif

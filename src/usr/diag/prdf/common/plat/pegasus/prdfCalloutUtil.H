@@ -28,10 +28,11 @@
  *  @brief Utility functions for common, non-trivial callouts.
  */
 
-struct STEP_CODE_DATA_STRUCT;
-
 namespace PRDF
 {
+
+struct STEP_CODE_DATA_STRUCT;
+
 namespace CalloutUtil
 {
 

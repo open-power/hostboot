@@ -45,6 +45,10 @@
 #endif
 
 #include <iipsdbug.h>
+
+namespace PRDF
+{
+
 //--------------------------------------------------------------------
 //  Forward References
 //--------------------------------------------------------------------
@@ -114,7 +118,7 @@ protected:
   //
   // End Function Specification ****************************************
 
-  virtual prdfBitKey Filter(const BIT_STRING_CLASS & bs) = 0;
+  virtual BitKey Filter(const BIT_STRING_CLASS & bs) = 0;
   // Function Specification ********************************************
   //
   // Purpose:      Filter out unwanted bits in the bit string.
@@ -129,7 +133,7 @@ protected:
   //
   // End Function Specification ****************************************
 
-  virtual bool FilterUndo(prdfBitKey & i_bit_list) = 0;
+  virtual bool FilterUndo(BitKey & i_bit_list) = 0;
 
   /**
    Find a resolution for the Bit List
@@ -144,9 +148,9 @@ protected:
                             Resolution Map then the ResolutionMap default is used
    </ul><br>
    */
-  virtual int32_t Lookup(STEP_CODE_DATA_STRUCT & sdc, prdfBitKey & bl) = 0; //dg02c
+  virtual int32_t Lookup(STEP_CODE_DATA_STRUCT & sdc, BitKey & bl) = 0;
 
-  virtual int32_t Reset(const prdfBitKey & bit_list,STEP_CODE_DATA_STRUCT & error) = 0;
+  virtual int32_t Reset(const BitKey & bit_list,STEP_CODE_DATA_STRUCT & error) = 0;
   // Function Specification ********************************************
   //
   // Purpose:      Reset the hardware & perform any other actions needed
@@ -164,6 +168,7 @@ protected:
 
 };
 
+} // end namespace PRDF
 
 #endif /* iipErrorRegisterType_h */
 

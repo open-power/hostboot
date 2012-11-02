@@ -49,7 +49,7 @@ namespace Membuf
  * @param  i_mbaChip A Centaur Membuf chip.
  * @return SUCCESS
  */
-int32_t Initialize( PrdfExtensibleChip * i_mbaChip )
+int32_t Initialize( ExtensibleChip * i_mbaChip )
 {
     // FIXME: need to implement
     return SUCCESS;
@@ -63,7 +63,7 @@ PRDF_PLUGIN_DEFINE( Membuf, Initialize );
  * @brief Used when the chip has a CHECK_STOP attention to check for the
  * presence of recovered errors.
  */
-int32_t CheckForRecovered(PrdfExtensibleChip * i_chip,
+int32_t CheckForRecovered(ExtensibleChip * i_chip,
                           bool & o_hasRecovered)
 {
     //FIXME: need to fully implement for Membuf
@@ -87,7 +87,7 @@ int32_t CheckForRecovered(PrdfExtensibleChip * i_chip,
  *         done after the framework clears the FIR bits that were at attention.
  * @return SUCCESS.
  */
-int32_t PostAnalysis( PrdfExtensibleChip * i_membufChip,
+int32_t PostAnalysis( ExtensibleChip * i_membufChip,
                       STEP_CODE_DATA_STRUCT & i_sc )
 {
     //FIXME: need to implement

@@ -54,6 +54,9 @@
   #include <prdfMfgThresholdMgr.H>
 #endif
 
+namespace PRDF
+{
+
 //----------------------------------------------------------------------
 //  User Types
 //----------------------------------------------------------------------
@@ -102,9 +105,9 @@ System::~System(void)
     ResolutionFactory::Access().Reset();
 
 #ifndef __HOSTBOOT_MODULE
-    // FIXME: need to implement PrdfMfgThresholdMgr in Hostboot
+    // FIXME: need to implement MfgThresholdMgr in Hostboot
     // clear the MfgThresholdMgr
-    PrdfMfgThresholdMgr::getInstance()->reset();
+    MfgThresholdMgr::getInstance()->reset();
 #endif
 
     // clear the threshold policies
@@ -148,8 +151,6 @@ Domain * System::GetDomain(DOMAIN_ID domainId)
 void System::AddChips(ChipContainerIterator begin,
                       ChipContainerIterator end)
 {
-    using namespace PRDF;
-
     size_t l_size = 0;
     if(begin < end) l_size = end-begin;
     else l_size = begin-end;
@@ -189,8 +190,6 @@ void System::RemoveStoppedChips(TARGETING::TargetHandle_t i_pchipHandle)
 
 void System::RemoveNonFunctionalChips()
 {
-    using namespace PRDF;
-
     ChipMapType l_chips;
 
     for(ChipMapType::iterator chipIterator = chips.begin();
@@ -255,8 +254,6 @@ void System::Initialize(void)
 int System::Analyze(STEP_CODE_DATA_STRUCT & serviceData,
                     ATTENTION_TYPE attentionType)
 {
-    using namespace PRDF;
-
     SYSTEM_DEBUG_CLASS sysdebug;
     Domain * domainAtAttentionPtr = NULL;
     ServiceDataCollector * l_saved_sdc = NULL;
@@ -336,3 +333,6 @@ int System::Analyze(STEP_CODE_DATA_STRUCT & serviceData,
 
     return(rc);
 }
+
+} // end namespace PRDF
+

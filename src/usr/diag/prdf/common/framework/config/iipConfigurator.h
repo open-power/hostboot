@@ -76,15 +76,16 @@
 #include <prdfMain.H>
 
 #include <vector>
+
+namespace PRDF
+{
+
 /*--------------------------------------------------------------------*/
 /*  Forward References                                                */
 /*--------------------------------------------------------------------*/
 class CHIP_CLASS;
 class Domain;
 class System;
-
-namespace PRDF
-{
 
 class Configurator
 {

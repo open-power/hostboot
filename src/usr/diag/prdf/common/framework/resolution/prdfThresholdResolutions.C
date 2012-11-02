@@ -45,6 +45,9 @@
 //  Global Variables
 //----------------------------------------------------------------------
 
+namespace PRDF
+{
+
 // This is global varaible for stroring threshold policy instances.
 // It must be cleared in prdf uninitialize
 FlyWeight<ThresholdResolution::ThresholdPolicy, 10> g_thresholdPFW;
@@ -72,7 +75,6 @@ const ThresholdResolution::ThresholdPolicy ThresholdResolution::cv_pllDefault
 //----------------------------------------------------------------------
 //  Internal Function Prototypes
 //----------------------------------------------------------------------
-
 
 //---------------------------------------------------------------------
 // Member Function Specifications
@@ -132,7 +134,7 @@ ThresholdResolution::ThresholdResolution( uint32_t maskId,
 int32_t ThresholdResolution::Resolve(STEP_CODE_DATA_STRUCT & error)
 {
   int32_t rc = SUCCESS;
-  PrdTimer curTime = error.service_data->GetTOE();    // get timestamp (Time Of Error) from SDC
+  Timer curTime = error.service_data->GetTOE();    // get timestamp (Time Of Error) from SDC
   ++iv_count;
   error.service_data->SetHits((uint8_t)iv_count);
   error.service_data->SetThreshold((uint8_t)iv_policy->threshold);
@@ -215,7 +217,7 @@ int32_t ThresholdSigResolution::Resolve(STEP_CODE_DATA_STRUCT & error)
 {
     int32_t l_rc = SUCCESS;
 
-    PrdTimer l_curTime = error.service_data->GetTOE();
+    Timer l_curTime = error.service_data->GetTOE();
     ErrorSignature l_sig = *error.service_data->GetErrorSignature();
     ThresholdCountAndTimer & l_countTime = iv_thresholds[l_sig];
 
@@ -257,3 +259,5 @@ int32_t ThresholdSigResolution::Resolve(STEP_CODE_DATA_STRUCT & error)
 
     return l_rc;
 }
+
+} // end namespace PRDF

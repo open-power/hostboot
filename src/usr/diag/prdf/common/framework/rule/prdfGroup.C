@@ -28,7 +28,10 @@
 #include <prdfMain.H>
 #include <iipServiceDataCollector.h>
 
-PrdfGroup::~PrdfGroup()
+namespace PRDF
+{
+
+Group::~Group()
 {
     RegisterList_t::const_iterator l_errRegsEnd = cv_errRegs.end();
     for (RegisterList_t::const_iterator i = cv_errRegs.begin();
@@ -56,9 +59,8 @@ PrdfGroup::~PrdfGroup()
     }
 }
 
-int32_t PrdfGroup::Analyze(STEP_CODE_DATA_STRUCT & i_step)
+int32_t Group::Analyze(STEP_CODE_DATA_STRUCT & i_step)
 {
-    using namespace PRDF;
     int32_t l_rc = -1;
     ServiceDataCollector l_backupStep(*i_step.service_data);
     int32_t l_tmpRC = SUCCESS;
@@ -87,21 +89,21 @@ int32_t PrdfGroup::Analyze(STEP_CODE_DATA_STRUCT & i_step)
     return l_rc;
 };
 
-void PrdfGroup::Add(SCAN_COMM_REGISTER_CLASS * i_reg,
+void Group::Add(SCAN_COMM_REGISTER_CLASS * i_reg,
                     const uint8_t * i_bits,
                     size_t i_bitSize,
                     Resolution & i_action,
-                    PrdfResetAndMaskPair & i_resets,
+                    ResetAndMaskPair & i_resets,
                     uint16_t i_scrID,
                     bool i_reqTranspose)
 {
-    prdfFilter * l_transposeFilter = NULL;
+    FilterClass * l_transposeFilter = NULL;
     uint8_t l_bits[1] = { '\0' };
     ResolutionMap * l_res = cv_resMaps[i_reg];
 
     if (NULL == l_res)
     {
-        l_res = cv_resMaps[i_reg] = new prdfResolutionMap(1, cv_defaultRes);
+        l_res = cv_resMaps[i_reg] = new ResolutionMap(1, cv_defaultRes);
         ResetAndMaskErrorRegister * l_errReg =
                 new ResetAndMaskErrorRegister(*i_reg, *l_res, i_scrID);
         cv_errRegs.push_back(l_errReg);
@@ -137,8 +139,8 @@ void PrdfGroup::Add(SCAN_COMM_REGISTER_CLASS * i_reg,
     if (i_reqTranspose)
     {
         // Create key and transposition filter.  Add to filter list.
-        prdfBitKey l_tmpKey(i_bits, i_bitSize);
-        l_transposeFilter = new prdfFilterTranspose(l_tmpKey,
+        BitKey l_tmpKey(i_bits, i_bitSize);
+        l_transposeFilter = new FilterTranspose(l_tmpKey,
                                                     cv_nextBitForTranspose);
         cv_filters.push_back(l_transposeFilter);
 
@@ -163,16 +165,16 @@ void PrdfGroup::Add(SCAN_COMM_REGISTER_CLASS * i_reg,
     l_res->Add(i_bits, i_bitSize, &i_action);
 };
 
-void PrdfGroup::Add(SCAN_COMM_REGISTER_CLASS * i_reg,
+void Group::Add(SCAN_COMM_REGISTER_CLASS * i_reg,
                     Resolution & i_action,
-                    PrdfResetAndMaskPair & i_resets,
+                    ResetAndMaskPair & i_resets,
                     uint16_t i_scrID)
 {
     ResolutionMap * l_res = cv_resMaps[i_reg];
 
     if (NULL == l_res)
     {
-        l_res = cv_resMaps[i_reg] = new prdfResolutionMap(1, cv_defaultRes);
+        l_res = cv_resMaps[i_reg] = new ResolutionMap(1, cv_defaultRes);
         ResetAndMaskErrorRegister * l_errReg =
                 new ResetAndMaskErrorRegister(*i_reg, *l_res, i_scrID);
         cv_errRegs.push_back(l_errReg);
@@ -208,7 +210,7 @@ void PrdfGroup::Add(SCAN_COMM_REGISTER_CLASS * i_reg,
 
 };
 
-void PrdfGroup::AddFilter(prdfFilter * i_filter)
+void Group::AddFilter(FilterClass * i_filter)
 {
     // Add to filter list, for deallocation later.
     cv_filters.push_back(i_filter);
@@ -219,7 +221,7 @@ void PrdfGroup::AddFilter(prdfFilter * i_filter)
         i++)
     {
         // Get old filter.
-        prdfFilter * l_filter = ((ResolutionMap *)(*i).second)->getFilter();
+        FilterClass * l_filter = ((ResolutionMap *)(*i).second)->getFilter();
 
         // Need new filter link?
         if (NULL != l_filter)
@@ -243,37 +245,26 @@ void PrdfGroup::AddFilter(prdfFilter * i_filter)
 
 
 
-const BIT_STRING_CLASS & PrdfGroup::Read(ATTENTION_TYPE i_attn)
+const BIT_STRING_CLASS & Group::Read(ATTENTION_TYPE i_attn)
 {
     static BIT_STRING_BUFFER_CLASS a(64);
     return a;
 };
 
-BIT_LIST_CLASS PrdfGroup::Filter(const BIT_STRING_CLASS & i)
+BIT_LIST_CLASS Group::Filter(const BIT_STRING_CLASS & i)
 {
     return BIT_LIST_CLASS();
 };
 
-int32_t PrdfGroup::Lookup(STEP_CODE_DATA_STRUCT & i_step, BIT_LIST_CLASS & b)
+int32_t Group::Lookup(STEP_CODE_DATA_STRUCT & i_step, BIT_LIST_CLASS & b)
 {
     return -1;
 };
 
-int32_t PrdfGroup::Reset(const BIT_LIST_CLASS & b, STEP_CODE_DATA_STRUCT & i_step)
+int32_t Group::Reset(const BIT_LIST_CLASS & b, STEP_CODE_DATA_STRUCT & i_step)
 {
     return -1;
 };
 
-// Change Log *********************************************************
-//
-//  Flag Reason   Vers Date     Coder    Description
-//  ---- -------- ---- -------- -------- -------------------------------
-//       F494911  f310 03/04/05 iawillia Initial File Creation
-//         F510901  f300 07/15/05 iawillia Add support for resets/masks.
-//         D520844  f300 09/14/05 iawillia Add destructor to free memory.
-//         D515833  f300 09/19/05 iawillia Use VMap instead of Map.
-//         F544848  f300 04/03/06 iawillia Add multi-bit support.
-//         F548507  f300 04/21/06 iawillia Prevent multiple reset/masks.
-//         F557408  f310 06/16/06 iawillia Add single-bit filter support.
-//  pw01 D568068  f310 08/29/06 iawillia Fix filter order.
-// End Change Log *****************************************************
+} // end namespace PRDF
+

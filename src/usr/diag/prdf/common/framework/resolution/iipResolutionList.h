@@ -52,6 +52,9 @@
 
 #include <vector>
 
+namespace PRDF
+{
+
 //--------------------------------------------------------------------
 //  Forward References
 //--------------------------------------------------------------------
@@ -173,13 +176,7 @@ ResolutionList::ResolutionList(Resolution * r1,Resolution * r2,
   resolutionList.push_back(r6);
 }
 
+} // end namespace PRDF
 
 #endif /* iipResolutionList_h */
 
-// Change Log *********************************************************
-//
-//  Flag Reason   Vers Date     Coder Description
-//  ---- -------- ---- -------- ----- -------------------------------
-//       d24758.1 v4r1 05/30/96 DRG   Initial Creation
-//
-// End Change Log *****************************************************

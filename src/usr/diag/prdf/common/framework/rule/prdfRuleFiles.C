@@ -40,6 +40,6 @@ namespace PRDF
     const char * Membuf = "Membuf";
     const char * Mba    = "Mba";
 
-};
+} // end namespace PRDF
 
 #endif

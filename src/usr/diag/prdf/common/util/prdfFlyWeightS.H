@@ -27,6 +27,8 @@
 #include <stdint.h>
 #include <vector>
 
+namespace PRDF
+{
 template<class T, uint32_t S>
 class FlyWeightS
 {
@@ -71,5 +73,5 @@ class FlyWeightS
 
         void increaseSize();
 };
-
+} //End namespace PRDF
 #endif

@@ -41,6 +41,9 @@
 #include <iipResolution.h>
 #endif
 
+namespace PRDF
+{
+
 //--------------------------------------------------------------------
 //  Forward References
 //--------------------------------------------------------------------
@@ -100,6 +103,7 @@ private:  // Data
 
 };
 
+} // end namespace PRDF
 
 #endif /* iipAnalyzeChipResolution_h */
 

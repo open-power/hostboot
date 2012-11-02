@@ -99,9 +99,9 @@ void getECIDString( TARGETING::TargetHandle_t i_pGivenHandle, const char *o_ecid
 
 /**
  * @brief Get a PRD timer value based on the current time.
- * @param o_timer The returned PrdTimer
+ * @param o_timer The returned Timer
  */
-void getCurrentTime( PrdTimer & o_timer );
+void getCurrentTime( Timer & o_timer );
 
 /**
  * @brief   synch the file with rmgr

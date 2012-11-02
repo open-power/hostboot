@@ -41,7 +41,8 @@
 //--------------------------------------------------------------------
 //
 //
-
+namespace PRDF
+{
 #if defined(ESW_SIM_COMPILE)
 class FlyWeightBase
 {
@@ -125,7 +126,7 @@ private:  // Data
   T * iv_nextOpen;
 };
 
-
+} //End namespace PRDF
 #endif /* PRDFFLYWEIGHT_H */
 
 // Change Log *****************************************************************

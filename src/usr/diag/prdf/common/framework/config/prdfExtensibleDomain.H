@@ -27,13 +27,16 @@
 #include <prdfPluginDef.H>
 #include <prdfExtensibleChip.H>
 
-class PrdfExtensibleDomain
+namespace PRDF
+{
+
+class ExtensibleDomain
 {
     public:
-        PrdfExtensibleDomain(const char * i_domainName) :
+        ExtensibleDomain(const char * i_domainName) :
                 iv_domainName(i_domainName), iv_dataBundle(NULL) {};
 
-        virtual ~PrdfExtensibleDomain()
+        virtual ~ExtensibleDomain()
             {
                 if (NULL != iv_dataBundle)
                 {
@@ -42,16 +45,18 @@ class PrdfExtensibleDomain
                 }
             };
 
-        virtual PrdfExtensibleDomainFunction *
+        virtual ExtensibleDomainFunction *
             getExtensibleFunction(const char * i_func,
                                   bool i_expectNull = false);
 
-        virtual PrdfDataBundle *& getDataBundle() { return iv_dataBundle; };
+        virtual DataBundle *& getDataBundle() { return iv_dataBundle; };
 
     private:
         const char * iv_domainName;
-        PrdfDataBundle * iv_dataBundle;
+        DataBundle * iv_dataBundle;
 
 };
+
+} // end namespace PRDF
 
 #endif //__PRDFEXTENSIBLEDOMAIN_H

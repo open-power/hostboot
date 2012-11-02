@@ -26,7 +26,10 @@
 
 #include <prdfRuleChipDomain.H>
 
-class PrdfMbaDomain : public PrdfRuleChipDomain
+namespace PRDF
+{
+
+class MbaDomain : public RuleChipDomain
 {
   public:
 
@@ -35,8 +38,8 @@ class PrdfMbaDomain : public PrdfRuleChipDomain
      * @param i_did  The domain ID
      * @param i_size The projected size of the domain
      */
-    PrdfMbaDomain( DOMAIN_ID i_did, uint32_t i_size = MBA_DOMAIN_SIZE ) :
-        PrdfRuleChipDomain( i_did, i_size )
+    MbaDomain( DOMAIN_ID i_did, uint32_t i_size = MBA_DOMAIN_SIZE ) :
+        RuleChipDomain( i_did, i_size )
     {}
 
     /**
@@ -50,6 +53,8 @@ class PrdfMbaDomain : public PrdfRuleChipDomain
     {  return false;  }
 
 };
+
+} // end namespace PRDF
 
 #endif /* __PRDFMBADOMAIN_H */
 

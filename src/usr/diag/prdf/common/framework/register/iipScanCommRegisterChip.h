@@ -64,6 +64,8 @@
 #include <iipbits.h>
 #endif
 
+namespace PRDF
+{
 
 // Forward References
 class CHIP_CLASS;
@@ -154,7 +156,8 @@ public:
   //
   // End Function Specification ****************************************
 
-  virtual const BIT_STRING_CLASS * GetBitString(ATTENTION_TYPE i_type = PRDF::INVALID_ATTENTION_TYPE) const
+  virtual const BIT_STRING_CLASS * GetBitString(
+                        ATTENTION_TYPE i_type = INVALID_ATTENTION_TYPE ) const
   { return &xBitString; }
   // Function Specification ********************************************
   //
@@ -210,17 +213,6 @@ private: // Data
 
 };
 
-// Change Log **********************************************************
-//
-//  Flag  PTR/DCR#  Userid    Date      Description
-//  ----  --------  --------  --------  -----------
-//  n/a   n/a       JST       04/18/95  Created.
-//        D49127.7  DGILBERT  09/20/96  Added xBitString, Get/SetBitString()
-//                                      AccessBitString()
-//                  DGILBERT  05/27/97  V4R3 changes
-//                  dgilbert  10/02/02  fips changes
-//
-// End Change Log ******************************************************
-
+} // end namespace PRDF
 
 #endif

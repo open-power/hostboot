@@ -46,13 +46,10 @@
 #include <iipEregResolution.h>
 #include <iipsdbug.h>
 #include <iipResolutionList.h>
-//#include <iipThresholdResolution.h>
 #include <iipCallAttnResolution.h>
 #include <iipTerminateResolution.h>
 #include <iipAnalyzeChipResolution.h>
 #include <xspprdTryResolution.h>
-//#include <prdfResetThresholdResolution.H>
-//#include <prdfIntervalThresholdResolution.H>
 #include <iipchip.h>
 #include <prdfCalloutConnected.H>
 #include <prdfAnalyzeConnected.H>
@@ -60,7 +57,8 @@
 
 #undef iipResolution_C
 
-using namespace PRDF;
+namespace PRDF
+{
 
 //----------------------------------------------------------------------
 //  User Types
@@ -203,7 +201,7 @@ int32_t TryResolution::Resolve(STEP_CODE_DATA_STRUCT & error)
     return rc;
 }
 
-int32_t prdfCalloutConnected::Resolve(STEP_CODE_DATA_STRUCT & serviceData)
+int32_t CalloutConnected::Resolve(STEP_CODE_DATA_STRUCT & serviceData)
 {
     using namespace TARGETING;
 
@@ -253,10 +251,9 @@ int32_t prdfCalloutConnected::Resolve(STEP_CODE_DATA_STRUCT & serviceData)
 //--------------------------------------------------------------------
 // AnalyzeConnected Member Functions
 //--------------------------------------------------------------------
-int32_t PrdfAnalyzeConnected::Resolve(STEP_CODE_DATA_STRUCT & serviceData)
+int32_t AnalyzeConnected::Resolve(STEP_CODE_DATA_STRUCT & serviceData)
 {
     using namespace TARGETING;
-    using namespace PRDF;
 
     CHIP_CLASS * l_connChipObj = NULL;
     TARGETING::TargetHandle_t l_pconnChipTarget = NULL;
@@ -304,54 +301,5 @@ int32_t PrdfAnalyzeConnected::Resolve(STEP_CODE_DATA_STRUCT & serviceData)
         return PRD_UNRESOLVED_CHIP_CONNECTION;
 }
 
-//--------------------------------------------------------------------
-// ResetThresholdResolution Member Functions
-//--------------------------------------------------------------------
+} // end namespace PRDF
 
-#if defined(_OBSOLITE_)
-int32_t ResetThresholdResolution::Resolve(STEP_CODE_DATA_STRUCT & error)
-{
-    ++count;
-    error.service_data->SetHits((uint16_t)count);
-    error.service_data->SetThreshold((uint16_t)threshold);
-    if((count == threshold) || (error.service_data->IsFlooding()))
-    {
-        error.service_data->SetThresholdMaskId(maskId);  // threshold, degraded YES
-        count = 0;                                       // Reset the counter when threshold is hit
-    }
-    int32_t rc = SUCCESS;
-    //  if(xRes != NULL) rc = xRes->Resolve(error);
-    return rc;
-}
-//--------------------------------------------------------------------
-// IntervalThresholdResolution Member Functions
-//--------------------------------------------------------------------
-
-int32_t IntervalThresholdResolution::Resolve(STEP_CODE_DATA_STRUCT & error)
-{
-    PrdTimer curTime = error.service_data->GetTOE();       // get timestamp (Time Of Error) from SDC;
-    ++count;
-    if (count == 1)                                        // The interval begins now at the first occurrence
-        intervalEndTime = curTime + intervalLength;        // Project the end of interval (intervalLength is in seconds)
-    else
-    {
-        if (curTime > intervalEndTime)                      // See if we're already past the time window
-        {
-            count = 1;                                      // Reset count as if it were the first
-            intervalEndTime = curTime + intervalLength;     // Project the new end of interval (intervalLength is in seconds)
-        }
-        else if((count == threshold) || (error.service_data->IsFlooding())) // We've hit threshold within the interval
-        {
-            error.service_data->SetThresholdMaskId(maskId);  // threshold, degraded YES
-            count = 0;                                       // Reset the counter when threshold is hit
-        }
-        else ;                                              // Nothing else--the count is already incremented
-    }
-    error.service_data->SetHits((uint16_t)count);
-    error.service_data->SetThreshold((uint16_t)threshold);
-
-    int32_t rc = SUCCESS;
-    //  if(xRes != NULL) rc = xRes->Resolve(error);
-    return rc;
-}
-#endif

@@ -24,24 +24,28 @@
 #include <prdfErrlSmartPtr.H>
 #include <iipglobl.h>
 
+namespace PRDF
+{
+
 /* void add_src()
  *         Add special SRC to error log specifying commited from smart
  *         pointer.
  */
-void PrdfErrlSmartPtr::add_src()
+void ErrlSmartPtr::add_src()
 {
 
     if (iv_errl)
     {
-        PRDF_ADD_SW_ERR(iv_errl, 0, PRDF_ERRLSMARTPTR, __LINE__);
-        PRDF_ADD_PROCEDURE_CALLOUT(iv_errl, SRCI_PRIORITY_MED, EPUB_PRC_SP_CODE);
+        PRDF_ADD_SW_ERR( iv_errl, 0, PRDF_ERRLSMARTPTR, __LINE__ );
+        PRDF_ADD_PROCEDURE_CALLOUT( iv_errl, SRCI_PRIORITY_MED,
+                                    EPUB_PRC_SP_CODE );
     }
-};
+}
 
 /* void commit_errl()
  *        Commit error log and delete.
  */
-void PrdfErrlSmartPtr::commit_errl()
+void ErrlSmartPtr::commit_errl()
 {
     if (iv_errl)
     {
@@ -49,5 +53,7 @@ void PrdfErrlSmartPtr::commit_errl()
 
         PRDF_COMMIT_ERRL(iv_errl, ERRL_ACTION_REPORT);
     }
-};
+}
+
+} // end namespace PRDF
 

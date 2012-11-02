@@ -90,6 +90,9 @@
 
 #include <iipsdbug.h>    // Include file for ATTENTION_TYPE
 
+namespace PRDF
+{
+
 // Forward Declarations
 class CHIP_CLASS;
 class Domain;
@@ -308,5 +311,6 @@ class System
     Resolution & noAttnResolution;
   };
 
+} // end namespace PRDF
 
 #endif

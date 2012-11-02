@@ -60,16 +60,14 @@
 // Member Function Specifications
 //---------------------------------------------------------------------
 
+namespace PRDF
+{
+
 int32_t GardResolution::Resolve(STEP_CODE_DATA_STRUCT & error)
 {
   error.service_data->Gard(xErrorType);
   return SUCCESS;
 }
 
-// Change Log *********************************************************
-//
-//  Flag Reason   Vers Date     Coder    Description
-//  ---- -------- ---- -------- -------- ------------------------------
-//                              DGILBERT Initial Creation
-//
-// End Change Log *****************************************************
+} // end namespace PRDF
+

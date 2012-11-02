@@ -37,6 +37,9 @@
 #include <targeting/common/target.H>
 #include <errlentry.H>
 
+namespace PRDF
+{
+
 //--------------------------------------------------------------------
 //  Forward References
 //--------------------------------------------------------------------
@@ -60,7 +63,7 @@ enum l3TableEnum
   <br><b>Notes:       </b>
   </ul><br>
 */
-extern int32_t prdfL3TableAdd(TARGETING::TargetHandle_t i_pl3targetHandle, uint32_t address);
+extern int32_t L3TableAdd(TARGETING::TargetHandle_t i_pl3targetHandle, uint32_t address);
 
  /**
   Copies the line delete table to memory address passed in
@@ -73,7 +76,7 @@ extern int32_t prdfL3TableAdd(TARGETING::TargetHandle_t i_pl3targetHandle, uint3
   <br><b>Notes:       </b>
   </ul><br>
 */
-extern void prdfL3TableGet(TARGETING::TargetHandle_t i_pl3targetHandle, uint32_t table[LineDeleteTableSize]);
+extern void L3TableGet(TARGETING::TargetHandle_t i_pl3targetHandle, uint32_t table[LineDeleteTableSize]);
 
  /**
   Get the count of line deletes in the table
@@ -101,13 +104,7 @@ extern int32_t prdfL3TableCount(TARGETING::TargetHandle_t i_pl3targetHandle);
 */
 extern errlHndl_t prdfL3LineDelete(TARGETING::TargetHandle_t i_pl3targetHandle, uint32_t address);
 
+} // end namespace PRDF
 
 #endif /* PRDFL3TABLE_H */
 
-// Change Log *****************************************************************
-//
-//  Flag Reason Vers     Date     Coder    Description
-//  ---- ------ -------- -------- -------- ------------------------------------
-//       485074 fips310  12/14/04 dgilbert Initial Creation from prdfGrL3Table.H
-//
-// End Change Log *************************************************************

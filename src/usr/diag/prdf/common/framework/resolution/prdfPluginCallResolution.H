@@ -28,28 +28,31 @@
 #include <prdfExtensibleChip.H>
 #include <prdfPluginDef.H>
 
-class PrdfPluginCallResolution : public Resolution
+namespace PRDF
+{
+
+class PluginCallResolution : public Resolution
 {
     private:
-        PrdfExtensibleChip * iv_chip;
-        PrdfExtensibleChipFunction * iv_function;
+        ExtensibleChip * iv_chip;
+        ExtensibleChipFunction * iv_function;
 
     public:
-        PrdfPluginCallResolution(void)
+        PluginCallResolution(void)
           : iv_chip(NULL), iv_function(NULL) {}
 
-        PrdfPluginCallResolution(PrdfExtensibleChip * i_chip,
-                                 PrdfExtensibleChipFunction * i_function)
+        PluginCallResolution(ExtensibleChip * i_chip,
+                                 ExtensibleChipFunction * i_function)
             : iv_chip(i_chip), iv_function(i_function) {};
 
-        PrdfPluginCallResolution & operator=(const PrdfPluginCallResolution & r)
+        PluginCallResolution & operator=(const PluginCallResolution & r)
         {
           iv_chip = r.iv_chip;
           iv_function = r.iv_function;
           return *this;
         }
 
-        bool operator==(const PrdfPluginCallResolution & r)
+        bool operator==(const PluginCallResolution & r)
         {
           return (iv_chip == r.iv_chip)&&(iv_function == r.iv_function);
         }
@@ -61,21 +64,14 @@ class PrdfPluginCallResolution : public Resolution
 
                 return (*iv_function)
                     (iv_chip,
-                     PrdfPluginDef::bindParm<STEP_CODE_DATA_STRUCT&>(i_error)
+                     PluginDef::bindParm<STEP_CODE_DATA_STRUCT&>(i_error)
                     ); //@pw01
 
             };
 
 };
 
-#endif
+} // end namespace PRDF
 
-// Change Log *********************************************************
-//
-//  Flag Reason   Vers Date     Coder    Description
-//  ---- -------- ---- -------- -------- -------------------------------
-//                              iawillia initial creation
-//       F522283  f300 09/27/05 dgilbert add defaut ctor, operator==, operator=
-//  pw01 F522638  f300 09/27/05 iawillia Fix possible object strip in bindParm.
-// End Change Log *****************************************************
+#endif
 

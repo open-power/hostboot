@@ -49,6 +49,10 @@
 #include <iipconst.h>
 #include <iipglobl.h>
 #undef iipErrorRegister_C
+
+namespace PRDF
+{
+
 //----------------------------------------------------------------------
 //  User Types
 //----------------------------------------------------------------------
@@ -73,10 +77,9 @@
 // Member Function Specifications
 //---------------------------------------------------------------------
 
-int32_t ErrorRegister::SetErrorSignature(STEP_CODE_DATA_STRUCT & error,prdfBitKey & bl)
+int32_t ErrorRegister::SetErrorSignature( STEP_CODE_DATA_STRUCT & error,
+                                          BitKey & bl )
 {
-  using namespace PRDF;
-
   int32_t rc = SUCCESS;
   ErrorSignature * esig = error.service_data->GetErrorSignature();
   uint32_t blen = bl.size();
@@ -103,20 +106,19 @@ int32_t ErrorRegister::SetErrorSignature(STEP_CODE_DATA_STRUCT & error,prdfBitKe
 
 /*---------------------------------------------------------------------*/
 
-ErrorRegister::ErrorRegister
-(SCAN_COMM_REGISTER_CLASS & r, prdfResolutionMap & rm, uint16_t scrId)
-: ErrorRegisterType(), scr(r), scr_rc(SUCCESS), rMap(rm),  xNoErrorOnZeroScr(false), xScrId(scrId)
+ErrorRegister::ErrorRegister( SCAN_COMM_REGISTER_CLASS & r, ResolutionMap & rm,
+                              uint16_t scrId ) :
+    ErrorRegisterType(), scr(r), scr_rc(SUCCESS), rMap(rm),
+    xNoErrorOnZeroScr(false), xScrId(scrId)
 {
-  PRDF_ASSERT(&r != NULL);
-  PRDF_ASSERT(&rm != NULL);
+    PRDF_ASSERT( &r  != NULL );
+    PRDF_ASSERT( &rm != NULL );
 }
 
 /*---------------------------------------------------------------------*/
 
 int32_t ErrorRegister::Analyze(STEP_CODE_DATA_STRUCT & error)
 {
-  using namespace PRDF;
-
   int32_t rc = SUCCESS;
 
   uint32_t l_savedErrSig = 0;  // @pw01
@@ -132,7 +134,7 @@ int32_t ErrorRegister::Analyze(STEP_CODE_DATA_STRUCT & error)
 
   // Get Data from hardware
   const BIT_STRING_CLASS &bs = Read(error.service_data->GetCauseAttentionType()); // @pw02
-  prdfBitKey bl;     // null bit list has length 0
+  BitKey bl;     // null bit list has length 0
 
   if (scr_rc == SUCCESS)
   {
@@ -195,24 +197,24 @@ const BIT_STRING_CLASS & ErrorRegister::Read(ATTENTION_TYPE i_attn)
 
 /*---------------------------------------------------------------------*/
 
-prdfBitKey ErrorRegister::Filter
+BitKey ErrorRegister::Filter
 (const BIT_STRING_CLASS & bs)
 {
-  prdfBitKey bit_list;
+  BitKey bit_list;
   bit_list = bs;
   return(bit_list);
 }
 
 /*---------------------------------------------------------------------*/
 
-int32_t ErrorRegister::Lookup(STEP_CODE_DATA_STRUCT & sdc, prdfBitKey & bl) // dg02c dg03c
+int32_t ErrorRegister::Lookup(STEP_CODE_DATA_STRUCT & sdc, BitKey & bl) // dg02c dg03c
 {
   int32_t rc = SUCCESS;
 //  if (bl.GetListLength() == 0) return(rMap.GetDefault());  /dg00d
-  prdfResolutionList rList;
+  ResolutionList rList;
   rMap.LookUp(rList,bl,sdc); // dg04c
   // SetErrorSignature(sdc,bl);   // LookUp may have changed bl dg02a dg04d
-  for(prdfResolutionList::iterator i = rList.begin(); i != rList.end(); ++i)
+  for(ResolutionList::iterator i = rList.begin(); i != rList.end(); ++i)
   {
     rc |= (*i)->Resolve(sdc);
   }
@@ -221,7 +223,10 @@ int32_t ErrorRegister::Lookup(STEP_CODE_DATA_STRUCT & sdc, prdfBitKey & bl) // d
 
 /*---------------------------------------------------------------------*/
 
-int32_t ErrorRegister::Reset(const prdfBitKey & bit_list, STEP_CODE_DATA_STRUCT & error)
+int32_t ErrorRegister::Reset(const BitKey & bit_list, STEP_CODE_DATA_STRUCT & error)
 {
   return(SUCCESS);
 }
+
+} // end namespace PRDF
+

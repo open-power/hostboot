@@ -28,6 +28,9 @@
 //
 // End Module Description **********************************************
 
+namespace PRDF
+{
+
 //----------------------------------------------------------------------
 //  Includes
 //----------------------------------------------------------------------
@@ -61,4 +64,4 @@ MopRegisterAccessScanComm::MopRegisterAccessScanComm(void)
   {
   }
 
-
+} // end namespace PRDF

@@ -45,6 +45,9 @@
 #include <iipServiceDataCollector.h>
 #endif
 
+namespace PRDF
+{
+
 /**
  Set a Flag in the Service Data Collector
  @author Mike Kobler
@@ -110,15 +113,7 @@ private:  // Data
 
 };
 
+} // end namespace PRDF
 
 #endif /* xspprdFlagResolution_h */
 
-// Change Log *********************************************************
-//
-//  Flag Reason   Vers Date     Coder   Description
-//  ---- -------- ---- -------- ------- -------------------------------
-//       D49420.9 V5R2 12/04/00 mkobler Initial Creation
-//       f522283   300 09/27/05 dgilbert make FlyWeight-able
-//       D608564  f310 05/18/07 dgilbert add operator==() to fix mem leak
-//
-// End Change Log *****************************************************

@@ -33,6 +33,10 @@
 // Includes
 //--------------------------------------------------------------------
 
+#include <map>
+
+#include <prdfErrorSignature.H>
+
 #if !defined(iipResolution_h)
 #include <iipResolution.h>
 #endif
@@ -41,6 +45,9 @@
 #include <time.h>
 #include <prdfTimer.H>
 #endif
+
+namespace PRDF
+{
 
 //--------------------------------------------------------------------
 //  Forward References
@@ -186,7 +193,7 @@ class ThresholdResolution : public MaskResolution
     //We take its value from global flyweight which will be freed in prd uninitialise
     const ThresholdPolicy * iv_policy;
     uint32_t iv_count;
-    PrdTimer iv_endTime;
+    Timer iv_endTime;
 
 };
 
@@ -198,8 +205,6 @@ class ThresholdResolution : public MaskResolution
  * ThresholdSigResolution class for each policy instead of one
  * ThresholdResolution for each error for each chip.
  */
-#include <map>
-#include <prdfErrorSignature.H>
 class ThresholdSigResolution: public Resolution
 {
     public:
@@ -248,7 +253,7 @@ class ThresholdSigResolution: public Resolution
     private:
 
         // Stores a count/timer pair.
-        typedef std::pair<uint32_t, PrdTimer> ThresholdCountAndTimer;
+        typedef std::pair<uint32_t, Timer> ThresholdCountAndTimer;
 
         // Policy for this object.
         // Though this is a pointer, we should never free it in destructor
@@ -260,19 +265,7 @@ class ThresholdSigResolution: public Resolution
 
 };
 
+} // end namespace PRDF
+
 #endif /* PRDFTHRESHOLDRESOLUTIONS_H */
 
-// Change Log *****************************************************************
-//
-// Flag Reason  Vers    Date     Coder    Description
-// ---- ------- ------- -------- -------- ------------------------------------
-//      400647                   dgilbert Initial Creation
-// wl01 406274  fips    06/27/03 lemmon   add support for ThresholdResolution GetCount and ResetCount
-// dg02 487035  fips222 12/10/04 dgilbert add operator== to MaskResolution
-//         507223  fips310 06/03/05 iawillia Add ThresholdSigResolution
-//        D515833 fips300 09/19/05 iawillia Use VMap instead of Map.
-//        F522128 fips300 09/22/05 iawillia Add TwoPerDay policy.
-//        F523599 fips300 10/11/05 iawillia Add ThirtyThreePerHalfHour policy.
-//        F548507 fips300 04/21/06 iawillia Add FivePerDay policy.
-// zs01        F565934 fips310 08/25/06 zshelle  Add SixteenPerDay policy.
-// End Change Log *************************************************************

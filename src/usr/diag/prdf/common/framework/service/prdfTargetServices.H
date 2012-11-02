@@ -232,7 +232,7 @@ bool checkLastFuncCore( TARGETING::TargetHandle_t i_coreTarget );
  * @brief   Returns the position of the given target.
  * @param   i_target Any target.
  * @return  The position or index of the given target relative to its container.
- *          Can compare against enums in PRDF::PositionBounds for validity.
+ *          Can compare against enums in PositionBounds for validity.
  */
 uint32_t getTargetPosition( TARGETING::TargetHandle_t i_target );
 

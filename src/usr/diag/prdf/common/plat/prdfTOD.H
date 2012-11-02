@@ -24,6 +24,8 @@
 #ifndef PRDFTOD_H
 #define PRDFTOD_H
 
+namespace PRDF
+{
 
 /** @struct PrdfTodFaultData
  *  TOD Fault isolation information from a chip.
@@ -37,21 +39,14 @@ struct PrdfTodFaultData
     TARGETING::TargetHandle_t topo_fault_chip[2];
 };
 
-int32_t prdfTorrent_TodCaptureRegisters(STEP_CODE_DATA_STRUCT & i_stepcode);
-int32_t prdfTorrent_TodCleanUpErrors(STEP_CODE_DATA_STRUCT & i_stepcode);
-int32_t prdfTorrent_TodCollectFaultDataSys(vector<PrdfTodFaultData> & o_faults,
-                                      STEP_CODE_DATA_STRUCT & i_stepcode);
-int32_t prdfTorrent_TodCollectFaultDataChip(PrdfExtensibleChip * i_chip,
-                                       vector<PrdfTodFaultData> & o_faults,
-                                       STEP_CODE_DATA_STRUCT & i_stepcode);
-
-
 int32_t prdfP7_TodCaptureRegisters(STEP_CODE_DATA_STRUCT & i_stepcode);
 int32_t prdfP7_TodCleanUpErrors(STEP_CODE_DATA_STRUCT & i_stepcode);
 int32_t prdfP7_TodCollectFaultDataSys(vector<PrdfTodFaultData> & o_faults,
                                       STEP_CODE_DATA_STRUCT & i_stepcode);
-int32_t prdfP7_TodCollectFaultDataChip(PrdfExtensibleChip * i_chip,
+int32_t prdfP7_TodCollectFaultDataChip(ExtensibleChip * i_chip,
                                        vector<PrdfTodFaultData> & o_faults,
                                        STEP_CODE_DATA_STRUCT & i_stepcode);
+
+} // end namespace PRDF
 
 #endif //PRDFTOD_H

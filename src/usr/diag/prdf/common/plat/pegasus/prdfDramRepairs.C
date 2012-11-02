@@ -446,4 +446,6 @@ int32_t restoreDramRepairs(TargetHandle_t i_mba)
 
     return calloutMade ? FAIL : SUCCESS;
 }
-}
+
+} // end namespace PRDF
+

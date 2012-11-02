@@ -33,6 +33,9 @@
     #include <targeting/common/target.H>
 #endif
 
+// FIXME: RTC 47288 Will need to wrap this in PRDF namespace once external
+//        interfaces are removed/modified.
+
 class PrdfMemoryMru
 {
   public:

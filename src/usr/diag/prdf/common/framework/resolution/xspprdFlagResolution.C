@@ -37,6 +37,9 @@
 
 #undef xspprdFlagResolution_C
 
+namespace PRDF
+{
+
 //---------------------------------------------------------------------
 // Member Function Specifications
 //---------------------------------------------------------------------
@@ -48,10 +51,5 @@ int32_t FlagResolution::Resolve(STEP_CODE_DATA_STRUCT & error)
   return rc;
 }
 
-// Change Log *********************************************************
-//
-//  Flag Reason   Vers Date     Coder    Description
-//  ---- -------- ---- -------- -------- ------------------------------
-//       D49420.9 V5R2 12/04/00 mkobler  Initial Creation
-//
-// End Change Log *****************************************************
+} // end namespace PRDF
+

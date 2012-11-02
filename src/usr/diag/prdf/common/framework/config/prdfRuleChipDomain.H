@@ -27,7 +27,10 @@
 #include <iipDomainContainer.h>
 #include <prdfRuleChip.H>
 
-class PrdfRuleChipDomain : public DomainContainer<PrdfRuleChip>
+namespace PRDF
+{
+
+class RuleChipDomain : public DomainContainer<RuleChip>
 {
   public:
 
@@ -49,13 +52,13 @@ class PrdfRuleChipDomain : public DomainContainer<PrdfRuleChip>
         TOTAL_DOMAINS = 5,
     };
 
-    /** @fn PrdfRuleChipDomain
+    /** @fn RuleChipDomain
      *  @brief Constructor
      *  @param DOMAIN_ID - the domain ID
      *  @param uint32_t - the projected size of the domain
      */
-    PrdfRuleChipDomain( DOMAIN_ID i_did, uint32_t i_size ) :
-        DomainContainer<PrdfRuleChip>( i_did, i_size )
+    RuleChipDomain( DOMAIN_ID i_did, uint32_t i_size ) :
+        DomainContainer<RuleChip>( i_did, i_size )
     {}
 
     /** @fn Query
@@ -73,5 +76,7 @@ class PrdfRuleChipDomain : public DomainContainer<PrdfRuleChip>
      */
     virtual void Order( ATTENTION_TYPE i_attnType);
 };
+
+} // end namespace PRDF
 
 #endif /* PRDFRULECHIPDOMAIN_H */

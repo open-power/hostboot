@@ -27,28 +27,30 @@
 #include <errlentry.H>
 #include <prdf_service_codes.H>
 
+namespace PRDF
+{
 /**
- * @class PrdfErrlSmartPtr
+ * @class ErrlSmartPtr
  *        This is a smart pointer class for errlHndl_t objects, especially for
  *        the g_prd_errl variable.  Currently, programmers can accidentially
  *        overwrite g_prd_errl and we leak a error log.  This class will keep
  *        track of the error logs and commit/delete it if it goes out of context.
  */
-class PrdfErrlSmartPtr
+class ErrlSmartPtr
 {
     public:
 
         class INVALID_TYPE_CONVERSION___SEE_COMMENTS_FOR_RELEASE_FUNCTION {};
 
         /* ctor - Initialize ptr to NULL */
-        PrdfErrlSmartPtr() : iv_errl(NULL) {};
+        ErrlSmartPtr() : iv_errl(NULL) {};
         /* dtor - Commit remaining error log */
-        ~PrdfErrlSmartPtr() { commit_errl(); };
+        ~ErrlSmartPtr() { commit_errl(); };
 
         /* operator =
          *        Someone attempted to overwrite the error log, commit if needed.
          */
-        PrdfErrlSmartPtr & operator=(errlHndl_t i_errl)
+        ErrlSmartPtr & operator=(errlHndl_t i_errl)
             {
                 this->commit_errl();
                 iv_errl = i_errl;
@@ -100,7 +102,7 @@ class PrdfErrlSmartPtr
          *                if (NULL == errl)
          */
         friend bool operator==(const errlHndl_t i_errl,
-                        const PrdfErrlSmartPtr & i_smrtptr)
+                        const ErrlSmartPtr & i_smrtptr)
             {
                 return i_smrtptr == i_errl;
             };
@@ -110,7 +112,7 @@ class PrdfErrlSmartPtr
          *                if (NULL =! errl)
          */
         friend bool operator!=(const errlHndl_t i_errl,
-                        const PrdfErrlSmartPtr & i_smrtptr)
+                        const ErrlSmartPtr & i_smrtptr)
             {
                 return i_smrtptr != i_errl;
             };
@@ -163,5 +165,7 @@ class PrdfErrlSmartPtr
         void commit_errl();
 
 };
+
+} // end namespace PRDF
 
 #endif

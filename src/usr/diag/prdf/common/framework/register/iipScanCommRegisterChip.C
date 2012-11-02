@@ -40,6 +40,9 @@
 
 #undef iipScanCommRegisterChip_C
 
+namespace PRDF
+{
+
 //----------------------------------------------------------------------
 //  User Types
 //----------------------------------------------------------------------
@@ -104,14 +107,5 @@ void ScanCommRegisterChip::SetBitString(const BIT_STRING_CLASS *bs)
 //   return(chipSelectValues);
 // }
 
-// Change Log **********************************************************
-//
-//  Flag  PTR/DCR#  Userid    Date      Description
-//  ----  --------  --------  --------  -----------
-//  n/a   n/a       JST       04/18/95  Created.
-//        D49127.7  DGILBERT  09/20/96  Added xBitString, Get/SetBitString()
-//                                      AccessBitString()
-//                  DGILBERT  05/27/97  V4R3 changes
-//
-// End Change Log ******************************************************
+} // end namespace PRDF
 

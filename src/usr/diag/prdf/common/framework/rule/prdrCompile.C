@@ -62,13 +62,18 @@ namespace TARGETING
 #include <prdrToken.H>
 #include <UtilHash.H>
 
+using namespace PRDR_COMPILER;
+
 int yyline;
 std::stack<std::pair<std::string, int> > yyincfiles;
 
-PrdrChip * g_currentChip;                                 // the current chip
-std::map<std::string, PrdrExpr *> g_rules;                // list of rules.
-std::map<std::string, PrdrGroup *> g_groups;                // list of bit groups
-std::map<std::string, PrdrGroup *> g_actionclasses;        // list of actions
+namespace PRDR_COMPILER
+{
+
+Chip * g_currentChip;                                 // the current chip
+std::map<std::string, Expr *> g_rules;                // list of rules.
+std::map<std::string, Group *> g_groups;              // list of bit groups
+std::map<std::string, Group *> g_actionclasses;       // list of actions
 std::map<std::string, std::string> g_attentionStartGroup;
 
 // Internal list of references, to make sure every reference resolved.
@@ -80,6 +85,8 @@ Prdr::HashCollisionMap g_regsHashCollision;
 // Used in error reference outputting.
 uint32_t g_nextAndBit;
 bool g_hadError;
+
+} // end namespace PRDR_COMPILER
 
 //--------------------------------------------
 // main
@@ -171,7 +178,7 @@ int main(int argc, char ** argv)
     // output rules.
     l_size = htons((uint16_t)g_rules.size());
     fwrite(&l_size, sizeof(l_size), 1, l_prfFile);
-    for (std::map<std::string, PrdrExpr *>::iterator i = g_rules.begin();
+    for (std::map<std::string, Expr *>::iterator i = g_rules.begin();
          i != g_rules.end();
          i++)
     {
@@ -206,7 +213,7 @@ int main(int argc, char ** argv)
 
 #endif
 
-    for (std::map<std::string, PrdrGroup *>::iterator i = g_groups.begin();
+    for (std::map<std::string, Group *>::iterator i = g_groups.begin();
          i != g_groups.end();
          i++, l_pos++)
     {
@@ -214,7 +221,7 @@ int main(int argc, char ** argv)
 #ifndef __HOSTBOOT_MODULE
         (*i).second->generateDoxygen(l_htmlFile, (*i).first, l_errFile);
 #endif
-    };
+    }
 
     // output action classes.
     l_size = htons((uint16_t)g_actionclasses.size());
@@ -231,7 +238,7 @@ int main(int argc, char ** argv)
 
 #endif
 
-    for (std::map<std::string, PrdrGroup *>::iterator i =
+    for (std::map<std::string, Group *>::iterator i =
                 g_actionclasses.begin();
          i != g_actionclasses.end();
          i++)
@@ -240,7 +247,7 @@ int main(int argc, char ** argv)
 #ifndef __HOSTBOOT_MODULE
         (*i).second->generateDoxygen(l_htmlFile, (*i).first);
 #endif
-    };
+    }
 
 #ifndef __HOSTBOOT_MODULE
     l_htmlFile << "</TABLE>" << std::endl;
@@ -256,7 +263,7 @@ int main(int argc, char ** argv)
 #ifndef __HOSTBOOT_MODULE
     // Add chip's extra signatures.
     l_errFile << "//---- Extra Signatures ----" << std::endl;
-    for (std::list<PrdrExtraSignature>::iterator i
+    for (std::list<ExtraSignature>::iterator i
             = g_currentChip->cv_sigExtras.begin();
             i != g_currentChip->cv_sigExtras.end();
             i++)
@@ -279,6 +286,9 @@ int main(int argc, char ** argv)
     return (g_hadError ? -1 : 0);
 };
 
+namespace PRDR_COMPILER
+{
+
 std::map<std::string, uint32_t> g_refId;
 std::map<std::string, char> g_refType;
 
@@ -295,6 +305,7 @@ uint16_t prdrGetRefId(std::string * i_name)
     //fprintf(stderr, "%s: %08x\n", i_name->c_str(), l_refId);
     return l_refId;
 };
+
 char prdrGetRefType(std::string * i_name)
 {
     if (NULL == i_name)
@@ -317,7 +328,7 @@ void prdrCheckReferences()
         if (NULL == g_currentChip)
             break;
 
-        for (PrdrRegisterList::iterator i = g_currentChip->cv_reglist.begin();
+        for (RegisterList::iterator i = g_currentChip->cv_reglist.begin();
                  i != g_currentChip->cv_reglist.end();
                  i++)
         {
@@ -325,7 +336,7 @@ void prdrCheckReferences()
             g_refType[*(*i)->cv_sname] = Prdr::REF_REG;
         }
 
-        for (std::map<std::string, PrdrExpr *>::iterator i = g_rules.begin();
+        for (std::map<std::string, Expr *>::iterator i = g_rules.begin();
                 i != g_rules.end();
                 i++)
         {
@@ -333,7 +344,7 @@ void prdrCheckReferences()
             g_refType[(*i).first] = Prdr::REF_RULE;
         }
 
-        for (std::map<std::string, PrdrGroup *>::iterator i = g_groups.begin();
+        for (std::map<std::string, Group *>::iterator i = g_groups.begin();
                 i != g_groups.end();
                 i++)
         {
@@ -341,7 +352,7 @@ void prdrCheckReferences()
             g_refType[(*i).first] = Prdr::REF_GRP;
         }
 
-        for (std::map<std::string, PrdrGroup *>::iterator i =
+        for (std::map<std::string, Group *>::iterator i =
                     g_actionclasses.begin();
                 i != g_actionclasses.end();
                 i++)
@@ -410,7 +421,7 @@ uint32_t prdrCaptureGroupMap( const std::string & i_arg )
     }
     else
     {
-        uint16_t hash = Util::hashString( i_arg.c_str() );
+        uint16_t hash = PRDF::Util::hashString( i_arg.c_str() );
         Prdr::HashCollisionMap::iterator i = g_groupHashCollision.find(hash);
         if ( g_groupHashCollision.end() != i )
         {
@@ -441,13 +452,19 @@ uint32_t prdrCaptureTypeMap(const std::string & i_arg)
     return 1;
 }
 
+} // end namespace PRDR_COMPILER
+
 #include <prdfCalloutMap.H> // for enums
 #undef __prdfCalloutMap_H
 #define PRDF_RULE_COMPILER_ENUMS
 #include <prdfCalloutMap.H> // for string-to-enum arrays
 #undef PRDF_RULE_COMPILER_ENUMS
 
+namespace PRDR_COMPILER
+{
+
 std::map<std::string, uint32_t> g_ActionArgMap;
+
 uint32_t prdrActionArgMap(const std::string & i_arg)
 {
     using namespace PRDF;
@@ -546,3 +563,6 @@ uint32_t prdrActionArgMap(const std::string & i_arg)
 
     return g_ActionArgMap[i_arg];
 }
+
+} // end namespace PRDR_COMPILER
+

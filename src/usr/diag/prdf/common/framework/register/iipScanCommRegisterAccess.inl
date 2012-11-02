@@ -56,6 +56,9 @@
 // Member Function Specifications
 //---------------------------------------------------------------------
 
+namespace PRDF
+{
+
 inline
 ScanCommRegisterAccess::ScanCommRegisterAccess(
   uint64_t ra,
@@ -66,3 +69,5 @@ synch(),
 hops(&hopsAccessor)
 {
 }
+
+} // end namespace PRDF

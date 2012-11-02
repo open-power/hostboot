@@ -41,6 +41,8 @@
 #include <prdfOperatorRegister.H>
 #include <prdfPlatServices.H>
 
+namespace PRDF
+{
 //--------------------------------------------------------------------
 //  Forward References
 //--------------------------------------------------------------------
@@ -97,8 +99,8 @@ public:
     attention type is CHECK_STOP.
    */
   SCAN_COMM_REGISTER_CLASS & GetScanRingRegister(TARGETING::TargetHandle_t i_ptargetHandle,
-                                                 PRDF::ScanRingField * start,
-                                                 PRDF::ScanRingField * end);
+                                                 ScanRingField * start,
+                                                 ScanRingField * end);
 
   /**
    * Get a register that bitwise inverts the bitstring of a register when read or written to
@@ -150,7 +152,7 @@ public:
                                                  SCAN_COMM_REGISTER_CLASS & i_proccs);
 
   /**
-   * Get a PrdfConstantRegister
+   * Get a ConstantRegister
    * @param BIT_STRING_CLASS - the bit string constant to use.
    * @post only one instance of the register with this BIT_STRING value will
    * exist.
@@ -173,31 +175,31 @@ private:  // functions
    */
   ScanFacility() {}
 
+  private:  // Data
 
-private:  // Data
-  typedef FlyWeight<PRDF::HomRegisterAccessScom,10> ScanCommAccess;
-  typedef std::vector<PRDF::HomRegisterAccessScan> ScanRingAccess;
-  typedef FlyWeightS<ScanCommRegisterChip,50> ScanCommRegisters;
-  typedef FlyWeight<PrdfAttnTypeRegister,50> AttnTypeRegisters;
-  typedef FlyWeightS<PrdfOrRegister,10> OrRegisters;
-  typedef FlyWeightS<PrdfAndRegister,50> AndRegisters;
-  typedef FlyWeightS<PrdfNotRegister,50> NotRegisters;
-  typedef FlyWeightS<PrdfLeftShiftRegister,10> LeftShiftRegisters;
-  typedef FlyWeightS<PrdfRightShiftRegister, 10> RightShiftRegisters;
-  typedef FlyWeight<PrdfConstantRegister, 10> ConstantRegisters;
+    typedef FlyWeight<HomRegisterAccessScom, 10> ScanCommAccess;
+    typedef std::vector<HomRegisterAccessScan>   ScanRingAccess;
+    typedef FlyWeightS<ScanCommRegisterChip, 50> ScanCommRegisters;
+    typedef FlyWeight<AttnTypeRegister, 50>      AttnTypeRegisters;
+    typedef FlyWeightS<AndRegister, 50>          AndRegisters;
+    typedef FlyWeightS<OrRegister, 10>           OrRegisters;
+    typedef FlyWeightS<NotRegister, 50>          NotRegisters;
+    typedef FlyWeightS<LeftShiftRegister, 10>    LeftShiftRegisters;
+    typedef FlyWeightS<RightShiftRegister, 10>   RightShiftRegisters;
+    typedef FlyWeight<ConstantRegister, 10>      ConstantRegisters;
 
-  ScanCommAccess iv_scomAccessFw;
-  ScanRingAccess iv_scanAccessList;
-  ScanCommRegisters iv_scomRegFw;
-  NotRegisters iv_notRegFw;
-  LeftShiftRegisters iv_leftRegFw;
-  RightShiftRegisters iv_rightRegFw;
-  AndRegisters iv_andRegFw;
-  OrRegisters iv_orRegFw;
-  AttnTypeRegisters iv_attnRegFw;
-  ConstantRegisters iv_constRegFw;
-
+    ScanCommAccess      iv_scomAccessFw;
+    ScanRingAccess      iv_scanAccessList;
+    ScanCommRegisters   iv_scomRegFw;
+    AttnTypeRegisters   iv_attnRegFw;
+    AndRegisters        iv_andRegFw;
+    OrRegisters         iv_orRegFw;
+    NotRegisters        iv_notRegFw;
+    LeftShiftRegisters  iv_leftRegFw;
+    RightShiftRegisters iv_rightRegFw;
+    ConstantRegisters   iv_constRegFw;
 };
 
+} // end namespace PRDF
 
 #endif /* PRDFSCANFACILITY_H */

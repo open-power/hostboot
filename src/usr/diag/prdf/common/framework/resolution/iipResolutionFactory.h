@@ -78,6 +78,9 @@
 #include <prdfCaptureResolution.H>                            // pw01
 #include <prdfClockResolution.H>                            // jl01a
 
+namespace PRDF
+{
+
 //--------------------------------------------------------------------
 //  Forward References
 //--------------------------------------------------------------------
@@ -137,8 +140,8 @@ public:
    <br><b>Note:        </b> Do not call this method from a static object
    </ul><br>
    */
-  Resolution & GetCalloutResolution( PRDF::PRDcallout callout,
-                                     PRDF::PRDpriority p = PRDF::MRU_MED);
+  Resolution & GetCalloutResolution( PRDcallout callout,
+                                     PRDpriority p = PRDF::MRU_MED);
 
   /**
    Get a threshold Resolution
@@ -175,7 +178,7 @@ public:
   Resolution & GetConnectedCalloutResolution(TARGETING::TargetHandle_t i_psourceHandle,
                                              TARGETING::TYPE i_targetType,
                                              uint32_t i_idx = 0,
-                                             PRDF::PRDpriority i_priority = PRDF::MRU_MED,
+                                             PRDpriority i_priority = MRU_MED,
                                              Resolution * i_altResolution = NULL);
   // dg04a - end
 
@@ -192,14 +195,14 @@ public:
         // dg05a - end
   // dg06a - start
   /**
-   * Get a PrdfPluginCallResolution
-   * @param ptr to PrdfExtensibleChip
-   * @param ptr to PrdfExtensibleFunction
+   * Get a PluginCallResolution
+   * @param ptr to ExtensibleChip
+   * @param ptr to ExtensibleFunction
    * @post one instance with these params will exist
    * @This flyweight is cleared by this->Reset()
    */
-  Resolution & GetPluginCallResolution(PrdfExtensibleChip * i_chip,
-                                       PrdfExtensibleChipFunction * i_function);
+  Resolution & GetPluginCallResolution(ExtensibleChip * i_chip,
+                                       ExtensibleChipFunction * i_function);
 
   /**
    * Get a threshold signature resolution
@@ -264,7 +267,7 @@ public:
    * @param i_group - The group to capture.
    * @post only one instance of this object with this param will exist
    */
-  Resolution & GetCaptureResolution(PrdfExtensibleChip * i_chip,
+  Resolution & GetCaptureResolution(ExtensibleChip * i_chip,
                                     uint32_t i_group);
 
     /**
@@ -391,17 +394,17 @@ private:  // Data
   typedef FlyWeight< ThresholdResolution, 50 > ThresholdResolutionList;  // dg02a
   typedef FlyWeight< MaskResolution, 50 > MaskResolutionFW;           // dg02a
 
-  typedef FlyWeight< prdfCalloutConnected, 25 > ConnectedFW;         // dg04a
-  typedef FlyWeight< PrdfAnalyzeConnected, 20 > AnalyzeCFW;          // dg05a
-  typedef FlyWeight< PrdfPluginCallResolution, 10 > PluginCallFW;    // dg06a
+  typedef FlyWeight< CalloutConnected, 25 > ConnectedFW;         // dg04a
+  typedef FlyWeight< AnalyzeConnected, 20 > AnalyzeCFW;          // dg05a
+  typedef FlyWeight< PluginCallResolution, 10 > PluginCallFW;    // dg06a
   typedef FlyWeight< ThresholdSigResolution, 10 > ThresholdSigFW;    // dg06a
   typedef FlyWeight< EregResolution, 50 > EregResolutionFW;          // dg06a
   typedef FlyWeight< TryResolution, 20 > TryResolutionFW;            // dg06a
   typedef FlyWeight< FlagResolution, 5 > FlagResolutionFW;           // dg06a
   typedef FlyWeight< DumpResolution, 5 > DumpResolutionFW;           // dg06a
   typedef FlyWeight< GardResolution, 5 > GardResolutionFW;           // dg06a
-  typedef FlyWeight< PrdfCaptureResolution, 5> CaptureResolutionFW;  // pw01
-  typedef FlyWeight< PrdfClockResolution, 8 > ClockResolutionFW;         // jl01a
+  typedef FlyWeight< CaptureResolution, 5> CaptureResolutionFW;  // pw01
+  typedef FlyWeight< ClockResolution, 8 > ClockResolutionFW;         // jl01a
 
   CalloutFW iv_Callouts;                            // dg01a
   ResolutionLinkFW iv_Links;                        // dg01a
@@ -449,5 +452,7 @@ Resolution & ResolutionFactory::LinkResolutions(Resolution &r1,
 {
   return LinkResolutions(LinkResolutions(r1,r2),LinkResolutions(r3,r4,r5));
 }
+
+} // end namespace PRDF
 
 #endif /* iipResolutionFactory_h */

@@ -51,6 +51,8 @@
 
 #include <prdrRegister.H> // REVIEW NOTE: Move to token.h?
 
+using namespace PRDR_COMPILER;
+
 %}
 
 /* Union for the 'yylval' variable in lex or $$ variables in yacc code.  Used
@@ -70,21 +72,21 @@
     /** string value from a token. */
     std::string * str_ptr;
     /** Parsed list of registers. */
-    PrdrRegisterList * reglist;
+    PRDR_COMPILER::RegisterList * reglist;
     /** A single parsed register. */
-    PrdrRegister * reg;
+    PRDR_COMPILER::Register * reg;
     /** A structure for the reset / mask keywords. */
-    PrdrResetOrMaskStruct * reg_mask;
+    PRDR_COMPILER::ResetOrMaskStruct * reg_mask;
     /** A chip object */
-    PrdrChip * chip;
+    PRDR_COMPILER::Chip * chip;
     /** A sub-expression token. */
-    PrdrExpr * expr;
+    PRDR_COMPILER::Expr * expr;
     /** A parsed group of bit-operation / action pairs */
-    PrdrGroup * grp;
+    PRDR_COMPILER::Group * grp;
     /** A list of strings */
     std::list<std::string *>* strlist;
     /** A list of filters */
-    std::list<PrdrGroup_Filter *>* filterlist;
+    std::list<PRDR_COMPILER::Group_Filter *>* filterlist;
 }
 
     /* Indicates the name for the start symbol. (non-terminal) */
@@ -195,7 +197,7 @@ chip:   PRDR_CHIP PRDR_ID '{' chiplines '}' ';'
     {
         // Create a default chip object is chiplines are empty.
         if (NULL == $4)
-            $4 = new PrdrChip();
+            $4 = new Chip();
 
         // Assign chip's shortname from ID.
         $4->cv_sname = $2;
@@ -217,7 +219,7 @@ chiplines:  { $$ = NULL; }  // empty line.
             else
             {
                 // Both are non-NULL, merge.
-                PrdrChip::merge($1, $2);
+                Chip::merge($1, $2);
                 $$ = $1;
                 delete $2;
             }
@@ -237,43 +239,43 @@ chiplines:  { $$ = NULL; }  // empty line.
 chipline:   { $$ = NULL; } // allow a free ;.
         | PRDR_CHIPID PRDR_INTEGER
     {
-        $$ = new PrdrChip();
+        $$ = new Chip();
         $$->cv_chipid = $2;
     }
         | PRDR_SIGNATURE_OFFSET PRDR_INTEGER
     {
-        $$ = new PrdrChip();
+        $$ = new Chip();
         $$->cv_signatureOffset = $2;
     }
         | PRDR_SIGNATURE_EXTRA '(' PRDR_ID ',' PRDR_INTEGER ','
             PRDR_STRING ',' PRDR_STRING ')'
     {
-        $$ = new PrdrChip();
-        $$->cv_sigExtras.push_back(PrdrExtraSignature($5, $7, $9));
+        $$ = new Chip();
+        $$->cv_sigExtras.push_back(ExtraSignature($5, $7, $9));
     }
         | PRDR_TARGETTYPE PRDR_ID
     {
-        $$ = new PrdrChip();
+        $$ = new Chip();
         $$->cv_targetType = prdrActionArgMap(*$2);
     }
         | PRDR_NAME_KW PRDR_STRING
     {
-        $$ = new PrdrChip();
+        $$ = new Chip();
         $$->cv_name = $2;
     }
         | register        // register non-terminal token.
     {
-        $$ = new PrdrChip();
+        $$ = new Chip();
         $$->cv_reglist.push_back($1);
     }
         | PRDR_SCOMLEN PRDR_INTEGER
     {
-        $$ = new PrdrChip();
+        $$ = new Chip();
         $$->cv_scomlen = $2;
     }
         | PRDR_ACT_DUMP PRDR_ID                        //@ecdf
     {
-        $$ = new PrdrChip();
+        $$ = new Chip();
         $$->cv_dumptype = prdrActionArgMap(*$2);
     }
 ;
@@ -283,7 +285,7 @@ register: PRDR_REGISTER PRDR_ID '{' reglines '}'
     {
         // Create register object as needed.
         if (NULL == $4)
-            $$ = new PrdrRegister();
+            $$ = new Register();
         else
             $$ = $4;
 
@@ -303,7 +305,7 @@ reglines:   { $$ = NULL; }
             else
             {
                 // Both are non-NULL, merge.
-                PrdrRegister::merge($1, $2);
+                Register::merge($1, $2);
                 $$ = $1;
                 delete $2;
             }
@@ -322,22 +324,22 @@ reglines:   { $$ = NULL; }
 regline:    { $$ = NULL; }
         | PRDR_NAME_KW PRDR_STRING
     {
-        $$ = new PrdrRegister();
+        $$ = new Register();
         $$->cv_name = $2;
     }
         | PRDR_NAME_KW PRDR_ID
     {
-        $$ = new PrdrRegister();
+        $$ = new Register();
         $$->cv_name = $2;
     }
         | PRDR_SCOMADDR PRDR_INTEGER
     {
-        $$ = new PrdrRegister();
+        $$ = new Register();
         $$->cv_scomaddr = $2;
     }
         | PRDR_SCOMLEN PRDR_INTEGER
     {
-        $$ = new PrdrRegister();
+        $$ = new Register();
         $$->cv_scomlen = $2;
 
         // Indicate that the register contains a non-default scomlen.
@@ -345,7 +347,7 @@ regline:    { $$ = NULL; }
     }
         | PRDR_RESET_ADDR '(' register_mask ')'
     {
-        $$ = new PrdrRegister();
+        $$ = new Register();
 
         // Add reset register to list.
         $$->cv_resets.push_back(*$3);
@@ -353,7 +355,7 @@ regline:    { $$ = NULL; }
     }
         | PRDR_MASK_ADDR '(' register_mask ')'
     {
-        $$ = new PrdrRegister();
+        $$ = new Register();
 
         // Add mask register to list.
         $$->cv_masks.push_back(*$3);
@@ -361,11 +363,11 @@ regline:    { $$ = NULL; }
     }
         | PRDR_ACT_CAPTURE PRDR_GROUP PRDR_ID
     {
-        $$ = new PrdrRegister();
+        $$ = new Register();
 
         // Define capture group.
-        PrdrCaptureReqStruct tmp;
-        tmp.type = PrdrCaptureReqStruct::PRDR_CAPTURE_GROUPID;
+        CaptureReqStruct tmp;
+        tmp.type = CaptureReqStruct::PRDR_CAPTURE_GROUPID;
         tmp.data[0] = prdrCaptureGroupMap(*$3);
 
         $$->cv_captures.push_back(tmp);
@@ -373,11 +375,11 @@ regline:    { $$ = NULL; }
 //@jl04 Add  a new capture "type" here for regsiters.
         | PRDR_ACT_CAPTURE PRDR_TYPE PRDR_ID
     {
-        $$ = new PrdrRegister();
+        $$ = new Register();
 
         // Define capture type.
-        PrdrCaptureReqStruct tmp;
-        tmp.type = PrdrCaptureReqStruct::PRDR_CAPTURE_TYPE;
+        CaptureReqStruct tmp;
+        tmp.type = CaptureReqStruct::PRDR_CAPTURE_TYPE;
         tmp.data[0] = prdrCaptureTypeMap(*$3);
         $$->cv_captures.push_back(tmp);
     }
@@ -385,11 +387,11 @@ regline:    { $$ = NULL; }
 
         |  PRDR_ACT_CAPTURE PRDR_REQUIRED_KW PRDR_CONNECTED '(' PRDR_ID  ')'
     {
-        $$ = new PrdrRegister();
+        $$ = new Register();
 
         // Define capture "connected" requirement.
-        PrdrCaptureReqStruct tmp;
-        tmp.type = PrdrCaptureReqStruct::PRDR_CAPTURE_CONN;
+        CaptureReqStruct tmp;
+        tmp.type = CaptureReqStruct::PRDR_CAPTURE_CONN;
         tmp.data[0] = prdrActionArgMap(*$5);
         tmp.data[1] = 0;
 
@@ -397,11 +399,11 @@ regline:    { $$ = NULL; }
     }
         | PRDR_ACT_CAPTURE PRDR_REQUIRED_KW PRDR_CONNECTED '(' PRDR_ID ',' PRDR_INTEGER ')'
     {
-        $$ = new PrdrRegister();
+        $$ = new Register();
 
         // Define capture "connected" requirement.
-        PrdrCaptureReqStruct tmp;
-        tmp.type = PrdrCaptureReqStruct::PRDR_CAPTURE_CONN;
+        CaptureReqStruct tmp;
+        tmp.type = CaptureReqStruct::PRDR_CAPTURE_CONN;
         tmp.data[0] = prdrActionArgMap(*$5);
         tmp.data[1] = $7;
 
@@ -409,11 +411,11 @@ regline:    { $$ = NULL; }
     }
         | PRDR_ACT_CAPTURE PRDR_REQUIRED_KW PRDR_ACT_FUNCCALL '(' PRDR_STRING ')'
     {
-        $$ = new PrdrRegister();
+        $$ = new Register();
 
         // Define funccall requirement.
-        PrdrCaptureReqStruct tmp;
-        tmp.type = PrdrCaptureReqStruct::PRDR_CAPTURE_FUNC;
+        CaptureReqStruct tmp;
+        tmp.type = CaptureReqStruct::PRDR_CAPTURE_FUNC;
         tmp.str = *$5;
 
         $$->cv_captures.push_back(tmp);
@@ -423,56 +425,56 @@ regline:    { $$ = NULL; }
     /* Define the possible reset/mask instructions. */
 register_mask: '|' ',' PRDR_INTEGER
     {
-        $$ = new PrdrResetOrMaskStruct();
+        $$ = new ResetOrMaskStruct();
         $$->type = '|';
         $$->addr_r = $3;
         $$->addr_w = $3;
     }
         | '|' ',' PRDR_INTEGER ',' PRDR_INTEGER
     {
-        $$ = new PrdrResetOrMaskStruct();
+        $$ = new ResetOrMaskStruct();
         $$->type = '|';
         $$->addr_r = $3;
         $$->addr_w = $5;
     }
         |  '&' ',' PRDR_INTEGER
     {
-        $$ = new PrdrResetOrMaskStruct();
+        $$ = new ResetOrMaskStruct();
         $$->type = '&';
         $$->addr_r = $3;
         $$->addr_w = $3;
     }
         | '&' ',' PRDR_INTEGER ',' PRDR_INTEGER
     {
-        $$ = new PrdrResetOrMaskStruct();
+        $$ = new ResetOrMaskStruct();
         $$->type = '&';
         $$->addr_r = $3;
         $$->addr_w = $5;
     }
         |  '^' ',' PRDR_INTEGER
     {
-        $$ = new PrdrResetOrMaskStruct();
+        $$ = new ResetOrMaskStruct();
         $$->type = '^';
         $$->addr_r = $3;
         $$->addr_w = $3;
     }
         | '^' ',' PRDR_INTEGER ',' PRDR_INTEGER
     {
-        $$ = new PrdrResetOrMaskStruct();
+        $$ = new ResetOrMaskStruct();
         $$->type = '^';
         $$->addr_r = $3;
         $$->addr_w = $5;
     }
         |  '~' ',' PRDR_INTEGER
     {
-        $$ = new PrdrResetOrMaskStruct();
+        $$ = new ResetOrMaskStruct();
         $$->type = '~';
         $$->addr_r = $3;
         $$->addr_w = $3;
     }
         | '~' ',' PRDR_INTEGER ',' PRDR_INTEGER
     {
-        $$ = new PrdrResetOrMaskStruct();
+        $$ = new ResetOrMaskStruct();
         $$->type = '~';
         $$->addr_r = $3;
         $$->addr_w = $5;
@@ -500,7 +502,7 @@ group:  PRDR_GROUP PRDR_ID grpattns grpfilters '{' grouplines '}' ';'
         // Add filters to group.
         if (NULL != $4)
         {
-            for (std::list<PrdrGroup_Filter *>::iterator i = $4->begin();
+            for (std::list<Group_Filter *>::iterator i = $4->begin();
                  i != $4->end();
                  ++i)
             {
@@ -551,55 +553,55 @@ grpfilt_items: grpfilt_items ',' grpfilt_item
 
 grpfilt_item: PRDR_FILTER_SINGLE_BIT
     {
-        $$ = new std::list<PrdrGroup_Filter *>;
-        $$->push_back(new PrdrGroup_Filter_SingleBit);
+        $$ = new std::list<Group_Filter *>;
+        $$->push_back(new Group_Filter_SingleBit);
     }
 ;
 
 grpfilt_item: PRDR_FILTER_PRIORITY '(' bitandlist ')'
     {
-        $$ = new std::list<PrdrGroup_Filter *>;
-        $$->push_back(new PrdrGroup_Filter_Priority($3));
+        $$ = new std::list<Group_Filter *>;
+        $$->push_back(new Group_Filter_Priority($3));
     }
 ;
 
 
 
-grouplines:     { $$ = new PrdrGroup(); }
+grouplines:     { $$ = new Group(); }
         | grouplines groupline ';'
     {
-        PrdrGroup::merge($1,$2);
+        Group::merge($1,$2);
         $$ = $1;
         delete $2;
     }        | grouplines dox_comment groupline ';'
     {
         $3->setComment(*$2);
-        PrdrGroup::merge($1,$3);
+        Group::merge($1,$3);
         $$ = $1;
         delete $3;
     }
 ;
 
-groupline:      { $$ = new PrdrGroup(); }
+groupline:      { $$ = new Group(); }
         | '(' PRDR_ID ',' bitgroup ')' '?' PRDR_ID
     {
-        $$ = new PrdrGroup();
-        $$->cv_rules.push_front(new PrdrExprRule($2,$4,$7));
-        g_references.push_front(PrdrRefPair("r",*$2));
-        g_references.push_front(PrdrRefPair("a",*$7));
+        $$ = new Group();
+        $$->cv_rules.push_front(new ExprRule($2,$4,$7));
+        g_references.push_front(RefPair("r",*$2));
+        g_references.push_front(RefPair("a",*$7));
     }
         | '(' PRDR_ID ',' bitgroup ')' '?' action_analyse
     {
-        $$ = new PrdrGroup();
-        $$->cv_rules.push_front(new PrdrExprRule($2,$4,static_cast<PrdrExprRef *>($7)->cv_name));
-        g_references.push_front(PrdrRefPair("r",*$2));
-        g_references.push_front(PrdrRefPair("g",*static_cast<PrdrExprRef *>($7)->cv_name));
+        $$ = new Group();
+        $$->cv_rules.push_front(new ExprRule($2,$4,static_cast<ExprRef *>($7)->cv_name));
+        g_references.push_front(RefPair("r",*$2));
+        g_references.push_front(RefPair("g",*static_cast<ExprRef *>($7)->cv_name));
     }
         | PRDR_ID
     {
-        $$ = new PrdrGroup();
-        $$->cv_rules.push_front(new PrdrExprRef($1));
-        g_references.push_front(PrdrRefPair("g",*$1));
+        $$ = new Group();
+        $$->cv_rules.push_front(new ExprRef($1));
+        g_references.push_front(RefPair("g",*$1));
     }
 ;
 
@@ -610,40 +612,40 @@ bitgroup: PRDR_BIT_KW '(' bitandlist ')'        { $$ = $3; }
 // TODO: Change to & instead of ,
 bitandlist: bitandlist ',' PRDR_INTEGER
     {
-        $$ = new PrdrExprOp2(Prdr::AND,
+        $$ = new ExprOp2(Prdr::AND,
                              $1,
-                             new PrdrExprInt($3, Prdr::INT_SHORT));
+                             new ExprInt($3, Prdr::INT_SHORT));
     }
         | PRDR_INTEGER
     {
-        $$ = new PrdrExprInt($1, Prdr::INT_SHORT);
+        $$ = new ExprInt($1, Prdr::INT_SHORT);
     }
 ;
 
 bitorlist: bitorlist '|' PRDR_INTEGER
     {
-        $$ = new PrdrExprOp2(Prdr::OR,
+        $$ = new ExprOp2(Prdr::OR,
                              $1,
-                             new PrdrExprInt($3, Prdr::INT_SHORT));
+                             new ExprInt($3, Prdr::INT_SHORT));
     }
         | PRDR_INTEGER '|' PRDR_INTEGER
     {
-        $$ = new PrdrExprOp2(Prdr::OR,
-                             new PrdrExprInt($1, Prdr::INT_SHORT),
-                             new PrdrExprInt($3, Prdr::INT_SHORT));
+        $$ = new ExprOp2(Prdr::OR,
+                             new ExprInt($1, Prdr::INT_SHORT),
+                             new ExprInt($3, Prdr::INT_SHORT));
     }
 ;
 
 // TODO: Merge attention types.
 rule: PRDR_RULE PRDR_ID '{' ruleexpr ';' '}' ';'
     {
-        g_rules[*$2] = new PrdrExprOp1(Prdr::RULE, $4);
+        g_rules[*$2] = new ExprOp1(Prdr::RULE, $4);
         delete $2;
     }
     | PRDR_RULE PRDR_ID '{' PRDR_ID ':' ruleexpr ';' '}' ';'
     {
-        g_rules[*$2] = new PrdrExprOp1(Prdr::RULE,
-                       new PrdrExprAttnLink($4, $6, NULL, NULL, NULL, NULL, NULL, NULL));
+        g_rules[*$2] = new ExprOp1(Prdr::RULE,
+                       new ExprAttnLink($4, $6, NULL, NULL, NULL, NULL, NULL, NULL));
         delete $2;
         delete $4;
     }
@@ -651,8 +653,8 @@ rule: PRDR_RULE PRDR_ID '{' ruleexpr ';' '}' ';'
                             PRDR_ID ':' ruleexpr ';'
                         '}' ';'
     {
-        g_rules[*$2] = new PrdrExprOp1(Prdr::RULE,
-                       new PrdrExprAttnLink($4, $6, $8, $10, NULL, NULL, NULL, NULL));
+        g_rules[*$2] = new ExprOp1(Prdr::RULE,
+                       new ExprAttnLink($4, $6, $8, $10, NULL, NULL, NULL, NULL));
         delete $2;
         delete $4;
         delete $8;
@@ -662,8 +664,8 @@ rule: PRDR_RULE PRDR_ID '{' ruleexpr ';' '}' ';'
                             PRDR_ID ':' ruleexpr ';'
                         '}' ';'
     {
-        g_rules[*$2] = new PrdrExprOp1(Prdr::RULE,
-                       new PrdrExprAttnLink($4, $6, $8, $10, $12, $14, NULL, NULL));
+        g_rules[*$2] = new ExprOp1(Prdr::RULE,
+                       new ExprAttnLink($4, $6, $8, $10, $12, $14, NULL, NULL));
         delete $2;
         delete $4;
         delete $8;
@@ -675,8 +677,8 @@ rule: PRDR_RULE PRDR_ID '{' ruleexpr ';' '}' ';'
                             PRDR_ID ':' ruleexpr ';'
                         '}' ';'
     {
-        g_rules[*$2] = new PrdrExprOp1(Prdr::RULE,
-                       new PrdrExprAttnLink($4, $6, $8, $10, $12, $14, $16, $18));
+        g_rules[*$2] = new ExprOp1(Prdr::RULE,
+                       new ExprAttnLink($4, $6, $8, $10, $12, $14, $16, $18));
         delete $2;
         delete $4;
         delete $8;
@@ -689,8 +691,8 @@ ruleexpr: ruleexpr_small                { $$ = $1; }
         | ruleexpr_small ruleop2 ruleexpr
     {
         $$ = $2;
-        static_cast<PrdrExprOp2 *>($$)->cv_arg[0] = $1;
-        static_cast<PrdrExprOp2 *>($$)->cv_arg[1] = $3;
+        static_cast<ExprOp2 *>($$)->cv_arg[0] = $1;
+        static_cast<ExprOp2 *>($$)->cv_arg[1] = $3;
     }
         | ruleexpr_shift                { $$ = $1; }
 ;
@@ -698,53 +700,53 @@ ruleexpr: ruleexpr_small                { $$ = $1; }
 ruleexpr_small: '(' ruleexpr ')'        { $$ = $2; }
         | PRDR_ID
     {
-        $$ = new PrdrExprRef($1);
-        g_references.push_front(PrdrRefPair("re", *$1));
+        $$ = new ExprRef($1);
+        g_references.push_front(RefPair("re", *$1));
     }
         | ruleop1 ruleexpr_small
     {
         $$ = $1;
-        static_cast<PrdrExprOp1 *>($$)->cv_arg = $2;
+        static_cast<ExprOp1 *>($$)->cv_arg = $2;
     }
         | PRDR_BIT_STRING
     {
-        $$ = new PrdrExprBitString(*$1);
+        $$ = new ExprBitString(*$1);
         delete $1;
     }
 ;
 
 ruleexpr_shift: ruleexpr_small PRDR_OP_LEFTSHIFT PRDR_INTEGER
     {
-        $$ = new PrdrExprOp2(Prdr::LSHIFT,
+        $$ = new ExprOp2(Prdr::LSHIFT,
                              $1,
-                             new PrdrExprInt($3));
+                             new ExprInt($3));
 
     }
         | ruleexpr_small PRDR_OP_RIGHTSHIFT PRDR_INTEGER
     {
-        $$ = new PrdrExprOp2(Prdr::RSHIFT,
+        $$ = new ExprOp2(Prdr::RSHIFT,
                              $1,
-                             new PrdrExprInt($3, Prdr::INT_SHORT));
+                             new ExprInt($3, Prdr::INT_SHORT));
     }
 ;
 
 ruleop1: '~'
     {
-        $$ = new PrdrExprOp1(Prdr::NOT);
+        $$ = new ExprOp1(Prdr::NOT);
     }
 ;
 
 ruleop2: '|'
     {
-        $$ = new PrdrExprOp2(Prdr::OR);
+        $$ = new ExprOp2(Prdr::OR);
     }
         | '&'
     {
-        $$ = new PrdrExprOp2(Prdr::AND);
+        $$ = new ExprOp2(Prdr::AND);
     }
         | '^'
     {
-        $$ = new PrdrExprOp2(Prdr::XOR);
+        $$ = new ExprOp2(Prdr::XOR);
     }
 ;
 
@@ -763,7 +765,7 @@ actionclass: PRDR_ACTIONCLASS PRDR_ID '{' actionlines '}' ';'
 
 actionlines:
     {
-        $$ = new PrdrGroup(Prdr::ACTION);
+        $$ = new Group(Prdr::ACTION);
     }
         | actionlines actionline ';'
     {
@@ -779,8 +781,8 @@ actionline:
     }
         | PRDR_ID
     {
-        $$ = new PrdrExprRef($1);
-        g_references.push_front(PrdrRefPair("a", *$1));
+        $$ = new ExprRef($1);
+        g_references.push_front(RefPair("a", *$1));
     }
         | action_threshold          { $$ = $1; }
         | action_shared_threshold   { $$ = $1; }
@@ -797,32 +799,32 @@ actionline:
 
 action_threshold: PRDR_ACT_THRESHOLD '(' ')'
     {
-        $$ = new PrdrExprAct_Thresh();
+        $$ = new ExprAct_Thresh();
     }
     | PRDR_ACT_THRESHOLD '(' PRDR_FLD_KW '(' PRDR_INTEGER  time_units ')' ')'
     {
-        $$ = new PrdrExprAct_Thresh($5, $6);
+        $$ = new ExprAct_Thresh($5, $6);
     }
     | PRDR_ACT_THRESHOLD '(' PRDR_FLD_KW '(' PRDR_INTEGER  time_units ')' ','  PRDR_MFG_KW '(' PRDR_INTEGER  time_units ')' ')'
     {
-        $$ = new PrdrExprAct_Thresh($5, $6, $11, $12);
+        $$ = new ExprAct_Thresh($5, $6, $11, $12);
     }
     | PRDR_ACT_THRESHOLD '(' PRDR_FLD_KW '(' PRDR_INTEGER  time_units ')' ','  PRDR_MFG_FILE_KW  '(' PRDR_ID ')' ')'
     {
-        $$ = new PrdrExprAct_Thresh($5, $6, 0, NULL, $11);
+        $$ = new ExprAct_Thresh($5, $6, 0, NULL, $11);
     }
 ;
 
 action_shared_threshold: action_threshold PRDR_SHARED_KW '(' PRDR_INTEGER ')'
     {
-        static_cast<PrdrExprAct_Thresh *>($1)->cv_3 = $4;
+        static_cast<ExprAct_Thresh *>($1)->cv_3 = $4;
         $$ = $1;
     }
 ;
 
 time_units:
     {
-        $$ = new PrdrExprTime(0xffffffff, Prdr::PRDR_TIME_BASE_SEC);
+        $$ = new ExprTime(0xffffffff, Prdr::PRDR_TIME_BASE_SEC);
     }
     // FIXME: (RTC 51218) It is impossible to reach a theshold of 1000 per
     //        second because PRD cannot respond to attentions that quickly (at
@@ -830,93 +832,93 @@ time_units:
     //        possible to based on the reaction type per attention ratio.
     | '/' PRDR_TIME_SEC
     {
-        $$ = new PrdrExprTime(1, Prdr::PRDR_TIME_BASE_SEC);
+        $$ = new ExprTime(1, Prdr::PRDR_TIME_BASE_SEC);
     }
     | '/' PRDR_TIME_MIN
     {
-        $$ = new PrdrExprTime(1, Prdr::PRDR_TIME_BASE_MIN);
+        $$ = new ExprTime(1, Prdr::PRDR_TIME_BASE_MIN);
     }
     | '/' PRDR_TIME_HOUR
     {
-        $$ = new PrdrExprTime(1, Prdr::PRDR_TIME_BASE_HOUR);
+        $$ = new ExprTime(1, Prdr::PRDR_TIME_BASE_HOUR);
     }
     | '/' PRDR_TIME_DAY
     {
-        $$ = new PrdrExprTime(1, Prdr::PRDR_TIME_BASE_DAY);
+        $$ = new ExprTime(1, Prdr::PRDR_TIME_BASE_DAY);
     }
     | '/' PRDR_INTEGER PRDR_TIME_SEC
     {
-        $$ = new PrdrExprTime($2, Prdr::PRDR_TIME_BASE_SEC);
+        $$ = new ExprTime($2, Prdr::PRDR_TIME_BASE_SEC);
     }
     | '/' PRDR_INTEGER PRDR_TIME_MIN
     {
-        $$ = new PrdrExprTime($2, Prdr::PRDR_TIME_BASE_MIN);
+        $$ = new ExprTime($2, Prdr::PRDR_TIME_BASE_MIN);
     }
     | '/' PRDR_INTEGER PRDR_TIME_HOUR
     {
-        $$ = new PrdrExprTime($2, Prdr::PRDR_TIME_BASE_HOUR);
+        $$ = new ExprTime($2, Prdr::PRDR_TIME_BASE_HOUR);
     }
     | '/' PRDR_INTEGER PRDR_TIME_DAY
     {
-        $$ = new PrdrExprTime($2, Prdr::PRDR_TIME_BASE_DAY);
+        $$ = new ExprTime($2, Prdr::PRDR_TIME_BASE_DAY);
     }
 ;
 
 action_analyse: PRDR_ACT_ANALYSE '(' PRDR_ID ')'
     {
-        $$ = new PrdrExprRef($3);
-        g_references.push_front(PrdrRefPair("g",*$3));
+        $$ = new ExprRef($3);
+        g_references.push_front(RefPair("g",*$3));
     }
 ;
 
 action_analyse_conn: PRDR_ACT_ANALYSE '(' PRDR_CONNECTED '(' PRDR_ID ')' ')'
     {
-        $$ = new PrdrExprAct_Analyse($5);
+        $$ = new ExprAct_Analyse($5);
     }
 ;
 
 action_analyse_conn: PRDR_ACT_ANALYSE '(' PRDR_CONNECTED '(' PRDR_ID ','  PRDR_INTEGER ')' ')'
     {
-        $$ = new PrdrExprAct_Analyse($5, $7);
+        $$ = new ExprAct_Analyse($5, $7);
     }
 ;
 
 action_try: PRDR_ACT_TRY '(' actionline ',' actionline ')'
     {
-        $$ = new PrdrExprAct_Try($3,$5);
+        $$ = new ExprAct_Try($3,$5);
     }
 ;
 
 action_dump: PRDR_ACT_DUMP '(' PRDR_ID ')'  //@ecdf
     {
-        $$ = new PrdrExprAct_Dump($3);
+        $$ = new ExprAct_Dump($3);
     }
     // TODO: Allow Dump connected.
 ;
 
 action_gard: PRDR_ACT_GARD '(' PRDR_ID ')'
     {
-        $$ = new PrdrExprAct_Gard($3);
+        $$ = new ExprAct_Gard($3);
     }
 ;
 
 action_callout: PRDR_ACT_CALLOUT '(' PRDR_ID ')'
     {
-        $$ = new PrdrExprAct_Callout($3);
+        $$ = new ExprAct_Callout($3);
     }
         | PRDR_ACT_CALLOUT '(' PRDR_CONNECTED '(' PRDR_ID  action_callout_alt ')' ',' PRDR_ID ')'
     {
-        $$ = new PrdrExprAct_Callout($9, $5, PrdrExprAct_Callout::CALLOUT_CHIP, 0xffffffff, $6);
+        $$ = new ExprAct_Callout($9, $5, ExprAct_Callout::CALLOUT_CHIP, 0xffffffff, $6);
     }
         | PRDR_ACT_CALLOUT '(' PRDR_CONNECTED '(' PRDR_ID  ',' PRDR_INTEGER action_callout_alt ')' ',' PRDR_ID ')'
     {
-        $$ = new PrdrExprAct_Callout($11, $5, PrdrExprAct_Callout::CALLOUT_CHIP, $7, $8);
+        $$ = new ExprAct_Callout($11, $5, ExprAct_Callout::CALLOUT_CHIP, $7, $8);
     }
 
 
         | PRDR_ACT_CALLOUT '(' PRDR_PROCEDURE '(' PRDR_ID ')' ',' PRDR_ID ')'
     {
-        $$ = new PrdrExprAct_Callout($8, $5, PrdrExprAct_Callout::CALLOUT_PROC);
+        $$ = new ExprAct_Callout($8, $5, ExprAct_Callout::CALLOUT_PROC);
     }
 
 ;
@@ -933,23 +935,23 @@ action_callout_alt:
 
 action_funccall: PRDR_ACT_FUNCCALL '(' PRDR_STRING ')'
     {
-        $$ = new PrdrExprAct_Funccall($3);
+        $$ = new ExprAct_Funccall($3);
     }
         | PRDR_ACT_FUNCCALL '(' PRDR_STRING ',' PRDR_ID ')'
     {
-        $$ = new PrdrExprAct_Funccall($3, $5);
+        $$ = new ExprAct_Funccall($3, $5);
     }
 ;
 
 action_flag: PRDR_ACT_FLAG '(' PRDR_ID ')'
     {
-        $$ = new PrdrExprAct_Flag($3);
+        $$ = new ExprAct_Flag($3);
     }
 ;
 
 action_capture: PRDR_ACT_CAPTURE '(' PRDR_ID ')'
     {
-        $$ = new PrdrExprAct_Capture($3);
+        $$ = new ExprAct_Capture($3);
     }
 ;
 

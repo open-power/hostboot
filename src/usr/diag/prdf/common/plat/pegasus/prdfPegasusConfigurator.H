@@ -32,10 +32,10 @@
 #include <iipCallAttnResolution.h> // For CallAttnResolution
 #include <prdfPllDomain.H>
 
-class PrdfRuleChipDomain;
-
 namespace PRDF
 {
+
+class RuleChipDomain;
 
 typedef std::vector< PRDF::PllDomain  *> PllDomainList;
 typedef std::vector< CHIP_CLASS *> PllChipList;
@@ -49,8 +49,8 @@ class PegasusConfigurator : public Configurator
      * @brief Constructor
      */
     PegasusConfigurator() :
-        Configurator( PrdfRuleChipDomain::TOTAL_CHIPS,
-                      PrdfRuleChipDomain::TOTAL_DOMAINS )
+        Configurator( RuleChipDomain::TOTAL_CHIPS,
+                      RuleChipDomain::TOTAL_DOMAINS )
     {}
 
     /**
@@ -83,9 +83,9 @@ class PegasusConfigurator : public Configurator
      * @parm  io_domain The associated domain.
      * @parm  io_pllDomains The associated PLL domain (optional for some)
      */
-    void addDomainChips( TARGETING::TYPE i_type,
-                         PrdfRuleChipDomain * io_domain,
-                         PllDomainList      * io_pllDomains = NULL );
+    void addDomainChips( TARGETING::TYPE  i_type,
+                         RuleChipDomain * io_domain,
+                         PllDomainList  * io_pllDomains = NULL );
 
     /**
      *  @brief  Add chip to its Pll Domain.
@@ -99,7 +99,7 @@ class PegasusConfigurator : public Configurator
     void addChipsToPllDomain(
          DOMAIN_ID                    i_domainId,
          PllDomainList              * io_fabricPllDomains,
-         PrdfRuleChip               * i_chip,
+         RuleChip                   * i_chip,
          TARGETING::TargetHandle_t    i_pTarget,
          ScanFacility               & i_scanFac,
          ResolutionFactory          & i_resFac);
@@ -111,7 +111,7 @@ class PegasusConfigurator : public Configurator
    */
   void addPllDomainsToSystem(
         PllDomainList  & i_fabricPllDomains,
-        PllDomainList  & i_membPllDomains);
+        PllDomainList  & i_membPllDomains );
 
   private: // data
 
@@ -119,6 +119,6 @@ class PegasusConfigurator : public Configurator
 
 };
 
-} // End namespace PRDF
+} // end namespace PRDF
 
 #endif

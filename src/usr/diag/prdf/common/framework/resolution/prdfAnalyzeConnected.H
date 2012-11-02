@@ -37,6 +37,9 @@
 #include <iipResolution.h>
 #include <prdfPlatServices.H>
 
+namespace PRDF
+{
+
 //--------------------------------------------------------------------
 //  Forward References
 //--------------------------------------------------------------------
@@ -51,13 +54,13 @@ struct STEP_CODE_DATA_STRUCT;
       dynamic failover and concurrent maintainance - without having to call
       PRD to re-build itself.
 */
-class PrdfAnalyzeConnected : public Resolution
+class AnalyzeConnected : public Resolution
 {
 public:
   /**
    default ctor
    */
-  PrdfAnalyzeConnected(void);
+  AnalyzeConnected(void);
 
   /**
    Constructor
@@ -65,7 +68,7 @@ public:
    @param   i_targetType          i_targetType of desired unit that's connected to i_psourceHandle
    @param   i_idx:                index into getConnected list of chip.
    */
-  PrdfAnalyzeConnected(TARGETING::TargetHandle_t i_psourceHandle ,
+  AnalyzeConnected(TARGETING::TargetHandle_t i_psourceHandle ,
                        TARGETING::TYPE i_targetType,
                        uint32_t i_idx =0xffffffff );
 
@@ -81,7 +84,7 @@ public:
    */
   virtual int32_t Resolve(STEP_CODE_DATA_STRUCT & io_service_data);
 
-  virtual bool operator==(const PrdfAnalyzeConnected & r) const;
+  virtual bool operator==(const AnalyzeConnected & r) const;
 
 private:  // functions
 private:  // Data
@@ -91,14 +94,14 @@ private:  // Data
   uint32_t  iv_idx;
 };
 
-inline PrdfAnalyzeConnected::PrdfAnalyzeConnected(void)
+inline AnalyzeConnected::AnalyzeConnected(void)
                             : iv_psourceHandle(NULL),
                               iv_targetType(TARGETING::TYPE_NA),
                               iv_idx(0xffffffff)
 {
 }
 
-inline PrdfAnalyzeConnected::PrdfAnalyzeConnected(
+inline AnalyzeConnected::AnalyzeConnected(
                                 TARGETING::TargetHandle_t i_psourceHandle,
                                 TARGETING::TYPE i_targetType,
                                 uint32_t i_idx)
@@ -108,18 +111,14 @@ inline PrdfAnalyzeConnected::PrdfAnalyzeConnected(
 {
 }
 
-inline bool PrdfAnalyzeConnected::operator==(const PrdfAnalyzeConnected & r) const
+inline bool AnalyzeConnected::operator==(const AnalyzeConnected & r) const
 {
   return (iv_psourceHandle == r.iv_psourceHandle &&
           iv_targetType == r.iv_targetType &&
           iv_idx == r.iv_idx);
 }
 
+} // end namespace PRDF
+
 #endif /* PRDFANALYZECONNECTED_H */
 
-// Change Log *****************************************************************
-//
-//  Flag Reason    Vers  Date     Coder    Description
-//  ---- --------- ----- -------- -------- ------------------------------------
-//       498293    f310  03/31/05 iawillia Initial Creation
-// End Change Log *************************************************************

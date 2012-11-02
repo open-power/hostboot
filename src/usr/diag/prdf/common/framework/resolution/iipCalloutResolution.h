@@ -54,6 +54,9 @@
 #include <iipResolution.h>
 #endif
 
+namespace PRDF
+{
+
 //--------------------------------------------------------------------
 //  Forward References
 //--------------------------------------------------------------------
@@ -142,12 +145,14 @@ CalloutResolution::CalloutResolution(PRDF::PRDcallout callout,
 
 inline
 CalloutResolution::CalloutResolution() :
-    xMruCallout(NULL), xPriority(PRDF::MRU_MED)
+    xMruCallout(NULL), xPriority(MRU_MED)
 {}
 
 inline
 CalloutResolution::CalloutResolution(const CalloutResolution & cr)
 : xMruCallout(cr.xMruCallout), xPriority(cr.xPriority)
 {}
+
+} // end namespace PRDF
 
 #endif /* iipCalloutResolution_h */

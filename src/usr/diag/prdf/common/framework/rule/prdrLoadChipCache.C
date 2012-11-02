@@ -47,7 +47,7 @@ namespace Prdr
              ++i)
         {
             if (NULL != i->second)
-                delete (PrdrChip*)i->second;
+                delete (Chip*)i->second;
         }
 
         // Clear map.
@@ -57,7 +57,7 @@ namespace Prdr
 
     //---------------------------------------------------------------------
     errlHndl_t LoadChipCache::loadChip(const char * i_file,
-                                       PrdrChip ** o_chip)
+                                       Chip ** o_chip)
     {
         errlHndl_t l_errl = NULL;
         *o_chip = NULL;
@@ -66,12 +66,12 @@ namespace Prdr
 
         if (cv_cache.end() != i) // Found object in cache.
         {
-            (*o_chip) = (PrdrChip*)(*i).second;
+            (*o_chip) = (Chip*)(*i).second;
             l_errl = NULL;
         }
         else
         {
-            (*o_chip) = new PrdrChip;
+            (*o_chip) = new Chip;
 
             do
             {
@@ -145,7 +145,7 @@ namespace Prdr
 
 #endif
                 // Load chip object.
-                l_errl = Prdr::prdrLoadChip(l_ruleFile, *(*o_chip));
+                l_errl = LoadChip(l_ruleFile, *(*o_chip));
 
             } while (0);
 
@@ -167,4 +167,5 @@ namespace Prdr
 
     };
     //---------------------------------------------------------------------
-}
+
+} // end namespace Prdr

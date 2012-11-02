@@ -80,6 +80,9 @@
 #include <iipMopRegisterAccess.h>
 #endif
 
+namespace PRDF
+{
+
 // // Forward References
 // #ifdef _USE_IOSTREAMS_
 // class ostream;
@@ -301,6 +304,8 @@ private: // Data
   uint16_t cv_shortId;
 };
 
+} // end namespace PRDF
+
 // #ifdef _USE_IOSTREAMS_
 
 //   // Function Specification ********************************************
@@ -321,20 +326,6 @@ private: // Data
 
 // #endif
 
-
 #include <iipScanCommRegisterAccess.inl>
-
-// Change Log **********************************************************
-//
-//  Flag  PTR/DCR#  Userid    Date      Description
-//  ----  --------  --------  --------  -----------
-//  n/a   n/a       JST       05/05/95  Created.
-//        D49127.7  DGILBERT  09/19/96  Ctor changed
-//                  DGILBERT  05/23/97  Access change
-//  dg00  D49420.1  DGILBERT  08/21/00  Add ForceRead()
-//          f510901   iawillia  06/29/05  Add GetId/SetId
-//
-// End Change Log ******************************************************
-
 
 #endif

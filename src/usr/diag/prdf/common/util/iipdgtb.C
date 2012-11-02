@@ -54,6 +54,9 @@
 #include <string.h> // for memcpy
 #include <iipdgtb.h>
 
+namespace PRDF
+{
+
 /*--------------------------------------------------------------------*/
 /*  User Types                                                        */
 /*--------------------------------------------------------------------*/
@@ -290,5 +293,7 @@ void DIGIT_STRING_BYTE_CLASS::SetValue
   {
   xbuffer[offset] = value;
   }
+
+} // end namespace PRDF
 
 #undef IIPDGTB_CPP

@@ -24,7 +24,10 @@
 #include <prdfCaptureResolution.H>
 #include <iipServiceDataCollector.h>
 
-int32_t PrdfCaptureResolution::Resolve(STEP_CODE_DATA_STRUCT & i_error)
+namespace PRDF
+{
+
+int32_t CaptureResolution::Resolve(STEP_CODE_DATA_STRUCT & i_error)
 {
     if (NULL != iv_chip)
         return iv_chip->CaptureErrorData(i_error.service_data->GetCaptureData(),
@@ -32,10 +35,5 @@ int32_t PrdfCaptureResolution::Resolve(STEP_CODE_DATA_STRUCT & i_error)
     return SUCCESS;
 };
 
-// Change Log *********************************************************
-//
-//  Flag Reason   Vers Date     Coder    Description
-//  ---- -------- ---- -------- -------- -------------------------------
-//                f310 08/31/06 iawillia Initial File Creation
-// End Change Log *****************************************************
+} // end namespace PRDF
 

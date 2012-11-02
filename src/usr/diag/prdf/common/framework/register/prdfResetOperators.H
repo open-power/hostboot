@@ -36,6 +36,9 @@
 #include <iipscr.h>
 #include <iipconst.h>
 
+namespace PRDF
+{
+
 /**
  * @class RegisterResetOperator
  * Interface class for reset operators.  (pure virtual)
@@ -315,16 +318,7 @@ class NotOperator : public RegisterResetOperator
     }
 };
 
+} // end namespace PRDF
 
 #endif
 
-// Change Log *********************************************************
-//
-//  Flag Reason   Vers Date     Coder    Description
-//  ---- -------- ---- -------- -------- -------------------------------
-//         F510901  f300 07/15/05 iawillia Initial file creation.
-//         F523598  f300 10/04/05 iawillia Add AndOperator.  Fix Or.
-//         F537132  f300 02/20/06 iawillia Add RMW mask register.
-//         F545881  f300 04/19/06 dgilbert Add #include <iipscr.h>
-//  zs01 D620028  f330 07/25/07 zshelle  Support for mcp5 compiler
-// End Change Log *****************************************************

@@ -29,12 +29,15 @@
 #undef NULL
 #define NULL 0
 
-#define BIT_LIST_CLASS prdfBitKey
-#define BIT_STRING_CLASS prdfBitString
-#define BIT_STRING_ADDRESS_CLASS prdfBitStringOffset
-#define BIT_STRING_BUFFER_CLASS prdfBitStringBuffer
-#define ResolutionMap prdfResolutionMap
-#define FILTER_PRIORITY_CLASS prdfFilterPriority
-#define FILTER_CLASS prdfFilter
+namespace PRDF
+{
+
+#define BIT_LIST_CLASS           BitKey
+#define BIT_STRING_CLASS         BitString
+#define BIT_STRING_ADDRESS_CLASS BitStringOffset
+#define BIT_STRING_BUFFER_CLASS  BitStringBuffer
+#define FILTER_CLASS             FilterClass
+
+} // end namespace PRDF
 
 #endif /* prdf_types_h */

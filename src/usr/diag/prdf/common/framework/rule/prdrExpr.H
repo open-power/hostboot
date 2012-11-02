@@ -34,26 +34,30 @@
 
 #include <prdrCommon.H> // for enums.
 
+using Prdr::SignatureOp;
+
+extern void yyerror(const char *);
+
+namespace PRDR_COMPILER
+{
+
 // -- Forward defs //
-class PrdrExpr;
+class Expr;
 uint16_t prdrGetRefId(std::string *);
 char prdrGetRefType(std::string *);
 void prdrCheckReferences();
 uint32_t prdrActionArgMap(const std::string &);
 uint32_t prdrCaptureGroupMap(const std::string &);
-uint32_t prdrCaptureTypeMap(const std::string &); // @jl04  Type for registers.
+uint32_t prdrCaptureTypeMap(const std::string &);
 std::list<std::string> prdrParseDoxygen(std::string & i_string);
-class PrdrChip;
-extern PrdrChip * g_currentChip;
-extern std::map<std::string, PrdrExpr *> g_rules;
-extern void yyerror(const char *);
+class Chip;
+extern Chip * g_currentChip;
+extern std::map<std::string, Expr *> g_rules;
 extern uint32_t g_nextAndBit;
 extern bool g_hadError;
 // -- end Forward defs //
 
-using Prdr::PrdrSignatureOp;
-
-class PrdrExpr
+class Expr
 {
     public:
 
@@ -71,23 +75,23 @@ class PrdrExpr
                 {
                     std::cerr << "def sig: " << typeid(*this).name()
                               << std::endl;
-                    return PrdrSignatureOp::DEFAULT_SIGNATURE;
+                    return SignatureOp::DEFAULT_SIGNATURE;
                 };
 
 
-        PrdrExpr() : cv_doxcomment("") {};
-        virtual ~PrdrExpr() {};
+        Expr() : cv_doxcomment("") {};
+        virtual ~Expr() {};
 
     protected:
         std::string cv_doxcomment;
 };
 
-class PrdrExprRef : public PrdrExpr
+class ExprRef : public Expr
 {
     public:
         std::string *         cv_name;
 
-        PrdrExprRef(std::string * n) : cv_name(n) {};
+        ExprRef(std::string * n) : cv_name(n) {};
 
         int output(FILE * i_file)
             {
@@ -112,17 +116,17 @@ class PrdrExprRef : public PrdrExpr
         {
             if (Prdr::REF_REG == prdrGetRefType(cv_name))
             {
-                return Util::hashString(cv_name->c_str());
+                return PRDF::Util::hashString(cv_name->c_str());
             }
             else
             {
-                PrdrExpr * tmp = g_rules[*cv_name];
+                Expr * tmp = g_rules[*cv_name];
                 if (NULL == tmp)
                 {
                     std::cerr << "NPE: " << *cv_name << std::endl;
                 }
                 return (NULL == tmp ?
-                        PrdrSignatureOp::DEFAULT_SIGNATURE
+                        SignatureOp::DEFAULT_SIGNATURE
                         : tmp->getSignature()
                     );
             }
@@ -130,14 +134,14 @@ class PrdrExprRef : public PrdrExpr
 
 };
 
-class PrdrExprInt : public PrdrExpr
+class ExprInt : public Expr
 {
     public:
         uint32_t        cv_value;
         char                cv_op;
 
-        PrdrExprInt() : cv_op(Prdr::INTEGER) {};
-        PrdrExprInt(uint32_t v, char o = Prdr::INTEGER) : cv_value(v),
+        ExprInt() : cv_op(Prdr::INTEGER) {};
+        ExprInt(uint32_t v, char o = Prdr::INTEGER) : cv_value(v),
                                                               cv_op(o) {};
 
         int output(FILE * i_file)
@@ -168,21 +172,21 @@ class PrdrExprInt : public PrdrExpr
                       << cv_value;
         };
 
-        uint16_t getSignature() { return PrdrSignatureOp::DEFAULT_SIGNATURE; };
+        uint16_t getSignature() { return SignatureOp::DEFAULT_SIGNATURE; };
 };
 
-class PrdrExprTime : public PrdrExpr
+class ExprTime : public Expr
 {
   public:
 
-    uint32_t                iv_units;
-    Prdr::PrdrTimeBaseFlags iv_base;
+    uint32_t            iv_units;
+    Prdr::TimeBaseFlags iv_base;
 
-    PrdrExprTime() :
+    ExprTime() :
         iv_units(0xffffffff), iv_base(Prdr::PRDR_TIME_BASE_SEC)
     {}
 
-    PrdrExprTime( uint32_t units, Prdr::PrdrTimeBaseFlags base ) :
+    ExprTime( uint32_t units, Prdr::TimeBaseFlags base ) :
         iv_units(units), iv_base(base)
     {}
 
@@ -214,14 +218,14 @@ class PrdrExprTime : public PrdrExpr
     }
 };
 
-class PrdrExprBitString : public PrdrExpr
+class ExprBitString : public Expr
 {
     public:
         std::string        cv_value;
         char                cv_op;
 
-        PrdrExprBitString() : cv_value(), cv_op(Prdr::BIT_STR) {};
-        PrdrExprBitString(std::string v, char o = Prdr::BIT_STR) : cv_value(v),
+        ExprBitString() : cv_value(), cv_op(Prdr::BIT_STR) {};
+        ExprBitString(std::string v, char o = Prdr::BIT_STR) : cv_value(v),
                                                                    cv_op(o) {};
 
         int output(FILE * i_file)
@@ -277,18 +281,18 @@ class PrdrExprBitString : public PrdrExpr
             o_errFile << cv_value;
         };
 
-        uint16_t getSignature() { return PrdrSignatureOp::DEFAULT_SIGNATURE; };
+        uint16_t getSignature() { return SignatureOp::DEFAULT_SIGNATURE; };
 };
 
 
-class PrdrExprOp1 : public PrdrExpr
+class ExprOp1 : public Expr
 {
     public:
         char                   cv_op;
-        PrdrExpr *         cv_arg;
+        Expr *         cv_arg;
 
-        PrdrExprOp1(char o) : cv_op(o) {};
-        PrdrExprOp1(char o, PrdrExpr * a) : cv_op(o), cv_arg(a) {};
+        ExprOp1(char o) : cv_op(o) {};
+        ExprOp1(char o, Expr * a) : cv_op(o), cv_arg(a) {};
 
         int output(FILE * i_file)
             {
@@ -310,21 +314,21 @@ class PrdrExprOp1 : public PrdrExpr
         uint16_t getSignature()
         {
             return (NULL == cv_arg ?
-                        PrdrSignatureOp::DEFAULT_SIGNATURE
+                        SignatureOp::DEFAULT_SIGNATURE
                         : cv_arg->getSignature()
                    );
         }
 
 };
 
-class PrdrExprOp2 : public PrdrExpr
+class ExprOp2 : public Expr
 {
     public:
-        PrdrExpr *        cv_arg[2];
+        Expr *        cv_arg[2];
         char                cv_op;
 
-        PrdrExprOp2(char o) : cv_op(o) {};
-        PrdrExprOp2(char o, PrdrExpr * a1, PrdrExpr * a2) : cv_op(o)
+        ExprOp2(char o) : cv_op(o) {};
+        ExprOp2(char o, Expr * a1, Expr * a2) : cv_op(o)
             {
                 cv_arg[0] = a1; cv_arg[1] = a2;
             };
@@ -352,29 +356,29 @@ class PrdrExprOp2 : public PrdrExpr
 
         uint16_t getSignature()
         {
-            return PrdrSignatureOp::combineSig(
+            return SignatureOp::combineSig(
                     (NULL == cv_arg[0] ?
-                        PrdrSignatureOp::DEFAULT_SIGNATURE
+                        SignatureOp::DEFAULT_SIGNATURE
                         : cv_arg[0]->getSignature()
                     ),
                     (NULL == cv_arg[1] ?
-                        PrdrSignatureOp::DEFAULT_SIGNATURE
+                        SignatureOp::DEFAULT_SIGNATURE
                         : cv_arg[1]->getSignature()
                     ));
         };
 
 };
 
-class PrdrExprAttnLink : public PrdrExpr
+class ExprAttnLink : public Expr
 {
     public:
         static const int MAX_ATTNS = 4;
-        PrdrExpr *        cv_arg[MAX_ATTNS];
+        Expr *        cv_arg[MAX_ATTNS];
 
-        PrdrExprAttnLink(std::string * attn1, PrdrExpr * exp1,
-                         std::string * attn2, PrdrExpr * exp2,
-                         std::string * attn3, PrdrExpr * exp3,
-                         std::string * attn4, PrdrExpr * exp4)
+        ExprAttnLink(std::string * attn1, Expr * exp1,
+                     std::string * attn2, Expr * exp2,
+                     std::string * attn3, Expr * exp3,
+                     std::string * attn4, Expr * exp4)
         {
             for (int i = 0; i < MAX_ATTNS; i++)
                 cv_arg[i] = NULL;
@@ -412,14 +416,14 @@ class PrdrExprAttnLink : public PrdrExpr
 
         uint16_t getSignature()
         {
-            uint16_t l_val = PrdrSignatureOp::DEFAULT_SIGNATURE;
+            uint16_t l_val = SignatureOp::DEFAULT_SIGNATURE;
             for (int i = 0; i < MAX_ATTNS; i++)
                 if (NULL != cv_arg[i])
-                    l_val = PrdrSignatureOp::combineSig(l_val,
+                    l_val = SignatureOp::combineSig(l_val,
                                                     cv_arg[i]->getSignature());
                 else
-                    l_val = PrdrSignatureOp::combineSig(l_val,
-                                            PrdrSignatureOp::DEFAULT_SIGNATURE);
+                    l_val = SignatureOp::combineSig(l_val,
+                                            SignatureOp::DEFAULT_SIGNATURE);
             return l_val;
         };
 
@@ -463,14 +467,14 @@ class PrdrExprAttnLink : public PrdrExpr
 };
 
 
-class PrdrExprRule : public PrdrExpr
+class ExprRule : public Expr
 {
     public:
         std::string *         cv_rulename;
-        PrdrExpr *         cv_bits;
+        Expr *         cv_bits;
         std::string *         cv_actionname;
 
-        PrdrExprRule(std::string * r, PrdrExpr * b, std::string * a)
+        ExprRule(std::string * r, Expr * b, std::string * a)
             : cv_rulename(r), cv_bits(b), cv_actionname(a) {};
 
         int output(FILE * i_file)
@@ -505,7 +509,7 @@ class PrdrExprRule : public PrdrExpr
             l_errFront << "\tPRDR_ERROR_SIGNATURE ( 0x"
                        << std::setfill('0') << std::setw(4)
                        << std::hex
-                       << ( (PrdrExprRef(cv_rulename).getSignature()
+                       << ( (ExprRef(cv_rulename).getSignature()
                              + g_currentChip->cv_signatureOffset) & 0xffff )
                        << "00";
 
@@ -560,9 +564,9 @@ class PrdrExprRule : public PrdrExpr
             {
                 o_errFile << l_errFront.str();
 
-                if (typeid(*cv_bits).name() == typeid(PrdrExprOp2).name())
+                if (typeid(*cv_bits).name() == typeid(ExprOp2).name())
                 {
-                    if (static_cast<PrdrExprOp2 *>(cv_bits)->cv_op == Prdr::AND)
+                    if (static_cast<ExprOp2 *>(cv_bits)->cv_op == Prdr::AND)
                     {
                         o_errFile << std::setfill('0') << std::setw(2)
                                   << std::hex;
@@ -588,12 +592,12 @@ class PrdrExprRule : public PrdrExpr
         };
 };
 
-class PrdrExprAct_Try : public PrdrExpr
+class ExprAct_Try : public Expr
 {
     public:
-        PrdrExpr * cv_left, * cv_right;
+        Expr * cv_left, * cv_right;
 
-        PrdrExprAct_Try(PrdrExpr * l, PrdrExpr * r) : cv_left(l),
+        ExprAct_Try(Expr * l, Expr * r) : cv_left(l),
                                                       cv_right(r) {};
 
         int output(FILE * i_file)
@@ -623,18 +627,18 @@ class PrdrExprAct_Try : public PrdrExpr
 
 };
 
-class PrdrExprAct_Thresh : public PrdrExpr
+class ExprAct_Thresh : public Expr
 {
     public:
-        PrdrExpr* cv_thresholdTime[2];
+        Expr* cv_thresholdTime[2];
         //Maximum threshold value supported is 255
         uint8_t cv_field;
         uint8_t cv_mfg;
         uint32_t cv_3;
         std::string * cv_mfg_file_thr;
 
-        PrdrExprAct_Thresh( uint8_t i_field = 0, PrdrExpr * i_fieldTime = NULL,
-                            uint8_t i_mfg   = 0, PrdrExpr * i_mfgTime   = NULL,
+        ExprAct_Thresh( uint8_t i_field = 0, Expr * i_fieldTime = NULL,
+                            uint8_t i_mfg   = 0, Expr * i_mfgTime   = NULL,
                             std::string * i_mfg_file = NULL ) :
             cv_field(i_field), cv_mfg(i_mfg), cv_mfg_file_thr(i_mfg_file)
         {
@@ -734,12 +738,12 @@ class PrdrExprAct_Thresh : public PrdrExpr
 };
 
 
-class PrdrExprAct_Dump : public PrdrExpr  //@ecdf
+class ExprAct_Dump : public Expr  //@ecdf
 {
     public:
         std::string * cv_1;
 
-        PrdrExprAct_Dump(std::string * i_1) : cv_1(i_1) {};
+        ExprAct_Dump(std::string * i_1) : cv_1(i_1) {};
 
         int output(FILE * i_file)
             {
@@ -769,12 +773,12 @@ class PrdrExprAct_Dump : public PrdrExpr  //@ecdf
 
 };
 
-class PrdrExprAct_Gard : public PrdrExpr
+class ExprAct_Gard : public Expr
 {
     public:
         std::string * cv_1;
 
-        PrdrExprAct_Gard(std::string * i_1) : cv_1(i_1) {};
+        ExprAct_Gard(std::string * i_1) : cv_1(i_1) {};
 
         int output(FILE * i_file)
             {
@@ -798,13 +802,13 @@ class PrdrExprAct_Gard : public PrdrExpr
 
 };
 
-class PrdrExprAct_Analyse : public PrdrExpr
+class ExprAct_Analyse : public Expr
 {
     public:
         std::string * cv_1;
         uint32_t cv_2;
 
-        PrdrExprAct_Analyse( std::string * i_1, uint32_t i_2 = 0xffffffff ) :
+        ExprAct_Analyse( std::string * i_1, uint32_t i_2 = 0xffffffff ) :
             cv_1(i_1), cv_2(i_2)
         {}
 
@@ -835,13 +839,13 @@ class PrdrExprAct_Analyse : public PrdrExpr
 
 };
 
-class PrdrExprAct_Callout : public PrdrExpr
+class ExprAct_Callout : public Expr
 {
     public:
         std::string * cv_1, * cv_2;
         uint32_t cv_3;
 
-        PrdrExpr * cv_alt;
+        Expr * cv_alt;
 
         enum Callout_type
         {
@@ -852,11 +856,11 @@ class PrdrExprAct_Callout : public PrdrExpr
 
         Callout_type cv_type;
 
-        PrdrExprAct_Callout(std::string * i_1,
+        ExprAct_Callout(std::string * i_1,
                             std::string * i_2 = NULL,
                             Callout_type  i_t = CALLOUT_SELF,
                             uint32_t      i_3 = 0xffffffff,
-                            PrdrExpr *    i_alt = NULL) :
+                            Expr *    i_alt = NULL) :
             cv_1(i_1), cv_2(i_2), cv_3(i_3), cv_alt(i_alt), cv_type(i_t)
         {}
 
@@ -916,12 +920,12 @@ class PrdrExprAct_Callout : public PrdrExpr
 
 };
 
-class PrdrExprAct_Funccall : public PrdrExpr
+class ExprAct_Funccall : public Expr
 {
     public:
         std::string * cv_1, * cv_2;
 
-        PrdrExprAct_Funccall(std::string * i_1, std::string * i_2 = NULL) :
+        ExprAct_Funccall(std::string * i_1, std::string * i_2 = NULL) :
                 cv_1(i_1), cv_2(i_2) {};
 
         int output(FILE * i_file)
@@ -958,12 +962,12 @@ class PrdrExprAct_Funccall : public PrdrExpr
 
 };
 
-class PrdrExprAct_Flag : public PrdrExpr
+class ExprAct_Flag : public Expr
 {
     public:
         std::string * cv_1;
 
-        PrdrExprAct_Flag(std::string * i_1) : cv_1(i_1) {};
+        ExprAct_Flag(std::string * i_1) : cv_1(i_1) {};
 
         int output(FILE * i_file)
             {
@@ -988,12 +992,12 @@ class PrdrExprAct_Flag : public PrdrExpr
 
 };
 
-class PrdrExprAct_Capture : public PrdrExpr
+class ExprAct_Capture : public Expr
 {
     public:
         std::string * cv_1;
 
-        PrdrExprAct_Capture(std::string * i_1) : cv_1(i_1) {};
+        ExprAct_Capture(std::string * i_1) : cv_1(i_1) {};
 
         int output(FILE * i_file)
             {
@@ -1018,27 +1022,12 @@ class PrdrExprAct_Capture : public PrdrExpr
 
 };
 
+extern std::map<std::string, Expr *> g_rules;
 
-extern std::map<std::string, PrdrExpr *> g_rules;
+typedef std::pair<std::string, std::string> RefPair;
+extern std::list<RefPair> g_references;
 
-typedef std::pair<std::string, std::string> PrdrRefPair;
-extern std::list<PrdrRefPair> g_references;
+} // end namespace PRDR_COMPILER
 
 #endif
 
-// Change Log *********************************************************
-//
-//  Flag Reason   Vers Date     Coder    Description
-//  ---- -------- ---- -------- -------- -------------------------------
-//       F494911  f310 03/04/05 iawillia Initial File Creation
-//         D515833  f300 09/19/05 iawillia Add capture support.
-//         F526728  f300 10/25/05 iawillia Add >> and << registers.
-//         F534311  f300 01/10/06 iawillia Add bit string expression.
-//         F544848  f300 04/03/06 iawillia Add multi-bit support.
-//         F549888  f300 05/01/06 iawillia Add Proc. CS attention.
-//  ecdf F550548  f300 05/04/06 iawillia eClipz DUMP flags support.
-//           D555348  f310 06/05/06 iawillia Update HTML generation.
-//  jl02   F605874  f330 07/31/07 lukas    Add functions to PRD framework/Galaxy
-//                                                   2 code for unit CS.
-// @jl04   F630836  f330 09/17/07 lukas    Add error log Cap. type.
-// End Change Log *****************************************************

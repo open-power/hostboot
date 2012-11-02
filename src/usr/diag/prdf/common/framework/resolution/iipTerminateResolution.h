@@ -67,6 +67,9 @@
 #include <iipResolution.h>
 #endif
 
+namespace PRDF
+{
+
 //--------------------------------------------------------------------
 //  Forward References
 //--------------------------------------------------------------------
@@ -128,12 +131,7 @@ private:  // Data
 inline
 TerminateResolution::TerminateResolution(): Resolution() {}
 
+} // end namespace PRDF
+
 #endif /* iipResolution_h */
 
-// Change Log *********************************************************
-//
-//  Flag Reason   Vers Date     Coder Description
-//  ---- -------- ---- -------- ----- -------------------------------
-//                V4R1 09/13/96 DRG   Created
-//
-// End Change Log *****************************************************

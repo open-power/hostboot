@@ -39,10 +39,10 @@
 namespace Prdr
 {
 
-void prdrReadExpr(UtilStream & i_stream, PrdrExpr & o_expr);
+void ReadExpr(UtilStream & i_stream, Expr & o_expr);
 
 // NOTE: caller must call delete[] to release the buffer
-void prdrReadString(UtilStream & i_stream, char *& o_string)
+void ReadString(UtilStream & i_stream, char *& o_string)
 {
     char  l_pBuf[100];
     memset(l_pBuf,'\0',100);
@@ -82,7 +82,7 @@ void prdrReadBitString(UtilStream & i_stream, std::vector<uint64_t> & o_vector)
     }
 }
 
-errlHndl_t prdrLoadChip(UtilStream & i_stream, PrdrChip & o_chip)
+errlHndl_t LoadChip(UtilStream & i_stream, Chip & o_chip)
 {
     errlHndl_t l_errl = NULL;
 
@@ -94,28 +94,28 @@ errlHndl_t prdrLoadChip(UtilStream & i_stream, PrdrChip & o_chip)
         i_stream >> l_temp;
         if (0 != memcmp(l_temp, "PRDRCHIP", 8))
         {
-            PRDF_ERR("prdrLoadChip() bad chip file - l_temp: %s ", l_temp);
+            PRDF_ERR("LoadChip() bad chip file - l_temp: %s ", l_temp);
             // Bad chip file.
             /*@
              * @errortype
-             * @refcode         LIC_REFCODE
-             * @subsys                 EPUB_FIRMWARE_SP
-             * @reasoncode         PRDF_CODE_FAIL
+             * @refcode    LIC_REFCODE
+             * @subsys     EPUB_FIRMWARE_SP
+             * @reasoncode PRDF_CODE_FAIL
              *
-             * @moduleid           PRDF_PRDRLOADCHIP
-             * @userdata1          0x50524452 ("PRDR")
-             * @userdata2          0x43484950 ("CHIP")
-             * @devdesc                Attempted to load chip rule file that lacked
-             *                         the proper header "PRDRCHIP".
+             * @moduleid   PRDF_LOADCHIP
+             * @userdata1  0x50524452 ("PRDR")
+             * @userdata2  0x43484950 ("CHIP")
+             * @devdesc    Attempted to load chip rule file that lacked
+             *             the proper header "PRDRCHIP".
              */
             PRDF_CREATE_ERRL(l_errl,
                              ERRL_SEV_UNRECOVERABLE,
                              ERRL_ETYPE_NOT_APPLICABLE,
                              SRCI_ERR_INFO,
                              SRCI_NO_ATTR,
-                             PRDF_PRDRLOADCHIP,
+                             PRDF::PRDF_LOADCHIP,
                              LIC_REFCODE,
-                             PRDF_CODE_FAIL,
+                             PRDF::PRDF_CODE_FAIL,
                              0x50524452, // PRDR
                              0x43484950, // CHIP
                              0, 0);
@@ -134,7 +134,7 @@ errlHndl_t prdrLoadChip(UtilStream & i_stream, PrdrChip & o_chip)
 
         if (o_chip.cv_regCount != 0)
         {
-            o_chip.cv_registers = new PrdrRegister[o_chip.cv_regCount];
+            o_chip.cv_registers = new Register[o_chip.cv_regCount];
             for (uint32_t i = 0; i < o_chip.cv_regCount; i++)
             {
                 i_stream >> o_chip.cv_registers[i].cv_name;
@@ -142,7 +142,7 @@ errlHndl_t prdrLoadChip(UtilStream & i_stream, PrdrChip & o_chip)
                 i_stream >> o_chip.cv_registers[i].cv_scomAddr;
 
                 if (o_chip.cv_registers[i].cv_flags &
-                        Prdr::PRDR_REGISTER_SCOMLEN)
+                        PRDR_REGISTER_SCOMLEN)
                 {
                     i_stream >> o_chip.cv_registers[i].cv_scomLen;
                 }
@@ -152,7 +152,7 @@ errlHndl_t prdrLoadChip(UtilStream & i_stream, PrdrChip & o_chip)
                 }
 
                 if (o_chip.cv_registers[i].cv_flags &
-                        Prdr::PRDR_REGISTER_RESETS)
+                        PRDR_REGISTER_RESETS)
                 {
                     // Read 'n' from stream.  Read that many reset structs out
                     // of the stream, insert into cv_resets for register.
@@ -160,15 +160,15 @@ errlHndl_t prdrLoadChip(UtilStream & i_stream, PrdrChip & o_chip)
                             std::back_inserter(
                                 o_chip.cv_registers[i].cv_resets
                                 ),
-                            Util::unary_input<uint16_t, UtilStream>(i_stream)(),
-                            Util::unary_input<PrdrRegister::ResetOrMaskStruct,
+                            PRDF::Util::unary_input<uint16_t, UtilStream>(i_stream)(),
+                            PRDF::Util::unary_input<Register::ResetOrMaskStruct,
                                               UtilStream> (i_stream)
                             );
 
                 }
 
                 if (o_chip.cv_registers[i].cv_flags &
-                        Prdr::PRDR_REGISTER_MASKS)
+                        PRDR_REGISTER_MASKS)
                 {
                     // Read 'n' from stream.  Read that many mask structs out
                     // of the stream, insert into cv_masks for register.
@@ -176,15 +176,15 @@ errlHndl_t prdrLoadChip(UtilStream & i_stream, PrdrChip & o_chip)
                             std::back_inserter(
                                 o_chip.cv_registers[i].cv_masks
                                 ),
-                            Util::unary_input<uint16_t, UtilStream>(i_stream)(),
-                            Util::unary_input<PrdrRegister::ResetOrMaskStruct,
+                            PRDF::Util::unary_input<uint16_t, UtilStream>(i_stream)(),
+                            PRDF::Util::unary_input<Register::ResetOrMaskStruct,
                                               UtilStream> (i_stream)
                             );
 
                 }
 
                 if (o_chip.cv_registers[i].cv_flags &
-                        Prdr::PRDR_REGISTER_CAPTURE)
+                        PRDR_REGISTER_CAPTURE)
                 {
                     // Read 'n' from stream.  Read that many mask structs out
                     // of the stream, insert into cv_masks for register.
@@ -192,8 +192,8 @@ errlHndl_t prdrLoadChip(UtilStream & i_stream, PrdrChip & o_chip)
                             std::back_inserter(
                                 o_chip.cv_registers[i].cv_captures
                                 ),
-                            Util::unary_input<uint16_t, UtilStream>(i_stream)(),
-                            Util::unary_input<PrdrRegister::CaptureInfoStruct,
+                            PRDF::Util::unary_input<uint16_t, UtilStream>(i_stream)(),
+                            PRDF::Util::unary_input<Register::CaptureInfoStruct,
                                               UtilStream> (i_stream)
                             );
                 }
@@ -204,11 +204,11 @@ errlHndl_t prdrLoadChip(UtilStream & i_stream, PrdrChip & o_chip)
         i_stream >> o_chip.cv_ruleCount;
         if (o_chip.cv_ruleCount != 0)
         {
-            o_chip.cv_rules = new PrdrExpr[o_chip.cv_ruleCount];
+            o_chip.cv_rules = new Expr[o_chip.cv_ruleCount];
             for (uint32_t i = 0; i < o_chip.cv_ruleCount; i++)
             {
                 i_stream >> l_temp[0]; // should be 'R'
-                prdrReadExpr(i_stream, o_chip.cv_rules[i]);
+                ReadExpr(i_stream, o_chip.cv_rules[i]);
             }
         }
 
@@ -218,19 +218,19 @@ errlHndl_t prdrLoadChip(UtilStream & i_stream, PrdrChip & o_chip)
             i_stream >> o_chip.cv_groupAttn[i];
         if (o_chip.cv_groupCount != 0)
         {
-            o_chip.cv_groups = new PrdrExpr * [o_chip.cv_groupCount];
+            o_chip.cv_groups = new Expr * [o_chip.cv_groupCount];
             o_chip.cv_groupSize = new uint16_t[o_chip.cv_groupCount];
             o_chip.cv_groupFlags = new uint8_t[o_chip.cv_groupCount];
-            o_chip.cv_groupPriorityBits = new PrdrExpr * [o_chip.cv_groupCount];
+            o_chip.cv_groupPriorityBits = new Expr * [o_chip.cv_groupCount];
             for (uint32_t i = 0; i < o_chip.cv_groupCount; i++)
             {
                 i_stream >> l_temp[0]; // should be 'G'
                 i_stream >> o_chip.cv_groupSize[i];
                 i_stream >> o_chip.cv_groupFlags[i];
-                if (Prdr::PRDR_GROUP_FILTER_PRIORITY & o_chip.cv_groupFlags[i])
+                if (PRDR_GROUP_FILTER_PRIORITY & o_chip.cv_groupFlags[i])
                 {
-                    o_chip.cv_groupPriorityBits[i] = new PrdrExpr();
-                    prdrReadExpr(i_stream, *o_chip.cv_groupPriorityBits[i]);
+                    o_chip.cv_groupPriorityBits[i] = new Expr();
+                    ReadExpr(i_stream, *o_chip.cv_groupPriorityBits[i]);
                 }
                 else
                 {
@@ -238,19 +238,19 @@ errlHndl_t prdrLoadChip(UtilStream & i_stream, PrdrChip & o_chip)
                 }
                 if (0 != o_chip.cv_groupSize[i])
                 {
-                    o_chip.cv_groups[i] = new PrdrExpr[o_chip.cv_groupSize[i]];
+                    o_chip.cv_groups[i] = new Expr[o_chip.cv_groupSize[i]];
                     for (uint32_t j = 0; j < o_chip.cv_groupSize[i]; j++)
                     {
-                        prdrReadExpr(i_stream, o_chip.cv_groups[i][j]);
-                        if (Prdr::REF_RULE == o_chip.cv_groups[i][j].cv_op)
+                        ReadExpr(i_stream, o_chip.cv_groups[i][j]);
+                        if (REF_RULE == o_chip.cv_groups[i][j].cv_op)
                         {
                             for (int k = 1; k <= 2; k++)
                             {
                                 o_chip.cv_groups[i][j].cv_value[k].p =
-                                        new PrdrExpr();
+                                        new Expr();
                                 o_chip.cv_groups[i][j].cv_deletePtr[k] = true;
 
-                                prdrReadExpr(i_stream,
+                                ReadExpr(i_stream,
                                         *o_chip.cv_groups[i][j].cv_value[k].p);
                             }
                         }
@@ -258,7 +258,7 @@ errlHndl_t prdrLoadChip(UtilStream & i_stream, PrdrChip & o_chip)
                 }
                 else
                 {
-                    o_chip.cv_groups[i] = new PrdrExpr[0]; /*accessing beyond memory*/
+                    o_chip.cv_groups[i] = new Expr[0]; /*accessing beyond memory*/
                                                           // False error BEAM.
                 };
             }
@@ -268,7 +268,7 @@ errlHndl_t prdrLoadChip(UtilStream & i_stream, PrdrChip & o_chip)
         i_stream >> o_chip.cv_actionCount;
         if (o_chip.cv_actionCount != 0)
         {
-            o_chip.cv_actions = new PrdrExpr * [o_chip.cv_actionCount];
+            o_chip.cv_actions = new Expr * [o_chip.cv_actionCount];
             o_chip.cv_actionSize = new uint16_t[o_chip.cv_actionCount];
             for (uint32_t i = 0; i < o_chip.cv_actionCount; i++)
             {
@@ -277,10 +277,10 @@ errlHndl_t prdrLoadChip(UtilStream & i_stream, PrdrChip & o_chip)
                 if (0 != o_chip.cv_actionSize[i])
                 {
                     o_chip.cv_actions[i] =
-                            new PrdrExpr[o_chip.cv_actionSize[i]];
+                            new Expr[o_chip.cv_actionSize[i]];
                     for (uint32_t j = 0; j < o_chip.cv_actionSize[i]; j++)
                     {
-                        prdrReadExpr(i_stream, o_chip.cv_actions[i][j]);
+                        ReadExpr(i_stream, o_chip.cv_actions[i][j]);
                     }
                 }
                 else //@pw01
@@ -298,7 +298,7 @@ errlHndl_t prdrLoadChip(UtilStream & i_stream, PrdrChip & o_chip)
     return l_errl;
 }
 
-void prdrReadExpr(UtilStream & i_stream, PrdrExpr & o_expr)
+void ReadExpr(UtilStream & i_stream, Expr & o_expr)
 {
     unsigned char l_tmpChar;
     uint32_t l_tmp32;
@@ -310,52 +310,52 @@ void prdrReadExpr(UtilStream & i_stream, PrdrExpr & o_expr)
 
     switch(o_expr.cv_op)
     {
-        case Prdr::AND:
-        case Prdr::OR:
-        case Prdr::XOR:
-        case Prdr::LSHIFT:
-        case Prdr::RSHIFT:
-        case Prdr::ACT_TRY:
-            o_expr.cv_value[0].p = new PrdrExpr();
+        case AND:
+        case OR:
+        case XOR:
+        case LSHIFT:
+        case RSHIFT:
+        case ACT_TRY:
+            o_expr.cv_value[0].p = new Expr();
             o_expr.cv_deletePtr[0] = true;
-            prdrReadExpr(i_stream, *o_expr.cv_value[0].p);
+            ReadExpr(i_stream, *o_expr.cv_value[0].p);
 
-            o_expr.cv_value[1].p = new PrdrExpr();
+            o_expr.cv_value[1].p = new Expr();
             o_expr.cv_deletePtr[1] = true;
-            prdrReadExpr(i_stream, *o_expr.cv_value[1].p);
+            ReadExpr(i_stream, *o_expr.cv_value[1].p);
             break;
 
-        case Prdr::NOT:
-            o_expr.cv_value[0].p = new PrdrExpr();
+        case NOT:
+            o_expr.cv_value[0].p = new Expr();
             o_expr.cv_deletePtr[0] = true;
-            prdrReadExpr(i_stream, *o_expr.cv_value[0].p);
+            ReadExpr(i_stream, *o_expr.cv_value[0].p);
             break;
 
-        case Prdr::INTEGER:
-        case Prdr::ACT_GARD:
-        case Prdr::ACT_FLAG:
+        case INTEGER:
+        case ACT_GARD:
+        case ACT_FLAG:
             i_stream >> o_expr.cv_value[0].i;
             break;
 
-        case Prdr::REF_RULE:
-        case Prdr::REF_REG:
-        case Prdr::REF_GRP:
-        case Prdr::REF_ACT:
-        case Prdr::INT_SHORT:
+        case REF_RULE:
+        case REF_REG:
+        case REF_GRP:
+        case REF_ACT:
+        case INT_SHORT:
             i_stream >> l_tmp16;
             o_expr.cv_value[0].i = l_tmp16;
             break;
 
-        case Prdr::BIT_STR:
+        case BIT_STR:
             o_expr.cv_bitStrVect.clear();
             prdrReadBitString(i_stream, o_expr.cv_bitStrVect);
             break;
 
-        case Prdr::ACT_THRES:
-            o_expr.cv_value[0].i = ThresholdResolution::cv_fieldDefault.interval;
-            o_expr.cv_value[1].i = ThresholdResolution::cv_fieldDefault.threshold;
-            o_expr.cv_value[2].i = ThresholdResolution::cv_mnfgDefault.interval;
-            o_expr.cv_value[3].i = ThresholdResolution::cv_mnfgDefault.threshold;
+        case ACT_THRES:
+            o_expr.cv_value[0].i = PRDF::ThresholdResolution::cv_fieldDefault.interval;
+            o_expr.cv_value[1].i = PRDF::ThresholdResolution::cv_fieldDefault.threshold;
+            o_expr.cv_value[2].i = PRDF::ThresholdResolution::cv_mnfgDefault.interval;
+            o_expr.cv_value[3].i = PRDF::ThresholdResolution::cv_mnfgDefault.threshold;
             //The syntax of thresholds in rule file is
             // op field_threshold field_intervale
             //optional fields (mnfg_threshold, mnfg_interval } | mnfg_ilr_threshold | maskid
@@ -385,19 +385,19 @@ void prdrReadExpr(UtilStream & i_stream, PrdrExpr & o_expr)
                 i_stream >> o_expr.cv_value[5];
             break;
 
-        case Prdr::ACT_ANALY:
+        case ACT_ANALY:
             i_stream >> o_expr.cv_value[0].i;
             i_stream >> o_expr.cv_value[1].i;
             break;
 
-        case Prdr::ACT_FUNC:
+        case ACT_FUNC:
             o_expr.cv_actFunc = NULL;
-            prdrReadString(i_stream, o_expr.cv_actFunc);
+            ReadString(i_stream, o_expr.cv_actFunc);
 
             i_stream >> o_expr.cv_value[1].i;
             break;
 
-        case Prdr::ACT_CALL:
+        case ACT_CALL:
             i_stream >> l_tmpChar;
             o_expr.cv_value[0].i = l_tmpChar;
             i_stream >> o_expr.cv_value[1].i;
@@ -410,32 +410,32 @@ void prdrReadExpr(UtilStream & i_stream, PrdrExpr & o_expr)
                 i_stream >> l_tmpChar;
                 if (0 != l_tmpChar)
                 {
-                    o_expr.cv_value[4].p = new PrdrExpr();
+                    o_expr.cv_value[4].p = new Expr();
                     o_expr.cv_deletePtr[4] = true;
-                    prdrReadExpr(i_stream, *o_expr.cv_value[4].p);
+                    ReadExpr(i_stream, *o_expr.cv_value[4].p);
                 }
                 else
                     o_expr.cv_value[4].p = NULL;
             }
             break;
 
-        case Prdr::ACT_DUMP: //@ecdf
+        case ACT_DUMP: //@ecdf
             i_stream >> o_expr.cv_value[0].i;
             break;
 
-        case Prdr::ATTNLINK:
+        case ATTNLINK:
             i_stream >> l_tmpChar; // get count
             l_tmp32 = l_tmpChar;
             for (size_t i = 0; i < l_tmp32; i++)
             {
                 i_stream >> l_tmpChar; // get index
-                o_expr.cv_value[l_tmpChar].p = new PrdrExpr();
+                o_expr.cv_value[l_tmpChar].p = new Expr();
                 o_expr.cv_deletePtr[l_tmpChar] = true;
-                prdrReadExpr(i_stream, *o_expr.cv_value[l_tmpChar].p);
+                ReadExpr(i_stream, *o_expr.cv_value[l_tmpChar].p);
             }
             break;
 
-        case Prdr::ACT_CAPT:
+        case ACT_CAPT:
             i_stream >> o_expr.cv_value[0].i;
 
         default:
@@ -443,10 +443,10 @@ void prdrReadExpr(UtilStream & i_stream, PrdrExpr & o_expr)
     }
 }
 
-PrdrRegister::PrdrRegister() : cv_name(0)
+Register::Register() : cv_name(0)
 {}
 
-PrdrRegister::~PrdrRegister()
+Register::~Register()
 {
     for(std::vector<CaptureInfoStruct>::iterator
         j = cv_captures.begin();
@@ -461,7 +461,7 @@ PrdrRegister::~PrdrRegister()
     }
 }
 
-PrdrExpr::PrdrExpr()
+Expr::Expr()
 {
     cv_op = 0;
     cv_actFunc = NULL;
@@ -473,21 +473,21 @@ PrdrExpr::PrdrExpr()
     }
 }
 
-PrdrExpr::~PrdrExpr()
+Expr::~Expr()
 {
     // Special things for certain operator types...
     switch (cv_op)
     {
         // On function call operator and bit string,
         // cv_value[0].p points to a string.
-        case Prdr::ACT_FUNC:
+        case ACT_FUNC:
             if(NULL != cv_actFunc)
             {
                 delete[] cv_actFunc;
                 cv_actFunc = NULL;
             }
             break;
-        case Prdr::BIT_STR:
+        case BIT_STR:
             cv_bitStrVect.clear();
             break;
 
@@ -502,4 +502,4 @@ PrdrExpr::~PrdrExpr()
             delete (cv_value[i].p);
 };
 
-} // end namespace.
+} // end namespace Prdr

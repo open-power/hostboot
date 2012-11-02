@@ -24,15 +24,17 @@
 //----------------------------------------------------------------------
 //  Includes
 //----------------------------------------------------------------------
-#define prdfBitKey_C
+#define BitKey_C
 
 //#include <prdfAssert.h>
 #include <prdfBitKey.H>
 #include <prdfBitString.H>
 #include <string.h>
 
-#undef prdfBitKey_C
+#undef BitKey_C
 
+namespace PRDF
+{
 //-------------------------------------------------------------------------------------------------
 // Local
 //-------------------------------------------------------------------------------------------------
@@ -45,7 +47,7 @@ inline uint32_t getWordSize(uint32_t bitCount) // # of bit32's needed for this b
 // member function definitions
 //-------------------------------------------------------------------------------------------------
 
-prdfBitKey::prdfBitKey(void)
+BitKey::BitKey(void)
 : iv_Capacity(0), iv_storage1(0)
 {
   iv_rep.storage2 = 0;
@@ -53,7 +55,7 @@ prdfBitKey::prdfBitKey(void)
 
 //-------------------------------------------------------------------------------------------------
 
-prdfBitKey::prdfBitKey(uint32_t i_bitPos)
+BitKey::BitKey(uint32_t i_bitPos)
 : iv_Capacity(0), iv_storage1(0)
 {
   iv_rep.storage2 = 0;
@@ -62,7 +64,7 @@ prdfBitKey::prdfBitKey(uint32_t i_bitPos)
 
 //-------------------------------------------------------------------------------------------------
 
-prdfBitKey::prdfBitKey(const uint8_t * i_array,uint8_t i_size)
+BitKey::BitKey(const uint8_t * i_array,uint8_t i_size)
 : iv_Capacity(0), iv_storage1(0)
 {
   iv_rep.storage2 = 0;
@@ -76,7 +78,7 @@ prdfBitKey::prdfBitKey(const uint8_t * i_array,uint8_t i_size)
 
 //-------------------------------------------------------------------------------------------------
 
-prdfBitKey::prdfBitKey(const char * i_ble)
+BitKey::BitKey(const char * i_ble)
 : iv_Capacity(0), iv_storage1(0)
 {
   iv_rep.storage2 = 0;
@@ -89,14 +91,14 @@ prdfBitKey::prdfBitKey(const char * i_ble)
 
 //-------------------------------------------------------------------------------------------------
 
-prdfBitKey::~prdfBitKey(void)
+BitKey::~BitKey(void)
 {
   if(!IsDirect()) delete [] iv_rep.buffer;
 }
 
 //-------------------------------------------------------------------------------------------------
 
-prdfBitKey::prdfBitKey (const prdfBitKey & bit_list)
+BitKey::BitKey (const BitKey & bit_list)
 : iv_Capacity(bit_list.iv_Capacity), iv_storage1(bit_list.iv_storage1)
 {
   if(IsDirect())
@@ -113,11 +115,11 @@ prdfBitKey::prdfBitKey (const prdfBitKey & bit_list)
 
 //-------------------------------------------------------------------------------------------------
 
-prdfBitKey & prdfBitKey::operator=(const prdfBitKey & bit_list)
+BitKey & BitKey::operator=(const BitKey & bit_list)
 {
   if(iv_Capacity)
   {
-    prdfBitString bs(iv_Capacity,DataPtr());
+    BitString bs(iv_Capacity,DataPtr());
     bs.Pattern(0x00000000);
   }
   ReAllocate(bit_list.iv_Capacity);
@@ -143,26 +145,26 @@ prdfBitKey & prdfBitKey::operator=(const prdfBitKey & bit_list)
 
 //-------------------------------------------------------------------------------------------------
 
-prdfBitKey & prdfBitKey::operator=(const prdfBitString & bit_string)
+BitKey & BitKey::operator=(const BitString & bit_string)
 {
   if(iv_Capacity)
   {
-    prdfBitString bs(iv_Capacity,DataPtr());
+    BitString bs(iv_Capacity,DataPtr());
     bs.Pattern(0x00000000);
   }
   ReAllocate(bit_string.GetLength());
-  prdfBitString dbs(iv_Capacity,DataPtr());
+  BitString dbs(iv_Capacity,DataPtr());
   dbs.SetBits(bit_string);
   return(*this);
 }
 
 //-------------------------------------------------------------------------------------------------
 
-prdfBitKey & prdfBitKey::operator=(const char * string_ptr)
+BitKey & BitKey::operator=(const char * string_ptr)
 {
   if(iv_Capacity)
   {
-    prdfBitString bs(iv_Capacity,DataPtr());
+    BitString bs(iv_Capacity,DataPtr());
     bs.Pattern(0x00000000);
   }
 
@@ -177,7 +179,7 @@ prdfBitKey & prdfBitKey::operator=(const char * string_ptr)
 
 //-------------------------------------------------------------------------------------------------
 
-bool prdfBitKey::operator==(const prdfBitKey & that) const
+bool BitKey::operator==(const BitKey & that) const
 {
   bool result = true;
   const uint32_t * mydata = cDataPtr();
@@ -213,7 +215,7 @@ bool prdfBitKey::operator==(const prdfBitKey & that) const
 //-------------------------------------------------------------------------------------------------
 
 // Candidate funciton for bs class
-bool prdfBitKey::isSubset(const prdfBitKey & that) const
+bool BitKey::isSubset(const BitKey & that) const
 {
   bool result = true;
   const uint32_t * mydata = cDataPtr();
@@ -222,7 +224,7 @@ bool prdfBitKey::isSubset(const prdfBitKey & that) const
   uint32_t yosize = getWordSize(that.iv_Capacity);
   uint32_t smsize = (yosize < mysize)? yosize : mysize;
   // size can be non-zero with no bits on - so if that has no bits than use operator==
-  prdfBitKey zero;
+  BitKey zero;
   if(that == zero) result = operator==(that); // only true if both are empty - eg not bits on"
   // if yosize <= mysize than just match smallest amount of data
   // if yozize > mysize than extra yodata must be zero
@@ -244,13 +246,13 @@ bool prdfBitKey::isSubset(const prdfBitKey & that) const
 //-------------------------------------------------------------------------------------------------
 
 // get bit position of nth bit that is set
-uint32_t prdfBitKey::getListValue(uint32_t n) const
+uint32_t BitKey::getListValue(uint32_t n) const
 {
   ++n;
   uint32_t setCount = 0;
   uint32_t bitPos = 0xffffffff;
 
-  prdfBitString bs(iv_Capacity,(CPU_WORD *)cDataPtr());
+  BitString bs(iv_Capacity,(CPU_WORD *)cDataPtr());
   for(uint32_t i = 0; i < iv_Capacity; ++i)
   {
     if(bs.IsSet(i)) ++setCount;
@@ -265,28 +267,28 @@ uint32_t prdfBitKey::getListValue(uint32_t n) const
 
 //-------------------------------------------------------------------------------------------------
 
-uint32_t prdfBitKey::size(void) const
+uint32_t BitKey::size(void) const
 {
-  const prdfBitString bs(iv_Capacity,(CPU_WORD *)cDataPtr());
+  const BitString bs(iv_Capacity,(CPU_WORD *)cDataPtr());
   return bs.GetSetCount();
 }
 
 //-------------------------------------------------------------------------------------------------
 
-void prdfBitKey::removeBit(uint32_t n)
+void BitKey::removeBit(uint32_t n)
 {
   if(n < size())
   {
-    prdfBitString bs(iv_Capacity,DataPtr());
+    BitString bs(iv_Capacity,DataPtr());
     bs.Clear(getListValue(n));
   }
 }
 
 //-------------------------------------------------------------------------------------------------
 
-void prdfBitKey::removeBit(void)
+void BitKey::removeBit(void)
 {
-  prdfBitString bs(iv_Capacity,DataPtr());
+  BitString bs(iv_Capacity,DataPtr());
   uint32_t i = iv_Capacity;
   while(i != 0)
   {
@@ -301,28 +303,28 @@ void prdfBitKey::removeBit(void)
 
 //-------------------------------------------------------------------------------------------------
 
-void prdfBitKey::removeBits(const prdfBitKey & i_bk)
+void BitKey::removeBits(const BitKey & i_bk)
 {
-  prdfBitString mybs(iv_Capacity,(CPU_WORD *)DataPtr());
-  const prdfBitString yobs(i_bk.iv_Capacity,(CPU_WORD *)i_bk.cDataPtr());
+  BitString mybs(iv_Capacity,(CPU_WORD *)DataPtr());
+  const BitString yobs(i_bk.iv_Capacity,(CPU_WORD *)i_bk.cDataPtr());
   mybs.Mask(yobs);
 }
 
 //-------------------------------------------------------------------------------------------------
 
-void prdfBitKey::setBit(uint32_t i_bitValue)
+void BitKey::setBit(uint32_t i_bitValue)
 {
   if(i_bitValue >= iv_Capacity)
   {
     ReAllocate(i_bitValue+1);
   }
-  prdfBitString bs(iv_Capacity,DataPtr());
+  BitString bs(iv_Capacity,DataPtr());
   bs.Set(i_bitValue);
 }
 
 //-------------------------------------------------------------------------------------------------
 
-void prdfBitKey::ReAllocate(uint32_t i_len)
+void BitKey::ReAllocate(uint32_t i_len)
 {
   if(i_len > iv_Capacity)  // never shrink
   {
@@ -338,9 +340,9 @@ void prdfBitKey::ReAllocate(uint32_t i_len)
     if(!isDirect)  // to indirect
     {
       uint32_t * newBuffer = new uint32_t[wordsize];
-      prdfBitString dbs(iv_Capacity,newBuffer);
+      BitString dbs(iv_Capacity,newBuffer);
       dbs.Pattern(0x00000000);
-      prdfBitString sbs(oldSize,oldPtr);
+      BitString sbs(oldSize,oldPtr);
       dbs.SetBits(sbs);
       iv_storage1 = 0;
       if(!wasDirect) // from indirect
@@ -352,11 +354,5 @@ void prdfBitKey::ReAllocate(uint32_t i_len)
   }
 }
 
+} // end namespace PRDF
 
-// Change Log *************************************************************************************
-//
-//  Flag Reason   Vers Date     Coder    Description
-//  ---- -------- ---- -------- -------- ---------------------------------------------------------
-//                              dgilbert Initial Creation
-//
-// End Change Log *********************************************************************************

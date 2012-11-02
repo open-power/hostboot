@@ -42,6 +42,9 @@
 #include <iipResolution.h>
 #endif
 
+namespace PRDF
+{
+
 //--------------------------------------------------------------------
 //  Forward References
 //--------------------------------------------------------------------
@@ -121,14 +124,7 @@ inline
 TryResolution::TryResolution()
   : xTryResolution(NULL), xDefaultResolution(NULL) {}
 
+} // end namespace PRDF
 
 #endif /* xspprdTryResolution_h */
 
-// Change Log *********************************************************
-//
-//  Flag Reason    Vers Date     Coder    Description
-//  ---- --------- ---- -------- -------- -------------------------------
-//       d49274.xx v4r5 12/28/99 dgilbert Initial Creation
-//       f522283   300  09/27/05 dgilbert Make flyweight-able
-//
-// End Change Log *****************************************************

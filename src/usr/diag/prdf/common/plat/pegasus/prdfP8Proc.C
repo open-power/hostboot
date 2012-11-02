@@ -46,7 +46,7 @@ namespace Proc
  * @param  i_chip P8 chip.
  * @return SUCCESS
  */
-int32_t Initialize( PrdfExtensibleChip * i_chip )
+int32_t Initialize( ExtensibleChip * i_chip )
 {
     // FIXME: Add proper initialization as per requirement
     return SUCCESS;
@@ -113,7 +113,7 @@ static inline bool OnlyMcOrExtCS (SCAN_COMM_REGISTER_CLASS * i_glcs,
  * @param o_hasRecovered - true if chip has a recovered that we want to analyze
  * @return SUCCESS
  */
-int32_t CheckForRecovered(PrdfExtensibleChip * i_chip,
+int32_t CheckForRecovered(ExtensibleChip * i_chip,
                           bool & o_hasRecovered)
 {
     o_hasRecovered = false;
@@ -192,7 +192,7 @@ int32_t CheckForRecovered(PrdfExtensibleChip * i_chip,
  * @return SUCCESS
  *
  */
-int32_t CheckForRecoveredSev(PrdfExtensibleChip * i_chip,
+int32_t CheckForRecoveredSev(ExtensibleChip * i_chip,
                              uint32_t & o_sev)
 {
     SCAN_COMM_REGISTER_CLASS * l_rer = NULL;
@@ -257,7 +257,7 @@ int32_t CheckForRecoveredSev(PrdfExtensibleChip * i_chip,
  *  @param o_externalChips - List of external fabrics driving checkstop.
  *  @param o_wofValue - Current WOF value (unused for now).
  */
-int32_t GetCheckstopInfo(PrdfExtensibleChip * i_chip,
+int32_t GetCheckstopInfo(ExtensibleChip * i_chip,
                    bool & o_wasInternal,
                    TARGETING::TargetHandleList & o_externalChips,
                    uint64_t & o_wofValue)
@@ -342,7 +342,7 @@ int32_t GetCheckstopInfo(PrdfExtensibleChip * i_chip,
 
 } PRDF_PLUGIN_DEFINE( Proc, GetCheckstopInfo );
 
-int32_t CoreConfigured(PrdfExtensibleChip * i_chip,
+int32_t CoreConfigured(ExtensibleChip * i_chip,
                        bool & o_isCoreConfigured)
 {
     using namespace TARGETING;

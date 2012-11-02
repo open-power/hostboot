@@ -49,6 +49,9 @@
 #endif
 #include <prdfFilters.H>
 
+namespace PRDF
+{
+
 //--------------------------------------------------------------------
 //  Forward References
 //--------------------------------------------------------------------
@@ -90,7 +93,8 @@ public:
    <br><b>Notes:       </b>
    </ul><br>
    */
-  ErrorRegisterFilter(SCAN_COMM_REGISTER_CLASS & r, ResolutionMap & rm, prdfFilter * f, uint16_t scrId = 0x0fff);
+  ErrorRegisterFilter( SCAN_COMM_REGISTER_CLASS & r, ResolutionMap & rm,
+                       FilterClass * f, uint16_t scrId = 0x0fff );
 
   /*
    Destructor
@@ -109,13 +113,13 @@ public:
    * @brief Get the stored filter associated with this resolution map.
    * @returns Currently assigned filter.
    */
-  prdfFilter * getFilter() const { return filter; };
+  FilterClass * getFilter() const { return filter; };
 
   /**
    * @brief Store a new filter with this resolution map.
-   * @param i - Filter to store.
+   * @param i - FilterClass to store.
    */
-  void setFilter(prdfFilter * i_filter) { filter = i_filter; };
+  void setFilter(FilterClass * i_filter) { filter = i_filter; };
 
 protected:  // functions
 
@@ -131,14 +135,14 @@ protected:  // functions
                             - DEFINTION in iipErrorRegisterMask.C
    </ul><br>
    */
-  virtual prdfBitKey Filter(const BIT_STRING_CLASS & bs);
+  virtual BitKey Filter(const BIT_STRING_CLASS & bs);
 
   /**
    * Certain filters need to be reversed in order for Reset() to work right
    * @return bit_list modified ? [true|false]
-   * @see prdfFilters.H
+   * @see Filters.H
    */
-  virtual bool FilterUndo(prdfBitKey & i_bit_list)
+  virtual bool FilterUndo(BitKey & i_bit_list)
   {
     bool modified = false;
     if(filter) modified = filter->Undo(i_bit_list);
@@ -154,7 +158,7 @@ private: // functions
 
 protected: // data
 
-  prdfFilter * filter;
+  FilterClass * filter;
 
 private:  // Data
 
@@ -170,20 +174,12 @@ ErrorRegisterFilter::ErrorRegisterFilter(SCAN_COMM_REGISTER_CLASS & r,
 inline
 ErrorRegisterFilter::ErrorRegisterFilter(SCAN_COMM_REGISTER_CLASS & r,
                                          ResolutionMap & rm,
-                                         prdfFilter * f,
+                                         FilterClass * f,
                                          uint16_t scrId)
 : ErrorRegister(r,rm,scrId), filter(f)
 {}
 
+} // end namespace PRDF
 
 #endif /* iipErrorRegisterFilter_h */
 
-// Change Log *************************************************************************************
-//
-//  Flag Reason   Vers    Date     Coder    Description
-//  ---- -------- ----    -------- -------- -------------------------------------------------------
-//       P4907878 v5r2    04/27/01 dgilbert Initial Creation
-//       423599   fsp     10/28/03 dgilbert make scrId a uint16_t
-//       558003   fips310 06/21/06 dgilbert add get/setFilter() and FilterUndo
-//
-// End Change Log *********************************************************************************

@@ -64,6 +64,9 @@
 
 #include <algorithm>    // @jl04 a Add this for the Drop function.
 
+namespace PRDF
+{
+
 //---------------------------------------------------------------------
 // Member Function Specifications
 //---------------------------------------------------------------------
@@ -158,7 +161,7 @@ void CaptureData::Add( TARGETING::TargetHandle_t i_pchipHandle,
                        int iScomId, uint64_t iScomAddress,
                        uint32_t iScomBitLength, Place iplace )
 {
-  PRDF::HomRegisterAccessScom hops(i_pchipHandle);
+  HomRegisterAccessScom hops(i_pchipHandle);
   ScanCommRegisterChip scrc(iScomAddress, iScomBitLength, hops);
 
   Add(i_pchipHandle, iScomId, scrc, iplace);
@@ -237,7 +240,6 @@ void CaptureData::AddDataElement( Data & dataElement,
 unsigned int CaptureData::Copy(uint8_t *i_buffer, unsigned int i_bufferSize) const
 {
     using namespace TARGETING;
-    using namespace PRDF;
 
     TargetHandle_t  l_pcurrentChipHandle =NULL ;
     uint8_t * l_entryCountPos = NULL;
@@ -336,12 +338,11 @@ unsigned int CaptureData::Copy(uint8_t *i_buffer, unsigned int i_bufferSize) con
 CaptureData & CaptureData::operator=(const uint8_t *i_flatdata)
 {
     using namespace TARGETING;
-    using namespace PRDF;
 
     uint32_t l_tmp32 = 0;
     uint16_t l_tmp16 = 0;
 
-    HUID  l_chipHuid =PRDF::INVALID_HUID ;
+    HUID  l_chipHuid = INVALID_HUID;
     const size_t l_huidSize = sizeof(l_chipHuid);
 
     // Read size.
@@ -386,7 +387,7 @@ CaptureData & CaptureData::operator=(const uint8_t *i_flatdata)
             uint32_t bytecount = ntohs(l_tmp16);
 
             // Read data for register.
-            prdfBitStringBuffer bs(bytecount * 8);
+            BitStringBuffer bs(bytecount * 8);
             for(uint32_t bc = 0; bc < bytecount; ++bc)
             {
                 bs.SetFieldJustify(bc*8,8,(CPU_WORD)(*(i_flatdata+bc))); //mp01a
@@ -434,3 +435,5 @@ CaptureData::Data & CaptureData::Data::operator=(const Data & d)
 
     return *this;
 }
+
+} // end of namespace PRDF

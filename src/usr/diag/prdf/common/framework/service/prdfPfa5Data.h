@@ -31,10 +31,13 @@
 #include <prdf_types.h>
 #include <utilstream.H>
 
+namespace PRDF
+{
+
 const uint32_t PFA5_Format = 0x50464135;
-const uint32_t prdfMruListLIMIT = 8;
-const uint32_t prdfHcdbListLIMIT = 8;
-const uint32_t prdfSignatureListLIMIT = 8;
+const uint32_t MruListLIMIT = 8;
+const uint32_t HcdbListLIMIT = 8;
+const uint32_t SignatureListLIMIT = 8;
 
 // Size of PRD Capture Data
 #ifdef __HOSTBOOT_MODULE
@@ -44,36 +47,36 @@ const uint32_t CaptureDataSize = 2048;
 const uint32_t CaptureDataSize = 4096*2;
 #endif
 
-enum prdfErrlVersion
+enum ErrlVersion
 {
-    prdfErrlVer1    = 1,
-    prdfErrlVer2    = 2,
+    ErrlVer1    = 1,
+    ErrlVer2    = 2,
 };
 
-enum prdfErrlSubsect
+enum ErrlSubsect
 {
-    prdfErrlSectPFA5_1   = 51,
-    prdfErrlSectPFA5_2   = 52,
-    prdfErrlCapData_1    = 1,
-    prdfErrlCapData_2    = 2,
-    prdfErrlAVPData_1    = 41,
-    prdfErrlAVPData_2    = 42,
-    prdfErrlString       = 10,
+    ErrlSectPFA5_1   = 51,
+    ErrlSectPFA5_2   = 52,
+    ErrlCapData_1    = 1,
+    ErrlCapData_2    = 2,
+    ErrlAVPData_1    = 41,
+    ErrlAVPData_2    = 42,
+    ErrlString       = 10,
 };
 
-struct prdfMsDumpStruct
+struct MsDumpStruct
 {
   int32_t DumpContent;
-  PRDF::HUID DumpId;
+  HUID DumpId;
 
-  friend UtilStream& operator<<(UtilStream& i_left, prdfMsDumpStruct& i_right)
+  friend UtilStream& operator<<(UtilStream& i_left, MsDumpStruct& i_right)
   {
       i_left << i_right.DumpContent << i_right.DumpId;
 
       return i_left;
   };
 
-  friend UtilStream& operator>>(UtilStream& i_left, prdfMsDumpStruct& i_right)
+  friend UtilStream& operator>>(UtilStream& i_left, MsDumpStruct& i_right)
   {
       i_left >> i_right.DumpContent >>i_right.DumpId;
 
@@ -81,7 +84,7 @@ struct prdfMsDumpStruct
   };
 };
 
-struct prdfPfaCalloutListStruct
+struct PfaCalloutListStruct
 {
   uint32_t Callout;
   uint8_t  MRUtype;         // See enum PRDcallout::MruType
@@ -96,7 +99,7 @@ struct prdfPfaCalloutListStruct
   uint8_t Reserved_4;
 
   friend UtilStream& operator<<(UtilStream& i_left,
-                                prdfPfaCalloutListStruct& i_right)
+                                PfaCalloutListStruct& i_right)
   {
         i_left << i_right.Callout << i_right.MRUtype << i_right.MRUpriority
              << i_right.Reserved_3 << i_right.Reserved_4;
@@ -105,7 +108,7 @@ struct prdfPfaCalloutListStruct
   };
 
   friend UtilStream& operator>>(UtilStream& i_left,
-                                prdfPfaCalloutListStruct& i_right)
+                                PfaCalloutListStruct& i_right)
   {
     i_left >> i_right.Callout >> i_right.MRUtype >> i_right.MRUpriority
              >> i_right.Reserved_3 >> i_right.Reserved_4;
@@ -117,16 +120,16 @@ struct prdfPfaCalloutListStruct
 //NOTE: The addition of the hcdb data requires additonal PFA data and
 //      error log parsing. This is triggered / indicated by a new
 //      PFA data bit,HCDB_SUPPORT. Support is for fips720 and beyond.
-struct prdfPfaHcdbListStruct
+struct PfaHcdbListStruct
 {
-    PRDF::HUID     hcdbId ;
+    HUID     hcdbId ;
     uint32_t compSubType;
     uint32_t compType;
     uint32_t hcdbReserved1;
     uint32_t hcdbReserved2;
 
     friend UtilStream& operator<<(UtilStream& i_left,
-                                  prdfPfaHcdbListStruct& i_right)
+                                  PfaHcdbListStruct& i_right)
     {
       i_left << i_right.hcdbId << i_right.compSubType << i_right.compType
           << i_right.hcdbReserved1 << i_right.hcdbReserved2;
@@ -134,7 +137,7 @@ struct prdfPfaHcdbListStruct
     };
 
     friend UtilStream& operator>>(UtilStream& i_left,
-                                  prdfPfaHcdbListStruct& i_right)
+                                  PfaHcdbListStruct& i_right)
     {
         i_left >> i_right.hcdbId >> i_right.compSubType >> i_right.compType
           >> i_right.hcdbReserved1 >> i_right.hcdbReserved2;
@@ -142,20 +145,20 @@ struct prdfPfaHcdbListStruct
     };
 };
 
-struct prdfPfaSignatureListStruct
+struct PfaSignatureListStruct
 {
-    PRDF::HUID  chipId ;
+    HUID  chipId ;
     uint32_t signature;
 
     friend UtilStream& operator<<(UtilStream& i_left,
-                                  prdfPfaSignatureListStruct& i_right)
+                                  PfaSignatureListStruct& i_right)
     {
         i_left << i_right.chipId << i_right.signature;
         return i_left;
     };
 
     friend UtilStream& operator>>(UtilStream& i_left,
-                                  prdfPfaSignatureListStruct& i_right)
+                                  PfaSignatureListStruct& i_right)
     {
         i_left >> i_right.chipId >> i_right.signature;
         return i_left;
@@ -166,11 +169,11 @@ struct prdfPfaSignatureListStruct
  * NOTE: the MsDumpLabel and its information must be first in this
  *       structure. Attn handling is dependent on this ordering.
  **********************************************************************/
-struct prdfPfaData
+struct PfaData
 {
   //0x0000
   uint32_t MsDumpLabel[2];
-  prdfMsDumpStruct MsDumpInfo;
+  MsDumpStruct MsDumpInfo;
 
   uint32_t PFA_errlActions :16,// Error Log Actions Parm
   //                              ERRL_ACTION_NONE              = 0x0000
@@ -268,13 +271,13 @@ struct prdfPfaData
            reasonCode           :16;  //MP06 a
 
   uint32_t PfaCalloutCount;      // The number of MRUs below.
-  prdfPfaCalloutListStruct PfaCalloutList[prdfMruListLIMIT]; //full list of MRUs and flags.
+  PfaCalloutListStruct PfaCalloutList[MruListLIMIT]; //full list of MRUs and flags.
   uint32_t hcdbListCount;  //mp15 a
-  prdfPfaHcdbListStruct PfaHcdbList[prdfHcdbListLIMIT];  //mp15 a
+  PfaHcdbListStruct PfaHcdbList[HcdbListLIMIT];
   uint32_t signatureCount;
-  prdfPfaSignatureListStruct PfaSignatureList[prdfSignatureListLIMIT];
+  PfaSignatureListStruct PfaSignatureList[SignatureListLIMIT];
   //pw01
-  friend UtilStream& operator<<(UtilStream& i_left, prdfPfaData& i_right)
+  friend UtilStream& operator<<(UtilStream& i_left, PfaData& i_right)
   {
       i_left << i_right.MsDumpLabel[0] << i_right.MsDumpLabel[1]
              << i_right.MsDumpInfo
@@ -350,7 +353,7 @@ struct prdfPfaData
       return i_left;
   };
 
-  friend UtilStream& operator>>(UtilStream& i_left, prdfPfaData& i_right)
+  friend UtilStream& operator>>(UtilStream& i_left, PfaData& i_right)
   {
       uint32_t l_tmp[6];
       i_left >> i_right.MsDumpLabel[0] >> i_right.MsDumpLabel[1]
@@ -422,7 +425,7 @@ struct prdfPfaData
   //--pw01
 };
 
-struct prdfCaptureData
+struct CaptureDataClass
 {
   uint32_t CaptureData_Label; // Label to show start of Capture data.
   uint32_t PfaCaptureDataSize;
@@ -430,4 +433,6 @@ struct prdfCaptureData
   uint32_t EndLabel[2];// Label to show End of Capture Data
 };
 
-#endif        //end prdfPfa5Data.h
+} // end namespace PRDF
+
+#endif // prdfPfa5Data_h

@@ -51,6 +51,9 @@
 //  User Types
 //----------------------------------------------------------------------
 
+namespace PRDF
+{
+
 //----------------------------------------------------------------------
 //  Constants
 //----------------------------------------------------------------------
@@ -70,7 +73,7 @@
 //---------------------------------------------------------------------
 // Member Function Specifications
 //---------------------------------------------------------------------
-int32_t ResetErrorRegister::Reset(const prdfBitKey & bit_list,
+int32_t ResetErrorRegister::Reset(const BitKey & bit_list,
                                  STEP_CODE_DATA_STRUCT & error)
 {
   #ifndef __HOSTBOOT_MODULE
@@ -99,10 +102,9 @@ int32_t ResetErrorRegister::Reset(const prdfBitKey & bit_list,
 
 // Reset and Mask error registers.
 int32_t
-ResetAndMaskErrorRegister::Reset(const prdfBitKey & bit_list,
+ResetAndMaskErrorRegister::Reset(const BitKey & bit_list,
                                  STEP_CODE_DATA_STRUCT & error)
 {
-    using namespace PRDF;
     int32_t rc = SUCCESS;
     // Don't do reset on CS.
     if ((CHECK_STOP != error.service_data->GetAttentionType()) && //@pw01
@@ -141,7 +143,7 @@ ResetAndMaskErrorRegister::Reset(const prdfBitKey & bit_list,
 
 // ----------------------------------------------------------------------
 
-int32_t XorResetErrorRegister::Reset(const prdfBitKey & bit_list,
+int32_t XorResetErrorRegister::Reset(const BitKey & bit_list,
                                     STEP_CODE_DATA_STRUCT & error)
 {
   #ifndef __HOSTBOOT_MODULE
@@ -171,7 +173,7 @@ int32_t XorResetErrorRegister::Reset(const prdfBitKey & bit_list,
 
 // -----------------------------------------------------------------------
 
-int32_t AndResetErrorRegister::Reset(const prdfBitKey & bit_list,
+int32_t AndResetErrorRegister::Reset(const BitKey & bit_list,
                                     STEP_CODE_DATA_STRUCT & error)
 {
   #ifndef __HOSTBOOT_MODULE
@@ -197,3 +199,5 @@ int32_t AndResetErrorRegister::Reset(const prdfBitKey & bit_list,
   }
   return rc;
 }
+
+} //End namespace PRDF

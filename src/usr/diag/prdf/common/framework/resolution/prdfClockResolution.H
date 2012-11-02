@@ -41,6 +41,10 @@
 #endif
 
 #include <prdfPlatServices.H>
+
+namespace PRDF
+{
+
 //--------------------------------------------------------------------
 //  Forward References
 //--------------------------------------------------------------------
@@ -50,7 +54,7 @@ class ServiceDataCollector;
  Set dump information in the Service Data Collector
  @author Mike Kobler
  */
-class PrdfClockResolution : public Resolution
+class ClockResolution : public Resolution
 {
 public:
   /**
@@ -65,7 +69,7 @@ public:
    </ul><br>
    */
     // FIXME: The default target type needs to be set to a PROC clock card.
-    PrdfClockResolution( TARGETING::TargetHandle_t i_pTargetHandle = NULL,
+    ClockResolution( TARGETING::TargetHandle_t i_pTargetHandle = NULL,
                          TARGETING::TYPE i_targetType = TARGETING::TYPE_PROC ) :
         iv_ptargetClock(i_pTargetHandle),
         iv_targetType(i_targetType)
@@ -88,7 +92,7 @@ public:
    * base class defines operator== so one is needed here
    * or the base class version will be used (bad)
    */
-  bool operator==(const PrdfClockResolution & r) const
+  bool operator==(const ClockResolution & r) const
   {
     return ((iv_ptargetClock == r.iv_ptargetClock) && (iv_targetType == r.iv_targetType));
   }
@@ -100,12 +104,7 @@ private:  // Data
   TARGETING::TYPE iv_targetType ;
 };
 
+} // end namespace PRDF
 
 #endif /* prdfClockResolution_H */
 
-// Change Log *********************************************************
-//
-//  Flag Reason   Vers    Date     Coder   Description
-//  ---- -------- ------  -------- ------- ----------------------------
-//       D725180  fips720 09/30/09 lukas   Initial file creation.
-// End Change Log *****************************************************

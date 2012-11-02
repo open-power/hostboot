@@ -56,13 +56,13 @@ namespace Prdr
      * @brief read string data out from the stream
      * @note  caller must call delete[] to release the buffer
      */
-    void prdrReadString(UtilStream & i_stream, char *& o_string);
+    void ReadString(UtilStream & i_stream, char *& o_string);
 
     /**
-     * @class PrdrRegister
+     * @class Register
      * @brief Holds data associated with a register.
      */
-    class PrdrRegister
+    class Register
     {
         public:
             uint16_t        cv_name;         /** hash id of Register Short Name */
@@ -72,8 +72,8 @@ namespace Prdr
             uint64_t        cv_scomAddr;         /** Scom Address */
             uint16_t        cv_scomLen;         /** Scom Length */
 
-            PrdrRegister();
-            ~PrdrRegister();
+            Register();
+            ~Register();
 
             struct ResetOrMaskStruct
             {
@@ -126,7 +126,7 @@ namespace Prdr
                     i_right.func = NULL;
                     if ('f' == i_right.op)
                     {
-                        prdrReadString(i_left, i_right.func);
+                        ReadString(i_left, i_right.func);
                     }
 
                     return i_left;
@@ -138,13 +138,13 @@ namespace Prdr
     };
 
     /**
-     * @class PrdrExpr
+     * @class Expr
      * @brief Contains data for the basic rule object, the "expression".
      */
-    class PrdrExpr
+    class Expr
     {
         public:
-            union value { uint32_t i; PrdrExpr * p; };
+            union value { uint32_t i; Expr * p; };
 
                     /** Maximum number of entries a expression can have. */
             static const uint32_t MAX_VALUES = 6;
@@ -162,25 +162,25 @@ namespace Prdr
             std::vector<uint64_t> cv_bitStrVect;
 
             /**
-             * @func PrdrExpr()
+             * @func Expr()
              * @brief Default constructor.  Clear entry arrays.
              */
-            PrdrExpr();
+            Expr();
 
             /**
-             * @func ~PrdrExpr()
+             * @func ~Expr()
              * @brief Default destructor.  Delete all attached pointers, as
              * requested.
              */
-            ~PrdrExpr();
+            ~Expr();
 
         private:
             // Don't let us copy these things, we don't want to mess with the
             // pointer tree.
-            PrdrExpr(const PrdrExpr & i_copy) {};
+            Expr(const Expr & i_copy) {};
     };
 
-    class PrdrChip
+    class Chip
     {
         public:
             uint32_t        cv_chipId;
@@ -189,20 +189,20 @@ namespace Prdr
             uint32_t        cv_dumpType;        // default dump content type.
             uint16_t        cv_scomLen;         // default scom length.
             uint16_t        cv_regCount;
-            PrdrRegister *  cv_registers;
+            Register *  cv_registers;
             uint16_t        cv_ruleCount;
-            PrdrExpr *      cv_rules;
+            Expr *      cv_rules;
             uint16_t        cv_groupCount;
             uint16_t        cv_groupAttn[NUM_GROUP_ATTN];
             uint16_t *      cv_groupSize;
             uint8_t *       cv_groupFlags;
-            PrdrExpr **     cv_groupPriorityBits;
-            PrdrExpr **     cv_groups;
+            Expr **     cv_groupPriorityBits;
+            Expr **     cv_groups;
             uint16_t        cv_actionCount;
             uint16_t *      cv_actionSize;
-            PrdrExpr **     cv_actions;
+            Expr **     cv_actions;
 
-            PrdrChip() : cv_regCount(0), cv_registers(NULL),
+            Chip() : cv_regCount(0), cv_registers(NULL),
                          cv_ruleCount(0), cv_rules(NULL),
                          cv_groupCount(0), cv_groupSize(NULL),
                          cv_groupFlags(NULL), cv_groupPriorityBits(NULL),
@@ -212,7 +212,7 @@ namespace Prdr
             {
             };
 
-            ~PrdrChip()
+            ~Chip()
             {
                 if (NULL != cv_registers) delete[] cv_registers;
                 if (NULL != cv_rules) delete[] cv_rules;
@@ -234,7 +234,8 @@ namespace Prdr
             };
     };
 
-    errlHndl_t prdrLoadChip(UtilStream & i_stream, PrdrChip & o_chip);
+    errlHndl_t LoadChip(UtilStream & i_stream, Chip & o_chip);
 
-};
+} // end namespace Prdr
+
 #endif

@@ -54,15 +54,15 @@ int32_t PllDomain::Initialize(void)
 //However, the inits from other comps are better are cleaning up the PLL errors.
 //    for (unsigned int i = 0; i < GetSize() && rc == SUCCESS; ++i)
 //    {
-//      PrdfExtensibleChip * l_chip = LookUp(i);
-//      PrdfExtensibleFunction * l_clearPll = l_chip->getExtensibleFunction("ClearPll");
+//      ExtensibleChip * l_chip = LookUp(i);
+//      ExtensibleFunction * l_clearPll = l_chip->getExtensibleFunction("ClearPll");
       // Call ClearPll on this chip  (see prdfPluginDef.H for bindParm defn)
-//      (*l_clearPll)(l_chip,PrdfPluginDef::bindParm<void *>(NULL));
+//      (*l_clearPll)(l_chip,PluginDef::bindParm<void *>(NULL));
 //@jl01 D-END
 
 // Don't unmask   04/20/2006 Review
-//      PrdfExtensibleFunction * l_unmask = l_chip->getExtensibleFunction("UnmaskPll");
-//      (*l_unmask)(l_chip,PrdfPluginDef::bindParm<void *>(NULL));
+//      ExtensibleFunction * l_unmask = l_chip->getExtensibleFunction("UnmaskPll");
+//      (*l_unmask)(l_chip,PluginDef::bindParm<void *>(NULL));
 //    }
   }
   return(rc);
@@ -84,10 +84,10 @@ bool PllDomain::Query(ATTENTION_TYPE attentionType)
         {
             if(sysdbug.IsAttentionActive(LookUp(index)->GetChipHandle()))
             {
-                PrdfExtensibleChip * l_chip = LookUp(index);
-                PrdfExtensibleChipFunction * l_query =
+                ExtensibleChip * l_chip = LookUp(index);
+                ExtensibleChipFunction * l_query =
                                     l_chip->getExtensibleFunction("QueryPll");
-                int32_t rc = (*l_query)(l_chip,PrdfPluginDef::bindParm<bool &>(atAttn));
+                int32_t rc = (*l_query)(l_chip,PluginDef::bindParm<bool &>(atAttn));
                 // if rc then scom read failed - Error log has already been generated
                 if( PRD_POWER_FAULT == rc )
                 {
@@ -110,7 +110,7 @@ bool PllDomain::Query(ATTENTION_TYPE attentionType)
 int32_t PllDomain::Analyze(STEP_CODE_DATA_STRUCT & serviceData,
                           ATTENTION_TYPE attentionType)
 {
-    typedef PrdfExtensibleChip * ChipPtr;
+    typedef ExtensibleChip * ChipPtr;
     CcAutoDeletePointerVector<ChipPtr> chip(new ChipPtr[GetSize()]);
     int count = 0;
     int32_t rc = SUCCESS;
@@ -118,16 +118,16 @@ int32_t PllDomain::Analyze(STEP_CODE_DATA_STRUCT & serviceData,
     // Due to clock issues some chips may be moved to non-functional during
     // analysis. In this case, these chips will need to be removed from their
     // domains.
-    typedef std::vector<PrdfExtensibleChip *> NonFuncChips;
+    typedef std::vector<ExtensibleChip *> NonFuncChips;
     NonFuncChips nfchips;
 
     // Count # of chips that had PLL error
     for(unsigned int index = 0; index < GetSize(); ++index)
     {
-        PrdfExtensibleChip * l_chip = LookUp(index);
-        PrdfExtensibleChipFunction * l_query = l_chip->getExtensibleFunction("QueryPll");
+        ExtensibleChip * l_chip = LookUp(index);
+        ExtensibleChipFunction * l_query = l_chip->getExtensibleFunction("QueryPll");
         bool atAttn;
-        rc = (*l_query)(l_chip,PrdfPluginDef::bindParm<bool &>(atAttn));
+        rc = (*l_query)(l_chip,PluginDef::bindParm<bool &>(atAttn));
         if(atAttn == true)
         {
             chip()[count] = LookUp(index);
@@ -160,12 +160,12 @@ int32_t PllDomain::Analyze(STEP_CODE_DATA_STRUCT & serviceData,
         const uint32_t tmpCount = serviceData.service_data->GetMruList().size();
 
         // Call this chip's CalloutPll plugin if it exists.
-        PrdfExtensibleChipFunction * l_callout =
+        ExtensibleChipFunction * l_callout =
                 chip()[0]->getExtensibleFunction( "CalloutPll", true );
         if ( NULL != l_callout )
         {
             (*l_callout)( chip()[0],
-                PrdfPluginDef::bindParm<STEP_CODE_DATA_STRUCT &>(serviceData) );
+                PluginDef::bindParm<STEP_CODE_DATA_STRUCT &>(serviceData) );
         }
 
         if ( tmpCount == serviceData.service_data->GetMruList().size() )
@@ -180,9 +180,9 @@ int32_t PllDomain::Analyze(STEP_CODE_DATA_STRUCT & serviceData,
     if(serviceData.service_data->IsAtThreshold())
     {
         // Mask in all chips in domain
-        PrdfExtensibleDomainFunction * l_mask = getExtensibleFunction("MaskPll");
+        ExtensibleDomainFunction * l_mask = getExtensibleFunction("MaskPll");
         (*l_mask)(this,
-                  PrdfPluginDef::bindParm<STEP_CODE_DATA_STRUCT&>(serviceData));
+                  PluginDef::bindParm<STEP_CODE_DATA_STRUCT&>(serviceData));
     }
     // Set Signature
     serviceData.service_data->GetErrorSignature()->setChipId(chip()[0]->GetId());
@@ -194,19 +194,19 @@ int32_t PllDomain::Analyze(STEP_CODE_DATA_STRUCT & serviceData,
 #endif
 
     // Clear PLLs from this domain.
-    PrdfExtensibleDomainFunction * l_clear = getExtensibleFunction("ClearPll");
+    ExtensibleDomainFunction * l_clear = getExtensibleFunction("ClearPll");
     (*l_clear)(this,
-               PrdfPluginDef::bindParm<STEP_CODE_DATA_STRUCT&>(serviceData));
+               PluginDef::bindParm<STEP_CODE_DATA_STRUCT&>(serviceData));
 
     // Run any PLL Post Analysis functions from this domain.
     for(int i = 0; i < count; i++)
     {
-        PrdfExtensibleChip * l_chip = chip()[i];
+        ExtensibleChip * l_chip = chip()[i];
         // Send any special messages indicating there was a PLL error.
-        PrdfExtensibleChipFunction * l_pllPostAnalysis =
+        ExtensibleChipFunction * l_pllPostAnalysis =
                         l_chip->getExtensibleFunction("PllPostAnalysis", true);
         (*l_pllPostAnalysis)(l_chip,
-                PrdfPluginDef::bindParm<STEP_CODE_DATA_STRUCT&>(serviceData));
+                PluginDef::bindParm<STEP_CODE_DATA_STRUCT&>(serviceData));
     }
 
     return rc;
@@ -221,7 +221,7 @@ void PllDomain::Order(ATTENTION_TYPE attentionType)
 
 //------------------------------------------------------------------------------
 
-int32_t PllDomain::ClearPll( PrdfExtensibleDomain * i_domain,
+int32_t PllDomain::ClearPll( ExtensibleDomain * i_domain,
                              STEP_CODE_DATA_STRUCT i_sc )
 {
     PllDomain * l_domain = (PllDomain *) i_domain;
@@ -229,23 +229,23 @@ int32_t PllDomain::ClearPll( PrdfExtensibleDomain * i_domain,
     // Clear children chips.
     for ( uint32_t i = 0; i < l_domain->GetSize(); i++ )
     {
-        PrdfExtensibleChip * l_chip = l_domain->LookUp(i);
-        PrdfExtensibleChipFunction * l_clear =
+        ExtensibleChip * l_chip = l_domain->LookUp(i);
+        ExtensibleChipFunction * l_clear =
                                     l_chip->getExtensibleFunction("ClearPll");
         (*l_clear)( l_chip,
-                    PrdfPluginDef::bindParm<STEP_CODE_DATA_STRUCT&>(i_sc) );
+                    PluginDef::bindParm<STEP_CODE_DATA_STRUCT&>(i_sc) );
     }
 
     // Clear children domains.
     // This looks like a recursive call.  It calls other domains of Clear.
-    ParentDomain<PrdfExtensibleDomain>::iterator i;
+    ParentDomain<ExtensibleDomain>::iterator i;
     for (i = l_domain->getBeginIterator(); i != l_domain->getEndIterator(); i++)
     {
         // Clear PLLs from this domain.
-        PrdfExtensibleDomainFunction * l_clear =
+        ExtensibleDomainFunction * l_clear =
                                 (i->second)->getExtensibleFunction("ClearPll");
         (*l_clear)( i->second,
-                    PrdfPluginDef::bindParm<STEP_CODE_DATA_STRUCT&>(i_sc) );
+                    PluginDef::bindParm<STEP_CODE_DATA_STRUCT&>(i_sc) );
     }
 
     return SUCCESS;
@@ -254,7 +254,7 @@ PRDF_PLUGIN_DEFINE( PllDomain, ClearPll );
 
 //------------------------------------------------------------------------------
 
-int32_t PllDomain::MaskPll( PrdfExtensibleDomain * i_domain,
+int32_t PllDomain::MaskPll( ExtensibleDomain * i_domain,
                             STEP_CODE_DATA_STRUCT i_sc )
 {
     PllDomain * l_domain = (PllDomain *) i_domain;
@@ -262,22 +262,22 @@ int32_t PllDomain::MaskPll( PrdfExtensibleDomain * i_domain,
     // Mask children chips.
     for ( uint32_t i = 0; i < l_domain->GetSize(); i++ )
     {
-        PrdfExtensibleChip * l_chip = l_domain->LookUp(i);
-        PrdfExtensibleChipFunction * l_mask =
+        ExtensibleChip * l_chip = l_domain->LookUp(i);
+        ExtensibleChipFunction * l_mask =
                                     l_chip->getExtensibleFunction("MaskPll");
         (*l_mask)( l_chip,
-                   PrdfPluginDef::bindParm<STEP_CODE_DATA_STRUCT&>(i_sc) );
+                   PluginDef::bindParm<STEP_CODE_DATA_STRUCT&>(i_sc) );
     }
 
     // Mask children domains.
     // This looks like a recursive call.  It calls other domains of Mask.
-    ParentDomain<PrdfExtensibleDomain>::iterator i;
+    ParentDomain<ExtensibleDomain>::iterator i;
     for (i = l_domain->getBeginIterator(); i != l_domain->getEndIterator(); i++)
     {
-        PrdfExtensibleDomainFunction * l_mask =
+        ExtensibleDomainFunction * l_mask =
                                 (i->second)->getExtensibleFunction("MaskPll");
         (*l_mask)( i->second,
-                   PrdfPluginDef::bindParm<STEP_CODE_DATA_STRUCT&>(i_sc) );
+                   PluginDef::bindParm<STEP_CODE_DATA_STRUCT&>(i_sc) );
     }
 
     return SUCCESS;

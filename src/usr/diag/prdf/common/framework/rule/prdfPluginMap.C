@@ -23,31 +23,36 @@
 
 #include <prdfPluginMap.H>
 
-PrdfPluginGlobalMap & prdfGetPluginGlobalMap()
+namespace PRDF
 {
-    static PrdfPluginGlobalMap g_globalPluginMap;
+
+PluginGlobalMap & getPluginGlobalMap()
+{
+    static PluginGlobalMap g_globalPluginMap;
     return g_globalPluginMap;
 };
 
-void PrdfPluginGlobalMap::registerPlugin(const char *   i_chipName,
+void PluginGlobalMap::registerPlugin(const char *   i_chipName,
                                          const char *   i_pluginName,
-                                         PrdfExtensibleFunctionType * i_plugin)
+                                         ExtensibleFunctionType * i_plugin)
 {
     this->cv_globalMap[i_chipName][i_pluginName] = i_plugin;
 };
 
-PrdfPluginMap & PrdfPluginGlobalMap::getPlugins(const char * i_chipName)
+PluginMap & PluginGlobalMap::getPlugins(const char * i_chipName)
 {
     return this->cv_globalMap[i_chipName];
 };
 
-PrdfPluginRegisterClass::PrdfPluginRegisterClass(
+PluginRegisterClass::PluginRegisterClass(
                                 const char * i_chipName,
                                 const char * i_pluginName,
-                                PrdfExtensibleFunctionType * i_plugin)
+                                ExtensibleFunctionType * i_plugin)
 {
-    prdfGetPluginGlobalMap().registerPlugin(i_chipName,
+    getPluginGlobalMap().registerPlugin(i_chipName,
                                             i_pluginName,
                                             i_plugin);
 };
+
+} // end namespace PRDF
 

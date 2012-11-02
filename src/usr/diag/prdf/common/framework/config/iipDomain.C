@@ -61,6 +61,9 @@
 // Member Function Specifications
 //---------------------------------------------------------------------
 
+namespace  PRDF
+{
+
 Domain::Domain(DOMAIN_ID domain_id) :
 dom_id(domain_id)
 {
@@ -76,9 +79,9 @@ int32_t Domain::Initialize (void)
   return(SUCCESS);
 }
 
-
-// @jl02  Add this for Unit CS. This is a virtual function so it doesn't need and code here.
 void Domain::Remove(TARGETING::TargetHandle_t i_ptargetChip)
 {
 };
-// @jl02 a End.
+
+} // end namespace PRDF
+

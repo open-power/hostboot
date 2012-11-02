@@ -27,6 +27,9 @@
 #include "UtilTree.H"
 #include <algorithm>
 
+namespace PRDF
+{
+
 template <class _A, class _B>
 class UtilMapX
 {
@@ -186,12 +189,7 @@ _B & UtilMapX<_A, _B>::operator[] (const _A & a)
     return l_node->second;
 };
 
+} // end namespace PRDF
+
 #endif
 
-// Change Log *********************************************************
-//
-//  Flag Reason   Vers Date     Coder    Description
-//  ---- -------- ---- -------- -------- -------------------------------
-//       F494911  f310 03/04/05 iawillia Initial File Creation
-//
-// End Change Log *****************************************************

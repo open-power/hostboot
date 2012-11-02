@@ -42,6 +42,9 @@
 #include <iipServiceDataCollector.h>
 
 #undef prdfErrorRegisterMask_C
+
+namespace PRDF
+{
 //----------------------------------------------------------------------
 //  User Types
 //----------------------------------------------------------------------
@@ -159,7 +162,7 @@ BIT_LIST_CLASS ErrorRegisterFilter::Filter
   return bit_list;
 }
 
-
+} //End namespace PRDF
 
 // Change Log *********************************************************
 //

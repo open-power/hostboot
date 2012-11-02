@@ -56,7 +56,8 @@
 
 #undef xspprdsdbug_C
 
-using namespace PRDF;
+namespace PRDF
+{
 
 //----------------------------------------------------------------------
 //  User Types
@@ -90,15 +91,16 @@ SYSTEM_DEBUG_CLASS::SYSTEM_DEBUG_CLASS(void)
 {
 }
 
-uint32_t SYSTEM_DEBUG_CLASS::Reinitialize(const PRDF::AttnList & i_attnList)
+uint32_t SYSTEM_DEBUG_CLASS::Reinitialize(const AttnList & i_attnList)
 {
     uint32_t l_rc = 0;
 
     do
     {
-        if( i_attnList.empty() )
+        if ( i_attnList.empty() )
         {
-            PRDF_ERR( "SYSTEM_DEBUG_CLASS::Reinitialize() input AttnList is empty" );
+            PRDF_ERR( "SYSTEM_DEBUG_CLASS::Reinitialize() input AttnList is "
+                      "empty" );
             /*@
              * @errortype
              * @subsys     EPUB_FIRMWARE_SP
@@ -111,21 +113,21 @@ uint32_t SYSTEM_DEBUG_CLASS::Reinitialize(const PRDF::AttnList & i_attnList)
              * @devdesc input AttnList is empty.
              * @procedure EPUB_PRC_SP_CODE
              */
-            PRDF_CREATE_ERRL(g_prd_errlHndl,
-                             ERRL_SEV_DIAGNOSTIC_ERROR1,  // error on diagnostic
-                             ERRL_ETYPE_NOT_APPLICABLE,
-                             SRCI_MACH_CHECK,
-                             SRCI_NO_ATTR,
-                             PRDF_SDBUG_INIT,             // module id
-                             FSP_DEFAULT_REFCODE,
-                             PRDF_CODE_FAIL,              // Reason code
-                             0,  // user data word 1
-                             0,  // user data word 2
-                             0,  // user data word 3
-                             0   // user data word 4
-                             );
+            PRDF_CREATE_ERRL( g_prd_errlHndl,
+                              ERRL_SEV_DIAGNOSTIC_ERROR1, // error on diagnostic
+                              ERRL_ETYPE_NOT_APPLICABLE,
+                              SRCI_MACH_CHECK,
+                              SRCI_NO_ATTR,
+                              PRDF_SDBUG_INIT,                 // module id
+                              FSP_DEFAULT_REFCODE,
+                              PRDF_CODE_FAIL,             // Reason code
+                              0,                          // user data word 1
+                              0,                          // user data word 2
+                              0,                          // user data word 3
+                              0 );                        // user data word 4
 
-            PRDF_ADD_PROCEDURE_CALLOUT(g_prd_errlHndl, SRCI_PRIORITY_MED, EPUB_PRC_SP_CODE);
+            PRDF_ADD_PROCEDURE_CALLOUT( g_prd_errlHndl, SRCI_PRIORITY_MED,
+                                        EPUB_PRC_SP_CODE );
             l_rc = PRD_ATTN_DATA_ACCESS_FAILED;
 
             break;
@@ -205,7 +207,7 @@ void SYSTEM_DEBUG_CLASS::CalloutThoseAtAttention(STEP_CODE_DATA_STRUCT & service
     {
         sdc->SetCallout((*i).targetHndl);
         AttnData ad(*i);
-        prdfBitString cbs(sizeof(AttnData)*8,(CPU_WORD *)&ad);
+        BitString cbs(sizeof(AttnData)*8,(CPU_WORD *)&ad);
 
         capture.Add(PlatServices::getSystemTarget(),0,cbs);
     }
@@ -236,3 +238,5 @@ void SYSTEM_DEBUG_CLASS::SetAttentionType(TARGETING::TargetHandle_t i_pTargetHan
         }
     }
 }
+
+} // end namespace PRDF

@@ -22,6 +22,10 @@
 /* IBM_PROLOG_END_TAG                                                     */
 
 #include "UtilTree.H"
+
+namespace PRDF
+{
+
 UtilTree::defaultComparator UtilTree::defComparator;
 UtilTree::defaultCleanup UtilTree::defCleanup;
 UtilTree::defaultCopier UtilTree::defCopy;
@@ -335,10 +339,5 @@ UtilTree::iterator UtilTree::begin() const
     return iterator(tmp, this);
 };
 
-// Change Log *********************************************************
-//
-//  Flag Reason   Vers Date     Coder    Description
-//  ---- -------- ---- -------- -------- -------------------------------
-//       F494911  f310 03/04/05 iawillia Initial File Creation
-//
-// End Change Log *****************************************************
+} // end namespace PRDF
+

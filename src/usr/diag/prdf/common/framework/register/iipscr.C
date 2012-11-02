@@ -79,6 +79,9 @@
 //
 // End Function Specification //////////////////////////////////////
 
+namespace PRDF
+{
+
 SCAN_COMM_REGISTER_CLASS::~SCAN_COMM_REGISTER_CLASS
 (
  void
@@ -282,5 +285,7 @@ SCAN_COMM_REGISTER_CLASS::SCAN_COMM_REGISTER_CLASS
 address(a)
 {
 }
+
+} // end namespace PRDF
 
 #undef IIPSCR_C

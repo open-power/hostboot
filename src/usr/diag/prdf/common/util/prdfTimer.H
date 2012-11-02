@@ -47,18 +47,19 @@
 
 #endif
 
-
+namespace PRDF
+{
 //--------------------------------------------------------------------
 //  Forward References
 //--------------------------------------------------------------------
 
 /**
-    PrdTimer
+    Timer
     @author Doug Gilbert
-    @par A PrdTimer holds the number of seconds since the beginning
+    @par A Timer holds the number of seconds since the beginning
     of the year
 */
-class PrdTimer
+class Timer
 {
 public:
   enum
@@ -93,7 +94,7 @@ public:
   /**
    Default Constructor
    */
-  PrdTimer() :xSec(0),ivTm()
+  Timer() :xSec(0),ivTm()
   {
   }
 
@@ -104,7 +105,7 @@ public:
    @note If seconds > seconds_in_year then reduced by seconds_in_year
    until seconds < seconds_in_year
    */
-  PrdTimer(unsigned int seconds)
+  Timer(unsigned int seconds)
     : xSec(seconds % YEAR) {}
 
 #if !defined(__GNUC__)
@@ -112,7 +113,7 @@ public:
    Constructor from a BIN_TIME_TYPE
    @see xsptodtypes.h
    */
-  PrdTimer(const BIN_TIME_TYPE & b)
+  Timer(const BIN_TIME_TYPE & b)
     :xSec( b.seconds +
            (b.minutes * 60) +
            (b.hours * 3600) +
@@ -126,12 +127,12 @@ public:
   /**
    Copy Constructor
    */
-  PrdTimer(const PrdTimer & t) : xSec(t.xSec), ivTm(t.ivTm) {}
+  Timer(const Timer & t) : xSec(t.xSec), ivTm(t.ivTm) {}
 
   /**
    Assignment from another PrdTime object
    */
-  const PrdTimer & operator=(const PrdTimer  & t)
+  const Timer & operator=(const Timer  & t)
   { xSec = t.xSec; ivTm = t.ivTm; return *this; }
 
 #if !defined(__GNUC__)
@@ -139,7 +140,7 @@ public:
    Assignment from a BIN_TIME_TYPE.
    @see xsptodtypes.h
    */
-  const PrdTimer & operator=(const BIN_TIME_TYPE & b)
+  const Timer & operator=(const BIN_TIME_TYPE & b)
   {
     xSec = b.seconds + (b.minutes * 60) +
       (b.hours * 3600) + (b.day_of_month*SEC_IN_DAY) + month_base[b.month];
@@ -151,7 +152,7 @@ public:
    If seconds > seconds_in_year then reduced by seconds_in_year
    until seconds < seconds_in_year
    */
-  const PrdTimer & operator=(const uint64_t & b)
+  const Timer & operator=(const uint64_t & b)
   {
     xSec = b % YEAR;
     return *this;
@@ -159,7 +160,7 @@ public:
 #endif
 
   /// equivalancy
-  bool operator==(const PrdTimer & t) const
+  bool operator==(const Timer & t) const
   {
     return (xSec == t.xSec);
   }
@@ -171,7 +172,7 @@ public:
    OR this < t2 and t2 - xSec > HALF_YEAR (timer wrapped)
    otherwise false
    */
-  bool operator>(const PrdTimer & t2) const
+  bool operator>(const Timer & t2) const
   {
     return ( ((xSec > t2.xSec) && (xSec - t2.xSec < HALF_YEAR)) ||
              ((xSec < t2.xSec) && (t2.xSec - xSec > HALF_YEAR)));
@@ -182,7 +183,7 @@ public:
    Add seconds to the timer.
    Internal timer value is wraped as needed
    */
-  PrdTimer operator+(unsigned int seconds) const
+  Timer operator+(unsigned int seconds) const
   {
     seconds = seconds % YEAR;
     seconds += xSec;
@@ -191,7 +192,7 @@ public:
   }
 
   // diff time
-  unsigned int operator-(const PrdTimer & t) const { return (xSec - t.xSec); }
+  unsigned int operator-(const Timer & t) const { return (xSec - t.xSec); }
 
   // get seconds since the beginning of the year
   unsigned int getSec() const { return xSec; }
@@ -222,7 +223,7 @@ static uint32_t month_base[12];   // # of seconds since start of year at start o
 
 #if !defined(__GNUC__)
 #if defined(iipResolution_C)
-uint32_t PrdTimer::month_base[12] =
+uint32_t Timer::month_base[12] =
 {
   0,
   SEC_IN_DAY * 31,
@@ -240,5 +241,5 @@ uint32_t PrdTimer::month_base[12] =
 #endif
 #endif
 
-
+} //End namespace PRDF
 #endif /* PRDFTIME_H */

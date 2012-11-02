@@ -25,6 +25,8 @@
 #include <algorithm>
 #include <prdfHeapBucketSize.H>
 
+namespace PRDF
+{
 //---------------------------------------------------------------------
 // Member Function Specifications
 //---------------------------------------------------------------------
@@ -304,3 +306,4 @@ void FlyWeightS<T,S>::print()
 
 }
 */
+} //End namespace PRDF

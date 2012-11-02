@@ -28,6 +28,9 @@
  * @file prdfAssert.h
  */
 
+namespace PRDF
+{
+
 #define PRDF_ASSERT(x) { if(!(x)) { prdfAssert(#x,__FILE__,__LINE__); } }
 
 /**
@@ -37,5 +40,7 @@
  * @param i_line The line of the file in which assert() is called.
  */
 void prdfAssert( const char * i_exp, const char * i_file, int i_line );
+
+} // end namespace PRDF
 
 #endif /* PRDFASSERT_H */

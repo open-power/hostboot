@@ -26,6 +26,9 @@
 
 // Includes
 
+namespace PRDF
+{
+
 template<class T>
 inline
 CcAutoDeletePointer<T>::CcAutoDeletePointer(T * ptr) :
@@ -75,13 +78,7 @@ T * CcAutoDeletePointerVector<T>::operator()(void) const
   return(pointer);
   }
 
-// Change Log **********************************************************
-//
-//  Flag  PTR/DCR#  Userid    Date      Description
-//  ----  --------  --------  --------  -----------
-//  n/a   n/a       JST       09/12/95  Created.
-//
-// End Change Log ******************************************************
+} // end namespace PRDF
 
 #endif
 

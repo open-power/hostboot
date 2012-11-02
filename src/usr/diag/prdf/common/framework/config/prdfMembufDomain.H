@@ -26,7 +26,10 @@
 
 #include <prdfRuleChipDomain.H>
 
-class PrdfMembufDomain : public PrdfRuleChipDomain
+namespace PRDF
+{
+
+class MembufDomain : public RuleChipDomain
 {
   public:
 
@@ -35,11 +38,13 @@ class PrdfMembufDomain : public PrdfRuleChipDomain
      * @param i_did  The domain ID
      * @param i_size The projected size of the domain
      */
-    PrdfMembufDomain( DOMAIN_ID i_did, uint32_t i_size = MEMBUF_DOMAIN_SIZE ) :
-        PrdfRuleChipDomain( i_did, i_size )
+    MembufDomain( DOMAIN_ID i_did, uint32_t i_size = MEMBUF_DOMAIN_SIZE ) :
+        RuleChipDomain( i_did, i_size )
     {}
 
 };
+
+} // end namespace PRDF
 
 #endif /* __PRDFMEMBUFDOMAIN_H */
 

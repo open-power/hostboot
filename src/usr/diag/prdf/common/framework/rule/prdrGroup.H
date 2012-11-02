@@ -31,33 +31,36 @@
 #include <prdrExpr.H>
 #include <prdrCommon.H>
 
-class PrdrChip;
-extern PrdrChip * g_currentChip;
-extern uint32_t g_nextAndBit;
-class PrdrGroup_Filter;
+namespace PRDR_COMPILER
+{
 
-class PrdrGroup
+class Chip;
+extern Chip * g_currentChip;
+extern uint32_t g_nextAndBit;
+class Group_Filter;
+
+class Group
 {
     public:
-        std::list<PrdrExpr *> cv_rules;
-        PrdrExpr * cv_priorityList;
+        std::list<Expr *> cv_rules;
+        Expr * cv_priorityList;
 
         char cv_op;
         uint8_t cv_flags;
         std::string cv_doxcomment;
 
-        PrdrGroup() :
+        Group() :
             cv_priorityList(NULL),
             cv_op(Prdr::GROUP),
             cv_flags(0),
             cv_doxcomment() {};
-        PrdrGroup(char o) :
+        Group(char o) :
             cv_priorityList(NULL),
             cv_op(o),
             cv_flags(0),
             cv_doxcomment() {};
 
-        static void merge(PrdrGroup * i_l, PrdrGroup * i_r)
+        static void merge(Group * i_l, Group * i_r)
         {
             // Copy over rules.
             i_l->cv_rules.insert(i_l->cv_rules.end(),
@@ -77,7 +80,7 @@ class PrdrGroup
             {
                 if (Prdr::GROUP == cv_op)
                 {
-                    PrdrExpr * l_front = *(cv_rules.begin());
+                    Expr * l_front = *(cv_rules.begin());
                     if (NULL == l_front)
                     {
                         // ICE.
@@ -133,7 +136,7 @@ class PrdrGroup
                     o_stream << "<TD>" << std::endl;
                 }
 
-                for (std::list<PrdrExpr *>::iterator i = cv_rules.begin();
+                for (std::list<Expr *>::iterator i = cv_rules.begin();
                      i != cv_rules.end();
                      i++)
                 {
@@ -184,7 +187,7 @@ class PrdrGroup
                 }
 
 
-                for (std::list<PrdrExpr *>::iterator i = cv_rules.begin();
+                for (std::list<Expr *>::iterator i = cv_rules.begin();
                      i != cv_rules.end();
                      i++)
                 {
@@ -197,51 +200,42 @@ class PrdrGroup
 
 };
 
-extern std::map<std::string, PrdrGroup *> g_groups;
-extern std::map<std::string, PrdrGroup *> g_actionclasses;
+extern std::map<std::string, Group *> g_groups;
+extern std::map<std::string, Group *> g_actionclasses;
 extern std::map<std::string, std::string> g_attentionStartGroup;
 
-class PrdrGroup_Filter
+class Group_Filter
 {
     public:
-        virtual ~PrdrGroup_Filter() { }  // zs01
-        virtual void AddFilter(PrdrGroup *) = 0;
+        virtual ~Group_Filter() { }  // zs01
+        virtual void AddFilter(Group *) = 0;
 };
 
-class PrdrGroup_Filter_SingleBit : public PrdrGroup_Filter
+class Group_Filter_SingleBit : public Group_Filter
 {
     public:
-        void AddFilter(PrdrGroup * i_group)
+        void AddFilter(Group * i_group)
             {
                 i_group->cv_flags |= Prdr::PRDR_GROUP_FILTER_SINGLE_BIT;
             };
 };
 
-class PrdrGroup_Filter_Priority : public PrdrGroup_Filter
+class Group_Filter_Priority : public Group_Filter
 {
     public:
-        PrdrGroup_Filter_Priority(PrdrExpr * i_list) : iv_list(i_list) {};
+        Group_Filter_Priority(Expr * i_list) : iv_list(i_list) {};
 
-        void AddFilter(PrdrGroup * i_group)
+        void AddFilter(Group * i_group)
             {
                 i_group->cv_flags |= Prdr::PRDR_GROUP_FILTER_PRIORITY;
                 i_group->cv_priorityList = iv_list;
             };
 
     private:
-        PrdrExpr * iv_list;
+        Expr * iv_list;
 };
 
+} // end namespace PRDR_COMPILER
 
 #endif
 
-// Change Log *********************************************************
-//
-//  Flag Reason   Vers Date     Coder    Description
-//  ---- -------- ---- -------- -------- -------------------------------
-//       F494911  f310 03/04/05 iawillia Initial File Creation
-//         F544848  f300 04/03/06 iawillia Add multi-bit support.
-//           D555348  f310 06/05/06 iawillia Update HTML generation.
-//         F557408  f310 06/16/06 iawillia Add single-bit filter support.
-//  zs01 D620028  f330 07/25/07 zshelle  Support for mcp5 compiler
-// End Change Log *****************************************************

@@ -50,7 +50,7 @@ namespace Mba
  * @param  i_mbaChip A Centaur MBA chip.
  * @return SUCCESS
  */
-int32_t Initialize( PrdfExtensibleChip * i_mbaChip )
+int32_t Initialize( ExtensibleChip * i_mbaChip )
 {
     i_mbaChip->getDataBundle() = new CenMbaDataBundle( i_mbaChip );
     return SUCCESS;
@@ -68,7 +68,7 @@ PRDF_PLUGIN_DEFINE( Mba, Initialize );
  *         done after the framework clears the FIR bits that were at attention.
  * @return SUCCESS.
  */
-int32_t PostAnalysis( PrdfExtensibleChip * i_mbaChip,
+int32_t PostAnalysis( ExtensibleChip * i_mbaChip,
                       STEP_CODE_DATA_STRUCT & i_sc )
 {
     #ifdef __HOSTBOOT_MODULE
@@ -110,7 +110,7 @@ PRDF_PLUGIN_DEFINE( Mba, PostAnalysis );
  * @param  i_sc      The step code data struct.
  * @return SUCCESS
  */
-int32_t MaintCmdComplete( PrdfExtensibleChip * i_mbaChip,
+int32_t MaintCmdComplete( ExtensibleChip * i_mbaChip,
                           STEP_CODE_DATA_STRUCT & i_sc )
 {
     using namespace TARGETING;
@@ -150,7 +150,7 @@ PRDF_PLUGIN_DEFINE( Mba, MaintCmdComplete );
  * @return SUCCESS
  */
 // FIXME: Story 51702 will implement this
-int32_t SkipMbaMsg( PrdfExtensibleChip * i_chip,
+int32_t SkipMbaMsg( ExtensibleChip * i_chip,
                            STEP_CODE_DATA_STRUCT & i_sc )
 {
     using namespace TARGETING;

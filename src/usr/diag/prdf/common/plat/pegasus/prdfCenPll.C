@@ -55,7 +55,7 @@ enum
   * @returns Failure or Success of query.
   * @note
   */
-int32_t QueryPll( PrdfExtensibleChip * i_chip,
+int32_t QueryPll( ExtensibleChip * i_chip,
                         bool & o_result)
 {
     int32_t rc = SUCCESS;
@@ -94,7 +94,7 @@ PRDF_PLUGIN_DEFINE( Membuf, QueryPll );
   * @returns Failure or Success of query.
   * @note
   */
-int32_t ClearPll( PrdfExtensibleChip * i_chip,
+int32_t ClearPll( ExtensibleChip * i_chip,
                         STEP_CODE_DATA_STRUCT & i_sc)
 {
     int32_t rc = SUCCESS;
@@ -120,7 +120,7 @@ PRDF_PLUGIN_DEFINE( Membuf, ClearPll );
   * @returns Failure or Success of query.
   * @note
   */
-int32_t MaskPll( PrdfExtensibleChip * i_chip,void * unused)
+int32_t MaskPll( ExtensibleChip * i_chip,void * unused)
 {
     int32_t rc = SUCCESS;
 
@@ -146,7 +146,7 @@ PRDF_PLUGIN_DEFINE( Membuf, MaskPll );
  * @param  i_sc     The step code data struct.
  * @return SUCCESS.
  */
-int32_t CalloutPll( PrdfExtensibleChip * i_chip,
+int32_t CalloutPll( ExtensibleChip * i_chip,
                     STEP_CODE_DATA_STRUCT & i_sc )
 {
     // FIXME: RTC: 51628 will address clock target issue
@@ -164,7 +164,7 @@ PRDF_PLUGIN_DEFINE( Membuf, CalloutPll );
   @returns Failure Or Success of message call.
   @note
    */
-int32_t PllPostAnalysis( PrdfExtensibleChip * i_chip,
+int32_t PllPostAnalysis( ExtensibleChip * i_chip,
                     STEP_CODE_DATA_STRUCT & i_sc )
 {
     using namespace TARGETING;
@@ -189,7 +189,7 @@ int32_t PllPostAnalysis( PrdfExtensibleChip * i_chip,
         for (TargetHandleList::iterator mbaIt = list.begin(); mbaIt != list.end(); ++mbaIt)
         {
             // Get the extensible chip for this mba
-            PrdfExtensibleChip *l_mbaChip = (PrdfExtensibleChip *)systemPtr->GetChip(*mbaIt);
+            ExtensibleChip *l_mbaChip = (ExtensibleChip *)systemPtr->GetChip(*mbaIt);
 
             //Check to make sure we are at threshold and have something garded.
             if( (NULL != l_mbaChip) &&
@@ -197,13 +197,13 @@ int32_t PllPostAnalysis( PrdfExtensibleChip * i_chip,
                 (i_sc.service_data->QueryGard() != GardResolution::NoGard) )
             {
                 //Call the Skip Maintanence Command on this mba
-                PrdfExtensibleChipFunction * l_skipMbaMsg =
+                ExtensibleChipFunction * l_skipMbaMsg =
                     l_mbaChip->getExtensibleFunction("SkipMbaMsg", true);
 
                 // This call will return an error if it doesn't complete.
                 // Don't fail on error.  keep going.
                 l_rc |= (*l_skipMbaMsg)(l_mbaChip,
-                        PrdfPluginDef::bindParm<STEP_CODE_DATA_STRUCT &>(i_sc));
+                        PluginDef::bindParm<STEP_CODE_DATA_STRUCT &>(i_sc));
             }
         }
 

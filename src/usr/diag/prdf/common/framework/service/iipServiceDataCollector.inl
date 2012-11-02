@@ -21,6 +21,9 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
+namespace PRDF
+{
+
 inline
 ServiceDataCollector::ServiceDataCollector() :
 #ifndef __HOSTBOOT_MODULE
@@ -30,7 +33,7 @@ ServiceDataCollector::ServiceDataCollector() :
     captureData(),
     xMruList(),
     maskId(0),
-    attentionType(PRDF::INVALID_ATTENTION_TYPE),
+    attentionType(INVALID_ATTENTION_TYPE),
     flags(TRACKIT | LOGIT),
     hitCount(0),
     threshold(0),
@@ -38,10 +41,10 @@ ServiceDataCollector::ServiceDataCollector() :
     startingPoint(NULL),
     errorType(GardResolution::NoGard),
     ivpDumpRequestChipHandle(NULL),
-    causeAttentionType(PRDF::INVALID_ATTENTION_TYPE),
+    causeAttentionType(INVALID_ATTENTION_TYPE),
     ivpThermalChipHandle(NULL)
 {
-    PRDF::PlatServices::getCurrentTime(ivCurrentEventTime);
+    PlatServices::getCurrentTime(ivCurrentEventTime);
 }
 
 // ---------------------------------------------------------------
@@ -50,7 +53,7 @@ inline
 void ServiceDataCollector::SetAttentionType( ATTENTION_TYPE attention )
 {
   attentionType = attention;
-  if(attention == PRDF::MACHINE_CHECK)
+  if(attention == MACHINE_CHECK)
   {
       flags |= SERVICE_CALL;
       errorType = GardResolution::Fatal;
@@ -148,3 +151,5 @@ void ServiceDataCollector::ClearHcdbList(void)
 }
 
 #endif
+
+} // end namespace PRDF

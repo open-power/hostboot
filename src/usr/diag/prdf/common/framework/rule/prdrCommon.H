@@ -37,21 +37,20 @@
   #include <string>
 #endif
 
-// @jl02 JL adding a constant for the number of attention types.
-enum PrdrNumberOfAttentions
-{
-  NUM_GROUP_ATTN = 4,
-};
-
-
 /**
  * @namespace Prdr
  * @brief Namespace to encapsulate Prdr specific enums, classes, and typedefs.
  */
 namespace Prdr
 {
+
+    enum NumberOfAttentions
+    {
+        NUM_GROUP_ATTN = 4,
+    };
+
     /**
-     * @enum PrdrRegisterFlags
+     * @enum RegisterFlags
      * @brief Flags for which register attributes are contained in a register
      * definition.
      *
@@ -59,7 +58,7 @@ namespace Prdr
      * these flags that describe what attributes are non-default (and therefore
      * contained in the file).
      */
-    enum PrdrRegisterFlags
+    enum RegisterFlags
     {
             /** Non-default scomlen */
         PRDR_REGISTER_SCOMLEN = 0x1,
@@ -72,7 +71,7 @@ namespace Prdr
     };
 
     /**
-     * @enum PrdrGroupFlags
+     * @enum GroupFlags
      * @brief Flags for which group attributes are contained in a group
      * definition.
      *
@@ -80,7 +79,7 @@ namespace Prdr
      * these flags that describe what attributes are non-default (and therefore
      * contained in the file).
      */
-    enum PrdrGroupFlags
+    enum GroupFlags
     {
             /** Single Bit Filter */
         PRDR_GROUP_FILTER_SINGLE_BIT = 0x1,
@@ -89,13 +88,13 @@ namespace Prdr
     };
 
     /**
-     * @enum PrdrTimeBaseFlags
+     * @enum TimeBaseFlags
      * @brief Enums for time base
      *
      * When reading rule file, these flags can be used to write in prf files
      * for time base values.
      */
-    enum PrdrTimeBaseFlags
+    enum TimeBaseFlags
     {
         PRDR_TIME_BASE_SEC  = 1,
         PRDR_TIME_BASE_MIN  = PRDR_TIME_BASE_SEC  * 60,
@@ -104,12 +103,12 @@ namespace Prdr
     };
 
     /**
-     * @enum PrdrExprOps
+     * @enum ExprOps
      * @brief Single char op's defined for .prf files.
      *
      * Needed for properly reading/writing .prf files.
      */
-    enum PrdrExprOps
+    enum ExprOps
     {
         REF_RULE  = 'r',
         REF_REG   = 'e',
@@ -141,7 +140,7 @@ namespace Prdr
         ACT_CAPT  = 'C',
     };
 
-    class PrdrSignatureOp
+    class SignatureOp
     {
       public:
         enum { DEFAULT_SIGNATURE = 0x0 };
@@ -160,19 +159,8 @@ namespace Prdr
     #ifdef __PRD_RULE_COMPILE
     typedef std::map<uint16_t, std::string> HashCollisionMap;
     #endif
-};
+
+} // end namespace Prdr
 
 #endif
 
-
-// Change Log *********************************************************
-//
-//  Flag Reason   Vers Date     Coder    Description
-//  ---- -------- ---- -------- -------- -------------------------------
-//         D515833  f300 09/19/05 iawillia Add capture support.
-//         F526728  f300 10/25/05 iawillia Add >> and << operators to rules.
-//         F534311  f300 01/10/06 iawillia Add Bit string.
-//         F557408  f310 06/16/06 iawillia Add single-bit filter support.
-//  jl02   F605874  f330 07/31/07 lukas    Add functions to PRD framework/Galaxy
-//                                                   2 code for unit CS.
-// End Change Log *****************************************************

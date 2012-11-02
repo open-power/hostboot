@@ -61,6 +61,8 @@
 #endif
 #include <prdfPlatServices.H>
 
+namespace PRDF
+{
 // Forward References
 class BIT_STRING_CLASS;
 
@@ -174,16 +176,8 @@ public:
 
   };
 
+} // end namespace PRDF
+
 #include <iipMopRegisterAccess.inl>
-
-// Change Log **********************************************************
-//
-//  Flag  PTR/DCR#  Userid    Date      Description
-//  ----  --------  --------  --------  -----------
-//  n/a   n/a       JST       09/08/95  Created.
-//        d         DGILBERT  05/19/95  Modified Access() parms
-//
-// End Change Log ******************************************************
-
 
 #endif

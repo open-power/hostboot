@@ -34,13 +34,8 @@ namespace PRDF
     #endif
 
     extern tracDesc_t traceDesc;
-}
 
-#ifdef __HOSTBOOT_MODULE
-  // FIXME: Will need to make a change in hbotcompid.H later.
-  #define PRDF_COMP_ID   HBPRDF_COMP_ID
-  #define PRDF_COMP_NAME HBPRDF_COMP_NAME
-#endif
+} // end namespace PRDF
 
 // field traces -------------------
 

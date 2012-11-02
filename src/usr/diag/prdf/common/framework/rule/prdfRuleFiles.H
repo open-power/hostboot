@@ -41,7 +41,7 @@ namespace PRDF
     extern const char * Membuf;
     extern const char * Mba;
 
-};
+} // end namespace PRDF
 
 #endif
 

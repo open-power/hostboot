@@ -53,6 +53,8 @@
 
 #include <iipdigit.h>
 
+namespace PRDF
+{
 /*--------------------------------------------------------------------*/
 /*  User Types                                                        */
 /*--------------------------------------------------------------------*/
@@ -177,5 +179,5 @@ bool DIGIT_STRING_CLASS::operator==
   return(rc);
 }
 
-
+} //End namespace PRDF
 #undef IIPDIGIT_CPP

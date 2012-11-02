@@ -51,6 +51,9 @@
 #include <iipResolution.h>
 #endif
 
+namespace PRDF
+{
+
 //--------------------------------------------------------------------
 //  Forward References
 //--------------------------------------------------------------------
@@ -119,14 +122,7 @@ inline
 EregResolution::EregResolution()
   : errorRegister(NULL) {}
 
+} // end namespace PRDF
+
 #endif /* iipEregResolution_h */
 
-// Change Log *********************************************************
-//
-//  Flag Reason  Vers Date     Coder    Description
-//  ---- ------- ---- -------- -------- -------------------------------
-//              v4r1m0 05/13/96  DRG    Initial Creation
-//  pw01 494911  f310 03/04/05 iawillia Use ErrorRegisterType instead of
-//                                          ErrorRegister.
-//                   f522283 fips300 09/27/05 dgilbert Make class FlyWeight -able
-// End Change Log *****************************************************

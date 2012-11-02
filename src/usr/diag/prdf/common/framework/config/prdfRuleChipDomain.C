@@ -31,18 +31,19 @@
 
 //------------------------------------------------------------------------------
 
-bool PrdfRuleChipDomain::Query( ATTENTION_TYPE i_attnType )
+namespace PRDF
 {
-    using namespace PRDF;
 
+bool RuleChipDomain::Query( ATTENTION_TYPE i_attnType )
+{
     bool o_rc = false;
 
-    using PrdfPluginDef::bindParm;
+    using PluginDef::bindParm;
     SYSTEM_DEBUG_CLASS sysdbug;
 
     for ( uint32_t i = 0; i < GetSize(); i++ )
     {
-        PrdfRuleChip * chip = LookUp(i);
+        RuleChip * chip = LookUp(i);
         TARGETING::TargetHandle_t l_pchipHandle = LookUp(i)->GetChipHandle();
 
         if ( sysdbug.IsAttentionActive(l_pchipHandle) )
@@ -76,7 +77,7 @@ bool PrdfRuleChipDomain::Query( ATTENTION_TYPE i_attnType )
                         continue;
                 }
 
-                PrdfExtensibleChipFunction * ef
+                ExtensibleChipFunction * ef
                   = chip->getExtensibleFunction( funcName, true );
 
                 bool ignore = false;
@@ -98,7 +99,7 @@ bool PrdfRuleChipDomain::Query( ATTENTION_TYPE i_attnType )
                  ( (sysdbug.GetAttentionType(l_pchipHandle) == CHECK_STOP) ||
                    (sysdbug.GetAttentionType(l_pchipHandle) == UNIT_CS) ) )
             {
-                PrdfExtensibleChipFunction * ef
+                ExtensibleChipFunction * ef
                            = chip->getExtensibleFunction("CheckForRecovered");
                 (*ef)(chip, bindParm<bool &>(o_rc));
 
@@ -112,18 +113,16 @@ bool PrdfRuleChipDomain::Query( ATTENTION_TYPE i_attnType )
 
 //------------------------------------------------------------------------------
 
-void PrdfRuleChipDomain::Order( ATTENTION_TYPE i_attnType )
+void RuleChipDomain::Order( ATTENTION_TYPE i_attnType )
 {
-    using namespace PRDF;
-
-    using PrdfPluginDef::bindParm;
+    using PluginDef::bindParm;
     SYSTEM_DEBUG_CLASS sysdbug;
     const char * funcName;     //mp01 a
 
 
     for ( int32_t i = (GetSize() - 1); i >= 0; i-- )
     {
-        PrdfRuleChip * chip = LookUp(i);
+        RuleChip * chip = LookUp(i);
         TARGETING::TargetHandle_t l_pchipHandle = LookUp(i)->GetChipHandle();
 
         if ( sysdbug.IsAttentionActive(l_pchipHandle) )
@@ -156,7 +155,7 @@ void PrdfRuleChipDomain::Order( ATTENTION_TYPE i_attnType )
                         continue;
                 }
 
-                PrdfExtensibleChipFunction * ef
+                ExtensibleChipFunction * ef
                   = chip->getExtensibleFunction( funcName, true );
 
                 bool ignore = false;
@@ -177,7 +176,7 @@ void PrdfRuleChipDomain::Order( ATTENTION_TYPE i_attnType )
                  ( (sysdbug.GetAttentionType(l_pchipHandle) == CHECK_STOP) ||
                    (sysdbug.GetAttentionType(l_pchipHandle) == UNIT_CS) ) )
             {
-                PrdfExtensibleChipFunction * ef
+                ExtensibleChipFunction * ef
                            = chip->getExtensibleFunction("CheckForRecovered");
                 bool hasRer = false;
                 (*ef)(chip, bindParm<bool &>(hasRer));
@@ -191,3 +190,5 @@ void PrdfRuleChipDomain::Order( ATTENTION_TYPE i_attnType )
         }
     }
 }
+
+} // end namespace PRDF

@@ -40,6 +40,9 @@
 
 #include <iipchip.h>
 
+namespace PRDF
+{
+
 //--------------------------------------------------------------------
 //  Forward References
 //--------------------------------------------------------------------
@@ -140,5 +143,7 @@ class AccessPllChip : public CHIP_CLASS
 inline AccessPllChip::AccessPllChip( TARGETING::TargetHandle_t i_target ) :
     CHIP_CLASS(i_target)
 {}
+
+} // end namespace PRDF
 
 #endif /* xspprdAccessPllChip_h */

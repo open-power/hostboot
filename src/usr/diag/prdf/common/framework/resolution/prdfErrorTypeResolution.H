@@ -21,8 +21,8 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-#ifndef prdfErrorTypeResolution_H
-#define prdfErrorTypeResolution_H
+#ifndef ErrorTypeResolution_H
+#define ErrorTypeResolution_H
 //--------------------------------------------------------------------
 // Includes
 //--------------------------------------------------------------------
@@ -34,12 +34,15 @@
 #include <iipServiceDataCollector.h>
 #endif
 
+namespace PRDF
+{
+
 /**
- @file prdfErrorTypeResolution.H
+ @file ErrorTypeResolution.H
  @brief Set the appropiate error type in the SDC and flag for
         Gard if necessary.
 */
-class prdfErrorTypeResolution : public Resolution
+class ErrorTypeResolution : public Resolution
 {
 public:
 
@@ -63,7 +66,7 @@ public:
    <br><b>Notes:       </b>
    </ul><br>
    */
-  prdfErrorTypeResolution(ErrorType et)
+  ErrorTypeResolution(ErrorType et)
   : xErrorType(et) {}
 
   /*
@@ -98,13 +101,7 @@ private:  // Data
 
 };
 
+} // end namespace PRDF
 
-#endif /* prdfErrorTypeResolution_H */
+#endif /* ErrorTypeResolution_H */
 
-// Change Log *********************************************************
-//
-//  Flag Reason   Vers Date     Coder   Description
-//  ---- -------- ---- -------- ------- -------------------------------
-//                     02/26/03 mkobler  Initial Creation
-//
-// End Change Log *****************************************************

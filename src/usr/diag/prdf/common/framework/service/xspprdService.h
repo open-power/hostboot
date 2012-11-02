@@ -63,14 +63,14 @@
 #include <errlentry.H> //for errlHndl_t  //mp01 a
 
 
-//--------------------------------------------------------------------
-//  Forward References
-//--------------------------------------------------------------------
-class ServiceDataCollector;
 
 namespace PRDF
 {
 
+//--------------------------------------------------------------------
+//  Forward References
+//--------------------------------------------------------------------
+class ServiceDataCollector;
 class ErrDataService;
 
 

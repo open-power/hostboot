@@ -170,7 +170,7 @@ void getECIDString(TARGETING::TargetHandle_t i_pGivenTarget, const char *o_ecidS
 
 //------------------------------------------------------------------------------
 
-void getCurrentTime( PrdTimer & o_timer )
+void getCurrentTime( Timer & o_timer )
 {
 #ifdef __HOSTBOOT_MODULE
 
@@ -190,7 +190,7 @@ void getCurrentTime( PrdTimer & o_timer )
     struct tm * l_curEventTime = localtime(&thetime);
 
     // record the detailed time struct
-    PrdTimer::prdftm_t l_tm(l_curEventTime->tm_sec,
+    Timer::prdftm_t l_tm(l_curEventTime->tm_sec,
                             l_curEventTime->tm_min,
                             l_curEventTime->tm_hour,
                             l_curEventTime->tm_wday,

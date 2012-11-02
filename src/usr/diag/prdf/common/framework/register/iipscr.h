@@ -48,6 +48,8 @@
 #include <iipsdbug.h>
 #include <prdfMain.H>
 
+namespace PRDF
+{
 
 /*--------------------------------------------------------------------*/
 /*  Forward References                                                */
@@ -273,7 +275,7 @@ public:
    */
   virtual
   const BIT_STRING_CLASS * GetBitString(ATTENTION_TYPE
-                                        i_type = PRDF::INVALID_ATTENTION_TYPE
+                                        i_type = INVALID_ATTENTION_TYPE
                                        ) const = 0;
 
   /**
@@ -441,5 +443,7 @@ private: // Data
   uint64_t                       address;
 
 };
+
+} // end namespace PRDF
 
 #endif

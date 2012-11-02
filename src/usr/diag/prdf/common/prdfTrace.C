@@ -32,5 +32,5 @@ namespace PRDF
 {
     tracDesc_t traceDesc = 0;
     TRAC_INIT( &traceDesc, PRDF_COMP_NAME, 4096 );
-}
+} //End namespace PRDF
 

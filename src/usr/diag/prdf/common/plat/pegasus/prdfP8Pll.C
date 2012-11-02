@@ -52,7 +52,7 @@ enum
   * @returns Failure or Success of query.
   * @note
   */
-int32_t QueryPll( PrdfExtensibleChip * i_chip,
+int32_t QueryPll( ExtensibleChip * i_chip,
                         bool & o_result)
 {
     int32_t rc = SUCCESS;
@@ -89,7 +89,7 @@ PRDF_PLUGIN_DEFINE( Proc, QueryPll );
   * @returns Failure or Success of query.
   * @note
   */
-int32_t ClearPll( PrdfExtensibleChip * i_chip,
+int32_t ClearPll( ExtensibleChip * i_chip,
                         STEP_CODE_DATA_STRUCT & i_sc)
 {
     int32_t rc = SUCCESS;
@@ -114,7 +114,7 @@ PRDF_PLUGIN_DEFINE( Proc, ClearPll );
   * @returns Failure or Success of query.
   * @note
   */
-int32_t MaskPll( PrdfExtensibleChip * i_chip,void * unused)
+int32_t MaskPll( ExtensibleChip * i_chip,void * unused)
 {
     int32_t rc = SUCCESS;
     SCAN_COMM_REGISTER_CLASS * tpmask_or = i_chip->getRegister("TP_LFIR_MASK_OR");
@@ -132,7 +132,7 @@ PRDF_PLUGIN_DEFINE( Proc, MaskPll );
  * @param  i_sc     The step code data struct.
  * @return SUCCESS.
  */
-int32_t CalloutPll( PrdfExtensibleChip * i_chip,
+int32_t CalloutPll( ExtensibleChip * i_chip,
                     STEP_CODE_DATA_STRUCT & i_sc )
 {
     // FIXME: RTC: 51628 will address clock target issue

@@ -46,6 +46,8 @@
 #include <algorithm>
 
 #undef prdfFabricDomain_C
+namespace PRDF
+{
 //----------------------------------------------------------------------
 //  User Types
 //----------------------------------------------------------------------
@@ -72,10 +74,8 @@
 int32_t FabricDomain::Analyze(STEP_CODE_DATA_STRUCT & serviceData,
                               ATTENTION_TYPE attentionType)
 {
-    using namespace PRDF;
-
     int32_t l_rc;
-    l_rc = DomainContainer<PrdfRuleChip>::Analyze(serviceData, attentionType);
+    l_rc = DomainContainer<RuleChip>::Analyze(serviceData, attentionType);
 
 
     if( l_rc == PRD_POWER_FAULT )
@@ -108,8 +108,7 @@ int32_t FabricDomain::Analyze(STEP_CODE_DATA_STRUCT & serviceData,
 
 void FabricDomain::Order(ATTENTION_TYPE attentionType)
 {
-    using namespace PRDF;
-    using PrdfPluginDef::bindParm;
+    using PluginDef::bindParm;
 
     if (attentionType == MACHINE_CHECK)
     {
@@ -125,7 +124,7 @@ void FabricDomain::Order(ATTENTION_TYPE attentionType)
         SYSTEM_DEBUG_CLASS sysdbug;
         for (int32_t i = (GetSize() - 1); i >= 0; --i) //pw03
         {
-            PrdfRuleChip * l_fabChip = LookUp(i);
+            RuleChip * l_fabChip = LookUp(i);
             TARGETING::TargetHandle_t l_pchipHandle = l_fabChip->GetChipHandle();
             if ((sysdbug.IsAttentionActive(l_pchipHandle)) &&
                     (sysdbug.GetAttentionType(l_pchipHandle ) == attentionType))
@@ -143,7 +142,7 @@ void FabricDomain::Order(ATTENTION_TYPE attentionType)
 //         3. WOF/TOD counters
 void FabricDomain::SortForXstop()
 {
-    using namespace PrdfPluginDef;
+    using namespace PluginDef;
     using namespace TARGETING;
 
     uint32_t l_internalOnlyCount = 0;
@@ -161,14 +160,14 @@ void FabricDomain::SortForXstop()
         l_externalDrivers[i] = 0;
         l_wofValues[i] = 0;
 
-        PrdfRuleChip * l_fabChip = LookUp(i);
+        RuleChip * l_fabChip = LookUp(i);
 
         ptr.u = &l_externalDrivers[i]; // zs01
-        prdfBitString l_externalChips(GetSize(), ptr.c); // zs01
+        BitString l_externalChips(GetSize(), ptr.c); // zs01
         TargetHandleList l_tmpList;
 
         // Call "GetCheckstopInfo" plugin.
-        PrdfExtensibleChipFunction * l_extFunc
+        ExtensibleChipFunction * l_extFunc
             = l_fabChip->getExtensibleFunction("GetCheckstopInfo");
 
         (*l_extFunc)(l_fabChip,
@@ -232,7 +231,7 @@ void FabricDomain::SortForXstop()
                 for (uint32_t j = 0; j < GetSize(); j++)
                 {
                     ptr.u = &l_externalDrivers[i]; // zs01
-                    if ( prdfBitString(GetSize(), ptr.c).IsSet(j) ) // zs01
+                    if ( BitString(GetSize(), ptr.c).IsSet(j) ) // zs01
                         l_current.Set(j);
                 }
         }
@@ -284,8 +283,7 @@ namespace __prdfFabricDomain // pw03 ---
 
 void FabricDomain::SortForRecov()
 {
-    using namespace PRDF;
-    using namespace PrdfPluginDef;
+    using namespace PluginDef;
 
     SYSTEM_DEBUG_CLASS sysdbug;
     uint32_t l_sev[GetSize()];
@@ -294,7 +292,7 @@ void FabricDomain::SortForRecov()
     // Loop through all chips.
     for (uint32_t i = 0; i < GetSize(); ++i)
     {
-        PrdfRuleChip * l_fabChip = LookUp(i);
+        RuleChip * l_fabChip = LookUp(i);
         TARGETING::TargetHandle_t l_pchipHandle = l_fabChip->GetChipHandle();
         if (sysdbug.IsAttentionActive(l_pchipHandle))  // If at attention, check.
         {
@@ -307,7 +305,7 @@ void FabricDomain::SortForRecov()
             else if (CHECK_STOP == sysdbug.GetAttentionType(l_pchipHandle))
             {
                 // Check for recovered error at checkstop.
-                PrdfExtensibleChipFunction * l_extFunc
+                ExtensibleChipFunction * l_extFunc
                     = l_fabChip->getExtensibleFunction("CheckForRecovered");
 
                 bool l_hasRer = false;
@@ -324,7 +322,7 @@ void FabricDomain::SortForRecov()
             // Find real severity level.
             if (0 != l_sev[i])
             {
-                PrdfExtensibleChipFunction * l_extFunc
+                ExtensibleChipFunction * l_extFunc
                         = l_fabChip->getExtensibleFunction(
                                                     "CheckForRecoveredSev");
 
@@ -363,7 +361,7 @@ int32_t FabricDomain::AnalyzeTheseChips(STEP_CODE_DATA_STRUCT & serviceData,
         for (TargetHandleList::iterator i = i_chips.begin(); i != i_chips.end(); ++i)
         {
             PRDF_DTRAC( "FabricDomain::AnalyzeTheseChips::Before--chip=0x%X",
-                        PRDF::PlatServices::getHuid(*i));
+                        PlatServices::getHuid(*i));
         }
 
         OrderTheseChips(attentionType, i_chips);
@@ -371,11 +369,11 @@ int32_t FabricDomain::AnalyzeTheseChips(STEP_CODE_DATA_STRUCT & serviceData,
         for (TargetHandleList::iterator i = i_chips.begin(); i != i_chips.end(); ++i)
         {
             PRDF_DTRAC( "FabricDomain::AnalyzeTheseChips::After--chip=0x%X",
-                        PRDF::PlatServices::getHuid(*i) );
+                        PlatServices::getHuid(*i) );
         }
         //After the Order function is called the first chip should contain the chip to look at.
         //Look here for the correct LookUp function.  I don't think this is working.
-        PrdfRuleChip * l_fabChip = FindChipInTheseChips(i_chips[0], i_chips);
+        RuleChip * l_fabChip = FindChipInTheseChips(i_chips[0], i_chips);
         PRDF_DTRAC( "FabricDomain::AnalyzeTheseChips::Analyzing this one: 0x%X",
                     l_fabChip->GetId() );
         if(NULL != l_fabChip)
@@ -397,7 +395,7 @@ int32_t FabricDomain::AnalyzeTheseChips(STEP_CODE_DATA_STRUCT & serviceData,
     //Get P7 chip Global FIR data for FFDC
     for (TargetHandleList::iterator i = i_chips.begin(); i != i_chips.end(); ++i)
     {
-        PrdfRuleChip * l_fabChip = FindChipInTheseChips(*i, i_chips);
+        RuleChip * l_fabChip = FindChipInTheseChips(*i, i_chips);
         l_fabChip->CaptureErrorData(
                                     serviceData.service_data->GetCaptureData(),
                                     Util::hashString("GlobalFIRs"));
@@ -412,7 +410,7 @@ int32_t FabricDomain::AnalyzeTheseChips(STEP_CODE_DATA_STRUCT & serviceData,
 int32_t FabricDomain::OrderTheseChips(ATTENTION_TYPE attentionType,
                                       TARGETING::TargetHandleList & i_chips)
 {
-    using namespace PrdfPluginDef;
+    using namespace PluginDef;
     using namespace TARGETING;
     PRDF_DENTER( "FabricDomain::OrderTheseChips" );
 
@@ -429,16 +427,16 @@ int32_t FabricDomain::OrderTheseChips(ATTENTION_TYPE attentionType,
     for (TargetHandleList::iterator i = i_chips.begin(); i != i_chips.end(); ++i)
     {
 
-        PrdfRuleChip * l_fabChip = FindChipInTheseChips(*i, i_chips);
+        RuleChip * l_fabChip = FindChipInTheseChips(*i, i_chips);
 
         ptr.u = &l_externalDrivers[l_chip];
-        prdfBitString l_externalChips(i_chips.size(), ptr.c);
+        BitString l_externalChips(i_chips.size(), ptr.c);
         TargetHandleList l_tmpList;
 
         if(l_fabChip != NULL)
         {
             // Call "GetCheckstopInfo" plugin.
-            PrdfExtensibleChipFunction * l_extFunc
+            ExtensibleChipFunction * l_extFunc
                 = l_fabChip->getExtensibleFunction("GetCheckstopInfo");
 
             (*l_extFunc)(l_fabChip,
@@ -489,12 +487,12 @@ int32_t FabricDomain::OrderTheseChips(ATTENTION_TYPE attentionType,
 
 //This function is to ensure the order of the chip in the list is the correct chip.
 //Because there is no garaunteed order within the domain container this is necessary.
-PrdfRuleChip * FabricDomain::FindChipInTheseChips(TARGETING::TargetHandle_t i_pchipHandle, TARGETING::TargetHandleList & i_chips)
+RuleChip * FabricDomain::FindChipInTheseChips(TARGETING::TargetHandle_t i_pchipHandle, TARGETING::TargetHandleList & i_chips)
 {
     using namespace TARGETING;
 
     PRDF_DENTER( "FabricDomain::FindChipNumber" );
-    PrdfRuleChip * l_fabChip = NULL;
+    RuleChip * l_fabChip = NULL;
     TargetHandle_t l_tmpfabHandle= NULL;
     // Loop through all chips.
     for (TargetHandleList::iterator iter = i_chips.begin(); iter != i_chips.end(); ++iter)
@@ -521,3 +519,5 @@ void FabricDomain::MoveToFrontInTheseChips(uint32_t i_chipToFront, TARGETING::Ta
         std::swap((*i), (*(i-1)));
     }
 }
+
+} //End namespace PRDF

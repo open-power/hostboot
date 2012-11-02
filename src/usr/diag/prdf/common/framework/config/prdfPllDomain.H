@@ -40,8 +40,8 @@ namespace PRDF
 
 //------------------------------------------------------------------------------
 
-class PllDomain : public PrdfRuleChipDomain, public PrdfExtensibleDomain,
-                  public ParentDomain<PrdfExtensibleDomain>
+class PllDomain : public RuleChipDomain, public ExtensibleDomain,
+                  public ParentDomain<ExtensibleDomain>
 {
   public:
 
@@ -106,7 +106,7 @@ class PllDomain : public PrdfRuleChipDomain, public PrdfExtensibleDomain,
      * @param  i_sc The step code data struct.
      * @return SUCCESS
      */
-    static int32_t ClearPll( PrdfExtensibleDomain * i_domain,
+    static int32_t ClearPll( ExtensibleDomain * i_domain,
                              STEP_CODE_DATA_STRUCT i_sc );
 
     /**
@@ -116,7 +116,7 @@ class PllDomain : public PrdfRuleChipDomain, public PrdfExtensibleDomain,
      * @param  i_sc The step code data struct.
      * @return SUCCESS
      */
-    static int32_t MaskPll( PrdfExtensibleDomain * i_domain,
+    static int32_t MaskPll( ExtensibleDomain * i_domain,
                             STEP_CODE_DATA_STRUCT i_sc );
 
 protected:
@@ -152,8 +152,8 @@ private:  // Data
 inline
 PllDomain::PllDomain( DOMAIN_ID domain_id, Resolution & clockSource,
                       const ThresholdResolution::ThresholdPolicy& i_mfgThresh) :
-    PrdfRuleChipDomain( domain_id, PllDomain::CONTAINER_SIZE ),
-    PrdfExtensibleDomain("PllDomain"),
+    RuleChipDomain( domain_id, PllDomain::CONTAINER_SIZE ),
+    ExtensibleDomain("PllDomain"),
     closeClockSource(clockSource),
     farClockSource(clockSource),
     iv_threshold( ResolutionFactory::Access().GetThresholdResolution( 1,
@@ -167,8 +167,8 @@ inline
 PllDomain::PllDomain( DOMAIN_ID domain_id, Resolution & clockSource,
                       hwTableContent i_hwdc,
                       const ThresholdResolution::ThresholdPolicy& i_mfgThresh) :
-    PrdfRuleChipDomain( domain_id, PllDomain::CONTAINER_SIZE ),
-    PrdfExtensibleDomain("PllDomain"),
+    RuleChipDomain( domain_id, PllDomain::CONTAINER_SIZE ),
+    ExtensibleDomain("PllDomain"),
     closeClockSource(clockSource),
     farClockSource(clockSource),
     iv_threshold( ResolutionFactory::Access().GetThresholdResolution( 1,

@@ -22,7 +22,7 @@
 /* IBM_PROLOG_END_TAG                                                     */
 
 /*!  /file prdfBitKey.H
- *   /brief prdfBitKey class Declairation
+ *   /brief BitKey class Declairation
  *
  */
 #ifndef PRDFBITLKEY_H
@@ -30,15 +30,18 @@
 
 #include <prdf_types.h>
 
+namespace PRDF
+{
+
 /*--------------------------------------------------------------------*/
 /*  Forward References                                                */
 /*--------------------------------------------------------------------*/
 
-class prdfBitString;
+class BitString;
 
-//! prdfBitKey
+//! BitKey
 /*!
-    prdfBitKey provides the representation of bit positions that are
+    BitKey provides the representation of bit positions that are
     set ('1') In a string of bits. It has the same iterface as the prdfBitList or BIT_LIST_CLASS.
 
 \remarks The object this class creates is meant to be used as a key in a map or table and
@@ -92,9 +95,9 @@ class prdfBitString;
             K + Mn where K and M are constants and n is the
             number of bit psotions in the list
 
-\sa         prdfBitString
+\sa         BitString
 */
-class prdfBitKey
+class BitKey
   {
   public:
 
@@ -102,13 +105,13 @@ class prdfBitKey
     /*!
         This function initializes the string to NULL (empty bit list)
      */
-    prdfBitKey(void);
+    BitKey(void);
 
     //! Constructor
     /*!
         This function initializes the bit list with one value;
      */
-    prdfBitKey(uint32_t i_bitPos);
+    BitKey(uint32_t i_bitPos);
 
     //! Constructor
     /*!
@@ -116,33 +119,33 @@ class prdfBitKey
      \param i_array ptr to array of bit list values
      \param i_size  size of the array
      */
-    prdfBitKey(const uint8_t * i_array,uint8_t i_size);
+    BitKey(const uint8_t * i_array,uint8_t i_size);
 
     /*!
      Constructor - from a bit list encoding
      \param i_ble ptr to Bit list encoding
      */
-    prdfBitKey(const char * i_ble);
+    BitKey(const char * i_ble);
 
     //! Copy Constructor
-    prdfBitKey (const prdfBitKey & bit_list);
+    BitKey (const BitKey & bit_list);
 
     //! Destructor
-    ~prdfBitKey(void);
+    ~BitKey(void);
 
-    //! Assignment operator from prdfBitKey
+    //! Assignment operator from BitKey
     /*!
      \post *this == bit_list
      */
-    prdfBitKey & operator=(const prdfBitKey & bit_list);
+    BitKey & operator=(const BitKey & bit_list);
 
-    //! Assignment operator from prdfBitString
+    //! Assignment operator from BitString
     /*!
      This function assigns the specified Bit String bit
      positions to this Bit List.  Bit positions are set
      from left to right.
      */
-    prdfBitKey & operator=(const prdfBitString & bit_string);
+    BitKey & operator=(const BitString & bit_string);
 
     //! Assignment operator from c string (char *)
     /*!
@@ -152,7 +155,7 @@ class prdfBitKey
      and thus a valid bit position, each character value is
      decremented to obtain the actual bit position.
     */
-    prdfBitKey & operator=(const char * string_ptr);
+    BitKey & operator=(const char * string_ptr);
 
     //! Equality operator
     /*!
@@ -163,7 +166,7 @@ class prdfBitKey
      positions.  If both Bit Lists are empty, they are
      considered equal.
      */
-    bool operator==(const prdfBitKey & bit_list) const;
+    bool operator==(const BitKey & bit_list) const;
 
     //! Is Subset
     /*!
@@ -183,7 +186,7 @@ class prdfBitKey
      A non-empty list is NOT as subset of an empty list
      \endverbatim
      */
-    bool isSubset(const prdfBitKey & bit_list) const;
+    bool isSubset(const BitKey & bit_list) const;
 
     //! Get Bit List Value
     /*!
@@ -221,7 +224,7 @@ class prdfBitKey
      \pre none
      \post bit list may be modified
      */
-    void removeBits(const prdfBitKey & i_bk);
+    void removeBits(const BitKey & i_bk);
 
 
     /*!
@@ -290,12 +293,7 @@ class prdfBitKey
 
   };
 
+} // end namespace PRDF
+
 #endif
 
-// Change Log *************************************************************************************
-//
-//  Flag Reason   Vers Date     Coder    Description
-//  ---- -------- ---- -------- -------- ---------------------------------------------------------
-//                              dgilbert Initial Creation
-//
-// End Change Log *********************************************************************************

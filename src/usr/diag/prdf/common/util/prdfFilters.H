@@ -25,8 +25,8 @@
 #define PRDFFILTER_H
 
 /**
- @file prdfFilter.H
- @brief FILTER_CLASSes selectivly remove bits from a prdfBitKey type object
+ @file Filter.H
+ @brief FILTER_CLASSes selectivly remove bits from a BitKey type object
 */
 
 /*--------------------------------------------------------------------*/
@@ -39,22 +39,24 @@
 
 #include <vector>
 
+namespace PRDF
+{
 /*--------------------------------------------------------------------*/
 /*  Forward References                                                */
 /*--------------------------------------------------------------------*/
 
-class prdfBitKey;
+class BitKey;
 
 /*--------------------------------------------------------------------*/
 /*  User Types                                                        */
 /*--------------------------------------------------------------------*/
 
 /**
- prdfFilter Specifies and interface for removing unwanted bits from a prdfBitKey.
+ FilterClass Specifies and interface for removing unwanted bits from a BitKey.
  Abstract base class
- @see prdfBitKey
+ @see BitKey
 */
-class prdfFilter
+class FilterClass
 {
 public:
 
@@ -62,15 +64,15 @@ public:
   /**
    Destructor. This implementation does nothing
    */
-  virtual ~prdfFilter(void);
+  virtual ~FilterClass(void);
 
 
   /**
-   Apply filter to the prdfBitKey.
+   Apply filter to the BitKey.
    @post bit_list may be modified
    @return true if bit_list was modified, otherwise false
    */
-  virtual bool Apply(prdfBitKey & io_bit_list) = 0;
+  virtual bool Apply(BitKey & io_bit_list) = 0;
 
   /**
    * Undo the filter effect (if possible)
@@ -81,7 +83,7 @@ public:
    * to reset the error register (eg. moves a bit to a new postition) than the Undo() function
    * should put the bit_list back into a state that can be used to reset an error register.
    */
-  virtual bool Undo(prdfBitKey & io_bit_list) { return false; }
+  virtual bool Undo(BitKey & io_bit_list) { return false; }
 
 protected:
 
@@ -90,13 +92,13 @@ protected:
    @note The default compiler generated copy constructor and assignment operator
    are adaquate.
    */
-  prdfFilter(void) {}
+  FilterClass(void) {}
 
 };
 
-//! prdfFilterPriority
+//! FilterPriority
 /*!
- prdfFilterPriority maintains a "subset" BitKey or a "priority" set of bits.
+ FilterPriority maintains a "subset" BitKey or a "priority" set of bits.
  When this filter is applied to a BitKey, If the "priority" BitKey is a subset of the
  BitKey than the BitKey becomes the priorty BitKey. (The non-priority bits are turned off);
  Otherwise the BitKey remains unchanged.
@@ -120,7 +122,7 @@ protected:
  Filtered BitKey: ("2", "7")
  \endverbatim
  */
-class prdfFilterPriority : public prdfFilter
+class FilterPriority : public FilterClass
 {
 public:
 
@@ -128,7 +130,7 @@ public:
    Constructor
    \param i_bld ptr bit list string encoding
    */
-  prdfFilterPriority(const char * i_ble)
+  FilterPriority(const char * i_ble)
   : ivBitKey(i_ble)
   {}
 
@@ -137,7 +139,7 @@ public:
    Constructor
    \param iBitList BitKey
    */
-  prdfFilterPriority(const prdfBitKey & iBitList)
+  FilterPriority(const BitKey & iBitList)
   : ivBitKey(iBitList)
   {}
 
@@ -146,18 +148,18 @@ public:
    \param ioBitList to apply filter to
    \returns true if iBitList modified otherwise false
    */
-  virtual bool Apply(prdfBitKey & ioBitList);
+  virtual bool Apply(BitKey & ioBitList);
 
 protected:
 
 
-  prdfBitKey ivBitKey;
+  BitKey ivBitKey;
 
 };
 
 //! PrioritySingleBitFilter
 /*!
- PrioritySingleBitFilter removes all but one bit from a prdfBitKey object.
+ PrioritySingleBitFilter removes all but one bit from a BitKey object.
  Priority (to not be removed) is given to the bits specified and in the order
  specified.
  @par Example
@@ -177,14 +179,14 @@ protected:
       //   and finally any remaining bits
  @endcode
  @par functionality
- - if no priority bits exist in prdfBitKey object then
+ - if no priority bits exist in BitKey object then
    - eliminate all but first entry in list
  - else if priority bits exist then
    - eliminate all non-priority bit entries
    - if multiple priority bit entries exist then elminate all but one,
      favoring the first qualified entry found in the list.
 */
-class PrioritySingleBitFilter : public prdfFilter
+class PrioritySingleBitFilter : public FilterClass
 {
 public:
 
@@ -222,7 +224,7 @@ public:
    @return true of bit list was modified otherwise false
    @note If the bit list is empty then it will be left empty.
    */
-  virtual bool Apply(prdfBitKey & bit_list);
+  virtual bool Apply(BitKey & bit_list);
 
 private:  // functions
 private:  // Data
@@ -231,12 +233,12 @@ private:  // Data
 
 };
 
-//! prdfFilterTranspose
+//! FilterTranspose
 /*!
- prdfFilterTranspose transposes an exactly matching key to a single bit. If there is not an
+ FilterTranspose transposes an exactly matching key to a single bit. If there is not an
  exact match, the key is not modified.
 */
-class prdfFilterTranspose : public prdfFilterPriority
+class FilterTranspose : public FilterPriority
 {
 public:
 
@@ -245,8 +247,8 @@ public:
    \param i_bitKey  bit list key
    \param iBitPos  bit to set if i_bitKey matches target.
    */
-  prdfFilterTranspose(const prdfBitKey &i_bitKey,uint32_t iBitPos)
-  : prdfFilterPriority(i_bitKey),ivSingleBitPos(iBitPos)
+  FilterTranspose(const BitKey &i_bitKey,uint32_t iBitPos)
+  : FilterPriority(i_bitKey),ivSingleBitPos(iBitPos)
   {}
 
   /**
@@ -257,7 +259,7 @@ public:
    bitlist is modified such that all bits are cleared and ivSingleBitPos is set.
    \return true of bit list was modified otherwise false
    */
-  virtual bool Apply(prdfBitKey & iBitList);
+  virtual bool Apply(BitKey & iBitList);
 
   /**
    * Undo the filter Apply()
@@ -265,7 +267,7 @@ public:
    * @Return true if bit_list was modified, otherwise false
    * @Note This function will only Undo the transposition if the transposed result bit is on
    */
-  virtual bool Undo(prdfBitKey & iBitList);
+  virtual bool Undo(BitKey & iBitList);
 
 private:  // functions
 private:  // Data
@@ -290,20 +292,20 @@ private:  // Data
    //   ereg will apply filter before analyzing the error
  \endcode
  */
-class SingleBitFilter: public prdfFilter
+class SingleBitFilter: public FilterClass
 {
 public:
   /*!
    Constructor
    */
-  SingleBitFilter(): prdfFilter() {}
+  SingleBitFilter(): FilterClass() {}
 
   /*!
    Remove all but one bit from bit_list
    \param ioBitList Target bit list
    \returns true if ioBitList was modified otherwise false
    */
-  virtual bool Apply(prdfBitKey & ioBitList);
+  virtual bool Apply(BitKey & ioBitList);
 
 private:  // functions
 private:  // Data
@@ -314,30 +316,30 @@ private:  // Data
 //! FilterLink
 /*!
  FilterLink links two FILTER_CLASS types together allowing two filters
- to act on a single prdfBitKey object.
+ to act on a single BitKey object.
  @code
 
-        prdfFilter * foo(prdfFilter & f1, prdfFilter & f2)
+        Filter * foo(Filter & f1, Filter & f2)
         {
-                prdfFilter * joint = new FilterLink(f1,f2);
+                Filter * joint = new FilterLink(f1,f2);
                 return joint;
         }
  @endcode
  */
-class FilterLink: public prdfFilter
+class FilterLink: public FilterClass
 {
 public:
   /**
    Constructor
    <ul>
-   <br><b>Parameters:  </b> Two Filters to be linked
+   <br><b>Parameters:  </b> Two FilterClasss to be linked
    <br><b>Requirements:</b> parm filters objects must exist and be valid
    <br><b>Promises:    </b> Object created
    <br><b>Exceptions:  </b> N/A
    <br><b>Notes:       </b>
    </ul><br>
    */
-  FilterLink(prdfFilter & f1, prdfFilter & f2);
+  FilterLink(FilterClass & f1, FilterClass & f2);
 
   /*
    Destructor
@@ -363,21 +365,21 @@ public:
    <br><b>Notes:       </b> calls all the other associated filters
    </ul><br>
    */
-  virtual bool Apply ( prdfBitKey & bit_list );
+  virtual bool Apply ( BitKey & bit_list );
 
   /**
    * Undo the filter Apply()
    * @post bit_list may be modified
    * @Return true if bit_list was modified, otherwise false
    */
-  virtual bool Undo(prdfBitKey & iBitList);
+  virtual bool Undo(BitKey & iBitList);
 
 private:  // functions
 private:  // Data
 
   // may be extended to use a vector if needed
-  prdfFilter & xFilter1;
-  prdfFilter & xFilter2;
+  FilterClass & xFilter1;
+  FilterClass & xFilter2;
 };
 
 
@@ -386,8 +388,8 @@ class SCAN_COMM_REGISTER_CLASS;
 //! ScanCommFilter
 /*!
  ScanCommFilter reads a HW scom register to determin which bits to
- removes bits from a prdfBitKey object
- @par Base class prdfFilter
+ removes bits from a BitKey object
+ @par Base class Filter
  @code
  //   This class is useful for Error registers whose bits can be
  //   configured to report different ways depending on another
@@ -405,7 +407,7 @@ class SCAN_COMM_REGISTER_CLASS;
  //   ereg will apply filter
  @endcode
  */
-class ScanCommFilter: public prdfFilter
+class ScanCommFilter: public FilterClass
 {
 public:
 
@@ -422,7 +424,7 @@ public:
    */
   ScanCommFilter(SCAN_COMM_REGISTER_CLASS & i_r, InvertValue invert = NONINVERT)
     :
-    prdfFilter(),
+    FilterClass(),
   scr(i_r),
   xInvert(invert)
   { }
@@ -432,7 +434,7 @@ public:
    @post bit_list may be modified
    @return true if bit_list was modified, otherwise false
    */
-   virtual bool Apply(prdfBitKey & bit_list);
+   virtual bool Apply(BitKey & bit_list);
 
 private:  // functions
 private:  // Data
@@ -441,19 +443,10 @@ private:  // Data
 };
 
 
-inline FilterLink::FilterLink(prdfFilter & f1, prdfFilter & f2)
+inline FilterLink::FilterLink(FilterClass & f1, FilterClass & f2)
 : xFilter1(f1), xFilter2(f2) {}
 
+} //End namespace PRDF
 
 #endif
-// Change Log *************************************************************************************
-//
-//  Flag Reason   Vers    Date     Coder    Description
-//  ---- -------- ------- -------- -------- -------------------------------------------------------
-//                V400    09/12/94 JST      Initial Creation
-//                fips    03/19/04 dgilbert Rename to prdfFilter.H added doxygen comments
-//       558003   fips310 06/21/06 dgilbert Add Undo() to filter
-//       582595          fips310 12/12/06 iawillia Update priority sb filter to maintain bit order.
-// End Change Log ********************************************************************************
-
 

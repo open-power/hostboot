@@ -31,8 +31,11 @@
 #include <iipServiceDataCollector.h>
 #include <prdfBitString.H>
 
+namespace PRDF
+{
+
 // See prdfLineDelete.H for full function documentation.
-namespace PrdfLineDelete
+namespace LineDelete
 {
 
     /* PrdfCacheCETable::addAddress
@@ -42,7 +45,7 @@ namespace PrdfLineDelete
                                        STEP_CODE_DATA_STRUCT & i_sdc )
     {
         // Get the time of the current error.
-        PrdTimer timeOfError = i_sdc.service_data->GetTOE();
+        Timer timeOfError = i_sdc.service_data->GetTOE();
 
         // Check if time interval has elapsed. If so, flush the table.
         if ( (timeOfError > cv_flushTimer) || !cv_flushTimerInited )
@@ -233,17 +236,5 @@ namespace PrdfLineDelete
     }
 };
 
+} // end namespace PRDF
 
-
-// Change Log ******************************************************************
-//
-// Flag Reason  Vers Date     Coder    Description
-// ---- ------- ---- -------- -------- -----------------------------------------
-//      F522128 f300 09/22/05 iawillia Initial File Creation
-// zs01 F565934 f310 09/06/06 zshelle  Adding getTotalCount()
-// zs02 d573288 f310 10/05/06 zshelle  Adding addToCaptureData()
-// zs03 588751  f310 03/12/07 zshelle  Adding getLargestEntry()
-// zs04 633659  f340 04/11/08 zshelle  Add getEntryCount() and getTableSize()
-// mp26 F750906 f720          plute    Add getCRCAnalysisEntries
-//
-// End Change Log **************************************************************

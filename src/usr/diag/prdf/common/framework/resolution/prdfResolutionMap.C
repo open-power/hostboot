@@ -29,8 +29,6 @@
 // Includes
 //------------------------------------------------------------------------------
 
-#define prdfResolutionMap_C
-
 #include <string.h>
 
 #include <prdfResolutionMap.H>
@@ -39,17 +37,17 @@
 #include <prdfErrorSignature.H>
 #include <prdfMain.H>
 
-#undef prdfResolutionMap_C
+namespace PRDF
+{
 
 //------------------------------------------------------------------------------
 
-void prdfResolutionMap::Add(uint8_t i_bitPos,
-                            prdfResolution * i_res )
+void ResolutionMap::Add( uint8_t i_bitPos, Resolution * i_res )
 {
     MapList::iterator i = iv_list.begin();
     while(i != iv_list.end())
     {
-        if (i->iv_blist == prdfBitKey()) // If empty bit string, skip.
+        if (i->iv_blist == BitKey()) // If empty bit string, skip.
         {
         }
         else if( (i->iv_res == i_res) || (*(i->iv_res) == *i_res))
@@ -71,8 +69,8 @@ void prdfResolutionMap::Add(uint8_t i_bitPos,
 
 //------------------------------------------------------------------------------
 
-void prdfResolutionMap::Add( uint8_t i_bitPos, prdfResolution * i_r1,
-                             prdfResolution * i_r2 )
+void ResolutionMap::Add( uint8_t i_bitPos, Resolution * i_r1,
+                         Resolution * i_r2 )
 {
     Add(i_bitPos,i_r1);
     Add(i_bitPos,i_r2);
@@ -80,10 +78,10 @@ void prdfResolutionMap::Add( uint8_t i_bitPos, prdfResolution * i_r1,
 
 //------------------------------------------------------------------------------
 
-void prdfResolutionMap::Add(uint8_t i_bitPos,
-                            prdfResolution * i_r1,
-                            prdfResolution * i_r2,
-                            prdfResolution * i_r3)
+void ResolutionMap::Add(uint8_t i_bitPos,
+                            Resolution * i_r1,
+                            Resolution * i_r2,
+                            Resolution * i_r3)
 {
     Add(i_bitPos,i_r1,i_r2);
     Add(i_bitPos,i_r3);
@@ -91,11 +89,11 @@ void prdfResolutionMap::Add(uint8_t i_bitPos,
 
 //------------------------------------------------------------------------------
 
-void prdfResolutionMap::Add(uint8_t i_bitPos,
-                            prdfResolution * i_r1,
-                            prdfResolution * i_r2,
-                            prdfResolution * i_r3,
-                            prdfResolution * i_r4)
+void ResolutionMap::Add(uint8_t i_bitPos,
+                            Resolution * i_r1,
+                            Resolution * i_r2,
+                            Resolution * i_r3,
+                            Resolution * i_r4)
 {
     Add(i_bitPos,i_r1,i_r2);
     Add(i_bitPos,i_r3,i_r4);
@@ -103,12 +101,12 @@ void prdfResolutionMap::Add(uint8_t i_bitPos,
 
 //------------------------------------------------------------------------------
 
-void prdfResolutionMap::Add(uint8_t i_bitPos,
-                            prdfResolution * i_r1,
-                            prdfResolution * i_r2,
-                            prdfResolution * i_r3,
-                            prdfResolution * i_r4,
-                            prdfResolution * i_r5)
+void ResolutionMap::Add(uint8_t i_bitPos,
+                            Resolution * i_r1,
+                            Resolution * i_r2,
+                            Resolution * i_r3,
+                            Resolution * i_r4,
+                            Resolution * i_r5)
 {
     Add(i_bitPos,i_r1,i_r2,i_r3);
     Add(i_bitPos,i_r4,i_r5);
@@ -116,13 +114,13 @@ void prdfResolutionMap::Add(uint8_t i_bitPos,
 
 //------------------------------------------------------------------------------
 
-void prdfResolutionMap::Add(uint8_t i_bitPos,
-                            prdfResolution * i_r1,
-                            prdfResolution * i_r2,
-                            prdfResolution * i_r3,
-                            prdfResolution * i_r4,
-                            prdfResolution * i_r5,
-                            prdfResolution * i_r6)
+void ResolutionMap::Add(uint8_t i_bitPos,
+                            Resolution * i_r1,
+                            Resolution * i_r2,
+                            Resolution * i_r3,
+                            Resolution * i_r4,
+                            Resolution * i_r5,
+                            Resolution * i_r6)
 {
     Add(i_bitPos,i_r1,i_r2,i_r3);
     Add(i_bitPos,i_r4,i_r5,i_r6);
@@ -130,14 +128,14 @@ void prdfResolutionMap::Add(uint8_t i_bitPos,
 
 //------------------------------------------------------------------------------
 
-void prdfResolutionMap::Add(uint8_t i_bitPos,
-                            prdfResolution * i_r1,
-                            prdfResolution * i_r2,
-                            prdfResolution * i_r3,
-                            prdfResolution * i_r4,
-                            prdfResolution * i_r5,
-                            prdfResolution * i_r6,
-                            prdfResolution * i_r7)
+void ResolutionMap::Add(uint8_t i_bitPos,
+                            Resolution * i_r1,
+                            Resolution * i_r2,
+                            Resolution * i_r3,
+                            Resolution * i_r4,
+                            Resolution * i_r5,
+                            Resolution * i_r6,
+                            Resolution * i_r7)
 {
     Add(i_bitPos,i_r1,i_r2,i_r3);
     Add(i_bitPos,i_r4,i_r5,i_r6,i_r7);
@@ -145,14 +143,14 @@ void prdfResolutionMap::Add(uint8_t i_bitPos,
 
 //------------------------------------------------------------------------------
 
-void prdfResolutionMap::Add( const uint8_t *i_ble,
-                             uint8_t i_bleLen,
-                             prdfResolution * i_res )
+void ResolutionMap::Add( const uint8_t *i_ble,
+                         uint8_t i_bleLen,
+                         Resolution * i_res )
 {
     MapList::iterator i = iv_list.begin();
     while(i != iv_list.end())
     {
-        if ((i->iv_blist == prdfBitKey()) || (0 == i_bleLen))
+        if ((i->iv_blist == BitKey()) || (0 == i_bleLen))
         {
             // Empty bit string, skip.
         }
@@ -184,10 +182,10 @@ void prdfResolutionMap::Add( const uint8_t *i_ble,
 
 //------------------------------------------------------------------------------
 
-void prdfResolutionMap::Add(const uint8_t *i_ble,
+void ResolutionMap::Add(const uint8_t *i_ble,
                             uint8_t i_bleLen,
-                            prdfResolution * r1,
-                            prdfResolution * r2)
+                            Resolution * r1,
+                            Resolution * r2)
 {
     Add(i_ble,i_bleLen,r1);
     Add(i_ble,i_bleLen,r2);
@@ -195,11 +193,11 @@ void prdfResolutionMap::Add(const uint8_t *i_ble,
 
 //------------------------------------------------------------------------------
 
-void prdfResolutionMap::Add(const uint8_t *i_ble,
+void ResolutionMap::Add(const uint8_t *i_ble,
                             uint8_t i_bleLen,
-                            prdfResolution * r1,
-                            prdfResolution * r2,
-                            prdfResolution * r3)
+                            Resolution * r1,
+                            Resolution * r2,
+                            Resolution * r3)
 {
     Add(i_ble,i_bleLen,r1,r2);
     Add(i_ble,i_bleLen,r3);
@@ -207,12 +205,12 @@ void prdfResolutionMap::Add(const uint8_t *i_ble,
 
 //------------------------------------------------------------------------------
 
-void prdfResolutionMap::Add(const uint8_t *i_ble,
+void ResolutionMap::Add(const uint8_t *i_ble,
                             uint8_t i_bleLen,
-                            prdfResolution * r1,
-                            prdfResolution * r2,
-                            prdfResolution * r3,
-                            prdfResolution * r4)
+                            Resolution * r1,
+                            Resolution * r2,
+                            Resolution * r3,
+                            Resolution * r4)
 {
     Add(i_ble,i_bleLen,r1,r2);
     Add(i_ble,i_bleLen,r3,r4);
@@ -220,13 +218,13 @@ void prdfResolutionMap::Add(const uint8_t *i_ble,
 
 //------------------------------------------------------------------------------
 
-void prdfResolutionMap::Add(const uint8_t *i_ble,
+void ResolutionMap::Add(const uint8_t *i_ble,
                             uint8_t i_bleLen,
-                            prdfResolution * r1,
-                            prdfResolution * r2,
-                            prdfResolution * r3,
-                            prdfResolution * r4,
-                            prdfResolution * r5)
+                            Resolution * r1,
+                            Resolution * r2,
+                            Resolution * r3,
+                            Resolution * r4,
+                            Resolution * r5)
 {
     Add(i_ble,i_bleLen,r1,r2);
     Add(i_ble,i_bleLen,r3,r4,r5);
@@ -234,14 +232,14 @@ void prdfResolutionMap::Add(const uint8_t *i_ble,
 
 //------------------------------------------------------------------------------
 
-void prdfResolutionMap::Add(const uint8_t *i_ble,
+void ResolutionMap::Add(const uint8_t *i_ble,
                             uint8_t i_bleLen,
-                            prdfResolution * r1,
-                            prdfResolution * r2,
-                            prdfResolution * r3,
-                            prdfResolution * r4,
-                            prdfResolution * r5,
-                            prdfResolution * r6)
+                            Resolution * r1,
+                            Resolution * r2,
+                            Resolution * r3,
+                            Resolution * r4,
+                            Resolution * r5,
+                            Resolution * r6)
 {
     Add(i_ble,i_bleLen,r1,r2,r3);
     Add(i_ble,i_bleLen,r4,r5,r6);
@@ -249,11 +247,10 @@ void prdfResolutionMap::Add(const uint8_t *i_ble,
 
 //------------------------------------------------------------------------------
 
-void prdfResolutionMap::LookUp(prdfResolutionList & o_list,
-                               prdfBitKey & io_bitList,
-                               STEP_CODE_DATA_STRUCT & scd)
+void ResolutionMap::LookUp( ResolutionList & o_list,
+                            BitKey & io_bitList,
+                            STEP_CODE_DATA_STRUCT & scd )
 {
-    using namespace PRDF;
     uint32_t lsize = o_list.size();
 
     if(iv_filter != NULL)
@@ -299,8 +296,7 @@ void prdfResolutionMap::LookUp(prdfResolutionList & o_list,
 
 //------------------------------------------------------------------------------
 
-void prdfResolutionMap::Add( const char *i_ble,
-                             prdfResolution * res )
+void ResolutionMap::Add( const char *i_ble, Resolution * res )
 {
     uint8_t len = strlen(i_ble);
     uint8_t * bl = new uint8_t[len];
@@ -312,51 +308,39 @@ void prdfResolutionMap::Add( const char *i_ble,
     delete [] bl;
 }
 
-void prdfResolutionMap::Add(const char *i_ble,
-                            prdfResolution * r1,
-                            prdfResolution * r2)
+void ResolutionMap::Add( const char *i_ble,
+                         Resolution * r1, Resolution * r2 )
 {
     Add(i_ble,r1);
     Add(i_ble,r2);
 }
 
-void prdfResolutionMap::Add(const char *i_ble,
-                            prdfResolution * r1,
-                            prdfResolution * r2,
-                            prdfResolution * r3)
+void ResolutionMap::Add( const char *i_ble,
+                         Resolution * r1, Resolution * r2, Resolution * r3 )
 {
     Add(i_ble,r1,r2);
     Add(i_ble,r3);
 }
 
-void prdfResolutionMap::Add(const char *i_ble,
-                            prdfResolution * r1,
-                            prdfResolution * r2,
-                            prdfResolution * r3,
-                            prdfResolution * r4)
+void ResolutionMap::Add( const char *i_ble,
+                         Resolution * r1, Resolution * r2, Resolution * r3,
+                         Resolution * r4 )
 {
     Add(i_ble,r1,r2);
     Add(i_ble,r3,r4);
 }
 
-void prdfResolutionMap::Add(const char *i_ble,
-                            prdfResolution * r1,
-                            prdfResolution * r2,
-                            prdfResolution * r3,
-                            prdfResolution * r4,
-                            prdfResolution * r5)
+void ResolutionMap::Add( const char *i_ble,
+                         Resolution * r1, Resolution * r2, Resolution * r3,
+                         Resolution * r4, Resolution * r5 )
 {
     Add(i_ble,r1,r2);
     Add(i_ble,r3,r4,r5);
 }
 
-void prdfResolutionMap::Add(const char *i_ble,
-                            prdfResolution * r1,
-                            prdfResolution * r2,
-                            prdfResolution * r3,
-                            prdfResolution * r4,
-                            prdfResolution * r5,
-                            prdfResolution * r6)
+void ResolutionMap::Add( const char *i_ble,
+                         Resolution * r1, Resolution * r2, Resolution * r3,
+                         Resolution * r4, Resolution * r5, Resolution * r6 )
 
 {
     Add(i_ble,r1,r2,r3);
@@ -365,17 +349,15 @@ void prdfResolutionMap::Add(const char *i_ble,
 
 //------------------------------------------------------------------------------
 
-void prdfResolutionMap::Add(const char *i_ble,
-                            prdfResolution * r1,
-                            prdfResolution * r2,
-                            prdfResolution * r3,
-                            prdfResolution * r4,
-                            prdfResolution * r5,
-                            prdfResolution * r6,
-                            prdfResolution * r7)
+void ResolutionMap::Add( const char *i_ble,
+                         Resolution * r1, Resolution * r2, Resolution * r3,
+                         Resolution * r4, Resolution * r5, Resolution * r6,
+                         Resolution * r7 )
 
 {
     Add(i_ble,r1,r2,r3);
     Add(i_ble,r4,r5,r6,r7);
 }
+
+} // end namespace PRDF
 

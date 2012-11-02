@@ -38,7 +38,7 @@ namespace PRDF
 /**
  * @brief The P7 Centaur MBA data bundle.
  */
-class CenMbaDataBundle : public PrdfDataBundle
+class CenMbaDataBundle : public DataBundle
 {
   public: // functions
 
@@ -46,7 +46,7 @@ class CenMbaDataBundle : public PrdfDataBundle
      * @brief Constructor.
      * @param i_mbaChip The MBA chip.
      */
-    explicit CenMbaDataBundle( PrdfExtensibleChip * i_mbaChip ) :
+    explicit CenMbaDataBundle( ExtensibleChip * i_mbaChip ) :
         iv_sendCmdCompleteMsg(false)
     {}
 
@@ -75,7 +75,7 @@ class CenMbaDataBundle : public PrdfDataBundle
  * @param  i_mbaChip The MBA chip.
  * @return This MBA's data bundle.
  */
-inline CenMbaDataBundle * getMbaDataBundle( PrdfExtensibleChip * i_mbaChip )
+inline CenMbaDataBundle * getMbaDataBundle( ExtensibleChip * i_mbaChip )
 {
     return static_cast<CenMbaDataBundle *>(i_mbaChip->getDataBundle());
 }

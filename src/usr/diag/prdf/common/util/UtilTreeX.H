@@ -26,6 +26,9 @@
 
 #include "UtilTree.H"
 
+namespace PRDF
+{
+
 template <class _T>
 class UtilTreeX
 {
@@ -159,13 +162,7 @@ const _T & UtilTreeX<_T>::peek()
     return *static_cast<const _T *>(tmp);
 };
 
+} // end namespace PRDF
 
 #endif
 
-// Change Log *********************************************************
-//
-//  Flag Reason   Vers Date     Coder    Description
-//  ---- -------- ---- -------- -------- -------------------------------
-//       F494911  f310 03/04/05 iawillia Initial File Creation
-//
-// End Change Log *****************************************************

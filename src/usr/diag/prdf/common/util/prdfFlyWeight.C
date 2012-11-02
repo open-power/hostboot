@@ -57,7 +57,8 @@
 //----------------------------------------------------------------------
 //  Global Variables
 //----------------------------------------------------------------------
-
+namespace PRDF
+{
 //---------------------------------------------------------------------
 // Member Function Specifications
 //---------------------------------------------------------------------
@@ -135,17 +136,20 @@ T & FlyWeight<T,S>::get(const T & key)
   }
   return *result;
 }
-
+} //End namespace PRDF
 #if defined(ESW_SIM_COMPILE)
 #include <iostream>
 #include <iomanip>
 
 //FlyWeightBase::FlyWeightList FlyWeightBase::cv_fwlist; //mp01d
-
+namespace PRDF
+{
 template < class T , uint32_t S >
 void FlyWeight<T,S>::printStats(void)
 {
   using namespace std;
   cout << "FlyWeight Memory allowcated = " << (iv_heap.size() * sizeof(T) * RoundBucketSize<T,S>::value) << endl;
 }
+} //End namespace PRDF
 #endif
+

@@ -61,6 +61,10 @@
 //--------------------------------------------------------------------
 //  Forward References
 //--------------------------------------------------------------------
+
+namespace PRDF
+{
+
 class SCAN_COMM_REGISTER_CLASS;
 class ResolutionMap;
 
@@ -151,7 +155,7 @@ protected:
    */
   virtual BIT_LIST_CLASS Filter(const BIT_STRING_CLASS & bs);
 
-  virtual bool FilterUndo(prdfBitKey & i_bit_list) { return false; }
+  virtual bool FilterUndo(BitKey & i_bit_list) { return false; }
   /**
    Find a resolution for the Bit List
    <ul>
@@ -205,20 +209,7 @@ private:  // Data
 
 };
 
-
+} // end namespace PRDF
 
 #endif /* iipErrorRegister_h */
 
-// Change Log *********************************************************
-//
-//  Flag Reason   Vers Date     Coder Description
-//  ---- -------- ---- -------- ----- -------------------------------
-//                     04/05/96 DRG   Initial Creation
-//       p4902214 v4r1m0 05/09/97 DRG   Added service data parm to Reset
-//                v4r1 01/07/98 DRG   Add NoErrorOnZeroScrRead()
-//       d49274.2 V4R5 09/23/98 DRG   Add scrId option
-//       423599   fsp  10/27/03 dgilbert make scrid a bit16
-//  dg02 482244 fips225 11/05/04 dgilbert add SetErrorSignture()
-//       558003 fips310 06/21/06 dgilbert add FilterUndo()
-//
-// End Change Log *****************************************************

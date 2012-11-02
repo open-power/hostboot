@@ -32,16 +32,12 @@
 
 #include<list>
 
-typedef std::list<Resolution *> prdfResolutionList;
+namespace PRDF
+{
 
-#define prdfResolution Resolution
+typedef std::list<Resolution *> ResolutionList;
+
+} // end namespace PRDF
 
 #endif /* PRDFRESOLUTIONLIST_H */
 
-// Change Log *****************************************************************
-//
-//  Flag Reason    Vers  Date     Coder    Description
-//  ---- --------- ----- -------- -------- ------------------------------------
-//                                dgilbert Initial Creation
-//
-// End Change Log *************************************************************

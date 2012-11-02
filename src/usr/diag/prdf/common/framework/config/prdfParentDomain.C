@@ -64,6 +64,8 @@
 // Member Function Specifications
 //---------------------------------------------------------------------
 
+namespace PRDF
+{
 
 //Constructor
 template<class T>
@@ -102,5 +104,6 @@ typename ParentDomain<T>::iterator ParentDomain<T>::getEndIterator()
 
 //This instance of ParentDomain has to remain after the definition
 //  of the Templated class function or it won't link correctly.
-template class ParentDomain<PrdfExtensibleDomain>;
+template class ParentDomain<ExtensibleDomain>;
 
+} // end namespace PRDF

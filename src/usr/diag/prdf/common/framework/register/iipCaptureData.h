@@ -82,6 +82,9 @@
 #include <prdfPlatServices.H>
 #include <functional>  // @jl04 a Needed for the unary function in new predicate.
 
+namespace PRDF
+{
+
 // Forward Declarations
 class SCAN_COMM_REGISTER_CLASS;
 class ScanCommRegisterAccess;
@@ -363,5 +366,7 @@ private:
     //Constructor allows a value to be passed in to compare against.
   };
 };
+
+} // end namespace PRDF
 
 #endif

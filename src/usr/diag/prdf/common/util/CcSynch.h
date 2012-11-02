@@ -83,6 +83,8 @@
 
 // Includes
 
+namespace PRDF
+{
 
 template <class STEP_TYPE, class ID>
 class CcSynch
@@ -187,16 +189,9 @@ class CcSynch
     StepType                       myStep;
   };
 
-#include "CcSynch.inl"
+} // end namespace PRDF
 
-// Change Log **********************************************************
-//
-//  Flag  PTR/DCR#  Userid    Date      Description
-//  ----  --------  --------  --------  -----------
-//  n/a   n/a       JST       04/06/95  Created.
-//        D24747.4  JFP       02/23/96  Added #ifndef BOOL_H
-//
-// End Change Log ******************************************************
+#include "CcSynch.inl"
 
 #endif
 

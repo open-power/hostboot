@@ -103,11 +103,11 @@ System * PegasusConfigurator::build()
     System * l_system = new System(noAttnResolution);
 
     // Create domains.
-    FabricDomain     * l_procDomain   = new FabricDomain(     FABRIC_DOMAIN );
-    PrdfExDomain     * l_exDomain     = new PrdfExDomain(     EX_DOMAIN     );
-    PrdfMcsDomain    * l_mcsDomain    = new PrdfMcsDomain(    MCS_DOMAIN    );
-    PrdfMembufDomain * l_membufDomain = new PrdfMembufDomain( MEMBUF_DOMAIN );
-    PrdfMbaDomain    * l_mbaDomain    = new PrdfMbaDomain(    MBA_DOMAIN    );
+    FabricDomain * l_procDomain   = new FabricDomain( FABRIC_DOMAIN );
+    ExDomain     * l_exDomain     = new ExDomain(     EX_DOMAIN     );
+    McsDomain    * l_mcsDomain    = new McsDomain(    MCS_DOMAIN    );
+    MembufDomain * l_membufDomain = new MembufDomain( MEMBUF_DOMAIN );
+    MbaDomain    * l_mbaDomain    = new MbaDomain(    MBA_DOMAIN    );
 
     uint32_t l_maxNodeCount = _getMaxNumNodes();
 
@@ -148,9 +148,9 @@ System * PegasusConfigurator::build()
 
 //------------------------------------------------------------------------------
 
-void PegasusConfigurator::addDomainChips( TARGETING::TYPE      i_type,
-                                          PrdfRuleChipDomain * io_domain,
-                                          PllDomainList      * io_pllDomains )
+void PegasusConfigurator::addDomainChips( TARGETING::TYPE  i_type,
+                                          RuleChipDomain * io_domain,
+                                          PllDomainList  * io_pllDomains )
 {
     using namespace TARGETING;
 
@@ -164,11 +164,11 @@ void PegasusConfigurator::addDomainChips( TARGETING::TYPE      i_type,
     const char * fileName = "";
     switch ( i_type )
     {
-        case TYPE_PROC:   fileName = PRDF::Proc;   break;
-        case TYPE_EX:     fileName = PRDF::Ex;     break;
-        case TYPE_MCS:    fileName = PRDF::Mcs;    break;
-        case TYPE_MEMBUF: fileName = PRDF::Membuf; break;
-        case TYPE_MBA:    fileName = PRDF::Mba;    break;
+        case TYPE_PROC:   fileName = Proc;   break;
+        case TYPE_EX:     fileName = Ex;     break;
+        case TYPE_MCS:    fileName = Mcs;    break;
+        case TYPE_MEMBUF: fileName = Membuf; break;
+        case TYPE_MBA:    fileName = Mba;    break;
 
         default:
             // Print a trace statement, but do not fail the build.
@@ -185,8 +185,8 @@ void PegasusConfigurator::addDomainChips( TARGETING::TYPE      i_type,
         {
             if ( NULL == *itr ) continue;
 
-            PrdfRuleChip * chip = new PrdfRuleChip( fileName, *itr,
-                                                    scanFac, resFac );
+            RuleChip * chip = new RuleChip( fileName, *itr,
+                                            scanFac, resFac );
             sysChipLst.push_back( chip );
             io_domain->AddChip(   chip );
 
@@ -223,7 +223,7 @@ void PegasusConfigurator::addDomainChips( TARGETING::TYPE      i_type,
 void PegasusConfigurator::addChipsToPllDomain(
  DOMAIN_ID                    i_domainId,
  PllDomainList              * io_pllDomains,
- PrdfRuleChip               * i_chip,
+ RuleChip                   * i_chip,
  TARGETING::TargetHandle_t    i_pTarget,
  ScanFacility               & i_scanFac,
  ResolutionFactory          & i_resFac)
@@ -295,4 +295,4 @@ void PegasusConfigurator::addPllDomainsToSystem(
     }
 }
 
-} // End namespace PRDF
+} // end namespace PRDF

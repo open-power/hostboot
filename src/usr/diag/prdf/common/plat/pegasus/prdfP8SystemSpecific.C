@@ -28,8 +28,10 @@
 #include <prdfPegasusConfigurator.H>
 #include <prdfPlatServices.H>
 
+namespace PRDF
+{
 
-namespace PrdfSystemSpecific
+namespace SystemSpecific
 {
     PRDF::Configurator * getConfiguratorPtr()
     {
@@ -41,3 +43,5 @@ namespace PrdfSystemSpecific
         return;
     }
 };
+
+} // end namespace PRDF

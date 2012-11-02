@@ -57,6 +57,9 @@ using namespace PRDF;
 //------------------------------------------------------------------------------
 #ifndef __HOSTBOOT_MODULE
 
+namespace PRDF
+{
+
 inline void buffer_append(uint8_t *&ptr, uint32_t value)
 {
     uint32_t l_tmp32 = htonl(value);
@@ -184,7 +187,7 @@ void ServiceDataCollector::AddSignatureList(TARGETING::TargetHandle_t i_pTargetH
     }
     if(found == false)
     {
-        iv_SignatureList.push_back(PrdfSignatureList(i_pTargetHandle, i_signature));
+        iv_SignatureList.push_back(SignatureList(i_pTargetHandle, i_signature));
     }
 }
 
@@ -196,13 +199,13 @@ uint32_t ServiceDataCollector::Flatten(uint8_t * i_buffer, uint32_t & io_size) c
 {
     uint32_t max_size = io_size;
     uint32_t rc = SUCCESS;
-    //getting the actual size of prdfHcdbChangeItem and PrdfSignatureList that gets saved in memory. since
+    //getting the actual size of prdfHcdbChangeItem and SignatureList that gets saved in memory. since
     //instead of handle we save the entity path
-    uint32_t l_sizeHcdbChange = iv_HcdbChangeList.size() * sizeof(PrdfHcdbChangeItem);
-    uint32_t l_sizeSignList   = iv_SignatureList.size()  * sizeof(PrdfSignatureList);
+    uint32_t l_sizeHcdbChange = iv_HcdbChangeList.size() * sizeof(HcdbChangeItem);
+    uint32_t l_sizeSignList   = iv_SignatureList.size()  * sizeof(SignatureList);
     uint32_t l_sizeMruList    = xMruList.size()          * sizeof(SdcCallout);
     // approximate space needed for essentials.  This estimate is slightly higher than actual
-    const uint32_t MIN_FLAT_SIZE = sizeof(ServiceDataCollector) + sizeof(struct PrdTimer::prdftm_t)
+    const uint32_t MIN_FLAT_SIZE = sizeof(ServiceDataCollector) + sizeof(struct Timer::prdftm_t)
                                    + l_sizeMruList + l_sizeHcdbChange + l_sizeSignList;
 
     uint8_t * current_ptr = i_buffer;
@@ -248,8 +251,8 @@ uint32_t ServiceDataCollector::Flatten(uint8_t * i_buffer, uint32_t & io_size) c
         //@ecdf - Removed ivDumpRequestType.
         buffer_append(current_ptr,ivDumpRequestContent);
         buffer_append(current_ptr,ivpDumpRequestChipHandle);
-        PrdTimer::prdftm_t l_tm = ivCurrentEventTime.gettm();
-        const uint32_t PRDFTM_SIZE = sizeof(struct PrdTimer::prdftm_t);
+        Timer::prdftm_t l_tm = ivCurrentEventTime.gettm();
+        const uint32_t PRDFTM_SIZE = sizeof(struct Timer::prdftm_t);
         memcpy(current_ptr,&l_tm,PRDFTM_SIZE);
         current_ptr += PRDFTM_SIZE;
         buffer_append(current_ptr,(uint32_t)causeAttentionType);
@@ -303,7 +306,7 @@ ServiceDataCollector & ServiceDataCollector::operator=(
         comp_id_t            l_compType =    (comp_id_t)buffer_get32(i_flatdata);
         if(NULL !=l_pChipHandle)
         {
-            PrdfHcdbChangeItem l_item(l_pChipHandle, l_compSubType, l_compType);
+            HcdbChangeItem l_item(l_pChipHandle, l_compSubType, l_compType);
             iv_HcdbChangeList.push_back(l_item);
 
         }
@@ -316,7 +319,7 @@ ServiceDataCollector & ServiceDataCollector::operator=(
         uint32_t             l_signature   = (uint32_t)  buffer_get32(i_flatdata);
         if(NULL !=l_pChipHandle)
         {
-            PrdfSignatureList    l_item(l_pChipHandle, l_signature);
+            SignatureList    l_item(l_pChipHandle, l_signature);
             iv_SignatureList.push_back(l_item);
         }
     }
@@ -332,8 +335,8 @@ ServiceDataCollector & ServiceDataCollector::operator=(
     ivDumpRequestContent = (hwTableContent) buffer_get32(i_flatdata); //@ecdf
     ivpDumpRequestChipHandle = buffer_getTarget(i_flatdata);
 
-    PrdTimer::prdftm_t l_tm;
-    const uint32_t PRDFTM_SIZE = sizeof(struct PrdTimer::prdftm_t);
+    Timer::prdftm_t l_tm;
+    const uint32_t PRDFTM_SIZE = sizeof(struct Timer::prdftm_t);
     memcpy(&l_tm,i_flatdata,PRDFTM_SIZE);
     i_flatdata += PRDFTM_SIZE;
     ivCurrentEventTime.settm(l_tm);
@@ -377,9 +380,12 @@ void ServiceDataCollector::AddChangeForHcdb(TARGETING::TargetHandle_t i_pTargetH
     }
     if(found == false)
     {
-        iv_HcdbChangeList.push_back( PrdfHcdbChangeItem(i_pTargetHandle, i_testType, i_compType));
+        iv_HcdbChangeList.push_back( HcdbChangeItem(i_pTargetHandle, i_testType,
+                                                    i_compType) );
     }
 }
+
+} // end namespace PRDF
 
 #endif
 

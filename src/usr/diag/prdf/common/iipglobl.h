@@ -52,6 +52,8 @@
 #include <prdf_types.h>
 #include <prdfErrlSmartPtr.H>
 
+namespace PRDF
+{
 /*--------------------------------------------------------------------*/
 /*  Forward References                                                */
 /*--------------------------------------------------------------------*/
@@ -62,11 +64,10 @@ class System;
 /*  Global Variables                                                  */
 /*--------------------------------------------------------------------*/
 
-namespace PRDF
-{
   extern System * systemPtr;
-  extern PrdfErrlSmartPtr g_prd_errlHndl;
-}
+  extern ErrlSmartPtr g_prd_errlHndl;
+
+} //End namespace PRDF
 
 /*--------------------------------------------------------------------*/
 /*  Singleton macros common to both FSP and Hostboot                  */

@@ -30,15 +30,18 @@
 #include <prdfPfa5Data.h>
 #include <iipglobl.h>
 
-PrdfExtensibleDomainFunction *
-    PrdfExtensibleDomain::getExtensibleFunction(const char * i_func,
+namespace PRDF
+{
+
+ExtensibleDomainFunction *
+        ExtensibleDomain::getExtensibleFunction(const char * i_func,
                                                 bool i_expectNull)
 {
-    PrdfExtensibleFunctionType * plugin =
-            prdfGetPluginGlobalMap().getPlugins(iv_domainName)[i_func];
+    ExtensibleFunctionType * plugin =
+            getPluginGlobalMap().getPlugins(iv_domainName)[i_func];
     if (NULL == plugin)
     {
-        static PrdfPlugin<PrdfExtensibleDomain> l_nullPlugin(NULL);
+        static Plugin<ExtensibleDomain> l_nullPlugin(NULL);
         plugin = &l_nullPlugin;
 
         if (!i_expectNull)
@@ -57,19 +60,22 @@ PrdfExtensibleDomainFunction *
             PRDF_ADD_FFDC(l_errl,
                           iv_domainName,
                           strlen(iv_domainName),
-                          prdfErrlVer1,
-                          prdfErrlString);
+                          ErrlVer1,
+                          ErrlString);
 
             PRDF_ADD_FFDC(l_errl,
                           i_func,
                           strlen(i_func),
-                          prdfErrlVer1,
-                          prdfErrlString);
+                          ErrlVer1,
+                          ErrlString);
 
             PRDF_COMMIT_ERRL(l_errl, ERRL_ACTION_REPORT);
             delete l_errl;
         }
     }
 
-    return (PrdfExtensibleDomainFunction *) plugin;
+    return (ExtensibleDomainFunction *) plugin;
 }
+
+} // end namespace PRDF
+

@@ -53,14 +53,12 @@ extern void yyerror(const char *);
 extern int yyline;
 extern std::stack<std::pair<std::string, int> > yyincfiles;
 
-extern PrdrChip * g_currentChip;
+namespace PRDR_COMPILER
+{
+
+extern Chip * g_currentChip;
+
+} // end namespace PRDR_COMPILER
 
 #endif
 
-// Change Log *********************************************************
-//
-//  Flag Reason   Vers Date     Coder    Description
-//  ---- -------- ---- -------- -------- -------------------------------
-//       F494911  f310 03/04/05 iawillia Initial File Creation
-//
-// End Change Log *****************************************************

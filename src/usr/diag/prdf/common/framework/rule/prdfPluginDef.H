@@ -32,7 +32,10 @@
   #include <cstdlib>
 #endif
 
-namespace PrdfPluginDef
+namespace PRDF
+{
+
+namespace PluginDef
 {
     class ParameterList
     {
@@ -119,40 +122,39 @@ namespace PrdfPluginDef
 
 };
 
-class PrdfExtensibleFunctionType
+class ExtensibleFunctionType
 {
     public:
-        virtual ~PrdfExtensibleFunctionType() {};
+        virtual ~ExtensibleFunctionType() {};
 };
 
 template <typename _ExtensibleObject>
-class PrdfExtensibleFunction : public PrdfExtensibleFunctionType
+class ExtensibleFunction : public ExtensibleFunctionType
 {
     public:
-        virtual ~PrdfExtensibleFunction() { }  // zs01
+        virtual ~ExtensibleFunction() { }  // zs01
         virtual int32_t operator()(_ExtensibleObject * A,
-                                   PrdfPluginDef::ParameterList * B) = 0;
+                                   PluginDef::ParameterList * B) = 0;
 };
 
-class PrdfExtensibleChip;
-class PrdfExtensibleDomain;
-typedef PrdfExtensibleFunction<PrdfExtensibleChip> PrdfExtensibleChipFunction;
-typedef PrdfExtensibleFunction<PrdfExtensibleDomain>
-                                        PrdfExtensibleDomainFunction;
-
+class ExtensibleChip;
+class ExtensibleDomain;
+typedef ExtensibleFunction<ExtensibleChip> ExtensibleChipFunction;
+typedef ExtensibleFunction<ExtensibleDomain>
+                                        ExtensibleDomainFunction;
 
 template <typename _ExtensibleObject>
-class PrdfPlugin : public PrdfExtensibleFunction<_ExtensibleObject>
+class Plugin : public ExtensibleFunction<_ExtensibleObject>
 {
     protected:
-        int32_t (*_func)(_ExtensibleObject *, PrdfPluginDef::ParameterList *);
+        int32_t (*_func)(_ExtensibleObject *, PluginDef::ParameterList *);
     public:
-        explicit PrdfPlugin(int32_t (*func)(_ExtensibleObject *,
-                                            PrdfPluginDef::ParameterList *))
+        explicit Plugin(int32_t (*func)(_ExtensibleObject *,
+                                            PluginDef::ParameterList *))
             : _func(func) {};
 
         int32_t operator()(_ExtensibleObject * A,
-                           PrdfPluginDef::ParameterList * B)
+                           PluginDef::ParameterList * B)
         {
             int32_t i = 0;
             if (NULL != _func)
@@ -165,16 +167,16 @@ class PrdfPlugin : public PrdfExtensibleFunction<_ExtensibleObject>
 };
 
 template <typename _ExtensibleObject>
-class PrdfPlugin_0arg : public PrdfExtensibleFunction<_ExtensibleObject>
+class Plugin_0arg : public ExtensibleFunction<_ExtensibleObject>
 {
     protected:
         int32_t (*_func)(_ExtensibleObject *);
     public:
-        explicit PrdfPlugin_0arg(int32_t (*func)(_ExtensibleObject *))
+        explicit Plugin_0arg(int32_t (*func)(_ExtensibleObject *))
             : _func(func) {};
 
         int32_t operator()(_ExtensibleObject * A,
-                           PrdfPluginDef::ParameterList * B)
+                           PluginDef::ParameterList * B)
         {
             int32_t i = _func(A);
             delete B;
@@ -183,95 +185,95 @@ class PrdfPlugin_0arg : public PrdfExtensibleFunction<_ExtensibleObject>
 };
 
 template <typename _ExtensibleObject>
-inline PrdfPlugin_0arg<_ExtensibleObject>
+inline Plugin_0arg<_ExtensibleObject>
     bind_plugin(int32_t (*func)(_ExtensibleObject *))
-        { return PrdfPlugin_0arg<_ExtensibleObject>(func); };
+        { return Plugin_0arg<_ExtensibleObject>(func); };
 
 template <typename _ExtensibleObject>
-inline PrdfPlugin_0arg<_ExtensibleObject> *
+inline Plugin_0arg<_ExtensibleObject> *
     bind_plugin_ptr(int32_t (*func)(_ExtensibleObject *), void * ptr)
-        { return new (ptr) PrdfPlugin_0arg<_ExtensibleObject>(func); };
+        { return new (ptr) Plugin_0arg<_ExtensibleObject>(func); };
 
 template <typename _A, typename _ExtensibleObject>
-class PrdfPlugin_1arg : public PrdfExtensibleFunction<_ExtensibleObject>
+class Plugin_1arg : public ExtensibleFunction<_ExtensibleObject>
 {
     protected:
         int32_t (*_func)(_ExtensibleObject *, _A);
     public:
-        explicit PrdfPlugin_1arg(int32_t (*func)(_ExtensibleObject *, _A))
+        explicit Plugin_1arg(int32_t (*func)(_ExtensibleObject *, _A))
             : _func(func) {};
 
         int32_t operator()(_ExtensibleObject * A,
-                           PrdfPluginDef::ParameterList * B)
+                           PluginDef::ParameterList * B)
         {
             int32_t i = _func(A,
-                (_A)static_cast<PrdfPluginDef::SingleParameter<_A> &>(*B));
+                (_A)static_cast<PluginDef::SingleParameter<_A> &>(*B));
             delete B;
             return i;
         };
 };
 
 template <typename _A, typename _ExtensibleObject>
-inline PrdfPlugin_1arg<_A, _ExtensibleObject>
+inline Plugin_1arg<_A, _ExtensibleObject>
     bind_plugin(int32_t (*func)(_ExtensibleObject *, _A))
-        { return PrdfPlugin_1arg<_A, _ExtensibleObject>(func); };
+        { return Plugin_1arg<_A, _ExtensibleObject>(func); };
 
 template <typename _A, typename _ExtensibleObject>
-inline PrdfPlugin_1arg<_A, _ExtensibleObject> *
+inline Plugin_1arg<_A, _ExtensibleObject> *
     bind_plugin_ptr(int32_t (*func)(_ExtensibleObject *, _A), void * ptr)
-        { return new (ptr) PrdfPlugin_1arg<_A, _ExtensibleObject>(func); };
+        { return new (ptr) Plugin_1arg<_A, _ExtensibleObject>(func); };
 
 
 template <typename _A, typename _B, typename _ExtensibleObject>
-class PrdfPlugin_2arg : public PrdfExtensibleFunction<_ExtensibleObject>
+class Plugin_2arg : public ExtensibleFunction<_ExtensibleObject>
 {
     protected:
         int32_t (*_func)(_ExtensibleObject *, _A, _B);
     public:
-        explicit PrdfPlugin_2arg(int32_t (*func)(_ExtensibleObject *, _A, _B))
+        explicit Plugin_2arg(int32_t (*func)(_ExtensibleObject *, _A, _B))
             : _func(func) {};
 
         int32_t operator()(_ExtensibleObject * A,
-                           PrdfPluginDef::ParameterList * B)
+                           PluginDef::ParameterList * B)
         {
             int32_t i = _func(A,
-                static_cast<PrdfPluginDef::TwoParameter<_A,_B> *>(B)->getA(),
-                static_cast<PrdfPluginDef::TwoParameter<_A,_B> *>(B)->getB());
+                static_cast<PluginDef::TwoParameter<_A,_B> *>(B)->getA(),
+                static_cast<PluginDef::TwoParameter<_A,_B> *>(B)->getB());
             delete B;
             return i;
         };
 };
 
 template <typename _A, typename _B, typename _ExtensibleObject>
-inline PrdfPlugin_2arg<_A, _B, _ExtensibleObject>
+inline Plugin_2arg<_A, _B, _ExtensibleObject>
     bind_plugin(int32_t (*func)(_ExtensibleObject *, _A, _B))
-        { return PrdfPlugin_2arg<_A, _B, _ExtensibleObject>(func); };
+        { return Plugin_2arg<_A, _B, _ExtensibleObject>(func); };
 
 template <typename _A, typename _B, typename _ExtensibleObject>
-inline PrdfPlugin_2arg<_A, _B, _ExtensibleObject> *
+inline Plugin_2arg<_A, _B, _ExtensibleObject> *
     bind_plugin_ptr(int32_t (*func)(_ExtensibleObject *, _A, _B), void * ptr)
-        { return new (ptr) PrdfPlugin_2arg<_A, _B, _ExtensibleObject>(func); };
+        { return new (ptr) Plugin_2arg<_A, _B, _ExtensibleObject>(func); };
 
 
 template <typename _A, typename _B, typename _C, typename _ExtensibleObject>
-class PrdfPlugin_3arg : public PrdfExtensibleFunction<_ExtensibleObject>
+class Plugin_3arg : public ExtensibleFunction<_ExtensibleObject>
 {
     protected:
         int32_t (*_func)(_ExtensibleObject *, _A, _B, _C);
     public:
-        explicit PrdfPlugin_3arg(int32_t (*func)
+        explicit Plugin_3arg(int32_t (*func)
                     (_ExtensibleObject *, _A, _B, _C))
             : _func(func) {};
 
         int32_t operator()(_ExtensibleObject * A,
-                           PrdfPluginDef::ParameterList * B)
+                           PluginDef::ParameterList * B)
         {
             int32_t i = _func(A,
-                static_cast<PrdfPluginDef::ThreeParameter<_A,_B,_C> *>
+                static_cast<PluginDef::ThreeParameter<_A,_B,_C> *>
                         (B)->getA(),
-                static_cast<PrdfPluginDef::ThreeParameter<_A,_B,_C> *>
+                static_cast<PluginDef::ThreeParameter<_A,_B,_C> *>
                         (B)->getB(),
-                static_cast<PrdfPluginDef::ThreeParameter<_A,_B,_C> *>
+                static_cast<PluginDef::ThreeParameter<_A,_B,_C> *>
                         (B)->getC()
                     );
             delete B;
@@ -280,39 +282,39 @@ class PrdfPlugin_3arg : public PrdfExtensibleFunction<_ExtensibleObject>
 };
 
 template <typename _A, typename _B, typename _C, typename _ExtensibleObject>
-inline PrdfPlugin_3arg<_A, _B, _C, _ExtensibleObject>
+inline Plugin_3arg<_A, _B, _C, _ExtensibleObject>
     bind_plugin(int32_t (*func)(_ExtensibleObject *, _A, _B, _C))
-        { return PrdfPlugin_3arg<_A, _B, _C, _ExtensibleObject>(func); };
+        { return Plugin_3arg<_A, _B, _C, _ExtensibleObject>(func); };
 
 template <typename _A, typename _B, typename _C, typename _ExtensibleObject>
-inline PrdfPlugin_3arg<_A, _B, _C, _ExtensibleObject> *
+inline Plugin_3arg<_A, _B, _C, _ExtensibleObject> *
     bind_plugin_ptr(int32_t (*func)(_ExtensibleObject *, _A, _B, _C),
                     void * ptr)
         { return new (ptr)
-                PrdfPlugin_3arg<_A, _B, _C, _ExtensibleObject>(func); };
+                Plugin_3arg<_A, _B, _C, _ExtensibleObject>(func); };
 
 template <typename _A, typename _B, typename _C, typename _D,
           typename _ExtensibleObject>
-class PrdfPlugin_4arg : public PrdfExtensibleFunction<_ExtensibleObject>
+class Plugin_4arg : public ExtensibleFunction<_ExtensibleObject>
 {
     protected:
         int32_t (*_func)(_ExtensibleObject *, _A, _B, _C, _D);
     public:
-        explicit PrdfPlugin_4arg(int32_t (*func)
+        explicit Plugin_4arg(int32_t (*func)
                     (_ExtensibleObject *, _A, _B, _C, _D))
             : _func(func) {};
 
         int32_t operator()(_ExtensibleObject * A,
-                           PrdfPluginDef::ParameterList * B)
+                           PluginDef::ParameterList * B)
         {
             int32_t i = _func(A,
-                static_cast<PrdfPluginDef::FourParameter<_A,_B,_C,_D> *>
+                static_cast<PluginDef::FourParameter<_A,_B,_C,_D> *>
                         (B)->getA(),
-                static_cast<PrdfPluginDef::FourParameter<_A,_B,_C,_D> *>
+                static_cast<PluginDef::FourParameter<_A,_B,_C,_D> *>
                         (B)->getB(),
-                static_cast<PrdfPluginDef::FourParameter<_A,_B,_C,_D> *>
+                static_cast<PluginDef::FourParameter<_A,_B,_C,_D> *>
                         (B)->getC(),
-                static_cast<PrdfPluginDef::FourParameter<_A,_B,_C,_D> *>
+                static_cast<PluginDef::FourParameter<_A,_B,_C,_D> *>
                         (B)->getD()
                     );
             delete B;
@@ -322,47 +324,40 @@ class PrdfPlugin_4arg : public PrdfExtensibleFunction<_ExtensibleObject>
 
 template <typename _A, typename _B, typename _C, typename _D,
           typename _ExtensibleObject>
-inline PrdfPlugin_4arg<_A, _B, _C, _D, _ExtensibleObject>
+inline Plugin_4arg<_A, _B, _C, _D, _ExtensibleObject>
     bind_plugin(int32_t (*func)(_ExtensibleObject *, _A, _B, _C, _D))
-        { return PrdfPlugin_4arg<_A, _B, _C, _D, _ExtensibleObject>(func); };
+        { return Plugin_4arg<_A, _B, _C, _D, _ExtensibleObject>(func); };
 
 template <typename _A, typename _B, typename _C, typename _D,
           typename _ExtensibleObject>
-inline PrdfPlugin_4arg<_A, _B, _C, _D, _ExtensibleObject> *
+inline Plugin_4arg<_A, _B, _C, _D, _ExtensibleObject> *
     bind_plugin_ptr(int32_t (*func)(_ExtensibleObject *, _A, _B, _C, _D),
                     void * ptr)
         { return new (ptr)
-                PrdfPlugin_4arg<_A, _B, _C, _D, _ExtensibleObject>(func); };
+                Plugin_4arg<_A, _B, _C, _D, _ExtensibleObject>(func); };
 
+} // end namespace PRDF
 
 #define __PRDF_PLUGIN_XYZ(X,Y,Z) X##Y##Z
 #define __PRDF_PLUGIN_MAKENAME(X,Y,Z) __PRDF_PLUGIN_XYZ(X,Y,Z)
 
 #define PRDF_PLUGIN_DEFINE(CHIP,PLUGIN_NAME) \
-    class __PRDF_PLUGIN_MAKENAME(PrdfPlugin_Registration_,CHIP,PLUGIN_NAME) \
+    class __PRDF_PLUGIN_MAKENAME(Plugin_Registration_,CHIP,PLUGIN_NAME) \
     { \
       private: \
-        PrdfExtensibleFunctionType * cv_plugin; \
-        PrdfPluginRegisterClass cv_registerClass; \
-        char cv_plugin_space[sizeof(PrdfPlugin<PrdfExtensibleChip>)]; \
+        ExtensibleFunctionType * cv_plugin; \
+        PluginRegisterClass cv_registerClass; \
+        char cv_plugin_space[sizeof(Plugin<ExtensibleChip>)]; \
       public: \
-        __PRDF_PLUGIN_MAKENAME(PrdfPlugin_Registration_,CHIP,PLUGIN_NAME)() : \
-            cv_plugin( bind_plugin_ptr(&PRDF::CHIP::PLUGIN_NAME, \
+        __PRDF_PLUGIN_MAKENAME(Plugin_Registration_,CHIP,PLUGIN_NAME)() : \
+            cv_plugin( bind_plugin_ptr(&CHIP::PLUGIN_NAME, \
                                        &cv_plugin_space) ), \
             cv_registerClass(#CHIP,#PLUGIN_NAME,cv_plugin) \
         {} \
     }; \
-    __PRDF_PLUGIN_MAKENAME(PrdfPlugin_Registration_,CHIP,PLUGIN_NAME) \
+    __PRDF_PLUGIN_MAKENAME(Plugin_Registration_,CHIP,PLUGIN_NAME) \
         __PRDF_PLUGIN_MAKENAME(g_PluginRegistration_,CHIP,PLUGIN_NAME)
 #endif
 
 #include <prdfPluginMap.H>
 
-// Change Log *********************************************************
-//
-//  Flag Reason   Vers Date     Coder    Description
-//  ---- -------- ---- -------- -------- -------------------------------
-//       F494911  f310 03/04/05 iawillia Initial File Creation
-//         F522638  f300 09/27/05 iawillia Add 4 parm, fix possible obj strip.
-//  zs01 D620028  f330 07/25/07 zshelle  Support for mcp5 compiler
-// End Change Log *****************************************************

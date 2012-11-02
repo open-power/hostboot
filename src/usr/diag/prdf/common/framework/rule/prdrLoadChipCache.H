@@ -72,11 +72,12 @@ namespace Prdr
              *
              * @retuns errlHndl_t - In the event of a registry or file failure.
              */
-            static errlHndl_t loadChip(const char * i_file, PrdrChip ** o_chip);
+            static errlHndl_t loadChip(const char * i_file, Chip ** o_chip);
 
         private:
             /** The file cache. */
-            typedef std::map<const char *, PrdrChip *, PrdfStrCompare> Cache_t;
+            typedef std::map<const char *, Chip *, PRDF::StrCompare> Cache_t;
             static Cache_t cv_cache;
     };
-};
+
+} // end namespace Prdr

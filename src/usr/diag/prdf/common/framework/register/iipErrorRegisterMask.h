@@ -71,6 +71,10 @@
 #ifndef IIPBITS_H
 #include <iipbits.h>
 #endif
+
+namespace PRDF
+{
+
 //--------------------------------------------------------------------
 //  Forward References
 //--------------------------------------------------------------------
@@ -187,7 +191,8 @@ protected:
    <br><b>Notes:       </b>
    </ul><br>
    */
-  virtual int32_t Reset(const BIT_LIST_CLASS & bit_list,STEP_CODE_DATA_STRUCT & error);
+  virtual int32_t Reset( const BIT_LIST_CLASS & bit_list,
+                         STEP_CODE_DATA_STRUCT & error );
 
 private:  // functions
   /** Copy forbidden  - no definition (code) exists*/
@@ -213,20 +218,7 @@ inline void ErrorRegisterMask::SetMaskBit(uint32_t bitPosition)
 inline void ErrorRegisterMask::SetMaskBits(const BIT_STRING_CLASS & bitString)
 { bitStringMask.SetBits(bitString); }
 
+} // end namespace PRDF
+
 #endif /* iipErrorRegisterMask_h */
 
-// Change Log *********************************************************
-//
-//  Flag  Reason   Vers   Date     Coder Description
-//  ---- -------- ----   -------- ----- -------------------------------
-//                       05/03/96 DRG   Initial Creation
-//       d49127.1 v4r1m0 05/31/96 DRG   Added Analyze() Reset() & maskIt
-//       p4902214 v4r1m0 05/09/97 DRG   Added service data parm to Reset
-//                                      Removed maskIt
-//       D49274.2 v4r5   09/24/98 DRG   Added scrId
-//  dg00          v5r2   04/05/00 DRG   Added maskScr
-//       P4907878 v5r2   04/27/01 drg   factor out filter into ErrorRegisterFilter
-//                                      class
-//       423599   fsp    10/28/03 dgilbert make scrId a uint16_t
-//
-// End Change Log *****************************************************

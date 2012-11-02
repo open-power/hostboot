@@ -41,6 +41,9 @@
 #include <prdfPlatServices.H>
 #include <algorithm>
 
+namespace PRDF
+{
+
 //----------------------------------------------------------------------
 //  User Types
 //----------------------------------------------------------------------
@@ -163,3 +166,6 @@ void DomainContainer<T>::Remove(TARGETING::TargetHandle_t i_pChipHandle)
     // This will iterate thru the vectors and remove any vectors with chip ID that matches the i_chip.
     chips.erase(std::remove_if(chips.begin(), chips.end(), prdfCompareChipIds(i_pChipHandle)), chips.end());
 }
+
+} // end namespace PRDF
+

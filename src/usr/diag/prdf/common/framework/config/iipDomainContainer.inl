@@ -24,6 +24,8 @@
 #ifndef iipDomainContainer_inl
 #define iipDomainContainer_inl
 
+namespace PRDF
+{
 
 template<class T>
 inline
@@ -52,6 +54,8 @@ uint32_t DomainContainer<T>::GetSize(void) const
 {
   return(chips.size());
 }
+
+} // end namespace PRDF
 
 #endif
 
