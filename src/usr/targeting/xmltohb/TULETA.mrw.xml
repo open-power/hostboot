@@ -160,7 +160,7 @@
 <targetInstance>
     <id>sys0node0proc0</id>
     <type>chip-processor-murano</type>
-    <attribute><id>HUID</id><default>0x00070000</default></attribute>
+    <attribute><id>HUID</id><default>0x00050000</default></attribute>
     <attribute><id>POSITION</id><default>0</default></attribute>
     <attribute><id>SCOM_SWITCHES</id>
         <default>
@@ -227,7 +227,7 @@
 <targetInstance>
     <id>sys0node0proc0ex4</id>
     <type>unit-ex-murano</type>
-    <attribute><id>HUID</id><default>0x000A0004</default></attribute>
+    <attribute><id>HUID</id><default>0x00060004</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/ex-4</default>
@@ -245,7 +245,7 @@
 <targetInstance>
     <id>sys0node0proc0ex5</id>
     <type>unit-ex-murano</type>
-    <attribute><id>HUID</id><default>0x000A0005</default></attribute>
+    <attribute><id>HUID</id><default>0x00060005</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/ex-5</default>
@@ -263,7 +263,7 @@
 <targetInstance>
     <id>sys0node0proc0ex6</id>
     <type>unit-ex-murano</type>
-    <attribute><id>HUID</id><default>0x000A0006</default></attribute>
+    <attribute><id>HUID</id><default>0x00060006</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/ex-6</default>
@@ -281,7 +281,7 @@
 <targetInstance>
     <id>sys0node0proc0ex12</id>
     <type>unit-ex-murano</type>
-    <attribute><id>HUID</id><default>0x000A000C</default></attribute>
+    <attribute><id>HUID</id><default>0x0006000C</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/ex-12</default>
@@ -299,7 +299,7 @@
 <targetInstance>
     <id>sys0node0proc0ex13</id>
     <type>unit-ex-murano</type>
-    <attribute><id>HUID</id><default>0x000A000D</default></attribute>
+    <attribute><id>HUID</id><default>0x0006000D</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/ex-13</default>
@@ -317,7 +317,7 @@
 <targetInstance>
     <id>sys0node0proc0ex14</id>
     <type>unit-ex-murano</type>
-    <attribute><id>HUID</id><default>0x000A000E</default></attribute>
+    <attribute><id>HUID</id><default>0x0006000E</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/ex-14</default>
@@ -337,7 +337,7 @@
 <targetInstance>
     <id>sys0node0proc0ex4core0</id>
     <type>unit-core-murano</type>
-    <attribute><id>HUID</id><default>0x000B0004</default></attribute>
+    <attribute><id>HUID</id><default>0x00070004</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/ex-4/core-0</default>
@@ -355,7 +355,7 @@
 <targetInstance>
     <id>sys0node0proc0ex5core0</id>
     <type>unit-core-murano</type>
-    <attribute><id>HUID</id><default>0x000B0005</default></attribute>
+    <attribute><id>HUID</id><default>0x00070005</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/ex-5/core-0</default>
@@ -373,7 +373,7 @@
 <targetInstance>
     <id>sys0node0proc0ex6core0</id>
     <type>unit-core-murano</type>
-    <attribute><id>HUID</id><default>0x000B0006</default></attribute>
+    <attribute><id>HUID</id><default>0x00070006</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/ex-6/core-0</default>
@@ -391,7 +391,7 @@
 <targetInstance>
     <id>sys0node0proc0ex12core0</id>
     <type>unit-core-murano</type>
-    <attribute><id>HUID</id><default>0x000B000C</default></attribute>
+    <attribute><id>HUID</id><default>0x0007000C</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/ex-12/core-0</default>
@@ -409,7 +409,7 @@
 <targetInstance>
     <id>sys0node0proc0ex13core0</id>
     <type>unit-core-murano</type>
-    <attribute><id>HUID</id><default>0x000B000D</default></attribute>
+    <attribute><id>HUID</id><default>0x0007000D</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/ex-13/core-0</default>
@@ -427,7 +427,7 @@
 <targetInstance>
     <id>sys0node0proc0ex14core0</id>
     <type>unit-core-murano</type>
-    <attribute><id>HUID</id><default>0x000B000E</default></attribute>
+    <attribute><id>HUID</id><default>0x0007000E</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/ex-14/core-0</default>
@@ -447,7 +447,7 @@
 <targetInstance>
     <id>sys0node0proc0mcs4</id>
     <type>unit-mcs-murano</type>
-    <attribute><id>HUID</id><default>0x000F0004</default></attribute>
+    <attribute><id>HUID</id><default>0x000B0004</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/mcs-4</default>
@@ -476,7 +476,7 @@
 <targetInstance>
     <id>sys0node0proc0mcs5</id>
     <type>unit-mcs-murano</type>
-    <attribute><id>HUID</id><default>0x000F0005</default></attribute>
+    <attribute><id>HUID</id><default>0x000B0005</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/mcs-5</default>
@@ -505,7 +505,7 @@
 <targetInstance>
     <id>sys0node0proc0mcs6</id>
     <type>unit-mcs-murano</type>
-    <attribute><id>HUID</id><default>0x000F0006</default></attribute>
+    <attribute><id>HUID</id><default>0x000B0006</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/mcs-6</default>
@@ -534,7 +534,7 @@
 <targetInstance>
     <id>sys0node0proc0mcs7</id>
     <type>unit-mcs-murano</type>
-    <attribute><id>HUID</id><default>0x000F0007</default></attribute>
+    <attribute><id>HUID</id><default>0x000B0007</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/mcs-7</default>
@@ -565,7 +565,7 @@
 <targetInstance>
     <id>sys0node0proc0pci0</id>
     <type>unit-pci-murano</type>
-    <attribute><id>HUID</id><default>0x00170000</default></attribute>
+    <attribute><id>HUID</id><default>0x00100000</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/pci-0</default>
@@ -583,7 +583,7 @@
 <targetInstance>
     <id>sys0node0proc0pci1</id>
     <type>unit-pci-murano</type>
-    <attribute><id>HUID</id><default>0x00170001</default></attribute>
+    <attribute><id>HUID</id><default>0x00100001</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/pci-1</default>
@@ -601,7 +601,7 @@
 <targetInstance>
     <id>sys0node0proc0pci2</id>
     <type>unit-pci-murano</type>
-    <attribute><id>HUID</id><default>0x00170002</default></attribute>
+    <attribute><id>HUID</id><default>0x00100002</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/pci-2</default>
@@ -621,7 +621,7 @@
 <targetInstance>
     <id>sys0node0proc0abus0</id>
     <type>unit-abus-murano</type>
-    <attribute><id>HUID</id><default>0x00160000</default></attribute>
+    <attribute><id>HUID</id><default>0x000F0000</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/abus-0</default>
@@ -639,7 +639,7 @@
 <targetInstance>
     <id>sys0node0proc0abus1</id>
     <type>unit-abus-murano</type>
-    <attribute><id>HUID</id><default>0x00160001</default></attribute>
+    <attribute><id>HUID</id><default>0x000F0001</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/abus-1</default>
@@ -661,7 +661,7 @@
 <targetInstance>
     <id>sys0node0proc0abus2</id>
     <type>unit-abus-murano</type>
-    <attribute><id>HUID</id><default>0x00160002</default></attribute>
+    <attribute><id>HUID</id><default>0x000F0002</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/abus-2</default>
@@ -685,7 +685,7 @@
 <targetInstance>
     <id>sys0node0proc0xbus1</id>
     <type>unit-xbus-murano</type>
-    <attribute><id>HUID</id><default>0x00150001</default></attribute>
+    <attribute><id>HUID</id><default>0x000E0001</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/xbus-1</default>
@@ -709,7 +709,7 @@
 <targetInstance>
     <id>sys0node0proc1</id>
     <type>chip-processor-murano</type>
-    <attribute><id>HUID</id><default>0x00070001</default></attribute>
+    <attribute><id>HUID</id><default>0x00050001</default></attribute>
     <attribute><id>POSITION</id><default>1</default></attribute>
     <attribute><id>SCOM_SWITCHES</id>
         <default>
@@ -797,7 +797,7 @@
 <targetInstance>
     <id>sys0node0proc1ex4</id>
     <type>unit-ex-murano</type>
-    <attribute><id>HUID</id><default>0x000A0014</default></attribute>
+    <attribute><id>HUID</id><default>0x00060014</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-1/ex-4</default>
@@ -815,7 +815,7 @@
 <targetInstance>
     <id>sys0node0proc1ex5</id>
     <type>unit-ex-murano</type>
-    <attribute><id>HUID</id><default>0x000A0015</default></attribute>
+    <attribute><id>HUID</id><default>0x00060015</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-1/ex-5</default>
@@ -833,7 +833,7 @@
 <targetInstance>
     <id>sys0node0proc1ex6</id>
     <type>unit-ex-murano</type>
-    <attribute><id>HUID</id><default>0x000A0016</default></attribute>
+    <attribute><id>HUID</id><default>0x00060016</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-1/ex-6</default>
@@ -851,7 +851,7 @@
 <targetInstance>
     <id>sys0node0proc1ex12</id>
     <type>unit-ex-murano</type>
-    <attribute><id>HUID</id><default>0x000A001C</default></attribute>
+    <attribute><id>HUID</id><default>0x0006001C</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-1/ex-12</default>
@@ -869,7 +869,7 @@
 <targetInstance>
     <id>sys0node0proc1ex13</id>
     <type>unit-ex-murano</type>
-    <attribute><id>HUID</id><default>0x000A001D</default></attribute>
+    <attribute><id>HUID</id><default>0x0006001D</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-1/ex-13</default>
@@ -887,7 +887,7 @@
 <targetInstance>
     <id>sys0node0proc1ex14</id>
     <type>unit-ex-murano</type>
-    <attribute><id>HUID</id><default>0x000A001E</default></attribute>
+    <attribute><id>HUID</id><default>0x0006001E</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-1/ex-14</default>
@@ -907,7 +907,7 @@
 <targetInstance>
     <id>sys0node0proc1ex4core0</id>
     <type>unit-core-murano</type>
-    <attribute><id>HUID</id><default>0x000B0014</default></attribute>
+    <attribute><id>HUID</id><default>0x00070014</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-1/ex-4/core-0</default>
@@ -925,7 +925,7 @@
 <targetInstance>
     <id>sys0node0proc1ex5core0</id>
     <type>unit-core-murano</type>
-    <attribute><id>HUID</id><default>0x000B0015</default></attribute>
+    <attribute><id>HUID</id><default>0x00070015</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-1/ex-5/core-0</default>
@@ -943,7 +943,7 @@
 <targetInstance>
     <id>sys0node0proc1ex6core0</id>
     <type>unit-core-murano</type>
-    <attribute><id>HUID</id><default>0x000B0016</default></attribute>
+    <attribute><id>HUID</id><default>0x00070016</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-1/ex-6/core-0</default>
@@ -961,7 +961,7 @@
 <targetInstance>
     <id>sys0node0proc1ex12core0</id>
     <type>unit-core-murano</type>
-    <attribute><id>HUID</id><default>0x000B001C</default></attribute>
+    <attribute><id>HUID</id><default>0x0007001C</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-1/ex-12/core-0</default>
@@ -979,7 +979,7 @@
 <targetInstance>
     <id>sys0node0proc1ex13core0</id>
     <type>unit-core-murano</type>
-    <attribute><id>HUID</id><default>0x000B001D</default></attribute>
+    <attribute><id>HUID</id><default>0x0007001D</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-1/ex-13/core-0</default>
@@ -997,7 +997,7 @@
 <targetInstance>
     <id>sys0node0proc1ex14core0</id>
     <type>unit-core-murano</type>
-    <attribute><id>HUID</id><default>0x000B001E</default></attribute>
+    <attribute><id>HUID</id><default>0x0007001E</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-1/ex-14/core-0</default>
@@ -1017,7 +1017,7 @@
 <targetInstance>
     <id>sys0node0proc1mcs4</id>
     <type>unit-mcs-murano</type>
-    <attribute><id>HUID</id><default>0x000F000C</default></attribute>
+    <attribute><id>HUID</id><default>0x000B000C</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-1/mcs-4</default>
@@ -1046,7 +1046,7 @@
 <targetInstance>
     <id>sys0node0proc1mcs5</id>
     <type>unit-mcs-murano</type>
-    <attribute><id>HUID</id><default>0x000F000D</default></attribute>
+    <attribute><id>HUID</id><default>0x000B000D</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-1/mcs-5</default>
@@ -1075,7 +1075,7 @@
 <targetInstance>
     <id>sys0node0proc1mcs6</id>
     <type>unit-mcs-murano</type>
-    <attribute><id>HUID</id><default>0x000F000E</default></attribute>
+    <attribute><id>HUID</id><default>0x000B000E</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-1/mcs-6</default>
@@ -1104,7 +1104,7 @@
 <targetInstance>
     <id>sys0node0proc1mcs7</id>
     <type>unit-mcs-murano</type>
-    <attribute><id>HUID</id><default>0x000F000F</default></attribute>
+    <attribute><id>HUID</id><default>0x000B000F</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-1/mcs-7</default>
@@ -1135,7 +1135,7 @@
 <targetInstance>
     <id>sys0node0proc1pci0</id>
     <type>unit-pci-murano</type>
-    <attribute><id>HUID</id><default>0x00170003</default></attribute>
+    <attribute><id>HUID</id><default>0x00100003</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-1/pci-0</default>
@@ -1153,7 +1153,7 @@
 <targetInstance>
     <id>sys0node0proc1pci1</id>
     <type>unit-pci-murano</type>
-    <attribute><id>HUID</id><default>0x00170004</default></attribute>
+    <attribute><id>HUID</id><default>0x00100004</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-1/pci-1</default>
@@ -1171,7 +1171,7 @@
 <targetInstance>
     <id>sys0node0proc1pci2</id>
     <type>unit-pci-murano</type>
-    <attribute><id>HUID</id><default>0x00170005</default></attribute>
+    <attribute><id>HUID</id><default>0x00100005</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-1/pci-2</default>
@@ -1191,7 +1191,7 @@
 <targetInstance>
     <id>sys0node0proc1abus0</id>
     <type>unit-abus-murano</type>
-    <attribute><id>HUID</id><default>0x00160003</default></attribute>
+    <attribute><id>HUID</id><default>0x000F0003</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-1/abus-0</default>
@@ -1209,7 +1209,7 @@
 <targetInstance>
     <id>sys0node0proc1abus1</id>
     <type>unit-abus-murano</type>
-    <attribute><id>HUID</id><default>0x00160004</default></attribute>
+    <attribute><id>HUID</id><default>0x000F0004</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-1/abus-1</default>
@@ -1231,7 +1231,7 @@
 <targetInstance>
     <id>sys0node0proc1abus2</id>
     <type>unit-abus-murano</type>
-    <attribute><id>HUID</id><default>0x00160005</default></attribute>
+    <attribute><id>HUID</id><default>0x000F0005</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-1/abus-2</default>
@@ -1255,7 +1255,7 @@
 <targetInstance>
     <id>sys0node0proc1xbus1</id>
     <type>unit-xbus-murano</type>
-    <attribute><id>HUID</id><default>0x00150005</default></attribute>
+    <attribute><id>HUID</id><default>0x000E0005</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-1/xbus-1</default>
@@ -1279,7 +1279,7 @@
 <targetInstance>
     <id>sys0node0proc2</id>
     <type>chip-processor-murano</type>
-    <attribute><id>HUID</id><default>0x00070002</default></attribute>
+    <attribute><id>HUID</id><default>0x00050002</default></attribute>
     <attribute><id>POSITION</id><default>2</default></attribute>
     <attribute><id>SCOM_SWITCHES</id>
         <default>
@@ -1367,7 +1367,7 @@
 <targetInstance>
     <id>sys0node0proc2ex4</id>
     <type>unit-ex-murano</type>
-    <attribute><id>HUID</id><default>0x000A0024</default></attribute>
+    <attribute><id>HUID</id><default>0x00060024</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-2/ex-4</default>
@@ -1385,7 +1385,7 @@
 <targetInstance>
     <id>sys0node0proc2ex5</id>
     <type>unit-ex-murano</type>
-    <attribute><id>HUID</id><default>0x000A0025</default></attribute>
+    <attribute><id>HUID</id><default>0x00060025</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-2/ex-5</default>
@@ -1403,7 +1403,7 @@
 <targetInstance>
     <id>sys0node0proc2ex6</id>
     <type>unit-ex-murano</type>
-    <attribute><id>HUID</id><default>0x000A0026</default></attribute>
+    <attribute><id>HUID</id><default>0x00060026</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-2/ex-6</default>
@@ -1421,7 +1421,7 @@
 <targetInstance>
     <id>sys0node0proc2ex12</id>
     <type>unit-ex-murano</type>
-    <attribute><id>HUID</id><default>0x000A002C</default></attribute>
+    <attribute><id>HUID</id><default>0x0006002C</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-2/ex-12</default>
@@ -1439,7 +1439,7 @@
 <targetInstance>
     <id>sys0node0proc2ex13</id>
     <type>unit-ex-murano</type>
-    <attribute><id>HUID</id><default>0x000A002D</default></attribute>
+    <attribute><id>HUID</id><default>0x0006002D</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-2/ex-13</default>
@@ -1457,7 +1457,7 @@
 <targetInstance>
     <id>sys0node0proc2ex14</id>
     <type>unit-ex-murano</type>
-    <attribute><id>HUID</id><default>0x000A002E</default></attribute>
+    <attribute><id>HUID</id><default>0x0006002E</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-2/ex-14</default>
@@ -1477,7 +1477,7 @@
 <targetInstance>
     <id>sys0node0proc2ex4core0</id>
     <type>unit-core-murano</type>
-    <attribute><id>HUID</id><default>0x000B0024</default></attribute>
+    <attribute><id>HUID</id><default>0x00070024</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-2/ex-4/core-0</default>
@@ -1495,7 +1495,7 @@
 <targetInstance>
     <id>sys0node0proc2ex5core0</id>
     <type>unit-core-murano</type>
-    <attribute><id>HUID</id><default>0x000B0025</default></attribute>
+    <attribute><id>HUID</id><default>0x00070025</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-2/ex-5/core-0</default>
@@ -1513,7 +1513,7 @@
 <targetInstance>
     <id>sys0node0proc2ex6core0</id>
     <type>unit-core-murano</type>
-    <attribute><id>HUID</id><default>0x000B0026</default></attribute>
+    <attribute><id>HUID</id><default>0x00070026</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-2/ex-6/core-0</default>
@@ -1531,7 +1531,7 @@
 <targetInstance>
     <id>sys0node0proc2ex12core0</id>
     <type>unit-core-murano</type>
-    <attribute><id>HUID</id><default>0x000B002C</default></attribute>
+    <attribute><id>HUID</id><default>0x0007002C</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-2/ex-12/core-0</default>
@@ -1549,7 +1549,7 @@
 <targetInstance>
     <id>sys0node0proc2ex13core0</id>
     <type>unit-core-murano</type>
-    <attribute><id>HUID</id><default>0x000B002D</default></attribute>
+    <attribute><id>HUID</id><default>0x0007002D</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-2/ex-13/core-0</default>
@@ -1567,7 +1567,7 @@
 <targetInstance>
     <id>sys0node0proc2ex14core0</id>
     <type>unit-core-murano</type>
-    <attribute><id>HUID</id><default>0x000B002E</default></attribute>
+    <attribute><id>HUID</id><default>0x0007002E</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-2/ex-14/core-0</default>
@@ -1587,7 +1587,7 @@
 <targetInstance>
     <id>sys0node0proc2mcs4</id>
     <type>unit-mcs-murano</type>
-    <attribute><id>HUID</id><default>0x000F0014</default></attribute>
+    <attribute><id>HUID</id><default>0x000B0014</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-2/mcs-4</default>
@@ -1616,7 +1616,7 @@
 <targetInstance>
     <id>sys0node0proc2mcs5</id>
     <type>unit-mcs-murano</type>
-    <attribute><id>HUID</id><default>0x000F0015</default></attribute>
+    <attribute><id>HUID</id><default>0x000B0015</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-2/mcs-5</default>
@@ -1645,7 +1645,7 @@
 <targetInstance>
     <id>sys0node0proc2mcs6</id>
     <type>unit-mcs-murano</type>
-    <attribute><id>HUID</id><default>0x000F0016</default></attribute>
+    <attribute><id>HUID</id><default>0x000B0016</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-2/mcs-6</default>
@@ -1674,7 +1674,7 @@
 <targetInstance>
     <id>sys0node0proc2mcs7</id>
     <type>unit-mcs-murano</type>
-    <attribute><id>HUID</id><default>0x000F0017</default></attribute>
+    <attribute><id>HUID</id><default>0x000B0017</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-2/mcs-7</default>
@@ -1705,7 +1705,7 @@
 <targetInstance>
     <id>sys0node0proc2pci0</id>
     <type>unit-pci-murano</type>
-    <attribute><id>HUID</id><default>0x00170006</default></attribute>
+    <attribute><id>HUID</id><default>0x00100006</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-2/pci-0</default>
@@ -1723,7 +1723,7 @@
 <targetInstance>
     <id>sys0node0proc2pci1</id>
     <type>unit-pci-murano</type>
-    <attribute><id>HUID</id><default>0x00170007</default></attribute>
+    <attribute><id>HUID</id><default>0x00100007</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-2/pci-1</default>
@@ -1741,7 +1741,7 @@
 <targetInstance>
     <id>sys0node0proc2pci2</id>
     <type>unit-pci-murano</type>
-    <attribute><id>HUID</id><default>0x00170008</default></attribute>
+    <attribute><id>HUID</id><default>0x00100008</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-2/pci-2</default>
@@ -1761,7 +1761,7 @@
 <targetInstance>
     <id>sys0node0proc2abus0</id>
     <type>unit-abus-murano</type>
-    <attribute><id>HUID</id><default>0x00160006</default></attribute>
+    <attribute><id>HUID</id><default>0x000F0006</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-2/abus-0</default>
@@ -1779,7 +1779,7 @@
 <targetInstance>
     <id>sys0node0proc2abus1</id>
     <type>unit-abus-murano</type>
-    <attribute><id>HUID</id><default>0x00160007</default></attribute>
+    <attribute><id>HUID</id><default>0x000F0007</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-2/abus-1</default>
@@ -1801,7 +1801,7 @@
 <targetInstance>
     <id>sys0node0proc2abus2</id>
     <type>unit-abus-murano</type>
-    <attribute><id>HUID</id><default>0x00160008</default></attribute>
+    <attribute><id>HUID</id><default>0x000F0008</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-2/abus-2</default>
@@ -1825,7 +1825,7 @@
 <targetInstance>
     <id>sys0node0proc2xbus1</id>
     <type>unit-xbus-murano</type>
-    <attribute><id>HUID</id><default>0x00150009</default></attribute>
+    <attribute><id>HUID</id><default>0x000E0009</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-2/xbus-1</default>
@@ -1849,7 +1849,7 @@
 <targetInstance>
     <id>sys0node0proc3</id>
     <type>chip-processor-murano</type>
-    <attribute><id>HUID</id><default>0x00070003</default></attribute>
+    <attribute><id>HUID</id><default>0x00050003</default></attribute>
     <attribute><id>POSITION</id><default>3</default></attribute>
     <attribute><id>SCOM_SWITCHES</id>
         <default>
@@ -1937,7 +1937,7 @@
 <targetInstance>
     <id>sys0node0proc3ex4</id>
     <type>unit-ex-murano</type>
-    <attribute><id>HUID</id><default>0x000A0034</default></attribute>
+    <attribute><id>HUID</id><default>0x00060034</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-3/ex-4</default>
@@ -1955,7 +1955,7 @@
 <targetInstance>
     <id>sys0node0proc3ex5</id>
     <type>unit-ex-murano</type>
-    <attribute><id>HUID</id><default>0x000A0035</default></attribute>
+    <attribute><id>HUID</id><default>0x00060035</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-3/ex-5</default>
@@ -1973,7 +1973,7 @@
 <targetInstance>
     <id>sys0node0proc3ex6</id>
     <type>unit-ex-murano</type>
-    <attribute><id>HUID</id><default>0x000A0036</default></attribute>
+    <attribute><id>HUID</id><default>0x00060036</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-3/ex-6</default>
@@ -1991,7 +1991,7 @@
 <targetInstance>
     <id>sys0node0proc3ex12</id>
     <type>unit-ex-murano</type>
-    <attribute><id>HUID</id><default>0x000A003C</default></attribute>
+    <attribute><id>HUID</id><default>0x0006003C</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-3/ex-12</default>
@@ -2009,7 +2009,7 @@
 <targetInstance>
     <id>sys0node0proc3ex13</id>
     <type>unit-ex-murano</type>
-    <attribute><id>HUID</id><default>0x000A003D</default></attribute>
+    <attribute><id>HUID</id><default>0x0006003D</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-3/ex-13</default>
@@ -2027,7 +2027,7 @@
 <targetInstance>
     <id>sys0node0proc3ex14</id>
     <type>unit-ex-murano</type>
-    <attribute><id>HUID</id><default>0x000A003E</default></attribute>
+    <attribute><id>HUID</id><default>0x0006003E</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-3/ex-14</default>
@@ -2047,7 +2047,7 @@
 <targetInstance>
     <id>sys0node0proc3ex4core0</id>
     <type>unit-core-murano</type>
-    <attribute><id>HUID</id><default>0x000B0034</default></attribute>
+    <attribute><id>HUID</id><default>0x00070034</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-3/ex-4/core-0</default>
@@ -2065,7 +2065,7 @@
 <targetInstance>
     <id>sys0node0proc3ex5core0</id>
     <type>unit-core-murano</type>
-    <attribute><id>HUID</id><default>0x000B0035</default></attribute>
+    <attribute><id>HUID</id><default>0x00070035</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-3/ex-5/core-0</default>
@@ -2083,7 +2083,7 @@
 <targetInstance>
     <id>sys0node0proc3ex6core0</id>
     <type>unit-core-murano</type>
-    <attribute><id>HUID</id><default>0x000B0036</default></attribute>
+    <attribute><id>HUID</id><default>0x00070036</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-3/ex-6/core-0</default>
@@ -2101,7 +2101,7 @@
 <targetInstance>
     <id>sys0node0proc3ex12core0</id>
     <type>unit-core-murano</type>
-    <attribute><id>HUID</id><default>0x000B003C</default></attribute>
+    <attribute><id>HUID</id><default>0x0007003C</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-3/ex-12/core-0</default>
@@ -2119,7 +2119,7 @@
 <targetInstance>
     <id>sys0node0proc3ex13core0</id>
     <type>unit-core-murano</type>
-    <attribute><id>HUID</id><default>0x000B003D</default></attribute>
+    <attribute><id>HUID</id><default>0x0007003D</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-3/ex-13/core-0</default>
@@ -2137,7 +2137,7 @@
 <targetInstance>
     <id>sys0node0proc3ex14core0</id>
     <type>unit-core-murano</type>
-    <attribute><id>HUID</id><default>0x000B003E</default></attribute>
+    <attribute><id>HUID</id><default>0x0007003E</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-3/ex-14/core-0</default>
@@ -2157,7 +2157,7 @@
 <targetInstance>
     <id>sys0node0proc3mcs4</id>
     <type>unit-mcs-murano</type>
-    <attribute><id>HUID</id><default>0x000F001C</default></attribute>
+    <attribute><id>HUID</id><default>0x000B001C</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-3/mcs-4</default>
@@ -2186,7 +2186,7 @@
 <targetInstance>
     <id>sys0node0proc3mcs5</id>
     <type>unit-mcs-murano</type>
-    <attribute><id>HUID</id><default>0x000F001D</default></attribute>
+    <attribute><id>HUID</id><default>0x000B001D</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-3/mcs-5</default>
@@ -2215,7 +2215,7 @@
 <targetInstance>
     <id>sys0node0proc3mcs6</id>
     <type>unit-mcs-murano</type>
-    <attribute><id>HUID</id><default>0x000F001E</default></attribute>
+    <attribute><id>HUID</id><default>0x000B001E</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-3/mcs-6</default>
@@ -2244,7 +2244,7 @@
 <targetInstance>
     <id>sys0node0proc3mcs7</id>
     <type>unit-mcs-murano</type>
-    <attribute><id>HUID</id><default>0x000F001F</default></attribute>
+    <attribute><id>HUID</id><default>0x000B001F</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-3/mcs-7</default>
@@ -2275,7 +2275,7 @@
 <targetInstance>
     <id>sys0node0proc3pci0</id>
     <type>unit-pci-murano</type>
-    <attribute><id>HUID</id><default>0x00170009</default></attribute>
+    <attribute><id>HUID</id><default>0x00100009</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-3/pci-0</default>
@@ -2293,7 +2293,7 @@
 <targetInstance>
     <id>sys0node0proc3pci1</id>
     <type>unit-pci-murano</type>
-    <attribute><id>HUID</id><default>0x0017000A</default></attribute>
+    <attribute><id>HUID</id><default>0x0010000A</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-3/pci-1</default>
@@ -2311,7 +2311,7 @@
 <targetInstance>
     <id>sys0node0proc3pci2</id>
     <type>unit-pci-murano</type>
-    <attribute><id>HUID</id><default>0x0017000B</default></attribute>
+    <attribute><id>HUID</id><default>0x0010000B</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-3/pci-2</default>
@@ -2331,7 +2331,7 @@
 <targetInstance>
     <id>sys0node0proc3abus0</id>
     <type>unit-abus-murano</type>
-    <attribute><id>HUID</id><default>0x00160009</default></attribute>
+    <attribute><id>HUID</id><default>0x000F0009</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-3/abus-0</default>
@@ -2349,7 +2349,7 @@
 <targetInstance>
     <id>sys0node0proc3abus1</id>
     <type>unit-abus-murano</type>
-    <attribute><id>HUID</id><default>0x0016000A</default></attribute>
+    <attribute><id>HUID</id><default>0x000F000A</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-3/abus-1</default>
@@ -2371,7 +2371,7 @@
 <targetInstance>
     <id>sys0node0proc3abus2</id>
     <type>unit-abus-murano</type>
-    <attribute><id>HUID</id><default>0x0016000B</default></attribute>
+    <attribute><id>HUID</id><default>0x000F000B</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-3/abus-2</default>
@@ -2395,7 +2395,7 @@
 <targetInstance>
     <id>sys0node0proc3xbus1</id>
     <type>unit-xbus-murano</type>
-    <attribute><id>HUID</id><default>0x0015000D</default></attribute>
+    <attribute><id>HUID</id><default>0x000E000D</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-3/xbus-1</default>
@@ -2419,7 +2419,7 @@
 <targetInstance>
     <id>sys0node0membuf4</id>
     <type>chip-membuf-centaur</type>
-    <attribute><id>HUID</id><default>0x00060004</default></attribute>
+    <attribute><id>HUID</id><default>0x00040004</default></attribute>
     <attribute><id>POSITION</id><default>4</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -2436,7 +2436,7 @@
         <default>X</default>
     </attribute>
     <attribute>
-            <id>EI_BUS_TX_MSB_LSB_SWAP</id>
+        <id>EI_BUS_TX_MSB_LSB_SWAP</id>
         <default>X</default>
     </attribute>
     -->
@@ -2469,7 +2469,7 @@
 <targetInstance>
     <id>sys0node0membuf4mbs0</id>
     <type>unit-mbs-centaur</type>
-    <attribute><id>HUID</id><default>0x00100004</default></attribute>
+    <attribute><id>HUID</id><default>0x000C0004</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/membuf-4/mbs-0</default>
@@ -2485,7 +2485,7 @@
 <targetInstance>
     <id>sys0node0membuf4mbs0mba0</id>
     <type>unit-mba-centaur</type>
-    <attribute><id>HUID</id><default>0x00110008</default></attribute>
+    <attribute><id>HUID</id><default>0x000D0008</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/membuf-4/mbs-0/mba-0</default>
@@ -2503,7 +2503,7 @@
 <targetInstance>
     <id>sys0node0membuf4mbs0mba1</id>
     <type>unit-mba-centaur</type>
-    <attribute><id>HUID</id><default>0x00110009</default></attribute>
+    <attribute><id>HUID</id><default>0x000D0009</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/membuf-4/mbs-0/mba-1</default>
@@ -2525,7 +2525,7 @@
 <targetInstance>
     <id>sys0node0membuf5</id>
     <type>chip-membuf-centaur</type>
-    <attribute><id>HUID</id><default>0x00060005</default></attribute>
+    <attribute><id>HUID</id><default>0x00040005</default></attribute>
     <attribute><id>POSITION</id><default>5</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -2575,7 +2575,7 @@
 <targetInstance>
     <id>sys0node0membuf5mbs0</id>
     <type>unit-mbs-centaur</type>
-    <attribute><id>HUID</id><default>0x00100005</default></attribute>
+    <attribute><id>HUID</id><default>0x000C0005</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/membuf-5/mbs-0</default>
@@ -2591,7 +2591,7 @@
 <targetInstance>
     <id>sys0node0membuf5mbs0mba0</id>
     <type>unit-mba-centaur</type>
-    <attribute><id>HUID</id><default>0x0011000A</default></attribute>
+    <attribute><id>HUID</id><default>0x000D000A</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/membuf-5/mbs-0/mba-0</default>
@@ -2609,7 +2609,7 @@
 <targetInstance>
     <id>sys0node0membuf5mbs0mba1</id>
     <type>unit-mba-centaur</type>
-    <attribute><id>HUID</id><default>0x0011000B</default></attribute>
+    <attribute><id>HUID</id><default>0x000D000B</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/membuf-5/mbs-0/mba-1</default>
@@ -2631,7 +2631,7 @@
 <targetInstance>
     <id>sys0node0membuf6</id>
     <type>chip-membuf-centaur</type>
-    <attribute><id>HUID</id><default>0x00060006</default></attribute>
+    <attribute><id>HUID</id><default>0x00040006</default></attribute>
     <attribute><id>POSITION</id><default>6</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -2681,7 +2681,7 @@
 <targetInstance>
     <id>sys0node0membuf6mbs0</id>
     <type>unit-mbs-centaur</type>
-    <attribute><id>HUID</id><default>0x00100006</default></attribute>
+    <attribute><id>HUID</id><default>0x000C0006</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/membuf-6/mbs-0</default>
@@ -2697,7 +2697,7 @@
 <targetInstance>
     <id>sys0node0membuf6mbs0mba0</id>
     <type>unit-mba-centaur</type>
-    <attribute><id>HUID</id><default>0x0011000C</default></attribute>
+    <attribute><id>HUID</id><default>0x000D000C</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/membuf-6/mbs-0/mba-0</default>
@@ -2715,7 +2715,7 @@
 <targetInstance>
     <id>sys0node0membuf6mbs0mba1</id>
     <type>unit-mba-centaur</type>
-    <attribute><id>HUID</id><default>0x0011000D</default></attribute>
+    <attribute><id>HUID</id><default>0x000D000D</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/membuf-6/mbs-0/mba-1</default>
@@ -2737,7 +2737,7 @@
 <targetInstance>
     <id>sys0node0membuf7</id>
     <type>chip-membuf-centaur</type>
-    <attribute><id>HUID</id><default>0x00060007</default></attribute>
+    <attribute><id>HUID</id><default>0x00040007</default></attribute>
     <attribute><id>POSITION</id><default>7</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -2787,7 +2787,7 @@
 <targetInstance>
     <id>sys0node0membuf7mbs0</id>
     <type>unit-mbs-centaur</type>
-    <attribute><id>HUID</id><default>0x00100007</default></attribute>
+    <attribute><id>HUID</id><default>0x000C0007</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/membuf-7/mbs-0</default>
@@ -2803,7 +2803,7 @@
 <targetInstance>
     <id>sys0node0membuf7mbs0mba0</id>
     <type>unit-mba-centaur</type>
-    <attribute><id>HUID</id><default>0x0011000E</default></attribute>
+    <attribute><id>HUID</id><default>0x000D000E</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/membuf-7/mbs-0/mba-0</default>
@@ -2821,7 +2821,7 @@
 <targetInstance>
     <id>sys0node0membuf7mbs0mba1</id>
     <type>unit-mba-centaur</type>
-    <attribute><id>HUID</id><default>0x0011000F</default></attribute>
+    <attribute><id>HUID</id><default>0x000D000F</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/membuf-7/mbs-0/mba-1</default>
@@ -2843,7 +2843,7 @@
 <targetInstance>
     <id>sys0node0membuf12</id>
     <type>chip-membuf-centaur</type>
-    <attribute><id>HUID</id><default>0x0006000C</default></attribute>
+    <attribute><id>HUID</id><default>0x0004000C</default></attribute>
     <attribute><id>POSITION</id><default>12</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -2893,7 +2893,7 @@
 <targetInstance>
     <id>sys0node0membuf12mbs0</id>
     <type>unit-mbs-centaur</type>
-    <attribute><id>HUID</id><default>0x0010000C</default></attribute>
+    <attribute><id>HUID</id><default>0x000C000C</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/membuf-12/mbs-0</default>
@@ -2909,7 +2909,7 @@
 <targetInstance>
     <id>sys0node0membuf12mbs0mba0</id>
     <type>unit-mba-centaur</type>
-    <attribute><id>HUID</id><default>0x00110018</default></attribute>
+    <attribute><id>HUID</id><default>0x000D0018</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/membuf-12/mbs-0/mba-0</default>
@@ -2927,7 +2927,7 @@
 <targetInstance>
     <id>sys0node0membuf12mbs0mba1</id>
     <type>unit-mba-centaur</type>
-    <attribute><id>HUID</id><default>0x00110019</default></attribute>
+    <attribute><id>HUID</id><default>0x000D0019</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/membuf-12/mbs-0/mba-1</default>
@@ -2949,7 +2949,7 @@
 <targetInstance>
     <id>sys0node0membuf13</id>
     <type>chip-membuf-centaur</type>
-    <attribute><id>HUID</id><default>0x0006000D</default></attribute>
+    <attribute><id>HUID</id><default>0x0004000D</default></attribute>
     <attribute><id>POSITION</id><default>13</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -2999,7 +2999,7 @@
 <targetInstance>
     <id>sys0node0membuf13mbs0</id>
     <type>unit-mbs-centaur</type>
-    <attribute><id>HUID</id><default>0x0010000D</default></attribute>
+    <attribute><id>HUID</id><default>0x000C000D</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/membuf-13/mbs-0</default>
@@ -3015,7 +3015,7 @@
 <targetInstance>
     <id>sys0node0membuf13mbs0mba0</id>
     <type>unit-mba-centaur</type>
-    <attribute><id>HUID</id><default>0x0011001A</default></attribute>
+    <attribute><id>HUID</id><default>0x000D001A</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/membuf-13/mbs-0/mba-0</default>
@@ -3033,7 +3033,7 @@
 <targetInstance>
     <id>sys0node0membuf13mbs0mba1</id>
     <type>unit-mba-centaur</type>
-    <attribute><id>HUID</id><default>0x0011001B</default></attribute>
+    <attribute><id>HUID</id><default>0x000D001B</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/membuf-13/mbs-0/mba-1</default>
@@ -3055,7 +3055,7 @@
 <targetInstance>
     <id>sys0node0membuf14</id>
     <type>chip-membuf-centaur</type>
-    <attribute><id>HUID</id><default>0x0006000E</default></attribute>
+    <attribute><id>HUID</id><default>0x0004000E</default></attribute>
     <attribute><id>POSITION</id><default>14</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -3105,7 +3105,7 @@
 <targetInstance>
     <id>sys0node0membuf14mbs0</id>
     <type>unit-mbs-centaur</type>
-    <attribute><id>HUID</id><default>0x0010000E</default></attribute>
+    <attribute><id>HUID</id><default>0x000C000E</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/membuf-14/mbs-0</default>
@@ -3121,7 +3121,7 @@
 <targetInstance>
     <id>sys0node0membuf14mbs0mba0</id>
     <type>unit-mba-centaur</type>
-    <attribute><id>HUID</id><default>0x0011001C</default></attribute>
+    <attribute><id>HUID</id><default>0x000D001C</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/membuf-14/mbs-0/mba-0</default>
@@ -3139,7 +3139,7 @@
 <targetInstance>
     <id>sys0node0membuf14mbs0mba1</id>
     <type>unit-mba-centaur</type>
-    <attribute><id>HUID</id><default>0x0011001D</default></attribute>
+    <attribute><id>HUID</id><default>0x000D001D</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/membuf-14/mbs-0/mba-1</default>
@@ -3161,7 +3161,7 @@
 <targetInstance>
     <id>sys0node0membuf15</id>
     <type>chip-membuf-centaur</type>
-    <attribute><id>HUID</id><default>0x0006000F</default></attribute>
+    <attribute><id>HUID</id><default>0x0004000F</default></attribute>
     <attribute><id>POSITION</id><default>15</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -3211,7 +3211,7 @@
 <targetInstance>
     <id>sys0node0membuf15mbs0</id>
     <type>unit-mbs-centaur</type>
-    <attribute><id>HUID</id><default>0x0010000F</default></attribute>
+    <attribute><id>HUID</id><default>0x000C000F</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/membuf-15/mbs-0</default>
@@ -3227,7 +3227,7 @@
 <targetInstance>
     <id>sys0node0membuf15mbs0mba0</id>
     <type>unit-mba-centaur</type>
-    <attribute><id>HUID</id><default>0x0011001E</default></attribute>
+    <attribute><id>HUID</id><default>0x000D001E</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/membuf-15/mbs-0/mba-0</default>
@@ -3245,7 +3245,7 @@
 <targetInstance>
     <id>sys0node0membuf15mbs0mba1</id>
     <type>unit-mba-centaur</type>
-    <attribute><id>HUID</id><default>0x0011001F</default></attribute>
+    <attribute><id>HUID</id><default>0x000D001F</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/membuf-15/mbs-0/mba-1</default>
@@ -3267,7 +3267,7 @@
 <targetInstance>
     <id>sys0node0membuf20</id>
     <type>chip-membuf-centaur</type>
-    <attribute><id>HUID</id><default>0x00060014</default></attribute>
+    <attribute><id>HUID</id><default>0x00040014</default></attribute>
     <attribute><id>POSITION</id><default>20</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -3317,7 +3317,7 @@
 <targetInstance>
     <id>sys0node0membuf20mbs0</id>
     <type>unit-mbs-centaur</type>
-    <attribute><id>HUID</id><default>0x00100014</default></attribute>
+    <attribute><id>HUID</id><default>0x000C0014</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/membuf-20/mbs-0</default>
@@ -3333,7 +3333,7 @@
 <targetInstance>
     <id>sys0node0membuf20mbs0mba0</id>
     <type>unit-mba-centaur</type>
-    <attribute><id>HUID</id><default>0x00110028</default></attribute>
+    <attribute><id>HUID</id><default>0x000D0028</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/membuf-20/mbs-0/mba-0</default>
@@ -3351,7 +3351,7 @@
 <targetInstance>
     <id>sys0node0membuf20mbs0mba1</id>
     <type>unit-mba-centaur</type>
-    <attribute><id>HUID</id><default>0x00110029</default></attribute>
+    <attribute><id>HUID</id><default>0x000D0029</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/membuf-20/mbs-0/mba-1</default>
@@ -3373,7 +3373,7 @@
 <targetInstance>
     <id>sys0node0membuf21</id>
     <type>chip-membuf-centaur</type>
-    <attribute><id>HUID</id><default>0x00060015</default></attribute>
+    <attribute><id>HUID</id><default>0x00040015</default></attribute>
     <attribute><id>POSITION</id><default>21</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -3423,7 +3423,7 @@
 <targetInstance>
     <id>sys0node0membuf21mbs0</id>
     <type>unit-mbs-centaur</type>
-    <attribute><id>HUID</id><default>0x00100015</default></attribute>
+    <attribute><id>HUID</id><default>0x000C0015</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/membuf-21/mbs-0</default>
@@ -3439,7 +3439,7 @@
 <targetInstance>
     <id>sys0node0membuf21mbs0mba0</id>
     <type>unit-mba-centaur</type>
-    <attribute><id>HUID</id><default>0x0011002A</default></attribute>
+    <attribute><id>HUID</id><default>0x000D002A</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/membuf-21/mbs-0/mba-0</default>
@@ -3457,7 +3457,7 @@
 <targetInstance>
     <id>sys0node0membuf21mbs0mba1</id>
     <type>unit-mba-centaur</type>
-    <attribute><id>HUID</id><default>0x0011002B</default></attribute>
+    <attribute><id>HUID</id><default>0x000D002B</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/membuf-21/mbs-0/mba-1</default>
@@ -3479,7 +3479,7 @@
 <targetInstance>
     <id>sys0node0membuf22</id>
     <type>chip-membuf-centaur</type>
-    <attribute><id>HUID</id><default>0x00060016</default></attribute>
+    <attribute><id>HUID</id><default>0x00040016</default></attribute>
     <attribute><id>POSITION</id><default>22</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -3529,7 +3529,7 @@
 <targetInstance>
     <id>sys0node0membuf22mbs0</id>
     <type>unit-mbs-centaur</type>
-    <attribute><id>HUID</id><default>0x00100016</default></attribute>
+    <attribute><id>HUID</id><default>0x000C0016</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/membuf-22/mbs-0</default>
@@ -3545,7 +3545,7 @@
 <targetInstance>
     <id>sys0node0membuf22mbs0mba0</id>
     <type>unit-mba-centaur</type>
-    <attribute><id>HUID</id><default>0x0011002C</default></attribute>
+    <attribute><id>HUID</id><default>0x000D002C</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/membuf-22/mbs-0/mba-0</default>
@@ -3563,7 +3563,7 @@
 <targetInstance>
     <id>sys0node0membuf22mbs0mba1</id>
     <type>unit-mba-centaur</type>
-    <attribute><id>HUID</id><default>0x0011002D</default></attribute>
+    <attribute><id>HUID</id><default>0x000D002D</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/membuf-22/mbs-0/mba-1</default>
@@ -3585,7 +3585,7 @@
 <targetInstance>
     <id>sys0node0membuf23</id>
     <type>chip-membuf-centaur</type>
-    <attribute><id>HUID</id><default>0x00060017</default></attribute>
+    <attribute><id>HUID</id><default>0x00040017</default></attribute>
     <attribute><id>POSITION</id><default>23</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -3635,7 +3635,7 @@
 <targetInstance>
     <id>sys0node0membuf23mbs0</id>
     <type>unit-mbs-centaur</type>
-    <attribute><id>HUID</id><default>0x00100017</default></attribute>
+    <attribute><id>HUID</id><default>0x000C0017</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/membuf-23/mbs-0</default>
@@ -3651,7 +3651,7 @@
 <targetInstance>
     <id>sys0node0membuf23mbs0mba0</id>
     <type>unit-mba-centaur</type>
-    <attribute><id>HUID</id><default>0x0011002E</default></attribute>
+    <attribute><id>HUID</id><default>0x000D002E</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/membuf-23/mbs-0/mba-0</default>
@@ -3669,7 +3669,7 @@
 <targetInstance>
     <id>sys0node0membuf23mbs0mba1</id>
     <type>unit-mba-centaur</type>
-    <attribute><id>HUID</id><default>0x0011002F</default></attribute>
+    <attribute><id>HUID</id><default>0x000D002F</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/membuf-23/mbs-0/mba-1</default>
@@ -3691,7 +3691,7 @@
 <targetInstance>
     <id>sys0node0membuf28</id>
     <type>chip-membuf-centaur</type>
-    <attribute><id>HUID</id><default>0x0006001C</default></attribute>
+    <attribute><id>HUID</id><default>0x0004001C</default></attribute>
     <attribute><id>POSITION</id><default>28</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -3741,7 +3741,7 @@
 <targetInstance>
     <id>sys0node0membuf28mbs0</id>
     <type>unit-mbs-centaur</type>
-    <attribute><id>HUID</id><default>0x0010001C</default></attribute>
+    <attribute><id>HUID</id><default>0x000C001C</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/membuf-28/mbs-0</default>
@@ -3757,7 +3757,7 @@
 <targetInstance>
     <id>sys0node0membuf28mbs0mba0</id>
     <type>unit-mba-centaur</type>
-    <attribute><id>HUID</id><default>0x00110038</default></attribute>
+    <attribute><id>HUID</id><default>0x000D0038</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/membuf-28/mbs-0/mba-0</default>
@@ -3775,7 +3775,7 @@
 <targetInstance>
     <id>sys0node0membuf28mbs0mba1</id>
     <type>unit-mba-centaur</type>
-    <attribute><id>HUID</id><default>0x00110039</default></attribute>
+    <attribute><id>HUID</id><default>0x000D0039</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/membuf-28/mbs-0/mba-1</default>
@@ -3797,7 +3797,7 @@
 <targetInstance>
     <id>sys0node0membuf29</id>
     <type>chip-membuf-centaur</type>
-    <attribute><id>HUID</id><default>0x0006001D</default></attribute>
+    <attribute><id>HUID</id><default>0x0004001D</default></attribute>
     <attribute><id>POSITION</id><default>29</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -3847,7 +3847,7 @@
 <targetInstance>
     <id>sys0node0membuf29mbs0</id>
     <type>unit-mbs-centaur</type>
-    <attribute><id>HUID</id><default>0x0010001D</default></attribute>
+    <attribute><id>HUID</id><default>0x000C001D</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/membuf-29/mbs-0</default>
@@ -3863,7 +3863,7 @@
 <targetInstance>
     <id>sys0node0membuf29mbs0mba0</id>
     <type>unit-mba-centaur</type>
-    <attribute><id>HUID</id><default>0x0011003A</default></attribute>
+    <attribute><id>HUID</id><default>0x000D003A</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/membuf-29/mbs-0/mba-0</default>
@@ -3881,7 +3881,7 @@
 <targetInstance>
     <id>sys0node0membuf29mbs0mba1</id>
     <type>unit-mba-centaur</type>
-    <attribute><id>HUID</id><default>0x0011003B</default></attribute>
+    <attribute><id>HUID</id><default>0x000D003B</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/membuf-29/mbs-0/mba-1</default>
@@ -3903,7 +3903,7 @@
 <targetInstance>
     <id>sys0node0membuf30</id>
     <type>chip-membuf-centaur</type>
-    <attribute><id>HUID</id><default>0x0006001E</default></attribute>
+    <attribute><id>HUID</id><default>0x0004001E</default></attribute>
     <attribute><id>POSITION</id><default>30</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -3953,7 +3953,7 @@
 <targetInstance>
     <id>sys0node0membuf30mbs0</id>
     <type>unit-mbs-centaur</type>
-    <attribute><id>HUID</id><default>0x0010001E</default></attribute>
+    <attribute><id>HUID</id><default>0x000C001E</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/membuf-30/mbs-0</default>
@@ -3969,7 +3969,7 @@
 <targetInstance>
     <id>sys0node0membuf30mbs0mba0</id>
     <type>unit-mba-centaur</type>
-    <attribute><id>HUID</id><default>0x0011003C</default></attribute>
+    <attribute><id>HUID</id><default>0x000D003C</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/membuf-30/mbs-0/mba-0</default>
@@ -3987,7 +3987,7 @@
 <targetInstance>
     <id>sys0node0membuf30mbs0mba1</id>
     <type>unit-mba-centaur</type>
-    <attribute><id>HUID</id><default>0x0011003D</default></attribute>
+    <attribute><id>HUID</id><default>0x000D003D</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/membuf-30/mbs-0/mba-1</default>
@@ -4009,7 +4009,7 @@
 <targetInstance>
     <id>sys0node0membuf31</id>
     <type>chip-membuf-centaur</type>
-    <attribute><id>HUID</id><default>0x0006001F</default></attribute>
+    <attribute><id>HUID</id><default>0x0004001F</default></attribute>
     <attribute><id>POSITION</id><default>31</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -4059,7 +4059,7 @@
 <targetInstance>
     <id>sys0node0membuf31mbs0</id>
     <type>unit-mbs-centaur</type>
-    <attribute><id>HUID</id><default>0x0010001F</default></attribute>
+    <attribute><id>HUID</id><default>0x000C001F</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/membuf-31/mbs-0</default>
@@ -4075,7 +4075,7 @@
 <targetInstance>
     <id>sys0node0membuf31mbs0mba0</id>
     <type>unit-mba-centaur</type>
-    <attribute><id>HUID</id><default>0x0011003E</default></attribute>
+    <attribute><id>HUID</id><default>0x000D003E</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/membuf-31/mbs-0/mba-0</default>
@@ -4093,7 +4093,7 @@
 <targetInstance>
     <id>sys0node0membuf31mbs0mba1</id>
     <type>unit-mba-centaur</type>
-    <attribute><id>HUID</id><default>0x0011003F</default></attribute>
+    <attribute><id>HUID</id><default>0x000D003F</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/membuf-31/mbs-0/mba-1</default>

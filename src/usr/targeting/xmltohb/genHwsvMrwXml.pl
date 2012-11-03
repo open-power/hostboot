@@ -1065,7 +1065,7 @@ sub generate_system_fsp
     <type>chip-fsp-power8</type>
     <attribute>
         <id>HUID</id>
-        <default>0x00190000</default>
+        <default>0x00150000</default>
     </attribute>
     <attribute>
         <id>POSITION</id>
@@ -1154,7 +1154,7 @@ sub generate_system_node
 <targetInstance>
     <id>sys0node0apss0</id>
     <type>apss</type>
-    <attribute><id>HUID</id><default>0x001B0000</default></attribute>
+    <attribute><id>HUID</id><default>0x00120000</default></attribute>
     <attribute><id>ORDINAL_ID</id><default>$node</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -1171,7 +1171,7 @@ sub generate_system_node
 <targetInstance>
     <id>sys0node0dpss0</id>
     <type>dpss</type>
-    <attribute><id>HUID</id><default>0x001A0000</default></attribute>
+    <attribute><id>HUID</id><default>0x00110000</default></attribute>
     <attribute><id>ORDINAL_ID</id><default>$node</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -1190,7 +1190,7 @@ sub generate_system_node
 sub generate_proc
 {
     my ($proc, $ipath, $lognode, $logid, $ordinalId, $master, $slave, $fsi) = @_;
-    my $uidstr = sprintf("0x%02X07%04X",${node},${proc}+${node}*8);
+    my $uidstr = sprintf("0x%02X05%04X",${node},${proc}+${node}*8);
     my $scompath = $devpath->{chip}->{$ipath}->{'scom-path'};
     my $scanpath = $devpath->{chip}->{$ipath}->{'scan-path'};
     my $scomsize = length($scompath) + 1;
@@ -1374,7 +1374,7 @@ sub generate_occ
     # configurations, since HUID doesn't take into account the node value, and
     # the oridinal ID repeats on every node.  Fix these with the multi-node
     # story
-    my $uidstr = sprintf("0x001C000%01X",$proc);
+    my $uidstr = sprintf("0x0013000%01X",$proc);
     my $ordinalId = $proc;
 
         print "
@@ -1433,7 +1433,7 @@ sub generate_fsp_psi_units
     # configurations, since ordinal ID should not be used in HUID calculations.
     # Instead, the lower byte should repeat for every node.
     # Fix this with the multi-node story
-    my $uidstr = sprintf("0x%02X20%04X",${node},$psi_ordinal);
+    my $uidstr = sprintf("0x%02X14%04X",${node},$psi_ordinal);
 
     print "
 <targetInstance>
@@ -1494,7 +1494,7 @@ sub generate_proc_psi
         $fsp_node,$fsp_chip_unit, $psi_ordinal, $fsp) = @_;
     $psi_ordinal += 1;
 
-    my $uidstr = sprintf("0x%02X20%04X",${node},$psi_ordinal);
+    my $uidstr = sprintf("0x%02X14%04X",${node},$psi_ordinal);
         print "
 <!-- $SYSNAME n${proc_node}p${proc_pos} PSI units -->
 
@@ -1540,7 +1540,7 @@ print"
 sub generate_ex
 {
     my ($proc, $ex, $ordinalId) = @_;
-    my $uidstr = sprintf("0x%02X0A%04X",${node},$ex+$proc*16+${node}*8*16);
+    my $uidstr = sprintf("0x%02X06%04X",${node},$ex+$proc*16+${node}*8*16);
     print "
 <targetInstance>
     <id>sys${sys}node${node}proc${proc}ex$ex</id>
@@ -1576,7 +1576,7 @@ sub generate_ex
 sub generate_ex_core
 {
     my ($proc, $ex, $ordinalId) = @_;
-    my $uidstr = sprintf("0x%02X0B%04X",${node},$ex+$proc*16+${node}*8*16);
+    my $uidstr = sprintf("0x%02X07%04X",${node},$ex+$proc*16+${node}*8*16);
     print "
 <targetInstance>
     <id>sys${sys}node${node}proc${proc}ex${ex}core0</id>
@@ -1612,7 +1612,7 @@ sub generate_ex_core
 sub generate_mcs
 {
     my ($proc, $mcs, $ordinalId) = @_;
-    my $uidstr = sprintf("0x%02X0F%04X",${node},$mcs+$proc*8+${node}*8*8);
+    my $uidstr = sprintf("0x%02X0B%04X",${node},$mcs+$proc*8+${node}*8*8);
     print "
 <targetInstance>
     <id>sys${sys}node${node}proc${proc}mcs$mcs</id>
@@ -1670,7 +1670,7 @@ sub generate_pcies
 sub generate_a_pcie
 {
     my ($proc, $phb, $ordinalId) = @_;
-    my $uidstr = sprintf("0x%02X17%04X",${node},$phb+$proc*3+${node}*8*3);
+    my $uidstr = sprintf("0x%02X10%04X",${node},$phb+$proc*3+${node}*8*3);
     print "
 <targetInstance>
     <id>sys${sys}node${node}proc${proc}pci${phb}</id>
@@ -1712,7 +1712,7 @@ sub generate_ax_buses
     my $minbus = ($type eq "A") ? 0 : 1;
     my $maxbus = ($type eq "A") ? 2 : 1;
     my $numperchip = ($type eq "A") ? 3 : 4;
-    my $typenum = ($type eq "A") ? 0x16 : 0x15;
+    my $typenum = ($type eq "A") ? 0x0F : 0x0E;
     $type = lc( $type );
     for my $i ( $minbus .. $maxbus )
     {
@@ -1787,7 +1787,7 @@ sub generate_centaur
     $proc =~ s/.*:p(.*):.*/$1/g;
     $mcs =~ s/.*:.*:mcs(.*)/$1/g;
 
-    my $uidstr = sprintf("0x%02X06%04X",${node},$mcs+$proc*8+${node}*8*8);
+    my $uidstr = sprintf("0x%02X04%04X",${node},$mcs+$proc*8+${node}*8*8);
 
     print "
 <!-- $SYSNAME Centaur n${node}p${ctaur} : start -->
@@ -1864,7 +1864,7 @@ sub generate_centaur
     }
     print "\n</targetInstance>\n";
 
-    $uidstr = sprintf("0x%02X10%04X",${node},$mcs+$proc*8+${node}*8*8);
+    $uidstr = sprintf("0x%02X0C%04X",${node},$mcs+$proc*8+${node}*8*8);
     print "
 <!-- $SYSNAME Centaur MBS affiliated with membuf$ctaur -->
 
@@ -1902,7 +1902,7 @@ sub generate_mba
     $proc =~ s/.*:p(.*):.*/$1/g;
     $mcs =~ s/.*:.*:mcs(.*)/$1/g;
 
-    my $uidstr = sprintf("0x%02X11%04X",${node},$mba+$mcs*2+$proc*8*2+${node}*8*8*2);
+    my $uidstr = sprintf("0x%02X0D%04X",${node},$mba+$mcs*2+$proc*8*2+${node}*8*8*2);
 
     print "
 <targetInstance>
@@ -2027,7 +2027,7 @@ sub generate_pnor
 
 # @TODO via RTC: 48523
 # Will need to compute the HUID using the workbook info to determine max # parts per node
-    my $uidstr = sprintf("0x%02X13%04X",${node},$pnor+${node}*2);
+    my $uidstr = sprintf("0x%02X16%04X",${node},$pnor+${node}*2);
 
 # @TODO via RTC: 37573
 # Will need to re-evaluate how to compute the PNOR RID value once
