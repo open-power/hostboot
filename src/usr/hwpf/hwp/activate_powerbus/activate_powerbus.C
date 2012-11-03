@@ -93,11 +93,11 @@ void*    call_proc_build_smp( void    *io_pArgs )
     TargetPairs_t l_abusConnections;
     TargetPairs_t l_xbusConnections;
     l_errl = PbusLinkSvc::getTheInstance().getPbusConnections(
-                                 l_abusConnections, TYPE_ABUS );
+                                 l_abusConnections, TYPE_ABUS, false );
     if (!l_errl)
     {
         l_errl = PbusLinkSvc::getTheInstance().getPbusConnections(
-                                 l_xbusConnections, TYPE_XBUS );
+                                 l_xbusConnections, TYPE_XBUS, false );
     }
 
     // Populate l_proc_Chips vector for each good processor chip
