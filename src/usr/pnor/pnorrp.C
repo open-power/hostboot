@@ -39,7 +39,7 @@
 
 // Trace definition
 trace_desc_t* g_trac_pnor = NULL;
-TRAC_INIT(&g_trac_pnor, "PNOR", 4096); //4K
+TRAC_INIT(&g_trac_pnor, "PNOR", 4096, TRACE::BUFFER_SLOW); //4K
 
 // Easy macro replace for unit testing
 //#define TRACUCOMP(args...)  TRACFCOMP(args)
@@ -339,7 +339,7 @@ errlHndl_t PnorRP::readTOC()
 #define SIDELESS_VADDR_INDEX 2
     uint64_t nextVAddr[] = {SIDEA_VADDR, SIDEB_VADDR, SIDELESS_VADDR};
 
-    do{ 
+    do{
         // Zero out my table
         for( uint64_t side = 0; side < NUM_SIDES; side++ )
         {
@@ -459,8 +459,8 @@ errlHndl_t PnorRP::readTOC()
             //For Sections found to be sideless, both PNOR sides will map to the same virtual address.
             if(!(ffsUserData->miscFlags & FFS_MISC_SIDELESS))
             {
-                iv_TOC[cur_side][secId].virtAddr = nextVAddr[cur_side];  
-                nextVAddr[cur_side] += iv_TOC[cur_side][secId].size; 
+                iv_TOC[cur_side][secId].virtAddr = nextVAddr[cur_side];
+                nextVAddr[cur_side] += iv_TOC[cur_side][secId].size;
             }
             else
             {
@@ -877,7 +877,7 @@ errlHndl_t PnorRP::computeSection( uint64_t i_vaddr,
     }while(0);
 
     if(o_id == PNOR::INVALID_SECTION)
-    {   
+    {
         TRACFCOMP( g_trac_pnor, "PnorRP::computeSection> Invalid virtual address : i_vaddr=%X", i_vaddr );
         /*@
          * @errortype

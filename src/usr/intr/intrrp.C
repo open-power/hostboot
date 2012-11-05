@@ -48,7 +48,7 @@
 using namespace INTR;
 
 trace_desc_t * g_trac_intr = NULL;
-TRAC_INIT(&g_trac_intr, INTR_TRACE_NAME, 2 * 1024);
+TRAC_INIT(&g_trac_intr, INTR_TRACE_NAME, 2 * 1024, TRACE::BUFFER_SLOW);
 
 /**
  * setup _start and handle barrier

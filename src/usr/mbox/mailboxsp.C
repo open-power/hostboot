@@ -47,7 +47,7 @@ extern trace_desc_t * g_trac_mboxmsg;
 
 const char HBMBOXMSG_TRACE_NAME[] = "MBOXMSG";
 trace_desc_t* g_trac_mboxmsg = NULL; // g_trac_mbox;
-TRAC_INIT(&g_trac_mboxmsg, HBMBOXMSG_TRACE_NAME, 2048);
+TRAC_INIT(&g_trac_mboxmsg, HBMBOXMSG_TRACE_NAME, 2048, TRACE::BUFFER_SLOW);
 
 
 
@@ -455,7 +455,7 @@ void MailboxSp::send_msg(mbox_msg_t * i_msg)
             {
                 iv_msg_to_send.msg_payload.data[0] = dma_size; // bitmap
                 iv_msg_to_send.msg_payload.data[1] =
-                  iv_dmaBuffer.toPhysAddr(dma_buffer);
+                iv_dmaBuffer.toPhysAddr(dma_buffer);
             }
             iv_sendq.pop_front();
         }
@@ -681,7 +681,7 @@ void MailboxSp::recv_msg(mbox_msg_t & i_mbox_msg)
                          i_mbox_msg.msg_queue_id
                         );
 
-                    UserDetailsMboxMsg 
+                    UserDetailsMboxMsg
                         ffdc(reinterpret_cast<uint64_t*>(&i_mbox_msg),
                              sizeof(mbox_msg_t),
                              reinterpret_cast<uint64_t*>(msg->extra_data),
@@ -710,10 +710,10 @@ void MailboxSp::recv_msg(mbox_msg_t & i_mbox_msg)
                 mbox_msg.msg_id = i_mbox_msg.msg_id;
 
                 // msg_id and msg_queue_id
-                mbox_msg.msg_payload.data[0] = 
+                mbox_msg.msg_payload.data[0] =
                     *(reinterpret_cast<uint64_t*>(&i_mbox_msg));
                 // type & flags
-                mbox_msg.msg_payload.data[1] = 
+                mbox_msg.msg_payload.data[1] =
                     *(reinterpret_cast<uint64_t*>(msg));
 
                 mbox_msg.msg_payload.extra_data = NULL;
@@ -746,7 +746,7 @@ void MailboxSp::recv_msg(mbox_msg_t & i_mbox_msg)
                      msg->type
                     );
 
-                UserDetailsMboxMsg 
+                UserDetailsMboxMsg
                     ffdc(reinterpret_cast<uint64_t*>(&i_mbox_msg),
                          sizeof(mbox_msg_t),
                          reinterpret_cast<uint64_t*>(msg->extra_data),
@@ -800,11 +800,11 @@ void MailboxSp::handle_hbmbox_msg(mbox_msg_t & i_mbox_msg)
     else if(msg->type == MSG_INVALID_MSG_QUEUE_ID ||
             msg->type == MSG_INVALID_MSG_TYPE)
     {
-        mbox_msg_t * bad_mbox_msg = 
+        mbox_msg_t * bad_mbox_msg =
             reinterpret_cast<mbox_msg_t*>(&(msg->data[0]));
         msg_t * bad_msg = &(bad_mbox_msg->msg_payload);
 
-        TRACFCOMP(g_trac_mbox, ERR_MRK"Invalid message was sent to FSP. Queue" 
+        TRACFCOMP(g_trac_mbox, ERR_MRK"Invalid message was sent to FSP. Queue"
                   " id: 0x%08x Type: %08x",
                   bad_mbox_msg->msg_queue_id,
                   bad_msg->type);
@@ -827,7 +827,7 @@ void MailboxSp::handle_hbmbox_msg(mbox_msg_t & i_mbox_msg)
              bad_msg->type
             );
 
-        UserDetailsMboxMsg 
+        UserDetailsMboxMsg
             ffdc(reinterpret_cast<uint64_t*>(&i_mbox_msg),
                  sizeof(mbox_msg_t),
                  reinterpret_cast<uint64_t*>(msg->extra_data),
@@ -839,7 +839,7 @@ void MailboxSp::handle_hbmbox_msg(mbox_msg_t & i_mbox_msg)
 
         // If the msg was sync then we need to respond to the
         // orignal sender and clean up the respondq
-        if(!msg_is_async(bad_msg)) 
+        if(!msg_is_async(bad_msg))
         {
             msg_t * key = reinterpret_cast<msg_t*>(bad_mbox_msg->msg_id);
             msg_respond_t * response = iv_respondq.find(key);
@@ -889,7 +889,7 @@ void MailboxSp::handle_hbmbox_msg(mbox_msg_t & i_mbox_msg)
              i_mbox_msg.msg_queue_id
             );
 
-        UserDetailsMboxMsg 
+        UserDetailsMboxMsg
             ffdc(reinterpret_cast<uint64_t*>(&i_mbox_msg),
                  sizeof(mbox_msg_t),
                  reinterpret_cast<uint64_t*>(msg->extra_data),
@@ -1019,7 +1019,7 @@ errlHndl_t MailboxSp::send(queue_id_t i_q_id, msg_t * io_msg)
              MBOX::MOD_MBOXSRV_SEND,                 //  moduleid
              MBOX::RC_MBOX_SERVICE_NOT_READY,        //  reason Code
              i_q_id,                                 //  queue id
-             0                                       //  
+             0                                       //
             );
     }
 
@@ -1239,7 +1239,7 @@ errlHndl_t MailboxSp::handleInterrupt()
             }
             else if(mbox_status & MBOX_ILLEGAL_OP)
             {
-                // Code problem could be FSP or HB 
+                // Code problem could be FSP or HB
                 // - log error and continue.
 
                 /*@ errorlog tag
@@ -1265,7 +1265,7 @@ errlHndl_t MailboxSp::handleInterrupt()
 
             //else if(mbox_status & MBOX_DATA_READ_ERR)
             //{
-            //    // Read when no message available 
+            //    // Read when no message available
             //    - Just ignore this one per Dean.
             //}
 
@@ -1294,10 +1294,10 @@ void MailboxSp::handleUnclaimed()
 
         mbox_msg_t * msg = &(*mbox_msg);
         // msg_id and msg_queue_id
-        r_mbox_msg.msg_payload.data[0] = 
+        r_mbox_msg.msg_payload.data[0] =
             *(reinterpret_cast<uint64_t*>(msg));
         // type & flags
-        r_mbox_msg.msg_payload.data[1] = 
+        r_mbox_msg.msg_payload.data[1] =
             *(reinterpret_cast<uint64_t*>(&(msg->msg_payload)));
 
         r_mbox_msg.msg_payload.extra_data = NULL;
@@ -1329,7 +1329,7 @@ void MailboxSp::handleUnclaimed()
              mbox_msg->msg_payload.type         //  message type
             );
 
-        UserDetailsMboxMsg 
+        UserDetailsMboxMsg
             ffdc(reinterpret_cast<uint64_t*>(msg),
                  sizeof(mbox_msg_t),
                  reinterpret_cast<uint64_t*>(msg->msg_payload.extra_data),
@@ -1485,7 +1485,7 @@ bool MBOX::mailbox_enabled()
     {
         enabled = true;
     }
-    
+
     return enabled;
 }
 

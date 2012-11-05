@@ -1,25 +1,25 @@
-//  IBM_PROLOG_BEGIN_TAG
-//  This is an automatically generated prolog.
-//
-//  $Source: src/usr/devicefw/associator.C $
-//
-//  IBM CONFIDENTIAL
-//
-//  COPYRIGHT International Business Machines Corp. 2011
-//
-//  p1
-//
-//  Object Code Only (OCO) source materials
-//  Licensed Internal Code Source Materials
-//  IBM HostBoot Licensed Internal Code
-//
-//  The source code for this program is not published or other-
-//  wise divested of its trade secrets, irrespective of what has
-//  been deposited with the U.S. Copyright Office.
-//
-//  Origin: 30
-//
-//  IBM_PROLOG_END
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/usr/devicefw/associator.C $                               */
+/*                                                                        */
+/* IBM CONFIDENTIAL                                                       */
+/*                                                                        */
+/* COPYRIGHT International Business Machines Corp. 2011,2012              */
+/*                                                                        */
+/* p1                                                                     */
+/*                                                                        */
+/* Object Code Only (OCO) source materials                                */
+/* Licensed Internal Code Source Materials                                */
+/* IBM HostBoot Licensed Internal Code                                    */
+/*                                                                        */
+/* The source code for this program is not published or otherwise         */
+/* divested of its trade secrets, irrespective of what has been           */
+/* deposited with the U.S. Copyright Office.                              */
+/*                                                                        */
+/* Origin: 30                                                             */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
 #include <algorithm>
 #include <errl/errlentry.H>
 #include <errl/errlmanager.H>
@@ -34,7 +34,7 @@ using namespace TARGETING;
 namespace DeviceFW
 {
     trace_desc_t* g_traceBuffer = NULL;
-    TRAC_INIT(&g_traceBuffer, "DevFW", 4096);
+    TRAC_INIT(&g_traceBuffer, "DevFW", 4096, TRACE::BUFFER_SLOW);
 
     Associator::Associator() : iv_mutex()
     {
@@ -47,7 +47,7 @@ namespace DeviceFW
     Associator::~Associator()
     {
 
-        TRACFCOMP(g_traceBuffer, EXIT_MRK "Associator::~Associator");        
+        TRACFCOMP(g_traceBuffer, EXIT_MRK "Associator::~Associator");
     }
 
     errlHndl_t Associator::registerRoute(int64_t i_opType,
@@ -59,7 +59,7 @@ namespace DeviceFW
                   i_opType, i_accType, i_targetType);
 
         // The ranges of the parameters should all be verified by the
-        // compiler due to the template specializations in driverif.H.  
+        // compiler due to the template specializations in driverif.H.
         // No assert-checks will be done here.
 
         mutex_lock(&iv_mutex);
@@ -77,7 +77,7 @@ namespace DeviceFW
                 if( l_devRoute != NULL )
                 {
                     TRACFCOMP(g_traceBuffer, "Double registration attempted : i_opType=%d, i_accType=%d, i_targetType=0x%X, existing function=%p", i_opType, i_accType, i_targetType, l_devRoute );
-                    /*@ 
+                    /*@
                      *  @errortype
                      *  @moduleid         DEVFW_MOD_ASSOCIATOR
                      *  @reasoncode       DEVFW_RC_DOUBLE_REGISTRATION
@@ -85,10 +85,10 @@ namespace DeviceFW
                      *  @userdata1[32:63] AccessType
                      *  @userdata2        TargetType
                      *
-                     *  @devdesc         A double registration was attempted 
+                     *  @devdesc         A double registration was attempted
                      *                   with the routing framework.
                      */
-                    errlHndl_t l_errl = 
+                    errlHndl_t l_errl =
                       new ErrlEntry(ERRL_SEV_INFORMATIONAL,
                                     DEVFW_MOD_ASSOCIATOR,
                                     DEVFW_RC_DOUBLE_REGISTRATION,
@@ -100,10 +100,10 @@ namespace DeviceFW
                 }
             }
         }
-        
+
         size_t ops = 0;
         AssociationData targets = AssociationData();
-        
+
         // Look up second level of map (op-type) or allocate fresh block.
         ops = iv_associations[iv_routeMap][i_accType].offset;
         if (0 == ops)
@@ -112,7 +112,7 @@ namespace DeviceFW
             ops = iv_associations.allocate(LAST_OP_TYPE + 1) + 1;
             iv_associations[iv_routeMap][i_accType].offset = ops;
         }
-        
+
         // Look up third level of map (access-type) or allocate fresh block.
         targets = iv_associations[ops][i_opType];
         if (0 == targets.offset)
@@ -140,7 +140,7 @@ namespace DeviceFW
                                                     iv_operations.end(),
                                                     i_regRoute);
         // Insert function into vector if not found.
-        if (iv_operations.end() == opLocation) 
+        if (iv_operations.end() == opLocation)
         {
             iv_operations.push_back(i_regRoute);
             opLocation = iv_operations.end() - 1;
@@ -159,10 +159,10 @@ namespace DeviceFW
     errlHndl_t Associator::performOp(OperationType i_opType,
                                      Target* i_target,
                                      void* io_buffer, size_t& io_buflen,
-                                     int64_t i_accessType, va_list i_addr) 
+                                     int64_t i_accessType, va_list i_addr)
     {
         errlHndl_t l_errl = NULL;
-        
+
         if( NULL == i_target )
         {
 	    TRACFCOMP(g_traceBuffer, "A device driver operation was attempted on a NULL target : i_opType=%d, i_accessType=%d", i_opType, i_accessType );
@@ -184,8 +184,8 @@ namespace DeviceFW
         }
 
 
-        TARGETING::TYPE l_devType = 
-            (i_target == MASTER_PROCESSOR_CHIP_TARGET_SENTINEL) ? 
+        TARGETING::TYPE l_devType =
+            (i_target == MASTER_PROCESSOR_CHIP_TARGET_SENTINEL) ?
             TYPE_PROC : i_target->getAttr<ATTR_TYPE>();
 
         TRACDCOMP(g_traceBuffer, "Device op requested for (%d, %d, %d)",
@@ -198,8 +198,8 @@ namespace DeviceFW
                                                  l_devType,
                                                  i_accessType );
 
-        mutex_unlock(&iv_mutex);        
-        
+        mutex_unlock(&iv_mutex);
+
         // Call function if one was found, create error otherwise.
         if (NULL == l_devRoute)
         {
@@ -223,7 +223,7 @@ namespace DeviceFW
         }
         else
         {
-            l_errl = (*l_devRoute)(i_opType, i_target, 
+            l_errl = (*l_devRoute)(i_opType, i_target,
                                    io_buffer, io_buflen,
                                    i_accessType, i_addr);
         }
@@ -231,7 +231,7 @@ namespace DeviceFW
         return l_errl;
     }
 
-    
+
     deviceOp_t Associator::findDeviceRoute( OperationType i_opType,
                                             TARGETING::TYPE i_devType,
                                             int64_t i_accessType )
@@ -255,7 +255,7 @@ namespace DeviceFW
                 break;
             }
 
-            const AssociationData* ops = 
+            const AssociationData* ops =
               iv_associations[routeMap[i_accessType].offset];
 
             // Check op type = WILDCARD registrations.
@@ -264,7 +264,7 @@ namespace DeviceFW
                 // Check access type = WILDCARD registrations.
                 if (ops[WILDCARD].flag)
                 {
-                    l_devRoute = 
+                    l_devRoute =
                       iv_operations[
                             iv_associations[ops[WILDCARD].offset]->offset];
                     break;

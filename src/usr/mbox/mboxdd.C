@@ -32,7 +32,7 @@
 
 
 trace_desc_t* g_trac_mbox = NULL;
-TRAC_INIT(&g_trac_mbox, "MBOX", 4096); //4K
+TRAC_INIT(&g_trac_mbox, "MBOX", 4096, TRACE::BUFFER_SLOW); //4K
 
 
 namespace MBOX
@@ -172,7 +172,7 @@ errlHndl_t mboxRead(TARGETING::Target* i_target,void *o_buffer,
             break;
         }
 
-        // Check to see if there is an error bit set. 
+        // Check to see if there is an error bit set.
         if ((l_IntReg[0] & MBOX_DOORBELL_ERROR) ==
              MBOX_DOORBELL_ERROR)
         {
@@ -222,7 +222,7 @@ errlHndl_t mboxRead(TARGETING::Target* i_target,void *o_buffer,
          */
 
         //If the Acknowledge bit is on and the Xup bit is on
-        if ((l_IntReg[0] & MBOX_HW_ACK) == 
+        if ((l_IntReg[0] & MBOX_HW_ACK) ==
             MBOX_HW_ACK &&
             (l_64bitBuf[0] & MBOX_XUP) == MBOX_XUP)
         {
@@ -261,7 +261,7 @@ errlHndl_t mboxRead(TARGETING::Target* i_target,void *o_buffer,
             // we are currently reading from.
             uint32_t cur_reg_cntr = 0;
             uint32_t l_data[2];
-            
+
             // Total number of registers to read to get all the data.
             uint8_t l_numRegsToRead = (io_buflen*sizeof(uint8_t))/sizeof(uint32_t);
 
@@ -275,7 +275,7 @@ errlHndl_t mboxRead(TARGETING::Target* i_target,void *o_buffer,
 
             uint32_t *local_buf = static_cast<uint32_t *>(o_buffer);
             // For the read we extract the data from the MBOX data registers.
-            // MBOX_DATA_LBUS_START = 0x00050080 and the end address is 
+            // MBOX_DATA_LBUS_START = 0x00050080 and the end address is
             // MBOX_DATA_LBUS_END   = 0x0005008F
             // each address inbetween increments by 1.
 
@@ -299,7 +299,7 @@ errlHndl_t mboxRead(TARGETING::Target* i_target,void *o_buffer,
                 if ((cur_reg_cntr -1 == l_numRegsToRead) &&
                    (l_numBytesLeft != 0))
                 {
-                // Only copy the number of bytes remaining.. 
+                // Only copy the number of bytes remaining..
                 memcpy( local_buf + cur_reg_cntr,
                         &l_data[0], l_numBytesLeft);
                 }
@@ -370,7 +370,7 @@ errlHndl_t mboxWrite(TARGETING::Target* i_target,void* i_buffer,
     do
     {
         //If the expected siZe in bytes is bigger than the max data allowed
-        // send back an error. 
+        // send back an error.
         if (i_buflen > MBOX_MAX_DATA_BYTES)
         {
             TRACFCOMP(g_trac_mbox, ERR_MRK "MBOX::write> Invalid data length : i_buflen=%d", i_buflen);
@@ -391,7 +391,7 @@ errlHndl_t mboxWrite(TARGETING::Target* i_target,void* i_buffer,
 
             // Set the i_buflen to 0 to indicate no write occured
             i_buflen = 0;
- 
+
             break;
         }
 
@@ -444,7 +444,7 @@ errlHndl_t mboxWrite(TARGETING::Target* i_target,void* i_buffer,
             uint32_t *l_buf = static_cast<uint32_t *>(i_buffer);
 
             // For the write we put the data into the MBOX data registers.
-            // MBOX_DATA_PIB_START    = 0x00050040 and the end address is 
+            // MBOX_DATA_PIB_START    = 0x00050040 and the end address is
             // MBOX_DATA_PIB_END      = 0x0005004F
             // each address inbetween increments by 1.
 
@@ -460,7 +460,7 @@ errlHndl_t mboxWrite(TARGETING::Target* i_target,void* i_buffer,
                     // zero out the data reg.
                     l_data[0] = 0;
 
-                    // Only copy the number of bytes remaining.. 
+                    // Only copy the number of bytes remaining..
                     memcpy(&l_data[0], l_buf+cur_reg_cntr,l_numBytesLeft);
 
                 }

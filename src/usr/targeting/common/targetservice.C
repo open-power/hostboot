@@ -74,7 +74,11 @@ TARGETING::TargetService& targetService()
 //******************************************************************************
 
 TARG_TD_t g_trac_targeting = {0};
+#ifdef __HOSTBOOT_MODULE
+TRAC_INIT(&g_trac_targeting, "TARG", 4096, TRACE::BUFFER_SLOW);
+#else
 TRAC_INIT(&g_trac_targeting, "TARG", 4096);
+#endif
 
 #undef TARG_CLASS
 #define TARG_CLASS "TargetService::"
@@ -293,11 +297,11 @@ Target* TargetService::toTarget(
         bool found = false;
         switch(i_entityPath.type())
         {
-            case EntityPath::PATH_PHYSICAL: 
+            case EntityPath::PATH_PHYSICAL:
                 found = (   (i_entityPath)
                          == (*iv_targets)[i].getAttr<ATTR_PHYS_PATH>());
                 break;
-            case EntityPath::PATH_AFFINITY: 
+            case EntityPath::PATH_AFFINITY:
                 found = (   (i_entityPath)
                          == (*iv_targets)[i].getAttr<ATTR_AFFINITY_PATH>());
                 break;
@@ -599,7 +603,7 @@ void TargetService::_configureTargetPool()
 
     // iv_pPnor--> points to uint32_t* --> points to --> uint32_t, targets[]
     //                   (uint32_t*)+1 --> points to ------------> targets[]
-    const AbstractPointer<uint32_t>* ppNumTargets 
+    const AbstractPointer<uint32_t>* ppNumTargets
         = static_cast<const AbstractPointer<uint32_t>*>(iv_pPnor);
     iv_targets =
            reinterpret_cast< Target(*)[] > (
@@ -638,7 +642,7 @@ uint32_t TargetService::_maxTargets()
 
     // Target count found by following the pointer pointed to by the iv_pPnor
     // pointer.
-    const AbstractPointer<uint32_t>* pNumTargetsPtr 
+    const AbstractPointer<uint32_t>* pNumTargetsPtr
         = static_cast<const AbstractPointer<uint32_t>*>(iv_pPnor);
     uint32_t* pNumTargets = TARG_TO_PLAT_PTR(*pNumTargetsPtr);
 
