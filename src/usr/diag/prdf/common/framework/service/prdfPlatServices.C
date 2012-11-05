@@ -38,6 +38,8 @@
 #include <prdfTrace.H>
 
 #include <fapi.H>
+#include <fapiTarget.H>
+#include <fapiPlatHwpInvoker.H>
 
 #ifdef __HOSTBOOT_MODULE
   #include <time.h>
@@ -45,7 +47,6 @@
   #include <sys/time.h>
   #include <diag/mdia/mdia.H>
   #include <diag/mdia/mdiamevent.H>
-  #include <fapiPlatHwpInvoker.H>
   #include <dimmBadDqBitmapFuncs.H>
 #else
   #include <iplp_registry.H>
@@ -61,6 +62,7 @@
   #include <utillib.H>
   #include <rmgrBaseClientLib.H>
   #include <services/hwas/hwsvHwAvailSvc.H> // For deconfigureTargetAtRuntime()
+  #include <proc_mpipl_check_eligibility.H>
 #endif
 
 //------------------------------------------------------------------------------
@@ -517,6 +519,33 @@ errlHndl_t runtimeDeconfig( TARGETING::TargetHandle_t i_target )
 {
     using namespace HWAS;
     return deconfigureTargetAtRuntime( i_target, DECONFIG_FOR_DUMP );
+}
+
+//------------------------------------------------------------------------------
+
+int32_t checkMpiplEligibility(TARGETING::TargetHandle_t i_procTarget,
+                              bool & o_mpiplEligible)
+{
+    int32_t o_rc = SUCCESS;
+    errlHndl_t l_err = NULL;
+    o_mpiplEligible = false;
+
+    FAPI_INVOKE_HWP(
+            l_err,
+            proc_mpipl_check_eligibility,
+            fapi::Target(fapi::TARGET_TYPE_PROC_CHIP, i_procTarget),
+            o_mpiplEligible);
+
+    if(NULL != l_err)
+    {
+        PRDF_ERR( "[PlatServices::checkMpiplEligibility] error [0x%X]"
+                  "returned from proc_mpipl_check_eligibility for "
+                  "Proc: 0x%08x", l_err->getRC(), getHuid(i_procTarget) );
+        PRDF_COMMIT_ERRL( l_err, ERRL_ACTION_REPORT );
+        o_rc = FAIL;
+    }
+
+    return o_rc;
 }
 
 #endif // not __HOSTBOOT_MODULE

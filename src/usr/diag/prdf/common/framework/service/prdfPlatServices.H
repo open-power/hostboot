@@ -280,6 +280,19 @@ int32_t getBadDqBitmap( TARGETING::TargetHandle_t i_mbaTarget,
  */
 errlHndl_t runtimeDeconfig( TARGETING::TargetHandle_t i_target );
 
+/**
+ * @brief determine whether a checkstop is eligible for
+ *        Memory Preserving IPL
+ *
+ * @param i_procTarget A PROC target
+ * @param o_mpiplMode true for MPIPL and false for no MPIPL
+ *
+ * @return non-SUCCESS for failure, SUCCESS otherwise
+*/
+
+int32_t checkMpiplEligibility(TARGETING::TargetHandle_t i_procTarget,
+                              bool & o_mpiplEligible);
+
 #endif // not __HOSTBOOT_MODULE
 
 } // end namespace PlatServices

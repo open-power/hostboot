@@ -906,6 +906,7 @@ errlHndl_t ErrDataService::GenerateSrcPfa(ATTENTION_TYPE attn_type,
 #else
     hwTableContent l_dumpRequestContent; //not used but needed to call GetDumpRequest
     sdc.GetDumpRequest( l_dumpRequestContent, l_dumpHandle );
+    pfaData.MsDumpInfo.DumpContent = l_dumpRequestContent;
 #endif
 
     pfaData.MsDumpInfo.DumpId = PlatServices::getHuid(l_dumpHandle);

@@ -1103,7 +1103,7 @@ group gPbCentFir filter singlebit
     /** PBCENTFIR[5]
      *  PB_CENT_CRESP_ADDR_ERROR
      */
-    (PbCentFir, bit(5)) ? TBDDefaultCallout;
+    (PbCentFir, bit(5)) ? analyzeMpIPL;
 
     /** PBCENTFIR[6]
      *  PB_CENT_CRESP_ERROR
@@ -1128,7 +1128,7 @@ group gPbCentFir filter singlebit
     /** PBCENTFIR[10]
      *  PB_CENT_FORCE_MP_IPL
      */
-    (PbCentFir, bit(10)) ? TBDDefaultCallout;
+    (PbCentFir, bit(10)) ? analyzeMpIPL;
 
     /** PBCENTFIR[11]
      *  PB_CENT_FIR_SPARE_0
@@ -2451,4 +2451,11 @@ group gIomcFir_1 filter singlebit
 # Actions specific to PB chiplet
 ################################################################################
 
-
+/**
+ * Check for Memory Preserving IPL Eligibility
+ * and force a SW_DUMP content for checkstop
+ */
+actionclass analyzeMpIPL
+{
+    funccall("analyzeMpIPL");
+};

@@ -30,6 +30,8 @@
 #include <prdfPlatServices.H>
 #include <prdfPluginMap.H>
 
+using namespace TARGETING;
+
 namespace PRDF
 {
 namespace Proc
@@ -257,12 +259,12 @@ int32_t CheckForRecoveredSev(ExtensibleChip * i_chip,
  *  @param o_externalChips - List of external fabrics driving checkstop.
  *  @param o_wofValue - Current WOF value (unused for now).
  */
-int32_t GetCheckstopInfo(ExtensibleChip * i_chip,
-                   bool & o_wasInternal,
-                   TARGETING::TargetHandleList & o_externalChips,
-                   uint64_t & o_wofValue)
+int32_t GetCheckstopInfo( ExtensibleChip * i_chip,
+                          bool & o_wasInternal,
+                          TargetHandleList & o_externalChips,
+                          uint64_t & o_wofValue )
 {
-    using namespace TARGETING; using namespace PlatServices;
+    using namespace PlatServices;
 
     // Clear parameters.
     o_wasInternal = false;
@@ -345,8 +347,6 @@ int32_t GetCheckstopInfo(ExtensibleChip * i_chip,
 int32_t CoreConfigured(ExtensibleChip * i_chip,
                        bool & o_isCoreConfigured)
 {
-    using namespace TARGETING;
-
     o_isCoreConfigured = false;
 
     TargetHandleList l_coreList =
@@ -357,6 +357,43 @@ int32_t CoreConfigured(ExtensibleChip * i_chip,
 
     return SUCCESS;
 } PRDF_PLUGIN_DEFINE(Proc, CoreConfigured);
+
+/**
+  * @brief Call  HWP and set the right dump type
+  * @param  i_chip P8 chip
+  * @param  i_sc   The step code data struct
+  * @returns Failure or Success
+  * @note
+  */
+int32_t analyzeMpIPL( ExtensibleChip * i_chip,
+                      STEP_CODE_DATA_STRUCT & i_sc )
+{
+    int32_t l_rc = SUCCESS;
+
+#ifndef __HOSTBOOT_MODULE
+
+    if (CHECK_STOP == i_sc.service_data->GetAttentionType())
+    {
+        TargetHandle_t l_procTarget = i_chip->GetChipHandle();
+        bool l_mpiplMode = false;
+        l_rc = PlatServices::checkMpiplEligibility(l_procTarget,
+                                                   l_mpiplMode);
+
+        PRDF_TRAC("[analyzeMpIPL] Proc: 0x%08x, l_mpiplMode: %d, "
+                  "l_rc: %d", i_chip->GetId(), l_mpiplMode, l_rc);
+
+        if((SUCCESS == l_rc) && (true == l_mpiplMode))
+        {
+            i_sc.service_data->SetDump(CONTENT_SW,
+                                       l_procTarget);
+        }
+    }
+
+#endif
+
+    return l_rc;
+}
+PRDF_PLUGIN_DEFINE( Proc, analyzeMpIPL );
 
 } // end namespace Proc
 } // end namespace PRDF
