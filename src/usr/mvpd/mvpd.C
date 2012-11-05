@@ -61,7 +61,7 @@ const bool g_readPNOR = true;
 // Trace definitions
 // ----------------------------------------------
 trace_desc_t* g_trac_mvpd = NULL;
-TRAC_INIT( & g_trac_mvpd, "MVPD", 4096 );
+TRAC_INIT( & g_trac_mvpd, "MVPD", KILOBYTE);
 
 // ------------------------
 // Macros for unit testing

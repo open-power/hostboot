@@ -32,7 +32,7 @@
 
 
 trace_desc_t* g_trac_mbox = NULL;
-TRAC_INIT(&g_trac_mbox, "MBOX", 4096, TRACE::BUFFER_SLOW); //4K
+TRAC_INIT(&g_trac_mbox, "MBOX", KILOBYTE, TRACE::BUFFER_SLOW); //4K
 
 
 namespace MBOX

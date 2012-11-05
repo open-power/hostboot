@@ -1,26 +1,25 @@
-/*  IBM_PROLOG_BEGIN_TAG
- *  This is an automatically generated prolog.
- *
- *  $Source: src/usr/hwpf/plat/fapiPlatUtil.C $
- *
- *  IBM CONFIDENTIAL
- *
- *  COPYRIGHT International Business Machines Corp. 2011-2012
- *
- *  p1
- *
- *  Object Code Only (OCO) source materials
- *  Licensed Internal Code Source Materials
- *  IBM HostBoot Licensed Internal Code
- *
- *  The source code for this program is not published or other-
- *  wise divested of its trade secrets, irrespective of what has
- *  been deposited with the U.S. Copyright Office.
- *
- *  Origin: 30
- *
- *  IBM_PROLOG_END_TAG
- */
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/usr/hwpf/plat/fapiPlatUtil.C $                            */
+/*                                                                        */
+/* IBM CONFIDENTIAL                                                       */
+/*                                                                        */
+/* COPYRIGHT International Business Machines Corp. 2011,2012              */
+/*                                                                        */
+/* p1                                                                     */
+/*                                                                        */
+/* Object Code Only (OCO) source materials                                */
+/* Licensed Internal Code Source Materials                                */
+/* IBM HostBoot Licensed Internal Code                                    */
+/*                                                                        */
+/* The source code for this program is not published or otherwise         */
+/* divested of its trade secrets, irrespective of what has been           */
+/* deposited with the U.S. Copyright Office.                              */
+/*                                                                        */
+/* Origin: 30                                                             */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
 /**
  *  @file fapiPlatUtil.C
  *
@@ -49,9 +48,9 @@ trace_desc_t* g_fapiScanTd;
 //******************************************************************************
 // Global TracInit objects. Construction will initialize the trace buffer
 //******************************************************************************
-TRAC_INIT(&g_fapiTd, FAPI_TRACE_NAME, 4096);
-TRAC_INIT(&g_fapiImpTd, FAPI_IMP_TRACE_NAME, 4096);
-TRAC_INIT(&g_fapiScanTd, FAPI_SCAN_TRACE_NAME, 4096);
+TRAC_INIT(&g_fapiTd, FAPI_TRACE_NAME, 2*KILOBYTE);
+TRAC_INIT(&g_fapiImpTd, FAPI_IMP_TRACE_NAME, 2*KILOBYTE);
+TRAC_INIT(&g_fapiScanTd, FAPI_SCAN_TRACE_NAME, 4*KILOBYTE);
 
 extern "C"
 {
@@ -121,7 +120,7 @@ void fapiLogError(fapi::ReturnCode & io_rc)
 }
 
 //****************************************************************************
-// platform-level implementation 
+// platform-level implementation
 
 bool platIsScanTraceEnabled()
 {
@@ -131,7 +130,7 @@ bool platIsScanTraceEnabled()
 }
 
 //****************************************************************************
-// platform-level implementation 
+// platform-level implementation
 
 void platSetScanTrace(bool i_enable)
 {
@@ -184,7 +183,7 @@ fapi::ReturnCode fapiLoadInitFile(const fapi::Target & i_Target,
 //******************************************************************************
 // fapiUnloadInitFile
 //******************************************************************************
-fapi::ReturnCode fapiUnloadInitFile(const char * i_file, const char *& io_addr, 
+fapi::ReturnCode fapiUnloadInitFile(const char * i_file, const char *& io_addr,
     size_t & io_size)
 {
     fapi::ReturnCode l_rc = fapi::FAPI_RC_SUCCESS;

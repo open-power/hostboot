@@ -50,10 +50,10 @@
 // Trace definitions
 // ----------------------------------------------
 trace_desc_t* g_trac_scandd = NULL;
-TRAC_INIT( & g_trac_scandd, "SCANDD", 4096 );
+TRAC_INIT( & g_trac_scandd, "SCANDD", KILOBYTE );
 
 trace_desc_t* g_trac_scanddr = NULL;
-TRAC_INIT( & g_trac_scanddr, "SCANDDR", 4096 );
+TRAC_INIT( & g_trac_scanddr, "SCANDDR", KILOBYTE );
 
 
 // ----------------------------------------------
@@ -319,7 +319,7 @@ errlHndl_t scanDoScan(  DeviceFW::OperationType i_opType,
         }
 
         // If this is a centaur chip need to read the header
-        // data area first before the header Write. 
+        // data area first before the header Write.
         if (l_isCentaur)
         {
             // Do a scom write to the scan type select register
@@ -351,7 +351,7 @@ errlHndl_t scanDoScan(  DeviceFW::OperationType i_opType,
                           l_buffer,
                           op_size,
                           DEVICE_SCOM_ADDRESS(l_headerDataAddr));
-     
+
         TRACDCOMP( g_trac_scandd,"SCAN:Headr PUTSCOM %.8x = %.8x %.8x",l_headerDataAddr , l_buffer[0], l_buffer[1]);
 
         if(l_err)
@@ -388,7 +388,7 @@ errlHndl_t scanDoScan(  DeviceFW::OperationType i_opType,
         uint32_t *temp_buffer = (uint32_t *)io_buffer;
 
         // Need to increment the buffer by 1 to get past word0 which is the
-        // header that we wrote to already above. 
+        // header that we wrote to already above.
         temp_buffer++;
         // decrement the number of words to read by 1 because read header above
         l_wordsInChain--;
@@ -500,7 +500,7 @@ errlHndl_t scanDoScan(  DeviceFW::OperationType i_opType,
             // If this is a scan Write
             if ( DeviceFW::WRITE == i_opType )
             {
-                // If this is not a Centaur chip then do the setpulse here. 
+                // If this is not a Centaur chip then do the setpulse here.
                 if (!l_isCentaur)
                 {
                     // If this is the last iteration and set pulse is requested
@@ -612,7 +612,7 @@ errlHndl_t scanDoScan(  DeviceFW::OperationType i_opType,
             break;
 
         }
-        // If header check on.. then need to verify the data. 
+        // If header check on.. then need to verify the data.
         if (!(i_flag & SCAN::NO_HEADER_CHECK))
         {
             // If the header data did not match..

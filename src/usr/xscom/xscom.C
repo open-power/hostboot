@@ -46,7 +46,7 @@
 
 // Trace definition
 trace_desc_t* g_trac_xscom = NULL;
-TRAC_INIT(&g_trac_xscom, "XSCOM", 4096, TRACE::BUFFER_SLOW);
+TRAC_INIT(&g_trac_xscom, "XSCOM", 2*KILOBYTE, TRACE::BUFFER_SLOW);
 
 namespace XSCOM
 {

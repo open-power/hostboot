@@ -29,12 +29,13 @@
  */
 #include <assert.h>
 #include <trace/interface.H>
+#include <limits.h>
 
 namespace TRACE
 {
     /** Unique trace buffer for assert statements. */
     trace_desc_t* g_assertTraceBuffer;
-    TRAC_INIT(&g_assertTraceBuffer, "ASSERT", 4096, TRACE::BUFFER_SLOW);
+    TRAC_INIT(&g_assertTraceBuffer, "ASSERT", KILOBYTE, TRACE::BUFFER_SLOW);
 
     /** @fn assertTrace
      *  @brief Hook to perform a trace on an assert failure.

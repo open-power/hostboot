@@ -50,8 +50,13 @@ using namespace HWAS::COMMON;
 HWAS_TD_t g_trac_dbg_hwas   = NULL; // debug - fast
 HWAS_TD_t g_trac_imp_hwas   = NULL; // important - slow
 
+#ifdef __HOSTBOOT_MODULE
+TRAC_INIT(&g_trac_dbg_hwas, "HWAS",     KILOBYTE );
+TRAC_INIT(&g_trac_imp_hwas, "HWAS_I",   KILOBYTE );
+#else
 TRAC_INIT(&g_trac_dbg_hwas, "HWAS",     1024 );
 TRAC_INIT(&g_trac_imp_hwas, "HWAS_I",   1024 );
+#endif
 
 /**
  * @brief       simple helper fn to get and set hwas state to poweredOn,

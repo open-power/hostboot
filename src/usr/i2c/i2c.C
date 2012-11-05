@@ -51,10 +51,10 @@
 // Trace definitions
 // ----------------------------------------------
 trace_desc_t* g_trac_i2c = NULL;
-TRAC_INIT( & g_trac_i2c, "I2C", 4096 );
+TRAC_INIT( & g_trac_i2c, "I2C", KILOBYTE );
 
 trace_desc_t* g_trac_i2cr = NULL;
-TRAC_INIT( & g_trac_i2cr, "I2CR", 4096 );
+TRAC_INIT( & g_trac_i2cr, "I2CR", KILOBYTE );
 
 // Easy macro replace for unit testing
 //#define TRACUCOMP(args...)  TRACFCOMP(args)

@@ -34,7 +34,7 @@ using namespace TARGETING;
 namespace DeviceFW
 {
     trace_desc_t* g_traceBuffer = NULL;
-    TRAC_INIT(&g_traceBuffer, "DevFW", 4096, TRACE::BUFFER_SLOW);
+    TRAC_INIT(&g_traceBuffer, "DevFW", KILOBYTE, TRACE::BUFFER_SLOW);
 
     Associator::Associator() : iv_mutex()
     {

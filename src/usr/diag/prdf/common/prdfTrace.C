@@ -27,10 +27,15 @@
  */
 
 #include "prdfTrace.H"
+#include <limits.h>
 
 namespace PRDF
 {
     tracDesc_t traceDesc = 0;
+#ifdef __HOSTBOOT_MODULE
+    TRAC_INIT( &traceDesc, PRDF_COMP_NAME, KILOBYTE );
+#else
     TRAC_INIT( &traceDesc, PRDF_COMP_NAME, 4096 );
+#endif
 } //End namespace PRDF
 

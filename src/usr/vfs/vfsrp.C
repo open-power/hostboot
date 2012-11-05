@@ -43,7 +43,7 @@ using namespace VFS;
 
 // Trace definitions
 trace_desc_t * g_trac_vfs = NULL;
-TRAC_INIT(&g_trac_vfs, VFS_COMP_NAME, 1024, TRACE::BUFFER_SLOW);
+TRAC_INIT(&g_trac_vfs, VFS_COMP_NAME, KILOBYTE, TRACE::BUFFER_SLOW);
 
 /**
  * setup _start and handle barrier

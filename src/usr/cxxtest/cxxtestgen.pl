@@ -642,6 +642,7 @@ sub writeHostBootPreamble() {
   print "#include <sys/task.h>\n";
   print "#include <sys/sync.h>\n";
   print "#include <trace/interface.H>\n";
+  print "#include <limits.h>\n";
   ## $$TODO print "#include <taskargs/taskargs.H>\n";
 
   print "#include <cxxtest/TestSuite.H>\n";
@@ -728,8 +729,7 @@ sub write_start() {
   print   "\n";
   print   "trace_desc_t *g_trac_test = NULL;\n";
 ##  Use same trace buffer for all unit tests, i.e. "UNIT_TEST"
-##  print   "TRAC_INIT(&g_trac_test, \"", suiteName(), "\", 4096);\n";
-  print   "TRAC_INIT(&g_trac_test, \"", "UNIT_TEST", "\", 4096);\n";
+  print   "TRAC_INIT(&g_trac_test, \"", "UNIT_TEST", "\", 4*KILOBYTE);\n";
 
 
   print   "\n\n";

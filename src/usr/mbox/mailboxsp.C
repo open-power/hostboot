@@ -47,7 +47,8 @@ extern trace_desc_t * g_trac_mboxmsg;
 
 const char HBMBOXMSG_TRACE_NAME[] = "MBOXMSG";
 trace_desc_t* g_trac_mboxmsg = NULL; // g_trac_mbox;
-TRAC_INIT(&g_trac_mboxmsg, HBMBOXMSG_TRACE_NAME, 2048, TRACE::BUFFER_SLOW);
+TRAC_INIT(&g_trac_mboxmsg, HBMBOXMSG_TRACE_NAME,
+          2*KILOBYTE, TRACE::BUFFER_SLOW);
 
 
 

@@ -148,7 +148,7 @@ void IStepDispatcher::init ( errlHndl_t &io_rtaskRetErrl )
     // initialize (and declare) ISTEPS_TRACE here, the rest of the isteps will
     // use it.
     ISTEPS_TRACE::g_trac_isteps_trace = NULL;
-    TRAC_INIT(&ISTEPS_TRACE::g_trac_isteps_trace, "ISTEPS_TRACE", 2048 );
+    TRAC_INIT(&ISTEPS_TRACE::g_trac_isteps_trace, "ISTEPS_TRACE", 2*KILOBYTE );
 
     printk( "IstepDispatcher entry.\n" );
     TRACFCOMP( g_trac_initsvc,

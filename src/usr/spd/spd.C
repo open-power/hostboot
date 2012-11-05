@@ -62,7 +62,7 @@ const bool g_usePNOR = true;
 // Trace definitions
 // ----------------------------------------------
 trace_desc_t* g_trac_spd = NULL;
-TRAC_INIT( & g_trac_spd, "SPD", 4096 );
+TRAC_INIT( & g_trac_spd, "SPD", KILOBYTE );
 
 // ------------------------
 // Macros for unit testing

@@ -24,11 +24,16 @@
 #include <prdfRepairHealth.H>
 #include <svpdextstructs.H>
 #include <svpdextinterface.H>
+#include <limits.h>
 
 //#include <prdfP7McRepairHealth.H>
 
 tracDesc_t g_asmTracDesc;
+#ifdef __HOSTBOOT_MODULE
+TRAC_INIT( &g_asmTracDesc, PRDF_COMP_NAME, KILOBYTE );
+#else
 TRAC_INIT( &g_asmTracDesc, PRDF_COMP_NAME, 4096 );
+#endif
 
 /* prdfGetRepairHealthStatus
  *         Get repair objects for FRU.

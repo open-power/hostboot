@@ -45,7 +45,7 @@ void    cxxinit( errlHndl_t    &io_taskRetErrl );
 
 
 trace_desc_t *g_trac_cxxtest = NULL;
-TRAC_INIT(&g_trac_cxxtest, CXXTEST_COMP_NAME, 1024 );
+TRAC_INIT(&g_trac_cxxtest, CXXTEST_COMP_NAME, KILOBYTE );
 
 
 /**
@@ -150,5 +150,5 @@ void    cxxinit( errlHndl_t    &io_taskRetErrl )
     //  @todo dump out an informational errorlog??
 
     // should always return NULL
-    io_taskRetErrl  = l_errl; 
+    io_taskRetErrl  = l_errl;
 }

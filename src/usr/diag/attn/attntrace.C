@@ -28,12 +28,13 @@
  */
 
 #include "attntrace.H"
+#include <limits.h>
 
 namespace ATTN
 {
 
 trace_desc_t * fastTd = 0, * slowTd = 0;
 
-TRAC_INIT(&fastTd, "ATTN_FAST", 4096);
-TRAC_INIT(&slowTd, "ATTN_SLOW", 4096);
+TRAC_INIT(&fastTd, "ATTN_FAST", KILOBYTE);
+TRAC_INIT(&slowTd, "ATTN_SLOW", KILOBYTE);
 }

@@ -41,7 +41,7 @@
 //#include <arch/ppc.H> //for MAGIC_INSTRUCTION
 
 trace_desc_t *g_trac_runtime = NULL;
-TRAC_INIT(&g_trac_runtime, "RUNTIME", 4096);
+TRAC_INIT(&g_trac_runtime, "RUNTIME", KILOBYTE);
 
 /**
  * @brief Read a FAPI attribute and stick it into mainstore

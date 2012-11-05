@@ -41,7 +41,7 @@
 
 // Trace definition
 trace_desc_t* g_trac_scom = NULL;
-TRAC_INIT(&g_trac_scom, "SCOM", 1024, TRACE::BUFFER_SLOW); //1K
+TRAC_INIT(&g_trac_scom, "SCOM", KILOBYTE, TRACE::BUFFER_SLOW); //1K
 
 
 namespace SCOM

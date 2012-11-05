@@ -75,7 +75,7 @@ TARGETING::TargetService& targetService()
 
 TARG_TD_t g_trac_targeting = {0};
 #ifdef __HOSTBOOT_MODULE
-TRAC_INIT(&g_trac_targeting, "TARG", 4096, TRACE::BUFFER_SLOW);
+TRAC_INIT(&g_trac_targeting, "TARG", 2*KILOBYTE, TRACE::BUFFER_SLOW);
 #else
 TRAC_INIT(&g_trac_targeting, "TARG", 4096);
 #endif

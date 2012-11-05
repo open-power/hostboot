@@ -67,7 +67,7 @@ namespace   INITSERVICE
 {
 
 trace_desc_t *g_trac_initsvc = NULL;
-TRAC_INIT(&g_trac_initsvc, "INITSVC", 2048 );
+TRAC_INIT(&g_trac_initsvc, "INITSVC", 2*KILOBYTE );
 
 /**
  *  @brief  start() task entry procedure
