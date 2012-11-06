@@ -72,7 +72,8 @@ FAPI_ATTR_SOURCES =          \
     activate_powerbus/proc_build_smp/proc_fab_smp_fabric_attributes.xml \
     runtime_attributes/pm_attributes_all_hwp.xml \
     runtime_attributes/pm_attributes_all_plat.xml \
-    nest_chiplets/proc_pcie_scominit/proc_pcie_scominit_attributes.xml
+    nest_chiplets/proc_pcie_scominit/proc_pcie_scominit_attributes.xml \
+    dmi_training/proc_cen_set_inband_addr/proc_cen_set_inband_addr_attributes.xml
 
 
 XMLTOHB_GENERIC_XML     = generic.xml

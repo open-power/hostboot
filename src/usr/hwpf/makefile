@@ -95,7 +95,8 @@ HWP_ATTR_XML_FILES = hwp/memory_attributes.xml \
                      hwp/activate_powerbus/proc_build_smp/proc_fab_smp_fabric_attributes.xml    \
                      hwp/runtime_attributes/pm_attributes_all_plat.xml \
                      hwp/runtime_attributes/pm_attributes_all_hwp.xml \
-                     hwp/nest_chiplets/proc_pcie_scominit/proc_pcie_scominit_attributes.xml
+                     hwp/nest_chiplets/proc_pcie_scominit/proc_pcie_scominit_attributes.xml \
+                     hwp/dmi_training/proc_cen_set_inband_addr/proc_cen_set_inband_addr_attributes.xml
 
 #------------------------------------------------------------------------------
 # Initfiles

@@ -3957,8 +3957,11 @@
         </uint64_t>
     </simpleType>
     <persistency>non-volatile</persistency>
-    <!-- Link to ATTR_PROC_INBAND_MCFGPRQ_BASE_ADDRESS (@todo RTC:42177) -->
     <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_MCS_INBAND_BASE_ADDRESS</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
 </attribute>
 
 <attribute>

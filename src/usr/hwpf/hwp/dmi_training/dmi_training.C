@@ -66,6 +66,7 @@
 #include    "proc_cen_framelock.H"
 #include    "dmi_io_run_training.H"
 #include    "dmi_scominit.H"
+#include    "proc_cen_set_inband_addr.H"
 
 namespace   DMI_TRAINING
 {
@@ -82,20 +83,20 @@ using   namespace   fapi;
 void*    call_dmi_scominit( void *io_pArgs )
 {
     errlHndl_t l_errl = NULL;
-
     IStepError l_StepError;
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_dmi_scominit entry" );
-    uint8_t l_num = 0;
 
     // Get all functional MCS chiplets
     TARGETING::TargetHandleList l_mcsTargetList;
     getAllChiplets(l_mcsTargetList, TYPE_MCS);
 
     // Invoke dmi_scominit on each one
-    for (l_num = 0; l_num < l_mcsTargetList.size(); l_num++)
+    for (TargetHandleList::iterator l_mcs_iter = l_mcsTargetList.begin();
+            l_mcs_iter != l_mcsTargetList.end();
+            ++l_mcs_iter)
     {
-        const TARGETING::Target* l_pTarget = l_mcsTargetList[l_num];
+        const TARGETING::Target* l_pTarget = *l_mcs_iter;
         const fapi::Target l_fapi_target(
             TARGET_TYPE_MCS_CHIPLET,
             reinterpret_cast<void *>
@@ -114,10 +115,8 @@ void*    call_dmi_scominit( void *io_pArgs )
                         "ERROR 0x%.8X : dmi_scominit HWP returns error",
                         l_errl->reasonCode());
 
-            ErrlUserDetailsTarget myDetails(l_pTarget);
-
             // capture the target data in the elog
-            myDetails.addToLog( l_errl );
+            ErrlUserDetailsTarget(l_pTarget).addToLog( l_errl );
 
             break;
         }
@@ -134,9 +133,11 @@ void*    call_dmi_scominit( void *io_pArgs )
         getAllChips(l_membufTargetList, TYPE_MEMBUF);
 
         // Invoke dmi_scominit on each one
-        for (l_num = 0; l_num < l_membufTargetList.size(); l_num++)
+        for (TargetHandleList::iterator l_membuf_iter = l_membufTargetList.begin();
+                l_membuf_iter != l_membufTargetList.end();
+                ++l_membuf_iter)
         {
-            const TARGETING::Target* l_pTarget = l_membufTargetList[l_num];
+            const TARGETING::Target* l_pTarget = *l_membuf_iter;
             const fapi::Target l_fapi_target(
                 TARGET_TYPE_MEMBUF_CHIP,
                 reinterpret_cast<void *>
@@ -153,10 +154,8 @@ void*    call_dmi_scominit( void *io_pArgs )
                 TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, "ERROR 0x%.8X : dmi_scominit HWP returns error",
                           l_errl->reasonCode());
 
-                ErrlUserDetailsTarget myDetails(l_pTarget);
-
                 // capture the target data in the elog
-                myDetails.addToLog( l_errl );
+                ErrlUserDetailsTarget(l_pTarget).addToLog( l_errl );
 
                 break;
             }
@@ -257,10 +256,12 @@ void*    call_dmi_io_run_training( void *io_pArgs )
     TARGETING::TargetHandleList l_cpuTargetList;
     getAllChips(l_cpuTargetList, TYPE_PROC);
 
-    for ( size_t i = 0; i < l_cpuTargetList.size(); i++ )
+    for (TargetHandleList::iterator l_cpu_iter = l_cpuTargetList.begin();
+            l_cpu_iter != l_cpuTargetList.end();
+            ++l_cpu_iter)
     {
         //  make a local copy of the CPU target
-        const TARGETING::Target*  l_cpu_target = l_cpuTargetList[i];
+        const TARGETING::Target* l_cpu_target = *l_cpu_iter;
 
         uint8_t l_cpuNum = l_cpu_target->getAttr<ATTR_POSITION>();
 
@@ -268,20 +269,27 @@ void*    call_dmi_io_run_training( void *io_pArgs )
         TARGETING::TargetHandleList l_mcsTargetList;
         getChildChiplets( l_mcsTargetList, l_cpu_target, TYPE_MCS );
 
-        for ( size_t j = 0; j < l_mcsTargetList.size(); j++ )
+        for (TargetHandleList::iterator l_mcs_iter = l_mcsTargetList.begin();
+                l_mcs_iter != l_mcsTargetList.end();
+                ++l_mcs_iter)
         {
             //  make a local copy of the MCS target
-            const TARGETING::Target*  l_mcs_target = l_mcsTargetList[j];
+            const TARGETING::Target* l_mcs_target = *l_mcs_iter;
+
             uint8_t l_mcsNum    =   l_mcs_target->getAttr<ATTR_CHIP_UNIT>();
 
             //  find all the Centaurs that are associated with this MCS
             TARGETING::TargetHandleList l_memTargetList;
             getAffinityChips(l_memTargetList, l_mcs_target, TYPE_MEMBUF);
 
-            for ( size_t k = 0; k < l_memTargetList.size(); k++ )
+            for (TargetHandleList::iterator l_mem_iter = l_memTargetList.begin();
+                    l_mem_iter != l_memTargetList.end();
+                    ++l_mem_iter)
             {
                 //  make a local copy of the MEMBUF target
-                const TARGETING::Target*  l_mem_target = l_memTargetList[k];
+                const TARGETING::Target*  l_mem_target = *l_mem_iter;
+
+                uint8_t l_memNum = l_mem_target->getAttr<ATTR_POSITION>();
 
                 //  struct containing custom parameters that is fed to HWP
                 //  call the HWP with each target   ( if parallel, spin off a task )
@@ -300,7 +308,7 @@ void*    call_dmi_io_run_training( void *io_pArgs )
                         "===== Call dmi_io_run_training HWP( cpu 0x%x, mcs 0x%x, mem 0x%x ) : ",
                         l_cpuNum,
                         l_mcsNum,
-                        k );
+                        l_memNum );
 
                 EntityPath l_path;
                 l_path = l_cpu_target->getAttr<ATTR_PHYS_PATH>();
@@ -321,12 +329,10 @@ void*    call_dmi_io_run_training( void *io_pArgs )
                             l_err->reasonCode(),
                             l_cpuNum,
                             l_mcsNum,
-                            k );
-
-                    ErrlUserDetailsTarget myDetails( l_mem_target );
+                            l_memNum );
 
                     // capture the target data in the elog
-                    myDetails.addToLog( l_err );
+                    ErrlUserDetailsTarget(l_mem_target).addToLog( l_err );
 
                     /*@
                      * @errortype
@@ -354,7 +360,7 @@ void*    call_dmi_io_run_training( void *io_pArgs )
                             "( cpu 0x%x, mcs 0x%x, mem 0x%x ) ",
                             l_cpuNum,
                             l_mcsNum,
-                            k );
+                            l_memNum );
                 }
 
             }  //end for l_mem_target
@@ -411,20 +417,25 @@ void*    call_proc_cen_framelock( void *io_pArgs )
     TARGETING::TargetHandleList l_mcsTargetList;
     getAllChiplets(l_mcsTargetList, TYPE_MCS);
 
-    for ( size_t i = 0; i < l_mcsTargetList.size() ; ++i  )
+    for (TargetHandleList::iterator l_mcs_iter = l_mcsTargetList.begin();
+            l_mcs_iter != l_mcsTargetList.end();
+            ++l_mcs_iter)
     {
         //  make a local copy of the MCS target
-        const TARGETING::Target*  l_mcs_target = l_mcsTargetList[i];
+        const TARGETING::Target*  l_mcs_target = *l_mcs_iter;
 
         //  find all the Centaurs that are associated with this MCS
         TARGETING::TargetHandleList l_memTargetList;
         getAffinityChips(l_memTargetList, l_mcs_target, TYPE_MEMBUF);
 
-        for ( uint8_t k = 0, l_memNum = 0; k < l_memTargetList.size();
-                                                             k++, l_memNum++ )
+        for (TargetHandleList::iterator l_mem_iter = l_memTargetList.begin();
+                l_mem_iter != l_memTargetList.end();
+                ++l_mem_iter)
         {
             //  make a local copy of the MEMBUF target
-            const TARGETING::Target*  l_mem_target = l_memTargetList[k];
+            const TARGETING::Target*  l_mem_target = *l_mem_iter;
+
+            uint8_t l_memNum = l_mem_target->getAttr<ATTR_POSITION>();
 
             // fill out the args struct.
             l_args.in_error_state       =   false;
@@ -538,14 +549,72 @@ void*    call_host_attnlisten_cen( void *io_pArgs )
 //
 void*    call_cen_set_inband_addr( void *io_pArgs )
 {
-    errlHndl_t l_err = NULL;
+    IStepError l_StepError;
 
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_cen_set_inband_addr entry" );
+    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+            "call_cen_set_inband_addr entry" );
+
+    //  get the mcs chiplets
+    TARGETING::TargetHandleList l_mcsTargetList;
+    getAllChiplets(l_mcsTargetList, TYPE_MCS);
+
+    for (TargetHandleList::iterator l_mcs_iter = l_mcsTargetList.begin();
+            l_mcs_iter != l_mcsTargetList.end();
+            ++l_mcs_iter)
+    {
+        const TARGETING::Target* l_pTarget = *l_mcs_iter;
+        const fapi::Target l_fapi_target( TARGET_TYPE_MCS_CHIPLET,
+                reinterpret_cast<void *>
+                    (const_cast<TARGETING::Target*>(l_pTarget)));
+
+        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                    "Running cen_set_inband_addr HWP on...");
+        EntityPath l_path;
+        l_path = l_pTarget->getAttr<ATTR_PHYS_PATH>();
+        l_path.dump();
+
+        errlHndl_t l_err = NULL;
+        FAPI_INVOKE_HWP(l_err, proc_cen_set_inband_addr, l_fapi_target);
+        if ( l_err )
+        {
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+            "ERROR 0x%.8X : proc_cen_set_inband_addr HWP", l_err->reasonCode());
+
+            // capture the target data in the elog
+            ErrlUserDetailsTarget(l_pTarget).addToLog( l_err );
+
+            /*@
+             * @errortype
+             * @reasoncode  ISTEP_DMI_TRAINING_FAILED
+             * @severity    ERRORLOG::ERRL_SEV_UNRECOVERABLE
+             * @moduleid    ISTEP_PROC_CEN_SET_INBAND_ADDR
+             * @userdata1   bytes 0-1: plid identifying first error
+             *              bytes 2-3: reason code of first error
+             * @userdata2   bytes 0-1: total number of elogs included
+             *              bytes 2-3: N/A
+             * @devdesc     call to proc_cen_set_inband_addr has failed
+             *
+             */
+            l_StepError.addErrorDetails(ISTEP_DMI_TRAINING_FAILED,
+                                        ISTEP_PROC_CEN_SET_INBAND_ADDR,
+                                        l_err);
+
+            errlCommit( l_err, HWPF_COMP_ID );
+
+            break; // break out of mcs loop
+        }
+        else
+        {
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                    "SUCCESS :  proc_cen_set_inband_addr HWP");
+        }
+    }   // end for mcs
 
 
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_cen_set_inband_addr exit" );
+    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+            "call_cen_set_inband_addr exit" );
 
-    return l_err;
+    return l_StepError.getErrorHandle();
 }
 
 

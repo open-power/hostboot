@@ -102,6 +102,7 @@ enum istepModuleId
     ISTEP_PROC_PCIE_SCOMINIT                            = 0x35,
     ISTEP_PROC_PCIE_CONFIG                              = 0x36,
     ISTEP_HOST_MPIPL_SERVICE                            = 0x37,
+    ISTEP_PROC_CEN_SET_INBAND_ADDR                      = 0x38,
 };
 
 /**

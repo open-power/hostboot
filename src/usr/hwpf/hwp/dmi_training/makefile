@@ -40,15 +40,18 @@ EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/bus_training
 EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/dmi_training/proc_cen_framelock
 EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/dmi_training/dmi_io_run_training
 EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/dmi_training/dmi_scominit
+EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/dmi_training/proc_cen_set_inband_addr
 
 OBJS =  dmi_training.o  \
         proc_cen_framelock.o    \
         dmi_io_run_training.o \
-        dmi_scominit.o
+        dmi_scominit.o \
+        proc_cen_set_inband_addr.o
 
 ##  NOTE: add a new directory onto the vpaths when you add a new HWP
 VPATH += ${ROOTPATH}/src/usr/hwpf/hwp/dmi_training/proc_cen_framelock
 VPATH += ${ROOTPATH}/src/usr/hwpf/hwp/dmi_training/dmi_io_run_training
 VPATH += ${ROOTPATH}/src/usr/hwpf/hwp/dmi_training/dmi_scominit
+VPATH += ${ROOTPATH}/src/usr/hwpf/hwp/dmi_training/proc_cen_set_inband_addr
 
 include ${ROOTPATH}/config.mk

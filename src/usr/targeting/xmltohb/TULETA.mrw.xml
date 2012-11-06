@@ -20,7 +20,7 @@
 <!-- Origin: 30                                                             -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
-<!-- Source path = /gsa/ausgsa-h2/02/vanlee/sb/102512M/obj/ppc/mrw/xml/data -->
+<!-- Source path = /esw/fips810/Builds/b1113t_1247.810/obj/ppc/mrw/xml/data -->
 <attributes>
 
 <!-- TULETA System with new values-->
@@ -586,6 +586,10 @@
         <id>CHIP_UNIT</id>
         <default>4</default>
     </attribute>
+    <attribute><id>IBSCOM_MCS_BASE_ADDR</id>
+        <!-- baseAddr = 0x0003E00000000000, 128GB per MCS -->
+        <default>0x0003E0800000000</default>
+    </attribute>
     <!-- TODO When MRW provides the information, these two attributes
          should be included. values of X come from MRW.
     <attribute>
@@ -614,6 +618,10 @@
     <attribute>
         <id>CHIP_UNIT</id>
         <default>5</default>
+    </attribute>
+    <attribute><id>IBSCOM_MCS_BASE_ADDR</id>
+        <!-- baseAddr = 0x0003E00000000000, 128GB per MCS -->
+        <default>0x0003E0A00000000</default>
     </attribute>
     <!-- TODO When MRW provides the information, these two attributes
          should be included. values of X come from MRW.
@@ -644,6 +652,10 @@
         <id>CHIP_UNIT</id>
         <default>6</default>
     </attribute>
+    <attribute><id>IBSCOM_MCS_BASE_ADDR</id>
+        <!-- baseAddr = 0x0003E00000000000, 128GB per MCS -->
+        <default>0x0003E0C00000000</default>
+    </attribute>
     <!-- TODO When MRW provides the information, these two attributes
          should be included. values of X come from MRW.
     <attribute>
@@ -672,6 +684,10 @@
     <attribute>
         <id>CHIP_UNIT</id>
         <default>7</default>
+    </attribute>
+    <attribute><id>IBSCOM_MCS_BASE_ADDR</id>
+        <!-- baseAddr = 0x0003E00000000000, 128GB per MCS -->
+        <default>0x0003E0E00000000</default>
     </attribute>
     <!-- TODO When MRW provides the information, these two attributes
          should be included. values of X come from MRW.
@@ -1251,6 +1267,10 @@
         <id>CHIP_UNIT</id>
         <default>4</default>
     </attribute>
+    <attribute><id>IBSCOM_MCS_BASE_ADDR</id>
+        <!-- baseAddr = 0x0003E00000000000, 128GB per MCS -->
+        <default>0x0003E1800000000</default>
+    </attribute>
     <!-- TODO When MRW provides the information, these two attributes
          should be included. values of X come from MRW.
     <attribute>
@@ -1279,6 +1299,10 @@
     <attribute>
         <id>CHIP_UNIT</id>
         <default>5</default>
+    </attribute>
+    <attribute><id>IBSCOM_MCS_BASE_ADDR</id>
+        <!-- baseAddr = 0x0003E00000000000, 128GB per MCS -->
+        <default>0x0003E1A00000000</default>
     </attribute>
     <!-- TODO When MRW provides the information, these two attributes
          should be included. values of X come from MRW.
@@ -1309,6 +1333,10 @@
         <id>CHIP_UNIT</id>
         <default>6</default>
     </attribute>
+    <attribute><id>IBSCOM_MCS_BASE_ADDR</id>
+        <!-- baseAddr = 0x0003E00000000000, 128GB per MCS -->
+        <default>0x0003E1C00000000</default>
+    </attribute>
     <!-- TODO When MRW provides the information, these two attributes
          should be included. values of X come from MRW.
     <attribute>
@@ -1337,6 +1365,10 @@
     <attribute>
         <id>CHIP_UNIT</id>
         <default>7</default>
+    </attribute>
+    <attribute><id>IBSCOM_MCS_BASE_ADDR</id>
+        <!-- baseAddr = 0x0003E00000000000, 128GB per MCS -->
+        <default>0x0003E1E00000000</default>
     </attribute>
     <!-- TODO When MRW provides the information, these two attributes
          should be included. values of X come from MRW.
@@ -1916,6 +1948,10 @@
         <id>CHIP_UNIT</id>
         <default>4</default>
     </attribute>
+    <attribute><id>IBSCOM_MCS_BASE_ADDR</id>
+        <!-- baseAddr = 0x0003E00000000000, 128GB per MCS -->
+        <default>0x0003E4800000000</default>
+    </attribute>
     <!-- TODO When MRW provides the information, these two attributes
          should be included. values of X come from MRW.
     <attribute>
@@ -1944,6 +1980,10 @@
     <attribute>
         <id>CHIP_UNIT</id>
         <default>5</default>
+    </attribute>
+    <attribute><id>IBSCOM_MCS_BASE_ADDR</id>
+        <!-- baseAddr = 0x0003E00000000000, 128GB per MCS -->
+        <default>0x0003E4A00000000</default>
     </attribute>
     <!-- TODO When MRW provides the information, these two attributes
          should be included. values of X come from MRW.
@@ -1974,6 +2014,10 @@
         <id>CHIP_UNIT</id>
         <default>6</default>
     </attribute>
+    <attribute><id>IBSCOM_MCS_BASE_ADDR</id>
+        <!-- baseAddr = 0x0003E00000000000, 128GB per MCS -->
+        <default>0x0003E4C00000000</default>
+    </attribute>
     <!-- TODO When MRW provides the information, these two attributes
          should be included. values of X come from MRW.
     <attribute>
@@ -2002,6 +2046,10 @@
     <attribute>
         <id>CHIP_UNIT</id>
         <default>7</default>
+    </attribute>
+    <attribute><id>IBSCOM_MCS_BASE_ADDR</id>
+        <!-- baseAddr = 0x0003E00000000000, 128GB per MCS -->
+        <default>0x0003E4E00000000</default>
     </attribute>
     <!-- TODO When MRW provides the information, these two attributes
          should be included. values of X come from MRW.
@@ -2581,6 +2629,10 @@
         <id>CHIP_UNIT</id>
         <default>4</default>
     </attribute>
+    <attribute><id>IBSCOM_MCS_BASE_ADDR</id>
+        <!-- baseAddr = 0x0003E00000000000, 128GB per MCS -->
+        <default>0x0003E5800000000</default>
+    </attribute>
     <!-- TODO When MRW provides the information, these two attributes
          should be included. values of X come from MRW.
     <attribute>
@@ -2609,6 +2661,10 @@
     <attribute>
         <id>CHIP_UNIT</id>
         <default>5</default>
+    </attribute>
+    <attribute><id>IBSCOM_MCS_BASE_ADDR</id>
+        <!-- baseAddr = 0x0003E00000000000, 128GB per MCS -->
+        <default>0x0003E5A00000000</default>
     </attribute>
     <!-- TODO When MRW provides the information, these two attributes
          should be included. values of X come from MRW.
@@ -2639,6 +2695,10 @@
         <id>CHIP_UNIT</id>
         <default>6</default>
     </attribute>
+    <attribute><id>IBSCOM_MCS_BASE_ADDR</id>
+        <!-- baseAddr = 0x0003E00000000000, 128GB per MCS -->
+        <default>0x0003E5C00000000</default>
+    </attribute>
     <!-- TODO When MRW provides the information, these two attributes
          should be included. values of X come from MRW.
     <attribute>
@@ -2667,6 +2727,10 @@
     <attribute>
         <id>CHIP_UNIT</id>
         <default>7</default>
+    </attribute>
+    <attribute><id>IBSCOM_MCS_BASE_ADDR</id>
+        <!-- baseAddr = 0x0003E00000000000, 128GB per MCS -->
+        <default>0x0003E5E00000000</default>
     </attribute>
     <!-- TODO When MRW provides the information, these two attributes
          should be included. values of X come from MRW.

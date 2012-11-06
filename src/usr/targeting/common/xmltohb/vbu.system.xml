@@ -490,6 +490,10 @@
         <id>CHIP_UNIT</id>
         <default>4</default>
     </attribute>
+    <attribute><id>IBSCOM_MCS_BASE_ADDR</id>
+        <!-- baseAddr = 0x0003E00000000000, 128GB per MCS -->
+        <default>0x0003E08000000000</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -507,6 +511,10 @@
     <attribute>
         <id>CHIP_UNIT</id>
         <default>5</default>
+    </attribute>
+    <attribute><id>IBSCOM_MCS_BASE_ADDR</id>
+        <!-- baseAddr = 0x0003E00000000000, 128GB per MCS -->
+        <default>0x0003E0A000000000</default>
     </attribute>
 </targetInstance>
 
@@ -526,6 +534,10 @@
         <id>CHIP_UNIT</id>
         <default>6</default>
     </attribute>
+    <attribute><id>IBSCOM_MCS_BASE_ADDR</id>
+        <!-- baseAddr = 0x0003E00000000000, 128GB per MCS -->
+        <default>0x0003E0C000000000</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -543,6 +555,10 @@
     <attribute>
         <id>CHIP_UNIT</id>
         <default>7</default>
+    </attribute>
+    <attribute><id>IBSCOM_MCS_BASE_ADDR</id>
+        <!-- baseAddr = 0x0003E00000000000, 128GB per MCS -->
+        <default>0x0003E0E000000000</default>
     </attribute>
 </targetInstance>
 
