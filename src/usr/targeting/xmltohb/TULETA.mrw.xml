@@ -20,7 +20,7 @@
 <!-- Origin: 30                                                             -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
-<!-- Source path = /esw/fips810/Builds/b1019a_1243.810/obj/ppc/mrw/xml/data -->
+<!-- Source path = /gsa/ausgsa-h2/02/vanlee/sb/102512M/obj/ppc/mrw/xml/data -->
 <attributes>
 
 <!-- TULETA System with new values-->
@@ -37,22 +37,6 @@
         <default>affinity:sys-0</default>
     </attribute>
     <attribute>
-        <id>PROC_EPS_TABLE_TYPE</id>
-        <default>2</default>
-    </attribute>
-    <attribute>
-        <id>PROC_FABRIC_PUMP_MODE</id>
-        <default>1</default>
-    </attribute>
-    <attribute>
-        <id>PROC_X_BUS_WIDTH</id>
-        <default>2</default>
-    </attribute>
-    <attribute>
-        <id>ALL_MCS_IN_INTERLEAVING_GROUP</id>
-        <default>1</default>
-    </attribute>
-    <attribute>
         <id>FREQ_PROC_REFCLOCK</id>
         <default>200</default>
     </attribute>
@@ -60,29 +44,105 @@
         <id>FREQ_MEM_REFCLOCK</id>
         <default>266</default>
     </attribute>
-    <!-- TODO: The frequency attributes below will need to be obtained -->
-    <!-- from the MRW. RTC 51209 will implement this when MRW is ready -->
-    <!-- to supply the values of these attributes                      -->
+    <!-- System Attributes from MRW -->
     <attribute>
-        <id>FREQ_CORE_FLOOR</id>
-        <default>0x2580</default>
-    </attribute>
-    <attribute>
-        <id>FREQ_PB</id>
-        <default>0x960</default>
-    </attribute>
-    <attribute>
-        <id>FREQ_X</id>
-        <default>0x12C0</default>
+        <id>ALL_MCS_IN_INTERLEAVING_GROUP</id>
+        <default>
+            1
+        </default>
     </attribute>
     <attribute>
         <id>FREQ_A</id>
-        <default>0x1900</default>
+        <default>
+            0x1900
+        </default>
+    </attribute>
+    <attribute>
+        <id>FREQ_CORE_FLOOR</id>
+        <default>
+            0x2580
+        </default>
+    </attribute>
+    <attribute>
+        <id>FREQ_PB</id>
+        <default>
+            0x960
+        </default>
     </attribute>
     <attribute>
         <id>FREQ_PCIE</id>
-        <default>0x3E8</default>
+        <default>
+            0x3E8
+        </default>
     </attribute>
+    <attribute>
+        <id>FREQ_X</id>
+        <default>
+            0x12C0
+        </default>
+    </attribute>
+    <attribute>
+        <id>MSS_CLEANER_ENABLE</id>
+        <default>
+            1
+        </default>
+    </attribute>
+    <attribute>
+        <id>MSS_MBA_ADDR_INTERLEAVE_BIT</id>
+        <default>
+            24
+        </default>
+    </attribute>
+    <attribute>
+        <id>MSS_MBA_CACHELINE_INTERLEAVE_MODE</id>
+        <default>
+            1
+        </default>
+    </attribute>
+    <attribute>
+        <id>MSS_MCA_HASH_MODE</id>
+        <default>
+            0
+        </default>
+    </attribute>
+    <attribute>
+        <id>MSS_PREFETCH_ENABLE</id>
+        <default>
+            1
+        </default>
+    </attribute>
+    <attribute>
+        <id>PAYLOAD_BASE</id>
+        <default>
+            256
+        </default>
+    </attribute>
+    <attribute>
+        <id>PAYLOAD_ENTRY</id>
+        <default>
+            0x180
+        </default>
+    </attribute>
+    <attribute>
+        <id>PROC_EPS_TABLE_TYPE</id>
+        <default>
+            2
+        </default>
+    </attribute>
+    <attribute>
+        <id>PROC_FABRIC_PUMP_MODE</id>
+        <default>
+            1
+        </default>
+    </attribute>
+    <attribute>
+        <id>PROC_X_BUS_WIDTH</id>
+        <default>
+            2
+        </default>
+    </attribute>
+    <!-- End System Attributes from MRW -->
+
     <!-- The default value of the following three attributes are written  -->
     <!-- by the HWP using them. The default values are not from MRW. They -->
     <!-- are included here FYI.                                           -->
@@ -106,35 +166,6 @@
             <field><id>fsiMasterInit</id><value>1</value></field>
             <field><id>reserved</id><value>0</value></field>
         </default>
-    </attribute>
-    <!-- TODO. These must be from MRW. Hardcoded for now -->
-    <attribute>
-        <id>PAYLOAD_BASE</id>
-        <default>256</default>
-    </attribute>
-    <attribute>
-        <id>PAYLOAD_ENTRY</id>
-        <default>0x180</default>
-    </attribute>
-    <attribute>
-        <id>MSS_MCA_HASH_MODE</id>
-        <default>0</default>
-    </attribute>
-    <attribute>
-        <id>MSS_MBA_ADDR_INTERLEAVE_BIT</id>
-        <default>24</default>
-    </attribute>
-    <attribute>
-        <id>MSS_MBA_CACHELINE_INTERLEAVE_MODE</id>
-        <default>1</default>
-    </attribute>
-    <attribute>
-        <id>MSS_PREFETCH_ENABLE</id>
-        <default>1</default>
-    </attribute>
-    <attribute>
-        <id>MSS_CLEANER_ENABLE</id>
-        <default>1</default>
     </attribute>
 </targetInstance>
 
@@ -220,6 +251,101 @@
     </attribute>
     <!-- End PHYP Memory Map -->
 
+    <!-- PROC_PCIE_ attributes -->
+    <attribute>
+        <id>PROC_PCIE_IOP_G2_PLL_CONTROL0</id>
+        <default>
+            0x18F4,0x18F4
+        </default>
+    </attribute>
+    <attribute>
+        <id>PROC_PCIE_IOP_G3_PLL_CONTROL0</id>
+        <default>
+            0x086C,0x086C
+        </default>
+    </attribute>
+    <attribute>
+        <id>PROC_PCIE_IOP_PCS_CONTROL0</id>
+        <default>
+            0x3AE8,0x3AE8
+        </default>
+    </attribute>
+    <attribute>
+        <id>PROC_PCIE_IOP_PCS_CONTROL1</id>
+        <default>
+            0x5CB9,0x5CB9
+        </default>
+    </attribute>
+    <attribute>
+        <id>PROC_PCIE_IOP_PLL_GLOBAL_CONTROL0</id>
+        <default>
+            0x146,0x146
+        </default>
+    </attribute>
+    <attribute>
+        <id>PROC_PCIE_IOP_PLL_GLOBAL_CONTROL1</id>
+        <default>
+            0x6D7,0x6D7
+        </default>
+    </attribute>
+    <attribute>
+        <id>PROC_PCIE_IOP_RX_PEAK</id>
+        <default>
+            0xB1B,0xB1B,0xB1B,0xB1B,0xB1B,0xB1B,0xB1B,0xB1B,0xB1B,0xB1B,0xB1B,0xB1B,0xB1B,0xB1B,0xB1B,0xB1B,0xB1B,0xB1B,0xB1B,0xB1B,0xB1B,0xB1B,0xB1B,0xB1B,0xB1B,0xB1B,0xB1B,0xB1B,0xB1B,0xB1B,0xB1B,0xB1B
+        </default>
+    </attribute>
+    <attribute>
+        <id>PROC_PCIE_IOP_RX_SDL</id>
+        <default>
+            0x294A,0x294A,0x294A,0x294A,0x294A,0x294A,0x294A,0x294A,0x294A,0x294A,0x294A,0x294A,0x294A,0x294A,0x294A,0x294A,0x294A,0x294A,0x294A,0x294A,0x294A,0x294A,0x294A,0x294A,0x294A,0x294A,0x294A,0x294A,0x294A,0x294A,0x294A,0x294A
+        </default>
+    </attribute>
+    <attribute>
+        <id>PROC_PCIE_IOP_RX_VGA_CONTROL2</id>
+        <default>
+            0x9451,0x9451,0x9451,0x9451,0x9451,0x9451,0x9451,0x9451,0x9451,0x9451,0x9451,0x9451,0x9451,0x9451,0x9451,0x9451,0x9451,0x9451,0x9451,0x9451,0x9451,0x9451,0x9451,0x9451,0x9451,0x9451,0x9451,0x9451,0x9451,0x9451,0x9451,0x9451
+        </default>
+    </attribute>
+    <attribute>
+        <id>PROC_PCIE_IOP_TX_BWLOSS1</id>
+        <default>
+            0x000,0x000,0x000,0x000,0x000,0x000,0x000,0x000,0x000,0x000,0x000,0x000,0x000,0x000,0x000,0x000,0x000,0x000,0x000,0x000,0x000,0x000,0x000,0x000,0x000,0x000,0x000,0x000,0x000,0x000,0x000,0x000
+        </default>
+    </attribute>
+    <attribute>
+        <id>PROC_PCIE_IOP_TX_FIFO_OFFSET</id>
+        <default>
+            0x4294,0x4294,0x4294,0x4294,0x4294,0x4294,0x4294,0x4294,0x4294,0x4294,0x4294,0x4294,0x4294,0x4294,0x4294,0x4294,0x4294,0x4294,0x4294,0x4294,0x4294,0x4294,0x4294,0x4294,0x4294,0x4294,0x4294,0x4294,0x4294,0x4294,0x4294,0x4294
+        </default>
+    </attribute>
+    <attribute>
+        <id>PROC_PCIE_IOP_TX_RCVRDETCNTL</id>
+        <default>
+            0x2151,0x2151,0x2151,0x2151,0x2151,0x2151,0x2151,0x2151,0x2151,0x2151,0x2151,0x2151,0x2151,0x2151,0x2151,0x2151,0x2151,0x2151,0x2151,0x2151,0x2151,0x2151,0x2151,0x2151,0x2151,0x2151,0x2151,0x2151,0x2151,0x2151,0x2151,0x2151
+        </default>
+    </attribute>
+    <attribute>
+        <id>PROC_PCIE_IOP_ZCAL_CONTROL</id>
+        <default>
+            0x000,0x000
+        </default>
+    </attribute>
+    <!-- End PROC_PCIE_ attributes -->
+
+    <!-- The default value of the following three attributes are written by -->
+    <!-- the FSP. They are included here because VBU/VPO uses faked PNOR.   -->
+    <attribute>
+        <id>PROC_PCIE_IOP_CONFIG</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>PROC_PCIE_IOP_SWAP</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>PROC_PCIE_PHB_ACTIVE</id>
+        <default>0xE0</default>
+    </attribute>
 </targetInstance>
 
 <!-- TULETA n0p0 EX units -->
@@ -790,6 +916,101 @@
     </attribute>
     <!-- End PHYP Memory Map -->
 
+    <!-- PROC_PCIE_ attributes -->
+    <attribute>
+        <id>PROC_PCIE_IOP_G2_PLL_CONTROL0</id>
+        <default>
+            0x18F4,0x18F4
+        </default>
+    </attribute>
+    <attribute>
+        <id>PROC_PCIE_IOP_G3_PLL_CONTROL0</id>
+        <default>
+            0x086C,0x086C
+        </default>
+    </attribute>
+    <attribute>
+        <id>PROC_PCIE_IOP_PCS_CONTROL0</id>
+        <default>
+            0x3AE8,0x3AE8
+        </default>
+    </attribute>
+    <attribute>
+        <id>PROC_PCIE_IOP_PCS_CONTROL1</id>
+        <default>
+            0x5CB9,0x5CB9
+        </default>
+    </attribute>
+    <attribute>
+        <id>PROC_PCIE_IOP_PLL_GLOBAL_CONTROL0</id>
+        <default>
+            0x146,0x146
+        </default>
+    </attribute>
+    <attribute>
+        <id>PROC_PCIE_IOP_PLL_GLOBAL_CONTROL1</id>
+        <default>
+            0x6D7,0x6D7
+        </default>
+    </attribute>
+    <attribute>
+        <id>PROC_PCIE_IOP_RX_PEAK</id>
+        <default>
+            0xB1B,0xB1B,0xB1B,0xB1B,0xB1B,0xB1B,0xB1B,0xB1B,0xB1B,0xB1B,0xB1B,0xB1B,0xB1B,0xB1B,0xB1B,0xB1B,0xB1B,0xB1B,0xB1B,0xB1B,0xB1B,0xB1B,0xB1B,0xB1B,0xB1B,0xB1B,0xB1B,0xB1B,0xB1B,0xB1B,0xB1B,0xB1B
+        </default>
+    </attribute>
+    <attribute>
+        <id>PROC_PCIE_IOP_RX_SDL</id>
+        <default>
+            0x294A,0x294A,0x294A,0x294A,0x294A,0x294A,0x294A,0x294A,0x294A,0x294A,0x294A,0x294A,0x294A,0x294A,0x294A,0x294A,0x294A,0x294A,0x294A,0x294A,0x294A,0x294A,0x294A,0x294A,0x294A,0x294A,0x294A,0x294A,0x294A,0x294A,0x294A,0x294A
+        </default>
+    </attribute>
+    <attribute>
+        <id>PROC_PCIE_IOP_RX_VGA_CONTROL2</id>
+        <default>
+            0x9451,0x9451,0x9451,0x9451,0x9451,0x9451,0x9451,0x9451,0x9451,0x9451,0x9451,0x9451,0x9451,0x9451,0x9451,0x9451,0x9451,0x9451,0x9451,0x9451,0x9451,0x9451,0x9451,0x9451,0x9451,0x9451,0x9451,0x9451,0x9451,0x9451,0x9451,0x9451
+        </default>
+    </attribute>
+    <attribute>
+        <id>PROC_PCIE_IOP_TX_BWLOSS1</id>
+        <default>
+            0x000,0x000,0x000,0x000,0x000,0x000,0x000,0x000,0x000,0x000,0x000,0x000,0x000,0x000,0x000,0x000,0x000,0x000,0x000,0x000,0x000,0x000,0x000,0x000,0x000,0x000,0x000,0x000,0x000,0x000,0x000,0x000
+        </default>
+    </attribute>
+    <attribute>
+        <id>PROC_PCIE_IOP_TX_FIFO_OFFSET</id>
+        <default>
+            0x4294,0x4294,0x4294,0x4294,0x4294,0x4294,0x4294,0x4294,0x4294,0x4294,0x4294,0x4294,0x4294,0x4294,0x4294,0x4294,0x4294,0x4294,0x4294,0x4294,0x4294,0x4294,0x4294,0x4294,0x4294,0x4294,0x4294,0x4294,0x4294,0x4294,0x4294,0x4294
+        </default>
+    </attribute>
+    <attribute>
+        <id>PROC_PCIE_IOP_TX_RCVRDETCNTL</id>
+        <default>
+            0x2151,0x2151,0x2151,0x2151,0x2151,0x2151,0x2151,0x2151,0x2151,0x2151,0x2151,0x2151,0x2151,0x2151,0x2151,0x2151,0x2151,0x2151,0x2151,0x2151,0x2151,0x2151,0x2151,0x2151,0x2151,0x2151,0x2151,0x2151,0x2151,0x2151,0x2151,0x2151
+        </default>
+    </attribute>
+    <attribute>
+        <id>PROC_PCIE_IOP_ZCAL_CONTROL</id>
+        <default>
+            0x000,0x000
+        </default>
+    </attribute>
+    <!-- End PROC_PCIE_ attributes -->
+
+    <!-- The default value of the following three attributes are written by -->
+    <!-- the FSP. They are included here because VBU/VPO uses faked PNOR.   -->
+    <attribute>
+        <id>PROC_PCIE_IOP_CONFIG</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>PROC_PCIE_IOP_SWAP</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>PROC_PCIE_PHB_ACTIVE</id>
+        <default>0xE0</default>
+    </attribute>
 </targetInstance>
 
 <!-- TULETA n0p1 EX units -->
@@ -1360,6 +1581,101 @@
     </attribute>
     <!-- End PHYP Memory Map -->
 
+    <!-- PROC_PCIE_ attributes -->
+    <attribute>
+        <id>PROC_PCIE_IOP_G2_PLL_CONTROL0</id>
+        <default>
+            0x18F4,0x18F4
+        </default>
+    </attribute>
+    <attribute>
+        <id>PROC_PCIE_IOP_G3_PLL_CONTROL0</id>
+        <default>
+            0x086C,0x086C
+        </default>
+    </attribute>
+    <attribute>
+        <id>PROC_PCIE_IOP_PCS_CONTROL0</id>
+        <default>
+            0x3AE8,0x3AE8
+        </default>
+    </attribute>
+    <attribute>
+        <id>PROC_PCIE_IOP_PCS_CONTROL1</id>
+        <default>
+            0x5CB9,0x5CB9
+        </default>
+    </attribute>
+    <attribute>
+        <id>PROC_PCIE_IOP_PLL_GLOBAL_CONTROL0</id>
+        <default>
+            0x146,0x146
+        </default>
+    </attribute>
+    <attribute>
+        <id>PROC_PCIE_IOP_PLL_GLOBAL_CONTROL1</id>
+        <default>
+            0x6D7,0x6D7
+        </default>
+    </attribute>
+    <attribute>
+        <id>PROC_PCIE_IOP_RX_PEAK</id>
+        <default>
+            0xB1B,0xB1B,0xB1B,0xB1B,0xB1B,0xB1B,0xB1B,0xB1B,0xB1B,0xB1B,0xB1B,0xB1B,0xB1B,0xB1B,0xB1B,0xB1B,0xB1B,0xB1B,0xB1B,0xB1B,0xB1B,0xB1B,0xB1B,0xB1B,0xB1B,0xB1B,0xB1B,0xB1B,0xB1B,0xB1B,0xB1B,0xB1B
+        </default>
+    </attribute>
+    <attribute>
+        <id>PROC_PCIE_IOP_RX_SDL</id>
+        <default>
+            0x294A,0x294A,0x294A,0x294A,0x294A,0x294A,0x294A,0x294A,0x294A,0x294A,0x294A,0x294A,0x294A,0x294A,0x294A,0x294A,0x294A,0x294A,0x294A,0x294A,0x294A,0x294A,0x294A,0x294A,0x294A,0x294A,0x294A,0x294A,0x294A,0x294A,0x294A,0x294A
+        </default>
+    </attribute>
+    <attribute>
+        <id>PROC_PCIE_IOP_RX_VGA_CONTROL2</id>
+        <default>
+            0x9451,0x9451,0x9451,0x9451,0x9451,0x9451,0x9451,0x9451,0x9451,0x9451,0x9451,0x9451,0x9451,0x9451,0x9451,0x9451,0x9451,0x9451,0x9451,0x9451,0x9451,0x9451,0x9451,0x9451,0x9451,0x9451,0x9451,0x9451,0x9451,0x9451,0x9451,0x9451
+        </default>
+    </attribute>
+    <attribute>
+        <id>PROC_PCIE_IOP_TX_BWLOSS1</id>
+        <default>
+            0x000,0x000,0x000,0x000,0x000,0x000,0x000,0x000,0x000,0x000,0x000,0x000,0x000,0x000,0x000,0x000,0x000,0x000,0x000,0x000,0x000,0x000,0x000,0x000,0x000,0x000,0x000,0x000,0x000,0x000,0x000,0x000
+        </default>
+    </attribute>
+    <attribute>
+        <id>PROC_PCIE_IOP_TX_FIFO_OFFSET</id>
+        <default>
+            0x4294,0x4294,0x4294,0x4294,0x4294,0x4294,0x4294,0x4294,0x4294,0x4294,0x4294,0x4294,0x4294,0x4294,0x4294,0x4294,0x4294,0x4294,0x4294,0x4294,0x4294,0x4294,0x4294,0x4294,0x4294,0x4294,0x4294,0x4294,0x4294,0x4294,0x4294,0x4294
+        </default>
+    </attribute>
+    <attribute>
+        <id>PROC_PCIE_IOP_TX_RCVRDETCNTL</id>
+        <default>
+            0x2151,0x2151,0x2151,0x2151,0x2151,0x2151,0x2151,0x2151,0x2151,0x2151,0x2151,0x2151,0x2151,0x2151,0x2151,0x2151,0x2151,0x2151,0x2151,0x2151,0x2151,0x2151,0x2151,0x2151,0x2151,0x2151,0x2151,0x2151,0x2151,0x2151,0x2151,0x2151
+        </default>
+    </attribute>
+    <attribute>
+        <id>PROC_PCIE_IOP_ZCAL_CONTROL</id>
+        <default>
+            0x000,0x000
+        </default>
+    </attribute>
+    <!-- End PROC_PCIE_ attributes -->
+
+    <!-- The default value of the following three attributes are written by -->
+    <!-- the FSP. They are included here because VBU/VPO uses faked PNOR.   -->
+    <attribute>
+        <id>PROC_PCIE_IOP_CONFIG</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>PROC_PCIE_IOP_SWAP</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>PROC_PCIE_PHB_ACTIVE</id>
+        <default>0xE0</default>
+    </attribute>
 </targetInstance>
 
 <!-- TULETA n0p2 EX units -->
@@ -1930,6 +2246,101 @@
     </attribute>
     <!-- End PHYP Memory Map -->
 
+    <!-- PROC_PCIE_ attributes -->
+    <attribute>
+        <id>PROC_PCIE_IOP_G2_PLL_CONTROL0</id>
+        <default>
+            0x18F4,0x18F4
+        </default>
+    </attribute>
+    <attribute>
+        <id>PROC_PCIE_IOP_G3_PLL_CONTROL0</id>
+        <default>
+            0x086C,0x086C
+        </default>
+    </attribute>
+    <attribute>
+        <id>PROC_PCIE_IOP_PCS_CONTROL0</id>
+        <default>
+            0x3AE8,0x3AE8
+        </default>
+    </attribute>
+    <attribute>
+        <id>PROC_PCIE_IOP_PCS_CONTROL1</id>
+        <default>
+            0x5CB9,0x5CB9
+        </default>
+    </attribute>
+    <attribute>
+        <id>PROC_PCIE_IOP_PLL_GLOBAL_CONTROL0</id>
+        <default>
+            0x146,0x146
+        </default>
+    </attribute>
+    <attribute>
+        <id>PROC_PCIE_IOP_PLL_GLOBAL_CONTROL1</id>
+        <default>
+            0x6D7,0x6D7
+        </default>
+    </attribute>
+    <attribute>
+        <id>PROC_PCIE_IOP_RX_PEAK</id>
+        <default>
+            0xB1B,0xB1B,0xB1B,0xB1B,0xB1B,0xB1B,0xB1B,0xB1B,0xB1B,0xB1B,0xB1B,0xB1B,0xB1B,0xB1B,0xB1B,0xB1B,0xB1B,0xB1B,0xB1B,0xB1B,0xB1B,0xB1B,0xB1B,0xB1B,0xB1B,0xB1B,0xB1B,0xB1B,0xB1B,0xB1B,0xB1B,0xB1B
+        </default>
+    </attribute>
+    <attribute>
+        <id>PROC_PCIE_IOP_RX_SDL</id>
+        <default>
+            0x294A,0x294A,0x294A,0x294A,0x294A,0x294A,0x294A,0x294A,0x294A,0x294A,0x294A,0x294A,0x294A,0x294A,0x294A,0x294A,0x294A,0x294A,0x294A,0x294A,0x294A,0x294A,0x294A,0x294A,0x294A,0x294A,0x294A,0x294A,0x294A,0x294A,0x294A,0x294A
+        </default>
+    </attribute>
+    <attribute>
+        <id>PROC_PCIE_IOP_RX_VGA_CONTROL2</id>
+        <default>
+            0x9451,0x9451,0x9451,0x9451,0x9451,0x9451,0x9451,0x9451,0x9451,0x9451,0x9451,0x9451,0x9451,0x9451,0x9451,0x9451,0x9451,0x9451,0x9451,0x9451,0x9451,0x9451,0x9451,0x9451,0x9451,0x9451,0x9451,0x9451,0x9451,0x9451,0x9451,0x9451
+        </default>
+    </attribute>
+    <attribute>
+        <id>PROC_PCIE_IOP_TX_BWLOSS1</id>
+        <default>
+            0x000,0x000,0x000,0x000,0x000,0x000,0x000,0x000,0x000,0x000,0x000,0x000,0x000,0x000,0x000,0x000,0x000,0x000,0x000,0x000,0x000,0x000,0x000,0x000,0x000,0x000,0x000,0x000,0x000,0x000,0x000,0x000
+        </default>
+    </attribute>
+    <attribute>
+        <id>PROC_PCIE_IOP_TX_FIFO_OFFSET</id>
+        <default>
+            0x4294,0x4294,0x4294,0x4294,0x4294,0x4294,0x4294,0x4294,0x4294,0x4294,0x4294,0x4294,0x4294,0x4294,0x4294,0x4294,0x4294,0x4294,0x4294,0x4294,0x4294,0x4294,0x4294,0x4294,0x4294,0x4294,0x4294,0x4294,0x4294,0x4294,0x4294,0x4294
+        </default>
+    </attribute>
+    <attribute>
+        <id>PROC_PCIE_IOP_TX_RCVRDETCNTL</id>
+        <default>
+            0x2151,0x2151,0x2151,0x2151,0x2151,0x2151,0x2151,0x2151,0x2151,0x2151,0x2151,0x2151,0x2151,0x2151,0x2151,0x2151,0x2151,0x2151,0x2151,0x2151,0x2151,0x2151,0x2151,0x2151,0x2151,0x2151,0x2151,0x2151,0x2151,0x2151,0x2151,0x2151
+        </default>
+    </attribute>
+    <attribute>
+        <id>PROC_PCIE_IOP_ZCAL_CONTROL</id>
+        <default>
+            0x000,0x000
+        </default>
+    </attribute>
+    <!-- End PROC_PCIE_ attributes -->
+
+    <!-- The default value of the following three attributes are written by -->
+    <!-- the FSP. They are included here because VBU/VPO uses faked PNOR.   -->
+    <attribute>
+        <id>PROC_PCIE_IOP_CONFIG</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>PROC_PCIE_IOP_SWAP</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>PROC_PCIE_PHB_ACTIVE</id>
+        <default>0xE0</default>
+    </attribute>
 </targetInstance>
 
 <!-- TULETA n0p3 EX units -->

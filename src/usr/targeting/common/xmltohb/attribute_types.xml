@@ -6844,5 +6844,354 @@ Consumers: proc_build_gpstate_table.C (among others)
 
 <!-- End pm_attributes_all_plat.xml -->
 
+<attribute>
+  <id>PROC_PCIE_IOP_CONFIG</id>
+  <description>PCIE IOP lane configuration
+      creator: platform
+      consumer: proc_pcie_scominit
+      firmware notes:
+        Encoded PCIE IOP lane configuration
+  </description>
+  <simpleType><uint8_t></uint8_t></simpleType>
+  <persistency>non-volatile</persistency>
+  <readable/>
+  <hwpfToHbAttrMap>
+      <id>ATTR_PROC_PCIE_IOP_CONFIG</id>
+      <macro>DIRECT</macro>
+  </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+  <id>PROC_PCIE_IOP_SWAP</id>
+  <description>PCIE IOP swap configuration
+      creator: platform
+      consumer: proc_pcie_scominit
+      firmware notes:
+        Encoded PCIE IOP swap configuration
+        Array index: IOP number (0:1)
+  </description>
+  <simpleType>
+      <uint8_t></uint8_t>
+      <array>2</array>
+  </simpleType>
+  <persistency>non-volatile</persistency>
+  <readable/>
+  <hwpfToHbAttrMap>
+      <id>ATTR_PROC_PCIE_IOP_SWAP</id>
+      <macro>DIRECT</macro>
+  </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+  <id>PROC_PCIE_PHB_ACTIVE</id>
+  <description>PCIE PHB valid mask
+      creator: platform
+      consumer: proc_pcie_scominit
+      firmware notes:
+        Bit mask defining set of active/valid PHBs
+        bit0=PHB0, bit1=PHB1, bit2=PHB2
+  </description>
+  <simpleType><uint8_t></uint8_t></simpleType>
+  <persistency>non-volatile</persistency>
+  <readable/>
+  <hwpfToHbAttrMap>
+      <id>ATTR_PROC_PCIE_PHB_ACTIVE</id>
+      <macro>DIRECT</macro>
+  </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+  <id>PROC_PCIE_IOP_G3_PLL_CONTROL0</id>
+  <description>
+      creator: platform (MRW)
+      consumer: proc_pcie_scominit
+      firmware notes:
+        PCIe Gen3 PLL Control Register 0.
+        ATUNE/CPISEL.
+        Array index: IOP number(0:1)
+  </description>
+  <simpleType>
+      <uint32_t></uint32_t>
+      <array>2</array>
+  </simpleType>
+  <persistency>non-volatile</persistency>
+  <readable/>
+  <hwpfToHbAttrMap>
+      <id>ATTR_PROC_PCIE_IOP_G3_PLL_CONTROL0</id>
+      <macro>DIRECT</macro>
+  </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+  <id>PROC_PCIE_IOP_G2_PLL_CONTROL0</id>
+  <description>
+      creator: platform (MRW)
+      consumer: proc_pcie_scominit
+      firmware notes:
+        PCIe Gen2/Gen1 PLL Control Register 0.
+        ATUNE/CPISEL.
+        Array index: IOP number(0:1)
+  </description>
+  <simpleType>
+      <uint32_t></uint32_t>
+      <array>2</array>
+  </simpleType>
+  <persistency>non-volatile</persistency>
+  <readable/>
+  <hwpfToHbAttrMap>
+      <id>ATTR_PROC_PCIE_IOP_G2_PLL_CONTROL0</id>
+      <macro>DIRECT</macro>
+  </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+  <id>PROC_PCIE_IOP_PLL_GLOBAL_CONTROL0</id>
+  <description>
+      creator: platform (MRW)
+      consumer: proc_pcie_scominit
+      notes:
+        PCIe PLL Global Control Register 0.
+        REFISRC/REFISINK.
+        Array index: IOP number (0:1)
+  </description>
+  <simpleType>
+      <uint32_t></uint32_t>
+      <array>2</array>
+  </simpleType>
+  <persistency>non-volatile</persistency>
+  <readable/>
+  <hwpfToHbAttrMap>
+      <id>ATTR_PROC_PCIE_IOP_PLL_GLOBAL_CONTROL0</id>
+      <macro>DIRECT</macro>
+  </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+  <id>PROC_PCIE_IOP_PLL_GLOBAL_CONTROL1</id>
+  <description>
+      creator: platform (MRW)
+      consumer: proc_pcie_scominit
+      notes:
+        PCIe PLL Global Control Register 1.
+	ENBGDOCPSRC/ENBGDOCAMP/REFVREG.
+        Array index: IOP number (0:1)
+  </description>
+  <simpleType>
+      <uint32_t></uint32_t>
+      <array>2</array>
+  </simpleType>
+  <persistency>non-volatile</persistency>
+  <readable/>
+  <hwpfToHbAttrMap>
+      <id>ATTR_PROC_PCIE_IOP_PLL_GLOBAL_CONTROL1</id>
+      <macro>DIRECT</macro>
+  </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+  <id>PROC_PCIE_IOP_PCS_CONTROL0</id>
+  <description>
+      creator: platform (MRW)
+      consumer: proc_pcie_scominit
+      notes:
+        PCIe PCS Control Register 0.
+        BITLOCKTIME/ADDDREMDELTA_810_B/STARTUPDELTA_810_B/ADDDREMDELTA_810_A/
+        STARTUPDELTA_A/RXREJECTHANDLING/EQCOMLETERESPONSE.
+        Array index: IOP number (0:1)
+  </description>
+  <simpleType>
+      <uint32_t></uint32_t>
+      <array>2</array>
+  </simpleType>
+  <persistency>non-volatile</persistency>
+  <readable/>
+  <hwpfToHbAttrMap>
+      <id>ATTR_PROC_PCIE_IOP_PCS_CONTROL0</id>
+      <macro>DIRECT</macro>
+  </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+  <id>PROC_PCIE_IOP_PCS_CONTROL1</id>
+  <description>
+      creator: platform (MRW)
+      consumer: proc_pcie_scominit
+      notes:
+        PCIe PCS Control Register 1.
+	RXSIGDETSETTING/ADDDREMDELTA_128130_B/STARTUPDELTA_128130_B/
+        ADDDREMDELTA_128130_A/STARTUPDELTA_128130_A.
+        Array index: IOP number (0:1)
+  </description>
+  <simpleType>
+      <uint32_t></uint32_t>
+      <array>2</array>
+  </simpleType>
+  <persistency>non-volatile</persistency>
+  <readable/>
+  <hwpfToHbAttrMap>
+      <id>ATTR_PROC_PCIE_IOP_PCS_CONTROL1</id>
+      <macro>DIRECT</macro>
+  </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+  <id>PROC_PCIE_IOP_TX_FIFO_OFFSET</id>
+  <description>
+      creator: platform (MRW)
+      consumer: proc_pcie_scominit
+      notes:
+        PCIe TX FIFO Offset Register.
+	G3OFFSET/G2OFFSET/G1OFFSET.
+        First array index: IOP number (0:1)
+        Second array index: Lane number (0:15)
+  </description>
+  <simpleType>
+      <uint32_t></uint32_t>
+      <array>2,16</array>
+  </simpleType>
+  <persistency>non-volatile</persistency>
+  <readable/>
+  <hwpfToHbAttrMap>
+      <id>ATTR_PROC_PCIE_IOP_TX_FIFO_OFFSET</id>
+      <macro>DIRECT</macro>
+  </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+  <id>PROC_PCIE_IOP_TX_RCVRDETCNTL</id>
+  <description>
+      creator: platform (MRW)
+      consumer: proc_pcie_scominit
+      notes:
+        PCIe TX Receiver Detect Control Register.
+        VREFSEL/RCVRDETCNT/DETDRVC/PH1WAIT.
+        First array index: IOP number (0:1)
+        Second array index: Lane number (0:15)
+  </description>
+  <simpleType>
+      <uint32_t></uint32_t>
+      <array>2,16</array>
+  </simpleType>
+  <persistency>non-volatile</persistency>
+  <readable/>
+  <hwpfToHbAttrMap>
+      <id>ATTR_PROC_PCIE_IOP_TX_RCVRDETCNTL</id>
+      <macro>DIRECT</macro>
+  </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+  <id>PROC_PCIE_IOP_TX_BWLOSS1</id>
+  <description>
+      creator: platform (MRW)
+      consumer: proc_pcie_scominit
+      notes:
+        PCIe TX Bandwidth Loss Coefficient Register.
+        GEN3BWCOEFF/GEN2BWCOEFF/GEN1BWCOEFF.
+        First array index: IOP number (0:1)
+        Second array index: Lane number (0:15)
+  </description>
+  <simpleType>
+      <uint32_t></uint32_t>
+      <array>2,16</array>
+  </simpleType>
+  <persistency>non-volatile</persistency>
+  <readable/>
+  <hwpfToHbAttrMap>
+      <id>ATTR_PROC_PCIE_IOP_TX_BWLOSS1</id>
+      <macro>DIRECT</macro>
+  </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+  <id>PROC_PCIE_IOP_RX_VGA_CONTROL2</id>
+  <description>
+      creator: platform (MRW)
+      consumer: proc_pcie_scominit
+      notes:
+        PCIe RX VGA Control Register 2.
+        GAIN2/GAIN1.
+        First array index: IOP number (0:1)
+        Second array index: Lane number (0:15)
+  </description>
+  <simpleType>
+      <uint32_t></uint32_t>
+      <array>2,16</array>
+  </simpleType>
+  <persistency>non-volatile</persistency>
+  <readable/>
+  <hwpfToHbAttrMap>
+      <id>ATTR_PROC_PCIE_IOP_RX_VGA_CONTROL2</id>
+      <macro>DIRECT</macro>
+  </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+  <id>PROC_PCIE_IOP_RX_PEAK</id>
+  <description>
+      creator: platform (MRW)
+      consumer: proc_pcie_scominit
+      notes:
+        PCIe RX Receiver Peaking Value Register.
+	PEAK1/PEAK2/PEAK3.
+        First array index: IOP number (0:1)
+        Second array index: Lane number (0:15)
+  </description>
+  <simpleType>
+      <uint32_t></uint32_t>
+      <array>2,16</array>
+  </simpleType>
+  <persistency>non-volatile</persistency>
+  <readable/>
+  <hwpfToHbAttrMap>
+      <id>ATTR_PROC_PCIE_IOP_RX_PEAK</id>
+      <macro>DIRECT</macro>
+  </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+  <id>PROC_PCIE_IOP_RX_SDL</id>
+  <description>
+      creator: platform (MRW)
+      consumer: proc_pcie_scominit
+      notes:
+        PCIe RX Signal Detect Level Register.
+        SDLVL3/SDLVL2/SDLVL1.
+        First array index: IOP number (0:1)
+        Second array index: Lane number (0:15)
+  </description>
+  <simpleType>
+      <uint32_t></uint32_t>
+      <array>2,16</array>
+  </simpleType>
+  <persistency>non-volatile</persistency>
+  <readable/>
+  <hwpfToHbAttrMap>
+      <id>ATTR_PROC_PCIE_IOP_RX_SDL</id>
+      <macro>DIRECT</macro>
+  </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+  <id>PROC_PCIE_IOP_ZCAL_CONTROL</id>
+  <description>
+      creator: platform (MRW)
+      consumer: proc_pcie_scominit
+      notes:
+        PCIe ZCAL Control Register.
+        CMPEVALDLY.
+        Array index: IOP number (0:1)
+  </description>
+  <simpleType>
+      <uint32_t></uint32_t>
+      <array>2</array>
+  </simpleType>
+  <persistency>non-volatile</persistency>
+  <readable/>
+  <hwpfToHbAttrMap>
+      <id>ATTR_PROC_PCIE_IOP_ZCAL_CONTROL</id>
+      <macro>DIRECT</macro>
+  </hwpfToHbAttrMap>
+</attribute>
 
 </attributes>

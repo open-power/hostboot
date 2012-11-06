@@ -371,6 +371,23 @@
     <attribute><id>IMT_BASE_ADDR</id></attribute>
     <attribute><id>IMT_BAR_SIZE</id></attribute>
     <!-- end Memory Map -->
+    <!-- PROC_PCIE  attributes -->
+    <attribute><id>PROC_PCIE_IOP_CONFIG</id></attribute>
+    <attribute><id>PROC_PCIE_IOP_SWAP</id></attribute>
+    <attribute><id>PROC_PCIE_PHB_ACTIVE</id></attribute>
+    <attribute><id>PROC_PCIE_IOP_G3_PLL_CONTROL0</id></attribute>
+    <attribute><id>PROC_PCIE_IOP_G2_PLL_CONTROL0</id></attribute>
+    <attribute><id>PROC_PCIE_IOP_PLL_GLOBAL_CONTROL0</id></attribute>
+    <attribute><id>PROC_PCIE_IOP_PLL_GLOBAL_CONTROL1</id></attribute>
+    <attribute><id>PROC_PCIE_IOP_PCS_CONTROL0</id></attribute>
+    <attribute><id>PROC_PCIE_IOP_PCS_CONTROL1</id></attribute>
+    <attribute><id>PROC_PCIE_IOP_TX_FIFO_OFFSET</id></attribute>
+    <attribute><id>PROC_PCIE_IOP_TX_RCVRDETCNTL</id></attribute>
+    <attribute><id>PROC_PCIE_IOP_TX_BWLOSS1</id></attribute>
+    <attribute><id>PROC_PCIE_IOP_RX_VGA_CONTROL2</id></attribute>
+    <attribute><id>PROC_PCIE_IOP_RX_PEAK</id></attribute>
+    <attribute><id>PROC_PCIE_IOP_RX_SDL</id></attribute>
+    <attribute><id>PROC_PCIE_IOP_ZCAL_CONTROL</id></attribute>
 </targetType>
 
 <targetType>

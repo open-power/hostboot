@@ -1,26 +1,26 @@
 #!/usr/bin/perl
-#  IBM_PROLOG_BEGIN_TAG
-#  This is an automatically generated prolog.
+# IBM_PROLOG_BEGIN_TAG
+# This is an automatically generated prolog.
 #
-#  $Source: src/usr/targeting/xmltohb/genHwsvMrwXml.pl $
+# $Source: src/usr/targeting/xmltohb/genHwsvMrwXml.pl $
 #
-#  IBM CONFIDENTIAL
+# IBM CONFIDENTIAL
 #
-#  COPYRIGHT International Business Machines Corp. 2012
+# COPYRIGHT International Business Machines Corp. 2012
 #
-#  p1
+# p1
 #
-#  Object Code Only (OCO) source materials
-#  Licensed Internal Code Source Materials
-#  IBM HostBoot Licensed Internal Code
+# Object Code Only (OCO) source materials
+# Licensed Internal Code Source Materials
+# IBM HostBoot Licensed Internal Code
 #
-#  The source code for this program is not published or other-
-#  wise divested of its trade secrets, irrespective of what has
-#  been deposited with the U.S. Copyright Office.
+# The source code for this program is not published or otherwise
+# divested of its trade secrets, irrespective of what has been
+# deposited with the U.S. Copyright Office.
 #
-#  Origin: 30
+# Origin: 30
 #
-#  IBM_PROLOG_END_TAG
+# IBM_PROLOG_END_TAG
 # Author:   Van Lee    vanlee@us.ibm.com
 #
 # Usage:
@@ -80,6 +80,13 @@ if ($outFile ne "")
 }
 
 my $SYSNAME = uc($sysname);
+
+open (FH, "<$mrwdir/${sysname}-temp-hwsv-attrs.xml") ||
+    die "ERROR: unable to open $mrwdir/${sysname}-temp-hwsv-attrs.xml\n";
+close (FH);
+
+my $FapiAttrs = XMLin("$mrwdir/${sysname}-temp-hwsv-attrs.xml",
+                          ForceArray => ['value']);
 
 open (FH, "<$mrwdir/${sysname}-chip-ids.xml") ||
     die "ERROR: unable to open $mrwdir/${sysname}-chip-ids.xml\n";
@@ -936,52 +943,19 @@ sub generate_sys
         <default>affinity:sys-$sys</default>
     </attribute>
     <attribute>
-        <id>PROC_EPS_TABLE_TYPE</id>
-        <default>2</default>
-    </attribute>
-    <attribute>
-        <id>PROC_FABRIC_PUMP_MODE</id>
-        <default>1</default>
-    </attribute>
-    <attribute>
-        <id>PROC_X_BUS_WIDTH</id>
-        <default>2</default>
-    </attribute>
-    <attribute>
-        <id>ALL_MCS_IN_INTERLEAVING_GROUP</id>
-        <default>1</default>
-    </attribute>
-    <attribute>
         <id>FREQ_PROC_REFCLOCK</id>
         <default>$proc_refclk</default>
     </attribute>
     <attribute>
         <id>FREQ_MEM_REFCLOCK</id>
         <default>$mem_refclk</default>
-    </attribute>
-    <!-- TODO: The frequency attributes below will need to be obtained -->
-    <!-- from the MRW. RTC 51209 will implement this when MRW is ready -->
-    <!-- to supply the values of these attributes                      -->
-    <attribute>
-        <id>FREQ_CORE_FLOOR</id>
-        <default>0x2580</default>
-    </attribute>
-    <attribute>
-        <id>FREQ_PB</id>
-        <default>0x960</default>
-    </attribute>
-    <attribute>
-        <id>FREQ_X</id>
-        <default>0x12C0</default>
-    </attribute>
-    <attribute>
-        <id>FREQ_A</id>
-        <default>0x1900</default>
-    </attribute>
-    <attribute>
-        <id>FREQ_PCIE</id>
-        <default>0x3E8</default>
-    </attribute>
+    </attribute>\n";
+
+    print "    <!-- System Attributes from MRW -->\n";
+    addSysAttrs();
+    print "    <!-- End System Attributes from MRW -->\n";
+
+    print "
     <!-- The default value of the following three attributes are written  -->
     <!-- by the HWP using them. The default values are not from MRW. They -->
     <!-- are included here FYI.                                           -->
@@ -1005,35 +979,6 @@ sub generate_sys
             <field><id>fsiMasterInit</id><value>1</value></field>
             <field><id>reserved</id><value>0</value></field>
         </default>
-    </attribute>
-    <!-- TODO. These must be from MRW. Hardcoded for now -->
-    <attribute>
-        <id>PAYLOAD_BASE</id>
-        <default>256</default>
-    </attribute>
-    <attribute>
-        <id>PAYLOAD_ENTRY</id>
-        <default>0x180</default>
-    </attribute>
-    <attribute>
-        <id>MSS_MCA_HASH_MODE</id>
-        <default>0</default>
-    </attribute>
-    <attribute>
-        <id>MSS_MBA_ADDR_INTERLEAVE_BIT</id>
-        <default>24</default>
-    </attribute>
-    <attribute>
-        <id>MSS_MBA_CACHELINE_INTERLEAVE_MODE</id>
-        <default>1</default>
-    </attribute>
-    <attribute>
-        <id>MSS_PREFETCH_ENABLE</id>
-        <default>1</default>
-    </attribute>
-    <attribute>
-        <id>MSS_CLEANER_ENABLE</id>
-        <default>1</default>
     </attribute>";
 
     if($build eq "fsp")
@@ -1369,10 +1314,29 @@ sub generate_proc
        0x0003FFFF40000000 + 0x1000*$proc );
     printf( "    </attribute>\n" );
 
-    print "    <!-- End PHYP Memory Map -->\n";
+    print "    <!-- End PHYP Memory Map -->\n\n";
     # end PHYP Memory Map
 
-    print "\n</targetInstance>\n";
+    print "    <!-- PROC_PCIE_ attributes -->\n";
+    addProcPcieAttrs( $proc );
+    print "    <!-- End PROC_PCIE_ attributes -->\n";
+
+    print "
+    <!-- The default value of the following three attributes are written by -->
+    <!-- the FSP. They are included here because VBU/VPO uses faked PNOR.   -->
+    <attribute>
+        <id>PROC_PCIE_IOP_CONFIG</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>PROC_PCIE_IOP_SWAP</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>PROC_PCIE_PHB_ACTIVE</id>
+        <default>0xE0</default>
+    </attribute>
+</targetInstance>\n";
 
 }
 
@@ -2093,6 +2057,62 @@ sub generate_pnor
     }
 
     print "\n</targetInstance>\n";
+}
+
+sub addSysAttrs
+{
+    my $sys = $FapiAttrs->{sys};
+    foreach my $Fapikey (sort keys %{$sys->{attribute}})
+    {
+        my $delimit = "            ";
+        my $Key = $Fapikey;
+        $Key =~ s/^ATTR_//g;
+        print "    <attribute>\n";
+        print "        <id>$Key</id>\n";
+        print "        <default>\n";
+        foreach my $value (@{$sys->{attribute}{$Fapikey}->{value}})
+        {
+            print "${delimit}$value";
+            $delimit = ",";
+        }
+        print "\n";
+        print "        </default>\n";
+        print "    </attribute>\n";
+    }
+}
+
+sub addProcPcieAttrs
+{
+    my ($position) = @_;
+    foreach my $pu (@{$FapiAttrs->{pu}})
+    {
+        if ( $position == $pu->{position} )
+        {
+            foreach my $Fapikey (sort keys %{$pu->{attribute}})
+            {
+                if ($Fapikey =~ /^ATTR_PROC_PCIE/)
+                {
+                    my $delimit = "            ";
+                    my $Key = $Fapikey;
+                    $Key =~ s/^ATTR_//g;
+                    print "    <attribute>\n";
+                    print "        <id>$Key</id>\n";
+                    print "        <default>\n";
+                    foreach my $iop (@{$pu->{attribute}{$Fapikey}->{iop}})
+                    {
+                        foreach my $value (@{$iop->{value}})
+                        {
+                            print "${delimit}$value";
+                            $delimit = ",";
+                        }
+                    }
+                    print "\n";
+                    print "        </default>\n";
+                    print "    </attribute>\n";
+                }
+            }
+        }
+    }
 }
 
 sub display_help
