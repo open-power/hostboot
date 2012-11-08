@@ -49,9 +49,10 @@ HWP_ERROR_XML_FILES = hwp/fapiHwpErrorInfo.xml   \
     hwp/activate_powerbus/proc_build_smp/proc_build_smp_errors.xml \
     hwp/activate_powerbus/proc_build_smp/proc_adu_utils_errors.xml \
     hwp/thread_activate/proc_thread_control/proc_thread_control.xml \
-    hwp/erepair_errors.xml  \
+    hwp/erepair_errors.xml \
+    hwp/nest_chiplets/proc_pcie_scominit/proc_pcie_scominit_errors.xml \
     hwp/build_winkle_images/p8_set_pore_bar/p8_set_pore_bar_errors.xml  \
-    hwp/build_winkle_images/p8_set_pore_bar/p8_pmc_deconfig_setup_errors.xml    \
+    hwp/build_winkle_images/p8_set_pore_bar/p8_pmc_deconfig_setup_errors.xml \
     hwp/build_winkle_images/p8_set_pore_bar/p8_poreslw_errors.xml   \
     hwp/slave_sbe/proc_check_slave_sbe_seeprom_complete/proc_check_slave_sbe_seeprom_complete_errors.xml \
     hwp/slave_sbe/proc_check_slave_sbe_seeprom_complete/proc_extract_sbe_rc_errors.xml \
@@ -91,7 +92,8 @@ HWP_ATTR_XML_FILES = hwp/memory_attributes.xml \
                      hwp/dram_initialization/proc_setup_bars/proc_setup_bars_mmio_attributes.xml \
                      hwp/activate_powerbus/proc_build_smp/proc_fab_smp_fabric_attributes.xml    \
                      hwp/runtime_attributes/pm_attributes_all_plat.xml \
-                     hwp/runtime_attributes/pm_attributes_all_hwp.xml
+                     hwp/runtime_attributes/pm_attributes_all_hwp.xml \
+                     hwp/nest_chiplets/proc_pcie_scominit/proc_pcie_scominit_attributes.xml
 
 #------------------------------------------------------------------------------
 # Initfiles
@@ -102,7 +104,8 @@ HWP_INITFILES = hwp/initfiles/sample.initfile \
                 hwp/initfiles/mbs_def.initfile \
                 hwp/initfiles/mba_def.initfile \
                 hwp/initfiles/cen_ddrphy.initfile \
-                hwp/initfiles/p8.fbc.scom.initfile
+                hwp/initfiles/p8.fbc.scom.initfile \
+                hwp/initfiles/p8.pe.phase1.scom.initfile
 
 HWP_IF_DEFINE_DIR = hwp/initfiles
 

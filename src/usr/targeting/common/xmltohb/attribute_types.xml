@@ -6855,6 +6855,7 @@ Consumers: proc_build_gpstate_table.C (among others)
   <simpleType><uint8_t></uint8_t></simpleType>
   <persistency>non-volatile</persistency>
   <readable/>
+  <writeable/>
   <hwpfToHbAttrMap>
       <id>ATTR_PROC_PCIE_IOP_CONFIG</id>
       <macro>DIRECT</macro>
@@ -6876,6 +6877,7 @@ Consumers: proc_build_gpstate_table.C (among others)
   </simpleType>
   <persistency>non-volatile</persistency>
   <readable/>
+  <writeable/>
   <hwpfToHbAttrMap>
       <id>ATTR_PROC_PCIE_IOP_SWAP</id>
       <macro>DIRECT</macro>
@@ -6894,6 +6896,7 @@ Consumers: proc_build_gpstate_table.C (among others)
   <simpleType><uint8_t></uint8_t></simpleType>
   <persistency>non-volatile</persistency>
   <readable/>
+  <writeable/>
   <hwpfToHbAttrMap>
       <id>ATTR_PROC_PCIE_PHB_ACTIVE</id>
       <macro>DIRECT</macro>

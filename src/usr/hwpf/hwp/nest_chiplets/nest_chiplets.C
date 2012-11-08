@@ -68,6 +68,7 @@
 #include    "proc_scomoverride_chiplets/proc_scomoverride_chiplets.H"
 #include    "proc_a_x_pci_dmi_pll_setup/proc_a_x_pci_dmi_pll_setup.H"
 #include    "proc_a_x_pci_dmi_pll_setup/proc_a_x_pci_dmi_pll_initf.H"
+#include    "proc_pcie_scominit/proc_pcie_scominit.H"
 
 namespace   NEST_CHIPLETS
 {
@@ -101,24 +102,22 @@ void*    call_proc_a_x_pci_dmi_pll_initf( void    *io_pArgs )
         return  l_err ;
     }
 
-    uint8_t l_cpuNum = 0;
+    TARGETING::TargetHandleList l_procTargetList;
+    getAllChips(l_procTargetList, TYPE_PROC);
 
-    TARGETING::TargetHandleList l_cpuTargetList;
-
-    getAllChips(l_cpuTargetList, TYPE_PROC);
-
-    for ( l_cpuNum=0; l_cpuNum < l_cpuTargetList.size(); l_cpuNum++ )
+    for ( TargetHandleList::iterator l_iter = l_procTargetList.begin();
+          l_iter != l_procTargetList.end(); ++l_iter )
     {
-        const TARGETING::Target*  l_cpu_target = l_cpuTargetList[l_cpuNum];
+        const TARGETING::Target*  l_proc_target = *l_iter;
         const fapi::Target l_fapi_proc_target(
                             TARGET_TYPE_PROC_CHIP,
                             reinterpret_cast<void *>
-                            ( const_cast<TARGETING::Target*>(l_cpu_target) ) );
+                            ( const_cast<TARGETING::Target*>(l_proc_target) ) );
 
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                    "Running proc_a_x_pci_dmi_pll_initf HWP");
         EntityPath l_path;
-        l_path  =   l_cpu_target->getAttr<ATTR_PHYS_PATH>();
+        l_path  =   l_proc_target->getAttr<ATTR_PHYS_PATH>();
         l_path.dump();
 
         //  call proc_a_x_pci_dmi_pll_initf
@@ -136,7 +135,7 @@ void*    call_proc_a_x_pci_dmi_pll_initf( void    *io_pArgs )
                       " HWP returns error",
                       l_err->reasonCode());
 
-            ErrlUserDetailsTarget myDetails(l_cpu_target);
+            ErrlUserDetailsTarget myDetails(l_proc_target);
 
             // capture the target data in the elog
             myDetails.addToLog(l_err );
@@ -169,7 +168,7 @@ void*    call_proc_a_x_pci_dmi_pll_initf( void    *io_pArgs )
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                "call_proc_a_x_pci_dmi_pll_initf exit" );
-    return l_err;
+    return l_StepError.getErrorHandle();
 }
 
 //*****************************************************************************
@@ -195,13 +194,13 @@ void*    call_proc_a_x_pci_dmi_pll_setup( void    *io_pArgs )
         return  l_err ;
     }
 
-    uint8_t l_procNum = 0;
     TARGETING::TargetHandleList l_procTargetList;
     getAllChips(l_procTargetList, TYPE_PROC);
 
-    for ( l_procNum=0; l_procNum < l_procTargetList.size(); l_procNum++ )
+    for ( TargetHandleList::iterator l_iter = l_procTargetList.begin();
+          l_iter != l_procTargetList.end(); ++l_iter )
     {
-        const TARGETING::Target*  l_proc_target = l_procTargetList[l_procNum];
+        const TARGETING::Target*  l_proc_target = *l_iter;
         const fapi::Target l_fapi_proc_target(
                 TARGET_TYPE_PROC_CHIP,
                 reinterpret_cast<void *>
@@ -278,25 +277,24 @@ void*    call_proc_startclock_chiplets( void    *io_pArgs )
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, 
                "call_proc_startclock_chiplets entry" );
 
-    uint8_t l_cpuNum = 0;
+    TARGETING::TargetHandleList l_procTargetList;
+    getAllChips(l_procTargetList, TYPE_PROC);
 
-    TARGETING::TargetHandleList l_cpuTargetList;
-    getAllChips(l_cpuTargetList, TYPE_PROC);
-
-    for ( l_cpuNum=0; l_cpuNum < l_cpuTargetList.size(); l_cpuNum++ )
+    for ( TargetHandleList::iterator l_iter = l_procTargetList.begin();
+          l_iter != l_procTargetList.end(); ++l_iter )
     {
-        const TARGETING::Target*  l_cpu_target = l_cpuTargetList[l_cpuNum];
+        const TARGETING::Target*  l_proc_target = *l_iter;
         const fapi::Target l_fapi_proc_target(
                 TARGET_TYPE_PROC_CHIP,
                 reinterpret_cast<void *>
-                ( const_cast<TARGETING::Target*>(l_cpu_target) )
+                ( const_cast<TARGETING::Target*>(l_proc_target) )
         );
 
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, 
                    "Running proc_startclock_chiplets HWP on..." );
         //  dump physical path to targets
         EntityPath l_path;
-        l_path  =   l_cpu_target->getAttr<ATTR_PHYS_PATH>();
+        l_path  =   l_proc_target->getAttr<ATTR_PHYS_PATH>();
         l_path.dump();
 
         //  call the HWP with each fapi::Target
@@ -312,7 +310,7 @@ void*    call_proc_startclock_chiplets( void    *io_pArgs )
                       "returns error",
                        l_err->reasonCode());
 
-            ErrlUserDetailsTarget myDetails(l_cpu_target);
+            ErrlUserDetailsTarget myDetails(l_proc_target);
 
             // capture the target data in the elog
             myDetails.addToLog(l_err );
@@ -374,60 +372,75 @@ void*    call_proc_chiplet_scominit( void    *io_pArgs )
 void*    call_proc_pcie_scominit( void    *io_pArgs )
 {
     errlHndl_t          l_errl      =   NULL;
+    IStepError          l_StepError;
 
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, 
-               "call_proc_pcie_scominit entry" );
+    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                            "call_proc_pcie_scominit entry" );
 
-#if 0
-    // @@@@@    CUSTOM BLOCK:   @@@@@
-    //  figure out what targets we need
-    //  customize any other inputs
-    //  set up loops to go through all targets (if parallel, spin off a task)
+    TARGETING::TargetHandleList l_procTargetList;
+    getAllChips(l_procTargetList, TYPE_PROC);
 
-    //  print call to hwp and dump physical path of the target(s)
-    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                    "=====  proc_pcie_scominit HWP(? ? ? )",
-                    ?
-                    ?
-                    ? );
-    //  dump physical path to targets
-    EntityPath l_path;
-    l_path  =   l_@targetN_target->getAttr<ATTR_PHYS_PATH>();
-    l_path.dump();
-    TRACFCOMP( g_trac_mc_init, "===== " );
-
-    // cast OUR type of target to a FAPI type of target.
-    const fapi::Target l_fapi_@targetN_target(
-                    TARGET_TYPE_MEMBUF_CHIP,
-                    reinterpret_cast<void *>
-                        (const_cast<TARGETING::Target*>(l_@targetN_target)) );
-
-    //  call the HWP with each fapi::Target
-    l_fapirc  =   proc_pcie_scominit( ? , ?, ? );
-
-    //  process return code.
-    if ( l_fapirc== fapi::FAPI_RC_SUCCESS )
+    for ( TargetHandleList::iterator l_iter = l_procTargetList.begin();
+          l_iter != l_procTargetList.end(); ++l_iter )
     {
-        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                "SUCCESS :  proc_pcie_scominit HWP(? ? ? )" );
-    }
-    else
-    {
-        /**
-         * @todo fapi error - just print out for now...
-         */
-        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                "ERROR 0x%.8X:  proc_pcie_scominit HWP(? ? ?) ",
-                static_cast<uint32_t>(l_fapirc) );
-    }
-    // @@@@@    END CUSTOM BLOCK:   @@@@@
-#endif
+        const TARGETING::Target*  l_proc_target = *l_iter;
+        const fapi::Target l_fapi_proc_target(
+                TARGET_TYPE_PROC_CHIP,
+                reinterpret_cast<void *>
+                ( const_cast<TARGETING::Target*>(l_proc_target) )
+        );
 
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, 
-               "call_proc_pcie_scominit exit" );
+        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                   "Running proc_pcie_scominit HWP on..." );
+
+        //  dump physical path to targets
+        EntityPath l_path;
+        l_path  =   l_proc_target->getAttr<ATTR_PHYS_PATH>();
+        l_path.dump();
+
+        //  call the HWP with each fapi::Target
+        FAPI_INVOKE_HWP(l_errl, proc_pcie_scominit, l_fapi_proc_target);
+
+        if (l_errl)
+        {
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                      "ERROR 0x%.8X : proc_pcie_scominit HWP returns error",
+                      l_errl->reasonCode());
+
+            /*@
+             * @errortype
+             * @reasoncode  ISTEP_NEST_CHIPLETS_FAILED
+             * @severity    ERRORLOG::ERRL_SEV_UNRECOVERABLE
+             * @moduleid    ISTEP_PROC_PCIE_SCOMINIT
+             * @userdata1   bytes 0-1: plid identifying first error
+             *              bytes 2-3: reason code of first error
+             * @userdata2   bytes 0-1: total number of elogs included
+             *              bytes 2-3: N/A
+             * @devdesc     call to proc_pcie_scominit has failed
+             */
+            l_StepError.addErrorDetails(ISTEP_NEST_CHIPLETS_FAILED,
+                                        ISTEP_PROC_PCIE_SCOMINIT,
+                                        l_errl);
+
+            // capture the target data in the elog
+            ErrlUserDetailsTarget(l_proc_target).addToLog( l_errl );
+
+            errlCommit( l_errl, HWPF_COMP_ID );
+
+            break;
+        }
+        else
+        {
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                   "SUCCESS :  proc_pcie_scominit HWP" );
+        }
+    }
+
+    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                            "call_proc_pcie_scominit exit" );
 
     // end task, returning any errorlogs to IStepDisp 
-    return l_errl;
+    return l_StepError.getErrorHandle();
 }
 
 //*****************************************************************************

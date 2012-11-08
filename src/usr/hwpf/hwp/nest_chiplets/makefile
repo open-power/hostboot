@@ -40,20 +40,23 @@ EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/nest_chiplets/proc_start_clocks_chip
 EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/nest_chiplets/proc_chiplet_scominit
 EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/nest_chiplets/proc_scomoverride_chiplets
 EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/nest_chiplets/proc_a_x_pci_dmi_pll_setup
+EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/nest_chiplets/proc_pcie_scominit
 
 ##  NOTE: add new object files when you add a new HWP
 OBJS =  nest_chiplets.o \
-		proc_start_clocks_chiplets.o \
+        proc_start_clocks_chiplets.o \
         proc_chiplet_scominit.o \
         proc_scomoverride_chiplets.o \
         proc_a_x_pci_dmi_pll_initf.o \
-        proc_a_x_pci_dmi_pll_setup.o
+        proc_a_x_pci_dmi_pll_setup.o \
+        proc_pcie_scominit.o
         
 ##  NOTE: add a new directory onto the vpaths when you add a new HWP
 VPATH += ${ROOTPATH}/src/usr/hwpf/hwp/nest_chiplets/proc_start_clocks_chiplets
 VPATH += ${ROOTPATH}/src/usr/hwpf/hwp/nest_chiplets/proc_chiplet_scominit
 VPATH += ${ROOTPATH}/src/usr/hwpf/hwp/nest_chiplets/proc_scomoverride_chiplets
 VPATH += ${ROOTPATH}/src/usr/hwpf/hwp/nest_chiplets/proc_a_x_pci_dmi_pll_setup
+VPATH += ${ROOTPATH}/src/usr/hwpf/hwp/nest_chiplets/proc_pcie_scominit
 
 include ${ROOTPATH}/config.mk
 

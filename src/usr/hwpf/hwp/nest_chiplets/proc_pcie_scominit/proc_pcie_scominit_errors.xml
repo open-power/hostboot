@@ -1,0 +1,41 @@
+<!-- IBM_PROLOG_BEGIN_TAG                                                   -->
+<!-- This is an automatically generated prolog.                             -->
+<!--                                                                        -->
+<!-- $Source: src/usr/hwpf/hwp/nest_chiplets/proc_pcie_scominit/proc_pcie_scominit_errors.xml $ -->
+<!--                                                                        -->
+<!-- IBM CONFIDENTIAL                                                       -->
+<!--                                                                        -->
+<!-- COPYRIGHT International Business Machines Corp. 2012                   -->
+<!--                                                                        -->
+<!-- p1                                                                     -->
+<!--                                                                        -->
+<!-- Object Code Only (OCO) source materials                                -->
+<!-- Licensed Internal Code Source Materials                                -->
+<!-- IBM HostBoot Licensed Internal Code                                    -->
+<!--                                                                        -->
+<!-- The source code for this program is not published or otherwise         -->
+<!-- divested of its trade secrets, irrespective of what has been           -->
+<!-- deposited with the U.S. Copyright Office.                              -->
+<!--                                                                        -->
+<!-- Origin: 30                                                             -->
+<!--                                                                        -->
+<!-- IBM_PROLOG_END_TAG                                                     -->
+<!-- Error definitions for proc_pcie_scominit -->
+<hwpErrors>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_PROC_PCIE_SCOMINIT_INVALID_TARGET</rc>
+    <description>Invalid target type provided to HWP.</description>
+  </hwpError>
+  <hwpError>
+    <rc>RC_PROC_PCIE_SCOMINIT_IOP_CONFIG_ATTR_ERR</rc>
+    <description>Unsupported/invalid IOP lane configuration attribute value.</description>
+    <ffdc>ATTR_DATA</ffdc>
+  </hwpError>
+  <hwpError>
+    <rc>RC_PROC_PCIE_SCOMINIT_IOP_SWAP_ATTR_ERR</rc>
+    <description>Unsupported/invalid IOP swap configuration attribute value.</description>
+    <ffdc>IOP_DATA</ffdc>
+    <ffdc>ATTR_DATA</ffdc>
+  </hwpError>
+</hwpErrors>

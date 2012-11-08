@@ -1,0 +1,1285 @@
+#-- $Id: p8.pe.phase1.scom.initfile,v 1.1 2012/11/05 21:39:30 jmcgill Exp $
+#-------------------------------------------------------------------------------
+#--
+#-- (C) Copyright International Business Machines Corp. 2011
+#-- All Rights Reserved -- Property of IBM
+#-- *** IBM Confidential ***
+#--
+#-- TITLE       : p8.pcie.phase1.scom.initfile
+#-- DESCRIPTION : Perform PCIe Physical IO Inits (Phase 1, Steps 5-6)
+#--
+#-- OWNER NAME  : Joe McDonald            Email: joemc@us.ibm.com
+#-- OWNER NAME  : Rick Mata               Email: ricmata@us.ibm.com
+#--
+#--------------------------------------------------------------------------------
+
+SyntaxVersion = 1
+
+#--------------------------------------------------------------------------------
+#-- Includes
+#--------------------------------------------------------------------------------
+
+#--------------------------------------------------------------------------------
+#-- Defines
+#--------------------------------------------------------------------------------
+
+#--------------------------------------------------------------------------------
+#-- SCOM initializations
+#--------------------------------------------------------------------------------
+
+#--
+#-- IOP 0
+#--
+
+#-- G3 PLL Control Register 0
+scom 0x800008010901143F {
+    bits,  scom_data;
+    51:63, ATTR_PROC_PCIE_IOP_G3_PLL_CONTROL0[0];
+}
+
+#-- G2 PLL Control Register 0
+scom 0x800008050901143F {
+    bits,     scom_data;
+    51:63,    ATTR_PROC_PCIE_IOP_G2_PLL_CONTROL0[0];
+}
+
+#-- PLL Global Control Register 0
+scom 0x800008080901143F {
+    bits,     scom_data;
+    52:63,    ATTR_PROC_PCIE_IOP_PLL_GLOBAL_CONTROL0[0];
+}
+
+#-- PLL Global Control Register 1
+scom 0x800008090901143F {
+    bits,     scom_data;
+    51:63,    ATTR_PROC_PCIE_IOP_PLL_GLOBAL_CONTROL1[0];
+}
+
+#-- PCS Control Register 0
+scom 0x800008800901143F {
+    bits,     scom_data;
+    48:63,    ATTR_PROC_PCIE_IOP_PCS_CONTROL0[0];
+}
+
+#-- PCS Control Register 1
+scom 0x800008810901143F {
+    bits,     scom_data;
+    48:63,    ATTR_PROC_PCIE_IOP_PCS_CONTROL1[0];
+}
+
+#-- TX FIFO Offset Register (A0)
+scom 0x800004010901143F {
+    bits,     scom_data;
+    49:63,    ATTR_PROC_PCIE_IOP_TX_FIFO_OFFSET[0][0];
+}
+
+#-- TX FIFO Offset Register (A1)
+scom 0x800004410901143F {
+    bits,     scom_data;
+    49:63,    ATTR_PROC_PCIE_IOP_TX_FIFO_OFFSET[0][1];
+}
+
+#-- TX FIFO Offset Register (A2)
+scom 0x800004810901143F {
+    bits,     scom_data;
+    49:63,    ATTR_PROC_PCIE_IOP_TX_FIFO_OFFSET[0][2];
+}
+
+#-- TX FIFO Offset Register (A3)
+scom 0x800004C10901143F {
+    bits,     scom_data;
+    49:63,    ATTR_PROC_PCIE_IOP_TX_FIFO_OFFSET[0][3];
+}
+
+#-- TX FIFO Offset Register (A4)
+scom 0x800005010901143F {
+    bits,     scom_data;
+    49:63,    ATTR_PROC_PCIE_IOP_TX_FIFO_OFFSET[0][4];
+}
+
+#-- TX FIFO Offset Register (A5)
+scom 0x800005410901143F {
+    bits,     scom_data;
+    49:63,    ATTR_PROC_PCIE_IOP_TX_FIFO_OFFSET[0][5];
+}
+
+#-- TX FIFO Offset Register (A6)
+scom 0x800005810901143F {
+    bits,     scom_data;
+    49:63,    ATTR_PROC_PCIE_IOP_TX_FIFO_OFFSET[0][6];
+}
+
+#-- TX FIFO Offset Register (A7)
+scom 0x800005C10901143F {
+    bits,     scom_data;
+    49:63,    ATTR_PROC_PCIE_IOP_TX_FIFO_OFFSET[0][7];
+}
+
+#-- TX FIFO Offset Register (B0)
+scom 0x800006010901143F {
+    bits,     scom_data;
+    49:63,    ATTR_PROC_PCIE_IOP_TX_FIFO_OFFSET[0][8];
+}
+
+#-- TX FIFO Offset Register (B1)
+scom 0x800006410901143F {
+    bits,     scom_data;
+    49:63,    ATTR_PROC_PCIE_IOP_TX_FIFO_OFFSET[0][9];
+}
+
+#-- TX FIFO Offset Register (B2)
+scom 0x800006810901143F {
+    bits,     scom_data;
+    49:63,    ATTR_PROC_PCIE_IOP_TX_FIFO_OFFSET[0][10];
+}
+
+#-- TX FIFO Offset Register (B3)
+scom 0x800006C10901143F {
+    bits,     scom_data;
+    49:63,    ATTR_PROC_PCIE_IOP_TX_FIFO_OFFSET[0][11];
+}
+
+#-- TX FIFO Offset Register (B4)
+scom 0x800007010901143F {
+    bits,     scom_data;
+    49:63,    ATTR_PROC_PCIE_IOP_TX_FIFO_OFFSET[0][12];
+}
+
+#-- TX FIFO Offset Register (B5)
+scom 0x800007410901143F {
+    bits,     scom_data;
+    49:63,    ATTR_PROC_PCIE_IOP_TX_FIFO_OFFSET[0][13];
+}
+
+#-- TX FIFO Offset Register (B6)
+scom 0x800007810901143F {
+    bits,     scom_data;
+    49:63,    ATTR_PROC_PCIE_IOP_TX_FIFO_OFFSET[0][14];
+}
+
+#-- TX FIFO Offset Register (B7)
+scom 0x800007C10901143F {
+    bits,     scom_data;
+    49:63,    ATTR_PROC_PCIE_IOP_TX_FIFO_OFFSET[0][15];
+}
+
+#-- TX Receiver Detect Control Register (A0)
+scom 0x800004020901143F {
+    bits,     scom_data;
+    49:63,    ATTR_PROC_PCIE_IOP_TX_RCVRDETCNTL[0][0];
+}
+
+#-- TX Receiver Detect Control Register (A1)
+scom 0x800004420901143F {
+    bits,     scom_data;
+    49:63,    ATTR_PROC_PCIE_IOP_TX_RCVRDETCNTL[0][1];
+}
+
+#-- TX Receiver Detect Control Register (A2)
+scom 0x800004820901143F {
+    bits,     scom_data;
+    49:63,    ATTR_PROC_PCIE_IOP_TX_RCVRDETCNTL[0][2];
+}
+
+#-- TX Receiver Detect Control Register (A3)
+scom 0x800004C20901143F {
+    bits,     scom_data;
+    49:63,    ATTR_PROC_PCIE_IOP_TX_RCVRDETCNTL[0][3];
+}
+
+#-- TX Receiver Detect Control Register (A4)
+scom 0x800005020901143F {
+    bits,     scom_data;
+    49:63,    ATTR_PROC_PCIE_IOP_TX_RCVRDETCNTL[0][4];
+}
+
+#-- TX Receiver Detect Control Register (A5)
+scom 0x800005420901143F {
+    bits,     scom_data;
+    49:63,    ATTR_PROC_PCIE_IOP_TX_RCVRDETCNTL[0][5];
+}
+
+#-- TX Receiver Detect Control Register (A6)
+scom 0x800005820901143F {
+    bits,     scom_data;
+    49:63,    ATTR_PROC_PCIE_IOP_TX_RCVRDETCNTL[0][6];
+}
+
+#-- TX Receiver Detect Control Register (A7)
+scom 0x800005C20901143F {
+    bits,     scom_data;
+    49:63,    ATTR_PROC_PCIE_IOP_TX_RCVRDETCNTL[0][7];
+}
+
+#-- TX Receiver Detect Control Register (B0)
+scom 0x800006020901143F {
+    bits,     scom_data;
+    49:63,    ATTR_PROC_PCIE_IOP_TX_RCVRDETCNTL[0][8];
+}
+
+#-- TX Receiver Detect Control Register (B1)
+scom 0x800006420901143F {
+    bits,     scom_data;
+    49:63,    ATTR_PROC_PCIE_IOP_TX_RCVRDETCNTL[0][9];
+}
+
+#-- TX Receiver Detect Control Register (B2)
+scom 0x800006820901143F {
+    bits,     scom_data;
+    49:63,    ATTR_PROC_PCIE_IOP_TX_RCVRDETCNTL[0][10];
+}
+
+#-- TX Receiver Detect Control Register (B3)
+scom 0x800006C20901143F {
+    bits,     scom_data;
+    49:63,    ATTR_PROC_PCIE_IOP_TX_RCVRDETCNTL[0][11];
+}
+
+#-- TX Receiver Detect Control Register (B4)
+scom 0x800007020901143F {
+    bits,     scom_data;
+    49:63,    ATTR_PROC_PCIE_IOP_TX_RCVRDETCNTL[0][12];
+}
+
+#-- TX Receiver Detect Control Register (B5)
+scom 0x800007420901143F {
+    bits,     scom_data;
+    49:63,    ATTR_PROC_PCIE_IOP_TX_RCVRDETCNTL[0][13];
+}
+
+#-- TX Receiver Detect Control Register (B6)
+scom 0x800007820901143F {
+    bits,     scom_data;
+    49:63,    ATTR_PROC_PCIE_IOP_TX_RCVRDETCNTL[0][14];
+}
+
+#-- TX Receiver Detect Control Register (B7)
+scom 0x800007C20901143F {
+    bits,     scom_data;
+    49:63,    ATTR_PROC_PCIE_IOP_TX_RCVRDETCNTL[0][15];
+}
+
+#-- TX Bandwidth Loss Coefficient Register (A0)
+scom 0x8000041B0901143F {
+    bits,     scom_data;
+    52:63,    ATTR_PROC_PCIE_IOP_TX_BWLOSS1[0][0];
+}
+
+#-- TX Bandwidth Loss Coefficient Register (A1)
+scom 0x8000045B0901143F {
+    bits,     scom_data;
+    52:63,    ATTR_PROC_PCIE_IOP_TX_BWLOSS1[0][1];
+}
+
+#-- TX Bandwidth Loss Coefficient Register (A2)
+scom 0x8000049B0901143F {
+    bits,     scom_data;
+    52:63,    ATTR_PROC_PCIE_IOP_TX_BWLOSS1[0][2];
+}
+
+#-- TX Bandwidth Loss Coefficient Register (A3)
+scom 0x800004DB0901143F {
+    bits,     scom_data;
+    52:63,    ATTR_PROC_PCIE_IOP_TX_BWLOSS1[0][3];
+}
+
+#-- TX Bandwidth Loss Coefficient Register (A4)
+scom 0x8000051B0901143F {
+    bits,     scom_data;
+    52:63,    ATTR_PROC_PCIE_IOP_TX_BWLOSS1[0][4];
+}
+
+#-- TX Bandwidth Loss Coefficient Register (A5)
+scom 0x8000055B0901143F {
+    bits,     scom_data;
+    52:63,    ATTR_PROC_PCIE_IOP_TX_BWLOSS1[0][5];
+}
+
+#-- TX Bandwidth Loss Coefficient Register (A6)
+scom 0x8000059B0901143F {
+    bits,     scom_data;
+    52:63,    ATTR_PROC_PCIE_IOP_TX_BWLOSS1[0][6];
+}
+
+#-- TX Bandwidth Loss Coefficient Register (A7)
+scom 0x800005DB0901143F {
+    bits,     scom_data;
+    52:63,    ATTR_PROC_PCIE_IOP_TX_BWLOSS1[0][7];
+}
+
+#-- TX Bandwidth Loss Coefficient Register (B0)
+scom 0x8000061B0901143F {
+    bits,     scom_data;
+    52:63,    ATTR_PROC_PCIE_IOP_TX_BWLOSS1[0][8];
+}
+
+#-- TX Bandwidth Loss Coefficient Register (B1)
+scom 0x8000065B0901143F {
+    bits,     scom_data;
+    52:63,    ATTR_PROC_PCIE_IOP_TX_BWLOSS1[0][9];
+}
+
+#-- TX Bandwidth Loss Coefficient Register (B2)
+scom 0x8000069B0901143F {
+    bits,     scom_data;
+    52:63,    ATTR_PROC_PCIE_IOP_TX_BWLOSS1[0][10];
+}
+
+#-- TX Bandwidth Loss Coefficient Register (B3)
+scom 0x800006DB0901143F {
+    bits,     scom_data;
+    52:63,    ATTR_PROC_PCIE_IOP_TX_BWLOSS1[0][11];
+}
+
+#-- TX Bandwidth Loss Coefficient Register (B4)
+scom 0x8000071B0901143F {
+    bits,     scom_data;
+    52:63,    ATTR_PROC_PCIE_IOP_TX_BWLOSS1[0][12];
+}
+
+#-- TX Bandwidth Loss Coefficient Register (B5)
+scom 0x8000075B0901143F {
+    bits,     scom_data;
+    52:63,    ATTR_PROC_PCIE_IOP_TX_BWLOSS1[0][13];
+}
+
+#-- TX Bandwidth Loss Coefficient Register (B6)
+scom 0x8000079B0901143F {
+    bits,     scom_data;
+    52:63,    ATTR_PROC_PCIE_IOP_TX_BWLOSS1[0][14];
+}
+
+#-- TX Bandwidth Loss Coefficient Register (B7)
+scom 0x800007DB0901143F {
+    bits,     scom_data;
+    52:63,    ATTR_PROC_PCIE_IOP_TX_BWLOSS1[0][15];
+}
+
+#-- RX VGA Control Register2 (A0)
+scom 0x8000000C0901143F {
+    bits,     scom_data;
+    48:63,    ATTR_PROC_PCIE_IOP_RX_VGA_CONTROL2[0][0];
+}
+
+#-- RX VGA Control Register2 (A1)
+scom 0x8000004C0901143F {
+    bits,     scom_data;
+    48:63,    ATTR_PROC_PCIE_IOP_RX_VGA_CONTROL2[0][1];
+}
+
+#-- RX VGA Control Register2 (A2)
+scom 0x8000008C0901143F {
+    bits,     scom_data;
+    48:63,    ATTR_PROC_PCIE_IOP_RX_VGA_CONTROL2[0][2];
+}
+
+#-- RX VGA Control Register2 (A3)
+scom 0x800000CC0901143F {
+    bits,     scom_data;
+    48:63,    ATTR_PROC_PCIE_IOP_RX_VGA_CONTROL2[0][3];
+}
+
+#-- RX VGA Control Register2 (A4)
+scom 0x8000010C0901143F {
+    bits,     scom_data;
+    48:63,    ATTR_PROC_PCIE_IOP_RX_VGA_CONTROL2[0][4];
+}
+
+#-- RX VGA Control Register2 (A5)
+scom 0x8000014C0901143F {
+    bits,     scom_data;
+    48:63,    ATTR_PROC_PCIE_IOP_RX_VGA_CONTROL2[0][5];
+}
+
+#-- RX VGA Control Register2 (A6)
+scom 0x8000018C0901143F {
+    bits,     scom_data;
+    48:63,    ATTR_PROC_PCIE_IOP_RX_VGA_CONTROL2[0][6];
+}
+
+#-- RX VGA Control Register2 (A7)
+scom 0x800001CC0901143F {
+    bits,     scom_data;
+    48:63,    ATTR_PROC_PCIE_IOP_RX_VGA_CONTROL2[0][7];
+}
+
+#-- RX VGA Control Register2 (B0)
+scom 0x8000020C0901143F {
+    bits,     scom_data;
+    48:63,    ATTR_PROC_PCIE_IOP_RX_VGA_CONTROL2[0][8];
+}
+
+#-- RX VGA Control Register2 (B1)
+scom 0x8000024C0901143F {
+    bits,     scom_data;
+    48:63,    ATTR_PROC_PCIE_IOP_RX_VGA_CONTROL2[0][9];
+}
+
+#-- RX VGA Control Register2 (B2)
+scom 0x8000028C0901143F {
+    bits,     scom_data;
+    48:63,    ATTR_PROC_PCIE_IOP_RX_VGA_CONTROL2[0][10];
+}
+
+#-- RX VGA Control Register2 (B3)
+scom 0x800002CC0901143F {
+    bits,     scom_data;
+    48:63,    ATTR_PROC_PCIE_IOP_RX_VGA_CONTROL2[0][11];
+}
+
+#-- RX VGA Control Register2 (B4)
+scom 0x8000030C0901143F {
+    bits,     scom_data;
+    48:63,    ATTR_PROC_PCIE_IOP_RX_VGA_CONTROL2[0][12];
+}
+
+#-- RX VGA Control Register2 (B5)
+scom 0x8000034C0901143F {
+    bits,     scom_data;
+    48:63,    ATTR_PROC_PCIE_IOP_RX_VGA_CONTROL2[0][13];
+}
+
+#-- RX VGA Control Register2 (B6)
+scom 0x8000038C0901143F {
+    bits,     scom_data;
+    48:63,    ATTR_PROC_PCIE_IOP_RX_VGA_CONTROL2[0][14];
+}
+
+#-- RX VGA Control Register2 (B7)
+scom 0x800003CC0901143F {
+    bits,     scom_data;
+    48:63,    ATTR_PROC_PCIE_IOP_RX_VGA_CONTROL2[0][15];
+}
+
+#-- RX Receiver Peaking Register (A0)
+scom 0x800000100901143F {
+    bits,     scom_data;
+    48:63,    ATTR_PROC_PCIE_IOP_RX_PEAK[0][0];
+}
+
+#-- RX Receiver Peaking Register (A1)
+scom 0x800000500901143F {
+    bits,     scom_data;
+    48:63,    ATTR_PROC_PCIE_IOP_RX_PEAK[0][1];
+}
+
+#-- RX Receiver Peaking Register (A2)
+scom 0x800000900901143F {
+    bits,     scom_data;
+    48:63,    ATTR_PROC_PCIE_IOP_RX_PEAK[0][2];
+}
+
+#-- RX Receiver Peaking Register (A3)
+scom 0x800000D00901143F {
+    bits,     scom_data;
+    48:63,    ATTR_PROC_PCIE_IOP_RX_PEAK[0][3];
+}
+
+#-- RX Receiver Peaking Register (A4)
+scom 0x800001100901143F {
+    bits,     scom_data;
+    48:63,    ATTR_PROC_PCIE_IOP_RX_PEAK[0][4];
+}
+
+#-- RX Receiver Peaking Register (A5)
+scom 0x800001500901143F {
+    bits,     scom_data;
+    48:63,    ATTR_PROC_PCIE_IOP_RX_PEAK[0][5];
+}
+
+#-- RX Receiver Peaking Register (A6)
+scom 0x800001900901143F {
+    bits,     scom_data;
+    48:63,    ATTR_PROC_PCIE_IOP_RX_PEAK[0][6];
+}
+
+#-- RX Receiver Peaking Register (A7)
+scom 0x800001D00901143F {
+    bits,     scom_data;
+    48:63,    ATTR_PROC_PCIE_IOP_RX_PEAK[0][7];
+}
+
+#-- RX Receiver Peaking Register (B0)
+scom 0x800002100901143F {
+    bits,     scom_data;
+    48:63,    ATTR_PROC_PCIE_IOP_RX_PEAK[0][8];
+}
+
+#-- RX Receiver Peaking Register (B1)
+scom 0x800002500901143F {
+    bits,     scom_data;
+    48:63,    ATTR_PROC_PCIE_IOP_RX_PEAK[0][9];
+}
+
+#-- RX Receiver Peaking Register (B2)
+scom 0x800002900901143F {
+    bits,     scom_data;
+    48:63,    ATTR_PROC_PCIE_IOP_RX_PEAK[0][10];
+}
+
+#-- RX Receiver Peaking Register (B3)
+scom 0x800002D00901143F {
+    bits,     scom_data;
+    48:63,    ATTR_PROC_PCIE_IOP_RX_PEAK[0][11];
+}
+
+#-- RX Receiver Peaking Register (B4)
+scom 0x800003100901143F {
+    bits,     scom_data;
+    48:63,    ATTR_PROC_PCIE_IOP_RX_PEAK[0][12];
+}
+
+#-- RX Receiver Peaking Register (B5)
+scom 0x800003500901143F {
+    bits,     scom_data;
+    48:63,    ATTR_PROC_PCIE_IOP_RX_PEAK[0][13];
+}
+
+#-- RX Receiver Peaking Register (B6)
+scom 0x800003900901143F {
+    bits,     scom_data;
+    48:63,    ATTR_PROC_PCIE_IOP_RX_PEAK[0][14];
+}
+
+#-- RX Receiver Peaking Register (B7)
+scom 0x800003D00901143F {
+    bits,     scom_data;
+    48:63,    ATTR_PROC_PCIE_IOP_RX_PEAK[0][15];
+}
+
+#-- RX Signal Detect Level Register (A0)
+scom 0x800000370901143F {
+    bits,     scom_data;
+    48:63,    ATTR_PROC_PCIE_IOP_RX_SDL[0][0];
+}
+
+#-- RX Signal Detect Level Register (A1)
+scom 0x800000770901143F {
+    bits,     scom_data;
+    48:63,    ATTR_PROC_PCIE_IOP_RX_SDL[0][1];
+}
+
+#-- RX Signal Detect Level Register (A2)
+scom 0x800000B70901143F {
+    bits,     scom_data;
+    48:63,    ATTR_PROC_PCIE_IOP_RX_SDL[0][2];
+}
+
+#-- RX Signal Detect Level Register (A3)
+scom 0x800000F70901143F {
+    bits,     scom_data;
+    48:63,    ATTR_PROC_PCIE_IOP_RX_SDL[0][3];
+}
+
+#-- RX Signal Detect Level Register (A4)
+scom 0x800001370901143F {
+    bits,     scom_data;
+    48:63,    ATTR_PROC_PCIE_IOP_RX_SDL[0][4];
+}
+
+#-- RX Signal Detect Level Register (A5)
+scom 0x800001770901143F {
+    bits,     scom_data;
+    48:63,    ATTR_PROC_PCIE_IOP_RX_SDL[0][5];
+}
+
+#-- RX Signal Detect Level Register (A6)
+scom 0x800001B70901143F {
+    bits,     scom_data;
+    48:63,    ATTR_PROC_PCIE_IOP_RX_SDL[0][6];
+}
+
+#-- RX Signal Detect Level Register (A7)
+scom 0x800001F70901143F {
+    bits,     scom_data;
+    48:63,    ATTR_PROC_PCIE_IOP_RX_SDL[0][7];
+}
+
+#-- RX Signal Detect Level Register (B0)
+scom 0x800002370901143F {
+    bits,     scom_data;
+    48:63,    ATTR_PROC_PCIE_IOP_RX_SDL[0][8];
+}
+
+#-- RX Signal Detect Level Register (B1)
+scom 0x800002770901143F {
+    bits,     scom_data;
+    48:63,    ATTR_PROC_PCIE_IOP_RX_SDL[0][9];
+}
+
+#-- RX Signal Detect Level Register (B2)
+scom 0x800002B70901143F {
+    bits,     scom_data;
+    48:63,    ATTR_PROC_PCIE_IOP_RX_SDL[0][10];
+}
+
+#-- RX Signal Detect Level Register (B3)
+scom 0x800002F70901143F {
+    bits,     scom_data;
+    48:63,    ATTR_PROC_PCIE_IOP_RX_SDL[0][11];
+}
+
+#-- RX Signal Detect Level Register (B4)
+scom 0x800003370901143F {
+    bits,     scom_data;
+    48:63,    ATTR_PROC_PCIE_IOP_RX_SDL[0][12];
+}
+
+#-- RX Signal Detect Level Register (B5)
+scom 0x800003770901143F {
+    bits,     scom_data;
+    48:63,    ATTR_PROC_PCIE_IOP_RX_SDL[0][13];
+}
+
+#-- RX Signal Detect Level Register (B6)
+scom 0x800003B70901143F {
+    bits,     scom_data;
+    48:63,    ATTR_PROC_PCIE_IOP_RX_SDL[0][14];
+}
+
+#-- RX Signal Detect Level Register (B7)
+scom 0x800003F70901143F {
+    bits,     scom_data;
+    48:63,    ATTR_PROC_PCIE_IOP_RX_SDL[0][15];
+}
+
+#-- ZCAL Control Register
+scom 0x800008400901143F {
+    bits,     scom_data;
+    53:60,    ATTR_PROC_PCIE_IOP_ZCAL_CONTROL[0];
+}
+
+#-- ZCAL Override Register
+scom 0x800008420901143F {
+    bits,     scom_data;
+    48:63,    0xEC30;
+}
+
+
+#--
+#-- IOP 1
+#--
+
+#-- G3 PLL Control Register 0
+scom 0x800008010901187F {
+    bits,     scom_data;
+    51:63,    ATTR_PROC_PCIE_IOP_G3_PLL_CONTROL0[1];
+}
+
+#-- G2 PLL Control Register 0
+scom 0x800008050901187F {
+    bits,     scom_data;
+    51:63,    ATTR_PROC_PCIE_IOP_G2_PLL_CONTROL0[1];
+}
+
+#-- PLL Global Control Register 0
+scom 0x800008080901187F {
+    bits,     scom_data;
+    52:63,    ATTR_PROC_PCIE_IOP_PLL_GLOBAL_CONTROL0[1];
+}
+
+#-- PLL Global Control Register 1
+scom 0x800008090901187F {
+    bits,     scom_data;
+    51:63,    ATTR_PROC_PCIE_IOP_PLL_GLOBAL_CONTROL1[1];
+}
+
+#-- PCS Control Register 0
+scom 0x800008800901187F {
+    bits,     scom_data;
+    48:63,    ATTR_PROC_PCIE_IOP_PCS_CONTROL0[1];
+}
+
+#-- PCS Control Register 1
+scom 0x800008810901187F {
+    bits,     scom_data;
+    48:63,    ATTR_PROC_PCIE_IOP_PCS_CONTROL1[1];
+}
+
+#-- TX FIFO Offset Register (A0)
+scom 0x800004010901187F {
+    bits,     scom_data;
+    49:63,    ATTR_PROC_PCIE_IOP_TX_FIFO_OFFSET[1][0];
+}
+
+#-- TX FIFO Offset Register (A1)
+scom 0x800004410901187F {
+    bits,     scom_data;
+    49:63,    ATTR_PROC_PCIE_IOP_TX_FIFO_OFFSET[1][1];
+}
+
+#-- TX FIFO Offset Register (A2)
+scom 0x800004810901187F {
+    bits,     scom_data;
+    49:63,    ATTR_PROC_PCIE_IOP_TX_FIFO_OFFSET[1][2];
+}
+
+#-- TX FIFO Offset Register (A3)
+scom 0x800004C10901187F {
+    bits,     scom_data;
+    49:63,    ATTR_PROC_PCIE_IOP_TX_FIFO_OFFSET[1][3];
+}
+
+#-- TX FIFO Offset Register (A4)
+scom 0x800005010901187F {
+    bits,     scom_data;
+    49:63,    ATTR_PROC_PCIE_IOP_TX_FIFO_OFFSET[1][4];
+}
+
+#-- TX FIFO Offset Register (A5)
+scom 0x800005410901187F {
+    bits,     scom_data;
+    49:63,    ATTR_PROC_PCIE_IOP_TX_FIFO_OFFSET[1][5];
+}
+
+#-- TX FIFO Offset Register (A6)
+scom 0x800005810901187F {
+    bits,     scom_data;
+    49:63,    ATTR_PROC_PCIE_IOP_TX_FIFO_OFFSET[1][6];
+}
+
+#-- TX FIFO Offset Register (A7)
+scom 0x800005C10901187F {
+    bits,     scom_data;
+    49:63,    ATTR_PROC_PCIE_IOP_TX_FIFO_OFFSET[1][7];
+}
+
+#-- TX FIFO Offset Register (B0)
+scom 0x800006010901187F {
+    bits,     scom_data;
+    49:63,    ATTR_PROC_PCIE_IOP_TX_FIFO_OFFSET[1][8];
+}
+
+#-- TX FIFO Offset Register (B1)
+scom 0x800006410901187F {
+    bits,     scom_data;
+    49:63,    ATTR_PROC_PCIE_IOP_TX_FIFO_OFFSET[1][9];
+}
+
+#-- TX FIFO Offset Register (B2)
+scom 0x800006810901187F {
+    bits,     scom_data;
+    49:63,    ATTR_PROC_PCIE_IOP_TX_FIFO_OFFSET[1][10];
+}
+
+#-- TX FIFO Offset Register (B3)
+scom 0x800006C10901187F {
+    bits,     scom_data;
+    49:63,    ATTR_PROC_PCIE_IOP_TX_FIFO_OFFSET[1][11];
+}
+
+#-- TX FIFO Offset Register (B4)
+scom 0x800007010901187F {
+    bits,     scom_data;
+    49:63,    ATTR_PROC_PCIE_IOP_TX_FIFO_OFFSET[1][12];
+}
+
+#-- TX FIFO Offset Register (B5)
+scom 0x800007410901187F {
+    bits,     scom_data;
+    49:63,    ATTR_PROC_PCIE_IOP_TX_FIFO_OFFSET[1][13];
+}
+
+#-- TX FIFO Offset Register (B6)
+scom 0x800007810901187F {
+    bits,     scom_data;
+    49:63,    ATTR_PROC_PCIE_IOP_TX_FIFO_OFFSET[1][14];
+}
+
+#-- TX FIFO Offset Register (B7)
+scom 0x800007C10901187F {
+    bits,     scom_data;
+    49:63,    ATTR_PROC_PCIE_IOP_TX_FIFO_OFFSET[1][15];
+}
+
+#-- TX Receiver Detect Control Register (A0)
+scom 0x800004020901187F {
+    bits,     scom_data;
+    49:63,    ATTR_PROC_PCIE_IOP_TX_RCVRDETCNTL[1][0];
+}
+
+#-- TX Receiver Detect Control Register (A1)
+scom 0x800004420901187F {
+    bits,     scom_data;
+    49:63,    ATTR_PROC_PCIE_IOP_TX_RCVRDETCNTL[1][1];
+}
+
+#-- TX Receiver Detect Control Register (A2)
+scom 0x800004820901187F {
+    bits,     scom_data;
+    49:63,    ATTR_PROC_PCIE_IOP_TX_RCVRDETCNTL[1][2];
+}
+
+#-- TX Receiver Detect Control Register (A3)
+scom 0x800004C20901187F {
+    bits,     scom_data;
+    49:63,    ATTR_PROC_PCIE_IOP_TX_RCVRDETCNTL[1][3];
+}
+
+#-- TX Receiver Detect Control Register (A4)
+scom 0x800005020901187F {
+    bits,     scom_data;
+    49:63,    ATTR_PROC_PCIE_IOP_TX_RCVRDETCNTL[1][4];
+}
+
+#-- TX Receiver Detect Control Register (A5)
+scom 0x800005420901187F {
+    bits,     scom_data;
+    49:63,    ATTR_PROC_PCIE_IOP_TX_RCVRDETCNTL[1][5];
+}
+
+#-- TX Receiver Detect Control Register (A6)
+scom 0x800005820901187F {
+    bits,     scom_data;
+    49:63,    ATTR_PROC_PCIE_IOP_TX_RCVRDETCNTL[1][6];
+}
+
+#-- TX Receiver Detect Control Register (A7)
+scom 0x800005C20901187F {
+    bits,     scom_data;
+    49:63,    ATTR_PROC_PCIE_IOP_TX_RCVRDETCNTL[1][7];
+}
+
+#-- TX Receiver Detect Control Register (B0)
+scom 0x800006020901187F {
+    bits,     scom_data;
+    49:63,    ATTR_PROC_PCIE_IOP_TX_RCVRDETCNTL[1][8];
+}
+
+#-- TX Receiver Detect Control Register (B1)
+scom 0x800006420901187F {
+    bits,     scom_data;
+    49:63,    ATTR_PROC_PCIE_IOP_TX_RCVRDETCNTL[1][9];
+}
+
+#-- TX Receiver Detect Control Register (B2)
+scom 0x800006820901187F {
+    bits,     scom_data;
+    49:63,    ATTR_PROC_PCIE_IOP_TX_RCVRDETCNTL[1][10];
+}
+
+#-- TX Receiver Detect Control Register (B3)
+scom 0x800006C20901187F {
+    bits,     scom_data;
+    49:63,    ATTR_PROC_PCIE_IOP_TX_RCVRDETCNTL[1][11];
+}
+
+#-- TX Receiver Detect Control Register (B4)
+scom 0x800007020901187F {
+    bits,     scom_data;
+    49:63,    ATTR_PROC_PCIE_IOP_TX_RCVRDETCNTL[1][12];
+}
+
+#-- TX Receiver Detect Control Register (B5)
+scom 0x800007420901187F {
+    bits,     scom_data;
+    49:63,    ATTR_PROC_PCIE_IOP_TX_RCVRDETCNTL[1][13];
+}
+
+#-- TX Receiver Detect Control Register (B6)
+scom 0x800007820901187F {
+    bits,     scom_data;
+    49:63,    ATTR_PROC_PCIE_IOP_TX_RCVRDETCNTL[1][14];
+}
+
+#-- TX Receiver Detect Control Register (B7)
+scom 0x800007C20901187F {
+    bits,     scom_data;
+    49:63,    ATTR_PROC_PCIE_IOP_TX_RCVRDETCNTL[1][15];
+}
+
+#-- TX Bandwidth Loss Coefficient Register (A0)
+scom 0x8000041B0901187F {
+    bits,     scom_data;
+    52:63,    ATTR_PROC_PCIE_IOP_TX_BWLOSS1[1][0];
+}
+
+#-- TX Bandwidth Loss Coefficient Register (A1)
+scom 0x8000045B0901187F {
+    bits,     scom_data;
+    52:63,    ATTR_PROC_PCIE_IOP_TX_BWLOSS1[1][1];
+}
+
+#-- TX Bandwidth Loss Coefficient Register (A2)
+scom 0x8000049B0901187F {
+    bits,     scom_data;
+    52:63,    ATTR_PROC_PCIE_IOP_TX_BWLOSS1[1][2];
+}
+
+#-- TX Bandwidth Loss Coefficient Register (A3)
+scom 0x800004DB0901187F {
+    bits,     scom_data;
+    52:63,    ATTR_PROC_PCIE_IOP_TX_BWLOSS1[1][3];
+}
+
+#-- TX Bandwidth Loss Coefficient Register (A4)
+scom 0x8000051B0901187F {
+    bits,     scom_data;
+    52:63,    ATTR_PROC_PCIE_IOP_TX_BWLOSS1[1][4];
+}
+
+#-- TX Bandwidth Loss Coefficient Register (A5)
+scom 0x8000055B0901187F {
+    bits,     scom_data;
+    52:63,    ATTR_PROC_PCIE_IOP_TX_BWLOSS1[1][5];
+}
+
+#-- TX Bandwidth Loss Coefficient Register (A6)
+scom 0x8000059B0901187F {
+    bits,     scom_data;
+    52:63,    ATTR_PROC_PCIE_IOP_TX_BWLOSS1[1][6];
+}
+
+#-- TX Bandwidth Loss Coefficient Register (A7)
+scom 0x800005DB0901187F {
+    bits,     scom_data;
+    52:63,    ATTR_PROC_PCIE_IOP_TX_BWLOSS1[1][7];
+}
+
+#-- TX Bandwidth Loss Coefficient Register (B0)
+scom 0x8000061B0901187F {
+    bits,     scom_data;
+    52:63,    ATTR_PROC_PCIE_IOP_TX_BWLOSS1[1][8];
+}
+
+#-- TX Bandwidth Loss Coefficient Register (B1)
+scom 0x8000065B0901187F {
+    bits,     scom_data;
+    52:63,    ATTR_PROC_PCIE_IOP_TX_BWLOSS1[1][9];
+}
+
+#-- TX Bandwidth Loss Coefficient Register (B2)
+scom 0x8000069B0901187F {
+    bits,     scom_data;
+    52:63,    ATTR_PROC_PCIE_IOP_TX_BWLOSS1[1][10];
+}
+
+#-- TX Bandwidth Loss Coefficient Register (B3)
+scom 0x800006DB0901187F {
+    bits,     scom_data;
+    52:63,    ATTR_PROC_PCIE_IOP_TX_BWLOSS1[1][11];
+}
+
+#-- TX Bandwidth Loss Coefficient Register (B4)
+scom 0x8000071B0901187F {
+    bits,     scom_data;
+    52:63,    ATTR_PROC_PCIE_IOP_TX_BWLOSS1[1][12];
+}
+
+#-- TX Bandwidth Loss Coefficient Register (B5)
+scom 0x8000075B0901187F {
+    bits,     scom_data;
+    52:63,    ATTR_PROC_PCIE_IOP_TX_BWLOSS1[1][13];
+}
+
+#-- TX Bandwidth Loss Coefficient Register (B6)
+scom 0x8000079B0901187F {
+    bits,     scom_data;
+    52:63,    ATTR_PROC_PCIE_IOP_TX_BWLOSS1[1][14];
+}
+
+#-- TX Bandwidth Loss Coefficient Register (B7)
+scom 0x800007DB0901187F {
+    bits,     scom_data;
+    52:63,    ATTR_PROC_PCIE_IOP_TX_BWLOSS1[1][15];
+}
+
+#-- RX VGA Control Register2 (A0)
+scom 0x8000000C0901187F {
+    bits,     scom_data;
+    48:63,    ATTR_PROC_PCIE_IOP_RX_VGA_CONTROL2[1][0];
+}
+
+#-- RX VGA Control Register2 (A1)
+scom 0x8000004C0901187F {
+    bits,     scom_data;
+    48:63,    ATTR_PROC_PCIE_IOP_RX_VGA_CONTROL2[1][1];
+}
+
+#-- RX VGA Control Register2 (A2)
+scom 0x8000008C0901187F {
+    bits,     scom_data;
+    48:63,    ATTR_PROC_PCIE_IOP_RX_VGA_CONTROL2[1][2];
+}
+
+#-- RX VGA Control Register2 (A3)
+scom 0x800000CC0901187F {
+    bits,     scom_data;
+    48:63,    ATTR_PROC_PCIE_IOP_RX_VGA_CONTROL2[1][3];
+}
+
+#-- RX VGA Control Register2 (A4)
+scom 0x8000010C0901187F {
+    bits,     scom_data;
+    48:63,    ATTR_PROC_PCIE_IOP_RX_VGA_CONTROL2[1][4];
+}
+
+#-- RX VGA Control Register2 (A5)
+scom 0x8000014C0901187F {
+    bits,     scom_data;
+    48:63,    ATTR_PROC_PCIE_IOP_RX_VGA_CONTROL2[1][5];
+}
+
+#-- RX VGA Control Register2 (A6)
+scom 0x8000018C0901187F {
+    bits,     scom_data;
+    48:63,    ATTR_PROC_PCIE_IOP_RX_VGA_CONTROL2[1][6];
+}
+
+#-- RX VGA Control Register2 (A7)
+scom 0x800001CC0901187F {
+    bits,     scom_data;
+    48:63,    ATTR_PROC_PCIE_IOP_RX_VGA_CONTROL2[1][7];
+}
+
+#-- RX VGA Control Register2 (B0)
+scom 0x8000020C0901187F {
+    bits,     scom_data;
+    48:63,    ATTR_PROC_PCIE_IOP_RX_VGA_CONTROL2[1][8];
+}
+
+#-- RX VGA Control Register2 (B1)
+scom 0x8000024C0901187F {
+    bits,     scom_data;
+    48:63,    ATTR_PROC_PCIE_IOP_RX_VGA_CONTROL2[1][9];
+}
+
+#-- RX VGA Control Register2 (B2)
+scom 0x8000028C0901187F {
+    bits,     scom_data;
+    48:63,    ATTR_PROC_PCIE_IOP_RX_VGA_CONTROL2[1][10];
+}
+
+#-- RX VGA Control Register2 (B3)
+scom 0x800002CC0901187F {
+    bits,     scom_data;
+    48:63,    ATTR_PROC_PCIE_IOP_RX_VGA_CONTROL2[1][11];
+}
+
+#-- RX VGA Control Register2 (B4)
+scom 0x8000030C0901187F {
+    bits,     scom_data;
+    48:63,    ATTR_PROC_PCIE_IOP_RX_VGA_CONTROL2[1][12];
+}
+
+#-- RX VGA Control Register2 (B5)
+scom 0x8000034C0901187F {
+    bits,     scom_data;
+    48:63,    ATTR_PROC_PCIE_IOP_RX_VGA_CONTROL2[1][13];
+}
+
+#-- RX VGA Control Register2 (B6)
+scom 0x8000038C0901187F {
+    bits,     scom_data;
+    48:63,    ATTR_PROC_PCIE_IOP_RX_VGA_CONTROL2[1][14];
+}
+
+#-- RX VGA Control Register2 (B7)
+scom 0x800003CC0901187F {
+    bits,     scom_data;
+    48:63,    ATTR_PROC_PCIE_IOP_RX_VGA_CONTROL2[1][15];
+}
+
+#-- RX Receiver Peaking Register (A0)
+scom 0x800000100901187F {
+    bits,     scom_data;
+    48:63,    ATTR_PROC_PCIE_IOP_RX_PEAK[1][0];
+}
+
+#-- RX Receiver Peaking Register (A1)
+scom 0x800000500901187F {
+    bits,     scom_data;
+    48:63,    ATTR_PROC_PCIE_IOP_RX_PEAK[1][1];
+}
+
+#-- RX Receiver Peaking Register (A2)
+scom 0x800000900901187F {
+    bits,     scom_data;
+    48:63,    ATTR_PROC_PCIE_IOP_RX_PEAK[1][2];
+}
+
+#-- RX Receiver Peaking Register (A3)
+scom 0x800000D00901187F {
+    bits,     scom_data;
+    48:63,    ATTR_PROC_PCIE_IOP_RX_PEAK[1][3];
+}
+
+#-- RX Receiver Peaking Register (A4)
+scom 0x800001100901187F {
+    bits,     scom_data;
+    48:63,    ATTR_PROC_PCIE_IOP_RX_PEAK[1][4];
+}
+
+#-- RX Receiver Peaking Register (A5)
+scom 0x800001500901187F {
+    bits,     scom_data;
+    48:63,    ATTR_PROC_PCIE_IOP_RX_PEAK[1][5];
+}
+
+#-- RX Receiver Peaking Register (A6)
+scom 0x800001900901187F {
+    bits,     scom_data;
+    48:63,    ATTR_PROC_PCIE_IOP_RX_PEAK[1][6];
+}
+
+#-- RX Receiver Peaking Register (A7)
+scom 0x800001D00901187F {
+    bits,     scom_data;
+    48:63,    ATTR_PROC_PCIE_IOP_RX_PEAK[1][7];
+}
+
+#-- RX Receiver Peaking Register (B0)
+scom 0x800002100901187F {
+    bits,     scom_data;
+    48:63,    ATTR_PROC_PCIE_IOP_RX_PEAK[1][8];
+}
+
+#-- RX Receiver Peaking Register (B1)
+scom 0x800002500901187F {
+    bits,     scom_data;
+    48:63,    ATTR_PROC_PCIE_IOP_RX_PEAK[1][9];
+}
+
+#-- RX Receiver Peaking Register (B2)
+scom 0x800002900901187F {
+    bits,     scom_data;
+    48:63,    ATTR_PROC_PCIE_IOP_RX_PEAK[1][10];
+}
+
+#-- RX Receiver Peaking Register (B3)
+scom 0x800002D00901187F {
+    bits,     scom_data;
+    48:63,    ATTR_PROC_PCIE_IOP_RX_PEAK[1][11];
+}
+
+#-- RX Receiver Peaking Register (B4)
+scom 0x800003100901187F {
+    bits,     scom_data;
+    48:63,    ATTR_PROC_PCIE_IOP_RX_PEAK[1][12];
+}
+
+#-- RX Receiver Peaking Register (B5)
+scom 0x800003500901187F {
+    bits,     scom_data;
+    48:63,    ATTR_PROC_PCIE_IOP_RX_PEAK[1][13];
+}
+
+#-- RX Receiver Peaking Register (B6)
+scom 0x800003900901187F {
+    bits,     scom_data;
+    48:63,    ATTR_PROC_PCIE_IOP_RX_PEAK[1][14];
+}
+
+#-- RX Receiver Peaking Register (B7)
+scom 0x800003D00901187F {
+    bits,     scom_data;
+    48:63,    ATTR_PROC_PCIE_IOP_RX_PEAK[1][15];
+}
+
+#-- RX Signal Detect Level Register (A0)
+scom 0x800000370901187F {
+    bits,     scom_data;
+    48:63,    ATTR_PROC_PCIE_IOP_RX_SDL[1][0];
+}
+
+#-- RX Signal Detect Level Register (A1)
+scom 0x800000770901187F {
+    bits,     scom_data;
+    48:63,    ATTR_PROC_PCIE_IOP_RX_SDL[1][1];
+}
+
+#-- RX Signal Detect Level Register (A2)
+scom 0x800000B70901187F {
+    bits,     scom_data;
+    48:63,    ATTR_PROC_PCIE_IOP_RX_SDL[1][2];
+}
+
+#-- RX Signal Detect Level Register (A3)
+scom 0x800000F70901187F {
+    bits,     scom_data;
+    48:63,    ATTR_PROC_PCIE_IOP_RX_SDL[1][3];
+}
+
+#-- RX Signal Detect Level Register (A4)
+scom 0x800001370901187F {
+    bits,     scom_data;
+    48:63,    ATTR_PROC_PCIE_IOP_RX_SDL[1][4];
+}
+
+#-- RX Signal Detect Level Register (A5)
+scom 0x800001770901187F {
+    bits,     scom_data;
+    48:63,    ATTR_PROC_PCIE_IOP_RX_SDL[1][5];
+}
+
+#-- RX Signal Detect Level Register (A6)
+scom 0x800001B70901187F {
+    bits,     scom_data;
+    48:63,    ATTR_PROC_PCIE_IOP_RX_SDL[1][6];
+}
+
+#-- RX Signal Detect Level Register (A7)
+scom 0x800001F70901187F {
+    bits,     scom_data;
+    48:63,    ATTR_PROC_PCIE_IOP_RX_SDL[1][7];
+}
+
+#-- RX Signal Detect Level Register (B0)
+scom 0x800002370901187F {
+    bits,     scom_data;
+    48:63,    ATTR_PROC_PCIE_IOP_RX_SDL[1][8];
+}
+
+#-- RX Signal Detect Level Register (B1)
+scom 0x800002770901187F {
+    bits,     scom_data;
+    48:63,    ATTR_PROC_PCIE_IOP_RX_SDL[1][9];
+}
+
+#-- RX Signal Detect Level Register (B2)
+scom 0x800002B70901187F {
+    bits,     scom_data;
+    48:63,    ATTR_PROC_PCIE_IOP_RX_SDL[1][10];
+}
+
+#-- RX Signal Detect Level Register (B3)
+scom 0x800002F70901187F {
+    bits,     scom_data;
+    48:63,    ATTR_PROC_PCIE_IOP_RX_SDL[1][11];
+}
+
+#-- RX Signal Detect Level Register (B4)
+scom 0x800003370901187F {
+    bits,     scom_data;
+    48:63,    ATTR_PROC_PCIE_IOP_RX_SDL[1][12];
+}
+
+#-- RX Signal Detect Level Register (B5)
+scom 0x800003770901187F {
+    bits,     scom_data;
+    48:63,    ATTR_PROC_PCIE_IOP_RX_SDL[1][13];
+}
+
+#-- RX Signal Detect Level Register (B6)
+scom 0x800003B70901187F {
+    bits,     scom_data;
+    48:63,    ATTR_PROC_PCIE_IOP_RX_SDL[1][14];
+}
+
+#-- RX Signal Detect Level Register (B7)
+scom 0x800003F70901187F {
+    bits,     scom_data;
+    48:63,    ATTR_PROC_PCIE_IOP_RX_SDL[1][15];
+}
+
+#-- ZCAL Control Register
+scom 0x800008400901187F {
+    bits,     scom_data;
+    53:60,    ATTR_PROC_PCIE_IOP_ZCAL_CONTROL[1];
+}
+
+#-- ZCAL Override Register
+scom 0x800008420901187F {
+    bits,     scom_data;
+    48:63,    0xEC30;
+}

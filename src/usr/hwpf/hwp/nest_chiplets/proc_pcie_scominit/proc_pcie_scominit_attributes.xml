@@ -1,0 +1,287 @@
+<!-- IBM_PROLOG_BEGIN_TAG                                                   -->
+<!-- This is an automatically generated prolog.                             -->
+<!--                                                                        -->
+<!-- $Source: src/usr/hwpf/hwp/nest_chiplets/proc_pcie_scominit/proc_pcie_scominit_attributes.xml $ -->
+<!--                                                                        -->
+<!-- IBM CONFIDENTIAL                                                       -->
+<!--                                                                        -->
+<!-- COPYRIGHT International Business Machines Corp. 2012                   -->
+<!--                                                                        -->
+<!-- p1                                                                     -->
+<!--                                                                        -->
+<!-- Object Code Only (OCO) source materials                                -->
+<!-- Licensed Internal Code Source Materials                                -->
+<!-- IBM HostBoot Licensed Internal Code                                    -->
+<!--                                                                        -->
+<!-- The source code for this program is not published or otherwise         -->
+<!-- divested of its trade secrets, irrespective of what has been           -->
+<!-- deposited with the U.S. Copyright Office.                              -->
+<!--                                                                        -->
+<!-- Origin: 30                                                             -->
+<!--                                                                        -->
+<!-- IBM_PROLOG_END_TAG                                                     -->
+<!-- proc_pcie_scominit_attributes.xml -->
+<attributes>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PROC_PCIE_IOP_CONFIG</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>PCIE IOP lane configuration
+      creator: platform
+      consumer: proc_pcie_scominit
+      firmware notes:
+        Encoded PCIE IOP lane configuration
+    </description>
+    <valueType>uint8</valueType>
+    <platInit/>
+    <persistRuntime/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PROC_PCIE_IOP_SWAP</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>PCIE IOP swap configuration
+      creator: platform
+      consumer: proc_pcie_scominit
+      firmware notes:
+        Encoded PCIE IOP swap configuration
+        Array index: IOP number (0:1)
+    </description>
+    <valueType>uint8</valueType>
+    <array>2</array>
+    <platInit/>
+    <persistRuntime/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PROC_PCIE_PHB_ACTIVE</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>PCIE PHB valid mask
+      creator: platform
+      consumer: proc_pcie_scominit
+      firmware notes:
+        Bit mask defining set of active/valid PHBs
+        bit0=PHB0, bit1=PHB1, bit2=PHB2
+    </description>
+    <valueType>uint8</valueType>
+    <platInit/>
+    <persistRuntime/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PROC_PCIE_IOP_G3_PLL_CONTROL0</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      creator: platform (MRW)
+      consumer: proc_pcie_scominit
+      firmware notes:
+        PCIe Gen3 PLL Control Register 0.
+        ATUNE/CPISEL.
+        Array index: IOP number(0:1)
+    </description>
+    <valueType>uint32</valueType>
+    <array>2</array>
+    <platInit/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PROC_PCIE_IOP_G2_PLL_CONTROL0</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      creator: platform (MRW)
+      consumer: proc_pcie_scominit
+      notes:
+        PCIe Gen2/Gen1 PLL Control Register 0.
+        ATUNE/CPISEL.
+        Array index: IOP number (0:1)
+    </description>
+    <valueType>uint32</valueType>
+    <array>2</array>
+    <platInit/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PROC_PCIE_IOP_PLL_GLOBAL_CONTROL0</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      creator: platform (MRW)
+      consumer: proc_pcie_scominit
+      notes:
+        PCIe PLL Global Control Register 0.
+        REFISRC/REFISINK.
+        Array index: IOP number (0:1)
+    </description>
+    <valueType>uint32</valueType>
+    <array>2</array>
+    <platInit/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PROC_PCIE_IOP_PLL_GLOBAL_CONTROL1</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      creator: platform (MRW)
+      consumer: proc_pcie_scominit
+      notes:
+        PCIe PLL Global Control Register 1.
+	ENBGDOCPSRC/ENBGDOCAMP/REFVREG.
+        Array index: IOP number (0:1)
+    </description>
+    <valueType>uint32</valueType>
+    <array>2</array>
+    <platInit/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PROC_PCIE_IOP_PCS_CONTROL0</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      creator: platform (MRW)
+      consumer: proc_pcie_scominit
+      notes:
+        PCIe PCS Control Register 0.
+        BITLOCKTIME/ADDDREMDELTA_810_B/STARTUPDELTA_810_B/ADDDREMDELTA_810_A/
+        STARTUPDELTA_A/RXREJECTHANDLING/EQCOMLETERESPONSE.
+        Array index: IOP number (0:1)
+    </description>
+    <valueType>uint32</valueType>
+    <array>2</array>
+    <platInit/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PROC_PCIE_IOP_PCS_CONTROL1</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      creator: platform (MRW)
+      consumer: proc_pcie_scominit
+      notes:
+        PCIe PCS Control Register 1.
+	RXSIGDETSETTING/ADDDREMDELTA_128130_B/STARTUPDELTA_128130_B/
+        ADDDREMDELTA_128130_A/STARTUPDELTA_128130_A.
+        Array index: IOP number (0:1)
+    </description>
+    <valueType>uint32</valueType>
+    <array>2</array>
+    <platInit/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PROC_PCIE_IOP_TX_FIFO_OFFSET</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      creator: platform (MRW)
+      consumer: proc_pcie_scominit
+      notes:
+        PCIe TX FIFO Offset Register.
+	G3OFFSET/G2OFFSET/G1OFFSET.
+        First array index: IOP number (0:1)
+        Second array index: Lane number (0:15)
+    </description>
+    <valueType>uint32</valueType>
+    <array>2,16</array>
+    <platInit/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PROC_PCIE_IOP_TX_RCVRDETCNTL</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      creator: platform (MRW)
+      consumer: proc_pcie_scominit
+      notes:
+        PCIe TX Receiver Detect Control Register.
+        VREFSEL/RCVRDETCNT/DETDRVC/PH1WAIT.
+        First array index: IOP number (0:1)
+        Second array index: Lane number (0:15)
+    </description>
+    <valueType>uint32</valueType>
+    <array>2,16</array>
+    <platInit/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PROC_PCIE_IOP_TX_BWLOSS1</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      creator: platform (MRW)
+      consumer: proc_pcie_scominit
+      notes:
+        PCIe TX Bandwidth Loss Coefficient Register.
+        GEN3BWCOEFF/GEN2BWCOEFF/GEN1BWCOEFF.
+        First array index: IOP number (0:1)
+        Second array index: Lane number (0:15)
+    </description>
+    <valueType>uint32</valueType>
+    <array>2,16</array>
+    <platInit/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PROC_PCIE_IOP_RX_VGA_CONTROL2</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      creator: platform (MRW)
+      consumer: proc_pcie_scominit
+      notes:
+        PCIe RX VGA Control Register 2.
+        GAIN2/GAIN1.
+        First array index: IOP number (0:1)
+        Second array index: Lane number (0:15)
+    </description>
+    <valueType>uint32</valueType>
+    <array>2,16</array>
+    <platInit/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PROC_PCIE_IOP_RX_PEAK</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      creator: platform (MRW)
+      consumer: proc_pcie_scominit
+      notes:
+        PCIe RX Receiver Peaking Value Register.
+	PEAK1/PEAK2/PEAK3.
+        First array index: IOP number (0:1)
+        Second array index: Lane number (0:15)
+    </description>
+    <valueType>uint32</valueType>
+    <array>2,16</array>
+    <platInit/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PROC_PCIE_IOP_RX_SDL</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      creator: platform (MRW)
+      consumer: proc_pcie_scominit
+      notes:
+        PCIe RX Signal Detect Level Register.
+        SDLVL3/SDLVL2/SDLVL1.
+        First array index: IOP number (0:1)
+        Second array index: Lane number (0:15)
+    </description>
+    <valueType>uint32</valueType>
+    <array>2,16</array>
+    <platInit/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PROC_PCIE_IOP_ZCAL_CONTROL</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      creator: platform (MRW)
+      consumer: proc_pcie_scominit
+      notes:
+        PCIe ZCAL Control Register.
+        CMPEVALDLY.
+        Array index: IOP number (0:1)
+    </description>
+    <valueType>uint32</valueType>
+    <array>2</array>
+    <platInit/>
+  </attribute>
+  <!-- ********************************************************************* -->
+</attributes>
