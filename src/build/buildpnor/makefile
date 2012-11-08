@@ -35,12 +35,17 @@ PNOR_VBU_TARGETS = vbu
 
 define PNOR_vbu_template
 $${IMGDIR}/$(1).pnor: $${IMGDIR}/hbicore_extended.bin $${IMGDIR}/$(1)_targeting.bin
+ifdef HOSTBOOT_PROFILE
+	@echo "  HOSTBOOT_PROFILE enabled."
+	@echo "  Build of vbu.pnor skipped due to space constraints."
+else
 	./buildpnorOld.pl --pnorLayout ./pnorLayoutVpo.xml \
 	    --genToc \
 	    --pnorOutBin $${IMGDIR}/$(1).pnor \
 	    --binFile_part $${IMGDIR}/$(1)_pnor.toc \
 	    --binFile_HBI $${IMGDIR}/hbicore_extended.bin \
 	    --binFile_HBD $${IMGDIR}/$(1)_targeting.bin
+endif
 endef
 
 PNOR_VBU_IMAGES =  $(addsuffix .pnor, $(addprefix $(IMGDIR)/, ${PNOR_VBU_TARGETS})) \
