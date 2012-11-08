@@ -50,96 +50,36 @@ class prdfTest: public CxxTest::TestSuite
 {
   public:
 
-    void testTrace(void)
-    {
-        /*
-        TS_TRACE(ENTER_MRK "testTrace()");
-        PRDF_ENTER( "testTrace()" );
-
-        const char * l_testStr = "running testTrace";
-        uint64_t l_testHex = 0xDEADBEEF;
-        uint64_t l_testDec = 99;
-        PRDF_INF( "testTrace() %s - testHex=0x%08X, testDec=%d", l_testStr, l_testHex, l_testDec );
-        PRDF_ERR( "testTrace() Please ignore this error trace 0x%08X", l_testHex );
-        PRDF_DENTER( "testTrace()" );
-        PRDF_DEXIT( "testTrace()" );
-
-        PRDF_EXIT( "testTrace()" );
-        TS_TRACE(EXIT_MRK "testTrace()");
-        */
-    }
-
-    void testPrdInitialize(void)
-    {
-        using namespace PRDF;
-        using namespace TARGETING;
-
-        TS_TRACE(ENTER_MRK "testPrdInitialize()");
-        PRDF_ENTER( "testPrdInitialize()" );
-
-        //FIXME: this is a hack in case some other test code
-        //deconfigs all PROC and MEMBUF chip targets
-
-        TargetHandle_t l_pMasterProcChip = NULL;
-        targetService().masterProcChipTargetHandle(l_pMasterProcChip);
-
-        // first check for any functional PROC targets
-        TargetHandleList list = PlatServices::getFunctionalTargetList( TYPE_PROC );
-        if(0 == list.size())
-        {
-            PRDF_TRAC( "testPrdInitialize(): no functional PROC target found" );
-            // set master proc state to functional
-            getSimServices().setHwasState(l_pMasterProcChip, true);
-        }
-
-        // next check for any functional MEMBUF targets
-        list = PlatServices::getFunctionalTargetList( TYPE_MEMBUF );
-        if(0 == list.size())
-        {
-            PRDF_TRAC( "testPrdInitialize(): no functional MEMBUF target found" );
-            TARGETING::PredicateCTM classTypeMatch(CLASS_CHIP, TYPE_MEMBUF);
-            TargetHandle_t l_pMembuf = NULL;
-            targetService().getAssociated(list,
-                                          l_pMasterProcChip,
-                                          TargetService::CHILD_BY_AFFINITY,
-                                          TargetService::ALL,
-                                          &classTypeMatch);
-            if(list.size() > 0)
-            {
-                l_pMembuf = list[0];
-                // set first membuf state to functional
-                getSimServices().setHwasState(l_pMembuf, true);
-            }
-        }
-        //end FIXME hack
-
-        errlHndl_t l_pErr = NULL;
-        l_pErr = PRDF::initialize();
-
-        if (l_pErr)
-        {
-            PRDF_ERR( "testPrdInitialize(): PRDF::initialize() returned error" );
-            TS_FAIL("testPrdInitialize(): PRDF::initialize returned error");
-            PRDF_COMMIT_ERRL(l_pErr, ERRL_ACTION_REPORT);
-        }
-        else
-        {
-            PRDF_INF( "testPrdInitialize(): PRDF::initialize completed with no error" );
-            TS_TRACE(INFO_MRK "testPrdInitialize(): PRDF::initialize completed with no error");
-        }
-
-        PRDF_EXIT( "testPrdInitialize()" );
-        TS_TRACE(EXIT_MRK "testPrdInitialize()");
-    }
-
     void testPrdMain(void)
     {
-
         using namespace PRDF;
         TS_TRACE(ENTER_MRK "testPrdMain()");
         PRDF_ENTER( "testPrdMain()" );
 
         // ---------------------------------
+/*
+        PRDS_BEGIN("Maintenance Command Complete Special Attention");
+
+        PRDS_ERROR_ENTRY("NODE{0}:MEMBUF{0}", SPECIAL);
+
+        // ( 0x9e8b0000, "MBASPA[0]", "MBSPAQ_COMMAND_COMPLETE_WO_ENA_ERR_ATTN" )
+//        PRDS_EXPECTED_SIGNATURE("NODE{0}:PROC{0}:MCS{4}:MEMBUF{0}:MBS{0}:MBA{0}", 0x9e8b0000);
+        PRDS_EXPECTED_SIGNATURE("NODE{0}:MEMBUF{0}:MBS{0}:MBA{0}", 0x9e8b0000);
+//        PRDS_EXPECTED_CALLOUT(NONE);
+
+        // GLOBAL_SPA
+        PRDS_SCR_WRITE("NODE{0}:MEMBUF{0}", 0x570F001A, 0x1000000000000000);
+
+        // MEM_CHIPLET_SPA
+        PRDS_SCR_WRITE("NODE{0}:MEMBUF{0}", 0x03040004, 0x8000000000000000);
+
+        // MBASPA
+        PRDS_SCR_WRITE("NODE{0}:MEMBUF{0}:MBS{0}:MBA{0}", 0x03010611, 0x8000000000000000);
+
+        PRDS_START_SIM();
+
+        PRDS_END();
+*/
         // ---------------------------------
 /*
         PRDS_BEGIN("PB Centaur Overflow Special attention");
@@ -220,7 +160,6 @@ class prdfTest: public CxxTest::TestSuite
         PRDS_END();
 */
         // ---------------------------------
-
 
         PRDF_EXIT( "testPrdMain()" );
         TS_TRACE(EXIT_MRK "testPrdMain()");

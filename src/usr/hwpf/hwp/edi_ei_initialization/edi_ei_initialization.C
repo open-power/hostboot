@@ -72,6 +72,7 @@
 // #include    "host_startPRD_pbus/host_startPRD_pbus.H"
 // #include    "host_attnlisten_proc/host_attnlisten_proc.H"
 #include    "proc_fab_iovalid/proc_fab_iovalid.H"
+#include    <diag/prdf/prdfMain.H>
 
 namespace   EDI_EI_INITIALIZATION
 {
@@ -386,43 +387,18 @@ void*    call_host_startPRD_pbus( void    *io_pArgs )
 {
     errlHndl_t  l_errl  =   NULL;
 
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                "call_host_startPRD_pbus entry" );
 
-#if 0
-    // @@@@@    CUSTOM BLOCK:   @@@@@
-    //  figure out what targets we need
-    //  customize any other inputs
-    //  set up loops to go through all targets (if parallel, spin off a task)
+    l_errl = PRDF::initialize();
 
-    //  dump physical path to targets
-    EntityPath l_path;
-    l_path  =   l_@targetN_target->getAttr<ATTR_PHYS_PATH>();
-    l_path.dump();
-
-    // cast OUR type of target to a FAPI type of target.
-    const fapi::Target l_fapi_@targetN_target(
-                    TARGET_TYPE_MEMBUF_CHIP,
-                    reinterpret_cast<void *>
-                        (const_cast<TARGETING::Target*>(l_@targetN_target)) );
-
-    //  call the HWP with each fapi::Target
-    FAPI_INVOKE_HWP( l_errl, host_startPRD_pbus, _args_...);
-    if ( l_errl )
+    if (l_errl)
     {
         TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                  "ERROR : .........." );
-        errlCommit( l_errl, HWPF_COMP_ID );
+                "Error returned from call to PRDF::initialize");
     }
-    else
-    {
-        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                   "SUCCESS : .........." );
-    }
-    // @@@@@    END CUSTOM BLOCK:   @@@@@
-#endif
 
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                "call_host_startPRD_pbus exit" );
 
     // end task, returning any errorlogs to IStepDisp
