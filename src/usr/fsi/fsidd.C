@@ -1368,7 +1368,7 @@ errlHndl_t FsiDD::initMasterControl(TARGETING::Target* i_master,
                 // 2= General reset to all bridges
                 // 3= General reset to all port controllers
                 databuf = 0x30000000;
-                l_err = write( ctl_reg|FSI_MRESP0_0D0|port, &databuf );
+                l_err = write( ctl_reg|FSI_MRESP0_0D0|(port*4), &databuf );
                 if( l_err ) { break; }
             }
             if( l_err ) { break; }
