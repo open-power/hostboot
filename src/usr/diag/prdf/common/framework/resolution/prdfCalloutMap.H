@@ -30,8 +30,10 @@
 
 //------------------------------------------------------------------------------
 
+#ifndef PRDF_SIM_ENUMS // needed to compile prdfsimEnumMap.C
 namespace PRDF
 {
+#endif
 
 //------------------------------------------------------------------------------
 
@@ -51,6 +53,10 @@ namespace PRDF
     #define PRDF_SYM_CALLOUT_MAP_END \
             { NULL , (SymbolicFru) 0 } \
         };
+
+#elif defined PRDF_SIM_ENUMS
+
+    // included from prdfsimEnumMap.C, nothing for now
 
 #else
 
@@ -103,6 +109,10 @@ PRDF_SYM_CALLOUT_MAP_END
             { NULL , (CalloutPriorityEnum) 0 } \
         };
 
+#elif defined PRDF_SIM_ENUMS
+
+    // included from prdfsimEnumMap.C, nothing for now
+
 #else
 
     #define PRDF_CALLOUT_PRIORITY_MAP_BEGIN \
@@ -134,7 +144,9 @@ PRDF_CALLOUT_PRIORITY_MAP_END
 
 //------------------------------------------------------------------------------
 
+#ifndef PRDF_SIM_ENUMS
 } // end namespace PRDF
+#endif
 
 #endif // __prdfCalloutMap_H
 
