@@ -24,7 +24,7 @@
 
 use strict;
 
-package Hostboot::Printk;
+package Hostboot::Dump;
 use Exporter;
 our @EXPORT_OK = ('main');
 
