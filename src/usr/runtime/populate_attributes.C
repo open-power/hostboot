@@ -54,7 +54,7 @@ TRAC_INIT(&g_trac_runtime, "RUNTIME", 4096);
         _failed_attribute = fapi::__fid; \
         break; \
     } \
-    TRACFCOMP( g_trac_runtime, "> %d: 0x%x=%X @ %p", *_num_attr, fapi::__fid, result_##__fid, _output_ptr ); \
+    TRACDCOMP( g_trac_runtime, "> %d: 0x%x=%X @ %p", *_num_attr, fapi::__fid, result_##__fid, _output_ptr ); \
     _cur_header = &(_all_headers[(*_num_attr)]); \
     _cur_header->id = fapi::__fid; \
     _cur_header->sizeBytes = sizeof(fapi::__fid##_Type); \
@@ -74,7 +74,7 @@ TRAC_INIT(&g_trac_runtime, "RUNTIME", 4096);
         _failed_attribute = fapi::__fid; \
         break; \
     } \
-    TRACFCOMP( g_trac_runtime, "> %d: 0x%x=%X @ %p", *_num_attr, fapi::__fid, result_##__fid, _output_ptr ); \
+    TRACDCOMP( g_trac_runtime, "> %d: 0x%x=%X @ %p", *_num_attr, fapi::__fid, result_##__fid, _output_ptr ); \
     _cur_header = &(_all_headers[(*_num_attr)]); \
     _cur_header->id = fapi::__fid; \
     _cur_header->sizeBytes = sizeof(fapi::__fid##_Type); \
@@ -88,7 +88,7 @@ TRAC_INIT(&g_trac_runtime, "RUNTIME", 4096);
  */
 #define ADD_HUID(__targ) \
     _huid_temp = TARGETING::get_huid(__targ); \
-    TRACFCOMP( g_trac_runtime, "> HUID=%.8X @ %p", _huid_temp, _output_ptr ); \
+    TRACDCOMP( g_trac_runtime, "> HUID=%.8X @ %p", _huid_temp, _output_ptr ); \
     _cur_header = &(_all_headers[(*_num_attr)]); \
     _cur_header->id = HSVC_HUID; \
     _cur_header->sizeBytes = sizeof(uint32_t); \
@@ -110,6 +110,21 @@ TRAC_INIT(&g_trac_runtime, "RUNTIME", 4096);
     memcpy( _output_ptr, &pathPhys,  _cur_header->sizeBytes ); \
     _output_ptr +=  _cur_header->sizeBytes; \
     (*_num_attr)++; }
+
+/**
+ * @brief Read the PHYS_PATH attribute from targeting and stick it into mainstore
+ */
+#define ADD_ECMD_STRING() \
+   { const char* estring = _target->toEcmdString(); \
+    _cur_header = &(_all_headers[(*_num_attr)]); \
+    _cur_header->id = HSVC_ECMD_STRING; \
+    _cur_header->sizeBytes = fapi::MAX_ECMD_STRING_LEN; \
+    _cur_header->offset = (_output_ptr - _beginning); \
+    memcpy( _output_ptr, estring,  _cur_header->sizeBytes ); \
+    _output_ptr +=  _cur_header->sizeBytes; \
+    (*_num_attr)++; }
+
+//void Target::toString(char (&o_ecmdString)[MAX_ECMD_STRING_LEN]) const
 
 /**
  * @brief Insert a terminator into the attribute list
@@ -150,7 +165,7 @@ struct node_data_t
         MAX_PROCS_RSV = 16, //leave space for double
         MAX_EX_PER_PROC = 16,
         MAX_EX_RSV = MAX_PROCS_RSV*MAX_EX_PER_PROC,
-        NUM_PROC_ATTRIBUTES = 100,
+        NUM_PROC_ATTRIBUTES = 125,
         NUM_EX_ATTRIBUTES = 10,
         MAX_ATTRIBUTES = MAX_PROCS_RSV*NUM_PROC_ATTRIBUTES +
                          MAX_PROCS_RSV*MAX_EX_PER_PROC*NUM_EX_ATTRIBUTES
@@ -186,7 +201,7 @@ errlHndl_t populate_system_attributes( void )
     int _rc = 0; //result from FAPI_ATTR_GET
 
     do {
-        TRACFCOMP( g_trac_runtime, "-SYSTEM-" );
+        TRACDCOMP( g_trac_runtime, "-SYSTEM-" );
 
         // allocate memory and fill it with some junk data
         // @fixme RTC:49509 - remove mm_linear_map and put in real HDAT.
@@ -231,6 +246,11 @@ errlHndl_t populate_system_attributes( void )
         // Add an empty attribute header to signal the end
         EMPTY_ATTRIBUTE;
 
+        TRACFCOMP( g_trac_runtime, "populate_system_attributes> numAttr=%d", sys_data->hsvc.numAttr );
+
+        // Make sure we don't overrun our space
+        assert( *_num_attr < system_data_t::MAX_ATTRIBUTES );
+
         TRACFCOMP( g_trac_runtime, "Run: system_cmp0.memory_ln4->image.save attributes.sys.bin 0x%X %d", sys_data,  sizeof(system_data_t) );
 
         //@todo - Walk through attribute headers to look for duplicates?
@@ -270,7 +290,7 @@ errlHndl_t populate_node_attributes( uint64_t i_nodeNum )
     int _rc = 0; //result from FAPI_ATTR_GET
 
     do {
-        TRACFCOMP( g_trac_runtime, "-NODE-" );
+        TRACDCOMP( g_trac_runtime, "-NODE-" );
 
         // allocate memory and fill it with some junk data
         node_data_t* node_data =
@@ -318,7 +338,7 @@ errlHndl_t populate_node_attributes( uint64_t i_nodeNum )
             uint64_t chip_id =
               all_procs[p]->getAttr<TARGETING::ATTR_FABRIC_CHIP_ID>();
             uint32_t procid = (node_id << 3) | (chip_id); //NNNCCC
-            TRACFCOMP( g_trac_runtime, "PROC:%d (%.8X)", procid, TARGETING::get_huid(all_procs[p]) );
+            TRACDCOMP( g_trac_runtime, "PROC:%d (%.8X)", procid, TARGETING::get_huid(all_procs[p]) );
 
             // Fill in the metadata
             node_data->procs[p].procid = procid;
@@ -336,13 +356,20 @@ errlHndl_t populate_node_attributes( uint64_t i_nodeNum )
             // Fill up the attributes
             ADD_HUID( (all_procs[p]) ); // for debug
             ADD_PHYS_PATH( (all_procs[p]) );
-            HSVC_LOAD_ATTR_P( ATTR_EC );
+            ADD_ECMD_STRING();
+            HSVC_LOAD_ATTR_P( ATTR_EC ); 
+            HSVC_LOAD_ATTR_P( ATTR_NAME );
+
             // Use a generated file for the list of attributes to load
             #include "common/hsvc_procdata.C"
 
             // Add an empty attribute header to signal the end
             EMPTY_ATTRIBUTE;
 
+            TRACFCOMP( g_trac_runtime, "populate_node_attributes> PROC:%d (%.8X) : numAttr=%d", procid, TARGETING::get_huid(all_procs[p]), node_data->procs[p].numAttr );
+            
+            // Make sure we don't overrun our space
+            assert( *_num_attr < node_data_t::NUM_PROC_ATTRIBUTES );
 
             // Loop around all of the EX chiplets for this proc
             TARGETING::TargetHandleList all_ex;
@@ -352,7 +379,7 @@ errlHndl_t populate_node_attributes( uint64_t i_nodeNum )
             {
                 uint32_t chiplet =
                   all_ex[e]->getAttr<TARGETING::ATTR_CHIP_UNIT>();
-                TRACFCOMP( g_trac_runtime, "EX:p%d c%d(%.8X)", procid, chiplet, get_huid(all_ex[e]) );
+                TRACDCOMP( g_trac_runtime, "EX:p%d c%d(%.8X)", procid, chiplet, get_huid(all_ex[e]) );
 
                 // Fill in the metadata
                 (node_data->hsvc.numTargets)++;
@@ -380,11 +407,17 @@ errlHndl_t populate_node_attributes( uint64_t i_nodeNum )
                 // Fill up the attributes
                 ADD_HUID( (all_ex[e]) ); // for debug
                 ADD_PHYS_PATH( (all_ex[e]) );
+                ADD_ECMD_STRING();
                 // Use a generated file for the list of attributes to load
                 #include "common/hsvc_exdata.C"
 
                 // Add an empty attribute header to signal the end
                 EMPTY_ATTRIBUTE;
+
+                TRACFCOMP( g_trac_runtime, "populate_node_attributes> EX:p%d c%d(%.8X) : numAttr=%d", procid, chiplet, get_huid(all_ex[e]), node_data->ex[next_ex].numAttr );
+
+                // Make sure we don't overrun our space
+                assert( *_num_attr < node_data_t::NUM_EX_ATTRIBUTES );
 
                 next_ex++;
             }
@@ -436,6 +469,8 @@ errlHndl_t populate_attributes( void )
     errlHndl_t errhdl = NULL;
 
     do {
+        TRACFCOMP( g_trac_runtime, "Running populate_attributes" );
+
         //@todo : Remove this before RTC:49137 is merged, fix with RTC:49509
         // Skip this in VPO
         if( TARGETING::is_vpo() )

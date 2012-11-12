@@ -107,7 +107,7 @@ errlHndl_t notifyFsp ( bool i_istepModeFlag,
 void*    call_host_runtime_setup( void    *io_pArgs )
 {
 
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
             "call_host_runtime_setup entry" );
 
     errlHndl_t l_err = NULL;
@@ -314,7 +314,7 @@ errlHndl_t callShutdown ( void )
 
         // do the shutdown.
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                   "call_host_start_payload finished, shutdown = 0x%x.",
+                   "callShutdown finished, shutdown = 0x%x.",
                    status );
         INITSERVICE::doShutdown( status,
                                  payloadBase,

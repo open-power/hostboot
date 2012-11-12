@@ -143,7 +143,7 @@ class RuntimeTest: public CxxTest::TestSuite
         if( attr != sysdata->numAttr )
         {
             TRACFCOMP( g_trac_runtime, "numAttr=%d, found attr=%d", sysdata->numAttr, attr );
-            TS_FAIL("Number of attributes found doesn't match expected value");
+            TS_FAIL("testVerifySystemAttributes> Number of attributes found doesn't match expected value");
         }
 
         TRACFCOMP( g_trac_runtime, "testVerifySystemAttributes> finish" );
@@ -223,7 +223,7 @@ class RuntimeTest: public CxxTest::TestSuite
                     if( headers[attr].sizeBytes !=
                         sizeof(fapi::ATTR_CHIP_ID_Type) )
                     {
-                        TRACFCOMP( g_trac_runtime, "size=%.16X", headers[attr].sizeBytes );
+                        TRACFCOMP( g_trac_runtime, "procid=%d: size=%.16X", curproc->procid, headers[attr].sizeBytes );
                         TS_FAIL("Size of fapi::ATTR_CHIP_ID data is wrong");
                     }
                     else
@@ -233,7 +233,7 @@ class RuntimeTest: public CxxTest::TestSuite
                           (beginning+headers[attr].offset);
                         if( *tmp1_act != tmp1 )
                         {
-                            TRACFCOMP( g_trac_runtime, "Expected=%X, Actual=%X", tmp1, *tmp1_act );
+                            TRACFCOMP( g_trac_runtime, "procid=%d: Expected=%X, Actual=%X", curproc->procid, tmp1, *tmp1_act );
                             TS_FAIL("fapi::ATTR_CHIP_ID data is wrong");
                         }
                     }
@@ -253,7 +253,7 @@ class RuntimeTest: public CxxTest::TestSuite
                           (beginning+headers[attr].offset);
                         if( *tmp2_act != tmp2 )
                         {
-                            TRACFCOMP( g_trac_runtime, "Expected=%X, Actual=%X", tmp2, *tmp2_act );
+                            TRACFCOMP( g_trac_runtime, "procid=%d: Expected=%X, Actual=%X", curproc->procid, tmp2, *tmp2_act );
                             TS_FAIL("fapi::ATTR_PM_PVSAFE_PSTATE data is wrong");
                         }
                     }
@@ -262,13 +262,12 @@ class RuntimeTest: public CxxTest::TestSuite
             }
             if( attr != curproc->numAttr )
             {
-                TRACFCOMP( g_trac_runtime, "numAttr=%d, found attr=%d", curproc->numAttr, attr );
-                TS_FAIL("Number of attributes found doesn't match expected value");
+                TRACFCOMP( g_trac_runtime, "procid=%d: numAttr=%d, found attr=%d", curproc->procid, curproc->numAttr, attr );
+                TS_FAIL("testVerifyNodeAttributes> Number of attributes found doesn't match expected value");
             }
 
             delete proc;
             curproc++;
-            TRACFCOMP( g_trac_runtime, "curproc=%p", curproc );
         }
 
 
@@ -333,7 +332,7 @@ class RuntimeTest: public CxxTest::TestSuite
                           (beginning+headers[attr].offset);
                         if( *tmp1_act != tmp1 )
                         {
-                            TRACFCOMP( g_trac_runtime, "Expected=%X, Actual=%X", tmp1, *tmp1_act );
+                            TRACFCOMP( g_trac_runtime, "procid=%d: Expected=%X, Actual=%X", curproc->procid, tmp1, *tmp1_act );
                             TS_FAIL("fapi::ATTR_CHIP_UNIT_POS data is wrong");
                         }
                     }
@@ -353,7 +352,7 @@ class RuntimeTest: public CxxTest::TestSuite
                           (beginning+headers[attr].offset);
                         if( *tmp2_act != tmp2 )
                         {
-                            TRACFCOMP( g_trac_runtime, "Expected=%X, Actual=%X", tmp2, *tmp2_act );
+                            TRACFCOMP( g_trac_runtime, "procid=%d: Expected=%X, Actual=%X", curproc->procid, tmp2, *tmp2_act );
                             TS_FAIL("fapi::ATTR_FUNCTIONAL data is wrong");
                         }
                     }
@@ -362,7 +361,7 @@ class RuntimeTest: public CxxTest::TestSuite
             }
             if( attr != curex->numAttr )
             {
-                TRACFCOMP( g_trac_runtime, "numAttr=%d, found attr=%d", curex->numAttr, attr );
+                TRACFCOMP( g_trac_runtime, "procid=%d: numAttr=%d, found attr=%d", curproc->procid, curex->numAttr, attr );
                 TS_FAIL("Number of attributes found doesn't match expected value");
             }
 

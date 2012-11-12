@@ -73,5 +73,6 @@ struct hsvc_node_data_t
 // Custom Attribute IDs
 //  Note: Standard fapi::AttributeId are only 32-bits so we can use the top
 //        32-bits of the 64-bit value for our own numbers
-static const uint64_t HSVC_HUID      = 0xFF000001FFFFFFFF;
-static const uint64_t HSVC_PHYS_PATH = 0xFF000002FFFFFFFF;
+static const uint64_t HSVC_HUID        = 0xFF000001FFFFFFFF;
+static const uint64_t HSVC_PHYS_PATH   = 0xFF000002FFFFFFFF;
+static const uint64_t HSVC_ECMD_STRING = 0xFF000003FFFFFFFF;
