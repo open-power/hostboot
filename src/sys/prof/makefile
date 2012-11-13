@@ -31,7 +31,7 @@ ROOTPATH = ../../..
 
 ifdef HOSTBOOT_PROFILE
 OBJS = gcov.o
-unexport HOSTBOOT_PROFILE
+HOSTBOOT_PROFILE =
 endif
 
 OBJS += idletask.o

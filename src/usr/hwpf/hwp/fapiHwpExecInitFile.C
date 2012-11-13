@@ -171,7 +171,7 @@ typedef struct ifData
     uint32_t                 numScoms;
     attrTableEntry_t *       attrs;
     uint64_t *               numericLits;
-    scomData_t *             scoms;
+    scomData_t **            scoms;
     rpnStack_t *             rpnStack;
 }ifData_t;
 
@@ -304,7 +304,7 @@ fapi::ReturnCode fapiHwpExecInitFile(const std::vector<fapi::Target> & i_target,
         #else
         #error "Byte order not defined"
         #endif
-        
+
         //Check the version
         uint32_t l_version;
         ifRead(l_ifInfo, reinterpret_cast<void*>(&l_version), IF_VERSION_SIZE);
@@ -637,7 +637,7 @@ fapi::ReturnCode getAttr(const ifData_t & i_ifData,
                          static_cast<uint32_t>(l_rc));
                 break;
             }
-            
+
             IF_DBG("fapiHwpExecInitFile: getAttr: val 0x%.16llx", o_val);
         }
         else
@@ -809,7 +809,7 @@ void loadScomSection(ifInfo_t & io_ifInfo,
 {
     IF_DBG(">> fapiHwpExecInitFile: loadScomSection");
 
-    scomData_t * l_scoms = NULL;
+    scomData_t ** l_scoms = NULL;
     uint32_t l_numScoms = 0;
     uint32_t l_scomSectionOffset = 0;
 
@@ -834,23 +834,28 @@ void loadScomSection(ifInfo_t & io_ifInfo,
         //------------------------------------
 
         //Allocate memory to hold the data
-        l_scoms = reinterpret_cast<scomData_t *>(malloc(l_numScoms * sizeof(scomData_t)));
-        memset(l_scoms, 0, l_numScoms * sizeof(scomData_t));
+        l_scoms = new scomData_t*[l_numScoms];
+        //reinterpret_cast<scomData_t *>(malloc(l_numScoms * sizeof(scomData_t)));
+        //memset(l_scoms, 0, l_numScoms * sizeof(scomData_t));
 
         for (uint32_t i = 0; i < l_numScoms; i++)
         {
+            // Allocate SCOM.
+            l_scoms[i] = new scomData_t;
+            memset(l_scoms[i], '\0', sizeof(scomData_t));
+
             //Read the SCOM len
-            ifRead(io_ifInfo, &(l_scoms[i].len), sizeof(l_scoms[i].len));
+            ifRead(io_ifInfo, &(l_scoms[i]->len), sizeof(l_scoms[i]->len));
 
             //Read the SCOM offset
-            ifRead(io_ifInfo, &(l_scoms[i].offset), sizeof(l_scoms[i].offset));
+            ifRead(io_ifInfo, &(l_scoms[i]->offset), sizeof(l_scoms[i]->offset));
 
             //Read the SCOM address id
-            ifRead(io_ifInfo, &(l_scoms[i].addrId), sizeof(l_scoms[i].addrId));
+            ifRead(io_ifInfo, &(l_scoms[i]->addrId), sizeof(l_scoms[i]->addrId));
 
             //Expect numeric literal id, 1-based
-            if ( ! ((IF_NUM_TYPE == (l_scoms[i].addrId & IF_TYPE_MASK)) &&
-                (IF_NUM_TYPE < l_scoms[i].addrId)) )
+            if ( ! ((IF_NUM_TYPE == (l_scoms[i]->addrId & IF_TYPE_MASK)) &&
+                (IF_NUM_TYPE < l_scoms[i]->addrId)) )
             {
                 FAPI_ERR("loadScomSection: scom[%u]: addrId not a numeric "
                          "literal", i);
@@ -858,22 +863,22 @@ void loadScomSection(ifInfo_t & io_ifInfo,
             }
 
             //Read the number of columns
-            ifRead(io_ifInfo, &(l_scoms[i].numCols), sizeof(l_scoms[i].numCols));
+            ifRead(io_ifInfo, &(l_scoms[i]->numCols), sizeof(l_scoms[i]->numCols));
 
             //Read the number of rows
-            ifRead(io_ifInfo, &(l_scoms[i].numRows), sizeof(l_scoms[i].numRows));
+            ifRead(io_ifInfo, &(l_scoms[i]->numRows), sizeof(l_scoms[i]->numRows));
 
             IF_DBG("loadScomSection: scom[%u]: len %u, offset %u",
-                     i, l_scoms[i].len, l_scoms[i].offset);
+                     i, l_scoms[i]->len, l_scoms[i]->offset);
             IF_DBG("loadScomSection: addr id 0x%x, #cols %u, #rows %u",
-                     l_scoms[i].addrId, l_scoms[i].numCols,
-                     l_scoms[i].numRows);
+                     l_scoms[i]->addrId, l_scoms[i]->numCols,
+                     l_scoms[i]->numRows);
 
             //Expect at least one row
-            if (0 >= l_scoms[i].numRows)
+            if (0 >= l_scoms[i]->numRows)
             {
                 FAPI_ERR("loadScomSection: scom[%u]: num rows %u <= 0",
-                         i, l_scoms[i].numRows);
+                         i, l_scoms[i]->numRows);
                 fapiAssert(false);
             }
 
@@ -885,12 +890,12 @@ void loadScomSection(ifInfo_t & io_ifInfo,
             char * l_rowPtr = NULL;
 
             //Allocate memory to hold the scom data
-            l_scoms[i].data =
-                reinterpret_cast<char**>(malloc(l_scoms[i].numRows * sizeof(char**)));
-            memset(l_scoms[i].data, 0, l_scoms[i].numRows * sizeof(char**));
+            l_scoms[i]->data =
+                reinterpret_cast<char**>(malloc(l_scoms[i]->numRows * sizeof(char**)));
+            memset(l_scoms[i]->data, 0, l_scoms[i]->numRows * sizeof(char**));
 
             //Read the scom data for each row
-            for (uint16_t j = 0; j < l_scoms[i].numRows; j++)
+            for (uint16_t j = 0; j < l_scoms[i]->numRows; j++)
             {
                 //Read the row size; i.e. # of bytes
                 ifRead(io_ifInfo, &l_rowSize, sizeof(l_rowSize));
@@ -904,9 +909,9 @@ void loadScomSection(ifInfo_t & io_ifInfo,
                 }
 
                 //Allocate the space for the scom data and its size
-                l_scoms[i].data[j] = reinterpret_cast<char *>(malloc(l_rowSize + 1));
-                memset(l_scoms[i].data[j], 0, l_rowSize + 1);
-                l_rowPtr = l_scoms[i].data[j];
+                l_scoms[i]->data[j] = reinterpret_cast<char *>(malloc(l_rowSize + 1));
+                memset(l_scoms[i]->data[j], 0, l_rowSize + 1);
+                l_rowPtr = l_scoms[i]->data[j];
 
                 //Save the size of the scom data
                 *l_rowPtr++ = l_rowSize;
@@ -924,23 +929,23 @@ void loadScomSection(ifInfo_t & io_ifInfo,
             }
 
             // Set to default
-            l_scoms[i].hasExpr = false;
+            l_scoms[i]->hasExpr = false;
 
             //-----------------------------------
             //Load the column data
             //-----------------------------------
-            if (0 < l_scoms[i].numCols)
+            if (0 < l_scoms[i]->numCols)
             {
                 //Allocate memory to hold the column data plus it's target id
-                l_scoms[i].colId =
-                    reinterpret_cast<char *>(malloc(l_scoms[i].numCols * 2 * sizeof(uint16_t)));
-                memset(l_scoms[i].colId, 0,
-                    l_scoms[i].numCols * 2 * sizeof(uint16_t));
+                l_scoms[i]->colId =
+                    reinterpret_cast<char *>(malloc(l_scoms[i]->numCols * 2 * sizeof(uint16_t)));
+                memset(l_scoms[i]->colId, 0,
+                    l_scoms[i]->numCols * 2 * sizeof(uint16_t));
 
                 //Read Column Id
                 uint16_t l_colId = 0;
-                char *l_pCol = l_scoms[i].colId;
-                for (uint16_t j = 0; j < l_scoms[i].numCols; j++)
+                char *l_pCol = l_scoms[i]->colId;
+                for (uint16_t j = 0; j < l_scoms[i]->numCols; j++)
                 {
                     //Don't swap the bytes - colId is parsed by bytes later in code.
                     ifRead(io_ifInfo, l_pCol, sizeof(uint16_t), false);
@@ -967,30 +972,30 @@ void loadScomSection(ifInfo_t & io_ifInfo,
                 if (IF_EXPR == l_colId)
                 {
                     IF_DBG("loadScomSection: scom[%u]: has expression", i);
-                    l_scoms[i].hasExpr = true;
+                    l_scoms[i]->hasExpr = true;
                 }
             }
 
             //-----------------------------------
             //Load the row data for each columns
             //-----------------------------------
-            if (0 == l_scoms[i].numCols)
+            if (0 == l_scoms[i]->numCols)
             {
                 // Set the row data ptr to NULL & discard 1-byte row size
-                l_scoms[i].rowData = NULL;
+                l_scoms[i]->rowData = NULL;
                 ifSeek(io_ifInfo, io_ifInfo.offset + 1);
             }
             else
             {
                 //Allocate memory to hold the row data
-                l_scoms[i].rowData =
-                    reinterpret_cast<char**>(malloc(l_scoms[i].numRows * sizeof(char**)));
-                memset(l_scoms[i].rowData, 0,
-                    l_scoms[i].numRows * sizeof(char**));
+                l_scoms[i]->rowData =
+                    reinterpret_cast<char**>(malloc(l_scoms[i]->numRows * sizeof(char**)));
+                memset(l_scoms[i]->rowData, 0,
+                    l_scoms[i]->numRows * sizeof(char**));
 
                 // Determine the number of simple columns (not an expr columns)
-                uint16_t l_numSimpleCols = l_scoms[i].numCols;
-                if (l_scoms[i].hasExpr)
+                uint16_t l_numSimpleCols = l_scoms[i]->numCols;
+                if (l_scoms[i]->hasExpr)
                 {
                     l_numSimpleCols--;
                 }
@@ -1000,7 +1005,7 @@ void loadScomSection(ifInfo_t & io_ifInfo,
                 l_rowPtr = NULL;
                 uint32_t c;
 
-                for (uint16_t j = 0; j < l_scoms[i].numRows; j++)
+                for (uint16_t j = 0; j < l_scoms[i]->numRows; j++)
                 {
                     //Read the row size; i.e. # of bytes
                     ifRead(io_ifInfo, &l_rowSize, sizeof(l_rowSize));
@@ -1014,14 +1019,14 @@ void loadScomSection(ifInfo_t & io_ifInfo,
                     }
 
                     //If have expr column, need another two bytes to store its length
-                    if (l_scoms[i].hasExpr)
+                    if (l_scoms[i]->hasExpr)
                     {
                         l_rowSize += 2;
                     }
 
                     //Allocate the space
-                    l_scoms[i].rowData[j] = reinterpret_cast<char *>(malloc(l_rowSize));
-                    l_rowPtr = l_scoms[i].rowData[j];
+                    l_scoms[i]->rowData[j] = reinterpret_cast<char *>(malloc(l_rowSize));
+                    l_rowPtr = l_scoms[i]->rowData[j];
 
                     //Read in the simple column entries in the rows
                     for (uint16_t k = 0; k < l_numSimpleCols; k++)
@@ -1056,7 +1061,7 @@ void loadScomSection(ifInfo_t & io_ifInfo,
 
                     //After the simple columns comes the expression column,
                     //if present
-                    if (l_scoms[i].hasExpr)
+                    if (l_scoms[i]->hasExpr)
                     {
                         //Save the length of the expr
                         l_rowSize -= 2;
@@ -1097,35 +1102,38 @@ void unloadScomSection(ifData_t & io_ifData)
     //Deallocate memory
     for (uint32_t i = 0; i < io_ifData.numScoms; i++)
     {
-        if (NULL != io_ifData.scoms[i].data)
+        if (NULL != io_ifData.scoms[i]->data)
         {
-            for (uint16_t j = 0; j < io_ifData.scoms[i].numRows; j++)
+            for (uint16_t j = 0; j < io_ifData.scoms[i]->numRows; j++)
             {
-                free(io_ifData.scoms[i].data[j]);
-                io_ifData.scoms[i].data[j] = NULL;
+                free(io_ifData.scoms[i]->data[j]);
+                io_ifData.scoms[i]->data[j] = NULL;
             }
 
-            free(io_ifData.scoms[i].data);
-            io_ifData.scoms[i].data = NULL;
+            free(io_ifData.scoms[i]->data);
+            io_ifData.scoms[i]->data = NULL;
         }
 
-        free(io_ifData.scoms[i].colId);
-        io_ifData.scoms[i].colId = NULL;
+        free(io_ifData.scoms[i]->colId);
+        io_ifData.scoms[i]->colId = NULL;
 
-        if (NULL != io_ifData.scoms[i].rowData)
+        if (NULL != io_ifData.scoms[i]->rowData)
         {
-            for (uint16_t j = 0; j < io_ifData.scoms[i].numRows; j++)
+            for (uint16_t j = 0; j < io_ifData.scoms[i]->numRows; j++)
             {
-                free(io_ifData.scoms[i].rowData[j]);
-                io_ifData.scoms[i].rowData[j] = NULL;
+                free(io_ifData.scoms[i]->rowData[j]);
+                io_ifData.scoms[i]->rowData[j] = NULL;
             }
 
-            free(io_ifData.scoms[i].rowData);
-            io_ifData.scoms[i].rowData = NULL;
+            free(io_ifData.scoms[i]->rowData);
+            io_ifData.scoms[i]->rowData = NULL;
         }
+
+        delete io_ifData.scoms[i];
+        io_ifData.scoms[i] = NULL;
     }
 
-    free(io_ifData.scoms);
+    delete[] io_ifData.scoms;
     io_ifData.scoms = NULL;
 
     IF_DBG("<< fapiHwpExecInitFile: unloadScomSection");
@@ -1161,8 +1169,8 @@ fapi::ReturnCode executeScoms(ifData_t & i_ifData)
     for (uint32_t i = 0; i < i_ifData.numScoms; i++)
     {
         //Get the number of simple columns
-        l_numSimpleCols = i_ifData.scoms[i].numCols;
-        if (i_ifData.scoms[i].hasExpr)
+        l_numSimpleCols = i_ifData.scoms[i]->numCols;
+        if (i_ifData.scoms[i]->hasExpr)
         {
             l_numSimpleCols--;
         }
@@ -1170,24 +1178,24 @@ fapi::ReturnCode executeScoms(ifData_t & i_ifData)
         IF_DBG("fapiHwpExecInitFile: executeScoms: #simple cols %u",
                  l_numSimpleCols);
 
-        for (l_row = 0; l_row < i_ifData.scoms[i].numRows; l_row++)
+        for (l_row = 0; l_row < i_ifData.scoms[i]->numRows; l_row++)
         {
             //Nothing to check if there are no columns
             //We found a row match
-            if ((0 == i_ifData.scoms[i].numCols) ||
-                (NULL == i_ifData.scoms[i].rowData))
+            if ((0 == i_ifData.scoms[i]->numCols) ||
+                (NULL == i_ifData.scoms[i]->rowData))
             {
                 IF_DBG("fapiHwpExecInitFile: executeScoms: no cols");
                 break;
             }
 
             //Get a pointer to the row expressions
-            l_rowExpr = i_ifData.scoms[i].rowData[l_row];
+            l_rowExpr = i_ifData.scoms[i]->rowData[l_row];
 
             //Get a pointer to the column expressions
             if (l_numSimpleCols > 0)
             {
-                l_colExpr = i_ifData.scoms[i].colId;
+                l_colExpr = i_ifData.scoms[i]->colId;
             }
 
             //Evaluate the simple columns (not the 'expr' column)
@@ -1224,7 +1232,7 @@ fapi::ReturnCode executeScoms(ifData_t & i_ifData)
                     if (l_rc)
                     {
                         FAPI_ERR("fapiHwpExecInitFile: Simple Column evalRpn failed"
-                                 " on scom 0x%X", i_ifData.scoms[i].addrId);
+                                 " on scom 0x%X", i_ifData.scoms[i]->addrId);
                         break;
                     }
                 }
@@ -1249,7 +1257,7 @@ fapi::ReturnCode executeScoms(ifData_t & i_ifData)
                 if (l_rc)
                 {
                     FAPI_ERR("fapiHwpExecInitFile: Simple Column evalRpn failed on "
-                             "scom 0x%X", i_ifData.scoms[i].addrId);
+                             "scom 0x%X", i_ifData.scoms[i]->addrId);
                     break;
                 }
 
@@ -1281,7 +1289,7 @@ fapi::ReturnCode executeScoms(ifData_t & i_ifData)
             }
 
             //Now evaluate the expression, if there is one
-            if (i_ifData.scoms[i].hasExpr)
+            if (i_ifData.scoms[i]->hasExpr)
             {
                 IF_DBG("fapiHwpExecInitFile: Evaluate expr");
 
@@ -1295,7 +1303,7 @@ fapi::ReturnCode executeScoms(ifData_t & i_ifData)
                 if (l_rc)
                 {
                     FAPI_ERR("fapiHwpExecInitFile: Row expression evalRpn failed on "
-                             "scom 0x%X", i_ifData.scoms[i].addrId);
+                             "scom 0x%X", i_ifData.scoms[i]->addrId);
                     break;
                 }
 
@@ -1330,7 +1338,7 @@ fapi::ReturnCode executeScoms(ifData_t & i_ifData)
 
         //Can tell we found a match by checking if we broke out of the
         //for loop early
-        if (l_row < i_ifData.scoms[i].numRows)
+        if (l_row < i_ifData.scoms[i]->numRows)
         {
             //Set the scom entry number and it's row
             l_scom.scomNum = i;
@@ -1356,8 +1364,8 @@ fapi::ReturnCode executeScoms(ifData_t & i_ifData)
             //or if the next entry is an op to a different Scom register
             //(addrIds don't match), else go to the next scom.
             if (((i+1) == i_ifData.numScoms) ||                                   //last scom entry
-                (0 == i_ifData.scoms[i].len) || (0 == i_ifData.scoms[i+1].len) || //not PutScomUnderMask
-                (i_ifData.scoms[i].addrId != i_ifData.scoms[i+1].addrId))         //different Scom regs
+                (0 == i_ifData.scoms[i]->len) || (0 == i_ifData.scoms[i+1]->len) || //not PutScomUnderMask
+                (i_ifData.scoms[i]->addrId != i_ifData.scoms[i+1]->addrId))         //different Scom regs
             {
                 // Perform a scom operation on the chip
                 #ifdef HWPEXECINITFILE_DEBUG2
@@ -1437,14 +1445,14 @@ fapi::ReturnCode writeScom(ifData_t & i_ifData,
             if (0 == l_entry)
             {
                 //Get the the scom address
-                l_addrId = i_ifData.scoms[l_scomNum].addrId;
+                l_addrId = i_ifData.scoms[l_scomNum]->addrId;
                 l_rc = getLit(i_ifData, l_addrId, l_addr);
                 if (l_rc)
                 {
                     break;
                 }
             }
-            else if (l_addrId != i_ifData.scoms[l_scomNum].addrId)
+            else if (l_addrId != i_ifData.scoms[l_scomNum]->addrId)
             {
                 //Address should be the same for all scoms in the list
                 FAPI_ERR("fapiHwpExecInitFile: writeScom: have scomList "
@@ -1455,7 +1463,7 @@ fapi::ReturnCode writeScom(ifData_t & i_ifData,
             //Get the scom data
             IF_DBG("fapiHwpExecInitFile: writeScom: Evaluate scom data");
 
-            l_rowExpr = i_ifData.scoms[l_scomNum].data[l_row];
+            l_rowExpr = i_ifData.scoms[l_scomNum]->data[l_row];
             l_rowSize = *((uint8_t*)l_rowExpr); //size of the scom data
             l_rowExpr++;
 
@@ -1464,7 +1472,7 @@ fapi::ReturnCode writeScom(ifData_t & i_ifData,
             if (l_rc)
             {
                 FAPI_ERR("fapiHwpExecInitFile: writeScom: scom data expression "
-                         "evalRpn failed on scom 0x%X", i_ifData.scoms[l_scomNum].addrId);
+                         "evalRpn failed on scom 0x%X", i_ifData.scoms[l_scomNum]->addrId);
                 break;
             }
 
@@ -1476,11 +1484,11 @@ fapi::ReturnCode writeScom(ifData_t & i_ifData,
                      "data 0x%.16llX", l_addr, l_tmpData);
 
             //Check if this is a bit operation
-            if (i_ifData.scoms[l_scomNum].len)
+            if (i_ifData.scoms[l_scomNum]->len)
             {
                 //Get offset and len
-                uint16_t l_offset = i_ifData.scoms[l_scomNum].offset;
-                uint16_t l_len = i_ifData.scoms[l_scomNum].len;
+                uint16_t l_offset = i_ifData.scoms[l_scomNum]->offset;
+                uint16_t l_len = i_ifData.scoms[l_scomNum]->len;
                 uint64_t l_tmpMask = 0; // mask for PutScomUnderMask ops
 
                 //Shift data to the right offset; data is right aligned
@@ -1612,7 +1620,7 @@ fapi::ReturnCode getAttrArrayDimension(const ifData_t & i_ifData,
                                        uint8_t & o_attrDimension)
 {
     fapi::ReturnCode l_rc = fapi::FAPI_RC_SUCCESS;
-    
+
     o_attrDimension = 0;
 
     //Mask out the type bits and zero-based
