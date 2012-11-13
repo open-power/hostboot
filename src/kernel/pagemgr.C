@@ -198,12 +198,9 @@ PageManager::PageManager()
 
     // Populate L3 cache lines.
     uint64_t* cache_line = reinterpret_cast<uint64_t*>(addr);
-    uint64_t* end_cache_line = (uint64_t*) VmmManager::FULL_MEM_SIZE;
-    while (cache_line != end_cache_line)
-    {
-        dcbz(cache_line);
-        cache_line += getCacheLineWords();
-    }
+    uint64_t* end_cache_line = (uint64_t*) VmmManager::INITIAL_MEM_SIZE;
+    KernelMisc::populate_cache_lines(cache_line, end_cache_line);
+
 
     // Allocate pages
     iv_heapKernel.addMemory( addr, RESERVED_PAGES );

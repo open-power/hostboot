@@ -96,12 +96,20 @@ int mm_remove_pages(PAGE_REMOVAL_OPS i_op, void* i_vaddr, uint64_t i_size);
  */
 int mm_set_permission(void* va, uint64_t size, uint64_t access_type);
 
+enum MM_EXTEND_SIZE
+{
+    MM_EXTEND_FULL_CACHE,      //< Extend memory to include full cache (8mb).
+    MM_EXTEND_REAL_MEMORY,     //< Extend memory into real mainstore.
+};
+
 /** @fn mm_extend()
- *  @brief System call to extend Memory to 32MEG
+ *  @brief System call to extend memory.
+ *
+ *  @param[in] i_size - Amount to extend memory by.
  *
  *  @return int - 0 for successful extension of memory, non-zero otherwise
  */
-int mm_extend(void);
+int mm_extend(MM_EXTEND_SIZE i_size = MM_EXTEND_REAL_MEMORY);
 
 /** @fn mm_linear_map()
  *  @brief   Allocates a block of memory of the given size at a specified
@@ -126,7 +134,7 @@ int mm_linear_map(void *i_paddr, uint64_t i_size);
 void mm_icache_invalidate(void * i_addr, size_t i_cpu_word_count);
 
 /** @fn mm_virt_to_phys()
- *  @brief System call to return the physical address backing a 
+ *  @brief System call to return the physical address backing a
  *      virtual address
  *
  *  @param[in] i_vaddr - Virtual address to translate

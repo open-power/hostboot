@@ -176,7 +176,7 @@ class PageManager
 
         enum
         {
-            MEMLEN = VmmManager::MBOX_DMA_ADDR,
+            MEMLEN = VmmManager::FIRST_RESERVED_PAGE,
             RESERVED_PAGES = 4,
 
             LOWMEM_NORM_LIMIT = 16,

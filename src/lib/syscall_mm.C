@@ -93,16 +93,16 @@ uint64_t mm_virt_to_phys( void* i_vaddr )
 }
 
 /**
- * System call to extend Memory to 32Meg. 
+ * System call to extend Memory to 32Meg.
  */
-int mm_extend(void)
+int mm_extend(MM_EXTEND_SIZE i_size)
 {
-    return (int64_t)_syscall0(MM_EXTEND);
+    return (int64_t)_syscall1(MM_EXTEND, reinterpret_cast<void*>(i_size));
 }
 
 
 /**
- * System call to create a block of memory at a specific physical address 
+ * System call to create a block of memory at a specific physical address
  */
 int mm_linear_map(void *i_paddr, uint64_t i_size)
 {

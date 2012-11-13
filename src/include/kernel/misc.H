@@ -1,26 +1,25 @@
-/*  IBM_PROLOG_BEGIN_TAG
- *  This is an automatically generated prolog.
- *
- *  $Source: src/include/kernel/misc.H $
- *
- *  IBM CONFIDENTIAL
- *
- *  COPYRIGHT International Business Machines Corp. 2011-2012
- *
- *  p1
- *
- *  Object Code Only (OCO) source materials
- *  Licensed Internal Code Source Materials
- *  IBM HostBoot Licensed Internal Code
- *
- *  The source code for this program is not published or other-
- *  wise divested of its trade secrets, irrespective of what has
- *  been deposited with the U.S. Copyright Office.
- *
- *  Origin: 30
- *
- *  IBM_PROLOG_END_TAG
- */
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/include/kernel/misc.H $                                   */
+/*                                                                        */
+/* IBM CONFIDENTIAL                                                       */
+/*                                                                        */
+/* COPYRIGHT International Business Machines Corp. 2011,2012              */
+/*                                                                        */
+/* p1                                                                     */
+/*                                                                        */
+/* Object Code Only (OCO) source materials                                */
+/* Licensed Internal Code Source Materials                                */
+/* IBM HostBoot Licensed Internal Code                                    */
+/*                                                                        */
+/* The source code for this program is not published or otherwise         */
+/* divested of its trade secrets, irrespective of what has been           */
+/* deposited with the U.S. Copyright Office.                              */
+/*                                                                        */
+/* Origin: 30                                                             */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
 /** @file misc.H
  *  @brief Misc. Kernel functions and utilities.
  */
@@ -88,5 +87,29 @@ namespace KernelMisc
                 /** Current time-base value for restore after winkle. */
             uint64_t iv_timebase;
     };
+
+    /** @fn expand_full_cache
+     *
+     *  @brief Expands the image footprint from a half-cache to full-cache
+     *         mode.
+     *
+     *  @return 0 or -errno
+     */
+    int expand_full_cache();
+
+    /** @fn populate_cache_lines
+     *
+     *  @brief Populates a range of memory addresses into the cache via dcbz.
+     *
+     *  This is meant to be used while the processor is in cache-contained
+     *  mode.  The entire cache line is zero'd so if the range is less then
+     *  a cache-line, or starts misaligned, then more memory might be zero'd
+     *  then would be expected.
+     *
+     *  @param[in] i_start - Address to start dcbz at.
+     *  @param[in] i_end - Address to stop dcbz at.
+     *                     (This address is not dcbz'd itself)
+     */
+    void populate_cache_lines(uint64_t* i_start, uint64_t* i_end);
 };
 #endif

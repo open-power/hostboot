@@ -804,18 +804,37 @@ namespace Systemcalls
     }
 
     /**
-     * Allocates a block of virtual memory that extends the VMM
-     * space upto 32MEG of Mainstore.
-     * @param[in] t: The task used to extend Memory 
+     * Extends the initial footprint of the image further into memory.
+     *
+     * Depending on the syscall parameter, we will either switch from 4MB
+     * to 8MB cache-contained mode or expand into 32MB of space using real
+     * system memory.
+
+     * @param[in] t: The task used to extend Memory
      */
     void MmExtend(task_t* t)
     {
-        TASK_SETRTN(t, VmmManager::mmExtend());
+        uint64_t size = TASK_GETARG0(t);
+
+        switch (size)
+        {
+            case MM_EXTEND_FULL_CACHE:
+                TASK_SETRTN(t, KernelMisc::expand_full_cache());
+                break;
+
+            case MM_EXTEND_REAL_MEMORY:
+                TASK_SETRTN(t, VmmManager::mmExtend());
+                break;
+
+            default:
+                TASK_SETRTN(t, -EINVAL);
+                break;
+        }
     }
 
     /**
      * Allocates a block of memory of the given size
-     * to at a specified physical address 
+     * to at a specified physical address
      */
     void MmLinearMap(task_t* t)
     {

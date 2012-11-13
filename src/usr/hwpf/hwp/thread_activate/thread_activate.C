@@ -40,7 +40,7 @@
 
 #include    <devicefw/userif.H>
 #include    <sys/misc.h>
-
+#include    <sys/mm.h>
 #include    <proc_thread_control.H>
 
 //  targeting support
@@ -219,6 +219,14 @@ void activate_threads( errlHndl_t& io_rtaskRetErrl )
                    thread );
 
     }
+
+    // Reclaim remainder of L3 cache if available.
+    // TODO: RTC 49137: Add calls to MVPD and PNOR to make decision.
+    if (!TARGETING::is_vpo())
+    {
+        mm_extend(MM_EXTEND_FULL_CACHE);
+    }
+
 
     TRACFCOMP( g_fapiTd,
                "activate_threads exit" );

@@ -36,6 +36,7 @@
 #include <targeting/common/targetservice.H>
 #include <targeting/common/utilFilter.H>
 #include <runtime/runtime_reasoncodes.H>
+#include <sys/mm.h> //@fixme RTC:49509 - remove if no longer needed.
 #include "common/hsvc_attribute_structs.H"
 //#include <arch/ppc.H> //for MAGIC_INSTRUCTION
 
@@ -60,7 +61,7 @@ TRAC_INIT(&g_trac_runtime, "RUNTIME", 4096);
     _cur_header->offset = (_output_ptr - _beginning); \
     memcpy( _output_ptr, &result_##__fid, sizeof(fapi::__fid##_Type) ); \
     _output_ptr += sizeof(fapi::__fid##_Type); \
-    (*_num_attr)++; 
+    (*_num_attr)++;
 
 /**
  * @brief Read a Privileged FAPI attribute and stick it into mainstore
@@ -80,7 +81,7 @@ TRAC_INIT(&g_trac_runtime, "RUNTIME", 4096);
     _cur_header->offset = (_output_ptr - _beginning); \
     memcpy( _output_ptr, &result_##__fid, sizeof(fapi::__fid##_Type) ); \
     _output_ptr += sizeof(fapi::__fid##_Type); \
-    (*_num_attr)++; 
+    (*_num_attr)++;
 
 /**
  * @brief Read the HUID attribute from targeting and stick it into mainstore
@@ -94,7 +95,7 @@ TRAC_INIT(&g_trac_runtime, "RUNTIME", 4096);
     _cur_header->offset = (_output_ptr - _beginning); \
     memcpy( _output_ptr, &_huid_temp, sizeof(uint32_t) ); \
     _output_ptr += sizeof(uint32_t); \
-    (*_num_attr)++; 
+    (*_num_attr)++;
 
 /**
  * @brief Read the PHYS_PATH attribute from targeting and stick it into mainstore
@@ -117,7 +118,7 @@ TRAC_INIT(&g_trac_runtime, "RUNTIME", 4096);
     _cur_header = &(_all_headers[(*_num_attr)]); \
     _cur_header->id = hsvc_attr_header_t::NO_ATTRIBUTE; \
     _cur_header->sizeBytes = 0; \
-    _cur_header->offset = 0; 
+    _cur_header->offset = 0;
 
 
 namespace RUNTIME
@@ -134,7 +135,7 @@ struct system_data_t
     // header data that HostServices uses
     hsvc_system_data_t hsvc;
 
-    // actual data content 
+    // actual data content
     hsvc_attr_header_t attrHeaders[MAX_ATTRIBUTES];
     char attributes[MAX_ATTRIBUTES*sizeof(uint32_t)];
 };
@@ -158,9 +159,9 @@ struct node_data_t
     // header data that HostServices uses
     hsvc_node_data_t hsvc;
 
-    // actual data content 
+    // actual data content
     hsvc_proc_header_t procs[MAX_PROCS_RSV];
-    hsvc_ex_header_t ex[MAX_PROCS_RSV*MAX_EX_PER_PROC];    
+    hsvc_ex_header_t ex[MAX_PROCS_RSV*MAX_EX_PER_PROC];
     hsvc_attr_header_t procAttrHeaders[MAX_PROCS_RSV][NUM_PROC_ATTRIBUTES];
     hsvc_attr_header_t exAttrHeaders[MAX_PROCS_RSV*MAX_EX_PER_PROC][NUM_EX_ATTRIBUTES];
     char attributes[MAX_ATTRIBUTES*sizeof(uint32_t)];
@@ -169,8 +170,8 @@ struct node_data_t
 
 //@fixme  RTC:49509
 // Steal the unused fake pnor space until we have mainstore
-#define SYSTEM_DATA_POINTER (5*MEGABYTE)
-#define NODE_DATA_POINTER (5*MEGABYTE+512*KILOBYTE)
+#define SYSTEM_DATA_POINTER (64*MEGABYTE)
+#define NODE_DATA_POINTER (SYSTEM_DATA_POINTER+512*KILOBYTE)
 
 
 /**
@@ -188,6 +189,8 @@ errlHndl_t populate_system_attributes( void )
         TRACFCOMP( g_trac_runtime, "-SYSTEM-" );
 
         // allocate memory and fill it with some junk data
+        // @fixme RTC:49509 - remove mm_linear_map and put in real HDAT.
+        mm_linear_map(reinterpret_cast<void*>(SYSTEM_DATA_POINTER), 4*MEGABYTE);
         system_data_t* sys_data =
           reinterpret_cast<system_data_t*>(SYSTEM_DATA_POINTER);
         memset( sys_data, 'A', sizeof(system_data_t) );
@@ -310,7 +313,7 @@ errlHndl_t populate_node_attributes( uint64_t i_nodeNum )
                          (const_cast<TARGETING::Target*>(all_procs[p])) );
 
             // Compute the processor id to match what HDAT uses
-            uint64_t node_id = 
+            uint64_t node_id =
               all_procs[p]->getAttr<TARGETING::ATTR_FABRIC_NODE_ID>();
             uint64_t chip_id =
               all_procs[p]->getAttr<TARGETING::ATTR_FABRIC_CHIP_ID>();
@@ -328,19 +331,19 @@ errlHndl_t populate_node_attributes( uint64_t i_nodeNum )
             // Prepare the variables for the HSVC_LOAD_ATTR calls
             _all_headers = &(node_data->procAttrHeaders[p][0]);
             _num_attr = &(node_data->procs[p].numAttr);
-            _target = &fapi_proc; 
+            _target = &fapi_proc;
 
             // Fill up the attributes
             ADD_HUID( (all_procs[p]) ); // for debug
             ADD_PHYS_PATH( (all_procs[p]) );
-            HSVC_LOAD_ATTR_P( ATTR_EC ); 
+            HSVC_LOAD_ATTR_P( ATTR_EC );
             // Use a generated file for the list of attributes to load
             #include "common/hsvc_procdata.C"
 
             // Add an empty attribute header to signal the end
             EMPTY_ATTRIBUTE;
 
-            
+
             // Loop around all of the EX chiplets for this proc
             TARGETING::TargetHandleList all_ex;
             TARGETING::getChildChiplets( all_ex, all_procs[p],
@@ -372,7 +375,7 @@ errlHndl_t populate_node_attributes( uint64_t i_nodeNum )
                 // Prepare the variables for the HSVC_LOAD_ATTR calls
                 _all_headers = &(node_data->exAttrHeaders[next_ex][0]);
                 _num_attr = &(node_data->ex[next_ex].numAttr);
-                _target = &fapi_ex; 
+                _target = &fapi_ex;
 
                 // Fill up the attributes
                 ADD_HUID( (all_ex[e]) ); // for debug
@@ -434,7 +437,7 @@ errlHndl_t populate_attributes( void )
 
     do {
         //@todo : Remove this before RTC:49137 is merged, fix with RTC:49509
-        // Skip this in VPO  
+        // Skip this in VPO
         if( TARGETING::is_vpo() )
         {
             TRACFCOMP( g_trac_runtime, "Skipping RUNTIME::populate_attributes in VPO mode" );

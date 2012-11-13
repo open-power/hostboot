@@ -77,7 +77,7 @@ class RuntimeTest: public CxxTest::TestSuite
         hsvc_attr_header_t* headers = reinterpret_cast<hsvc_attr_header_t*>
           ((beginning+sysdata->offset));
 
-        //Grab a couple of arbitrary attributes        
+        //Grab a couple of arbitrary attributes
         ReturnCode l_rc;
 
         fapi::ATTR_FREQ_PB_Type freq = 0;
@@ -161,15 +161,15 @@ class RuntimeTest: public CxxTest::TestSuite
         }
 
         //Make sure that the offsets are reasonable
-        if( nodedata->procOffset == 0 ) 
+        if( nodedata->procOffset == 0 )
         {
             TS_FAIL("testVerifyNodeAttributes> procOffset is invalid");
         }
-        if( nodedata->exOffset == 0 ) 
+        if( nodedata->exOffset == 0 )
         {
             TS_FAIL("testVerifyNodeAttributes> exOffset is invalid");
         }
-        if( nodedata->procOffset == nodedata->exOffset ) 
+        if( nodedata->procOffset == nodedata->exOffset )
         {
             TS_FAIL("testVerifyNodeAttributes> offsets are equal - that is bad");
         }
@@ -196,7 +196,7 @@ class RuntimeTest: public CxxTest::TestSuite
             fapi::Target* proc = getProcTarget( curproc->procid );
             TRACDCOMP( g_trac_runtime, "procid = %d", curproc->procid );
 
-            //Grab a couple of arbitrary attributes        
+            //Grab a couple of arbitrary attributes
             hsvc_attr_header_t* headers = reinterpret_cast<hsvc_attr_header_t*>
               ((beginning+curproc->offset));
             ReturnCode l_rc;
@@ -292,7 +292,7 @@ class RuntimeTest: public CxxTest::TestSuite
                                             curex->chiplet );
             TRACDCOMP( g_trac_runtime, "procid = %d, chiplet = %d", curex->parent_procid, curex->chiplet );
 
-            //Grab a couple of arbitrary attributes        
+            //Grab a couple of arbitrary attributes
             hsvc_attr_header_t* headers = reinterpret_cast<hsvc_attr_header_t*>
               ((beginning+curex->offset));
             ReturnCode l_rc;
@@ -377,11 +377,11 @@ class RuntimeTest: public CxxTest::TestSuite
     //@fixme  RTC:49509
     hsvc_system_data_t* getSysPtr(void)
     {
-        return( (hsvc_system_data_t*)(5*MEGABYTE) );
+        return( (hsvc_system_data_t*)(64*MEGABYTE) );
     };
     hsvc_node_data_t* getNodePtr(void)
     {
-        return( (hsvc_node_data_t*)(5*MEGABYTE+512*KILOBYTE) );
+        return( (hsvc_node_data_t*)(64*MEGABYTE+512*KILOBYTE) );
     };
 
     //utility to fetch a proc target based on a procid
@@ -410,7 +410,7 @@ class RuntimeTest: public CxxTest::TestSuite
         TARGETING::Target* proc_target = NULL;
         for( size_t p = 0; p < all_procs.size(); p++ )
         {
-            uint64_t node_id = 
+            uint64_t node_id =
               all_procs[p]->getAttr<TARGETING::ATTR_FABRIC_NODE_ID>();
             uint64_t CHIP_UNIT_POS =
               all_procs[p]->getAttr<TARGETING::ATTR_FABRIC_CHIP_ID>();

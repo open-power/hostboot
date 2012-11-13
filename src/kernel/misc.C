@@ -29,6 +29,9 @@
 #include <assert.h>
 #include <kernel/terminate.H>
 #include <kernel/hbterminatetypes.H>
+#include <sys/mm.h>
+#include <errno.h>
+#include <kernel/pagemgr.H>
 
 extern "C"
     void kernel_shutdown(size_t, uint64_t, uint64_t, uint64_t) NO_RETURN;
@@ -230,5 +233,59 @@ namespace KernelMisc
         // Attempted to winkle the master and another thread came online in
         // the process.
         kassert(false);
+    }
+
+    int expand_full_cache()
+    {
+        static bool executed = false;
+
+        if (executed) // Why are we being called a second time?
+        {
+            return -EFAULT;
+        }
+
+        uint64_t* startAddr = NULL;
+        uint64_t* endAddr = NULL;
+
+        switch(CpuID::getCpuType())
+        {
+            case CORE_POWER8_MURANO:
+            case CORE_POWER8_VENICE:
+                /* TODO: RTC 52972 - Change to INITIAL_MEM_SIZE once
+                 *                   SLW images are put in the "right" spot.
+                 */
+                startAddr =
+                    reinterpret_cast<uint64_t*>((OUTPUT_PORE_IMG_ADDR +
+                                                 MAX_OUTPUT_PORE_IMG_SIZE));
+                endAddr =
+                    reinterpret_cast<uint64_t*>(8 * MEGABYTE);
+
+            default:
+                break;
+        }
+
+        if (startAddr != NULL)
+        {
+            populate_cache_lines(startAddr, endAddr);
+            size_t pages = (reinterpret_cast<uint64_t>(endAddr) -
+                            reinterpret_cast<uint64_t>(startAddr)) / PAGESIZE;
+
+            PageManager::addMemory(reinterpret_cast<uint64_t>(startAddr),
+                                   pages);
+        }
+
+        executed = true;
+        return 0;
+    }
+
+    void populate_cache_lines(uint64_t* i_start, uint64_t* i_end)
+    {
+        size_t cache_line_size = getCacheLineWords();
+
+        while(i_start != i_end)
+        {
+            dcbz(i_start);
+            i_start += cache_line_size;
+        }
     }
 };

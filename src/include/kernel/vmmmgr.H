@@ -40,17 +40,20 @@ class VmmManager
          */
         enum VMM_CONSTS
         {
-            FULL_MEM_SIZE = 4*MEGABYTE,
+            INITIAL_MEM_SIZE = 4*MEGABYTE,
 
             // put the Page Table at the end of our memory space
             PTSIZE = (1 << 18),
-            HTABORG_OFFSET = (FULL_MEM_SIZE - PTSIZE),
+            HTABORG_OFFSET = (INITIAL_MEM_SIZE - PTSIZE),
 
             // Put the DMA Pages just under the Page Table
             MBOX_DMA_PAGES = 64,    // must be <= 64
             MBOX_DMA_PAGESIZE = (1 * KILOBYTE),
             MBOX_DMA_ADDR = (HTABORG_OFFSET
                              - (MBOX_DMA_PAGES * MBOX_DMA_PAGESIZE)),
+
+            /** The base image and heap must be below this address. */
+            FIRST_RESERVED_PAGE = MBOX_DMA_ADDR,
 
             // Tells processor to ignore HRMOR
             FORCE_PHYS_ADDR = 0x8000000000000000,
@@ -187,7 +190,7 @@ class VmmManager
 
         /**
          * @brief Allocates a block of virtual memory that extends the VMM
-         *          space upto 32MEG of Mainstore. 
+         *          space upto 32MEG of Mainstore.
          */
         static int mmExtend( void);
 
