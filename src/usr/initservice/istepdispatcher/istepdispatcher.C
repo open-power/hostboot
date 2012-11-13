@@ -248,6 +248,10 @@ errlHndl_t IStepDispatcher::executeAllISteps ( void )
                  substep < (g_isteps[istep].numitems + 1);
                  substep++ )
             {
+#if 1
+                //  $$  please save, need to fix for
+                //  $$      IPL service not returning error on invalid isteps
+#else
                 //  If the istep/substep doesn't exist, skip it.
                 if ( findTaskInfo( istep, substep ) ==  NULL )
                 {
@@ -257,6 +261,7 @@ errlHndl_t IStepDispatcher::executeAllISteps ( void )
                                substep  );
                     continue;
                 }
+#endif
                 // Before we can do anything, we need to be sure the worker thread is
                 // ready to start
                 theMsg = msg_wait( iv_msgQ );

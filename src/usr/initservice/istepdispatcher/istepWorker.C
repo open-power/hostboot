@@ -166,7 +166,13 @@ void iStepWorkerThread ( void * i_msgQ )
         }
         else
         {
-
+#if 1
+            //  Nothing to do for this istep.
+            TRACFCOMP( g_trac_initsvc,
+                       INFO_MRK"Empty Istep, Nothing to do!" );
+#else
+            //  $$  please save, need to fix for
+            //  $$      IPL service not returning error on invalid isteps
             //  This istep should have not been sent here to run, make up
             //  an errorlog and return it.
             /*@
@@ -189,6 +195,7 @@ void iStepWorkerThread ( void * i_msgQ )
                        istep,
                        substep,
                        err->plid()  );
+#endif
         }
 
         //  flush contTrace after each istep/substep  returns
