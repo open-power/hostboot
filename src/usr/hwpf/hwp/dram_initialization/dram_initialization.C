@@ -48,6 +48,7 @@
 #include    <diag/attn/attn.H>
 #include    <initservice/isteps_trace.H>
 #include    <hwpisteperror.H>
+#include    <errl/errludtarget.H>
 
 //  targeting support
 #include    <targeting/common/commontargeting.H>
@@ -68,7 +69,7 @@
 #include    "mss_extent_setup/mss_extent_setup.H"
 // #include    "mss_memdiag/mss_memdiag.H"
 // #include    "mss_scrub/mss_scrub.H"
-// #include    "mss_thermal_init/mss_thermal_init.H"
+#include    "mss_thermal_init/mss_thermal_init.H"
 #include    "proc_setup_bars/mss_setup_bars.H"
 #include    "proc_setup_bars/proc_setup_bars.H"
 #include    "proc_pcie_config/proc_pcie_config.H"
@@ -86,6 +87,7 @@ namespace   DRAM_INITIALIZATION
 
 using   namespace   ISTEP;
 using   namespace   ISTEP_ERROR;
+using   namespace   ERRORLOG;
 using   namespace   TARGETING;
 using   namespace   EDI_EI_INITIALIZATION;
 using   namespace   fapi;
@@ -117,7 +119,8 @@ void*    call_host_startPRD_dram( void    *io_pArgs )
     const fapi::Target l_fapi_@targetN_target(
                     TARGET_TYPE_MEMBUF_CHIP,
                     reinterpret_cast<void *>
-                        (const_cast<TARGETING::Target*>(l_@targetN_target)) );
+                        (const_cast<TARGETING::
+                         Target*>(l_@targetN_target)) );
 
     //  call the HWP with each fapi::Target
     FAPI_INVOKE_HWP( l_errl, host_startPRD_dram, _args_...);
@@ -329,47 +332,86 @@ void*    call_mss_thermal_init( void    *io_pArgs )
 {
     errlHndl_t  l_errl  =   NULL;
 
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+    IStepError  l_StepError;
+
+    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                "call_mss_thermal_init entry" );
 
-#if 0
-    // @@@@@    CUSTOM BLOCK:   @@@@@
-    //  figure out what targets we need
-    //  customize any other inputs
-    //  set up loops to go through all targets (if parallel, spin off a task)
+    // Get all Centaur targets
+    TARGETING::TargetHandleList l_memBufTargetList;
+    getAllChips(l_memBufTargetList, TYPE_MEMBUF );
 
-    //  dump physical path to targets
-    EntityPath l_path;
-    l_path  =   l_@targetN_target->getAttr<ATTR_PHYS_PATH>();
-    l_path.dump();
-
-    // cast OUR type of target to a FAPI type of target.
-    const fapi::Target l_fapi_@targetN_target(
-                    TARGET_TYPE_MEMBUF_CHIP,
-                    reinterpret_cast<void *>
-                        (const_cast<TARGETING::Target*>(l_@targetN_target)) );
-
-    //  call the HWP with each fapi::Target
-    FAPI_INVOKE_HWP( l_errl, mss_thermal_init, _args_...);
-    if ( l_errl )
+    //  --------------------------------------------------------------------
+    //  run mss_thermal_init on all Centaurs
+    //  --------------------------------------------------------------------
+    for (TargetHandleList::iterator l_iter = l_memBufTargetList.begin();
+            l_iter != l_memBufTargetList.end();
+            ++l_iter)
     {
-        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                  "ERROR : .........." );
-        errlCommit( l_errl, HWPF_COMP_ID );
+        //  make a local copy of the target for ease of use
+        const TARGETING::Target*  l_pCentaur = *l_iter;
+
+        //  dump physical path to targets
+        EntityPath l_path;
+        l_path  =   l_pCentaur->getAttr<ATTR_PHYS_PATH>();
+        l_path.dump();
+
+        // cast OUR type of target to a FAPI type of target.
+        const fapi::Target l_fapi_pCentaur(
+                TARGET_TYPE_MEMBUF_CHIP,
+                reinterpret_cast<void *>
+                (const_cast<TARGETING::Target*>(l_pCentaur)) );
+
+        //  call the HWP with each fapi::Target
+        FAPI_INVOKE_HWP( l_errl, mss_thermal_init, l_fapi_pCentaur );
+
+        if ( l_errl )
+        {
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                    "ERROR 0x%.8X: mss_thermal_init HWP returns error",
+                    l_errl->reasonCode());
+
+            ErrlUserDetailsTarget myDetails(l_pCentaur);
+
+            // capture the target data in the elog
+            myDetails.addToLog( l_errl );
+
+            /*@
+             * @errortype
+             * @reasoncode       ISTEP_DRAM_INITIALIZATION_FAILED
+             * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE
+             * @moduleid         ISTEP_MSS_THERMAL_INIT
+             * @userdata1        bytes 0-1: plid identifying first error
+             *                   bytes 2-3: reason code of first error
+             * @userdata2        bytes 0-1: total number of elogs included
+             *                   bytes 2-3: N/A
+             * @devdesc          call to mss_thermal_init has failed
+             *                   see error log in the user details section for
+             *                   additional details.
+             */
+            l_StepError.addErrorDetails(ISTEP_DRAM_INITIALIZATION_FAILED,
+                                        ISTEP_MSS_THERMAL_INIT,
+                                        l_errl );
+
+            errlCommit( l_errl, HWPF_COMP_ID );
+
+            break;
+        }
+
     }
-    else
+
+    if(l_StepError.isNull())
     {
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                   "SUCCESS : .........." );
+                   "SUCCESS : call_mss_thermal_init" );
     }
-    // @@@@@    END CUSTOM BLOCK:   @@@@@
-#endif
 
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+
+    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                "call_mss_thermal_init exit" );
 
     // end task, returning any errorlogs to IStepDisp
-    return l_errl;
+    return l_StepError.getErrorHandle();
 }
 
 
@@ -393,9 +435,9 @@ void*    call_proc_setup_bars( void    *io_pArgs )
     TARGETING::TargetHandleList l_cpuTargetList;
     getAllChips(l_cpuTargetList, TYPE_PROC );
 
-    //  -----------------------------------------------------------------------
+    //  --------------------------------------------------------------------
     //  run mss_setup_bars on all CPUs.
-    //  -----------------------------------------------------------------------
+    //  --------------------------------------------------------------------
     for ( size_t i = 0; i < l_cpuTargetList.size(); i++ )
     {
         //  make a local copy of the target for ease of use

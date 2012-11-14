@@ -47,6 +47,7 @@ EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/dram_initialization/proc_setup_bars
 EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/dram_initialization/mss_memdiag
 EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/dram_initialization/proc_pcie_config
 EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/dram_initialization/host_mpipl_service
+EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/dram_initialization/mss_thermal_init
 
 
 ##  NOTE: add new object files when you add a new HWP
@@ -59,7 +60,8 @@ OBJS =  dram_initialization.o \
         mss_maint_cmds.o \
         proc_pcie_config.o \
         proc_mpipl_ex_cleanup.o \
-        proc_mpipl_chip_cleanup.o
+        proc_mpipl_chip_cleanup.o \
+        mss_thermal_init.o
 
 
 ##  NOTE: add a new directory onto the vpaths when you add a new HWP
@@ -71,6 +73,7 @@ VPATH += ${ROOTPATH}/src/usr/hwpf/hwp/dram_initialization/proc_setup_bars
 VPATH += ${ROOTPATH}/src/usr/hwpf/hwp/dram_initialization/mss_memdiag
 VPATH += ${ROOTPATH}/src/usr/hwpf/hwp/dram_initialization/proc_pcie_config
 VPATH += ${ROOTPATH}/src/usr/hwpf/hwp/dram_initialization/host_mpipl_service
+VPATH += ${ROOTPATH}/src/usr/hwpf/hwp/dram_initialization/mss_thermal_init
 
 
 include ${ROOTPATH}/config.mk
