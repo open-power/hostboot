@@ -1,25 +1,25 @@
-//  IBM_PROLOG_BEGIN_TAG
-//  This is an automatically generated prolog.
-//
-//  $Source: src/include/usr/hwpf/fapi/fapiReturnCodes.H $
-//
-//  IBM CONFIDENTIAL
-//
-//  COPYRIGHT International Business Machines Corp. 2011
-//
-//  p1
-//
-//  Object Code Only (OCO) source materials
-//  Licensed Internal Code Source Materials
-//  IBM HostBoot Licensed Internal Code
-//
-//  The source code for this program is not published or other-
-//  wise divested of its trade secrets, irrespective of what has
-//  been deposited with the U.S. Copyright Office.
-//
-//  Origin: 30
-//
-//  IBM_PROLOG_END
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/include/usr/hwpf/fapi/fapiReturnCodes.H $                 */
+/*                                                                        */
+/* IBM CONFIDENTIAL                                                       */
+/*                                                                        */
+/* COPYRIGHT International Business Machines Corp. 2011,2012              */
+/*                                                                        */
+/* p1                                                                     */
+/*                                                                        */
+/* Object Code Only (OCO) source materials                                */
+/* Licensed Internal Code Source Materials                                */
+/* IBM HostBoot Licensed Internal Code                                    */
+/*                                                                        */
+/* The source code for this program is not published or otherwise         */
+/* divested of its trade secrets, irrespective of what has been           */
+/* deposited with the U.S. Copyright Office.                              */
+/*                                                                        */
+/* Origin: 30                                                             */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
 /**
  *  @file fapiReturnCodes.H
  *
@@ -41,6 +41,7 @@
  *                          mjjones     01/13/2012  Name enumeration
  *                          mjjones     04/16/2012  Add FAPI_RC_INVALID_CHIP_EC_FEATURE_GET
  *                          mjjones     05/02/2012  Add FAPI_RC_PLAT_ERR_ADU_LOCKED
+ *                          mjjones     11/14/2012  Add FAPI_RC_UNRECOGNIZED_SBE_ERROR
  */
 
 #ifndef FAPIRETURNCODES_H_
@@ -78,6 +79,9 @@ enum ReturnCodes
 
     // HWP requested a chip EC feature with an invalid attribute ID
     FAPI_RC_INVALID_CHIP_EC_FEATURE_GET = FAPI_RC_FAPI_MASK | 0x02,
+
+    // HWP attempted to create an unrecognized SBE error
+    FAPI_RC_UNRECOGNIZED_SBE_ERROR      = FAPI_RC_FAPI_MASK | 0x03,
 
     //--------------------------------------------------------------------------
     // PLAT generated return codes. Additional details may be contained in
