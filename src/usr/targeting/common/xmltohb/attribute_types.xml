@@ -775,6 +775,23 @@
 </attribute>
 
 <attribute>
+    <id>IS_MPIPL</id>
+    <description>1 = in Memory Preserving IPL mode. 0 = in normal IPL mode.</description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_IS_MPIPL</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
     <id>HWAS_STATE</id>
     <description>HardWare Availability Service State Attribute.
         Keeps track of Target values poweredOn, present, functional,

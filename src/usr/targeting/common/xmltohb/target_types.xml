@@ -88,6 +88,7 @@
         <id>IS_SIMULATION</id>
         <default>0</default>
     </attribute>
+    <attribute><id>IS_MPIPL</id></attribute>
     <attribute><id>ISTEP_MODE</id></attribute>
     <attribute><id>PROC_EPS_TABLE_TYPE</id></attribute>
     <attribute><id>PROC_FABRIC_PUMP_MODE</id></attribute>

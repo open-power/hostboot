@@ -52,6 +52,15 @@
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>
+    <id>ATTR_IS_MPIPL</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>1 = in Memory Preserving IPL mode. 0 = in normal IPL mode.</description>
+    <valueType>uint8</valueType>
+    <platInit/>
+    <writeable/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
     <id>ATTR_MNFG_FLAGS</id>
     <targetType>TARGET_TYPE_SYSTEM</targetType>
     <description>
