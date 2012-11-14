@@ -61,4 +61,18 @@
     <ffdc>CHIPLET_ID</ffdc>
   </hwpError>
   <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_MVPD_RING_FUNC_INVALID_PARAMETER</rc>
+    <description>
+        An invalid parameter was passed to a mvpd ring function.
+    </description>
+  </hwpError>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_MVPD_RING_FUNC_INSUFFICIENT_RECORD_SPACE</rc>
+    <description>
+        Insufficient room in the record to set the requested ring.
+    </description>
+  </hwpError>
+  <!-- *********************************************************************** -->
 </hwpErrors>

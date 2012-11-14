@@ -75,6 +75,7 @@ mvpdTestData mvpdData[] =
     { CP00, PG },
 //    { CP00, PK }, // TODO - no PK in test data. pull for now RTC 51716
     { CP00, pdR },
+    { CP00, pdG },
     { CP00, pdV },
     { CP00, pdH },
 //    { CP00, pdP }, // TODO - no #P in test data, pull for now RTC 51716

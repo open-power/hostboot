@@ -170,6 +170,7 @@ const mvpdKeywordInfo mvpdKeywords[] =
     { OC,  "OC" },
     { FO,  "FO" },
     { pdI, "#I" },
+    { pdG, "#G" },
     // -------------------------------------------------------------------
     // DO NOT USE!!  This is for test purposes ONLY!
     { MVPD_TEST_KEYWORD, "TEST" },

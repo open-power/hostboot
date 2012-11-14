@@ -24,7 +24,7 @@ EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/mvpd_accessors
 
 VPATH += mvpd_accessors
 
-OBJS += getRepairRing.o \
-        setRepairRing.o \
+OBJS += getMvpdRing.o \
+        setMvpdRing.o \
         mvpdRingFuncs.o
 

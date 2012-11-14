@@ -1,26 +1,25 @@
-/*  IBM_PROLOG_BEGIN_TAG
- *  This is an automatically generated prolog.
- *
- *  $Source: src/include/usr/hwpf/fapi/fapiUtil.H $
- *
- *  IBM CONFIDENTIAL
- *
- *  COPYRIGHT International Business Machines Corp. 2011-2012
- *
- *  p1
- *
- *  Object Code Only (OCO) source materials
- *  Licensed Internal Code Source Materials
- *  IBM HostBoot Licensed Internal Code
- *
- *  The source code for this program is not published or other-
- *  wise divested of its trade secrets, irrespective of what has
- *  been deposited with the U.S. Copyright Office.
- *
- *  Origin: 30
- *
- *  IBM_PROLOG_END_TAG
- */
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/include/usr/hwpf/fapi/fapiUtil.H $                        */
+/*                                                                        */
+/* IBM CONFIDENTIAL                                                       */
+/*                                                                        */
+/* COPYRIGHT International Business Machines Corp. 2011,2012              */
+/*                                                                        */
+/* p1                                                                     */
+/*                                                                        */
+/* Object Code Only (OCO) source materials                                */
+/* Licensed Internal Code Source Materials                                */
+/* IBM HostBoot Licensed Internal Code                                    */
+/*                                                                        */
+/* The source code for this program is not published or otherwise         */
+/* divested of its trade secrets, irrespective of what has been           */
+/* deposited with the U.S. Copyright Office.                              */
+/*                                                                        */
+/* Origin: 30                                                             */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
 /**
  *  @file fapiUtil.H
  *
@@ -53,6 +52,23 @@
 #include <stdint.h>
 #include <stddef.h>
 #include <fapiReturnCode.H>
+#include <fapiPlatUtil.H>
+
+// Defines for endian convertion 
+#define FAPI_BE16TOH(x) FAPI_PLAT_BE16TOH(x)
+#define FAPI_LE16TOH(x) FAPI_PLAT_LE16TOH(x)
+#define FAPI_HTOBE16(x) FAPI_PLAT_HTOBE16(x)
+#define FAPI_HTOLE16(x) FAPI_PLAT_HTOLE16(x)
+
+#define FAPI_BE32TOH(x) FAPI_PLAT_BE32TOH(x)
+#define FAPI_LE32TOH(x) FAPI_PLAT_LE32TOH(x)
+#define FAPI_HTOBE32(x) FAPI_PLAT_HTOBE32(x)
+#define FAPI_HTOLE32(x) FAPI_PLAT_HTOLE32(x)
+
+#define FAPI_BE64TOH(x) FAPI_PLAT_BE64TOH(x)
+#define FAPI_LE64TOH(x) FAPI_PLAT_LE64TOH(x)
+#define FAPI_HTOBE64(x) FAPI_PLAT_HTOBE64(x)
+#define FAPI_HTOLE64(x) FAPI_PLAT_HTOLE64(x)
 
 // It is an eCMD requirement that these functions have a "C" symbol
 // because they may be used from a dynamically linked shared library

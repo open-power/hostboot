@@ -110,6 +110,7 @@ namespace fapi
         MVPD_KEYWORD_OC  = 0x1c,
         MVPD_KEYWORD_FO  = 0x1d,
         MVPD_KEYWORD_PDI = 0x1e,
+        MVPD_KEYWORD_PDG = 0x1f,
     };
 }
 

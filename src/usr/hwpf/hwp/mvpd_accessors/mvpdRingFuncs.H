@@ -1,7 +1,7 @@
  /*  IBM_PROLOG_BEGIN_TAG
  *  This is an automatically generated prolog.
  *
- *  $Source: src/include/usr/hwpf/hwp/RepairRingFunc.H $
+ *  $Source: src/include/usr/hwpf/hwp/mvpdRingFuncs.H $
  *
  *  IBM CONFIDENTIAL
  *
@@ -24,9 +24,7 @@
 /**
  *  @file mvpdRingFuncs.H
  *
- *  @brief Prototype for getMvpdRingField() -
- *          return a  buffer containing the entire field with a pointer to
- *          the requested ring.
+ *  @brief Prototype for mvpdRingFuncs() 
  */
 
  #ifndef    _HWP_MVPDRINGFUNCS_
@@ -34,35 +32,45 @@
 
  #include   <fapi.H>
 
-
+// mvpdRingFunc can be used for get and set
+enum mvpdRingFuncOp
+{ 
+    MVPD_RING_GET,
+    MVPD_RING_SET,
+};
 
 extern "C"
 {
 
 /**
- * @brief   return mvpd field with pointer to requested ring 
+ * @brief   get or set the requested ring for the record and keyword
  *          for the specified target CPU.
- *          It is an error if the requested ring is not there.
- *          RC_REPAIR_RING_NOT_FOUND will be returned if the requested
- *          ring is not there.
  *
- * @param i_chipletId       -   Chiplet ID to search for
- * @param i_ringId          -   Ring ID to search for
- * @param i_pFieldBuf       -   The buffer containing the field to search
- * @param i_fieldBufsize    -   Number of bytes in the field buffer 
- * @param o_pRingBuf        -   Pointer to ring in the field buffer
- * @param o_rRingBufsize    -   Size of ring
+ *          detailed comments on get and set are in the 
+ *          getMvpdRing.H and setMvpdRing.H and apply here as well.
+ *
+ * @param i_mvpdRingFuncOp  -   indicate get or set via enum mvpdRingFuncOp
+ * @param i_record          -   Record enumerator 
+ * @param i_keyword         -   Keyword enumerator 
+ * @param i_fapiTarget      -   cpu target
+ * @param i_chipletId       -   Chiplet ID 
+ * @param i_ringId          -   Ring ID 
+ * @param i_pRingBuf        -   The buffer to receive or send the ring
+ * @param io_rRingBufsize   -   Size of ring / ring buffer
  *
  * @return fapi::ReturnCode -   FAPI_RC_SUCCESS if success,
  *                              relevant error code for failure.
  */
+fapi::ReturnCode mvpdRingFunc(  mvpdRingFuncOp       i_mvpdRingFuncOp, 
+                                fapi::MvpdRecord     i_record,
+                                fapi::MvpdKeyword    i_keyword,
+                                const fapi::Target   &i_fapiTarget,
+                                const uint8_t        i_chipletId,
+                                const uint8_t        i_ringId,
+                                uint8_t              *i_pRingBuf,
+                                uint32_t             &io_rRingBufsize);
 
-fapi::ReturnCode findMvpdRingField( const uint8_t   i_chipletId,
-                                const uint8_t       i_ringId,
-                                uint8_t     * const i_pFieldBuf,
-                                uint32_t            i_fieldBufsize,
-                                uint8_t           * &o_rRingBuf,
-                                uint32_t            &o_rRingBufsize);
+
 } // extern "C"
 
 #endif // _HWP_REPAIRRINGFUNC
