@@ -177,16 +177,23 @@ use constant POS_FIELD  => 2;
 use constant UNIT_FIELD => 3;
 use constant PATH_FIELD => 4;
 use constant LOC_FIELD  => 5;
-use constant ORDINAL_FIELD  => 6; 
-use constant PLUG_POS => 7; 
+use constant ORDINAL_FIELD  => 6;
+use constant FRU_PATH => 7; 
+use constant PLUG_POS => 8;
 my @Targets;
 foreach my $i (@{$eTargets->{target}}) 
 {
     my $plugPosition = $i->{'plug-xpath'};
+    my $frupath = "";
     $plugPosition =~ s/.*mrw:position\/text\(\)=\'(.*)\'\]$/$1/;
+    if (exists $devpath->{chip}->{$i->{'instance-path'}}->{'fru-instance-path'})
+    {
+        $frupath = $devpath->{chip}->{$i->{'instance-path'}}->{'fru-instance-path'};
+    }
+
     push @Targets, [ $i->{'ecmd-common-name'}, $i->{node}, $i->{position},
                      $i->{'chip-unit'}, $i->{'instance-path'}, $i->{location},
-                      0, $plugPosition ];
+                      0,$frupath, $plugPosition ];
 }
 
 open (FH, "<$mrwdir/${sysname}-fsi-busses.xml") ||
@@ -449,13 +456,22 @@ if ($build eq "fsp")
 my $ex_count = 0;
 my $mcs_count = 0;
 my $proc_ordinal_id =0;
+my $fru_id = 0;
+my @fru_paths;
+
 for (my $do_core = 0, my $i = 0; $i <= $#STargets; $i++)
 {
     if ($STargets[$i][NAME_FIELD] eq "pu")
     {
+        my $fru_found = 0;
+        my $fru_path = $STargets[$i][FRU_PATH];
         my $proc = $STargets[$i][POS_FIELD];
         my $ipath = $STargets[$i][PATH_FIELD];
         $proc_ordinal_id = $STargets[$i][ORDINAL_FIELD];
+        
+        use constant FRU_PATHS => 0;
+        use constant FRU_ID => 1;
+        
         my $lognode;
         my $logid;
         for (my $j = 0; $j <= $#chipIDs; $j++)
@@ -467,10 +483,34 @@ for (my $do_core = 0, my $i = 0; $i <= $#STargets; $i++)
                 last;
             }
         }
+       
+        if($#fru_paths < 0)
+        {
+            $fru_id = 0;
+            push @fru_paths, [ $fru_path, $fru_id ];
+        }
+        else
+        {
+            for (my $k = 0; $k <= $#fru_paths; $k++)
+            {
+                if ( $fru_paths[$k][FRU_PATHS] eq $fru_path)
+                {
+                    $fru_id =  $fru_paths[$k][FRU_ID];
+                    $fru_found = 1;
+                    last;
+                }
+            
+            }
+            if ($fru_found == 0)
+            {
+                $fru_id = $#fru_paths + 1;
+                push @fru_paths, [ $fru_path, $fru_id ];            
+            }
+        }
         if ($proc eq $Mproc)
         {
             generate_proc($proc, $ipath, $lognode, $logid,
-                                         $proc_ordinal_id, 1, 0, 0);
+                                         $proc_ordinal_id, 1, 0, 0,$fru_id);
             if ($build eq "fsp")
             {
                 generate_occ($proc);
@@ -507,7 +547,7 @@ for (my $do_core = 0, my $i = 0; $i <= $#STargets; $i++)
                 }
             }
             generate_proc($proc, $ipath, $lognode, $logid,
-                                         $proc_ordinal_id,  0, 1, $fsi);
+                                         $proc_ordinal_id,  0, 1, $fsi,$fru_id);
             if ($build eq "fsp")
             {
                 generate_occ($proc);
@@ -1134,7 +1174,7 @@ sub generate_system_node
 
 sub generate_proc
 {
-    my ($proc, $ipath, $lognode, $logid, $ordinalId, $master, $slave, $fsi) = @_;
+    my ($proc, $ipath, $lognode, $logid, $ordinalId, $master, $slave, $fsi, $fruid) = @_;
     my $uidstr = sprintf("0x%02X05%04X",${node},${proc}+${node}*8);
     my $scompath = $devpath->{chip}->{$ipath}->{'scom-path'};
     my $scanpath = $devpath->{chip}->{$ipath}->{'scan-path'};
@@ -1227,6 +1267,10 @@ sub generate_proc
     <attribute>
         <id>RID</id>
         <default>0x100$proc</default>
+    </attribute>
+    <attribute>
+        <id>FRU_ID</id>
+        <default>$fruid</default>
     </attribute>";
     }
 
