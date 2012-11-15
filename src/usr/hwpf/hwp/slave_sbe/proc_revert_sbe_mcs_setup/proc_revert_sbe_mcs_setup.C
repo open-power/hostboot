@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_revert_sbe_mcs_setup.C,v 1.3 2012/07/23 14:16:04 jmcgill Exp $
+// $Id: proc_revert_sbe_mcs_setup.C,v 1.5 2012/11/16 04:48:35 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_revert_sbe_mcs_setup.C,v $
 //------------------------------------------------------------------------------
 // *|
@@ -174,6 +174,7 @@ fapi::ReturnCode proc_revert_sbe_mcs_setup(
     const fapi::Target& i_target)
 {
     fapi::ReturnCode rc;
+    ecmdDataBufferBase mcsmode1_reset_data(64);
 
     // vector to hold MCS chiplet targets
     std::vector<fapi::Target> mcs_chiplets;
@@ -203,6 +204,16 @@ fapi::ReturnCode proc_revert_sbe_mcs_setup(
             if (!rc.ok())
             {
                 FAPI_ERR("proc_revert_sbe_mcs_setup: Error from proc_revert_sbe_mcs_setup_reset_mcfgp");
+                break;
+            }
+
+            FAPI_DBG("proc_revert_sbe_mcs_setup: reset MCSMODE1");
+            rc = fapiPutScom(*i,
+                             MCS_MCSMODE1_0x02011808,
+                             mcsmode1_reset_data);
+            if (!rc.ok())
+            {
+                FAPI_ERR("proc_revert_sbe_mcs_setup: fapiPutScom error (MCS_MCSMODE1_0x02011808)");
                 break;
             }
 
