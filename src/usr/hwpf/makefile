@@ -51,6 +51,7 @@ HWP_ERROR_XML_FILES = hwp/fapiHwpErrorInfo.xml   \
     hwp/thread_activate/proc_thread_control/proc_thread_control.xml \
     hwp/erepair_errors.xml \
     hwp/nest_chiplets/proc_pcie_scominit/proc_pcie_scominit_errors.xml \
+    hwp/dram_initialization/proc_pcie_config/proc_pcie_config_errors.xml \
     hwp/build_winkle_images/p8_set_pore_bar/p8_set_pore_bar_errors.xml  \
     hwp/build_winkle_images/p8_set_pore_bar/p8_pmc_deconfig_setup_errors.xml \
     hwp/build_winkle_images/p8_set_pore_bar/p8_poreslw_errors.xml   \
@@ -105,7 +106,8 @@ HWP_INITFILES = hwp/initfiles/sample.initfile \
                 hwp/initfiles/mba_def.initfile \
                 hwp/initfiles/cen_ddrphy.initfile \
                 hwp/initfiles/p8.fbc.scom.initfile \
-                hwp/initfiles/p8.pe.phase1.scom.initfile
+                hwp/initfiles/p8.pe.phase1.scom.initfile \
+                hwp/initfiles/p8.pe.phase2.scom.initfile
 
 HWP_IF_DEFINE_DIR = hwp/initfiles
 

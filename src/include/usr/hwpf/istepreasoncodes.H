@@ -100,6 +100,7 @@ enum istepModuleId
     ISTEP_HOST_START_PAYLOAD                            = 0x33,
     ISTEP_PROC_CHECK_SLAVE_SBE_SEEPROM_COMPLETE         = 0x34,
     ISTEP_PROC_PCIE_SCOMINIT                            = 0x35,
+    ISTEP_PROC_PCIE_CONFIG                              = 0x36,
 };
 
 /**

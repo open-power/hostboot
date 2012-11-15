@@ -83,7 +83,7 @@ include ${ROOTPATH}/src/usr/diag/prdf/common/prd_ruletable.mk
 # image later.
 hbicore_DATA_MODULES =  sample.if p8.dmi.scom.if cen.dmi.scom.if \
                         p8.fbc.scom.if mbs_def.if mba_def.if cen_ddrphy.if \
-                        p8.pe.phase1.scom.if \
+                        p8.pe.phase1.scom.if p8.pe.phase2.scom.if \
                         dimmspd.dat centaur.sbe_pnor.bin procmvpd.dat \
                         procpore.dat ${PRDR_RULE_TABLE_TARGETS}
 

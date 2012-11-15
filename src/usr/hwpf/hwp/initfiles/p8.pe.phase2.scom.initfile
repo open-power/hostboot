@@ -1,0 +1,65 @@
+#-- $Id: p8.pe.phase2.scom.initfile,v 1.1 2012/11/05 21:39:35 jmcgill Exp $
+#-------------------------------------------------------------------------------
+#--
+#-- (C) Copyright International Business Machines Corp. 2011
+#-- All Rights Reserved -- Property of IBM
+#-- *** IBM Confidential ***
+#--
+#-- TITLE       : p8.pcie.phase2.scom.initfile
+#-- DESCRIPTION : Perform PCIe PBCQ/AIB Inits (Phase 2, Steps 9-17)
+#--
+#-- OWNER NAME  : Joe McDonald            Email: joemc@us.ibm.com
+#-- OWNER NAME  : Rick Mata               Email: ricmata@us.ibm.com
+#--
+#--------------------------------------------------------------------------------
+
+SyntaxVersion = 1
+
+#--------------------------------------------------------------------------------
+#-- Includes
+#--------------------------------------------------------------------------------
+
+#--------------------------------------------------------------------------------
+#-- Defines
+#--------------------------------------------------------------------------------
+
+define def_nest_freq_r0 = (SYS.ATTR_FREQ_PB >= 2200);
+define def_nest_freq_r1 = ((SYS.ATTR_FREQ_PB <= 1700) && (SYS.ATTR_FREQ_PB < 2200));
+define def_nest_freq_r2 = (SYS.ATTR_FREQ_PB < 1700);
+
+#--------------------------------------------------------------------------------
+#-- SCOM initializations
+#--------------------------------------------------------------------------------
+
+#-- PBCQ Mode Control Register
+scom 0x02012(0,4,8)0B {
+    bits,    scom_data;
+    26,      0b1;                                                   #-- enable enhanced IVE performance ordering
+}
+
+#-- PCI Hardware Configuration 0 Register
+scom 0x02012(0,4,8)18 {
+    bits,    scom_data;
+    17,      0b1;                                                   #-- disable out-of-order store behavior
+}
+
+#-- PCI Nest Clock Trace Control Register
+scom 0x02012(0,4,8)0D {
+    bits,    scom_data;
+    0:3,     0b1001;                                                #-- enable trace, select inbound + address info
+}
+
+#-- PB AIB Control/Status Register
+scom 0x09012(0,4,8)0F {
+    bits,    scom_data,    expr;
+    0:2,     0b011,        (def_nest_freq_r0);                      #-- Maximum Ch0 command credit given to ETU
+    0:2,     0b010,        (def_nest_freq_r1);
+    0:2,     0b001,        (def_nest_freq_r2);
+    3:5,     0b001,        any;                                     #-- Maximum Ch1 command credit given to ETU
+    6:8,     0b011,        (def_nest_freq_r0);                      #-- Maximum Ch2 command credit given to ETU
+    6:8,     0b010,        (def_nest_freq_r1 || def_nest_freq_r2);
+    9:11,    0b000,        any;                                     #-- Maximum Ch3 command credit given to ETU
+    12:13,   0b10,         (def_nest_freq_r0 || def_nest_freq_r1);  #-- Overcommit of inbound speed matching buffer
+    12:13,   0b11,         (def_nest_freq_r2);
+    30:31,   0b11,         any;                                     #-- enable PCI clock tracing w/ ETU as default
+}

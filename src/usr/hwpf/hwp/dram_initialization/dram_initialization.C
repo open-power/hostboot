@@ -43,6 +43,7 @@
 #include    <trace/interface.H>
 #include    <initservice/taskargs.H>
 #include    <errl/errlentry.H>
+#include    <errl/errludtarget.H>
 #include    <diag/mdia/mdia.H>
 #include    <diag/attn/attn.H>
 #include    <initservice/isteps_trace.H>
@@ -68,7 +69,7 @@
 // #include    "mss_thermal_init/mss_thermal_init.H"
 #include    "proc_setup_bars/mss_setup_bars.H"
 #include    "proc_setup_bars/proc_setup_bars.H"
-// #include    "proc_pcie_config/proc_pcie_config.H"
+#include    "proc_pcie_config/proc_pcie_config.H"
 #include    "proc_exit_cache_contained/proc_exit_cache_contained.H"
 #include    <hwpf/plat/fapiPlatReasonCodes.H>
 //remove these once memory setup workaround is removed
@@ -86,6 +87,7 @@ using   namespace   ISTEP_ERROR;
 using   namespace   TARGETING;
 using   namespace   EDI_EI_INITIALIZATION;
 using   namespace   fapi;
+using   namespace   ERRORLOG;
 
 //
 //  Wrapper function to call 14.1 :
@@ -605,47 +607,71 @@ void*    call_proc_pcie_config( void    *io_pArgs )
 {
     errlHndl_t  l_errl  =   NULL;
 
+    IStepError  l_stepError;
+
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                "call_proc_pcie_config entry" );
 
-#if 0
-    // @@@@@    CUSTOM BLOCK:   @@@@@
-    //  figure out what targets we need
-    //  customize any other inputs
-    //  set up loops to go through all targets (if parallel, spin off a task)
+    TARGETING::TargetHandleList l_procTargetList;
+    getAllChips(l_procTargetList, TYPE_PROC );
 
-    //  dump physical path to targets
-    EntityPath l_path;
-    l_path  =   l_@targetN_target->getAttr<ATTR_PHYS_PATH>();
-    l_path.dump();
-
-    // cast OUR type of target to a FAPI type of target.
-    const fapi::Target l_fapi_@targetN_target(
-                    TARGET_TYPE_MEMBUF_CHIP,
-                    reinterpret_cast<void *>
-                        (const_cast<TARGETING::Target*>(l_@targetN_target)) );
-
-    //  call the HWP with each fapi::Target
-    FAPI_INVOKE_HWP( l_errl, proc_pcie_config, _args_...);
-    if ( l_errl )
+    for ( TargetHandleList::iterator l_iter = l_procTargetList.begin();
+          l_iter != l_procTargetList.end(); ++l_iter )
     {
-        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                  "ERROR : .........." );
-        errlCommit( l_errl, HWPF_COMP_ID );
+        const TARGETING::Target* l_pTarget = *l_iter;
+
+        //  dump physical path to targets
+        EntityPath l_path;
+        l_path = l_pTarget->getAttr<ATTR_PHYS_PATH>();
+        l_path.dump();
+
+        // build a FAPI type of target.
+        const fapi::Target l_fapi_pTarget( TARGET_TYPE_PROC_CHIP,
+          reinterpret_cast<void*>(const_cast<TARGETING::Target*>(l_pTarget)) );
+
+        //  call the HWP with each fapi::Target
+        FAPI_INVOKE_HWP( l_errl, proc_pcie_config, l_fapi_pTarget );
+
+        if ( l_errl )
+        {
+            /*@
+             * @errortype
+             * @reasoncode      ISTEP_DRAM_INITIALIZATION_FAILED
+             * @severity        ERRORLOG::ERRL_SEV_UNRECOVERABLE
+             * @moduleid        ISTEP_PROC_PCIE_CONFIG
+             * @userdata1       bytes 0-1: plid identifying first error
+             *                  bytes 2-3: reason code of first error
+             * @userdata2       bytes 0-1: total number of elogs included
+             *                  bytes 2-3: N/A
+             * @devdesc         call to proc_pcie_config failed, see error log
+             *                  identified by the plid in user data 1.
+             */
+            l_stepError.addErrorDetails(ISTEP_DRAM_INITIALIZATION_FAILED,
+                                        ISTEP_PROC_PCIE_CONFIG,
+                                        l_errl );
+
+            // capture the target data in the elog
+            ErrlUserDetailsTarget(l_pTarget).addToLog( l_errl );
+
+            errlCommit( l_errl, HWPF_COMP_ID );
+
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                      "ERROR : proc_pcie_config" );
+
+            break;
+        }
+        else
+        {
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                       "SUCCESS : proc_pcie_config" );
+        }
     }
-    else
-    {
-        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                   "SUCCESS : .........." );
-    }
-    // @@@@@    END CUSTOM BLOCK:   @@@@@
-#endif
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                "call_proc_pcie_config exit" );
 
     // end task, returning any errorlogs to IStepDisp
-    return l_errl;
+    return l_stepError.getErrorHandle();
 }
 
 
