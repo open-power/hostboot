@@ -74,7 +74,7 @@ hbicore_MODULES = ${BASE_MODULES}
 hbicore_EXTENDED_MODULES = ${EXTENDED_MODULES}
 
 # for PRDR_RULE_TABLE_TARGETS
-include ${ROOTPATH}/src/usr/diag/prdf/prd_ruletable.mk
+include ${ROOTPATH}/src/usr/diag/prdf/common/prd_ruletable.mk
 
 #@todo - Temporary workaround
 # The centaur.sbe_pnor.bin is manually built from CVS SBE procedure files in

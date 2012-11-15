@@ -72,7 +72,7 @@
 // #include    "host_startPRD_pbus/host_startPRD_pbus.H"
 // #include    "host_attnlisten_proc/host_attnlisten_proc.H"
 #include    "proc_fab_iovalid/proc_fab_iovalid.H"
-#include    <diag/prdf/prdfMain.H>
+#include    <diag/prdf/common/prdfMain.H>
 
 namespace   EDI_EI_INITIALIZATION
 {

@@ -31,15 +31,17 @@ MODULE = testprdf
 PRD_USR_PATH = ${ROOTPATH}/src/usr/diag/prdf
 
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/diag/prdf
+EXTRAINCDIR += ${ROOTPATH}/src/include/usr/diag/prdf/common
 EXTRAINCDIR += ${PRD_USR_PATH}
-EXTRAINCDIR += ${PRD_USR_PATH}/util
-EXTRAINCDIR += ${PRD_USR_PATH}/framework/service
-EXTRAINCDIR += ${PRD_USR_PATH}/framework/register
-EXTRAINCDIR += ${PRD_USR_PATH}/framework/resolution
-EXTRAINCDIR += ${PRD_USR_PATH}/framework/config
-EXTRAINCDIR += ${PRD_USR_PATH}/framework/rule
-EXTRAINCDIR += ${PRD_USR_PATH}/plat
-EXTRAINCDIR += ${PRD_USR_PATH}/plat/pegasus
+EXTRAINCDIR += ${PRD_USR_PATH}/common
+EXTRAINCDIR += ${PRD_USR_PATH}/common/util
+EXTRAINCDIR += ${PRD_USR_PATH}/common/framework/service
+EXTRAINCDIR += ${PRD_USR_PATH}/common/framework/register
+EXTRAINCDIR += ${PRD_USR_PATH}/common/framework/resolution
+EXTRAINCDIR += ${PRD_USR_PATH}/common/framework/config
+EXTRAINCDIR += ${PRD_USR_PATH}/common/framework/rule
+EXTRAINCDIR += ${PRD_USR_PATH}/common/plat
+EXTRAINCDIR += ${PRD_USR_PATH}/common/plat/pegasus
 EXTRAINCDIR += ${PRD_USR_PATH}/mnfgtools
 EXTRAINCDIR += ${PRD_USR_PATH}/test
 
@@ -48,6 +50,7 @@ EXTRAINCDIR += ${ROOTPATH}/src/include/usr/errl
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/hwpf/fapi
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/hwpf/plat
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/hwpf/hwp
+EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp
 
 #------------------------------------------------------------------------------
 # objects

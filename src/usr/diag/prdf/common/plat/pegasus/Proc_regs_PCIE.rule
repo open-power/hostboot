@@ -1,0 +1,323 @@
+# IBM_PROLOG_BEGIN_TAG
+# This is an automatically generated prolog.
+#
+# $Source: src/usr/diag/prdf/common/plat/pegasus/Proc_regs_PCIE.rule $
+#
+# IBM CONFIDENTIAL
+#
+# COPYRIGHT International Business Machines Corp. 2012
+#
+# p1
+#
+# Object Code Only (OCO) source materials
+# Licensed Internal Code Source Materials
+# IBM HostBoot Licensed Internal Code
+#
+# The source code for this program is not published or otherwise
+# divested of its trade secrets, irrespective of what has been
+# deposited with the U.S. Copyright Office.
+#
+# Origin: 30
+#
+# IBM_PROLOG_END_TAG
+
+    ############################################################################
+    # PCIE Chiplet Registers
+    ############################################################################
+
+    register PCIE_CHIPLET_CS_FIR
+    {
+        name        "ES.PE_WRAP_TOP.TPC.XFIR";
+        scomaddr    0x09040000;
+        capture     group default;
+    };
+
+    register PCIE_CHIPLET_RE_FIR
+    {
+        name        "ES.PE_WRAP_TOP.TPC.RFIR";
+        scomaddr    0x09040001;
+        capture     group default;
+    };
+
+    register PCIE_CHIPLET_FIR_MASK
+    {
+        name        "ES.PE_WRAP_TOP.TPC.FIR_MASK";
+        scomaddr    0x09040002;
+        capture     type secondary;
+        capture     group default;
+    };
+
+    register PCIE_CHIPLET_SPA
+    {
+        name        "ES.PE_WRAP_TOP.TPC.EPS.FIR.SPATTN";
+        scomaddr    0x09040004;
+        capture     group default;
+    };
+
+    register PCIE_CHIPLET_SPA_MASK
+    {
+        name        "ES.PE_WRAP_TOP.TPC.EPS.FIR.SPA_MASK";
+        scomaddr    0x09040007;
+        capture     type secondary;
+        capture     group default;
+    };
+
+    ############################################################################
+    # PCIE Chiplet LFIR
+    ############################################################################
+
+    register PCIE_LFIR
+    {
+        name        "ES.PE_WRAP_TOP.TPC.LOCAL_FIR";
+        scomaddr    0x0904000a;
+        reset       (&, 0x0904000b);
+        mask        (|, 0x0904000f);
+        capture     group default;
+    };
+
+    register PCIE_LFIR_MASK
+    {
+        name        "ES.PE_WRAP_TOP.TPC.EPS.FIR.LOCAL_FIR_MASK";
+        scomaddr    0x0904000d;
+        capture     type secondary;
+        capture     group default;
+    };
+
+    register PCIE_LFIR_ACT0
+    {
+        name        "ES.PE_WRAP_TOP.TPC.EPS.FIR.LOCAL_FIR_ACTION0";
+        scomaddr    0x09040010;
+        capture     type secondary;
+        capture     group default;
+    };
+
+    register PCIE_LFIR_ACT1
+    {
+        name        "ES.PE_WRAP_TOP.TPC.EPS.FIR.LOCAL_FIR_ACTION1";
+        scomaddr    0x09040011;
+        capture     type secondary;
+        capture     group default;
+    };
+
+    ############################################################################
+    # PCIE Chiplet PCICLOCKFIR_0
+    ############################################################################
+
+    register PCICLOCKFIR_0
+    {
+        name        "ES.PE_WRAP_TOP.PE0.PH3_TOP.ETU.RSB.PR_REGS.LEM.FIR_REG";
+        scomaddr    0x09012000;
+        reset       (&, 0x09012001);
+        mask        (|, 0x09012005);
+        capture     group default;
+    };
+
+    register PCICLOCKFIR_0_MASK
+    {
+        name        "ES.PE_WRAP_TOP.PE0.PH3_TOP.ETU.RSB.PR_REGS.LEM.FIR_MASK_REG";
+        scomaddr    0x09012003;
+        capture     type secondary;
+        capture     group default;
+    };
+
+    register PCICLOCKFIR_0_ACT0
+    {
+        name        "ES.PE_WRAP_TOP.PE0.PH3_TOP.ETU.RSB.PR_REGS.LEM.FIR_ACTION0_REG";
+        scomaddr    0x09012006;
+        capture     type secondary;
+        capture     group default;
+    };
+
+    register PCICLOCKFIR_0_ACT1
+    {
+        name        "ES.PE_WRAP_TOP.PE0.PH3_TOP.ETU.RSB.PR_REGS.LEM.FIR_ACTION1_REG";
+        scomaddr    0x09012007;
+        capture     type secondary;
+        capture     group default;
+    };
+
+    ############################################################################
+    # PCIE Chiplet PCICLOCKFIR_1
+    ############################################################################
+
+    register PCICLOCKFIR_1
+    {
+        name        "ES.PE_WRAP_TOP.PE1.PH3_TOP.ETU.RSB.PR_REGS.LEM.FIR_REG";
+        scomaddr    0x09012400;
+        reset       (&, 0x09012401);
+        mask        (|, 0x09012405);
+        capture     group default;
+    };
+
+    register PCICLOCKFIR_1_MASK
+    {
+        name        "ES.PE_WRAP_TOP.PE1.PH3_TOP.ETU.RSB.PR_REGS.LEM.FIR_MASK_REG";
+        scomaddr    0x09012403;
+        capture     type secondary;
+        capture     group default;
+    };
+
+    register PCICLOCKFIR_1_ACT0
+    {
+        name        "ES.PE_WRAP_TOP.PE1.PH3_TOP.ETU.RSB.PR_REGS.LEM.FIR_ACTION0_REG";
+        scomaddr    0x09012406;
+        capture     type secondary;
+        capture     group default;
+    };
+
+    register PCICLOCKFIR_1_ACT1
+    {
+        name        "ES.PE_WRAP_TOP.PE1.PH3_TOP.ETU.RSB.PR_REGS.LEM.FIR_ACTION1_REG";
+        scomaddr    0x09012407;
+        capture     type secondary;
+        capture     group default;
+    };
+
+    ############################################################################
+    # PCIE Chiplet PCICLOCKFIR_2
+    ############################################################################
+
+    register PCICLOCKFIR_2
+    {
+        name        "ES.PE_WRAP_TOP.PE2.PH3_TOP.ETU.RSB.PR_REGS.LEM.FIR_REG";
+        scomaddr    0x09012800;
+        reset       (&, 0x09012801);
+        mask        (|, 0x09012805);
+        capture     group default;
+    };
+
+    register PCICLOCKFIR_2_MASK
+    {
+        name        "ES.PE_WRAP_TOP.PE2.PH3_TOP.ETU.RSB.PR_REGS.LEM.FIR_MASK_REG";
+        scomaddr    0x09012803;
+        capture     type secondary;
+        capture     group default;
+    };
+
+    register PCICLOCKFIR_2_ACT0
+    {
+        name        "ES.PE_WRAP_TOP.PE2.PH3_TOP.ETU.RSB.PR_REGS.LEM.FIR_ACTION0_REG";
+        scomaddr    0x09012806;
+        capture     type secondary;
+        capture     group default;
+    };
+
+    register PCICLOCKFIR_2_ACT1
+    {
+        name        "ES.PE_WRAP_TOP.PE2.PH3_TOP.ETU.RSB.PR_REGS.LEM.FIR_ACTION1_REG";
+        scomaddr    0x09012807;
+        capture     type secondary;
+        capture     group default;
+    };
+
+    ############################################################################
+    # PCIE Chiplet PBFFIR
+    ############################################################################
+
+    register PBFFIR
+    {
+        name        "ES.PBES_WRAP_TOP.PBES_TOP.MISC_IOF.SCOM.PB_IOF_FIR_REG";
+        scomaddr    0x09010800;
+        reset       (&, 0x09010801);
+        mask        (|, 0x09010805);
+        capture     group default;
+    };
+
+    register PBFFIR_MASK
+    {
+        name        "ES.PBES_WRAP_TOP.PBES_TOP.MISC_IOF.SCOM.PB_IOF_FIR_MASK_REG";
+        scomaddr    0x09010803;
+        capture     type secondary;
+        capture     group default;
+    };
+
+    register PBFFIR_ACT0
+    {
+        name        "ES.PBES_WRAP_TOP.PBES_TOP.MISC_IOF.SCOM.PB_IOF_FIR_ACTION0_REG";
+        scomaddr    0x09010806;
+        capture     type secondary;
+        capture     group default;
+    };
+
+    register PBFFIR_ACT1
+    {
+        name        "ES.PBES_WRAP_TOP.PBES_TOP.MISC_IOF.SCOM.PB_IOF_FIR_ACTION1_REG";
+        scomaddr    0x09010807;
+        capture     type secondary;
+        capture     group default;
+    };
+
+    ############################################################################
+    # PCIE Chiplet IOPPCIFIR_0
+    ############################################################################
+
+    register IOPPCIFIR_0
+    {
+        name        "IOP.IOP_X880.IOP_PMA0.IOP_PMA_PLL0.IOP_PMA_PLL_RLM.IOP_PMA_PLL_REG_CONTROL.FIR_STATUS_REG";
+        scomaddr    0x09011400;
+        reset       (&, 0x09011401);
+        mask        (|, 0x09011405);
+        capture     group default;
+    };
+
+    register IOPPCIFIR_0_MASK
+    {
+        name        "IOP.IOP_X880.IOP_PMA0.IOP_PMA_PLL0.IOP_PMA_PLL_RLM.IOP_PMA_PLL_REG_CONTROL.FIR_MASK_REG";
+        scomaddr    0x09011403;
+        capture     type secondary;
+        capture     group default;
+    };
+
+    register IOPPCIFIR_0_ACT0
+    {
+        name        "IOP.IOP_X880.IOP_PMA0.IOP_PMA_PLL0.IOP_PMA_PLL_RLM.IOP_PMA_PLL_REG_CONTROL.FIR_ACTION0_REG";
+        scomaddr    0x09011406;
+        capture     type secondary;
+        capture     group default;
+    };
+
+    register IOPPCIFIR_0_ACT1
+    {
+        name        "IOP.IOP_X880.IOP_PMA0.IOP_PMA_PLL0.IOP_PMA_PLL_RLM.IOP_PMA_PLL_REG_CONTROL.FIR_ACTION1_REG";
+        scomaddr    0x09011407;
+        capture     type secondary;
+        capture     group default;
+    };
+
+    ############################################################################
+    # PCIE Chiplet IOPPCIFIR_1
+    ############################################################################
+
+    register IOPPCIFIR_1
+    {
+        name        "IOP.IOP_X881.IOP_PMA0.IOP_PMA_PLL0.IOP_PMA_PLL_RLM.IOP_PMA_PLL_REG_CONTROL.FIR_STATUS_REG";
+        scomaddr    0x09011840;
+        reset       (&, 0x09011841);
+        mask        (|, 0x09011845);
+        capture     group default;
+    };
+
+    register IOPPCIFIR_1_MASK
+    {
+        name        "IOP.IOP_X881.IOP_PMA0.IOP_PMA_PLL0.IOP_PMA_PLL_RLM.IOP_PMA_PLL_REG_CONTROL.FIR_MASK_REG";
+        scomaddr    0x09011843;
+        capture     type secondary;
+        capture     group default;
+    };
+
+    register IOPPCIFIR_1_ACT0
+    {
+        name        "IOP.IOP_X881.IOP_PMA0.IOP_PMA_PLL0.IOP_PMA_PLL_RLM.IOP_PMA_PLL_REG_CONTROL.FIR_ACTION0_REG";
+        scomaddr    0x09011846;
+        capture     type secondary;
+        capture     group default;
+    };
+
+    register IOPPCIFIR_1_ACT1
+    {
+        name        "IOP.IOP_X881.IOP_PMA0.IOP_PMA_PLL0.IOP_PMA_PLL_RLM.IOP_PMA_PLL_REG_CONTROL.FIR_ACTION1_REG";
+        scomaddr    0x09011847;
+        capture     type secondary;
+        capture     group default;
+    };
+

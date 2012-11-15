@@ -1,0 +1,106 @@
+# IBM_PROLOG_BEGIN_TAG
+# This is an automatically generated prolog.
+#
+# $Source: src/usr/diag/prdf/common/plat/pegasus/CommonActions.rule $
+#
+# IBM CONFIDENTIAL
+#
+# COPYRIGHT International Business Machines Corp. 2012
+#
+# p1
+#
+# Object Code Only (OCO) source materials
+# Licensed Internal Code Source Materials
+# IBM HostBoot Licensed Internal Code
+#
+# The source code for this program is not published or otherwise
+# divested of its trade secrets, irrespective of what has been
+# deposited with the U.S. Copyright Office.
+#
+# Origin: 30
+#
+# IBM_PROLOG_END_TAG
+
+################################################################################
+# This file is intended to create a common set of actionclasses for all rule
+# files. Simply add the following line at the top the actionclass section of
+# each rule file.
+#
+# .include "CommonActions.rule"
+#
+# Note that no indentation can be used for the .include keyword.
+################################################################################
+
+################################################################################
+#                           Thresholds and Flags                               #
+################################################################################
+
+# Threshold syntax:
+#   threshold( field(<timebase>) [, mfg(<timebase>)|mfg_file(<mfg_theshold>)] );
+#
+# Timebase syntax:
+#   <threshold_count> [/ [timbase_count] <sec|min|hour|day>]
+#
+# Note that <mfg_theshold> can be found in prdfMfgThresholds.lst
+# FIXME: mfg_file() is currently not supported in Hostboot because there
+#        currently is no way to get the values from the FSP command line to
+#        Hostboot.
+#
+# Examples:
+#   threshold( field( 1        ) );
+#   threshold( field(32 /   day) );
+#   threshold( field( 5 / 2 min) );
+#   threshold( field(32 / 1 day), mfg(2 / hour) );
+#   threshold( field( 2 /   min), mfg(1       ) );
+#   threshold( field(32 /   day), mfg_file(P7CORE_L2_CACHE_CES) );
+
+/** Threshold of 1 */
+actionclass threshold1
+{
+    threshold( field(1) );
+};
+
+/** Threshold of 32 per day */
+actionclass threshold32pday
+{
+    threshold( field(32 / day) );
+};
+
+################################################################################
+#                               Simple Callouts                                #
+################################################################################
+
+/** Callout 2nd Level Support, priority medium */
+actionclass callout2ndLvlMed
+{
+    callout(procedure(NextLevelSupport_ENUM), MRU_MED);
+};
+
+################################################################################
+#                               Dump Types                                     #
+################################################################################
+
+/** Dump SH */
+actionclass dumpSH
+{
+    dump(DUMP_CONTENT_SH);
+};
+
+################################################################################
+#                               Default callouts                               #
+################################################################################
+
+/** Default action for an unexpected unmasked bit */
+actionclass defaultMaskedError
+{
+    dumpSH;
+    callout2ndLvlMed;
+    threshold1;
+};
+
+/** Default TBD action */
+actionclass TBDDefaultCallout
+{
+    defaultMaskedError;
+};
+

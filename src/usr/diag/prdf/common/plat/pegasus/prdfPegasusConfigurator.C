@@ -1,0 +1,298 @@
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/usr/diag/prdf/common/plat/pegasus/prdfPegasusConfigurator.C $ */
+/*                                                                        */
+/* IBM CONFIDENTIAL                                                       */
+/*                                                                        */
+/* COPYRIGHT International Business Machines Corp. 2012                   */
+/*                                                                        */
+/* p1                                                                     */
+/*                                                                        */
+/* Object Code Only (OCO) source materials                                */
+/* Licensed Internal Code Source Materials                                */
+/* IBM HostBoot Licensed Internal Code                                    */
+/*                                                                        */
+/* The source code for this program is not published or otherwise         */
+/* divested of its trade secrets, irrespective of what has been           */
+/* deposited with the U.S. Copyright Office.                              */
+/*                                                                        */
+/* Origin: 30                                                             */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
+
+//------------------------------------------------------------------------------
+// Includes
+//------------------------------------------------------------------------------
+
+#include <iipglobl.h>
+#include <prdfPegasusConfigurator.H>
+#include <prdfRuleFiles.H>
+
+#include <prdfRuleChip.H>
+#include <iipDomainContainer.h>
+#include <prdfScanFacility.H>
+#include <iipResolutionFactory.h>
+
+#include <prdfFabricDomain.H>
+#include <prdfExDomain.H>
+#include <prdfMcsDomain.H>
+#include <prdfMembufDomain.H>
+#include <prdfMbaDomain.H>
+#include <prdfPlatServices.H>
+#include <iipSystem.h>
+#include <prdrLoadChipCache.H>  // To flush chip-file cache.
+
+namespace PRDF
+{
+
+//------------------------------------------------------------------------------
+
+// Resolution for no chips at attention.
+CallAttnResolution PegasusConfigurator::noAttnResolution;
+
+//------------------------------------------------------------------------------
+// Local Helper functions
+
+/**
+ * @brief Return max number of nodes in the system
+ *        Note that Hostboot only has node view.
+ * @return max number of nodes
+ *         always return 1 in Hostboot
+ */
+uint32_t _getMaxNumNodes()
+{
+    #ifdef __HOSTBOOT_MODULE
+        return 1; // only one node in Hostboot
+    #else
+        return MAX_NODE_PER_SYS;
+    #endif
+}
+
+/**
+ * @brief   Returns the position of a node in which the given target is
+ *          contained.
+ * @param   i_target Any target.
+ * @return  The position of the connected node.
+ *          Hostboot only has node view so it always returns 0.
+ */
+uint32_t _getNodePosition( TARGETING::TargetHandle_t i_pTarget )
+{
+    using namespace TARGETING;
+
+    uint32_t o_pos = 0;
+
+    #ifndef __HOSTBOOT_MODULE
+
+    o_pos = PlatServices::getNodePosition(i_pTarget);
+
+    #endif
+
+    return o_pos;
+}
+
+//------------------------------------------------------------------------------
+
+System * PegasusConfigurator::build()
+{
+    using namespace TARGETING;
+
+    PRDF_ENTER( "PegasusConfigurator::build()" );
+
+    // Create System object to populate with domains.
+    System * l_system = new System(noAttnResolution);
+
+    // Create domains.
+    FabricDomain     * l_procDomain   = new FabricDomain(     FABRIC_DOMAIN );
+    PrdfExDomain     * l_exDomain     = new PrdfExDomain(     EX_DOMAIN     );
+    PrdfMcsDomain    * l_mcsDomain    = new PrdfMcsDomain(    MCS_DOMAIN    );
+    PrdfMembufDomain * l_membufDomain = new PrdfMembufDomain( MEMBUF_DOMAIN );
+    PrdfMbaDomain    * l_mbaDomain    = new PrdfMbaDomain(    MBA_DOMAIN    );
+
+    uint32_t l_maxNodeCount = _getMaxNumNodes();
+
+    // PLL domains
+    PllDomainList l_fabricPllDomains(l_maxNodeCount, NULL);
+    PllDomainList l_membPllDomains(  l_maxNodeCount, NULL);
+
+    // Add chips to domains.
+    addDomainChips( TYPE_PROC,   l_procDomain,   &l_fabricPllDomains );
+    addDomainChips( TYPE_EX,     l_exDomain     );
+    addDomainChips( TYPE_MCS,    l_mcsDomain    );
+    addDomainChips( TYPE_MEMBUF, l_membufDomain, &l_membPllDomains );
+    addDomainChips( TYPE_MBA,    l_mbaDomain    );
+
+    // Add Pll domains to domain list.
+    addPllDomainsToSystem( l_fabricPllDomains, l_membPllDomains );
+
+    // Add domains to domain list. NOTE: Order is important because this is the
+    // order the domains will be analyzed.
+    sysDmnLst.push_back( l_procDomain   );
+    sysDmnLst.push_back( l_exDomain     );
+    sysDmnLst.push_back( l_mcsDomain    );
+    sysDmnLst.push_back( l_membufDomain );
+    sysDmnLst.push_back( l_mbaDomain    );
+
+    // Add chips to the system.
+    Configurator::chipList & chips = getChipList();
+    l_system->AddChips( chips.begin(), chips.end() );
+
+    // Add domains to the system.
+    Configurator::domainList & domains = getDomainList();
+    l_system->AddDomains( domains.begin(), domains.end() );
+
+    PRDF_EXIT( "PegasusConfigurator::build()" );
+
+    return l_system;
+}
+
+//------------------------------------------------------------------------------
+
+void PegasusConfigurator::addDomainChips( TARGETING::TYPE      i_type,
+                                          PrdfRuleChipDomain * io_domain,
+                                          PllDomainList      * io_pllDomains )
+{
+    using namespace TARGETING;
+
+    int32_t l_rc = SUCCESS;
+
+    // Get references to factory objects.
+    ScanFacility      & scanFac = ScanFacility::Access();
+    ResolutionFactory & resFac  = ResolutionFactory::Access();
+
+    // Get rule filename based on type.
+    const char * fileName = "";
+    switch ( i_type )
+    {
+        case TYPE_PROC:   fileName = PRDF::Proc;   break;
+        case TYPE_EX:     fileName = PRDF::Ex;     break;
+        case TYPE_MCS:    fileName = PRDF::Mcs;    break;
+        case TYPE_MEMBUF: fileName = PRDF::Membuf; break;
+        case TYPE_MBA:    fileName = PRDF::Mba;    break;
+
+        default:
+            // Print a trace statement, but do not fail the build.
+            PRDF_ERR( "[addDomainChips] Unsupported target type: %d", i_type );
+            l_rc = FAIL;
+    }
+
+    if ( SUCCESS == l_rc )
+    {
+        // Get all targets of specified type and add to given domain.
+        TargetHandleList list = PlatServices::getFunctionalTargetList( i_type );
+        for ( TargetHandleList::const_iterator itr = list.begin();
+              itr != list.end(); ++itr )
+        {
+            if ( NULL == *itr ) continue;
+
+            PrdfRuleChip * chip = new PrdfRuleChip( fileName, *itr,
+                                                    scanFac, resFac );
+            sysChipLst.push_back( chip );
+            io_domain->AddChip(   chip );
+
+            // PLL domains
+            switch ( i_type )
+            {
+                case TYPE_PROC:
+                    addChipsToPllDomain(CLOCK_DOMAIN_FAB,
+                                        io_pllDomains,
+                                        chip,
+                                        *itr,
+                                        scanFac,
+                                        resFac);
+                    break;
+                case TYPE_MEMBUF:
+                    addChipsToPllDomain(CLOCK_DOMAIN_MEMBUF,
+                                        io_pllDomains,
+                                        chip,
+                                        *itr,
+                                        scanFac,
+                                        resFac);
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        // Flush rule table cache since objects are all built.
+        Prdr::LoadChipCache::flushCache();
+
+    }
+}
+
+void PegasusConfigurator::addChipsToPllDomain(
+ DOMAIN_ID                    i_domainId,
+ PllDomainList              * io_pllDomains,
+ PrdfRuleChip               * i_chip,
+ TARGETING::TargetHandle_t    i_pTarget,
+ ScanFacility               & i_scanFac,
+ ResolutionFactory          & i_resFac)
+{
+    using namespace TARGETING;
+
+    do
+    {
+        uint32_t l_node = _getNodePosition(i_pTarget);
+
+        // Fabric PLL - only one per node as all fabs on node have same clock source
+        if(NULL != io_pllDomains)
+        {
+            if(NULL == (*io_pllDomains)[l_node])
+            {
+                if((CLOCK_DOMAIN_FAB    == i_domainId) ||
+                   (CLOCK_DOMAIN_MEMBUF == i_domainId))
+                {
+                    Resolution & l_clock =(CLOCK_DOMAIN_FAB == i_domainId) ?
+                        i_resFac.GetClockResolution(i_pTarget, TYPE_PROC) :
+                        i_resFac.GetClockResolution(i_pTarget, TYPE_MEMBUF);
+
+                    #ifdef __HOSTBOOT_MODULE
+                    (*io_pllDomains)[l_node] = new PllDomain(
+                                        i_domainId, l_clock,
+                                        ThresholdResolution::cv_pllDefault );
+                    #else
+                    (*io_pllDomains)[l_node] = new PllDomain(
+                                        i_domainId, l_clock, CONTENT_HW,
+                                        ThresholdResolution::cv_pllDefault );
+                    #endif
+                }
+                else
+                {
+                    PRDF_ERR( "[addChipsToPllDomain] Unsupported PLL Domain: "
+                              "0x%08x", i_domainId );
+                    break;
+                }
+            }
+
+            (*io_pllDomains)[l_node]->AddChip(i_chip);
+        }
+
+    } while(0);
+}
+
+void PegasusConfigurator::addPllDomainsToSystem(
+       PllDomainList  & i_fabricPllDomains,
+       PllDomainList  & i_membPllDomains)
+{
+    uint32_t l_maxNodeCount = _getMaxNumNodes();
+
+    //Add Fabric Pll Domains to the system.
+    for(uint32_t n = 0; n < l_maxNodeCount; ++n)
+    {
+        if(NULL != i_fabricPllDomains[n])
+        {
+            sysDmnLst.push_back(i_fabricPllDomains[n]);
+        }
+    }
+
+    //Add Membuf Pll Domains to the system.
+    for(uint32_t n = 0; n < l_maxNodeCount; ++n)
+    {
+        if(NULL != i_membPllDomains[n])
+        {
+            sysDmnLst.push_back(i_membPllDomains[n]);
+        }
+    }
+}
+
+} // End namespace PRDF

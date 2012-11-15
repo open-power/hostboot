@@ -1,0 +1,76 @@
+#!/usr/bin/perl
+# IBM_PROLOG_BEGIN_TAG
+# This is an automatically generated prolog.
+#
+# $Source: src/usr/diag/prdf/common/framework/rule/prdrpp $
+#
+# IBM CONFIDENTIAL
+#
+# COPYRIGHT International Business Machines Corp. 2004,2012
+#
+# p1
+#
+# Object Code Only (OCO) source materials
+# Licensed Internal Code Source Materials
+# IBM HostBoot Licensed Internal Code
+#
+# The source code for this program is not published or otherwise
+# divested of its trade secrets, irrespective of what has been
+# deposited with the U.S. Copyright Office.
+#
+# Origin: 30
+#
+# IBM_PROLOG_END_TAG
+
+use strict;
+
+my @search_dirs = ();
+
+foreach my $arg (@ARGV)
+{
+    if ($arg =~ m/-I/)
+    {
+        $arg =~ s/-I//;
+        push @search_dirs, $arg;
+    }
+}
+read_file(\*STDIN);
+
+sub read_file
+{
+    my $file = shift;
+    while (my $line = <$file>)
+    {
+        if ($line =~ m/^\.include.*\".*\".*/)
+        {
+            my $include = $line;
+            chomp($include);
+            $include =~ s/.*\"(.*)\".*/$1/;
+            print ".included \"$include\"\n";
+            open_file($include);
+            print ".end_included\n";
+        }
+        else
+        {
+            print $line;
+        }
+
+    }
+}
+
+sub open_file
+{
+    my $filename = shift;
+    foreach my $dir (@search_dirs)
+    {
+        my $fileDirName = "$dir/$filename";
+        if (-e $fileDirName)
+        {
+            open FILE, "< $fileDirName" || die "Error opening $fileDirName";
+            read_file(\*FILE);
+            close FILE;
+            return;
+        }
+    }
+    print STDERR "prdrpp: $filename not found!\n";
+}

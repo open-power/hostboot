@@ -1,0 +1,716 @@
+# IBM_PROLOG_BEGIN_TAG
+# This is an automatically generated prolog.
+#
+# $Source: src/usr/diag/prdf/common/plat/pegasus/Mba.rule $
+#
+# IBM CONFIDENTIAL
+#
+# COPYRIGHT International Business Machines Corp. 2012
+#
+# p1
+#
+# Object Code Only (OCO) source materials
+# Licensed Internal Code Source Materials
+# IBM HostBoot Licensed Internal Code
+#
+# The source code for this program is not published or otherwise
+# divested of its trade secrets, irrespective of what has been
+# deposited with the U.S. Copyright Office.
+#
+# Origin: 30
+#
+# IBM_PROLOG_END_TAG
+
+################################################################################
+#
+# Scope:
+#   Registers and actions for the following chiplets:
+#
+# Chiplet  Register Addresses       Description
+# =======  =======================  ============================================
+#   MEM    0x03010400 - 0x0301043F  MBA 01
+#   MEM    0x03010600 - 0x0301063F  MBA 01 MCBIST
+#   MEM    0x03010C00 - 0x03010C3F  MBA 23
+#   MEM    0x03010E00 - 0x03010E3F  MBA 23 MCBIST
+#
+################################################################################
+
+chip Mba
+{
+    name        "Centaur MBA Chiplet";
+    targettype  TYPE_MBA;
+    sigoff      0x8000;
+# FIXME May need to update dump type
+    dump        DUMP_CONTENT_HWSUPERNOVA;
+    scomlen     64;
+
+ #############################################################################
+ #                                                                           #
+ #  ######                                                                   #
+ #  #     #  ######   ####     ###    ####    #####  ######  #####    ####   #
+ #  #     #  #       #    #     #    #          #    #       #    #  #       #
+ #  ######   #####   #          #     ####      #    #####   #    #   ####   #
+ #  #   #    #       #  ###     #         #     #    #       #####        #  #
+ #  #    #   #       #    #     #    #    #     #    #       #   #   #    #  #
+ #  #     #  ######   ####     ###    ####      #    ######  #    #   ####   #
+ #                                                                           #
+ #############################################################################
+
+    ############################################################################
+    # MEM Chiplet MBAFIR
+    ############################################################################
+
+    register MBAFIR
+    {
+        name        "MBU.MBA01.MBA_MCBIST.SCOMFIR.MBAFIRQ";
+        scomaddr    0x03010600;
+        reset       (&, 0x03010601);
+        mask        (|, 0x03010605);
+        capture     group default;
+    };
+
+    register MBAFIR_MASK
+    {
+        name        "MBU.MBA01.MBA_MCBIST.SCOMFIR.MBAFIRMASK";
+        scomaddr    0x03010603;
+        capture     type secondary;
+        capture     group default;
+    };
+
+    register MBAFIR_ACT0
+    {
+        name        "MBU.MBA01.MBA_MCBIST.SCOMFIR.MBAFIRACT0";
+        scomaddr    0x03010606;
+        capture     type secondary;
+        capture     group default;
+    };
+
+    register MBAFIR_ACT1
+    {
+        name        "MBU.MBA01.MBA_MCBIST.SCOMFIR.MBAFIRACT1";
+        scomaddr    0x03010607;
+        capture     type secondary;
+        capture     group default;
+    };
+
+    ############################################################################
+    # MEM Chiplet MBASECUREFIR
+    ############################################################################
+
+    register MBASECUREFIR
+    {
+        name        "MBU.MBA01.MBA_SRQ.MBASIRQ";
+        scomaddr    0x0301041b;
+        reset       (&, 0x0301041c);
+        # This is a special register in which we are not able to mask. All bits
+        # in this register should be set to checkstop so we will not need to
+        # mask anyway.
+        capture     group default;
+    };
+
+    register MBASECUREFIR_MASK
+    {
+        name        "MBU.MBA01.MBA_SRQ.MBASIRMASK";
+        scomaddr    0x0301041e;
+        capture     type secondary;
+        capture     group default;
+    };
+
+    register MBASECUREFIR_ACT0
+    {
+        name        "MBU.MBA01.MBA_SRQ.MBASIRACT0";
+        scomaddr    0x03010421;
+        capture     type secondary;
+        capture     group default;
+    };
+
+    register MBASECUREFIR_ACT1
+    {
+        name        "MBU.MBA01.MBA_SRQ.MBASIRACT1";
+        scomaddr    0x03010422;
+        capture     type secondary;
+        capture     group default;
+    };
+
+    ############################################################################
+    # MEM Chiplet DDRPHYFIR
+    ############################################################################
+
+    register MBADDRPHYFIR
+    {
+        name        "DPHY01.PHY01_DDRPHY_FIR_REG";
+        scomaddr    0x800200900301143F;
+        reset       (&, 0x800200910301143F);
+        mask        (|, 0x800200950301143F);
+        capture     group default;
+    };
+
+    register MBADDRPHYFIR_MASK
+    {
+        name        "DPHY01.PHY01_DDRPHY_FIR_MASK_REG";
+        scomaddr    0x800200930301143F;
+        capture     type secondary;
+        capture     group default;
+    };
+
+    register MBADDRPHYFIR_ACT0
+    {
+        name        "DPHY01.PHY01_DDRPHY_FIR_ACTION0_REG";
+        scomaddr    0x800200960301143F;
+        capture     type secondary;
+        capture     group default;
+    };
+
+    register MBADDRPHYFIR_ACT1
+    {
+        name        "DPHY01.PHY01_DDRPHY_FIR_ACTION1_REG";
+        scomaddr    0x800200970301143F;
+        capture     type secondary;
+        capture     group default;
+    };
+
+    ############################################################################
+    # MEM Chiplet MBACALFIR
+    ############################################################################
+
+    register MBACALFIR
+    {
+        name        "MBU.MBA01.MBA_SRQ.MBACALFIRQ";
+        scomaddr    0x03010400;
+        reset       (&, 0x03010401);
+        mask        (|, 0x03010405);
+        capture     group default;
+    };
+
+    register MBACALFIR_MASK
+    {
+        name        "MBU.MBA01.MBA_SRQ.MBACALFIR_MASK";
+        scomaddr    0x03010403;
+        capture     type secondary;
+        capture     group default;
+    };
+
+    register MBACALFIR_ACT0
+    {
+        name        "MBU.MBA01.MBA_SRQ.MBACALFIR_ACTION0";
+        scomaddr    0x03010406;
+        capture     type secondary;
+        capture     group default;
+    };
+
+    register MBACALFIR_ACT1
+    {
+        name        "MBU.MBA01.MBA_SRQ.MBACALFIR_ACTION1";
+        scomaddr    0x03010407;
+        capture     type secondary;
+        capture     group default;
+    };
+
+    ############################################################################
+    # MEM Chiplet MBASPA
+    ############################################################################
+
+    register MBASPA
+    {
+        name        "MBU.MBA01.MBA_MCBIST.SCOMFIR.MBSPAQ";
+        scomaddr    0x03010611;
+        reset       (&, 0x03010612);
+        #FIXME : There is no OR register for mask. Is it right to use  mask register value
+        mask        (|, 0x03010614);
+        capture     group default;
+    };
+
+    register MBASPA_MASK
+    {
+        name        "MBU.MBA01.MBA_MCBIST.SCOMFIR.MBSPAMSKQ";
+        scomaddr    0x03010614;
+        capture     type secondary;
+        capture     group default;
+    };
+};
+
+ ##############################################################################
+ #                                                                            #
+ # ####                                 #                                     #
+ # #   # #   # #    #####  ###      #  # #    ##  ##### ###  ###  #   #  ###  #
+ # #   # #   # #    #     #        #  #   #  #  #   #    #  #   # ##  # #     #
+ # ####  #   # #    ####   ###    #  ####### #      #    #  #   # # # #  ###  #
+ # #  #  #   # #    #         #  #   #     # #  #   #    #  #   # #  ##     # #
+ # #   #  ###  #### #####  ###  #    #     #  ##    #   ###  ###  #   #  ###  #
+ #                                                                            #
+ ##############################################################################
+
+# This group is a layer of indirection. Normally, each rule file will have a
+# single global or chiplet FIR which will have group that defines which lower
+# level FIRs to analyze. Unfortunately, the MBA target contains only a subset of
+# the FIRs in the Centaur's MEM chiplet. So the MEM chiplet FIR's group
+# definition must remain in Membuf.rule. This group will serve as a psuedo
+# chiplet FIR. This group could contain the bit definitions for all of the MBA
+# registers, however, we could not utilize the filter for each register.
+# Instead, the bit definitions will simply analyze the respective FIR groups.
+# The FIRs in this group will be analyzed in order so if a FIR should be
+# analyzed before another then simply change the order of the FIRs in this
+# group.
+
+# NOTE: The rule definition for this group must be different than that of the
+#       individual FIR groups. Otherwise, it causes hashing collisions in the
+#       signatures. In this case, we will add the SPECIAL attention line even
+#       though none of these registers will trigger a special attention. This
+#       should change the hash enough to make a unique signature.
+
+rule tmpMbaFir
+{
+  CHECK_STOP:  MBAFIR & ~MBAFIR_MASK & ~MBAFIR_ACT0 & ~MBAFIR_ACT1;
+  RECOVERABLE: MBAFIR & ~MBAFIR_MASK & ~MBAFIR_ACT0 &  MBAFIR_ACT1;
+  SPECIAL:     MBAFIR; # See note above.
+};
+
+rule tmpMbaSecureFir
+{
+  CHECK_STOP:
+    MBASECUREFIR & ~MBASECUREFIR_MASK & ~MBASECUREFIR_ACT0 & ~MBASECUREFIR_ACT1;
+  # NOTE: This secure FIR will only report checkstop attentions.
+  SPECIAL:
+    MBASECUREFIR; # See note above.
+};
+
+rule tmpMbaCalFir
+{
+  CHECK_STOP:  MBACALFIR & ~MBACALFIR_MASK & ~MBACALFIR_ACT0 & ~MBACALFIR_ACT1;
+  RECOVERABLE: MBACALFIR & ~MBACALFIR_MASK & ~MBACALFIR_ACT0 &  MBACALFIR_ACT1;
+  SPECIAL:     MBACALFIR; # See note above.
+};
+
+rule tmpMbaDdrPhyFir
+{
+  CHECK_STOP:
+    MBADDRPHYFIR & ~MBADDRPHYFIR_MASK & ~MBADDRPHYFIR_ACT0 & ~MBADDRPHYFIR_ACT1;
+  RECOVERABLE:
+    MBADDRPHYFIR & ~MBADDRPHYFIR_MASK & ~MBADDRPHYFIR_ACT0 &  MBADDRPHYFIR_ACT1;
+  SPECIAL:
+    MBADDRPHYFIR; # See note above.
+};
+
+group gMBA attntype CHECK_STOP, RECOVERABLE filter singlebit
+{
+    (tmpMbaFir,       bit( 0| 1| 2| 3| 4| 5| 6| 7| 8| 9|
+                          10|11|12|13|14|15|16|17|18|19|
+                          20|21|22|23|24|25|26|27|28|29|
+                          30|31|32|33|34|35|36|37|38|39|
+                          40|41|42|43|44|45|46|47|48|49|
+                          50|51|52|53|54|55|56|57|58|59|
+                          60|61|62|63 ))               ? analyze(gMbaFir);
+
+    (tmpMbaSecureFir, bit( 0| 1| 2| 3| 4| 5| 6| 7| 8| 9|
+                          10|11|12|13|14|15|16|17|18|19|
+                          20|21|22|23|24|25|26|27|28|29|
+                          30|31|32|33|34|35|36|37|38|39|
+                          40|41|42|43|44|45|46|47|48|49|
+                          50|51|52|53|54|55|56|57|58|59|
+                          60|61|62|63 ))               ? analyze(gMbaSecureFir);
+
+    (tmpMbaDdrPhyFir, bit( 0| 1| 2| 3| 4| 5| 6| 7| 8| 9|
+                          10|11|12|13|14|15|16|17|18|19|
+                          20|21|22|23|24|25|26|27|28|29|
+                          30|31|32|33|34|35|36|37|38|39|
+                          40|41|42|43|44|45|46|47|48|49|
+                          50|51|52|53|54|55|56|57|58|59|
+                          60|61|62|63 ))               ? analyze(gMbaDdrPhyFir);
+
+    (tmpMbaCalFir,    bit( 0| 1| 2| 3| 4| 5| 6| 7| 8| 9|
+                          10|11|12|13|14|15|16|17|18|19|
+                          20|21|22|23|24|25|26|27|28|29|
+                          30|31|32|33|34|35|36|37|38|39|
+                          40|41|42|43|44|45|46|47|48|49|
+                          50|51|52|53|54|55|56|57|58|59|
+                          60|61|62|63 ))               ? analyze(gMbaCalFir);
+};
+
+################################################################################
+# MEM Chiplet MBAFIR
+################################################################################
+
+rule MbaFir
+{
+    CHECK_STOP:  MBAFIR & ~MBAFIR_MASK & ~MBAFIR_ACT0 & ~MBAFIR_ACT1;
+    RECOVERABLE: MBAFIR & ~MBAFIR_MASK & ~MBAFIR_ACT0 &  MBAFIR_ACT1;
+};
+
+group gMbaFir filter singlebit
+{
+    /** MBAFIR[0]
+     *  MBAFIRQ_INVALID_MAINT_CMD
+     */
+    (MbaFir, bit(0)) ? TBDDefaultCallout;
+
+    /** MBAFIR[1]
+     *  MBAFIRQ_INVALID_MAINT_ADDRESS
+     */
+    (MbaFir, bit(1)) ? TBDDefaultCallout;
+
+    /** MBAFIR[2]
+     *  MBAFIRQ_MULTI_ADDRESS_MAINT_TIMEOU
+     */
+    (MbaFir, bit(2)) ? TBDDefaultCallout;
+
+    /** MBAFIR[3]
+     *  MBAFIRQ_INTERNAL_FSM_ERROR
+     */
+    (MbaFir, bit(3)) ? TBDDefaultCallout;
+
+    /** MBAFIR[4]
+     *  MBAFIRQ_MCBIST_ERROR
+     */
+    (MbaFir, bit(4)) ? TBDDefaultCallout;
+
+    /** MBAFIR[5]
+     *  MBAFIRQ_SCOM_CMD_REG_PE
+     */
+    (MbaFir, bit(5)) ? TBDDefaultCallout;
+
+    /** MBAFIR[6]
+     *  MBAFIRQ_CHANNEL_CHKSTP_ERR
+     */
+    (MbaFir, bit(6)) ? TBDDefaultCallout;
+
+    /** MBAFIR[7]
+     *  MBAFIRQ_WRD_CAW2_DATA_CE_UE_ERR
+     */
+    (MbaFir, bit(7)) ? TBDDefaultCallout;
+
+    /** MBAFIR[15]
+     *  MBAFIRQ_INTERNAL_SCOM_ERROR
+     */
+    (MbaFir, bit(15)) ? TBDDefaultCallout;
+
+    /** MBAFIR[16]
+     *  MBAFIRQ_INTERNAL_SCOM_ERROR_CLONE
+     */
+    (MbaFir, bit(16)) ? TBDDefaultCallout;
+};
+
+################################################################################
+# MEM Chiplet MBASECUREFIR
+################################################################################
+
+rule MbaSecureFir
+{
+  CHECK_STOP:
+    MBASECUREFIR & ~MBASECUREFIR_MASK & ~MBASECUREFIR_ACT0 & ~MBASECUREFIR_ACT1;
+  # NOTE: This secure FIR will only report checkstop attentions.
+};
+
+group gMbaSecureFir filter singlebit
+{
+    /** MBASECUREFIR[0]
+     *  MBASIRQ_INVALID_MBA_CAL0Q_ACCESS
+     */
+    (MbaSecureFir, bit(0)) ? TBDDefaultCallout;
+
+    /** MBASECUREFIR[1]
+     *  MBASIRQ_INVALID_MBA_CAL1Q_ACCESS
+     */
+    (MbaSecureFir, bit(1)) ? TBDDefaultCallout;
+
+    /** MBASECUREFIR[2]
+     *  MBASIRQ_INVALID_MBA_CAL2Q_ACCESS
+     */
+    (MbaSecureFir, bit(2)) ? TBDDefaultCallout;
+
+    /** MBASECUREFIR[3]
+     *  MBASIRQ_INVALID_MBA_CAL3Q_ACCESS
+     */
+    (MbaSecureFir, bit(3)) ? TBDDefaultCallout;
+
+    /** MBASECUREFIR[4]
+     *  MBASIRQ_INVALID_DDR_CONFIG_REG_ACCESS
+     */
+    (MbaSecureFir, bit(4)) ? TBDDefaultCallout;
+
+    /** MBASECUREFIR[5]
+     *  MBASIRQ_INVALID_SIR_MASK_OR_ACTION_REGISTER_ACCESS
+     */
+    (MbaSecureFir, bit(5)) ? TBDDefaultCallout;
+};
+
+################################################################################
+# MEM Chiplet DDRPHYFIR
+################################################################################
+
+rule MbaDdrPhyFir
+{
+  CHECK_STOP:
+    MBADDRPHYFIR & ~MBADDRPHYFIR_MASK & ~MBADDRPHYFIR_ACT0 & ~MBADDRPHYFIR_ACT1;
+  RECOVERABLE:
+    MBADDRPHYFIR & ~MBADDRPHYFIR_MASK & ~MBADDRPHYFIR_ACT0 &  MBADDRPHYFIR_ACT1;
+};
+
+group gMbaDdrPhyFir filter singlebit
+{
+    /** MBADDRPHYFIR[48]
+     *  PHY01_DDRPHY_FIR_REG_DDR0_FSM_CKSTP
+     */
+    (MbaDdrPhyFir, bit(48)) ? TBDDefaultCallout;
+
+    /** MBADDRPHYFIR[49]
+     *  PHY01_DDRPHY_FIR_REG_DDR0_PARITY_CKSTP
+     */
+    (MbaDdrPhyFir, bit(49)) ? TBDDefaultCallout;
+
+    /** MBADDRPHYFIR[50]
+     *  PHY01_DDRPHY_FIR_REG_DDR0_CALIBRATION_ERROR
+     */
+    (MbaDdrPhyFir, bit(50)) ? TBDDefaultCallout;
+
+    /** MBADDRPHYFIR[51]
+     *  PHY01_DDRPHY_FIR_REG_DDR0_FSM_ERR
+     */
+    (MbaDdrPhyFir, bit(51)) ? TBDDefaultCallout;
+
+    /** MBADDRPHYFIR[52]
+     *  PHY01_DDRPHY_FIR_REG_DDR0_PARITY_ERR
+     */
+    (MbaDdrPhyFir, bit(52)) ? TBDDefaultCallout;
+
+    /** MBADDRPHYFIR[53]
+     *  PHY01_DDRPHY_FIR_REG_DDR01_FIR_PARITY_ERR
+     */
+    (MbaDdrPhyFir, bit(53)) ? TBDDefaultCallout;
+
+    /** MBADDRPHYFIR[56]
+     *  PHY01_DDRPHY_FIR_REG_DDR1_FSM_CKSTP
+     */
+    (MbaDdrPhyFir, bit(56)) ? TBDDefaultCallout;
+
+    /** MBADDRPHYFIR[57]
+     *  PHY01_DDRPHY_FIR_REG_DDR1_PARITY_CKSTP
+     */
+    (MbaDdrPhyFir, bit(57)) ? TBDDefaultCallout;
+
+    /** MBADDRPHYFIR[58]
+     *  PHY01_DDRPHY_FIR_REG_DDR1_CALIBRATION_ERROR
+     */
+    (MbaDdrPhyFir, bit(58)) ? TBDDefaultCallout;
+
+    /** MBADDRPHYFIR[59]
+     *  PHY01_DDRPHY_FIR_REG_DDR1_FSM_ERR
+     */
+    (MbaDdrPhyFir, bit(59)) ? TBDDefaultCallout;
+
+    /** MBADDRPHYFIR[60]
+     *  PHY01_DDRPHY_FIR_REG_DDR1_PARITY_ERR
+     */
+    (MbaDdrPhyFir, bit(60)) ? TBDDefaultCallout;
+};
+
+################################################################################
+# MEM Chiplet MBACALFIR
+################################################################################
+
+rule MbaCalFir
+{
+  CHECK_STOP:  MBACALFIR & ~MBACALFIR_MASK & ~MBACALFIR_ACT0 & ~MBACALFIR_ACT1;
+  RECOVERABLE: MBACALFIR & ~MBACALFIR_MASK & ~MBACALFIR_ACT0 &  MBACALFIR_ACT1;
+};
+
+group gMbaCalFir filter singlebit
+{
+    /** MBACALFIR[0]
+     *  MBACALFIRQ_MBA_RECOVERABLE_ERROR
+     */
+    (MbaCalFir, bit(0)) ? TBDDefaultCallout;
+
+    /** MBACALFIR[1]
+     *  MBACALFIRQ_MBA_NONRECOVERABLE_ERROR
+     */
+    (MbaCalFir, bit(1)) ? TBDDefaultCallout;
+
+    /** MBACALFIR[2]
+     *  MBACALFIRQ_REFRESH_OVERRUN
+     */
+    (MbaCalFir, bit(2)) ? TBDDefaultCallout;
+
+    /** MBACALFIR[3]
+     *  MBACALFIRQ_WAT_ERROR
+     */
+    (MbaCalFir, bit(3)) ? TBDDefaultCallout;
+
+    /** MBACALFIR[4]
+     *  MBACALFIRQ_RCD_PARITY_ERROR_0
+     */
+    (MbaCalFir, bit(4)) ? TBDDefaultCallout;
+
+    /** MBACALFIR[5]
+     *  MBACALFIRQ_DDR0_CAL_TIMEOUT_ERR
+     */
+    (MbaCalFir, bit(5)) ? TBDDefaultCallout;
+
+    /** MBACALFIR[6]
+     *  MBACALFIRQ_DDR1_CAL_TIMEOUT_ERR
+     */
+    (MbaCalFir, bit(6)) ? TBDDefaultCallout;
+
+    /** MBACALFIR[7]
+     *  MBACALFIRQ_RCD_PARITY_ERROR_1
+     */
+    (MbaCalFir, bit(7)) ? TBDDefaultCallout;
+
+    /** MBACALFIR[8]
+     *  MBACALFIRQ_MBX_TO_MBA_PAR_ERROR
+     */
+    (MbaCalFir, bit(8)) ? TBDDefaultCallout;
+
+    /** MBACALFIR[9]
+     *  MBACALFIRQ_MBA_WRD_UE
+     */
+    (MbaCalFir, bit(9)) ? TBDDefaultCallout;
+
+    /** MBACALFIR[10]
+     *  MBACALFIRQ_MBA_WRD_CE
+     */
+    (MbaCalFir, bit(10)) ? TBDDefaultCallout;
+
+    /** MBACALFIR[11]
+     *  MBACALFIRQ_MBA_MAINT_UE
+     */
+    (MbaCalFir, bit(11)) ? TBDDefaultCallout;
+
+    /** MBACALFIR[12]
+     *  MBACALFIRQ_MBA_MAINT_CE
+     */
+    (MbaCalFir, bit(12)) ? TBDDefaultCallout;
+
+    /** MBACALFIR[13]
+     *  MBACALFIRQ_DDR_CAL_RESET_TIMEOUT
+     */
+    (MbaCalFir, bit(13)) ? TBDDefaultCallout;
+
+    /** MBACALFIR[14]
+     *  MBACALFIRQ_WRQ_DATA_CE
+     */
+    (MbaCalFir, bit(14)) ? TBDDefaultCallout;
+
+    /** MBACALFIR[15]
+     *  MBACALFIRQ_WRQ_DATA_UE
+     */
+    (MbaCalFir, bit(15)) ? TBDDefaultCallout;
+
+    /** MBACALFIR[16]
+     *  MBACALFIRQ_WRQ_DATA_SUE
+     */
+    (MbaCalFir, bit(16)) ? TBDDefaultCallout;
+
+    /** MBACALFIR[17]
+     *  MBACALFIRQ_WRQ_RRQ_HANG_ERR
+     */
+    (MbaCalFir, bit(17)) ? TBDDefaultCallout;
+
+    /** MBACALFIR[18]
+     *  MBACALFIRQ_SM_1HOT_ERR
+     */
+    (MbaCalFir, bit(18)) ? TBDDefaultCallout;
+
+    /** MBACALFIR[19]
+     *  MBACALFIRQ_WRD_SCOM_ERROR
+     */
+    (MbaCalFir, bit(19)) ? TBDDefaultCallout;
+
+    /** MBACALFIR[20]
+     *  MBACALFIRQ_INTERNAL_SCOM_ERROR
+     */
+    (MbaCalFir, bit(20)) ? TBDDefaultCallout;
+
+    /** MBACALFIR[21]
+     *  MBACALFIRQ_INTERNAL_SCOM_ERROR_COPY
+     */
+    (MbaCalFir, bit(21)) ? TBDDefaultCallout;
+};
+
+###############################################################################
+# MEM Chiplet MBASPA
+################################################################################
+
+rule MbaSpa
+{
+    SPECIAL: MBASPA & ~MBASPA_MASK;
+};
+
+group gMbaSpa attntype SPECIAL filter singlebit
+{
+    /** MBASPA[0]
+     *  MBSPAQ_COMMAND_COMPLETE_WO_ENA_ERR_ATTN
+     */
+    (MbaSpa, bit(0)) ? analyzeMaintCmdComplete;
+
+    /** MBASPA[1]
+     *  MBSPAQ_HARD_CE_ETE_ATTN
+     */
+    (MbaSpa, bit(1)) ? TBDDefaultCallout;
+
+    /** MBASPA[2]
+     *  MBSPAQ_SOFT_CE_ETE_ATTN
+     */
+    (MbaSpa, bit(2)) ? TBDDefaultCallout;
+
+    /** MBASPA[3]
+     *  MBSPAQ_INTERMITTENT_ETE_ATTN
+     */
+    (MbaSpa, bit(3)) ? TBDDefaultCallout;
+
+    /** MBASPA[4]
+     *  MBSPAQ_RCE_ETE_ATTN
+     */
+    (MbaSpa, bit(4)) ? TBDDefaultCallout;
+
+    /** MBASPA[5]
+     *  MBSPAQ_EMERGENCY_THROTTLE_ATTN
+     */
+    (MbaSpa, bit(5)) ? TBDDefaultCallout;
+
+    /** MBASPA[6]
+     *  MBSPAQ_FIRMWARE_ATTN0
+     */
+    (MbaSpa, bit(6)) ? TBDDefaultCallout;
+
+    /** MBASPA[7]
+     *  MBSPAQ_FIRMWARE_ATTN1
+     */
+    (MbaSpa, bit(7)) ? TBDDefaultCallout;
+
+    /** MBASPA[8]
+     *  MBSPAQ_WAT_DEBUG_ATTN
+     */
+    (MbaSpa, bit(8)) ? TBDDefaultCallout;
+
+    /** MBASPA[9]
+     *  MBSPAQ_SPARE_ATTN1
+     */
+    (MbaSpa, bit(9)) ? TBDDefaultCallout;
+
+    /** MBASPA[10]
+     *  MBSPAQ_MCBIST_DONE
+     */
+    (MbaSpa, bit(10)) ? TBDDefaultCallout;
+};
+
+ ##############################################################################
+ #                                                                            #
+ #    #                                  ###                                  #
+ #   # #    ##  ##### ###  ###  #   #   #   # #     #    ###   ###  ###  ###  #
+ #  #   #  #  #   #    #  #   # ##  #   #     #    # #  #     #     #   #     #
+ # ####### #      #    #  #   # # # #   #     #   #####  ###   ###  ##   ###  #
+ # #     # #  #   #    #  #   # #  ##   #   # #   #   #     #     # #       # #
+ # #     #  ##    #   ###  ###  #   #    ###  ### #   #  ###   ###  ###  ###  #
+ #                                                                            #
+ ##############################################################################
+
+# Include the common action set.
+.include "CommonActions.rule";
+
+################################################################################
+# Higher level actions
+################################################################################
+
+/** Analyze maintenance command complete */
+actionclass analyzeMaintCmdComplete { funccall("MaintCmdComplete"); };
+

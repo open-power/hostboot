@@ -33,16 +33,18 @@ MODULE = prdf
 PRD_USR_PATH = ${ROOTPATH}/src/usr/diag/prdf
 
 VPATH =  \
-    util \
-    plat \
-    plat/pegasus \
+    common \
+    common/util \
+    common/plat \
+    common/plat/pegasus \
+    common/framework \
+    common/framework/resolution \
+    common/framework/register \
+    common/framework/service \
+    common/framework/config \
+    common/framework/rule \
     framework \
-    framework/resolution \
-    framework/register \
-    framework/service \
-    framework/config \
     framework/rule \
-    mnfgtools
 
 #FIXME: we can remove most of these as well if we have them include correctly
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/hwpf/fapi
@@ -51,28 +53,39 @@ EXTRAINCDIR += ${ROOTPATH}/src/include/usr/hwpf/hwp
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/util
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/errl
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/ecmddatabuffer
+EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp
 
 #FIXME: once we fix the PRD includes, we can move most of the prd subdirs below
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/diag/prdf
+EXTRAINCDIR += ${ROOTPATH}/src/include/usr/diag/prdf/common
 EXTRAINCDIR += ${PRD_USR_PATH}
-EXTRAINCDIR += ${PRD_USR_PATH}/util
-EXTRAINCDIR += ${PRD_USR_PATH}/framework/service
-EXTRAINCDIR += ${PRD_USR_PATH}/framework/register
-EXTRAINCDIR += ${PRD_USR_PATH}/framework/resolution
-EXTRAINCDIR += ${PRD_USR_PATH}/framework/config
-EXTRAINCDIR += ${PRD_USR_PATH}/framework/rule
-EXTRAINCDIR += ${PRD_USR_PATH}/plat
-EXTRAINCDIR += ${PRD_USR_PATH}/plat/pegasus
-EXTRAINCDIR += ${PRD_USR_PATH}/mnfgtools
+EXTRAINCDIR += ${PRD_USR_PATH}/common
+EXTRAINCDIR += ${PRD_USR_PATH}/common/util
+EXTRAINCDIR += ${PRD_USR_PATH}/common/framework/service
+EXTRAINCDIR += ${PRD_USR_PATH}/common/framework/register
+EXTRAINCDIR += ${PRD_USR_PATH}/common/framework/resolution
+EXTRAINCDIR += ${PRD_USR_PATH}/common/framework/config
+EXTRAINCDIR += ${PRD_USR_PATH}/common/framework/rule
+EXTRAINCDIR += ${PRD_USR_PATH}/common/plat
+EXTRAINCDIR += ${PRD_USR_PATH}/common/plat/pegasus
 
 #------------------------------------------------------------------------------
 # objects
 #------------------------------------------------------------------------------
-include prd_framework.mk
-include prd_ruletable.mk
-include prd_pegasus.mk
+include common/prd_framework.mk
+include common/prd_ruletable.mk
+include common/prd_pegasus.mk
 
-OBJS = ${prd_framework} ${prd_util} ${prd_register} ${prd_resolution} ${prd_ruletable} ${prd_service} ${prd_env_service} ${prd_config} ${prd_pegasus_specific} ${PRDF_RULE_PLUGINS_PEGASUS_WSIM} ${PRDF_RULE_PLUGINS_PEGASUS}
-
+OBJS = ${prd_framework} \
+	   ${prd_util} \
+	   ${prd_register} \
+	   ${prd_resolution} \
+	   ${prd_ruletable} \
+	   ${prd_service} \
+	   ${prd_env_service} \
+	   ${prd_config} \
+	   ${prd_pegasus_specific} ${prd_pegasus_specific_HB} \
+	   ${PRDF_RULE_PLUGINS_PEGASUS_WSIM} \
+	   ${PRDF_RULE_PLUGINS_PEGASUS}
 
 include ${ROOTPATH}/config.mk

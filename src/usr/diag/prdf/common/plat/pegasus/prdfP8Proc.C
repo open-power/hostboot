@@ -1,0 +1,362 @@
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/usr/diag/prdf/common/plat/pegasus/prdfP8Proc.C $          */
+/*                                                                        */
+/* IBM CONFIDENTIAL                                                       */
+/*                                                                        */
+/* COPYRIGHT International Business Machines Corp. 2012                   */
+/*                                                                        */
+/* p1                                                                     */
+/*                                                                        */
+/* Object Code Only (OCO) source materials                                */
+/* Licensed Internal Code Source Materials                                */
+/* IBM HostBoot Licensed Internal Code                                    */
+/*                                                                        */
+/* The source code for this program is not published or otherwise         */
+/* divested of its trade secrets, irrespective of what has been           */
+/* deposited with the U.S. Copyright Office.                              */
+/*                                                                        */
+/* Origin: 30                                                             */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
+
+/** @file  prdfP8Proc.C
+ *  @brief Contains all the plugin code for the PRD P8 Proc
+ */
+#include <prdfPluginDef.H>
+#include <iipServiceDataCollector.h>
+#include <prdfExtensibleChip.H>
+#include <prdfPlatServices.H>
+#include <prdfPluginMap.H>
+
+namespace PRDF
+{
+namespace Proc
+{
+
+//##############################################################################
+//
+//                             Special plugins
+//
+//##############################################################################
+
+/**
+ * @brief  Plugin that initializes the P8 Mba data bundle.
+ * @param  i_chip P8 chip.
+ * @return SUCCESS
+ */
+int32_t Initialize( PrdfExtensibleChip * i_chip )
+{
+    // FIXME: Add proper initialization as per requirement
+    return SUCCESS;
+}
+PRDF_PLUGIN_DEFINE( Proc, Initialize );
+
+/**
+ * @brief Checks the Global Broadcast register.
+ * @param i_reg - the global recoverable register
+ * @param i_tpReg - the TP chiplet recoverable register
+ * @return true if only MC bits are on.
+ */
+static inline bool OnlyMcRec (SCAN_COMM_REGISTER_CLASS * i_reg,
+                              SCAN_COMM_REGISTER_CLASS * i_tpReg)
+{
+    bool rc = false;
+
+    if ( (0 == i_reg->GetBitFieldJustified(2,23)) &&
+         (0 == i_tpReg->GetBitFieldJustified(1,2)) &&
+         (0 != i_tpReg->GetBitFieldJustified(3,8)) &&
+         (0 == i_tpReg->GetBitFieldJustified(11,8)) )
+    {
+        rc = true;
+    }
+    return rc;
+}
+
+/**
+ * @brief Checks the GLobal CS Brodacast register and
+ *        the PBXSTP Chiplet register
+ * @param i_glcs - the Global CS Broadcast register
+ * @param i_tpcs - the TPXSTP register
+ * @param i_pbcs - the PBXSTP register
+ * @return true if only mem bits are on in CS, or,
+ *         if the only other CS is External CS.
+ */
+static inline bool OnlyMcOrExtCS (SCAN_COMM_REGISTER_CLASS * i_glcs,
+                                  SCAN_COMM_REGISTER_CLASS * i_tpCs,
+                                  SCAN_COMM_REGISTER_CLASS * i_pbcs)
+{
+    bool rc = false;
+
+    if (((0 == i_glcs->GetBitFieldJustified(3,22)) && //No CS besides TP and PB
+         (0 == i_tpCs->GetBitFieldJustified(3,2 )) && //No CS in TP besides MCs
+         (0 == i_tpCs->GetBitFieldJustified(13,8)))   //No CS in TP besides MCs
+        &&                                            //and
+        (((!i_glcs->IsBitSet(2)) &&                   // if its not from PB
+          (0 != i_tpCs->GetBitFieldJustified(5,8)))   // and it is from a MC
+         ||                                           //   or
+         ((i_glcs->IsBitSet(2)) &&                    // it is from PB
+          (i_pbcs->IsBitSet(2)) &&                    // and its external
+          (0 == i_pbcs->GetBitFieldJustified(3,18)))))// and nothing else in PB
+    {
+        rc = true;
+    }
+
+    return rc;
+}
+
+/**
+ * @brief Used when the chip has a CHECK_STOP attention to check for the
+ * presence of recovered errors.
+ * @param  i_chip - P8 chip.
+ * @param o_hasRecovered - true if chip has a recovered that we want to analyze
+ * @return SUCCESS
+ */
+int32_t CheckForRecovered(PrdfExtensibleChip * i_chip,
+                          bool & o_hasRecovered)
+{
+    o_hasRecovered = false;
+    int32_t o_rc = SUCCESS;
+
+    SCAN_COMM_REGISTER_CLASS * l_rer =
+      i_chip->getRegister("GLOBAL_RE_FIR");
+    o_rc |= l_rer->Read();
+
+    SCAN_COMM_REGISTER_CLASS * l_TPrer =
+      i_chip->getRegister("TP_CHIPLET_RE_FIR");
+    o_rc |= l_TPrer->Read();
+
+    SCAN_COMM_REGISTER_CLASS * l_TPxstp =
+      i_chip->getRegister("TP_CHIPLET_CS_FIR");
+    o_rc |= l_TPxstp->Read();
+
+    SCAN_COMM_REGISTER_CLASS * l_xstop =
+      i_chip->getRegister("GLOBAL_CS_FIR");
+    o_rc |= l_xstop->Read();
+
+    SCAN_COMM_REGISTER_CLASS * l_pbXstpFir =
+      i_chip->getRegister("PB_CHIPLET_CS_FIR");
+    o_rc |= l_pbXstpFir->Read();
+
+    if (o_rc)
+    {
+        PRDF_ERR( "[CheckForRecovered] SCOM fail on 0x%08x rc=%x",
+                  i_chip->GetId(), o_rc);
+        return o_rc;
+    }
+
+    if ( 0 != l_rer->GetBitFieldJustified(0,32) )
+    {
+        if ( 0 == l_TPrer->GetBitFieldJustified(3,8) )
+        { //No MC Recov
+            o_hasRecovered = true;
+        }
+        else if ( 0 != l_TPxstp->GetBitFieldJustified(5,8) )
+        {
+            // There is Mc Recov and Mc xstop
+            if ( OnlyMcRec(l_rer, l_TPrer) &&
+                 OnlyMcOrExtCS(l_xstop, l_TPxstp, l_pbXstpFir) )
+            {
+                // Ignore the Mc Recoverable if only the Mc bits are
+                // on in Global Recoverable reg, and, either the only
+                // Global CS bits are Mc or there is an External CS.
+            }
+            else
+            {
+                o_hasRecovered = true;
+            }
+        }
+        else
+        {
+            // MC Recov does not match MC Xstop
+              o_hasRecovered = true;
+        }
+    }
+
+    return SUCCESS;
+} PRDF_PLUGIN_DEFINE( Proc, CheckForRecovered );
+
+//------------------------------------------------------------------------------
+/**
+ * @brief Used when the chip is queried, by the fabric domain, for RECOVERED
+ * attentions to assign a severity to the attention for sorting.
+ * @param[in]   i_chip - P8 chip
+ * @param[out]  o_sev - Priority order (lowest to highest):
+ *  1 - Core chiplet checkstop
+ *  2 - Core chiplet error
+ *  3 - PCB chiplet error (TOD logic)
+ *  4 - Other error
+ *  5 - Memory controller chiplet
+ *
+ * @return SUCCESS
+ *
+ */
+int32_t CheckForRecoveredSev(PrdfExtensibleChip * i_chip,
+                             uint32_t & o_sev)
+{
+    SCAN_COMM_REGISTER_CLASS * l_rer = NULL;
+    SCAN_COMM_REGISTER_CLASS * l_TPrer = NULL;
+    SCAN_COMM_REGISTER_CLASS * l_unitxstp = NULL;
+
+    int32_t o_rc = SUCCESS;
+
+    l_unitxstp = i_chip->getRegister("GLOBALUNITXSTPFIR");
+    o_rc |= l_unitxstp->Read();
+    l_rer = i_chip->getRegister("GLOBAL_RE_FIR");
+    o_rc |= l_rer->Read();
+    l_TPrer = i_chip->getRegister("TP_CHIPLET_RE_FIR");
+    o_rc |= l_TPrer->Read();
+
+    if (o_rc)
+    {
+        PRDF_ERR( "[CheckForRecoveredSev] SCOM fail on 0x%08x rc=%x",
+                  i_chip->GetId(), o_rc);
+        return o_rc;
+    }
+
+    if (l_TPrer->GetBitFieldJustified(3,8) != 0)
+    {
+        // errors from MCS chiplets
+        o_sev = 5;
+    }
+    else if(l_rer->IsBitSet(2) || l_rer->IsBitSet(4) || l_rer->IsBitSet(8))
+    {
+        // errors from PB, X, or A bus chiplets
+        o_sev = 4;
+    }
+    else if(l_rer->IsBitSet(1))
+    {
+        // error from TP (other than MCS chiplets)
+        o_sev = 3;
+    }
+    else if((l_rer->GetBitFieldJustified(11,14) &
+             l_unitxstp->GetBitFieldJustified(11,14)) == 0)
+    {
+        // core recoverable
+        o_sev = 2;
+    }
+    else
+    {
+        // core checkstop
+        o_sev = 1;
+    }
+
+    return SUCCESS;
+
+} PRDF_PLUGIN_DEFINE( Proc, CheckForRecoveredSev );
+
+/** @func GetCheckstopInfo
+ *  To be called from the fabric domain to gather Checkstop information.  This
+ *  information is used in a sorting algorithm.
+ *
+ *  This is a plugin function: GetCheckstopInfo
+ *
+ *  @param i_chip - The chip.
+ *  @param o_wasInternal - True if this chip has an internal checkstop.
+ *  @param o_externalChips - List of external fabrics driving checkstop.
+ *  @param o_wofValue - Current WOF value (unused for now).
+ */
+int32_t GetCheckstopInfo(PrdfExtensibleChip * i_chip,
+                   bool & o_wasInternal,
+                   TARGETING::TargetHandleList & o_externalChips,
+                   uint64_t & o_wofValue)
+{
+    using namespace TARGETING; using namespace PlatServices;
+
+    // Clear parameters.
+    o_wasInternal = false;
+    o_externalChips.erase(o_externalChips.begin(), o_externalChips.end());
+    o_wofValue = 0;
+
+    SCAN_COMM_REGISTER_CLASS * l_globalFir =
+      i_chip->getRegister("GLOBAL_CS_FIR");
+
+    SCAN_COMM_REGISTER_CLASS * l_pbXstpFir =
+      i_chip->getRegister("PB_CHIPLET_CS_FIR");
+
+    SCAN_COMM_REGISTER_CLASS * l_extXstpFir =
+      i_chip->getRegister("PBEXTFIR");
+
+    int32_t o_rc = SUCCESS;
+    o_rc |= l_globalFir->Read();
+    o_rc |= l_pbXstpFir->Read();
+    o_rc |= l_extXstpFir->Read();
+
+    if(o_rc)
+    {
+        PRDF_ERR( "[GetCheckstopInfo] SCOM fail on 0x%08x rc=%x",
+                  i_chip->GetId(), o_rc);
+        return o_rc;
+    }
+
+    if ((0 != l_globalFir->GetBitFieldJustified(0,32)) &&
+        (!l_globalFir->IsBitSet(2) ||
+         !l_pbXstpFir->IsBitSet(2)))
+        o_wasInternal = true;
+
+    // Get connected chips.
+    uint32_t l_connectedXstps = l_extXstpFir->GetBitFieldJustified(0,7);
+    uint32_t l_positions[] =
+    {
+        0, // bit 0 - XBUS 0
+        1, // bit 1 - XBUS 1
+        2, // bit 2 - XBUS 2
+        3, // bit 3 - XBUS 3
+        0, // bit 4 - ABUS 0
+        1, // bit 5 - ABUS 1
+        2  // bit 6 - ABUS 2
+    };
+
+    for (int i = 0, j = 0x40; i < 7; i++, j >>= 1)
+    {
+        if (0 != (j & l_connectedXstps))
+        {
+            TargetHandle_t l_connectedFab =
+              getConnectedPeerProc(i_chip->GetChipHandle(),
+                                   i<4 ? TYPE_XBUS : TYPE_ABUS,
+                                   l_positions[i]);
+
+            if (NULL != l_connectedFab)
+            {
+                o_externalChips.push_back(l_connectedFab);
+            }
+        }
+    }
+
+    // Read WOF value.
+    SCAN_COMM_REGISTER_CLASS * l_wof = i_chip->getRegister("TODWOF");
+    o_rc |= l_wof->Read();
+
+    if(o_rc)
+    {
+        PRDF_ERR( "[GetCheckstopInfo] SCOM fail on 0x%08x rc=%x",
+                  i_chip->GetId(), o_rc);
+        return o_rc;
+    }
+
+    o_wofValue = (((uint64_t)l_wof->GetBitFieldJustified(0,32)) << 32) |
+      ((uint64_t)l_wof->GetBitFieldJustified(32,32));
+
+    return SUCCESS;
+
+} PRDF_PLUGIN_DEFINE( Proc, GetCheckstopInfo );
+
+int32_t CoreConfigured(PrdfExtensibleChip * i_chip,
+                       bool & o_isCoreConfigured)
+{
+    using namespace TARGETING;
+
+    o_isCoreConfigured = false;
+
+    TargetHandleList l_coreList =
+      PlatServices::getConnected(i_chip->GetChipHandle(), TYPE_EX);
+
+    if (l_coreList.size() > 0)
+        o_isCoreConfigured = true;
+
+    return SUCCESS;
+} PRDF_PLUGIN_DEFINE(Proc, CoreConfigured);
+
+} // end namespace Proc
+} // end namespace PRDF

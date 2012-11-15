@@ -1,0 +1,2454 @@
+# IBM_PROLOG_BEGIN_TAG
+# This is an automatically generated prolog.
+#
+# $Source: src/usr/diag/prdf/common/plat/pegasus/Proc_acts_PB.rule $
+#
+# IBM CONFIDENTIAL
+#
+# COPYRIGHT International Business Machines Corp. 2012
+#
+# p1
+#
+# Object Code Only (OCO) source materials
+# Licensed Internal Code Source Materials
+# IBM HostBoot Licensed Internal Code
+#
+# The source code for this program is not published or otherwise
+# divested of its trade secrets, irrespective of what has been
+# deposited with the U.S. Copyright Office.
+#
+# Origin: 30
+#
+# IBM_PROLOG_END_TAG
+
+################################################################################
+# PB Chiplet Registers
+################################################################################
+
+rule PbChipletFir
+{
+  CHECK_STOP:
+     (PB_CHIPLET_CS_FIR        & `1FDFF80000000000`) & ~PB_CHIPLET_FIR_MASK;
+  RECOVERABLE:
+    ((PB_CHIPLET_RE_FIR >> 2 ) & `1FDFF80000000000`) & ~PB_CHIPLET_FIR_MASK;
+};
+
+group gPbChipletFir filter singlebit
+{
+    /** PB_CHIPLET_FIR[3]
+     *  Attention from LFIR
+     */
+    (PbChipletFir, bit(3)) ? analyze(gPbLFir);
+
+    /** PB_CHIPLET_FIR[4]
+     *  Attention from NXDMAENGFIR
+     */
+    (PbChipletFir, bit(4)) ? analyze(gNxDmaEngFir);
+
+    /** PB_CHIPLET_FIR[5]
+     *  Attention from NXCQFIR
+     */
+    (PbChipletFir, bit(5)) ? analyze(gNxCqFir);
+
+    /** PB_CHIPLET_FIR[6]
+     *  Attention from MCDFIR
+     */
+    (PbChipletFir, bit(6)) ? analyze(gMcdFir);
+
+    /** PB_CHIPLET_FIR[7|9]
+     *  Attention from PBWESTFIR or PBEASTFIR
+     */
+    (PbChipletFir, bit(7|9)) ? analyze(gPbWestEastFir);
+
+    /** PB_CHIPLET_FIR[8]
+     *  Attention from PBCENTFIR
+     */
+    (PbChipletFir, bit(8)) ? analyze(gPbCentFir);
+
+    /** PB_CHIPLET_FIR[11]
+     *  Attention from PSIFIR
+     */
+    (PbChipletFir, bit(11)) ? analyze(gPsiFir);
+
+    /** PB_CHIPLET_FIR[12]
+     *  Attention from ICPFIR
+     */
+    (PbChipletFir, bit(12)) ? analyze(gIcpFir);
+
+    /** PB_CHIPLET_FIR[13]
+     *  Attention from PBAFIR
+     */
+    (PbChipletFir, bit(13)) ? analyze(gPbaFir);
+
+    /** PB_CHIPLET_FIR[14]
+     *  Attention from EHHCAFIR
+     */
+    (PbChipletFir, bit(14)) ? analyze(gEhHcaFir);
+
+    /** PB_CHIPLET_FIR[15]
+     *  Attention from NXASFIR
+     */
+    (PbChipletFir, bit(15)) ? analyze(gNxAsFir);
+
+    /** PB_CHIPLET_FIR[16]
+     *  Attention from ENHCAFIR
+     */
+    (PbChipletFir, bit(16)) ? analyze(gEnHcaFir);
+
+    /** PB_CHIPLET_FIR[17|18|19]
+     *  Attention from PCINESTFIRs
+     */
+    (PbChipletFir, bit(17|18|19)) ? analyze(gPciNestFir);
+
+    /** PB_CHIPLET_FIR[20]
+     *  Attention from NXCXAFIR
+     */
+    (PbChipletFir, bit(20)) ? analyze(gNxCxaFir);
+};
+
+rule PbChipletSpa
+{
+    SPECIAL: PB_CHIPLET_SPA & ~PB_CHIPLET_SPA_MASK;
+};
+
+group gPbChipletSpa filter singlebit
+{
+    /** PB_CHIPLET_SPA[0]
+     *  Attention from PBCENTFIR
+     */
+    (PbChipletSpa, bit(0)) ? analyze(gPbCentFir);
+};
+
+################################################################################
+# PB Chiplet LFIR
+################################################################################
+
+rule PbLFir
+{
+  CHECK_STOP:  PB_LFIR & ~PB_LFIR_MASK & ~PB_LFIR_ACT0 & ~PB_LFIR_ACT1;
+  RECOVERABLE: PB_LFIR & ~PB_LFIR_MASK & ~PB_LFIR_ACT0 &  PB_LFIR_ACT1;
+};
+
+group gPbLFir filter singlebit
+{
+    /** PB_LFIR[0]
+     *  CFIR internal parity error
+     */
+    (PbLFir, bit(0)) ? TBDDefaultCallout;
+
+    /** PB_LFIR[1]
+     *  Local errors from GPIO (PCB error)
+     */
+    (PbLFir, bit(1)) ? TBDDefaultCallout;
+
+    /** PB_LFIR[2]
+     *  Local errors from CC (PCB error)
+     */
+    (PbLFir, bit(2)) ? TBDDefaultCallout;
+
+    /** PB_LFIR[3]
+     *  Local errors from CC (OPCG, parity, scan collision, ...)
+     */
+    (PbLFir, bit(3)) ? TBDDefaultCallout;
+
+    /** PB_LFIR[4]
+     *  Local errors from PSC (PCB error)
+     */
+    (PbLFir, bit(4)) ? TBDDefaultCallout;
+
+    /** PB_LFIR[5]
+     *  Local errors from PSC (parity error)
+     */
+    (PbLFir, bit(5)) ? TBDDefaultCallout;
+
+    /** PB_LFIR[6]
+     *  Local errors from Thermal (parity error)
+     */
+    (PbLFir, bit(6)) ? TBDDefaultCallout;
+
+    /** PB_LFIR[7]
+     *  Local errors from Thermal (PCB error)
+     */
+    (PbLFir, bit(7)) ? TBDDefaultCallout;
+
+    /** PB_LFIR[8|9]
+     *  Local errors from Thermal (Trip error)
+     */
+    (PbLFir, bit(8|9)) ? TBDDefaultCallout;
+
+    /** PB_LFIR[10|11]
+     *  Local errors from Trace Array ( error)
+     */
+    (PbLFir, bit(10|11)) ? TBDDefaultCallout;
+};
+
+################################################################################
+# PB Chiplet NXDMAENGFIR
+################################################################################
+
+rule NxDmaEngFir
+{
+    CHECK_STOP:
+        NXDMAENGFIR & ~NXDMAENGFIR_MASK & ~NXDMAENGFIR_ACT0 & ~NXDMAENGFIR_ACT1;
+    RECOVERABLE:
+        NXDMAENGFIR & ~NXDMAENGFIR_MASK & ~NXDMAENGFIR_ACT0 &  NXDMAENGFIR_ACT1;
+};
+
+group gNxDmaEngFir filter singlebit
+{
+# FIXME - Get confirmation from HW team to see how this FIR is wired.
+#         Also, a temp fix to generate error signature by setting bit 0
+    /** NXDMAENGFIR[0]
+     *  ERROR
+     */
+    (NxDmaEngFir, bit(0)) ? TBDDefaultCallout;
+};
+
+################################################################################
+# PB Chiplet NXCQFIR
+################################################################################
+
+rule NxCqFir
+{
+    CHECK_STOP:  NXCQFIR & ~NXCQFIR_MASK & ~NXCQFIR_ACT0 & ~NXCQFIR_ACT1;
+    RECOVERABLE: NXCQFIR & ~NXCQFIR_MASK & ~NXCQFIR_ACT0 &  NXCQFIR_ACT1;
+};
+
+group gNxCqFir filter singlebit
+{
+# FIXME - Get confirmation from HW team to see how this FIR is wired.
+#         Also, a temp fix to generate error signature by setting bit 0
+    /** NXCQFIR[0]
+     *  ERROR
+     */
+    (NxCqFir, bit(0)) ? TBDDefaultCallout;
+};
+
+################################################################################
+# PB Chiplet NXASFIR
+################################################################################
+
+rule NxAsFir
+{
+    CHECK_STOP:  NXASFIR & ~NXASFIR_MASK & ~NXASFIR_ACT0 & ~NXASFIR_ACT1;
+    RECOVERABLE: NXASFIR & ~NXASFIR_MASK & ~NXASFIR_ACT0 &  NXASFIR_ACT1;
+};
+
+group gNxAsFir filter singlebit
+{
+    /** NXASFIR[0]
+     *  SND_ARY_UE
+     */
+    (NxAsFir, bit(0)) ? TBDDefaultCallout;
+
+    /** NXASFIR[1]
+     *  MMIO_DAT_UE
+     */
+    (NxAsFir, bit(1)) ? TBDDefaultCallout;
+
+    /** NXASFIR[2]
+     *  COPREQ_DAT_UE
+     */
+    (NxAsFir, bit(2)) ? TBDDefaultCallout;
+
+    /** NXASFIR[3]
+     *  PBCQ_Q_INFO_PE
+     */
+    (NxAsFir, bit(3)) ? TBDDefaultCallout;
+
+    /** NXASFIR[4]
+     *  RCMD0_ADDR_PE
+     */
+    (NxAsFir, bit(4)) ? TBDDefaultCallout;
+
+    /** NXASFIR[5]
+     *  RCMD0_TTAG_PE
+     */
+    (NxAsFir, bit(5)) ? TBDDefaultCallout;
+
+    /** NXASFIR[6]
+     *  RCMD1_ADDR_PE
+     */
+    (NxAsFir, bit(6)) ? TBDDefaultCallout;
+
+    /** NXASFIR[7]
+     *  RCMD1_TTAG_PE
+     */
+    (NxAsFir, bit(7)) ? TBDDefaultCallout;
+
+    /** NXASFIR[8]
+     *  MAL_FMD_MMIO_ST
+     */
+    (NxAsFir, bit(8)) ? TBDDefaultCallout;
+
+    /** NXASFIR[9]
+     *  DATA_HANG
+     */
+    (NxAsFir, bit(9)) ? TBDDefaultCallout;
+
+    /** NXASFIR[10]
+     *  CANNOT_RTY_ERR
+     */
+    (NxAsFir, bit(10)) ? TBDDefaultCallout;
+
+    /** NXASFIR[11]
+     *  CMPL_CNT_ERR
+     */
+    (NxAsFir, bit(11)) ? TBDDefaultCallout;
+
+    /** NXASFIR[12]
+     *  MULT_CAM_HIT_ERR
+     */
+    (NxAsFir, bit(12)) ? TBDDefaultCallout;
+
+    /** NXASFIR[13]
+     *  FUTURE_ERR_1
+     */
+    (NxAsFir, bit(13)) ? TBDDefaultCallout;
+
+    /** NXASFIR[14]
+     *  FL_FIFO_OVFLW
+     */
+    (NxAsFir, bit(14)) ? TBDDefaultCallout;
+
+    /** NXASFIR[15]
+     *  CMD_TO_INVALID_RW
+     */
+    (NxAsFir, bit(15)) ? TBDDefaultCallout;
+
+    /** NXASFIR[16]
+     *  DMA_WL_UE
+     */
+    (NxAsFir, bit(16)) ? TBDDefaultCallout;
+
+    /** NXASFIR[17]
+     *  CREDWT_RTY_ERR
+     */
+    (NxAsFir, bit(17)) ? TBDDefaultCallout;
+
+    /** NXASFIR[18]
+     *  NOTIFY_RTY_ERR
+     */
+    (NxAsFir, bit(18)) ? TBDDefaultCallout;
+
+    /** NXASFIR[19]
+     *  RCV_TAB_UE
+     */
+    (NxAsFir, bit(19)) ? TBDDefaultCallout;
+
+    /** NXASFIR[20]
+     *  FIFO_ADR_TAB_UE
+     */
+    (NxAsFir, bit(20)) ? TBDDefaultCallout;
+
+    /** NXASFIR[21]
+     *  MMIO_CR_DARY_UE
+     */
+    (NxAsFir, bit(21)) ? TBDDefaultCallout;
+
+    /** NXASFIR[22]
+     *  NOTIF_ARY_UE
+     */
+    (NxAsFir, bit(22)) ? TBDDefaultCallout;
+
+    /** NXASFIR[23]
+     *  INTR_ARY_UE
+     */
+    (NxAsFir, bit(23)) ? TBDDefaultCallout;
+
+    /** NXASFIR[24]
+     *  CR0_ATAG_PE
+     */
+    (NxAsFir, bit(24)) ? TBDDefaultCallout;
+
+    /** NXASFIR[25]
+     *  CR0_TTAG_PE
+     */
+    (NxAsFir, bit(25)) ? TBDDefaultCallout;
+
+    /** NXASFIR[26]
+     *  CR1_ATAG_PE
+     */
+    (NxAsFir, bit(26)) ? TBDDefaultCallout;
+
+    /** NXASFIR[27]
+     *  CR1_TTAG_PE
+     */
+    (NxAsFir, bit(27)) ? TBDDefaultCallout;
+
+    /** NXASFIR[28]
+     *  CW_ADR_ERR
+     */
+    (NxAsFir, bit(28)) ? TBDDefaultCallout;
+
+    /** NXASFIR[29]
+     *  INTR_RTY_CNT_EXP
+     */
+    (NxAsFir, bit(29)) ? TBDDefaultCallout;
+
+    /** NXASFIR[30]
+     *  EG_OVFLW
+     */
+    (NxAsFir, bit(30)) ? TBDDefaultCallout;
+
+    /** NXASFIR[31]
+     *  MULT_PM_HIT
+     */
+    (NxAsFir, bit(31)) ? TBDDefaultCallout;
+
+    /** NXASFIR[32]
+     *  EG_SCOM_ERR
+     */
+    (NxAsFir, bit(32)) ? TBDDefaultCallout;
+
+    /** NXASFIR[33]
+     *  UNUSUAL_EG_SCENARIO
+     */
+    (NxAsFir, bit(33)) ? TBDDefaultCallout;
+
+    /** NXASFIR[34]
+     *  DSLC_INTF_PE
+     */
+    (NxAsFir, bit(34)) ? TBDDefaultCallout;
+
+    /** NXASFIR[35]
+     *  AS_IN_CE
+     */
+    (NxAsFir, bit(35)) ? TBDDefaultCallout;
+
+    /** NXASFIR[36]
+     *  AS_IN_UNSUP_CFG
+     */
+    (NxAsFir, bit(36)) ? TBDDefaultCallout;
+
+    /** NXASFIR[37]
+     * COPREQ_CRESP_ERR
+     */
+    (NxAsFir, bit(37)) ? TBDDefaultCallout;
+
+    /** NXASFIR[38]
+     *  CREDWT_CRESP_ERR
+     */
+    (NxAsFir, bit(38)) ? TBDDefaultCallout;
+
+    /** NXASFIR[39]
+     *  AS_IN_SP_FIR
+     */
+    (NxAsFir, bit(39)) ? TBDDefaultCallout;
+
+    /** NXASFIR[40]
+     *  AS_EG_CE
+     */
+    (NxAsFir, bit(40)) ? TBDDefaultCallout;
+
+    /** NXASFIR[41]
+     *  SCOM_ERR
+     */
+    (NxAsFir, bit(41)) ? TBDDefaultCallout;
+
+    /** NXASFIR[42]
+     *  SCOM_ERR_DUP
+     */
+    (NxAsFir, bit(42)) ? TBDDefaultCallout;
+};
+
+################################################################################
+# PB Chiplet NXCXAFIR
+################################################################################
+
+rule NxCxaFir
+{
+    CHECK_STOP:  NXCXAFIR & ~NXCXAFIR_MASK & ~NXCXAFIR_ACT0 & ~NXCXAFIR_ACT1;
+    RECOVERABLE: NXCXAFIR & ~NXCXAFIR_MASK & ~NXCXAFIR_ACT0 &  NXCXAFIR_ACT1;
+};
+
+group gNxCxaFir filter singlebit
+{
+    /** NXCXAFIR[0]
+     *  BAR_PE
+     */
+    (NxCxaFir, bit(0)) ? TBDDefaultCallout;
+
+    /** NXCXAFIR[1]
+     *  REGISTER_PE
+     */
+    (NxCxaFir, bit(1)) ? TBDDefaultCallout;
+
+    /** NXCXAFIR[2]
+     *  MASTER_ARRAY_CE
+     */
+    (NxCxaFir, bit(2)) ? TBDDefaultCallout;
+
+    /** NXCXAFIR[3]
+     *  MASTER_ARRAY_UE
+     */
+    (NxCxaFir, bit(3)) ? TBDDefaultCallout;
+
+    /** NXCXAFIR[4]
+     *  TIMER_EXPIRED_RECOV_ERROR
+     */
+    (NxCxaFir, bit(4)) ? TBDDefaultCallout;
+
+    /** NXCXAFIR[5]
+     *  TIMER_EXPIRED_XSTOP_ERROR
+     */
+    (NxCxaFir, bit(5)) ? TBDDefaultCallout;
+
+    /** NXCXAFIR[6]
+     *  PSL_CMD_UE
+     */
+    (NxCxaFir, bit(6)) ? TBDDefaultCallout;
+
+    /** NXCXAFIR[7]
+     *  PSL_CMD_SUE
+     */
+    (NxCxaFir, bit(7)) ? TBDDefaultCallout;
+
+    /** NXCXAFIR[8]
+     *  SNOOP_ARRAY_CE
+     */
+    (NxCxaFir, bit(8)) ? TBDDefaultCallout;
+
+    /** NXCXAFIR[9]
+     *  SNOOP_ARRAY_UE
+     */
+    (NxCxaFir, bit(9)) ? TBDDefaultCallout;
+
+    /** NXCXAFIR[10]
+     *  RECOVERY_FAILED
+     */
+    (NxCxaFir, bit(10)) ? TBDDefaultCallout;
+
+    /** NXCXAFIR[13]
+     *  MASTER_RECOVERABLE_ERROR
+     */
+    (NxCxaFir, bit(13)) ? TBDDefaultCallout;
+
+    /** NXCXAFIR[14]
+     *  SNOOPER_RECOVERABLE_ERROR
+     */
+    (NxCxaFir, bit(14)) ? TBDDefaultCallout;
+
+    /** NXCXAFIR[15]
+     *  XPT_RECOVERABLE_ERROR
+     */
+    (NxCxaFir, bit(15)) ? TBDDefaultCallout;
+
+    /** NXCXAFIR[16]
+     *  MASTER_SYS_XSTOP_ERROR
+     */
+    (NxCxaFir, bit(16)) ? TBDDefaultCallout;
+
+    /** NXCXAFIR[17]
+     *  SNOOPER_SYS_XSTOP_ERROR
+     */
+    (NxCxaFir, bit(17)) ? TBDDefaultCallout;
+
+    /** NXCXAFIR[18]
+     *  XPT_SYS_XSTOP_ERROR
+     */
+    (NxCxaFir, bit(18)) ? TBDDefaultCallout;
+
+    /** NXCXAFIR[19]
+     *  MUOP_ERROR_1
+     */
+    (NxCxaFir, bit(19)) ? TBDDefaultCallout;
+
+    /** NXCXAFIR[20]
+     *  MUOP_ERROR_2
+     */
+    (NxCxaFir, bit(20)) ? TBDDefaultCallout;
+
+    /** NXCXAFIR[21]
+     *  MUOP_ERROR_3
+     */
+    (NxCxaFir, bit(21)) ? TBDDefaultCallout;
+
+    /** NXCXAFIR[22]
+     *  SUOP_ERROR_1
+     */
+    (NxCxaFir, bit(22)) ? TBDDefaultCallout;
+
+    /** NXCXAFIR[23]
+     *  SUOP_ERROR_2
+     */
+    (NxCxaFir, bit(23)) ? TBDDefaultCallout;
+
+    /** NXCXAFIR[24]
+     *  SUOP_ERROR_3
+     */
+    (NxCxaFir, bit(24)) ? TBDDefaultCallout;
+
+    /** NXCXAFIR[25]
+     *  POWERBUS_MISC_ERROR
+     */
+    (NxCxaFir, bit(25)) ? TBDDefaultCallout;
+
+    /** NXCXAFIR[26]
+     *  POWERBUS_INTERFACE_PE
+     */
+    (NxCxaFir, bit(26)) ? TBDDefaultCallout;
+
+    /** NXCXAFIR[27]
+     *POWERBUS_DATA_HANG_ERROR
+     */
+    (NxCxaFir, bit(27)) ? TBDDefaultCallout;
+
+    /** NXCXAFIR[28]
+     *  POWERBUS_HANG_ERROR
+     */
+    (NxCxaFir, bit(28)) ? TBDDefaultCallout;
+
+    /** NXCXAFIR[29]
+     *  LD_CLASS_CMD_ADDR_ERR
+     */
+    (NxCxaFir, bit(29)) ? TBDDefaultCallout;
+
+    /** NXCXAFIR[30]
+     *  ST_CLASS_CMD_ADDR_ERR
+     */
+    (NxCxaFir, bit(30)) ? TBDDefaultCallout;
+
+    /** NXCXAFIR[31]
+     *  PHB_LINK_DOWN
+     */
+    (NxCxaFir, bit(31)) ? TBDDefaultCallout;
+
+    /** NXCXAFIR[32]
+     *  LD_CLASS_CMD_FOREIGN_LINK_FAIL
+     */
+    (NxCxaFir, bit(32)) ? TBDDefaultCallout;
+
+    /** NXCXAFIR[33]
+     *  FOREIGN_LINK_HANG_ERROR
+     */
+    (NxCxaFir, bit(33)) ? TBDDefaultCallout;
+
+    /** NXCXAFIR[34]
+     *  XPT_POWERBUS_CE
+     */
+    (NxCxaFir, bit(34)) ? TBDDefaultCallout;
+
+    /** NXCXAFIR[35]
+     *  XPT_POWERBUS_UE
+     */
+    (NxCxaFir, bit(35)) ? TBDDefaultCallout;
+
+    /** NXCXAFIR[36]
+     *  XPT_POWERBUS_SUE
+     */
+    (NxCxaFir, bit(36)) ? TBDDefaultCallout;
+
+    /** NXCXAFIR[37]
+     *  TLBI_TIMEOUT
+     */
+    (NxCxaFir, bit(37)) ? TBDDefaultCallout;
+
+    /** NXCXAFIR[38]
+     *  TLBI_SEQ_ERR
+     */
+    (NxCxaFir, bit(38)) ? TBDDefaultCallout;
+
+    /** NXCXAFIR[39]
+     *  TLBI_BAD_OP_ERR
+     */
+    (NxCxaFir, bit(39)) ? TBDDefaultCallout;
+
+    /** NXCXAFIR[40]
+     *  TLBI_SEQ_NUM_PARITY_ERR
+     */
+    (NxCxaFir, bit(40)) ? TBDDefaultCallout;
+
+    /** NXCXAFIR[41]
+     *  ST_CLASS_CMD_FOREIGN_LINK_FAIL
+     */
+    (NxCxaFir, bit(41)) ? TBDDefaultCallout;
+
+    /** NXCXAFIR[47]
+     *  SCOM_ERR2
+     */
+    (NxCxaFir, bit(47)) ? TBDDefaultCallout;
+
+    /** NXCXAFIR[48]
+     *  SCOM_ERR
+     */
+    (NxCxaFir, bit(48)) ? TBDDefaultCallout;
+};
+
+################################################################################
+# PB Chiplet MCDFIR
+################################################################################
+
+rule McdFir
+{
+    CHECK_STOP:  MCDFIR & ~MCDFIR_MASK & ~MCDFIR_ACT0 & ~MCDFIR_ACT1;
+    RECOVERABLE: MCDFIR & ~MCDFIR_MASK & ~MCDFIR_ACT0 &  MCDFIR_ACT1;
+};
+
+group gMcdFir filter singlebit
+{
+    /** MCDFIR[0]
+     *  MCD_ARRAY_ECC_UE_ERR
+     */
+    (McdFir, bit(0)) ? TBDDefaultCallout;
+
+    /** MCDFIR[1]
+     *  MCD_ARRAY_ECC_CE_ERR
+     */
+    (McdFir, bit(1)) ? TBDDefaultCallout;
+
+    /** MCDFIR[2]
+     *  MCD_REG_PARITY_ERR
+     */
+    (McdFir, bit(2)) ? TBDDefaultCallout;
+
+    /** MCDFIR[3]
+     *  MCD_SM_ERR
+     */
+    (McdFir, bit(3)) ? TBDDefaultCallout;
+
+    /** MCDFIR[4]
+     *  MCD_REC_HANG_ERR
+     */
+    (McdFir, bit(4)) ? TBDDefaultCallout;
+
+    /** MCDFIR[5]
+     *  MCD_PB_PARITY_ERR
+     */
+    (McdFir, bit(5)) ? TBDDefaultCallout;
+
+    /** MCDFIR[6]
+     *  MCD_UNSOLICITED_CRESP_ERR
+     */
+    (McdFir, bit(6)) ? TBDDefaultCallout;
+
+    /** MCDFIR[7]
+     *  MCD_ACK_DEAD_ERR
+     */
+    (McdFir, bit(7)) ? TBDDefaultCallout;
+
+    /** MCDFIR[8]
+     *  FIR_PARITY_ERR2
+     */
+    (McdFir, bit(8)) ? TBDDefaultCallout;
+
+    /** MCDFIR[9]
+     *  FIR_PARITY_ERR
+     */
+    (McdFir, bit(9)) ? TBDDefaultCallout;
+};
+
+################################################################################
+# PB Chiplet PBEASTFIR and PBWESTFIR
+################################################################################
+
+# TODO - All these FIRs should have the same bit definition. Idealy, we will
+#        only want to have one copy of the bit definition. Unfortuately, the
+#        rule code parser does not have the support for something like this.
+#        Maybe we can add this as a later feature.
+
+rule PbEastFir
+{
+  CHECK_STOP:  PBEASTFIR & ~PBEASTFIR_MASK & ~PBEASTFIR_ACT0 & ~PBEASTFIR_ACT1;
+  RECOVERABLE: PBEASTFIR & ~PBEASTFIR_MASK & ~PBEASTFIR_ACT0 &  PBEASTFIR_ACT1;
+};
+
+rule PbWestFir
+{
+  CHECK_STOP:  PBWESTFIR & ~PBWESTFIR_MASK & ~PBWESTFIR_ACT0 & ~PBWESTFIR_ACT1;
+  RECOVERABLE: PBWESTFIR & ~PBWESTFIR_MASK & ~PBWESTFIR_ACT0 &  PBWESTFIR_ACT1;
+};
+
+group gPbWestEastFir filter singlebit
+{
+    /** PBWESTFIR[0]
+     *  PB_WEST_PBIEX01_PBH_HW_ERROR
+     */
+    (PbWestFir, bit(0)) ? TBDDefaultCallout;
+
+    /** PBEASTFIR[0]
+     *  PB_EAST_PBIEX04_PBH_HW_ERROR
+     */
+    (PbEastFir, bit(0)) ? TBDDefaultCallout;
+
+    /** PBWESTFIR[1]
+     *  PB_WEST_PBIEX01_PBH_RECOV_ERROR
+     */
+    (PbWestFir, bit(1)) ? TBDDefaultCallout;
+
+    /** PBEASTFIR[1]
+     *  PB_EAST_PBIEX04_PBH_RECOV_ERROR
+     */
+    (PbEastFir, bit(1)) ? TBDDefaultCallout;
+
+    /** PBWESTFIR[2]
+     *  PB_WEST_PBIEX01_PBH_PROTOCOL_ERROR
+     */
+    (PbWestFir, bit(2)) ? TBDDefaultCallout;
+
+    /** PBEASTFIR[2]
+     *  PB_EAST_PBIEX04_PBH_PROTOCOL_ERROR
+     */
+    (PbEastFir, bit(2)) ? TBDDefaultCallout;
+
+    /** PBWESTFIR[3]
+     *  PB_WEST_PBIEX01_PBH_OVERFLOW_ERROR
+     */
+    (PbWestFir, bit(3)) ? TBDDefaultCallout;
+
+    /** PBEASTFIR[3]
+     *  PB_EAST_PBIEX04_PBH_OVERFLOW_ERROR
+     */
+    (PbEastFir, bit(3)) ? TBDDefaultCallout;
+
+    /** PBWESTFIR[4]
+     *  PB_WEST_PBIEX02_PBH_HW_ERROR
+     */
+    (PbWestFir, bit(4)) ? TBDDefaultCallout;
+
+    /** PBEASTFIR[4]
+     *  PB_EAST_PBIEX05_PBH_HW_ERROR
+     */
+    (PbEastFir, bit(4)) ? TBDDefaultCallout;
+
+    /** PBWESTFIR[5]
+     *  PB_WEST_PBIEX02_PBH_RECOV_ERROR
+     */
+    (PbWestFir, bit(5)) ? TBDDefaultCallout;
+
+    /** PBEASTFIR[5]
+     *  PB_EAST_PBIEX05_PBH_RECOV_ERROR
+     */
+    (PbEastFir, bit(5)) ? TBDDefaultCallout;
+
+    /** PBWESTFIR[6]
+     *  PB_WEST_PBIEX02_PBH_PROTOCOL_ERROR
+     */
+    (PbWestFir, bit(6)) ? TBDDefaultCallout;
+
+    /** PBEASTFIR[6]
+     *  PB_EAST_PBIEX05_PBH_PROTOCOL_ERROR
+     */
+    (PbEastFir, bit(6)) ? TBDDefaultCallout;
+
+    /** PBWESTFIR[7]
+     *  PB_WEST_PBIEX02_PBH_OVERFLOW_ERROR
+     */
+    (PbWestFir, bit(7)) ? TBDDefaultCallout;
+
+    /** PBEASTFIR[7]
+     *  PB_EAST_PBIEX05_PBH_OVERFLOW_ERROR
+     */
+    (PbEastFir, bit(7)) ? TBDDefaultCallout;
+
+    /** PBWESTFIR[8]
+     *  PB_WEST_PBIEX03_PBH_HW_ERROR
+     */
+    (PbWestFir, bit(8)) ? TBDDefaultCallout;
+
+    /** PBEASTFIR[8]
+     *  PB_EAST_PBIEX06_PBH_HW_ERROR
+     */
+    (PbEastFir, bit(8)) ? TBDDefaultCallout;
+
+    /** PBWESTFIR[9]
+     *  PB_WEST_PBIEX03_PBH_RECOV_ERROR
+     */
+    (PbWestFir, bit(9)) ? TBDDefaultCallout;
+
+    /** PBEASTFIR[9]
+     *  PB_EAST_PBIEX06_PBH_RECOV_ERROR
+     */
+    (PbEastFir, bit(9)) ? TBDDefaultCallout;
+
+    /** PBWESTFIR[10]
+     *  PB_WEST_PBIEX03_PBH_PROTOCOL_ERROR
+     */
+    (PbWestFir, bit(10)) ? TBDDefaultCallout;
+
+    /** PBEASTFIR[10]
+     *  PB_EAST_PBIEX06_PBH_PROTOCOL_ERROR
+     */
+    (PbEastFir, bit(10)) ? TBDDefaultCallout;
+
+    /** PBWESTFIR[11]
+     *  PB_WEST_PBIEX03_PBH_OVERFLOW_ERROR
+     */
+    (PbWestFir, bit(11)) ? TBDDefaultCallout;
+
+    /** PBEASTFIR[11]
+     *  PB_EAST_PBIEX06_PBH_OVERFLOW_ERROR
+     */
+    (PbEastFir, bit(11)) ? TBDDefaultCallout;
+
+    /** PBWESTFIR[12]
+     *  PB_WEST_PBIEX09_PBH_HW_ERROR
+     */
+    (PbWestFir, bit(12)) ? TBDDefaultCallout;
+
+    /** PBEASTFIR[12]
+     *  PB_EAST_PBIEX12_PBH_HW_ERROR
+     */
+    (PbEastFir, bit(12)) ? TBDDefaultCallout;
+
+    /** PBWESTFIR[13]
+     *  PB_WEST_PBIEX09_PBH_RECOV_ERROR
+     */
+    (PbWestFir, bit(13)) ? TBDDefaultCallout;
+
+    /** PBEASTFIR[13]
+     *  PB_EAST_PBIEX12_PBH_RECOV_ERROR
+     */
+    (PbEastFir, bit(13)) ? TBDDefaultCallout;
+
+    /** PBWESTFIR[14]
+     *  PB_WEST_PBIEX09_PBH_PROTOCOL_ERROR
+     */
+    (PbWestFir, bit(14)) ? TBDDefaultCallout;
+
+    /** PBEASTFIR[14]
+     *  PB_EAST_PBIEX12_PBH_PROTOCOL_ERROR
+     */
+    (PbEastFir, bit(14)) ? TBDDefaultCallout;
+
+    /** PBWESTFIR[15]
+     *  PB_WEST_PBIEX09_PBH_OVERFLOW_ERROR
+     */
+    (PbWestFir, bit(15)) ? TBDDefaultCallout;
+
+    /** PBEASTFIR[15]
+     *  PB_EAST_PBIEX12_PBH_OVERFLOW_ERROR
+     */
+    (PbEastFir, bit(15)) ? TBDDefaultCallout;
+
+    /** PBWESTFIR[16]
+     *  PB_WEST_PBIEX10_PBH_HW_ERROR
+     */
+    (PbWestFir, bit(16)) ? TBDDefaultCallout;
+
+    /** PBEASTFIR[16]
+     *  PB_EAST_PBIEX13_PBH_HW_ERROR
+     */
+    (PbEastFir, bit(16)) ? TBDDefaultCallout;
+
+    /** PBWESTFIR[17]
+     *  PB_WEST_PBIEX10_PBH_RECOV_ERROR
+     */
+    (PbWestFir, bit(17)) ? TBDDefaultCallout;
+
+    /** PBEASTFIR[17]
+     *  PB_EAST_PBIEX13_PBH_RECOV_ERROR
+     */
+    (PbEastFir, bit(17)) ? TBDDefaultCallout;
+
+    /** PBWESTFIR[18]
+     *  PB_WEST_PBIEX10_PBH_PROTOCOL_ERROR
+     */
+    (PbWestFir, bit(18)) ? TBDDefaultCallout;
+
+    /** PBEASTFIR[18]
+     *  PB_EAST_PBIEX13_PBH_PROTOCOL_ERROR
+     */
+    (PbEastFir, bit(18)) ? TBDDefaultCallout;
+
+    /** PBWESTFIR[19]
+     *  PB_WEST_PBIEX10_PBH_OVERFLOW_ERROR
+     */
+    (PbWestFir, bit(19)) ? TBDDefaultCallout;
+
+    /** PBEASTFIR[19]
+     *  PB_EAST_PBIEX13_PBH_OVERFLOW_ERROR
+     */
+    (PbEastFir, bit(19)) ? TBDDefaultCallout;
+
+    /** PBWESTFIR[20]
+     *  PB_WEST_PBIEX11_PBH_HW_ERROR
+     */
+    (PbWestFir, bit(20)) ? TBDDefaultCallout;
+
+    /** PBEASTFIR[20]
+     *  PB_EAST_PBIEX14_PBH_HW_ERROR
+     */
+    (PbEastFir, bit(20)) ? TBDDefaultCallout;
+
+    /** PBWESTFIR[21]
+     *  PB_WEST_PBIEX11_PBH_RECOV_ERROR
+     */
+    (PbWestFir, bit(21)) ? TBDDefaultCallout;
+
+    /** PBEASTFIR[21]
+     *  PB_EAST_PBIEX14_PBH_RECOV_ERROR
+     */
+    (PbEastFir, bit(21)) ? TBDDefaultCallout;
+
+    /** PBWESTFIR[22]
+     *  PB_WEST_PBIEX11_PBH_PROTOCOL_ERROR
+     */
+    (PbWestFir, bit(22)) ? TBDDefaultCallout;
+
+    /** PBEASTFIR[22]
+     *  PB_EAST_PBIEX14_PBH_PROTOCOL_ERROR
+     */
+    (PbEastFir, bit(22)) ? TBDDefaultCallout;
+
+    /** PBWESTFIR[23]
+     *  PB_WEST_PBIEX11_PBH_OVERFLOW_ERROR
+     */
+    (PbWestFir, bit(23)) ? TBDDefaultCallout;
+
+    /** PBEASTFIR[23]
+     *  PB_EAST_PBIEX14_PBH_OVERFLOW_ERROR
+     */
+    (PbEastFir, bit(23)) ? TBDDefaultCallout;
+
+    /** PBWESTFIR[24]
+     *  PB_WEST_DATA_OVERFLOW_ERROR
+     */
+    (PbWestFir, bit(24)) ? TBDDefaultCallout;
+
+    /** PBEASTFIR[24]
+     *  PB_EAST_DATA_OVERFLOW_ERROR
+     */
+    (PbEastFir, bit(24)) ? TBDDefaultCallout;
+
+    /** PBWESTFIR[25]
+     *  PB_WEST_DATA_PROTOCOL_ERROR
+     */
+    (PbWestFir, bit(25)) ? TBDDefaultCallout;
+
+    /** PBEASTFIR[25]
+     *  PB_EAST_DATA_PROTOCOL_ERROR
+     */
+    (PbEastFir, bit(25)) ? TBDDefaultCallout;
+
+    /** PBWESTFIR[26]
+     *  PB_WEST_DATA_ROUTE_ERROR
+     */
+    (PbWestFir, bit(26)) ? TBDDefaultCallout;
+
+    /** PBEASTFIR[26]
+     *  PB_EAST_DATA_ROUTE_ERROR
+     */
+    (PbEastFir, bit(26)) ? TBDDefaultCallout;
+
+    /** PBWESTFIR[27]
+     *  PB_WEST_CMD_OVERFLOW_ERROR
+     */
+    (PbWestFir, bit(27)) ? TBDDefaultCallout;
+
+    /** PBEASTFIR[27]
+     *  PB_EAST_CMD_OVERFLOW_ERROR
+     */
+    (PbEastFir, bit(27)) ? TBDDefaultCallout;
+
+    /** PBWESTFIR[32]
+     *  FIR_SCOM_WEST_ERR
+     */
+    (PbWestFir, bit(32)) ? TBDDefaultCallout;
+
+    /** PBEASTFIR[32]
+     *  FIR_SCOM_EAST_ERR
+     */
+    (PbEastFir, bit(32)) ? TBDDefaultCallout;
+
+    /** PBWESTFIR[33]
+     *  FIR_SCOM_WEST_ERR_DUP
+     */
+    (PbWestFir, bit(33)) ? TBDDefaultCallout;
+
+    /** PBEASTFIR[33]
+     *  FIR_SCOM_EAST_ERR_DUP
+     */
+    (PbEastFir, bit(33)) ? TBDDefaultCallout;
+};
+
+################################################################################
+# PB Chiplet PBCENTFIR
+################################################################################
+
+rule PbCentFir
+{
+  CHECK_STOP:  PBCENTFIR & ~PBCENTFIR_MASK & ~PBCENTFIR_ACT0 & ~PBCENTFIR_ACT1;
+  RECOVERABLE: PBCENTFIR & ~PBCENTFIR_MASK & ~PBCENTFIR_ACT0 &  PBCENTFIR_ACT1;
+  SPECIAL:     PBCENTFIR & ~PBCENTFIR_MASK &  PBCENTFIR_ACT0 & ~PBCENTFIR_ACT1;
+};
+
+group gPbCentFir filter singlebit
+{
+    /** PBCENTFIR[0]
+     *  PB_CENT_PROTOCOL_ERROR
+     */
+    (PbCentFir, bit(0)) ? TBDDefaultCallout;
+
+    /** PBCENTFIR[1]
+     *  PB_CENT_OVERFLOW_ERROR
+     */
+    (PbCentFir, bit(1)) ? TBDDefaultCallout;
+
+    /** PBCENTFIR[2]
+     *  PB_CENT_HW_PARITY_ERROR
+     */
+    (PbCentFir, bit(2)) ? TBDDefaultCallout;
+
+    /** PBCENTFIR[3]
+     *  PB_CENT_TLBIE_TM_TIMEOUT_ERROR
+     */
+    (PbCentFir, bit(3)) ? TBDDefaultCallout;
+
+    /** PBCENTFIR[4]
+     *  PB_CENT_COHERENCY_ERROR
+     */
+    (PbCentFir, bit(4)) ? TBDDefaultCallout;
+
+    /** PBCENTFIR[5]
+     *  PB_CENT_CRESP_ADDR_ERROR
+     */
+    (PbCentFir, bit(5)) ? TBDDefaultCallout;
+
+    /** PBCENTFIR[6]
+     *  PB_CENT_CRESP_ERROR
+     */
+    (PbCentFir, bit(6)) ? TBDDefaultCallout;
+
+    /** PBCENTFIR[7]
+     *  PB_CENT_HANG_RECOVERY_LIMIT_ERROR
+     */
+    (PbCentFir, bit(7)) ? TBDDefaultCallout;
+
+    /** PBCENTFIR[8]
+     *  PB_CENT_DATA_ROUTE_ERROR
+     */
+    (PbCentFir, bit(8)) ? TBDDefaultCallout;
+
+    /** PBCENTFIR[9]
+     *  PB_CENT_HANG_RECOVERY_GTE_LEVEL1
+     */
+    (PbCentFir, bit(9)) ? TBDDefaultCallout;
+
+    /** PBCENTFIR[10]
+     *  PB_CENT_FORCE_MP_IPL
+     */
+    (PbCentFir, bit(10)) ? TBDDefaultCallout;
+
+    /** PBCENTFIR[11]
+     *  PB_CENT_FIR_SPARE_0
+     */
+    (PbCentFir, bit(11)) ? TBDDefaultCallout;
+
+    /** PBCENTFIR[12]
+     *  PB_CENT_F0LINK_ERROR
+     */
+    (PbCentFir, bit(12)) ? TBDDefaultCallout;
+
+    /** PBCENTFIR[13]
+     *  PB_CENT_F1LINK_ERROR
+     */
+    (PbCentFir, bit(13)) ? TBDDefaultCallout;
+
+    /** PBCENTFIR[14]
+     *  PB_CENT_F0_OVERFLOW
+     */
+    (PbCentFir, bit(14)) ? TBDDefaultCallout;
+
+    /** PBCENTFIR[15]
+     *  PB_CENT_F1_OVERFLOW
+     */
+    (PbCentFir, bit(15)) ? TBDDefaultCallout;
+
+    /** PBCENTFIR[16]
+     *  FIR_SCOM_CENT_ERR
+     */
+    (PbCentFir, bit(16)) ? TBDDefaultCallout;
+
+    /** PBCENTFIR[17]
+     *  FIR_SCOM_CENT_ERR_DUP
+     */
+    (PbCentFir, bit(17)) ? TBDDefaultCallout;
+};
+
+################################################################################
+# PB Chiplet PSIFIR
+################################################################################
+
+rule PsiFir
+{
+    CHECK_STOP:  PSIFIR & ~PSIFIR_MASK & ~PSIFIR_ACT0 & ~PSIFIR_ACT1;
+    RECOVERABLE: PSIFIR & ~PSIFIR_MASK & ~PSIFIR_ACT0 &  PSIFIR_ACT1;
+};
+
+group gPsiFir filter singlebit
+{
+    /** PSIFIR[0]
+     *  PB_ECC_ERR_CE
+     */
+    (PsiFir, bit(0)) ? TBDDefaultCallout;
+
+    /** PSIFIR[1]
+     *  PB_ECC_ERR_UE
+     */
+    (PsiFir, bit(1)) ? TBDDefaultCallout;
+
+    /** PSIFIR[2]
+     *  PB_ECC_ERR_SUE
+     */
+    (PsiFir, bit(3)) ? TBDDefaultCallout;
+
+    /** PSIFIR[4]
+     *  INTERRUPT_FROM_FSP
+     */
+    (PsiFir, bit(4)) ? TBDDefaultCallout;
+
+    /** PSIFIR[5]
+     *  FSP_ECC_ERR_CE
+     */
+    (PsiFir, bit(5)) ? TBDDefaultCallout;
+
+    /** PSIFIR[6]
+     *  FSP_ECC_ERR_UE
+     */
+    (PsiFir, bit(6)) ? TBDDefaultCallout;
+
+    /** PSIFIR[7]
+     *  ERROR_STATE
+     */
+    (PsiFir, bit(7)) ? TBDDefaultCallout;
+
+    /** PSIFIR[8]
+     *  INVALID_TTYPE
+     */
+    (PsiFir, bit(8)) ? TBDDefaultCallout;
+
+    /** PSIFIR[9]
+     *  INVALID_CRESP
+     */
+    (PsiFir, bit(9)) ? TBDDefaultCallout;
+
+    /** PSIFIR[10]
+     *  PB_DATA_TIME_OUT
+     */
+    (PsiFir, bit(10)) ? TBDDefaultCallout;
+
+    /** PSIFIR[11]
+     *  PB_PARITY_ERROR
+     */
+    (PsiFir, bit(11)) ? TBDDefaultCallout;
+
+    /** PSIFIR[12]
+     *  FSP_ACCESS_TRUSTED_SPACE
+     */
+    (PsiFir, bit(12)) ? TBDDefaultCallout;
+
+    /** PSIFIR[13]
+     *  UNEXPECTED_PB
+     */
+    (PsiFir, bit(13)) ? TBDDefaultCallout;
+
+    /** PSIFIR[14]
+     *  INTERRUPT_REG_CHANGE_WHILE_ACTIVE
+     */
+    (PsiFir, bit(14)) ? TBDDefaultCallout;
+
+    /** PSIFIR[15]
+     *  INTERRUPT0_ADDRESS_ERROR
+     */
+    (PsiFir, bit(15)) ? TBDDefaultCallout;
+
+    /** PSIFIR[16]
+     *  INTERRUPT1_ADDRESS_ERROR
+     */
+    (PsiFir, bit(16)) ? TBDDefaultCallout;
+
+    /** PSIFIR[17]
+     *  INTERRUPT2_ADDRESS_ERROR
+     */
+    (PsiFir, bit(17)) ? TBDDefaultCallout;
+
+    /** PSIFIR[18]
+     *  INTERRUPT3_ADDRESS_ERROR
+     */
+    (PsiFir, bit(18)) ? TBDDefaultCallout;
+
+    /** PSIFIR[19]
+     *  INTERRUPT4_ADDRESS_ERROR
+     */
+    (PsiFir, bit(19)) ? TBDDefaultCallout;
+
+    /** PSIFIR[20]
+     *  INTERRUPT5_ADDRESS_ERROR
+     */
+    (PsiFir, bit(20)) ? TBDDefaultCallout;
+
+    /** PSIFIR[21]
+     *  TCBR_TP_PSI_GLB_ERR_0
+     */
+    (PsiFir, bit(21)) ? TBDDefaultCallout;
+
+    /** PSIFIR[22]
+     *  TCBR_TP_PSI_GLB_ERR_1
+     */
+    (PsiFir, bit(22)) ? TBDDefaultCallout;
+
+    /** PSIFIR[23]
+     *  SCOM_ERROR
+     */
+    (PsiFir, bit(23)) ? TBDDefaultCallout;
+
+    /** PSIFIR[24]
+     *  FIR_PARITY_ERROR
+     */
+    (PsiFir, bit(24)) ? TBDDefaultCallout;
+};
+
+################################################################################
+# PB Chiplet ICPFIR
+################################################################################
+
+rule IcpFir
+{
+    CHECK_STOP:  ICPFIR & ~ICPFIR_MASK & ~ICPFIR_ACT0 & ~ICPFIR_ACT1;
+    RECOVERABLE: ICPFIR & ~ICPFIR_MASK & ~ICPFIR_ACT0 &  ICPFIR_ACT1;
+};
+
+group gIcpFir filter singlebit
+{
+    /** ICPFIR[0]
+     *  INT_HW_ERROR_EOI_Q
+     */
+    (IcpFir, bit(0)) ? TBDDefaultCallout;
+
+    /** ICPFIR[1]
+     *  INT_HW_ERROR_FWD_Q
+     */
+    (IcpFir, bit(1)) ? TBDDefaultCallout;
+
+    /** ICPFIR[2]
+     *  INT_HW_ERROR_IR_QU
+     */
+    (IcpFir, bit(2)) ? TBDDefaultCallout;
+
+    /** ICPFIR[3]
+     *  INT_HW_ERROR_RET_Q
+     */
+    (IcpFir, bit(3)) ? TBDDefaultCallout;
+
+    /** ICPFIR[4]
+     *  INT_HW_ERROR_ADDRI
+     */
+    (IcpFir, bit(4)) ? TBDDefaultCallout;
+
+    /** ICPFIR[5]
+     *  INT_HW_ERROR_DATAI
+     */
+    (IcpFir, bit(5)) ? TBDDefaultCallout;
+
+    /** ICPFIR[6]
+     *  INT_HW_ERROR_ADDRO
+     */
+    (IcpFir, bit(7)) ? TBDDefaultCallout;
+
+    /** ICPFIR[8]
+     *  INT_HW_ERROR_LDSTQ
+     */
+    (IcpFir, bit(8)) ? TBDDefaultCallout;
+
+    /** ICPFIR[9]
+     *  INT_HW_ERROR_REQQ
+     */
+    (IcpFir, bit(9)) ? TBDDefaultCallout;
+
+    /** ICPFIR[10]
+     *  SCOM_REG_CHECK
+     */
+    (IcpFir, bit(10)) ? TBDDefaultCallout;
+
+    /** ICPFIR[11]
+     *  INVALID_FORWARD_SETUP
+     */
+    (IcpFir, bit(11)) ? TBDDefaultCallout;
+
+    /** ICPFIR[12]
+     *  ADDRESS_CORE_FIELD
+     */
+    (IcpFir, bit(12)) ? TBDDefaultCallout;
+
+    /** ICPFIR[13]
+     *  ADDRESS_CORE_FIELD_MMIO
+     */
+    (IcpFir, bit(13)) ? TBDDefaultCallout;
+
+    /** ICPFIR[14]
+     *  UNSOLICITED_CRESP
+     */
+    (IcpFir, bit(14)) ? TBDDefaultCallout;
+
+    /** ICPFIR[15]
+     *  UNSOLICITED_DATA
+     */
+    (IcpFir, bit(15)) ? TBDDefaultCallout;
+
+    /** ICPFIR[16]
+     *  INVALID_CMD
+     */
+    (IcpFir, bit(16)) ? TBDDefaultCallout;
+
+    /** ICPFIR[17]
+     *  INVALID_CRESPZ
+     */
+    (IcpFir, bit(17)) ? TBDDefaultCallout;
+
+    /** ICPFIR[18]
+     *  INVALID_CRESP
+     */
+    (IcpFir, bit(18)) ? TBDDefaultCallout;
+
+    /** ICPFIR[19]
+     *  Reserved field (Access type is reserved)
+     */
+    (IcpFir, bit(19)) ? TBDDefaultCallout;
+
+    /** ICPFIR[20]
+     *  ECC_CE_ON_DATA
+     */
+    (IcpFir, bit(20)) ? TBDDefaultCallout;
+
+    /** ICPFIR[21]
+     *  ECC_UE_ON_DATA
+     */
+    (IcpFir, bit(21)) ? TBDDefaultCallout;
+
+    /** ICPFIR[22]
+     *  ECC_SUE_ON_DATA
+     */
+    (IcpFir, bit(22)) ? TBDDefaultCallout;
+
+    /** ICPFIR[23]
+     *  PARITY_CHK_ADDRESS
+     */
+    (IcpFir, bit(23)) ? TBDDefaultCallout;
+
+    /** ICPFIR[24]
+     *  PARITY_CHK_TAG
+     */
+    (IcpFir, bit(24)) ? TBDDefaultCallout;
+
+    /** ICPFIR[25]
+     *  TIMEOUT_LD_STQ
+     */
+    (IcpFir, bit(25)) ? TBDDefaultCallout;
+
+    /** ICPFIR[26]
+     *  TIMEOUT_RETURNQ
+     */
+    (IcpFir, bit(26)) ? TBDDefaultCallout;
+
+    /** ICPFIR[27]
+     *  TIMEOUT_FWDQ
+     */
+    (IcpFir, bit(27)) ? TBDDefaultCallout;
+
+    /** ICPFIR[28]
+     *  TIMEOUT_EOIQ
+     */
+    (IcpFir, bit(28)) ? TBDDefaultCallout;
+
+    /** ICPFIR[32]
+     *  EXT_TRACE_0
+     */
+    (IcpFir, bit(32)) ? TBDDefaultCallout;
+
+    /** ICPFIR[33]
+     *  EXT_TRACE_1
+     */
+    (IcpFir, bit(33)) ? TBDDefaultCallout;
+
+    /** ICPFIR[34]
+     *  ADU_RECOV
+     */
+    (IcpFir, bit(34)) ? TBDDefaultCallout;
+
+    /** ICPFIR[35]
+     *  EXT_XSTOP
+     */
+    (IcpFir, bit(35)) ? TBDDefaultCallout;
+};
+
+################################################################################
+# PB Chiplet PBAFIR
+################################################################################
+
+rule PbaFir
+{
+    CHECK_STOP:  PBAFIR & ~PBAFIR_MASK & ~PBAFIR_ACT0 & ~PBAFIR_ACT1;
+    RECOVERABLE: PBAFIR & ~PBAFIR_MASK & ~PBAFIR_ACT0 &  PBAFIR_ACT1;
+};
+
+group gPbaFir filter singlebit
+{
+    /** PBAFIR[0]
+     *  PBAFIR_OCI_APAR_ERR
+     */
+    (PbaFir, bit(0)) ? TBDDefaultCallout;
+
+    /** PBAFIR[1]
+     *  PBAFIR_PB_RDADRERR_FW
+     */
+    (PbaFir, bit(1)) ? TBDDefaultCallout;
+
+    /** PBAFIR[2]
+     *  PBAFIR_PB_RDDATATO_FW
+     */
+    (PbaFir, bit(2)) ? TBDDefaultCallout;
+
+    /** PBAFIR[3]
+     *  PBAFIR_PB_SUE_FW
+     */
+    (PbaFir, bit(3)) ? TBDDefaultCallout;
+
+    /** PBAFIR[4]
+     *  PBAFIR_PB_UE_FW
+     */
+    (PbaFir, bit(4)) ? TBDDefaultCallout;
+
+    /** PBAFIR[5]
+     *  PBAFIR_PB_CE_FW
+     */
+    (PbaFir, bit(5)) ? TBDDefaultCallout;
+
+    /** PBAFIR[6]
+     *  PBAFIR_OCI_SLAVE_INIT
+     */
+    (PbaFir, bit(6)) ? TBDDefaultCallout;
+
+    /** PBAFIR[7]
+     *  PBAFIR_OCI_WRPAR_ERR
+     */
+    (PbaFir, bit(7)) ? TBDDefaultCallout;
+
+    /** PBAFIR[8]
+     *  PBAFIR_OCI_REREQTO
+     */
+    (PbaFir, bit(8)) ? TBDDefaultCallout;
+
+    /** PBAFIR[9]
+     *  PBAFIR_PB_UNEXPCRESP
+     */
+    (PbaFir, bit(9)) ? TBDDefaultCallout;
+
+    /** PBAFIR[10]
+     *  PBAFIR_PB_UNEXPDATA
+     */
+    (PbaFir, bit(10)) ? TBDDefaultCallout;
+
+    /** PBAFIR[11]
+     *  PBAFIR_PB_PARITY_ERR
+     */
+    (PbaFir, bit(11)) ? TBDDefaultCallout;
+
+    /** PBAFIR[12]
+     *  PBAFIR_PB_WRADRERR_FW
+     */
+    (PbaFir, bit(12)) ? TBDDefaultCallout;
+
+    /** PBAFIR[13]
+     *  PBAFIR_PB_BADCRESP
+     */
+    (PbaFir, bit(13)) ? TBDDefaultCallout;
+
+    /** PBAFIR[14]
+     *  PBAFIR_PB_ACKDEAD_FW
+     */
+    (PbaFir, bit(14)) ? TBDDefaultCallout;
+
+    /** PBAFIR[15]
+     *  PBAFIR_PB_CRESPTO
+     */
+    (PbaFir, bit(15)) ? TBDDefaultCallout;
+
+    /** PBAFIR[16]
+     *  PBAFIR_BCUE_SETUP_ERR
+     */
+    (PbaFir, bit(16)) ? TBDDefaultCallout;
+
+    /** PBAFIR[17]
+     *  PBAFIR_BCUE_PB_ACK_DEAD
+     */
+    (PbaFir, bit(17)) ? TBDDefaultCallout;
+
+    /** PBAFIR[18]
+     *  PBAFIR_BCUE_PB_ADRERR
+     */
+    (PbaFir, bit(18)) ? TBDDefaultCallout;
+
+    /** PBAFIR[19]
+     *  PBAFIR_BCUE_OCI_DATERR
+     */
+    (PbaFir, bit(19)) ? TBDDefaultCallout;
+
+    /** PBAFIR[20]
+     *  PBAFIR_BCDE_SETUP_ERR
+     */
+    (PbaFir, bit(20)) ? TBDDefaultCallout;
+
+    /** PBAFIR[21]
+     *  PBAFIR_BCDE_PB_ACK_DEAD
+     */
+    (PbaFir, bit(21)) ? TBDDefaultCallout;
+
+    /** PBAFIR[22]
+     *  PBAFIR_BCDE_PB_ADRERR
+     */
+    (PbaFir, bit(22)) ? TBDDefaultCallout;
+
+    /** PBAFIR[23]
+     *  PBAFIR_BCDE_RDDATATO_ERR
+     */
+    (PbaFir, bit(23)) ? TBDDefaultCallout;
+
+    /** PBAFIR[24]
+     *  PBAFIR_BCDE_SUE_ERR
+     */
+    (PbaFir, bit(24)) ? TBDDefaultCallout;
+
+    /** PBAFIR[25]
+     *  PBAFIR_BCDE_UE_ERR
+     */
+    (PbaFir, bit(25)) ? TBDDefaultCallout;
+
+    /** PBAFIR[26]
+     *  PBAFIR_BCDE_CE
+     */
+    (PbaFir, bit(26)) ? TBDDefaultCallout;
+
+    /** PBAFIR[27]
+     *  PBAFIR_BCDE_OCI_DATERR
+     */
+    (PbaFir, bit(27)) ? TBDDefaultCallout;
+
+    /** PBAFIR[28]
+     *  PBAFIR_INTERNAL_ERR
+     */
+    (PbaFir, bit(28)) ? TBDDefaultCallout;
+
+    /** PBAFIR[29]
+     *  PBAFIR_ILLEGAL_CACHE_OP
+     */
+    (PbaFir, bit(29)) ? TBDDefaultCallout;
+
+    /** PBAFIR[30]
+     *  PBAFIR_OCI_BAD_REG_ADDR
+     */
+    (PbaFir, bit(30)) ? TBDDefaultCallout;
+
+    /** PBAFIR[31]
+     *  PBAFIR_AXPUSH_WRERR
+     */
+    (PbaFir, bit(31)) ? TBDDefaultCallout;
+
+    /** PBAFIR[32]
+     *  PBAFIR_AXRCV_DLO_ERR
+     */
+    (PbaFir, bit(32)) ? TBDDefaultCallout;
+
+    /** PBAFIR[33]
+     *  PBAFIR_AXRCV_DLO_TO
+     */
+    (PbaFir, bit(33)) ? TBDDefaultCallout;
+
+    /** PBAFIR[34]
+     *  PBAFIR_AXRCV_RSVDATA_TO
+     */
+    (PbaFir, bit(34)) ? TBDDefaultCallout;
+
+    /** PBAFIR[35]
+     *  PBAFIR_AXFLOW_ERR
+     */
+    (PbaFir, bit(35)) ? TBDDefaultCallout;
+
+    /** PBAFIR[36]
+     *  PBAFIR_AXSND_DHI_RTYTO
+     */
+    (PbaFir, bit(36)) ? TBDDefaultCallout;
+
+    /** PBAFIR[37]
+     *  PBAFIR_AXSND_DLO_RTYTO
+     */
+    (PbaFir, bit(37)) ? TBDDefaultCallout;
+
+    /** PBAFIR[38]
+     *  PBAFIR_AXSND_RSVTO
+     */
+    (PbaFir, bit(38)) ? TBDDefaultCallout;
+
+    /** PBAFIR[39]
+     *  PBAFIR_AXSND_RSVERR
+     */
+    (PbaFir, bit(39)) ? TBDDefaultCallout;
+
+    /** PBAFIR[40]
+     *  PBAFIR_PB_ACKDEAD_FW_WR
+     */
+    (PbaFir, bit(40)) ? TBDDefaultCallout;
+
+    /** PBAFIR[44|45]
+     *  PBAFIR_FIR_PARITY_ERR
+     */
+    (PbaFir, bit(44|45)) ? TBDDefaultCallout;
+};
+
+################################################################################
+# PB Chiplet EHHCAFIR
+################################################################################
+
+rule EhHcaFir
+{
+    CHECK_STOP:  EHHCAFIR & ~EHHCAFIR_MASK & ~EHHCAFIR_ACT0 & ~EHHCAFIR_ACT1;
+    RECOVERABLE: EHHCAFIR & ~EHHCAFIR_MASK & ~EHHCAFIR_ACT0 &  EHHCAFIR_ACT1;
+};
+
+group gEhHcaFir filter singlebit
+{
+    /** EHHCAFIR[0]
+     *  CE1_0_OUT: array0_a CE
+     */
+    (EhHcaFir, bit(0)) ? TBDDefaultCallout;
+
+    /** EHHCAFIR[1]
+     *  CE2_0_OUT: array0_b CE
+     */
+    (EhHcaFir, bit(1)) ? TBDDefaultCallout;
+
+    /** EHHCAFIR[2
+     *  UE1_0_OUT: array0_a ue
+     */
+    (EhHcaFir, bit(2)) ? TBDDefaultCallout;
+
+    /** EHHCAFIR[3]
+     *  UE2_0_OUT: array0_b ue
+     */
+    (EhHcaFir, bit(3)) ? TBDDefaultCallout;
+
+    /** EHHCAFIR[4]
+     *  CE1_1_OUT: array1_a CE
+     */
+    (EhHcaFir, bit(4)) ? TBDDefaultCallout;
+
+    /** EHHCAFIR[5]
+     *  CE2_1_OUT: array1_b CE
+     */
+    (EhHcaFir, bit(5)) ? TBDDefaultCallout;
+
+    /** EHHCAFIR[6]
+     *  UE1_1_OUT: array1_a ue
+     */
+    (EhHcaFir, bit(6)) ? TBDDefaultCallout;
+
+    /** EHHCAFIR[7]
+     *  UE2_1_OUT: array1_b ue
+     */
+    (EhHcaFir, bit(7)) ? TBDDefaultCallout;
+
+    /** EHHCAFIR[8]
+     *  CE1_2_OUT: array2_a CE
+     */
+    (EhHcaFir, bit(8)) ? TBDDefaultCallout;
+
+    /** EHHCAFIR[9]
+     *  CE2_2_OUT: array2_b CE
+     */
+    (EhHcaFir, bit(9)) ? TBDDefaultCallout;
+
+    /** EHHCAFIR[10]
+     *  UE1_2_OUT: array2_a ue
+     */
+    (EhHcaFir, bit(10)) ? TBDDefaultCallout;
+
+    /** EHHCAFIR[11]
+     *  UE2_2_OUT: array2_b ue
+     */
+    (EhHcaFir, bit(11)) ? TBDDefaultCallout;
+
+    /** EHHCAFIR[12]
+     *  CE1_3_OUT: array3_a CE
+     */
+    (EhHcaFir, bit(12)) ? TBDDefaultCallout;
+
+    /** EHHCAFIR[13]
+     *  CE2_3_OUT: array3_b CE
+     */
+    (EhHcaFir, bit(13)) ? TBDDefaultCallout;
+
+    /** EHHCAFIR[14]
+     *  UE1_3_OUT: array3_a ue
+     */
+    (EhHcaFir, bit(14)) ? TBDDefaultCallout;
+
+    /** EHHCAFIR[15]
+     *  UE2_3_OUT: array3_b ue
+     */
+    (EhHcaFir, bit(15)) ? TBDDefaultCallout;
+
+    /** EHHCAFIR[16]
+     *  CE1_4_OUT: array4_a CE
+     */
+    (EhHcaFir, bit(16)) ? TBDDefaultCallout;
+
+    /** EHHCAFIR[17]
+     *  CE2_4_OUT: array4_b CE
+     */
+    (EhHcaFir, bit(17)) ? TBDDefaultCallout;
+
+    /** EHHCAFIR[18]
+     *  UE1_4_OUT: array4_a ue
+     */
+    (EhHcaFir, bit(18)) ? TBDDefaultCallout;
+
+    /** EHHCAFIR[19]
+     *  UE2_4_OUT: array4_b ue
+     */
+    (EhHcaFir, bit(19)) ? TBDDefaultCallout;
+
+    /** EHHCAFIR[20]
+     *  CE1_5_OUT: array5_a CE
+     */
+    (EhHcaFir, bit(20)) ? TBDDefaultCallout;
+
+    /** EHHCAFIR[21]
+     *  CE2_5_OUT: array5_b CE
+     */
+    (EhHcaFir, bit(21)) ? TBDDefaultCallout;
+
+    /** EHHCAFIR[22]
+     *  UE1_5_OUT: array5_a ue
+     */
+    (EhHcaFir, bit(22)) ? TBDDefaultCallout;
+
+    /** EHHCAFIR[23]
+     *  UE2_5_OUT: array5_b ue
+     */
+    (EhHcaFir, bit(23)) ? TBDDefaultCallout;
+
+    /** EHHCAFIR[24]
+     *  CE1_6_OUT: array6_a CE
+     */
+    (EhHcaFir, bit(24)) ? TBDDefaultCallout;
+
+    /** EHHCAFIR[25]
+     *  CE2_6_OUT: array6_b CE
+     */
+    (EhHcaFir, bit(25)) ? TBDDefaultCallout;
+
+    /** EHHCAFIR[26]
+     *  UE1_6_OUT: array6_a ue
+     */
+    (EhHcaFir, bit(26)) ? TBDDefaultCallout;
+
+    /** EHHCAFIR[27]
+     *  UE2_6_OUT: array6_b ue
+     */
+    (EhHcaFir, bit(27)) ? TBDDefaultCallout;
+
+    /** EHHCAFIR[28]
+     *  CE1_7_OUT: array7_a CE
+     */
+    (EhHcaFir, bit(28)) ? TBDDefaultCallout;
+
+    /** EHHCAFIR[29]
+     *  CE2_7_OUT: array7_b CE
+     */
+    (EhHcaFir, bit(29)) ? TBDDefaultCallout;
+
+    /** EHHCAFIR[30]
+     *  UE1_7_OUT: array7_a ue
+     */
+    (EhHcaFir, bit(30)) ? TBDDefaultCallout;
+
+    /** EHHCAFIR[31]
+     *  UE2_7_OUT: array7_b ue
+     */
+    (EhHcaFir, bit(31)) ? TBDDefaultCallout;
+
+    /** EHHCAFIR[32]
+     *  DROP_COUNTER_FULL: Drop Counter Full
+     */
+    (EhHcaFir, bit(32)) ? TBDDefaultCallout;
+
+    /** EHHCAFIR[33]
+     *  INTERNAL_ERROR: Internal Error
+     */
+    (EhHcaFir, bit(33)) ? TBDDefaultCallout;
+
+    /** EHHCAFIR[34]
+     *  SCOM_ERROR
+     */
+    (EhHcaFir, bit(34)) ? TBDDefaultCallout;
+
+    /** EHHCAFIR[35]
+     *  FIR_PARITY_ERROR
+     */
+    (EhHcaFir, bit(35)) ? TBDDefaultCallout;
+};
+
+################################################################################
+# PB Chiplet ENHCAFIR
+################################################################################
+
+rule EnHcaFir
+{
+    CHECK_STOP:  ENHCAFIR & ~ENHCAFIR_MASK & ~ENHCAFIR_ACT0 & ~ENHCAFIR_ACT1;
+    RECOVERABLE: ENHCAFIR & ~ENHCAFIR_MASK & ~ENHCAFIR_ACT0 &  ENHCAFIR_ACT1;
+};
+
+group gEnHcaFir filter singlebit
+{
+    /** ENHCAFIR[0]
+     *  DPX0_DAT_UE: PB0 data UE
+     */
+    (EnHcaFir, bit(0)) ? TBDDefaultCallout;
+
+    /** ENHCAFIR[1]
+     *  DPX0_DAT_SUE: PB0 data UE
+     */
+    (EnHcaFir, bit(1)) ? TBDDefaultCallout;
+
+    /** ENHCAFIR[2]
+     *  DPX0_DAT_CE: PB0 data ue
+     */
+    (EnHcaFir, bit(2)) ? TBDDefaultCallout;
+
+    /** ENHCAFIR[3]
+     *
+     */
+    (EnHcaFir, bit(3)) ? TBDDefaultCallout;
+
+    /** ENHCAFIR[4]
+     *  CO_DROP_COUNTER_FULL: Castout Drop Counter Full
+     */
+    (EnHcaFir, bit(4)) ? TBDDefaultCallout;
+
+    /** ENHCAFIR[5]
+     *  DATA_HANG_DETECT: Castout Drop Counter Full
+     */
+    (EnHcaFir, bit(5)) ? TBDDefaultCallout;
+
+    /** ENHCAFIR[6]
+     *  UNEXPECTED_DATA_OR_CRESP: Castout Drop Counter Full
+     */
+    (EnHcaFir, bit(6)) ? TBDDefaultCallout;
+
+    /** ENHCAFIR[7]
+     *  INTERNAL_ERROR: Castout Drop Counter Full
+     */
+    (EnHcaFir, bit(7)) ? TBDDefaultCallout;
+
+    /** ENHCAFIR[8]
+     *  SCOM_ERROR
+     */
+    (EnHcaFir, bit(8)) ? TBDDefaultCallout;
+
+    /** ENHCAFIR[9]
+     *  FIR_PARITY_ERROR
+     */
+    (EnHcaFir, bit(9)) ? TBDDefaultCallout;
+};
+
+################################################################################
+# PB Chiplet PCINESTFIRs
+################################################################################
+
+# TODO - All these FIRs should have the same bit definition. Idealy, we will
+#        only want to have one copy of the bit definition. Unfortuately, the
+#        rule code parser does not have the support for something like this.
+#        Maybe we can add this as a later feature.
+
+rule PciNestFir_0
+{
+  CHECK_STOP:
+    PCINESTFIR_0 & ~PCINESTFIR_0_MASK & ~PCINESTFIR_0_ACT0 & ~PCINESTFIR_0_ACT1;
+  RECOVERABLE:
+    PCINESTFIR_0 & ~PCINESTFIR_0_MASK & ~PCINESTFIR_0_ACT0 &  PCINESTFIR_0_ACT1;
+};
+
+rule PciNestFir_1
+{
+  CHECK_STOP:
+    PCINESTFIR_1 & ~PCINESTFIR_1_MASK & ~PCINESTFIR_1_ACT0 & ~PCINESTFIR_1_ACT1;
+  RECOVERABLE:
+    PCINESTFIR_1 & ~PCINESTFIR_1_MASK & ~PCINESTFIR_1_ACT0 &  PCINESTFIR_1_ACT1;
+};
+
+rule PciNestFir_2
+{
+  CHECK_STOP:
+    PCINESTFIR_2 & ~PCINESTFIR_2_MASK & ~PCINESTFIR_2_ACT0 & ~PCINESTFIR_2_ACT1;
+  RECOVERABLE:
+    PCINESTFIR_2 & ~PCINESTFIR_2_MASK & ~PCINESTFIR_2_ACT0 &  PCINESTFIR_2_ACT1;
+};
+
+group gPciNestFir filter singlebit
+{
+    /** PCINESTFIR_0[0]
+     *  BAR_PE
+     */
+    (PciNestFir_0, bit(0)) ? TBDDefaultCallout;
+
+    /** PCINESTFIR_1[0]
+     *  BAR_PE
+     */
+    (PciNestFir_1, bit(0)) ? TBDDefaultCallout;
+
+    /** PCINESTFIR_2[0]
+     *  BAR_PE
+     */
+    (PciNestFir_2, bit(0)) ? TBDDefaultCallout;
+
+    /** PCINESTFIR_0[1]
+     *  NONBAR_PE
+     */
+    (PciNestFir_0, bit(1)) ? TBDDefaultCallout;
+
+    /** PCINESTFIR_1[1]
+     *  NONBAR_PE
+     */
+    (PciNestFir_1, bit(1)) ? TBDDefaultCallout;
+
+    /** PCINESTFIR_2[1]
+     *  NONBAR_PE
+     */
+    (PciNestFir_2, bit(1)) ? TBDDefaultCallout;
+
+    /** PCINESTFIR_0[2]
+     *  PB_TO_PEC_CE
+     */
+    (PciNestFir_0, bit(2)) ? TBDDefaultCallout;
+
+    /** PCINESTFIR_1[2]
+     *  PB_TO_PEC_CE
+     */
+    (PciNestFir_1, bit(2)) ? TBDDefaultCallout;
+
+    /** PCINESTFIR_2[2]
+     *  PB_TO_PEC_CE
+     */
+    (PciNestFir_2, bit(2)) ? TBDDefaultCallout;
+
+    /** PCINESTFIR_0[3]
+     *  PB_TO_PEC_UE
+     */
+    (PciNestFir_0, bit(3)) ? TBDDefaultCallout;
+
+    /** PCINESTFIR_1[3]
+     *  PB_TO_PEC_UE
+     */
+    (PciNestFir_1, bit(3)) ? TBDDefaultCallout;
+
+    /** PCINESTFIR_2[3]
+     *  PB_TO_PEC_UE
+     */
+    (PciNestFir_2, bit(3)) ? TBDDefaultCallout;
+
+    /** PCINESTFIR_0[4]
+     *  PB_TO_PEC_SUE
+     */
+    (PciNestFir_0, bit(4)) ? TBDDefaultCallout;
+
+    /** PCINESTFIR_1[4]
+     *  PB_TO_PEC_SUE
+     */
+    (PciNestFir_1, bit(4)) ? TBDDefaultCallout;
+
+    /** PCINESTFIR_2[4]
+     *  PB_TO_PEC_SUE
+     */
+    (PciNestFir_2, bit(4)) ? TBDDefaultCallout;
+
+    /** PCINESTFIR_0[5]
+     *  ARY_ECC_CE
+     */
+    (PciNestFir_0, bit(5)) ? TBDDefaultCallout;
+
+    /** PCINESTFIR_1[5]
+     *  ARY_ECC_CE
+     */
+    (PciNestFir_1, bit(5)) ? TBDDefaultCallout;
+
+    /** PCINESTFIR_2[5]
+     *  ARY_ECC_CE
+     */
+    (PciNestFir_2, bit(5)) ? TBDDefaultCallout;
+
+    /** PCINESTFIR_0[6]
+     *  ARY_ECC_UE
+     */
+    (PciNestFir_0, bit(6)) ? TBDDefaultCallout;
+
+    /** PCINESTFIR_1[6]
+     *  ARY_ECC_UE
+     */
+    (PciNestFir_1, bit(6)) ? TBDDefaultCallout;
+
+    /** PCINESTFIR_2[6]
+     *  ARY_ECC_UE
+     */
+    (PciNestFir_2, bit(6)) ? TBDDefaultCallout;
+
+    /** PCINESTFIR_0[7]
+     *  ARY_ECC_SUE
+     */
+    (PciNestFir_0, bit(7)) ? TBDDefaultCallout;
+
+    /** PCINESTFIR_1[7]
+     *  ARY_ECC_SUE
+     */
+    (PciNestFir_1, bit(7)) ? TBDDefaultCallout;
+
+    /** PCINESTFIR_2[7]
+     *  ARY_ECC_SUE
+     */
+    (PciNestFir_2, bit(7)) ? TBDDefaultCallout;
+
+    /** PCINESTFIR_0[8]
+     *  REGISTER_ARRAY_PE
+     */
+    (PciNestFir_0, bit(8)) ? TBDDefaultCallout;
+
+    /** PCINESTFIR_1[8]
+     *  REGISTER_ARRAY_PE
+     */
+    (PciNestFir_1, bit(8)) ? TBDDefaultCallout;
+
+    /** PCINESTFIR_2[8]
+     *  REGISTER_ARRAY_PE
+     */
+    (PciNestFir_2, bit(8)) ? TBDDefaultCallout;
+
+    /** PCINESTFIR_0[9]
+     *  PB_INTERFACE_PE
+     */
+    (PciNestFir_0, bit(9)) ? TBDDefaultCallout;
+
+    /** PCINESTFIR_1[9]
+     *  PB_INTERFACE_PE
+     */
+    (PciNestFir_1, bit(9)) ? TBDDefaultCallout;
+
+    /** PCINESTFIR_2[9]
+     *  PB_INTERFACE_PE
+     */
+    (PciNestFir_2, bit(9)) ? TBDDefaultCallout;
+
+    /** PCINESTFIR_0[10]
+     *  PB_DATA_HANG_ERRORS
+     */
+    (PciNestFir_0, bit(10)) ? TBDDefaultCallout;
+
+    /** PCINESTFIR_1[10]
+     *  PB_DATA_HANG_ERRORS
+     */
+    (PciNestFir_1, bit(10)) ? TBDDefaultCallout;
+
+    /** PCINESTFIR_2[10]
+     *  PB_DATA_HANG_ERRORS
+     */
+    (PciNestFir_2, bit(10)) ? TBDDefaultCallout;
+
+    /** PCINESTFIR_0[11]
+     *  PB_HANG_ERRORS
+     */
+    (PciNestFir_0, bit(11)) ? TBDDefaultCallout;
+
+    /** PCINESTFIR_1[11]
+     *  PB_HANG_ERRORS
+     */
+    (PciNestFir_1, bit(11)) ? TBDDefaultCallout;
+
+    /** PCINESTFIR_2[11]
+     *  PB_HANG_ERRORS
+     */
+    (PciNestFir_2, bit(11)) ? TBDDefaultCallout;
+
+    /** PCINESTFIR_0[12]
+     *  RD_ARE_ERRORS
+     */
+    (PciNestFir_0, bit(12)) ? TBDDefaultCallout;
+
+    /** PCINESTFIR_1[12]
+     *  RD_ARE_ERRORS
+     */
+    (PciNestFir_1, bit(12)) ? TBDDefaultCallout;
+
+    /** PCINESTFIR_2[12]
+     *  RD_ARE_ERRORS
+     */
+    (PciNestFir_2, bit(12)) ? TBDDefaultCallout;
+
+    /** PCINESTFIR_0[13]
+     *  NONRD_ARE_ERRORS
+     */
+    (PciNestFir_0, bit(13)) ? TBDDefaultCallout;
+
+    /** PCINESTFIR_1[13]
+     *  NONRD_ARE_ERRORS
+     */
+    (PciNestFir_1, bit(13)) ? TBDDefaultCallout;
+
+    /** PCINESTFIR_2[13]
+     *  NONRD_ARE_ERRORS
+     */
+    (PciNestFir_2, bit(13)) ? TBDDefaultCallout;
+
+    /** PCINESTFIR_0[14]
+     *  PCI_HANG_ERROR
+     */
+    (PciNestFir_0, bit(14)) ? TBDDefaultCallout;
+
+    /** PCINESTFIR_1[14]
+     *  PCI_HANG_ERROR
+     */
+    (PciNestFir_1, bit(14)) ? TBDDefaultCallout;
+
+    /** PCINESTFIR_2[14]
+     *  PCI_HANG_ERROR
+     */
+    (PciNestFir_2, bit(14)) ? TBDDefaultCallout;
+
+    /** PCINESTFIR_0[15]
+     *  PCI_CLOCK_ERROR
+     */
+    (PciNestFir_0, bit(15)) ? TBDDefaultCallout;
+
+    /** PCINESTFIR_1[15]
+     *  PCI_CLOCK_ERROR
+     */
+    (PciNestFir_1, bit(15)) ? TBDDefaultCallout;
+
+    /** PCINESTFIR_2[15]
+     *  PCI_CLOCK_ERROR
+     */
+    (PciNestFir_2, bit(15)) ? TBDDefaultCallout;
+
+    /** PCINESTFIR_0[16]
+     *  AIB_FENCE
+     */
+    (PciNestFir_0, bit(16)) ? TBDDefaultCallout;
+
+    /** PCINESTFIR_1[16]
+     *  AIB_FENCE
+     */
+    (PciNestFir_1, bit(16)) ? TBDDefaultCallout;
+
+    /** PCINESTFIR_2[16]
+     *  AIB_FENCE
+     */
+    (PciNestFir_2, bit(16)) ? TBDDefaultCallout;
+
+    /** PCINESTFIR_0[17]
+     *  HW_ERRORS
+     */
+    (PciNestFir_0, bit(17)) ? TBDDefaultCallout;
+
+    /** PCINESTFIR_1[17]
+     *  HW_ERRORS
+     */
+    (PciNestFir_1, bit(17)) ? TBDDefaultCallout;
+
+    /** PCINESTFIR_2[17]
+     *  HW_ERRORS
+     */
+    (PciNestFir_2, bit(17)) ? TBDDefaultCallout;
+
+    /** PCINESTFIR_0[18]
+     *  UNSOLICITIEDPBDATA
+     */
+    (PciNestFir_0, bit(18)) ? TBDDefaultCallout;
+
+    /** PCINESTFIR_1[18]
+     *  UNSOLICITIEDPBDATA
+     */
+    (PciNestFir_1, bit(18)) ? TBDDefaultCallout;
+
+    /** PCINESTFIR_2[18]
+     *  UNSOLICITIEDPBDATA
+     */
+    (PciNestFir_2, bit(18)) ? TBDDefaultCallout;
+
+    /** PCINESTFIR_0[19]
+     *  UNEXPECTEDCRESP
+     */
+    (PciNestFir_0, bit(19)) ? TBDDefaultCallout;
+
+    /** PCINESTFIR_1[19]
+     *  UNEXPECTEDCRESP
+     */
+    (PciNestFir_1, bit(19)) ? TBDDefaultCallout;
+
+    /** PCINESTFIR_2[19]
+     *  UNEXPECTEDCRESP
+     */
+    (PciNestFir_2, bit(19)) ? TBDDefaultCallout;
+
+    /** PCINESTFIR_0[20]
+     *  INVALIDCRESP
+     */
+    (PciNestFir_0, bit(20)) ? TBDDefaultCallout;
+
+    /** PCINESTFIR_1[20]
+     *  INVALIDCRESP
+     */
+    (PciNestFir_1, bit(20)) ? TBDDefaultCallout;
+
+    /** PCINESTFIR_2[20]
+     *  INVALIDCRESP
+     */
+    (PciNestFir_2, bit(20)) ? TBDDefaultCallout;
+
+    /** PCINESTFIR_0[21]
+     *  PBUNSUPPORTEDSIZE
+     */
+    (PciNestFir_0, bit(21)) ? TBDDefaultCallout;
+
+    /** PCINESTFIR_1[21]
+     *  PBUNSUPPORTEDSIZE
+     */
+    (PciNestFir_1, bit(21)) ? TBDDefaultCallout;
+
+    /** PCINESTFIR_2[21]
+     *  PBUNSUPPORTEDSIZE
+     */
+    (PciNestFir_2, bit(21)) ? TBDDefaultCallout;
+
+    /** PCINESTFIR_0[22]
+     *  PBUNSUPPORTEDCMD
+     */
+    (PciNestFir_0, bit(22)) ? TBDDefaultCallout;
+
+    /** PCINESTFIR_1[22]
+     *  PBUNSUPPORTEDCMD
+     */
+    (PciNestFir_1, bit(22)) ? TBDDefaultCallout;
+
+    /** PCINESTFIR_2[22]
+     *  PBUNSUPPORTEDCMD
+     */
+    (PciNestFir_2, bit(22)) ? TBDDefaultCallout;
+
+    /** PCINESTFIR_0[23]
+     *  AIB_PE
+     */
+    (PciNestFir_0, bit(23)) ? TBDDefaultCallout;
+
+    /** PCINESTFIR_1[23]
+     *  AIB_PE
+     */
+    (PciNestFir_1, bit(23)) ? TBDDefaultCallout;
+
+    /** PCINESTFIR_2[23]
+     *  AIB_PE
+     */
+    (PciNestFir_2, bit(23)) ? TBDDefaultCallout;
+
+    /** PCINESTFIR_0[24]
+     *  ASB_ERROR
+     */
+    (PciNestFir_0, bit(24)) ? TBDDefaultCallout;
+
+    /** PCINESTFIR_1[24]
+     *  ASB_ERROR
+     */
+    (PciNestFir_1, bit(24)) ? TBDDefaultCallout;
+
+    /** PCINESTFIR_2[24]
+     *  ASB_ERROR
+     */
+    (PciNestFir_2, bit(24)) ? TBDDefaultCallout;
+
+    /** PCINESTFIR_0[25]
+     *  FOREIGN_LINK_FAIL
+     */
+    (PciNestFir_0, bit(25)) ? TBDDefaultCallout;
+
+    /** PCINESTFIR_1[25]
+     *  FOREIGN_LINK_FAIL
+     */
+    (PciNestFir_1, bit(25)) ? TBDDefaultCallout;
+
+    /** PCINESTFIR_2[25]
+     *  FOREIGN_LINK_FAIL
+     */
+    (PciNestFir_2, bit(25)) ? TBDDefaultCallout;
+
+    /** PCINESTFIR_0[26]
+     *  FOREIGN_PB_HANG
+     */
+    (PciNestFir_0, bit(26)) ? TBDDefaultCallout;
+
+    /** PCINESTFIR_1[26]
+     *  FOREIGN_PB_HANG
+     */
+    (PciNestFir_1, bit(26)) ? TBDDefaultCallout;
+
+    /** PCINESTFIR_2[26]
+     *  FOREIGN_PB_HANG
+     */
+    (PciNestFir_2, bit(26)) ? TBDDefaultCallout;
+
+    /** PCINESTFIR_0[27]
+     *  CAPP_ERROR
+     */
+    (PciNestFir_0, bit(27)) ? TBDDefaultCallout;
+
+    /** PCINESTFIR_1[27]
+     *  CAPP_ERROR
+     */
+    (PciNestFir_1, bit(27)) ? TBDDefaultCallout;
+
+    /** PCINESTFIR_2[27]
+     *  CAPP_ERROR
+     */
+    (PciNestFir_2, bit(27)) ? TBDDefaultCallout;
+
+    /** PCINESTFIR_0[28]
+     *  SYNC_SCOM_ERR
+     */
+    (PciNestFir_0, bit(28)) ? TBDDefaultCallout;
+
+    /** PCINESTFIR_1[28]
+     *  SYNC_SCOM_ERR
+     */
+    (PciNestFir_1, bit(28)) ? TBDDefaultCallout;
+
+    /** PCINESTFIR_2[28]
+     *  SYNC_SCOM_ERR
+     */
+    (PciNestFir_2, bit(28)) ? TBDDefaultCallout;
+};
+
+################################################################################
+# PB Chiplet IOMCFIR_0
+################################################################################
+
+# Venice only
+
+################################################################################
+# PB Chiplet IOMCFIR_1
+################################################################################
+
+rule IomcFir_1
+{
+  CHECK_STOP:  IOMCFIR_1 & ~IOMCFIR_1_MASK & ~IOMCFIR_1_ACT0 & ~IOMCFIR_1_ACT1;
+  RECOVERABLE: IOMCFIR_1 & ~IOMCFIR_1_MASK & ~IOMCFIR_1_ACT0 &  IOMCFIR_1_ACT1;
+};
+
+group gIomcFir_1 filter singlebit
+{
+# FIXME:A temp fix to generate error signature by setting bit 0
+    /** IOMCFIR_1[0]
+     *  ERROR
+     */
+    (IomcFir_1, bit(0)) ? TBDDefaultCallout;
+};
+
+################################################################################
+# Actions specific to PB chiplet
+################################################################################
+
+

@@ -25,6 +25,10 @@ ROOTPATH = ../../../../../..
 
 RULEOBJDIR = ${ROOTPATH}/obj/modules/prdf/rule
 
+PRD_USR_PATH = ${ROOTPATH}/src/usr/diag/prdf
+
+VPATH = ${PRD_USR_PATH}/common/framework/rule
+
 #------------------------------------------------------------------------------
 # Generated files
 #------------------------------------------------------------------------------
@@ -51,7 +55,7 @@ PRDR_CMP_YACC_H_PATH = ${RULEOBJDIR}/${PRDR_CMP_YACC_H}
 PRDR_CMP_FLEX_o_PATH = ${RULEOBJDIR}/${PRDR_CMP_FLEX_o}
 PRDR_CMP_FLEX_C_PATH = ${RULEOBJDIR}/${PRDR_CMP_FLEX_C}
 
-include ../../prd_ruletable.mk # for PRDR_RULE_TABLE_TARGETS
+include ../../common/prd_ruletable.mk # for PRDR_RULE_TABLE_TARGETS
 
 #-------------------------------------------------------------------------------
 # code_pass
@@ -95,19 +99,25 @@ USERDEFINES = -D__HOSTBOOT_MODULE -O3 -pipe
 
 ${PRDR_CMP_YACC_o_PATH}: ${PRDR_CMP_YACC_C_PATH} ${PRDR_CMP_YACC_H_PATH}
 	i686-mcp6-g++ -c $(USERDEFINES) $< \
-		-I ./ -I ../../util -I ${RULEOBJDIR} \
+		-I ${PRD_USR_PATH}/common/framework/rule \
+		-I ${PRD_USR_PATH}/common/util -I ${RULEOBJDIR} \
 		-o $@
 
 ${PRDR_CMP_FLEX_o_PATH}: ${PRDR_CMP_FLEX_C_PATH} ${PRDR_CMP_YACC_H_PATH}
 	i686-mcp6-g++ -c $(USERDEFINES) $< \
-		-I ./ -I ../../util -I ${RULEOBJDIR} \
+		-I ${PRD_USR_PATH}/common/framework/rule \
+		-I ${PRD_USR_PATH}/common/util -I ${RULEOBJDIR} \
 		-o $@
 
 ${PRDR_CMP_o_PATH}: ${PRDR_CMP_C}
 	mkdir -p ${RULEOBJDIR}
 	i686-mcp6-g++ -c $(USERDEFINES) $< \
-		-I ./ -I ../.. -I ../../util -I ${GENDIR} -I ${RULEOBJDIR} \
-		-I ../resolution -I ../service \
+		-I ${PRD_USR_PATH}/common/framework/rule \
+		-I ${PRD_USR_PATH}/common \
+		-I ${PRD_USR_PATH}/common/util \
+		-I ${GENDIR} -I ${RULEOBJDIR} \
+		-I ${PRD_USR_PATH}/common/framework/resolution \
+		-I ${PRD_USR_PATH}/common/framework/service \
 		-o $@
 
 ${PRDR_CMP_PATH}: ${PRDR_CMP_YACC_o_PATH} ${PRDR_CMP_FLEX_o_PATH} \
@@ -120,12 +130,12 @@ ${PRDR_CMP_PATH}: ${PRDR_CMP_YACC_o_PATH} ${PRDR_CMP_FLEX_o_PATH} \
 # Build the .prf files
 #------------------------------------------------------------------------------
 
-vpath %.rule ../../plat/pegasus
-PRDRPP_SEARCHDIRS = -I../../plat/pegasus
+vpath %.rule ../../common/plat/pegasus
+PRDRPP_SEARCHDIRS = -I../../common/plat/pegasus
 
 # Build .prf files from .rule files and store them in ${RULEOBJDIR}
 ${RULEOBJDIR}/%.prf : %.rule ${PRDR_CMP_PATH}
-	cat $< | ./prdrpp ${PRDRPP_SEARCHDIRS} \
+	cat $< | ${PRD_USR_PATH}/common/framework/rule/prdrpp ${PRDRPP_SEARCHDIRS} \
 		   | i686-mcp6-jail ${PRDR_CMP_PATH} $@
 
 # Copy all .prf files from ${RULEOBJDIR} to ${IMGDIR}
