@@ -104,6 +104,7 @@ ${PRDR_CMP_FLEX_o_PATH}: ${PRDR_CMP_FLEX_C_PATH} ${PRDR_CMP_YACC_H_PATH}
 		-o $@
 
 ${PRDR_CMP_o_PATH}: ${PRDR_CMP_C}
+	mkdir -p ${RULEOBJDIR}
 	i686-mcp6-g++ -c $(USERDEFINES) $< \
 		-I ./ -I ../.. -I ../../util -I ${GENDIR} -I ${RULEOBJDIR} \
 		-I ../resolution -I ../service \
