@@ -322,17 +322,8 @@ PageTableManager::PageTableManager( bool i_userSpace )
 {
     if( i_userSpace )
     {
-        //@TODO: Remove with 43401.
-        // Don't have enough contiguous memory to do this allocation, so
-        // allocate a VMM block instead.
-        ivTABLE = reinterpret_cast<char*>(VMM_VADDR_RMVPAGE_TEST - getSize());
-        mm_alloc_block(NULL, ivTABLE, getSize());
-        mm_set_permission(ivTABLE, getSize(), WRITABLE | ALLOCATE_FROM_ZERO);
-
-        //@TODO: Add back after 43401.
-        //ivTABLE = new char[getSize()];
-
-        //printk( "** PageTableManager running in USER_SPACE : ivTABLE = %p**\n", ivTABLE );
+        ivTABLE = new char[getSize()];
+        printk( "** PageTableManager running in USER_SPACE : ivTABLE = %p**\n", ivTABLE );
     }
     else
     {
@@ -362,11 +353,7 @@ void PageTableManager::invalidatePT( void )
 PageTableManager::~PageTableManager()
 {
     if( ivTABLE ) {
-        //@TODO: Remove after 43401.
-        mm_remove_pages(RELEASE, ivTABLE, getSize());
-
-        //@TODO: Add back after 43401.
-        //delete[] ivTABLE;
+        delete[] ivTABLE;
     }
 }
 

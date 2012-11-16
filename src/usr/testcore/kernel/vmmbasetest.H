@@ -90,7 +90,12 @@ class VmmBaseTest : public CxxTest::TestSuite
             // @TODO. VMM not ready.
         }
 
-        void testCastOutPages()
+        // Do not run this test by default since we now have a lot of
+        //  mainstore to fill up.  We know that this function gets
+        //  tested during the IPL so the unit test isn't required.
+        //  However, leaving it here in case we want to run some
+        //  targeted tests at a later date.
+        void skipme_testCastOutPages()
         {
             uint64_t l_testAddr = VMM_VADDR_RMVPAGE_TEST;
             uint64_t l_testSize = VMM_SIZE_RMVPAGE_TEST;
