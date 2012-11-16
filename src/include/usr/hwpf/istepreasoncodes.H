@@ -98,6 +98,7 @@ enum istepModuleId
     ISTEP_HOST_RUNTIME_SETUP                            = 0x31,
     ISTEP_HOST_VERIFY_HDAT                              = 0x32,
     ISTEP_HOST_START_PAYLOAD                            = 0x33,
+    ISTEP_PROC_CHECK_SLAVE_SBE_SEEPROM_COMPLETE         = 0x34,
 };
 
 /**

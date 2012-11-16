@@ -43,6 +43,8 @@
 //  targeting support
 #include <targeting/common/commontargeting.H>
 #include <targeting/common/utilFilter.H>
+#include    <targeting/namedtarget.H>
+#include    <targeting/attrsync.H>
 
 #include <hwpisteperror.H>
 #include <errl/errludtarget.H>
@@ -58,6 +60,7 @@
 using namespace ISTEP;
 using namespace ISTEP_ERROR;
 using namespace ERRORLOG;
+using namespace TARGETING;
 
 namespace SLAVE_SBE
 {
@@ -68,7 +71,6 @@ namespace SLAVE_SBE
 void* call_proc_revert_sbe_mcs_setup(void *io_pArgs)
 {
     errlHndl_t  l_errl = NULL;
-
     IStepError  l_stepError;
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
@@ -130,19 +132,19 @@ void* call_proc_revert_sbe_mcs_setup(void *io_pArgs)
 //******************************************************************************
 void* call_host_slave_sbe_config(void *io_pArgs)
 {
+    errlHndl_t l_errl = NULL;
+    IStepError  l_stepError;
+
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                "call_host_slave_sbe_config entry" );
 
-    errlHndl_t l_err = NULL;
-
-    // $TODO RTC: Story 41184 implement slave_sbe_config 
-    // call proc_read_nest_freq.C
-    // call proc_setup_sbe_config.C
+    l_errl  =   NULL;       // assignment to make the compiler happy
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                "call_host_slave_sbe_config exit" );
 
-    return l_err;
+    // end task, returning any errorlogs to IStepDisp
+    return l_stepError.getErrorHandle();
 
 }
 
@@ -151,91 +153,145 @@ void* call_host_slave_sbe_config(void *io_pArgs)
 //******************************************************************************
 void* call_host_sbe_start( void *io_pArgs )
 {
+    errlHndl_t  l_errl = NULL;
+    IStepError  l_stepError;
+
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_host_sbe_start entry" );
-    errlHndl_t errl = NULL;
 
     // call proc_sbe_start.C
+    l_errl  =   NULL;       // assignment to make the compiler happy
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_host_sbe_start exit" );
 
-    return errl;
+    // end task, returning any errorlogs to IStepDisp
+    return l_stepError.getErrorHandle();
 }
+
+
 //******************************************************************************
 // call_proc_check_slave_sbe_seeprom_complete function  (step 6.11)
 //******************************************************************************
 void* call_proc_check_slave_sbe_seeprom_complete( void *io_pArgs )
 {
     errlHndl_t  l_errl = NULL;
+    IStepError  l_stepError;
 
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                "call_proc_check_slave_sbe_seeprom_complete entry" );
 
-    TARGETING::Target* l_pProcTarget = NULL;
-    TARGETING::targetService().masterProcChipTargetHandle(l_pProcTarget);
+    //
+    //  get the master Proc target, we want to IGNORE this one.
+    //
+    TARGETING::Target* l_pMasterProcTarget = NULL;
+    TARGETING::targetService().masterProcChipTargetHandle(l_pMasterProcTarget);
 
-    fapi::Target l_fapiProcTarget(fapi::TARGET_TYPE_PROC_CHIP, l_pProcTarget);
+    //
+    //  get a list of all the procs in the system
+    //
+    TARGETING::TargetHandleList l_procTargetList;
+    getAllChips(l_procTargetList, TYPE_PROC);
+
+    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+        "proc_check_slave_sbe_seeprom_complete: %d procs in the system.",
+        l_procTargetList.size() );
+
+    //  @todo $$ convert to iterators - RTC 52905
+    // loop thru all the cpu's
+    for ( uint8_t l_procNum=0; l_procNum < l_procTargetList.size(); l_procNum++)
+    {
+        //  make a local copy of the Processor target
+        TARGETING::Target*  l_pProcTarget = l_procTargetList[l_procNum];
+
+        //  dump physical path to proc target
+        EntityPath l_path;
+        l_path  =   l_pProcTarget->getAttr<ATTR_PHYS_PATH>();
+        l_path.dump();
+
+        if ( l_pProcTarget  ==  l_pMasterProcTarget )
+        {
+            // we are just checking the Slave SBE's, skip the master
+            continue;
+        }
+
+        fapi::Target l_fapiProcTarget( fapi::TARGET_TYPE_PROC_CHIP,
+                                       l_pProcTarget    );
 
 #if 1
-    //  SIMICS HACK - The values written by simics are not correct -
-    //  Write them here until we can fix the action files.
-    //  @todo   RTC Task 52856 is opened to remove these workaround blocks
-    //  once simics is updated.
-    //  Defect SW173843 posted to Simics team to fix this - this is
-    //          not a simple action file change.
-    const  uint64_t PORE_SBE_CONTROL_0x000E0001 =   0x00000000000E0001 ;
-    const  uint64_t MBOX_SBEVITAL_0x0005001C    =   0x000000000005001C ;
-    fapi::ReturnCode    rc;
-    ecmdDataBufferBase data(64);
-    uint32_t    sbe_code    =   0;
+        //  SIMICS HACK - The values written by simics are not correct -
+        //  Write them here until we can fix the action files.
+        //  @todo   RTC Task 52856 is opened to remove these workaround blocks
+        //  once simics is updated.
+        //  Defect SW173843 posted to Simics team to fix this - this is
+        //          not a simple action file change.
+        const  uint64_t PORE_SBE_CONTROL_0x000E0001 =   0x00000000000E0001 ;
+        const  uint64_t MBOX_SBEVITAL_0x0005001C    =   0x000000000005001C ;
+        fapi::ReturnCode    rc;
+        ecmdDataBufferBase data(64);
+        uint32_t    sbe_code    =   0;
 
-    rc = fapiGetScom(   l_fapiProcTarget,
-                        PORE_SBE_CONTROL_0x000E0001,
-                        data );
-    if(!rc.ok()) { TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,"ERROR: reading scom" ); }
-
-    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-               "DEBUG: PORE_SBE_CONTROL_0x000E0001  =   0x%lx",
-               data.getDoubleWord( 0 ) );
-
-    if ( !TARGETING::is_vpo() )
-    {
-        //  proc_check_slave_sbe_seeprom_complete expects bit 0 to be
-        //      on (SBE stopped)
-        data.setBit(0);
-        rc = fapiPutScom(   l_fapiProcTarget,
+        rc = fapiGetScom(   l_fapiProcTarget,
                             PORE_SBE_CONTROL_0x000E0001,
                             data );
-    }
+        if (!rc.ok()) {
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+            "ERROR: reading scom" );
 
-    rc = fapiGetScom(   l_fapiProcTarget,
-                        MBOX_SBEVITAL_0x0005001C,
-                        data );
-    if(!rc.ok()) { TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,"ERROR: reading scom" ); }
+        }
 
-    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-               "DEBUG: MBOX_SBEVITAL_0x0005001C =   0x%lx",
-               data.getDoubleWord( 0 ) );
+        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                   "DEBUG: PORE_SBE_CONTROL_0x000E0001  =   0x%lx",
+                   data.getDoubleWord( 0 ) );
 
-    if ( !TARGETING::is_vpo() )
-    {
-        //  proc_check_slave_sbe_seeprom_complete expects the SBE to write
-        //      000F2111 to SBE_VITAL before we get here:
-        //      halt code   =   SBE_EXIT_SUCCESS_0xF (0x0f) ,
-        //      istep_num   =   PROC_SBE_CHECK_MASTER_ISTEP_NUM ( 0x0211 ),
-        //      substep_num =   SUBSTEP_CHECK_MASTER_SLAVE_CHIP ( 0x01 )
-        sbe_code    =   0x000F2111;
-        data.insertFromRight( &sbe_code,
-                              12,           // ISTEP_NUM_BIT_POSITION
-                              20 );         // number of bits
-        rc = fapiPutScom(   l_fapiProcTarget,
+        if ( !TARGETING::is_vpo() )
+        {
+            //  proc_check_slave_sbe_seeprom_complete expects bit 0 to be
+            //      on (slave SBE stopped)
+            data.setBit(0);
+            rc = fapiPutScom(   l_fapiProcTarget,
+                                PORE_SBE_CONTROL_0x000E0001,
+                                data );
+            if (!rc.ok()) {
+                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                "ERROR: writing scom" );
+
+            }
+        }
+
+        rc = fapiGetScom(   l_fapiProcTarget,
                             MBOX_SBEVITAL_0x0005001C,
                             data );
-        if(!rc.ok()) { TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,"ERROR: writing scom" );}
-    }
+        if (!rc.ok()) {
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+            "ERROR: reading scom" );
+        }
+
+        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                   "DEBUG: MBOX_SBEVITAL_0x0005001C =   0x%lx",
+                   data.getDoubleWord( 0 ) );
+
+        if ( !TARGETING::is_vpo() )
+        {
+            //  proc_check_slave_sbe_seeprom_complete expects the slave SBE to
+            //      write 000F2111 to SBE_VITAL before we get here:
+            //      halt code   =   SBE_EXIT_SUCCESS_0xF (0x0f) ,
+            //      istep_num   =   PROC_SBE_CHECK_MASTER_ISTEP_NUM ( 0x0212 ),
+            //      substep_num =   SUBSTEP_CHECK_MASTER_SLAVE_CHIP ( 0x01 )
+            sbe_code    =   0x000F2121;
+            data.insertFromRight( &sbe_code,
+                                  12,           // ISTEP_NUM_BIT_POSITION
+                                  20 );         // number of bits
+            rc = fapiPutScom(   l_fapiProcTarget,
+                                MBOX_SBEVITAL_0x0005001C,
+                                data );
+            if (!rc.ok()) {
+                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                "ERROR: writing scom" );
+            }
+        }
 
 #else
-			            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-			                       "Simics has been fixed..." );
+        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                   "Simics has been fixed..." );
 #endif
 
         // Invoke the HWP
@@ -243,25 +299,51 @@ void* call_proc_check_slave_sbe_seeprom_complete( void *io_pArgs )
                         proc_check_slave_sbe_seeprom_complete,
                         l_fapiProcTarget);
 
-    if (l_errl)
-    {
-        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                  "ERROR : proc_check_slave_sbe_seeprom_complete",
-                  "failed, returning errorlog" );
-    }
-    else
-    {
-        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                  "SUCCESS : proc_check_slave_sbe_seeprom_complete",
-                  "completed ok");
+        if (l_errl)
+        {
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                      "ERROR : proc_check_slave_sbe_seeprom_complete",
+                      "failed, returning errorlog" );
 
-    }
+            ErrlUserDetailsTarget myDetails(l_pProcTarget);
+
+            // capture the target data in the elog
+            myDetails.addToLog( l_errl );
+
+            /*@
+             * @errortype
+             * @reasoncode  ISTEP_SLAVE_SBE_FAILED
+             * @severity    ERRORLOG::ERRL_SEV_UNRECOVERABLE
+             * @moduleid    ISTEP_PROC_CHECK_SLAVE_SBE_SEEPROM_COMPLETE
+             * @userdata1   bytes 0-1: plid identifying first error
+             *              bytes 2-3: reason code of first error
+             * @userdata2   bytes 0-1: total number of elogs included
+             *              bytes 2-3: N/A
+             * @devdesc     call to proc_check_slave_sbe_seeprom_complete
+             *              returned an error
+             *
+             */
+            l_stepError.addErrorDetails(
+                            ISTEP_SLAVE_SBE_FAILED,
+                            ISTEP_PROC_CHECK_SLAVE_SBE_SEEPROM_COMPLETE,
+                            l_errl );
+
+            errlCommit( l_errl, HWPF_COMP_ID );
+        }
+        else
+        {
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                      "SUCCESS : proc_check_slave_sbe_seeprom_complete",
+                      "completed ok");
+
+        }
+    }   // endfor
 
     TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
               "call_proc_check_slave_sbe_seeprom_complete exit");
 
     // end task, returning any errorlogs to IStepDisp
-    return  l_errl ;
+    return l_stepError.getErrorHandle();
 }
 
 //******************************************************************************
@@ -270,16 +352,19 @@ void* call_proc_check_slave_sbe_seeprom_complete( void *io_pArgs )
 void* call_proc_xmit_sbe(void *io_pArgs )
 {
     errlHndl_t  l_errl = NULL;
+    IStepError  l_stepError;
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                "call_proc_xmit_sbe entry" );
 
     // call proc_xmit_sbe.C
+    l_errl  =   NULL;       // assignment to make the compiler happy
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                "call_proc_xmit_sbe exit" );
 
-    return l_errl;
+    // end task, returning any errorlogs to IStepDisp
+    return l_stepError.getErrorHandle();
 }
 
 
