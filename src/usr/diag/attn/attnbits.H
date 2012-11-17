@@ -249,7 +249,7 @@ struct PsiHbIrqSrcCmp
 enum
 {
     PSI_HB_IC_ENABLE        = 1,
-    LCL_ERR_ISN             = 2,
+    LCL_ERR_ISN             = 4,
     LCL_ERR_XIVR_ADDR       = 0x02010919,
     LCL_ERR_PRIO_DISABLED   = 0xff,
     LCL_ERR_PRIO            = 0x20,
