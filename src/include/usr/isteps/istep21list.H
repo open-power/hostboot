@@ -63,6 +63,7 @@ namespace   INITSERVICE
                 {
                         NONE,
                         EXT_IMAGE,
+                        IPL_NOOP,
                 }
         },
 
@@ -72,6 +73,7 @@ namespace   INITSERVICE
                 {
                         START_FN,
                         EXT_IMAGE,
+                        MPIPL_OP | NORMAL_IPL_OP,
                 }
         },
         {
@@ -80,6 +82,7 @@ namespace   INITSERVICE
                 {
                         START_FN,
                         EXT_IMAGE,
+                        MPIPL_OP | NORMAL_IPL_OP,
                 }
         },
         {
@@ -88,6 +91,7 @@ namespace   INITSERVICE
                 {
                         START_FN,
                         EXT_IMAGE,
+                        MPIPL_OP | NORMAL_IPL_OP,
                 }
         },
 

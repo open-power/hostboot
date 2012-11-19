@@ -172,6 +172,14 @@ public:
     void getIstepInfo ( uint8_t & o_iStep,
                         uint8_t & o_subStep );
 
+    /**
+     * @brief This function will return whether or not we are in MPIPL mode  
+     *
+     *  @return bool - flag indicating whether we're in MPIPL mode
+     *  @retval false if not in  MPIPL mode
+     *          true if in MPIPL mode
+     */
+    bool isMpiplMode( void ) const;
 
 protected:
 
@@ -276,6 +284,15 @@ private:
      * @return bool - whether we are SPLESS.
      */
     bool spLess ( void );
+     
+    /**
+     * @brief This function will check whether or not we are in MPIPL mode  
+     *
+     *  @return bool - flag indicating whether we're in MPIPL mode
+     *  @retval false if not in  MPIPL mode
+     *          true if in MPIPL mode
+     */
+    bool checkMpiplMode ( void ) const;
 
 
     //  -----   internal vars   -----------------------------
@@ -287,6 +304,7 @@ private:
     uint8_t iv_curIStep;
     uint8_t iv_curSubStep;
     bool iv_sync;
+    bool iv_mpipl_mode;     //flag indicating whether we're in MPIPL mode
     msg_q_t iv_msgQ;
     msg_t* iv_workerMsg;    // More work Needed Msg from Worker
     msg_t* iv_Msg;          // All other Msgs that need to be saved

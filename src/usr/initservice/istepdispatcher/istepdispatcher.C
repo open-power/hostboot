@@ -108,6 +108,11 @@ IStepDispatcher::IStepDispatcher ()
     iv_curIStep = 0x0;
     iv_curSubStep = 0x0;
     iv_sync = false;
+    
+    // Save flag indicating whether we're in MPIPL mode
+    iv_mpipl_mode = checkMpiplMode();
+    TRACFCOMP( g_trac_initsvc, "MPIPL mode = %u",
+        iv_mpipl_mode );
 
     // init mailbox / message Q.
     iv_msgQ = msg_q_create();
@@ -914,5 +919,39 @@ bool IStepDispatcher::spLess ( void )
     return spless;
 }
 
+
+// ----------------------------------------------------------------------------
+// IStepDispatcher::checkMpiplMode()
+// ----------------------------------------------------------------------------
+bool IStepDispatcher::checkMpiplMode( ) const
+{
+    using namespace TARGETING;
+    Target* l_pTopLevel = NULL;
+    bool l_isMpiplMode = false;
+    TargetService& l_targetService = targetService();
+
+    (void)l_targetService.getTopLevelTarget( l_pTopLevel );
+    if( l_pTopLevel == NULL )
+    {
+        TRACFCOMP( g_trac_initsvc,
+                   "Top level handle was NULL" );
+        l_isMpiplMode = false;
+    }
+    else
+    {
+        l_isMpiplMode = l_pTopLevel->getAttr<ATTR_IS_MPIPL> ();
+    }
+
+    return  l_isMpiplMode;
+}
+
+
+// ----------------------------------------------------------------------------
+// IStepDispatcher::isMpiplMode()
+// ----------------------------------------------------------------------------
+bool IStepDispatcher::isMpiplMode( ) const
+{
+    return iv_mpipl_mode;
+}
 
 } // namespace

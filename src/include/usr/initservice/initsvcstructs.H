@@ -106,6 +106,16 @@ enum    ModuleType
     EXT_IMAGE,
 };
 
+/**
+ * @enum    IplOpType
+ * bitmap indicating whether the task is an op in certain IPL modes.
+ */
+enum IplOpType
+{
+    IPL_NOOP      = 0x00,
+    NORMAL_IPL_OP = 0x01,
+    MPIPL_OP      = 0x02,
+};
 
 /**
  * @struct  TaskFlags
@@ -119,6 +129,9 @@ struct  TaskFlags
 {
     TaskType            task_type;          // task execution flags
     ModuleType          module_type;        // BASE_IMAGE or EXT_IMAGE
+    uint8_t             ipl_op;             // bitmap of IplOpType enum
+                                            // indicating whether task
+                                            // is an op in certain IPL modes.
 };
 
 

@@ -47,6 +47,7 @@
 
 #include "istep_mbox_msgs.H"
 #include "istepWorker.H"
+#include "istepdispatcher.H"
 
 //  -----   namespace   INITSERVICE -------------------------------------------
 namespace   INITSERVICE
@@ -221,6 +222,9 @@ const TaskInfo * findTaskInfo( const uint32_t i_IStep,
     //  default return is NULL
     const TaskInfo *l_pistep = NULL;
 
+    // Cache the ipl mode since it doesn't change during an IPL
+    static bool l_mpipl_mode = IStepDispatcher::getTheInstance().isMpiplMode();
+
     //  apply filters
     do
     {
@@ -275,6 +279,32 @@ const TaskInfo * findTaskInfo( const uint32_t i_IStep,
                        i_IStep,
                        i_SubStep );
             break;
+        }
+
+        //  check to see if we should skip this istep
+        //  This is possible depending on which IPL mode we're in
+        uint8_t l_ipl_op = g_isteps[i_IStep].pti[i_SubStep].taskflags.ipl_op;
+        if (true == l_mpipl_mode)
+        {
+            if (!(l_ipl_op & MPIPL_OP))
+            {
+                TRACDCOMP( g_trac_initsvc,
+                           "Skipping IStep %d SubStep %d for MPIPL mode",
+                           i_IStep,
+                           i_SubStep );
+                break;
+            }
+        }
+        else
+        {
+            if (!(l_ipl_op & NORMAL_IPL_OP))
+            {
+                TRACDCOMP( g_trac_initsvc,
+                           "Skipping IStep %d SubStep %d for non MPIPL mode",
+                           i_IStep,
+                           i_SubStep );
+                break;
+            }
         }
 
         //  we're good, set the istep & return it to caller

@@ -78,6 +78,7 @@ const   TaskInfo    g_istep13[]  =   {
                 {
                         NONE,
                         EXT_IMAGE,
+                        IPL_NOOP,
                 }
         },
 
@@ -87,6 +88,7 @@ const   TaskInfo    g_istep13[]  =   {
                 {
                         START_FN,
                         EXT_IMAGE,
+                        NORMAL_IPL_OP,
                 }
         },
         {
@@ -95,6 +97,7 @@ const   TaskInfo    g_istep13[]  =   {
                 {
                         START_FN,
                         EXT_IMAGE,
+                        NORMAL_IPL_OP,
                 }
         },
         {
@@ -103,6 +106,7 @@ const   TaskInfo    g_istep13[]  =   {
                 {
                         START_FN,
                         EXT_IMAGE,
+                        NORMAL_IPL_OP,
                 }
         },
         {
@@ -111,6 +115,7 @@ const   TaskInfo    g_istep13[]  =   {
                 {
                         START_FN,
                         EXT_IMAGE,
+                        NORMAL_IPL_OP,
                 }
         },
         {
@@ -119,6 +124,7 @@ const   TaskInfo    g_istep13[]  =   {
                 {
                         START_FN,
                         EXT_IMAGE,
+                        NORMAL_IPL_OP,
                 }
         },
         {
@@ -127,6 +133,7 @@ const   TaskInfo    g_istep13[]  =   {
                 {
                         START_FN,
                         EXT_IMAGE,
+                        NORMAL_IPL_OP,
                 }
         },
         {
@@ -135,6 +142,7 @@ const   TaskInfo    g_istep13[]  =   {
                 {
                         START_FN,
                         EXT_IMAGE,
+                        NORMAL_IPL_OP,
                 }
         },
         {
@@ -143,6 +151,7 @@ const   TaskInfo    g_istep13[]  =   {
                 {
                         START_FN,
                         EXT_IMAGE,
+                        NORMAL_IPL_OP,
                 }
         },
         {
@@ -151,6 +160,7 @@ const   TaskInfo    g_istep13[]  =   {
                 {
                         START_FN,
                         EXT_IMAGE,
+                        NORMAL_IPL_OP,
                 }
         },
         {
@@ -159,6 +169,7 @@ const   TaskInfo    g_istep13[]  =   {
                 {
                         START_FN,
                         EXT_IMAGE,
+                        NORMAL_IPL_OP,
                 }
         },
         {
@@ -167,6 +178,7 @@ const   TaskInfo    g_istep13[]  =   {
                 {
                         START_FN,
                         EXT_IMAGE,
+                        NORMAL_IPL_OP,
                 }
         },
 

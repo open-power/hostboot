@@ -76,6 +76,7 @@ const   TaskInfo    g_istep11[]  =   {
                 {
                         NONE,
                         EXT_IMAGE,
+                        IPL_NOOP,
                 }
         },
         {
@@ -84,6 +85,7 @@ const   TaskInfo    g_istep11[]  =   {
                 {
                         START_FN,                           // task type
                         EXT_IMAGE,                          // Extended Module
+                        NORMAL_IPL_OP,
                 }
         },
         {
@@ -92,6 +94,7 @@ const   TaskInfo    g_istep11[]  =   {
                 {
                         START_FN,                           // task type
                         EXT_IMAGE,                          // Extended Module
+                        NORMAL_IPL_OP,
                 }
         },
         {
@@ -100,6 +103,7 @@ const   TaskInfo    g_istep11[]  =   {
                 {
                         START_FN,                           // task type
                         EXT_IMAGE,                          // Extended Module
+                        NORMAL_IPL_OP,
                 }
         },
         {
@@ -108,6 +112,7 @@ const   TaskInfo    g_istep11[]  =   {
                 {
                         START_FN,                           // task type
                         EXT_IMAGE,                          // Extended Module
+                        NORMAL_IPL_OP,
                 }
         },
         {
@@ -116,6 +121,7 @@ const   TaskInfo    g_istep11[]  =   {
                 {
                         START_FN,                           // task type
                         EXT_IMAGE,                          // Extended Module
+                        NORMAL_IPL_OP,
                 }
         },
         {
@@ -124,6 +130,7 @@ const   TaskInfo    g_istep11[]  =   {
                 {
                         START_FN,                           // task type
                         EXT_IMAGE,                          // Extended Module
+                        NORMAL_IPL_OP,
                 }
         },
         {
@@ -132,6 +139,7 @@ const   TaskInfo    g_istep11[]  =   {
                 {
                         START_FN,                           // task type
                         EXT_IMAGE,                          // Extended Module
+                        NORMAL_IPL_OP,
                 }
         },
         {
@@ -140,6 +148,7 @@ const   TaskInfo    g_istep11[]  =   {
                 {
                         START_FN,                           // task type
                         EXT_IMAGE,                          // Extended Module
+                        NORMAL_IPL_OP,
                 }
         },
         {
@@ -148,6 +157,7 @@ const   TaskInfo    g_istep11[]  =   {
                 {
                         START_FN,                           // task type
                         EXT_IMAGE,                          // Extended Module
+                        NORMAL_IPL_OP,
                 }
         },
         {
@@ -156,6 +166,7 @@ const   TaskInfo    g_istep11[]  =   {
                 {
                         START_FN,                           // task type
                         EXT_IMAGE,                          // Extended Module
+                        NORMAL_IPL_OP,
                 }
         },
 
