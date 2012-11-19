@@ -720,8 +720,26 @@ namespace TARGETING
         SECTION_TYPE_HEAP_ZERO_INIT = 0x03,
 
         // FSP section
-        // TODO RTC: 35451 
-        SECTION_TYPE_FSP = 0x04,
+
+        // Initialized to zero on Fsp Reset / Obliterate on Fsp Reset or R/R
+        SECTION_TYPE_FSP_P0_ZERO_INIT = 0x4,
+        
+        // Initialized from Flash / Obliterate on Fsp Reset or R/R
+        SECTION_TYPE_FSP_P0_FLASH_INIT = 0x5,
+        
+        // This section remains across fsp power cycle, fixed, never updates
+        SECTION_TYPE_FSP_P3_RO = 0x6,
+
+        // This section persist changes across Fsp Power cycle
+        SECTION_TYPE_FSP_P3_RW = 0x7,
+         
+        // Initialized to zero on hard reset, else existing P1 memory
+        // copied on R/R
+        SECTION_TYPE_FSP_P1_ZERO_INIT = 0x8,
+
+        // Intialized to default from P3 on hard reset, else existing P1
+        // memory copied on R/R
+        SECTION_TYPE_FSP_P1_FLASH_INIT = 0x9,
     };
 
     struct TargetingSection
@@ -3347,9 +3365,13 @@ sub generateTargetingImage {
     my $heapPnorInitBaseAddr = $pnorRwBaseAddress    + $vmmSectionOffset;
     my $heapZeroInitBaseAddr = $heapPnorInitBaseAddr + $vmmSectionOffset;
 
-    # TODO RTC: 35451
     # Split "fsp" into additional sections
-    my $fspBaseAddr          = $heapZeroInitBaseAddr + $vmmSectionOffset;
+    my $fspP0DefaultedFromZeroBaseAddr   = $heapZeroInitBaseAddr + $vmmSectionOffset;
+    my $fspP0DefaultedFromP3BaseAddr  = $fspP0DefaultedFromZeroBaseAddr + $vmmSectionOffset;
+    my $fspP3RoBaseAddr         = $fspP0DefaultedFromP3BaseAddr + $vmmSectionOffset;
+    my $fspP3RwBaseAddr         = $fspP3RoBaseAddr + $vmmSectionOffset;
+    my $fspP1DefaultedFromZeroBaseAddr   = $fspP3RwBaseAddr + $vmmSectionOffset;
+    my $fspP1DefaultedFromP3BaseAddr  = $fspP1DefaultedFromZeroBaseAddr + $vmmSectionOffset;
 
     # Reserve 256 bytes for the header, then keep track of PNOR RO offset
     my $headerSize = 256;
@@ -3450,10 +3472,19 @@ sub generateTargetingImage {
     my $rwAttrBinData;
     my $rwOffset = 0;
 
-    # TODO RTC: 35451   
     # Split into more granular sections
-    my $fspOffset = 0;
-    my $fspBinData;
+    my $fspP0DefaultedFromZeroOffset = 0;
+    my $fspP0DefaultedFromZeroBinData;
+    my $fspP0DefaultedFromP3Offset = 0;
+    my $fspP0DefaultedFromP3BinData;
+    my $fspP1DefaultedFromZeroOffset = 0;
+    my $fspP1DefaultedFromZeroBinData;
+    my $fspP1DefaultedFromP3Offset = 0;
+    my $fspP1DefaultedFromP3BinData;
+    my $fspP3RoOffset = 0;
+    my $fspP3RoBinData;
+    my $fspP3RwOffset = 0;
+    my $fspP3RwBinData;
 
     my $attributePointerBinData;
     my $targetsBinData;
@@ -3536,12 +3567,41 @@ sub generateTargetingImage {
             }
 
             my $section;
-            # TODO RTC: 35451
             # Split "fsp" into more sections later
             if(   (exists $attributeDef->{fspOnly})
                || ($fspTarget))
             {
-                $section = "fsp";
+                if( $attributeDef->{persistency} eq "volatile-zeroed"  )
+                {
+                    $section = "fspP0DefaultedFromZero";
+                }
+                elsif( $attributeDef->{persistency} eq "volatile" )
+                {
+                    $section = "fspP0DefaultedFromP3";
+                }
+                elsif( !exists $attributeDef->{writeable}
+                       && $attributeDef->{persistency} eq "non-volatile" )
+                {
+                    $section = "fspP3Ro";
+                }
+                elsif( exists $attributeDef->{writeable}
+                       && $attributeDef->{persistency} eq "non-volatile" ) 
+                {
+                    $section = "fspP3Rw";
+                }
+                elsif( $attributeDef->{persistency} eq "semi-non-volatile-zeroed" )
+                {
+                    $section = "fspP1DefaultedFromZero";
+                }
+                elsif( $attributeDef->{persistency} eq "semi-non-volatile" ) 
+                {
+                    $section = "fspP1DefaultedFromP3";
+                }
+                else
+                {
+                    print STDOUT "Persistency not found =$attributeDef->{persistency}\n";
+                    fatal("Persistency not supported.");
+                }
             }
             elsif( exists $attributeDef->{writeable}
                     && $attributeDef->{persistency} eq "non-volatile" )
@@ -3655,27 +3715,122 @@ sub generateTargetingImage {
 
                 $heapPnorInitBinData .= $heapPnorInitData;
             }
-            # TODO RTC: 35451
             # Split FSP section into more granular sections
-            elsif($section eq "fsp")
+            elsif($section eq "fspP0DefaultedFromZero")
             {
-                my ($fspData,$alignment) = packAttribute(
+                my ($fspP0ZeroData,$alignment) = packAttribute(
                         $attributes,
                         $attributeDef,$attrhash{$attributeId}->{default});
 
                 # Align the data as necessary
-                my $pads = ($alignment - ($fspOffset
+                my $pads = ($alignment - ($fspP0DefaultedFromZeroOffset
                             % $alignment)) % $alignment;
-                $fspBinData .= pack ("@".$pads);
-                $fspOffset += $pads;
+                $fspP0DefaultedFromZeroBinData .= pack ("@".$pads);
+                $fspP0DefaultedFromZeroOffset += $pads;
 
                 $attributePointerBinData .= pack8byte(
-                    $fspOffset + $fspBaseAddr);
+                    $fspP0DefaultedFromZeroOffset + $fspP0DefaultedFromZeroBaseAddr);
 
-                $fspOffset += (length $fspData);
+                $fspP0DefaultedFromZeroOffset += (length $fspP0ZeroData);
 
-                $fspBinData .= $fspData;
-            }  
+                $fspP0DefaultedFromZeroBinData .= $fspP0ZeroData;
+            }
+            elsif($section eq "fspP0DefaultedFromP3")
+            {
+                my ($fspP0FlashData,$alignment) = packAttribute(
+                        $attributes,
+                        $attributeDef,$attrhash{$attributeId}->{default});
+
+                # Align the data as necessary
+                my $pads = ($alignment - ($fspP0DefaultedFromP3Offset
+                            % $alignment)) % $alignment;
+                $fspP0DefaultedFromP3BinData .= pack ("@".$pads);
+                $fspP0DefaultedFromP3Offset += $pads;
+
+                $attributePointerBinData .= pack8byte(
+                    $fspP0DefaultedFromP3Offset + $fspP0DefaultedFromP3BaseAddr);
+
+                $fspP0DefaultedFromP3Offset += (length $fspP0FlashData);
+
+                $fspP0DefaultedFromP3BinData .= $fspP0FlashData;
+            }
+            elsif($section eq "fspP3Ro")
+            {
+                my ($fspP3RoData,$alignment) = packAttribute(
+                        $attributes,
+                        $attributeDef,$attrhash{$attributeId}->{default});
+
+                # Align the data as necessary
+                my $pads = ($alignment - ($fspP3RoOffset
+                            % $alignment)) % $alignment;
+                $fspP3RoBinData .= pack ("@".$pads);
+                $fspP3RoOffset += $pads;
+
+                $attributePointerBinData .= pack8byte(
+                    $fspP3RoOffset + $fspP3RoBaseAddr);
+
+                $fspP3RoOffset += (length $fspP3RoData);
+
+                $fspP3RoBinData .= $fspP3RoData;
+            }
+            elsif($section eq "fspP3Rw")
+            {
+                my ($fspP3RwData,$alignment) = packAttribute(
+                        $attributes,
+                        $attributeDef,$attrhash{$attributeId}->{default});
+
+                # Align the data as necessary
+                my $pads = ($alignment - ($fspP3RwOffset
+                            % $alignment)) % $alignment;
+                $fspP3RwBinData .= pack ("@".$pads);
+                $fspP3RwOffset += $pads;
+
+                $attributePointerBinData .= pack8byte(
+                    $fspP3RwOffset + $fspP3RwBaseAddr);
+
+                $fspP3RwOffset += (length $fspP3RwData);
+
+                $fspP3RwBinData .= $fspP3RwData;
+            }
+            elsif($section eq "fspP1DefaultedFromZero")
+            {
+                my ($fspP1ZeroData,$alignment) = packAttribute(
+                        $attributes,
+                        $attributeDef,$attrhash{$attributeId}->{default});
+
+                # Align the data as necessary
+                my $pads = ($alignment - ($fspP1DefaultedFromZeroOffset
+                            % $alignment)) % $alignment;
+                $fspP1DefaultedFromZeroBinData .= pack ("@".$pads);
+                $fspP1DefaultedFromZeroOffset += $pads;
+
+                $attributePointerBinData .= pack8byte(
+                    $fspP1DefaultedFromZeroOffset + $fspP1DefaultedFromZeroBaseAddr);
+
+                $fspP1DefaultedFromZeroOffset += (length $fspP1ZeroData);
+
+                $fspP1DefaultedFromZeroBinData .= $fspP1ZeroData;
+            }
+            elsif($section eq "fspP1DefaultedFromP3")
+            {
+                my ($fspP1FlashData,$alignment) = packAttribute(
+                        $attributes,
+                        $attributeDef,$attrhash{$attributeId}->{default});
+
+                # Align the data as necessary
+                my $pads = ($alignment - ($fspP1DefaultedFromP3Offset
+                            % $alignment)) % $alignment;
+                $fspP1DefaultedFromP3BinData .= pack ("@".$pads);
+                $fspP1DefaultedFromP3Offset += $pads;
+
+                $attributePointerBinData .= pack8byte(
+                    $fspP1DefaultedFromP3Offset + $fspP1DefaultedFromP3BaseAddr);
+
+                $fspP1DefaultedFromP3Offset += (length $fspP1FlashData);
+
+                $fspP1DefaultedFromP3BinData .= $fspP1FlashData;
+            }
+
             else
             {
                 fatal("Could not find a suitable section.");
@@ -3720,17 +3875,49 @@ sub generateTargetingImage {
     $sectionHoH{ heapZeroInit }{ size   } =
         sizeBlockAligned($heapZeroInitOffset,$blockSize,1);
   
-    # TODO RTC: 35451
     # Split "fsp" into additional sections
     if($cfgIncludeFspAttributes)
     {
         # zeroInitSection occupies no space in the binary, so set the FSP
         # section address to that of the zeroInitSection
-        $sectionHoH{ fsp }{ offset } =
+        $sectionHoH{ fspP0DefaultedFromZero }{ offset } =
              $sectionHoH{heapZeroInit}{offset};
-        $sectionHoH{ fsp }{ type } = 4;
-        $sectionHoH{ fsp }{ size } =
-            sizeBlockAligned($fspOffset,$blockSize,1);
+        $sectionHoH{ fspP0DefaultedFromZero }{ type } = 4;
+        $sectionHoH{ fspP0DefaultedFromZero }{ size } =
+            sizeBlockAligned($fspP0DefaultedFromZeroOffset,$blockSize,1);
+
+        $sectionHoH{ fspP0DefaultedFromP3 }{ offset } =
+             $sectionHoH{fspP0DefaultedFromZero}{offset} +
+             $sectionHoH{fspP0DefaultedFromZero}{size};
+        $sectionHoH{ fspP0DefaultedFromP3 }{ type } = 5;
+        $sectionHoH{ fspP0DefaultedFromP3 }{ size } =
+            sizeBlockAligned($fspP0DefaultedFromP3Offset,$blockSize,1);
+
+        $sectionHoH{ fspP3Ro }{ offset } =
+             $sectionHoH{fspP0DefaultedFromP3}{offset} +
+             $sectionHoH{fspP0DefaultedFromP3}{size};
+        $sectionHoH{ fspP3Ro }{ type } = 6;
+        $sectionHoH{ fspP3Ro }{ size } =
+            sizeBlockAligned($fspP3RoOffset,$blockSize,1);
+
+        $sectionHoH{ fspP3Rw }{ offset } =
+             $sectionHoH{fspP3Ro}{offset} + $sectionHoH{fspP3Ro}{size};
+        $sectionHoH{ fspP3Rw }{ type } = 7;
+        $sectionHoH{ fspP3Rw }{ size } =
+            sizeBlockAligned($fspP3RwOffset,$blockSize,1);
+
+        $sectionHoH{ fspP1DefaultedFromZero }{ offset } =
+             $sectionHoH{fspP3Rw}{offset} + $sectionHoH{fspP3Rw}{size};
+        $sectionHoH{ fspP1DefaultedFromZero }{ type } = 8;
+        $sectionHoH{ fspP1DefaultedFromZero }{ size } =
+            sizeBlockAligned($fspP1DefaultedFromZeroOffset,$blockSize,1);
+
+        $sectionHoH{ fspP1DefaultedFromP3 }{ offset } =
+             $sectionHoH{fspP1DefaultedFromZero}{offset} +
+             $sectionHoH{fspP1DefaultedFromZero}{size};
+        $sectionHoH{ fspP1DefaultedFromP3 }{ type } = 9;
+        $sectionHoH{ fspP1DefaultedFromP3 }{ size } =
+            sizeBlockAligned($fspP1DefaultedFromP3Offset,$blockSize,1);
     }
 
     my $numSections = keys %sectionHoH;
@@ -3750,12 +3937,16 @@ sub generateTargetingImage {
     $headerBinData .= pack4byte($numSections);
     $headerBinData .= pack4byte($offsetToSections);
 
-    # TODO RTC: 35451
     # Split "fsp" into additional sections
     my @sections = ("pnorRo","pnorRw","heapPnorInit","heapZeroInit");
     if($cfgIncludeFspAttributes)
     {
-        push(@sections,"fsp");
+        push(@sections,"fspP0DefaultedFromZero");
+        push(@sections,"fspP0DefaultedFromP3");
+        push(@sections,"fspP3Ro");
+        push(@sections,"fspP3Rw");
+        push(@sections,"fspP1DefaultedFromZero");
+        push(@sections,"fspP1DefaultedFromP3");
     }
 
     foreach my $section (@sections)
@@ -3799,14 +3990,33 @@ sub generateTargetingImage {
     $outFile .= pack("@".($sectionHoH{heapPnorInit}{size}
         - $heapPnorInitOffset));
 
-    # TODO RTC: 35451
     # Serialize FSP section to multiple of 4k page size (pad if
     # necessary)
     if($cfgIncludeFspAttributes)
     {
-        $outFile .= $fspBinData;
-        $outFile .= pack("@".($sectionHoH{fsp}{size}
-            - $fspOffset));
+        $outFile .= $fspP0DefaultedFromZeroBinData;
+        $outFile .= pack("@".($sectionHoH{fspP0DefaultedFromZero}{size}
+            - $fspP0DefaultedFromZeroOffset));
+
+        $outFile .= $fspP0DefaultedFromP3BinData;
+        $outFile .= pack("@".($sectionHoH{fspP0DefaultedFromP3}{size}
+            - $fspP0DefaultedFromP3Offset));
+
+        $outFile .= $fspP3RoBinData;
+        $outFile .= pack("@".($sectionHoH{fspP3Ro}{size}
+            - $fspP3RoOffset));
+
+        $outFile .= $fspP3RwBinData;
+        $outFile .= pack("@".($sectionHoH{fspP3Rw}{size}
+            - $fspP3RwOffset));
+
+        $outFile .= $fspP1DefaultedFromZeroBinData;
+        $outFile .= pack("@".($sectionHoH{fspP1DefaultedFromZero}{size}
+            - $fspP1DefaultedFromZeroOffset));
+
+        $outFile .= $fspP1DefaultedFromP3BinData;
+        $outFile .= pack("@".($sectionHoH{fspP1DefaultedFromP3}{size}
+            - $fspP1DefaultedFromP3Offset));
     }
 
     return $outFile;
