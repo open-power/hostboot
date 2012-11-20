@@ -52,20 +52,19 @@ use constant TARGET_TYPE_MCS_CHIPLET => 0x00000040;
 use constant TARGET_TYPE_XBUS_ENDPOINT => 0x00000080;
 use constant TARGET_TYPE_ABUS_ENDPOINT => 0x00000100;
 
-# From fapiAttributeOverride.H
+# From fapiAttributeTank.H
 use constant ATTR_POS_NA => 0xffff;
 use constant ATTR_UNIT_POS_NA => 0xff;
 use constant ATTR_ARRAYD_NA => 0xff;
-use constant ATTR_OVERRIDE_CONST => 1;
-use constant ATTR_OVERRIDE_NON_CONST => 2;
-use constant ATTR_OVERRIDE_CLEAR_ALL => 3;
+use constant ATTR_FLAG_CONST => 1;
 
 # From fapiPlatAttrOverrideDirect.C
 my $overrideSymbol = 'fapi::g_attrOverride';
 
 # Expected filenames
-my $attributeIdFileName = 'fapiAttributeIds.H';
-my $overrideFileName = 'hwpfAttributeOverrides.txt';
+my $attributeIdsFileName = 'fapiAttributeIds.txt';
+my $attributeEnumsFileName = 'fapiAttributeEnums.txt';
+my $overrideFileName = 'OverrideAttrs.txt';
 
 sub main
 {
@@ -77,13 +76,20 @@ sub main
     }
 
     #--------------------------------------------------------------------------
-    # Check if the Attribute ID and Attribute Overrides files exist
+    # Check if the Attribute IDs/Enums and Attribute Overrides files exist
     #--------------------------------------------------------------------------
-    my $attributeIdFile = ::getImgPath();
-    $attributeIdFile = $attributeIdFile."$attributeIdFileName";
-    unless (-e $attributeIdFile)
+    my $attributeIdsFile = ::getImgPath();
+    $attributeIdsFile = $attributeIdsFile."$attributeIdsFileName";
+    unless (-e $attributeIdsFile)
     {
-        die "Cannot find file $attributeIdFile";
+        die "Cannot find file $attributeIdsFile";
+    }
+
+    my $attributeEnumsFile = ::getImgPath();
+    $attributeEnumsFile = $attributeEnumsFile."$attributeEnumsFileName";
+    unless (-e $attributeEnumsFile)
+    {
+        die "Cannot find file $attributeEnumsFile";
     }
 
     my $overrideFile = ::getImgPath();
@@ -94,35 +100,46 @@ sub main
     }
 
     #--------------------------------------------------------------------------
-    # Process the Attribute ID file. Record the values of the Attribute IDs and
-    # the Attribute Enumeration Values in hashes
+    # Process the Attribute ID file. Record the values of the Attribute IDs in
+    # a hash
     #--------------------------------------------------------------------------
     my %attributeIdVals;
-    my %attributeEnumVals;
 
-    open(IDFILE, "< $attributeIdFile") or die "Cannot open file $attributeIdFile";
+    open(IDFILE, "< $attributeIdsFile") or die "Cannot open file $attributeIdsFile";
     while (my $line = <IDFILE>)
     {
         chomp($line);
 
-        if ($line =~ /^\s+(ATTR_\S+) = 0x(\S+),/)
+        if ($line =~ /(ATTR_\S+) 0x(\S+)/)
         {
             # Found an attribute ID
             $attributeIdVals{$1} = hex $2
         }
+    }
+    close(IDFILE);
+
+    #--------------------------------------------------------------------------
+    # Process the Attribute ENUM file. Record the values of the Attribute ENUMs
+    # in a hash
+    #--------------------------------------------------------------------------
+    my %attributeEnumVals;
+
+    open(ENUMFILE, "< $attributeEnumsFile") or die "Cannot open file $attributeEnumsFile";
+    while (my $line = <ENUMFILE>)
+    {
         # Note that enumerated values can end with 'ULL'
-        elsif ($line =~ /\s+(ENUM_ATTR_\S+) = 0x([a-fA-F0-9]+)/)
+        if ($line =~ /(ATTR_\S+) = 0x([a-fA-F0-9]+)/)
         {
             # Found a hex attribute value enumeration
             $attributeEnumVals{$1} = hex $2;
         }
-        elsif ($line =~ /\s+(ENUM_ATTR_\S+) = ([0-9]+)/)
+        elsif ($line =~ /(ATTR_\S+) = ([0-9]+)/)
         {
             # Found a decimal attribute value enumeration
             $attributeEnumVals{$1} = $2;
         }
     }
-    close(IDFILE);
+    close(ENUMFILE);
 
     # Debug output
     if ($debug)
@@ -142,31 +159,18 @@ sub main
     # override in arrays
     #--------------------------------------------------------------------------
     my @attrIdString;
-    my @overrideVal;
+    my @val;
     my @attrId;
     my @targetType;
     my @pos;
     my @unitPos;
-    my @overrideType;
+    my @flags;
     my @arrayD1;
     my @arrayD2;
     my @arrayD3;
     my @arrayD4;
 
-    # Setup the initial override to be an instruction to "clear all overrides"
-    $attrIdString[0] = "CLEAR_ALL_OVERRIDES";
-    $overrideVal[0] = 0;
-    $attrId[0] = 0;
-    $targetType[0] = 0;
-    $pos[0] = 0;
-    $unitPos[0] = 0;
-    $overrideType[0] = ATTR_OVERRIDE_CLEAR_ALL;
-    $arrayD1[0] = 0;
-    $arrayD2[0] = 0;
-    $arrayD3[0] = 0;
-    $arrayD4[0] = 0;
-
-    my $numOverrides = 1;
+    my $numOverrides = 0;
     my $curTargetType = TARGET_TYPE_SYSTEM;
     my $curPos = ATTR_POS_NA;
     my $curUnitPos = ATTR_UNIT_POS_NA;
@@ -275,7 +279,7 @@ sub main
             }
             else
             {
-                ::userDisplay "Cannot find ID $1 in $attributeIdFile\n";
+                ::userDisplay "Cannot find ID $1 in $attributeIdsFile\n";
                 die; 
             }
 
@@ -322,29 +326,29 @@ sub main
             }
 
             # Figure out the override value
-            if ($line =~ /^ATTR_\S+\s+\S+\s+([A-Za-z]+\S*)/)
+            if ($line =~ /^ATTR_\S+\s+([A-Za-z]+\S*)/)
             {
                 # enumerator
-                my $enum = "ENUM_"."$attrIdString[$numOverrides]"."_$1";
+                my $enum = "$attrIdString[$numOverrides]"."_$1";
                 if (exists $attributeEnumVals{$enum})
                 {
-                    $overrideVal[$numOverrides] = $attributeEnumVals{$enum};
+                    $val[$numOverrides] = $attributeEnumVals{$enum};
                 }
                 else
                 {
-                    ::userDisplay "Cannot find enum $enum in $attributeIdFile\n";
+                    ::userDisplay "Cannot find enum $enum in $attributeEnumsFile\n";
                     die;
                 }
             }
-            elsif ($line =~ /^ATTR_\S+\s+\S+\s+0x([0-9A-Za-z]+)/)
+            elsif ($line =~ /^ATTR_\S+\s+0x([0-9A-Za-z]+)/)
             {
                 # Hex value
-                $overrideVal[$numOverrides] = hex $1;
+                $val[$numOverrides] = hex $1;
             }
-            elsif ($line =~ /^ATTR_\S+\s+\S+\s+(\d+)/)
+            elsif ($line =~ /^ATTR_\S+\s+(\d+)/)
             {
                 # Decimal Value
-                $overrideVal[$numOverrides] = $1;
+                $val[$numOverrides] = $1;
             }
             else
             {
@@ -352,24 +356,24 @@ sub main
                 die;
             }
 
-            # Figure out the override type
+            # Figure out if it is a const override
             if ($line =~ /CONST\s*/)
             {
-                $overrideType[$numOverrides] = ATTR_OVERRIDE_CONST;
+                $flags[$numOverrides] = ATTR_FLAG_CONST;
             }
             else
             {
-                $overrideType[$numOverrides] = ATTR_OVERRIDE_NON_CONST;
+                $flags[$numOverrides] = 0;
             }
 
             # Debug output
             if ($debug)
             {
-                ::userDisplay "OVERRIDE. Val: $overrideVal[$numOverrides]. ";
+                ::userDisplay "OVERRIDE. Val: $val[$numOverrides]. ";
                 ::userDisplay "ID: $attrId[$numOverrides]. ";
                 ::userDisplay "TargType: $targetType[$numOverrides]. ";
                 ::userDisplay "Pos: $pos[$numOverrides].$unitPos[$numOverrides].\n";
-                ::userDisplay "          OType: $overrideType[$numOverrides]. ";
+                ::userDisplay "          OFlags: $flags[$numOverrides]. ";
                 ::userDisplay "Dims: $arrayD1[$numOverrides].";
                 ::userDisplay "$arrayD2[$numOverrides].";
                 ::userDisplay "$arrayD3[$numOverrides].";
@@ -404,17 +408,17 @@ sub main
     # From fapiAttributeOverride.H
     # struct AttributeOverride
     # {
-    #     uint64_t iv_overrideVal;  // Large enough to hold the biggest attribute size
-    #     uint32_t iv_attrId;       // fapi::AttributeId enum value
-    #     uint32_t iv_targetType;   // fapi::TargetType enum value
-    #     uint16_t iv_pos;          // For chips/dimms the position
-    #                               // For chiplets the parent chip position
-    #     uint8_t  iv_unitPos;      // For chiplets the position
-    #     uint8_t  iv_overrideType; // fapi::AttributeOverrideType enum value
-    #     uint8_t  iv_arrayD1;      // Applies to element D1 in 1D or more array atts
-    #     uint8_t  iv_arrayD2;      // Applies to element D2 in 2D or more array atts
-    #     uint8_t  iv_arrayD3;      // Applies to element D3 in 3D or more array atts
-    #     uint8_t  iv_arrayD4;      // Applies to element D4 in 4D array atts
+    #     uint64_t iv_val;        // Large enough to hold the biggest attribute size
+    #     uint32_t iv_attrId;     // fapi::AttributeId enum value
+    #     uint32_t iv_targetType; // fapi::TargetType enum value
+    #     uint16_t iv_pos;        // For chips/dimms the position
+    #                             // For chiplets the parent chip position
+    #     uint8_t  iv_unitPos;    // For chiplets the position
+    #     uint8_t  iv_flags;      // fapi::AttributeFlags enum value
+    #     uint8_t  iv_arrayD1;    // Applies to element D1 in 1D or more array atts
+    #     uint8_t  iv_arrayD2;    // Applies to element D2 in 2D or more array atts
+    #     uint8_t  iv_arrayD3;    // Applies to element D3 in 3D or more array atts
+    #     uint8_t  iv_arrayD4;    // Applies to element D4 in 4D array atts
     # };
 
     #--------------------------------------------------------------------------
@@ -424,7 +428,7 @@ sub main
     {
         # Write override to Hostboot
         my $addr = $overrideAddr;
-        ::write64($addr, $overrideVal[$i]);
+        ::write64($addr, $val[$i]);
         $addr += 8;
         ::write32($addr, $attrId[$i]);
         $addr += 4;
@@ -434,7 +438,7 @@ sub main
         $addr += 2;
         ::write8($addr, $unitPos[$i]);
         $addr++;
-        ::write8($addr, $overrideType[$i]);
+        ::write8($addr, $flags[$i]);
         $addr++;
         ::write8($addr, $arrayD1[$i]);
         $addr++;
@@ -447,7 +451,7 @@ sub main
         # Tell Hostboot to process the override
         my $callFuncForce = 0;
         my @callFuncParms;
-        Hostboot::CallFunc::execFunc("fapi::platAttrOverrideDirect()",
+        Hostboot::CallFunc::execFunc("fapi::attrOverrideSync::directOverride()",
             $debug, $callFuncForce, \@callFuncParms);
 
         if ($debug)
@@ -456,9 +460,7 @@ sub main
         }
     }
 
-    # The first override is actually an instruction to clear all overrides
-    my $actualNum = $numOverrides - 1;
-    ::userDisplay "All $actualNum override(s) successfully sent to Hostboot\n";
+    ::userDisplay "All $numOverrides override(s) successfully sent to Hostboot\n";
 }
 
 sub helpInfo
@@ -469,8 +471,9 @@ sub helpInfo
         options => {
                     "debug" => ["More debug output."],
                    },
-        notes => ["Looks for two files in the image directory",
-                  "$attributeIdFileName: Contains attribute id/enum values",
+        notes => ["Looks for three files in the image directory",
+                  "$attributeIdsFileName: Contains attribute id values",
+                  "$attributeEnumsFileName: Contains attribute enum values",
                   "$overrideFileName: Contains the attribute overrides"]
     );
 }

@@ -60,7 +60,8 @@ COPY_FILES = \
     img/isteplist.csv:tools,vpo \
     img/dimmspd.dat:vpo \
     img/procmvpd.dat:vpo \
-    obj/genfiles/fapiAttributeIds.H:vpo \
+    obj/genfiles/fapiAttributeIds.txt:vpo \
+    obj/genfiles/fapiAttributeEnums.txt:vpo \
     src/build/hwpf/prcd_compile.tcl:tools \
     src/usr/hwpf/hwp/initfiles/sample.initfile:tools \
     $(foreach file, $(call ROOTPATH_WILDCARD,releaseNotes.html), $(file):fsp)\
@@ -149,7 +150,8 @@ simics.tar_CONTENTS = \
     src/build/simics/hb-pnor-vpd-preload.pl \
     img/dimmspd.dat \
     img/procmvpd.dat \
-    obj/genfiles/fapiAttributeIds.H \
+    obj/genfiles/fapiAttributeIds.txt \
+    obj/genfiles/fapiAttributeEnums.txt \
 
 #
 # Contents for the fsp.tar.
@@ -164,6 +166,8 @@ fsp.tar_CONTENTS = \
     img/simics_MURANO_targeting.bin \
     img/simics_VENICE_targeting.bin \
     img/TULETA_targeting.bin \
+    obj/genfiles/fapiAttributeIds.txt \
+    obj/genfiles/fapiAttributeEnums.txt \
     $(addsuffix :targeting/,\
 	$(call ROOTPATH_WILDCARD_RECURSIVE,src/usr/targeting/common))\
     $(addsuffix :targeting/,\

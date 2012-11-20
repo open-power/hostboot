@@ -42,14 +42,12 @@
  *                          camvanng    11/09/2011  Update attr enum test
  *                          mjjones     11/17/2011  Removed some initfile attr tests
  *                          mjjones     11/22/2011  Demonstrate use of heap based array
+ *                          mjjones     10/19/2012  Update AttributeTank tests
  *
  *  HWP_IGNORE_VERSION_CHECK
  */
 
 #include <fapiTestHwpAttr.H>
-#include <targeting/common/target.H>
-#include <targeting/common/commontargeting.H>
-#include <targeting/common/utilFilter.H>
 
 extern "C"
 {
@@ -57,76 +55,14 @@ extern "C"
 //******************************************************************************
 // hwpTestAttributes function
 //******************************************************************************
-fapi::ReturnCode hwpTestAttributes()
+fapi::ReturnCode hwpTestAttributes(fapi::Target & i_mbaTarget,
+                                   fapi::Target & i_procTarget)
 {
     FAPI_INF("hwpTestAttributes: Start HWP");
     fapi::ReturnCode l_rc;
 
     do
     {
-        //----------------------------------------------------------------------
-        // Test ATTR_MSS_DIMM_MFG_ID_CODE
-        //----------------------------------------------------------------------
-        {
-            uint32_t l_data;
-            TARGETING::TargetHandleList l_dimmList;
-            getAllLogicalCards( l_dimmList, TARGETING::TYPE_DIMM );
-
-            for( size_t i = 0; i < l_dimmList.size(); i++)
-            {
-                fapi::Target l_target( fapi::TARGET_TYPE_DIMM,
-                                        (void *)(l_dimmList[i]) ); 
-                l_rc = FAPI_ATTR_GET(ATTR_POS, &l_target, l_data);
-
-                if (l_rc)
-                {
-                    FAPI_ERR("hwpTestAttributes: ATTR_POS. Error from GET");
-                    break;
-                }
-                else
-                {
-                    FAPI_INF("hwpTestAttributes: ATTR_POS = %d", l_data);
-                }
-            }
-
-            if (l_rc)
-            {
-                break;
-            }
-        }
-
-        //----------------------------------------------------------------------
-        // Test ATTR_MSS_DIMM_MFG_ID_CODE
-        //----------------------------------------------------------------------
-        {
-            uint32_t l_data[2][2];
-
-            TARGETING::PredicateCTM l_pred(TARGETING::CLASS_UNIT, TARGETING::TYPE_MBA);
-            TARGETING::TargetRangeFilter l_filter(TARGETING::targetService().begin(),
-                                                  TARGETING::targetService().end(),
-                                                  &l_pred);
-
-            // Just look at the first MBA chiplet
-            if (l_filter)
-            {
-                fapi::Target l_target(fapi::TARGET_TYPE_MBA_CHIPLET, *l_filter); 
-
-                l_rc = FAPI_ATTR_GET(ATTR_MSS_DIMM_MFG_ID_CODE, &l_target, l_data);
-
-                if (l_rc)
-                {
-                    FAPI_ERR("hwpTestAttributes: ATTR_MSS_DIMM_MFG_ID_CODE. Error from GET");
-                    break;
-                }
-            }
-            else
-            {
-                FAPI_ERR("hwpTestAttributes: ATTR_MSS_DIMM_MFG_ID_CODE. No MBAs found");
-                FAPI_SET_HWP_ERROR(l_rc, RC_HWP_ATTR_UNIT_TEST_FAIL);
-                break;
-            }
-        }
-
         //----------------------------------------------------------------------
         // Test ATTR_SCRATCH_UINT8_1
         //----------------------------------------------------------------------
@@ -940,260 +876,312 @@ fapi::ReturnCode hwpTestAttributes()
         }
         
         //----------------------------------------------------------------------
-        // Test non-const Attribute Override on ATTR_SCRATCH_UINT64_1
+        // Test AttributeTank functions with empty tank
         //----------------------------------------------------------------------
         {
-        if (fapi::platAttrSvc::overridesExistWrap())
+        // Create a local OverrideAttributeTank (this is not the singleton)
+        fapi::OverrideAttributeTank l_tank;
+        
+        // Check that tank is empty
+        if (l_tank.attributesExist())
         {
-            FAPI_INF("hwpTestAttributes: OverrideUint64. Overrides exist, skipping test");
+            FAPI_SET_HWP_ERROR(l_rc, RC_HWP_ATTR_UNIT_TEST_FAIL);
+            FAPI_ERR("hwpTestAttributes: Error. AttributeTank is not empty (1.1)");
+            break;
         }
-        else
+        
+        // Clear all attributes from empty tank
+        l_tank.clearAllAttributes();
+        
+        // Clear a non-const system attribute from empty tank
+        l_tank.clearNonConstAttribute(fapi::ATTR_SCRATCH_UINT64_1, NULL);
+        
+        // Try to get a system attribute from empty tank
+        uint64_t l_val = 0;
+        if (l_tank.getAttribute(fapi::ATTR_SCRATCH_UINT64_1, NULL, l_val))
         {
-            // Set the attribute to a known value
-            uint64_t l_val = 4;
-            l_rc = FAPI_ATTR_SET(ATTR_SCRATCH_UINT64_1, NULL, l_val);
-            
-            if (l_rc)
-            {
-                FAPI_ERR("hwpTestAttributes: OverrideUint64. Error from SET");
-                break;
-            }
-            
-            // Create an non-const override
-            fapi::AttributeOverride l_override;
-            l_override.iv_overrideVal = 9;
-            l_override.iv_attrId =
-                static_cast<uint32_t>(fapi::ATTR_SCRATCH_UINT64_1);
-            l_override.iv_targetType =
-                static_cast<uint32_t>(fapi::TARGET_TYPE_SYSTEM);
-            l_override.iv_pos = fapi::ATTR_POS_NA;
-            l_override.iv_unitPos = fapi::ATTR_UNIT_POS_NA;
-            l_override.iv_overrideType = fapi::ATTR_OVERRIDE_NON_CONST;
-            l_override.iv_arrayD1 = fapi::ATTR_ARRAYD_NA;
-            l_override.iv_arrayD2 = fapi::ATTR_ARRAYD_NA;
-            l_override.iv_arrayD3 = fapi::ATTR_ARRAYD_NA;
-            l_override.iv_arrayD4 = fapi::ATTR_ARRAYD_NA;
-            fapi::platAttrSvc::setOverrideWrap(l_override);
-            
-            // Check that the override value is returned
-            l_rc = FAPI_ATTR_GET(ATTR_SCRATCH_UINT64_1, NULL, l_val);
-            
-            if (l_rc)
-            {
-                FAPI_ERR("hwpTestAttributes: OverrideUint64. Error from GET");
-                break;
-            }
-            
-            if (l_val != 9)
-            {
-                FAPI_SET_HWP_ERROR(l_rc, RC_HWP_ATTR_UNIT_TEST_FAIL);
-                FAPI_ERR("hwpTestAttributes: OverrideUint64 GET returned %d",
-                         static_cast<uint32_t>(l_val));
-                break;
-            }
-            
-            // Set the attribute to a known value
-            l_val = 8;
-            l_rc = FAPI_ATTR_SET(ATTR_SCRATCH_UINT64_1, NULL, l_val);
-            
-            if (l_rc)
-            {
-                FAPI_ERR("hwpTestAttributes: OverrideUint64. Error from SET (2)");
-                break;
-            }
-            
-            // Check that the override was cancelled (it is a non-const override)
-            l_val = 0;
-            l_rc = FAPI_ATTR_GET(ATTR_SCRATCH_UINT64_1, NULL, l_val);
-            
-            if (l_rc)
-            {
-                FAPI_ERR("hwpTestAttributes: OverrideUint64. Error from GET (2)");
-                break;
-            }
-            
-            if (l_val != 8)
-            {
-                FAPI_SET_HWP_ERROR(l_rc, RC_HWP_ATTR_UNIT_TEST_FAIL);
-                FAPI_ERR("hwpTestAttributes: OverrideUint64 GET returned %d (2)",
-                         static_cast<uint32_t>(l_val));
-                break;
-            }
-            
-            // Clear all overrides
-            fapi::platAttrSvc::clearOverridesWrap();
+            FAPI_SET_HWP_ERROR(l_rc, RC_HWP_ATTR_UNIT_TEST_FAIL);
+            FAPI_ERR("hwpTestAttributes: Error. Got sys attr from empty tank (1.2)");
+            break;
         }
+        
+        // Try to get a chiplet attribute from empty tank
+        if (l_tank.getAttribute(fapi::ATTR_SCRATCH_UINT64_1, &i_mbaTarget,
+                                l_val))
+        {
+            FAPI_SET_HWP_ERROR(l_rc, RC_HWP_ATTR_UNIT_TEST_FAIL);
+            FAPI_ERR("hwpTestAttributes: Error. Got chiplet attr from empty tank (1.3)");
+            break;
         }
+        
+        // Try to get all attributes from empty tank
+        std::vector<fapi::AttributeChunk> l_attributes;
+        l_tank.getAllAttributes(fapi::AttributeTank::ALLOC_TYPE_MALLOC,
+                                l_attributes);
 
-        //----------------------------------------------------------------------
-        // Test const Attribute Override on ATTR_SCRATCH_UINT8_1
-        //----------------------------------------------------------------------
+        if (l_attributes.size())
         {
-        if (fapi::platAttrSvc::overridesExistWrap())
-        {
-            FAPI_INF("hwpTestAttributes: OverrideUint8. Overrides exist, skipping test");
-        }
-        else
-        {
-            // Set the attribute to a known value
-            uint8_t l_val = 1;
-            l_rc = FAPI_ATTR_SET(ATTR_SCRATCH_UINT8_1, NULL, l_val);
-            
-            if (l_rc)
-            {
-                FAPI_ERR("hwpTestAttributes: OverrideUint8. Error from SET");
-                break;
-            }
-            
-            // Create a const override
-            fapi::AttributeOverride l_override;
-            l_override.iv_overrideVal = 2;
-            l_override.iv_attrId =
-                static_cast<uint32_t>(fapi::ATTR_SCRATCH_UINT8_1);
-            l_override.iv_targetType =
-                static_cast<uint32_t>(fapi::TARGET_TYPE_SYSTEM);
-            l_override.iv_pos = fapi::ATTR_POS_NA;
-            l_override.iv_unitPos = fapi::ATTR_UNIT_POS_NA;
-            l_override.iv_overrideType = fapi::ATTR_OVERRIDE_CONST;
-            l_override.iv_arrayD1 = fapi::ATTR_ARRAYD_NA;
-            l_override.iv_arrayD2 = fapi::ATTR_ARRAYD_NA;
-            l_override.iv_arrayD3 = fapi::ATTR_ARRAYD_NA;
-            l_override.iv_arrayD4 = fapi::ATTR_ARRAYD_NA;
-            fapi::platAttrSvc::setOverrideWrap(l_override);
-            
-            // Check that the override value is returned
-            l_rc = FAPI_ATTR_GET(ATTR_SCRATCH_UINT8_1, NULL, l_val);
-            
-            if (l_rc)
-            {
-                FAPI_ERR("hwpTestAttributes: OverrideUint8. Error from GET");
-                break;
-            }
-            
-            if (l_val != 2)
-            {
-                FAPI_SET_HWP_ERROR(l_rc, RC_HWP_ATTR_UNIT_TEST_FAIL);
-                FAPI_ERR("hwpTestAttributes: OverrideUint8 GET returned %d",
-                         l_val);
-                break;
-            }
-            
-            // Set the attribute to a known value
-            l_val = 3;
-            l_rc = FAPI_ATTR_SET(ATTR_SCRATCH_UINT8_1, NULL, l_val);
-            
-            if (l_rc)
-            {
-                FAPI_ERR("hwpTestAttributes: OverrideUint8. Error from SET (2)");
-                break;
-            }
-            
-            // Check that the override value is still returned
-            l_val = 0;
-            l_rc = FAPI_ATTR_GET(ATTR_SCRATCH_UINT8_1, NULL, l_val);
-            
-            if (l_rc)
-            {
-                FAPI_ERR("hwpTestAttributes: OverrideUint8. Error from GET (2)");
-                break;
-            }
-            
-            if (l_val != 2)
-            {
-                FAPI_SET_HWP_ERROR(l_rc, RC_HWP_ATTR_UNIT_TEST_FAIL);
-                FAPI_ERR("hwpTestAttributes: OverrideUint8 GET returned %d (2)",
-                         l_val);
-                break;
-            }
-            
-            // Clear all overrides
-            fapi::platAttrSvc::clearOverridesWrap();
-            
-            // Check that the real value is now returned
-            l_val = 0;
-            l_rc = FAPI_ATTR_GET(ATTR_SCRATCH_UINT8_1, NULL, l_val);
-            
-            if (l_rc)
-            {
-                FAPI_ERR("hwpTestAttributes: OverrideUint8. Error from GET (3)");
-                break;
-            }
-            
-            if (l_val != 3)
-            {
-                FAPI_SET_HWP_ERROR(l_rc, RC_HWP_ATTR_UNIT_TEST_FAIL);
-                FAPI_ERR("hwpTestAttributes: OverrideUint8 GET returned %d (3)",
-                         l_val);
-                break;
-            }
+            FAPI_SET_HWP_ERROR(l_rc, RC_HWP_ATTR_UNIT_TEST_FAIL);
+            FAPI_ERR("hwpTestAttributes: Error. Got all attrs from empty tank (1.4)");
+            break;
         }
         }
         
+        //----------------------------------------------------------------------
+        // Test AttributeTank functions with single attribute in tank
+        //----------------------------------------------------------------------
+        {
+        // Create a local OverrideAttributeTank (this is not the singleton)
+        fapi::OverrideAttributeTank l_tank;
+        
+        // Add ATTR_SCRATCH_UINT64_1 as a sytem attribute to the tank
+        uint64_t l_val = 4;
+        l_tank.setAttribute(fapi::ATTR_SCRATCH_UINT64_1, NULL, l_val);
+        
+        // Check that attributes exist in the tank
+        if (!l_tank.attributesExist())
+        {
+            FAPI_SET_HWP_ERROR(l_rc, RC_HWP_ATTR_UNIT_TEST_FAIL);
+            FAPI_ERR("hwpTestAttributes: Error. AttributeTank is empty (2.1)");
+            break;
+        }
+        
+        // Try to get the wrong attribute from the tank
+        l_val = 0;
+        if (l_tank.getAttribute(fapi::ATTR_SCRATCH_UINT64_2, NULL, l_val))
+        {
+            FAPI_SET_HWP_ERROR(l_rc, RC_HWP_ATTR_UNIT_TEST_FAIL);
+            FAPI_ERR("hwpTestAttributes: Error. Got wrong attr from tank (2.2)");
+            break;
+        }
+        
+        // Get the attribute from the tank
+        if (!(l_tank.getAttribute(fapi::ATTR_SCRATCH_UINT64_1, NULL, l_val)))
+        {
+            FAPI_SET_HWP_ERROR(l_rc, RC_HWP_ATTR_UNIT_TEST_FAIL);
+            FAPI_ERR("hwpTestAttributes: Error. Did not get attr from tank (2.3)");
+            break;
+        }
+        
+        if (l_val != 4)
+        {
+            FAPI_SET_HWP_ERROR(l_rc, RC_HWP_ATTR_UNIT_TEST_FAIL);
+            FAPI_ERR("hwpTestAttributes: Error. Got bad value (0x%llx) from tank (2.4)",
+                     l_val);
+            break;
+        }
+        
+        // Get all attributes from the tank
+        std::vector<fapi::AttributeChunk> l_attributes;
+        l_tank.getAllAttributes(fapi::AttributeTank::ALLOC_TYPE_NEW,
+                                l_attributes);
+        
+        if (l_attributes.size() != 1)
+        {
+            FAPI_SET_HWP_ERROR(l_rc, RC_HWP_ATTR_UNIT_TEST_FAIL);
+            FAPI_ERR("hwpTestAttributes: Error. Got wrong chunk size (%d) of attrs from tank (2.5)",
+                     l_attributes.size());
+            break;
+        }
+            
+        if (l_attributes[0].iv_numAttributes != 1)
+        {
+            FAPI_SET_HWP_ERROR(l_rc, RC_HWP_ATTR_UNIT_TEST_FAIL);
+            FAPI_ERR("hwpTestAttributes: Error. Got wrong size (%d) of attrs from tank (2.6)",
+                     l_attributes[0].iv_numAttributes);
+            break;
+        }
+        
+        fapi::Attribute * l_pAttr = reinterpret_cast<fapi::Attribute *>
+            (l_attributes[0].iv_pAttributes);
+        if (l_pAttr[0].iv_val != 4)
+        {
+            FAPI_SET_HWP_ERROR(l_rc, RC_HWP_ATTR_UNIT_TEST_FAIL);
+            FAPI_ERR("hwpTestAttributes: Error. Got bad value (0x%llx) from tank (2.7)",
+                     l_pAttr[0].iv_val);
+            break;
+        }
+        delete [] l_attributes[0].iv_pAttributes;
+        }
         
         //----------------------------------------------------------------------
-        // Test non-const Attribute Override on ATTR_SCRATCH_UINT64_ARRAY_2
+        // Test AttributeTank functions with multiple attributes in tank
         //----------------------------------------------------------------------
         {
-        if (fapi::platAttrSvc::overridesExistWrap())
+        // Create a local OverrideAttributeTank (this is not the singleton)
+        fapi::OverrideAttributeTank l_tank;
+        
+        // Add ATTR_SCRATCH_UINT64_1 as a chip attribute to the tank
+        uint64_t l_val = 4;
+        l_tank.setAttribute(fapi::ATTR_SCRATCH_UINT64_1, &i_procTarget, l_val);
+        
+        // Add ATTR_SCRATCH_UINT64_2 as an MBA attribute to the tank
+        l_val = 5;
+        l_tank.setAttribute(fapi::ATTR_SCRATCH_UINT64_2, &i_mbaTarget, l_val);
+        
+        // Get the first attribute from the tank
+        if (!(l_tank.getAttribute(fapi::ATTR_SCRATCH_UINT64_1, &i_procTarget, l_val)))
         {
-            FAPI_INF("hwpTestAttributes: OverrideUint64array. Overrides exist, skipping test");
+            FAPI_SET_HWP_ERROR(l_rc, RC_HWP_ATTR_UNIT_TEST_FAIL);
+            FAPI_ERR("hwpTestAttributes: Error. Did not get attr from tank (3.1)");
+            break;
         }
-        else
+        
+        if (l_val != 4)
         {
-            // Create a non-const override
-            fapi::AttributeOverride l_override;
-            l_override.iv_attrId =
-                static_cast<uint32_t>(fapi::ATTR_SCRATCH_UINT64_ARRAY_2);
-            l_override.iv_targetType =
-                static_cast<uint32_t>(fapi::TARGET_TYPE_SYSTEM);
-            l_override.iv_pos = fapi::ATTR_POS_NA;
-            l_override.iv_unitPos = fapi::ATTR_UNIT_POS_NA;
-            l_override.iv_overrideType = fapi::ATTR_OVERRIDE_NON_CONST;
-            l_override.iv_arrayD3 = fapi::ATTR_ARRAYD_NA;
-            l_override.iv_arrayD4 = fapi::ATTR_ARRAYD_NA;
-    
-            l_override.iv_overrideVal = 20;
-            l_override.iv_arrayD1 = 0;
-            l_override.iv_arrayD2 = 0;
-            fapi::platAttrSvc::setOverrideWrap(l_override);
-            
-            l_override.iv_overrideVal = 21;
-            l_override.iv_arrayD1 = 0;
-            l_override.iv_arrayD2 = 1;
-            fapi::platAttrSvc::setOverrideWrap(l_override);
-            
-            l_override.iv_overrideVal = 22;
-            l_override.iv_arrayD1 = 1;
-            l_override.iv_arrayD2 = 0;
-            fapi::platAttrSvc::setOverrideWrap(l_override);
-            
-            l_override.iv_overrideVal = 0xfffffffe;
-            l_override.iv_arrayD1 = 1;
-            l_override.iv_arrayD2 = 1;
-            fapi::platAttrSvc::setOverrideWrap(l_override);
-            
-            // Check that the override value is returned
-            uint64_t l_val[2][2];
-            l_rc = FAPI_ATTR_GET(ATTR_SCRATCH_UINT64_ARRAY_2, NULL, l_val);
-            
-            if (l_rc)
-            {
-                FAPI_ERR("hwpTestAttributes: OverrideUint64array. Error from GET");
-                break;
-            }
-            
-            if ((l_val[0][0] != 20) || (l_val[0][1] != 21) ||
-                (l_val[1][0] != 22) || (l_val[1][1] != 0xfffffffe))
-            {
-                FAPI_SET_HWP_ERROR(l_rc, RC_HWP_ATTR_UNIT_TEST_FAIL);
-                FAPI_ERR("hwpTestAttributes: OverrideUint64array GET returned 0x%llx:0x%llx:0x%llx:0x%llx",
-                         l_val[0][0], l_val[0][1], l_val[1][0], l_val[1][1]);
-                break;
-            }
-            
-            // Clear all overrides
-            fapi::platAttrSvc::clearOverridesWrap();
+            FAPI_SET_HWP_ERROR(l_rc, RC_HWP_ATTR_UNIT_TEST_FAIL);
+            FAPI_ERR("hwpTestAttributes: Error. Got bad value (0x%llx) from tank (3.2)",
+                     l_val);
+            break;
         }
+        
+        // Get the second attribute from the tank
+        if (!(l_tank.getAttribute(fapi::ATTR_SCRATCH_UINT64_2, &i_mbaTarget, l_val)))
+        {
+            FAPI_SET_HWP_ERROR(l_rc, RC_HWP_ATTR_UNIT_TEST_FAIL);
+            FAPI_ERR("hwpTestAttributes: Error. Did not get attr from tank (3.3)");
+            break;
+        }
+        
+        if (l_val != 5)
+        {
+            FAPI_SET_HWP_ERROR(l_rc, RC_HWP_ATTR_UNIT_TEST_FAIL);
+            FAPI_ERR("hwpTestAttributes: Error. Got bad value (0x%llx) from tank (3.4)",
+                     l_val);
+            break;
+        }
+        
+        // Get all attributes from the tank
+        std::vector<fapi::AttributeChunk> l_attributes;
+        l_tank.getAllAttributes(fapi::AttributeTank::ALLOC_TYPE_MALLOC,
+                                l_attributes);
+        
+        if (l_attributes.size() != 1)
+        {
+            FAPI_SET_HWP_ERROR(l_rc, RC_HWP_ATTR_UNIT_TEST_FAIL);
+            FAPI_ERR("hwpTestAttributes: Error. Got wrong chunk size (%d) of attrs from tank (3.5)",
+                     l_attributes.size());
+            break;
+        }
+        
+        if (l_attributes[0].iv_numAttributes != 2)
+        {
+            FAPI_SET_HWP_ERROR(l_rc, RC_HWP_ATTR_UNIT_TEST_FAIL);
+            FAPI_ERR("hwpTestAttributes: Error. Got wrong size (%d) of attrs from tank (3.6)",
+                     l_attributes[0].iv_numAttributes);
+            break;
+        }
+        
+        fapi::Attribute * l_pAttr = reinterpret_cast<fapi::Attribute *>
+            (l_attributes[0].iv_pAttributes);
+        if (l_pAttr[0].iv_val != 4)
+        {
+            FAPI_SET_HWP_ERROR(l_rc, RC_HWP_ATTR_UNIT_TEST_FAIL);
+            FAPI_ERR("hwpTestAttributes: Error. Got bad value (0x%llx) from tank (3.7)",
+                     l_pAttr[0].iv_val);
+            break;
+        }
+        
+        if (l_pAttr[1].iv_val != 5)
+        {
+            FAPI_SET_HWP_ERROR(l_rc, RC_HWP_ATTR_UNIT_TEST_FAIL);
+            FAPI_ERR("hwpTestAttributes: Error. Got bad value (0x%llx) from tank (3.8)",
+                     l_pAttr->iv_val);
+            break;
+        }
+        
+        free (l_attributes[0].iv_pAttributes);
+        }
+        
+        //----------------------------------------------------------------------
+        // Test AttributeTank functions with constant attribute
+        //----------------------------------------------------------------------
+        {
+        // Create a local OverrideAttributeTank (this is not the singleton)
+        fapi::OverrideAttributeTank l_tank;
+        
+        // Set const attribute
+        fapi::Attribute l_attr;
+        l_attr.iv_val = 7;
+        l_attr.iv_attrId = fapi::ATTR_SCRATCH_UINT64_2;
+        l_attr.iv_targetType = fapi::TARGET_TYPE_SYSTEM;
+        l_attr.iv_pos = fapi::ATTR_POS_NA;
+        l_attr.iv_unitPos = fapi::ATTR_UNIT_POS_NA;
+        l_attr.iv_flags = fapi::ATTR_FLAG_CONST;
+        l_attr.iv_arrayD1 = 0;
+        l_attr.iv_arrayD2 = 0;
+        l_attr.iv_arrayD3 = 0;
+        l_attr.iv_arrayD4 = 0;
+        l_tank.setAttribute(l_attr);
+            
+        // Try to clear the attribute, it should not be cleared
+        l_tank.clearNonConstAttribute(fapi::ATTR_SCRATCH_UINT64_2, NULL);
+        
+        // Check that tank is not-empty
+        if (!l_tank.attributesExist())
+        {
+            FAPI_SET_HWP_ERROR(l_rc, RC_HWP_ATTR_UNIT_TEST_FAIL);
+            FAPI_ERR("hwpTestAttributes: Error. AttributeTank is empty (4.1)");
+            break;
+        }
+        
+        // Clear all attribute
+        l_tank.clearAllAttributes();
+        
+        // Check that tank is empty
+        if (l_tank.attributesExist())
+        {
+            FAPI_SET_HWP_ERROR(l_rc, RC_HWP_ATTR_UNIT_TEST_FAIL);
+            FAPI_ERR("hwpTestAttributes: Error. AttributeTank is not empty (4.2)");
+            break;
+        }
+        }
+        
+        //----------------------------------------------------------------------
+        // Test adding the same attribute twice to a tank
+        //----------------------------------------------------------------------
+        {
+        // Create a local OverrideAttributeTank (this is not the singleton)
+        fapi::OverrideAttributeTank l_tank;
+        
+        // Add ATTR_SCRATCH_UINT64_1 to the tank twice
+        uint64_t l_val = 4;
+        l_tank.setAttribute(fapi::ATTR_SCRATCH_UINT64_1, NULL, l_val);
+        l_val = 5;
+        l_tank.setAttribute(fapi::ATTR_SCRATCH_UINT64_1, NULL, l_val);
+        
+        // Get all attributes from the tank
+        std::vector<fapi::AttributeChunk> l_attributes;
+        l_tank.getAllAttributes(fapi::AttributeTank::ALLOC_TYPE_MALLOC,
+                                l_attributes);
+        
+        if (l_attributes.size() != 1)
+        {
+            FAPI_SET_HWP_ERROR(l_rc, RC_HWP_ATTR_UNIT_TEST_FAIL);
+            FAPI_ERR("hwpTestAttributes: Error. Got wrong chunk size (%d) of attrs from tank (5.1)",
+                     l_attributes.size());
+            break;
+        }
+        
+        if (l_attributes[0].iv_numAttributes != 1)
+        {
+            FAPI_SET_HWP_ERROR(l_rc, RC_HWP_ATTR_UNIT_TEST_FAIL);
+            FAPI_ERR("hwpTestAttributes: Error. Got wrong size (%d) of attrs from tank (5.2)",
+                     l_attributes[0].iv_numAttributes);
+            break;
+        }
+        
+        fapi::Attribute * l_pAttr = reinterpret_cast<fapi::Attribute *>
+            (l_attributes[0].iv_pAttributes);
+        if (l_pAttr[0].iv_val != 5)
+        {
+            FAPI_SET_HWP_ERROR(l_rc, RC_HWP_ATTR_UNIT_TEST_FAIL);
+            FAPI_ERR("hwpTestAttributes: Error. Got bad value (0x%llx) from tank (5.3)",
+                     l_pAttr[0].iv_val);
+            break;
+        }
+        
+        free (l_attributes[0].iv_pAttributes);
         }
         
     } while (0);

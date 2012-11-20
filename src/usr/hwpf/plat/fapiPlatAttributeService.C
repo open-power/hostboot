@@ -23,7 +23,7 @@
 /**
  *  @file fapiPlatAttributeService.C
  *
- *  @brief Implements HWP attribute -> HB attribute bridging functions
+ *  @brief Implements the functions that access attributes
  *
  */
 
@@ -705,75 +705,6 @@ fapi::ReturnCode fapiPlatGetTargetPos(const fapi::Target * i_pFapiTarget,
 
     return l_rc;
 }
-
-//******************************************************************************
-// fapi::platAttrSvc::getOverrideWrap function
-//******************************************************************************
-bool getOverrideWrap(const fapi::AttributeId i_attrId,
-                     const fapi::Target * const i_pTarget,
-                     uint64_t & o_overrideVal,
-                     const uint8_t i_arrayD1,
-                     const uint8_t i_arrayD2,
-                     const uint8_t i_arrayD3,
-                     const uint8_t i_arrayD4)
-{
-    return Singleton<fapi::AttributeOverrides>::instance().getOverride(
-        i_attrId, i_pTarget, o_overrideVal, i_arrayD1, i_arrayD2, i_arrayD3,
-        i_arrayD4);
-}
-
-//******************************************************************************
-// fapi::platAttrSvc::clearNonConstOverrideWrap function
-//******************************************************************************
-void clearNonConstOverrideWrap(const fapi::AttributeId i_attrId,
-                               const fapi::Target * const i_pTarget)
-{
-    Singleton<fapi::AttributeOverrides>::instance().clearNonConstOverride(
-        i_attrId, i_pTarget);
-}
-
-//******************************************************************************
-// fapi::platAttrSvc::setOverrideWrap function
-//******************************************************************************
-void setOverrideWrap(const AttributeOverride & i_override)
-{
-    Singleton<fapi::AttributeOverrides>::instance().setOverride(i_override);
-}
-
-//******************************************************************************
-// fapi::platAttrSvc::clearOverridesWrap function
-//******************************************************************************
-void clearOverridesWrap()
-{
-    Singleton<fapi::AttributeOverrides>::instance().clearOverrides();
-}
-
-//******************************************************************************
-// fapi::platAttrSvc::overridesExistWrap function
-//******************************************************************************
-bool overridesExistWrap()
-{
-    return Singleton<fapi::AttributeOverrides>::instance().overridesExist();
-}
-
-//******************************************************************************
-// fapi::platAttrSvc::AttributeOverridesLock class
-// This is a simple container for a mutex
-//******************************************************************************
-class AttributeOverridesLock
-{
-public:
-    AttributeOverridesLock()
-    {
-        mutex_init(&iv_mutex);
-    }
-
-    ~AttributeOverridesLock()
-    {
-        mutex_destroy(&iv_mutex);
-    }
-    mutex_t iv_mutex;
-};
 
 /**
  *  @enum
@@ -1493,25 +1424,5 @@ fapi::ReturnCode fapiPlatGetProcPcieBarSize (
 }
 
 } // End platAttrSvc namespace
-
-//******************************************************************************
-// fapi::AttributeOverrides::platLock function
-// This is the Hostboot PLAT implementation of the FAPI function
-//******************************************************************************
-void AttributeOverrides::platLock()
-{
-    mutex_lock(&(Singleton
-        <fapi::platAttrSvc::AttributeOverridesLock>::instance().iv_mutex));
-}
-
-//******************************************************************************
-// fapi::AttributeOverrides::platUnlock function
-// This is the Hostboot PLAT implementation of the FAPI function
-//******************************************************************************
-void AttributeOverrides::platUnlock()
-{
-    mutex_unlock(&(Singleton
-        <fapi::platAttrSvc::AttributeOverridesLock>::instance().iv_mutex));
-}
 
 } // End fapi namespace

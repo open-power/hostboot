@@ -53,6 +53,8 @@
 #include    <targeting/common/attributes.H> //  ISTEP_MODE attribute
 #include    <targeting/common/targetservice.H>
 
+#include    <hwpf/plat/fapiPlatAttributeService.H>
+
 #include    <mbox/mbox_queues.H>            // HB_ISTEP_MSGQ
 #include    <mbox/mboxif.H>                 // register mailbox
 
@@ -752,6 +754,11 @@ void IStepDispatcher::handleMoreWorkNeededMsg ( bool i_first )
                        iv_Msg->data[0],
                        iv_Msg->data[1],
                        iv_Msg->extra_data );
+
+            // Send the potentially modified set of HWPF Attribute overrides and any
+            // HWPF Attributes to sync to the FSP
+            fapi::attrOverrideSync::sendAttrOverridesAndSyncsToFsp();
+
             msg_respond( iv_msgQ,
                          iv_Msg );
             iv_Msg = NULL;

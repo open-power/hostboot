@@ -30,10 +30,10 @@
 //******************************************************************************
 // Includes
 //******************************************************************************
-#include <sys/task.h>
 #include <initservice/taskargs.H>
-#include <hwpf/fapi/fapiAttributeOverride.H>
-#include <fapiPlatTrace.H>
+#include <hwpf/fapi/fapiAttributeTank.H>
+#include <hwpf/plat/fapiPlatAttrOverrideSync.H>
+#include <hwpf/plat/fapiPlatTrace.H>
 
 namespace fapi
 {
@@ -41,23 +41,40 @@ namespace fapi
 //******************************************************************************
 // Global Variables
 //******************************************************************************
-// Defined in fapiPlatAttrOverrideDirect.C
-extern AttributeOverride g_attrOverride;
+// Defined in fapiPlatAttrOverrideSync.C
+extern Attribute g_attrOverride;
 
 //******************************************************************************
-// platTaskEntry
-// This function writes the g_attrOverride global variable first written by the
-// Simics/VBU console and then read by fapiPlatAttrOverrideDirect.C to ensure
-// it is paged and pinned in memory
+// This function monitors for FSP mailbox messages
+//******************************************************************************
+void * platMonitorForFspMessages(void * i_pContext)
+{
+    FAPI_IMP("Starting platMonitorForFspMessages");
+    fapi::attrOverrideSync::monitorForFspMessages();
+    return NULL; // Execution should never reach here
+}
+
+//******************************************************************************
+// This function is run when the extended initservice loads the plat module
+//
+// It writes the g_attrOverride global to ensure it is paged and pinned in
+// memory. This variable is used by a debug tool to override HWPF Attributes
+//
+// It starts a task that monitors for FSP mailbox messages on the
+// HB_HWPF_ATTR_MSGQ message queue
 //******************************************************************************
 void platTaskEntry(errlHndl_t &io_errl)
 {
     FAPI_IMP("Starting platTaskEntry");
-    g_attrOverride.iv_overrideVal = 0;
-    io_errl=NULL;
+
+    // Write the g_attrOverride global
+    g_attrOverride.iv_val = 0;
+
+    // Start task that monitors for FSP mailbox messages
+    task_create(fapi::platMonitorForFspMessages, NULL);
 }
+
+} // End fapi namespace
 
 // Macro that creates the _start function
 TASK_ENTRY_MACRO(fapi::platTaskEntry);
-
-} // End fapi namespace

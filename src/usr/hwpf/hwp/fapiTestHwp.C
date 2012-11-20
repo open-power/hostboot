@@ -96,7 +96,7 @@ fapi::ReturnCode hwpInitialTest(const std::vector<fapi::Target> & i_target)
         // --------------------------------------------------------
         // 2. fapiPutScom test
         // --------------------------------------------------------
-        uint64_t l_scomWriteValue = 0x9000000000000000;
+        uint64_t l_scomWriteValue = 0x9000000000000000ULL;
 
         l_ecmdRc = l_ScomData.setDoubleWord(0, l_scomWriteValue);
         if (l_ecmdRc != ECMD_DBUF_SUCCESS)
@@ -120,8 +120,8 @@ fapi::ReturnCode hwpInitialTest(const std::vector<fapi::Target> & i_target)
         // --------------------------------------------------------
         // 3. fapiPutScomUnderMask test
         // --------------------------------------------------------
-        l_scomWriteValue = 0xA000000000000000;
-        uint64_t l_mask  = 0x3000000000000000;
+        l_scomWriteValue = 0xA000000000000000ULL;
+        uint64_t l_mask  = 0x3000000000000000ULL;
         ecmdDataBufferBase l_maskData(64);
 
         l_ecmdRc = l_ScomData.setDoubleWord(0, l_scomWriteValue);

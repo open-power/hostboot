@@ -62,6 +62,8 @@
 #                  mjjones   06/12/12  Add new include file to fapiChipEcFeature.C
 #                  mjjones   08/08/12  Output target types and if PlatInit
 #                  mjjones   09/28/12  Minor change to add FFDC on error
+#                  mjjones   11/05/12  Generate fapiAttributeIds.txt
+#                                      Generate fapiAttributeEnums.txt
 #
 # End Change Log ******************************************************
 
@@ -80,6 +82,8 @@ if ($numArgs < 2)
     print ("  - fapiAttributePlatCheck.H.    Contains compile time checks that all attributes are\n");
     print ("                                 handled by the platform\n");
     print ("  - fapiAttributesSupported.html Contains the HWPF attributes supported\n");
+    print ("  - fapiAttributeIds.txt         Used to xlate between AttrID string and value\n");
+    print ("  - fapiAttributeEnums.txt       Used to xlate between AttrEnum string and value\n");
     exit(1);
 }
 
@@ -122,6 +126,16 @@ my $asFile = $ARGV[0];
 $asFile .= "/";
 $asFile .= "fapiAttributesSupported.html";
 open(ASFILE, ">", $asFile);
+
+my $itFile = $ARGV[0];
+$itFile .= "/";
+$itFile .= "fapiAttributeIds.txt";
+open(ITFILE, ">", $itFile);
+
+my $etFile = $ARGV[0];
+$etFile .= "/";
+$etFile .= "fapiAttributeEnums.txt";
+open(ETFILE, ">", $etFile);
 
 #------------------------------------------------------------------------------
 # Print Start of file information to fapiAttributeIds.H
@@ -196,8 +210,8 @@ print ASFILE "<h4>HWPF Attributes supported by this build.</h4>\n";
 print ASFILE "<table border=\"4\">\n";
 print ASFILE "<tr><th>Attribute ID</th><th>Attribute Description</th></tr>";
 
-my %enumHash;
-my %attrIdHash;
+my %attrIdHash;  # Records which Attribute IDs have been used
+my %attrValHash; # Records which Attribute values have been used
 
 #------------------------------------------------------------------------------
 # For each XML file
@@ -219,9 +233,9 @@ foreach my $argnum (1 .. $#ARGV)
     foreach my $attr (@{$attributes->{attribute}})
     {
         #----------------------------------------------------------------------
-        # Print the AttributeId enum to fapiAttributeIds.H
-        # The enumerator value for each attribute is a hash value generated
-        # from the attribute name, this ties a specific enumerator value to a
+        # Print the Attribute ID and calculated value to fapiAttributeIds.H and
+        # fapiAttributeIds.txt. The value for an attribute is a hash value
+        # generated from the attribute name, this ties a specific value to a
         # specific attribute name. This is done for Cronus so that if a HWP is
         # not recompiled against a new eCMD/Cronus version where the attributes
         # have changed then there will not be a mismatch in enumerator values.
@@ -248,9 +262,14 @@ foreach my $argnum (1 .. $#ARGV)
         # Calculate a 28 bit hash value.
         my $attrHash128Bit = md5_hex($attr->{id});
         my $attrHash28Bit = substr($attrHash128Bit, 0, 7);
+
+        # Print the attribute ID/value to fapiAttributeIds.H
         print AIFILE "    $attr->{id} = 0x$attrHash28Bit,\n";
 
-        if (exists($enumHash{$attrHash28Bit}))
+        # Print the attribute ID/value to fapiAttributeIds.txt
+        print ITFILE "$attr->{id} 0x$attrHash28Bit\n";
+
+        if (exists($attrValHash{$attrHash28Bit}))
         {
             # Two different attributes generate the same hash-value!
             print ("fapiParseAttributeInfo.pl ERROR. Duplicate attr id hash value for ",
@@ -258,7 +277,7 @@ foreach my $argnum (1 .. $#ARGV)
             exit(1);
         }
 
-        $enumHash{$attrHash28Bit} = 1;
+        $attrValHash{$attrHash28Bit} = 1;
     };
 }
 
@@ -316,8 +335,6 @@ foreach my $argnum (1 .. $#ARGV)
         my $numArrayDimensions = 0;
         if ($attr->{array})
         {
-            # Figure out the array dimensions
-
             # Remove leading whitespace
             my $dimText = $attr->{array};
             $dimText =~ s/^\s+//;
@@ -424,7 +441,8 @@ foreach my $argnum (1 .. $#ARGV)
         }
 
         #----------------------------------------------------------------------
-        # Print the value enumeration (if specified) to fapiAttributeIds.H
+        # Print the value enumeration (if specified) to fapiAttributeIds.H and
+        # fapiAttributeEnums.txt
         #----------------------------------------------------------------------
         if (exists $attr->{enum})
         {
@@ -440,7 +458,14 @@ foreach my $argnum (1 .. $#ARGV)
                 $val =~ s/\n//;
                 $val =~ s/^\s+//;
                 $val =~ s/\s+$//;
+
+                # Print the attribute enum to fapiAttributeIds.H
                 print AIFILE "    ENUM_$attr->{id}_${val}";
+
+                # Print the attribute enum to fapiAttributeEnums.txt
+                my $attrEnumTxt = "$attr->{id}_${val}\n";
+                $attrEnumTxt =~ s/= //;
+                print ETFILE $attrEnumTxt;
 
                 if ($attr->{valueType} eq 'uint64')
                 {
@@ -630,6 +655,9 @@ print ASFILE "</html>\n";
 # Close output files
 #------------------------------------------------------------------------------
 close(AIFILE);
+close(ECFILE);
 close(ACFILE);
 close(ASFILE);
+close(ITFILE);
+close(ETFILE);
 

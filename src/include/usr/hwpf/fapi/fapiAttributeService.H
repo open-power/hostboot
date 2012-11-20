@@ -1,26 +1,25 @@
-/*  IBM_PROLOG_BEGIN_TAG
- *  This is an automatically generated prolog.
- *
- *  $Source: src/include/usr/hwpf/fapi/fapiAttributeService.H $
- *
- *  IBM CONFIDENTIAL
- *
- *  COPYRIGHT International Business Machines Corp. 2011-2012
- *
- *  p1
- *
- *  Object Code Only (OCO) source materials
- *  Licensed Internal Code Source Materials
- *  IBM HostBoot Licensed Internal Code
- *
- *  The source code for this program is not published or other-
- *  wise divested of its trade secrets, irrespective of what has
- *  been deposited with the U.S. Copyright Office.
- *
- *  Origin: 30
- *
- *  IBM_PROLOG_END_TAG
- */
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/include/usr/hwpf/fapi/fapiAttributeService.H $            */
+/*                                                                        */
+/* IBM CONFIDENTIAL                                                       */
+/*                                                                        */
+/* COPYRIGHT International Business Machines Corp. 2011,2012              */
+/*                                                                        */
+/* p1                                                                     */
+/*                                                                        */
+/* Object Code Only (OCO) source materials                                */
+/* Licensed Internal Code Source Materials                                */
+/* IBM HostBoot Licensed Internal Code                                    */
+/*                                                                        */
+/* The source code for this program is not published or otherwise         */
+/* divested of its trade secrets, irrespective of what has been           */
+/* deposited with the U.S. Copyright Office.                              */
+/*                                                                        */
+/* Origin: 30                                                             */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
 /**
  *  @file fapiAttributeService.H
  *
@@ -86,12 +85,12 @@
  *     <ID>_GETMACRO PLAT macro is called to get the attribute, platforms must
  *     define a _GETMACRO for each attribute.
  *
- *     The SET macro calls the <ID>_SETMACRO PLAT macro to set the attribute,
- *     platforms must define a _SETMACRO for each attribute. It then calls the
- *     FAPI_PLAT_CLEAR_NON_CONST_ATTR_OVERRIDE to clear any non-const attribute
- *     overrides (platforms can set this to NULL if they do not support
- *     attribute override or if they handle it in the standard <ID>_SETMACRO
- *     path).
+ *     The SET macro calls the FAPI_PLAT_ATTR_SET_ACTIONS PLAT macro to perform
+ *     any necessary platform actions on an attribute set, this includes
+ *     clearing any non-const attribute override and storing the attribute for
+ *     synchronization (platforms can set this to NULL if they do not need to
+ *     take any actions). It then calls the <ID>_SETMACRO PLAT macro to set the
+ *     attribute, platforms must define a _SETMACRO for each attribute
  *
  * Note that a const attribute override is one that is always returned on a
  * FAPI_ATTR_GET even if a subsequent FAPI_ATTR_SET is done. A non-const
@@ -107,7 +106,7 @@
 #define FAPI_ATTR_SET(ID, PTARGET, VAL) \
     (fapi::fapiFailIfPrivileged<fapi::ID##_Privileged>(), \
      fapi::fapiCheckIdType<fapi::ID##_Type>(fapi::ID, VAL), \
-     FAPI_PLAT_CLEAR_NON_CONST_ATTR_OVERRIDE(fapi::ID, PTARGET), \
+     FAPI_PLAT_ATTR_SET_ACTIONS(fapi::ID, PTARGET, VAL), \
      ID##_SETMACRO(ID, PTARGET, VAL))
 
 #define FAPI_ATTR_GET_PRIVILEGED(ID, PTARGET, VAL) \
@@ -118,7 +117,7 @@
 
 #define FAPI_ATTR_SET_PRIVILEGED(ID, PTARGET, VAL) \
     (fapi::fapiCheckIdType<fapi::ID##_Type>(fapi::ID, VAL), \
-     FAPI_PLAT_CLEAR_NON_CONST_ATTR_OVERRIDE(fapi::ID, PTARGET), \
+     FAPI_PLAT_ATTR_SET_ACTIONS(fapi::ID, PTARGET, VAL), \
      ID##_SETMACRO(ID, PTARGET, VAL))
 
 namespace fapi

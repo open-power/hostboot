@@ -40,23 +40,24 @@ namespace MBOX
     enum queue_id_t
     {
         NOT_FOUND               = 0,
-        HB_MAILBOX_MSGQ,
-        HB_ISTEP_MSGQ,
-        HB_ATTR_SYNC_MSGQ,
-        HB_ERROR_MSGQ,
+        HB_MAILBOX_MSGQ         = 1,
+        HB_ISTEP_MSGQ           = 2,
+        HB_ATTR_SYNC_MSGQ       = 3,
+        HB_ERROR_MSGQ           = 4,
+        HB_HWPF_ATTR_MSGQ       = 5, // HWPF Attribute override/sync
         // Add HB services here:
 
         HB_TEST_MSGQ            = 0x7FFFFFFF,
 
         // FSP mailboxes
         FSP_FIRST_MSGQ          = 0x80000000,
-        FSP_MAILBOX_MSGQ,
-        FSP_PROGRESS_CODES_MSGQ,
-        FSP_TRACE_MSGQ,
+        FSP_MAILBOX_MSGQ        = 0x80000001,
+        FSP_PROGRESS_CODES_MSGQ = 0x80000002,
+        FSP_TRACE_MSGQ          = 0x80000003,
         FSP_ERROR_MSGQ          = 0x80000004,
-        IPL_SERVICE_QUEUE       = 0x80000008,   // Defined by Fsp team
+        IPL_SERVICE_QUEUE       = 0x80000008, // Defined by Fsp team
         FSP_ATTR_SYNC_MSGQ      = 0x80000009,
-
+        FSP_HWPF_ATTR_MSGQ      = 0x8000000a, // HWPF Attribute override/sync
         // Add FSP services here:
         FSP_ECHO_MSGQ = 0xFFFFFFFF,     // Fake FSP for test
     };

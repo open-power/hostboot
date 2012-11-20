@@ -36,7 +36,7 @@ OBJS =  fapiReturnCode.o \
         fapiErrorInfo.o \
         fapiAttributeService.o \
         fapiChipEcFeature.o \
-        fapiAttributeOverride.o \
+        fapiAttributeTank.o \
         fapiCollectRegFfdc.o
 
 include ${ROOTPATH}/config.mk
