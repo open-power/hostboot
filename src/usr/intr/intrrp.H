@@ -89,6 +89,12 @@ namespace INTR
                 LINKB_OFFSET = 20,              //!< offset to LINKB register
                 LINKC_OFFSET = 24,              //!< offset to LINKC register
                 XISR_MASK    = 0x00FFFFFF,      //!< XISR MASK in XIRR register
+
+                ICPBAR_EN    = 30,              //!< BAR enable bit pos 
+                ICPBAR_SCOM_ADDR = 0x020109ca,  //!< ICP BAR scom address
+
+                // MASK base ICP address
+                ICPBAR_BASE_ADDRESS_MASK = 0xFFFFFFFFFC000000ULL,
             };
 
             // If the interrupt can't be handled by the current chip there are

@@ -1,26 +1,25 @@
-/*  IBM_PROLOG_BEGIN_TAG
- *  This is an automatically generated prolog.
- *
- *  $Source: src/include/sys/msg.h $
- *
- *  IBM CONFIDENTIAL
- *
- *  COPYRIGHT International Business Machines Corp. 2010-2012
- *
- *  p1
- *
- *  Object Code Only (OCO) source materials
- *  Licensed Internal Code Source Materials
- *  IBM HostBoot Licensed Internal Code
- *
- *  The source code for this program is not published or other-
- *  wise divested of its trade secrets, irrespective of what has
- *  been deposited with the U.S. Copyright Office.
- *
- *  Origin: 30
- *
- *  IBM_PROLOG_END_TAG
- */
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/include/sys/msg.h $                                       */
+/*                                                                        */
+/* IBM CONFIDENTIAL                                                       */
+/*                                                                        */
+/* COPYRIGHT International Business Machines Corp. 2010,2012              */
+/*                                                                        */
+/* p1                                                                     */
+/*                                                                        */
+/* Object Code Only (OCO) source materials                                */
+/* Licensed Internal Code Source Materials                                */
+/* IBM HostBoot Licensed Internal Code                                    */
+/*                                                                        */
+/* The source code for this program is not published or otherwise         */
+/* divested of its trade secrets, irrespective of what has been           */
+/* deposited with the U.S. Copyright Office.                              */
+/*                                                                        */
+/* Origin: 30                                                             */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
 #ifndef __SYS_MSG_H
 #define __SYS_MSG_H
 
@@ -141,9 +140,22 @@ void msg_q_destroy( msg_q_t q );
   * @param[in] q - handle of message queue to name
   * @param[in] name - name
   *
-  * @return  Result of msg_sendrecv where zero indicates success
+  * @return  Result of the syscall where zero indicates success
   */
 int msg_q_register(msg_q_t q, const char* name);
+
+/** @fn msg_intr_q_register
+  * @brief Register the interrupt message queue
+  *
+  * @param[in] q - handle of message queue to register
+  * @param[in] i_ipc_base_addr Is the base MMIO address of the
+  *                            IPC register set
+  *
+  * @return Result of the syscall where zero indicates success
+  *         < 0 is the ERRNO
+  */
+int msg_intr_q_register(msg_q_t q,
+                        uint64_t i_ipc_base_addr);
 
 /** @fn msg_q_remove
  * @brief Remove a message queue from the registry

@@ -41,6 +41,7 @@
 #include <targeting/common/attributes.H>
 #include <devicefw/userif.H>
 #include <sys/time.h>
+#include <sys/vfs.h>
 
 #define INTR_TRACE_NAME INTR_COMP_NAME
 
@@ -48,7 +49,6 @@ using namespace INTR;
 
 trace_desc_t * g_trac_intr = NULL;
 TRAC_INIT(&g_trac_intr, INTR_TRACE_NAME, 2 * 1024);
-
 
 /**
  * setup _start and handle barrier
@@ -105,8 +105,14 @@ errlHndl_t IntrRp::_init()
     // that would have the lowest BAR value in the system,
     // whether it exists or not. In this case n0p0
 
-    // [14:43] is BAR field in address to shift by (34 - 14)
-    uint64_t realAddr = (static_cast<uint64_t>(ICPBAR_VAL)) << 20;
+    TARGETING::Target* procTarget = NULL;
+    TARGETING::targetService().masterProcChipTargetHandle( procTarget );
+
+    uint64_t barValue = 0;
+    procTarget->tryGetAttr<TARGETING::ATTR_INTP_BASE_ADDR>(barValue);
+
+    // Mask off node & chip id to get base address
+    uint64_t realAddr = barValue & ICPBAR_BASE_ADDRESS_MASK;
 
     TRACFCOMP(g_trac_intr,"INTR: realAddr = %lx",realAddr);
 
@@ -117,9 +123,6 @@ errlHndl_t IntrRp::_init()
     TRACFCOMP(g_trac_intr,"INTR: vAddr = %lx",iv_baseAddr);
 
     // Set the BAR scom reg
-    TARGETING::Target* procTarget = NULL;
-    TARGETING::targetService().masterProcChipTargetHandle( procTarget );
-
     err = setBAR(procTarget,iv_masterCpu);
 
     if(!err)
@@ -148,7 +151,7 @@ errlHndl_t IntrRp::_init()
         // Get the kernel msg queue for ext intr
         // Create a task to handle the messages
         iv_msgQ = msg_q_create();
-        msg_q_register(iv_msgQ, INTR_MSGQ);
+        msg_intr_q_register(iv_msgQ, realAddr);
 
         task_create(IntrRp::msg_handler, NULL);
 
@@ -426,9 +429,10 @@ errlHndl_t IntrRp::setBAR(TARGETING::Target * i_target,
 {
     errlHndl_t err = NULL;
 
-    uint64_t barValue = static_cast<uint64_t>(ICPBAR_VAL) +
-            (8 * i_pir.nodeId) + i_pir.chipId;
-    barValue <<= 34;
+    uint64_t barValue = 0;
+    i_target->tryGetAttr<TARGETING::ATTR_INTP_BASE_ADDR>(barValue);
+
+    barValue <<= 14;
     barValue |= 1ULL << (63 - ICPBAR_EN);
 
     TRACFCOMP(g_trac_intr,"INTR: Target %p. ICPBAR value: 0x%016lx",
@@ -674,7 +678,7 @@ errlHndl_t INTR::registerMsgQ(msg_q_t i_msgQ,
     errlHndl_t err = NULL;
     // Can't add while handling an interrupt, so
     // send msg instead of direct call
-    msg_q_t intr_msgQ = msg_q_resolve(INTR_MSGQ);
+    msg_q_t intr_msgQ = msg_q_resolve(VFS_ROOT_MSG_INTR);
     if(intr_msgQ)
     {
         msg_t * msg = msg_allocate();
@@ -726,7 +730,7 @@ errlHndl_t INTR::registerMsgQ(msg_q_t i_msgQ,
 msg_q_t INTR::unRegisterMsgQ(ext_intr_t i_type)
 {
     msg_q_t msgQ = NULL;
-    msg_q_t intr_msgQ = msg_q_resolve(INTR_MSGQ);
+    msg_q_t intr_msgQ = msg_q_resolve(VFS_ROOT_MSG_INTR);
     if(intr_msgQ)
     {
         msg_t * msg = msg_allocate();
@@ -758,8 +762,8 @@ msg_q_t INTR::unRegisterMsgQ(ext_intr_t i_type)
 errlHndl_t INTR::enableExternalInterrupts()
 {
     errlHndl_t err = NULL;
-    msg_q_t intr_msgQ = msg_q_resolve(INTR_MSGQ);
-    if(intr_msgQ)
+    msg_q_t intr_msgQ = msg_q_resolve(VFS_ROOT_MSG_INTR);
+   if(intr_msgQ)
     {
         msg_t * msg = msg_allocate();
         msg->type = MSG_INTR_ENABLE;
@@ -800,7 +804,7 @@ errlHndl_t INTR::disableExternalInterrupts()
 {
     errlHndl_t err = NULL;
     // Can't disable while handling interrupt, so send msg to serialize
-    msg_q_t intr_msgQ = msg_q_resolve(INTR_MSGQ);
+    msg_q_t intr_msgQ = msg_q_resolve(VFS_ROOT_MSG_INTR);
     if(intr_msgQ)
     {
         msg_t * msg = msg_allocate();

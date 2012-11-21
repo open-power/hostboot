@@ -1,25 +1,25 @@
-//  IBM_PROLOG_BEGIN_TAG
-//  This is an automatically generated prolog.
-//
-//  $Source: src/include/kernel/intmsghandler.H $
-//
-//  IBM CONFIDENTIAL
-//
-//  COPYRIGHT International Business Machines Corp. 2011
-//
-//  p1
-//
-//  Object Code Only (OCO) source materials
-//  Licensed Internal Code Source Materials
-//  IBM HostBoot Licensed Internal Code
-//
-//  The source code for this program is not published or other-
-//  wise divested of its trade secrets, irrespective of what has
-//  been deposited with the U.S. Copyright Office.
-//
-//  Origin: 30
-//
-//  IBM_PROLOG_END
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/include/kernel/intmsghandler.H $                          */
+/*                                                                        */
+/* IBM CONFIDENTIAL                                                       */
+/*                                                                        */
+/* COPYRIGHT International Business Machines Corp. 2011,2012              */
+/*                                                                        */
+/* p1                                                                     */
+/*                                                                        */
+/* Object Code Only (OCO) source materials                                */
+/* Licensed Internal Code Source Materials                                */
+/* IBM HostBoot Licensed Internal Code                                    */
+/*                                                                        */
+/* The source code for this program is not published or otherwise         */
+/* divested of its trade secrets, irrespective of what has been           */
+/* deposited with the U.S. Copyright Office.                              */
+/*                                                                        */
+/* Origin: 30                                                             */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
 #ifndef __KERNEL_INTERRUPTMSGHDLR_H
 #define __KERNEL_INTERRUPTMSGHDLR_H
 
@@ -75,7 +75,7 @@ class InterruptMsgHdlr : public MessageHandler
          * Constructor
          */
         InterruptMsgHdlr(MessageQueue * i_msgQ)
-            : MessageHandler(NULL,i_msgQ) {} // TODO need splinlock?
+            : MessageHandler(NULL,i_msgQ) {}
 
         /** 
          * Destructor.
@@ -120,8 +120,9 @@ class InterruptMsgHdlr : public MessageHandler
         /**
          * Create the InterruptMsgHdlr to handle external interrupts
          * @param[in] i_msgQ The message queue
+         * @param[in] i_ipc_addr  The base address of the IPC registers
          */
-        static void create(MessageQueue * i_msgQ);
+        static void create(MessageQueue * i_msgQ, uint64_t i_ipc_addr);
 
         /**
          * Handle an external interrupt from HW
@@ -138,6 +139,7 @@ class InterruptMsgHdlr : public MessageHandler
     private:
 
         static InterruptMsgHdlr * cv_instance;
+        static uint64_t cv_ipc_base_address;
 };
 
 

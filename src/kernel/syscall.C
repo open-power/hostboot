@@ -272,9 +272,12 @@ namespace Systemcalls
                 break;
 
             case MSGQ_ROOT_INTR:
-                msgQIntr = (MessageQueue*) TASK_GETARG1(t);
-                InterruptMsgHdlr::create(msgQIntr);
-                TASK_SETRTN(t,0);
+                {
+                    msgQIntr = (MessageQueue*) TASK_GETARG1(t);
+                    uint64_t ipc_addr = (uint64_t) TASK_GETARG2(t);
+                    InterruptMsgHdlr::create(msgQIntr,ipc_addr);
+                    TASK_SETRTN(t,0);
+                }
                 break;
 
             default:
