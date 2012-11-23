@@ -58,8 +58,14 @@ EXTRAINCDIR += ${ROOTPATH}/src/include/usr/hwpf/hwp
 
 OBJS = prdfsimHomRegisterAccess.o  prdfsim_ras_services.o  prdfsimScrDataSet.o  prdfsimScrDB.o  prdfsimServices.o  prdsimSignatureParser.o prdfsimUtil.o
 
+TESTS = prdfTest_ABus.H \
+        prdfTest_Ex.H  \
+        prdfTest.H  \
+        prdfTest_Mba.H  \
+        prdfTest_Mcs.H  \
+        prdfTest_Proc.H  \
+        prdfTest_XBus.H
 
 
-TESTS = *.H
 
 include ${ROOTPATH}/config.mk

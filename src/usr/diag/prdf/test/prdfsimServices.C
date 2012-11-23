@@ -137,11 +137,13 @@ namespace PRDF
         }
     }
 
-    void SimServices::endSim()
+    bool SimServices::endSim()
     {
-        summarySig();
+        bool l_testStatus = false;
+        l_testStatus = summarySig();
         PRDF_TRAC( "SimServices::endSim() Test: %s",
                     (iv_testName ? iv_testName : "No Test Name specified"));
+        return l_testStatus;
     }
 
     void SimServices::addAttnEntry(const char * i_epath,
@@ -224,9 +226,15 @@ namespace PRDF
         iv_SimSignatureParser->Report(i_chip, i_sig);
     }
 
-    void SimServices::summarySig()
+    bool SimServices::summarySig()
     {
-        iv_SimSignatureParser->Summary();
+        return iv_SimSignatureParser->Summary();
+    }
+
+    void SimServices::setTestName(const char * i_testName)
+    {
+        reset();
+        iv_testName = i_testName;
     }
 
     void SimServices::initTargeting()

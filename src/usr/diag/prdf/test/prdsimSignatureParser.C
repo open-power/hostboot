@@ -163,7 +163,7 @@ const char * SimSignatureParser::Description(const Signature & signature)
 
 // --------------------------------------------------------------------
 
-void SimSignatureParser::Summary(void)
+bool SimSignatureParser::Summary(void)
 {
   PRDF_TRAC("%s", STATUS_BAR);
   PRDF_TRAC("%s", SIG_SUM);
@@ -175,7 +175,6 @@ void SimSignatureParser::Summary(void)
   }
   else
   {
-    passed = false;
     int iterations = actualSigList.size();
     for(int i = 0; i < iterations; ++i)
     {
@@ -208,10 +207,10 @@ void SimSignatureParser::Summary(void)
                        expectedSigList[i].chip, expectedSigList[i].code);
           }
       }
-
   }
 
   PRDF_TRAC("%s", STATUS_BAR);
+  return passed;
 }
 
 } // End namespace PRDF

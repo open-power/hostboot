@@ -47,11 +47,11 @@ class SimServices
 
     void reset();
 
-    void setTestName(const char * i_testName) { iv_testName = i_testName; }
+    void setTestName(const char * i_testName);
 
     void startSim();
 
-    void endSim();
+    bool endSim();
 
     void addAttnEntry(const char * i_epath, PRDF::ATTENTION_VALUE_TYPE i_attnType);
 
@@ -72,7 +72,7 @@ class SimServices
     //void AddSig(TARGETING::EntityPath & i_path, uint32_t i_sig);
     void addSig(const char * i_epath, uint32_t i_sig);
     void reportSig(uint32_t i_chip, uint32_t i_sig);
-    void summarySig();
+    bool summarySig();
     // SimSignatureParser functions end --------------
 
     /**

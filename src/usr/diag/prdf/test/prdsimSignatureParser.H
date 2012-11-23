@@ -53,7 +53,7 @@ public:
   // default dtor is ok
   void Add(uint32_t i_chip, uint32_t i_sig);
   void Report(uint32_t i_chip, uint32_t i_sig);
-  void Summary();
+  bool Summary();
 
 
   class Signature
