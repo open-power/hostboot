@@ -1,25 +1,25 @@
-//  IBM_PROLOG_BEGIN_TAG
-//  This is an automatically generated prolog.
-//
-//  $Source: src/include/usr/pnor/pnor_reasoncodes.H $
-//
-//  IBM CONFIDENTIAL
-//
-//  COPYRIGHT International Business Machines Corp. 2011
-//
-//  p1
-//
-//  Object Code Only (OCO) source materials
-//  Licensed Internal Code Source Materials
-//  IBM HostBoot Licensed Internal Code
-//
-//  The source code for this program is not published or other-
-//  wise divested of its trade secrets, irrespective of what has
-//  been deposited with the U.S. Copyright Office.
-//
-//  Origin: 30
-//
-//  IBM_PROLOG_END
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/include/usr/pnor/pnor_reasoncodes.H $                     */
+/*                                                                        */
+/* IBM CONFIDENTIAL                                                       */
+/*                                                                        */
+/* COPYRIGHT International Business Machines Corp. 2011,2012              */
+/*                                                                        */
+/* p1                                                                     */
+/*                                                                        */
+/* Object Code Only (OCO) source materials                                */
+/* Licensed Internal Code Source Materials                                */
+/* IBM HostBoot Licensed Internal Code                                    */
+/*                                                                        */
+/* The source code for this program is not published or otherwise         */
+/* divested of its trade secrets, irrespective of what has been           */
+/* deposited with the U.S. Copyright Office.                              */
+/*                                                                        */
+/* Origin: 30                                                             */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
 #ifndef __PNOR_REASONCODES_H
 #define __PNOR_REASONCODES_H
 
@@ -50,6 +50,7 @@ namespace PNOR
         MOD_PNORDD_WRITELPC             = 0x19, /**< pnordd.C : PnorDD::writeLPC */
         MOD_PNORDD_ERASEFLASH           = 0x1A, /**< pnordd.C : PnorDD::eraseFlash */
         MOD_PNORDD_COMPAREANDWRITEBLOCK = 0x1B, /**< pnordd.C : PnorDD::compareAndWriteBlock */
+        MOD_PNORDD_MICRONOPCOMPLETE     = 0x1C, /**< pnordd.C : PnorDD::micronOpComplete */
 
     };
 
@@ -65,6 +66,7 @@ namespace PNOR
         RC_LPC_ERROR                 = PNOR_COMP_ID | 0x08,
         RC_BAD_STARTUP_RC            = PNOR_COMP_ID | 0x09,
         RC_UNSUPORTED_HARDWARE       = PNOR_COMP_ID | 0x0A,
+        RC_MICRON_INCOMPLETE         = PNOR_COMP_ID | 0x0B,
     };
 };
 

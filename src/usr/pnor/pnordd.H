@@ -121,6 +121,12 @@ class PnorDD
         SPI_GET_CHIPID_OP   = 0x9F, /**< Default Op code for getting NOR ChipID */
         SPI_START4BA        = 0x37, /**< Enable Macronix 4-Byte addressing */
 
+        /*This command is only use on Micron NOR chips which require special
+         * procedure to check write & erase op complete
+         */
+        SPI_MICRON_FLAG_STAT    = 0x70, /**< Check complete on Micron */
+        SPI_MICRON_CLRFLAG_STAT = 0x50, /**< Clear Micron Flag Status reg */
+
         SPI_SIM_SM_ERASE_OP = 0x00000020, /**< Simics Op Code for Small Erase */
         SPI_SIM_SM_ERASE_SZ = 0x1000, /**< Simics Small Erase Size */
     };
@@ -131,8 +137,9 @@ class PnorDD
      */
     enum NorChipIDs
     {
-        SIMICS_NOR_ID     = 0x20ba2000,  /**< CHIP ID returned by Simics NOR chip */
-        VPO_NOR_ID        = 0x20201800,  /**< CHIP ID returned by VPO NOR chip */
+        /* Note: Simics currently models Micron NOR  */
+        MICRON_NOR_ID     = 0x20ba2000,  /**< Micron NOR chip ID */
+        VPO_NOR_ID        = 0x20201800,  /**< VPO NOR chip ID */
 
         ID_MASK           = 0xFFFFFF00,  /**< Only look at 3 bytes */
     };
@@ -163,8 +170,7 @@ class PnorDD
         SFC_REG_ADRCMS  = 0x8C, /**< ADRCMS : Second Intf NOR Allocation */
         SFC_REG_OADRNB  = 0x90, /**< OADRNB : Direct Access OBP Window Base Address */
         SFC_REG_OADRNS  = 0x94, /**< OADRNS : DIrect Access OPB Window Size */
-
-
+        SFC_REG_CHIPIDCONF  = 0x9C, /**< CHIPIDCONF : config ChipId CMD */
     };
 
     /**
@@ -195,6 +201,14 @@ class PnorDD
 
     };
 
+
+    /**
+     * Flags used to trigger Hardware workarounds
+     */
+    enum {
+        HWWK_MICRON_WRT_ERASE = 0x00000001, /**< Micron Wrt/Erase workaround */
+    };
+
     /**
      * @brief  SFC Command Register Layout
      */
@@ -203,9 +217,9 @@ class PnorDD
         uint32_t data32;
         struct
         {
-            uint32_t reserved    : 16; /**< 0:15 = Reserved  */
-            uint32_t opcode      : 7;  /**< 16:22 = OpCode */
-            uint32_t length      : 9;  /**< 22:31 = Num bytes for ReadRaw/WriteRaw */
+            uint32_t reserved : 16; /**< 0:15 = Reserved  */
+            uint32_t opcode   : 7;  /**< 16:22 = OpCode */
+            uint32_t length   : 9;  /**< 22:31 = Num bytes for Read/Write Raw */
         };
         SfcCmdReg_t() : data32(0) {};
     };
@@ -261,6 +275,16 @@ class PnorDD
      */
     errlHndl_t pollSfcOpComplete(uint64_t i_pollTime = SFC_POLL_TIME_NS);
 
+    /**
+     * @brief Poll for Op complete on Micron NOR chips
+     *        The current version of Micron parts require a special
+     *        form of checking for erase and write complete.
+     *
+     * @parm i_pollTime  Amount of time to Poll, default SFC_POLL_TIME_NS
+     *
+     * @return Error from operation
+     */
+    errlHndl_t micronOpComplete(uint64_t i_pollTime = SFC_POLL_TIME_NS);
 
     /**
      * @brief Read the NOR FLash ChipID
@@ -573,6 +597,12 @@ class PnorDD
      *
      */
     static uint32_t cv_nor_chipid;
+
+    /**
+     * @brief Hardware workarounds
+     *
+     */
+    static uint32_t cv_hw_workaround;
 
     /**
      * @brief indicates if SFC initialization has been performed.

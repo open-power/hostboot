@@ -400,6 +400,7 @@ PnorDD::~PnorDD()
 
 bool PnorDD::cv_sfcInitDone = false;  //Static flag to ensure we only init the SFC one time.
 uint32_t PnorDD::cv_nor_chipid = 0;  //Detected NOR Flash Type
+uint32_t PnorDD::cv_hw_workaround = 0;  //Hardware Workaround flags
 
 /**
  * STATIC
@@ -449,15 +450,19 @@ void PnorDD::sfcInit( )
 
             //Determine NOR Flash type, configure SFC and PNOR DD as needed
             l_err = getNORChipId(cv_nor_chipid);
-            TRACFCOMP(g_trac_pnor, "PnorDD::sfcInit: cv_nor_chipid=0x%.8x> ", cv_nor_chipid );
+            TRACFCOMP(g_trac_pnor,
+                      "PnorDD::sfcInit: cv_nor_chipid=0x%.8x> ",
+                      cv_nor_chipid );
 
-            //TODO: Need to add support for VPO (RTC: 42325), Spansion NOR (RTC: 42326),
-            //      Micron NOR (RTC: 42328), Macronix (RTC: 42330), and Simics (RTC: 42331)
-            //      There will probably be some overlap between those stories, but keeping them
-            //      all separate for now to ensure everything is covered.
-            if(SIMICS_NOR_ID == cv_nor_chipid)
+            //TODO: Need to add support for VPO (RTC: 42325), 
+            //      Spansion NOR (RTC: 42326),, Macronix (RTC: 42330)
+            //      There will probably be some overlap between those 
+            //      stories, but keeping them all separate for now to
+            //      ensure everything is covered
+            if(MICRON_NOR_ID == cv_nor_chipid)  /* Simics currently Micron */
             {
-                TRACFCOMP(g_trac_pnor, "PnorDD::sfcInit: Configuring SFC for SIMICS NOR> " );
+                TRACFCOMP(g_trac_pnor,
+                          "PnorDD::sfcInit: Configuring SFC for SIMICS NOR> " );
                 uint32_t sm_erase_op = SPI_SIM_SM_ERASE_OP;
                 iv_erasesize_bytes = SPI_SIM_SM_ERASE_SZ;
 
@@ -473,7 +478,7 @@ void PnorDD::sfcInit( )
                                     iv_erasesize_bytes);
                 if(l_err) { break; }
 
-                //Enable 4-byte addressing for Macronix-type device
+                //Enable 4-byte addressing
                 SfcCmdReg_t sfc_cmd;
                 sfc_cmd.opcode = SPI_START4BA;
                 sfc_cmd.length = 0;
@@ -618,6 +623,7 @@ errlHndl_t PnorDD::pollSfcOpComplete(uint64_t i_pollTime)
             //  the wait each time through
             //TODO tmp remove for VPO, need better polling strategy -- RTC43738
             //nanosleep( 0, SFC_POLL_INCR_NS*(++loop) );
+            ++loop;
             poll_time += SFC_POLL_INCR_NS*loop;
         }
         if( l_err ) { break; }
@@ -626,7 +632,9 @@ errlHndl_t PnorDD::pollSfcOpComplete(uint64_t i_pollTime)
         // TODO: What errors do we check?
         if( (sfc_stat.done == 0) )
         {
-            TRACFCOMP(g_trac_pnor, "PnorDD::pollSfcOpComplete> Error or timeout from LPC Status Register" );
+            TRACFCOMP(g_trac_pnor,
+                      "PnorDD::pollSfcOpComplete> Error or timeout from SFC Status Register"
+                      );
 
             /*@
              * @errortype
@@ -635,18 +643,148 @@ errlHndl_t PnorDD::pollSfcOpComplete(uint64_t i_pollTime)
              * @userdata1[0:31]   NOR Flash Chip ID
              * @userdata1[32:63]  Total poll time (ns)
              * @userdata2[0:31]    ECCB Status Register
-             * @devdesc      PnorDD::readLPC> Error or timeout from
-             *               LPC Status Register
+             * @devdesc      PnorDD::pollSfcOpComplete> Error or timeout from
+             *               SFC Status Register
              */
             l_err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                             PNOR::MOD_PNORDD_POLLSFCOPCOMPLETE,
                                             PNOR::RC_LPC_ERROR,
-                                            TWO_UINT32_TO_UINT64(cv_nor_chipid,poll_time),
+                                            TWO_UINT32_TO_UINT64(cv_nor_chipid,
+                                                                 poll_time),
                                             TWO_UINT32_TO_UINT64(sfc_stat.data32,0));
 
             l_err->collectTrace("PNOR");
             l_err->collectTrace("XSCOM");
             //@todo (RTC:37744) - Any cleanup or recovery needed?
+            break;
+        }
+
+
+    }while(0);
+
+    return l_err;
+
+}
+
+/**
+ * @brief Poll for Op complete on Micron NOR chips
+ *        The current version of Micron parts require a special
+ *        form of checking for erase and write complete.
+ */
+errlHndl_t PnorDD::micronOpComplete(uint64_t i_pollTime)
+{
+    errlHndl_t l_err = NULL;
+    TRACFCOMP( g_trac_pnor, "PnorDD::micronOpComplete> i_pollTime=0x%.8x",
+               i_pollTime );
+
+    do {
+
+        //Configure Get "Chip ID" command in SFC to check special
+        //Micron 'flag status' register
+        uint32_t confData = SPI_MICRON_FLAG_STAT << 24;
+        confData |= 0x00800001;  // 8-> read, 1->1 bytes
+        TRACDCOMP( g_trac_pnor, "PnorDD::micronOpComplete> confData=0x%.8x",
+                   confData );
+        l_err = writeRegSfc(SFC_CMD_SPACE,
+                            SFC_REG_CHIPIDCONF,
+                            confData);
+        if(l_err) { break; }
+
+
+        //Poll for complete status
+        uint32_t opStatus;
+        uint64_t poll_time = 0;
+        uint64_t loop = 0;
+        while( poll_time < i_pollTime )
+        {
+            //Issue Get Chip ID command (reading flag status)
+            SfcCmdReg_t sfc_cmd;
+            sfc_cmd.opcode = SFC_OP_CHIPID;
+            sfc_cmd.length = 0;
+
+            l_err = writeRegSfc(SFC_CMD_SPACE,
+                                SFC_REG_CMD,
+                                sfc_cmd.data32);
+            if(l_err) { break; }
+
+            //Read the Status from the Command Buffer
+            l_err = readRegSfc(SFC_CMDBUF_SPACE,
+                               0, //Offset into CMD BUFF space in bytes
+                               opStatus);
+            if(l_err) { break; }
+
+            //check for complete or error
+            // bit 0 = ready, bit 2=erase fail, bit 3=Program (Write) failure
+            if( (opStatus & 0xB0000000))
+            {
+                break;
+            }
+
+            // want to start out incrementing by small numbers then get bigger
+            //  to avoid a really tight loop in an error case so we'll increase
+            //  the wait each time through
+            //TODO tmp remove for VPO, need better polling strategy -- RTC43738
+            //nanosleep( 0, SFC_POLL_INCR_NS*(++loop) );
+            ++loop;
+            poll_time += SFC_POLL_INCR_NS*loop;
+        }
+        if( l_err ) { break; }
+
+        // check for ready and no errors
+        // bit 0 = ready, bit 2=erase fail, bit 3=Program (Write) failure
+        if( (opStatus & 0xB0000000) != 0x80000000)
+        {
+            TRACFCOMP(g_trac_pnor,
+                      "PnorDD::micronOpComplete> Error or timeout from Micron Flag Status Register (0x%.8X)",
+                      opStatus);
+
+            /*@
+             * @errortype
+             * @moduleid     PNOR::MOD_PNORDD_MICRONOPCOMPLETE
+             * @reasoncode   PNOR::RC_MICRON_INCOMPLETE
+             * @userdata1[0:31]   NOR Flash Chip ID
+             * @userdata1[32:63]  Total poll time (ns)
+             * @userdata2[0:31]   Micron Flag status register
+             * @devdesc      PnorDD::micronOpComplete> Error or timeout from
+             *               Micron Flag Status Register
+             */
+            l_err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                            PNOR::MOD_PNORDD_MICRONOPCOMPLETE,
+                                            PNOR::RC_MICRON_INCOMPLETE,
+                                            TWO_UINT32_TO_UINT64(cv_nor_chipid,
+                                                                 poll_time),
+                                            TWO_UINT32_TO_UINT64(opStatus,0));
+
+            l_err->collectTrace("PNOR");
+            l_err->collectTrace("XSCOM");
+
+            //Erase & Program error bits are sticky, so they need to be cleared.
+
+            //Configure Get "Chip ID" command in SFC to clear special
+            //Micron 'flag status' register. remaining bits are all zero 
+            //  since we just need to issue the SPI command.
+            uint32_t confData = SPI_MICRON_CLRFLAG_STAT << 24;
+            TRACDCOMP( g_trac_pnor, "PnorDD::micronOpComplete> confData=0x%.8x",
+                       confData );
+            errlHndl_t tmp_err = NULL;
+            tmp_err = writeRegSfc(SFC_CMD_SPACE,
+                                SFC_REG_CHIPIDCONF,
+                                confData);
+            if(tmp_err) {
+                //commit this error and return the original
+                ERRORLOG::errlCommit(tmp_err,PNOR_COMP_ID);
+            }
+
+            //Issue Get Chip ID command (clearing flag status)
+            SfcCmdReg_t sfc_cmd;
+            sfc_cmd.opcode = SFC_OP_CHIPID;
+            sfc_cmd.length = 0;
+
+            l_err = writeRegSfc(SFC_CMD_SPACE,
+                                SFC_REG_CMD,
+                                sfc_cmd.data32);
+            if(l_err) { break; }
+
             break;
         }
 
@@ -668,10 +806,19 @@ errlHndl_t PnorDD::getNORChipId(uint32_t& o_chipId,
                i_spiOpcode );
 
     do {
+        //Configure Get Chip ID opcode
+        uint32_t confData = i_spiOpcode << 24;
+        confData |= 0x00800003;  // 8-> read, 3->3 bytes
+        TRACDCOMP( g_trac_pnor, "PnorDD::getNORChipId> confData=0x%.8x",
+                   confData );
+        l_err = writeRegSfc(SFC_CMD_SPACE,
+                            SFC_REG_CHIPIDCONF,
+                            confData);
+        if(l_err) { break; }
 
         //Issue Get Chip ID command
         SfcCmdReg_t sfc_cmd;
-        sfc_cmd.opcode = i_spiOpcode;
+        sfc_cmd.opcode = SFC_OP_CHIPID;
         sfc_cmd.length = 0;
 
         l_err = writeRegSfc(SFC_CMD_SPACE,
@@ -693,6 +840,57 @@ errlHndl_t PnorDD::getNORChipId(uint32_t& o_chipId,
 
         // Only look at a portion of the data that is returned
         o_chipId &= ID_MASK;
+
+        //Some micron chips require a special workaround required
+        //so need to set a flag for later use
+        //We can't read all 6 bytes above because not all MFG
+        //support that operation.
+        if(o_chipId == MICRON_NOR_ID)
+        {
+            //Change ChipID command to read back 6 bytes.
+            //If bit 1 is set in 2nd word of cmd buffer data, then
+            //We must do the workaround.
+            //Ex: CCCCCCLL 40000000
+            //    CCCCCC -> Industry Standard Chip ID
+            //    LL -> Lenght of Micron extended data
+            //    4 -> Bit to indicate we must to erase/write workaround
+            confData = i_spiOpcode << 24;
+            confData |= 0x00800006;  // 8-> read, 6->6 bytes
+            l_err = writeRegSfc(SFC_CMD_SPACE,
+                                SFC_REG_CHIPIDCONF,
+                                confData);
+            if(l_err) { break; }
+
+            //Issue Get Chip ID command
+            SfcCmdReg_t sfc_cmd;
+            sfc_cmd.opcode = SFC_OP_CHIPID;
+            sfc_cmd.length = 0;
+
+            l_err = writeRegSfc(SFC_CMD_SPACE,
+                                SFC_REG_CMD,
+                                sfc_cmd.data32);
+            if(l_err) { break; }
+
+            uint32_t extIdData = 0;
+
+            //Read the Extended from the Command Buffer
+            l_err = readRegSfc(SFC_CMDBUF_SPACE,
+                               4, //Offset into CMD BUFF space in bytes
+                               extIdData);
+            if(l_err) {
+                break;
+            }
+            if((extIdData & 0x40000000) == 0x00000000)
+            {
+                TRACFCOMP( g_trac_pnor,
+                           "PnorDD::getNORChipId> Setting Micron workaround flag"
+                           );
+                //Set Micron workaround flag
+                cv_hw_workaround |= HWWK_MICRON_WRT_ERASE;
+            }
+
+        }
+
 
     }while(0);
 
@@ -745,7 +943,8 @@ errlHndl_t PnorDD::flushSfcBuf(uint32_t i_addr,
                           size_t i_size)
 {
     errlHndl_t l_err = NULL;
-    TRACDCOMP( g_trac_pnor, "PnorDD::flushSfcBuf> i_addr=0x%.8x, i_size=0x%.8x",
+    TRACDCOMP( g_trac_pnor,
+               "PnorDD::flushSfcBuf> i_addr=0x%.8x, i_size=0x%.8x",
                i_addr, i_size );
 
     do {
@@ -765,9 +964,18 @@ errlHndl_t PnorDD::flushSfcBuf(uint32_t i_addr,
                             sfc_cmd.data32);
         if(l_err) { break; }
 
-        //Poll for complete status
-        l_err = pollSfcOpComplete();
-        if(l_err) { break; }
+        //check for special Micron Op Complete
+        if(cv_hw_workaround & HWWK_MICRON_WRT_ERASE)
+        {
+            l_err = micronOpComplete();
+            if(l_err) { break; }
+        }
+        else //Use Normal Op Complete
+        {
+            //Poll for complete status
+            l_err = pollSfcOpComplete();
+            if(l_err) { break; }
+        }
 
     }while(0);
 
@@ -1358,7 +1566,9 @@ errlHndl_t PnorDD::eraseFlash(uint32_t i_address)
             if(iv_erases[idx].addr == i_address)
             {
                 iv_erases[idx].count++;
-                TRACFCOMP(g_trac_pnor, "PnorDD::eraseFlash> Block 0x%.8X has %d erasures", i_address, iv_erases[idx].count );
+                TRACFCOMP(g_trac_pnor,
+                          "PnorDD::eraseFlash> Block 0x%.8X has %d erasures",
+                          i_address, iv_erases[idx].count );
                 break;
 
             }
@@ -1368,12 +1578,16 @@ errlHndl_t PnorDD::eraseFlash(uint32_t i_address)
             {
                 iv_erases[idx].addr = i_address;
                 iv_erases[idx].count = 1;
-                TRACFCOMP(g_trac_pnor, "PnorDD::eraseFlash> Block 0x%.8X has %d erasures", i_address, iv_erases[idx].count );
+                TRACFCOMP(g_trac_pnor,
+                          "PnorDD::eraseFlash> Block 0x%.8X has %d erasures",
+                          i_address, iv_erases[idx].count );
                 break;
             }
             else if( idx == (ERASE_COUNT_MAX - 1))
             {
-                TRACFCOMP(g_trac_pnor, "PnorDD::eraseFlash> Erase counter full!  Block 0x%.8X Erased", i_address );
+                TRACFCOMP(g_trac_pnor,
+                          "PnorDD::eraseFlash> Erase counter full!  Block 0x%.8X Erased",
+                          i_address );
                 break;
             }
         }
@@ -1384,15 +1598,16 @@ errlHndl_t PnorDD::eraseFlash(uint32_t i_address)
             break; //all done
         }
 
-        if(cv_nor_chipid != 0)
+        else if(cv_nor_chipid != 0)
         {
-            TRACDCOMP(g_trac_pnor, "PnorDD::eraseFlash> Erasing flash for cv_nor_chipid=0x%.8x, iv_mode=0x%.8x", cv_nor_chipid, iv_mode);
+            TRACDCOMP(g_trac_pnor,
+                      "PnorDD::eraseFlash> Erasing flash for cv_nor_chipid=0x%.8x, iv_mode=0x%.8x",
+                      cv_nor_chipid, iv_mode);
 
             //Write erase address to ADR reg
             l_err = writeRegSfc(SFC_CMD_SPACE,
                                 SFC_REG_ADR,
                                 i_address);
-
 
             //Issue Erase command
             SfcCmdReg_t sfc_cmd;
@@ -1404,14 +1619,24 @@ errlHndl_t PnorDD::eraseFlash(uint32_t i_address)
                                 sfc_cmd.data32);
             if(l_err) { break; }
 
-            //Poll for complete status
-            l_err = pollSfcOpComplete();
-            if(l_err) { break; }
-
+            //check for special Micron Op Complete
+            if(cv_hw_workaround & HWWK_MICRON_WRT_ERASE)
+            {
+                l_err = micronOpComplete();
+                if(l_err) { break; }
+            }
+            else //Use Normal Op Complete
+            {
+                //Poll for complete status
+                l_err = pollSfcOpComplete();
+                if(l_err) { break; }
+            }
         }
         else
         {
-            TRACFCOMP(g_trac_pnor, "PnorDD::eraseFlash> Erase not supported for cv_nor_chipid=%d", cv_nor_chipid );
+            TRACFCOMP(g_trac_pnor,
+                      "PnorDD::eraseFlash> Erase not supported for cv_nor_chipid=%d",
+                      cv_nor_chipid );
 
             /*@
              * @errortype
