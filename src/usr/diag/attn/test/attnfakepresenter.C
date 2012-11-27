@@ -129,7 +129,7 @@ void FakePresenter::interrupt(
 
     if(iv_tid)
     {
-        IcpXisr xisr;
+        INTR::XISR_t xisr;
 
         uint64_t node = 0, chip = 0;
 
@@ -145,7 +145,7 @@ void FakePresenter::interrupt(
         p->type = i_type;
         p->data = i_data;
         p->callback = i_callback;
-        p->xisr = xisr.u64;
+        p->xisr = xisr.u32;
 
         msg_t * m = msg_allocate();
 

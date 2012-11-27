@@ -79,7 +79,7 @@ enum MessageType
     /**
      * @brief ATTENTION Attention message.
      */
-    ATTENTION = INTR::ATTENTION,
+    ATTENTION = 0x1,
 
     /**
      * @brief SHUTDOWN Shutdown message.

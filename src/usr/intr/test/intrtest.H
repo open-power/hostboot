@@ -1,25 +1,25 @@
-//  IBM_PROLOG_BEGIN_TAG
-//  This is an automatically generated prolog.
-//
-//  $Source: src/usr/intr/test/intrtest.H $
-//
-//  IBM CONFIDENTIAL
-//
-//  COPYRIGHT International Business Machines Corp. 2011
-//
-//  p1
-//
-//  Object Code Only (OCO) source materials
-//  Licensed Internal Code Source Materials
-//  IBM HostBoot Licensed Internal Code
-//
-//  The source code for this program is not published or other-
-//  wise divested of its trade secrets, irrespective of what has
-//  been deposited with the U.S. Copyright Office.
-//
-//  Origin: 30
-//
-//  IBM_PROLOG_END
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/usr/intr/test/intrtest.H $                                */
+/*                                                                        */
+/* IBM CONFIDENTIAL                                                       */
+/*                                                                        */
+/* COPYRIGHT International Business Machines Corp. 2011,2012              */
+/*                                                                        */
+/* p1                                                                     */
+/*                                                                        */
+/* Object Code Only (OCO) source materials                                */
+/* Licensed Internal Code Source Materials                                */
+/* IBM HostBoot Licensed Internal Code                                    */
+/*                                                                        */
+/* The source code for this program is not published or otherwise         */
+/* divested of its trade secrets, irrespective of what has been           */
+/* deposited with the U.S. Copyright Office.                              */
+/*                                                                        */
+/* Origin: 30                                                             */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
 #ifndef __INTRTEST_H
 #define __INTRTEST_H
 
@@ -139,7 +139,7 @@ class IntrTest: public CxxTest::TestSuite
 
             // Need to register a msgq
             msg_q_t msgQ = msg_q_create();
-            err = INTR::registerMsgQ(msgQ,0,INTR::INTERPROC);
+            err = INTR::registerMsgQ(msgQ,0,INTR::ISN_INTERPROC);
             if(err)
             {
                 TS_FAIL("Errl from INTR::registerMsgQ()");
@@ -151,16 +151,17 @@ class IntrTest: public CxxTest::TestSuite
             volatile uint8_t * mfrr =
                 reinterpret_cast<uint8_t *>(iv_masterAddr+12);
             *(mfrr) = 0x55;
-
+            
+            TRACFCOMP(g_trac_intr,"Waiting for IPI interrupt");
             msg_t* msg = msg_wait(msgQ); // wait for interrupt msg
             TRACFCOMP(g_trac_intr,"Interrupt handled! Type=%lx",msg->data[0]);
-            if(msg->data[0] != INTR::INTERPROC)
+            if(msg->data[0] != INTR::INTERPROC_XISR)
             {
                 TS_FAIL("INTR::unexpected interrupt type %lx",msg->data[0]);
             }
             msg_respond(msgQ,msg);
 
-            msgQ = INTR::unRegisterMsgQ(INTR::INTERPROC);
+            msgQ = INTR::unRegisterMsgQ(INTR::ISN_INTERPROC);
             if(msgQ)
             {
                 msg_q_destroy(msgQ);
@@ -168,6 +169,29 @@ class IntrTest: public CxxTest::TestSuite
             else
             {
                 TS_FAIL("INTR::unRegisterMsgQ failed");
+            }
+        }
+
+        // This checks the enablePsiIntr. Even though the master proc
+        // is already configured it does not use this interface
+        // and there are no other processor currently configured in simics
+        // to test with.
+        void test_enablePsi( void )
+        {
+            errlHndl_t err = NULL;
+            if( TARGETING::is_vpo() )
+            {
+                return;
+            }
+
+            TARGETING::Target* target = NULL;
+            TARGETING::targetService().masterProcChipTargetHandle( target );
+
+            err = INTR::enablePsiIntr(target);
+            if(err)
+            {
+                TS_FAIL("Errl from INTER::enablePsiIntr");
+                errlCommit(err,INTR_COMP_ID);
             }
         }
 

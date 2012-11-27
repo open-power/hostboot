@@ -76,6 +76,7 @@
 #include    "proc_fab_iovalid/proc_fab_iovalid.H"
 #include    <diag/prdf/common/prdfMain.H>
 #include    "fabric_io_dccal/fabric_io_dccal.H"
+#include    <intr/interrupt.H>
 
 // eRepair Restore
 #include <erepairAccessorHwpFuncs.H>
@@ -822,30 +823,8 @@ void*    call_proc_fab_iovalid( void    *io_pArgs )
                 (l_errl ? "ERROR" : "SUCCESS"));
     }
 
-    if (l_errl)
-    {
-        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                "ERROR : call_proc_fab_iovalid encountered an error");
-        /*@
-         * @errortype
-         * @reasoncode       ISTEP_EDI_EI_INITIALIZATION_FAILED
-         * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE
-         * @moduleid         ISTEP_PROC_FAB_IOVALID
-         * @userdata1        bytes 0-1: plid identifying first error
-         *                   bytes 2-3: reason code of first error
-         * @userdata2        bytes 0-1: total number of elogs included
-         *                   bytes 2-3: N/A
-         * @devdesc          call to proc_fab_iovalid has failed
-         */
-        l_StepError.addErrorDetails(ISTEP_EDI_EI_INITIALIZATION_FAILED,
-                                    ISTEP_PROC_FAB_IOVALID,
-                                    l_errl );
-
-        errlCommit( l_errl, HWPF_COMP_ID );
-
-    }
     // no errors during the proc_fabric_iovalid so switch to XSCOM
-    else
+    if(!l_errl)
     {
         // At the point where we can now change the proc chips to use
         // XSCOM rather than FSISCOM which is the default.
@@ -878,9 +857,41 @@ void*    call_proc_fab_iovalid( void    *io_pArgs )
                 }
             }
 
+            // Enable PSI interrupts even if can't Xscom as
+            // Pbus is up and interrupts can flow
+            l_errl = INTR::enablePsiIntr(l_proc_target); 
+            if(l_errl)
+            {
+                break;
+            }
+
             ++curproc;
         }
     }
+
+    if (l_errl)
+    {
+        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                "ERROR : call_proc_fab_iovalid encountered an error");
+        /*@
+         * @errortype
+         * @reasoncode       ISTEP_EDI_EI_INITIALIZATION_FAILED
+         * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE
+         * @moduleid         ISTEP_PROC_FAB_IOVALID
+         * @userdata1        bytes 0-1: plid identifying first error
+         *                   bytes 2-3: reason code of first error
+         * @userdata2        bytes 0-1: total number of elogs included
+         *                   bytes 2-3: N/A
+         * @devdesc          call to proc_fab_iovalid has failed
+         */
+        l_StepError.addErrorDetails(ISTEP_EDI_EI_INITIALIZATION_FAILED,
+                                    ISTEP_PROC_FAB_IOVALID,
+                                    l_errl );
+
+        errlCommit( l_errl, HWPF_COMP_ID );
+
+    }
+
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                "call_proc_fab_iovalid exit" );
 

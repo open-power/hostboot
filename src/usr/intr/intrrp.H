@@ -31,6 +31,7 @@
 #include <sys/misc.h>
 #include <intr/interrupt.H>
 #include <map>
+#include <algorithm>
 
 struct msg_t;
 
@@ -41,6 +42,57 @@ namespace TARGETING
 
 namespace INTR
 {
+    /**
+     * cpu PIR register
+     */
+    struct PIR_t
+    {
+        union
+        {
+            uint32_t word;
+            struct
+            {
+                //P8:
+                uint32_t        reserved:19;    //!< zeros
+                uint32_t        nodeId:3;       //!< node (0-3)
+                uint32_t        chipId:3;       //!< chip pos on node (0-5)
+                uint32_t        coreId:4;       //!< Core number (1-6,9-14)?
+                uint32_t        threadId:3;     //!< Thread number (0-7)
+            } PACKED;
+        };
+        PIR_t(uint32_t i_word) : word(i_word) {}
+
+        PIR_t operator= (uint32_t i_word)
+        {
+            word = i_word;
+            return word;
+        }
+
+        bool operator< (const PIR_t& r) const
+        {
+            return word < r.word;
+        }
+    };
+
+    /**
+     * Make an XISR value
+     * @param[in] i_node  The PIR node id (0-7)
+     * @param[in] i_chip  The PIR chip id (0-7)
+     * @param[in] i_isn   The Interrupt Source Number (0-7)
+     * @return the XISR value
+     */
+    inline
+      uint32_t makeXISR(PIR_t i_pir, uint32_t i_isn)
+    {
+        XISR_t r;
+        r.u32 = 0;
+        r.isn = i_isn;
+        r.chip = i_pir.chipId;
+        r.node = i_pir.nodeId;
+        r.intrproc = 1;  // not interproc intr
+        return r.u32;
+    }
+
     class IntrRp
     {
         public:
@@ -53,9 +105,10 @@ namespace INTR
 
             /**
              * Get the CPU id of the master cpu.
+             * @return cpu id of the master cpu
              */
             ALWAYS_INLINE
-            uint32_t intrDestCpuId(uint32_t i_xisr) const { return iv_masterCpu.word; }
+            PIR_t intrDestCpuId() const { return iv_masterCpu; }
 
         protected:
 
@@ -81,21 +134,21 @@ namespace INTR
 
             enum
             {
-                XIRR_RO_OFFSET = 0,             //!< offset to XIRR (poll)
-                CPPR_OFFSET = 4,                //!< offset to CPPR (1 byte)
-                XIRR_OFFSET = 4,                //!< offset to XIRR (4 bytes)
-                MFRR_OFFSET = 12,               //!< offset to MFRR (12 bytes)
-                LINKA_OFFSET = 16,              //!< offset to LINKA register
-                LINKB_OFFSET = 20,              //!< offset to LINKB register
-                LINKC_OFFSET = 24,              //!< offset to LINKC register
-                XISR_MASK    = 0x00FFFFFF,      //!< XISR MASK in XIRR register
+                XIRR_RO_OFFSET = 0,            //!< offset to XIRR (poll)
+                CPPR_OFFSET = 4,               //!< offset to CPPR (1 byte)
+                XIRR_OFFSET = 4,               //!< offset to XIRR (4 bytes)
+                MFRR_OFFSET = 12,              //!< offset to MFRR (12 bytes)
+                LINKA_OFFSET = 16,             //!< offset to LINKA register
+                LINKB_OFFSET = 20,             //!< offset to LINKB register
+                LINKC_OFFSET = 24,             //!< offset to LINKC register
+                XISR_MASK    = 0x00FFFFFF,     //!< XISR MASK in XIRR register
 
                 ICPBAR_EN    = 30,              //!< BAR enable bit pos 
                 ICPBAR_SCOM_ADDR = 0x020109ca,  //!< ICP BAR scom address
 
                 // MASK base ICP address
                 ICPBAR_BASE_ADDRESS_MASK = 0xFFFFFFFFFC000000ULL,
-            };
+           };
 
             // If the interrupt can't be handled by the current chip there are
             // three link registers used provide targets to forward the
@@ -136,36 +189,84 @@ namespace INTR
             };
 
             /**
-             * cpu PIR register
+             * This is the Interrupt Requestoer Source Compare Register.
+             * See Book IV, PSI chapter.
              */
-            struct PIR_t
+            struct PSIHB_ISRN_REG_t
             {
+                enum
+                {
+                    //PSIHB_ISRN_REG_t values. See book IV & P8 scom reg defn.
+                    DISABLE                 = 0,
+                    ENABLE                  = 1,
+                    IRSN_MASK               = 0x7FFF8,    //!< IRSN bits
+                    PSIHB_ISRN_REG          = 0x0201091b, //!< ISRN SCOM Address
+                };
+
                 union
                 {
-                    uint32_t word;
+                    uint64_t    d64;
+
                     struct
                     {
-                        //P8:
-                        uint32_t        reserved:19;    //!< zeros
-                        uint32_t        nodeId:3;       //!< node (0-3)
-                        uint32_t        chipId:3;       //!< chip pos on node (0-5)
-                        uint32_t        coreId:4;       //!< Core number (1-6,9-14)?
-                        uint32_t        threadId:3;     //!< Thread number (0-7)
+                        uint64_t irsn:19;       //!< IRSN compare reg
+                        uint64_t res1:10;       //!< zeros
+                        uint64_t reset:1;       //!< ICS Reset
+                        uint64_t die:1;         //!< Downstream Interrupt Enable
+                        uint64_t uie:1;         //!< Upstream Interrupt Enable
+                        uint64_t mask:19;       //!< IRSN Compare Mask
+                        uint64_t res2:13;       //!< zeros
                     } PACKED;
                 };
-                PIR_t(uint32_t i_word) : word(i_word) {}
 
-                PIR_t operator= (uint32_t i_word)
-                {
-                    word = i_word;
-                    return word;
-                }
-
-                bool operator< (const PIR_t& r) const
-                {
-                    return word < r.word;
-                }
+                /**
+                 * Default Contructor
+                 */
+                PSIHB_ISRN_REG_t() : d64(0) {}
             };
+
+            /**
+             * @brief PsiHbXivr Layout for XIVR registers.
+             */
+            struct PsiHbXivr
+            {
+                enum
+                {
+                    PRIO_DISABLED           = 0xff,
+
+                    OCC_PRIO            = 0x30,
+                    FSI_PRIO            = 0x20,
+                    LPC_PRIO            = 0x40,
+                    LCL_ERR_PRIO        = 0x10,
+                    HOST_PRIO           = 0x50,
+
+                    OCC_XIVR_ADRR           = 0x02010916,
+                    FSI_XIVR_ADRR           = 0x02010917,
+                    LPC_XIVR_ADRR           = 0x02010918,
+                    LCL_ERR_XIVR_ADDR       = 0x02010919,
+                    HOST_XIVR_ADRR          = 0x0201091A,
+                };
+
+
+                union
+                {
+                    uint64_t u64;
+
+                    struct
+                    {
+                        uint64_t res1:8;       // zeros
+                        uint64_t pir:14;       // interrupt destination (server)
+                        uint64_t linkptr:2;    // which link reg in intr presenter
+                        uint64_t priority:8;   // intr priority level
+                        uint64_t source:3;     // source number
+                        uint64_t res2:4;       // zeros
+                        uint64_t intr_pend:25; // interrupt is pending
+                    } PACKED;
+                };
+
+                PsiHbXivr() : u64(0) {}
+            };
+
 
             struct intr_response_t
             {
@@ -187,9 +288,10 @@ namespace INTR
 
             };
 
-
             typedef std::map<ext_intr_t,intr_response_t> Registry_t;
             typedef std::vector<PIR_t> CpuList_t;
+            typedef std::vector<TARGETING::Target *> ChipList_t;
+            typedef  std::vector<ISNvalue_t> ISNList_t;
 
 
             msg_q_t     iv_msgQ;        //!< Kernel Interrupt message queue
@@ -197,6 +299,8 @@ namespace INTR
             uint64_t    iv_baseAddr;    //!< Base address of hw INTR regs
             PIR_t       iv_masterCpu;   //!< Master cpu PIR
             CpuList_t   iv_cpuList;     //!< Other CPU chips
+            ChipList_t  iv_chipList;    //!< Proc chips with PSI intr enabled
+            ISNList_t   iv_isnList;     //!< List of ISN's to clear on shutdown
 
             typedef std::pair<uint8_t, msg_t*> IPI_Info_t;
             typedef std::map<PIR_t, IPI_Info_t> IPI_Pending_t;
@@ -220,8 +324,8 @@ namespace INTR
              *                        i_intr_type occurrs.
              * @param[in] i_intr_type, The interrupt type to register.
              *
-             * @note the interrupt type is currently the XISR value in the XIRR
-             *       register and consists of the chipid, buid, and level
+             * @note the interrupt type is currently the ISN value in the XIVR
+             *       register.   and consists of the chipid, buid, and level
              *       @see src/include/usr/intr/interrupt.H i_intr_type for
              *       enumerations.
              *
@@ -230,9 +334,28 @@ namespace INTR
              * i_msgQ with i_intr_type in message data word 0 and then waits
              * for a response.
              */
-            errlHndl_t registerInterrupt(msg_q_t i_msgQ,
+            errlHndl_t registerInterruptISN(msg_q_t i_msgQ,
                                          uint32_t i_msg_type,
                                          ext_intr_t i_intr_type);
+            /* Same as above, but operates directly on XISR*/
+            errlHndl_t registerInterruptXISR(msg_q_t i_msgQ,
+                                         uint32_t i_msg_type,
+                                         ext_intr_t i_xisr);
+
+            /**
+             * Unregister for a given interrupt type
+             * @param[in] i_isn_type The type of interrupt to unregister
+             *
+             * @note the interrupt type is currently the ISN value in the PSIHB
+             *       XIVR register
+             *       @see  i_intr_type for enumerations.
+             *
+             * @return The message queue that was unregistered with i_type
+             *         | NULL if no queue was not found for i_type
+             */
+            msg_q_t unregisterInterruptISN(ISNvalue_t i_intr_type);
+            /*Same as above, but operates on XISR*/
+            msg_q_t unregisterInterruptXISR(ext_intr_t i_xisr);
 
             /**
              * Enable hardware to reporting external interrupts
@@ -271,6 +394,22 @@ namespace INTR
                               const PIR_t i_pir);
 
             /**
+             * Initialize the IRSCReg to enable PSI to present interrupts
+             * @param[in] i_target  The target processor
+             * @return error log handle on error
+             */
+            errlHndl_t initIRSCReg(TARGETING::Target * i_target);
+
+            /**
+             * Initialize the PSIHB XIVR Reg to generate interrupts
+             * on all processors for given ISN
+             * @param[in] i_isn      XIVR to enable/disable
+             * @param[in] i_enable   enable (true), disable(false)
+             * @return error log handle on error
+             */
+            errlHndl_t initXIVR(enum ISNvalue_t i_isn, bool i_enable);
+
+            /**
              * Shutdown procedure
              */
             void shutDown();
@@ -280,7 +419,7 @@ namespace INTR
              * @param[in] i_pir PIR value for the presenter
              * @return the offset
              */
-                ALWAYS_INLINE
+            ALWAYS_INLINE
                 uint64_t cpuOffsetAddr(const PIR_t i_pir) const
                 {
                     // TODO when P7 support is removed then change this

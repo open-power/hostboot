@@ -36,16 +36,19 @@
 #include <sys/misc.h>
 #include <kernel/console.H>
 #include <sys/task.h>
-#include <targeting/common/targetservice.H>
 #include <vmmconst.h>
+#include <targeting/common/targetservice.H>
 #include <targeting/common/attributes.H>
+#include <targeting/common/utilFilter.H>
 #include <devicefw/userif.H>
 #include <sys/time.h>
 #include <sys/vfs.h>
+#include <hwas/common/hwasCallout.H>
 
 #define INTR_TRACE_NAME INTR_COMP_NAME
 
 using namespace INTR;
+using namespace TARGETING;
 
 trace_desc_t * g_trac_intr = NULL;
 TRAC_INIT(&g_trac_intr, INTR_TRACE_NAME, KILOBYTE, TRACE::BUFFER_SLOW);
@@ -161,6 +164,12 @@ errlHndl_t IntrRp::_init()
                                            INITSERVICE::INTR_PRIORITY);
     }
 
+    if(!err)
+    {
+        // Enable PSI to present interrupts
+        err = initIRSCReg(procTarget);
+    }
+
     return err;
 }
 
@@ -263,7 +272,7 @@ void IntrRp::msgHandler()
                         }
                         msg_free(rmsg);
                     }
-                    else if (type == INTERPROC)
+                    else if (type == INTERPROC_XISR)
                     {
                         // Ignore "spurious" IPIs (handled below).
 
@@ -278,13 +287,13 @@ void IntrRp::msgHandler()
                         TRACFCOMP(g_trac_intr,ERR_MRK
                                   "External Interrupt recieved type = %d, but "
                                   "nothing registered to handle it. "
-                                  "Ignoreing it.",
+                                  "Ignoring it.",
                                   (uint32_t)type);
                     }
 
                     // Handle IPIs special since they're used for waking up
                     // cores and have special clearing requirements.
-                    if (type == INTERPROC)
+                    if (type == INTERPROC_XISR)
                     {
                         // Clear IPI request.
                         volatile uint8_t * mfrr =
@@ -331,8 +340,15 @@ void IntrRp::msgHandler()
                 {
                     msg_q_t l_msgQ = reinterpret_cast<msg_q_t>(msg->data[0]);
                     uint64_t l_type = msg->data[1];
-                    ext_intr_t l_intr_type = static_cast<ext_intr_t>(l_type & 0xFFFF);
-                    errlHndl_t err = registerInterrupt(l_msgQ,l_type >> 32,l_intr_type);
+                    ISNvalue_t l_intr_type = static_cast<ISNvalue_t>
+                      (l_type & 0xFFFF);
+
+                    errlHndl_t err = registerInterruptISN(l_msgQ,l_type >> 32,
+                                                       l_intr_type);
+                    if(!err)
+                    {
+                        err = initXIVR(l_intr_type, true);
+                    }
 
                     msg->data[1] = reinterpret_cast<uint64_t>(err);
                     msg_respond(iv_msgQ,msg);
@@ -344,14 +360,18 @@ void IntrRp::msgHandler()
                     TRACFCOMP(g_trac_intr,
                               "INTR remove registration of interrupt type = 0x%lx",
                               msg->data[0]);
+                    ISNvalue_t l_type = static_cast<ISNvalue_t>(msg->data[0]);
+                    msg_q_t msgQ = unregisterInterruptISN(l_type);
 
-                    msg_q_t msgQ = NULL;
-                    ext_intr_t type = static_cast<ext_intr_t>(msg->data[0]);
-                    Registry_t::iterator r = iv_registry.find(type);
-                    if(r != iv_registry.end())
+                    if(msgQ)
                     {
-                        msgQ = r->second.msgQ;
-                        iv_registry.erase(r);
+                        //shouldn't get an error since we found a queue
+                        //Just commit it
+                        errlHndl_t err = initXIVR(l_type, false);
+                        if(err)
+                        {
+                            errlCommit(err,INTR_COMP_ID);
+                        }
                     }
 
                     msg->data[1] = reinterpret_cast<uint64_t>(msgQ);
@@ -405,6 +425,16 @@ void IntrRp::msgHandler()
                 }
                 break;
 
+            case MSG_INTR_ENABLE_PSI_INTR:
+                {
+                    TARGETING::Target * target = 
+                        reinterpret_cast<TARGETING::Target *>(msg->data[0]);
+                    errlHndl_t err = initIRSCReg(target);
+                    msg->data[1] = reinterpret_cast<uint64_t>(err);
+                    msg_respond(iv_msgQ,msg);
+                }
+                break;
+
             case MSG_INTR_SHUTDOWN:
                 {
                     TRACFCOMP(g_trac_intr,"Shutdown event received");
@@ -454,45 +484,291 @@ errlHndl_t IntrRp::setBAR(TARGETING::Target * i_target,
 }
 
 
+errlHndl_t IntrRp::initIRSCReg(TARGETING::Target * i_target)
+{
+    errlHndl_t err = NULL;
 
-errlHndl_t IntrRp::registerInterrupt(msg_q_t i_msgQ,
+    // Only do once for each proc chip
+    if(std::find(iv_chipList.begin(),iv_chipList.end(),i_target) ==
+       iv_chipList.end())
+    {
+        uint8_t chip = 0;
+        uint8_t node = 0;
+
+        i_target->tryGetAttr<ATTR_FABRIC_NODE_ID>(node);
+        i_target->tryGetAttr<ATTR_FABRIC_CHIP_ID>(chip);
+
+        size_t scom_len = sizeof(uint64_t);
+
+        // Setup PHBISR
+        // EN.TPC.PSIHB.PSIHB_ISRN_REG set to 0x00030003FFFF0000
+        PSIHB_ISRN_REG_t reg;
+
+        PIR_t pir(0);
+        pir.nodeId = node;
+        pir.chipId = chip;
+        // IRSN must be unique for each processor chip
+        reg.irsn = makeXISR(pir,0);
+        reg.die  = PSIHB_ISRN_REG_t::ENABLE;
+        reg.uie  = PSIHB_ISRN_REG_t::ENABLE;
+        reg.mask = PSIHB_ISRN_REG_t::IRSN_MASK;
+
+        TRACFCOMP(g_trac_intr,"PSIHB_ISRN_REG: 0x%016lx",reg.d64);
+
+        err = deviceWrite
+            ( i_target,
+              &reg,
+              scom_len,
+              DEVICE_SCOM_ADDRESS(PSIHB_ISRN_REG_t::PSIHB_ISRN_REG));
+
+        if(err)
+        {
+            // add callout
+            err->addHwCallout(i_target,
+                              HWAS::SRCI_PRIORITY_HIGH,
+                              HWAS::DECONFIG,
+                              HWAS::GARD_NULL);
+        }
+        else
+        {
+            iv_chipList.push_back(i_target);
+        }
+    }
+
+    return err;
+}
+
+errlHndl_t IntrRp::initXIVR(enum ISNvalue_t i_isn, bool i_enable)
+{
+    errlHndl_t err = NULL;
+    size_t scom_len = sizeof(uint64_t);
+    uint64_t scom_addr = 0;
+
+    //Don't do any of this for ISN_INTERPROC
+    if(ISN_INTERPROC != i_isn)
+    {
+        //Setup the XIVR register
+        PsiHbXivr xivr;
+        PIR_t pir = intrDestCpuId();
+        xivr.pir = pir.word;
+        xivr.source = i_isn;
+
+        switch(i_isn)
+        {
+        case ISN_OCC:
+            xivr.priority   = PsiHbXivr::OCC_PRIO;
+            scom_addr       = PsiHbXivr::OCC_XIVR_ADRR;
+            break;
+
+        case ISN_FSI: //FSP_MAILBOX
+            xivr.priority   = PsiHbXivr::FSI_PRIO;
+            scom_addr       = PsiHbXivr::FSI_XIVR_ADRR;
+            break;
+
+        case ISN_LPC:
+            xivr.priority   = PsiHbXivr::LPC_PRIO;
+            scom_addr       = PsiHbXivr::LPC_XIVR_ADRR;
+            break;
+
+        case ISN_LCL_ERR:
+            xivr.priority   = PsiHbXivr::LCL_ERR_PRIO;
+            scom_addr       = PsiHbXivr::LCL_ERR_XIVR_ADDR;
+            break;
+
+        case ISN_HOST:
+            xivr.priority   = PsiHbXivr::HOST_PRIO;
+            scom_addr       = PsiHbXivr::HOST_XIVR_ADRR;
+            break;
+
+        default: //Unsupported ISN
+            TRACFCOMP(g_trac_intr,"Unsupported ISN: 0x%02x",i_isn);
+            /*@ errorlog tag
+             * @errortype  ERRL_SEV_INFORMATIONAL
+             * @moduleid   INTR::MOD_INTR_INIT_XIVR
+             * @reasoncode INTR::RC_BAD_ISN
+             * @userdata1  Interrupt type to register
+             * @userdata2  0
+             *
+             * @defdesc    Unsupported ISN Requested
+             *
+             */
+            err = new ERRORLOG::ErrlEntry
+              (
+               ERRORLOG::ERRL_SEV_INFORMATIONAL,    // severity
+               INTR::MOD_INTR_INIT_XIVR,            // moduleid
+               INTR::RC_BAD_ISN,                    // reason code
+               static_cast<uint64_t>(i_isn),
+               0
+               );
+        }
+
+        // Init the XIVR on all chips we have setup
+        // Note that this doesn't handle chips getting added midstream,
+        // But the current use case only has FSIMbox (1 chip) and
+        // ATTN (all chips) at stable points in the IPL
+        if(!err)
+        {
+            if(i_enable)
+            {
+                iv_isnList.push_back(i_isn);
+            }
+            else
+            {
+                xivr.priority = PsiHbXivr::PRIO_DISABLED;
+
+                //Remove from isn list
+                ISNList_t::iterator itr = std::find(iv_isnList.begin(),
+                                                    iv_isnList.end(),
+                                                    i_isn);
+                if(itr != iv_isnList.end())
+                {
+                    iv_isnList.erase(itr);
+                }
+            }
+
+            for(ChipList_t::iterator target_itr = iv_chipList.begin();
+                target_itr != iv_chipList.end(); ++target_itr)
+            {
+                err = deviceWrite
+                  (*target_itr,
+                   &xivr,
+                   scom_len,
+                   DEVICE_SCOM_ADDRESS(scom_addr));
+
+                if(err)
+                {
+                    break;
+                }
+            }
+        }
+    }
+
+    return err;
+}
+
+
+
+errlHndl_t IntrRp::registerInterruptISN(msg_q_t i_msgQ,
                                      uint32_t i_msg_type,
                                      ext_intr_t i_intr_type)
 {
     errlHndl_t err = NULL;
 
-    Registry_t::iterator r = iv_registry.find(i_intr_type);
+    //INTERPROC is special -- same for all procs
+    if(i_intr_type == ISN_INTERPROC)
+    {
+        err = registerInterruptXISR(i_msgQ, i_msg_type,
+                                    INTERPROC_XISR);
+    }
+    else
+    {
+        //Register interrupt type on all present procs
+        for(ChipList_t::iterator target_itr = iv_chipList.begin();
+            target_itr != iv_chipList.end(); ++target_itr)
+        {
+            uint8_t chip = 0;
+            uint8_t node = 0;
+            (*target_itr)->tryGetAttr<ATTR_FABRIC_NODE_ID>(node);
+            (*target_itr)->tryGetAttr<ATTR_FABRIC_CHIP_ID>(chip);
+
+            PIR_t pir(0);
+            pir.nodeId = node;
+            pir.chipId = chip;
+            uint32_t l_irsn = makeXISR(pir, i_intr_type);
+
+            err = registerInterruptXISR(i_msgQ, i_msg_type, l_irsn);
+            if(err)
+            {
+                break;
+            }
+        }
+    }
+    return err;
+}
+
+errlHndl_t IntrRp::registerInterruptXISR(msg_q_t i_msgQ,
+                                     uint32_t i_msg_type,
+                                     ext_intr_t i_xisr)
+{
+    errlHndl_t err = NULL;
+
+    Registry_t::iterator r = iv_registry.find(i_xisr);
     if(r == iv_registry.end())
     {
-        TRACFCOMP(g_trac_intr,"INTR::register intr type 0x%x", i_intr_type);
-        iv_registry[i_intr_type] = intr_response_t(i_msgQ,i_msg_type);
+        TRACFCOMP(g_trac_intr,"INTR::register intr type 0x%x", i_xisr);
+        iv_registry[i_xisr] = intr_response_t(i_msgQ,i_msg_type);
     }
     else
     {
         if(r->second.msgQ != i_msgQ)
         {
-        /*@ errorlog tag
-         * @errortype       ERRL_SEV_INFORMATIONAL
-         * @moduleid        INTR::MOD_INTRRP_REGISTERINTERRUPT
-         * @reasoncode      INTR::RC_ALREADY_REGISTERED
-         * @userdata1       Interrupt type
-         * @userdata2       0
-         *
-         * @defdesc         Interrupt type already registered
-         *
-         */
+            /*@ errorlog tag
+             * @errortype       ERRL_SEV_INFORMATIONAL
+             * @moduleid        INTR::MOD_INTRRP_REGISTERINTERRUPT
+             * @reasoncode      INTR::RC_ALREADY_REGISTERED
+             * @userdata1       XISR
+             * @userdata2       0
+             *
+             * @defdesc         Interrupt type already registered
+             *
+             */
             err = new ERRORLOG::ErrlEntry
-                (
-                 ERRORLOG::ERRL_SEV_INFORMATIONAL,    // severity
-                 INTR::MOD_INTRRP_REGISTERINTERRUPT,  // moduleid
-                 INTR::RC_ALREADY_REGISTERED,         // reason code
-                 i_intr_type,
-                 0
-                );
+              (
+               ERRORLOG::ERRL_SEV_INFORMATIONAL,    // severity
+               INTR::MOD_INTRRP_REGISTERINTERRUPT,  // moduleid
+               INTR::RC_ALREADY_REGISTERED,         // reason code
+               i_xisr,
+               0
+               );
         }
-
     }
     return err;
+}
+
+msg_q_t IntrRp::unregisterInterruptISN(ISNvalue_t i_intr_type)
+{
+    msg_q_t msgQ = NULL;
+
+    //INTERPROC is special -- same for all procs
+    if(i_intr_type == ISN_INTERPROC)
+    {
+        msgQ = unregisterInterruptXISR(INTERPROC_XISR);
+    }
+    else
+    {
+        //Unregister interrupt type on all present procs
+        for(ChipList_t::iterator target_itr = iv_chipList.begin();
+            target_itr != iv_chipList.end(); ++target_itr)
+        {
+            uint8_t chip = 0;
+            uint8_t node = 0;
+            (*target_itr)->tryGetAttr<ATTR_FABRIC_NODE_ID>(node);
+            (*target_itr)->tryGetAttr<ATTR_FABRIC_CHIP_ID>(chip);
+
+            PIR_t pir(0);
+            pir.nodeId = node;
+            pir.chipId = chip;
+            uint32_t l_irsn = makeXISR(pir, i_intr_type);
+
+            msgQ = unregisterInterruptXISR(l_irsn);
+        }
+    }
+
+    return msgQ;
+}
+
+msg_q_t IntrRp::unregisterInterruptXISR(ext_intr_t i_xisr)
+{
+    msg_q_t msgQ = NULL;
+
+    Registry_t::iterator r = iv_registry.find(i_xisr);
+    if(r != iv_registry.end())
+    {
+        msgQ = r->second.msgQ;
+        iv_registry.erase(r);
+    }
+
+    return msgQ;
 }
 
 void IntrRp::initInterruptPresenter(const PIR_t i_pir) const
@@ -621,6 +897,7 @@ errlHndl_t IntrRp::checkAddress(uint64_t i_addr)
 
 void IntrRp::shutDown()
 {
+    errlHndl_t err = NULL;
     msg_t * rmsg = msg_allocate();
 
     // Call everyone and say shutting down!
@@ -647,7 +924,49 @@ void IntrRp::shutDown()
 
     msg_free(rmsg);
 
-    // Reset the hardware regiseters
+    // Reset the PSI regs
+    // NOTE: there is nothing in the  IRSN Proposal.odt document that
+    // specifies a procedure or order for disabling interrupts.
+    // @see RTC story 47105 discussion for Firmware & Hardware requirements
+    //
+
+    //Going to clear the XIVRs first
+    ISNList_t l_isnList = iv_isnList;
+    for(ISNList_t::iterator isnItr = l_isnList.begin();
+        isnItr != l_isnList.end();++isnItr)
+    {
+        //shouldn't get an error since we found a queue
+        //so just commit it
+        err = initXIVR((*isnItr), false);
+        if(err)
+        {
+            errlCommit(err,INTR_COMP_ID);
+            err = NULL;
+        }
+    }
+
+    // TODO secure boot - how do we know a processor chip has been added?
+    PSIHB_ISRN_REG_t reg;               //zeros self
+    size_t scom_len = sizeof(reg);
+
+    for(ChipList_t::iterator target_itr = iv_chipList.begin();
+        target_itr != iv_chipList.end(); ++target_itr)
+    {
+        err = deviceWrite
+            (*target_itr,
+             &reg,
+             scom_len,
+             DEVICE_SCOM_ADDRESS(PSIHB_ISRN_REG_t::PSIHB_ISRN_REG));
+
+        if(err)
+        {
+            errlCommit(err,INTR_COMP_ID);
+            err = NULL;
+        }
+    }
+
+
+    // Reset the IP hardware regiseters
 
     iv_cpuList.push_back(iv_masterCpu);
 
@@ -839,8 +1158,43 @@ errlHndl_t INTR::disableExternalInterrupts()
     return err;
 }
 
-uint32_t INTR::intrDestCpuId(uint32_t i_xisr)
+errlHndl_t INTR::enablePsiIntr(TARGETING::Target * i_target)
 {
-    return Singleton<IntrRp>::instance().intrDestCpuId(i_xisr);
+    errlHndl_t err = NULL;
+    msg_q_t intr_msgQ = msg_q_resolve(VFS_ROOT_MSG_INTR);
+    if(intr_msgQ)
+    {
+        msg_t * msg = msg_allocate();
+        msg->type = MSG_INTR_ENABLE_PSI_INTR;
+        msg->data[0] = reinterpret_cast<uint64_t>(i_target);
+
+        msg_sendrecv(intr_msgQ, msg);
+
+        err = reinterpret_cast<errlHndl_t>(msg->data[1]);
+        msg_free(msg);
+    }
+    else
+    {
+        /*@ errorlog tag
+         * @errortype       ERRL_SEV_INFORMATIONAL
+         * @moduleid        INTR::MOD_INTR_ENABLE_PSI_INTR
+         * @reasoncode      INTR::RC_RP_NOT_INITIALIZED
+         * @userdata1       MSG_INTR_ENABLE_PSI_INTR
+         * @userdata2       0
+         *
+         * @defdesc         Interrupt resource provider not initialized yet.
+         *
+         */
+        err = new ERRORLOG::ErrlEntry
+            (
+             ERRORLOG::ERRL_SEV_INFORMATIONAL,      // severity
+             INTR::MOD_INTR_ENABLE_PSI_INTR,        // moduleid
+             INTR::RC_RP_NOT_INITIALIZED,           // reason code
+             static_cast<uint64_t>(MSG_INTR_ENABLE_PSI_INTR),
+             0
+            );
+    }
+    return err;
 }
+
 

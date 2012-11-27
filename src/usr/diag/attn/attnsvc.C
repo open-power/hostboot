@@ -45,56 +45,6 @@ using namespace ERRORLOG;
 namespace ATTN
 {
 
-errlHndl_t Service::configureInterrupt(
-        ConfigureMode i_mode,
-        TargetHandle_t i_proc,
-        msg_q_t i_q,
-        uint64_t i_xisr,
-        uint64_t i_xivrData,
-        uint64_t i_xivrAddr)
-{
-    errlHndl_t err = NULL;
-
-    do {
-
-        if(i_mode == UP)
-        {
-            err = INTR::registerMsgQ(
-                    i_q,
-                    ATTENTION,
-                    static_cast<INTR::ext_intr_t>(i_xisr));
-        }
-        else
-        {
-            if(NULL == INTR::unRegisterMsgQ(
-                    static_cast<INTR::ext_intr_t>(i_xisr)))
-            {
-                ATTN_ERR("INTR did not find xisr: 0x%07x, tgt: %p",
-                        i_xisr, i_proc);
-            }
-        }
-
-        if(err)
-        {
-            break;
-        }
-
-
-        // TODO: validate this order of operations doesn't
-        // cause any checkstops (RTC: 52894)
-
-        err = putScom(i_proc, i_xivrAddr, i_xivrData);
-
-        if(err)
-        {
-            break;
-        }
-
-    } while(0);
-
-    return err;
-}
-
 void getMask(uint64_t i_type, void * i_data)
 {
     uint64_t & mask = *static_cast<uint64_t *>(i_data);
@@ -109,152 +59,113 @@ errlHndl_t Service::configureInterrupts(
         msg_q_t i_q,
         ConfigureMode i_mode)
 {
-    uint64_t prio = i_mode == UP
-        ? LCL_ERR_PRIO
-        : LCL_ERR_PRIO_DISABLED;
-
     errlHndl_t err = NULL;
 
-    TargetHandleList procs;
-
-    getTargetService().getAllChips(procs, TYPE_PROC);
-
-    TargetHandleList::iterator it = procs.begin();
-
-    while(it != procs.end())
+    // First register for Q
+    // This will set up the lcl_err interrupt on all chips
+    if(i_mode == UP)
     {
-        PsiHbIrqSrcCmp psiHbIrqSrcCmpData;
-
-        psiHbIrqSrcCmpData.irsn = PSI_HB_IRSN;
-        psiHbIrqSrcCmpData.mask = PSI_HB_IRSN_MASK;
-        psiHbIrqSrcCmpData.die = PSI_HB_IC_ENABLE;
-        psiHbIrqSrcCmpData.uie = PSI_HB_IC_ENABLE;
-
-        if(i_mode == UP)
+        err = INTR::registerMsgQ(i_q,
+                                 ATTENTION,
+                                 INTR::ISN_LCL_ERR);
+    }
+    else
+    {
+        if(NULL == INTR::unRegisterMsgQ(INTR::ISN_LCL_ERR))
         {
-            // setup psihb interrupts
-
-            // FIXME: This scom can go away when RTC 47105 in place.
-
-            err = putScom(
-                    *it,
-                    PSI_HB_IRQ_SRC_CMP_ADDR,
-                    psiHbIrqSrcCmpData.u64);
+            ATTN_ERR("INTR did not find isn: 0x%07x",
+                     INTR::ISN_LCL_ERR);
         }
-
-        if(err)
-        {
-            break;
-        }
-
-        // setup local error interrupts
-
-        IcpXisr xisr;
-
-        uint64_t node = 0, chip = 0;
-
-        getTargetService().getAttribute(ATTR_FABRIC_NODE_ID, *it, node);
-        getTargetService().getAttribute(ATTR_FABRIC_CHIP_ID, *it, chip);
-
-        xisr.node = node;
-        xisr.chip = chip;
-        xisr.source = PSI_HB_IRSN | LCL_ERR_ISN;
-
-        PsiHbXivr psiHbXivrData;
-
-        psiHbXivrData.source = LCL_ERR_ISN;
-        psiHbXivrData.priority = prio;
-        psiHbXivrData.pir = INTR::intrDestCpuId(xisr.u64);
-
-        err = configureInterrupt(
-                i_mode,
-                *it,
-                i_q,
-                xisr.u64,
-                psiHbXivrData.u64,
-                LCL_ERR_XIVR_ADDR);
-
-        if(err)
-        {
-            break;
-        }
-
-        uint64_t mask = 0;
-
-        // clear status
-
-        if(i_mode == UP)
-        {
-            err = putScom(*it, INTR_TYPE_LCL_ERR_STATUS_REG, 0);
-        }
-
-        if(err)
-        {
-            break;
-        }
-
-        // unmask lcl err intr
-
-        mask = 0x8000000000000000ull;
-
-        err = modifyScom(
-                *it,
-                INTR_TYPE_MASK_REG,
-                i_mode == UP ? ~mask : mask,
-                i_mode == UP ? SCOM_AND : SCOM_OR);
-
-        if(err)
-        {
-            break;
-        }
-
-        // set lcl err intr conf - or
-
-        if(i_mode == UP)
-        {
-            err = modifyScom(*it, INTR_TYPE_CONFIG_REG, ~mask, SCOM_AND);
-        }
-
-        if(err)
-        {
-            break;
-        }
-
-        // enable powerbus gpin
-
-        mask = 0x0018000000000000ull;
-
-        err = modifyScom(
-                *it,
-                GP2_REG,
-                i_mode == UP ? mask : ~mask,
-                i_mode == UP ? SCOM_OR : SCOM_AND);
-
-        if(err)
-        {
-            break;
-        }
-
-        // enable interrupts in ipoll mask
-
-        mask = 0;
-
-        IPOLL::forEach(~0, &mask, &getMask);
-
-        err = modifyScom(
-                *it,
-                IPOLL::address,
-                i_mode == UP ? mask : ~mask,
-                i_mode == UP ? SCOM_OR : SCOM_AND);
-
-        if(err)
-        {
-            break;
-        }
-
-        ++it;
     }
 
+
+    //Issue scoms to allow attentions to flow via INTR
+    if(!err)
+    {
+        TargetHandleList procs;
+        getTargetService().getAllChips(procs, TYPE_PROC);
+        TargetHandleList::iterator it = procs.begin();
+
+        while(it != procs.end())
+        {
+            uint64_t mask = 0;
+
+            // clear status
+
+            if(i_mode == UP)
+            {
+                err = putScom(*it, INTR_TYPE_LCL_ERR_STATUS_REG,
+                              0);
+            }
+
+            if(err)
+            {
+                break;
+            }
+
+            // unmask lcl err intr
+
+            mask = 0x8000000000000000ull;
+
+            err = modifyScom(
+                             *it,
+                             INTR_TYPE_MASK_REG,
+                             i_mode == UP ? ~mask : mask,
+                             i_mode == UP ? SCOM_AND : SCOM_OR);
+
+            if(err)
+            {
+                break;
+            }
+
+            // set lcl err intr conf - or
+
+            if(i_mode == UP)
+            {
+                err = modifyScom(*it, INTR_TYPE_CONFIG_REG,
+                                 ~mask, SCOM_AND);
+            }
+
+            if(err)
+            {
+                break;
+            }
+
+            // enable powerbus gpin
+
+            mask = 0x0018000000000000ull;
+
+            err = modifyScom(
+                             *it,
+                             GP2_REG,
+                             i_mode == UP ? mask : ~mask,
+                             i_mode == UP ? SCOM_OR : SCOM_AND);
+
+            if(err)
+            {
+                break;
+            }
+
+            // enable interrupts in ipoll mask
+
+            mask = 0;
+
+            IPOLL::forEach(~0, &mask, &getMask);
+
+            err = modifyScom(
+                             *it,
+                             IPOLL::address,
+                             i_mode == UP ? mask : ~mask,
+                             i_mode == UP ? SCOM_OR : SCOM_AND);
+
+            if(err)
+            {
+                break;
+            }
+
+            ++it;
+        }
+    }
     return err;
 }
 
@@ -326,9 +237,9 @@ errlHndl_t Service::processIntrQMsgPreAck(const msg_t & i_msg,
 
     TargetHandle_t proc = NULL;
 
-    IcpXisr xisr;
+    INTR::XISR_t xisr;
 
-    xisr.u64 = i_msg.data[0];
+    xisr.u32 = i_msg.data[0];
 
     TargetHandleList procs;
     getTargetService().getAllChips(procs, TYPE_PROC);
@@ -352,7 +263,7 @@ errlHndl_t Service::processIntrQMsgPreAck(const msg_t & i_msg,
         ++it;
     }
 
-    ATTN_DBG("preack: xisr: 0x%07x, tgt: %p", xisr.u64, proc);
+    ATTN_DBG("preack: xisr: 0x%07x, tgt: %p", xisr.u32, proc);
 
     do {
 

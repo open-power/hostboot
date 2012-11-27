@@ -26,9 +26,13 @@
 #include <sys/msg.h>
 #include <errl/errlentry.H>
 
+namespace TARGETING
+{
+    class Target;
+};
+
 namespace INTR
 {
-
 
     /**
      * External Interrupt Types (XISR)
@@ -43,15 +47,53 @@ namespace INTR
      *
      * extr_intr_t values are XISR right shifted, lsb = bit 23
      */
-    enum ext_intr_t
+    enum XISRvalue_t
     {
         NO_INTERRUPT = 0,       //!< no interrupt present
-        INTERPROC = 2,          //!< Inter processor interrupt (should be changed?)
-        FSP_MAILBOX = 0x1A,     //!< TODO final value??
-        ATTENTION = 0x26,       //!< TODO find this value
+        INTERPROC_XISR = 2,     //!< XISR value for IPIs
         MAX_XISR  = 0x00FFFFFF, //!< Max value of the XISR
         SHUT_DOWN = 0x01000000, //!< INTR presenter sends this when shutting down
     };
+
+    typedef uint32_t ext_intr_t;
+
+    enum ISNvalue_t
+    {
+        ISN_FSP         = 0,
+        ISN_OCC         = 1,
+        ISN_FSI         = 2,
+        FSP_MAILBOX     = 2,
+        ISN_LPC         = 3,
+        ISN_LCL_ERR     = 4,
+        ISN_HOST        = 5,
+        ISN_INTERPROC   = 0xF0, //"special" as it isn't part of PSIHB
+    };
+
+    /**
+     * The XISR value is the logical OR of the Interrup Requestor Source
+     * Number (IRSN) and the Interrrupt Source Number (ISN).
+     * See BookIV PSI chapter.  ISN is defined in the XIVR register and
+     * IRSN is defined in the Interupt Requester Source Compare Register
+     */
+    struct XISR_t
+    {
+        union
+        {
+            uint32_t       u32;
+            struct
+            {
+                uint32_t        res:22; //!< Not used by Host boot
+                uint32_t       node:3;  //!< PIR node id value
+                uint32_t       chip:3;  //!< PIR chip id value
+                uint32_t   intrproc:1;  //!< '0'-> interproc interrupt else '1'
+                uint32_t        isn:3;  //!< Interrupt Source Number
+
+            } PACKED;
+        };
+
+        XISR_t() : u32(0) {}
+    };
+
 
     /**
      * Msg types for intrRp from usr space
@@ -62,9 +104,9 @@ namespace INTR
         MSG_INTR_UNREGISTER_MSGQ,   //!< Un register a msgQ
         MSG_INTR_ENABLE,            //!< Enable external Interrupts
         MSG_INTR_DISABLE,           //!< Disable external interrupts
-        MSG_INTR_SHUTDOWN,         //!< Call to shutdown interrupt presenter
+        MSG_INTR_SHUTDOWN,          //!< Call to shutdown interrupt presenter
+        MSG_INTR_ENABLE_PSI_INTR,   //!< Enable PSI interrupts
     };
-
 
     /**
      * Register a message queue for an interrupt type
@@ -72,16 +114,18 @@ namespace INTR
      * @param[in] i_msg_type, The message type of the message to send
      *                        to i_msgQ when an interrupt of
      *                        i_intr_type occurrs.
-     * @param[in] i_intr_type, The interrupt type to register.
+     * @param[in] i_intr_type, The interrupt type to register. Done
+     *       for all chips presently capable of generating interrupts
      *
-     * @note the interrupt type is currently the XISR value in the XIRR
-     *       register and consists of the chipid, buid, and level
+     * @note the interrupt type is currently the ISN value in the PSIHB
+     *       XIVR register
      *       @see  i_intr_type for enumerations.
      *
      * @note when an interrupt of type i_msg_type occurrs, the
      * interrupt presenter sends a sync message with type i_msg_type to
-     * i_msgQ with i_intr_type in message data word 0 and then waits
-     * for a response.
+     * i_msgQ with FULL IRSN word 0 and then waits for a response.
+     * the full IRSN has the node/chip/ISN, not just the ISN
+     *       @see makeXISR
      *
      * @note When HB is shutting down the interrupt presenter will send
      * a message to all registered queues with a sync message type of
@@ -93,7 +137,7 @@ namespace INTR
 
     /**
      * Un register a message queue from the interrupt handler
-     * @param[in] i_type the type of interrupt (XISR value)
+     * @param[in] i_type the type of interrupt (ISN value)
      * @return The message queue that was unregistered with i_type
      *         | NULL if no queue was not found for i_type
      */
@@ -112,13 +156,11 @@ namespace INTR
     errlHndl_t disableExternalInterrupts();
 
     /**
-     * Get the cpu id of the interrupt destination
-     * @param[in] i_xisr, The XISR value for the interrupt
-     * @return cpuId (PIR value)
-     * @pre The interrupt service provider is initialized
-     * @note the XISR = IRSN | IRSN_source
+     * Initialize the IRSCReg to enable PSI to present interrupts
+     * @param[in] i_target  The target processor
+     * @return error log handle on error
      */
-    uint32_t intrDestCpuId(uint32_t i_xisr);
+    errlHndl_t enablePsiIntr(TARGETING::Target * i_target);
 
 };
 

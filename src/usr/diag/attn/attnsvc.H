@@ -125,36 +125,6 @@ class Service
                 ConfigureMode i_mode);
 
         /**
-         * @brief configureInterrupt enable or disable
-         *    a specific interrupt type on a single processor.
-         *
-         * @post Service (un)hooked to/from interrupt service
-         *   for local error and host interrupts.
-         * @post local error and host priority set(cleared).
-         * @post local error and host interrupts (un)masked at GFIR macro.
-         *
-         * @param[in] i_mode Up or down
-         * @param[in] i_proc The proc to be configured.
-         * @param[in] i_q The msg q to be registered with the
-         *             interrupt service.
-         * @param[in] i_xisr The XISR value for the type being configured.
-         * @param[in] i_xivrData The XIVR register content for
-         *              the type being configured.
-         * @param[in] i_xivrAddr The XIVR register address for the type
-         *               being configured.
-         *
-         * @retval[0] No error
-         * @retval[!0] Unexpected error
-         */
-        errlHndl_t configureInterrupt(
-                ConfigureMode i_mode,
-                TARGETING::TargetHandle_t i_proc,
-                msg_q_t i_q,
-                uint64_t i_xisr,
-                uint64_t i_xivrData,
-                uint64_t i_xivrAddr);
-
-        /**
          * @brief intrTask infinite wait-for-interrupt loop
          *
          * repeatedly call intrTaskWait and processIntrQMsg
