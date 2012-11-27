@@ -68,7 +68,6 @@
     <attribute><id>SCRATCH_UINT64_ARRAY_1</id></attribute>
     <attribute><id>SCRATCH_UINT64_ARRAY_2</id></attribute>
     <attribute><id>NUMERIC_POD_TYPE_TEST</id></attribute>
-    <attribute><id>HB_MUTEX_TEST_LOCK</id></attribute>
     <attribute><id>DUMMY_RW</id></attribute>
     <attribute><id>XSCOM_BASE_ADDRESS</id></attribute>
     <attribute><id>TEST_NULL_STRING</id></attribute>
@@ -87,7 +86,6 @@
         <id>IS_SIMULATION</id>
         <default>0</default>
     </attribute>
-    <attribute><id>IS_MPIPL</id></attribute>
     <attribute><id>ISTEP_MODE</id></attribute>
     <attribute><id>PROC_EPS_TABLE_TYPE</id></attribute>
     <attribute><id>PROC_FABRIC_PUMP_MODE</id></attribute>
@@ -192,15 +190,6 @@
         <id>SCOM_SWITCHES</id>
     </attribute>
     <attribute>
-        <id>FSI_MASTER_MUTEX</id>
-    </attribute>
-    <attribute>
-        <id>FSI_SCOM_MUTEX</id>
-    </attribute>
-    <attribute>
-        <id>SCOM_IND_MUTEX</id>
-    </attribute>
-    <attribute>
         <!-- Processor chips have SCOM accessible FSI GP regs -->
         <id>FSI_GP_REG_SCOM_ACCESS</id>
         <default>1</default>
@@ -229,9 +218,6 @@
      <!--   proc_fab_smp_fabric_attributes.xml  -->
      <attribute><id>FREQ_CORE</id></attribute>
      <attribute><id>PROC_PCIE_NOT_F_LINK</id></attribute>
-     <!-- new attribute for isteps 15 & 16 -->
-     <attribute><id>SLW_IMAGE_ADDR</id></attribute>
-     <attribute><id>SLW_IMAGE_SIZE</id></attribute>
      <attribute><id>MSS_INTERLEAVE_ENABLE</id></attribute>
      <attribute><id>MSS_MCS_GROUP_32</id></attribute>
      <!-- Start pm_attributes_all_plat.xml -->
@@ -338,21 +324,6 @@
     <parent>chip-processor</parent>
     <attribute><id>DUMMY_RW</id></attribute>
     <attribute><id>DUMMY_HEAP_ZERO_DEFAULT</id></attribute>
-    <attribute>
-        <id>I2C_ENGINE_MUTEX_0</id>
-        <default>0</default>
-    </attribute>
-    <attribute>
-        <id>I2C_ENGINE_MUTEX_1</id>
-        <default>0</default>
-    </attribute>
-    <attribute>
-        <id>I2C_ENGINE_MUTEX_2</id>
-        <default>0</default>
-    </attribute>
-    <attribute>
-        <id>XSCOM_VIRTUAL_ADDR</id>
-    </attribute>
     <attribute><id>MSS_MEM_MC_IN_GROUP</id></attribute>
 
     <!-- From PHYP Memory Map -->
@@ -829,15 +800,6 @@
     <attribute><id>MSS_LAB_OVERRIDE_FOR_MEM_PLL</id></attribute>
     <attribute><id>EI_BUS_RX_MSB_LSB_SWAP</id></attribute>
     <attribute><id>EI_BUS_TX_MSB_LSB_SWAP</id></attribute>
-    <attribute>
-        <id>FSI_SCOM_MUTEX</id>
-    </attribute>
-    <attribute>
-        <id>SCOM_IND_MUTEX</id>
-    </attribute>
-    <attribute>
-        <id>IBSCOM_VIRTUAL_ADDR</id>
-    </attribute>
     <attribute>
         <!-- Centaur memory buffer chips do not have SCOM accessible FSI GP regs -->
         <id>FSI_GP_REG_SCOM_ACCESS</id>

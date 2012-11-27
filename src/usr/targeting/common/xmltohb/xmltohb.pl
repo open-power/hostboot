@@ -70,6 +70,7 @@ my $cfgVerbose = 0;
 my $cfgShortEnums = 0;
 my $cfgBigEndian = 1;
 my $cfgIncludeFspAttributes = 0;
+my $cfgIncludeHbAttributes = 0;
 
 GetOptions("hb-xml-file:s" => \$cfgHbXmlFile,
            "src-output-dir:s" =>  \$cfgSrcOutputDir,
@@ -80,6 +81,7 @@ GetOptions("hb-xml-file:s" => \$cfgHbXmlFile,
            "short-enums!" =>  \$cfgShortEnums,
            "big-endian!" =>  \$cfgBigEndian,
            "include-fsp-attributes!" =>  \$cfgIncludeFspAttributes,
+           "include-hb-attributes!" =>  \$cfgIncludeHbAttributes,
            "help" => \$cfgHelp,
            "man" => \$cfgMan,
            "verbose" => \$cfgVerbose ) || pod2usage(-verbose => 0);
@@ -108,6 +110,7 @@ if($cfgVerbose)
     print STDOUT "Short enums = $cfgShortEnums\n";
     print STDOUT "Big endian = $cfgBigEndian\n";
     print STDOUT "include-fsp-attributes = $cfgIncludeFspAttributes\n",
+    print STDOUT "include-hb-attributes = $cfgIncludeHbAttributes\n",
 }
 
 ################################################################################
@@ -322,6 +325,7 @@ sub validateAttributes {
     $elements{"description"} = { required => 1, isscalar => 1};
     $elements{"persistency"} = { required => 1, isscalar => 1};
     $elements{"fspOnly"}     = { required => 0, isscalar => 0};
+    $elements{"hbOnly"}      = { required => 0, isscalar => 0};
     $elements{"readable"}    = { required => 0, isscalar => 0};
     $elements{"simpleType"}  = { required => 0, isscalar => 0};
     $elements{"complexType"} = { required => 0, isscalar => 0};
@@ -740,6 +744,12 @@ namespace TARGETING
         // Intialized to default from P3 on hard reset, else existing P1
         // memory copied on R/R
         SECTION_TYPE_FSP_P1_FLASH_INIT = 0x9,
+
+        // HOSTBOOT section
+
+        // Targeting heap section intialized to zero
+        SECTION_TYPE_HB_HEAP_ZERO_INIT = 0x0A,
+
     };
 
     struct TargetingSection
@@ -3365,6 +3375,8 @@ sub generateTargetingImage {
     my $heapPnorInitBaseAddr = $pnorRwBaseAddress    + $vmmSectionOffset;
     my $heapZeroInitBaseAddr = $heapPnorInitBaseAddr + $vmmSectionOffset;
 
+    #We will either have additional FSP sections or Hostboot section but not both
+
     # Split "fsp" into additional sections
     my $fspP0DefaultedFromZeroBaseAddr   = $heapZeroInitBaseAddr + $vmmSectionOffset;
     my $fspP0DefaultedFromP3BaseAddr  = $fspP0DefaultedFromZeroBaseAddr + $vmmSectionOffset;
@@ -3372,6 +3384,9 @@ sub generateTargetingImage {
     my $fspP3RwBaseAddr         = $fspP3RoBaseAddr + $vmmSectionOffset;
     my $fspP1DefaultedFromZeroBaseAddr   = $fspP3RwBaseAddr + $vmmSectionOffset;
     my $fspP1DefaultedFromP3BaseAddr  = $fspP1DefaultedFromZeroBaseAddr + $vmmSectionOffset;
+
+    # Hostboot specific section
+    my $hbHeapZeroInitBaseAddr = $heapZeroInitBaseAddr + $vmmSectionOffset;
 
     # Reserve 256 bytes for the header, then keep track of PNOR RO offset
     my $headerSize = 256;
@@ -3486,6 +3501,10 @@ sub generateTargetingImage {
     my $fspP3RwOffset = 0;
     my $fspP3RwBinData;
 
+    # Hostboot specific section
+    my $hbHeapZeroInitOffset = 0;
+    my $hbHeapZeroInitBinData;
+
     my $attributePointerBinData;
     my $targetsBinData;
 
@@ -3599,8 +3618,20 @@ sub generateTargetingImage {
                 }
                 else
                 {
-                    print STDOUT "Persistency not found =$attributeDef->{persistency}\n";
-                    fatal("Persistency not supported.");
+                    fatal("Persistency '$attributeDef->{persistency}' is not "
+                          . "supported for fspOnly attribute '$attributeId'.");
+                }
+            }
+            elsif( exists $attributeDef->{hbOnly} )
+            {
+                if( $attributeDef->{persistency} eq "volatile-zeroed" )
+                {
+                    $section = "hb-heap-zero-initialized";
+                }
+                else
+                {
+                    fatal("Persistency '$attributeDef->{persistency}' is not "
+                          . "supported for hbOnly attribute '$attributeId'.");
                 }
             }
             elsif( exists $attributeDef->{writeable}
@@ -3623,7 +3654,8 @@ sub generateTargetingImage {
             }
             else
             {
-                fatal("Persistency not supported.");
+                fatal("Persistency '$attributeDef->{persistency}' is not "
+                      . "supported for attribute '$attributeId'.");
             }
 
             if($section eq "pnor-ro")
@@ -3646,8 +3678,8 @@ sub generateTargetingImage {
                 $roAttrBinData .= pack ("@".$pads);
                 $offset += $pads;
 
-                        $attributePointerBinData .= pack8byte(
-                            $offset + $pnorRoBaseAddress);
+                $attributePointerBinData .= pack8byte(
+                    $offset + $pnorRoBaseAddress);
 
                 $offset += (length $rodata);
 
@@ -3830,6 +3862,26 @@ sub generateTargetingImage {
 
                 $fspP1DefaultedFromP3BinData .= $fspP1FlashData;
             }
+            # Hostboot specific section
+            elsif($section eq "hb-heap-zero-initialized")
+            {
+                my ($hbHeapZeroInitData,$alignment) = packAttribute(
+                        $attributes,
+                        $attributeDef,$attrhash{$attributeId}->{default});
+
+                # Align the data as necessary
+                my $pads = ($alignment - ($hbHeapZeroInitOffset
+                            % $alignment)) % $alignment;
+                $hbHeapZeroInitBinData .= pack ("@".$pads);
+                $hbHeapZeroInitOffset += $pads;
+
+                $attributePointerBinData .= pack8byte(
+                    $hbHeapZeroInitOffset + $hbHeapZeroInitBaseAddr);
+
+                $hbHeapZeroInitOffset += (length $hbHeapZeroInitData);
+
+                $hbHeapZeroInitBinData .= $hbHeapZeroInitData;
+            }
 
             else
             {
@@ -3919,6 +3971,16 @@ sub generateTargetingImage {
         $sectionHoH{ fspP1DefaultedFromP3 }{ size } =
             sizeBlockAligned($fspP1DefaultedFromP3Offset,$blockSize,1);
     }
+    elsif($cfgIncludeHbAttributes)
+    {
+        # zeroInitSection occupies no space in the binary, so set the
+        # Hostboot section address to that of the zeroInitSection
+        $sectionHoH{ hbHeapZeroInit }{ offset } =
+            $sectionHoH{heapZeroInit}{ offset };
+        $sectionHoH{ hbHeapZeroInit }{ type } = 10;
+        $sectionHoH{ hbHeapZeroInit }{ size } =
+            sizeBlockAligned($hbHeapZeroInitOffset,$blockSize,1);
+    }
 
     my $numSections = keys %sectionHoH;
 
@@ -3947,6 +4009,10 @@ sub generateTargetingImage {
         push(@sections,"fspP3Rw");
         push(@sections,"fspP1DefaultedFromZero");
         push(@sections,"fspP1DefaultedFromP3");
+    }
+    elsif($cfgIncludeHbAttributes)
+    {
+        push(@sections,"hbHeapZeroInit");
     }
 
     foreach my $section (@sections)
@@ -4106,6 +4172,16 @@ generated code.
 =item B<--noinclude-fsp-attributes>
 
 Omits FSP specific attributes and targets from the generated binaries and
+generated code.  This is the default behavior.
+
+=item B<--include-hb-attributes>
+
+Emits Hostboot specific attributes and targets into the generated binaries and
+generated code.  
+
+=item B<--noinclude-hb-attributes>
+
+Omits Hostboot specific attributes and targets from the generated binaries and
 generated code.  This is the default behavior.
 
 =item B<--verbose>

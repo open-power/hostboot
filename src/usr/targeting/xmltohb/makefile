@@ -1,25 +1,25 @@
-#   IBM_PROLOG_BEGIN_TAG
-#  This is an automatically generated prolog.
+# IBM_PROLOG_BEGIN_TAG
+# This is an automatically generated prolog.
 #
-#  $Source: src/usr/targeting/xmltohb/makefile $
+# $Source: src/usr/targeting/xmltohb/makefile $
 #
-#  IBM CONFIDENTIAL
+# IBM CONFIDENTIAL
 #
-#  COPYRIGHT International Business Machines Corp. 2011-2012
+# COPYRIGHT International Business Machines Corp. 2011,2012
 #
-#  p1
+# p1
 #
-#  Object Code Only (OCO) source materials
-#  Licensed Internal Code Source Materials
-#  IBM HostBoot Licensed Internal Code
+# Object Code Only (OCO) source materials
+# Licensed Internal Code Source Materials
+# IBM HostBoot Licensed Internal Code
 #
-#  The source code for this program is not published or other-
-#  wise divested of its trade secrets, irrespective of what has
-#  been deposited with the U.S. Copyright Office.
+# The source code for this program is not published or otherwise
+# divested of its trade secrets, irrespective of what has been
+# deposited with the U.S. Copyright Office.
 #
-#  Origin: 30
+# Origin: 30
 #
-#  IBM_PROLOG_END_TAG
+# IBM_PROLOG_END_TAG
 ################################################################################
 #
 #  @file targeting/xmltohb/makefile
@@ -50,6 +50,24 @@ FAPI_ATTR_SOURCE_DIR = ${ROOTPATH}/src/usr/hwpf/hwp
 XMLTOHB_FAPIATTR_SOURCES = \
     ${addprefix ${FAPI_ATTR_SOURCE_DIR}/, ${FAPI_ATTR_SOURCES}}
 
+XMLTOHB_COMMON_ATTRIBUTE_SOURCES        = attribute_types.xml
+XMLTOHB_COMMON_TARGET_SOURCES           = target_types.xml
+
+XMLTOHB_HB_ATTRIBUTE_SOURCES            = attribute_types_hb.xml
+XMLTOHB_HB_TARGET_SOURCES               = target_types_hb.xml
+
+XMLTOHB_MERGED_COMMON_TARGET_SOURCES    = target_types_merged.xml
+
+#Redefine XMLTOHB_GENERIC_SOURCES
+XMLTOHB_GENERIC_SOURCES =                               \
+    ${XMLTOHB_COMMON_ATTRIBUTE_SOURCES}                 \
+    ${XMLTOHB_HB_ATTRIBUTE_SOURCES}                     \
+    ${GENDIR}/${XMLTOHB_MERGED_COMMON_TARGET_SOURCES}   \
+    ${XMLTOHB_HB_TARGET_SOURCES}
+
+#XML target types merge script
+XMLTOHB_TARGET_MERGE_SCRIPT = updatetargetxml.pl
+
 VMM_CONSTS_FILE = \
     ${ROOTPATH}/src/include/usr/vmmconst.h
 
@@ -67,13 +85,19 @@ GENFILES = ${XMLTOHB_TARGETS}
 #	@echo FAPI_ATTR_SOURCES = ${FAPI_ATTR_SOURCES}
 #	@echo FAPI_ATTR_SOURCE_DIR = ${FAPI_ATTR_SOURCE_DIR}
 #	@echo XMLTOHB_FAPIATTR_SOURCES = ${XMLTOHB_FAPIATTR_SOURCES}
+#	@echo XMLTOHB_COMMON_ATTRIBUTE_SOURCES = ${XMLTOHB_COMMON_ATTRIBUTE_SOURCES}
+#	@echo XMLTOHB_COMMON_TARGET_SOURCES = ${XMLTOHB_COMMON_TARGET_SOURCES}
+#	@echo XMLTOHB_HB_ATTRIBUTE_SOURCES = ${XMLTOHB_HB_ATTRIBUTE_SOURCES}
+#	@echo XMLTOHB_HB_TARGET_SOURCES = ${XMLTOHB_HB_TARGET_SOURCES}
+#	@echo XMLTOHB_MERGED_COMMON_TARGET_SOURCES = ${XMLTOHB_MERGED_COMMON_TARGET_SOURCES}
 #	@echo VPATH = ${VPATH}
     
 EXTRA_PARTS = $(addprefix $(IMGDIR)/, $(XMLTOHB_SYSTEM_BINARIES))
 
 EXTRA_CLEAN = $(addprefix $(GENDIR)/, ${XMLTOHB_SYSTEM_BINARIES}) \
           $(addprefix $(GENDIR)/, ${XMLTOHB_SYSTEM_BINARIES:.bin=.xml}) \
-              ${GENDIR}/${XMLTOHB_GENERIC_XML} ${GENDIR}/${XMLTOHB_FAPI_XML}
+              ${GENDIR}/${XMLTOHB_GENERIC_XML} ${GENDIR}/${XMLTOHB_FAPI_XML} \
+              ${GENDIR}/${XMLTOHB_MERGED_COMMON_TARGET_SOURCES}
 
 include ${ROOTPATH}/config.mk
 
@@ -82,6 +106,12 @@ include ${ROOTPATH}/config.mk
 
 ${EXTRA_PARTS}: ${IMGDIR}/% : ${GENDIR}/%
 	cp -f $^ $@
+
+# create merged target xml
+${GENDIR}/${XMLTOHB_MERGED_COMMON_TARGET_SOURCES}: \
+        ${XMLTOHB_TARGET_MERGE_SCRIPT} ${XMLTOHB_COMMON_TARGET_SOURCES} ${XMLTOHB_HB_TARGET_SOURCES}
+	./${XMLTOHB_TARGET_MERGE_SCRIPT} $(addprefix --hb=,${XMLTOHB_HB_TARGET_SOURCES}) \
+       $(addprefix --common=,${COMMON_TARGETING_REL_PATH}/${XMLTOHB_COMMON_TARGET_SOURCES}) > $@
 
 # generic XML is created from the generic sources only
 ${GENDIR}/${XMLTOHB_GENERIC_XML}: \
@@ -114,5 +144,5 @@ ${GENDIR}/%_targeting.bin: ${XMLTOHB_COMPILER_SCRIPT} ${GENDIR}/%.hb.xml \
         $(addprefix --fapi-attributes-xml-file=,${GENDIR}/${XMLTOHB_FAPI_XML}) \
          --src-output-dir=none --img-output-dir=$(dir $@) \
          --img-output-file=$(notdir $@) \
-         --vmm-consts-file=$(VMM_CONSTS_FILE) --noshort-enums
+         --vmm-consts-file=$(VMM_CONSTS_FILE) --noshort-enums --include-hb-attributes
 

@@ -1,0 +1,203 @@
+<!-- IBM_PROLOG_BEGIN_TAG                                                   -->
+<!-- This is an automatically generated prolog.                             -->
+<!--                                                                        -->
+<!-- $Source: src/usr/targeting/common/xmltohb/attribute_types.xml $        -->
+<!--                                                                        -->
+<!-- IBM CONFIDENTIAL                                                       -->
+<!--                                                                        -->
+<!-- COPYRIGHT International Business Machines Corp. 2011,2012              -->
+<!--                                                                        -->
+<!-- p1                                                                     -->
+<!--                                                                        -->
+<!-- Object Code Only (OCO) source materials                                -->
+<!-- Licensed Internal Code Source Materials                                -->
+<!-- IBM HostBoot Licensed Internal Code                                    -->
+<!--                                                                        -->
+<!-- The source code for this program is not published or otherwise         -->
+<!-- divested of its trade secrets, irrespective of what has been           -->
+<!-- deposited with the U.S. Copyright Office.                              -->
+<!--                                                                        -->
+<!-- Origin: 30                                                             -->
+<!--                                                                        -->
+<!-- IBM_PROLOG_END_TAG                                                     -->
+
+<attributes>
+
+<!-- =====================================================================
+     HOST BOOT ATTRIBUTE TYPES
+     Contains the definition of hostboot attributes which should not be
+     synced to/from FSP
+     ================================================================= -->
+
+<attribute>
+    <id>IS_MPIPL</id>
+    <description>1 = in Memory Preserving IPL mode. 0 = in normal IPL mode.</description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_IS_MPIPL</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>XSCOM_VIRTUAL_ADDR</id>
+    <description>Cached Virtual Address of Xscom memory space for this Chip</description>
+    <simpleType>
+        <uint64_t>
+            <default>0</default>
+        </uint64_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hbOnly/>
+</attribute>
+
+<attribute>
+    <id>FSI_MASTER_MUTEX</id>
+    <description>Mutex for FSI Master Operations</description>
+    <simpleType>
+        <hbmutex>
+            <default>0</default>
+        </hbmutex>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hbOnly/>
+</attribute>
+
+<!-- For POD Testing -->
+<attribute>
+    <id>HB_MUTEX_TEST_LOCK</id>
+    <description>Host boot mutex for testing</description>
+    <simpleType>
+        <hbmutex>
+            <default>0</default>
+        </hbmutex>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hbOnly/>
+</attribute>
+
+<attribute>
+    <id>I2C_ENGINE_MUTEX_0</id>
+    <description>Mutex for I2C Master engine 0</description>
+    <simpleType>
+        <hbmutex>
+            <default>0</default>
+        </hbmutex>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hbOnly/>
+</attribute>
+
+<attribute>
+    <id>I2C_ENGINE_MUTEX_1</id>
+    <description>Mutex for I2C Master engine 1</description>
+    <simpleType>
+        <hbmutex>
+            <default>0</default>
+        </hbmutex>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hbOnly/>
+</attribute>
+
+<attribute>
+    <id>I2C_ENGINE_MUTEX_2</id>
+    <description>Mutex for I2C Master engine 2</description>
+    <simpleType>
+        <hbmutex>
+            <default>0</default>
+        </hbmutex>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hbOnly/>
+</attribute>
+
+<attribute>
+    <id>FSI_SCOM_MUTEX</id>
+    <description>Mutex for FSI-based SCOM Operations</description>
+    <simpleType>
+        <hbmutex>
+            <default>0</default>
+        </hbmutex>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hbOnly/>
+</attribute>
+
+<attribute>
+    <id>SCOM_IND_MUTEX</id>
+    <description>Mutex for Indirect SCOM read operation</description>
+    <simpleType>
+        <hbmutex>
+            <default>0</default>
+        </hbmutex>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hbOnly/>
+</attribute>
+
+<attribute>
+    <id>SLW_IMAGE_ADDR</id>
+    <description>
+        Location of runtime winkle image for this processor chip.
+        Written by host_build_winkle (istep 15.1)
+    </description>
+    <simpleType>
+        <uint64_t></uint64_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+</attribute>
+
+<attribute>
+    <id>SLW_IMAGE_SIZE</id>
+    <description>
+        Size of runtime winkle image for this processor chip.
+        Written by host_build_winkle (istep 15.1)
+    </description>
+    <simpleType>
+        <uint64_t></uint64_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+</attribute>
+
+<attribute>
+    <id>IBSCOM_VIRTUAL_ADDR</id>
+    <description>Cached Virtual Address of Inband Scom memory space for this Chip</description>
+    <simpleType>
+        <uint64_t>
+            <default>0</default>
+        </uint64_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+</attribute>
+
+</attributes>

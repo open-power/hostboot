@@ -196,8 +196,10 @@ namespace TARGETING
                     case MSG_MM_RP_READ:
                         // HEAP_ZERO_INIT should never be requested for read
                         // because kernel should automatically get a zero page.
-                        if (iv_sections[section].type ==
-                            SECTION_TYPE_HEAP_ZERO_INIT)
+                        if ( (iv_sections[section].type ==
+                              SECTION_TYPE_HEAP_ZERO_INIT) ||
+                             (iv_sections[section].type ==
+                              SECTION_TYPE_HB_HEAP_ZERO_INIT) )
                         {
                             TRACFCOMP(g_trac_targeting,
                                       ERR_MRK "AttrRP: Read request on "
@@ -395,6 +397,7 @@ namespace TARGETING
                         break;
 
                     case SECTION_TYPE_HEAP_ZERO_INIT:
+                    case SECTION_TYPE_HB_HEAP_ZERO_INIT:
                         l_perm = WRITABLE | ALLOCATE_FROM_ZERO;
                         break;
 
@@ -420,12 +423,19 @@ namespace TARGETING
                     break;
                 }
                 
-                int rc = mm_alloc_block((iv_sections[i].type ==
-                                        SECTION_TYPE_HEAP_ZERO_INIT ?
-                                     NULL : iv_msgQ),
-                                    reinterpret_cast<void*>(
-                                            iv_sections[i].vmmAddress),
+                int rc = 0;
+                msg_q_t l_msgQ = iv_msgQ;
+
+                if ( (iv_sections[i].type == SECTION_TYPE_HEAP_ZERO_INIT) ||
+                     (iv_sections[i].type == SECTION_TYPE_HB_HEAP_ZERO_INIT) )
+                {
+                    l_msgQ = NULL;
+                }
+
+                rc = mm_alloc_block(l_msgQ,
+                                    reinterpret_cast<void*>(iv_sections[i].vmmAddress),
                                     iv_sections[i].size);
+
                 if (rc)
                 {
                     /*@
