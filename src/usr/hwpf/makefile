@@ -71,7 +71,8 @@ HWP_ERROR_XML_FILES = hwp/fapiHwpErrorInfo.xml   \
     hwp/runtime_errors/proc_pss_errors.xml \
     hwp/runtime_errors/proc_cpu_special_wakeup_errors.xml \
     hwp/runtime_errors/p8_poregpe_errors.xml \
-    hwp/runtime_errors/p8_pba_init_errors.xml
+    hwp/runtime_errors/p8_pba_init_errors.xml \
+    hwp/dram_initialization/host_mpipl_service/proc_mpipl_chip_cleanup_errors.xml
 
 
 ## these get generated into obj/genfiles/AttributeIds.H

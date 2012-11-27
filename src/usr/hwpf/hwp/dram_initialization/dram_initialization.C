@@ -63,6 +63,8 @@
 
 //  Uncomment these files as they become available:
 // #include    "host_startPRD_dram/host_startPRD_dram.H"
+#include    "host_mpipl_service/proc_mpipl_ex_cleanup.H"
+#include    "host_mpipl_service/proc_mpipl_chip_cleanup.H"
 #include    "mss_extent_setup/mss_extent_setup.H"
 // #include    "mss_memdiag/mss_memdiag.H"
 // #include    "mss_scrub/mss_scrub.H"
@@ -390,7 +392,6 @@ void*    call_proc_setup_bars( void    *io_pArgs )
     // Get all Centaur targets
     TARGETING::TargetHandleList l_cpuTargetList;
     getAllChips(l_cpuTargetList, TYPE_PROC );
-
 
     //  -----------------------------------------------------------------------
     //  run mss_setup_bars on all CPUs.
@@ -777,16 +778,106 @@ void*    call_proc_exit_cache_contained( void    *io_pArgs )
 //
 void*   call_host_mpipl_service( void *io_pArgs )
 {
-    errlHndl_t  l_errl  =   NULL;
 
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+    IStepError l_StepError;
+
+    errlHndl_t l_err = NULL;
+
+    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                "call_host_mpipl_service entry" );
 
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+    // call proc_mpipl_chip_cleanup.C
+    TARGETING::TargetHandleList l_procTargetList;
+    getAllChips(l_procTargetList, TYPE_PROC );
+
+    //  ---------------------------------------------------------------
+    //  run proc_mpipl_chip_cleanup.C on all proc chips
+    //  ---------------------------------------------------------------
+    for (TargetHandleList::iterator l_iter = l_procTargetList.begin();
+         l_iter != l_procTargetList.end(); ++l_iter)
+    {
+        //  make a local copy of the target for ease of use
+        const TARGETING::Target*  l_pProcTarget = *l_iter;
+
+        //  dump physical path to targets
+        EntityPath l_path;
+        l_path  =   l_pProcTarget->getAttr<ATTR_PHYS_PATH>();
+        l_path.dump();
+
+        // cast OUR type of target to a FAPI type of target.
+        const fapi::Target l_fapi_pProcTarget(
+                                           TARGET_TYPE_PROC_CHIP,
+                                           reinterpret_cast<void *>
+                                           (const_cast<TARGETING::Target*>
+                                           (l_pProcTarget)) );
+
+        //  call the HWP with each fapi::Target
+        FAPI_INVOKE_HWP(l_err, proc_mpipl_chip_cleanup,
+                        l_fapi_pProcTarget );
+
+        if ( l_err )
+        {
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                    "ERROR : returned from proc_mpipl_chip_cleanup" );
+
+            // capture the target data in the elog
+            ERRORLOG::ErrlUserDetailsTarget(l_pProcTarget).addToLog( l_err );
+
+            // since we are doing an mpipl break out, the mpipl has failed
+            break;
+        }
+
+        //  ---------------------------------------------------------------
+        //  run proc_mpipl_ex_cleanup.C on all proc chips
+        //  ---------------------------------------------------------------
+        //  call the HWP with each fapi::Target
+        FAPI_INVOKE_HWP(l_err,
+                        proc_mpipl_ex_cleanup,
+                        l_fapi_pProcTarget );
+
+        if ( l_err )
+        {
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                    "ERROR : returned from proc_mpipl_ex_cleanup" );
+
+            // capture the target data in the elog
+            ERRORLOG::ErrlUserDetailsTarget(l_pProcTarget).addToLog( l_err );
+
+            // since we are doing an mpipl break out, the mpipl has failed
+            break;
+        }
+    }
+
+    if( l_err )
+    {
+
+        /*@
+         * @errortype
+         * @reasoncode      ISTEP_DRAM_INITIALIZATION_FAILED
+         * @severity        ERRORLOG::ERRL_SEV_UNRECOVERABLE
+         * @moduleid        TARGETING::ISTEP_HOST_MPIPL_SERVICE
+         * @userdata1       bytes 0-1: plid identifying first error
+         *                  bytes 2-3: reason code of first error
+         * @userdata2       bytes 0-1: total number of elogs
+         *                             included
+         *                  bytes 2-3: N/A
+         * @devdesc         call to proc_mpipl_ex_cleanup or
+         *                  proc_mpipl_chip_cleanup has failed
+         *                  see error log identified by the plid
+         *                  in user data 1
+         */
+        l_StepError.addErrorDetails(
+                                ISTEP_DRAM_INITIALIZATION_FAILED,
+                                ISTEP_HOST_MPIPL_SERVICE,
+                                l_err );
+
+        errlCommit( l_err, HWPF_COMP_ID );
+    }
+
+    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                "call_host_mpipl_service exit" );
 
-    return l_errl;
-
+    return l_StepError.getErrorHandle();
 }
 
 };   // end namespace

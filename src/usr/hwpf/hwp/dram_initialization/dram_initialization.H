@@ -218,6 +218,10 @@ void*    call_proc_exit_cache_contained( void    *io_pArgs );
  *
  *  return  pointer to any errlogs
  *
+ *  NOTE: this step will only run as part of an mpipl,
+ *        the istep dispatcher will not call this step for
+ *        the normal ipl flow
+ *
  */
 void*   call_host_mpipl_service( void   *io_pArgs);
 
