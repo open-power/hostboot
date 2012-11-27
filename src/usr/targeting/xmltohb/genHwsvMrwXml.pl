@@ -989,6 +989,15 @@ sub generate_sys
     <attribute>
         <id>FREQ_MEM_REFCLOCK</id>
         <default>$mem_refclk</default>
+    </attribute>
+    <!-- PAYLOAD_BASE and PAYLOAD_ENTRY should be from FW xml -->
+    <attribute>
+        <id>PAYLOAD_BASE</id>
+        <default>256</default>
+    </attribute>
+    <attribute>
+        <id>PAYLOAD_ENTRY</id>
+        <default>0x180</default>
     </attribute>\n";
 
     print "    <!-- System Attributes from MRW -->\n";
