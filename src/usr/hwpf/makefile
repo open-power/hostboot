@@ -79,8 +79,8 @@ HWP_ERROR_XML_FILES = hwp/fapiHwpErrorInfo.xml   \
     hwp/proc_fab_iovalid_errors.xml \
     hwp/nest_chiplets/proc_chiplet_scominit/proc_abus_scominit_errors.xml \
     hwp/nest_chiplets/proc_chiplet_scominit/proc_xbus_scominit_errors.xml
-    
-    
+
+
 ## these get generated into obj/genfiles/AttributeIds.H
 HWP_ATTR_XML_FILES = hwp/memory_attributes.xml \
                      hwp/L2_L3_attributes.xml \
@@ -96,6 +96,7 @@ HWP_ATTR_XML_FILES = hwp/memory_attributes.xml \
                      hwp/chip_ec_attributes.xml \
                      hwp/centaur_ec_attributes.xml \
                      hwp/common_attributes.xml \
+                     hwp/sync_attributes.xml   \
                      hwp/dram_initialization/proc_setup_bars/proc_setup_bars_memory_attributes.xml \
                      hwp/dram_initialization/proc_setup_bars/proc_setup_bars_l3_attributes.xml \
                      hwp/dram_initialization/proc_setup_bars/proc_setup_bars_mmio_attributes.xml \

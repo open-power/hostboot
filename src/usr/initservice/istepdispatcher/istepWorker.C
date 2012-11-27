@@ -1,26 +1,25 @@
-/*  IBM_PROLOG_BEGIN_TAG
- *  This is an automatically generated prolog.
- *
- *  $Source: src/usr/initservice/istepdispatcher/istepWorker.C $
- *
- *  IBM CONFIDENTIAL
- *
- *  COPYRIGHT International Business Machines Corp. 2012
- *
- *  p1
- *
- *  Object Code Only (OCO) source materials
- *  Licensed Internal Code Source Materials
- *  IBM HostBoot Licensed Internal Code
- *
- *  The source code for this program is not published or other-
- *  wise divested of its trade secrets, irrespective of what has
- *  been deposited with the U.S. Copyright Office.
- *
- *  Origin: 30
- *
- *  IBM_PROLOG_END_TAG
- */
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/usr/initservice/istepdispatcher/istepWorker.C $           */
+/*                                                                        */
+/* IBM CONFIDENTIAL                                                       */
+/*                                                                        */
+/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/*                                                                        */
+/* p1                                                                     */
+/*                                                                        */
+/* Object Code Only (OCO) source materials                                */
+/* Licensed Internal Code Source Materials                                */
+/* IBM HostBoot Licensed Internal Code                                    */
+/*                                                                        */
+/* The source code for this program is not published or otherwise         */
+/* divested of its trade secrets, irrespective of what has been           */
+/* deposited with the U.S. Copyright Office.                              */
+/*                                                                        */
+/* Origin: 30                                                             */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
 /**
  *  @file istepWorker.C
  *
@@ -47,6 +46,12 @@
 
 //#include <initservice/initsvcudistep.H>  //  InitSvcUserDetailsIstep
 
+#include <targeting/attrsync.H>
+
+#include <targeting/common/attributes.H>
+
+#include <fapiAttributeService.H>
+
 #include "istep_mbox_msgs.H"
 #include "istepWorker.H"
 #include "istepdispatcher.H"
@@ -59,6 +64,7 @@ namespace   INITSERVICE
 /******************************************************************************/
 extern trace_desc_t *g_trac_initsvc;
 
+bool getSyncEnabledAttribute();
 
 // ----------------------------------------------------------------------------
 // startIStepWorkerThread
@@ -93,10 +99,13 @@ void iStepWorkerThread ( void * i_msgQ )
     uint32_t istep          =   0x0;
     uint32_t substep        =   0x0;
     uint64_t progressCode   =   0x0;
-    bool first = true;
+    bool first              =   true;
 
     TRACDCOMP( g_trac_initsvc,
                ENTER_MRK"iStepWorkerThread()" );
+
+    // cache the value, it wont change during ipl.
+    bool step_mode = IStepDispatcher::getTheInstance().getIStepMode();
 
     while( 1 )
     {
@@ -152,12 +161,34 @@ void iStepWorkerThread ( void * i_msgQ )
         if( NULL != theStep )
         {
             TRACFCOMP( g_trac_initsvc,
-                       "IStepDispatcher (worker): Run Istep (%d), substep(%d), "
-                       "- %s",
+                    "IStepDispatcher (worker): Run Istep (%d), substep(%d), "
+                    "- %s",
                        istep, substep, theStep->taskname );
 
             err = InitService::getTheInstance().executeFn( theStep,
                                                            NULL );
+
+            // sync the attributes to fsp in single step mode but only
+            // after step 6 is complete to allow discoverTargets() to 
+            // run before the sync is done.
+            if( step_mode && istep > 6 )
+            {
+                // this value can change between steps, so read now
+                if( getSyncEnabledAttribute() )
+                {
+                    TRACFCOMP( g_trac_initsvc, "sync attributes to FSP");
+
+                    errlHndl_t l_errl = TARGETING::syncAllAttributesToFsp();
+
+                    if(l_errl)
+                    {
+                        TRACFCOMP(g_trac_initsvc, "Attribute sync between steps failed, see"
+                                   "%x for details", l_errl->eid());
+
+                        errlCommit(l_errl, INITSVC_COMP_ID);
+                    }
+                }
+            }
 
             if( err )
             {
@@ -216,6 +247,8 @@ void iStepWorkerThread ( void * i_msgQ )
                        err->plid()  );
 #endif
         }
+
+
 
         //  flush contTrace after each istep/substep  returns
         TRAC_FLUSH_BUFFERS();
@@ -332,5 +365,23 @@ const TaskInfo * findTaskInfo( const uint32_t i_IStep,
     return  l_pistep;
 }
 
+// $TODO - temporary implementation for bringup
+bool getSyncEnabledAttribute()
+{
+    uint8_t l_syncEnabled = 0;
 
+    // $TODO RTC Issue 64008 - update to use targeting attribute accessors
+    fapi::ReturnCode l_rc;
+    l_rc = FAPI_ATTR_GET(ATTR_SYNC_BETWEEN_STEPS, NULL, l_syncEnabled);
+
+    if (l_rc)
+    {
+       // trace for now, elog with new implementation
+       TRACFCOMP(g_trac_initsvc,"failed to read ATTR_SYNC_BETWEEN_STEPS, default"
+                                " to no sync");
+
+    }
+
+    return  ( (l_syncEnabled) ? true : false );
+}
 } // namespace

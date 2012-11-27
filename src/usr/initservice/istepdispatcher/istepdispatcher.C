@@ -51,6 +51,7 @@
 
 #include    <targeting/common/attributes.H> //  ISTEP_MODE attribute
 #include    <targeting/common/targetservice.H>
+#include    <targeting/attrsync.H>
 
 #include    <hwpf/plat/fapiPlatAttributeService.H>
 
@@ -213,8 +214,22 @@ void IStepDispatcher::init ( errlHndl_t &io_rtaskRetErrl )
 
             // Execute all Isteps sequentially in 'normal' mode
             err = executeAllISteps();
+
             if( err )
             {
+                // per interlock meeting, adding sync after ipl failure in
+                // normal IPL mode
+                TRACFCOMP( g_trac_initsvc, "sync attributes to FSP");
+
+                errlHndl_t l_errl = TARGETING::syncAllAttributesToFsp();
+
+                if(l_errl)
+                {
+                    TRACFCOMP(g_trac_initsvc, "Attribute sync failed, see"
+                            "%x for details", l_errl->eid());
+                    errlCommit(l_errl, INITSVC_COMP_ID);
+                }
+
                 break;
             }
         }

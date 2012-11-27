@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2012              */
+/* COPYRIGHT International Business Machines Corp. 2011,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -181,6 +181,15 @@ public:
      */
     bool isMpiplMode( void ) const;
 
+    /**
+     * @brief   getIStepMode - return value of IStep Mode
+     *
+     *  @return bool - value of iv_istepmodeflag
+     *  @retval false if IStep Mode is "OFF"
+     *          true if IStep Mode is "ON"
+     */
+    bool getIStepMode( ) const;
+
 protected:
 
     /**
@@ -202,14 +211,6 @@ private:
     IStepDispatcher(const IStepDispatcher& i_right);
     IStepDispatcher& operator=(const IStepDispatcher& i_right);
 
-    /**
-     * @brief   getIStepMode - return value of IStep Mode
-     *
-     *  @return bool - value of iv_istepmodeflag
-     *  @retval false if IStep Mode is "OFF"
-     *          true if IStep Mode is "ON"
-     */
-    bool getIStepMode( ) const;
 
     /**
      * @brief This function will start at istep 0, substep 0, and cycle

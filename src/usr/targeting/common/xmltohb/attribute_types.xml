@@ -9883,7 +9883,6 @@ Measured in GB</description>
 
 <!-- ===== End supporting poreve_memory_attributes.xml ===== -->
 
-
 <!-- ===== Supporting A/X bus enable in p8_xip_customize_attributes.xml ===== -->
 <attribute>
     <id>PROC_A_ENABLE</id>
@@ -9898,7 +9897,7 @@ Measured in GB</description>
             <default>1</default>
         </uint8_t>
     </simpleType>
-    <persistency>volatile</persistency>    
+    <persistency>volatile</persistency>
     <readable/>
     <writeable/>
     <hwpfToHbAttrMap>
@@ -9931,5 +9930,26 @@ Measured in GB</description>
 
 <!-- ===== End supporting A/X bus enable in p8_xip_customize_attributes.xml ===== -->
 
-
+<!-- Support for sync_attributes.xml -->
+<attribute>
+    <id>SYNC_BETWEEN_STEPS</id>
+    <description>
+        Attribute to enable targetting attribute sync when in istep mode.
+        1 = sync will occur following each substep when ipl'ing in single step mode
+        0 = sync will not be done after each step
+    </description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+    </simpleType>
+        <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_SYNC_BETWEEN_STEPS</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+<!-- End support for sync_attributes.xml -->
 </attributes>

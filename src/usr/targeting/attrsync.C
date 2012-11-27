@@ -1,26 +1,25 @@
-/*  IBM_PROLOG_BEGIN_TAG
- *  This is an automatically generated prolog.
- *
- *  $Source: src/usr/targeting/attrsync.C $
- *
- *  IBM CONFIDENTIAL
- *
- *  COPYRIGHT International Business Machines Corp. 2012
- *
- *  p1
- *
- *  Object Code Only (OCO) source materials
- *  Licensed Internal Code Source Materials
- *  IBM HostBoot Licensed Internal Code
- *
- *  The source code for this program is not published or other-
- *  wise divested of its trade secrets, irrespective of what has
- *  been deposited with the U.S. Copyright Office.
- *
- *  Origin: 30
- *
- *  IBM_PROLOG_END_TAG
- */
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/usr/targeting/attrsync.C $                                */
+/*                                                                        */
+/* IBM CONFIDENTIAL                                                       */
+/*                                                                        */
+/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/*                                                                        */
+/* p1                                                                     */
+/*                                                                        */
+/* Object Code Only (OCO) source materials                                */
+/* Licensed Internal Code Source Materials                                */
+/* IBM HostBoot Licensed Internal Code                                    */
+/*                                                                        */
+/* The source code for this program is not published or otherwise         */
+/* divested of its trade secrets, irrespective of what has been           */
+/* deposited with the U.S. Copyright Office.                              */
+/*                                                                        */
+/* Origin: 30                                                             */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
 #include <targeting/attrsync.H>
 #include <targeting/common/targreasoncodes.H>
 #include <targeting/common/trace.H>
@@ -64,7 +63,7 @@ namespace TARGETING
         iv_section_to_sync = i_section_to_sync;
 
 
-        do{ 
+        do{
 
             // set up the pointers to the data area
             getSectionData();
@@ -89,12 +88,12 @@ namespace TARGETING
                 msg->extra_data = malloc( PAGESIZE );
 
                 // copy the attributes from mem to our buffer.
-                memcpy( msg->extra_data, 
+                memcpy( msg->extra_data,
                         iv_pages[iv_current_page].dataPtr, PAGESIZE );
 
-                TRACFCOMP(g_trac_targeting, 
+                TRACFCOMP(g_trac_targeting,
                         "syncSectionToFsp()  - copy %d bytes from %p to %p",
-                        PAGESIZE, iv_pages[iv_current_page].dataPtr, 
+                        PAGESIZE, iv_pages[iv_current_page].dataPtr,
                         msg->extra_data);
 
                 // mailbox code will free both the msg and the extra data
@@ -109,7 +108,8 @@ namespace TARGETING
 
             }
 
-            if( l_errl == NULL )
+            // if there was no error and there was data to send
+            if(( l_errl == NULL ) && ( iv_total_pages != 0 ))
             {
                 // tell fsp to commit the last section of data we sent
                 l_errl =  sendSyncCompleteMessage();

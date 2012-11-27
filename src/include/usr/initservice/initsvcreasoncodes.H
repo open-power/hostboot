@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2012              */
+/* COPYRIGHT International Business Machines Corp. 2011,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -72,6 +72,7 @@ enum    InitServiceReasonCode
     LAST_ISTEP_FAILED           =   INITSVC_COMP_ID | 0x11,
     NO_MSG_PRESENT              =   INITSVC_COMP_ID | 0x12,
     ISTEP_INVALID_ISTEP         =   INITSVC_COMP_ID | 0x13,
+    ISTEP_FAPI_ATTR_READ_FAILED =   INITSVC_COMP_ID | 0x14,
 
 };
 
