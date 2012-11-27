@@ -1,25 +1,25 @@
-//  IBM_PROLOG_BEGIN_TAG
-//  This is an automatically generated prolog.
-//
-//  $Source: src/usr/i2c/i2c.C $
-//
-//  IBM CONFIDENTIAL
-//
-//  COPYRIGHT International Business Machines Corp. 2011
-//
-//  p1
-//
-//  Object Code Only (OCO) source materials
-//  Licensed Internal Code Source Materials
-//  IBM HostBoot Licensed Internal Code
-//
-//  The source code for this program is not published or other-
-//  wise divested of its trade secrets, irrespective of what has
-//  been deposited with the U.S. Copyright Office.
-//
-//  Origin: 30
-//
-//  IBM_PROLOG_END
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/usr/i2c/i2c.C $                                           */
+/*                                                                        */
+/* IBM CONFIDENTIAL                                                       */
+/*                                                                        */
+/* COPYRIGHT International Business Machines Corp. 2011,2012              */
+/*                                                                        */
+/* p1                                                                     */
+/*                                                                        */
+/* Object Code Only (OCO) source materials                                */
+/* Licensed Internal Code Source Materials                                */
+/* IBM HostBoot Licensed Internal Code                                    */
+/*                                                                        */
+/* The source code for this program is not published or otherwise         */
+/* divested of its trade secrets, irrespective of what has been           */
+/* deposited with the U.S. Copyright Office.                              */
+/*                                                                        */
+/* Origin: 30                                                             */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
 /**
  * @file i2c.C
  *
@@ -38,7 +38,9 @@
 #include <errl/errlmanager.H>
 #include <targeting/common/targetservice.H>
 #include <devicefw/driverif.H>
+#include <targeting/common/predicates/predicates.H>
 #include <i2c/i2creasoncodes.H>
+#include <i2c/i2cif.H>
 
 #include "i2c.H"
 // ----------------------------------------------
@@ -64,6 +66,8 @@ TRAC_INIT( & g_trac_i2cr, "I2CR", 4096 );
 #define I2C_COMMAND_ATTEMPTS 2      // 1 Retry on failure
 #define I2C_RETRY_DELAY 10000000    // Sleep for 10 ms before retrying
 #define MAX_I2C_ENGINES 3           // Maximum of 3 engines per I2C Master
+#define P8_MASTER_ENGINES 2         // Number of Engines used in P8
+#define CENTAUR_MASTER_ENGINES 1    // Number of Engines in a Centaur
 // ----------------------------------------------
 
 namespace I2C
@@ -1093,5 +1097,208 @@ errlHndl_t i2cGetInterrupts ( TARGETING::Target * i_target,
 
     return err;
 } // end i2cGetInterrupts
+
+
+// ------------------------------------------------------------------
+// i2cSetupMasters
+// ------------------------------------------------------------------
+errlHndl_t i2cSetupMasters ( void )
+{
+    errlHndl_t err = NULL;
+
+    modereg mode;
+    size_t size = sizeof(uint64_t);
+
+    TRACFCOMP( g_trac_i2c,
+               ENTER_MRK"i2cSetupMasters()" );
+
+    do
+    {
+        // Get top level system target
+        TARGETING::TargetService& tS = TARGETING::targetService();
+        TARGETING::Target * sysTarget = NULL;
+        tS.getTopLevelTarget( sysTarget );
+        assert( sysTarget != NULL );
+
+        // Get list of the Centaur Chips
+        TARGETING::TargetHandleList centList;
+        TARGETING::PredicateCTM predCent( TARGETING::CLASS_CHIP,
+                                          TARGETING::TYPE_MEMBUF );
+        tS.getAssociated( centList,
+                          sysTarget,
+                          TARGETING::TargetService::CHILD,
+                          TARGETING::TargetService::ALL,
+                          &predCent );
+
+        if( 0 == centList.size() )
+        {
+            TRACFCOMP( g_trac_i2c,
+                       ERR_MRK"i2cSetupMasters: No Centaur chips found!" );
+
+            /*@
+             * @errortype
+             * @reasoncode       I2C_NO_CENTAUR_FOUND
+             * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE
+             * @moduleid         I2C_SETUP_MASTERS
+             * @userdata1        <UNUSED>
+             * @userdata2        <UNUSED>
+             * @frucallout       <NONE>
+             * @devdesc          No Centaur chips found to programm I2C bus
+             * divisor
+             */
+            err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                           I2C_SETUP_MASTERS,
+                                           I2C_NO_CENTAUR_FOUND,
+                                           0x0, 0x0 );
+            break;
+        }
+
+        TRACDCOMP( g_trac_i2c,
+                   INFO_MRK"I2C Master Centaurs: %d",
+                   centList.size() );
+
+        // Setup each Membuf Master
+        for( uint32_t centaur = 0; centaur < centList.size(); centaur++ )
+        {
+            if( !centList[centaur]->getAttr<TARGETING::ATTR_HWAS_STATE>().functional )
+            {
+                // Non functional
+                TRACDCOMP( g_trac_i2c,
+                           INFO_MRK"Centaur %d is non-functional",
+                           centaur );
+                continue;
+            }
+
+            for( uint32_t engine = 0; engine < CENTAUR_MASTER_ENGINES; engine++ )
+            {
+                // Write Mode Register:
+                mode.value = 0x0ull;
+
+                // TODO - Hard code to 400KHz until we get attributes in place
+                // to get this from the target.
+                mode.bit_rate_div = I2C_CLOCK_DIVISOR_400KHZ;
+                err = deviceWrite( centList[centaur],
+                                   &mode.value,
+                                   size,
+                                   DEVICE_SCOM_ADDRESS( masterAddrs[engine].mode ) );
+
+                if( err )
+                {
+                    TRACFCOMP( g_trac_i2c,
+                               ERR_MRK"i2cSetupMasters: Error reading from "
+                               "Centaur, engine: %d",
+                               engine );
+
+                    // If we get errors on these reads, we still need to continue
+                    // to program the I2C Bus Divisor for the rest
+                    errlCommit( err,
+                                I2C_COMP_ID );
+                }
+            }
+
+            if( err )
+            {
+                break;
+            }
+        }
+
+        if( err )
+        {
+            break;
+        }
+
+        // Get list of Procs
+        TARGETING::TargetHandleList procList;
+        TARGETING::PredicateCTM predProc( TARGETING::CLASS_CHIP,
+                                          TARGETING::TYPE_PROC );
+        tS.getAssociated( procList,
+                          sysTarget,
+                          TARGETING::TargetService::CHILD,
+                          TARGETING::TargetService::ALL,
+                          &predProc );
+
+        if( 0 == procList.size() )
+        {
+            TRACFCOMP( g_trac_i2c,
+                       ERR_MRK"i2cSetupMasters: No Processor chips found!" );
+
+            /*@
+             * @errortype
+             * @reasoncode       I2C_NO_PROC_FOUND
+             * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE
+             * @moduleid         I2C_SETUP_MASTERS
+             * @userdata1        <UNUSED>
+             * @userdata2        <UNUSED>
+             * @frucallout       <NONE>
+             * @devdesc          No Centaur chips found to programm I2C bus
+             * divisor
+             */
+            err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                           I2C_SETUP_MASTERS,
+                                           I2C_NO_PROC_FOUND,
+                                           0x0, 0x0 );
+            break;
+        }
+
+        TRACDCOMP( g_trac_i2c,
+                   INFO_MRK"I2C Master Procs: %d",
+                   procList.size() );
+
+        // Do reads to each Proc
+        for( uint32_t proc = 0; proc < procList.size(); proc++ )
+        {
+            if( !procList[proc]->getAttr<TARGETING::ATTR_HWAS_STATE>().functional )
+            {
+                // Non functional
+                TRACDCOMP( g_trac_i2c,
+                           INFO_MRK"proc %d, is non-functional",
+                           proc );
+                continue;
+            }
+
+            for( uint32_t engine = 0; engine < P8_MASTER_ENGINES; engine++ )
+            {
+                // Write Mode Register:
+                mode.value = 0x0ull;
+
+                // TODO - Hard code to 400KHz until we get attributes in place
+                // to get this from the target.
+                mode.bit_rate_div = I2C_CLOCK_DIVISOR_400KHZ;
+                err = deviceWrite( procList[proc],
+                                   &mode.value,
+                                   size,
+                                   DEVICE_SCOM_ADDRESS( masterAddrs[engine].mode ) );
+
+                if( err )
+                {
+                    TRACFCOMP( g_trac_i2c,
+                               ERR_MRK"i2cSetupMasters: Error reading from "
+                               "Processor, engine: %d",
+                               engine );
+
+                    // If we get errors on these reads, we still need to continue
+                    // to program the I2C Bus Divisor for the rest
+                    errlCommit( err,
+                                I2C_COMP_ID );
+                }
+            }
+
+            if( err )
+            {
+                break;
+            }
+        }
+
+        if( err )
+        {
+            break;
+        }
+    } while( 0 );
+
+    TRACFCOMP( g_trac_i2c,
+               EXIT_MRK"i2cSetupMasters()" );
+
+    return err;
+}
 
 } // end namespace I2C

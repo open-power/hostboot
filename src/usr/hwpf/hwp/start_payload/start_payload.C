@@ -51,6 +51,7 @@
 #include    <sys/mmio.h>
 #include    <mbox/mbox_queues.H>
 #include    <mbox/mboxif.H>
+#include    <i2c/i2cif.H>
 
 #include    <initservice/isteps_trace.H>
 #include    <hwpisteperror.H>
@@ -136,7 +137,7 @@ void*    call_host_runtime_setup( void    *io_pArgs )
         // Write the HostServices attributes into mainstore
         l_err = RUNTIME::populate_attributes();
 
-        //  - Update HDAT with tpmd logs 
+        //  - Update HDAT with tpmd logs
 
     } while(0);
 
@@ -243,6 +244,18 @@ errlHndl_t callShutdown ( void )
 
     do
     {
+        // Phyp needs us to program all of the I2C masters with the bus
+        // divisor
+        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                   "Setup I2C Masters" );
+        err = I2C::i2cSetupMasters();
+        if( err )
+        {
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                       "Error setting up I2C Bus Divisors" );
+            break;
+        }
+
         // Set scratch register to indicate Hostboot is [still] active.
         const char * hostboot_string = "hostboot";
         mmio_scratch_write(MMIO_SCRATCH_HOSTBOOT_ACTIVE,
