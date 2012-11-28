@@ -52,7 +52,6 @@
 
 namespace PRDF
 {
-    // FIXME: RTC: 51689 will address this issue
     #ifndef CONTEXT_x86_nfp
     typedef TARGETING::ATTR_HUID_type HUID;
     #else

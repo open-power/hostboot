@@ -306,9 +306,7 @@ errlHndl_t ErrDataService::GenerateSrcPfa(ATTENTION_TYPE attn_type,
     {
 #ifdef  __HOSTBOOT_MODULE
 
-        // FIXME: do we want to commit any log here?
         PRDF_ERR( PRDF_FUNC"Hostboot should NOT have any system checkstop!" );
-
 #else
         writeVPD = true;              // Change the default so as to Write Capture Data
         pldCheck = true;              // Do the PLD check

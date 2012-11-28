@@ -72,12 +72,14 @@ class ErrlSmartPtr
          *        at the rc value:
          *                (uint32_t) *errl;
          */
-        /* FIXME : Hostboot ErrorLog disallow this operation but it also doesn't seem to get used
-        ErrlEntry operator*() const
+        #ifdef __HOSTBOOT_MODULE
+        ERRORLOG::ErrlEntry& operator*() const
+        #else
+        ErrlEntry& operator*() const
+        #endif
             {
                 return *iv_errl;
             };
-        */
 
         /* operator ==
          *        Compare with NULL or other ptr values:
