@@ -76,6 +76,9 @@ void* call_proc_revert_sbe_mcs_setup(void *io_pArgs)
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                "call_proc_revert_sbe_mcs_setup entry" );
 
+    // Note: Even though Cronus trace shows this HWP runs on all proc,
+    // this should be done only for Master chip per Dean.
+
     TARGETING::Target* l_pProcTarget = NULL;
     TARGETING::targetService().masterProcChipTargetHandle(l_pProcTarget);
 

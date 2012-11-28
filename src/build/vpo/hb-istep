@@ -47,6 +47,8 @@
 #                            VPO performance improvement changes
 # Version 1.2   06-11-2012   Change "-c3" to "-cft" (first avail core)
 #
+# Version 1.3   11-27-2012   Modified for Multichip run
+#
 ##################################################################################
 
 #------------------------------------------------------------------------------
@@ -121,6 +123,8 @@ my  $opt_clear_trace    =   0;          ##  submit command 02
 my  $opt_cmdfile        =   0;          ## batchmode, later
 my  $opt_setup          =   "";         ##  run Jim's script to start up the model
 
+# Start all threads by default, only thread 0 for initial startup
+my  $threads_active = "RUNNING";
 
 ##  initialize inList to "undefined"
 my  @inList;
@@ -177,13 +181,23 @@ if ( !defined( $hbCount ) || ( $hbCount eq "" ) )
     $hbCount    =   0xffffffff;     ##  effectively infinite ...
 }
 
+my  $hbCommand =   $ENV{'HB_COMMAND'};
+if ( !defined( $hbCommand ) )
+{
+    $hbCommand = "";
+}
+
+
+##  disable continuous trace check
+my  $disableContTrace   =   $ENV{'HB_DISABLE_CONT_TRACE'};
+
 my $CSVfile     =   "$hbDir/isteplist.csv";
 my $hbSymsFile  =   "$hbDir/hbicore.syms";                #Use hbicore.syms
 if ( ! -e "$hbSymsFile" )  { die "Can't find symbols file $hbSymsFile\n";   }
 if ( ! -e "$CSVfile" )  { die "Can't find isteplist file $hbSymsFile\n";   }
 
 
-print   STDOUT  "Welcome to hb-istep 3.04 .\n";
+print   STDOUT  "Welcome to hb-istep 3.05 .\n";
 
 
 ## exit if no args
@@ -326,6 +340,7 @@ if  ( $opt_debug )
     print   STDERR  "pgmDir             =   $pgmDir\n";
     print   STDERR  "hbDir              =   $hbDir\n";
     print   STDERR  "hbCount            =   $hbCount\n";
+    print   STDERR  "hbCommand          =   $hbCommand\n";
 
     print   STDERR  "hbSymsFile         =   $hbSymsFile   \n" ;
     print   STDERR  "IstepModeReg       =   $IstepModeReg \n" ;
@@ -378,24 +393,22 @@ sub main()
         exit;
     }
 
-    ## Stop instruction to read L3
-    VBU_Cacheline::P8_Ins_Stop();
-    VBU_Cacheline::P8_Flush_L2();
-
     if ( isShutDown() )
     {
         print   STDOUT  "HostBoot has shut down." ;
-
         exit EXIT_SHUTDOWN;
     }
 
+    ## Stop instruction to read L3
+    VBU_Cacheline::P8_Ins_Stop();
+    VBU_Cacheline::P8_Flush_L2();
 
     ##
     ##  process --Istep Mode command
     ##
     if ( $opt_splessmode ==  1   )
     {
-        print STDOUT  "ENable splessmode...\n";
+        print STDOUT  "Enable splessmode...\n";
         setMode( "spless" );
         exit;
     }
@@ -606,9 +619,6 @@ sub find_in_inList( $ )
 ##
 sub isShutDown()
 {
-    ## Make sure system is stopped and flushed.
-    VBU_Cacheline::P8_Ins_Stop();
-    VBU_Cacheline::P8_Flush_L2();
 
     my $flag    =   VBU_Cacheline::CLread( sprintf( "%x", $ShutDownFlag ) );
     my $status  =   VBU_Cacheline::CLread( sprintf( "%x", $ShutDownSts ) );
@@ -718,7 +728,14 @@ sub getSyncStatus( )
     my  $running =  0;
 
     # Start instructions before going into loop
-    VBU_Cacheline::P8_Ins_Start();
+    if ( "$threads_active" eq "RUNNING_T0" )
+    {
+        VBU_Cacheline::P8_Ins_Start_T0();
+    }
+    else
+    {
+        VBU_Cacheline::P8_Ins_Start();
+    }
 
     ##  get response.  sendCmd() should have bumped g_SeqNum, so we will sit
     ##  here for a reasonable amount of time waiting for the correct sequence
@@ -743,11 +760,23 @@ sub getSyncStatus( )
         {
            # Print Trace Full message just for reference when running.
            print   STDOUT  "T/F";
+           # Save current thread active state
+           if ( "$threads_active" eq "RUNNING_T0" )
+           {
+                $threads_active = VBU_Cacheline::P8_Ins_Query();
+           }
            system ("$hbToolsDir/hb-ContTrace --no-save-states --mute > /dev/null" );
            system ("cat hb-ContTrace.output >> tracMERG");
 
            # Need to start instructions after trace has been dumped out.
-           VBU_Cacheline::P8_Ins_Start();
+           if ( "$threads_active" eq "RUNNING_T0" )
+           {
+               VBU_Cacheline::P8_Ins_Start_T0();
+           }
+           else
+           {
+               VBU_Cacheline::P8_Ins_Start();
+           }
         }
 
         ##  Fetch status reg(s)
@@ -773,6 +802,14 @@ sub getSyncStatus( )
         {
             printf  STDERR "=== getSyncStatus:  count=%d, result=0x%lx\n", $count, $result  ;
         }
+
+	if ( $count <= 0 )
+	{
+	    if ( defined( $hbCommand ) && ( $hbCommand ne "" ) )
+	    {
+		if (system("$hbCommand") == 0) { $count = $hbCount; }
+	    }
+	}
 
         if ( $count <= 0 )
         {
@@ -972,15 +1009,33 @@ sub setMode( $ )
     my  $readybit   =   0;
     my  $result     =   0;
     my  $hexstr     =   sprintf( "%x",$IstepModeReg );
-    my  $resultRaw   =  0;
+    my  $resultRaw  =  0;
+    my  $clearcmd   =  0;
 
-
-    ## Stop and flush
-    VBU_Cacheline::P8_Ins_Stop();
-    VBU_Cacheline::P8_Flush_L2();
 
     if ( $cmd eq "spless" )
     {
+
+       ##  Clear status reg(s) before we start.  If the status reg is initialized
+       ##      to garbage, there is a chance that it will mistaken for the readybit
+
+       $clearcmd = "putscom pu 050039 0000000000000000 -quiet" ;       ##  lo reg
+       if ( $opt_debug )   {   print STDERR __LINE__,  "-- run $clearcmd ...\n";    }
+       ( system( $clearcmd ) == 0 )
+           or die "$clearcmd failed, $? : $! \n";
+
+       $clearcmd = "putscom pu 05003a 0000000000000000 -quiet" ;       ## hi reg
+       if ( $opt_debug )   {   print STDERR __LINE__,  "-- run $clearcmd ...\n";    }
+       ( system( $clearcmd ) == 0 )
+           or die "$clearcmd failed, $? : $! \n";
+
+       ##  clear command reg as well.
+       $clearcmd = "putscom pu 05003b 0000000000000000 -quiet" ;       ##  cmd reg
+
+       if ( $opt_debug )   {   print STDERR __LINE__,  "-- run $clearcmd ...\n";    }
+       ( system( $clearcmd ) == 0 )
+           or die "$clearcmd failed, $? : $! \n";
+
         VBU_Cacheline::CLwrite( $hexstr, SPLESS_MODE_SIGNATURE );
         $expected    =   1;
     }
@@ -997,28 +1052,8 @@ sub setMode( $ )
         printf STDERR "===  istepmodereg readback:  0x%lx\n", $result ;
     }
 
-    ##  Clear status reg(s) before we start.  If the status reg is initialized
-    ##      to garbage, there is a chance that it will mistaken for the readybit
-
-    $cmd = "putscom pu 05003a -p0 -quiet 0" ;       ## hi reg
-
-    if ( $opt_debug )   {   print STDERR __LINE__,  "-- run $cmd ...\n";    }
-    ( system( $cmd ) == 0 )
-        or die "$cmd failed, $? : $! \n";
-
-    $cmd = "putscom pu 050039 -p0 -quiet 0" ;       ##  lo reg
-
-    if ( $opt_debug )   {   print STDERR __LINE__,  "-- run $cmd ...\n";    }
-    ( system( $cmd ) == 0 )
-        or die "$cmd failed, $? : $! \n";
-
-    ##  clear command reg as well.
-    $cmd = "putscom pu 05003b -p0 -quiet 0" ;       ##  cmd reg
-
-    if ( $opt_debug )   {   print STDERR __LINE__,  "-- run $cmd ...\n";    }
-    ( system( $cmd ) == 0 )
-        or die "$cmd failed, $? : $! \n";
-
+    # Start instruction only for master thread 0
+    VBU_Cacheline::P8_Ins_Start_T0();
 
     ##  Loop, advancing clock, and wait for readybit
     ##  @todo   revisit
@@ -1040,18 +1075,6 @@ sub setMode( $ )
            system ("cat hb-ContTrace.output >> tracMERG");
         }
 
-        # Because setMode read data from L3 instead of SCOM,
-        # Start instruction needs to be done every loop
-        VBU_Cacheline::P8_Ins_Start();
-
-        ##  advance HostBoot code by a certain # of cycles, then check the
-        ##  sequence number to see if it has changed.  rinse and repeat.
-        runClocks( );
-
-        ##  Stop instructions, flush L2
-        VBU_Cacheline::P8_Ins_Stop();
-        VBU_Cacheline::P8_Flush_L2();
-
         ## check for system crash
         if ( isShutDown( ) )
         {
@@ -1060,6 +1083,12 @@ sub setMode( $ )
             print   STDOUT  "HostBoot has shut down.";
             return -1;
         }
+
+        VBU_Cacheline::P8_Ins_Start_T0();
+
+        ##  advance HostBoot code by a certain # of cycles, then check the
+        ##  sequence number to see if it has changed.  rinse and repeat.
+        runClocks( );
 
         if ( $cmd eq "spless" )
         {
@@ -1079,6 +1108,14 @@ sub setMode( $ )
             print   STDOUT  "\n";
             print STDOUT "Set $cmd Mode success.\n" ;
             return 0;
+        }
+
+        if ( $count <= 0 )
+        {
+            if ( defined( $hbCommand ) && ( $hbCommand ne "" ) )
+            {
+             	if (system("$hbCommand") == 0) { $count = $hbCount; }
+            }
         }
 
         if ( $count <= 0 )
@@ -1180,6 +1217,14 @@ sub clock_istep()
 
     print STDOUT "Clock istep\n";
 
+    # Startup requires using only thread 0 -- allow an environment setting to tell us it is ok for all threads
+
+    my $HB_START_TALL = $ENV{'HB_START_TALL'};
+    if ( ! defined ( $HB_START_TALL ) || "$HB_START_TALL" ne "YES" )
+    {
+           $threads_active = "RUNNING_T0";
+    }
+
     $result = getSyncStatus();
 
     ## if result is -1 we have a timeout
@@ -1267,6 +1312,11 @@ sub clear_trace( )
 ##
 sub isTraceFull()
 {
+    if  (   $disableContTrace )
+    {
+        return 0;
+    }
+
     my $traceIsFull = 1;
     my $trigger = "simGETFAC B0.C0.S0.P0.E8.TPC.FSI.FSI_MAILBOX.FSXCOMP." .
                   "FSXLOG.LBUS_MAILBOX.Q_GMB2E0.NLC.L2 32";

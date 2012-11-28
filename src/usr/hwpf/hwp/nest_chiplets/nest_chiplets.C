@@ -69,6 +69,10 @@
 #include    "proc_a_x_pci_dmi_pll_setup/proc_a_x_pci_dmi_pll_setup.H"
 #include    "proc_a_x_pci_dmi_pll_setup/proc_a_x_pci_dmi_pll_initf.H"
 #include    "proc_pcie_scominit/proc_pcie_scominit.H"
+#include    "../bus_training/pbusLinkSvc.H"
+#include    <fapiHwpExecInitFile.H>
+const char * const PROC_CHIPLET_ABUS_IF = "p8.abus.scom.if";
+const char * const PROC_CHIPLET_XBUS_IF = "p8.xbus.scom.if";
 
 namespace   NEST_CHIPLETS
 {
@@ -197,10 +201,11 @@ void*    call_proc_a_x_pci_dmi_pll_setup( void    *io_pArgs )
     TARGETING::TargetHandleList l_procTargetList;
     getAllChips(l_procTargetList, TYPE_PROC);
 
-    for ( TargetHandleList::iterator l_iter = l_procTargetList.begin();
-          l_iter != l_procTargetList.end(); ++l_iter )
+    for (TARGETING::TargetHandleList::iterator l_cpuIter =
+         l_procTargetList.begin(); l_cpuIter != l_procTargetList.end();
+         ++l_cpuIter)
     {
-        const TARGETING::Target*  l_proc_target = *l_iter;
+        const TARGETING::Target* l_proc_target = *l_cpuIter;
         const fapi::Target l_fapi_proc_target(
                 TARGET_TYPE_PROC_CHIP,
                 reinterpret_cast<void *>
@@ -354,16 +359,301 @@ void*    call_proc_startclock_chiplets( void    *io_pArgs )
 void*    call_proc_chiplet_scominit( void    *io_pArgs )
 {
     errlHndl_t l_err = NULL;
+    fapi::ReturnCode rc;
+    IStepError l_StepError;
 
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, 
-               "call_proc_chiplet_scominit entry" );
+    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_proc_chiplet_scominit entry" );
 
-    // proc_chiplet_scominit will be called when there are initfiles to execute
+    uint8_t l_cpuNum = 0;
+    TARGETING::TargetHandleList l_cpuTargetList;
+    getAllChips(l_cpuTargetList, TYPE_PROC);
 
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, 
-               "call_proc_chiplet_scominit exit" );
+    do
+    {
+        // ----------------------------------------------
+        // Execute PROC_CHIPLET_SCOMINIT_FBC_IF initfile
+        // ----------------------------------------------
 
-    return l_err;
+        for (TARGETING::TargetHandleList::iterator l_cpuIter =
+             l_cpuTargetList.begin(); l_cpuIter != l_cpuTargetList.end();
+             ++l_cpuIter)
+        {
+            const TARGETING::Target* l_cpu_target = *l_cpuIter;
+            const fapi::Target l_fapi_proc_target(
+                    TARGET_TYPE_PROC_CHIP,
+                    reinterpret_cast<void *>
+                    ( const_cast<TARGETING::Target*>(l_cpu_target) ) );
+
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "Running proc_chiplet_scominit HWP on..." );
+            //  dump physical path to targets
+            EntityPath l_path;
+            l_path  = l_cpu_target->getAttr<ATTR_PHYS_PATH>();
+            l_path.dump();
+
+            //  call the HWP with each fapi::Target
+            FAPI_INVOKE_HWP(l_err, proc_chiplet_scominit, l_fapi_proc_target);
+            if (l_err)
+            {
+                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, "ERROR 0x%.8X : "
+                 "proc_chiplet_scominit HWP returns error.  Target 0x%.8X",
+                        l_err->reasonCode(), TARGETING::get_huid(l_cpu_target));
+                ErrlUserDetailsTarget myDetails(l_cpu_target);
+                /*@
+                 * @errortype
+                 * @reasoncode       ISTEP_PROC_CHIPLET_SCOMINIT_FAILED
+                 * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE
+                 * @moduleid         ISTEP_PROC_CHIPLET_SCOMINIT
+                 * @userdata1        bytes 0-1: plid identifying first error
+                 *                   bytes 2-3: reason code of first error
+                 * @userdata2        bytes 0-1: total number of elogs included
+                 *                   bytes 2-3: N/A
+                 * @devdesc          call to proc_chiplet_scominit has failed
+                 */
+                l_StepError.addErrorDetails(ISTEP_PROC_CHIPLET_SCOMINIT_FAILED,
+                                            ISTEP_PROC_CHIPLET_SCOMINIT,
+                                            l_err );
+                // We want to continue to the next target instead of exiting,
+                // Commit the error log and move on
+                // Note: Error log should already be deleted and set to NULL
+                // after committing
+                errlCommit(l_err, HWPF_COMP_ID);
+            }
+        }
+
+        // ----------------------------------------------
+        // Execute PROC_CHIPLET_ABUS/XBUS initfiles
+        // Note: the order is intentional to make
+        // HB and Cronus trace in the same order.
+        // Please do not change
+        // ----------------------------------------------
+
+        // Do XBUS first, get all XBUS connections
+        EDI_EI_INITIALIZATION::TargetPairs_t l_XbusConnections;
+        l_err =
+        EDI_EI_INITIALIZATION::PbusLinkSvc::getTheInstance().getPbusConnections(
+                                          l_XbusConnections, TYPE_XBUS, false);
+        if (l_err)
+        {
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, "ERROR 0x%.8X : getPbusConnections XBUS returns error",
+                      l_err->reasonCode());
+
+            // TODO - RTC 57977
+            // Need to discuss with Jamie on how to handle this:
+            // - An istep may fail in multiple locations.  The failure
+            //   may not be always from invoking the HW procedures.
+            //   It may come from support functions in this case.
+            // - How do we set the error tags and use reason code for different
+            //   fail scenarios?
+            l_StepError.addErrorDetails(ISTEP_PROC_CHIPLET_SCOMINIT_FAILED,
+                                        ISTEP_PROC_CHIPLET_SCOMINIT,
+                                        l_err);
+
+            // Shouldn't continue on this fatal error (no XBUS), break out
+            break;
+        }
+
+
+        // Loop thru the proc
+        for ( l_cpuNum=0; l_cpuNum < l_cpuTargetList.size(); l_cpuNum++ )
+        {
+            const TARGETING::Target* l_cpuTarget = l_cpuTargetList[l_cpuNum];
+
+            // ----------------------------------------------
+            // Execute PROC_CHIPLET_XBUS initfiles
+            // ----------------------------------------------
+            TARGETING::TargetHandleList l_xbusList;
+            getChildChiplets( l_xbusList, l_cpuTarget, TYPE_XBUS );
+
+            // For each XBUS unit in this proc
+            for (size_t jj = 0; jj < l_xbusList.size(); jj++)
+            {
+                TARGETING::Target * l_xbusTarget = l_xbusList[jj];
+                EDI_EI_INITIALIZATION::TargetPairs_t::iterator l_itr =
+                                l_XbusConnections.find(l_xbusTarget);
+                if ( l_itr == l_XbusConnections.end() )
+                {
+                    continue;
+                }
+
+                const TARGETING::Target *l_pParent =
+                      getParentChip(
+                         (const_cast<TARGETING::Target*>(l_itr->second)));
+
+                // Targets to pass in HW procedure
+                std::vector<fapi::Target> targets;
+
+                const fapi::Target l_fapi_xbus_target(
+                       TARGET_TYPE_XBUS_ENDPOINT,
+                       reinterpret_cast<void *>
+                       (const_cast<TARGETING::Target*>(l_xbusTarget)));
+                targets.push_back(l_fapi_xbus_target);
+
+                const fapi::Target l_fapi_this_cpu_target(
+                       TARGET_TYPE_PROC_CHIP,
+                       reinterpret_cast<void *>
+                       (const_cast<TARGETING::Target*>(
+                               l_cpuTarget)));
+                targets.push_back(l_fapi_this_cpu_target);
+
+                const fapi::Target l_fapi_other_cpu_target(
+                       TARGET_TYPE_PROC_CHIP,
+                       reinterpret_cast<void *>
+                       (const_cast<TARGETING::Target*>(
+                               l_pParent)));
+                targets.push_back(l_fapi_other_cpu_target);
+
+                // execute PROC_CHIPLET_XBUS_IF initfile
+                FAPI_INF("proc_chiplet_scominit: Executing %s on...",
+                    PROC_CHIPLET_XBUS_IF);
+                EntityPath l_path = l_xbusTarget->getAttr<ATTR_PHYS_PATH>();
+                l_path.dump();
+                l_path = l_cpuTarget->getAttr<ATTR_PHYS_PATH>();
+                l_path.dump();
+                l_path = l_pParent->getAttr<ATTR_PHYS_PATH>();
+                l_path.dump();
+
+                FAPI_EXEC_HWP(rc,
+                              fapiHwpExecInitFile,
+                              targets,
+                              PROC_CHIPLET_XBUS_IF);
+
+                l_err = fapi::fapiRcToErrl(rc);
+                if (l_err)
+                {
+                    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                              "proc_chiplet_scominit: Error from fapiHwpExecInitfile executing %s",
+                              PROC_CHIPLET_XBUS_IF);
+
+                    l_StepError.addErrorDetails(
+                               ISTEP_PROC_XBUS_IF_EXECUTION_FAILED,
+                               ISTEP_PROC_CHIPLET_SCOMINIT,
+                               l_err);
+
+                    // We want to continue to the next link instead of exiting,
+                    // Commit the error log and move on
+                    // Log should be deleted and set to NULL in errlCommit.
+                    errlCommit(l_err, HWPF_COMP_ID);
+                }
+
+            }  // End xbus loop
+
+
+        } // End cpunum loop
+
+        // Note: all error logs exist above must have been committed.
+        // We want to move on to the ABUS training.  The usage of l_err
+        // again below should not cause mem leakage.
+
+        // Now do ABUS, get all ABUS connections
+        EDI_EI_INITIALIZATION::TargetPairs_t l_AbusConnections;
+        l_err =
+        EDI_EI_INITIALIZATION::PbusLinkSvc::getTheInstance().getPbusConnections(
+                                          l_AbusConnections, TYPE_ABUS, false);
+        if (l_err)
+        {
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, "ERROR 0x%.8X : getPbusConnections ABUS returns error",
+                      l_err->reasonCode());
+
+            // TODO - RTC 57977
+            // Need to discuss with Jamie on how to handle this:
+            // - An istep may fail in multiple locations.  The failure
+            //   may not be always from invoking the HW procedures.
+            //   It may come from support functions in this case.
+            // - How do we set the error tags and use reason code for different
+            //   fail scenarios?
+            l_StepError.addErrorDetails(ISTEP_PROC_CHIPLET_SCOMINIT_FAILED,
+                                        ISTEP_PROC_CHIPLET_SCOMINIT,
+                                        l_err);
+
+            // Shouldn't continue on this fatal error (no ABUS), break out
+            break;
+        }
+
+        // Loop thru the proc
+        for ( l_cpuNum=0; l_cpuNum < l_cpuTargetList.size(); l_cpuNum++ )
+        {
+            const TARGETING::Target* l_cpuTarget = l_cpuTargetList[l_cpuNum];
+            // Get the ABUS under this proc
+            TARGETING::TargetHandleList l_abusList;
+            getChildChiplets( l_abusList, l_cpuTarget, TYPE_ABUS );
+
+            // For each ABUS unit in this proc
+            for (size_t ii = 0; ii < l_abusList.size(); ii++)
+            {
+                TARGETING::Target * l_abusTarget = l_abusList[ii];
+                EDI_EI_INITIALIZATION::TargetPairs_t::iterator l_itr =
+                                l_AbusConnections.find(l_abusTarget);
+                if ( l_itr == l_AbusConnections.end() )
+                {
+                    continue;
+                }
+
+                const TARGETING::Target *l_pParent =
+                      getParentChip(
+                        (const_cast<TARGETING::Target*>(l_itr->second)));
+
+                // Targets to pass in HW procedure
+                std::vector<fapi::Target> targets;
+
+                const fapi::Target l_fapi_abus_target(
+                       TARGET_TYPE_ABUS_ENDPOINT,
+                       reinterpret_cast<void *>
+                       (const_cast<TARGETING::Target*>(l_abusTarget)));
+                targets.push_back(l_fapi_abus_target);
+
+                const fapi::Target l_fapi_this_cpu_target(
+                       TARGET_TYPE_PROC_CHIP,
+                       reinterpret_cast<void *>
+                       (const_cast<TARGETING::Target*>(
+                               l_cpuTarget)));
+                targets.push_back(l_fapi_this_cpu_target);
+
+                const fapi::Target l_fapi_other_cpu_target(
+                       TARGET_TYPE_PROC_CHIP,
+                       reinterpret_cast<void *>
+                       (const_cast<TARGETING::Target*>(
+                               l_pParent)));
+                targets.push_back(l_fapi_other_cpu_target);
+
+                // execute PROC_CHIPLET_ABUS_IF initfile
+                FAPI_INF("proc_chiplet_scominit: Executing %s on...",
+                    PROC_CHIPLET_ABUS_IF);
+                EntityPath l_path = l_abusTarget->getAttr<ATTR_PHYS_PATH>();
+                l_path.dump();
+                l_path = l_cpuTarget->getAttr<ATTR_PHYS_PATH>();
+                l_path.dump();
+                l_path = l_pParent->getAttr<ATTR_PHYS_PATH>();
+                l_path.dump();
+
+                FAPI_EXEC_HWP(rc,
+                              fapiHwpExecInitFile,
+                              targets,
+                              PROC_CHIPLET_ABUS_IF);
+                l_err = fapi::fapiRcToErrl(rc);
+                if (l_err)
+                {
+                    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                              "proc_chiplet_scominit: Error from fapiHwpExecInitfile executing %s",
+                              PROC_CHIPLET_ABUS_IF);
+
+                    l_StepError.addErrorDetails(
+                               ISTEP_PROC_ABUS_IF_EXECUTION_FAILED,
+                               ISTEP_PROC_CHIPLET_SCOMINIT,
+                               l_err);
+
+                    // We want to continue to the next link instead of exiting,
+                    // Commit the error log and move on
+                    // Log should be deleted and set to NULL in errlCommit.
+                    errlCommit(l_err, HWPF_COMP_ID);
+                }
+            } // End abus list loop
+
+        } // End cpunum loop
+
+
+    } while (0);
+
+    return l_StepError.getErrorHandle();
 }
 
 //*****************************************************************************

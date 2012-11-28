@@ -1,9 +1,9 @@
-#-- $Id: edi.io.define,v 1.3 2012/07/09 22:31:54 ttnguyen Exp $
+#-- $Id: ei4.io.define,v 1.2 2012/08/01 05:31:17 thomsen Exp $
 #-- CHANGE HISTORY:
 #--------------------------------------------------------------------------------
 #-- Version:|Author: | Date:  | Comment:
 #-- --------|--------|--------|--------------------------------------------------
-#--     1.1 |thomsen |06/11/12|Created initial version
+#--     1.1 |pmegan  |07/10/12|Created initial version
 #-- --------|--------|--------|--------------------------------------------------
 #--------------------------------------------------------------------------------
 # End of revision history
@@ -20,8 +20,6 @@ define tx_fir_pl=010001010; 	       #08A
 define tx_fir_mask_pl=010001011; 	       #08B
 define tx_fir_error_inject_pl=010001100; 	       #08C
 define tx_mode_fast_pl=010001101; 	       #08D
-define tx_tdr_stat_pl=010001110; 	       #08E
-define tx_cntl_gcrmsg_pl=010001111; 	       #08F
 define tx_clk_mode_pg=110000000; 	       #180
 define tx_spare_mode_pg=110000001; 	       #181
 define tx_cntl_stat_pg=110000010; 	       #182
@@ -35,40 +33,39 @@ define tx_id1_pg=110010010; 	       #192
 define tx_id2_pg=110010011; 	       #193
 define tx_id3_pg=110010100; 	       #194
 define tx_clk_cntl_gcrmsg_pg=110011000; 	       #198
-define tx_ffe_mode_pg=110011001; 	       #199
-define tx_ffe_main_pg=110011010; 	       #19A
-define tx_ffe_post_pg=110011011; 	       #19B
-define tx_ffe_margin_pg=110011100; 	       #19C
 define tx_bad_lane_enc_gcrmsg_pg=110011101; 	       #19D
 define tx_ber_cntl_pg=110011110; 	       #19E
 define tx_sls_lane_enc_gcrmsg_pg=110011111; 	       #19F
 define tx_wt_seg_enable_pg=110100000; 	       #1A0
+#define #tx_term_pg=110100000; 	       #1A0
+define tx_pc_ffe_pg=110100001; 	       #1A1
+define tx_misc_analog_pg=110100010; 	       #1A2
 define tx_lane_disabled_vec_0_15_pg=110100011; 	       #1A3
 define tx_lane_disabled_vec_16_31_pg=110100100; 	       #1A4
 define tx_sls_lane_mux_gcrmsg_pg=110100101; 	       #1A5
 define tx_dyn_rpr_pg=110100110; 	       #1A6
 define tx_slv_mv_sls_ln_req_gcrmsg_pg=110100111; 	       #1A7
+define tx_rdt_cntl_pg=110101000; 	       #1A8
+define rx_dll_cal_cntl_pg=111000111; 	       #1C7
+define rx_dll1_setpoint1_pg=111001000; 	       #1C8
+define rx_dll1_setpoint2_pg=111001001; 	       #1C9
+define rx_dll1_setpoint3_pg=111001010; 	       #1CA
+define rx_dll2_setpoint1_pg=111001011; 	       #1CB
+define rx_dll2_setpoint2_pg=111001100; 	       #1CC
+define rx_dll2_setpoint3_pg=111001101; 	       #1CD
+define rx_dll_filter_mode_pg=111001110; 	       #1CE
+define rx_dll_analog_tweaks_pg=111001111; 	       #1CF
 define tx_wiretest_pp=111010000; 	       #1D0
 define tx_mode_pp=111010001; 	       #1D1
 define tx_sls_gcrmsg_pp=111010010; 	       #1D2
 define tx_ber_cntl_a_pp=111010011; 	       #1D3
 define tx_ber_cntl_b_pp=111010100; 	       #1D4
-define tx_dyn_recal_timeouts_pp=111010101; 	       #1D5
 define tx_bist_cntl_pp=111010110; 	       #1D6
 define tx_ber_cntl_sls_pp=111010111; 	       #1D7
 define tx_cntl_pp=111011000; 	       #1D8
 define tx_reset_cfg_pp=111011001; 	       #1D9
-define tx_tdr_cntl1_pp=111011010; 	       #1DA
 define tx_tdr_cntl2_pp=111011011; 	       #1DB
 define tx_tdr_cntl3_pp=111011100; 	       #1DC
-define tx_impcal_pb=111100000; 	       #1E0
-define tx_impcal_nval_pb=111100001; 	       #1E1
-define tx_impcal_pval_pb=111100010; 	       #1E2
-define tx_impcal_p_4x_pb=111100011; 	       #1E3
-define tx_impcal_swo1_pb=111100100; 	       #1E4
-define tx_impcal_swo2_pb=111100101; 	       #1E5
-define tx_analog_iref_pb=111100110; 	       #1E6
-define tx_minikerf_pb=111100111; 	       #1E7
 define tx_init_version_pb=111101000; 	       #1E8
 define tx_scratch_reg_pb=111101001; 	       #1E9
 define rx_mode_pl=000000000; 	       #000
@@ -77,22 +74,18 @@ define rx_spare_mode_pl=000000010; 	       #002
 define rx_prot_edge_status_pl=000000011; 	       #003
 #define #rx_prot_gb_status_pl=000000100; 	       #004
 define rx_bist_stat_pl=000000101; 	       #005
+#define ##rx_eyeopt_mode_pl=000000110; 	       #006
 #define #rx_eyeopt_stat_pl=000000111; 	       #007
 define rx_offset_even_pl=000001000; 	       #008
 define rx_offset_odd_pl=000001001; 	       #009
 define rx_amp_val_pl=000001010; 	       #00A
-define rx_amp_cntl_pl=000001011; 	       #00B
 define rx_prot_status_pl=000001100; 	       #00C
 define rx_prot_mode_pl=000001101; 	       #00D
 define rx_prot_cntl_pl=000001110; 	       #00E
 #define #rx_wiretest_stat_pl=000001110; 	       #00E
 define rx_fifo_stat_pl=000001111; 	       #00F
-define rx_ap_pl =000010000; 	       #010
-define rx_an_pl =000010001; 	       #011
-define rx_amin_pl=000010010; 	       #012
-define rx_h1_even_pl=000010011; 	       #013
-define rx_h1_odd_pl=000010100; 	       #014
 define rx_prbs_mode_pl=000010110; 	       #016
+define rx_vref_pl=000010111; 	       #017
 define rx_stat_pl=000011000; 	       #018
 define rx_deskew_stat_pl=000011001; 	       #019
 define rx_fir_pl=000011010; 	       #01A
@@ -111,7 +104,6 @@ define rx_fifo_diag_16_31_pl=000100110; 	       #026
 define rx_fifo_diag_32_47_pl=000100111; 	       #027
 define rx_eye_width_status_pl=000101000; 	       #028
 define rx_eye_width_cntl_pl=000101001; 	       #029
-define rx_dfe_clkadj_pl=000101010; 	       #02A
 define rx_trace_pl=000101011; 	       #02B
 define rx_servo_ber_count_pl=000101100; 	       #02C
 define rx_eye_opt_stat_pl=000101101; 	       #02D
@@ -125,7 +117,6 @@ define rx_reset_act_pg=100001001; 	       #109
 define rx_id1_pg=100001010; 	       #10A
 define rx_id2_pg=100001011; 	       #10B
 define rx_id3_pg=100001100; 	       #10C
-define rx_minikerf_pg=100001101; 	       #10D
 define rx_dyn_rpr_debug2_pg=100001110; 	       #10E
 define rx_sls_mode_pg=100001111; 	       #10F
 define rx_training_start_pg=100010000; 	       #110
@@ -164,6 +155,7 @@ define rx_static_repair_state_pg=100110010; 	       #132
 define rx_tx_bus_info_pg=100110011; 	       #133
 define rx_sls_lane_enc_gcrmsg_pg=100110100; 	       #134
 define rx_fence_pg=100110101; 	       #135
+define rx_term_pg=100110110; 	       #136
 define rx_timeout_sel2_pg=100110111; 	       #137
 define rx_misc_analog_pg=100111000; 	       #138
 define rx_dyn_rpr_pg=100111001; 	       #139
@@ -174,27 +166,19 @@ define rx_gcr_msg_debug_dest_ids_pg=100111101; 	       #13D
 define rx_gcr_msg_debug_src_ids_pg=100111110; 	       #13E
 define rx_gcr_msg_debug_dest_addr_pg=100111111; 	       #13F
 define rx_gcr_msg_debug_write_data_pg=101000000; 	       #140
-define rx_dyn_recal_pg=101000001; 	       #141
 define rx_wt_clk_status_pg=101000010; 	       #142
-define rx_dyn_recal_config_pg=101000011; 	       #143
 define rx_wt_config_pg=101000100; 	       #144
-define rx_dyn_recal_gcrmsg_pg=101000101; 	       #145
 define rx_wiretest_pll_cntl_pg=101000110; 	       #146
 define rx_eo_step_cntl_pg=101000111; 	       #147
 define rx_eo_step_stat_pg=101001000; 	       #148
 define rx_eo_step_fail_pg=101001001; 	       #149
-define rx_ap_pg =101001010; 	       #14A
-define rx_an_pg =101001011; 	       #14B
-define rx_amin_pg=101001100; 	       #14C
-define rx_amax_pg=101001101; 	       #14D
 define rx_amp_val_pg=101001110; 	       #14E
-define rx_amp_offset_pg=101001111; 	       #14F
-define rx_eo_convergence_pg=101010000; 	       #150
 define rx_sls_rcvy_pg=101010001; 	       #151
 define rx_sls_rcvy_gcrmsg_pg=101010010; 	       #152
 define rx_tx_lane_info_gcrmsg_pg=101010011; 	       #153
 define rx_err_tallying_gcrmsg_pg=101010100; 	       #154
 define rx_trace_pg=101010101; 	       #155
+define rx_rdt_cntl_pg=101010110; 	       #156
 define rx_rc_step_cntl_pg=101010111; 	       #157
 define rx_eo_recal_pg=101011000; 	       #158
 define rx_servo_ber_count_pg=101011001; 	       #159
@@ -202,27 +186,25 @@ define rx_func_state_pg=101011010; 	       #15A
 define rx_dyn_rpr_debug_pg=101011011; 	       #15B
 define rx_dyn_rpr_err_tallying2_pg=101011100; 	       #15C
 define rx_result_chk_pg=101011101; 	       #15D
-define rx_ber_chk_pg=101011110; 	       #15E
 define rx_sls_rcvy_fin_gcrmsg_pg=101011111; 	       #15F
 #define #rx_wiretest_pp=101100000; 	       #160
 define rx_mode1_pp=101100001; 	       #161
 define rx_cntl_fast_pp=101100010; 	       #162
-define rx_dyn_recal_timeouts_pp=101101000; 	       #168
+define rx_ei4_cal_cntl_pp=101100011; 	       #163
+define rx_ei4_cal_inc_a_d_pp=101100100; 	       #164
+define rx_ei4_cal_inc_e_h_pp=101100101; 	       #165
+define rx_ei4_cal_dec_a_d_pp=101100110; 	       #166
+define rx_ei4_cal_dec_e_h_pp=101100111; 	       #167
 define rx_ber_cntl_pp=101101010; 	       #16A
 define rx_ber_mode_pp=101101011; 	       #16B
 define rx_servo_to1_pp=101101100; 	       #16C
 define rx_servo_to2_pp=101101101; 	       #16D
-define rx_servo_to3_pp=101101110; 	       #16E
-define rx_dfe_config_pp=101101111; 	       #16F
-define rx_dfe_timers_pp=101110000; 	       #170
 define rx_reset_cfg_pp=101110001; 	       #171
 define rx_recal_to1_pp=101110010; 	       #172
 define rx_recal_to2_pp=101110011; 	       #173
-define rx_recal_to3_pp=101110100; 	       #174
 define rx_recal_cntl_pp=101110101; 	       #175
 define rx_mode2_pp=101110110; 	       #176
 define rx_bist_gcrmsg_pp=101110111; 	       #177
-define rx_scope_cntl_pp=101111000; 	       #178
 define rx_fir_reset_pb=111110000; 	       #1F0
 define rx_fir_pb=111110001; 	       #1F1
 define rx_fir_mask_pb=111110010; 	       #1F2
@@ -231,12 +213,10 @@ define rx_fir_msg_pb=111111111; 	       #1FF
 define tx_mode_pl_full_reg=48:63; 	 #start_bit=48, number_of_bit=16
 define tx_lane_pdwn=48:48; 	 #start_bit=48, number_of_bit=1
 define tx_lane_invert=49:49; 	 #start_bit=49, number_of_bit=1
-define tx_lane_quiesce_p=50:51; 	 #start_bit=50, number_of_bit=2
-define tx_lane_quiesce_n=52:53; 	 #start_bit=52, number_of_bit=2
+define tx_lane_quiesce=50:51; 	 #start_bit=50, number_of_bit=2
 define tx_lane_scramble_disable=54:54; 	 #start_bit=54, number_of_bit=1
 #define #tx_lane_error_inject_mode=58:63; 	 #start_bit=58, number_of_bit=6
 define tx_fifo_err=48:48; 	 #start_bit=48, number_of_bit=1
-define tx_pdwn_lite_gcrmsg=48:48; 	 #start_bit=48, number_of_bit=1
 define tx_pl_spare_mode_0=48:48; 	 #start_bit=48, number_of_bit=1
 define tx_pl_spare_mode_1=49:49; 	 #start_bit=49, number_of_bit=1
 define tx_pl_spare_mode_2=50:50; 	 #start_bit=50, number_of_bit=1
@@ -265,12 +245,10 @@ define tx_drv_sync_patt_gcrmsg=49:49; 	 #start_bit=49, number_of_bit=1
 define tx_err_inject=48:51; 	 #start_bit=48, number_of_bit=4
 define tx_err_inj_A_enable=52:52; 	 #start_bit=52, number_of_bit=1
 define tx_err_inj_B_enable=53:53; 	 #start_bit=53, number_of_bit=1
-define tx_tdr_capt_val=48:48; 	 #start_bit=48, number_of_bit=1
 define tx_clk_pdwn=48:48; 	 #start_bit=48, number_of_bit=1
 define tx_clk_invert=49:49; 	 #start_bit=49, number_of_bit=1
 define tx_clk_quiesce_p=50:51; 	 #start_bit=50, number_of_bit=2
 define tx_clk_quiesce_n=52:53; 	 #start_bit=52, number_of_bit=2
-define tx_clk_ddr_mode=54:54; 	 #start_bit=54, number_of_bit=1
 define tx_pg_spare_mode_0=48:48; 	 #start_bit=48, number_of_bit=1
 define tx_pg_spare_mode_1=49:49; 	 #start_bit=49, number_of_bit=1
 define tx_pg_spare_mode_2=50:50; 	 #start_bit=50, number_of_bit=1
@@ -279,13 +257,12 @@ define tx_pg_spare_mode_4=52:52; 	 #start_bit=52, number_of_bit=1
 define tx_pg_spare_mode_5=53:53; 	 #start_bit=53, number_of_bit=1
 define tx_pg_spare_mode_6=54:54; 	 #start_bit=54, number_of_bit=1
 define tx_pg_spare_mode_7=55:55; 	 #start_bit=55, number_of_bit=1
-define tx_clk_bist_err=49:49; 	 #start_bit=49, number_of_bit=1
-define tx_clk_bist_done=51:51; 	 #start_bit=51, number_of_bit=1
+define tx_clk_bist_err=48:49; 	 #start_bit=48, number_of_bit=2
+define tx_clk_bist_done=50:51; 	 #start_bit=50, number_of_bit=2
 #define #tx_cntl_stat_pg_spare=48:48; 	 #start_bit=48, number_of_bit=1
 define tx_fifo_init=49:49; 	 #start_bit=49, number_of_bit=1
 define tx_max_bad_lanes=48:52; 	 #start_bit=48, number_of_bit=5
 define tx_msbswap=53:53; 	 #start_bit=53, number_of_bit=1
-define tx_pdwn_lite_disable=54:54; 	 #start_bit=54, number_of_bit=1
 define tx_reset_cfg_ena=48:48; 	 #start_bit=48, number_of_bit=1
 define tx_clr_par_errs=62:62; 	 #start_bit=62, number_of_bit=1
 define tx_fir_reset=63:63; 	 #start_bit=63, number_of_bit=1
@@ -320,20 +297,26 @@ define tx_end_lane_id=57:63; 	 #start_bit=57, number_of_bit=7
 define tx_drv_clk_pattern_gcrmsg=48:49; 	 #start_bit=48, number_of_bit=2
 define tx_wt_en_all_clk_segs_gcrmsg=48:48; 	 #start_bit=48, number_of_bit=1
 define tx_wt_en_all_data_segs_gcrmsg=49:49; 	 #start_bit=49, number_of_bit=1
-define tx_ffe_test_mode=50:51; 	 #start_bit=50, number_of_bit=2
-define tx_ffe_test_override1r=54:54; 	 #start_bit=54, number_of_bit=1
-define tx_ffe_test_override2r=55:55; 	 #start_bit=55, number_of_bit=1
-define tx_ffe_main_p_enc=49:55; 	 #start_bit=49, number_of_bit=7
-define tx_ffe_main_n_enc=57:63; 	 #start_bit=57, number_of_bit=7
-define tx_ffe_post_p_enc=51:55; 	 #start_bit=51, number_of_bit=5
-define tx_ffe_post_n_enc=59:63; 	 #start_bit=59, number_of_bit=5
-define tx_ffe_margin_p_enc=51:55; 	 #start_bit=51, number_of_bit=5
-define tx_ffe_margin_n_enc=59:63; 	 #start_bit=59, number_of_bit=5
 define tx_bad_lane1_gcrmsg=48:54; 	 #start_bit=48, number_of_bit=7
 define tx_bad_lane2_gcrmsg=55:61; 	 #start_bit=55, number_of_bit=7
 define tx_bad_lane_code_gcrmsg=62:63; 	 #start_bit=62, number_of_bit=2
 define tx_sls_lane_gcrmsg=48:54; 	 #start_bit=48, number_of_bit=7
 define tx_sls_lane_val_gcrmsg=55:55; 	 #start_bit=55, number_of_bit=1
+#define #tx_term_n_mode_enc=48:51; 	 #start_bit=48, number_of_bit=4
+#define #tx_term_p_mode_enc=52:55; 	 #start_bit=52, number_of_bit=4
+#define #tx_term_test_mode=56:56; 	 #start_bit=56, number_of_bit=1
+#define #tx_termffe_n_mode_enc=57:59; 	 #start_bit=57, number_of_bit=3
+#define #tx_termffe_p_mode_enc=61:63; 	 #start_bit=61, number_of_bit=3
+define tx_pc_test_mode=48:48; 	 #start_bit=48, number_of_bit=1
+#define #tx_ffe_slice_en_enc=49:51; 	 #start_bit=49, number_of_bit=3
+define tx_main_slice_en_enc=52:55; 	 #start_bit=52, number_of_bit=4
+#define #tx_mt_slice_en_enc=57:59; 	 #start_bit=57, number_of_bit=3
+define tx_pc_slice_en_enc=60:63; 	 #start_bit=60, number_of_bit=4
+define tx_slewctl=48:51; 	 #start_bit=48, number_of_bit=4
+#define #tx_pvtnb_enc=52:53; 	 #start_bit=52, number_of_bit=2
+#define #tx_pvtpb_enc=54:55; 	 #start_bit=54, number_of_bit=2
+define tx_pvtnl_enc=58:59; 	 #start_bit=58, number_of_bit=2
+define tx_pvtpl_enc=62:63; 	 #start_bit=62, number_of_bit=2
 define tx_lane_disabled_vec_0_15=48:63; 	 #start_bit=48, number_of_bit=16
 define tx_lane_disabled_vec_16_31=48:63; 	 #start_bit=48, number_of_bit=16
 define tx_sls_lane_shdw_gcrmsg=48:48; 	 #start_bit=48, number_of_bit=1
@@ -346,11 +329,12 @@ define tx_bus_width=52:58; 	 #start_bit=52, number_of_bit=7
 define tx_slv_mv_sls_rpr_req_gcrmsg=59:59; 	 #start_bit=59, number_of_bit=1
 define tx_sls_lane_sel_lg_gcrmsg=60:60; 	 #start_bit=60, number_of_bit=1
 define tx_sls_lane_unsel_lg_gcrmsg=61:61; 	 #start_bit=61, number_of_bit=1
-define tx_spr_lns_pdwn_lite_gcrmsg=62:62; 	 #start_bit=62, number_of_bit=1
+define tx_rdt_mode=48:48; 	 #start_bit=48, number_of_bit=1
+define tx_run_rdt=49:49; 	 #start_bit=49, number_of_bit=1
 define tx_wt_pattern_length=48:49; 	 #start_bit=48, number_of_bit=2
 define tx_reduced_scramble_mode=48:49; 	 #start_bit=48, number_of_bit=2
 define tx_prbs_scramble_mode=50:51; 	 #start_bit=50, number_of_bit=2
-define tx_fifo_l2u_dly=52:54; 	 #start_bit=52, number_of_bit=3
+define tx_ei3_mode=63:63; 	 #start_bit=63, number_of_bit=1
 define tx_bist_en=48:48; 	 #start_bit=48, number_of_bit=1
 define tx_bist_clr=49:49; 	 #start_bit=49, number_of_bit=1
 define tx_snd_sls_cmd_gcrmsg=48:48; 	 #start_bit=48, number_of_bit=1
@@ -370,41 +354,10 @@ define tx_err_inj_sls_mode=48:48; 	 #start_bit=48, number_of_bit=1
 define tx_err_inj_sls_all_cmd=49:49; 	 #start_bit=49, number_of_bit=1
 define tx_err_inj_sls_recal=50:50; 	 #start_bit=50, number_of_bit=1
 define tx_err_inj_sls_cmd=58:63; 	 #start_bit=58, number_of_bit=6
-define tx_dyn_recal_interval_timeout_sel=49:51; 	 #start_bit=49, number_of_bit=3
-define tx_dyn_recal_status_rpt_timeout_sel=52:53; 	 #start_bit=52, number_of_bit=2
 define tx_enable_reduced_scramble=48:48; 	 #start_bit=48, number_of_bit=1
 define tx_reset_cfg_hld=48:63; 	 #start_bit=48, number_of_bit=16
-define tx_tdr_dac_cntl=48:55; 	 #start_bit=48, number_of_bit=8
-define tx_tdr_phase_sel=57:57; 	 #start_bit=57, number_of_bit=1
-#define #tx_tdr_capt_val=63:63; 	 #start_bit=63, number_of_bit=1
 define tx_tdr_pulse_offset=48:59; 	 #start_bit=48, number_of_bit=12
 define tx_tdr_pulse_width=48:59; 	 #start_bit=48, number_of_bit=12
-#define #tx_zcal_spare=48:48; 	 #start_bit=48, number_of_bit=1
-define tx_zcal_req=49:49; 	 #start_bit=49, number_of_bit=1
-define tx_zcal_done=50:50; 	 #start_bit=50, number_of_bit=1
-define tx_zcal_error=51:51; 	 #start_bit=51, number_of_bit=1
-define tx_zcal_busy=52:52; 	 #start_bit=52, number_of_bit=1
-define tx_zcal_force_sample=53:53; 	 #start_bit=53, number_of_bit=1
-define tx_zcal_cmp_out=54:54; 	 #start_bit=54, number_of_bit=1
-define tx_zcal_sample_cnt=55:63; 	 #start_bit=55, number_of_bit=9
-define tx_zcal_n=48:56; 	 #start_bit=48, number_of_bit=9
-define tx_zcal_p=48:56; 	 #start_bit=48, number_of_bit=9
-define tx_zcal_p_4x=48:52; 	 #start_bit=48, number_of_bit=5
-define tx_zcal_swo_en=48:48; 	 #start_bit=48, number_of_bit=1
-define tx_zcal_swo_cal_segs=49:49; 	 #start_bit=49, number_of_bit=1
-define tx_zcal_swo_cmp_inv=50:50; 	 #start_bit=50, number_of_bit=1
-define tx_zcal_swo_cmp_offset=51:51; 	 #start_bit=51, number_of_bit=1
-define tx_zcal_swo_cmp_reset=52:52; 	 #start_bit=52, number_of_bit=1
-define tx_zcal_swo_powerdown=53:53; 	 #start_bit=53, number_of_bit=1
-define tx_zcal_cya_data_inv=54:54; 	 #start_bit=54, number_of_bit=1
-define tx_zcal_test_ovr_2r=55:55; 	 #start_bit=55, number_of_bit=1
-define tx_zcal_debug_mode=62:63; 	 #start_bit=62, number_of_bit=2
-define tx_zcal_sm_min_val=48:54; 	 #start_bit=48, number_of_bit=7
-define tx_zcal_sm_max_val=55:61; 	 #start_bit=55, number_of_bit=7
-define tx_iref_bc=48:50; 	 #start_bit=48, number_of_bit=3
-define tx_minikerf=48:63; 	 #start_bit=48, number_of_bit=16
-define tx_init_version=48:63; 	 #start_bit=48, number_of_bit=16
-define tx_scratch_reg=48:63; 	 #start_bit=48, number_of_bit=16
 define rx_mode_pl_full_reg=48:63; 	 #start_bit=48, number_of_bit=16
 define rx_lane_pdwn=48:48; 	 #start_bit=48, number_of_bit=1
 #define #rx_lane_invert=49:49; 	 #start_bit=49, number_of_bit=1
@@ -412,7 +365,6 @@ define rx_lane_pdwn=48:48; 	 #start_bit=48, number_of_bit=1
 define rx_lane_scramble_disable=54:54; 	 #start_bit=54, number_of_bit=1
 define rx_block_lock_lane=48:48; 	 #start_bit=48, number_of_bit=1
 define rx_check_skew_lane=49:49; 	 #start_bit=49, number_of_bit=1
-define rx_pdwn_lite=50:50; 	 #start_bit=50, number_of_bit=1
 define rx_offcal_mode=51:51; 	 #start_bit=51, number_of_bit=1
 define rx_pl_spare_mode_0=48:48; 	 #start_bit=48, number_of_bit=1
 define rx_pl_spare_mode_1=49:49; 	 #start_bit=49, number_of_bit=1
@@ -425,17 +377,18 @@ define rx_pl_spare_mode_7=55:55; 	 #start_bit=55, number_of_bit=1
 #define #rx_lane_id_pl=48:52; 	 #start_bit=48, number_of_bit=5
 define rx_bist_err=48:48; 	 #start_bit=48, number_of_bit=1
 define rx_bist_done=49:49; 	 #start_bit=49, number_of_bit=1
+#define ##rx_ddc_disable=48:48; 	 #start_bit=48, number_of_bit=1
 #define #rx_eyeopt_stat_tbd=48:48; 	 #start_bit=48, number_of_bit=1
 define rx_offset_even_samp1=49:55; 	 #start_bit=49, number_of_bit=7
+#define #rx_offset_even_samp1=50:55; 	 #start_bit=50, number_of_bit=6
 define rx_offset_even_samp0=57:63; 	 #start_bit=57, number_of_bit=7
+#define #rx_offset_even_samp0=58:63; 	 #start_bit=58, number_of_bit=6
 define rx_offset_odd_samp1=49:55; 	 #start_bit=49, number_of_bit=7
+#define #rx_offset_odd_samp1=50:55; 	 #start_bit=50, number_of_bit=6
 define rx_offset_odd_samp0=57:63; 	 #start_bit=57, number_of_bit=7
+#define #rx_offset_odd_samp0=58:63; 	 #start_bit=58, number_of_bit=6
 #define #rx_amp_peak=48:51; 	 #start_bit=48, number_of_bit=4
-define rx_amp_peak=48:51; 	 #start_bit=48, number_of_bit=4
-define rx_amp_gain=52:55; 	 #start_bit=52, number_of_bit=4
-define rx_amp_offset=58:63; 	 #start_bit=58, number_of_bit=6
-define rx_amp_adj_done=48:48; 	 #start_bit=48, number_of_bit=1
-define rx_amp_adj_all_done_b=49:49; 	 #start_bit=49, number_of_bit=1
+define rx_amp_peak=48:53; 	 #start_bit=48, number_of_bit=6
 #define #rx_wiretest_lane_bad=48:48; 	 #start_bit=48, number_of_bit=1
 #define #rx_lane_inverted=49:49; 	 #start_bit=49, number_of_bit=1
 #define #rx_lane_fault_details=52:54; 	 #start_bit=52, number_of_bit=3
@@ -450,31 +403,16 @@ define rx_bad_skew=49:49; 	 #start_bit=49, number_of_bit=1
 define rx_bad_deskew=50:50; 	 #start_bit=50, number_of_bit=1
 define rx_bad_eye_opt_ber=48:48; 	 #start_bit=48, number_of_bit=1
 define rx_bad_eye_opt_width=49:49; 	 #start_bit=49, number_of_bit=1
-define rx_bad_eye_opt_height=50:50; 	 #start_bit=50, number_of_bit=1
-define rx_bad_eye_opt_ddc=51:51; 	 #start_bit=51, number_of_bit=1
-define rx_ap_even_samp=48:55; 	 #start_bit=48, number_of_bit=8
-define rx_ap_odd_samp=56:63; 	 #start_bit=56, number_of_bit=8
-define rx_an_even_samp=48:55; 	 #start_bit=48, number_of_bit=8
-define rx_an_odd_samp=56:63; 	 #start_bit=56, number_of_bit=8
-define rx_dfe_clkadj=48:51; 	 #start_bit=48, number_of_bit=4
-define rx_amin_even=48:55; 	 #start_bit=48, number_of_bit=8
-define rx_amin_odd=56:63; 	 #start_bit=56, number_of_bit=8
-define rx_h1_even_samp1=49:55; 	 #start_bit=49, number_of_bit=7
-define rx_h1_even_samp0=57:63; 	 #start_bit=57, number_of_bit=7
-define rx_h1_odd_samp1=49:55; 	 #start_bit=49, number_of_bit=7
-define rx_h1_odd_samp0=57:63; 	 #start_bit=57, number_of_bit=7
+define rx_vref  =48:55; 	 #start_bit=48, number_of_bit=8
 define rx_pl_fir_errs_full_reg=48:63; 	 #start_bit=48, number_of_bit=16
-define rx_pl_fir_errs=48:49; 	 #start_bit=48, number_of_bit=2
+define rx_pl_fir_errs=48:48; 	 #start_bit=48, number_of_bit=1
 define rx_pl_fir_err_pl_regs=48:48; 	 #start_bit=48, number_of_bit=1
-define rx_pl_fir_err_ddc_sm=49:49; 	 #start_bit=49, number_of_bit=1
 define rx_pl_fir_errs_mask_full_reg=48:63; 	 #start_bit=48, number_of_bit=16
-define rx_pl_fir_errs_mask=48:49; 	 #start_bit=48, number_of_bit=2
+define rx_pl_fir_errs_mask=48:48; 	 #start_bit=48, number_of_bit=1
 define rx_pl_fir_err_mask_pl_regs=48:48; 	 #start_bit=48, number_of_bit=1
-define rx_pl_fir_err_mask_ddc_sm=49:49; 	 #start_bit=49, number_of_bit=1
 define rx_pl_fir_err_inj_full_reg=48:63; 	 #start_bit=48, number_of_bit=16
-define rx_pl_fir_err_inj=48:49; 	 #start_bit=48, number_of_bit=2
+define rx_pl_fir_err_inj=48:48; 	 #start_bit=48, number_of_bit=1
 define rx_pl_fir_err_inj_pl_regs=48:48; 	 #start_bit=48, number_of_bit=1
-define rx_pl_fir_err_inj_ddc_sm=49:49; 	 #start_bit=49, number_of_bit=1
 define rx_prbs_tap_id=48:50; 	 #start_bit=48, number_of_bit=3
 define rx_some_block_locked=48:48; 	 #start_bit=48, number_of_bit=1
 define rx_all_block_locked_b=49:49; 	 #start_bit=49, number_of_bit=1
@@ -489,20 +427,14 @@ define rx_wt_lane_disabled=48:48; 	 #start_bit=48, number_of_bit=1
 define rx_wt_lane_inverted=49:49; 	 #start_bit=49, number_of_bit=1
 define rx_wt_lane_bad_code=50:52; 	 #start_bit=50, number_of_bit=3
 define rx_wt_lane_status_alias=49:52; 	 #start_bit=49, number_of_bit=4
-define rx_bump_left_half_ui=48:48; 	 #start_bit=48, number_of_bit=1
-define rx_bump_right_half_ui=49:49; 	 #start_bit=49, number_of_bit=1
-define rx_bump_one_ui=50:50; 	 #start_bit=50, number_of_bit=1
-define rx_bump_two_ui=51:51; 	 #start_bit=51, number_of_bit=1
+#define #rx_prot_cntl_pl_dummy=48:48; 	 #start_bit=48, number_of_bit=1
 define rx_ext_sr=52:52; 	 #start_bit=52, number_of_bit=1
 define rx_ext_sl=53:53; 	 #start_bit=53, number_of_bit=1
-define rx_phaserot_offset=50:55; 	 #start_bit=50, number_of_bit=6
-define rx_phaserot_val=50:55; 	 #start_bit=50, number_of_bit=6
-define rx_phaserot_ddc_complete=56:56; 	 #start_bit=56, number_of_bit=1
-define rx_phaserot_block_lock_err=57:57; 	 #start_bit=57, number_of_bit=1
-define rx_phaserot_left_edge=50:55; 	 #start_bit=50, number_of_bit=6
-define rx_phaserot_right_edge=56:61; 	 #start_bit=56, number_of_bit=6
+define rx_phaserot_offset=49:55; 	 #start_bit=49, number_of_bit=7
+define rx_phaserot_val=49:55; 	 #start_bit=49, number_of_bit=7
+#define #rx_phaserot_left_edge=49:55; 	 #start_bit=49, number_of_bit=7
 #define #rx_phaserot_gb_hist_valid=48:48; 	 #start_bit=48, number_of_bit=1
-#define #rx_phaserot_gb_hist=52:55; 	 #start_bit=52, number_of_bit=4
+#define #rx_phaserot_gb_hist=51:55; 	 #start_bit=51, number_of_bit=5
 define rx_eye_width=50:55; 	 #start_bit=50, number_of_bit=6
 define rx_hist_min_eye_width_valid=56:56; 	 #start_bit=56, number_of_bit=1
 define rx_hist_min_eye_width=58:63; 	 #start_bit=58, number_of_bit=6
@@ -518,7 +450,6 @@ define rx_ber_timer_value_32_39=48:55; 	 #start_bit=48, number_of_bit=8
 define rx_servo_op_done=48:48; 	 #start_bit=48, number_of_bit=1
 define rx_servo_op_all_done_b=49:49; 	 #start_bit=49, number_of_bit=1
 define rx_servo_op=50:54; 	 #start_bit=50, number_of_bit=5
-define rx_scope_en=55:55; 	 #start_bit=55, number_of_bit=1
 define rx_fifo_out_0_15=48:63; 	 #start_bit=48, number_of_bit=16
 define rx_fifo_out_16_31=48:63; 	 #start_bit=48, number_of_bit=16
 define rx_fifo_out_32_47=48:63; 	 #start_bit=48, number_of_bit=16
@@ -536,8 +467,6 @@ define rx_pg_spare_mode_6=54:54; 	 #start_bit=54, number_of_bit=1
 define rx_pg_spare_mode_7=55:55; 	 #start_bit=55, number_of_bit=1
 define rx_master_mode=48:48; 	 #start_bit=48, number_of_bit=1
 define rx_disable_fence_reset=49:49; 	 #start_bit=49, number_of_bit=1
-define rx_pdwn_lite_disable=50:50; 	 #start_bit=50, number_of_bit=1
-define rx_use_sls_as_spr=51:51; 	 #start_bit=51, number_of_bit=1
 define rx_reset_cfg_ena=48:48; 	 #start_bit=48, number_of_bit=1
 define rx_clr_par_errs=62:62; 	 #start_bit=62, number_of_bit=1
 define rx_fir_reset=63:63; 	 #start_bit=63, number_of_bit=1
@@ -546,7 +475,6 @@ define rx_group_id=55:60; 	 #start_bit=55, number_of_bit=6
 define rx_last_group_id=48:53; 	 #start_bit=48, number_of_bit=6
 define rx_start_lane_id=49:55; 	 #start_bit=49, number_of_bit=7
 define rx_end_lane_id=57:63; 	 #start_bit=57, number_of_bit=7
-define rx_minikerf=48:63; 	 #start_bit=48, number_of_bit=16
 define rx_sls_disable=48:48; 	 #start_bit=48, number_of_bit=1
 define tx_sls_disable=49:49; 	 #start_bit=49, number_of_bit=1
 define rx_sls_cntr_tap_pts=50:51; 	 #start_bit=50, number_of_bit=2
@@ -582,16 +510,18 @@ define rx_wt_bypass_failed=63:63; 	 #start_bit=63, number_of_bit=1
 define rx_recal_status=48:63; 	 #start_bit=48, number_of_bit=16
 define rx_wt_check_count=48:52; 	 #start_bit=48, number_of_bit=5
 define rx_wt_check_lanes=53:54; 	 #start_bit=53, number_of_bit=2
+define rx_wt_enable_term_mode=55:55; 	 #start_bit=55, number_of_bit=1
+define rx_wt_term_phase=56:56; 	 #start_bit=56, number_of_bit=1
+define rx_wt_term_mode_enc=57:61; 	 #start_bit=57, number_of_bit=5
 define rx_sls_timeout_sel=48:50; 	 #start_bit=48, number_of_bit=3
 define rx_ds_bl_timeout_sel=51:53; 	 #start_bit=51, number_of_bit=3
 define rx_cl_timeout_sel=54:56; 	 #start_bit=54, number_of_bit=3
 define rx_wt_timeout_sel=57:59; 	 #start_bit=57, number_of_bit=3
 define rx_ds_timeout_sel=60:62; 	 #start_bit=60, number_of_bit=3
 define rx_eo_offset_timeout_sel=48:50; 	 #start_bit=48, number_of_bit=3
-define rx_eo_amp_timeout_sel=51:53; 	 #start_bit=51, number_of_bit=3
+define rx_eo_vref_timeout_sel=51:53; 	 #start_bit=51, number_of_bit=3
 define rx_eo_ctle_timeout_sel=54:56; 	 #start_bit=54, number_of_bit=3
-define rx_eo_h1ap_timeout_sel=57:59; 	 #start_bit=57, number_of_bit=3
-define rx_eo_ddc_timeout_sel=60:62; 	 #start_bit=60, number_of_bit=3
+define rx_eo_et_timeout_sel=60:62; 	 #start_bit=60, number_of_bit=3
 define rx_eo_final_l2u_timeout_sel=63:63; 	 #start_bit=63, number_of_bit=1
 define rx_func_mode_timeout_sel=48:50; 	 #start_bit=48, number_of_bit=3
 define rx_rc_slowdown_timeout_sel=51:53; 	 #start_bit=51, number_of_bit=3
@@ -727,7 +657,32 @@ define rx_wt_cu_pll_reset=49:49; 	 #start_bit=49, number_of_bit=1
 define rx_wt_cu_pll_pgooddly=50:52; 	 #start_bit=50, number_of_bit=3
 define rx_wt_cu_pll_lock=53:53; 	 #start_bit=53, number_of_bit=1
 define rx_wt_pll_refclksel=54:54; 	 #start_bit=54, number_of_bit=1
-define rx_pll_refclksel_scom_en=55:55; 	 #start_bit=55, number_of_bit=1
+define rx_dll1_cal_good=48:48; 	 #start_bit=48, number_of_bit=1
+define rx_dll1_cal_error=49:49; 	 #start_bit=49, number_of_bit=1
+define rx_dll1_cal_error_fine=50:50; 	 #start_bit=50, number_of_bit=1
+define rx_dll1_cal_skip=51:52; 	 #start_bit=51, number_of_bit=2
+define rx_dll1_coarse_adj_by2=53:53; 	 #start_bit=53, number_of_bit=1
+define rx_dll2_cal_good=56:56; 	 #start_bit=56, number_of_bit=1
+define rx_dll2_cal_error=57:57; 	 #start_bit=57, number_of_bit=1
+define rx_dll2_cal_error_fine=58:58; 	 #start_bit=58, number_of_bit=1
+define rx_dll2_cal_skip=59:60; 	 #start_bit=59, number_of_bit=2
+define rx_dll2_coarse_adj_by2=61:61; 	 #start_bit=61, number_of_bit=1
+define rx_dll1_coarse_en=48:53; 	 #start_bit=48, number_of_bit=6
+define rx_dll1_vreg_dac_coarse=55:61; 	 #start_bit=55, number_of_bit=7
+define rx_dll1_vreg_dac_lower=48:62; 	 #start_bit=48, number_of_bit=15
+define rx_dll1_vreg_dac_upper=48:62; 	 #start_bit=48, number_of_bit=15
+define rx_dll2_coarse_en=48:53; 	 #start_bit=48, number_of_bit=6
+define rx_dll2_vreg_dac_coarse=55:61; 	 #start_bit=55, number_of_bit=7
+define rx_dll2_vreg_dac_lower=48:62; 	 #start_bit=48, number_of_bit=15
+define rx_dll2_vreg_dac_upper=48:62; 	 #start_bit=48, number_of_bit=15
+define rx_dll_dll_filter_length=48:50; 	 #start_bit=48, number_of_bit=3
+define rx_dll_dll_lead_lag_separation=52:54; 	 #start_bit=52, number_of_bit=3
+define rx_dll_vreg_con=48:48; 	 #start_bit=48, number_of_bit=1
+define rx_dll_vreg_compcon=49:51; 	 #start_bit=49, number_of_bit=3
+define rx_dll_vreg_ref_sel=52:54; 	 #start_bit=52, number_of_bit=3
+define rx_dll1_vreg_drvcon=55:57; 	 #start_bit=55, number_of_bit=3
+define rx_dll2_vreg_drvcon=58:60; 	 #start_bit=58, number_of_bit=3
+define rx_dll_vreg_dac_pullup=61:61; 	 #start_bit=61, number_of_bit=1
 define rx_deskew_seq_gcrmsg=48:50; 	 #start_bit=48, number_of_bit=3
 define rx_deskew_skmin_gcrmsg=52:57; 	 #start_bit=52, number_of_bit=6
 define rx_deskew_skmax_gcrmsg=58:63; 	 #start_bit=58, number_of_bit=6
@@ -746,10 +701,19 @@ define rx_rx_bus_width=55:61; 	 #start_bit=55, number_of_bit=7
 define rx_sls_lane_gcrmsg=48:54; 	 #start_bit=48, number_of_bit=7
 define rx_sls_lane_val_gcrmsg=55:55; 	 #start_bit=55, number_of_bit=1
 define rx_fence =48:48; 	 #start_bit=48, number_of_bit=1
-define rx_c4_sel=48:49; 	 #start_bit=48, number_of_bit=2
-define rx_negz_en=50:50; 	 #start_bit=50, number_of_bit=1
-define rx_prot_speed_slct=51:51; 	 #start_bit=51, number_of_bit=1
+define rx_term_test_mode=48:48; 	 #start_bit=48, number_of_bit=1
+#define #rx_term_n_mode_enc=48:51; 	 #start_bit=48, number_of_bit=4
+define rx_term_mode_enc=51:55; 	 #start_bit=51, number_of_bit=5
+#define #rx_termffe_n_mode_enc=57:59; 	 #start_bit=57, number_of_bit=3
+#define #rx_termffe_p_mode_enc=61:63; 	 #start_bit=61, number_of_bit=3
+#define #rx_pc_test_mode=48:48; 	 #start_bit=48, number_of_bit=1
+#define #rx_ffe_slice_en_enc=49:51; 	 #start_bit=49, number_of_bit=3
+#define #rx_main_slice_en_enc=52:55; 	 #start_bit=52, number_of_bit=4
+#define #rx_mt_slice_en_enc=57:59; 	 #start_bit=57, number_of_bit=3
+#define #rx_pc_slice_en_enc=60:63; 	 #start_bit=60, number_of_bit=4
+#define #rx_slewctl=48:51; 	 #start_bit=48, number_of_bit=4
 define rx_iref_bc=52:54; 	 #start_bit=52, number_of_bit=3
+define rx_iref_bypass=55:55; 	 #start_bit=55, number_of_bit=1
 define rx_dyn_rpr_state=50:55; 	 #start_bit=50, number_of_bit=6
 define rx_sls_hndshk_state=56:63; 	 #start_bit=56, number_of_bit=8
 define rx_dyn_rpr_req_gcrmsg=48:48; 	 #start_bit=48, number_of_bit=1
@@ -768,74 +732,36 @@ define rx_gcr_msg_debug_src_group_id=54:59; 	 #start_bit=54, number_of_bit=6
 define rx_gcr_msg_debug_dest_addr=48:56; 	 #start_bit=48, number_of_bit=9
 define rx_gcr_msg_debug_send_msg=63:63; 	 #start_bit=63, number_of_bit=1
 define rx_gcr_msg_debug_write_data=48:63; 	 #start_bit=48, number_of_bit=16
-define rx_servo_recal_ip=48:48; 	 #start_bit=48, number_of_bit=1
-define rx_dyn_recal_main_state=50:55; 	 #start_bit=50, number_of_bit=6
-define rx_dyn_recal_hndshk_state=57:63; 	 #start_bit=57, number_of_bit=7
 define rx_eye_opt_state=48:55; 	 #start_bit=48, number_of_bit=8
 define rx_recal_state=56:63; 	 #start_bit=56, number_of_bit=8
 define rx_wt_clk_lane_inverted=49:49; 	 #start_bit=49, number_of_bit=1
 define rx_wt_clk_lane_bad_code=50:52; 	 #start_bit=50, number_of_bit=3
 define rx_wt_clk_lane_status_alias=49:52; 	 #start_bit=49, number_of_bit=4
-define rx_dyn_recal_overall_timeout_sel=48:50; 	 #start_bit=48, number_of_bit=3
-define rx_dyn_recal_suspend=51:51; 	 #start_bit=51, number_of_bit=1
-#define #rx_dyn_recal_ber_test_timeout=61:63; 	 #start_bit=61, number_of_bit=3
-define rx_dyn_recal_ip_gcrmsg=48:48; 	 #start_bit=48, number_of_bit=1
-define rx_dyn_recal_failed_gcrmsg=49:49; 	 #start_bit=49, number_of_bit=1
-define rx_dyn_recal_ripple_gcrmsg=50:50; 	 #start_bit=50, number_of_bit=1
-define rx_dyn_recal_timeout_gcrmsg=51:51; 	 #start_bit=51, number_of_bit=1
 define rx_eo_enable_latch_offset_cal=48:48; 	 #start_bit=48, number_of_bit=1
 define rx_eo_enable_ctle_cal=49:49; 	 #start_bit=49, number_of_bit=1
-define rx_eo_enable_vga_cal=50:50; 	 #start_bit=50, number_of_bit=1
-define rx_eo_enable_dfe_h1_cal=52:52; 	 #start_bit=52, number_of_bit=1
-define rx_eo_enable_h1ap_tweak=53:53; 	 #start_bit=53, number_of_bit=1
-define rx_eo_enable_ddc=54:54; 	 #start_bit=54, number_of_bit=1
+define rx_eo_enable_vref_cal=51:51; 	 #start_bit=51, number_of_bit=1
+define rx_eo_enable_measure_eye_width=55:55; 	 #start_bit=55, number_of_bit=1
 define rx_eo_enable_final_l2u_adj=56:56; 	 #start_bit=56, number_of_bit=1
 define rx_eo_enable_ber_test=57:57; 	 #start_bit=57, number_of_bit=1
 define rx_eo_enable_result_check=58:58; 	 #start_bit=58, number_of_bit=1
-define rx_eo_enable_ctle_edge_track_only=59:59; 	 #start_bit=59, number_of_bit=1
-define rx_rc_enable_latch_offset_cal=48:48; 	 #start_bit=48, number_of_bit=1
-define rx_rc_enable_ctle_cal=49:49; 	 #start_bit=49, number_of_bit=1
-define rx_rc_enable_vga_cal=50:50; 	 #start_bit=50, number_of_bit=1
-define rx_rc_enable_dfe_h1_cal=52:52; 	 #start_bit=52, number_of_bit=1
-define rx_rc_enable_h1ap_tweak=53:53; 	 #start_bit=53, number_of_bit=1
-define rx_rc_enable_ddc=54:54; 	 #start_bit=54, number_of_bit=1
-define rx_rc_enable_ber_test=56:56; 	 #start_bit=56, number_of_bit=1
+define rx_rc_enable_edge_track=51:51; 	 #start_bit=51, number_of_bit=1
+define rx_rc_enable_measure_eye_width=55:55; 	 #start_bit=55, number_of_bit=1
 define rx_rc_enable_result_check=57:57; 	 #start_bit=57, number_of_bit=1
-define rx_rc_enable_ctle_edge_track_only=59:59; 	 #start_bit=59, number_of_bit=1
+define rx_rc_enable_dll_update=58:58; 	 #start_bit=58, number_of_bit=1
 define rx_eo_latch_offset_done=48:48; 	 #start_bit=48, number_of_bit=1
 define rx_eo_ctle_done=49:49; 	 #start_bit=49, number_of_bit=1
-define rx_eo_vga_done=50:50; 	 #start_bit=50, number_of_bit=1
-define rx_eo_dfe_h1_done=52:52; 	 #start_bit=52, number_of_bit=1
-define rx_eo_h1ap_tweak_done=53:53; 	 #start_bit=53, number_of_bit=1
-define rx_eo_ddc_done=54:54; 	 #start_bit=54, number_of_bit=1
+define rx_eo_vref_done=51:51; 	 #start_bit=51, number_of_bit=1
+define rx_eo_measure_eye_width_done=55:55; 	 #start_bit=55, number_of_bit=1
 define rx_eo_final_l2u_adj_done=56:56; 	 #start_bit=56, number_of_bit=1
-define rx_eo_dfe_flag=57:57; 	 #start_bit=57, number_of_bit=1
-define rx_eo_ber_test_done=58:58; 	 #start_bit=58, number_of_bit=1
 define rx_eo_result_check_done=59:59; 	 #start_bit=59, number_of_bit=1
 define rx_eo_latch_offset_failed=48:48; 	 #start_bit=48, number_of_bit=1
 define rx_eo_ctle_failed=49:49; 	 #start_bit=49, number_of_bit=1
-define rx_eo_vga_failed=50:50; 	 #start_bit=50, number_of_bit=1
-define rx_eo_dfe_h1_failed=52:52; 	 #start_bit=52, number_of_bit=1
-define rx_eo_h1ap_tweak_failed=53:53; 	 #start_bit=53, number_of_bit=1
-define rx_eo_ddc_failed=54:54; 	 #start_bit=54, number_of_bit=1
+define rx_eo_vref_failed=51:51; 	 #start_bit=51, number_of_bit=1
+define rx_eo_measure_eye_width_failed=55:55; 	 #start_bit=55, number_of_bit=1
 define rx_eo_final_l2u_adj_failed=56:56; 	 #start_bit=56, number_of_bit=1
 define rx_eo_result_check_failed=57:57; 	 #start_bit=57, number_of_bit=1
-define rx_eo_converged_count=48:51; 	 #start_bit=48, number_of_bit=4
-define rx_eo_converged_end_count=52:55; 	 #start_bit=52, number_of_bit=4
-define rx_ap_even_work=48:55; 	 #start_bit=48, number_of_bit=8
-define rx_ap_odd_work=56:63; 	 #start_bit=56, number_of_bit=8
-define rx_an_even_work=48:55; 	 #start_bit=48, number_of_bit=8
-define rx_an_odd_work=56:63; 	 #start_bit=56, number_of_bit=8
-define rx_amin_even_work=48:55; 	 #start_bit=48, number_of_bit=8
-define rx_amin_odd_work=56:63; 	 #start_bit=56, number_of_bit=8
-define rx_amax_high=48:55; 	 #start_bit=48, number_of_bit=8
-define rx_amax_low=56:63; 	 #start_bit=56, number_of_bit=8
 #define #rx_amp_peak_work=48:51; 	 #start_bit=48, number_of_bit=4
-define rx_amp_peak_work=48:51; 	 #start_bit=48, number_of_bit=4
-define rx_amp_gain_work=52:55; 	 #start_bit=52, number_of_bit=4
-define rx_amp_offset_work=58:63; 	 #start_bit=58, number_of_bit=6
-define rx_amp_offset_max=48:53; 	 #start_bit=48, number_of_bit=6
-define rx_amp_offset_min=54:59; 	 #start_bit=54, number_of_bit=6
+#define #rx_amp_peak_work=48:53; 	 #start_bit=48, number_of_bit=6
 define rx_servo_ber_count_work=48:59; 	 #start_bit=48, number_of_bit=12
 define rx_eo_final_l2u_dly_seq_gcrmsg=48:49; 	 #start_bit=48, number_of_bit=2
 define rx_eo_final_l2u_dly_maxchg_gcrmsg=50:55; 	 #start_bit=50, number_of_bit=6
@@ -847,6 +773,9 @@ define rx_sls_rcvy_ip_gcrmsg=49:49; 	 #start_bit=49, number_of_bit=1
 define rx_sls_rcvy_done_gcrmsg=50:50; 	 #start_bit=50, number_of_bit=1
 define rx_tx_bad_lane_cntr_gcrmsg=48:49; 	 #start_bit=48, number_of_bit=2
 define rx_dis_synd_tallying_gcrmsg=48:48; 	 #start_bit=48, number_of_bit=1
+define rx_run_rdt=48:48; 	 #start_bit=48, number_of_bit=1
+define rx_rdt_check_mask=50:54; 	 #start_bit=50, number_of_bit=5
+define rx_rdt_failed=55:55; 	 #start_bit=55, number_of_bit=1
 define rx_trc_mode=48:51; 	 #start_bit=48, number_of_bit=4
 define rx_trc_grp=54:59; 	 #start_bit=54, number_of_bit=6
 define rx_dyn_rpr_bad_lane_valid_debug=48:48; 	 #start_bit=48, number_of_bit=1
@@ -859,8 +788,6 @@ define rx_dyn_rpr_bad_bus_max=48:54; 	 #start_bit=48, number_of_bit=7
 define rx_dyn_rpr_err_cntr2_duration=55:58; 	 #start_bit=55, number_of_bit=4
 define rx_dyn_rpr_clr_err_cntr2=59:59; 	 #start_bit=59, number_of_bit=1
 define rx_min_eye_width=50:55; 	 #start_bit=50, number_of_bit=6
-define rx_min_eye_height=56:63; 	 #start_bit=56, number_of_bit=8
-define rx_max_ber_check_count=56:63; 	 #start_bit=56, number_of_bit=8
 define rx_stop_state_enable=48:48; 	 #start_bit=48, number_of_bit=1
 define rx_state_stopped=49:49; 	 #start_bit=49, number_of_bit=1
 define rx_resume_from_stop=50:50; 	 #start_bit=50, number_of_bit=1
@@ -888,9 +815,12 @@ define rx_prbs_scramble_mode=50:51; 	 #start_bit=50, number_of_bit=2
 define rx_act_check_timeout_sel=52:54; 	 #start_bit=52, number_of_bit=3
 define rx_block_lock_timeout_sel=55:57; 	 #start_bit=55, number_of_bit=3
 define rx_bit_lock_timeout_sel=58:60; 	 #start_bit=58, number_of_bit=3
+define rx_reverse_shift=62:62; 	 #start_bit=62, number_of_bit=1
+define rx_ei3_mode=63:63; 	 #start_bit=63, number_of_bit=1
 define rx_pp_trc_mode=48:50; 	 #start_bit=48, number_of_bit=3
 define rx_bist_jitter_pulse_sel=51:52; 	 #start_bit=51, number_of_bit=2
-define rx_bist_min_eye_width=54:59; 	 #start_bit=54, number_of_bit=6
+define rx_bist_min_eye_width=53:59; 	 #start_bit=53, number_of_bit=7
+define rx_dis_block_lock_vref=60:60; 	 #start_bit=60, number_of_bit=1
 define rx_wt_pattern_length=61:62; 	 #start_bit=61, number_of_bit=2
 define rx_servo_timeout_sel_A=48:51; 	 #start_bit=48, number_of_bit=4
 define rx_servo_timeout_sel_B=52:55; 	 #start_bit=52, number_of_bit=4
@@ -900,42 +830,33 @@ define rx_servo_timeout_sel_E=48:51; 	 #start_bit=48, number_of_bit=4
 define rx_servo_timeout_sel_F=52:55; 	 #start_bit=52, number_of_bit=4
 define rx_servo_timeout_sel_G=56:59; 	 #start_bit=56, number_of_bit=4
 define rx_servo_timeout_sel_H=60:63; 	 #start_bit=60, number_of_bit=4
-define rx_servo_timeout_sel_I=48:51; 	 #start_bit=48, number_of_bit=4
-define rx_servo_timeout_sel_J=52:55; 	 #start_bit=52, number_of_bit=4
-define rx_servo_timeout_sel_K=56:59; 	 #start_bit=56, number_of_bit=4
-define rx_servo_timeout_sel_L=60:63; 	 #start_bit=60, number_of_bit=4
 define rx_recal_timeout_sel_A=48:51; 	 #start_bit=48, number_of_bit=4
-define rx_recal_timeout_sel_B=52:55; 	 #start_bit=52, number_of_bit=4
-define rx_recal_timeout_sel_G=56:59; 	 #start_bit=56, number_of_bit=4
-define rx_recal_timeout_sel_H=60:63; 	 #start_bit=60, number_of_bit=4
-define rx_recal_timeout_sel_I=48:51; 	 #start_bit=48, number_of_bit=4
-define rx_recal_timeout_sel_J=52:55; 	 #start_bit=52, number_of_bit=4
-define rx_recal_timeout_sel_K=56:59; 	 #start_bit=56, number_of_bit=4
-define rx_recal_timeout_sel_L=60:63; 	 #start_bit=60, number_of_bit=4
+define rx_recal_timeout_sel_E=48:51; 	 #start_bit=48, number_of_bit=4
+define rx_recal_timeout_sel_F=52:55; 	 #start_bit=52, number_of_bit=4
 #define #rx_block_lock=48:48; 	 #start_bit=48, number_of_bit=1
 define rx_prbs_check_sync=49:49; 	 #start_bit=49, number_of_bit=1
 define rx_enable_reduced_scramble=50:50; 	 #start_bit=50, number_of_bit=1
 define rx_prbs_inc=51:51; 	 #start_bit=51, number_of_bit=1
 define rx_prbs_dec=52:52; 	 #start_bit=52, number_of_bit=1
 define rx_recal_in_progress=48:48; 	 #start_bit=48, number_of_bit=1
-define rx_dyn_recal_interval_timeout_sel=49:51; 	 #start_bit=49, number_of_bit=3
-define rx_dyn_recal_status_rpt_timeout_sel=52:53; 	 #start_bit=52, number_of_bit=2
-define rx_peak_cfg=48:49; 	 #start_bit=48, number_of_bit=2
-define rx_amin_cfg=50:52; 	 #start_bit=50, number_of_bit=3
-define rx_anap_cfg=53:54; 	 #start_bit=53, number_of_bit=2
-define rx_h1_cfg=55:56; 	 #start_bit=55, number_of_bit=2
-define rx_h1ap_cfg=57:59; 	 #start_bit=57, number_of_bit=3
-define rx_dfe_ca_cfg=60:61; 	 #start_bit=60, number_of_bit=2
-define rx_spmux_cfg=62:63; 	 #start_bit=62, number_of_bit=2
-define rx_init_tmr_cfg=48:50; 	 #start_bit=48, number_of_bit=3
-define rx_ber_cfg=51:53; 	 #start_bit=51, number_of_bit=3
-define rx_fifo_dly_cfg=54:55; 	 #start_bit=54, number_of_bit=2
-define rx_ddc_cfg=56:57; 	 #start_bit=56, number_of_bit=2
-define rx_dac_bo_cfg=58:60; 	 #start_bit=58, number_of_bit=3
-define rx_prot_cfg=61:62; 	 #start_bit=61, number_of_bit=2
+define rx_ddc_use_cyc_block_lock=48:48; 	 #start_bit=48, number_of_bit=1
+define rx_cal_inc_val_A=48:51; 	 #start_bit=48, number_of_bit=4
+define rx_cal_inc_val_B=52:55; 	 #start_bit=52, number_of_bit=4
+define rx_cal_inc_val_C=56:59; 	 #start_bit=56, number_of_bit=4
+define rx_cal_inc_val_D=60:63; 	 #start_bit=60, number_of_bit=4
+define rx_cal_inc_val_E=48:51; 	 #start_bit=48, number_of_bit=4
+define rx_cal_inc_val_F=52:55; 	 #start_bit=52, number_of_bit=4
+define rx_cal_inc_val_G=56:59; 	 #start_bit=56, number_of_bit=4
+define rx_cal_inc_val_H=60:63; 	 #start_bit=60, number_of_bit=4
+define rx_cal_dec_val_A=48:51; 	 #start_bit=48, number_of_bit=4
+define rx_cal_dec_val_B=52:55; 	 #start_bit=52, number_of_bit=4
+define rx_cal_dec_val_C=56:59; 	 #start_bit=56, number_of_bit=4
+define rx_cal_dec_val_D=60:63; 	 #start_bit=60, number_of_bit=4
+define rx_cal_dec_val_E=48:51; 	 #start_bit=48, number_of_bit=4
+define rx_cal_dec_val_F=52:55; 	 #start_bit=52, number_of_bit=4
+define rx_cal_dec_val_G=56:59; 	 #start_bit=56, number_of_bit=4
+define rx_cal_dec_val_H=60:63; 	 #start_bit=60, number_of_bit=4
 define rx_reset_cfg_hld=48:63; 	 #start_bit=48, number_of_bit=16
-define rx_scope_control=48:49; 	 #start_bit=48, number_of_bit=2
-define rx_bump_scope=50:50; 	 #start_bit=50, number_of_bit=1
 define rx_bist_en=48:48; 	 #start_bit=48, number_of_bit=1
 define rx_ber_en=48:48; 	 #start_bit=48, number_of_bit=1
 define rx_ber_count_clr=49:49; 	 #start_bit=49, number_of_bit=1
@@ -985,10 +906,10 @@ define rx_pb_fir_err_inj_gcrs_ld_sm2=54:54; 	 #start_bit=54, number_of_bit=1
 define rx_pb_fir_err_inj_gcrs_unld_sm0=55:55; 	 #start_bit=55, number_of_bit=1
 define rx_pb_fir_err_inj_gcrs_unld_sm1=56:56; 	 #start_bit=56, number_of_bit=1
 define rx_pb_fir_err_inj_gcrs_unld_sm2=57:57; 	 #start_bit=57, number_of_bit=1
-define abus_gcr_addr=08010C3F;
-define dmi0_gcr_addr=02011A3F;
-define dmi1_gcr_addr=02011E3F;
-define cn_gcr_addr=0201043F;
+define xbus0_gcr_addr=0401103F;
+define xbus1_gcr_addr=0401143F;
+define xbus2_gcr_addr=04011C3F;
+define xbus3_gcr_addr=0401183F;
 define rx_grp0=000000;       # 0x00
 define rx_grp1=000001;       # 0x01
 define rx_grp2=000010;       # 0x02
@@ -1022,20 +943,19 @@ define lane_20=10100;
 define lane_21=10101;
 define lane_22=10110;
 define lane_23=10111;
-define rx_prbs_tap_id_pattern_a=0b000;
-define rx_prbs_tap_id_pattern_b=0b001;
-define rx_prbs_tap_id_pattern_c=0b010;
-define rx_prbs_tap_id_pattern_d=0b011;
-define rx_prbs_tap_id_pattern_e=0b100;
-define rx_prbs_tap_id_pattern_f=0b101;
-define rx_prbs_tap_id_pattern_g=0b110;
-define rx_prbs_tap_id_pattern_h=0b111;
-define tx_prbs_tap_id_pattern_a=0b000;
-define tx_prbs_tap_id_pattern_b=0b001;
-define tx_prbs_tap_id_pattern_c=0b010;
-define tx_prbs_tap_id_pattern_d=0b011;
-define tx_prbs_tap_id_pattern_e=0b100;
-define tx_prbs_tap_id_pattern_f=0b101;
-define tx_prbs_tap_id_pattern_g=0b110;
-define tx_prbs_tap_id_pattern_h=0b111;
-
+define rx_prbs_tap_id_pattern_a=0b0000000000000000;
+define rx_prbs_tap_id_pattern_b=0b0010000000000000;
+define rx_prbs_tap_id_pattern_c=0b0100000000000000;
+define rx_prbs_tap_id_pattern_d=0b0110000000000000;
+define rx_prbs_tap_id_pattern_e=0b1000000000000000;
+define rx_prbs_tap_id_pattern_f=0b1010000000000000;
+define rx_prbs_tap_id_pattern_g=0b1100000000000000;
+define rx_prbs_tap_id_pattern_h=0b1110000000000000;
+define tx_prbs_tap_id_pattern_a=0b0000000000000000;
+define tx_prbs_tap_id_pattern_b=0b0010000000000000;
+define tx_prbs_tap_id_pattern_c=0b0100000000000000;
+define tx_prbs_tap_id_pattern_d=0b0110000000000000;
+define tx_prbs_tap_id_pattern_e=0b1000000000000000;
+define tx_prbs_tap_id_pattern_f=0b1010000000000000;
+define tx_prbs_tap_id_pattern_g=0b1100000000000000;
+define tx_prbs_tap_id_pattern_h=0b1110000000000000;

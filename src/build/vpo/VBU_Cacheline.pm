@@ -1,26 +1,26 @@
 #!/usr/bin/perl
-#  IBM_PROLOG_BEGIN_TAG
-#  This is an automatically generated prolog.
+# IBM_PROLOG_BEGIN_TAG
+# This is an automatically generated prolog.
 #
-#  $Source: src/build/vpo/VBU_Cacheline.pm $
+# $Source: src/build/vpo/VBU_Cacheline.pm $
 #
-#  IBM CONFIDENTIAL
+# IBM CONFIDENTIAL
 #
-#  COPYRIGHT International Business Machines Corp. 2011-2012
+# COPYRIGHT International Business Machines Corp. 2011,2012
 #
-#  p1
+# p1
 #
-#  Object Code Only (OCO) source materials
-#  Licensed Internal Code Source Materials
-#  IBM HostBoot Licensed Internal Code
+# Object Code Only (OCO) source materials
+# Licensed Internal Code Source Materials
+# IBM HostBoot Licensed Internal Code
 #
-#  The source code for this program is not published or other-
-#  wise divested of its trade secrets, irrespective of what has
-#  been deposited with the U.S. Copyright Office.
+# The source code for this program is not published or otherwise
+# divested of its trade secrets, irrespective of what has been
+# deposited with the U.S. Copyright Office.
 #
-#  Origin: 30
+# Origin: 30
 #
-#  IBM_PROLOG_END_TAG
+# IBM_PROLOG_END_TAG
 #
 # Name:     src/build/vpo/VBU_Cacheline.pm
 #
@@ -41,7 +41,7 @@ package VBU_Cacheline;
 require Exporter;
 
 our @ISA        =   qw( Exporter );
-our @EXPORT     =   qw( CLread CLwrite RunClocks P8_Ins_Start P8_Ins_Stop P8_Ins_Query SetFlags);
+our @EXPORT     =   qw( CLread CLwrite RunClocks P8_Ins_Start P8_Ins_Start_T0 P8_Ins_Stop P8_Ins_Query SetFlags);
 
 
 #------------------------------------------------------------------------------
@@ -63,6 +63,7 @@ sub CLread;
 sub CLwrite;
 sub RunClocks;
 sub P8_Ins_Start;
+sub P8_Ins_Start_T0;
 sub P8_Ins_Stop;
 sub P8_Ins_Query;
 sub P8_Flush_L2;
@@ -72,11 +73,15 @@ sub SetFlags;
 ############################################
 ##  constants
 ############################################
-my  $curDir      =   getcwd();
+my  $curDir      =   $ENV{'PWD'};
 my  $CLfile     =   "$curDir/istepmodereg.dma";
 my  $CORE       =   "-cft";
 
-my  $SIM_CLOCKS =   "3000000";
+my  $SIM_CLOCKS =   $ENV{'HB_SIMCLOCKS'};
+if ( ! defined ( $SIM_CLOCKS ) || $SIM_CLOCKS == 0 ) {
+	 $SIM_CLOCKS =   "5000000";
+}
+print "clocks=$SIM_CLOCKS\n";
 
 #############################################
 ##  Internal Globals
@@ -89,17 +94,20 @@ my  $CLtest     =   0;
 my  $L2_Flushed =   0;
 
 my $vbuToolsDir = $ENV{'HB_VBUTOOLS'};
-if (defined ($vbuToolsDir))
-{
-    unless ($vbuToolsDir ne "")
-    {
-        $vbuToolsDir = "/gsa/ausgsa/projects/h/hostboot/vbutools/latest";
-    }
+if ( ! defined ( $vbuToolsDir ) || $vbuToolsDir eq "" ) {
+	$vbuToolsDir = "/gsa/ausgsa/projects/h/hostboot/vbutools/dev";
+}
+
+my $vbuProcsRoot = $ENV{'VBU_PROCS_ROOT'};
+if ( ! defined ( $vbuProcsRoot ) || $vbuProcsRoot eq "" ) {
+	my $vbuProcsRoot = $vbuToolsDir;
 }
 
 my  $DUMPCMD    =   "$vbuToolsDir/p8_dump_l3";
+my  $GETMEMCMD    =   "$vbuToolsDir/proc_pba_getmem_coherent_wrap.x86";
+my  $PUTMEMCMD    =   "$vbuToolsDir/proc_pba_putmem_coherent_wrap.x86";
 my  $LOADCMD    =   "$vbuToolsDir/p8_load_l3";
-my  $FLUSHCMD   =   "$vbuToolsDir/proc_l2_flush_wrap.x86 $CORE -quiet";
+my  $FLUSHCMD   =   "$vbuProcsRoot/proc_l2_flush_wrap.x86 $CORE -quiet";
 my  $FLUSHQUERY =   "$vbuToolsDir/p8_check_l3";
 my  $RUNCLKSCMD =   "simclock";
 
@@ -116,10 +124,11 @@ my  $RUNCLKSCMD =   "simclock";
 #   "proc_thread_control: Thread Start failed: RAS Status Run bit is not on"
 # Temporary workaround is using only one thread as shown below.
 # Lance Karm is still investigating.
-my  $QUERYCMD   =   "$vbuToolsDir/proc_thread_control_wrap.x86 -query  $CORE -t0 -quiet";
-my  $STARTCMD   =   "$vbuToolsDir/proc_thread_control_wrap.x86 -start  $CORE -t0 -quiet -warncheck";
-my  $STOPCMD    =   "$vbuToolsDir/proc_thread_control_wrap.x86 -stop   $CORE -t0 -quiet";
-my  $RESETCMD   =   "$vbuToolsDir/proc_thread_control_wrap.x86 -sreset $CORE -quiet";
+my  $QUERYCMD   =   "sh -c \"$vbuProcsRoot/proc_thread_control_wrap.x86 -query  $CORE -tall -quiet | sed -n -e '/State/s/ *//gp'\"";
+my  $STARTCMD   =   "sh -c \"$vbuProcsRoot/proc_thread_control_wrap.x86 -start  $CORE -tall -quiet -warncheck \| sed -e '/ Using deprecated ReturnCode function to assign integer/d'\"";
+my  $STARTCMD_T0   =   "sh -c \"$vbuProcsRoot/proc_thread_control_wrap.x86 -start  $CORE -t0 -quiet -warncheck \| sed -e '/ Using deprecated ReturnCode function to assign integer/d'\"";
+my  $STOPCMD    =   "sh -c \"$vbuProcsRoot/proc_thread_control_wrap.x86 -stop   $CORE -tall -quiet \| sed -e '/ Using deprecated ReturnCode function to assign integer/d'\"";
+my  $RESETCMD   =   "$vbuProcsRoot/proc_thread_control_wrap.x86 -sreset $CORE -tall -quiet";
 
 ##
 #==============================================================================
@@ -140,19 +149,10 @@ sub readcacheline( $ )
 
     if ( $CLdebug )   { print  STDERR __LINE__,  "--  Read cacheline at $hexaddr...\n"; }
 
-    ##  Stop simulation so we can read L3 properly
-    ## $$ P8_Ins_Stop();
-
-    ##  flush   L2 if necessary
-    ## $$ P8_Flush_L2();
-
-    $cmd    =   "$DUMPCMD $hexaddr 1 -f $CLfile -b $CORE";
+    $cmd    =   "$GETMEMCMD $hexaddr 1 -f $CLfile -binmode -quiet $CORE";
     if ( $CLdebug )   {   print STDERR __LINE__,  "-- run $cmd ...\n";   }
-    ( system( $cmd ) == 0 )
+    ( system( "sh -c \"$cmd  \| sed -e '/ Using deprecated ReturnCode function to assign integer/d'\"" ) == 0)
         or die "$cmd failed $? : $! \n";
-
-    ##  Start simulation back up.
-    ##  P8_Ins_Start();
 
 }
 
@@ -204,16 +204,10 @@ sub writecacheline( $ )
     ##  my  $hexaddr    =   sprintf( "0x%x", $addr );
     my  $hexaddr    =   sprintf( "%x", $addr );
 
-    ##  Stop simulation so we can write L3
-    P8_Ins_Stop();
-
     $cmd    =   "$LOADCMD -o $hexaddr -f $CLfile -b $CORE";
     if ( $CLdebug )   {   print STDERR __LINE__,  "-- run $cmd ...\n";   }
     ( system( $cmd ) == 0 )
         or die "$cmd failed, $? : $! \n";
-
-    ##  Start sim back up
-    ## P8_Ins_Start();
 
 }
 
@@ -232,21 +226,30 @@ sub P8_Ins_Query()
     $retstr = `$cmd`;
     if ( $? != 0 )  { die "$cmd failed $? : $! \n"; }
 
-    if  (    ($retstr =~ m/Quiesced/)
-         || ($retstr =~ m/STOPPED/)
-        )
+    chomp($retstr);
+
+    if ( $CLdebug ) {   print STDERR __LINE__,  "--   P8_Ins_Query: $retstr\n"; }
+
+    # Return STOPPED only if all threads are quiesced (including POR state)
+    $retstr =~ s/\(POR\)//g;
+    if  ( "$retstr" eq "State|Quiesced|Quiesced|Quiesced|Quiesced|Quiesced|Quiesced|Quiesced|Quiesced|" )
     {
         return "STOPPED";
     }
-    elsif   (   ($retstr =~ m/Running/)
-              ||($retstr =~ m/RUNNING/)
-            )
+    elsif  ( "$retstr" eq "State|Running|Quiesced|Quiesced|Quiesced|Quiesced|Quiesced|Quiesced|Quiesced|" )
+    {
+	return "RUNNING_T0";
+    }
+
+    # Return RUNNING if one or more threads are Running and the rest are Quiesced
+    $retstr =~ s/Quiesced/Running/g;
+
+    if ( "$retstr" eq "State|Running|Running|Running|Running|Running|Running|Running|Running|" )
     {
         return "RUNNING";
     }
     else
     {
-        chomp( $retstr );
         die "invalid string \"$retstr\" from P8_Ins_Query\n";
     }
 }
@@ -272,6 +275,25 @@ sub P8_Ins_Start()
 
 }
 
+##
+##  Start master thread 0
+##
+sub P8_Ins_Start_T0()
+{
+    my  $cmd    =   "$STARTCMD_T0";
+
+    if ( !$CLdebug )
+    {   $cmd    .=  " -quiet";  }
+    else
+    {   print STDERR __LINE__,  "--   run $cmd ...\n";   }
+
+    ( system( $cmd ) == 0 )
+        or die "$cmd failed $? : $! \n";
+
+    ##  reset the flushFlag, need to flush again before a read.
+    $L2_Flushed   =   0;
+
+}
 
 ##
 ##  Stop the simulation.
@@ -280,7 +302,7 @@ sub P8_Ins_Stop()
 {
     my  $cmd    =   "$STOPCMD";
 
-    if ( P8_Ins_Query() eq "RUNNING" )
+    if ( P8_Ins_Query() ne "STOPPED" )
     {
         if ( ! $CLdebug )
         {   $cmd    .=  " -quiet";  }
@@ -385,6 +407,7 @@ sub CLread( $ )
 
     if ( $CLdebug ) {   printf STDERR __LINE__, "-- CLread( %s ) : CLbase=0x%x, CLoffset=0x%x\n", $addr, $CLbase, $CLoffset }
 
+    system( "rm -f $CLfile" );
     readcacheline( $CLbase );
 
     ##  extract quadword from cacheline file

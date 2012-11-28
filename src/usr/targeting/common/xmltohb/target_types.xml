@@ -565,6 +565,8 @@
         <default>ABUS</default>
     </attribute>
     <attribute><id>CHIP_UNIT</id></attribute>
+    <attribute><id>EI_BUS_RX_MSB_LSB_SWAP</id></attribute>
+    <attribute><id>EI_BUS_TX_MSB_LSB_SWAP</id></attribute>
     <attribute><id>PEER_TARGET</id></attribute>
 </targetType>
 

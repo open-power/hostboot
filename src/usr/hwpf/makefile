@@ -109,7 +109,9 @@ HWP_INITFILES = hwp/initfiles/sample.initfile \
                 hwp/initfiles/cen_ddrphy.initfile \
                 hwp/initfiles/p8.fbc.scom.initfile \
                 hwp/initfiles/p8.pe.phase1.scom.initfile \
-                hwp/initfiles/p8.pe.phase2.scom.initfile
+                hwp/initfiles/p8.pe.phase2.scom.initfile \
+                hwp/initfiles/p8.abus.scom.initfile \
+                hwp/initfiles/p8.xbus.scom.initfile 
 
 HWP_IF_DEFINE_DIR = hwp/initfiles
 

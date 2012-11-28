@@ -285,12 +285,12 @@ sub userDisplay
 #
 sub flushL2
 {
-    if (0 == $l2Flushed)
+    if ($opt_realmem == 0 && 0 == $l2Flushed)
     {
         #stop instructions
         ## @todo problems with the model, just use thread 0 for now
         ## $$ stopInstructions("all");
-        stopInstructions("0");
+        stopInstructions("all");
 
         my $command = "$vbuToolDir/proc_l2_flush_wrap.x86 @ecmdOpt $flag";
         die "ERROR: cannot flush L2" if (system("$command") != 0);
@@ -337,7 +337,7 @@ sub readData
         ##
         ##  @todo RTC 50233 need to modify all these routines to sense
         ##  cache-contained mode and do the switch automatically
-        $command = sprintf ("getmemdma %x %d -fb $fname -quiet",
+        $command = sprintf ("getmemdma %x %d -fb $fname -quiet >/dev/null",
                                $addr,
                                $size    );
         ##  not using cachelines, no need to seek to offset.
@@ -488,7 +488,7 @@ sub queryThreadState
 {
     my $thread = shift;
 
-    my $command = "$vbuToolDir/proc_thread_control_wrap.x86 @ecmdOpt -query -t$thread";
+    my $command = "$vbuToolDir/proc_thread_control_wrap.x86 @ecmdOpt -query -quiet -t$thread";
     if ($debug)
     {
         print   STDERR  "--- queryThreadState:  run $command\n";
@@ -533,7 +533,7 @@ sub restoreThreadStates
             }
             else
             {
-                stoptInstructions($i);
+                stopInstructions($i);
             }
         }
     }
@@ -584,9 +584,7 @@ sub executeInstrCycles
     }
 
     #start instructions
-    ##  @todo   problems with the model - use just thread 0 for now
-    ## $$ startInstructions("all");
-    startInstructions("0");
+    startInstructions("all");
 
     # run clock cycles
     my $cycles = shift;
@@ -904,9 +902,8 @@ sub checkContTrace()
         system ("cat hb-ContTrace.output >> tracMERG");
 
         ## ContTrace might leave instructions stopped, turn them
-        ##  back on here to make sure.
-        ##  @todo problems with the model, use just thread 0 for now
-        ::startInstructions("0");
+        ## back on here to make sure.
+        ::startInstructions("all");
     }
 
 }

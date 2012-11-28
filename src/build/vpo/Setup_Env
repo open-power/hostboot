@@ -45,6 +45,8 @@
 #                          Update for new m_4_a model, default to new checkpoint
 #                          Load SPD data
 #
+# Version 1.5   10-09-2012 Added m_9_g/m_10_g/m_10_h models
+#
 ################################################################################
 
 # Define useful pointers to automated tests/scripts
@@ -74,6 +76,9 @@ AUTOVBU_HBVBUTOOLS_BASEDIR=/gsa/ausgsa/projects/h/hostboot/vbutools
 unset HB_IMGDIR HB_RELDIR HB_VBUTOOLS DEFAULT_LEVEL
 unset AWAN_CONFIG AWAN_SCRIPT AUTOVBU_ECMD_VER
 unset AUTOVBU_START AUTOVBU_ISTEP_START AUTOVBU_ISTEP_LIST AUTOVBU_ISTEP_CHKPT
+unset ISTEP_ROOT ISTEP_ROOT_JIM
+unset HB_COUNT HB_COMMAND HB_SIMCLOCKS
+unset HB_VBUPNOR_ADDR HB_SYSMVPD_ADDR HB_SYSSPD_ADDR
 
 ################################################################################
 #
@@ -88,24 +93,28 @@ Setup_MyEnv() {
 	sprint=hb0606a_1219.810
 	
 	# Initialize HostBoot environment/cronus/tools - note new naming convention
-	#export AUTOVBU_CRONUS_SIM=rel.20120709
 	export AUTOVBU_CRONUS_SIM=dev
 
+        export ISTEP_ARCHIVE=archives/12.11.15
 	export GLOBAL_DEBUG=8.VW.Vc.dG.F3.0I.E8.V
-	export HB_TOOLS=$AUTOVBU_HBTOOLS_BASEDIR/rel.20120710
+	export HB_TOOLS=$AUTOVBU_HBTOOLS_BASEDIR/rel.20121126
 
 	# Select default model -- choose either VBU or VPO versions
-	export VPO_MODEL=m_4_a; unset VBU_MODEL; VBUVPO=VPO
+	export VPO_MODEL=m_10_h; unset VBU_MODEL; VBUVPO=VPO
 	
 	# Default AWAN request time - shorter periods get AWAN faster
 
 	export AWAN_TIME_REQ=-h24
 	
+	# Default AWAN request server
+
+	export ASUBMIT_SERVER=asubmit1.pok.ibm.com
+
 	# Default sprint test case settings
 	
 	export AUTOVBU_CORE=-cft
-	export AUTOVBU_SIMCLOCKS=3000000
-	export AUTOVBU_INITIAL_CHKPT=zero_vpo_after_proc_sbe
+	export AUTOVBU_SIMCLOCKS=5000000
+	export AUTOVBU_INITIAL_CHKPT=after_real_proc_sbe.chkpt
 	export AUTOVBU_LOOPS=1200
 	export AUTOVBU_PRINTK_LINES=50
 	
@@ -261,32 +270,21 @@ Setup_MyDynamic() {
 	# Set other defaults based upon MODEL
 	case "$VPO_MODEL$VBU_MODEL"
 	in
-        s1_e8032_c0400_cen1_cen073_unopt_2|m_3_b)
-            export AUTOVBU_ECMD_VER=${AUTOVBU_ECMD_VER-p8s1}
-            export AWAN_CONFIG=${AWAN_CONFIG-star8b}
-            unset DEFAULT_LEVEL
-            ;;
-        s1_e8032_c0400_cen1_cen077_unopt_1|m_4_a)
-            export AUTOVBU_ECMD_VER=${AUTOVBU_ECMD_VER-p8s1}
-            export AWAN_CONFIG=${AWAN_CONFIG-star8b}
-            unset DEFAULT_LEVEL
-            ;;
-        s1_e8024_wafer_nomem_dc_opt_6|s1_e8026_c0400_cen1_cen069_unopt_1|m_3_a)
-            export AUTOVBU_ECMD_VER=${AUTOVBU_ECMD_VER-p8s1}
-            export AWAN_CONFIG=${AWAN_CONFIG-star8b}
-            unset DEFAULT_LEVEL
-            ;;
-	m_2_a|p1_e8062_c1000_cen1_cen061_unopt_1)
-            export AUTOVBU_ECMD_VER=${AUTOVBU_ECMD_VER-cronusflex}
-            export AWAN_SCRIPT=${AWAN_SCRIPT- run_script_star8b_flex}
-            export AWAN_CONFIG=${AWAN_CONFIG-star8b}
-            export DEFAULT_LEVEL=prev
-            ;;
-	*)
-            export AUTOVBU_ECMD_VER=${AUTOVBU_ECMD_VER-p8s1}
-            export AWAN_SCRIPT=${AWAN_SCRIPT-run_script_star8b}
-            export AWAN_CONFIG=${AWAN_CONFIG-star8b}
-            ;;
+                 s1_e8052_nA_p8_c0400_cen1_cen081_unopt_1|s1_e8052_c0400_cen1_cen081_unopt_1|s1_e8050_c0400_cen1_cen081_unopt_1|s1_e8050_nA_p8_c0400_cen1_cen081_unopt_1|m_9_a|m_9_g|m_10_g)
+                          export AUTOVBU_ECMD_VER=${AUTOVBU_ECMD_VER-p8s1}
+                          export AWAN_CONFIG=${AWAN_CONFIG-star12b}
+                          unset DEFAULT_LEVEL
+                          ;;
+		s1_e8052_nA_pC_c0400_cen1_cen081_unopt_1|s1_e8050_he_cen1_cen081_nA_pC_c0400_unopt_1|m_10_h)
+                          export AUTOVBU_ECMD_VER=${AUTOVBU_ECMD_VER-p8s1}
+                          export AWAN_CONFIG=${AWAN_CONFIG-star24b}
+                          unset DEFAULT_LEVEL
+                          ;;
+        	*)
+                 export AUTOVBU_ECMD_VER=${AUTOVBU_ECMD_VER-p8s1}
+                 export AWAN_SCRIPT=${AWAN_SCRIPT-run_script_star8b}
+                 export AWAN_CONFIG=${AWAN_CONFIG-star8b}
+                 ;;
 	esac
 
 	if [ "$AUTOVBU_ECMD_VER" = "cronusflex" ]; then
@@ -330,7 +328,10 @@ Setup_MyAWAN() {
 	# Make sure DISPLAY includes our host name
 	
 	test "`expr index "$DISPLAY" ':'`" = "1" && DISPLAY=`hostname`$DISPLAY
-	
+
+	# Force common DISPLAY format "<hostname>:<vnc>"
+	DISPLAY=`echo $DISPLAY | sed -e 's/\(:[^\.]*\).*/\1/'`
+
 	# Defines used for AWAN communication
 	
 	MY_AWAN_TARGET=/afs/apd.pok.ibm.com/u/${MY_AFS_USER-$USER}/awan/awan.target-$VBU_MODEL$VPO_MODEL-${MY_AWAN_DIR-${MY_AFS_USER-$USER}}-$DISPLAY
@@ -357,7 +358,7 @@ Setup_MyAWAN() {
 			echo
 		        echo "  export MY_BSO_ID=<ibm_intranet_id>"
 			echo
-			exit 1
+			return 1
 		fi
 	
 		unset my_bso_cmd
@@ -458,14 +459,17 @@ Setup_MyHBImage() {
 
 	if [ "$load_hb_img" = "YES" ]; then
 
-		# Load initial checkpoint first
+	# Load initial checkpoint first
 
         set -x
-        siminit ${AUTOVBU_INITIAL_CHKPT-zero_vpo_after_proc_sbe} -quiet || return 1
+        siminit ${AUTOVBU_INITIAL_CHKPT-after_proc_sbe} -quiet || return 1
         $HB_VBUTOOLS/p8_load_l3 -l ${DEFAULT_LEVEL-rel} -f ${HB_IMGDIR}/hbicore${use_test}.bin -b ${AUTOVBU_CORE--cft} || return 1
-        $HB_VBUTOOLS/p8_load_l3 -l ${DEFAULT_LEVEL-rel} -f ${HB_IMGDIR}/vbu${use_test}.pnor -o 0x400000 -b ${AUTOVBU_CORE--cft} || return 1
-        $HB_VBUTOOLS/p8_load_l3 -l ${DEFAULT_LEVEL-rel} -f ${HB_IMGDIR}/sysmvpd.dat -o 0x681000 -b ${CORE--cft} || exit 1
-        $HB_VBUTOOLS/p8_load_l3 -l ${DEFAULT_LEVEL-rel} -f ${HB_IMGDIR}/sysspd.dat -o 0x701000 -b ${CORE--cft} || exit 1
+        $HB_VBUTOOLS/p8_load_l3 -l ${DEFAULT_LEVEL-rel} -f ${HB_IMGDIR}/vbu${use_test}.pnor -o ${HB_VBUPNOR_ADDR-0x480000} -b ${AUTOVBU_CORE--cft} || return 1
+	if [ -f ${HB_IMGDIR}/sysmvpd.dat ]; then
+	        $HB_VBUTOOLS/p8_load_l3 -l ${DEFAULT_LEVEL-rel} -f ${HB_IMGDIR}/sysmvpd.dat -o ${HB_SYSMVPD_ADDR-0x481000} -b ${CORE--cft} || return 1
+	        $HB_VBUTOOLS/p8_load_l3 -l ${DEFAULT_LEVEL-rel} -f ${HB_IMGDIR}/sysspd.dat -o ${HB_SYSSPD_ADDR-0x4C1000} -b ${CORE--cft} || return 1
+	fi
+	putscom pu.ex 10013284 FAC0FAC0FAC0FAC0 -p0 -call -quiet
         set +x
 	fi
 
@@ -491,7 +495,7 @@ AWAN_EXIT() {
 
 # Include ECMD aliases
 
-if [ "$CTEPATH" != "" ]; then
+if [ "$LABPS" != "" -a "$CTEPATH" != "" -a "$CTEUSRHOME" != "" ]; then
 	source $CTEPATH/tools/ecmd/rel/bin/ecmdaliases.ksh
 else
 	echo "ERROR: This script must be sourced while running in a p8lab window"
@@ -542,7 +546,7 @@ echo
 echo "Current Settings"
 echo
 
-env | egrep "^AUTO|^AWAN|^HB_|^VPO|^VBU|^J[PRS]=" | sort
+env | egrep "^AUTO|^AWAN|^HB_|^VPO|^VBU|^PGM_DIR|^ISTEP_|^J[PRS]=" | sort
 
 echo
 echo "To gracefully terminate your AWAN session enter: AWAN_EXIT"

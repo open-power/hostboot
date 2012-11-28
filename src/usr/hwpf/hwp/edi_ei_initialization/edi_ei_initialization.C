@@ -259,7 +259,9 @@ void*    call_fabric_io_run_training( void    *io_pArgs )
     TargetPairs_t l_PbusConnections;
     TargetPairs_t::iterator l_itr;
     const uint32_t MaxBusSet = 2;
-    TYPE busSet[MaxBusSet] = { TYPE_ABUS, TYPE_XBUS };
+
+    // Note: Run XBUS first to match with Cronus
+    TYPE busSet[MaxBusSet] = { TYPE_XBUS, TYPE_ABUS };
 
     for (uint32_t i = 0; (!l_errl) && (i < MaxBusSet); i++)
     {
@@ -270,11 +272,11 @@ void*    call_fabric_io_run_training( void    *io_pArgs )
              (!l_errl) && (l_itr != l_PbusConnections.end()); ++l_itr)
         {
             const fapi::Target l_fapi_endp1_target(
-                   (i ? TARGET_TYPE_XBUS_ENDPOINT : TARGET_TYPE_ABUS_ENDPOINT),
+                   (i ? TARGET_TYPE_ABUS_ENDPOINT : TARGET_TYPE_XBUS_ENDPOINT),
                    reinterpret_cast<void *>
                    (const_cast<TARGETING::Target*>(l_itr->first)));
             const fapi::Target l_fapi_endp2_target(
-                   (i ? TARGET_TYPE_XBUS_ENDPOINT : TARGET_TYPE_ABUS_ENDPOINT),
+                   (i ? TARGET_TYPE_ABUS_ENDPOINT : TARGET_TYPE_XBUS_ENDPOINT),
                    reinterpret_cast<void *>
                    (const_cast<TARGETING::Target*>(l_itr->second)));
 
@@ -291,7 +293,7 @@ void*    call_fabric_io_run_training( void    *io_pArgs )
             TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                        "%s : %cbus connection io_run_training",
                        (l_errl ? "ERROR" : "SUCCESS"),
-                       (i ? 'X' : 'A') );
+                       (i ? 'A' : 'X') );
 
             if ( l_errl )
             {
