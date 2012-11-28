@@ -1223,7 +1223,18 @@ errlHndl_t FsiDD::initPort(FsiChipInfo_t i_fsiInfo,
             && sys->tryGetAttr<TARGETING::ATTR_SP_FUNCTIONS>(spfuncs)
             && spfuncs.fsiSlaveInit )
         {
-            TRACFCOMP( g_trac_fsi, "FsiDD::initPort> Skipping Slave Init" );
+            TRACFCOMP( g_trac_fsi, "FsiDD::initPort> Skipping Slave Init because SP did it" );
+            o_enabled = true;
+            break;
+        }
+
+        // Do not do any hardware initialization in mpipl
+        uint8_t is_mpipl = 0;
+        if( sys
+            && sys->tryGetAttr<TARGETING::ATTR_IS_MPIPL>(is_mpipl)
+            && is_mpipl )
+        {
+            TRACFCOMP( g_trac_fsi, "FsiDD::initPort> Skipping Slave Init in MPIPL" );
             o_enabled = true;
             break;
         }
@@ -1344,8 +1355,17 @@ errlHndl_t FsiDD::initMasterControl(TARGETING::Target* i_master,
             && sys->tryGetAttr<TARGETING::ATTR_SP_FUNCTIONS>(spfuncs)
             && spfuncs.fsiMasterInit )
         {
-            TRACFCOMP( g_trac_fsi, "FsiDD::initMasterControl> Skipping Master Init" );
+            TRACFCOMP( g_trac_fsi, "FsiDD::initMasterControl> Skipping Master Init because SP did it" );
             fsp_master_init = true;
+        }
+
+        // Do not do any hardware initialization in mpipl
+        uint8_t is_mpipl = 0;
+        if( sys
+            && sys->tryGetAttr<TARGETING::ATTR_IS_MPIPL>(is_mpipl)
+            && is_mpipl )
+        {
+            TRACFCOMP( g_trac_fsi, "FsiDD::initMasterControl> Skipping Master Init in MPIPL" );
         }
 
         uint32_t databuf = 0;
@@ -1360,7 +1380,7 @@ errlHndl_t FsiDD::initMasterControl(TARGETING::Target* i_master,
             ctl_reg += getPortOffset(TARGETING::FSI_MASTER_TYPE_MFSI,m_info.port);
         }
 
-        if( !fsp_master_init )
+        if( !fsp_master_init && !is_mpipl )
         {
             //Clear fsi port errors and general reset on all ports
             for( uint32_t port = 0; port < MAX_SLAVE_PORTS; ++port )
@@ -1424,7 +1444,7 @@ errlHndl_t FsiDD::initMasterControl(TARGETING::Target* i_master,
                 ec_level = (idec & 0xF0000000) >> 24;
                 ec_level |= ((idec & 0x00F00000) >> 20);
 
-                TRACFCOMP( g_trac_fsi, "EC=%X", ec_level );
+                TRACFCOMP( g_trac_fsi, "%.8X: EC=%X", TARGETING::get_huid(i_master), ec_level );
                 if( ec_level == 0x10 )
                 {
                     // 25=clock/4 mode 
@@ -1435,6 +1455,8 @@ errlHndl_t FsiDD::initMasterControl(TARGETING::Target* i_master,
             if( l_err ) { break; }
         }
 
+        //NOTE: Need to do slave detection even in non-init cases
+        //  because we cache this data up to use later
 
         //Determine which links are present 
         l_err = read( ctl_reg|FSI_MLEVP0_018, &databuf );
@@ -1456,7 +1478,7 @@ errlHndl_t FsiDD::initMasterControl(TARGETING::Target* i_master,
         iv_slaves[slave_index] = (uint8_t)(databuf >> (32-MAX_SLAVE_PORTS));
         TRACFCOMP( g_trac_fsi, "FsiDD::initMasterControl> %.8X:%d : Slave Detect = %.8X", TARGETING::get_huid(i_master), i_type, databuf );
 
-        if( fsp_master_init )
+        if( fsp_master_init || is_mpipl )
         {
             break; //all done
         }
