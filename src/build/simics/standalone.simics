@@ -1,5 +1,7 @@
 p8Proc0.proc_fsi2host_mbox->responder_enable=1
 
-#Trigger the SBE start 
-p8Proc0.proc_lbus_map.write 0x2870 0x50000000  #SBE Vital 0x281C
+#Write the PNOR MMIO addr into Scratch 2, 0x283A 
+#Then trigger the SBE start 
+p8Proc0.proc_lbus_map.write 0x28e8 0xFFEF0000 
+p8Proc0.proc_lbus_map.write 0x2870 0x10000000  #SBE Vital 0x281C 
 p8Proc0.proc_lbus_map.write 0x2870 0x90000000  #SBE Vital 0x281C

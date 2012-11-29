@@ -161,7 +161,7 @@ errlHndl_t MailboxSp::_init()
         msg_t * msg = msg_allocate();
         msg->type = MSG_INITIAL_DMA;
         msg->data[0] = 0;
-        msg->data[1] = reinterpret_cast<uint64_t>(iv_dmaBuffer.getDmaBufferHead());
+        msg->data[1] =iv_dmaBuffer.toPhysAddr(iv_dmaBuffer.getDmaBufferHead());
         msg->extra_data = NULL;
         MBOX::send(FSP_MAILBOX_MSGQ,msg);
 
@@ -446,15 +446,16 @@ void MailboxSp::send_msg(mbox_msg_t * i_msg)
             if(payload->extra_data != NULL)
             {
                 memcpy(dma_buffer,payload->extra_data,payload->data[1]);
-                iv_msg_to_send.msg_payload.extra_data = dma_buffer;
+                iv_msg_to_send.msg_payload.extra_data =
+                  reinterpret_cast<void*>(iv_dmaBuffer.toPhysAddr(dma_buffer));
 
                 free(payload->extra_data);
             }
             else  // DMA buffer request from FSP
             {
                 iv_msg_to_send.msg_payload.data[0] = dma_size; // bitmap
-                iv_msg_to_send.msg_payload.data[1] = 
-                    reinterpret_cast<uint64_t>(dma_buffer);
+                iv_msg_to_send.msg_payload.data[1] =
+                  iv_dmaBuffer.toPhysAddr(dma_buffer);
             }
             iv_sendq.pop_front();
         }
@@ -1151,6 +1152,15 @@ errlHndl_t MailboxSp::handleInterrupt()
         if(mbox_status & MBOX_DATA_PENDING)
         {
             trace_msg("RECV",mbox_msg);
+            //Adjust address back to Virt here if present
+            uint64_t l_dma = reinterpret_cast<uint64_t>(
+                           mbox_msg.msg_payload.extra_data);
+            if(l_dma)
+            {
+                mbox_msg.msg_payload.extra_data =
+                  iv_dmaBuffer.toVirtAddr(l_dma);
+            }
+
             if(mbox_msg.msg_queue_id == HB_MAILBOX_MSGQ)
             {
                 // msg to hb mailbox from fsp mbox

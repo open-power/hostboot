@@ -31,4 +31,27 @@ echo "+++ Update cec-chip files for Centaur maint command complete."
 mkdir -p $sb/simu/data/cec-chip/
 cp $bb/src/simu/data/cec-chip/centaur.act $sb/simu/data/cec-chip/centaur.act
 patch -p0 $sb/simu/data/cec-chip/centaur.act $HOSTBOOTROOT/src/build/citest/etc/patches/centaur.act.patch
-###
+
+#### Update config file with new variables (Remove with RTC: 59984) ####
+echo "+++ Forcing SBE header usage till Fips defaults to ON"
+mkdir -p $sb/simu/configs
+mkdir -p $sb/simu/data/cec-chip
+egrep -v "SETENV GFW_P8_MURANO_HB_BASE_IMG_USE_PNOR|SETENV GFW_P8_MURANO_HB_BASE_IMG_WITH_ECC" $BACKING_BUILD/src/simu/configs/P8_MURANO.config> $sb/simu/configs/P8_MURANO.config
+egrep -v "SETENV GFW_P8_VENICE_HB_BASE_IMG_USE_PNOR|SETENV GFW_P8_VENICE_HB_BASE_IMG_WITH_ECC" $BACKING_BUILD/src/simu/configs/P8_VENICE.config> $sb/simu/configs/P8_VENICE.config
+echo "SETENV GFW_P8_MURANO_HB_BASE_IMG_USE_PNOR yes" >> $sb/simu/configs/P8_MURANO.config
+echo "SETENV GFW_P8_VENICE_HB_BASE_IMG_USE_PNOR yes" >> $sb/simu/configs/P8_VENICE.config
+echo "SETENV GFW_P8_MURANO_HB_BASE_IMG_WITH_ECC yes" >> $sb/simu/configs/P8_MURANO.config
+echo "SETENV GFW_P8_VENICE_HB_BASE_IMG_WITH_ECC yes" >> $sb/simu/configs/P8_VENICE.config
+
+echo "+++ Updating s1.act and p8_common.chip"
+mkdir -p $sb/simu/data/cec-chip
+cp $BACKING_BUILD/src/simu/data/cec-chip/s1.act $sb/simu/data/cec-chip
+cp $BACKING_BUILD/src/simu/data/cec-chip/p8.act $sb/simu/data/cec-chip
+sed -i -e's/sbeStart, 0x03eca000,/sbeStart, FSIMBOX(0x3A),/' $sb/simu/data/cec-chip/s1.act
+sed -i -e's/sbeStart, 0x03eca000,/sbeStart, FSIMBOX(0x3A),/' $sb/simu/data/cec-chip/p8.act
+
+cp $BACKING_BUILD/src/simu/data/cec-chip/p8_common.chip $sb/simu/data/cec-chip
+sed -i -e's/0xE0, 32  #MBOX_SCRATCH_0/0x38, 32  #MBOX_SCRATCH_0/' $sb/simu/data/cec-chip/p8_common.chip
+sed -i -e's/0xE4, 32  #MBOX_SCRATCH_1/0x39, 32  #MBOX_SCRATCH_1/' $sb/simu/data/cec-chip/p8_common.chip
+sed -i -e's/0xE8, 32  #MBOX_SCRATCH_2/0x3A, 32  #MBOX_SCRATCH_2/' $sb/simu/data/cec-chip/p8_common.chip
+sed -i -e's/0xEC, 32  #MBOX_SCRATCH_3/0x3B, 32  #MBOX_SCRATCH_3/' $sb/simu/data/cec-chip/p8_common.chip

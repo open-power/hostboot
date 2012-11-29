@@ -148,7 +148,8 @@
     <section>
         <description>Hostboot Base (576K)</description>
         <eyeCatch>HBB</eyeCatch>
-        <physicalOffset>0x3ECA000</physicalOffset>
+	<!--NOTE: MUST update standalone.simics if offset changes -->
+        <physicalOffset>0x3ECE000</physicalOffset>
         <physicalRegionSize>0x90000</physicalRegionSize>
         <ecc>no</ecc>
         <source>File</source>
@@ -157,7 +158,7 @@
     <section>
         <description>Global Data (36K)</description>
         <eyeCatch>GLOBAL</eyeCatch>
-        <physicalOffset>0x3FEA000</physicalOffset>
+        <physicalOffset>0x3FEE000</physicalOffset>
         <physicalRegionSize>0x9000</physicalRegionSize>
         <ecc>no</ecc>
         <source>Blank</source>

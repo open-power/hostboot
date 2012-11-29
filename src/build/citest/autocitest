@@ -1,26 +1,26 @@
 #!/bin/bash
-#  IBM_PROLOG_BEGIN_TAG
-#  This is an automatically generated prolog.
+# IBM_PROLOG_BEGIN_TAG
+# This is an automatically generated prolog.
 #
-#  $Source: src/build/citest/autocitest $
+# $Source: src/build/citest/autocitest $
 #
-#  IBM CONFIDENTIAL
+# IBM CONFIDENTIAL
 #
-#  COPYRIGHT International Business Machines Corp. 2011-2012
+# COPYRIGHT International Business Machines Corp. 2011,2012
 #
-#  p1
+# p1
 #
-#  Object Code Only (OCO) source materials
-#  Licensed Internal Code Source Materials
-#  IBM HostBoot Licensed Internal Code
+# Object Code Only (OCO) source materials
+# Licensed Internal Code Source Materials
+# IBM HostBoot Licensed Internal Code
 #
-#  The source code for this program is not published or other-
-#  wise divested of its trade secrets, irrespective of what has
-#  been deposited with the U.S. Copyright Office.
+# The source code for this program is not published or otherwise
+# divested of its trade secrets, irrespective of what has been
+# deposited with the U.S. Copyright Office.
 #
-#  Origin: 30
+# Origin: 30
 #
-#  IBM_PROLOG_END_TAG
+# IBM_PROLOG_END_TAG
 ################################################################################
 ##  Simics automation using autosim
 ##  2011-05-23  mww modified to run hostboot in simics
@@ -319,7 +319,31 @@ mods_started_addr=`grep "CxxTest::g_ModulesStarted" \
         ${SBXHOME}/${HBICORE_TEST_SYMS} | awk '{split($0,a,","); print a[2]}'`
 mods_completed_addr=`grep "CxxTest::g_ModulesCompleted" \
         ${SBXHOME}/${HBICORE_TEST_SYMS} | awk '{split($0,a,","); print a[2]}'`
-        
+
+#Adjust addresses for HRMOR
+HRMOR=`autosim $NOWIN --simcmd   "python \"getHRMOR()\""| tr -d '\n\r'`
+
+temp=$(($HRMOR + 0x$printk_buffer_addr))
+printk_buffer_addr=`echo "obase=16; $temp" | bc`
+
+temp=$(($HRMOR + 0x$totaltests_addr))
+totaltests_addr=`echo "obase=16; $temp" | bc`
+
+temp=$(($HRMOR + 0x$failedtests_addr))
+failedtests_addr=`echo "obase=16; $temp" | bc`
+
+temp=$(($HRMOR + 0x$warnings_addr))
+warnings_addr=`echo "obase=16; $temp" | bc`
+
+temp=$(($HRMOR + 0x$tracecalls_addr))
+tracecalls_addr=`echo "obase=16; $temp" | bc`
+
+temp=$(($HRMOR + 0x$mods_started_addr))
+mods_started_addr=`echo "obase=16; $temp" | bc`
+
+temp=$(($HRMOR + 0x$mods_completed_addr))
+mods_completed_addr=`echo "obase=16; $temp" | bc`
+     
 ##  note, don't use $VERBOSE here or you get all sorts of extra junk in the output file.
 echo "Wait for unit test completion."
 declare -i timeout=0

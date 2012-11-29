@@ -26,3 +26,10 @@ try {
 try {
     fpga0.sfc_master->state_three_bytes=0
 } except { echo "ERROR: Failed to run 4-byte PNOR address workaround in combined.simics." }
+
+# Manually set HB location till HWSV RTC 48188 is done
+try {
+    p8Proc0.proc_lbus_map.write 0x28e8 0xFFEF0000
+} except { echo "ERROR: Failed to set HB MMIO location workaround in combined.simics." }
+
+

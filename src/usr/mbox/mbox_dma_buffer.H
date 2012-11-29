@@ -108,6 +108,30 @@ namespace MBOX
                                  VmmManager::MBOX_DMA_PAGESIZE)));
             }
 
+            /**
+             * Get the physical address of DMA buf to send to the FSP
+             * @param[in] i_address, The HB address to translate
+             * @return [FSP physical address]
+             */
+            ALWAYS_INLINE
+            uint64_t toPhysAddr(void * i_address) const
+            {
+                return mm_virt_to_phys(i_address);
+            }
+
+            /**
+             * Get the virtual address of DMA buf to sent by the FSP
+             * @param[in] i_address, The FSP Physical address to translate
+             * @return [HB virtual address]
+             */
+            ALWAYS_INLINE
+            void* toVirtAddr(uint64_t i_address) const
+            {
+                uint64_t base = reinterpret_cast<uint64_t>(iv_head);
+                return reinterpret_cast<void*>(
+                                    base + (i_address-iv_phys_head));
+            }
+
         private:
 
             /**
@@ -123,8 +147,9 @@ namespace MBOX
                 MAX_MASK_SIZE = sizeof(uint64_t) * 8,
             };
 
-            void * iv_head;     //!< Start of DMA memory
-            uint64_t iv_dir;    //!< 1 bit per 1k buffer, 1 = available
+            void * iv_head;            //!< Start of DMA memory
+            uint64_t iv_phys_head;     //!< Physical translation of iv_head
+            uint64_t iv_dir;           //!< 1 bit per 1k buffer, 1 = available
 
     };
 }; // namespace

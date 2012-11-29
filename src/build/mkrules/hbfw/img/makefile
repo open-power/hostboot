@@ -37,7 +37,7 @@ VPATH += ../fsp
 DEFAULT_PATH = ${.PATH}
 SRCPATH = ${DEFAULT_PATH:M*src*}
 
-OTHERS = cp_hbfiles build_pnor_images
+OTHERS = cp_hbfiles build_pnor_images 
 
 #################################################
 # Copy Hostboot binary images to obj dir to be grabbed
@@ -46,13 +46,26 @@ OTHERS = cp_hbfiles build_pnor_images
 # changes expected in the future which will require using OBJ version.
 #################################################
 BASE_IMAGE = hostboot.bin
-BASE_IMAGES = ${BASE_IMAGE} hostboot_extended.bin
+EXT_IMAGE =  hostboot_extended.bin
+BASE_IMAGES = ${BASE_IMAGE} ${EXT_IMAGE}
+BASE_W_HEADER_IMAGE = hostboot.header.bin
+BASE_W_HEADER_ECC_IMAGE = hostboot.header.bin.ecc
+BASE_ECC_IMAGE = hostboot.bin.ecc
 
-cp_hbfiles: .SPECTARG 
+
+cp_hbfiles: .SPECTARG
 	${BASE_IMAGES:@image@cp -f -u ${SRCPATH:F${image}} ${image};@}
+	echo "0000000000180000000000000800000000081000" | xxd -r -ps - sbe.header
+	dd if=/dev/zero of=secureboot.header bs=1 count=4K
+	cat sbe.header secureboot.header ${BASE_IMAGE} > ${BASE_W_HEADER_IMAGE}
+	currentsb -chain
+	ecc --inject ${BASE_IMAGE} --output ${BASE_ECC_IMAGE}
+	ecc --inject ${BASE_W_HEADER_IMAGE} --output ${BASE_W_HEADER_ECC_IMAGE}
+
 
 clobber_cp_hbfiles:
-	rm -f ${BASE_IMAGES}
+	rm -f ${BASE_IMAGES} ${BASE_W_HEADER_IMAGE} {BASE_W_HEADER_ECC_IMAGE} \
+	      sbe.header secureboot.header
 
 
 #################################################
@@ -74,7 +87,7 @@ PNOR_BUILD_SCRIPT = ${buildpnor.pl:P}
 #so need to use tryinclude for now.
 .tryinclude <${.PATH:Ffips_pnor.mk}>
 
-HOSTBOOT_DEFAULT_SECTIONS = HBB=hostboot.bin,HBI=hostboot_extended.bin
+HOSTBOOT_DEFAULT_SECTIONS = HBB=${BASE_W_HEADER_ECC_IMAGE},HBI=${EXT_IMAGE}
 
 PNOR_IMG_INFO = murano.pnor:defaultPnorLayout.xml:HBD=simics_MURANO_targeting.bin,${HOSTBOOT_DEFAULT_SECTIONS} \
 	      venice.pnor:defaultPnorLayout.xml:HBD=simics_VENICE_targeting.bin,${HOSTBOOT_DEFAULT_SECTIONS} \
@@ -115,11 +128,12 @@ clobber_build_pnor_images:
 #Special target to copy images to flash dir for simics
 #################################################
 FLASH_DEST = $(MAKETOP)$(OBJECTDIRTOP)../images/$(CONTEXT)/lab/flash
+FLASH_IMG = ${BASE_IMAGE} ${BASE_ECC_IMAGE}
 
 update_images_for_sandbox: build_pnor_images 
 	mkdir -p ${FLASH_DEST}
 	#Copy hostboot base image to flash dir
-	${BASE_IMAGE:@image@${baseimg:!cd ${FLASH_DEST}; cp -f ${.PATH:F${image}} ${image};!e}@}
+	${FLASH_IMG:@image@${baseimg:!cd ${FLASH_DEST}; cp -f ${.PATH:F${image}} ${image};!e}@}
 	#Copy pnor images to flash dir
 	${PNOR_IMG_INFO:@image@${pnorimg:!cd ${FLASH_DEST}; cp -f ${.PATH:F${image:s/:/ /g:xs/ .*//}} ${image:s/:/ /g:xs/ .*//};!e}@}
 
