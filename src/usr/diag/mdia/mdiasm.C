@@ -37,6 +37,7 @@
 #include <hbotcompid.H>
 #include <fapi.H>
 #include <fapiPlatHwpInvoker.H>
+#include <diag/prdf/common/prdfMain.H>
 
 using namespace TARGETING;
 using namespace std;
@@ -317,6 +318,11 @@ bool StateMachine::executeWorkItem(WorkFlowProperties * i_wfp)
         switch(workItem)
         {
             // do the appropriate thing based on the phase for this target
+
+            case RESTORE_DRAM_REPAIRS:
+
+                PRDF::restoreDramRepairs(getTarget(*i_wfp));
+                break;
 
             case START_PATTERN_0:
             case START_PATTERN_1:
