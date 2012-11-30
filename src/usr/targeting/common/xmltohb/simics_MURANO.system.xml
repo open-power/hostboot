@@ -244,12 +244,6 @@
             0x0003D02000000000,0x0003D03000000000
         </default>
     </attribute>
-    <attribute><id>MEM_BASE</id>
-        <default>0x0000000000000000</default>
-    </attribute>
-    <attribute><id>MIRROR_BASE</id>
-        <default>0x0002000000000000</default>
-    </attribute>
     <attribute><id>RNG_BASE_ADDR</id>
         <default>0x0003FFFF40000000</default>
     </attribute>
@@ -956,12 +950,6 @@
             0x0003D04000000000,0x0003D05000000000,
             0x0003D06000000000,0x0003D07000000000
         </default>
-    </attribute>
-    <attribute><id>MEM_BASE</id>
-        <default>0x0000020000000000</default>
-    </attribute>
-    <attribute><id>MIRROR_BASE</id>
-        <default>0x0002020000000000</default>
     </attribute>
     <attribute><id>RNG_BASE_ADDR</id>
         <default>0x0003FFFF40001000</default>
@@ -1671,12 +1659,6 @@
             0x0003D0A000000000,0x0003D0B000000000
         </default>
     </attribute>
-    <attribute><id>MEM_BASE</id>
-        <default>0x0000040000000000</default>
-    </attribute>
-    <attribute><id>MIRROR_BASE</id>
-        <default>0x0002040000000000</default>
-    </attribute>
     <attribute><id>RNG_BASE_ADDR</id>
         <default>0x0003FFFF40002000</default>
     </attribute>
@@ -2385,12 +2367,6 @@
             0x0003D0C000000000,0x0003D0D000000000,
             0x0003D0E000000000,0x0003D0F000000000
         </default>
-    </attribute>
-    <attribute><id>MEM_BASE</id>
-        <default>0x0000060000000000</default>
-    </attribute>
-    <attribute><id>MIRROR_BASE</id>
-        <default>0x0002060000000000</default>
     </attribute>
     <attribute><id>RNG_BASE_ADDR</id>
         <default>0x0003FFFF40003000</default>

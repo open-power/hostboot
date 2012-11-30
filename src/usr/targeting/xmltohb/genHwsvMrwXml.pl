@@ -1718,17 +1718,6 @@ sub generate_proc
     printf( "        </default>\n" );
     printf( "    </attribute>\n" );
 
-    # Starts at 0, 2TB per proc
-    printf( "    <attribute><id>MEM_BASE</id>\n" );
-    printf( "        <default>0x%016X</default>\n", 0x20000000000*$proc );
-    printf( "    </attribute>\n" );
-
-    # Starts at 512TB, 2TB per proc
-    printf( "    <attribute><id>MIRROR_BASE</id>\n" );
-    printf( "        <default>0x%016X</default>\n",
-       0x0002000000000000 + 0x20000000000*$proc );
-    printf( "    </attribute>\n" );
-
     # Starts at 1024TB - 3GB
     printf( "    <attribute><id>RNG_BASE_ADDR</id>\n" );
     printf( "        <default>0x%016X</default>\n",

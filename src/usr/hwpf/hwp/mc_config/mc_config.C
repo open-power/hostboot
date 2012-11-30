@@ -71,6 +71,7 @@
 #include    "mss_freq/mss_freq.H"
 #include    "mss_eff_config/mss_eff_config.H"
 #include    "mss_eff_config/mss_eff_grouping.H"
+#include    "mss_eff_config/opt_memmap.H"
 
 namespace   MC_CONFIG
 {
@@ -335,6 +336,45 @@ errlHndl_t call_mss_eff_grouping()
     return l_err;
 }
 
+errlHndl_t call_opt_memmap()
+{
+    errlHndl_t l_err = NULL;
+
+    TARGETING::TargetHandleList l_procs;
+    getAllChips(l_procs, TYPE_PROC);
+
+    std::vector<fapi::Target> l_fapi_procs;
+
+    for ( TARGETING::TargetHandleList::iterator l_iter = l_procs.begin();
+          l_iter != l_procs.end(); ++l_iter )
+    {
+        //  make a local copy of the target for ease of use
+        const TARGETING::Target*  l_target = *l_iter;
+
+        // cast OUR type of target to a FAPI type of target.
+        const fapi::Target l_fapi_target( TARGET_TYPE_PROC_CHIP,
+                    reinterpret_cast<void *>
+                    (const_cast<TARGETING::Target*>(l_target)) );
+
+        l_fapi_procs.push_back(l_fapi_target);
+    }
+
+    FAPI_INVOKE_HWP(l_err, opt_memmap, l_fapi_procs);
+
+    if ( l_err )
+    {
+        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                   "ERROR 0x%.8X:  opt_memmap HWP", l_err->reasonCode());
+    }
+    else
+    {
+        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                   "SUCCESS :  opt_memmap HWP");
+    }
+
+    return l_err;
+}
+
 //
 //  Wrapper function to call 12.3 : mss_eff_config
 //
@@ -393,21 +433,37 @@ void*    call_mss_eff_config( void *io_pArgs )
         }
     }   // endfor
 
+    TARGETING::TargetHandleList l_procs;
+    getAllChips(l_procs, TYPE_PROC);
+
+    for (TARGETING::TargetHandleList::iterator l_iter = l_procs.begin();
+         l_iter != l_procs.end() && !l_err; ++l_iter)
+    {
+        TARGETING::Target*  l_target = *l_iter;
+
+        uint64_t l_base = 0;
+        l_target->setAttr<ATTR_MEM_BASE>( l_base  );
+
+        l_base = 0x0002000000000000;	// 512TB
+        l_target->setAttr<ATTR_MIRROR_BASE>( l_base );
+    }
+    
     if (!l_err)
     {
         l_err = call_mss_eff_grouping();
+
+        if (!l_err)
+        {
+            l_err = call_opt_memmap();
+
+            if (!l_err)
+            {
+                l_err = call_mss_eff_grouping();
+            }
+        }
     }
 
-    // When opt_memmap HWP is available, it will be called
-    // here between the two call_mss_eff_grouping() 
-    //
-
-    if(!l_err)
-    {
-        l_err = call_mss_eff_grouping();
-    }
-
-    if(l_err)
+    if (l_err)
     {
         /*@
          * @errortype

@@ -4151,10 +4151,10 @@
     <description>Base Address for all mainstore behind this processor</description>
     <simpleType>
         <uint64_t>
-            <default>0xFFFFFFFFFFFFFFFF</default>
+            <default>0</default>
         </uint64_t>
     </simpleType>
-    <persistency>non-volatile</persistency>
+    <persistency>volatile-zeroed</persistency>
     <readable/>
     <writeable/>
     <hwpfToHbAttrMap>
@@ -4168,10 +4168,10 @@
     <description>Base Address for all mirrored mainstore behind this processor</description>
     <simpleType>
         <uint64_t>
-            <default>0xFFFFFFFFFFFFFFFF</default>
+            <default>0</default>
         </uint64_t>
     </simpleType>
-    <persistency>non-volatile</persistency>
+    <persistency>volatile-zeroed</persistency>
     <readable/>
     <writeable/>
     <hwpfToHbAttrMap>

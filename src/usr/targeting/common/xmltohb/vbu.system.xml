@@ -221,12 +221,6 @@
        0x0003D02000000000,0x0003D03000000000
     </default>
     </attribute>
-    <attribute><id>MEM_BASE</id>
-        <default>0x0000000000000000</default>
-    </attribute>
-    <attribute><id>MIRROR_BASE</id>
-        <default>0x0002000000000000</default>
-    </attribute>
     <attribute><id>RNG_BASE_ADDR</id>
         <default>0x0003FFFF40000000</default>
     </attribute>
