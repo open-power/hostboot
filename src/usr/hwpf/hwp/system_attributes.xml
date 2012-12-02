@@ -139,4 +139,82 @@
     <platInit/>
     <persistRuntime/>
   </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_NEST_FREQ_MHZ</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+     Nest Freq for system in MHz
+    </description>
+    <valueType>uint32</valueType>
+    <platInit/>
+    <writeable/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_BOOT_FREQ_MHZ</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>Boot frequency in MHZ.</description>
+    <valueType>uint32</valueType>
+    <platInit/>
+    <writeable/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_EX_GARD_BITS</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+     Vector to communicate the guarded EX chiplets to SBE
+      One Guard bit per EX chiplet, bit location aligned to chiplet ID
+      (bit 16: EX00, bit 17: EX01, bit 18: EX02 ... bit 31: EX15)
+      Guarded EX chiplets are marked by a '1'.
+    </description>
+    <valueType>uint32</valueType>
+    <platInit/>
+    <writeable/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PIB_I2C_REFCLOCK</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+      i2c reference clock for the system
+    </description>
+    <valueType>uint32</valueType>
+    <platInit/>
+    <writeable/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PIB_I2C_NEST_PLL</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+      i2c pll for the system
+    </description>
+    <valueType>uint32</valueType>
+    <platInit/>
+    <writeable/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_SBE_IMAGE_OFFSET</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+      HostBoot image for SBE, offset to account for ECC
+    </description>
+    <valueType>uint32</valueType>
+    <platInit/>
+    <writeable/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_BOOT_VOLTAGE</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+     Boot Voltage for system
+    </description>
+    <valueType>uint32</valueType>
+    <platInit/>
+    <writeable/>
+  </attribute>
 </attributes>

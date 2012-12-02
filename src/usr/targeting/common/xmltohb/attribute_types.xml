@@ -3909,7 +3909,7 @@
         Per MCS group number
         Value is index for PROC_MEM_BASES and PROC_MEM_SIZES arrays
         creator: mss_eff_grouping.C
-        consumer: HDAT        
+        consumer: HDAT
     </description>
     <simpleType>
         <uint8_t>
@@ -3925,7 +3925,7 @@
     </hwpfToHbAttrMap>
 </attribute>
 
-<!-- ===== ===== ===== ===== ===== ===== ===== ===== ===== ===== 
+<!-- ===== ===== ===== ===== ===== ===== ===== ===== ===== =====
      Memory Map
      The attributes below are defined by the PHYP Memory Map
      documentation owned by Shawn Lambeth
@@ -4532,8 +4532,8 @@ bits6:7  will be consumed together to form COARSE_LVL. </description>
         in a single value.  The bits are
         masked together so the single value
         will have data on several mnfg flags.
-        Should note that the MNFG_FLAG_BIT enum 
-        is used to provide the value of the 
+        Should note that the MNFG_FLAG_BIT enum
+        is used to provide the value of the
         different mnfg flags.  A user can bitwise
         'OR' several of the MNFG_FLAG_BIT values
         together to indicate that multiple mnfg
@@ -4541,7 +4541,7 @@ bits6:7  will be consumed together to form COARSE_LVL. </description>
         @TODO via RTC: 35451
         The HostBoot side can only read the mnfg
         flag attribute. However the FSP side will
-        need to read and write the mnfg flag 
+        need to read and write the mnfg flag
         attributes.  For now making it so both sides
         are read and writeable but will need to revisit
         to find a better way to handle persistency when
@@ -4566,7 +4566,7 @@ bits6:7  will be consumed together to form COARSE_LVL. </description>
     <description>Enumeration indicating the mnfg flags
         that are set by the user.  The values can be
         combined using a bitwise 'OR'.  The values will
-        need to be kept in sync with the FAPI 
+        need to be kept in sync with the FAPI
         enumerator values.  Also the enumeration type
         is used by the ATTR_MNFG_FLAGS attribute.  Should
         note that the MNFG_FLAG_BIT values are of type uint32_t
@@ -4625,7 +4625,7 @@ bits6:7  will be consumed together to form COARSE_LVL. </description>
       PROC_CHIP Attribute
         The  Power Proxy Trace timer (binary in microseconds) defines the time between Power Proxy Trace records when no other event that would otherwise produce a record has occured.  Values must be within a range of 32us to 64ms.
     </description>
-    <simpleType>	
+    <simpleType>
         <uint32_t></uint32_t>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
@@ -4643,7 +4643,7 @@ bits6:7  will be consumed together to form COARSE_LVL. </description>
       PROC_CHIP Attribute
         The delay is 32us * ATTR_PM_PPT_TIMER_MATCH_VALUE
     </description>
-    <simpleType>	
+    <simpleType>
         <uint32_t></uint32_t>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
@@ -4661,7 +4661,7 @@ bits6:7  will be consumed together to form COARSE_LVL. </description>
       PROC_CHIP Attribute
         Defines the Power Proxy Trace interval timer tick (0=25us, 1=0.5us, 2=1us, and 3=2us)
     </description>
-    <simpleType>	
+    <simpleType>
         <uint32_t></uint32_t>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
@@ -4679,7 +4679,7 @@ bits6:7  will be consumed together to form COARSE_LVL. </description>
       PROC_CHIP Attribute
         Defines the timeout value for the Architected Idle State Sequencer (AISS).
     </description>
-    <simpleType>	
+    <simpleType>
         <uint8_t></uint8_t>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
@@ -4703,7 +4703,7 @@ Producer: proc_build_pstate_tables.C
 
 Consumer: OCC pstate_init()
     </description>
-    <simpleType>	
+    <simpleType>
         <uint8_t></uint8_t>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
@@ -4725,7 +4725,7 @@ A 4 bit field  selects one of the the upper 16bit of a 19bit counter (16+3) incr
 
 Consumer: proc_pm.scominit
     </description>
-    <simpleType>	
+    <simpleType>
         <uint8_t></uint8_t>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
@@ -4745,7 +4745,7 @@ Consumer: proc_pm.scominit
 
 Consumer: proc_pm.scominit
     </description>
-    <simpleType>	
+    <simpleType>
         <uint8_t></uint8_t>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
@@ -4767,7 +4767,7 @@ Producer:  prc_pm_effective
 
 Consumer: proc_pm.scominit
     </description>
-    <simpleType>	
+    <simpleType>
         <uint8_t></uint8_t>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
@@ -4783,14 +4783,14 @@ Consumer: proc_pm.scominit
     <id>PM_PVSAFE_PSTATE</id>
     <description>
       PROC_CHIP Attribute
-        
+
 Pstate that is invoked in the PMC voltage controller upon the loss of the OCC Heartbeat..
 
 Producer:  proc_pm_effective.C
 
 Consumer: proc_pm.scominit
     </description>
-    <simpleType>	
+    <simpleType>
         <uint8_t></uint8_t>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
@@ -4812,7 +4812,7 @@ Supported values: 0x20 (32d)
 
 Chip Select assertion duration is spi_frame_size + 2
     </description>
-    <simpleType>	
+    <simpleType>
         <uint8_t></uint8_t>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
@@ -4832,7 +4832,7 @@ Chip Select assertion duration is spi_frame_size + 2
 
 Supported values: 0x00 to spi_frame_size.  Values beyond spi_frame_size result in the input never being captured
     </description>
-    <simpleType>	
+    <simpleType>
         <uint8_t></uint8_t>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
@@ -4852,7 +4852,7 @@ Supported values: 0x00 to spi_frame_size.  Values beyond spi_frame_size result i
 
 Supported values: 0x00 to spi_frame_size.  Values beyond spi_frame_size result in the input never being captured
     </description>
-    <simpleType>	
+    <simpleType>
         <uint8_t></uint8_t>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
@@ -4870,7 +4870,7 @@ Supported values: 0x00 to spi_frame_size.  Values beyond spi_frame_size result i
       PROC_CHIP Attribute
         SPVID Clock Polarity  (CPOL=0 means that clk idle is deasserted, CPOL=1 means that clk idle is asserted)
     </description>
-    <simpleType>	
+    <simpleType>
         <uint8_t></uint8_t>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
@@ -4888,7 +4888,7 @@ Supported values: 0x00 to spi_frame_size.  Values beyond spi_frame_size result i
       PROC_CHIP Attribute
         SPI clock phase (CPHA=0 means to change/sample values of data signals on first edge, otherwise on 2nd)
     </description>
-    <simpleType>	
+    <simpleType>
         <uint8_t></uint8_t>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
@@ -4907,7 +4907,7 @@ Supported values: 0x00 to spi_frame_size.  Values beyond spi_frame_size result i
         SPIVID clock speed divider to divide the nest_nclk/4 mesh clock, which results in a divider = (nest_freq/ (SPI_freq*8))-1
 For a 2.4GHz nest clock, this means that the SPI clk can be theoretically adjusted between 600MHz and 0.29MHz (cycle time 1.66ns...3.41us, in 1.66ns steps). However, a practical range is 0.5...25MHz.
     </description>
-    <simpleType>	
+    <simpleType>
         <uint32_t></uint32_t>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
@@ -4926,7 +4926,7 @@ For a 2.4GHz nest clock, this means that the SPI clk can be theoretically adjust
         Delay between command and status frames of a SPIVID 'WRITE' operation (binary in nanoseconds)
 Consumer: proc_pmc_init
     </description>
-    <simpleType>	
+    <simpleType>
         <uint32_t></uint32_t>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
@@ -4951,7 +4951,7 @@ Delay is computed as:  (value * ~100ns_hang_pulse)  +0/-~100ns_hang_pulse time
 
 For values greater than 0x00000, the actual delay is 1 SPI Clock + the time delay designated by the value defined. Max. delay at 0x1FFFF: 13.1ms + 1 SPI clock cycle.
     </description>
-    <simpleType>	
+    <simpleType>
         <uint32_t></uint32_t>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
@@ -4976,7 +4976,7 @@ Delay is computed as:  (value * ~100ns_hang_pulse)  +0/-~100ns_hang_pulse time
 
 For values greater than 0x00000, the actual delay is 1 SPI Clock + the time delay designated by the value defined. Max. delay at 0x1FFFF: 13.1ms + 1 SPI clock cycle.
     </description>
-    <simpleType>	
+    <simpleType>
         <uint32_t></uint32_t>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
@@ -4995,7 +4995,7 @@ For values greater than 0x00000, the actual delay is 1 SPI Clock + the time dela
         Delay between SPIVID reture attempts when WRITE command status indicates an error (binary in nanoseconds)
 Consumer: proc_pmc_init
     </description>
-    <simpleType>	
+    <simpleType>
         <uint32_t></uint32_t>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
@@ -5013,7 +5013,7 @@ Consumer: proc_pmc_init
       PROC_CHIP Attribute
         EnableS CRC generation from processor to VRM device. This will produce an 8b CRC per the enabled polynomial. If CRC generation is disabled, the full 32 bits at the data input of the SPI master are transmitted.
     </description>
-    <simpleType>	
+    <simpleType>
         <uint8_t></uint8_t>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
@@ -5031,7 +5031,7 @@ Consumer: proc_pmc_init
       PROC_CHIP Attribute
         Enables CRC checking in the processor of frames from the VRM device.
     </description>
-    <simpleType>	
+    <simpleType>
         <uint8_t></uint8_t>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
@@ -5049,7 +5049,7 @@ Consumer: proc_pmc_init
       PROC_CHIP Attribute
         enables the a majority vote on the 3B of status payload on a frame received by the master as each of these have a 1 byte status field replicated three (3) times by the slave.
     </description>
-    <simpleType>	
+    <simpleType>
         <uint8_t></uint8_t>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
@@ -5070,7 +5070,7 @@ Consumer: proc_pmc_init
 0x00: No retry
 0x01 to 0x1F: 1 to 31 respectively
     </description>
-    <simpleType>	
+    <simpleType>
         <uint8_t></uint8_t>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
@@ -5093,7 +5093,7 @@ An 8 bit mask vector to enable XORs in the CRC generation and checking LFSRs at 
 Planned CRC8 polynomial: x^8 + x^7 + x^6 + x^4 + x^2 + 1
 Value to enable planned polynomial: 0b1101_0101 (=0xD5)
     </description>
-    <simpleType>	
+    <simpleType>
         <uint8_t></uint8_t>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
@@ -5112,7 +5112,7 @@ Value to enable planned polynomial: 0b1101_0101 (=0xD5)
         Time within which the OCC firmware must access the PMC or the OCC will be considered faulty whereby  FIRs and malfunction alerts will be produced . (binary in nanoseconds)
 Consumer: OCC FW
     </description>
-    <simpleType>	
+    <simpleType>
         <uint32_t></uint32_t>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
@@ -5132,7 +5132,7 @@ Consumer: OCC FW
 
 Consumer: proc_pmc_init.C.  Will be translated to a DYNAMIC ATTRIBUTE for use by proc_pm..scominit  as a multiple of PM hang pulses.. Counter starts at 0, is increased with every tp_pmc_hang_pulse as long as PORE is busy and set the PMC local FIR bit 19 when count = threshold.
     </description>
-    <simpleType>	
+    <simpleType>
         <uint32_t></uint32_t>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
@@ -5150,7 +5150,7 @@ Consumer: proc_pmc_init.C.  Will be translated to a DYNAMIC ATTRIBUTE for use by
       PROC_CHIP Attribute
         Delay (binary in nanoseconds) after a step in the Core power-up  PFET sequence.  Enabled per step by the vector defined in ATTR_PM_PFET_POWERUP_CORE_SEQUENCE_DELAY_SELECT
     </description>
-    <simpleType>	
+    <simpleType>
         <uint32_t></uint32_t>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
@@ -5168,7 +5168,7 @@ Consumer: proc_pmc_init.C.  Will be translated to a DYNAMIC ATTRIBUTE for use by
       PROC_CHIP Attribute
         Delay (binary in nanoseconds) after a step in the Core power-up  PFET sequence.  Enabled per step by the vector defined in ATTR_PM_PFET_POWERUP_CORE_SEQUENCE_DELAY_SELECT
     </description>
-    <simpleType>	
+    <simpleType>
         <uint32_t></uint32_t>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
@@ -5186,7 +5186,7 @@ Consumer: proc_pmc_init.C.  Will be translated to a DYNAMIC ATTRIBUTE for use by
       PROC_CHIP Attribute
         Delay value 0  between any step in the Core power-up  PFET sequence.
     </description>
-    <simpleType>	
+    <simpleType>
         <uint8_t></uint8_t>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
@@ -5204,7 +5204,7 @@ Consumer: proc_pmc_init.C.  Will be translated to a DYNAMIC ATTRIBUTE for use by
       PROC_CHIP Attribute
         Delay value 1  between any step in the Core power-up  PFET sequence.
     </description>
-    <simpleType>	
+    <simpleType>
         <uint8_t></uint8_t>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
@@ -5226,7 +5226,7 @@ Consumer: proc_pmc_init.C.  Will be translated to a DYNAMIC ATTRIBUTE for use by
 
 1 in the bit position:  use ATTR_PM_PFET_POWERUP_CORE_DELAY1
     </description>
-    <simpleType>	
+    <simpleType>
         <uint32_t></uint32_t>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
@@ -5244,7 +5244,7 @@ Consumer: proc_pmc_init.C.  Will be translated to a DYNAMIC ATTRIBUTE for use by
       PROC_CHIP Attribute
         Delay (binary in nanoseconds) between a step in the Core power-down  PFET sequence.  Enabled per step by the vector defined in ATTR_PM_PFET_POWERDOWN_CORE_SEQUENCE_DELAY_SELECT
     </description>
-    <simpleType>	
+    <simpleType>
         <uint32_t></uint32_t>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
@@ -5262,7 +5262,7 @@ Consumer: proc_pmc_init.C.  Will be translated to a DYNAMIC ATTRIBUTE for use by
       PROC_CHIP Attribute
         Delay (binary in nanoseconds) between a step in the Core power-down  PFET sequence.  Enabled per step by the vector defined in ATTR_PM_PFET_POWERDOWN_CORE_SEQUENCE_DELAY_SELECT
     </description>
-    <simpleType>	
+    <simpleType>
         <uint32_t></uint32_t>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
@@ -5280,7 +5280,7 @@ Consumer: proc_pmc_init.C.  Will be translated to a DYNAMIC ATTRIBUTE for use by
       PROC_CHIP Attribute
         Delay value 0  between any step in the Core power-up  PFET sequence.
     </description>
-    <simpleType>	
+    <simpleType>
         <uint8_t></uint8_t>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
@@ -5298,7 +5298,7 @@ Consumer: proc_pmc_init.C.  Will be translated to a DYNAMIC ATTRIBUTE for use by
       PROC_CHIP Attribute
         Delay value 1  between any step in the Core power-up  PFET sequence.
     </description>
-    <simpleType>	
+    <simpleType>
         <uint8_t></uint8_t>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
@@ -5320,7 +5320,7 @@ Consumer: proc_pmc_init.C.  Will be translated to a DYNAMIC ATTRIBUTE for use by
 
 1 in the bit position:  use ATTR_PM_PFET_POWERUP_CORE_DELAY1
     </description>
-    <simpleType>	
+    <simpleType>
         <uint32_t></uint32_t>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
@@ -5338,7 +5338,7 @@ Consumer: proc_pmc_init.C.  Will be translated to a DYNAMIC ATTRIBUTE for use by
       PROC_CHIP Attribute
         Delay (binary in nanoseconds) after a step in the ECO power-up  PFET sequence.  Enabled per step by the vector defined in ATTR_PM_PFET_POWERUP_ECO_SEQUENCE_DELAY_SELECT
     </description>
-    <simpleType>	
+    <simpleType>
         <uint32_t></uint32_t>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
@@ -5356,7 +5356,7 @@ Consumer: proc_pmc_init.C.  Will be translated to a DYNAMIC ATTRIBUTE for use by
       PROC_CHIP Attribute
         Delay (binary in nanoseconds) after a step in the ECO power-up  PFET sequence.  Enabled per step by the vector defined in ATTR_PM_PFET_POWERUP_ECO_SEQUENCE_DELAY_SELECT
     </description>
-    <simpleType>	
+    <simpleType>
         <uint32_t></uint32_t>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
@@ -5374,7 +5374,7 @@ Consumer: proc_pmc_init.C.  Will be translated to a DYNAMIC ATTRIBUTE for use by
       PROC_CHIP Attribute
         Delay value 0  between any step in the ECO power-up  PFET sequence.
     </description>
-    <simpleType>	
+    <simpleType>
         <uint8_t></uint8_t>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
@@ -5392,7 +5392,7 @@ Consumer: proc_pmc_init.C.  Will be translated to a DYNAMIC ATTRIBUTE for use by
       PROC_CHIP Attribute
         Delay value 1  between any step in the ECO power-up  PFET sequence.
     </description>
-    <simpleType>	
+    <simpleType>
         <uint8_t></uint8_t>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
@@ -5414,7 +5414,7 @@ Consumer: proc_pmc_init.C.  Will be translated to a DYNAMIC ATTRIBUTE for use by
 
 1 in the bit position:  use ATTR_PM_PFET_POWERUP_ECO_DELAY1
     </description>
-    <simpleType>	
+    <simpleType>
         <uint32_t></uint32_t>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
@@ -5432,7 +5432,7 @@ Consumer: proc_pmc_init.C.  Will be translated to a DYNAMIC ATTRIBUTE for use by
       PROC_CHIP Attribute
         Delay (binary in nanoseconds) between a step in the ECO power-down  PFET sequence.  Enabled per step by the vector defined in ATTR_PM_PFET_POWERDOWN_ECO_SEQUENCE_DELAY_SELECT
     </description>
-    <simpleType>	
+    <simpleType>
         <uint32_t></uint32_t>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
@@ -5450,7 +5450,7 @@ Consumer: proc_pmc_init.C.  Will be translated to a DYNAMIC ATTRIBUTE for use by
       PROC_CHIP Attribute
         Delay (binary in nanoseconds) between a step in the ECO power-down  PFET sequence.  Enabled per step by the vector defined in ATTR_PM_PFET_POWERDOWN_ECO_SEQUENCE_DELAY_SELECT
     </description>
-    <simpleType>	
+    <simpleType>
         <uint32_t></uint32_t>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
@@ -5468,7 +5468,7 @@ Consumer: proc_pmc_init.C.  Will be translated to a DYNAMIC ATTRIBUTE for use by
       PROC_CHIP Attribute
         Delay value 0  between any step in the ECO power-up  PFET sequence.
     </description>
-    <simpleType>	
+    <simpleType>
         <uint8_t></uint8_t>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
@@ -5486,7 +5486,7 @@ Consumer: proc_pmc_init.C.  Will be translated to a DYNAMIC ATTRIBUTE for use by
       PROC_CHIP Attribute
         Delay value 1  between any step in the ECO power-up  PFET sequence.
     </description>
-    <simpleType>	
+    <simpleType>
         <uint8_t></uint8_t>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
@@ -5504,7 +5504,7 @@ Consumer: proc_pmc_init.C.  Will be translated to a DYNAMIC ATTRIBUTE for use by
       PROC_CHIP Attribute
         Binary vector where the most significant bits (0:11) identify the delay to be used for that step of the ECO power up sequence.  Power up goes from 11, then 10, then 9,.... then 0.  0 in the bit position:  use ATTR_PM_PFET_POWERUP_ECO_DELAY0;  1 in the bit position:  use ATTR_PM_PFET_POWERUP_ECO_DELAY1
     </description>
-    <simpleType>	
+    <simpleType>
         <uint32_t></uint32_t>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
@@ -5524,9 +5524,9 @@ Consumer: proc_pmc_init.C.  Will be translated to a DYNAMIC ATTRIBUTE for use by
 
 Producer: proc_build_gpstate.C
 
-Consumers: proc_pcbs_init.C, proc_pcbs_lpst_init.C, 
+Consumers: proc_pcbs_init.C, proc_pcbs_lpst_init.C,
     </description>
-    <simpleType>	
+    <simpleType>
         <uint32_t></uint32_t>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
@@ -5544,7 +5544,7 @@ Consumers: proc_pcbs_init.C, proc_pcbs_lpst_init.C,
       PROC_CHIP Attribute
         Indicates whether available internal voltage regulation macros (iVRMs) are to enabled.  This indicates that module VPD has valid #M keywords available.
     </description>
-    <simpleType>	
+    <simpleType>
         <uint8_t></uint8_t>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
@@ -5580,7 +5580,7 @@ If psafe > PMSR[global_actual_pstate], the  global_actual_pstate is forced.
 
 The value of Psafe needs to be at or below the nominal Pstate to make sure safe operation of all chiplets.
     </description>
-    <simpleType>	
+    <simpleType>
         <uint8_t></uint8_t>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
@@ -5598,7 +5598,7 @@ The value of Psafe needs to be at or below the nominal Pstate to make sure safe 
       PROC_CHIP Attribute
         Resonant Clock Enable
     </description>
-    <simpleType>	
+    <simpleType>
         <uint8_t></uint8_t>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
@@ -5618,7 +5618,7 @@ The value of Psafe needs to be at or below the nominal Pstate to make sure safe 
 Defines the Pstate for the point at which clock sector buffers should be at full strength.  This is to support Vmin operation.
 
     </description>
-    <simpleType>	
+    <simpleType>
         <uint8_t></uint8_t>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
@@ -5636,7 +5636,7 @@ Defines the Pstate for the point at which clock sector buffers should be at full
       PROC_CHIP Attribute
         LFRLower = Low Frequency Resonant Lower.  Defines the Pstate for the lower end of the Low Frequency Resonant band
     </description>
-    <simpleType>	
+    <simpleType>
         <uint8_t></uint8_t>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
@@ -5654,7 +5654,7 @@ Defines the Pstate for the point at which clock sector buffers should be at full
       PROC_CHIP Attribute
         LFRUpper = Low Frequency Resonant Upper. Defines the Pstate for the upper end of the Low Frequency Resonant band
     </description>
-    <simpleType>	
+    <simpleType>
         <uint8_t></uint8_t>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
@@ -5672,7 +5672,7 @@ Defines the Pstate for the point at which clock sector buffers should be at full
       PROC_CHIP Attribute
         HFRLower = High Frequency Resonant Low. Defines the Pstate for the lower end of the High Frequency Resonant band
     </description>
-    <simpleType>	
+    <simpleType>
         <uint8_t></uint8_t>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
@@ -5690,7 +5690,7 @@ Defines the Pstate for the point at which clock sector buffers should be at full
       PROC_CHIP Attribute
         HFRUpper = High Frequency Resonant Upper. Defines the Pstate for the upper end of the High Frequency Resonant band
     </description>
-    <simpleType>	
+    <simpleType>
         <uint8_t></uint8_t>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
@@ -5712,7 +5712,7 @@ Supported values: 0x10 (16d),
 
 Chip Select assertion duration is spi_frame_size + 2
     </description>
-    <simpleType>	
+    <simpleType>
         <uint8_t></uint8_t>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
@@ -5732,7 +5732,7 @@ Chip Select assertion duration is spi_frame_size + 2
 
 Supported values: 0x000 to spi_frame_size.  Values beyond spi_frame_size are ignored.
     </description>
-    <simpleType>	
+    <simpleType>
         <uint8_t></uint8_t>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
@@ -5752,7 +5752,7 @@ Supported values: 0x000 to spi_frame_size.  Values beyond spi_frame_size are ign
 
 Supported values: 0x000 to spi_frame_size.  Values beyond spi_frame_size result in the input never being captured
     </description>
-    <simpleType>	
+    <simpleType>
         <uint8_t></uint8_t>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
@@ -5772,7 +5772,7 @@ Supported values: 0x000 to spi_frame_size.  Values beyond spi_frame_size result 
 
 Supported values: 0x000 to spi_frame_size.  The actual number of bits captured is spi_frame_size - spi_in_delay
     </description>
-    <simpleType>	
+    <simpleType>
         <uint8_t></uint8_t>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
@@ -5790,7 +5790,7 @@ Supported values: 0x000 to spi_frame_size.  The actual number of bits captured i
       PROC_CHIP Attribute
         SPIPSS Clock Polarity  (CPOL=0 means that clk idle is deasserted, CPOH=1 means that clk idle is asserted)
     </description>
-    <simpleType>	
+    <simpleType>
         <uint8_t></uint8_t>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
@@ -5808,7 +5808,7 @@ Supported values: 0x000 to spi_frame_size.  The actual number of bits captured i
       PROC_CHIP Attribute
         SPIPSS clock phase (CPHA=0 means to change/sample values of data signals on first edge, otherwise on 2nd)
     </description>
-    <simpleType>	
+    <simpleType>
         <uint8_t></uint8_t>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
@@ -5826,7 +5826,7 @@ Supported values: 0x000 to spi_frame_size.  The actual number of bits captured i
       PROC_CHIP Attribute
         SPI clock speed divider to divide the nest_nclk/4 mesh clock, which results in a divider = (nest_freq/ (SPI_freq*8))-1
     </description>
-    <simpleType>	
+    <simpleType>
         <uint8_t></uint8_t>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
@@ -5842,7 +5842,7 @@ Supported values: 0x000 to spi_frame_size.  The actual number of bits captured i
     <id>PM_SPIPSS_INTER_FRAME_DELAY_SETTING</id>
     <description>
       PROC_CHIP Attribute
-        
+
 Delay is computed as:  (value * ~100ns_hang_pulse)  +0/-~100ns_hang_pulse time
 
 0x00000: Wait 1 PSS Clock
@@ -5854,7 +5854,7 @@ Producer: proc_pm_effective
 
 Consumer: proc_pss_init
     </description>
-    <simpleType>	
+    <simpleType>
         <uint32_t></uint32_t>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
@@ -5876,7 +5876,7 @@ Consumer: proc_pm_effective
 
 Produces ATTR_PM_SPIPSS_INTER_FRAME_DELAY_SETTING
     </description>
-    <simpleType>	
+    <simpleType>
         <uint32_t></uint32_t>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
@@ -5904,7 +5904,7 @@ Divider for the 1us PBAX hang pulse.  A hang is detected after two divided hang 
 . . .
 11111  = divided hang pulse = PBAX hang pulse/31
     </description>
-    <simpleType>	
+    <simpleType>
         <uint8_t></uint8_t>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
@@ -5923,7 +5923,7 @@ Divider for the 1us PBAX hang pulse.  A hang is detected after two divided hang 
         PBAX Send Retry count overcommit
 Mode bit to count overcommit retries for the send retry threshold when sending PBAX commands on the powerbus.
     </description>
-    <simpleType>	
+    <simpleType>
         <uint8_t></uint8_t>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
@@ -5948,7 +5948,7 @@ Defines the maximum number of retry attempts by the Send Engine for any phase of
 .etc.
 0xFF :  255 attempts
     </description>
-    <simpleType>	
+    <simpleType>
         <uint8_t></uint8_t>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
@@ -5974,7 +5974,7 @@ Divider for the 1us PBAX hang pulse.  A hang is detected after two divided hang 
 . . .
 11111  = divided hang pulse = PBAX hang pulse/31
     </description>
-    <simpleType>	
+    <simpleType>
         <uint8_t></uint8_t>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
@@ -6001,7 +6001,7 @@ Divider for the 1us PBAX hang pulse.  A hang is detected after two divided hang 
 11111  = divided hang pulse = PBAX hang pulse/31
         Arbitration Attribute for FSP special wakeups:  upon set, increment, upon clear, decrement;   hardware bit only cleared upon attribute being 0.
     </description>
-    <simpleType>	
+    <simpleType>
         <uint32_t></uint32_t>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
@@ -6029,7 +6029,7 @@ Divider for the 1us PBAX hang pulse.  A hang is detected after two divided hang 
         Arbitration Attribute for FSP special wakeups:  upon set, increment, upon clear, decrement;   hardware bit only cleared upon attribute being 0.
         Arbitration Attribute for OCC special wakeups:  upon set, increment, upon clear, decrement;   hardware bit only cleared upon attribute being 0.
     </description>
-    <simpleType>	
+    <simpleType>
         <uint32_t></uint32_t>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
@@ -6058,7 +6058,7 @@ Divider for the 1us PBAX hang pulse.  A hang is detected after two divided hang 
         Arbitration Attribute for OCC special wakeups:  upon set, increment, upon clear, decrement;   hardware bit only cleared upon attribute being 0.
         Arbitration Attribute for PHYP special wakeups:  upon set, increment, upon clear, decrement;   hardware bit only cleared upon attribute being 0.
     </description>
-    <simpleType>	
+    <simpleType>
         <uint32_t></uint32_t>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
@@ -6085,7 +6085,7 @@ Used for enabling operations between the two chips for to voltage control based 
 
 Consumer: proc_pm.scominit
     </description>
-    <simpleType>	
+    <simpleType>
         <uint8_t></uint8_t>
     </simpleType>
     <persistency>non-volatile</persistency>
@@ -6106,7 +6106,7 @@ MRWB after system characterization
 
 Consumer: proc_build_pstate_tables.C, proc_pmc_init.C -config
     </description>
-    <simpleType>	
+    <simpleType>
         <uint32_t></uint32_t>
     </simpleType>
     <persistency>non-volatile</persistency>
@@ -6128,7 +6128,7 @@ Producer:  MRWB after system characterization
 
 Consumer: proc_pmc_init -config
     </description>
-    <simpleType>	
+    <simpleType>
         <uint32_t></uint32_t>
     </simpleType>
     <persistency>non-volatile</persistency>
@@ -6154,9 +6154,9 @@ Consumer: proc_pm_effective.C
 
 DYNAMIC_ATTRIBUTE: ATTR_PM_SAFE_PSTATE
 
-Consumer: proc_pm.scominit 
+Consumer: proc_pm.scominit
     </description>
-    <simpleType>	
+    <simpleType>
         <uint8_t></uint8_t>
     </simpleType>
     <persistency>non-volatile</persistency>
@@ -6177,7 +6177,7 @@ Consumer: OCC FW; OCC Lab Tools
 
 Need to create a process for MRWB elements to get passed to OCC (FW or lab tools)
     </description>
-    <simpleType>	
+    <simpleType>
         <uint8_t></uint8_t>
     </simpleType>
     <persistency>non-volatile</persistency>
@@ -6198,7 +6198,7 @@ Consumer: OCC FW; OCC Lab Tools
 
 Need to create a process for MRWB elements to get passed to OCC (FW or lab tools)
     </description>
-    <simpleType>	
+    <simpleType>
         <uint8_t></uint8_t>
     </simpleType>
     <persistency>non-volatile</persistency>
@@ -6218,7 +6218,7 @@ Consumer: proc_pm_effective
 
 Produces ATTR_PM_SPIVID_CLOCK_DIVIDER
     </description>
-    <simpleType>	
+    <simpleType>
         <uint32_t></uint32_t>
     </simpleType>
     <persistency>non-volatile</persistency>
@@ -6235,7 +6235,7 @@ Produces ATTR_PM_SPIVID_CLOCK_DIVIDER
       PROC_CHIP Attribute
 Defines the configuration of the SPIVID ports from the target.  NONE means that no VRM is attached; PORTxNONRED means that the indicated port is used in a non-redundant configuration;  REDUNDANT means that all three are connected and considered redundant.
     </description>
-    <simpleType>	
+    <simpleType>
         <uint8_t></uint8_t>
     </simpleType>
     <persistency>non-volatile</persistency>
@@ -6258,7 +6258,7 @@ Producer: MRWB
 
 Consumer:  proc_pm_init -config and proc_pcbs_init
     </description>
-    <simpleType>	
+    <simpleType>
         <uint8_t></uint8_t>
     </simpleType>
     <persistency>non-volatile</persistency>
@@ -6284,7 +6284,7 @@ Producer: MRWB
 
 Consumer: proc_pm_init -config and proc_pcbs_init
     </description>
-    <simpleType>	
+    <simpleType>
         <uint8_t></uint8_t>
     </simpleType>
     <persistency>non-volatile</persistency>
@@ -6306,7 +6306,7 @@ Producer: MRWB
 
 Consumer: proc_pm_init -config and proc_pcbs_init
     </description>
-    <simpleType>	
+    <simpleType>
         <uint8_t></uint8_t>
     </simpleType>
     <persistency>non-volatile</persistency>
@@ -6329,7 +6329,7 @@ Producer: MRWB
 
 Consumer:  proc_pm_init -config and proc_pcbs_init
     </description>
-    <simpleType>	
+    <simpleType>
         <uint8_t></uint8_t>
     </simpleType>
     <persistency>non-volatile</persistency>
@@ -6355,7 +6355,7 @@ Producer: MRWB
 
 Consumer:  proc_pm_effective and proc_pcbs_init.
     </description>
-    <simpleType>	
+    <simpleType>
         <uint8_t></uint8_t>
     </simpleType>
     <persistency>non-volatile</persistency>
@@ -6377,7 +6377,7 @@ Producer: MRWB
 
 Consumer:  proc_pm_init -config and proc_pcbs_init
     </description>
-    <simpleType>	
+    <simpleType>
         <uint8_t></uint8_t>
     </simpleType>
     <persistency>non-volatile</persistency>
@@ -6402,9 +6402,9 @@ Consumer: proc_pm_effective.C
 
 DYNAMIC_ATTRIBUTE: ATTR_PM_SAFE_PSTATE
 
-Consumer: proc_pcbs_init.C  
+Consumer: proc_pcbs_init.C
     </description>
-    <simpleType>	
+    <simpleType>
         <uint32_t></uint32_t>
     </simpleType>
     <persistency>non-volatile</persistency>
@@ -6421,7 +6421,7 @@ Consumer: proc_pcbs_init.C
       PROC_CHIP Attribute
 Frequency (binary in MHz) for the point at which clock sector buffers should be at full strength.  This is to support Vmin operation.  Setting cannot overlap the Low or High bands.
     </description>
-    <simpleType>	
+    <simpleType>
         <uint32_t></uint32_t>
     </simpleType>
     <persistency>non-volatile</persistency>
@@ -6438,7 +6438,7 @@ Frequency (binary in MHz) for the point at which clock sector buffers should be 
       PROC_CHIP Attribute
 Frequency (binary in MHz)) for the lower end of the Low Frequency Resonant band
     </description>
-    <simpleType>	
+    <simpleType>
         <uint32_t></uint32_t>
     </simpleType>
     <persistency>non-volatile</persistency>
@@ -6455,7 +6455,7 @@ Frequency (binary in MHz)) for the lower end of the Low Frequency Resonant band
       PROC_CHIP Attribute
 Frequency (binary in MHz) for the upper end of the Low Frequency Resonant band
     </description>
-    <simpleType>	
+    <simpleType>
         <uint32_t></uint32_t>
     </simpleType>
     <persistency>non-volatile</persistency>
@@ -6472,7 +6472,7 @@ Frequency (binary in MHz) for the upper end of the Low Frequency Resonant band
       PROC_CHIP Attribute
 Frequency (binary in MHz) for the lower end of the High Frequency Resonant band
     </description>
-    <simpleType>	
+    <simpleType>
         <uint32_t></uint32_t>
     </simpleType>
     <persistency>non-volatile</persistency>
@@ -6489,7 +6489,7 @@ Frequency (binary in MHz) for the lower end of the High Frequency Resonant band
       PROC_CHIP Attribute
 Frequency (binary in MHz)) for the upper end of the High Frequency Resonant band
     </description>
-    <simpleType>	
+    <simpleType>
         <uint32_t></uint32_t>
     </simpleType>
     <persistency>non-volatile</persistency>
@@ -6510,7 +6510,7 @@ Valid range: 0.5MHz to 25MHz
 
 Consumer: proc_pmc_init
     </description>
-    <simpleType>	
+    <simpleType>
         <uint32_t></uint32_t>
     </simpleType>
     <persistency>non-volatile</persistency>
@@ -6527,7 +6527,7 @@ Consumer: proc_pmc_init
       PROC_CHIP Attribute
 Defines which of the PSS chip selects that the APSS is connected
     </description>
-    <simpleType>	
+    <simpleType>
         <uint8_t></uint8_t>
     </simpleType>
     <persistency>non-volatile</persistency>
@@ -6545,7 +6545,7 @@ Defines which of the PSS chip selects that the APSS is connected
 Receive PBAX Nodeid
 Value that indicates this PBA's PBAX Node affinity.  This is matched to pbax_nodeid of the PMISC Address phase.
     </description>
-    <simpleType>	
+    <simpleType>
         <uint8_t></uint8_t>
     </simpleType>
     <persistency>non-volatile</persistency>
@@ -6563,7 +6563,7 @@ Value that indicates this PBA's PBAX Node affinity.  This is matched to pbax_nod
 Receive PBAX Chipid
 Value that indicates this PBA's PBAX Chipid within the PBAX node.  Is matched to pbax_chipid of the Address phase if pbax_type=unicast.
     </description>
-    <simpleType>	
+    <simpleType>
         <uint8_t></uint8_t>
     </simpleType>
     <persistency>non-volatile</persistency>
@@ -6581,7 +6581,7 @@ Value that indicates this PBA's PBAX Chipid within the PBAX node.  Is matched to
 Receive PBAX Broadcast Group
 Vector that is indexed when decoded PMISC pbax_type=broadcast with the decoded PMISC pbax_chipid value.  If the bit in this vector at the decoded bit location is a 1, then this receive engine will participate in the broadcast operation.
     </description>
-    <simpleType>	
+    <simpleType>
         <uint8_t></uint8_t>
     </simpleType>
     <persistency>non-volatile</persistency>
@@ -6602,7 +6602,7 @@ Producer: MRWB (via the power subsystem design per system)
 
 Consumers: proc_build_gpstate_table.C
     </description>
-    <simpleType>	
+    <simpleType>
         <uint32_t></uint32_t>
     </simpleType>
     <persistency>non-volatile</persistency>
@@ -6623,7 +6623,7 @@ Producer: MRWB (via the power subsystem design per system)
 
 Consumers: proc_build_gpstate_table.C
     </description>
-    <simpleType>	
+    <simpleType>
         <uint32_t></uint32_t>
     </simpleType>
     <persistency>non-volatile</persistency>
@@ -6644,7 +6644,7 @@ Producer: MRWB (via the power subsystem design per system)
 
 Consumers: proc_build_gpstate_table.C
     </description>
-    <simpleType>	
+    <simpleType>
         <uint32_t></uint32_t>
     </simpleType>
     <persistency>non-volatile</persistency>
@@ -6665,7 +6665,7 @@ Producer: MRWB
 
 Consumers: proc_build_gpstate_table.C
     </description>
-    <simpleType>	
+    <simpleType>
         <uint8_t></uint8_t>
     </simpleType>
     <persistency>non-volatile</persistency>
@@ -6687,7 +6687,7 @@ Producer: MRWB (system design)
 
 Consumers: proc_build_gpstate_table.C (among others)
     </description>
-    <simpleType>	
+    <simpleType>
         <uint32_t></uint32_t>
     </simpleType>
     <persistency>non-volatile</persistency>
@@ -7540,6 +7540,149 @@ firmware notes: Used as override attribute for pstate procedure
     </simpleType>
     <persistency>non-volatile</persistency>
     <readable/>
+</attribute>
+
+<!--    Add attributes for sbe_config_update    -->
+
+<attribute>
+<id>NEST_FREQ_MHZ</id>
+<description>
+    Nest frequency in MHz
+    @todo   need a default value here.
+</description>
+    <simpleType>
+        <uint32_t>
+            <default>0</default>
+        </uint32_t>
+    </simpleType>
+    <persistency>volatile</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_NEST_FREQ_MHZ</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>BOOT_FREQ_MHZ</id>
+    <description>
+       Boot frequency in MHZ.  Default is 50% of nominal.
+    </description>
+    <simpleType>
+        <uint32_t>
+            <default>1500</default>
+        </uint32_t>
+    </simpleType>
+    <persistency>volatile</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_BOOT_FREQ_MHZ</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EX_GARD_BITS</id>
+    <description>
+      Vector to communicate the guarded EX chiplets to SBE
+			One Guard bit per EX chiplet, bit location aligned to chiplet ID
+      (bit 16: EX00, bit 17: EX01, bit 18: EX02 ... bit 31: EX15)
+			Guarded EX chiplets are marked by a '1'.
+    </description>
+    <simpleType>
+        <uint32_t>
+            <default>0</default>
+        </uint32_t>
+    </simpleType>
+    <persistency>volatile</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EX_GARD_BITS</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+<id>PIB_I2C_REFCLOCK</id>
+<description>
+    i2c reference clock for the system.
+    default is 266 per Dean
+</description>
+    <simpleType>
+        <uint32_t>
+            <default>0x10A</default>
+        </uint32_t>
+    </simpleType>
+    <persistency>volatile</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_PIB_I2C_REFCLOCK</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+<id>PIB_I2C_NEST_PLL</id>
+<description>
+    i2c pll for the system
+    default is 0x0177 per Dean.
+</description>
+    <simpleType>
+        <uint32_t>
+            <default>0x0177</default>
+        </uint32_t>
+    </simpleType>
+    <persistency>volatile</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_PIB_I2C_NEST_PLL</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+<id>SBE_IMAGE_OFFSET</id>
+<description>
+    HostBoot image for SBE, offset to account for ECC
+    Default is calculated from Hostboot base image of 0x3ece000
+</description>
+    <simpleType>
+        <uint32_t>
+            <default>0xffef0000</default>
+        </uint32_t>
+    </simpleType>
+    <persistency>volatile</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_SBE_IMAGE_OFFSET</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+<id>BOOT_VOLTAGE</id>
+<description>
+     Boot Voltage for system.
+     Note: default =0 is OK for simics, must change for VPO and HW
+</description>
+    <simpleType>
+        <uint32_t>
+            <default>0</default>
+        </uint32_t>
+    </simpleType>
+    <persistency>volatile</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_BOOT_VOLTAGE</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
 </attribute>
 
 </attributes>

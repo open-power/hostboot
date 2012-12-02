@@ -129,6 +129,14 @@
     <attribute><id>FREQ_CORE_MAX</id></attribute>
     <attribute><id>PROC_DPLL_DIVIDER</id></attribute>
     <!-- End pm_attributes_all_plat.xml -->
+    <!--    sbe_config_update attributes    -->
+    <attribute><id>NEST_FREQ_MHZ</id></attribute>
+    <attribute><id>BOOT_FREQ_MHZ</id></attribute>
+    <attribute><id>EX_GARD_BITS</id></attribute>
+    <attribute><id>PIB_I2C_REFCLOCK</id></attribute>
+    <attribute><id>PIB_I2C_NEST_PLL</id></attribute>
+    <attribute><id>SBE_IMAGE_OFFSET</id></attribute>
+    <attribute><id>BOOT_VOLTAGE</id></attribute>
 </targetType>
 
 <targetType>
