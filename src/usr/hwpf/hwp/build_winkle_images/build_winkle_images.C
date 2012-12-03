@@ -319,8 +319,7 @@ errlHndl_t  applyPoreGenCpuRegs(   TARGETING::Target *i_cpuTarget,
 }
 
 //
-//  Wrapper function to call 15.1 :
-//      host_build_winkle
+//  Wrapper function to call host_build_winkle
 //
 void*    call_host_build_winkle( void    *io_pArgs )
 {
@@ -489,8 +488,7 @@ void*    call_host_build_winkle( void    *io_pArgs )
 
 
 //
-//  Wrapper function to call 15.2 :
-//      p8_set_pore_bar
+//  Wrapper function to call p8_set_pore_bar
 //
 void*    call_proc_set_pore_bar( void    *io_pArgs )
 {
@@ -605,8 +603,7 @@ void*    call_proc_set_pore_bar( void    *io_pArgs )
 }
 
 //
-//  Wrapper function to call 15.3 :
-//      p8_poreslw_init
+//  Wrapper function to call p8_poreslw_init
 //
 void*    call_p8_poreslw_init( void    *io_pArgs )
 {

@@ -43,14 +43,14 @@
  */
 
  /*  @tag isteplist
- *  @docversion     v1.08 (08/13/12)
+ *  @docversion     v1.28 (12/03/12)
  *  @istepname      dram_initialization
  *  @istepnum       14
  *  @istepdesc      Dram Initialization
  *
  *  @{
  *      @substepnum     1
- *      @substepname    host_startPRD_dram
+ *      @substepname    host_startprd_dram
  *      @substepdesc    : Load PRD for DRAM domain
  *          @target_sched   serial
  *  @}
@@ -96,7 +96,13 @@
  *      @substepdesc    : Allow execution from memory
  *          @target_sched   serial
  *  @}
- *
+ *  @{
+ *      @substepnum     9
+ *      @substepname    host_mpipl_service
+ *      @substepdesc    : host_mpipl_service
+ *          @target_sched   serial
+ *  @}
+
  */
 
 namespace   DRAM_INITIALIZATION
@@ -104,22 +110,22 @@ namespace   DRAM_INITIALIZATION
 
 
 /**
- *  @brief   host_startPRD_dram
+ *  @brief   host_startprd_dram
  *
- *  14.1 : : Load PRD for DRAM domain
+ *           Load PRD for DRAM domain
  *
  *  param[in,out]   -   pointer to any arguments, usually NULL
  *
  *  return  pointer to any errlogs
  *
  */
-void*    call_host_startPRD_dram( void    *io_pArgs );
+void*    call_host_startprd_dram( void    *io_pArgs );
 
 
 /**
  *  @brief   mss_extent_setup
  *
- *  14.2 : MSS Extent Setup
+ *           MSS Extent Setup
  *
  *  param[in,out]   -   pointer to any arguments, usually NULL
  *
@@ -138,12 +144,12 @@ void*    call_mss_extent_setup( void    *io_pArgs );
  *  return  pointer to any errlogs
  *
  */
-errlHndl_t call_mss_memdiag( void    *io_pArgs );
+void*   call_mss_memdiag( void    *io_pArgs );
 
 /**
  *  @brief   mss_scrub
  *
- *  14.3 : : Start background scrub
+ *           Start background scrub
  *
  *  param[in,out]   -   pointer to any arguments, usually NULL
  *
@@ -157,7 +163,7 @@ void*    call_mss_scrub( void    *io_pArgs );
 /**
  *  @brief   mss_thermal_init
  *
- *  14.4 : : Initialize the thermal sensor
+ *           Initialize the thermal sensor
  *
  *  param[in,out]   -   pointer to any arguments, usually NULL
  *
@@ -171,7 +177,7 @@ void*    call_mss_thermal_init( void    *io_pArgs );
 /**
  *  @brief   proc_setup_bars
  *
- *  14.5 : : Setup Memory BARs
+ *           Setup Memory BARs
  *
  *  param[in,out]   -   pointer to any arguments, usually NULL
  *
@@ -185,7 +191,7 @@ void*    call_proc_setup_bars( void    *io_pArgs );
 /**
  *  @brief   proc_pcie_config
  *
- *  14.6 : : Configure the PHBs
+ *           Configure the PHBs
  *
  *  param[in,out]   -   pointer to any arguments, usually NULL
  *
@@ -199,7 +205,7 @@ void*    call_proc_pcie_config( void    *io_pArgs );
 /**
  *  @brief   proc_exit_cache_contained
  *
- *  14.7 : : Allow execution from memory
+ *           Allow execution from memory
  *
  *  param[in,out]   -   pointer to any arguments, usually NULL
  *
@@ -212,7 +218,7 @@ void*    call_proc_exit_cache_contained( void    *io_pArgs );
 /**
  *  @brief   host_mpipl_service
  *
- *  14.8 : : Perform MPIPL tasks
+ *           Perform MPIPL tasks
  *
  *  param[in,out]   -   pointer to any arguments, usually NULL
  *

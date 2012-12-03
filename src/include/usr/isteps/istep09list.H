@@ -28,11 +28,10 @@
  * @file    istep09list.H
  *
  *  IStep 09    Activate PowerBus
- *  IPL FLow Doc        v1.18 (10/18/12)
+ *  IPL FLow Doc        v1.28 (12/03/12)
  *
  *    09.1    proc_build_smp
  *          : Integrate PgP Islands into SMP
- *
  *    09.2    host_slave_sbe_update
  *          : placeholder for secure boot
  *

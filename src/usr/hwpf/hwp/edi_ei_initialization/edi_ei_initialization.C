@@ -69,7 +69,7 @@
 // #include    "fabric_pre_trainadv/fabric_pre_trainadv.H"
 #include    "fabric_io_run_training/fabric_io_run_training.H"
 // #include    "fabric_post_trainadv/fabric_post_trainadv.H"
-// #include    "host_startPRD_pbus/host_startPRD_pbus.H"
+// #include    "host_startprd_pbus/host_startprd_pbus.H"
 // #include    "host_attnlisten_proc/host_attnlisten_proc.H"
 #include    "proc_fab_iovalid/proc_fab_iovalid.H"
 #include    <diag/prdf/common/prdfMain.H>
@@ -85,8 +85,7 @@ using   namespace   fapi;
 
 
 //
-//  Wrapper function to call 08.1 :
-//      fabric_erepair
+//  Wrapper function to call fabric_erepair
 //
 void*    call_fabric_erepair( void    *io_pArgs )
 {
@@ -138,8 +137,7 @@ void*    call_fabric_erepair( void    *io_pArgs )
 
 
 //
-//  Wrapper function to call 08.2 :
-//      fabric_io_dccal
+//  Wrapper function to call fabric_io_dccal
 //
 void*    call_fabric_io_dccal( void    *io_pArgs )
 {
@@ -191,8 +189,7 @@ void*    call_fabric_io_dccal( void    *io_pArgs )
 
 
 //
-//  Wrapper function to call 08.3 :
-//      fabric_pre_trainadv
+//  Wrapper function to call fabric_pre_trainadv
 //
 void*    call_fabric_pre_trainadv( void    *io_pArgs )
 {
@@ -244,8 +241,7 @@ void*    call_fabric_pre_trainadv( void    *io_pArgs )
 
 
 //
-//  Wrapper function to call 08.4 :
-//      fabric_io_run_training
+//  Wrapper function to call fabric_io_run_training
 //
 void*    call_fabric_io_run_training( void    *io_pArgs )
 {
@@ -329,8 +325,7 @@ void*    call_fabric_io_run_training( void    *io_pArgs )
 
 
 //
-//  Wrapper function to call 08.5 :
-//      fabric_post_trainadv
+//  Wrapper function to call fabric_post_trainadv
 //
 void*    call_fabric_post_trainadv( void    *io_pArgs )
 {
@@ -382,15 +377,14 @@ void*    call_fabric_post_trainadv( void    *io_pArgs )
 
 
 //
-//  Wrapper function to call 08.6 :
-//      host_startPRD_pbus
+//  Wrapper function to call host_startprd_pbus
 //
-void*    call_host_startPRD_pbus( void    *io_pArgs )
+void*    call_host_startprd_pbus( void    *io_pArgs )
 {
     errlHndl_t  l_errl  =   NULL;
 
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-               "call_host_startPRD_pbus entry" );
+               "call_host_startprd_pbus entry" );
 
     l_errl = PRDF::initialize();
 
@@ -401,7 +395,7 @@ void*    call_host_startPRD_pbus( void    *io_pArgs )
     }
 
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-               "call_host_startPRD_pbus exit" );
+               "call_host_startprd_pbus exit" );
 
     // end task, returning any errorlogs to IStepDisp
     return l_errl;
@@ -410,8 +404,7 @@ void*    call_host_startPRD_pbus( void    *io_pArgs )
 
 
 //
-//  Wrapper function to call 08.7 :
-//      host_attnlisten_proc
+//  Wrapper function to call host_attnlisten_proc
 //
 void*    call_host_attnlisten_proc( void    *io_pArgs )
 {
@@ -463,8 +456,7 @@ void*    call_host_attnlisten_proc( void    *io_pArgs )
 
 
 //
-//  Wrapper function to call 08.8 :
-//      proc_fab_iovalid
+//  Wrapper function to call proc_fab_iovalid
 //
 void*    call_proc_fab_iovalid( void    *io_pArgs )
 {

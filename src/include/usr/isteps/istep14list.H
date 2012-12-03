@@ -28,28 +28,27 @@
  * @file    istep14list.H
  *
  *  IStep 14    Dram Initialization
- *  IPL FLow Doc        v1.18 (10/18/12)
+ *  IPL FLow Doc        v1.28 (12/03/12)
  *
- *    14.1    host_startPRD_dram
- *          : Load PRD for DRAM domain
+ *    14.1    host_startprd_dram
+ *          : Load prd for DRAM domain
  *    14.2    mss_extent_setup
- *          MSS Extent Setup
- *    14.3    mss_scrub
+ *          : MSS Extent Setup
+ *    14.3    mss_memdiag
+ *          : Mainstore Pattern Testing
+ *    14.4    mss_scrub
  *          : Start background scrub
- *    14.4    mss_thermal_init
+ *    14.5    mss_thermal_init
  *          : Initialize the thermal sensor
- *    14.5    proc_setup_bars
+ *    14.6    proc_setup_bars
  *          : Setup Memory BARs
- *    14.6    proc_pcie_config
+ *    14.7    proc_pcie_config
  *          : Configure the PHBs
- *    14.7    proc_exit_cache_contained
+ *    14.8    proc_exit_cache_contained
  *          : Allow execution from memory
- *    14.8    host_mpipl_service
+ *    14.9    host_mpipl_service
  *          : Perform MPIPL tasks
  *
- *  *****************************************************************
- *  THIS FILE WAS GENERATED ON 2012-04-11:1608
- *  *****************************************************************
  *
  *  Please see the note in initsvcstructs.H for description of
  *      the ISTEPNAME macro.
@@ -78,16 +77,14 @@ namespace   INITSERVICE
         },
 
         {
-                ISTEPNAME(14,01,"host_startPRD_dram"),
-                DRAM_INITIALIZATION::call_host_startPRD_dram,
+                ISTEPNAME(14,01,"host_startprd_dram"),
+                DRAM_INITIALIZATION::call_host_startprd_dram,
                 {
                         START_FN,
                         EXT_IMAGE,
                         NORMAL_IPL_OP,
                 }
         },
-
-
         {
                 ISTEPNAME(14,02,"mss_extent_setup"),
                 DRAM_INITIALIZATION::call_mss_extent_setup,
@@ -98,7 +95,16 @@ namespace   INITSERVICE
                 }
         },
         {
-                ISTEPNAME(14,03,"mss_scrub"),
+                ISTEPNAME(14,03,"mss_memdiag"),
+                DRAM_INITIALIZATION::call_mss_memdiag,
+                {
+                        START_FN,
+                        EXT_IMAGE,
+                        NORMAL_IPL_OP,
+                }
+        },
+        {
+                ISTEPNAME(14,04,"mss_scrub"),
                 DRAM_INITIALIZATION::call_mss_scrub,
                 {
                         START_FN,
@@ -109,7 +115,7 @@ namespace   INITSERVICE
 
 
         {
-                ISTEPNAME(14,04,"mss_thermal_init"),
+                ISTEPNAME(14,05,"mss_thermal_init"),
                 DRAM_INITIALIZATION::call_mss_thermal_init,
                 {
                         START_FN,
@@ -120,7 +126,7 @@ namespace   INITSERVICE
 
 
         {
-                ISTEPNAME(14,05,"proc_setup_bars"),
+                ISTEPNAME(14,06,"proc_setup_bars"),
                 DRAM_INITIALIZATION::call_proc_setup_bars,
                 {
                         START_FN,
@@ -131,7 +137,7 @@ namespace   INITSERVICE
 
 
         {
-                ISTEPNAME(14,06,"proc_pcie_config"),
+                ISTEPNAME(14,07,"proc_pcie_config"),
                 DRAM_INITIALIZATION::call_proc_pcie_config,
                 {
                         START_FN,
@@ -142,7 +148,7 @@ namespace   INITSERVICE
 
 
         {
-                ISTEPNAME(14,07,"proc_exit_cache_contained"),
+                ISTEPNAME(14,08,"proc_exit_cache_contained"),
                 DRAM_INITIALIZATION::call_proc_exit_cache_contained,
                 {
                         START_FN,
@@ -151,7 +157,7 @@ namespace   INITSERVICE
                 }
         },
         {
-                ISTEPNAME(14,08,"host_mpipl_service"),
+                ISTEPNAME(14,09,"host_mpipl_service"),
                 DRAM_INITIALIZATION::call_host_mpipl_service,
                 {
                         START_FN,

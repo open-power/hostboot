@@ -71,8 +71,7 @@ using   namespace   EDI_EI_INITIALIZATION;
 using   namespace   fapi;
 
 //******************************************************************************
-//  Wrapper function to call 09.1 :
-//      proc_build_smp
+// wrapper function to call proc_build_smp
 //******************************************************************************
 void*    call_proc_build_smp( void    *io_pArgs )
 {
@@ -105,7 +104,7 @@ void*    call_proc_build_smp( void    *io_pArgs )
         // Get XBUS connections
         l_errl = PbusLinkSvc::getTheInstance().getPbusConnections(
                                  l_xbusConnections, TYPE_XBUS, false );
-        
+
         if (l_errl)
         {
             l_StepError.addErrorDetails(ISTEP_ACTIVATE_POWER_BUS_FAILED,
@@ -244,18 +243,18 @@ void*    call_proc_build_smp( void    *io_pArgs )
 }
 
 //******************************************************************************
-// wrapper function to call step 9.02 - host_slave_sbe_update
+// wrapper function to call host_slave_sbe_update
 //******************************************************************************
 void * call_host_slave_sbe_update( void * io_pArgs )
 {
     errlHndl_t  l_errl  =   NULL;
 
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, 
+    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                "call_host_slave_sbe_update entry" );
 
     // call p8_customize_image.C
 
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, 
+    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                "call_host_slave_sbe_update exit" );
 
     return l_errl;

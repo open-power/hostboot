@@ -28,7 +28,7 @@
  * @file    istep08list.H
  *
  *  IStep 08    EDI, EI Initialization
- *  IPL FLow Doc        v1.18 (10/18/12)
+ *  IPL FLow Doc        v1.28 (12/03/12)
  *
  *    08.1    fabric_erepair
  *          : Restore Fabric/EDI Bus eRepair data
@@ -40,8 +40,8 @@
  *          : Run training on internal buses
  *    08.5    fabric_post_trainadv
  *          : Advanced post EI/EDI training
- *    08.6    host_startPRD_pbus
- *          : Load PRD for powerbus domain
+ *    08.6    host_startprd_pbus
+ *          : Load prd for powerbus domain
  *    08.7    host_attnlisten_proc
  *          : Start listening for attentions
  *    08.8    proc_fab_iovalid
@@ -133,8 +133,8 @@ namespace   INITSERVICE
 
 
         {
-                ISTEPNAME(08,06,"host_startPRD_pbus"),
-                EDI_EI_INITIALIZATION::call_host_startPRD_pbus,
+                ISTEPNAME(08,06,"host_startprd_pbus"),
+                EDI_EI_INITIALIZATION::call_host_startprd_pbus,
                 {
                         START_FN,
                         EXT_IMAGE,

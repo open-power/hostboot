@@ -29,16 +29,16 @@
  * @file    istep10list.H
  *
  *  Step 10 Hostboot SBE Centaur Init
- *  IPL FLow Doc        v1.18 (10/10/12)
+ *  IPL FLow Doc        v1.28 (12/03/12)
  *
- *    10.1    host_PRD_hwreconfig
- *          : Hook for PRD to handle reconfig 
- *    10.2    cen_sbe_istep_pnor
+ *    10.1    host_prd_hwreconfig
+ *          : Hook for prd to handle reconfig
+ *    10.2    cen_sbe_tp_chiplet_init1
  *          : TP Chiplet init
- *    10.3    cen_sbe_tp_chiplet_init1
- *          : TP Chiplet init
- *    10.4    cen_sbe_npll_initf
+ *    10.3    cen_sbe_pll_initf
  *          : Program Nest PLL
+ *    10.4    cen_sbe_pll_setup
+ *          : Setup Nest PLL
  *    10.5    cen_sbe_tp_chiplet_init2
  *          : Cen TP Chiplet init 2
  *    10.6    cen_sbe_tp_arrayinit 
@@ -86,17 +86,16 @@ const   TaskInfo    g_istep10[]  =   {
                 }
         },
         {
-                ISTEPNAME(10,01,"host_PRD_hwreconfig"),
-                HWAS::host_PRD_hwreconfig,
+                ISTEPNAME(10,01,"host_prd_hwreconfig"),
+                HWAS::host_prd_hwreconfig,
                 {
                         START_FN,
                         EXT_IMAGE,
                         NORMAL_IPL_OP,
                 }
         },
-
         {
-                ISTEPNAME(10,02,"cen_sbe_istep_pnor"),
+                ISTEPNAME(10,02,"cen_sbe_tp_chiplet_init1"),
                 SBE_CENTAUR_INIT::call_sbe_centaur_init,
                 {
                         START_FN,
@@ -105,7 +104,7 @@ const   TaskInfo    g_istep10[]  =   {
                 }
         },
         {
-                ISTEPNAME(10,03,"cen_sbe_tp_chiplet_init1"),
+                ISTEPNAME(10,03,"cen_sbe_pll_initf"),
                 HWAS::host_stub,
                 {
                         START_FN,
@@ -114,7 +113,7 @@ const   TaskInfo    g_istep10[]  =   {
                 }
         },
         {
-                ISTEPNAME(10,04,"cen_sbe_npll_initf"),
+                ISTEPNAME(10,04,"cen_sbe_pll_setup"),
                 HWAS::host_stub,
                 {
                         START_FN,
@@ -122,6 +121,7 @@ const   TaskInfo    g_istep10[]  =   {
                         NORMAL_IPL_OP,
                 }
         },
+
         {
                 ISTEPNAME(10,05,"cen_sbe_tp_chiplet_init2"),
                 HWAS::host_stub,

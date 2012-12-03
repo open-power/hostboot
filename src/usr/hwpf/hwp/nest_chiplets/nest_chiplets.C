@@ -84,7 +84,7 @@ using   namespace   TARGETING;
 using   namespace   fapi;
 
 //*****************************************************************************
-// wrapper function to call step 7.01 - proc_a_x_pci_dmi_pll_initf
+// wrapper function to call proc_a_x_pci_dmi_pll_initf
 //*****************************************************************************
 void*    call_proc_a_x_pci_dmi_pll_initf( void    *io_pArgs )
 {
@@ -176,7 +176,7 @@ void*    call_proc_a_x_pci_dmi_pll_initf( void    *io_pArgs )
 }
 
 //*****************************************************************************
-// wrapper function to call step 7.02 - proc_a_x_pci_dmi_pll_setup
+// wrapper function to call proc_a_x_pci_dmi_pll_setup
 //*****************************************************************************
 void*    call_proc_a_x_pci_dmi_pll_setup( void    *io_pArgs )
 {
@@ -271,7 +271,7 @@ void*    call_proc_a_x_pci_dmi_pll_setup( void    *io_pArgs )
 }
 
 //*****************************************************************************
-// wrapper function to call step 7.03 - proc_startclock_chiplets
+// wrapper function to call proc_startclock_chiplets
 //*****************************************************************************
 void*    call_proc_startclock_chiplets( void    *io_pArgs )
 {
@@ -354,7 +354,7 @@ void*    call_proc_startclock_chiplets( void    *io_pArgs )
 }
 
 //******************************************************************************
-// wrapper function ito call step 7.04 - proc_chiplet_scominit
+// wrapper function to call proc_chiplet_scominit
 //******************************************************************************
 void*    call_proc_chiplet_scominit( void    *io_pArgs )
 {
@@ -655,9 +655,41 @@ void*    call_proc_chiplet_scominit( void    *io_pArgs )
 
     return l_StepError.getErrorHandle();
 }
+//*****************************************************************************
+// wrapper function to call proc_xbus_scominit
+//******************************************************************************
+void*    call_proc_xbus_scominit( void    *io_pArgs )
+{
+    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, 
+               "call_proc_xbus_scominit entry" );
+
+    // call proc_xbus_scominit.C
+
+    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, 
+               "call_proc_xbus_scominit exit" );
+
+    return NULL;
+}
 
 //*****************************************************************************
-// wrapper function to call step 7.05 - proc_pcie_scominit
+// wrapper function to call proc_abus_scominit
+//******************************************************************************
+void*    call_proc_abus_scominit( void    *io_pArgs )
+{
+    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, 
+               "call_proc_abus_scominit entry" );
+
+    // call proc_abus_scominit.C
+    //
+    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, 
+               "call_proc_abus_scominit exit" );
+
+    return NULL;
+}
+
+
+//*****************************************************************************
+// wrapper function to call proc_pcie_scominit
 //******************************************************************************
 void*    call_proc_pcie_scominit( void    *io_pArgs )
 {
@@ -734,7 +766,7 @@ void*    call_proc_pcie_scominit( void    *io_pArgs )
 }
 
 //*****************************************************************************
-// wrapper function to call step 7.06 - proc_scomoverride_chiplets
+// wrapper function to call proc_scomoverride_chiplets
 //*****************************************************************************
 void*    call_proc_scomoverride_chiplets( void    *io_pArgs )
 {

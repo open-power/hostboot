@@ -41,7 +41,7 @@
  */
 
 /*  @tag isteplist
- *  @docversion     v1.08 (08/13/12)
+ *  @docversion     v1.28 (12/03/12)
  *  @istepname      dram_training
  *  @istepnum       13
  *  @istepdesc      Step 13 DRAM Training
@@ -54,54 +54,61 @@
  *  @}
  *  @{
  *      @substepnum     2
+ *      @substepname    mem_pll_initf
+ *      @substepdesc    : PLL initfile for MBAs
+ *      @target_sched   serial
+ *  @}
+
+ *  @{
+ *      @substepnum     3
  *      @substepname    mem_pll_setup
  *      @substepdesc    : Setup PLL for MBAs
  *      @target_sched   serial
  *  @}
  *  @{
- *      @substepnum     3
+ *      @substepnum     4
  *      @substepname    mem_startclocks
  *      @substepdesc    : Start clocks on MBAs
  *      @target_sched   serial
  *  @}
  *  @{
- *      @substepnum     4
+ *      @substepnum     5
  *      @substepname    host_enable_vddr
  *      @substepdesc    : Enable the VDDR3 Voltage Rail
  *      @target_sched   serial
  *  @}
  *  @{
- *      @substepnum     5
+ *      @substepnum     6
  *      @substepname    mss_scominit
  *      @substepdesc    : Perform scom inits to MC and PHY
  *      @target_sched   serial
  *  @}
  *  @{
- *      @substepnum     6
+ *      @substepnum     7
  *      @substepname    mss_ddr_phy_reset
  *      @substepdesc    : Soft reset of DDR PHY macros
  *      @target_sched   serial
  *  @}
  *  @{
- *      @substepnum     7
+ *      @substepnum     8
  *      @substepname    mss_draminit
  *      @substepdesc    : Dram initialize
  *      @target_sched   serial
  *  @}
  *  @{
- *      @substepnum     8
+ *      @substepnum     9
  *      @substepname    mss_draminit_training
  *      @substepdesc    : Dram training
  *      @target_sched   serial
  *  @}
  *  @{
- *      @substepnum     9
+ *      @substepnum     10
  *      @substepname     mss_draminit_trainadv
  *      @substepdesc     : Advanced dram training
  *      @target_sched   serial
  *  @}
  *  @{
- *      @substepnum     10
+ *      @substepnum     11
  *      @substepname     mss_draminit_mc
  *      @substepdesc     : Hand off control to MC
  *      @target_sched   serial
@@ -118,7 +125,7 @@ namespace   DRAM_TRAINING
 /**
  *  @brief   host_disable_vddr
  *
- *  13.1 : : Disable VDDR on CanContinue loops
+ *           Disable VDDR on CanContinue loops
  *
  *  param[in,out] io_pArgs  -   (normally) a pointer to a TaskArgs struct,
  *                              or NULL.
@@ -128,9 +135,9 @@ namespace   DRAM_TRAINING
 void*    call_host_disable_vddr( void * io_pArgs );
 
 /**
- *  @brief   mem_pll_pll_initf
+ *  @brief   mem_pll_initf
  *
- *  13.2 : : PLL init file for MBAs
+ *           PLL init file for MBAs
  *
  *  param[in,out] io_pArgs  -   (normally) a pointer to a TaskArgs struct,
  *                              or NULL.
@@ -142,7 +149,7 @@ void*    call_mem_pll_initf( void * io_pArgs );
 /**
  *  @brief   mem_pll_setup
  *
- *  13.3 : : Setup PLL for MBAs
+ *           Setup PLL for MBAs
  *
  *  param[in,out] io_pArgs  -   (normally) a pointer to a TaskArgs struct,
  *                              or NULL.
@@ -156,7 +163,7 @@ void*    call_mem_pll_setup( void * io_pArgs );
 /**
  *  @brief   mem_startclocks
  *
- *  13.4 : : Start clocks on MBAs
+ *           Start clocks on MBAs
  *
  *  param[in,out] io_pArgs  -   (normally) a pointer to a TaskArgs struct,
  *                              or NULL.
@@ -170,7 +177,7 @@ void*    call_mem_startclocks( void * io_pArgs );
 /**
  *  @brief   host_enable_vddr
  *
- *  13.5 : : Enable the VDDR3 Voltage Rail
+ *           Enable the VDDR3 Voltage Rail
  *
  *  param[in,out] io_pArgs  -   (normally) a pointer to a TaskArgs struct,
  *                              or NULL.
@@ -185,7 +192,7 @@ void*    call_host_enable_vddr( void * io_pArgs );
 /**
  *  @brief   mss_scominit
  *
- *  13.6 : : Perform scom inits to MC and PHY
+ *           Perform scom inits to MC and PHY
  *
  *  param[in,out] io_pArgs  -   (normally) a pointer to a TaskArgs struct,
  *                              or NULL.
@@ -199,7 +206,7 @@ void*    call_mss_scominit( void * io_pArgs );
 /**
  *  @brief   mss_ddr_phy_reset
  *
- *  13.7 : : Soft reset of DDR PHY macros
+ *           Soft reset of DDR PHY macros
  *
  *  param[in,out] io_pArgs  -   (normally) a pointer to a TaskArgs struct,
  *                              or NULL.
@@ -213,7 +220,7 @@ void*    call_mss_ddr_phy_reset( void * io_pArgs );
 /**
  *  @brief   mss_draminit
  *
- *  13.8 : : Dram initialize
+ *           Dram initialize
  *
  *  param[in,out] io_pArgs  -   (normally) a pointer to a TaskArgs struct,
  *                              or NULL.
@@ -226,7 +233,7 @@ void*    call_mss_draminit( void * io_pArgs );
 /**
  *  @brief   mss_draminit_training
  *
- *  13.9 : : Dram training
+ *           Dram training
  *
  *  param[in,out] io_pArgs  -   (normally) a pointer to a TaskArgs struct,
  *                              or NULL.
@@ -240,7 +247,7 @@ void*    call_mss_draminit_training( void * io_pArgs );
 /**
  *  @brief   mss_draminit_trainadv
  *
- *  13.10 : : Advanced dram training
+ *           Advanced dram training
  *
  *  param[in,out] io_pArgs  -   (normally) a pointer to a TaskArgs struct,
  *                              or NULL.
@@ -254,7 +261,7 @@ void*    call_mss_draminit_trainadv( void * io_pArgs );
 /**
  *  @brief   mss_draminit_mc
  *
- *  13.11 : : Hand off control to MC
+ *           Hand off control to MC
  *
  *  param[in,out] io_pArgs  -   (normally) a pointer to a TaskArgs struct,
  *                              or NULL.

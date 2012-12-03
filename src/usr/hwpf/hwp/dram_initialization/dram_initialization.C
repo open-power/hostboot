@@ -94,10 +94,9 @@ using   namespace   fapi;
 using   namespace   ERRORLOG;
 
 //
-//  Wrapper function to call 14.1 :
-//      host_startPRD_dram
+//  Wrapper function to call host_startprd_dram
 //
-void*    call_host_startPRD_dram( void    *io_pArgs )
+void*    call_host_startprd_dram( void    *io_pArgs )
 {
     errlHndl_t  l_errl  =   NULL;
 
@@ -146,8 +145,7 @@ void*    call_host_startPRD_dram( void    *io_pArgs )
 }
 
 //
-//  Wrapper function to call 14.2 :
-//      mss_extent_setup
+//  Wrapper function to call mss_extent_setup
 //
 void*    call_mss_extent_setup( void    *io_pArgs )
 {
@@ -188,31 +186,8 @@ void*    call_mss_extent_setup( void    *io_pArgs )
     {
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                 "SUCCESS : mss_extent_setup completed ok" );
-
-        // call mss_memdiag
-        l_errl = call_mss_memdiag(io_pArgs);
-
-        if( l_errl )
-        {
-            /*@
-             * @errortype
-             * @reasoncode       ISTEP_DRAM_INITIALIZATION_FAILED
-             * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE
-             * @moduleid         ISTEP_MSS_MEMDIAG
-             * @userdata1        bytes 0-1: plid identifying first error
-             *                   bytes 2-3: reason code of first error
-             * @userdata2        bytes 0-1: total number of elogs included
-             *                   bytes 2-3: N/A
-             * @devdesc          call to mss_memdiag has failed, see error log
-             *                   identified by the plid in user data
-             */
-            l_stepError.addErrorDetails(ISTEP_DRAM_INITIALIZATION_FAILED,
-                                        ISTEP_MSS_MEMDIAG,
-                                        l_errl );
-
-            errlCommit( l_errl, HWPF_COMP_ID );
-        }
     }
+
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
             "call_mss_extent_setup exit" );
@@ -221,14 +196,17 @@ void*    call_mss_extent_setup( void    *io_pArgs )
     return l_stepError.getErrorHandle();
 }
 
+
 //
 //  Wrapper function to call mss_memdiag
 //
-errlHndl_t call_mss_memdiag( void    *io_pArgs )
+void*   call_mss_memdiag( void    *io_pArgs )
 {
     using namespace MDIA;
 
     errlHndl_t  l_errl  =   NULL;
+
+    IStepError  l_stepError;
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                "call_mss_memdiag entry" );
@@ -262,18 +240,38 @@ errlHndl_t call_mss_memdiag( void    *io_pArgs )
 
     } while (0);
 
+     if( l_errl )
+     {
+         /*@
+          * @errortype
+          * @reasoncode       ISTEP_DRAM_INITIALIZATION_FAILED
+          * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE
+          * @moduleid         ISTEP_MSS_MEMDIAG
+          * @userdata1        bytes 0-1: plid identifying first error
+          *                   bytes 2-3: reason code of first error
+          * @userdata2        bytes 0-1: total number of elogs included
+          *                   bytes 2-3: N/A
+          * @devdesc          call to mss_memdiag has failed, see error log
+          *                   identified by the plid in user data
+          */
+         l_stepError.addErrorDetails(ISTEP_DRAM_INITIALIZATION_FAILED,
+                                     ISTEP_MSS_MEMDIAG,
+                                     l_errl );
+
+         errlCommit( l_errl, HWPF_COMP_ID );
+     }
+
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                "call_mss_memdiag exit" );
 
     // end task, returning any errorlogs to IStepDisp
-    return l_errl;
+    return l_stepError.getErrorHandle();
 }
 
 
 //
-//  Wrapper function to call 14.3 :
-//      mss_scrub
+//  Wrapper function to call mss_scrub
 //
 void*    call_mss_scrub( void    *io_pArgs )
 {
@@ -325,8 +323,7 @@ void*    call_mss_scrub( void    *io_pArgs )
 
 
 //
-//  Wrapper function to call 14.4 :
-//      mss_thermal_init
+//  Wrapper function to call mss_thermal_init
 //
 void*    call_mss_thermal_init( void    *io_pArgs )
 {
@@ -417,8 +414,7 @@ void*    call_mss_thermal_init( void    *io_pArgs )
 
 
 //
-//  Wrapper function to call 14.5 :
-//      proc_setup_bars
+//  Wrapper function to call proc_setup_bars
 //
 void*    call_proc_setup_bars( void    *io_pArgs )
 {
@@ -643,8 +639,7 @@ void*    call_proc_setup_bars( void    *io_pArgs )
 
 
 //
-//  Wrapper function to call 14.6 :
-//      proc_pcie_config
+//  Wrapper function to call proc_pcie_config
 //
 void*    call_proc_pcie_config( void    *io_pArgs )
 {
@@ -720,8 +715,7 @@ void*    call_proc_pcie_config( void    *io_pArgs )
 
 
 //
-//  Wrapper function to call 14.7 :
-//      proc_exit_cache_contained
+//  Wrapper function to call proc_exit_cache_contained
 //
 void*    call_proc_exit_cache_contained( void    *io_pArgs )
 {
@@ -764,8 +758,8 @@ void*    call_proc_exit_cache_contained( void    *io_pArgs )
          * @errortype
          * @moduleid     fapi::MOD_EXIT_CACHE_CONTAINED
          * @reasoncode   fapi::RC_MM_EXTEND_FAILED
-         *   @userdata1  rc from mm_extend
-         *   @userdata2        <UNUSED>
+         * @userdata1    rc from mm_extend
+         * @userdata2    <UNUSED>
          *
          *   @devdesc  Failure extending memory to 32MEG after
          *        exiting cache contained mode.
@@ -815,8 +809,7 @@ void*    call_proc_exit_cache_contained( void    *io_pArgs )
 
 
 //
-//  Wrapper function to call 14.8 :
-//      call_host_mpipl_service
+//  Wrapper function to call call_host_mpipl_service
 //
 void*   call_host_mpipl_service( void *io_pArgs )
 {

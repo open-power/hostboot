@@ -41,7 +41,7 @@
  */
 
  /*  @tag isteplist
- *  @docversion     v1.01 (03/26/12)
+ *  @docversion     v1.28 (12/03/12)
  *  @istepname      core_activate
  *  @istepnum       16
  *  @istepdesc      Core Activate
@@ -80,7 +80,7 @@ namespace   CORE_ACTIVATE
 /**
  *  @brief   host_activate_master
  *
- *  16.1 : : Activate master core
+ *           Activate master core
  *
  *  param[in,out]   -   pointer to any arguments, usually NULL
  *
@@ -94,7 +94,7 @@ void*    call_host_activate_master( void    *io_pArgs );
 /**
  *  @brief   host_activate_slave_cores
  *
- *  16.2 : : Activate slave cores
+ *           Activate slave cores
  *
  *  param[in,out]   -   pointer to any arguments, usually NULL
  *
@@ -108,7 +108,7 @@ void*    call_host_activate_slave_cores( void    *io_pArgs );
 /**
  *  @brief   host_ipl_complete
  *
- *  16.3 : : Notify FSP drawer ipl complete
+ *           Notify FSP drawer ipl complete
  *
  *  param[in,out]   -   pointer to any arguments, usually NULL
  *

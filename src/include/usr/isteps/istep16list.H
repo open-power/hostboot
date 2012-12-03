@@ -28,7 +28,7 @@
  * @file    istep16list.H
  *
  *  IStep 16    Core Activate
- *  IPL FLow Doc        v1.18 (10/18/12)
+ *  IPL FLow Doc        v1.28 (12/03/12)
  *
  *    16.1    host_activate_master
  *          : Activate master core

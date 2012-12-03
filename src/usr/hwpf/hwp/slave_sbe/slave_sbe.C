@@ -66,7 +66,7 @@ namespace SLAVE_SBE
 {
 
 //******************************************************************************
-// call_proc_revert_sbe_mcs_setup function (step 6.08)
+// call_proc_revert_sbe_mcs_setup function
 //******************************************************************************
 void* call_proc_revert_sbe_mcs_setup(void *io_pArgs)
 {
@@ -131,7 +131,7 @@ void* call_proc_revert_sbe_mcs_setup(void *io_pArgs)
 
 
 //******************************************************************************
-// call_host_slave_sbe function (step 6.09)
+// call_host_slave_sbe function
 //******************************************************************************
 void* call_host_slave_sbe_config(void *io_pArgs)
 {
@@ -140,6 +140,9 @@ void* call_host_slave_sbe_config(void *io_pArgs)
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                "call_host_slave_sbe_config entry" );
+
+    // execute proc_read_nest_freq.C
+    // execute proc_setup_sbe_config.C
 
     l_errl  =   NULL;       // assignment to make the compiler happy
 
@@ -152,7 +155,7 @@ void* call_host_slave_sbe_config(void *io_pArgs)
 }
 
 //******************************************************************************
-// call_host_sbe_start function (step 6.10)
+// call_host_sbe_start function
 //******************************************************************************
 void* call_host_sbe_start( void *io_pArgs )
 {
@@ -172,7 +175,7 @@ void* call_host_sbe_start( void *io_pArgs )
 
 
 //******************************************************************************
-// call_proc_check_slave_sbe_seeprom_complete function  (step 6.11)
+// call_proc_check_slave_sbe_seeprom_complete function
 //******************************************************************************
 void* call_proc_check_slave_sbe_seeprom_complete( void *io_pArgs )
 {
@@ -350,7 +353,7 @@ void* call_proc_check_slave_sbe_seeprom_complete( void *io_pArgs )
 }
 
 //******************************************************************************
-// call_proc_xmit_sbe (step 6.12)
+// call_proc_xmit_sbe
 //******************************************************************************
 void* call_proc_xmit_sbe(void *io_pArgs )
 {

@@ -43,7 +43,7 @@ namespace HWAS
 // functions called from the istep dispatcher -- hostboot only
 
 //******************************************************************************
-// host_init_fsi function  (step 6.3)
+// host_init_fsi function
 //******************************************************************************
 void* host_init_fsi( void *io_pArgs )
 {
@@ -57,7 +57,7 @@ void* host_init_fsi( void *io_pArgs )
 }
 
 //******************************************************************************
-// host_set_ipl_parms function (step 6.4)
+// host_set_ipl_parms function
 //******************************************************************************
 void* host_set_ipl_parms( void *io_pArgs )
 {
@@ -72,7 +72,7 @@ void* host_set_ipl_parms( void *io_pArgs )
 }
 
 //******************************************************************************
-// host_discover_targets function (step 6.5)
+// host_discover_targets function
 //******************************************************************************
 void* host_discover_targets( void *io_pArgs )
 {
@@ -88,7 +88,7 @@ void* host_discover_targets( void *io_pArgs )
 }
 
 //******************************************************************************
-// host_gard function (step 6.6)
+// host_gard function
 //******************************************************************************
 void* host_gard( void *io_pArgs )
 {
@@ -102,7 +102,7 @@ void* host_gard( void *io_pArgs )
 }
 
 //******************************************************************************
-// host_cancontinue_clear functioni (step 6.7)
+// host_cancontinue_clear function
 //******************************************************************************
 void* host_cancontinue_clear( void *io_pArgs )
 {
@@ -119,19 +119,19 @@ void* host_cancontinue_clear( void *io_pArgs )
 }
 
 //******************************************************************************
-// host_PRD_hwreconfig function
+// host_prd_hwreconfig function
 //******************************************************************************
-void* host_PRD_hwreconfig( void *io_pArgs )
+void* host_prd_hwreconfig( void *io_pArgs )
 {
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                "host_PRD_hwreconfig entry" );
+                "host_prd_hwreconfig entry" );
 
     errlHndl_t errl = NULL;
 
     // stub -- nothing here currently
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                "host_PRD_hwreconfig exit" );
+                "host_prd_hwreconfig exit" );
 
     return errl;
 }

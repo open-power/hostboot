@@ -82,8 +82,7 @@ using   namespace   ISTEP_ERROR;
 
 
 //
-//  Wrapper function to call 16.1 :
-//      host_activate_master
+//  Wrapper function to call host_activate_master
 //
 void*    call_host_activate_master( void    *io_pArgs )
 {
@@ -325,8 +324,7 @@ void*    call_host_activate_master( void    *io_pArgs )
 
 
 //
-//  Wrapper function to call 16.2 :
-//      host_activate_slave_cores
+//  Wrapper function to call host_activate_slave_cores
 //
 void*    call_host_activate_slave_cores( void    *io_pArgs )
 {
@@ -487,8 +485,7 @@ void*    call_host_activate_slave_cores( void    *io_pArgs )
 
 
 //
-//  Wrapper function to call 16.3 :
-//      host_ipl_complete
+//  Wrapper function to call host_ipl_complete
 //
 void*    call_host_ipl_complete( void    *io_pArgs )
 {

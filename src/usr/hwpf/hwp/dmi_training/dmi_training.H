@@ -34,68 +34,79 @@
  */
 
 /*  @tag isteplist
- *  @docversion     v1.08 (08/13/12)
+ *  @docversion     v1.18 (12/03/12)
  *  @istepname      dmi_training
  *  @istepnum       11
  *  @istepdesc      DMI Training
  *
- *
  *  @{
  *      @substepnum     1
+ *      @substepname    mss_getecid
+ *      @substepdesc    : Read out ECID from all centaur chips
+ *          @target_sched   serial
+ *  @}
+ *  @{
+ *      @substepnum     2
+ *      @substepname    proc_dmi_scominit
+ *      @substepdesc    : DMI Scom setup on P8 MCS
+ *          @target_sched   serial
+ *  @}
+ *  @{
+ *      @substepnum     3
  *      @substepname    dmi_scominit
  *      @substepdesc    : Scom setup on centaur
  *          @target_sched   serial
  *  @}
  *  @{
- *      @substepnum     2
+ *      @substepnum     4
  *      @substepname    dmi_erepair
  *      @substepdesc    : Restore EDI Bus eRepair data
  *          @target_sched   serial
  *  @}
  *  @{
- *      @substepnum     3
+ *      @substepnum     5
  *      @substepname    dmi_io_dccal
  *      @substepdesc    : Calibrate DMI interfaces
  *          @target_sched   serial
  *  @}
  *  @{
- *      @substepnum     4
+ *      @substepnum     6
  *      @substepname    dmi_pre_trainadv
  *      @substepdesc    : Advanced pre DMI training
  *          @target_sched   serial
  *  @}
  *  @{
- *      @substepnum     5
+ *      @substepnum     7
  *      @substepname    dmi_io_run_training
  *      @substepdesc    : Run training on MC buses
  *          @target_sched   serial
  *  @}
  *  @{
- *      @substepnum     6
+ *      @substepnum     8
  *      @substepname    dmi_post_trainadv
  *      @substepdesc    : Advanced post DMI training
  *          @target_sched   serial
  *  @}
  *  @{
- *      @substepnum     7
+ *      @substepnum     9
  *      @substepname    proc_cen_framelock
  *      @substepdesc    : Initialize EDI Frame
  *          @target_sched   serial
  *  @}
  *  @{
- *      @substepnum     8
- *      @substepname    host_startPRD_dmi
+ *      @substepnum     10
+ *      @substepname    host_startprd_dmi
  *      @substepdesc    : Load PRD for DMI domain
  *          @target_sched   serial
  *  @}
  *  @{
- *      @substepnum     9
+ *      @substepnum     11
  *      @substepname    host_attnlisten_cen
  *      @substepdesc    : Start listening for attentions
  *          @target_sched   serial
  *  @}
  *  @{
- *      @substepnum    10 
+ *      @substepnum    12
  *      @substepname    cen_set_inband_addr
  *      @substepdesc    : Set the Inband base addresses
  *          @target_sched   serial
@@ -114,9 +125,35 @@ namespace   DMI_TRAINING
 {
 
 /**
+ * @brief   mss_getecid
+ *
+ *          Read out ECID of all centaur chips
+ *
+ *  param[in,out] io_pArgs  -   (normally) a pointer to a TaskArgs struct,
+ *                               or NULL.
+ *  return  any error logs to istep
+ *
+ */
+void*    call_mss_getecid( void * io_pArgs );
+
+
+/**
+ * @brief   proc_dmi_scominit
+ *
+ *          DMI Scom setup on P8 MCS
+ *
+ *  param[in,out] io_pArgs  -   (normally) a pointer to a TaskArgs struct,
+ *                               or NULL.
+ *  return  any error logs to istep
+ *
+ */
+void*    call_proc_dmi_scominit( void * io_pArgs );
+
+
+/**
  * @brief   dmi_scominit
  *
- *  11.1 :  Scom setup on centaur
+ *          Scom setup on centaur
  *
  *  param[in,out] io_pArgs  -   (normally) a pointer to a TaskArgs struct,
  *                               or NULL.
@@ -129,7 +166,7 @@ void*    call_dmi_scominit( void * io_pArgs );
 /**
  *  @brief   dmi_erepair
  *
- *  11.2   : Restore EDI Bus eRepair data
+ *           Restore EDI Bus eRepair data
  *
  *  param[in,out] io_pArgs  -   (normally) a pointer to a TaskArgs struct,
  *                               or NULL.
@@ -142,7 +179,7 @@ void*    call_dmi_erepair( void * io_pArgs );
 /**
  *  @brief   dmi_io_dccal
  *
- *  11.3 : Calibrate DMI interfaces
+ *           Calibrate DMI interfaces
  *
  *  param[in,out] io_pArgs  -   (normally) a pointer to a TaskArgs struct,
  *                               or NULL.
@@ -155,7 +192,7 @@ void*    call_dmi_io_dccal( void * io_pArgs );
 /**
  *  @brief   dmi_pre_trainadv
  *
- *  11.4    : Advanced pre DMI training
+ *           Advanced pre DMI training
  *
  *  param[in,out] io_pArgs  -   (normally) a pointer to a TaskArgs struct,
  *                               or NULL.
@@ -168,7 +205,7 @@ void*    call_dmi_pre_trainadv( void * io_pArgs );
 /**
  *  @brief   dmi_io_run_training
  *
- *  11.5    : Run training on MC buses
+ *           Run training on MC buses
  *
  *  param[in,out] io_pArgs  -   (normally) a pointer to a TaskArgs struct,
  *                               or NULL.
@@ -181,7 +218,7 @@ void*    call_dmi_io_run_training( void * io_pArgs );
 /**
  *  @brief   dmi_post_trainadv
  *
- *  11.6    : Advanced post DMI training
+ *           Advanced post DMI training
  *
  *  param[in,out] io_pArgs  -   (normally) a pointer to a TaskArgs struct,
  *                               or NULL.
@@ -194,7 +231,7 @@ void*    call_dmi_post_trainadv( void * io_pArgs );
 /**
  *  @brief  proc_cen_framelock
  *
- *  11.7    : Initialize EDI Frame
+ *          Initialize EDI Frame
  *
  *  param[in,out] io_pArgs  -   (normally) a pointer to a TaskArgs struct,
  *                               or NULL.
@@ -205,22 +242,22 @@ void*    call_proc_cen_framelock( void *io_pArgs );
 
 
 /**
- *  @brief   host_startPRD_dmi
+ *  @brief   host_startprd_dmi
  *
- *  11.8 : Load PRD for DMI domain
+ *           Load PRD for DMI domain
  *
  *  param[in,out] io_pArgs  -   (normally) a pointer to a TaskArgs struct,
  *                               or NULL.
  *  return  any error logs to istep
  *
  */
-void*    call_host_startPRD_dmi( void * io_pArgs );
+void*    call_host_startprd_dmi( void * io_pArgs );
 
 
 /**
  *  @brief   host_attnlisten_cen
  *
- *  11.9    : Start listening for attentions
+ *           Start listening for attentions
  *
  *  param[in,out] io_pArgs  -   (normally) a pointer to a TaskArgs struct,
  *                               or NULL.
@@ -233,7 +270,7 @@ void*    call_host_attnlisten_cen( void * io_pArgs );
 /**
  *  @brief   cen_set_inband_addr
  *
- *  11.10    : Set the Inband base addresses
+ *           Set the Inband base addresses
  *
  *  param[in,out] io_pArgs  -   (normally) a pointer to a TaskArgs struct,
  *                               or NULL.

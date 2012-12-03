@@ -101,8 +101,7 @@ errlHndl_t notifyFsp ( bool i_istepModeFlag,
                        TARGETING::SpFunctions i_spFuncs );
 
 //
-//  Wrapper function to call 21.1 :
-//      host_runtime_setup
+//  Wrapper function to call host_runtime_setup
 //
 void*    call_host_runtime_setup( void    *io_pArgs )
 {
@@ -160,8 +159,7 @@ void*    call_host_runtime_setup( void    *io_pArgs )
 }
 
 //
-//  Wrapper function to call 21.2 :
-//      host_start_payload
+//  Wrapper function to call host_start_payload
 //
 void*    call_host_verify_hdat( void    *io_pArgs )
 {
@@ -183,8 +181,7 @@ void*    call_host_verify_hdat( void    *io_pArgs )
     return l_err;
 }
 //
-//  Wrapper function to call 21.3 :
-//      host_start_payload
+//  Wrapper function to call host_start_payload
 //
 void*    call_host_start_payload( void    *io_pArgs )
 {

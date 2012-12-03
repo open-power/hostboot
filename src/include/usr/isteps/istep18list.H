@@ -28,7 +28,7 @@
  * @file    istep18list.H
  *
  *  IStep 18    Establish System SMP
- *  IPL FLow Doc        v1.18 (10/18/12)
+ *  IPL FLow Doc        v1.28 (12/03/12)
  *
  *    18.10    host_coalesce_host
  *          : Create single host image

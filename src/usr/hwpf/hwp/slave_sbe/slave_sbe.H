@@ -41,7 +41,7 @@
  */
 
  /*  @tag isteplist
- *  @docversion     v1.05 (06/28/12)
+ *  @docversion     v1.28 (12/03/12)
  *  @istepname      slave_sbe
  *  @istepnum       6
  *  @istepdesc      Slave SBE
@@ -52,6 +52,24 @@
  *      @substepdesc    : Clean up MCS Extent regs
  *          @target_sched   serial
  *  @}
+ *  @{
+ *      @substepnum     9
+ *      @substepname    host_slave_sbe_config
+ *      @substepdesc    : 
+ *          @target_sched   serial
+ *  @}
+ *  @{
+ *      @substepnum     10
+ *      @substepname    host_sbe_start
+ *      @substepdesc    : execute proc_start_sbe.C procedure
+ *          @target_sched   serial
+ *  @}
+ *  @{
+ *      @substepnum     11
+ *      @substepname    proc_check_slave_slave_sbe_seeprom_complete
+ *      @substepdesc    : Check slave SBE complete
+ *          @target_sched   serial
+
  *
  */
 
@@ -61,7 +79,7 @@ namespace SLAVE_SBE
 /**
  *  @brief proc_revert_sbe_mcs_setup
  *
- *  6.8 : : Clean up MCS Extent regs
+ *  Clean up MCS Extent regs
  *
  *  param[in,out]   -   pointer to any arguments, usually NULL
  *
@@ -72,8 +90,6 @@ void* call_proc_revert_sbe_mcs_setup(void *io_pArgs);
 /**
  *  @brief host_slave_sbe_config
  *
- *  6.9 : : 
- *
  *  param[in,out]   -   pointer to any arguments, usually NULL
  *
  *  return any error logs to istep 
@@ -82,8 +98,6 @@ void* call_host_slave_sbe_config(void *io_pArgs);
 
 /**
  *  @brief host_sbe_start
- *
- *  6.10 : : 
  *
  *  param[in,out]   -   pointer to any arguments, usually NULL
  *
@@ -94,8 +108,6 @@ void* call_host_sbe_start(void *io_pArgs);
 /**
  *  @brief proc_check_slave_sbe_seeprom_complete
  *
- *  6.11 : : 
- *
  *  param[in,out]   -   pointer to any arguments, usually NULL
  *
  *  return any error logs to istep 
@@ -104,8 +116,6 @@ void* call_proc_check_slave_sbe_seeprom_complete(void *io_pArgs);
 
 /**
  *  @brief proc_xmit_sbe
- *
- *  6.12 : : 
  *
  *  param[in,out]   -   pointer to any arguments, usually NULL
  *

@@ -37,13 +37,25 @@
  */
 
  /*  @tag isteplist
- *  @docversion     v1.01 (03/26/12)
+ *  @docversion     v1.28 (12/03/12)
  *  @istepname      start_payload
  *  @istepnum       21
  *  @istepdesc      Start Payload
  *
  *  @{
  *      @substepnum     1
+ *      @substepname    host_runtime_setup
+ *      @substepdesc    :
+ *          @target_sched   serial
+ *  @}
+ *  @{
+ *      @substepnum     2
+ *      @substepname    host_verify_hdat
+ *      @substepdesc    :  Start Payload
+ *          @target_sched   serial
+ *  @}
+ *  @{
+ *      @substepnum     3
  *      @substepname    host_start_payload
  *      @substepdesc    :  Start Payload
  *          @target_sched   serial
@@ -62,7 +74,7 @@ namespace   START_PAYLOAD
 /**
  *  @brief   host_runtime_setup
  *
- *  21.1 : :  Host Runtime Setup
+ *           Host Runtime Setup
  *
  *  param[in,out]   -   pointer to any arguments, usually NULL
  *
@@ -74,7 +86,7 @@ void*    call_host_runtime_setup( void    *io_pArgs );
 /**
  *  @brief   host_verify_hdat
  *
- *  21.2 : : Secureboot verification of PHYP/AVP image load
+ *           Secureboot verification of PHYP/AVP image load
  *
  *  param[in,out]   -   pointer to any arguments, usually NULL
  *
@@ -86,7 +98,7 @@ void*    call_host_verify_hdat( void    *io_pArgs );
 /**
  *  @brief   host_start_payload
  *
- *  21.3 : :  Start Payload
+ *           Start Payload
  *
  *  param[in,out]   -   pointer to any arguments, usually NULL
  *

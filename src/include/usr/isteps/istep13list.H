@@ -28,7 +28,7 @@
  * @file    istep13list.H
  *
  *  IStep 13    Step 13 DRAM Training
- *  IPL FLow Doc        v1.18 (10/18/12)
+ *  IPL FLow Doc        v1.28 (12/03/12)
  *
  *  13.1      host_disable_vddr
  *      : Disable VDDR on CanContinue loops

@@ -27,7 +27,7 @@
  * @file    istep6list.H
  *
  *  list of functions called by HWAS (ISTEP 6) - "named isteps"
- *  IPL FLow Doc        v1.18 (10/18/12)
+ *  IPL FLow Doc        v1.28 (12/03/12)
  *
  *  Please see the note in initsvcstructs.H for description of
  *      the ISTEPNAME macro.
@@ -44,20 +44,35 @@ namespace   INITSERVICE
 {
 
 /**
+ * @file    istep06list.H
+ *
  * @note    IStep definition for Hostboot - Slave SBE
  *
- *  1.  host_setup : Setup host environment
- *  2.  host_istep_enable : Hostboot istep ready
- *  3.  host_init_fsi : Setup the FSI links to slave chips
- *  4.  host_set_ipl_parms : Build ipl parameters
- *  5.  host_discover_targets : Builds targeting
- *  6.  host_gard : Do Gard
- *  7.  host_cancontinue_clear : Clear deconfigured states
- *  8.  proc_revert_sbe_mcs_setup : Clean up MCS extent regs
- *  9.  host_slave_sbe_config
- * 10.  host_sbe_start
- * 11.  proc_check_slave_sbe_seeprom_complete : Check Slave SBE Complete
- * 12.  proc_xmit_sbe : vSBE Init of Slave Chips
+ *  IStep 06    Slave SBE
+ *  IPL FLow Doc        v1.28 (12/03/12)
+ *
+ *  06.1    host_setup
+ *        : Setup host environment (non-executable istep)
+ *  06.2    host_istep_enable
+ *        : Hostboot istep ready (non-executable istep)
+ *  06.3    host_init_fsi
+ *        : Setup the FSI links to slave chips
+ *  06.4    host_set_ipl_parms
+ *        : Build ipl parameters
+ *  06.5    host_discover_targets 
+ *      :   Builds targeting
+ *  06.6    host_gard
+ *      :   Do Gard
+ *  06.7    host_cancontinue_clear
+ *      :   Clear deconfigured states
+ *  06.8    proc_revert_sbe_mcs_setup
+ *      :   Clean up MCS extent regs
+ *  06.9    host_slave_sbe_config
+ *  06.10   host_sbe_start
+ *  06.11   proc_check_slave_sbe_seeprom_complete
+ *        : Check Slave SBE Complete
+ *  06.12   proc_xmit_sbe
+ *        : vSBE Init of Slave Chips
  *
  */
 const   TaskInfo    g_istep06[]  =   {

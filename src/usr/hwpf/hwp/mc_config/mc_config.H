@@ -41,7 +41,7 @@
  */
 
 /*  @tag isteplist
- *  @docversion     v1.08 (08/13/12)
+ *  @docversion     v1.28 (12/03/12)
  *  @istepname      mc_config
  *  @istepnum       12
  *  @istepdesc      Step 12 MC Config
@@ -84,7 +84,7 @@ namespace   MC_CONFIG
 /**
  *  @brief   host_collect_dimm_spd
  *
- *  12.1 : : Collect Master dimm SPD
+ *           Collect Master dimm SPD
  *
  *  param[in,out] io_pArgs  -   (normally) a pointer to a TaskArgs struct,
  *                              or NULL.
@@ -105,14 +105,14 @@ void*    call_host_collect_dimm_spd( void * io_pArgs );
  *  return  any error logs to istep
  *
  */
-errlHndl_t call_mss_volt( void * io_pArgs );
+void*   call_mss_volt( void * io_pArgs );
 
 
 
 /**
  *  @brief   mss_freq
  *
- *  12.2 : : Calc dimm frequency
+ *           Calc dimm frequency
  *
  *  param[in,out] io_pArgs  -   (normally) a pointer to a TaskArgs struct,
  *                              or NULL.
@@ -126,7 +126,7 @@ void*    call_mss_freq( void * io_pArgs );
 /**
  *  @brief   mss_eff_config
  *
- *  12.3 : : Determine effective config
+ *           Determine effective config
  *
  *  param[in,out] io_pArgs  -   (normally) a pointer to a TaskArgs struct,
  *                              or NULL.

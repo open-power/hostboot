@@ -71,8 +71,7 @@ using   namespace   fapi;
 
 
 //
-//  Wrapper function to call 18.8 :
-//      host_coalesce_host
+//  Wrapper function to call host_coalesce_host
 //
 void*    call_host_coalesce_host( void    *io_pArgs )
 {

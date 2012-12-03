@@ -72,7 +72,7 @@ using   namespace   vsbe;
 
 
 //
-//  Wrapper function to call step 10 : sbe_centaur_init
+//  Wrapper function to call step 10
 //
 void*    call_sbe_centaur_init( void *io_pArgs )
 {

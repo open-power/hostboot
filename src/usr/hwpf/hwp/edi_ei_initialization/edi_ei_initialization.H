@@ -41,7 +41,7 @@
  */
 
  /*  @tag isteplist
- *  @docversion     v1.08 (08/13/12)
+ *  @docversion     v1.28 (12/03/12)
  *  @istepname      edi_ei_initialization
  *  @istepnum       08
  *  @istepdesc      EDI, EI Initialization
@@ -78,7 +78,7 @@
  *  @}
  *  @{
  *      @substepnum     6
- *      @substepname    host_startPRD_pbus
+ *      @substepname    host_startprd_pbus
  *      @substepdesc    : Load PRD for powerbus domain
  *          @target_sched   serial
  *  @}
@@ -110,7 +110,7 @@ namespace   EDI_EI_INITIALIZATION
 /**
  *  @brief   fabric_erepair
  *
- *  08.1 : : Restore Fabric/EDI Bus eRepair data
+ *           Restore Fabric/EDI Bus eRepair data
  *
  *  param[in,out]   -   pointer to any arguments, usually NULL
  *
@@ -124,7 +124,7 @@ void*    call_fabric_erepair( void    *io_pArgs );
 /**
  *  @brief   fabric_io_dccal
  *
- *  08.2 : : Calibrate Fabric/EDI interfaces
+ *           Calibrate Fabric/EDI interfaces
  *
  *  param[in,out]   -   pointer to any arguments, usually NULL
  *
@@ -152,7 +152,7 @@ void*    call_fabric_pre_trainadv( void    *io_pArgs );
 /**
  *  @brief   fabric_io_run_training
  *
- *  08.4 : : Run training on internal buses
+ *           Run training on internal buses
  *
  *  param[in,out]   -   pointer to any arguments, usually NULL
  *
@@ -166,7 +166,7 @@ void*    call_fabric_io_run_training( void    *io_pArgs );
 /**
  *  @brief   fabric_post_trainadv
  *
- *  08.5 : : Advanced post EI/EDI training
+ *           Advanced post EI/EDI training
  *
  *  param[in,out]   -   pointer to any arguments, usually NULL
  *
@@ -178,23 +178,23 @@ void*    call_fabric_post_trainadv( void    *io_pArgs );
 
 
 /**
- *  @brief   host_startPRD_pbus
+ *  @brief   host_startprd_pbus
  *
- *  08.6 : : Load PRD for powerbus domain
+ *           Load PRD for powerbus domain
  *
  *  param[in,out]   -   pointer to any arguments, usually NULL
  *
  *  return  any errlogs to istep 
  *
  */
-void*    call_host_startPRD_pbus( void    *io_pArgs );
+void*    call_host_startprd_pbus( void    *io_pArgs );
 
 
 
 /**
  *  @brief   host_attnlisten_proc
  *
- *  08.7 : : Start listening for attentions
+ *           Start listening for attentions
  *
  *  param[in,out]   -   pointer to any arguments, usually NULL
  *
@@ -208,7 +208,7 @@ void*    call_host_attnlisten_proc( void    *io_pArgs );
 /**
  *  @brief   proc_fab_iovalid
  *
- *  08.8 : : Lower functional fences on local SMP
+ *           Lower functional fences on local SMP
  *
  *  param[in,out]   -   pointer to any arguments, usually NULL
  *

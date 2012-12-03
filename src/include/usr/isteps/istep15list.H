@@ -28,7 +28,7 @@
  * @file    istep15list.H
  *
  *  IStep 15    Build Winkle Images
- *  IPL FLow Doc        v1.18 (10/18/12)
+ *  IPL FLow Doc        v1.28 (12/03/12)
  *
  *    15.1    host_build_winkle
  *          : Build runtime winkle images
@@ -37,9 +37,6 @@
  *    15.3    proc_poreslw_init
  *          : Initialize the PORE-SLW engine
  *
- *  *****************************************************************
- *  THIS FILE WAS GENERATED ON 2012-04-12:1228
- *  *****************************************************************
  *
  *  Please see the note in initsvcstructs.H for description of
  *      the ISTEPNAME macro.

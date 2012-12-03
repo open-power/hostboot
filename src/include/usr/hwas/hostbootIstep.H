@@ -112,7 +112,7 @@ void* host_gard( void *io_pArgs );
 void* host_cancontinue_clear( void *io_pArgs );
 
 /**
- * @brief   host_PRD_hwreconfig  Hook for PRD to handle reconfigure
+ * @brief   host_prd_hwreconfig  Hook for PRD to handle reconfigure
  *
  *  TBD
  *
@@ -120,7 +120,7 @@ void* host_cancontinue_clear( void *io_pArgs );
  *                              or NULL.
  *  return  any error logs to istep
  */
-void* host_PRD_hwreconfig( void *io_pArgs );
+void* host_prd_hwreconfig( void *io_pArgs );
 
 } // namespace HWAS
 #endif // HOSTBOOTISTEP_H_

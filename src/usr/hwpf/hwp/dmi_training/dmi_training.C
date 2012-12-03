@@ -77,8 +77,39 @@ using   namespace   ERRORLOG;
 using   namespace   TARGETING;
 using   namespace   fapi;
 
+
 //
-//  Wrapper function to call 11.1   dmi_scominit
+//  Wrapper function to call mss_getecid
+//
+void*    call_mss_getecid( void *io_pArgs )
+{
+    errlHndl_t l_err = NULL;
+    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mss_getecid entry" );
+
+    // call mss_getecid.C
+
+    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mss_getecid exit" );
+
+    return l_err;
+}
+
+//
+//  Wrapper function to call proc_dmi_scominit
+//
+void*    call_proc_dmi_scominit( void *io_pArgs )
+{
+    errlHndl_t l_err = NULL;
+    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_proc_dmi_scominit entry" );
+
+    // call proc_dmi_scominit.C
+
+    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_proc_dmi_scominit exit" );
+
+    return l_err;
+}
+
+//
+//  Wrapper function to call dmi_scominit
 //
 void*    call_dmi_scominit( void *io_pArgs )
 {
@@ -197,7 +228,7 @@ void*    call_dmi_scominit( void *io_pArgs )
 
 
 //
-//  Wrapper function to call 11.2 :  dmi_erepair
+//  Wrapper function to call  dmi_erepair
 //
 void*    call_dmi_erepair( void *io_pArgs )
 {
@@ -211,7 +242,7 @@ void*    call_dmi_erepair( void *io_pArgs )
 }
 
 //
-//  Wrapper function to call 11.3 : dmi_io_dccal
+//  Wrapper function to call  dmi_io_dccal
 //
 void*    call_dmi_io_dccal( void *io_pArgs )
 {
@@ -227,7 +258,7 @@ void*    call_dmi_io_dccal( void *io_pArgs )
 
 
 //
-//  Wrapper function to call 11.4 : dmi_pre_trainadv
+//  Wrapper function to call dmi_pre_trainadv
 //
 void*    call_dmi_pre_trainadv( void *io_pArgs )
 {
@@ -243,7 +274,7 @@ void*    call_dmi_pre_trainadv( void *io_pArgs )
 
 
 //
-//  Wrapper function to call 11.5 : dmi_io_run_training
+//  Wrapper function to call dmi_io_run_training
 //
 void*    call_dmi_io_run_training( void *io_pArgs )
 {
@@ -386,7 +417,7 @@ void*    call_dmi_io_run_training( void *io_pArgs )
 }
 
 //
-//  Wrapper function to call 11.6 : dmi_post_trainadv
+//  Wrapper function to call dmi_post_trainadv
 //
 void*    call_dmi_post_trainadv( void *io_pArgs )
 {
@@ -402,7 +433,7 @@ void*    call_dmi_post_trainadv( void *io_pArgs )
 
 
 //
-//  Wrapper function to call 11.7 : proc_cen_framelock
+//  Wrapper function to call  proc_cen_framelock
 //
 void*    call_proc_cen_framelock( void *io_pArgs )
 {
@@ -515,9 +546,9 @@ void*    call_proc_cen_framelock( void *io_pArgs )
 }
 
 //
-//  Wrapper function to call 11.8 : host_startPRD_dmi
+//  Wrapper function to call host_startprd_dmi
 //
-void*    call_host_startPRD_dmi( void *io_pArgs )
+void*    call_host_startprd_dmi( void *io_pArgs )
 {
     errlHndl_t l_err = NULL;
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_host_startPRD_dmi entry" );
@@ -529,7 +560,7 @@ void*    call_host_startPRD_dmi( void *io_pArgs )
 }
 
 //
-//  Wrapper function to call 11.9 : host_attnlisten_cen
+//  Wrapper function to call host_attnlisten_cen
 //
 void*    call_host_attnlisten_cen( void *io_pArgs )
 {
@@ -545,7 +576,7 @@ void*    call_host_attnlisten_cen( void *io_pArgs )
 }
 
 //
-//  Wrapper function to call 11.10 : cen_set_inband_addr
+//  Wrapper function to call cen_set_inband_addr
 //
 void*    call_cen_set_inband_addr( void *io_pArgs )
 {

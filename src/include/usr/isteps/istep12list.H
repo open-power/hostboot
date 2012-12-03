@@ -28,13 +28,15 @@
  * @file    istep12list.H
  *
  *  IStep 12    Step 12 MC Config
- *  IPL FLow Doc        v1.18 (10/18/12)
+ *  IPL FLow Doc        v1.28 (12/03/12)
  *
  *  12.1	  host_collect_dimm_spd
  *  	: Collect Master dimm SPD
- *  12.2	  mss_freq
+  *  12.2	  mss_volt
+ *  	: Calc dimm voltage
+ *  12.3	  mss_freq
  *  	: Calc dimm frequency
- *  12.3	  mss_eff_config
+ *  12.4	  mss_eff_config
  *  	: Determine effective config
  *
  *  *****************************************************************
@@ -76,7 +78,16 @@ const   TaskInfo    g_istep12[]  =   {
                 }
         },
         {
-                ISTEPNAME(12,02,"mss_freq"),
+                ISTEPNAME(12,02,"mss_volt"),
+                MC_CONFIG::call_mss_volt,
+                {
+                        START_FN,
+                        EXT_IMAGE,
+                        NORMAL_IPL_OP,
+                }
+        },
+        {
+                ISTEPNAME(12,03,"mss_freq"),
                 MC_CONFIG::call_mss_freq,
                 {
                         START_FN,
@@ -85,7 +96,7 @@ const   TaskInfo    g_istep12[]  =   {
                 }
         },
         {
-                ISTEPNAME(12,03,"mss_eff_config"),
+                ISTEPNAME(12,04,"mss_eff_config"),
                 MC_CONFIG::call_mss_eff_config,
                 {
                         START_FN,

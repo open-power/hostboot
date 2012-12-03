@@ -41,7 +41,7 @@
  */
 
  /*  @tag isteplist
- *  @docversion     v1.08 (08/13/12)
+ *  @docversion     v1.28 (12/03/12)
  *  @istepname      build_winkle_images
  *  @istepnum       15
  *  @istepdesc      Build Winkle Images
@@ -79,7 +79,7 @@ namespace   BUILD_WINKLE_IMAGES
 /**
  *  @brief   host_build_winkle
  *
- *  15.1 : : Build runtime winkle images
+ *           Build runtime winkle images
  *
  *  param[in,out]   -   pointer to any arguments, usually NULL
  *
@@ -93,7 +93,7 @@ void*    call_host_build_winkle( void    *io_pArgs );
 /**
  *  @brief   proc_set_pore_bar
  *
- *  15.2 : : Tell SLW Eng where winkle image is
+ *           Tell SLW Eng where winkle image is
  *
  *  param[in,out]   -   pointer to any arguments, usually NULL
  *
@@ -107,7 +107,7 @@ void*    call_proc_set_pore_bar( void    *io_pArgs );
 /**
  *  @brief   p8_poreslw_init
  *
- *  15.3 : : Initialize the PORE-SLW engine
+ *           Initialize the PORE-SLW engine
  *
  *  param[in,out]   -   pointer to any arguments, usually NULL
  *

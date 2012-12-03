@@ -41,13 +41,13 @@
  */
 
  /*  @tag isteplist
- *  @docversion     v1.08 (08/13/12)
+ *  @docversion     v1.28 (12/03/12)
  *  @istepname      establish_system_smp
  *  @istepnum       18
  *  @istepdesc      Establish System SMP
  *
  *  @{
- *      @substepnum     8
+ *      @substepnum     10
  *      @substepname    host_coalesce_host
  *      @substepdesc    : Create single host image
  *          @target_sched   serial
@@ -68,7 +68,7 @@ namespace   ESTABLISH_SYSTEM_SMP
 /**
  *  @brief   host_coalesce_host
  *
- *  18.8 : : Create single host image
+ *           Create single host image
  *
  *  param[in,out]   -   pointer to any arguments, usually NULL
  *

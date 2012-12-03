@@ -34,18 +34,26 @@
  */
 
 /*  @tag isteplist
- *  @docversion     v0.99 (02/10/12)
+ *  @docversion     v1.28 (12/03/12)
  *  @istepname      sbe_centaur_init
  *  @istepnum       10
  *  @istepdesc      Step 10 Hostboot SBE Centaur Init
  *
  *  @{
  *      @substepnum     1
- *      @substepname    sbe_centaur_init
- *      @substepdesc    : SBE Centaur Init
- *      @param  target  (CLASS_CHIP, TYPE_MEMBUF)
+ *      @substepname    host_prd_hwreconfig
+ *      @substepdesc    : Hook for PRD to handle reconfig
+ *      @param  target 
  *          @target_sched   serial
  *  @}
+ *  @{
+ *      @substepnum     2
+ *      @substepname    cen_sbe_tp_chiplet_init1
+ *      @substepdesc    : Execute all steps in ISTEP 10
+ *      @param  target 
+ *          @target_sched   serial
+ *  @}
+
  *
  */
 
@@ -60,6 +68,8 @@ namespace   SBE_CENTAUR_INIT
 
     /**
      *  @brief   sbe_centaur_init
+     *
+     *           Execute alll steps in step 10
      *
      *  param[in,out] io_pArgs  -   (normally) a pointer to args,
      *                              or NULL.

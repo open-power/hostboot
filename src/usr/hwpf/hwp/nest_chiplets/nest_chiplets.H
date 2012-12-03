@@ -41,37 +41,56 @@
  */
 
  /*  @tag isteplist
- *  @docversion     v1.01 (03/26/12)
+ *  @docversion     v1.28 (12/03/12)
  *  @istepname      nest_chiplets
  *  @istepnum       07
  *  @istepdesc      Nest Chiplets
  *
  *  @{
  *      @substepnum     1
+ *      @substepname    proc_a_x_pci_dmi_pll_initf
+ *      @substepdesc    : PLL Initfile for A, X, PCIe, DMI
+ *          @target_sched   serial
+ *  @}
+ *  @{
+ *      @substepnum     2
  *      @substepname    proc_a_x_pci_dmi_pll_setup
  *      @substepdesc    : Setup PLL for A, X, PCIe, DMI
  *          @target_sched   serial
  *  @}
  *  @{
- *      @substepnum     2
+ *      @substepnum     3
  *      @substepname    proc_startclock_chiplets
  *      @substepdesc    : Start clocks on A, X, PCIe chiplets
  *          @target_sched   serial
  *  @}
  *  @{
- *      @substepnum     3
+ *      @substepnum     4
  *      @substepname    proc_chiplet_scominit
  *      @substepdesc    : Apply scom inits to chiplets
  *          @target_sched   serial
  *  @}
  *  @{
- *      @substepnum     4
+ *      @substepnum     5
+ *      @substepname    proc_xbus_scominit
+ *      @substepdesc    : Apply scom inits to Xbus
+ *          @target_sched   serial
+ *  @}
+ *  @{
+ *      @substepnum     6
+ *      @substepname    proc_abus_scominit
+ *      @substepdesc    : Apply scom inits to Abus
+ *          @target_sched   serial
+ *  @}
+
+ *  @{
+ *      @substepnum     7
  *      @substepname    proc_pcie_scominit
  *      @substepdesc    : Apply scom inits to PCIe chiplets
  *          @target_sched   serial
  *  @}
  *  @{
- *      @substepnum     5
+ *      @substepnum     8
  *      @substepname    proc_scomoverride_chiplets
  *      @substepdesc    : Apply sequenced scom inits
  *          @target_sched   serial
@@ -87,65 +106,83 @@
 namespace   NEST_CHIPLETS
 {
 
-
 /**
- *  @brief   proc_a_x_pci_dmi_pll_initf
+ *  @brief  proc_a_x_pci_dmi_pll_initf
  *
- *  07.1 : : PLL init file for A, X, PCIe, DMI
+ *           PLL init file for A, X, PCIe, DMI
  *
  *  param[in,out]   -   pointer to any arguments, usually NULL
- *                    
+ *
  *  return  any error logs to istep
  *
  */
 void*    call_proc_a_x_pci_dmi_pll_initf( void    *io_pArgs );
 
 /**
- *  @brief   proc_a_x_pci_dmi_pll_setup
+ *  @brief  proc_a_x_pci_dmi_pll_setup
  *
- *  07.2 : : Setup PLL for A, X, PCIe, DMI
+ *          Setup PLL for A, X, PCIe, DMI
  *
  *  param[in,out]   -   pointer to any arguments, usually NULL
- *                    
+ *
  *  return  any error logs to istep
  *
  */
 void*    call_proc_a_x_pci_dmi_pll_setup( void    *io_pArgs );
 
 
-
 /**
- *  @brief   proc_startclock_chiplets
+ *  @brief  proc_startclock_chiplets
  *
- *  07.3 : : Start clocks on A, X, PCIe chiplets
+ *          Start clocks on A, X, PCIe chiplets
  *
  *  param[in,out]   -   pointer to any arguments, usually NULL
- *                    
+ *
  *  return  any error logs to istep
  *
  */
 void*    call_proc_startclock_chiplets( void    *io_pArgs );
 
-
-
 /**
- *  @brief   proc_chiplet_scominit
+ *  @brief  proc_chiplet_scominit
  *
- *  07.3 : : Apply scom inits to chiplets
+ *          Apply scom inits to chiplets
  *
  *  param[in,out]   -   pointer to any arguments, usually NULL
- *                    
+ *
  *  return  any error logs to istep
  *
  */
 void*    call_proc_chiplet_scominit( void    *io_pArgs );
 
+/**
+ *  @brief   proc_xbus_scominit
+ *
+ *           Apply scom inits to Xbus
+ *
+ *  param[in,out]   -   pointer to any arguments, usually NULL
+ *
+ *  return  any error logs to istep
+ *
+ */
+void*    call_proc_xbus_scominit( void    *io_pArgs );
 
+/**
+ *  @brief   proc_abus_scominit
+ *
+ *           Apply scom inits to Abus
+ *
+ *  param[in,out]   -   pointer to any arguments, usually NULL
+ *
+ *  return  any error logs to istep
+ *
+ */
+void*    call_proc_abus_scominit( void    *io_pArgs );
 
 /**
  *  @brief   proc_pcie_scominit
  *
- *  07.5 : : Apply scom inits to PCIe chiplets
+ *           Apply scom inits to PCIe chiplets
  *
  *  param[in,out]   -   pointer to any arguments, usually NULL
  *
@@ -154,15 +191,13 @@ void*    call_proc_chiplet_scominit( void    *io_pArgs );
  */
 void*    call_proc_pcie_scominit( void    *io_pArgs );
 
-
-
 /**
  *  @brief   proc_scomoverride_chiplets
  *
- *  07.6 : : Apply sequenced scom inits
+ *           Apply sequenced scom inits
  *
  *  param[in,out]   -   pointer to any arguments, usually NULL
- *                    
+ *
  *  return  any error logs to istep
  *
  */

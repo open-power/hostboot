@@ -41,7 +41,7 @@
  */
 
  /*  @tag isteplist
- *  @docversion     v1.01 (03/26/12)
+ *  @docversion     v1.28 (12/03/12)
  *  @istepname      activate_powerbus
  *  @istepnum       09
  *  @istepdesc      Activate PowerBus
@@ -50,6 +50,12 @@
  *      @substepnum     1
  *      @substepname    proc_build_smp
  *      @substepdesc    : Integrate PgP Islands into SMP
+ *          @target_sched   serial
+ *  @}
+ *  @{
+ *      @substepnum     2
+ *      @substepname    host_slave_sbe_update
+ *      @substepdesc    : execute p8_customize_image
  *          @target_sched   serial
  *  @}
  *
@@ -68,7 +74,7 @@ namespace   ACTIVATE_POWERBUS
 /**
  *  @brief   proc_build_smp
  *
- *  09.1 : : Integrate PgP Islands into SMP
+ *           Integrate PgP Islands into SMP
  *
  *  param[in,out]   -   pointer to any arguments, usually NULL
  *
@@ -80,8 +86,8 @@ void*   call_proc_build_smp( void    *io_pArgs );
 /**
  *  @brief  host_slave_sbe_update 
  *
- *  09.2 : : Placeholder for secureboot where Hostboot must update
- *           SEEPROM because FSP cannot.
+ *          Placeholder for secureboot where Hostboot must update
+ *          SEEPROM because FSP cannot.
  *
  *  param[in,out]   -   pointer to any arguments, usually NULL
  *

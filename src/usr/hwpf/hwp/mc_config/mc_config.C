@@ -85,51 +85,26 @@ using   namespace   fapi;
 
 
 //
-//  Wrapper function to call 12.1 : host_collect_dimm_spd
+//  Wrapper function to call host_collect_dimm_spd
 //
 void*    call_host_collect_dimm_spd( void *io_pArgs )
 {
     errlHndl_t l_err = NULL;
 
-    IStepError l_StepError;
-
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_host_collect_dimm_spd entry" );
-
-    l_err = call_mss_volt( io_pArgs );
-
-    if( l_err )
-    {
-        /*@
-         * @errortype
-         * @reasoncode       ISTEP_MC_CONFIG_FAILED
-         * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE
-         * @moduleid         ISTEP_HOST_COLLECT_DIMM_SPD
-         * @userdata1        bytes 0-1: plid identifying first error
-         *                   bytes 2-3: reason code of first error
-         * @userdata2        bytes 0-1: total number of elogs included
-         *                   bytes 2-3: N/A
-         * @devdesc          call to mss_volt has failed
-         *
-         */
-        l_StepError.addErrorDetails(ISTEP_MC_CONFIG_FAILED,
-                                    ISTEP_HOST_COLLECT_DIMM_SPD,
-                                    l_err );
-
-        errlCommit( l_err, HWPF_COMP_ID );
-
-    }
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_host_collect_dimm_spd exit" );
 
     return l_err;
 }
 
-
 //
-//  Wrapper function to call  mss_volt
+//  Wrapper function to call mss_volt
 //
-errlHndl_t  call_mss_volt( void *io_pArgs )
+void*   call_mss_volt( void *io_pArgs )
 {
     errlHndl_t l_err = NULL;
+
+    IStepError l_StepError;
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mss_volt entry" );
 
@@ -163,7 +138,7 @@ errlHndl_t  call_mss_volt( void *io_pArgs )
 
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
             "=====  mss_volt HWP( vector )" );
-    //  call the HWP with each target   ( if parallel, spin off a task )
+    //  call the HWP with a vector of targets
     FAPI_INVOKE_HWP(l_err, mss_volt, l_membufFapiTargets);
 
     //  process return code.
@@ -171,6 +146,24 @@ errlHndl_t  call_mss_volt( void *io_pArgs )
     {
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                 "ERROR 0x%.8X:  mss_volt HWP( ) ", l_err->reasonCode());
+
+        /*@
+        * @errortype
+        * @reasoncode       ISTEP_MC_CONFIG_FAILED
+        * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE
+        * @moduleid         ISTEP_MSS_VOLT
+        * @userdata1        bytes 0-1: plid identifying first error
+        *                   bytes 2-3: reason code of first error
+        * @userdata2        bytes 0-1: total number of elogs included
+        *                   bytes 2-3: N/A
+        * @devdesc          call to mss_volt has failed
+        *
+        */
+        l_StepError.addErrorDetails(ISTEP_MC_CONFIG_FAILED,
+                                    ISTEP_MSS_VOLT,
+                                    l_err );
+
+        errlCommit( l_err, HWPF_COMP_ID );
 
     }
     else
@@ -181,11 +174,11 @@ errlHndl_t  call_mss_volt( void *io_pArgs )
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mss_volt exit" );
 
-    return l_err; 
+    return l_StepError.getErrorHandle();
 }
 
 //
-//  Wrapper function to call 12.2 : mss_freq
+//  Wrapper function to call mss_freq
 //
 void*    call_mss_freq( void *io_pArgs )
 {
@@ -376,7 +369,7 @@ errlHndl_t call_opt_memmap()
 }
 
 //
-//  Wrapper function to call 12.3 : mss_eff_config
+//  Wrapper function to call mss_eff_config
 //
 void*    call_mss_eff_config( void *io_pArgs )
 {

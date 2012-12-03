@@ -104,6 +104,7 @@ enum istepModuleId
     ISTEP_HOST_MPIPL_SERVICE                            = 0x37,
     ISTEP_PROC_CEN_SET_INBAND_ADDR                      = 0x38,
     ISTEP_MSS_THERMAL_INIT                              = 0x39,
+    ISTEP_MSS_VOLT                                      = 0x3A,
 };
 
 /**
