@@ -46,7 +46,7 @@ DIRECT_BOOT_OBJECTS = start.o kernel.o taskmgr.o cpumgr.o syscall.o \
                       shutdown.o forceattn_p8.o terminate.o 
 
 BASE_MODULES = trace errl devicefw scom xscom initservice \
-               pnor vfs
+               pnor vfs 
 
 EXTENDED_MODULES = targeting ecmddatabuffer fapi hwp plat	\
                    extinitsvc istepdisp hwas fsi fsiscom i2c intr scan \
@@ -57,14 +57,14 @@ EXTENDED_MODULES = targeting ecmddatabuffer fapi hwp plat	\
                    core_activate dram_initialization edi_ei_initialization \
                    establish_system_smp \
                    nest_chiplets start_payload thread_activate slave_sbe \
-                   attn runtime ibscom
+                   attn runtime ibscom dump
 
 TESTCASE_MODULES = cxxtest testtrace testerrl testdevicefw testsyslib \
                    testscom testxscom testtargeting testinitservice testkernel \
                    testhwpf testecmddatabuffer initsvctesttask testcxxtest \
                    testpnor testi2c testfsi testvfs testhwas testintr testvpd \
                    testpore testutil testmbox testmdia testprdf testattn \
-                   testscan testruntime testibscom
+                   testscan testruntime testibscom testdump
 
 RELOCATABLE_IMAGE_LDFLAGS = -pie --export-dynamic
 

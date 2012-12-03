@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012                   */
+/* COPYRIGHT International Business Machines Corp. 2012,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -200,103 +200,106 @@ class HdatServiceTest: public CxxTest::TestSuite
                                     0,
                                     dump_addr,
                                     dump_size );
-        if( errhdl && (payload_kind == TARGETING::PAYLOAD_KIND_PHYP) )
+
+        if( errhdl
+            && ((payload_kind == TARGETING::PAYLOAD_KIND_PHYP) 
+                || (payload_kind == TARGETING::PAYLOAD_KIND_NONE)))
         {
-            if( errhdl )
-            {
-                TS_FAIL("testHdat> Error trying to locate MS_DUMP_SRC_TBL");
-                errlCommit(errhdl,RUNTIME_COMP_ID);
-            }
-            else if( dump_addr == 0 )
-            {
-                TS_FAIL("testHdat> NULL returned for get_host_data_section(MS_DUMP_SRC_TBL)");
-            }
-            else if( dump_size < 16 ) //1 entry is 16 bytes
-            {
-                TRACFCOMP( g_trac_runtime, "testHdat> dump_size=%d", dump_size );
-                TS_FAIL("testHdat> Size of MS_DUMP_SRC_TBL data too small");
-            }
+            TS_FAIL("testHdat> Error trying to locate MS_DUMP_SRC_TBL");
+            errlCommit(errhdl,RUNTIME_COMP_ID);
         }
-        else
+        else if( !errhdl
+                 && (payload_kind != TARGETING::PAYLOAD_KIND_PHYP) 
+                 && (payload_kind != TARGETING::PAYLOAD_KIND_NONE) )
         {
-            if( !errhdl )
-            {
-                TS_FAIL("testHdat> Did not get expected error trying to locate MS_DUMP_SRC_TBL for non-PHYP Payload");
-            }
-            else
-            {
-                delete errhdl;
-            }
+            TS_FAIL("testHdat> Did not get expected error trying to locate MS_DUMP_SRC_TBL for non-PHYP/Standalone Payload");
         }
+        else if( ((dump_addr == 0) || (dump_size < 16))
+                 && (payload_kind != TARGETING::PAYLOAD_KIND_PHYP) 
+                 && (payload_kind != TARGETING::PAYLOAD_KIND_NONE) )
+        {
+            TS_FAIL("testHdat> NULL or zero size returned for get_host_data_section(MS_DUMP_SRC_TBL)");
+        }
+        else if( (dump_size <16)
+                 || (dump_size == RUNTIME::DATA_SIZE_UNKNOWN) )
+        {
+            TS_FAIL("testHdat> Size of MS_DUMP_SRC_TBL is unexpected");
+        }
+        if( errhdl )
+        {
+            delete errhdl;
+        }
+
 
         errhdl = RUNTIME::get_host_data_section(
                                     RUNTIME::MS_DUMP_DST_TBL,
                                     0,
                                     dump_addr,
                                     dump_size );
-        if( errhdl && (payload_kind == TARGETING::PAYLOAD_KIND_PHYP) )
+        if( errhdl
+            && ((payload_kind == TARGETING::PAYLOAD_KIND_PHYP) 
+                || (payload_kind == TARGETING::PAYLOAD_KIND_NONE)) )
         {
-            if( errhdl )
-            {
-                TS_FAIL("testHdat> Error trying to locate MS_DUMP_DST_TBL");
-                errlCommit(errhdl,RUNTIME_COMP_ID);
-            }
-            else if( dump_addr == 0 )
-            {
-                TS_FAIL("testHdat> NULL returned for get_host_data_section(MS_DUMP_DST_TBL)");
-            }
-            else if( dump_size < 16 ) //1 entry is 16 bytes
-            {
-                TRACFCOMP( g_trac_runtime, "testHdat> dump_size=%d", dump_size );
-                TS_FAIL("testHdat> Size of MS_DUMP_DST_TBL data too small");
-            }
+            TS_FAIL("testHdat> Error trying to locate MS_DUMP_DST_TBL");
+            errlCommit(errhdl,RUNTIME_COMP_ID);
         }
-        else
+        else if( !errhdl
+                 && (payload_kind != TARGETING::PAYLOAD_KIND_PHYP) 
+                 && (payload_kind != TARGETING::PAYLOAD_KIND_NONE) )
         {
-            if( !errhdl )
-            {
-                TS_FAIL("testHdat> Did not get expected error trying to locate MS_DUMP_DST_TBL for non-PHYP Payload");
-            }
-            else
-            {
-                delete errhdl;
-            }
+            TS_FAIL("testHdat> Did not get expected error trying to locate MS_DUMP_DST_TBL for non-PHYP/Standalone Payload");
         }
+        else if( ((dump_addr == 0) || (dump_size < 16))
+                 && (payload_kind != TARGETING::PAYLOAD_KIND_PHYP) 
+                 && (payload_kind != TARGETING::PAYLOAD_KIND_NONE) )
+        {
+            TS_FAIL("testHdat> NULL or zero size returned for get_host_data_section(MS_DUMP_DST_TBL)");
+        }
+        else if( (dump_size <16)
+                 || (dump_size == RUNTIME::DATA_SIZE_UNKNOWN) )
+        {
+            TS_FAIL("testHdat> Size of MS_DUMP_DST_TBL is unexpected");
+        }
+        if( errhdl )
+        {
+            delete errhdl;
+        }
+
 
         errhdl = RUNTIME::get_host_data_section(
                                     RUNTIME::MS_DUMP_RESULTS_TBL,
                                     0,
                                     dump_addr,
                                     dump_size );
-        if( errhdl && (payload_kind == TARGETING::PAYLOAD_KIND_PHYP) )
-        {
-            if( errhdl )
-            {
-                TS_FAIL("testHdat> Error trying to locate MS_DUMP_RESULTS_TBL");
-                errlCommit(errhdl,RUNTIME_COMP_ID);
-            }
-            else if( dump_addr == 0 )
-            {
-                TS_FAIL("testHdat> NULL returned for get_host_data_section(MS_DUMP_RESULTS_TBL)");
-            }
-            else if( dump_size < 16 ) //1 entry is 16 bytes
-            {
-                TRACFCOMP( g_trac_runtime, "testHdat> dump_size=%d", dump_size );
-                TS_FAIL("testHdat> Size of MS_DUMP_RESULTS_TBL data too small");
-            }
-        }
-        else
-        {
-            if( !errhdl )
-            {
-                TS_FAIL("testHdat> Did not get expected error trying to locate MS_DUMP_RESULTS_TBL for non-PHYP Payload");
-            }
-            else
-            {
-                delete errhdl;
-            }
-        }
 
+        if( errhdl
+            && ((payload_kind == TARGETING::PAYLOAD_KIND_PHYP) 
+                || (payload_kind == TARGETING::PAYLOAD_KIND_NONE)) )
+        {
+            TS_FAIL("testHdat> Error trying to locate MS_DUMP_SRC_TBL");
+            errlCommit(errhdl,RUNTIME_COMP_ID);
+        }
+        else if( !errhdl
+                 && (payload_kind != TARGETING::PAYLOAD_KIND_PHYP) 
+                 && (payload_kind != TARGETING::PAYLOAD_KIND_NONE) )
+        {
+            TS_FAIL("testHdat> Did not get expected error trying to locate MS_DUMP_RESULTS_TBL for non-PHYP/Standalone Payload");
+        }
+        else if( ((dump_addr == 0) || (dump_size < 16))
+                 && (payload_kind != TARGETING::PAYLOAD_KIND_PHYP) 
+                 && (payload_kind != TARGETING::PAYLOAD_KIND_NONE) )
+        {
+            TS_FAIL("testHdat> NULL or zero size returned for get_host_data_section(MS_DUMP_RESULTS_TBL)");
+        }
+        else if( (dump_size <16)
+                 || (dump_size == RUNTIME::DATA_SIZE_UNKNOWN) )
+        {
+            TS_FAIL("testHdat> Size of MS_DUMP_RESULTS_TBL is unexpected");
+        }
+        if( errhdl )
+        {
+            delete errhdl;
+        }
 
         TRACFCOMP( g_trac_runtime, "testHdat> finish" );
     }

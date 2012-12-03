@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012                   */
+/* COPYRIGHT International Business Machines Corp. 2012,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -253,6 +253,21 @@ errlHndl_t get_standalone_section( RUNTIME::SectionId i_section,
         o_dataAddr = HSVC_TEST_MEMORY_ADDR + 512*KILOBYTE;
         o_dataSize = HSVC_TEST_MEMORY_SIZE - 512*KILOBYTE;
     }
+    else if( RUNTIME::MS_DUMP_SRC_TBL == i_section )
+    {
+        o_dataAddr = DUMP_TEST_SRC_MEM_ADDR;
+        o_dataSize = DUMP_TEST_SRC_MEM_SIZE;
+    }
+    else if( RUNTIME::MS_DUMP_DST_TBL == i_section )
+    {
+        o_dataAddr = DUMP_TEST_DST_MEM_ADDR;
+        o_dataSize = DUMP_TEST_DST_MEM_SIZE;
+    }
+    else if( RUNTIME::MS_DUMP_RESULTS_TBL == i_section )
+    {
+        o_dataAddr = DUMP_TEST_RESULTS_MEM_ADDR;
+        o_dataSize = DUMP_TEST_RESULTS_MEM_SIZE;
+    }
     else
     {
         TRACFCOMP( g_trac_runtime, "get_standalone_section> Section %d not valid in standalone mode", i_section );
@@ -405,7 +420,38 @@ errlHndl_t RUNTIME::load_host_data( void )
                                    HSVC_TEST_MEMORY_SIZE );
                 errhdl->collectTrace("RUNTIME",1024);
                 break;
+            }
+
+            // Map in some memory for the DumpCollect code to use
+            TRACFCOMP( g_trac_runtime,
+                       "load_host_data> STANDALONE: Mapping in 0x%X-0x%X (%d MB)", DUMP_TEST_TABLE_START, DUMP_TEST_TABLE_END, DUMP_TEST_TABLE_SIZE);
+
+            rc = mm_linear_map(
+                        reinterpret_cast<void*>(DUMP_TEST_SRC_MEM_ADDR),
+
+                                   DUMP_TEST_SRC_MEM_SIZE+DUMP_TEST_DST_MEM_SIZE+DUMP_TEST_RESULTS_MEM_SIZE);
+
+            if (rc != 0)
+            {
+                TRACFCOMP( g_trac_runtime, "Failure calling mm_linear_map : rc=%d", rc );
+                /*@
+                 * @errortype
+                 * @moduleid     RUNTIME::MOD_HDATSERVICE_LOAD_HOST_DATA
+                 * @reasoncode   RUNTIME::RC_CANNOT_MAP_MEMORY3
+                 * @userdata1    Starting Address
+                 * @userdata2    Size
+                 * @devdesc      Error mapping in standalone DUMP memory
+                 */
+                errhdl = new ERRORLOG::ErrlEntry(
+                                   ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                   RUNTIME::MOD_HDATSERVICE_LOAD_HOST_DATA,
+                                   RUNTIME::RC_CANNOT_MAP_MEMORY3,
+                                   DUMP_TEST_SRC_MEM_ADDR,
+                                   DUMP_TEST_TABLE_SIZE);
+                errhdl->collectTrace("RUNTIME",1024);
+                break;
             }        
+     
         }
         else
         {

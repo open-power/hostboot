@@ -180,7 +180,13 @@ const compId_t MBOX_COMP_ID = 0x1100;
 const char MBOX_COMP_NAME[] = "mbox";
 //@}
 
-// 0x1200 - open to reclaim
+/** @name DUMP
+ *  DUMP component
+ */
+//@{
+const compId_t DUMP_COMP_ID = 0x1200;
+const char DUMP_COMP_NAME[] = "dump";
+//@}
 
 // 0x1300 - open to reclaim
 
@@ -253,7 +259,7 @@ const char KERNEL_COMP_NAME[] = "kernel";
 //@{
 const compId_t IBSCOM_COMP_ID = 0x1C00;
 const char IBSCOM_COMP_NAME[] = "ibscom";
-//@}
+
 
 /** @name VPD
  *  Common VPD device driver component
@@ -262,6 +268,7 @@ const char IBSCOM_COMP_NAME[] = "ibscom";
 const compId_t VPD_COMP_ID = 0x1D00;
 const char VPD_COMP_NAME[] = "vpd";
 //@}
+
 
 /** @name HSVC
  * Host Services component

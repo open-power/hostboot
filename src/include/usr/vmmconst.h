@@ -129,5 +129,42 @@ enum BlockPriority
 #define HSVC_TEST_MEMORY_ADDR  (VMM_MEMORY_SIZE + 32*MEGABYTE)
 #define HSVC_TEST_MEMORY_SIZE  (2*MEGABYTE)
 
+/* Chunk of physical memory used for Dump Source Table */
+//#define DUMP_TEST_SRC_MEM_ADDR  (VMM_MEMORY_SIZE + 64*MEGABYTE)
+#define DUMP_TEST_MEMORY_ADDR (HSVC_TEST_MEMORY_ADDR + HSVC_TEST_MEMORY_SIZE)
+#define DUMP_TEST_MEMORY_SIZE  (4*MEGABYTE)
+
+
+// The rest of  these #defines will be moved to dumpif.H.
+
+#define DUMP_TEST_SRC_MEM_ADDR  (HSVC_TEST_MEMORY_ADDR + HSVC_TEST_MEMORY_SIZE)
+#define DUMP_TEST_SRC_MEM_SIZE  (MEGABYTE)
+
+/* Chunk of physical memory used for Dump Destination Table */
+#define DUMP_TEST_DST_MEM_ADDR  (DUMP_TEST_SRC_MEM_ADDR + DUMP_TEST_SRC_MEM_SIZE)
+#define DUMP_TEST_DST_MEM_SIZE  (MEGABYTE)
+
+/* Chunk of physical memory used for Dump Results Table */
+#define DUMP_TEST_RESULTS_MEM_ADDR  (DUMP_TEST_DST_MEM_ADDR + DUMP_TEST_DST_MEM_SIZE)
+#define DUMP_TEST_RESULTS_MEM_SIZE  (MEGABYTE)
+
+// Data location where the src, destination tables point to.
+#define DUMP_TEST_SRC_DATA_AREA      DUMP_TEST_RESULTS_MEM_ADDR +  DUMP_TEST_RESULTS_MEM_SIZE
+#define DUMP_TEST_DST_DATA_AREA      DUMP_TEST_SRC_DATA_AREA +  DUMP_TEST_DATA_SIZE
+#define DUMP_TEST_DATA_SIZE          MEGABYTE
+
+// default enums to point out the start and end of the DUMP Tables in memory
+#define DUMP_TEST_TABLE_START  DUMP_TEST_SRC_MEM_ADDR
+#define DUMP_TEST_TABLE_SIZE  DUMP_TEST_SRC_MEM_SIZE + DUMP_TEST_DST_MEM_SIZE + DUMP_TEST_RESULTS_MEM_SIZE
+#define DUMP_TEST_TABLE_END  DUMP_TEST_TABLE_START + DUMP_TEST_TABLE_SIZE 
+
+// In addition to the dump table locations we have scratch data area that is used
+// to put the SRC data that the MDST will point to.
+
+// This is the size of all the Data used for Dump testing
+#define DUMP_TEST_ALL_SIZE = DUMP_TEST_TABLE_SIZE + (2*MEGABYTE)
+// This is the ending address of test Data area
+#define DUMP_TEST_ALL_END = DUMP_TEST_TABLE_START + DUMP_TEST_ALL_SIZE
+
 
 #endif /* _VMMCONST_H */

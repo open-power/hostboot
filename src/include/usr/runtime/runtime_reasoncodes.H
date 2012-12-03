@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012                   */
+/* COPYRIGHT International Business Machines Corp. 2012,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -54,6 +54,8 @@ namespace RUNTIME
         RC_BAD_NACA                 = RUNTIME_COMP_ID | 0x0A,
         RC_INVALID_ADDRESS          = RUNTIME_COMP_ID | 0x0B,
         RC_INVALID_SECTION          = RUNTIME_COMP_ID | 0x0C,
+        RC_CANNOT_MAP_MEMORY3       = RUNTIME_COMP_ID | 0x0D,
+
     };
 };
 

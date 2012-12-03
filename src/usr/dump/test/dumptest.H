@@ -1,0 +1,1198 @@
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/usr/dump/test/dumptest.H $                                */
+/*                                                                        */
+/* IBM CONFIDENTIAL                                                       */
+/*                                                                        */
+/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/*                                                                        */
+/* p1                                                                     */
+/*                                                                        */
+/* Object Code Only (OCO) source materials                                */
+/* Licensed Internal Code Source Materials                                */
+/* IBM HostBoot Licensed Internal Code                                    */
+/*                                                                        */
+/* The source code for this program is not published or otherwise         */
+/* divested of its trade secrets, irrespective of what has been           */
+/* deposited with the U.S. Copyright Office.                              */
+/*                                                                        */
+/* Origin: 30                                                             */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
+
+#ifndef __DUMPTEST_H
+#define __DUMPTEST_H
+
+/**
+ *  @file dumptest.H
+ *
+ *  @brief Test case for dump code
+*/
+
+#include <cxxtest/TestSuite.H>
+#include <errl/errlmanager.H>
+#include <errl/errlentry.H>
+#include <devicefw/userif.H>
+#include <targeting/common/util.H>
+#include "../dumpCollect.H"
+#include <runtime/runtime.H>
+#include <usr/vmmconst.h>
+#include <sys/mmio.h>
+#include <util/align.H>
+#include <sys/mm.h>
+
+
+extern trace_desc_t* g_trac_dump;
+
+class DumpTest: public CxxTest::TestSuite
+{
+  public:
+
+
+    /**
+     * @brief Basic dump test that has sequential src addresses to
+     *   equivalent destination locations and sizes.
+     *
+     */
+
+    void test_DumpCollect(void)
+    {
+
+        TRACFCOMP( g_trac_dump, "DumpTest::test_dumpCollect START" );
+
+        errlHndl_t l_err = NULL;
+
+        uint64_t srcTableAddr = 0;
+        uint64_t srcTableSize = 0;
+
+        uint64_t dstTableAddr = 0;
+        uint64_t dstTableSize = 0;
+
+        uint64_t resultsTableAddr = 0;
+        uint64_t resultsTableSize = 0;
+
+        DUMP::dumpEntry *srcTableEntry = NULL;
+        DUMP::dumpEntry *destTableEntry = NULL;
+        DUMP::resultsEntry *resultsTableEntry = NULL;
+
+        // For testing I am using my own data pointers and setting it up
+        // to look like PHYP would have to test the copy function.
+        srcTableAddr = DUMP_TEST_SRC_MEM_ADDR;
+        srcTableSize = DUMP_TEST_SRC_MEM_SIZE;
+        dstTableAddr = DUMP_TEST_DST_MEM_ADDR;
+        dstTableSize = DUMP_TEST_DST_MEM_SIZE;
+        resultsTableAddr = DUMP_TEST_RESULTS_MEM_ADDR;
+        resultsTableSize = DUMP_TEST_RESULTS_MEM_SIZE;
+
+
+        uint64_t src_data[8] = {DUMP_TEST_SRC_DATA_AREA, 64,  // 450000
+                                DUMP_TEST_SRC_DATA_AREA + 64, 64,
+                                DUMP_TEST_SRC_DATA_AREA + 128, 64,
+                                DUMP_TEST_SRC_DATA_AREA + 192, 64};
+
+
+        uint64_t dst_data[8] = {DUMP_TEST_DST_DATA_AREA, 64,   // 460000
+                                DUMP_TEST_DST_DATA_AREA + 64, 64,
+                                DUMP_TEST_DST_DATA_AREA + 128, 64,
+                                DUMP_TEST_DST_DATA_AREA + 192, 64};
+
+
+        // Point to the location of the src Data pointer. 
+        uint64_t *srcTablePtr = reinterpret_cast<uint64_t *>(srcTableAddr); 
+
+       // Point to the location of the dest Data pointer. 
+        uint64_t *dstTablePtr = reinterpret_cast<uint64_t *>(dstTableAddr); 
+
+        uint64_t *resultTablePtr = reinterpret_cast<uint64_t *>(resultsTableAddr);
+
+        // Put the src addresses defined above into the MDST 
+        memcpy(srcTablePtr, src_data, sizeof(src_data)); 
+
+       // Put the src addresses defined above into the MDDT 
+        memcpy(dstTablePtr, dst_data, sizeof(dst_data)); 
+
+        // Need to memory map
+        uint64_t src_Inputdata[4][8] = {
+                                 {0x1111111111111111, 0x1111111111111111,
+                                  0x1111111111111111, 0x1111111111111111,
+                                  0x1111111111111111, 0x1111111111111111,
+                                  0x1111111111111111, 0x1111111111111111},
+
+                                 {0x2222222222222222, 0x2222222222222222,
+                                  0x2222222222222222, 0x2222222222222222,
+                                  0x2222222222222222, 0x2222222222222222,
+                                  0x2222222222222222, 0x2222222222222222},
+
+                                 {0x3333333333333333, 0x3333333333333333,
+                                  0x3333333333333333, 0x3333333333333333,
+                                  0x3333333333333333, 0x3333333333333333,
+                                  0x3333333333333333,0x3333333333333333},
+
+                                 {0x4444444444444444, 0x4444444444444444,
+                                  0x4444444444444444, 0x4444444444444444,
+                                  0x4444444444444444, 0x4444444444444444,
+                                  0x4444444444444444, 0x4444444444444444}
+        };
+
+
+        // results output data expected
+        uint64_t result_data[12] = {
+                      DUMP_TEST_SRC_DATA_AREA, DUMP_TEST_DST_DATA_AREA, 64,
+                      DUMP_TEST_SRC_DATA_AREA+64, DUMP_TEST_DST_DATA_AREA+64, 64,
+                      DUMP_TEST_SRC_DATA_AREA+128, DUMP_TEST_DST_DATA_AREA+128, 64,
+                      DUMP_TEST_SRC_DATA_AREA+192, DUMP_TEST_DST_DATA_AREA+192, 64,
+        };
+
+        uint64_t *va_mapsrcTableAddr = 0;
+        uint64_t *va_srcTableAddr = 0;
+        uint64_t offset = 0;
+        int index = 0;
+
+        for (int i = 0; i<4; i++)
+        {
+            
+            // Get the Va for the page aligned Physical address
+            va_mapsrcTableAddr =
+              static_cast<uint64_t*>(mmio_dev_map(reinterpret_cast<void*>(ALIGN_PAGE_DOWN(src_data[index])),
+                                                  THIRTYTWO_GB));
+
+            // copy the mapped VA to a VA pointer we will 
+            va_srcTableAddr = va_mapsrcTableAddr;
+
+            // calculate offset based on page alignment.
+            offset = src_data[index] - ALIGN_PAGE_DOWN(src_data[index]);
+
+            // increment the offset to correct VA offset. 
+            va_srcTableAddr += (offset/(sizeof (uint64_t)));
+
+            memcpy(va_srcTableAddr, src_Inputdata[i], sizeof(src_Inputdata[i]));
+
+            // unmap the previous src entry
+            int rc =
+              mmio_dev_unmap(reinterpret_cast<void*>(va_mapsrcTableAddr));
+
+            if (rc != 0)
+            {
+               TRACFCOMP(g_trac_dump, "DumpTest:test_DumpCollect> got an error back from unmap : RC=%X",rc);
+               TS_FAIL( "DumpTest::CollectDump ERROR : BAD Rc from mmio_dev_unmap" );
+               break;
+            }
+            index+=2;
+        }
+
+
+            srcTableEntry = reinterpret_cast<DUMP::dumpEntry *>(srcTableAddr);
+            destTableEntry = reinterpret_cast<DUMP::dumpEntry *>(dstTableAddr);
+            resultsTableEntry = reinterpret_cast<DUMP::resultsEntry *>(resultsTableAddr);
+
+
+        l_err = DUMP::copySrcToDest(srcTableEntry,srcTableSize,
+                                    destTableEntry,dstTableSize,
+                                    resultsTableEntry,resultsTableSize);
+
+        if( l_err )
+        {
+            TRACFCOMP(g_trac_dump, "DumpTest:test_DumpCollect> got an error back from dumpcollect : RC=%X",l_err->reasonCode() );
+            TS_FAIL( "DumpTest::CollectDump ERROR : Unexpected error log from dumpcollect" );
+            errlCommit(l_err,DUMP_COMP_ID);
+        }
+
+
+        // Verify that the data and the VA mapping is correct.
+        uint64_t *va_mapdestTableAddr = 0;
+        uint64_t *va_destTableAddr = 0;
+        offset = 0;
+        index = 0;
+
+        for (int i = 0; i<4; i++)
+        {
+            // Get the Va for the page aligned Physical address
+            va_mapdestTableAddr =
+              static_cast<uint64_t*>(mmio_dev_map(reinterpret_cast<void*>(ALIGN_PAGE_DOWN(dst_data[index])),
+                                                  THIRTYTWO_GB));
+
+            // copy the mapped VA to a VA pointer we will 
+            va_destTableAddr = va_mapdestTableAddr;
+
+            // calculate offset based on page alignment.
+            offset = dst_data[index] - ALIGN_PAGE_DOWN(dst_data[index]);
+
+            // increment the offset to correct VA offset. 
+            va_destTableAddr += (offset/(sizeof (uint64_t)));
+
+            uint64_t paddr = mm_virt_to_phys(va_destTableAddr);
+
+            if (paddr != dst_data[index])
+            {
+                TRACFCOMP(g_trac_dump,
+                          "DumpTest:test_DumpCollect:1> mapping mismatch actual paddr = %lx, expected paddr = %lx", paddr, dst_data[index]);
+                TS_FAIL( "DumpTest:test_DumpCollect:1 ERROR : Unexpected error physical address mismatch" );
+            }
+
+
+            // Check the destination table. 
+            int src_rc = memcmp(va_destTableAddr,src_Inputdata[i],sizeof(src_Inputdata[i]));
+
+            if (src_rc!=0)
+            {
+                TRACFCOMP(g_trac_dump, "DumpTest::DumpCollect:1 : Results Data mismatch rc = %d", src_rc);
+                TS_FAIL( "DumpTest::DumpCollect ERROR : Unexpected error data mismatch in results table" );
+            }
+
+
+            // unmap the previous src entry
+            int rc =
+              mmio_dev_unmap(reinterpret_cast<void*>(va_mapsrcTableAddr));
+
+            if (rc != 0)
+            {
+               TRACFCOMP(g_trac_dump,
+                         "DumpTest::DumpCollect got an error back from unmap : RC=%X",rc);
+               TS_FAIL( "DumpTest::DumpCollect ERROR : BAD Rc from mmio_dev_unmap" );
+               break;
+            }
+            index+=2;
+        }
+
+
+        // Check the results table. 
+        int result_rc = memcmp(resultTablePtr,result_data,sizeof (result_data));
+
+        if (result_rc!=0)
+        {
+            TRACFCOMP(g_trac_dump, "DumpTest::DumpCollect:1 : Results Data mismatch rc = %d", result_rc);
+            TS_FAIL( "DumpTest::DumpCollect ERROR : Unexpected error data mismatch in results table" );
+        }
+
+        TRACFCOMP( g_trac_dump, "DumpTest::DumpCollect COMPLETE" );
+
+    }
+
+    /**
+     * @brief Basic dump test that has sequential src addresses to
+     *   imbalanced destination locations and sizes. 
+     *
+     */
+    void test_DumpCollectUnevenDest(void)
+    {
+
+        TRACFCOMP( g_trac_dump, "DumpTest::DumpCollectUnevenDest START" );
+        errlHndl_t l_err = NULL;
+        uint64_t srcTableAddr = 0;
+        uint64_t srcTableSize = 0;
+        uint64_t dstTableAddr = 0;
+        uint64_t dstTableSize = 0;
+        uint64_t resultsTableAddr = 0;
+        uint64_t resultsTableSize = 0;
+
+        DUMP::dumpEntry *srcTableEntry = NULL;
+        DUMP::dumpEntry *destTableEntry = NULL;
+        DUMP::resultsEntry *resultsTableEntry = NULL;
+
+        // Setting up TESt version of the MDST, MDDT and MDRT.
+        srcTableAddr = DUMP_TEST_SRC_MEM_ADDR;
+        srcTableSize = DUMP_TEST_SRC_MEM_SIZE;
+        dstTableAddr = DUMP_TEST_DST_MEM_ADDR;
+        dstTableSize = DUMP_TEST_DST_MEM_SIZE;
+        resultsTableAddr = DUMP_TEST_RESULTS_MEM_ADDR;
+        resultsTableSize = DUMP_TEST_RESULTS_MEM_SIZE;
+
+
+        uint64_t src_data[8] = {DUMP_TEST_SRC_DATA_AREA+256, 64,      // 4500100
+                                DUMP_TEST_SRC_DATA_AREA+256 + 64,64,  // 4500140
+                                DUMP_TEST_SRC_DATA_AREA+256 + 128,64, // 4500180
+                                DUMP_TEST_SRC_DATA_AREA+256 + 192, 64}; // 45001C0
+
+        uint64_t dst_data[8] = {DUMP_TEST_DST_DATA_AREA+1024, 64,   // 4600400
+                                DUMP_TEST_DST_DATA_AREA+1024 + 64, 32, // 4600440
+                                DUMP_TEST_DST_DATA_AREA+1024 + 96, 32, // 4600480
+                                DUMP_TEST_DST_DATA_AREA+1024+ 128, 128}; // 46004C0
+
+        uint64_t *srcTablePtr = reinterpret_cast<uint64_t *>(srcTableAddr); 
+        uint64_t *dstTablePtr = reinterpret_cast<uint64_t *>(dstTableAddr); 
+        uint64_t *resultTablePtr = reinterpret_cast<uint64_t *>(resultsTableAddr);
+
+        memcpy(srcTablePtr, src_data, sizeof(src_data)); 
+        memcpy(dstTablePtr, dst_data, sizeof(dst_data)); 
+
+
+        // Need to memory map
+        uint64_t src_Inputdata[4][8] = {
+                                        {0xaaaaaaaaaaaaaaaa, 0xaaaaaaaaaaaaaaaa,
+                                         0xaaaaaaaaaaaaaaaa, 0xaaaaaaaaaaaaaaaa,
+                                         0xaaaaaaaaaaaaaaaa, 0xaaaaaaaaaaaaaaaa,
+                                         0xaaaaaaaaaaaaaaaa, 0xaaaaaaaaaaaaaaaa},
+
+                                        {0xbbbbbbbbbbbbbbbb, 0xbbbbbbbbbbbbbbbb,
+                                         0xbbbbbbbbbbbbbbbb, 0xbbbbbbbbbbbbbbbb,
+                                         0xbbbbbbbbbbbbbbbb, 0xbbbbbbbbbbbbbbbb,
+                                         0xbbbbbbbbbbbbbbbb, 0xbbbbbbbbbbbbbbbb},
+
+                                        {0xcccccccccccccccc, 0xcccccccccccccccc,
+                                         0xcccccccccccccccc, 0xcccccccccccccccc,
+                                         0xcccccccccccccccc, 0xcccccccccccccccc,
+                                         0xcccccccccccccccc, 0xcccccccccccccccc},
+
+                                        {0xdddddddddddddddd, 0xdddddddddddddddd,
+                                         0xdddddddddddddddd, 0xdddddddddddddddd,
+                                         0xdddddddddddddddd, 0xdddddddddddddddd,
+                                         0xdddddddddddddddd, 0xdddddddddddddddd},                            
+        };
+
+        // results output data expected
+        uint64_t result_data[15] = {
+                   DUMP_TEST_SRC_DATA_AREA+256, DUMP_TEST_DST_DATA_AREA+1024, 64,
+                   DUMP_TEST_SRC_DATA_AREA+256+64, DUMP_TEST_DST_DATA_AREA+1024+64, 32,
+                   DUMP_TEST_SRC_DATA_AREA+256+64+32, DUMP_TEST_DST_DATA_AREA+1024+64+32, 32,
+                   DUMP_TEST_SRC_DATA_AREA+256+128,DUMP_TEST_DST_DATA_AREA+1024+128, 64,
+                   DUMP_TEST_SRC_DATA_AREA+256+192, DUMP_TEST_DST_DATA_AREA+1024+128+64, 64,
+        };
+
+        uint64_t *va_mapsrcTableAddr = 0;
+        uint64_t *va_srcTableAddr = 0;
+        uint64_t offset = 0;
+        int index = 0;
+
+        for (int i = 0; i<4; i++)
+        {    
+            // Get the Va for the page aligned Physical address
+            va_mapsrcTableAddr =
+              static_cast<uint64_t*>(mmio_dev_map(reinterpret_cast<void*>(ALIGN_PAGE_DOWN(src_data[index])),
+                                                  THIRTYTWO_GB));
+
+            // copy the mapped VA to a VA pointer 
+            va_srcTableAddr = va_mapsrcTableAddr;
+
+            // calculate offset based on page alignment.
+            offset = src_data[index] - ALIGN_PAGE_DOWN(src_data[index]);
+
+            // increment the offset to correct VA offset. 
+            va_srcTableAddr += (offset/(sizeof (uint64_t)));
+
+            memcpy(va_srcTableAddr, src_Inputdata[i], sizeof(src_Inputdata[i]));
+
+            // unmap the previous src entry
+            int rc =
+              mmio_dev_unmap(reinterpret_cast<void*>(va_mapsrcTableAddr));
+
+            if (rc != 0)
+            {
+               TRACFCOMP(g_trac_dump,
+                         "DumpTest::DumpCollectUnevenDest> got an error back from unmap : RC=%X",rc);
+               TS_FAIL( "DumpTest::CollectDumpUnevenDest ERROR : BAD Rc from mmio_dev_unmap" );
+               break;
+            }
+            index+=2;
+        }
+
+            srcTableEntry = reinterpret_cast<DUMP::dumpEntry *>(srcTableAddr);
+            destTableEntry = reinterpret_cast<DUMP::dumpEntry *>(dstTableAddr);
+            resultsTableEntry = reinterpret_cast<DUMP::resultsEntry *>(resultsTableAddr);
+
+
+        l_err = DUMP::copySrcToDest(srcTableEntry,srcTableSize,
+                                    destTableEntry,dstTableSize,
+                                    resultsTableEntry,resultsTableSize);
+
+
+        if( l_err )
+        {
+            TRACFCOMP(g_trac_dump, "DumpTest::DumpCollectUnevenDest got an error back from dumpcollect : RC=%X",l_err->reasonCode() );
+            TS_FAIL( "DumpTest::CollectDumpUnevenDest ERROR : Unexpected error log from dumpcollect" );
+            errlCommit(l_err,DUMP_COMP_ID);
+        }
+
+        //----------------------------------------------------------------
+        // !!!!! VERIFYING RESULTS  
+        // Verify that the data and the VA mapping is correct.
+        //--------------------------------------------------------------
+        do
+        {
+
+            uint64_t *va_mapdestTableAddr = 0;
+            uint64_t *va_destTableAddr = 0;
+            offset = 0;
+            index = 0;
+
+            int src_rc = 0;
+            uint64_t paddr = 0;
+
+            // Looping throught the first 3 destinations
+            for (int i = 0; i<3; i++)
+            {
+
+                // Get the Va for the page aligned Physical address
+                va_mapdestTableAddr = static_cast<uint64_t*>(mmio_dev_map(reinterpret_cast<void*>(ALIGN_PAGE_DOWN(dst_data[index])),THIRTYTWO_GB));
+
+                // copy the mapped VA to a VA pointer we will 
+                va_destTableAddr = va_mapdestTableAddr;
+
+                // calculate offset based on page alignment.
+                offset = dst_data[index] - ALIGN_PAGE_DOWN(dst_data[index]);
+
+                // increment the offset to correct VA offset. 
+                va_destTableAddr += (offset/(sizeof (uint64_t)));
+
+                paddr = mm_virt_to_phys(va_destTableAddr);
+
+                if (paddr != dst_data[index])
+                {
+                    TRACFCOMP(g_trac_dump,
+                              "DumpTest::DumpCollectUnevenDest:1> mapping mismatch actual paddr = %lx, expected paddr = %lx",
+                               paddr, dst_data[index]);
+                    TS_FAIL( "DumpTest::DumpCollectUnevenDest ERROR : Unexpected error physical address mismatch" );
+                }
+
+                //if entry need to compare destination data to second portion of previous src
+                if (i == 2)
+                {
+                    src_rc = memcmp(va_destTableAddr, &src_Inputdata[1][4], dst_data[index+1]);
+                }
+                else
+                {
+                    // Check the destination table. 
+                    src_rc = memcmp(va_destTableAddr,src_Inputdata[i],dst_data[index+1]);
+                }
+
+                // If got a memcmp fail
+                if (src_rc!=0)
+                {
+                    TRACFCOMP(g_trac_dump, "DumpTest::DumpCollectUnevenDest:1 : Results Data mismatch rc = %d for index = %d", src_rc, i);
+                    TS_FAIL( "DumpTest::DumpCollectUnevenDest ERROR : Unexpected error data mismatch in results table" );
+                }
+
+
+                // unmap the previous src entry
+                int rc =
+                  mmio_dev_unmap(reinterpret_cast<void*>(va_mapsrcTableAddr));
+
+                if (rc != 0)
+                {
+                    TRACFCOMP(g_trac_dump,
+                              "DumpTest::DumpCollectUnevenDest got an error back from unmap : RC=%X",rc);
+                    TS_FAIL( "DumpTest::DumpCollectUnevenDest ERROR : BAD Rc from mmio_dev_unmap" );
+                    break;
+                }
+                index+=2;
+            }
+
+
+            // checking the 4th entry as it crosses through 2 source entries
+
+            // Get the Va for the page aligned Physical address
+            va_mapdestTableAddr = static_cast<uint64_t*>(mmio_dev_map(reinterpret_cast<void*>(ALIGN_PAGE_DOWN(dst_data[index])),THIRTYTWO_GB));
+
+            // copy the mapped VA to a VA pointer we will 
+            va_destTableAddr = va_mapdestTableAddr;
+
+            // calculate offset based on page alignment.
+            offset = dst_data[index] - ALIGN_PAGE_DOWN(dst_data[index]);
+
+            // increment the offset to correct VA offset. 
+            va_destTableAddr += (offset/(sizeof (uint64_t)));
+
+            paddr = mm_virt_to_phys(va_destTableAddr);
+
+            if (paddr != dst_data[index])
+            {
+                TRACFCOMP(g_trac_dump,
+                          "DumpTest::DumpCollectUnevenDest:2> mapping mismatch actual paddr = %lx, expected paddr = %lx",
+                          paddr, dst_data[index]);
+                TS_FAIL( "DumpTest::DumpCollectUnevenDest:2 ERROR : Unexpected error physical address mismatch" );
+            }
+
+            int dataentries = (dst_data[index+1]/16);
+
+            // start with 3rd src index.. 
+            int i = 2;
+            // Src Data input.
+            int dataIndex = 0;
+
+            // Now loop through the data at this memory address and compare it to the data 
+            for (int j = 0; j<dataentries; j++)
+            {
+                if (va_destTableAddr[j] != src_Inputdata[i][dataIndex])
+                {
+                    // error
+                    TRACFCOMP(g_trac_dump,
+                              "DumpTest::DumpCollectUnevenDest:3 : Data mismatch input data = %lX, outputdata = %lx",
+                               src_Inputdata[i][dataIndex], va_destTableAddr[j]);
+                    TS_FAIL( "DumpTest::DumpCollectUnevenDest:3 ERROR : Unexpected error data mismatch" );
+                    break;
+                }
+
+                dataIndex++;
+
+                if (j == 7)
+                {
+                    i++;
+                    dataIndex = 0;
+                }
+
+            }
+
+
+            // unmap the previous src entry
+            int rc =
+              mmio_dev_unmap(reinterpret_cast<void*>(va_mapdestTableAddr));
+
+            if (rc != 0)
+            {
+                TRACFCOMP(g_trac_dump,
+                          "DumpTest::DumpCollectUnevenDest got an error back from unmap : RC=%X",rc);
+                TS_FAIL( "DumpTest::CollectDumpUnevenDest ERROR : BAD Rc from mmio_dev_unmap" );
+                break;
+            }
+            index+=2;
+
+        }while(0);
+
+        // Check the results table. 
+        int result_rc = memcmp(resultTablePtr,result_data,sizeof (result_data));
+
+        if (result_rc!=0)
+        {
+            TRACFCOMP(g_trac_dump, "DumpTest::DumpCollectUnevenDest : Results Data mismatch rc = %d", result_rc);
+            TS_FAIL( "DumpTest::DumpCollectUnevenDest ERROR : Unexpected error data mismatch in results table" );
+        }
+
+   
+     TRACFCOMP( g_trac_dump, "dumpTest::test_dumpCollectUnevenDest COMPLETE" );
+    }
+
+
+    /**
+     * @brief Basic dump test that has non sequential src addresses with varying
+     *     sizes to non sequential destination locations and uneven src
+     *
+     */
+
+    void test_DumpCollectUnevenSrc(void)
+    {
+
+        TRACFCOMP( g_trac_dump, "dumpTest::test_dumpCollectUnevenSrc START" );
+
+        errlHndl_t l_err = NULL;
+
+        uint64_t srcTableAddr = 0;
+        uint64_t srcTableSize = 0;
+
+        uint64_t dstTableAddr = 0;
+        uint64_t dstTableSize = 0;
+
+        uint64_t resultsTableAddr = 0;
+        uint64_t resultsTableSize = 0;
+
+        uint64_t offset = 0;
+
+        DUMP::dumpEntry *srcTableEntry = NULL;
+        DUMP::dumpEntry *destTableEntry = NULL;
+        DUMP::resultsEntry *resultsTableEntry = NULL;
+
+        // Setting up TESt version of the MDST, MDDT and MDRT.
+        srcTableAddr = DUMP_TEST_SRC_MEM_ADDR;
+        srcTableSize = DUMP_TEST_SRC_MEM_SIZE;
+        dstTableAddr = DUMP_TEST_DST_MEM_ADDR;
+        dstTableSize = DUMP_TEST_DST_MEM_SIZE;
+        resultsTableAddr = DUMP_TEST_RESULTS_MEM_ADDR;
+        resultsTableSize = DUMP_TEST_RESULTS_MEM_SIZE;
+
+        uint64_t src_data[8] = {DUMP_TEST_SRC_DATA_AREA+1024, 16,   // 4500400
+                                DUMP_TEST_SRC_DATA_AREA+2048, 48,   // 4500800
+                                DUMP_TEST_SRC_DATA_AREA+3072, 32,   // 4500C00
+                                DUMP_TEST_SRC_DATA_AREA+4096, 160}; // 4501000
+
+
+        uint64_t dst_data[8] = {DUMP_TEST_DST_DATA_AREA+2048,     64,  // 4600800
+                                DUMP_TEST_DST_DATA_AREA+2048+128, 32,  // 4600880
+                                DUMP_TEST_DST_DATA_AREA+3072,     32,  // 4600C00
+                                DUMP_TEST_DST_DATA_AREA+3072+64,  128}; // 4600C40
+
+
+        uint64_t *srcTablePtr = reinterpret_cast<uint64_t *>(srcTableAddr); 
+        uint64_t *dstTablePtr = reinterpret_cast<uint64_t *>(dstTableAddr); 
+        uint64_t *resultTablePtr = reinterpret_cast<uint64_t *>(resultsTableAddr);
+
+        memcpy(srcTablePtr, src_data, sizeof(src_data)); 
+        memcpy(dstTablePtr, dst_data, sizeof(dst_data)); 
+
+
+        // Need to memory map
+        uint64_t src_data0[2] = {0x1212121212121212, 0x1212121212121212};
+
+        uint64_t src_data1[6] = {0x3434343434343434, 0x3434343434343434,
+                                 0x3434343434343434, 0x3434343434343434,
+                                 0x3434343434343434, 0x3434343434343434};
+
+        uint64_t src_data2[4] = {0x5656565656565656, 0x5656565656565656,
+                                 0x5656565656565656, 0x5656565656565656};
+
+        uint64_t src_data3[20] = {0x7878787878787878, 0x7878787878787878,
+                                  0x7878787878787878, 0x7878787878787878,
+                                  0x7878787878787878, 0x7878787878787878,
+                                  0x7878787878787878, 0x7878787878787878,
+                                  0x7878787878787878, 0x7878787878787878,
+                                  0x7878787878787878, 0x7878787878787878,
+                                  0x7878787878787878, 0x7878787878787878,
+                                  0x7878787878787878, 0x7878787878787878,
+                                  0x7878787878787878, 0x7878787878787878,
+                                  0x7878787878787878, 0x7878787878787878};
+
+
+        // results output data expected
+        uint64_t result_data[15] = {
+                   DUMP_TEST_SRC_DATA_AREA+1024, DUMP_TEST_DST_DATA_AREA+2048, 16,
+                   DUMP_TEST_SRC_DATA_AREA+2048, DUMP_TEST_DST_DATA_AREA+2048+16, 48,
+                   DUMP_TEST_SRC_DATA_AREA+3072, DUMP_TEST_DST_DATA_AREA+2048+128, 32,
+                   DUMP_TEST_SRC_DATA_AREA+4096, DUMP_TEST_DST_DATA_AREA+3072, 32,
+                   DUMP_TEST_SRC_DATA_AREA+4096+32, DUMP_TEST_DST_DATA_AREA+3072+64, 128,
+        };
+
+        do
+        {
+            uint64_t *va_mapsrcTableAddr =
+              static_cast<uint64_t*>(mmio_dev_map(reinterpret_cast<void*>(ALIGN_PAGE_DOWN(src_data[0])),
+                                                  THIRTYTWO_GB));
+
+            uint64_t *va_srcTableAddr = va_mapsrcTableAddr;
+
+            offset = src_data[0] - ALIGN_PAGE_DOWN(src_data[0]);
+
+            // increment the offset to correct VA offset. 
+            va_srcTableAddr += (offset/(sizeof (uint64_t)));
+
+            memcpy(va_srcTableAddr, src_data0, sizeof(src_data0));
+
+            // unmap the previous src entry
+            int rc =  mmio_dev_unmap(reinterpret_cast<void*>(va_mapsrcTableAddr));
+
+            if (rc != 0)
+            {
+               TRACFCOMP(g_trac_dump,
+                         "DumpTest::DumpCollectUnevenSrc mmio_dev_map (1) bad RC=%X for addr %llx",rc, va_mapsrcTableAddr);
+               TS_FAIL( "DumpTest::DumpCollectUnevenSrc ERROR : BAD Rc from mmio_dev_unmap" );
+               break;
+
+            }
+
+            va_mapsrcTableAddr =
+              static_cast<uint64_t*>(mmio_dev_map(reinterpret_cast<void*>(ALIGN_PAGE_DOWN(src_data[2])),
+                                                  THIRTYTWO_GB));
+
+            va_srcTableAddr = va_mapsrcTableAddr;
+
+            // calculate offset based on page alignment.
+            offset = src_data[2] - ALIGN_PAGE_DOWN(src_data[2]);
+
+            // increment the offset to correct VA offset. 
+            va_srcTableAddr += (offset/(sizeof (uint64_t)));
+
+            memcpy(va_srcTableAddr, src_data1, sizeof(src_data1));
+
+            // unmap the previous src entry
+            rc =  mmio_dev_unmap(reinterpret_cast<void*>(va_mapsrcTableAddr));
+
+            if (rc != 0)
+            {
+               TRACFCOMP(g_trac_dump,
+                         "DumpTest::DumpCollectUnevenSrc mmio_dev_map (2) bad RC=%X for addr %llx",rc, va_mapsrcTableAddr);
+               TS_FAIL( "DumpTest::DumpCollectUnevenSrc ERROR : BAD Rc from mmio_dev_unmap" );
+               break;
+            }
+
+
+            va_mapsrcTableAddr =
+              static_cast<uint64_t*>(mmio_dev_map(reinterpret_cast<void*>(ALIGN_PAGE_DOWN(src_data[4])),
+                                                  THIRTYTWO_GB));
+
+            va_srcTableAddr = va_mapsrcTableAddr;
+
+            // calculate offset based on page alignment.
+            offset = src_data[4] - ALIGN_PAGE_DOWN(src_data[4]);
+
+            // increment the offset to correct VA offset. 
+            va_srcTableAddr += (offset/(sizeof (uint64_t)));
+
+            memcpy(va_srcTableAddr, src_data2, sizeof(src_data2));
+
+            // unmap the previous src entry
+            rc =  mmio_dev_unmap(reinterpret_cast<void*>(va_mapsrcTableAddr));
+
+            if (rc != 0)
+            {
+               TRACFCOMP(g_trac_dump,
+                         "DumpTest::DumpCollectUnevenSrc mmio_dev_map (3) bad RC=%X for addr %llx",rc, va_mapsrcTableAddr);
+               TS_FAIL( "DumpTest::DumpCollectUnevenSrc ERROR : BAD Rc from mmio_dev_unmap" );
+               break;
+
+            }
+
+            va_mapsrcTableAddr =
+              static_cast<uint64_t*>(mmio_dev_map(reinterpret_cast<void*>(ALIGN_PAGE_DOWN(src_data[6])),
+                                                  THIRTYTWO_GB));
+
+            va_srcTableAddr = va_mapsrcTableAddr;
+
+            // calculate offset based on page alignment.
+            offset = src_data[6] - ALIGN_PAGE_DOWN(src_data[6]);
+
+            // increment the offset to correct VA offset. 
+            va_srcTableAddr += (offset/(sizeof (uint64_t)));
+
+            memcpy(va_srcTableAddr, src_data3, sizeof(src_data3));
+
+
+            // unmap the previous src entry
+            rc =  mmio_dev_unmap(reinterpret_cast<void*>(va_mapsrcTableAddr));
+
+            if (rc != 0)
+            {
+               TRACFCOMP(g_trac_dump,
+                         "DumpTest::DumpCollectUnevenSrc mmio_dev_map (4) bad RC=%X for addr %llx",rc, va_mapsrcTableAddr);
+               TS_FAIL( "DumpTest::DumpCollectUnevenSrc ERROR : BAD Rc from mmio_dev_unmap" );
+               break;
+            }
+        }while(0);
+
+
+            srcTableEntry = reinterpret_cast<DUMP::dumpEntry *>(srcTableAddr);
+            destTableEntry = reinterpret_cast<DUMP::dumpEntry *>(dstTableAddr);
+            resultsTableEntry = reinterpret_cast<DUMP::resultsEntry *>(resultsTableAddr);
+
+
+        l_err = DUMP::copySrcToDest(srcTableEntry,srcTableSize,
+                                    destTableEntry,dstTableSize,
+                                    resultsTableEntry,resultsTableSize);
+
+        if( l_err )
+        {
+            TRACFCOMP(g_trac_dump,
+                      "DumpTest::DumpCollectUnevenSrc got an error back from copySrcToDest : RC=%X",
+                       l_err->reasonCode() );
+            TS_FAIL( "DumpTest::DumpCollectUnevenSrc ERROR : Unexpected error log from copySrcToDest" );
+            errlCommit(l_err,DUMP_COMP_ID);
+        }
+
+
+        //----------------------------------------------------------------
+        // !!!!! VERIFYING RESULTS  
+        // Verify that the data and the VA mapping is correct.
+        //----------------------------------------------------------------
+
+        do
+        {
+
+            uint64_t *va_mapdestTableAddr = 0;
+            uint64_t *va_destTableAddr = 0;
+            offset = 0;
+            int index = 0;
+            int i = 0;
+
+
+            // FIRST Destination ENTRY source entires 0 and 1   !!!!
+            // Get the Va for the page aligned Physical address
+            va_mapdestTableAddr =
+              static_cast<uint64_t*>(mmio_dev_map(reinterpret_cast<void*>(ALIGN_PAGE_DOWN(dst_data[index])),
+                                                  THIRTYTWO_GB));
+
+            // copy the mapped VA to a VA pointer we will 
+            va_destTableAddr = va_mapdestTableAddr;
+
+            // calculate offset based on page alignment.
+            offset = dst_data[index] - ALIGN_PAGE_DOWN(dst_data[index]);
+
+            // increment the offset to correct VA offset. 
+            va_destTableAddr += (offset/(sizeof (uint64_t)));
+
+            uint64_t paddr = mm_virt_to_phys(va_destTableAddr);
+
+            if (paddr != dst_data[index])
+            {
+                TRACFCOMP(g_trac_dump,
+                          "DumpTest::DumpCollectUnevenSrc:1 mapping mismatch actual paddr = %lx, expected paddr = %lx",
+                           paddr, dst_data[index]);
+                TS_FAIL( "DumpTest::DumpCollectUnevenSrc ERROR : Unexpected error log from dumpcollect" );
+            }
+
+            int dataentries = (dst_data[index+1]/16);
+
+           int curSrcEntry = 0;
+
+            // Now loop through the data at this memory address and compare it to the data 
+            for (int j = 0; j<2; j++)
+            {
+                if (va_destTableAddr[j] != src_data0[j])
+                {
+                    // error
+                    TRACFCOMP(g_trac_dump,
+                              "DumpTest::DumpCollectUnevenSrc:1 : Data mismatch input data = %lX, outputdata = %lx",
+                               src_data0[j], va_destTableAddr[j]);
+                    TS_FAIL( "DumpTest::DumpCollectUnevenSrc ERROR : Unexpected error data mismatch" );
+                    break;
+                }
+                dataentries = dataentries-1;
+                curSrcEntry++;
+            }
+
+
+            // Now loop through the remainder of this destination to a new src data entry 
+            for (int j = 0; j<dataentries; j++)
+            {
+                if (va_destTableAddr[curSrcEntry] != src_data1[j])
+                {
+                    // error
+                    TRACFCOMP(g_trac_dump,
+                              "DumpTest::DumpCollectUnevenSrc:2 : Data mismatch input data = %lX, outputdata = %lx",
+                               src_data1[j], va_destTableAddr[j]);
+                    TS_FAIL( "DumpTest::DumpCollectUnevenSrc ERROR : Unexpected error data mismatch" );
+                    break;
+                }
+
+            }
+
+            // unmap the previous src entry
+            int rc =
+              mmio_dev_unmap(reinterpret_cast<void*>(va_mapdestTableAddr));
+
+            if (rc != 0)
+            {
+                TRACFCOMP(g_trac_dump,
+                          "DumpTest::DumpCollectUnevenSrc:5 got an error back from unmap : RC=%X",rc);
+                TS_FAIL( "DumpTest::DumpCollectUnevenSrc:5 ERROR : BAD Rc from mmio_dev_unmap" );
+                break;
+            }
+            index+=2;
+
+
+            // SECOND DEStination ENTRY  third source entry!!!!
+
+            // Get the Va for the page aligned Physical address
+            va_mapdestTableAddr =
+              static_cast<uint64_t*>(mmio_dev_map(reinterpret_cast<void*>(ALIGN_PAGE_DOWN(dst_data[index])),
+                                                  THIRTYTWO_GB));
+
+            // copy the mapped VA to a VA pointer we will 
+            va_destTableAddr = va_mapdestTableAddr;
+
+            // calculate offset based on page alignment.
+            offset = dst_data[index] - ALIGN_PAGE_DOWN(dst_data[index]);
+
+            // increment the offset to correct VA offset. 
+            va_destTableAddr += (offset/(sizeof (uint64_t)));
+
+            paddr = mm_virt_to_phys(va_destTableAddr);
+
+            if (paddr != dst_data[index])
+            {
+                TRACFCOMP(g_trac_dump, "DumpTest::DumpCollectUnevenSrc:2 mapping mismatch actual paddr = %lx, expected paddr = %lx", paddr, dst_data[index]);
+                TS_FAIL( "DumpTest::DumpCollectUnevenSrc:2 ERROR : Unexpected error log from dumpcollect" );
+            }
+
+            dataentries = (dst_data[index+1]/16);
+            i = 0;
+
+            // Now loop through the data at this memory address and compare it to the data 
+            for (int j = 0; j<dataentries; j++)
+            {
+                if (va_destTableAddr[j] != src_data2[j])
+                {
+                    // error
+                    TRACFCOMP(g_trac_dump, "DumpTest::DumpCollectUnevenSrc:3 : Data mismatch input data = %lX, outputdata = %lx", src_data2[j], va_destTableAddr[j]);
+                    TS_FAIL( "DumpTest::DumpCollectUnevenSrc:3 ERROR : Unexpected error data mismatch" );
+                    break;
+                }
+            }
+
+            // unmap the previous src entry
+            rc =
+              mmio_dev_unmap(reinterpret_cast<void*>(va_mapdestTableAddr));
+
+            if (rc != 0)
+            {
+                TRACFCOMP(g_trac_dump,
+                          "DumpTest::DumpCollectUnevenSrc:6 got an error back from unmap : RC=%X",rc);
+                TS_FAIL( "DumpTest::DumpCollectUnevenSrc:6 ERROR : BAD Rc from mmio_dev_unmap" );
+                break;
+            }
+
+            index+=2;
+
+            // THIRD destination entry - part of last source!!!!
+
+            // Get the Va for the page aligned Physical address
+            va_mapdestTableAddr = static_cast<uint64_t*>(mmio_dev_map(reinterpret_cast<void*>(ALIGN_PAGE_DOWN(dst_data[index])),THIRTYTWO_GB));
+
+            // copy the mapped VA to a VA pointer we will 
+            va_destTableAddr = va_mapdestTableAddr;
+
+            // calculate offset based on page alignment.
+            offset = dst_data[index] - ALIGN_PAGE_DOWN(dst_data[index]);
+
+            // increment the offset to correct VA offset. 
+            va_destTableAddr += (offset/(sizeof (uint64_t)));
+
+            paddr = mm_virt_to_phys(va_destTableAddr);
+
+            if (paddr != dst_data[index])
+            {
+                TRACFCOMP(g_trac_dump, "DumpTest::DumpCollectUnevenSrc:3 mapping mismatch actual paddr = %lx, expected paddr = %lx", paddr, dst_data[index]);
+                TS_FAIL( "DumpTest::DumpCollectUnevenSrc:3 ERROR : Unexpected error log from dumpcollect" );
+            }
+
+            dataentries = (dst_data[index+1]/16);
+   
+            curSrcEntry = 0;
+
+
+            // Now loop through the data at this memory address and compare it to the data 
+            for (int j = 0; j<dataentries; j++)
+            {
+                if (va_destTableAddr[j] != src_data3[j])
+                {
+                    // error
+                    TRACFCOMP(g_trac_dump, "DumpTest::DumpCollectUnevenSrc:4: Data mismatch input data = %lX, outputdata = %lx", src_data3[j], va_destTableAddr[j]);
+                    TS_FAIL( "DumpTest::DumpCollectUnevenSrc ERROR : Unexpected error data mismatch" );
+                    break;
+                }
+                curSrcEntry++;
+            }
+
+
+            // unmap the previous src entry
+            rc =
+              mmio_dev_unmap(reinterpret_cast<void*>(va_mapdestTableAddr));
+
+            if (rc != 0)
+            {
+                TRACFCOMP(g_trac_dump,
+                          "DumpTest::DumpCollectUnevenSrc:7  got an error back from unmap : RC=%X",rc);
+                TS_FAIL( "DumpTest::DumpCollectUnevenSrc:7 ERROR : BAD Rc from mmio_dev_unmap" );
+                break;
+            }
+            index+=2;
+
+
+            // FOURTH SRC ENTRY !!!!
+
+            // Get the Va for the page aligned Physical address
+            va_mapdestTableAddr =
+              static_cast<uint64_t*>(mmio_dev_map(reinterpret_cast<void*>(ALIGN_PAGE_DOWN(dst_data[index])),
+                                                  THIRTYTWO_GB));
+
+            // copy the mapped VA to a VA pointer we will 
+            va_destTableAddr = va_mapdestTableAddr;
+
+            // calculate offset based on page alignment.
+            offset = dst_data[index] - ALIGN_PAGE_DOWN(dst_data[index]);
+
+            // increment the offset to correct VA offset. 
+            va_destTableAddr += (offset/(sizeof (uint64_t)));
+
+            paddr = mm_virt_to_phys(va_destTableAddr);
+
+            if (paddr != dst_data[index])
+            {
+                TRACFCOMP(g_trac_dump,
+                          "DumpTest::DumpCollectUnevenSrc:5 mapping mismatch actual paddr = %lx, expected paddr = %lx",
+                           paddr, dst_data[index]);
+                TS_FAIL( "DumpTest::DumpCollectUnevenSrc:4 ERROR : Unexpected error log from dumpcollect" );
+            }
+
+            dataentries = (dst_data[index+1]/16);
+
+            // Now loop through the data at this memory address and compare it to the data 
+            for (int j = 0; j<dataentries; j++)
+            {
+                if (va_destTableAddr[j] != src_data3[curSrcEntry])
+                {
+                    // error
+                    TRACFCOMP(g_trac_dump,
+                              "DumpTest::DumpCollectUnevenSrc:5 : Data mismatch input data = %lX, outputdata = %lx",
+                               src_data3[curSrcEntry], va_destTableAddr[j]);
+                    TS_FAIL( "DumpTest::DumpCollectUnevenSrc ERROR : Unexpected error data mismatch" );
+                    break;
+                }
+
+                curSrcEntry++;
+            }
+
+            // unmap the previous src entry
+            rc =
+              mmio_dev_unmap(reinterpret_cast<void*>(va_mapdestTableAddr));
+
+            if (rc != 0)
+            {
+                TRACFCOMP(g_trac_dump,
+                          "DumpTest::DumpCollectUnevenSrc:8 got an error back from unmap : RC=%X",rc);
+                TS_FAIL( "DumpTest::DumpCollectUnevenSrc:8 ERROR : BAD Rc from mmio_dev_unmap" );
+                break;
+            }
+            index+=2;
+
+        }while(0);
+
+
+        // Check the results table. 
+        int result_rc = memcmp(resultTablePtr,result_data,sizeof (result_data));
+
+        if (result_rc!=0)
+        {
+            TRACFCOMP(g_trac_dump, "DumpTest::DumpCollectUnevenSRC:1 : Results Data mismatch rc = %d", result_rc);
+            TS_FAIL( "DumpTest::DumpCollectUnevenSrc ERROR : Unexpected error data mismatch in results table" );
+        }
+
+
+        TRACFCOMP( g_trac_dump, "dumpTest::test_dumpCollectUnevenSrc COMPLETE" );
+    }
+
+
+    /**
+     * @brief Basic dump test that forces an error condition that does not have
+     *     enough destination space to hold the src size
+     *
+     */
+
+    void test_DumpCollectNotEnoughDest(void)
+    {
+
+        TRACFCOMP( g_trac_dump, "dumpTest::test_dumpCollectNotEnoughDest START" );
+
+        errlHndl_t l_err = NULL;
+
+        uint64_t srcTableAddr = 0;
+        uint64_t srcTableSize = 0;
+
+        uint64_t dstTableAddr = 0;
+        uint64_t dstTableSize = 0;
+
+        uint64_t resultsTableAddr = 0;
+        uint64_t resultsTableSize = 0;
+
+        DUMP::dumpEntry *srcTableEntry = NULL;
+        DUMP::dumpEntry *destTableEntry = NULL;
+        DUMP::resultsEntry *resultsTableEntry = NULL;
+
+        // Test locations of the MDST, MDDT, MDRT
+        srcTableAddr = DUMP_TEST_SRC_MEM_ADDR;
+        srcTableSize = DUMP_TEST_SRC_MEM_SIZE;
+        dstTableAddr = DUMP_TEST_DST_MEM_ADDR;
+        dstTableSize = DUMP_TEST_DST_MEM_SIZE;
+        resultsTableAddr = DUMP_TEST_RESULTS_MEM_ADDR;
+        resultsTableSize = DUMP_TEST_RESULTS_MEM_SIZE;
+
+        uint64_t src_data[8] = {DUMP_TEST_SRC_DATA_AREA, 64,  // 450000
+                                DUMP_TEST_SRC_DATA_AREA + 64, 64,
+                                DUMP_TEST_SRC_DATA_AREA + 128, 64,
+                                DUMP_TEST_SRC_DATA_AREA + 192, 64};
+
+
+        uint64_t dst_data[8] = {DUMP_TEST_DST_DATA_AREA+4096, 64,   // 4601000
+                                DUMP_TEST_DST_DATA_AREA + 4096 + 64, 64,
+                                DUMP_TEST_DST_DATA_AREA + 4096 + 128, 64,
+                                DUMP_TEST_DST_DATA_AREA + 4096 + 192, 32};  // NOTE>> TOO SMALL of a space.. 
+
+
+        // Point to the location of the src Data pointer. 
+        uint64_t *srcTablePtr = reinterpret_cast<uint64_t *>(srcTableAddr); 
+
+        // Point to the location of the dest Data pointer. 
+        uint64_t *dstTablePtr = reinterpret_cast<uint64_t *>(dstTableAddr); 
+
+        // Put the src addresses defined above into the MDST 
+        memcpy(srcTablePtr, src_data, sizeof(src_data)); 
+
+        // Put the src addresses defined above into the MDDT 
+        memcpy(dstTablePtr, dst_data, sizeof(dst_data)); 
+
+
+        // Need to memory map
+        uint64_t src_Inputdata[4][8] = {
+            {0x1111111111111111, 0x1111111111111111,
+            0x1111111111111111, 0x1111111111111111,
+            0x1111111111111111, 0x1111111111111111,
+            0x1111111111111111, 0x1111111111111111},
+
+            {0x2222222222222222, 0x2222222222222222,
+            0x2222222222222222, 0x2222222222222222,
+            0x2222222222222222, 0x2222222222222222,
+            0x2222222222222222, 0x2222222222222222},
+
+            {0x3333333333333333, 0x3333333333333333,
+            0x3333333333333333, 0x3333333333333333,
+            0x3333333333333333, 0x3333333333333333,
+            0x3333333333333333,0x3333333333333333},
+
+            {0x4444444444444444, 0x4444444444444444,
+            0x4444444444444444, 0x4444444444444444,
+            0x4444444444444444, 0x4444444444444444,
+            0x4444444444444444, 0x4444444444444444}
+        };
+
+        uint64_t *va_mapsrcTableAddr = 0;
+        uint64_t *va_srcTableAddr = 0;
+        uint64_t offset = 0;
+        int index = 0;
+
+        for (int i = 0; i<4; i++)
+        {
+
+            // Get the Va for the page aligned Physical address
+            va_mapsrcTableAddr = static_cast<uint64_t*>(mmio_dev_map(reinterpret_cast<void*>(ALIGN_PAGE_DOWN(src_data[index])),THIRTYTWO_GB));
+
+            // copy the mapped VA to a VA pointer we will 
+            va_srcTableAddr = va_mapsrcTableAddr;
+
+            // calculate offset based on page alignment.
+            offset = src_data[index] - ALIGN_PAGE_DOWN(src_data[index]);
+
+            // increment the offset to correct VA offset. 
+            va_srcTableAddr += (offset/(sizeof (uint64_t)));
+
+            memcpy(va_srcTableAddr, src_Inputdata[i], sizeof(src_Inputdata[i]));
+
+            // unmap the previous src entry
+            int rc =
+              mmio_dev_unmap(reinterpret_cast<void*>(va_mapsrcTableAddr));
+
+            if (rc != 0)
+            {
+                TRACFCOMP(g_trac_dump, "DumpTest::DumpCollectNotEnoughDest ERROR..got an error back from unmap : RC=%X",rc);
+                TS_FAIL( "DumpTest::DumpCollectNotEnoughDest ERROR : BAD Rc from mmio_dev_unmap" );
+                break;
+            }
+            index+=2;
+        }
+
+
+        srcTableEntry = reinterpret_cast<DUMP::dumpEntry *>(srcTableAddr);
+        destTableEntry = reinterpret_cast<DUMP::dumpEntry *>(dstTableAddr);
+        resultsTableEntry = reinterpret_cast<DUMP::resultsEntry *>(resultsTableAddr);
+
+
+        l_err = DUMP::copySrcToDest(srcTableEntry,srcTableSize,
+                                    destTableEntry,dstTableSize,
+                                    resultsTableEntry,resultsTableSize);
+
+
+        // this testcase expects an error returned.
+        if( l_err )
+        {
+            TRACFCOMP(g_trac_dump,
+                      "DumpTest::DumpCollectNotEnoughDest got an EXPECTED error back from copySrcToDest : RC=%X",l_err->reasonCode() );
+            delete l_err;
+        }
+        else
+        {
+            TRACFCOMP(g_trac_dump,
+                      "DumpTest::DumpCollectNotEnoughDest ERROR : Did NOT get errorlog back from copySrcToDest");
+            TS_FAIL( "DumpTest::DumpCollectNotEnoughDest ERROR : DID not get expected error on too small dest entry" );
+        }
+
+
+        TRACFCOMP( g_trac_dump, "dumpTest::test_dumpCollectNotEnoughDest COMPLETE" );
+
+    }
+};
+
+#endif
