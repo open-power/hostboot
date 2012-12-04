@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 1996,2012              */
+/* COPYRIGHT International Business Machines Corp. 1996,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -187,20 +187,6 @@ public:
       Place place = BACK);
 */
 
-  /**
-   Add scr & data to capture log (defunct)
-   <ul>
-   <br><b>Paramter:  chipid (or chip enum)
-   <br><b>Paramter:  Scan comm register object
-   <br><b>Paramter:  Optional location in capure vector [FRONT | BACK] def = BACK
-   <br><b>Returns:   Nothing
-   <br><b>Requires:  Nothing
-   <br><b>Promises:  scr.Read()
-   <br><b>Notes:     This method is no longer implemented
-   </ul><br>
-   */
-  void Add(ScanCommRegisterAccess & scr, Place place = BACK);
-
   // dg02 start
   /**
    Add scr & data to capture log
@@ -219,25 +205,6 @@ public:
             BIT_STRING_CLASS & bs, Place place = BACK);
 
   // dg02 end
-  // dg06a start
-  /**
-   Add scr & data to capture log
-   <ul>
-   <br><b>Paramter:  i_pTargetHandle Handle of chip object
-   <br><b>Paramter:  scan comm id (unique  code representing scan comm address)
-   <br><b>Paramter:  Scan comm register address
-   <br><b>Paramter:  Scan comm register bit length length
-   <br><b>Paramter:  Optional location in capure vector [FRONT | BACK] def = BACK
-   <br><b>Returns:   Nothing
-   <br><b>Requires:  Nothing
-   <br><b>Promises:
-   <br><b>Notes:     This is available for Regatta and beyond. Not implemented on Condor
-   </ul><br>
-   */
-  void Add( TARGETING::TargetHandle_t i_pTargetHandle , int iScomId,
-            uint64_t iScomAddress, uint32_t iScomBitLength ,
-            Place iplace = BACK);
-  // dg06a end
 
 // start @jl04a
   /**

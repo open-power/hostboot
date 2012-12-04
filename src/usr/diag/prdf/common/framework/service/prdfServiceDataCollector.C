@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2004,2012              */
+/* COPYRIGHT International Business Machines Corp. 2004,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -46,7 +46,6 @@
 #include <prdfTrace.H>
 #undef prdfServiceDataCollector_C
 
-using namespace PRDF;
 
 //------------------------------------------------------------------------------
 //  User Types, Constants, macros, prototypes, globals
@@ -55,10 +54,13 @@ using namespace PRDF;
 //------------------------------------------------------------------------------
 // Member Function Specifications
 //------------------------------------------------------------------------------
-#ifndef __HOSTBOOT_MODULE
 
 namespace PRDF
 {
+
+   std::list<ExtensibleChip*> ServiceDataCollector::cv_ruleChipStack;
+
+#ifndef __HOSTBOOT_MODULE
 
 inline void buffer_append(uint8_t *&ptr, uint32_t value)
 {
@@ -125,7 +127,7 @@ inline TARGETING::TargetHandle_t buffer_getTarget( const uint8_t *&ptr )
     return l_tempChipHandle;
 }
 
-#endif
+#endif  //ifndef__HOSTBOOT_MODULE
 
 //------------------------------------------------------------------------------
 
@@ -385,7 +387,8 @@ void ServiceDataCollector::AddChangeForHcdb(TARGETING::TargetHandle_t i_pTargetH
     }
 }
 
+#endif // ifndef __HOSTBOOT_MODULE
+
 } // end namespace PRDF
 
-#endif
 

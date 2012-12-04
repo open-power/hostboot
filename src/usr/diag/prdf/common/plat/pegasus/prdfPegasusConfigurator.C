@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012                   */
+/* COPYRIGHT International Business Machines Corp. 2012,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -140,6 +140,14 @@ System * PegasusConfigurator::build()
     // Add domains to the system.
     Configurator::domainList & domains = getDomainList();
     l_system->AddDomains( domains.begin(), domains.end() );
+
+#ifdef __MEM_PROFILING
+
+    ScanFacility      & scanFac = ScanFacility::Access();
+    PRDF_DTRAC( "printing flyweight size ");
+    scanFac.printStats();
+    PRDF_DTRAC("total chips in the system %d ",chips.size());
+#endif
 
     PRDF_EXIT( "PegasusConfigurator::build()" );
 

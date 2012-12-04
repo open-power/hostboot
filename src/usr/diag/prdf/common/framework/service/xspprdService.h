@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 1999,2012              */
+/* COPYRIGHT International Business Machines Corp. 1999,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -56,11 +56,8 @@
 #define IIPSERVICEGENERATOR_H
 
 
-#if !defined(IIPSDBUG_H)
- #include <iipsdbug.h>          // for ATTENTION_TYPE
-#endif
-
-#include <errlentry.H> //for errlHndl_t  //mp01 a
+#include <iipsdbug.h>       // for ATTENTION_TYPE
+#include <errlentry.H>      //for errlHndl_t
 
 
 
@@ -128,7 +125,6 @@ public:
 
   /**
    * @brief set the err data service to be used
-   *
    * @param[in] i_errDataService new err data service
    */
   virtual void setErrDataService(ErrDataService & i_errDataService)=0;

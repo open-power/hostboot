@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2008,2012              */
+/* COPYRIGHT International Business Machines Corp. 2008,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -50,7 +50,7 @@ namespace PRDF
 
 namespace SystemSpecific
 {
-    PRDF::Configurator * getConfiguratorPtr();
+    Configurator * getConfiguratorPtr();
     void postAnalysisWorkarounds(STEP_CODE_DATA_STRUCT & i_sdc);
 };
 

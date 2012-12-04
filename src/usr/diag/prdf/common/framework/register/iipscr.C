@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 1997,2012              */
+/* COPYRIGHT International Business Machines Corp. 1997,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -43,6 +43,8 @@
 #include <iipscr.h>
 #include <iipconst.h>
 
+namespace PRDF
+{
 /*--------------------------------------------------------------------*/
 /*  User Types                                                        */
 /*--------------------------------------------------------------------*/
@@ -78,9 +80,6 @@
 // Dependencies:  None.
 //
 // End Function Specification //////////////////////////////////////
-
-namespace PRDF
-{
 
 SCAN_COMM_REGISTER_CLASS::~SCAN_COMM_REGISTER_CLASS
 (
@@ -124,10 +123,6 @@ uint32_t SCAN_COMM_REGISTER_CLASS::Read
 
   return(rc);
 }
-
-
-uint32_t SCAN_COMM_REGISTER_CLASS::UnSync(void){return(SUCCESS);}
-
 // Function Specification //////////////////////////////////////////
 //
 //  Title:  Set Bit
@@ -182,62 +177,7 @@ void SCAN_COMM_REGISTER_CLASS::ClearBit
   bitString.Clear(bit_position);
 }
 
-// Function Specification //////////////////////////////////////////
-//
-// Title:  SCAN_COMM_REGISTER_CLASS (Copy constructor)
-//
-// Purpose:  This constuctor initializes the data members.  This
-//           copy constructor uses a "deep" copy.
-//
-// Side-effects:  This instance is initialized.
-//
-// Dependencies:  None.
-//
-// Time Complexity:  Constant + time complexity of SetBitString()
-//
-// End Function Specification //////////////////////////////////////
 
-SCAN_COMM_REGISTER_CLASS::SCAN_COMM_REGISTER_CLASS
-(
- const SCAN_COMM_REGISTER_CLASS & scr
- /*!i Scan Comm Register reference to copy                        */
- ) :
-/*!o No value returned                                           */
-address(scr.address)
-{
-}
-
-// Function Specification ///////////////////////////////////////////
-//
-// Title:  operator= (Assignment operator)
-//
-// Purpose:  This assignment operator assigns the Bit String data
-//           member.
-//
-// Side-effects:  Bit String data member is modified.
-//                Memory is reallocated.
-//
-// Dependencies:  None.
-//
-// Time Complexity:  Constant
-//
-// End Function Specification //////////////////////////////////////
-
-SCAN_COMM_REGISTER_CLASS & SCAN_COMM_REGISTER_CLASS::operator=
-(
- const SCAN_COMM_REGISTER_CLASS & scr
- /*!i Scan Comm Register instance to assign from              */
- )
-/*!o Reference to this Scan Comm Register instance           */
-{
-  // Check for assignment to self
-  if(this != &scr)
-  {
-    address = scr.address;
-  }
-
-  return(*this);
-}
 
 // Function Specification ///////////////////////////////////////////
 //
@@ -264,28 +204,7 @@ void SCAN_COMM_REGISTER_CLASS::setAllBits()
     bitString.Pattern( 0, bitString.GetLength(), 0xffffffff, 32 );
 }
 
-// Function Specification //////////////////////////////////////////
-//
-// Title:  SCAN_COMM_REGISTER_CLASS (Constructor)
-//
-// Purpose:  This constuctor initializes the data members.
-//
-// Side-effects:  This instance is initialized. Memory may be allocated
-//
-// Dependencies:  None.
-//
-// End Function Specification //////////////////////////////////////
 
-SCAN_COMM_REGISTER_CLASS::SCAN_COMM_REGISTER_CLASS
-(
- uint64_t a
- /*!i Physical address of register                                */
- ) :
-/*!o No value returned                                           */
-address(a)
-{
-}
 
-} // end namespace PRDF
-
+}//namespace PRDF ends
 #undef IIPSCR_C

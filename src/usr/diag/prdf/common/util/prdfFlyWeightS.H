@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2007,2012              */
+/* COPYRIGHT International Business Machines Corp. 2007,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -45,6 +45,10 @@ class FlyWeightS
         T & get(const T & key);
 
         //void print();
+#ifdef __MEM_PROFILING
+
+        void printStats();
+#endif
 
     private:
 

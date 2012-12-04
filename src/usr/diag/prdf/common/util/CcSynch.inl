@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 1995,2012              */
+/* COPYRIGHT International Business Machines Corp. 1995,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */

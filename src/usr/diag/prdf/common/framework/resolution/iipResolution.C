@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 1996,2012              */
+/* COPYRIGHT International Business Machines Corp. 1996,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -39,7 +39,6 @@
 //#include <iipCalloutMap.h>
 #include <iipCalloutResolution.h>
 #include <iipstep.h>
-#include <iipScanCommRegisterChip.h>
 #include <iipCaptureData.h>
 #include <iipServiceDataCollector.h>
 #include <iipErrorRegister.h>

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2004,2012              */
+/* COPYRIGHT International Business Machines Corp. 2004,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -59,6 +59,7 @@ class CaptureData;
 class ErrorRegisterType;
 class Resolution;
 class Group;
+
 
 typedef std::pair<ResetAndMaskErrorRegister::ResetRegisterVector,
                        ResetAndMaskErrorRegister::ResetRegisterVector>
@@ -128,6 +129,14 @@ class RuleChip : public ExtensibleChip
         };
 
     public:
+
+       /*Note:
+       At the beginning of all the public function of this class,'this' pointer
+       should be pushed to stack maintained in service data collector.Also, at
+       the end of same function,it should be popped.It is accomplished by just
+       instantiating ChipScopeLock at the beginning of the function.This is
+       encapsulated by PRDF_LOCK_CHIP_SCOPE */
+
         // TODO : add parameter for parent domains, connected chip classes.
         RuleChip(const char * i_fileName,
                      TARGETING::TargetHandle_t   i_pTargetHandle,
@@ -146,11 +155,19 @@ class RuleChip : public ExtensibleChip
 
         int32_t Analyze(STEP_CODE_DATA_STRUCT &, ATTENTION_TYPE);
         int32_t CaptureErrorData(CaptureData &, int i_group = 1);
+        /*Note
+          functions like MaskError(),getDataBundle(),getSignatureOffset()
+          just return a constant or a member variable. These function don't need
+          to call any other functions of RuleChip.Hence,despite the fact that
+          these functions are public,we are not using macro PRDF_LOCK_CHIP_SCOPE
+          in these function.
+        */
         int32_t MaskError(uint32_t i) { return SUCCESS; };
 
         ExtensibleChipFunction *
                 getExtensibleFunction(const char *, bool = false);
         SCAN_COMM_REGISTER_CLASS * getRegister(const char *, bool = false);
+
         DataBundle *& getDataBundle() { return cv_dataBundle; };
 
         uint32_t getSignatureOffset() const { return iv_sigOff; };

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2002,2012              */
+/* COPYRIGHT International Business Machines Corp. 2002,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -260,7 +260,8 @@ public:
    @post Error log(s) build and logged, SRC built, etc.
    @exception None.
    */
-  virtual errlHndl_t GenerateSrcPfa(ATTENTION_TYPE attn_type, ServiceDataCollector & sdc); //mp01 c
+  virtual errlHndl_t GenerateSrcPfa( ATTENTION_TYPE attn_type,
+                                    ServiceDataCollector & sdc );
 
 #ifndef __HOSTBOOT_MODULE
   /**
@@ -281,7 +282,6 @@ public:
 
 
 private:  // Data
-
   // actual or sim err data service
   ErrDataService * iv_ErrDataService;
 

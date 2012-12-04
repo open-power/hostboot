@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 1998,2012              */
+/* COPYRIGHT International Business Machines Corp. 1998,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -83,19 +83,21 @@
 #endif
 
 #endif
+#include <list>
+#include <prdfExtensibleChip.H>
 
 namespace PRDF
 {
 
 struct SdcCallout {
-  PRDF::PRDcallout callout;
-  PRDF::PRDpriority priority;
+  PRDcallout callout;
+  PRDpriority priority;
   //bool gard;
   SdcCallout() : callout(NULL), priority(MRU_LOW) {}
   SdcCallout(PRDcallout & mru, PRDpriority p)
     : callout(mru), priority(p)
   {}
-  SdcCallout(TARGETING::TargetHandle_t i_pcalloutHandle , PRDF::PRDpriority p)
+  SdcCallout(TARGETING::TargetHandle_t i_pcalloutHandle , PRDpriority p)
     : callout(i_pcalloutHandle), priority(p)
   {}
 };
@@ -939,9 +941,46 @@ private:  // Data
   ATTENTION_TYPE causeAttentionType;    // MCK,REC,SPCL
 
   TARGETING::TargetHandle_t ivpThermalChipHandle;
-
+  //RTC: 60553 Eventually we shall use hostboot implementation of stack istead
+  //of std:list
+  static std::list< ExtensibleChip *> cv_ruleChipStack ;
 public:
+  /**
+   * @brief   get the rulechip  under analysis
+   * @param   None
+   * @return  RuleChip currently under analysis
+   */
+  static  ExtensibleChip* getChipAnalyzed()
+  {
+    return cv_ruleChipStack.back( );
+  }
+  /**
+   * @brief   pushes the rulechip under analysis in a list
+   * @param   i_analyzingChip RuleChip under analysis
+   * @return  None
+   */
+  static void  pushChipAnalyzed( ExtensibleChip* i_analyzingChip )
+  {
+    cv_ruleChipStack.push_back( i_analyzingChip );
+  }
+  /**
+   * @brief   pops the last rulechip under analysis from  list
+   * @param   i_analyzingChip RuleChip under analysis
+   * @return  None
+   */
+  static void popChipAnalyzed( )
+  {
+    cv_ruleChipStack.pop_back();
+  }
 
+  /**
+   * @brief     Clears the list containing pointers to all the RuleChip under
+   *            analysis
+   */
+  static void clearChipStack( )
+  {
+      cv_ruleChipStack.clear();
+  }
 // --------------------------------------
 // FSP only functions begin
 // --------------------------------------
@@ -1035,6 +1074,43 @@ public:
 // --------------------------------------
 
 };
+
+
+/**
+ * @brief   limits the scope of RuleChip pointer in stack to a given scope.
+ *
+ * This class basically binds the scope of a given RuleChip pointer in SDC chip
+ * stack to certain scope. When an instance of this class is created, RuleChip
+ * is pushed to stack.In destructor,same gets popped.As a result, the scpoe of
+ * this  RuleChip pointer gets tied to scope of ChipScopeLock instance.
+ * PRDF_DEFINE_CHIP_SCOPE encapsulates instantiation of ScopeChipLock.
+
+ */
+
+#define PRDF_DEFINE_CHIP_SCOPE( ARG ) \
+                                ChipScopeLock csl( ARG )
+class ChipScopeLock
+{
+    public:
+    /**
+     * @brief     Constructor
+     * @param     i_pChipAnalyzed    Chip for which scope is to be locked
+     */
+    ChipScopeLock( ExtensibleChip * i_pChipAnalyzed )
+    {
+        ServiceDataCollector::pushChipAnalyzed( i_pChipAnalyzed );
+    }
+    /**
+     * @brief     Destructor
+     */
+    ~ChipScopeLock()
+    {
+        ServiceDataCollector::popChipAnalyzed( );
+    }
+};
+
+
+
 
 } // end namespace PRDF
 

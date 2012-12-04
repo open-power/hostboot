@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2004,2012              */
+/* COPYRIGHT International Business Machines Corp. 2004,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -60,6 +60,7 @@
 
 #include <prdfResetOperators.H>
 #include <algorithm>
+#include <prdf_ras_services.H>
 
 namespace PRDF
 {
@@ -69,12 +70,12 @@ struct ResetAndMaskTransformer
     : public std::unary_function<Prdr::Register::ResetOrMaskStruct,
                                  ResetAndMaskErrorRegister::ResetRegisterStruct>
 {
-    ResetAndMaskTransformer(ScanFacility & i_scanFactory,
-                            TARGETING::TargetHandle_t i_pchipHandle ,
-                            size_t i_scomlen)
-            : cv_scanFactory(i_scanFactory),
-              cv_pchipHandle (i_pchipHandle ),
-              cv_scomlen(i_scomlen)
+    ResetAndMaskTransformer( ScanFacility & i_scanFactory,
+                             size_t i_scomlen ,
+                             TARGETING::TYPE i_type ):
+                            cv_scanFactory( i_scanFactory ),
+                            cv_scomlen( i_scomlen ),
+                            iv_chipType( i_type )
         {};
 
     virtual ~ResetAndMaskTransformer() {};  // zs01
@@ -83,13 +84,11 @@ struct ResetAndMaskTransformer
         operator()(const Prdr::Register::ResetOrMaskStruct & i)
     {
         ResetAndMaskErrorRegister::ResetRegisterStruct o;
+        o.read = & cv_scanFactory.GetScanCommRegister( i.addr_r ,
+                                                      cv_scomlen,iv_chipType );
+        o.write = & cv_scanFactory.GetScanCommRegister( i.addr_w ,
+                                                       cv_scomlen ,iv_chipType );
 
-        o.read = &cv_scanFactory.GetScanCommRegister(cv_pchipHandle ,
-                                                     i.addr_r,
-                                                     cv_scomlen);
-        o.write = &cv_scanFactory.GetScanCommRegister(cv_pchipHandle ,
-                                                      i.addr_w,
-                                                      cv_scomlen);
 
         switch (i.op)
         {
@@ -119,8 +118,8 @@ struct ResetAndMaskTransformer
 
     private:
         ScanFacility & cv_scanFactory;
-        TARGETING::TargetHandle_t  cv_pchipHandle ;
         size_t cv_scomlen;
+        TARGETING::TYPE iv_chipType;
 };
 
 
@@ -162,6 +161,8 @@ void RuleChip::loadRuleFile(ScanFacility & i_scanFactory,
     // Get default dump type.
     cv_dumpType = l_chip->cv_dumpType;
 
+    //getting target type before creating hardware register
+    TARGETING::TYPE l_type = PlatServices::getTargetType( GetChipHandle() ) ;
     // Set signature offset for capture data output.
     iv_sigOff = l_chip->cv_signatureOffset;
 
@@ -172,9 +173,9 @@ void RuleChip::loadRuleFile(ScanFacility & i_scanFactory,
 
         l_regMap[l_id] = cv_hwRegs[hashId]
                        = &i_scanFactory.GetScanCommRegister(
-                                        this->GetChipHandle(),
                                         l_chip->cv_registers[i].cv_scomAddr,
-                                        l_chip->cv_registers[i].cv_scomLen );
+                                        l_chip->cv_registers[i].cv_scomLen,
+                                        l_type );
         l_regMap[l_id]->SetId(hashId);
 
         // Copy reset registers.
@@ -184,8 +185,8 @@ void RuleChip::loadRuleFile(ScanFacility & i_scanFactory,
                  std::back_inserter(l_resetMap[l_id].first),
                  ResetAndMaskTransformer<RESETOPERATOR_RESET>(
                         i_scanFactory,
-                        this->GetChipHandle(),
-                        l_chip->cv_registers[i].cv_scomLen)
+                        l_chip->cv_registers[i].cv_scomLen,
+                        l_type )
                 );
 
         // Copy mask registers.
@@ -195,14 +196,15 @@ void RuleChip::loadRuleFile(ScanFacility & i_scanFactory,
                  std::back_inserter(l_resetMap[l_id].second),
                  ResetAndMaskTransformer<RESETOPERATOR_MASK>(
                         i_scanFactory,
-                        this->GetChipHandle(),
-                        l_chip->cv_registers[i].cv_scomLen)
+                        l_chip->cv_registers[i].cv_scomLen,
+                        l_type )
                 );
 
         //This flag signifies that a mapping IS or ISN'T created between a
-        //  uint32_t mapping and a vector of SCAN_COMM_REGISTER_CLASS pointers.
+        //uint32_t mapping and a vector of SCAN_COMM_REGISTER_CLASS pointers.
         //If there is no mapping outside of the for loop then it is because
-        //  there is a capture type or requirement without a group statement in the rule file.
+        //there is a capture type or requirement without a group statement in
+        //the rule file.
         bool l_group_is_created = false;
         // Copy into capture groups.
         std::vector<Prdr::Register::CaptureInfoStruct>::const_iterator
@@ -219,9 +221,10 @@ void RuleChip::loadRuleFile(ScanFacility & i_scanFactory,
                 l_group_is_created = true;   //@jl06 Added this to indicate group was created.
             }
             // @jl04 a  Start.
-            // This else if was added for a new capture "type" for registers primary/secondary.
-            // Cannot put the "type" in with the G group otherwise it will show up as a
-            //   i_group of 2 which is not called.
+            // This else if was added for a new capture "type" for registers
+            // primary/secondary.
+            // Cannot put the "type" in with the G group otherwise it will show
+            // up as a i_group of 2 which is not called.
             else if('T' == (*j).op)
             {
                 //@jl06. d Deleted temporary declaration of CaptureType in
@@ -335,6 +338,9 @@ RuleChip::~RuleChip()
 int32_t RuleChip::Analyze(STEP_CODE_DATA_STRUCT & i_serviceData,
                               ATTENTION_TYPE i_attnType)
 {
+    //this pointer is retained in stack just for the scope of this function
+    PRDF_DEFINE_CHIP_SCOPE( this );
+
     ServiceDataCollector & i_sdc = *(i_serviceData.service_data);
     ErrorSignature & l_errSig = *(i_sdc.GetErrorSignature());
     CaptureData & capture = i_serviceData.service_data->GetCaptureData();  // @jl04 a Add this for Drop call.
@@ -450,6 +456,8 @@ int32_t RuleChip::Analyze(STEP_CODE_DATA_STRUCT & i_serviceData,
 int32_t RuleChip::CaptureErrorData(CaptureData & i_cap, int i_group)
 {
     using namespace TARGETING;
+    //this pointer is retained in stack just for the scope of this function
+    PRDF_DEFINE_CHIP_SCOPE( this );
 
     std::vector<SCAN_COMM_REGISTER_CLASS *>::const_iterator l_hwCaptureEnd =
         cv_hwCaptureGroups[i_group].end();
@@ -909,6 +917,9 @@ void RuleChip::createGroup(Group * i_group,
 ExtensibleChipFunction *
     RuleChip::getExtensibleFunction(const char * i_func, bool i_expectNull)
 {
+    //this pointer is retained in stack just for the scope of this function
+    PRDF_DEFINE_CHIP_SCOPE( this );
+
     ExtensibleFunctionType * plugin =
         getPluginGlobalMap().getPlugins(cv_fileName)[i_func];
     if (NULL == plugin)
@@ -954,6 +965,8 @@ ExtensibleChipFunction *
 SCAN_COMM_REGISTER_CLASS * RuleChip::getRegister(const char * i_reg,
                                                      bool i_expectNull)
 {
+    //this pointer is retained in stack just for the scope of this function
+    PRDF_DEFINE_CHIP_SCOPE( this );
     uint16_t hashId = Util::hashString( i_reg );
 
     SCAN_COMM_REGISTER_CLASS * l_register = cv_hwRegs[hashId];
@@ -992,6 +1005,23 @@ SCAN_COMM_REGISTER_CLASS * RuleChip::getRegister(const char * i_reg,
 
             PRDF_COMMIT_ERRL(l_errl, ERRL_ACTION_REPORT);
         }
+
+    }
+    else
+    {   /* l_register obtained from cv_hwRegs is a ScomRegister which does not
+           have rule chip info built in.Analyze leg of code uses this register.
+           Inorder to use this register for scom, target info is obtained from
+           service data collector.This register does not suit us for read and
+           write operation in plugin function.It is because in plugin function
+           register read should not be concerend with finding the associated
+           rule chip or target.Inorder to address this situation,we create a
+           wrapper register.This register has rule chip info in addition to all
+           the data of scomRegister.This object is created through factory and
+           and destroyed at the end of analysis.
+        */
+        SCAN_COMM_REGISTER_CLASS * l_pReg = l_register;
+        ScanFacility      & l_scanFac = ScanFacility::Access();
+        l_register = & l_scanFac.GetPluginRegister(*l_pReg,*this);
 
     }
     return l_register;

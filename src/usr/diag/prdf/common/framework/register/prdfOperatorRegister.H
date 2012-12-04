@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2004,2012              */
+/* COPYRIGHT International Business Machines Corp. 2004,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -36,14 +36,14 @@ class NotRegister : public SCAN_COMM_REGISTER_CLASS
 {
   public:
     NotRegister() :
-        SCAN_COMM_REGISTER_CLASS(0), iv_child(NULL), iv_iBS(0)
+        SCAN_COMM_REGISTER_CLASS( ), iv_child(NULL), iv_iBS(0)
     {
         iv_bs = &iv_iBS;
     }
 
     NotRegister(SCAN_COMM_REGISTER_CLASS & i_arg) :
-        SCAN_COMM_REGISTER_CLASS(0), iv_child(&i_arg),
-        iv_iBS(i_arg.GetBitString()->GetLength())
+        SCAN_COMM_REGISTER_CLASS( ), iv_child(&i_arg),
+        iv_iBS(i_arg.GetBitLength())
     {
         iv_bs = &iv_iBS;
     }
@@ -93,14 +93,14 @@ class LeftShiftRegister : public SCAN_COMM_REGISTER_CLASS
 {
   public:
     LeftShiftRegister() :
-        SCAN_COMM_REGISTER_CLASS(0), iv_child(NULL), iv_amount(0), iv_iBS(0)
+        SCAN_COMM_REGISTER_CLASS( ), iv_child(NULL), iv_amount(0), iv_iBS(0)
     {
         iv_bs = &iv_iBS;
     }
 
     LeftShiftRegister(SCAN_COMM_REGISTER_CLASS & i_arg, uint16_t i_amount) :
-        SCAN_COMM_REGISTER_CLASS(0), iv_child(&i_arg), iv_amount(i_amount),
-        iv_iBS(i_arg.GetBitString()->GetLength())
+        SCAN_COMM_REGISTER_CLASS( ), iv_child(&i_arg), iv_amount(i_amount),
+        iv_iBS(i_arg.GetBitLength())
     {
         iv_bs = &iv_iBS;
     }
@@ -160,14 +160,14 @@ class RightShiftRegister : public SCAN_COMM_REGISTER_CLASS
 {
   public:
     RightShiftRegister() :
-        SCAN_COMM_REGISTER_CLASS(0), iv_child(NULL), iv_amount(0), iv_iBS(0)
+        SCAN_COMM_REGISTER_CLASS( ), iv_child(NULL), iv_amount(0), iv_iBS(0)
     {
         iv_bs = &iv_iBS;
     }
 
     RightShiftRegister(SCAN_COMM_REGISTER_CLASS & i_arg, uint16_t i_amount) :
-        SCAN_COMM_REGISTER_CLASS(0), iv_child(&i_arg), iv_amount(i_amount),
-        iv_iBS(i_arg.GetBitString()->GetLength())
+        SCAN_COMM_REGISTER_CLASS( ), iv_child(&i_arg), iv_amount(i_amount),
+        iv_iBS(i_arg.GetBitLength())
     {
         iv_bs = &iv_iBS;
     }
@@ -228,16 +228,16 @@ class AndRegister : public SCAN_COMM_REGISTER_CLASS
 {
   public:
     AndRegister() :
-        SCAN_COMM_REGISTER_CLASS(0), iv_left(NULL), iv_right(NULL), iv_iBS(0)
+        SCAN_COMM_REGISTER_CLASS( ), iv_left(NULL), iv_right(NULL), iv_iBS(0)
     {
         iv_bs = &iv_iBS;
     }
 
     AndRegister( SCAN_COMM_REGISTER_CLASS & i_left,
                  SCAN_COMM_REGISTER_CLASS & i_right ) :
-        SCAN_COMM_REGISTER_CLASS(0), iv_left(&i_left), iv_right(&i_right),
-        iv_iBS(std::min(i_left.GetBitString()->GetLength(),
-                        i_right.GetBitString()->GetLength()))
+        SCAN_COMM_REGISTER_CLASS( ), iv_left(&i_left), iv_right(&i_right),
+        iv_iBS(std::min(i_left.GetBitLength(),
+                        i_right.GetBitLength()))
     {
         iv_bs = &iv_iBS;
     }
@@ -310,16 +310,16 @@ class OrRegister : public SCAN_COMM_REGISTER_CLASS
   public:
 
     OrRegister() :
-        SCAN_COMM_REGISTER_CLASS(0), iv_left(NULL), iv_right(NULL), iv_iBS(0)
+        SCAN_COMM_REGISTER_CLASS( ), iv_left(NULL), iv_right(NULL), iv_iBS(0)
     {
         iv_bs = &iv_iBS;
     }
 
     OrRegister( SCAN_COMM_REGISTER_CLASS & i_left,
                 SCAN_COMM_REGISTER_CLASS & i_right ) :
-        SCAN_COMM_REGISTER_CLASS(0), iv_left(&i_left), iv_right(&i_right),
-        iv_iBS(std::min(i_left.GetBitString()->GetLength(),
-                        i_right.GetBitString()->GetLength()))
+        SCAN_COMM_REGISTER_CLASS( ), iv_left(&i_left), iv_right(&i_right),
+        iv_iBS(std::min(i_left.GetBitLength(),
+                        i_right.GetBitLength()))
     {
         iv_bs = &iv_iBS;
     }
@@ -392,7 +392,7 @@ class NullRegister : public SCAN_COMM_REGISTER_CLASS
 {
   public:
     NullRegister(int size) :
-        SCAN_COMM_REGISTER_CLASS(0), iv_iBS(size)
+        SCAN_COMM_REGISTER_CLASS( ), iv_iBS(size)
     {}
 
     NullRegister & operator=(const NullRegister & r)
@@ -428,7 +428,7 @@ class AttnTypeRegister : public SCAN_COMM_REGISTER_CLASS
 {
   public:
     AttnTypeRegister() :
-        SCAN_COMM_REGISTER_CLASS(0), iv_check(&cv_null), iv_recov(&cv_null),
+        SCAN_COMM_REGISTER_CLASS( ), iv_check(&cv_null), iv_recov(&cv_null),
         iv_special(&cv_null), iv_proccs(&cv_null), iv_iBS(0)
     {
         iv_bs = &iv_iBS;
@@ -438,7 +438,7 @@ class AttnTypeRegister : public SCAN_COMM_REGISTER_CLASS
                       SCAN_COMM_REGISTER_CLASS & i_recov,
                       SCAN_COMM_REGISTER_CLASS & i_special,
                       SCAN_COMM_REGISTER_CLASS & i_proccs ) :
-        SCAN_COMM_REGISTER_CLASS(0),
+        SCAN_COMM_REGISTER_CLASS( ),
         iv_check(  NULL == &i_check   ? &cv_null : &i_check),
         iv_recov(  NULL == &i_recov   ? &cv_null : &i_recov),
         iv_special(NULL == &i_special ? &cv_null : &i_special),
@@ -446,10 +446,10 @@ class AttnTypeRegister : public SCAN_COMM_REGISTER_CLASS
         iv_iBS(0)         // will fully initialize this inside ctor.
     {
         uint32_t l_length = 1024;
-        l_length = std::min(l_length, iv_check->GetBitString()->GetLength());
-        l_length = std::min(l_length, iv_recov->GetBitString()->GetLength());
-        l_length = std::min(l_length, iv_special->GetBitString()->GetLength());
-        l_length = std::min(l_length, iv_proccs->GetBitString()->GetLength());
+        l_length = std::min(l_length, iv_check->GetBitLength());
+        l_length = std::min(l_length, iv_recov->GetBitLength());
+        l_length = std::min(l_length, iv_special->GetBitLength());
+        l_length = std::min(l_length, iv_proccs->GetBitLength());
         iv_iBS = BitStringBuffer(l_length);
         iv_bs = &iv_iBS;
     }
@@ -545,11 +545,11 @@ class ConstantRegister : public SCAN_COMM_REGISTER_CLASS
 {
   public:
     ConstantRegister() :
-        SCAN_COMM_REGISTER_CLASS(0), iv_iBS(0)
+        SCAN_COMM_REGISTER_CLASS( ), iv_iBS(0)
     {}
 
     ConstantRegister(BIT_STRING_CLASS i_arg) :
-        SCAN_COMM_REGISTER_CLASS(0), iv_iBS(i_arg)
+        SCAN_COMM_REGISTER_CLASS( ), iv_iBS(i_arg)
     {}
 
     ConstantRegister & operator=(const ConstantRegister & r)

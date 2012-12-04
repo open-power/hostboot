@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 1997,2012              */
+/* COPYRIGHT International Business Machines Corp. 1997,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -41,16 +41,12 @@
 //  Includes
 //----------------------------------------------------------------------
 
-#if !defined(IIPBITS_H)
 #include <iipbits.h>
-#endif
-
 #include <iipsdbug.h>
 #include <prdfMain.H>
 
 namespace PRDF
 {
-
 /*--------------------------------------------------------------------*/
 /*  Forward References                                                */
 /*--------------------------------------------------------------------*/
@@ -122,7 +118,6 @@ namespace PRDF
 //                     number of bits in the register.
 //
 // End Class Specification *********************************************
-
 /**
  SCAN_COMM_REGISTER_CLASS
  @author Doug Gilbert
@@ -171,8 +166,6 @@ public:
    */
   virtual uint32_t Read(void) = 0;
 
-  virtual uint32_t UnSync(void);
-
   /**
    Read hardware register and apply a mask
    <ul>
@@ -215,13 +208,13 @@ public:
    Access a copy of the scan comm address
    <ul>
    <br><b>Parameters:  </b> None
-   <br><b>Returns:     </b> Scan Comm address
+   <br><b>Returns:     </b> Returns scom address
    <br><b>Requirements:</b> None.
    <br><b>Promises:    </b> None.
    <br><b>Exceptions:  </b> None.
    </ul><br>
    */
-  uint64_t GetAddress(void) const { return address; }
+  virtual uint64_t GetAddress(void) const {return 0 ;}
 
   /**
    Access a copy of the short id for signatures.
@@ -259,7 +252,7 @@ public:
    <br><b>Exceptions:  </b> None.
    </ul><br>
    */
-  uint32_t GetBitLength(void) const { return (GetBitString())->GetLength();}
+   virtual uint32_t GetBitLength(void) const { return DEFAULT_BIT_LENGTH ;}
 
   /**
    Access the internal bit string (pure virtual)
@@ -378,36 +371,14 @@ public:
    */
   bool BitStringIsZero()
   { return GetBitString()->IsZero(); }
+   /**
+    *@brief    Returns TYPE_NA as type of Target associated with register.Acutal
+    *          implementation is expected in derived class
+     *@return   TYPE_NA
+   */
+  virtual TARGETING::TYPE getChipType(void)const { return TARGETING::TYPE_NA; }
 
 protected:
-
-  /**
-   Constructor
-   <ul>
-   <br><b>Parameters:  </b> Scan Comm Address
-   <br><b>Promises:    </b> Heap memory may be allocated
-   </ul><br>
-   */
-  SCAN_COMM_REGISTER_CLASS( uint64_t a);
-
-  /**
-   Copy Constructor
-   <ul>
-   <br><b>Parameters:  </b> SCAN_COMM_REGISTER_CLASS
-   <br><b>Promises:    </b> Heap memory may be (re)allocated
-   </ul><br>
-   */
-  SCAN_COMM_REGISTER_CLASS(const SCAN_COMM_REGISTER_CLASS & scr);
-
-  /**
-   Assignment operator
-   <ul>
-   <br><b>Parameters:  </b> SCAN_COMM_REGISTER_CLASS
-   <br><b>Promises:    </b> Heap memory may be (re)allocated
-                            (*this) == scr;
-   </ul><br>
-   */
-  SCAN_COMM_REGISTER_CLASS & operator= ( const SCAN_COMM_REGISTER_CLASS & scr);
 
   /**
    Get modifiable reference to internal bit string (don't even thing about making this public!!!)
@@ -419,8 +390,8 @@ protected:
    </ul><br>
    */
   virtual BIT_STRING_CLASS & AccessBitString(void) = 0;
-
 private: // Data
+  static const int DEFAULT_BIT_LENGTH = 64;
 
   // Enum Specification //////////////////////////////////////////////
   //
@@ -440,10 +411,9 @@ private: // Data
   //
   // End Data Specification //////////////////////////////////////////
 
-  uint64_t                       address;
 
 };
 
-} // end namespace PRDF
+}//namespace PRDF
 
 #endif

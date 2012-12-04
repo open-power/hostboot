@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012                   */
+/* COPYRIGHT International Business Machines Corp. 2012,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -22,9 +22,7 @@
 /* IBM_PROLOG_END_TAG                                                     */
 
 #include <prdfSystemSpecific.H>
-
 #include <iipglobl.h>
-#include <iipScanCommRegisterAccess.h>
 #include <prdfPegasusConfigurator.H>
 #include <prdfPlatServices.H>
 

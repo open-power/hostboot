@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2003,2012              */
+/* COPYRIGHT International Business Machines Corp. 2003,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -43,25 +43,12 @@
 #include <netinet/in.h>
 
 #endif
-
-#ifndef IIPBITS_H
 #include <iipbits.h>
-#endif
-
-// 3 dg06d
 #include <prdfHomRegisterAccess.H>  // dg06a
-#include <iipScanCommRegisterChip.h>    // dg06a
-
-#ifndef IIPCHIP_H
+#include <prdfScomRegister.H>
 #include <iipchip.h>
-#endif
-
-#ifndef IIPCAPTUREDATA_H
 #include <iipCaptureData.h>
-#endif
-
 #include <string.h>
-
 #include <algorithm>    // @jl04 a Add this for the Drop function.
 
 namespace PRDF
@@ -156,18 +143,6 @@ void CaptureData::Add( TARGETING::TargetHandle_t i_pchipHandle, int scomId,
 
 // end dg02
 
-// start dg06a
-void CaptureData::Add( TARGETING::TargetHandle_t i_pchipHandle,
-                       int iScomId, uint64_t iScomAddress,
-                       uint32_t iScomBitLength, Place iplace )
-{
-  HomRegisterAccessScom hops(i_pchipHandle);
-  ScanCommRegisterChip scrc(iScomAddress, iScomBitLength, hops);
-
-  Add(i_pchipHandle, iScomId, scrc, iplace);
-}
-
-// end dg06a
 
 // start jl04a
 void CaptureData::Drop(RegType i_type)

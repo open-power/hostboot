@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2002,2012              */
+/* COPYRIGHT International Business Machines Corp. 2002,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -35,7 +35,6 @@
 #include <CcAutoDeletePointer.h>
 
 #include <iipSystem.h>
-#include <iipScanCommRegisterAccess.h>
 #include <iipstep.h>                     // for STEP_CODE_DATA_STRUCT
 #include <iipServiceDataCollector.h>
 #include <xspprdService.h>               // for ServiceGenerator
@@ -52,9 +51,9 @@
 #include <prdrLoadChipCache.H>  // To flush chip-file cache.
 
 #include <prdfWorkarounds.H>
-
+#include <prdfRegisterCache.H>
 #include <UtilHash.H>
-
+#include <prdfScanFacility.H>
 //For some odd reason when compile in FSP, these includes have to be down here
 //or there will be some weird compiling error in iipResolutionFactory.h
 #ifndef __HOSTBOOT_MODULE
@@ -88,7 +87,8 @@ void unInitialize(void)
     delete systemPtr;
     systemPtr = NULL;
     g_initialized = false;
-    // Some Resolutions carry state and must be re-created - this call resets what it needs to.
+    // Some Resolutions carry state and must be re-created - this call resets
+    // what it needs to.
     ResolutionFactory::Access().Reset();
 
 #ifndef __HOSTBOOT_MODULE
@@ -109,8 +109,7 @@ errlHndl_t initialize()
 
     // Synchronize SCOM access to hardware
     // Start un-synchronized so hardware is accessed
-    ScanCommRegisterAccess::SynchType::Advance();
-
+    RegDataCache::getCachedRegisters().flush();
     if(g_initialized == true && systemPtr != NULL)
     {
         // This means we are being re-initialized (and we were in a good state)
@@ -127,7 +126,8 @@ errlHndl_t initialize()
 
 #ifndef __HOSTBOOT_MODULE
 
-        //Is this the correct place to add the check for the saved SDC and the sdc errl commit, if found???
+        //FIXME RTC64373 Is this the correct place to add the check for the
+        //saved SDC and sdc errl commit, if found???
         bool isSavedSdc = false;
         ServiceDataCollector thisSavedSdc;
 
@@ -197,6 +197,8 @@ errlHndl_t main(ATTENTION_VALUE_TYPE i_attentionType, const AttnList & i_attnLis
     g_prd_errlHndl = NULL;
 
     uint32_t rc =  SUCCESS;
+    // clears all the chips saved to stack during last analysis
+    ServiceDataCollector::clearChipStack( );
 
     if(( g_initialized == false)&&(NULL ==systemPtr))
     {
@@ -246,8 +248,8 @@ errlHndl_t main(ATTENTION_VALUE_TYPE i_attentionType, const AttnList & i_attnLis
     }
     else  // do the analysis
     {
-        // Advance SCR Synch so that SCR reads access hardware
-        ScanCommRegisterAccess::SynchType::Advance();
+        // flush Cache so that SCR reads access hardware
+        RegDataCache::getCachedRegisters().flush();
 
         serviceData.SetAttentionType(i_attentionType);
 
@@ -264,6 +266,12 @@ errlHndl_t main(ATTENTION_VALUE_TYPE i_attentionType, const AttnList & i_attnLis
         if (!latent_check_stop)
         {
             int32_t analyzeRc = systemPtr->Analyze(sdc, i_attentionType);
+            // flush Cache to free up the memory
+            RegDataCache::getCachedRegisters().flush();
+            ScanFacility      & l_scanFac = ScanFacility::Access();
+            //delete all the wrapper register objects since these were created
+            //just for plugin code
+            l_scanFac.ResetPluginRegister();
             SystemSpecific::postAnalysisWorkarounds(sdc);
             if(analyzeRc != SUCCESS && g_prd_errlHndl == NULL)
             {

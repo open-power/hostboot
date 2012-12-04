@@ -5,7 +5,7 @@
 #
 # IBM CONFIDENTIAL
 #
-# COPYRIGHT International Business Machines Corp. 2005,2012
+# COPYRIGHT International Business Machines Corp. 2005,2013
 #
 # p1
 #
@@ -119,12 +119,13 @@ prd_register = \
  iipscr.o \
  prdfErrorRegister.o \
  prdfErrorRegisterMask.o \
- iipMopRegisterAccess.o \
+ prdfRegisterCache.o \
  prdfResetErrorRegister.o \
- iipScanCommRegisterAccess.o \
- iipScanCommRegisterChip.o \
+ prdfScomRegister.o \
+ prdfScomRegisterAccess.o \
  prdfCaptureData.o \
  prdfScanFacility.o
+
 
 prd_register_includes = \
 

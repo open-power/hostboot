@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2007,2012              */
+/* COPYRIGHT International Business Machines Corp. 2007,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -285,6 +285,16 @@ void FlyWeightS<T,S>::increaseSize()
                   iv_rows.end());
 
 };
+
+#ifdef __MEM_PROFILING
+template < class T , uint32_t S >
+void FlyWeightS<T,S>::printStats(void)
+{
+  using namespace std;
+  PRDF_DTRAC( "no. of elements %d  Flyweight size %d",
+            iv_heaps.size()*S,(iv_heaps.size() * sizeof(T) * S) );
+}
+#endif
 
 /*
 template <typename T, uint32_t S>
