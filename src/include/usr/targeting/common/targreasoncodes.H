@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2012              */
+/* COPYRIGHT International Business Machines Corp. 2011,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -43,13 +43,15 @@ enum TargetingModuleId
 
 enum TargetingReasonCode
 {
-    TARG_RC_TEST_TARGET_FFDC        = TARG_COMP_ID | 0x01,
-    TARG_RC_BAD_EYECATCH            = TARG_COMP_ID | 0x02,
-    TARG_RC_MM_BLOCK_FAIL           = TARG_COMP_ID | 0x03,
-    TARG_RC_MM_PERM_FAIL            = TARG_COMP_ID | 0x04,
-    TARG_RC_ATTR_MSG_FAIL           = TARG_COMP_ID | 0x05,
-    TARG_RC_UNHANDLED_ATTR_SEC_TYPE = TARG_COMP_ID | 0x06,
-    TARG_RC_ATTR_SYNC_FAIL          = TARG_COMP_ID | 0x07,
+    TARG_RC_TEST_TARGET_FFDC             = TARG_COMP_ID | 0x01,
+    TARG_RC_BAD_EYECATCH                 = TARG_COMP_ID | 0x02,
+    TARG_RC_MM_BLOCK_FAIL                = TARG_COMP_ID | 0x03,
+    TARG_RC_MM_PERM_FAIL                 = TARG_COMP_ID | 0x04,
+    TARG_RC_ATTR_MSG_FAIL                = TARG_COMP_ID | 0x05,
+    TARG_RC_UNHANDLED_ATTR_SEC_TYPE      = TARG_COMP_ID | 0x06,
+    TARG_RC_ATTR_SYNC_TO_FSP_FAIL        = TARG_COMP_ID | 0x07,
+    TARG_RC_ATTR_SYNC_REQUEST_TO_HB_FAIL = TARG_COMP_ID | 0x08,
+    TARG_RC_ATTR_SYNC_TO_HB_FAIL         = TARG_COMP_ID | 0x09,
 };
 
 }; // End TARGETING namespace

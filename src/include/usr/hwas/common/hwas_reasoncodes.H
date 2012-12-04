@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2012              */
+/* COPYRIGHT International Business Machines Corp. 2011,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -27,8 +27,9 @@ namespace HWAS
 {
     enum HwasModuleID
     {
-        MOD_DECONFIG_GARD    = 0x01,
-        MOD_PROCESS_CALLOUT  = 0x02,
+        MOD_DECONFIG_GARD         = 0x01,
+        MOD_PROCESS_CALLOUT       = 0x02,
+        MOD_HOST_DISCOVER_TARGETS = 0x03,
     };
 
     enum HwasReasonCode
@@ -40,6 +41,7 @@ namespace HWAS
         RC_GARD_REPOSITORY_FULL             = 0x03,
         RC_TARGET_NOT_FOUND_FOR_GARD_RECORD = 0x04,
         RC_INVALID_TARGET                   = 0x05,
+        RC_TOP_LEVEL_TARGET_NULL            = 0x06,
         // if more are added, modify each hwasPlatError.C file as appropriate.
     };
 };

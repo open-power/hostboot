@@ -1,26 +1,25 @@
-/*  IBM_PROLOG_BEGIN_TAG
- *  This is an automatically generated prolog.
- *
- *  $Source: src/include/usr/targeting/attrsync.H $
- *
- *  IBM CONFIDENTIAL
- *
- *  COPYRIGHT International Business Machines Corp. 2012
- *
- *  p1
- *
- *  Object Code Only (OCO) source materials
- *  Licensed Internal Code Source Materials
- *  IBM HostBoot Licensed Internal Code
- *
- *  The source code for this program is not published or other-
- *  wise divested of its trade secrets, irrespective of what has
- *  been deposited with the U.S. Copyright Office.
- *
- *  Origin: 30
- *
- *  IBM_PROLOG_END_TAG
- */
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/include/usr/targeting/attrsync.H $                        */
+/*                                                                        */
+/* IBM CONFIDENTIAL                                                       */
+/*                                                                        */
+/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/*                                                                        */
+/* p1                                                                     */
+/*                                                                        */
+/* Object Code Only (OCO) source materials                                */
+/* Licensed Internal Code Source Materials                                */
+/* IBM HostBoot Licensed Internal Code                                    */
+/*                                                                        */
+/* The source code for this program is not published or otherwise         */
+/* divested of its trade secrets, irrespective of what has been           */
+/* deposited with the U.S. Copyright Office.                              */
+/*                                                                        */
+/* Origin: 30                                                             */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
 #ifndef __ATTRSYNC_H_
 #define __ATTRSYNC_H_
 /**
@@ -83,7 +82,7 @@ namespace   TARGETING
              *          attribute section.
              *
              *  @par Detailed Description:
-             *          This funciton will call into the AttRP:: to have the
+             *          This function will call into the AttRP:: to have the
              *          correct attribute section paged into accessable memory.
              *          this function may be called multiple times with different
              *          section names.
@@ -106,6 +105,38 @@ namespace   TARGETING
             errlHndl_t  syncSectionToFsp( 
                                     TARGETING::SECTION_TYPE i_section_to_sync );
 
+            /**
+             *  @brief  Sends a request to the FSP to sync its data to Hostboot
+             *          for a specific attribute section.  Write the data
+             *          received from the FSP to the attribute section.
+             *
+             *  @par Detailed Description:
+             *          This function will call into the AttRP:: to have the
+             *          correct attribute section updated.  This function may be
+             *          called multiple times with different section names.
+             *
+             *  @pre None:
+             *
+             *  @post   The entire section from the FSP attribute section
+             *          passed in has been synchronized to the HB memory area.
+             *
+             *  @param[in]  i_section_to_sync
+             *                  TARGETING::SECTION_TYPE is passed in to
+             *                  identify the section to be synced from the
+             *                  FSP.
+             *              i_msgQ
+             *                  the message queue which FSP will use to send
+             *                  the attribute data
+             *
+             *  @return     errlHndl_t
+             *                  return errl ==  NULL  -> success
+             *                  return errl !=  NULL  -> failure
+             *
+             */
+            errlHndl_t  syncSectionFromFsp(
+                                    TARGETING::SECTION_TYPE i_section_to_sync,
+                                    msg_q_t i_pMsgQ );
+
         private:
 
             /**
@@ -126,11 +157,25 @@ namespace   TARGETING
              *          attribute section.
              *
              *  @par Detailed Description:
-             *      This funciton will call into the AttRP:: to have the
+             *      This function will call into the AttRP:: to have the
              *      correct attribute section paged into accessable memory
              *
              */
             void        getSectionData();
+
+            /**
+             *  @brief  Write the attribute data received from the FSP to
+             *          the attribute section.
+             *
+             *  @par Detailed Description:
+             *      This function will call into the AttRP:: to have the
+             *      correct attribute section written
+             *
+             *  @return     ATTR_SYNC_SUCCESS -> success
+             *              ATTR_SYNC_FAILURE -> failure
+             *
+             */
+            ATTR_SYNC_RC updateSectionData() const;
 
             /**
              *  @brief  Uses the internal mailbox to send a message to the FSP
@@ -169,6 +214,17 @@ namespace   TARGETING
              */
             errlHndl_t  sendSyncCompleteMessage();
 
+            /**
+             *  @brief  Sends the sync to HB request message to the FSP
+             *          requesting the FSP to sync it's attribute data
+             *          to Hostboot.
+             *
+             *  @return     errlHndl_t
+             *                  return errl ==  NULL  -> success
+             *                  return errl !=  NULL  -> failure
+             */
+            errlHndl_t  sendSyncToHBRequestMessage();
+
         private:
 
             // id of the section being updated
@@ -191,7 +247,7 @@ namespace   TARGETING
 
     /**
      *  @brief  Handles synchronization of all RW targeting attributes from
-     *          hostboot to the fsp; the following section are are 
+     *          hostboot to the fsp; the following sections are
      *          synchronized.
      * 
      *           1). SECTION_TYPE_PNOR_RW
@@ -204,6 +260,22 @@ namespace   TARGETING
      *                  return errl !=  NULL  -> failure
      */
     errlHndl_t syncAllAttributesToFsp();
+
+    /**
+     *  @brief  Handles synchronization of all RW targeting attributes from
+     *          the fsp to hostboot; the following sections are
+     *          synchronized.
+     * 
+     *           1). SECTION_TYPE_PNOR_RW
+     *           2). SECTION_TYPE_HEAP_PNOR_INIT
+     *           3). SECTION_TYPE_HEAP_PNOR_ZERO_INIT
+     *
+     *
+     *  @return     errlHndl_t
+     *                  return errl ==  NULL  -> success
+     *                  return errl !=  NULL  -> failure
+     */
+    errlHndl_t syncAllAttributesFromFsp();
 
 } // namespace
 #endif

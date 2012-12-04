@@ -1,26 +1,25 @@
-/*  IBM_PROLOG_BEGIN_TAG
- *  This is an automatically generated prolog.
- *
- *  $Source: src/include/usr/targeting/common/attrsyncdefs.H $
- *
- *  IBM CONFIDENTIAL
- *
- *  COPYRIGHT International Business Machines Corp. 2012
- *
- *  p1
- *
- *  Object Code Only (OCO) source materials
- *  Licensed Internal Code Source Materials
- *  IBM HostBoot Licensed Internal Code
- *
- *  The source code for this program is not published or other-
- *  wise divested of its trade secrets, irrespective of what has
- *  been deposited with the U.S. Copyright Office.
- *
- *  Origin: 30
- *
- *  IBM_PROLOG_END_TAG
- */
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/include/usr/targeting/common/attrsyncdefs.H $             */
+/*                                                                        */
+/* IBM CONFIDENTIAL                                                       */
+/*                                                                        */
+/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/*                                                                        */
+/* p1                                                                     */
+/*                                                                        */
+/* Object Code Only (OCO) source materials                                */
+/* Licensed Internal Code Source Materials                                */
+/* IBM HostBoot Licensed Internal Code                                    */
+/*                                                                        */
+/* The source code for this program is not published or otherwise         */
+/* divested of its trade secrets, irrespective of what has been           */
+/* deposited with the U.S. Copyright Office.                              */
+/*                                                                        */
+/* Origin: 30                                                             */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
 #ifndef __ATTRSYNC_DEFS_H__
 #define __ATTRSYNC_DEFS_H__
 
@@ -47,21 +46,43 @@ const uint64_t RETURN_CODE_MASK     = 0xFFFF000000000000;
                             ( data0 = ( data0 & ~SECTIONID_MASK) | \
                             ( static_cast<uint64_t>(sectionId) << 48 ) )
 
-// used to add the number of the current page to by sync'd. used in the
+// used to get the section from the first data word of an attribute sync
+// message - only retrieves the first two bytes of the uint64_t
+#define ATTR_SYNC_GET_SECTION_ID( data0 ) ( static_cast<SECTION_TYPE>( \
+                            ( data0 & SECTIONID_MASK ) >> 48 ) )
+
+// used to add the number of the current page to be sync'd. used in the
 // attribute sync message code. Only modifies the second two bytes 
 // of the uint64_t
 #define ATTR_SYNC_ADD_PAGE_NUMBER( pageNumber, data0 )    \
                             ( data0 = ( data0 & ~PAGE_NUMBER_MASK) | \
                             ( static_cast<uint64_t>(pageNumber) << 32 ) )
 
+// used to get the number of the current page to be sync'd. used in the
+// attribute sync message code. Only retrieves the second two bytes
+// of the uint64_t
+#define ATTR_SYNC_GET_PAGE_NUMBER( data0 ) ( static_cast<uint16_t>( \
+                            ( data0 & PAGE_NUMBER_MASK ) >> 32 ) )
+
 // Used in the commit message sent after all the pages of the current section
-// oare sent, the macro will add the total page count to the first two bytes
+// are sent, the macro will add the total page count to the first two bytes
 // of the data[0] uint64_t in the mailbox message.
 #define ATTR_SYNC_ADD_PAGE_COUNT( pageCount, data0 ) \
                             ( data0 = ( data0 & ~PAGE_COUNT_MASK) | \
                             ( static_cast<uint64_t>(pageCount) << 48 ) )
 
-// grabs the return code from the uint64_t returned by the mailbox message
+// Used in the commit message sent after all the pages of the current section
+// are sent, the macro will extract the total page count from the first two bytes
+// of the data[0] uint64_t in the mailbox message.
+#define ATTR_SYNC_GET_PAGE_COUNT( data0 ) ( static_cast<uint16_t> ( \
+                            ( data0 & PAGE_COUNT_MASK ) >> 48 ) )
+
+// sets the return code in the first 2 bytes of the mailbox message
+#define ATTR_SYNC_ADD_RC( rc, data0 ) \
+                            ( data0 = (data0 & ~RETURN_CODE_MASK) | \
+                            ( static_cast<uint64_t>(rc) << 48 ) )
+
+// gets the return code from the uint64_t returned by the mailbox message
 #define ATTR_SYNC_GET_RC( data0 ) ( static_cast<ATTR_SYNC_RC>( \
                             ( data0 & RETURN_CODE_MASK )  >> 48 ))
 
@@ -71,13 +92,16 @@ namespace   TARGETING
      * @enum TARGETING::ATTR_SYNC_MSG_TYPE
      *
      * @brief  Targeting attribute sync service message types for use in the
-     *         attribute sync messges between FSP and Hostboot
+     *         attribute sync messages between FSP and Hostboot
      */
     enum ATTR_SYNC_MSG_TYPE
     {
-        ATTR_SYNC_NO_MSG    = 0,
-        ATTR_SYNC_SECTION   = 0x000000A1,
-        ATTR_SYNC_COMPLETE  = 0x000000A2,
+        ATTR_SYNC_NO_MSG          = 0,
+        ATTR_SYNC_SECTION_TO_FSP  = 0x000000A1,
+        ATTR_SYNC_COMPLETE_TO_FSP = 0x000000A2,
+        ATTR_SYNC_REQUEST_TO_HB   = 0x000000A3,
+        ATTR_SYNC_SECTION_TO_HB   = 0x000000A4,
+        ATTR_SYNC_COMPLETE_TO_HB  = 0x000000A5,
     };
 
 

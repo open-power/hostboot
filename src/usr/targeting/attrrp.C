@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2012              */
+/* COPYRIGHT International Business Machines Corp. 2011,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -506,11 +506,62 @@ namespace TARGETING
         return l_errl;
     }
 
-    void AttrRP::writeSectionData(
-                        const std::vector<TARGETING::sectionRefData>& i_pages)
+    bool AttrRP::writeSectionData(
+        const std::vector<TARGETING::sectionRefData>& i_pages) const
     {
-        // $TODO RTC Story 46672
-        assert(0);
+        TARG_INF(ENTER_MRK "AttrRP::writeSectionData");
+
+        uint8_t * l_dataPtr = NULL; // ptr to Attribute virtual address space
+        bool      l_rc = true;      // true if write to section is successful
+
+        // for each page
+        for ( size_t i = 0; (i < i_pages.size()) && (true == l_rc); i++ )
+        {
+            // search for the section we need
+            for ( size_t j = 0; j < iv_sectionCount; j++ )
+            {
+                if ( iv_sections[j].type == i_pages[i].sectionId )
+                {
+                    // found it..
+                    TARG_DBG( "Writing Attribute Section: ID: %u, "
+                        "address: 0x%lx size: 0x%lx page: %u",
+                        iv_sections[j].type,
+                        iv_sections[j].vmmAddress,
+                        iv_sections[j].size,
+                        i_pages[i].pageNumber);
+
+                    // check that page number is within range
+                    uint64_t l_pageOffset = i_pages[i].pageNumber * PAGESIZE;
+                    if ( iv_sections[j].size < (l_pageOffset + PAGESIZE) )
+                    {
+                        TARG_ERR("page offset 0x%lx is greater than "
+                            "size 0x%lx of section %u",
+                            l_pageOffset,
+                            iv_sections[j].size,
+                            iv_sections[j].type);
+
+                        l_rc = false;
+                        break;
+                    }
+
+                    // adjust the pointer out by page size * page number
+                    l_dataPtr =
+                        reinterpret_cast<uint8_t *>
+                        (iv_sections[j].vmmAddress) + l_pageOffset;
+
+                    memcpy( l_dataPtr, i_pages[i].dataPtr, PAGESIZE );
+                    break;
+                }
+            }
+
+            if (false == l_rc)
+            {
+                break;
+            }
+        }
+
+        TARG_INF( EXIT_MRK "AttrRP::writeSectionData" );
+        return l_rc;
     }
 
     void AttrRP::readSectionData(

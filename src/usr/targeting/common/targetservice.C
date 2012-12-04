@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2012              */
+/* COPYRIGHT International Business Machines Corp. 2011,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -562,8 +562,7 @@ bool TargetService::writeSectionData(
     bool l_response = false;
     if(i_pages.size() != 0)
     {
-        TARG_GET_SINGLETON(TARGETING::theAttrRP).writeSectionData(i_pages);
-        l_response = true;
+        l_response = TARG_GET_SINGLETON(TARGETING::theAttrRP).writeSectionData(i_pages);
     }
     TARG_EXIT();
 

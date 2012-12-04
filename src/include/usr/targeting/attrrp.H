@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2012              */
+/* COPYRIGHT International Business Machines Corp. 2011,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -147,11 +147,12 @@ class AttrRP
          *
          *  @param[in] i_pages, vector of sectionRefData struct
          *
-         *  @return void
+         *  @return true successful in writing Section Data
+         *  @return false failed writing Section Data
          */
 
-        void writeSectionData(
-                const std::vector <sectionRefData>& i_pages);
+        bool writeSectionData(
+                const std::vector <sectionRefData>& i_pages) const;
 
         /**
          *  @brief Populates the output vector with the correct information
