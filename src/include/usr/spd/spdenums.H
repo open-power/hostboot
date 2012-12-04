@@ -30,6 +30,8 @@
 #ifndef __SPDENUMS_H
 #define __SPDENUMS_H
 
+#include <mbox/mbox_queues.H>
+
 namespace SPD
 {
 
@@ -257,6 +259,45 @@ enum
     // Invalid Keyword
     INVALID_SPD_KEYWORD                 = 0xFFFF,
 };
+
+/**
+ * @brief VPD Message Types 
+ */
+enum VPD_MSG_TYPE
+{
+    VPD_WRITE_DIMM    = 0x00C1, //< DIMM SPD
+    VPD_WRITE_PROC    = 0x00C2, //< Processor MVPD
+    VPD_WRITE_MEMBUF  = 0x00C3, //< Centaur FRU VPD
+};
+
+/**
+ * @brief Message definition for VPD Write Request
+ *
+ * - data0 : 
+ *   - [16] VPD Record Number
+ *   - [32] 4-byte ASCII String for record name
+ *          'XXXX'=Entire VPD section from PNOR
+ *   - [16] 2-byte ASCII String for keyword or offset into SPD
+ *          'XX'=Entire VPD record
+ * - data1 : 
+ *   - [64] Size of binary data in bytes
+ * - extra data : Binary VPD Data
+ */
+union VpdWriteMsg_t
+{
+    uint64_t data0;
+    struct
+    {
+        uint16_t rec_num;     //< VPD_REC_NUM
+        char record[4];       //< ASCII Record Name
+        union
+        {
+            char keyword[2];  //< ASCII Keyword (for IBM VPD)
+            uint16_t offset;  //< Offset into record in bytes (for DIMM SPD)
+        };
+    } PACKED;
+};
+
 
 };  // end SPD
 

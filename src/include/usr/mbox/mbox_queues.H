@@ -57,8 +57,10 @@ namespace MBOX
         FSP_ERROR_MSGQ          = 0x80000004,
         IPL_SERVICE_QUEUE       = 0x80000008, // Defined by Fsp team
         FSP_ATTR_SYNC_MSGQ      = 0x80000009,
-        FSP_HWPF_ATTR_MSGQ      = 0x8000000b, // HWPF Attribute override/sync
+        FSP_HWPF_ATTR_MSGQ      = 0x8000000B, // HWPF Attribute override/sync
+        FSP_VPD_MSGQ            = 0x8000000C,
         // Add FSP services here:
+
         FSP_ECHO_MSGQ = 0xFFFFFFFF,     // Fake FSP for test
     };
 

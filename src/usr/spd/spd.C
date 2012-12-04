@@ -66,8 +66,8 @@ TRAC_INIT( & g_trac_spd, "SPD", KILOBYTE );
 
 // ------------------------
 // Macros for unit testing
-//#define TRACUCOMP(args...)  TRACFCOMP(args)
-#define TRACUCOMP(args...)
+#define TRACUCOMP(args...)  TRACFCOMP(args)
+//#define TRACUCOMP(args...)
 //#define TRACSSCOMP(args...)  TRACFCOMP(args)
 #define TRACSSCOMP(args...)
 
@@ -616,6 +616,10 @@ errlHndl_t spdWriteValue ( uint64_t i_keyword,
                 break;
             }
 
+            //@todo: RTC:39177 - Need to handle writes that are not on a
+            // byte boundary by reading the rest of the byte first
+            assert( (entry->length)%8 == 0 );
+
             // Write value
             err = spdWriteData( entry->offset,
                                 io_buflen,
@@ -628,7 +632,10 @@ errlHndl_t spdWriteValue ( uint64_t i_keyword,
             }
 
             // Send mbox message with new data to Fsp
-            err = spdSendMboxWriteMsg();
+            err = spdSendMboxWriteMsg( entry->offset,
+                                       io_buflen,
+                                       io_buffer,
+                                       i_target );
 
             if( err )
             {
@@ -1018,27 +1025,68 @@ errlHndl_t spdReadBinaryFile ( uint64_t i_byteAddr,
 // ------------------------------------------------------------------
 // spdSendMboxWriteMsg
 // ------------------------------------------------------------------
-errlHndl_t spdSendMboxWriteMsg ( void )
+errlHndl_t spdSendMboxWriteMsg ( uint64_t i_offset,
+                                 size_t i_numBytes,
+                                 void * i_data,
+                                 TARGETING::Target * i_target )
 {
-    errlHndl_t err = NULL;
+    errlHndl_t l_err = NULL;
+    msg_t* msg = NULL;
 
     TRACSSCOMP( g_trac_spd,
                 ENTER_MRK"spdSendMboxWriteMsg()" );
 
     do
     {
-        // TODO - Since all writes to SPD will be greather than 16 bytes,
-        // there is a need for the "extra_data" option from mbox.  This is not
-        // available as of yet.
-        //
-        // This will be implemented with Story 41365, which cannot be done
-        // until story 34032 has been completed.
+        //Create a mailbox message to send to FSP
+        msg = msg_allocate();
+        msg->type = VPD_WRITE_DIMM;
+
+        VpdWriteMsg_t msgdata;
+        msgdata.rec_num = i_target->getAttr<TARGETING::ATTR_VPD_REC_NUM>();
+        memcpy( msgdata.record, "XXXX", 4 ); //offset relative to whole section
+        msgdata.offset = i_offset;
+        msg->data[0] = msgdata.data0;
+        msg->data[1] = i_numBytes;
+
+        //should never need more than 4KB
+        assert( i_numBytes < PAGESIZE);
+
+        msg->extra_data = malloc( i_numBytes );
+        memcpy( msg->extra_data, i_data, i_numBytes );
+        TRACFCOMP( g_trac_spd, "extra_data=%p", msg->extra_data );
+
+        TRACFCOMP( g_trac_spd,
+                   INFO_MRK"Send msg to FSP to write record %d, offset 0x%X",
+                   msgdata.rec_num,
+                   msgdata.offset );
+
+        //Create a mbox message with the error log and send it to FSP
+        //We only send error log to FSP when mailbox is enabled
+        if( !MBOX::mailbox_enabled() )
+        {
+            TRACFCOMP(g_trac_spd, INFO_MRK "Mailbox is disabled, skipping SPD write");
+            TRACFBIN( g_trac_spd, "msg=", msg, sizeof(msg_t) );
+            TRACFBIN( g_trac_spd, "extra=", msg->extra_data, i_numBytes );
+        }
+
+        l_err = MBOX::send( MBOX::FSP_VPD_MSGQ, msg );
+        if( l_err )
+        {
+            TRACFCOMP(g_trac_spd, ERR_MRK "Failed sending SPD to FSP");           
+            // just commit the log and move on, nothing else to do
+            l_err->collectTrace("SPD",1024);
+            errlCommit( l_err, SPD_COMP_ID );
+            l_err = NULL;
+
+            msg_free( msg );
+        }
     } while( 0 );
 
     TRACSSCOMP( g_trac_spd,
                 EXIT_MRK"spdSendMboxWriteMsg()" );
 
-    return err;
+    return l_err;
 }
 
 

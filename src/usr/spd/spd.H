@@ -464,13 +464,21 @@ errlHndl_t writePNOR ( uint64_t i_byteAddr,
  * @brief This function handles sending the mailbox message to the Fsp to
  *      notify of updates to the data.
  *
- * TODO with Story 41365
- * @param NONE, yet.
+ * @param[in] i_offset - The offset into the JEDEC SPD layout.
+ *
+ * @param[in] i_numbytes - Number of bytes to read.
+ *
+ * @param[in] i_data - The data buffer that will return the data read.
+ *
+ * @param[in] i_target - The target DIMM to access.
  *
  * @return errlHndl_t - NULL if successful, otherwise a pointer to the error
  *      log.
  */
-errlHndl_t spdSendMboxWriteMsg ( void );
+errlHndl_t spdSendMboxWriteMsg ( uint64_t i_offset,
+                                 size_t i_numBytes,
+                                 void * i_data,
+                                 TARGETING::Target * i_target );
 
 }; // end SPD namespace
 

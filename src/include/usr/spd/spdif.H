@@ -83,6 +83,40 @@ errlHndl_t readPNOR ( uint64_t i_byteAddr,
                       uint64_t &io_cachedAddr,
                       mutex_t * i_mutex );
 
+/**
+ * @brief This function will write the PNOR at the correct offset and number
+ *      of bytes for the keyword requested.
+ *
+ * @param[in] i_byteAddr - The offset to access in the PNOR.
+ *
+ * @param[in] i_numBytes - The number of bytes to write.
+ *
+ * @param[in] i_data - The data buffer of the data to be written.
+ *
+ * @param[in] i_target - The chip target to access the data for.
+ *
+ * @param[in] i_pnorInfo - Information about the PNOR section and side that we
+ *      need to know to make the request.
+ *
+ * @param[in/out] io_cachedAddr - The address offset to the data chunk in
+ *      PNOR.
+ *
+ * @param[in] i_mutex - The mutex to lock/unlock while setting io_isAddrCached
+ *      and io_cachedAddr.  It is assumed that those parameters are global
+ *      variables in the code where they reside.
+ *
+ * @return errlHndl_t - NULL if successful, otherwise a pointer to the error
+ *      log.
+ */
+errlHndl_t writePNOR ( uint64_t i_byteAddr,
+                       size_t i_numBytes,
+                       void * i_data,
+                       TARGETING::Target * i_target,
+                       pnorInformation & i_pnorInfo,
+                       uint64_t &io_cachedAddr,
+                       mutex_t * i_mutex );
+
+
 };  // end SPD
 
 #endif
