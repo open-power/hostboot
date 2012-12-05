@@ -121,6 +121,70 @@ foreach my $i (@{$powerbus->{'power-bus'}})
     push @pbus, [ lc($endp2), lc($endp1) ];
 }
 
+open (FH, "<$mrwdir/${sysname}-vmem.xml") ||
+    die "ERROR: unable to open $mrwdir/${sysname}-vmem.xml\n";
+close (FH);
+
+my $vmemCentaur = XMLin("$mrwdir/${sysname}-vmem.xml");
+
+# Capture all pnor attributes into the @unsortedPnorTargets array
+use constant VMEM_DEV_PATH_FIELD => 0;
+use constant VMEM_I2C_ADDR_FIELD => 1;
+use constant VMEM_NODE_FIELD => 2;
+use constant VMEM_POS_FIELD => 3;
+use constant VMEM_ID_FIELD => 4;
+
+my $vmemId = 0x0;
+
+my @unsortedVmem;
+my @vmemArray;
+my @vmemDevAddr;
+my $vmemValue =0;
+my $found=0;
+my $loc=0;
+my $newValue =0;
+
+foreach my $i (@{$vmemCentaur->{'centaur-vrd-connection'}})
+{
+    my $vmemDev = $i->{'vrd'}->{'i2c-dev-path'};
+    my $vmemAddr = $i->{'vrd'}->{'i2c-address'};
+
+    for my $j (0 .. $#vmemDevAddr)
+    {
+        if ( ($vmemDev eq $vmemDevAddr[$j][VMEM_DEV_PATH_FIELD]) &&
+             ($vmemAddr eq $vmemDevAddr[$j][VMEM_I2C_ADDR_FIELD]) )
+        {
+            $found =1;
+            $vmemValue=$vmemArray[$j];
+            last;
+        }
+        else
+        {
+            $found=0;
+        }
+    }
+    if ($found ==1)
+    {
+        push (@vmemArray,$vmemValue);
+    }
+    else
+    {
+        $vmemValue=$newValue++;
+        push (@vmemArray,$vmemValue);
+    }
+
+    push (@vmemDevAddr,[$vmemDev, $vmemAddr]);
+
+    my $vmemNode = $i->{'centaur'}->{'target'}->{'node'};
+    my $vmemPosition = $i->{'centaur'}->{'target'}->{'position'};
+
+    push (@unsortedVmem,[$vmemDev, $vmemAddr, $vmemNode, $vmemPosition, $vmemValue]);
+}
+
+
+my @SortedVmem = sort byVmemNodePos @unsortedVmem;
+
+
 open (FH, "<$mrwdir/${sysname}-lpc2spi.xml") ||
     die "ERROR: unable to open $mrwdir/${sysname}-lpc2spi.xml\n";
 close (FH);
@@ -633,6 +697,10 @@ for (my $do_core = 0, my $i = 0; $i <= $#STargets; $i++)
 my $memb;
 my $membMcs;
 my $mba_count = 0;
+my $vmem_id =0;
+my $vmem_count =0;
+my $vmemAddr_prev="";
+my $vmemDevPath_prev="";
 
 for my $i ( 0 .. $#STargets )
 {
@@ -660,8 +728,19 @@ for my $i ( 0 .. $#STargets )
             die "ERROR. Can't locate Centaur from memory bus table\n";
         }
         my $relativeCentaurRid = $STargets[$i][PLUG_POS];
+
+        #should note that the $SortedVmem is sorted by node and position and currently
+        #$STargets is also sorted by node and postion.  If this ever changes then
+        #will need to make a modification here
+        my $vmemDevPath=$SortedVmem[$vmem_count][VMEM_DEV_PATH_FIELD];
+        my $vmemAddr=$SortedVmem[$vmem_count][VMEM_I2C_ADDR_FIELD];
+        my $vmem_id=$SortedVmem[$vmem_count][VMEM_ID_FIELD];
+        $vmem_count++;
+
         generate_centaur( $memb, $membMcs, $cfsi, $ipath, 
-                                $STargets[$i][ORDINAL_FIELD],$relativeCentaurRid);
+                                $STargets[$i][ORDINAL_FIELD],$relativeCentaurRid,
+                                $vmem_id, $vmemDevPath, $vmemAddr);
+
     }
     elsif ($STargets[$i][NAME_FIELD] eq "mba")
     {
@@ -922,6 +1001,37 @@ sub byPnorNodePos($$)
 }
 
 ################################################################################
+# Compares two Vmem instances based on the node and position #
+################################################################################
+sub byVmemNodePos($$)
+{
+    my $retVal = -1;
+
+    my $lhsInstance_node = $_[0][VMEM_NODE_FIELD];
+    my $rhsInstance_node = $_[1][VMEM_NODE_FIELD];
+    if(int($lhsInstance_node) eq int($rhsInstance_node))
+    {
+         my $lhsInstance_pos = $_[0][VMEM_POS_FIELD];
+         my $rhsInstance_pos = $_[1][VMEM_POS_FIELD];
+         if(int($lhsInstance_pos) eq int($rhsInstance_pos))
+         {
+                die "ERROR: Duplicate vmem positions: 2 vmem with same
+                    node and position, \
+                    NODE: $lhsInstance_node POSITION: $lhsInstance_pos\n";
+         }
+         elsif(int($lhsInstance_pos) > int($rhsInstance_pos))
+         {
+             $retVal = 1;
+         }
+    }
+    elsif(int($lhsInstance_node) > int($rhsInstance_node))
+    {
+        $retVal = 1;
+    }
+    return $retVal;
+}
+
+################################################################################
 # Compares two PSI Units instances based on the node, position & chip unit #
 ################################################################################
 sub byPSINodePosChpUnit($$)
@@ -1130,6 +1240,10 @@ sub generate_system_node
     if($build eq "fsp")
     {
         print "
+    <attribute>
+        <id>RID</id>
+        <default>0x800</default>
+    </attribute>
     <attribute>
         <id>ORDINAL_ID</id>
         <default>$node</default>
@@ -1820,7 +1934,8 @@ sub generate_ax_buses
 
 sub generate_centaur
 {
-    my ($ctaur, $mcs, $cfsi, $ipath, $ordinalId, $relativeCentaurRid) = @_;
+    my ($ctaur, $mcs, $cfsi, $ipath, $ordinalId, $relativeCentaurRid,
+            $vmemId, $vmemDevPath, $vmemAddr) = @_;
     my $scompath = $devpath->{chip}->{$ipath}->{'scom-path'};
     my $scanpath = $devpath->{chip}->{$ipath}->{'scan-path'};
     my $scomsize = length($scompath) + 1;
@@ -1846,6 +1961,10 @@ sub generate_centaur
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-$sys/node-$node/proc-$proc/mcs-$mcs/membuf-$ctaur</default>
+    </attribute>
+    <attribute>
+        <id>VMEM_ID</id>
+        <default>$vmemId</default>
     </attribute>
     <!-- TODO When MRW provides the information, these two attributes
          should be included. values of X come from MRW.
@@ -1902,6 +2021,14 @@ sub generate_centaur
     <attribute>
         <id>ORDINAL_ID</id>
         <default>$ordinalId</default>
+    </attribute>
+    <attribute>
+        <id>FSP_VMEM_DEVICE_PATH</id>
+        <default>$vmemDevPath</default>
+    </attribute>
+    <attribute>
+        <id>FSP_VMEM_I2C_ADDR</id>
+        <default>$vmemAddr</default>
     </attribute>";
     }
     print "\n</targetInstance>\n";
