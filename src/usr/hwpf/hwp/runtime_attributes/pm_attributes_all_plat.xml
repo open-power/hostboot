@@ -29,21 +29,6 @@
 <!-- *********************************************************************** -->
 
 <attribute>
-    <id>ATTR_PROC_DCM_INSTALLED</id>
-    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
-    <description>
-This attribute is set to 1 if the target processor is part of a Dual Chip Module (DCM).
-
-Used for enabling operations between the two chips for to voltage control based on 'interchip_mode' and the settings of PMIC0.
-
-Consumer: proc_pm.scominit
-    </description>
-    <valueType>uint8</valueType>
-    <enum>TRUE = 1, FALSE = 0</enum>
-    <platInit/>
-</attribute>
-
-<attribute>
     <id>ATTR_PM_EXTERNAL_VRM_STEPSIZE</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description>

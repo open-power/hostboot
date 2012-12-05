@@ -7565,6 +7565,56 @@ firmware notes: Used as override attribute for pstate procedure
 </attribute>
 
 <attribute>
+    <id>CHIP_REGIONS_TO_ENABLE</id>
+    <description>
+      Called to get data to customize an IPL or SLW image with data indicating
+        which chip regions the SBE should enable
+      The data is in the format of the Module VPD PG (Partial Good Vector)
+        keyword which is an 32 entry array of 16bit words, each word
+        represents a chiplet and a defined set of bits within the word
+        represents regions that are good. The 16 bit word is embedded within
+        a 64bit word as described in the MVPD spec to reflect the clock
+        controller region register layout:
+          bits 0:3 are reserved -> set to 0
+          bits 4:19 are the 16 bit data word
+          bits 20:63 are reserved -> set to 0
+      A platform needs to return data indicating the chip regions to enable,
+      this may not be just the MVPD partial-good data, it may also not enable
+      other chips and chiplets it has decided are non-functional - this is
+      why it is not a standard MVPD query.
+    </description>
+    <simpleType>	
+        <uint64_t></uint64_t>
+        <array>32</array>
+    </simpleType>
+    <persistency>volatile</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_CHIP_REGIONS_TO_ENABLE</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>PROC_NX_ENABLE</id>
+    <description>
+      NX partial good control
+      creator: platform
+      firmware notes:
+        must track ATTR_CHIP_REGIONS_TO_ENABLE
+    </description>
+    <simpleType>
+        <uint8_t></uint8_t>
+    </simpleType>
+    <persistency>volatile</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_PROC_NX_ENABLE</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
     <id>BOOT_FREQ_MHZ</id>
     <description>
        Boot frequency in MHZ.  Default is 50% of nominal.
@@ -7579,6 +7629,25 @@ firmware notes: Used as override attribute for pstate procedure
     <writeable/>
     <hwpfToHbAttrMap>
         <id>ATTR_BOOT_FREQ_MHZ</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>PROC_PCIE_ENABLE</id>
+    <description>
+      PCIE partial good control
+      creator: platform
+      firmware notes:
+        must track ATTR_CHIP_REGIONS_TO_ENABLE
+    </description>
+    <simpleType>
+        <uint8_t></uint8_t>
+    </simpleType>
+    <persistency>volatile</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_PROC_PCIE_ENABLE</id>
         <macro>DIRECT</macro>
     </hwpfToHbAttrMap>
 </attribute>
@@ -7606,6 +7675,25 @@ firmware notes: Used as override attribute for pstate procedure
 </attribute>
 
 <attribute>
+    <id>PROC_L3_ENABLE</id>
+    <description>
+      L3 partial good control
+      creator: platform
+      firmware notes:
+        must track ATTR_CHIP_REGIONS_TO_ENABLE
+    </description>
+    <simpleType>
+        <uint8_t></uint8_t>
+    </simpleType>
+    <persistency>volatile</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_PROC_L3_ENABLE</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
 <id>PIB_I2C_REFCLOCK</id>
 <description>
     i2c reference clock for the system.
@@ -7621,6 +7709,25 @@ firmware notes: Used as override attribute for pstate procedure
     <writeable/>
     <hwpfToHbAttrMap>
         <id>ATTR_PIB_I2C_REFCLOCK</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>PROC_ADU_UNTRUSTED_BAR_BASE_ADDR</id>
+    <description>
+      ADU Untrusted BAR base address (secure mode)
+      creator: platform
+      firmware notes:
+        64-bit address representing BAR RA
+    </description>
+    <simpleType>
+        <uint64_t></uint64_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_PROC_ADU_UNTRUSTED_BAR_BASE_ADDR</id>
         <macro>DIRECT</macro>
     </hwpfToHbAttrMap>
 </attribute>
@@ -7646,6 +7753,25 @@ firmware notes: Used as override attribute for pstate procedure
 </attribute>
 
 <attribute>
+    <id>PROC_ADU_UNTRUSTED_BAR_SIZE</id>
+    <description>
+      ADU Untrusted BAR size (secure mode)
+      creator: platform
+      firmware notes:
+        mask applied to RA 14:43
+    </description>
+    <simpleType>
+        <uint64_t></uint64_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_PROC_ADU_UNTRUSTED_BAR_SIZE</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
 <id>SBE_IMAGE_OFFSET</id>
 <description>
     HostBoot image for SBE, offset to account for ECC
@@ -7666,6 +7792,25 @@ firmware notes: Used as override attribute for pstate procedure
 </attribute>
 
 <attribute>
+    <id>PROC_PSI_UNTRUSTED_BAR0_BASE_ADDR</id>
+    <description>
+      PSI Untrusted BAR0 base address (secure mode)
+      creator: platform
+      firmware notes:
+        64-bit address representing BAR RA
+    </description>
+    <simpleType>
+        <uint64_t></uint64_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_PROC_PSI_UNTRUSTED_BAR0_BASE_ADDR</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
 <id>BOOT_VOLTAGE</id>
 <description>
      Boot Voltage for system.
@@ -7681,6 +7826,63 @@ firmware notes: Used as override attribute for pstate procedure
     <writeable/>
     <hwpfToHbAttrMap>
         <id>ATTR_BOOT_VOLTAGE</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>PROC_PSI_UNTRUSTED_BAR0_SIZE</id>
+    <description>
+      PSI Untrusted BAR0 size (secure mode)
+      creator: platform
+      firmware notes:
+        mask applied to RA 14:43
+    </description>
+    <simpleType>
+        <uint64_t></uint64_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_PROC_PSI_UNTRUSTED_BAR0_SIZE</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>PROC_PSI_UNTRUSTED_BAR1_BASE_ADDR</id>
+    <description>
+      PSI Untrusted BAR1 base address (secure mode)
+      creator: platform
+      firmware notes:
+        64-bit address representing BAR RA
+    </description>
+    <simpleType>
+        <uint64_t></uint64_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_PROC_PSI_UNTRUSTED_BAR1_BASE_ADDR</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>PROC_PSI_UNTRUSTED_BAR1_SIZE</id>
+    <description>
+      PSI Untrusted BAR1 size (secure mode)
+      creator: platform
+      firmware notes:
+        mask applied to RA 14:43
+    </description>
+    <simpleType>
+        <uint64_t></uint64_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_PROC_PSI_UNTRUSTED_BAR1_SIZE</id>
         <macro>DIRECT</macro>
     </hwpfToHbAttrMap>
 </attribute>

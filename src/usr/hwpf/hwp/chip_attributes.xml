@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- IBM CONFIDENTIAL                                                       -->
 <!--                                                                        -->
-<!-- COPYRIGHT International Business Machines Corp. 2011,2012              -->
+<!-- COPYRIGHT International Business Machines Corp. 2012                   -->
 <!--                                                                        -->
 <!-- p1                                                                     -->
 <!--                                                                        -->
@@ -36,17 +36,18 @@
     </description>
     <valueType>uint32</valueType>
     <platInit/>
-    <persistRuntime/>
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>
     <id>ATTR_NAME</id>
     <targetType>TARGET_TYPE_PROC_CHIP,TARGET_TYPE_MEMBUF_CHIP</targetType>
-    <description>Product name of a chip target</description>
+    <description>
+        Product name of a chip target
+        Provided by the Machine Readable Workbook
+    </description>
     <valueType>uint8</valueType>
     <enum>NONE = 0, VENICE = 1, MURANO = 2, CENTAUR = 3</enum>
     <platInit/>
-    <persistRuntime/>
     <!-- To make HWPs data driven, this is a privileged attribute that cannot
          be accessed by normal HWPs. -->
     <privileged/>
@@ -61,7 +62,6 @@
     </description>
     <valueType>uint8</valueType>
     <platInit/>
-    <persistRuntime/>
     <!-- To make HWPs data driven, this is a privileged attribute that cannot
          be accessed by normal HWPs. -->
     <privileged/>
@@ -77,7 +77,6 @@
     <valueType>uint8</valueType>
     <enum>false = 0, true = 1</enum>
     <platInit/>
-    <persistRuntime/>
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>
@@ -114,6 +113,42 @@
     <valueType>uint8</valueType>
     <enum>false = 0, true = 1</enum>
     <platInit/>
-    <persistRuntime/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PROC_DCM_INSTALLED</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+        If true, the chip is installed on a Dual Chip Module
+        Provided by the Machine Readable Workbook
+    </description>
+    <valueType>uint8</valueType>
+    <enum>false = 0, true = 1</enum>
+    <platInit/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_CHIP_REGIONS_TO_ENABLE</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      Called to get data to customize an IPL or SLW image with data indicating
+        which chip regions the SBE should enable
+      The data is in the format of the Module VPD PG (Partial Good Vector)
+        keyword which is an 32 entry array of 16bit words, each word
+        represents a chiplet and a defined set of bits within the word
+        represents regions that are good. The 16 bit word is embedded within
+        a 64bit word as described in the MVPD spec to reflect the clock
+        controller region register layout:
+          bits 0:3 are reserved -> set to 0
+          bits 4:19 are the 16 bit data word
+          bits 20:63 are reserved -> set to 0
+      A platform needs to return data indicating the chip regions to enable,
+      this may not be just the MVPD partial-good data, it may also not enable
+      other chips and chiplets it has decided are non-functional - this is
+      why it is not a standard MVPD query.
+    </description>
+    <valueType>uint64</valueType>
+    <array>32</array>
+    <platInit/>
   </attribute>
 </attributes>

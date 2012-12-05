@@ -229,7 +229,6 @@
      <attribute><id>MSS_INTERLEAVE_ENABLE</id></attribute>
      <attribute><id>MSS_MCS_GROUP_32</id></attribute>
      <!-- Start pm_attributes_all_plat.xml -->
-     <attribute><id>PROC_DCM_INSTALLED</id></attribute>
      <attribute><id>PM_EXTERNAL_VRM_STEPSIZE</id></attribute>
      <attribute><id>PM_EXTERNAL_VRM_STEPDELAY</id></attribute>
      <attribute><id>PM_SAFE_VOLTAGE</id></attribute>
@@ -366,6 +365,15 @@
     <attribute><id>PROC_PCIE_IOP_RX_PEAK</id></attribute>
     <attribute><id>PROC_PCIE_IOP_RX_SDL</id></attribute>
     <attribute><id>PROC_PCIE_IOP_ZCAL_CONTROL</id></attribute>
+    <attribute><id>PROC_DCM_INSTALLED</id></attribute>
+    <attribute><id>PROC_NX_ENABLE</id></attribute>
+    <attribute><id>PROC_PCIE_ENABLE</id></attribute>
+    <attribute><id>PROC_ADU_UNTRUSTED_BAR_BASE_ADDR</id></attribute>
+    <attribute><id>PROC_ADU_UNTRUSTED_BAR_SIZE</id></attribute>
+    <attribute><id>PROC_PSI_UNTRUSTED_BAR0_BASE_ADDR</id></attribute>
+    <attribute><id>PROC_PSI_UNTRUSTED_BAR0_SIZE</id></attribute>
+    <attribute><id>PROC_PSI_UNTRUSTED_BAR1_BASE_ADDR</id></attribute>
+    <attribute><id>PROC_PSI_UNTRUSTED_BAR1_SIZE</id></attribute>
 </targetType>
 
 <targetType>
@@ -453,6 +461,7 @@
     <attribute><id>OVERRIDE_MVPD_V_CS_LAB_VOLTAGE</id></attribute>
     <attribute><id>OVERRIDE_MVPD_I_CS_LAB_CURRENT</id></attribute>
     <!-- End pm_attributes_all_hwp.xml -->
+    <attribute><id>PROC_L3_ENABLE</id></attribute>
 </targetType>
 
 <targetType>
