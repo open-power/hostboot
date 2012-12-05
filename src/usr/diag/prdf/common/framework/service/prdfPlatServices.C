@@ -51,7 +51,6 @@
 #else
   #include <iplp_registry.H>
   #include <mboxclientlib.H>
-  #include <mnfgPolicyFlags.H>
   #include <smgr_ipltypes.H>
   #include <smgr_registry.H>
   #include <svpd_externals.H>
@@ -216,64 +215,6 @@ errlHndl_t syncFile( const char* i_fileName )
     return rmgrSyncFile(PRDF_COMP_ID, i_fileName);
 #endif
 }
-
-//##############################################################################
-//##                     MNFG Policy Flag Functions
-//##############################################################################
-
-#ifdef __HOSTBOOT_MODULE
-
-// TODO: This is a hack until we are able to get these flags supported in
-//       Hostboot.
-enum
-{
-    MNFG_THRESHOLDS = 0,
-    MNFG_HDAT_AVP_ENABLE,
-    MNFG_SRC_TERM,
-    MNFG_NO_RBS,
-};
-
-#endif
-
-// Helper function to access the state of manufacturing policy flags.
-// TODO: Need hostboot support for the following flags:
-//          MNFG_AVP_ENABLE
-//          MNFG_SRC_TERM
-//          MNFG_NO_RBS
-//          MNFG_FAST_BACKGROUND_SCRUB
-//          MNFG_TEST_RBS
-//          MNFG_IPL_MEMORY_CE_CHECKING
-bool isMnfgFlagSet( uint32_t i_flag )
-{
-    bool o_rc = false;
-
-    #ifdef __HOSTBOOT_MODULE
-
-    // TODO - mnfgIsPolicyFlagSet() may not be supported in hostboot. Need to
-    // verify how this will be done.
-    PRDF_ERR( "[isMnfgFlagSet] Hostboot Function not implemented yet" );
-
-    #else
-
-    errlHndl_t errl = mnfgIsPolicyFlagSet( i_flag, o_rc );
-    if ( NULL != errl )
-    {
-        PRDF_ERR( "[isMnfgFlagSet] mnfgIsPolicyFlagSet(0x%08x)", i_flag );
-        PRDF_COMMIT_ERRL(errl, ERRL_ACTION_REPORT);
-        o_rc = false;
-    }
-
-    #endif
-
-    return o_rc;
-}
-
-//------------------------------------------------------------------------------
-
-bool mfgMode()       { return isMnfgFlagSet( MNFG_THRESHOLDS      ); }
-bool hdatAvpMode()   { return isMnfgFlagSet( MNFG_HDAT_AVP_ENABLE ); }
-bool mnfgTerminate() { return isMnfgFlagSet( MNFG_SRC_TERM        ); }
-bool areDramRepairsDisabled() { return isMnfgFlagSet( MNFG_NO_RBS ); }
 
 //##############################################################################
 //##                        Memory specific functions

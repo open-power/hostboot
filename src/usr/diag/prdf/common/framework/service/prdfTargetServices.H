@@ -357,6 +357,39 @@ TARGETING::TargetHandle_t getClockId(TARGETING::TargetHandle_t
 TARGETING::TargetHandle_t getClockMux(TARGETING::TargetHandle_t
                              i_pFabricHandle);
 
+//##############################################################################
+//##                     MNFG Policy Flag Functions
+//##############################################################################
+
+/**
+ * @brief   Returns the state of the MNFG_THRESHOLDS policy flag.
+ * @return  TRUE if MNFG_THRESHOLDS is set, FALSE otherwise.
+ */
+bool mfgMode();
+
+/**
+ * @brief   Returns the state of the MNFG_HDAT_AVP_ENABLE policy flag.
+ * @return  TRUE if MNFG_HDAT_AVP_ENABLE is set, FALSE otherwise.
+ */
+bool hdatAvpMode();
+
+/**
+ * @brief   Returns status of MNFG_SRC_TERM manufacturing policy flag.
+ * @param   None.
+ * @return  TRUE if MNFG_SRC_TERM policy flag is set, FALSE
+ *          otherwise.
+ * @pre     None.
+ * @post    None.
+ */
+bool mnfgTerminate();
+
+/**
+ * @brief  Returns the state of the MNFG_NO_RBS policy flag.
+ * @return TRUE if MNFG_NO_RBS is set, FALSE otherwise.
+ */
+bool areDramRepairsDisabled();
+
+
 } // end namespace PlatServices
 
 } // end namespace PRDF

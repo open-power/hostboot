@@ -42,6 +42,7 @@
 #include <errlentry.H>
 #include <fapi.H>
 #include <targeting/common/targetservice.H>
+#include <attributeenums.H>
 
 using namespace TARGETING;
 
@@ -1091,6 +1092,46 @@ TARGETING::TargetHandle_t getClockMux(TARGETING::TargetHandle_t
     #endif
     return o_ptargetClockMux;
 }
+
+//##############################################################################
+//##                     MNFG Policy Flag Functions
+//##############################################################################
+
+// Helper function to access the state of manufacturing policy flags.
+bool isMnfgFlagSet( uint32_t i_flag )
+{
+    using namespace TARGETING;
+    bool o_rc = false;
+    ATTR_MNFG_FLAGS_type l_attrValue = 0;
+    TargetHandle_t l_pTopTarget= NULL;
+    targetService().getTopLevelTarget(l_pTopTarget);
+    if(l_pTopTarget)
+    {
+        l_attrValue = l_pTopTarget->getAttr<ATTR_MNFG_FLAGS>();
+        o_rc = l_attrValue & i_flag;
+    }
+    else
+    {
+        PRDF_ERR("[isMnfgFlagSet] error finding l_pTopTarget");
+    }
+
+    //PRDF_TRAC("[isMnfgFlagSet] MNFG Flags: 0x%016llX, i_flag: "
+    //          "0x%08X, o_rc: %d", l_attrValue, i_flag, o_rc);
+
+    return o_rc;
+}
+
+//------------------------------------------------------------------------------
+
+bool mfgMode()
+{ return isMnfgFlagSet( MNFG_FLAG_BIT_MNFG_THRESHOLDS      ); }
+bool hdatAvpMode()
+{ return isMnfgFlagSet( MNFG_FLAG_BIT_MNFG_HDAT_AVP_ENABLE ); }
+bool mnfgTerminate()
+{ return isMnfgFlagSet( MNFG_FLAG_BIT_MNFG_SRC_TERM        ); }
+bool areDramRepairsDisabled()
+{ return isMnfgFlagSet( MNFG_FLAG_BIT_MNFG_DISABLE_DRAM_REPAIRS ); }
+
 
 } // end namespace PlatServices
 
