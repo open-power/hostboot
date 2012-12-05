@@ -70,7 +70,6 @@ my $cfgVerbose = 0;
 my $cfgShortEnums = 0;
 my $cfgBigEndian = 1;
 my $cfgIncludeFspAttributes = 0;
-my $cfgIncludeHbAttributes = 0;
 
 GetOptions("hb-xml-file:s" => \$cfgHbXmlFile,
            "src-output-dir:s" =>  \$cfgSrcOutputDir,
@@ -81,7 +80,6 @@ GetOptions("hb-xml-file:s" => \$cfgHbXmlFile,
            "short-enums!" =>  \$cfgShortEnums,
            "big-endian!" =>  \$cfgBigEndian,
            "include-fsp-attributes!" =>  \$cfgIncludeFspAttributes,
-           "include-hb-attributes!" =>  \$cfgIncludeHbAttributes,
            "help" => \$cfgHelp,
            "man" => \$cfgMan,
            "verbose" => \$cfgVerbose ) || pod2usage(-verbose => 0);
@@ -110,7 +108,6 @@ if($cfgVerbose)
     print STDOUT "Short enums = $cfgShortEnums\n";
     print STDOUT "Big endian = $cfgBigEndian\n";
     print STDOUT "include-fsp-attributes = $cfgIncludeFspAttributes\n",
-    print STDOUT "include-hb-attributes = $cfgIncludeHbAttributes\n",
 }
 
 ################################################################################
@@ -3374,19 +3371,15 @@ sub generateTargetingImage {
     my $pnorRwBaseAddress    = $pnorRoBaseAddress    + $vmmSectionOffset;
     my $heapPnorInitBaseAddr = $pnorRwBaseAddress    + $vmmSectionOffset;
     my $heapZeroInitBaseAddr = $heapPnorInitBaseAddr + $vmmSectionOffset;
-
-    #We will either have additional FSP sections or Hostboot section but not both
+    my $hbHeapZeroInitBaseAddr = $heapZeroInitBaseAddr + $vmmSectionOffset;
 
     # Split "fsp" into additional sections
-    my $fspP0DefaultedFromZeroBaseAddr   = $heapZeroInitBaseAddr + $vmmSectionOffset;
+    my $fspP0DefaultedFromZeroBaseAddr   = $hbHeapZeroInitBaseAddr + $vmmSectionOffset;
     my $fspP0DefaultedFromP3BaseAddr  = $fspP0DefaultedFromZeroBaseAddr + $vmmSectionOffset;
     my $fspP3RoBaseAddr         = $fspP0DefaultedFromP3BaseAddr + $vmmSectionOffset;
     my $fspP3RwBaseAddr         = $fspP3RoBaseAddr + $vmmSectionOffset;
     my $fspP1DefaultedFromZeroBaseAddr   = $fspP3RwBaseAddr + $vmmSectionOffset;
     my $fspP1DefaultedFromP3BaseAddr  = $fspP1DefaultedFromZeroBaseAddr + $vmmSectionOffset;
-
-    # Hostboot specific section
-    my $hbHeapZeroInitBaseAddr = $heapZeroInitBaseAddr + $vmmSectionOffset;
 
     # Reserve 256 bytes for the header, then keep track of PNOR RO offset
     my $headerSize = 256;
@@ -3927,6 +3920,14 @@ sub generateTargetingImage {
     $sectionHoH{ heapZeroInit }{ size   } =
         sizeBlockAligned($heapZeroInitOffset,$blockSize,1);
   
+    # zeroInitSection occupies no space in the binary, so set the
+    # Hostboot section address to that of the zeroInitSection
+    $sectionHoH{ hbHeapZeroInit }{ offset } =
+        $sectionHoH{heapZeroInit}{ offset };
+    $sectionHoH{ hbHeapZeroInit }{ type } = 10;
+    $sectionHoH{ hbHeapZeroInit }{ size } =
+        sizeBlockAligned($hbHeapZeroInitOffset,$blockSize,1);
+
     # Split "fsp" into additional sections
     if($cfgIncludeFspAttributes)
     {
@@ -3971,16 +3972,6 @@ sub generateTargetingImage {
         $sectionHoH{ fspP1DefaultedFromP3 }{ size } =
             sizeBlockAligned($fspP1DefaultedFromP3Offset,$blockSize,1);
     }
-    elsif($cfgIncludeHbAttributes)
-    {
-        # zeroInitSection occupies no space in the binary, so set the
-        # Hostboot section address to that of the zeroInitSection
-        $sectionHoH{ hbHeapZeroInit }{ offset } =
-            $sectionHoH{heapZeroInit}{ offset };
-        $sectionHoH{ hbHeapZeroInit }{ type } = 10;
-        $sectionHoH{ hbHeapZeroInit }{ size } =
-            sizeBlockAligned($hbHeapZeroInitOffset,$blockSize,1);
-    }
 
     my $numSections = keys %sectionHoH;
 
@@ -4000,7 +3991,7 @@ sub generateTargetingImage {
     $headerBinData .= pack4byte($offsetToSections);
 
     # Split "fsp" into additional sections
-    my @sections = ("pnorRo","pnorRw","heapPnorInit","heapZeroInit");
+    my @sections = ("pnorRo","pnorRw","heapPnorInit","heapZeroInit", "hbHeapZeroInit");
     if($cfgIncludeFspAttributes)
     {
         push(@sections,"fspP0DefaultedFromZero");
@@ -4009,10 +4000,6 @@ sub generateTargetingImage {
         push(@sections,"fspP3Rw");
         push(@sections,"fspP1DefaultedFromZero");
         push(@sections,"fspP1DefaultedFromP3");
-    }
-    elsif($cfgIncludeHbAttributes)
-    {
-        push(@sections,"hbHeapZeroInit");
     }
 
     foreach my $section (@sections)
@@ -4172,16 +4159,6 @@ generated code.
 =item B<--noinclude-fsp-attributes>
 
 Omits FSP specific attributes and targets from the generated binaries and
-generated code.  This is the default behavior.
-
-=item B<--include-hb-attributes>
-
-Emits Hostboot specific attributes and targets into the generated binaries and
-generated code.  
-
-=item B<--noinclude-hb-attributes>
-
-Omits Hostboot specific attributes and targets from the generated binaries and
 generated code.  This is the default behavior.
 
 =item B<--verbose>

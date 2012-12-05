@@ -946,7 +946,7 @@ bool IStepDispatcher::checkMpiplMode( ) const
     }
     else
     {
-        l_isMpiplMode = l_pTopLevel->getAttr<ATTR_IS_MPIPL> ();
+        l_isMpiplMode = l_pTopLevel->getAttr<ATTR_IS_MPIPL_HB> ();
     }
 
     return  l_isMpiplMode;

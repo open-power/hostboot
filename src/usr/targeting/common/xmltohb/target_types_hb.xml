@@ -31,7 +31,7 @@
 
 <targetTypeExtension>
     <id>sys-sys-power8</id>
-    <attribute><id>IS_MPIPL</id></attribute>
+    <attribute><id>IS_MPIPL_HB</id></attribute>
     <attribute><id>HB_MUTEX_TEST_LOCK</id></attribute>
 </targetTypeExtension>
 

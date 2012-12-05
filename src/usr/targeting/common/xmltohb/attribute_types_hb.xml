@@ -30,7 +30,7 @@
      ================================================================= -->
 
 <attribute>
-    <id>IS_MPIPL</id>
+    <id>IS_MPIPL_HB</id>
     <description>1 = in Memory Preserving IPL mode. 0 = in normal IPL mode.</description>
     <simpleType>
         <uint8_t>
@@ -41,9 +41,10 @@
     <readable/>
     <writeable/>
     <hwpfToHbAttrMap>
-        <id>ATTR_IS_MPIPL</id>
+        <id>ATTR_IS_MPIPL_HB</id>
         <macro>DIRECT</macro>
     </hwpfToHbAttrMap>
+    <hbOnly/>
 </attribute>
 
 <attribute>
@@ -171,6 +172,7 @@
     <persistency>volatile-zeroed</persistency>
     <readable/>
     <writeable/>
+    <hbOnly/>
 </attribute>
 
 <attribute>
@@ -185,6 +187,7 @@
     <persistency>volatile-zeroed</persistency>
     <readable/>
     <writeable/>
+    <hbOnly/>
 </attribute>
 
 <attribute>
@@ -198,6 +201,7 @@
     <persistency>volatile-zeroed</persistency>
     <readable/>
     <writeable/>
+    <hbOnly/>
 </attribute>
 
 </attributes>

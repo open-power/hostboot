@@ -110,7 +110,7 @@ ${EXTRA_PARTS}: ${IMGDIR}/% : ${GENDIR}/%
 # create merged target xml
 ${GENDIR}/${XMLTOHB_MERGED_COMMON_TARGET_SOURCES}: \
         ${XMLTOHB_TARGET_MERGE_SCRIPT} ${XMLTOHB_COMMON_TARGET_SOURCES} ${XMLTOHB_HB_TARGET_SOURCES}
-	./${XMLTOHB_TARGET_MERGE_SCRIPT} $(addprefix --hb=,${XMLTOHB_HB_TARGET_SOURCES}) \
+	./${XMLTOHB_TARGET_MERGE_SCRIPT} $(addprefix --hb=,${COMMON_TARGETING_REL_PATH}/${XMLTOHB_HB_TARGET_SOURCES}) \
        $(addprefix --common=,${COMMON_TARGETING_REL_PATH}/${XMLTOHB_COMMON_TARGET_SOURCES}) > $@
 
 # generic XML is created from the generic sources only
@@ -144,5 +144,5 @@ ${GENDIR}/%_targeting.bin: ${XMLTOHB_COMPILER_SCRIPT} ${GENDIR}/%.hb.xml \
         $(addprefix --fapi-attributes-xml-file=,${GENDIR}/${XMLTOHB_FAPI_XML}) \
          --src-output-dir=none --img-output-dir=$(dir $@) \
          --img-output-file=$(notdir $@) \
-         --vmm-consts-file=$(VMM_CONSTS_FILE) --noshort-enums --include-hb-attributes
+         --vmm-consts-file=$(VMM_CONSTS_FILE) --noshort-enums
 

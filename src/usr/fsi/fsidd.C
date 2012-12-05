@@ -1231,7 +1231,7 @@ errlHndl_t FsiDD::initPort(FsiChipInfo_t i_fsiInfo,
         // Do not do any hardware initialization in mpipl
         uint8_t is_mpipl = 0;
         if( sys
-            && sys->tryGetAttr<TARGETING::ATTR_IS_MPIPL>(is_mpipl)
+            && sys->tryGetAttr<TARGETING::ATTR_IS_MPIPL_HB>(is_mpipl)
             && is_mpipl )
         {
             TRACFCOMP( g_trac_fsi, "FsiDD::initPort> Skipping Slave Init in MPIPL" );
@@ -1362,7 +1362,7 @@ errlHndl_t FsiDD::initMasterControl(TARGETING::Target* i_master,
         // Do not do any hardware initialization in mpipl
         uint8_t is_mpipl = 0;
         if( sys
-            && sys->tryGetAttr<TARGETING::ATTR_IS_MPIPL>(is_mpipl)
+            && sys->tryGetAttr<TARGETING::ATTR_IS_MPIPL_HB>(is_mpipl)
             && is_mpipl )
         {
             TRACFCOMP( g_trac_fsi, "FsiDD::initMasterControl> Skipping Master Init in MPIPL" );
