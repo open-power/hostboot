@@ -78,9 +78,27 @@ namespace TRACE
             enum MSG_TYPES
             {
                     /** Client work is ready to be performed; flush buffers. */
-                TRACE_DAEMON_SIGNAL = MBOX::FIRST_SECURE_MSG | 0,
+                TRACE_DAEMON_SIGNAL = MBOX::FIRST_UNSECURE_MSG | 0,
+                    /** Flush continuous trace buffers. */
+                TRACE_CONT_TRACE_FLUSH = TRACE_DAEMON_SIGNAL,
                     /** Daemon should shutdown. */
-                TRACE_DAEMON_SHUTDOWN = MBOX::FIRST_UNSECURE_MSG | 1,
+                TRACE_DAEMON_SHUTDOWN = MBOX::FIRST_SECURE_MSG | 1,
+                    /** Modify continuous trace state. */
+                TRACE_CONT_TRACE_STATE = MBOX::FIRST_UNSECURE_MSG | 2,
+                    /** Reset trace buffers. */
+                TRACE_RESET_BUFFERS = MBOX::FIRST_UNSECURE_MSG | 3,
+                    /** Enable Debug state (TRACS mode). */
+                TRACE_ENABLE_DEBUG = MBOX::FIRST_UNSECURE_MSG | 4,
+                    /** Disable Debug state (TRACS mode). */
+                TRACE_DISABLE_DEBUG = MBOX::FIRST_UNSECURE_MSG | 5,
+                    /** Extract all buffers. */
+                TRACE_EXTRACT_BUFFERS = MBOX::FIRST_UNSECURE_MSG | 6,
+            };
+
+            enum FSP_MSG_TYPES
+            {
+                TRACE_CONT_TRACE_BUFFER = 0,
+                TRACE_BUFFER = 1,
             };
 
             // Since the below functions are only used by the daemon, they

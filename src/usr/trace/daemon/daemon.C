@@ -29,6 +29,8 @@
 #include "../compdesc.H"
 #include "../debug.H"
 
+#include <errno.h>
+
 #include <initservice/taskargs.H>
 #include <initservice/initserviceif.H>
 
@@ -38,6 +40,8 @@
 
 #include <targeting/common/commontargeting.H>
 #include <devicefw/userif.H>
+
+#include <mbox/mboxif.H>
 
 namespace TRACE
 {
@@ -76,6 +80,16 @@ namespace TRACEDAEMON
         iv_service = Service::getGlobalInstance();
         iv_service->iv_daemon->start();
 
+        // Register messages with mailbox daemon.
+        {
+            errlHndl_t l_errl = MBOX::msgq_register(MBOX::HB_TRACE_MSGQ,
+                                            iv_service->iv_daemon->iv_queue);
+            if (l_errl)
+            {
+                errlCommit(l_errl, HBTRACE_COMP_ID);
+            }
+        }
+
         // Register shutdown events with init service.
         //      Do one at the "beginning" and "end" of shutdown processesing.
         //      The one at the beginning will flush out everything prior to
@@ -109,6 +123,7 @@ namespace TRACEDAEMON
                     pruneTraceEntries();
                     coalescePages();
 
+                    msg->data[0] = msg->data[1] = 0;
                     break;
                 }
 
@@ -120,10 +135,94 @@ namespace TRACEDAEMON
                     break;
                 }
 
+                // Continuous trace state.
+                case DaemonIf::TRACE_CONT_TRACE_STATE:
+                {
+                    if (msg->data[0] == 0)
+                    {
+                        g_debugSettings.contTraceOverride =
+                            DebugSettings::CONT_TRACE_FORCE_DISABLE;
+                    }
+                    else if (msg->data[0] == 1)
+                    {
+                        g_debugSettings.contTraceOverride =
+                            DebugSettings::CONT_TRACE_FORCE_ENABLE;
+                    }
+
+                    msg->data[0] = msg->data[1] = 0;
+                    break;
+                }
+
+                // Reset trace buffers.
+                case DaemonIf::TRACE_RESET_BUFFERS:
+                {
+                    // Collect current trace entries from client.
+                    collectTracePages();
+
+                    // Prune all trace entries.
+                    pruneTraceEntries(true);
+                    coalescePages();
+
+                    msg->data[0] = msg->data[1] = 0;
+                    break;
+                }
+
+                // Enable / disable debug state.
+                case DaemonIf::TRACE_ENABLE_DEBUG:
+                case DaemonIf::TRACE_DISABLE_DEBUG:
+                {
+                    bool enable = (msg->type == DaemonIf::TRACE_ENABLE_DEBUG);
+
+                    // An empty string indicates request to modify the global
+                    // override setting.
+                    if ('\0' == *reinterpret_cast<char*>(&msg->data[0]))
+                    {
+                        g_debugSettings.globalDebugEnable = enable;
+                        msg->data[0] = msg->data[1] = 0;
+                    }
+                    // Otherwise, data0/1 are a 16-char array of the
+                    // component name.  extra_data gives us the '\0'
+                    // terminator if the full 16 are needed.
+                    else
+                    {
+                        ComponentDesc* iv_comp =
+                            iv_service->iv_compList->getDescriptor(
+                                reinterpret_cast<const char*>(&msg->data[0]),
+                                0);
+
+                        if (iv_comp == NULL)
+                        {
+                            msg->data[0] = EBADF;
+                            msg->data[1] = 0;
+                        }
+                        else
+                        {
+                            iv_comp->iv_debugEnabled = enable;
+                            msg->data[0] = msg->data[1] = 0;
+                        }
+                    }
+                    break;
+                }
+
+                case DaemonIf::TRACE_EXTRACT_BUFFERS:
+                {
+                    // Collect current trace entries from client.
+                    collectTracePages();
+
+                    // Extract trace buffers.
+                    extractTraceBuffer();
+
+                    msg->data[0] = msg->data[1] = 0;
+                    break;
+                }
+
 
                 default:
                 {
-                    assert(0);
+                    // Since we can get messages from the FSP (of unknown
+                    // quality), we don't want to assert here.  Not really
+                    // much we can do, so blindly ignore this condition.
+                    msg->data[0] = EINVAL;
                     break;
                 }
             }
@@ -240,6 +339,7 @@ namespace TRACEDAEMON
                 if (NULL != contBuffer)
                 {
                     sendContBuffer(contBuffer, contBufferSize);
+                    // contBuffer pointer is transfered to mailbox now.
                 }
 
                 contBuffer = reinterpret_cast<char*>(malloc(PAGESIZE));
@@ -283,6 +383,7 @@ namespace TRACEDAEMON
             if (contBufferSize > 1)
             {
                 sendContBuffer(contBuffer, contBufferSize);
+                // contBuffer pointer is transfered to mailbox now.
             }
             else
             {
@@ -330,9 +431,11 @@ namespace TRACEDAEMON
 
         // Determine if continuous trace is currently enabled.
         bool contEnabled = hbSettings.traceContinuous;
-        if (g_debugSettings.contTraceOverride != 0)
+        if (g_debugSettings.contTraceOverride !=
+                DebugSettings::CONT_TRACE_USE_ATTR)
         {
-            contEnabled = (g_debugSettings.contTraceOverride == 2);
+            contEnabled = (g_debugSettings.contTraceOverride ==
+                            DebugSettings::CONT_TRACE_FORCE_ENABLE);
         }
 
         if (!contEnabled)
@@ -344,8 +447,18 @@ namespace TRACEDAEMON
         {
             if (spFunctions.mailboxEnabled)
             {
-                // TODO: Send message to FSP.
-                free(i_buffer);
+                msg_t* msg = msg_allocate();
+                msg->type = DaemonIf::TRACE_CONT_TRACE_BUFFER;
+                msg->data[1] = i_size;
+                msg->extra_data = i_buffer;
+
+                errlHndl_t l_errl = MBOX::send(MBOX::FSP_TRACE_MSGQ, msg);
+                if (l_errl)
+                {
+                    errlCommit(l_errl, HBTRACE_COMP_ID);
+                    free(i_buffer);
+                    msg_free(msg);
+                }
             }
             else
             {
@@ -358,6 +471,28 @@ namespace TRACEDAEMON
             }
         }
     }
+
+    void Daemon::sendExtractBuffer(void* i_buffer, size_t i_size)
+    {
+        // Send buffer message.
+        //    We don't need to check for mailbox attributes or readiness
+        //    because we should only be sending this message if we were
+        //    requested to by the SP.
+
+        msg_t* msg = msg_allocate();
+        msg->type = DaemonIf::TRACE_BUFFER;
+        msg->data[1] = i_size;
+        msg->extra_data = i_buffer;
+
+        errlHndl_t l_errl = MBOX::send(MBOX::FSP_TRACE_MSGQ, msg);
+        if (l_errl)
+        {
+            errlCommit(l_errl, HBTRACE_COMP_ID);
+            free(i_buffer);
+            msg_free(msg);
+        }
+    }
+
 
     void Daemon::replaceEntry(Entry* from, Entry* to)
     {
@@ -413,7 +548,7 @@ namespace TRACEDAEMON
         } while (1);
     }
 
-    void Daemon::pruneTraceEntries()
+    void Daemon::pruneTraceEntries(bool i_all)
     {
         ComponentList::List::iterator component;
 
@@ -427,7 +562,10 @@ namespace TRACEDAEMON
             Entry* orig_entry = entry;
 
             // Invalidate entries until the component is small enough.
-            while((entry) && (component->iv_curSize > component->iv_maxSize))
+            while((entry) &&
+                    ((component->iv_curSize > component->iv_maxSize) ||
+                     i_all)
+                 )
             {
                 if (!reinterpret_cast<BufferPage*>(
                         ALIGN_PAGE_DOWN(
@@ -549,6 +687,69 @@ namespace TRACEDAEMON
             BufferPage* temp = oldPage->prev;
             BufferPage::deallocate(oldPage);
             oldPage = temp;
+        }
+
+    }
+
+    void Daemon::extractTraceBuffer()
+    {
+        char* curBuffer = NULL;
+        size_t curBufferSize = 0;
+
+        for(BufferPage* page = iv_first; page != NULL; page = page->prev)
+        {
+            size_t offset = 0;
+            while (offset < page->usedSize)
+            {
+                Entry* entry = reinterpret_cast<Entry*>(&page->data[offset]);
+
+                if (NULL != entry->comp)
+                {
+                    // Calculate entry size.
+                    size_t entryDataLength =
+                        reinterpret_cast<trace_bin_entry_t*>(&entry->data[0])
+                            ->head.length + sizeof(trace_bin_entry_t);
+
+                    size_t entrySize = entry->comp->iv_compNameLen +
+                                       entryDataLength;
+
+                    // Allocate new page / send old page, if needed.
+                    if ((NULL == curBuffer) ||
+                        ((curBufferSize + entrySize) >= PAGESIZE))
+                    {
+                        if (NULL != curBuffer)
+                        {
+                            sendExtractBuffer(curBuffer, curBufferSize);
+                            // curBuffer pointer is transfered to mailbox now.
+                        }
+
+                        curBuffer = reinterpret_cast<char*>(malloc(PAGESIZE));
+                        memset(curBuffer, '\0', PAGESIZE);
+                        curBuffer[0] = TRACE_BUF_CONT;
+                        curBufferSize = 1;
+                    }
+
+                    // Copy entry into buffer.
+                    memcpy(&curBuffer[curBufferSize],
+                           entry->comp->iv_compName,
+                           entry->comp->iv_compNameLen);
+                    curBufferSize += entry->comp->iv_compNameLen;
+
+                    memcpy(&curBuffer[curBufferSize],
+                           &entry->data[0],
+                           entryDataLength);
+                    curBufferSize += entryDataLength;
+                }
+
+                offset += entry->size + sizeof(Entry);
+            }
+        }
+
+        // Send remaining buffer page to SP.
+        if (NULL != curBuffer)
+        {
+            sendExtractBuffer(curBuffer, curBufferSize);
+            // curBuffer pointer is transfered to mailbox now.
         }
 
     }

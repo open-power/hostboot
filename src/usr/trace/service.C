@@ -25,6 +25,7 @@
 #include "entry.H"
 #include "compdesc.H"
 #include "daemonif.H"
+#include "debug.H"
 
 #include <sys/time.h>
 #include <sys/task.h>
@@ -54,9 +55,19 @@ namespace TRACE
                              trace_hash_val i_hash,
                              const char * i_fmt,
                              uint32_t i_line,
-                             int32_t i_type,
+                             uint32_t i_type,
                              va_list i_args)
     {
+        // Skip writing trace if debug is disabled.
+        if (unlikely(i_type == TRACE_DEBUG))
+        {
+            if ((!i_td->iv_debugEnabled) ||
+                (!g_debugSettings.globalDebugEnable))
+            {
+                return;
+            }
+        }
+
         do
         {
             // Get the right buffer for this component.
@@ -200,8 +211,18 @@ namespace TRACE
                                 uint32_t i_line,
                                 const void* i_ptr,
                                 uint32_t i_size,
-                                int32_t i_type)
+                                uint32_t i_type)
     {
+        // Skip writing trace if debug is disabled.
+        if (unlikely(i_type == TRACE_DEBUG))
+        {
+            if ((!i_td->iv_debugEnabled) ||
+                (!g_debugSettings.globalDebugEnable))
+            {
+                return;
+            }
+        }
+
         do
         {
             // Get the right buffer for this component.

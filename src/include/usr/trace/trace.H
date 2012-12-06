@@ -93,7 +93,7 @@ namespace TRACE
                               const trace_hash_val i_hash,
                               const char * i_fmt,
                               const uint32_t i_line,
-                              const int32_t i_type, ...);
+                              const uint32_t i_type, ...);
 
     /**
      *  @brief  Write binary data out to trace buffer
@@ -115,7 +115,7 @@ namespace TRACE
                               const uint32_t i_line,
                               const void *i_ptr,
                               const uint32_t i_size,
-                              const int32_t i_type);
+                              const uint32_t i_type);
 
     /**
      *  @brief  Retrieve the trace buffer named by i_pName

@@ -41,25 +41,29 @@ namespace MBOX
     {
         NOT_FOUND               = 0,
         HB_MAILBOX_MSGQ         = 1,
+        // Add HB services here:
         HB_ISTEP_MSGQ           = 2,
         HB_ATTR_SYNC_MSGQ       = 3,
         HB_ERROR_MSGQ           = 4,
+        //                        5,  // Reserved for VID
         HB_HWPF_ATTR_MSGQ       = 6, // HWPF Attribute override/sync
-        // Add HB services here:
+        HB_TRACE_MSGQ           = 7,
 
         HB_TEST_MSGQ            = 0x7FFFFFFF,
 
         // FSP mailboxes
         FSP_FIRST_MSGQ          = 0x80000000,
         FSP_MAILBOX_MSGQ        = 0x80000001,
-        FSP_PROGRESS_CODES_MSGQ = 0x80000002,
-        FSP_TRACE_MSGQ          = 0x80000003,
+        // Add FSP services here:
+        FSP_TRACE_MSGQ          = 0x80000002,
+        FSP_PROGRESS_CODES_MSGQ = 0x80000003,
         FSP_ERROR_MSGQ          = 0x80000004,
-        IPL_SERVICE_QUEUE       = 0x80000008, // Defined by Fsp team
+        //                        0x80000007, // reserved for TMGT
+        IPL_SERVICE_QUEUE       = 0x80000008,
         FSP_ATTR_SYNC_MSGQ      = 0x80000009,
+        //                        0x8000000A, // Reserved for VID
         FSP_HWPF_ATTR_MSGQ      = 0x8000000B, // HWPF Attribute override/sync
         FSP_VPD_MSGQ            = 0x8000000C,
-        // Add FSP services here:
 
         FSP_ECHO_MSGQ = 0xFFFFFFFF,     // Fake FSP for test
     };

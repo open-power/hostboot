@@ -74,12 +74,22 @@ namespace TRACEDAEMON
 
             /** Gather trace pages from client-side buffers. */
             void collectTracePages();
-            /** Send continuous trace buffer to SP. */
+            /** Send continuous trace buffer to SP.
+             *
+             *  Ownership of i_buffer is transfered to mailbox.
+             */
             void sendContBuffer(void* i_buffer, size_t i_size);
+            /** Send extract trace buffer to SP.
+             *
+             *  Ownership of i_buffer is transfered to mailbox.
+             */
+            void sendExtractBuffer(void* i_buffer, size_t i_size);
             /** Reduce component trace buffers if exceeded max size. */
-            void pruneTraceEntries();
+            void pruneTraceEntries(bool i_all = false);
             /** Combine trace buffer pages to remove pruned entries. */
             void coalescePages();
+            /** Extract all trace buffers down to the SP. */
+            void extractTraceBuffer();
 
             /** Locklessly move a trace entry from one location to another. */
             void replaceEntry(TRACE::Entry* from, TRACE::Entry* to);

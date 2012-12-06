@@ -25,6 +25,6 @@
 namespace TRACE
 {
 
-    DebugSettings g_debugSettings = { 0, 0, NULL };
+    DebugSettings g_debugSettings = { 0, false, 0, NULL };
 
 }

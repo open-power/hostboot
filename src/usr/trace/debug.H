@@ -34,17 +34,25 @@ namespace TRACE
      */
     struct DebugSettings
     {
+        enum
+        {
+            /** Use attribute (default). */
+            CONT_TRACE_USE_ATTR = 0,
+            /** Force disable. */
+            CONT_TRACE_FORCE_DISABLE = 1,
+            /** Force enable. */
+            CONT_TRACE_FORCE_ENABLE = 2,
+        };
+
         // Continuous Trace:
-            /** Override of attribute setting.
-             *    0 - Use attribute (default).
-             *    1 - Force Disable
-             *    2 - Force Enable
-             */
         uint8_t contTraceOverride;
+        /** Global switch for debug trace (TRACS). */
+        bool globalDebugEnable;
             /** Size of continuous trace buffer. */
         uint16_t bufferSize;
             /** Pointer to continuous trace buffer. */
         void* bufferPage;
+
     };
 
     extern DebugSettings g_debugSettings;

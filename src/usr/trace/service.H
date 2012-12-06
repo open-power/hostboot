@@ -99,7 +99,7 @@ namespace TRACE
                             trace_hash_val i_hash,
                             const char * i_fmt,
                             uint32_t i_line,
-                            int32_t i_type,
+                            uint32_t i_type,
                             va_list i_args);
 
             /** @brief Write a binary entry to a trace buffer.
@@ -117,7 +117,7 @@ namespace TRACE
                                uint32_t i_line,
                                const void* i_ptr,
                                uint32_t i_size,
-                               int32_t i_type);
+                               uint32_t i_type);
 
             /** @brief Extract a component's trace buffer.
              *
