@@ -107,6 +107,8 @@ enum istepModuleId
     ISTEP_MSS_VOLT                                      = 0x3A,
     ISTEP_MSS_GETECID                                   = 0x3B,
     ISTEP_MSS_DRAMINIT_TRAINADV                         = 0x3C,
+    ISTEP_DMI_IO_RESTORE_EREPAIR                        = 0x3D,
+    ISTEP_FABRIC_IO_RESTORE_EREPAIR                     = 0x3E,
 };
 
 /**
@@ -144,6 +146,12 @@ enum istepReasonCode
     ISTEP_PROC_CHIPLET_SCOMINIT_FAILED          = ISTEP_COMP_ID | 0x18,
     ISTEP_PROC_XBUS_IF_EXECUTION_FAILED         = ISTEP_COMP_ID | 0x19,
     ISTEP_PROC_ABUS_IF_EXECUTION_FAILED         = ISTEP_COMP_ID | 0x1A,
+    ISTEP_DMI_DRIVE_RESTORE_FAILED              = ISTEP_COMP_ID | 0x1B,
+    ISTEP_DMI_RECEIVE_RESTORE_FAILED            = ISTEP_COMP_ID | 0x1C,
+    ISTEP_FABRIC_DRIVE_RESTORE_FAILED           = ISTEP_COMP_ID | 0x1D,
+    ISTEP_FABRIC_RECEIVE_RESTORE_FAILED         = ISTEP_COMP_ID | 0x1E,
+    ISTEP_DMI_GET_RESTORE_LANES_FAILED          = ISTEP_COMP_ID | 0x1F,
+    ISTEP_FABRIC_GET_RESTORE_LANES_FAILED       = ISTEP_COMP_ID | 0x20,
 };  // end ISTEP
 
 }

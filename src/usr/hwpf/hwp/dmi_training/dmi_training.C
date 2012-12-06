@@ -68,6 +68,10 @@
 #include    "dmi_scominit.H"
 #include    "proc_cen_set_inband_addr.H"
 #include    "mss_get_cen_ecid.H"
+#include    "io_restore_erepair.H"
+
+// eRepair Restore
+#include <erepairAccessorHwpFuncs.H>
 
 namespace   DMI_TRAINING
 {
@@ -88,7 +92,7 @@ void*    call_mss_getecid( void *io_pArgs )
     IStepError l_StepError;
     uint8_t    l_ddr_port_status = 0;
 
-    mss_get_cen_ecid_ddr_status l_mbaBadMask[2] = 
+    mss_get_cen_ecid_ddr_status l_mbaBadMask[2] =
        { MSS_GET_CEN_ECID_DDR_STATUS_MBA0_BAD,
          MSS_GET_CEN_ECID_DDR_STATUS_MBA1_BAD };
 
@@ -181,7 +185,7 @@ void*    call_mss_getecid( void *io_pArgs )
             {
                 //  Make a local copy of the target for ease of use
                 TARGETING::Target*  l_pMBA = *l_mba_iter;
-                
+
                 // Get the MBA chip unit position
                 uint8_t l_pos = l_pMBA->getAttr<ATTR_CHIP_UNIT>();
 
@@ -370,15 +374,207 @@ void*    call_dmi_scominit( void *io_pArgs )
 //
 //  Wrapper function to call  dmi_erepair
 //
-void*    call_dmi_erepair( void *io_pArgs )
+void* call_dmi_erepair( void *io_pArgs )
 {
-    errlHndl_t l_err = NULL;
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_dmi_erepair entry" );
+    ISTEP_ERROR::IStepError l_StepError;
+    errlHndl_t l_errPtr = NULL;
+    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_dmi_erepair entry" );
 
+    fapi::ReturnCode l_rc;
+    std::vector<uint8_t> l_endp1_txFaillanes;
+    std::vector<uint8_t> l_endp1_rxFaillanes;
+    std::vector<uint8_t> l_endp2_txFaillanes;
+    std::vector<uint8_t> l_endp2_rxFaillanes;
 
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_dmi_erepair exit" );
+    TargetHandleList           l_mcsTargetList;
+    TargetHandleList           l_memTargetList;
+    TargetHandleList::iterator l_mcs_iter;
+    TargetHandleList::iterator l_mem_iter;
+    TargetHandle_t             l_mcs_target;
+    TargetHandle_t             l_mem_target;
+    uint8_t l_mcsNum = 0;
+    uint8_t l_memNum = 0;
 
-    return l_err;
+    // find all MCS chiplets of all procs
+    getAllChiplets(l_mcsTargetList, TYPE_MCS);
+
+    for (l_mcs_iter = l_mcsTargetList.begin();
+         l_mcs_iter != l_mcsTargetList.end();
+         ++l_mcs_iter)
+    {
+        // make a local copy of the MCS target
+        l_mcs_target = *l_mcs_iter;
+        l_mcsNum = l_mcs_target->getAttr<ATTR_CHIP_UNIT>();
+
+        // find all the Centaurs that are associated with this MCS
+        getAffinityChips(l_memTargetList, l_mcs_target, TYPE_MEMBUF);
+
+        if(l_memTargetList.size() != EREPAIR_MAX_CENTAUR_PER_MCS)
+        {
+            continue;
+        }
+
+        // There will always be 1 Centaur associated with a MCS
+        l_mem_iter = l_memTargetList.begin();
+
+        // make a local copy of the MEMBUF target
+        l_mem_target = *l_mem_iter;
+        l_memNum = l_mem_target->getAttr<ATTR_POSITION>();
+
+        // struct containing custom parameters that is fed to HWP
+        // call the HWP with each target(if parallel, spin off a task)
+        const fapi::Target l_fapi_endp1_target(TARGET_TYPE_MCS_CHIPLET,
+                                               l_mcs_target);
+
+        const fapi::Target l_fapi_endp2_target(TARGET_TYPE_MEMBUF_CHIP,
+                                               l_mem_target);
+
+        // Get the repair lanes from the VPD
+        l_rc = erepairGetRestoreLanes(l_fapi_endp1_target,
+                                      l_endp1_txFaillanes,
+                                      l_endp1_rxFaillanes,
+                                      l_fapi_endp2_target,
+                                      l_endp2_txFaillanes,
+                                      l_endp2_rxFaillanes);
+
+        if(l_rc)
+        {
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, "Unable to"
+                      " retrieve DMI eRepair data from the VPD");
+
+            EntityPath l_path;
+            l_path = l_mem_target->getAttr<ATTR_AFFINITY_PATH>();  // TODO: verify this during testing
+            l_path.dump();
+
+            // Convert fapi returnCode to Error handle
+            l_errPtr = fapiRcToErrl(l_rc);
+
+            // capture the target data in the elog
+            ErrlUserDetailsTarget(l_mcs_target).addToLog(l_errPtr);
+            ErrlUserDetailsTarget(l_mem_target).addToLog(l_errPtr);
+
+            /*@
+             * @errortype
+             * @reasoncode  ISTEP_DMI_GET_RESTORE_LANES_FAILED
+             * @severity    ERRL_SEV_UNRECOVERABLE
+             * @moduleid    ISTEP_DMI_IO_RESTORE_EREPAIR
+             * @userdata1   bytes 0-1: plid identifying first error
+             *              bytes 2-3: reason code of first error
+             * @userdata2   bytes 0-1: total number of elogs included
+             *              bytes 2-3: N/A
+             * @devdesc     call to io_restore_erepair has failed
+             */
+            l_StepError.addErrorDetails(ISTEP_DMI_GET_RESTORE_LANES_FAILED,
+                                        ISTEP_DMI_IO_RESTORE_EREPAIR,
+                                        l_errPtr);
+
+            errlCommit(l_errPtr, HWPF_COMP_ID);
+
+            break;
+        }
+
+        if(l_endp1_txFaillanes.size() || l_endp1_rxFaillanes.size())
+        {
+            // call the io_restore_erepair HWP to restore eRepair
+            // lanes of endp1
+
+            TRACDCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                                   "io_restore_erepair HWP on %s"
+                                   " ( mcs 0x%x, mem 0x%x ) : ",
+                                   l_fapi_endp1_target.toEcmdString(),
+                                   l_mcsNum,
+                                   l_memNum );
+
+            FAPI_INVOKE_HWP(l_errPtr,
+                            io_restore_erepair,
+                            l_fapi_endp1_target,
+                            l_endp1_txFaillanes,
+                            l_endp1_rxFaillanes);
+        }
+
+        if(l_errPtr)
+        {
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                             "ERROR 0x%.8X : io_restore_erepair HWP"
+                             "( mcs 0x%x, mem 0x%x ) ",
+                             l_errPtr->reasonCode(),
+                             l_mcsNum,
+                             l_memNum);
+            /*@
+             * @errortype
+             * @reasoncode  ISTEP_DMI_DRIVE_RESTORE_FAILED
+             * @severity    ERRL_SEV_UNRECOVERABLE
+             * @moduleid    ISTEP_DMI_IO_RESTORE_EREPAIR
+             * @userdata1   bytes 0-1: plid identifying first error
+             *              bytes 2-3: reason code of first error
+             * @userdata2   bytes 0-1: total number of elogs included
+             *              bytes 2-3: N/A
+             * @devdesc     call to io_restore_erepair has failed
+             */
+            l_StepError.addErrorDetails(ISTEP_DMI_DRIVE_RESTORE_FAILED,
+                                        ISTEP_DMI_IO_RESTORE_EREPAIR,
+                                        l_errPtr);
+
+            errlCommit(l_errPtr, HWPF_COMP_ID);
+            break;
+        }
+
+        if(l_endp2_txFaillanes.size() || l_endp2_rxFaillanes.size())
+        {
+            // call the io_restore_erepair HWP to restore eRepair
+            // lanes of endp2
+
+            TRACDCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                                   "io_restore_erepair HWP on %s"
+                                   " ( mcs 0x%x, mem 0x%x ) : ",
+                                   l_fapi_endp2_target.toEcmdString(),
+                                   l_mcsNum,
+                                   l_memNum );
+
+            FAPI_INVOKE_HWP(l_errPtr,
+                            io_restore_erepair,
+                            l_fapi_endp2_target,
+                            l_endp2_txFaillanes,
+                            l_endp2_rxFaillanes);
+        }
+
+        if (l_errPtr)
+        {
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                              "ERROR 0x%.8X : io_restore_erepair HWP"
+                              "( mcs 0x%x, mem 0x%x ) ",
+                              l_errPtr->reasonCode(),
+                              l_mcsNum,
+                              l_memNum);
+
+            /*@
+             * @errortype
+             * @reasoncode  ISTEP_DMI_RECEIVE_RESTORE_FAILED
+             * @severity    ERRL_SEV_UNRECOVERABLE
+             * @moduleid    ISTEP_DMI_IO_RESTORE_EREPAIR
+             * @userdata1   bytes 0-1: plid identifying first error
+             *              bytes 2-3: reason code of first error
+             * @userdata2   bytes 0-1: total number of elogs included
+             *              bytes 2-3: N/A
+             * @devdesc     call to io_restore_erepair has failed
+             */
+            l_StepError.addErrorDetails(ISTEP_DMI_RECEIVE_RESTORE_FAILED,
+                                        ISTEP_DMI_IO_RESTORE_EREPAIR,
+                                        l_errPtr);
+
+            errlCommit(l_errPtr, HWPF_COMP_ID);
+            break;
+        }
+
+        if(!l_StepError.isNull())
+        {
+            break;
+        }
+    } // end for l_mcs_target
+
+    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_dmi_erepair exit" );
+
+    return l_StepError.getErrorHandle();
 }
 
 //

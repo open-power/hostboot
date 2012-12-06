@@ -42,6 +42,7 @@ EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/dmi_training/dmi_io_run_training
 EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/dmi_training/dmi_scominit
 EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/dmi_training/proc_cen_set_inband_addr
 EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/dmi_training/mss_getecid
+EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/io_restore_erepair
 
 OBJS =  dmi_training.o  \
         proc_cen_framelock.o    \

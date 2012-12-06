@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/hwpf/hwp/erepairFailLaneGetHwp.C $                    */
+/* $Source: src/usr/hwpf/hwp/erepairGetMnfgFailedLanesHwp.C $             */
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
@@ -21,19 +21,20 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 /**
- *  @file erepairGetFailedLanesHwp.C
+ *  @file erepairGetMnfgFailedLanesHwp.C
  *
- *  @brief FW Team HWP that accesses the fail lanes of Fabric and Memory buses.
+ *  @brief FW Team HWP that accesses the fail lanes of Fabric and Memory buses
+ *         from the Manufacturing VPD.
  */
 
 /*
  * Change Log ******************************************************************
  * Flag     Defect/Feature  User        Date        Description
  * ------   --------------  ----------  ----------- ----------------------------
- *                          bilicon     09/14/2012  Created.
+ *                          bilicon     12/02/2012  Created.
  */
 
-#include <erepairGetFailedLanesHwp.H>
+#include <erepairGetMnfgFailedLanesHwp.H>
 
 extern "C"
 {
@@ -43,8 +44,8 @@ extern "C"
  *****************************************************************************/
 
 /**
- * @brief Function called by the FW Team HWP that reads the data from Field VPD.
- *        This function makes the actual calls to read the VPD 
+ * @brief Function called by the FW Team HWP that reads the data from Mnfg VPD.
+ *        This function makes the actual calls to read the VPD.
  *        It determines the size of the buffer to be read, allocates memory
  *        of the determined size, calls fapiGetMvpdField to read the eRepair
  *        records. This buffer is further passed to another routine for
@@ -62,15 +63,15 @@ extern "C"
  *
  * @return ReturnCode
  */
-fapi::ReturnCode retrieveRepairData(const fapi::Target   &i_tgtHandle,
-                                    const fapi::Target   &i_procTgt,
-                                    fapi::MvpdRecord     i_recordType,
-                                    std::vector<uint8_t> &o_txFailLanes,
-                                    std::vector<uint8_t> &o_rxFailLanes);
+fapi::ReturnCode retrieveMnfgRepairData(const fapi::Target   &i_tgtHandle,
+                                        const fapi::Target   &i_procTgt,
+                                        fapi::MvpdRecord     i_recordType,
+                                        std::vector<uint8_t> &o_txFailLanes,
+                                        std::vector<uint8_t> &o_rxFailLanes);
 
 /**
  * @brief Function called by the FW Team HWP that parses the data read from
- *        Field VPD. This function matches each eRepair record read from the VPD
+ *        Mnfg VPD. This function matches each eRepair record read from the VPD
  *        and matches it against the attributes of the passed target.
  *        If a match is found, the corresponding eRepair record is copied into
  *        the respective failLane vectors to be returned to the caller.
@@ -86,28 +87,27 @@ fapi::ReturnCode retrieveRepairData(const fapi::Target   &i_tgtHandle,
  *
  * @return ReturnCode
  */
-fapi::ReturnCode determineRepairLanes(const fapi::Target   &i_tgtHandle,
-                                      uint8_t              *i_buf,
-                                      uint32_t             i_bufSz,
-                                      std::vector<uint8_t> &o_txFailLanes,
-                                      std::vector<uint8_t> &o_rxFailLanes);
+fapi::ReturnCode determineMnfgRepairLanes(const fapi::Target   &i_tgtHandle,
+                                          uint8_t              *i_buf,
+                                          uint32_t             i_bufSz,
+                                          std::vector<uint8_t> &o_txFailLanes,
+                                          std::vector<uint8_t> &o_rxFailLanes);
 
 
 /******************************************************************************
  * Accessor HWP
  *****************************************************************************/
 
-fapi::ReturnCode erepairGetFailedLanesHwp(const fapi::Target   &i_tgtHandle,
-                                          std::vector<uint8_t> &o_txFailLanes,
-                                          std::vector<uint8_t> &o_rxFailLanes)
+fapi::ReturnCode erepairGetMnfgFailedLanesHwp(const fapi::Target   &i_tgtHandle,
+                                              std::vector<uint8_t> &o_txFailLanes,
+                                              std::vector<uint8_t> &o_rxFailLanes)
 {
     fapi::ReturnCode l_rc;
     fapi::Target     l_processorTgt;
-    fapi::MvpdRecord l_fieldRecord;
     fapi::TargetType l_tgtType = fapi::TARGET_TYPE_NONE;
     std::vector<fapi::Target> l_mcsChiplets;
 
-    FAPI_INF(">> erepairGetFailedLanesHwp: i_tgtHandle: %s",
+    FAPI_INF(">> erepairGetMnfgFailedLanesHwp: i_tgtHandle: %s",
              i_tgtHandle.toEcmdString());
 
     do
@@ -126,7 +126,7 @@ fapi::ReturnCode erepairGetFailedLanesHwp(const fapi::Target   &i_tgtHandle,
            (l_tgtType != fapi::TARGET_TYPE_XBUS_ENDPOINT)  &&
            (l_tgtType != fapi::TARGET_TYPE_ABUS_ENDPOINT))
         {
-            FAPI_ERR("erepairGetFailedLanesHwp: Invalid Target type %d",
+            FAPI_ERR("erepairGetMnfgFailedLanesHwp: Invalid Target type %d",
                     l_tgtType);
             FAPI_SET_HWP_ERROR(l_rc, RC_ACCESSOR_HWP_INVALID_TARGET_TYPE);
             break;
@@ -141,39 +141,45 @@ fapi::ReturnCode erepairGetFailedLanesHwp(const fapi::Target   &i_tgtHandle,
             break;
         }
 
-        // Retrieve the Field eRepair lane numbers from the VPD
-        l_fieldRecord = fapi::MVPD_RECORD_VWML;
-        l_rc = retrieveRepairData(i_tgtHandle,
+        // Retrieve the Manufacturing eRepair lane numbers from the VPD
+        // TODO: Uncomment this block when the support for Mnfg VPD is
+        // available by HWSV in PNOR
+        /*
+        fapi::MvpdRecord l_mfgRecord;
+        l_mfgRecord = fapi::MVPD_RECORD_MER0;
+        l_rc = retrieveMnfgRepairData(i_tgtHandle,
                                   l_processorTgt,
-                                  l_fieldRecord,
+                                  l_mfgRecord,
                                   o_txFailLanes,
                                   o_rxFailLanes);
 
         if(l_rc)
         {
-            FAPI_ERR("Error (0x%x) during retrieval of Field records",
+            FAPI_ERR("Error (0x%x) during retrieval of Mfg records",
                      static_cast<uint32_t>(l_rc));
             break;
         }
+        */
     }while(0);
 
-    FAPI_INF("<< erepairGetFailedLanesHwp");
+    FAPI_INF("<< erepairGetMnfgFailedLanesHwp");
 
     return l_rc;
 }
 
 
-fapi::ReturnCode retrieveRepairData(const fapi::Target   &i_tgtHandle,
-                                    const fapi::Target   &i_procTgt,
-                                    fapi::MvpdRecord     i_recordType,
-                                    std::vector<uint8_t> &o_txFailLanes,
-                                    std::vector<uint8_t> &o_rxFailLanes)
+fapi::ReturnCode retrieveMnfgRepairData(const fapi::Target   &i_tgtHandle,
+                                        const fapi::Target   &i_procTgt,
+                                        fapi::MvpdRecord     i_recordType,
+                                        std::vector<uint8_t> &o_txFailLanes,
+                                        std::vector<uint8_t> &o_rxFailLanes)
 {
     uint8_t  *l_retBuf = NULL;
     uint32_t l_bufSize = 0;
     fapi::ReturnCode l_rc;
 
-    FAPI_INF(">> retrieveRepairData: i_procTgt: %s", i_procTgt.toEcmdString());
+    FAPI_INF(">> retrieveMnfgRepairData: i_procTgt: %s",
+             i_procTgt.toEcmdString());
 
     do
     {
@@ -218,11 +224,11 @@ fapi::ReturnCode retrieveRepairData(const fapi::Target   &i_tgtHandle,
 
             // Parse the buffer to determine eRepair lanes and copy the
             // fail lane numbers to the return vector
-            l_rc = determineRepairLanes(i_tgtHandle,
-                                        l_retBuf,
-                                        l_bufSize,
-                                        o_txFailLanes,
-                                        o_rxFailLanes);
+            l_rc = determineMnfgRepairLanes(i_tgtHandle,
+                                            l_retBuf,
+                                            l_bufSize,
+                                            o_txFailLanes,
+                                            o_rxFailLanes);
             if(l_rc)
             {
                 FAPI_ERR("determineRepairLanes failed");
@@ -234,27 +240,27 @@ fapi::ReturnCode retrieveRepairData(const fapi::Target   &i_tgtHandle,
     // Delete the buffer which has Field eRepair data
     delete[] l_retBuf;
 
-    FAPI_INF("<< retrieveRepairData");
+    FAPI_INF("<< retrieveMnfgRepairData");
 
     return (l_rc);
 }
 
-fapi::ReturnCode determineRepairLanes(const fapi::Target   &i_tgtHandle,
-                                      uint8_t              *i_buf,
-                                      uint32_t             i_bufSz,
-                                      std::vector<uint8_t> &o_txFailLanes,
-                                      std::vector<uint8_t> &o_rxFailLanes)
+fapi::ReturnCode determineMnfgRepairLanes(const fapi::Target   &i_tgtHandle,
+                                          uint8_t              *i_buf,
+                                          uint32_t             i_bufSz,
+                                          std::vector<uint8_t> &o_txFailLanes,
+                                          std::vector<uint8_t> &o_rxFailLanes)
 {
-    uint32_t         l_numRepairs   = 0;
-    uint8_t          *l_vpdPtr      = NULL;
-    eRepairHeader    *l_vpdHeadPtr  = NULL;
-    uint32_t         l_loop         = 0;
-    uint32_t         l_bytesParsed  = 0;
-    fapi::TargetType l_tgtType      = fapi::TARGET_TYPE_NONE;
+    uint32_t         l_numRepairs    = 0;
+    uint8_t          *l_vpdPtr       = NULL;
+    eRepairHeader    *l_vpdHeadPtr   = NULL;
+    uint32_t         l_loop          = 0;
+    uint32_t         l_bytesParsed   = 0;
+    fapi::TargetType l_tgtType       = fapi::TARGET_TYPE_NONE;
     fapi::ReturnCode l_rc;
     fapi::ATTR_CHIP_UNIT_POS_Type l_busNum;
 
-    FAPI_INF(">> determineRepairLanes");
+    FAPI_INF(">> determineMnfgRepairLanes");
 
     do
     {
@@ -401,8 +407,7 @@ fapi::ReturnCode determineRepairLanes(const fapi::Target   &i_tgtHandle,
 
     }while(0);
 
-    FAPI_INF("<< determineRepairLanes: tx: %d, rx: %d",
-              o_txFailLanes.size(), o_rxFailLanes.size());
+    FAPI_INF("<< determineMnfgRepairLanes");
 
     return(l_rc);
 }

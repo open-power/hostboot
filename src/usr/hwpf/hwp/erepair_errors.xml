@@ -36,4 +36,40 @@
     </description>
   </hwpError>
   <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_EREPAIR_RESTORE_INVALID_TARGET_PAIR</rc>
+    <description>
+        Invalid input parameter: Valid target pairs are: XBus-XBus, ABus-ABus,
+        MCS-MEMBUF
+    </description>
+  </hwpError>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_EREPAIR_RESTORE_FIELD_VPD_NOT_CLEAR</rc>
+    <description>
+        Field VPD needs to be clear during Manufacturing Mode eRepair restore
+    </description>
+  </hwpError>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_EREPAIR_RESTORE_THRESHOLD_EXCEED</rc>
+    <description>
+        The threshold limit for eRepair has been crossed
+    </description>
+  </hwpError>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_EREPAIR_RESTORE_CHARM_THRESHOLD_EXCEED</rc>
+    <description>
+        The threshold limit for eRepair has been crossed during CHARM operation
+    </description>
+  </hwpError>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_EREPAIR_RESTORE_SPARE_LANES_IN_VPD</rc>
+    <description>
+        There are spare lanes in the VPD. Spare lanes cannot be restored.
+    </description>
+  </hwpError>
+  <!-- *********************************************************************** -->
 </hwpErrors>

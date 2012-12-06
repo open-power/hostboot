@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/include/usr/hwpf/hwp/erepairFailLaneGetHwp.H $            */
+/* $Source: src/include/usr/hwpf/hwp/erepairGetMnfgFailedLanesHwp.H $     */
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
@@ -21,7 +21,7 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 /**
- *  @file erepairGetFailedLanesHwp.H
+ *  @file erepairGetMnfgFailedLanesHwp.H.H
  *
  *  @brief FW Team HWP that accesses the fail lanes of Fabric and Memory buses.
  */
@@ -30,17 +30,17 @@
  * Change Log ******************************************************************
  * Flag     Defect/Feature  User        Date        Description
  * ------   --------------  ----------  ----------- ----------------------------
- *                          bilicon     09/14/2012  Created.
+ *                          bilicon     12/02/2012  Created.
  */
 
-#ifndef EREPAIRGETFAILEDLANESHWP_H_
-#define EREPAIRGETFAILEDLANESHWP_H_
+#ifndef EREPAIRGETMNFGFAILEDLANESHWP_H_
+#define EREPAIRGETMNFGFAILEDLANESHWP_H_
 
 #include <fapi.H>
 #include <erepairConsts.H>
 
 
-typedef fapi::ReturnCode (*erepairGetFailedLanesHwp_FP_t)(
+typedef fapi::ReturnCode (*erepairGetMnfgFailedLanesHwp_FP_t)(
                           const fapi::Target   &i_tgtHandle,
                           std::vector<uint8_t> &o_txFailLanes,
                           std::vector<uint8_t> &o_rxFailLanes);
@@ -51,7 +51,7 @@ extern "C"
 /**
  * @brief FW Team HWP that retrieves the eRepair fail lanes.
  *        It retrieves the eRepair data from the P8 MVPD and the Centaur FRU
- *        VPD sections reserved for Field usage. It then parses the 
+ *        VPD sections that is reserved for Mnfg usage. It then parses the
  *        eRepair data to determine the fail lane numbers on the sub-interfaces
  *        (Tx and Rx) of the passed bus target.
  *
@@ -66,9 +66,9 @@ extern "C"
  * TODO: i_tgtHandle        There will be future support for Centaur Target.
  *                          RTC Task 51234. Depends on RTC Story 44009
  */
-fapi::ReturnCode erepairGetFailedLanesHwp(const fapi::Target   &i_tgtHandle,
-                                          std::vector<uint8_t> &o_txFailLanes,
-                                          std::vector<uint8_t> &o_rxFailLanes);
+fapi::ReturnCode erepairGetMnfgFailedLanesHwp(const fapi::Target   &i_tgtHandle,
+                                              std::vector<uint8_t> &o_txFailLanes,
+                                              std::vector<uint8_t> &o_rxFailLanes);
 
 }// end of extern C
 

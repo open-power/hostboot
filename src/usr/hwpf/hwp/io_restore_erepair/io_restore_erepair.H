@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/include/usr/hwpf/plat/fapiPlatHwpExecutor.H $             */
+/* $Source: src/usr/hwpf/hwp/io_restore_erepair/io_restore_erepair.H $    */
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2012              */
+/* COPYRIGHT International Business Machines Corp. 2012                   */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,36 +20,38 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-/**
- *  @file fapiPlatHwpExecutor.H
- *
- *  @brief Defines the FAPI PLAT HWP Executor Macro.
- *
- *  The PLAT HWP Executor macro is called by the FAPI HWP Executor macro when a
- *  PLAT invoker function or a HWP wants to execute a HWP. Each platform can
- *  modify the macro to do any platform specific work to execute the HWP (e.g.
- *  dlopening a shared library)
- */
+// $Id: io_restore_erepair.H,v 1.8 2012/12/10 17:30:46 varkeykv Exp $
+#ifndef IO_RESTORE_EREPAIR_H_
+#define IO_RESTORE_EREPAIR_H_
 
-#ifndef FAPIPLATHWPEXECUTOR_H_
-#define FAPIPLATHWPEXECUTOR_H_
-
-#include <fapiTestHwp.H>
-#include <fapiTestHwpError.H>
-#include <fapiTestHwpFfdc.H>
-#include <fapiTestHwpConfig.H>
-#include <fapiTestHwpAttr.H>
-#include <fapiTestHwpDq.H>
-#include <dimmBadDqBitmapAccessHwp.H>
-#include <erepairGetFailedLanesHwp.H>
-#include <erepairGetMnfgFailedLanesHwp.H>
+#include <fapi.H>
 
 /**
- * @brief HWP Executor macro
+ * @brief IO restore e repair function
+ * In Cronus the tx_lanes and rx_lanes vectors should be passed empty so we will use the accessor provided data instead 
+ * This is due to a MFG FW requirement that needed to pass in bad lanes as args instead of via VPD
+ * Note that power down of lanes is done by a seperate HWP called io_power_down_lanes
+ * Its up to the caller to call that separately to power down a lane if required
  *
- * Call the HWP directly.
  */
-#define FAPI_PLAT_EXEC_HWP(RC, FUNC, _args_...) \
-    RC = FUNC(_args_)
+typedef fapi::ReturnCode (*io_restore_erepair_FP_t)(const fapi::Target &target,std::vector<uint8_t> &tx_lanes,std::vector<uint8_t> &rx_lanes);
 
-#endif // FAPIPLATHWPEXECUTOR_H_
+extern "C"
+{
+
+/**
+ * @brief IO restore erepair function 
+ *
+ * @param[in] target could P8 MCS ,Centaur ( MEMBUF )  , p8 XBUS or p8 ABUS
+ *
+ * rx lanes and tx lanes should be passed in by the caller based on VPD data for bad lanes on this target endpoint.
+ * Invalidation and other checks should be done prior to passing in these parms
+ *
+ * @return ReturnCode
+ */
+
+fapi::ReturnCode io_restore_erepair(const fapi::Target &target,std::vector<uint8_t> &tx_lanes,std::vector<uint8_t> &rx_lanes);
+
+} // extern "C"
+
+#endif // IO_RESTORE_EREPAIR_H_
