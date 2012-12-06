@@ -419,6 +419,31 @@
     <attribute><id>PM_SPWUP_FSP</id></attribute>
     <attribute><id>PM_SPWUP_OCC</id></attribute>
     <attribute><id>PM_SPWUP_PHYP</id></attribute>
+    <attribute><id>OVERRIDE_MVPD_NOM_FREQ_MHZ</id></attribute>
+    <attribute><id>OVERRIDE_MVPD_V_NEST_NOM_VOLTAGE</id></attribute>
+    <attribute><id>OVERRIDE_MVPD_I_NEST_NOM_CURRENT</id></attribute>
+    <attribute><id>OVERRIDE_MVPD_V_CS_NOM_VOLTAGE</id></attribute>
+    <attribute><id>OVERRIDE_MVPD_I_CS_NOM_CURRENT</id></attribute>
+    <attribute><id>OVERRIDE_MVPD_PS_FREQ_MHZ</id></attribute>
+    <attribute><id>OVERRIDE_MVPD_V_NEST_PS_VOLTAGE</id></attribute>
+    <attribute><id>OVERRIDE_MVPD_I_NEST_PS_CURRENT</id></attribute>
+    <attribute><id>OVERRIDE_MVPD_V_CS_PS_VOLTAGE</id></attribute>
+    <attribute><id>OVERRIDE_MVPD_I_CS_PS_CURRENT</id></attribute>
+    <attribute><id>OVERRIDE_MVPD_TURBO_FREQ_MHZ</id></attribute>
+    <attribute><id>OVERRIDE_MVPD_V_NEST_TURBO_VOLTAGE</id></attribute>
+    <attribute><id>OVERRIDE_MVPD_I_NEST_TURBO_CURRENT</id></attribute>
+    <attribute><id>OVERRIDE_MVPD_V_CS_TURBO_VOLTAGE</id></attribute>
+    <attribute><id>OVERRIDE_MVPD_I_CS_TURBO_CURRENT</id></attribute>
+    <attribute><id>OVERRIDE_MVPD_FVMIN_FREQ_MHZ</id></attribute>
+    <attribute><id>OVERRIDE_MVPD_V_NEST_FVMIN_VOLTAGE</id></attribute>
+    <attribute><id>OVERRIDE_MVPD_I_NEST_FVMIN_CURRENT</id></attribute>
+    <attribute><id>OVERRIDE_MVPD_V_CS_FVMIN_VOLTAGE</id></attribute>
+    <attribute><id>OVERRIDE_MVPD_I_CS_FVMIN_CURRENT</id></attribute>
+    <attribute><id>OVERRIDE_MVPD_LAB_FREQ_MHZ</id></attribute>
+    <attribute><id>OVERRIDE_MVPD_V_NEST_LAB_VOLTAGE</id></attribute>
+    <attribute><id>OVERRIDE_MVPD_I_NEST_LAB_CURRENT</id></attribute>
+    <attribute><id>OVERRIDE_MVPD_V_CS_LAB_VOLTAGE</id></attribute>
+    <attribute><id>OVERRIDE_MVPD_I_CS_LAB_CURRENT</id></attribute>
     <!-- End pm_attributes_all_hwp.xml -->
 </targetType>
 

@@ -6692,6 +6692,7 @@ Consumers: proc_build_gpstate_table.C (among others)
     </simpleType>
     <persistency>non-volatile</persistency>
     <readable/>
+    <writeable/>
     <hwpfToHbAttrMap>
         <id>ATTR_FREQ_CORE_MAX</id>
         <macro>DIRECT</macro>
@@ -6699,6 +6700,478 @@ Consumers: proc_build_gpstate_table.C (among others)
 </attribute>
 
 <!-- End pm_attributes_all_plat.xml -->
+
+<attribute>
+    <id>OVERRIDE_MVPD_NOM_FREQ_MHZ</id>
+   <description>Module VPD #V keyword Nominal Frequency in MHZ
+consumer: p8_build_pstate_datablock, others
+firmware notes: Used as override attribute for pstate procedure
+    </description>
+    <simpleType>
+        <uint32_t></uint32_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_OVERRIDE_MVPD_NOM_FREQ_MHZ</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>OVERRIDE_MVPD_V_NEST_NOM_VOLTAGE</id>
+    <description>Module VPD #V keyword V-nest nominal voltage
+consumer: p8_build_pstate_datablock, others
+firmware notes: Used as override attribute for pstate procedure
+    </description>
+    <simpleType>
+        <uint32_t></uint32_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_OVERRIDE_MVPD_V_NEST_NOM_VOLTAGE</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>OVERRIDE_MVPD_I_NEST_NOM_CURRENT</id>
+    <description>Module VPD #V keyword I-nest nominal current
+consumer: p8_build_pstate_datablock, others
+firmware notes: Used as override attribute for pstate procedure</description>
+    <simpleType>
+        <uint32_t></uint32_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_OVERRIDE_MVPD_I_NEST_NOM_CURRENT</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>OVERRIDE_MVPD_V_CS_NOM_VOLTAGE</id>
+    <description>
+    Module VPD #V keyword V-cs nominal voltage
+consumer: p8_build_pstate_datablock, others
+firmware notes: Used as override attribute for pstate procedure
+    </description>
+    <simpleType>
+        <uint32_t></uint32_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_OVERRIDE_MVPD_V_CS_NOM_VOLTAGE</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>OVERRIDE_MVPD_I_CS_NOM_CURRENT</id>
+    <description>
+    Module VPD #V keyword I-cs nominal current
+consumer: p8_build_pstate_datablock, others
+firmware notes: Used as override attribute for pstate procedure
+    </description>
+    <simpleType>
+        <uint32_t></uint32_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_OVERRIDE_MVPD_I_CS_NOM_CURRENT</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>OVERRIDE_MVPD_PS_FREQ_MHZ</id>
+    <description>
+    Module VPD #V keyword PowerSave Frequency in MHZ
+consumer: p8_build_pstate_datablock, others
+firmware notes: Used as override attribute for pstate procedure
+    </description>
+    <simpleType>
+        <uint32_t></uint32_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_OVERRIDE_MVPD_PS_FREQ_MHZ</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>OVERRIDE_MVPD_V_NEST_PS_VOLTAGE</id>
+    <description>
+    Module VPD #V keyword V-nest powersave voltage
+consumer: p8_build_pstate_datablock, others
+firmware notes: Used as override attribute for pstate procedure
+    </description>
+    <simpleType>
+        <uint32_t></uint32_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_OVERRIDE_MVPD_V_NEST_PS_VOLTAGE</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>OVERRIDE_MVPD_I_NEST_PS_CURRENT</id>
+    <description>
+    Module VPD #V keyword I-nest powersave current
+consumer: p8_build_pstate_datablock, others
+firmware notes: Used as override attribute for pstate procedure
+    </description>
+    <simpleType>
+        <uint32_t></uint32_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_OVERRIDE_MVPD_I_NEST_PS_CURRENT</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>OVERRIDE_MVPD_V_CS_PS_VOLTAGE</id>
+    <description>
+    Module VPD #V keyword V-cs powersave voltage
+consumer: p8_build_pstate_datablock, others
+firmware notes: Used as override attribute for pstate procedure
+    </description>
+    <simpleType>
+        <uint32_t></uint32_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_OVERRIDE_MVPD_V_CS_PS_VOLTAGE</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>OVERRIDE_MVPD_I_CS_PS_CURRENT</id>
+    <description>
+    Module VPD #V keyword I-cs powersave current
+consumer: p8_build_pstate_datablock, others
+firmware notes: Used as override attribute for pstate procedure
+    </description>
+    <simpleType>
+        <uint32_t></uint32_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_OVERRIDE_MVPD_I_CS_PS_CURRENT</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>OVERRIDE_MVPD_TURBO_FREQ_MHZ</id>
+    <description>
+    Module VPD #V keyword turbo frequency in MHZ
+consumer: p8_build_pstate_datablock, others
+firmware notes: Used as override attribute for pstate procedure
+    </description>
+    <simpleType>
+        <uint32_t></uint32_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_OVERRIDE_MVPD_TURBO_FREQ_MHZ</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>OVERRIDE_MVPD_V_NEST_TURBO_VOLTAGE</id>
+    <description>
+    Module VPD #V keyword V-nest turbo voltage
+consumer: p8_build_pstate_datablock, others
+firmware notes: Used as override attribute for pstate procedure
+    </description>
+    <simpleType>
+        <uint32_t></uint32_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_OVERRIDE_MVPD_V_NEST_TURBO_VOLTAGE</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>OVERRIDE_MVPD_I_NEST_TURBO_CURRENT</id>
+    <description>
+    Module VPD #V keyword I-nest turbo current
+consumer: p8_build_pstate_datablock, others
+firmware notes: Used as override attribute for pstate procedure
+    </description>
+    <simpleType>
+        <uint32_t></uint32_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_OVERRIDE_MVPD_I_NEST_TURBO_CURRENT</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>OVERRIDE_MVPD_V_CS_TURBO_VOLTAGE</id>
+    <description>
+    Module VPD #V keyword V-cs turbo voltage
+consumer: p8_build_pstate_datablock, others
+firmware notes: Used as override attribute for pstate procedure
+    </description>
+    <simpleType>
+        <uint32_t></uint32_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_OVERRIDE_MVPD_V_CS_TURBO_VOLTAGE</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>OVERRIDE_MVPD_I_CS_TURBO_CURRENT</id>
+    <description>
+    Module VPD #V keyword I-cs turbo current
+consumer: p8_build_pstate_datablock, others
+firmware notes: Used as override attribute for pstate procedure
+    </description>
+    <simpleType>
+        <uint32_t></uint32_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_OVERRIDE_MVPD_I_CS_TURBO_CURRENT</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+
+<attribute>
+    <id>OVERRIDE_MVPD_FVMIN_FREQ_MHZ</id>
+    <description>
+    Module VPD #V keyword fvmin frequency MHZ
+consumer: p8_build_pstate_datablock, others
+firmware notes: Used as override attribute for pstate procedure
+    </description>
+    <simpleType>
+        <uint32_t></uint32_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_OVERRIDE_MVPD_FVMIN_FREQ_MHZ</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>OVERRIDE_MVPD_V_NEST_FVMIN_VOLTAGE</id>
+    <description>
+    Module VPD #V keyword V-nest fvmin voltage
+consumer: p8_build_pstate_datablock, others
+firmware notes: Used as override attribute for pstate procedure
+    </description>
+    <simpleType>
+        <uint32_t></uint32_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_OVERRIDE_MVPD_V_NEST_FVMIN_VOLTAGE</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>OVERRIDE_MVPD_I_NEST_FVMIN_CURRENT</id>
+    <description>
+    Module VPD #V keyword I-nest fvmin current
+consumer: p8_build_pstate_datablock, others
+firmware notes: Used as override attribute for pstate procedure
+    </description>
+    <simpleType>
+        <uint32_t></uint32_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_OVERRIDE_MVPD_I_NEST_FVMIN_CURRENT</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>OVERRIDE_MVPD_V_CS_FVMIN_VOLTAGE</id>
+    <description>
+    Module VPD #V keyword V-cs fvmin voltage
+consumer: p8_build_pstate_datablock, others
+firmware notes: Used as override attribute for pstate procedure
+    </description>
+    <simpleType>
+        <uint32_t></uint32_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_OVERRIDE_MVPD_V_CS_FVMIN_VOLTAGE</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>OVERRIDE_MVPD_I_CS_FVMIN_CURRENT</id>
+    <description>
+    Module VPD #V keyword I-cs fvmin current
+consumer: p8_build_pstate_datablock, others
+firmware notes: Used as override attribute for pstate procedure
+    </description>
+    <simpleType>
+        <uint32_t></uint32_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_OVERRIDE_MVPD_I_CS_FVMIN_CURRENT</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>OVERRIDE_MVPD_LAB_FREQ_MHZ</id>
+    <description>
+    Module VPD #V keyword lab frequency MHZ
+consumer: p8_build_pstate_datablock, others
+firmware notes: Used as override attribute for pstate procedure
+    </description>
+    <simpleType>
+        <uint32_t></uint32_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_OVERRIDE_MVPD_LAB_FREQ_MHZ</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>OVERRIDE_MVPD_V_NEST_LAB_VOLTAGE</id>
+    <description>
+    Module VPD #V keyword V-nest lab voltage
+consumer: p8_build_pstate_datablock, others
+firmware notes: Used as override attribute for pstate procedure
+    </description>
+    <simpleType>
+        <uint32_t></uint32_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_OVERRIDE_MVPD_V_NEST_LAB_VOLTAGE</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>OVERRIDE_MVPD_I_NEST_LAB_CURRENT</id>
+    <description>
+    Module VPD #V keyword I-nest lab current
+consumer: p8_build_pstate_datablock, others
+firmware notes: Used as override attribute for pstate procedure
+    </description>
+    <simpleType>
+        <uint32_t></uint32_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_OVERRIDE_MVPD_I_NEST_LAB_CURRENT</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>OVERRIDE_MVPD_V_CS_LAB_VOLTAGE</id>
+    <description>
+    Module VPD #V keyword V-cs lab voltage
+consumer: p8_build_pstate_datablock, others
+firmware notes: Used as override attribute for pstate procedure
+    </description>
+    <simpleType>
+        <uint32_t></uint32_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_OVERRIDE_MVPD_V_CS_LAB_VOLTAGE</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>OVERRIDE_MVPD_I_CS_LAB_CURRENT</id>
+    <description>
+    Module VPD #V keyword I-cs lab current
+consumer: p8_build_pstate_datablock, others
+firmware notes: Used as override attribute for pstate procedure
+    </description>
+    <simpleType>
+        <uint32_t></uint32_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_OVERRIDE_MVPD_I_CS_LAB_CURRENT</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
 
 <attribute>
   <id>PROC_PCIE_IOP_CONFIG</id>
