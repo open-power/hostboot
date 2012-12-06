@@ -24,7 +24,7 @@ ROOTPATH = ../../..
 MODULE = trace
 
 OBJS = interface.o service.o compdesc.o buffer.o bufferpage.o daemonif.o \
-       assert.o
+       debug.o assert.o
 
 SUBDIRS = daemon.d test.d
 

@@ -27,6 +27,7 @@
 #include "../bufferpage.H"
 #include "../entry.H"
 #include "../compdesc.H"
+#include "../debug.H"
 
 #include <initservice/taskargs.H>
 #include <initservice/initserviceif.H>
@@ -308,6 +309,9 @@ namespace TRACEDAEMON
 
     void Daemon::sendContBuffer(void* i_buffer, size_t i_size)
     {
+        // Write debug structure with buffer information.
+        g_debugSettings.bufferSize = i_size;
+        g_debugSettings.bufferPage = i_buffer;
         // Write scratch register indicating continuous trace is available.
         writeScratchReg(1ull << 32);
 
@@ -322,7 +326,14 @@ namespace TRACEDAEMON
         TARGETING::SpFunctions spFunctions =
             sys->getAttr<TARGETING::ATTR_SP_FUNCTIONS>();
 
-        if (!spFunctions.traceContinuous)
+        // Determine if continuous trace is currently enabled.
+        bool contEnabled = spFunctions.traceContinuous;
+        if (g_debugSettings.contTraceOverride != 0)
+        {
+            contEnabled = (g_debugSettings.contTraceOverride == 2);
+        }
+
+        if (!contEnabled)
         {
             // Trace isn't enabled so just discard the buffer.
             free(i_buffer);
@@ -341,6 +352,7 @@ namespace TRACEDAEMON
                 {
                     task_yield();
                 }
+                free(i_buffer);
             }
         }
     }
