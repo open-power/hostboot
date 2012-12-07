@@ -69,9 +69,9 @@
 #include    "proc_cen_set_inband_addr.H"
 #include    "mss_get_cen_ecid.H"
 #include    "io_restore_erepair.H"
-
-// eRepair Restore
 #include <erepairAccessorHwpFuncs.H>
+#include    "dmi_io_dccal/dmi_io_dccal.H"
+#include    <pbusLinkSvc.H>
 
 namespace   DMI_TRAINING
 {
@@ -81,6 +81,12 @@ using   namespace   ISTEP_ERROR;
 using   namespace   ERRORLOG;
 using   namespace   TARGETING;
 using   namespace   fapi;
+using   namespace   EDI_EI_INITIALIZATION;
+
+//*****************************************************************
+// Function prototypes
+//*****************************************************************
+void get_dmi_io_targets(TargetPairs_t& o_dmi_io_targets);
 
 
 //
@@ -582,14 +588,132 @@ void* call_dmi_erepair( void *io_pArgs )
 //
 void*    call_dmi_io_dccal( void *io_pArgs )
 {
-    errlHndl_t l_err = NULL;
+    errlHndl_t  l_errl  =   NULL;
+    ISTEP_ERROR::IStepError l_StepError;
 
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_dmi_io_dccal entry" );
+    // We are not running this analog procedure in VPO
+    if (TARGETING::is_vpo())
+    {
+        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                   "Skip dmi_io_dccal in VPO!");
+        return l_StepError.getErrorHandle();
+    }
+
+    // TODO: RTC 60627
+    // Reinstate this to enable dmi_io_dccal
+    return l_StepError.getErrorHandle();
+
+    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+               "call_dmi_io_dccal entry" );
+
+    TargetPairs_t l_dmi_io_dccal_targets;
+    get_dmi_io_targets(l_dmi_io_dccal_targets);
 
 
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_dmi_io_dccal exit" );
+    // Note:
+    // Due to lab tester board environment, HW procedure writer (Varkey) has
+    // requested to send in one target of a time (we used to send in
+    // the MCS and MEMBUF pair in one call). Even though they don't have to be
+    // in order, we should keep the pair concept here in case we need to send
+    // in a pair in the future again.
+    for (TargetPairs_t::iterator l_itr = l_dmi_io_dccal_targets.begin();
+         l_itr != l_dmi_io_dccal_targets.end(); ++l_itr)
+    {
+        const fapi::Target l_fapi_mcs_target(
+                TARGET_TYPE_MCS_CHIPLET,
+                reinterpret_cast<void *>
+                (const_cast<TARGETING::Target*>(l_itr->first)));
 
-    return l_err;
+        const fapi::Target l_fapi_membuf_target(
+                TARGET_TYPE_MEMBUF_CHIP,
+                reinterpret_cast<void *>
+                (const_cast<TARGETING::Target*>(l_itr->second)));
+
+        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                "===== Call dmi_io_dccal HWP( mcs 0x%.8X, mem 0x%.8X) : ",
+                TARGETING::get_huid(l_itr->first),
+                TARGETING::get_huid(l_itr->second));
+
+        EntityPath l_path;
+        l_path  =   l_itr->first->getAttr<ATTR_PHYS_PATH>();
+        l_path.dump();
+        l_path  =   l_itr->second->getAttr<ATTR_PHYS_PATH>();
+        l_path.dump();
+
+        // Call on the MCS
+        FAPI_INVOKE_HWP(l_errl, dmi_io_dccal, l_fapi_mcs_target);
+
+        if (l_errl)
+        {
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                      "ERROR 0x%.8X :  dmi_io_dccal HWP Target MCS 0x%.8X",
+                      l_errl->reasonCode(), TARGETING::get_huid(l_itr->first));
+            /*@
+             * @errortype
+             * @reasoncode  ISTEP_DMI_IO_DCCAL_MCS_FAILED
+             * @severity    ERRORLOG::ERRL_SEV_UNRECOVERABLE
+             * @moduleid    ISTEP_DMI_IO_DCCAL
+             * @userdata1   bytes 0-1: plid identifying first error
+             *              bytes 2-3: reason code of first error
+             * @userdata2   bytes 0-1: total number of elogs included
+             *              bytes 2-3: N/A
+             * @devdesc     call to dmi_io_dccal on MCS has failed
+             */
+            l_StepError.addErrorDetails(ISTEP_DMI_IO_DCCAL_MCS_FAILED,
+                                        ISTEP_DMI_IO_DCCAL,
+                                        l_errl);
+
+            errlCommit( l_errl, HWPF_COMP_ID );
+            // We want to continue the training despite the error, so
+            // no break
+        }
+        else
+        {
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                    "SUCCESS :  call_dmi_io_dccal HWP - Target 0x%.8X",
+                    TARGETING::get_huid(l_itr->first));
+        }
+
+        // Call on the MEMBUF
+        FAPI_INVOKE_HWP(l_errl, dmi_io_dccal, l_fapi_membuf_target);
+        if (l_errl)
+        {
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                      "ERROR 0x%.8X :  dmi_io_dccal HWP Target Membuf 0x%.8X",
+                      l_errl->reasonCode(), TARGETING::get_huid(l_itr->second));
+            /*@
+             * @errortype
+             * @reasoncode  ISTEP_DMI_IO_DCCAL_MEMBUF_FAILED
+             * @severity    ERRORLOG::ERRL_SEV_UNRECOVERABLE
+             * @moduleid    ISTEP_DMI_IO_DCCAL
+             * @userdata1   bytes 0-1: plid identifying first error
+             *              bytes 2-3: reason code of first error
+             * @userdata2   bytes 0-1: total number of elogs included
+             *              bytes 2-3: N/A
+             * @devdesc     call to dmi_io_dccal on MEMBUF has failed
+             */
+            l_StepError.addErrorDetails(ISTEP_DMI_IO_DCCAL_MEMBUF_FAILED,
+                                        ISTEP_DMI_IO_DCCAL,
+                                        l_errl);
+
+            errlCommit( l_errl, HWPF_COMP_ID );
+            // We want to continue the training despite the error, so
+            // no break
+        }
+        else
+        {
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                    "SUCCESS :  call_dmi_io_dccal HWP - Target 0x%.8X",
+                    TARGETING::get_huid(l_itr->second));
+        }
+
+    }
+
+    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+               "call_dmi_io_dccal exit" );
+
+    // end task, returning any errorlogs to IStepDisp
+    return l_StepError.getErrorHandle();
 }
 
 
@@ -620,132 +744,69 @@ void*    call_dmi_io_run_training( void *io_pArgs )
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_dmi_io_run_training entry" );
 
+    TargetPairs_t l_dmi_io_dccal_targets;
+    get_dmi_io_targets(l_dmi_io_dccal_targets);
+
     TARGETING::TargetHandleList l_cpuTargetList;
     getAllChips(l_cpuTargetList, TYPE_PROC);
 
-    for (TargetHandleList::iterator l_cpu_iter = l_cpuTargetList.begin();
-            l_cpu_iter != l_cpuTargetList.end();
-            ++l_cpu_iter)
+    TargetPairs_t::iterator l_itr;
+    for (l_itr = l_dmi_io_dccal_targets.begin();
+         (!l_err) && (l_itr != l_dmi_io_dccal_targets.end()); ++l_itr)
     {
-        //  make a local copy of the CPU target
-        const TARGETING::Target* l_cpu_target = *l_cpu_iter;
+        const fapi::Target l_fapi_master_target(
+                TARGET_TYPE_MCS_CHIPLET,
+                reinterpret_cast<void *>
+                (const_cast<TARGETING::Target*>(l_itr->first)));
 
-        uint8_t l_cpuNum = l_cpu_target->getAttr<ATTR_POSITION>();
+        const fapi::Target l_fapi_slave_target(
+                TARGET_TYPE_MEMBUF_CHIP,
+                reinterpret_cast<void *>
+                (const_cast<TARGETING::Target*>(l_itr->second)));
 
-        // find all MCS chiplets of the proc
-        TARGETING::TargetHandleList l_mcsTargetList;
-        getChildChiplets( l_mcsTargetList, l_cpu_target, TYPE_MCS );
+       TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+               "===== Call dmi_io_run_training HWP(mcs 0x%x, mem 0x%x ) : ",
+               TARGETING::get_huid(l_itr->first),
+               TARGETING::get_huid(l_itr->second));
 
-        for (TargetHandleList::iterator l_mcs_iter = l_mcsTargetList.begin();
-                l_mcs_iter != l_mcsTargetList.end();
-                ++l_mcs_iter)
+        EntityPath l_path;
+        l_path  =   l_itr->first->getAttr<ATTR_PHYS_PATH>();
+        l_path.dump();
+        l_path  =   l_itr->second->getAttr<ATTR_PHYS_PATH>();
+        l_path.dump();
+
+        FAPI_INVOKE_HWP(l_err, dmi_io_run_training,
+                        l_fapi_master_target, l_fapi_slave_target);
+
+        if (l_err)
         {
-            //  make a local copy of the MCS target
-            const TARGETING::Target* l_mcs_target = *l_mcs_iter;
-
-            uint8_t l_mcsNum    =   l_mcs_target->getAttr<ATTR_CHIP_UNIT>();
-
-            //  find all the Centaurs that are associated with this MCS
-            TARGETING::TargetHandleList l_memTargetList;
-            getAffinityChips(l_memTargetList, l_mcs_target, TYPE_MEMBUF);
-
-            for (TargetHandleList::iterator l_mem_iter = l_memTargetList.begin();
-                    l_mem_iter != l_memTargetList.end();
-                    ++l_mem_iter)
-            {
-                //  make a local copy of the MEMBUF target
-                const TARGETING::Target*  l_mem_target = *l_mem_iter;
-
-                uint8_t l_memNum = l_mem_target->getAttr<ATTR_POSITION>();
-
-                //  struct containing custom parameters that is fed to HWP
-                //  call the HWP with each target   ( if parallel, spin off a task )
-                const fapi::Target l_fapi_master_target(
-                        TARGET_TYPE_MCS_CHIPLET,
-                        reinterpret_cast<void *>
-                ( const_cast<TARGETING::Target*>(l_mcs_target) )
-                );
-                const fapi::Target l_fapi_slave_target(
-                        TARGET_TYPE_MEMBUF_CHIP,
-                        reinterpret_cast<void *>
-                (const_cast<TARGETING::Target*>(l_mem_target))
-                );
-
-                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                        "===== Call dmi_io_run_training HWP( cpu 0x%x, mcs 0x%x, mem 0x%x ) : ",
-                        l_cpuNum,
-                        l_mcsNum,
-                        l_memNum );
-
-                EntityPath l_path;
-                l_path = l_cpu_target->getAttr<ATTR_PHYS_PATH>();
-                l_path.dump();
-                l_path  =   l_mcs_target->getAttr<ATTR_PHYS_PATH>();
-                l_path.dump();
-                l_path  =   l_mem_target->getAttr<ATTR_PHYS_PATH>();
-                l_path.dump();
-                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "===== " );
-                FAPI_INVOKE_HWP(l_err, dmi_io_run_training,
-                                l_fapi_master_target, l_fapi_slave_target);
-
-                if (l_err)
-                {
-                    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                            "ERROR 0x%.8X :  dmi_io_run_training HWP"
-                            "( cpu 0x%x, mcs 0x%x, mem 0x%x ) ",
-                            l_err->reasonCode(),
-                            l_cpuNum,
-                            l_mcsNum,
-                            l_memNum );
-
-                    // capture the target data in the elog
-                    ErrlUserDetailsTarget(l_mem_target).addToLog( l_err );
-
-                    /*@
-                     * @errortype
-                     * @reasoncode  ISTEP_DMI_TRAINING_FAILED
-                     * @severity    ERRORLOG::ERRL_SEV_UNRECOVERABLE
-                     * @moduleid    ISTEP_DMI_IO_RUN_TRAINING
-                     * @userdata1   bytes 0-1: plid identifying first error
-                     *              bytes 2-3: reason code of first error
-                     * @userdata2   bytes 0-1: total number of elogs included
-                     *              bytes 2-3: N/A
-                     * @devdesc     call to dmi_io_run_training has failed
-                     */
-                    l_StepError.addErrorDetails(ISTEP_DMI_TRAINING_FAILED,
-                                                ISTEP_DMI_IO_RUN_TRAINING,
-                                                l_err);
-
-                    errlCommit( l_err, HWPF_COMP_ID );
-
-                    break; // Break out mem target loop
-                }
-                else
-                {
-                    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                            "SUCCESS :  dmi_io_run_training HWP"
-                            "( cpu 0x%x, mcs 0x%x, mem 0x%x ) ",
-                            l_cpuNum,
-                            l_mcsNum,
-                            l_memNum );
-                }
-
-            }  //end for l_mem_target
-
-            // if there is an error bail out
-            if ( !l_StepError.isNull() )
-            {
-                break; // Break out l_mcs_target
-            }
-
-        }   // end for l_mcs_target
-
-        if ( !l_StepError.isNull() )
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                      "ERROR 0x%.8X :  dmi_io_run_training HWP",
+                      l_err->reasonCode());
+            /*@
+             * @errortype
+             * @reasoncode  ISTEP_DMI_TRAINING_FAILED
+             * @severity    ERRORLOG::ERRL_SEV_UNRECOVERABLE
+             * @moduleid    ISTEP_DMI_IO_RUN_TRAINING
+             * @userdata1   bytes 0-1: plid identifying first error
+             *              bytes 2-3: reason code of first error
+             * @userdata2   bytes 0-1: total number of elogs included
+             *              bytes 2-3: N/A
+             * @devdesc     call to dmi_io_run_training has failed
+             */
+            l_StepError.addErrorDetails(ISTEP_DMI_TRAINING_FAILED,
+                                        ISTEP_DMI_IO_RUN_TRAINING,
+                                        l_err);
+            errlCommit( l_err, HWPF_COMP_ID );
+            break; // Break out target list loop
+        }
+        else
         {
-            break; // Break out l_cpu_target
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                    "SUCCESS :  dmi_io_run_training HWP");
         }
 
-    }   // end for l_cpu_target
+    }   // end target pair list
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_dmi_io_run_training exit" );
 
@@ -983,6 +1044,56 @@ void*    call_cen_set_inband_addr( void *io_pArgs )
     return l_StepError.getErrorHandle();
 }
 
+//
+//  Utility function to get DMI IO target list
+//  First is MCS target, Second is MEMBUF target
+//
+void get_dmi_io_targets(TargetPairs_t& o_dmi_io_targets)
+{
+    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "get_dmi_io_targets" );
+
+    o_dmi_io_targets.clear();
+    TARGETING::TargetHandleList l_cpuTargetList;
+    getAllChips(l_cpuTargetList, TYPE_PROC);
+
+    for ( TargetHandleList::iterator l_iter = l_cpuTargetList.begin();
+          l_iter != l_cpuTargetList.end(); ++l_iter )
+    {
+        //  make a local copy of the CPU target
+        const TARGETING::Target*  l_cpu_target = *l_iter;
+
+        // find all MCS chiplets of the proc
+        TARGETING::TargetHandleList l_mcsTargetList;
+        getChildChiplets( l_mcsTargetList, l_cpu_target, TYPE_MCS );
+
+        for ( TargetHandleList::iterator l_iterMCS = l_mcsTargetList.begin();
+              l_iterMCS != l_mcsTargetList.end(); ++l_iterMCS )
+        {
+            //  make a local copy of the MCS target
+            const TARGETING::Target*  l_mcs_target = *l_iterMCS;
+
+            //  find all the Centaurs that are associated with this MCS
+            TARGETING::TargetHandleList l_memTargetList;
+            getAffinityChips(l_memTargetList, l_mcs_target, TYPE_MEMBUF);
+
+            for ( TargetHandleList::iterator l_iterMemBuf = l_memTargetList.begin();
+                    l_iterMemBuf != l_memTargetList.end(); ++l_iterMemBuf )
+            {
+                //  make a local copy of the MEMBUF target
+                const TARGETING::Target*  l_mem_target = *l_iterMemBuf;
+                o_dmi_io_targets.insert(std::pair<const TARGETING::Target*,
+                  const TARGETING::Target*>(l_mcs_target, l_mem_target));
+
+            }  //end for l_mem_target
+
+        }   // end for l_mcs_target
+
+    }   // end for l_cpu_target
+
+    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "get_dmi_io_targets exit" );
+
+    return;
+}
 
 };   // end namespace
 

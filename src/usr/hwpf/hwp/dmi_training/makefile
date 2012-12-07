@@ -43,13 +43,15 @@ EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/dmi_training/dmi_scominit
 EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/dmi_training/proc_cen_set_inband_addr
 EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/dmi_training/mss_getecid
 EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/io_restore_erepair
+EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/dmi_training/dmi_io_dccal
 
 OBJS =  dmi_training.o  \
         proc_cen_framelock.o    \
         dmi_io_run_training.o \
         dmi_scominit.o \
         proc_cen_set_inband_addr.o \
-        mss_get_cen_ecid.o
+        mss_get_cen_ecid.o \
+        dmi_io_dccal.o
 
 ##  NOTE: add a new directory onto the vpaths when you add a new HWP
 VPATH += ${ROOTPATH}/src/usr/hwpf/hwp/dmi_training/proc_cen_framelock
@@ -57,5 +59,6 @@ VPATH += ${ROOTPATH}/src/usr/hwpf/hwp/dmi_training/dmi_io_run_training
 VPATH += ${ROOTPATH}/src/usr/hwpf/hwp/dmi_training/dmi_scominit
 VPATH += ${ROOTPATH}/src/usr/hwpf/hwp/dmi_training/proc_cen_set_inband_addr
 VPATH += ${ROOTPATH}/src/usr/hwpf/hwp/dmi_training/mss_getecid
+VPATH += ${ROOTPATH}/src/usr/hwpf/hwp/dmi_training/dmi_io_dccal
 
 include ${ROOTPATH}/config.mk

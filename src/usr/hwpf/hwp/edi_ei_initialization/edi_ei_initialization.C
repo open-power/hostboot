@@ -67,6 +67,7 @@
 //  Uncomment these files as they become available:
 #include    "io_restore_erepair.H"
 // #include    "fabric_io_dccal/fabric_io_dccal.H"
+// #include    "fabric_erepair/fabric_erepair.H"
 // #include    "fabric_pre_trainadv/fabric_pre_trainadv.H"
 #include    "fabric_io_run_training/fabric_io_run_training.H"
 // #include    "fabric_post_trainadv/fabric_post_trainadv.H"
@@ -74,6 +75,7 @@
 // #include    "host_attnlisten_proc/host_attnlisten_proc.H"
 #include    "proc_fab_iovalid/proc_fab_iovalid.H"
 #include    <diag/prdf/common/prdfMain.H>
+#include    "fabric_io_dccal/fabric_io_dccal.H"
 
 // eRepair Restore
 #include <erepairAccessorHwpFuncs.H>
@@ -286,48 +288,122 @@ void*    call_fabric_erepair( void    *io_pArgs )
 void*    call_fabric_io_dccal( void    *io_pArgs )
 {
     errlHndl_t  l_errl  =   NULL;
+    IStepError  l_StepError;
 
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-               "call_fabric_io_dccal entry" );
-
-#if 0
-    // @@@@@    CUSTOM BLOCK:   @@@@@
-    //  figure out what targets we need
-    //  customize any other inputs
-    //  set up loops to go through all targets (if parallel, spin off a task)
-
-    //  dump physical path to targets
-    EntityPath l_path;
-    l_path  =   l_@targetN_target->getAttr<ATTR_PHYS_PATH>();
-    l_path.dump();
-
-    // cast OUR type of target to a FAPI type of target.
-    const fapi::Target l_fapi_@targetN_target(
-                    TARGET_TYPE_MEMBUF_CHIP,
-                    reinterpret_cast<void *>
-                        (const_cast<TARGETING::Target*>(l_@targetN_target)) );
-
-    //  call the HWP with each fapi::Target
-    FAPI_INVOKE_HWP( l_errl, fabric_io_dccal, _args_...);
-    if ( l_errl )
-    {
-        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                  "ERROR : .........." );
-        errlCommit( l_errl, HWPF_COMP_ID );
-    }
-    else
+    // We are not running this analog procedure in VPO
+    if (TARGETING::is_vpo())
     {
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                   "SUCCESS : .........." );
+                   "Skip call_fabric_io_dccal in VPO!");
+        return l_StepError.getErrorHandle();
     }
-    // @@@@@    END CUSTOM BLOCK:   @@@@@
-#endif
 
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+               "call_fabric_io_dccal entry" );
+
+    TargetPairs_t l_PbusConnections;
+    TargetPairs_t::iterator l_itr;
+    const uint32_t MaxBusSet = 2;
+    TYPE busSet[MaxBusSet] = { TYPE_ABUS, TYPE_XBUS };
+
+    // Note:
+    // Due to lab tester board environment, HW procedure writer (Varkey) has
+    // requested to send in one target of a time (we used to send in
+    // both ends in one call). Even though they don't have to be
+    // in order, we should keep the pair concept here in case we need to send
+    // in a pair in the future again.
+    for (uint32_t ii = 0; (!l_errl) && (ii < MaxBusSet); ii++)
+    {
+        l_errl = PbusLinkSvc::getTheInstance().getPbusConnections(
+                                            l_PbusConnections, busSet[ii] );
+
+        for (l_itr = l_PbusConnections.begin();
+             l_itr != l_PbusConnections.end(); ++l_itr)
+        {
+            const fapi::Target l_fapi_endp1_target(
+                   (ii ? TARGET_TYPE_XBUS_ENDPOINT : TARGET_TYPE_ABUS_ENDPOINT),
+                   reinterpret_cast<void *>
+                   (const_cast<TARGETING::Target*>(l_itr->first)));
+            const fapi::Target l_fapi_endp2_target(
+                   (ii ? TARGET_TYPE_XBUS_ENDPOINT : TARGET_TYPE_ABUS_ENDPOINT),
+                   reinterpret_cast<void *>
+                   (const_cast<TARGETING::Target*>(l_itr->second)));
+
+            EntityPath l_path;
+            l_path  =   l_itr->first->getAttr<ATTR_PHYS_PATH>();
+            l_path.dump();
+            l_path  =   l_itr->second->getAttr<ATTR_PHYS_PATH>();
+            l_path.dump();
+
+            //  call the HWP with each bus connection
+            FAPI_INVOKE_HWP( l_errl, fabric_io_dccal, l_fapi_endp1_target );
+
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                       "%s : %cbus connection fabric_io_dccal. Target 0x%.8X",
+                       (l_errl ? "ERROR" : "SUCCESS"), (ii ? 'X' : 'A'),
+                        TARGETING::get_huid(l_itr->first) );
+            if ( l_errl )
+            {
+                /*@
+                 * @errortype
+                 * @reasoncode  ISTEP_FABRIC_IO_DCCAL_ENDPOINT1_FAILED
+                 * @severity    ERRORLOG::ERRL_SEV_UNRECOVERABLE
+                 * @moduleid    ISTEP_FABRIC_IO_DCCAL
+                 * @userdata1   bytes 0-1: plid identifying first error
+                 *              bytes 2-3: reason code of first error
+                 * @userdata2   bytes 0-1: total number of elogs included
+                 *              bytes 2-3: N/A
+                 * @devdesc     call to fabric_io_run_training has failed
+                 *              see error log in the user details section for
+                 *              additional details.
+                 */
+                l_StepError.addErrorDetails(ISTEP_FABRIC_IO_DCCAL_ENDPOINT1_FAILED,
+                                            ISTEP_FABRIC_IO_DCCAL,
+                                            l_errl );
+
+                errlCommit( l_errl, HWPF_COMP_ID );
+                // We want to continue the training despite the error, so
+                // no break
+            }
+
+            //  call the HWP with each bus connection
+            FAPI_INVOKE_HWP( l_errl, fabric_io_dccal, l_fapi_endp2_target );
+
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                       "%s : %cbus connection fabric_io_dccal. Target 0x%.8X",
+                       (l_errl ? "ERROR" : "SUCCESS"), (ii ? 'X' : 'A'),
+                        TARGETING::get_huid(l_itr->second) );
+            if ( l_errl )
+            {
+                /*@
+                 * @errortype
+                 * @reasoncode  ISTEP_FABRIC_IO_DCCAL_ENDPOINT2_FAILED
+                 * @severity    ERRORLOG::ERRL_SEV_UNRECOVERABLE
+                 * @moduleid    ISTEP_FABRIC_IO_DCCAL
+                 * @userdata1   bytes 0-1: plid identifying first error
+                 *              bytes 2-3: reason code of first error
+                 * @userdata2   bytes 0-1: total number of elogs included
+                 *              bytes 2-3: N/A
+                 * @devdesc     call to fabric_io_run_training has failed
+                 *              see error log in the user details section for
+                 *              additional details.
+                 */
+                l_StepError.addErrorDetails(ISTEP_FABRIC_IO_DCCAL_ENDPOINT2_FAILED,
+                                            ISTEP_FABRIC_IO_DCCAL,
+                                            l_errl );
+
+                errlCommit( l_errl, HWPF_COMP_ID );
+                // We want to continue the training despite the error, so
+                // no break
+            }
+        }
+    }
+
+    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                "call_fabric_io_dccal exit" );
 
     // end task, returning any errorlogs to IStepDisp
-    return l_errl;
+    return l_StepError.getErrorHandle();
 }
 
 

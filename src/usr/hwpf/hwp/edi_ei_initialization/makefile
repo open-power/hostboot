@@ -45,11 +45,11 @@ EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/io_restore_erepair
 ##  EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/edi_ei_initialization/<HWP_dir>
 EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/edi_ei_initialization/proc_fab_iovalid
 EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/edi_ei_initialization/fabric_io_run_training
-
+EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/edi_ei_initialization/fabric_io_dccal
 
 ##  NOTE: add new object files when you add a new HWP
 OBJS =  edi_ei_initialization.o \
-        proc_fab_iovalid.o fabric_io_run_training.o
+        proc_fab_iovalid.o fabric_io_run_training.o fabric_io_dccal.o
 
         
 ##  NOTE: add a new directory onto the vpaths when you add a new HWP
@@ -57,7 +57,7 @@ OBJS =  edi_ei_initialization.o \
 #   VPATH += ${ROOTPATH}/src/usr/hwpf/hwp/edi_ei_initialization/<HWP_dir>
 VPATH += ${ROOTPATH}/src/usr/hwpf/hwp/edi_ei_initialization/proc_fab_iovalid
 VPATH += ${ROOTPATH}/src/usr/hwpf/hwp/edi_ei_initialization/fabric_io_run_training
-
+VPATH += ${ROOTPATH}/src/usr/hwpf/hwp/edi_ei_initialization/fabric_io_dccal
 
 include ${ROOTPATH}/config.mk
 

@@ -111,6 +111,8 @@ enum istepModuleId
     ISTEP_FABRIC_IO_RESTORE_EREPAIR                     = 0x3E,
     ISTEP_VDDR_ENABLE                                   = 0x3F,
     ISTEP_VDDR_DISABLE                                  = 0x40,
+    ISTEP_DMI_IO_DCCAL                                  = 0x41,
+    ISTEP_FABRIC_IO_DCCAL                               = 0x42,
 };
 
 /**
@@ -155,6 +157,10 @@ enum istepReasonCode
     ISTEP_DMI_GET_RESTORE_LANES_FAILED          = ISTEP_COMP_ID | 0x1F,
     ISTEP_FABRIC_GET_RESTORE_LANES_FAILED       = ISTEP_COMP_ID | 0x20,
     ISTEP_GET_PBUS_CONNECTIONS_FAILED           = ISTEP_COMP_ID | 0x21,
+    ISTEP_DMI_IO_DCCAL_MCS_FAILED               = ISTEP_COMP_ID | 0x22,
+    ISTEP_DMI_IO_DCCAL_MEMBUF_FAILED            = ISTEP_COMP_ID | 0x23,
+    ISTEP_FABRIC_IO_DCCAL_ENDPOINT1_FAILED      = ISTEP_COMP_ID | 0x24,
+    ISTEP_FABRIC_IO_DCCAL_ENDPOINT2_FAILED      = ISTEP_COMP_ID | 0x25,
 };  // end ISTEP
 
 }

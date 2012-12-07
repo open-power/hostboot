@@ -1,0 +1,503 @@
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/usr/hwpf/hwp/bus_training/io_dccal.C $                    */
+/*                                                                        */
+/* IBM CONFIDENTIAL                                                       */
+/*                                                                        */
+/* COPYRIGHT International Business Machines Corp. 2012                   */
+/*                                                                        */
+/* p1                                                                     */
+/*                                                                        */
+/* Object Code Only (OCO) source materials                                */
+/* Licensed Internal Code Source Materials                                */
+/* IBM HostBoot Licensed Internal Code                                    */
+/*                                                                        */
+/* The source code for this program is not published or otherwise         */
+/* divested of its trade secrets, irrespective of what has been           */
+/* deposited with the U.S. Copyright Office.                              */
+/*                                                                        */
+/* Origin: 30                                                             */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
+// $Id: io_dccal.C,v 1.14 2012/12/07 13:43:57 varkeykv Exp $
+// *!***************************************************************************
+// *! (C) Copyright International Business Machines Corp. 1997, 1998
+// *!           All Rights Reserved -- Property of IBM
+// *!                   *** IBM Confidential ***
+// *!***************************************************************************
+// *! FILENAME             : io_dccal.C
+// *! TITLE                : 
+// *! DESCRIPTION          : Impedance & offset calibration
+// *! CONTEXT              : 
+// *!
+// *! OWNER  NAME          : Varghese, Varkey         Email: varkey.kv@in.ibm.com
+// *! BACKUP NAME          : Swaminathan, Janani      Email: jaswamin@in.ibm.com      
+// *!
+// *!***************************************************************************
+// CHANGE HISTORY:
+//------------------------------------------------------------------------------
+// Version:|Author: | Date:  | Comment:
+// --------|--------|--------|--------------------------------------------------
+//   1.0   |varkeykv|09/27/11|Initial check in . Have to modify targets once bus target is defined and available.Not tested in any way other than in unit SIM IOTK
+//   1.1   |varkeykv |17/11/11|Code cleanup . Fixed header files. Changed fAPI API 
+//------------------------------------------------------------------------------
+
+#include <fapi.H>
+#include "io_dccal.H"
+#include "gcr_funcs.H"
+
+extern "C" {
+
+
+using namespace fapi;
+
+int binStrToInt(char *str,uint32_t length) {
+  int i = 0;
+  for ( uint32_t j = 0; j <length; j++ ) {
+    char c = str[j];
+    if ( c == '0' ) {
+      i = (i << 1);
+    } else {
+      i = (i << 1) | 0x1;
+    }
+  }
+  return i;
+}
+
+uint32_t  BinaryRound(uint32_t val, uint32_t numTruncBits, uint32_t center) {
+  // Round val by removing numTruncBits
+  // If the truncated fraction is exactly 0.5, round
+  // toward center
+  uint32_t newVal = 0x0;
+
+  uint32_t mask = 0x0;
+  for (uint32_t i = 0; i < numTruncBits; i++) {
+    mask = (mask << 1) + 0x1;
+  }
+
+  uint32_t half = 0x1 << (numTruncBits-1);
+
+  if ( (val & mask) > half  ) {
+    newVal = (val >> numTruncBits) + 1; // round up
+  } else if ( (val & mask) < half  ) {
+    newVal = (val >> numTruncBits); // round down
+  } else {
+    // On the boundary!  Round towards the nominal value
+    if ( val < (center << numTruncBits) ) {
+      newVal = (val >> numTruncBits) + 1; // round up
+    } else {
+      newVal = (val >> numTruncBits); // round down
+    }
+  }
+
+  return newVal;
+}
+
+
+// Offset cal doesnt do anything in VBU/sim ...
+ReturnCode run_offset_cal(const Target &target,io_interface_t master_interface,uint32_t master_group){
+// Assuming I will receive a target and slave_target from the Invoker. 
+    ReturnCode rc;
+    uint32_t rc_ecmd=0;
+    uint16_t bits = 0;
+    ecmdDataBufferBase data_buffer;
+ 
+    ecmdDataBufferBase set_bits(16);
+    ecmdDataBufferBase clear_bits(16);
+     io_interface_t chip_interface=master_interface;//first we run on master chip
+    uint32_t group=master_group;
+    const Target *target_ptr=&target; // Assuming I am allowed to do this . 
+ 
+    for(int i=0;i<2;++i){ // master and slave side looper
+        FAPI_DBG("IO_DCCAL : Starting Offset Calibration on interface %d group %d",chip_interface,group);
+        bits=rx_start_offset_cal;
+        rc_ecmd|=set_bits.insert(bits,0,16);
+        bits=rx_start_offset_cal_clear;
+        rc_ecmd|=clear_bits.insert(bits,0,16); 
+        if(rc_ecmd)
+        {
+            rc.setEcmdError(rc_ecmd);
+            return(rc);
+        }
+        rc=GCR_write(*target_ptr,chip_interface,rx_training_start_pg,group,0,set_bits ,clear_bits);if (rc) {return(rc);}
+      
+        // Poll for the done bit
+        rc=GCR_read(*target_ptr,master_interface,rx_training_status_pg ,group,0,data_buffer);if (rc) {return(rc);} // have to add support for field parsing
+        
+        int done_bit=rx_offset_cal_done;
+        int fail_bit=rx_offset_cal_failed;
+        bool fail= data_buffer.getHalfWord(0) & fail_bit;
+        bool done = data_buffer.getHalfWord(0)& done_bit;
+        int timeoutCnt = 0;
+        while ( ( !done ) && ( timeoutCnt < 150 ) && !fail )
+        {
+                // wait for 80000 time units
+                // Time units may be something for simulation, and something else (or nothing) for hardware
+                // At any rate, this is intended to be approximately 100 us.
+                rc=GCR_read(*target_ptr,chip_interface,rx_training_status_pg,group,0,data_buffer); if (rc) {return(rc);}// have to add support for field parsing
+                fail= data_buffer.getHalfWord(0) & fail_bit;
+                done = data_buffer.getHalfWord(0)& done_bit;
+                fapiDelay(1000000,1000000);
+                timeoutCnt++;
+        }
+        
+        if ( fail)
+        {
+                FAPI_ERR("IO Offset cal error on interface %d",chip_interface);
+                //Set HWP error
+                FAPI_SET_HWP_ERROR(rc,IO_DCCAL_OFFCAL_ERROR_RC);
+                return rc;
+        }
+        // Check for errors
+        else if ( timeoutCnt >= 100 && !done && !fail )
+        {
+                FAPI_ERR("Timed out waiting for Done bit to be set");
+                //Set HWP error
+                FAPI_SET_HWP_ERROR(rc,IO_DCCAL_OFFCAL_TIMEOUT_RC);
+                return rc;
+        }
+        else
+        {
+             FAPI_DBG("IO Offset cal Completed on interface %d",chip_interface);
+        }
+    }
+    return(rc);
+}
+
+ReturnCode run_zcal_debug(const Target& target,io_interface_t interface,uint32_t group)
+{
+    ReturnCode rc;
+    ecmdDataBufferBase data_buffer(16);
+    rc=GCR_read(target,interface,tx_impcal_nval_pb,group,0,data_buffer);if (rc) {return(rc);} // have to add support for field parsing
+    rc=GCR_read(target,interface,tx_impcal_pval_pb,group,0,data_buffer);if (rc) {return(rc);} // have to add support for field parsing
+    rc=GCR_read(target,interface,tx_impcal_p_4x_pb,group,0,data_buffer);if (rc) {return(rc);} // have to add support for field parsing 
+    return rc;
+}
+
+ReturnCode run_zcal(const Target& target,io_interface_t master_interface,uint32_t master_group){
+    ReturnCode rc;
+    const Target *target_ptr=&target; // Assuming I am allowed to do this . 
+    uint32_t m=128; // MARGIN RATIO
+    uint32_t k2=0; // POST CURSOR DRIVE RATIO
+    bool swOverride=false;// IS SW_OVERRIDE requested
+    uint16_t bits = 0;
+    uint32_t rc_ecmd=0;
+    ecmdDataBufferBase set_bits(16);
+    ecmdDataBufferBase clear_bits(16);
+    ecmdDataBufferBase data_buffer(16);
+    rc_ecmd|=set_bits.flushTo0();
+    rc_ecmd|=clear_bits.flushTo1(); // I dont want to clear anything by default
+    if(rc_ecmd)
+    {
+        rc.setEcmdError(rc_ecmd);
+        return(rc);
+    }
+    io_interface_t chip_interface=master_interface;//first we run on master chip
+    uint32_t group=master_group;
+    // Get all the input attributes from PLAT
+    /*
+    Need to check if these attributes are required or not 
+    rc = FAPI_ATTR_GET(ATTR_IOD_MARGIN_RATIO, &target, m); // Fetch the attribute for the chip we are working on 
+    rc = FAPI_ATTR_GET(ATTR_IOD_POST_CURSOR_DRIVER_RATIO, &target, k2);
+    // Find if we are in SW_OVERRIDE mode
+    rc = FAPI_ATTR_GET(ATTR_IOD_ZCAL_SW_OVERRIDE, &target, swOverride);
+    */
+    
+        const uint32_t min        = (10<<3);   // impcntl min -  - p8 - 10<<3
+        const uint32_t max        = (40<<3);   // impcntl max -  - p8 - 40<<3
+    
+        uint32_t zcal_p = 0;
+        uint32_t zcal_n = 0;
+            
+        uint32_t  zcal_override = 0; 
+    
+        if ((zcal_n>0) && (zcal_p>0) )
+        {
+                zcal_override = 1;
+        }
+    
+        if ( k2 > 0x20 ) {
+                    FAPI_DBG("POST CURSOR DRIVER RATIO k2 has exceeded 0.25");
+                    FAPI_SET_HWP_ERROR(rc,IO_DCCAL_ZCAL_K2_EXCEEDED_RC);
+                    return rc;
+        }
+    
+        if ( m > 0x80 ) {
+                    FAPI_DBG("MARGIN RATIO m has exceeded 100 percent");
+                    FAPI_SET_HWP_ERROR(rc,IO_DCCAL_ZCAL_M_EXCEEDED_RC);
+                    return rc;
+        }
+    
+        //if ( m < 0x40 ) {
+        //            FAPI_DBG("MARGIN RATIO m is less than 50 percent");
+        //            FAPI_SET_HWP_ERROR(rc,IO_DCCAL_ZCAL_M_LOW_RC);
+        //            return rc;
+        //}
+          if ( ( ! zcal_override ) && ( ! swOverride ) )
+        {
+
+                                FAPI_DBG("IO_DCCAL : Starting Impedance Calibration ");
+                                //Get initial settings for debug purpose
+                                run_zcal_debug(*target_ptr,chip_interface,group);
+                                // Need to first set start bit to 0 to enable rise to 1 transition , also skip readback since this is WO field
+                                rc=GCR_write(*target_ptr,chip_interface,tx_impcal_pb,group,0,set_bits,clear_bits,true);if (rc) {return(rc);}
+                                bits=tx_zcal_req;
+                                rc_ecmd|=set_bits.insert(bits,0,16);
+                                bits=tx_zcal_req_clear;
+                                rc_ecmd|=clear_bits.insert(bits,0,16);                                
+                                if(rc_ecmd)
+                                {
+                                    rc.setEcmdError(rc_ecmd);
+                                    return(rc);
+                                }
+                                // Skip a readback and verify 
+                                rc=GCR_write(*target_ptr,chip_interface,tx_impcal_pb,group,0,set_bits,clear_bits,true);if (rc) {return(rc);}
+                                // Poll for the done bit
+                                rc=GCR_read(*target_ptr,chip_interface,tx_impcal_pb,group,0,data_buffer);if (rc) {return(rc);} // have to add support for field parsing
+                                int done_bit=tx_zcal_done;
+                                int fail_bit=tx_zcal_error;
+                                bool fail= data_buffer.getHalfWord(0) & fail_bit;
+                                bool done = data_buffer.getHalfWord(0)& done_bit;
+                                int timeoutCnt = 0;
+                                while ( ( !done ) && ( timeoutCnt <150 ) ) {
+                                            // wait for 80000 time units
+                                            // Time units may be something for simulation, and something else (or nothing) for hardware
+                                            // At any rate, this is intended to be approximately 100 us.                                                  
+                                            rc=GCR_read(*target_ptr,chip_interface,tx_impcal_pb,group,0,data_buffer); if (rc) {return(rc);}// have to add support for field parsing
+                                            done = data_buffer.getHalfWord(0)& done_bit;
+                                            fail= data_buffer.getHalfWord(0) & fail_bit;
+                                            fapiDelay(10000,10000000); //Wait around for HW 
+                                            timeoutCnt++;
+                                }
+                                if(fail)
+                                {
+                                    FAPI_DBG("IO Impedance cal error on interface %d ",chip_interface);
+                                     run_zcal_debug(*target_ptr,chip_interface,group);
+                                    //set HWP error
+                                    FAPI_SET_HWP_ERROR(rc,IO_DCCAL_ZCAL_ERROR_RC);
+                                    return(rc);
+                                    
+                                }
+                                // Check for errors
+                                else if ( timeoutCnt >= 100 &&!done && !fail )
+                                {
+                                            FAPI_DBG("Timed out waiting for Done bit to be set");
+                                            //set HWP error
+                                            FAPI_SET_HWP_ERROR(rc,IO_DCCAL_ZCAL_TIMEOUT_RC);
+                                            return rc;
+                                }
+                                else
+                                {
+                                    FAPI_DBG("IO Impedance cal DONE successfully on interface %d",chip_interface);
+                                }                
+    
+    
+                    // Read the calculated values
+                    // (Values are: xxxxxx yy zz, where yy are 2R and 4R values, and zz is a binary fraction)
+                    rc=GCR_read(*target_ptr,chip_interface,tx_impcal_nval_pb,group,0,data_buffer);if (rc) {return(rc);} // have to add support for field parsing
+                    data_buffer.extractToRight(&zcal_n,0,9); 
+                    rc=GCR_read(*target_ptr,chip_interface,tx_impcal_pval_pb,group,0,data_buffer);if (rc) {return(rc);} // have to add support for field parsing
+                    data_buffer.extractToRight(&zcal_p,0,9); 
+    
+        }
+        else if ( swOverride )
+        {
+            /*
+                   Software override might be required in case of workarounds to HW
+            */
+        }
+    
+        if ( ( (uint32_t)zcal_n < min )|| ( (uint32_t)zcal_n > max ) )
+        {
+                    FAPI_ERR("zcal_n value is out of impcntl range");
+                    FAPI_SET_HWP_ERROR(rc, IO_DCCAL_ZCALN_VALUE_OUT_OF_RANGE_RC);
+                    return rc;
+        }
+        if (   ( (uint32_t)zcal_p < min )|| ( (uint32_t)zcal_p > max ) )
+        {
+                    FAPI_ERR("zcal_p value is out of impcntl range");
+                    FAPI_SET_HWP_ERROR(rc, IO_DCCAL_ZCALP_VALUE_OUT_OF_RANGE_RC); 
+                    return rc;
+        }
+    
+        // margin = (1 -m)*zcal/2
+        //  bits:                       7    10
+        uint32_t margin_p = (0x80 - m) * zcal_p / 2;  // 7+2 = 9 binary decimal places // when it is 1 - something should it not be 0x01 - m?
+        uint32_t margin_n = (0x80 - m) * zcal_n / 2;  // 7+2 = 9 binary decimal places
+    
+        // postcursor = (zcal - 2*margin)*k2
+        //  bits:             7    7   10
+        uint32_t post_p = (zcal_p - (margin_p<<1))*k2;  // 7+7+2 = 16 binary decimal places
+        uint32_t post_n = (zcal_n - (margin_n<<1))*k2;  // 7+7+2 = 16 binary decimal places
+    
+        uint32_t main_p = (zcal_p - (margin_p<<1))- post_p;  // 2 binary decimal places
+        uint32_t main_n = (zcal_n - (margin_n<<1))- post_n;  // 2 binary decimal places
+    
+    
+        // Rounding
+        post_p = BinaryRound(post_p, 16, 999); // round up
+        post_n = BinaryRound(post_n, 16, 999); // round up
+        margin_p = BinaryRound(margin_p, 9, 999); // round up
+        margin_n = BinaryRound(margin_n, 9, 999); // round up
+        main_p = BinaryRound(main_p, 2, 999); // round up
+        main_n = BinaryRound(main_n, 2, 999); // round up
+             
+        FAPI_DBG("main_p value %d",main_p);
+        FAPI_DBG("post_p value %d",post_p);
+        FAPI_DBG("margin_p value %d",margin_p);
+        FAPI_DBG("main_n value %d",main_n);
+        FAPI_DBG("post_n value %d",post_n);
+        FAPI_DBG("margin_n value %d",margin_n);
+
+        //p segments
+        rc_ecmd|=set_bits.insert(main_p,0,7,25);
+        bits=tx_ffe_main_p_enc_clear;
+        rc_ecmd|=clear_bits.insert(bits,0,16);
+        if(rc_ecmd)
+        {
+            rc.setEcmdError(rc_ecmd);
+            return(rc);
+        }
+        rc=GCR_write(*target_ptr,chip_interface,tx_ffe_main_pg ,group,0,set_bits,clear_bits);if (rc) {return(rc);}
+        rc_ecmd|=set_bits.insert(post_p,0,5,27);
+        bits=tx_ffe_post_p_enc_clear;
+        rc_ecmd|=clear_bits.insert(bits,0,16);
+        if(rc_ecmd)
+        {
+            rc.setEcmdError(rc_ecmd);
+            return(rc);
+        }
+        rc=GCR_write(*target_ptr,chip_interface,tx_ffe_post_pg ,group,0,set_bits,clear_bits);if (rc) {return(rc);}
+        rc_ecmd|=set_bits.insert(margin_p,0,5,27);
+        bits=tx_ffe_margin_p_enc_clear;
+        rc_ecmd|=clear_bits.insert(bits,0,16);
+        if(rc_ecmd)
+        {
+            rc.setEcmdError(rc_ecmd);
+            return(rc);
+        }
+        rc=GCR_write(*target_ptr,chip_interface,tx_ffe_margin_pg  ,group,0,set_bits,clear_bits);if (rc) {return(rc);}
+
+        //N segments
+        rc_ecmd|=set_bits.insert(main_n,0,7,25);
+        bits=tx_ffe_main_n_enc_clear;
+        rc_ecmd|=clear_bits.insert(bits,0,16);
+        if(rc_ecmd)
+        {
+            rc.setEcmdError(rc_ecmd);
+            return(rc);
+        }
+        rc=GCR_write(*target_ptr,chip_interface,tx_ffe_main_pg ,group,0,set_bits,clear_bits);if (rc) {return(rc);}
+        rc_ecmd|=set_bits.insert(post_n,0,5,27);
+        bits=tx_ffe_post_n_enc_clear;
+        rc_ecmd|=clear_bits.insert(bits,0,16);
+        if(rc_ecmd)
+        {
+            rc.setEcmdError(rc_ecmd);
+            return(rc);
+        }
+        rc=GCR_write(*target_ptr,chip_interface,tx_ffe_post_pg ,group,0,set_bits,clear_bits);if (rc) {return(rc);}
+        rc_ecmd|=set_bits.insert(margin_n,0,5,27);
+        bits=tx_ffe_margin_n_enc_clear;
+        rc_ecmd|=clear_bits.insert(bits,0,16);
+        if(rc_ecmd)
+        {
+            rc.setEcmdError(rc_ecmd);
+            return(rc);
+        }
+        rc=GCR_write(*target_ptr,chip_interface,tx_ffe_margin_pg  ,group,0,set_bits,clear_bits);if (rc) {return(rc);}
+        
+
+    return rc;
+}
+
+// Determines if target is a master ..I had assumed that PLAT wrapper code will know which side is master and which is slave 
+ReturnCode isChipMaster(const Target&  chip_target, io_interface_t chip_interface,uint32_t current_group, bool   & masterchip_found ) {
+    ReturnCode rc;
+    ecmdDataBufferBase    mode_data(16);
+    masterchip_found=false;
+
+    // Check if rx_master_mode bit is set for chip
+    // Read  rx_master_mode  for chip
+    if(chip_interface==CP_FABRIC_X0)
+    {
+	rc=GCR_read(chip_target ,  chip_interface, ei4_rx_mode_pg,  current_group,0, mode_data);
+    }
+    else
+    {
+	rc=GCR_read(chip_target ,  chip_interface, rx_mode_pg,  current_group,0, mode_data);
+    }
+    if (rc) {
+         FAPI_DBG("io_run_training: Error reading master mode bit\n");
+    }
+    // Check if  chip is master
+    if (mode_data.isBitSet(0)) {
+	 FAPI_DBG("This chip is a master\n");
+        masterchip_found  =true;
+    }
+    return(rc);
+}
+
+// These functions work on a pair of targets. One is the master side of the bus interface, the other the slave side. For eg; in EDI(DMI2)PU is the master and Centaur is the slave
+// In EI4 both sides have pu targets
+ReturnCode io_dccal(const Target& target){
+    ReturnCode rc;
+    io_interface_t master_interface=CP_IOMC0_P0;
+    uint32_t master_group=0;
+    FAPI_DBG("Running IO DCCAL PROCEDURE");
+    // This is a DMI/MC bus 
+    if( (target.getType() == fapi::TARGET_TYPE_MCS_CHIPLET )){
+      FAPI_DBG("This is a Processor DMI bus using base DMI scom address");
+      master_interface=CP_IOMC0_P0; // base scom for MC bus
+      master_group=3; // Design requires us to do this as per scom map and layout
+      // EDI/DMI needs both impedance cal and offset cal
+      // Z cal doesnt require group since its a per bus feature , but to satisfy PLAT swapped translation requirements we pass group=3 on master
+      rc=run_zcal(target,master_interface,master_group);if (rc) {return(rc);};
+      // Offset cal requires group address
+      rc=run_offset_cal(target,master_interface,master_group);if (rc) {return(rc);};
+    }
+    else if( (target.getType() ==  fapi::TARGET_TYPE_MEMBUF_CHIP)){
+      FAPI_DBG("This is a Centaur DMI bus using base DMI scom address");
+      master_interface=CEN_DMI; // base scom for CEN
+      master_group=0;
+      // EDI/DMI needs both impedance cal and offset cal
+      // Z cal doesnt require group since its a per bus feature , but to satisfy PLAT swapped translation requirements we pass group=3 on master
+      rc=run_zcal(target,master_interface,master_group);if (rc) {return(rc);};
+      // Offset cal requires group address
+      rc=run_offset_cal(target,master_interface,master_group);if (rc) {return(rc);};
+    }
+    //This is an X Bus
+    else if( (target.getType() == fapi::TARGET_TYPE_XBUS_ENDPOINT  )){
+      FAPI_DBG("This is a X Bus training invocation");
+      master_interface=CP_FABRIC_X0; // base scom for X bus
+      master_group=0; // Design requires us to do this as per scom map and layout
+      if(rc.ok()){
+          // No Z cal in EI4/X bus design
+          for(int i=0;i<5;++i){
+             master_group=i;
+              rc=run_offset_cal(target,master_interface,master_group);if (rc) {return(rc);};            
+          }
+      }
+    }
+    //This is an A Bus
+    else if( (target.getType() == fapi::TARGET_TYPE_ABUS_ENDPOINT )){
+      FAPI_DBG("This is an A Bus training invocation");
+      master_interface=CP_FABRIC_A0; // base scom for A bus , assume translation to A1 by PLAT 
+      master_group=0; // Design requires us to do this as per scom map and layout
+                // EDI-A bus needs both impedance cal and offset cal 
+       rc=run_zcal(target,master_interface,master_group);if (rc) {return(rc);};
+       rc=run_offset_cal(target,master_interface,master_group);if (rc) {return(rc);};
+    }
+    else{
+      FAPI_ERR("Invalid io_dccal HWP invocation . Target doesnt belong to DMI/X/A instances");
+      FAPI_SET_HWP_ERROR(rc, IO_DCCAL_INVALID_INVOCATION_RC);
+    }
+    return rc;
+}
+
+
+
+
+
+} //end extern C
