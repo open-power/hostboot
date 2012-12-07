@@ -67,6 +67,7 @@
 #include    "dmi_io_run_training.H"
 #include    "dmi_scominit.H"
 #include    "proc_cen_set_inband_addr.H"
+#include    "mss_get_cen_ecid.H"
 
 namespace   DMI_TRAINING
 {
@@ -84,14 +85,152 @@ using   namespace   fapi;
 void*    call_mss_getecid( void *io_pArgs )
 {
     errlHndl_t l_err = NULL;
+    IStepError l_StepError;
+    uint8_t    l_ddr_port_status = 0;
+
+    mss_get_cen_ecid_ddr_status l_mbaBadMask[2] = 
+       { MSS_GET_CEN_ECID_DDR_STATUS_MBA0_BAD,
+         MSS_GET_CEN_ECID_DDR_STATUS_MBA1_BAD };
+
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mss_getecid entry" );
 
-    // call mss_getecid.C
+    // Get all Centaur targets
+    TARGETING::TargetHandleList l_membufTargetList;
+    getAllChips(l_membufTargetList, TYPE_MEMBUF);
+
+    for (TargetHandleList::iterator l_membuf_iter = l_membufTargetList.begin();
+            l_membuf_iter != l_membufTargetList.end();
+            ++l_membuf_iter)
+    {
+        //  make a local copy of the target for ease of use
+        TARGETING::Target* l_pCentaur = *l_membuf_iter;
+
+        // Dump current run on target
+        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                   "Running mss_get_cen_ecid HWP on..." );
+
+        EntityPath l_path;
+        l_path  =   l_pCentaur->getAttr<ATTR_PHYS_PATH>();
+        l_path.dump();
+
+        // Cast to a FAPI type of target.
+        const fapi::Target l_fapi_centaur(
+                TARGET_TYPE_MEMBUF_CHIP,
+                reinterpret_cast<void *>
+                (const_cast<TARGETING::Target*>(l_pCentaur)) );
+
+        //  call the HWP with each fapi::Target
+        //  Note:  This HWP does not actually return the entire ECID data.  It
+        //  updates the attribute ATTR_MSS_ECID and returns the DDR port status
+        //  which is a portion of the ECID data.
+        FAPI_INVOKE_HWP(l_err, mss_get_cen_ecid,
+                        l_fapi_centaur, l_ddr_port_status);
+
+        if (l_err)
+        {
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                      "ERROR 0x%.8X: mss_get_cen_ecid HWP returns error",
+                      l_err->reasonCode());
+
+            ErrlUserDetailsTarget myDetails(l_pCentaur);
+
+            // capture the target data in the elog
+            myDetails.addToLog(l_err);
+
+            /*@
+             * @errortype
+             * @reasoncode  ISTEP_DMI_TRAINING_FAILED
+             * @severity    ERRORLOG::ERRL_SEV_UNRECOVERABLE
+             * @moduleid    ISTEP_MSS_GETECID
+             * @userdata1   bytes 0-1: plid identifying first error
+             *              bytes 2-3: reason code of first error
+             * @userdata2   bytes 0-1: total number of elogs included
+             *              bytes 2-3: N/A
+             * @devdesc     call to mss_get_cen_ecid has failed
+             *              see error log in the user details section for
+             *              additional details.
+             */
+            l_StepError.addErrorDetails(ISTEP_DMI_TRAINING_FAILED,
+                                        ISTEP_MSS_GETECID,
+                                        l_err );
+
+            errlCommit( l_err, HWPF_COMP_ID );
+        }
+        else if (MSS_GET_CEN_ECID_DDR_STATUS_ALL_GOOD != l_ddr_port_status)
+        {
+            // Check the DDR port status returned by mss_get_cen_ecid to
+            // see which MBA is bad.  If the MBA's state is
+            // functional and the DDR port status indicates that it's bad,
+            // then set the MBA to nonfunctional.  If the MBA's state is
+            // nonfunctional, then do nothing since we don't want to override
+            // previous settings.
+
+            // Find the functional MBAs associated with this Centaur
+            PredicateCTM l_mba_pred(CLASS_UNIT,TYPE_MBA);
+            TARGETING::TargetHandleList l_mbaTargetList;
+            getChildChiplets(l_mbaTargetList,
+                             l_pCentaur,
+                             TYPE_MBA);
+
+            uint8_t l_num_func_mbas = l_mbaTargetList.size();
+
+            for (TargetHandleList::iterator l_mba_iter =
+                    l_mbaTargetList.begin();
+                    l_mba_iter != l_mbaTargetList.end();
+                    ++l_mba_iter)
+            {
+                //  Make a local copy of the target for ease of use
+                TARGETING::Target*  l_pMBA = *l_mba_iter;
+                
+                // Get the MBA chip unit position
+                uint8_t l_pos = l_pMBA->getAttr<ATTR_CHIP_UNIT>();
+
+                // Check the DDR port status to see if this MBA should be
+                // set to nonfunctional.
+                if ( l_ddr_port_status & l_mbaBadMask[l_pos] )
+                {
+                    //  Get the mba's state
+                    TARGETING::HwasState l_hwasState =
+                        l_pMBA->getAttr<ATTR_HWAS_STATE>();
+
+                    // Set to nonfunctional
+                    l_hwasState.functional = false;
+                    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                               "Setting MBA%c to nonfunctional", l_pos );
+
+                    l_pMBA->setAttr<ATTR_HWAS_STATE>(l_hwasState);
+
+                    l_num_func_mbas--;
+                }
+            }
+
+            // If there are no functional MBAs for this Centaur, set the
+            // Centaur to nonfunctional as well
+            if (0 == l_num_func_mbas)
+            {
+                //  Get the Centaur's state
+                TARGETING::HwasState l_hwasState =
+                    l_pCentaur->getAttr<ATTR_HWAS_STATE>();
+
+                // Set to nonfunctional
+                l_hwasState.functional = false;
+                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                           "Setting Centaur to nonfunctional" );
+
+                l_pCentaur->setAttr<ATTR_HWAS_STATE>(l_hwasState);
+            }
+        }
+
+        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                   "SUCCESS :  mss_get_cen_ecid HWP( )" );
+    }
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mss_getecid exit" );
 
-    return l_err;
+    // end task, returning any errorlogs to IStepDisp
+    return l_StepError.getErrorHandle();
 }
+
 
 //
 //  Wrapper function to call proc_dmi_scominit
@@ -107,6 +246,7 @@ void*    call_proc_dmi_scominit( void *io_pArgs )
 
     return l_err;
 }
+
 
 //
 //  Wrapper function to call dmi_scominit
