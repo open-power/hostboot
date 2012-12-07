@@ -138,8 +138,15 @@ void monitorForFspMessages()
             Singleton<fapi::OverrideAttributeTank>::instance().
                 clearAllAttributes();
             
-            // Send message back as response
-            msg_respond(l_pMsgQ, l_pMsg);
+            if (msg_is_async(l_pMsg))
+            {
+                msg_free(l_pMsg);
+            }
+            else
+            {
+                // Send the message back as a response
+                msg_respond(l_pMsgQ, l_pMsg);
+            }
         }
         else
         {
@@ -209,18 +216,20 @@ void sendAttrOverridesAndSyncsToFsp()
         l_pMsg->data[1] = 0;
         l_pMsg->extra_data = NULL;
 
-        // Send the message and wait for a response, the response message is not
-        // read, it just ensures that the code waits until the FSP is done
-        errlHndl_t l_pErr = MBOX::sendrecv(MBOX::FSP_HWPF_ATTR_MSGQ, l_pMsg);
-        msg_free(l_pMsg);   
+        // Send the message
+        errlHndl_t l_pErr = MBOX::send(MBOX::FSP_HWPF_ATTR_MSGQ, l_pMsg);
  
         if (l_pErr)
         {
             FAPI_ERR("SendAttrOverridesToFsp: Error clearing FSP overrides");
             errlCommit(l_pErr, HWPF_COMP_ID);
+            msg_free(l_pMsg);
+            l_pMsg = NULL;
         }
         else
         {
+            l_pMsg = NULL;
+
             // Send Hostboot Attribute Overrides to the FSP
             std::vector<AttributeChunk> l_attributes;
 
