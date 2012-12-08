@@ -121,11 +121,11 @@ foreach my $i (@{$powerbus->{'power-bus'}})
     push @pbus, [ lc($endp2), lc($endp1) ];
 }
 
-open (FH, "<$mrwdir/${sysname}-vmem.xml") ||
-    die "ERROR: unable to open $mrwdir/${sysname}-vmem.xml\n";
+open (FH, "<$mrwdir/${sysname}-cent-vrds.xml") ||
+    die "ERROR: unable to open $mrwdir/${sysname}-cent-vrds.xml\n";
 close (FH);
 
-my $vmemCentaur = XMLin("$mrwdir/${sysname}-vmem.xml");
+my $vmemCentaur = XMLin("$mrwdir/${sysname}-cent-vrds.xml");
 
 # Capture all pnor attributes into the @unsortedPnorTargets array
 use constant VMEM_DEV_PATH_FIELD => 0;
