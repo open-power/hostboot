@@ -48,7 +48,7 @@ EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/dram_initialization/mss_memdiag
 EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/dram_initialization/proc_pcie_config
 EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/dram_initialization/host_mpipl_service
 EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/dram_initialization/mss_thermal_init
-
+EXTRAINCDIR += ${ROOTPATH}/src/include/usr/hwpf/hwp/dram_initialization/mss_memdiag
 
 ##  NOTE: add new object files when you add a new HWP
 OBJS =  dram_initialization.o \

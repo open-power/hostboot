@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/hwpf/hwp/dram_initialization/mss_memdiag/mss_maint_cmds.H $ */
+/* $Source: src/include/usr/hwpf/hwp/dram_initialization/mss_memdiag/mss_maint_cmds.H $ */
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_maint_cmds.H,v 1.10 2012/09/07 21:32:14 gollub Exp $
+// $Id: mss_maint_cmds.H,v 1.14 2012/11/21 21:21:42 gollub Exp $
 //------------------------------------------------------------------------------
 // Don't forget to create CVS comments when you check in your changes!
 //------------------------------------------------------------------------------
@@ -44,6 +44,10 @@
 //         |          |         | save/restore of setting for super fast read
 //   1.10  | 09/07/12 | gollub  | Updates from review.
 //         |          |         | Support for more patterns.
+//   1.11  | 09/28/12 | gollub  | Added mss_restore_DRAM_repairs
+//   1.12  | 11/02/12 | gollub  | Updates from review.  
+//   1.13  | 11/08/12 | gollub  | Added timebase steer cleanup      
+//   1.14  | 11/21/12 | gollub  | Updates from review.
 
 
 #ifndef _MSS_MAINT_CMDS_H
@@ -73,6 +77,14 @@
  */
 const uint8_t MSS_ALL_RANKS = 0xff;
 
+
+/**
+ * @brief Used to indicate invalid symbol
+ */
+const uint8_t MSS_INVALID_SYMBOL = 0xff;
+
+
+
 namespace mss_SteerMux
 {
 
@@ -95,6 +107,7 @@ namespace mss_SteerMux
         ECC_SPARE = 2,           // ECC spare (used in x4 mode only)
     };
 };
+
 
 
 //------------------------------------------------------------------------------
@@ -725,6 +738,64 @@ class mss_TimeBaseScrub : public mss_MaintCmd
 };
 
 
+//------------------------------------------------------------------------------
+// mss_TimeBaseSteerCleanup
+//------------------------------------------------------------------------------
+class mss_TimeBaseSteerCleanup : public mss_MaintCmd
+{
+  public: // Constructor(s)
+
+    mss_TimeBaseSteerCleanup( const fapi::Target & i_target,    // MBA target
+                       const ecmdDataBufferBase & i_startAddr,  // Address cmd will start at
+                       const ecmdDataBufferBase & i_endAddr,    // Address cmd will stop at
+                       TimeBaseSpeed i_speed,                   // TODO: fast for runtime, faster for ipl?
+                       uint32_t i_stopCondition,                // Mask of error conditions cmd should stop on
+                       bool i_poll );                           // Set to true if you wait for command to complete
+
+  public:
+
+    fapi::ReturnCode setupAndExecuteCmd();
+    fapi::ReturnCode stopCmd();
+    CmdType getCmdType() const { return cv_cmdType; }
+
+    // This class's implementation of parent class functions that can be 
+    // overridden.
+    fapi::ReturnCode cleanupCmd();
+
+
+
+    void setStartAddr(ecmdDataBufferBase i_startAddr) 
+    { iv_startAddr = i_startAddr; }
+    
+    void setEndAddr(  ecmdDataBufferBase i_endAddr  ) 
+    { iv_endAddr   = i_endAddr;   }
+
+    ecmdDataBufferBase getStartAddr() const { return iv_startAddr; }
+    ecmdDataBufferBase getEndAddr()   const { return iv_endAddr; }
+
+  private:
+
+    fapi::ReturnCode setSavedData( uint32_t i_savedData ) 
+    {fapi::ReturnCode l_rc; iv_savedData = i_savedData; return l_rc; }
+    
+    uint32_t getSavedData() { return iv_savedData; }
+
+  private: // Class variable(s)
+
+    static const CmdType cv_cmdType;
+
+  private: // Instance variable(s)
+
+    // list of things to save may be specific to each cmd, so keep it 
+    // here for now
+    uint32_t iv_savedData;
+    
+    // TODO: Want as fast as possible, but IPL may be able to go faster than
+    // runtime since no fetch traffic to worry about.
+    TimeBaseSpeed iv_speed; 
+};
+
+
 
 //------------------------------------------------------------------------------
 // Utility funcitons
@@ -798,6 +869,8 @@ fapi::ReturnCode mss_put_mark_store( const fapi::Target & i_target,
  *
  * @param  i_target                 MBA target
  * @param  i_rank                   Rank we want to read steer mux for.
+ * @param  i_muxType                Select either the read mux or the write mux 
+ *                                  to get.
  * @param  o_dramSparePort0Symbol   First symbol index of the DRAM fixed by the 
  *                                  spare on port0 (if no steer, return 0xff)
  * @param  o_dramSparePort1Symbol   First symbol index of the DRAM fixed by the
@@ -823,9 +896,9 @@ fapi::ReturnCode mss_get_steer_mux( const fapi::Target & i_target,
  * @param  i_rank                  Rank we want to write steer mux for.
  * @param  i_muxType               Select either the read mux or the write mux 
  *                                 to update.
- * @param  i_steerType             DRAM_SPARE_PORT0, Spare DRAM on port0
- *                                 DRAM_SPARE_PORT1, Spare DRAM on port1
- *                                 ECC_SPARE, ECC spare (used in x4 mode only)
+ * @param  i_steerType             0 = DRAM_SPARE_PORT0, Spare DRAM on port0
+ *                                 1 = DRAM_SPARE_PORT1, Spare DRAM on port1
+ *                                 2 = ECC_SPARE, ECC spare (used in x4 mode only)
  * @param  i_symbol                First symbol index of the DRAM to steer 
  *                                 around.
  * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise. 
@@ -833,9 +906,60 @@ fapi::ReturnCode mss_get_steer_mux( const fapi::Target & i_target,
 fapi::ReturnCode mss_put_steer_mux( const fapi::Target & i_target,
                                     uint8_t i_rank,
                                     mss_SteerMux::muxType i_muxType,
-                                    mss_SteerMux::steerType i_steerType,
+                                    uint8_t i_steerType,
                                     uint8_t i_symbol );
 
+
+
+
+/**
+ * @brief  This procedure applies the maximum possible DRAM repairs 
+ *         (chip/symbol marks, DRAM steers) to known bad bits recorded in 
+ *         DIMM VPD. This operation is done on both valid logical DIMM pairs
+ *         behind the given MBA.
+ *
+ * @param  i_target                MBA target
+ * @param  o_repairs_applied       8-bit mask, where a bit set means the
+ *                                 specified rank had any repairs applied. 
+ *
+ *                       rank0 = 0x80 		(maps to port0_dimm0, port1_dimm0)
+ *                       rank1 = 0x40 		(maps to port0_dimm0, port1_dimm0)
+ *                       rank2 = 0x20 		(maps to port0_dimm0, port1_dimm0)
+ *                       rank3 = 0x10 		(maps to port0_dimm0, port1_dimm0)
+ *                       rank4 = 0x08 		(maps to port0_dimm1, port1_dimm1)
+ *                       rank5 = 0x04 		(maps to port0_dimm1, port1_dimm1)
+ *                       rank6 = 0x02 		(maps to port0_dimm1, port1_dimm1)
+ *                       rank7 = 0x01 		(maps to port0_dimm1, port1_dimm1)
+ *
+ * @param  o_repairs_exceeded      4-bit mask, where a bit set means the 
+ *                                 specified DIMM-select on the specified port
+ *                                 had more bad bits than could be repaired.
+ *
+ *                        port0_dimm0 = 0x8
+ *                        port0_dimm1 = 0x4
+ *                        port1_dimm0 = 0x2
+ *                        port1_dimm1 = 0x1
+ *
+ * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise. 
+ */
+fapi::ReturnCode mss_restore_DRAM_repairs( const fapi::Target & i_target,
+                                           uint8_t & o_repairs_applied,
+                                           uint8_t & o_repairs_exceeded);
+
+
+
+/**
+ * @brief  This function takes converts from a Centaur DQ on a given port
+ *         to a corresponding symbol index.
+ *
+ * @param  i_dq     Centaur DQ from 0-71
+ *
+ * @param  i_port   port 0 or 1
+ *
+ * @return          Symbol index
+ */
+
+uint8_t mss_centaurDQ_to_symbol( uint8_t i_dq, uint8_t i_port );
 
 
 
