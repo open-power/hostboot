@@ -776,14 +776,29 @@ group gPmcFir filter singlebit
 ################################################################################
 
 /** Analyze connected MCS 20 */
-actionclass analyzeMcs20 { analyze(connected(TYPE_MCS, 4)); };
+actionclass analyzeMcs20
+{
+    analyze(connected(TYPE_MCS, 4));
+    funccall("MaskMCS20IfCentaurCheckstop");
+};
 
 /** Analyze connected MCS 21 */
-actionclass analyzeMcs21 { analyze(connected(TYPE_MCS, 5)); };
+actionclass analyzeMcs21
+{
+    analyze(connected(TYPE_MCS, 5));
+    funccall("MaskMCS21IfCentaurCheckstop");
+};
 
 /** Analyze connected MCS 30 */
-actionclass analyzeMcs30 { analyze(connected(TYPE_MCS, 6)); };
+actionclass analyzeMcs30
+{
+    analyze(connected(TYPE_MCS, 6));
+    funccall("MaskMCS30IfCentaurCheckstop");
+};
 
 /** Analyze connected MCS 31 */
-actionclass analyzeMcs31 { analyze(connected(TYPE_MCS, 7)); };
-
+actionclass analyzeMcs31
+{
+    analyze(connected(TYPE_MCS, 7));
+    funccall("MaskMCS31IfCentaurCheckstop");
+};

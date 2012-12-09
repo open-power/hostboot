@@ -634,5 +634,79 @@ int32_t dmiBus3TooManyErrors(  ExtensibleChip * i_chip,
 }
 PRDF_PLUGIN_DEFINE( Proc, dmiBus3TooManyErrors );
 
+/**
+ * @brief Mask attentions from MCIFIR after Centaur Unit checkstop
+ * @param  i_chip P8 chip
+ * @param  i_sc   The step code data struct
+ * @param i_bit   The bit in TP mask to set
+ * @returns Failure or Success
+ */
+int32_t MaskIfCentaurCheckstop( ExtensibleChip * i_chip,
+                      STEP_CODE_DATA_STRUCT & i_sc, uint32_t i_bit )
+{
+    int32_t l_rc = SUCCESS;
+
+    if (i_sc.service_data->GetFlag(ServiceDataCollector::UNIT_CS))
+    {
+        SCAN_COMM_REGISTER_CLASS * l_tpMask =
+          i_chip->getRegister("TP_CHIPLET_FIR_MASK");
+        l_rc |= l_tpMask->Read();
+        if (!l_rc)
+        {
+            l_tpMask->SetBit(i_bit);
+            l_rc |= l_tpMask->Write();
+        }
+    }
+
+    if (l_rc)
+    {
+        PRDF_ERR( "[MaskIfCentaurCheckstop] SCOM fail on 0x%08x rc=%x",
+                  i_chip->GetId(), l_rc);
+    }
+    return l_rc;
+}
+
+/**
+ * @brief Call MaskIfCentaurCheckstop with the correct bit to mask
+ * @param  i_chip P8 chip
+ * @param  i_sc   The step code data struct
+ * @returns Failure or Success
+ */
+int32_t MaskMCS20IfCentaurCheckstop( ExtensibleChip * i_chip,
+                                     STEP_CODE_DATA_STRUCT & i_sc )
+{
+    int32_t l_rc = SUCCESS;
+    l_rc = MaskIfCentaurCheckstop(i_chip, i_sc, 9);
+    return l_rc;
+}
+PRDF_PLUGIN_DEFINE( Proc, MaskMCS20IfCentaurCheckstop );
+
+int32_t MaskMCS21IfCentaurCheckstop( ExtensibleChip * i_chip,
+                                     STEP_CODE_DATA_STRUCT & i_sc )
+{
+    int32_t l_rc = SUCCESS;
+    l_rc = MaskIfCentaurCheckstop(i_chip, i_sc, 10);
+    return l_rc;
+}
+PRDF_PLUGIN_DEFINE( Proc, MaskMCS21IfCentaurCheckstop );
+
+int32_t MaskMCS30IfCentaurCheckstop( ExtensibleChip * i_chip,
+                                     STEP_CODE_DATA_STRUCT & i_sc )
+{
+    int32_t l_rc = SUCCESS;
+    l_rc = MaskIfCentaurCheckstop(i_chip, i_sc, 11);
+    return l_rc;
+}
+PRDF_PLUGIN_DEFINE( Proc, MaskMCS30IfCentaurCheckstop );
+
+int32_t MaskMCS31IfCentaurCheckstop( ExtensibleChip * i_chip,
+                                     STEP_CODE_DATA_STRUCT & i_sc )
+{
+    int32_t l_rc = SUCCESS;
+    l_rc = MaskIfCentaurCheckstop(i_chip, i_sc, 12);
+    return l_rc;
+}
+PRDF_PLUGIN_DEFINE( Proc, MaskMCS31IfCentaurCheckstop );
+
 } // end namespace Proc
 } // end namespace PRDF

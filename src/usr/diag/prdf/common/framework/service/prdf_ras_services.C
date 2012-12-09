@@ -1250,6 +1250,28 @@ will also be removed. Need to confirm if this code is required anymore.
                                          pfaData.MsDumpInfo.DumpId );
                 }
             }
+            else if (l_targetType == TYPE_MEMBUF ||
+                     l_targetType == TYPE_MCS)
+            {
+                // Centaur Checkstop
+                TargetHandle_t centaurHandle = l_dumpHandle;
+                if (l_targetType == TYPE_MCS)
+                {
+                    centaurHandle = PlatServices::getConnected(l_dumpHandle,
+                                                            TYPE_MEMBUF) [0];
+                }
+
+                if (centaurHandle)
+                {
+                    int32_t l_rc = PRDF_RUNTIME_DECONFIG(centaurHandle);
+                    if ( SUCCESS != l_rc )
+                    {
+                        PRDF_ERR( PRDF_FUNC"runtime deconfig failed 0x%08x",
+                                  pfaData.MsDumpInfo.DumpId );
+                    }
+                    // No unit dump for Centaur checkstop
+                }
+            }
             else
             {
                 int32_t l_rc = PRDF_RUNTIME_DECONFIG( l_dumpHandle );
