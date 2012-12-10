@@ -166,8 +166,8 @@
     {
         name        "MBU.MBS.MBS_FIR_REG";
         scomaddr    0x02011400;
-        reset       (&, 02011401);
-        mask        (|, 02011405);
+        reset       (&, 0x02011401);
+        mask        (|, 0x02011405);
         capture     group default;
     };
 
@@ -203,8 +203,8 @@
     {
         name        "MBU.MBS.ECC01.MBECCFIR";
         scomaddr    0x02011440;
-        reset       (&, 02011441);
-        mask        (|, 02011445);
+        reset       (&, 0x02011441);
+        mask        (|, 0x02011445);
         capture     group default;
     };
 
@@ -240,8 +240,8 @@
     {
         name        "MBU.MBS.ECC23.MBECCFIR";
         scomaddr    0x02011480;
-        reset       (&, 02011481);
-        mask        (|, 02011485);
+        reset       (&, 0x02011481);
+        mask        (|, 0x02011485);
         capture     group default;
     };
 
