@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2012              */
+/* COPYRIGHT International Business Machines Corp. 2011,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -66,6 +66,10 @@ DeconfigGard & theDeconfigGard();
  */
 class DeconfigGard
 {
+
+    // allow GardAddress to access private methods.
+    friend class GardAddress;
+
 public:
 
     /**
@@ -78,6 +82,12 @@ public:
         DECONFIG_CAUSE_GARD_RECORD       = 1,  // Existence of GARD Record
         DECONFIG_CAUSE_FIRMWARE_REQ      = 2,  // Firmware Request
         DECONFIG_CAUSE_DECONFIG_BY_ASSOC = 3,  // Deconfigure by Association
+    };
+
+    enum 
+    {
+        CLEAR_ALL_GARD_RECORDS = EMPTY_GARD_RECORDID,
+        GET_ALL_GARD_RECORDS = EMPTY_GARD_RECORDID,
     };
 
     /**
@@ -222,8 +232,8 @@ public:
      * only errors returned are usage errors and errors accessing the GARD
      * Records.
      *
-     * @param[in] i_recordId RecordId to clear. If zero then all GARD Records
-     *                       are cleared.
+     * @param[in] i_recordId RecordId to clear. If zero (CLEAR_ALL_GARD_RECORDS)
+     *                          then all GARD Records cleared.
      *
      * @return errlHndl_t. Error log handle.
      */
@@ -380,8 +390,8 @@ private:
     /**
      * @brief Clears the specified GARD Records.
      *
-     * @param[in] i_recordId RecordId to clear. If zero then all GARD Records
-     *                       are cleared.
+     * @param[in] i_recordId RecordId to clear. If zero (CLEAR_ALL_GARD_RECORDS)
+     *                          then all GARD Records cleared.
      *
      * @return errlHndl_t. Error log handle.
      */
@@ -423,15 +433,15 @@ private:
                                GardRecords_t & o_records);
     
     /**
-     * @brief Ensures that the GARD Record data is setup
+     * @brief sets the maxGardRecords and nextGardRecordId variables
      * 
-     * @return errlHndl_t. Error log handle.
+     * @param[in]  i_size size of GARD area in PNOR/memory
      */
-    errlHndl_t _ensureGardRecordDataSetup();
-    
+    void _GardRecordIdSetup(uint32_t i_size);
+
     // Mutex for thread safety
     HWAS_MUTEX_TYPE iv_mutex;
-    
+
     // GARD Record Data
     uint32_t iv_nextGardRecordId;   // Next GARD Record ID to use
     uint32_t iv_maxGardRecords;     // Maximum number of GARD Records
@@ -439,9 +449,57 @@ private:
 
     // The Deconfigure Records
     DeconfigureRecords_t iv_deconfigureRecords;
-};
 
+
+}; // DeconfigGard
 HWAS_DECLARE_SINGLETON(HWAS::DeconfigGard,theDeconfigGardSingleton);
+
+// The HWAS Common code needs to allow for the fact that the platforms
+//  may need to know when the DeconfigGard functions are done using the
+//  PNOR area for GARD record access. To this end, GardAddress is an
+//  object that the common code will create when it needs to use the
+//  address to the GARD records data (iv_pGardRecords). When this object
+//  goes out of scope, the destructor will get called, and the platform
+//  code will know that access to the PNOR area is complete.
+class GardAddress
+{
+public:
+
+    /**
+     * @brief Constructor.
+     *  PLATFORM must implement this function
+     *
+     * @param[in]  o_gardEnabled  boolean returned:
+     *                  true - reading/writing of gard records is enabled;
+     *                  false - not enabled
+     */
+    GardAddress(bool &o_gardEnabled);
+
+    /**
+     * @brief Destructor.
+     *  PLATFORM must implement this function
+     */
+    ~GardAddress();
+
+    /**
+     * @brief writeRecord. Add the indicated address to a vector, so
+     *  that the destructor knows which GARD records were updated.
+     *
+     * @param[in]  i_addr  address of GARD record that was updated.
+     */
+    void writeRecord(void *i_addr)
+    {
+        if (i_addr !=NULL)
+        {
+            iv_addr.push_back(i_addr);
+        }
+    }
+
+protected:
+
+    std::vector<void *>iv_addr;
+
+}; // GardAddress
 }
 
 #endif

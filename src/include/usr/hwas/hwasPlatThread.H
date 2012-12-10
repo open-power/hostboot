@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012                   */
+/* COPYRIGHT International Business Machines Corp. 2012,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -37,15 +37,15 @@
 mutable mutex_t
 
 #define HWAS_MUTEX_INIT(_t) \
- mutex_init(_t)
+ mutex_init(&(_t))
 
 #define HWAS_MUTEX_DESTROY(_t) \
- mutex_destroy(_t)
+ mutex_destroy(&(_t))
 
 #define HWAS_MUTEX_LOCK(_t) \
- mutex_lock(_t)
+ mutex_lock(&(_t))
 
 #define HWAS_MUTEX_UNLOCK(_t) \
- mutex_unlock(_t)
+ mutex_unlock(&(_t))
 
 #endif // __HWAS_PLAT_THREAD_H

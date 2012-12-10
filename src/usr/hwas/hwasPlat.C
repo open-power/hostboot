@@ -1,26 +1,25 @@
-/*  IBM_PROLOG_BEGIN_TAG
- *  This is an automatically generated prolog.
- *
- *  $Source: src/usr/hwas/hwasPlat.C $
- *
- *  IBM CONFIDENTIAL
- *
- *  COPYRIGHT International Business Machines Corp. 2012
- *
- *  p1
- *
- *  Object Code Only (OCO) source materials
- *  Licensed Internal Code Source Materials
- *  IBM HostBoot Licensed Internal Code
- *
- *  The source code for this program is not published or other-
- *  wise divested of its trade secrets, irrespective of what has
- *  been deposited with the U.S. Copyright Office.
- *
- *  Origin: 30
- *
- *  IBM_PROLOG_END_TAG
- */
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/usr/hwas/hwasPlat.C $                                     */
+/*                                                                        */
+/* IBM CONFIDENTIAL                                                       */
+/*                                                                        */
+/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/*                                                                        */
+/* p1                                                                     */
+/*                                                                        */
+/* Object Code Only (OCO) source materials                                */
+/* Licensed Internal Code Source Materials                                */
+/* IBM HostBoot Licensed Internal Code                                    */
+/*                                                                        */
+/* The source code for this program is not published or otherwise         */
+/* divested of its trade secrets, irrespective of what has been           */
+/* deposited with the U.S. Copyright Office.                              */
+/*                                                                        */
+/* Origin: 30                                                             */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
 /**
  *  @file hwasPlat.C
  *
@@ -35,6 +34,7 @@
 #include <initservice/taskargs.H>
 #include <mvpd/mvpdenums.H>
 #include <stdio.h>
+#include <sys/mm.h>
 
 #include <pnor/pnorif.H>
 
@@ -221,42 +221,70 @@ errlHndl_t platPresenceDetect(TargetHandleList &io_targets)
 } // platPresenceDetect
 
 
-
-
-//******************************************************************************
-// platGetGardPnorAddr function
-//******************************************************************************
-errlHndl_t platGetGardPnorAddr(void *& o_addr,uint64_t &o_size)
+GardAddress::GardAddress(bool &o_gardEnabled)
 {
-    errlHndl_t errl = NULL;
+    DeconfigGard::GardRecord *l_addr = HWAS::theDeconfigGard().iv_pGardRecords;
+    HWAS_INF("GardAddress ctor: iv_pGardRecords %p", l_addr);
+    o_gardEnabled = true;
 
-    do
+    // if this is the first time thru here, get the PNOR address.
+    if (l_addr == NULL)
     {
-#if 0
-        //TODO: RTC 37739
         PNOR::SectionInfo_t l_section;
+        errlHndl_t errl;
         errl = PNOR::getSectionInfo(PNOR::GUARD_DATA, PNOR::CURRENT_SIDE,
-                l_section);
+                        l_section);
         if (errl)
         {
-            // TODO: do the malloc and store it locally?
-            break;
+            HWAS_ERR("PNOR::getSectionInfo failed!!!");
+            // no support for GARD in this configuration.  
+            // Commit the log as unrecoverable and keep going.
+            errlCommit(errl, HWAS_COMP_ID);
+            // errl is now NULL
+
+            // set flag so that we don't continue to try to write GARD records
+            o_gardEnabled = false;
+        }
+        else
+        {
+            l_addr = reinterpret_cast<DeconfigGard::GardRecord *>
+                        (l_section.vaddr);
+            HWAS_DBG("PNOR vaddr=%p size=%d", l_section.vaddr, l_section.size);
+
+            // tell the DeconfigGard what the address
+            HWAS::theDeconfigGard().iv_pGardRecords = l_addr;
+
+            // and let him compute and save maxRecords and nextRecordId
+            HWAS::theDeconfigGard()._GardRecordIdSetup(l_section.size);
         }
 
-        o_addr = reinterpret_cast<void *>(l_section.vaddr);
-        o_size = l_section.size;
-#else
-        // just use a buffer instead of PNOR
-        o_size = 20 * sizeof(DeconfigGard::GardRecord);
-        o_addr = malloc(o_size);
-        memset(o_addr, EMPTY_GARD_VALUE, o_size);
-#endif
-
-        HWAS_INF("GARD in PNOR: addr=%p, size=%d", o_addr, o_size);
+        HWAS_INF("GardAddress iv_pGardRecords=%p", l_addr);
     }
-    while (0);
+}
 
-    return errl;
-} // platGetGardPnorAddr
+
+GardAddress::~GardAddress()
+{
+    // flush PNOR iff we wrote
+    if (iv_addr.size() > 0)
+    {
+        for (std::vector<void *>::iterator iter = iv_addr.begin();
+                iter != iv_addr.end();
+                iter++)
+        {
+            HWAS_DBG("flushing GARD in PNOR: addr=%p", *iter);
+            int l_rc = mm_remove_pages(FLUSH, (void *) *iter,
+                        sizeof(DeconfigGard::GardRecord));
+            if (l_rc)
+            {
+                HWAS_ERR("mm_remove_pages(FLUSH,%p,%d) returned %d", 
+                        *iter, sizeof(DeconfigGard::GardRecord),l_rc);
+            }
+        }
+
+        // all done - just get rid of them all
+        iv_addr.clear();
+    }
+}
 
 } // namespace HWAS

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2012              */
+/* COPYRIGHT International Business Machines Corp. 2011,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -353,7 +353,8 @@ public:
         errlHndl_t l_pErr = NULL;
         HWAS::DeconfigGard::GardRecords_t l_records;
 
-        l_pErr = HWAS::theDeconfigGard().getGardRecords(0, l_records);
+        l_pErr = HWAS::theDeconfigGard().getGardRecords(
+                        HWAS::DeconfigGard::GET_ALL_GARD_RECORDS, l_records);
         
         if (l_pErr)
         {
@@ -853,7 +854,8 @@ public:
         do
         {
             // Get all existing GARD Records
-            l_pErr = HWAS::theDeconfigGard().getGardRecords(0, l_records);
+            l_pErr = HWAS::theDeconfigGard().getGardRecords(
+                            HWAS::DeconfigGard::GET_ALL_GARD_RECORDS, l_records);
             
             if (l_pErr)
             {
@@ -892,7 +894,8 @@ public:
             }
 
             // Clear all GARD Records
-            l_pErr = HWAS::theDeconfigGard().clearGardRecords(0);
+            l_pErr = HWAS::theDeconfigGard().clearGardRecords(
+                            HWAS::DeconfigGard::CLEAR_ALL_GARD_RECORDS);
             
             if (l_pErr)
             {
@@ -903,7 +906,8 @@ public:
             // Get the GARD Records
             l_records.clear();
             
-            l_pErr = HWAS::theDeconfigGard().getGardRecords(0, l_records);
+            l_pErr = HWAS::theDeconfigGard().getGardRecords(
+                            HWAS::DeconfigGard::GET_ALL_GARD_RECORDS, l_records);
             
             if (l_pErr)
             {

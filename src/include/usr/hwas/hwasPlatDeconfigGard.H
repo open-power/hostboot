@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012                   */
+/* COPYRIGHT International Business Machines Corp. 2012,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -29,38 +29,6 @@
 
 #ifndef HWASPLATDECONFIGGARD_H_
 #define HWASPLATDECONFIGGARD_H_
-
-#include <sys/mm.h>
-#include <trace/interface.H>
-#include <errl/errlentry.H>
-#include <hwas/hwasPlatError.H>
-
-//******************************************************************************
-// Trace descriptors that are defined in a C file
-//******************************************************************************
-namespace HWAS
-{
-
-#if 0
-//TODO: RTC 37739: flush PNOR
-// questions -- what address and what size do it need to use? the section
-//  starting address and section size? or the address and size of the
-//  gard record that is being flushed?
-
-/**
- * @brief function to push GARD records 'out' to PNOR
- */
-inline void pushGardRecords(void *i_pAddr, uint64_t i_size)
-{
-    int l_rc = mm_remove_pages(FLUSH, i_pAddr, i_size);
-    if (l_rc )
-    {   // mm_remove_pages returns none zero for error
-        HWAS_ERR("Fail to flush the page");
-    }
-}
-#endif
-
-}
 
 /**
  *  @brief Adapt common singleton declaration to specific platform

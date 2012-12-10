@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2012              */
+/* COPYRIGHT International Business Machines Corp. 2011,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -94,26 +94,26 @@ DeconfigGard::DeconfigGard()
   iv_pGardRecords(NULL)
 {
     HWAS_INF("DeconfigGard Constructor");
-    HWAS_MUTEX_INIT(&iv_mutex);
+    HWAS_MUTEX_INIT(iv_mutex);
 }
 
 //******************************************************************************
 DeconfigGard::~DeconfigGard()
 {
     HWAS_INF("DeconfigGard Destructor");
-    HWAS_MUTEX_DESTROY(&iv_mutex);
+    HWAS_MUTEX_DESTROY(iv_mutex);
 }
 
 //******************************************************************************
 errlHndl_t DeconfigGard::clearGardRecordsForReplacedTargets()
 {
     HWAS_INF("****TBD****Usr Request: Clear GARD Records for replaced Targets");
-    HWAS_MUTEX_LOCK(&iv_mutex);
+    HWAS_MUTEX_LOCK(iv_mutex);
     errlHndl_t l_pErr = NULL;
 
     // TODO
 
-    HWAS_MUTEX_UNLOCK(&iv_mutex);
+    HWAS_MUTEX_UNLOCK(iv_mutex);
     return l_pErr;
 }
 
@@ -121,7 +121,7 @@ errlHndl_t DeconfigGard::clearGardRecordsForReplacedTargets()
 errlHndl_t DeconfigGard::deconfigureTargetsFromGardRecordsForIpl()
 {
     HWAS_INF("Usr Request: Deconfigure Targets from GARD Records for IPL");
-    HWAS_MUTEX_LOCK(&iv_mutex);
+    HWAS_MUTEX_LOCK(iv_mutex);
     errlHndl_t l_pErr = NULL;
     GardRecords_t l_gardRecords;
 
@@ -131,7 +131,7 @@ errlHndl_t DeconfigGard::deconfigureTargetsFromGardRecordsForIpl()
     //      This is known as Resource Recovery
 
     // Get all GARD Records
-    l_pErr = _getGardRecords(0, l_gardRecords);
+    l_pErr = _getGardRecords(GET_ALL_GARD_RECORDS, l_gardRecords);
 
     if (l_pErr)
     {
@@ -178,7 +178,7 @@ errlHndl_t DeconfigGard::deconfigureTargetsFromGardRecordsForIpl()
         }
     }
 
-    HWAS_MUTEX_UNLOCK(&iv_mutex);
+    HWAS_MUTEX_UNLOCK(iv_mutex);
     return l_pErr;
 }
 
@@ -186,8 +186,8 @@ errlHndl_t DeconfigGard::deconfigureTargetsFromGardRecordsForIpl()
 errlHndl_t DeconfigGard::deconfigureTarget(TARGETING::Target & i_target,
                                            const uint32_t i_errlPlid)
 {
-    HWAS_ERR("Usr Request: Deconfigure Target");
-    HWAS_MUTEX_LOCK(&iv_mutex);
+    HWAS_INF("Usr Request: Deconfigure Target");
+    HWAS_MUTEX_LOCK(iv_mutex);
 
     // Deconfigure the Target
     _deconfigureTarget(i_target, i_errlPlid, DECONFIG_CAUSE_FIRMWARE_REQ);
@@ -195,7 +195,7 @@ errlHndl_t DeconfigGard::deconfigureTarget(TARGETING::Target & i_target,
     // Deconfigure other Targets by association
     _deconfigureByAssoc(i_target, i_errlPlid);
 
-    HWAS_MUTEX_UNLOCK(&iv_mutex);
+    HWAS_MUTEX_UNLOCK(iv_mutex);
     return NULL;
 }
 
@@ -204,10 +204,10 @@ errlHndl_t DeconfigGard::createGardRecord(const TARGETING::Target & i_target,
                                           const uint32_t i_errlPlid,
                                           const GARD_ErrorType i_errorType)
 {
-    HWAS_ERR("Usr Request: Create GARD Record");
-    HWAS_MUTEX_LOCK(&iv_mutex);
+    HWAS_INF("Usr Request: Create GARD Record");
+    HWAS_MUTEX_LOCK(iv_mutex);
     errlHndl_t l_pErr = _createGardRecord(i_target, i_errlPlid, i_errorType);
-    HWAS_MUTEX_UNLOCK(&iv_mutex);
+    HWAS_MUTEX_UNLOCK(iv_mutex);
     return l_pErr;
 }
 
@@ -217,9 +217,9 @@ errlHndl_t DeconfigGard::getDeconfigureRecords(
     DeconfigureRecords_t & o_records)
 {
     HWAS_INF("Usr Request: Get Deconfigure Record(s)");
-    HWAS_MUTEX_LOCK(&iv_mutex);
+    HWAS_MUTEX_LOCK(iv_mutex);
     _getDeconfigureRecords(i_pTargetId, o_records);
-    HWAS_MUTEX_UNLOCK(&iv_mutex);
+    HWAS_MUTEX_UNLOCK(iv_mutex);
     return NULL;
 }
 
@@ -228,9 +228,9 @@ errlHndl_t DeconfigGard::getDeconfigureRecords(
 errlHndl_t DeconfigGard::clearGardRecords(const uint32_t i_recordId)
 {
     HWAS_INF("Usr Request: Clear GARD Record(s) by Record ID");
-    HWAS_MUTEX_LOCK(&iv_mutex);
+    HWAS_MUTEX_LOCK(iv_mutex);
     errlHndl_t l_pErr = _clearGardRecords(i_recordId);
-    HWAS_MUTEX_UNLOCK(&iv_mutex);
+    HWAS_MUTEX_UNLOCK(iv_mutex);
     return l_pErr;
 }
 
@@ -239,9 +239,9 @@ errlHndl_t DeconfigGard::clearGardRecords(
     const TARGETING::EntityPath & i_targetId)
 {
     HWAS_INF("Usr Request: Clear GARD Record(s) by Target ID");
-    HWAS_MUTEX_LOCK(&iv_mutex);
+    HWAS_MUTEX_LOCK(iv_mutex);
     errlHndl_t l_pErr = _clearGardRecords(i_targetId);
-    HWAS_MUTEX_UNLOCK(&iv_mutex);
+    HWAS_MUTEX_UNLOCK(iv_mutex);
     return l_pErr;
 }
 
@@ -251,9 +251,9 @@ errlHndl_t DeconfigGard::getGardRecords(
     GardRecords_t & o_records)
 {
     HWAS_INF("Usr Request: Get GARD Record(s) by Record ID");
-    HWAS_MUTEX_LOCK(&iv_mutex);
+    HWAS_MUTEX_LOCK(iv_mutex);
     errlHndl_t l_pErr = _getGardRecords(i_recordId, o_records);
-    HWAS_MUTEX_UNLOCK(&iv_mutex);
+    HWAS_MUTEX_UNLOCK(iv_mutex);
     return l_pErr;
 }
 
@@ -263,9 +263,9 @@ errlHndl_t DeconfigGard::getGardRecords(
     GardRecords_t & o_records)
 {
     HWAS_INF("Usr Request: Get GARD Record(s) by Target ID");
-    HWAS_MUTEX_LOCK(&iv_mutex);
+    HWAS_MUTEX_LOCK(iv_mutex);
     errlHndl_t l_pErr = _getGardRecords(i_targetId, o_records);
-    HWAS_MUTEX_UNLOCK(&iv_mutex);
+    HWAS_MUTEX_UNLOCK(iv_mutex);
     return l_pErr;
 }
 
@@ -273,7 +273,7 @@ errlHndl_t DeconfigGard::getGardRecords(
 void DeconfigGard::_deconfigureByAssoc(TARGETING::Target & i_target,
                                        const uint32_t i_errlPlid)
 {
-    HWAS_ERR("****TBD****: Deconfiguring by Association for: %.8X",
+    HWAS_INF("****TBD****: Deconfiguring by Association for: %.8X",
                    i_target.getAttr<TARGETING::ATTR_HUID>());
 
     // TODO
@@ -290,7 +290,9 @@ void DeconfigGard::_deconfigureTarget(TARGETING::Target & i_target,
     if (!i_target.getAttr<TARGETING::ATTR_DECONFIG_GARDABLE>())
     {
         // Target is not Deconfigurable. Commit an error
-        HWAS_ERR("Target not Deconfigurable");
+        HWAS_ERR("Target %.8X not Deconfigurable",
+            i_target.getAttr<TARGETING::ATTR_HUID>());
+
         /*@
          * @errortype
          * @moduleid     HWAS::MOD_DECONFIG_GARD
@@ -299,10 +301,9 @@ void DeconfigGard::_deconfigureTarget(TARGETING::Target & i_target,
          *               deconfigurable
          * @userdata1    HUID of input target
          */
-        const uint64_t userdata1 =
-                (uint64_t)i_target.getAttr<TARGETING::ATTR_HUID>() << 32;
-        errlHndl_t l_pErr = NULL;
-        l_pErr = hwasError(
+        const uint64_t userdata1 = static_cast<uint64_t>
+                (i_target.getAttr<TARGETING::ATTR_HUID>()) << 32;
+        errlHndl_t l_pErr = hwasError(
             ERRL_SEV_INFORMATIONAL,
             HWAS::MOD_DECONFIG_GARD,
             HWAS::RC_TARGET_NOT_DECONFIGURABLE,
@@ -319,11 +320,11 @@ void DeconfigGard::_deconfigureTarget(TARGETING::Target & i_target,
 
         if (!l_state.functional)
         {
-            HWAS_ERR("Target HWAS_STATE already non-functional");
+            HWAS_DBG("Target HWAS_STATE already non-functional");
         }
         else
         {
-            HWAS_ERR("Setting Target HWAS_STATE to non-functional");
+            HWAS_INF("Setting Target HWAS_STATE to non-functional");
             l_state.functional = 0;
             i_target.setAttr<TARGETING::ATTR_HWAS_STATE>(l_state);
         }
@@ -364,12 +365,12 @@ void DeconfigGard::_createDeconfigureRecord(
 
     if (l_itr != iv_deconfigureRecords.end())
     {
-        HWAS_ERR("Not creating a Deconfigure Record, one already exists");
+        HWAS_DBG("Not creating a Deconfigure Record, one already exists");
     }
     else
     {
         // Create a DeconfigureRecord
-        HWAS_ERR("Creating a Deconfigure Record");
+        HWAS_INF("Creating a Deconfigure Record");
 
         DeconfigureRecord l_record;
         l_record.iv_targetId = l_id;
@@ -417,10 +418,6 @@ void DeconfigGard::_clearDeconfigureRecords(
         {
             DG_TRAC_TARGET(INFO_MRK "Did not find a Deconfigure Record to clear for: ",
                            i_pTargetId);
-        }
-        else
-        {
-            //TODO: RTC 37739: flush PNOR as well
         }
     }
 }
@@ -484,6 +481,7 @@ errlHndl_t DeconfigGard::_createGardRecord(const TARGETING::Target & i_target,
         {
             // Target is not GARDable. Commit an error
             HWAS_ERR("Target not GARDable");
+
             /*@
              * @errortype
              * @moduleid     HWAS::MOD_DECONFIG_GARD
@@ -503,11 +501,12 @@ errlHndl_t DeconfigGard::_createGardRecord(const TARGETING::Target & i_target,
             break;
         }
 
-        l_pErr = _ensureGardRecordDataSetup();
+        bool l_gardEnabled;
+        GardAddress l_GardAddress(l_gardEnabled);
 
-        if (l_pErr)
+        if (!l_gardEnabled)
         {
-            HWAS_ERR("Error from _ensureGardRecordDataSetup");
+            HWAS_ERR("Error from l_GardAddress");
             break;
         }
 
@@ -526,6 +525,7 @@ errlHndl_t DeconfigGard::_createGardRecord(const TARGETING::Target & i_target,
         if (!l_pRecord)
         {
             HWAS_ERR("GARD Record Repository full");
+
             /*@
              * @errortype
              * @moduleid     HWAS::MOD_DECONFIG_GARD
@@ -554,7 +554,8 @@ errlHndl_t DeconfigGard::_createGardRecord(const TARGETING::Target & i_target,
         l_pRecord->iv_padding[2] = 0;
         l_pRecord->iv_gardTime = 0; // TODO Get epoch time
 
-        //TODO: RTC 37739: flush PNOR as well
+        l_GardAddress.writeRecord((void *)l_pRecord);
+
     }
     while (0);
 
@@ -566,15 +567,12 @@ errlHndl_t DeconfigGard::_clearGardRecords(const uint32_t i_recordId)
 {
     errlHndl_t l_pErr = NULL;
 
-    l_pErr = _ensureGardRecordDataSetup();
+    bool l_gardEnabled;
+    GardAddress l_GardAddress(l_gardEnabled);
 
-    if (l_pErr)
+    if (l_gardEnabled)
     {
-        HWAS_ERR("Error from _ensureGardRecordDataSetup");
-    }
-    else
-    {
-        if (i_recordId == 0)
+        if (i_recordId == CLEAR_ALL_GARD_RECORDS)
         {
             HWAS_INF("Clearing all GARD Records");
 
@@ -585,7 +583,7 @@ errlHndl_t DeconfigGard::_clearGardRecords(const uint32_t i_recordId)
                 {
                     // clear iv_recordId
                     iv_pGardRecords[i].iv_recordId = EMPTY_GARD_RECORDID;
-                    //TODO: RTC 37739: flush PNOR as well
+                    l_GardAddress.writeRecord(&iv_pGardRecords[i]);
                 }
             }
         }
@@ -599,7 +597,7 @@ errlHndl_t DeconfigGard::_clearGardRecords(const uint32_t i_recordId)
                     HWAS_INF("Clearing GARD Record ID 0x%x", i_recordId);
                     // clear iv_recordId
                     iv_pGardRecords[i].iv_recordId = EMPTY_GARD_RECORDID;
-                    //TODO: RTC 37739: flush PNOR as well
+                    l_GardAddress.writeRecord(&iv_pGardRecords[i]);
                     break;
                 }
             }
@@ -609,6 +607,10 @@ errlHndl_t DeconfigGard::_clearGardRecords(const uint32_t i_recordId)
                 HWAS_INF("No GARD Record ID 0x%x to clear", i_recordId);
             }
         }
+    }
+    else
+    {
+        HWAS_ERR("Error from l_GardAddress");
     }
 
     return l_pErr;
@@ -620,13 +622,10 @@ errlHndl_t DeconfigGard::_clearGardRecords(
 {
     errlHndl_t l_pErr = NULL;
 
-    l_pErr = _ensureGardRecordDataSetup();
+    bool l_gardEnabled;
+    GardAddress l_GardAddress(l_gardEnabled);
 
-    if (l_pErr)
-    {
-        HWAS_ERR("Error from _ensureGardRecordDataSetup");
-    }
-    else
+    if (l_gardEnabled)
     {
         bool l_gardRecordsCleared = false;
 
@@ -641,6 +640,7 @@ errlHndl_t DeconfigGard::_clearGardRecords(
                 // clear iv_recordId
                 iv_pGardRecords[i].iv_recordId = EMPTY_GARD_RECORDID;
                 l_gardRecordsCleared = true;
+                l_GardAddress.writeRecord(&iv_pGardRecords[i]);
             }
         }
 
@@ -649,7 +649,10 @@ errlHndl_t DeconfigGard::_clearGardRecords(
             DG_TRAC_TARGET(INFO_MRK "No GARD Records to clear for: ",
                            &i_targetId);
         }
-        //TODO: RTC 37739: flush PNOR as well
+    }
+    else
+    {
+        HWAS_ERR("Error from l_GardAddress");
     }
 
     return l_pErr;
@@ -662,22 +665,19 @@ errlHndl_t DeconfigGard::_getGardRecords(const uint32_t i_recordId,
     errlHndl_t l_pErr = NULL;
     o_records.clear();
 
-    l_pErr = _ensureGardRecordDataSetup();
+    bool l_gardEnabled;
+    GardAddress l_GardAddress(l_gardEnabled);
 
-    if (l_pErr)
+    if (l_gardEnabled)
     {
-        HWAS_ERR("Error from _ensureGardRecordDataSetup");
-    }
-    else
-    {
-        if (i_recordId == 0)
+        if (i_recordId == GET_ALL_GARD_RECORDS)
         {
-            HWAS_INF("Getting all GARD Records");
+            HWAS_DBG("Getting all GARD Records");
             for (uint32_t i = 0; i < iv_maxGardRecords; i++)
             {
                 if (iv_pGardRecords[i].iv_recordId != EMPTY_GARD_RECORDID)
                 {
-                    HWAS_INF("Getting GARD Record ID 0x%x",
+                    HWAS_DBG("Getting GARD Record ID 0x%x",
                              iv_pGardRecords[i].iv_recordId);
                     o_records.push_back(iv_pGardRecords[i]);
                 }
@@ -690,7 +690,7 @@ errlHndl_t DeconfigGard::_getGardRecords(const uint32_t i_recordId,
             {
                 if (iv_pGardRecords[i].iv_recordId == i_recordId)
                 {
-                    HWAS_INF("Getting GARD Record ID 0x%x", i_recordId);
+                    HWAS_DBG("Getting GARD Record ID 0x%x", i_recordId);
                     o_records.push_back(iv_pGardRecords[i]);
                     break;
                 }
@@ -698,9 +698,13 @@ errlHndl_t DeconfigGard::_getGardRecords(const uint32_t i_recordId,
 
             if (i == iv_maxGardRecords)
             {
-                HWAS_INF("No GARD Record ID 0x%x to get", i_recordId);
+                HWAS_DBG("No GARD Record ID 0x%x to get", i_recordId);
             }
         }
+    }
+    else
+    {
+        HWAS_ERR("Error from l_GardAddress");
     }
 
     return l_pErr;
@@ -714,13 +718,10 @@ errlHndl_t DeconfigGard::_getGardRecords(
     errlHndl_t l_pErr = NULL;
     o_records.clear();
 
-    l_pErr = _ensureGardRecordDataSetup();
+    bool l_gardEnabled;
+    GardAddress l_GardAddress(l_gardEnabled);
 
-    if (l_pErr)
-    {
-        HWAS_ERR("Error from _ensureGardRecordDataSetup");
-    }
-    else
+    if (l_gardEnabled)
     {
         bool l_gardRecordsGot = false;
 
@@ -743,36 +744,23 @@ errlHndl_t DeconfigGard::_getGardRecords(
                            &i_targetId);
         }
     }
+    else
+    {
+        HWAS_ERR("Error from l_GardAddress");
+    }
 
     return l_pErr;
 }
 
 //******************************************************************************
-errlHndl_t DeconfigGard::_ensureGardRecordDataSetup()
+void DeconfigGard::_GardRecordIdSetup(uint32_t i_size)
 {
-    errlHndl_t l_pErr = NULL;
-
-    do
+    if (iv_maxGardRecords == 0)
     {
-        if (iv_pGardRecords != NULL)
-        {
-            // already set, just get out of here.
-            break;
-        }
+        // hasn't been computed yet
+        HWAS_INF("GardRecordIdSetup(size=%d)", i_size);
 
-        uint64_t gardSectionSize = 0;
-        void *l_addr = NULL;
-        l_pErr = platGetGardPnorAddr(l_addr, gardSectionSize);
-        if (l_pErr)
-        {
-            HWAS_ERR("Error getting GARD Record PNOR section info");
-            break;
-        }
-        iv_pGardRecords = (GardRecord *)l_addr;
-        HWAS_INF("GARD in PNOR: addr=%p, size=%lld",
-                iv_pGardRecords, gardSectionSize);
-
-        iv_maxGardRecords = gardSectionSize / sizeof(GardRecord);
+        iv_maxGardRecords = i_size / sizeof(GardRecord);
 
         // Figure out the next GARD Record ID to use
         uint32_t l_numGardRecords = 0;
@@ -795,13 +783,9 @@ errlHndl_t DeconfigGard::_ensureGardRecordDataSetup()
         // next record will start after the highest Id we found
         iv_nextGardRecordId++;
 
-        HWAS_INF("GARD setup. MaxRecords %d NextID %d NumRecords %d",
+        HWAS_INF("GARD setup. maxRecords %d nextID %d numRecords %d",
                  iv_maxGardRecords, iv_nextGardRecordId, l_numGardRecords);
-
     }
-    while (0);
-
-    return l_pErr;
 }
 
 } // namespce HWAS
