@@ -128,7 +128,7 @@ fapi::ReturnCode MvpdKeywordXlate(const fapi::MvpdKeyword i_fapiKeyword,
     // Create a lookup table for converting a FAPI MVPD keyword enumerator to a
     // Hostboot MVPD keyword enumerator. This is a simple array and relies on
     // the FAPI record enumerators starting at zero and incrementing.
-    const uint8_t NUM_MVPD_KEYWORDS = 0x20;
+    const uint8_t NUM_MVPD_KEYWORDS = 0x22;
     static const MVPD::mvpdKeyword
         mvpdFapiKeywordToHbKeyword[NUM_MVPD_KEYWORDS] =
     {
@@ -164,6 +164,8 @@ fapi::ReturnCode MvpdKeywordXlate(const fapi::MvpdKeyword i_fapiKeyword,
         MVPD::FO,
         MVPD::pdI,
         MVPD::pdG,
+        MVPD::MK,
+        MVPD::PB,
     };
     
     fapi::ReturnCode l_rc;

@@ -113,6 +113,8 @@ enum mvpdKeyword
     FO          = 0x1d,
     pdI         = 0x1e,
     pdG         = 0x1f,
+    MK          = 0x20,
+    PB          = 0x21,
 
     // Last Keyword
     MVPD_LAST_KEYWORD,
