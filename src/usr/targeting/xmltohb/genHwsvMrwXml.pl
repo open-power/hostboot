@@ -1831,18 +1831,18 @@ sub generate_fsp_psi_units
     </attribute>
     <attribute>
         <id>PHYS_PATH</id>
-        <default>physical:sys-${sys}/node-${fsp_node}/fsp-${fsp}/
-                          psi-${fsp_chip_unit}</default>
+        <default>physical:sys-${sys}/node-${fsp_node}/fsp-${fsp}/"
+                        . "psi-${fsp_chip_unit}</default>
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-${sys}/node-${fsp_node}/fsp-${fsp}/
-                          psi-${fsp_chip_unit}</default>
+        <default>affinity:sys-${sys}/node-${fsp_node}/fsp-${fsp}/"
+                        . "psi-${fsp_chip_unit}</default>
     </attribute>
     <attribute>
         <id>PEER_TARGET</id>
-        <default>physical:sys-${sys}/node-${proc_node}/proc-${proc_pos}/
-                          psi-${proc_chip_unit}</default>
+        <default>physical:sys-${sys}/node-${proc_node}/proc-${proc_pos}/"
+                        . "psi-${proc_chip_unit}</default>
     </attribute>";
 if($fsp_chip_unit eq 0)
 {
@@ -1883,18 +1883,18 @@ sub generate_proc_psi
     </attribute>
     <attribute>
         <id>PHYS_PATH</id>
-        <default>physical:sys-${sys}/node-${proc_node}/proc-${proc_pos}/
-                          psi-${proc_chip_unit}</default>
+        <default>physical:sys-${sys}/node-${proc_node}/proc-${proc_pos}/"
+                       . "psi-${proc_chip_unit}</default>
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-${sys}/node-${proc_node}/proc-${proc_pos}/
-                          psi-${proc_chip_unit}</default>
+        <default>affinity:sys-${sys}/node-${proc_node}/proc-${proc_pos}/"
+                       . "psi-${proc_chip_unit}</default>
     </attribute>
     <attribute>
         <id>PEER_TARGET</id>
-        <default>physical:sys-${sys}/node-${fsp_node}/fsp-${fsp}/
-                          psi-${fsp_chip_unit}</default>
+        <default>physical:sys-${sys}/node-${fsp_node}/fsp-${fsp}/"
+                       . "psi-${fsp_chip_unit}</default>
     </attribute>";
 if($fsp_chip_unit eq 0)
 {
@@ -2144,8 +2144,8 @@ sub generate_ax_buses
             print "
     <attribute>
         <id>PEER_TARGET</id>
-        <default>physical:sys-$sys/node-$node/proc-$p_proc/${type}bus-$p_port
-        </default>
+        <default>physical:sys-$sys/node-$node/proc-$p_proc/"
+            . "${type}bus-$p_port</default>
     </attribute>";
         }
 
@@ -2190,8 +2190,8 @@ sub generate_centaur
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-$sys/node-$node/proc-$proc/mcs-$mcs/membuf-$ctaur
-        </default>
+        <default>affinity:sys-$sys/node-$node/proc-$proc/mcs-$mcs/"
+            . "membuf-$ctaur</default>
     </attribute>
     <attribute>
         <id>VMEM_ID</id>
@@ -2282,8 +2282,8 @@ sub generate_centaur
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-$sys/node-$node/proc-$proc/mcs-$mcs/membuf-$ctaur/
-                 mbs-0</default>
+        <default>affinity:sys-$sys/node-$node/proc-$proc/mcs-$mcs/"
+            . "membuf-$ctaur/mbs-0</default>
     </attribute>";
 
     if($build eq "fsp")
@@ -2317,13 +2317,13 @@ sub generate_mba
     <attribute><id>HUID</id><default>${uidstr}</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
-        <default>physical:sys-$sys/node-$node/membuf-$ctaur/mbs-0/mba-$mba
-        </default>
+        <default>physical:sys-$sys/node-$node/membuf-$ctaur/mbs-0/"
+            . "mba-$mba</default>
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-$sys/node-$node/proc-$proc/mcs-$mcs/membuf-$ctaur/
-                 mbs-0/mba-$mba</default>
+        <default>affinity:sys-$sys/node-$node/proc-$proc/mcs-$mcs/"
+            . "membuf-$ctaur/mbs-0/mba-$mba</default>
     </attribute>
     <attribute>
         <id>CHIP_UNIT</id>
@@ -2402,8 +2402,8 @@ sub generate_dimm
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-$sys/node-$node/proc-$proc/mcs-$mcs/membuf-$pos/
-                 mbs-0/mba-$x/dimm-$zz</default>
+        <default>affinity:sys-$sys/node-$node/proc-$proc/mcs-$mcs/"
+            . "membuf-$pos/mbs-0/mba-$x/dimm-$zz</default>
     </attribute>
     <attribute>
         <id>MBA_DIMM</id>
