@@ -32,14 +32,3 @@ mkdir -p $sb/simu/data/cec-chip/
 cp $bb/src/simu/data/cec-chip/centaur.act $sb/simu/data/cec-chip/centaur.act
 patch -p0 $sb/simu/data/cec-chip/centaur.act $HOSTBOOTROOT/src/build/citest/etc/patches/centaur.act.patch
 ###
-
-#### Update config file with new variables (Remove with RTC: 59984) ####
-echo "+++ Forcing SBE header usage till Fips defaults to OFF"
-mkdir -p $sb/simu/configs
-mkdir -p $sb/simu/data/cec-chip
-egrep -v "SETENV GFW_P8_MURANO_HB_BASE_IMG_USE_PNOR" $BACKING_BUILD/src/simu/configs/P8_MURANO.config> $sb/simu/configs/P8_MURANO.config
-egrep -v "SETENV GFW_P8_VENICE_HB_BASE_IMG_USE_PNOR" $BACKING_BUILD/src/simu/configs/P8_VENICE.config> $sb/simu/configs/P8_VENICE.config
-echo "SETENV GFW_P8_MURANO_HB_BASE_IMG_USE_PNOR no" >> $sb/simu/configs/P8_MURANO.config
-echo "SETENV GFW_P8_VENICE_HB_BASE_IMG_USE_PNOR no" >> $sb/simu/configs/P8_VENICE.config
-echo "SETENV GFW_P8_MURANO_HB_BASE_IMG_WITH_ECC no" >> $sb/simu/configs/P8_MURANO.config
-echo "SETENV GFW_P8_VENICE_HB_BASE_IMG_WITH_ECC no" >> $sb/simu/configs/P8_VENICE.config

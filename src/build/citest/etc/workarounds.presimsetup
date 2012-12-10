@@ -32,9 +32,3 @@
 #egrep -v "WSALIAS HOSTBOOT_LEVEL FIPSLEVEL|WSALIAS HOSTBOOT_LEVEL SIMICSLEVEL" $BACKING_BUILD/src/simu/data/simicsInfo > $sb/simu/data/simicsInfo
 #echo "WSALIAS HOSTBOOT_LEVEL FIPSLEVEL env/gfwb/simics-4.2.0/simics-4.2.83/fips/fld36/fi120201a700.42" >> $sb/simu/data/simicsInfo
 #echo "WSALIAS HOSTBOOT_LEVEL SIMICSLEVEL env/vtechb/simics-4.2.0/simics-4.2.83/bin" >> $sb/simu/data/simicsInfo
-
-####### Remove with RTC: 59984
-echo "+++ Override simics level to support Micron parts."
-mkdir -p $sb/simu/data
-egrep -v "WSALIAS DEFAULT FIPSLEVEL" $BACKING_BUILD/src/simu/data/simicsInfo > $sb/simu/data/simicsInfo
-echo "WSALIAS DEFAULT FIPSLEVEL env/gfwf/simics-4.2.0/simics-4.2.98/fips/fld36/fi121205d800.42" >> $sb/simu/data/simicsInfo
