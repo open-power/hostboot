@@ -452,17 +452,12 @@ int32_t mssRestoreDramRepairs(
 
     errlHndl_t err = NULL;
 
-    // FIXME uncomment when this function exists ... RTC 51507
-
-#if 0
-
     FAPI_INVOKE_HWP(
             err,
-            mss_restore_dram_repairs,
+            mss_restore_DRAM_repairs,
             fapi::Target(fapi::TARGET_TYPE_MBA_CHIPLET, i_mbaTarget),
             o_repairedRankMask,
             o_badDimmMask);
-#endif
 
     if(NULL != err)
     {
