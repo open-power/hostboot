@@ -179,18 +179,6 @@ void*    call_mem_pll_setup( void *io_pArgs )
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mem_pll_setup entry" );
 
-    //TODO - Enable this procedure in SIMICs when RTC 46643 is done.
-    //       For now, only run this procedure in VPO.
-    if ( !(TARGETING::is_vpo()) )
-    {
-        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                            "WARNING: mem_pll_setup HWP is disabled in SIMICS run!");
-        // end task
-        return l_err;
-
-    }
-
-
     // Get all Centaur targets
     TARGETING::TargetHandleList l_membufTargetList;
     getAllChips(l_membufTargetList, TYPE_MEMBUF);

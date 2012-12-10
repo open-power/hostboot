@@ -227,7 +227,7 @@ errlHndl_t scanDoScan(  DeviceFW::OperationType i_opType,
     do
     {
 
-        TRACDCOMP( g_trac_scandd,"SCAN::scanDoScan> Start::: i_ring=%.8X, i_ringLength=%d, i_flag=%.8X, i_opType=%.8X",i_ring, i_ringlength, i_flag, i_opType);
+        TRACFCOMP( g_trac_scandd,"SCAN::scanDoScan> Start::: i_ring=%lX, i_ringLength=%d, i_flag=%lX, i_opType=%.8X",i_ring, i_ringlength, i_flag, i_opType);
 
         // To get the remaining bits of data
         // If not on a 32bit boundary need to know how many bits to shift.
@@ -278,13 +278,13 @@ errlHndl_t scanDoScan(  DeviceFW::OperationType i_opType,
                           op_size,
                           DEVICE_SCOM_ADDRESS(l_scanTypeAddr));
 
-        TRACDCOMP( g_trac_scandd,"SCAN: ScanSelect  PUTSCOM %.8x = %.8x, %.8x", l_scanTypeAddr , l_buffer[0], l_buffer[1]);
+        TRACDCOMP( g_trac_scandd,"SCAN: ScanSelect  PUTSCOM %lX = %.8x, %.8x", l_scanTypeAddr , l_buffer[0], l_buffer[1]);
 
 
         if(l_err)
         {
             TRACFCOMP( g_trac_scandd, ERR_MRK
-                       "SCAN::scanDoScan> SCOM Write to scan select register failed. i_ring=%.8X, scanTypeData=%llX,scanTypeAddr=%.8X, target =%.8X", i_ring, l_scanTypeData,l_scanTypeAddr, TARGETING::get_huid(i_target) );
+                       "SCAN::scanDoScan> SCOM Write to scan select register failed. i_ring=%lX, scanTypeData=%lX,scanTypeAddr=%lX, target =%.8X", i_ring, l_scanTypeData,l_scanTypeAddr, TARGETING::get_huid(i_target) );
 
             // TODO:  Add usrDetails
             break;
@@ -329,7 +329,7 @@ errlHndl_t scanDoScan(  DeviceFW::OperationType i_opType,
                               op_size,
                               DEVICE_SCOM_ADDRESS(l_headerDataAddr));
 
-             TRACDCOMP( g_trac_scandd,"SCAN:(Cent Headr) GETSCOM %.8x = %.8x %.8x",l_headerDataAddr , l_buffer[0], l_buffer[1]);
+             TRACDCOMP( g_trac_scandd,"SCAN:(Cent Headr) GETSCOM %lX = %.8x %.8x",l_headerDataAddr , l_buffer[0], l_buffer[1]);
 
              if(l_err)
              {
@@ -427,7 +427,7 @@ errlHndl_t scanDoScan(  DeviceFW::OperationType i_opType,
                 // and there are no additional bits left..
                 // then set bit 18
                 if ((l_wordCnt == l_wordsInChain-1) && (l_setPulse) &&
-                    (l_lastDataBits == 0))
+                    (l_lastDataBits == 0) && (!l_isCentaur))
                 {
                     l_scanDataAddr |= 0x00002000;
                     l_setPulse = 0;
@@ -435,7 +435,7 @@ errlHndl_t scanDoScan(  DeviceFW::OperationType i_opType,
 
                 l_buffer[0] = *temp_buffer;
 
-                TRACDCOMP( g_trac_scandd,"SCAN: Word PUTSCOM %.8x = %.8x %.8x",l_scanDataAddr , l_buffer[0], l_buffer[1]);
+                TRACDCOMP( g_trac_scandd,"SCAN: Word PUTSCOM %lX = %.8x %.8x",l_scanDataAddr , l_buffer[0], l_buffer[1]);
 
             }
 
@@ -463,7 +463,7 @@ errlHndl_t scanDoScan(  DeviceFW::OperationType i_opType,
                 // the buffer we will return
                 *temp_buffer = l_buffer[0];
 
-                TRACDCOMP( g_trac_scandd,"SCAN: Word GETSCOM %.8x = %.8x %.8x",l_scanDataAddr , l_buffer[0], l_buffer[1]);
+                TRACDCOMP( g_trac_scandd,"SCAN: Word GETSCOM %lX = %.8x %.8x",l_scanDataAddr , l_buffer[0], l_buffer[1]);
 
             }
 
@@ -518,7 +518,7 @@ errlHndl_t scanDoScan(  DeviceFW::OperationType i_opType,
 
                 // TRACDCOMP( g_trac_scandd,"SCAN::scanDoScan: Last Bits WRITE> scanTypeDataAddr=%.8X, l_lastDataBits=%d, bytes copied %d,",l_scanDataAddr, l_lastDataBits, ((l_lastDataBits-1)/8 + 1));
 
-                TRACDCOMP( g_trac_scandd,"SCAN: <32Bits PUTSCOM %.8x = %.8x %.8x",l_scanDataAddr , l_buffer[0], l_buffer[1]);
+                TRACDCOMP( g_trac_scandd,"SCAN: <32Bits PUTSCOM %lX = %.8x %.8x",l_scanDataAddr , l_buffer[0], l_buffer[1]);
             }
 
             // read/write remaining bits and shift
@@ -539,6 +539,11 @@ errlHndl_t scanDoScan(  DeviceFW::OperationType i_opType,
             // If this was a read operation.
             if( DeviceFW::READ == i_opType )
             {
+
+                // Need to shift the data bits to have the data bits be left
+                // justified
+                l_buffer[0] = l_buffer[0]<<(32-l_lastDataBits);
+
                 // Need to copy the last data bits read in by scom back into
                 // the buffer we will return
                 // subtracting 1 from the bits before dividing by 8 to insure
@@ -547,7 +552,7 @@ errlHndl_t scanDoScan(  DeviceFW::OperationType i_opType,
 
                 //TRACDCOMP( g_trac_scandd, "SCAN::scanDoScan: Last Bits READ> scanTypeDataAddr=%.8X, l_lastDataBits=%d, bytes copied = %d",l_scanDataAddr, l_lastDataBits, ((l_lastDataBits-1)/8 + 1));
 
-                TRACDCOMP( g_trac_scandd,"SCAN: <32bits GETSCOM %.8x = %.8x %.8x",l_scanDataAddr , l_buffer[0], l_buffer[1]);
+                TRACDCOMP( g_trac_scandd,"SCAN: <32bits GETSCOM %lX = %.8x %.8x",l_scanDataAddr , l_buffer[0], l_buffer[1]);
             }
         }
 
@@ -589,7 +594,7 @@ errlHndl_t scanDoScan(  DeviceFW::OperationType i_opType,
                 // then set bit 18
                 if (l_setPulse)
                 {
-                    l_scanDataAddr |= 0x00002000;
+                    l_headerDataAddr |= 0x00002000;
                     l_setPulse = 0;
                 }
             }
@@ -602,7 +607,7 @@ errlHndl_t scanDoScan(  DeviceFW::OperationType i_opType,
                           op_size,
                           DEVICE_SCOM_ADDRESS(l_headerDataAddr));
 
-        TRACDCOMP( g_trac_scandd,"SCAN: Headr GETSCOM %.8x = %.8x  %.8x",l_headerDataAddr , l_buffer[0], l_buffer[1]);
+        TRACDCOMP( g_trac_scandd,"SCAN: Headr GETSCOM %lX = %.8x  %.8x",l_headerDataAddr , l_buffer[0], l_buffer[1]);
 
         if(l_err)
         {
@@ -618,9 +623,9 @@ errlHndl_t scanDoScan(  DeviceFW::OperationType i_opType,
             // If the header data did not match..
             if ((l_buffer[0] != HEADER_CHECK_DATA))
             {
-                TRACFCOMP( g_trac_scandd,"SCAN::scanDoScan> Header Check expect deadbeef.. i_ring=%.8X, i_opType=%.8X , ring data=%.8X, i_flag=%.8X,", i_ring, i_opType, l_buffer[0], i_flag );
+                TRACDCOMP( g_trac_scandd,"SCAN::scanDoScan> Header Check Failed expect deadbeef.. i_ring=%.8X, i_opType=%.8X , ring data=%.8X, i_flag=%.8X,", i_ring, i_opType, l_buffer[0], i_flag );
 
-                TRACFCOMP( g_trac_scandd,"SCAN: HEADER DATA FAILED%.8x = %.8x  %.8x",l_headerDataAddr , l_buffer[0], l_buffer[1]);
+                TRACFCOMP( g_trac_scandd,"SCAN: HEADER DATA FAILED!! %.8x = %.8x  %.8x",l_headerDataAddr , l_buffer[0], l_buffer[1]);
 
                 /*@
                  * @errortype

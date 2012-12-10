@@ -95,17 +95,6 @@ void*    call_proc_a_x_pci_dmi_pll_initf( void    *io_pArgs )
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, 
             "call_proc_a_x_pci_dmi_pll_initf entry" );
 
-    //TODO - Enable this procedure in SIMICs when RTC 46643 is done.
-    //       For now, only run this procedure in VPO.
-    if ( !(TARGETING::is_vpo()) )
-    {
-        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                   "WARNING: proc_a_x_pci_dmi_pll_initf HWP"
-                   " is disabled in SIMICS run!");
-        // end task
-        return  l_err ;
-    }
-
     TARGETING::TargetHandleList l_procTargetList;
     getAllChips(l_procTargetList, TYPE_PROC);
 
@@ -186,17 +175,6 @@ void*    call_proc_a_x_pci_dmi_pll_setup( void    *io_pArgs )
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, 
             "call_proc_a_x_pci_dmi_pll_setup entry" );
-
-    //TODO - Enable this procedure in SIMICs when RTC 46643 is done.
-    //       For now, only run this procedure in VPO.
-    if ( !(TARGETING::is_vpo()) )
-    {
-        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                   "WARNING: proc_a_x_pci_dmi_pll_setup HWP "
-                   "is disabled in SIMICS run!");
-        // end task
-        return  l_err ;
-    }
 
     TARGETING::TargetHandleList l_procTargetList;
     getAllChips(l_procTargetList, TYPE_PROC);

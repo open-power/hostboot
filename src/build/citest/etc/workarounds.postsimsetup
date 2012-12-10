@@ -37,15 +37,21 @@ echo "+++ Updating Centaur Action File to support slew calibration"
 patch -p0 $sb/simu/data/cec-chip/centaur.act $HOSTBOOTROOT/src/build/citest/etc/patches/centaur.act.slew.patch
 
 #### Update config file with new variables (Remove with RTC: 59984) ####
+#### Update config file with new GFW_P8_MURANO_CENTAUR_MODEL_EC separate RTC:60617) ###
+#### Update config file with new GFW_P8_VENICE_CENTAUR_MODEL_EC separate RTC:60617) ###
+
 echo "+++ Forcing SBE header usage till Fips defaults to ON"
+echo "+++ Forcing GFW_P8_MURANO_CENTAUR_MODEL_EC to 790 from 730 there currently"
 mkdir -p $sb/simu/configs
 mkdir -p $sb/simu/data/cec-chip
-egrep -v "SETENV GFW_P8_MURANO_HB_BASE_IMG_USE_PNOR|SETENV GFW_P8_MURANO_HB_BASE_IMG_WITH_ECC" $BACKING_BUILD/src/simu/configs/P8_MURANO.config> $sb/simu/configs/P8_MURANO.config
-egrep -v "SETENV GFW_P8_VENICE_HB_BASE_IMG_USE_PNOR|SETENV GFW_P8_VENICE_HB_BASE_IMG_WITH_ECC" $BACKING_BUILD/src/simu/configs/P8_VENICE.config> $sb/simu/configs/P8_VENICE.config
+egrep -v "SETENV GFW_P8_MURANO_HB_BASE_IMG_USE_PNOR|SETENV GFW_P8_MURANO_HB_BASE_IMG_WITH_ECC|GFW_P8_MURANO_CENTAUR_MODEL_EC" $BACKING_BUILD/src/simu/configs/P8_MURANO.config> $sb/simu/configs/P8_MURANO.config
+egrep -v "SETENV GFW_P8_VENICE_HB_BASE_IMG_USE_PNOR|SETENV GFW_P8_VENICE_HB_BASE_IMG_WITH_ECC|GFW_P8_VENICE_CENTAUR_MODEL_EC" $BACKING_BUILD/src/simu/configs/P8_VENICE.config> $sb/simu/configs/P8_VENICE.config
 echo "SETENV GFW_P8_MURANO_HB_BASE_IMG_USE_PNOR yes" >> $sb/simu/configs/P8_MURANO.config
 echo "SETENV GFW_P8_VENICE_HB_BASE_IMG_USE_PNOR yes" >> $sb/simu/configs/P8_VENICE.config
 echo "SETENV GFW_P8_MURANO_HB_BASE_IMG_WITH_ECC yes" >> $sb/simu/configs/P8_MURANO.config
 echo "SETENV GFW_P8_VENICE_HB_BASE_IMG_WITH_ECC yes" >> $sb/simu/configs/P8_VENICE.config
+echo "SETENV GFW_P8_VENICE_CENTAUR_MODEL_EC  910790" >> $sb/simu/configs/P8_VENICE.config
+echo "SETENV GFW_P8_MURANO_CENTAUR_MODEL_EC  910790" >> $sb/simu/configs/P8_MURANO.config
 
 echo "+++ Updating s1.act and p8_common.chip"
 mkdir -p $sb/simu/data/cec-chip
@@ -63,3 +69,61 @@ sed -i -e's/0xE0, 32  #MBOX_SCRATCH_0/0x38, 32  #MBOX_SCRATCH_0/' $sb/simu/data/
 sed -i -e's/0xE4, 32  #MBOX_SCRATCH_1/0x39, 32  #MBOX_SCRATCH_1/' $sb/simu/data/cec-chip/p8_common.chip
 sed -i -e's/0xE8, 32  #MBOX_SCRATCH_2/0x3A, 32  #MBOX_SCRATCH_2/' $sb/simu/data/cec-chip/p8_common.chip
 sed -i -e's/0xEC, 32  #MBOX_SCRATCH_3/0x3B, 32  #MBOX_SCRATCH_3/' $sb/simu/data/cec-chip/p8_common.chip
+
+#### Update actions files for proc_a_x_pci_dmi_pll_setup -
+####      Remove when F864674 under RTC 60617
+echo "
+ #A Bus PLL workaround
+ CAUSE_EFFECT {
+ LABEL=[P8 ABUS PLL Lock]
+ WATCH=[REG(0x080F0013)]
+ CAUSE: TARGET=[REG(0x080F0013)] OP=[EQUALTO,BUF] DATA=[LITERAL(64,F7FFFFFF FFFFFFFF)]
+ EFFECT: TARGET=[REG(0x080F0019)] OP=[BIT,ON] BIT=[0]  # PLL Lock 
+} " >> $sb/simu/data/cec-chip/s1.act
+
+echo "
+ #A Bus PLL workaround
+ CAUSE_EFFECT {
+ LABEL=[P8 ABUS PLL Lock]
+ WATCH=[REG(0x080F0013)]
+ CAUSE: TARGET=[REG(0x080F0013)] OP=[EQUALTO,BUF] DATA=[LITERAL(64,F7FFFFFF FFFFFFFF)]
+ EFFECT: TARGET=[REG(0x080F0019)] OP=[BIT,ON] BIT=[0]  # PLL Lock 
+} " >> $sb/simu/data/cec-chip/p8.act
+
+echo "
+ #DMI PLL workaround
+CAUSE_EFFECT {
+ LABEL=[P8 DMI PLL Lock]
+ WATCH=[REG(0x020F0013)]
+ CAUSE: TARGET=[REG(0x020F0013)] OP=[EQUALTO,BUF] DATA=[LITERAL(64,F7FFFFFF FFFFFFFF)]
+ EFFECT: TARGET=[REG(0x020F0019)] OP=[BIT,ON] BIT=[0]  # PLL Lock 
+} " >>  $sb/simu/data/cec-chip/s1.act
+
+
+echo "
+ #DMI PLL workaround
+CAUSE_EFFECT {
+ LABEL=[P8 DMI PLL Lock]
+ WATCH=[REG(0x020F0013)]
+ CAUSE: TARGET=[REG(0x020F0013)] OP=[EQUALTO,BUF] DATA=[LITERAL(64,F7FFFFFF FFFFFFFF)]
+ EFFECT: TARGET=[REG(0x020F0019)] OP=[BIT,ON] BIT=[0]  # PLL Lock 
+} " >>  $sb/simu/data/cec-chip/p8.act
+
+
+echo "
+ #PCIE PLL workaround
+CAUSE_EFFECT {
+ LABEL=[P8 PCIE PLL Lock]
+ WATCH=[REG(0x090F0013)]
+ CAUSE: TARGET=[REG(0x090F0013)] OP=[EQUALTO,BUF] DATA=[LITERAL(64,F7FFFFFF FFFFFFFF)]
+ EFFECT: TARGET=[REG(0x090F0019)] OP=[BIT,ON] BIT=[0]  # PLL Lock 
+} " >> $sb/simu/data/cec-chip/s1.act
+
+echo "
+ #PCIE PLL workaround
+CAUSE_EFFECT {
+ LABEL=[P8 PCIE PLL Lock]
+ WATCH=[REG(0x090F0013)]
+ CAUSE: TARGET=[REG(0x090F0013)] OP=[EQUALTO,BUF] DATA=[LITERAL(64,F7FFFFFF FFFFFFFF)]
+ EFFECT: TARGET=[REG(0x090F0019)] OP=[BIT,ON] BIT=[0]  # PLL Lock 
+} " >> $sb/simu/data/cec-chip/p8.act
