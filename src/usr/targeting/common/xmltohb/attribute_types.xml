@@ -7587,11 +7587,11 @@ firmware notes: Used as override attribute for pstate procedure
 <id>NEST_FREQ_MHZ</id>
 <description>
     Nest frequency in MHz
-    @todo   need a default value here.
+    Default should be 2000 MHz per Greg Still
 </description>
     <simpleType>
         <uint32_t>
-            <default>0</default>
+            <default>2000</default>
         </uint32_t>
     </simpleType>
     <persistency>volatile</persistency>
@@ -7622,7 +7622,7 @@ firmware notes: Used as override attribute for pstate procedure
       other chips and chiplets it has decided are non-functional - this is
       why it is not a standard MVPD query.
     </description>
-    <simpleType>	
+    <simpleType>
         <uint64_t></uint64_t>
         <array>32</array>
     </simpleType>
@@ -7737,11 +7737,11 @@ firmware notes: Used as override attribute for pstate procedure
 <id>PIB_I2C_REFCLOCK</id>
 <description>
     i2c reference clock for the system.
-    default is 266 per Dean
+    default is 0x15  per Andreas Koenig
 </description>
     <simpleType>
         <uint32_t>
-            <default>0x10A</default>
+            <default>0x15</default>
         </uint32_t>
     </simpleType>
     <persistency>volatile</persistency>
@@ -7776,7 +7776,7 @@ firmware notes: Used as override attribute for pstate procedure
 <id>PIB_I2C_NEST_PLL</id>
 <description>
     i2c pll for the system
-    default is 0x0177 per Dean.
+    default is 0x0177 per Andreas Koenig.
 </description>
     <simpleType>
         <uint32_t>
@@ -7853,12 +7853,24 @@ firmware notes: Used as override attribute for pstate procedure
 <attribute>
 <id>BOOT_VOLTAGE</id>
 <description>
-     Boot Voltage for system.
-     Note: default =0 is OK for simics, must change for VPO and HW
+    Boot Voltage for system.
+    0:2   -> port enables (3b - system design based:
+        port 0 for non-redundant systems (100); all ports for non-redundant (111))
+    3     -> Unused
+     - current recommended default = 1000b
+    4:7   -> phase enables (4b - defined by the system power design)
+    - current recommended default = 0000b
+    8:15  -> VDD voltage (1B in VRM-11 encoded form - 6.25mV increments)
+        note: VPD is in 5mV increments
+    - current recommended default   =   0x52
+    16:23 -> VCS voltage (1B in VRM-11 encoded form - 6.25mV increments)
+        note: VPD is in 5mV increments
+    -current recommended default    =   0x4a
+    24:31 -> Unused                 =   0x00
 </description>
     <simpleType>
         <uint32_t>
-            <default>0</default>
+            <default>0x80524a00</default>
         </uint32_t>
     </simpleType>
     <persistency>volatile</persistency>
