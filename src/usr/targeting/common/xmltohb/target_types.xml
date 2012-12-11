@@ -366,6 +366,7 @@
     <attribute><id>PROC_PCIE_IOP_RX_SDL</id></attribute>
     <attribute><id>PROC_PCIE_IOP_ZCAL_CONTROL</id></attribute>
     <attribute><id>PROC_DCM_INSTALLED</id></attribute>
+    <attribute><id>CHIP_REGIONS_TO_ENABLE</id></attribute>
     <attribute><id>PROC_NX_ENABLE</id></attribute>
     <attribute><id>PROC_PCIE_ENABLE</id></attribute>
     <attribute><id>PROC_ADU_UNTRUSTED_BAR_BASE_ADDR</id></attribute>

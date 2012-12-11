@@ -7589,6 +7589,7 @@ firmware notes: Used as override attribute for pstate procedure
     </simpleType>
     <persistency>volatile</persistency>
     <readable/>
+    <writeable/>
     <hwpfToHbAttrMap>
         <id>ATTR_CHIP_REGIONS_TO_ENABLE</id>
         <macro>DIRECT</macro>
