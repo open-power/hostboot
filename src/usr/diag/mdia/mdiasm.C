@@ -40,6 +40,7 @@
 #include <diag/prdf/common/prdfMain.H>
 
 using namespace TARGETING;
+using namespace ERRORLOG;
 using namespace std;
 using namespace fapi;
 
@@ -76,6 +77,36 @@ void StateMachine::processCommandTimeout(const MonitorIDs & i_monitorIDs)
                 {
                     (*wit)->status = COMMAND_TIMED_OUT;
                     wkflprop = *wit;
+
+                    // log a timeout event
+
+                    TargetHandle_t target = getTarget(**wit);
+
+                    MDIA_ERR("command %d timed out on: %p",
+                            *((*wit)->workItem),
+                            target);
+
+                    /*@
+                     * @errortype
+                     * @reasoncode       MDIA::MAINT_COMMAND_TIMED_OUT
+                     * @severity         ERRORLOG::ERRL_SEV_INFORMATIONAL
+                     * @moduleid         MDIA::PROCESS_COMMAND_TIMEOUT
+                     * @userData1        Associated memory diag work item
+                     * @devdesc          A maint command timed out
+                     */
+                    errlHndl_t err = new ErrlEntry(
+                            ERRL_SEV_INFORMATIONAL,
+                            PROCESS_COMMAND_TIMEOUT,
+                            MAINT_COMMAND_TIMED_OUT,
+                            *((*wit)->workItem), 0);
+
+                    err->addHwCallout(target,
+                            HWAS::SRCI_PRIORITY_HIGH,
+                            HWAS::DECONFIG,
+                            HWAS::GARD_NULL);
+
+                    errlCommit(err, HBMDIA_COMP_ID);
+
                     break;
                 }
             }

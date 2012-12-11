@@ -29,6 +29,7 @@
  */
 
 #include <mdia/mdia.H>
+#include <mdia/mdiareasoncodes.H>
 #include <targeting/common/attributes.H>
 #include <vector>
 #include <map>
