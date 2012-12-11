@@ -26,6 +26,9 @@
  *  @brief Implementation of SCOM operations
  */
 
+
+// Code up to date for version: p8 1.9/s1 1.3 of p8.chipunit.scominfo
+
 /*****************************************************************************/
 // I n c l u d e s
 /*****************************************************************************/
@@ -74,7 +77,6 @@ DEVICE_REGISTER_ROUTE(DeviceFW::WILDCARD,
                       DeviceFW::SCOM,
                       TARGETING::TYPE_ABUS,
                       scomTranslate);
-
 
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -208,15 +210,25 @@ errlHndl_t scomTranslate(DeviceFW::OperationType i_opType,
             // correct address range.
 
             // MCS Indirect mask = 0x80000060_FFFFFFFF
-            //   0x80000060_02011A3F      MCS      0  # DMI0 Indirect SCOM
-            //   0x80000040_02011A3F      MCS      1  # DMI1 Indirect SCOM
-            //   0x80000020_02011A3F      MCS      2  # DMI2 Indirect SCOM
-            //   0x80000000_02011A3F      MCS      3  # DMI3 Indirect SCOM
-            //   0x80000060_02011E3F      MCS      4  # DMI4 Indirect SCOM
-            //   0x80000040_02011E3F      MCS      5  # DMI5 Indirect SCOM
-            //   0x80000020_02011E3F      MCS      6  # DMI6 Indirect SCOM
-            //   0x80000000_02011E3F      MCS      7  # DMI7 Indirect SCOM
+            //   0x80000060_02011A3F      MCS      0  # DMI0 Indirect SCOM RX3
+            //   0x80000040_02011A3F      MCS      1  # DMI1 Indirect SCOM RX2
+            //   0x80000020_02011A3F      MCS      2  # DMI2 Indirect SCOM RX1
+            //   0x80000000_02011A3F      MCS      3  # DMI3 Indirect SCOM RX0 
+            //   0x80000060_02011E3F      MCS      4  # DMI4 Indirect SCOM RX3
+            //   0x80000040_02011E3F      MCS      5  # DMI5 Indirect SCOM RX2
+            //   0x80000020_02011E3F      MCS      6  # DMI6 Indirect SCOM RX1
+            //   0x80000000_02011E3F      MCS      7  # DMI7 Indirect SCOM RX0
+
+            //   0x80000460_02011A3F      MCS      0  # DMI0 Indirect SCOM TX3
+            //   0x80000440_02011A3F      MCS      1  # DMI1 Indirect SCOM TX2
+            //   0x80000420_02011A3F      MCS      2  # DMI2 Indirect SCOM TX1
+            //   0x80000400_02011A3F      MCS      3  # DMI3 Indirect SCOM TX0
+            //   0x80000460_02011E3F      MCS      4  # DMI4 Indirect SCOM TX3
+            //   0x80000440_02011E3F      MCS      5  # DMI5 Indirect SCOM TX2
+            //   0x80000420_02011E3F      MCS      6  # DMI6 Indirect SCOM TX1
+            //   0x80000400_02011E3F      MCS      7  # DMI7 Indirect SCOM TX0
             //  SCOM_TRANS_IND_MCS_BASEADDR =     0x8000006002011A00,
+
 
             // check that we are working with a MCS/DMI address range..
             // can be indirect or direct.
@@ -287,11 +299,16 @@ errlHndl_t scomTranslate(DeviceFW::OperationType i_opType,
             //  0x04011800   XBUS 3    # XBUS3 Direct SCOM
             //
             // XBUS Indirect Address info
-            //  mask = 0x80000000_FFFFFFFF
-            //   0x800000000401103F   XBUS  0   # XBUS0 Indirect SCOM
-            //   0x800000000401143F   XBUS  1   # XBUS1 Indirect SCOM
-            //   0x8000000004011C3F   XBUS  2   # XBUS2 Indirect SCOM
-            //   0x800000000401183F   XBUS  3   # XBUS3 Indirect SCOM
+            //  mask = 0x80000000_FFFFFFC0
+            //   0x800000000401103F   XBUS  0   # XBUS0 RX0 Indirect SCOM
+            //   0x800000000401143F   XBUS  1   # XBUS1 RX1 Indirect SCOM
+            //   0x8000000004011C3F   XBUS  2   # XBUS2 RX2 Indirect SCOM
+            //   0x800000000401183F   XBUS  3   # XBUS3 RX3 Indirect SCOM
+            //
+            //   0x800004000401103F   XBUS  0   # XBUS0 TX0 Indirect SCOM
+            //   0x800004000401143F   XBUS  1   # XBUS1 TX1 Indirect SCOM
+            //   0x8000040004011C3F   XBUS  2   # XBUS2 TX2 Indirect SCOM
+            //   0x800004000401183F   XBUS  3   # XBUS3 TX3 Indirect SCOM
 
 
             // no differentiation between direct and indirect.. translate the same way
@@ -351,9 +368,14 @@ errlHndl_t scomTranslate(DeviceFW::OperationType i_opType,
            //
            // Abus Indirect Addresses
            // Abus Indirect MASK =   0x80000060FFFFFFFF
-           //  0x80000000_08010C3F  ABUS 0   # ABUS0 Indirect SCOM
-           //  0x80000020_08010C3F  ABUS 1   # ABUS1 Indirect SCOM 
-           //  0x80000040_08010C3F  ABUS 2   # ABUS2 Indirect SCOM
+           //  0x80000000_08010C3F  ABUS 0   # ABUS0 RX0 Indirect SCOM
+           //  0x80000020_08010C3F  ABUS 1   # ABUS1 RX1 Indirect SCOM 
+           //  0x80000040_08010C3F  ABUS 2   # ABUS2 RX2 Indirect SCOM
+           //
+           //  0x80000400_08010C3F  ABUS 0   # ABUS0 TX0 Indirect SCOM
+           //  0x80000420_08010C3F  ABUS 1   # ABUS1 TX1 Indirect SCOM 
+           //  0x80000440_08010C3F  ABUS 2   # ABUS2 TX2 Indirect SCOM
+
 
 
             // Check that we are working with the correct address range
