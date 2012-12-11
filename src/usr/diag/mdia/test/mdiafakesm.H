@@ -157,45 +157,5 @@ class FakeStateMachine1 : public StateMachine
          */
         mutex_t *iv_mutex;
 };
-
-/**
- * @brief FakeStateMachine2
- *
- * Used to test processing a maint command timeout
- * from the StateMachine perspective
- */
-class FakeStateMachine2 : public StateMachine
-{
-    public:
-
-        /**
-         * @brief doMaintCommand maint command work item handler
-         *
-         * determine correct comman and issue it. Does not support
-         * polling/processing fake events.
-         *
-         * @param[in] i_wfp the target for which a command should be issued
-         */
-        errlHndl_t doMaintCommand(WorkFlowProperties & i_wfp);
-
-        /**
-         * @brief ctor
-         */
-        FakeStateMachine2(){}
-
-        /**
-         * @brief dtor
-         */
-        ~FakeStateMachine2(){}
-
-    private:
-
-        /**
-         * @brief getMonitor Create and start the FakeMdiaCMTest
-         *
-         * @retval CommandMonitor reference
-         */
-        CommandMonitor & getMonitor();
-};
 }
 #endif
