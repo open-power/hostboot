@@ -74,6 +74,7 @@ namespace   INITSERVICE
                         NONE,
                         EXT_IMAGE,
                         IPL_NOOP,
+                        false,                                  // true = check for attentions
                 }
         },
 
@@ -84,6 +85,7 @@ namespace   INITSERVICE
                         START_FN,
                         EXT_IMAGE,
                         NORMAL_IPL_OP,
+                        false,
                 }
         },
 
@@ -95,6 +97,7 @@ namespace   INITSERVICE
                         START_FN,
                         EXT_IMAGE,
                         NORMAL_IPL_OP,
+                        false,
                 }
         },
 
@@ -106,6 +109,7 @@ namespace   INITSERVICE
                         START_FN,
                         EXT_IMAGE,
                         NORMAL_IPL_OP,
+                        false,
                 }
         },
 
@@ -117,6 +121,7 @@ namespace   INITSERVICE
                         START_FN,
                         EXT_IMAGE,
                         NORMAL_IPL_OP,
+                        false,
                 }
         },
 
@@ -128,6 +133,7 @@ namespace   INITSERVICE
                         START_FN,
                         EXT_IMAGE,
                         NORMAL_IPL_OP,
+                        false,
                 }
         },
 
@@ -139,6 +145,7 @@ namespace   INITSERVICE
                         START_FN,
                         EXT_IMAGE,
                         NORMAL_IPL_OP,
+                        false,
                 }
         },
 
@@ -150,6 +157,7 @@ namespace   INITSERVICE
                         START_FN,
                         EXT_IMAGE,
                         NORMAL_IPL_OP,
+                        false,
                 }
         },
 
@@ -161,6 +169,7 @@ namespace   INITSERVICE
                         START_FN,
                         EXT_IMAGE,
                         NORMAL_IPL_OP,
+                        true,
                 }
         },
 

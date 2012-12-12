@@ -83,6 +83,7 @@ const   TaskInfo    g_istep06[]  =   {
                         NONE,
                         EXT_IMAGE,
                         IPL_NOOP,
+                        false,
                 }
         },
         {
@@ -92,6 +93,7 @@ const   TaskInfo    g_istep06[]  =   {
                         NONE,
                         EXT_IMAGE,
                         IPL_NOOP,
+                        false,
                 }
         },
         {
@@ -101,6 +103,7 @@ const   TaskInfo    g_istep06[]  =   {
                         NONE,
                         EXT_IMAGE,
                         IPL_NOOP,
+                        false,
                 }
         },
 
@@ -111,6 +114,7 @@ const   TaskInfo    g_istep06[]  =   {
                         START_FN,                           // task type
                         EXT_IMAGE,                          // Extended Module
                         NORMAL_IPL_OP | MPIPL_OP,
+                        false,                              // true = check for attentions
                 }
         },
         {
@@ -120,6 +124,7 @@ const   TaskInfo    g_istep06[]  =   {
                         START_FN,
                         EXT_IMAGE,
                         NORMAL_IPL_OP | MPIPL_OP,
+                        false,
                 }
         },
         {
@@ -129,6 +134,7 @@ const   TaskInfo    g_istep06[]  =   {
                         START_FN,                           // task type
                         EXT_IMAGE,                          // Extended Module
                         NORMAL_IPL_OP | MPIPL_OP,
+                        false,
                 }
         },
         {
@@ -138,6 +144,7 @@ const   TaskInfo    g_istep06[]  =   {
                         START_FN,                       // task type
                         EXT_IMAGE,                      // Extended Module
                         NORMAL_IPL_OP | MPIPL_OP,
+                        false,
                 }
         },
         {
@@ -147,6 +154,7 @@ const   TaskInfo    g_istep06[]  =   {
                         START_FN,
                         EXT_IMAGE,
                         NORMAL_IPL_OP,
+                        false,
                 }
         },
         {
@@ -156,6 +164,7 @@ const   TaskInfo    g_istep06[]  =   {
                         START_FN,
                         EXT_IMAGE,
                         NORMAL_IPL_OP,
+                        false,
                 }
         },
         {
@@ -165,6 +174,7 @@ const   TaskInfo    g_istep06[]  =   {
                         START_FN,
                         EXT_IMAGE,
                         NORMAL_IPL_OP,
+                        false,
                 }
         },
 
@@ -175,6 +185,7 @@ const   TaskInfo    g_istep06[]  =   {
                         START_FN,
                         EXT_IMAGE,
                         NORMAL_IPL_OP,
+                        false,
                 }
         },
 
@@ -185,6 +196,7 @@ const   TaskInfo    g_istep06[]  =   {
                         START_FN,
                         EXT_IMAGE,
                         NORMAL_IPL_OP,
+                        false,
                 }
         },
         {
@@ -194,6 +206,7 @@ const   TaskInfo    g_istep06[]  =   {
                         START_FN,
                         EXT_IMAGE,
                         NORMAL_IPL_OP,
+                        false,
                 }
         },
 

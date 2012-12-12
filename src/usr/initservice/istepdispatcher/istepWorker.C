@@ -43,6 +43,8 @@
 
 #include    "../baseinitsvc/initservice.H"
 
+#include <diag/attn/attn.H>
+
 //#include <initservice/initsvcudistep.H>  //  InitSvcUserDetailsIstep
 
 #include "istep_mbox_msgs.H"
@@ -163,6 +165,22 @@ void iStepWorkerThread ( void * i_msgQ )
                            "IStepDipspatcher (worker): Istep %s returned "
                            "errlog=%p",
                            theStep->taskname, err );
+            }
+            // Check for any attentions and invoke PRD for analysis
+            else if ( true == theStep->taskflags.check_attn )
+            {
+                TRACDCOMP( g_trac_initsvc,
+                           INFO_MRK"Check for attentions and invoke PRD" );
+
+                err = ATTN::checkForIplAttentions();
+
+                if ( err )
+                {
+                    TRACFCOMP( g_trac_initsvc,
+                               "IStepDipspatcher (worker): Error returned "
+                               "from PRD analysis after Istep %s",
+                               theStep->taskname);
+                }
             }
         }
         else

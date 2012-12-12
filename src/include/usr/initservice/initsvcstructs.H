@@ -132,6 +132,11 @@ struct  TaskFlags
     uint8_t             ipl_op;             // bitmap of IplOpType enum
                                             // indicating whether task
                                             // is an op in certain IPL modes.
+    bool                check_attn;         // flag indicating whether to check
+                                            // for attentions and invoke PRD
+                                            // for analysis after executing
+                                            // the istep substep
+                                            // true = check for attentions
 };
 
 

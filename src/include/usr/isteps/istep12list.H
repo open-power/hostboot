@@ -65,6 +65,7 @@ const   TaskInfo    g_istep12[]  =   {
                         NONE,
                         EXT_IMAGE,
                         IPL_NOOP,
+                        false,                      // true = check for attentions
                 }
         },
 
@@ -75,6 +76,7 @@ const   TaskInfo    g_istep12[]  =   {
                         START_FN,
                         EXT_IMAGE,
                         NORMAL_IPL_OP,
+                        true,
                 }
         },
         {
@@ -84,6 +86,7 @@ const   TaskInfo    g_istep12[]  =   {
                         START_FN,
                         EXT_IMAGE,
                         NORMAL_IPL_OP,
+                        true,
                 }
         },
         {
@@ -93,6 +96,7 @@ const   TaskInfo    g_istep12[]  =   {
                         START_FN,
                         EXT_IMAGE,
                         NORMAL_IPL_OP,
+                        true,
                 }
         },
         {
@@ -102,6 +106,7 @@ const   TaskInfo    g_istep12[]  =   {
                         START_FN,
                         EXT_IMAGE,
                         NORMAL_IPL_OP,
+                        true,
                 }
         },
 
