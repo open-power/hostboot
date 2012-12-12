@@ -21,7 +21,7 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 // -*- mode: C++; c-file-style: "linux";  -*-
-// $Id: proc_check_slave_sbe_seeprom_complete.C,v 1.4 2012/10/29 22:05:38 jeshua Exp $
+// $Id: proc_check_slave_sbe_seeprom_complete.C,v 1.5 2012/11/13 21:00:34 jeshua Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_check_slave_sbe_seeprom_complete.C,v $
 //------------------------------------------------------------------------------
 // *|
@@ -302,7 +302,7 @@ extern "C"
                     istep_num,
                     substep_num);
                 //Get the error code from the SBE code
-                FAPI_PLAT_EXEC_HWP(rc, proc_extract_sbe_rc, i_target);
+                FAPI_EXEC_HWP(rc, proc_extract_sbe_rc, i_target);
                 break;
             }
             //Halt code was success

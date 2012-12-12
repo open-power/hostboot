@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_prep_master_winkle.H,v 1.5 2012/08/24 18:32:51 jeshua Exp $
+// $Id: proc_prep_master_winkle.H,v 1.6 2012/10/24 22:22:43 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_prep_master_winkle.H,v $
 //------------------------------------------------------------------------------
 // *|
@@ -76,7 +76,7 @@ extern "C"
  * @return ReturnCode
  */
   fapi::ReturnCode proc_prep_master_winkle(const fapi::Target & i_target,
-                                           const bool i_useRealSBE);
+                                           const bool & i_useRealSBE);
 
 } // extern "C"
 

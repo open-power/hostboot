@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_pmc_deconfig_setup.C,v 1.4 2012/09/20 12:22:42 stillgs Exp $
+// $Id: p8_pmc_deconfig_setup.C,v 1.6 2012/09/28 15:24:33 stillgs Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/p8_pmc_deconfig_setup.C,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
@@ -60,10 +60,7 @@
 #include "p8_scom_addresses.H"
 #include "p8_pmc_deconfig_setup.H"
 
-#ifdef FAPIECMD
 extern "C" {
-#endif
-
 
 using namespace fapi;
 
@@ -100,7 +97,6 @@ p8_pmc_deconfig_setup(const Target& i_target)
     ecmdDataBufferBase              data(64);
     ecmdDataBufferBase              config_data(64);
     std::vector<fapi::Target>       l_exChiplets;
-//    std::vector<Target>::iterator   l_itr;
     uint8_t                         l_functional = 0;
     uint8_t                         l_ex_number = 0;
     bool                            core_flag = false;
@@ -116,23 +112,23 @@ p8_pmc_deconfig_setup(const Target& i_target)
 	}
 
 	FAPI_DBG("\tChiplet vector size  => %u ", l_exChiplets.size());
-    
+
     // Set the buffer to assume that all chiplets are deconfigured.  Validly configured
     // chiplets will then turn off this deconfiguration.
     FAPI_INF("\tAssuming all cores are non-functional");
     e_rc |= config_data.flushTo0();
-    e_rc |= config_data.setBit(0, 16);   
+    e_rc |= config_data.setBit(0, 16);
     if (e_rc)
     {
         FAPI_ERR("Error (0x%x) flushing ecmdDataBufferBase", e_rc);
         l_rc.setEcmdError(e_rc);
         return l_rc;
     }
-    
+
     // Iterate through the returned chiplets
 	for (uint8_t j=0; j < l_exChiplets.size(); j++)
 	{
-       
+
         // Determine if it's functional
         l_rc = FAPI_ATTR_GET(ATTR_FUNCTIONAL, &l_exChiplets[j], l_functional);
         if (l_rc)
@@ -141,8 +137,8 @@ p8_pmc_deconfig_setup(const Target& i_target)
             break;
         }
         else
-        {               
-            if ( l_functional ) 
+        {
+            if ( l_functional )
             {
                 // Get the core number
                 l_rc = FAPI_ATTR_GET(ATTR_CHIP_UNIT_POS, &l_exChiplets[j], l_ex_number);
@@ -153,19 +149,19 @@ p8_pmc_deconfig_setup(const Target& i_target)
                 }
 
                 l_rc=fapiGetScom(i_target, (EX_GP3_0x100F0012+(l_ex_number*0x01000000)), data);
-                if(l_rc) 
+                if(l_rc)
                 {
-                    FAPI_ERR("GetScom error"); 
+                    FAPI_ERR("GetScom error");
                     break;
                 }
 
-                FAPI_DBG("\tGP0(0) from core %x (@ %08llx) => 0x%16llx", 
-                                l_ex_number, 
+                FAPI_DBG("\tGP0(0) from core %x (@ %08llx) => 0x%16llx",
+                                l_ex_number,
                                 (EX_GP3_0x100F0012+(l_ex_number*0x01000000)),
                                 data.getDoubleWord(0));
 
-                // Check if chiplet enable bit is set (configured);  If so, 
-                // clear the chiplet bit in PMC Core Deconfig Register (0:15) 
+                // Check if chiplet enable bit is set (configured);  If so,
+                // clear the chiplet bit in PMC Core Deconfig Register (0:15)
                 // indexed by ex number
                 if ( data.isBitSet(0) )
                 {
@@ -177,25 +173,25 @@ p8_pmc_deconfig_setup(const Target& i_target)
                         l_rc.setEcmdError(e_rc);
                         break;
                     }
+                    core_flag =  true;
                 }
-	            core_flag =  true;
-                }
+            }
             else  // Not Functional so skip it
             {
                 // Do nothing
             }
         }
 	}
-    
+
     // If no errors, write the deconfig register
     if (!l_rc)
-    {    
+    {
 	    if ( core_flag )
         {
             l_rc=fapiPutScom(i_target, PMC_CORE_DECONFIG_REG_0x0006200D , config_data);
-            if(l_rc) 
+            if(l_rc)
             {
-                FAPI_ERR("PutScom error"); 
+                FAPI_ERR("PutScom error");
             }
             else
             {
@@ -212,7 +208,5 @@ p8_pmc_deconfig_setup(const Target& i_target)
 }
 
 
-
-#ifdef FAPIECMD
 } //end extern C
-#endif
+

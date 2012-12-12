@@ -21,7 +21,7 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 // -*- mode: C++; c-file-style: "linux";  -*-
-// $Id: proc_stop_deadman_timer.C,v 1.6 2012/09/21 19:35:08 stillgs Exp $
+// $Id: proc_stop_deadman_timer.C,v 1.7 2012/10/24 22:23:37 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_stop_deadman_timer.C,v $
 //------------------------------------------------------------------------------
 // *|
@@ -54,7 +54,6 @@
 //------------------------------------------------------------------------------
 #include "proc_stop_deadman_timer.H"
 #include "p8_scom_addresses.H"
-#include "proc_sbe_ffdc.H"
 #include "p8_istep_num.H"
 #include "proc_sbe_trigger_winkle.H"
 

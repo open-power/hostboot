@@ -21,7 +21,7 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 // -*- mode: C++; c-file-style: "linux";  -*-
-// $Id: proc_prep_master_winkle.C,v 1.9 2012/09/11 14:06:21 jeshua Exp $
+// $Id: proc_prep_master_winkle.C,v 1.11 2012/10/24 22:22:23 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_prep_master_winkle.C,v $
 //------------------------------------------------------------------------------
 // *|
@@ -57,7 +57,6 @@
 //------------------------------------------------------------------------------
 #include "proc_prep_master_winkle.H"
 #include "p8_scom_addresses.H"
-#include "proc_sbe_ffdc.H"
 #include "p8_istep_num.H"
 #include "proc_sbe_trigger_winkle.H"
 
@@ -84,7 +83,7 @@ extern "C"
 // returns: FAPI_RC_SUCCESS if operation was successful, else error
 //------------------------------------------------------------------------------
     fapi::ReturnCode proc_prep_master_winkle(const fapi::Target & i_target, 
-                                             bool i_useRealSBE = true)
+                                             const bool & i_useRealSBE = true)
     {
         // data buffer to hold register values
         ecmdDataBufferBase data(64);
@@ -137,6 +136,7 @@ extern "C"
             if(rc_ecmd)
             {
                 FAPI_ERR("Error (0x%x) setting up ecmdDataBufferBase", rc_ecmd);
+
                 rc.setEcmdError(rc_ecmd);
                 break;
             }
