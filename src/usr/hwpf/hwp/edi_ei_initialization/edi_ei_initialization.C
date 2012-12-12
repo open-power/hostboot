@@ -579,7 +579,43 @@ void*    call_proc_fab_iovalid( void    *io_pArgs )
         errlCommit( l_errl, HWPF_COMP_ID );
 
     }
+    // no errors during the proc_fabric_iovalid so switch to XSCOM
+    else
+    {
+        // At the point where we can now change the proc chips to use
+        // XSCOM rather than FSISCOM which is the default.
 
+        TARGETING::TargetHandleList procChips;
+        getAllChips(procChips, TYPE_PROC);
+
+        TARGETING::TargetHandleList::iterator curproc = procChips.begin();
+
+        // Loop through all proc chips
+        while(curproc != procChips.end())
+        {
+            TARGETING::Target*  l_proc_target = *curproc;
+
+            // If the proc chip supports xscom.. 
+            if (l_proc_target->getAttr<ATTR_PRIMARY_CAPABILITIES>()
+                .supportsXscom)
+            {
+                ScomSwitches l_switches =
+                  l_proc_target->getAttr<ATTR_SCOM_SWITCHES>();
+
+                // If Xscom is not already enabled.
+                if ((l_switches.useXscom != 1) || (l_switches.useFsiScom != 0))
+                {
+                    l_switches.useFsiScom = 0;
+                    l_switches.useXscom = 1;
+
+                    // Turn off FSI scom and turn on Xscom.
+                    l_proc_target->setAttr<ATTR_SCOM_SWITCHES>(l_switches);
+                }
+            }
+
+            ++curproc;
+        }
+    }
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                "call_proc_fab_iovalid exit" );
 

@@ -653,6 +653,7 @@
     </complexType>
     <persistency>volatile</persistency>
     <readable/>
+    <writeable/>
 </attribute>
 
 <attribute>
