@@ -37,6 +37,7 @@ EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/bus_training
 
 ##  NOTE: add the base istep dir here. 
 EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/edi_ei_initialization
+EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/io_restore_erepair
 
 ##  Include sub dirs
 ##  NOTE: add a new EXTRAINCDIR when you add a new HWP
