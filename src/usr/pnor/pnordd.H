@@ -72,6 +72,17 @@ class PnorDD
                           size_t& io_buflen,
                           uint64_t i_address);
 
+    /**
+     * @brief Informs caller if PNORDD is using
+     *        L3 Cache for fake PNOR or not.
+     *
+     * @return Indicate state of fake PNOR
+     *         true = PNOR DD is using L3 Cache for fake PNOR
+     *         false = PNOR DD not using L3 Cache for fake PNOR
+     */
+    bool usingL3Cache( );
+
+
         // Enumeration values must match those in debug framework.
     enum PnorMode_t {
         MODEL_UNKNOWN,   /**< Invalid */

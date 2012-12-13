@@ -99,6 +99,18 @@ errlHndl_t getSectionInfo( SectionId i_section,
                            SideSelect i_side,
                            SectionInfo_t& o_info );
 
+/**
+ * @brief Informs caller if PNORDD is using
+ *        L3 Cache for fake PNOR or not.
+ *
+ * @return Indicate state of fake PNOR
+ *         true = PNOR DD is using L3 Cache for fake PNOR
+ *         false = PNOR DD not using L3 Cache for fake PNOR
+ */
+bool usingL3Cache();
 
 }
+
+
+
 #endif

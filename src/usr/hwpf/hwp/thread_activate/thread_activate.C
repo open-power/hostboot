@@ -53,9 +53,180 @@
 #include    <hwpf/plat/fapiPlatReasonCodes.H>
 #include    <hwpf/plat/fapiPlatTrace.H>
 
+#include    <pnor/pnorif.H>
+#include    <mvpd/mvpdenums.H>
 
 namespace   THREAD_ACTIVATE
 {
+
+/**
+ * @brief This function will query MVPD and figure out if the master
+ *        core has a fully configured cache or not..
+ *
+ * @param[in] i_masterCoreId - Core number of the core we're running on.
+ *
+ *
+ * @return bool - Indicates if half of cache is deconfigured or not.
+ *                true - half cache deconfigured, only 4MB available
+ *                false -> No Cache deconfigured, 8MB available.
+*/
+bool getCacheDeconfig(uint64_t i_masterCoreId)
+{
+    TRACFCOMP( g_fapiImpTd,
+               "Entering getCacheDeconfig, i_masterCoreId=0x%.8X",
+               i_masterCoreId);
+
+    //CH Keyword in LPRx Record of MVPD contains the Cache Deconfig State
+    //the x in LPRx is the core number.
+
+    errlHndl_t  l_errl  =   NULL;
+    bool cacheDeconfig = true;
+    uint64_t theRecord = 0x0;
+    uint64_t theKeyword = MVPD::CH;
+    uint8_t * theData = NULL;
+    size_t theSize = 0;
+    TARGETING::Target* l_procTarget = NULL;
+
+    do {
+        // Target: Find the Master processor
+        TARGETING::targetService().masterProcChipTargetHandle(l_procTarget);
+        assert(l_procTarget != NULL);
+
+        //Convert core number to LPRx Record ID.
+        //TODO: use a common utility function for conversion. RTC: 60552
+        switch (i_masterCoreId)
+        {
+        case 0x0:
+            theRecord = MVPD::LRP0;
+            break;
+        case 0x1:
+            theRecord = MVPD::LRP1;
+            break;
+        case 0x2:
+            theRecord = MVPD::LRP2;
+            break;
+        case 0x3:
+            theRecord = MVPD::LRP3;
+            break;
+        case 0x4:
+            theRecord = MVPD::LRP4;
+            break;
+        case 0x5:
+            theRecord = MVPD::LRP5;
+            break;
+        case 0x6:
+            theRecord = MVPD::LRP6;
+            break;
+        case 0x7:
+            theRecord = MVPD::LRP7;
+            break;
+        case 0x8:
+            theRecord = MVPD::LRP8;
+            break;
+        case 0x9:
+            theRecord = MVPD::LRP9;
+            break;
+        case 0xA:
+            theRecord = MVPD::LRPA;
+            break;
+        case 0xB:
+            theRecord = MVPD::LRPB;
+            break;
+        case 0xC:
+            theRecord = MVPD::LRPC;
+            break;
+        case 0xD:
+            theRecord = MVPD::LRPE;
+            break;
+        case 0xE:
+            theRecord = MVPD::LRPE;
+            break;
+        default:
+            TRACFCOMP( g_fapiImpTd,
+                       "getCacheDeconfig: No MVPD Record for core 0x%.8X",
+                       i_masterCoreId);
+            /*@
+             * @errortype
+             * @moduleid     fapi::MOD_GET_CACHE_DECONFIG
+             * @reasoncode   fapi::RC_INVALID_RECORD
+             * @userdata1    Master Core Number
+             * @userdata2    Master processor chip huid
+             * @devdesc      getCacheDeconfig> Master core is not mapped
+             *               to a LRPx Module VPD Record.
+             */
+            l_errl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                             fapi::MOD_GET_CACHE_DECONFIG,
+                                             fapi::RC_INVALID_RECORD,
+                                             i_masterCoreId,
+                                             TARGETING::get_huid(l_procTarget));
+            break;
+        }
+
+        //First call is just to get the Record size.
+        l_errl = deviceRead(l_procTarget,
+                          NULL,
+                          theSize,
+                          DEVICE_MVPD_ADDRESS( theRecord,
+                                               theKeyword ) );
+        if( l_errl ) { break; }
+
+        if(theSize != 1)
+        {
+            /*@
+             * @errortype
+             * @moduleid     fapi::MOD_GET_CACHE_DECONFIG
+             * @reasoncode   fapi::RC_INCORRECT_KEWORD_SIZE
+             * @userdata1    Master Core Number
+             * @userdata2    CH Keyword Size
+             * @devdesc      getCacheDeconfig> LRPx Record, CH keyword
+             *               is incorrect size
+             */
+            l_errl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                             fapi::MOD_GET_CACHE_DECONFIG,
+                                             fapi::RC_INCORRECT_KEWORD_SIZE,
+                                             i_masterCoreId,
+                                             theSize);
+            break;
+        }
+
+        theData = static_cast<uint8_t*>(malloc( theSize ));
+
+        //2nd call is to get the actual data.
+        l_errl = deviceRead(l_procTarget,
+                          theData,
+                          theSize,
+                          DEVICE_MVPD_ADDRESS( theRecord,
+                                               theKeyword ) );
+        if( l_errl ) { break; }
+
+        
+        if(0 == theData[0])
+        {
+            cacheDeconfig = false;
+        }
+
+    } while(0);
+
+    if(NULL != theData)
+    {
+        free(theData);
+    }
+
+    if(NULL != l_errl)
+    {
+        //TODO: We may not be able to run with only 4MB
+        // in the long run so need to revist this after
+        // we no longer have to deal with parital good
+        // bringup chips.  RTC: 60620
+
+        //Not worth taking the system down, just assume
+        //we only have half the cache available.
+        errlCommit(l_errl,HWPF_COMP_ID);
+        cacheDeconfig = true;
+    }
+
+    return cacheDeconfig;
+}
 
 
 void activate_threads( errlHndl_t& io_rtaskRetErrl )
@@ -221,9 +392,11 @@ void activate_threads( errlHndl_t& io_rtaskRetErrl )
     }
 
     // Reclaim remainder of L3 cache if available.
-    // TODO: RTC 49137: Add calls to MVPD and PNOR to make decision.
-    if (!TARGETING::is_vpo())
+    if ((!PNOR::usingL3Cache()) &&
+        (!getCacheDeconfig(l_masterCoreID)))
     {
+        TRACFCOMP( g_fapiTd,
+                   "activate_threads: Extending cache to 8MB" );
         mm_extend(MM_EXTEND_FULL_CACHE);
     }
 

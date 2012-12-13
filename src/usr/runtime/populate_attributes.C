@@ -531,14 +531,6 @@ errlHndl_t populate_attributes( void )
             break;
         }
 
-        //@todo : Remove this before RTC:49137 is merged, fix with RTC:49509
-        // Skip this in VPO
-        if( TARGETING::is_vpo() )
-        {
-            TRACFCOMP( g_trac_runtime, "Skipping RUNTIME::populate_attributes in VPO mode" );
-            break;
-        }
-
         errhdl = populate_system_attributes();
         if( errhdl )
         {

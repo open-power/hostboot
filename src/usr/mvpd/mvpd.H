@@ -109,6 +109,9 @@ const mvpdRecordInfo mvpdRecords[] =
     { LRP9, "LRP9" },
     { LRPA, "LRPA" },
     { LRPB, "LRPB" },
+    { LRPC, "LRPC" },
+    { LRPD, "LRPD" },
+    { LRPE, "LRPE" },
     { LWP0, "LWP0" },
     { LWP1, "LWP1" },
     { LWP2, "LWP2" },
@@ -121,6 +124,9 @@ const mvpdRecordInfo mvpdRecords[] =
     { LWP9, "LWP9" },
     { LWPA, "LWPA" },
     { LWPB, "LWPB" },
+    { LWPC, "LWPC" },
+    { LWPD, "LWPD" },
+    { LWPE, "LWPE" },
     { VWML, "VWML" },
     // -------------------------------------------------------------------
     // DO NOT USE!!  This is for test purposes ONLY!
@@ -173,6 +179,7 @@ const mvpdKeywordInfo mvpdKeywords[] =
     { pdG, "#G" },
     { MK,  "MK" },
     { PB,  "PB" },
+    { CH,  "CH" },
     // -------------------------------------------------------------------
     // DO NOT USE!!  This is for test purposes ONLY!
     { MVPD_TEST_KEYWORD, "TEST" },

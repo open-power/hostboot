@@ -160,6 +160,19 @@ errlHndl_t ddWrite(DeviceFW::OperationType i_opType,
     return l_err;
 }
 
+/**
+ * @brief Informs caller if PNORDD is using
+ *        L3 Cache for fake PNOR or not.
+ *
+ * @return Indicate state of fake PNOR
+ *         true = PNOR DD is using L3 Cache for fake PNOR
+ *         false = PNOR DD not using L3 Cache for fake PNOR
+ */
+bool usingL3Cache()
+{
+    return Singleton<PnorDD>::instance().usingL3Cache();
+}
+
 // Register PNORDD access functions to DD framework
 DEVICE_REGISTER_ROUTE(DeviceFW::READ,
                       DeviceFW::PNOR,
@@ -527,8 +540,24 @@ void PnorDD::sfcInit( )
     {
         errlCommit(l_err,PNOR_COMP_ID);
     }
+}
 
+bool PnorDD::usingL3Cache( )
+{
+    TRACDCOMP(g_trac_pnor,
+              "PnorDD::usingL3Cache> iv_mode=0x%.8x", iv_mode );
 
+    //If we are in one of the fake PNOR modes,
+    //than we are using L3 CAche
+    if( (MODEL_MEMCPY == iv_mode) ||
+        (MODEL_LPC_MEM == iv_mode) )
+    {
+        return true;
+    }
+    else
+    {
+        return false;
+    }
 }
 
 /**
