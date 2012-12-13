@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_pore_table_gen_api.C,v 1.10 2012/09/24 21:25:55 cmolsen Exp $
+// $Id: p8_pore_table_gen_api.C,v 1.11 2012/10/04 02:39:07 cmolsen Exp $
 //
 /*------------------------------------------------------------------------------*/
 /* *! (C) Copyright International Business Machines Corp. 2012                  */
@@ -45,8 +45,8 @@
 /*------------------------------------------------------------------------------*/
 
 #define __P8_PORE_TABLE_GEN_API_C
-#include <p8_pore_api_custom.h>
 #include <HvPlicModule.H>
+#include <p8_pore_api_custom.h>
 #include <p8_pore_table_gen_api.H>
 #include <p8_delta_scan_rw.h>
 
@@ -115,7 +115,7 @@ uint32_t p8_pore_gen_cpureg(  void      *io_image,
   }
   // ...check thread ID
   if (i_threadId>=SLW_CORE_THREADS)  {
-    MY_ERR("Thread ID = %i is not within valid range of [0;%i]\n",i_coreId,SLW_CORE_THREADS-1);
+    MY_ERR("Thread ID = %i is not within valid range of [0;%i]\n",i_threadId,SLW_CORE_THREADS-1);
     rcLoc = 1;
   }
   if (rcLoc)
@@ -221,8 +221,8 @@ uint32_t p8_pore_gen_cpureg(  void      *io_image,
       // Check hostRamTableThis for sizeTableThis>SLW_MAX_CPUREGS_OPS
       if ((uint64_t)hostRamTableNext==(uint64_t)hostRamTableThis)  {
         if ((sizeTableThis/XIPSIZE_RAM_ENTRY+1)>SLW_MAX_CPUREGS_OPS)  {
-          MY_ERR("Table entry overflow. (SLW_MAX_CPUREGS_OPS=%i). Exiting.\n",SLW_MAX_CPUREGS_OPS);
-          return IMGBUILD_ERR_RAM_TABLE_OVERFLOW;
+          MY_ERR("RAM table is full. Max %i entries allowed.\n",SLW_MAX_CPUREGS_OPS);
+          return IMGBUILD_ERR_RAM_TABLE_FULL;
         }
       }
       // Update total table size.
@@ -271,26 +271,32 @@ uint32_t p8_pore_gen_cpureg(  void      *io_image,
     // Insert at end of existing table.
     hostRamEntryNext = hostRamTableThis;
     ramEntryNext = (RamTableEntry*)hostRamEntryNext;
-    iCount = 0;
+    iCount = 1;
 		while ((myRev32(ramEntryNext->header) & RAM_HEADER_END_MASK_C)==0)  {
+			if (iCount>=SLW_MAX_CPUREGS_OPS)  {
+				MY_ERR("Bad table! Header end bit not found and RAM table full (=%i entries).\n",SLW_MAX_CPUREGS_OPS);
+        return IMGBUILD_ERR_RAM_TABLE_END_NOT_FOUND;
+			}
       hostRamEntryNext = (void*)((uint8_t*)hostRamEntryNext + XIPSIZE_RAM_ENTRY);
       ramEntryNext = (RamTableEntry*)hostRamEntryNext;
 			iCount++;
-			if ((iCount+1)>SLW_MAX_CPUREGS_OPS)  {
-        MY_ERR("Table end bit, in header, wasn't found within max OPs allowed per table.\n");
-        return IMGBUILD_ERR_RAM_TABLE_END_NOT_FOUND;
-			}
     }
-    // ...zero out previous END bit in header
-    if ((myRev32(ramEntryNext->header) & RAM_HEADER_END_MASK_C))  {
-      ramEntryNext->header = ramEntryNext->header & myRev32(~RAM_HEADER_END_MASK_C);
-    }
-    else  {
-      MY_ERR("ERROR : We should never get here. Check code. Dumping data:\n");
-      MY_ERR("myRev32(ramEntryNext->header) = 0x%08x\n",myRev32(ramEntryNext->header));
-      MY_ERR("RAM_HEADER_END_MASK_C         = 0x%08x\n",RAM_HEADER_END_MASK_C);
-      return IMGBUILD_ERR_RAM_CODE;
-    }
+		if (iCount<SLW_MAX_CPUREGS_OPS)  {
+	    // ...zero out previous END bit in header
+	    if ((myRev32(ramEntryNext->header) & RAM_HEADER_END_MASK_C))  {
+	      ramEntryNext->header = ramEntryNext->header & myRev32(~RAM_HEADER_END_MASK_C);
+	    }
+	    else  {
+	      MY_ERR("We should never get here. Check code. Dumping data:\n");
+	      MY_ERR("myRev32(ramEntryNext->header) = 0x%08x\n",myRev32(ramEntryNext->header));
+	      MY_ERR("RAM_HEADER_END_MASK_C         = 0x%08x\n",RAM_HEADER_END_MASK_C);
+	      return IMGBUILD_ERR_RAM_CODE;
+	    }
+		}
+		else  {
+			MY_ERR("RAM table is full. Max %i entries allowed.\n",SLW_MAX_CPUREGS_OPS);
+      return IMGBUILD_ERR_RAM_TABLE_FULL;
+		}
     // ...this is the spot for the new entry
     hostRamEntryThis = (void*)((uint8_t*)hostRamEntryNext + XIPSIZE_RAM_ENTRY);
     bEntryEnd = 1;
@@ -307,7 +313,7 @@ uint32_t p8_pore_gen_cpureg(  void      *io_image,
           ramEntryNext--  )  {
       *(ramEntryNext+1) = *ramEntryNext;
       if ((ramEntryNext+1)->instr!=ramEntryNext->instr)  {
-        MY_ERR("ERROR : Incorrect shifting of table entries. Check code.\n");
+        MY_ERR("Incorrect shifting of table entries. Check code.\n");
         return IMGBUILD_ERR_RAM_CODE;
       }
     }
@@ -334,7 +340,7 @@ uint32_t p8_pore_gen_cpureg(  void      *io_image,
   	// ...do the SPR instr 
   	sprSwiz = i_regName>>5 | (i_regName & 0x0000001f)<<5;
   	if (sprSwiz!=SLW_SPR_REGS[iReg].swizzled)  {
-  	  MY_ERR("ERROR : Inconsistent swizzle rules implemented. Check code. Dumping data.\n");
+  	  MY_ERR("Inconsistent swizzle rules implemented. Check code. Dumping data.\n");
   	  MY_ERR("\tsprSwiz (on-the-fly-calc)=%i\n",sprSwiz);
   	  MY_ERR("\tSLW_SPR_REGS[%i].swizzled=%i\n",iReg,SLW_SPR_REGS[iReg].swizzled);
   	  return IMGBUILD_ERR_RAM_CODE;
@@ -383,21 +389,21 @@ uint32_t p8_pore_gen_cpureg(  void      *io_image,
 uint32_t p8_pore_gen_scom(  void       *io_image,
                             uint32_t   i_sizeImage,
                             uint32_t   i_scomAddr,
-                            uint32_t   i_coreId, 
-                            uint64_t   i_scomData,   // [1:4]
-                            uint32_t   i_operation)  // [0:15]
+                            uint32_t   i_coreId,     // [0:15] 
+                            uint64_t   i_scomData,
+                            uint32_t   i_operation,  // [0:5]
+														uint32_t   i_section)      // [0,2,3]
 {
   uint32_t  rc=0, rcLoc=0, iEntry=0;
-  int       pgas_rc=0;
   uint32_t  chipletId=0;
   uint32_t  operation=0;
-  uint32_t  entriesCount=0, entriesMatch=0;
+  uint32_t  entriesCount=0, entriesMatch=0, entriesNOP=0;
   uint32_t  sizeImageIn=0;
   void      *hostSlwSection;
   uint64_t  xipScomTableThis;
   void      *hostScomVector, *hostScomTableThis;
   void      *hostScomEntryNext;       // running entry pointer
-  void      *hostScomEntryFound=NULL; // pointer to entry that matches scomAddr
+  void      *hostScomEntryMatch=NULL; // pointer to entry that matches scomAddr
   void      *hostScomEntryRET=NULL;   // pointer to first return instr after table
   void      *hostScomEntryNOP=NULL;   // pointer to first nop IIS
   uint8_t   bufIIS[XIPSIZE_SCOM_ENTRY], bufNOP[4], bufRET[4];
@@ -464,19 +470,43 @@ uint32_t p8_pore_gen_scom(  void       *io_image,
   MY_INF("Input parameter checks - OK\n");
   MY_INF("\tRegister  = 0x%08x\n",i_scomAddr);
   MY_INF("\tOperation = %i\n",i_operation);
+  MY_INF("\tSection   = %i\n",i_section);
   MY_INF("\tCore ID   = %i\n",i_coreId);
   MY_INF("Image validation and size checks - OK\n");
   MY_INF("\tImage size      = %i\n",i_sizeImage);
   MY_INF("\tSLW section size=  %i\n",xipSection.iv_size);
   
   // -------------------------------------------------------------------------
-  // Locate Scom vector and locate Scom table associated with "This" core ID.
+  // Locate Scom vector according to i_section and then locate Scom table 
+	//   associated with "This" core ID.
   //
-  rc = sbe_xip_find( io_image, SLW_HOST_SCOM_VECTOR_TOC_NAME, &xipTocItem);
-  if (rc)  {
-    MY_ERR("Probably invalid key word for SLW_HOST_SCOM_VECTOR_TOC_NAME.\n");
-    return IMGBUILD_ERR_KEYWORD_NOT_FOUND;
-  }
+	switch (i_section)  {
+	case 0:
+    rc = sbe_xip_find( io_image, SLW_HOST_SCOM_NC_VECTOR_TOC_NAME, &xipTocItem);
+    if (rc)  {
+		  MY_ERR("Probably invalid key word for SLW_HOST_SCOM_NC_VECTOR_TOC_NAME.\n");
+      return IMGBUILD_ERR_KEYWORD_NOT_FOUND;
+		}
+		break;
+	case 2:
+    rc = sbe_xip_find( io_image, SLW_HOST_SCOM_L2_VECTOR_TOC_NAME, &xipTocItem);
+    if (rc)  {
+		  MY_ERR("Probably invalid key word for SLW_HOST_SCOM_L2_VECTOR_TOC_NAME.\n");
+      return IMGBUILD_ERR_KEYWORD_NOT_FOUND;
+		}
+		break;
+	case 3:
+    rc = sbe_xip_find( io_image, SLW_HOST_SCOM_L3_VECTOR_TOC_NAME, &xipTocItem);
+    if (rc)  {
+		  MY_ERR("Probably invalid key word for SLW_HOST_SCOM_L3_VECTOR_TOC_NAME.\n");
+      return IMGBUILD_ERR_KEYWORD_NOT_FOUND;
+		}
+		break;
+	default:
+    MY_ERR("Invalid value for i_section (=%i).\n",i_section);
+		MY_ERR("Valid values for i_section = [0,2,3].\n");
+    return IMGBUILD_ERR_SCOM_INVALID_SUBSECTION;
+	}
   MY_INF("xipTocItem.iv_address = 0x%016llx\n",xipTocItem.iv_address);
   sbe_xip_pore2host( io_image, xipTocItem.iv_address, &hostScomVector);
   MY_INF("hostScomVector = 0x%016llx\n",(uint64_t)hostScomVector);
@@ -485,7 +515,7 @@ uint32_t p8_pore_gen_scom(  void       *io_image,
   if (xipScomTableThis)  {
     sbe_xip_pore2host( io_image, xipScomTableThis, &hostScomTableThis);
   }
-  else  {  // We should never get here.
+  else  {  // Should never be here.
     MY_ERR("Code or image bug. Scom vector table entries should never be null.\n");
     return IMGBUILD_ERR_CHECK_CODE;
   }
@@ -499,62 +529,87 @@ uint32_t p8_pore_gen_scom(  void       *io_image,
   // - If no NOP found, insert at first RET.
   //
   
-  // First, create search string
-  // Note, this IIS will also be used in case of operation==replace.
+  // First, create search strings for addr, nop and ret.
+  // Note, the following IIS will also be used in case of
+	// - i_operation==append
+	// - i_operation==replace
   pore_inline_context_create( &ctx, (void*)bufIIS, XIPSIZE_SCOM_ENTRY, 0, 0);
-  pgas_rc =           pore_LS( &ctx, P1, chipletId);
-  pgas_rc = pgas_rc + pore_STI( &ctx, i_scomAddr, P1, i_scomData);
-  if (pgas_rc>0)  {
-    MY_ERR("pore_LS or _STI generated rc = %d", pgas_rc);
+  pore_LS( &ctx, P1, chipletId);
+  pore_STI( &ctx, i_scomAddr, P1, i_scomData);
+  if (ctx.error  > 0)  {
+    MY_ERR("pore_LS or _STI generated rc = %d", ctx.error);
     return IMGBUILD_ERR_PORE_INLINE_ASM;
   }
   pore_inline_context_create( &ctx, (void*)bufRET, 4, 0, 0);
-  pgas_rc = pore_RET( &ctx);
-  if (pgas_rc>0)  {
-    MY_ERR("pore_RET generated rc = %d", pgas_rc);
+  pore_RET( &ctx);
+  if (ctx.error > 0)  {
+    MY_ERR("pore_RET generated rc = %d", ctx.error);
     return IMGBUILD_ERR_PORE_INLINE_ASM;
   }
   pore_inline_context_create( &ctx, (void*)bufNOP, 4, 0, 0);
-  pgas_rc = pore_NOP( &ctx);
-  if (pgas_rc>0)  {
-    MY_ERR("pore_NOP generated rc = %d", pgas_rc);
+  pore_NOP( &ctx);
+  if (ctx.error > 0)  {
+    MY_ERR("pore_NOP generated rc = %d", ctx.error);
     return IMGBUILD_ERR_PORE_INLINE_ASM;
   }
   
-  // Second, search for scomAddr in relevant coreId table until first RET.
+  // Second, search for addr and nop in relevant coreId table until first RET.
   // Note:
-  // - We go through ALL entries until first RET instr.
-	// - Count number of entries and check for overrun.
-  // - Check for repeat entries, which are not allowed.
-  // - The STI opcode is in the 2nd word of the Scom entry.
-  // - Last NOP is picked, if any, for append (if no entry found for a replace)
+  // - We go through ALL entries until first RET instr. We MUST find a RET instr,
+	//   though we don't check for overrun until later. (Should be improved.)
+	// - Count number of entries and check for overrun, though we'll continue
+	//   searching until we find an RET. (Should be improved.)
+  // - The STI(+SCOM_addr) opcode is in the 2nd word of the Scom entry.
+  // - For an append operation, if a NOP is found (before a RET obviously), the 
+	//   SCOM is replacing that NNNN sequence.
   hostScomEntryNext = hostScomTableThis;
   while (*(uint32_t*)hostScomEntryNext!=*(uint32_t*)bufRET)  {
 	  entriesCount++;
-		if (*((uint32_t*)bufIIS+1)==*((uint32_t*)hostScomEntryNext+1))  {// +1 skips 1st word in Scom entry
-      hostScomEntryFound = hostScomEntryNext;
+		if (*((uint32_t*)bufIIS+1)==*((uint32_t*)hostScomEntryNext+1) && entriesMatch==0)  {// +1 skips 1st word in Scom entry (which loads the PC in an LS operation.)
+      hostScomEntryMatch = hostScomEntryNext;
       entriesMatch++;
     }
-    if (*(uint32_t*)hostScomEntryNext==*(uint32_t*)bufNOP )
-      hostScomEntryNOP = hostScomEntryNext;  // If >1 NOP, then pick last NOP.
+    if (*(uint32_t*)hostScomEntryNext==*(uint32_t*)bufNOP && entriesNOP==0)  {
+      hostScomEntryNOP = hostScomEntryNext;
+			entriesNOP++;
+		}
     hostScomEntryNext = (void*)((uintptr_t)hostScomEntryNext + XIPSIZE_SCOM_ENTRY);
   }
   hostScomEntryRET = hostScomEntryNext; // The last EntryNext will always be the first RET.
-  if (entriesMatch>1)  {
-    MY_ERR("Repeat Scom entries not allowed. (entriesMatch=%i)\n",entriesMatch);
-    return IMGBUILD_ERR_SCOM_REPEAT_ENTRIES;
-  }
-	if (entriesCount>SLW_MAX_SCOMS_NC)  {
-		MY_ERR("Too many Scoms in table. Max %i is allowed.\n",SLW_MAX_SCOMS_NC);
-		MY_ERR("Check code.\n");
-		return IMGBUILD_ERR_CHECK_CODE;
+  
+	switch (i_section)  {
+	case 0:
+	  if (entriesCount>=SLW_MAX_SCOMS_NC)  {
+		  MY_ERR("SCOM table NC is full. Max %i entries allowed.\n",SLW_MAX_SCOMS_NC);
+		  return IMGBUILD_ERR_CHECK_CODE;
+	  }
+		break;
+	case 2:
+	  if (entriesCount>=SLW_MAX_SCOMS_L2)  {
+		  MY_ERR("SCOM table L2 is full. Max %i entries allowed.\n",SLW_MAX_SCOMS_L2);
+		  return IMGBUILD_ERR_CHECK_CODE;
+	  }
+		break;
+	case 3:
+	  if (entriesCount>=SLW_MAX_SCOMS_L3)  {
+		  MY_ERR("SCOM table L3 is full. Max %i entries allowed.\n",SLW_MAX_SCOMS_L3);
+		  return IMGBUILD_ERR_CHECK_CODE;
+	  }
+		break;
+	default:
+    MY_ERR("Invalid value for i_section (=%i).\n",i_section);
+		MY_ERR("Valid values for i_section = [0,2,3].\n");
+    return IMGBUILD_ERR_SCOM_INVALID_SUBSECTION;
 	}
 
   //
   // Further qualify (translate) operation and IIS.
   //
-  if (i_operation==P8_PORE_SCOM_REPLACE)  {
-    if (hostScomEntryFound)
+	if (i_operation==P8_PORE_SCOM_APPEND)  {
+	  operation = i_operation;
+	}
+  else if (i_operation==P8_PORE_SCOM_REPLACE)  {
+    if (hostScomEntryMatch)
       // ... do a replace
       operation = i_operation;
     else
@@ -564,12 +619,12 @@ uint32_t p8_pore_gen_scom(  void       *io_image,
   else if (i_operation==P8_PORE_SCOM_NOOP)  {
     // ...overwrite earlier bufIIS from the search step
     pore_inline_context_create( &ctx, (void*)bufIIS, XIPSIZE_SCOM_ENTRY, 0, 0);
-    pgas_rc =           pore_NOP( &ctx);
-    pgas_rc = pgas_rc + pore_NOP( &ctx);
-    pgas_rc = pgas_rc + pore_NOP( &ctx);
-    pgas_rc = pgas_rc + pore_NOP( &ctx);
-    if (pgas_rc>0)  {
-      MY_ERR("*** _NOP generated rc = %d", pgas_rc);
+    pore_NOP( &ctx);
+    pore_NOP( &ctx);
+    pore_NOP( &ctx);
+    pore_NOP( &ctx);
+    if (ctx.error > 0)  {
+      MY_ERR("*** _NOP generated rc = %d", ctx.error);
       return IMGBUILD_ERR_PORE_INLINE_ASM;
     }
     operation = i_operation;
@@ -581,12 +636,12 @@ uint32_t p8_pore_gen_scom(  void       *io_image,
 	else if (i_operation==P8_PORE_SCOM_RESET)  {
   // ... create RNNN instruction sequence.
 	  pore_inline_context_create( &ctx, (void*)bufIIS, XIPSIZE_SCOM_ENTRY, 0, 0);
-	  pgas_rc =           pore_RET( &ctx);
-	  pgas_rc = pgas_rc + pore_NOP( &ctx);
-	  pgas_rc = pgas_rc + pore_NOP( &ctx);
-	  pgas_rc = pgas_rc + pore_NOP( &ctx);
-	  if (pgas_rc>0)  {
-	    MY_ERR("***_RET or _NOP generated rc = %d", pgas_rc);
+	  pore_RET( &ctx);
+	  pore_NOP( &ctx);
+	  pore_NOP( &ctx);
+	  pore_NOP( &ctx);
+	  if (ctx.error > 0)  {
+	    MY_ERR("***_RET or _NOP generated rc = %d", ctx.error);
 			return IMGBUILD_ERR_PORE_INLINE_ASM;
 	  }
 		operation = i_operation;
@@ -605,46 +660,51 @@ uint32_t p8_pore_gen_scom(  void       *io_image,
   // - Remember to check for more than SLW_MAX_SCOMS_NC entries!
   switch (operation)  {
 
-  case P8_PORE_SCOM_APPEND:  // Append a Scom at a NOP or at RET  
+  case P8_PORE_SCOM_APPEND:  // Append a Scom at first occurring NNNN or RNNN,  
     if (hostScomEntryNOP)  {
-      // ... do an append at a NOP
+      // ... replace the NNNN
 			MY_INF("Append at NOP\n");
       memcpy(hostScomEntryNOP,(void*)bufIIS,XIPSIZE_SCOM_ENTRY);
 		}
-    else  {
-      // ... do an append at the RET
+    else if (hostScomEntryRET)  {
+      // ... replace the RNNN
 			MY_INF("Append at RET\n");
       memcpy(hostScomEntryRET,(void*)bufIIS,XIPSIZE_SCOM_ENTRY);
 		}
+		else  {
+      // We should never be here.
+      MY_ERR("In case=_SCOM_APPEND: EntryRET=NULL is impossible. Check code.\n");
+      return IMGBUILD_ERR_CHECK_CODE;
+		}
     break;
   case P8_PORE_SCOM_REPLACE: // Replace existing Scom with new data
-    if (hostScomEntryFound)  {
+    if (hostScomEntryMatch)  {
       // ... do a vanilla replace
 			MY_INF("Replace existing Scom\n");
-      memcpy(hostScomEntryFound,(void*)bufIIS,XIPSIZE_SCOM_ENTRY);
+      memcpy(hostScomEntryMatch,(void*)bufIIS,XIPSIZE_SCOM_ENTRY);
 		}
     else  {
       // We should never be here.
-      MY_ERR("In case=_SCOM_REPLACE: EntryFound=NULL is impossible. Check code.\n");
+      MY_ERR("In case=_SCOM_REPLACE: EntryMatch=NULL is impossible. Check code.\n");
       return IMGBUILD_ERR_CHECK_CODE;
     }
     break;
   case P8_PORE_SCOM_NOOP:
-    if (hostScomEntryFound)  {
+    if (hostScomEntryMatch)  {
       // ... do a vanilla replace
 			MY_INF("Replace existing Scom w/NOPs\n");
-      memcpy(hostScomEntryFound,(void*)bufIIS,XIPSIZE_SCOM_ENTRY);
+      memcpy(hostScomEntryMatch,(void*)bufIIS,XIPSIZE_SCOM_ENTRY);
 		}
     else  { 
       // do nothing, and assume everything is fine, since we did no damage.
     }
     break;
   case P8_PORE_SCOM_OR:      // Overlay Scom data onto existing data by bitwise OR
-    if (hostScomEntryFound)  {
+    if (hostScomEntryMatch)  {
       // ... do an OR on the data (which is the 2nd DWord in the entry)
 			MY_INF("Overlay existing Scom - OR case\n");
-      *((uint64_t*)hostScomEntryFound+1) = 
-        *((uint64_t*)hostScomEntryFound+1) | myRev64(i_scomData);
+      *((uint64_t*)hostScomEntryMatch+1) = 
+        *((uint64_t*)hostScomEntryMatch+1) | myRev64(i_scomData);
 		}
     else  { 
       MY_ERR("No Scom entry found to do OR operation with.\n");
@@ -652,11 +712,11 @@ uint32_t p8_pore_gen_scom(  void       *io_image,
     }
     break;
   case P8_PORE_SCOM_AND:     // Overlay Scom data onto existing data by bitwise AND
-    if (hostScomEntryFound)  {
+    if (hostScomEntryMatch)  {
       // ... do an AND on the data (which is the 2nd DWord in the entry)
 			MY_INF("Overlay existing Scom - AND case\n");
-      *((uint64_t*)hostScomEntryFound+1) = 
-        *((uint64_t*)hostScomEntryFound+1) & myRev64(i_scomData);
+      *((uint64_t*)hostScomEntryMatch+1) = 
+        *((uint64_t*)hostScomEntryMatch+1) & myRev64(i_scomData);
 		}
     else  { 
       MY_ERR("No Scom entry found to do AND operation with.\n");
@@ -672,7 +732,8 @@ uint32_t p8_pore_gen_scom(  void       *io_image,
 		}
 		break;
   default:
-    break;
+    MY_ERR("Impossible value of operation (=%i). Check code.\n",operation);
+    return IMGBUILD_ERR_CHECK_CODE;
   
   }  // End of switch(operation)
 

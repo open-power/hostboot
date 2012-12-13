@@ -20,10 +20,10 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_delta_scan_rw.h,v 1.23 2012/09/21 15:08:02 cmolsen Exp $
+// $Id: p8_delta_scan_rw.h,v 1.27 2012/12/14 19:44:53 cmolsen Exp $
 #define OVERRIDE_OFFSET 8            // Byte offset of forward pointer's addr relative 
                                      //   to base forward pointer's addr.
-#define SIZE_IMAGE_BUF_MAX     50000000 // Max ~50MB image buffer size.
+#define SIZE_IMAGE_BUF_MAX      5000000 // Max ~50MB image buffer size.
 #define SIZE_IMAGE_CENTAUR_MAX  5000000 // Max ~5MB image buffer size.
 #define SIZE_REPR_RING_MAX        50000 // Max ~50kB repr ring buffer size.
 #define SCOM_REG_MASK   0x00ffffff   // Scom register mask (within a chiplet)
@@ -31,6 +31,10 @@
 #define CID_EX_LOW      0x10         // Lowest EX chiplet addr
 #define CID_EX_HIGH     0x1f         // Highest EX chiplet addr
 
+/*****  Xip customize support ****/
+#define COMBINED_GOOD_VECTORS_TOC_NAME    "combined_good_vectors"
+#define PERV_PIB_REPR_VECTOR_TOC_NAME     "proc_sbe_pibmem_repair_vector"
+#define NEST_SKEWADJUST_VECTOR_TOC_NAME   "proc_sbe_nest_skewadjust_vector"
 
 /*****  Scan setting  *****/
 #define OPCG_SCAN_RATIO                     4
@@ -65,10 +69,14 @@
 #define DSLWB_SLWB_IMAGE_ERROR               44
 #define DSLWB_SLWB_UNKNOWN_ERROR             45
 #define IMGBUILD_SUCCESS                      0  // Successful img build.
-#define IMGBUILD_NO_RINGS_FOUND               1  // Successful img build but no rings found.
-#define IMGBUILD_BAD_ARGS                     2  // Bad function arguments.
-#define IMGBUILD_ERR_MEMORY                   4  // Memory allocation error.
-#define IMGBUILD_ERR_CHECK_CODE               6  // Coding or image data problem.
+#define IMGBUILD_ERR_GENERIC                  1  // Non-specific error code.
+#define IMGBUILD_ERR_FILE_ACCESS              2  // Unable to access/open file.
+#define IMGBUILD_ERR_CHIPLET_ID_MESS          4  // Chiplet ID mess(mostly for VPD rings).
+#define IMGBUILD_NO_RINGS_FOUND               5  // Successful img build but no rings found.
+#define IMGBUILD_BAD_ARGS                     6  // Bad function arguments.
+#define IMGBUILD_ERR_MEMORY                   7  // Memory allocation error.
+#define IMGBUILD_ERR_RING_TOO_LARGE           8  // Ring size exceeds HB/PHYP's buffer.
+#define IMGBUILD_ERR_CHECK_CODE               9  // Coding or image data problem.
 #define IMGBUILD_INVALID_IMAGE               10  // Invalid image.
 #define IMGBUILD_IMAGE_SIZE_MISMATCH         11  // Mismatch between image sizes.
 #define IMGBUILD_ERR_PORE_INLINE             20  // Pore inline error.
@@ -85,7 +93,7 @@
 #define IMGBUILD_ERR_XIP_UNKNOWN             58  // Unknown XIP image error.
 #define IMGBUILD_ERR_RS4_DECOMPRESS          59  // Error during RS4 decompression.
 #define IMGBUILD_ERR_RAM_HDRS_NOT_SYNCED     61  // Ram headers not synchronized.
-#define IMGBUILD_ERR_RAM_TABLE_OVERFLOW      63  // Ram table entry overflow.
+#define IMGBUILD_ERR_RAM_TABLE_FULL          63  // Ram table is full.       
 #define IMGBUILD_ERR_RAM_CODE                64  // Code error in Ram API code.
 #define IMGBUILD_ERR_RAM_INVALID_PARM        65  // Invalid Ramming parameter.
 #define IMGBUILD_WARN_RAM_TABLE_CONTAMINATION 66 // Ram table contamination
@@ -95,6 +103,7 @@
 #define IMGBUILD_ERR_SCOM_HDRS_NOT_SYNCD     72  // Scom headers out of sync.
 #define IMGBUILD_ERR_SCOM_ENTRY_NOT_FOUND    74  // Scom entry not found (OR/AND oper.)
 #define IMGBUILD_ERR_SCOM_REPEAT_ENTRIES     76  // Repeat entries not allow.
+#define IMGBUILD_ERR_SCOM_INVALID_SUBSECTION 77  // Invalid subsection value.
 #define IMGBUILD_ERR_SCOM_TABLE_FAIL         79  // Unsuccessful SCOM table build.
 
 #if defined SLW_COMMAND_LINE_RAM || defined XIPC_COMMAND_LINE
@@ -235,30 +244,54 @@ int write_ring_block_to_image(  void *io_image,
                                 DeltaRingLayout *i_ringBlock,
                                 uint32_t  i_sizeImageMax);
 
-int  gen_ring_delta_state(  
+int gen_ring_delta_state(  
               uint32_t   bitLen, 
               uint32_t   *i_init, 
               uint32_t   *i_alter,
               uint32_t   *o_delta,
               uint32_t   verbose);
 
-int write_delta_ring_to_image(  
+//int write_delta_ring_to_image(  
+//              char       *i_fnImage,
+//              CompressedScanData *i_RS4,
+//              uint32_t   i_ddLevel,
+//              uint8_t    i_sysPhase,
+//              uint8_t    i_override,
+//              char       *i_varName,
+//              char       *i_fnMetaData,
+//              uint32_t   verbose);
+int write_rs4_ring_to_ref_image(  
               char       *i_fnImage,
               CompressedScanData *i_RS4,
               uint32_t   i_ddLevel,
               uint8_t    i_sysPhase,
               uint8_t    i_override,
+							uint8_t    i_ringType,
               char       *i_varName,
               char       *i_fnMetaData,
+							void       *i_bufTmp,
+							uint32_t   i_sizeBufTmp,
               uint32_t   verbose);
 
-int write_repr_ring_to_image(
+int write_vpd_ring_to_ipl_image(
               void       *io_image,
-							uint32_t   *io_sizeImageOut,
+							uint32_t   &io_sizeImageOut,
 							CompressedScanData *i_bufRs4Ring,
-							uint8_t    i_chipletId,
+							uint32_t   i_ddLevel,
 							uint8_t    i_sysPhase,
-              char       *i_ringName);
+              char       *i_ringName,
+							void       *i_bufTmp,
+							uint32_t   i_sizeBufTmp);
+
+int write_vpd_ring_to_slw_image(
+              void       *io_image,
+							uint32_t   &io_sizeImageOut,
+							CompressedScanData *i_bufRs4Ring,
+							uint32_t   i_ddLevel,
+							uint8_t    i_sysPhase,
+              char       *i_ringName,
+							void       *i_bufTmp,
+							uint32_t   i_sizeBufTmp);
 
 int get_delta_ring_from_image(
               char       *i_fnImage,

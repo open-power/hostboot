@@ -74,7 +74,8 @@ FAPI_ATTR_SOURCES =          \
     runtime_attributes/pm_attributes_all_plat.xml \
     nest_chiplets/proc_pcie_scominit/proc_pcie_scominit_attributes.xml \
     dmi_training/proc_cen_set_inband_addr/proc_cen_set_inband_addr_attributes.xml \
-    common_attributes.xml
+    common_attributes.xml \
+    build_winkle_images/p8_slw_build/p8_xip_customize_attributes.xml
 
 
 XMLTOHB_GENERIC_XML     = generic.xml

@@ -117,4 +117,10 @@
     <description>Unknown error. (Shouldn't be in this code section.)</description>
     <ffdc>RC_LOCAL</ffdc>
   </hwpError>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_PROC_SLWB_MEMORY_ERROR</rc>
+    <description>Memory allocation error.</description>
+    <ffdc>RC_LOCAL</ffdc>
+  </hwpError>
 </hwpErrors>

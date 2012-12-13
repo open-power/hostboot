@@ -1,0 +1,245 @@
+<!-- IBM_PROLOG_BEGIN_TAG                                                   -->
+<!-- This is an automatically generated prolog.                             -->
+<!--                                                                        -->
+<!-- $Source: src/usr/hwpf/hwp/build_winkle_images/p8_slw_build/p8_xip_customize_attributes.xml $ -->
+<!--                                                                        -->
+<!-- IBM CONFIDENTIAL                                                       -->
+<!--                                                                        -->
+<!-- COPYRIGHT International Business Machines Corp. 2012                   -->
+<!--                                                                        -->
+<!-- p1                                                                     -->
+<!--                                                                        -->
+<!-- Object Code Only (OCO) source materials                                -->
+<!-- Licensed Internal Code Source Materials                                -->
+<!-- IBM HostBoot Licensed Internal Code                                    -->
+<!--                                                                        -->
+<!-- The source code for this program is not published or otherwise         -->
+<!-- divested of its trade secrets, irrespective of what has been           -->
+<!-- deposited with the U.S. Copyright Office.                              -->
+<!--                                                                        -->
+<!-- Origin: 30                                                             -->
+<!--                                                                        -->
+<!-- IBM_PROLOG_END_TAG                                                     -->
+<!-- p8_xip_customize_attributes.xml -->
+<attributes>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PROC_NX_ENABLE</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>NX partial good control
+      creator: platform
+      firmware notes:
+        must track ATTR_CHIP_REGIONS_TO_ENABLE
+    </description>
+    <valueType>uint8</valueType>
+    <enum>DISABLE = 0x0, ENABLE = 0x1</enum>
+    <platInit/>
+    <persistRuntime/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PROC_PCIE_ENABLE</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>PCIE partial good control
+      creator: platform
+      firmware notes:
+        must track ATTR_CHIP_REGIONS_TO_ENABLE
+    </description>
+    <valueType>uint8</valueType>
+    <enum>DISABLE = 0x0, ENABLE = 0x1</enum>
+    <platInit/>
+    <persistRuntime/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PROC_L3_ENABLE</id>
+    <targetType>TARGET_TYPE_EX_CHIPLET</targetType>
+    <description>L3 partial good control
+      creator: platform
+      firmware notes:
+        must track ATTR_CHIP_REGIONS_TO_ENABLE
+    </description>
+    <valueType>uint8</valueType>
+    <enum>DISABLE = 0x0, ENABLE = 0x1</enum>
+    <platInit/>
+    <persistRuntime/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PROC_ADU_UNTRUSTED_BAR_BASE_ADDR</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>ADU Untrusted BAR base address (secure mode)
+      creator: platform
+      firmware notes:
+        64-bit address representing BAR RA
+    </description>
+    <valueType>uint64</valueType>
+    <platInit/>
+    <persistRuntime/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PROC_ADU_UNTRUSTED_BAR_SIZE</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>ADU Untrusted BAR size (secure mode)
+      creator: platform
+      firmware notes:
+        mask applied to RA 14:43
+    </description>
+    <valueType>uint64</valueType>
+    <enum>
+        1_PB = 0x0000000000000000,
+      512_TB = 0x0002000000000000,
+      256_TB = 0x0003000000000000,
+      128_TB = 0x0003800000000000,
+       64_TB = 0x0003C00000000000,
+       32_TB = 0x0003E00000000000,
+       16_TB = 0x0003F00000000000,
+        8_TB = 0x0003F80000000000,
+        4_TB = 0x0003FC0000000000,
+        2_TB = 0x0003FE0000000000,
+        1_TB = 0x0003FF0000000000,
+      512_GB = 0x0003FF8000000000,
+      256_GB = 0x0003FFC000000000,
+      128_GB = 0x0003FFE000000000,
+       64_GB = 0x0003FFF000000000,
+       32_GB = 0x0003FFF800000000,
+       16_GB = 0x0003FFFC00000000,
+        8_GB = 0x0003FFFE00000000,
+        4_GB = 0x0003FFFF00000000,
+        2_GB = 0x0003FFFF80000000,
+        1_GB = 0x0003FFFFC0000000,
+      512_MB = 0x0003FFFFE0000000,
+      256_MB = 0x0003FFFFF0000000,
+      128_MB = 0x0003FFFFF8000000,
+       64_MB = 0x0003FFFFFC000000,
+       32_MB = 0x0003FFFFFE000000,
+       16_MB = 0x0003FFFFFF000000,
+        8_MB = 0x0003FFFFFF800000,
+        4_MB = 0x0003FFFFFFC00000,
+        2_MB = 0x0003FFFFFFE00000,
+        1_MB = 0x0003FFFFFFF00000
+    </enum>
+    <platInit/>
+    <persistRuntime/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PROC_PSI_UNTRUSTED_BAR0_BASE_ADDR</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>PSI Untrusted BAR0 base address (secure mode)
+      creator: platform
+      firmware notes:
+        64-bit address representing BAR RA
+    </description>
+    <valueType>uint64</valueType>
+    <platInit/>
+    <persistRuntime/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PROC_PSI_UNTRUSTED_BAR0_SIZE</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>PSI Untrusted BAR0 size (secure mode)
+      creator: platform
+      firmware notes:
+        mask applied to RA 14:43
+    </description>
+    <valueType>uint64</valueType>
+    <enum>
+        1_PB = 0x0000000000000000,
+      512_TB = 0x0002000000000000,
+      256_TB = 0x0003000000000000,
+      128_TB = 0x0003800000000000,
+       64_TB = 0x0003C00000000000,
+       32_TB = 0x0003E00000000000,
+       16_TB = 0x0003F00000000000,
+        8_TB = 0x0003F80000000000,
+        4_TB = 0x0003FC0000000000,
+        2_TB = 0x0003FE0000000000,
+        1_TB = 0x0003FF0000000000,
+      512_GB = 0x0003FF8000000000,
+      256_GB = 0x0003FFC000000000,
+      128_GB = 0x0003FFE000000000,
+       64_GB = 0x0003FFF000000000,
+       32_GB = 0x0003FFF800000000,
+       16_GB = 0x0003FFFC00000000,
+        8_GB = 0x0003FFFE00000000,
+        4_GB = 0x0003FFFF00000000,
+        2_GB = 0x0003FFFF80000000,
+        1_GB = 0x0003FFFFC0000000,
+      512_MB = 0x0003FFFFE0000000,
+      256_MB = 0x0003FFFFF0000000,
+      128_MB = 0x0003FFFFF8000000,
+       64_MB = 0x0003FFFFFC000000,
+       32_MB = 0x0003FFFFFE000000,
+       16_MB = 0x0003FFFFFF000000,
+        8_MB = 0x0003FFFFFF800000,
+        4_MB = 0x0003FFFFFFC00000,
+        2_MB = 0x0003FFFFFFE00000,
+        1_MB = 0x0003FFFFFFF00000
+    </enum>
+    <platInit/>
+    <persistRuntime/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PROC_PSI_UNTRUSTED_BAR1_BASE_ADDR</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>PSI Untrusted BAR1 base address (secure mode)
+      creator: platform
+      firmware notes:
+        64-bit address representing BAR RA
+    </description>
+    <valueType>uint64</valueType>
+    <platInit/>
+    <persistRuntime/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PROC_PSI_UNTRUSTED_BAR1_SIZE</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>PSI Untrusted BAR1 size (secure mode)
+      creator: platform
+      firmware notes:
+        mask applied to RA 14:43
+    </description>
+    <valueType>uint64</valueType>
+    <enum>
+        1_PB = 0x0000000000000000,
+      512_TB = 0x0002000000000000,
+      256_TB = 0x0003000000000000,
+      128_TB = 0x0003800000000000,
+       64_TB = 0x0003C00000000000,
+       32_TB = 0x0003E00000000000,
+       16_TB = 0x0003F00000000000,
+        8_TB = 0x0003F80000000000,
+        4_TB = 0x0003FC0000000000,
+        2_TB = 0x0003FE0000000000,
+        1_TB = 0x0003FF0000000000,
+      512_GB = 0x0003FF8000000000,
+      256_GB = 0x0003FFC000000000,
+      128_GB = 0x0003FFE000000000,
+       64_GB = 0x0003FFF000000000,
+       32_GB = 0x0003FFF800000000,
+       16_GB = 0x0003FFFC00000000,
+        8_GB = 0x0003FFFE00000000,
+        4_GB = 0x0003FFFF00000000,
+        2_GB = 0x0003FFFF80000000,
+        1_GB = 0x0003FFFFC0000000,
+      512_MB = 0x0003FFFFE0000000,
+      256_MB = 0x0003FFFFF0000000,
+      128_MB = 0x0003FFFFF8000000,
+       64_MB = 0x0003FFFFFC000000,
+       32_MB = 0x0003FFFFFE000000,
+       16_MB = 0x0003FFFFFF000000,
+        8_MB = 0x0003FFFFFF800000,
+        4_MB = 0x0003FFFFFFC00000,
+        2_MB = 0x0003FFFFFFE00000,
+        1_MB = 0x0003FFFFFFF00000
+    </enum>
+    <platInit/>
+    <persistRuntime/>
+  </attribute>
+  <!-- ********************************************************************* -->
+</attributes>

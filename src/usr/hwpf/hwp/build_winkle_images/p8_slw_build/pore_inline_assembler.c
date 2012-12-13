@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: pore_inline_assembler.c,v 1.14 2012/05/23 19:03:42 bcbrock Exp $
+// $Id: pore_inline_assembler.c,v 1.15 2012/11/12 19:54:15 bcbrock Exp $
 
 // ** WARNING : This file is maintained as part of the OCC firmware.  Do **
 // ** not edit this file in the PMX area or the hardware procedure area  **
@@ -94,8 +94,8 @@
 /// \section Assembler
 ///
 /// The inline assembler implements each PORE/PGAS instruction as individual
-/// function calls.  The APIs are consistently named \c pore_<OPCODE>, where
-/// \c <OPCODE> is a PGAS mnemonic in upper case.  The arguments to each
+/// function calls.  The APIs are consistently named \c pore_\<OPCODE\>, where
+/// \c \<OPCODE\> is a PGAS mnemonic in upper case.  The arguments to each
 /// opcode appear in the same order that they appear in the source-level
 /// assembler, with appropriate C-language types. The supported opcode APIs
 /// are defined in pore_inline.h
@@ -159,7 +159,7 @@
 /// \subsection Assembling Branches
 ///
 /// Opcodes that implement relative branches require that the branch target be
-/// specified as a <em> location counter <\em>. Once initialized, the current
+/// specified as a <em> location counter </em>. Once initialized, the current
 /// location counter is available as the \a lc field of the PoreInlineContext
 /// object controlling the assembly.  The \a lc field is the only field
 /// (besides the error code held in the \a error field) that application code
@@ -247,7 +247,7 @@
 /// branch-to-self - the recommended idiom for forward branch source
 /// instructions.  Once the entire sequence has been assembled,
 /// pore_inline_branch_fixup() reassembles the \c source instruction as a
-/// branch to the \target instruction. The above instruction sequence is
+/// branch to the \c target instruction. The above instruction sequence is
 /// equivalent to the PGAS code below:
 ///
 /// \code
@@ -362,9 +362,11 @@
 /// \subsection Data Disassembly
 ///
 /// If the PoreInlineContext is created with the flag
-/// PORE_INLINE_DISASSEMBLE_DATA, then the context is disassembled as
-/// data. For complete information see the documentation for
-/// pore_inline_disassemble().
+/// PORE_INLINE_DISASSEMBLE_DATA, then the context is disassembled as data. If
+/// the PoreInlineContext is created with the flag
+/// PORE_INLINE_DISASSEMBLE_UNKNOWN then putative data embedded in a text
+/// section will be disassembled as data.  For complete information see the
+/// documentation for pore_inline_disassemble().
 
 
 #define __PORE_INLINE_ASSEMBLER_C__
@@ -704,8 +706,8 @@ pore_inline_context_reset_excursion(PoreInlineContext *ctx)
 /// conjunction with PORE_INLINE_LISTING_MODE.
 ///
 /// - PORE_INLINE_8_BYTE_DATA : generate data disassembly using 8-byte values
-/// rather than the default 4-byte values.  text. Normally data is
-/// disassembled as .quad directives, however if the context is unaligned or
+/// rather than the default 4-byte values.  Normally data is disassembled as
+/// .quad directives under this option, however if the context is unaligned or
 /// of an odd length then .long and .byte directives may be used as well.
 /// This option can be used in conjunction with PORE_INLINE_LISTING_MODE.
 ///
@@ -733,10 +735,12 @@ pore_inline_context_create(PoreInlineContext *ctx,
     int rc;
 
     int valid_options = 
-	PORE_INLINE_GENERATE_PARITY |
-	PORE_INLINE_CHECK_PARITY    |
-	PORE_INLINE_LISTING_MODE    |
-        PORE_INLINE_DISASSEMBLE_DATA;
+	PORE_INLINE_GENERATE_PARITY  |
+	PORE_INLINE_CHECK_PARITY     |
+	PORE_INLINE_LISTING_MODE     |
+        PORE_INLINE_DISASSEMBLE_DATA |
+        PORE_INLINE_8_BYTE_DATA      |
+        PORE_INLINE_DISASSEMBLE_UNKNOWN;
 
     if ((ctx == 0) || ((memory == 0) && (size != 0)) || 
 	((options & ~valid_options) != 0)) {
@@ -765,7 +769,7 @@ pore_inline_context_create(PoreInlineContext *ctx,
 /// source of the copy.
 ///
 /// This API copies one PoreInlineContext structure to another.  An example
-/// use appears in \ref pore_inline_assembly in the section discussing
+/// use appears in \ref pore_inline_assembler in the section discussing
 /// disassembly.
 
 void

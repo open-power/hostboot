@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_scan_compression.C,v 1.5 2012/09/20 20:25:29 bcbrock Exp $
+// $Id: p8_scan_compression.C,v 1.6 2012/10/22 22:13:38 bcbrock Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/utils/p8_scan_compression.C,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
@@ -134,6 +134,7 @@
 
 
 #include <stdlib.h>
+#include <string.h>
 #include "p8_scan_compression.H"
 
 // Diagnostic aids for debugging
@@ -173,6 +174,10 @@
 
 #endif  // DEBUG_P8_SCAN_COMPRESSION
 
+// Note: PHYP requires that all subroutines, _even static subroutines_, have
+// unique names to support concurrent update.  Most routines defined here have
+// some variant of 'rs4' in their names; others should be inherently unique.
+
 // Note: For maximum flexibility we provide private versions of
 // endian-conversion routines rather than counting on a system-specific header
 // to provide these.
@@ -180,7 +185,7 @@
 // Byte-reverse a 32-bit integer if on a little-endian machine
 
 static uint32_t
-revle32(const uint32_t i_x)
+rs4_revle32(const uint32_t i_x)
 {
     uint32_t rx;
 
@@ -207,11 +212,11 @@ void
 compressed_scan_data_translate(CompressedScanData* o_data,
                                CompressedScanData* i_data)
 {
-    o_data->iv_magic             = revle32(i_data->iv_magic);
-    o_data->iv_size              = revle32(i_data->iv_size);
-    o_data->iv_algorithmReserved = revle32(i_data->iv_algorithmReserved);
-    o_data->iv_length            = revle32(i_data->iv_length);
-    o_data->iv_scanSelect        = revle32(i_data->iv_scanSelect);
+    o_data->iv_magic             = rs4_revle32(i_data->iv_magic);
+    o_data->iv_size              = rs4_revle32(i_data->iv_size);
+    o_data->iv_algorithmReserved = rs4_revle32(i_data->iv_algorithmReserved);
+    o_data->iv_length            = rs4_revle32(i_data->iv_length);
+    o_data->iv_scanSelect        = rs4_revle32(i_data->iv_scanSelect);
     o_data->iv_headerVersion     = i_data->iv_headerVersion;
     o_data->iv_flushOptimization = i_data->iv_flushOptimization;
     o_data->iv_ringId            = i_data->iv_ringId;
@@ -222,7 +227,7 @@ compressed_scan_data_translate(CompressedScanData* o_data,
 // Return a big-endian-indexed nibble from a byte string
 
 static int
-get_nibble(const uint8_t* i_string, const uint32_t i_i)
+rs4_get_nibble(const uint8_t* i_string, const uint32_t i_i)
 {
     uint8_t byte;
     int nibble;
@@ -240,7 +245,7 @@ get_nibble(const uint8_t* i_string, const uint32_t i_i)
 // Set a big-endian-indexed nibble in a byte string
 
 static int
-set_nibble(uint8_t* io_string, const uint32_t i_i, const int i_nibble)
+rs4_set_nibble(uint8_t* io_string, const uint32_t i_i, const int i_nibble)
 {
     uint8_t* byte;
 
@@ -259,7 +264,7 @@ set_nibble(uint8_t* io_string, const uint32_t i_i, const int i_nibble)
 // resulting code. 
 
 static int
-stop_encode(const uint32_t i_count, uint8_t* io_string, const uint32_t i_i)
+rs4_stop_encode(const uint32_t i_count, uint8_t* io_string, const uint32_t i_i)
 {
     uint32_t count;
     int digits, offset;
@@ -276,14 +281,14 @@ stop_encode(const uint32_t i_count, uint8_t* io_string, const uint32_t i_i)
     // First insert the stop (low-order) digit
 
     offset = digits - 1;
-    set_nibble(io_string, i_i + offset, (i_count & 0x7) | 0x8);
+    rs4_set_nibble(io_string, i_i + offset, (i_count & 0x7) | 0x8);
 
     // Now insert the high-order digits
 
     count = i_count >> 3;
     offset--;
     while (count) {
-        set_nibble(io_string, i_i + offset, count & 0x7);
+        rs4_set_nibble(io_string, i_i + offset, count & 0x7);
         offset--;
         count >>= 3;
     }
@@ -306,7 +311,7 @@ stop_decode(uint32_t* o_count, const uint8_t* i_string, const uint32_t i_i)
     i = i_i;
 
     do {
-        nibble = get_nibble(i_string, i);
+        nibble = rs4_get_nibble(i_string, i);
         count = (count * 8) + (nibble & 0x7);
         i++;
         digits++;
@@ -334,9 +339,9 @@ stop_decode(uint32_t* o_count, const uint8_t* i_string, const uint32_t i_i)
 // Returns the number of nibbles in the compressed string.
 
 static uint32_t
-_rs4_compress(CompressedScanData* o_data,
-              const uint8_t* i_string, 
-              const uint32_t i_length)
+__rs4_compress(CompressedScanData* o_data,
+               const uint8_t* i_string, 
+               const uint32_t i_length)
 {
     int state;                  /* 0 : Rotate, 1 : Scan */
     uint32_t n;                 /* Number of whole nibbles in i_data */
@@ -361,36 +366,36 @@ _rs4_compress(CompressedScanData* o_data,
 
     while (i < n) {
         if (state == 0) {
-            if (get_nibble(i_string, i) == 0) {
+            if (rs4_get_nibble(i_string, i) == 0) {
                 count++;
                 i++;
             } else {
-                j += stop_encode(count, data, j);
+                j += rs4_stop_encode(count, data, j);
                 count = 0;
                 k = j;
                 j++;
                 state = 1;
             }
         } else {
-            if (get_nibble(i_string, i) == 0) {
-                if (((i + 1) < n) && (get_nibble(i_string, i + 1) == 0)) {
-                    set_nibble(data, k, count);
+            if (rs4_get_nibble(i_string, i) == 0) {
+                if (((i + 1) < n) && (rs4_get_nibble(i_string, i + 1) == 0)) {
+                    rs4_set_nibble(data, k, count);
                     count = 0;
                     state = 0;
                 } else {
-                    set_nibble(data, j, 0);
+                    rs4_set_nibble(data, j, 0);
                     count++;
                     i++;
                     j++;
                 }
             } else {
-                set_nibble(data, j, get_nibble(i_string, i));
+                rs4_set_nibble(data, j, rs4_get_nibble(i_string, i));
                 count++;
                 i++;
                 j++;
             }
             if ((state == 1) && (count == 15)) {
-                set_nibble(data, k, 15);
+                rs4_set_nibble(data, k, 15);
                 state = 0;
                 count = 0;
             }
@@ -401,27 +406,85 @@ _rs4_compress(CompressedScanData* o_data,
     // finish on a scan we must insert a null rotate first.
 
     if (state == 0) {
-        j += stop_encode(count, data, j);
+        j += rs4_stop_encode(count, data, j);
     } else {
-        set_nibble(data, k, count);
-        j += stop_encode(0, data, j);
+        rs4_set_nibble(data, k, count);
+        j += rs4_stop_encode(0, data, j);
     }
-    set_nibble(data, j, 0);
+    rs4_set_nibble(data, j, 0);
     j++;
 
     // Insert the remainder count nibble, and if non-0, the remainder data
     // nibble. 
     
-    set_nibble(data, j, r);
+    rs4_set_nibble(data, j, r);
     j++;
     if (r != 0) {
-        set_nibble(data, j, get_nibble(i_string, n));
+        rs4_set_nibble(data, j, rs4_get_nibble(i_string, n));
         j++;
     }
 
     // Return the number of nibbles in the compressed string. 
 
     return j;
+}
+
+
+// The worst-case compression for RS4 requires 2 nibbles of control overhead
+// per 15 nibbles of data (17/15), plus a maximum of 2 nibbles of termination.
+// We always require this worst-case amount of memory including the header and
+// any rounding required to guarantee that the data size is a multiple of 8
+// bytes.  The final image size is also rounded up to a multiple of 8 bytes.
+
+int
+_rs4_compress(CompressedScanData* io_data,
+              uint32_t i_dataSize,
+              uint32_t* o_imageSize,
+              const uint8_t* i_string, 
+              const uint32_t i_length,
+              const uint64_t i_scanSelect,
+              const uint8_t i_ringId,
+              const uint8_t i_chipletId,
+              const uint8_t i_flushOptimization)
+{
+    int rc;
+    uint32_t nibbles, bytes;
+
+    nibbles = (((((i_length + 3) / 4) + 14) / 15) * 17) + 2;
+    bytes = ((nibbles + 1) / 2) + sizeof(CompressedScanData);
+    bytes = ((bytes + 7) / 8) * 8;
+
+    do {
+
+        if (i_dataSize < bytes) {
+            rc = BUG(SCAN_COMPRESSION_BUFFER_OVERFLOW);
+            break;
+        }
+
+        memset(io_data, 0, bytes);
+
+        nibbles = __rs4_compress(io_data, i_string, i_length);
+        bytes = ((nibbles + 1) / 2) + sizeof(CompressedScanData);
+        bytes = ((bytes + 7) / 8) * 8;
+
+        io_data->iv_magic             = rs4_revle32(RS4_MAGIC);
+        io_data->iv_size              = rs4_revle32(bytes);
+        io_data->iv_algorithmReserved = rs4_revle32(nibbles);
+        io_data->iv_length            = rs4_revle32(i_length);
+        io_data->iv_scanSelect        = rs4_revle32((uint32_t)(i_scanSelect >> 
+                                                               32));
+        io_data->iv_headerVersion     = COMPRESSED_SCAN_DATA_VERSION;
+        io_data->iv_flushOptimization = i_flushOptimization;
+        io_data->iv_ringId            = i_ringId;
+        io_data->iv_chipletId         = i_chipletId;
+
+        *o_imageSize = bytes;
+
+        rc = SCAN_COMPRESSION_OK;
+
+    } while (0);
+
+    return rc;
 }
 
 
@@ -438,7 +501,7 @@ rs4_compress(CompressedScanData** o_data,
              const uint8_t* i_string, 
              const uint32_t i_length,
              const uint64_t i_scanSelect,
-						 const uint8_t i_ringId,
+             const uint8_t i_ringId,
              const uint8_t i_chipletId,
              const uint8_t i_flushOptimization)
 {
@@ -449,28 +512,14 @@ rs4_compress(CompressedScanData** o_data,
     bytes = ((nibbles + 1) / 2) + sizeof(CompressedScanData);
     bytes = ((bytes + 7) / 8) * 8;
 
-    *o_data = (CompressedScanData*)calloc(bytes, 1);
+    *o_data = (CompressedScanData*)malloc(bytes);
 
     if (*o_data == 0) {
         rc = BUG(SCAN_COMPRESSION_NO_MEMORY);
     } else {
-        nibbles = _rs4_compress(*o_data, i_string, i_length);
-        bytes = ((nibbles + 1) / 2) + sizeof(CompressedScanData);
-        bytes = ((bytes + 7) / 8) * 8;
-
-        (*o_data)->iv_magic             = revle32(RS4_MAGIC);
-        (*o_data)->iv_size              = revle32(bytes);
-        (*o_data)->iv_algorithmReserved = revle32(nibbles);
-        (*o_data)->iv_length            = revle32(i_length);
-        (*o_data)->iv_scanSelect        = revle32((uint32_t)(i_scanSelect >> 32));
-        (*o_data)->iv_headerVersion     = COMPRESSED_SCAN_DATA_VERSION;
-        (*o_data)->iv_flushOptimization = i_flushOptimization;
-        (*o_data)->iv_ringId            = i_ringId;
-        (*o_data)->iv_chipletId         = i_chipletId;
-
-        *o_size = bytes;
-
-        rc = SCAN_COMPRESSION_OK;
+        rc = _rs4_compress(*o_data, bytes, o_size, i_string, i_length,
+                           i_scanSelect, i_ringId, i_chipletId,
+                           i_flushOptimization);
     }
 
     return rc;
@@ -483,9 +532,9 @@ rs4_compress(CompressedScanData** o_data,
 // Returns a scan compression return code.
 
 static int
-_rs4_decompress(uint8_t* o_string, 
-                const uint8_t* i_string, 
-                const uint32_t i_length)
+__rs4_decompress(uint8_t* o_string, 
+                 const uint8_t* i_string, 
+                 const uint32_t i_length)
 {
     int rc;
     int state;                  /* 0 : Rotate, 1 : Scan */
@@ -515,12 +564,12 @@ _rs4_decompress(uint8_t* o_string,
             i += nibbles;
             bits += (4 * count);
             for (k = 0; k < count; k++) {
-                set_nibble(o_string, j, 0);
+                rs4_set_nibble(o_string, j, 0);
                 j++;
             }
             state = 1;
         } else {
-            nibbles = get_nibble(i_string, i);
+            nibbles = rs4_get_nibble(i_string, i);
             i++;
             if (nibbles == 0) {
                 break;
@@ -531,7 +580,7 @@ _rs4_decompress(uint8_t* o_string,
             }
             bits += (4 * nibbles);
             for (k = 0; k < nibbles; k++) {
-                set_nibble(o_string, j, get_nibble(i_string, i));
+                rs4_set_nibble(o_string, j, rs4_get_nibble(i_string, i));
                 i++;
                 j++;
             }
@@ -542,14 +591,14 @@ _rs4_decompress(uint8_t* o_string,
     // Now handle string termination
 
     if (!rc) {
-        r = get_nibble(i_string, i);
+        r = rs4_get_nibble(i_string, i);
         i++;
         if (r != 0) {
             if ((bits + r) > i_length) {
                 rc = BUG(SCAN_DECOMPRESSION_SIZE_ERROR);
             } else {
                 bits += r;
-                set_nibble(o_string, j, get_nibble(i_string, i));
+                rs4_set_nibble(o_string, j, rs4_get_nibble(i_string, i));
             }
         }
     }
@@ -569,30 +618,64 @@ _rs4_decompress(uint8_t* o_string,
 
 
 int
-rs4_decompress(uint8_t** o_string,
-               uint32_t* o_length,
-               const CompressedScanData* i_data)
+_rs4_decompress(uint8_t* io_string,
+                uint32_t i_stringSize,
+                uint32_t* o_length,
+                const CompressedScanData* i_data)
 {
     int rc;
     uint32_t bytes;
 
     do {
-        if (revle32(i_data->iv_magic) != RS4_MAGIC) {
+        if (rs4_revle32(i_data->iv_magic) != RS4_MAGIC) {
             rc = BUG(SCAN_DECOMPRESSION_MAGIC_ERROR);
             break;
         }
 
-        *o_length = revle32(i_data->iv_length);
+        *o_length = rs4_revle32(i_data->iv_length);
         bytes = (*o_length + 7) / 8;
-        *o_string = (uint8_t*)calloc(bytes, 1);
+
+        if (i_stringSize < bytes) {
+            rc = BUG(SCAN_COMPRESSION_BUFFER_OVERFLOW);
+            break;
+        }
+
+        memset(io_string, 0, bytes);
+
+        rc = __rs4_decompress(io_string, 
+                              (uint8_t*)i_data + sizeof(CompressedScanData),
+                              *o_length);
+    } while (0);
+
+    return rc;
+}
+
+
+int
+rs4_decompress(uint8_t** o_string,
+               uint32_t* o_length,
+               const CompressedScanData* i_data)
+{
+    int rc;
+    uint32_t length, bytes;
+
+    do {
+        if (rs4_revle32(i_data->iv_magic) != RS4_MAGIC) {
+            rc = BUG(SCAN_DECOMPRESSION_MAGIC_ERROR);
+            break;
+        }
+
+        length = rs4_revle32(i_data->iv_length);
+        bytes = (length + 7) / 8;
+        *o_string = (uint8_t*)malloc(bytes);
+
         if (*o_string == 0) {
             rc = BUG(SCAN_COMPRESSION_NO_MEMORY);
             break;
         }
 
-        rc = _rs4_decompress(*o_string, 
-                             (uint8_t*)i_data + sizeof(CompressedScanData),
-                             *o_length);
+        rc = _rs4_decompress(*o_string, bytes, o_length, i_data);
+
     } while (0);
 
     return rc;

@@ -1,30 +1,29 @@
-/*  IBM_PROLOG_BEGIN_TAG
- *  This is an automatically generated prolog.
- *
- *  $Source: src/usr/hwpf/hwp/build_winkle_images/proc_slw_build/pore_inline.h $
- *
- *  IBM CONFIDENTIAL
- *
- *  COPYRIGHT International Business Machines Corp. 2012
- *
- *  p1
- *
- *  Object Code Only (OCO) source materials
- *  Licensed Internal Code Source Materials
- *  IBM HostBoot Licensed Internal Code
- *
- *  The source code for this program is not published or other-
- *  wise divested of its trade secrets, irrespective of what has
- *  been deposited with the U.S. Copyright Office.
- *
- *  Origin: 30
- *
- *  IBM_PROLOG_END_TAG
- */
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/usr/hwpf/hwp/build_winkle_images/p8_slw_build/pore_inline.h $ */
+/*                                                                        */
+/* IBM CONFIDENTIAL                                                       */
+/*                                                                        */
+/* COPYRIGHT International Business Machines Corp. 2012                   */
+/*                                                                        */
+/* p1                                                                     */
+/*                                                                        */
+/* Object Code Only (OCO) source materials                                */
+/* Licensed Internal Code Source Materials                                */
+/* IBM HostBoot Licensed Internal Code                                    */
+/*                                                                        */
+/* The source code for this program is not published or otherwise         */
+/* divested of its trade secrets, irrespective of what has been           */
+/* deposited with the U.S. Copyright Office.                              */
+/*                                                                        */
+/* Origin: 30                                                             */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
 #ifndef __PORE_INLINE_H__
 #define __PORE_INLINE_H__
 
-// $Id: pore_inline.h,v 1.15 2012/05/23 19:03:42 bcbrock Exp $
+// $Id: pore_inline.h,v 1.16 2012/11/12 19:54:15 bcbrock Exp $
 
 // ** WARNING : This file is maintained as part of the OCC firmware.  Do **
 // ** not edit this file in the PMX area or the hardware procedure area  **
@@ -248,6 +247,18 @@ enum {
 /// the PoreInlineContext between calls of pore_inline_disassemble().
 #define PORE_INLINE_8_BYTE_DATA 0x10
 
+/// Disassemble unrecognized opcodes as 4-byte data
+///
+/// This flag is an option to pore_inline_context_create().  If set, then
+/// any putative instruction with an unrecognized opcode will be silently
+/// diassembled as 4-byte data.
+///
+/// This option was added to allow error-free disassembly of
+/// non-parity-protected PORE text sections that contain 0x00000000 alignment
+/// padding, and is not guaranteed to produce correct or consistent results in
+/// any other case.
+#define PORE_INLINE_DISASSEMBLE_UNKNOWN 0x20
+
 
 #ifndef __ASSEMBLER__
 
@@ -409,11 +420,14 @@ typedef struct {
 
     /// The data (for data disassembly)
     ///
-    /// This is either 1 or 8 bytes in host byte order.
+    /// This is either 1, 4 or 8 bytes in host byte order.
     uint64_t data;
 
     /// The size of the disassembled \a data field (for data disassembly)
     size_t data_size;
+
+    /// Was this location disassembled as an instruction (0) or as data (1)
+    int is_data;
 
 } PoreInlineDisassembly;
 

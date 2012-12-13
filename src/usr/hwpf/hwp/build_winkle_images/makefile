@@ -35,6 +35,7 @@ EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/include
 
 ##  NOTE: add the base istep dir here.
 EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/build_winkle_images
+EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/mvpd_accessors
 
 ##  Include sub dirs
 ##  NOTE: add a new EXTRAINCDIR when you add a new HWP
@@ -58,7 +59,9 @@ OBJS =  build_winkle_images.o   \
         p8_pmc_deconfig_setup.o \
         p8_poreslw_init.o       \
         p8_set_pore_bar.o       \
-        p8_slw_build.o
+        p8_slw_build.o          \
+        p8_xip_customize.o      \
+        p8_ring_identification.o 
 
 ##  NOTE: add a new directory onto the vpaths when you add a new HWP
 ##  EXAMPLE:
@@ -67,7 +70,8 @@ VPATH += ${ROOTPATH}/src/usr/hwpf/hwp/build_winkle_images/p8_slw_build
 VPATH += ${ROOTPATH}/src/usr/hwpf/hwp/build_winkle_images/p8_set_pore_bar
 
 ##  Point to the PORE image in PNOR
-BINARY_FILES = $(IMGDIR)/procpore.dat:d177d9a2a28f80fc282f09b145d790fa56719ba2
+#BINARY_FILES = $(IMGDIR)/procpore.dat:d177d9a2a28f80fc282f09b145d790fa56719ba2
+BINARY_FILES = $(IMGDIR)/procpore.dat:8886974065a94f3ea83d98be88716e063bcba57e
 
 include ${ROOTPATH}/config.mk
 

@@ -23,7 +23,7 @@
 #ifndef __P8_SCAN_COMPRESSION_H__
 #define __P8_SCAN_COMPRESSION_H__
 
-// $Id: p8_scan_compression.H,v 1.3 2012/09/20 20:25:37 bcbrock Exp $
+// $Id: p8_scan_compression.H,v 1.4 2012/10/22 22:13:39 bcbrock Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/utils/p8_scan_compression.H,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
@@ -163,7 +163,68 @@ compressed_scan_data_translate(CompressedScanData* o_data,
 
 /// Compress a scan string using the RS4 compression algorithm
 ///
-/// \param o_data This algorithm uses malloc() to allocate memory for the
+/// \param[in,out] io_data This is a pointer to a memory area which must be
+/// large enough to hold the worst-case result of compressing \a i_string (see
+/// below).  Note that the CompressedScanData is always created in big-endian
+/// format, however the caller can use compresed_scan_data_translate() to
+/// create a copy of the header in host format.
+///
+/// \param[in] i_dataSize The size of \a io_data in bytes.
+///
+/// \param[out] o_imageSize The effective size of the entire compressed scan
+/// data structure (header + compressed data) created in \a io_data, in bytes.
+/// This value will always be a multiple of 8.
+///
+/// \param[in] i_string The string to compress.  Scan data to compress is
+/// left-justified in this input string.
+///
+/// \param[in] i_length The length of the input string in \e bits.  It is
+/// assumed the \a i_string contains at least (\a i_length + 7) / 8 bytes.
+///
+/// \param[in] i_scanSelect The 64-bit value written to the Scan Select
+/// register to set up for the scan. Only the 32 high-order bits are actually
+/// stored.
+///
+/// \param[in] i_ringId The ring ID that uniquely identifies the ring name of
+/// a repair ring. (See p8_ring_identification.c for more info.)
+///
+/// \param[in] i_chipletId The 7-bit value for the iv_chipletId field of the
+/// CompressedScanData.
+///
+/// \param[in] i_flushOptimization This input parameter should be set to a
+/// non-0 value if it is known that this ring difference will be applied to a
+/// scan-0 flush state.  This will improve the performance of the
+/// decompress-scan routine. If the initial state of the ring is unknown, set
+/// this parameter to 0.
+///
+/// This API is required for integration with PHYP which does not support
+/// malloc().  Applications in environments supporting malloc() can use
+/// rs4_compress() instead.
+///
+/// The worst-case compression for RS4 requires 2 nibbles of control overhead
+/// per 15 nibbles of data (17/15), plus a maximum of 2 nibbles of termination.
+/// We always require this worst-case amount of memory including the header and
+/// any rounding required to guarantee that the data size is a multiple of 8
+/// bytes.  The final image size is also rounded up to a multiple of 8 bytes.
+/// If the \a i_dataSize is less than this amount (based on \a i_length) the
+/// call will fail.
+///
+/// \returns See \ref scan_compression_codes
+int
+_rs4_compress(CompressedScanData* io_data,
+              uint32_t i_dataSize,
+              uint32_t* o_imageSize,
+              const uint8_t* i_string, 
+              const uint32_t i_length,
+              const uint64_t i_scanSelect,
+              const uint8_t i_ringId,
+              const uint8_t i_chipletId,
+              const uint8_t i_flushOptimization);
+             
+
+/// Compress a scan string using the RS4 compression algorithm
+///
+/// \param[out] o_data This algorithm uses malloc() to allocate memory for the
 /// compresed data, and returns a pointer to this memory in \a o_data. After
 /// the call this memory is owned by the caller who is responsible for
 /// free()-ing the data area once it is no longer required. Note that the
@@ -171,30 +232,31 @@ compressed_scan_data_translate(CompressedScanData* o_data,
 /// caller can use compresed_scan_data_translate() to create a copy of the
 /// header in host format.
 ///
-/// \param o_size The effective size of the entire compressed scan data
+/// \param[out] o_size The effective size of the entire compressed scan data
 /// structure (header + compressed data) pointed to by \a o_data, in bytes.
 /// This value will always be a multiple of 8.
 ///
-/// \param i_string The string to compress.  Scan data to compress is
+/// \param[in] i_string The string to compress.  Scan data to compress is
 /// left-justified in this input string.
 ///
-/// \param i_length  The length of the input string in \e bits.  It is assumed
-/// the \a i_string contains at least (\a i_length + 7) / 8 bytes.
+/// \param[in] i_length The length of the input string in \e bits.  It is
+/// assumed the \a i_string contains at least (\a i_length + 7) / 8 bytes.
 ///
-/// \param i_scanSelect The 64-bit value written to the Scan Select register
-/// to set up for the scan. Only the 32 high-order bits are actually stored.
+/// \param[in] i_scanSelect The 64-bit value written to the Scan Select
+/// register to set up for the scan. Only the 32 high-order bits are actually
+/// stored.
 ///
-/// \param i_ringId The ring ID that uniquely identifies the ring name of
+/// \param[in] i_ringId The ring ID that uniquely identifies the ring name of
 /// a repair ring. (See p8_ring_identification.c for more info.)
 ///
-/// \param i_chipletId The 7-bit value for the iv_chipletId field of the
-/// CompressedScanData. 
+/// \param[in] i_chipletId The 7-bit value for the iv_chipletId field of the
+/// CompressedScanData.
 ///
-/// \param i_flushOptimization This input parameter should be set to a non-0
-/// value if it is known that this ring difference will be applied to a scan-0
-/// flush state.  This will improve the performance of the decompress-scan
-/// routine. If the initial state of the ring is unknown, set this parameter
-/// to 0.
+/// \param[in] i_flushOptimization This input parameter should be set to a
+/// non-0 value if it is known that this ring difference will be applied to a
+/// scan-0 flush state.  This will improve the performance of the
+/// decompress-scan routine. If the initial state of the ring is unknown, set
+/// this parameter to 0.
 ///
 /// \returns See \ref scan_compression_codes
 int
@@ -210,21 +272,50 @@ rs4_compress(CompressedScanData** o_data,
 
 /// Decompress a scan string compressed using the RS4 compression algorithm
 ///
-/// \param o_string The API malloc()-s this data area to contain the
+/// \param[in,out] io_string A caller-supplied data area to contain the
+/// decompressed string. The \a i_stringSize must be large enough to contain
+/// the decompressed string, which is the size of the original string in bits
+/// rounded up to the nearest byte.
+///
+/// \param[in] i_stringSize The size (in bytes) of \a i_string.
+///
+/// \param[out] o_length The length of the decompressed string in \e bits.
+///
+/// \param[in] i_data A pointer to the CompressedScanData header + data to be
+/// decompressed.
+///
+/// This API is required for integration with PHYP which does not support
+/// malloc().  Applications in environments supporting malloc() can use
+/// rs4_decompress() instead.
+///
+/// \returns See \ref scan_compression_codes
+int
+_rs4_decompress(uint8_t* i_string,
+                uint32_t i_stringSize,
+                uint32_t* o_length,
+                const CompressedScanData* i_data);
+             
+
+/// Decompress a scan string compressed using the RS4 compression algorithm
+///
+/// \param[out] o_string The API malloc()-s this data area to contain the
 /// decompressed string. After this call the caller owns \a o_string and is
 /// responsible for free()-ing this data area once it is no longer required.
 ///
-/// \param o_length The length of the decompressed string in \e bits.  The
-/// caller may assume that \a o_string contains at least (\a o_length + 7) / 8
-/// bytes.
+/// \param[out] o_length The length of the decompressed string in \e bits.
+/// The caller may assume that \a o_string contains at least (\a o_length + 7)
+/// / 8 \e bytes.
 ///
-/// \param i_data A pointer to the CompressedScanData header + data to be
-/// decompressed. 
+/// \param[in] i_data A pointer to the CompressedScanData header + data to be
+/// decompressed.
+///
+/// \returns See \ref scan_compression_codes
 int
 rs4_decompress(uint8_t** o_string,
                uint32_t* o_length,
                const CompressedScanData* i_data);
              
+
 #endif  // __ASSEMBLER__
 
 
@@ -269,6 +360,14 @@ CONST_UINT8_T(SCAN_DECOMPRESSION_MAGIC_ERROR, 2);
 /// application should be considered corrupted if this error occurs since it
 /// may not be discovered until after the decompression buffer is overrun.
 CONST_UINT8_T(SCAN_DECOMPRESSION_SIZE_ERROR, 3);
+
+/// A buffer would overflow
+///
+/// Either the caller-supplied memory buffer to _rs4_decompress() was too
+/// small to contain the decompressed string, or a caller-supplied buffer to
+/// _rs4_compress() was not large enough to hold the worst-case compressed
+/// string.
+CONST_UINT8_T(SCAN_COMPRESSION_BUFFER_OVERFLOW, 4);
 
 /// @}
 

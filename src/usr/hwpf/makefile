@@ -42,6 +42,7 @@ HWP_ERROR_XML_FILES = hwp/fapiHwpErrorInfo.xml   \
     hwp/dram_initialization/proc_setup_bars/proc_setup_bars_errors.xml  \
     hwp/nest_chiplets/proc_chiplet_scominit/proc_chiplet_scominit_errors.xml \
     hwp/build_winkle_images/p8_slw_build/p8_slw_build_errors.xml    \
+    hwp/build_winkle_images/p8_slw_build/p8_xip_customize_errors.xml    \
     hwp/build_winkle_images/p8_slw_build/proc_pba_bar_config_errors.xml \
     hwp/nest_chiplets/proc_a_x_pci_dmi_pll_setup_errors.xml \
     hwp/core_activate/proc_prep_master_winkle/proc_prep_master_winkle_errors.xml \
@@ -97,7 +98,8 @@ HWP_ATTR_XML_FILES = hwp/memory_attributes.xml \
                      hwp/runtime_attributes/pm_attributes_all_plat.xml \
                      hwp/runtime_attributes/pm_attributes_all_hwp.xml \
                      hwp/nest_chiplets/proc_pcie_scominit/proc_pcie_scominit_attributes.xml \
-                     hwp/dmi_training/proc_cen_set_inband_addr/proc_cen_set_inband_addr_attributes.xml
+                     hwp/dmi_training/proc_cen_set_inband_addr/proc_cen_set_inband_addr_attributes.xml \
+                     hwp/build_winkle_images/p8_slw_build/p8_xip_customize_attributes.xml
 
 #------------------------------------------------------------------------------
 # Initfiles

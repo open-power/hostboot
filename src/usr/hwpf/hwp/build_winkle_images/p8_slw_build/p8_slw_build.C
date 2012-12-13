@@ -20,13 +20,13 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_slw_build.C,v 1.3 2012/09/19 14:07:17 cmolsen Exp $
+// $Id: p8_slw_build.C,v 1.7 2012/11/27 18:44:03 cmolsen Exp $
 /*------------------------------------------------------------------------------*/
 /* *! TITLE : p8_slw_build                                                      */
 /* *! DESCRIPTION : Extracts and decompresses delta ring states from EPROM      */
 //                  image. Utilizes the linked list approach (LLA) to extract
-//                  and position wiggle-flip programs in .rings according to
-//                  back pointer, DD level, phase and override settings.
+//                  and position wiggle-flip programs in .rings according to 
+//                  back pointer, DD level, phase and override settings. 
 /* *! OWNER NAME : Michael Olsen                  cmolsen@us.ibm.com            */
 //
 /* *! EXTENDED DESCRIPTION :                                                    */
@@ -34,8 +34,8 @@
 /* *! USAGE : To build (for Hostboot) -                                         */
 //              buildfapiprcd  -C "p8_image_help.C,p8_scan_compression.C"  -c "sbe_xip_image.c,pore_inline_assembler.c" -e "../../xml/error_info/p8_slw_build_errors.xml"  p8_slw_build.C
 //            To build (for command-line) -
-//              buildfapiprcd  -C "p8_image_help.C,p8_scan_compression.C"  -c "sbe_xip_image.c,pore_inline_assembler.c" -e "../../xml/error_info/p8_slw_build_errors.xml"  -u "SLW_COMMAND_LINE"  p8_slw_build.C
-//            Other Pre-Processor Directive (PPD) options -
+//              buildfapiprcd  -r ver-13-0  -C "p8_image_help.C,p8_scan_compression.C"  -c "sbe_xip_image.c,pore_inline_assembler.c" -e "../../xml/error_info/p8_slw_build_errors.xml"  -u "SLW_COMMAND_LINE,IMGBUILD_PPD_IGNORE_XIPC"  p8_slw_build.C
+//            Other Pre-Processor Directive (PPD) options - 
 //            To debug WF programs:
 //              -u "IMGBUILD_PPD_DEBUG_WF"
 //            To add worst-case PIB access to wf programs:
@@ -44,10 +44,10 @@
 //              -u "IMGBUILD_PPD_WF_POLLING_PROT"
 //            (NB!  This will eventually be changed to IMGBUILD_PPD_WF_NO POLLING_PROT
 //                  because we want the polling protocol to be default.)
-//            To add repair rings to the .rings section:
-//              -u "IMGBUILD_PPD_ADD_REPR_RINGS"
-//            (NB!  This will eventually be changed to IMGBUILD_PPD_OMIT_REPR_RINGS
-//                  because we want the adding of repair rings to be default.)
+//            To NOT run xip_customize:
+//              -u "IMGBUILD_PPD_IGNORE_XIPC"
+//            (NB!  Thus, by defaul for HB and PHYP, since they don't used PPDs,
+//                  xip_customize() will always be called.)
 //
 /* *! ASSUMPTIONS :                                                             */
 //    - For Hostboot environment:
@@ -61,14 +61,19 @@
 /* *! COMMENTS :                                                                */
 //    - All image content, incl .initf content and ring layout, is handled
 //      in BE format. No matter which platform.
-//    - A ring may only be requested with the sysPhase=0 or 1. Any other
+//    - A ring may only be requested with the sysPhase=0 or 1. Any other 
 //      sysPhase value, incl sysPhase=2, will cause no rings to be found.
 //
 /*------------------------------------------------------------------------------*/
+// The IMGBUILD_PPD_IGNORE_XIPC is defined to temporarily disable the call of
+//  p8_xip_customize HWP.
+// @Todo:  RTC 60670 will remove the macro to re-enable the HWP.
+#define IMGBUILD_PPD_IGNORE_XIPC
 
 #include <p8_pore_api_custom.h>
 #include <HvPlicModule.H>
 #include <p8_slw_build.H>
+#include <p8_xip_customize.H>
 #include <p8_delta_scan_rw.h>
 #include <p8_pore_table_gen_api.H>
 
@@ -90,22 +95,55 @@ ReturnCode p8_slw_build( const fapi::Target    &i_target,
                          uint32_t         *io_sizeImageOut)
 {
   ReturnCode rc;
-  uint8_t l_uint8 = 0;
+  uint8_t  l_uint8 = 0;
   uint32_t ddLevel=0;
-  uint8_t  sysPhase=1; // To build SLW image for Hostboot.
-
+  uint8_t  sysPhase=1; // Build an SLW image.
+    
   uint32_t  rcLoc=0, rcSearch=0, i, countWF=0;
   uint32_t  sizeImage=0, sizeImageOutMax, sizeImageTmp, sizeImageOld;
-  uint8_t *deltaRingDxed=NULL;
+  //uint8_t   *deltaRingDxed=NULL;
   CompressedScanData *deltaRingRS4=NULL;
   DeltaRingLayout rs4RingLayout;
   void *nextRing=NULL;
-  uint32_t ringBitLen=0; //ringByteLen=0, ringTrailBits=0;
-  uint32_t *wfInline=NULL;
-  uint32_t wfInlineLenInWords;
-	uint64_t scanMaxRotate=SCAN_ROTATE_DEFAULT;
+  uint32_t  ringBitLen=0; //ringByteLen=0, ringTrailBits=0;
+  uint32_t  *wfInline=NULL;
+  uint32_t  wfInlineLenInWords;
+	uint64_t  scanMaxRotate=SCAN_ROTATE_DEFAULT;
   sizeImageOutMax = *io_sizeImageOut;
+	
+	
+	// 2012-11-13: CMO- Temporary defines of ring buffers. This will be changed by
+	//             Dec 03 where we'll switch over to a fixed size image for ffdc
+	//             support and will schedule the enhancement to slw_build's 
+	//             interface to accept these buffers as well as to ditch
+	//             io_sizeImageOut. We also should drop i_sizeImageIn. It really
+	//             serves no purpose to require caller to pass this when we can 
+	//             immediately retrieve through xip_image_size().
+	//             CMO- Very important. Stop freeing buffers, incl wfInline, once
+	//             these buffers are being passed as parms by slw_build().
+  void      *buf1=NULL, *buf2=NULL;
+  uint32_t  sizeBuf1=0, sizeBuf2=0;
+	uint32_t  rcTmp=1;
+  sizeBuf1 = FIXED_RING_BUF_SIZE;
+  buf1 = malloc(sizeBuf1);
+  if (!buf1)  {
+    FAPI_ERR("malloc() for ring buffer 1 failed.");
+    uint32_t & RC_LOCAL = rcTmp;
+	  FAPI_SET_HWP_ERROR(rc, RC_PROC_SLWB_MEMORY_ERROR);
+	  return rc;
+	}
+  sizeBuf2 = FIXED_RING_BUF_SIZE;
+  buf2 = malloc(sizeBuf2);
+  if (!buf2)  {
+    FAPI_ERR("malloc() for ring buffer 1 failed.");
+    uint32_t & RC_LOCAL = rcTmp;
+	  FAPI_SET_HWP_ERROR(rc, RC_PROC_SLWB_MEMORY_ERROR);
+    free(buf1);
+	  return rc;
+  }
 
+
+	// Sanity check.
   if (sizeImageOutMax<i_sizeImageIn)  {
     FAPI_ERR("Inp image size (from caller): %i",i_sizeImageIn);
     FAPI_ERR("Max image size (from caller): %i",*io_sizeImageOut);
@@ -114,8 +152,7 @@ ReturnCode p8_slw_build( const fapi::Target    &i_target,
 		FAPI_SET_HWP_ERROR(rc, RC_PROC_SLWB_INPUT_IMAGE_SIZE_MESS);
     return rc;
   }
-
-
+    
   // ==========================================================================
   // Check and copy image to mainstore and clean it up.
   // ==========================================================================
@@ -142,7 +179,7 @@ ReturnCode p8_slw_build( const fapi::Target    &i_target,
     return rc;
   }
   FAPI_DBG("Image size (in EPROM): %i",i_sizeImageIn);
-
+  
   // Second, copy input image to supplied mainstore location.
   //
   memcpy( i_imageOut, i_imageIn, i_sizeImageIn);
@@ -216,7 +253,7 @@ ReturnCode p8_slw_build( const fapi::Target    &i_target,
   do  {
 
   FAPI_DBG("nextRing (at top)=0x%016llx",(uint64_t)nextRing);
-
+  
 
   // ==========================================================================
   // Get ring layout from image
@@ -228,37 +265,55 @@ ReturnCode p8_slw_build( const fapi::Target    &i_target,
                                       &rs4RingLayout,
                                       &nextRing);
   rcSearch = rcLoc;
-  if (rcSearch!=DSLWB_RING_SEARCH_MATCH &&
-      rcSearch!=DSLWB_RING_SEARCH_EXHAUST_MATCH &&
+  if (rcSearch!=DSLWB_RING_SEARCH_MATCH && 
+      rcSearch!=DSLWB_RING_SEARCH_EXHAUST_MATCH && 
       rcSearch!=DSLWB_RING_SEARCH_NO_MATCH)  {
-    FAPI_ERR("\tERROR : Getting delta ring from image was unsuccessful (rcSearch=%i).",rcSearch);
+    FAPI_ERR("\tGetting delta ring from image was unsuccessful (rcSearch=%i).",rcSearch);
     FAPI_ERR("\tNo wiggle-flip programs will be stored in .rings section.");
     FAPI_ERR("\tThe following ELF sections have been emptied: .rings, .pibmem0, .ipl_text.");
     uint32_t & RC_LOCAL=rcLoc;
 	  FAPI_SET_HWP_ERROR(rc, RC_PROC_SLWB_RING_RETRIEVAL_ERROR);
     return rc;
   }
-  if (rcSearch==DSLWB_RING_SEARCH_MATCH ||
+  if (rcSearch==DSLWB_RING_SEARCH_MATCH || 
       rcSearch==DSLWB_RING_SEARCH_EXHAUST_MATCH)
     FAPI_DBG("\tRetrieving RS4 delta ring was successful.");
 
   // Check if we're done at this point.
-  //
+  //      
   if (rcSearch==DSLWB_RING_SEARCH_NO_MATCH)  {
-#ifdef IMGBUILD_PPD_ADD_REPR_RINGS
-		// Add repair rings.
-		rc = p8_xip_customize(	i_target,
-														i_imageOut,
-														sizeImageOld,
-														sysPhase,
-														NULL,
-														sizeImageoutMax);
-		// TBD. Need to check RC.
-#endif
     FAPI_INF("Wiggle-flip programming done.");
     FAPI_INF("Number of wf programs appended: %i", countWF);
     if (countWF==0)
       FAPI_INF("ZERO WF programs appended to .rings section.");
+#ifndef IMGBUILD_PPD_IGNORE_XIPC
+		// Do various customizations to image.
+		if (!buf1 || !buf2)  {
+			FAPI_ERR("The [assumed] pre-allocated ring buffers, buf1/2, do not exist.\n");
+      uint32_t & RC_LOCAL = rcTmp;
+		  FAPI_SET_HWP_ERROR(rc, RC_PROC_SLWB_MEMORY_ERROR);
+		  return rc;
+		}
+    sizeImageTmp = sizeImageOutMax;
+		FAPI_INF("Calling xip_customize().\n");
+		FAPI_EXEC_HWP(rc, p8_xip_customize,	
+		                  i_target,
+											i_imageOut,   // This is both in and out image for xip_customize.
+											NULL,         // No need to pass a separate out image
+											sizeImageTmp,
+											sysPhase,
+											buf1,
+											sizeBuf1,
+											buf2,
+											sizeBuf2);
+		free(buf1);
+		free(buf2);
+		if (rc!=FAPI_RC_SUCCESS)  {
+    	FAPI_ERR("Xip customization failed.");
+			return rc;
+		}
+    FAPI_INF("Xip customization done.");
+#endif
 		sizeImageTmp = sizeImageOutMax;
     // Initialize .slw section with PORE table.
     rcLoc = initialize_slw_section( i_imageOut,
@@ -287,11 +342,13 @@ ReturnCode p8_slw_build( const fapi::Target    &i_target,
 		// Report final size.
     sbe_xip_image_size( i_imageOut, io_sizeImageOut);
     FAPI_INF("Final SLW image size: %i", *io_sizeImageOut);
+		if (buf1) free(buf1);
+		if (buf2) free(buf2);
     return FAPI_RC_SUCCESS;
   }
-
+  
   deltaRingRS4 = (CompressedScanData*)rs4RingLayout.rs4Delta;
-
+  
   FAPI_DBG("Dumping ring layout:");
   FAPI_DBG("\tentryOffset      = %i",(uint32_t)myRev64(rs4RingLayout.entryOffset));
   FAPI_DBG("\tbackItemPtr     = 0x%016llx",myRev64(rs4RingLayout.backItemPtr));
@@ -301,7 +358,7 @@ ReturnCode p8_slw_build( const fapi::Target    &i_target,
   FAPI_DBG("\tsysPhase        = %i",rs4RingLayout.sysPhase);
   FAPI_DBG("\toverride        = %i",rs4RingLayout.override);
   FAPI_DBG("\treserved1+2     = %i",rs4RingLayout.reserved1|rs4RingLayout.reserved2);
-  FAPI_DBG("\tRS4 magic #     = 0x%08x",myRev32(deltaRingRS4->iv_magic));
+  FAPI_DBG("\tRS4 magic #     = 0x%08x",myRev32(deltaRingRS4->iv_magic));    
   FAPI_DBG("\tRS4 total size  = %i",myRev32(deltaRingRS4->iv_size));
   FAPI_DBG("\tUnXed data size = %i",myRev32(deltaRingRS4->iv_length));
   FAPI_DBG("\tScan select     = 0x%08x",myRev32(deltaRingRS4->iv_scanSelect));
@@ -322,23 +379,25 @@ ReturnCode p8_slw_build( const fapi::Target    &i_target,
   // ==========================================================================
   FAPI_DBG("--> Decompressing RS4 delta ring.");
   // Note:  deltaRingDxed is left-aligned. If converting to uint32_t, do BE->LE flip.
-  deltaRingDxed = NULL;
-  rcLoc = rs4_decompress( &deltaRingDxed,
-                          &ringBitLen,
+  //deltaRingDxed = NULL;
+  //rcLoc = rs4_decompress( &deltaRingDxed,
+  //                        &ringBitLen,
+  //                        deltaRingRS4);
+  rcLoc = _rs4_decompress((uint8_t*)buf2,
+                          sizeBuf2,
+													&ringBitLen,
                           deltaRingRS4);
-  FAPI_DBG("rs4_decompress %d.\n", rcLoc );
   if (rcLoc)  {
-    FAPI_ERR("\tERROR : rs4_decompress() failed: rc=%i",rcLoc);
-    if (deltaRingDxed)  free(deltaRingDxed);
+    //FAPI_ERR("\trs4_decompress() failed: rc=%i",rcLoc);
+    //if (deltaRingDxed)  free(deltaRingDxed);
+    FAPI_ERR("\t_rs4_decompress() failed: rc=%i",rcLoc);
+    if (buf2)  free(buf2);
 		uint32_t & RC_LOCAL=rcLoc;
     FAPI_SET_HWP_ERROR(rc, RC_PROC_SLWB_RS4_DECOMPRESSION_ERROR);
     return rc;
   }
   FAPI_DBG("\tDecompression successful.\n");
-
-//  ringByteLen = (ringBitLen-1)/8+1;
-//  ringTrailBits = ringBitLen - 8*(ringByteLen-1);
-
+  
 
   // ==========================================================================
   // Create Wiggle-Flip Programs (but first resolve max rotate status.)
@@ -356,7 +415,8 @@ ReturnCode p8_slw_build( const fapi::Target    &i_target,
 	  }
 		else  {
 			FAPI_ERR("ERROR: Nope, couldn't wing it.");
-      if (deltaRingDxed)  free(deltaRingDxed);
+      //if (deltaRingDxed)  free(deltaRingDxed);
+      if (buf2)  free(buf2);
 		  uint32_t & RC_LOCAL=rcLoc;
 		  FAPI_SET_HWP_ERROR(rc, RC_PROC_SLWB_UNKNOWN_XIP_ERROR);
 		  return rc;
@@ -369,23 +429,27 @@ ReturnCode p8_slw_build( const fapi::Target    &i_target,
 		FAPI_INF("Continuing...\n");
 	}
 
-  rcLoc = create_wiggle_flip_prg( (uint32_t*)deltaRingDxed,
+	wfInline = (uint32_t*)buf1;
+	wfInlineLenInWords = sizeBuf1/4;
+  //rcLoc = create_wiggle_flip_prg( (uint32_t*)deltaRingDxed, 
+  rcLoc = create_wiggle_flip_prg( (uint32_t*)buf2, 
                                   ringBitLen,
                                   myRev32(deltaRingRS4->iv_scanSelect),
                                   (uint32_t)deltaRingRS4->iv_chipletId,
-                                  &wfInline,
+                                  &wfInline, 
                                   &wfInlineLenInWords,
 																	(uint32_t)scanMaxRotate);
   if (rcLoc)  {
-    FAPI_ERR("ERROR : create_wiggle_flip_prg() failed w/rcLoc=%i",rcLoc);
-    if (deltaRingDxed)  free(deltaRingDxed);
+    FAPI_ERR("create_wiggle_flip_prg() failed w/rcLoc=%i",rcLoc);
+    //if (deltaRingDxed)  free(deltaRingDxed);
+    if (buf2)  free(buf2);
     if (wfInline)  free(wfInline);
 		uint32_t & RC_LOCAL=rcLoc;
     FAPI_SET_HWP_ERROR(rc, RC_PROC_SLWB_WF_CREATION_ERROR);
     return rc;
   }
   FAPI_DBG("\tWiggle-flip programming successful.");
-
+  
 
   // ==========================================================================
   // Append Wiggle-Flip programs to .rings section.
@@ -398,8 +462,9 @@ ReturnCode p8_slw_build( const fapi::Target    &i_target,
                                       wfInline,
                                       wfInlineLenInWords);
   if (rcLoc)  {
-    FAPI_ERR("ERROR : write_wiggle_flip_to_image() failed w/rcLoc=%i",rcLoc);
-    if (deltaRingDxed)  free(deltaRingDxed);
+    FAPI_ERR("write_wiggle_flip_to_image() failed w/rcLoc=%i",rcLoc);
+    //if (deltaRingDxed)  free(deltaRingDxed);
+    if (buf2)  free(buf2);
     if (wfInline)  free(wfInline);
     if (rcLoc==IMGBUILD_ERR_IMAGE_TOO_LARGE)  {
 		  uint32_t & DATA_IMG_SIZE_OLD=sizeImageOld;
@@ -414,7 +479,7 @@ ReturnCode p8_slw_build( const fapi::Target    &i_target,
     return rc;
   }
   FAPI_DBG("\tUpdating image w/wiggle-flip program + header was successful.");
-
+  
   // Update some variables for debugging and error reporting.
   sizeImageOld = sizeImageTmp;
   countWF++;
@@ -423,28 +488,47 @@ ReturnCode p8_slw_build( const fapi::Target    &i_target,
   // ==========================================================================
   // Clean up
   // ==========================================================================
-  if (deltaRingDxed)  free(deltaRingDxed);
-  if (wfInline)  free(wfInline);
-
-
+  //if (deltaRingDxed)  free(deltaRingDxed);
+  // 2012-11-14: CMO- Do NOT free buf1 or buf2 here! They are used in xip_customize().
+	//             And once these buffers are actually passed as parms to slw_build,
+	//             stop freeing them inside slw_build!!!!!!!!
+  
   // ==========================================================================
   // Are we done?
   // ==========================================================================
   if (rcSearch==DSLWB_RING_SEARCH_EXHAUST_MATCH)  {
-#ifdef IMGBUILD_PPD_ADD_REPR_RINGS
-		// Add repair rings.
-		rc = p8_xip_customize(	i_target,
-														i_imageOut,
-														sizeImageOld,
-														sysPhase,
-														NULL,
-														sizeImageoutMax);
-		// TBD. Need to check RC.
-#endif
     FAPI_INF("Wiggle-flip programming done.");
     FAPI_INF("Number of wf programs appended: %i", countWF);
     if (countWF==0)
       FAPI_INF("ZERO WF programs appended to .rings section.");
+#ifndef IMGBUILD_PPD_IGNORE_XIPC
+		// Do various customizations to image.
+		if (!buf1 || !buf2)  {
+			FAPI_ERR("The [assumed] pre-allocated ring buffers, buf1/2, do not exist.\n");
+      uint32_t & RC_LOCAL = rcTmp;
+		  FAPI_SET_HWP_ERROR(rc, RC_PROC_SLWB_MEMORY_ERROR);
+		  return rc;
+		}
+    sizeImageTmp = sizeImageOutMax;
+		FAPI_INF("Calling xip_customize().\n");
+		FAPI_EXEC_HWP(rc, p8_xip_customize,	
+		                  i_target,
+											i_imageOut,   // This is both in and out image for xip_customize.
+											NULL,         // No need to pass a separate out image
+											sizeImageTmp,
+											sysPhase,
+											buf1,
+											sizeBuf1,
+											buf2,
+											sizeBuf2);
+		free(buf1);
+		free(buf2);
+		if (rc!=FAPI_RC_SUCCESS)  {
+    	FAPI_ERR("Xip customization failed.");
+			return rc;
+		}
+    FAPI_INF("Xip customization done.");
+#endif
     sizeImageTmp = sizeImageOutMax;
     // Initialize .slw section with PORE table.
 		rcLoc = initialize_slw_section( i_imageOut,
@@ -473,17 +557,19 @@ ReturnCode p8_slw_build( const fapi::Target    &i_target,
 		// Report final size.
 		sbe_xip_image_size( i_imageOut, io_sizeImageOut);
     FAPI_INF("Final SLW image size: %i", *io_sizeImageOut);
+		if (buf1) free(buf1);
+		if (buf2) free(buf2);
     return FAPI_RC_SUCCESS;
   }
 
   FAPI_DBG("nextRing (at bottom)=0x%016llx",(uint64_t)nextRing);
-
+    
   }   while (nextRing!=NULL);
   /***************************************************************************
    *                            SEARCH LOOP - End                              *
    ***************************************************************************/
 
-  FAPI_ERR("ERROR : Shouldn't be in this code section. Check code.");
+  FAPI_ERR("Shouldn't be in this code section. Check code.");
   rcLoc = IMGBUILD_ERR_CHECK_CODE;
   uint32_t & RC_LOCAL=rcLoc;
   FAPI_SET_HWP_ERROR(rc, RC_PROC_SLWB_UNKNOWN_ERROR);

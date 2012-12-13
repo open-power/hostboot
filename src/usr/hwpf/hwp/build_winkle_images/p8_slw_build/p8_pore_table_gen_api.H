@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_pore_table_gen_api.H,v 1.13 2012/09/24 15:02:48 cmolsen Exp $
+// $Id: p8_pore_table_gen_api.H,v 1.15 2012/10/17 19:06:54 cmolsen Exp $
 /*------------------------------------------------------------------------------*/
 /* *! (C) Copyright International Business Machines Corp. 2012                  */
 /* *! All Rights Reserved -- Property of IBM                                    */
@@ -61,7 +61,7 @@
 //    1       - Reserved
 //    2:3     - Type
 //                00: MTSPR
-//                01: MTGPR 
+//                01: MTMSRD
 //                10: Reserved
 //                11: Reserved
 //    4:13    - SPR number in non-swizzled form (0:9)
@@ -122,7 +122,6 @@ CONST_UINT64_T( EX_PERV_SCRATCH7                      , ULL(0x1001328A) );
 
 // RAM Status reg settings.
 CONST_UINT64_T( RAM_STATUS_REG_AFTER_RAM,        0x5000000000000000);
-CONST_UINT32_T( SLW_MAX_RAM_POLLS               ,ULL(0x04) );
 
 // mfspr gpr0, scratch0  opcode left-shifted 29 bits, ready for ramming.
 CONST_UINT64_T( MTSPR_SCRATCH0_GPR0_RAM_READY,  (0x000000007C1543A6<<29));
@@ -189,16 +188,17 @@ CONST_UINT64_T( SCRATCH0_RESET_VALUE,           (0xABBA99EBBA33DADA) );
 /* Other defs needed for ramming and scomming */
 // TOC names
 #define SLW_HOST_REG_VECTOR_TOC_NAME         "slw_host_reg_vector"
-#define SLW_HOST_SCOM_VECTOR_TOC_NAME        "slw_host_scom_vector"
+#define SLW_HOST_SCOM_NC_VECTOR_TOC_NAME     "slw_host_scom_nc_vector"
 #define SLW_HOST_SCOM_L2_VECTOR_TOC_NAME     "slw_host_scom_l2_vector"
 #define SLW_HOST_SCOM_L3_VECTOR_TOC_NAME     "slw_host_scom_l3_vector"
-//#define SLW_HOST_REG_TABLE_TOC_NAME          "slw_core_reg_table"
 
 // Defines for slw_build() to update "runtime_scom" pointers w/pointer to 
 //   "sub_slw_runtime_scom" subroutines at SLW image build time.
 #define HOST_RUNTIME_SCOM_TOC_NAME           "host_runtime_scom"    // Null 1st, then fill w/addr of SLW_RUNTIME_SCOM_TOC_NAME
 #define SLW_RUNTIME_SCOM_TOC_NAME            "sub_slw_runtime_scom"
-#define EX_ENABLE_RUNTIME_SCOM_TOC_NAME      "ex_enable_runtime_scom"    // Null 1st, then fill w/addr of SLW_EX_ENABLE_RUNTIME_SCOM_TOC_NAME
+
+// The following two provide TRANSITIONAL SUPPORT only. TO BE REMOVED ASAP.
+#define EX_ENABLE_RUNTIME_SCOM_TOC_NAME      "ex_enable_runtime_scom"
 #define SLW_EX_ENABLE_RUNTIME_SCOM_TOC_NAME  "sub_slw_ex_enable_runtime_scom"
 
 #define SCAN_MAX_ROTATE_38XXX_NAME           "scan_max_rotate_38xxx"
@@ -211,9 +211,10 @@ CONST_UINT64_T( SCRATCH0_RESET_VALUE,           (0xABBA99EBBA33DADA) );
 #define SLW_MAX_CPUREGS_CORE     9
 #define SLW_MAX_CPUREGS_THREADS  2
 #define SLW_CORE_THREADS         8
-#define SLW_MAX_CPUREGS_OPS     (  SLW_MAX_CPUREGS_CORE + \
-                                   SLW_CORE_THREADS*SLW_MAX_CPUREGS_THREADS )
-#define SLW_RAM_TABLE_SIZE      (  SLW_MAX_CORES * SLW_MAX_CPUREGS_OPS * XIPSIZE_RAM_ENTRY )
+#define SLW_MAX_CPUREGS_OPS     ( SLW_MAX_CPUREGS_CORE + \
+                                  SLW_CORE_THREADS*SLW_MAX_CPUREGS_THREADS )
+#define SLW_RAM_TABLE_SPACE_PER_CORE ( SLW_MAX_CPUREGS_OPS * XIPSIZE_RAM_ENTRY )
+#define SLW_RAM_TABLE_SIZE      ( SLW_MAX_CORES * SLW_RAM_TABLE_SPACE_PER_CORE )
 
 // SPR and MSR values for i_regName
 enum  {
@@ -233,31 +234,41 @@ enum  {
 // SCOM table defines - Common
 #define XIPSIZE_SCOM_ENTRY      16
 
-// SCOM table defines - Non-cache
+// SCOM table defines - Non-cache section
 #define SLW_MAX_SCOMS_NC        32
 #define SLW_SCOM_TABLE_SPACE_PER_CORE_NC ( (SLW_MAX_SCOMS_NC+1)*XIPSIZE_SCOM_ENTRY ) // Add 1 for RNNN IIS
 #define SLW_SCOM_TABLE_SIZE_NC     (  SLW_MAX_CORES * SLW_SCOM_TABLE_SPACE_PER_CORE_NC )
 
-// SCOM table defines - L2
+// SCOM table defines - L2 section
 #define SLW_MAX_SCOMS_L2        16
 #define SLW_SCOM_TABLE_SPACE_PER_CORE_L2 ( (SLW_MAX_SCOMS_L2+1)*XIPSIZE_SCOM_ENTRY ) // Add 1 for RNNN IIS
 #define SLW_SCOM_TABLE_SIZE_L2     (  SLW_MAX_CORES * SLW_SCOM_TABLE_SPACE_PER_CORE_L2 )
 
-// SCOM table defines - L3
+// SCOM table defines - L3 section
 #define SLW_MAX_SCOMS_L3        16
 #define SLW_SCOM_TABLE_SPACE_PER_CORE_L3 ( (SLW_MAX_SCOMS_L3+1)*XIPSIZE_SCOM_ENTRY ) // Add 1 for RNNN IIS
 #define SLW_SCOM_TABLE_SIZE_L3     (  SLW_MAX_CORES * SLW_SCOM_TABLE_SPACE_PER_CORE_L3 )
 
 #define SLW_SCOM_TABLE_SIZE_ALL   ( SLW_SCOM_TABLE_SIZE_NC + SLW_SCOM_TABLE_SIZE_L2 + SLW_SCOM_TABLE_SIZE_L3)
- 
+
+// RAM and SCOM sub-section offsets from beginning of .slw section.
+#define SLW_RAM_TABLE_OFFSET        0
+#define SLW_SCOM_TABLE_OFFSET_NC    (SLW_RAM_TABLE_OFFSET + SLW_RAM_TABLE_SIZE)
+#define SLW_SCOM_TABLE_OFFSET_L2    (SLW_SCOM_TABLE_OFFSET_NC + SLW_SCOM_TABLE_SIZE_NC)
+#define SLW_SCOM_TABLE_OFFSET_L3    (SLW_SCOM_TABLE_OFFSET_L2 + SLW_SCOM_TABLE_SIZE_L2)
+#define SLW_TABLE_SIZE_ALL          (SLW_RAM_TABLE_SIZE + SLW_SCOM_TABLE_SIZE_ALL)
+
+// FFDC section
+#define FFDC_SECTION_SIZE       256
+
 // SCOM/CID masks and ranges
 #define P8_CID_EX_LOW         0x10        // Lowest EX chiplet addr
 #define P8_CID_EX_HIGH        0x1f        // Highest EX chiplet addr
 
 // SCOM Operators
-#define P8_PORE_SCOM_FIRST_OP 1  // First supported INPUT Scom operation.
-#define P8_PORE_SCOM_APPEND   0  // Add Scom to the end of table (only used internally)
-#define P8_PORE_SCOM_REPLACE  1  // Replace existing Scom, or append to end of table
+#define P8_PORE_SCOM_FIRST_OP 0  // First supported INPUT Scom operation.
+#define P8_PORE_SCOM_APPEND   0  // Add Scom to end of table
+#define P8_PORE_SCOM_REPLACE  1  // Repl 1st matching Scom addr or add to end of table
 #define P8_PORE_SCOM_OR       2  // Overlay data onto existing Scom by bitwise OR
 #define P8_PORE_SCOM_AND      3  // Overlay data onto existing Scom by bitwise AND
 #define P8_PORE_SCOM_NOOP     4  // Replace existing Scom PORE NOP instruction
@@ -323,16 +334,18 @@ uint32_t p8_pore_gen_cpureg(void      *io_image,
  *  Parameter list:   i_image     - pointer to SLW mainstore image
  *                    i_sizeImage - size of SLW mainstore image
  *                    i_scomAddr  - scom register address
- *                    i_scomData  - 64-bit data to put in scom register
- *                    i_operation - what to do with the scom data
  *                    i_coreId    - the core ID [0:15]
+ *                    i_scomData  - 64-bit data to put in scom register
+ *                    i_operation - what to do with the scom data [0:5]
+ *                    i_section   - SCOM section [0,2,3]
  */
 uint32_t p8_pore_gen_scom(void      *io_image,
                           uint32_t  i_sizeImage, 
                           uint32_t  i_scomAddr,
                           uint32_t  i_coreId,
                           uint64_t  i_scomData,
-                          uint32_t  i_operation);
+                          uint32_t  i_operation,
+  												uint32_t  i_section);
 
 #ifdef __cplusplus
 }
