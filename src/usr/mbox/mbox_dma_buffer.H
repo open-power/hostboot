@@ -43,12 +43,12 @@ namespace MBOX
 
             DmaBuffer();
             ~DmaBuffer();
-            
+
             /**
              * Get DMA buffer space
              * @param[in/out] io_size, size in bytes of space needed,
              *                         0 means get all available buffers
-             *                         bit map is returned showing blocks 
+             *                         bit map is returned showing blocks
              *                         aquired.
              *
              * @note: There are 64 total buffers in the shared DMA pool. The
@@ -103,7 +103,7 @@ namespace MBOX
                 uint64_t address = reinterpret_cast<uint64_t>(i_address);
                 return
                     (address >= VmmManager::MBOX_DMA_ADDR &&
-                     address < (VmmManager::MBOX_DMA_ADDR + 
+                     address < (VmmManager::MBOX_DMA_ADDR +
                                 (VmmManager::MBOX_DMA_PAGES *
                                  VmmManager::MBOX_DMA_PAGESIZE)));
             }
@@ -116,7 +116,9 @@ namespace MBOX
             ALWAYS_INLINE
             uint64_t toPhysAddr(void * i_address) const
             {
-                return mm_virt_to_phys(i_address);
+                return iv_phys_head +
+                    (reinterpret_cast<uint64_t>(i_address) -
+                     reinterpret_cast<uint64_t>(iv_head));
             }
 
             /**
