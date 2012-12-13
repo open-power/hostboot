@@ -58,6 +58,9 @@
 #include    <fapi.H>
 #include    <fapiPlatHwpInvoker.H>
 
+//hb vddr support
+#include <hbVddrMsg.H>
+
 // Run on all Centaurs/MBAs, but needs to keep this one handy in case we
 // want to limit them in VPO
 const uint8_t UNLIMITED_RUN = 0xFF;
@@ -102,54 +105,61 @@ void*    call_host_disable_vddr( void *io_pArgs )
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_host_disable_vddr entry" );
 
-#if 0
-    // @@@@@    CUSTOM BLOCK:   @@@@@
-    //  figure out what targets we need
-    //  customize any other inputs
-    //  set up loops to go through all targets (if parallel, spin off a task)
-
-    //  print call to hwp and dump physical path of the target(s)
-    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                    "=====  host_disable_vddr HWP(? ? ? )",
-                    ?
-                    ?
-                    ? );
-    //  dump physical path to targets
-    EntityPath l_path;
-    l_path  =   l_@targetN_target->getAttr<ATTR_PHYS_PATH>();
-    l_path.dump();
-    TRACFCOMP( g_trac_mc_init, "===== " );
-
-    // cast OUR type of target to a FAPI type of target.
-    const fapi::Target l_fapi_@targetN_target(
-                    TARGET_TYPE_MEMBUF_CHIP,
-                    reinterpret_cast<void *>
-                        (const_cast<TARGETING::Target*>(l_@targetN_target)) );
-
-    //  call the HWP with each fapi::Target
-    l_fapirc  =   host_disable_vddr( ? , ?, ? );
-
-    //  process return code.
-    if ( l_fapirc== fapi::FAPI_RC_SUCCESS )
+    if( MBOX::mailbox_enabled() )
     {
-        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                "SUCCESS :  host_disable_vddr HWP(? ? ? )" );
+        IStepError l_StepError;
+    
+        HBVddrMsg l_hbVddr;
+
+        l_err = l_hbVddr.sendMsg(HBVddrMsg::HB_VDDR_DISABLE);
+        if (l_err)
+        {
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                          "ERROR 0x%.8X: call_host_disable_vddr to sendMsg returns error",
+                          l_err->reasonCode());
+            /*@
+             * @errortype
+             * @reasoncode  ISTEP_DRAM_TRAINING_FAILED
+             * @severity    ERRORLOG::ERRL_SEV_UNRECOVERABLE
+             * @moduleid    ISTEP_VDDR_DISABLE
+             * @userdata1   bytes 0-1: plid identifying first error
+             *              bytes 2-3: reason code of first error
+             * @userdata2   bytes 0-1: total number of elogs included
+             *              bytes 2-3: N/A
+             * @devdesc     call to mss_scominit has failed
+             *              see error log in the user details section for
+             *              additional details.
+             */
+            l_StepError.addErrorDetails(ISTEP_DRAM_TRAINING_FAILED,
+                                        ISTEP_VDDR_DISABLE,
+                                        l_err );
+
+            errlCommit( l_err, HWPF_COMP_ID );
+    
+        }
+        else
+        {
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                           "SUCCESS :  host_disable_vddr()" );
+        }
+        TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_host_disable_vddr"
+                    "when a fsp present exit" );
+
+        return l_StepError.getErrorHandle();
     }
     else
     {
-        /**
-         * @todo fapi error - just print out for now...
-         */
-        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                "ERROR 0x%.8X:  host_disable_vddr HWP(? ? ?) ",
-                static_cast<uint32_t>(l_fapirc) );
+        //no mailbox running so this is a fsp less system.  Right now the istep
+        //only works when a FSP is present.  May add code in the future for 
+        //Stradale which is a FSP-less system
+        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,"call_host_disable_vddr"
+                "no-op because fsp-less");
+        TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_host_disable_vddr "
+                "for an fsp less system exit" );
+
+        return l_err;       
     }
-    // @@@@@    END CUSTOM BLOCK:   @@@@@
-#endif
 
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_host_disable_vddr exit" );
-
-    return l_err;
 }
 
 //
@@ -355,58 +365,64 @@ void*    call_mem_startclocks( void *io_pArgs )
 //
 void*    call_host_enable_vddr( void *io_pArgs )
 {
-    errlHndl_t l_err = NULL;
-
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_host_enable_vddr entry" );
 
-#if 0
-    // @@@@@    CUSTOM BLOCK:   @@@@@
-    //  figure out what targets we need
-    //  customize any other inputs
-    //  set up loops to go through all targets (if parallel, spin off a task)
+    errlHndl_t l_err = NULL;
 
-    //  print call to hwp and dump physical path of the target(s)
-    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                    "=====  host_enable_vddr HWP(? ? ? )",
-                    ?
-                    ?
-                    ? );
-    //  dump physical path to targets
-    EntityPath l_path;
-    l_path  =   l_@targetN_target->getAttr<ATTR_PHYS_PATH>();
-    l_path.dump();
-    TRACFCOMP( g_trac_mc_init, "===== " );
-
-    // cast OUR type of target to a FAPI type of target.
-    const fapi::Target l_fapi_@targetN_target(
-                    TARGET_TYPE_MEMBUF_CHIP,
-                    reinterpret_cast<void *>
-                        (const_cast<TARGETING::Target*>(l_@targetN_target)) );
-
-    //  call the HWP with each fapi::Target
-    l_fapirc  =   host_enable_vddr( ? , ?, ? );
-
-    //  process return code.
-    if ( l_fapirc== fapi::FAPI_RC_SUCCESS )
+    if( MBOX::mailbox_enabled() )
     {
-        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                "SUCCESS :  host_enable_vddr HWP(? ? ? )" );
+        IStepError l_StepError;
+
+        HBVddrMsg l_hbVddr;
+
+        l_err = l_hbVddr.sendMsg(HBVddrMsg::HB_VDDR_ENABLE);
+        if (l_err)
+        {
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                          "ERROR 0x%.8X: call_host_enable_vddr to sendMsg returns error",
+                          l_err->reasonCode());
+            /*@
+             * @errortype
+             * @reasoncode  ISTEP_DRAM_TRAINING_FAILED
+             * @severity    ERRORLOG::ERRL_SEV_UNRECOVERABLE
+             * @moduleid    ISTEP_VDDR_ENABLE
+             * @userdata1   bytes 0-1: plid identifying first error
+             *              bytes 2-3: reason code of first error
+             * @userdata2   bytes 0-1: total number of elogs included
+             *              bytes 2-3: N/A
+             * @devdesc     call to mss_scominit has failed
+             *              see error log in the user details section for
+             *              additional details.
+             */
+            l_StepError.addErrorDetails(ISTEP_DRAM_TRAINING_FAILED,
+                                        ISTEP_VDDR_ENABLE,
+                                        l_err );
+
+            errlCommit( l_err, HWPF_COMP_ID );
+
+        }
+        else
+        {
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                           "SUCCESS :  host_enable_vddr()" );
+        }   
+        TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_host_enable_vddr exit" );
+
+        return l_StepError.getErrorHandle();
     }
     else
     {
-        /**
-         * @todo fapi error - just print out for now...
-         */
-        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                "ERROR 0x%.8X:  host_enable_vddr HWP(? ? ?) ",
-                static_cast<uint32_t>(l_fapirc) );
+        //no mailbox running so this is a fsp less system.  Right now the istep
+        //only works when a FSP is present.  May add code in the future for 
+        //Stradale which is a FSP-less system
+        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,"call_host_enable_vddr"
+                "no-op because fsp-less");
+        TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_host_enable_vddr "
+                "for an fsp less system exit" );
+
+        return l_err;
+
     }
-    // @@@@@    END CUSTOM BLOCK:   @@@@@
-#endif
-
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_host_enable_vddr exit" );
-
-    return l_err;
 }
 
 

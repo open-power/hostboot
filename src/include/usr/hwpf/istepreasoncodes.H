@@ -109,6 +109,8 @@ enum istepModuleId
     ISTEP_MSS_DRAMINIT_TRAINADV                         = 0x3C,
     ISTEP_DMI_IO_RESTORE_EREPAIR                        = 0x3D,
     ISTEP_FABRIC_IO_RESTORE_EREPAIR                     = 0x3E,
+    ISTEP_VDDR_ENABLE                                   = 0x3F,
+    ISTEP_VDDR_DISABLE                                  = 0x40,
 };
 
 /**

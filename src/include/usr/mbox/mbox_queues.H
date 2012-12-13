@@ -58,8 +58,8 @@ namespace MBOX
         FSP_TRACE_MSGQ          = 0x80000002,
         FSP_PROGRESS_CODES_MSGQ = 0x80000003,
         FSP_ERROR_MSGQ          = 0x80000004,
-        //                        0x80000007, // reserved for TMGT
-        IPL_SERVICE_QUEUE       = 0x80000008,
+        FSP_VDDR_MSGQ           = 0x80000005,
+        IPL_SERVICE_QUEUE       = 0x80000008, // Defined by Fsp team
         FSP_ATTR_SYNC_MSGQ      = 0x80000009,
         //                        0x8000000A, // Reserved for VID
         FSP_HWPF_ATTR_MSGQ      = 0x8000000B, // HWPF Attribute override/sync

@@ -66,7 +66,8 @@ OBJS =  dram_training.o \
         mss_access_delay_reg.o \
         mss_generic_shmoo.o \
         mss_mcbist.o \
-        mss_mcbist_common.o
+        mss_mcbist_common.o\
+        hbVddrMsg.o
         
 ##  NOTE: add a new directory onto the vpaths when you add a new HWP
 ##@ VPATH += ${ROOTPATH}/src/usr/hwpf/hwp/???

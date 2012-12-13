@@ -177,9 +177,9 @@ my $vmemCentaur = XMLin("$mrwdir/${sysname}-cent-vrds.xml");
 # Capture all pnor attributes into the @unsortedPnorTargets array
 use constant VMEM_DEV_PATH_FIELD => 0;
 use constant VMEM_I2C_ADDR_FIELD => 1;
-use constant VMEM_NODE_FIELD => 2;
-use constant VMEM_POS_FIELD => 3;
-use constant VMEM_ID_FIELD => 4;
+use constant VMEM_ID_FIELD => 2;
+use constant VMEM_NODE_FIELD => 3;
+use constant VMEM_POS_FIELD => 4;
 
 my $vmemId = 0x0;
 
@@ -202,7 +202,7 @@ foreach my $i (@{$vmemCentaur->{'centaur-vrd-connection'}})
              ($vmemAddr eq $vmemDevAddr[$j][VMEM_I2C_ADDR_FIELD]) )
         {
             $found =1;
-            $vmemValue=$vmemArray[$j];
+            $vmemValue=$vmemDevAddr[$j][VMEM_ID_FIELD];
             last;
         }
         else
@@ -210,23 +210,18 @@ foreach my $i (@{$vmemCentaur->{'centaur-vrd-connection'}})
             $found=0;
         }
     }
-    if ($found ==1)
-    {
-        push (@vmemArray,$vmemValue);
-    }
-    else
+    if ($found ==0)
     {
         $vmemValue=$newValue++;
-        push (@vmemArray,$vmemValue);
+        push (@vmemDevAddr,[$vmemDev, $vmemAddr, $vmemValue]);
     }
 
-    push (@vmemDevAddr,[$vmemDev, $vmemAddr]);
 
     my $vmemNode = $i->{'centaur'}->{'target'}->{'node'};
     my $vmemPosition = $i->{'centaur'}->{'target'}->{'position'};
 
-    push (@unsortedVmem,[$vmemDev, $vmemAddr, $vmemNode, $vmemPosition,
-                         $vmemValue]);
+    push (@unsortedVmem,[$vmemDev, $vmemAddr, $vmemValue, $vmemNode, 
+                         $vmemPosition]);
 }
 
 
@@ -918,8 +913,6 @@ my $membMcs;
 my $mba_count = 0;
 my $vmem_id =0;
 my $vmem_count =0;
-my $vmemAddr_prev="";
-my $vmemDevPath_prev="";
 
 for my $i ( 0 .. $#STargets )
 {
@@ -2365,10 +2358,6 @@ sub generate_centaur
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-$sys/node-$node/proc-$proc/mcs-$mcs/"
             . "membuf-$ctaur</default>
-    </attribute>
-    <attribute>
-        <id>VMEM_ID</id>
-        <default>$vmemId</default>
     </attribute>
     <!-- TODO When MRW provides the information, these two attributes
          should be included. values of X come from MRW.

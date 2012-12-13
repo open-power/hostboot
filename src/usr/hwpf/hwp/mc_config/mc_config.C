@@ -111,69 +111,98 @@ void*   call_mss_volt( void *io_pArgs )
     TARGETING::TargetHandleList l_membufTargetList;
     getAllChips(l_membufTargetList, TYPE_MEMBUF);
 
-    //  declare a vector of fapi targets to pass to mss_volt
-    std::vector<fapi::Target> l_membufFapiTargets;
+    //get a list of unique VmemIds
+    std::vector<TARGETING::ATTR_VMEM_ID_type> l_VmemList;
 
-    //  fill in the vector
-    for ( size_t i = 0; i < l_membufTargetList.size(); i++ )
+    for (size_t i = 0; i < l_membufTargetList.size(); i++ )
     {
-        //  make a local copy of the target for ease of use
-        const TARGETING::Target*  l_membuf_target = l_membufTargetList[i];
+        TARGETING::ATTR_VMEM_ID_type l_VmemID =
+                            l_membufTargetList[i]->getAttr<ATTR_VMEM_ID>();
+        l_VmemList.push_back(l_VmemID);     
+    }
 
-        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                "=====  add to fapi::Target vector..." );
-        EntityPath l_path;
-        l_path  =   l_membuf_target->getAttr<ATTR_PHYS_PATH>();
-        l_path.dump();
+    std::sort(l_VmemList.begin(), l_VmemList.end());
 
-        fapi::Target l_membuf_fapi_target(
-                TARGET_TYPE_MEMBUF_CHIP,
-                reinterpret_cast<void *>
-        (const_cast<TARGETING::Target*>(l_membuf_target)) );
-
-        l_membufFapiTargets.push_back( l_membuf_fapi_target );
-
-    }   // endfor
+    std::vector<TARGETING::ATTR_VMEM_ID_type>::iterator objItr;
+    objItr=std::unique(l_VmemList.begin(), l_VmemList.end());
+    l_VmemList.erase(objItr,l_VmemList.end());
 
 
-    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-            "=====  mss_volt HWP( vector )" );
-    //  call the HWP with a vector of targets
-    FAPI_INVOKE_HWP(l_err, mss_volt, l_membufFapiTargets);
-
-    //  process return code.
-    if ( l_err )
+    //for each unique VmemId filter it out of the list of membuf targets
+    //to create a subsetlist of membufs with just that vmemid
+    for(size_t i = 0; i < l_VmemList.size(); i++)
     {
-        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                "ERROR 0x%.8X:  mss_volt HWP( ) ", l_err->reasonCode());
 
-        /*@
-        * @errortype
-        * @reasoncode       ISTEP_MC_CONFIG_FAILED
-        * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE
-        * @moduleid         ISTEP_MSS_VOLT
-        * @userdata1        bytes 0-1: plid identifying first error
-        *                   bytes 2-3: reason code of first error
-        * @userdata2        bytes 0-1: total number of elogs included
-        *                   bytes 2-3: N/A
-        * @devdesc          call to mss_volt has failed
-        *
-        */
-        l_StepError.addErrorDetails(ISTEP_MC_CONFIG_FAILED,
+        //  declare a vector of fapi targets to pass to mss_volt
+        std::vector<fapi::Target> l_membufFapiTargets;
+
+        for (size_t j = 0; j < l_membufTargetList.size(); j++)
+        {
+            if (l_membufTargetList[j]->getAttr<ATTR_VMEM_ID>()==l_VmemList[i])
+            {
+                //  make a local copy of the target for ease of use
+                const TARGETING::Target*  l_membuf_target = 
+                                            l_membufTargetList[j];
+                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                    "=====  add to fapi::Target vector vmem_id=0x%08X...",
+                    l_membuf_target->getAttr<ATTR_VMEM_ID>());
+
+                EntityPath l_path;
+                l_path  =   l_membuf_target->getAttr<ATTR_PHYS_PATH>();
+                l_path.dump();
+    
+                fapi::Target l_membuf_fapi_target(
+                        TARGET_TYPE_MEMBUF_CHIP,
+                        reinterpret_cast<void *>
+                        (const_cast<TARGETING::Target*>(l_membuf_target)) );
+
+                l_membufFapiTargets.push_back( l_membuf_fapi_target );
+
+            }
+
+        }
+        
+        //now have the a list of fapi membufs with just the one VmemId
+        //call the HWP on the list of fapi targets
+        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                            "=====  mss_volt HWP( vector )" );
+        FAPI_INVOKE_HWP(l_err, mss_volt, l_membufFapiTargets);
+            
+        //  process return code.
+        if ( l_err )
+        {
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                    "ERROR 0x%.8X:  mss_volt HWP( ) ", l_err->reasonCode());
+
+            /*@
+            * @errortype
+            * @reasoncode       ISTEP_MC_CONFIG_FAILED
+            * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE
+            * @moduleid         ISTEP_MSS_VOLT
+            * @userdata1        bytes 0-1: plid identifying first error
+            *                   bytes 2-3: reason code of first error
+            * @userdata2        bytes 0-1: total number of elogs included
+            *                   bytes 2-3: N/A
+            * @devdesc          call to mss_volt has failed
+            *
+            */
+            l_StepError.addErrorDetails(ISTEP_MC_CONFIG_FAILED,
                                     ISTEP_MSS_VOLT,
                                     l_err );
 
-        errlCommit( l_err, HWPF_COMP_ID );
+            errlCommit( l_err, HWPF_COMP_ID );
+            break;
 
-    }
-    else
-    {
-        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                "SUCCESS :  mss_volt HWP( )" );
-    }
+        }
+        else
+        {
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                    "SUCCESS :  mss_volt HWP( )" );
+        }
+
+    }   // endfor
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mss_volt exit" );
-
     return l_StepError.getErrorHandle();
 }
 
