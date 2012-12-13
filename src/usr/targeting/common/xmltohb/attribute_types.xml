@@ -9271,4 +9271,24 @@ Measured in GB</description>
 
 <!-- ===== End Attributes supporting memory_attributes.xml HWPF Attributes ===== -->
 
+<attribute>
+    <id>EI_BUS_TX_LANE_INVERT</id>
+    <description>
+      This attribute represents the polarity of a differential wire pair on the DMI and A buses.
+      creator: platform (generated based on MRW data)
+      See defintion in common_attributes.xml for more information.
+    </description>
+    <simpleType>
+      <uint32_t>
+        <default>0</default>
+      </uint32_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EI_BUS_TX_LANE_INVERT</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
 </attributes>

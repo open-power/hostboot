@@ -571,6 +571,7 @@
     <attribute><id>EI_BUS_RX_MSB_LSB_SWAP</id></attribute>
     <attribute><id>EI_BUS_TX_MSB_LSB_SWAP</id></attribute>
     <attribute><id>PEER_TARGET</id></attribute>
+    <attribute><id>EI_BUS_TX_LANE_INVERT</id></attribute>
 </targetType>
 
 <targetType>
@@ -834,6 +835,7 @@
     <attribute><id>EI_BUS_RX_MSB_LSB_SWAP</id></attribute>
     <attribute><id>EI_BUS_TX_MSB_LSB_SWAP</id></attribute>
     <attribute><id>IBSCOM_MCS_BASE_ADDR</id></attribute>
+    <attribute><id>EI_BUS_TX_LANE_INVERT</id></attribute>
 </targetType>
 
 <targetType>
@@ -945,6 +947,7 @@
     </attribute>
     <attribute><id>MSS_CACHE_ENABLE</id></attribute>
     <attribute><id>VMEM_ID</id></attribute>
+    <attribute><id>EI_BUS_TX_LANE_INVERT</id></attribute>
 </targetType>
 
 <!-- Centaur MBS -->

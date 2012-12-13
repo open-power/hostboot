@@ -111,15 +111,62 @@ close (FH);
 my $powerbus = XMLin("$mrwdir/${sysname}-power-busses.xml");
 
 my @pbus;
+use constant PBUS_FIRST_END_POINT_INDEX => 0;
+use constant PBUS_SECOND_END_POINT_INDEX => 1;
+use constant PBUS_DOWNSTREAM_INDEX => 2;
+use constant PBUS_UPSTREAM_INDEX => 3;
 foreach my $i (@{$powerbus->{'power-bus'}})
 {
+    # Pull out the connection information from the description
+    # example: n0:p0:A2 to n0:p2:A2
     my $endp1 = $i->{'description'};
     my $endp2 = $endp1;
     $endp1 =~ s/^(.*) to.*/$1/;
     $endp2 =~ s/.* to (.*)\s*$/$1/;
-    push @pbus, [ lc($endp1), lc($endp2) ];
-    push @pbus, [ lc($endp2), lc($endp1) ];
+    # Grab the lane swap information
+    my $dwnstrm_swap = $i->{'downstream-n-p-lane-swap-mask'};
+    my $upstrm_swap =  $i->{'upstream-n-p-lane-swap-mask'};
+    #print STDOUT "powerbus: $endp1, $endp2, $dwnstrm_swap, $upstrm_swap\n";
+    push @pbus, [ lc($endp1), lc($endp2), $dwnstrm_swap, $upstrm_swap ];
+    push @pbus, [ lc($endp2), lc($endp1), $dwnstrm_swap, $upstrm_swap ];
 }
+
+open (FH, "<$mrwdir/${sysname}-dmi-busses.xml") ||
+    die "ERROR: unable to open $mrwdir/${sysname}-dmi-busses.xml\n";
+close (FH);
+
+my $dmibus = XMLin("$mrwdir/${sysname}-dmi-busses.xml");
+
+my @dbus_mcs;
+use constant DBUS_MCS_NODE_INDEX => 0;
+use constant DBUS_MCS_PROC_INDEX => 1;
+use constant DBUS_MCS_UNIT_INDEX => 2;
+use constant DBUS_MCS_DOWNSTREAM_INDEX => 3;
+
+my @dbus_centaur;
+use constant DBUS_CENTAUR_NODE_INDEX => 0;
+use constant DBUS_CENTAUR_MEMBUF_INDEX => 1;
+use constant DBUS_CENTAUR_UPSTREAM_INDEX => 2;
+foreach my $dmi (@{$dmibus->{'dmi-bus'}})
+{
+    # First grab the MCS information
+    # MCS is always master so it gets downstream
+    my $node = $dmi->{'mcs'}->{'target'}->{'node'};
+    my $proc = $dmi->{'mcs'}->{'target'}->{'position'};
+    my $mcs = $dmi->{'mcs'}->{'target'}->{'chipUnit'};
+    my $swap = $dmi->{'downstream-n-p-lane-swap-mask'};
+    #print STDOUT "dbus_mcs: n$node:p$proc:mcs:$mcs swap:$swap\n";
+    push @dbus_mcs, [ $node, $proc, $mcs, $swap ];
+
+    # Now grab the centuar chip information
+    # Centaur is always slave so it gets upstream
+    my $node = $dmi->{'centaur'}->{'target'}->{'node'};
+    my $membuf = $dmi->{'centaur'}->{'target'}->{'position'};
+    my $swap = $dmi->{'upstream-n-p-lane-swap-mask'};
+    #print STDOUT "dbus_centaur: n$node:cen$membuf swap:$swap\n";
+    push @dbus_centaur, [ $node, $membuf, $swap ];
+}
+
 
 open (FH, "<$mrwdir/${sysname}-cent-vrds.xml") ||
     die "ERROR: unable to open $mrwdir/${sysname}-cent-vrds.xml\n";
@@ -2069,6 +2116,18 @@ sub generate_mcs
     my $mcsOffset = $nodeOffset + $procOffset + $mcs*2;
     my $mscStr = sprintf("0x0003E%02X00000000", $mcsOffset);
 
+    my $lane_swap = 0;
+    foreach my $dmi ( @dbus_mcs )
+    {
+        if (($dmi->[DBUS_MCS_NODE_INDEX],
+             $dmi->[DBUS_MCS_PROC_INDEX],
+             $dmi->[DBUS_MCS_UNIT_INDEX]) eq (${node},$proc,$mcs))
+        {
+            $lane_swap = $dmi->[DBUS_MCS_DOWNSTREAM_INDEX];
+            last;
+        }
+    }
+
     print "
 <targetInstance>
     <id>sys${sys}node${node}proc${proc}mcs$mcs</id>
@@ -2100,7 +2159,11 @@ sub generate_mcs
         <id>EI_BUS_TX_MSB_LSB_SWAP</id>
         <default>X</default>
     </attribute>
-    -->";
+    -->
+    <attribute>
+        <id>EI_BUS_TX_LANE_INVERT</id>
+        <default>$lane_swap</default>
+    </attribute>";
 
     if($build eq "fsp")
     {
@@ -2185,15 +2248,31 @@ sub generate_ax_buses
         my $peer = 0;
         my $p_proc = 0;
         my $p_port = 0;
-        foreach my $j ( @pbus )
+        my $lane_swap = 0;
+        foreach my $pbus ( @pbus )
         {
-            if ($j->[0] eq "n${node}:p${proc}:${type}${i}")
+            if ($pbus->[PBUS_FIRST_END_POINT_INDEX] eq "n${node}:p${proc}:${type}${i}")
             {
                 $peer = 1;
-                $p_proc = $j->[1];
+                $p_proc = $pbus->[PBUS_SECOND_END_POINT_INDEX];
                 $p_port = $p_proc;
+                my $p_node = $pbus->[PBUS_SECOND_END_POINT_INDEX];
+                $p_node =~ s/^n(.*):p.*:.*$/$1/;
                 $p_proc =~ s/^.*:p(.*):.*$/$1/;
                 $p_port =~ s/.*:p.*:.(.*)$/$1/;
+                # Calculation from Pete Thomsen for 'master' chip
+                if(((${node}*100) + $proc) < (($p_node*100) + $p_proc))
+                {
+                    # This chip is lower so it's master so it gets
+                    # the downstream data.
+                    $lane_swap = $pbus->[PBUS_DOWNSTREAM_INDEX];
+                }
+                else
+                {
+                    # This chip is higher so it's the slave chip
+                    # and gets the upstream
+                    $lane_swap = $pbus->[PBUS_UPSTREAM_INDEX];
+                }
                 last;
             }
         }
@@ -2232,6 +2311,14 @@ sub generate_ax_buses
         <default>$ordinalId</default>
     </attribute>";
         }
+        if($type eq "a")
+        {
+            print "
+    <attribute>
+        <id>EI_BUS_TX_LANE_INVERT</id>
+        <default>$lane_swap</default>
+    </attribute>";
+        }
 
         print "\n</targetInstance>\n";
     }
@@ -2250,6 +2337,17 @@ sub generate_centaur
     $mcs =~ s/.*:.*:mcs(.*)/$1/g;
 
     my $uidstr = sprintf("0x%02X04%04X",${node},$mcs+$proc*8+${node}*8*8);
+
+    my $lane_swap = 0;
+    foreach my $dmi ( @dbus_centaur )
+    {
+        if (($dmi->[DBUS_CENTAUR_NODE_INDEX],
+             $dmi->[DBUS_CENTAUR_MEMBUF_INDEX]) eq (${node},$ctaur))
+        {
+            $lane_swap = $dmi->[DBUS_CENTAUR_UPSTREAM_INDEX];
+            last;
+        }
+    }
 
     print "
 <!-- $SYSNAME Centaur n${node}p${ctaur} : start -->
@@ -2304,6 +2402,10 @@ sub generate_centaur
     <attribute>
         <id>FSI_OPTION_FLAGS</id>
         <default>0</default>
+    </attribute>
+    <attribute>
+        <id>EI_BUS_TX_LANE_INVERT</id>
+        <default>$lane_swap</default>
     </attribute>";
 
     if ($build eq "fsp")
