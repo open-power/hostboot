@@ -997,11 +997,12 @@ fapi::ReturnCode hwpTestAttributes(fapi::Target & i_mbaTarget,
         if (l_pAttr[0].iv_val != 4)
         {
             FAPI_SET_HWP_ERROR(l_rc, RC_HWP_ATTR_UNIT_TEST_FAIL);
-            FAPI_ERR("hwpTestAttributes: Error. Got bad value (0x%llx) from tank (2.7)",
+            FAPI_ERR("hwpTestAttributes: Error. Got bad value (0x%016llx) from tank (2.7)",
                      l_pAttr[0].iv_val);
             break;
         }
         delete [] l_attributes[0].iv_pAttributes;
+        l_attributes[0].iv_pAttributes = NULL;
         }
         
         //----------------------------------------------------------------------
@@ -1030,7 +1031,7 @@ fapi::ReturnCode hwpTestAttributes(fapi::Target & i_mbaTarget,
         if (l_val != 4)
         {
             FAPI_SET_HWP_ERROR(l_rc, RC_HWP_ATTR_UNIT_TEST_FAIL);
-            FAPI_ERR("hwpTestAttributes: Error. Got bad value (0x%llx) from tank (3.2)",
+            FAPI_ERR("hwpTestAttributes: Error. Got bad value (0x%016llx) from tank (3.2)",
                      l_val);
             break;
         }
@@ -1091,6 +1092,7 @@ fapi::ReturnCode hwpTestAttributes(fapi::Target & i_mbaTarget,
         }
         
         free (l_attributes[0].iv_pAttributes);
+        l_attributes[0].iv_pAttributes = NULL;
         }
         
         //----------------------------------------------------------------------
@@ -1182,6 +1184,7 @@ fapi::ReturnCode hwpTestAttributes(fapi::Target & i_mbaTarget,
         }
         
         free (l_attributes[0].iv_pAttributes);
+        l_attributes[0].iv_pAttributes = NULL;
         }
         
     } while (0);

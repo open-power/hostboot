@@ -44,7 +44,7 @@ namespace MBOX
         HB_ISTEP_MSGQ           = 2,
         HB_ATTR_SYNC_MSGQ       = 3,
         HB_ERROR_MSGQ           = 4,
-        HB_HWPF_ATTR_MSGQ       = 5, // HWPF Attribute override/sync
+        HB_HWPF_ATTR_MSGQ       = 6, // HWPF Attribute override/sync
         // Add HB services here:
 
         HB_TEST_MSGQ            = 0x7FFFFFFF,
@@ -57,7 +57,7 @@ namespace MBOX
         FSP_ERROR_MSGQ          = 0x80000004,
         IPL_SERVICE_QUEUE       = 0x80000008, // Defined by Fsp team
         FSP_ATTR_SYNC_MSGQ      = 0x80000009,
-        FSP_HWPF_ATTR_MSGQ      = 0x8000000a, // HWPF Attribute override/sync
+        FSP_HWPF_ATTR_MSGQ      = 0x8000000b, // HWPF Attribute override/sync
         // Add FSP services here:
         FSP_ECHO_MSGQ = 0xFFFFFFFF,     // Fake FSP for test
     };

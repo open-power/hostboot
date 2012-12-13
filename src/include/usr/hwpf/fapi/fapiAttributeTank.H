@@ -73,6 +73,11 @@ const uint8_t  ATTR_ARRAYD_NA = 0xff;     // iv_arrayDX not applicable
  */
 struct Attribute
 {
+    /**
+     * @brief Constructor initializes default values
+     */
+    Attribute();
+
     uint64_t iv_val;        // Value of attribute.
     uint32_t iv_attrId;     // fapi::AttributeId enum value
     uint32_t iv_targetType; // fapi::TargetType enum value
@@ -98,6 +103,11 @@ struct AttributeChunk
     static const size_t MAX_CHUNK_SIZE_BYTES = 4096;
     static const size_t MAX_ATTRS_PER_CHUNK =
         MAX_CHUNK_SIZE_BYTES / sizeof(Attribute);
+
+    /**
+     * @brief Constructor initializes default values
+     */
+    AttributeChunk();
     size_t iv_numAttributes;  // Number of Attributes in chunk
     uint8_t * iv_pAttributes; // Pointer to chunk of memory
 };
@@ -227,7 +237,7 @@ public:
      *                          or delete[] (if NEW) each chunk's memory
      */
     virtual void getAllAttributes(
-        AllocType i_allocType,
+        const AllocType i_allocType,
         std::vector<AttributeChunk> & o_attributes) const;
     
     /**

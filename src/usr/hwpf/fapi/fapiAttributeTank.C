@@ -43,6 +43,21 @@ namespace fapi
 {
 
 //******************************************************************************
+Attribute::Attribute() :
+    iv_val(0), iv_attrId(0), iv_targetType(0), iv_pos(0), iv_unitPos(0),
+    iv_flags(0), iv_arrayD1(0), iv_arrayD2(0), iv_arrayD3(0), iv_arrayD4(0)
+{
+
+}
+
+//******************************************************************************
+AttributeChunk::AttributeChunk() :
+    iv_numAttributes(0), iv_pAttributes(NULL)
+{
+
+}
+
+//******************************************************************************
 AttributeTank::AttributeTank() :
     iv_pName("AttributeTank"), iv_attributesExist(false)
 {
@@ -249,7 +264,7 @@ bool AttributeTank::getAttribute(const fapi::AttributeId i_attrId,
 
 //******************************************************************************
 void AttributeTank::getAllAttributes(
-    AllocType i_allocType,
+    const AllocType i_allocType,
     std::vector<AttributeChunk> & o_attributes) const
 {
     platLock();
