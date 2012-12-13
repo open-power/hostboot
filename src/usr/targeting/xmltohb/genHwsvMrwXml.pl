@@ -227,6 +227,12 @@ close (FH);
 my $devpath = XMLin("$mrwdir/${sysname}-cec-chips.xml",
                         KeyAttr=>'instance-path');
 
+open (FH, "<$mrwdir/${sysname}-i2c-busses.xml") ||
+    die "ERROR: unable to open $mrwdir/${sysname}-i2c-busses.xml\n";
+close (FH);
+
+my $i2c_devices = XMLin("$mrwdir/${sysname}-i2c-busses.xml");
+
 open (FH, "<$mrwdir/${sysname}-pcie-busses.xml") ||
     die "ERROR: unable to open $mrwdir/${sysname}-pcie-busses.xml\n";
 close (FH);
@@ -349,6 +355,38 @@ foreach my $pcie_bus (@{$pcie_buses->{'pcie-bus'}})
 open (FH, "<$mrwdir/${sysname}-system-policy.xml") ||
     die "ERROR: unable to open $mrwdir/${sysname}-system-policy.xml\n";
 close (FH);
+
+my %sbe_i2c_paths;
+foreach my $i2c_device (@{$i2c_devices->{'i2c-device'}})
+{
+    if(   (exists($i2c_device->{'content-type'}))
+       && ($i2c_device->{'content-type'} eq 'SBE_VPD'))
+    {
+        my $dev_path = 
+            $i2c_device->{'system-paths'}->{'system-path'}->{'fsp-device-path'};
+        my $ipath = $i2c_device->{'i2c-master'}{'instance-path'};
+
+        # @TODO via RTC: 60269
+        # Uncomment the line below and remove the next when once correct size 
+        # is available in MRW
+        #my $size = $i2c_device->{'size'};
+        my $size = "2c0512";
+        my $addr = $i2c_device->{'address'};
+        
+        # @TODO via RTC: 60436
+        # Read primary device directly from MRW
+        if($addr eq 'AE')
+        {
+            $sbe_i2c_paths{$ipath}->{'secondary-path'}
+                = 'L,'.$dev_path.','.$size.','.$addr;
+        }
+        else
+        { 
+            $sbe_i2c_paths{$ipath}->{'primary-path'}
+                = 'L,'.$dev_path.','.$size.','.$addr;
+        }
+    }
+}
 
 my $policy = XMLin("$mrwdir/${sysname}-system-policy.xml");
 
@@ -1648,6 +1686,14 @@ sub generate_proc
     <attribute>
         <id>PROC_PCIE_LANE_EQUALIZATION</id>
         <default>0,0,0,0</default>
+    </attribute>
+    <attribute>
+        <id>PRIMARY_SBE_SEEPROM_ADDRESS</id>
+        <default>$sbe_i2c_paths{$ipath}->{'primary-path'}</default>
+    </attribute>
+    <attribute>
+        <id>SECONDARY_SBE_SEEPROM_ADDRESS</id>
+        <default>$sbe_i2c_paths{$ipath}->{'secondary-path'}</default>
     </attribute>";
     }
 
@@ -2214,10 +2260,6 @@ sub generate_centaur
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-$sys/node-$node/proc-$proc/mcs-$mcs/"
             . "membuf-$ctaur</default>
-    </attribute>
-    <attribute>
-        <id>VMEM_ID</id>
-        <default>$vmemId</default>
     </attribute>
     <attribute>
         <id>VMEM_ID</id>
