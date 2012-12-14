@@ -1826,8 +1826,9 @@
             <id>PAYLOAD_KIND</id>
         </enumeration>
     </simpleType>
-    <persistency>non-volatile</persistency>
+    <persistency>volatile</persistency>
     <readable/>
+    <writeable/>
     <hasStringConversion/>
 </attribute>
 

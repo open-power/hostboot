@@ -293,9 +293,28 @@ errlHndl_t RUNTIME::load_host_data( void )
         TARGETING::targetService().getTopLevelTarget( sys );
         assert(sys != NULL);
 
+        // get the current payload kind
         TARGETING::ATTR_PAYLOAD_KIND_type payload_kind
           = sys->getAttr<TARGETING::ATTR_PAYLOAD_KIND>();
         
+        // read the mfg flags
+        TARGETING::ATTR_MNFG_FLAGS_type mnfg_flags
+          = sys->getAttr<TARGETING::ATTR_MNFG_FLAGS>();
+
+        // if any AVP flags are set, override the payload kind
+        if( (mnfg_flags & TARGETING::MNFG_FLAG_BIT_MNFG_AVP_ENABLE)
+            || (mnfg_flags & TARGETING::MNFG_FLAG_BIT_MNFG_AVP_ENABLE) )
+        {
+            if( payload_kind != TARGETING::PAYLOAD_KIND_AVP )
+            {
+                TRACFCOMP( g_trac_runtime,
+                           "Overriding PAYLOAD_KIND to AVP (from %d) based on MNFG flags (=%.8X)",
+                           payload_kind, mnfg_flags );
+                payload_kind = TARGETING::PAYLOAD_KIND_AVP;
+                sys->setAttr<TARGETING::ATTR_PAYLOAD_KIND>(payload_kind);
+            }
+        }
+
         if( TARGETING::PAYLOAD_KIND_PHYP == payload_kind )
         {
             // PHYP
