@@ -52,9 +52,11 @@ EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/dram_training/mem_pll_setup
 OBJS =  dram_training.o \
         mss_draminit.o \
         mss_funcs.o \
+        mss_unmask_errors.o \
         mss_draminit_mc.o \
         mss_draminit_training.o \
         mss_ddr_phy_reset.o \
+        mss_termination_control.o \
         cen_mem_startclocks.o \
 		mss_scominit.o \
         cen_mem_pll_initf.o \

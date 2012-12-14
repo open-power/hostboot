@@ -490,6 +490,12 @@ fapi::ReturnCode fapiPlatGetProcPcieBarSize (
     fapi::platAttrSvc::fapiPlatGetSpdAttr( PTARGET, SPD::SPD_SDRAM_THERMAL_REFRESH_OPTIONS, &(VAL), sizeof(VAL) )
 #define ATTR_SPD_MODULE_THERMAL_SENSOR_GETMACRO(ID, PTARGET, VAL) \
     fapi::platAttrSvc::fapiPlatGetSpdAttr( PTARGET, SPD::SPD_MODULE_THERMAL_SENSOR, &(VAL), sizeof(VAL) )
+#define ATTR_SPD_SDRAM_DEVICE_TYPE_GETMACRO(ID, PTARGET, VAL) \
+    fapi::platAttrSvc::fapiPlatGetSpdAttr( PTARGET, SPD::SDRAM_DEVICE_TYPE, &(VAL), sizeof(VAL) )
+#define ATTR_SPD_SDRAM_DEVICE_TYPE_SIGNAL_LOADING_GETMACRO(ID, PTARGET, VAL) \
+    fapi::platAttrSvc::fapiPlatGetSpdAttr( PTARGET, SPD::SDRAM_DEVICE_TYPE_SIGNAL_LOADING, &(VAL), sizeof(VAL) )
+#define ATTR_SPD_SDRAM_DIE_COUNT_GETMACRO(ID, PTARGET, VAL) \
+    fapi::platAttrSvc::fapiPlatGetSpdAttr( PTARGET, SPD::SDRAM_DIE_COUNT, &(VAL), sizeof(VAL) )
 #define ATTR_SPD_FINE_OFFSET_TCKMIN_GETMACRO(ID, PTARGET, VAL) \
     fapi::platAttrSvc::fapiPlatGetSpdAttr( PTARGET, SPD::TCKMIN_FINE_OFFSET, &(VAL), sizeof(VAL) )
 #define ATTR_SPD_FINE_OFFSET_TAAMIN_GETMACRO(ID, PTARGET, VAL) \
@@ -500,6 +506,8 @@ fapi::ReturnCode fapiPlatGetProcPcieBarSize (
     fapi::platAttrSvc::fapiPlatGetSpdAttr( PTARGET, SPD::TRPMIN_FINE_OFFSET, &(VAL), sizeof(VAL) )
 #define ATTR_SPD_FINE_OFFSET_TRCMIN_GETMACRO(ID, PTARGET, VAL) \
     fapi::platAttrSvc::fapiPlatGetSpdAttr( PTARGET, SPD::TRCMIN_FINE_OFFSET, &(VAL), sizeof(VAL) )
+#define ATTR_SPD_NUM_OF_REGISTERS_USED_ON_RDIMM_GETMACRO(ID, PTARGET, VAL) \
+    fapi::platAttrSvc::fapiPlatGetSpdAttr( PTARGET, SPD::RMM_REGS_RDIMM, &(VAL), sizeof(VAL) )
 #define ATTR_SPD_MODULE_SPECIFIC_SECTION_GETMACRO(ID, PTARGET, VAL) \
     fapi::platAttrSvc::fapiPlatGetSpdAttr( PTARGET, SPD::MODULE_TYPE_SPECIFIC_SECTION, &(VAL), sizeof(VAL) )
 #define ATTR_SPD_MODULE_ID_MODULE_MANUFACTURERS_JEDEC_ID_CODE_GETMACRO(ID, PTARGET, VAL) \

@@ -1,26 +1,26 @@
-/*  IBM_PROLOG_BEGIN_TAG
- *  This is an automatically generated prolog.
- *
- *  $Source: src/usr/hwpf/hwp/bus_training/io_run_training.C $
- *
- *  IBM CONFIDENTIAL
- *
- *  COPYRIGHT International Business Machines Corp. 2012
- *
- *  p1
- *
- *  Object Code Only (OCO) source materials
- *  Licensed Internal Code Source Materials
- *  IBM HostBoot Licensed Internal Code
- *
- *  The source code for this program is not published or other-
- *  wise divested of its trade secrets, irrespective of what has
- *  been deposited with the U.S. Copyright Office.
- *
- *  Origin: 30
- *
- *  IBM_PROLOG_END_TAG
- */
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/usr/hwpf/hwp/bus_training/io_run_training.C $             */
+/*                                                                        */
+/* IBM CONFIDENTIAL                                                       */
+/*                                                                        */
+/* COPYRIGHT International Business Machines Corp. 2012                   */
+/*                                                                        */
+/* p1                                                                     */
+/*                                                                        */
+/* Object Code Only (OCO) source materials                                */
+/* Licensed Internal Code Source Materials                                */
+/* IBM HostBoot Licensed Internal Code                                    */
+/*                                                                        */
+/* The source code for this program is not published or otherwise         */
+/* divested of its trade secrets, irrespective of what has been           */
+/* deposited with the U.S. Copyright Office.                              */
+/*                                                                        */
+/* Origin: 30                                                             */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
+// $Id: io_run_training.C,v 1.25 2012/12/04 08:29:17 varkeykv Exp $
 // *!***************************************************************************
 // *! (C) Copyright International Business Machines Corp. 1997, 1998
 // *!           All Rights Reserved -- Property of IBM
@@ -57,6 +57,9 @@ ReturnCode io_run_training(const Target &master_target,const Target &slave_targe
      uint32_t master_group=0;
      uint32_t slave_group=0;
      edi_training init;
+     // Workaround - HW 220654 -- Need to split WDERF into WDE + RF
+     edi_training init1(SELECTED,SELECTED,SELECTED, NOT_RUNNING, NOT_RUNNING); // Run WDE first
+     edi_training init2( NOT_RUNNING, NOT_RUNNING, NOT_RUNNING,SELECTED,SELECTED); // Run RF next
      bool is_master=false;
      // This is a DMI/MC bus 
      if( (master_target.getType() == fapi::TARGET_TYPE_MCS_CHIPLET )&& (slave_target.getType() == fapi::TARGET_TYPE_MEMBUF_CHIP)){
@@ -65,7 +68,9 @@ ReturnCode io_run_training(const Target &master_target,const Target &slave_targe
           slave_interface=CEN_DMI; // Centaur scom base
           master_group=3; // Design requires us to do this as per scom map and layout
           slave_group=0;
-          rc=init.run_training(master_target,master_interface,master_group,slave_target,slave_interface,slave_group);
+          // Workaround - HW 220654 -- Need to split WDERF into WDE + RF due to sync problem
+          rc=init1.run_training(master_target,master_interface,master_group,slave_target,slave_interface,slave_group);
+          rc=init2.run_training(master_target,master_interface,master_group,slave_target,slave_interface,slave_group);
      }
      //This is an X Bus
      else if( (master_target.getType() == fapi::TARGET_TYPE_XBUS_ENDPOINT  )&& (slave_target.getType() == fapi::TARGET_TYPE_XBUS_ENDPOINT )){

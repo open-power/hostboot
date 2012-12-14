@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/hwpf/hwp/dram_training/mss_scominit/mss_scominit.H $  */
+/* $Source: src/usr/hwpf/hwp/mc_config/mss_eff_config/mss_bulk_pwr_throttles.H $ */
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
@@ -20,19 +20,20 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_scominit.H,v 1.7 2012/11/10 02:53:17 mwuu Exp $
+// $Id: mss_bulk_pwr_throttles.H,v 1.3 2012/10/15 13:05:17 pardeik Exp $
+// $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/centaur/working/procedures/ipl/fapi/mss_bulk_pwr_throttles.H,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
 // *! All Rights Reserved -- Property of IBM
 // *! *** IBM Confidential ***
 //------------------------------------------------------------------------------
-// *! TITLE       : mss_scominit.H
+// *! TITLE       : mss_bulk_pwr_throttles.H
 // *! DESCRIPTION : see additional comments below
-// *! OWNER NAME  : Menlo Wuu         Email: menlowuu@us.ibm.com
-// *! BACKUP NAME : Mark Bellows      Email: bellows@us.ibm.com
+// *! OWNER NAME  : Joab Henderson    Email: joabhend@us.ibm.com
+// *! BACKUP NAME : Michael Pardeik   Email: pardeik@us.ibm.com
 // *! ADDITIONAL COMMENTS :
 //
-// Header file for mss_scominit.
+// Header file for mss_bulk_pwr_throttles.
 //
 //------------------------------------------------------------------------------
 // Don't forget to create CVS comments when you check in your changes!
@@ -41,43 +42,34 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
-//   1.7   | menlowuu |09-NOV-12| Removed mss_set_bbm_regs since now done in
-//   							  draminit_training
-//   1.6   | menlowuu |15-AUG-12| added bad bitmask function
-//   1.5   |bellows   |16-JUL-12| added in Id tag
-//   1.4   | menlowuu |20-JUN-12| added type to the typedef
-//   1.3   | menlowuu |13-JUN-12| added & to reference i_target in FP_t function
-//	 							  added comment expecting centaur target
-//   1.2   | menlowuu |06-JUN-12| Removed char* parameter for function
-//   0.1   | menlowuu |01-DEC-11| First Draft.
+//   1.3   | pardeik  |11-OCT-12| change i_target to i_target_mba
+//   1.2   | pardeik  |03-APR-12| use mba target intead of mbs
+//   1.1   | pardeik  |11-NOV-11| First Draft.
 
 
-#ifndef MSS_SCOMINIT_H_
-#define MSS_SCOMINIT_H_
 
-//----------------------------------------------------------------------
-//  My Includes
-//----------------------------------------------------------------------
-
+#ifndef MSS_BULK_PWR_THROTTLES_H_
+#define MSS_BULK_PWR_THROTTLES_H_
 
 //----------------------------------------------------------------------
 //  Includes
 //----------------------------------------------------------------------
 #include <fapi.H>
 
-typedef fapi::ReturnCode (*mss_scominit_FP_t)(const fapi::Target & i_target);
+typedef fapi::ReturnCode (*mss_bulk_pwr_throttles_FP_t)(const fapi::Target & i_target_mba);
 
-extern "C" {
+extern "C"
+{
+/**
+ * @brief mss_bulk_pwr_throttles procedure. Set dimm and channel throttle attributes based on available centaur mba port power
+ *
+ * @param[in]  i_target_mba  Reference to centaur mba target
+ *
+ * @return ReturnCode
+ */
 
-//******************************************************************************
-// mss_scominit
-//******************************************************************************
-// mss_scominit procedure [Calls the vaious memory initfiles]
-// param[in] i_target [Reference to target, expecting centaur(MEMBUF) target]
-// return ReturnCode
-
-fapi::ReturnCode mss_scominit(const fapi::Target & i_target);
+    fapi::ReturnCode mss_bulk_pwr_throttles(const fapi::Target & i_target_mba);
 
 } // extern "C"
 
-#endif // MSS_SCOMINIT_H_
+#endif // MSS_BULK_PWR_THROTTLES_H_

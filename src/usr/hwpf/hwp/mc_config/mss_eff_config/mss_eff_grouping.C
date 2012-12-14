@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_eff_grouping.C,v 1.10 2012/09/27 11:11:53 bellows Exp $
+// $Id: mss_eff_grouping.C,v 1.16 2012/12/14 08:41:20 gpaulraj Exp $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
 // *! All Rights Reserved -- Property of IBM
@@ -38,6 +38,11 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
+//  1.16   | gpaulraj | 12-14-12| Modified "unable to group dimm size" as Error message
+//  1.15   | bellows  | 12-11-12| Picked up latest updates from Girisankar
+//  1.14   | bellows  | 12-11-12| added ; to DBG line
+//  1.13   | bellows  | 12-07-12| fix for interleaving attr and array bounds
+//  1.11   | bellows  | 11-27-12| review updates
 //  1.10   | bellows  | 09-27-12| Additional Review Updates
 //  1.9    | bellows  | 09-25-12| updates from review, code from Girisankar
 //  1.8    | bellows  | 09-06-12| updates suggested by Van
@@ -66,7 +71,7 @@ extern "C" {
 //----------------------------------------------------
 
   ReturnCode mss_eff_grouping(const fapi::Target & i_target, std::vector<fapi::Target> & i_associated_centaurs); // Target is Proc target & Each MCS connected to each Centaur. Associated centaur is collection of the Centaure location for the processor
-  uint8_t mss_eff_grouping_recursion(uint8_t number);
+  uint8_t mss_eff_grouping_recursion(uint32_t number);
 //ReturnCode mba_collection(std::vector<fapi::Target> & associated_centaurs);
 //ReturnCode mcs_grouping(const fapi::Target & target);
 //ReturnCode mcs_grouping_general();
@@ -104,11 +109,12 @@ extern "C" {
                               std::vector<fapi::Target> & i_associated_centaurs
                               ) {
     ReturnCode rc;
-    Eff_Grouping_Data eff_grouping_data;
+    Eff_Grouping_Data eff_grouping_data,tempgpID;
        //Eff_Grouping_Data &eff_grouping_data;
         //eff_grouping_data.groupID[16][16]={{0}};
-    uint32_t pos=0;
+    //uint32_t pos=0;
     uint64_t mss_base_address;
+    uint64_t mirror_base;
         //uint32_t MBA_size[8][2]={{0}};
         //uint32_t MCS_size[8]={0};
     uint32_t l_unit_pos =0;
@@ -194,137 +200,298 @@ extern "C" {
         FAPI_INF("MCS SIZE %d \n",eff_grouping_data.MCS_size[i]);
       }
       FAPI_INF("Group parsing Starting..");
-      rc =  FAPI_ATTR_GET(ATTR_MSS_INTERLEAVE_ENABLE,&i_target,min_group);
-      if(!rc.ok()) {FAPI_ERR("MSS_INTERLEAV_ENABLE is not available"); return rc;}
-        //rc=mcs_grouping_general();
-      if(!rc.ok()) {FAPI_ERR("MCS Grouping: fails at generating the MCS size"); return rc;}			
 // 	groupID[i][0]=Size;
 //  groupID[i][1]= number of MBA in the group for example 4 MBA in the group
 //  groupID[i][2]= Total size of memory
 //  groupID[i][3] to groupIDsize[i][6]  - group pos indication
-      uint32_t temp[12];
-      uint8_t min_group = 1;
-      uint32_t max_group = 8;
-      uint32_t mirroring =0;
-      uint8_t pos_t=0;
+    //  uint32_t temp[12];
       uint8_t count=0;
-      uint8_t onemcs=0;
-      if ((((eff_grouping_data.MCS_size[0] == eff_grouping_data.MCS_size[4])
-            && (eff_grouping_data.MCS_size[1] == eff_grouping_data.MCS_size[5]))
-           &&(eff_grouping_data.MCS_size[3]==eff_grouping_data.MCS_size[4])
-           &&(eff_grouping_data.MCS_size[5]==eff_grouping_data.MCS_size[6])
-           &&((eff_grouping_data.MCS_size[2] == eff_grouping_data.MCS_size[6])
-              &&(eff_grouping_data.MCS_size[3] ==eff_grouping_data.MCS_size[7])))
-          && l_unit_pos==8)
-      {
-        eff_grouping_data.groupID[0][1] =4;
-        eff_grouping_data.groupID[0][4] =0;
-        eff_grouping_data.groupID[0][5] =2;
-        eff_grouping_data.groupID[0][6] =1;
-        eff_grouping_data.groupID[0][7] =3;
-        eff_grouping_data.groupID[0][0] = eff_grouping_data.MCS_size[4];	
-        gp_pos=1;
-        mirroring =1;
-        FAPI_INF("Mirroring enabled\n");
-      }
-      else if ((((eff_grouping_data.MCS_size[0] == eff_grouping_data.MCS_size[1])
-                 &&(eff_grouping_data.MCS_size[0] == eff_grouping_data.MCS_size[4])
-                 &&(eff_grouping_data.MCS_size[4] == eff_grouping_data.MCS_size[5]))
-                ||((eff_grouping_data.MCS_size[2] == eff_grouping_data.MCS_size[3])
-                   &&(eff_grouping_data.MCS_size[2] == eff_grouping_data.MCS_size[6])
-                   &&(eff_grouping_data.MCS_size[6] == eff_grouping_data.MCS_size[7])))
-               && l_unit_pos==4)
-      {
-        eff_grouping_data.groupID[0][1] =2;
-        eff_grouping_data.groupID[0][4] =4;
-        eff_grouping_data.groupID[0][5] =5;
-        eff_grouping_data.groupID[0][0] = eff_grouping_data.MCS_size[4];
-        eff_grouping_data.groupID[1][1] =2;
-        eff_grouping_data.groupID[1][4] =6;
-        eff_grouping_data.groupID[1][5] =7;
-        eff_grouping_data.groupID[1][0] = eff_grouping_data.MCS_size[5];
-        gp_pos=2;
-        mirroring =1;         	
-        FAPI_INF("Mirroring enabled\n");
-      }
-      else
-      {
-        while(max_group>=min_group)
+        uint8_t done;
+        uint8_t pos;
+        uint8_t config_4MCS[6][4]={{0,1,4,5},{2,3,6,7},{0,1,6,7},{2,3,4,5},{0,1,2,3},{4,5,6,7}};
+        int flag;
+        uint8_t config4_pos[6];
+        uint8_t groups_allowed;
+        // uint8_t tempgpID.groupID[16][16];
+        uint8_t grouped[16];
+        uint8_t check_board;
+        uint8_t gp=0;
+        uint8_t pos1=0;
+        uint8_t pos2=0;
+        uint8_t allowed=0;
+
+
+
+        for(uint8_t i=0;i<6;i++)
+          config4_pos[i]=0;
+
+	rc = FAPI_ATTR_GET(ATTR_MSS_INTERLEAVE_ENABLE,&i_target,groups_allowed);
+	if(!rc.ok()) {FAPI_ERR("MSS_INTERLEAVE_ENABLE is not available"); return rc; }
+	rc = FAPI_ATTR_GET(ATTR_ALL_MCS_IN_INTERLEAVING_GROUP, NULL,check_board); // system level attribute
+	if (!rc.ok()) { FAPI_ERR("Error reading ATTR_ALL_MCS_IN_INTERLEAVING_GROUP"); return rc; }
+
+
+
+        for(uint8_t i=0;i<16;i++)
         {
-          for(uint8_t i=0;i<16;i++)
-            for(uint8_t j=0;j<16;j++)
-              eff_grouping_data.groupID[i][j]=0;
-          gp_pos=0;
-          count=0;
-          for(pos=0;pos<8;pos++)
-          {
-            eff_grouping_data.groupID[gp_pos][0] = eff_grouping_data.MCS_size[pos];
-            eff_grouping_data.groupID[gp_pos][1] = 1;
-            eff_grouping_data.groupID[gp_pos][4]= pos;
-            gp_pos++;
-          }
-          for(pos_t=0;pos_t<=gp_pos;pos_t++)
-          {
-            for(pos=pos_t+1; pos<=gp_pos;pos++)
-            {
-              if(eff_grouping_data.groupID[pos_t][0] == eff_grouping_data.groupID[pos][0])
-              {
-                if( eff_grouping_data.groupID[pos_t][1]<max_group)
+             grouped[i]=0;
+             for(uint8_t j=0;j<16;j++)
+             {
+                 eff_grouping_data.groupID[i][j]=0;
+                 tempgpID.groupID[i][j]=0;
+             }
+         }
+
+
+        gp_pos=0;
+
+        for(pos=0;pos<8;pos++)
+        {
+             eff_grouping_data.groupID[gp_pos][0] = eff_grouping_data.MCS_size[pos];
+             eff_grouping_data.groupID[gp_pos][1] = 1;
+             eff_grouping_data.groupID[gp_pos][4]= pos;
+
+             if(eff_grouping_data.MBA_size[pos][0]>eff_grouping_data.MBA_size[pos][1])
+                  eff_grouping_data.groupID[gp_pos][15]= eff_grouping_data.MBA_size[pos][0];
+             else
+                  eff_grouping_data.groupID[gp_pos][15]= eff_grouping_data.MBA_size[pos][1];
+
+             gp_pos++;
+         }
+
+
+           done = 0 ;
+           if(!done && (groups_allowed & 0x08) && check_board)
+           {
+          	
+                count =0;
+                for(pos=0;pos< gp_pos;pos++)
                 {
-                  eff_grouping_data.groupID[pos_t][1]++;
-                  eff_grouping_data.groupID[pos_t][eff_grouping_data.groupID[pos_t][1]+3]=pos;
+                    if(eff_grouping_data.groupID[0][0] == eff_grouping_data.groupID[pos][0] && eff_grouping_data.groupID[pos][0] !=0)
+                    {
+                      count++;
+                    }
+                 }
+
+                 if(count == 8)
+                 {
+                   done=1;
+                   eff_grouping_data.groupID[0][1] = 8;
+                   eff_grouping_data.groupID[0][4] = 0;
+                   eff_grouping_data.groupID[0][5] = 4;
+                   eff_grouping_data.groupID[0][6] = 1;
+                   eff_grouping_data.groupID[0][7] = 5;
+                   eff_grouping_data.groupID[0][8] = 2;
+                   eff_grouping_data.groupID[0][9] = 6;
+                   eff_grouping_data.groupID[0][10] = 3;
+                   eff_grouping_data.groupID[0][11] = 7;
+                   for(uint8_t i=1;i<16;i++)
+                     for(uint8_t j=0;j<16;j++)
+                       eff_grouping_data.groupID[i][j]=0;
+                 }
+
+            }
+            if(!done && (groups_allowed & 0x04) && check_board)
+            {
+                 count=0;
+                 for(uint8_t i=0;i<6;i++)
+                 {
+                   flag=0;
+                   for( int j=0;j<4;j++)
+                    {
+                      if((eff_grouping_data.groupID[config_4MCS[i][0]][0]== 0) || (eff_grouping_data.groupID[config_4MCS[i][0]][0] != eff_grouping_data.groupID[config_4MCS[i][j]][0]))
+                       {
+                         flag=1;
+                       }
+                    }
+                    if(!flag)
+                    {
+
+                    config4_pos[i]=1;
+                    count++;
+                    }
+                 }
+                 if(count>=2)
+                 {
+                    if(config4_pos[0] && config4_pos[1])
+                    {
+                       allowed=1;
+                       pos1=0;
+                       pos2=1;
+                    }
+                    else if(config4_pos[2] && config4_pos[3])
+                    {
+                       allowed=1;
+                       pos1=2;
+                       pos2=3;
+                    }
+                    else if(config4_pos[4] && config4_pos[5])
+                    {
+                       allowed=1;
+                       pos1=4;
+                       pos2=5;
+                    }
+                 }
+                 if(allowed)
+                  {
+          	           done =1;
+                         //define the group_data
+                         eff_grouping_data.groupID[0][0] =eff_grouping_data.groupID[config_4MCS[pos1][0]][0];
+                         eff_grouping_data.groupID[0][1] = 4;
+                         eff_grouping_data.groupID[0][4] = config_4MCS[pos1][0];
+                         eff_grouping_data.groupID[0][5] = config_4MCS[pos1][2];
+                         eff_grouping_data.groupID[0][6] = config_4MCS[pos1][1];
+                         eff_grouping_data.groupID[0][7] = config_4MCS[pos1][3];
+                         eff_grouping_data.groupID[0][15] =eff_grouping_data.groupID[config_4MCS[pos1][0]][15];
+
+                         eff_grouping_data.groupID[1][0] =eff_grouping_data.groupID[config_4MCS[pos2][0]][0];
+                         eff_grouping_data.groupID[1][1] = 4;
+                         eff_grouping_data.groupID[1][4] = config_4MCS[pos2][0];
+                         eff_grouping_data.groupID[1][5] = config_4MCS[pos2][2];
+                         eff_grouping_data.groupID[1][6] = config_4MCS[pos2][1];
+                         eff_grouping_data.groupID[1][7] = config_4MCS[pos2][3];
+                         eff_grouping_data.groupID[1][15] =eff_grouping_data.groupID[config_4MCS[pos2][0]][15];
+
+                         for(uint8_t i=2;i<16;i++)
+                           for(uint8_t j=0;j<16;j++)
+                             eff_grouping_data.groupID[i][j]=0;
+                  }
+                  else if (count ==1 || !allowed )
+                  {
+                       for(uint8_t i=0;i<6;i++)
+                       {
+                         if(config4_pos[i])
+                         {
+                           allowed=1;
+                           pos1=i;
+                           break;
+                         }
+                       }
+                       if(allowed)
+                       {
+          	          //define the group_data
+          	           tempgpID.groupID[0][0] = eff_grouping_data.groupID[config_4MCS[pos1][0]][0];
+                           tempgpID.groupID[0][1] = 4;
+                           tempgpID.groupID[0][4] = config_4MCS[pos1][0];
+                           tempgpID.groupID[0][5] = config_4MCS[pos1][2];
+                           tempgpID.groupID[0][6] = config_4MCS[pos1][1];
+                           tempgpID.groupID[0][7] = config_4MCS[pos1][3];
+                           tempgpID.groupID[0][15] = eff_grouping_data.groupID[config_4MCS[pos1][0]][15];
+          	           gp++;
+                           for(int i=0; i<4;i++)
+                           {
+                              eff_grouping_data.groupID[config_4MCS[pos1][i]][0]=0;
+                              grouped[config_4MCS[config4_pos[0]][i]]=1;
+                           }
+                       }
+                   }
+           }
+           if(!done && (groups_allowed & 0x02) && check_board)
+           {
+            for(pos=0;pos< gp_pos;pos=pos+2)
+            {
+                 if(eff_grouping_data.groupID[pos][0] == eff_grouping_data.groupID[pos+1][0] && eff_grouping_data.groupID[pos][0] !=0  )
+                 {
+                  //group
+                  tempgpID.groupID[gp][0] =eff_grouping_data.groupID[pos][0] ;
+                  tempgpID.groupID[gp][1] = 2;
+                  tempgpID.groupID[gp][4] =  pos;
+                  tempgpID.groupID[gp][5] = pos+1;
+                  tempgpID.groupID[gp][15] =eff_grouping_data.groupID[pos][15] ;
+                  grouped[pos]=1;
+                  grouped[pos+1]=1;
                   eff_grouping_data.groupID[pos][0]=0;
-                  eff_grouping_data.groupID[pos][1]=0;
-                }
-                else {}
+                  eff_grouping_data.groupID[pos+1][0]=0;
+                  gp++;
+                 }
+             }
+           }
+           if(!done && (groups_allowed & 0x01)&& !check_board)
+           {
+            for(pos=0;pos< gp_pos;pos++)
+            {
+                 if(eff_grouping_data.groupID[pos][0] !=0  )
+                 {
+                  //group
+                  tempgpID.groupID[gp][0] =eff_grouping_data.groupID[pos][0] ;
+                  tempgpID.groupID[gp][1] = 1;
+                  tempgpID.groupID[gp][4] =  pos;
+                  tempgpID.groupID[gp][15] =eff_grouping_data.groupID[pos][15] ;
+                  grouped[pos]=1;
+                  eff_grouping_data.groupID[pos][0]=0;
+                  gp++;
+                 }
+             }
+           }
+           if(!done)
+           {
+              for(uint8_t i=0;i<8;i++)
+              {
+          		   if(grouped[i] !=1 && eff_grouping_data.groupID[i][0] != 0 )
+          		   FAPI_ERR ("UNABLE TO GROUP MCS%d size is %d", i,eff_grouping_data.groupID[i][0]);
               }
-            }	 	
-          }
-          for(uint8_t i=0;i<8;i++)
-          {
-            if ((eff_grouping_data.groupID[i][0]!= 0) && (eff_grouping_data.groupID[i][1] == max_group))
-            { count += eff_grouping_data.groupID[i][1];FAPI_INF("group ID %dMCS size %d\n",i,eff_grouping_data.groupID[i][1]);}
-          }
-          if (count == l_unit_pos) { FAPI_INF("group done correctly\n");onemcs=0;break;}
-          else{ FAPI_INF("this grouping is not possible with %d\n",max_group);onemcs=0;}
-          max_group= max_group/2;
-        }
-      }  	  	
-   // uint32_t temp[12];
+
+             for(uint8_t i=0;i<gp;i++)
+               for(uint8_t j=0;j<16;j++)
+                 eff_grouping_data.groupID[i][j]=tempgpID.groupID[i][j];
+
+             for(uint8_t i=gp ; i<8 ; i++)
+               for(uint8_t j=0;j<16;j++)
+               eff_grouping_data.groupID[i][j]=0;
+           }
+            flag=0;
+            for(uint8_t i=0;i<16;i++)
+               if(grouped[i])
+                  flag=1;
+            gp_pos=0;
+            if(done || flag)
+            {
+               for(uint8_t i=0;i<16;i++)
+               {
+            	      if( eff_grouping_data.groupID[i][0] !=0)
+            	      {
+                         gp_pos++;
+                         FAPI_INF(" group no= %d , num of MCS = %d , size of MCS = %d \n ", i,eff_grouping_data.groupID[i][1],eff_grouping_data.groupID[i][0]);
+                         for(uint8_t k=0 ; k< eff_grouping_data.groupID[i][1];k++)
+                         {
+            	           FAPI_INF("MCSID%d = %d \n ", k, eff_grouping_data.groupID[i][4+k]);
+                         }
+                      }
+                  }
+             }
+      uint32_t temp[16];
       uint8_t i=0;
       uint8_t j=0;
-    //uint8_t count=0;
-      for(i=0;i<8;i++)
-      {
-        for(j=0;j<12;j++)
-        {
-          FAPI_INF(" groupID[%d][%d] = %d",i,j,eff_grouping_data.groupID[i][j]);
-        }
-        FAPI_INF("\n");
-      }
-      for(pos=0;pos<=gp_pos;pos++)
+      count=0;
+
+    for(pos=0;pos<=gp_pos;pos++)
       {
         eff_grouping_data.groupID[pos][2] = eff_grouping_data.groupID[pos][0]*eff_grouping_data.groupID[pos][1];
+        //eff_grouping_data.groupID[pos+8][2]= eff_grouping_data.groupID[pos][2]/2; // group size when mirrored
+
         count =  mss_eff_grouping_recursion(eff_grouping_data.groupID[pos][2]);
         if(count>1)
         {
           FAPI_INF("MCS pos %d needs alternate bars defintation group Size %d\n",pos,eff_grouping_data.groupID[pos][3]);
-          if (eff_grouping_data.MBA_size[pos][1] > eff_grouping_data.MBA_size[pos][0])
-          {
-            eff_grouping_data.groupID[pos][2] = eff_grouping_data.MBA_size[pos][1]*2*eff_grouping_data.groupID[pos][1];
-            eff_grouping_data.groupID[pos][13] = eff_grouping_data.groupID[pos][1]*eff_grouping_data.MBA_size[pos][1];
-          }
-          else
-          {
-            eff_grouping_data.groupID[pos][2] = eff_grouping_data.MBA_size[pos][0]*2*eff_grouping_data.groupID[pos][1];
-            eff_grouping_data.groupID[pos][13] = eff_grouping_data.groupID[pos][1]*eff_grouping_data.MBA_size[pos][0];
-          }
-          eff_grouping_data.groupID[pos][12] =1;
-        }		
+
+
+
+            eff_grouping_data.groupID[pos][2] = eff_grouping_data.groupID[pos][15]*2*eff_grouping_data.groupID[pos][1];
+            eff_grouping_data.groupID[pos][13] = eff_grouping_data.groupID[pos][1]*(eff_grouping_data.groupID[pos][0]-eff_grouping_data.groupID[pos][15]);
+
+            //mirrored group
+            //eff_grouping_data.groupID[pos+8][2] = eff_grouping_data.groupID[pos][2]/2;  //group size with alternate bars
+            //eff_grouping_data.groupID[pos+8][13] = eff_grouping_data.groupID[pos][13]/2;
+             eff_grouping_data.groupID[pos][12] =1;
+        }
       }
-      for(pos=0;pos<=gp_pos;pos++)
+      for(i=0;i<gp_pos;i++)
       {
-        eff_grouping_data.groupID[pos][2] = eff_grouping_data.groupID[pos][0]*eff_grouping_data.groupID[pos][1];
+          for(j=0;j<12;j++)
+          {
+            FAPI_INF(" groupID[%d][%d] = %d",i,j,eff_grouping_data.groupID[i][j]);
+          }
+          FAPI_INF("\n");
       }
       for(pos=0;pos<=gp_pos;pos++)
       {	
@@ -332,37 +499,102 @@ extern "C" {
         {
           if ( eff_grouping_data.groupID[i][2] > eff_grouping_data.groupID[pos][2])
           {
-            for(j=0;j<12;j++)	temp[j] = eff_grouping_data.groupID[pos][j];
-            for(j=0;j<12;j++)	eff_grouping_data.groupID[pos][j] = eff_grouping_data.groupID[i][j];
-            for(j=0;j<12;j++)	eff_grouping_data.groupID[i][j] = temp[j];
+            for(j=0;j<16;j++)	temp[j] = eff_grouping_data.groupID[pos][j];
+            for(j=0;j<16;j++)	eff_grouping_data.groupID[pos][j] = eff_grouping_data.groupID[i][j];
+            for(j=0;j<16;j++)	eff_grouping_data.groupID[i][j] = temp[j];
           }
           else {}
-        }	
-      }			
+        }
+      }
+
+
+       // calcutate mirrored group size
+       for(pos=0;pos<gp_pos;pos++)
+      {
+        if(eff_grouping_data.groupID[pos][0]!=0 && eff_grouping_data.groupID[pos][1]>1 )
+        {
+          eff_grouping_data.groupID[pos+8][2]= eff_grouping_data.groupID[pos][2]/2; // group size when mirrored
+
+
+          if(eff_grouping_data.groupID[pos][12])
+          {
+            FAPI_INF("Mirrored group pos %d needs alternate bars defintation group Size %d\n",pos,eff_grouping_data.groupID[pos][3]);
+            //mirrored group
+            eff_grouping_data.groupID[pos+8][2] = eff_grouping_data.groupID[pos][2]/2;  //group size with alternate bars
+            eff_grouping_data.groupID[pos+8][13] = eff_grouping_data.groupID[pos][13]/2;
+
+          }
+        }
+      }
+
       rc = FAPI_ATTR_GET(ATTR_PROC_MEM_BASE,&i_target,mss_base_address);
       mss_base_address =   mss_base_address >> 30;
       if(!rc.ok()) return rc;
-      for(pos=0;pos<=gp_pos;pos++)
+
+      rc = FAPI_ATTR_GET(ATTR_PROC_MIRROR_BASE,&i_target,mirror_base);
+      mirror_base =   mirror_base >> 30;
+
+      if(!rc.ok()) return rc;
+
+      for(pos=0;pos<gp_pos;pos++)
       {
         if(pos==0)
         {
-          eff_grouping_data.groupID[pos][3] = mss_base_address;
+
+          eff_grouping_data.groupID[pos][3] =mss_base_address;
+          eff_grouping_data.groupID[pos+8][3]=mirror_base;  //mirrored base address
           if(eff_grouping_data.groupID[pos][12])
           {
-            eff_grouping_data.groupID[pos][14] = eff_grouping_data.groupID[pos][3]+ eff_grouping_data.groupID[pos][2];
+
+            eff_grouping_data.groupID[pos][14] = eff_grouping_data.groupID[pos][3]+ eff_grouping_data.groupID[pos][2]/2;
+            eff_grouping_data.groupID[pos+8][14] = eff_grouping_data.groupID[pos+8][3]+ eff_grouping_data.groupID[pos+8][2]/2; //mirrored base address with alternate bars
           }
         }
         else
         {
           eff_grouping_data.groupID[pos][3] = eff_grouping_data.groupID[pos-1][3]+eff_grouping_data.groupID[pos-1][2];
+          eff_grouping_data.groupID[pos+8][3]= eff_grouping_data.groupID[pos-1+8][3]+eff_grouping_data.groupID[pos-1+8][2];
+
           if(eff_grouping_data.groupID[pos][12])
           {
-            eff_grouping_data.groupID[pos][14] = eff_grouping_data.groupID[pos][3]+ eff_grouping_data.groupID[pos][2];
+            eff_grouping_data.groupID[pos][14] = eff_grouping_data.groupID[pos][3]+ eff_grouping_data.groupID[pos][2]/2;
+            eff_grouping_data.groupID[pos+8][14] = eff_grouping_data.groupID[pos+8][3]+ eff_grouping_data.groupID[pos+8][2]/2; //mirrored base address with alternate bars
           }
         }		
       }		
+      ecmdDataBufferBase MC_IN_GP(8);
+      uint8_t mcs_in_group[8];
+      for(uint8_t i=0;i<8;i++)
+           mcs_in_group[i]=0;
+      for(uint8_t i=0;i<gp_pos;i++)
+      {
+        count=0;
+        MC_IN_GP.flushTo0();
+        if(eff_grouping_data.groupID[i][0]!=0)
+        {
+          count = eff_grouping_data.groupID[i][1];
+          for(uint8_t j=0;j<count;j++)
+                 MC_IN_GP.setBit(eff_grouping_data.groupID[i][4+j]);
+          mcs_in_group[i]= MC_IN_GP.getByte(0);
+        }
+       }
+       FAPI_DBG("  ATTR_MSS_MEM_MC_IN_GROUP[0]: 0x%x", mcs_in_group[0]);
+       FAPI_DBG("  ATTR_MSS_MEM_MC_IN_GROUP[1]: 0x%x", mcs_in_group[1]);
+       FAPI_DBG("  ATTR_MSS_MEM_MC_IN_GROUP[2]: 0x%x", mcs_in_group[2]);
+       FAPI_DBG("  ATTR_MSS_MEM_MC_IN_GROUP[3]: 0x%x", mcs_in_group[3]);
+       FAPI_DBG("  ATTR_MSS_MEM_MC_IN_GROUP[4]: 0x%x", mcs_in_group[4]);
+       FAPI_DBG("  ATTR_MSS_MEM_MC_IN_GROUP[5]: 0x%x", mcs_in_group[5]);
+       FAPI_DBG("  ATTR_MSS_MEM_MC_IN_GROUP[6]: 0x%x", mcs_in_group[6]);
+       FAPI_DBG("  ATTR_MSS_MEM_MC_IN_GROUP[7]: 0x%x", mcs_in_group[7]);
+
+       rc= FAPI_ATTR_SET(ATTR_MSS_MEM_MC_IN_GROUP, &i_target, mcs_in_group);
+       if (!rc.ok())FAPI_ERR("Error writing ATTR_MSS_MEM_MC_IN_GROUP");
+
       uint64_t mem_bases[8];
       uint64_t l_memory_sizes[8];
+      //uint64_t mirror_base;
+      uint64_t mirror_bases[4];
+      uint64_t l_mirror_sizes[4];
         //uint32_t temp[8];
       for(uint8_t i=0;i<8;i++)
       {
@@ -372,11 +604,17 @@ extern "C" {
           FAPI_INF (" No of MCS %4d ",eff_grouping_data.groupID[i][1]);
           FAPI_INF (" Group Size %4d ",eff_grouping_data.groupID[i][2]);
           FAPI_INF (" Base Add.  %4d ",eff_grouping_data.groupID[i][3]);
+          FAPI_INF (" Mirrored Group SIze %4d", eff_grouping_data.groupID[i+8][2]);
+          FAPI_INF (" Mirror Base Add %4d", eff_grouping_data.groupID[i+8][3]);
           for(uint8_t j=4;j<4+eff_grouping_data.groupID[i][1];j++)
           {
             FAPI_INF (" MCSID%d- Pos %4d",(j-4),eff_grouping_data.groupID[i][j]);
           }
           FAPI_INF (" Alter-bar  %4d",eff_grouping_data.groupID[i][12]);
+          FAPI_INF("Alter-bar base add = %4d",eff_grouping_data.groupID[i][14]);
+          FAPI_INF("Alter-bar size = %4d",eff_grouping_data.groupID[i][13]);
+          FAPI_INF("Alter-bar Mirrored Base add = %4d", eff_grouping_data.groupID[i+8][14]);
+          FAPI_INF("Alter-bar Mirrored size = %4d", eff_grouping_data.groupID[i+8][13]);
         }
         else
         {
@@ -465,18 +703,88 @@ extern "C" {
         FAPI_ERR("Error writing ATTR_PROC_MEM_SIZES");
         break;
       }
-      rc = FAPI_ATTR_SET(ATTR_MSS_MCS_GROUP_32,&i_target,eff_grouping_data.groupID);
+       rc = FAPI_ATTR_GET(ATTR_PROC_MEM_SIZES, &i_target, l_memory_sizes);
+        if (!rc.ok())
+      {
+        FAPI_ERR("Error writing ATTR_PROC_MEM_SIZES");
+        break;
+      }
+       FAPI_DBG("  ATTR_PROC_MEM_SIZES[0]: %016llx", l_memory_sizes[0]);
+      FAPI_DBG("  ATTR_PROC_MEM_SIZES[1]: %016llx", l_memory_sizes[1]);
+      FAPI_DBG("  ATTR_PROC_MEM_SIZES[2]: %016llx", l_memory_sizes[2]);
+      FAPI_DBG("  ATTR_PROC_MEM_SIZES[3]: %016llx", l_memory_sizes[3]);
+      FAPI_DBG("  ATTR_PROC_MEM_SIZES[4]: %016llx", l_memory_sizes[4]);
+      FAPI_DBG("  ATTR_PROC_MEM_SIZES[5]: %016llx", l_memory_sizes[5]);
+      FAPI_DBG("  ATTR_PROC_MEM_SIZES[6]: %016llx", l_memory_sizes[6]);
+      FAPI_DBG("  ATTR_PROC_MEM_SIZES[7]: %016llx", l_memory_sizes[7]);
+
+      rc = FAPI_ATTR_SET(ATTR_MSS_MCS_GROUP_32,&i_target, eff_grouping_data.groupID);
       if (!rc.ok())
       {
         FAPI_ERR("Error writing ATTR_MSS_MCS_GROUP");
         break;
       }
+          // process mirrored ranges
+        //
+
+        // read chip base address attribute
+///      rc = FAPI_ATTR_GET(ATTR_PROC_MIRROR_BASE, &i_chip_target, mirror_base);
+//      if (!rc.ok())
+//      {
+//        FAPI_ERR("Error reading ATTR_PROC_MIRROR_BASE");
+//        break;
+//      }
+
+        // base addresses for distinct mirrored ranges
+      mirror_bases[0] = eff_grouping_data.groupID[8][3];
+      mirror_bases[1] = eff_grouping_data.groupID[9][3];
+      mirror_bases[2] = eff_grouping_data.groupID[10][3];
+      mirror_bases[3] = eff_grouping_data.groupID[11][3];
+
+      mirror_bases[0] = mirror_bases[0]<<30;
+      mirror_bases[1] = mirror_bases[1]<<30;
+      mirror_bases[2] = mirror_bases[2]<<30;
+      mirror_bases[3] = mirror_bases[3]<<30;
+      FAPI_DBG("  ATTR_PROC_MIRROR_BASES[0]: %016llx", mirror_bases[0]);
+      FAPI_DBG("  ATTR_PROC_MIRROR_BASES[1]: %016llx", mirror_bases[1]);
+      FAPI_DBG("  ATTR_PROC_MIRROR_BASES[2]: %016llx", mirror_bases[2]);
+      FAPI_DBG("  ATTR_PROC_MIRROR_BASES[3]: %016llx", mirror_bases[3]);
+
+      rc = FAPI_ATTR_SET(ATTR_PROC_MIRROR_BASES, &i_target, mirror_bases);
+      if (!rc.ok())
+      {
+        FAPI_ERR("Error writing ATTR_PROC_MIRROR_BASES");
+        break;
+      }
+
+        // sizes for distinct mirrored ranges
+      l_mirror_sizes[0]=eff_grouping_data.groupID[8][2];
+      l_mirror_sizes[1]=eff_grouping_data.groupID[9][2];
+      l_mirror_sizes[2]=eff_grouping_data.groupID[10][2];
+      l_mirror_sizes[3]=eff_grouping_data.groupID[11][2];
+
+      l_mirror_sizes[0] = l_mirror_sizes[0]<<30;
+      l_mirror_sizes[1] = l_mirror_sizes[1]<<30;
+      l_mirror_sizes[2] = l_mirror_sizes[2]<<30;
+      l_mirror_sizes[3] = l_mirror_sizes[3]<<30;
+
+      FAPI_DBG("  ATTR_PROC_MIRROR_SIZES[0]: %016llx", l_mirror_sizes[0]);
+      FAPI_DBG("  ATTR_PROC_MIRROR_SIZES[1]: %016llx", l_mirror_sizes[1]);
+      FAPI_DBG("  ATTR_PROC_MIRROR_SIZES[2]: %016llx", l_mirror_sizes[2]);
+      FAPI_DBG("  ATTR_PROC_MIRROR_SIZES[3]: %016llx", l_mirror_sizes[3]);
+
+      rc = FAPI_ATTR_SET(ATTR_PROC_MIRROR_SIZES, &i_target, l_mirror_sizes);
+      if (!rc.ok())
+      {
+        FAPI_ERR("Error writing ATTR_PROC_MIRROR_SIZES");
+        break;
+       }
     }while(0);
     return rc;			
   }
 
-  uint8_t  mss_eff_grouping_recursion(uint8_t number){
-    uint8_t temp = number;
+  uint8_t  mss_eff_grouping_recursion(uint32_t number){
+    uint32_t temp = number;
     uint8_t count=0;
     uint8_t buffersize=0;	
     while(1)

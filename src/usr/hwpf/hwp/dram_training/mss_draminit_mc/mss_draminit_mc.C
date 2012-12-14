@@ -1,27 +1,26 @@
-/*  IBM_PROLOG_BEGIN_TAG
- *  This is an automatically generated prolog.
- *
- *  $Source: src/usr/hwpf/hwp/dram_training/mss_draminit_mc/mss_draminit_mc.C $
- *
- *  IBM CONFIDENTIAL
- *
- *  COPYRIGHT International Business Machines Corp. 2012
- *
- *  p1
- *
- *  Object Code Only (OCO) source materials
- *  Licensed Internal Code Source Materials
- *  IBM HostBoot Licensed Internal Code
- *
- *  The source code for this program is not published or other-
- *  wise divested of its trade secrets, irrespective of what has
- *  been deposited with the U.S. Copyright Office.
- *
- *  Origin: 30
- *
- *  IBM_PROLOG_END_TAG
- */
-// $Id: mss_draminit_mc.C,v 1.24 2012/07/17 13:23:51 bellows Exp $
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/usr/hwpf/hwp/dram_training/mss_draminit_mc/mss_draminit_mc.C $ */
+/*                                                                        */
+/* IBM CONFIDENTIAL                                                       */
+/*                                                                        */
+/* COPYRIGHT International Business Machines Corp. 2012                   */
+/*                                                                        */
+/* p1                                                                     */
+/*                                                                        */
+/* Object Code Only (OCO) source materials                                */
+/* Licensed Internal Code Source Materials                                */
+/* IBM HostBoot Licensed Internal Code                                    */
+/*                                                                        */
+/* The source code for this program is not published or otherwise         */
+/* divested of its trade secrets, irrespective of what has been           */
+/* deposited with the U.S. Copyright Office.                              */
+/*                                                                        */
+/* Origin: 30                                                             */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
+// $Id: mss_draminit_mc.C,v 1.26 2012/09/11 14:35:22 jdsloat Exp $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
 // *! All Rights Reserved -- Property of IBM
@@ -45,6 +44,7 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
+//  1.25   | jdsloat  |11-SEP-12| Changed Periodic Cal to Execute via MBA regs depending upon the ZQ Cal and MEM Cal timer values; 0 = disabled
 //  1.24   | bellows  |16-JUL-12| added in Id tag
 //  1.22   | bellows  |13-JUL-12| Fixed periodic cal bit 61 being set. HW214829
 //  1.20   | jdsloat  |21-MAY-12| Typo fix, addresses moved to cen_scom_addresses.H, moved per cal settings to initfile
@@ -213,85 +213,54 @@ ReturnCode mss_enable_periodic_cal (Target& i_target)
     ecmdDataBufferBase mba01_data_buffer_64_p0(64);
     ecmdDataBufferBase mba01_data_buffer_64_p1(64);
 
-    //Determine whether or not we want to do a particular type of calibration on the given ranks
-    //ALL CALS CURRENTLY SET AS ON, ONLY CHECK RANK PAIRS PRESENT
-    //***mba01 Setup
-    rc_num = rc_num | mba01_data_buffer_64_p0.flushTo0();
-    rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_PER_CAL_CONFIG_P0_0x8000C00B0301143F, mba01_data_buffer_64_p0);
+    ecmdDataBufferBase data_buffer_64(64);
+
+    uint32_t memcal_iterval; //  00 = Disable
+    rc = FAPI_ATTR_GET(ATTR_EFF_MEMCAL_INTERVAL, &i_target, memcal_iterval);
     if(rc) return rc;
 
-    rc_num = rc_num | mba01_data_buffer_64_p1.flushTo0();
-    rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_PER_CAL_CONFIG_P1_0x8001C00B0301143F, mba01_data_buffer_64_p1);
+    uint32_t zq_cal_iterval; //  00 = Disable
+    rc = FAPI_ATTR_GET(ATTR_EFF_ZQCAL_INTERVAL, &i_target, zq_cal_iterval);
     if(rc) return rc;
 
-    uint8_t primary_rank_group0_array[2]; //[rank]
-    rc = FAPI_ATTR_GET(ATTR_EFF_PRIMARY_RANK_GROUP0, &i_target, primary_rank_group0_array);
+    rc_num = rc_num | data_buffer_64.flushTo0();
+    rc = fapiGetScom(i_target, MBA01_MBA_CAL0Q_0x0301040F, data_buffer_64);
     if(rc) return rc;
 
-    uint8_t primary_rank_group1_array[2]; //[rank]
-    rc = FAPI_ATTR_GET(ATTR_EFF_PRIMARY_RANK_GROUP1, &i_target, primary_rank_group1_array);
-    if(rc) return rc;
+    FAPI_INF("+++ Enabling Periodic Calibration +++");
 
-    uint8_t primary_rank_group2_array[2]; //[rank]
-    rc = FAPI_ATTR_GET(ATTR_EFF_PRIMARY_RANK_GROUP2, &i_target, primary_rank_group2_array);
-    if(rc) return rc;
-
-    uint8_t primary_rank_group3_array[2]; //[rank]
-    rc = FAPI_ATTR_GET(ATTR_EFF_PRIMARY_RANK_GROUP3, &i_target, primary_rank_group3_array);
-    if(rc) return rc;
-
-    if(primary_rank_group0_array[0] != 255)
+    if (zq_cal_iterval != 0)
     {
-       //Rank Group 0 Enabled
-       rc_num = rc_num | mba01_data_buffer_64_p0.setBit(48);
+        //ZQ Cal Enabled
+	rc_num = rc_num | data_buffer_64.setBit(0);
+	FAPI_INF("+++ Periodic Calibration: ZQ Cal Enabled p0+++");
     }
-    if(primary_rank_group1_array[0] != 255)
+    else
     {
-       //Rank Group 1 Enabled
-       rc_num = rc_num | mba01_data_buffer_64_p0.setBit(49);
-    }
-    if(primary_rank_group2_array[0] != 255)
-    {
-       //Rank Group 2 Enabled
-       rc_num = rc_num | mba01_data_buffer_64_p0.setBit(50);
-    }
-    if(primary_rank_group3_array[0] != 255)
-    {
-       //Rank Group 3 Enabled
-       rc_num = rc_num | mba01_data_buffer_64_p0.setBit(51);
-    }
-    if(primary_rank_group0_array[1] != 255)
-    {
-       //Rank Group 0 Enabled
-       rc_num = rc_num | mba01_data_buffer_64_p1.setBit(48);
-    }
-    if(primary_rank_group1_array[1] != 255)
-    {
-       //Rank Group 1 Enabled
-       rc_num = rc_num | mba01_data_buffer_64_p1.setBit(49);
-    }
-    if(primary_rank_group2_array[1] != 255)
-    {
-       //Rank Group 2 Enabled
-       rc_num = rc_num | mba01_data_buffer_64_p1.setBit(50);
-    }
-    if(primary_rank_group3_array[1] != 255)
-    {
-       //Rank Group 3 Enabled
-       rc_num = rc_num | mba01_data_buffer_64_p1.setBit(51);
+        //ZQ Cal Disabled
+	rc_num = rc_num | data_buffer_64.clearBit(0);
+	FAPI_INF("+++ Periodic Calibration: ZQ Cal Disabled p0+++");
     }
 
-    //Start the periodic Cal
-    // do not set bit 61 - HW214829
-    // rc_num = rc_num | mba01_data_buffer_64_p1.setBit(61);
+    rc = fapiPutScom(i_target, MBA01_MBA_CAL0Q_0x0301040F, data_buffer_64);
+    if(rc) return rc;
 
-    //Write the mba_p01_PER_CAL_CFG_REG
-    rc = fapiPutScom(i_target, DPHY01_DDRPHY_PC_PER_CAL_CONFIG_P0_0x8000C00B0301143F, mba01_data_buffer_64_p0);
+    rc_num = rc_num | data_buffer_64.flushTo0();
+    rc = fapiGetScom(i_target, MBA01_MBA_CAL1Q_0x03010410, data_buffer_64);
+    if (memcal_iterval != 0)
+    {
+        //Mem Cal Enabled
+	rc_num = rc_num | data_buffer_64.setBit(0);
+	FAPI_INF("+++ Periodic Calibration: Mem Cal Enabled p0+++");
+    }
+    else
+    {
+        //Mem Cal Disabled
+	rc_num = rc_num | data_buffer_64.clearBit(0);
+	FAPI_INF("+++ Periodic Calibration: Mem Cal Disabled p0+++");
+    }
+    rc = fapiPutScom(i_target, MBA01_MBA_CAL1Q_0x03010410, data_buffer_64);
     if(rc) return rc;
-    FAPI_INF("+++ Periodic Calibration Enabled p0+++");
-    rc = fapiPutScom(i_target, DPHY01_DDRPHY_PC_PER_CAL_CONFIG_P1_0x8001C00B0301143F, mba01_data_buffer_64_p1);
-    if(rc) return rc;
-    FAPI_INF("+++ Periodic Calibration Enabled p1+++");
 
     if (rc_num)
     {

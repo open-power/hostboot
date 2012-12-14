@@ -1,27 +1,26 @@
-/*  IBM_PROLOG_BEGIN_TAG
- *  This is an automatically generated prolog.
- *
- *  $Source: src/usr/hwpf/hwp/dram_training/mss_funcs.H $
- *
- *  IBM CONFIDENTIAL
- *
- *  COPYRIGHT International Business Machines Corp. 2012
- *
- *  p1
- *
- *  Object Code Only (OCO) source materials
- *  Licensed Internal Code Source Materials
- *  IBM HostBoot Licensed Internal Code
- *
- *  The source code for this program is not published or other-
- *  wise divested of its trade secrets, irrespective of what has
- *  been deposited with the U.S. Copyright Office.
- *
- *  Origin: 30
- *
- *  IBM_PROLOG_END_TAG
- */
-// $Id: mss_funcs.H,v 1.12 2012/07/17 13:22:58 bellows Exp $
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/usr/hwpf/hwp/dram_training/mss_funcs.H $                  */
+/*                                                                        */
+/* IBM CONFIDENTIAL                                                       */
+/*                                                                        */
+/* COPYRIGHT International Business Machines Corp. 2012                   */
+/*                                                                        */
+/* p1                                                                     */
+/*                                                                        */
+/* Object Code Only (OCO) source materials                                */
+/* Licensed Internal Code Source Materials                                */
+/* IBM HostBoot Licensed Internal Code                                    */
+/*                                                                        */
+/* The source code for this program is not published or otherwise         */
+/* divested of its trade secrets, irrespective of what has been           */
+/* deposited with the U.S. Copyright Office.                              */
+/*                                                                        */
+/* Origin: 30                                                             */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
+// $Id: mss_funcs.H,v 1.13 2012/11/19 21:18:41 jsabrow Exp $
 /* File mss_funcs.H created by SLOAT JACOB D. (JAKE),2D3970 on Fri Apr 22 2011. */
 
 //------------------------------------------------------------------------------
@@ -44,6 +43,7 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
+//  1.13   | jsabrow  | 11/19/12| added CCS data loader: mss_ccs_load_data_pattern
 //  1.12   | 07/16/12 | bellows | added in Id tag
 //  1.11   | 3/21/12  | divyakum| Added mss_execute_zq_cal function 
 //  1.10   | 2/14/12  | jdsloat | Comment section filled in, elimated unnecessary constant, added enums
@@ -90,6 +90,14 @@ enum mss_ccs_status_query_result
 };
 
 
+enum mss_ccs_data_pattern
+{
+    MSS_CCS_DATA_PATTERN_00 = 1,
+    MSS_CCS_DATA_PATTERN_0F = 2,
+    MSS_CCS_DATA_PATTERN_F0 = 3,
+    MSS_CCS_DATA_PATTERN_FF = 4
+};
+
 
 const bool MSS_CCS_START = 0;
 const bool MSS_CCS_STOP = 1;
@@ -133,6 +141,27 @@ fapi::ReturnCode mss_ccs_inst_arry_1( fapi::Target& i_target,
                                       ecmdDataBufferBase i_ddr_cal_enable,
                                       ecmdDataBufferBase i_ccs_end);
 
+
+//---------------------------------------------------------------
+// mss_ccs_load_data_pattern
+// load predefined pattern (enum) into specified array1 index
+// Target = centaur.mba
+//---------------------------------------------------------------
+fapi::ReturnCode mss_ccs_load_data_pattern( fapi::Target& i_target,
+					    uint32_t io_instruction_number,
+                                            mss_ccs_data_pattern data_pattern);
+
+
+//---------------------------------------------------------------
+// mss_ccs_load_data_pattern
+// load specified pattern (20 bits) into specified array1 index
+// Target = centaur.mba
+//---------------------------------------------------------------
+fapi::ReturnCode mss_ccs_load_data_pattern( fapi::Target& i_target,
+					    uint32_t io_instruction_number,
+                                            uint32_t data_pattern);
+
+
 //-----------------------------------------
 // mss_ccs_status_query
 // Querying the status of the CCS
@@ -140,6 +169,7 @@ fapi::ReturnCode mss_ccs_inst_arry_1( fapi::Target& i_target,
 //-----------------------------------------
 fapi::ReturnCode mss_ccs_status_query( fapi::Target& i_target,
                                        mss_ccs_status_query_result& io_status);
+
 
 //-----------------------------------------
 // mss_ccs_start_stop
@@ -171,6 +201,7 @@ fapi::ReturnCode mss_ccs_mode( fapi::Target& i_target,
 // Target = centaur.mba
 //-----------------------------------------
 fapi::ReturnCode mss_ccs_fail_type( fapi::Target& i_target);
+
 
 //-----------------------------------
 // mss_execute_ccs_inst_array

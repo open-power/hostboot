@@ -10,3 +10,21 @@ New actions for Centaur maint command complete
 -CMVC: D862701 is integrating the changes
 -Files: centaur.act.patch
 -Coreq: there are related changes in workarounds.postsimsetup
+
+Bus training does not set all 5 training bits at once, therefore the
+Murano Action File must cope with any bit being set.
+Proc-Cen Framelock now looks for a different status bit in a different
+register, therefore the Murano Action File must cope
+-RTC: Task 60658 will remove this patch
+-CMVC: 864393
+-Files: s1.act.io.patch
+-Coreq: None
+
+Centaur Slew calibration sets a start bit in a register and looks
+for completion and calibration values in another register, therefore
+the Centaur Action File must cope
+-RTC: Task 60658 will remove this patch
+-CMVC: 864393
+-Files: centaur.act.slew.patch
+-Coreq: None
+

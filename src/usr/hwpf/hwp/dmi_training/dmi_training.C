@@ -469,7 +469,6 @@ void*    call_proc_cen_framelock( void *io_pArgs )
             uint8_t l_memNum = l_mem_target->getAttr<ATTR_POSITION>();
 
             // fill out the args struct.
-            l_args.in_error_state       =   false;
             l_args.channel_init_timeout =   CHANNEL_INIT_TIMEOUT_NO_TIMEOUT;
             l_args.frtl_auto_not_manual =   true;
             l_args.frtl_manual_pu       =   0;

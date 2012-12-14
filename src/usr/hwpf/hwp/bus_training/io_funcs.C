@@ -1,26 +1,26 @@
-/*  IBM_PROLOG_BEGIN_TAG
- *  This is an automatically generated prolog.
- *
- *  $Source: src/usr/hwpf/hwp/bus_training/io_funcs.C $
- *
- *  IBM CONFIDENTIAL
- *
- *  COPYRIGHT International Business Machines Corp. 2012
- *
- *  p1
- *
- *  Object Code Only (OCO) source materials
- *  Licensed Internal Code Source Materials
- *  IBM HostBoot Licensed Internal Code
- *
- *  The source code for this program is not published or other-
- *  wise divested of its trade secrets, irrespective of what has
- *  been deposited with the U.S. Copyright Office.
- *
- *  Origin: 30
- *
- *  IBM_PROLOG_END_TAG
- */
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/usr/hwpf/hwp/bus_training/io_funcs.C $                    */
+/*                                                                        */
+/* IBM CONFIDENTIAL                                                       */
+/*                                                                        */
+/* COPYRIGHT International Business Machines Corp. 2012                   */
+/*                                                                        */
+/* p1                                                                     */
+/*                                                                        */
+/* Object Code Only (OCO) source materials                                */
+/* Licensed Internal Code Source Materials                                */
+/* IBM HostBoot Licensed Internal Code                                    */
+/*                                                                        */
+/* The source code for this program is not published or otherwise         */
+/* divested of its trade secrets, irrespective of what has been           */
+/* deposited with the U.S. Copyright Office.                              */
+/*                                                                        */
+/* Origin: 30                                                             */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
+// $Id: io_funcs.C,v 1.13 2012/12/04 08:28:37 varkeykv Exp $
 // *!***************************************************************************
 // *! (C) Copyright International Business Machines Corp. 1997, 1998
 // *!           All Rights Reserved -- Property of IBM
@@ -104,7 +104,7 @@ ReturnCode  edi_training::run_training_functions(const Target& target, io_interf
 	rc_ecmd|=set_bits.setBitLength(16);
 	rc_ecmd|=clear_bits.setBitLength(16);
 	rc_ecmd|=set_bits.flushTo0();
-	rc_ecmd|=clear_bits.flushTo1();
+	rc_ecmd|=clear_bits.flushTo0();
 	
 	if(rc_ecmd)
 	{
@@ -164,6 +164,7 @@ ReturnCode  edi_training::run_training_functions(const Target& target, io_interf
 		// Set Start Bits for group
 		// Group address is set to 0 , since according to Discussion with Dean ,this code will run once per group.
 		rc_ecmd|=set_bits.insert(bits,0,16);
+
 		if(rc_ecmd)
 		{
 			FAPI_ERR("io_run_training:Data Buffer insertion failed !!\n");
@@ -331,6 +332,7 @@ ReturnCode  edi_training::training_function_status(const Target&  master_chip_ta
                     
                     if (functional_status == RUNNING)
                     {
+			FAPI_DBG("functional status is Running!!");
                             state=FUNCTIONAL;
                             fail_bit=rx_func_mode_failed;
 			     //Done bit does not get set on FAIL ..Update as per Mike Spears/Pete

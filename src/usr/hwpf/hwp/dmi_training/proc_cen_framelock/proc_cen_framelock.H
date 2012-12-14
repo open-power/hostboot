@@ -1,27 +1,26 @@
-/*  IBM_PROLOG_BEGIN_TAG
- *  This is an automatically generated prolog.
- *
- *  $Source: src/usr/hwpf/hwp/dmi_training/proc_cen_framelock/proc_cen_framelock.H $
- *
- *  IBM CONFIDENTIAL
- *
- *  COPYRIGHT International Business Machines Corp. 2012
- *
- *  p1
- *
- *  Object Code Only (OCO) source materials
- *  Licensed Internal Code Source Materials
- *  IBM HostBoot Licensed Internal Code
- *
- *  The source code for this program is not published or other-
- *  wise divested of its trade secrets, irrespective of what has
- *  been deposited with the U.S. Copyright Office.
- *
- *  Origin: 30
- *
- *  IBM_PROLOG_END_TAG
- */
-// $Id: proc_cen_framelock.H,v 1.6 2012/07/23 14:15:49 jmcgill Exp $
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/usr/hwpf/hwp/dmi_training/proc_cen_framelock/proc_cen_framelock.H $ */
+/*                                                                        */
+/* IBM CONFIDENTIAL                                                       */
+/*                                                                        */
+/* COPYRIGHT International Business Machines Corp. 2012                   */
+/*                                                                        */
+/* p1                                                                     */
+/*                                                                        */
+/* Object Code Only (OCO) source materials                                */
+/* Licensed Internal Code Source Materials                                */
+/* IBM HostBoot Licensed Internal Code                                    */
+/*                                                                        */
+/* The source code for this program is not published or otherwise         */
+/* divested of its trade secrets, irrespective of what has been           */
+/* deposited with the U.S. Copyright Office.                              */
+/*                                                                        */
+/* Origin: 30                                                             */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
+// $Id: proc_cen_framelock.H,v 1.7 2012/10/12 03:35:07 baysah Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_cen_framelock.H,v $
 //------------------------------------------------------------------------------
 // *|
@@ -53,6 +52,9 @@
 //------------------------------------------------------------------------------
 
 #include <fapi.H>
+#include <fapiUtil.H>
+#include <p8_scom_addresses.H>
+#include <cen_scom_addresses.H>
 
 //------------------------------------------------------------------------------
 // Structure definitions
@@ -70,7 +72,6 @@ enum proc_cen_framelock_channel_init_timeout
 // structure to represent HWP arguments
 struct proc_cen_framelock_args
 {
-    bool in_error_state; // apply error state overrides to framelock/auto FRTL?
     proc_cen_framelock_channel_init_timeout channel_init_timeout;
                          // channel init timeout value to program for framelock/
                          // auto/FRTL
@@ -97,6 +98,7 @@ const uint8_t PROC_CEN_FRAMELOCK_MAX_FRAMELOCK_POLLS = 5;
 const uint8_t PROC_CEN_FRAMELOCK_MAX_FRTL_POLLS = 5;
 
 // P8 MCI Configuration Register field/bit definitions
+const uint32_t MCI_CFG_FORCE_CHANNEL_FAIL_BIT = 0;
 const uint32_t MCI_CFG_START_FRAMELOCK_BIT = 7;
 const uint32_t MCI_CFG_START_FRTL_BIT = 8;
 const uint32_t MCI_CFG_AUTO_FRTL_DISABLE_BIT = 9;
@@ -114,8 +116,22 @@ const uint32_t MCI_STAT_FRAMELOCK_PASS_BIT = 0;
 const uint32_t MCI_STAT_FRAMELOCK_FAIL_BIT = 1;
 const uint32_t MCI_STAT_FRTL_PASS_BIT = 2;
 const uint32_t MCI_STAT_FRTL_FAIL_BIT = 3;
+const uint32_t MCI_STAT_CHANNEL_INTERLOCK_PASS_BIT = 12;
+const uint32_t MCI_STAT_CHANNEL_INTERLOCK_FAIL_BIT = 13;
+
+// P8 MCI FIR Register field/bit definitions
+const uint32_t MCI_FIR_DMI_CHANNEL_FAIL_BIT = 1;
+const uint32_t MCI_FIR_CHANNEL_INIT_TIMEOUT_BIT = 7;
+const uint32_t MCI_FIR_INTERNAL_CONTROL_PARITY_ERROR_BIT = 8;
+const uint32_t MCI_FIR_DATA_FLOW_PARITY_ERROR_BIT = 9;
+const uint32_t MCI_FIR_CHANNEL_INTERLOCK_FAIL_BIT = 11;
+const uint32_t MCI_FIR_CENTAUR_CHECKSTOP_FAIL_BIT = 12;
+const uint32_t MCI_FIR_FRTL_COUNTER_OVERFLOW_BIT = 19;
+const uint32_t MCI_FIR_MCICFGQ_PARITY_ERROR_BIT = 22;
+const uint32_t MCI_FIR_CHANNEL_FAIL_ACTIVE_BIT = 31;
 
 // Centaur MBI Configuration Register field/bit defintions
+const uint32_t MBI_CFG_FORCE_CHANNEL_FAIL_BIT = 0;
 const uint32_t MBI_CFG_FORCE_FRAMELOCK_BIT = 7;
 const uint32_t MBI_CFG_FORCE_FRTL_BIT = 8;
 const uint32_t MBI_CFG_AUTO_FRTL_DISABLE_BIT = 9;
@@ -133,6 +149,19 @@ const uint32_t MBI_STAT_FRAMELOCK_PASS_BIT = 0;
 const uint32_t MBI_STAT_FRAMELOCK_FAIL_BIT = 1;
 const uint32_t MBI_STAT_FRTL_PASS_BIT = 2;
 const uint32_t MBI_STAT_FRTL_FAIL_BIT = 3;
+const uint32_t MBI_STAT_CHANNEL_INTERLOCK_PASS_BIT = 13;
+const uint32_t MBI_STAT_CHANNEL_INTERLOCK_FAIL_BIT = 14;
+
+// Centaur MBI FIR Register field/bit definitions
+const uint32_t MBI_FIR_DMI_CHANNEL_FAIL_BIT = 1;
+const uint32_t MBI_FIR_CHANNEL_INIT_TIMEOUT_BIT = 7;
+const uint32_t MBI_FIR_INTERNAL_CONTROL_PARITY_ERROR_BIT = 8;
+const uint32_t MBI_FIR_DATA_FLOW_PARITY_ERROR_BIT = 9;
+const uint32_t MBI_FIR_GLOBAL_HOST_CHECKSTOP_BIT = 11;
+const uint32_t MBI_FIR_CHANNEL_INTERLOCK_FAIL_BIT = 13;
+const uint32_t MBI_FIR_LOCAL_HOST_CHECKSTOP_BIT = 14;
+const uint32_t MBI_FIR_FRTL_COUNTER_OVERFLOW_BIT = 15;
+const uint32_t MBI_FIR_MBICFGQ_PARITY_ERROR_BIT = 19;
 
 extern "C"
 {

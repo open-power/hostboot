@@ -535,7 +535,7 @@ void*  call_mss_ddr_phy_reset( void *io_pArgs )
 
         // Cast to a FAPI type of target.
         const fapi::Target l_fapi_mba_target(
-                TARGET_TYPE_MEMBUF_CHIP,
+                TARGET_TYPE_MBA_CHIPLET,
                 reinterpret_cast<void *>
         (const_cast<TARGETING::Target*>(l_mba_target)) );
 
@@ -707,7 +707,7 @@ void*    call_mss_draminit_training( void *io_pArgs )
 
         // Cast to a FAPI type of target.
         const fapi::Target l_fapi_mba_target(
-                TARGET_TYPE_MEMBUF_CHIP,
+                TARGET_TYPE_MBA_CHIPLET,
                 reinterpret_cast<void *>
         (const_cast<TARGETING::Target*>(l_mba_target)) );
 

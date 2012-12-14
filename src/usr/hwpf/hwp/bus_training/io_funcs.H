@@ -1,26 +1,26 @@
-/*  IBM_PROLOG_BEGIN_TAG
- *  This is an automatically generated prolog.
- *
- *  $Source: src/usr/hwpf/hwp/bus_training/io_funcs.H $
- *
- *  IBM CONFIDENTIAL
- *
- *  COPYRIGHT International Business Machines Corp. 2012
- *
- *  p1
- *
- *  Object Code Only (OCO) source materials
- *  Licensed Internal Code Source Materials
- *  IBM HostBoot Licensed Internal Code
- *
- *  The source code for this program is not published or other-
- *  wise divested of its trade secrets, irrespective of what has
- *  been deposited with the U.S. Copyright Office.
- *
- *  Origin: 30
- *
- *  IBM_PROLOG_END_TAG
- */
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/usr/hwpf/hwp/bus_training/io_funcs.H $                    */
+/*                                                                        */
+/* IBM CONFIDENTIAL                                                       */
+/*                                                                        */
+/* COPYRIGHT International Business Machines Corp. 2012                   */
+/*                                                                        */
+/* p1                                                                     */
+/*                                                                        */
+/* Object Code Only (OCO) source materials                                */
+/* Licensed Internal Code Source Materials                                */
+/* IBM HostBoot Licensed Internal Code                                    */
+/*                                                                        */
+/* The source code for this program is not published or otherwise         */
+/* divested of its trade secrets, irrespective of what has been           */
+/* deposited with the U.S. Copyright Office.                              */
+/*                                                                        */
+/* Origin: 30                                                             */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
+// $Id: io_funcs.H,v 1.12 2012/12/04 08:28:39 varkeykv Exp $
 // *!***************************************************************************
 // *! (C) Copyright International Business Machines Corp. 1997, 1998
 // *!           All Rights Reserved -- Property of IBM
@@ -51,6 +51,9 @@
 #include "gcr_funcs.H"
 
 using namespace fapi;
+	// Bus Status State
+	typedef enum {  NOT_RUNNING, SELECTED,  RUNNING,   SUCCESSFULL  ,
+        FAILED} bus_status;
 
 class edi_training {
 public:
@@ -58,9 +61,7 @@ public:
 	// Training enums for Wire test , Deskew , Eye Opt ,Repair , Functional   ---
 	typedef   enum {  WIRE_TEST ,  DESKEW ,  EYE_OPT ,  REPAIR , FUNCTIONAL
                                            , TRAINING_TYPES} training_function;
-	// Bus Status State
-	typedef enum {  NOT_RUNNING, SELECTED,  RUNNING,   SUCCESSFULL  ,
-        FAILED} bus_status;
+
     // Selection
 	bus_status    wire_test_selected;
 	bus_status    desckew_selected;
@@ -85,19 +86,19 @@ public:
 	bool		          rx_wderf_failed[6];    // Summary 5 bit failed
 
 	// Constructor Initializes default states for status variables
-    edi_training( )
+    edi_training( bus_status wire_test=SELECTED,bus_status deskew=SELECTED,bus_status eye_opt=SELECTED,bus_status repair=SELECTED,bus_status functional=SELECTED)
     {
-        wire_test_selected     =       SELECTED;
-        desckew_selected       =       SELECTED;
-        eye_opt_selected       =       SELECTED;
-        repair_selected        =       SELECTED;
-        functional_selected    =       SELECTED;
+        wire_test_selected     =       wire_test;
+        desckew_selected       =       deskew;
+        eye_opt_selected       =       eye_opt;
+        repair_selected        =       repair;
+        functional_selected    =       functional;
 
-        wire_test_status        =     SELECTED;
-        desckew_status          =     SELECTED;
-        eye_opt_status          =     SELECTED;
-        repair_status           =     SELECTED;
-        functional_status       =     SELECTED;
+        wire_test_status        =     wire_test;
+        desckew_status          =     deskew;
+        eye_opt_status          =     eye_opt;
+        repair_status           =     repair;
+        functional_status       =     functional;
         
         for(int i=0;i<6;++i)
         {

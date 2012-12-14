@@ -643,7 +643,10 @@ fapi::ReturnCode proc_start_clocks_chiplets(const fapi::Target& i_target,
             FAPI_DBG("Starting A bus chiplet clocks ...");
             rc = proc_start_clocks_generic_chiplet(
                 i_target,
-                A_BUS_CHIPLET_0x09000000,
+                // TODO MJJ Updated to A_BUS_CHIPLET_0x08000000 to match new
+                // p8_scom_addresses, this will go away when this HWP is
+                // refreshed
+                A_BUS_CHIPLET_0x08000000,
                 PROC_START_CLOCKS_CHIPLETS_ABUS_CLK_STATUS_REG_EXP);
             if (rc)
             {
@@ -656,7 +659,10 @@ fapi::ReturnCode proc_start_clocks_chiplets(const fapi::Target& i_target,
             FAPI_DBG("Starting PCIE chiplet clocks ...");
             rc = proc_start_clocks_generic_chiplet(
                 i_target,
-                PCIE_CHIPLET_0x08000000,
+                // TODO MJJ Updated to PCIE_CHIPLET_0x09000000 to match new
+                // p8_scom_addresses, this will go away when this HWP is
+                // refreshed
+                PCIE_CHIPLET_0x09000000,
                 PROC_START_CLOCKS_CHIPLETS_PCIE_CLK_STATUS_REG_EXP);
             if (rc)
             {

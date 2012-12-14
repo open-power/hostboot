@@ -229,6 +229,7 @@
      <attribute><id>PROC_PCIE_NOT_F_LINK</id></attribute>
      <attribute><id>MSS_INTERLEAVE_ENABLE</id></attribute>
      <attribute><id>MSS_MCS_GROUP_32</id></attribute>
+     <attribute><id>MSS_MEM_IPL_COMPLETE</id></attribute>
      <!-- Start pm_attributes_all_plat.xml -->
      <attribute><id>PM_EXTERNAL_VRM_STEPSIZE</id></attribute>
      <attribute><id>PM_EXTERNAL_VRM_STEPDELAY</id></attribute>
@@ -660,19 +661,43 @@
     <attribute><id>EFF_QUATERNARY_RANK_GROUP3</id></attribute>
     <attribute><id>EFF_ODT_RD</id></attribute>
     <attribute><id>EFF_ODT_WR</id></attribute>
+    <attribute><id>EFF_CKE_MAP</id></attribute>
+    <attribute><id>EFF_SPCKE_MAP</id></attribute>
+    <attribute><id>EFF_DIMM_SPARE</id></attribute>
     <attribute><id>EFF_DRAM_RON</id></attribute>
     <attribute><id>EFF_DRAM_RTT_NOM</id></attribute>
     <attribute><id>EFF_DRAM_RTT_WR</id></attribute>
     <attribute><id>EFF_DRAM_WR_VREF</id></attribute>
+    <attribute><id>EFF_DRAM_WRDDR4_VREF</id></attribute>
+    <attribute><id>EFF_DRAM_WR_VREF_SCHMOO</id></attribute>
+    <attribute><id>EFF_DRAM_WRDDR4_VREF_SCHMOO</id></attribute>
     <attribute><id>EFF_CEN_DRV_IMP_DQ_DQS</id></attribute>
-    <attribute><id>EFF_CEN_DRV_IMP_CMD</id></attribute>
+    <attribute><id>EFF_CEN_DRV_IMP_ADDR</id></attribute>
     <attribute><id>EFF_CEN_DRV_IMP_CNTL</id></attribute>
+    <attribute><id>EFF_CEN_DRV_IMP_CLK</id></attribute>
+    <attribute><id>EFF_CEN_DRV_IMP_SPCKE</id></attribute>
+    <attribute><id>EFF_CEN_DRV_IMP_DQ_DQS_SCHMOO</id></attribute>
+    <attribute><id>EFF_CEN_DRV_IMP_CLK_SCHMOO</id></attribute>
+    <attribute><id>EFF_CEN_DRV_IMP_SPCKE_SCHMOO</id></attribute>
+    <attribute><id>EFF_CEN_DRV_IMP_CNTL_SCHMOO</id></attribute>
     <attribute><id>EFF_CEN_RCV_IMP_DQ_DQS</id></attribute>
+    <attribute><id>EFF_CEN_RCV_IMP_DQ_DQS_SCHMOO</id></attribute>
     <attribute><id>EFF_CEN_SLEW_RATE_DQ_DQS</id></attribute>
-    <attribute><id>EFF_CEN_SLEW_RATE_CMD</id></attribute>
+    <attribute><id>EFF_CEN_SLEW_RATE_ADDR</id></attribute>
+    <attribute><id>EFF_CEN_SLEW_RATE_CLK</id></attribute>
+    <attribute><id>EFF_CEN_SLEW_RATE_SPCKE</id></attribute>
     <attribute><id>EFF_CEN_SLEW_RATE_CNTL</id></attribute>
+    <attribute><id>EFF_CEN_SLEW_RATE_DQ_DQS_SCHMOO</id></attribute>
+    <attribute><id>EFF_CEN_SLEW_RATE_CLK_SCHMOO</id></attribute>
+    <attribute><id>EFF_CEN_SLEW_RATE_SPCKE_SCHMOO</id></attribute>
+    <attribute><id>EFF_CEN_SLEW_RATE_ADDR_SCHMOO</id></attribute>
+    <attribute><id>EFF_CEN_SLEW_RATE_CNTL_SCHMOO</id></attribute>
     <attribute><id>EFF_CEN_RD_VREF</id></attribute>
+    <attribute><id>EFF_CEN_RD_VREF_SCHMOO</id></attribute>
     <attribute><id>EFF_DIMM_SIZE</id></attribute>
+    <attribute><id>EFF_DRAM_BANKS</id></attribute>
+    <attribute><id>EFF_DRAM_ROWS</id></attribute>
+    <attribute><id>EFF_DRAM_COLS</id></attribute>
     <attribute><id>EFF_DRAM_DENSITY</id></attribute>
     <attribute><id>EFF_DRAM_TRCD</id></attribute>
     <attribute><id>EFF_DRAM_TRRD</id></attribute>
@@ -703,39 +728,99 @@
     <attribute><id>EFF_MPR_LOC</id></attribute>
     <attribute><id>EFF_MPR_MODE</id></attribute>
     <attribute><id>EFF_DIMM_RCD_CNTL_WORD_0_15</id></attribute>
-    <attribute><id>EFF_SCHMOO_MODE</id></attribute>
-    <attribute><id>EFF_SCHMOO_TEST_VALID</id></attribute>
-    <attribute><id>EFF_SCHMOO_PARAM_VALID</id></attribute>
-    <attribute><id>EFF_MEMCAL_INTERVAL</id></attribute>
-    <attribute><id>EFF_ZQCAL_INTERVAL</id></attribute>
-    <attribute><id>MSS_THROTTLE_NUMERATOR</id></attribute>
-    <attribute><id>MSS_THROTTLE_DENOMINATOR</id></attribute>
-    <attribute><id>MSS_THROTTLE_CHANNEL_NUMERATOR</id></attribute>
-    <attribute><id>MSS_THROTTLE_CHANNEL_DENOMINATOR</id></attribute>
-    <attribute><id>MSS_WATT_TARGET</id></attribute>
-    <attribute><id>MSS_POWER_SLOPE</id></attribute>
-    <attribute><id>MSS_POWER_INT</id></attribute>
-    <attribute><id>MSS_DIMM_MAXBANDWIDTH_GBS</id></attribute>
-    <attribute><id>MSS_DIMM_MAXBANDWIDTH_MRS</id></attribute>
-    <attribute><id>MSS_CHANNEL_MAXBANDWIDTH_GBS</id></attribute>
-    <attribute><id>MSS_CHANNEL_MAXBANDWIDTH_MRS</id></attribute>
-    <attribute><id>MSS_DIMM_MAXPOWER</id></attribute>
-    <attribute><id>MSS_CHANNEL_MAXPOWER</id></attribute>
-    <attribute><id>MSS_MEMSIZE_MBA</id></attribute>
-    <attribute><id>EFF_DRAM_BANKS</id></attribute>
-    <attribute><id>EFF_DRAM_ROWS</id></attribute>
-    <attribute><id>EFF_DRAM_COLS</id></attribute>
     <attribute><id>EFF_DIMM_RCD_IBT</id></attribute>
     <attribute><id>EFF_DIMM_RCD_MIRROR_MODE</id></attribute>
+    <attribute><id>EFF_SCHMOO_MODE</id></attribute>
+    <attribute><id>EFF_SCHMOO_ADDR_MODE</id></attribute>
+    <attribute><id>EFF_SCHMOO_TEST_VALID</id></attribute>
+    <attribute><id>EFF_SCHMOO_PARAM_VALID</id></attribute>
+    <attribute><id>EFF_SCHMOO_WR_EYE_MIN_MARGIN</id></attribute>
+    <attribute><id>EFF_SCHMOO_RD_EYE_MIN_MARGIN</id></attribute>
+    <attribute><id>EFF_SCHMOO_DQS_CLK_MIN_MARGIN</id></attribute>
+    <attribute><id>EFF_SCHMOO_RD_GATE_MIN_MARGIN</id></attribute>
+    <attribute><id>EFF_SCHMOO_ADDR_CMD_MIN_MARGIN</id></attribute>
+    <attribute><id>EFF_MEMCAL_INTERVAL</id></attribute>
+    <attribute><id>EFF_ZQCAL_INTERVAL</id></attribute>
     <attribute><id>EFF_IBM_TYPE</id></attribute>
     <attribute><id>EFF_NUM_DROPS_PER_PORT</id></attribute>
     <attribute><id>EFF_STACK_TYPE</id></attribute>
     <attribute><id>EFF_NUM_MASTER_RANKS_PER_DIMM</id></attribute>
     <attribute><id>EFF_NUM_PACKAGES_PER_RANK</id></attribute>
     <attribute><id>EFF_NUM_DIES_PER_PACKAGE</id></attribute>
-    <attribute><id>MSS_SPARE_BYTE</id></attribute>
+    <attribute><id>MSS_MEM_THROTTLE_NUMERATOR_PER_MBA</id></attribute>
+    <attribute><id>MSS_MEM_THROTTLE_DENOMINATOR</id></attribute>
+    <attribute><id>MSS_MEM_THROTTLE_NUMERATOR_PER_CHIP</id></attribute>
+    <attribute><id>MSS_MEM_WATT_TARGET</id></attribute>
+    <attribute><id>MSS_POWER_SLOPE</id></attribute>
+    <attribute><id>MSS_POWER_SLOPE2</id></attribute>
+    <attribute><id>MSS_POWER_INT</id></attribute>
+    <attribute><id>MSS_POWER_INT2</id></attribute>
+    <attribute><id>MSS_DIMM_MAXBANDWIDTH_GBS</id></attribute>
+    <attribute><id>MSS_DIMM_MAXBANDWIDTH_MRS</id></attribute>
+    <attribute><id>MSS_CHANNEL_MAXBANDWIDTH_GBS</id></attribute>
+    <attribute><id>MSS_CHANNEL_PAIR_MAXBANDWIDTH_GBS</id></attribute>
+    <attribute><id>MSS_CHANNEL_MAXBANDWIDTH_MRS</id></attribute>
+    <attribute><id>MSS_CHANNEL_PAIR_MAXBANDWIDTH_MRS</id></attribute>
+    <attribute><id>MSS_DIMM_MAXPOWER</id></attribute>
+    <attribute><id>MSS_CHANNEL_MAXPOWER</id></attribute>
+    <attribute><id>MSS_CHANNEL_PAIR_MAXPOWER</id></attribute>
+    <attribute><id>MSS_RUNTIME_MEM_THROTTLE_NUMERATOR_PER_MBA</id></attribute>
+    <attribute><id>MSS_RUNTIME_MEM_THROTTLE_DENOMINATOR</id></attribute>
+    <attribute><id>MSS_RUNTIME_MEM_THROTTLE_NUMERATOR_PER_CHIP</id></attribute>
     <attribute><id>MSS_EFF_DIMM_FUNCTIONAL_VECTOR</id></attribute>
     <attribute><id>MSS_CAL_STEP_ENABLE</id></attribute>
+    <attribute><id>MSS_SLEW_RATE_DATA</id></attribute>
+    <attribute><id>MSS_SLEW_RATE_ADR</id></attribute>
+    <attribute><id>MSS_ALLOW_SINGLE_PORT</id></attribute>
+    <attribute><id>EFF_CEN_PHASE_ROT_M0_CLK_P0</id></attribute>
+    <attribute><id>EFF_CEN_PHASE_ROT_M0_CLK_P1</id></attribute>
+    <attribute><id>EFF_CEN_PHASE_ROT_M1_CLK_P0</id></attribute>
+    <attribute><id>EFF_CEN_PHASE_ROT_M1_CLK_P1</id></attribute>
+    <attribute><id>EFF_CEN_PHASE_ROT_M_CMD_A0</id></attribute>
+    <attribute><id>EFF_CEN_PHASE_ROT_M_CMD_A1</id></attribute>
+    <attribute><id>EFF_CEN_PHASE_ROT_M_CMD_A2</id></attribute>
+    <attribute><id>EFF_CEN_PHASE_ROT_M_CMD_A3</id></attribute>
+    <attribute><id>EFF_CEN_PHASE_ROT_M_CMD_A4</id></attribute>
+    <attribute><id>EFF_CEN_PHASE_ROT_M_CMD_A5</id></attribute>
+    <attribute><id>EFF_CEN_PHASE_ROT_M_CMD_A6</id></attribute>
+    <attribute><id>EFF_CEN_PHASE_ROT_M_CMD_A7</id></attribute>
+    <attribute><id>EFF_CEN_PHASE_ROT_M_CMD_A8</id></attribute>
+    <attribute><id>EFF_CEN_PHASE_ROT_M_CMD_A9</id></attribute>
+    <attribute><id>EFF_CEN_PHASE_ROT_M_CMD_A10</id></attribute>
+    <attribute><id>EFF_CEN_PHASE_ROT_M_CMD_A11</id></attribute>
+    <attribute><id>EFF_CEN_PHASE_ROT_M_CMD_A12</id></attribute>
+    <attribute><id>EFF_CEN_PHASE_ROT_M_CMD_A13</id></attribute>
+    <attribute><id>EFF_CEN_PHASE_ROT_M_CMD_A14</id></attribute>
+    <attribute><id>EFF_CEN_PHASE_ROT_M_CMD_A15</id></attribute>
+    <attribute><id>EFF_CEN_PHASE_ROT_M_CMD_BA0</id></attribute>
+    <attribute><id>EFF_CEN_PHASE_ROT_M_CMD_BA1</id></attribute>
+    <attribute><id>EFF_CEN_PHASE_ROT_M_CMD_BA2</id></attribute>
+    <attribute><id>EFF_CEN_PHASE_ROT_M_CMD_CASN</id></attribute>
+    <attribute><id>EFF_CEN_PHASE_ROT_M_CMD_RASN</id></attribute>
+    <attribute><id>EFF_CEN_PHASE_ROT_M_CMD_WEN</id></attribute>
+    <attribute><id>EFF_CEN_PHASE_ROT_M_PAR</id></attribute>
+    <attribute><id>EFF_CEN_PHASE_ROT_M_ACTN</id></attribute>
+    <attribute><id>EFF_CEN_PHASE_ROT_M0_CNTL_CKE0</id></attribute>
+    <attribute><id>EFF_CEN_PHASE_ROT_M0_CNTL_CKE1</id></attribute>
+    <attribute><id>EFF_CEN_PHASE_ROT_M0_CNTL_CKE2</id></attribute>
+    <attribute><id>EFF_CEN_PHASE_ROT_M0_CNTL_CKE3</id></attribute>
+    <attribute><id>EFF_CEN_PHASE_ROT_M0_CNTL_CSN0</id></attribute>
+    <attribute><id>EFF_CEN_PHASE_ROT_M0_CNTL_CSN1</id></attribute>
+    <attribute><id>EFF_CEN_PHASE_ROT_M0_CNTL_CSN2</id></attribute>
+    <attribute><id>EFF_CEN_PHASE_ROT_M0_CNTL_CSN3</id></attribute>
+    <attribute><id>EFF_CEN_PHASE_ROT_M0_CNTL_ODT0</id></attribute>
+    <attribute><id>EFF_CEN_PHASE_ROT_M0_CNTL_ODT1</id></attribute>
+    <attribute><id>EFF_CEN_PHASE_ROT_M1_CNTL_CKE0</id></attribute>
+    <attribute><id>EFF_CEN_PHASE_ROT_M1_CNTL_CKE1</id></attribute>
+    <attribute><id>EFF_CEN_PHASE_ROT_M1_CNTL_CKE2</id></attribute>
+    <attribute><id>EFF_CEN_PHASE_ROT_M1_CNTL_CKE3</id></attribute>
+    <attribute><id>EFF_CEN_PHASE_ROT_M1_CNTL_CSN0</id></attribute>
+    <attribute><id>EFF_CEN_PHASE_ROT_M1_CNTL_CSN1</id></attribute>
+    <attribute><id>EFF_CEN_PHASE_ROT_M1_CNTL_CSN2</id></attribute>
+    <attribute><id>EFF_CEN_PHASE_ROT_M1_CNTL_CSN3</id></attribute>
+    <attribute><id>EFF_CEN_PHASE_ROT_M1_CNTL_ODT0</id></attribute>
+    <attribute><id>EFF_CEN_PHASE_ROT_M1_CNTL_ODT1</id></attribute>
+    <attribute><id>MSS_DQS_SWIZZLE_TYPE</id></attribute>
 </targetType>
 
 <targetType>
@@ -844,6 +929,7 @@
     <attribute><id>MSS_VOLT</id></attribute>
     <attribute><id>MSS_FREQ</id></attribute>
     <attribute><id>MSS_LAB_OVERRIDE_FOR_MEM_PLL</id></attribute>
+    <attribute><id>MSS_ECID</id></attribute>
     <attribute><id>EI_BUS_RX_MSB_LSB_SWAP</id></attribute>
     <attribute><id>EI_BUS_TX_MSB_LSB_SWAP</id></attribute>
     <attribute>

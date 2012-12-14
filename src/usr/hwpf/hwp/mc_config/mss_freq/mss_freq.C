@@ -1,27 +1,26 @@
-/*  IBM_PROLOG_BEGIN_TAG
- *  This is an automatically generated prolog.
- *
- *  $Source: src/usr/hwpf/hwp/mc_init/mss_freq/mss_freq.C $
- *
- *  IBM CONFIDENTIAL
- *
- *  COPYRIGHT International Business Machines Corp. 2012
- *
- *  p1
- *
- *  Object Code Only (OCO) source materials
- *  Licensed Internal Code Source Materials
- *  IBM HostBoot Licensed Internal Code
- *
- *  The source code for this program is not published or other-
- *  wise divested of its trade secrets, irrespective of what has
- *  been deposited with the U.S. Copyright Office.
- *
- *  Origin: 30
- *
- *  IBM_PROLOG_END_TAG
- */
-// $Id: mss_freq.C,v 1.17 2012/07/17 13:24:13 bellows Exp $
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/usr/hwpf/hwp/mc_config/mss_freq/mss_freq.C $              */
+/*                                                                        */
+/* IBM CONFIDENTIAL                                                       */
+/*                                                                        */
+/* COPYRIGHT International Business Machines Corp. 2012                   */
+/*                                                                        */
+/* p1                                                                     */
+/*                                                                        */
+/* Object Code Only (OCO) source materials                                */
+/* Licensed Internal Code Source Materials                                */
+/* IBM HostBoot Licensed Internal Code                                    */
+/*                                                                        */
+/* The source code for this program is not published or otherwise         */
+/* divested of its trade secrets, irrespective of what has been           */
+/* deposited with the U.S. Copyright Office.                              */
+/*                                                                        */
+/* Origin: 30                                                             */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
+// $Id: mss_freq.C,v 1.18 2012/09/07 22:22:08 jdsloat Exp $
 /* File mss_volt.C created by JEFF SABROWSKI on Fri 21 Oct 2011. */
 
 //------------------------------------------------------------------------------
@@ -58,6 +57,7 @@
 //  1.15   | jdsloat  | 06/04/12 | Added a Configuration check
 //  1.16   | jdsloat  | 06/08/12 | Updates per Firware request
 //  1.17   | bellows  | 07/16/12 | added in Id tag
+//  1.18   | jdsloat  | 09/07/12 | Added FTB offset to TAA and TCK
 //
 // This procedure takes CENTAUR as argument.  for each DIMM (under each MBA)
 // DIMM SPD attributes are read to determine optimal DRAM frequency
@@ -95,12 +95,18 @@ fapi::ReturnCode mss_freq(const fapi::Target &i_target_memb)
   std::vector<fapi::Target> l_dimm_targets;
   uint8_t l_spd_mtb_dividend=0;
   uint8_t l_spd_mtb_divisor=0;
+  uint8_t l_spd_ftb_dividend=0;
+  uint8_t l_spd_ftb_divisor=0;
   uint32_t l_dimm_freq_calc=0;
   uint32_t l_dimm_freq_min=9999;
   uint8_t l_spd_min_tck_MTB=0;
+  uint8_t l_spd_tck_offset_FTB=0;
+  uint8_t l_spd_tck_offset=0;
   uint32_t l_spd_min_tck=0;
   uint32_t l_spd_min_tck_max=0;
   uint8_t  l_spd_min_taa_MTB=0;
+  uint8_t  l_spd_taa_offset_FTB=0;
+  uint8_t  l_spd_taa_offset=0;
   uint32_t l_spd_min_taa=0;
   uint32_t l_spd_min_taa_max=0;
   uint32_t l_selected_dimm_freq=0;
@@ -195,10 +201,34 @@ fapi::ReturnCode mss_freq(const fapi::Target &i_target_memb)
 	      FAPI_ERR("Unable to read the SPD number of ranks");
 	      break;
 	  }
+	  l_rc = FAPI_ATTR_GET(ATTR_SPD_FINE_OFFSET_TAAMIN,  &l_dimm_targets[j], l_spd_taa_offset_FTB); if(l_rc) return l_rc;
+	  if (l_rc)
+	  {
+	      FAPI_ERR("Unable to read the SPD TAA offset (FTB)");
+	      break;
+	  }
+	  l_rc = FAPI_ATTR_GET(ATTR_SPD_FINE_OFFSET_TCKMIN,  &l_dimm_targets[j], l_spd_tck_offset_FTB); if(l_rc) return l_rc;
+	  if (l_rc)
+	  {
+	      FAPI_ERR("Unable to read the SPD TCK offset (FTB)");
+	      break;
+	  }
+	  l_rc = FAPI_ATTR_GET(ATTR_SPD_FTB_DIVIDEND,  &l_dimm_targets[j], l_spd_ftb_dividend); if(l_rc) return l_rc;
+	  if (l_rc)
+	  {
+	      FAPI_ERR("Unable to read the SPD FTB dividend");
+	      break;
+	  }
+	  l_rc = FAPI_ATTR_GET(ATTR_SPD_FTB_DIVISOR,  &l_dimm_targets[j], l_spd_ftb_divisor); if(l_rc) return l_rc;
+	  if (l_rc)
+	  {
+	      FAPI_ERR("Unable to read the SPD FTB divisor");
+	      break;
+	  }
 
 	  cur_dimm_spd_valid_u8array[cur_mba_port][cur_mba_dimm] = MSS_FREQ_VALID;
 
-	  if ((l_spd_min_tck_MTB == 0)||(l_spd_mtb_dividend == 0)||(l_spd_mtb_divisor == 0)||(l_spd_min_taa_MTB == 0))
+	  if ((l_spd_min_tck_MTB == 0)||(l_spd_mtb_dividend == 0)||(l_spd_mtb_divisor == 0)||(l_spd_min_taa_MTB == 0)||(l_spd_ftb_dividend == 0)||(l_spd_ftb_divisor == 0))
 	  {
 	      //Invalid due to the fact that JEDEC dictates that these should be non-zero.
 	      FAPI_ERR("Invalid data recieved from SPD within MTB Dividend, MTB Divisor, TCK Min, or TAA Min");
@@ -210,6 +240,34 @@ fapi::ReturnCode mss_freq(const fapi::Target &i_target_memb)
 	  // Frequency listed with multiplication of 2 as clocking data on both +- edges
 	  l_spd_min_tck =  ( 1000 * l_spd_min_tck_MTB * l_spd_mtb_dividend ) / l_spd_mtb_divisor;
 	  l_spd_min_taa =  ( 1000 * l_spd_min_taa_MTB * l_spd_mtb_dividend ) / l_spd_mtb_divisor;
+
+	  // Adjusting by tck offset -- tck offset represented in 2's compliment as it could be positive or negative adjustment
+	  // No multiplication of 1000 as it is already in picoseconds.
+	  if (l_spd_tck_offset_FTB & 0x80)
+	  {
+	      l_spd_tck_offset_FTB = ~( l_spd_tck_offset_FTB ) + 1;
+	      l_spd_tck_offset = (l_spd_tck_offset_FTB  * l_spd_ftb_dividend )  / l_spd_ftb_divisor;
+	      l_spd_min_tck =  l_spd_min_tck - l_spd_tck_offset;
+	  }
+	  else
+	  {
+	      l_spd_tck_offset = (l_spd_tck_offset_FTB  * l_spd_ftb_dividend )  / l_spd_ftb_divisor;
+	      l_spd_min_tck =  l_spd_min_tck + l_spd_tck_offset;
+	  }
+
+	  // Adjusting by taa offset -- taa offset represented in 2's compliment as it could be positive or negative adjustment
+	  if (l_spd_taa_offset_FTB & 0x80)
+	  {
+	      l_spd_taa_offset_FTB = ~( l_spd_taa_offset_FTB) + 1;
+	      l_spd_taa_offset = (l_spd_taa_offset_FTB  * l_spd_ftb_dividend )  / l_spd_ftb_divisor;
+	      l_spd_min_taa =  l_spd_min_taa - l_spd_taa_offset;
+	  }
+	  else
+	  {
+	      l_spd_taa_offset = (l_spd_taa_offset_FTB  * l_spd_ftb_dividend )  / l_spd_ftb_divisor;
+	      l_spd_min_taa =  l_spd_min_taa + l_spd_taa_offset;
+	  }
+
 	  if ((l_spd_min_tck == 0)||(l_spd_min_taa == 0))
 	  {
 	      //Invalid due to the fact that JEDEC dictates that these should be non-zero.

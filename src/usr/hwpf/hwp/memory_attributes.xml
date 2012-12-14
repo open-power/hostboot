@@ -408,7 +408,18 @@ firmware notes: none</description>
 <attribute>
     <id>ATTR_EFF_CKE_MAP</id>
     <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
-    <description>Rank to CKE map. Used in various locations and is computed in mss_eff_cnfg_cke. Can be overwritten by ODM vendors if done from the PNOR or odm_eff_cnfg.   creator: mss_eff_cnfg_cke consumer: various firmware notes: none</description>
+    <description>Rank to CKE map. Used in various locations and is computed in mss_eff_cnfg_cke_map. Can be overwritten by ODM vendors if done from the PNOR or odm_eff_cnfg.   creator: mss_eff_cnfg_cke_map consumer: various firmware notes: none</description>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <odmVisable/>
+    <odmChangeable/>
+    <array> 2 2 4</array>
+</attribute>
+
+<attribute>
+    <id>ATTR_EFF_SPCKE_MAP</id>
+    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
+    <description>Rank to Spare CKE map. Used in various locations and is computed in mss_eff_cnfg_cke_map. Can be overwritten by ODM vendors if done from the PNOR or odm_eff_cnfg.   creator: mss_eff_cnfg_cke_map consumer: various firmware notes: none</description>
     <valueType>uint8</valueType>
     <writeable/>
     <odmVisable/>
@@ -479,12 +490,54 @@ firmware notes: none</description>
     <description>DRAM Write Vref. Used in various locations and is computed in mss_eff_cnfg_termination. Can be overwritten by ODM vendors if done from the PNOR or odm_eff_cnfg.
 creator: mss_eff_cnfg_termination
 consumer: various
-firmware notes: none</description>
+firmware notes: none
+This is the nominal value
+This is for DDR3</description>
     <valueType>uint32</valueType>
     <enum>VDD420 = 420, VDD425 = 425, VDD430 = 430, VDD435 = 435, VDD440 = 440, VDD445 = 445, VDD450 = 450, VDD455 = 455, VDD460 = 460, VDD465 = 465, VDD470 = 470, VDD475 = 475, VDD480 = 480, VDD485 = 485, VDD490 = 490, VDD495 = 495, VDD500 = 500, VDD505 = 505, VDD510 = 510, VDD515 = 515, VDD520 = 520, VDD525 = 525, VDD530 = 530, VDD535 = 535, VDD540 = 540, VDD545 = 545, VDD550 = 550, VDD555 = 555, VDD560 = 560, VDD565 = 565, VDD570 = 570, VDD575 = 575</enum>
     <writeable/>
     <odmVisable/>
     <odmChangeable/>
+    <array> 2</array>
+</attribute>
+
+<attribute>
+    <id>ATTR_EFF_DRAM_WRDDR4_VREF</id>
+    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
+    <description>DRAM Write Vref. Used in various locations and is computed in mss_eff_cnfg_termination. Can be overwritten by ODM vendors if done from the PNOR or odm_eff_cnfg.
+creator: mss_eff_cnfg_termination
+consumer: various
+firmware notes: none
+This is the nominal value
+This is for DDR4
+The value is from 0 to 50</description>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <odmVisable/>
+    <odmChangeable/>
+    <array> 2</array>
+</attribute>
+
+<attribute>
+    <id>ATTR_EFF_DRAM_WR_VREF_SCHMOO</id>
+    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
+    <description>Enables for which VREF to use on the WR Schmoo.  The LSB corresponds to the highest WR Vref</description>
+    <valueType>uint32</valueType>
+    <writeable/>
+    <odmVisable/>
+    <odmChangeable/>
+    <array> 2</array>
+</attribute>
+
+<attribute>
+    <id>ATTR_EFF_DRAM_WRDDR4_VREF_SCHMOO</id>
+    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
+    <description>Enables for which VREF to use on the WR Schmoo.  The LSB corresponds to the highest WR Vref</description>
+    <valueType>uint32</valueType>
+    <writeable/>
+    <odmVisable/>
+    <odmChangeable/>
+    <array> 2</array>
 </attribute>
 
 <attribute>
@@ -493,26 +546,31 @@ firmware notes: none</description>
     <description>Centaur DQ and DQS Drive Impedance Used in various locations and is computed in mss_eff_cnfg_termination. Can be overwritten by ODM vendors if done from the PNOR or odm_eff_cnfg.
 creator: mss_eff_cnfg_termination
 consumer: various
-firmware notes: none</description>
+firmware notes: none
+This is the nominal value</description>
     <valueType>uint8</valueType>
-    <enum>OHM24 = 24, OHM30 = 30, OHM34 = 34, OHM40 = 40</enum>
+    <enum>OHM24_FFE0, OHM30_FFE0,
+OHM30_FFE480, OHM30_FFE240, OHM30_FFE160, OHM30_FFE120, OHM34_FFE0, OHM34_FFE480, OHM34_FFE240, OHM34_FFE160, OHM34_FFE120, OHM40_FFE0, OHM40_FFE480, OHM40_FFE240, OHM40_FFE160, OHM40_FFE120</enum>
     <writeable/>
     <odmVisable/>
     <odmChangeable/>
+    <array> 2</array>
 </attribute>
 
 <attribute>
-    <id>ATTR_EFF_CEN_DRV_IMP_CMD</id>
+    <id>ATTR_EFF_CEN_DRV_IMP_ADDR</id>
     <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
-    <description>Centaur Command Drive Impedance Used in various locations and is computed in mss_eff_cnfg_termination. Can be overwritten by ODM vendors if done from the PNOR or odm_eff_cnfg.
+    <description>Centaur Address Drive Impedance Used in various locations and is computed in mss_eff_cnfg_termination. Can be overwritten by ODM vendors if done from the PNOR or odm_eff_cnfg.
 creator: mss_eff_cnfg_termination
 consumer: various
-firmware notes: none</description>
+firmware notes: none
+This is the nominal value</description>
     <valueType>uint8</valueType>
     <enum>OHM15 = 15, OHM20 = 20, OHM30 = 30, OHM40 = 40</enum>
     <writeable/>
     <odmVisable/>
     <odmChangeable/>
+    <array> 2</array>
 </attribute>
 
 <attribute>
@@ -521,12 +579,92 @@ firmware notes: none</description>
     <description>Centaur Control Drive Impedance Used in various locations and is computed in mss_eff_cnfg_termination. Can be overwritten by ODM vendors if done from the PNOR or odm_eff_cnfg.
 creator: mss_eff_cnfg_termination
 consumer: various
-firmware notes: none</description>
+firmware notes: none
+This is the nominal value</description>
     <valueType>uint8</valueType>
     <enum>OHM15 = 15, OHM20 = 20, OHM30 = 30, OHM40 = 40</enum>
     <writeable/>
     <odmVisable/>
     <odmChangeable/>
+    <array> 2</array>
+</attribute>
+
+<attribute>
+    <id>ATTR_EFF_CEN_DRV_IMP_CLK</id>
+    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
+    <description>Centaur Clock Drive Impedance Used in various locations and is computed in mss_eff_cnfg_termination. Can be overwritten by ODM vendors if done from the PNOR or odm_eff_cnfg.
+creator: mss_eff_cnfg_termination
+consumer: various
+firmware notes: none
+This is the nominal value</description>
+    <valueType>uint8</valueType>
+    <enum>OHM15 = 15, OHM20 = 20, OHM30 = 30, OHM40 = 40</enum>
+    <writeable/>
+    <odmVisable/>
+    <odmChangeable/>
+    <array> 2</array>
+</attribute>
+
+<attribute>
+    <id>ATTR_EFF_CEN_DRV_IMP_SPCKE</id>
+    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
+    <description>Centaur Spare Clock Drive Impedance Used in various locations and is computed in mss_eff_cnfg_termination. Can be overwritten by ODM vendors if done from the PNOR or odm_eff_cnfg.
+creator: mss_eff_cnfg_termination
+consumer: various
+firmware notes: none
+This is the nominal value</description>
+    <valueType>uint8</valueType>
+    <enum>OHM15 = 15, OHM20 = 20, OHM30 = 30, OHM40 = 40</enum>
+    <writeable/>
+    <odmVisable/>
+    <odmChangeable/>
+    <array> 2</array>
+</attribute>
+
+<attribute>
+    <id>ATTR_EFF_CEN_DRV_IMP_DQ_DQS_SCHMOO</id>
+    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
+    <description>Enables for which impedance values can be used and tested in a timing test.  The bits have a one to one correspondence to the possible driver strengths and start with the first value down to the last (largest) impedance as the LSB of the 8 bit field.</description>
+    <valueType>uint32</valueType>
+    <writeable/>
+    <odmVisable/>
+    <odmChangeable/>
+    <array> 2</array>
+</attribute>
+
+<attribute>
+    <id>ATTR_EFF_CEN_DRV_IMP_CLK_SCHMOO</id>
+    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
+    <description>Enables for which impedance values can be used and tested in a timing test.  The bits have a one to one correspondence to the possible driver strengths and start with the first value down to the last (largest) impedance as the LSB of the 8 bit field.</description>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <odmVisable/>
+    <odmChangeable/>
+    <array> 2</array>
+</attribute>
+
+<attribute>
+    <id>ATTR_EFF_CEN_DRV_IMP_SPCKE_SCHMOO</id>
+    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
+    <description>Enables for which impedance values can be used and tested in a timing test.  The bits have a one to one correspondence to the possible driver strengths and start with the first value down to the last (largest) impedance as the LSB of the 8 bit field.</description>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <odmVisable/>
+    <odmChangeable/>
+    <array> 2</array>
+</attribute>
+
+<attribute>
+    <id>ATTR_EFF_CEN_DRV_IMP_CNTL_SCHMOO</id>
+    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
+    <description>Enables for which impedance values can be used and tested in a timing test.  The bits have a one to one correspondence to the possible driver strengths and start with the first value down to the last (largest) impedance as the LSB of the 8 bit field.
+This is the nominal value</description>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <odmVisable/>
+    <odmChangeable/>
+    <array> 2</array>
+    <persistRuntime/>
 </attribute>
 
 <attribute>
@@ -535,12 +673,25 @@ firmware notes: none</description>
     <description>Centaur DQ and DQS Receiver Impedance Used in various locations and is computed in mss_eff_cnfg_termination. Can be overwritten by ODM vendors if done from the PNOR or odm_eff_cnfg.
 creator: mss_eff_cnfg_termination
 consumer: various
-firmware notes: none</description>
+firmware notes: none
+This is the nominal value</description>
     <valueType>uint8</valueType>
     <enum>OHM15 = 15, OHM20 = 20, OHM30 = 30, OHM40 = 40, OHM48 = 48, OHM60 = 60,  OHM80 = 80, OHM120 = 120, OHM160 = 160, OHM240 = 240</enum>
     <writeable/>
     <odmVisable/>
     <odmChangeable/>
+    <array> 2</array>
+</attribute>
+
+<attribute>
+    <id>ATTR_EFF_CEN_RCV_IMP_DQ_DQS_SCHMOO</id>
+    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
+    <description>Enables for which impedance values can be used and tested in a timing test.  The bits have a one to one correspondence to the possible receiver termination and start with the first value down to the last (largest) impedance as the LSB of the 32 bit field.</description>
+    <valueType>uint32</valueType>
+    <writeable/>
+    <odmVisable/>
+    <odmChangeable/>
+    <array> 2</array>
 </attribute>
 
 <attribute>
@@ -549,24 +700,79 @@ firmware notes: none</description>
     <description>Centaur DQ and DQS Slew Rate Used in various locations and is computed in mss_eff_cnfg_termination. Slowest slew rate is 0, incrementing by one. The lower the number the slower the slew rate the higher the faster. Can be overwritten by ODM vendors if done from the PNOR or odm_eff_cnfg.
 creator: mss_eff_cnfg_termination
 consumer: various
-firmware notes: none</description>
+firmware notes: none
+This is the nominal value</description>
     <valueType>uint8</valueType>
+    <enum>SLEW_3V_NS = 3,
+SLEW_4V_NS = 4,
+SLEW_5V_NS = 5,
+SLEW_6V_NS = 6,
+SLEW_MAXV_NS = 7</enum>
     <writeable/>
     <odmVisable/>
     <odmChangeable/>
+    <array> 2</array>
 </attribute>
 
 <attribute>
-    <id>ATTR_EFF_CEN_SLEW_RATE_CMD</id>
+    <id>ATTR_EFF_CEN_SLEW_RATE_ADDR</id>
     <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
-    <description>Centaur Command Slew Rate Used in various locations and is computed in mss_eff_cnfg_termination. Slowest slew rate is 0, incrementing by one. The lower the number the slower the slew rate the higher the faster. Can be overwritten by ODM vendors if done from the PNOR or odm_eff_cnfg.
+    <description>Centaur Address Slew Rate Used in various locations and is computed in mss_eff_cnfg_termination. Slowest slew rate is 0, incrementing by one. The lower the number the slower the slew rate the higher the faster. Can be overwritten by ODM vendors if done from the PNOR or odm_eff_cnfg.
 creator: mss_eff_cnfg_termination
 consumer: various
-firmware notes: none</description>
+firmware notes: none
+This is the nominal value</description>
     <valueType>uint8</valueType>
+    <enum>SLEW_3V_NS = 3,
+SLEW_4V_NS = 4,
+SLEW_5V_NS = 5,
+SLEW_6V_NS = 6,
+SLEW_MAXV_NS = 7</enum>
     <writeable/>
     <odmVisable/>
     <odmChangeable/>
+    <array> 2</array>
+</attribute>
+
+<attribute>
+    <id>ATTR_EFF_CEN_SLEW_RATE_CLK</id>
+    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
+    <description>Centaur Clock Slew Rate Used in various locations and is computed in mss_eff_cnfg_termination. Slowest slew rate is 0, incrementing by one. The lower the number the slower the slew rate the higher the faster. Can be overwritten by ODM vendors if done from the PNOR or odm_eff_cnfg.
+creator: mss_eff_cnfg_termination
+consumer: various
+firmware notes: none
+This is the nominal value</description>
+    <valueType>uint8</valueType>
+    <enum>SLEW_3V_NS = 3,
+SLEW_4V_NS = 4,
+SLEW_5V_NS = 5,
+SLEW_6V_NS = 6,
+SLEW_MAXV_NS = 7</enum>
+    <writeable/>
+    <odmVisable/>
+    <odmChangeable/>
+    <array> 2</array>
+</attribute>
+
+<attribute>
+    <id>ATTR_EFF_CEN_SLEW_RATE_SPCKE</id>
+    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
+    <description>Centaur Spare Clock Slew Rate Used in various locations and is computed in mss_eff_cnfg_termination. Slowest slew rate is 0, incrementing by one. The lower the number the slower the slew rate the higher the faster. Can be overwritten by ODM vendors if done from the PNOR or odm_eff_cnfg.
+creator: mss_eff_cnfg_termination
+consumer: various
+firmware notes: none
+This is the nominal value</description>
+    <valueType>uint8</valueType>
+    <enum>SLEW_3V_NS = 3,
+SLEW_4V_NS = 4,
+SLEW_5V_NS = 5,
+SLEW_6V_NS = 6,
+SLEW_MAXV_NS = 7
+</enum>
+    <writeable/>
+    <odmVisable/>
+    <odmChangeable/>
+    <array> 2</array>
 </attribute>
 
 <attribute>
@@ -575,11 +781,74 @@ firmware notes: none</description>
     <description>Centaur Control Slew Rate Used in various locations and is computed in mss_eff_cnfg_termination. Slowest slew rate is 0, incrementing by one. The lower the number the slower the slew rate the higher the faster. Can be overwritten by ODM vendors if done from the PNOR or odm_eff_cnfg.
 creator: mss_eff_cnfg_termination
 consumer: various
-firmware notes: none</description>
+firmware notes: none
+This is the nominal value</description>
+    <valueType>uint8</valueType>
+    <enum>SLEW_3V_NS = 3,
+SLEW_4V_NS = 4,
+SLEW_5V_NS = 5,
+SLEW_6V_NS = 6,
+SLEW_MAXV_NS = 7
+</enum>
+    <writeable/>
+    <odmVisable/>
+    <odmChangeable/>
+    <array> 2</array>
+</attribute>
+
+<attribute>
+    <id>ATTR_EFF_CEN_SLEW_RATE_DQ_DQS_SCHMOO</id>
+    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
+    <description>Slew Rates that can be selected during timing adjustments.  The fastest rate is the LSB</description>
     <valueType>uint8</valueType>
     <writeable/>
     <odmVisable/>
     <odmChangeable/>
+    <array> 2</array>
+</attribute>
+
+<attribute>
+    <id>ATTR_EFF_CEN_SLEW_RATE_CLK_SCHMOO</id>
+    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
+    <description>Slew Rates that can be selected during timing adjustments.  The fastest rate is the LSB</description>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <odmVisable/>
+    <odmChangeable/>
+    <array> 2</array>
+</attribute>
+
+<attribute>
+    <id>ATTR_EFF_CEN_SLEW_RATE_SPCKE_SCHMOO</id>
+    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
+    <description>Slew Rates that can be selected during timing adjustments.  The fastest rate is the LSB</description>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <odmVisable/>
+    <odmChangeable/>
+    <array> 2</array>
+</attribute>
+
+<attribute>
+    <id>ATTR_EFF_CEN_SLEW_RATE_ADDR_SCHMOO</id>
+    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
+    <description>Slew Rates that can be selected during timing adjustments.  The fastest rate is the LSB</description>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <odmVisable/>
+    <odmChangeable/>
+    <array> 2</array>
+</attribute>
+
+<attribute>
+    <id>ATTR_EFF_CEN_SLEW_RATE_CNTL_SCHMOO</id>
+    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
+    <description>Slew Rates that can be selected during timing adjustments.  The fastest rate is the LSB</description>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <odmVisable/>
+    <odmChangeable/>
+    <array> 2</array>
 </attribute>
 
 <attribute>
@@ -588,12 +857,25 @@ firmware notes: none</description>
     <description>Centaur Read Vref. Used in various locations and is computed in mss_eff_cnfg_termination. Can be overwritten by ODM vendors if done from the PNOR or odm_eff_cnfg.
 creator: mss_eff_cnfg_termination
 consumer: various
-firmware notes: none</description>
+firmware notes: none
+This is the nominal value</description>
     <valueType>uint32</valueType>
     <enum>VDD40375 = 40375, VDD41750 = 41750, VDD43125 = 43125, VDD44500 = 44500, VDD45875 = 45875, VDD47250 = 47250, VDD48625 = 48625, VDD50000 = 50000, VDD51375 = 51375, VDD52750 = 52750, VDD54125 = 54125, VDD55500 = 55500, VDD56875 = 56875, VDD58250 = 58250, VDD59625 = 59625, VDD61000 = 61000, VDD60375 = 60375, VDD61750 = 61750, VDD63125 = 63125, VDD64500 = 64500, VDD65875 = 65875, VDD67250 = 67250, VDD68625 = 68625, VDD70000 = 70000, VDD71375 = 71375, VDD72750 = 72750, VDD74125 = 74125, VDD75500 = 75500, VDD76875 = 76875, VDD78250 = 78250, VDD79625 = 79625, VDD81000 = 81000</enum>
     <writeable/>
     <odmVisable/>
     <odmChangeable/>
+    <array> 2</array>
+</attribute>
+
+<attribute>
+    <id>ATTR_EFF_CEN_RD_VREF_SCHMOO</id>
+    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
+    <description>Enables for which VREF value can be used in timing adjustments.  The highest voltage corresponds to the LSB</description>
+    <valueType>uint32</valueType>
+    <writeable/>
+    <odmVisable/>
+    <odmChangeable/>
+    <array> 2</array>
 </attribute>
 
 <attribute>
@@ -1097,10 +1379,27 @@ firmware notes: none</description>
 </attribute>
 
 <attribute>
+    <id>ATTR_EFF_SCHMOO_ADDR_MODE</id>
+    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
+    <description>Specifies the schmoo mode to use during draminit_train_adv</description>
+    <valueType>uint8</valueType>
+    <enum>FEW_ADDR= 0, QUARTER_ADDR = 1, HALF_ADDR = 2, FULL_ADDR = 3</enum>
+    <writeable/>
+    <odmVisable/>
+    <odmChangeable/>
+</attribute>
+
+<attribute>
     <id>ATTR_EFF_SCHMOO_TEST_VALID</id>
     <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
     <description>Specifies the schmoo test to run during draminit_train_adv. Bit wise.</description>
     <valueType>uint8</valueType>
+    <enum> NONE = 0x00,
+ MCBIST = 0x01,
+ WR_EYE = 0x02,
+ RD_EYE = 0x04,
+ WR_DQS = 0x08,
+ RD_DQS = 0x10</enum>
     <writeable/>
     <odmVisable/>
     <odmChangeable/>
@@ -1111,6 +1410,13 @@ firmware notes: none</description>
     <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
     <description>Specifies the schmoo parameters to use during draminit_train_adv. Bit wise.</description>
     <valueType>uint8</valueType>
+    <enum> PARAM_NONE = 0x00,
+ DELAY_REG = 0x01,
+ DRV_IMP = 0x02,
+ SLEW_RATE = 0x04,
+ WR_VREF = 0x08,
+ RD_VREF = 0x10,
+ RCV_IMP = 0x20</enum>
     <writeable/>
     <odmVisable/>
     <odmChangeable/>
@@ -1193,7 +1499,7 @@ firmware notes: none</description>
     <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
     <description>Specifies the memory topology type. See centaur workbook.</description>
     <valueType>uint8</valueType>
-    <enum>UNDEFINED = 0, TYPE_1A = 1, TYPE_1B = 2, TYPE_1C = 3, TYPE_2A = 4, TYPE_2B = 5, TYPE_2C = 6, TYPE_3A = 7, TYPE_3B = 8, TYPE_3C = 9, TYPE_4A = 10, TYPE_4B = 11, TYPE_4C = 12, TYPE_5A = 13, TYPE_5B = 14, TYPE_5C = 15, TYPE_5D = 16, TYPE_6A = 17, TYPE_6B = 18, TYPE_6C = 19, TYPE_7A = 20, TYPE_7B = 21, TYPE_7C = 22, TYPE_8A = 23, TYPE_8B = 24, TYPE_8C = 25</enum>
+    <enum>UNDEFINED = 0, TYPE_1A = 1, TYPE_1B = 2, TYPE_1C = 3, TYPE_1D = 4, TYPE_2A = 5, TYPE_2B = 6, TYPE_2C = 7, TYPE_3A = 8, TYPE_3B = 9, TYPE_3C = 10, TYPE_4A = 11, TYPE_4B = 12, TYPE_4C = 13, TYPE_5A = 14, TYPE_5B = 15, TYPE_5C = 16, TYPE_5D = 17, TYPE_6A = 18, TYPE_6B = 19, TYPE_6C = 20, TYPE_7A = 21, TYPE_7B = 22, TYPE_7C = 23, TYPE_8A = 24, TYPE_8B = 25, TYPE_8C = 26</enum>
     <writeable/>
     <odmVisable/>
     <odmChangeable/>
@@ -1257,86 +1563,65 @@ firmware notes: none</description>
 </attribute>
 
 <attribute>
-    <id>ATTR_MSS_THROTTLE_NUMERATOR</id>
+    <id>ATTR_MSS_MEM_THROTTLE_NUMERATOR_PER_MBA</id>
     <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
-    <description>Each DIMM can have a throttle amount.  This is the numerator
-creator: mss_eff_cnfg
-consumer: mc_config
-firmware notes: none</description>
+    <description>This is the throttle numerator setting for cfg_nm_n_per_mba creator: mss_eff_cnfg consumer: mc_config firmware notes: none</description>
     <valueType>uint32</valueType>
     <writeable/>
     <odmVisable/>
     <odmChangeable/>
-    <array> 2 2</array>
     <persistRuntime/>
 </attribute>
 
 <attribute>
-    <id>ATTR_MSS_THROTTLE_DENOMINATOR</id>
+    <id>ATTR_MSS_MEM_THROTTLE_DENOMINATOR</id>
     <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
-    <description>Each DIMM can have a throttle amount.  This is the denominator
-creator: mss_eff_cnfg
-consumer: mc_config
-firmware notes: none</description>
+    <description>This is the throttle denominator setting for cfg_nm_m creator: mss_eff_cnfg consumer: mc_config  firmware notes: none</description>
     <valueType>uint32</valueType>
     <writeable/>
     <odmVisable/>
     <odmChangeable/>
-    <array> 2 2</array>
     <persistRuntime/>
 </attribute>
 
 <attribute>
-    <id>ATTR_MSS_THROTTLE_CHANNEL_NUMERATOR</id>
+    <id>ATTR_MSS_MEM_THROTTLE_NUMERATOR_PER_CHIP</id>
     <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
-    <description>This is a channel throttle amount
-this is the numerator
-creator: mss_eff_cnfg
-consumer: mc config
-firmware notes:none</description>
+    <description>This is the throttle numerator setting for cfg_nm_n_per_chip creator: mss_eff_cnfg consumer: mc_config firmware notes: none</description>
     <valueType>uint32</valueType>
     <writeable/>
     <odmVisable/>
     <odmChangeable/>
-    <array> 2</array>
     <persistRuntime/>
 </attribute>
 
 <attribute>
-    <id>ATTR_MSS_THROTTLE_CHANNEL_DENOMINATOR</id>
+    <id>ATTR_MSS_MEM_WATT_TARGET</id>
     <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
-    <description>This is a channel throttle amount
-this is the denominator
-creator: mss_eff_cnfg
-consumer: mc config
-firmware notes:none</description>
+    <description>Total memory power limit in cW for the dimms on the memory channel pair. Used to compute the throttles on the channel and/or dimms creator: unknown consumer: mss_eff_config firmware notes: none</description>
     <valueType>uint32</valueType>
     <writeable/>
     <odmVisable/>
     <odmChangeable/>
-    <array> 2</array>
-    <persistRuntime/>
-</attribute>
-
-<attribute>
-    <id>ATTR_MSS_WATT_TARGET</id>
-    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
-    <description>Total memory watts upper limit for this memory channel. Used to compute the throttles on the channel and/or dimms
-creator: unknown
-consumer: mss_eff_config
-firmware notes: none</description>
-    <valueType>uint32</valueType>
-    <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
-    <array> 2</array>
     <persistRuntime/>
 </attribute>
 
 <attribute>
     <id>ATTR_MSS_POWER_SLOPE</id>
     <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
-    <description>Power slope value for dimm in double drop config</description>
+    <description>Master Power slope value for dimm</description>
+    <valueType>uint32</valueType>
+    <writeable/>
+    <odmVisable/>
+    <odmChangeable/>
+    <array> 2 2</array>
+    <persistRuntime/>
+</attribute>
+
+<attribute>
+    <id>ATTR_MSS_POWER_SLOPE2</id>
+    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
+    <description>Supplier Power slope value for dimm</description>
     <valueType>uint32</valueType>
     <writeable/>
     <odmVisable/>
@@ -1348,7 +1633,19 @@ firmware notes: none</description>
 <attribute>
     <id>ATTR_MSS_POWER_INT</id>
     <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
-    <description>Power intercept value for dimm in double drop config</description>
+    <description>Master Power intercept value for dimm</description>
+    <valueType>uint32</valueType>
+    <writeable/>
+    <odmVisable/>
+    <odmChangeable/>
+    <array> 2 2</array>
+    <persistRuntime/>
+</attribute>
+
+<attribute>
+    <id>ATTR_MSS_POWER_INT2</id>
+    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
+    <description>Supplier Power intercept value for dimm</description>
     <valueType>uint32</valueType>
     <writeable/>
     <odmVisable/>
@@ -1394,6 +1691,17 @@ firmware notes: none</description>
 </attribute>
 
 <attribute>
+    <id>ATTR_MSS_CHANNEL_PAIR_MAXBANDWIDTH_GBS</id>
+    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
+    <description>Channel Pair Max Bandwidth in GBs output from thermal procedures</description>
+    <valueType>uint32</valueType>
+    <writeable/>
+    <odmVisable/>
+    <odmChangeable/>
+    <persistRuntime/>
+</attribute>
+
+<attribute>
     <id>ATTR_MSS_CHANNEL_MAXBANDWIDTH_MRS</id>
     <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
     <description>Channel Max Bandwidth MRs output from thermal procedures</description>
@@ -1402,6 +1710,17 @@ firmware notes: none</description>
     <odmVisable/>
     <odmChangeable/>
     <array> 2</array>
+    <persistRuntime/>
+</attribute>
+
+<attribute>
+    <id>ATTR_MSS_CHANNEL_PAIR_MAXBANDWIDTH_MRS</id>
+    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
+    <description>Channel Pair Max Bandwidth MRs output from thermal procedures</description>
+    <valueType>uint32</valueType>
+    <writeable/>
+    <odmVisable/>
+    <odmChangeable/>
     <persistRuntime/>
 </attribute>
 
@@ -1430,6 +1749,93 @@ firmware notes: none</description>
 </attribute>
 
 <attribute>
+    <id>ATTR_MSS_CHANNEL_PAIR_MAXPOWER</id>
+    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
+    <description>Channel Pair Max Power output from thermal procedures</description>
+    <valueType>uint32</valueType>
+    <writeable/>
+    <odmVisable/>
+    <odmChangeable/>
+    <persistRuntime/>
+</attribute>
+
+<attribute>
+    <id>ATTR_MSS_RUNTIME_MEM_THROTTLE_NUMERATOR_PER_MBA</id>
+    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
+    <description>Runtime throttle numerator setting for cfg_nm_n_per_mba</description>
+    <valueType>uint32</valueType>
+    <writeable/>
+    <odmVisable/>
+    <odmChangeable/>
+    <persistRuntime/>
+</attribute>
+
+<attribute>
+    <id>ATTR_MSS_RUNTIME_MEM_THROTTLE_DENOMINATOR</id>
+    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
+    <description>Runtime throttle denominator setting for cfg_nm_m</description>
+    <valueType>uint32</valueType>
+    <writeable/>
+    <odmVisable/>
+    <odmChangeable/>
+    <persistRuntime/>
+</attribute>
+
+<attribute>
+    <id>ATTR_MSS_RUNTIME_MEM_THROTTLE_NUMERATOR_PER_CHIP</id>
+    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
+    <description>Runtime throttle numerator setting for cfg_nm_n_per_chip</description>
+    <valueType>uint32</valueType>
+    <writeable/>
+    <odmVisable/>
+    <odmChangeable/>
+    <persistRuntime/>
+</attribute>
+
+<!-- Comment out until HWP integrated that uses these attributes. Platform needs to initialize
+
+<attribute>
+    <id>ATTR_MRW_SAFEMODE_MEM_THROTTLE_NUMERATOR_PER_MBA</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>Machine Readable Workbook safe mode throttle value for numerator cfg_nm_n_per_mba</description>
+    <valueType>uint32</valueType>
+    <platInit/>
+    <odmVisable/>
+    <persistRuntime/>
+</attribute>
+
+<attribute>
+    <id>ATTR_MRW_SAFEMODE_MEM_THROTTLE_DENOMINATOR</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>Machine Readable Workbook safe mode throttle value for denominator cfg_nm_m</description>
+    <valueType>uint32</valueType>
+    <platInit/>
+    <odmVisable/>
+    <persistRuntime/>
+</attribute>
+
+<attribute>
+    <id>ATTR_MRW_SAFEMODE_MEM_THROTTLE_NUMERATOR_PER_CHIP</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>Machine Readable Workbook safe mode throttle value for numerator cfg_nm_n_per_chip</description>
+    <valueType>uint32</valueType>
+    <platInit/>
+    <odmVisable/>
+    <persistRuntime/>
+</attribute>
+
+<attribute>
+    <id>ATTR_MRW_THERMAL_MEMORY_POWER_LIMIT</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>Machine Readable Workbook Thermal Memory Power Limit</description>
+    <valueType>uint32</valueType>
+    <platInit/>
+    <odmVisable/>
+</attribute>
+
+-->
+
+<attribute>
     <id>ATTR_MSS_INTERLEAVE_ENABLE</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description>Used in the setting of groups.  It is a bit vector.  If the value  BITWISE_AND  1 = 1 then groups of 1 are enabled with special checkerboard modes needed, if the value  BITWISE_AND  2 = 2, then groups of 2 are possible; if value  BITWISE_AND  4, the groups of 4 are possible; if value  BITWISE_AND  8, the groups of 8 are possible.  If no groups can formed according to this input, then an error will be thrown.</description>
@@ -1437,16 +1843,6 @@ firmware notes: none</description>
     <platInit/>
     <odmVisable/>
     <odmChangeable/>
-</attribute>
-
-<attribute>
-    <id>ATTR_MSS_MEMSIZE_MBA</id>
-    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
-    <description>At the MBA level, how much memory is available</description>
-    <valueType>uint64</valueType>
-    <writeable/>
-    <odmVisable/>
-    <persistRuntime/>
 </attribute>
 
 <attribute>
@@ -1484,10 +1880,14 @@ Hash modes values are 0,1 and 2. Used in the intifile </description>
 <attribute>
     <id>ATTR_MSS_CACHE_ENABLE</id>
     <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
-    <description>Value of on or off.  Determines if the L4 is enabled or not. See chapter 6 of the Centaur Workbook.</description>
+    <description>Value of on or off.  Determines if the L4 is enabled or not. See chapter 6 of the Centaur Workbook.  On means the full cache is enabled.  HALF_A means only A is enabled and HALF_B means only B is enabled. These values are set in the mss_get_cen_ecid.</description>
     <valueType>uint8</valueType>
-    <enum>OFF = 0, ON = 1</enum>
+    <enum>OFF = 0, ON = 1, HALF_A = 3, HALF_B = 5</enum>
+    <!-- TODO RTC 58012. This attribute is not platInit in the master file in eKB/cvs.
+         It is setup by the mss_get_cen_ecid HWP. Before that HWP is integrated, this
+         attribute is platInit and Hostboot firmware defaults the value to ON -->
     <platInit/>
+    <writeable/>
     <odmVisable/>
     <odmChangeable/>
 </attribute>
@@ -1553,20 +1953,6 @@ Measured in GB</description>
 </attribute>
 
 <attribute>
-    <id>ATTR_MSS_MCS_GROUP</id>
-    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
-    <description>Data Structure from eff grouping to setup bars to help determine different groups
-   Non- Mirroring [0-7] 0 -- MCS size //1-- No of MCS/group //2-- Total group size //3 -- Base address// 4-11 - MCS ID number// 12 --Alter.Bar //13 - A.Group Size // 14 - A.Base address
- //  Mirroring      [8-15] 0 -- MCS size //1-- No of MCS/group //2-- Total group size //3 -- Base address// 4-11 - MCS ID number// 12 --Alter.Bar //13 - A.Group Size // 14 - A.Base address
-Measured in GB - THIS ATTRIBUTE WILL EVENTUALLY BE OBSOLETE.  USE MSS_MCS_GROUP_32</description>
-    <valueType>uint8</valueType>
-    <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
-    <array>16 16</array>
-</attribute>
-
-<attribute>
     <id>ATTR_MSS_EFF_DIMM_FUNCTIONAL_VECTOR</id>
     <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
     <description>A bit vector (per Dean's request) specifying if a DIMM is functional.  DIMM attributes, such as SIZE, are qualified by this bit vector.  The attribute ANDed 0x80 means port 0, DIMM 0 is functional, 0x40 means port 0, DIMM 1 is functional.  0x08 means port 1, DIMM 0 is functional and 0x04 means port 1 DIMM 1 is functional.  A fully populated system would have the value of 0xCC. Used in various locations and is computed in mss_eff_cnfg. Can be overwritten by ODM vendors if done from the PNOR or odm_eff_cnfg.  Each memory channel will have a value. creator: mss_eff_cnfg consumer: various firmware notes: none
@@ -1606,6 +1992,656 @@ bits6:7  will be consumed together to form COARSE_LVL. </description>
     <odmVisable/>
     <odmChangeable/>
     <persistRuntime/>
+</attribute>
+
+<attribute>
+    <id>ATTR_MSS_SLEW_RATE_DATA</id>
+    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
+    <description>The 4 bit result of running the slew calibration algorithm at various rates and impedances.  The first dimension is port, the second is the impedance of 24,30,34, and 40 Ohms.  The 3rd dimension is the rate: 3,4,5 or 6 V/ns.  Computed and sent to the correct data blocks in phy_reset.  Also used in advanced training</description>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <odmVisable/>
+    <odmChangeable/>
+    <array> 2 4 4</array>
+</attribute>
+
+<attribute>
+    <id>ATTR_MSS_SLEW_RATE_ADR</id>
+    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
+    <description>The 4 bit result of running the slew calibration algorithm at various rates and impedances.  The first dimension is the port.  The second is the impedance of 15, 20, 30 and 40 Ohms.  The 3rd dimension is the rate:3, 4,5 or 6 V/ns.  Computed and sent to the correct data blocks in phy_reset.  Also used in advanced training</description>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <odmVisable/>
+    <odmChangeable/>
+    <array> 2 4 4</array>
+</attribute>
+
+<attribute>
+    <id>ATTR_MSS_ECID</id>
+    <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
+    <description>Bits 0 to 63 of the ECID in array entry 0 and bits 64 to 127 in ECID array entry 1
+Created from running the mss_get_cen_ecid.C</description>
+    <valueType>uint64</valueType>
+    <writeable/>
+    <odmVisable/>
+    <odmChangeable/>
+    <array> 2</array>
+</attribute>
+
+<attribute>
+    <id>ATTR_MSS_ALLOW_SINGLE_PORT</id>
+    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
+    <description>When this value is true, then mss_eff config will allow a single port to have one dimm and will allow ports to have different sizes.  Used in eff_config</description>
+    <valueType>uint8</valueType>
+    <enum>FALSE = 0, TRUE = 1</enum>
+    <platInit/>
+    <writeable/>
+    <odmVisable/>
+    <odmChangeable/>
+</attribute>
+
+<!-- Comment out until HWP integrated that uses this attribute. Platform needs to initialize
+     At first glance, this looks like it could be a Chip EC Feature Attribute
+
+<attribute>
+    <id>ATTR_MSS_CONTINUE_ON_DP18_PLL_LOCK_FAIL</id>
+    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
+    <description>Controls the ddr_phy_reset procedure.  When set to TRUE, the procedure will continue with processing other DP18 blocks, if one fails.  In DD2, this attribute must be set to false so that the failing hardware (centaur) is marked as bad and not the DIMM.  Set by firwmare using the EC level or by a MRW</description>
+    <valueType>uint8</valueType>
+    <enum>FALSE = 0, TRUE = 1</enum>
+    <platInit/>
+    <writeable/>
+    <odmVisable/>
+    <odmChangeable/>
+</attribute>
+
+-->
+
+<attribute>
+    <id>ATTR_EFF_CEN_PHASE_ROT_M0_CLK_P0</id>
+    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
+    <description>Phase rotator value that comes from termination on the CDIMM VPD.  This controls the IO M0_CLK_P0</description>
+    <valueType>uint8</valueType>
+    <platInit/>
+    <writeable/>
+    <odmVisable/>
+    <odmChangeable/>
+    <array> 2</array>
+</attribute>
+
+<attribute>
+    <id>ATTR_EFF_CEN_PHASE_ROT_M0_CLK_P1</id>
+    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
+    <description>Phase rotator value that comes from termination on the CDIMM VPD.  This controls the IO M0_CLK_P1</description>
+    <valueType>uint8</valueType>
+    <platInit/>
+    <writeable/>
+    <odmVisable/>
+    <odmChangeable/>
+    <array> 2</array>
+</attribute>
+
+<attribute>
+    <id>ATTR_EFF_CEN_PHASE_ROT_M1_CLK_P0</id>
+    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
+    <description>Phase rotator value that comes from termination on the CDIMM VPD.  This controls the IO M1_CLK_P0</description>
+    <valueType>uint8</valueType>
+    <platInit/>
+    <writeable/>
+    <odmVisable/>
+    <odmChangeable/>
+    <array> 2</array>
+</attribute>
+
+<attribute>
+    <id>ATTR_EFF_CEN_PHASE_ROT_M1_CLK_P1</id>
+    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
+    <description>Phase rotator value that comes from termination on the CDIMM VPD.  This controls the IO M1_CLK_P1</description>
+    <valueType>uint8</valueType>
+    <platInit/>
+    <writeable/>
+    <odmVisable/>
+    <odmChangeable/>
+    <array> 2</array>
+</attribute>
+
+<attribute>
+    <id>ATTR_EFF_CEN_PHASE_ROT_M_CMD_A0</id>
+    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
+    <description>Phase rotator value that comes from termination on the CDIMM VPD.  This controls the IO M_CMD_A0</description>
+    <valueType>uint8</valueType>
+    <platInit/>
+    <writeable/>
+    <odmVisable/>
+    <odmChangeable/>
+    <array> 2</array>
+</attribute>
+
+<attribute>
+    <id>ATTR_EFF_CEN_PHASE_ROT_M_CMD_A1</id>
+    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
+    <description>Phase rotator value that comes from termination on the CDIMM VPD.  This controls the IO M_CMD_A1</description>
+    <valueType>uint8</valueType>
+    <platInit/>
+    <writeable/>
+    <odmVisable/>
+    <odmChangeable/>
+    <array> 2</array>
+</attribute>
+
+<attribute>
+    <id>ATTR_EFF_CEN_PHASE_ROT_M_CMD_A2</id>
+    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
+    <description>Phase rotator value that comes from termination on the CDIMM VPD.  This controls the IO M_CMD_A2</description>
+    <valueType>uint8</valueType>
+    <platInit/>
+    <writeable/>
+    <odmVisable/>
+    <odmChangeable/>
+    <array> 2</array>
+</attribute>
+
+<attribute>
+    <id>ATTR_EFF_CEN_PHASE_ROT_M_CMD_A3</id>
+    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
+    <description>Phase rotator value that comes from termination on the CDIMM VPD.  This controls the IO M_CMD_A3</description>
+    <valueType>uint8</valueType>
+    <platInit/>
+    <writeable/>
+    <odmVisable/>
+    <odmChangeable/>
+    <array> 2</array>
+</attribute>
+
+<attribute>
+    <id>ATTR_EFF_CEN_PHASE_ROT_M_CMD_A4</id>
+    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
+    <description>Phase rotator value that comes from termination on the CDIMM VPD.  This controls the IO M_CMD_A4</description>
+    <valueType>uint8</valueType>
+    <platInit/>
+    <writeable/>
+    <odmVisable/>
+    <odmChangeable/>
+    <array> 2</array>
+</attribute>
+
+<attribute>
+    <id>ATTR_EFF_CEN_PHASE_ROT_M_CMD_A5</id>
+    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
+    <description>Phase rotator value that comes from termination on the CDIMM VPD.  This controls the IO M_CMD_A5</description>
+    <valueType>uint8</valueType>
+    <platInit/>
+    <writeable/>
+    <odmVisable/>
+    <odmChangeable/>
+    <array> 2</array>
+</attribute>
+
+<attribute>
+    <id>ATTR_EFF_CEN_PHASE_ROT_M_CMD_A6</id>
+    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
+    <description>Phase rotator value that comes from termination on the CDIMM VPD.  This controls the IO M_CMD_A6</description>
+    <valueType>uint8</valueType>
+    <platInit/>
+    <writeable/>
+    <odmVisable/>
+    <odmChangeable/>
+    <array> 2</array>
+</attribute>
+
+<attribute>
+    <id>ATTR_EFF_CEN_PHASE_ROT_M_CMD_A7</id>
+    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
+    <description>Phase rotator value that comes from termination on the CDIMM VPD.  This controls the IO M_CMD_A7</description>
+    <valueType>uint8</valueType>
+    <platInit/>
+    <writeable/>
+    <odmVisable/>
+    <odmChangeable/>
+    <array> 2</array>
+</attribute>
+
+<attribute>
+    <id>ATTR_EFF_CEN_PHASE_ROT_M_CMD_A8</id>
+    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
+    <description>Phase rotator value that comes from termination on the CDIMM VPD.  This controls the IO M_CMD_A8</description>
+    <valueType>uint8</valueType>
+    <platInit/>
+    <writeable/>
+    <odmVisable/>
+    <odmChangeable/>
+    <array> 2</array>
+</attribute>
+
+<attribute>
+    <id>ATTR_EFF_CEN_PHASE_ROT_M_CMD_A9</id>
+    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
+    <description>Phase rotator value that comes from termination on the CDIMM VPD.  This controls the IO M_CMD_A9</description>
+    <valueType>uint8</valueType>
+    <platInit/>
+    <writeable/>
+    <odmVisable/>
+    <odmChangeable/>
+    <array> 2</array>
+</attribute>
+
+<attribute>
+    <id>ATTR_EFF_CEN_PHASE_ROT_M_CMD_A10</id>
+    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
+    <description>Phase rotator value that comes from termination on the CDIMM VPD.  This controls the IO M_CMD_A10</description>
+    <valueType>uint8</valueType>
+    <platInit/>
+    <writeable/>
+    <odmVisable/>
+    <odmChangeable/>
+    <array> 2</array>
+</attribute>
+
+<attribute>
+    <id>ATTR_EFF_CEN_PHASE_ROT_M_CMD_A11</id>
+    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
+    <description>Phase rotator value that comes from termination on the CDIMM VPD.  This controls the IO M_CMD_A11</description>
+    <valueType>uint8</valueType>
+    <platInit/>
+    <writeable/>
+    <odmVisable/>
+    <odmChangeable/>
+    <array> 2</array>
+</attribute>
+
+<attribute>
+    <id>ATTR_EFF_CEN_PHASE_ROT_M_CMD_A12</id>
+    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
+    <description>Phase rotator value that comes from termination on the CDIMM VPD.  This controls the IO M_CMD_A12</description>
+    <valueType>uint8</valueType>
+    <platInit/>
+    <writeable/>
+    <odmVisable/>
+    <odmChangeable/>
+    <array> 2</array>
+</attribute>
+
+<attribute>
+    <id>ATTR_EFF_CEN_PHASE_ROT_M_CMD_A13</id>
+    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
+    <description>Phase rotator value that comes from termination on the CDIMM VPD.  This controls the IO M_CMD_A13</description>
+    <valueType>uint8</valueType>
+    <platInit/>
+    <writeable/>
+    <odmVisable/>
+    <odmChangeable/>
+    <array> 2</array>
+</attribute>
+
+<attribute>
+    <id>ATTR_EFF_CEN_PHASE_ROT_M_CMD_A14</id>
+    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
+    <description>Phase rotator value that comes from termination on the CDIMM VPD.  This controls the IO M_CMD_A14</description>
+    <valueType>uint8</valueType>
+    <platInit/>
+    <writeable/>
+    <odmVisable/>
+    <odmChangeable/>
+    <array> 2</array>
+</attribute>
+
+<attribute>
+    <id>ATTR_EFF_CEN_PHASE_ROT_M_CMD_A15</id>
+    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
+    <description>Phase rotator value that comes from termination on the CDIMM VPD.  This controls the IO M_CMD_A15</description>
+    <valueType>uint8</valueType>
+    <platInit/>
+    <writeable/>
+    <odmVisable/>
+    <odmChangeable/>
+    <array> 2</array>
+</attribute>
+
+<attribute>
+    <id>ATTR_EFF_CEN_PHASE_ROT_M_CMD_BA0</id>
+    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
+    <description>Phase rotator value that comes from termination on the CDIMM VPD.  This controls the IO M_CMD_BA0</description>
+    <valueType>uint8</valueType>
+    <platInit/>
+    <writeable/>
+    <odmVisable/>
+    <odmChangeable/>
+    <array> 2</array>
+</attribute>
+
+<attribute>
+    <id>ATTR_EFF_CEN_PHASE_ROT_M_CMD_BA1</id>
+    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
+    <description>Phase rotator value that comes from termination on the CDIMM VPD.  This controls the IO M_CMD_BA1</description>
+    <valueType>uint8</valueType>
+    <platInit/>
+    <writeable/>
+    <odmVisable/>
+    <odmChangeable/>
+    <array> 2</array>
+</attribute>
+
+<attribute>
+    <id>ATTR_EFF_CEN_PHASE_ROT_M_CMD_BA2</id>
+    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
+    <description>Phase rotator value that comes from termination on the CDIMM VPD.  This controls the IO M_CMD_BA2</description>
+    <valueType>uint8</valueType>
+    <platInit/>
+    <writeable/>
+    <odmVisable/>
+    <odmChangeable/>
+    <array> 2</array>
+</attribute>
+
+<attribute>
+    <id>ATTR_EFF_CEN_PHASE_ROT_M_CMD_CASN</id>
+    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
+    <description>Phase rotator value that comes from termination on the CDIMM VPD.  This controls the IO M_CMD_CASN</description>
+    <valueType>uint8</valueType>
+    <platInit/>
+    <writeable/>
+    <odmVisable/>
+    <odmChangeable/>
+    <array> 2</array>
+</attribute>
+
+<attribute>
+    <id>ATTR_EFF_CEN_PHASE_ROT_M_CMD_RASN</id>
+    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
+    <description>Phase rotator value that comes from termination on the CDIMM VPD.  This controls the IO M_CMD_RASN</description>
+    <valueType>uint8</valueType>
+    <platInit/>
+    <writeable/>
+    <odmVisable/>
+    <odmChangeable/>
+    <array> 2</array>
+</attribute>
+
+<attribute>
+    <id>ATTR_EFF_CEN_PHASE_ROT_M_CMD_WEN</id>
+    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
+    <description>Phase rotator value that comes from termination on the CDIMM VPD.  This controls the IO M_CMD_WEN</description>
+    <valueType>uint8</valueType>
+    <platInit/>
+    <writeable/>
+    <odmVisable/>
+    <odmChangeable/>
+    <array> 2</array>
+</attribute>
+
+<attribute>
+    <id>ATTR_EFF_CEN_PHASE_ROT_M_PAR</id>
+    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
+    <description>Phase rotator value that comes from termination on the CDIMM VPD.  This controls the IO M_PAR</description>
+    <valueType>uint8</valueType>
+    <platInit/>
+    <writeable/>
+    <odmVisable/>
+    <odmChangeable/>
+    <array> 2</array>
+</attribute>
+
+<attribute>
+    <id>ATTR_EFF_CEN_PHASE_ROT_M_ACTN</id>
+    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
+    <description>Phase rotator value that comes from termination on the CDIMM VPD.  This controls the IO M_ACTN</description>
+    <valueType>uint8</valueType>
+    <platInit/>
+    <writeable/>
+    <odmVisable/>
+    <odmChangeable/>
+    <array> 2</array>
+</attribute>
+
+<attribute>
+    <id>ATTR_EFF_CEN_PHASE_ROT_M0_CNTL_CKE0</id>
+    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
+    <description>Phase rotator value that comes from termination on the CDIMM VPD.  This controls the IO M0_CNTL_CKE0</description>
+    <valueType>uint8</valueType>
+    <platInit/>
+    <writeable/>
+    <odmVisable/>
+    <odmChangeable/>
+    <array> 2</array>
+</attribute>
+
+<attribute>
+    <id>ATTR_EFF_CEN_PHASE_ROT_M0_CNTL_CKE1</id>
+    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
+    <description>Phase rotator value that comes from termination on the CDIMM VPD.  This controls the IO M0_CNTL_CKE1</description>
+    <valueType>uint8</valueType>
+    <platInit/>
+    <writeable/>
+    <odmVisable/>
+    <odmChangeable/>
+    <array> 2</array>
+</attribute>
+
+<attribute>
+    <id>ATTR_EFF_CEN_PHASE_ROT_M0_CNTL_CKE2</id>
+    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
+    <description>Phase rotator value that comes from termination on the CDIMM VPD.  This controls the IO M0_CNTL_CKE2</description>
+    <valueType>uint8</valueType>
+    <platInit/>
+    <writeable/>
+    <odmVisable/>
+    <odmChangeable/>
+    <array> 2</array>
+</attribute>
+
+<attribute>
+    <id>ATTR_EFF_CEN_PHASE_ROT_M0_CNTL_CKE3</id>
+    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
+    <description>Phase rotator value that comes from termination on the CDIMM VPD.  This controls the IO M0_CNTL_CKE3</description>
+    <valueType>uint8</valueType>
+    <platInit/>
+    <writeable/>
+    <odmVisable/>
+    <odmChangeable/>
+    <array> 2</array>
+</attribute>
+
+<attribute>
+    <id>ATTR_EFF_CEN_PHASE_ROT_M0_CNTL_CSN0</id>
+    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
+    <description>Phase rotator value that comes from termination on the CDIMM VPD.  This controls the IO M0_CNTL_CSN0</description>
+    <valueType>uint8</valueType>
+    <platInit/>
+    <writeable/>
+    <odmVisable/>
+    <odmChangeable/>
+    <array> 2</array>
+</attribute>
+
+<attribute>
+    <id>ATTR_EFF_CEN_PHASE_ROT_M0_CNTL_CSN1</id>
+    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
+    <description>Phase rotator value that comes from termination on the CDIMM VPD.  This controls the IO M0_CNTL_CSN1</description>
+    <valueType>uint8</valueType>
+    <platInit/>
+    <writeable/>
+    <odmVisable/>
+    <odmChangeable/>
+    <array> 2</array>
+</attribute>
+
+<attribute>
+    <id>ATTR_EFF_CEN_PHASE_ROT_M0_CNTL_CSN2</id>
+    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
+    <description>Phase rotator value that comes from termination on the CDIMM VPD.  This controls the IO M0_CNTL_CSN2</description>
+    <valueType>uint8</valueType>
+    <platInit/>
+    <writeable/>
+    <odmVisable/>
+    <odmChangeable/>
+    <array> 2</array>
+</attribute>
+
+<attribute>
+    <id>ATTR_EFF_CEN_PHASE_ROT_M0_CNTL_CSN3</id>
+    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
+    <description>Phase rotator value that comes from termination on the CDIMM VPD.  This controls the IO M0_CNTL_CSN3</description>
+    <valueType>uint8</valueType>
+    <platInit/>
+    <writeable/>
+    <odmVisable/>
+    <odmChangeable/>
+    <array> 2</array>
+</attribute>
+
+<attribute>
+    <id>ATTR_EFF_CEN_PHASE_ROT_M0_CNTL_ODT0</id>
+    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
+    <description>Phase rotator value that comes from termination on the CDIMM VPD.  This controls the IO M0_CNTL_ODT0</description>
+    <valueType>uint8</valueType>
+    <platInit/>
+    <writeable/>
+    <odmVisable/>
+    <odmChangeable/>
+    <array> 2</array>
+</attribute>
+
+<attribute>
+    <id>ATTR_EFF_CEN_PHASE_ROT_M0_CNTL_ODT1</id>
+    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
+    <description>Phase rotator value that comes from termination on the CDIMM VPD.  This controls the IO M0_CNTL_ODT1</description>
+    <valueType>uint8</valueType>
+    <platInit/>
+    <writeable/>
+    <odmVisable/>
+    <odmChangeable/>
+    <array> 2</array>
+</attribute>
+
+<attribute>
+    <id>ATTR_EFF_CEN_PHASE_ROT_M1_CNTL_CKE0</id>
+    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
+    <description>Phase rotator value that comes from termination on the CDIMM VPD.  This controls the IO M1_CNTL_CKE0</description>
+    <valueType>uint8</valueType>
+    <platInit/>
+    <writeable/>
+    <odmVisable/>
+    <odmChangeable/>
+    <array> 2</array>
+</attribute>
+
+<attribute>
+    <id>ATTR_EFF_CEN_PHASE_ROT_M1_CNTL_CKE1</id>
+    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
+    <description>Phase rotator value that comes from termination on the CDIMM VPD.  This controls the IO M1_CNTL_CKE1</description>
+    <valueType>uint8</valueType>
+    <platInit/>
+    <writeable/>
+    <odmVisable/>
+    <odmChangeable/>
+    <array> 2</array>
+</attribute>
+
+<attribute>
+    <id>ATTR_EFF_CEN_PHASE_ROT_M1_CNTL_CKE2</id>
+    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
+    <description>Phase rotator value that comes from termination on the CDIMM VPD.  This controls the IO M1_CNTL_CKE2</description>
+    <valueType>uint8</valueType>
+    <platInit/>
+    <writeable/>
+    <odmVisable/>
+    <odmChangeable/>
+    <array> 2</array>
+</attribute>
+
+<attribute>
+    <id>ATTR_EFF_CEN_PHASE_ROT_M1_CNTL_CKE3</id>
+    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
+    <description>Phase rotator value that comes from termination on the CDIMM VPD.  This controls the IO M1_CNTL_CKE3</description>
+    <valueType>uint8</valueType>
+    <platInit/>
+    <writeable/>
+    <odmVisable/>
+    <odmChangeable/>
+    <array> 2</array>
+</attribute>
+
+<attribute>
+    <id>ATTR_EFF_CEN_PHASE_ROT_M1_CNTL_CSN0</id>
+    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
+    <description>Phase rotator value that comes from termination on the CDIMM VPD.  This controls the IO M1_CNTL_CSN0</description>
+    <valueType>uint8</valueType>
+    <platInit/>
+    <writeable/>
+    <odmVisable/>
+    <odmChangeable/>
+    <array> 2</array>
+</attribute>
+
+<attribute>
+    <id>ATTR_EFF_CEN_PHASE_ROT_M1_CNTL_CSN1</id>
+    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
+    <description>Phase rotator value that comes from termination on the CDIMM VPD.  This controls the IO M1_CNTL_CSN1</description>
+    <valueType>uint8</valueType>
+    <platInit/>
+    <writeable/>
+    <odmVisable/>
+    <odmChangeable/>
+    <array> 2</array>
+</attribute>
+
+<attribute>
+    <id>ATTR_EFF_CEN_PHASE_ROT_M1_CNTL_CSN2</id>
+    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
+    <description>Phase rotator value that comes from termination on the CDIMM VPD.  This controls the IO M1_CNTL_CSN2</description>
+    <valueType>uint8</valueType>
+    <platInit/>
+    <writeable/>
+    <odmVisable/>
+    <odmChangeable/>
+    <array> 2</array>
+</attribute>
+
+<attribute>
+    <id>ATTR_EFF_CEN_PHASE_ROT_M1_CNTL_CSN3</id>
+    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
+    <description>Phase rotator value that comes from termination on the CDIMM VPD.  This controls the IO M1_CNTL_CSN3</description>
+    <valueType>uint8</valueType>
+    <platInit/>
+    <writeable/>
+    <odmVisable/>
+    <odmChangeable/>
+    <array> 2</array>
+</attribute>
+
+<attribute>
+    <id>ATTR_EFF_CEN_PHASE_ROT_M1_CNTL_ODT0</id>
+    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
+    <description>Phase rotator value that comes from termination on the CDIMM VPD.  This controls the IO M1_CNTL_ODT0</description>
+    <valueType>uint8</valueType>
+    <platInit/>
+    <writeable/>
+    <odmVisable/>
+    <odmChangeable/>
+    <array> 2</array>
+</attribute>
+
+<attribute>
+    <id>ATTR_EFF_CEN_PHASE_ROT_M1_CNTL_ODT1</id>
+    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
+    <description>Phase rotator value that comes from termination on the CDIMM VPD.  This controls the IO M1_CNTL_ODT1</description>
+    <valueType>uint8</valueType>
+    <platInit/>
+    <writeable/>
+    <odmVisable/>
+    <odmChangeable/>
+    <array> 2</array>
+</attribute>
+
+<attribute>
+    <id>ATTR_MSS_DQS_SWIZZLE_TYPE</id>
+    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
+    <description>DQS Swizzle type is set by the platform to describe what kind of DQS connection is being used for register acceses. Type 0 is normal, type 1 is for systems with wiring like glacier 1.  Additional types maybe defined if new boards have even different DQS swizzle features</description>
+    <valueType>uint8</valueType>
+    <platInit/>
+    <writeable/>
+    <odmVisable/>
+    <odmChangeable/>
 </attribute>
 
 <!-- DO NOT EDIT THIS FILE DIRECTLY PLEASE UPDATE THE ODS FILE AND FOLLOW THE INSTRUCTION TAB -->

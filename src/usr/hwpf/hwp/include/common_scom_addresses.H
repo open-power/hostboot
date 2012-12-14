@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: common_scom_addresses.H,v 1.34 2012/10/25 11:54:47 koenig Exp $
+// $Id: common_scom_addresses.H,v 1.38 2012/11/17 19:53:05 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/common_scom_addresses.H,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
@@ -199,6 +199,7 @@ CONST_UINT32_T( CFAM_FSI_SHIFT_CTRL_0x00000C10        , ULL(0x00000C10) );
 CONST_UINT32_T( CFAM_FSI_DATA_0_0x00001000            , ULL(0x00001000) );
 CONST_UINT32_T( CFAM_FSI_DATA_1_0x00001001            , ULL(0x00001001) );
 CONST_UINT32_T( CFAM_FSI_CMD_REG_0x00001002           , ULL(0x00001002) );
+CONST_UINT32_T( CFAM_FSI_RESET_0x00001006             , ULL(0x00001006) );
 CONST_UINT32_T( CFAM_FSI_STATUS_0x00001007            , ULL(0x00001007) );
 CONST_UINT32_T( CFAM_FSI_GP1_0x00001010               , ULL(0x00001010) );
 CONST_UINT32_T( CFAM_FSI_GP2_0x00001011               , ULL(0x00001011) );
@@ -274,9 +275,14 @@ CONST_UINT64_T( MBOX_SCRATCH_REG3_0x0005003B          , ULL(0x0005003B) );
 //------------------------------------------------------------------------------
 //      TP ADDITIONAL REGISTER
 //------------------------------------------------------------------------------
-CONST_UINT64_T( TP_PLL_LOCK_0x010F0019                 , ULL(0x010F0019) );
-CONST_UINT64_T( TP_CLK_ADJ_SET_0x010F0016              , ULL(0x010F0016) );
+CONST_UINT64_T( TP_PLL_LOCK_0x010F0019                , ULL(0x010F0019) );
+CONST_UINT64_T( TP_CLK_ADJ_SET_0x010F0016             , ULL(0x010F0016) );
 
+//------------------------------------------------------------------------------
+//      ECCB REGISTERS
+//------------------------------------------------------------------------------
+
+CONST_UINT64_T( ECCB_ECC_ADDR_REG_0x000C0004          , ULL(0x000C0004) );
 
 //------------------------------------------------------------------------------
 //      I2C MASTER (MEMS0)
@@ -318,6 +324,7 @@ CONST_UINT64_T( TP_SCOM_0x01010000                    , ULL(0x01010000) );
 //------------------------------------------------------------------------------
 //      TP TRACE
 //------------------------------------------------------------------------------
+CONST_UINT64_T( TP_TRACE_STATUS_0x01010004            , ULL(0x01010004) );
 CONST_UINT64_T( TP_TRACE_DATA_HI_0x01010400           , ULL(0x01010400) );
 CONST_UINT64_T( TP_TRACE_DATA_LO_0x01010401           , ULL(0x01010401) );
 
@@ -404,6 +411,11 @@ CONST_UINT64_T( NEST_GP4_OR_0x02000007                , ULL(0x02000007) );
 //      NEST SCOM
 //------------------------------------------------------------------------------
 CONST_UINT64_T( NEST_SCOM_0x02010000                  , ULL(0x02010000) );
+
+//------------------------------------------------------------------------------
+//      NEST TRACE
+//------------------------------------------------------------------------------
+CONST_UINT64_T( NEST_TRACE_STATUS_0x02010004          , ULL(0x02010004) );
 
 //------------------------------------------------------------------------------
 //      NEST CLOCK CONTROL
@@ -550,6 +562,7 @@ CONST_UINT64_T( SCAN_ALLREGIONEXVITAL,              ULL(0x0FF00E0000000000) );
 CONST_UINT64_T( SCAN_CLK_ALL,                       ULL(0x0FF00E0000000000) );
 CONST_UINT64_T( SCAN_CLK_ALLEXDPLL,                 ULL(0x0FE00E0000000000) );
 CONST_UINT64_T( SCAN_CLK_ALL_BUT_PLL,               ULL(0x0FE00E0000000000) );
+CONST_UINT64_T( SCAN_CLK_PLL,                       ULL(0x00100E0000000000) );
 CONST_UINT64_T( SCAN_CLK_CORE_ONLY,                 ULL(0x06000E0000000000) );
 
 
@@ -559,6 +572,8 @@ CONST_UINT64_T( SCAN_ALL_BUT_GPTRTIMEREP,           ULL(0x0FF00DCE00000000) );
 CONST_UINT64_T( SCAN_ALL_BUT_VITALDPLLGPTRTIME,     ULL(0x0FE00DCE00000000) );
 CONST_UINT64_T( SCAN_ALL_BUT_VITALPLLGPTRTIME,      ULL(0x0FE00DCE00000000) );
 CONST_UINT64_T( SCAN_GPTR_TIME_REP,                 ULL(0x0FF0023000000000) );
+CONST_UINT64_T( SCAN_PLL_GPTR,                      ULL(0x0010020000000000) );
+CONST_UINT64_T( SCAN_PLL_BNDY_FUNC,                 ULL(0x0010080800000000) );
 CONST_UINT64_T( SCAN_TIME_REP,                      ULL(0x0CF0003000000000) );
 
 CONST_UINT64_T( SCAN_CORE_ALL,                      ULL(0x06000FFE00000000) );
@@ -595,6 +610,18 @@ This section is automatically updated by CVS when you check in this file.
 Be sure to create CVS comments when you commit so that they can be included here.
 
 $Log: common_scom_addresses.H,v $
+Revision 1.38  2012/11/17 19:53:05  jmcgill
+add trace status registers
+
+Revision 1.37  2012/11/16 15:19:48  jeshua
+Added defines for PLL scan0
+
+Revision 1.36  2012/11/16 04:06:18  jmcgill
+add FSI2PIB reset register
+
+Revision 1.35  2012/10/30 15:28:50  koenig
+New ECCB register for ecc enable - AK
+
 Revision 1.34  2012/10/25 11:54:47  koenig
 Added some hangcounter register - AK
 

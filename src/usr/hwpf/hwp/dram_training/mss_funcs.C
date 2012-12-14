@@ -1,27 +1,26 @@
-/*  IBM_PROLOG_BEGIN_TAG
- *  This is an automatically generated prolog.
- *
- *  $Source: src/usr/hwpf/hwp/dram_training/mss_funcs.C $
- *
- *  IBM CONFIDENTIAL
- *
- *  COPYRIGHT International Business Machines Corp. 2012
- *
- *  p1
- *
- *  Object Code Only (OCO) source materials
- *  Licensed Internal Code Source Materials
- *  IBM HostBoot Licensed Internal Code
- *
- *  The source code for this program is not published or other-
- *  wise divested of its trade secrets, irrespective of what has
- *  been deposited with the U.S. Copyright Office.
- *
- *  Origin: 30
- *
- *  IBM_PROLOG_END_TAG
- */
-// $Id: mss_funcs.C,v 1.28 2012/07/17 13:24:16 bellows Exp $
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/usr/hwpf/hwp/dram_training/mss_funcs.C $                  */
+/*                                                                        */
+/* IBM CONFIDENTIAL                                                       */
+/*                                                                        */
+/* COPYRIGHT International Business Machines Corp. 2012                   */
+/*                                                                        */
+/* p1                                                                     */
+/*                                                                        */
+/* Object Code Only (OCO) source materials                                */
+/* Licensed Internal Code Source Materials                                */
+/* IBM HostBoot Licensed Internal Code                                    */
+/*                                                                        */
+/* The source code for this program is not published or otherwise         */
+/* divested of its trade secrets, irrespective of what has been           */
+/* deposited with the U.S. Copyright Office.                              */
+/*                                                                        */
+/* Origin: 30                                                             */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
+// $Id: mss_funcs.C,v 1.29 2012/11/19 21:18:40 jsabrow Exp $
 /* File mss_funcs.C created by SLOAT JACOB D. (JAKE),2D3970 on Fri Apr 22 2011. */
 
 //------------------------------------------------------------------------------
@@ -44,6 +43,7 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
+//  1.29   | jsabrow  | 11/19/12| added CCS data loader: mss_ccs_load_data_pattern
 //  1.28   | bellows  | 07/16/12|added in Id tag
 //  1.27   | divyakum | 3/22/12 | Fixed warnings from mss_execute_zq_cal function
 //  1.26   | divyakum | 3/22/12 | Fixed mss_execute_zq_cal function variable name mismatch
@@ -228,7 +228,7 @@ ReturnCode mss_ccs_inst_arry_1(
 
     rc_num = rc_num | goto_inst.insertFromRight(io_instruction_number + 1, 0, 5);
 
-    //Setting up a CSS Instruction Array Type 1
+    //Setting up a CCS Instruction Array Type 1
     rc_num = rc_num | data_buffer.insert( i_num_idles, 0, 16, 0);
     rc_num = rc_num | data_buffer.insert( i_num_repeat, 16, 16, 0);
     rc_num = rc_num | data_buffer.insert( i_data, 32, 20, 0);
@@ -249,6 +249,82 @@ ReturnCode mss_ccs_inst_arry_1(
 
     return rc;
 }
+
+//--------------
+ReturnCode mss_ccs_load_data_pattern(
+            Target& i_target,
+            uint32_t io_instruction_number,
+	    mss_ccs_data_pattern data_pattern)
+{
+    //Example Use:
+    //
+    ReturnCode rc;
+
+    if (data_pattern == MSS_CCS_DATA_PATTERN_00)
+      {
+	rc = mss_ccs_load_data_pattern(i_target, io_instruction_number, 0x00000000);
+      }
+    else if (data_pattern == MSS_CCS_DATA_PATTERN_0F)
+      {
+	rc = mss_ccs_load_data_pattern(i_target, io_instruction_number, 0x00055555);
+      }
+    else if (data_pattern == MSS_CCS_DATA_PATTERN_F0)
+      {
+	rc = mss_ccs_load_data_pattern(i_target, io_instruction_number, 0x000aaaaa);
+      }
+    else if (data_pattern == MSS_CCS_DATA_PATTERN_FF)
+      {
+	rc = mss_ccs_load_data_pattern(i_target, io_instruction_number, 0x000fffff);
+      }
+
+    return rc;
+}
+
+
+ReturnCode mss_ccs_load_data_pattern(
+            Target& i_target,
+            uint32_t io_instruction_number,
+	    uint32_t data_pattern)
+{
+    //Example Use:
+    //
+    ReturnCode rc;
+    ReturnCode rc_buff;
+    uint32_t rc_num = 0; 
+    uint32_t reg_address = 0;
+
+    if (io_instruction_number > 31)
+    {
+        FAPI_INF("mss_ccs_load_data_pattern: CCS Instruction Array index out of bounds");
+    }
+    else
+    {
+      reg_address = io_instruction_number + CCS_INST_ARRY1_AB_REG0_0x03010635;
+      ecmdDataBufferBase data_buffer(64);
+
+      //read current array1 reg
+      rc = fapiGetScom(i_target, reg_address, data_buffer);
+      if(rc) return rc;
+      
+      //modify data bits for specified pattern
+      rc_num = rc_num | data_buffer.insertFromRight(data_pattern, 32, 20);
+      if (rc_num)
+	{
+        FAPI_ERR( "mss_ccs_load_data_pattern: Error setting up buffers");
+        rc_buff.setEcmdError(rc_num);
+        return rc_buff;
+	}
+      
+      //write array1 back out
+      rc = fapiPutScom(i_target, reg_address, data_buffer);
+      if(rc) return rc;
+    }
+
+    return rc;
+}
+//--------------
+
+
 
 ReturnCode mss_ccs_mode(
             Target& i_target,

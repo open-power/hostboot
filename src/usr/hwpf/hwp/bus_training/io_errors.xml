@@ -1,25 +1,25 @@
-<!--  IBM_PROLOG_BEGIN_TAG
-     This is an automatically generated prolog.
-   
-     $Source: src/usr/hwpf/hwp/bus_training/io_errors.xml $
-   
-     IBM CONFIDENTIAL
-   
-     COPYRIGHT International Business Machines Corp. 2012
-   
-     p1
-   
-     Object Code Only (OCO) source materials
-     Licensed Internal Code Source Materials
-     IBM HostBoot Licensed Internal Code
-   
-     The source code for this program is not published or other-
-     wise divested of its trade secrets, irrespective of what has
-     been deposited with the U.S. Copyright Office.
-   
-     Origin: 30
-   
-     IBM_PROLOG_END_TAG -->
+<!-- IBM_PROLOG_BEGIN_TAG                                                   -->
+<!-- This is an automatically generated prolog.                             -->
+<!--                                                                        -->
+<!-- $Source: src/usr/hwpf/hwp/bus_training/io_errors.xml $                 -->
+<!--                                                                        -->
+<!-- IBM CONFIDENTIAL                                                       -->
+<!--                                                                        -->
+<!-- COPYRIGHT International Business Machines Corp. 2012                   -->
+<!--                                                                        -->
+<!-- p1                                                                     -->
+<!--                                                                        -->
+<!-- Object Code Only (OCO) source materials                                -->
+<!-- Licensed Internal Code Source Materials                                -->
+<!-- IBM HostBoot Licensed Internal Code                                    -->
+<!--                                                                        -->
+<!-- The source code for this program is not published or otherwise         -->
+<!-- divested of its trade secrets, irrespective of what has been           -->
+<!-- deposited with the U.S. Copyright Office.                              -->
+<!--                                                                        -->
+<!-- Origin: 30                                                             -->
+<!--                                                                        -->
+<!-- IBM_PROLOG_END_TAG                                                     -->
 <!-- Error definitions for IO HWPS  -->
 <hwpErrors>
   <!-- *********************************************************************** -->
@@ -123,5 +123,30 @@
   <hwpError>
     <rc>IO_DCCAL_ZCAL_TIMEOUT_RC</rc>
     <description>io impedance cal timed out</description>
+  </hwpError>
+       <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>IO_DCCAL_ZCALN_VALUE_OUT_OF_RANGE_RC</rc>
+    <description>Impedance calibration zcal_n value out of range</description>
+  </hwpError>
+         <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>IO_DCCAL_ZCALP_VALUE_OUT_OF_RANGE_RC</rc>
+    <description>Impedance calibration zcal_p value out of range</description>
+  </hwpError>
+           <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>IO_DCCAL_ZCAL_K2_EXCEEDED_RC</rc>
+    <description>Post cursor drive ratio has exceeded 0.25</description>
+  </hwpError>
+             <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>IO_DCCAL_ZCAL_M_EXCEEDED_RC</rc>
+    <description>Margin Ratio has exceeded 100 percentage</description>
+  </hwpError>
+               <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>IO_DCCAL_ZCAL_M_LOW_RC</rc>
+    <description>Margin Ratio is less than 50 percent</description>
   </hwpError>
 </hwpErrors>

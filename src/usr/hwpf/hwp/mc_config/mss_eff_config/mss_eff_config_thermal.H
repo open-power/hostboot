@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_eff_config_thermal.H,v 1.3 2012/04/03 22:13:03 pardeik Exp $
+// $Id: mss_eff_config_thermal.H,v 1.4 2012/10/15 13:05:10 pardeik Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/centaur/working/procedures/ipl/fapi/mss_eff_config_thermal.H,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
@@ -42,6 +42,7 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
+//   1.4   | pardeik  |11-OCT-12| change i_target to i_target_mba
 //   1.3   | pardeik  |03-APR-12| use mba target instead of mbs
 //   1.2   | pardeik  |26-MAR-12| Removed structure (going into .C file)
 //         | pardeik  |01-DEC-11| Added structures and defines
@@ -58,19 +59,19 @@
 #include <fapi.H>
 
 
-typedef fapi::ReturnCode (*mss_eff_config_thermal_FP_t)(const fapi::Target & i_target);
+typedef fapi::ReturnCode (*mss_eff_config_thermal_FP_t)(const fapi::Target & i_target_mba);
 
 
 extern "C" {
 /**
  * @brief mss_eff_config_thermal procedure. Sets up dimm power curve attributes and dimm and channel throttle attributes
  *
- * @param[in]  i_target  Reference to centaur mba target
+ * @param[in]  i_target_mba  Reference to centaur mba target
  *
  * @return ReturnCode
  */
 
-    fapi::ReturnCode mss_eff_config_thermal(const fapi::Target & i_target);
+    fapi::ReturnCode mss_eff_config_thermal(const fapi::Target & i_target_mba);
 
 } //extern C
 

@@ -1,27 +1,26 @@
-/*  IBM_PROLOG_BEGIN_TAG
- *  This is an automatically generated prolog.
- *
- *  $Source: src/usr/hwpf/hwp/dram_training/mss_ddr_phy_reset/mss_ddr_phy_reset.C $
- *
- *  IBM CONFIDENTIAL
- *
- *  COPYRIGHT International Business Machines Corp. 2012
- *
- *  p1
- *
- *  Object Code Only (OCO) source materials
- *  Licensed Internal Code Source Materials
- *  IBM HostBoot Licensed Internal Code
- *
- *  The source code for this program is not published or other-
- *  wise divested of its trade secrets, irrespective of what has
- *  been deposited with the U.S. Copyright Office.
- *
- *  Origin: 30
- *
- *  IBM_PROLOG_END_TAG
- */
-// $Id: mss_ddr_phy_reset.C,v 1.11 2012/07/27 16:43:25 bellows Exp $
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/usr/hwpf/hwp/dram_training/mss_ddr_phy_reset/mss_ddr_phy_reset.C $ */
+/*                                                                        */
+/* IBM CONFIDENTIAL                                                       */
+/*                                                                        */
+/* COPYRIGHT International Business Machines Corp. 2012                   */
+/*                                                                        */
+/* p1                                                                     */
+/*                                                                        */
+/* Object Code Only (OCO) source materials                                */
+/* Licensed Internal Code Source Materials                                */
+/* IBM HostBoot Licensed Internal Code                                    */
+/*                                                                        */
+/* The source code for this program is not published or otherwise         */
+/* divested of its trade secrets, irrespective of what has been           */
+/* deposited with the U.S. Copyright Office.                              */
+/*                                                                        */
+/* Origin: 30                                                             */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
+// $Id: mss_ddr_phy_reset.C,v 1.17 2012/12/03 15:49:27 mfred Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/centaur/working/procedures/ipl/fapi/mss_ddr_phy_reset.C,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
@@ -45,6 +44,9 @@
 #include <fapi.H>
 #include <cen_scom_addresses.H>
 #include <mss_ddr_phy_reset.H>
+#include <mss_termination_control.H>
+#include <mss_unmask_errors.H>
+#include <dimmBadDqBitmapFuncs.H>
 
 //  Constants
 const uint64_t  DELAY_100NS             = 100;      // general purpose 100 ns delay for HW mode   (2000 sim cycles if simclk = 20ghz)
@@ -64,11 +66,47 @@ extern "C" {
 
 using namespace fapi;
 
-   // prototype of function called in phy reset
+// prototypes of functions called in phy reset
 ReturnCode mss_deassert_force_mclk_low (const Target& i_target); 
-
+ReturnCode mss_ddr_phy_reset_cloned(const fapi::Target & i_target);
 
 fapi::ReturnCode mss_ddr_phy_reset(const fapi::Target & i_target)
+{
+
+    // Target is centaur.mba
+
+    fapi::ReturnCode rc;
+    fapi::ReturnCode slewcal_rc;
+
+    rc = mss_ddr_phy_reset_cloned(i_target);
+
+    slewcal_rc = mss_slew_cal(i_target);
+
+    // If mss_ddr_phy_reset returns an error
+    //      then log the error from mss_slew_cal (if any) and pass the error from mss_ddr_phy_reset
+    // If only mss_slew_cal returns an error
+    //      then move that error to RC and pass it along
+    if ((slewcal_rc) && (rc))
+    {
+        FAPI_ERR(" mss_slew_cal failed!   rc = 0x%08X (creator = %d)", uint32_t(slewcal_rc), slewcal_rc.getCreator());
+        fapiLogError(slewcal_rc);
+    }
+     else if (slewcal_rc)
+    {
+        rc = slewcal_rc;
+    }
+
+    // If mss_unmask_ddrphy_errors gets it's own bad rc,
+    // it will commit the passed in rc (if non-zero), and return it's own bad rc.
+    // Else if mss_unmask_ddrphy_errors runs clean,
+    // it will just return the passed in rc.
+    rc = mss_unmask_ddrphy_errors(i_target, rc);
+
+    return rc;
+}
+
+
+fapi::ReturnCode mss_ddr_phy_reset_cloned(const fapi::Target & i_target)
 {
     // Target is centaur.mba
 
@@ -77,25 +115,34 @@ fapi::ReturnCode mss_ddr_phy_reset(const fapi::Target & i_target)
     uint32_t poll_count = 0;
     uint32_t done_polling = 0;
     uint8_t is_simulation = 0;
-    ecmdDataBufferBase i_data, j_data, k_data, l_data;
+    ecmdDataBufferBase i_data(64);
+    ecmdDataBufferBase dp_p0_lock_data(64);
+    ecmdDataBufferBase dp_p1_lock_data(64);
+    ecmdDataBufferBase ad_p0_lock_data(64);
+    ecmdDataBufferBase ad_p1_lock_data(64);
+    uint8_t l_dqBitmap[DIMM_DQ_RANK_BITMAP_SIZE]; // 10 byte array of bad bits
+    uint8_t valid_dimms  = 0;
+    uint8_t valid_dimm[2][2];
+    uint8_t num_ranks_per_dimm[2][2];
+    uint8_t l_port       = 0;
+    uint8_t l_dimm       = 0;
+    uint8_t l_rank       = 0;
+    uint8_t new_error    = 0;
+    uint8_t P0_DP0_reg_error = 0;
+    uint8_t P0_DP1_reg_error = 0;
+    uint8_t P0_DP2_reg_error = 0;
+    uint8_t P0_DP3_reg_error = 0;
+    uint8_t P0_DP4_reg_error = 0;
+    uint8_t P1_DP0_reg_error = 0;
+    uint8_t P1_DP1_reg_error = 0;
+    uint8_t P1_DP2_reg_error = 0;
+    uint8_t P1_DP3_reg_error = 0;
+    uint8_t P1_DP4_reg_error = 0;
 
 
     FAPI_INF("********* mss_ddr_phy_reset start *********");
     do
     { 
-
-        rc_ecmd |= i_data.setBitLength(64);
-        rc_ecmd |= j_data.setBitLength(64);
-        rc_ecmd |= k_data.setBitLength(64);
-        rc_ecmd |= l_data.setBitLength(64);
-        if (rc_ecmd)
-        {
-            FAPI_ERR("Error 0x%x setting ecmd data buffer bit length.",  rc_ecmd);
-            rc.setEcmdError(rc_ecmd);
-            break;
-        }
-
-
 
         //
         // Here are the specific instructions from section 14.7.3 of the Centaur Chip Specification:
@@ -114,12 +161,12 @@ fapi::ReturnCode mss_ddr_phy_reset(const fapi::Target & i_target)
          // PLL Lock cannot happen if mclk low is asserted
         // this procedure was moved from draminit to:
         // Deassert Force_mclk_low signal
-        // see CQ 216395
+        // see CQ 216395 (HW217109)
         rc = mss_deassert_force_mclk_low(i_target);
         if(rc)
         {
             FAPI_ERR(" deassert_force_mclk_low Failed rc = 0x%08X (creator = %d)", uint32_t(rc), rc.getCreator());
-            return rc;
+            break;
         }
 
   
@@ -164,8 +211,8 @@ fapi::ReturnCode mss_ddr_phy_reset(const fapi::Target & i_target)
             break;
         }
 
-  
-  
+
+
         //
         // 3. For DD0: Deassert dfi_reset_all (GP4 bit 5 = "0")
         //    For DD1: Deassert mcbist_ddr_dfi_reset_recover = "0" (CCS_MODEQ(25) SCOM Addr: 0x030106A7 0x03010EA7)
@@ -193,9 +240,61 @@ fapi::ReturnCode mss_ddr_phy_reset(const fapi::Target & i_target)
   
   
         //
-        // 4. Write 0x0008 to PC IO PVT N/P FET driver control registers to assert ZCTL reset
-        //    and reset the internal impedance controller.(SCOM Addr: 0x8000C0140301143F,  0x8000C0140301183F, 0x8001C0140301143F, 0x8001C0140301183F)
-        FAPI_DBG("Step 4: Write 0x0008 to PC IO PVT N/P FET driver control registers to assert ZCTL reset.\n");
+        // 4. Write 0x0010 to PC IO PVT N/P FET driver control registers to assert ZCTL reset and enable the internal impedance controller.
+        //    (SCOM Addr: 0x8000C0140301143F,  0x8000C0140301183F, 0x8001C0140301143F, 0x8001C0140301183F)
+        FAPI_DBG("Step 4: Write 0x0010 to PC IO PVT N/P FET driver control registers to assert ZCTL reset.\n");
+        rc_ecmd |= i_data.setDoubleWord(0, 0x0000000000000010ull);
+        if (rc_ecmd)
+        {
+            FAPI_ERR("Error 0x%x setting up ecmd data buffer to write 0x0010 into PC_IO_PVT_FET_CONTROL regs.",  rc_ecmd);
+            rc.setEcmdError(rc_ecmd);
+            break;
+        }
+        rc = fapiPutScom( i_target, DPHY01_DDRPHY_PC_IO_PVT_FET_CONTROL_P0_0x8000C0140301143F, i_data);
+        if (rc)
+        {
+            FAPI_ERR("Error writing DPHY01_DDRPHY_PC_IO_PVT_FET_CONTROL_P0 register.");
+            break;
+        }
+        rc = fapiPutScom( i_target, DPHY01_DDRPHY_PC_IO_PVT_FET_CONTROL_P1_0x8001C0140301143F, i_data);
+        if (rc)
+        {
+            FAPI_ERR("Error writing DPHY01_DDRPHY_PC_IO_PVT_FET_CONTROL_P1 register.");
+            break;
+        }
+
+
+
+        //
+        // 5. Write 0x0018 to PC IO PVT N/P FET driver control registers to deassert ZCTL reset while impedance controller is still enabled.
+        //    (SCOM Addr: 0x8000C0140301143F,  0x8000C0140301183F, 0x8001C0140301143F, 0x8001C0140301183F)
+        FAPI_DBG("Step 5: Write 0x0018 to PC IO PVT N/P FET driver control registers to deassert ZCTL reset.\n");
+        rc_ecmd |= i_data.setDoubleWord(0, 0x0000000000000018ull);
+        if (rc_ecmd)
+        {
+            FAPI_ERR("Error 0x%x setting up ecmd data buffer to write 0x0018 into PC_IO_PVT_FET_CONTROL regs.",  rc_ecmd);
+            rc.setEcmdError(rc_ecmd);
+            break;
+        }
+        rc = fapiPutScom( i_target, DPHY01_DDRPHY_PC_IO_PVT_FET_CONTROL_P0_0x8000C0140301143F, i_data);
+        if (rc)
+        {
+            FAPI_ERR("Error writing DPHY01_DDRPHY_PC_IO_PVT_FET_CONTROL_P0 register.");
+            break;
+        }
+        rc = fapiPutScom( i_target, DPHY01_DDRPHY_PC_IO_PVT_FET_CONTROL_P1_0x8001C0140301143F, i_data);
+        if (rc)
+        {
+            FAPI_ERR("Error writing DPHY01_DDRPHY_PC_IO_PVT_FET_CONTROL_P1 register.");
+            break;
+        }
+
+
+
+        //
+        // 6. Write 0x0008 to PC IO PVT N/P FET driver control registers to deassert the impedance controller.
+        //    (SCOM Addr: 0x8000C0140301143F,  0x8000C0140301183F, 0x8001C0140301143F, 0x8001C0140301183F)
+        FAPI_DBG("Step 6: Write 0x0008 to PC IO PVT N/P FET driver control registers to deassert the impedance controller.\n");
         rc_ecmd |= i_data.setDoubleWord(0, 0x0000000000000008ull);
         if (rc_ecmd)
         {
@@ -215,39 +314,13 @@ fapi::ReturnCode mss_ddr_phy_reset(const fapi::Target & i_target)
             FAPI_ERR("Error writing DPHY01_DDRPHY_PC_IO_PVT_FET_CONTROL_P1 register.");
             break;
         }
-  
-  
-  
+
+
+
         //
-        // 5. Write 0x0000 to PC IO PVT N/P FET driver control registers to deassert ZCTL reset
-        //                                                (SCOM Addr: 0x8000C0140301143F,  0x8000C0140301183F, 0x8001C0140301143F, 0x8001C0140301183F)
-        FAPI_DBG("Step 5: Write 0x0000 to PC IO PVT N/P FET driver control registers to deassert ZCTL reset.\n");
-        rc_ecmd |= i_data.setDoubleWord(0, 0x0000000000000000ull);
-        if (rc_ecmd)
-        {
-            FAPI_ERR("Error 0x%x setting up ecmd data buffer to write 0x0000 into PC_IO_PVT_FET_CONTROL regs.",  rc_ecmd);
-            rc.setEcmdError(rc_ecmd);
-            break;
-        }
-        rc = fapiPutScom( i_target, DPHY01_DDRPHY_PC_IO_PVT_FET_CONTROL_P0_0x8000C0140301143F, i_data);
-        if (rc)
-        {
-            FAPI_ERR("Error writing DPHY01_DDRPHY_PC_IO_PVT_FET_CONTROL_P0 register.");
-            break;
-        }
-        rc = fapiPutScom( i_target, DPHY01_DDRPHY_PC_IO_PVT_FET_CONTROL_P1_0x8001C0140301143F, i_data);
-        if (rc)
-        {
-            FAPI_ERR("Error writing DPHY01_DDRPHY_PC_IO_PVT_FET_CONTROL_P1 register.");
-            break;
-        }
-  
-  
-  
-        //
-        // 6. Write 0x4000 into the PC Resets Registers. This deasserts the PLL_RESET and leaves the SYSCLK_RESET bit active
+        // 7. Write 0x4000 into the PC Resets Registers. This deasserts the PLL_RESET and leaves the SYSCLK_RESET bit active
         //                                                (SCOM Addr: 0x8000C00E0301143F, 0x8001C00E0301143F, 0x8000C00E0301183F, 0x8001C00E0301183F)
-        FAPI_DBG("Step 6: Write 0x4000 into the PC Resets Regs. This deasserts the PLL_RESET and leaves the SYSCLK_RESET bit active.\n");
+        FAPI_DBG("Step 7: Write 0x4000 into the PC Resets Regs. This deasserts the PLL_RESET and leaves the SYSCLK_RESET bit active.\n");
         rc_ecmd |= i_data.setDoubleWord(0, 0x0000000000004000ull);
         if (rc_ecmd)
         {
@@ -267,15 +340,17 @@ fapi::ReturnCode mss_ddr_phy_reset(const fapi::Target & i_target)
             FAPI_ERR("Error writing DPHY01_DDRPHY_PC_RESETS_P1 register.");
             break;
         }
-  
-  
-  
+
+
+
         //
-        // 7. Wait at least 1 millisecond to allow the PLLs to lock. Otherwise, poll the PC DP18 PLL Lock Status
+        // 8. Wait at least 1 millisecond to allow the PLLs to lock. Otherwise, poll the PC DP18 PLL Lock Status
         //    and the PC AD32S PLL Lock Status to determine if all PLLs have locked.
         //    PC DP18 PLL Lock Status should be 0xF800:  (SCOM Addr: 0x8000C0000301143F, 0x8001C0000301143F, 0x8000C0000301183F, 0x8001C0000301183F)
         //    PC AD32S PLL Lock Status should be 0xC000: (SCOM Addr: 0x8000C0010301143F, 0x8001C0010301143F, 0x8000C0010301183F, 0x8001C0010301183F)
-        FAPI_DBG("Step 7: Poll until DP18 and AD32S PLLs have locked....\n");
+        //------------------------
+        // 7a - Poll for lock bits
+        FAPI_DBG("Step 8: Poll until DP18 and AD32S PLLs have locked....\n");
         do
         {
             rc = fapiDelay(DELAY_1US, DELAY_20000SIMCYCLES); // wait 20000 simcycles (in sim mode) OR 1 usec (in hw mode)
@@ -285,74 +360,92 @@ fapi::ReturnCode mss_ddr_phy_reset(const fapi::Target & i_target)
                 break;
             }
             done_polling = 1;
-            rc = fapiGetScom( i_target, DPHY01_DDRPHY_PC_DP18_PLL_LOCK_STATUS_P0_0x8000C0000301143F, i_data);
+            rc = fapiGetScom( i_target, DPHY01_DDRPHY_PC_DP18_PLL_LOCK_STATUS_P0_0x8000C0000301143F, dp_p0_lock_data);
             if (rc)
             {
                 FAPI_ERR("Error reading DPHY01_DDRPHY_PC_DP18_PLL_LOCK_STATUS_P0 register.");
                 break;
             }
-            if ( i_data.getHalfWord(3) != DP18_PLL_EXP_LOCK_STATUS ) done_polling = 0;
-            rc = fapiGetScom( i_target, DPHY01_DDRPHY_PC_DP18_PLL_LOCK_STATUS_P1_0x8001C0000301143F, j_data);
+            if ( dp_p0_lock_data.getHalfWord(3) != DP18_PLL_EXP_LOCK_STATUS ) done_polling = 0;
+            rc = fapiGetScom( i_target, DPHY01_DDRPHY_PC_DP18_PLL_LOCK_STATUS_P1_0x8001C0000301143F, dp_p1_lock_data);
             if (rc)
             {
                 FAPI_ERR("Error reading DPHY01_DDRPHY_PC_DP18_PLL_LOCK_STATUS_P1 register.");
                 break;
             }
-            if ( j_data.getHalfWord(3) != DP18_PLL_EXP_LOCK_STATUS ) done_polling = 0;
-            rc = fapiGetScom( i_target, DPHY01_DDRPHY_PC_AD32S_PLL_LOCK_STATUS_P0_0x8000C0010301143F, k_data);
+            if ( dp_p1_lock_data.getHalfWord(3) != DP18_PLL_EXP_LOCK_STATUS ) done_polling = 0;
+            rc = fapiGetScom( i_target, DPHY01_DDRPHY_PC_AD32S_PLL_LOCK_STATUS_P0_0x8000C0010301143F, ad_p0_lock_data);
             if (rc)
             {
                 FAPI_ERR("Error reading DPHY01_DDRPHY_PC_AD32S_PLL_LOCK_STATUS_P0 register.");
                 break;
             }
-            if ( k_data.getHalfWord(3) != AD32S_PLL_EXP_LOCK_STATUS ) done_polling = 0;
-            rc = fapiGetScom( i_target, DPHY01_DDRPHY_PC_AD32S_PLL_LOCK_STATUS_P1_0x8001C0010301143F, l_data);
+            if ( ad_p0_lock_data.getHalfWord(3) != AD32S_PLL_EXP_LOCK_STATUS ) done_polling = 0;
+            rc = fapiGetScom( i_target, DPHY01_DDRPHY_PC_AD32S_PLL_LOCK_STATUS_P1_0x8001C0010301143F, ad_p1_lock_data);
             if (rc)
             {
                 FAPI_ERR("Error reading DPHY01_DDRPHY_PC_AD32S_PLL_LOCK_STATUS_P1 register.");
                 break;
             }
-            if ( l_data.getHalfWord(3) != AD32S_PLL_EXP_LOCK_STATUS ) done_polling = 0;
+            if ( ad_p1_lock_data.getHalfWord(3) != AD32S_PLL_EXP_LOCK_STATUS ) done_polling = 0;
             poll_count++;
         } while ((done_polling == 0) && (poll_count < MAX_POLL_LOOPS)); // Poll until PLLs are locked.
         if (rc) break;    // Go to end of proc if error found inside polling loop.
   
         if (poll_count == MAX_POLL_LOOPS)
         {
-            if ( i_data.getHalfWord(3) != DP18_PLL_EXP_LOCK_STATUS )
+            //-------------------------------
+            // 7b - Check Port 0 DP lock bits
+            if ( dp_p0_lock_data.getHalfWord(3) != DP18_PLL_EXP_LOCK_STATUS )
             {
-                FAPI_ERR("DP18  0x0C000 PLL failed to lock!   Lock Status = %04X",i_data.getHalfWord(3));
+                FAPI_ERR("One or more DP18 port 0 (0x0C000) PLL failed to lock!   Lock Status = %04X",dp_p0_lock_data.getHalfWord(3));
                 FAPI_SET_HWP_ERROR(rc, RC_MSS_DP18_0_PLL_FAILED_TO_LOCK);
-                break;
+                if ( dp_p0_lock_data.isBitClear(48) ) { FAPI_ERR("Port 0 DP 0 PLL failed to lock!");}
+                if ( dp_p0_lock_data.isBitClear(49) ) { FAPI_ERR("Port 0 DP 1 PLL failed to lock!");}
+                if ( dp_p0_lock_data.isBitClear(50) ) { FAPI_ERR("Port 0 DP 2 PLL failed to lock!");}
+                if ( dp_p0_lock_data.isBitClear(51) ) { FAPI_ERR("Port 0 DP 3 PLL failed to lock!");}
+                if ( dp_p0_lock_data.isBitClear(52) ) { FAPI_ERR("Port 0 DP 4 PLL failed to lock!");}
+                // break;  // Don't break.  Keep going to initialize any other channels that might be good.
             }
-            if ( j_data.getHalfWord(3) != DP18_PLL_EXP_LOCK_STATUS )
+            //-------------------------------
+            // 7c - Check Port 1 DP lock bits
+            if ( dp_p1_lock_data.getHalfWord(3) != DP18_PLL_EXP_LOCK_STATUS )
             {
-                FAPI_ERR("DP18  0x1C000 PLL failed to lock!   Lock Status = %04X",j_data.getHalfWord(3));
+                FAPI_ERR("One or more DP18 port 1 (0x1C000) PLL failed to lock!   Lock Status = %04X",dp_p1_lock_data.getHalfWord(3));
                 FAPI_SET_HWP_ERROR(rc, RC_MSS_DP18_1_PLL_FAILED_TO_LOCK);
-                break;
+                if ( dp_p1_lock_data.isBitClear(48) ) { FAPI_ERR("Port 1 DP 0 PLL failed to lock!");}
+                if ( dp_p1_lock_data.isBitClear(49) ) { FAPI_ERR("Port 1 DP 1 PLL failed to lock!");}
+                if ( dp_p1_lock_data.isBitClear(50) ) { FAPI_ERR("Port 1 DP 2 PLL failed to lock!");}
+                if ( dp_p1_lock_data.isBitClear(51) ) { FAPI_ERR("Port 1 DP 3 PLL failed to lock!");}
+                if ( dp_p1_lock_data.isBitClear(52) ) { FAPI_ERR("Port 1 DP 4 PLL failed to lock!");}
+                // break;  // Don't break.  Keep going to initialize any channels that might be good.
             }
-            if ( k_data.getHalfWord(3) != AD32S_PLL_EXP_LOCK_STATUS )
+            //-------------------------------
+            // 7d - Check Port 0 AD lock bits
+            if ( ad_p0_lock_data.getHalfWord(3) != AD32S_PLL_EXP_LOCK_STATUS )
             {
-                FAPI_ERR("AD32S 0x0C001 PLL failed to lock!   Lock Status = %04X",k_data.getHalfWord(3));
+                FAPI_ERR("One or more AD32S port 0 (0x0C001) PLL failed to lock!   Lock Status = %04X",ad_p0_lock_data.getHalfWord(3));
                 FAPI_SET_HWP_ERROR(rc, RC_MSS_AD32S_0_PLL_FAILED_TO_LOCK);
                 break;
             }
-            if ( l_data.getHalfWord(3) != AD32S_PLL_EXP_LOCK_STATUS )
+            //-------------------------------
+            // 7e - Check Port 1 AD lock bits
+            if ( ad_p1_lock_data.getHalfWord(3) != AD32S_PLL_EXP_LOCK_STATUS )
             {
-                FAPI_ERR("AD32S 0x1C001 PLL failed to lock!   Lock Status = %04X",l_data.getHalfWord(3));
+                FAPI_ERR("One or more AD32S port 1 (0x1C001) PLL failed to lock!   Lock Status = %04X",ad_p1_lock_data.getHalfWord(3));
                 FAPI_SET_HWP_ERROR(rc, RC_MSS_AD32S_1_PLL_FAILED_TO_LOCK);
                 break;
             }
         }
         else
         {
-            FAPI_INF("DP18 and AD32S PLLs are now locked.");
+            FAPI_INF("AD32S PLLs are now locked.  DP18 PLLs should also be locked.");
         }
-  
-  
-  
+
+
+
         //
-        // 8.Write '8024'x into the ADR SysClk Phase Rotator Control Registers and into the DP18 SysClk Phase Rotator Control Registers.
+        // 9.Write '8024'x into the ADR SysClk Phase Rotator Control Registers and into the DP18 SysClk Phase Rotator Control Registers.
         //   This takes the dphy_nclk/SysClk alignment circuit out of reset and puts the dphy_nclk/SysClk alignment circuit into the Continuous Update Mode.
         //           ADR SysClk PR Control Registers  :  (SCOM Addr: 0x800080320301143F, 0x800084320301143F, 0x800180320301143F, 0x800184320301143F,
         //                                                           0x800080320301183F, 0x800084320301183F, 0x800180320301183F, 0x800184320301183F)
@@ -360,7 +453,7 @@ fapi::ReturnCode mss_ddr_phy_reset(const fapi::Target & i_target)
         //                                                           0x800000070301183F, 0x800004070301183F, 0x800008070301183F, 0x80000C070301183F, 0x800010070301183F,
         //                                                           0x800100070301143F, 0x800104070301143F, 0x800108070301143F, 0x80010C070301143F, 0x800110070301143F,
         //                                                           0x800100070301183F, 0x800104070301183F, 0x800108070301183F, 0x80010C070301183F, 0x800110070301183F)
-        FAPI_DBG("Step 8: Write '8024'x into the ADR SysClk Phase Rotator Control Regs and the DP18 SysClk Phase Rotator Control Regs.\n");
+        FAPI_DBG("Step 9: Write '8024'x into the ADR SysClk Phase Rotator Control Regs and the DP18 SysClk Phase Rotator Control Regs.\n");
         rc_ecmd |= i_data.setDoubleWord(0, 0x0000000000008024ull);
         if (rc_ecmd)
         {
@@ -392,72 +485,75 @@ fapi::ReturnCode mss_ddr_phy_reset(const fapi::Target & i_target)
             FAPI_ERR("Error writing DPHY01_DDRPHY_ADR_SYSCLK_CNTL_PR_P1_ADR32S1 register.");
             break;
         }
+
+
+
         rc = fapiPutScom( i_target, DPHY01_DDRPHY_DP18_SYSCLK_PR_P0_0_0x800000070301143F, i_data);
         if (rc)
         {
             FAPI_ERR("Error writing DPHY01_DDRPHY_DP18_SYSCLK_PR_P0_0 register.");
-            break;
+            P0_DP0_reg_error = 1;
         }
         rc = fapiPutScom( i_target, DPHY01_DDRPHY_DP18_SYSCLK_PR_P1_0_0x800100070301143F, i_data);
         if (rc)
         {
             FAPI_ERR("Error writing DPHY01_DDRPHY_DP18_SYSCLK_PR_P1_0 register.");
-            break;
+            P1_DP0_reg_error = 1;
         }
         rc = fapiPutScom( i_target, DPHY01_DDRPHY_DP18_SYSCLK_PR_P0_1_0x800004070301143F, i_data);
         if (rc)
         {
             FAPI_ERR("Error writing DPHY01_DDRPHY_DP18_SYSCLK_PR_P0_1 register.");
-            break;
+            P0_DP1_reg_error = 1;
         }
         rc = fapiPutScom( i_target, DPHY01_DDRPHY_DP18_SYSCLK_PR_P1_1_0x800104070301143F, i_data);
         if (rc)
         {
             FAPI_ERR("Error writing DPHY01_DDRPHY_DP18_SYSCLK_PR_P1_1 register.");
-            break;
+            P1_DP1_reg_error = 1;
         }
         rc = fapiPutScom( i_target, DPHY01_DDRPHY_DP18_SYSCLK_PR_P0_2_0x800008070301143F, i_data);
         if (rc)
         {
             FAPI_ERR("Error writing DPHY01_DDRPHY_DP18_SYSCLK_PR_P0_2 register.");
-            break;
+            P0_DP2_reg_error = 1;
         }
         rc = fapiPutScom( i_target, DPHY01_DDRPHY_DP18_SYSCLK_PR_P1_2_0x800108070301143F, i_data);
         if (rc)
         {
             FAPI_ERR("Error writing DPHY01_DDRPHY_DP18_SYSCLK_PR_P1_2 register.");
-            break;
+            P1_DP2_reg_error = 1;
         }
         rc = fapiPutScom( i_target, DPHY01_DDRPHY_DP18_SYSCLK_PR_P0_3_0x80000C070301143F, i_data);
         if (rc)
         {
             FAPI_ERR("Error writing DPHY01_DDRPHY_DP18_SYSCLK_PR_P0_3 register.");
-            break;
+            P0_DP3_reg_error = 1;
         }
         rc = fapiPutScom( i_target, DPHY01_DDRPHY_DP18_SYSCLK_PR_P1_3_0x80010C070301143F, i_data);
         if (rc)
         {
             FAPI_ERR("Error writing DPHY01_DDRPHY_DP18_SYSCLK_PR_P1_3 register.");
-            break;
+            P1_DP3_reg_error = 1;
         }
         rc = fapiPutScom( i_target, DPHY01_DDRPHY_DP18_SYSCLK_PR_P0_4_0x800010070301143F, i_data);
         if (rc)
         {
             FAPI_ERR("Error writing DPHY01_DDRPHY_DP18_SYSCLK_PR_P0_4 register.");
-            break;
+            P0_DP4_reg_error = 1;
         }
         rc = fapiPutScom( i_target, DPHY01_DDRPHY_DP18_SYSCLK_PR_P1_4_0x800110070301143F, i_data);
         if (rc)
         {
             FAPI_ERR("Error writing DPHY01_DDRPHY_DP18_SYSCLK_PR_P1_4 register.");
-            break;
+            P1_DP4_reg_error = 1;
         }
-  
-  
-  
+
+
+
         //
-        // 9.Wait at least 5932 memory clock cycles to allow the clock alignment circuit to perform initial alignment.
-        FAPI_DBG("Step 9: Wait at least 5932 memory clock cycles to allow the clock alignment circuit to perform initial alignment.\n");
+        // 10.Wait at least 5932 memory clock cycles to allow the clock alignment circuit to perform initial alignment.
+        FAPI_DBG("Step 10: Wait at least 5932 memory clock cycles to allow the clock alignment circuit to perform initial alignment.\n");
         rc = fapiDelay(DELAY_100US, DELAY_2000000SIMCYCLES); // wait 2000000 simcycles (in sim mode) OR 100 usec (in hw mode)
         if (rc)
         {
@@ -465,12 +561,12 @@ fapi::ReturnCode mss_ddr_phy_reset(const fapi::Target & i_target)
             break;
         }
 
-  
-  
+
+
         //
-        // 10.Write 0x0000 into the PC Resets Register. This deasserts the SysClk Reset
+        // 11.Write 0x0000 into the PC Resets Register. This deasserts the SysClk Reset
         //                                                (SCOM Addr: 0x8000C00E0301143F, 0x8001C00E0301143F, 0x8000C00E0301183F, 0x8001C00E0301183F)
-        FAPI_DBG("Step 10: Write 0x0000 into the PC Resets Register. This deasserts the SysClk Reset.\n");
+        FAPI_DBG("Step 11: Write 0x0000 into the PC Resets Register. This deasserts the SysClk Reset.\n");
         rc_ecmd |= i_data.setDoubleWord(0, 0x0000000000000000ull);
         if (rc_ecmd)
         {
@@ -490,11 +586,11 @@ fapi::ReturnCode mss_ddr_phy_reset(const fapi::Target & i_target)
             FAPI_ERR("Error writing DPHY01_DDRPHY_PC_RESETS_P1 register.");
             break;
         }
-  
-  
-  
+
+
+
         //
-        // 11.Write '8020'x into the ADR SysClk Phase Rotator Control Registers and into the DP18 SysClk Phase Rotator Control Registers.
+        // 12.Write '8020'x into the ADR SysClk Phase Rotator Control Registers and into the DP18 SysClk Phase Rotator Control Registers.
         //    This takes the dphy_nclk/SysClk alignment circuit out of Continuous Update Mode.
         //           ADR SysClk PR Control Registers  :  (SCOM Addr: 0x800080320301143F, 0x800084320301143F, 0x800180320301143F, 0x800184320301143F,
         //                                                           0x800080320301183F, 0x800084320301183F, 0x800180320301183F, 0x800184320301183F)
@@ -502,7 +598,7 @@ fapi::ReturnCode mss_ddr_phy_reset(const fapi::Target & i_target)
         //                                                           0x800000070301183F, 0x800004070301183F, 0x800008070301183F, 0x80000C070301183F, 0x800010070301183F,
         //                                                           0x800100070301143F, 0x800104070301143F, 0x800108070301143F, 0x80010C070301143F, 0x800110070301143F,
         //                                                           0x800100070301183F, 0x800104070301183F, 0x800108070301183F, 0x80010C070301183F, 0x800110070301183F)
-        FAPI_DBG("Step 11: Write '8020'x into the ADR SysClk Phase Rotator Control Regs and the DP18 SysClk Phase Rotator Control Regs.\n");
+        FAPI_DBG("Step 12: Write '8020'x into the ADR SysClk Phase Rotator Control Regs and the DP18 SysClk Phase Rotator Control Regs.\n");
         rc_ecmd |= i_data.setDoubleWord(0, 0x0000000000008020ull);
         if (rc_ecmd)
         {
@@ -534,65 +630,68 @@ fapi::ReturnCode mss_ddr_phy_reset(const fapi::Target & i_target)
             FAPI_ERR("Error writing DPHY01_DDRPHY_ADR_SYSCLK_CNTL_PR_P1_ADR32S1 register.");
             break;
         }
+
+
+
         rc = fapiPutScom( i_target, DPHY01_DDRPHY_DP18_SYSCLK_PR_P0_0_0x800000070301143F, i_data);
         if (rc)
         {
             FAPI_ERR("Error writing DPHY01_DDRPHY_DP18_SYSCLK_PR_P0_0 register.");
-            break;
+            P0_DP0_reg_error = 1;
         }
         rc = fapiPutScom( i_target, DPHY01_DDRPHY_DP18_SYSCLK_PR_P1_0_0x800100070301143F, i_data);
         if (rc)
         {
             FAPI_ERR("Error writing DPHY01_DDRPHY_DP18_SYSCLK_PR_P1_0 register.");
-            break;
+            P1_DP0_reg_error = 1;
         }
         rc = fapiPutScom( i_target, DPHY01_DDRPHY_DP18_SYSCLK_PR_P0_1_0x800004070301143F, i_data);
         if (rc)
         {
             FAPI_ERR("Error writing DPHY01_DDRPHY_DP18_SYSCLK_PR_P0_1 register.");
-            break;
+            P0_DP1_reg_error = 1;
         }
         rc = fapiPutScom( i_target, DPHY01_DDRPHY_DP18_SYSCLK_PR_P1_1_0x800104070301143F, i_data);
         if (rc)
         {
             FAPI_ERR("Error writing DPHY01_DDRPHY_DP18_SYSCLK_PR_P1_1 register.");
-            break;
+            P1_DP1_reg_error = 1;
         }
         rc = fapiPutScom( i_target, DPHY01_DDRPHY_DP18_SYSCLK_PR_P0_2_0x800008070301143F, i_data);
         if (rc)
         {
             FAPI_ERR("Error writing DPHY01_DDRPHY_DP18_SYSCLK_PR_P0_2 register.");
-            break;
+            P0_DP2_reg_error = 1;
         }
         rc = fapiPutScom( i_target, DPHY01_DDRPHY_DP18_SYSCLK_PR_P1_2_0x800108070301143F, i_data);
         if (rc)
         {
             FAPI_ERR("Error writing DPHY01_DDRPHY_DP18_SYSCLK_PR_P1_2 register.");
-            break;
+            P1_DP2_reg_error = 1;
         }
         rc = fapiPutScom( i_target, DPHY01_DDRPHY_DP18_SYSCLK_PR_P0_3_0x80000C070301143F, i_data);
         if (rc)
         {
             FAPI_ERR("Error writing DPHY01_DDRPHY_DP18_SYSCLK_PR_P0_3 register.");
-            break;
+            P0_DP3_reg_error = 1;
         }
         rc = fapiPutScom( i_target, DPHY01_DDRPHY_DP18_SYSCLK_PR_P1_3_0x80010C070301143F, i_data);
         if (rc)
         {
             FAPI_ERR("Error writing DPHY01_DDRPHY_DP18_SYSCLK_PR_P1_3 register.");
-            break;
+            P1_DP3_reg_error = 1;
         }
         rc = fapiPutScom( i_target, DPHY01_DDRPHY_DP18_SYSCLK_PR_P0_4_0x800010070301143F, i_data);
         if (rc)
         {
             FAPI_ERR("Error writing DPHY01_DDRPHY_DP18_SYSCLK_PR_P0_4 register.");
-            break;
+            P0_DP4_reg_error = 1;
         }
         rc = fapiPutScom( i_target, DPHY01_DDRPHY_DP18_SYSCLK_PR_P1_4_0x800110070301143F, i_data);
         if (rc)
         {
             FAPI_ERR("Error writing DPHY01_DDRPHY_DP18_SYSCLK_PR_P1_4 register.");
-            break;
+            P1_DP4_reg_error = 1;
         }
 
 
@@ -607,7 +706,7 @@ fapi::ReturnCode mss_ddr_phy_reset(const fapi::Target & i_target)
         }
         if (is_simulation)
         {
-            FAPI_DBG("Step 11.1 (SIM ONLY): Write '8000'x into the ADR SysClk Phase Rotator Control Regs and the DP18 SysClk Phase Rotator Control Regs.\n");
+            FAPI_DBG("Step 12.1 (SIM ONLY): Write '8000'x into the ADR SysClk Phase Rotator Control Regs and the DP18 SysClk Phase Rotator Control Regs.\n");
             rc_ecmd |= i_data.setDoubleWord(0, 0x0000000000008000ull);
             if (rc_ecmd)
             {
@@ -639,69 +738,72 @@ fapi::ReturnCode mss_ddr_phy_reset(const fapi::Target & i_target)
                 FAPI_ERR("Error writing DPHY01_DDRPHY_ADR_SYSCLK_CNTL_PR_P1_ADR32S1 register.");
                 break;
             }
+
+
+
             rc = fapiPutScom( i_target, DPHY01_DDRPHY_DP18_SYSCLK_PR_P0_0_0x800000070301143F, i_data);
             if (rc)
             {
                 FAPI_ERR("Error writing DPHY01_DDRPHY_DP18_SYSCLK_PR_P0_0 register.");
-                break;
+                P0_DP0_reg_error = 1;
             }
             rc = fapiPutScom( i_target, DPHY01_DDRPHY_DP18_SYSCLK_PR_P1_0_0x800100070301143F, i_data);
             if (rc)
             {
                 FAPI_ERR("Error writing DPHY01_DDRPHY_DP18_SYSCLK_PR_P1_0 register.");
-                break;
+                P1_DP0_reg_error = 1;
             }
             rc = fapiPutScom( i_target, DPHY01_DDRPHY_DP18_SYSCLK_PR_P0_1_0x800004070301143F, i_data);
             if (rc)
             {
                 FAPI_ERR("Error writing DPHY01_DDRPHY_DP18_SYSCLK_PR_P0_1 register.");
-                break;
+                P0_DP1_reg_error = 1;
             }
             rc = fapiPutScom( i_target, DPHY01_DDRPHY_DP18_SYSCLK_PR_P1_1_0x800104070301143F, i_data);
             if (rc)
             {
                 FAPI_ERR("Error writing DPHY01_DDRPHY_DP18_SYSCLK_PR_P1_1 register.");
-                break;
+                P1_DP1_reg_error = 1;
             }
             rc = fapiPutScom( i_target, DPHY01_DDRPHY_DP18_SYSCLK_PR_P0_2_0x800008070301143F, i_data);
             if (rc)
             {
                 FAPI_ERR("Error writing DPHY01_DDRPHY_DP18_SYSCLK_PR_P0_2 register.");
-                break;
+                P0_DP2_reg_error = 1;
             }
             rc = fapiPutScom( i_target, DPHY01_DDRPHY_DP18_SYSCLK_PR_P1_2_0x800108070301143F, i_data);
             if (rc)
             {
                 FAPI_ERR("Error writing DPHY01_DDRPHY_DP18_SYSCLK_PR_P1_2 register.");
-                break;
+                P1_DP2_reg_error = 1;
             }
             rc = fapiPutScom( i_target, DPHY01_DDRPHY_DP18_SYSCLK_PR_P0_3_0x80000C070301143F, i_data);
             if (rc)
             {
                 FAPI_ERR("Error writing DPHY01_DDRPHY_DP18_SYSCLK_PR_P0_3 register.");
-                break;
+                P0_DP3_reg_error = 1;
             }
             rc = fapiPutScom( i_target, DPHY01_DDRPHY_DP18_SYSCLK_PR_P1_3_0x80010C070301143F, i_data);
             if (rc)
             {
                 FAPI_ERR("Error writing DPHY01_DDRPHY_DP18_SYSCLK_PR_P1_3 register.");
-                break;
+                P1_DP3_reg_error = 1;
             }
             rc = fapiPutScom( i_target, DPHY01_DDRPHY_DP18_SYSCLK_PR_P0_4_0x800010070301143F, i_data);
             if (rc)
             {
                 FAPI_ERR("Error writing DPHY01_DDRPHY_DP18_SYSCLK_PR_P0_4 register.");
-                break;
+                P0_DP4_reg_error = 1;
             }
             rc = fapiPutScom( i_target, DPHY01_DDRPHY_DP18_SYSCLK_PR_P1_4_0x800110070301143F, i_data);
             if (rc)
             {
                 FAPI_ERR("Error writing DPHY01_DDRPHY_DP18_SYSCLK_PR_P1_4 register.");
-                break;
+                P1_DP4_reg_error = 1;
             }
-    
-    
-            FAPI_DBG("Step 11.2 (SIM ONLY): Write '8080'x into the ADR SysClk Phase Rotator Control Regs and the DP18 SysClk Phase Rotator Control Regs.\n");
+
+
+            FAPI_DBG("Step 12.2 (SIM ONLY): Write '8080'x into the ADR SysClk Phase Rotator Control Regs and the DP18 SysClk Phase Rotator Control Regs.\n");
             rc_ecmd |= i_data.setDoubleWord(0, 0x0000000000008080ull);
             if (rc_ecmd)
             {
@@ -733,72 +835,75 @@ fapi::ReturnCode mss_ddr_phy_reset(const fapi::Target & i_target)
                 FAPI_ERR("Error writing DPHY01_DDRPHY_ADR_SYSCLK_CNTL_PR_P1_ADR32S1 register.");
                 break;
             }
+
+
+
             rc = fapiPutScom( i_target, DPHY01_DDRPHY_DP18_SYSCLK_PR_P0_0_0x800000070301143F, i_data);
             if (rc)
             {
                 FAPI_ERR("Error writing DPHY01_DDRPHY_DP18_SYSCLK_PR_P0_0 register.");
-                break;
+                P0_DP0_reg_error = 1;
             }
             rc = fapiPutScom( i_target, DPHY01_DDRPHY_DP18_SYSCLK_PR_P1_0_0x800100070301143F, i_data);
             if (rc)
             {
                 FAPI_ERR("Error writing DPHY01_DDRPHY_DP18_SYSCLK_PR_P1_0 register.");
-                break;
+                P1_DP0_reg_error = 1;
             }
             rc = fapiPutScom( i_target, DPHY01_DDRPHY_DP18_SYSCLK_PR_P0_1_0x800004070301143F, i_data);
             if (rc)
             {
                 FAPI_ERR("Error writing DPHY01_DDRPHY_DP18_SYSCLK_PR_P0_1 register.");
-                break;
+                P0_DP1_reg_error = 1;
             }
             rc = fapiPutScom( i_target, DPHY01_DDRPHY_DP18_SYSCLK_PR_P1_1_0x800104070301143F, i_data);
             if (rc)
             {
                 FAPI_ERR("Error writing DPHY01_DDRPHY_DP18_SYSCLK_PR_P1_1 register.");
-                break;
+                P1_DP1_reg_error = 1;
             }
             rc = fapiPutScom( i_target, DPHY01_DDRPHY_DP18_SYSCLK_PR_P0_2_0x800008070301143F, i_data);
             if (rc)
             {
                 FAPI_ERR("Error writing DPHY01_DDRPHY_DP18_SYSCLK_PR_P0_2 register.");
-                break;
+                P0_DP2_reg_error = 1;
             }
             rc = fapiPutScom( i_target, DPHY01_DDRPHY_DP18_SYSCLK_PR_P1_2_0x800108070301143F, i_data);
             if (rc)
             {
                 FAPI_ERR("Error writing DPHY01_DDRPHY_DP18_SYSCLK_PR_P1_2 register.");
-                break;
+                P1_DP2_reg_error = 1;
             }
             rc = fapiPutScom( i_target, DPHY01_DDRPHY_DP18_SYSCLK_PR_P0_3_0x80000C070301143F, i_data);
             if (rc)
             {
                 FAPI_ERR("Error writing DPHY01_DDRPHY_DP18_SYSCLK_PR_P0_3 register.");
-                break;
+                P0_DP3_reg_error = 1;
             }
             rc = fapiPutScom( i_target, DPHY01_DDRPHY_DP18_SYSCLK_PR_P1_3_0x80010C070301143F, i_data);
             if (rc)
             {
                 FAPI_ERR("Error writing DPHY01_DDRPHY_DP18_SYSCLK_PR_P1_3 register.");
-                break;
+                P1_DP3_reg_error = 1;
             }
             rc = fapiPutScom( i_target, DPHY01_DDRPHY_DP18_SYSCLK_PR_P0_4_0x800010070301143F, i_data);
             if (rc)
             {
                 FAPI_ERR("Error writing DPHY01_DDRPHY_DP18_SYSCLK_PR_P0_4 register.");
-                break;
+                P0_DP4_reg_error = 1;
             }
             rc = fapiPutScom( i_target, DPHY01_DDRPHY_DP18_SYSCLK_PR_P1_4_0x800110070301143F, i_data);
             if (rc)
             {
                 FAPI_ERR("Error writing DPHY01_DDRPHY_DP18_SYSCLK_PR_P1_4 register.");
-                break;
+                P1_DP4_reg_error = 1;
             }
         }
 
-  
+
         //
-        // 12.Wait at least 32 memory clock cycles.
-        FAPI_DBG("Step 12: Wait at least 32 memory clock cycles.\n");
+        // 13.Wait at least 32 memory clock cycles.
+        FAPI_DBG("Step 13: Wait at least 32 memory clock cycles.\n");
         rc = fapiDelay(DELAY_100NS, DELAY_2000SIMCYCLES); // wait 2000 simcycles (in sim mode) OR 100 nS (in hw mode)
         if (rc)
         {
@@ -806,17 +911,17 @@ fapi::ReturnCode mss_ddr_phy_reset(const fapi::Target & i_target)
             break;
         }
 
-  
-  
+
+
         //
-        // 13.Write 0x0010 to PC IO PVT N/P FET driver control register to enable internal ZQ calibration.
+        // 14.Write 0x0018 to PC IO PVT N/P FET driver control register to enable internal ZQ calibration.
         //    This step takes approximately 2112 (64 * 33) memory clock cycles.
         //                                                (SCOM Addr: 0x8000C0140301143F,  0x8000C0140301183F, 0x8001C0140301143F, 0x8001C0140301183F)
-        FAPI_DBG("Step 13: Write 0x0010 to PC IO PVT N/P FET driver control register to enable internal ZQ calibration.\n");
-        rc_ecmd |= i_data.setDoubleWord(0, 0x0000000000000010ull);
+        FAPI_DBG("Step 14: Write 0x0018 to PC IO PVT N/P FET driver control register to enable internal ZQ calibration.\n");
+        rc_ecmd |= i_data.setDoubleWord(0, 0x0000000000000018ull);
         if (rc_ecmd)
         {
-            FAPI_ERR("Error 0x%x setting up ecmd data buffer to write 0x0010 into the PC_IO_PVT_FET_CONTROL registers.",  rc_ecmd);
+            FAPI_ERR("Error 0x%x setting up ecmd data buffer to write 0x0018 into the PC_IO_PVT_FET_CONTROL registers.",  rc_ecmd);
             rc.setEcmdError(rc_ecmd);
             break;
         }
@@ -835,11 +940,110 @@ fapi::ReturnCode mss_ddr_phy_reset(const fapi::Target & i_target)
 
 
 
+
+
+        //
+        // Now do some error checking and mark bad channels
+        // Check to see if there were any register access problems on DP registers, or corresponding PLLs that did not lock.
+        // If so, mark the DP pairs as bad.
+
+        // Loop through only valid (functional) dimms.
+        // For each valid dimm, loop through all the ranks belonging to that dimm.
+        // If there was either a register access error, or if the PLL did not lock, then mark the DP pair as bad.
+        // Do this by setting the dqBitmap attribute for all dimms and ranks associated with that PLL or register.
+        // Read the dqBitmap first, so that you do not clear values that may already be set.
+        // (Some DP channels may already be marked as bad.)
+
+	// Find out which dimms are functional
+        rc = FAPI_ATTR_GET(ATTR_MSS_EFF_DIMM_FUNCTIONAL_VECTOR,	&i_target, valid_dimms);
+        if (rc)
+        {
+            FAPI_ERR("Failed to get attribute: ATTR_MSS_EFF_DIMM_FUNCTIONAL_VECTOR");
+            break;
+        }
+        valid_dimm[0][0] = (valid_dimms & 0x80);
+        valid_dimm[0][1] = (valid_dimms & 0x40);
+        valid_dimm[1][0] = (valid_dimms & 0x08);
+        valid_dimm[1][1] = (valid_dimms & 0x04);
+
+        // Find out how many ranks are on each dimm
+        rc = FAPI_ATTR_GET( ATTR_EFF_NUM_RANKS_PER_DIMM, &i_target, num_ranks_per_dimm);
+        if (rc)
+        {
+            FAPI_ERR("Failed to get attribute: ATTR_EFF_NUM_RANKS_PER_DIMM.");
+            break;
+        }
+
+
+        // Loop through each PORT (0,1)
+        for(l_port=0; l_port<1; l_port++ )
+        {
+            // Loop through each DIMM:(0,1)
+            for(l_dimm=0; l_dimm<DIMM_DQ_MAX_MBAPORT_DIMMS; l_dimm++ )
+            {
+                if (valid_dimm[l_port][l_dimm])
+                {
+                    // Ok, this DIMM is functional. So loop through the RANKs of this dimm.
+                    for(l_rank=0; l_rank<num_ranks_per_dimm[l_port][l_dimm]; l_rank++ )
+                    {
+                        // Get the bad DQ Bitmap for l_port, l_dimm, l_rank
+                        rc = dimmGetBadDqBitmap(i_target,
+                                                l_port,
+                                                l_dimm,
+                                                l_rank,
+                                                l_dqBitmap);
+                        if (rc)
+                        {
+                            FAPI_ERR("Error from dimmGetBadDqBitmap");
+                            break;
+                        }
+            
+                        // Mark the bad bits for each register that had problems or PLL that did not lock
+                        new_error = 0;
+                        if ( l_port == 0 )
+                        {
+                            if (( P0_DP0_reg_error == 1 ) || ( dp_p0_lock_data.isBitClear(48) )) { l_dqBitmap[0] = 0xff; l_dqBitmap[1] = 0xff; new_error = 1; }
+                            if (( P0_DP1_reg_error == 1 ) || ( dp_p0_lock_data.isBitClear(49) )) { l_dqBitmap[2] = 0xff; l_dqBitmap[3] = 0xff; new_error = 1; }
+                            if (( P0_DP2_reg_error == 1 ) || ( dp_p0_lock_data.isBitClear(50) )) { l_dqBitmap[4] = 0xff; l_dqBitmap[5] = 0xff; new_error = 1; }
+                            if (( P0_DP3_reg_error == 1 ) || ( dp_p0_lock_data.isBitClear(51) )) { l_dqBitmap[6] = 0xff; l_dqBitmap[7] = 0xff; new_error = 1; }
+                            if (( P0_DP4_reg_error == 1 ) || ( dp_p0_lock_data.isBitClear(52) )) { l_dqBitmap[8] = 0xff; l_dqBitmap[9] = 0xff; new_error = 1; }
+                        } else {
+                            if (( P1_DP0_reg_error == 1 ) || ( dp_p1_lock_data.isBitClear(48) )) { l_dqBitmap[0] = 0xff; l_dqBitmap[1] = 0xff; new_error = 1; }
+                            if (( P1_DP1_reg_error == 1 ) || ( dp_p1_lock_data.isBitClear(49) )) { l_dqBitmap[2] = 0xff; l_dqBitmap[3] = 0xff; new_error = 1; }
+                            if (( P1_DP2_reg_error == 1 ) || ( dp_p1_lock_data.isBitClear(50) )) { l_dqBitmap[4] = 0xff; l_dqBitmap[5] = 0xff; new_error = 1; }
+                            if (( P1_DP3_reg_error == 1 ) || ( dp_p1_lock_data.isBitClear(51) )) { l_dqBitmap[6] = 0xff; l_dqBitmap[7] = 0xff; new_error = 1; }
+                            if (( P1_DP4_reg_error == 1 ) || ( dp_p1_lock_data.isBitClear(52) )) { l_dqBitmap[8] = 0xff; l_dqBitmap[9] = 0xff; new_error = 1; }
+                        }
+            
+                        // If there are new errors, write back the bad DQ Bitmap for l_port, l_dimm, l_rank
+                        if ( new_error == 1 )
+                        {
+                            rc = dimmSetBadDqBitmap(i_target,
+                                                    l_port,
+                                                    l_dimm,
+                                                    l_rank,
+                                                    l_dqBitmap);
+                            if (rc)
+                            {
+                                FAPI_ERR("Error from dimmPutBadDqBitmap");
+                                break;
+                            }
+                        }
+                    }  // End of loop over RANKs
+                    if (rc) break;    // Go to end of proc if error found inside loop.
+                }
+            }  // End of loop over DIMMs
+            if (rc) break;    // Go to end of proc if error found inside loop.
+        }  // End of loop over PORTs
+
+
     } while(0);
 
     FAPI_INF("********* mss_ddr_phy_reset complete *********");
+
     return rc;
 }
+
 
 // function moved from draminit because we need mclk low not asserted for pll locking
 ReturnCode mss_deassert_force_mclk_low (const Target& i_target)
@@ -875,6 +1079,25 @@ This section is automatically updated by CVS when you check in this file.
 Be sure to create CVS comments when you commit so that they can be included here.
 
 $Log: mss_ddr_phy_reset.C,v $
+Revision 1.17  2012/12/03 15:49:27  mfred
+Fixed bug to allow exit from loops in case of error.
+
+Revision 1.16  2012/11/29 23:02:53  mfred
+Fix for ZQ_CAL workaround and support for partial set of dimms.
+
+Revision 1.15  2012/11/16 16:36:20  mfred
+Update code to return an error from mss_slew_cal, if any, unless there is an error from mss_ddr_phy_reset.
+
+Revision 1.14  2012/11/14 23:42:43  mfred
+Call mss_slew_cal after the ddr_phy_reset steps.
+
+Revision 1.13  2012/10/19 20:27:26  mfred
+Added support for sub-partial-good operation when only a subset of DPs are good.
+
+Revision 1.12  2012/09/06 15:01:46  gollub
+
+Calling mss_unmask_ddrphy_errors after mss_ddr_phy_reser_cloned.
+
 Revision 1.11  2012/07/27 16:43:25  bellows
 CQ216395 hardware needs force mclk low in phy reset procedure
 

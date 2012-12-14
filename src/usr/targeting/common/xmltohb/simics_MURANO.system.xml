@@ -71,7 +71,7 @@
     </attribute>
     <attribute>
         <id>ALL_MCS_IN_INTERLEAVING_GROUP</id>
-        <default>1</default>
+        <default>0</default>
     </attribute>
     <attribute>
         <id>FREQ_PROC_REFCLOCK</id>

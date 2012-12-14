@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_eff_config.C,v 1.11 2012/09/25 17:58:32 mjjones Exp $
+// $Id: mss_eff_config.C,v 1.15 2012/11/16 14:44:04 asaetow Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/
 //          centaur/working/procedures/ipl/fapi/mss_eff_config.C,v $
 //------------------------------------------------------------------------------
@@ -44,8 +44,38 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
-//   1.12  |          |         |
-//   1.11  | kjpower  |27-AUG-12| Restructured code, added modularity
+//   1.16  |          |         |
+//   1.15  | asaetow  |15-NOV-12| Added call to mss_eff_config_cke_map().
+//         |          |         | NOTE: DO NOT pick-up without
+//         |          |         | mss_eff_config_cke_map.C v1.3 or newer.
+//         |          |         | Added ATTR_MSS_ALLOW_SINGLE_PORT check. 
+//         |          |         | Added ATTR_EFF_DIMM_SPARE.
+//         |          |         | Fixed NUM_RANKS_PER_DIMM for single drop. 
+//         |          |         | Fixed calc_timing_in_clk() for negative. 
+//         |          |         | Fixed IBM_TYPE and STACK_TYPE. 
+//   1.14  | asaetow  |08-NOV-12| Changed to match new memory_attributes.xml
+//         |          |         | v1.45 or newer.
+//         |          |         | NOTE: DO NOT pick-up without
+//         |          |         | memory_attributes.xml v1.45 or newer.
+//   1.13  | asaetow  |11-OCT-12| Added ATTR_EFF_SCHMOO_ADDR_MODE, 
+//         |          |         | ATTR_EFF_SCHMOO_WR_EYE_MIN_MARGIN,
+//         |          |         | ATTR_EFF_SCHMOO_RD_EYE_MIN_MARGIN,
+//         |          |         | ATTR_EFF_SCHMOO_DQS_CLK_MIN_MARGIN,
+//         |          |         | ATTR_EFF_SCHMOO_RD_GATE_MIN_MARGIN,
+//         |          |         | ATTR_EFF_SCHMOO_ADDR_CMD_MIN_MARGIN,
+//         |          |         | ATTR_EFF_DRAM_WR_VREF_SCHMOO,
+//         |          |         | ATTR_EFF_CEN_RD_VREF_SCHMOO,
+//         |          |         | ATTR_EFF_CEN_DRV_IMP_DQ_DQS_SCHMOO,
+//         |          |         | ATTR_EFF_CEN_DRV_IMP_CMD_SCHMOO,
+//         |          |         | ATTR_EFF_CEN_DRV_IMP_CNTL_SCHMOO,
+//         |          |         | ATTR_EFF_CEN_RCV_IMP_DQ_DQS_SCHMOO,
+//         |          |         | ATTR_EFF_CEN_SLEW_RATE_DQ_DQS_SCHMOO,
+//         |          |         | ATTR_EFF_CEN_SLEW_RATE_CMD_SCHMOO,
+//         |          |         | and ATTR_EFF_CEN_SLEW_RATE_CNTL_SCHMOO.
+//   1.12  | asaetow  |26-SEP-12| Added initial equation for
+//         |          |         | ATTR_EFF_ZQCAL_INTERVAL and
+//         |          |         | ATTR_EFF_MEMCAL_INTERVAL from Ken.
+//   1.11  | kjpower  |26-SEP-12| Restructured code, added modularity
 //   1.10  | bellows  |02-AUG-12| Added in DIMM functional vector for Daniel
 //   1.9   | asaetow  |29-MAY-12| Added divide by 0 check for mss_freq.
 //         |          |         | Added 9 new attributes from
@@ -93,6 +123,7 @@
 //------------------------------------------------------------------------------
 #include <mss_eff_config.H>
 #include <mss_eff_config_rank_group.H>
+#include <mss_eff_config_cke_map.H>
 #include <mss_eff_config_termination.H>
 #include <mss_eff_config_thermal.H>
 
@@ -109,6 +140,7 @@ const uint32_t MSS_EFF_VALID = 255;
 const uint32_t TWO_MHZ = 2000000;
 const uint8_t PORT_SIZE = 2;
 const uint8_t DIMM_SIZE = 2;
+const uint8_t RANK_SIZE = 4;
 
 //------------------------------------------------------------------------------
 // Structure
@@ -120,6 +152,7 @@ struct mss_eff_config_data
 {
     uint8_t cur_dimm_spd_valid_u8array[PORT_SIZE][DIMM_SIZE];
     uint8_t dimm_functional;
+    uint8_t allow_single_port;
     uint8_t cur_dram_density;
     uint32_t mss_freq;
     uint32_t mtb_in_ps_u32array[PORT_SIZE][DIMM_SIZE];
@@ -211,6 +244,7 @@ struct mss_eff_config_atts
     // AST HERE: Needs SPD byte68:76
     uint64_t eff_dimm_rcd_cntl_word_0_15[PORT_SIZE][DIMM_SIZE];
     uint8_t eff_dimm_size[PORT_SIZE][DIMM_SIZE];
+    uint8_t eff_dimm_spare[PORT_SIZE][DIMM_SIZE][RANK_SIZE];
     uint8_t eff_dimm_type;
     uint8_t eff_dram_al; // initialized to 1
     uint8_t eff_dram_asr;
@@ -248,8 +282,6 @@ struct mss_eff_config_atts
     uint8_t eff_dram_width;
     uint8_t eff_dram_wr;
     uint8_t eff_dram_wr_lvl_enable;
-    // AST HERE: Needs SPD byte33[7,1:0], currently hard coded to TYPE_1B
-    // initialized to {{2,2},{2,2}}
     uint8_t eff_ibm_type[PORT_SIZE][DIMM_SIZE];
     uint32_t eff_memcal_interval;
     uint8_t eff_mpr_loc;
@@ -262,10 +294,28 @@ struct mss_eff_config_atts
     uint8_t eff_num_packages_per_rank[PORT_SIZE][DIMM_SIZE];
     uint8_t eff_num_ranks_per_dimm[PORT_SIZE][DIMM_SIZE];
     uint8_t eff_schmoo_mode;
+
+    uint8_t eff_schmoo_addr_mode;
+    uint8_t eff_schmoo_wr_eye_min_margin;
+    uint8_t eff_schmoo_rd_eye_min_margin;
+    uint8_t eff_schmoo_dqs_clk_min_margin;
+    uint8_t eff_schmoo_rd_gate_min_margin;
+    uint8_t eff_schmoo_addr_cmd_min_margin;
+    uint32_t eff_cen_rd_vref_schmoo[PORT_SIZE];
+    uint32_t eff_dram_wr_vref_schmoo[PORT_SIZE];
+    uint32_t eff_cen_rcv_imp_dq_dqs_schmoo[PORT_SIZE];
+    uint32_t eff_cen_drv_imp_dq_dqs_schmoo[PORT_SIZE];
+    uint8_t eff_cen_drv_imp_cntl_schmoo[PORT_SIZE];
+    uint8_t eff_cen_drv_imp_clk_schmoo[PORT_SIZE];
+    uint8_t eff_cen_drv_imp_spcke_schmoo[PORT_SIZE];
+    uint8_t eff_cen_slew_rate_dq_dqs_schmoo[PORT_SIZE];
+    uint8_t eff_cen_slew_rate_cntl_schmoo[PORT_SIZE];
+    uint8_t eff_cen_slew_rate_addr_schmoo[PORT_SIZE];
+    uint8_t eff_cen_slew_rate_clk_schmoo[PORT_SIZE];
+    uint8_t eff_cen_slew_rate_spcke_schmoo[PORT_SIZE];
+
     uint8_t eff_schmoo_param_valid;
     uint8_t eff_schmoo_test_valid;
-    // AST HERE: Needs SPD byte33[7,1:0], currently hard coded to 1
-    // initialized to {{1,1},{1,1}}
     uint8_t eff_stack_type[PORT_SIZE][DIMM_SIZE];
     uint32_t eff_zqcal_interval;
     uint8_t dimm_functional_vector;
@@ -330,7 +380,12 @@ uint32_t calc_timing_in_clk(uint32_t i_mtb_in_ps, uint32_t i_ftb_in_fs,
     uint32_t l_tCK_in_ps;
     // perform calculations
     l_tCK_in_ps = TWO_MHZ/i_mss_freq;
-    l_timing = (i_unit * i_mtb_in_ps) + (i_offset * i_ftb_in_fs);
+    if ( i_offset >= 128 ) {
+       i_offset = 256 - i_offset;
+       l_timing = (i_unit * i_mtb_in_ps) - (i_offset * i_ftb_in_fs);
+    } else {
+       l_timing = (i_unit * i_mtb_in_ps) + (i_offset * i_ftb_in_fs);
+    }
     // ceiling()
     l_timing_in_clk = l_timing / l_tCK_in_ps;
     // check l_timing
@@ -339,9 +394,7 @@ uint32_t calc_timing_in_clk(uint32_t i_mtb_in_ps, uint32_t i_ftb_in_fs,
         l_timing_in_clk += 1;
     }
     // DEBUG HERE:
-    //FAPI_INF("calc_timing_in_clk: l_timing_in_clk = %d, l_tCK_in_ps = %d,
-    // i_mtb_in_ps = %d, i_ftb_in_fs = %d, i_unit = %d, i_offset = %d",
-    //l_timing_in_clk, l_tCK_in_ps, i_mtb_in_ps, i_ftb_in_fs, i_unit, i_offset);
+    //FAPI_INF("calc_timing_in_clk: l_timing_in_clk = %d, l_tCK_in_ps = %d, i_mtb_in_ps = %d, i_ftb_in_fs = %d, i_unit = %d, i_offset = %d", l_timing_in_clk, l_tCK_in_ps, i_mtb_in_ps, i_ftb_in_fs, i_unit, i_offset);
 
     return l_timing_in_clk;
 } // end calc_timing_in_clk()
@@ -651,7 +704,7 @@ fapi::ReturnCode mss_eff_config_verify_plug_rules(
         FAPI_SET_HWP_ERROR(rc, RC_MSS_PLACE_HOLDER_ERROR);
         return rc;
     }
-    if (
+    if ( (
             ((p_i_mss_eff_config_data->
               cur_dimm_spd_valid_u8array[0][0] == MSS_EFF_VALID)
              && (p_i_mss_eff_config_data->
@@ -661,7 +714,20 @@ fapi::ReturnCode mss_eff_config_verify_plug_rules(
               cur_dimm_spd_valid_u8array[0][1] == MSS_EFF_VALID)
              && (p_i_mss_eff_config_data->
                  cur_dimm_spd_valid_u8array[1][1] == MSS_EFF_EMPTY))
-       )
+       ) && (p_i_mss_eff_config_data->allow_single_port == fapi::ENUM_ATTR_MSS_ALLOW_SINGLE_PORT_FALSE) )
+    {
+        FAPI_ERR("Plug rule violation on %s!", i_target_mba.toEcmdString());
+        FAPI_SET_HWP_ERROR(rc, RC_MSS_PLACE_HOLDER_ERROR);
+        return rc;
+    }
+    if ( (
+            (p_i_mss_eff_config_data->
+              cur_dimm_spd_valid_u8array[0][1] == MSS_EFF_VALID)
+             || (p_i_mss_eff_config_data->
+                 cur_dimm_spd_valid_u8array[1][0] == MSS_EFF_VALID)
+             || (p_i_mss_eff_config_data->
+                 cur_dimm_spd_valid_u8array[1][1] == MSS_EFF_VALID)
+       ) && (p_i_mss_eff_config_data->allow_single_port == fapi::ENUM_ATTR_MSS_ALLOW_SINGLE_PORT_TRUE) )
     {
         FAPI_ERR("Plug rule violation on %s!", i_target_mba.toEcmdString());
         FAPI_SET_HWP_ERROR(rc, RC_MSS_PLACE_HOLDER_ERROR);
@@ -979,13 +1045,19 @@ fapi::ReturnCode mss_eff_config_setup_eff_atts(
         for(int j = 0; j < DIMM_SIZE; j++)
         {
             // i <-> PORT_SIZE, j <-> DIMM_SIZE
-            // initializes to {{1,1},{1,1}} and {{2,2},{2,2}} respectively
-            p_o_atts->eff_stack_type[i][j] = 1;
-            p_o_atts->eff_ibm_type[i][j] = 2;
+            p_o_atts->eff_stack_type[i][j] = 0;
+            p_o_atts->eff_ibm_type[i][j] = 0;
         }
     }
 
     // Assigning values to attributes
+//------------------------------------------------------------------------------
+    p_o_atts->eff_schmoo_wr_eye_min_margin = 70;
+    p_o_atts->eff_schmoo_rd_eye_min_margin = 70;
+    p_o_atts->eff_schmoo_dqs_clk_min_margin = 140;
+    p_o_atts->eff_schmoo_rd_gate_min_margin = 100;
+    p_o_atts->eff_schmoo_addr_cmd_min_margin = 140;
+//------------------------------------------------------------------------------
     switch(p_i_data->dram_device_type[0][0])
     {
         case fapi::ENUM_ATTR_SPD_DRAM_DEVICE_TYPE_DDR3:
@@ -1009,7 +1081,20 @@ fapi::ReturnCode mss_eff_config_setup_eff_atts(
             p_o_atts->eff_dimm_type = fapi::ENUM_ATTR_EFF_DIMM_TYPE_RDIMM;
             break;
         case fapi::ENUM_ATTR_SPD_MODULE_TYPE_UDIMM:
-            p_o_atts->eff_dimm_type = fapi::ENUM_ATTR_EFF_DIMM_TYPE_UDIMM;
+            // TODO RTC Task 60572
+            // DIMM SPD Module Type in byte 3 can be 0x82.
+            // 0x80 is CDIMM, 0x02 is unbuffered
+            // Problem 1: Firmware SPD DD only returns the lower 4 bits because
+            //   the top 4 bits are reserved in the spec. There needs to be a
+            //   new SPD attribute for the top bit that can be queried by this
+            //   HWP. HW team to provide updated dimm_spd_attributes.xml. FW
+            //   team to support the new attribute.
+            // Problem 2: This HWP and mss_eff_config_termination fail if
+            //   eff_dimm_type is not CDIMM or RDIMM. Depending on the fix for
+            //   Problem 1, the HWPs need fixing to recognize Unbuffered-CDIMM
+            // The workaround is to treat UDIMM(0x02) as a CDIMM
+            //OLD: p_o_atts->eff_dimm_type = fapi::ENUM_ATTR_EFF_DIMM_TYPE_UDIMM;
+            p_o_atts->eff_dimm_type = fapi::ENUM_ATTR_EFF_DIMM_TYPE_CDIMM;
             break;
         case fapi::ENUM_ATTR_SPD_MODULE_TYPE_LRDIMM:
             p_o_atts->eff_dimm_type = fapi::ENUM_ATTR_EFF_DIMM_TYPE_LRDIMM;
@@ -1123,7 +1208,11 @@ fapi::ReturnCode mss_eff_config_setup_eff_atts(
 //------------------------------------------------------------------------------
     p_o_atts->eff_dram_density = 16;
 
-    for (int l_cur_mba_port = 0; l_cur_mba_port < PORT_SIZE; l_cur_mba_port += 1)
+    uint8_t allow_port_size = 1;
+    if (p_i_mss_eff_config_data->allow_single_port == fapi::ENUM_ATTR_MSS_ALLOW_SINGLE_PORT_FALSE) {
+       allow_port_size = PORT_SIZE;
+    }
+    for (int l_cur_mba_port = 0; l_cur_mba_port < allow_port_size; l_cur_mba_port += 1)
     {
         for (int l_cur_mba_dimm = 0; l_cur_mba_dimm <
                 p_o_atts->eff_num_drops_per_port; l_cur_mba_dimm += 1)
@@ -1155,10 +1244,13 @@ fapi::ReturnCode mss_eff_config_setup_eff_atts(
             }
             else
             {
-               FAPI_ERR("Unsupported DRAM density on %s!",
-                       i_target_mba.toEcmdString());
-               FAPI_SET_HWP_ERROR(rc, RC_MSS_PLACE_HOLDER_ERROR);
-               return rc;
+               p_i_mss_eff_config_data->cur_dram_density = 1;
+               if (p_i_mss_eff_config_data->allow_single_port == fapi::ENUM_ATTR_MSS_ALLOW_SINGLE_PORT_FALSE) {
+                  FAPI_ERR("Unsupported DRAM density on %s!",
+                          i_target_mba.toEcmdString());
+                  FAPI_SET_HWP_ERROR(rc, RC_MSS_PLACE_HOLDER_ERROR);
+                  return rc;
+               }
             }
 //------------------------------------------------------------------------------
             if (p_o_atts->eff_dram_density >
@@ -1415,6 +1507,17 @@ fapi::ReturnCode mss_eff_config_setup_eff_atts(
         return rc;
     }
 //------------------------------------------------------------------------------
+    // Calculate ZQCAL Interval based on the following equation from Ken:
+    //            0.5
+    //  ------------------------------ = 13.333ms 
+    //  (1.5 * 10) + (0.15 * 150)
+    p_o_atts->eff_zqcal_interval = ( 13333 *
+            p_i_mss_eff_config_data->mss_freq) / 2;
+//------------------------------------------------------------------------------
+    // Calculate MEMCAL Interval based on 1sec interval across all bits per DP18
+    p_o_atts->eff_memcal_interval = (62500 *
+            p_i_mss_eff_config_data->mss_freq) / 2;
+//------------------------------------------------------------------------------
     // Calculate tRFI
     p_o_atts->eff_dram_trfi = (3900 *
             p_i_mss_eff_config_data->mss_freq) / 2000;
@@ -1426,6 +1529,9 @@ fapi::ReturnCode mss_eff_config_setup_eff_atts(
         for (int l_cur_mba_dimm = 0; l_cur_mba_dimm <
                 DIMM_SIZE; l_cur_mba_dimm += 1)
         {
+          if (p_i_mss_eff_config_data->
+              cur_dimm_spd_valid_u8array[l_cur_mba_port][l_cur_mba_dimm] == MSS_EFF_VALID)
+          {
             if (p_i_data->num_ranks[l_cur_mba_port]
                     [l_cur_mba_dimm] == fapi::ENUM_ATTR_SPD_NUM_RANKS_R4)
             {
@@ -1456,6 +1562,74 @@ fapi::ReturnCode mss_eff_config_setup_eff_atts(
                 p_o_atts->eff_dimm_ranks_configed[l_cur_mba_port]
                     [l_cur_mba_dimm] = 0x00;
             }
+            for (int l_cur_mba_rank = 0; l_cur_mba_rank <
+               RANK_SIZE; l_cur_mba_rank += 1)
+            {
+               if (( p_o_atts->eff_dimm_type == fapi::ENUM_ATTR_EFF_DIMM_TYPE_CDIMM)
+                    && ( l_cur_mba_rank < p_o_atts->eff_num_ranks_per_dimm[l_cur_mba_port][l_cur_mba_dimm] ))
+               {
+                 p_o_atts->
+                  eff_dimm_spare[l_cur_mba_port][l_cur_mba_dimm][l_cur_mba_rank]
+                    = fapi::ENUM_ATTR_EFF_DIMM_SPARE_FULL_BYTE;
+               } else {
+                 p_o_atts->
+                  eff_dimm_spare[l_cur_mba_port][l_cur_mba_dimm][l_cur_mba_rank] 
+                    = fapi::ENUM_ATTR_EFF_DIMM_SPARE_NO_SPARE;
+               }  
+            }
+            // AST HERE: Needs SPD byte33[7,1:0], for expanded IBM_TYPE and STACK_TYPE
+            if ( p_o_atts->eff_dimm_type == fapi::ENUM_ATTR_EFF_DIMM_TYPE_RDIMM ) {
+               if (p_o_atts->eff_num_ranks_per_dimm[l_cur_mba_port][l_cur_mba_dimm] == 1) {
+                  p_o_atts->eff_stack_type[l_cur_mba_port][l_cur_mba_dimm] = fapi::ENUM_ATTR_EFF_STACK_TYPE_NONE;
+                  p_o_atts->eff_ibm_type[l_cur_mba_port][l_cur_mba_dimm] = fapi::ENUM_ATTR_EFF_IBM_TYPE_TYPE_1A;
+               } else if (p_o_atts->eff_num_ranks_per_dimm[l_cur_mba_port][l_cur_mba_dimm] == 2) {
+                  p_o_atts->eff_stack_type[l_cur_mba_port][l_cur_mba_dimm] = fapi::ENUM_ATTR_EFF_STACK_TYPE_NONE;
+                  p_o_atts->eff_ibm_type[l_cur_mba_port][l_cur_mba_dimm] = fapi::ENUM_ATTR_EFF_IBM_TYPE_TYPE_1B;
+               } else if (p_o_atts->eff_num_ranks_per_dimm[l_cur_mba_port][l_cur_mba_dimm] == 4) {
+                  p_o_atts->eff_stack_type[l_cur_mba_port][l_cur_mba_dimm] = fapi::ENUM_ATTR_EFF_STACK_TYPE_DDP_QDP;
+                  p_o_atts->eff_ibm_type[l_cur_mba_port][l_cur_mba_dimm] = fapi::ENUM_ATTR_EFF_IBM_TYPE_TYPE_1D;
+               } else {
+                  p_o_atts->eff_stack_type[l_cur_mba_port][l_cur_mba_dimm] = fapi::ENUM_ATTR_EFF_STACK_TYPE_NONE;
+                  p_o_atts->eff_ibm_type[l_cur_mba_port][l_cur_mba_dimm] = fapi::ENUM_ATTR_EFF_IBM_TYPE_UNDEFINED;
+                  FAPI_ERR("Currently unsupported IBM_TYPE on %s!", i_target_mba.toEcmdString());
+                  FAPI_SET_HWP_ERROR(rc, RC_MSS_PLACE_HOLDER_ERROR); return rc;
+               }
+            } else if ( p_o_atts->eff_dimm_type == fapi::ENUM_ATTR_EFF_DIMM_TYPE_CDIMM ) {
+               if (p_o_atts->eff_num_ranks_per_dimm[l_cur_mba_port][l_cur_mba_dimm] == 1) {
+                  p_o_atts->eff_stack_type[l_cur_mba_port][l_cur_mba_dimm] = fapi::ENUM_ATTR_EFF_STACK_TYPE_NONE;
+                  p_o_atts->eff_ibm_type[l_cur_mba_port][l_cur_mba_dimm] = fapi::ENUM_ATTR_EFF_IBM_TYPE_TYPE_1A;
+               } else if (p_o_atts->eff_num_ranks_per_dimm[l_cur_mba_port][l_cur_mba_dimm] == 2) {
+                  p_o_atts->eff_stack_type[l_cur_mba_port][l_cur_mba_dimm] = fapi::ENUM_ATTR_EFF_STACK_TYPE_DDP_QDP;
+                  p_o_atts->eff_ibm_type[l_cur_mba_port][l_cur_mba_dimm] = fapi::ENUM_ATTR_EFF_IBM_TYPE_TYPE_1B;
+               } else {
+                  p_o_atts->eff_stack_type[l_cur_mba_port][l_cur_mba_dimm] = fapi::ENUM_ATTR_EFF_STACK_TYPE_NONE;
+                  p_o_atts->eff_ibm_type[l_cur_mba_port][l_cur_mba_dimm] = fapi::ENUM_ATTR_EFF_IBM_TYPE_UNDEFINED;
+                  FAPI_ERR("Currently unsupported IBM_TYPE on %s!", i_target_mba.toEcmdString());
+                  FAPI_SET_HWP_ERROR(rc, RC_MSS_PLACE_HOLDER_ERROR); return rc;
+               }
+            } else {
+               p_o_atts->eff_stack_type[l_cur_mba_port][l_cur_mba_dimm] = fapi::ENUM_ATTR_EFF_STACK_TYPE_NONE;
+               p_o_atts->eff_ibm_type[l_cur_mba_port][l_cur_mba_dimm] = fapi::ENUM_ATTR_EFF_IBM_TYPE_UNDEFINED;
+               FAPI_ERR("Currently unsupported DIMM_TYPE on %s!", i_target_mba.toEcmdString());
+               FAPI_SET_HWP_ERROR(rc, RC_MSS_PLACE_HOLDER_ERROR); return rc;
+            }
+          } else {
+             p_o_atts->eff_num_ranks_per_dimm[l_cur_mba_port]
+                 [l_cur_mba_dimm] = 0;
+             p_o_atts->eff_dimm_ranks_configed[l_cur_mba_port]
+                 [l_cur_mba_dimm] = 0x00;
+            for (int l_cur_mba_rank = 0; l_cur_mba_rank <
+               RANK_SIZE; l_cur_mba_rank += 1)
+            {
+               p_o_atts->
+                eff_dimm_spare[l_cur_mba_port][l_cur_mba_dimm][l_cur_mba_rank]
+                  = fapi::ENUM_ATTR_EFF_DIMM_SPARE_NO_SPARE;
+            }
+            p_o_atts->eff_stack_type[l_cur_mba_port][l_cur_mba_dimm] = fapi::ENUM_ATTR_EFF_STACK_TYPE_NONE;
+            p_o_atts->eff_ibm_type[l_cur_mba_port][l_cur_mba_dimm] = fapi::ENUM_ATTR_EFF_IBM_TYPE_UNDEFINED;
+          }
+//------------------------------------------------------------------------------
+          
 //------------------------------------------------------------------------------
             if (p_o_atts->eff_num_ranks_per_dimm[l_cur_mba_port]
                     [l_cur_mba_dimm] != 0)
@@ -1552,7 +1726,11 @@ fapi::ReturnCode mss_eff_config_write_eff_atts(
                 p_i_atts->eff_dimm_rcd_cntl_word_0_15);
         if(rc) break;
         rc = FAPI_ATTR_SET(ATTR_EFF_DIMM_SIZE, &i_target_mba,
-                p_i_atts->eff_dimm_size); if(rc) break;
+                p_i_atts->eff_dimm_size);
+        if(rc) break;
+        rc = FAPI_ATTR_SET(ATTR_EFF_DIMM_SPARE, &i_target_mba,
+                p_i_atts->eff_dimm_spare);
+        if(rc) break;
         rc = FAPI_ATTR_SET(ATTR_EFF_DIMM_TYPE, &i_target_mba,
                 p_i_atts->eff_dimm_type);
         if(rc) break;
@@ -1683,12 +1861,70 @@ fapi::ReturnCode mss_eff_config_write_eff_atts(
         rc = FAPI_ATTR_SET(ATTR_EFF_SCHMOO_MODE, &i_target_mba,
                 p_i_atts->eff_schmoo_mode);
         if(rc) break;
+        rc = FAPI_ATTR_SET(ATTR_EFF_SCHMOO_ADDR_MODE, &i_target_mba,
+                p_i_atts->eff_schmoo_addr_mode);
+        if(rc) break;
         rc = FAPI_ATTR_SET(ATTR_EFF_SCHMOO_PARAM_VALID, &i_target_mba,
                 p_i_atts->eff_schmoo_param_valid);
         if(rc) break;
         rc = FAPI_ATTR_SET(ATTR_EFF_SCHMOO_TEST_VALID, &i_target_mba,
                 p_i_atts->eff_schmoo_test_valid);
         if(rc) break;
+        rc = FAPI_ATTR_SET(ATTR_EFF_SCHMOO_WR_EYE_MIN_MARGIN, &i_target_mba,
+                p_i_atts->eff_schmoo_wr_eye_min_margin);
+        if(rc) break;
+        rc = FAPI_ATTR_SET(ATTR_EFF_SCHMOO_RD_EYE_MIN_MARGIN, &i_target_mba,
+                p_i_atts->eff_schmoo_rd_eye_min_margin);
+        if(rc) break;
+        rc = FAPI_ATTR_SET(ATTR_EFF_SCHMOO_DQS_CLK_MIN_MARGIN, &i_target_mba,
+                p_i_atts->eff_schmoo_dqs_clk_min_margin);
+        if(rc) break;
+        rc = FAPI_ATTR_SET(ATTR_EFF_SCHMOO_RD_GATE_MIN_MARGIN, &i_target_mba,
+                p_i_atts->eff_schmoo_rd_gate_min_margin);
+        if(rc) break;
+        rc = FAPI_ATTR_SET(ATTR_EFF_SCHMOO_ADDR_CMD_MIN_MARGIN, &i_target_mba,
+                p_i_atts->eff_schmoo_addr_cmd_min_margin);
+        if(rc) break;
+
+        rc = FAPI_ATTR_SET(ATTR_EFF_CEN_RD_VREF_SCHMOO, &i_target_mba,
+                p_i_atts->eff_cen_rd_vref_schmoo);
+        if(rc) break;
+        rc = FAPI_ATTR_SET(ATTR_EFF_DRAM_WR_VREF_SCHMOO, &i_target_mba,
+                p_i_atts->eff_dram_wr_vref_schmoo);
+        if(rc) break;
+
+        rc = FAPI_ATTR_SET(ATTR_EFF_CEN_RCV_IMP_DQ_DQS_SCHMOO, &i_target_mba,
+                p_i_atts->eff_cen_rcv_imp_dq_dqs_schmoo);
+        if(rc) break;
+        rc = FAPI_ATTR_SET(ATTR_EFF_CEN_DRV_IMP_DQ_DQS_SCHMOO, &i_target_mba,
+                p_i_atts->eff_cen_drv_imp_dq_dqs_schmoo);
+        if(rc) break;
+        rc = FAPI_ATTR_SET(ATTR_EFF_CEN_DRV_IMP_CNTL_SCHMOO, &i_target_mba,
+                p_i_atts->eff_cen_drv_imp_cntl_schmoo);
+        if(rc) break;
+        rc = FAPI_ATTR_SET(ATTR_EFF_CEN_DRV_IMP_CLK_SCHMOO, &i_target_mba,
+                p_i_atts->eff_cen_drv_imp_clk_schmoo);
+        if(rc) break;
+        rc = FAPI_ATTR_SET(ATTR_EFF_CEN_DRV_IMP_SPCKE_SCHMOO, &i_target_mba,
+                p_i_atts->eff_cen_drv_imp_spcke_schmoo);
+        if(rc) break;
+
+        rc = FAPI_ATTR_SET(ATTR_EFF_CEN_SLEW_RATE_DQ_DQS_SCHMOO, &i_target_mba,
+                p_i_atts->eff_cen_slew_rate_dq_dqs_schmoo);
+        if(rc) break;
+        rc = FAPI_ATTR_SET(ATTR_EFF_CEN_SLEW_RATE_CNTL_SCHMOO, &i_target_mba,
+                p_i_atts->eff_cen_slew_rate_cntl_schmoo);
+        if(rc) break;
+        rc = FAPI_ATTR_SET(ATTR_EFF_CEN_SLEW_RATE_ADDR_SCHMOO, &i_target_mba,
+                p_i_atts->eff_cen_slew_rate_addr_schmoo);
+        if(rc) break;
+        rc = FAPI_ATTR_SET(ATTR_EFF_CEN_SLEW_RATE_CLK_SCHMOO, &i_target_mba,
+                p_i_atts->eff_cen_slew_rate_clk_schmoo);
+        if(rc) break;
+        rc = FAPI_ATTR_SET(ATTR_EFF_CEN_SLEW_RATE_SPCKE_SCHMOO, &i_target_mba,
+                p_i_atts->eff_cen_slew_rate_spcke_schmoo);
+        if(rc) break;
+
         rc = FAPI_ATTR_SET(ATTR_EFF_STACK_TYPE, &i_target_mba,
                 p_i_atts->eff_stack_type);
         if(rc) break;
@@ -1737,6 +1973,13 @@ fapi::ReturnCode mss_eff_config(const fapi::Target i_target_mba)
     do
     {
 //------------------------------------------------------------------------------
+        // Grab allow single port data
+        rc = FAPI_ATTR_GET(ATTR_MSS_ALLOW_SINGLE_PORT, &i_target_mba, p_l_mss_eff_config_data->allow_single_port);
+        if(rc) break;
+        if ( p_l_mss_eff_config_data->allow_single_port == fapi::ENUM_ATTR_MSS_ALLOW_SINGLE_PORT_TRUE ) {
+           FAPI_INF("WARNING: allow_single_port = %d on %s.", p_l_mss_eff_config_data->allow_single_port, i_target_mba.toEcmdString());
+        }
+//------------------------------------------------------------------------------
         // Grab freq/volt data
         rc = fapiGetParentChip(i_target_mba, l_target_centaur);
         if(rc) break;
@@ -1783,8 +2026,9 @@ fapi::ReturnCode mss_eff_config(const fapi::Target i_target_mba)
         }
 
         // verify SPD data
-        if( p_l_atts->eff_num_drops_per_port
+        if(( p_l_atts->eff_num_drops_per_port
                 != fapi::ENUM_ATTR_EFF_NUM_DROPS_PER_PORT_EMPTY )
+          && ( p_l_mss_eff_config_data->allow_single_port == fapi::ENUM_ATTR_MSS_ALLOW_SINGLE_PORT_FALSE ))
         {
             rc = mss_eff_config_verify_spd_data( i_target_mba,
                     p_l_atts, p_l_spd_data );
@@ -1818,6 +2062,7 @@ fapi::ReturnCode mss_eff_config(const fapi::Target i_target_mba)
 
         // Calls to sub-procedures
         rc = mss_eff_config_rank_group(i_target_mba); if(rc) break;
+        rc = mss_eff_config_cke_map(i_target_mba); if(rc) break;
         rc = mss_eff_config_termination(i_target_mba); if(rc) break;
         rc = mss_eff_config_thermal(i_target_mba); if(rc) break;
 

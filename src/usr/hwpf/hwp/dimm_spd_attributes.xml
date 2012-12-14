@@ -1,25 +1,25 @@
-<!--  IBM_PROLOG_BEGIN_TAG
-     This is an automatically generated prolog.
-   
-     $Source: src/usr/hwpf/hwp/dimm_spd_attributes.xml $
-   
-     IBM CONFIDENTIAL
-   
-     COPYRIGHT International Business Machines Corp. 2012
-   
-     p1
-   
-     Object Code Only (OCO) source materials
-     Licensed Internal Code Source Materials
-     IBM HostBoot Licensed Internal Code
-   
-     The source code for this program is not published or other-
-     wise divested of its trade secrets, irrespective of what has
-     been deposited with the U.S. Copyright Office.
-   
-     Origin: 30
-   
-     IBM_PROLOG_END -->
+<!-- IBM_PROLOG_BEGIN_TAG                                                   -->
+<!-- This is an automatically generated prolog.                             -->
+<!--                                                                        -->
+<!-- $Source: src/usr/hwpf/hwp/dimm_spd_attributes.xml $                    -->
+<!--                                                                        -->
+<!-- IBM CONFIDENTIAL                                                       -->
+<!--                                                                        -->
+<!-- COPYRIGHT International Business Machines Corp. 2012                   -->
+<!--                                                                        -->
+<!-- p1                                                                     -->
+<!--                                                                        -->
+<!-- Object Code Only (OCO) source materials                                -->
+<!-- Licensed Internal Code Source Materials                                -->
+<!-- IBM HostBoot Licensed Internal Code                                    -->
+<!--                                                                        -->
+<!-- The source code for this program is not published or otherwise         -->
+<!-- divested of its trade secrets, irrespective of what has been           -->
+<!-- deposited with the U.S. Copyright Office.                              -->
+<!--                                                                        -->
+<!-- Origin: 30                                                             -->
+<!--                                                                        -->
+<!-- IBM_PROLOG_END_TAG                                                     -->
 <!-- XML file specifying DIMM SPD attributes used by HW Procedures. -->
 <attributes>
 
@@ -224,7 +224,7 @@
         CL_7  = 0x00000008,
         CL_6  = 0x00000004,
         CL_5  = 0x00000002,
-        CL_4  = 0x00000001,
+        CL_4  = 0x00000001
     </enum>
     <platInit/>
 </attribute>
@@ -387,6 +387,41 @@
 </attribute>
 
 <attribute>
+    <id>ATTR_SPD_SDRAM_DEVICE_TYPE</id>
+    <targetType>TARGET_TYPE_DIMM</targetType>
+    <description>
+        SDRAM Device Type.
+        Located in DDR3 SPD byte 33, bit 7.
+    </description>
+    <valueType>uint8</valueType>
+    <enum>STANDARD_MONOLITHIC = 0x00, NON_STANDARD = 0x80</enum>
+    <platInit/>
+</attribute>
+
+<attribute>
+    <id>ATTR_SPD_SDRAM_DEVICE_TYPE_SIGNAL_LOADING</id>
+    <targetType>TARGET_TYPE_DIMM</targetType>
+    <description>
+        SDRAM Device Type Signal Loading for stacked DRAMs.
+        Located in DDR3 SPD byte 33, bits 1-0.
+    </description>
+    <valueType>uint8</valueType>
+    <enum>NOT_SPECIFIED = 0x00, MULTI_LOAD_STACK = 0x01, SINGLE_LOAD_STACK = 0x02</enum>
+    <platInit/>
+</attribute>
+
+<attribute>
+    <id>ATTR_SPD_SDRAM_DIE_COUNT</id> 
+    <targetType>TARGET_TYPE_DIMM</targetType>
+    <description>
+        SDRAM Device Type Die Count.
+        Located in DDR3 SPD byte 33, bits 6-4.
+    </description>
+    <valueType>uint8</valueType>
+    <platInit/>
+</attribute>
+
+<attribute>
     <id>ATTR_SPD_FINE_OFFSET_TCKMIN</id>
     <targetType>TARGET_TYPE_DIMM</targetType>
     <description>
@@ -438,6 +473,17 @@
         Fine Offset for Minimum Active to Active/Refresh Delay Time (tRCmin).
         Located in DDR3 SPD byte 38.
     </description>
+    <valueType>uint8</valueType>
+    <platInit/>
+</attribute>
+
+<attribute>
+    <id>ATTR_SPD_NUM_OF_REGISTERS_USED_ON_RDIMM</id>
+    <targetType>TARGET_TYPE_DIMM</targetType>
+    <description>
+        Number of Registers used on RDIMM.
+        Located in DDR3 SPD byte 63 bits 1-0.
+    </description> 
     <valueType>uint8</valueType>
     <platInit/>
 </attribute>

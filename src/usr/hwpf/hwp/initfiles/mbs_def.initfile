@@ -1,8 +1,10 @@
-#-- $Id: mbs_def.initfile,v 1.19 2012/08/21 23:01:12 mwuu Exp $
+#-- $Id: mbs_def.initfile,v 1.23 2012/10/23 14:29:41 yctschan Exp $
 #-- CHANGE HISTORY:
 #--------------------------------------------------------------------------------
 #-- Version:|Author: | Date:  | Comment:
 #-- --------|--------|--------|--------------------------------------------------
+#--   1.21  |tschang |10/23/12| disable interleaving when one or both MBA are disabled (partial good tests)
+#--   1.20  |tschang |09/27/12| added partial good support for the SCOM write using ATTR_FUNCTIONAL
 #--   1.19  |menlowuu|08/21/12| fixed 2 address typo's
 #--   1.18  |tschang |08/20/12| added mbs mcbist setup values for simple write and read test
 #--   1.17  |bellows |07/23/12| made ATTR_MSS_CACHE_ENABLE at centaur level instead of system
@@ -398,15 +400,15 @@ define def_mba23_Planar_DIMM_with_both_DIMM_slots_0_and_1_populated    = (def_mb
 # Name = MBU.MBS.ECC01 (scomdef)
 # MBSECCQ   MBS Memory ECC Control Register (01)
 scom 0x0201144A   {
-    bits,       scom_data   ;
-    0   ,       0b1     ;  # disable mba23 memory ecc check/correct
+    bits,       scom_data   , MBA0.ATTR_FUNCTIONAL, expr ;
+    0   ,       0b1         ,        1            , any ;  # disable mba01 memory ecc check/correct
 }
 
 # Name = MBU.MBS.ECC23 (scomdef)
 # MBSECCQ   MBS Memory ECC Control Register (23)
 scom 0x0201148A   {
-   bits,       scom_data   ;
-   0   ,       0b1     ;  # disable MBA23 memory ecc check/correct
+    bits,       scom_data   , MBA1.ATTR_FUNCTIONAL, expr ;
+    0   ,       0b1         ,        1            , any ;  # disable MBA23 memory ecc check/correct
 }
 
 ######################
@@ -474,13 +476,19 @@ scom 0x0201140F   {
 
 
 scom 0x0201140D {
-    bits,       scom_data   ,	expr;
-     0:2  ,       0b000   , 	any;		# MBA01_master_rank_0_select is 0 for all cfgs
-     3:5  ,       0b001   , 	any;		# MBA01_master_rank_1_select is 1 for all cfgs
-     6:8  ,       0b010   , 	any;		# MBA01_master_rank_2_select is 2 for all cfgs
-    24:26 ,       0b000   , 	any;		# MBA23_master_rank_0_select is 0 for all cfgs
-    27:29 ,       0b001   , 	any;		# MBA23_master_rank_1_select is 1 for all cfgs
-    30:32 ,       0b010   , 	any;		# MBA23_master_rank_2_select is 2 for all cfgs
+    bits,       scom_data  , MBA0.ATTR_FUNCTIONAL, MBA1.ATTR_FUNCTIONAL, expr;
+     0:2  ,       0b000    ,        1            ,          0          , any;		# MBA01_master_rank_0_select is 0 for all cfgs
+     0:2  ,       0b000    ,        1            ,          1          , any;		# MBA01_master_rank_0_select is 0 for all cfgs
+     3:5  ,       0b001    ,        1            ,          0          , any;		# MBA01_master_rank_1_select is 1 for all cfgs
+     3:5  ,       0b001    ,        1            ,          1          , any;		# MBA01_master_rank_1_select is 1 for all cfgs
+     6:8  ,       0b010    ,        1            ,          0          , any;		# MBA01_master_rank_2_select is 2 for all cfgs
+     6:8  ,       0b010    ,        1            ,          1          , any;		# MBA01_master_rank_2_select is 2 for all cfgs
+    24:26 ,       0b000    ,        0            ,          1          , any;		# MBA23_master_rank_0_select is 0 for all cfgs
+    24:26 ,       0b000    ,        1            ,          1          , any;		# MBA23_master_rank_0_select is 0 for all cfgs
+    27:29 ,       0b001    ,        0            ,          1          , any;		# MBA23_master_rank_1_select is 1 for all cfgs
+    27:29 ,       0b001    ,        1            ,          1          , any;		# MBA23_master_rank_1_select is 1 for all cfgs
+    30:32 ,       0b010    ,        0            ,          1          , any;		# MBA23_master_rank_2_select is 2 for all cfgs
+    30:32 ,       0b010    ,        1            ,          1          , any;		# MBA23_master_rank_2_select is 2 for all cfgs
 }
 
 
@@ -495,17 +503,17 @@ scom 0x0201140D {
 scom 0x0201140A {
     bits,       scom_data   ,	expr;
 #     0:4 ,       0b10001 , 	any;		#-MW to match dials
-     0:4 ,       0b00000 , (SYS.ATTR_MSS_MBA_ADDR_INTERLEAVE_BIT == 0);                        # no MBA interleave
-     0:4 ,       0b10000 , (SYS.ATTR_MSS_MBA_ADDR_INTERLEAVE_BIT == 23);                       #
-     0:4 ,       0b10001 , (SYS.ATTR_MSS_MBA_ADDR_INTERLEAVE_BIT == 24);                       #
-     0:4 ,       0b10010 , (SYS.ATTR_MSS_MBA_ADDR_INTERLEAVE_BIT == 25);                       #
-     0:4 ,       0b10011 , (SYS.ATTR_MSS_MBA_ADDR_INTERLEAVE_BIT == 26);                       #
-     0:4 ,       0b10100 , (SYS.ATTR_MSS_MBA_ADDR_INTERLEAVE_BIT == 27);                       #
-     0:4 ,       0b10101 , (SYS.ATTR_MSS_MBA_ADDR_INTERLEAVE_BIT == 28);                       #
-     0:4 ,       0b10110 , (SYS.ATTR_MSS_MBA_ADDR_INTERLEAVE_BIT == 29);                       #
-     0:4 ,       0b10111 , (SYS.ATTR_MSS_MBA_ADDR_INTERLEAVE_BIT == 30);                       #
-     0:4 ,       0b11000 , (SYS.ATTR_MSS_MBA_ADDR_INTERLEAVE_BIT == 31);                       #
-     0:4 ,       0b11001 , (SYS.ATTR_MSS_MBA_ADDR_INTERLEAVE_BIT == 32);                       #
+     0:4 ,       0b00000 , (SYS.ATTR_MSS_MBA_ADDR_INTERLEAVE_BIT == 0) || (MBA0.ATTR_FUNCTIONAL == 0) || (MBA1.ATTR_FUNCTIONAL == 0);                        # no MBA interleave
+     0:4 ,       0b10000 , (SYS.ATTR_MSS_MBA_ADDR_INTERLEAVE_BIT == 23) && (MBA0.ATTR_FUNCTIONAL == 1) && (MBA1.ATTR_FUNCTIONAL == 1);                       #
+     0:4 ,       0b10001 , (SYS.ATTR_MSS_MBA_ADDR_INTERLEAVE_BIT == 24) && (MBA0.ATTR_FUNCTIONAL == 1) && (MBA1.ATTR_FUNCTIONAL == 1);                       #
+     0:4 ,       0b10010 , (SYS.ATTR_MSS_MBA_ADDR_INTERLEAVE_BIT == 25) && (MBA0.ATTR_FUNCTIONAL == 1) && (MBA1.ATTR_FUNCTIONAL == 1);                       #
+     0:4 ,       0b10011 , (SYS.ATTR_MSS_MBA_ADDR_INTERLEAVE_BIT == 26) && (MBA0.ATTR_FUNCTIONAL == 1) && (MBA1.ATTR_FUNCTIONAL == 1);                       #
+     0:4 ,       0b10100 , (SYS.ATTR_MSS_MBA_ADDR_INTERLEAVE_BIT == 27) && (MBA0.ATTR_FUNCTIONAL == 1) && (MBA1.ATTR_FUNCTIONAL == 1);                       #
+     0:4 ,       0b10101 , (SYS.ATTR_MSS_MBA_ADDR_INTERLEAVE_BIT == 28) && (MBA0.ATTR_FUNCTIONAL == 1) && (MBA1.ATTR_FUNCTIONAL == 1);                       #
+     0:4 ,       0b10110 , (SYS.ATTR_MSS_MBA_ADDR_INTERLEAVE_BIT == 29) && (MBA0.ATTR_FUNCTIONAL == 1) && (MBA1.ATTR_FUNCTIONAL == 1);                       #
+     0:4 ,       0b10111 , (SYS.ATTR_MSS_MBA_ADDR_INTERLEAVE_BIT == 30) && (MBA0.ATTR_FUNCTIONAL == 1) && (MBA1.ATTR_FUNCTIONAL == 1);                       #
+     0:4 ,       0b11000 , (SYS.ATTR_MSS_MBA_ADDR_INTERLEAVE_BIT == 31) && (MBA0.ATTR_FUNCTIONAL == 1) && (MBA1.ATTR_FUNCTIONAL == 1);                       #
+     0:4 ,       0b11001 , (SYS.ATTR_MSS_MBA_ADDR_INTERLEAVE_BIT == 32) && (MBA0.ATTR_FUNCTIONAL == 1) && (MBA1.ATTR_FUNCTIONAL == 1);                       #
      5   ,       0b0       , any      ;                       # Z mode only
 }
 
@@ -519,35 +527,35 @@ scom 0x0201140A {
 #
 
 scom 0x0201140B     {
-    bits    ,   scom_data   , expr;
-    0:3     ,   0b0000  , (def_mba01_nomem == 1);                                     # MBAXCR01Q_MBA01_config_type    D
-    0:3     ,   0b0001  , (def_type1_memory_populated_behind_MBA01 == 1);             # MBAXCR01Q_MBA01_config_type    D
-    0:3     ,   0b0010  , (def_type2_memory_populated_behind_MBA01 == 1);             # MBAXCR01Q_MBA01_config_type    D
-    0:3     ,   0b0011  , (def_type3_memory_populated_behind_MBA01 == 1);             # MBAXCR01Q_MBA01_config_type    D
-    0:3     ,   0b0100  , (def_type4_memory_populated_behind_MBA01 == 1);             # MBAXCR01Q_MBA01_config_type    D
-    0:3     ,   0b0101  , (def_type5_memory_populated_behind_MBA01 == 1);             # MBAXCR01Q_MBA01_config_type    D
-    0:3     ,   0b0110  , (def_type6_memory_populated_behind_MBA01 == 1);             # MBAXCR01Q_MBA01_config_type    D
-    0:3     ,   0b0111  , (def_type7_memory_populated_behind_MBA01 == 1);             # MBAXCR01Q_MBA01_config_type    D
-#    0:3     ,   0b1000  , (def_type8_memory_populated_behind_MBA01 == 1);             # MBAXCR01Q_MBA01_config_type    D
-#    4:5     ,   0b01    , any                           ; # temp until ibm type is fully supported             # MBAXCR01Q_MBA01_config_subtype                    D
-    4:5     ,   0b00    , (def_mba01_subtype_A == 1);              # MBAXCR01Q_MBA01_config_subtype                    D
-    4:5     ,   0b01    , (def_mba01_subtype_B == 1);              # MBAXCR01Q_MBA01_config_subtype                    D
-    4:5     ,   0b10    , (def_mba01_subtype_C == 1);              # MBAXCR01Q_MBA01_config_subtype                    D
-    6:7     ,   0b00    , (MBA0.ATTR_EFF_DRAM_DENSITY == 2);   # MBAXCR01Q_MBA01_DRAM_size                         D
-    6:7     ,   0b01    , (MBA0.ATTR_EFF_DRAM_DENSITY == 4);   # MBAXCR01Q_MBA01_DRAM_size                         D
-    6:7     ,   0b10    , (MBA0.ATTR_EFF_DRAM_DENSITY == 8);   # MBAXCR01Q_MBA01_DRAM_size                         D
-    8       ,   0b0     , (def_mba01_Centaur_or_Planar_DIMM_with_only_DIMM_slot0_populated == 1);                # MBAXCR01Q_MBA01_Configuration                                          D
-    8       ,   0b1     , (def_mba01_Planar_DIMM_with_both_DIMM_slots_0_and_1_populated    == 1);                # MBAXCR01Q_MBA01_Configuration                                          D
-#    8       ,   0b0     , (MBA0.ATTR_EFF_NUM_DROPS_PER_PORT == 1) && (MBA0.ATTR_CHIP_UNIT_POS == 0);                # MBAXCR01Q_MBA01_Configuration                                           D
-#    8       ,   0b1     , ((((MBA0.ATTR_EFF_NUM_DROPS_PER_PORT == 2) || (ATTR_EFF_DIMM_TYPE == 0)) && (MBA0.ATTR_CHIP_UNIT_POS == 0)) == 1);                # MBAXCR01Q_MBA01_Configuration   D
-    9       ,   0b1     , (MBA0.ATTR_EFF_DRAM_WIDTH == 4);     # MBAXCR01Q_MBA01_DRAM_Width                    D
-    9       ,   0b0     , (MBA0.ATTR_EFF_DRAM_WIDTH == 8);     # MBAXCR01Q_MBA01_DRAM_Width                    D
-    10:11   ,   0b00    , (SYS.ATTR_MSS_MCA_HASH_MODE == 0);  # MBAXCR01Q_MBA01_Hash_Mode
-    10:11   ,   0b01    , (SYS.ATTR_MSS_MCA_HASH_MODE == 1);  # MBAXCR01Q_MBA01_Hash_Mode
-    10:11   ,   0b10    , (SYS.ATTR_MSS_MCA_HASH_MODE == 2);  # MBAXCR01Q_MBA01_Hash_Mode
-#    12      ,   0b0     , any;							# -MW match dials  # MBAXCR01Q_MBA01_Interleave_Mode
-    12      ,   0b0     , (SYS.ATTR_MSS_MBA_CACHELINE_INTERLEAVE_MODE == 0);  # MBAXCR01Q_MBA01_Interleave_Mode
-    12      ,   0b1     , (SYS.ATTR_MSS_MBA_CACHELINE_INTERLEAVE_MODE == 1);  # MBAXCR01Q_MBA01_Interleave_Mode
+    bits    ,   scom_data   , MBA0.ATTR_FUNCTIONAL, expr;
+    0:3     ,   0b0000      ,         1           , (def_mba01_nomem == 1);                                     # MBAXCR01Q_MBA01_config_type    D
+    0:3     ,   0b0001      ,         1           , (def_type1_memory_populated_behind_MBA01 == 1);             # MBAXCR01Q_MBA01_config_type    D
+    0:3     ,   0b0010      ,         1           , (def_type2_memory_populated_behind_MBA01 == 1);             # MBAXCR01Q_MBA01_config_type    D
+    0:3     ,   0b0011      ,         1           , (def_type3_memory_populated_behind_MBA01 == 1);             # MBAXCR01Q_MBA01_config_type    D
+    0:3     ,   0b0100      ,         1           , (def_type4_memory_populated_behind_MBA01 == 1);             # MBAXCR01Q_MBA01_config_type    D
+    0:3     ,   0b0101      ,         1           , (def_type5_memory_populated_behind_MBA01 == 1);             # MBAXCR01Q_MBA01_config_type    D
+    0:3     ,   0b0110      ,         1           , (def_type6_memory_populated_behind_MBA01 == 1);             # MBAXCR01Q_MBA01_config_type    D
+    0:3     ,   0b0111      ,         1           , (def_type7_memory_populated_behind_MBA01 == 1);             # MBAXCR01Q_MBA01_config_type    D
+#    0:3     ,   0b1000      ,         1           , (def_type8_memory_populated_behind_MBA01 == 1);             # MBAXCR01Q_MBA01_config_type    D
+#    4:5     ,   0b01        ,         1           , any                           ; # temp until ibm type is fully supported             # MBAXCR01Q_MBA01_config_subtype                    D
+    4:5     ,   0b00        ,         1           , (def_mba01_subtype_A == 1);              # MBAXCR01Q_MBA01_config_subtype                    D
+    4:5     ,   0b01        ,         1           , (def_mba01_subtype_B == 1);              # MBAXCR01Q_MBA01_config_subtype                    D
+    4:5     ,   0b10        ,         1           , (def_mba01_subtype_C == 1);              # MBAXCR01Q_MBA01_config_subtype                    D
+    6:7     ,   0b00        ,         1           , (MBA0.ATTR_EFF_DRAM_DENSITY == 2);   # MBAXCR01Q_MBA01_DRAM_size                         D
+    6:7     ,   0b01        ,         1           , (MBA0.ATTR_EFF_DRAM_DENSITY == 4);   # MBAXCR01Q_MBA01_DRAM_size                         D
+    6:7     ,   0b10        ,         1           , (MBA0.ATTR_EFF_DRAM_DENSITY == 8);   # MBAXCR01Q_MBA01_DRAM_size                         D
+    8       ,   0b0         ,         1           , (def_mba01_Centaur_or_Planar_DIMM_with_only_DIMM_slot0_populated == 1);                # MBAXCR01Q_MBA01_Configuration                                          D
+    8       ,   0b1         ,         1           , (def_mba01_Planar_DIMM_with_both_DIMM_slots_0_and_1_populated    == 1);                # MBAXCR01Q_MBA01_Configuration                                          D
+#    8       ,   0b0         ,         1           , (MBA0.ATTR_EFF_NUM_DROPS_PER_PORT == 1) && (MBA0.ATTR_CHIP_UNIT_POS == 0);                # MBAXCR01Q_MBA01_Configuration                                           D
+#    8       ,   0b1         ,         1           , ((((MBA0.ATTR_EFF_NUM_DROPS_PER_PORT == 2) || (ATTR_EFF_DIMM_TYPE == 0)) && (MBA0.ATTR_CHIP_UNIT_POS == 0)) == 1);                # MBAXCR01Q_MBA01_Configuration   D
+    9       ,   0b1         ,         1           , (MBA0.ATTR_EFF_DRAM_WIDTH == 4);     # MBAXCR01Q_MBA01_DRAM_Width                    D
+    9       ,   0b0         ,         1           , (MBA0.ATTR_EFF_DRAM_WIDTH == 8);     # MBAXCR01Q_MBA01_DRAM_Width                    D
+    10:11   ,   0b00        ,         1           , (SYS.ATTR_MSS_MCA_HASH_MODE == 0);  # MBAXCR01Q_MBA01_Hash_Mode
+    10:11   ,   0b01        ,         1           , (SYS.ATTR_MSS_MCA_HASH_MODE == 1);  # MBAXCR01Q_MBA01_Hash_Mode
+    10:11   ,   0b10        ,         1           , (SYS.ATTR_MSS_MCA_HASH_MODE == 2);  # MBAXCR01Q_MBA01_Hash_Mode
+#    12      ,   0b0         ,         1           , any;							# -MW match dials  # MBAXCR01Q_MBA01_Interleave_Mode
+    12      ,   0b0         ,         1           , (SYS.ATTR_MSS_MBA_CACHELINE_INTERLEAVE_MODE == 0);  # MBAXCR01Q_MBA01_Interleave_Mode
+    12      ,   0b1         ,         1           , (SYS.ATTR_MSS_MBA_CACHELINE_INTERLEAVE_MODE == 1);  # MBAXCR01Q_MBA01_Interleave_Mode
 }
 
 
@@ -560,35 +568,35 @@ scom 0x0201140B     {
 # MBAXCR23Q MBA23 Address Translate Control Register
 #
 scom 0x0201140C     {
-    bits    ,   scom_data   , expr;
-    0:3     ,   0b0000  , (def_mba23_nomem == 1);                                     # MBAXCR01Q_MBA23_config_type    D
-    0:3     ,   0b0001  , (def_type1_memory_populated_behind_MBA23 == 1);             # MBAXCR01Q_MBA23_config_type    D
-    0:3     ,   0b0010  , (def_type2_memory_populated_behind_MBA23 == 1);             # MBAXCR01Q_MBA23_config_type    D
-    0:3     ,   0b0011  , (def_type3_memory_populated_behind_MBA23 == 1);             # MBAXCR01Q_MBA23_config_type    D
-    0:3     ,   0b0100  , (def_type4_memory_populated_behind_MBA23 == 1);             # MBAXCR01Q_MBA23_config_type    D
-    0:3     ,   0b0101  , (def_type5_memory_populated_behind_MBA23 == 1);             # MBAXCR01Q_MBA23_config_type    D
-    0:3     ,   0b0110  , (def_type6_memory_populated_behind_MBA23 == 1);             # MBAXCR01Q_MBA23_config_type    D
-    0:3     ,   0b0111  , (def_type7_memory_populated_behind_MBA23 == 1);             # MBAXCR01Q_MBA23_config_type    D
-#    0:3     ,   0b1000  , (def_type8_memory_populated_behind_MBA23 == 1);             # MBAXCR01Q_MBA23_config_type    D
-#    4:5     ,   0b01    , any                       ;# temp until ibm type is fully supported               # MBAXCR01Q_MBA23_config_subtype                    D
-    4:5     ,   0b00    , (def_mba23_subtype_A == 1);              # MBAXCR01Q_MBA23_config_subtype                    D
-    4:5     ,   0b01    , (def_mba23_subtype_B == 1);              # MBAXCR01Q_MBA23_config_subtype                    D
-    4:5     ,   0b10    , (def_mba23_subtype_C == 1);              # MBAXCR01Q_MBA23_config_subtype                    D
-    6:7     ,   0b00    , (MBA1.ATTR_EFF_DRAM_DENSITY == 2);   # MBAXCR01Q_MBA23_DRAM_size                         D
-    6:7     ,   0b01    , (MBA1.ATTR_EFF_DRAM_DENSITY == 4);   # MBAXCR01Q_MBA23_DRAM_size                         D
-    6:7     ,   0b10    , (MBA1.ATTR_EFF_DRAM_DENSITY == 8);   # MBAXCR01Q_MBA23_DRAM_size                         D
-    8       ,   0b0     , (def_mba23_Centaur_or_Planar_DIMM_with_only_DIMM_slot0_populated == 1);                # MBAXCR01Q_MBA23_Configuration                                          D
-    8       ,   0b1     , (def_mba23_Planar_DIMM_with_both_DIMM_slots_0_and_1_populated    == 1);                # MBAXCR01Q_MBA23_Configuration                                          D
-#    8       ,   0b0     , (ATTR_EFF_NUM_DROPS_PER_PORT == 1) && (MBA0.ATTR_CHIP_UNIT_POS == 0);                # MBAXCR01Q_MBA23_Configuration                                           D
-#    8       ,   0b1     , ((((ATTR_EFF_NUM_DROPS_PER_PORT == 2) || (ATTR_EFF_DIMM_TYPE == 0)) && (MBA0.ATTR_CHIP_UNIT_POS == 0)) == 1);                # MBAXCR01Q_MBA23_Configuration   D
-    9       ,   0b1     , (MBA1.ATTR_EFF_DRAM_WIDTH == 4);     # MBAXCR01Q_MBA23_DRAM_Width                    D
-    9       ,   0b0     , (MBA1.ATTR_EFF_DRAM_WIDTH == 8);     # MBAXCR01Q_MBA23_DRAM_Width                    D
-    10:11   ,   0b00    , (SYS.ATTR_MSS_MCA_HASH_MODE == 0);  # MBAXCR01Q_MBA23_Hash_Mode
-    10:11   ,   0b01    , (SYS.ATTR_MSS_MCA_HASH_MODE == 1);  # MBAXCR01Q_MBA23_Hash_Mode
-    10:11   ,   0b10    , (SYS.ATTR_MSS_MCA_HASH_MODE == 2);  # MBAXCR01Q_MBA23_Hash_Mode
-#    12      ,   0b0     , any;							# -MW match dials  # MBAXCR01Q_MBA23_Interleave_Mode
-    12      ,   0b0     , (SYS.ATTR_MSS_MBA_CACHELINE_INTERLEAVE_MODE == 0);  # MBAXCR01Q_MBA23_Interleave_Mode
-    12      ,   0b1     , (SYS.ATTR_MSS_MBA_CACHELINE_INTERLEAVE_MODE == 1);  # MBAXCR01Q_MBA23_Interleave_Mode
+    bits    ,   scom_data   , MBA1.ATTR_FUNCTIONAL, expr;
+    0:3     ,   0b0000      ,         1           , (def_mba23_nomem == 1);                                     # MBAXCR01Q_MBA23_config_type    D
+    0:3     ,   0b0001      ,         1           , (def_type1_memory_populated_behind_MBA23 == 1);             # MBAXCR01Q_MBA23_config_type    D
+    0:3     ,   0b0010      ,         1           , (def_type2_memory_populated_behind_MBA23 == 1);             # MBAXCR01Q_MBA23_config_type    D
+    0:3     ,   0b0011      ,         1           , (def_type3_memory_populated_behind_MBA23 == 1);             # MBAXCR01Q_MBA23_config_type    D
+    0:3     ,   0b0100      ,         1           , (def_type4_memory_populated_behind_MBA23 == 1);             # MBAXCR01Q_MBA23_config_type    D
+    0:3     ,   0b0101      ,         1           , (def_type5_memory_populated_behind_MBA23 == 1);             # MBAXCR01Q_MBA23_config_type    D
+    0:3     ,   0b0110      ,         1           , (def_type6_memory_populated_behind_MBA23 == 1);             # MBAXCR01Q_MBA23_config_type    D
+    0:3     ,   0b0111      ,         1           , (def_type7_memory_populated_behind_MBA23 == 1);             # MBAXCR01Q_MBA23_config_type    D
+#    0:3     ,   0b1000      ,         1           , (def_type8_memory_populated_behind_MBA23 == 1);             # MBAXCR01Q_MBA23_config_type    D
+#    4:5     ,   0b01        ,         1           , any                       ;# temp until ibm type is fully supported               # MBAXCR01Q_MBA23_config_subtype                    D
+    4:5     ,   0b00        ,         1           , (def_mba23_subtype_A == 1);              # MBAXCR01Q_MBA23_config_subtype                    D
+    4:5     ,   0b01        ,         1           , (def_mba23_subtype_B == 1);              # MBAXCR01Q_MBA23_config_subtype                    D
+    4:5     ,   0b10        ,         1           , (def_mba23_subtype_C == 1);              # MBAXCR01Q_MBA23_config_subtype                    D
+    6:7     ,   0b00        ,         1           , (MBA1.ATTR_EFF_DRAM_DENSITY == 2);   # MBAXCR01Q_MBA23_DRAM_size                         D
+    6:7     ,   0b01        ,         1           , (MBA1.ATTR_EFF_DRAM_DENSITY == 4);   # MBAXCR01Q_MBA23_DRAM_size                         D
+    6:7     ,   0b10        ,         1           , (MBA1.ATTR_EFF_DRAM_DENSITY == 8);   # MBAXCR01Q_MBA23_DRAM_size                         D
+    8       ,   0b0         ,         1           , (def_mba23_Centaur_or_Planar_DIMM_with_only_DIMM_slot0_populated == 1);                # MBAXCR01Q_MBA23_Configuration                                          D
+    8       ,   0b1         ,         1           , (def_mba23_Planar_DIMM_with_both_DIMM_slots_0_and_1_populated    == 1);                # MBAXCR01Q_MBA23_Configuration                                          D
+#    8       ,   0b0         ,         1           , (ATTR_EFF_NUM_DROPS_PER_PORT == 1) && (MBA0.ATTR_CHIP_UNIT_POS == 0);                # MBAXCR01Q_MBA23_Configuration                                           D
+#    8       ,   0b1         ,         1           , ((((ATTR_EFF_NUM_DROPS_PER_PORT == 2) || (ATTR_EFF_DIMM_TYPE == 0)) && (MBA0.ATTR_CHIP_UNIT_POS == 0)) == 1);                # MBAXCR01Q_MBA23_Configuration   D
+    9       ,   0b1         ,         1           , (MBA1.ATTR_EFF_DRAM_WIDTH == 4);     # MBAXCR01Q_MBA23_DRAM_Width                    D
+    9       ,   0b0         ,         1           , (MBA1.ATTR_EFF_DRAM_WIDTH == 8);     # MBAXCR01Q_MBA23_DRAM_Width                    D
+    10:11   ,   0b00        ,         1           , (SYS.ATTR_MSS_MCA_HASH_MODE == 0);  # MBAXCR01Q_MBA23_Hash_Mode
+    10:11   ,   0b01        ,         1           , (SYS.ATTR_MSS_MCA_HASH_MODE == 1);  # MBAXCR01Q_MBA23_Hash_Mode
+    10:11   ,   0b10        ,         1           , (SYS.ATTR_MSS_MCA_HASH_MODE == 2);  # MBAXCR01Q_MBA23_Hash_Mode
+#    12      ,   0b0         ,         1           , any;							# -MW match dials  # MBAXCR01Q_MBA23_Interleave_Mode
+    12      ,   0b0         ,         1           , (SYS.ATTR_MSS_MBA_CACHELINE_INTERLEAVE_MODE == 0);  # MBAXCR01Q_MBA23_Interleave_Mode
+    12      ,   0b1         ,         1           , (SYS.ATTR_MSS_MBA_CACHELINE_INTERLEAVE_MODE == 1);  # MBAXCR01Q_MBA23_Interleave_Mode
 }
 
 
@@ -599,60 +607,118 @@ scom 0x0201140C     {
 ###########################################################################################
 
 ###################################
-# MCBIST Fixed data pattern
+# MCBIST Fixed data pattern MBA01
 ###################################
 # Name = MBA01.MBA_MCBIST.SCOMFIR.MCBFD[0-7]Q_Q(0:63) (scomdef)
 # Name = MBA01.MBA_MCBIST.SCOMFIR.MCBFDQ_Q(0:63) (scomdef)
 # Name = MBA01.MBA_MCBIST.SCOMFIR.MCBFDSPQ_Q(0:63) (scomdef)
 
 scom 0x02011681     {
-    bits    ,   scom_data   , expr;
-    0:63    ,   0x1111111111111111, any;         # Fixed data burst 0
+    bits    ,   scom_data         , MBA0.ATTR_FUNCTIONAL, expr;
+    0:63    ,   0x1111111111111111,        1            , any;         # Fixed data burst 0
 }
 
 scom 0x02011682     {
-    bits    ,   scom_data   , expr;
-    0:63    ,   0x2222222222222222, any;         # Fixed data burst 1
+    bits    ,   scom_data         , MBA0.ATTR_FUNCTIONAL, expr;
+    0:63    ,   0x2222222222222222,        1            , any;         # Fixed data burst 1
 }
 
 scom 0x02011683     {
-    bits    ,   scom_data   , expr;
-    0:63    ,   0x3333333333333333, any;         # Fixed data burst 2
+    bits    ,   scom_data         , MBA0.ATTR_FUNCTIONAL, expr;
+    0:63    ,   0x3333333333333333,        1            , any;         # Fixed data burst 2
 }
 
 scom 0x02011684     {
-    bits    ,   scom_data   , expr;
-    0:63    ,   0x4444444444444444, any;         # Fixed data burst 3
+    bits    ,   scom_data         , MBA0.ATTR_FUNCTIONAL, expr;
+    0:63    ,   0x4444444444444444,        1            , any;         # Fixed data burst 3
 }
 
 scom 0x02011685     {
-    bits    ,   scom_data   , expr;
-    0:63    ,   0x5555555555555555, any;         # Fixed data burst 4
+    bits    ,   scom_data         , MBA0.ATTR_FUNCTIONAL, expr;
+    0:63    ,   0x5555555555555555,        1            , any;         # Fixed data burst 4
 }
 
 scom 0x02011686     {
-    bits    ,   scom_data   , expr;
-    0:63    ,   0x6666666666666666, any;         # Fixed data burst 5
+    bits    ,   scom_data         , MBA0.ATTR_FUNCTIONAL, expr;
+    0:63    ,   0x6666666666666666,        1            , any;         # Fixed data burst 5
 }
 
 scom 0x02011687     {
-    bits    ,   scom_data   , expr;
-    0:63    ,   0x7777777777777777, any;         # Fixed data burst 6
+    bits    ,   scom_data         , MBA0.ATTR_FUNCTIONAL, expr;
+    0:63    ,   0x7777777777777777,        1            , any;         # Fixed data burst 6
 }
 
 scom 0x02011688     {
-    bits    ,   scom_data   , expr;
-    0:63    ,   0x8888888888888888, any;         # Fixed data burst 7
+    bits    ,   scom_data         , MBA0.ATTR_FUNCTIONAL, expr;
+    0:63    ,   0x8888888888888888,        1            , any;         # Fixed data burst 7
 }
 
 scom 0x02011689     {
-    bits    ,   scom_data   , expr;
-    0:63    ,   0x9999999999999999, any;         # Fixed data burst 0-7 ECC bits
+    bits    ,   scom_data         , MBA0.ATTR_FUNCTIONAL, expr;
+    0:63    ,   0x9999999999999999,        1            , any;         # Fixed data burst 0-7 ECC bits
 }
 
 scom 0x0201168A     {
-    bits    ,   scom_data   , expr;
-    0:63    ,   0xAAAAAAAAAAAAAAAA, any;         # Fixed data burst 0-7 SPARE bits
+    bits    ,   scom_data         , MBA0.ATTR_FUNCTIONAL, expr;
+    0:63    ,   0xAAAAAAAAAAAAAAAA,        1            , any;         # Fixed data burst 0-7 SPARE bits
+}
+
+
+###################################
+# MCBIST Fixed data pattern MBA23
+###################################
+# Name = MBA23.MBA_MCBIST.SCOMFIR.MCBFD[0-7]Q_Q(0:63) (scomdef)
+# Name = MBA23.MBA_MCBIST.SCOMFIR.MCBFDQ_Q(0:63) (scomdef)
+# Name = MBA23.MBA_MCBIST.SCOMFIR.MCBFDSPQ_Q(0:63) (scomdef)
+
+scom 0x02011781     {
+    bits    ,   scom_data         , MBA1.ATTR_FUNCTIONAL, expr;
+    0:63    ,   0x1111111111111111,        1            , any;         # Fixed data burst 0
+}
+
+scom 0x02011782     {
+    bits    ,   scom_data         , MBA1.ATTR_FUNCTIONAL, expr;
+    0:63    ,   0x2222222222222222,        1            , any;         # Fixed data burst 1
+}
+
+scom 0x02011783     {
+    bits    ,   scom_data         , MBA1.ATTR_FUNCTIONAL, expr;
+    0:63    ,   0x3333333333333333,        1            , any;         # Fixed data burst 2
+}
+
+scom 0x02011784     {
+    bits    ,   scom_data         , MBA1.ATTR_FUNCTIONAL, expr;
+    0:63    ,   0x4444444444444444,        1            , any;         # Fixed data burst 3
+}
+
+scom 0x02011785     {
+    bits    ,   scom_data         , MBA1.ATTR_FUNCTIONAL, expr;
+    0:63    ,   0x5555555555555555,        1            , any;         # Fixed data burst 4
+}
+
+scom 0x02011786     {
+    bits    ,   scom_data         , MBA1.ATTR_FUNCTIONAL, expr;
+    0:63    ,   0x6666666666666666,        1            , any;         # Fixed data burst 5
+}
+
+scom 0x02011787     {
+    bits    ,   scom_data         , MBA1.ATTR_FUNCTIONAL, expr;
+    0:63    ,   0x7777777777777777,        1            , any;         # Fixed data burst 6
+}
+
+scom 0x02011788     {
+    bits    ,   scom_data         , MBA1.ATTR_FUNCTIONAL, expr;
+    0:63    ,   0x8888888888888888,        1            , any;         # Fixed data burst 7
+}
+
+scom 0x02011789     {
+    bits    ,   scom_data         , MBA1.ATTR_FUNCTIONAL, expr;
+    0:63    ,   0x9999999999999999,        1            , any;         # Fixed data burst 0-7 ECC bits
+}
+
+scom 0x0201178A     {
+    bits    ,   scom_data         , MBA1.ATTR_FUNCTIONAL, expr;
+    0:63    ,   0xAAAAAAAAAAAAAAAA,        1            , any;         # Fixed data burst 0-7 SPARE bits
 }
 
 

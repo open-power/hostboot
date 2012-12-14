@@ -970,1560 +970,6 @@
 </attribute>
 
 <attribute>
-    <id>MSS_VOLT</id>
-    <description>DRAM Voltage. Initialized and used by HWPs.</description>
-    <simpleType>
-        <uint32_t>
-            <default>0</default>
-        </uint32_t>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_MSS_VOLT</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
-    <id>MSS_FREQ</id>
-    <description>Frequency of memory channel in MHz. Initialized and used by HWPs.</description>
-    <simpleType>
-        <uint32_t>
-            <default>0</default>
-        </uint32_t>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_MSS_FREQ</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
-    <id>MSS_DIMM_MFG_ID_CODE</id>
-    <description>DIMM Manufacturer ID Code. Initialized and used by HWPs.</description>
-    <simpleType>
-        <uint32_t>
-            <default>0</default>
-        </uint32_t>
-        <array>2,2</array><!-- [drop][port] -->
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_MSS_DIMM_MFG_ID_CODE</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
-    <id>EFF_DIMM_RANKS_CONFIGED</id>
-    <description>DIMM ranks configured. Initialized and used by HWPs.</description>
-    <simpleType>
-        <uint8_t>
-            <default>0</default>
-        </uint8_t>
-        <array>2,2</array><!-- [drop][port] -->
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_EFF_DIMM_RANKS_CONFIGED</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
-    <id>EFF_NUM_RANKS_PER_DIMM</id>
-    <description>Number of ranks per DIMM. Initialized and used by HWPs.</description>
-    <simpleType>
-        <uint8_t>
-            <default>0</default>
-        </uint8_t>
-        <array>2,2</array><!-- [drop][port] -->
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_EFF_NUM_RANKS_PER_DIMM</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
-    <id>EFF_DIMM_TYPE</id>
-    <description>Type of DIMM. Initialized and used by HWPs.</description>
-    <simpleType>
-        <uint8_t>
-            <default>0</default>
-        </uint8_t>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_EFF_DIMM_TYPE</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
-    <id>EFF_DRAM_WIDTH</id>
-    <description>DRAM Device Width. Initialized and used by HWPs.</description>
-    <simpleType>
-        <uint8_t>
-            <default>0</default>
-        </uint8_t>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_EFF_DRAM_WIDTH</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
-    <id>EFF_DRAM_GEN</id>
-    <description>DRAM Generation. Initialized and used by HWPs.</description>
-    <simpleType>
-        <uint8_t>
-            <default>0</default>
-        </uint8_t>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_EFF_DRAM_GEN</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
-    <id>EFF_PRIMARY_RANK_GROUP0</id>
-    <description>Primary RankGroup0. Initialized and used by HWPs.</description>
-    <simpleType>
-        <uint8_t>
-            <default>0</default>
-        </uint8_t>
-        <array>2</array>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_EFF_PRIMARY_RANK_GROUP0</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
-    <id>EFF_PRIMARY_RANK_GROUP1</id>
-    <description>Primary RankGroup1. Initialized and used by HWPs.</description>
-    <simpleType>
-        <uint8_t>
-            <default>0</default>
-        </uint8_t>
-        <array>2</array>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_EFF_PRIMARY_RANK_GROUP1</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
-    <id>EFF_PRIMARY_RANK_GROUP2</id>
-    <description>Primary RankGroup2. Initialized and used by HWPs.</description>
-    <simpleType>
-        <uint8_t>
-            <default>0</default>
-        </uint8_t>
-        <array>2</array>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_EFF_PRIMARY_RANK_GROUP2</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
-    <id>EFF_PRIMARY_RANK_GROUP3</id>
-    <description>Primary RankGroup3. Initialized and used by HWPs.</description>
-    <simpleType>
-        <uint8_t>
-            <default>0</default>
-        </uint8_t>
-        <array>2</array>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_EFF_PRIMARY_RANK_GROUP3</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
-    <id>EFF_SECONDARY_RANK_GROUP0</id>
-    <description>Secondary RankGroup0. Initialized and used by HWPs.</description>
-    <simpleType>
-        <uint8_t>
-            <default>0</default>
-        </uint8_t>
-        <array>2</array>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_EFF_SECONDARY_RANK_GROUP0</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
-    <id>EFF_SECONDARY_RANK_GROUP1</id>
-    <description>Secondary RankGroup1. Initialized and used by HWPs.</description>
-    <simpleType>
-        <uint8_t>
-            <default>0</default>
-        </uint8_t>
-        <array>2</array>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_EFF_SECONDARY_RANK_GROUP1</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
-    <id>EFF_SECONDARY_RANK_GROUP2</id>
-    <description>Secondary RankGroup2. Initialized and used by HWPs.</description>
-    <simpleType>
-        <uint8_t>
-            <default>0</default>
-        </uint8_t>
-        <array>2</array>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_EFF_SECONDARY_RANK_GROUP2</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
-    <id>EFF_SECONDARY_RANK_GROUP3</id>
-    <description>Secondary RankGroup3. Initialized and used by HWPs.</description>
-    <simpleType>
-        <uint8_t>
-            <default>0</default>
-        </uint8_t>
-        <array>2</array>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_EFF_SECONDARY_RANK_GROUP3</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
-    <id>EFF_TERTIARY_RANK_GROUP0</id>
-    <description>Tertiary RankGroup0. Initialized and used by HWPs.</description>
-    <simpleType>
-        <uint8_t>
-            <default>0</default>
-        </uint8_t>
-        <array>2</array>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_EFF_TERTIARY_RANK_GROUP0</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
-    <id>EFF_TERTIARY_RANK_GROUP1</id>
-    <description>Tertiary RankGroup1. Initialized and used by HWPs.</description>
-    <simpleType>
-        <uint8_t>
-            <default>0</default>
-        </uint8_t>
-        <array>2</array>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_EFF_TERTIARY_RANK_GROUP1</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
-    <id>EFF_TERTIARY_RANK_GROUP2</id>
-    <description>Tertiary RankGroup2. Initialized and used by HWPs.</description>
-    <simpleType>
-        <uint8_t>
-            <default>0</default>
-        </uint8_t>
-        <array>2</array>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_EFF_TERTIARY_RANK_GROUP2</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
-    <id>EFF_TERTIARY_RANK_GROUP3</id>
-    <description>Tertiary RankGroup3. Initialized and used by HWPs.</description>
-    <simpleType>
-        <uint8_t>
-            <default>0</default>
-        </uint8_t>
-        <array>2</array>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_EFF_TERTIARY_RANK_GROUP3</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
-    <id>EFF_QUATERNARY_RANK_GROUP0</id>
-    <description>Quaternary RankGroup0. Initialized and used by HWPs.</description>
-    <simpleType>
-        <uint8_t>
-            <default>0</default>
-        </uint8_t>
-        <array>2</array>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_EFF_QUATERNARY_RANK_GROUP0</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
-    <id>EFF_QUATERNARY_RANK_GROUP1</id>
-    <description>Quaternary RankGroup1. Initialized and used by HWPs.</description>
-    <simpleType>
-        <uint8_t>
-            <default>0</default>
-        </uint8_t>
-        <array>2</array>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_EFF_QUATERNARY_RANK_GROUP1</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
-    <id>EFF_QUATERNARY_RANK_GROUP2</id>
-    <description>Quaternary RankGroup2. Initialized and used by HWPs.</description>
-    <simpleType>
-        <uint8_t>
-            <default>0</default>
-        </uint8_t>
-        <array>2</array>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_EFF_QUATERNARY_RANK_GROUP2</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
-    <id>EFF_QUATERNARY_RANK_GROUP3</id>
-    <description>Quaternary RankGroup3. Initialized and used by HWPs.</description>
-    <simpleType>
-        <uint8_t>
-            <default>0</default>
-        </uint8_t>
-        <array>2</array>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_EFF_QUATERNARY_RANK_GROUP3</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
-    <id>EFF_ODT_RD</id>
-    <description>Rank Read ODT. Initialized and used by HWPs.</description>
-    <simpleType>
-        <uint8_t>
-            <default>0</default>
-        </uint8_t>
-        <array>2,2,4</array>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_EFF_ODT_RD</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
-    <id>EFF_ODT_WR</id>
-    <description>Rank Write ODT. Initialized and used by HWPs.</description>
-    <simpleType>
-        <uint8_t>
-            <default>0</default>
-        </uint8_t>
-        <array>2,2,4</array>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_EFF_ODT_WR</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
-    <id>EFF_DRAM_RON</id>
-    <description>DRAM Ron. Initialized and used by HWPs.</description>
-    <simpleType>
-        <uint8_t>
-            <default>0</default>
-        </uint8_t>
-        <array>2,2</array><!-- [drop][port] -->
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_EFF_DRAM_RON</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
-    <id>EFF_DRAM_RTT_NOM</id>
-    <description>DRAM Rtt_Nom. Initialized and used by HWPs.</description>
-    <simpleType>
-        <uint8_t>
-            <default>0</default>
-        </uint8_t>
-        <array>2,2,4</array>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_EFF_DRAM_RTT_NOM</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
-    <id>EFF_DRAM_RTT_WR</id>
-    <description>DRAM Rtt_WR. Initialized and used by HWPs.</description>
-    <simpleType>
-        <uint8_t>
-            <default>0</default>
-        </uint8_t>
-        <array>2,2,4</array>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_EFF_DRAM_RTT_WR</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
-    <id>EFF_DRAM_WR_VREF</id>
-    <description>DRAM Write Vref. Initialized and used by HWPs.</description>
-    <simpleType>
-        <uint32_t>
-            <default>0</default>
-        </uint32_t>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_EFF_DRAM_WR_VREF</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
-    <id>EFF_CEN_DRV_IMP_DQ_DQS</id>
-    <description>Centaur DQ and DQS Drive Impedance. Initialized and used by HWPs.</description>
-    <simpleType>
-        <uint8_t>
-            <default>0</default>
-        </uint8_t>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_EFF_CEN_DRV_IMP_DQ_DQS</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
-    <id>EFF_CEN_DRV_IMP_CMD</id>
-    <description>Centaur Command Drive Impedance. Initialized and used by HWPs.</description>
-    <simpleType>
-        <uint8_t>
-            <default>0</default>
-        </uint8_t>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_EFF_CEN_DRV_IMP_CMD</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
-    <id>EFF_CEN_DRV_IMP_CNTL</id>
-    <description>Centaur Control Drive Impedance. Initialized and used by HWPs.</description>
-    <simpleType>
-        <uint8_t>
-            <default>0</default>
-        </uint8_t>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_EFF_CEN_DRV_IMP_CNTL</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
-    <id>EFF_CEN_RCV_IMP_DQ_DQS</id>
-    <description>Centaur DQ and DQS Receiver Impedance. Initialized and used by HWPs.</description>
-    <simpleType>
-        <uint8_t>
-            <default>0</default>
-        </uint8_t>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_EFF_CEN_RCV_IMP_DQ_DQS</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
-    <id>EFF_CEN_SLEW_RATE_DQ_DQS</id>
-    <description>Centaur DQ and DQS Slew Rate. Initialized and used by HWPs.</description>
-    <simpleType>
-        <uint8_t>
-            <default>0</default>
-        </uint8_t>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_EFF_CEN_SLEW_RATE_DQ_DQS</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
-    <id>EFF_CEN_SLEW_RATE_CMD</id>
-    <description>Centaur Command Slew Rate. Initialized and used by HWPs.</description>
-    <simpleType>
-        <uint8_t>
-            <default>0</default>
-        </uint8_t>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_EFF_CEN_SLEW_RATE_CMD</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
-    <id>EFF_CEN_SLEW_RATE_CNTL</id>
-    <description>Centaur Control Slew Rate. Initialized and used by HWPs.</description>
-    <simpleType>
-        <uint8_t>
-            <default>0</default>
-        </uint8_t>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_EFF_CEN_SLEW_RATE_CNTL</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
-    <id>EFF_CEN_RD_VREF</id>
-    <description>Centaur Read Vref. Initialized and used by HWPs.</description>
-    <simpleType>
-        <uint32_t>
-            <default>0</default>
-        </uint32_t>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_EFF_CEN_RD_VREF</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
-    <id>EFF_DIMM_SIZE</id>
-    <description>DIMM Size. Initialized and used by HWPs.</description>
-    <simpleType>
-        <uint8_t>
-            <default>0</default>
-        </uint8_t>
-        <array>2,2</array><!-- [drop][port] -->
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_EFF_DIMM_SIZE</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
-    <id>EFF_DIMM_SIZE_CONFIGED</id>
-    <description>Actual Configured DIMM Size. Initialized and used by HWPs.
-    </description>
-    <simpleType>
-        <uint8_t>
-            <default>0</default>
-        </uint8_t>
-        <array>2,2</array><!-- [drop][port] -->
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_EFF_DIMM_SIZE_CONFIGED</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
-    <id>EFF_DRAM_DENSITY</id>
-    <description>DRAM Density. Initialized and used by HWPs.</description>
-    <simpleType>
-        <uint8_t>
-            <default>0</default>
-        </uint8_t>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_EFF_DRAM_DENSITY</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
-    <id>EFF_DRAM_TRCD</id>
-    <description>DRAM RAS to CAS Delay. Initialized and used by HWPs.</description>
-    <simpleType>
-        <uint8_t>
-            <default>0</default>
-        </uint8_t>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_EFF_DRAM_TRCD</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
-    <id>EFF_DRAM_TRRD</id>
-    <description>DRAM Row ACT to Row ACT Delay. Initialized and used by HWPs.</description>
-    <simpleType>
-        <uint8_t>
-            <default>0</default>
-        </uint8_t>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_EFF_DRAM_TRRD</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
-    <id>EFF_DRAM_TRP</id>
-    <description>DRAM Row Precharge Delay. Initialized and used by HWPs.</description>
-    <simpleType>
-        <uint8_t>
-            <default>0</default>
-        </uint8_t>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_EFF_DRAM_TRP</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
-    <id>EFF_DRAM_TRAS</id>
-    <description>DRAM ACT to Precharge Delay. Initialized and used by HWPs.</description>
-    <simpleType>
-        <uint8_t>
-            <default>0</default>
-        </uint8_t>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_EFF_DRAM_TRAS</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
-    <id>EFF_DRAM_TRC</id>
-    <description>DRAM ACT to ACT/Refresh Delay. Initialized and used by HWPs.</description>
-    <simpleType>
-        <uint8_t>
-            <default>0</default>
-        </uint8_t>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_EFF_DRAM_TRC</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
-    <id>EFF_DRAM_TRFI</id>
-    <description>Refresh Interval. Initialized and used by HWPs.</description>
-    <simpleType>
-        <uint32_t>
-            <default>0</default>
-        </uint32_t>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_EFF_DRAM_TRFI</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
-    <id>EFF_DRAM_TRFC</id>
-    <description>DRAM Refresh Recovery Delay. Initialized and used by HWPs.</description>
-    <simpleType>
-        <uint32_t>
-            <default>0</default>
-        </uint32_t>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_EFF_DRAM_TRFC</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
-    <id>EFF_DRAM_TWTR</id>
-    <description>DRAM Internal Write to Read Delay. Initialized and used by HWPs.</description>
-    <simpleType>
-        <uint8_t>
-            <default>0</default>
-        </uint8_t>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_EFF_DRAM_TWTR</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
-    <id>EFF_DRAM_TRTP</id>
-    <description>DRAM Internal Read to Precharge Delay. Initialized and used by HWPs.</description>
-    <simpleType>
-        <uint8_t>
-            <default>0</default>
-        </uint8_t>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_EFF_DRAM_TRTP</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
-    <id>EFF_DRAM_TFAW</id>
-    <description>DRAM Four ACT Window Delay. Initialized and used by HWPs.</description>
-    <simpleType>
-        <uint8_t>
-            <default>0</default>
-        </uint8_t>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_EFF_DRAM_TFAW</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
-    <id>EFF_DRAM_BL</id>
-    <description>DRAM Burst Length. Initialized and used by HWPs.</description>
-    <simpleType>
-        <uint8_t>
-            <default>0</default>
-        </uint8_t>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_EFF_DRAM_BL</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
-    <id>EFF_DRAM_CL</id>
-    <description>DRAM CAS Latency. Initialized and used by HWPs.</description>
-    <simpleType>
-        <uint8_t>
-            <default>0</default>
-        </uint8_t>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_EFF_DRAM_CL</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
-    <id>EFF_DRAM_AL</id>
-    <description>DRAM Additive Latency. Initialized and used by HWPs.</description>
-    <simpleType>
-        <uint8_t>
-            <default>0</default>
-        </uint8_t>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_EFF_DRAM_AL</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
-    <id>EFF_DRAM_CWL</id>
-    <description>DRAM CAS Write Latency. Initialized and used by HWPs.</description>
-    <simpleType>
-        <uint8_t>
-            <default>0</default>
-        </uint8_t>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_EFF_DRAM_CWL</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
-    <id>EFF_DRAM_RBT</id>
-    <description>DRAM Read Burst Type. Initialized and used by HWPs.</description>
-    <simpleType>
-        <uint8_t>
-            <default>0</default>
-        </uint8_t>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_EFF_DRAM_RBT</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
-    <id>EFF_DRAM_TM</id>
-    <description>DRAM Test Mode. Initialized and used by HWPs.</description>
-    <simpleType>
-        <uint8_t>
-            <default>0</default>
-        </uint8_t>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_EFF_DRAM_TM</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
-    <id>EFF_DRAM_DLL_RESET</id>
-    <description>DRAM DLL Reset. Initialized and used by HWPs.</description>
-    <simpleType>
-        <uint8_t>
-            <default>0</default>
-        </uint8_t>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_EFF_DRAM_DLL_RESET</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
-    <id>EFF_DRAM_WR</id>
-    <description>DRAM Write Recovery. Initialized and used by HWPs.</description>
-    <simpleType>
-        <uint8_t>
-            <default>0</default>
-        </uint8_t>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_EFF_DRAM_WR</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
-    <id>EFF_DRAM_DLL_PPD</id>
-    <description>DRAM DLL Precharge PD. Initialized and used by HWPs.</description>
-    <simpleType>
-        <uint8_t>
-            <default>0</default>
-        </uint8_t>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_EFF_DRAM_DLL_PPD</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
-    <id>EFF_DRAM_DLL_ENABLE</id>
-    <description>DRAM DLL Enable. Initialized and used by HWPs.</description>
-    <simpleType>
-        <uint8_t>
-            <default>0</default>
-        </uint8_t>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_EFF_DRAM_DLL_ENABLE</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
-    <id>EFF_DRAM_TDQS</id>
-    <description>DRAM TDQS. Initialized and used by HWPs.</description>
-    <simpleType>
-        <uint8_t>
-            <default>0</default>
-        </uint8_t>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_EFF_DRAM_TDQS</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
-    <id>EFF_DRAM_WR_LVL_ENABLE</id>
-    <description>DRAM Write Level Enable. Initialized and used by HWPs.</description>
-    <simpleType>
-        <uint8_t>
-            <default>0</default>
-        </uint8_t>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_EFF_DRAM_WR_LVL_ENABLE</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
-    <id>EFF_DRAM_OUTPUT_BUFFER</id>
-    <description>DRAM output buffer. Initialized and used by HWPs.</description>
-    <simpleType>
-        <uint8_t>
-            <default>0</default>
-        </uint8_t>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_EFF_DRAM_OUTPUT_BUFFER</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
-    <id>EFF_DRAM_PASR</id>
-    <description>DRAM Partial Array Self-Refresh. Initialized and used by HWPs.</description>
-    <simpleType>
-        <uint8_t>
-            <default>0</default>
-        </uint8_t>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_EFF_DRAM_PASR</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
-    <id>EFF_DRAM_ASR</id>
-    <description>DRAM Auto Self-Refresh. Initialized and used by HWPs.</description>
-    <simpleType>
-        <uint8_t>
-            <default>0</default>
-        </uint8_t>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_EFF_DRAM_ASR</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
-    <id>EFF_DRAM_SRT</id>
-    <description>DRAM Self-Refresh Temperature Range. Initialized and used by HWPs.</description>
-    <simpleType>
-        <uint8_t>
-            <default>0</default>
-        </uint8_t>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_EFF_DRAM_SRT</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
-    <id>EFF_MPR_LOC</id>
-    <description>Multi Purpose Register Location. Initialized and used by HWPs.</description>
-    <simpleType>
-        <uint8_t>
-            <default>0</default>
-        </uint8_t>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_EFF_MPR_LOC</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
-    <id>EFF_MPR_MODE</id>
-    <description>Multi Purpose Register Mode. Initialized and used by HWPs.</description>
-    <simpleType>
-        <uint8_t>
-            <default>0</default>
-        </uint8_t>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_EFF_MPR_MODE</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
-    <id>EFF_DIMM_RCD_CNTL_WORD_0_15</id>
-    <description>DIMM RCD Control Word. Initialized and used by HWPs.</description>
-    <simpleType>
-        <uint64_t>
-            <default>0</default>
-        </uint64_t>
-        <array>2,2</array><!-- [drop][port] -->
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_EFF_DIMM_RCD_CNTL_WORD_0_15</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
-    <id>EFF_SCHMOO_MODE</id>
-    <description>Specifies the schmoo mode to use during draminit_train_adv. Initialized and used by HWPs.</description>
-    <simpleType>
-        <uint8_t>
-            <default>0</default>
-        </uint8_t>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_EFF_SCHMOO_MODE</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
-    <id>EFF_SCHMOO_TEST_VALID</id>
-    <description>Specifies the schmoo test to run during draminit_train_adv. Initialized and used by HWPs.</description>
-    <simpleType>
-        <uint8_t>
-            <default>0</default>
-        </uint8_t>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_EFF_SCHMOO_TEST_VALID</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
-    <id>EFF_SCHMOO_PARAM_VALID</id>
-    <description>Specifies the schmoo parameters to use during draminit_train_adv. Initialized and used by HWPs.</description>
-    <simpleType>
-        <uint8_t>
-            <default>0</default>
-        </uint8_t>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_EFF_SCHMOO_PARAM_VALID</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
-    <id>EFF_MEMCAL_INTERVAL</id>
-    <description>Specifies the memcal interval in clocks. Initialized and used by HWPs.</description>
-    <simpleType>
-        <uint32_t>
-            <default>0</default>
-        </uint32_t>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_EFF_MEMCAL_INTERVAL</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
-    <id>EFF_ZQCAL_INTERVAL</id>
-    <description>Specifies the zqcal interval in clocks. Initialized and used by HWPs.</description>
-    <simpleType>
-        <uint32_t>
-            <default>0</default>
-        </uint32_t>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_EFF_ZQCAL_INTERVAL</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
-    <id>MSS_THROTTLE_NUMERATOR</id>
-    <description>DIMM throttle numerator. Initialized and used by HWPs.</description>
-    <simpleType>
-        <uint32_t>
-            <default>0</default>
-        </uint32_t>
-        <array>2,2</array><!-- [drop][port] -->
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_MSS_THROTTLE_NUMERATOR</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
-    <id>MSS_THROTTLE_DENOMINATOR</id>
-    <description>DIMM throttle denominator. Initialized and used by HWPs.</description>
-    <simpleType>
-        <uint32_t>
-            <default>0</default>
-        </uint32_t>
-        <array>2,2</array><!-- [drop][port] -->
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_MSS_THROTTLE_DENOMINATOR</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
-    <id>MSS_THROTTLE_CHANNEL_NUMERATOR</id>
-    <description>Channel throttle numerator. Initialized and used by HWPs.</description>
-    <simpleType>
-        <uint32_t>
-            <default>0</default>
-        </uint32_t>
-        <array>2</array>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_MSS_THROTTLE_CHANNEL_NUMERATOR</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
-    <id>MSS_THROTTLE_CHANNEL_DENOMINATOR</id>
-    <description>Channel throttle denominator. Initialized and used by HWPs.</description>
-    <simpleType>
-        <uint32_t>
-            <default>0</default>
-        </uint32_t>
-        <array>2</array>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_MSS_THROTTLE_CHANNEL_DENOMINATOR</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
-    <id>MSS_WATT_TARGET</id>
-    <description>Channel total memory watts. Initialized and used by HWPs.</description>
-    <simpleType>
-        <uint32_t>
-            <default>0</default>
-        </uint32_t>
-        <array>2</array>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_MSS_WATT_TARGET</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
-    <id>MSS_POWER_SLOPE</id>
-    <description>DIMM Power slope value. Initialized and used by HWPs.</description>
-    <simpleType>
-        <uint32_t>
-            <default>0</default>
-        </uint32_t>
-        <array>2,2</array><!-- [drop][port] -->
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_MSS_POWER_SLOPE</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
-    <id>MSS_POWER_INT</id>
-    <description>DIMM Power intercept value. Initialized and used by HWPs.</description>
-    <simpleType>
-        <uint32_t>
-            <default>0</default>
-        </uint32_t>
-        <array>2,2</array><!-- [drop][port] -->
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_MSS_POWER_INT</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
-    <id>MSS_DIMM_MAXBANDWIDTH_GBS</id>
-    <description>DIMM Max Bandwidth in GBs. Initialized and used by HWPs.</description>
-    <simpleType>
-        <uint32_t>
-            <default>0</default>
-        </uint32_t>
-        <array>2,2</array><!-- [drop][port] -->
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_MSS_DIMM_MAXBANDWIDTH_GBS</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
-    <id>MSS_DIMM_MAXBANDWIDTH_MRS</id>
-    <description>DIMM Max Bandwidth in MRs. Initialized and used by HWPs.</description>
-    <simpleType>
-        <uint32_t>
-            <default>0</default>
-        </uint32_t>
-        <array>2,2</array><!-- [drop][port] -->
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_MSS_DIMM_MAXBANDWIDTH_MRS</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
-    <id>MSS_CHANNEL_MAXBANDWIDTH_GBS</id>
-    <description>Channel Max Bandwidth in GBs. Initialized and used by HWPs.</description>
-    <simpleType>
-        <uint32_t>
-            <default>0</default>
-        </uint32_t>
-        <array>2</array>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_MSS_CHANNEL_MAXBANDWIDTH_GBS</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
-    <id>MSS_CHANNEL_MAXBANDWIDTH_MRS</id>
-    <description>Channel Max Bandwidth MRs. Initialized and used by HWPs.</description>
-    <simpleType>
-        <uint32_t>
-            <default>0</default>
-        </uint32_t>
-        <array>2</array>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_MSS_CHANNEL_MAXBANDWIDTH_MRS</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
-    <id>MSS_DIMM_MAXPOWER</id>
-    <description>DIMM Max Power output. Initialized and used by HWPs.</description>
-    <simpleType>
-        <uint32_t>
-            <default>0</default>
-        </uint32_t>
-        <array>2,2</array><!-- [drop][port] -->
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_MSS_DIMM_MAXPOWER</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
-    <id>MSS_CHANNEL_MAXPOWER</id>
-    <description>Channel Max Power output. Initialized and used by HWPs.</description>
-    <simpleType>
-        <uint32_t>
-            <default>0</default>
-        </uint32_t>
-        <array>2</array>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_MSS_CHANNEL_MAXPOWER</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
-    <id>MSS_MEMSIZE_MBA</id>
-    <description>At the MBA level, how much memory is available. Initialized by HWP.</description>
-    <simpleType>
-        <uint64_t>
-            <default>0</default>
-        </uint64_t>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_MSS_MEMSIZE_MBA</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
     <id>EC</id>
     <description>attribute indicating the chip target's EC level</description>
     <simpleType>
@@ -3362,355 +1808,6 @@
 </attribute>
 
 <attribute>
-    <id>EFF_DRAM_BANKS</id>
-    <description>Number of DRAM banks. Initialized and used by HWPs.</description>
-    <simpleType>
-        <uint8_t>
-            <default>0</default>
-        </uint8_t>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_EFF_DRAM_BANKS</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
-    <id>EFF_DRAM_ROWS</id>
-    <description>Number of DRAM rows. Initialized and used by HWPs.</description>
-    <simpleType>
-        <uint8_t>
-            <default>0</default>
-        </uint8_t>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_EFF_DRAM_ROWS</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
-    <id>EFF_DRAM_COLS</id>
-    <description>Number of DRAM columns. Initialized and used by HWPs.</description>
-    <simpleType>
-        <uint8_t>
-            <default>0</default>
-        </uint8_t>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_EFF_DRAM_COLS</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
-    <id>EFF_DIMM_RCD_IBT</id>
-    <description>DIMM RCD IBT. Initialized and used by HWPs.</description>
-    <simpleType>
-        <uint32_t>
-            <default>0</default>
-        </uint32_t>
-        <array>2,2</array><!-- [drop][port] -->
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_EFF_DIMM_RCD_IBT</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
-    <id>EFF_DIMM_RCD_MIRROR_MODE</id>
-    <description>DIMM RCD Mirror mode. Initialized and used by HWPs.</description>
-    <simpleType>
-        <uint8_t>
-            <default>0</default>
-        </uint8_t>
-        <array>2,2</array><!-- [drop][port] -->
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_EFF_DIMM_RCD_MIRROR_MODE</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
-    <id>EFF_IBM_TYPE</id>
-    <description>Specifies the memory topology type. Initialized and used by HWPs.</description>
-    <simpleType>
-        <uint8_t>
-            <default>0</default>
-        </uint8_t>
-        <array>2,2</array><!-- [drop][port] -->
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_EFF_IBM_TYPE</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
-    <id>EFF_NUM_DROPS_PER_PORT</id>
-    <description>Specifies the number of DIMM dimensions that are valid per port. Initialized and used by HWPs.</description>
-    <simpleType>
-        <uint8_t>
-            <default>0</default>
-        </uint8_t>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_EFF_NUM_DROPS_PER_PORT</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
-    <id>EFF_STACK_TYPE</id>
-    <description>Specifies the DRAM package type. Initialized and used by HWPs.</description>
-    <simpleType>
-        <uint8_t>
-            <default>0</default>
-        </uint8_t>
-        <array>2,2</array><!-- [drop][port] -->
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_EFF_STACK_TYPE</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
-    <id>EFF_NUM_MASTER_RANKS_PER_DIMM</id>
-    <description>Specifies the number of master ranks per DIMM. Initialized and used by HWPs.</description>
-    <simpleType>
-        <uint8_t>
-            <default>0</default>
-        </uint8_t>
-        <array>2,2</array><!-- [drop][port] -->
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
-    <id>EFF_NUM_PACKAGES_PER_RANK</id>
-    <description>Specifies the number of DRAM packages per rank. Initialized and used by HWPs.</description>
-    <simpleType>
-        <uint8_t>
-            <default>0</default>
-        </uint8_t>
-        <array>2,2</array><!-- [drop][port] -->
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_EFF_NUM_PACKAGES_PER_RANK</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
-    <id>EFF_NUM_DIES_PER_PACKAGE</id>
-    <description>Specifies the number of DRAM dies per package. Initialized and used by HWPs.</description>
-    <simpleType>
-        <uint8_t>
-            <default>0</default>
-        </uint8_t>
-        <array>2,2</array><!-- [drop][port] -->
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_EFF_NUM_DIES_PER_PACKAGE</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
-    <id>MSS_SPARE_BYTE</id>
-    <description>This says that the system can have a 10th byte. Initialized and used by HWPs.</description>
-    <simpleType>
-        <uint8_t>
-            <default>0</default>
-        </uint8_t>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_MSS_SPARE_BYTE</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
-    <id>MSS_MEM_MC_IN_GROUP</id>
-    <description>A 8 bit vector that would be a designation of which MC are involved in the group. Initialized and used by HWPs.</description>
-    <simpleType>
-        <uint8_t>
-            <default>0</default>
-        </uint8_t>
-        <array>8</array>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_MSS_MEM_MC_IN_GROUP</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
-    <id>MSS_MCA_HASH_MODE</id>
-    <description>sets up the centaur hash mode policy. Mode values are 0, 1, and 2.</description>
-    <simpleType>
-        <uint8_t>
-            <default>0</default>
-        </uint8_t>
-    </simpleType>
-    <persistency>non-volatile</persistency>
-    <readable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_MSS_MCA_HASH_MODE</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
-    <id>MSS_MBA_ADDR_INTERLEAVE_BIT</id>
-    <description>sets the Centaur address bits used to interleave addresses between MBA01 and MBA23. valid values are 23 through 32.</description>
-    <simpleType>
-        <uint8_t>
-            <default>0</default>
-        </uint8_t>
-    </simpleType>
-    <persistency>non-volatile</persistency>
-    <readable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_MSS_MBA_ADDR_INTERLEAVE_BIT</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
-    <id>MSS_MBA_CACHELINE_INTERLEAVE_MODE</id>
-    <description>centaur interleave mode. 1 = 256-BIT, 0 = 128-BIT.</description>
-    <simpleType>
-        <uint8_t>
-            <default>0</default>
-        </uint8_t>
-    </simpleType>
-    <persistency>non-volatile</persistency>
-    <readable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_MSS_MBA_CACHELINE_INTERLEAVE_MODE</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
-    <id>MSS_CACHE_ENABLE</id>
-    <description>
-        Specifies if a Memory Buffer chip L4 cache is enabled or disabled
-        For good memory buffer chips, L4 is enabled
-        Firmware can set to disabled for a particular chip if the cache is
-          not functional
-        1 = enabled, 0 = disabled.
-    </description>
-    <simpleType>
-        <uint8_t>
-            <default>1</default>
-        </uint8_t>
-    </simpleType>
-    <persistency>volatile</persistency>
-    <readable/>
-    <writeable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_MSS_CACHE_ENABLE</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
-    <id>MSS_PREFETCH_ENABLE</id>
-    <description>Prefteching enable. 1 = enable, 0 = disable.</description>
-    <simpleType>
-        <uint8_t>
-            <default>0</default>
-        </uint8_t>
-    </simpleType>
-    <persistency>non-volatile</persistency>
-    <readable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_MSS_PREFETCH_ENABLE</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
-    <id>MSS_CLEANER_ENABLE</id>
-    <description>L4 cleaner enable. 1 = enable, 0 = disable.</description>
-    <simpleType>
-        <uint8_t>
-            <default>0</default>
-        </uint8_t>
-    </simpleType>
-    <persistency>non-volatile</persistency>
-    <readable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_MSS_CLEANER_ENABLE</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
-    <id>MSS_LAB_OVERRIDE_FOR_MEM_PLL</id>
-    <description>override the default Centaur MEM PLL settings with user-specified scan chain data. 1 = ON, 0 = OFF.</description>
-    <simpleType>
-        <uint8_t>
-            <default>0</default>
-        </uint8_t>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_MSS_LAB_OVERRIDE_FOR_MEM_PLL</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
     <id>EI_BUS_RX_MSB_LSB_SWAP</id>
     <description>PRBS scramble pattern per lane on DMI bus for p8 and centaur.</description>
     <simpleType>
@@ -4252,245 +2349,6 @@
 </attribute>
 
 <!-- ===== ===== End Memory Map ===== ===== ===== ===== ===== ===== -->
-
-<attribute>
-    <id>MSS_MCS_GROUP</id>
-    <description>Data Structure from eff grouping to setup bars to help determine different groups
-   Non- Mirroring [0-7] 0 -- MCS size //1-- No of MCS/group //2-- Total group size //3 -- Base address// 4-11 - MCS ID number// 12 --Alter.Bar //13 - A.Group Size // 14 - A.Base address
- //  Mirroring      [8-15] 0 -- MCS size //1-- No of MCS/group //2-- Total group size //3 -- Base address// 4-11 - MCS ID number// 12 --Alter.Bar //13 - A.Group Size // 14 - A.Base address
-Measured in GB</description>
-    <simpleType>
-        <uint8_t>
-            <default>0</default>
-        </uint8_t>
-        <array>16,16</array>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_MSS_MCS_GROUP</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
-    <id>MSS_MCS_GROUP_32</id>
-    <description>Data Structure from eff grouping to setup bars to help determine different groups
-   Non- Mirroring [0-7] 0 -- MCS size //1-- No of MCS/group //2-- Total group size //3 -- Base address// 4-11 - MCS ID number// 12 --Alter.Bar //13 - A.Group Size // 14 - A.Base address
- //  Mirroring      [8-15] 0 -- MCS size //1-- No of MCS/group //2-- Total group size //3 -- Base address// 4-11 - MCS ID number// 12 --Alter.Bar //13 - A.Group Size // 14 - A.Base address
-Measured in GB</description>
-    <simpleType>
-        <uint32_t>
-            <default>0</default>
-        </uint32_t>
-        <array>16,16</array>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_MSS_MCS_GROUP_32</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
-    <id>MSS_EFF_DIMM_FUNCTIONAL_VECTOR</id>
-    <description>A bit vector (per Dean's request) specifying if a DIMM is functional.  DIMM attributes, such as SIZE, are qualified by this bit vector.  The attribute ANDed 0x80 means port 0, DIMM 0 is functional, 0x40 means port 0, DIMM 1 is functional.  0x08 means port 1, DIMM 0 is functional and 0x04 means port 1 DIMM 1 is functional.  A fully populated system would have the value of 0xCC. Used in various locations and is computed in mss_eff_cnfg. Can be overwritten by ODM vendors if done from the PNOR or odm_eff_cnfg.  Each memory channel will have a value. creator: mss_eff_cnfg consumer: various firmware notes: none
-This factors in functionality</description>
-    <simpleType>
-        <uint8_t>
-            <default>0</default>
-        </uint8_t>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_MSS_EFF_DIMM_FUNCTIONAL_VECTOR</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
-    <id>MSS_INTERLEAVE_ENABLE</id>
-    <description>Used in the setting of groups.  It is a bit vector.  If the value  BITWISE_AND  1 = 1 then groups of 1 are enabled with special checkerboard modes needed, if the value  BITWISE_AND  2 = 2, then groups of 2 are possible; if value  BITWISE_AND  4, the groups of 4 are possible; if value  BITWISE_AND  8, the groups of 8 are possible.  If no groups can formed according to this input, then an error will be thrown.</description>
-    <simpleType>
-        <uint8_t>
-            <default>0</default>
-        </uint8_t>
-    </simpleType>
-    <persistency>non-volatile</persistency>
-    <readable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_MSS_INTERLEAVE_ENABLE</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
-    <id>EFF_CKE_MAP</id>
-    <description>Rank to CKE map. Used in various locations and is computed in mss_eff_cnfg_cke. Can be overwritten by ODM vendors if done from the PNOR or odm_eff_cnfg.   creator: mss_eff_cnfg_cke consumer: various firmware notes: none</description>
-    <simpleType>
-        <uint8_t>
-            <default>0</default>
-        </uint8_t>
-        <array>2,2,4</array>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_EFF_CKE_MAP</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
-    <id>EFF_DIMM_SPARE</id>
-    <description>Spare DRAM availability. Used in various locations and is computed in mss_eff_cnfg. Can be overwritten by ODM vendors if done from the PNOR or odm_eff_cnfg.   creator: mss_eff_cnfg consumer: various firmware notes: load from spd</description>
-    <simpleType>
-        <uint8_t>
-            <default>0</default>
-        </uint8_t>
-        <array>2,2,4</array>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_EFF_DIMM_SPARE</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
-    <id>EFF_SCHMOO_WR_EYE_MIN_MARGIN</id>
-    <description>Specifies the schmoo minimum margin to use during draminit_train_adv. Used to signal possible SI issues in memory.</description>
-    <simpleType>
-        <uint8_t>
-            <default>0</default>
-        </uint8_t>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_EFF_SCHMOO_WR_EYE_MIN_MARGIN</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
-    <id>EFF_SCHMOO_RD_EYE_MIN_MARGIN</id>
-    <description>Specifies the schmoo minimum margin to use during draminit_train_adv. Used to signal possible SI issues in memory.</description>
-    <simpleType>
-        <uint8_t>
-            <default>0</default>
-        </uint8_t>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_EFF_SCHMOO_RD_EYE_MIN_MARGIN</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
-    <id>EFF_SCHMOO_DQS_CLK_MIN_MARGIN</id>
-    <description>Specifies the schmoo minimum margin to use during draminit_train_adv. Used to signal possible SI issues in memory.</description>
-    <simpleType>
-        <uint8_t>
-            <default>0</default>
-        </uint8_t>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_EFF_SCHMOO_DQS_CLK_MIN_MARGIN</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
-    <id>EFF_SCHMOO_RD_GATE_MIN_MARGIN</id>
-    <description>Specifies the schmoo minimum margin to use during draminit_train_adv. Used to signal possible SI issues in memory.</description>
-    <simpleType>
-        <uint8_t>
-            <default>0</default>
-        </uint8_t>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_EFF_SCHMOO_RD_GATE_MIN_MARGIN</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
-    <id>EFF_SCHMOO_ADDR_CMD_MIN_MARGIN</id>
-    <description>Specifies the schmoo minimum margin to use during draminit_train_adv. Used to signal possible SI issues in memory.</description>
-    <simpleType>
-        <uint8_t>
-            <default>0</default>
-        </uint8_t>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_EFF_SCHMOO_ADDR_CMD_MIN_MARGIN</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
-    <id>MSS_CAL_STEP_ENABLE</id>
-    <description>A bit vector denoting valid cal steps to run during dram_init_train. [0] EXT_ZQCAL
-[1] WR_LEVEL
-[2] DQS_ALIGN
-[3] RDCLK_ALIGN
-[4] READ_CTR
-[5] WRITE_CTR
-[6] COARSE_WR
-[7] COARSE_RD
-bits6:7  will be consumed together to form COARSE_LVL. </description>
-    <simpleType>
-        <uint8_t>
-            <default>0</default>
-        </uint8_t>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_MSS_CAL_STEP_ENABLE</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
-    <id>MSS_MEM_IPL_COMPLETE</id>
-    <description>A numerical number indicating if the memory procedures are complete.  written by mss_setup_bars when the bars are now functional in the processor.  </description>
-    <simpleType>
-        <uint8_t>
-            <default>0</default>
-        </uint8_t>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_MSS_MEM_IPL_COMPLETE</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
 
 <attribute>
   <id>PROC_EPS_GB_PERCENTAGE</id>
@@ -7950,5 +5808,3442 @@ firmware notes: Used as override attribute for pstate procedure
         <macro>DIRECT</macro>
     </hwpfToHbAttrMap>
 </attribute>
+
+<!-- ===== Attributes supporting memory_attributes.xml HWPF Attributes ===== -->
+
+<attribute>
+    <id>MSS_VOLT</id>
+    <description>DRAM Voltage. Initialized and used by HWPs.</description>
+    <simpleType>
+        <uint32_t>
+            <default>0</default>
+        </uint32_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_MSS_VOLT</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>MSS_FREQ</id>
+    <description>Frequency of memory channel in MHz. Initialized and used by HWPs.</description>
+    <simpleType>
+        <uint32_t>
+            <default>0</default>
+        </uint32_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_MSS_FREQ</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>MSS_DIMM_MFG_ID_CODE</id>
+    <description>DIMM Manufacturer ID Code. Initialized and used by HWPs.</description>
+    <simpleType>
+        <uint32_t>
+            <default>0</default>
+        </uint32_t>
+        <array>2,2</array><!-- [drop][port] -->
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_MSS_DIMM_MFG_ID_CODE</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_DIMM_RANKS_CONFIGED</id>
+    <description>DIMM ranks configured. Initialized and used by HWPs.</description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+        <array>2,2</array><!-- [drop][port] -->
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_DIMM_RANKS_CONFIGED</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_NUM_RANKS_PER_DIMM</id>
+    <description>Number of ranks per DIMM. Initialized and used by HWPs.</description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+        <array>2,2</array><!-- [drop][port] -->
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_NUM_RANKS_PER_DIMM</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_DIMM_TYPE</id>
+    <description>Type of DIMM. Initialized and used by HWPs.</description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_DIMM_TYPE</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_DRAM_WIDTH</id>
+    <description>DRAM Device Width. Initialized and used by HWPs.</description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_DRAM_WIDTH</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_DRAM_GEN</id>
+    <description>DRAM Generation. Initialized and used by HWPs.</description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_DRAM_GEN</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_PRIMARY_RANK_GROUP0</id>
+    <description>Primary RankGroup0. Initialized and used by HWPs.</description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+        <array>2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_PRIMARY_RANK_GROUP0</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_PRIMARY_RANK_GROUP1</id>
+    <description>Primary RankGroup1. Initialized and used by HWPs.</description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+        <array>2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_PRIMARY_RANK_GROUP1</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_PRIMARY_RANK_GROUP2</id>
+    <description>Primary RankGroup2. Initialized and used by HWPs.</description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+        <array>2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_PRIMARY_RANK_GROUP2</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_PRIMARY_RANK_GROUP3</id>
+    <description>Primary RankGroup3. Initialized and used by HWPs.</description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+        <array>2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_PRIMARY_RANK_GROUP3</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_SECONDARY_RANK_GROUP0</id>
+    <description>Secondary RankGroup0. Initialized and used by HWPs.</description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+        <array>2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_SECONDARY_RANK_GROUP0</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_SECONDARY_RANK_GROUP1</id>
+    <description>Secondary RankGroup1. Initialized and used by HWPs.</description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+        <array>2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_SECONDARY_RANK_GROUP1</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_SECONDARY_RANK_GROUP2</id>
+    <description>Secondary RankGroup2. Initialized and used by HWPs.</description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+        <array>2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_SECONDARY_RANK_GROUP2</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_SECONDARY_RANK_GROUP3</id>
+    <description>Secondary RankGroup3. Initialized and used by HWPs.</description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+        <array>2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_SECONDARY_RANK_GROUP3</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_TERTIARY_RANK_GROUP0</id>
+    <description>Tertiary RankGroup0. Initialized and used by HWPs.</description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+        <array>2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_TERTIARY_RANK_GROUP0</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_TERTIARY_RANK_GROUP1</id>
+    <description>Tertiary RankGroup1. Initialized and used by HWPs.</description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+        <array>2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_TERTIARY_RANK_GROUP1</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_TERTIARY_RANK_GROUP2</id>
+    <description>Tertiary RankGroup2. Initialized and used by HWPs.</description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+        <array>2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_TERTIARY_RANK_GROUP2</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_TERTIARY_RANK_GROUP3</id>
+    <description>Tertiary RankGroup3. Initialized and used by HWPs.</description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+        <array>2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_TERTIARY_RANK_GROUP3</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_QUATERNARY_RANK_GROUP0</id>
+    <description>Quaternary RankGroup0. Initialized and used by HWPs.</description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+        <array>2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_QUATERNARY_RANK_GROUP0</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_QUATERNARY_RANK_GROUP1</id>
+    <description>Quaternary RankGroup1. Initialized and used by HWPs.</description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+        <array>2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_QUATERNARY_RANK_GROUP1</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_QUATERNARY_RANK_GROUP2</id>
+    <description>Quaternary RankGroup2. Initialized and used by HWPs.</description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+        <array>2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_QUATERNARY_RANK_GROUP2</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_QUATERNARY_RANK_GROUP3</id>
+    <description>Quaternary RankGroup3. Initialized and used by HWPs.</description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+        <array>2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_QUATERNARY_RANK_GROUP3</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_ODT_RD</id>
+    <description>Rank Read ODT. Initialized and used by HWPs.</description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+        <array>2,2,4</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_ODT_RD</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_ODT_WR</id>
+    <description>Rank Write ODT. Initialized and used by HWPs.</description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+        <array>2,2,4</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_ODT_WR</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_DRAM_RON</id>
+    <description>DRAM Ron. Initialized and used by HWPs.</description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+        <array>2,2</array><!-- [drop][port] -->
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_DRAM_RON</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_DRAM_RTT_NOM</id>
+    <description>DRAM Rtt_Nom. Initialized and used by HWPs.</description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+        <array>2,2,4</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_DRAM_RTT_NOM</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_DRAM_RTT_WR</id>
+    <description>DRAM Rtt_WR. Initialized and used by HWPs.</description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+        <array>2,2,4</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_DRAM_RTT_WR</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_DRAM_WR_VREF</id>
+    <description>DRAM Write Vref. Initialized and used by HWPs.</description>
+    <simpleType>
+        <uint32_t>
+            <default>0</default>
+        </uint32_t>
+        <array>2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_DRAM_WR_VREF</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_DRAM_WRDDR4_VREF</id>
+    <description>DRAM Write Vref for DDR4. Initialized and used by HWPs.</description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+        <array>2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_DRAM_WRDDR4_VREF</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_DRAM_WR_VREF_SCHMOO</id>
+    <description>Enables for which VREF to use on the WR Schmoo. Initialized and used by HWPs.</description>
+    <simpleType>
+        <uint32_t>
+            <default>0</default>
+        </uint32_t>
+        <array>2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_DRAM_WR_VREF_SCHMOO</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_DRAM_WRDDR4_VREF_SCHMOO</id>
+    <description>Enables for which VREF to use on the WR Schmoo for DDR4. Initialized and used by HWPs.</description>
+    <simpleType>
+        <uint32_t>
+            <default>0</default>
+        </uint32_t>
+        <array>2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_DRAM_WRDDR4_VREF_SCHMOO</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_CEN_DRV_IMP_DQ_DQS</id>
+    <description>Centaur DQ and DQS Drive Impedance. Initialized and used by HWPs.</description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+        <array>2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_CEN_DRV_IMP_DQ_DQS</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_CEN_DRV_IMP_ADDR</id>
+    <description>Centaur Address Drive Impedance. Initialized and used by HWPs.</description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+        <array>2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_CEN_DRV_IMP_ADDR</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_CEN_DRV_IMP_CNTL</id>
+    <description>Centaur Control Drive Impedance. Initialized and used by HWPs.</description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+        <array>2</array> 
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_CEN_DRV_IMP_CNTL</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_CEN_DRV_IMP_CLK</id>
+    <description>Centaur Clock Drive Impedance. Initialized and used by HWPs.</description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+        <array>2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_CEN_DRV_IMP_CLK</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_CEN_DRV_IMP_SPCKE</id>
+    <description>Centaur Spare Clock Drive Impedance. Initialized and used by HWPs.</description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+        <array>2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_CEN_DRV_IMP_SPCKE</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_CEN_DRV_IMP_DQ_DQS_SCHMOO</id>
+    <description>Enables for which impedance values can be used and tested in a timing test. Initialized and used by HWPs.</description>
+    <simpleType>
+        <uint32_t>
+            <default>0</default>
+        </uint32_t>
+        <array>2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_CEN_DRV_IMP_DQ_DQS_SCHMOO</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_CEN_DRV_IMP_CLK_SCHMOO</id>
+    <description>Enables for which impedance values can be used and tested in a timing test. Initialized and used by HWPs.</description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+        <array>2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_CEN_DRV_IMP_CLK_SCHMOO</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_CEN_DRV_IMP_SPCKE_SCHMOO</id>
+    <description>Enables for which impedance values can be used and tested in a timing test. Initialized and used by HWPs.</description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+        <array>2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_CEN_DRV_IMP_SPCKE_SCHMOO</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_CEN_DRV_IMP_CNTL_SCHMOO</id>
+    <description>Enables for which impedance values can be used and tested in a timing test. Initialized and used by HWPs.</description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+        <array>2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_CEN_DRV_IMP_CNTL_SCHMOO</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_CEN_RCV_IMP_DQ_DQS</id>
+    <description>Centaur DQ and DQS Receiver Impedance. Initialized and used by HWPs.</description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+        <array>2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_CEN_RCV_IMP_DQ_DQS</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_CEN_RCV_IMP_DQ_DQS_SCHMOO</id>
+    <description>Enables for which impedance values can be used and tested in a timing test. Initialized and used by HWPs.</description>
+    <simpleType>
+        <uint32_t>
+            <default>0</default>
+        </uint32_t>
+        <array>2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_CEN_RCV_IMP_DQ_DQS_SCHMOO</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_CEN_SLEW_RATE_DQ_DQS</id>
+    <description>Centaur DQ and DQS Slew Rate. Initialized and used by HWPs.</description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+        <array>2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_CEN_SLEW_RATE_DQ_DQS</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_CEN_SLEW_RATE_ADDR</id>
+    <description>Centaur Address Slew Rate. Initialized and used by HWPs.</description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+        <array>2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_CEN_SLEW_RATE_ADDR</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_CEN_SLEW_RATE_CLK</id>
+    <description>Centaur Clock Slew Rate. Initialized and used by HWPs.</description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+        <array>2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_CEN_SLEW_RATE_CLK</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_CEN_SLEW_RATE_SPCKE</id>
+    <description>Centaur Spare Clock Slew Rate. Initialized and used by HWPs.</description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+        <array>2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_CEN_SLEW_RATE_SPCKE</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_CEN_SLEW_RATE_CNTL</id>
+    <description>Centaur Control Slew Rate. Initialized and used by HWPs.</description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+        <array>2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_CEN_SLEW_RATE_CNTL</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_CEN_SLEW_RATE_DQ_DQS_SCHMOO</id>
+    <description>Slew Rates that can be selected during timing adjustments. Initialized and used by HWPs.</description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+        <array>2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_CEN_SLEW_RATE_DQ_DQS_SCHMOO</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_CEN_SLEW_RATE_CLK_SCHMOO</id>
+    <description>Slew Rates that can be selected during timing adjustments. Initialized and used by HWPs.</description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+        <array>2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_CEN_SLEW_RATE_CLK_SCHMOO</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_CEN_SLEW_RATE_SPCKE_SCHMOO</id>
+    <description>Slew Rates that can be selected during timing adjustments. Initialized and used by HWPs.</description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+        <array>2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_CEN_SLEW_RATE_SPCKE_SCHMOO</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_CEN_SLEW_RATE_ADDR_SCHMOO</id>
+    <description>Slew Rates that can be selected during timing adjustments. Initialized and used by HWPs.</description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+        <array>2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_CEN_SLEW_RATE_ADDR_SCHMOO</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_CEN_SLEW_RATE_CNTL_SCHMOO</id>
+    <description>Slew Rates that can be selected during timing adjustments. Initialized and used by HWPs.</description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+        <array>2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_CEN_SLEW_RATE_CNTL_SCHMOO</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_CEN_RD_VREF</id>
+    <description>Centaur Read Vref. Initialized and used by HWPs.</description>
+    <simpleType>
+        <uint32_t>
+            <default>0</default>
+        </uint32_t>
+        <array>2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_CEN_RD_VREF</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_CEN_RD_VREF_SCHMOO</id>
+    <description>Enables for which VREF value can be used in timing adjustments. Initialized and used by HWPs.</description>
+    <simpleType>
+        <uint32_t>
+            <default>0</default>
+        </uint32_t>
+        <array>2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_CEN_RD_VREF_SCHMOO</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_DIMM_SIZE</id>
+    <description>DIMM Size. Initialized and used by HWPs.</description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+        <array>2,2</array><!-- [drop][port] -->
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_DIMM_SIZE</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_DRAM_BANKS</id>
+    <description>Number of DRAM banks. Initialized and used by HWPs.</description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_DRAM_BANKS</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_DRAM_ROWS</id>
+    <description>Number of DRAM rows. Initialized and used by HWPs.</description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_DRAM_ROWS</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_DRAM_COLS</id>
+    <description>Number of DRAM columns. Initialized and used by HWPs.</description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_DRAM_COLS</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_DRAM_DENSITY</id>
+    <description>DRAM Density. Initialized and used by HWPs.</description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_DRAM_DENSITY</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_DRAM_TRCD</id>
+    <description>DRAM RAS to CAS Delay. Initialized and used by HWPs.</description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_DRAM_TRCD</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_DRAM_TRRD</id>
+    <description>DRAM Row ACT to Row ACT Delay. Initialized and used by HWPs.</description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_DRAM_TRRD</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_DRAM_TRP</id>
+    <description>DRAM Row Precharge Delay. Initialized and used by HWPs.</description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_DRAM_TRP</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_DRAM_TRAS</id>
+    <description>DRAM ACT to Precharge Delay. Initialized and used by HWPs.</description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_DRAM_TRAS</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_DRAM_TRC</id>
+    <description>DRAM ACT to ACT/Refresh Delay. Initialized and used by HWPs.</description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_DRAM_TRC</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_DRAM_TRFI</id>
+    <description>Refresh Interval. Initialized and used by HWPs.</description>
+    <simpleType>
+        <uint32_t>
+            <default>0</default>
+        </uint32_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_DRAM_TRFI</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_DRAM_TRFC</id>
+    <description>DRAM Refresh Recovery Delay. Initialized and used by HWPs.</description>
+    <simpleType>
+        <uint32_t>
+            <default>0</default>
+        </uint32_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_DRAM_TRFC</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_DRAM_TWTR</id>
+    <description>DRAM Internal Write to Read Delay. Initialized and used by HWPs.</description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_DRAM_TWTR</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_DRAM_TRTP</id>
+    <description>DRAM Internal Read to Precharge Delay. Initialized and used by HWPs.</description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_DRAM_TRTP</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_DRAM_TFAW</id>
+    <description>DRAM Four ACT Window Delay. Initialized and used by HWPs.</description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_DRAM_TFAW</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_DRAM_BL</id>
+    <description>DRAM Burst Length. Initialized and used by HWPs.</description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_DRAM_BL</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_DRAM_CL</id>
+    <description>DRAM CAS Latency. Initialized and used by HWPs.</description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_DRAM_CL</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_DRAM_AL</id>
+    <description>DRAM Additive Latency. Initialized and used by HWPs.</description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_DRAM_AL</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_DRAM_CWL</id>
+    <description>DRAM CAS Write Latency. Initialized and used by HWPs.</description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_DRAM_CWL</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_DRAM_RBT</id>
+    <description>DRAM Read Burst Type. Initialized and used by HWPs.</description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_DRAM_RBT</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_DRAM_TM</id>
+    <description>DRAM Test Mode. Initialized and used by HWPs.</description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_DRAM_TM</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_DRAM_DLL_RESET</id>
+    <description>DRAM DLL Reset. Initialized and used by HWPs.</description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_DRAM_DLL_RESET</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_DRAM_WR</id>
+    <description>DRAM Write Recovery. Initialized and used by HWPs.</description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_DRAM_WR</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_DRAM_DLL_PPD</id>
+    <description>DRAM DLL Precharge PD. Initialized and used by HWPs.</description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_DRAM_DLL_PPD</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_DRAM_DLL_ENABLE</id>
+    <description>DRAM DLL Enable. Initialized and used by HWPs.</description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_DRAM_DLL_ENABLE</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_DRAM_TDQS</id>
+    <description>DRAM TDQS. Initialized and used by HWPs.</description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_DRAM_TDQS</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_DRAM_WR_LVL_ENABLE</id>
+    <description>DRAM Write Level Enable. Initialized and used by HWPs.</description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_DRAM_WR_LVL_ENABLE</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_DRAM_OUTPUT_BUFFER</id>
+    <description>DRAM output buffer. Initialized and used by HWPs.</description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_DRAM_OUTPUT_BUFFER</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_DRAM_PASR</id>
+    <description>DRAM Partial Array Self-Refresh. Initialized and used by HWPs.</description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_DRAM_PASR</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_DRAM_ASR</id>
+    <description>DRAM Auto Self-Refresh. Initialized and used by HWPs.</description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_DRAM_ASR</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_DRAM_SRT</id>
+    <description>DRAM Self-Refresh Temperature Range. Initialized and used by HWPs.</description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_DRAM_SRT</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_MPR_LOC</id>
+    <description>Multi Purpose Register Location. Initialized and used by HWPs.</description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_MPR_LOC</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_MPR_MODE</id>
+    <description>Multi Purpose Register Mode. Initialized and used by HWPs.</description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_MPR_MODE</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_DIMM_RCD_CNTL_WORD_0_15</id>
+    <description>DIMM RCD Control Word. Initialized and used by HWPs.</description>
+    <simpleType>
+        <uint64_t>
+            <default>0</default>
+        </uint64_t>
+        <array>2,2</array><!-- [drop][port] -->
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_DIMM_RCD_CNTL_WORD_0_15</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_DIMM_RCD_IBT</id>
+    <description>DIMM RCD IBT. Initialized and used by HWPs.</description>
+    <simpleType>
+        <uint32_t>
+            <default>0</default>
+        </uint32_t>
+        <array>2,2</array><!-- [drop][port] -->
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_DIMM_RCD_IBT</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_DIMM_RCD_MIRROR_MODE</id>
+    <description>DIMM RCD Mirror mode. Initialized and used by HWPs.</description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+        <array>2,2</array><!-- [drop][port] -->
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_DIMM_RCD_MIRROR_MODE</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_SCHMOO_MODE</id>
+    <description>Specifies the schmoo mode to use during draminit_train_adv. Initialized and used by HWPs.</description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_SCHMOO_MODE</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_SCHMOO_ADDR_MODE</id>
+    <description>Specifies the schmoo mode to use during draminit_train_adv. Initialized and used by HWPs.</description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_SCHMOO_ADDR_MODE</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_SCHMOO_TEST_VALID</id>
+    <description>Specifies the schmoo test to run during draminit_train_adv. Initialized and used by HWPs.</description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_SCHMOO_TEST_VALID</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_SCHMOO_PARAM_VALID</id>
+    <description>Specifies the schmoo parameters to use during draminit_train_adv. Initialized and used by HWPs.</description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_SCHMOO_PARAM_VALID</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_SCHMOO_WR_EYE_MIN_MARGIN</id>
+    <description>Specifies the schmoo minimum margin to use during draminit_train_adv. Used to signal possible SI issues in memory.</description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_SCHMOO_WR_EYE_MIN_MARGIN</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_SCHMOO_RD_EYE_MIN_MARGIN</id>
+    <description>Specifies the schmoo minimum margin to use during draminit_train_adv. Used to signal possible SI issues in memory.</description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_SCHMOO_RD_EYE_MIN_MARGIN</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_SCHMOO_DQS_CLK_MIN_MARGIN</id>
+    <description>Specifies the schmoo minimum margin to use during draminit_train_adv. Used to signal possible SI issues in memory.</description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_SCHMOO_DQS_CLK_MIN_MARGIN</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_SCHMOO_RD_GATE_MIN_MARGIN</id>
+    <description>Specifies the schmoo minimum margin to use during draminit_train_adv. Used to signal possible SI issues in memory.</description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_SCHMOO_RD_GATE_MIN_MARGIN</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_SCHMOO_ADDR_CMD_MIN_MARGIN</id>
+    <description>Specifies the schmoo minimum margin to use during draminit_train_adv. Used to signal possible SI issues in memory.</description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_SCHMOO_ADDR_CMD_MIN_MARGIN</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_MEMCAL_INTERVAL</id>
+    <description>Specifies the memcal interval in clocks. Initialized and used by HWPs.</description>
+    <simpleType>
+        <uint32_t>
+            <default>0</default>
+        </uint32_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_MEMCAL_INTERVAL</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_ZQCAL_INTERVAL</id>
+    <description>Specifies the zqcal interval in clocks. Initialized and used by HWPs.</description>
+    <simpleType>
+        <uint32_t>
+            <default>0</default>
+        </uint32_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_ZQCAL_INTERVAL</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_IBM_TYPE</id>
+    <description>Specifies the memory topology type. Initialized and used by HWPs.</description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+        <array>2,2</array><!-- [drop][port] -->
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_IBM_TYPE</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_NUM_DROPS_PER_PORT</id>
+    <description>Specifies the number of DIMM dimensions that are valid per port. Initialized and used by HWPs.</description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_NUM_DROPS_PER_PORT</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_STACK_TYPE</id>
+    <description>Specifies the DRAM package type. Initialized and used by HWPs.</description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+        <array>2,2</array><!-- [drop][port] -->
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_STACK_TYPE</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_NUM_MASTER_RANKS_PER_DIMM</id>
+    <description>Specifies the number of master ranks per DIMM. Initialized and used by HWPs.</description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+        <array>2,2</array><!-- [drop][port] -->
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_NUM_PACKAGES_PER_RANK</id>
+    <description>Specifies the number of DRAM packages per rank. Initialized and used by HWPs.</description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+        <array>2,2</array><!-- [drop][port] -->
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_NUM_PACKAGES_PER_RANK</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_NUM_DIES_PER_PACKAGE</id>
+    <description>Specifies the number of DRAM dies per package. Initialized and used by HWPs.</description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+        <array>2,2</array><!-- [drop][port] -->
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_NUM_DIES_PER_PACKAGE</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>MSS_MEM_THROTTLE_NUMERATOR_PER_MBA</id>
+    <description>DIMM throttle numerator. Initialized and used by HWPs.</description>
+    <simpleType>
+        <uint32_t>
+            <default>0</default>
+        </uint32_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_MSS_MEM_THROTTLE_NUMERATOR_PER_MBA</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>MSS_MEM_THROTTLE_DENOMINATOR</id>
+    <description>DIMM throttle denominator. Initialized and used by HWPs.</description>
+    <simpleType>
+        <uint32_t>
+            <default>0</default>
+        </uint32_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_MSS_MEM_THROTTLE_DENOMINATOR</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>MSS_MEM_THROTTLE_NUMERATOR_PER_CHIP</id>
+    <description>This is the throttle numerator setting for cfg_nm_n_per_chip. Initialized and used by HWPs.</description>
+    <simpleType>
+        <uint32_t>
+            <default>0</default>
+        </uint32_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_MSS_MEM_THROTTLE_NUMERATOR_PER_CHIP</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>MSS_MEM_WATT_TARGET</id>
+    <description>Channel total memory watts. Initialized and used by HWPs.</description>
+    <simpleType>
+        <uint32_t>
+            <default>0</default>
+        </uint32_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_MSS_MEM_WATT_TARGET</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>MSS_POWER_SLOPE</id>
+    <description>DIMM Power slope value. Initialized and used by HWPs.</description>
+    <simpleType>
+        <uint32_t>
+            <default>0</default>
+        </uint32_t>
+        <array>2,2</array><!-- [drop][port] -->
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_MSS_POWER_SLOPE</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>MSS_POWER_SLOPE2</id>
+    <description>DIMM Power slope value. Initialized and used by HWPs.</description>
+    <simpleType>
+        <uint32_t>
+            <default>0</default>
+        </uint32_t>
+        <array>2,2</array><!-- [drop][port] -->
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_MSS_POWER_SLOPE2</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>MSS_POWER_INT</id>
+    <description>DIMM Power intercept value. Initialized and used by HWPs.</description>
+    <simpleType>
+        <uint32_t>
+            <default>0</default>
+        </uint32_t>
+        <array>2,2</array><!-- [drop][port] -->
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_MSS_POWER_INT</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>MSS_POWER_INT2</id>
+    <description>DIMM Power intercept value. Initialized and used by HWPs.</description>
+    <simpleType>
+        <uint32_t>
+            <default>0</default>
+        </uint32_t>
+        <array>2,2</array><!-- [drop][port] -->
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_MSS_POWER_INT2</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>MSS_DIMM_MAXBANDWIDTH_GBS</id>
+    <description>DIMM Max Bandwidth in GBs. Initialized and used by HWPs.</description>
+    <simpleType>
+        <uint32_t>
+            <default>0</default>
+        </uint32_t>
+        <array>2,2</array><!-- [drop][port] -->
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_MSS_DIMM_MAXBANDWIDTH_GBS</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>MSS_DIMM_MAXBANDWIDTH_MRS</id>
+    <description>DIMM Max Bandwidth in MRs. Initialized and used by HWPs.</description>
+    <simpleType>
+        <uint32_t>
+            <default>0</default>
+        </uint32_t>
+        <array>2,2</array><!-- [drop][port] -->
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_MSS_DIMM_MAXBANDWIDTH_MRS</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>MSS_CHANNEL_MAXBANDWIDTH_GBS</id>
+    <description>Channel Max Bandwidth in GBs. Initialized and used by HWPs.</description>
+    <simpleType>
+        <uint32_t>
+            <default>0</default>
+        </uint32_t>
+        <array>2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_MSS_CHANNEL_MAXBANDWIDTH_GBS</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>MSS_CHANNEL_PAIR_MAXBANDWIDTH_GBS</id>
+    <description>Channel Pair Max Bandwidth in GBs. Initialized and used by HWPs.</description>
+    <simpleType>
+        <uint32_t>
+            <default>0</default>
+        </uint32_t>
+        <array>2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_MSS_CHANNEL_PAIR_MAXBANDWIDTH_GBS</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>MSS_CHANNEL_MAXBANDWIDTH_MRS</id>
+    <description>Channel Max Bandwidth MRs. Initialized and used by HWPs.</description>
+    <simpleType>
+        <uint32_t>
+            <default>0</default>
+        </uint32_t>
+        <array>2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_MSS_CHANNEL_MAXBANDWIDTH_MRS</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>MSS_CHANNEL_PAIR_MAXBANDWIDTH_MRS</id>
+    <description>Channel Pair Max Bandwidth MRs. Initialized and used by HWPs.</description>
+    <simpleType>
+        <uint32_t>
+            <default>0</default>
+        </uint32_t>
+        <array>2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_MSS_CHANNEL_PAIR_MAXBANDWIDTH_MRS</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>MSS_DIMM_MAXPOWER</id>
+    <description>DIMM Max Power output. Initialized and used by HWPs.</description>
+    <simpleType>
+        <uint32_t>
+            <default>0</default>
+        </uint32_t>
+        <array>2,2</array><!-- [drop][port] -->
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_MSS_DIMM_MAXPOWER</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>MSS_CHANNEL_MAXPOWER</id>
+    <description>Channel Max Power output. Initialized and used by HWPs.</description>
+    <simpleType>
+        <uint32_t>
+            <default>0</default>
+        </uint32_t>
+        <array>2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_MSS_CHANNEL_MAXPOWER</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>MSS_CHANNEL_PAIR_MAXPOWER</id>
+    <description>Channel Pair Max Power output. Initialized and used by HWPs.</description>
+    <simpleType>
+        <uint32_t>
+            <default>0</default>
+        </uint32_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_MSS_CHANNEL_PAIR_MAXPOWER</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>MSS_RUNTIME_MEM_THROTTLE_NUMERATOR_PER_MBA</id>
+    <description>Runtime throttle numerator setting for cfg_nm_n_per_mba. Initialized and used by HWPs.</description>
+    <simpleType>
+        <uint32_t>
+            <default>0</default>
+        </uint32_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_MSS_RUNTIME_MEM_THROTTLE_NUMERATOR_PER_MBA</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>MSS_RUNTIME_MEM_THROTTLE_DENOMINATOR</id>
+    <description>Runtime throttle denominator setting for cfg_nm_m. Initialized and used by HWPs.</description>
+    <simpleType>
+        <uint32_t>
+            <default>0</default>
+        </uint32_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_MSS_RUNTIME_MEM_THROTTLE_DENOMINATOR</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>MSS_RUNTIME_MEM_THROTTLE_NUMERATOR_PER_CHIP</id>
+    <description>Runtime throttle numerator setting for cfg_nm_n_per_chip. Initialized and used by HWPs.</description>
+    <simpleType>
+        <uint32_t>
+            <default>0</default>
+        </uint32_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_MSS_RUNTIME_MEM_THROTTLE_NUMERATOR_PER_CHIP</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>MSS_INTERLEAVE_ENABLE</id>
+    <description>Used in the setting of groups.  It is a bit vector.  If the value  BITWISE_AND  1 = 1 then groups of 1 are enabled with special checkerboard modes needed, if the value  BITWISE_AND  2 = 2, then groups of 2 are possible; if value  BITWISE_AND  4, the groups of 4 are possible; if value  BITWISE_AND  8, the groups of 8 are possible.  If no groups can formed according to this input, then an error will be thrown.</description>
+    <simpleType>
+        <uint8_t>
+            <default>0xff</default>
+        </uint8_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_MSS_INTERLEAVE_ENABLE</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>MSS_MCA_HASH_MODE</id>
+    <description>sets up the centaur hash mode policy. Mode values are 0, 1, and 2.</description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_MSS_MCA_HASH_MODE</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>MSS_MBA_ADDR_INTERLEAVE_BIT</id>
+    <description>sets the Centaur address bits used to interleave addresses between MBA01 and MBA23. valid values are 23 through 32.</description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_MSS_MBA_ADDR_INTERLEAVE_BIT</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>MSS_MBA_CACHELINE_INTERLEAVE_MODE</id>
+    <description>centaur interleave mode. 1 = 256-BIT, 0 = 128-BIT.</description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_MSS_MBA_CACHELINE_INTERLEAVE_MODE</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>MSS_CACHE_ENABLE</id>
+    <description>
+        Specifies if a Memory Buffer chip L4 cache is enabled or disabled
+        For good memory buffer chips, L4 is enabled
+        Firmware can set to disabled for a particular chip if the cache is
+          not functional
+        1 = enabled, 0 = disabled.
+    </description>
+    <simpleType>
+        <uint8_t>
+            <default>1</default>
+        </uint8_t>
+    </simpleType>
+    <persistency>volatile</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_MSS_CACHE_ENABLE</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>MSS_PREFETCH_ENABLE</id>
+    <description>Prefteching enable. 1 = enable, 0 = disable.</description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_MSS_PREFETCH_ENABLE</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>MSS_CLEANER_ENABLE</id>
+    <description>L4 cleaner enable. 1 = enable, 0 = disable.</description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_MSS_CLEANER_ENABLE</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>MSS_LAB_OVERRIDE_FOR_MEM_PLL</id>
+    <description>override the default Centaur MEM PLL settings with user-specified scan chain data. 1 = ON, 0 = OFF.</description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_MSS_LAB_OVERRIDE_FOR_MEM_PLL</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>MSS_MEM_MC_IN_GROUP</id>
+    <description>A 8 bit vector that would be a designation of which MC are involved in the group. Initialized and used by HWPs.</description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+        <array>8</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_MSS_MEM_MC_IN_GROUP</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>MSS_MCS_GROUP_32</id>
+    <description>Data Structure from eff grouping to setup bars to help determine different groups
+   Non- Mirroring [0-7] 0 -- MCS size //1-- No of MCS/group //2-- Total group size //3 -- Base address// 4-11 - MCS ID number// 12 --Alter.Bar //13 - A.Group Size // 14 - A.Base address
+ //  Mirroring      [8-15] 0 -- MCS size //1-- No of MCS/group //2-- Total group size //3 -- Base address// 4-11 - MCS ID number// 12 --Alter.Bar //13 - A.Group Size // 14 - A.Base address
+Measured in GB</description>
+    <simpleType>
+        <uint32_t>
+            <default>0</default>
+        </uint32_t>
+        <array>16,16</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_MSS_MCS_GROUP_32</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>MSS_EFF_DIMM_FUNCTIONAL_VECTOR</id>
+    <description>A bit vector (per Dean's request) specifying if a DIMM is functional.  DIMM attributes, such as SIZE, are qualified by this bit vector.  The attribute ANDed 0x80 means port 0, DIMM 0 is functional, 0x40 means port 0, DIMM 1 is functional.  0x08 means port 1, DIMM 0 is functional and 0x04 means port 1 DIMM 1 is functional.  A fully populated system would have the value of 0xCC. Used in various locations and is computed in mss_eff_cnfg. Can be overwritten by ODM vendors if done from the PNOR or odm_eff_cnfg.  Each memory channel will have a value. creator: mss_eff_cnfg consumer: various firmware notes: none
+This factors in functionality</description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_MSS_EFF_DIMM_FUNCTIONAL_VECTOR</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>MSS_CAL_STEP_ENABLE</id>
+    <description>A bit vector denoting valid cal steps to run during dram_init_train. [0] EXT_ZQCAL
+[1] WR_LEVEL
+[2] DQS_ALIGN
+[3] RDCLK_ALIGN
+[4] READ_CTR
+[5] WRITE_CTR
+[6] COARSE_WR
+[7] COARSE_RD
+bits6:7  will be consumed together to form COARSE_LVL. </description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_MSS_CAL_STEP_ENABLE</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>MSS_MEM_IPL_COMPLETE</id>
+    <description>A numerical number indicating if the memory procedures are complete.  written by mss_setup_bars when the bars are now functional in the processor.  </description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_MSS_MEM_IPL_COMPLETE</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>MSS_SLEW_RATE_DATA</id>
+    <description>The 4 bit result of running the slew calibration algorithm at various rates and impedances</description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+        <array>2, 4, 4</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_MSS_SLEW_RATE_DATA</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>MSS_SLEW_RATE_ADR</id>
+    <description>The 4 bit result of running the slew calibration algorithm at various rates and impedances</description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+        <array>2, 4, 4</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_MSS_SLEW_RATE_ADR</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>MSS_ECID</id>
+    <description>Bits 0 to 63 of the ECID in array entry 0 and bits 64 to 127 in ECID array entry 1
+Created from running the mss_get_cen_ecid.C</description>
+    <simpleType>
+        <uint64_t>
+            <default>0</default>
+        </uint64_t>
+        <array>2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_MSS_ECID</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>MSS_ALLOW_SINGLE_PORT</id>
+    <description>When this value is true, then mss_eff config will allow a single port to have one dimm and will allow ports to have different sizes.  Used in eff_config</description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_MSS_ALLOW_SINGLE_PORT</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<!-- TODO RTC 59048. These phase rotator attributes need to come from CDIMM VPD. For now
+     they are setup by the mss_eff_config_termination HWP -->
+
+<attribute>
+    <id>EFF_CEN_PHASE_ROT_M0_CLK_P0</id>
+    <description>Phase rotator value that comes from termination on the CDIMM VPD</description>
+    <simpleType>
+        <uint8_t><default>0</default></uint8_t>
+        <array>2</array>
+    </simpleType>
+    <persistency>volatile</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_CEN_PHASE_ROT_M0_CLK_P0</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_CEN_PHASE_ROT_M0_CLK_P1</id>
+    <description>Phase rotator value that comes from termination on the CDIMM VPD</description>
+    <simpleType>
+        <uint8_t><default>0</default></uint8_t>
+        <array>2</array>
+    </simpleType>
+    <persistency>volatile</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_CEN_PHASE_ROT_M0_CLK_P1</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_CEN_PHASE_ROT_M1_CLK_P0</id>
+    <description>Phase rotator value that comes from termination on the CDIMM VPD</description>
+    <simpleType>
+        <uint8_t><default>0</default></uint8_t>
+        <array>2</array>
+    </simpleType>
+    <persistency>volatile</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_CEN_PHASE_ROT_M1_CLK_P0</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_CEN_PHASE_ROT_M1_CLK_P1</id>
+    <description>Phase rotator value that comes from termination on the CDIMM VPD</description>
+    <simpleType>
+        <uint8_t><default>0</default></uint8_t>
+        <array>2</array>
+    </simpleType>
+    <persistency>volatile</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_CEN_PHASE_ROT_M1_CLK_P1</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_CEN_PHASE_ROT_M_CMD_A0</id>
+    <description>Phase rotator value that comes from termination on the CDIMM VPD</description>
+    <simpleType>
+        <uint8_t><default>0</default></uint8_t>
+        <array>2</array>
+    </simpleType>
+    <persistency>volatile</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_CEN_PHASE_ROT_M_CMD_A0</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_CEN_PHASE_ROT_M_CMD_A1</id>
+    <description>Phase rotator value that comes from termination on the CDIMM VPD</description>
+    <simpleType>
+        <uint8_t><default>0</default></uint8_t>
+        <array>2</array>
+    </simpleType>
+    <persistency>volatile</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_CEN_PHASE_ROT_M_CMD_A1</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_CEN_PHASE_ROT_M_CMD_A2</id>
+    <description>Phase rotator value that comes from termination on the CDIMM VPD</description>
+    <simpleType>
+        <uint8_t><default>0</default></uint8_t>
+        <array>2</array>
+    </simpleType>
+    <persistency>volatile</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_CEN_PHASE_ROT_M_CMD_A2</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_CEN_PHASE_ROT_M_CMD_A3</id>
+    <description>Phase rotator value that comes from termination on the CDIMM VPD</description>
+    <simpleType>
+        <uint8_t><default>0</default></uint8_t>
+        <array>2</array>
+    </simpleType>
+    <persistency>volatile</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_CEN_PHASE_ROT_M_CMD_A3</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_CEN_PHASE_ROT_M_CMD_A4</id>
+    <description>Phase rotator value that comes from termination on the CDIMM VPD</description>
+    <simpleType>
+        <uint8_t><default>0</default></uint8_t>
+        <array>2</array>
+    </simpleType>
+    <persistency>volatile</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_CEN_PHASE_ROT_M_CMD_A4</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_CEN_PHASE_ROT_M_CMD_A5</id>
+    <description>Phase rotator value that comes from termination on the CDIMM VPD</description>
+    <simpleType>
+        <uint8_t><default>0</default></uint8_t>
+        <array>2</array>
+    </simpleType>
+    <persistency>volatile</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_CEN_PHASE_ROT_M_CMD_A5</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_CEN_PHASE_ROT_M_CMD_A6</id>
+    <description>Phase rotator value that comes from termination on the CDIMM VPD</description>
+    <simpleType>
+        <uint8_t><default>0</default></uint8_t>
+        <array>2</array>
+    </simpleType>
+    <persistency>volatile</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_CEN_PHASE_ROT_M_CMD_A6</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_CEN_PHASE_ROT_M_CMD_A7</id>
+    <description>Phase rotator value that comes from termination on the CDIMM VPD</description>
+    <simpleType>
+        <uint8_t><default>0</default></uint8_t>
+        <array>2</array>
+    </simpleType>
+    <persistency>volatile</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_CEN_PHASE_ROT_M_CMD_A7</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_CEN_PHASE_ROT_M_CMD_A8</id>
+    <description>Phase rotator value that comes from termination on the CDIMM VPD</description>
+    <simpleType>
+        <uint8_t><default>0</default></uint8_t>
+        <array>2</array>
+    </simpleType>
+    <persistency>volatile</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_CEN_PHASE_ROT_M_CMD_A8</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_CEN_PHASE_ROT_M_CMD_A9</id>
+    <description>Phase rotator value that comes from termination on the CDIMM VPD</description>
+    <simpleType>
+        <uint8_t><default>0</default></uint8_t>
+        <array>2</array>
+    </simpleType>
+    <persistency>volatile</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_CEN_PHASE_ROT_M_CMD_A9</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_CEN_PHASE_ROT_M_CMD_A10</id>
+    <description>Phase rotator value that comes from termination on the CDIMM VPD</description>
+    <simpleType>
+        <uint8_t><default>0</default></uint8_t>
+        <array>2</array>
+    </simpleType>
+    <persistency>volatile</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_CEN_PHASE_ROT_M_CMD_A10</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_CEN_PHASE_ROT_M_CMD_A11</id>
+    <description>Phase rotator value that comes from termination on the CDIMM VPD</description>
+    <simpleType>
+        <uint8_t><default>0</default></uint8_t>
+        <array>2</array>
+    </simpleType>
+    <persistency>volatile</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_CEN_PHASE_ROT_M_CMD_A11</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_CEN_PHASE_ROT_M_CMD_A12</id>
+    <description>Phase rotator value that comes from termination on the CDIMM VPD</description>
+    <simpleType>
+        <uint8_t><default>0</default></uint8_t>
+        <array>2</array>
+    </simpleType>
+    <persistency>volatile</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_CEN_PHASE_ROT_M_CMD_A12</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_CEN_PHASE_ROT_M_CMD_A13</id>
+    <description>Phase rotator value that comes from termination on the CDIMM VPD</description>
+    <simpleType>
+        <uint8_t><default>0</default></uint8_t>
+        <array>2</array>
+    </simpleType>
+    <persistency>volatile</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_CEN_PHASE_ROT_M_CMD_A13</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_CEN_PHASE_ROT_M_CMD_A14</id>
+    <description>Phase rotator value that comes from termination on the CDIMM VPD</description>
+    <simpleType>
+        <uint8_t><default>0</default></uint8_t>
+        <array>2</array>
+    </simpleType>
+    <persistency>volatile</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_CEN_PHASE_ROT_M_CMD_A14</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_CEN_PHASE_ROT_M_CMD_A15</id>
+    <description>Phase rotator value that comes from termination on the CDIMM VPD</description>
+    <simpleType>
+        <uint8_t><default>0</default></uint8_t>
+        <array>2</array>
+    </simpleType>
+    <persistency>volatile</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_CEN_PHASE_ROT_M_CMD_A15</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_CEN_PHASE_ROT_M_CMD_BA0</id>
+    <description>Phase rotator value that comes from termination on the CDIMM VPD</description>
+    <simpleType>
+        <uint8_t><default>0</default></uint8_t>
+        <array>2</array>
+    </simpleType>
+    <persistency>volatile</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_CEN_PHASE_ROT_M_CMD_BA0</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_CEN_PHASE_ROT_M_CMD_BA1</id>
+    <description>Phase rotator value that comes from termination on the CDIMM VPD</description>
+    <simpleType>
+        <uint8_t><default>0</default></uint8_t>
+        <array>2</array>
+    </simpleType>
+    <persistency>volatile</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_CEN_PHASE_ROT_M_CMD_BA1</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_CEN_PHASE_ROT_M_CMD_BA2</id>
+    <description>Phase rotator value that comes from termination on the CDIMM VPD</description>
+    <simpleType>
+        <uint8_t><default>0</default></uint8_t>
+        <array>2</array>
+    </simpleType>
+    <persistency>volatile</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_CEN_PHASE_ROT_M_CMD_BA2</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_CEN_PHASE_ROT_M_CMD_CASN</id>
+    <description>Phase rotator value that comes from termination on the CDIMM VPD</description>
+    <simpleType>
+        <uint8_t><default>0</default></uint8_t>
+        <array>2</array>
+    </simpleType>
+    <persistency>volatile</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_CEN_PHASE_ROT_M_CMD_CASN</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_CEN_PHASE_ROT_M_CMD_RASN</id>
+    <description>Phase rotator value that comes from termination on the CDIMM VPD</description>
+    <simpleType>
+        <uint8_t><default>0</default></uint8_t>
+        <array>2</array>
+    </simpleType>
+    <persistency>volatile</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_CEN_PHASE_ROT_M_CMD_RASN</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_CEN_PHASE_ROT_M_CMD_WEN</id>
+    <description>Phase rotator value that comes from termination on the CDIMM VPD</description>
+    <simpleType>
+        <uint8_t><default>0</default></uint8_t>
+        <array>2</array>
+    </simpleType>
+    <persistency>volatile</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_CEN_PHASE_ROT_M_CMD_WEN</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_CEN_PHASE_ROT_M_PAR</id>
+    <description>Phase rotator value that comes from termination on the CDIMM VPD</description>
+    <simpleType>
+        <uint8_t><default>0</default></uint8_t>
+        <array>2</array>
+    </simpleType>
+    <persistency>volatile</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_CEN_PHASE_ROT_M_PAR</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_CEN_PHASE_ROT_M_ACTN</id>
+    <description>Phase rotator value that comes from termination on the CDIMM VPD</description>
+    <simpleType>
+        <uint8_t><default>0</default></uint8_t>
+        <array>2</array>
+    </simpleType>
+    <persistency>volatile</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_CEN_PHASE_ROT_M_ACTN</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_CEN_PHASE_ROT_M0_CNTL_CKE0</id>
+    <description>Phase rotator value that comes from termination on the CDIMM VPD</description>
+    <simpleType>
+        <uint8_t><default>0</default></uint8_t>
+        <array>2</array>
+    </simpleType>
+    <persistency>volatile</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_CEN_PHASE_ROT_M0_CNTL_CKE0</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_CEN_PHASE_ROT_M0_CNTL_CKE1</id>
+    <description>Phase rotator value that comes from termination on the CDIMM VPD</description>
+    <simpleType>
+        <uint8_t><default>0</default></uint8_t>
+        <array>2</array>
+    </simpleType>
+    <persistency>volatile</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_CEN_PHASE_ROT_M0_CNTL_CKE1</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_CEN_PHASE_ROT_M0_CNTL_CKE2</id>
+    <description>Phase rotator value that comes from termination on the CDIMM VPD</description>
+    <simpleType>
+        <uint8_t><default>0</default></uint8_t>
+        <array>2</array>
+    </simpleType>
+    <persistency>volatile</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_CEN_PHASE_ROT_M0_CNTL_CKE2</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_CEN_PHASE_ROT_M0_CNTL_CKE3</id>
+    <description>Phase rotator value that comes from termination on the CDIMM VPD</description>
+    <simpleType>
+        <uint8_t><default>0</default></uint8_t>
+        <array>2</array>
+    </simpleType>
+    <persistency>volatile</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_CEN_PHASE_ROT_M0_CNTL_CKE3</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_CEN_PHASE_ROT_M0_CNTL_CSN0</id>
+    <description>Phase rotator value that comes from termination on the CDIMM VPD</description>
+    <simpleType>
+        <uint8_t><default>0</default></uint8_t>
+        <array>2</array>
+    </simpleType>
+    <persistency>volatile</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_CEN_PHASE_ROT_M0_CNTL_CSN0</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_CEN_PHASE_ROT_M0_CNTL_CSN1</id>
+    <description>Phase rotator value that comes from termination on the CDIMM VPD</description>
+    <simpleType>
+        <uint8_t><default>0</default></uint8_t>
+        <array>2</array>
+    </simpleType>
+    <persistency>volatile</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_CEN_PHASE_ROT_M0_CNTL_CSN1</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_CEN_PHASE_ROT_M0_CNTL_CSN2</id>
+    <description>Phase rotator value that comes from termination on the CDIMM VPD</description>
+    <simpleType>
+        <uint8_t><default>0</default></uint8_t>
+        <array>2</array>
+    </simpleType>
+    <persistency>volatile</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_CEN_PHASE_ROT_M0_CNTL_CSN2</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_CEN_PHASE_ROT_M0_CNTL_CSN3</id>
+    <description>Phase rotator value that comes from termination on the CDIMM VPD</description>
+    <simpleType>
+        <uint8_t><default>0</default></uint8_t>
+        <array>2</array>
+    </simpleType>
+    <persistency>volatile</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_CEN_PHASE_ROT_M0_CNTL_CSN3</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_CEN_PHASE_ROT_M0_CNTL_ODT0</id>
+    <description>Phase rotator value that comes from termination on the CDIMM VPD</description>
+    <simpleType>
+        <uint8_t><default>0</default></uint8_t>
+        <array>2</array>
+    </simpleType>
+    <persistency>volatile</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_CEN_PHASE_ROT_M0_CNTL_ODT0</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_CEN_PHASE_ROT_M0_CNTL_ODT1</id>
+    <description>Phase rotator value that comes from termination on the CDIMM VPD</description>
+    <simpleType>
+        <uint8_t><default>0</default></uint8_t>
+        <array>2</array>
+    </simpleType>
+    <persistency>volatile</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_CEN_PHASE_ROT_M0_CNTL_ODT1</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_CEN_PHASE_ROT_M1_CNTL_CKE0</id>
+    <description>Phase rotator value that comes from termination on the CDIMM VPD</description>
+    <simpleType>
+        <uint8_t><default>0</default></uint8_t>
+        <array>2</array>
+    </simpleType>
+    <persistency>volatile</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_CEN_PHASE_ROT_M1_CNTL_CKE0</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_CEN_PHASE_ROT_M1_CNTL_CKE1</id>
+    <description>Phase rotator value that comes from termination on the CDIMM VPD</description>
+    <simpleType>
+        <uint8_t><default>0</default></uint8_t>
+        <array>2</array>
+    </simpleType>
+    <persistency>volatile</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_CEN_PHASE_ROT_M1_CNTL_CKE1</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_CEN_PHASE_ROT_M1_CNTL_CKE2</id>
+    <description>Phase rotator value that comes from termination on the CDIMM VPD</description>
+    <simpleType>
+        <uint8_t><default>0</default></uint8_t>
+        <array>2</array>
+    </simpleType>
+    <persistency>volatile</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_CEN_PHASE_ROT_M1_CNTL_CKE2</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_CEN_PHASE_ROT_M1_CNTL_CKE3</id>
+    <description>Phase rotator value that comes from termination on the CDIMM VPD</description>
+    <simpleType>
+        <uint8_t><default>0</default></uint8_t>
+        <array>2</array>
+    </simpleType>
+    <persistency>volatile</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_CEN_PHASE_ROT_M1_CNTL_CKE3</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_CEN_PHASE_ROT_M1_CNTL_CSN0</id>
+    <description>Phase rotator value that comes from termination on the CDIMM VPD</description>
+    <simpleType>
+        <uint8_t><default>0</default></uint8_t>
+        <array>2</array>
+    </simpleType>
+    <persistency>volatile</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_CEN_PHASE_ROT_M1_CNTL_CSN0</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_CEN_PHASE_ROT_M1_CNTL_CSN1</id>
+    <description>Phase rotator value that comes from termination on the CDIMM VPD</description>
+    <simpleType>
+        <uint8_t><default>0</default></uint8_t>
+        <array>2</array>
+    </simpleType>
+    <persistency>volatile</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_CEN_PHASE_ROT_M1_CNTL_CSN1</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_CEN_PHASE_ROT_M1_CNTL_CSN2</id>
+    <description>Phase rotator value that comes from termination on the CDIMM VPD</description>
+    <simpleType>
+        <uint8_t><default>0</default></uint8_t>
+        <array>2</array>
+    </simpleType>
+    <persistency>volatile</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_CEN_PHASE_ROT_M1_CNTL_CSN2</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_CEN_PHASE_ROT_M1_CNTL_CSN3</id>
+    <description>Phase rotator value that comes from termination on the CDIMM VPD</description>
+    <simpleType>
+        <uint8_t><default>0</default></uint8_t>
+        <array>2</array>
+    </simpleType>
+    <persistency>volatile</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_CEN_PHASE_ROT_M1_CNTL_CSN3</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_CEN_PHASE_ROT_M1_CNTL_ODT0</id>
+    <description>Phase rotator value that comes from termination on the CDIMM VPD</description>
+    <simpleType>
+        <uint8_t><default>0</default></uint8_t>
+        <array>2</array>
+    </simpleType>
+    <persistency>volatile</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_CEN_PHASE_ROT_M1_CNTL_ODT0</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_CEN_PHASE_ROT_M1_CNTL_ODT1</id>
+    <description>Phase rotator value that comes from termination on the CDIMM VPD</description>
+    <simpleType>
+        <uint8_t><default>0</default></uint8_t>
+        <array>2</array>
+    </simpleType>
+    <persistency>volatile</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_CEN_PHASE_ROT_M1_CNTL_ODT1</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>MSS_DQS_SWIZZLE_TYPE</id>
+    <description>DQS Swizzle type is set by the platform to describe what kind of DQS connection is being used for register acceses. Type 0 is normal, type 1 is for systems with wiring like glacier 1.  Additional types maybe defined if new boards have even different DQS swizzle features</description>
+    <simpleType>
+        <uint8_t><default>0</default></uint8_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_MSS_DQS_SWIZZLE_TYPE</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>MSS_MCS_GROUP</id>
+    <description>Data Structure from eff grouping to setup bars to help determine different groups
+   Non- Mirroring [0-7] 0 -- MCS size //1-- No of MCS/group //2-- Total group size //3 -- Base address// 4-11 - MCS ID number// 12 --Alter.Bar //13 - A.Group Size // 14 - A.Base address
+ //  Mirroring      [8-15] 0 -- MCS size //1-- No of MCS/group //2-- Total group size //3 -- Base address// 4-11 - MCS ID number// 12 --Alter.Bar //13 - A.Group Size // 14 - A.Base address
+Measured in GB</description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+        <array>16,16</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_MSS_MCS_GROUP</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_CKE_MAP</id>
+    <description>Rank to CKE map. Used in various locations and is computed in mss_eff_cnfg_cke_map. Can be overwritten by ODM vendors if done from the PNOR or odm_eff_cnfg.   creator: mss_eff_cnfg_cke_map consumer: various firmware notes: none</description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+        <array>2,2,4</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_CKE_MAP</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_SPCKE_MAP</id>
+    <description>Rank to Spare CKE map. Used in various locations and is computed in mss_eff_cnfg_cke_map. Can be overwritten by ODM vendors if done from the PNOR or odm_eff_cnfg.   creator: mss_eff_cnfg_cke_map consumer: various firmware notes: none</description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+        <array>2,2,4</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_SPCKE_MAP</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_DIMM_SPARE</id>
+    <description>Spare DRAM availability. Used in various locations and is computed in mss_eff_cnfg. Can be overwritten by ODM vendors if done from the PNOR or odm_eff_cnfg.   creator: mss_eff_cnfg consumer: various firmware notes: load from spd</description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+        <array>2,2,4</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_DIMM_SPARE</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<!-- ===== End Attributes supporting memory_attributes.xml HWPF Attributes ===== -->
 
 </attributes>

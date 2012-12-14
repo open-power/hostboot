@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: cen_mem_pll_initf.C,v 1.2 2012/08/27 16:05:20 mfred Exp $
+// $Id: cen_mem_pll_initf.C,v 1.3 2012/11/07 23:22:44 mfred Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/centaur/working/procedures/ipl/fapi/cen_mem_pll_initf.C,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2012
@@ -88,7 +88,7 @@ const uint64_t CLK_REGION_FOR_SETPULSE = 0x0010040000000000ull;
 
 // The supported frequencies are 800, 1066, 1333, 1600, 1866, and 2133 MHz  (These are the DDR frequencies and the PLL output B frequencies.)
 
-// Here are the bit definitions for the Analog PLL controller:
+// Here are the bit definitions for the Analog PLL controller:  (Checked with values from T.Diemoz Nov.7,2012)
 //
 //  Bits        Purpose                Value to be used for OutB=1600MHz (when using real HW PLL)
 // -------      --------------         ------------------------
@@ -104,7 +104,7 @@ const uint64_t CLK_REGION_FOR_SETPULSE = 0x0010040000000000ull;
 // 46 to 54     mult                   011000000   (put different values here for different freqs)
 // 55 to 56     outsel                 00
 // 57 to 58     phasedet_tune          10
-// 59           fbksel                 1
+// 59           fbksel                 0
 // 60 to 63     rangea                 0001        (put different values here for different freqs)
 // 64 to 67     rangeb                 0011        (put different values here for different freqs)
 // 68           refdiv                 0
@@ -148,32 +148,32 @@ const uint64_t MEM_PLL_CNTRL2_SIM_FREQ_1600  = 0x0F;   // Temp value:  Put F int
 // HARDWARE-ONLY PLL SETTINGS:
 //------------------------------
 // TODO adjust this HW setting for PLL OutputB = 800 Mhz
-const uint64_t MEM_PLL_CNTRL0_FREQ_800   = 0x128000000A018051ull;
+const uint64_t MEM_PLL_CNTRL0_FREQ_800   = 0x128000000A018041ull;
 const uint64_t MEM_PLL_CNTRL1_FREQ_800   = 0x3000000200000000ull;
 const uint64_t MEM_PLL_CNTRL2_FREQ_800   = 0x00;
 
 // TODO adjust this HW setting for PLL OutputB = 1066 Mhz
-const uint64_t MEM_PLL_CNTRL0_FREQ_1066  = 0x128000000A018051ull;
+const uint64_t MEM_PLL_CNTRL0_FREQ_1066  = 0x128000000A018041ull;
 const uint64_t MEM_PLL_CNTRL1_FREQ_1066  = 0x3000000200000000ull;
 const uint64_t MEM_PLL_CNTRL2_FREQ_1066  = 0x00;
 
-// HW Setting for PLL OutputB = 1333 Mhz
-const uint64_t MEM_PLL_CNTRL0_FREQ_1333  = 0x128000000A028051ull;
+// HW Setting for PLL OutputB = 1333 Mhz (Checked with values from T.Diemoz Nov.7,2012)
+const uint64_t MEM_PLL_CNTRL0_FREQ_1333  = 0x128000000A028041ull;
 const uint64_t MEM_PLL_CNTRL1_FREQ_1333  = 0x3000000200000000ull;
 const uint64_t MEM_PLL_CNTRL2_FREQ_1333  = 0x00;
 
-// HW Setting for PLL OutputB = 1600 Mhz
-const uint64_t MEM_PLL_CNTRL0_FREQ_1600  = 0x128000000A018051ull;
+// HW Setting for PLL OutputB = 1600 Mhz (Checked with values from T.Diemoz Nov.7,2012)
+const uint64_t MEM_PLL_CNTRL0_FREQ_1600  = 0x128000000A018041ull;
 const uint64_t MEM_PLL_CNTRL1_FREQ_1600  = 0x3000000200000000ull;
 const uint64_t MEM_PLL_CNTRL2_FREQ_1600  = 0x00;
 
-// HW Setting for PLL OutputB = 1866 Mhz
-const uint64_t MEM_PLL_CNTRL0_FREQ_1866  = 0x128000000A038055ull;
+// HW Setting for PLL OutputB = 1866 Mhz (Checked with values from T.Diemoz Nov.7,2012)
+const uint64_t MEM_PLL_CNTRL0_FREQ_1866  = 0x128000000A038045ull;
 const uint64_t MEM_PLL_CNTRL1_FREQ_1866  = 0xB000000200000000ull;
 const uint64_t MEM_PLL_CNTRL2_FREQ_1866  = 0x00;
 
 // TODO adjust this HW setting for PLL OutputB = 2133 Mhz
-const uint64_t MEM_PLL_CNTRL0_FREQ_2133  = 0x128000000A018051ull;
+const uint64_t MEM_PLL_CNTRL0_FREQ_2133  = 0x128000000A018041ull;
 const uint64_t MEM_PLL_CNTRL1_FREQ_2133  = 0x3000000200000000ull;
 const uint64_t MEM_PLL_CNTRL2_FREQ_2133  = 0x00;
 
@@ -265,12 +265,14 @@ fapi::ReturnCode cen_mem_pll_initf(const fapi::Target & i_target)
             // The supported frequencies are 800, 1066, 1333, 1600, 1866, and 2133 MHz  (These are the DDR frequencies and the PLL output B frequencies.)
             if (mss_freq == 800)
             {
+FAPI_ERR("PLL settings not specified for this frequency.  Defaulting to 1600MHz..");
                 rc_ecmd |= pll_data.setDoubleWord( 0, MEM_PLL_CNTRL0_FREQ_800 );
                 rc_ecmd |= pll_data.setDoubleWord( 1, MEM_PLL_CNTRL1_FREQ_800 );
                 rc_ecmd |= pll_data.setByte(      16, MEM_PLL_CNTRL2_FREQ_800 );
             }
             else if (mss_freq == 1066)
             {
+FAPI_ERR("PLL settings not specified for this frequency.  Defaulting to 1600MHz..");
                 rc_ecmd |= pll_data.setDoubleWord( 0, MEM_PLL_CNTRL0_FREQ_1066 );
                 rc_ecmd |= pll_data.setDoubleWord( 1, MEM_PLL_CNTRL1_FREQ_1066 );
                 rc_ecmd |= pll_data.setByte(      16, MEM_PLL_CNTRL2_FREQ_1066 );
@@ -295,6 +297,7 @@ fapi::ReturnCode cen_mem_pll_initf(const fapi::Target & i_target)
             }
             else if (mss_freq == 2133)
             {
+FAPI_ERR("PLL settings not specified for this frequency.  Defaulting to 1600MHz..");
                 rc_ecmd |= pll_data.setDoubleWord( 0, MEM_PLL_CNTRL0_FREQ_2133 );
                 rc_ecmd |= pll_data.setDoubleWord( 1, MEM_PLL_CNTRL1_FREQ_2133 );
                 rc_ecmd |= pll_data.setByte(      16, MEM_PLL_CNTRL2_FREQ_2133 );
@@ -490,6 +493,9 @@ fapi::ReturnCode cen_mem_pll_initf(const fapi::Target & i_target)
 This section is automatically updated by CVS when you check in this file.
 Be sure to create CVS comments when you commit so that they can be included here.
 $Log: cen_mem_pll_initf.C,v $
+Revision 1.3  2012/11/07 23:22:44  mfred
+Updated MEM PLL settings for HW with values from Tim Diemoz.
+
 Revision 1.2  2012/08/27 16:05:20  mfred
 committing minor updates as suggested by FW review.
 

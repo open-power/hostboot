@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/hwpf/hwp/dram_training/mss_scominit/mss_scominit.H $  */
+/* $Source: src/usr/hwpf/hwp/mc_config/mss_eff_config/mss_throttle_to_power.H $ */
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
@@ -20,19 +20,20 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_scominit.H,v 1.7 2012/11/10 02:53:17 mwuu Exp $
+// $Id: mss_throttle_to_power.H,v 1.3 2012/10/15 13:05:23 pardeik Exp $
+// $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/centaur/working/procedures/ipl/fapi/mss_throttle_to_power.H,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
 // *! All Rights Reserved -- Property of IBM
 // *! *** IBM Confidential ***
 //------------------------------------------------------------------------------
-// *! TITLE       : mss_scominit.H
+// *! TITLE       : mss_throttle_to_power.H
 // *! DESCRIPTION : see additional comments below
-// *! OWNER NAME  : Menlo Wuu         Email: menlowuu@us.ibm.com
-// *! BACKUP NAME : Mark Bellows      Email: bellows@us.ibm.com
+// *! OWNER NAME  : Joab Henderson    Email: joabhend@us.ibm.com
+// *! BACKUP NAME : Michael Pardeik   Email: pardeik@us.ibm.com
 // *! ADDITIONAL COMMENTS :
 //
-// Header file for mss_scominit.
+// Header file for mss_throttle_to_power.
 //
 //------------------------------------------------------------------------------
 // Don't forget to create CVS comments when you check in your changes!
@@ -41,43 +42,63 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
-//   1.7   | menlowuu |09-NOV-12| Removed mss_set_bbm_regs since now done in
-//   							  draminit_training
-//   1.6   | menlowuu |15-AUG-12| added bad bitmask function
-//   1.5   |bellows   |16-JUL-12| added in Id tag
-//   1.4   | menlowuu |20-JUN-12| added type to the typedef
-//   1.3   | menlowuu |13-JUN-12| added & to reference i_target in FP_t function
-//	 							  added comment expecting centaur target
-//   1.2   | menlowuu |06-JUN-12| Removed char* parameter for function
-//   0.1   | menlowuu |01-DEC-11| First Draft.
+//   1.3   | pardeik  |11-OCT-12| change i_target to i_target_mba
+//   1.2   | pardeik  |03-APR-12| use mba target instead of mbs
+//   1.1   | pardeik  |01-DEC-11| First Draft.
 
 
-#ifndef MSS_SCOMINIT_H_
-#define MSS_SCOMINIT_H_
 
-//----------------------------------------------------------------------
-//  My Includes
-//----------------------------------------------------------------------
-
+#ifndef MSS_THROTTLE_TO_POWER_H_
+#define MSS_THROTTLE_TO_POWER_H_
 
 //----------------------------------------------------------------------
 //  Includes
 //----------------------------------------------------------------------
 #include <fapi.H>
 
-typedef fapi::ReturnCode (*mss_scominit_FP_t)(const fapi::Target & i_target);
+typedef fapi::ReturnCode (*mss_throttle_to_power_FP_t)(const fapi::Target & i_target_mba);
 
-extern "C" {
+typedef fapi::ReturnCode (*mss_throttle_to_power_calc_FP_t)(
+						const fapi::Target &i_target_mba,
+						uint32_t i_throttle_n_per_mba,
+						uint32_t i_throttle_n_per_chip,
+						uint32_t i_throttle_d,
+						float &channel_pair_power
+						);
 
-//******************************************************************************
-// mss_scominit
-//******************************************************************************
-// mss_scominit procedure [Calls the vaious memory initfiles]
-// param[in] i_target [Reference to target, expecting centaur(MEMBUF) target]
-// return ReturnCode
+extern "C"
+{
 
-fapi::ReturnCode mss_scominit(const fapi::Target & i_target);
+//------------------------------------------------------------------------------
+// @brief mss_throttle_to_power(): This function will get the throttle attributes and call another function to determine the dimm and channel pair power based on those throttles
+//
+// @param    const fapi::Target &i_target_mba:  MBA Target
+//
+// @return fapi::ReturnCode
+//------------------------------------------------------------------------------
+
+    fapi::ReturnCode mss_throttle_to_power(const fapi::Target & i_target_mba);
+
+//------------------------------------------------------------------------------
+// @brief mss_throttle_to_power_calc(): This function will calculate the dimm and channel pair power and update attributes with the power values
+//
+// @param    const fapi::Target &i_target_mba:  MBA Target
+// @param    uint32_t i_throttle_n_per_mba:  Throttle value for cfg_nm_n_per_mba
+// @param    uint32_t i_throttle_n_per_chip:  Throttle value for cfg_nm_n_per_chip
+// @param    uint32_t i_throttle_d:  Throttle value for cfg_nm_m
+// @param    float &o_channel_pair_power:  channel pair power at these throttle settings
+//
+// @return fapi::ReturnCode
+//------------------------------------------------------------------------------
+
+    fapi::ReturnCode mss_throttle_to_power_calc(
+						const fapi::Target &i_target_mba,
+						uint32_t i_throttle_n_per_mba,
+						uint32_t i_throttle_n_per_chip,
+						uint32_t i_throttle_d,
+						float &channel_pair_power
+						);
 
 } // extern "C"
 
-#endif // MSS_SCOMINIT_H_
+#endif // MSS_THROTTLE_TO_POWER_H_

@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/hwpf/hwp/dram_training/mss_scominit/mss_scominit.H $  */
+/* $Source: src/usr/hwpf/hwp/mc_config/mss_eff_config/mss_eff_config_cke_map.H $ */
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
@@ -20,19 +20,20 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_scominit.H,v 1.7 2012/11/10 02:53:17 mwuu Exp $
+// $Id: mss_eff_config_cke_map.H,v 1.1 2012/11/14 01:28:48 asaetow Exp $
+// $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/centaur/working/procedures/ipl/fapi/mss_eff_config_cke_map.H,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
 // *! All Rights Reserved -- Property of IBM
 // *! *** IBM Confidential ***
 //------------------------------------------------------------------------------
-// *! TITLE       : mss_scominit.H
-// *! DESCRIPTION : see additional comments below
-// *! OWNER NAME  : Menlo Wuu         Email: menlowuu@us.ibm.com
+// *! TITLE       : mss_eff_config_cke_map.H
+// *! DESCRIPTION : Header file for mss_eff_config_cke_map.
+// *! OWNER NAME  : Anuwat Saetow     Email: asaetow@us.ibm.com
 // *! BACKUP NAME : Mark Bellows      Email: bellows@us.ibm.com
 // *! ADDITIONAL COMMENTS :
 //
-// Header file for mss_scominit.
+//
 //
 //------------------------------------------------------------------------------
 // Don't forget to create CVS comments when you check in your changes!
@@ -41,19 +42,12 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
-//   1.7   | menlowuu |09-NOV-12| Removed mss_set_bbm_regs since now done in
-//   							  draminit_training
-//   1.6   | menlowuu |15-AUG-12| added bad bitmask function
-//   1.5   |bellows   |16-JUL-12| added in Id tag
-//   1.4   | menlowuu |20-JUN-12| added type to the typedef
-//   1.3   | menlowuu |13-JUN-12| added & to reference i_target in FP_t function
-//	 							  added comment expecting centaur target
-//   1.2   | menlowuu |06-JUN-12| Removed char* parameter for function
-//   0.1   | menlowuu |01-DEC-11| First Draft.
+//   1.2   |          |         |
+//   1.1   | asaetow  |13-NOV-12| First Draft.
 
 
-#ifndef MSS_SCOMINIT_H_
-#define MSS_SCOMINIT_H_
+#ifndef MSS_EFF_CONFIG_CKE_MAP_H_
+#define MSS_EFF_CONFIG_CKE_MAP_H_
 
 //----------------------------------------------------------------------
 //  My Includes
@@ -65,19 +59,16 @@
 //----------------------------------------------------------------------
 #include <fapi.H>
 
-typedef fapi::ReturnCode (*mss_scominit_FP_t)(const fapi::Target & i_target);
+
+typedef fapi::ReturnCode (*mss_eff_config_cke_map_FP_t)(const fapi::Target i_target_mba);
 
 extern "C" {
 
 //******************************************************************************
-// mss_scominit
+//* name=mss_eff_config_cke_map, param=i_target_mba, return=ReturnCode
 //******************************************************************************
-// mss_scominit procedure [Calls the vaious memory initfiles]
-// param[in] i_target [Reference to target, expecting centaur(MEMBUF) target]
-// return ReturnCode
-
-fapi::ReturnCode mss_scominit(const fapi::Target & i_target);
+fapi::ReturnCode mss_eff_config_cke_map(const fapi::Target i_target_mba);
 
 } // extern "C"
 
-#endif // MSS_SCOMINIT_H_
+#endif // MSS_EFF_CONFIG_CKE_MAP_H_

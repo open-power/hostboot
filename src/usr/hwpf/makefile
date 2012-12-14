@@ -88,6 +88,7 @@ HWP_ATTR_XML_FILES = hwp/memory_attributes.xml \
                      hwp/proc_mvpd_attributes.xml \
                      hwp/ei_bus_attributes.xml \
                      hwp/chip_ec_attributes.xml \
+                     hwp/centaur_ec_attributes.xml \
                      hwp/common_attributes.xml \
                      hwp/dram_initialization/proc_setup_bars/proc_setup_bars_memory_attributes.xml \
                      hwp/dram_initialization/proc_setup_bars/proc_setup_bars_l3_attributes.xml \
