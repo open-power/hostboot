@@ -127,3 +127,12 @@ CAUSE_EFFECT {
  CAUSE: TARGET=[REG(0x090F0013)] OP=[EQUALTO,BUF] DATA=[LITERAL(64,F7FFFFFF FFFFFFFF)]
  EFFECT: TARGET=[REG(0x090F0019)] OP=[BIT,ON] BIT=[0]  # PLL Lock 
 } " >> $sb/simu/data/cec-chip/p8.act
+
+#### Additional updates for maint commands (Remove with RTC:60668)
+echo "+++ Fix up inverted ipoll mask"
+cp $bb/src/simu/data/cec-chip/p8_mba.act $sb/simu/data/cec-chip/p8_mba.act
+cp $bb/src/simu/data/cec-chip/s1_mba.act $sb/simu/data/cec-chip/s1_mba.act
+
+patch -p0 $sb/simu/data/cec-chip/p8_mba.act $HOSTBOOTROOT/src/build/citest/etc/patches/p8_mba.act.patch
+patch -p0 $sb/simu/data/cec-chip/s1_mba.act $HOSTBOOTROOT/src/build/citest/etc/patches/s1_mba.act.patch
+###

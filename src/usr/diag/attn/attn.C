@@ -98,7 +98,7 @@ errlHndl_t checkForIplAttentions()
 
             // query the proc resolver for active attentions
 
-            err = procOps.resolve(*tit, 0, attentions);
+            err = procOps.resolve(*tit, ~0, attentions);
 
             if(err)
             {
@@ -107,7 +107,7 @@ errlHndl_t checkForIplAttentions()
 
             // query the mem resolver for active attentions
 
-            err = memOps.resolve(*tit, 0, attentions);
+            err = memOps.resolve(*tit, ~0, attentions);
 
             if(err)
             {

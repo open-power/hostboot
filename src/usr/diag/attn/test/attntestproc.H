@@ -96,7 +96,7 @@ class AttnProcTest: public CxxTest::TestSuite
                     break;
                 }
 
-                randomData = randomData & ~maskbits;
+                randomData = randomData | maskbits;
 
                 err = putScom(
                         d.targetHndl,
@@ -127,13 +127,13 @@ class AttnProcTest: public CxxTest::TestSuite
                 // verify that the attn was masked, and that
                 // other bits weren't touched
 
-                if(!(data & maskbits))
+                if(!(~data & maskbits))
                 {
-                    TS_FAIL("attention not masked");
+                    TS_FAIL("attention unmasked");
                     break;
                 }
 
-                if((data & ~maskbits) != randomData)
+                if((data | maskbits) != randomData)
                 {
                     TS_FAIL("unexpected data in mask register");
                     break;
@@ -204,7 +204,7 @@ class AttnProcTest: public CxxTest::TestSuite
                     break;
                 }
 
-                randomData = randomData | maskbits;
+                randomData = randomData & ~maskbits;
 
                 err = putScom(d.targetHndl, IPOLL::address, randomData);
                 if(err)
@@ -217,7 +217,7 @@ class AttnProcTest: public CxxTest::TestSuite
 
                 if(err)
                 {
-                    TS_FAIL("unexpected error masking attention");
+                    TS_FAIL("unexpected error unmasking attention");
                     break;
                 }
 
@@ -232,13 +232,13 @@ class AttnProcTest: public CxxTest::TestSuite
                 // verify that the attn was unmasked, and that
                 // other bits weren't touched
 
-                if(!(~data & maskbits))
+                if(!(data & maskbits))
                 {
-                    TS_FAIL("attention not unmasked");
+                    TS_FAIL("attention masked");
                     break;
                 }
 
-                if((data | maskbits) != randomData)
+                if((data & ~maskbits) != randomData)
                 {
                     TS_FAIL("unexpected data in mask register");
                     break;

@@ -65,11 +65,11 @@ errlHndl_t FakeIpoll::processPutReg(
         ? i_new
         : i_sys.getReg(i_target, iv_address);
 
-    bool masked = (ipollContent & iv_ipollbits);
+    bool masked = (~ipollContent & iv_ipollbits);
     bool hi = (content & iv_gfirbits);
 
     bool unmasked = i_address == IPOLL::address
-        ? ~ipollContent & i_old & iv_ipollbits
+        ? ipollContent & ~i_old & iv_ipollbits
         : false;
 
     bool set = i_address == IPOLL::address
@@ -96,7 +96,7 @@ void FakeIpoll::processEoi(
     uint64_t ipollContent = i_sys.getReg(i_source, IPOLL::address);
     uint64_t content = i_sys.getReg(i_source, iv_address);
 
-    bool masked = ipollContent & iv_ipollbits;
+    bool masked = ~ipollContent & iv_ipollbits;
     bool high = content & iv_gfirbits;
 
     if(high && !masked)

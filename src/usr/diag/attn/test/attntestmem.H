@@ -101,7 +101,7 @@ class AttnMemTest: public CxxTest::TestSuite
                     break;
                 }
 
-                randomData = randomData & ~maskbits;
+                randomData = randomData | maskbits;
 
                 err = putScom(
                         proc,
@@ -132,13 +132,13 @@ class AttnMemTest: public CxxTest::TestSuite
                 // verify that the attn was masked, and that
                 // other bits weren't touched
 
-                if(!(data & maskbits))
+                if(!(~data & maskbits))
                 {
                     TS_FAIL("attention not masked");
                     break;
                 }
 
-                if((data & ~maskbits) != randomData)
+                if((data | maskbits) != randomData)
                 {
                     TS_FAIL("unexpected data in mask register");
                     break;
@@ -212,7 +212,7 @@ class AttnMemTest: public CxxTest::TestSuite
                     break;
                 }
 
-                randomData = randomData | maskbits;
+                randomData = randomData & ~maskbits;
 
                 err = putScom(proc, IPOLL::address, randomData);
                 if(err)
@@ -240,13 +240,13 @@ class AttnMemTest: public CxxTest::TestSuite
                 // verify that the attn was masked, and that
                 // other bits weren't touched
 
-                if(!(~data & maskbits))
+                if(!(data & maskbits))
                 {
                     TS_FAIL("attention not unmasked");
                     break;
                 }
 
-                if((data | maskbits) != randomData)
+                if((data & ~maskbits) != randomData)
                 {
                     TS_FAIL("unexpected data in mask register");
                     break;

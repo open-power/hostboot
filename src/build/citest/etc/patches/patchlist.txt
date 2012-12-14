@@ -28,3 +28,8 @@ the Centaur Action File must cope
 -Files: centaur.act.slew.patch
 -Coreq: None
 
+Additional actions for Centaur maint command complete
+-RTC: Task 60668 will remove the patch
+-CMVC: D864673 is integrating the changes
+-Files: p8_mba.act.patch s1_mba.act.patch
+-Coreq: there are related changes in workarounds.postsimsetup

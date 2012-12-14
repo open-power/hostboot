@@ -244,8 +244,8 @@ errlHndl_t Service::configureInterrupts(
         err = modifyScom(
                 *it,
                 IPOLL::address,
-                i_mode == UP ? ~mask : mask,
-                i_mode == UP ? SCOM_AND : SCOM_OR);
+                i_mode == UP ? mask : ~mask,
+                i_mode == UP ? SCOM_OR : SCOM_AND);
 
         if(err)
         {
@@ -399,6 +399,15 @@ errlHndl_t Service::processIntrQMsgPreAck(const msg_t & i_msg,
         // mask them
 
         err = o_attentions.forEach(MaskFunct()).err;
+
+        if(err)
+        {
+            break;
+        }
+
+        // clear anything in the status register
+
+        err = putScom(proc, INTR_TYPE_LCL_ERR_STATUS_REG, 0);
 
         if(err)
         {

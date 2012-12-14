@@ -68,7 +68,7 @@ errlHndl_t Validator::processPutAttention(
         target = getTargetService().getProc(i_attention.targetHndl);
     }
 
-    bool masked = i_sys.getReg(target, IPOLL::address) & ipollCheckbits;
+    bool masked = ~i_sys.getReg(target, IPOLL::address) & ipollCheckbits;
 
     if(!masked)
     {
@@ -217,7 +217,7 @@ errlHndl_t Validator::processPutReg(
 
     // these bits turned off
 
-    IPOLL::forEach(i_old & ~i_new, &args, &appendOuterLoop);
+    IPOLL::forEach(i_new & ~i_old, &args, &appendOuterLoop);
 
     AttnList::iterator it = args.list.begin();
 
@@ -231,7 +231,7 @@ errlHndl_t Validator::processPutReg(
 
     // these bits turned on
 
-    IPOLL::forEach(i_new & ~i_old, &args, &appendOuterLoop);
+    IPOLL::forEach(i_old & ~i_new, &args, &appendOuterLoop);
 
     it = args.list.begin();
 
