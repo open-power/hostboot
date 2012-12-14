@@ -66,8 +66,6 @@
   #include <evenmgt.H>
   #include <rmgrBaseClientLib.H>  //for rmgrSyncFile
   #include <prdfSdcFileControl.H>
-  // FIXME: move dump include to iipglobl.h when Adriana's fix is in
-  #include <dumpHWURequest_applet.H>
 #endif
 
 #undef prdf_ras_services_C

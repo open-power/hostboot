@@ -62,6 +62,7 @@
   #include <utillib.H>
   #include <rmgrBaseClientLib.H>
   #include <services/hwas/hwsvHwAvailSvc.H> // For deconfigureTargetAtRuntime()
+  #include <dumpHWURequest_applet.H>
   #include <proc_mpipl_check_eligibility.H>
 #endif
 
@@ -510,11 +511,29 @@ int32_t getBadDqBitmap( TARGETING::TargetHandle_t i_mbaTarget,
 
 #ifndef __HOSTBOOT_MODULE
 
+//------------------------------------------------------------------------------
+
 errlHndl_t runtimeDeconfig( TARGETING::TargetHandle_t i_target )
 {
     using namespace HWAS;
     return deconfigureTargetAtRuntime( i_target, DECONFIG_FOR_DUMP );
 }
+
+//------------------------------------------------------------------------------
+
+errlHndl_t dumpHWURequest(  hwTableContent i_Content,
+                            comp_id_t i_ClientId,
+                            uint32_t i_ErrorLogId,
+                            SrciSrc &i_Src,
+                            TARGETING::HUID_ATTR i_FailingHomUnitId )
+{
+    return dumpHWURequestApplet(  i_Content,
+                                  i_ClientId,
+                                  i_ErrorLogId,
+                                  i_Src,
+                                  i_FailingHomUnitId );
+}
+
 
 //------------------------------------------------------------------------------
 

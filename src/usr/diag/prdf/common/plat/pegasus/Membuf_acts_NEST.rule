@@ -30,7 +30,7 @@ rule NestChipletFir
   CHECK_STOP:
      (NEST_CHIPLET_CS_FIR       & `17fe000000000000`) & ~NEST_CHIPLET_FIR_MASK;
   RECOVERABLE:
-    ((NEST_CHIPLET_RE_FIR >> 2) & `17fe000000000000`) & ~NEST_CHIPLET_FIR_MASK;
+    ((NEST_CHIPLET_RE_FIR >> 2) & `17fc000000000000`) & ~NEST_CHIPLET_FIR_MASK;
 };
 
 group gNestChipletFir filter singlebit
@@ -78,7 +78,7 @@ group gNestChipletFir filter singlebit
     /** NEST_CHIPLET_FIR[14]
      *  Attention from MBS secure FIR
      */
-    (NestChipletFir, bit(14))? analyze(gMbsSecureFir);
+    (NestChipletFir, bit(14))? analyze(gMbsSecureFir); # Checkstop only
 };
 
 ################################################################################

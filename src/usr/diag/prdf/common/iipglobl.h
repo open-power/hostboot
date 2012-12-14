@@ -544,11 +544,11 @@ class System;
 #define PRDF_HWUDUMP(io_dumpErrl, i_errl,   \
                      i_content, i_dumpHuid) \
   SrciSrc l_src(*(i_errl->getSRC(0)));          \
-  io_dumpErrl= dumpHWURequestApplet( i_content, \
-                                 PRDF_COMP_ID,  \
-                                 i_errl->plid(),\
-                                 l_src,         \
-                                 i_dumpHuid );
+  io_dumpErrl= PlatServices::dumpHWURequest( i_content, \
+                                             PRDF_COMP_ID,  \
+                                             i_errl->plid(),\
+                                             l_src,         \
+                                             i_dumpHuid );
 
 /**
  * @brief Interface to deconfig target at Runtime

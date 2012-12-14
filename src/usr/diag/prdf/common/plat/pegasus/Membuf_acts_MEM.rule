@@ -28,9 +28,9 @@
 rule MemChipletFir
 {
   CHECK_STOP:
-     (MEM_CHIPLET_CS_FIR       & `17f6000000000000`) & ~MEM_CHIPLET_FIR_MASK;
+     (MEM_CHIPLET_CS_FIR       & `17fc000000000000`) & ~MEM_CHIPLET_FIR_MASK;
   RECOVERABLE:
-    ((MEM_CHIPLET_RE_FIR >> 2) & `17f6000000000000`) & ~MEM_CHIPLET_FIR_MASK;
+    ((MEM_CHIPLET_RE_FIR >> 2) & `17f0000000000000`) & ~MEM_CHIPLET_FIR_MASK;
 };
 
 group gMemChipletFir filter singlebit
@@ -78,12 +78,12 @@ group gMemChipletFir filter singlebit
     /** MEM_CHIPLET_FIR[12]
      *  Attention from MBASECUREFIR (MBA 01)
      */
-    (MemChipletFir, bit(12)) ? analyzeMba0;
+    (MemChipletFir, bit(12)) ? analyzeMba0; # Checkstop only
 
     /** MEM_CHIPLET_FIR[13]
      *  Attention from MBASECUREFIR (MBA 23)
      */
-    (MemChipletFir, bit(13)) ? analyzeMba1;
+    (MemChipletFir, bit(13)) ? analyzeMba1; # Checkstop only
 };
 
 rule MemChipletSpa

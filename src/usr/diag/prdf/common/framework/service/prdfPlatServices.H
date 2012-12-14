@@ -44,6 +44,8 @@
 
 #ifdef __HOSTBOOT_MODULE
   #include <dram_initialization/mss_memdiag/mss_maint_cmds.H>
+#else
+  #include <hdctContent.H>
 #endif
 
 //------------------------------------------------------------------------------
@@ -279,6 +281,21 @@ int32_t getBadDqBitmap( TARGETING::TargetHandle_t i_mbaTarget,
  * @return NULL if deconfig is successful, non-NULL otherwise.
  */
 errlHndl_t runtimeDeconfig( TARGETING::TargetHandle_t i_target );
+
+
+/**
+ * @brief  Interface for HWSV (PRD) to request a local dump of a hardware target.
+ * @param[in] i_Content Content to collect
+ * @param[in] i_ClientId Component ID requesting the hardware unit dump
+ * @param[in] i_ErrorLogId Platform Log ID, PLID, received from the failure
+ * @param[in] i_Src Primary SRC of reason error log
+ * @param[in] i_FailingHomUnitId Failing target to dump
+*/
+errlHndl_t dumpHWURequest( hwTableContent i_Content,
+                           comp_id_t i_ClientId,
+                           uint32_t i_ErrorLogId,
+                           SrciSrc &i_Src,
+                           TARGETING::HUID_ATTR i_FailingHomUnitId );
 
 /**
  * @brief determine whether a checkstop is eligible for

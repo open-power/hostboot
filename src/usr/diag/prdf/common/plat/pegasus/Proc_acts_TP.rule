@@ -86,7 +86,7 @@ group gTpChipletFir filter singlebit
     (TpChipletFir, bit(12)) ? analyzeMcs31;
 
     /** TP_CHIPLET_FIR[13]
-     *  Attention from IOMCFIR_1 (Venice only)
+     *  Attention from IOMCFIR_0 (Venice only)
      */
     (TpChipletFir, bit(13)) ? defaultMaskedError;
 
@@ -101,7 +101,7 @@ group gTpChipletFir filter singlebit
     (TpChipletFir, bit(15)) ? analyze(gPbamFir);
 
     /** TP_CHIPLET_FIR[16|17|18|19]
-     *  Attention from CS from MC 0-3
+     *  CS attention from MC 0-3
      */
     (TpChipletFir, bit(16|17|18|19)) ? defaultMaskedError;
 
