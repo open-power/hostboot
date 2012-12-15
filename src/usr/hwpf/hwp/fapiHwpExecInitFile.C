@@ -60,6 +60,9 @@
  *                          camvanng    06/27/2012  Fix bug in targetId
  *                          camvanng    09/07/2012  Optimization - do PutScom vs PutScomUnderMask
  *                                                  if the combined bit mask enables all 64 bits
+ *                          camvanng    12/15/2012  For PutScomUnderMask ops, grab only valid bits
+ *                                                  of the data when the data length is greater
+ *                                                  then number of bits specified.
  */
 
 #include <fapiHwpExecInitFile.H>
@@ -1491,16 +1494,18 @@ fapi::ReturnCode writeScom(ifData_t & i_ifData,
                 uint16_t l_len = i_ifData.scoms[l_scomNum]->len;
                 uint64_t l_tmpMask = 0; // mask for PutScomUnderMask ops
 
-                //Shift data to the right offset; data is right aligned
-                l_tmpData <<= (64 - (l_offset + l_len));
-                l_data |= l_tmpData;
-
                 //Create mask
                 for (uint64_t i = l_offset; i < (l_offset + l_len); i++)
                 {
                     l_tmpMask |= (0x8000000000000000ll >> i);
                 }
                 l_mask |= l_tmpMask;
+
+                //Shift data to the right offset and grab only the valid
+                //bits; data is right aligned
+                l_tmpData <<= (64 - (l_offset + l_len));
+                l_tmpData &= l_tmpMask;
+                l_data |= l_tmpData;
 
                 FAPI_DBG("fapiHwpExecInitFile: writeScom: data 0x%.16llX "
                          "mask 0x%.16llX len %u offset %u",
