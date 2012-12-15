@@ -325,9 +325,11 @@ namespace TRACEDAEMON
 
         TARGETING::SpFunctions spFunctions =
             sys->getAttr<TARGETING::ATTR_SP_FUNCTIONS>();
+        TARGETING::HbSettings hbSettings =
+            sys->getAttr<TARGETING::ATTR_HB_SETTINGS>();
 
         // Determine if continuous trace is currently enabled.
-        bool contEnabled = spFunctions.traceContinuous;
+        bool contEnabled = hbSettings.traceContinuous;
         if (g_debugSettings.contTraceOverride != 0)
         {
             contEnabled = (g_debugSettings.contTraceOverride == 2);

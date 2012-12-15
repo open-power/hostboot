@@ -362,17 +362,17 @@ foreach my $i2c_device (@{$i2c_devices->{'i2c-device'}})
     if(   (exists($i2c_device->{'content-type'}))
        && ($i2c_device->{'content-type'} eq 'SBE_VPD'))
     {
-        my $dev_path = 
+        my $dev_path =
             $i2c_device->{'system-paths'}->{'system-path'}->{'fsp-device-path'};
         my $ipath = $i2c_device->{'i2c-master'}{'instance-path'};
 
         # @TODO via RTC: 60269
-        # Uncomment the line below and remove the next when once correct size 
+        # Uncomment the line below and remove the next when once correct size
         # is available in MRW
         #my $size = $i2c_device->{'size'};
         my $size = "2c0512";
         my $addr = $i2c_device->{'address'};
-        
+
         # @TODO via RTC: 60436
         # Read primary device directly from MRW
         if($addr eq 'AE')
@@ -381,7 +381,7 @@ foreach my $i2c_device (@{$i2c_devices->{'i2c-device'}})
                 = 'L,'.$dev_path.','.$size.','.$addr;
         }
         else
-        { 
+        {
             $sbe_i2c_paths{$ipath}->{'primary-path'}
                 = 'L,'.$dev_path.','.$size.','.$addr;
         }
@@ -1311,6 +1311,12 @@ sub generate_sys
             <field><id>fsiSlaveInit</id><value>1</value></field>
             <field><id>mailboxEnabled</id><value>1</value></field>
             <field><id>fsiMasterInit</id><value>1</value></field>
+            <field><id>reserved</id><value>0</value></field>
+        </default>
+    </attribute>
+        <attribute>
+        <id>HB_SETTINGS</id>
+        <default>
             <field><id>traceContinuous</id><value>0</value></field>
             <field><id>reserved</id><value>0</value></field>
         </default>

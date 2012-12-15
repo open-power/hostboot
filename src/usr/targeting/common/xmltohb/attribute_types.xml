@@ -1630,6 +1630,28 @@
             <default>1</default>
         </field>
         <field>
+            <name>reserved</name>
+            <description>Reserved for future use</description>
+            <type>uint8_t</type>
+            <bits>5</bits>
+            <default>0</default>
+        </field>
+        </complexType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+</attribute>
+
+<attribute>
+    <id>HB_SETTINGS</id>
+    <description>
+      Attribute which describes how the SP has configured features in
+      Hostboot.
+    </description>
+    <complexType>
+        <description>Structure which defines a system's HB settings.
+         Applicable for System target only.
+        </description>
+        <field>
             <name>traceContinuous</name>
             <description>
             Enable / Disable continuous trace.
@@ -1644,13 +1666,15 @@
             <name>reserved</name>
             <description>Reserved for future use</description>
             <type>uint8_t</type>
-            <bits>4</bits>
+            <bits>7</bits>
             <default>0</default>
         </field>
         </complexType>
     <persistency>non-volatile</persistency>
     <readable/>
+    <writeable/>
 </attribute>
+
 
 <!-- Begin attributes (4) to test string support -->
 
