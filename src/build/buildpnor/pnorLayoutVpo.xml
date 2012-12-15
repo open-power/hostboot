@@ -58,10 +58,10 @@
         <sideless>yes</sideless>
     </section>
     <section>
-        <description>Hostboot Extended image (2.5MB)</description>
+        <description>Hostboot Extended image (2752K)</description>
         <eyeCatch>HBI</eyeCatch>
         <physicalOffset>0x61000</physicalOffset>
-        <physicalRegionSize>0x280000</physicalRegionSize>
+        <physicalRegionSize>0x2B0000</physicalRegionSize>
         <ecc>no</ecc>
         <source>File</source>
         <sideless>no</sideless>
@@ -70,8 +70,8 @@
         <!-- NOTE: smaller that official layout  for fake-PNOR  -->
         <description>Sleep Winkle Ref Image (196K) </description>
         <eyeCatch>WINK</eyeCatch>
-        <physicalOffset>0x2E1000</physicalOffset>
-        <physicalRegionSize>0x30000</physicalRegionSize>
+        <physicalOffset>0x311000</physicalOffset>
+        <physicalRegionSize>0x31000</physicalRegionSize>
         <actualRegionSize>0x30000</actualRegionSize>
         <ecc>no</ecc>
         <source>Blank</source>
@@ -81,7 +81,7 @@
         <!-- NOTE: smaller that official layout  for fake-PNOR  -->
         <description>Hostboot Error Logs (64K)</description>
         <eyeCatch>HBEL</eyeCatch>
-        <physicalOffset>0x311000</physicalOffset>
+        <physicalOffset>0x342000</physicalOffset>
         <physicalRegionSize>0x10000</physicalRegionSize>
         <actualRegionSize>0x10000</actualRegionSize>
         <ecc>no</ecc>
@@ -89,10 +89,10 @@
         <sideless>no</sideless>
     </section>
     <section>
-        <description>Attribute Data (256K)</description>
+        <description>Attribute Data (128k)</description>
         <eyeCatch>HBD</eyeCatch>
-        <physicalOffset>0x321000</physicalOffset>
-        <physicalRegionSize>0x40000</physicalRegionSize>
+        <physicalOffset>0x352000</physicalOffset>
+        <physicalRegionSize>0x20000</physicalRegionSize>
         <ecc>no</ecc>
         <source>File</source>
         <sideless>no</sideless>
