@@ -105,6 +105,7 @@ enum istepModuleId
     ISTEP_PROC_CEN_SET_INBAND_ADDR                      = 0x38,
     ISTEP_MSS_THERMAL_INIT                              = 0x39,
     ISTEP_MSS_VOLT                                      = 0x3A,
+    ISTEP_MSS_DRAMINIT_TRAINADV                         = 0x3C,
 };
 
 /**

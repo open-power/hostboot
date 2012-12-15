@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/hwpf/hwp/dram_training/mss_ddr_phy_reset/mss_termination_control.H $ */
+/* $Source: src/usr/hwpf/hwp/dram_training/mss_termination_control.H $    */
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_termination_control.H,v 1.9 2012/12/06 19:17:47 sasethur Exp $
+// $Id: mss_termination_control.H,v 1.10 2012/12/14 16:17:07 sasethur Exp $
 /* File is created by SARAVANAN SETHURAMAN on Thur Sept 28 2011. */
 
 //------------------------------------------------------------------------------
@@ -43,6 +43,7 @@
 //------------------------------------------------------------------------------
 // Version:|  Author:  |  Date:   | Comment:
 //---------|---------- |--------- |---------------------------------------------
+//  1.10   | 14-Dec-12 | sasethur | Updated for fw review comments
 //  1.9    | 07-Dec-12 | sasethur | Updated for fw review comments
 //  1.8	   | 16-Nov-12 | mwuu	  | Added typedef for external call of
 //                                  mss_slew_cal F
@@ -262,8 +263,8 @@ fapi::ReturnCode config_rd_cen_vref(const fapi::Target & i_target_mba, uint8_t i
 fapi::ReturnCode config_drv_imp(const fapi::Target & i_target_mba, uint8_t i_port, uint8_t l_drv_imp_dq_dqs);
 fapi::ReturnCode config_rcv_imp(const fapi::Target & i_target_mba, uint8_t i_port, uint8_t l_rcv_imp_dq_dqs);
 fapi::ReturnCode config_slew_rate(const fapi::Target & i_target_mba,
-	const uint8_t i_port, const uint8_t l_slew_type, const uint8_t l_slew_imp,
-	const uint8_t l_slew_rate);
+	const uint8_t i_port, const uint8_t i_slew_type, const uint8_t i_slew_imp,
+	const uint8_t i_slew_rate);
 fapi::ReturnCode mss_slew_cal(const fapi::Target & i_target_mba);
 } // extern C
 #endif

@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/hwpf/hwp/dram_training/mss_ddr_phy_reset/mss_termination_control.C $ */
+/* $Source: src/usr/hwpf/hwp/dram_training/mss_termination_control.C $    */
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_termination_control.C,v 1.11 2012/12/06 19:16:38 sasethur Exp $
+// $Id: mss_termination_control.C,v 1.12 2012/12/14 21:46:04 mwuu Exp $
 /* File is created by SARAVANAN SETHURAMAN on Thur 29 Sept 2011. */
 
 //------------------------------------------------------------------------------
@@ -43,6 +43,7 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
+//  1.12   | mwuu	  |14-Dec-12| Updated additional fw review comments
 //  1.11   | sasethur |07-Dec-12| Updated for fw review comments
 //  1.10   | mwuu     |28-Nov-12| Added changes suggested from FW team.
 //  1.9    | mwuu     |20-Nov-12| Changed warning status to not cause error.
@@ -73,7 +74,7 @@
 //----------------------------------------------------------------------
 #include <mss_termination_control.H>
 #include <cen_scom_addresses.H>
-//#include <mss_draminit_training_advanced.H>
+#include <mss_draminit_training_advanced.H>
 
 /*------------------------------------------------------------------------------
  * Function: config_drv_imp()
@@ -88,7 +89,6 @@ fapi::ReturnCode config_drv_imp(const fapi::Target & i_target_mba, uint8_t i_por
 
     ecmdDataBufferBase data_buffer(64);
     fapi::ReturnCode rc;
-    fapi::ReturnCode rc_buff;
     uint32_t rc_num = 0;
     uint8_t enslice_drv = 0xFF;
     uint8_t enslice_ffedrv = 0xF;
@@ -139,8 +139,8 @@ fapi::ReturnCode config_drv_imp(const fapi::Target & i_target_mba, uint8_t i_por
         if (rc_num)
         {
             FAPI_ERR( "config_rd_vref: Error in setting up buffer ");
-            rc_buff.setEcmdError(rc_num);
-            return rc_buff;
+            rc.setEcmdError(rc_num);
+            return rc;
         }
 	rc = fapiPutScom(i_target_mba,
 		    DPHY01_DDRPHY_DP18_IO_TX_NFET_SLICE_P0_0_0x800000780301143F,
@@ -183,8 +183,8 @@ fapi::ReturnCode config_drv_imp(const fapi::Target & i_target_mba, uint8_t i_por
         if (rc_num)
         {
             FAPI_ERR( "config_rd_vref: Error in setting up buffer ");
-            rc_buff.setEcmdError(rc_num);
-            return rc_buff;
+            rc.setEcmdError(rc_num);
+            return rc;
         }
 	rc = fapiPutScom(i_target_mba,
 		    DPHY01_DDRPHY_DP18_IO_TX_NFET_SLICE_P1_0_0x800100780301143F,
@@ -235,7 +235,6 @@ fapi::ReturnCode config_rcv_imp(const fapi::Target & i_target_mba, uint8_t i_por
 
     ecmdDataBufferBase data_buffer(64);
     fapi::ReturnCode rc;
-    fapi::ReturnCode rc_buff;
     uint32_t rc_num = 0;
     uint8_t enslicepterm = 0xFF;
     uint8_t enslicepffeterm = 0;
@@ -307,8 +306,8 @@ fapi::ReturnCode config_rcv_imp(const fapi::Target & i_target_mba, uint8_t i_por
         if (rc_num)
         {
             FAPI_ERR( "config_drv_imp: Error in setting up buffer ");
-            rc_buff.setEcmdError(rc_num);
-            return rc_buff;
+            rc.setEcmdError(rc_num);
+            return rc;
         }
 	rc = fapiPutScom(i_target_mba,
 		    DPHY01_DDRPHY_DP18_IO_TX_NFET_TERM_P0_0_0x8000007A0301143F,
@@ -351,8 +350,8 @@ fapi::ReturnCode config_rcv_imp(const fapi::Target & i_target_mba, uint8_t i_por
         if (rc_num)
         {
             FAPI_ERR( "config_drv_imp: Error in setting up buffer ");
-            rc_buff.setEcmdError(rc_num);
-            return rc_buff;
+            rc.setEcmdError(rc_num);
+            return rc;
         }
 	rc = fapiPutScom(i_target_mba,
 		    DPHY01_DDRPHY_DP18_IO_TX_NFET_TERM_P1_0_0x8001007A0301143F,
@@ -404,7 +403,6 @@ fapi::ReturnCode config_slew_rate(const fapi::Target & i_target_mba,
 	const uint8_t i_slew_rate)
 {
     fapi::ReturnCode rc;
-    fapi::ReturnCode rc_buff;
     ecmdDataBufferBase data_buffer(64);
     uint32_t rc_num = 0;
     uint8_t slew_cal_value = 0;
@@ -507,8 +505,8 @@ fapi::ReturnCode config_slew_rate(const fapi::Target & i_target_mba,
 	    if (rc_num)
 	    {
 		FAPI_ERR("Error in setting up DATA slew buffer");
-			rc_buff.setEcmdError(rc_num);
-			return rc_buff;
+			rc.setEcmdError(rc_num);
+			return rc;
 	    }
 
 	    rc = fapiPutScom(i_target_mba,
@@ -537,8 +535,8 @@ fapi::ReturnCode config_slew_rate(const fapi::Target & i_target_mba,
 	    if (rc_num)
 	    {
 		FAPI_ERR( "Error in setting up DATA slew buffer");
-		rc_buff.setEcmdError(rc_num);
-		return rc_buff;
+		rc.setEcmdError(rc_num);
+		return rc;
 	    }
 
 	    rc = fapiPutScom(i_target_mba,
@@ -633,8 +631,8 @@ fapi::ReturnCode config_slew_rate(const fapi::Target & i_target_mba,
 	    if (rc_num)
 	    {
 	        FAPI_ERR( "Error in setting up ADR slew buffer");
-	        rc_buff.setEcmdError(rc_num);
-	        return rc_buff;
+	        rc.setEcmdError(rc_num);
+	        return rc;
 	    }
 
 	    rc = fapiPutScom(i_target_mba,
@@ -660,8 +658,8 @@ fapi::ReturnCode config_slew_rate(const fapi::Target & i_target_mba,
 	    if (rc_num)
 	    {
 	        FAPI_ERR( "Error in setting up ADR slew buffer");
-	        rc_buff.setEcmdError(rc_num);
-	        return rc_buff;
+	        rc.setEcmdError(rc_num);
+	        return rc;
 	    }
 	    rc = fapiPutScom(i_target_mba,
 		DPHY01_DDRPHY_ADR_IO_SLEW_CTL_VALUE_P1_ADR0_0x8001401A0301143F,
@@ -697,7 +695,7 @@ fapi::ReturnCode config_wr_dram_vref(const fapi::Target & i_target_mba, uint8_t 
 {
 
     ecmdDataBufferBase data_buffer(64);
-    fapi::ReturnCode rc, rc_buff;
+    fapi::ReturnCode rc;
     uint32_t rc_num = 0;
     uint32_t pcvref = 0;
     uint32_t i = 0;
@@ -727,8 +725,8 @@ fapi::ReturnCode config_wr_dram_vref(const fapi::Target & i_target_mba, uint8_t 
         if (rc_num)
         {
             FAPI_ERR( "config_wr_vref: Error in setting up buffer ");
-	    rc_buff.setEcmdError(rc_num);
-            return rc_buff;
+	    rc.setEcmdError(rc_num);
+            return rc;
         }
 	rc = fapiPutScom(i_target_mba, DPHY01_DDRPHY_PC_VREF_DRV_CONTROL_P0_0x8000C0150301143F, data_buffer); if(rc) return rc;
     }
@@ -740,8 +738,8 @@ fapi::ReturnCode config_wr_dram_vref(const fapi::Target & i_target_mba, uint8_t 
         if (rc_num)
         {
             FAPI_ERR( "config_wr_vref: Error in setting up buffer ");
-	    rc_buff.setEcmdError(rc_num);
-            return rc_buff;
+	    rc.setEcmdError(rc_num);
+            return rc;
         }
 	rc = fapiPutScom(i_target_mba, DPHY01_DDRPHY_PC_VREF_DRV_CONTROL_P1_0x8001C0150301143F, data_buffer); if(rc) return rc;
     }
@@ -766,7 +764,7 @@ fapi::ReturnCode config_rd_cen_vref (const fapi::Target & i_target_mba, uint8_t 
 {
 
     ecmdDataBufferBase data_buffer(64);
-    fapi::ReturnCode rc, rc_buff;
+    fapi::ReturnCode rc;
     uint32_t rc_num = 0;
     uint32_t rd_vref = 0;
 
@@ -794,8 +792,8 @@ fapi::ReturnCode config_rd_cen_vref (const fapi::Target & i_target_mba, uint8_t 
         if (rc_num)
         {
             FAPI_ERR( "config_rd_vref: Error in setting up buffer ");
-            rc_buff.setEcmdError(rc_num);
-            return rc_buff;
+            rc.setEcmdError(rc_num);
+            return rc;
         }
 	rc = fapiPutScom(i_target_mba,
 		    DPHY01_DDRPHY_DP18_RX_PEAK_AMP_P0_0_0x800000060301143F,
@@ -822,8 +820,8 @@ fapi::ReturnCode config_rd_cen_vref (const fapi::Target & i_target_mba, uint8_t 
         if (rc_num)
         {
             FAPI_ERR( "config_rd_vref: Error in setting up buffer ");
-            rc_buff.setEcmdError(rc_num);
-            return rc_buff;
+            rc.setEcmdError(rc_num);
+            return rc;
         }
 	rc = fapiPutScom(i_target_mba,
 		    DPHY01_DDRPHY_DP18_RX_PEAK_AMP_P1_0_0x800100060301143F,
@@ -855,7 +853,7 @@ fapi::ReturnCode mss_slew_cal(const fapi::Target &i_target)
 {
 	fapi::ReturnCode rc;
     uint32_t rc_ecmd = 0;
-	std::vector<fapi::ReturnCode> vector_rcs;	// to capture rc's on port loop
+	fapi::ReturnCode array_rcs[MAX_NUM_PORTS]={fapi::FAPI_RC_SUCCESS}; // capture rc per port loop
     uint32_t poll_count = 0;
 	uint8_t ports_valid = 0;
 	uint8_t is_sim = 0;
@@ -1008,15 +1006,15 @@ fapi::ReturnCode mss_slew_cal(const fapi::Target &i_target)
 	FAPI_INF("Enabling slew calibration engine... dram=DDR%i(%u), freq=%u(%u)",
 			(ddr_type+2), ddr_idx, ddr_freq, freq_idx);
 
-	vector_rcs.clear();		// clear rc vector
 	for (uint8_t l_port=0; l_port < MAX_NUM_PORTS; l_port++)
 	{
 		uint8_t port_val = (ports_valid & (0xF0 >> (4 * l_port)));
 
 		if (port_val == 0) {
 			FAPI_INF("WARNING:  Port %u is invalid from "
-					"ATTR_MSS_EFF_DIMM_FUNCTIONAL_VECTOR, 0x%02x",
+					"ATTR_MSS_EFF_DIMM_FUNCTIONAL_VECTOR (0x%02x), skipping.",
 					l_port, ports_valid);
+			continue;
 		}
 	//	Step A: Configure ADR registers and MCLK detect (done in ddr_phy_reset)
 	// DPHY01_DDRPHY_ADR_SLEW_CAL_CNTL_P0_ADR32S0_0x800080390301143F + port
@@ -1024,9 +1022,7 @@ fapi::ReturnCode mss_slew_cal(const fapi::Target &i_target)
 		if (rc)
 		{
 			FAPI_ERR("Error reading DDRPHY_ADR_SLEW_CAL_CNTL register.");
-			//return rc;
-			vector_rcs.push_back(rc);
-			continue;
+			return rc;
 		}
 
 		rc_ecmd = ctl_reg.flushTo0();
@@ -1036,9 +1032,7 @@ fapi::ReturnCode mss_slew_cal(const fapi::Target &i_target)
 			FAPI_ERR("Error setting enable bit in ADR Slew calibration "
 					"control register.");
 			rc.setEcmdError(rc_ecmd);
-			//return rc;
-			vector_rcs.push_back(rc);
-			continue;
+			return rc;
 		}
 
 		// DPHY01_DDRPHY_ADR_SLEW_CAL_CNTL_P0_ADR32S0_0x800080390301143F + port
@@ -1047,9 +1041,7 @@ fapi::ReturnCode mss_slew_cal(const fapi::Target &i_target)
 		{
 			FAPI_ERR("Error enabling slew calibration engine in "
 					"DDRPHY_ADR_SLEW_CAL_CNTL register.");
-			//return rc;
-			vector_rcs.push_back(rc);
-			continue;
+			return rc;
 		}
 
 		//---------------------------------------------------------------------/
@@ -1060,9 +1052,7 @@ fapi::ReturnCode mss_slew_cal(const fapi::Target &i_target)
 			rc = fapiDelay(DELAY_100NS, DELAY_SIMCYCLES);
 			if (rc) {
 				FAPI_ERR("Error executing fapiDelay of 100ns or 2000simcycles");
-				//return rc;
-				vector_rcs.push_back(rc);
-				continue;
+				return rc;
 			}
 	// DPHY01_DDRPHY_ADR_SYSCLK_PR_VALUE_RO_P0_ADR32S0_0x800080340301143F + port
 			rc = fapiGetScom(i_target, slew_cal_stat[l_port], stat_reg);
@@ -1070,9 +1060,7 @@ fapi::ReturnCode mss_slew_cal(const fapi::Target &i_target)
 			{
 				FAPI_ERR("Error reading DDRPHY_ADR_SYSCLK_PR_VALUE_RO register "
 						"for BB_Lock.");
-				//return rc;
-				vector_rcs.push_back(rc);
-				continue;
+				return rc;
 			}
 			FAPI_DBG("stat_reg = 0x%04x, count=%i",stat_reg.getHalfWord(3),
 					poll_count);
@@ -1112,9 +1100,7 @@ fapi::ReturnCode mss_slew_cal(const fapi::Target &i_target)
 					{
 						FAPI_ERR("Error setting start bit or cal input value.");
 						rc.setEcmdError(rc_ecmd);
-						//return rc;
-						vector_rcs.push_back(rc);
-						continue;
+						return rc;
 					}
 
 	// DPHY01_DDRPHY_ADR_SLEW_CAL_CNTL_P0_ADR32S0_0x800080390301143F + port
@@ -1125,9 +1111,7 @@ fapi::ReturnCode mss_slew_cal(const fapi::Target &i_target)
 					if (rc)
 					{
 						FAPI_ERR("Error starting slew calibration.");
-						//return rc;
-						vector_rcs.push_back(rc);
-						continue;
+						return rc;
 					}
 
 					// poll for calibration status done or timeout...
@@ -1144,18 +1128,14 @@ fapi::ReturnCode mss_slew_cal(const fapi::Target &i_target)
 							FAPI_ERR("Error reading "
 									"DDRPHY_ADR_SYSCLK_PR_VALUE_RO "
 									"register for calibration status.");
-							//return rc;
-							vector_rcs.push_back(rc);
-							continue;
+							return rc;
 						}
 						rc_ecmd = stat_reg.extractToRight(&cal_status, 58, 2);
 						if (rc_ecmd)
 						{
 							FAPI_ERR("Error getting calibration status bits");
 							rc.setEcmdError(rc_ecmd);
-							//return rc;
-							vector_rcs.push_back(rc);
-							continue;
+							return rc;
 						}
 						FAPI_DBG("cal_status = %i",cal_status);
 						if (cal_status != 0)
@@ -1164,9 +1144,7 @@ fapi::ReturnCode mss_slew_cal(const fapi::Target &i_target)
 						rc = fapiDelay(DELAY_100NS, DELAY_SIMCYCLES);
 						if(rc)
 						{
-							//return rc;
-							vector_rcs.push_back(rc);
-							continue;
+							return rc;
 						}
 					}
 
@@ -1181,22 +1159,20 @@ fapi::ReturnCode mss_slew_cal(const fapi::Target &i_target)
 							FAPI_ERR("Error getting calibration output "
 									"slew value");
 							rc.setEcmdError(rc_ecmd);
-							//return rc;
-							vector_rcs.push_back(rc);
-							continue;
+							return rc;
 						}
 						calibrated_slew[data_adr][l_port][imp][slew] = cal_slew;
 					}
 					else if (cal_status == 2)
 					{
-						FAPI_ERR("warning occurred during slew "
+						FAPI_INF("WARNING: occurred during slew "
 								"calibration, continuing...");
 					}
 					else
 					{
 						if (cal_status == 1)
 						{
-							FAPI_ERR("error occurred during slew calibration");
+							FAPI_ERR("Error occurred during slew calibration");
 						}
 						else
 						{
@@ -1221,7 +1197,7 @@ fapi::ReturnCode mss_slew_cal(const fapi::Target &i_target)
 						{
 							FAPI_SET_HWP_ERROR(rc, RC_MSS_SLEW_CAL_ERROR);
 							//return rc;
-							vector_rcs.push_back(rc);
+							array_rcs[l_port]=rc;
 							continue;
 						}
 					} // end error check
@@ -1236,14 +1212,17 @@ fapi::ReturnCode mss_slew_cal(const fapi::Target &i_target)
 		{
 			FAPI_ERR("Error disabling slew calibration engine in "
 					"DDRPHY_ADR_SLEW_CAL_CNTL register.");
-			//return rc;
-			vector_rcs.push_back(rc);
+			return rc;
 		}
 	} // end port loop
 
-	if (vector_rcs.size() != 0)
+	for (uint8_t rn=0; rn < MAX_NUM_PORTS; rn++)
 	{
-		return vector_rcs.front();	// return first RC encountered
+		if (array_rcs[rn] != fapi::FAPI_RC_SUCCESS)
+		{
+			FAPI_ERR("Returning ERROR RC for port %u",rn);
+			return array_rcs[rn];
+		}
 	}
 	FAPI_INF("Setting output slew tables ATTR_MSS_SLEW_RATE_DATA/ADR");
 	// ATTR_MSS_SLEW_RATE_DATA [2][4][4]	port, imped, slew_rate

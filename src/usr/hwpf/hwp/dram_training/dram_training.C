@@ -81,7 +81,7 @@ const uint8_t VPO_NUM_OF_MEMBUF_TO_RUN = UNLIMITED_RUN;
 #include    "mss_ddr_phy_reset/mss_ddr_phy_reset.H"
 #include    "mss_draminit/mss_draminit.H"
 #include    "mss_draminit_training/mss_draminit_training.H"
-// #include    "mss_draminit_trainadv/mss_draminit_trainadv.H"
+#include    "mss_draminit_trainadv/mss_draminit_training_advanced.H"
 #include    "mss_draminit_mc/mss_draminit_mc.H"
 
 namespace   DRAM_TRAINING
@@ -763,57 +763,83 @@ void*    call_mss_draminit_training( void *io_pArgs )
 void*    call_mss_draminit_trainadv( void *io_pArgs )
 {
     errlHndl_t l_err = NULL;
+    IStepError l_stepError;
+    uint8_t l_pattern = 0;
+    uint8_t l_test_type = 0;
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mss_draminit_trainadv entry" );
 
-#if 0
-    // @@@@@    CUSTOM BLOCK:   @@@@@
-    //  figure out what targets we need
-    //  customize any other inputs
-    //  set up loops to go through all targets (if parallel, spin off a task)
+    // Get all MBA targets
+    TARGETING::TargetHandleList l_mbaTargetList;
+    getAllChiplets(l_mbaTargetList, TYPE_MBA);
 
-    //  print call to hwp and dump physical path of the target(s)
-    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                    "=====  mss_draminit_trainadv HWP(? ? ? )",
-                    ?
-                    ?
-                    ? );
-    //  dump physical path to targets
-    EntityPath l_path;
-    l_path  =   l_@targetN_target->getAttr<ATTR_PHYS_PATH>();
-    l_path.dump();
-    TRACFCOMP( g_trac_mc_init, "===== " );
-
-    // cast OUR type of target to a FAPI type of target.
-    const fapi::Target l_fapi_@targetN_target(
-                    TARGET_TYPE_MEMBUF_CHIP,
-                    reinterpret_cast<void *>
-                        (const_cast<TARGETING::Target*>(l_@targetN_target)) );
-
-    //  call the HWP with each fapi::Target
-    l_fapirc  =   mss_draminit_trainadv( ? , ?, ? );
-
-    //  process return code.
-    if ( l_fapirc== fapi::FAPI_RC_SUCCESS )
+    // Limit the number of MBAs to run in VPO environment to save time.
+    uint8_t l_mbaLimit = UNLIMITED_RUN;
+    if (TARGETING::is_vpo() )
     {
-        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                "SUCCESS :  mss_draminit_trainadv HWP(? ? ? )" );
+           l_mbaLimit = VPO_NUM_OF_MBAS_TO_RUN;
     }
-    else
+
+    uint8_t l_mbaNum = 0;
+    for (TargetHandleList::iterator l_mba_iter = l_mbaTargetList.begin();
+            (l_mbaNum < l_mbaLimit) && (l_mba_iter != l_mbaTargetList.end());
+            ++l_mba_iter, ++l_mbaNum)
     {
-        /**
-         * @todo fapi error - just print out for now...
-         */
-        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                "ERROR 0x%.8X:  mss_draminit_trainadv HWP(? ? ?) ",
-                static_cast<uint32_t>(l_fapirc) );
+        //  make a local copy of the target for ease of use
+        const TARGETING::Target*  l_mba_target = *l_mba_iter;
+
+        // Dump current run on target
+        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "Running mss_draminit_training_advanced HWP on..." );
+        EntityPath l_path;
+        l_path  =   l_mba_target->getAttr<ATTR_PHYS_PATH>();
+        l_path.dump();
+
+        // Cast to a FAPI type of target.
+        const fapi::Target l_fapi_mba_target(
+                TARGET_TYPE_MBA_CHIPLET,
+                reinterpret_cast<void *>
+        (const_cast<TARGETING::Target*>(l_mba_target)) );
+
+        //  call the HWP with each fapi::Target
+        FAPI_INVOKE_HWP(l_err, mss_draminit_training_advanced, l_fapi_mba_target,
+                        l_pattern, l_test_type);
+
+        if (l_err)
+        {
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                "ERROR 0x%.8X : mss_draminit_training_advanced HWP returns error",
+                l_err->reasonCode());
+
+            ErrlUserDetailsTarget myDetails(l_mba_target);
+
+            // capture the target data in the elog
+            myDetails.addToLog(l_err );
+
+            /*@
+             *
+             * @errortype
+             * @reasoncode  ISTEP_DRAM_TRAINING_FAILED
+             * @severity    ERRORLOG::ERRL_SEV_UNRECOVERABLE
+             * @moduleid    ISTEP_MSS_DRAMINIT_TRAINADV
+             * @userdata1   bytes 0-1: plid identifying first error
+             *              bytes 2-3: reason code of first error
+             * @userdata2   bytes 0-1: total number of elogs included
+             *              bytes 2-3: N/A
+             * @devdesc     call to mss_dram_init_training_advanced has failed
+             */
+            l_stepError.addErrorDetails( ISTEP_DRAM_TRAINING_FAILED,
+                                         ISTEP_MSS_DRAMINIT_TRAINADV,
+                                         l_err );
+
+            errlCommit( l_err, HWPF_COMP_ID );
+        }
+
+        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "SUCCESS :  mss_draminit_training_advanced HWP( )" );
     }
-    // @@@@@    END CUSTOM BLOCK:   @@@@@
-#endif
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mss_draminit_trainadv exit" );
 
-    return l_err;
+    return l_stepError.getErrorHandle();
 }
 
 //
