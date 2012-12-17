@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2012              */
+/* COPYRIGHT International Business Machines Corp. 2011,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -107,11 +107,11 @@ enum BlockPriority
 /** Page Size in bits per SLBE  */
 #define SLBE_b 12
 
-/** Hardwired pointer to output SLW image, temporary location */
+/** Hardwired pointer to output SLW image in real mem */
+/** 128M + 32M  */
 /** SLW image must be on 1M boundary */
-/** MAX image size is 512 K */
-#define OUTPUT_PORE_IMG_ADDR        0x400000
-#define MAX_OUTPUT_PORE_IMG_SIZE    512*1024
+#define OUTPUT_PORE_IMG_ADDR        128*MEGABYTE + 32*MEGABYTE
+#define MAX_OUTPUT_PORE_IMG_SIZE    4*MEGABYTE
 
 
 /**

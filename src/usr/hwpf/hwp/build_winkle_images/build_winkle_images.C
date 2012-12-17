@@ -1,26 +1,25 @@
-/*  IBM_PROLOG_BEGIN_TAG
- *  This is an automatically generated prolog.
- *
- *  $Source: src/usr/hwpf/hwp/build_winkle_images/build_winkle_images.C $
- *
- *  IBM CONFIDENTIAL
- *
- *  COPYRIGHT International Business Machines Corp. 2012
- *
- *  p1
- *
- *  Object Code Only (OCO) source materials
- *  Licensed Internal Code Source Materials
- *  IBM HostBoot Licensed Internal Code
- *
- *  The source code for this program is not published or other-
- *  wise divested of its trade secrets, irrespective of what has
- *  been deposited with the U.S. Copyright Office.
- *
- *  Origin: 30
- *
- *  IBM_PROLOG_END_TAG
- */
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/usr/hwpf/hwp/build_winkle_images/build_winkle_images.C $  */
+/*                                                                        */
+/* IBM CONFIDENTIAL                                                       */
+/*                                                                        */
+/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/*                                                                        */
+/* p1                                                                     */
+/*                                                                        */
+/* Object Code Only (OCO) source materials                                */
+/* Licensed Internal Code Source Materials                                */
+/* IBM HostBoot Licensed Internal Code                                    */
+/*                                                                        */
+/* The source code for this program is not published or otherwise         */
+/* divested of its trade secrets, irrespective of what has been           */
+/* deposited with the U.S. Copyright Office.                              */
+/*                                                                        */
+/* Origin: 30                                                             */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
 /**
  *  @file build_winkle_images.C
  *
@@ -38,6 +37,7 @@
 
 #include    <sys/misc.h>                        //  cpu_thread_count()
 #include    <vfs/vfs.H>                         // PORE image
+#include    <sys/mm.h>                          //  mm_linear_map
 
 #include    <trace/interface.H>
 #include    <initservice/taskargs.H>
@@ -84,13 +84,6 @@ using   namespace   DeviceFW;
 
 
 // @@@@@    CUSTOM BLOCK:   @@@@@
-
-/**
- *  @def pointer to area for output PORE image
- *  @todo - make system call to allocate 512k - 1M of space to put output
- *          image for the master chip.
- *          Currently hardwired to 0x400000
- */
 
 /**
  *  @brief Load PORE image and return a pointer to it, or NULL
@@ -325,158 +318,218 @@ void*    call_host_build_winkle( void    *io_pArgs )
 {
     errlHndl_t  l_errl  =   NULL;
 
-    const char                  *l_pPoreImage   =   NULL;
-    size_t                      l_poreSize      =   0;
-    void                        *l_pImageOut    =   NULL;
-    uint32_t                    l_sizeImageOut  =   MAX_OUTPUT_PORE_IMG_SIZE;
+    const char  *l_pPoreImage   =   NULL;
+    size_t      l_poreSize      =   0;
+    int         l_getAddrRc     =   0;
+    void        *l_pRealMemBase =
+                        reinterpret_cast<void * const>( OUTPUT_PORE_IMG_ADDR ) ;
+    uint64_t    l_RealMemSize   =   0;
 
     ISTEP_ERROR::IStepError     l_StepError;
 
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                "call_host_build_winkle entry" );
 
     // @@@@@    CUSTOM BLOCK:   @@@@@
 
-    // find the master core, i.e. the one we are running on
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-               "Find master chip: " );
+    //  @todo   Issue   61361
+    //  Should be a system-wide  constant stating the maximum number of procs
+    //  in the system.  In the meantime:
+    const   uint64_t    MAX_POSSIBLE_PROCS_IN_P8_SYSTEM  =   8;
+    l_RealMemSize  =    ( MAX_OUTPUT_PORE_IMG_SIZE *
+                                        MAX_POSSIBLE_PROCS_IN_P8_SYSTEM );
 
-    const TARGETING::Target*  l_masterCore  = getMasterCore( );
-    assert( l_masterCore != NULL );
-
-    TARGETING::Target* l_cpu_target = const_cast<TARGETING::Target *>
-                                            ( getParentChip( l_masterCore ) );
-
-    //  dump physical path to target
-    EntityPath l_path;
-    l_path  =   l_cpu_target->getAttr<ATTR_PHYS_PATH>();
-    l_path.dump();
-
-    do {
-
-        l_errl  =   loadPoreImage(  l_cpu_target,
-                                    l_pPoreImage,
-                                    l_poreSize );
-        if ( l_errl )
-        {
-            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                      "host_build_winkle ERROR : Returning errorlog, PLID=0x%x",
-                      l_errl->plid() );
-
-            ErrlUserDetailsTarget myDetails(l_cpu_target);
-
-            // capture the target data in the elog
-            myDetails.addToLog(l_errl);
-
-            // drop out of loop and return errlog to fail.
-            break;
-        }
-        //
-        //  @todo stub - eventually this will make a system call to get storage
-        //  ( and size ) for the output buffer for PORE image for this CPU.
-        //  Save the results in attributes so that other isteps/substeps can
-        //  use it.
-        //
-        //  @NOTE NOTE NOTE
-        //  This address must be on a 1-meg boundary.
-        //
-        l_pImageOut =   reinterpret_cast<void * const >(OUTPUT_PORE_IMG_ADDR);
-        l_cpu_target->setAttr<TARGETING::ATTR_SLW_IMAGE_ADDR>
-                                                    ( OUTPUT_PORE_IMG_ADDR );
-
-        l_sizeImageOut  =   MAX_OUTPUT_PORE_IMG_SIZE;
-        l_cpu_target->setAttr<TARGETING::ATTR_SLW_IMAGE_SIZE>
-                                                ( MAX_OUTPUT_PORE_IMG_SIZE );
-
-        // cast OUR type of target to a FAPI type of target.
-        const fapi::Target l_fapi_cpu_target(
-                                TARGET_TYPE_PROC_CHIP,
-                                reinterpret_cast<void *>
-                                              (const_cast<TARGETING::Target*>
-                                                            (l_cpu_target)) );
-
-        //  call the HWP with each fapi::Target
-        FAPI_INVOKE_HWP( l_errl,
-                         p8_slw_build,
-                         l_fapi_cpu_target,
-                         reinterpret_cast<const void*>(l_pPoreImage),
-                         static_cast<uint32_t>(l_poreSize),
-                         l_pImageOut,
-                         &l_sizeImageOut
-                       );
-        if ( l_errl )
-        {
-            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                      "host_build_winkle ERROR : Returning errorlog, PLID=0x%x",
-                      l_errl->plid() );
-
-            ErrlUserDetailsTarget myDetails(l_cpu_target);
-
-            // capture the target data in the elog
-            myDetails.addToLog(l_errl);
-
-            //  drop out if we hit an error and quit.
-            break;
-        }
-        else
-        {
-            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                       "host_build_winkle SUCCESS : out image size = 0x%x ",
-                       l_sizeImageOut );
-        }
-
-        //  set the actual size of the image now.
-        l_cpu_target->setAttr<TARGETING::ATTR_SLW_IMAGE_SIZE>
-                                                        ( l_sizeImageOut );
-
-        //  apply the cpu reg information to the image.
-        l_errl =   applyPoreGenCpuRegs( l_cpu_target,
-                                        l_pImageOut,
-                                        l_sizeImageOut );
-        if ( l_errl )
-        {
-            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                      "applyPoreGenCpuRegs ERROR : Returning errorlog, PLID=0x%x",
-                      l_errl->plid() );
-
-            ErrlUserDetailsTarget myDetails(l_cpu_target);
-
-            // capture the target data in the elog
-            myDetails.addToLog(l_errl);
-
-            //  drop out if we hit an error and quit.
-            break;
-        }
-        else
-        {
-            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                       "applyPoreGenCpuRegs SUCCESS " );
-        }
-
-    }   while (0);  // end do block
-
-    // @@@@@    END CUSTOM BLOCK:   @@@@@
-
-    if(l_errl)
+    l_getAddrRc =   mm_linear_map(  l_pRealMemBase,
+                                    l_RealMemSize   );
+    if ( l_getAddrRc != 0 )
     {
+        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                   "ERROR:  could not get real mem." );
+
+        //  build userdata2, truncated pointer in hi, size in low
+        uint64_t    l_userdata2 =   (
+                            ( ( (reinterpret_cast<uint64_t>
+                              (l_pRealMemBase) )& 0x00000000ffffffff) << 32 )
+                        |
+                            l_RealMemSize );
         /*@
          * @errortype
-         * @reasoncode  ISTEP_BUILD_WINKLE_IMAGES_FAILED
+         * @reasoncode  ISTEP_GET_SLW_OUTPUT_BUFFER_FAILED
          * @severity    ERRORLOG::ERRL_SEV_UNRECOVERABLE
-         * @moduleid    ISTEP_HOST_BUILD_WINKLE
-         * @userdata1   bytes 0-1: plid identifying first error
-         *              bytes 2-3: reason code of first error
-         * @userdata2   bytes 0-1: total number of elogs included
-         *              bytes 2-3: N/A
-         * @devdesc     call to host_build_winkle has failed
+         * @moduleid    ISTEP_BUILD_WINKLE_IMAGES
+         * @userdata1   return code from mm_linear_map
+         * @userdata2   Hi 32 bits: Address of memory requested
+         *              Lo 32 bits: Size of memory requested
+         *
+         * @devdesc     Failed to get an address for PORE output buffer
          *
          */
-        l_StepError.addErrorDetails(ISTEP_BUILD_WINKLE_IMAGES_FAILED,
-                                    ISTEP_HOST_BUILD_WINKLE,
-                                    l_errl);
-
-        errlCommit( l_errl, HWPF_COMP_ID );
+        l_errl =
+            new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                     ISTEP::ISTEP_BUILD_WINKLE_IMAGES,
+                                     ISTEP::ISTEP_GET_SLW_OUTPUT_BUFFER_FAILED,
+                                     l_getAddrRc,
+                                     l_userdata2 );
     }
+    else
+    {
+        TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                   "Got real mem  buffer for 0x%08x cpu's = 0x%p",
+                   MAX_POSSIBLE_PROCS_IN_P8_SYSTEM,
+                   l_pRealMemBase  );
+    }
+
+    //  bail if we can't get any real mem
+    if ( !l_errl )
+    {
+
+        //  Loop through all functional Procs and generate images for them.
+        TARGETING::TargetHandleList l_procChips;
+        getAllChips( l_procChips,
+                     TARGETING::TYPE_PROC   );
+
+        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                   "Found %d procs in system",
+                   l_procChips.size()   );
+
+        for ( TargetHandleList::iterator l_iter = l_procChips.begin();
+              l_iter != l_procChips.end();
+              ++l_iter )
+        {
+            TARGETING::Target * l_procChip  =   (*l_iter) ;
+
+            do  {
+
+                //  dump physical path to proc target
+                EntityPath l_path;
+                l_path  =   l_procChip->getAttr<ATTR_PHYS_PATH>();
+                l_path.dump();
+
+                l_errl  =   loadPoreImage(  l_procChip,
+                                            l_pPoreImage,
+                                            l_poreSize );
+                if ( l_errl )
+                {
+                    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                              "host_build_winkle ERROR : errorlog PLID=0x%x",
+                              l_errl->plid() );
+
+                    // drop out of block with errorlog.
+                    break;
+                }
+
+                //  calculate size and location of the SLW output buffer
+                uint32_t l_procNum =
+                l_procChip->getAttr<TARGETING::ATTR_POSITION>();
+                uint64_t l_procRealMemAddr  =
+                ( reinterpret_cast<uint64_t>(l_pRealMemBase) +
+                  ( l_procNum * MAX_OUTPUT_PORE_IMG_SIZE )) ;
+                void        *l_pImageOut = reinterpret_cast<void * const>
+                                           ( l_procRealMemAddr );
+                uint32_t    l_sizeImageOut  =   MAX_OUTPUT_PORE_IMG_SIZE ;
+
+                //  set default values, p8_slw_build will provide actual size
+                l_procChip->setAttr<TARGETING::ATTR_SLW_IMAGE_ADDR>
+                ( l_procRealMemAddr );
+                l_procChip->setAttr<TARGETING::ATTR_SLW_IMAGE_SIZE>
+                ( l_sizeImageOut ) ;
+
+                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                           "Real mem  buffer for cpu 0x%08x = 0x%p",
+                           l_procNum,
+                           l_procRealMemAddr );
+
+                // cast OUR type of target to a FAPI type of target.
+                const fapi::Target l_fapi_cpu_target(
+                                                TARGET_TYPE_PROC_CHIP,
+                                                reinterpret_cast<void *>
+                                                (const_cast<TARGETING::Target*>
+                                                (l_procChip)) );
+
+                //  call the HWP with each fapi::Target
+                FAPI_INVOKE_HWP( l_errl,
+                                 p8_slw_build,
+                                 l_fapi_cpu_target,
+                                 reinterpret_cast<const void*>(l_pPoreImage),
+                                 static_cast<uint32_t>(l_poreSize),
+                                 l_pImageOut,
+                                 &l_sizeImageOut
+                               );
+                if ( l_errl )
+                {
+                    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                              "host_build_winkle ERROR : errorlog PLID=0x%x",
+                              l_errl->plid() );
+
+                    //  drop out of block with errorlog.
+                    break;
+                }
+                else
+                {
+                    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                               "host_build_winkle SUCCESS : image size = 0x%x ",
+                               l_sizeImageOut );
+                }
+
+                //  set the actual size of the image now.
+                l_procChip->setAttr<TARGETING::ATTR_SLW_IMAGE_SIZE>
+                ( l_sizeImageOut );
+
+                //  apply the cpu reg information to the image.
+                l_errl =   applyPoreGenCpuRegs( l_procChip,
+                                                l_pImageOut,
+                                                l_sizeImageOut );
+                if ( l_errl )
+                {
+                    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                              "applyPoreGenCpuRegs ERROR : errorlog PLID=0x%x",
+                              l_errl->plid() );
+
+                    //  drop out of block with errorlog.
+                    break;
+                }
+                else
+                {
+                    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                               "applyPoreGenCpuRegs SUCCESS " );
+                }
+
+            }   while (0) ;
+
+            // broke out due to an error, store all the details away, store
+            //  the errlog in IStepError, and continue to next proc
+            if(l_errl)
+            {
+                // Add all the details for this proc
+                ErrlUserDetailsTarget myDetails(l_procChip);
+
+                // capture the target data in the elog
+                myDetails.addToLog(l_errl);
+
+                /*@
+                 * @errortype
+                 * @reasoncode  ISTEP_BUILD_WINKLE_IMAGES_FAILED
+                 * @severity    ERRORLOG::ERRL_SEV_UNRECOVERABLE
+                 * @moduleid    ISTEP_HOST_BUILD_WINKLE
+                 * @userdata1   bytes 0-1: plid identifying first error
+                 *              bytes 2-3: reason code of first error
+                 * @userdata2   bytes 0-1: total number of elogs included
+                 *              bytes 2-3: N/A
+                 * @devdesc     call to host_build_winkle has failed
+                 *
+                 */
+                l_StepError.addErrorDetails(ISTEP_BUILD_WINKLE_IMAGES_FAILED,
+                                            ISTEP_HOST_BUILD_WINKLE,
+                                            l_errl);
+
+                errlCommit( l_errl, HWPF_COMP_ID );
+            }
+
+        } ;  // endfor
+
+    }
+    // @@@@@    END CUSTOM BLOCK:   @@@@@
+
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                "call_host_build_winkle exit" );
@@ -501,26 +554,32 @@ void*    call_proc_set_pore_bar( void    *io_pArgs )
 
     // @@@@@    CUSTOM BLOCK:   @@@@@
 
+    TARGETING::TargetHandleList l_procChips;
+    getAllChips( l_procChips,
+                 TARGETING::TYPE_PROC   );
 
-    const TARGETING::Target*  l_masterCore  = TARGETING::getMasterCore( );
-    assert( l_masterCore != NULL );
+    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+               "Found %d procs in system",
+               l_procChips.size()   );
 
-    TARGETING::Target* l_cpu_target = const_cast<TARGETING::Target *>
-                                      ( getParentChip( l_masterCore ) );
+        for ( TargetHandleList::iterator l_iter = l_procChips.begin();
+              l_iter != l_procChips.end();
+              ++l_iter )
+    {
+        TARGETING::Target * l_procChip  =   (*l_iter) ;
 
-    //  dump physical path to target
-    EntityPath l_path;
-    l_path  =   l_cpu_target->getAttr<ATTR_PHYS_PATH>();
-    l_path.dump();
+        //  dump physical path to target
+        EntityPath l_path;
+        l_path  =   l_procChip->getAttr<ATTR_PHYS_PATH>();
+        l_path.dump();
 
-    do  {
 
         // cast OUR type of target to a FAPI type of target.
         const fapi::Target l_fapi_cpu_target(
                                             TARGET_TYPE_PROC_CHIP,
                                             reinterpret_cast<void *>
                                             (const_cast<TARGETING::Target*>
-                                             (l_cpu_target)) );
+                                             (l_procChip)) );
 
         //  fetch image location and size, written by host_build_winkle above
 
@@ -533,7 +592,7 @@ void*    call_proc_set_pore_bar( void    *io_pArgs )
         //      to handle this, or there may one already???
         //
         uint64_t l_imageAddr =
-            l_cpu_target->getAttr<TARGETING::ATTR_SLW_IMAGE_ADDR>();
+        l_procChip->getAttr<TARGETING::ATTR_SLW_IMAGE_ADDR>();
 
 
         // Size in Meg of the image, this is rounded up to the nearest power
@@ -546,9 +605,9 @@ void*    call_proc_set_pore_bar( void    *io_pArgs )
 
         //  call the HWP with each fapi::Target
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                   "Call p8_set_pore_bar, membar=0x%lx, size=0x%lx, mask=0x%lx, type=0x%x",
+                   "p8_set_pore_bar, mem=0x%lx, sz=0x%lx, msk=0x%lx, type=0x%x",
                    l_imageAddr,
-                   (l_cpu_target->getAttr<ATTR_SLW_IMAGE_SIZE>()),
+                   (l_procChip->getAttr<ATTR_SLW_IMAGE_SIZE>()),
                    l_mem_size,
                    l_mem_type );
 
@@ -590,7 +649,7 @@ void*    call_proc_set_pore_bar( void    *io_pArgs )
                        "SUCCESS : p8_set_pore_bar" );
         }
 
-    }   while ( 0 ); // end do block
+    }   // end for
 
     // @@@@@    END CUSTOM BLOCK:   @@@@@
 
@@ -617,25 +676,32 @@ void*    call_p8_poreslw_init( void    *io_pArgs )
     // @@@@@    CUSTOM BLOCK:   @@@@@
 
 
-    const TARGETING::Target*  l_masterCore  = TARGETING::getMasterCore( );
-    assert( l_masterCore != NULL );
+    TARGETING::TargetHandleList l_procChips;
+    getAllChips( l_procChips,
+                 TARGETING::TYPE_PROC   );
 
-    TARGETING::Target* l_cpu_target = const_cast<TARGETING::Target *>
-                                      ( getParentChip( l_masterCore ) );
+    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+               "Found %d procs in system",
+               l_procChips.size()   );
 
-    //  dump physical path to target
-    EntityPath l_path;
-    l_path  =   l_cpu_target->getAttr<ATTR_PHYS_PATH>();
-    l_path.dump();
+        for ( TargetHandleList::iterator l_iter = l_procChips.begin();
+              l_iter != l_procChips.end();
+              ++l_iter )
+    {
+        TARGETING::Target * l_procChip  =   (*l_iter) ;
 
-    do  {
+        //  dump physical path to target
+        EntityPath l_path;
+        l_path  =   l_procChip->getAttr<ATTR_PHYS_PATH>();
+        l_path.dump();
+
 
         // cast OUR type of target to a FAPI type of target.
         const fapi::Target l_fapi_cpu_target(
                                             TARGET_TYPE_PROC_CHIP,
                                             reinterpret_cast<void *>
                                             (const_cast<TARGETING::Target*>
-                                             (l_cpu_target)) );
+                                             (l_procChip)) );
 
         //
         //  Configure the SLW PORE and related functions to enable idle
@@ -672,7 +738,7 @@ void*    call_p8_poreslw_init( void    *io_pArgs )
                        "SUCCESS : p8_poreslw_init " );
         }
 
-    }   while ( 0 ); // end do block
+    }   // end for
 
     // @@@@@    END CUSTOM BLOCK:   @@@@@
 

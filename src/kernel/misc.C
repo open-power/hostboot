@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2012              */
+/* COPYRIGHT International Business Machines Corp. 2011,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -32,6 +32,7 @@
 #include <sys/mm.h>
 #include <errno.h>
 #include <kernel/pagemgr.H>
+#include <kernel/vmmmgr.H>              // INITIAL_MEM_SIZE
 
 extern "C"
     void kernel_shutdown(size_t, uint64_t, uint64_t, uint64_t) NO_RETURN;
@@ -248,12 +249,8 @@ namespace KernelMisc
         {
             case CORE_POWER8_MURANO:
             case CORE_POWER8_VENICE:
-                /* TODO: RTC 52972 - Change to INITIAL_MEM_SIZE once
-                 *                   SLW images are put in the "right" spot.
-                 */
-                startAddr =
-                    reinterpret_cast<uint64_t*>((OUTPUT_PORE_IMG_ADDR +
-                                                 MAX_OUTPUT_PORE_IMG_SIZE));
+                startAddr = reinterpret_cast<uint64_t*>
+                                         ( VmmManager::INITIAL_MEM_SIZE ) ;
                 endAddr =
                     reinterpret_cast<uint64_t*>(8 * MEGABYTE);
 
