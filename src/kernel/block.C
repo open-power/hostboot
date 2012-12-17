@@ -71,7 +71,7 @@ void Block::init(MessageQueue* i_msgQ, uint64_t *i_spteAddr)
     else // set the page table to reside at the address requested
     {
         // Doing a placement new to put the SPTE at the beginging
-        // of the block we allocated. 
+        // of the block we allocated.
         iv_ptes = new(i_spteAddr) ShadowPTE[iv_size / PAGESIZE];
     }
 
@@ -176,12 +176,25 @@ bool Block::handlePageFault(task_t* i_task, uint64_t i_addr, bool i_store)
         }
     }
 
+    // Determine access type.
+    uint64_t l_access = (iv_mappedToPhysical ? BYPASS_HRMOR : 0);
+    if (pte->isExecutable())
+    {
+        l_access |= EXECUTABLE;
+    }
+    else if (pte->isWritable() && pte->isDirty())
+    {
+        l_access |= WRITABLE;
+    }
+    else
+    {
+        l_access |= READ_ONLY;
+    }
+
     PageTableManager::addEntry(
             l_addr_palign,
             pte->getPage(),
-            (pte->isExecutable() ? EXECUTABLE :
-                ((pte->isWritable() && pte->isDirty()) ? WRITABLE :
-                                     READ_ONLY)));
+            l_access);
 
     return true;
 
@@ -241,13 +254,25 @@ void Block::attachSPTE(void *i_vaddr)
     //Set the present bit for the address associated with this block
     l_pte->setPresent(true);
 
+    // Determine access type.
+    uint64_t l_access = (iv_mappedToPhysical ? BYPASS_HRMOR : 0);
+    if (l_pte->isExecutable())
+    {
+        l_access |= EXECUTABLE;
+    }
+    else if (l_pte->isWritable() && l_pte->isDirty())
+    {
+        l_access |= WRITABLE;
+    }
+    else
+    {
+        l_access |= READ_ONLY;
+    }
+
     //Add page table entry
     PageTableManager::addEntry((l_vaddr / PAGESIZE) * PAGESIZE,
                                 l_pte->getPage(),
-                                (l_pte->isExecutable() ? EXECUTABLE :
-                                 ((l_pte->isWritable() && l_pte->isDirty()) ?
-                                    WRITABLE :
-                                    READ_ONLY)));
+                                l_access);
 
     // update permission for the page that corresponds to the physical page
     // addr now that we have handled the page fault.

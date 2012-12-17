@@ -209,7 +209,8 @@ void PageTableManager::addEntry( uint64_t i_vAddr,
                                  uint64_t i_accessType )
 {
     // adjust physical address for the HRMOR unless this is a mmio
-    if( SegmentManager::CI_ACCESS != i_accessType )
+    if ((SegmentManager::CI_ACCESS != i_accessType) &&
+        ((BYPASS_HRMOR & i_accessType) == 0))
     {
         i_page |= (getHRMOR() / PAGESIZE);
     }
@@ -252,7 +253,7 @@ void PageTableManager::delRangePN( uint64_t i_pnStart,
         i_pnStart |= (getHRMOR() / PAGESIZE);
         i_pnFinish |= (getHRMOR() / PAGESIZE);
     }
-    
+
     return Singleton<PageTableManager>::instance()._delRangePN(i_pnStart,i_pnFinish);
 }
 
