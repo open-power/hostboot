@@ -39,7 +39,7 @@
  *                          mjjones     09/14/2011  Update to scom function name
  *                          camvanng    09/28/2011  Added test for initfile
  *                          camvanng    11/16/2011  Change function name
- *                                                  fapiHwpExecInitFile() 
+ *                                                  fapiHwpExecInitFile()
  *                          mjjones     01/13/2012  Use new ReturnCode interfaces
  *                          mjjones     02/21/2012  Use new Target toEcmdString
  *                          camvanng    05/07/2012  Suppport for associated
@@ -73,7 +73,8 @@ fapi::ReturnCode hwpInitialTest(const std::vector<fapi::Target> & i_target)
     do
     {
         // Use this SCOM register for testing
-        const uint64_t l_addr = 0x14010002;
+        //@TODO via RTC: 60769 -- base 15XXXXXX addr on master core
+        const uint64_t l_addr = 0x15010002;
         ecmdDataBufferBase l_ScomData(64);
         uint64_t l_originalScomData = 0;
 

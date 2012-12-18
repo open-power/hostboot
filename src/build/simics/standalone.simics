@@ -1,5 +1,8 @@
 p8Proc0.proc_fsi2host_mbox->responder_enable=1
 
+#Trigger a power on to cec-chip
+@SIM_get_interface(conf.p8Proc0.proc_chip, "signal").signal_raise(conf.p8Proc0.proc_chip)
+
 #Write the PNOR MMIO addr into Scratch 2, 0x283A 
 #Then trigger the SBE start 
 p8Proc0.proc_lbus_map.write 0x28e8 0xFFEF0000 

@@ -7,8 +7,9 @@ try {
         echo "Running Hostboot developer patch commands"
         $sbbase = (python "os.environ['sb']")
         $hbsrc_dir = "/host/" + $sbbase + "/hbfw/img/"
+        $hbobj_dir = "/host/" + $sbbase + "/../obj/ppc/hbfw/img/"
 
-        $hbpatch_cmd = "cp " + $hbsrc_dir + "/hostboot.bin "
+        $hbpatch_cmd = "cp " + $hbobj_dir + "/hostboot.header.bin "
         $hbpatch_cmd = $hbpatch_cmd + $hbsrc_dir + "/hostboot_extended.bin "
         $hbpatch_cmd = $hbpatch_cmd + "/opt/fips/components/hwsv/\n"
 

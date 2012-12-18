@@ -50,8 +50,9 @@ struct testXscomAddrData
 const testXscomAddrData g_xscomAddrTable[] =
 {
         // Write data to be ORed with read value
-        {0x14030007, 0x0000040000000000},
-        {0x14010002, 0xC000000000000000},
+        //@TODO via RTC: 60769 -- base addr on master core
+        {0x15030007, 0x0000040000000000},
+        {0x15010002, 0xC000000000000000},
 };
 const uint32_t g_xscomAddrTableSz =
                     sizeof(g_xscomAddrTable)/sizeof(testXscomAddrData);
