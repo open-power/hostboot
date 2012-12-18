@@ -425,7 +425,7 @@ void PnorDD::sfcInit( )
     errlHndl_t  l_err  =   NULL;
 
     //Initial configuration settings for SFC:
-    #define oadrnb_init 0x04000000  //Set MMIO/Direct window to start at 64MB
+    #define oadrnb_init 0x0C000000  //Set MMIO/Direct window to start at 64MB
     #define oadrns_init 0x0000000F  //Set the MMIO/Direct window size to 64MB
     #define adrcbf_init 0x00000000  //Set the flash index to 0
     #define adrcmf_init 0x0000000F  //Set the flash size to 64MB
@@ -703,7 +703,7 @@ errlHndl_t PnorDD::pollSfcOpComplete(uint64_t i_pollTime)
 errlHndl_t PnorDD::micronOpComplete(uint64_t i_pollTime)
 {
     errlHndl_t l_err = NULL;
-    TRACFCOMP( g_trac_pnor, "PnorDD::micronOpComplete> i_pollTime=0x%.8x",
+    TRACDCOMP( g_trac_pnor, "PnorDD::micronOpComplete> i_pollTime=0x%.8x",
                i_pollTime );
 
     do {

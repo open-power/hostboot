@@ -33,8 +33,9 @@
 #echo "WSALIAS HOSTBOOT_LEVEL FIPSLEVEL env/gfwb/simics-4.2.0/simics-4.2.83/fips/fld36/fi120201a700.42" >> $sb/simu/data/simicsInfo
 #echo "WSALIAS HOSTBOOT_LEVEL SIMICSLEVEL env/vtechb/simics-4.2.0/simics-4.2.83/bin" >> $sb/simu/data/simicsInfo
 
-echo "+++ Backing to Simics Build for Scan support remove with RTC:60617."
+echo "+++ Backing to Simics Build for Scan support and PNOR mmio changes."
+# remove with RTC:60617 when simics info contains FIPSLEVEL fi121218a800.42
+#  or later.
 mkdir -p $sb/simu/data
 egrep -v "WSALIAS DEFAULT FIPSLEVEL " $BACKING_BUILD/src/simu/data/simicsInfo > $sb/simu/data/simicsInfo
-echo "WSALIAS DEFAULT FIPSLEVEL env/gfwf/simics-4.2.0/simics-4.2.98/fips/fld36/fi121211q800.42 " >> $sb/simu/data/simicsInfo
-echo "WSALIAS DEFAULT SIMICSLEVEL env/vtechb/simics-4.2.0/simics-4.2.98/bin" >> $sb/simu/data/simicsInfo
+echo "WSALIAS DEFAULT FIPSLEVEL env/gfwf/simics-4.2.0/simics-4.2.98/fips/fld36/fi121218a800.42 " >> $sb/simu/data/simicsInfo

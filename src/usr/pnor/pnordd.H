@@ -392,10 +392,9 @@ class PnorDD
         LPCHC_IO_SPACE  = 0xD0010000, /**< LPC Host Controller I/O Space */
         LPCHC_REG_SPACE = 0xC0012000, /**< LPC Host Ctlr Register Space */
 
-        LPC_DIRECT_READ_OFFSET = 0xFC000000,
         LPC_SFC_CMDREG_OFFSET = 0xF0000C00, /** LPC Offest to SFC Cmd Regs */
         LPC_SFC_CMDBUF_OFFSET = 0xF0000D00, /** LPC Off to SFC Cmd Buf space */
-        LPC_SFC_MMIO_OFFSET = 0xF4000000, /** LPC Off to SFC Direct Read space*/
+        LPC_SFC_MMIO_OFFSET = 0xFC000000, /** LPC Off to SFC Direct Read space*/
         LPC_TOP_OF_FLASH_OFFSET = 0xFFFFFFFF,
 
         ECCB_CTL_REG  = 0x000B0020, /**< ECCB Control Reg (FW) */

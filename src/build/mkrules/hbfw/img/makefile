@@ -55,7 +55,7 @@ BASE_ECC_IMAGE = hostboot.bin.ecc
 
 cp_hbfiles: .SPECTARG
 	${BASE_IMAGES:@image@cp -f -u ${SRCPATH:F${image}} ${image};@}
-	echo "0000000000180000000000000800000000081000" | xxd -r -ps - sbe.header
+	echo "000000000018000000000000080000000000000000081000" | xxd -r -ps - sbe.header
 	dd if=/dev/zero of=secureboot.header bs=1 count=4K
 	cat sbe.header secureboot.header ${BASE_IMAGE} > ${BASE_W_HEADER_IMAGE}
 	currentsb -chain

@@ -10,3 +10,14 @@ Additional actions for Centaur maint command complete
 -CMVC: D864673 is integrating the changes
 -Files: p8_mba.act.patch s1_mba.act.patch
 -Coreq: there are related changes in workarounds.postsimsetup
+
+Override the simics level
+-RTC: Story 60617 will remove the patch
+-CMVC: Simics team is updating simicsInfo, Feature 864898
+-Files: workarounds.presimsetup
+-Coreq: there are related changes in workarounds.postsimsetup
+
+Override simics config file values
+-RTC: Story 60780 will remove the patch
+-CMVC: Feature 864669 used to checkin config file changes
+-Coreq: there are related changes in workarounds.presimsetup

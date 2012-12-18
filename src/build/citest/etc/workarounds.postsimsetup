@@ -98,3 +98,18 @@ cp $bb/src/simu/data/cec-chip/s1_mba.act $sb/simu/data/cec-chip/s1_mba.act
 patch -p0 $sb/simu/data/cec-chip/p8_mba.act $HOSTBOOTROOT/src/build/citest/etc/patches/p8_mba.act.patch
 patch -p0 $sb/simu/data/cec-chip/s1_mba.act $HOSTBOOTROOT/src/build/citest/etc/patches/s1_mba.act.patch
 ###
+
+#remove with RTC 60780
+echo "+++ Updating config files - checked in with CMVC Defect 864669"
+mkdir -p $sb/simu/configs
+egrep -v "GFW_P8_MURANO_PNOR_DIRECT_MMIO" $BACKING_BUILD/src/simu/configs/P8_MURANO.config > $sb/simu/configs/P8_MURANO.config
+echo "SETENV GFW_P8_MURANO_PNOR_DIRECT_MMIO       0xC000000  " >> $sb/simu/configs/P8_MURANO.config
+
+egrep -v "GFW_P8_VENICE_PNOR_DIRECT_MMIO" $BACKING_BUILD/src/simu/configs/P8_VENICE.config > $sb/simu/configs/P8_VENICE.config
+echo "SETENV GFW_P8_VENICE_PNOR_DIRECT_MMIO       0xC000000  " >> $sb/simu/configs/P8_VENICE.config
+
+egrep -v "GFW_P8_TULETA_PNOR_DIRECT_MMIO" $BACKING_BUILD/src/simu/configs/P8_TULETA.config > $sb/simu/configs/P8_TULETA.config
+echo "SETENV GFW_P8_TULETA_PNOR_DIRECT_MMIO       0xC000000  " >> $sb/simu/configs/P8_TULETA.config
+
+egrep -v "GFW_P8_TULETA_PNOR_DIRECT_MMIO" $BACKING_BUILD/src/simu/configs/P8_TULETA_POWERON.config > $sb/simu/configs/P8_TULETA_POWERON.config
+echo "SETENV GFW_P8_TULETA_PNOR_DIRECT_MMIO       0xC000000  " >> $sb/simu/configs/P8_TULETA_POWERON.config
