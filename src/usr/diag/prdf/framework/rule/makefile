@@ -1,25 +1,25 @@
 # IBM_PROLOG_BEGIN_TAG
 # This is an automatically generated prolog.
-# 
-# $Source: src/usr/diag/prdf/framework/rule/makefile $
-# 
+#
+# $Source: framework/rule/makefile $
+#
 # IBM CONFIDENTIAL
-# 
-# COPYRIGHT International Business Machines Corp. 2012
-# 
+#
+# COPYRIGHT International Business Machines Corp. 2012,2013
+#
 # p1
-# 
+#
 # Object Code Only (OCO) source materials
 # Licensed Internal Code Source Materials
 # IBM HostBoot Licensed Internal Code
-# 
+#
 # The source code for this program is not published or otherwise
 # divested of its trade secrets, irrespective of what has been
 # deposited with the U.S. Copyright Office.
-# 
+#
 # Origin: 30
-# 
-# IBM_PROLOG_END_TAG 
+#
+# IBM_PROLOG_END_TAG
 
 ROOTPATH = ../../../../../..
 
@@ -98,20 +98,20 @@ ${PRDR_CMP_FLEX_C_PATH}: ${PRDR_CMP_FLEX}
 USERDEFINES = -D__HOSTBOOT_MODULE -O3 -pipe
 
 ${PRDR_CMP_YACC_o_PATH}: ${PRDR_CMP_YACC_C_PATH} ${PRDR_CMP_YACC_H_PATH}
-	i686-mcp6-g++ -c $(USERDEFINES) $< \
+	i686-$(MCP_VER)-g++ -c $(USERDEFINES) $< \
 		-I ${PRD_USR_PATH}/common/framework/rule \
 		-I ${PRD_USR_PATH}/common/util -I ${RULEOBJDIR} \
 		-o $@
 
 ${PRDR_CMP_FLEX_o_PATH}: ${PRDR_CMP_FLEX_C_PATH} ${PRDR_CMP_YACC_H_PATH}
-	i686-mcp6-g++ -c $(USERDEFINES) $< \
+	i686-$(MCP_VER)-g++ -c $(USERDEFINES) $< \
 		-I ${PRD_USR_PATH}/common/framework/rule \
 		-I ${PRD_USR_PATH}/common/util -I ${RULEOBJDIR} \
 		-o $@
 
 ${PRDR_CMP_o_PATH}: ${PRDR_CMP_C}
 	mkdir -p ${RULEOBJDIR}
-	i686-mcp6-g++ -c $(USERDEFINES) $< \
+	i686-$(MCP_VER)-g++ -c $(USERDEFINES) $< \
 		-I ${PRD_USR_PATH}/common/framework/rule \
 		-I ${PRD_USR_PATH}/common \
 		-I ${PRD_USR_PATH}/common/util \
@@ -122,7 +122,7 @@ ${PRDR_CMP_o_PATH}: ${PRDR_CMP_C}
 
 ${PRDR_CMP_PATH}: ${PRDR_CMP_YACC_o_PATH} ${PRDR_CMP_FLEX_o_PATH} \
 				  ${PRDR_CMP_o_PATH}
-	i686-mcp6-g++ $(USERDEFINES) \
+	i686-$(MCP_VER)-g++ $(USERDEFINES) \
 		${PRDR_CMP_YACC_o_PATH} ${PRDR_CMP_FLEX_o_PATH} ${PRDR_CMP_o_PATH} \
         -o $@
 
@@ -136,7 +136,7 @@ PRDRPP_SEARCHDIRS = -I../../common/plat/pegasus
 # Build .prf files from .rule files and store them in ${RULEOBJDIR}
 ${RULEOBJDIR}/%.prf : %.rule ${PRDR_CMP_PATH}
 	cat $< | ${PRD_USR_PATH}/common/framework/rule/prdrpp ${PRDRPP_SEARCHDIRS} \
-		   | i686-mcp6-jail ${PRDR_CMP_PATH} $@
+		   | i686-$(MCP_VER)-jail ${PRDR_CMP_PATH} $@
 
 # Copy all .prf files from ${RULEOBJDIR} to ${IMGDIR}
 ${EXTRA_PARTS}: ${IMGDIR}/% : ${RULEOBJDIR}/%
