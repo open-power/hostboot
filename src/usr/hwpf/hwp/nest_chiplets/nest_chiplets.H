@@ -203,6 +203,15 @@ void*    call_proc_pcie_scominit( void    *io_pArgs );
  */
 void*    call_proc_scomoverride_chiplets( void    *io_pArgs );
 
+/**
+ *  @brief Setup the ATTR_CHIP_REGIONS_TO_ENABLE attribute for input proc.
+ *
+ *  @param[in] i_procTarget Processor target to customize data for.
+ *
+ *  @return Valid error handle otherwise NULL
+ *
+ */
+errlHndl_t customizeChipRegions(TARGETING::Target* i_procTarget);
 
 };   // end namespace
 

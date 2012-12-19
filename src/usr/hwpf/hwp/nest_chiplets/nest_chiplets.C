@@ -57,6 +57,11 @@
 #include    <fapi.H>
 #include    <fapiPlatHwpInvoker.H>
 
+//  MVPD
+#include <devicefw/userif.H>
+#include <mvpd/mvpdenums.H>
+
+
 //  --  prototype   includes    --
 //  Add any customized routines that you don't want overwritten into
 //      "start_clocks_on_nest_chiplets_custom.C" and include 
@@ -248,6 +253,94 @@ void*    call_proc_a_x_pci_dmi_pll_setup( void    *io_pArgs )
     return l_StepError.getErrorHandle();
 }
 
+//******************************************************************************
+// customizeChipRegions
+//******************************************************************************
+errlHndl_t customizeChipRegions(TARGETING::Target* i_procTarget)
+{
+
+    errlHndl_t l_err = NULL;
+    uint8_t *l_pgData = NULL;
+
+    do{
+
+        size_t l_pgSize = 0; 
+
+        // First get the size
+        l_err = deviceRead(i_procTarget,
+                           NULL,
+                           l_pgSize,
+                           DEVICE_MVPD_ADDRESS(MVPD::CP00, MVPD::PG));
+        if (l_err)
+        {
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                      "ERROR: deviceRead of MVPD for PG failed (size): "
+                      "errorlog PLID=0x%x",
+                      l_err->plid());
+            break;
+        }
+
+        // Now allocate a buffer and read it
+        l_pgData = static_cast<uint8_t *>(malloc(l_pgSize));
+        l_err = deviceRead(i_procTarget,
+                           l_pgData,
+                           l_pgSize,
+                           DEVICE_MVPD_ADDRESS(MVPD::CP00, MVPD::PG));
+        if (l_err)
+        {
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                      "ERROR: deviceRead of MVPD for PG failed (data): "
+                      "errorlog PLID=0x%x",
+                      l_err->plid());
+            break;
+        }
+
+        TRACDBIN(ISTEPS_TRACE::g_trac_isteps_trace,
+                 "Binary dump of PG:",l_pgData,l_pgSize);
+
+        static const size_t VPD_CP00_PG_HDR_LENGTH =  01;
+        // TODO RTC 47050 : Debate on a max config interface
+        static const uint32_t MAX_CHIPLETS_PER_PROC = 32;
+        //Starting position of the PG VPD data in ATTR_CHIP_REGIONS_TO_ENABLE
+        static const size_t PG_START_POS = ( 64-16-4);
+
+        //prepare the vector to be populated to ATTR_CHIP_REGIONS_TO_ENABLE
+        TARGETING::ATTR_CHIP_REGIONS_TO_ENABLE_type l_chipRegionData; 
+        memset(l_chipRegionData,sizeof(ATTR_CHIP_REGIONS_TO_ENABLE_type),0);
+
+        //Skip the header
+        uint16_t *l_partialGoodUint16=reinterpret_cast<uint16_t*>(
+                    &l_pgData[VPD_CP00_PG_HDR_LENGTH]);
+
+        //For customizing the image data, the 16 bit partial good value 
+        //retrieved for the chiplets ( 32 no. ) , should be set from bit 4..19 
+        //of the attribute ATTR_CHIP_REGIONS_TO_ENABLE for the processor
+
+        for ( uint32_t l_chipRegionIndex = 0  ; 
+                l_chipRegionIndex <  MAX_CHIPLETS_PER_PROC ;
+                ++l_chipRegionIndex)
+        {
+            l_chipRegionData[l_chipRegionIndex] = 
+                l_partialGoodUint16[l_chipRegionIndex];
+            l_chipRegionData[l_chipRegionIndex] = 
+                l_chipRegionData[l_chipRegionIndex]<<PG_START_POS;
+        }
+
+        TRACDBIN(ISTEPS_TRACE::g_trac_isteps_trace,
+                 "Binary dump of ATTR_CHIP_REGIONS_TO_ENABLE:",
+                 l_chipRegionData,sizeof(ATTR_CHIP_REGIONS_TO_ENABLE_type));
+
+        i_procTarget->setAttr<TARGETING::ATTR_CHIP_REGIONS_TO_ENABLE>
+            (l_chipRegionData);
+
+    }while(0);
+
+    free(l_pgData);
+
+    return l_err;
+    
+}
+
 //*****************************************************************************
 // wrapper function to call proc_startclock_chiplets
 //*****************************************************************************
@@ -272,6 +365,39 @@ void*    call_proc_startclock_chiplets( void    *io_pArgs )
                 reinterpret_cast<void *>
                 ( const_cast<TARGETING::Target*>(l_proc_target) )
         );
+
+        l_err = customizeChipRegions(*l_iter);
+        if(l_err)
+        {
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                      "ERROR 0x%.8X : customizeChipRegions "
+                      "returns error",
+                      l_err->reasonCode());
+
+            ErrlUserDetailsTarget myDetails(l_proc_target);
+
+            // capture the target data in the elog
+            myDetails.addToLog(l_err );
+
+            /*@
+             * @errortype
+             * @reasoncode  ISTEP_CUSTOMIZE_CHIP_REGIONS_FAILED
+             * @severity    ERRORLOG::ERRL_SEV_UNRECOVERABLE
+             * @moduleid    ISTEP_PROC_STARTCLOCK_CHIPLETS
+             * @userdata1   bytes 0-1: plid identifying first error
+             *              bytes 2-3: reason code of first error
+             * @userdata2   bytes 0-1: total number of elogs included
+             *              bytes 2-3: N/A
+             * @devdesc     call to customizeChipRegions failed, check module VPD.
+             */
+            l_StepError.addErrorDetails(ISTEP_CUSTOMIZE_CHIP_REGIONS_FAILED,
+                                        ISTEP_PROC_STARTCLOCK_CHIPLETS,
+                                        l_err);
+
+            errlCommit( l_err, HWPF_COMP_ID );
+
+            break;
+        }
 
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, 
                    "Running proc_startclock_chiplets HWP on..." );
