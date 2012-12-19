@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_scom_addresses.H,v 1.124 2012/12/07 21:32:13 stillgs Exp $
+// $Id: p8_scom_addresses.H,v 1.125 2012/12/12 04:55:22 stillgs Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/p8_scom_addresses.H,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
@@ -1602,6 +1602,19 @@ CONST_UINT64_T( EX_GP3_0x100F0012                     , ULL(0x100F0012) );
 CONST_UINT64_T( EX_GP3_AND_0x100F0013                 , ULL(0x100F0013) );
 CONST_UINT64_T( EX_GP3_OR_0x100F0014                  , ULL(0x100F0014) );
 
+//Slave Configuration Register
+CONST_UINT64_T( EX_SLAVE_CONFIG_0x100F001E            , ULL(0x100F001E) );
+
+//Hang counter registers
+CONST_UINT64_T( EX_HANG_P0_0x100F0020                 , ULL(0x100F0020) );
+CONST_UINT64_T( EX_HANG_P1_0x100F0021                 , ULL(0x100F0021) );
+CONST_UINT64_T( EX_HANG_P2_0x100F0022                 , ULL(0x100F0022) );
+CONST_UINT64_T( EX_HANG_P3_0x100F0023                 , ULL(0x100F0023) );
+CONST_UINT64_T( EX_HANG_P4_0x100F0024                 , ULL(0x100F0024) );
+CONST_UINT64_T( EX_HANG_P5_0x100F0025                 , ULL(0x100F0025) );
+CONST_UINT64_T( EX_HANG_P6_0x100F0026                 , ULL(0x100F0026) );
+CONST_UINT64_T( EX_HANG_PRE_0x100F0028                , ULL(0x100F0028) );
+
 // Atomic Lock
 CONST_UINT64_T( EX_ATOMIC_LOCK_0x100F03FF             , ULL(0x100F03FF) );
 
@@ -1674,15 +1687,7 @@ CONST_UINT64_T( EX15_GP3_OR_0x1F0F0014                , ULL(0x1F0F0014) );
 //      EX PCB SLAVE PM
 //------------------------------------------------------------------------------
 //Generic names (need to add in (cuTarget.chipUnitNum * 0x01000000)) when being used
-//Hang counter registers
-CONST_UINT64_T( EX_HANG_P0_0x100F0020                 , ULL(0x100F0020) );
-CONST_UINT64_T( EX_HANG_P1_0x100F0021                 , ULL(0x100F0021) );
-CONST_UINT64_T( EX_HANG_P2_0x100F0022                 , ULL(0x100F0022) );
-CONST_UINT64_T( EX_HANG_P3_0x100F0023                 , ULL(0x100F0023) );
-CONST_UINT64_T( EX_HANG_P4_0x100F0024                 , ULL(0x100F0024) );
-CONST_UINT64_T( EX_HANG_P5_0x100F0025                 , ULL(0x100F0025) );
-CONST_UINT64_T( EX_HANG_P6_0x100F0026                 , ULL(0x100F0026) );
-CONST_UINT64_T( EX_HANG_PRE_0x100F0028                , ULL(0x100F0028) );
+
 //PMGP0 Register
 CONST_UINT64_T( EX_PMGP0_0x100F0100                   , ULL(0x100F0100) );
 CONST_UINT64_T( EX_PMGP0_AND_0x100F0101               , ULL(0x100F0101) );
@@ -1786,6 +1791,9 @@ This section is automatically updated by CVS when you check in this file.
 Be sure to create CVS comments when you commit so that they can be included here.
 
 $Log: p8_scom_addresses.H,v $
+Revision 1.125  2012/12/12 04:55:22  stillgs
+Added EX PCBS Slave Configuration register
+
 Revision 1.124  2012/12/07 21:32:13  stillgs
 Fix ECO PFET Delay register name problem
 
