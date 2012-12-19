@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_pcie_config.C,v 1.1 2012/11/05 21:52:34 jmcgill Exp $
+// $Id: proc_pcie_config.C,v 1.3 2012/12/11 23:59:02 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_pcie_config.C,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2012
@@ -104,7 +104,6 @@ fapi::ReturnCode proc_pcie_config_pbcq_fir(
     fapi::ReturnCode rc;
 
     ecmdDataBufferBase zero_data(64);
-    ecmdDataBufferBase ones_data(64);
 
     // mark function entry
     FAPI_INF("proc_pcie_config_pbcq_fir: Start");
@@ -157,6 +156,7 @@ fapi::ReturnCode proc_pcie_config(
     const fapi::Target & i_target)
 {
     fapi::ReturnCode rc;
+    uint8_t pcie_enabled;
 
     // mark HWP entry
     FAPI_INF("proc_pcie_config: Start");
@@ -171,19 +171,33 @@ fapi::ReturnCode proc_pcie_config(
             break;
         }
 
-        // initialize PBCQ/AIB, configure PBCQ FIRs
-        rc = proc_pcie_config_pbcq(i_target);
+        // query PCIE partial good attribute
+        rc = FAPI_ATTR_GET(ATTR_PROC_PCIE_ENABLE,
+                           &i_target,
+                           pcie_enabled);
         if (!rc.ok())
         {
-            FAPI_ERR("proc_pcie_config: Error from proc_pcie_config_pbcq");
+            FAPI_ERR("proc_pcie_config: Error querying ATTR_PROC_PCIE_ENABLE");
             break;
         }
 
-        rc = proc_pcie_config_pbcq_fir(i_target);
-        if (!rc.ok())
+        // initialize PBCQ/AIB, configure PBCQ FIRs (only if partial good
+        // atttribute is set)
+        if (pcie_enabled == fapi::ENUM_ATTR_PROC_PCIE_ENABLE_ENABLE)
         {
-            FAPI_ERR("proc_pcie_config: Error from proc_pcie_config_pbcq_fir");
-            break;
+            rc = proc_pcie_config_pbcq(i_target);
+            if (!rc.ok())
+            {
+                FAPI_ERR("proc_pcie_config: Error from proc_pcie_config_pbcq");
+                break;
+            }
+
+            rc = proc_pcie_config_pbcq_fir(i_target);
+            if (!rc.ok())
+            {
+                FAPI_ERR("proc_pcie_config: Error from proc_pcie_config_pbcq_fir");
+                break;
+            }
         }
 
     } while(0);
