@@ -34,7 +34,6 @@
 
 #include <prdfFlyWeight.H>
 #include <tracinterface.H>
-#include <iipglobl.h>
 #include <prdfHeapBucketSize.H>
 
 #undef prdfFlyWeight_C
@@ -137,19 +136,20 @@ T & FlyWeight<T,S>::get(const T & key)
   return *result;
 }
 } //End namespace PRDF
-#if defined(ESW_SIM_COMPILE)
-#include <iostream>
-#include <iomanip>
 
-//FlyWeightBase::FlyWeightList FlyWeightBase::cv_fwlist; //mp01d
+
+#if defined( FLYWEIGHT_PROFILING )
+
 namespace PRDF
 {
 template < class T , uint32_t S >
 void FlyWeight<T,S>::printStats(void)
 {
-  using namespace std;
-  cout << "FlyWeight Memory allowcated = " << (iv_heap.size() * sizeof(T) * RoundBucketSize<T,S>::value) << endl;
+
+    PRDF_TRAC( "FlyWeight Memory allocated = %d",(iv_heap.size() * sizeof(T) *
+                RoundBucketSize<T,S>::value ) );
 }
+
 } //End namespace PRDF
 #endif
 

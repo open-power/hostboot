@@ -54,13 +54,8 @@
 // Includes
 //--------------------------------------------------------------------
 
-#if !defined(PRDF_TYPES_H)
 #include <prdf_types.h>
-#endif
-
-#if !defined(IIPSTEP_H)
 #include <iipstep.h>
-#endif
 
 namespace PRDF
 {
@@ -87,12 +82,11 @@ public:
   virtual ~Resolution();
 
   /**
-   Resolve the service data for this error syndrome
-   @pre None
-   @post service data is complete
-   @return SUCCESS | non-zero
+   * @brief     Resolve the service data for this error syndrome
+   * @param[io] io_data Reference to STEP_CODE_DATA_STRUCT
+   * @return    SUCCESS | non-zero
    */
-  virtual int32_t Resolve(STEP_CODE_DATA_STRUCT & data) = 0;
+  virtual int32_t Resolve( STEP_CODE_DATA_STRUCT & io_data ) = 0;
   // Function Specification ********************************************
   //
   // Purpose:      Resolve service data for a specific error bit (Pure Virtual)

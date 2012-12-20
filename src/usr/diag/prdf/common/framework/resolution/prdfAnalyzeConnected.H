@@ -63,59 +63,54 @@ public:
   AnalyzeConnected(void);
 
   /**
-   Constructor
-   @param   i_psourceHandle       target handle of connection source
-   @param   i_targetType          i_targetType of desired unit that's connected to i_psourceHandle
-   @param   i_idx:                index into getConnected list of chip.
+   * @brief       Constructor
+   * @param[in]   i_targetType  Target type of unit that's connected to given
+   *                            target
+   * @param[in]   i_idx:        index into getConnected list of chip.
    */
-  AnalyzeConnected(TARGETING::TargetHandle_t i_psourceHandle ,
-                       TARGETING::TYPE i_targetType,
-                       uint32_t i_idx =0xffffffff );
+  AnalyzeConnected( TARGETING::TYPE i_targetType,
+                    uint32_t i_idx =0xffffffff );
 
   // ~prdfAnalyzeConnected(); default dtor is sufficient
 
   /**
-   Determine chip object for current connected unit and call its analyze func.
-   @param service data collector
-   @pre None
-   @return SUCCESS | non-zero if chip not found.
-   @note if the call to getConnected yeilds an invalid homId than the altResolution is called. If the
-         altResolution is NULL than the source is added to the callout list.
+   * @brief     Determine chip object for current connected unit and call its
+   *            analyze func.
+   * @param[io] io_service_data Refernce to STEP_CODE_DATA_STRUCT
+   * @return    SUCCESS | non-zero if chip not found.
+   * @note      if the call to getConnected yeilds NULL  than the
+   *            altResolution is called. If the altResolution is NULL than the
+   *            source is added to the callout list.
    */
-  virtual int32_t Resolve(STEP_CODE_DATA_STRUCT & io_service_data);
+  virtual int32_t Resolve( STEP_CODE_DATA_STRUCT & io_service_data );
 
   virtual bool operator==(const AnalyzeConnected & r) const;
 
 private:  // functions
 private:  // Data
 
-  TARGETING::TargetHandle_t iv_psourceHandle;
   TARGETING::TYPE iv_targetType;
   uint32_t  iv_idx;
 };
 
 inline AnalyzeConnected::AnalyzeConnected(void)
-                            : iv_psourceHandle(NULL),
-                              iv_targetType(TARGETING::TYPE_NA),
-                              iv_idx(0xffffffff)
+                              : iv_targetType(TARGETING::TYPE_NA),
+                                iv_idx(0xffffffff)
 {
 }
 
 inline AnalyzeConnected::AnalyzeConnected(
-                                TARGETING::TargetHandle_t i_psourceHandle,
                                 TARGETING::TYPE i_targetType,
-                                uint32_t i_idx)
-                                : iv_psourceHandle(i_psourceHandle),
-                                iv_targetType(i_targetType),
-                                iv_idx(i_idx)
+                                uint32_t i_idx )
+                                : iv_targetType(i_targetType),
+                                  iv_idx(i_idx)
 {
 }
 
 inline bool AnalyzeConnected::operator==(const AnalyzeConnected & r) const
 {
-  return (iv_psourceHandle == r.iv_psourceHandle &&
-          iv_targetType == r.iv_targetType &&
-          iv_idx == r.iv_idx);
+  return ( iv_targetType == r.iv_targetType &&
+            iv_idx == r.iv_idx );
 }
 
 } // end namespace PRDF

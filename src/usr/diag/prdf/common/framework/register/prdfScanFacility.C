@@ -185,20 +185,20 @@ void ScanFacility::ResetPluginRegister()
 }
 
 //------------------------------------------------------------------------------
-#ifdef __MEM_PROFILING
+#ifdef FLYWEIGHT_PROFILING
 void ScanFacility::printStats()
 {
-    PRDF_DTRAC("ScomRegister");
+    PRDF_TRAC("ScomRegister");
     iv_scomRegFw.printStats();
-    PRDF_DTRAC("Not Register");
+    PRDF_TRAC("Not Register");
     iv_notRegFw.printStats();
-    PRDF_DTRAC("Left Register");
+    PRDF_TRAC("Left Register");
     iv_leftRegFw.printStats();
-    PRDF_DTRAC("Right Register");
+    PRDF_TRAC("Right Register");
     iv_rightRegFw.printStats();
-    PRDF_DTRAC("And Register");
+    PRDF_TRAC("And Register");
     iv_andRegFw.printStats();
-    PRDF_DTRAC("Or Register");
+    PRDF_TRAC("Or Register");
     iv_orRegFw.printStats();
 
 }

@@ -34,17 +34,10 @@
 //--------------------------------------------------------------------
 
 #include <map>
-
 #include <prdfErrorSignature.H>
-
-#if !defined(iipResolution_h)
 #include <iipResolution.h>
-#endif
-
-#if !defined(PRDFTIMER_H)
 #include <time.h>
 #include <prdfTimer.H>
-#endif
 
 namespace PRDF
 {

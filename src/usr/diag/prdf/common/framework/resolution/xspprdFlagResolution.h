@@ -37,13 +37,9 @@
 //--------------------------------------------------------------------
 // Includes
 //--------------------------------------------------------------------
-#if !defined(iipResolution_h)
 #include <iipResolution.h>
-#endif
 
-#if !defined(iipServiceDataCollector_h)
 #include <iipServiceDataCollector.h>
-#endif
 
 namespace PRDF
 {
@@ -56,20 +52,19 @@ class FlagResolution : public Resolution
 {
 public:
   /**
-   Constructor
-   <ul>
-   <br><b>Parameters:  </b> None
-   <br><b>Returns:     </b> Nothing
-   <br><b>Requirements:</b> None
-   <br><b>Promises:    </b> Object created
-   <br><b>Exceptions:  </b> None
-   <br><b>Notes:       </b>
-   </ul><br>
+   * @brief     Constructor
+   * @param[in] i_flag  flag resolution
    */
-  FlagResolution(ServiceDataCollector::Flag flag)
-  : xFlag(flag) {}
-  FlagResolution()
-    : xFlag(ServiceDataCollector::SERVICE_CALL) {}
+
+  FlagResolution( ServiceDataCollector::Flag i_flag ): xFlag( i_flag )
+  { }
+
+  /**
+   * @brief     Constructor
+   */
+  FlagResolution() : xFlag( ServiceDataCollector::SERVICE_CALL )
+  { }
+
 
   /*
    Destructor
@@ -84,18 +79,12 @@ public:
    */
   //  ~xspprdFlagResolution();
 
-  /**
-   Resolve by adding a the MRU callout to the service data collector
-   <ul>
-   <br><b>Parameters:  </b> ServiceDataCollector
-   <br><b>Returns:     </b> Return code [SUCCESS | nonZero]
-   <br><b>Requirements:</b> none.
-   <br><b>Promises:    </b> serviceData::GetMruList().GetCount()++
-   serviceData::QueryFlag() == this callout
-   <br><b>Exceptions:  </b> None.
-   </ul><br>
-   */
-  virtual int32_t Resolve(STEP_CODE_DATA_STRUCT & error);
+ /**
+  * @brief      sets a flag in service data collector
+  * @param[io]  io_serviceData Reference to STEP_CODE_DATA_STRUCT
+  * @return     None
+  */
+  virtual int32_t Resolve( STEP_CODE_DATA_STRUCT & io_serviceData );
 
   /*
    * base class defines operator== so one is needed here

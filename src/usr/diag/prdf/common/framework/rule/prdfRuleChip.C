@@ -697,7 +697,6 @@ Resolution * RuleChip::createResolution( Prdr::Expr * i_action,
 
         case Prdr::ACT_FUNC: // FUNCCALL
             l_rc = &i_data.cv_reslFactory.GetPluginCallResolution(
-                        this,
                         this->getExtensibleFunction(i_action->cv_actFunc)
                     );
             break;
@@ -777,11 +776,10 @@ Resolution * RuleChip::createResolution( Prdr::Expr * i_action,
             //FIXME: comment out hwtablecontent for hostboot
             l_rc = &i_data.cv_reslFactory.GetDumpResolution(
                                 /*(hwTableContent)    i_action->cv_value[0].i,*/
-                                GetChipHandle());
+                                );
             #else
             l_rc = &i_data.cv_reslFactory.GetDumpResolution(
-                                (hwTableContent)    i_action->cv_value[0].i,
-                                GetChipHandle());
+                                (hwTableContent)    i_action->cv_value[0].i );
             #endif
             break;
 
@@ -792,23 +790,22 @@ Resolution * RuleChip::createResolution( Prdr::Expr * i_action,
 
         case Prdr::ACT_ANALY: // ANALYZE
             l_rc = &i_data.cv_reslFactory.GetAnalyzeConnectedResolution(
-                                                     this->GetChipHandle(),
-                            (TARGETING::TYPE)        i_action->cv_value[0].i,
-                                                     i_action->cv_value[1].i);
+                                    (TARGETING::TYPE) i_action->cv_value[0].i,
+                                    i_action->cv_value[1].i );
             break;
 
         case Prdr::ACT_CALL: // CALLOUT
+        {
             switch ((char)i_action->cv_value[0].i)
             {
                 case 'c': // connected chip.
                     l_rc = &i_data.cv_reslFactory.GetConnectedCalloutResolution(
-                                                          this->GetChipHandle(),
-                                (TARGETING::TYPE)         i_action->cv_value[2].i,
-                                                          i_action->cv_value[3].i,
-                                (CalloutPriorityEnum)     i_action->cv_value[1].i,
-                                (NULL == i_action->cv_value[4].p ? NULL :
-                                    (this->createResolution(
-                                            i_action->cv_value[4].p, i_data)))
+                                ( TARGETING::TYPE )     i_action->cv_value[2].i,
+                                                        i_action->cv_value[3].i,
+                                ( CalloutPriorityEnum ) i_action->cv_value[1].i,
+                                ( NULL == i_action->cv_value[4].p ? NULL :
+                                        ( this->createResolution(
+                                          i_action->cv_value[4].p, i_data ) ) )
 
                             );
                     break;
@@ -821,17 +818,29 @@ Resolution * RuleChip::createResolution( Prdr::Expr * i_action,
 
                 case 's': // SELF
                 default:
+                    /*Passing NULL as target in this function creates a dummy
+                     * place holder object of PRDcallout for  TARGET TYPE
+                     * callout.Since resolution object is no longer tied to a
+                     * specific target,any RulChip which needs target type
+                     * callout with a given priority can use this resolution.
+                     * .Since the same function shall be used for creating
+                     * TYPE_MEMMRU and TYPE_SYMFRU callout ,it is not possible
+                     * to remove this input parameter.So,by passing NULL as
+                     * target other two callout remain  unaffected and we are
+                     * still able to create place holder resolution object for
+                     * target type callout.
+                     */
                     l_rc = &i_data.cv_reslFactory.GetCalloutResolution(
-                                                      this->GetChipHandle(),
-                                (CalloutPriorityEnum) i_action->cv_value[1].i);
+                                NULL ,
+                                (CalloutPriorityEnum) i_action->cv_value[1].i );
                     break;
 
             };
+        }
             break;
 
         case Prdr::ACT_CAPT:  // Capture resolution.
             l_rc = &i_data.cv_reslFactory.GetCaptureResolution(
-                                this,
                                 i_action->cv_value[0].i);
             break;
     };

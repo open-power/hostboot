@@ -69,41 +69,42 @@ public:
   CalloutConnected(void);
 
   /**
-   Constructor
-   @param       i_psourceHandle             handle of  connection source
-   @param       i_targetType                type of desired unit that's connected to i_psourceHandle
-   @param       i_idx                       index into getConnected list to callout
-                                            (i_idx = 0xffffffff means callout the first valid target)
-   @param       i_priority                  callout priority  @see srci.H for priority values
-   @param       i_altResolution             to use if the connection does not exist or is invalid.
-                                            If NULL than source is called out
-   @note Don't use this class to callout clocks - use prdfClockResolution
+   * @brief       Constructor
+   * @param[in]   i_targetType      type of desired unit that's connected to
+   *                                i_psourceHandle
+   * @param[in]   i_idx             index into getConnected list to callout
+   *                                (i_idx = 0xffffffff means callout the first
+   *                                valid target)
+   * @param[in]   i_priority        callout priority  @see srci.H for priority
+   *                                values
+   * @param[in]   i_altResolution   to use if the connection does not exist or
+   *                                is invalid.
+   *                                If NULL than source is called out
+   * @note        Don't use this class to callout clocks - use ClockResolution
    */
-  CalloutConnected(TARGETING::TargetHandle_t i_psourceHandle,
-                       TARGETING::TYPE i_targetType,
-                       uint32_t i_idx =0xffffffff ,
-                       PRDpriority i_priority = MRU_MED,
-                       Resolution * i_altResolution = NULL);
+  CalloutConnected( TARGETING::TYPE i_targetType,
+                    uint32_t i_idx =0xffffffff ,
+                    PRDpriority i_priority = MRU_MED,
+                    Resolution * i_altResolution = NULL );
 
   // ~CalloutConnected(); default dtor is sufficient
 
   /**
-   Determine callout for current connected unit and add to the service data
-   @param service data collector
-   @pre None
-   @post service_data is complete
-   @return SUCCESS | non-zero
-   @note if the call to getConnected yeilds an invalid homId than the altResolution is called. If the
-         altResolution is NULL than the source is added to the callout list.
+   * @brief     calls out the target connected to target under analysis.
+   * @param[io] io_service_data  Reference to STEP_CODE_DATA_STRUCT
+   * @post      service_data is complete
+   * @return    SUCCESS | non-zero
+   * @note      if the call to getConnected yeilds an invalid  target then
+   *            altResolution is called. If the altResolution is NULL than the
+   *            source is added to the callout list.
    */
-  virtual int32_t Resolve(STEP_CODE_DATA_STRUCT & io_service_data);
+  virtual int32_t Resolve( STEP_CODE_DATA_STRUCT & io_service_data );
 
   virtual bool operator==(const CalloutConnected & r) const;
 
 private:  // functions
 private:  // Data
 
-  TARGETING::TargetHandle_t iv_psourceHandle;
   TARGETING::TYPE iv_targetType;
   uint32_t iv_idx;
   PRDF::PRDpriority iv_priority;
@@ -111,32 +112,28 @@ private:  // Data
 };
 
 inline CalloutConnected::CalloutConnected(void)
-: iv_psourceHandle(NULL),
-  iv_targetType(TARGETING::TYPE_NA),
+: iv_targetType(TARGETING::TYPE_NA),
   iv_idx(0xffffffff ),
   iv_priority(MRU_LOW),
   iv_altResolution(NULL)
 {}
 
-inline CalloutConnected::CalloutConnected(TARGETING::TargetHandle_t i_psourceHandle,
-                                                  TARGETING::TYPE i_targetType,
-                                                  uint32_t i_idx,
-                                                  PRDF::PRDpriority i_priority,
-                                                  Resolution * i_altResolution)
-: iv_psourceHandle(i_psourceHandle),
-  iv_targetType(i_targetType),
-  iv_idx(i_idx),
-  iv_priority(i_priority),
-  iv_altResolution(i_altResolution)
-{}
+inline CalloutConnected::CalloutConnected( TARGETING::TYPE i_targetType,
+                                           uint32_t i_idx,
+                                           PRDpriority i_priority,
+                                           Resolution * i_altResolution ):
+                                           iv_targetType( i_targetType ),
+                                           iv_idx( i_idx ),
+                                           iv_priority( i_priority ),
+                                           iv_altResolution( i_altResolution )
+{ }
 
-inline bool CalloutConnected::operator==(const CalloutConnected & r) const
+inline bool CalloutConnected::operator == ( const CalloutConnected & r ) const
 {
-  return (iv_psourceHandle == r.iv_psourceHandle &&
-          iv_targetType == r.iv_targetType &&
-          iv_idx == r.iv_idx &&
-          iv_priority == r.iv_priority &&
-          (iv_altResolution == r.iv_altResolution || &iv_altResolution == &r.iv_altResolution));
+    return ( ( iv_targetType == r.iv_targetType ) && ( iv_idx == r.iv_idx ) &&
+            ( iv_priority == r.iv_priority ) &&
+            ( ( iv_altResolution == r.iv_altResolution ) ||
+            ( &iv_altResolution == &r.iv_altResolution ) ) );
 }
 
 } // end namespace PRDF

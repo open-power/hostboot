@@ -39,9 +39,7 @@
 // Includes
 //--------------------------------------------------------------------
 
-#if !defined(iipResolution_h)
 #include <iipResolution.h>
-#endif
 
 namespace PRDF
 {
@@ -77,18 +75,11 @@ public:
 
 
   /**
-   Constructor
-   <ul>
-   <br><b>Parameters:  </b> None
-   <br><b>Returns:     </b> Nothing
-   <br><b>Requirements:</b> None
-   <br><b>Promises:    </b> Object created
-   <br><b>Exceptions:  </b> None
-   <br><b>Notes:       </b>
-   </ul><br>
+   * @brief     Constructor
+   * @param[in] i_et  error type
    */
-  GardResolution(ErrorType et=NoGard)
-  : xErrorType(et) {}
+  GardResolution( ErrorType i_et = NoGard ) : xErrorType( i_et )
+  { }
 
   /*
    Destructor
@@ -103,18 +94,12 @@ public:
    */
   //  ~xspprdGardResolution();
 
-  /**
-   Resolve by adding a the MRU callout to the service data collector
-   <ul>
-   <br><b>Parameters:  </b> ServiceDataCollector
-   <br><b>Returns:     </b> Return code [SUCCESS | nonZero]
-   <br><b>Requirements:</b> none.
-   <br><b>Promises:    </b> serviceData::GetMruList().GetCount()++
-   serviceData::QueryGard() == this callout
-   <br><b>Exceptions:  </b> None.
-   </ul><br>
-   */
-  virtual int32_t Resolve(STEP_CODE_DATA_STRUCT & error);
+ /**
+  * @brief      gard resolution operation
+  * @param[io]  io_serviceData   Reference to STEP_CODE_DATA_STRUCT
+  * @return     SUCCESS
+  */
+  virtual int32_t Resolve( STEP_CODE_DATA_STRUCT & io_serviceData );
 
   bool operator==(const GardResolution & r) const
   {

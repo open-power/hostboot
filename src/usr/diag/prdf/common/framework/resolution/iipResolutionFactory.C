@@ -184,35 +184,32 @@ MaskResolution & ResolutionFactory::GetThresholdResolution(uint32_t maskId)
 }
 
 Resolution & ResolutionFactory::GetConnectedCalloutResolution(
-                                    TARGETING::TargetHandle_t  i_psourceHandle,
                                     TARGETING::TYPE i_targetType,
                                     uint32_t i_idx,
                                     PRDpriority i_priority,
                                     Resolution * i_altResolution )
 {
-    CalloutConnected key( i_psourceHandle,
-                              i_targetType,
-                              i_idx,
-                              i_priority,
-                              i_altResolution );
+    CalloutConnected key(   i_targetType,
+                            i_idx,
+                            i_priority,
+                            i_altResolution );
 
     return iv_connectedCallouts.get(key);
 }
 
 Resolution & ResolutionFactory::GetAnalyzeConnectedResolution(
-                                    TARGETING::TargetHandle_t  i_psourceHandle,
                                     TARGETING::TYPE i_targetType,
                                     uint32_t i_idx )
 {
-    AnalyzeConnected key( i_psourceHandle, i_targetType, i_idx );
+    AnalyzeConnected key( i_targetType, i_idx );
 
     return iv_analyzeConnected.get(key);
 }
 
 Resolution & ResolutionFactory::GetPluginCallResolution(
-        ExtensibleChip * i_chip, ExtensibleChipFunction * i_function)
+                                    ExtensibleChipFunction * i_function )
 {
-    return iv_pluginCallFW.get(PluginCallResolution(i_chip,i_function));
+    return iv_pluginCallFW.get( PluginCallResolution( i_function ) );
 }
 
 Resolution & ResolutionFactory::GetThresholdSigResolution(
@@ -221,35 +218,36 @@ Resolution & ResolutionFactory::GetThresholdSigResolution(
     return iv_thresholdSigFW.get(ThresholdSigResolution(policy));
 }
 
-Resolution & ResolutionFactory::GetEregResolution(ErrorRegisterType & er)
+Resolution & ResolutionFactory::GetEregResolution(ErrorRegisterType & i_er)
 {
-    return iv_eregResolutionFW.get(EregResolution(er));
+    return iv_eregResolutionFW.get(EregResolution(i_er));
 }
 
-Resolution & ResolutionFactory::GetTryResolution( Resolution & tryRes,
-                                                  Resolution & defaultRes )
+Resolution & ResolutionFactory::GetTryResolution( Resolution & i_tryRes,
+                                                  Resolution & i_defaultRes )
 {
-    return iv_tryResolutionFW.get(TryResolution(tryRes,defaultRes));
+    return iv_tryResolutionFW.get(TryResolution(i_tryRes,i_defaultRes));
 }
 
-Resolution & ResolutionFactory::GetFlagResolution(ServiceDataCollector::Flag flag)
+Resolution & ResolutionFactory::GetFlagResolution(
+                                    ServiceDataCollector::Flag i_flag )
 {
-    return iv_flagResolutionFW.get(FlagResolution(flag));
+    return iv_flagResolutionFW.get( FlagResolution( i_flag ) );
 }
 
 #ifdef __HOSTBOOT_MODULE
 Resolution & ResolutionFactory::GetDumpResolution(
-                                    /* FIXME: hwTableContent iDumpRequestContent, */
-                                    TARGETING::TargetHandle_t i_pDumpHandle )
+                             /* FIXME: hwTableContent iDumpRequestContent, */
+                                                 )
 {
-    return iv_dumpResolutionFW.get(DumpResolution(/*FIXME: iDumpRequestContent,*/ i_pDumpHandle));
+    return iv_dumpResolutionFW.get( DumpResolution(
+                                    /*FIXME: iDumpRequestContent,*/ ) );
 }
 #else
 Resolution & ResolutionFactory::GetDumpResolution(
-                                    hwTableContent iDumpRequestContent,
-                                    TARGETING::TargetHandle_t i_pDumpHandle )
+                                    hwTableContent iDumpRequestContent )
 {
-    return iv_dumpResolutionFW.get(DumpResolution(iDumpRequestContent, i_pDumpHandle));
+    return iv_dumpResolutionFW.get(DumpResolution( iDumpRequestContent ) );
 }
 #endif
 
@@ -258,19 +256,17 @@ Resolution & ResolutionFactory::GetGardResolution(GardResolution::ErrorType et)
     return iv_gardResolutionFW.get(GardResolution(et));
 }
 
-Resolution & ResolutionFactory::GetCaptureResolution
-    (ExtensibleChip * i_chip,
-     uint32_t i_group)
+Resolution & ResolutionFactory::GetCaptureResolution( int32_t i_group )
 {
-    return iv_captureResolutionFW.get(CaptureResolution(i_chip,i_group));
+    return iv_captureResolutionFW.get( CaptureResolution( i_group ) );
 }
 
 Resolution & ResolutionFactory::GetClockResolution(
                                     TARGETING::TargetHandle_t i_pClockHandle,
                                     TARGETING::TYPE i_targetType )
 {
-    return iv_clockResolutionFW.get( ClockResolution(i_pClockHandle,
-                                                         i_targetType) );
+    return iv_clockResolutionFW.get( ClockResolution( i_pClockHandle,
+                                                      i_targetType ) );
 }
 
 void ResolutionFactory::Reset()
@@ -278,16 +274,56 @@ void ResolutionFactory::Reset()
   PRDF_INF( "ResolutionFactory.Reset()" );
 
   iv_thresholdResolutions.clear();
-  iv_Links.clear(); // we must clear this because it could have links to Thresholds
+  // we must clear this because it could have links to Thresholds
+  iv_Links.clear();
   iv_pluginCallFW.clear();
   iv_thresholdSigFW.clear();
   iv_eregResolutionFW.clear();
   iv_tryResolutionFW.clear();
-  iv_captureResolutionFW.clear(); //dgxx
-  iv_connectedCallouts.clear(); // Clear because the "alt resolution" could have be a link or other cleared resolution.
-  iv_clockResolutionFW.clear(); //jl01a
+  iv_captureResolutionFW.clear();
+  /*Clear because the "alt resolution" could have be a link or other cleared
+  resolution.*/
+  iv_connectedCallouts.clear();
+  iv_clockResolutionFW.clear();
 
 }
 
+#ifdef FLYWEIGHT_PROFILING
+
+void ResolutionFactory::printStats()
+{
+    PRDF_TRAC("Callout");
+    iv_Callouts.printStats( );
+    PRDF_TRAC("Link Resolution");
+    iv_Links.printStats( );
+    PRDF_TRAC("ThresholdResolutionList");
+    iv_thresholdResolutions.printStats( );
+    PRDF_TRAC("MaskResolution");
+    iv_maskResolutions.printStats( );
+    PRDF_TRAC("ConnectedCallout");
+    iv_connectedCallouts.printStats( );
+    PRDF_TRAC("AnalyzeConnectedCallout");
+    iv_analyzeConnected.printStats( );
+    PRDF_TRAC("pluginCallFW");
+    iv_pluginCallFW.printStats( );
+    PRDF_TRAC("Threshhold");
+    iv_thresholdSigFW.printStats( );
+    PRDF_TRAC("EregResolution");
+    iv_eregResolutionFW.printStats( );
+    PRDF_TRAC("TryResolution");
+    iv_tryResolutionFW.printStats( );
+    PRDF_TRAC("FlagResolution");
+    iv_flagResolutionFW.printStats( );
+    PRDF_TRAC("dumpResolution");
+    iv_dumpResolutionFW.printStats( );
+    PRDF_TRAC("gardResolution");
+    iv_gardResolutionFW.printStats( );
+    PRDF_TRAC("captureResolution");
+    iv_captureResolutionFW.printStats( );
+    PRDF_TRAC("clockResolution");
+    iv_clockResolutionFW.printStats( );
+
+}
+#endif
 } // end namespace PRDF
 

@@ -58,35 +58,24 @@ class ClockResolution : public Resolution
 {
 public:
   /**
-   Constructor
-   <ul>
-   <br><b>Parameters:  </b>
-   <br><b>Returns:     </b> Nothing
-   <br><b>Requirements:</b> None
-   <br><b>Promises:    </b> Object created
-   <br><b>Exceptions:  </b> None
-   <br><b>Notes:       </b>
-   </ul><br>
-   */
+   * @brief     constructor
+   * @param[in] i_pTargetHandle  target pointer for clock source
+   * @param[in] i_targetType  type of target connected to clock source
+   * @return    Non-SUCCESS if an internal function fails, SUCCESS otherwise.
+  */
     // FIXME: The default target type needs to be set to a PROC clock card.
     ClockResolution( TARGETING::TargetHandle_t i_pTargetHandle = NULL,
                          TARGETING::TYPE i_targetType = TARGETING::TYPE_PROC ) :
-        iv_ptargetClock(i_pTargetHandle),
-        iv_targetType(i_targetType)
-    {}
+                         iv_ptargetClock( i_pTargetHandle ),
+                         iv_targetType( i_targetType )
+    { }
 
   /**
-   Resolve by adding a the MRU callout to the service data collector
-   <ul>
-   <br><b>Parameters:  </b> ServiceDataCollector
-   <br><b>Returns:     </b> Return code [SUCCESS | nonZero]
-   <br><b>Requirements:</b> none.
-   <br><b>Promises:    </b> serviceData::GetMruList().GetCount()++
-   serviceData::QueryDump() == this callout
-   <br><b>Exceptions:  </b> None.
-   </ul><br>
-   */
-  virtual int32_t Resolve(STEP_CODE_DATA_STRUCT & data);
+   * @brief     Resolve by adding MRU callout to the service data collector
+   * @param[io] io_data Reference to STEP_CODE_DATA_STRUCT
+   * @return    Non-SUCCESS if an internal function fails, SUCCESS otherwise
+  */
+  virtual int32_t Resolve( STEP_CODE_DATA_STRUCT & io_data );
 
   /*
    * base class defines operator== so one is needed here
@@ -94,7 +83,8 @@ public:
    */
   bool operator==(const ClockResolution & r) const
   {
-    return ((iv_ptargetClock == r.iv_ptargetClock) && (iv_targetType == r.iv_targetType));
+    return ( ( iv_ptargetClock == r.iv_ptargetClock ) &&
+             ( iv_targetType == r.iv_targetType ) );
   }
 
 private:  // functions

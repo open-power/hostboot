@@ -127,7 +127,7 @@ inline TARGETING::TargetHandle_t buffer_getTarget( const uint8_t *&ptr )
     return l_tempChipHandle;
 }
 
-#endif  //ifndef__HOSTBOOT_MODULE
+#endif // ifndef __HOSTBOOT_MODULE
 
 //------------------------------------------------------------------------------
 
@@ -193,6 +193,18 @@ void ServiceDataCollector::AddSignatureList(TARGETING::TargetHandle_t i_pTargetH
     }
 }
 
+//------------------------------------------------------------------------------
+
+TARGETING::TargetHandle_t ServiceDataCollector::getTargetAnalyzed( )
+{
+    ExtensibleChip * l_pChipAnalyzed = getChipAnalyzed();
+    TARGETING::TargetHandle_t l_pTargetAnalyzed = NULL;
+    if( NULL != l_pChipAnalyzed )
+    {
+         l_pTargetAnalyzed = l_pChipAnalyzed->GetChipHandle( );
+    }
+    return  l_pTargetAnalyzed ;
+}
 //------------------------------------------------------------------------------
 
 #ifndef __HOSTBOOT_MODULE
@@ -386,8 +398,8 @@ void ServiceDataCollector::AddChangeForHcdb(TARGETING::TargetHandle_t i_pTargetH
                                                     i_compType) );
     }
 }
-
-#endif // ifndef __HOSTBOOT_MODULE
+#endif // #ifndef __HOSTBOOT_MODULE
+//------------------------------------------------------------------------------
 
 } // end namespace PRDF
 

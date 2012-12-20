@@ -286,11 +286,11 @@ void FlyWeightS<T,S>::increaseSize()
 
 };
 
-#ifdef __MEM_PROFILING
+#ifdef FLYWEIGHT_PROFILING
+
 template < class T , uint32_t S >
 void FlyWeightS<T,S>::printStats(void)
 {
-  using namespace std;
   PRDF_DTRAC( "no. of elements %d  Flyweight size %d",
             iv_heaps.size()*S,(iv_heaps.size() * sizeof(T) * S) );
 }

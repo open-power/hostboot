@@ -44,28 +44,16 @@
 
 #ifndef PRDF_SDC_FLAGS_MAP_ONLY
 
-#if !defined(ErrorSignature_h)
 #include <prdfErrorSignature.H>
-#endif
-
-#if !defined(iipCaptureData_h)
 #include <iipCaptureData.h>
-#endif
-
 #include <vector>
 #include <time.h>
-
 #include <prdfCallouts.H>
 #include <prdfMain.H>
-
 #if !defined(PRDFTIMER_H) // dg08
 #include <prdfTimer.H>    // dg08
 #endif                    // dg08
-
-#if !defined(xspprdGardResolution_h)
 #include <xspprdGardResolution.h>     // for ErrorType
-#endif
-
 #include <prdfAssert.h>
 #if( !defined(CONTEXT_x86_nfp) && !defined(_NFP) ) //only for ppc context (@54)
 #include <prdfPlatServices.H>
@@ -945,6 +933,7 @@ private:  // Data
   //of std:list
   static std::list< ExtensibleChip *> cv_ruleChipStack ;
 public:
+
   /**
    * @brief   get the rulechip  under analysis
    * @param   None
@@ -981,6 +970,15 @@ public:
   {
       cv_ruleChipStack.clear();
   }
+
+  /**
+   * @brief       get Target pointer pertaining to RuleChip under analysis
+   * @return      target pointer
+   * @note        Should be called only in Analyze leg of code
+   */
+
+   static TARGETING::TargetHandle_t  getTargetAnalyzed( );
+
 // --------------------------------------
 // FSP only functions begin
 // --------------------------------------

@@ -26,6 +26,7 @@
 
 #include <stdint.h>
 #include <vector>
+#include <iipglobl.h>
 
 namespace PRDF
 {
@@ -45,9 +46,13 @@ class FlyWeightS
         T & get(const T & key);
 
         //void print();
-#ifdef __MEM_PROFILING
+#ifdef FLYWEIGHT_PROFILING
+        /**
+         * @brief   prints the memory occupied by objects in flyweight.
+         */
 
         void printStats();
+
 #endif
 
     private:

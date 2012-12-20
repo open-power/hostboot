@@ -141,12 +141,14 @@ System * PegasusConfigurator::build()
     Configurator::domainList & domains = getDomainList();
     l_system->AddDomains( domains.begin(), domains.end() );
 
-#ifdef __MEM_PROFILING
+#ifdef FLYWEIGHT_PROFILING
 
     ScanFacility      & scanFac = ScanFacility::Access();
-    PRDF_DTRAC( "printing flyweight size ");
+    PRDF_TRAC( "printing flyweight register and resolution objects ");
     scanFac.printStats();
-    PRDF_DTRAC("total chips in the system %d ",chips.size());
+    PRDF_TRAC("total chips in the system %d ",chips.size());
+    ResolutionFactory & resol = ResolutionFactory::Access( );
+    resol.printStats();
 #endif
 
     PRDF_EXIT( "PegasusConfigurator::build()" );

@@ -49,10 +49,7 @@
 //--------------------------------------------------------------------
 
 #include <prdfCallouts.H>
-
-#if !defined(iipResolution_h)
 #include <iipResolution.h>
-#endif
 
 namespace PRDF
 {
@@ -81,7 +78,7 @@ public:
    <br><b>Exceptions:  </b> None.
    </ul><br>
    */
-  CalloutResolution(PRDF::PRDcallout callout, PRDF::PRDpriority priority);
+  CalloutResolution(PRDcallout callout, PRDpriority priority);
   CalloutResolution(void);    // default
   CalloutResolution(const CalloutResolution & cr);
 
@@ -131,15 +128,15 @@ public:
 private:  // functions
 private:  // Data
 
-  PRDF::PRDcallout xMruCallout;
-  PRDF::PRDpriority xPriority;
+ PRDcallout xMruCallout;
+ PRDpriority xPriority;
 
 };
 
 
 inline
-CalloutResolution::CalloutResolution(PRDF::PRDcallout callout,
-                                     PRDF::PRDpriority priority)
+CalloutResolution::CalloutResolution(PRDcallout callout,
+                                     PRDpriority priority)
 : xMruCallout(callout), xPriority(priority)
 {}
 

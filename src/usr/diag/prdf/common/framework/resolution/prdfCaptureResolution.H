@@ -34,7 +34,7 @@ namespace PRDF
 class CaptureResolution : public Resolution
 {
     public:
-        CaptureResolution() : iv_chip(NULL), iv_captureGroup(0) {};
+        CaptureResolution() :iv_captureGroup(0) {};
 
         /** @fn CaptureResolution
          *  @brief Typical constructor.
@@ -42,27 +42,24 @@ class CaptureResolution : public Resolution
          *  @param i_chip - Extensible chip object to capture from.
          *  @param i_group - Capture-group to gather.
          */
-        CaptureResolution(ExtensibleChip * i_chip,
-                              uint32_t i_captureGroup)
-                                    : iv_chip(i_chip),
-                                      iv_captureGroup(i_captureGroup) {};
+        CaptureResolution( uint32_t i_captureGroup ) :
+                        iv_captureGroup(i_captureGroup) {};
 
-        /** @fn Resolve
-         *  @brief Perform capture.
+        /** @brief      Perform capture.
+         *  @param[io]  io_serviceData Reference to STEP_CODE_DATA_STRUCT
+         *  @return     SUCCESS| FAIL
          */
-        virtual int32_t Resolve(STEP_CODE_DATA_STRUCT & i_error);
+        virtual int32_t Resolve( STEP_CODE_DATA_STRUCT & io_serviceData );
 
         /**
          *  Comparison operator to aid in ResolutionFactory.
          */
-        bool operator==(const CaptureResolution & i_rhs)
-                { return ((iv_chip == i_rhs.iv_chip) &&
-                          (iv_captureGroup == i_rhs.iv_captureGroup));
-                };
+        bool operator == ( const CaptureResolution & i_rhs )
+        {
+            return ( iv_captureGroup == i_rhs.iv_captureGroup );
+        };
     private:
 
-            /** The chip to capture from */
-        ExtensibleChip * iv_chip;
             /** The group id to capture */
         uint32_t iv_captureGroup;
 

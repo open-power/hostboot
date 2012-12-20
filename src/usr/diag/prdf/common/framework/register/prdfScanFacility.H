@@ -195,7 +195,10 @@ public:
    * exist.
    */
   void ResetPluginRegister();
-#ifdef __MEM_PROFILING
+#ifdef FLYWEIGHT_PROFILING
+/**
+ * @brief       prints memory allocated for object residing on flyweight
+ */
   void printStats();
 #endif
 

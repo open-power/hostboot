@@ -50,23 +50,12 @@
 // Includes
 //--------------------------------------------------------------------
 
-#if !defined(IIPCONST_H)
 #include <iipconst.h>
-#endif
-
-#if !defined(PRDFFLYWEIGHT_H)                                // dg01
+#include <iipglobl.h>
 #include <prdfFlyWeight.H>                                   // dg01
 #include <prdfFlyWeightS.H>
-#endif                                                       // dg01
-
-#if !defined(iipCalloutResolution_h)
 #include <iipCalloutResolution.h>
-#endif
-
-#if !defined(PRDFTHRESHOLDRESOLUTIONS_H)                    // dg02a
 #include <prdfThresholdResolutions.H>                       // dg02a
-#endif                                                      // dg02a
-
 #include <prdfCalloutConnected.H>                           // dg04a
 #include <prdfAnalyzeConnected.H>                           // dg05a
 #include <prdfPluginCallResolution.H>                       // dg06a
@@ -95,190 +84,186 @@ class ResolutionFactory
 public:
 
   /**
-   Access the ResolutionFactory singleton
-   <ul>
-   <br><b>Parameters:  </b> None.
-   <br><b>Returns:     </b> Resolution factory
-   <br><b>Requirements:</b> None.
-   <br><b>Promises:    </b> Object created if it does not already exist
-   <br><b>Exceptions:  </b> None.
-   </ul><br>
+   * @brief         Accesses the ResolutionFactory singleton
+   * @return        Resolution factory
    */
   static ResolutionFactory & Access(void);
 
   /**
-   DTOR
-   <ul>
-   <br><b>Requirements:</b> None.
-   <br><b>Promises:    </b> Resources released
-   <br><b>Exceptions:  </b> None.
-   </ul><br>
+   * @brief         Destructor
    */
   ~ResolutionFactory();
 
 
   // dg03a start
   /**
-   Reset after a re-ipl
-   Clear the resolution lists that need clearing on a re-ipl
-   @note currently clears the threshold resolution list and the link resolution list
+   * @brief         Reset after a re-ipl
+   *                Clear the resolution lists that need clearing on a re-ipl
+   * @note          currently clears the threshold resolution list and the link
+   *                resolution list
    */
   void Reset();
   // dg03a end
 
   /**
-   Get a resolution that makes a callout
-   <ul>
-   <br><b>Parameter:   </b> PRDcallout  (see prdfCallouts.H)
-   <br><b>Parameter:   </b> PRDpriority (see prdfCallouts.H)
-   <br><b>Returns:     </b> Resolution &
-   <br><b>Requirements:</b> None.
-   <br><b>Promises:    </b> If a resolution does not exist for this MruCallout
-                            then one is created.
-   <br><b>Exceptions:  </b> None.
-   <br><b>Note:        </b> Regatta CSP use only
-   <br><b>Note:        </b> Do not call this method from a static object
-   </ul><br>
+   * @brief         Get a resolution that makes a callout
+   * @param [in]    PRDcallout  (see prdfCallouts.H)
+   * @param [in]    PRDpriority (see prdfCallouts.H)
+   * @return        Resolution &
+   * @note          Regatta CSP use only. Do not call this method from a static
+   *                object.
    */
   Resolution & GetCalloutResolution( PRDcallout callout,
                                      PRDpriority p = PRDF::MRU_MED);
 
   /**
-   Get a threshold Resolution
-   @param Mask id to set when threshold is reached
-   @param policy (theshold value & time interval) during normal runtime (default is ???)
-   @param mfgPolicy for manufactoring mode  (default is threshold one, infinate interval)
-   @return reference to a resolution
-   @pre None
-   @post appropriate Resolution created.
-   @note the iv_thresholdResoltion FlyWeight is cleared by this->Reset()
+   * @brief         Get a threshold Resolution
+   * @param[in]     maskId      MaskId to set when threshold is reached
+   * @param[in]     policy      policy during normal runtime
+   * @param[in]     mfgPolicy   policy for manufactoring mode ( default is
+   *                            threshold one,infinate interval )
+   * @return        reference to a resolution
+   * @post          appropriate Resolution created.
+   * @note          the iv_thresholdResoltion FlyWeight is cleared by
+   *                this->Reset()
    */
   MaskResolution & GetThresholdResolution(uint32_t maskId,
-                                      const ThresholdResolution::ThresholdPolicy& policy,
-                                      const ThresholdResolution::ThresholdPolicy& mfgPolicy);
+                    const ThresholdResolution::ThresholdPolicy& policy,
+                    const ThresholdResolution::ThresholdPolicy& mfgPolicy);
 
   MaskResolution & GetThresholdResolution(uint32_t maskId,
-                                      const ThresholdResolution::ThresholdPolicy& policy);
+                    const ThresholdResolution::ThresholdPolicy& policy);
 
   MaskResolution & GetThresholdResolution(uint32_t maskId);
   MaskResolution & GetThresholdResolution(uint32_t maskId,
-                                      const ThresholdResolution::ThresholdPolicy* policy);
+                            const ThresholdResolution::ThresholdPolicy* policy);
 
   // dg04a - start
   /**
-   GetConnectedCalloutResolution
-   @param       i_psourceHandle         handle of connection source
-   @param       i_targetType            Type of target  connected to i_source
-   @param       idx                     index in GetConnected list to use
-   @param       i_priority              @see prdfCallouts.H
-   @param       i_altResolution         to use if the connection does not exist, is not functional, or is invalid.
-                                        If NULL than the connection source is called-out
-   @note Don't use this to callout clocks - use prdfClockResolution
+   * @brief          GetConnectedCalloutResolution
+   * @param[in]      i_targetType Type of target  connected to i_source
+   * @param[in]      idx          index in GetConnected list to use
+   * @param[in]      i_priority   @see prdfCallouts.H
+   * @param[in]      i_altResolution resolution for failure scenarios
+   * @return         reference to a resolution
+   * @note           Don't use this to callout clocks - use prdfClockResolution
    */
-  Resolution & GetConnectedCalloutResolution(TARGETING::TargetHandle_t i_psourceHandle,
-                                             TARGETING::TYPE i_targetType,
-                                             uint32_t i_idx = 0,
-                                             PRDpriority i_priority = MRU_MED,
-                                             Resolution * i_altResolution = NULL);
+  Resolution & GetConnectedCalloutResolution(
+                                        TARGETING::TYPE i_targetType,
+                                        uint32_t i_idx = 0,
+                                        PRDpriority i_priority = MRU_MED,
+                                        Resolution * i_altResolution = NULL );
   // dg04a - end
 
   // dg05a - start
   /**
-   * GetAnalyzeConnectedResoltuion
-   * @param     i_psourceHandle             handle of connection source
-   * @param     i_targetType                type of  desired unit that's connected to the source
-   * @param     i_dx                        index in GetConnected list to analyze
+   * @brief     GetAnalyzeConnectedResoltuion
+   * @param[in] i_targetType type of unit that's connected to the source
+   * @param[in] i_dx         index in GetConnected list to analyze
+   * @return    reference to a resolution
    */
-  Resolution & GetAnalyzeConnectedResolution(TARGETING::TargetHandle_t i_psourceHandle,
-                                             TARGETING::TYPE i_targetType,
+  Resolution & GetAnalyzeConnectedResolution( TARGETING::TYPE i_targetType,
                                              uint32_t i_idx =0xffffffff );
         // dg05a - end
   // dg06a - start
   /**
-   * Get a PluginCallResolution
-   * @param ptr to ExtensibleChip
-   * @param ptr to ExtensibleFunction
-   * @post one instance with these params will exist
-   * @This flyweight is cleared by this->Reset()
+   * @brief     Returns object of PluginCallResolution
+   * @param[in] i_function pointer to ExtensibleFunction
+   * @return    reference to a resolution
+   * @post      one instance with these params will exist
+   * @note      This flyweight is cleared by this->Reset()
    */
-  Resolution & GetPluginCallResolution(ExtensibleChip * i_chip,
-                                       ExtensibleChipFunction * i_function);
+  Resolution & GetPluginCallResolution( ExtensibleChipFunction * i_function );
 
   /**
-   * Get a threshold signature resolution
-   * @param policy (either enum or uint32_t)
-   * @post one instance with this policy will exist
-   * @this flyweight is cleared by this->Reset()
+   * @brief     Get a threshold signature resolution
+   * @param[in] i_policy Reference to ThresholdPolicy struct
+   * @return    reference to a resolution
+   * @post      one instance with this policy will exist
+   * @note      This flyweight is cleared by this->Reset()
    */
-  Resolution & GetThresholdSigResolution(const ThresholdResolution::ThresholdPolicy& policy);
+  Resolution & GetThresholdSigResolution( const ThresholdResolution::
+                                            ThresholdPolicy& i_policy );
 
 
   /**
-   * Get an EregResolution
-   * @param Error register
-   * @post one instance with the param will exist
-   * @note the error register provided must remain in scope as long as the Resolution Factory
-   * @note This Flyweight is cleared by this->Reset()
+   * @brief     Get an EregResolution
+   * @param[in] i_er    Error register
+   * @return    reference to a resolution
+   * @post      one instance with the param will exist
+   * @note      the error register provided must remain in scope as long as the
+   *            Resolution Factory
+   * @note      This Flyweight is cleared by this->Reset()
    */
-  Resolution & GetEregResolution(ErrorRegisterType & er);
+  Resolution & GetEregResolution(ErrorRegisterType & i_er);
 
   /**
-   * Get a TryResolution
-   * @param Resolution to try
-   * @param Resolution to use if the first one returns a non-zero return code
-   * @post one instance with these params will exist
-   * @note The resolutions provided mus remain in scope as long as the Resolution Factory
-   * @note This Flyweight is cleared by this->Reset()
+   * @brief     Get a TryResolution
+   * @param[in] i_tryRes    Resolution to try
+   * @param[in] i_defaultRes    Resolution to use if the first one returns a
+   *                            non-zero return code
+   * @return    reference to a resolution
+   * @post      one instance with these params will exist
+   * @note      The resolutions provided must remain in scope as long as the
+   *            Resolution Factory
+   * @note      This Flyweight is cleared by this->Reset()
    */
-  Resolution & GetTryResolution(Resolution &tryRes, Resolution & defaultRes);
+  Resolution & GetTryResolution(Resolution &i_tryRes, Resolution & i_defaultRes);
 
   /**
-   * Get a FlagResolution
-   * @param servicedatacollector::flag
-   * @post only one instance of this object with this param will exist
+   * @brief     Get a FlagResolution
+   * @param[in] i_flag
+   * @return    reference to a resolution
+   * @post      only one instance of this object with this param will exist
    */
-  Resolution & GetFlagResolution(ServiceDataCollector::Flag flag);
+  Resolution & GetFlagResolution(ServiceDataCollector::Flag i_flag);
 
   /**
-   * Get a DumpResolution
-   * @param dump flags
-   * @post only one instance of this obect with these paramaters will exist
+   * @brief     Get a DumpResolution
+   * @param[in] iDumpRequestContent
+   * @return    reference to a resolution
+   * @post      only one instance of this obect with these paramaters will exist
    */
   #ifdef __HOSTBOOT_MODULE
-  Resolution & GetDumpResolution(/* FIXME: hwTableContent iDumpRequestContent = CONTENT_HW,*/
-                                 TARGETING::TargetHandle_t i_pDumpHandle = NULL);
+  Resolution & GetDumpResolution(/* FIXME: hwTableContent
+                                    iDumpRequestContent = CONTENT_HW*/
+                                 );
   #else
-  Resolution & GetDumpResolution(hwTableContent iDumpRequestContent = CONTENT_HW,
-                                 TARGETING::TargetHandle_t i_pDumpHandle = NULL);
-  #endif
+  Resolution & GetDumpResolution( hwTableContent iDumpRequestContent =
+                                    CONTENT_HW );
+
+  #endif    //ifdef __HOSTBOOT_MODULE
 
   /**
-   * Get a Gard Resolution
-   * @param The Gard Flag
-   * @post only one instance of this object with this param will exist
+   * @brief     Get a Gard Resolution
+   * @param[in] i_gardErrorType gard error type
+   * @return    reference to a resolution
+   * @post      only one instance of this object with this param will exist
    */
-  Resolution & GetGardResolution(GardResolution::ErrorType et);
+  Resolution & GetGardResolution( GardResolution::ErrorType i_gardErrorType );
 
   // dg06a - end
 
   /**
-   * Get a Capture Resolution
-   * @param i_chip - The extensible chip to capture from.
-   * @param i_group - The group to capture.
-   * @post only one instance of this object with this param will exist
+   * @brief     Get a Capture Resolution
+   * @param[in] i_group  The group to capture.
+   * @return    reference to a resolution
+   * @post      only one instance of this object with this param will exist
    */
-  Resolution & GetCaptureResolution(ExtensibleChip * i_chip,
-                                    uint32_t i_group);
+  Resolution & GetCaptureResolution( int32_t i_group );
 
     /**
-   * Get a ClockResolution
-   * @param
-   * @post only one instance of this obect with these paramaters will exist
+   * @brief     Get a ClockResolution
+   * @param[in] i_pClockHandle Target pointer pertaining to clock
+   * @param[in] i_targetType   desired Targets type connected to clock
+   * @return    reference to a resolution
+   * @post      only one instance of this obect with these paramaters will exist
    */
   // FIXME: Need support for clock targets
   // FIXME: Need support for clock targets types
-  Resolution & GetClockResolution(TARGETING::TargetHandle_t i_pClockHandle =NULL,
-                                  TARGETING::TYPE i_targetType = TARGETING::TYPE_PROC);                                                                                        //should be repla
+  Resolution & GetClockResolution(
+                    TARGETING::TargetHandle_t i_pClockHandle = NULL ,
+                    TARGETING::TYPE i_targetType = TARGETING::TYPE_PROC );
 /**
    Link resolutions to form a single resolution performing the actions of them all
    <ul>
@@ -384,6 +369,12 @@ public:
     Resolution * xlnk1;
     Resolution * xlnk2;
   };
+#ifdef FLYWEIGHT_PROFILING
+/**
+ * @brief       prints memory allocated for object residing in flyweight
+ */
+  void printStats();
+#endif
 
 private:  // Data
 

@@ -35,6 +35,7 @@
 
 #include <stdint.h>
 #include <vector>
+#include <iipglobl.h>
 
 //--------------------------------------------------------------------
 //  Forward References
@@ -43,27 +44,6 @@
 //
 namespace PRDF
 {
-#if defined(ESW_SIM_COMPILE)
-class FlyWeightBase
-{
-  public:
-    FlyWeightBase() { cv_fwlist.push_back(this); }
-    virtual ~FlyWeightBase() {}
-    virtual void printStats(void) = 0;
-
-    static void report(void)
-    {
-      for(FlyWeightList::iterator i = cv_fwlist.begin(); i != cv_fwlist.end(); ++i)
-      {
-        (*i)->printStats();
-      }
-    }
-
-    typedef std::vector<FlyWeightBase *> FlyWeightList;
-    static FlyWeightList cv_fwlist;
-};
-#endif
-
 /**
     **One line Class description**
     @author Doug Gilbert
@@ -74,9 +54,6 @@ class FlyWeightBase
 */
 template <class T, uint32_t S>
 class FlyWeight
-#if defined(ESW_SIM_COMPILE)
- : public FlyWeightBase
-#endif
 {
 public:
   /**
@@ -113,8 +90,13 @@ public:
    */
   T & get(const T & key);
 
-#if defined(ESW_SIM_COMPILE)
+#ifdef  FLYWEIGHT_PROFILING
+  /**
+   * @brief   prints the memory occupied by objects in flyweight.
+   */
+
   virtual void printStats(void);
+
 #endif
 
 private:  // functions

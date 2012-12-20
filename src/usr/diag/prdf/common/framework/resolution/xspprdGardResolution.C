@@ -63,10 +63,10 @@
 namespace PRDF
 {
 
-int32_t GardResolution::Resolve(STEP_CODE_DATA_STRUCT & error)
+int32_t GardResolution::Resolve( STEP_CODE_DATA_STRUCT & io_serviceData )
 {
-  error.service_data->Gard(xErrorType);
-  return SUCCESS;
+    io_serviceData.service_data->Gard( xErrorType );
+    return SUCCESS;
 }
 
 } // end namespace PRDF

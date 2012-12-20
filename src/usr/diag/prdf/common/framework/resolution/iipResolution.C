@@ -53,7 +53,6 @@
 #include <prdfCalloutConnected.H>
 #include <prdfAnalyzeConnected.H>
 #include <prdfPlatServices.H>
-
 #undef iipResolution_C
 
 namespace PRDF
@@ -88,12 +87,12 @@ Resolution::~Resolution() {}
 // EregResolution Member Function Specifications
 //---------------------------------------------------------------------
 
-int32_t EregResolution::Resolve(STEP_CODE_DATA_STRUCT & data)
+int32_t EregResolution::Resolve( STEP_CODE_DATA_STRUCT & io_data )
 {
     int32_t rc = PRD_INTERNAL_CODE_ERROR;
-    if(errorRegister != NULL)
+    if( errorRegister != NULL )
     {
-        rc = errorRegister->Analyze(data);
+        rc = errorRegister->Analyze( io_data );
     }
     return rc;
 }
@@ -104,9 +103,32 @@ int32_t EregResolution::Resolve(STEP_CODE_DATA_STRUCT & data)
 // using MruValues (xspiiCallout.h)
 //---------------------------------------------------------------------
 
-int32_t CalloutResolution::Resolve(STEP_CODE_DATA_STRUCT & error)
+int32_t CalloutResolution::Resolve( STEP_CODE_DATA_STRUCT & io_serviceData )
 {
-    error.service_data->SetCallout(xMruCallout,xPriority);
+    /*
+    This resolution is only needed when we callout self.So during RuleChip
+    creation,we create CalloutResolution passing NULL as target value.In Resolve
+    function when we need to update SDC with target to be called out we get it
+    from Service Data Collector.It is because target currently under analysis is
+    the target that needs to be called out here.By instantiating Callout
+    resolution with just priority info and NULL target , we are able to reduce
+    CalloutResolution objects to one per priority instead of one per target per
+    priority.So,this reduction in number of resolution objects shall eventually
+    reduce memory utilization.
+    */
+
+    if( PRDcallout::TYPE_TARGET == xMruCallout.getType( ) )
+    {
+        PRDcallout l_targetCallout(
+                            ServiceDataCollector::getTargetAnalyzed( ) );
+
+        io_serviceData.service_data->SetCallout( l_targetCallout ,xPriority );
+    }
+    else
+    {
+        io_serviceData.service_data->SetCallout( xMruCallout,xPriority );
+    }
+
     return(SUCCESS);
 }
 
@@ -114,7 +136,7 @@ int32_t CalloutResolution::Resolve(STEP_CODE_DATA_STRUCT & error)
 // ResolutionList Member Functions
 //--------------------------------------------------------------------
 
-int32_t ResolutionList::Resolve(STEP_CODE_DATA_STRUCT & error)
+int32_t ResolutionList::Resolve( STEP_CODE_DATA_STRUCT & io_serviceData )
 {
     int32_t rc = SUCCESS;
     for(std::vector<void *>::iterator iter = resolutionList.begin();
@@ -122,8 +144,8 @@ int32_t ResolutionList::Resolve(STEP_CODE_DATA_STRUCT & error)
         ++iter)
     {
         Resolution * r = (Resolution *) *iter;
-        rc = r->Resolve(error);
-        if(rc != SUCCESS) break;
+        rc = r->Resolve( io_serviceData );
+        if( rc != SUCCESS ) break;
     }
     return(rc);
 }
@@ -149,16 +171,17 @@ int32_t ResolutionList::Resolve(STEP_CODE_DATA_STRUCT & error)
 //--------------------------------------------------------------------
 // Call all chips raising attention as reported by sp sysdebug area
 //--------------------------------------------------------------------
-int32_t CallAttnResolution::Resolve(STEP_CODE_DATA_STRUCT & error)
+int32_t CallAttnResolution::Resolve( STEP_CODE_DATA_STRUCT & io_serviceData )
 {
     int32_t rc = NO_DOMAINS_AT_ATTENTION;
     SYSTEM_DEBUG_CLASS systemDebug;
 
-    ErrorSignature * signature = error.service_data->GetErrorSignature();
+    ErrorSignature * signature =
+                        io_serviceData.service_data->GetErrorSignature();
     signature->clear();
     signature->setChipId(0xffffffff);
 
-    systemDebug.CalloutThoseAtAttention(error);
+    systemDebug.CalloutThoseAtAttention( io_serviceData );
 
     signature->setErrCode((uint16_t)NO_PRD_ANALYSIS);
 
@@ -167,60 +190,64 @@ int32_t CallAttnResolution::Resolve(STEP_CODE_DATA_STRUCT & error)
 
 // ********************************************************************
 
-int32_t TerminateResolution::Resolve(STEP_CODE_DATA_STRUCT & error)
+int32_t TerminateResolution::Resolve( STEP_CODE_DATA_STRUCT & io_serviceData )
 {
-    error.service_data->SetTerminate();
+    io_serviceData.service_data->SetTerminate();
     return(SUCCESS);
 }
 
 // ********************************************************************
 
-int32_t AnalyzeChipResolution::Resolve(STEP_CODE_DATA_STRUCT & error)
+int32_t AnalyzeChipResolution::Resolve( STEP_CODE_DATA_STRUCT & io_serviceData )
 {
     // mk442956 a
-    return xChip.Analyze(error,error.service_data->GetCauseAttentionType());
+    return xChip.Analyze( io_serviceData,
+                          io_serviceData.service_data->GetCauseAttentionType() );
 }
 
 // ********************************************************************
 
-int32_t TryResolution::Resolve(STEP_CODE_DATA_STRUCT & error)
+int32_t TryResolution::Resolve( STEP_CODE_DATA_STRUCT & io_serviceData )
 {
     // Save the current error signature
-    ErrorSignature * es = error.service_data->GetErrorSignature();
+    ErrorSignature * es = io_serviceData.service_data->GetErrorSignature();
     ErrorSignature temp = *es;
     // Try the tryResolution
-    int32_t rc = xTryResolution->Resolve(error);
+    int32_t rc = xTryResolution->Resolve( io_serviceData  );
     if ( (SUCCESS != rc) && (PRD_NO_CLEAR_FIR_BITS != rc) ) // if it didn't work
     {
         // Restore signature
         *es = temp;
         // Call the default signature
-        rc = xDefaultResolution->Resolve(error);
+        rc = xDefaultResolution->Resolve( io_serviceData );
     }
     return rc;
 }
 
-int32_t CalloutConnected::Resolve(STEP_CODE_DATA_STRUCT & serviceData)
+int32_t CalloutConnected::Resolve( STEP_CODE_DATA_STRUCT & io_serviceData )
 {
     using namespace TARGETING;
 
     TargetHandle_t l_pconnectedTarget = NULL;
+    TARGETING::TargetHandle_t l_psourceTarget =
+                            ServiceDataCollector::getTargetAnalyzed( ) ;
     TargetHandleList l_connectedTargetList;
-    l_connectedTargetList = PlatServices::getConnected( iv_psourceHandle,
+    l_connectedTargetList = PlatServices::getConnected( l_psourceTarget,
                                                         iv_targetType );
-    if(0xffffffff == iv_idx)
+    if( 0xffffffff == iv_idx )
     {
-        if(l_connectedTargetList.size()>0)
+        if( l_connectedTargetList.size()>0 )
         {
             l_pconnectedTarget = l_connectedTargetList[0];
         }
     }
     else
     {
-        for(TargetHandleList::iterator itrTarget = l_connectedTargetList.begin();
-            itrTarget!= l_connectedTargetList.end();itrTarget++)
+        for( TargetHandleList::iterator itrTarget =
+            l_connectedTargetList.begin();
+            itrTarget!= l_connectedTargetList.end();itrTarget++ )
         {
-            if(iv_idx == PlatServices::getTargetPosition(*itrTarget))
+            if( iv_idx == PlatServices::getTargetPosition( *itrTarget ) )
             {
                 l_pconnectedTarget = *itrTarget ;
                 break;
@@ -230,17 +257,18 @@ int32_t CalloutConnected::Resolve(STEP_CODE_DATA_STRUCT & serviceData)
 
     if ( l_pconnectedTarget != NULL )
     {
-        serviceData.service_data->SetCallout(l_pconnectedTarget,iv_priority);
+        io_serviceData.service_data->SetCallout( l_pconnectedTarget,
+                                                 iv_priority );
     }
     else
     {
         if(iv_altResolution != NULL)
         {
-            iv_altResolution->Resolve(serviceData);
+            iv_altResolution->Resolve( io_serviceData );
         }
         else
         {
-            serviceData.service_data->SetCallout(iv_psourceHandle);
+            io_serviceData.service_data->SetCallout( l_psourceTarget );
         }
     }
 
@@ -250,22 +278,23 @@ int32_t CalloutConnected::Resolve(STEP_CODE_DATA_STRUCT & serviceData)
 //--------------------------------------------------------------------
 // AnalyzeConnected Member Functions
 //--------------------------------------------------------------------
-int32_t AnalyzeConnected::Resolve(STEP_CODE_DATA_STRUCT & serviceData)
+int32_t AnalyzeConnected::Resolve( STEP_CODE_DATA_STRUCT & io_serviceData )
 {
     using namespace TARGETING;
 
     CHIP_CLASS * l_connChipObj = NULL;
     TARGETING::TargetHandle_t l_pconnChipTarget = NULL;
-
+    TARGETING::TargetHandle_t l_psourceHandle =
+                            ServiceDataCollector::getTargetAnalyzed( ) ;
     // Get connected list.
     TargetHandleList l_connectedTargetList = PlatServices::getConnected(
-                                                            iv_psourceHandle,
+                                                            l_psourceHandle,
                                                             iv_targetType );
 
     // If ID = 0xffffffff, find first valid.
-    if (0xffffffff == iv_idx)
+    if ( 0xffffffff == iv_idx )
     {
-        if(l_connectedTargetList.size()>0)
+        if( l_connectedTargetList.size()>0 )
         {
             //First valid handle. we don't allow invalid things in list
             l_pconnChipTarget = l_connectedTargetList[0] ;
@@ -274,10 +303,11 @@ int32_t AnalyzeConnected::Resolve(STEP_CODE_DATA_STRUCT & serviceData)
     // Otherwise, grab from correct index.
     else
     {
-        for(TargetHandleList::iterator itrTarget = l_connectedTargetList.begin();
-            itrTarget!= l_connectedTargetList.end();itrTarget++)
+        for( TargetHandleList::iterator itrTarget =
+            l_connectedTargetList.begin();
+            itrTarget!= l_connectedTargetList.end();itrTarget++ )
         {
-            if(iv_idx == PlatServices::getTargetPosition(*itrTarget))
+            if( iv_idx == PlatServices::getTargetPosition( *itrTarget ) )
             {
                 l_pconnChipTarget = *itrTarget ;
                 break;
@@ -287,15 +317,15 @@ int32_t AnalyzeConnected::Resolve(STEP_CODE_DATA_STRUCT & serviceData)
     }
 
     // If valid chip found, look up in global system container.
-    if (NULL != l_pconnChipTarget)
+    if ( NULL != l_pconnChipTarget )
     {
-        l_connChipObj = systemPtr->GetChip(l_pconnChipTarget);
+        l_connChipObj = systemPtr->GetChip( l_pconnChipTarget );
     }
 
     // Analyze chip.
     if (NULL != l_connChipObj)
-        return l_connChipObj->Analyze( serviceData,
-                            serviceData.service_data->GetCauseAttentionType() );
+        return l_connChipObj->Analyze( io_serviceData,
+                        io_serviceData.service_data->GetCauseAttentionType() );
     else
         return PRD_UNRESOLVED_CHIP_CONNECTION;
 }

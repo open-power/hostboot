@@ -104,7 +104,7 @@ uint32_t ScomRegister::Read( )
     readCache( l_readStat );
     if( false == l_readStat )
     {
-        //updating cache by reading hardware .So that next read  need not access
+        //updating cache by reading hardware .So next read  need not access
         //hardware
         rc = ForceRead();
     }

@@ -36,9 +36,7 @@
 //--------------------------------------------------------------------
 // Includes
 //--------------------------------------------------------------------
-#if !defined(iipResolution_h)
 #include <iipResolution.h>
-#endif
 
 #ifndef __HOSTBOOT_MODULE
 
@@ -64,25 +62,16 @@ class DumpResolution : public Resolution
 {
 public:
   /**
-   Constructor
-   <ul>
-   <br><b>Parameters:  </b> Optional: Processor handle value
-   <br><b>Returns:     </b> Nothing
-   <br><b>Requirements:</b> None
-   <br><b>Promises:    </b> Object created
-   <br><b>Exceptions:  </b> None
-   <br><b>Notes:       </b>
-   </ul><br>
+   * @brief     Constructor
+   * @param[in] iDumpRequestContent
+   * @return    Non-SUCCESS in internal function fails, SUCCESS otherwise.
    */
   #ifdef __HOSTBOOT_MODULE
-  DumpResolution(/*FIXME: hwTableContent iDumpRequestContent = CONTENT_HW, */
-                 TARGETING::TargetHandle_t i_pdumpHandle =NULL ) :
+  DumpResolution(/*FIXME: hwTableContent iDumpRequestContent = CONTENT_HW, */)
   #else
-  DumpResolution(hwTableContent iDumpRequestContent = CONTENT_HW,
-                 TARGETING::TargetHandle_t i_pdumpHandle =NULL ) :
-  ivDumpContent(iDumpRequestContent),
+  DumpResolution( hwTableContent iDumpRequestContent = CONTENT_HW )
+    : ivDumpContent( iDumpRequestContent )
   #endif
-  iv_pdumpHandle(i_pdumpHandle)
   {}
 
   /*
@@ -99,17 +88,11 @@ public:
   //  ~xspprdDumpResolution();
 
   /**
-   Resolve by adding a the MRU callout to the service data collector
-   <ul>
-   <br><b>Parameters:  </b> ServiceDataCollector
-   <br><b>Returns:     </b> Return code [SUCCESS | nonZero]
-   <br><b>Requirements:</b> none.
-   <br><b>Promises:    </b> serviceData::GetMruList().GetCount()++
-   serviceData::QueryDump() == this callout
-   <br><b>Exceptions:  </b> None.
-   </ul><br>
+   * @brief     updates  the dump flag in service data collector
+   * @param[io] io_serviceData Reference to STEP_CODE_DATA_STRUCT
+   * @return    Non-SUCCESS in internal function fails, SUCCESS otherwise.
    */
-  virtual int32_t Resolve(STEP_CODE_DATA_STRUCT & error);
+  virtual int32_t Resolve( STEP_CODE_DATA_STRUCT & io_serviceData );
 
 #ifndef __HOSTBOOT_MODULE
 
@@ -117,10 +100,9 @@ public:
    * base class defines operator== so one is needed here
    * or the base class version will be used (bad)
    */
-  bool operator==(const DumpResolution & r) const
+  bool operator == (const DumpResolution & r) const
   {
-    return ( (ivDumpContent  == r.ivDumpContent) &&
-             (iv_pdumpHandle == r.iv_pdumpHandle) );
+    return ( ivDumpContent  == r.ivDumpContent );
   }
 
 #endif
@@ -132,7 +114,6 @@ private:  // Data
   hwTableContent ivDumpContent;
   #endif
 
-  TARGETING:: TargetHandle_t iv_pdumpHandle;
 };
 
 } // end namespace PRDF

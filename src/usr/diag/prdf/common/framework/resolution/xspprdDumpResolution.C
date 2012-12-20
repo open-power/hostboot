@@ -44,17 +44,23 @@ namespace PRDF
 // Member Function Specifications
 //---------------------------------------------------------------------
 
-int32_t DumpResolution::Resolve(STEP_CODE_DATA_STRUCT & error)
+int32_t DumpResolution::Resolve( STEP_CODE_DATA_STRUCT & io_serviceData )
 {
-  uint32_t rc = SUCCESS;
+    uint32_t rc = SUCCESS;
+    TARGETING::TargetHandle_t l_ptarget =
+                            ServiceDataCollector::getTargetAnalyzed( );
 
-  #ifdef __HOSTBOOT_MODULE
-  error.service_data->SetDump(/*FIXME: ivDumpContent,*/ iv_pdumpHandle);
-  #else
-  error.service_data->SetDump(ivDumpContent,iv_pdumpHandle);
-  #endif
+    #ifdef __HOSTBOOT_MODULE
 
-  return rc;
+    io_serviceData.service_data->SetDump(/*FIXME: ivDumpContent,*/ l_ptarget );
+
+    #else
+
+    io_serviceData.service_data->SetDump( ivDumpContent,l_ptarget );
+
+    #endif
+
+    return rc;
 }
 
 } // end namespace PRDF

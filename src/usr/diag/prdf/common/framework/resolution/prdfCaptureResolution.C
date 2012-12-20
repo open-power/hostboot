@@ -27,12 +27,15 @@
 namespace PRDF
 {
 
-int32_t CaptureResolution::Resolve(STEP_CODE_DATA_STRUCT & i_error)
+int32_t CaptureResolution::Resolve( STEP_CODE_DATA_STRUCT & io_error )
 {
-    if (NULL != iv_chip)
-        return iv_chip->CaptureErrorData(i_error.service_data->GetCaptureData(),
-                                         iv_captureGroup);
-    return SUCCESS;
+    ExtensibleChip * l_pResolutionChip =
+                                ServiceDataCollector::getChipAnalyzed( );
+    PRDF_ASSERT( NULL != l_pResolutionChip );
+
+    return l_pResolutionChip->CaptureErrorData(
+                                    io_error.service_data->GetCaptureData(),
+                                    iv_captureGroup );
 };
 
 } // end namespace PRDF

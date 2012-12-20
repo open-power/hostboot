@@ -27,48 +27,50 @@
 #include <iipResolution.h>
 #include <prdfExtensibleChip.H>
 #include <prdfPluginDef.H>
-
+#include <iipServiceDataCollector.h>
 namespace PRDF
 {
 
 class PluginCallResolution : public Resolution
 {
     private:
-        ExtensibleChip * iv_chip;
         ExtensibleChipFunction * iv_function;
 
     public:
         PluginCallResolution(void)
-          : iv_chip(NULL), iv_function(NULL) {}
+          : iv_function( NULL ) {}
 
-        PluginCallResolution(ExtensibleChip * i_chip,
-                                 ExtensibleChipFunction * i_function)
-            : iv_chip(i_chip), iv_function(i_function) {};
+        PluginCallResolution( ExtensibleChipFunction * i_function )
+            :iv_function(i_function) {};
 
-        PluginCallResolution & operator=(const PluginCallResolution & r)
+        PluginCallResolution & operator = (const PluginCallResolution & r)
         {
-          iv_chip = r.iv_chip;
           iv_function = r.iv_function;
           return *this;
         }
 
-        bool operator==(const PluginCallResolution & r)
+        bool operator == (const PluginCallResolution & r)
         {
-          return (iv_chip == r.iv_chip)&&(iv_function == r.iv_function);
+          return (iv_function == r.iv_function);
         }
 
         virtual int32_t Resolve(STEP_CODE_DATA_STRUCT & i_error)
+        {
+            if (NULL == iv_function)
             {
-                if ((NULL == iv_chip) || (NULL == iv_function))
-                    return -1;
+                return FAIL;
 
-                return (*iv_function)
-                    (iv_chip,
-                     PluginDef::bindParm<STEP_CODE_DATA_STRUCT&>(i_error)
-                    ); //@pw01
+            }
 
-            };
+            ExtensibleChip * l_pResolutionChip =
+                                    ServiceDataCollector::getChipAnalyzed( );
 
+            PRDF_ASSERT( NULL != l_pResolutionChip );
+
+            return ( *iv_function ) ( l_pResolutionChip, PluginDef::bindParm
+                                        <STEP_CODE_DATA_STRUCT&>( i_error ) );
+
+        };
 };
 
 } // end namespace PRDF
