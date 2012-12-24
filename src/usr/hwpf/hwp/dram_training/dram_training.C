@@ -1,35 +1,31 @@
-/*  IBM_PROLOG_BEGIN_TAG
- *  This is an automatically generated prolog.
- *
- *  $Source: src/usr/hwpf/hwp/dram_training/dram_training.C $
- *
- *  IBM CONFIDENTIAL
- *
- *  COPYRIGHT International Business Machines Corp. 2012
- *
- *  p1
- *
- *  Object Code Only (OCO) source materials
- *  Licensed Internal Code Source Materials
- *  IBM HostBoot Licensed Internal Code
- *
- *  The source code for this program is not published or other-
- *  wise divested of its trade secrets, irrespective of what has
- *  been deposited with the U.S. Copyright Office.
- *
- *  Origin: 30
- *
- *  IBM_PROLOG_END_TAG
- */
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/usr/hwpf/hwp/dram_training/dram_training.C $              */
+/*                                                                        */
+/* IBM CONFIDENTIAL                                                       */
+/*                                                                        */
+/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/*                                                                        */
+/* p1                                                                     */
+/*                                                                        */
+/* Object Code Only (OCO) source materials                                */
+/* Licensed Internal Code Source Materials                                */
+/* IBM HostBoot Licensed Internal Code                                    */
+/*                                                                        */
+/* The source code for this program is not published or otherwise         */
+/* divested of its trade secrets, irrespective of what has been           */
+/* deposited with the U.S. Copyright Office.                              */
+/*                                                                        */
+/* Origin: 30                                                             */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
 /**
  *  @file dram_training.C
  *
  *  Support file for IStep: dram_training
  *   Step 13 DRAM Training
  *
- *  *****************************************************************
- *  THIS FILE WAS GENERATED ON 2012-02-27:2142
- *  *****************************************************************
  *
  *  HWP_IGNORE_VERSION_CHECK
  *
@@ -47,9 +43,9 @@
 #include    <initservice/isteps_trace.H>
 
 //  targeting support
-#include <targeting/common/commontargeting.H>
-#include <targeting/common/util.H>
-#include <targeting/common/utilFilter.H>
+#include    <targeting/common/commontargeting.H>
+#include    <targeting/common/util.H>
+#include    <targeting/common/utilFilter.H>
 
 #include    <hwpisteperror.H>
 #include    <errl/errludtarget.H>
@@ -59,7 +55,7 @@
 #include    <fapiPlatHwpInvoker.H>
 
 //hb vddr support
-#include <hbVddrMsg.H>
+#include    <hbVddrMsg.H>
 
 // Run on all Centaurs/MBAs, but needs to keep this one handy in case we
 // want to limit them in VPO
@@ -68,10 +64,6 @@ const uint8_t VPO_NUM_OF_MBAS_TO_RUN = UNLIMITED_RUN;
 const uint8_t VPO_NUM_OF_MEMBUF_TO_RUN = UNLIMITED_RUN;
 
 //  --  prototype   includes    --
-//  Add any customized routines that you don't want overwritten into
-//      "dram_training_custom.C" and include the prototypes here.
-//  #include    "dram_training_custom.H"
-
 #include    "dram_training.H"
 
 //  Un-comment these files as they become available:
@@ -108,7 +100,7 @@ void*    call_host_disable_vddr( void *io_pArgs )
     if( MBOX::mailbox_enabled() )
     {
         IStepError l_StepError;
-    
+
         HBVddrMsg l_hbVddr;
 
         l_err = l_hbVddr.sendMsg(HBVddrMsg::HB_VDDR_DISABLE);
@@ -135,7 +127,7 @@ void*    call_host_disable_vddr( void *io_pArgs )
                                         l_err );
 
             errlCommit( l_err, HWPF_COMP_ID );
-    
+
         }
         else
         {
@@ -150,14 +142,14 @@ void*    call_host_disable_vddr( void *io_pArgs )
     else
     {
         //no mailbox running so this is a fsp less system.  Right now the istep
-        //only works when a FSP is present.  May add code in the future for 
+        //only works when a FSP is present.  May add code in the future for
         //Stradale which is a FSP-less system
         TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,"call_host_disable_vddr"
                 "no-op because fsp-less");
         TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_host_disable_vddr "
                 "for an fsp less system exit" );
 
-        return l_err;       
+        return l_err;
     }
 
 }
@@ -168,13 +160,17 @@ void*    call_host_disable_vddr( void *io_pArgs )
 void*    call_mem_pll_initf( void *io_pArgs )
 {
     errlHndl_t l_err = NULL;
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mem_pll_initf entry" );
+
+    IStepError l_StepError;
+
+    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mem_pll_initf entry" );
 
     // call cen_mem_pll_initf.C
 
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mem_pll_initf exit" );
+    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mem_pll_initf exit" );
 
-    return l_err;
+    return  l_err;      // remove this when HWP is implemented
+    // return l_StepError.getErrorHandle();
 }
 
 
@@ -187,7 +183,7 @@ void*    call_mem_pll_setup( void *io_pArgs )
 
     IStepError l_StepError;
 
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mem_pll_setup entry" );
+    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mem_pll_setup entry" );
 
     // Get all Centaur targets
     TARGETING::TargetHandleList l_membufTargetList;
@@ -274,9 +270,9 @@ void*    call_mem_pll_setup( void *io_pArgs )
         errlCommit( l_err, HWPF_COMP_ID );
     }
 
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mem_pll_setup exit" );
+    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mem_pll_setup exit" );
 
-    return l_err;
+    return l_StepError.getErrorHandle();
 }
 
 //
@@ -405,7 +401,7 @@ void*    call_host_enable_vddr( void *io_pArgs )
         {
             TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                            "SUCCESS :  host_enable_vddr()" );
-        }   
+        }
         TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_host_enable_vddr exit" );
 
         return l_StepError.getErrorHandle();
@@ -413,7 +409,7 @@ void*    call_host_enable_vddr( void *io_pArgs )
     else
     {
         //no mailbox running so this is a fsp less system.  Right now the istep
-        //only works when a FSP is present.  May add code in the future for 
+        //only works when a FSP is present.  May add code in the future for
         //Stradale which is a FSP-less system
         TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,"call_host_enable_vddr"
                 "no-op because fsp-less");

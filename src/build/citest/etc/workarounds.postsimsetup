@@ -31,8 +31,7 @@ echo "+++ Updating s1.act"
 mkdir -p $sb/simu/data/cec-chip
 cp $BACKING_BUILD/src/simu/data/cec-chip/s1.act $sb/simu/data/cec-chip
 
-## Update exitCacheContainedMode action to remove sim workaround
-## Remove with RTC 61075, CMVC F865077
-echo "+++ Update exitCacheContainedMode action to remove sim workaround"
-patch -p0 $sb/simu/data/cec-chip/s1.act $HOSTBOOTROOT/src/build/citest/etc/patches/s1.act.patch
+## Update tweak address till F865457 goes in, RTC 61075
+echo "+++ Update exitCacheContainedMode scom addr"
+sed -i -e's/0x02012040/0x0201340C/' $sb/simu/data/cec-chip/s1.act
 
