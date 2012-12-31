@@ -330,34 +330,24 @@ public:
     /** @brief Flushes all bits to 1. */
     void setAllBits();
 
-  /**
-   Get a field within the bitstring (right justified)
-   <ul>
-   <br><b>Parameters:  </b> start bit position, length of field
-   <br><b>Returns:     </b> CPU_WORD containing requested bits (right justified)
-   <br><b>Requirements:</b> bit_position < GetBitLength(),
-                            length <= sizeof(CPU_WORD) (32 bits for 603/403)
-   <br><b>Promises:    </b> None.
-   <br><b>Exceptions:  </b> None.
-   </ul><br>
-   */
-  CPU_WORD GetBitFieldJustified(uint32_t bit_position,uint32_t length) const
-  { return GetBitString()->GetFieldJustify(bit_position,length); }
+    /**
+     * @brief Returns target value from the BitString (right justified).
+     * @param i_pos   Starting position in the bit string.
+     * @param i_len   Length of target value.
+     * @pre   i_pos + i_len must be less than or equal 64 bits.
+     * @return The target value (right justified).
+     */
+    uint64_t GetBitFieldJustified( uint32_t i_pos, uint32_t i_len ) const;
 
-  /**
-   Set a field within the bitstring with a value (from right to left in bit string)
-   <ul>
-   <br><b>Parameters:  </b> start bit position, length of field, value
-   <br><b>Returns:     </b> Nothing
-   <br><b>Requirements:</b> bit_position < GetBitLength(),
-                            length <= sizeof(CPU_WORD) (32 bits for 603/403),
-                            length must be large enought to hold the value.
-   <br><b>Promises:    </b> GetBitFieldJustified(bitPosition,length) == value
-   <br><b>Exceptions:  </b> None.
-   </ul><br>
-   */
-  void SetBitFieldJustified(uint32_t bitPosition,uint32_t length,CPU_WORD value)
-  { AccessBitString().SetFieldJustify(bitPosition,length,value); }
+    /**
+     * @brief Set a field within the BitString with a value (right justified).
+     * @param i_pos   Starting position in the bit string.
+     * @param i_len   Length of target value.
+     * @param i_value Value to add to BitString.
+     * @pre   i_pos + i_len must be less than or equal 64 bits.
+     */
+    void SetBitFieldJustified( uint32_t i_pos, uint32_t i_len,
+                               uint64_t i_value );
 
   /**
    Query if bit string is all zeros

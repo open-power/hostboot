@@ -337,8 +337,7 @@ int32_t GetCheckstopInfo( ExtensibleChip * i_chip,
         return o_rc;
     }
 
-    o_wofValue = (((uint64_t)l_wof->GetBitFieldJustified(0,32)) << 32) |
-      ((uint64_t)l_wof->GetBitFieldJustified(32,32));
+    o_wofValue = l_wof->GetBitFieldJustified(0,64);
 
     return SUCCESS;
 

@@ -204,7 +204,67 @@ void SCAN_COMM_REGISTER_CLASS::setAllBits()
     bitString.Pattern( 0, bitString.GetLength(), 0xffffffff, 32 );
 }
 
+//------------------------------------------------------------------------------
 
+uint64_t SCAN_COMM_REGISTER_CLASS::GetBitFieldJustified( uint32_t i_pos,
+                                                         uint32_t i_len ) const
+{
+    uint64_t o_value = 0;
 
-}//namespace PRDF ends
+    const uint32_t len_cpu_word = sizeof(CPU_WORD) * 8;
+    const uint32_t len_uint64   = sizeof(uint64_t) * 8;
+    const uint32_t pos_end      = i_pos + i_len;
+
+    PRDF_ASSERT( pos_end <= len_uint64 );
+
+    const BIT_STRING_CLASS * bs = GetBitString();
+
+    for ( uint32_t pos = i_pos; pos < pos_end; pos += len_cpu_word )
+    {
+        // Calculate chunk length.
+        uint32_t len_chunk = len_cpu_word;
+        if ( len_chunk > pos_end - pos )
+            len_chunk = pos_end - pos;
+
+        o_value <<= len_chunk; // Make room for new chunk.
+
+        // Get chunk.
+        o_value |= static_cast<uint64_t>(bs->GetFieldJustify(pos, len_chunk));
+    }
+
+    return o_value;
+}
+
+//------------------------------------------------------------------------------
+
+void SCAN_COMM_REGISTER_CLASS::SetBitFieldJustified( uint32_t i_pos,
+                                                     uint32_t i_len,
+                                                     uint64_t i_value )
+{
+    const uint32_t len_cpu_word = sizeof(CPU_WORD) * 8;
+    const uint32_t len_uint64   = sizeof(uint64_t) * 8;
+
+    PRDF_ASSERT( i_pos + i_len <= len_uint64 );
+
+    BIT_STRING_CLASS & bs = AccessBitString();
+
+    for ( uint32_t offset = 0; offset < i_len; offset += len_cpu_word )
+    {
+        // Calculate chunk length.
+        uint32_t len_chunk = len_cpu_word;
+        if ( len_chunk > i_len - offset )
+            len_chunk = i_len - offset;
+
+        uint64_t value = i_value;
+        value >>= i_len - (offset + len_chunk); // right justify
+
+        // Set chunk.
+        bs.SetFieldJustify( i_pos + offset, len_chunk,
+                            static_cast<CPU_WORD>(value) );
+    }
+}
+
+} // end namespace PRDF
+
 #undef IIPSCR_C
+
