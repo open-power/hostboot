@@ -6,7 +6,7 @@
 #
 # IBM CONFIDENTIAL
 #
-# COPYRIGHT International Business Machines Corp. 2011,2012
+# COPYRIGHT International Business Machines Corp. 2011,2013
 #
 # p1
 #
@@ -94,7 +94,7 @@ sub readData
     my $addr = shift;
     my $size = shift;
 
-    $addr += getHRMOR();
+    $addr = translateHRMOR($addr);
 
     sendIPCMsg("read-data", "$addr,$size");
 
@@ -116,7 +116,7 @@ sub writeData
     my $size = shift;
     my $value = shift;
 
-    $addr += getHRMOR();
+    $addr = translateHRMOR($addr);
 
     my $value = unpack("H*", $value);
     sendIPCMsg("write-data", "$addr,$size,$value");
@@ -244,7 +244,7 @@ sub readScom
 
     my ($type, $data) = recvIPCMsg();
 
-    return $data;
+    return hex $data;
 }
 
 # @sub writeScom

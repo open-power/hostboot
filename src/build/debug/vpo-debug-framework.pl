@@ -1,26 +1,26 @@
 #!/usr/bin/perl
-#  IBM_PROLOG_BEGIN_TAG
-#  This is an automatically generated prolog.
+# IBM_PROLOG_BEGIN_TAG
+# This is an automatically generated prolog.
 #
-#  $Source: src/build/debug/vpo-debug-framework.pl $
+# $Source: src/build/debug/vpo-debug-framework.pl $
 #
-#  IBM CONFIDENTIAL
+# IBM CONFIDENTIAL
 #
-#  COPYRIGHT International Business Machines Corp. 2012
+# COPYRIGHT International Business Machines Corp. 2012,2013
 #
-#  p1
+# p1
 #
-#  Object Code Only (OCO) source materials
-#  Licensed Internal Code Source Materials
-#  IBM HostBoot Licensed Internal Code
+# Object Code Only (OCO) source materials
+# Licensed Internal Code Source Materials
+# IBM HostBoot Licensed Internal Code
 #
-#  The source code for this program is not published or other-
-#  wise divested of its trade secrets, irrespective of what has
-#  been deposited with the U.S. Copyright Office.
+# The source code for this program is not published or otherwise
+# divested of its trade secrets, irrespective of what has been
+# deposited with the U.S. Copyright Office.
 #
-#  Origin: 30
+# Origin: 30
 #
-#  IBM_PROLOG_END_TAG
+# IBM_PROLOG_END_TAG
 # @file vpo-debug-framework.pl
 # @brief Implementation of the common debug framework for running in vpo.
 #
@@ -315,6 +315,8 @@ sub readData
     my $addr = shift;
     my $size = shift;
 
+    $addr = translateHRMOR($addr);
+
     #flushL2
     flushL2();
 
@@ -376,6 +378,8 @@ sub writeData
     my $addr = shift;
     my $size = shift;
     my $value = shift;
+
+    $addr = translateHRMOR($addr);
 
     #Compute the # of cache lines
     my $base = $addr & CACHELINEMASK;
@@ -839,7 +843,7 @@ sub readScom
     ##     (sprintf("0x%x-->%s, 0x%x : %s", $addr,$vpoaddr,$size,$result)), "\n";
 
     ##  comes in as a 32-bit #, need to shift 32 to match simics
-    return ( "0x" . $result . "00000000" );
+    return (hex ( "0x" . $result . "00000000" ));
 }
 
 # @sub writeScom
@@ -895,7 +899,7 @@ sub checkContTrace()
     my  $contTrace      =   "";
 
     $contTrace  =   ::readScom( $SCRATCH_MBOX0, 8 );
-    if ( ( hex $contTrace ) != 0  )
+    if ( $contTrace != 0  )
     {
         ##  activate continuous trace
         system ("$hbToolsDir/hb-ContTrace --mute > /dev/null" );
@@ -906,6 +910,15 @@ sub checkContTrace()
         ::startInstructions("all");
     }
 
+}
+
+# @sub getHRMOR
+#
+# Returns the HRMOR (0 for VPO).
+#
+sub getHRMOR
+{
+    return 0;
 }
 
 

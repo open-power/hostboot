@@ -6,7 +6,7 @@
 #
 # IBM CONFIDENTIAL
 #
-# COPYRIGHT International Business Machines Corp. 2011,2012
+# COPYRIGHT International Business Machines Corp. 2011,2013
 #
 # p1
 #
@@ -82,6 +82,7 @@ use constant BLOCK_SIZE_OFFSET => 8;
 use constant BLOCK_PARENT_SEGMENTPTR_OFFSET => 16;
 use constant BLOCK_NEXTPTR_OFFSET => 24;
 use constant BLOCK_SPTE_OFFSET => 32;
+use constant BLOCK_IS_PHYSICAL => 56;
 
 
 
@@ -311,6 +312,8 @@ sub getPhyAddrfromSPTE
 
     my $SPTE_entry = ::read32 ($SPTE_ptr + $spteindex, 4);
 
+    my $isPhysical = ::read8 ($block_ptr + BLOCK_IS_PHYSICAL);
+
     if ($debug)
     {
         ::userDisplay (sprintf "        The SPTE ptr is:   %X\n" , $SPTE_ptr);
@@ -335,8 +338,13 @@ sub getPhyAddrfromSPTE
 
         $paddr = $SPTEaddr + $addrOffset;
 
-        # add the HRMOR value to get the actual physical address
-        $paddr += ::getHRMOR();
+        if (0 == $isPhysical)
+        {
+            # add the HRMOR value to get the actual physical address
+            $paddr += ::getHRMOR();
+        }
+        # mark address as bypassing HRMOR translation.
+        $paddr |= 0x8000000000000000;
     }
     else
     {

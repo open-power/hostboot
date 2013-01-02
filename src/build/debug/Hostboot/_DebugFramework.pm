@@ -1,26 +1,26 @@
 #!/usr/bin/perl
-#  IBM_PROLOG_BEGIN_TAG
-#  This is an automatically generated prolog.
+# IBM_PROLOG_BEGIN_TAG
+# This is an automatically generated prolog.
 #
-#  $Source: src/build/debug/Hostboot/_DebugFramework.pm $
+# $Source: src/build/debug/Hostboot/_DebugFramework.pm $
 #
-#  IBM CONFIDENTIAL
+# IBM CONFIDENTIAL
 #
-#  COPYRIGHT International Business Machines Corp. 2011-2012
+# COPYRIGHT International Business Machines Corp. 2011,2013
 #
-#  p1
+# p1
 #
-#  Object Code Only (OCO) source materials
-#  Licensed Internal Code Source Materials
-#  IBM HostBoot Licensed Internal Code
+# Object Code Only (OCO) source materials
+# Licensed Internal Code Source Materials
+# IBM HostBoot Licensed Internal Code
 #
-#  The source code for this program is not published or other-
-#  wise divested of its trade secrets, irrespective of what has
-#  been deposited with the U.S. Copyright Office.
+# The source code for this program is not published or otherwise
+# divested of its trade secrets, irrespective of what has been
+# deposited with the U.S. Copyright Office.
 #
-#  Origin: 30
+# Origin: 30
 #
-#  IBM_PROLOG_END_TAG
+# IBM_PROLOG_END_TAG
 # _DebugFramework.pm
 #
 # This module is a set of utility functions for the debug framework, which
@@ -49,6 +49,7 @@ our @EXPORT = ( 'callToolModule', 'callToolModuleHelp', 'callToolModuleHelpInfo'
                 'littleendian',
                 'read64', 'read32', 'read16', 'read8', 'readStr',
                 'write64', 'write32', 'write16', 'write8',
+                'translateHRMOR',
                 'getIstepList'
               );
 
@@ -596,6 +597,31 @@ sub write8
     $value = pack("C", $value);
 
     my $result = ::writeData($addr, 1, $value);
+}
+
+# @sub translateHRMOR
+#
+# Translate an address with the HRMOR if necessary.
+#
+# In the event that the most-significant-bit is on, then the HRMOR should be
+# bypassed, otherwise the HRMOR is applied.
+#
+# @param Address to translate.
+#
+sub translateHRMOR
+{
+    my $addr = shift;
+
+    if (0 != ($addr & 0x8000000000000000))
+    {
+        $addr &= 0x7FFFFFFFFFFFFFFF;
+    }
+    else
+    {
+        $addr += ::getHRMOR();
+    }
+
+    return $addr;
 }
 
 # @sub  getIstepList
