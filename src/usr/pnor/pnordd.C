@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2012              */
+/* COPYRIGHT International Business Machines Corp. 2011,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -696,14 +696,15 @@ errlHndl_t PnorDD::pollSfcOpComplete(uint64_t i_pollTime)
 }
 
 /**
- * @brief Poll for Op complete on Micron NOR chips
- *        The current version of Micron parts require a special
- *        form of checking for erase and write complete.
+ * @brief Check flag status bit on Micron NOR chips
+ *        The current version of Micron parts require the Flag
+ *        Status register be read after a read or erase operation,
+ *        otherwise all future operations won't work..
  */
-errlHndl_t PnorDD::micronOpComplete(uint64_t i_pollTime)
+errlHndl_t PnorDD::micronFlagStatus(uint64_t i_pollTime)
 {
     errlHndl_t l_err = NULL;
-    TRACDCOMP( g_trac_pnor, "PnorDD::micronOpComplete> i_pollTime=0x%.8x",
+    TRACDCOMP( g_trac_pnor, "PnorDD::micronFlagStatus> i_pollTime=0x%.8x",
                i_pollTime );
 
     do {
@@ -712,7 +713,7 @@ errlHndl_t PnorDD::micronOpComplete(uint64_t i_pollTime)
         //Micron 'flag status' register
         uint32_t confData = SPI_MICRON_FLAG_STAT << 24;
         confData |= 0x00800001;  // 8-> read, 1->1 bytes
-        TRACDCOMP( g_trac_pnor, "PnorDD::micronOpComplete> confData=0x%.8x",
+        TRACDCOMP( g_trac_pnor, "PnorDD::micronFlagStatus> confData=0x%.8x",
                    confData );
         l_err = writeRegSfc(SFC_CMD_SPACE,
                             SFC_REG_CHIPIDCONF,
@@ -720,7 +721,7 @@ errlHndl_t PnorDD::micronOpComplete(uint64_t i_pollTime)
         if(l_err) { break; }
 
 
-        //Poll for complete status
+        //Check flag status bit.
         uint32_t opStatus;
         uint64_t poll_time = 0;
         uint64_t loop = 0;
@@ -764,21 +765,21 @@ errlHndl_t PnorDD::micronOpComplete(uint64_t i_pollTime)
         if( (opStatus & 0xB0000000) != 0x80000000)
         {
             TRACFCOMP(g_trac_pnor,
-                      "PnorDD::micronOpComplete> Error or timeout from Micron Flag Status Register (0x%.8X)",
+                      "PnorDD::micronFlagStatus> Error or timeout from Micron Flag Status Register (0x%.8X)",
                       opStatus);
 
             /*@
              * @errortype
-             * @moduleid     PNOR::MOD_PNORDD_MICRONOPCOMPLETE
+             * @moduleid     PNOR::MOD_PNORDD_MICRONFLAGSTATUS
              * @reasoncode   PNOR::RC_MICRON_INCOMPLETE
              * @userdata1[0:31]   NOR Flash Chip ID
              * @userdata1[32:63]  Total poll time (ns)
              * @userdata2[0:31]   Micron Flag status register
-             * @devdesc      PnorDD::micronOpComplete> Error or timeout from
+             * @devdesc      PnorDD::micronFlagStatus> Error or timeout from
              *               Micron Flag Status Register
              */
             l_err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                            PNOR::MOD_PNORDD_MICRONOPCOMPLETE,
+                                            PNOR::MOD_PNORDD_MICRONFLAGSTATUS,
                                             PNOR::RC_MICRON_INCOMPLETE,
                                             TWO_UINT32_TO_UINT64(cv_nor_chipid,
                                                                  poll_time),
@@ -793,7 +794,7 @@ errlHndl_t PnorDD::micronOpComplete(uint64_t i_pollTime)
             //Micron 'flag status' register. remaining bits are all zero 
             //  since we just need to issue the SPI command.
             uint32_t confData = SPI_MICRON_CLRFLAG_STAT << 24;
-            TRACDCOMP( g_trac_pnor, "PnorDD::micronOpComplete> confData=0x%.8x",
+            TRACDCOMP( g_trac_pnor, "PnorDD::micronFlagStatus> confData=0x%.8x",
                        confData );
             errlHndl_t tmp_err = NULL;
             tmp_err = writeRegSfc(SFC_CMD_SPACE,
@@ -993,16 +994,14 @@ errlHndl_t PnorDD::flushSfcBuf(uint32_t i_addr,
                             sfc_cmd.data32);
         if(l_err) { break; }
 
-        //check for special Micron Op Complete
+        //Poll for complete status
+        l_err = pollSfcOpComplete();
+        if(l_err) { break; }
+
+        //check for special Micron Flag Status reg
         if(cv_hw_workaround & HWWK_MICRON_WRT_ERASE)
         {
-            l_err = micronOpComplete();
-            if(l_err) { break; }
-        }
-        else //Use Normal Op Complete
-        {
-            //Poll for complete status
-            l_err = pollSfcOpComplete();
+            l_err = micronFlagStatus();
             if(l_err) { break; }
         }
 
@@ -1648,16 +1647,14 @@ errlHndl_t PnorDD::eraseFlash(uint32_t i_address)
                                 sfc_cmd.data32);
             if(l_err) { break; }
 
-            //check for special Micron Op Complete
+            //Poll for complete status
+            l_err = pollSfcOpComplete();
+            if(l_err) { break; }
+
+            //check for special Micron Flag Status reg
             if(cv_hw_workaround & HWWK_MICRON_WRT_ERASE)
             {
-                l_err = micronOpComplete();
-                if(l_err) { break; }
-            }
-            else //Use Normal Op Complete
-            {
-                //Poll for complete status
-                l_err = pollSfcOpComplete();
+                l_err = micronFlagStatus();
                 if(l_err) { break; }
             }
         }

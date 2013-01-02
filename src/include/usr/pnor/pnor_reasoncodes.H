@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2012              */
+/* COPYRIGHT International Business Machines Corp. 2011,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -49,8 +49,7 @@ namespace PNOR
         MOD_PNORDD_READLPC              = 0x18, /**< pnordd.C : PnorDD::readLPC */
         MOD_PNORDD_WRITELPC             = 0x19, /**< pnordd.C : PnorDD::writeLPC */
         MOD_PNORDD_ERASEFLASH           = 0x1A, /**< pnordd.C : PnorDD::eraseFlash */
-        MOD_PNORDD_COMPAREANDWRITEBLOCK = 0x1B, /**< pnordd.C : PnorDD::compareAndWriteBlock */
-        MOD_PNORDD_MICRONOPCOMPLETE     = 0x1C, /**< pnordd.C : PnorDD::micronOpComplete */
+        MOD_PNORDD_MICRONFLAGSTATUS     = 0x1B, /**< pnordd.C : PnorDD::micronFlagStatus */
 
     };
 

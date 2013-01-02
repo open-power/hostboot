@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2012              */
+/* COPYRIGHT International Business Machines Corp. 2011,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -287,15 +287,16 @@ class PnorDD
     errlHndl_t pollSfcOpComplete(uint64_t i_pollTime = SFC_POLL_TIME_NS);
 
     /**
-     * @brief Poll for Op complete on Micron NOR chips
-     *        The current version of Micron parts require a special
-     *        form of checking for erase and write complete.
+     * @brief Check flag status bit on Micron NOR chips
+     *        The current version of Micron parts require the Flag
+     *        Status register be read after a read or erase operation,
+     *        otherwise all future operations won't work..
      *
      * @parm i_pollTime  Amount of time to Poll, default SFC_POLL_TIME_NS
      *
      * @return Error from operation
      */
-    errlHndl_t micronOpComplete(uint64_t i_pollTime = SFC_POLL_TIME_NS);
+    errlHndl_t micronFlagStatus(uint64_t i_pollTime = SFC_POLL_TIME_NS);
 
     /**
      * @brief Read the NOR FLash ChipID
