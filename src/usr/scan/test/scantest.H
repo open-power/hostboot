@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2012              */
+/* COPYRIGHT International Business Machines Corp. 2011,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -125,7 +125,7 @@ public:
           uint64_t length;
           uint64_t flag;  // used for header check..
       } test_data[] = {
-          { scan_targets[myPROC0],    {0x12121212, 0x12341234, 0x12341234, 0x12341234, 0x12341234, 0x12341234, 0x10000000, 0x00000000}, 0x14030803, 197, 0x0},
+          { scan_targets[myPROC0],    {0x12121212, 0x12341234, 0x12341234, 0x12341234, 0x12341234, 0x12341234, 0x10000000, 0x00000000}, 0x15030803, 197, 0x0},
           { scan_targets[memBuf0],    {0x34343434, 0xaaaaaaaa, 0xbbbbbbbb, 0xb0000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000}, 0x01034001, 100, 0x2},
       };
       const uint64_t NUM_ADDRS = sizeof(test_data)/sizeof(test_data[0]);

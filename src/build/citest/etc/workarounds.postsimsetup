@@ -1,115 +1,38 @@
 #!/bin/sh
-# IBM_PROLOG_BEGIN_TAG 
-# This is an automatically generated prolog. 
-#  
-# $Source: src/build/citest/etc/workarounds.postsimsetup $ 
-#  
-# IBM CONFIDENTIAL 
-#  
-# COPYRIGHT International Business Machines Corp. 2011,2012 
-#  
-# p1 
-#  
-# Object Code Only (OCO) source materials 
-# Licensed Internal Code Source Materials 
-# IBM HostBoot Licensed Internal Code 
-#  
-# The source code for this program is not published or otherwise 
-# divested of its trade secrets, irrespective of what has been 
-# deposited with the U.S. Copyright Office. 
-#  
-# Origin: 30 
-#  
-# IBM_PROLOG_END_TAG 
+# IBM_PROLOG_BEGIN_TAG
+# This is an automatically generated prolog.
+#
+# $Source: src/build/citest/etc/workarounds.postsimsetup $
+#
+# IBM CONFIDENTIAL
+#
+# COPYRIGHT International Business Machines Corp. 2011,2013
+#
+# p1
+#
+# Object Code Only (OCO) source materials
+# Licensed Internal Code Source Materials
+# IBM HostBoot Licensed Internal Code
+#
+# The source code for this program is not published or otherwise
+# divested of its trade secrets, irrespective of what has been
+# deposited with the U.S. Copyright Office.
+#
+# Origin: 30
+#
+# IBM_PROLOG_END_TAG
 ##
 ## Workarounds that are run after start_simics is executed for the first time
 ##    to setup the sandbox
 ##
 
 
-echo "+++ Updating s1.act and p8_common.chip"
+echo "+++ Updating s1.act"
 mkdir -p $sb/simu/data/cec-chip
 cp $BACKING_BUILD/src/simu/data/cec-chip/s1.act $sb/simu/data/cec-chip
-cp $BACKING_BUILD/src/simu/data/cec-chip/p8.act $sb/simu/data/cec-chip
 
-#### Update actions files for proc_a_x_pci_dmi_pll_setup -
-####      Remove when F864674 under RTC 60617
-echo "
- #A Bus PLL workaround
- CAUSE_EFFECT {
- LABEL=[P8 ABUS PLL Lock]
- WATCH=[REG(0x080F0013)]
- CAUSE: TARGET=[REG(0x080F0013)] OP=[EQUALTO,BUF] DATA=[LITERAL(64,F7FFFFFF FFFFFFFF)]
- EFFECT: TARGET=[REG(0x080F0019)] OP=[BIT,ON] BIT=[0]  # PLL Lock 
-} " >> $sb/simu/data/cec-chip/s1.act
+## Update exitCacheContainedMode action to remove sim workaround
+## Remove with RTC 61075, CMVC F865077
+echo "+++ Update exitCacheContainedMode action to remove sim workaround"
+patch -p0 $sb/simu/data/cec-chip/s1.act $HOSTBOOTROOT/src/build/citest/etc/patches/s1.act.patch
 
-echo "
- #A Bus PLL workaround
- CAUSE_EFFECT {
- LABEL=[P8 ABUS PLL Lock]
- WATCH=[REG(0x080F0013)]
- CAUSE: TARGET=[REG(0x080F0013)] OP=[EQUALTO,BUF] DATA=[LITERAL(64,F7FFFFFF FFFFFFFF)]
- EFFECT: TARGET=[REG(0x080F0019)] OP=[BIT,ON] BIT=[0]  # PLL Lock 
-} " >> $sb/simu/data/cec-chip/p8.act
-
-echo "
- #DMI PLL workaround
-CAUSE_EFFECT {
- LABEL=[P8 DMI PLL Lock]
- WATCH=[REG(0x020F0013)]
- CAUSE: TARGET=[REG(0x020F0013)] OP=[EQUALTO,BUF] DATA=[LITERAL(64,F7FFFFFF FFFFFFFF)]
- EFFECT: TARGET=[REG(0x020F0019)] OP=[BIT,ON] BIT=[0]  # PLL Lock 
-} " >>  $sb/simu/data/cec-chip/s1.act
-
-
-echo "
- #DMI PLL workaround
-CAUSE_EFFECT {
- LABEL=[P8 DMI PLL Lock]
- WATCH=[REG(0x020F0013)]
- CAUSE: TARGET=[REG(0x020F0013)] OP=[EQUALTO,BUF] DATA=[LITERAL(64,F7FFFFFF FFFFFFFF)]
- EFFECT: TARGET=[REG(0x020F0019)] OP=[BIT,ON] BIT=[0]  # PLL Lock 
-} " >>  $sb/simu/data/cec-chip/p8.act
-
-
-echo "
- #PCIE PLL workaround
-CAUSE_EFFECT {
- LABEL=[P8 PCIE PLL Lock]
- WATCH=[REG(0x090F0013)]
- CAUSE: TARGET=[REG(0x090F0013)] OP=[EQUALTO,BUF] DATA=[LITERAL(64,F7FFFFFF FFFFFFFF)]
- EFFECT: TARGET=[REG(0x090F0019)] OP=[BIT,ON] BIT=[0]  # PLL Lock 
-} " >> $sb/simu/data/cec-chip/s1.act
-
-echo "
- #PCIE PLL workaround
-CAUSE_EFFECT {
- LABEL=[P8 PCIE PLL Lock]
- WATCH=[REG(0x090F0013)]
- CAUSE: TARGET=[REG(0x090F0013)] OP=[EQUALTO,BUF] DATA=[LITERAL(64,F7FFFFFF FFFFFFFF)]
- EFFECT: TARGET=[REG(0x090F0019)] OP=[BIT,ON] BIT=[0]  # PLL Lock 
-} " >> $sb/simu/data/cec-chip/p8.act
-
-#### Additional updates for maint commands (Remove with RTC:60668)
-echo "+++ Fix up inverted ipoll mask"
-cp $bb/src/simu/data/cec-chip/p8_mba.act $sb/simu/data/cec-chip/p8_mba.act
-cp $bb/src/simu/data/cec-chip/s1_mba.act $sb/simu/data/cec-chip/s1_mba.act
-
-patch -p0 $sb/simu/data/cec-chip/p8_mba.act $HOSTBOOTROOT/src/build/citest/etc/patches/p8_mba.act.patch
-patch -p0 $sb/simu/data/cec-chip/s1_mba.act $HOSTBOOTROOT/src/build/citest/etc/patches/s1_mba.act.patch
-###
-
-#remove with RTC 60780
-echo "+++ Updating config files - checked in with CMVC Defect 864669"
-mkdir -p $sb/simu/configs
-egrep -v "GFW_P8_MURANO_PNOR_DIRECT_MMIO" $BACKING_BUILD/src/simu/configs/P8_MURANO.config > $sb/simu/configs/P8_MURANO.config
-echo "SETENV GFW_P8_MURANO_PNOR_DIRECT_MMIO       0xC000000  " >> $sb/simu/configs/P8_MURANO.config
-
-egrep -v "GFW_P8_VENICE_PNOR_DIRECT_MMIO" $BACKING_BUILD/src/simu/configs/P8_VENICE.config > $sb/simu/configs/P8_VENICE.config
-echo "SETENV GFW_P8_VENICE_PNOR_DIRECT_MMIO       0xC000000  " >> $sb/simu/configs/P8_VENICE.config
-
-egrep -v "GFW_P8_TULETA_PNOR_DIRECT_MMIO" $BACKING_BUILD/src/simu/configs/P8_TULETA.config > $sb/simu/configs/P8_TULETA.config
-echo "SETENV GFW_P8_TULETA_PNOR_DIRECT_MMIO       0xC000000  " >> $sb/simu/configs/P8_TULETA.config
-
-egrep -v "GFW_P8_TULETA_PNOR_DIRECT_MMIO" $BACKING_BUILD/src/simu/configs/P8_TULETA_POWERON.config > $sb/simu/configs/P8_TULETA_POWERON.config
-echo "SETENV GFW_P8_TULETA_PNOR_DIRECT_MMIO       0xC000000  " >> $sb/simu/configs/P8_TULETA_POWERON.config

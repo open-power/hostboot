@@ -1,26 +1,25 @@
-/*  IBM_PROLOG_BEGIN_TAG
- *  This is an automatically generated prolog.
- *
- *  $Source: src/usr/hwpf/hwp/dram_initialization/dram_initialization.C $
- *
- *  IBM CONFIDENTIAL
- *
- *  COPYRIGHT International Business Machines Corp. 2012
- *
- *  p1
- *
- *  Object Code Only (OCO) source materials
- *  Licensed Internal Code Source Materials
- *  IBM HostBoot Licensed Internal Code
- *
- *  The source code for this program is not published or other-
- *  wise divested of its trade secrets, irrespective of what has
- *  been deposited with the U.S. Copyright Office.
- *
- *  Origin: 30
- *
- *  IBM_PROLOG_END_TAG
- */
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/usr/hwpf/hwp/dram_initialization/dram_initialization.C $  */
+/*                                                                        */
+/* IBM CONFIDENTIAL                                                       */
+/*                                                                        */
+/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/*                                                                        */
+/* p1                                                                     */
+/*                                                                        */
+/* Object Code Only (OCO) source materials                                */
+/* Licensed Internal Code Source Materials                                */
+/* IBM HostBoot Licensed Internal Code                                    */
+/*                                                                        */
+/* The source code for this program is not published or otherwise         */
+/* divested of its trade secrets, irrespective of what has been           */
+/* deposited with the U.S. Copyright Office.                              */
+/*                                                                        */
+/* Origin: 30                                                             */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
 /**
  *  @file dram_initialization.C
  *
@@ -490,40 +489,6 @@ void*    call_proc_setup_bars( void    *io_pArgs )
         }
     }   // endfor
 
-
-
-    //  ----------------------------------------------------------------------
-    // @@@@@    TEMPORARY SIMICS HACK for PHYP 6/1 milestone @@@@@
-    //  ----------------------------------------------------------------------
-    if ( !TARGETING::is_vpo() )
-    {
-        //Now need to scom the L3 bar on my EX to trigger Simics cache contained exit
-        if (l_stepError.isNull())
-        {
-            TARGETING::Target* procTarget = NULL;
-            TARGETING::targetService().masterProcChipTargetHandle( procTarget );
-
-            //Base scom address is 0x1001080b, need to place core id from cpuid
-            //EX chiplet is bits 4:7 of scom addr, EX unit in cpuid is bits 25:28
-            uint32_t scom_addr = 0x1001080b | (((task_getcpuid()) & 0x78) << 21);
-            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                       "EX L3 BAR1 addr [%08x]", scom_addr);
-
-            uint64_t scom_data = 0x0; //data doesn't matter, just the write
-            size_t size = sizeof(scom_data);
-
-            l_errl = deviceWrite( procTarget,
-                                  &scom_data,
-                                  size,
-                                  DEVICE_SCOM_ADDRESS(scom_addr) );
-            if (l_errl)
-            {
-                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                           "Failed to write EX %08x addr\n", scom_addr);
-            }
-        }
-        // @@@@@    end TEMPORARY SIMICS HACK for PHYP 6/1 milestone @@@@@
-    }
 
     if ( l_stepError.isNull() )
     {
