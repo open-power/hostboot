@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- IBM CONFIDENTIAL                                                       -->
 <!--                                                                        -->
-<!-- COPYRIGHT International Business Machines Corp. 2011,2012              -->
+<!-- COPYRIGHT International Business Machines Corp. 2011,2013              -->
 <!--                                                                        -->
 <!-- p1                                                                     -->
 <!--                                                                        -->
@@ -125,7 +125,8 @@
     <attribute>
         <id>HB_SETTINGS</id>
         <default>
-            <field><id>traceContinuous</id><value>1</value></field>            
+            <field><id>traceContinuous</id><value>1</value></field>
+            <field><id>traceScanDebug</id><value>1</value></field>            
             <field><id>reserved</id><value>0</value></field>
         </default>
     </attribute>

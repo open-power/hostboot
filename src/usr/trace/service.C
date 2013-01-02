@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012                   */
+/* COPYRIGHT International Business Machines Corp. 2012,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -61,7 +61,7 @@ namespace TRACE
         // Skip writing trace if debug is disabled.
         if (unlikely(i_type == TRACE_DEBUG))
         {
-            if ((!i_td->iv_debugEnabled) ||
+            if ((!i_td->iv_debugEnabled) &&
                 (!g_debugSettings.globalDebugEnable))
             {
                 return;
@@ -216,7 +216,7 @@ namespace TRACE
         // Skip writing trace if debug is disabled.
         if (unlikely(i_type == TRACE_DEBUG))
         {
-            if ((!i_td->iv_debugEnabled) ||
+            if ((!i_td->iv_debugEnabled) &&
                 (!g_debugSettings.globalDebugEnable))
             {
                 return;

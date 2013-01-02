@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012                   */
+/* COPYRIGHT International Business Machines Corp. 2012,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -25,6 +25,8 @@
 #include <assert.h>
 #include <string.h>
 #include <string_ext.h>
+
+#include <targeting/common/commontargeting.H>
 
 namespace TRACE
 {
@@ -89,6 +91,21 @@ namespace TRACE
             iv_components.push_back(ComponentDesc(l_compName, i_size,
                                                   i_bufferType));
             l_rc = &iv_components.back();
+        }
+
+        // Check for special SCAN component to force enable debug trace on.
+        if (0 == memcmp(l_compName, "SCAN", 5))
+        {
+            TARGETING::Target* sys = NULL;
+            TARGETING::targetService().getTopLevelTarget(sys);
+
+            TARGETING::HbSettings hbSettings =
+                sys->getAttr<TARGETING::ATTR_HB_SETTINGS>();
+
+            if (hbSettings.traceScanDebug)
+            {
+                l_rc->iv_debugEnabled = true;
+            }
         }
 
         mutex_unlock(&iv_mutex);

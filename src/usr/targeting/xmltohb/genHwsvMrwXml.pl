@@ -220,7 +220,7 @@ foreach my $i (@{$vmemCentaur->{'centaur-vrd-connection'}})
     my $vmemNode = $i->{'centaur'}->{'target'}->{'node'};
     my $vmemPosition = $i->{'centaur'}->{'target'}->{'position'};
 
-    push (@unsortedVmem,[$vmemDev, $vmemAddr, $vmemValue, $vmemNode, 
+    push (@unsortedVmem,[$vmemDev, $vmemAddr, $vmemValue, $vmemNode,
                          $vmemPosition]);
 }
 
@@ -1358,6 +1358,7 @@ sub generate_sys
         <id>HB_SETTINGS</id>
         <default>
             <field><id>traceContinuous</id><value>0</value></field>
+            <field><id>traceScanDebug</id><value>0</value></field>
             <field><id>reserved</id><value>0</value></field>
         </default>
     </attribute>

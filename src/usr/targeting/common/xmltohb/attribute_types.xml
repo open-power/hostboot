@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- IBM CONFIDENTIAL                                                       -->
 <!--                                                                        -->
-<!-- COPYRIGHT International Business Machines Corp. 2011,2012              -->
+<!-- COPYRIGHT International Business Machines Corp. 2011,2013              -->
 <!--                                                                        -->
 <!-- p1                                                                     -->
 <!--                                                                        -->
@@ -1663,10 +1663,21 @@
             <default>0</default>
         </field>
         <field>
+            <name>traceScanDebug</name>
+            <description>
+            Override trace debug selection for SCAN component.
+                0b0: TRACS entries for SCAN have default behavior.
+                0b1: TRACS entries for SCAN are enabled.
+            </description>
+            <type>uint8_t</type>
+            <bits>1</bits>
+            <default>0</default>
+        </field>
+        <field>
             <name>reserved</name>
             <description>Reserved for future use</description>
             <type>uint8_t</type>
-            <bits>7</bits>
+            <bits>6</bits>
             <default>0</default>
         </field>
         </complexType>
