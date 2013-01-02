@@ -6,7 +6,7 @@
 #
 # IBM CONFIDENTIAL
 #
-# COPYRIGHT International Business Machines Corp. 2012
+# COPYRIGHT International Business Machines Corp. 2012,2013
 #
 # p1
 #
@@ -2358,6 +2358,10 @@ sub generate_centaur
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-$sys/node-$node/proc-$proc/mcs-$mcs/"
             . "membuf-$ctaur</default>
+    </attribute>
+    <attribute>
+        <id>VMEM_ID</id>
+        <default>$vmemId</default>
     </attribute>
     <!-- TODO When MRW provides the information, these two attributes
          should be included. values of X come from MRW.
