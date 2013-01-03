@@ -2030,8 +2030,12 @@
         <value>2</value>
     </enumerator>
     <enumerator>
-        <name>NONE</name>
+        <name>SAPPHIRE</name>
         <value>3</value>
+    </enumerator>
+    <enumerator>
+        <name>NONE</name>
+        <value>4</value>
     </enumerator>
     <default>UNKNOWN</default>
 </enumerationType>

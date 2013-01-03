@@ -1619,6 +1619,7 @@ void IntrRp::cleanCheck()
     }
 }
 
+
 //----------------------------------------------------------------------------
 // External interfaces
 //----------------------------------------------------------------------------
@@ -1830,4 +1831,21 @@ errlHndl_t INTR::enablePsiIntr(TARGETING::Target * i_target)
     }
     return err;
 }
+
+uint64_t INTR::getIntpAddr(const TARGETING::Target * i_ex, uint8_t i_thread)
+{
+    const TARGETING::Target * l_proc = getParentChip(i_ex);
+    uint64_t l_intB =l_proc->getAttr<TARGETING::ATTR_INTP_BASE_ADDR>();
+
+    PIR_t pir(0);
+    pir.nodeId = l_proc->getAttr<TARGETING::ATTR_FABRIC_NODE_ID>();
+    pir.chipId = l_proc->getAttr<TARGETING::ATTR_FABRIC_CHIP_ID>();
+    pir.coreId = i_ex->getAttr<TARGETING::ATTR_CHIP_UNIT>();
+    pir.threadId = i_thread;
+
+    return (l_intB+ InterruptMsgHdlr::mmio_offset(
+              pir.word & (InterruptMsgHdlr::P8_PIR_THREADID_MSK |
+                          InterruptMsgHdlr::P8_PIR_COREID_MSK)));
+}
+
 

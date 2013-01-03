@@ -1,25 +1,25 @@
-//  IBM_PROLOG_BEGIN_TAG
-//  This is an automatically generated prolog.
-//
-//  $Source: src/usr/initservice/baseinitsvc/initservice.H $
-//
-//  IBM CONFIDENTIAL
-//
-//  COPYRIGHT International Business Machines Corp. 2011
-//
-//  p1
-//
-//  Object Code Only (OCO) source materials
-//  Licensed Internal Code Source Materials
-//  IBM HostBoot Licensed Internal Code
-//
-//  The source code for this program is not published or other-
-//  wise divested of its trade secrets, irrespective of what has
-//  been deposited with the U.S. Copyright Office.
-//
-//  Origin: 30
-//
-//  IBM_PROLOG_END
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/usr/initservice/baseinitsvc/initservice.H $               */
+/*                                                                        */
+/* IBM CONFIDENTIAL                                                       */
+/*                                                                        */
+/* COPYRIGHT International Business Machines Corp. 2011,2013              */
+/*                                                                        */
+/* p1                                                                     */
+/*                                                                        */
+/* Object Code Only (OCO) source materials                                */
+/* Licensed Internal Code Source Materials                                */
+/* IBM HostBoot Licensed Internal Code                                    */
+/*                                                                        */
+/* The source code for this program is not published or otherwise         */
+/* divested of its trade secrets, irrespective of what has been           */
+/* deposited with the U.S. Copyright Office.                              */
+/*                                                                        */
+/* Origin: 30                                                             */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
 
 #ifndef __BASEINITSVC_INITSERVICE_H
 #define __BASEINITSVC_INITSERVICE_H
@@ -207,6 +207,8 @@ public:
      *                             payload.
      * @param[in] i_payload_entry - The offset from base address of the
      *                              payload entry-point.
+     * @param[in] i_payload_entry - HRMOR adjusted address of any payload data
+     *                              placed in r3
      *
      * @return Nothing
      * @note This calls registered services to notify them of shutdown and it
@@ -214,7 +216,8 @@ public:
      */
     void doShutdown ( uint64_t i_status,
                       uint64_t i_payload_base = 0,
-                      uint64_t i_payload_entry = 0 );
+                      uint64_t i_payload_entry = 0,
+                      uint64_t i_payload_data = 0);
 
 
 protected:

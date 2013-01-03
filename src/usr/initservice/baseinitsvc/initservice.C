@@ -617,11 +617,13 @@ void InitService::registerBlock(void* i_vaddr, uint64_t i_size,
 
 void doShutdown ( uint64_t i_status,
                   uint64_t i_payload_base,
-                  uint64_t i_payload_entry )
+                  uint64_t i_payload_entry,
+                  uint64_t i_payload_data)
 {
     Singleton<InitService>::instance().doShutdown( i_status,
                                                    i_payload_base,
-                                                   i_payload_entry );
+                                                   i_payload_entry,
+                                                   i_payload_data);
 
     while(1)
     {
@@ -631,7 +633,8 @@ void doShutdown ( uint64_t i_status,
 
 void InitService::doShutdown(uint64_t i_status,
                              uint64_t i_payload_base,
-                             uint64_t i_payload_entry)
+                             uint64_t i_payload_entry,
+                             uint64_t i_payload_data)
 {
     int l_rc = 0;
     errlHndl_t l_err = NULL;
@@ -682,7 +685,7 @@ void InitService::doShutdown(uint64_t i_status,
         l_rb_iter++;
     }
 
-    shutdown(i_status, i_payload_base, i_payload_entry);
+    shutdown(i_status, i_payload_base, i_payload_entry, i_payload_data);
 }
 
 bool InitService::registerShutdownEvent(msg_q_t i_msgQ,

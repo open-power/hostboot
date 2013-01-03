@@ -33,6 +33,37 @@ namespace TARGETING
 
 namespace INTR
 {
+    /**
+     * cpu PIR register
+     */
+    struct PIR_t
+    {
+        union
+        {
+            uint32_t word;
+            struct
+            {
+                //P8:
+                uint32_t        reserved:19;    //!< zeros
+                uint32_t        nodeId:3;       //!< node (0-3)
+                uint32_t        chipId:3;       //!< chip pos on node (0-5)
+                uint32_t        coreId:4;       //!< Core number (1-6,9-14)?
+                uint32_t        threadId:3;     //!< Thread number (0-7)
+            } PACKED;
+        };
+        PIR_t(uint32_t i_word = 0) : word(i_word) {}
+
+        PIR_t operator= (uint32_t i_word)
+        {
+            word = i_word;
+            return word;
+        }
+
+        bool operator< (const PIR_t& r) const
+        {
+            return word < r.word;
+        }
+    };
 
     /**
      * External Interrupt Types (XISR)
@@ -164,6 +195,15 @@ namespace INTR
      * @return error log handle on error
      */
     errlHndl_t enablePsiIntr(TARGETING::Target * i_target);
+
+    /**
+     * Return the interrupt presenter for requested target/thread
+     * @param[in] i_ex  The target EX
+     * @param[in] i_thread  Which thread on EX (0-7)
+     * @return 64 bit address for the interrupt present addr
+     */
+    uint64_t getIntpAddr(const TARGETING::Target * i_ex,
+                         uint8_t i_thread);
 
 };
 

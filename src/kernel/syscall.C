@@ -650,6 +650,7 @@ namespace Systemcalls
         uint64_t status = static_cast<uint64_t>(TASK_GETARG0(t));
         KernelMisc::g_payload_base = static_cast<uint64_t>(TASK_GETARG1(t));
         KernelMisc::g_payload_entry = static_cast<uint64_t>(TASK_GETARG2(t));
+        KernelMisc::g_payload_data = static_cast<uint64_t>(TASK_GETARG3(t));
         CpuManager::requestShutdown(status);
         TASK_SETRTN(t, 0);
     }

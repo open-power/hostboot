@@ -30,12 +30,14 @@ using namespace Systemcalls;
 
 void shutdown(uint64_t i_status,
               uint64_t i_payload_base,
-              uint64_t i_payload_entry)
+              uint64_t i_payload_entry,
+              uint64_t i_payload_data)
 {
-    _syscall3(MISC_SHUTDOWN,
+    _syscall4(MISC_SHUTDOWN,
                 reinterpret_cast<void*>(i_status),
                 reinterpret_cast<void*>(i_payload_base),
-                reinterpret_cast<void*>(i_payload_entry));
+                reinterpret_cast<void*>(i_payload_entry),
+                reinterpret_cast<void*>(i_payload_data));
 }
 
 ProcessorCoreType cpu_core_type()

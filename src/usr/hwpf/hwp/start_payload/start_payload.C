@@ -65,6 +65,7 @@
 
 #include    "start_payload.H"
 #include    <runtime/runtime.H>
+#include    <devtree/devtreeif.H>
 
 //  Uncomment these files as they become available:
 // #include    "host_start_payload/host_start_payload.H"
@@ -119,6 +120,7 @@ void*    call_host_runtime_setup( void    *io_pArgs )
 
     do
     {
+
         // Need to load up the runtime module if it isn't already loaded
         if (  !VFS::module_is_loaded( "libruntime.so" ) )
         {
@@ -199,18 +201,32 @@ void*    call_host_runtime_setup( void    *io_pArgs )
             }
             break;
         }
-
-        // Write the HostServices attributes into mainstore
-        l_err = RUNTIME::populate_attributes();
-        if ( l_err )
+        else if( TARGETING::PAYLOAD_KIND_SAPPHIRE == payload_kind)
         {
-            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                    "Could not populate attributes" );
-            // break from do loop if error occured
-            break;
+            // Write the devtree out
+            l_err = DEVTREE::build_flatdevtree();
+            if ( l_err )
+            {
+                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                           "Could not build dev tree" );
+                // break from do loop if error occured
+                break;
+            }
+        }
+        else
+        {
+            // Write the HostServices attributes into mainstore
+            l_err = RUNTIME::populate_attributes();
+            if ( l_err )
+            {
+                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                           "Could not populate attributes" );
+                // break from do loop if error occured
+                break;
+            }
         }
 
-        //  - Update HDAT with tpmd logs
+        //  - Update HDAT/DEVTREE with tpmd logs
 
     } while(0);
 
@@ -331,6 +347,7 @@ errlHndl_t callShutdown ( void )
     errlHndl_t err = NULL;
     uint64_t payloadBase = 0x0;
     uint64_t payloadEntry = 0x0;
+    uint64_t payloadData = 0x0;
     bool istepModeFlag = false;
     uint64_t status = SHUTDOWN_STATUS_GOOD;
 
@@ -417,13 +434,22 @@ errlHndl_t callShutdown ( void )
             break;
         }
 
+        // Load payload data if in SAPPHIRE mode
+        TARGETING::ATTR_PAYLOAD_KIND_type payload_kind
+          = sys->getAttr<TARGETING::ATTR_PAYLOAD_KIND>();
+        if( TARGETING::PAYLOAD_KIND_SAPPHIRE == payload_kind )
+        {
+            payloadData = DEVTREE::get_flatdevtree_phys_addr();
+        }
+
         // do the shutdown.
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                    "callShutdown finished, shutdown = 0x%x.",
                    status );
         INITSERVICE::doShutdown( status,
                                  payloadBase,
-                                 payloadEntry );
+                                 payloadEntry,
+                                 payloadData);
 
     } while( 0 );
 

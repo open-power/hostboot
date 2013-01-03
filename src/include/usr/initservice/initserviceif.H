@@ -84,6 +84,7 @@ bool unregisterShutdownEvent(msg_q_t i_msgQ);
  *                             payload.
  * @param[in] i_payload_entry - The offset from base address of the
  *                              payload entry-point.
+ * @param[in] i_payload_data - Pointer to payload data (if needed)
  *
  * @return Nothing
  *
@@ -91,8 +92,8 @@ bool unregisterShutdownEvent(msg_q_t i_msgQ);
  */
 void doShutdown ( uint64_t i_status,
                   uint64_t i_payload_base = 0,
-                  uint64_t i_payload_entry = 0 ) NO_RETURN;
-
+                  uint64_t i_payload_entry = 0,
+                  uint64_t i_payload_data = 0) NO_RETURN;
 }
 
 #endif

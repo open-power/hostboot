@@ -95,10 +95,13 @@ extern "C"
  *  @param[in] i_payload_base   The base address (target HRMOR) of the payload.
  *  @param[in] i_payload_entry  The offset from base address of the payload
  *                              entry-point.
+ *  @param[in] i_payload_data   Data pointer fo the payload.  For standalone
+ *                              Saphire this is the devtree
  */
 extern "C" void shutdown(uint64_t i_status,
                          uint64_t i_payload_base,
-                         uint64_t i_payload_entry);
+                         uint64_t i_payload_entry,
+                         uint64_t i_payload_data);
 #endif
 
 /** @enum ProcessorCoreType

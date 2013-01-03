@@ -265,6 +265,7 @@ const char KERNEL_COMP_NAME[] = "kernel";
 //@{
 const compId_t IBSCOM_COMP_ID = 0x1C00;
 const char IBSCOM_COMP_NAME[] = "ibscom";
+//@}
 
 
 /** @name VPD
@@ -291,7 +292,6 @@ const compId_t IPC_COMP_ID = 0x1F00;
 const char IPC_COMP_NAME[] = "ipc";
 //@}
 
-
 /** @name HSVC
  * Host Services component
  * For the code running under PHYP
@@ -299,6 +299,14 @@ const char IPC_COMP_NAME[] = "ipc";
 //@{
 const compId_t HSVC_COMP_ID = 0x2000;
 const char HSVC_COMP_NAME[] = "hsvc";
+
+/** @name DEVTREE
+ *  DEVTREE component
+ */
+//@{
+const compId_t DEVTREE_COMP_ID = 0x2100;
+const char DEVTREE_COMP_NAME[] = "devtree";
+//@}
 
 /** @name RESERVED
  *  Reserved component ID. x3100 is the component ID

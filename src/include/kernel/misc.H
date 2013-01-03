@@ -45,6 +45,8 @@ namespace KernelMisc
     extern uint64_t g_payload_base;
     /** @brief Address from base of payload entry-point. */
     extern uint64_t g_payload_entry;
+    /** @brief Address from base of payload data pointer. */
+    extern uint64_t g_payload_data;
 
     /** @fn in_kernel_mode
      *  @brief Determine if the code is currently in kernel mode or not.

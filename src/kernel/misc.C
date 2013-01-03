@@ -38,7 +38,8 @@
 #include <kernel/hbdescriptor.H>
 
 extern "C"
-    void kernel_shutdown(size_t, uint64_t, uint64_t, uint64_t) NO_RETURN;
+    void kernel_shutdown(size_t, uint64_t, uint64_t, uint64_t,
+                         uint64_t) NO_RETURN;
 
 extern HB_Descriptor kernel_hbDescriptor;
 
@@ -47,6 +48,7 @@ namespace KernelMisc
 
     uint64_t g_payload_base = 0;
     uint64_t g_payload_entry = 0;
+    uint64_t g_payload_data = 0;
 
     void shutdown()
     {
@@ -139,6 +141,7 @@ namespace KernelMisc
                 kernel_shutdown(CpuManager::getCpuCount(),
                                 g_payload_base,
                                 g_payload_entry,
+                                g_payload_data,
                                 l_lowestPIR);
             }
         }

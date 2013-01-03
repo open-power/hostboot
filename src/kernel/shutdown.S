@@ -1,25 +1,25 @@
-#   IBM_PROLOG_BEGIN_TAG
-#   This is an automatically generated prolog.
+# IBM_PROLOG_BEGIN_TAG
+# This is an automatically generated prolog.
 #
-#   $Source: src/kernel/shutdown.S $
+# $Source: src/kernel/shutdown.S $
 #
-#   IBM CONFIDENTIAL
+# IBM CONFIDENTIAL
 #
-#   COPYRIGHT International Business Machines Corp. 2012
+# COPYRIGHT International Business Machines Corp. 2012,2013
 #
-#   p1
+# p1
 #
-#   Object Code Only (OCO) source materials
-#   Licensed Internal Code Source Materials
-#   IBM HostBoot Licensed Internal Code
+# Object Code Only (OCO) source materials
+# Licensed Internal Code Source Materials
+# IBM HostBoot Licensed Internal Code
 #
-#   The source code for this program is not published or other-
-#   wise divested of its trade secrets, irrespective of what has
-#   been deposited with the U.S. Copyright Office.
+# The source code for this program is not published or otherwise
+# divested of its trade secrets, irrespective of what has been
+# deposited with the U.S. Copyright Office.
 #
-#   Origin: 30
+# Origin: 30
 #
-#   IBM_PROLOG_END_TAG
+# IBM_PROLOG_END_TAG
 .include "kernel/ppcconsts.S"
 
 #define KERNEL_BARRIER(addr, count, temp) \
@@ -64,7 +64,8 @@
     ;// @param[in] r3 - CPU count - Number of active CPUs.
     ;// @param[in] r4 - Payload Base
     ;// @param[in] r5 - Payload Entry
-    ;// @param[in] r6 - Last thread to enter payload.
+    ;// @param[in] r6 - Payload Data
+    ;// @param[in] r7 - Last thread to enter payload.
     ;//
 .global kernel_shutdown
 kernel_shutdown:
@@ -72,16 +73,16 @@ kernel_shutdown:
     li r10, 1
     rotldi r10, r10, 63
         ;// Retrieve existing HRMOR.
-    mfspr r7, HRMOR
+    mfspr r0, HRMOR
         ;// Determine physical address of shutdown_barrier.
     lis r8, kernel_shutdown_barriers@h
     ori r8, r8, kernel_shutdown_barriers@l
-    or r8, r8, r7       ;// Apply HRMOR.
+    or r8, r8, r0       ;// Apply HRMOR.
     or r8, r8, r10      ;// Apply EA[0] = 1.
         ;// Determine physical address of EA[0]=1 mode instruction.
     lis r9, kernel_shutdown_ea0_1_mode@h
     ori r9, r9, kernel_shutdown_ea0_1_mode@l
-    or r9, r9, r7       ;// Apply HRMOR.
+    or r9, r9, r0       ;// Apply HRMOR.
     or r9, r9, r10      ;// Apply EA[0] = 1.
         ;// Jump to enter EA[0] = 1
     mtlr r9
@@ -110,11 +111,11 @@ kernel_shutdown_ea0_1_mode:
     KERNEL_BARRIER(r8, r3, r11)
 
         ;// "Barrier" 4:
-        ;//     Increment counter as leaving, except PIR == r6 waits.
+        ;//     Increment counter as leaving, except PIR == r7 waits.
     addi r8, r8, 8
-            ;// Check for PIR == r6.
+            ;// Check for PIR == r7.
     mfspr r10, PIR
-    cmp cr0, r10, r6
+    cmp cr0, r10, r7
     beq 3f
         ;// Increment thread count.
 1:
@@ -130,10 +131,12 @@ kernel_shutdown_ea0_1_mode:
         ;// Save MSR, move to HSRR1.
     mfmsr r10
     mtspr HSRR1, r10
+        ;// Move payload data to r3
+    mr  r3,r6
         ;// Jump to entry point. Causes HSRR0 -> NIA, HSSR1 -> MSR.
     hrfid
 
-        ;// PIR == r6 waits here for all others to leave.
+        ;// PIR == r7 waits here for all others to leave.
 3:
     subi r3, r3, 1
 1:
