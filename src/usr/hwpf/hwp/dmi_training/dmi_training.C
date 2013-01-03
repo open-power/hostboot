@@ -1,26 +1,25 @@
-/*  IBM_PROLOG_BEGIN_TAG
- *  This is an automatically generated prolog.
- *
- *  $Source: src/usr/hwpf/hwp/dmi_training/dmi_training.C $
- *
- *  IBM CONFIDENTIAL
- *
- *  COPYRIGHT International Business Machines Corp. 2012
- *
- *  p1
- *
- *  Object Code Only (OCO) source materials
- *  Licensed Internal Code Source Materials
- *  IBM HostBoot Licensed Internal Code
- *
- *  The source code for this program is not published or other-
- *  wise divested of its trade secrets, irrespective of what has
- *  been deposited with the U.S. Copyright Office.
- *
- *  Origin: 30
- *
- *  IBM_PROLOG_END_TAG
- */
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/usr/hwpf/hwp/dmi_training/dmi_training.C $                */
+/*                                                                        */
+/* IBM CONFIDENTIAL                                                       */
+/*                                                                        */
+/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/*                                                                        */
+/* p1                                                                     */
+/*                                                                        */
+/* Object Code Only (OCO) source materials                                */
+/* Licensed Internal Code Source Materials                                */
+/* IBM HostBoot Licensed Internal Code                                    */
+/*                                                                        */
+/* The source code for this program is not published or otherwise         */
+/* divested of its trade secrets, irrespective of what has been           */
+/* deposited with the U.S. Copyright Office.                              */
+/*                                                                        */
+/* Origin: 30                                                             */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
 
 /**
  *  @file dmi_training.C
@@ -496,33 +495,32 @@ void* call_dmi_erepair( void *io_pArgs )
                             l_fapi_endp1_target,
                             l_endp1_txFaillanes,
                             l_endp1_rxFaillanes);
-        }
-
-        if(l_errPtr)
-        {
-            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+            if(l_errPtr)
+            {
+                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
                              "ERROR 0x%.8X : io_restore_erepair HWP"
                              "( mcs 0x%x, mem 0x%x ) ",
                              l_errPtr->reasonCode(),
                              l_mcsNum,
                              l_memNum);
-            /*@
-             * @errortype
-             * @reasoncode  ISTEP_DMI_DRIVE_RESTORE_FAILED
-             * @severity    ERRL_SEV_UNRECOVERABLE
-             * @moduleid    ISTEP_DMI_IO_RESTORE_EREPAIR
-             * @userdata1   bytes 0-1: plid identifying first error
-             *              bytes 2-3: reason code of first error
-             * @userdata2   bytes 0-1: total number of elogs included
-             *              bytes 2-3: N/A
-             * @devdesc     call to io_restore_erepair has failed
-             */
-            l_StepError.addErrorDetails(ISTEP_DMI_DRIVE_RESTORE_FAILED,
-                                        ISTEP_DMI_IO_RESTORE_EREPAIR,
-                                        l_errPtr);
+                /*@
+                 * @errortype
+                 * @reasoncode  ISTEP_DMI_DRIVE_RESTORE_FAILED
+                 * @severity    ERRL_SEV_UNRECOVERABLE
+                 * @moduleid    ISTEP_DMI_IO_RESTORE_EREPAIR
+                 * @userdata1   bytes 0-1: plid identifying first error
+                 *              bytes 2-3: reason code of first error
+                 * @userdata2   bytes 0-1: total number of elogs included
+                 *              bytes 2-3: N/A
+                 * @devdesc     call to io_restore_erepair has failed
+                 */
+                l_StepError.addErrorDetails(ISTEP_DMI_DRIVE_RESTORE_FAILED,
+                                            ISTEP_DMI_IO_RESTORE_EREPAIR,
+                                            l_errPtr);
 
-            errlCommit(l_errPtr, HWPF_COMP_ID);
-            break;
+                errlCommit(l_errPtr, HWPF_COMP_ID);
+                break;
+            }
         }
 
         if(l_endp2_txFaillanes.size() || l_endp2_rxFaillanes.size())
@@ -542,39 +540,33 @@ void* call_dmi_erepair( void *io_pArgs )
                             l_fapi_endp2_target,
                             l_endp2_txFaillanes,
                             l_endp2_rxFaillanes);
-        }
-
-        if (l_errPtr)
-        {
-            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                              "ERROR 0x%.8X : io_restore_erepair HWP"
+            if (l_errPtr)
+            {
+                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                             "ERROR 0x%.8X : io_restore_erepair HWP"
                               "( mcs 0x%x, mem 0x%x ) ",
                               l_errPtr->reasonCode(),
                               l_mcsNum,
                               l_memNum);
 
-            /*@
-             * @errortype
-             * @reasoncode  ISTEP_DMI_RECEIVE_RESTORE_FAILED
-             * @severity    ERRL_SEV_UNRECOVERABLE
-             * @moduleid    ISTEP_DMI_IO_RESTORE_EREPAIR
-             * @userdata1   bytes 0-1: plid identifying first error
-             *              bytes 2-3: reason code of first error
-             * @userdata2   bytes 0-1: total number of elogs included
-             *              bytes 2-3: N/A
-             * @devdesc     call to io_restore_erepair has failed
-             */
-            l_StepError.addErrorDetails(ISTEP_DMI_RECEIVE_RESTORE_FAILED,
-                                        ISTEP_DMI_IO_RESTORE_EREPAIR,
-                                        l_errPtr);
+                /*@
+                 * @errortype
+                 * @reasoncode  ISTEP_DMI_RECEIVE_RESTORE_FAILED
+                 * @severity    ERRL_SEV_UNRECOVERABLE
+                 * @moduleid    ISTEP_DMI_IO_RESTORE_EREPAIR
+                 * @userdata1   bytes 0-1: plid identifying first error
+                 *              bytes 2-3: reason code of first error
+                 * @userdata2   bytes 0-1: total number of elogs included
+                 *              bytes 2-3: N/A
+                 * @devdesc     call to io_restore_erepair has failed
+                 */
+                l_StepError.addErrorDetails(ISTEP_DMI_RECEIVE_RESTORE_FAILED,
+                                            ISTEP_DMI_IO_RESTORE_EREPAIR,
+                                            l_errPtr);
 
-            errlCommit(l_errPtr, HWPF_COMP_ID);
-            break;
-        }
-
-        if(!l_StepError.isNull())
-        {
-            break;
+                errlCommit(l_errPtr, HWPF_COMP_ID);
+                break;
+            }
         }
     } // end for l_mcs_target
 

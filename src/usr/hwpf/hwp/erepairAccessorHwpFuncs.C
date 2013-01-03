@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012                   */
+/* COPYRIGHT International Business Machines Corp. 2012,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -85,7 +85,7 @@ fapi::ReturnCode mnfgCheckFieldVPD(const fapi::Target &i_endp1_target,
  *                                   CHARM operation, FALSE otherwise
  * @param [in]  i_vpdType            Indicates whether to read Mnfg VPD or
  *                                   Field VPD
- 
+ *
  * @return ReturnCode
  */
 fapi::ReturnCode getVerifiedRepairLanes(
@@ -113,7 +113,7 @@ fapi::ReturnCode getVerifiedRepairLanes(
  * @param [out] o_invalidFails_inRx_Ofendp2 If TRUE, indicates that Tx has fail
  *                                          lane numbers for which there is no
  *                                          matching entry on Tx side
- 
+ *
  * @return void
  */
 void invalidateNonMatchingFailLanes(std::vector<uint8_t> &io_endp1_txFaillanes,
@@ -162,10 +162,10 @@ bool removeSpareLanes(const fapi::Target   &i_endp_target,
 
 /**
  * @brief This function determines the lane numbers that needs to be spared
- *        to support Fabric Corner testing.
+ *        to support Corner testing.
  *
- * @param [in]  i_tgtType            The target type(XBus or ABus) for which
- *                                   the lanes that need to be spared are
+ * @param [in]  i_tgtType            The target type(XBus or ABus or DMIBus) for
+ *                                   which the lanes that need to be spared are
  *                                   determined
  * @param [out] o_endp1_txFailLanes  The reference to the vector which will
  *                                   have the Tx side of lanes that need to be
@@ -182,40 +182,11 @@ bool removeSpareLanes(const fapi::Target   &i_endp_target,
  *
  * @return void
  */
-void getFabricCornerTestingLanes(const fapi::TargetType i_tgtType,
-                                std::vector<uint8_t> &o_endp1_txFailLanes,
-                                std::vector<uint8_t> &o_endp1_rxFailLanes,
-                                std::vector<uint8_t> &o_endp2_txFailLanes,
-                                std::vector<uint8_t> &o_endp2_rxFailLanes);
-
-
-/**
- * @brief This function determines the lane numbers that needs to be spared
- *        to support Memory Corner testing.
- *
- * @param [in]  i_tgtType            The target type(MCS or MemBuf) for which
- *                                   the lanes that need to be spared are
- *                                   determined
- * @param [out] o_endp1_txFailLanes  The reference to the vector which will
- *                                   have the MCS_Transmit side of lanes that
- *                                   need to be spared for endp1
- * @param [out] o_endp1_rxFailLanes  The reference to the vector which will
- *                                   have the MCS_Receive side of lanes that
- *                                   need to be spared for endp1
- * @param [out] o_endp2_txFailLanes  The reference to the vector which will
- *                                   have the MemBuf_Transmit side of lanes
- *                                   that need to be spared for endp2
- * @param [out] o_endp2_rxFailLanes  The reference to the vector which will
- *                                   have the MemBuf_Receive side of lanes
- *                                   that need to be spared for endp2
- *
- * @return void
- */
-void getMemoryCornerTestingLanes(const fapi::TargetType i_tgtType,
-                                 std::vector<uint8_t> &o_endp1_txFailLanes,
-                                 std::vector<uint8_t> &o_endp1_rxFailLanes,
-                                 std::vector<uint8_t> &o_endp2_txFailLanes,
-                                 std::vector<uint8_t> &o_endp2_rxFailLanes);
+void getCornerTestingLanes(const fapi::TargetType i_tgtType,
+                           std::vector<uint8_t> &o_endp1_txFailLanes,
+                           std::vector<uint8_t> &o_endp1_rxFailLanes,
+                           std::vector<uint8_t> &o_endp2_txFailLanes,
+                           std::vector<uint8_t> &o_endp2_rxFailLanes);
 
 /**
  * @brief This function combines the eRepair lane numbers read from
@@ -370,7 +341,7 @@ fapi::ReturnCode erepairGetRestoreLanes(const fapi::Target &i_endp1_target,
         else if((l_endp1_tgtType    == fapi::TARGET_TYPE_MCS_CHIPLET
                  && l_endp2_tgtType != fapi::TARGET_TYPE_MEMBUF_CHIP) ||
                 (l_endp1_tgtType    == fapi::TARGET_TYPE_MEMBUF_CHIP
-                 && l_endp2_tgtType != fapi::TARGET_TYPE_MCS_CHIPLET)) 
+                 && l_endp2_tgtType != fapi::TARGET_TYPE_MCS_CHIPLET))
         {
             FAPI_ERR("erepairGetRestoreLanes: Invalid endpoint target"
                      " type %d-%d", l_endp1_tgtType, l_endp2_tgtType);
@@ -444,7 +415,7 @@ fapi::ReturnCode erepairGetRestoreLanes(const fapi::Target &i_endp1_target,
             // TODO: This is a temporary workaround until HWSV gets
             //       the MER0 records into PNOR. As per Dean, the
             //       Manufacturing support is needed by Feb-2013
-            //       RTC Task: 60517 
+            //       RTC Task: 60517
             /*   // Uncomment this block when MER0 is available
             l_rc = getVerifiedRepairLanes(l_endp1_target,
                                           o_endp1_txFaillanes,
@@ -546,7 +517,7 @@ fapi::ReturnCode erepairGetRestoreLanes(const fapi::Target &i_endp1_target,
         o_endp1_rxFaillanes.erase(std::remove(o_endp1_rxFaillanes.begin(),
                                               o_endp1_rxFaillanes.end(),
                                               INVALID_FAIL_LANE_NUMBER),
-                                  o_endp1_rxFaillanes.end());        
+                                  o_endp1_rxFaillanes.end());
 
         // Check if there are invalid lanes in Tx side of endp2.
         // If found, erase them from the vector
@@ -583,7 +554,7 @@ fapi::ReturnCode erepairGetRestoreLanes(const fapi::Target &i_endp1_target,
                      " seen in Tx of endp1 target. No.of lanes: %d",
                      o_endp1_txFaillanes.size());
             // TODO: RTC 60623
-            // Need to provide FFDC data that has - 
+            // Need to provide FFDC data that has -
             // End point targets, Sub-interface type and fail lanes causing
             // threshold exceed
         }
@@ -597,7 +568,7 @@ fapi::ReturnCode erepairGetRestoreLanes(const fapi::Target &i_endp1_target,
                      " seen in Rx of endp1 target. No.of lanes: %d",
                      o_endp1_rxFaillanes.size());
             // TODO: RTC 60623
-            // Need to provide FFDC data that has - 
+            // Need to provide FFDC data that has -
             // End point targets, Sub-interface type and fail lanes causing
             // threshold exceed
         }
@@ -611,7 +582,7 @@ fapi::ReturnCode erepairGetRestoreLanes(const fapi::Target &i_endp1_target,
                      " seen in Tx of endp2 target. No.of lanes: %d",
                      o_endp2_txFaillanes.size());
             // TODO: RTC 60623
-            // Need to provide FFDC data that has - 
+            // Need to provide FFDC data that has -
             // End point targets, Sub-interface type and fail lanes causing
             // threshold exceed
         }
@@ -625,7 +596,7 @@ fapi::ReturnCode erepairGetRestoreLanes(const fapi::Target &i_endp1_target,
                      " seen in Rx of endp2 target. No.of lanes: %d",
                      o_endp2_rxFaillanes.size());
             // TODO: RTC 60623
-            // Need to provide FFDC data that has - 
+            // Need to provide FFDC data that has -
             // End point targets, Sub-interface type and fail lanes causing
             // threshold exceed
         }
@@ -736,30 +707,15 @@ fapi::ReturnCode erepairGetRestoreLanes(const fapi::Target &i_endp1_target,
             }
             */
 
-            if(l_enableDmiSpares &&
-              (l_endp1_tgtType == fapi::TARGET_TYPE_MEMBUF_CHIP ||
-               l_endp1_tgtType == fapi::TARGET_TYPE_MCS_CHIPLET))
+            if(l_enableDmiSpares || l_enableFabricSpares)
             {
-                // This is a Memory Corner testing IPL.
+                // This is a Corner testing IPL.
                 // eRepair Restore the pre-determined memory lanes
-                getMemoryCornerTestingLanes(l_endp1_tgtType,
-                                            o_endp1_txFaillanes,
-                                            o_endp1_rxFaillanes,
-                                            o_endp2_txFaillanes,
-                                            o_endp2_rxFaillanes);
-            }
-
-            if(l_enableFabricSpares &&
-              (l_endp1_tgtType == fapi::TARGET_TYPE_XBUS_ENDPOINT ||
-               l_endp1_tgtType == fapi::TARGET_TYPE_ABUS_ENDPOINT))
-            {
-                // This is a Fabric Corner testing IPL.
-                // eRepair Restore the pre-determined fabric lanes
-                getFabricCornerTestingLanes(l_endp1_tgtType,
-                                            o_endp1_txFaillanes,
-                                            o_endp1_rxFaillanes,
-                                            o_endp2_txFaillanes,
-                                            o_endp2_rxFaillanes);
+                getCornerTestingLanes(l_endp1_tgtType,
+                                      o_endp1_txFaillanes,
+                                      o_endp1_rxFaillanes,
+                                      o_endp2_txFaillanes,
+                                      o_endp2_rxFaillanes);
             }
         } // end of if(l_mnfgModeIPL)
     }while(0);
@@ -794,207 +750,93 @@ void combineFieldandMnfgLanes(std::vector<uint8_t> &i_mnfgFaillanes,
 
 }
 
-void getFabricCornerTestingLanes(const fapi::TargetType i_tgtType,
-                                 std::vector<uint8_t> &o_endp1_txFaillanes,
-                                 std::vector<uint8_t> &o_endp1_rxFaillanes,
-                                 std::vector<uint8_t> &o_endp2_txFaillanes,
-                                 std::vector<uint8_t> &o_endp2_rxFaillanes)
+void getCornerTestingLanes(const fapi::TargetType i_tgtType,
+                           std::vector<uint8_t> &o_endp1_txFaillanes,
+                           std::vector<uint8_t> &o_endp1_rxFaillanes,
+                           std::vector<uint8_t> &o_endp2_txFaillanes,
+                           std::vector<uint8_t> &o_endp2_rxFaillanes)
 {
     std::vector<uint8_t>::iterator l_it;
-    uint8_t l_spareIndx = 0;
+    uint8_t l_deployIndx = 0;
+    uint8_t l_maxDeploys = 0;
+    uint8_t *l_deployPtr = NULL;
 
-    uint8_t l_xSpareLanes[XBUS_MAXSPARES_IN_HW] = {XBUS_8_SPARE_LANE_1,
-                                                   XBUS_8_SPARE_LANE_2};
-    
-    // Idea is to push_back the pre-determined lanes into the Tx and Rx 
-    // vectors of endpoint1 and clear the vectors of endpoint2
+    uint8_t l_xDeployLanes[XBUS_MAXSPARES_IN_HW] = {XBUS_SPARE_DEPLOY_LANE_1,
+                                                    XBUS_SPARE_DEPLOY_LANE_2};
+
+    uint8_t l_aDeployLanes[ABUS_MAXSPARES_IN_HW] = {ABUS_SPARE_DEPLOY_LANE_1};
+
+    uint8_t l_dmiDeployLanes[DMIBUS_MAXSPARES_IN_HW] = {
+                                                 DMIBUS_SPARE_DEPLOY_LANE_1,
+                                                 DMIBUS_SPARE_DEPLOY_LANE_2};
+
+    // Idea is to push_back the pre-determined lanes into the Tx and Rx
+    // vectors of endpoint1 and endpoint2
     do
     {
-        // We can clear out the lanes of endpoint2 because any existing
-        // faillanes in endpoint2 have already been matched with endpoint1.
-        // This means that there cannot be any faillanes in endpoint2 vectors
-        // that do not have equivalent lanes in endpoint1.
-        o_endp2_txFaillanes.clear();
-        o_endp2_rxFaillanes.clear();
-
         switch(i_tgtType)
         {
             case fapi::TARGET_TYPE_XBUS_ENDPOINT:
-
-                for(l_spareIndx = 0;
-                    ((o_endp1_txFaillanes.size() < XBUS_MAXSPARES_IN_HW) &&
-                     (l_spareIndx < XBUS_MAXSPARES_IN_HW));
-                    l_spareIndx++)
-                {
-                    l_it = std::find(o_endp1_txFaillanes.begin(),
-                                     o_endp1_txFaillanes.end(),
-                                     l_xSpareLanes[l_spareIndx]);
-
-                    if(l_it == o_endp1_txFaillanes.end())
-                    {
-                        o_endp1_txFaillanes.push_back(
-                                                  l_xSpareLanes[l_spareIndx]);
-                    }
-                }
-
-                for(l_spareIndx = 0;
-                    ((o_endp1_rxFaillanes.size() < XBUS_MAXSPARES_IN_HW) &&
-                     (l_spareIndx < XBUS_MAXSPARES_IN_HW));
-                    l_spareIndx++)
-                {
-                    l_it = std::find(o_endp1_rxFaillanes.begin(),
-                                     o_endp1_rxFaillanes.end(),
-                                     l_xSpareLanes[l_spareIndx]);
-
-                    if(l_it == o_endp1_rxFaillanes.end())
-                    {
-                        o_endp1_rxFaillanes.push_back(
-                                                  l_xSpareLanes[l_spareIndx]);
-                    }
-                }
+                l_maxDeploys = XBUS_MAXSPARES_IN_HW;
+                l_deployPtr = l_xDeployLanes;
                 break;
 
             case fapi::TARGET_TYPE_ABUS_ENDPOINT:
-
-                if(o_endp1_txFaillanes.size() < ABUS_MAXSPARES_IN_HW)
-                {
-                    l_it = std::find(o_endp1_txFaillanes.begin(),
-                                     o_endp1_txFaillanes.end(),
-                                     ABUS_SPARE_DEPLOY_LANE_1);
-
-                    if(l_it == o_endp1_txFaillanes.end())
-                    {
-                        o_endp1_txFaillanes.push_back(
-                                ABUS_SPARE_DEPLOY_LANE_1);
-                    }
-                }
-
-                if(o_endp1_rxFaillanes.size() < ABUS_MAXSPARES_IN_HW)
-                {
-                    l_it = std::find(o_endp1_rxFaillanes.begin(),
-                                     o_endp1_rxFaillanes.end(),
-                                     ABUS_SPARE_DEPLOY_LANE_1);
-
-                    if(l_it == o_endp1_rxFaillanes.end())
-                    {
-                        o_endp1_rxFaillanes.push_back(
-                                ABUS_SPARE_DEPLOY_LANE_1);
-                    }
-                }
-
+                l_maxDeploys = ABUS_MAXSPARES_IN_HW;
+                l_deployPtr = l_aDeployLanes;
                 break;
 
-                default:
-                FAPI_ERR("getFabricCornerTestingLanes: Invalid target type");
-                break;
-        }; // end of switch case
-    }while(0);
-}
-
-void getMemoryCornerTestingLanes(const fapi::TargetType i_tgtType,
-                                 std::vector<uint8_t> &o_endp1_txFaillanes,
-                                 std::vector<uint8_t> &o_endp1_rxFaillanes,
-                                 std::vector<uint8_t> &o_endp2_txFaillanes,
-                                 std::vector<uint8_t> &o_endp2_rxFaillanes)
-{
-    std::vector<uint8_t>::iterator l_it;
-    uint8_t l_spareIndx = 0;
-
-    uint8_t l_dmiUpSpareLanes[DMIBUS_MAXSPARES_IN_HW] = {
-                                                 DMIBUS_UPSTREAM_SPARE_LANE_1,
-                                                 DMIBUS_UPSTREAM_SPARE_LANE_2};
-
-    uint8_t l_dmiDownSpareLanes[DMIBUS_MAXSPARES_IN_HW] = {
-                                                DMIBUS_DOWNSTREAM_SPARE_LANE_1,
-                                                DMIBUS_DOWNSTREAM_SPARE_LANE_2};
-
-    // Idea is to push_back the pre-determined lanes into the UpStream
-    // and DownStream vectors of endpoint1 and clear the vectors of endpoint2
-    do
-    {
-        // We can clear out the lanes of endpoint2 because any existing
-        // faillanes in endpoint2 have already been matched with endpoint1.
-        // This means that there cannot be any faillanes in endpoint2 vectors
-        // that do not have equivalent lanes in endpoint1.
-        o_endp2_txFaillanes.clear();
-        o_endp2_rxFaillanes.clear();
-
-        switch(i_tgtType)
-        {
             case fapi::TARGET_TYPE_MCS_CHIPLET:
-
-                for(l_spareIndx = 0;
-                    ((o_endp1_txFaillanes.size() < DMIBUS_MAXSPARES_IN_HW) &&
-                     (l_spareIndx < DMIBUS_MAXSPARES_IN_HW));
-                     l_spareIndx++)
-                {
-                    l_it = std::find(o_endp1_txFaillanes.begin(),
-                                     o_endp1_txFaillanes.end(),
-                                     l_dmiDownSpareLanes[l_spareIndx]);
-
-                    if(l_it == o_endp1_txFaillanes.end())
-                    {
-                        o_endp1_txFaillanes.push_back(
-                                            l_dmiDownSpareLanes[l_spareIndx]);
-                    }
-                }
-
-                for(l_spareIndx = 0;
-                    ((o_endp1_rxFaillanes.size() < DMIBUS_MAXSPARES_IN_HW) &&
-                     (l_spareIndx < DMIBUS_MAXSPARES_IN_HW));
-                     l_spareIndx++)
-                {
-                    l_it = std::find(o_endp1_rxFaillanes.begin(),
-                                     o_endp1_rxFaillanes.end(),
-                                     l_dmiUpSpareLanes[l_spareIndx]);
-
-                    if(l_it == o_endp1_rxFaillanes.end())
-                    {
-                        o_endp1_rxFaillanes.push_back(
-                                              l_dmiUpSpareLanes[l_spareIndx]);
-                    }
-                }
-                break;
-
             case fapi::TARGET_TYPE_MEMBUF_CHIP:
-
-                for(l_spareIndx = 0;
-                    ((o_endp1_txFaillanes.size() < DMIBUS_MAXSPARES_IN_HW) &&
-                     (l_spareIndx < DMIBUS_MAXSPARES_IN_HW));
-                     l_spareIndx++)
-                {
-                    l_it = std::find(o_endp1_txFaillanes.begin(),
-                                     o_endp1_txFaillanes.end(),
-                                     l_dmiUpSpareLanes[l_spareIndx]);
-
-                    if(l_it == o_endp1_txFaillanes.end())
-                    {
-                        o_endp1_txFaillanes.push_back(
-                                              l_dmiUpSpareLanes[l_spareIndx]);
-                    }
-                }
-
-                for(l_spareIndx = 0;
-                    ((o_endp1_rxFaillanes.size() < DMIBUS_MAXSPARES_IN_HW) &&
-                     (l_spareIndx < DMIBUS_MAXSPARES_IN_HW));
-                     l_spareIndx++)
-                {
-                    l_it = std::find(o_endp1_rxFaillanes.begin(),
-                                     o_endp1_rxFaillanes.end(),
-                                     l_dmiDownSpareLanes[l_spareIndx]);
-
-                    if(l_it == o_endp1_rxFaillanes.end())
-                    {
-                        o_endp1_rxFaillanes.push_back(
-                                            l_dmiDownSpareLanes[l_spareIndx]);
-                    }
-                }
+                l_maxDeploys = DMIBUS_MAXSPARES_IN_HW;
+                l_deployPtr = l_dmiDeployLanes;
                 break;
 
             default:
-                FAPI_ERR("getMemoryCornerTestingLanes: Invalid target type");
+                FAPI_ERR("getCornerTestingLanes: Invalid target type");
                 break;
-        }; // end of switch case
+        };
+
+        std::sort(o_endp1_txFaillanes.begin(), o_endp1_txFaillanes.end());
+        std::sort(o_endp1_rxFaillanes.begin(), o_endp1_rxFaillanes.end());
+
+        for(l_deployIndx = 0;
+            ((l_deployIndx < l_maxDeploys) &&
+             (o_endp1_txFaillanes.size() < l_maxDeploys));
+            l_deployIndx++)
+        {
+            l_it = std::find(o_endp1_txFaillanes.begin(),
+                             o_endp1_txFaillanes.end(),
+                             l_deployPtr[l_deployIndx]);
+
+            if(l_it == o_endp1_txFaillanes.end())
+            {
+                o_endp1_txFaillanes.push_back(l_deployPtr[l_deployIndx]);
+            }
+        }
+
+        for(l_deployIndx = 0;
+            ((o_endp1_rxFaillanes.size() < l_maxDeploys) &&
+             (l_deployIndx < l_maxDeploys));
+            l_deployIndx++)
+        {
+            l_it = std::find(o_endp1_rxFaillanes.begin(),
+                             o_endp1_rxFaillanes.end(),
+                             l_deployPtr[l_deployIndx]);
+
+            if(l_it == o_endp1_rxFaillanes.end())
+            {
+                o_endp1_rxFaillanes.push_back(l_deployPtr[l_deployIndx]);
+            }
+        }
+
+        // We can cassign the lanes of endpoint1 to endpoint2 because any
+        // existing faillanes in endpoint2 have already been matched with
+        // endpoint1. This means that there cannot be any faillanes in
+        // endpoint2 that do not have equivalent lanes in endpoint1.
+        o_endp2_txFaillanes = o_endp1_txFaillanes;
+        o_endp2_rxFaillanes = o_endp1_rxFaillanes;
+
     }while(0);
 }
 
@@ -1005,10 +847,15 @@ bool removeSpareLanes(const fapi::Target   &i_endp_target,
     fapi::TargetType  l_tgtType     = fapi::TARGET_TYPE_NONE;
     bool              l_sparesFound = false;
     uint8_t           l_spareIndx   = 0;
+    uint8_t           l_maxSpares   = 0;
+    uint8_t           *l_txSparePtr = NULL;
+    uint8_t           *l_rxSparePtr = NULL;
     std::vector<uint8_t>::iterator l_it;
 
     uint8_t l_xSpareLanes[XBUS_MAXSPARES_IN_HW] = {XBUS_8_SPARE_LANE_1,
                                                    XBUS_8_SPARE_LANE_2};
+
+    uint8_t l_aSpareLanes[ABUS_MAXSPARES_IN_HW] = {ABUS_SPARE_LANE_1};
 
     uint8_t l_dmiUpSpareLanes[DMIBUS_MAXSPARES_IN_HW] =
                                                 {DMIBUS_UPSTREAM_SPARE_LANE_1,
@@ -1029,176 +876,66 @@ bool removeSpareLanes(const fapi::Target   &i_endp_target,
         switch(l_tgtType)
         {
             case fapi::TARGET_TYPE_XBUS_ENDPOINT:
-
-                for(l_spareIndx = 0;
-                    l_spareIndx < XBUS_MAXSPARES_IN_HW;
-                    l_spareIndx++)
-                {
-                    // Find if there are spares as faillanes on Tx side,
-                    // and erase all instances
-                    l_it = std::remove(o_txFaillanes.begin(),
-                                       o_txFaillanes.end(),
-                                       l_xSpareLanes[l_spareIndx]);
-
-                    if(l_it != o_txFaillanes.end())
-                    {
-                        FAPI_ERR("removeSpareLanes: Error, XBus spare lane %d"
-                                 " cannot be repaired",
-                                 l_xSpareLanes[l_spareIndx]);                    
-
-                        l_sparesFound = true;
-                        o_txFaillanes.erase(l_it, o_txFaillanes.end());
-                    }
-
-                    // Find if there are spares as faillanes on Rx side,
-                    // and erase all instances
-                    l_it = std::remove(o_rxFaillanes.begin(),
-                                       o_rxFaillanes.end(),
-                                       l_xSpareLanes[l_spareIndx]);
-
-                    if(l_it != o_rxFaillanes.end())
-                    {
-                        FAPI_ERR("removeSpareLanes: Error, XBus spare lane %d"
-                                 " cannot be repaired",
-                                 l_xSpareLanes[l_spareIndx]);
-
-                        l_sparesFound = true;
-                        o_rxFaillanes.erase(l_it, o_rxFaillanes.end());
-                    }
-                }
-
+                l_maxSpares = XBUS_MAXSPARES_IN_HW;
+                l_txSparePtr = l_rxSparePtr = l_xSpareLanes;
                 break;
 
             case fapi::TARGET_TYPE_ABUS_ENDPOINT:
-
-                 // Find if there is fail lane ABUS_SPARE_LANE_1 on Tx side
-                 // and erase all instances
-                 l_it = std::remove(o_txFaillanes.begin(),
-                                    o_txFaillanes.end(),
-                                    ABUS_SPARE_LANE_1);
-                 if(l_it != o_txFaillanes.end())
-                 {
-                     FAPI_ERR("removeSpareLanes: Error, ABus spare lane %d"
-                              " cannot be repaired",
-                              ABUS_SPARE_LANE_1);
-
-                     l_sparesFound = true;
-                     o_txFaillanes.erase(l_it, o_txFaillanes.end());
-                 }
-
-                 // Find if there is fail lane ABUS_SPARE_LANE_1 on Rx side
-                 // and erase all instances
-                 l_it = std::remove(o_rxFaillanes.begin(),
-                                    o_rxFaillanes.end(),
-                                    ABUS_SPARE_LANE_1);
-                 if(l_it != o_rxFaillanes.end())
-                 {
-                     FAPI_ERR("removeSpareLanes: Error, ABus spare lane %d"
-                              " cannot be repaired",
-                              ABUS_SPARE_LANE_1);
-
-                     l_sparesFound = true;
-                     o_rxFaillanes.erase(l_it, o_rxFaillanes.end());
-                 }
-
-                 break;
+                l_maxSpares = ABUS_MAXSPARES_IN_HW;
+                l_txSparePtr = l_rxSparePtr = l_aSpareLanes;
+                break;
 
             case fapi::TARGET_TYPE_MCS_CHIPLET:
-
-                // Find if there are spares as faillanes on Tx(DownStream)
-                // side, and erase all instances
-                for(l_spareIndx = 0;
-                    l_spareIndx < DMIBUS_MAXSPARES_IN_HW;
-                    l_spareIndx++)
-                {
-                    l_it = std::remove(o_txFaillanes.begin(),
-                                       o_txFaillanes.end(),
-                                       l_dmiDownSpareLanes[l_spareIndx]);
-
-                    if(l_it != o_txFaillanes.end())
-                    {
-                        FAPI_ERR("removeSpareLanes: Error, DMIBus spare lane"
-                                 " %d cannot be repaired",
-                                 l_dmiDownSpareLanes[l_spareIndx]);
-
-                        l_sparesFound = true;
-                        o_txFaillanes.erase(l_it, o_txFaillanes.end());
-                    }
-                }
-
-                // Find if there are spares as faillanes on Rx(UpStream),
-                // side, and erase all instances
-                for(l_spareIndx = 0;
-                    l_spareIndx < DMIBUS_MAXSPARES_IN_HW;
-                    l_spareIndx++)
-                {
-                    l_it = std::remove(o_rxFaillanes.begin(),
-                                       o_rxFaillanes.end(),
-                                       l_dmiUpSpareLanes[l_spareIndx]);
-
-                    if(l_it != o_rxFaillanes.end())
-                    {
-                        FAPI_ERR("removeSpareLanes: Error, DMIBus spare lane"
-                                 " %d cannot be repaired",
-                                 l_dmiUpSpareLanes[l_spareIndx]);
-
-                        l_sparesFound = true;
-                        o_rxFaillanes.erase(l_it, o_rxFaillanes.end());
-                    }
-                }
-
+                l_maxSpares = DMIBUS_MAXSPARES_IN_HW;
+                l_txSparePtr = l_dmiDownSpareLanes;
+                l_rxSparePtr = l_dmiUpSpareLanes;
                 break;
 
             case fapi::TARGET_TYPE_MEMBUF_CHIP:
-
-                // Find if there are spares as faillanes on Tx(UpStream)
-                // side, and erase all instances
-                for(l_spareIndx = 0;
-                    l_spareIndx < DMIBUS_MAXSPARES_IN_HW;
-                    l_spareIndx++)
-                {
-                    l_it = std::remove(o_txFaillanes.begin(),
-                                       o_txFaillanes.end(),
-                                       l_dmiUpSpareLanes[l_spareIndx]);
-
-                    if(l_it != o_txFaillanes.end())
-                    {
-                        FAPI_ERR("removeSpareLanes: Error, DMIBus spare lane"
-                                 " %d cannot be repaired",
-                                 l_dmiUpSpareLanes[l_spareIndx]);
-
-                        l_sparesFound = true;
-                        o_txFaillanes.erase(l_it, o_txFaillanes.end());
-                    }
-                }
-
-                // Find if there are spares as faillanes on Rx(DownStream),
-                // side, and erase all instances
-                for(l_spareIndx = 0;
-                    l_spareIndx < DMIBUS_MAXSPARES_IN_HW;
-                    l_spareIndx++)
-                {
-                    l_it = std::remove(o_rxFaillanes.begin(),
-                                       o_rxFaillanes.end(),
-                                       l_dmiDownSpareLanes[l_spareIndx]);
-
-                    if(l_it != o_rxFaillanes.end())
-                    {
-                        FAPI_ERR("removeSpareLanes: Error, DMIBus spare lane"
-                                 " %d cannot be repaired",
-                                 l_dmiDownSpareLanes[l_spareIndx]);
-
-                        l_sparesFound = true;
-                        o_rxFaillanes.erase(l_it, o_rxFaillanes.end());
-                    }
-                }
-
+                l_maxSpares = DMIBUS_MAXSPARES_IN_HW;
+                l_txSparePtr = l_dmiUpSpareLanes;
+                l_rxSparePtr = l_dmiDownSpareLanes;
                 break;
 
             default:
                 FAPI_ERR("removeSpareLanes: Invalid target type %d",l_tgtType);
                 break;
         };
+
+        for(l_spareIndx = 0; l_spareIndx < l_maxSpares; l_spareIndx++)
+        {
+            // Find if there are spares as faillanes on Tx side,
+            // and erase all instances
+            l_it = std::remove(o_txFaillanes.begin(),
+                               o_txFaillanes.end(),
+                               l_txSparePtr[l_spareIndx]);
+
+            if(l_it != o_txFaillanes.end())
+            {
+                FAPI_ERR("removeSpareLanes: Error, spare lane %d"
+                        " cannot be repaired",
+                        l_txSparePtr[l_spareIndx]);
+
+                l_sparesFound = true;
+                o_txFaillanes.erase(l_it, o_txFaillanes.end());
+            }
+
+            // Find if there are spares as faillanes on Rx side,
+            // and erase all instances
+            l_it = std::remove(o_rxFaillanes.begin(),
+                               o_rxFaillanes.end(),
+                               l_rxSparePtr[l_spareIndx]);
+
+            if(l_it != o_rxFaillanes.end())
+            {
+                FAPI_ERR("removeSpareLanes: Error, spare lane %d"
+                         " cannot be repaired",
+                         l_rxSparePtr[l_spareIndx]);
+
+                l_sparesFound = true;
+                o_rxFaillanes.erase(l_it, o_rxFaillanes.end());
+            }
+        }
     }while(0);
 
     return (l_sparesFound);
@@ -1366,7 +1103,6 @@ fapi::ReturnCode mnfgCheckFieldVPD(const fapi::Target &i_endp1_target,
     return (l_rc);
 }
 
-
 fapi::ReturnCode getVerifiedRepairLanes(
                                   const fapi::Target   &i_endp1_target,
                                   std::vector<uint8_t> &o_endp1_txFaillanes,
@@ -1403,67 +1139,41 @@ fapi::ReturnCode getVerifiedRepairLanes(
         if(i_vpdType == EREPAIR_VPD_FIELD)
         {
             l_getLanes = &erepairGetFieldFailedLanes;
-
-            for(l_tgtIndx = 0; l_tgtIndx < 2; l_tgtIndx++)
-            {
-                // Get failed Field lanes for endp1 and endp2
-                l_rc = l_getLanes(l_target[l_tgtIndx],
-                                  l_txFaillanes,
-                                  l_rxFaillanes);
-
-                if(l_rc)
-                {
-                    FAPI_ERR("getVerifiedRepairLanes: Error from"
-                             " erepairGetFieldFailedLanes for %s",
-                             l_target[l_tgtIndx].toEcmdString());
-                    break;                    
-                }
-                if(l_tgtIndx == 0)
-                {
-                    o_endp1_txFaillanes = l_txFaillanes;
-                    o_endp1_rxFaillanes = l_rxFaillanes;
-                }
-                else
-                {
-                    o_endp2_txFaillanes = l_txFaillanes;
-                    o_endp2_rxFaillanes = l_rxFaillanes;
-                }
-
-                l_txFaillanes.clear();
-                l_rxFaillanes.clear();
-            }
+            l_setLanes = &erepairSetFieldFailedLanes;
         }
         else if(i_vpdType == EREPAIR_VPD_MNFG)
         {
             l_getLanes = &erepairGetMnfgFailedLanes;
-            for(l_tgtIndx = 0; l_tgtIndx < 2; l_tgtIndx++)
+            l_setLanes = &erepairSetMnfgFailedLanes;
+        }
+
+        for(l_tgtIndx = 0; l_tgtIndx < 2; l_tgtIndx++)
+        {
+            // Get failed lanes for endp1 and endp2
+            l_rc = l_getLanes(l_target[l_tgtIndx],
+                              l_txFaillanes,
+                              l_rxFaillanes);
+
+            if(l_rc)
             {
-                // Get failed Mnfg lanes for endp1 and endp2
-                l_rc = l_getLanes(l_target[l_tgtIndx],
-                                  l_txFaillanes,
-                                  l_rxFaillanes);
-
-                if(l_rc)
-                {
-                    FAPI_ERR("getVerifiedRepairLanes: Error from"
-                             " erepairGetMnfgFailedLanes for %s",
-                             l_target[l_tgtIndx].toEcmdString());
-                    break;
-                }
-                if(l_tgtIndx == 0)
-                {
-                    o_endp1_txFaillanes = l_txFaillanes;
-                    o_endp1_rxFaillanes = l_rxFaillanes;
-                }
-                else
-                {
-                    o_endp2_txFaillanes = l_txFaillanes;
-                    o_endp2_rxFaillanes = l_rxFaillanes;
-                }
-
-                l_txFaillanes.clear();
-                l_rxFaillanes.clear();
+                FAPI_ERR("getVerifiedRepairLanes: Error while getting failed"
+                         " lanes for %s",
+                         l_target[l_tgtIndx].toEcmdString());
+                break;
             }
+            if(l_tgtIndx == 0)
+            {
+                o_endp1_txFaillanes = l_txFaillanes;
+                o_endp1_rxFaillanes = l_rxFaillanes;
+            }
+            else
+            {
+                o_endp2_txFaillanes = l_txFaillanes;
+                o_endp2_rxFaillanes = l_rxFaillanes;
+            }
+
+            l_txFaillanes.clear();
+            l_rxFaillanes.clear();
         }
 
         if(l_rc)
@@ -1506,132 +1216,65 @@ fapi::ReturnCode getVerifiedRepairLanes(
 
         /***** Correct eRepair data of endp1 in VPD *****/
 
-        if(i_vpdType == EREPAIR_VPD_FIELD)
+        for(l_tgtIndx = 0; l_tgtIndx < 2; l_tgtIndx++)
         {
-            l_setLanes = &erepairSetFieldFailedLanes;
-
-            for(l_tgtIndx = 0; l_tgtIndx < 2; l_tgtIndx++)
+            if(l_tgtIndx == 0)
             {
-                if(l_tgtIndx == 0)
-                {
-                    l_txFaillanes = o_endp1_txFaillanes;
-                    l_rxFaillanes = o_endp1_rxFaillanes;
-                }
-                else
-                {
-                    l_txFaillanes = o_endp2_txFaillanes;
-                    l_rxFaillanes = o_endp2_rxFaillanes;
-                }
+                l_txFaillanes = o_endp1_txFaillanes;
+                l_rxFaillanes = o_endp1_rxFaillanes;
+            }
+            else
+            {
+                l_txFaillanes = o_endp2_txFaillanes;
+                l_rxFaillanes = o_endp2_rxFaillanes;
+            }
 
-                // Update endp1 and endp2 VPD to invalidate fail lanes that do
-                // not have matching fail lanes on the other end
-                if(l_invalidFails_inTx_Ofendp1 && l_invalidFails_inRx_Ofendp1)
+            // Update endp1 and endp2 VPD to invalidate fail lanes that do
+            // not have matching fail lanes on the other end
+            if(l_invalidFails_inTx_Ofendp1 && l_invalidFails_inRx_Ofendp1)
+            {
+                l_rc = l_setLanes(l_target[l_tgtIndx],
+                                  l_txFaillanes,
+                                  l_rxFaillanes);
+                if(l_rc)
                 {
-                    l_rc = l_setLanes(l_target[l_tgtIndx],
-                                      l_txFaillanes,
-                                      l_rxFaillanes);
-                    if(l_rc)
-                    {
-                        FAPI_ERR("getVerifiedRepairLanes: Error from"
-                                 " erepairSetFieldFailedLanes for Tx and Rx lanes"
-                                 " on %s", l_target[l_tgtIndx].toEcmdString());
-                        break;
-                    }
-                }
-                else if(l_invalidFails_inTx_Ofendp1)
-                {
-                    l_rc = l_setLanes(l_target[l_tgtIndx],
-                                    l_txFaillanes,
-                                    l_emptyVector);
-                    if(l_rc)
-                    {
-                        FAPI_ERR("getVerifiedRepairLanes: Error from"
-                                 " erepairSetFieldFailedLanes for Tx lanes on %s",
-                                 l_target[l_tgtIndx].toEcmdString());
-                        break;
-                    }
-                }
-                else if(l_invalidFails_inRx_Ofendp1)
-                {
-                    l_rc = l_setLanes(l_target[l_tgtIndx],
-                                      l_emptyVector,
-                                      l_rxFaillanes);
-                    if(l_rc)
-                    {
-                        FAPI_ERR("getVerifiedRepairLanes: Error from"
-                                 " erepairSetFieldFailedLanes for Rx lanes on %s",
-                                 l_target[l_tgtIndx].toEcmdString());
-                        break;
-                    }
+                    FAPI_ERR("getVerifiedRepairLanes: Error while setting"
+                             " lanes for Tx and Rx on %s",
+                             l_target[l_tgtIndx].toEcmdString());
+                    break;
                 }
             }
-        } // end of if(i_vpdType == EREPAIR_VPD_FIELD)
-        else if(i_vpdType == EREPAIR_VPD_MNFG)
-        {
-            l_setLanes = &erepairSetMnfgFailedLanes;
-
-            for(l_tgtIndx = 0; l_tgtIndx < 2; l_tgtIndx++)
+            else if(l_invalidFails_inTx_Ofendp1)
             {
-                if(l_tgtIndx == 0)
+                l_rc = l_setLanes(l_target[l_tgtIndx],
+                                  l_txFaillanes,
+                                  l_emptyVector);
+                if(l_rc)
                 {
-                    l_txFaillanes = o_endp1_txFaillanes;
-                    l_rxFaillanes = o_endp1_rxFaillanes;
+                    FAPI_ERR("getVerifiedRepairLanes: Error while setting"
+                             " lanes for Tx on %s",
+                             l_target[l_tgtIndx].toEcmdString());
+                    break;
                 }
-                else
+            }
+            else if(l_invalidFails_inRx_Ofendp1)
+            {
+                l_rc = l_setLanes(l_target[l_tgtIndx],
+                                  l_emptyVector,
+                                  l_rxFaillanes);
+                if(l_rc)
                 {
-                    l_txFaillanes = o_endp2_txFaillanes;
-                    l_rxFaillanes = o_endp2_rxFaillanes;
+                    FAPI_ERR("getVerifiedRepairLanes: Error while setting"
+                              " lanes Rx on %s",
+                              l_target[l_tgtIndx].toEcmdString());
+                    break;
                 }
-
-                // Update endp1 and endp2 VPD to invalidate fail lanes that do
-                // not have matching fail lanes on the other end
-                if(l_invalidFails_inTx_Ofendp1 && l_invalidFails_inRx_Ofendp1)
-                {
-                    l_rc = l_setLanes(l_target[l_tgtIndx],
-                                      l_txFaillanes,
-                                      l_rxFaillanes);
-                    if(l_rc)
-                    {
-                        FAPI_ERR("getVerifiedRepairLanes: Error from"
-                                 " erepairSetMnfgFailedLanes for Tx and Rx lanes"
-                                 " on %s", l_target[l_tgtIndx].toEcmdString());
-                        break;
-                    }
-                }
-                else if(l_invalidFails_inTx_Ofendp1)
-                {
-                    l_rc = l_setLanes(l_target[l_tgtIndx],
-                                      l_txFaillanes,
-                                      l_emptyVector);
-                    if(l_rc)
-                    {
-                        FAPI_ERR("getVerifiedRepairLanes: Error from"
-                                 " erepairSetMnfgFailedLanes for Tx lanes on %s",
-                                 l_target[l_tgtIndx].toEcmdString());
-                        break;
-                    }
-                }
-                else if(l_invalidFails_inRx_Ofendp1)
-                {
-                    l_rc = l_setLanes(l_target[l_tgtIndx],
-                                      l_emptyVector,
-                                      l_rxFaillanes);
-                    if(l_rc)
-                    {
-                        FAPI_ERR("getVerifiedRepairLanes: Error from"
-                                 " erepairSetMnfgFailedLanes for Rx lanes on %s",
-                                 l_target[l_tgtIndx].toEcmdString());
-                        break;
-                    }
-                }
-            } // end of for(l_tgtIndx) loop
-        } // end of if(i_vpdType == EREPAIR_VPD_MNFG)
-
+            }
+        } // end of for loop
     }while(0);
 
     return l_rc;
 }
-
 
 void invalidateNonMatchingFailLanes(std::vector<uint8_t> &io_endp1_txFaillanes,
                                     std::vector<uint8_t> &io_endp2_rxFaillanes,
@@ -1639,6 +1282,7 @@ void invalidateNonMatchingFailLanes(std::vector<uint8_t> &io_endp1_txFaillanes,
                                     bool &o_invalidFails_inRx_Ofendp2)
 {
     std::vector<uint8_t>::iterator l_it;
+    std::vector<uint8_t>::iterator l_itTmp;
     std::vector<uint8_t>::iterator l_itDrv;
     std::vector<uint8_t>::iterator l_itRcv;
 
@@ -1650,41 +1294,59 @@ void invalidateNonMatchingFailLanes(std::vector<uint8_t> &io_endp1_txFaillanes,
 
     // Start with drive side fail lanes and check for matching lanes
     // on the recieve side
+    l_itTmp = io_endp2_rxFaillanes.begin();
     for(l_itDrv = io_endp1_txFaillanes.begin();
         l_itDrv != io_endp1_txFaillanes.end();
         l_itDrv++)
     {
-        l_it = std::find(io_endp2_rxFaillanes.begin(),
-                         io_endp2_rxFaillanes.end(),
-                         *l_itDrv);
+        l_it = std::lower_bound(io_endp2_rxFaillanes.begin(),
+                                io_endp2_rxFaillanes.end(),
+                                *l_itDrv);
 
         // If matching fail lane is not found on the receive side,
         // invalidate the drive side fail lane number
-        if(l_it == io_endp2_rxFaillanes.end())
+        if((l_it == io_endp2_rxFaillanes.end()) || (*l_it > *l_itDrv))
         {
             *l_itDrv = INVALID_FAIL_LANE_NUMBER;
             o_invalidFails_inTx_Ofendp1 = true;
         }
+        else
+        {
+            // save the iterator for the next search
+            l_itTmp = l_it;
+        }
     }
 
+    // Sort again as we might have invalidated some lanes
+    std::sort(io_endp1_txFaillanes.begin(),io_endp1_txFaillanes.end());
 
     // Now, traverse through the receive side fail lanes and
     // check for matching lanes on the drive side
     for(l_itRcv = io_endp2_rxFaillanes.begin();
-        l_itRcv != io_endp2_rxFaillanes.end();
+        ((l_itRcv <= l_itTmp) && (l_itRcv != io_endp2_rxFaillanes.end()));
         l_itRcv++)
     {
-        l_it = std::find(io_endp1_txFaillanes.begin(),
-                         io_endp1_txFaillanes.end(),
-                         *l_itRcv);
+        l_it = std::lower_bound(io_endp1_txFaillanes.begin(),
+                                io_endp1_txFaillanes.end(),
+                                *l_itRcv);
 
         // If matching lane is not found on the driver side,
         // invalidate the receive side fail lane number
-        if(l_it == io_endp1_txFaillanes.end())
+        if((l_it == io_endp1_txFaillanes.end()) || (*l_it > *l_itRcv))
         {
             *l_itRcv = INVALID_FAIL_LANE_NUMBER;
             o_invalidFails_inRx_Ofendp2 = true;
-        }        
+        }
+    }
+
+    // Need to invalidate all the entries beyond the last
+    // lower bound of first search
+    if(l_itTmp != io_endp2_rxFaillanes.end())
+    {
+        for(l_itTmp++; l_itTmp != io_endp2_rxFaillanes.end(); l_itTmp++)
+        {
+            *l_itTmp = INVALID_FAIL_LANE_NUMBER;
+        }
     }
 }
 
