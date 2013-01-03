@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012                   */
+/* COPYRIGHT International Business Machines Corp. 2012,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -103,12 +103,13 @@ void monitorForFspMessages()
         if (l_pMsg->type == MSG_SET_OVERRIDES)
         {
             // FSP is setting attribute override(s).
-            FAPI_INF("monitorForFspMessages: MSG_SET_OVERRIDES");
             uint64_t l_size = l_pMsg->data[1];
+            FAPI_INF("monitorForFspMessages: MSG_SET_OVERRIDES (%lld overrides)",
+                     l_size / sizeof(fapi::Attribute));
             Attribute * l_pAttribute =
                 reinterpret_cast<Attribute *>(l_pMsg->extra_data);
             
-            while (l_size > sizeof(fapi::Attribute))
+            while (l_size >= sizeof(fapi::Attribute))
             {
                 Singleton<fapi::OverrideAttributeTank>::instance().
                     setAttribute(*l_pAttribute);
