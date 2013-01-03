@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- IBM CONFIDENTIAL                                                       -->
 <!--                                                                        -->
-<!-- COPYRIGHT International Business Machines Corp. 2012                   -->
+<!-- COPYRIGHT International Business Machines Corp. 2012,2013              -->
 <!--                                                                        -->
 <!-- p1                                                                     -->
 <!--                                                                        -->
@@ -69,6 +69,20 @@
 </hwpError>
 <!-- *********************************************************************** -->
 <hwpError>
+  <rc>RC_PROC_XIPC_PLL_RING_SIZE_TOO_LARGE</rc>
+  <description>PLL ring size returned from attribute is too large.</description>
+  <ffdc>DATA_ATTRIBUTE_RING_SIZE</ffdc>
+  <ffdc>DATA_MAX_PLL_RING_SIZE</ffdc>
+	<ffdc>DATA_SIZE_OF_BUF1</ffdc>
+</hwpError>
+<!-- *********************************************************************** -->
+<hwpError>
+  <rc>RC_PROC_XIPC_IMGBUILD_ERROR</rc>
+  <description>Local IMGBUILD_xyz error from non-FAPI routine. Check rc code in p8_delta_scan_rw.h.</description>
+  <ffdc>RC_LOCAL</ffdc>
+</hwpError>
+<!-- *********************************************************************** -->
+<hwpError>
   <rc>RC_PROC_XIPC_XIP_FIND_ERROR</rc>
   <description>sbe_xip_find() failed w/local rc.</description>
   <ffdc>RC_LOCAL</ffdc>
@@ -84,7 +98,40 @@
   <rc>RC_PROC_XIPC_RS4_COMPRESS_SIZE_MESS</rc>
   <description>Problem with RS4 ring sizes from _rs4_compress().</description>
   <ffdc>DATA_SIZE_RS4_COMPRESS_RETURN</ffdc>
-  <ffdc>DATA_SIZE_RS4_COMPRESS_CONTAINERN</ffdc>
+  <ffdc>DATA_SIZE_RS4_COMPRESS_CONTAINER</ffdc>
+</hwpError>
+<!-- *********************************************************************** -->
+<hwpError>
+  <rc>RC_PROC_XIPC_ILLEGAL_RS4_DECOMPRESS_ADDR</rc>
+  <description>RS4 decompress address has illegal value.</description>
+  <ffdc>DATA_RS4_DECOMPRESS_ADDR</ffdc>
+</hwpError>
+<!-- *********************************************************************** -->
+<hwpError>
+  <rc>RC_PROC_XIPC_PORE_INLINE_CTX_CREATE_ERROR</rc>
+  <description>pore_inline_context_create failed w/local rc.</description>
+  <ffdc>RC_LOCAL</ffdc>
+</hwpError>
+<!-- *********************************************************************** -->
+<hwpError>
+  <rc>RC_PROC_XIPC_PORE_INLINE_RS4_LAUNCH_CREATE_ERROR</rc>
+  <description>pore_MR/ADDS/LI/BRAD failed w/local rc.</description>
+  <ffdc>RC_LOCAL</ffdc>
+</hwpError>
+<!-- *********************************************************************** -->
+<hwpError>
+  <rc>RC_PROC_XIPC_PLL_RING_BLOCK_TOO_LARGE</rc>
+  <description>PLL ring block is too large.</description>
+  <ffdc>DATA_RING_BLOCK_SIZEOFTHIS</ffdc>
+	<ffdc>DATA_SIZE_OF_BUF1</ffdc>
+</hwpError>
+<!-- *********************************************************************** -->
+<hwpError>
+  <rc>RC_PROC_XIPC_RING_BLOCK_ALIGN_ERROR</rc>
+  <description>Problem with RS4 PLL ring block alignment.</description>
+  <ffdc>DATA_SIZE_OF_RS4_LAUNCH</ffdc>
+  <ffdc>DATA_RING_BLOCK_ENTRYOFFSET</ffdc>
+  <ffdc>DATA_RING_BLOCK_SIZEOFTHIS</ffdc>
 </hwpError>
 <!-- *********************************************************************** -->
 <hwpError>
@@ -124,6 +171,12 @@
   <rc>RC_PROC_XIPC_VPD_KEYWORD_RESOLVE_ERROR</rc>
   <description>Unable to resolve local vpd keyword to fapi-level mvpd keyword.</description>
   <ffdc>DATA_RING_LIST_VPD_KEYWORD</ffdc>
+</hwpError>
+<!-- *********************************************************************** -->
+<hwpError>
+  <rc>RC_PROC_XIPC_WRITE_VPD_RING_TO_IMAGE_ERROR</rc>
+  <description>Error occured during write_vpd_ring_to_{ipl,slw}_image()</description>
+  <ffdc>RC_LOCAL</ffdc>
 </hwpError>
 <!-- *********************************************************************** -->
 <hwpError>

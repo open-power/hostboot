@@ -5,7 +5,7 @@
 #
 # IBM CONFIDENTIAL
 #
-# COPYRIGHT International Business Machines Corp. 2011,2012
+# COPYRIGHT International Business Machines Corp. 2011,2013
 #
 # p1
 #
@@ -99,6 +99,7 @@ HWP_ATTR_XML_FILES = hwp/memory_attributes.xml \
                      hwp/runtime_attributes/pm_attributes_all_hwp.xml \
                      hwp/nest_chiplets/proc_pcie_scominit/proc_pcie_scominit_attributes.xml \
                      hwp/dmi_training/proc_cen_set_inband_addr/proc_cen_set_inband_addr_attributes.xml \
+                     hwp/build_winkle_images/p8_slw_build/proc_pll_ring_attributes.xml \
                      hwp/build_winkle_images/p8_slw_build/p8_xip_customize_attributes.xml
 
 #------------------------------------------------------------------------------

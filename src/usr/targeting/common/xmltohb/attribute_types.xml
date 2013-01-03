@@ -9302,4 +9302,446 @@ Measured in GB</description>
     </hwpfToHbAttrMap>
 </attribute>
 
+<attribute>
+    <id>PROC_PERV_BNDY_PLL_DATA</id>
+    <description>Ring image for perv_bndy_pll ring containing filter plls and xb_pll,nest_pll
+      creator: platform
+      firmware notes:
+    </description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+        <array>128</array>
+    </simpleType>
+    <persistency>volatile</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_PROC_PERV_BNDY_PLL_DATA</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>PROC_PB_BNDY_DMIPLL_DATA</id>
+    <description>Ring image for pb_bndy_dmipll ring
+      creator: platform
+      firmware notes:
+    </description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+        <array>192</array>
+    </simpleType>
+    <persistency>volatile</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_PROC_PB_BNDY_DMIPLL_DATA</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>PROC_PB_BNDY_DMIPLL_FOR_DCCAL_DATA</id>
+    <description>Ring image for pb_bndy_dmipll ring for DC cal
+      creator: platform
+      firmware notes:
+    </description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+        <array>192</array>
+    </simpleType>
+    <persistency>volatile</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_PROC_PB_BNDY_DMIPLL_FOR_DCCAL_DATA</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>PROC_AB_BNDY_PLL_DATA</id>
+    <description>Ring image for ab_bndy_pll ring
+      creator: platform
+      firmware notes:
+    </description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+        <array>80</array>
+    </simpleType>
+    <persistency>volatile</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_PROC_AB_BNDY_PLL_DATA</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>PROC_AB_BNDY_PLL_FOR_DCCAL_DATA</id>
+    <description>Ring image for ab_bndy_pll ring
+      creator: platform
+      firmware notes:
+    </description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+        <array>80</array>
+    </simpleType>
+    <persistency>volatile</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_PROC_AB_BNDY_PLL_FOR_DCCAL_DATA</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>PROC_PCI_BNDY_PLL_DATA</id>
+    <description>Ring image for pci_bndy_pll ring
+      creator: platform
+      firmware notes:
+    </description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+        <array>80</array>
+    </simpleType>
+    <persistency>volatile</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_PROC_PCI_BNDY_PLL_DATA</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>PROC_PERV_BNDY_PLL_LENGTH</id>
+    <description>Length of data in ring image for perv_bndy_pll ring containing filter plls and xb_pll,nest_pll
+      creator: platform
+      firmware notes:
+    </description>
+    <simpleType>
+        <uint32_t>
+            <default>128</default>
+        </uint32_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_PROC_PERV_BNDY_PLL_LENGTH</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>PROC_PB_BNDY_DMIPLL_LENGTH</id>
+    <description>Length of data in ring image for pb_bndy_dmipll ring
+      creator: platform
+      firmware notes:
+    </description>
+    <simpleType>
+        <uint32_t>
+            <default>192</default>
+        </uint32_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_PROC_PB_BNDY_DMIPLL_LENGTH</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>PROC_AB_BNDY_PLL_LENGTH</id>
+    <description>Length of data in ring image for ab_bndy_pll ring
+      creator: platform
+      firmware notes:
+    </description>
+    <simpleType>
+        <uint32_t>
+            <default>80</default>
+        </uint32_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_PROC_AB_BNDY_PLL_LENGTH</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>PROC_PCI_BNDY_PLL_LENGTH</id>
+    <description>Length of data in ring image for pci_bndy_pll ring
+      creator: platform
+      firmware notes:
+    </description>
+    <simpleType>
+        <uint32_t>
+            <default>80</default>
+        </uint32_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_PROC_PCI_BNDY_PLL_LENGTH</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>PROC_PERV_BNDY_PLL_FLUSH</id>
+    <description>Ring flush image for perv_bndy_pll ring containing filter plls and xb_pll,nest_pll
+      creator: platform
+      firmware notes:
+    </description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+        <array>128</array>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_PROC_PERV_BNDY_PLL_FLUSH</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>PROC_PB_BNDY_DMIPLL_FLUSH</id>
+    <description>Ring flush image for pb_bndy_dmipll ring
+      creator: platform
+      firmware notes:
+    </description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+        <array>192</array>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_PROC_PB_BNDY_DMIPLL_FLUSH</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>PROC_AB_BNDY_PLL_FLUSH</id>
+    <description>Ring flush image for ab_bndy_pll ring
+      creator: platform
+      firmware notes:
+    </description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+        <array>80</array>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_PROC_AB_BNDY_PLL_FLUSH</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>PROC_PCI_BNDY_PLL_FLUSH</id>
+    <description>Ring flush image for pci_bndy_pll ring
+      creator: platform
+      firmware notes:
+    </description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+        <array>80</array>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_PROC_PCI_BNDY_PLL_FLUSH</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>PROC_PERV_BNDY_PLL_CHIPLET_ID</id>
+    <description>Chiplet ID for ring image for perv_bndy_pll ring containing filter plls and xb_pll,nest_pll
+      creator: platform
+      firmware notes:
+    </description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+    </simpleType>
+    <persistency>volatile</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_PROC_PERV_BNDY_PLL_CHIPLET_ID</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>PROC_PB_BNDY_DMIPLL_CHIPLET_ID</id>
+    <description>Chiplet ID for ring image for pb_bndy_dmipll ring
+      creator: platform
+      firmware notes:
+    </description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+    </simpleType>
+    <persistency>volatile</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_PROC_PB_BNDY_DMIPLL_CHIPLET_ID</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>PROC_AB_BNDY_PLL_CHIPLET_ID</id>
+    <description>Chiplet ID for ring image for ab_bndy_pll ring
+      creator: platform
+      firmware notes:
+    </description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+    </simpleType>
+    <persistency>volatile</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_PROC_AB_BNDY_PLL_CHIPLET_ID</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>PROC_PCI_BNDY_PLL_CHIPLET_ID</id>
+    <description>Chiplet ID for ring image for pci_bndy_pll ring
+      creator: platform
+      firmware notes:
+    </description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+    </simpleType>
+    <persistency>volatile</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_PROC_PCI_BNDY_PLL_CHIPLET_ID</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>PROC_PERV_BNDY_PLL_SCAN_SELECT</id>
+    <description>Scan select for ring image for perv_bndy_pll ring containing filter plls and xb_pll,nest_pll
+      creator: platform
+      firmware notes:
+    </description>
+    <simpleType>
+        <uint32_t>
+            <default>0</default>
+        </uint32_t>
+    </simpleType>
+    <persistency>volatile</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_PROC_PERV_BNDY_PLL_SCAN_SELECT</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>PROC_PB_BNDY_DMIPLL_SCAN_SELECT</id>
+    <description>Scan select for ring image for pb_bndy_dmipll ring
+      creator: platform
+      firmware notes:
+    </description>
+    <simpleType>
+        <uint32_t>
+            <default>0</default>
+        </uint32_t>
+    </simpleType>
+    <persistency>volatile</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_PROC_PB_BNDY_DMIPLL_SCAN_SELECT</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>PROC_AB_BNDY_PLL_SCAN_SELECT</id>
+    <description>Scan select for ring image for ab_bndy_pll ring
+      creator: platform
+      firmware notes:
+    </description>
+    <simpleType>
+        <uint32_t>
+            <default>0</default>
+        </uint32_t>
+    </simpleType>
+    <persistency>volatile</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_PROC_AB_BNDY_PLL_SCAN_SELECT</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>PROC_PCI_BNDY_PLL_SCAN_SELECT</id>
+    <description>Scan select for ring image for pci_bndy_pll ring
+      creator: platform
+      firmware notes:
+    </description>
+    <simpleType>
+        <uint32_t>
+            <default>0</default>
+        </uint32_t>
+    </simpleType>
+    <persistency>volatile</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_PROC_PCI_BNDY_PLL_SCAN_SELECT</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
 </attributes>

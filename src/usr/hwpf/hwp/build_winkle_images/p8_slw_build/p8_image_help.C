@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012                   */
+/* COPYRIGHT International Business Machines Corp. 2012,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_image_help.C,v 1.32 2012/11/14 12:33:45 cmolsen Exp $
+// $Id: p8_image_help.C,v 1.35 2013/01/02 23:00:00 cmolsen Exp $
 //
 /*------------------------------------------------------------------------------*/
 /* *! TITLE : p8_image_help.C                                                   */
@@ -229,12 +229,6 @@ int create_wiggle_flip_prg( uint32_t *i_deltaRing,          // scan ring delta s
 
 	maxWfInlineLenInWords = *o_wfInlineLenInWords;
 	
-/* 2012-11-13: CMO- Commented out since both slw_build and centaur_build now pass
-               preallocated buffers.
-  if (*o_wfInline==NULL)
-		*o_wfInline = (uint32_t*)malloc(maxWfInlineLenInWords);
-*/
-
   pore_inline_context_create(&ctx, *o_wfInline, maxWfInlineLenInWords * 4, 0, 0);
   
   // Get chiplet and Ring Addr info.
@@ -438,7 +432,7 @@ int create_wiggle_flip_prg( uint32_t *i_deltaRing,          // scan ring delta s
           return ctx.error;
         }  
 #else
-        scanRing_poreAddr=scanRing_baseAddr | rotateLen;
+        scanRing_poreAddr = scanRing_baseAddr | rotateLen;
         pore_LD(&ctx, D0, scanRing_poreAddr, P1);
         if (ctx.error > 0)  {
           MY_ERR("***LD D0 rc = %d", ctx.error);
@@ -1179,13 +1173,12 @@ int update_runtime_scom_pointer( void *io_image)
 }
 
 
-
 // write_vpd_ring_to_ipl_image()
 // - For VPD rings, there is no notion of a base and override ring. There can only be
 //   one ring. Thus, for core ID specific rings, their vector locations are updated only
 //   by 8-bytes, unlike 16-bytes for non-VPD rings which have base+override.
 // - Any ring, including ex_ rings, that have a chipletId==0xFF will get stored at its
-//   "top" or base position, i.e. as if it was coreId=0, or chipletId=0x10.
+//   zero-offset position, i.e. as if it was coreId=0, or chipletId=0x10.
 // - For IPL images, #R/G must be accessible through .fixed_toc since .toc is removed.
 //   and same is true for proc_sbe_decompress_scan_chiplet_address (for RS4 launch.)
 // Notes:
@@ -1193,30 +1186,25 @@ int update_runtime_scom_pointer( void *io_image)
 //   Consider merging the two codes.
 int write_vpd_ring_to_ipl_image(void			*io_image,
                                 uint32_t  &io_sizeImageOut,
-														  	CompressedScanData *i_bufRs4Ring,
+														  	CompressedScanData *i_bufRs4Ring, // HB buf1
 															  uint32_t  i_ddLevel,
 															  uint8_t   i_sysPhase,
 															  char 			*i_ringName,
-															  void      *i_bufTmp,
+															  void      *i_bufTmp,              // HB buf2
 															  uint32_t  i_sizeBufTmp)
 {
 	uint32_t rc=0, bufLC;
-	uint8_t  chipletId, coreId;
+	uint8_t  chipletId, idxVector=0;
 	uint32_t sizeRs4Launch, sizeRs4Ring;
-	uint32_t sizeImageIn, sizeImageOut, sizeImageOutEst, sizeNewDataBlock;
+	uint32_t sizeImageIn;
 	PoreInlineContext ctx;
 	uint32_t asmInitLC=0;
 	uint32_t asmBuffer[ASM_RS4_LAUNCH_BUF_SIZE/4];
-	void     *ringsBuffer=NULL;
 	uint64_t scanChipletAddress=0;
-	Rs4RingLayout rs4RingLayout, rs4RingLayoutBE;
-	uint32_t ringsDataBlockOffset=0;
-	uint64_t ringsDataBlockPoreAddr=0, addrOfFwdPtr=0;
-	SbeXipItem tocItem;
 	
   SBE_XIP_ERROR_STRINGS(errorStrings);
 
-	MY_INF("i_ringName=%s",	i_ringName);
+	MY_INF("i_ringName=%s; \n",	i_ringName);
 
   if (i_bufTmp == NULL)  {
     MY_ERR("\tTemporary ring buffer passed by caller points to NULL and is invalid.\n");
@@ -1225,6 +1213,8 @@ int write_vpd_ring_to_ipl_image(void			*io_image,
 
   sbe_xip_image_size( io_image, &sizeImageIn);
   
+  chipletId = i_bufRs4Ring->iv_chipletId;
+
 	// Create RS4 launcher and store in asmBuffer.
 	//
 	rc = sbe_xip_get_scalar( io_image, "proc_sbe_decompress_scan_chiplet_address", &scanChipletAddress);
@@ -1279,214 +1269,287 @@ int write_vpd_ring_to_ipl_image(void			*io_image,
 			return IMGBUILD_ERR_CHECK_CODE;
 	}
 
-	// Obtain the back pointer to the .data item, i.e. the location of the ptr associated 
-	//   with the ring name in the -> .fixed_toc <- (since .toc is removed in IPL images.)
+	// Populate ring header and put ring header and Rs4 ring into
+	// proper spots in pre-allocated bufRs4RingBlock buffer (HB buf2).
 	//
-	rc = sbe_xip_find( io_image, i_ringName, &tocItem);
-  if (rc)   {
-      MY_ERR("\tWARNING: sbe_xip_find() failed: %s\n", SBE_XIP_ERROR_STRING(errorStrings, rc));
-      if (rc==SBE_XIP_ITEM_NOT_FOUND)  {
-				MY_ERR("\tProbable cause:\n");
-				MY_ERR("\t\tThe variable name supplied (=%s) is not a valid key word in the image. (No .fixed_toc record.)\n",
-					i_ringName);
-				return IMGBUILD_ERR_KEYWORD_NOT_FOUND;
-			} 
-			else  {
-				MY_ERR("\tUnknown cause.\n");
-  	    return IMGBUILD_ERR_XIP_UNKNOWN;
-  	  }
-  }
-
-  // Store the forward pointer at the ring's vector:
-  // - For VPD rings, there is no notion of a base and override ring. There can only be
-  //   one ring. Thus, for core ID specific rings, their vector locations are updated in
-  //   8-byte increments, unlike 16-bytes for non-VPD rings which have base+override.
-  //   2012-11-12: According to Jeshua, #G might have overrides!
-  // - Any ring, including ex_ rings, that have a chipletId==0xFF will get stored at its
-  //   zero-offset position.
-  chipletId = i_bufRs4Ring->iv_chipletId;
-	if (chipletId>=0x10 && chipletId<0x20)  {
-    coreId = chipletId - 0x10;
-  	addrOfFwdPtr = tocItem.iv_address + 8*coreId;
+	DeltaRingLayout *bufRs4RingBlock;
+	uint64_t entryOffsetRs4RingBlock;
+	uint32_t sizeRs4RingBlock, sizeRs4RingBlockMax;
+	
+	bufRs4RingBlock = (DeltaRingLayout*)i_bufTmp; //HB buf2.
+  sizeRs4RingBlockMax = i_sizeBufTmp;
+  entryOffsetRs4RingBlock      = calc_ring_layout_entry_offset( 0, 0);
+  bufRs4RingBlock->entryOffset = myRev64(entryOffsetRs4RingBlock);
+  bufRs4RingBlock->backItemPtr = 0; // Will be updated later.
+	sizeRs4RingBlock     	       =	entryOffsetRs4RingBlock +  // Must be 8-byte aligned.
+  												        sizeRs4Launch +            // Must be 8-byte aligned.
+  												        sizeRs4Ring;               // Must be 8-byte aligned.
+	// Quick check to see if final ring block size will fit in HB buffer.
+	if (sizeRs4RingBlock>sizeRs4RingBlockMax)  {
+	  MY_ERR("RS4 ring block size (=%i) exceeds HB buf2 size (=%i).",
+	    sizeRs4RingBlock, sizeRs4RingBlockMax);
+	  return IMGBUILD_ERR_RING_TOO_LARGE;
 	}
+	// Populate RS4 ring block members.
+	bufRs4RingBlock->sizeOfThis  = myRev32(sizeRs4RingBlock);
+	bufRs4RingBlock->sizeOfMeta	 = 0;
+	bufRs4RingBlock->ddLevel     = myRev32(i_ddLevel);
+	bufRs4RingBlock->sysPhase    = i_sysPhase;
+	bufRs4RingBlock->override    = 0;
+	bufRs4RingBlock->reserved1   = 0;
+	bufRs4RingBlock->reserved2   = 0;
+  // Add the RS4 launch code and RS4 ring data...
+	bufLC = (uint32_t)entryOffsetRs4RingBlock;
+	// Copy over meta data which is zero, so nothing to do in this case!
+	// Copy over RS4 launch code which is already 8-byte aligned.
+	memcpy( (uint8_t*)bufRs4RingBlock+bufLC, (uint8_t*)asmBuffer, (size_t)sizeRs4Launch);
+	bufLC = bufLC + sizeRs4Launch;
+	// Copy over RS4 delta ring which is already BE formatted.
+	memcpy( (uint8_t*)bufRs4RingBlock+bufLC, (uint8_t*)i_bufRs4Ring, (size_t)sizeRs4Ring);
+
+  // Now, some post-sanity checks on alignments.
+	if ( entryOffsetRs4RingBlock%8 || 
+	     sizeRs4RingBlock%8)  {
+		MY_ERR("Member(s) of RS4 ring block are not 8-byte aligned; \n");
+    MY_ERR("  Entry offset            = %i; \n", (uint32_t)entryOffsetRs4RingBlock);
+		MY_ERR("  Size of ring block      = %i; \n", sizeRs4RingBlock);
+		return IMGBUILD_ERR_MISALIGNED_RING_LAYOUT;
+	}
+
+  // Calculate any vector offset, i.e., in case of ex_ chiplet common ring name.
+	if (chipletId>=CID_EX_LOW && chipletId<=CID_EX_HIGH)
+    idxVector = chipletId - CID_EX_LOW;
 	else
-  	addrOfFwdPtr = tocItem.iv_address;
-	MY_INF("Addr of forward ptr = 0x%016llx\n", addrOfFwdPtr);
-	
-	// Populate the local ring layout structure
-	//
-	rs4RingLayout.entryOffset = (uint64_t)(
-	                          sizeof(rs4RingLayout.entryOffset) +
-														sizeof(rs4RingLayout.backItemPtr) +
-														sizeof(rs4RingLayout.sizeOfThis) +
-														sizeof(rs4RingLayout.sizeOfMeta) +
-														sizeof(rs4RingLayout.ddLevel) +
-														sizeof(rs4RingLayout.sysPhase) +
-														sizeof(rs4RingLayout.override) +
-														sizeof(rs4RingLayout.reserved1) +
-														sizeof(rs4RingLayout.reserved2) +
-														0 ); // No meta data => automatic 8-byte align of RS4 launch.
-	rs4RingLayout.backItemPtr	= addrOfFwdPtr;
-	rs4RingLayout.sizeOfThis 	=	rs4RingLayout.entryOffset +      // Must be 8-byte aligned.
-	                            sizeRs4Launch +                  // Must be 8-byte aligned.
-															sizeRs4Ring;                     // Must be 8-byte aligned.
-	rs4RingLayout.sizeOfMeta  = 0;
-	rs4RingLayout.ddLevel			= i_ddLevel; 
-	rs4RingLayout.sysPhase		= i_sysPhase;
-	rs4RingLayout.override		= 0; // Doesn't apply for VPD ring. Always "base".
-	rs4RingLayout.reserved1		= 0;
-	rs4RingLayout.reserved2		= 0;
-	
-	if (rs4RingLayout.entryOffset%8)  {
-		MY_ERR("\tRS4 launch code entry not 8-byte aligned.\n\trs4RingLayout.entryOffset=%i",
-		  (uint32_t)rs4RingLayout.entryOffset);
-		return IMGBUILD_ERR_CHECK_CODE;
-	}
-	if (rs4RingLayout.sizeOfThis%8)  {
-		MY_ERR("\tRS4 ring layout not 8-byte aligned.\n\trs4RingLayout.sizeOfThis=%i\n",
-		  rs4RingLayout.sizeOfThis);
-		return IMGBUILD_ERR_CHECK_CODE;
-	}
-			
-	// Calc the size of the data section we're adding and the resulting output image's
-	// max size (needed for sbe_xip_append() )..
-	//
-	sizeNewDataBlock = rs4RingLayout.sizeOfThis;
-  sizeImageOutEst = sizeImageIn + sizeNewDataBlock + SBE_XIP_MAX_SECTION_ALIGNMENT;
-  if (sizeImageOutEst>io_sizeImageOut)  {
-    MY_ERR("Estimated new image size (=%i) would exceed max allowed image size (=%i).",
-      sizeImageOutEst, io_sizeImageOut);
-    io_sizeImageOut = sizeImageOutEst;
-    return IMGBUILD_ERR_IMAGE_TOO_LARGE;
-  }
-      
-	MY_INF("\tInput image size\t\t= %6i\n\tNew initf data block size\t= %6i\n\tOutput image size (max)\t\t= %6i\n",
-		sizeImageIn, sizeNewDataBlock, sizeImageOutEst);
-	MY_INF("\tentryOffset = %i\n\tsizeOfThis = %i\n",
-		(uint32_t)rs4RingLayout.entryOffset, rs4RingLayout.sizeOfThis);
-	MY_INF("\tRS4 launch size = %i\n\tRS4 delta size = %i\n", sizeRs4Launch, sizeRs4Ring);
-	MY_INF("\tBack item ptr = 0x%016llx\n",	rs4RingLayout.backItemPtr);
-	MY_INF("\tDD level = %i\n\tSys phase = %i\n\tOverride = %i\n",
-		rs4RingLayout.ddLevel, rs4RingLayout.sysPhase, rs4RingLayout.override);
+  	idxVector = 0;
 
-	// Combine rs4RingLayout members into a unified buffer (ringsBuffer).
-	//
-	if (sizeNewDataBlock>i_sizeBufTmp)  {
-    MY_ERR("New ring data block size (=%i) would exceed max allowed size (=%i).",
-      sizeNewDataBlock, i_sizeBufTmp);
-    return IMGBUILD_ERR_RING_TOO_LARGE;
-	}
-	ringsBuffer = i_bufTmp;
-  // ... and copy the rs4 ring layout data into ringsBuffer in BIG-ENDIAN format.
-  bufLC = 0;
-  rs4RingLayoutBE.entryOffset = myRev64(rs4RingLayout.entryOffset);
-	memcpy( (uint8_t*)ringsBuffer+bufLC, &rs4RingLayoutBE.entryOffset, sizeof(rs4RingLayoutBE.entryOffset));
-	
-	bufLC = bufLC + sizeof(rs4RingLayoutBE.entryOffset);
-	rs4RingLayoutBE.backItemPtr = myRev64(rs4RingLayout.backItemPtr);
-	memcpy( (uint8_t*)ringsBuffer+bufLC, &rs4RingLayoutBE.backItemPtr,  sizeof(rs4RingLayoutBE.backItemPtr));
-	
-	bufLC = bufLC + sizeof(rs4RingLayoutBE.backItemPtr);
-	rs4RingLayoutBE.sizeOfThis = myRev32(rs4RingLayout.sizeOfThis);
-	memcpy( (uint8_t*)ringsBuffer+bufLC, &rs4RingLayoutBE.sizeOfThis,  sizeof(rs4RingLayoutBE.sizeOfThis));
-	
-	bufLC = bufLC + sizeof(rs4RingLayoutBE.sizeOfThis);
-	rs4RingLayoutBE.sizeOfMeta = myRev32(rs4RingLayout.sizeOfMeta);
-	memcpy( (uint8_t*)ringsBuffer+bufLC, &rs4RingLayoutBE.sizeOfMeta,  sizeof(rs4RingLayoutBE.sizeOfMeta));
-	
-	bufLC = bufLC + sizeof(rs4RingLayoutBE.sizeOfMeta);
-	rs4RingLayoutBE.ddLevel = myRev32(rs4RingLayout.ddLevel);
-	memcpy( (uint8_t*)ringsBuffer+bufLC, &rs4RingLayoutBE.ddLevel,  sizeof(rs4RingLayoutBE.ddLevel));
-	
-	bufLC = bufLC + sizeof(rs4RingLayoutBE.ddLevel);
-	rs4RingLayoutBE.sysPhase = myRev32(rs4RingLayout.sysPhase);
-	memcpy( (uint8_t*)ringsBuffer+bufLC, &rs4RingLayout.sysPhase,  sizeof(rs4RingLayoutBE.sysPhase));
-	
-	bufLC = bufLC + sizeof(rs4RingLayoutBE.sysPhase);
-	rs4RingLayoutBE.override = myRev32(rs4RingLayout.override);
-	memcpy( (uint8_t*)ringsBuffer+bufLC, &rs4RingLayout.override,  sizeof(rs4RingLayoutBE.override));
-	
-	bufLC = bufLC + sizeof(rs4RingLayoutBE.override);
-	rs4RingLayoutBE.reserved1 = myRev32(rs4RingLayout.reserved1);
-	memcpy( (uint8_t*)ringsBuffer+bufLC, &rs4RingLayout.reserved1,  sizeof(rs4RingLayoutBE.reserved1));
-	
-	bufLC = bufLC + sizeof(rs4RingLayoutBE.reserved1);
-	rs4RingLayoutBE.reserved2 = myRev32(rs4RingLayout.reserved2);
-	memcpy( (uint8_t*)ringsBuffer+bufLC, &rs4RingLayout.reserved2,  sizeof(rs4RingLayoutBE.reserved2));
-	
-	bufLC = bufLC + sizeof(rs4RingLayoutBE.reserved2);
-  
-  if (bufLC!=(uint32_t)rs4RingLayout.entryOffset)  {
-    MY_ERR("Inconsistent calculations of entryOffset to RS4 launch code.\n");
-    return IMGBUILD_ERR_CHECK_CODE;
+  // Write ring block to image.
+	rc = write_ring_block_to_image(io_image,
+	                               i_ringName,
+	                               bufRs4RingBlock,
+	                               idxVector,
+	                               0,
+	                               0,
+	                               io_sizeImageOut);
+  if (rc)  {
+  	MY_ERR("write_ring_block_to_image() failed w/rc=%i",rc);
+    MY_ERR("Check p8_delta_scan_rw.h for meaning of IMGBUILD_xyz rc code.");
+    return IMGBUILD_ERR_RING_WRITE_TO_IMAGE;
   }
 
-	// RS4 launch buffer alread BE formatted.
-	memcpy( (uint8_t*)ringsBuffer+bufLC, (uint8_t*)asmBuffer, (size_t)sizeRs4Launch);
-
-	bufLC = bufLC + sizeRs4Launch;               // This is [already] 8-byte aligned.
-	if (bufLC%8)  {
-		MY_ERR("\tRS4 ring layout (during buffer copy) is not 8-byte aligned.\n\tbufLC=%i\n",
-		  bufLC);
-		return IMGBUILD_ERR_CHECK_CODE;
-	}
-
-	// RS4 delta ring already BE formatted.
-	memcpy( (uint8_t*)ringsBuffer+bufLC, (uint8_t*)i_bufRs4Ring, (size_t)sizeRs4Ring);
-	
-	// Append rs4DeltaLayout to .rings section of in-memory input image.
-	//   Note! All rs4DeltaLayout members should already be 8-byte aligned.
-	//
-	ringsDataBlockOffset = 0;
-	rc = sbe_xip_append( 	io_image, 
-												SBE_XIP_SECTION_RINGS, 
-												(void*)ringsBuffer,
-												sizeNewDataBlock,
-												sizeImageOutEst,
-												&ringsDataBlockOffset);
-  MY_INF("\tringsDataBlockOffset=0x%08x\n",ringsDataBlockOffset);
-  if (rc)   {
-    MY_ERR("\tsbe_xip_append() failed: %s\n", SBE_XIP_ERROR_STRING(errorStrings, rc));
-    return IMGBUILD_ERR_XIP_MISC;
-  }
-	// ...test if successful update.
-	sbe_xip_image_size(io_image, &sizeImageOut);
-	io_sizeImageOut = sizeImageOut;
-  rc = sbe_xip_validate(io_image, sizeImageOut);
-  if (rc)   {
-    MY_ERR("\tsbe_xip_validate() of output image copy failed: %s\n", SBE_XIP_ERROR_STRING(errorStrings, rc));
-    return IMGBUILD_ERR_XIP_MISC;
-  }
-  MY_INF("\tSuccessful append of RS4 ring to .rings... Next, update variable name ptr...\n");
-	// ...convert rings section offset to a PORE address
-	rc = sbe_xip_section2pore( io_image, SBE_XIP_SECTION_RINGS, ringsDataBlockOffset, &ringsDataBlockPoreAddr);
-  MY_INF("\tringsDataBlockPoreAddr=0x%016llx\n", ringsDataBlockPoreAddr);
-  if (rc)   {
-    MY_ERR("\tsbe_xip_section2pore() failed: %s\n", SBE_XIP_ERROR_STRING(errorStrings, rc));
-    return IMGBUILD_ERR_XIP_MISC;
-  }
-	// ...and lastly, associate PORE addr with ringName.
-	rc = sbe_xip_set_scalar( io_image, i_ringName, ringsDataBlockPoreAddr); 
-  if (rc)   {
-    MY_ERR("\tsbe_xip_set_scalar() failed: %s\n", SBE_XIP_ERROR_STRING(errorStrings, rc));
-    if (rc==SBE_XIP_ITEM_NOT_FOUND)  {
-			MY_ERR("\tProbable cause:\n");
-			MY_ERR("\t\tThe variable name supplied (=%s) is not a valid key word in the image. (No TOC record.)\n",
-				i_ringName);
-				return IMGBUILD_ERR_KEYWORD_NOT_FOUND;
-		}
-    if (rc==SBE_XIP_BUG)  {
-			MY_ERR("\tProbable cause:\n");
-			MY_ERR("\t\tThe variable name supplied (=%s) is a valid key word but cannot be updated with a scalar value.\n",
-				i_ringName);
-				return IMGBUILD_ERR_XIP_MISC;
-		}
-    return IMGBUILD_ERR_XIP_UNKNOWN;
-  }
-
-	MY_INF("\tSuccessful in-memory image update...\n");
+	MY_INF("\tSuccessful IPL image update; \n");
 
 	return rc;
+}
+
+
+// write_vpd_ring_to_slw_image()
+// - For VPD rings, there is no notion of a base and override ring. There can only be
+//   one ring. Thus, for core ID specific rings, their vector locations are updated only
+//   by 8-bytes, unlike 16-bytes for non-VPD rings which have base+override.
+// - Any ring, including ex_ rings, that have a chipletId==0xFF will get stored at its
+//   "top" or base position, i.e. as if it was coreId=0, or chipletId=0x10.
+// - For IPL images, #R/G must be accessible through .fixed_toc since .toc is removed.
+//   and same is true for proc_sbe_decompress_scan_chiplet_address (for RS4 launch.)
+// Notes:
+int write_vpd_ring_to_slw_image(void			*io_image,
+                                uint32_t  &io_sizeImageOut,
+														  	CompressedScanData *i_bufRs4Ring, // HB buf1
+															  uint32_t  i_ddLevel,
+															  uint8_t   i_sysPhase,
+															  char 			*i_ringName,
+															  void      *i_bufTmp,              // HB buf2
+															  uint32_t  i_sizeBufTmp)
+{
+	uint32_t rc=0, bufLC;
+	uint8_t  chipletId, idxVector=0;
+	uint32_t sizeRingRaw=0, sizeRingRawChk;
+	uint32_t sizeImageIn;
+	uint32_t *wfInline=NULL;
+	uint32_t wfInlineLenInWords;
+	uint64_t scanMaxRotate=SCAN_ROTATE_DEFAULT;
+	
+	MY_INF("i_ringName=%s; \n",	i_ringName);
+
+  if (i_bufTmp == NULL)  {
+    MY_ERR("Temporary ring buffer passed by caller points to NULL and is invalid.\n");
+    return IMGBUILD_ERR_MEMORY;
+  }
+
+  sbe_xip_image_size( io_image, &sizeImageIn);
+  
+  chipletId = i_bufRs4Ring->iv_chipletId;
+  
+  // Decompress RS4 VPD ring.
+  //
+  sizeRingRaw = myRev32(i_bufRs4Ring->iv_length);
+  if ((sizeRingRaw+7)/8 > i_sizeBufTmp)  {
+    MY_ERR("Decompressed byte size of VPD ring (=%i) exceeds size of buffer (=%i).",
+      (sizeRingRaw+7)/8, i_sizeBufTmp);
+    return IMGBUILD_ERR_RING_TOO_LARGE;
+  }
+  rc = _rs4_decompress((uint8_t*)i_bufTmp,
+                       i_sizeBufTmp,
+                       &sizeRingRawChk,  // Uncompressed raw ring size in bits.
+                       i_bufRs4Ring);
+  if (rc)  {
+    MY_ERR("_rs4_decompress() failed w/rc=%i; ",rc);
+    return IMGBUILD_ERR_RS4_DECOMPRESS;
+  }
+  if (sizeRingRaw != sizeRingRawChk)  {
+    MY_ERR("Ring size from RS4 container (=%i) differs from ring size returned by _rs4_decompress (=%i).",
+      sizeRingRaw, sizeRingRawChk);
+    return IMGBUILD_ERR_RS4_DECOMPRESS;
+  }
+
+	// Create wiggle-flip program.
+	//
+	rc = sbe_xip_get_scalar( io_image, SCAN_MAX_ROTATE_38XXX_NAME, &scanMaxRotate);
+	if (rc)  {
+	  MY_ERR("Strange error from sbe_xip_get_scalar(SCAN_MAX_ROTATE_38XXX_NAME) w/rc=%i; ",rc);
+	  MY_ERR("Already retrieved SCAN_MAX_ROTATE_38XXX_NAME in slw_build() w/o trouble; ");
+	  return IMGBUILD_ERR_XIP_MISC;
+	}
+	if (scanMaxRotate<0x20 || scanMaxRotate>SCAN_MAX_ROTATE)  {
+	  MY_INF("WARNING: Value of key word SCAN_MAX_ROTATE_38XXX_NAME=0x%llx is not permitted; ",scanMaxRotate);
+    scanMaxRotate = SCAN_ROTATE_DEFAULT;
+		MY_INF("scanMaxRotate set to 0x%llx; ", scanMaxRotate);
+		MY_INF("Continuing...; ");
+	}
+	wfInline = (uint32_t*)i_bufRs4Ring;  // Reuse this buffer (HB buf1) for wiggle-flip prg.
+	wfInlineLenInWords = i_sizeBufTmp/4; // Assuming same size of both HB buf1 and buf2.
+	rc = create_wiggle_flip_prg((uint32_t*)i_bufTmp,
+	                            sizeRingRaw,
+	                            myRev32(i_bufRs4Ring->iv_scanSelect),
+	                            (uint32_t)i_bufRs4Ring->iv_chipletId,
+	                            &wfInline,
+	                            &wfInlineLenInWords, // Is 8-byte aligned on return.
+	                            (uint32_t)scanMaxRotate);
+	if (rc)  {
+	  MY_ERR("create_wiggle_flip_prg() failed w/rc=%i; ",rc);
+	  return IMGBUILD_ERR_WF_CREATE;
+	}
+
+  // Populate ring header and put ring header and Wf ring into 
+  // proper spots in pre-allocated bufWfRingBlock buffer (HB buf2).
+  //
+  DeltaRingLayout *bufWfRingBlock;
+  uint64_t entryOffsetWfRingBlock;
+  uint32_t sizeWfRingBlock, sizeWfRingBlockMax;
+
+  bufWfRingBlock = (DeltaRingLayout*)i_bufTmp; // Reuse this buffer (HB buf2) for WF ring block.
+  sizeWfRingBlockMax = i_sizeBufTmp;
+  entryOffsetWfRingBlock      = calc_ring_layout_entry_offset( 1, 0);
+  bufWfRingBlock->entryOffset = myRev64(entryOffsetWfRingBlock);
+  bufWfRingBlock->backItemPtr	= 0; // Will be updated below, as we don't know yet.
+	sizeWfRingBlock     	      =	entryOffsetWfRingBlock +  // Must be 8-byte aligned.
+  												      wfInlineLenInWords*4;     // Must be 8-byte aligned.
+	// Quick check to see if final ring block size will fit in HB buffer.
+	if (sizeWfRingBlock>sizeWfRingBlockMax)  {
+	  MY_ERR("WF ring block size (=%i) exceeds HB buf2 size (=%i).",
+	    sizeWfRingBlock, sizeWfRingBlockMax);
+	  return IMGBUILD_ERR_RING_TOO_LARGE;
+	}
+	bufWfRingBlock->sizeOfThis  = myRev32(sizeWfRingBlock);
+	bufWfRingBlock->sizeOfMeta	=	0;
+	bufLC = (uint32_t)entryOffsetWfRingBlock;
+	// Copy over meta data which is zero, so nothing to do in this case!
+	// Copy over WF ring prg which is already 8-byte aligned.
+	memcpy( (uint8_t*)bufWfRingBlock+bufLC, wfInline, (size_t)wfInlineLenInWords*4);
+
+  // Now, some post-sanity checks on alignments.
+	if ( entryOffsetWfRingBlock%8 || 
+	     sizeWfRingBlock%8)  {
+		MY_ERR("Member(s) of WF ring block are not 8-byte aligned:");
+    MY_ERR("  Entry offset            = %i", (uint32_t)entryOffsetWfRingBlock);
+		MY_ERR("  Size of ring block      = %i", sizeWfRingBlock);
+		return IMGBUILD_ERR_MISALIGNED_RING_LAYOUT;
+	}
+
+  // Calculate any vector offset, i.e., in case of ex_ chiplet common ring name.
+	if (chipletId>=CID_EX_LOW && chipletId<=CID_EX_HIGH)
+    idxVector = chipletId - CID_EX_LOW;
+	else
+  	idxVector = 0;
+
+  // Write ring block to image.
+	rc = write_ring_block_to_image(io_image,
+	                               i_ringName,
+	                               bufWfRingBlock,
+	                               idxVector,
+	                               0,
+	                               0,
+	                               io_sizeImageOut);
+  if (rc)  {
+  	MY_ERR("write_ring_block_to_image() failed w/rc=%i; \n",rc);
+    MY_ERR("Check p8_delta_scan_rw.h for meaning of IMGBUILD_xyz rc code; \n");
+    return IMGBUILD_ERR_RING_WRITE_TO_IMAGE;
+  }
+
+	MY_INF("Successful SLW image update; \n");
+
+	return rc;
+}
+
+
+// calc_ring_delta_state() parms:
+// i_init - init (flush) ring state
+// i_alter - altered (desired) ring state
+// o_delta - ring delta state, caller allocates buffer
+// i_ringLen - length of ring in bits
+int calc_ring_delta_state( const uint32_t  *i_init, 
+													 const uint32_t  *i_alter, 
+													 uint32_t        *o_delta,
+													 const uint32_t  i_ringLen )
+{
+  int      i=0, count=0, bit=0, remainder=0, remainingBits=0;
+  uint32_t init, alter;
+  uint32_t mask=0;
+
+  // Do some checking of input parms
+  if ( (i_init==NULL) || (i_alter==NULL) || (o_delta==NULL) || (i_ringLen==0) )  {
+  	MY_ERR("Bad input arguments.\n");
+    return IMGBUILD_BAD_ARGS;
+  }
+
+  // Check how many 32-bit shift ops are needed and if we need final shift of remaining bit.
+  count = i_ringLen/32;
+  remainder = i_ringLen%32;
+	if (remainder>0)
+	    count = count + 1;
+	remainingBits = i_ringLen;
+	MY_DBG("count=%i  rem=%i  remBits=%i\n",count,remainder,remainingBits);
+
+  // XOR flush and init values 32 bits at a time.  Store result in o_delta buffer.
+	for (i=0; i<count; i++)  {
+
+		if (remainingBits<=0)  {
+			MY_ERR("remaingBits can not be negative.\n");
+			return IMGBUILD_ERR_CHECK_CODE;
+		}
+
+    init  = i_init[i];
+    alter = i_alter[i];
+
+    if (remainingBits>=32)
+      remainingBits = remainingBits-32;
+	  else  {  //If remaining bits are less than 32 bits, mask unused bits
+	    mask = 0;
+	    for (bit=0; bit<(32-remainingBits); bit++)  {
+	      mask = mask << 1;
+	      mask = mask + 1;
+	    }
+		  MY_DBG("remainingBits=%i<32. Padding w/zeros. True bit length unaltered. (@word count=%i)\n",remainingBits,count);
+	    mask  = ~mask;
+	    init  = init & mask;
+	    alter = alter & mask;
+	    remainingBits = 0;
+	  }
+	  
+    // Do the XORing.
+		o_delta[i]  = init ^ alter;
+	}
+
+  return IMGBUILD_SUCCESS;
 }
 
 

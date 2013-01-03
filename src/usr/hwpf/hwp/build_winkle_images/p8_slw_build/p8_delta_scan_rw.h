@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012                   */
+/* COPYRIGHT International Business Machines Corp. 2012,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_delta_scan_rw.h,v 1.27 2012/12/14 19:44:53 cmolsen Exp $
+// $Id: p8_delta_scan_rw.h,v 1.29 2013/01/02 03:03:10 cmolsen Exp $
 #define OVERRIDE_OFFSET 8            // Byte offset of forward pointer's addr relative 
                                      //   to base forward pointer's addr.
 #define SIZE_IMAGE_BUF_MAX      5000000 // Max ~50MB image buffer size.
@@ -33,8 +33,11 @@
 
 /*****  Xip customize support ****/
 #define COMBINED_GOOD_VECTORS_TOC_NAME    "combined_good_vectors"
-#define PERV_PIB_REPR_VECTOR_TOC_NAME     "proc_sbe_pibmem_repair_vector"
+#define PROC_PIB_REPR_VECTOR_TOC_NAME     "proc_sbe_pibmem_repair_vector"
 #define NEST_SKEWADJUST_VECTOR_TOC_NAME   "proc_sbe_nest_skewadjust_vector"
+#define MAX_PLL_RING_SIZE                 128 // Bytes
+#define PERV_BNDY_PLL_RING_TOC_NAME       "perv_bndy_pll_ring"
+#define PERV_BNDY_PLL_RING_ALT_TOC_NAME   "perv_bndy_pll_ring_alt"
 
 /*****  Scan setting  *****/
 #define OPCG_SCAN_RATIO                     4
@@ -81,6 +84,8 @@
 #define IMGBUILD_IMAGE_SIZE_MISMATCH         11  // Mismatch between image sizes.
 #define IMGBUILD_ERR_PORE_INLINE             20  // Pore inline error.
 #define IMGBUILD_ERR_PORE_INLINE_ASM         21  // Err assoc w/inline assembler.
+#define IMGBUILD_ERR_WF_CREATE               45  // Err assoc w/create_wiggle_flip_prg.
+#define IMGBUILD_ERR_RING_WRITE_TO_IMAGE     46  // Err assoc w/wr_ring_block_to_img.
 #define IMGBUILD_ERR_GET_SECTION             49  // Err assoc w/getting section ID.
 #define IMGBUILD_ERR_SECTION_DELETE          50  // Err assoc w/deleting ELF section.
 #define IMGBUILD_ERR_APPEND                  51  // Err assoc w/appending to ELF section.
@@ -209,40 +214,33 @@ typedef struct {
   char     data[];
 } MetaData;
 
-/*
-// RS4 specific layout.
-typedef struct {
-  uint64_t entryOffset;
-  uint64_t backItemPtr;
-  uint32_t sizeOfThis;
-  uint32_t sizeOfMeta; // Exact size of meta data. Arbitrary size. Not null terminated.
-  uint32_t ddLevel;
-  uint8_t  sysPhase;
-  uint8_t  override;
-  uint8_t  reserved1;
-  uint8_t  reserved2;
-} Rs4RingLayout;
-*/
+int p8_centaur_build( 
+							void      *i_imageIn,
+              uint32_t  i_ddLevel,
+              void      *i_imageOut,
+              uint32_t  i_sizeImageOutMax);
 
-int p8_centaur_build( void      *i_imageIn,
-                      uint32_t  i_ddLevel,
-                      void      *i_imageOut,
-                      uint32_t  i_sizeImageOutMax);
+int p8_ipl_build(     
+							void      *i_imageIn,
+              uint32_t  i_ddLevel,
+              void      *i_imageOut,
+              uint32_t  i_sizeImageOutMax);
 
-int p8_ipl_build(     void      *i_imageIn,
-                      uint32_t  i_ddLevel,
-                      void      *i_imageOut,
-                      uint32_t  i_sizeImageOutMax);
+int get_ring_layout_from_image2(  
+							const void  *i_imageIn,
+              uint32_t    i_ddLevel,
+              uint8_t      i_sysPhase,
+              DeltaRingLayout  **o_rs4RingLayout,
+              void        **nextRing);
 
-int get_ring_layout_from_image2(  const void  *i_imageIn,
-                                  uint32_t    i_ddLevel,
-                                  uint8_t      i_sysPhase,
-                                  DeltaRingLayout  **o_rs4RingLayout,
-                                  void        **nextRing);
-
-int write_ring_block_to_image(  void *io_image,
-                                DeltaRingLayout *i_ringBlock,
-                                uint32_t  i_sizeImageMax);
+int write_ring_block_to_image(  
+							void             *io_image,
+							const char       *i_ringName,    // NULL if no name.
+              DeltaRingLayout  *i_ringBlock,
+							const uint8_t    i_idxVector,   // [0-15] - Ignored if ringName==NULL
+							const uint8_t    i_override,    // [0,1]  - Ignored if ringName==NULL
+							const uint8_t    i_overridable, // [0,1]  - Ignored if ringName==NULL
+              const uint32_t   i_sizeImageMax);
 
 int gen_ring_delta_state(  
               uint32_t   bitLen, 
@@ -251,15 +249,12 @@ int gen_ring_delta_state(
               uint32_t   *o_delta,
               uint32_t   verbose);
 
-//int write_delta_ring_to_image(  
-//              char       *i_fnImage,
-//              CompressedScanData *i_RS4,
-//              uint32_t   i_ddLevel,
-//              uint8_t    i_sysPhase,
-//              uint8_t    i_override,
-//              char       *i_varName,
-//              char       *i_fnMetaData,
-//              uint32_t   verbose);
+int calc_ring_delta_state(  
+              const uint32_t  *i_init,
+							const uint32_t  *i_alter,
+							uint32_t        *o_delta,
+							const uint32_t  i_ringLen);
+
 int write_rs4_ring_to_ref_image(  
               char       *i_fnImage,
               CompressedScanData *i_RS4,
@@ -338,6 +333,10 @@ int initialize_slw_section(
 
 int update_runtime_scom_pointer(
 							void			*io_image);
+
+uint64_t calc_ring_layout_entry_offset(
+							uint8_t  i_typeRingLayout,
+							uint32_t i_sizeMetaData);
 
 void cleanup(
               void *buf1=NULL,

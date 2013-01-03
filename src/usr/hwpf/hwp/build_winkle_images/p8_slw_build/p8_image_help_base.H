@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012                   */
+/* COPYRIGHT International Business Machines Corp. 2012,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_image_help_base.H,v 1.8 2012/11/13 16:40:53 cmolsen Exp $
+// $Id: p8_image_help_base.H,v 1.9 2012/12/18 05:24:00 cmolsen Exp $
 //------------------------------------------------------------------------------
 //  Title:  p8_image_help_base.H
 //  Description:  Contains the most basic structures and defines needed for 
@@ -35,7 +35,8 @@ const uint8_t   CHIPLET_ID_MIN          = 0x00;
 const uint8_t   CHIPLET_ID_MAX          = 0x1F;
 const uint8_t   MAX_CHIPLETS            = CHIPLET_ID_MAX-CHIPLET_ID_MIN+1;
 const uint32_t  ASM_RS4_LAUNCH_BUF_SIZE = 24;	// Byte size of RS4 launch buffer. 
-#define LISTING_STRING_SIZE  (2*PORE_INLINE_DISASSEMBLER_STRING_SIZE)
+const uint32_t  LISTING_STRING_SIZE     = 256;
+const uint64_t  MAX_UINT64_T            = (uint64_t)0xFFFFFFFF<<32 | (uint64_t)0xFFFFFFFF;
 
 // Base (shared) ring layout for both RS4 and Wiggle-flip layouts.
 typedef struct {

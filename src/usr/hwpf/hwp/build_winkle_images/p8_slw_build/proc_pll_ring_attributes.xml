@@ -1,0 +1,299 @@
+<!-- IBM_PROLOG_BEGIN_TAG                                                   -->
+<!-- This is an automatically generated prolog.                             -->
+<!--                                                                        -->
+<!-- $Source: src/usr/hwpf/hwp/build_winkle_images/p8_slw_build/proc_pll_ring_attributes.xml $ -->
+<!--                                                                        -->
+<!-- IBM CONFIDENTIAL                                                       -->
+<!--                                                                        -->
+<!-- COPYRIGHT International Business Machines Corp. 2013                   -->
+<!--                                                                        -->
+<!-- p1                                                                     -->
+<!--                                                                        -->
+<!-- Object Code Only (OCO) source materials                                -->
+<!-- Licensed Internal Code Source Materials                                -->
+<!-- IBM HostBoot Licensed Internal Code                                    -->
+<!--                                                                        -->
+<!-- The source code for this program is not published or otherwise         -->
+<!-- divested of its trade secrets, irrespective of what has been           -->
+<!-- deposited with the U.S. Copyright Office.                              -->
+<!--                                                                        -->
+<!-- Origin: 30                                                             -->
+<!--                                                                        -->
+<!-- IBM_PROLOG_END_TAG                                                     -->
+<!-- proc_pll_ring_attributes.xml -->
+<attributes>
+  <attribute>
+    <id>ATTR_PROC_PERV_BNDY_PLL_DATA</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>Ring image for perv_bndy_pll ring containing filter plls and xb_pll,nest_pll
+      creator: platform
+      firmware notes:
+    </description>
+    <valueType>uint8</valueType>
+    <array>128</array>
+    <platInit/>
+    <persistRuntime/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PROC_PB_BNDY_DMIPLL_DATA</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>Ring image for pb_bndy_dmipll ring
+      creator: platform
+      firmware notes:
+    </description>
+    <valueType>uint8</valueType>
+    <array>192</array>
+    <platInit/>
+    <persistRuntime/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PROC_PB_BNDY_DMIPLL_FOR_DCCAL_DATA</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>Ring image for pb_bndy_dmipll ring for DC cal
+      creator: platform
+      firmware notes:
+    </description>
+    <valueType>uint8</valueType>
+    <array>192</array>
+    <platInit/>
+    <persistRuntime/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PROC_AB_BNDY_PLL_DATA</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>Ring image for ab_bndy_pll ring
+      creator: platform
+      firmware notes:
+    </description>
+    <valueType>uint8</valueType>
+    <array>80</array>
+    <platInit/>
+    <persistRuntime/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PROC_AB_BNDY_PLL_FOR_DCCAL_DATA</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>Ring image for ab_bndy_pll ring
+      creator: platform
+      firmware notes:
+    </description>
+    <valueType>uint8</valueType>
+    <array>80</array>
+    <platInit/>
+    <persistRuntime/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PROC_PCI_BNDY_PLL_DATA</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>Ring image for pci_bndy_pll ring
+      creator: platform
+      firmware notes:
+    </description>
+    <valueType>uint8</valueType>
+    <array>80</array>
+    <platInit/>
+    <persistRuntime/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PROC_PERV_BNDY_PLL_LENGTH</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>Length of data in ring image for perv_bndy_pll ring containing filter plls and xb_pll,nest_pll
+      creator: platform
+      firmware notes:
+    </description>
+    <valueType>uint32</valueType>
+    <platInit/>
+    <persistRuntime/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PROC_PB_BNDY_DMIPLL_LENGTH</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>Length of data in ring image for pb_bndy_dmipll ring
+      creator: platform
+      firmware notes:
+    </description>
+    <valueType>uint32</valueType>
+    <platInit/>
+    <persistRuntime/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PROC_AB_BNDY_PLL_LENGTH</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>Length of data in ring image for ab_bndy_pll ring
+      creator: platform
+      firmware notes:
+    </description>
+    <valueType>uint32</valueType>
+    <platInit/>
+    <persistRuntime/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PROC_PCI_BNDY_PLL_LENGTH</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>Length of data in ring image for pci_bndy_pll ring
+      creator: platform
+      firmware notes:
+    </description>
+    <valueType>uint32</valueType>
+    <platInit/>
+    <persistRuntime/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PROC_PERV_BNDY_PLL_FLUSH</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>Ring flush image for perv_bndy_pll ring containing filter plls and xb_pll,nest_pll
+      creator: platform
+      firmware notes:
+    </description>
+    <valueType>uint8</valueType>
+    <array>128</array>
+    <platInit/>
+    <persistRuntime/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PROC_PB_BNDY_DMIPLL_FLUSH</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>Ring flush image for pb_bndy_dmipll ring
+      creator: platform
+      firmware notes:
+    </description>
+    <valueType>uint8</valueType>
+    <array>192</array>
+    <platInit/>
+    <persistRuntime/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PROC_AB_BNDY_PLL_FLUSH</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>Ring flush image for ab_bndy_pll ring
+      creator: platform
+      firmware notes:
+    </description>
+    <valueType>uint8</valueType>
+    <array>80</array>
+    <platInit/>
+    <persistRuntime/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PROC_PCI_BNDY_PLL_FLUSH</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>Ring flush image for pci_bndy_pll ring
+      creator: platform
+      firmware notes:
+    </description>
+    <valueType>uint8</valueType>
+    <array>80</array>
+    <platInit/>
+    <persistRuntime/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PROC_PERV_BNDY_PLL_CHIPLET_ID</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>Chiplet ID for ring image for perv_bndy_pll ring containing filter plls and xb_pll,nest_pll
+      creator: platform
+      firmware notes:
+    </description>
+    <valueType>uint8</valueType>
+    <platInit/>
+    <persistRuntime/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PROC_PB_BNDY_DMIPLL_CHIPLET_ID</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>Chiplet ID for ring image for pb_bndy_dmipll ring
+      creator: platform
+      firmware notes:
+    </description>
+    <valueType>uint8</valueType>
+    <platInit/>
+    <persistRuntime/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PROC_AB_BNDY_PLL_CHIPLET_ID</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>Chiplet ID for ring image for ab_bndy_pll ring
+      creator: platform
+      firmware notes:
+    </description>
+    <valueType>uint8</valueType>
+    <platInit/>
+    <persistRuntime/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PROC_PCI_BNDY_PLL_CHIPLET_ID</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>Chiplet ID for ring image for pci_bndy_pll ring
+      creator: platform
+      firmware notes:
+    </description>
+    <valueType>uint8</valueType>
+    <platInit/>
+    <persistRuntime/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PROC_PERV_BNDY_PLL_SCAN_SELECT</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>Scan select for ring image for perv_bndy_pll ring containing filter plls and xb_pll,nest_pll
+      creator: platform
+      firmware notes:
+    </description>
+    <valueType>uint32</valueType>
+    <platInit/>
+    <persistRuntime/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PROC_PB_BNDY_DMIPLL_SCAN_SELECT</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>Scan select for ring image for pb_bndy_dmipll ring
+      creator: platform
+      firmware notes:
+    </description>
+    <valueType>uint32</valueType>
+    <platInit/>
+    <persistRuntime/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PROC_AB_BNDY_PLL_SCAN_SELECT</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>Scan select for ring image for ab_bndy_pll ring
+      creator: platform
+      firmware notes:
+    </description>
+    <valueType>uint32</valueType>
+    <platInit/>
+    <persistRuntime/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PROC_PCI_BNDY_PLL_SCAN_SELECT</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>Scan select for ring image for pci_bndy_pll ring
+      creator: platform
+      firmware notes:
+    </description>
+    <valueType>uint32</valueType>
+    <platInit/>
+    <persistRuntime/>
+  </attribute>
+  <!-- ********************************************************************* -->
+</attributes>

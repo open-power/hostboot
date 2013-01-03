@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012                   */
+/* COPYRIGHT International Business Machines Corp. 2012,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_slw_build.C,v 1.7 2012/11/27 18:44:03 cmolsen Exp $
+// $Id: p8_slw_build.C,v 1.9 2013/01/02 02:54:19 cmolsen Exp $
 /*------------------------------------------------------------------------------*/
 /* *! TITLE : p8_slw_build                                                      */
 /* *! DESCRIPTION : Extracts and decompresses delta ring states from EPROM      */
@@ -32,9 +32,9 @@
 /* *! EXTENDED DESCRIPTION :                                                    */
 //
 /* *! USAGE : To build (for Hostboot) -                                         */
-//              buildfapiprcd  -C "p8_image_help.C,p8_scan_compression.C"  -c "sbe_xip_image.c,pore_inline_assembler.c" -e "../../xml/error_info/p8_slw_build_errors.xml"  p8_slw_build.C
+//              buildfapiprcd  -C "p8_image_help.C,p8_image_help_base.C,p8_scan_compression.C"  -c "sbe_xip_image.c,pore_inline_assembler.c" -e "../../xml/error_info/p8_slw_build_errors.xml"  p8_slw_build.C
 //            To build (for command-line) -
-//              buildfapiprcd  -r ver-13-0  -C "p8_image_help.C,p8_scan_compression.C"  -c "sbe_xip_image.c,pore_inline_assembler.c" -e "../../xml/error_info/p8_slw_build_errors.xml"  -u "SLW_COMMAND_LINE,IMGBUILD_PPD_IGNORE_XIPC"  p8_slw_build.C
+//              buildfapiprcd  -r ver-13-0  -C "p8_image_help.C,p8_image_help_base.C,p8_scan_compression.C"  -c "sbe_xip_image.c,pore_inline_assembler.c" -e "../../xml/error_info/p8_slw_build_errors.xml"  -u "SLW_COMMAND_LINE,IMGBUILD_PPD_IGNORE_XIPC"  p8_slw_build.C
 //            Other Pre-Processor Directive (PPD) options - 
 //            To debug WF programs:
 //              -u "IMGBUILD_PPD_DEBUG_WF"
@@ -65,10 +65,6 @@
 //      sysPhase value, incl sysPhase=2, will cause no rings to be found.
 //
 /*------------------------------------------------------------------------------*/
-// The IMGBUILD_PPD_IGNORE_XIPC is defined to temporarily disable the call of
-//  p8_xip_customize HWP.
-// @Todo:  RTC 60670 will remove the macro to re-enable the HWP.
-#define IMGBUILD_PPD_IGNORE_XIPC
 
 #include <p8_pore_api_custom.h>
 #include <HvPlicModule.H>
@@ -308,6 +304,7 @@ ReturnCode p8_slw_build( const fapi::Target    &i_target,
 											sizeBuf2);
 		free(buf1);
 		free(buf2);
+    buf1 = buf2 = NULL;
 		if (rc!=FAPI_RC_SUCCESS)  {
     	FAPI_ERR("Xip customization failed.");
 			return rc;
@@ -342,8 +339,6 @@ ReturnCode p8_slw_build( const fapi::Target    &i_target,
 		// Report final size.
     sbe_xip_image_size( i_imageOut, io_sizeImageOut);
     FAPI_INF("Final SLW image size: %i", *io_sizeImageOut);
-		if (buf1) free(buf1);
-		if (buf2) free(buf2);
     return FAPI_RC_SUCCESS;
   }
   
@@ -442,8 +437,8 @@ ReturnCode p8_slw_build( const fapi::Target    &i_target,
   if (rcLoc)  {
     FAPI_ERR("create_wiggle_flip_prg() failed w/rcLoc=%i",rcLoc);
     //if (deltaRingDxed)  free(deltaRingDxed);
+    if (buf1)  free(buf1);
     if (buf2)  free(buf2);
-    if (wfInline)  free(wfInline);
 		uint32_t & RC_LOCAL=rcLoc;
     FAPI_SET_HWP_ERROR(rc, RC_PROC_SLWB_WF_CREATION_ERROR);
     return rc;
@@ -464,8 +459,8 @@ ReturnCode p8_slw_build( const fapi::Target    &i_target,
   if (rcLoc)  {
     FAPI_ERR("write_wiggle_flip_to_image() failed w/rcLoc=%i",rcLoc);
     //if (deltaRingDxed)  free(deltaRingDxed);
+    if (buf1)  free(buf1);
     if (buf2)  free(buf2);
-    if (wfInline)  free(wfInline);
     if (rcLoc==IMGBUILD_ERR_IMAGE_TOO_LARGE)  {
 		  uint32_t & DATA_IMG_SIZE_OLD=sizeImageOld;
 		  uint32_t & DATA_IMG_SIZE_EST=sizeImageTmp;
@@ -523,6 +518,7 @@ ReturnCode p8_slw_build( const fapi::Target    &i_target,
 											sizeBuf2);
 		free(buf1);
 		free(buf2);
+    buf1 = buf2 = NULL;
 		if (rc!=FAPI_RC_SUCCESS)  {
     	FAPI_ERR("Xip customization failed.");
 			return rc;
@@ -546,9 +542,9 @@ ReturnCode p8_slw_build( const fapi::Target    &i_target,
       }
 			return rc;
     }
-    FAPI_INF("SLW section allocated for Ramming and Scomming tables.");
+    FAPI_INF("SLW section initialized for Ramming and Scomming tables.");
     // Update host_runtime_scom pointer to point to sub_slw_runtime_scom
-		rcLoc = update_runtime_scom_pointer( i_imageOut);
+		rcLoc = update_runtime_scom_pointer(i_imageOut);
 		if (rcLoc==IMGBUILD_ERR_KEYWORD_NOT_FOUND)  {
 			uint32_t &RC_LOCAL=rcLoc;
 			FAPI_SET_HWP_ERROR(rc, RC_PROC_SLWB_KEYWORD_NOT_FOUND_ERROR);
@@ -557,8 +553,6 @@ ReturnCode p8_slw_build( const fapi::Target    &i_target,
 		// Report final size.
 		sbe_xip_image_size( i_imageOut, io_sizeImageOut);
     FAPI_INF("Final SLW image size: %i", *io_sizeImageOut);
-		if (buf1) free(buf1);
-		if (buf2) free(buf2);
     return FAPI_RC_SUCCESS;
   }
 
