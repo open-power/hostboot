@@ -5,7 +5,8 @@ p8Proc0.proc_fsi2host_mbox->responder_enable=1
 
 #Write the PNOR MMIO addr into Scratch 2, 0x283A 
 #Then trigger the flush, load, and SBE start 
-p8Proc0.proc_lbus_map.write 0x28e8 0xFFEF0000 
+p8Proc0.proc_lbus_map.write 0x28e8 0xFFEF0000  #HB PNOR addr
+p8Proc0.proc_lbus_map.write 0x28e0 0x0000FBFF  #NonFunc EX (only 5 is good)
 p8Proc0.proc_lbus_map.write 0x2848 0x00000FFF  #GP3 0x2812 (flush) 
 p8Proc0.proc_lbus_map.write 0x2870 0x10000000  #SBE Vital 0x281C (load) 
 p8Proc0.proc_lbus_map.write 0x2870 0x90000000  #SBE Vital 0x281C (start)

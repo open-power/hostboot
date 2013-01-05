@@ -242,8 +242,6 @@ void*    call_host_activate_slave_cores( void    *io_pArgs )
                "call_host_activate_slave_cores entry" );
 
     // @@@@@    CUSTOM BLOCK:   @@@@@
-#if 0 // @TODO: Enable when FSP supports attr sync and core state in HDAT
-      // Story 41245
 
     uint64_t l_masterCoreID = task_getcpuid() & ~7;
 
@@ -288,7 +286,7 @@ void*    call_host_activate_slave_cores( void    *io_pArgs )
                  * @errortype
                  * @reasoncode  ISTEP_BAD_RC
                  * @severity    ERRORLOG::ERRL_SEV_UNRECOVERABLE
-                 * @moduleid    ISTEP_ACTIVATE_SLAVE_CORES
+                 * @moduleid    ISTEP_HOST_ACTIVATE_SLAVE_CORES
                  * @userdata1   PIR of failing core.
                  * @userdata2   rc of cpu_start_core().
                  *
@@ -296,15 +294,13 @@ void*    call_host_activate_slave_cores( void    *io_pArgs )
                  */
                 l_errl =
                     new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                            ISTEP_ACTIVATE_SLAVE_CORES,
+                                            ISTEP_HOST_ACTIVATE_SLAVE_CORES,
                                             ISTEP_BAD_RC,
                                             pir,
                                             rc );
             }
         }
     }
-
-#endif
 
     if ( ! l_errl )
     {
