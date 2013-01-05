@@ -25,13 +25,3 @@
 ## Workarounds that are run after start_simics is executed for the first time
 ##    to setup the sandbox
 ##
-
-
-echo "+++ Updating s1.act"
-mkdir -p $sb/simu/data/cec-chip
-cp $BACKING_BUILD/src/simu/data/cec-chip/s1.act $sb/simu/data/cec-chip
-
-## Update tweak address till F865457 goes in, RTC 61075
-echo "+++ Update exitCacheContainedMode scom addr"
-sed -i -e's/0x02012040/0x0201340C/' $sb/simu/data/cec-chip/s1.act
-

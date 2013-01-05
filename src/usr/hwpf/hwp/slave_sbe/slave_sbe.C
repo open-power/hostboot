@@ -1,26 +1,25 @@
-/*  IBM_PROLOG_BEGIN_TAG
- *  This is an automatically generated prolog.
- *
- *  $Source: src/usr/hwpf/hwp/slave_sbe/slave_sbe.C $
- *
- *  IBM CONFIDENTIAL
- *
- *  COPYRIGHT International Business Machines Corp. 2012
- *
- *  p1
- *
- *  Object Code Only (OCO) source materials
- *  Licensed Internal Code Source Materials
- *  IBM HostBoot Licensed Internal Code
- *
- *  The source code for this program is not published or other-
- *  wise divested of its trade secrets, irrespective of what has
- *  been deposited with the U.S. Copyright Office.
- *
- *  Origin: 30
- *
- *  IBM_PROLOG_END_TAG
- */
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/usr/hwpf/hwp/slave_sbe/slave_sbe.C $                      */
+/*                                                                        */
+/* IBM CONFIDENTIAL                                                       */
+/*                                                                        */
+/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/*                                                                        */
+/* p1                                                                     */
+/*                                                                        */
+/* Object Code Only (OCO) source materials                                */
+/* Licensed Internal Code Source Materials                                */
+/* IBM HostBoot Licensed Internal Code                                    */
+/*                                                                        */
+/* The source code for this program is not published or otherwise         */
+/* divested of its trade secrets, irrespective of what has been           */
+/* deposited with the U.S. Copyright Office.                              */
+/*                                                                        */
+/* Origin: 30                                                             */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
 /**
  *  @file slave_sbe.C
  *
@@ -221,84 +220,6 @@ void* call_proc_check_slave_sbe_seeprom_complete( void *io_pArgs )
 
         fapi::Target l_fapiProcTarget( fapi::TARGET_TYPE_PROC_CHIP,
                                        l_pProcTarget    );
-
-#if 1
-        //  SIMICS HACK - The values written by simics are not correct -
-        //  Write them here until we can fix the action files.
-        //  @todo   RTC Task 52856 is opened to remove these workaround blocks
-        //  once simics is updated.
-        //  Defect SW173843 posted to Simics team to fix this - this is
-        //          not a simple action file change.
-        const  uint64_t PORE_SBE_CONTROL_0x000E0001 =   0x00000000000E0001 ;
-        const  uint64_t MBOX_SBEVITAL_0x0005001C    =   0x000000000005001C ;
-        fapi::ReturnCode    rc;
-        ecmdDataBufferBase data(64);
-        uint32_t    sbe_code    =   0;
-
-        rc = fapiGetScom(   l_fapiProcTarget,
-                            PORE_SBE_CONTROL_0x000E0001,
-                            data );
-        if (!rc.ok()) {
-            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-            "ERROR: reading scom" );
-
-        }
-
-        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                   "DEBUG: PORE_SBE_CONTROL_0x000E0001  =   0x%lx",
-                   data.getDoubleWord( 0 ) );
-
-        if ( !TARGETING::is_vpo() )
-        {
-            //  proc_check_slave_sbe_seeprom_complete expects bit 0 to be
-            //      on (slave SBE stopped)
-            data.setBit(0);
-            rc = fapiPutScom(   l_fapiProcTarget,
-                                PORE_SBE_CONTROL_0x000E0001,
-                                data );
-            if (!rc.ok()) {
-                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                "ERROR: writing scom" );
-
-            }
-        }
-
-        rc = fapiGetScom(   l_fapiProcTarget,
-                            MBOX_SBEVITAL_0x0005001C,
-                            data );
-        if (!rc.ok()) {
-            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-            "ERROR: reading scom" );
-        }
-
-        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                   "DEBUG: MBOX_SBEVITAL_0x0005001C =   0x%lx",
-                   data.getDoubleWord( 0 ) );
-
-        if ( !TARGETING::is_vpo() )
-        {
-            //  proc_check_slave_sbe_seeprom_complete expects the slave SBE to
-            //      write 000F2111 to SBE_VITAL before we get here:
-            //      halt code   =   SBE_EXIT_SUCCESS_0xF (0x0f) ,
-            //      istep_num   =   PROC_SBE_CHECK_MASTER_ISTEP_NUM ( 0x0212 ),
-            //      substep_num =   SUBSTEP_CHECK_MASTER_SLAVE_CHIP ( 0x01 )
-            sbe_code    =   0x000F2121;
-            data.insertFromRight( &sbe_code,
-                                  12,           // ISTEP_NUM_BIT_POSITION
-                                  20 );         // number of bits
-            rc = fapiPutScom(   l_fapiProcTarget,
-                                MBOX_SBEVITAL_0x0005001C,
-                                data );
-            if (!rc.ok()) {
-                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                "ERROR: writing scom" );
-            }
-        }
-
-#else
-        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                   "Simics has been fixed..." );
-#endif
 
         // Invoke the HWP
         FAPI_INVOKE_HWP(l_errl,
