@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2012              */
+/* COPYRIGHT International Business Machines Corp. 2011,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -59,8 +59,19 @@ class IntrTest: public CxxTest::TestSuite
 
             size_t threads = cpu_thread_count();
 
+            //look for an override
+            TARGETING::Target* sys = NULL;
+            TARGETING::targetService().getTopLevelTarget(sys);
+            assert( sys != NULL );
+            uint64_t en_threads = sys->getAttr<TARGETING::ATTR_ENABLED_THREADS>();
+
             for(size_t thread = 0; thread < threads; ++thread)
             {
+                if( !(en_threads & (0x8000000000000000>>thread)) )
+                {
+                    continue;
+                }
+
                 addr = reinterpret_cast<uint32_t *>
                     (iv_masterAddr + (thread << 12) + 16); // LINK A reg
 

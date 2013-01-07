@@ -10027,4 +10027,19 @@ Measured in GB</description>
   </hwpfToHbAttrMap>
 </attribute>
 
+<attribute>
+    <id>ENABLED_THREADS</id>
+    <description>
+       Bitmask of threads to enable for each processor, 
+       Zero means enable all architected threads
+    </description>
+    <simpleType>
+        <uint64_t>
+        </uint64_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <writeable/>
+</attribute>
+
 </attributes>

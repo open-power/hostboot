@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2010,2012              */
+/* COPYRIGHT International Business Machines Corp. 2010,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -643,7 +643,8 @@ namespace Systemcalls
     void CpuStartCore(task_t *t)
     {
         TASK_SETRTN(t,
-            CpuManager::startCore(static_cast<uint64_t>(TASK_GETARG0(t))));
+            CpuManager::startCore(static_cast<uint64_t>(TASK_GETARG0(t)),
+                                  static_cast<uint64_t>(TASK_GETARG1(t))));
     };
 
     /** Read SPR values. */

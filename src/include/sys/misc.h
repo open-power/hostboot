@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2012              */
+/* COPYRIGHT International Business Machines Corp. 2011,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -86,7 +86,7 @@ ProcessorCoreType cpu_core_type();
 uint8_t cpu_dd_level();
 
 /** @fn cpu_thread_count()
- *  @brief Get the number of threads per cpu for this proctype
+ *  @brief Get the number of available threads per cpu for this proctype
  *  @return # of threads per cpu
  */
 size_t cpu_thread_count();
@@ -95,6 +95,7 @@ size_t cpu_thread_count();
  *  @brief Have the kernel start a new core.
  *
  *  @param[in] pir - PIR value of the first thread on the core.
+ *  @param[in] i_threads - Bitstring of threads to enable (left-justified).
  *
  *  @note The kernel will start all threads on the requested core even
  *        though the callee only requests with a single PIR value.
@@ -104,7 +105,7 @@ size_t cpu_thread_count();
  *  @retval -ENXIO - The core ID was outside of the range the kernel is
  *                   prepared to support.
  */
-int cpu_start_core(uint64_t pir);
+int cpu_start_core(uint64_t pir,uint64_t i_threads);
 
 /**
  * @enum CpuSprNames

@@ -202,6 +202,11 @@ errlHndl_t  applyPoreGenCpuRegs(   TARGETING::Target *i_cpuTarget,
     //  and 23.7.3.5 - 6 in Murano Book 4
     l_lpcrVal   &=  ~(0x0000000000002000) ;
 
+    TARGETING::Target* sys = NULL;
+    TARGETING::targetService().getTopLevelTarget(sys);
+    assert( sys != NULL );
+    uint64_t en_threads = sys->getAttr<ATTR_ENABLED_THREADS>();
+
     uint64_t    l_hrmorVal  =   cpu_spr_value(CPU_SPR_HRMOR);
     for (TargetHandleList::const_iterator
             l_coreIds_iter = l_coreIds.begin();
@@ -250,6 +255,12 @@ errlHndl_t  applyPoreGenCpuRegs(   TARGETING::Target *i_cpuTarget,
         //  fill in lpcr for each thread
         for ( l_threadId=0; l_threadId < l_cpu_thread_count; l_threadId++ )
         {
+            // Skip threads that we shouldn't be starting
+            if( !(en_threads & (0x8000000000000000>>l_threadId)) )
+            {
+                continue;
+            } 
+
             TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                        "applyPoreGenCpuRegs: core=0x%x,thread=0x%x: ",
                        l_coreId, l_threadId );

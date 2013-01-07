@@ -97,6 +97,9 @@ enum MMIO_Scratch_Register
         /** Thread7 Scratch Register - Identifies if Hostboot is active after
          *                             host_start_payload. */
     MMIO_SCRATCH_HOSTBOOT_ACTIVE = 0x38,
+        /** Thread7 Scratch Register - Set be SBE for reduced-threads support
+         *                             for AVPs.  */
+    MMIO_SCRATCH_AVP_THREADS = 0x38,
 };
 
 /** @fn mmio_scratch_read()

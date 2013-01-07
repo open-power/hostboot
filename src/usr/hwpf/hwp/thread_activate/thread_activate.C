@@ -311,8 +311,13 @@ void activate_threads( errlHndl_t& io_rtaskRetErrl )
     const fapi::Target l_fapiCore( fapi::TARGET_TYPE_EX_CHIPLET,
                (const_cast<TARGETING::Target*>(l_masterCore)));
 
-    // loop around threads 0-6, SBE starts thread 7
-    const uint64_t max_threads = cpu_thread_count();
+    //  AVPs might enable a subset of the available threads
+    uint64_t max_threads = cpu_thread_count();
+    TARGETING::Target* sys = NULL;
+    TARGETING::targetService().getTopLevelTarget(sys);
+    assert( sys != NULL );
+    uint64_t en_threads = sys->getAttr<TARGETING::ATTR_ENABLED_THREADS>();
+
     for( uint64_t thread = 0; thread < max_threads; thread++ )
     {
         // Skip the thread that we're running on
@@ -320,6 +325,12 @@ void activate_threads( errlHndl_t& io_rtaskRetErrl )
         {
             continue;
         }
+
+        // Skip threads that we shouldn't be starting
+        if( !(en_threads & (0x8000000000000000>>thread)) )
+        {
+            continue;
+        } 
 
         // send a magic instruction for PHYP Simics to work...
         MAGIC_INSTRUCTION(MAGIC_SIMICS_CORESTATESAVE);

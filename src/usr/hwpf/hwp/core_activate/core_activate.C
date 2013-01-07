@@ -265,9 +265,13 @@ void*    call_host_activate_slave_cores( void    *io_pArgs )
         CHIP_UNIT_ATTR l_coreId =
                 (*l_core)->getAttr<TARGETING::ATTR_CHIP_UNIT>();
         FABRIC_NODE_ID_ATTR l_logicalNodeId =
-                l_processor->getAttr<TARGETING::ATTR_FABRIC_NODE_ID>();
+          l_processor->getAttr<TARGETING::ATTR_FABRIC_NODE_ID>();
         FABRIC_CHIP_ID_ATTR l_chipId =
-                l_processor->getAttr<TARGETING::ATTR_FABRIC_CHIP_ID>();
+          l_processor->getAttr<TARGETING::ATTR_FABRIC_CHIP_ID>();
+        TARGETING::Target* sys = NULL;
+        TARGETING::targetService().getTopLevelTarget(sys);
+        assert( sys != NULL );
+        uint64_t en_threads = sys->getAttr<ATTR_ENABLED_THREADS>();
 
         uint64_t pir = l_coreId << 3;
         pir |= l_chipId << 7;
@@ -278,7 +282,7 @@ void*    call_host_activate_slave_cores( void    *io_pArgs )
             TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                        "call_host_activate_slave_cores: Waking %x", pir);
 
-            int rc = cpu_start_core(pir);
+            int rc = cpu_start_core(pir,en_threads);
 
             // We purposefully only create one error log here.  The only
             // failure from the kernel is a bad PIR, which means we have

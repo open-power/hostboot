@@ -381,7 +381,7 @@ void CpuManager::executePeriodics(cpu_t * i_cpu)
 
 }
 
-int CpuManager::startCore(uint64_t pir)
+int CpuManager::startCore(uint64_t pir,uint64_t i_threads)
 {
     size_t threads = getThreadCount();
     pir = pir & ~(threads-1);
@@ -394,7 +394,11 @@ int CpuManager::startCore(uint64_t pir)
 
     for(size_t i = 0; i < threads; i++)
     {
-        Singleton<CpuManager>::instance().startCPU(pir + i);
+        // Only start the threads we were told to start
+        if( i_threads & (0x8000000000000000 >> i) )
+        {
+            Singleton<CpuManager>::instance().startCPU(pir + i);
+        }
     }
     __sync_synchronize();
 

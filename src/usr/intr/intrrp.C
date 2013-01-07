@@ -59,6 +59,45 @@ TRAC_INIT(&g_trac_intr, INTR_TRACE_NAME, KILOBYTE, TRACE::BUFFER_SLOW);
 TASK_ENTRY_MACRO( IntrRp::init );
 
 
+/**
+ * @brief Utility function to get the list of enabled threads
+ * @return Bitstring of enabled threads
+ */
+uint64_t get_enabled_threads( void )
+{
+    TARGETING::Target* sys = NULL;
+    TARGETING::targetService().getTopLevelTarget(sys);
+    assert( sys != NULL );
+    uint64_t en_threads = sys->getAttr<TARGETING::ATTR_ENABLED_THREADS>();
+    if( en_threads == 0 )
+    {
+        // Read the scratch reg that the SBE setup
+        //  Enabled threads are listed as a bitstring in bits 16:23
+        //  A value of zero means the SBE hasn't set them up yet
+        while( en_threads == 0 )
+        {
+            en_threads = mmio_scratch_read(MMIO_SCRATCH_AVP_THREADS);
+
+            //@todo RTC:63991 - Remove this after we get the new SBE image
+            if( en_threads == 0 )
+            {
+                // Default to all threads enabled
+                uint64_t max_threads = cpu_thread_count();
+                en_threads =
+                  ((1ull << max_threads) - 1ull) << (48ull - max_threads);
+            }
+        }
+        en_threads = en_threads << 16; //left-justify the threads
+        TRACFCOMP( g_trac_intr,
+                   "Enabled Threads = %.16X",
+                   en_threads );
+
+        sys->setAttr<TARGETING::ATTR_ENABLED_THREADS>(en_threads);
+    }
+    TRACDCOMP( g_trac_intr, "en_threads=%.16X", en_threads );
+    return en_threads;
+}
+
 void IntrRp::init( errlHndl_t   &io_errlHndl_t )
 {
     errlHndl_t err = NULL;
@@ -138,11 +177,18 @@ errlHndl_t IntrRp::_init()
         // Set up link registers to forward all intrpts to master cpu.
         //
         // There is one register set per cpu thread.
-        size_t threads = cpu_thread_count();
+        uint64_t max_threads = cpu_thread_count();
+        uint64_t en_threads = get_enabled_threads();
 
         PIR_t pir = iv_masterCpu;
-        for(size_t thread = 0; thread < threads; ++thread)
+        for(size_t thread = 0; thread < max_threads; ++thread)
         {
+            // Skip threads that we shouldn't be starting
+            if( !(en_threads & (0x8000000000000000>>thread)) )
+            {
+                TRACDCOMP(g_trac_intr,"IntrRp::_init: Skipping thread %d : en_threads=%X",thread,en_threads);
+                continue;
+            } 
             pir.threadId = thread;
             initInterruptPresenter(pir);
         }
@@ -410,10 +456,18 @@ void IntrRp::msgHandler()
                               pir.threadId);
 
                     size_t threads = cpu_thread_count();
+                    uint64_t en_threads = get_enabled_threads();
+
                     iv_ipisPending[pir] = IPI_Info_t((1 << threads)-1, msg);
 
                     for(size_t thread = 0; thread < threads; ++thread)
                     {
+                        // Skip threads that we shouldn't be starting
+                        if( !(en_threads & (0x8000000000000000>>thread)) )
+                        {
+                            TRACDCOMP(g_trac_intr,"MSG_INTR_ADD_CPU: Skipping thread %d",thread);
+                            continue;
+                        } 
                         pir.threadId = thread;
                         initInterruptPresenter(pir);
                         sendIPI(pir);
@@ -967,6 +1021,8 @@ void IntrRp::shutDown()
     iv_cpuList.push_back(iv_masterCpu);
 
     size_t threads = cpu_thread_count();
+    uint64_t en_threads = get_enabled_threads();
+
     for(CpuList_t::iterator pir_itr = iv_cpuList.begin();
         pir_itr != iv_cpuList.end();
         ++pir_itr)
@@ -974,6 +1030,12 @@ void IntrRp::shutDown()
         PIR_t pir = *pir_itr;
         for(size_t thread = 0; thread < threads; ++thread)
         {
+            // Skip threads that were never started
+            if( !(en_threads & (0x8000000000000000>>thread)) )
+            {
+                TRACDCOMP(g_trac_intr,"IntrRp::shutDown: Skipping thread %d",thread);
+                continue;
+            } 
             pir.threadId = thread;
             deconfigureInterruptPresenter(pir);
         }

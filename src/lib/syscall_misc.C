@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2012              */
+/* COPYRIGHT International Business Machines Corp. 2011,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -66,10 +66,12 @@ size_t cpu_thread_count()
     return threads;
 }
 
-int cpu_start_core(uint64_t pir)
+int cpu_start_core(uint64_t pir,uint64_t i_threads)
 {
     return reinterpret_cast<int64_t>(
-        _syscall1(MISC_CPUSTARTCORE, reinterpret_cast<void*>(pir)));
+        _syscall2(MISC_CPUSTARTCORE,
+                  reinterpret_cast<void*>(pir),
+                  reinterpret_cast<void*>(i_threads)));
 }
 
 uint64_t cpu_spr_value(CpuSprNames spr)
