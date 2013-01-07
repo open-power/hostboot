@@ -1,26 +1,25 @@
-/*  IBM_PROLOG_BEGIN_TAG
- *  This is an automatically generated prolog.
- *
- *  $Source: src/usr/mvpd/test/mvpdtest.H $
- *
- *  IBM CONFIDENTIAL
- *
- *  COPYRIGHT International Business Machines Corp. 2012
- *
- *  p1
- *
- *  Object Code Only (OCO) source materials
- *  Licensed Internal Code Source Materials
- *  IBM HostBoot Licensed Internal Code
- *
- *  The source code for this program is not published or other-
- *  wise divested of its trade secrets, irrespective of what has
- *  been deposited with the U.S. Copyright Office.
- *
- *  Origin: 30
- *
- *  IBM_PROLOG_END_TAG
- */
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/usr/vpd/test/mvpdtest.H $                                 */
+/*                                                                        */
+/* IBM CONFIDENTIAL                                                       */
+/*                                                                        */
+/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/*                                                                        */
+/* p1                                                                     */
+/*                                                                        */
+/* Object Code Only (OCO) source materials                                */
+/* Licensed Internal Code Source Materials                                */
+/* IBM HostBoot Licensed Internal Code                                    */
+/*                                                                        */
+/* The source code for this program is not published or otherwise         */
+/* divested of its trade secrets, irrespective of what has been           */
+/* deposited with the U.S. Copyright Office.                              */
+/*                                                                        */
+/* Origin: 30                                                             */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
 #ifndef __MVPDTEST_H
 #define __MVPDTEST_H
 
@@ -37,8 +36,8 @@
 #include <devicefw/driverif.H>
 #include <targeting/common/predicates/predicatectm.H>
 
-#include <mvpd/mvpdenums.H>
-#include <mvpd/mvpdreasoncodes.H>
+#include <vpd/mvpdenums.H>
+#include <vpd/vpdreasoncodes.H>
 #include "../mvpd.H"
 
 
@@ -334,7 +333,7 @@ class MVPDTest: public CxxTest::TestSuite
                                    theKeyword );
                         TS_FAIL( "testMvpdRead() - Failure reading keyword size!" );
                         errlCommit( err,
-                                    MVPD_COMP_ID );
+                                    VPD_COMP_ID );
                         continue;
                     }
 
@@ -359,7 +358,7 @@ class MVPDTest: public CxxTest::TestSuite
                                    theSize, curCmd );
                         TS_FAIL( "testMvpdRead() - Failure during MVPD read!" );
                         errlCommit( err,
-                                    MVPD_COMP_ID );
+                                    VPD_COMP_ID );
 
                         // Free the data
                         if( NULL != theData )

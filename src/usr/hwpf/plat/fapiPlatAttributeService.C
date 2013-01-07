@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2012              */
+/* COPYRIGHT International Business Machines Corp. 2011,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -36,7 +36,7 @@
 #include <errl/errlentry.H>
 #include <hwpf/plat/fapiPlatAttributeService.H>
 #include <hwpf/plat/fapiPlatReasonCodes.H>
-#include <spd/spdenums.H>
+#include <vpd/spdenums.H>
 #include <devicefw/driverif.H>
 #include <hwas/common/hwas.H>
 #include <hwas/common/hwasCommon.H>

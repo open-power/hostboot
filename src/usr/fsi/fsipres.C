@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2012              */
+/* COPYRIGHT International Business Machines Corp. 2011,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -24,7 +24,7 @@
 #include <targeting/common/attributes.H>
 #include <fsi/fsiif.H>
 #include <fsi/fsi_reasoncodes.H>
-#include <mvpd/mvpdenums.H>
+#include <vpd/mvpdenums.H>
 #include <errl/errlmanager.H>
 #include <targeting/common/predicates/predicatectm.H>
 

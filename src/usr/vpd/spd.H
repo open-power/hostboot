@@ -1,26 +1,25 @@
-/*  IBM_PROLOG_BEGIN_TAG
- *  This is an automatically generated prolog.
- *
- *  $Source: src/usr/spd/spd.H $
- *
- *  IBM CONFIDENTIAL
- *
- *  COPYRIGHT International Business Machines Corp. 2012
- *
- *  p1
- *
- *  Object Code Only (OCO) source materials
- *  Licensed Internal Code Source Materials
- *  IBM HostBoot Licensed Internal Code
- *
- *  The source code for this program is not published or other-
- *  wise divested of its trade secrets, irrespective of what has
- *  been deposited with the U.S. Copyright Office.
- *
- *  Origin: 30
- *
- *  IBM_PROLOG_END_TAG
- */
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/usr/vpd/spd.H $                                           */
+/*                                                                        */
+/* IBM CONFIDENTIAL                                                       */
+/*                                                                        */
+/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/*                                                                        */
+/* p1                                                                     */
+/*                                                                        */
+/* Object Code Only (OCO) source materials                                */
+/* Licensed Internal Code Source Materials                                */
+/* IBM HostBoot Licensed Internal Code                                    */
+/*                                                                        */
+/* The source code for this program is not published or otherwise         */
+/* divested of its trade secrets, irrespective of what has been           */
+/* deposited with the U.S. Copyright Office.                              */
+/*                                                                        */
+/* Origin: 30                                                             */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
 #ifndef __SPD_H
 #define __SPD_H
 
@@ -35,7 +34,7 @@
 // Includes
 // ----------------------------------------------
 #include <errl/errlentry.H>
-#include <spd/spdif.H>
+#include "vpd.H"
 
 namespace SPD
 {
@@ -357,28 +356,6 @@ errlHndl_t checkModSpecificKeyword ( KeywordData i_kwdData,
                                      TARGETING::Target * i_target );
 
 /**
- * @brief This function will query the PNOR RP to get the offset of the
- *      section requested.  It will then set global variables to save this
- *      value away for later use.  This function only needs to be called once.
- *
- * @param[in] i_pnorInfo - Structure of common PNOR information needed to
- *      query for the sections address.
- *
- * @param[in/out] io_cachedAddr - This parameter is a gloval variable in the
- *      calling code.  It is the address that is obtained from the PNOR
- *      RP.
- *
- * @param[in] i_mutex - The Mutex from the calling code.  It is locked when
- *      the globals are modified.
- *
- * @return errlHndl_t - NULL if successful, otherwise a pointer to the
- *      Error log.
-*/
-errlHndl_t getPnorAddr ( pnorInformation & i_pnorInfo,
-                         uint64_t &io_cachedAddr,
-                         mutex_t * i_mutex );
-
-/**
  * @brief This function is used to query the attribute code to get the VPD
  *      Location value for the target provided.
  *
@@ -392,93 +369,6 @@ errlHndl_t getPnorAddr ( pnorInformation & i_pnorInfo,
 errlHndl_t getVpdLocation ( int64_t & o_vpdLocation,
                             TARGETING::Target * i_target );
 
-
-/**
- * @brief This function will read the PNOR at the correct offset and number of
- *      bytes for the keyword requested.
- *
- * @param[in] i_byteAddr - The offset to access in the PNOR.
- *
- * @param[in] i_numBytes - Number of bytes to read.
- *
- * @param[out] o_data - The data buffer that the read data will be placed
- *      into.
- *
- * @param[in] i_target - The chip target to access the data for.
- *
- * @param[in] i_pnorInfo - Information about the PNOR section and side that we
- *      need to know to make the request.
- *
- * @param[in/out] io_cachedAddr - The address offset to the data chunk in
- *      PNOR.
- *
- * @param[in] i_mutex - The mutex to lock/unlock while setting io_isAddrCached
- *      and io_cachedAddr.  It is assumed that those parameters are global
- *      variables in the code where they reside.
- *
- * @return errlHndl_t - NULL if successful, otherwise a pointer to the error
- *      log.
- */
-errlHndl_t readPNOR ( uint64_t i_byteAddr,
-                      size_t i_numBytes,
-                      void * o_data,
-                      TARGETING::Target * i_target,
-                      pnorInformation & i_pnorInfo,
-                      uint64_t &io_cachedAddr,
-                      mutex_t i_mutex );
-
-/**
- * @brief This function will write the PNOR at the correct offset and number
- *      of bytes for the keyword requested.
- *
- * @param[in] i_byteAddr - The offset to access in the PNOR.
- *
- * @param[in] i_numBytes - The number of bytes to write.
- *
- * @param[in] i_data - The data buffer of the data to be written.
- *
- * @param[in] i_target - The chip target to access the data for.
- *
- * @param[in] i_pnorInfo - Information about the PNOR section and side that we
- *      need to know to make the request.
- *
- * @param[in/out] io_cachedAddr - The address offset to the data chunk in
- *      PNOR.
- *
- * @param[in] i_mutex - The mutex to lock/unlock while setting io_isAddrCached
- *      and io_cachedAddr.  It is assumed that those parameters are global
- *      variables in the code where they reside.
- *
- * @return errlHndl_t - NULL if successful, otherwise a pointer to the error
- *      log.
- */
-errlHndl_t writePNOR ( uint64_t i_byteAddr,
-                       size_t i_numBytes,
-                       void * i_data,
-                       TARGETING::Target * i_target,
-                       pnorInformation & i_pnorInfo,
-                       uint64_t &io_cachedAddr,
-                       mutex_t * i_mutex );
-
-/**
- * @brief This function handles sending the mailbox message to the Fsp to
- *      notify of updates to the data.
- *
- * @param[in] i_offset - The offset into the JEDEC SPD layout.
- *
- * @param[in] i_numbytes - Number of bytes to read.
- *
- * @param[in] i_data - The data buffer that will return the data read.
- *
- * @param[in] i_target - The target DIMM to access.
- *
- * @return errlHndl_t - NULL if successful, otherwise a pointer to the error
- *      log.
- */
-errlHndl_t spdSendMboxWriteMsg ( uint64_t i_offset,
-                                 size_t i_numBytes,
-                                 void * i_data,
-                                 TARGETING::Target * i_target );
 
 }; // end SPD namespace
 

@@ -76,7 +76,7 @@
 #include    <hwpf/plat/fapiPlatReasonCodes.H>
 //remove these once memory setup workaround is removed
 #include <devicefw/driverif.H>
-#include <spd/spdenums.H>
+#include <vpd/spdenums.H>
 #include <sys/time.h>
 #include <sys/mm.h>
 

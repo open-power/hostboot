@@ -59,8 +59,8 @@
 #include    <fapiPlatHwpInvoker.H>
 
 #include    <devicefw/userif.H>
-#include    <mvpd/mvpdenums.H>
-#include    <mvpd/mvpdreasoncodes.H>
+#include    <vpd/mvpdenums.H>
+#include    <vpd/vpdreasoncodes.H>
 
 #include    <hwpf/istepreasoncodes.H>
 

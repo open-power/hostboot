@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/spd/test/spdtest.H $                                  */
+/* $Source: src/usr/vpd/test/spdtest.H $                                  */
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
@@ -37,8 +37,8 @@
 #include <targeting/common/predicates/predicates.H>
 #include <targeting/common/utilFilter.H>
 
-#include <spd/spdreasoncodes.H>
-#include <spd/spdenums.H>
+#include <vpd/vpdreasoncodes.H>
+#include <vpd/spdenums.H>
 #include "../spdDDR3.H"
 #include "../spd.H"
 
@@ -120,7 +120,7 @@ class SPDTest: public CxxTest::TestSuite
                     fails++;
                     TS_FAIL( "testSpdRead- Failure reading Basic memory type!" );
                     errlCommit( err,
-                                SPD_COMP_ID );
+                                VPD_COMP_ID );
                     break;;
                 }
 
@@ -179,7 +179,7 @@ class SPDTest: public CxxTest::TestSuite
                         TS_FAIL( "testSpdRead - Failure on keyword: %04x",
                                  keyword );
                         errlCommit( err,
-                                    SPD_COMP_ID );
+                                    VPD_COMP_ID );
                         continue;
                     }
 
@@ -221,6 +221,7 @@ class SPDTest: public CxxTest::TestSuite
             uint64_t cmds = 0x0;
             uint64_t fails = 0x0;
             uint8_t * theData = NULL;
+            uint8_t * origData = NULL;
 
             TRACFCOMP( g_trac_spd,
                        ENTER_MRK"testSpdWrite()" );
@@ -256,7 +257,7 @@ class SPDTest: public CxxTest::TestSuite
                     fails++;
                     TS_FAIL( "testSpdWrite - failed to read memtype!" );
                     errlCommit( err,
-                                SPD_COMP_ID );
+                                VPD_COMP_ID );
                     break;
                 }
 
@@ -282,7 +283,7 @@ class SPDTest: public CxxTest::TestSuite
                                memType );
                     TS_FAIL( "testSpdWrite - Unsupported Memory Type!" );
                     errlCommit( err,
-                                SPD_COMP_ID );
+                                VPD_COMP_ID );
                     break;
                 }
 
@@ -300,9 +301,12 @@ class SPDTest: public CxxTest::TestSuite
                     fails++;
                     TS_FAIL( "testSpdWrite - failed to read DIMM Bad DQ data!" );
                     errlCommit( err,
-                                SPD_COMP_ID );
+                                VPD_COMP_ID );
                     break;
                 }
+
+                origData = static_cast<uint8_t*>(malloc( theSize ));
+                memcpy( origData, theData, theSize );
 
                 // Write the data back
                 err = deviceWrite( theTarget,
@@ -323,11 +327,41 @@ class SPDTest: public CxxTest::TestSuite
                     delete err;
                     err = NULL;
                 }
+
+                // Read the data out again to check it
+                err = deviceRead( theTarget,
+                                  theData,
+                                  theSize,
+                                  DEVICE_SPD_ADDRESS( DIMM_BAD_DQ_DATA ) );
+
+                if( err )
+                {
+                    fails++;
+                    TS_FAIL( "testSpdWrite - failed to read DIMM Bad DQ data! [2]" );
+                    errlCommit( err,
+                                VPD_COMP_ID );
+                    break;
+                }
+
+                if( memcmp( theData, origData, theSize ) )
+                {
+                    fails++;
+                    TS_FAIL( "testSpdWrite - DIMM Bad DQ data does not match what we wrote!" );
+                    TRACFBIN( g_trac_spd, "orig=", origData, theSize );
+                    TRACFBIN( g_trac_spd, "read=", theData, theSize );
+                }
+
             } while( 0 );
 
             if( NULL != theData )
             {
                 free( theData );
+                theData = NULL;
+            }
+
+            if( NULL != origData )
+            {
+                free( origData );
                 theData = NULL;
             }
 
@@ -564,7 +598,7 @@ class SPDTest: public CxxTest::TestSuite
                     TS_FAIL( "testspdDDR3ModSpecKwds- Failure reading Basic "
                              "memory type!" );
                     errlCommit( err,
-                                SPD_COMP_ID );
+                                VPD_COMP_ID );
                     break;
                 }
 
@@ -580,7 +614,7 @@ class SPDTest: public CxxTest::TestSuite
                     TS_FAIL( "testspdDDR3ModSpecKwds - Failure reading Module "
                              "type" );
                     errlCommit( err,
-                                SPD_COMP_ID );
+                                VPD_COMP_ID );
                     break;
                 }
 
@@ -662,7 +696,7 @@ class SPDTest: public CxxTest::TestSuite
                                  "d: %04x",
                                  keyword );
                         errlCommit( err,
-                                    SPD_COMP_ID );
+                                    VPD_COMP_ID );
                         continue;
                     }
 

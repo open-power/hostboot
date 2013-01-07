@@ -1,26 +1,25 @@
-/*  IBM_PROLOG_BEGIN_TAG
- *  This is an automatically generated prolog.
- *
- *  $Source: src/usr/mvpd/mvpd.C $
- *
- *  IBM CONFIDENTIAL
- *
- *  COPYRIGHT International Business Machines Corp. 2012
- *
- *  p1
- *
- *  Object Code Only (OCO) source materials
- *  Licensed Internal Code Source Materials
- *  IBM HostBoot Licensed Internal Code
- *
- *  The source code for this program is not published or other-
- *  wise divested of its trade secrets, irrespective of what has
- *  been deposited with the U.S. Copyright Office.
- *
- *  Origin: 30
- *
- *  IBM_PROLOG_END_TAG
- */
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/usr/vpd/mvpd.C $                                          */
+/*                                                                        */
+/* IBM CONFIDENTIAL                                                       */
+/*                                                                        */
+/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/*                                                                        */
+/* p1                                                                     */
+/*                                                                        */
+/* Object Code Only (OCO) source materials                                */
+/* Licensed Internal Code Source Materials                                */
+/* IBM HostBoot Licensed Internal Code                                    */
+/*                                                                        */
+/* The source code for this program is not published or otherwise         */
+/* divested of its trade secrets, irrespective of what has been           */
+/* deposited with the U.S. Copyright Office.                              */
+/*                                                                        */
+/* Origin: 30                                                             */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
 /**
  * @file mvpd.C
  *
@@ -39,23 +38,11 @@
 #include <targeting/common/targetservice.H>
 #include <devicefw/driverif.H>
 #include <vfs/vfs.H>
-#include <spd/spdif.H>
-#include <mvpd/mvpdreasoncodes.H>
-#include <mvpd/mvpdenums.H>
+#include <vpd/vpdreasoncodes.H>
+#include <vpd/mvpdenums.H>
 
 #include "mvpd.H"
-
-// ----------------------------------------------
-// Globals
-// ----------------------------------------------
-bool g_loadModule = true;
-mutex_t g_mvpdMutex = MUTEX_INITIALIZER;
-
-uint64_t g_mvpdPnorAddr = 0x0;
-
-// By setting to false, allows debug at a later time by allowing to
-// substitute a binary file (procmvpd.dat) into PNOR.
-const bool g_readPNOR = true;
+#include "vpd.H"
 
 // ----------------------------------------------
 // Trace definitions
@@ -78,6 +65,18 @@ TRAC_INIT( & g_trac_mvpd, "MVPD", KILOBYTE);
 
 namespace MVPD
 {
+// ----------------------------------------------
+// Globals
+// ----------------------------------------------
+bool g_loadModule = true;
+mutex_t g_mvpdMutex = MUTEX_INITIALIZER;
+
+uint64_t g_mvpdPnorAddr = 0x0;
+
+// By setting to false, allows debug at a later time by allowing to
+// substitute a binary file (procmvpd.dat) into PNOR.
+const bool g_readPNOR = true;
+
 
 /**
 * @brief This function compares 2 mvpd record values.  Used for binary
@@ -235,16 +234,16 @@ errlHndl_t mvpdWrite ( DeviceFW::OperationType i_opType,
 
         /*@
          * @errortype
-         * @reasoncode       MVPD_OPERATION_NOT_SUPPORTED
+         * @reasoncode       VPD::VPD_OPERATION_NOT_SUPPORTED
          * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE
-         * @moduleid         MVPD_WRITE
+         * @moduleid         VPD::VPD_MVPD_WRITE
          * @userdata1        Requested Record
          * @userdata2        Requested Keyword
          * @devdesc          MVPD Writes are not supported currently.
          */
         err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                       MVPD_WRITE,
-                                       MVPD_OPERATION_NOT_SUPPORTED,
+                                       VPD::VPD_MVPD_WRITE,
+                                       VPD::VPD_OPERATION_NOT_SUPPORTED,
                                        args.record,
                                        args.keyword );
 
@@ -289,17 +288,17 @@ errlHndl_t mvpdTranslateRecord ( mvpdRecord i_record,
 
             /*@
              * @errortype
-             * @reasoncode       MVPD_RECORD_NOT_FOUND
+             * @reasoncode       VPD::VPD_RECORD_NOT_FOUND
              * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE
-             * @moduleid         MVPD_TRANSLATE_RECORD
+             * @moduleid         VPD::VPD_MVPD_TRANSLATE_RECORD
              * @userdata1        Record enumeration.
              * @userdata2        <UNUSED>
              * @devdesc          The record enumeration did not have a
              *                   corresponding string value.
              */
             err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                           MVPD_TRANSLATE_RECORD,
-                                           MVPD_RECORD_NOT_FOUND,
+                                           VPD::VPD_MVPD_TRANSLATE_RECORD,
+                                           VPD::VPD_RECORD_NOT_FOUND,
                                            i_record,
                                            0x0 );
 
@@ -349,17 +348,17 @@ errlHndl_t mvpdTranslateKeyword ( mvpdKeyword i_keyword,
 
             /*@
              * @errortype
-             * @reasoncode       MVPD_KEYWORD_NOT_FOUND
+             * @reasoncode       VPD::VPD_KEYWORD_NOT_FOUND
              * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE
-             * @moduleid         MVPD_TRANSLATE_KEYWORD
+             * @moduleid         VPD::VPD_MVPD_TRANSLATE_KEYWORD
              * @userdata1        Keyword Enumeration
              * @userdata2        <UNUSED>
              * @devdesc          The keyword enumeration did not have a
              *                   corresponding string value.
              */
             err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                           MVPD_TRANSLATE_KEYWORD,
-                                           MVPD_KEYWORD_NOT_FOUND,
+                                           VPD::VPD_MVPD_TRANSLATE_KEYWORD,
+                                           VPD::VPD_KEYWORD_NOT_FOUND,
                                            i_keyword,
                                            0x0 );
 
@@ -460,16 +459,16 @@ errlHndl_t mvpdFindRecordOffset ( const char * i_record,
 
         /*@
          * @errortype
-         * @reasoncode       MVPD_RECORD_NOT_FOUND
+         * @reasoncode       VPD::VPD_RECORD_NOT_FOUND
          * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE
-         * @moduleid         MVPD_FIND_RECORD_OFFSET
+         * @moduleid         VPD::VPD_MVPD_FIND_RECORD_OFFSET
          * @userdata1        Requested Record
          * @userdata2        Requested Keyword
          * @devdesc          The requested record was not found in the MVPD TOC.
          */
         err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                       MVPD_FIND_RECORD_OFFSET,
-                                       MVPD_RECORD_NOT_FOUND,
+                                       VPD::VPD_MVPD_FIND_RECORD_OFFSET,
+                                       VPD::VPD_RECORD_NOT_FOUND,
                                        i_args.record,
                                        i_args.keyword );
         // Add trace to the log so we know what record was being requested.
@@ -550,17 +549,17 @@ errlHndl_t mvpdRetrieveKeyword ( const char * i_keywordName,
 
             /*@
              * @errortype
-             * @reasoncode       MVPD_RECORD_MISMATCH
+             * @reasoncode       VPD::VPD_RECORD_MISMATCH
              * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE
-             * @moduleid         MVPD_RETRIEVE_KEYWORD
+             * @moduleid         VPD::VPD_MVPD_RETRIEVE_KEYWORD
              * @userdata1        Current offset into MVPD
              * @userdata2        Start of Record offset
              * @devdesc          Record name does not match value expected for
              *                   offset read.
              */
             err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                           MVPD_RETRIEVE_KEYWORD,
-                                           MVPD_RECORD_MISMATCH,
+                                           VPD::VPD_MVPD_RETRIEVE_KEYWORD,
+                                           VPD::VPD_RECORD_MISMATCH,
                                            offset,
                                            i_offset );
             // Add trace so we see what record was being compared
@@ -693,9 +692,9 @@ errlHndl_t mvpdRetrieveKeyword ( const char * i_keywordName,
 
         /*@
          * @errortype
-         * @reasoncode       MVPD_KEYWORD_NOT_FOUND
+         * @reasoncode       VPD::VPD_KEYWORD_NOT_FOUND
          * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE
-         * @moduleid         MVPD_RETRIEVE_KEYWORD
+         * @moduleid         VPD::VPD_MVPD_RETRIEVE_KEYWORD
          * @userdata1        Start of Record Offset
          * @userdata2[0:31]  Requested Record
          * @userdata2[32:63] Requested Keyword
@@ -703,8 +702,8 @@ errlHndl_t mvpdRetrieveKeyword ( const char * i_keywordName,
          *                   offset.
          */
         err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                       MVPD_RETRIEVE_KEYWORD,
-                                       MVPD_KEYWORD_NOT_FOUND,
+                                       VPD::VPD_MVPD_RETRIEVE_KEYWORD,
+                                       VPD::VPD_KEYWORD_NOT_FOUND,
                                        i_offset,
                                        TWO_UINT32_TO_UINT64( i_args.record,
                                                              i_args.keyword ) );
@@ -737,15 +736,13 @@ errlHndl_t mvpdFetchData ( uint64_t i_byteAddr,
     {
         if( g_readPNOR )
         {
-            // Call a function in the SPD code which does an identical thing,
-            // but with different address offsets.  Saves us having to
-            // duplicate the code between the 2 modules.
-            SPD::pnorInformation info;
+            // Call a function in the common VPD code 
+            VPD::pnorInformation info;
             info.segmentSize = MVPD_SECTION_SIZE;
             info.maxSegments = MVPD_MAX_SECTIONS;
             info.pnorSection = PNOR::MODULE_VPD;
             info.pnorSide = PNOR::CURRENT_SIDE;
-            err = SPD::readPNOR( i_byteAddr,
+            err = VPD::readPNOR( i_byteAddr,
                                  i_numBytes,
                                  o_data,
                                  i_target,
@@ -854,9 +851,9 @@ errlHndl_t mvpdReadBinaryFile ( uint64_t i_offset,
 
             /*@
              * @errortype
-             * @reasoncode       MVPD_INSUFFICIENT_FILE_SIZE
+             * @reasoncode       VPD::VPD_INSUFFICIENT_FILE_SIZE
              * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE
-             * @moduleid         MVPD_READ_BINARY_FILE
+             * @moduleid         VPD::VPD_MVPD_READ_BINARY_FILE
              * @userdata1        File Size
              * @userdata2[0:31]  Starting offset into file
              * @userdata2[32:63] Number of bytes to read
@@ -864,8 +861,8 @@ errlHndl_t mvpdReadBinaryFile ( uint64_t i_offset,
              *                   bytes at offset given without overrunning file.
              */
             err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                           MVPD_READ_BINARY_FILE,
-                                           MVPD_INSUFFICIENT_FILE_SIZE,
+                                           VPD::VPD_MVPD_READ_BINARY_FILE,
+                                           VPD::VPD_INSUFFICIENT_FILE_SIZE,
                                            fileSize,
                                            TWO_UINT32_TO_UINT64( i_offset,
                                                                  fileSize ) );
@@ -904,17 +901,17 @@ errlHndl_t checkBufferSize( size_t i_bufferSize,
 
         /*@
          * @errortype
-         * @reasoncode       MVPD_INSUFFICIENT_BUFFER_SIZE
+         * @reasoncode       VPD::VPD_INSUFFICIENT_BUFFER_SIZE
          * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE
-         * @moduleid         MVPD_CHECK_BUFFER_SIZE
+         * @moduleid         VPD::VPD_MVPD_CHECK_BUFFER_SIZE
          * @userdata1        Buffer Size
          * @userdata2        Expected Buffer Size
          * @devdesc          Buffer size was not greater than or equal to
          *                   expected buffer size.
          */
         err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                       MVPD_CHECK_BUFFER_SIZE,
-                                       MVPD_INSUFFICIENT_BUFFER_SIZE,
+                                       VPD::VPD_MVPD_CHECK_BUFFER_SIZE,
+                                       VPD::VPD_INSUFFICIENT_BUFFER_SIZE,
                                        i_bufferSize,
                                        i_expectedSize );
     }

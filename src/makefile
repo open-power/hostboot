@@ -51,9 +51,9 @@ BASE_MODULES = trace errl devicefw scom xscom initservice \
 
 EXTENDED_MODULES = targeting ecmddatabuffer fapi hwp plat	\
                    extinitsvc istepdisp hwas fsi fsiscom i2c intr scan \
-                   spd dmi_training fapiporeve poreve util tracedaemon	\
+                   vpd dmi_training fapiporeve poreve util tracedaemon	\
                    sbe_centaur_init mc_config dram_training \
-                   mdia mbox mvpd prdf bus_training \
+                   mdia mbox prdf bus_training \
                    activate_powerbus build_winkle_images \
                    core_activate dram_initialization edi_ei_initialization \
                    establish_system_smp \
@@ -63,8 +63,8 @@ EXTENDED_MODULES = targeting ecmddatabuffer fapi hwp plat	\
 TESTCASE_MODULES = cxxtest testtrace testerrl testdevicefw testsyslib \
                    testscom testxscom testtargeting testinitservice testkernel \
                    testhwpf testecmddatabuffer initsvctesttask testcxxtest \
-                   testpnor testi2c testfsi testvfs testhwas testintr testspd \
-                   testpore testutil testmbox testmdia testmvpd testprdf testattn \
+                   testpnor testi2c testfsi testvfs testhwas testintr testvpd \
+                   testpore testutil testmbox testmdia testprdf testattn \
                    testscan testruntime testibscom
 
 RELOCATABLE_IMAGE_LDFLAGS = -pie --export-dynamic

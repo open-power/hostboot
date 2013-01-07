@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2012              */
+/* COPYRIGHT International Business Machines Corp. 2011,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -53,7 +53,7 @@
 #include <hwpf/fapi/fapiTarget.H>
 #include <hwpf/fapi/fapiAttributeTank.H>
 #include <hwpf/plat/fapiPlatAttrOverrideSync.H>
-#include <spd/spdenums.H>
+#include <vpd/spdenums.H>
 #include <dimmConsts.H>
 #include <util/singleton.H>
 #include <procMemConsts.H>

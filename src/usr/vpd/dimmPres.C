@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/spd/dimmPres.C $                                      */
+/* $Source: src/usr/vpd/dimmPres.C $                                      */
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012                   */
+/* COPYRIGHT International Business Machines Corp. 2012,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -35,8 +35,8 @@
 #include <errl/errlmanager.H>
 #include <targeting/common/targetservice.H>
 #include <devicefw/driverif.H>
-#include <spd/spdreasoncodes.H>
-#include <spd/spdenums.H>
+#include <vpd/vpdreasoncodes.H>
+#include <vpd/spdenums.H>
 
 #include "spd.H"
 
@@ -98,16 +98,16 @@ errlHndl_t dimmPresenceDetect( DeviceFW::OperationType i_opType,
 
             /*@
              * @errortype
-             * @reasoncode       SPD_INSUFFICIENT_BUFFER_SIZE
+             * @reasoncode       VPD::VPD_INSUFFICIENT_BUFFER_SIZE
              * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE
-             * @moduleid         SPD_PRESENCE_DETECT
+             * @moduleid         VPD::VPD_SPD_PRESENCE_DETECT
              * @userdata1        Buffer Length
              * @userdata2        <UNUSED>
              * @devdesc          Buffer for checking Presence Detect was not the correct size.
              */
             err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                           SPD_PRESENCE_DETECT,
-                                           SPD_INSUFFICIENT_BUFFER_SIZE,
+                                           VPD::VPD_SPD_PRESENCE_DETECT,
+                                           VPD::VPD_INSUFFICIENT_BUFFER_SIZE,
                                            TO_UINT64(io_buflen),
                                            0x0 );
 

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2012              */
+/* COPYRIGHT International Business Machines Corp. 2011,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -37,7 +37,7 @@
 #include <targeting/common/commontargeting.H>
 #include <targeting/common/utilFilter.H>
 #include <fapiHwpExecInitFile.H>
-#include <spd/spdenums.H>
+#include <vpd/spdenums.H>
 
 using namespace fapi;
 using namespace TARGETING;

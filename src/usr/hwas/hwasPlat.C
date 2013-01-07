@@ -32,7 +32,7 @@
 
 #include <devicefw/driverif.H>
 #include <initservice/taskargs.H>
-#include <mvpd/mvpdenums.H>
+#include <vpd/mvpdenums.H>
 #include <stdio.h>
 #include <sys/mm.h>
 

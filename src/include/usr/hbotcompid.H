@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2012              */
+/* COPYRIGHT International Business Machines Corp. 2011,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -170,13 +170,7 @@ const compId_t INTR_COMP_ID = 0x0F00;
 const char INTR_COMP_NAME[] = "intr";
 //@}
 
-/** @name SPD
- *  DIMM SPD device driver component
- */
-//@{
-const compId_t SPD_COMP_ID = 0x1000;
-const char SPD_COMP_NAME[] = "spd";
-//@}
+// 0x1000 - open to reclaim
 
 /** @name HBMBOX
  *  MBOX component
@@ -186,13 +180,7 @@ const compId_t HBMBOX_COMP_ID = 0x1100;
 const char HBMBOX_COMP_NAME[] = "mbox";
 //@}
 
-/** @name MVPD
- *  MVPD device driver component
- */
-//@{
-const compId_t MVPD_COMP_ID = 0x1200;
-const char MVPD_COMP_NAME[] = "mvpd";
-//@}
+// 0x1200 - open to reclaim
 
 /** @name PRDF
  *  PRDF component
@@ -271,6 +259,14 @@ const char KERNEL_COMP_NAME[] = "kernel";
 //@{
 const compId_t IBSCOM_COMP_ID = 0x1C00;
 const char IBSCOM_COMP_NAME[] = "ibscom";
+//@}
+
+/** @name VPD
+ *  Common VPD device driver component
+ */
+//@{
+const compId_t VPD_COMP_ID = 0x1D00;
+const char VPD_COMP_NAME[] = "vpd";
 //@}
 
 /** @name HSVC

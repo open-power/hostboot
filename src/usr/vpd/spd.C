@@ -37,25 +37,11 @@
 #include <devicefw/driverif.H>
 #include <vfs/vfs.H>
 #include <pnor/pnorif.H>
-#include <spd/spdreasoncodes.H>
-#include <spd/spdenums.H>
+#include <vpd/vpdreasoncodes.H>
+#include <vpd/spdenums.H>
 #include <algorithm>
 #include "spd.H"
 #include "spdDDR3.H"
-
-// ----------------------------------------------
-// Globals
-// ----------------------------------------------
-bool g_loadModule = true;
-
-// This mutex is used to lock for writing/updating the global variables.
-mutex_t g_spdMutex = MUTEX_INITIALIZER;
-
-uint64_t g_spdPnorAddr = 0x0;
-
-// By setting to false, allows debug at a later time by allowing to
-// substitute a binary file (dimmspd.dat) into PNOR.
-const bool g_usePNOR = true;
 
 // ----------------------------------------------
 // Trace definitions
@@ -78,6 +64,20 @@ TRAC_INIT( & g_trac_spd, "SPD", KILOBYTE );
 
 namespace SPD
 {
+// ----------------------------------------------
+// Globals
+// ----------------------------------------------
+bool g_loadModule = true;
+
+// This mutex is used to lock for writing/updating the global variables.
+mutex_t g_spdMutex = MUTEX_INITIALIZER;
+
+uint64_t g_spdPnorAddr = 0x0;
+
+// By setting to false, allows debug at a later time by allowing to
+// substitute a binary file (dimmspd.dat) into PNOR.
+const bool g_usePNOR = true;
+
 
 /**
 * @brief Compare two values and return whether e2 is greater than
@@ -202,16 +202,16 @@ errlHndl_t spdGetKeywordValue ( DeviceFW::OperationType i_opType,
 
             /*@
              * @errortype
-             * @reasoncode       SPD_INVALID_BASIC_MEMORY_TYPE
+             * @reasoncode       VPD::VPD_INVALID_BASIC_MEMORY_TYPE
              * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE
-             * @moduleid         SPD_GET_KEYWORD_VALUE
+             * @moduleid         VPD::VPD_SPD_GET_KEYWORD_VALUE
              * @userdata1        Basic Memory Type (Byte 2)
              * @userdata2        Keyword Requested
              * @devdesc          Invalid Basic Memory Type
              */
             err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                           SPD_GET_KEYWORD_VALUE,
-                                           SPD_INVALID_BASIC_MEMORY_TYPE,
+                                           VPD::VPD_SPD_GET_KEYWORD_VALUE,
+                                           VPD::VPD_INVALID_BASIC_MEMORY_TYPE,
                                            memType,
                                            keyword );
 
@@ -276,16 +276,16 @@ errlHndl_t spdWriteKeywordValue ( DeviceFW::OperationType i_opType,
 
             /*@
              * @errortype
-             * @reasoncode       SPD_INVALID_BASIC_MEMORY_TYPE
+             * @reasoncode       VPD::VPD_INVALID_BASIC_MEMORY_TYPE
              * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE
-             * @moduleid         SPD_WRITE_KEYWORD_VALUE
+             * @moduleid         VPD::VPD_SPD_WRITE_KEYWORD_VALUE
              * @userdata1        Basic Memory Type (Byte 2)
              * @userdata2        Keyword Requested
              * @devdesc          Invalid Basic Memory Type
              */
             err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                           SPD_WRITE_KEYWORD_VALUE,
-                                           SPD_INVALID_BASIC_MEMORY_TYPE,
+                                           VPD::VPD_SPD_WRITE_KEYWORD_VALUE,
+                                           VPD::VPD_INVALID_BASIC_MEMORY_TYPE,
                                            memType,
                                            keyword );
 
@@ -318,18 +318,18 @@ errlHndl_t spdFetchData ( uint64_t i_byteAddr,
         if( likely( g_usePNOR ) )
         {
             // Setup info needed to read from PNOR
-            pnorInformation info;
+            VPD::pnorInformation info;
             info.segmentSize = DIMM_SPD_SECTION_SIZE;
             info.maxSegments = DIMM_SPD_MAX_SECTIONS;
             info.pnorSection = PNOR::DIMM_JEDEC_VPD;
             info.pnorSide = PNOR::CURRENT_SIDE;
-            err = readPNOR( i_byteAddr,
-                            i_numBytes,
-                            o_data,
-                            i_target,
-                            info,
-                            g_spdPnorAddr,
-                            &g_spdMutex );
+            err = VPD::readPNOR( i_byteAddr,
+                                 i_numBytes,
+                                 o_data,
+                                 i_target,
+                                 info,
+                                 g_spdPnorAddr,
+                                 &g_spdMutex );
 
             if( err )
             {
@@ -374,18 +374,18 @@ errlHndl_t spdWriteData ( uint64_t i_offset,
         if( likely( g_usePNOR ) )
         {
             // Setup info needed to write from PNOR
-            pnorInformation info;
+            VPD::pnorInformation info;
             info.segmentSize = DIMM_SPD_SECTION_SIZE;
             info.maxSegments = DIMM_SPD_MAX_SECTIONS;
             info.pnorSection = PNOR::DIMM_JEDEC_VPD;
             info.pnorSide = PNOR::CURRENT_SIDE;
-            err = writePNOR( i_offset,
-                             i_numBytes,
-                             i_data,
-                             i_target,
-                             info,
-                             g_spdPnorAddr,
-                             &g_spdMutex );
+            err = VPD::writePNOR( i_offset,
+                                  i_numBytes,
+                                  i_data,
+                                  i_target,
+                                  info,
+                                  g_spdPnorAddr,
+                                  &g_spdMutex );
 
             if( err )
             {
@@ -399,17 +399,17 @@ errlHndl_t spdWriteData ( uint64_t i_offset,
 
             /*@
              * @errortype
-             * @reasoncode       SPD_INVALID_WRITE_METHOD
+             * @reasoncode       VPD::VPD_INVALID_WRITE_METHOD
              * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE
-             * @moduleid         SPD_WRITE_DATA
+             * @moduleid         VPD::VPD_SPD_WRITE_DATA
              * @userdata1        Write Offset
              * @userdata2        Number of Bytes to Write
              * @devdesc          g_usePNOR is false, but there isn't an
              *                   alternate way to write PNOR.
              */
             err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                           SPD_WRITE_DATA,
-                                           SPD_INVALID_WRITE_METHOD,
+                                           VPD::VPD_SPD_WRITE_DATA,
+                                           VPD::VPD_INVALID_WRITE_METHOD,
                                            i_offset,
                                            i_numBytes );
 
@@ -459,9 +459,9 @@ errlHndl_t spdGetValue ( uint64_t i_keyword,
 
             /*@
              * @errortype
-             * @reasoncode       SPD_NULL_ENTRY
+             * @reasoncode       VPD::VPD_NULL_ENTRY
              * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE
-             * @moduleid         SPD_GET_VALUE
+             * @moduleid         VPD::VPD_SPD_GET_VALUE
              * @userdata1        SPD Keyword
              * @userdata2[0:31]  Buffer Size
              * @userdata2[32:63] Memory Type
@@ -469,8 +469,8 @@ errlHndl_t spdGetValue ( uint64_t i_keyword,
              *                   NULL.
              */
             err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                           SPD_GET_VALUE,
-                                           SPD_NULL_ENTRY,
+                                           VPD::VPD_SPD_GET_VALUE,
+                                           VPD::VPD_NULL_ENTRY,
                                            i_keyword,
                                            TWO_UINT32_TO_UINT64( io_buflen,
                                                                  i_DDRRev ) );
@@ -583,9 +583,9 @@ errlHndl_t spdWriteValue ( uint64_t i_keyword,
 
             /*@
              * @errortype
-             * @reasoncode       SPD_NULL_ENTRY
+             * @reasoncode       VPD::VPD_NULL_ENTRY
              * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE
-             * @moduleid         SPD_WRITE_VALUE
+             * @moduleid         VPD::VPD_SPD_WRITE_VALUE
              * @userdata1        SPD Keyword
              * @userdata2[0:31]  Buffer Length
              * @userdata2[32:63] Memory Type
@@ -593,8 +593,8 @@ errlHndl_t spdWriteValue ( uint64_t i_keyword,
              *                   NULL.
              */
             err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                           SPD_WRITE_VALUE,
-                                           SPD_NULL_ENTRY,
+                                           VPD::VPD_SPD_WRITE_VALUE,
+                                           VPD::VPD_NULL_ENTRY,
                                            i_keyword,
                                            TWO_UINT32_TO_UINT64( io_buflen,
                                                                  i_DDRRev ) );
@@ -631,10 +631,16 @@ errlHndl_t spdWriteValue ( uint64_t i_keyword,
             }
 
             // Send mbox message with new data to Fsp
-            err = spdSendMboxWriteMsg( entry->offset,
-                                       io_buflen,
-                                       io_buffer,
-                                       i_target );
+            VPD::VpdWriteMsg_t msgdata;
+            msgdata.rec_num = i_target->getAttr<TARGETING::ATTR_VPD_REC_NUM>();
+            //XXXX=offset relative to whole section
+            memcpy( msgdata.record, "XXXX", 4 ); 
+            msgdata.offset = entry->offset;
+            err = VPD::sendMboxWriteMsg( io_buflen,
+                                         io_buffer,
+                                         i_target,
+                                         VPD::VPD_WRITE_DIMM,
+                                         msgdata );
 
             if( err )
             {
@@ -651,17 +657,17 @@ errlHndl_t spdWriteValue ( uint64_t i_keyword,
 
             /*@
              * @errortype
-             * @reasoncode       SPD_KEYWORD_NOT_WRITABLE
+             * @reasoncode       VPD::VPD_KEYWORD_NOT_WRITABLE
              * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE
-             * @moduleid         SPD_WRITE_VALUE
+             * @moduleid         VPD::VPD_SPD_WRITE_VALUE
              * @userdata1        SPD Keyword
              * @userdata2[0:31]  Buffer Length
              * @userdata2[32:63] Memory Type
              * @devdesc          The SPD Keyword is not writable.
              */
             err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                           SPD_WRITE_VALUE,
-                                           SPD_KEYWORD_NOT_WRITABLE,
+                                           VPD::VPD_SPD_WRITE_VALUE,
+                                           VPD::VPD_KEYWORD_NOT_WRITABLE,
                                            i_keyword,
                                            TWO_UINT32_TO_UINT64( io_buflen,
                                                                  i_DDRRev ) );
@@ -824,16 +830,16 @@ errlHndl_t spdSpecialCases ( KeywordData i_kwdData,
 
                     /*@
                      * @errortype
-                     * @reasoncode       SPD_INVALID_SPD_KEYWORD
+                     * @reasoncode       VPD::VPD_INVALID_SPD_KEYWORD
                      * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE
-                     * @moduleid         SPD_SPECIAL_CASES
+                     * @moduleid         VPD::VPD_SPD_SPECIAL_CASES
                      * @userdata1        SPD Keyword
                      * @userdata2        UNUSED
                      * @devdesc          Keyword is not a special case keyword.
                      */
                     err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                                   SPD_SPECIAL_CASES,
-                                                   SPD_INVALID_SPD_KEYWORD,
+                                                   VPD::VPD_SPD_SPECIAL_CASES,
+                                                   VPD::VPD_INVALID_SPD_KEYWORD,
                                                    i_kwdData.keyword,
                                                    0x0 );
                     break;
@@ -847,16 +853,16 @@ errlHndl_t spdSpecialCases ( KeywordData i_kwdData,
 
             /*@
              * @errortype
-             * @reasoncode       SPD_INVALID_BASIC_MEMORY_TYPE
+             * @reasoncode       VPD::VPD_INVALID_BASIC_MEMORY_TYPE
              * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE
-             * @moduleid         SPD_SPECIAL_CASES
+             * @moduleid         VPD::VPD_SPD_SPECIAL_CASES
              * @userdata1        SPD Keyword
              * @userdata2        DIMM DDR Revision
              * @devdesc          Invalid DDR Revision
              */
             err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                           SPD_SPECIAL_CASES,
-                                           SPD_INVALID_BASIC_MEMORY_TYPE,
+                                           VPD::VPD_SPD_SPECIAL_CASES,
+                                           VPD::VPD_INVALID_BASIC_MEMORY_TYPE,
                                            i_kwdData.keyword,
                                            i_DDRRev );
 
@@ -891,9 +897,9 @@ errlHndl_t spdCheckSize ( size_t i_bufferSz,
 
         /*@
          * @errortype
-         * @reasoncode       SPD_INSUFFICIENT_BUFFER_SIZE
+         * @reasoncode       VPD::VPD_INSUFFICIENT_BUFFER_SIZE
          * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE
-         * @moduleid         SPD_CHECK_SIZE
+         * @moduleid         VPD::VPD_SPD_CHECK_SIZE
          * @userdata1        Keyword
          * @userdata2[0:31]  Needed Buffer Size
          * @userdata2[32:63] Expected Buffer Size
@@ -901,8 +907,8 @@ errlHndl_t spdCheckSize ( size_t i_bufferSz,
          *                   the keyword requested.
          */
         err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                       SPD_CHECK_SIZE,
-                                       SPD_INSUFFICIENT_BUFFER_SIZE,
+                                       VPD::VPD_SPD_CHECK_SIZE,
+                                       VPD::VPD_INSUFFICIENT_BUFFER_SIZE,
                                        i_keyword,
                                        TWO_UINT32_TO_UINT64( i_bufferSz,
                                                              i_expBufferSz ) );
@@ -990,9 +996,9 @@ errlHndl_t spdReadBinaryFile ( uint64_t i_byteAddr,
 
             /*@
              * @errortype
-             * @reasoncode       SPD_INSUFFICIENT_FILE_SIZE
+             * @reasoncode       VPD::VPD_INSUFFICIENT_FILE_SIZE
              * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE
-             * @moduleid         SPD_READ_BINARY_FILE
+             * @moduleid         VPD::VPD_SPD_READ_BINARY_FILE
              * @userdata1        File Size
              * @userdata2[0:48]  Starting offset into file
              * @userdata2[49:63] Number of bytes to read
@@ -1000,8 +1006,8 @@ errlHndl_t spdReadBinaryFile ( uint64_t i_byteAddr,
              *                   bytes at offset given without overrunning file.
              */
             err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                           SPD_READ_BINARY_FILE,
-                                           SPD_INSUFFICIENT_FILE_SIZE,
+                                           VPD::VPD_SPD_READ_BINARY_FILE,
+                                           VPD::VPD_INSUFFICIENT_FILE_SIZE,
                                            fileSize,
                                            tmpData );
 
@@ -1016,278 +1022,6 @@ errlHndl_t spdReadBinaryFile ( uint64_t i_byteAddr,
 
     TRACSSCOMP( g_trac_spd,
                 EXIT_MRK"spdReadBinaryFile()" );
-
-    return err;
-}
-
-
-// ------------------------------------------------------------------
-// spdSendMboxWriteMsg
-// ------------------------------------------------------------------
-errlHndl_t spdSendMboxWriteMsg ( uint64_t i_offset,
-                                 size_t i_numBytes,
-                                 void * i_data,
-                                 TARGETING::Target * i_target )
-{
-    errlHndl_t l_err = NULL;
-    msg_t* msg = NULL;
-
-    TRACSSCOMP( g_trac_spd,
-                ENTER_MRK"spdSendMboxWriteMsg()" );
-
-    do
-    {
-        //Create a mailbox message to send to FSP
-        msg = msg_allocate();
-        msg->type = VPD_WRITE_DIMM;
-
-        VpdWriteMsg_t msgdata;
-        msgdata.rec_num = i_target->getAttr<TARGETING::ATTR_VPD_REC_NUM>();
-        memcpy( msgdata.record, "XXXX", 4 ); //offset relative to whole section
-        msgdata.offset = i_offset;
-        msg->data[0] = msgdata.data0;
-        msg->data[1] = i_numBytes;
-
-        //should never need more than 4KB
-        assert( i_numBytes < PAGESIZE);
-
-        msg->extra_data = malloc( i_numBytes );
-        memcpy( msg->extra_data, i_data, i_numBytes );
-        TRACFCOMP( g_trac_spd, "extra_data=%p", msg->extra_data );
-
-        TRACFCOMP( g_trac_spd,
-                   INFO_MRK"Send msg to FSP to write record %d, offset 0x%X",
-                   msgdata.rec_num,
-                   msgdata.offset );
-
-        //Create a mbox message with the error log and send it to FSP
-        //We only send error log to FSP when mailbox is enabled
-        if( !MBOX::mailbox_enabled() )
-        {
-            TRACFCOMP(g_trac_spd, INFO_MRK "Mailbox is disabled, skipping SPD write");
-            TRACFBIN( g_trac_spd, "msg=", msg, sizeof(msg_t) );
-            TRACFBIN( g_trac_spd, "extra=", msg->extra_data, i_numBytes );
-        }
-
-        l_err = MBOX::send( MBOX::FSP_VPD_MSGQ, msg );
-        if( l_err )
-        {
-            TRACFCOMP(g_trac_spd, ERR_MRK "Failed sending SPD to FSP");
-            // just commit the log and move on, nothing else to do
-            l_err->collectTrace("SPD",1024);
-            errlCommit( l_err, SPD_COMP_ID );
-            l_err = NULL;
-
-            msg_free( msg );
-        }
-    } while( 0 );
-
-    TRACSSCOMP( g_trac_spd,
-                EXIT_MRK"spdSendMboxWriteMsg()" );
-
-    return l_err;
-}
-
-
-// ------------------------------------------------------------------
-// readPNOR
-// ------------------------------------------------------------------
-errlHndl_t readPNOR ( uint64_t i_byteAddr,
-                      size_t i_numBytes,
-                      void * o_data,
-                      TARGETING::Target * i_target,
-                      pnorInformation & i_pnorInfo,
-                      uint64_t &io_cachedAddr,
-                      mutex_t * i_mutex )
-{
-    errlHndl_t err = NULL;
-    int64_t vpdLocation = 0;
-    uint64_t addr = 0x0;
-    const char * readAddr = NULL;
-
-    TRACSSCOMP( g_trac_spd,
-                ENTER_MRK"readPNOR()" );
-
-    do
-    {
-        // Check if we have the PNOR addr cached.
-        if( 0x0 == io_cachedAddr )
-        {
-            err = getPnorAddr( i_pnorInfo,
-                               io_cachedAddr,
-                               i_mutex );
-
-            if( err )
-            {
-                break;
-            }
-        }
-        addr = io_cachedAddr;
-
-        // Find vpd location of the target
-        err = getVpdLocation( vpdLocation,
-                              i_target );
-
-        if( err )
-        {
-            break;
-        }
-
-        // Offset cached address by vpd location multiplier
-        addr += (vpdLocation * i_pnorInfo.segmentSize);
-
-        // Now offset into that chunk of data by i_byteAddr
-        addr += i_byteAddr;
-
-        TRACUCOMP( g_trac_spd,
-                   INFO_MRK"Address to read: 0x%08x",
-                   addr );
-
-        //TODO: Validate write is within bounds of appropriate PNOR
-        //   partition/section.   RTC: 51807
-
-        // Pull the data
-        readAddr = reinterpret_cast<const char*>( addr );
-        memcpy( o_data,
-                readAddr,
-                i_numBytes );
-    } while( 0 );
-
-    TRACSSCOMP( g_trac_spd,
-                EXIT_MRK"readPNOR()" );
-
-    return err;
-}
-
-
-// ------------------------------------------------------------------
-// writePNOR
-// ------------------------------------------------------------------
-errlHndl_t writePNOR ( uint64_t i_byteAddr,
-                       size_t i_numBytes,
-                       void * i_data,
-                       TARGETING::Target * i_target,
-                       pnorInformation & i_pnorInfo,
-                       uint64_t &io_cachedAddr,
-                       mutex_t * i_mutex )
-{
-    errlHndl_t err = NULL;
-    int64_t vpdLocation = 0;
-    uint64_t addr = 0x0;
-    const char * writeAddr = NULL;
-
-    TRACSSCOMP( g_trac_spd,
-                ENTER_MRK"writePNOR()" );
-
-    do
-    {
-        // Check if we have the PNOR addr cached.
-        if( 0x0 == io_cachedAddr )
-        {
-            err = getPnorAddr( i_pnorInfo,
-                               io_cachedAddr,
-                               i_mutex );
-
-            if( err )
-            {
-                break;
-            }
-        }
-        addr = io_cachedAddr;
-
-        // Find vpd location of the target
-        err = getVpdLocation( vpdLocation,
-                              i_target );
-
-        if( err )
-        {
-            break;
-        }
-
-        // Offset cached address by vpd location multiplier
-        addr += (vpdLocation * i_pnorInfo.segmentSize);
-
-        // Now offset into that chunk of data by i_byteAddr
-        addr += i_byteAddr;
-
-        //TODO: Validate write is within bounds of appropriate PNOR
-        //   partition/section.   RTC: 51807
-
-        TRACUCOMP( g_trac_spd,
-                   INFO_MRK"Address to write: 0x%08x",
-                   addr );
-
-        // Write the data
-        writeAddr = reinterpret_cast<const char*>( addr );
-        memcpy( (void*)(writeAddr),
-                i_data,
-                i_numBytes );
-    } while( 0 );
-
-    TRACSSCOMP( g_trac_spd,
-                EXIT_MRK"writePNOR()" );
-
-    return err;
-}
-
-
-// ------------------------------------------------------------------
-// getPnorAddr
-// ------------------------------------------------------------------
-errlHndl_t getPnorAddr ( pnorInformation & i_pnorInfo,
-                         uint64_t &io_cachedAddr,
-                         mutex_t * i_mutex )
-{
-    errlHndl_t err = NULL;
-    PNOR::SectionInfo_t info;
-
-    TRACSSCOMP( g_trac_spd,
-                ENTER_MRK"getPnorAddr()" );
-
-    do
-    {
-        // Get SPD PNOR section info from PNOR RP
-        err = PNOR::getSectionInfo( i_pnorInfo.pnorSection,
-                                    i_pnorInfo.pnorSide,
-                                    info );
-
-        if( err )
-        {
-            break;
-        }
-
-        // Set the globals appropriately
-        mutex_lock( i_mutex );
-        io_cachedAddr = info.vaddr;
-        mutex_unlock( i_mutex );
-    } while( 0 );
-
-    TRACSSCOMP( g_trac_spd,
-                EXIT_MRK"getPnorAddr() - addr: 0x%08x",
-                io_cachedAddr );
-
-    return err;
-}
-
-
-// ------------------------------------------------------------------
-// getVpdLocation
-// ------------------------------------------------------------------
-errlHndl_t getVpdLocation ( int64_t & o_vpdLocation,
-                            TARGETING::Target * i_target )
-{
-    errlHndl_t err = NULL;
-
-    TRACSSCOMP( g_trac_spd,
-                ENTER_MRK"getVpdLocation()" );
-
-    o_vpdLocation = i_target->getAttr<TARGETING::ATTR_VPD_REC_NUM>();
-    TRACUCOMP( g_trac_spd,
-               INFO_MRK"Using VPD location: %d",
-               o_vpdLocation );
-
-    TRACSSCOMP( g_trac_spd,
-                EXIT_MRK"getVpdLocation()" );
 
     return err;
 }
@@ -1353,16 +1087,16 @@ errlHndl_t checkModSpecificKeyword ( KeywordData i_kwdData,
 
             /*@
              * @errortype
-             * @reasoncode       SPD_NULL_ENTRY
+             * @reasoncode       VPD::VPD_NULL_ENTRY
              * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE
-             * @moduleid         SPD_CHECK_MODULE_SPECIFIC_KEYWORD
+             * @moduleid         VPD::VPD_SPD_CHECK_MODULE_SPECIFIC_KEYWORD
              * @userdata1        i_memType
              * @userdata2        <UNUSED>
              * @devdesc          Entry to get Module type is NULL
              */
             err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                           SPD_CHECK_MODULE_SPECIFIC_KEYWORD,
-                                           SPD_NULL_ENTRY,
+                                           VPD::VPD_SPD_CHECK_MODULE_SPECIFIC_KEYWORD,
+                                           VPD::VPD_NULL_ENTRY,
                                            i_memType,
                                            0x0 );
 
@@ -1400,9 +1134,9 @@ errlHndl_t checkModSpecificKeyword ( KeywordData i_kwdData,
 
                 /*@
                  * @errortype
-                 * @reasoncode       SPD_MOD_SPECIFIC_MISMATCH_UMM
+                 * @reasoncode       VPD::VPD_MOD_SPECIFIC_MISMATCH_UMM
                  * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE
-                 * @moduleid         SPD_CHECK_MODULE_SPECIFIC_KEYWORD
+                 * @moduleid         VPD::VPD_SPD_CHECK_MODULE_SPECIFIC_KEYWORD
                  * @userdata1[0:31]  Module Type (byte 3[3:0])
                  * @userdata1[32:63] Memory Type (byte 2)
                  * @userdata2[0:31]  SPD Keyword
@@ -1410,8 +1144,8 @@ errlHndl_t checkModSpecificKeyword ( KeywordData i_kwdData,
                  * @devdesc          Keyword requested was not UMM Module specific.
                  */
                 err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                               SPD_CHECK_MODULE_SPECIFIC_KEYWORD,
-                                               SPD_MOD_SPECIFIC_MISMATCH_UMM,
+                                               VPD::VPD_SPD_CHECK_MODULE_SPECIFIC_KEYWORD,
+                                               VPD::VPD_MOD_SPECIFIC_MISMATCH_UMM,
                                                TWO_UINT32_TO_UINT64( modType, i_memType ),
                                                TWO_UINT32_TO_UINT64( i_kwdData.keyword,
                                                                      i_kwdData.modSpec ) );
@@ -1433,9 +1167,9 @@ errlHndl_t checkModSpecificKeyword ( KeywordData i_kwdData,
 
                 /*@
                  * @errortype
-                 * @reasoncode       SPD_MOD_SPECIFIC_MISMATCH_RMM
+                 * @reasoncode       VPD::VPD_MOD_SPECIFIC_MISMATCH_RMM
                  * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE
-                 * @moduleid         SPD_CHECK_MODULE_SPECIFIC_KEYWORD
+                 * @moduleid         VPD::VPD_SPD_CHECK_MODULE_SPECIFIC_KEYWORD
                  * @userdata1[0:31]  Module Type (byte 3[3:0])
                  * @userdata1[32:63] Memory Type (byte 2)
                  * @userdata2[0:31]  SPD Keyword
@@ -1443,8 +1177,8 @@ errlHndl_t checkModSpecificKeyword ( KeywordData i_kwdData,
                  * @devdesc          Keyword requested was not RMM Module specific.
                  */
                 err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                               SPD_CHECK_MODULE_SPECIFIC_KEYWORD,
-                                               SPD_MOD_SPECIFIC_MISMATCH_RMM,
+                                               VPD::VPD_SPD_CHECK_MODULE_SPECIFIC_KEYWORD,
+                                               VPD::VPD_MOD_SPECIFIC_MISMATCH_RMM,
                                                TWO_UINT32_TO_UINT64( modType, i_memType ),
                                                TWO_UINT32_TO_UINT64( i_kwdData.keyword,
                                                                      i_kwdData.modSpec ) );
@@ -1465,9 +1199,9 @@ errlHndl_t checkModSpecificKeyword ( KeywordData i_kwdData,
 
                 /*@
                  * @errortype
-                 * @reasoncode       SPD_MOD_SPECIFIC_MISMATCH_CMM
+                 * @reasoncode       VPD::VPD_MOD_SPECIFIC_MISMATCH_CMM
                  * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE
-                 * @moduleid         SPD_CHECK_MODULE_SPECIFIC_KEYWORD
+                 * @moduleid         VPD::VPD_SPD_CHECK_MODULE_SPECIFIC_KEYWORD
                  * @userdata1[0:31]  Module Type (byte 3[3:0])
                  * @userdata1[32:63] Memory Type (byte 2)
                  * @userdata2[0:31]  SPD Keyword
@@ -1475,8 +1209,8 @@ errlHndl_t checkModSpecificKeyword ( KeywordData i_kwdData,
                  * @devdesc          Keyword requested was not CMM Module specific.
                  */
                 err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                               SPD_CHECK_MODULE_SPECIFIC_KEYWORD,
-                                               SPD_MOD_SPECIFIC_MISMATCH_CMM,
+                                               VPD::VPD_SPD_CHECK_MODULE_SPECIFIC_KEYWORD,
+                                               VPD::VPD_MOD_SPECIFIC_MISMATCH_CMM,
                                                TWO_UINT32_TO_UINT64( modType, i_memType ),
                                                TWO_UINT32_TO_UINT64( i_kwdData.keyword,
                                                                      i_kwdData.modSpec ) );
@@ -1496,9 +1230,9 @@ errlHndl_t checkModSpecificKeyword ( KeywordData i_kwdData,
 
                 /*@
                  * @errortype
-                 * @reasoncode       SPD_MOD_SPECIFIC_MISMATCH_LRMM
+                 * @reasoncode       VPD::VPD_MOD_SPECIFIC_MISMATCH_LRMM
                  * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE
-                 * @moduleid         SPD_CHECK_MODULE_SPECIFIC_KEYWORD
+                 * @moduleid         VPD::VPD_SPD_CHECK_MODULE_SPECIFIC_KEYWORD
                  * @userdata1[0:31]  Module Type (byte 3[3:0])
                  * @userdata1[32:63] Memory Type (byte 2)
                  * @userdata2[0:31]  SPD Keyword
@@ -1506,8 +1240,8 @@ errlHndl_t checkModSpecificKeyword ( KeywordData i_kwdData,
                  * @devdesc          Keyword requested was not LRMM Module specific.
                  */
                 err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                               SPD_CHECK_MODULE_SPECIFIC_KEYWORD,
-                                               SPD_MOD_SPECIFIC_MISMATCH_LRMM,
+                                               VPD::VPD_SPD_CHECK_MODULE_SPECIFIC_KEYWORD,
+                                               VPD::VPD_MOD_SPECIFIC_MISMATCH_LRMM,
                                                TWO_UINT32_TO_UINT64( modType, i_memType ),
                                                TWO_UINT32_TO_UINT64( i_kwdData.keyword,
                                                                      i_kwdData.modSpec ) );
@@ -1528,9 +1262,9 @@ errlHndl_t checkModSpecificKeyword ( KeywordData i_kwdData,
 
             /*@
              * @errortype
-             * @reasoncode       SPD_MOD_SPECIFIC_UNSUPPORTED
+             * @reasoncode       VPD::VPD_MOD_SPECIFIC_UNSUPPORTED
              * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE
-             * @moduleid         SPD_CHECK_MODULE_SPECIFIC_KEYWORD
+             * @moduleid         VPD::VPD_SPD_CHECK_MODULE_SPECIFIC_KEYWORD
              * @userdata1[0:31]  Module Type (byte 3[3:0])
              * @userdata1[32:63] Memory Type (byte 2)
              * @userdata2[0:31]  SPD Keyword
@@ -1538,8 +1272,8 @@ errlHndl_t checkModSpecificKeyword ( KeywordData i_kwdData,
              * @devdesc          Unsupported Module Specific setup.
              */
             err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                           SPD_CHECK_MODULE_SPECIFIC_KEYWORD,
-                                           SPD_MOD_SPECIFIC_UNSUPPORTED,
+                                           VPD::VPD_SPD_CHECK_MODULE_SPECIFIC_KEYWORD,
+                                           VPD::VPD_MOD_SPECIFIC_UNSUPPORTED,
                                            TWO_UINT32_TO_UINT64( modType, i_memType ),
                                            TWO_UINT32_TO_UINT64( i_kwdData.keyword,
                                                                  i_kwdData.modSpec ) );
@@ -1607,16 +1341,16 @@ errlHndl_t getKeywordEntry ( uint64_t i_keyword,
 
             /*@
              * @errortype
-             * @reasoncode       SPD_INVALID_BASIC_MEMORY_TYPE
+             * @reasoncode       VPD::VPD_INVALID_BASIC_MEMORY_TYPE
              * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE
-             * @moduleid         SPD_GET_KEYWORD_ENTRY
+             * @moduleid         VPD::VPD_SPD_GET_KEYWORD_ENTRY
              * @userdata1        SPD Keyword
              * @userdata2        The DDR Revision
              * @devdesc          Invalid DDR Revision
              */
             err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                           SPD_GET_KEYWORD_ENTRY,
-                                           SPD_INVALID_BASIC_MEMORY_TYPE,
+                                           VPD::VPD_SPD_GET_KEYWORD_ENTRY,
+                                           VPD::VPD_INVALID_BASIC_MEMORY_TYPE,
                                            i_keyword,
                                            i_memType );
 
@@ -1639,16 +1373,16 @@ errlHndl_t getKeywordEntry ( uint64_t i_keyword,
 
             /*@
              * @errortype
-             * @reasoncode       SPD_KEYWORD_NOT_FOUND
+             * @reasoncode       VPD::VPD_KEYWORD_NOT_FOUND
              * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE
-             * @moduleid         SPD_GET_KEYWORD_ENTRY
+             * @moduleid         VPD::VPD_SPD_GET_KEYWORD_ENTRY
              * @userdata1        SPD Keyword
              * @userdata2        <UNUSED>
              * @devdesc          Invalid SPD Keyword
              */
             err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                           SPD_GET_KEYWORD_ENTRY,
-                                           SPD_KEYWORD_NOT_FOUND,
+                                           VPD::VPD_SPD_GET_KEYWORD_ENTRY,
+                                           VPD::VPD_KEYWORD_NOT_FOUND,
                                            i_keyword,
                                            0x0 );
 

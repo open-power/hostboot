@@ -1,32 +1,25 @@
-/*  IBM_PROLOG_BEGIN_TAG
- *  This is an automatically generated prolog.
- *
- *  $Source: src/include/usr/spd/spdenums.H $
- *
- *  IBM CONFIDENTIAL
- *
- *  COPYRIGHT International Business Machines Corp. 2012
- *
- *  p1
- *
- *  Object Code Only (OCO) source materials
- *  Licensed Internal Code Source Materials
- *  IBM HostBoot Licensed Internal Code
- *
- *  The source code for this program is not published or other-
- *  wise divested of its trade secrets, irrespective of what has
- *  been deposited with the U.S. Copyright Office.
- *
- *  Origin: 30
- *
- *  IBM_PROLOG_END_TAG
- */
-/**
- * @file spdenums.H
- *
- * @brief Enums for the SPD fields to be requested.
- *
- */
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/include/usr/vpd/spdenums.H $                              */
+/*                                                                        */
+/* IBM CONFIDENTIAL                                                       */
+/*                                                                        */
+/* COPYRIGHT International Business Machines Corp. 2013                   */
+/*                                                                        */
+/* p1                                                                     */
+/*                                                                        */
+/* Object Code Only (OCO) source materials                                */
+/* Licensed Internal Code Source Materials                                */
+/* IBM HostBoot Licensed Internal Code                                    */
+/*                                                                        */
+/* The source code for this program is not published or otherwise         */
+/* divested of its trade secrets, irrespective of what has been           */
+/* deposited with the U.S. Copyright Office.                              */
+/*                                                                        */
+/* Origin: 30                                                             */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
 #ifndef __SPDENUMS_H
 #define __SPDENUMS_H
 
@@ -259,45 +252,6 @@ enum
     // Invalid Keyword
     INVALID_SPD_KEYWORD                 = 0xFFFF,
 };
-
-/**
- * @brief VPD Message Types 
- */
-enum VPD_MSG_TYPE
-{
-    VPD_WRITE_DIMM    = 0x00C1, //< DIMM SPD
-    VPD_WRITE_PROC    = 0x00C2, //< Processor MVPD
-    VPD_WRITE_MEMBUF  = 0x00C3, //< Centaur FRU VPD
-};
-
-/**
- * @brief Message definition for VPD Write Request
- *
- * - data0 : 
- *   - [16] VPD Record Number
- *   - [32] 4-byte ASCII String for record name
- *          'XXXX'=Entire VPD section from PNOR
- *   - [16] 2-byte ASCII String for keyword or offset into SPD
- *          'XX'=Entire VPD record
- * - data1 : 
- *   - [64] Size of binary data in bytes
- * - extra data : Binary VPD Data
- */
-union VpdWriteMsg_t
-{
-    uint64_t data0;
-    struct
-    {
-        uint16_t rec_num;     //< VPD_REC_NUM
-        char record[4];       //< ASCII Record Name
-        union
-        {
-            char keyword[2];  //< ASCII Keyword (for IBM VPD)
-            uint16_t offset;  //< Offset into record in bytes (for DIMM SPD)
-        };
-    } PACKED;
-};
-
 
 };  // end SPD
 

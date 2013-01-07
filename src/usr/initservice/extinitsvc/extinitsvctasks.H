@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2012              */
+/* COPYRIGHT International Business Machines Corp. 2011,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -157,19 +157,7 @@ const TaskInfo g_exttaskinfolist[]   =   {
          * @brief spd task
          */
         {
-            "libspd.so",                                    // taskname
-            NULL,                                           // no pointer to fn
-            {
-                INIT_TASK,                                  // task type
-                EXT_IMAGE,                                  // Extended module
-            }
-        },
-
-        /**
-         * @brief mvpd task
-         */
-        {
-            "libmvpd.so",                                   // taskname
+            "libvpd.so",                                    // taskname
             NULL,                                           // no pointer to fn
             {
                 INIT_TASK,                                  // task type
