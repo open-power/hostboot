@@ -1,27 +1,26 @@
-/*  IBM_PROLOG_BEGIN_TAG
- *  This is an automatically generated prolog.
- *
- *  $Source: src/usr/hwpf/hwp/nest_chiplets/proc_start_clocks_chiplets/proc_start_clocks_chiplets.C $
- *
- *  IBM CONFIDENTIAL
- *
- *  COPYRIGHT International Business Machines Corp. 2012
- *
- *  p1
- *
- *  Object Code Only (OCO) source materials
- *  Licensed Internal Code Source Materials
- *  IBM HostBoot Licensed Internal Code
- *
- *  The source code for this program is not published or other-
- *  wise divested of its trade secrets, irrespective of what has
- *  been deposited with the U.S. Copyright Office.
- *
- *  Origin: 30
- *
- *  IBM_PROLOG_END_TAG
- */
-// $Id: proc_start_clocks_chiplets.C,v 1.5 2012/08/08 12:05:11 rkoester Exp $
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/usr/hwpf/hwp/nest_chiplets/proc_start_clocks_chiplets/proc_start_clocks_chiplets.C $ */
+/*                                                                        */
+/* IBM CONFIDENTIAL                                                       */
+/*                                                                        */
+/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/*                                                                        */
+/* p1                                                                     */
+/*                                                                        */
+/* Object Code Only (OCO) source materials                                */
+/* Licensed Internal Code Source Materials                                */
+/* IBM HostBoot Licensed Internal Code                                    */
+/*                                                                        */
+/* The source code for this program is not published or otherwise         */
+/* divested of its trade secrets, irrespective of what has been           */
+/* deposited with the U.S. Copyright Office.                              */
+/*                                                                        */
+/* Origin: 30                                                             */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
+// $Id: proc_start_clocks_chiplets.C,v 1.10 2012/12/12 10:43:10 rkoester Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_start_clocks_chiplets.C,v $
 //------------------------------------------------------------------------------
 // *|
@@ -229,27 +228,128 @@ fapi::ReturnCode proc_start_clocks_chiplet_clear_clk_scansel_reg(
 
 
 //------------------------------------------------------------------------------
+// function: utility subroutine to get partial good vector from SEEPROM
+// parameters: i_target                 => chip target
+//             i_chiplet_base_addr      => base SCOM address for chiplet
+//             i_chiplet_reg_vec        => output vector
+// returns: FAPI_RC_SUCCESS if operation was successful, else error
+//------------------------------------------------------------------------------
+fapi::ReturnCode proc_start_clocks_get_partial_good_vector(
+    const fapi::Target& i_target,
+    const uint32_t i_chiplet_base_addr,
+    uint64_t * o_chiplet_reg_vec
+    )
+{
+    fapi::ReturnCode rc;
+//  uint32_t rc_ecmd = 0;
+
+//  uint8_t  chiplet = 0;
+    uint64_t partial_good_regions[32];
+
+    FAPI_DBG("proc_start_clocks_get_partial_good_vector: Start");
+
+    do
+    {
+
+        FAPI_DBG("proc_start_clocks_get_partial_good_vector: Get attribute ATTR_CHIP_REGIONS_TO_ENABLE (partial good region data) " );
+        rc = FAPI_ATTR_GET( ATTR_CHIP_REGIONS_TO_ENABLE, &i_target, partial_good_regions);
+        if (rc) {
+            FAPI_ERR("fapi_attr_get( ATTR_CHIP_REGIONS_TO_ENABLE ) failed. With rc = 0x%x",
+                     (uint32_t) rc );
+            break;
+        }
+
+
+// expectecd value out of SEEPROM (all good)
+// Partial Good Region Pattern are:
+// XBUS = 0xF000
+// ABUS = 0xE100
+// PCIE = 0xF700
+
+
+        FAPI_DBG("proc_start_clocks_get_partial_good_vector: start assignment of the partial good vector per chiplet");
+
+        switch (i_chiplet_base_addr)
+        {
+
+          case X_BUS_CHIPLET_0x04000000:
+              FAPI_DBG("proc_start_clocks_get_partial_good_vector: XBUS, attribute for XBUS (%016llX)", partial_good_regions[4]);
+              *o_chiplet_reg_vec = partial_good_regions[4];
+              break;
+
+
+          case A_BUS_CHIPLET_0x08000000:
+              FAPI_DBG("proc_start_clocks_get_partial_good_vector: ABUS, attribute for ABUS (%016llX)", partial_good_regions[8]);
+              *o_chiplet_reg_vec = partial_good_regions[8];
+              break;
+
+          case PCIE_CHIPLET_0x09000000:
+              FAPI_DBG("proc_start_clocks_get_partial_good_vector: PCIE, attribute for PCIE (%016llX)", partial_good_regions[9]);
+              *o_chiplet_reg_vec = partial_good_regions[9];
+              break;
+
+          default:
+
+               FAPI_ERR("proc_start_clocks_get_partial_good_vector: invalid chiplet base address selected when selecting par. good vector (0x%08X)",
+                        i_chiplet_base_addr);
+               uint32_t CHIPLET_BASE_SCOM_ADDR = i_chiplet_base_addr;
+               FAPI_SET_HWP_ERROR(rc, RC_PROC_START_CLOCKS_CHIPLETS_PARTIAL_GOOD_ERR);
+               break;
+
+        }
+
+        FAPI_DBG("proc_start_clocks_get_partial_good_vector: picked partial good regions vector is (%016llX)", *o_chiplet_reg_vec);
+
+
+    } while(0);
+
+    FAPI_DBG("proc_start_clocks_get_partial_good_vector: End");
+
+    return rc;
+}
+
+
+//------------------------------------------------------------------------------
 // function: utility subroutine to set clock region register (starts clocks)
 // parameters: i_target                 => chip target
 //             i_chiplet_base_addr => base SCOM address for chiplet
+//             i_chiplet_reg_vec   => vector from SEEPROM with partial good
+//                                    clock regions
 // returns: FAPI_RC_SUCCESS if operation was successful, else error
+
 //------------------------------------------------------------------------------
 fapi::ReturnCode proc_start_clocks_chiplet_set_clk_region_reg(
     const fapi::Target& i_target,
-    const uint32_t i_chiplet_base_addr)
+    const uint32_t i_chiplet_base_addr,
+    const uint64_t i_chiplet_reg_vec,
+    uint64_t * o_chiplet_clkreg_vec
+    )
+
+
 {
     fapi::ReturnCode rc;
     uint32_t rc_ecmd = 0;
     ecmdDataBufferBase data(64);
     uint32_t scom_addr = i_chiplet_base_addr |
                          GENERIC_CLK_REGION_0x00030006;
+    uint64_t extracted_rec_vec;
+    uint64_t clk_region_start_nsl_ary_masked;
+    uint64_t clk_region_start_all_masked;
 
     FAPI_DBG("proc_start_clocks_chiplet_set_clk_region_reg: Start");
 
     do
     {
+
+
+        // bitwise ORing of input vector
+        extracted_rec_vec = PROC_START_CLOCKS_CHIPLETS_CLOCK_REGION_MANIPULATION | i_chiplet_reg_vec;
+
         // start NSL/array clocks
-        rc_ecmd |= data.setDoubleWord(0, PROC_START_CLOCKS_CHIPLETS_CLK_REGION_REG_START_NSL_ARY);
+
+        clk_region_start_nsl_ary_masked = PROC_START_CLOCKS_CHIPLETS_CLK_REGION_REG_START_NSL_ARY & extracted_rec_vec;
+
+        rc_ecmd |= data.setDoubleWord(0, clk_region_start_nsl_ary_masked);
         if (rc_ecmd)
         {
             FAPI_ERR("proc_start_clocks_chiplet_set_clk_region_reg: Error 0x%x setting up data buffer for NSL/ARY clock start",
@@ -267,7 +367,14 @@ fapi::ReturnCode proc_start_clocks_chiplet_set_clk_region_reg(
         }
 
         // start all clocks
-        rc_ecmd |= data.setDoubleWord(0, PROC_START_CLOCKS_CHIPLETS_CLK_REGION_REG_START_ALL);
+
+        clk_region_start_all_masked = PROC_START_CLOCKS_CHIPLETS_CLK_REGION_REG_START_ALL & extracted_rec_vec;
+
+        // output: value written into clk_region register, reused for status register checking
+
+        *o_chiplet_clkreg_vec = clk_region_start_all_masked;
+
+        rc_ecmd |= data.setDoubleWord(0, clk_region_start_all_masked);
         if (rc_ecmd)
         {
             FAPI_ERR("proc_start_clocks_chiplet_set_clk_region_reg: Error 0x%x setting up data buffer for SL/NSL/ARY clock start",
@@ -297,8 +404,8 @@ fapi::ReturnCode proc_start_clocks_chiplet_set_clk_region_reg(
 //           all desired clock domains have been started
 // parameters: i_target            => chip target
 //             i_chiplet_base_addr => base SCOM address for chiplet
-//             i_status_reg_exp    => expected value for clock status register
-//                                    after clock start
+//             i_chiplet_reg_vec   => region vector of SEEPROM for clock regions
+//                                    need to be turned on
 // returns: FAPI_RC_SUCCESS if operation was successful, else
 //          RC_PROC_START_CLOCKS_CHIPLETS_CLK_STATUS_ERR if status register
 //          data does not match expected pattern
@@ -306,17 +413,22 @@ fapi::ReturnCode proc_start_clocks_chiplet_set_clk_region_reg(
 fapi::ReturnCode proc_start_clocks_chiplet_check_clk_status_reg(
     const fapi::Target& i_target,
     const uint32_t i_chiplet_base_addr,
-    const uint64_t i_status_reg_exp)
+    const uint64_t i_chiplet_clkreg_vec)
 {
     fapi::ReturnCode rc;
+    uint32_t rc_ecmd = 0;
+    ecmdDataBufferBase vec_data(64);
     ecmdDataBufferBase status_data(64);
+    ecmdDataBufferBase exp_data(64);
     uint32_t scom_addr = i_chiplet_base_addr |
                          GENERIC_CLK_STATUS_0x00030008;
+    const uint32_t xbus = X_BUS_CHIPLET_0x04000000;
 
     FAPI_DBG("proc_start_clocks_chiplet_check_clk_status_reg: Start");
 
     do
     {
+
         // read clock status register
         rc = fapiGetScom(i_target, scom_addr, status_data);
         if (rc)
@@ -326,12 +438,52 @@ fapi::ReturnCode proc_start_clocks_chiplet_check_clk_status_reg(
             break;
         }
 
+        // intialize reference databuffer
+        rc_ecmd |= vec_data.flushTo0();
+        // load it with reference data
+        rc_ecmd |= vec_data.setDoubleWord(0, i_chiplet_clkreg_vec);
+        // generate expected value databuffer
+        rc_ecmd |= exp_data.flushTo1();
+
+        if ( i_chiplet_base_addr == xbus)
+        {
+
+           if ( vec_data.isBitSet(4)) { rc_ecmd |= exp_data.clearBit(0,3); }
+           if ( vec_data.isBitSet(5)) { rc_ecmd |= exp_data.clearBit(3,6); }
+           if ( vec_data.isBitSet(6)) { rc_ecmd |= exp_data.clearBit(9,6); }
+           if ( vec_data.isBitSet(7)) { rc_ecmd |= exp_data.clearBit(15,3);}
+
+        }
+
+        else
+        {
+
+           if ( vec_data.isBitSet(4))  { rc_ecmd |= exp_data.clearBit(0,3); }
+           if ( vec_data.isBitSet(5))  { rc_ecmd |= exp_data.clearBit(3,3); }
+           if ( vec_data.isBitSet(6))  { rc_ecmd |= exp_data.clearBit(6,3); }
+           if ( vec_data.isBitSet(7))  { rc_ecmd |= exp_data.clearBit(9,3); }
+           if ( vec_data.isBitSet(9))  { rc_ecmd |= exp_data.clearBit(15,3);}
+           if ( vec_data.isBitSet(10)) { rc_ecmd |= exp_data.clearBit(18,3);}
+           if ( vec_data.isBitSet(11)) { rc_ecmd |= exp_data.clearBit(21,3);}
+
+        }
+
+
+        if (rc_ecmd)
+        {
+            FAPI_ERR("proc_start_clocks_chiplet_check_clk_status_reg: Error 0x%x setting up data buffer to set clock status",
+                     rc_ecmd);
+            rc.setEcmdError(rc_ecmd);
+            break;
+        }
+
+
         // check that value matches expected pattern
         // set a unique HWP_ERROR
-        if (status_data.getDoubleWord(0) != i_status_reg_exp)
+        if (status_data.getDoubleWord(0) != exp_data.getDoubleWord(0))
         {
             FAPI_ERR("proc_start_clocks_chiplet_check_clk_status_reg: Clock status register actual value (%016llX) does not match expected value (%016llX)",
-                     status_data.getDoubleWord(0), i_status_reg_exp);
+                     status_data.getDoubleWord(0), exp_data.getDoubleWord(0));
             ecmdDataBufferBase & STATUS_REG = status_data;
             uint32_t CHIPLET_BASE_SCOM_ADDR = i_chiplet_base_addr;
             FAPI_SET_HWP_ERROR(rc, RC_PROC_START_CLOCKS_CHIPLETS_CLK_STATUS_ERR);
@@ -504,15 +656,19 @@ fapi::ReturnCode proc_start_clocks_chiplet_check_fir(
 //------------------------------------------------------------------------------
 fapi::ReturnCode proc_start_clocks_generic_chiplet(
     const fapi::Target& i_target,
-    const uint32_t i_chiplet_base_addr,
-    const uint64_t i_status_reg_exp)
+    const uint32_t i_chiplet_base_addr)
+
 {
     fapi::ReturnCode rc;
+    uint64_t chiplet_reg_vec;
+    uint64_t chiplet_clkreg_vec;
 
     FAPI_DBG("proc_start_clocks_generic_chiplet: Start");
 
     do
     {
+
+
         // clear chiplet fence in GP3 register
         FAPI_DBG("Writing GP3 AND mask to clear chiplet fence ...");
         rc = proc_start_clocks_chiplet_clear_chiplet_fence(i_target,
@@ -553,10 +709,28 @@ fapi::ReturnCode proc_start_clocks_generic_chiplet(
             break;
         }
 
+        // pick partial good region vector from SEEPROM
+        FAPI_DBG("Get partial good region vector ...");
+        rc = proc_start_clocks_get_partial_good_vector(i_target,
+                                                       i_chiplet_base_addr,
+                                                       & chiplet_reg_vec
+                                                       );
+        if (rc)
+        {
+            FAPI_ERR("proc_start_clocks_partial_good_vector: Error getting partial good region vector");
+            break;
+        }
+
+
         // write clock region register to start clocks
         FAPI_DBG("Writing clock region register to start clocks ...");
         rc = proc_start_clocks_chiplet_set_clk_region_reg(i_target,
-                                                          i_chiplet_base_addr);
+                                                          i_chiplet_base_addr,
+                                                          chiplet_reg_vec,
+                                                          & chiplet_clkreg_vec
+                                                          );
+
+
         if (rc)
         {
             FAPI_ERR("proc_start_clocks_generic_chiplet: Error writing clock region register");
@@ -564,10 +738,10 @@ fapi::ReturnCode proc_start_clocks_generic_chiplet(
         }
 
         // check clock status register to ensure that all clocks are started
-        FAPI_DBG("Chcecking clock status register ...");
+        FAPI_DBG("Checking clock status register ...");
         rc = proc_start_clocks_chiplet_check_clk_status_reg(i_target,
                                                             i_chiplet_base_addr,
-                                                            i_status_reg_exp);
+                                                            chiplet_clkreg_vec);
         if (rc)
         {
             FAPI_ERR("proc_start_clocks_generic_chiplet: Error checking clock status register");
@@ -630,8 +804,7 @@ fapi::ReturnCode proc_start_clocks_chiplets(const fapi::Target& i_target,
             FAPI_DBG("Starting X bus chiplet clocks ...");
             rc = proc_start_clocks_generic_chiplet(
                 i_target,
-                X_BUS_CHIPLET_0x04000000,
-                PROC_START_CLOCKS_CHIPLETS_XBUS_CLK_STATUS_REG_EXP);
+                X_BUS_CHIPLET_0x04000000);
             if (rc)
             {
                 break;
@@ -643,11 +816,7 @@ fapi::ReturnCode proc_start_clocks_chiplets(const fapi::Target& i_target,
             FAPI_DBG("Starting A bus chiplet clocks ...");
             rc = proc_start_clocks_generic_chiplet(
                 i_target,
-                // TODO MJJ Updated to A_BUS_CHIPLET_0x08000000 to match new
-                // p8_scom_addresses, this will go away when this HWP is
-                // refreshed
-                A_BUS_CHIPLET_0x08000000,
-                PROC_START_CLOCKS_CHIPLETS_ABUS_CLK_STATUS_REG_EXP);
+                A_BUS_CHIPLET_0x08000000);
             if (rc)
             {
                 break;
@@ -659,11 +828,7 @@ fapi::ReturnCode proc_start_clocks_chiplets(const fapi::Target& i_target,
             FAPI_DBG("Starting PCIE chiplet clocks ...");
             rc = proc_start_clocks_generic_chiplet(
                 i_target,
-                // TODO MJJ Updated to PCIE_CHIPLET_0x09000000 to match new
-                // p8_scom_addresses, this will go away when this HWP is
-                // refreshed
-                PCIE_CHIPLET_0x09000000,
-                PROC_START_CLOCKS_CHIPLETS_PCIE_CLK_STATUS_REG_EXP);
+                PCIE_CHIPLET_0x09000000);
             if (rc)
             {
                 break;

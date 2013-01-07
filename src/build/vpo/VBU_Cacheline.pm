@@ -6,7 +6,7 @@
 #
 # IBM CONFIDENTIAL
 #
-# COPYRIGHT International Business Machines Corp. 2011,2012
+# COPYRIGHT International Business Machines Corp. 2011,2013
 #
 # p1
 #
@@ -79,7 +79,7 @@ my  $CORE       =   "-cft";
 
 my  $SIM_CLOCKS =   $ENV{'HB_SIMCLOCKS'};
 if ( ! defined ( $SIM_CLOCKS ) || $SIM_CLOCKS == 0 ) {
-	 $SIM_CLOCKS =   "5000000";
+	 $SIM_CLOCKS =   "4000000";
 }
 print "clocks=$SIM_CLOCKS\n";
 

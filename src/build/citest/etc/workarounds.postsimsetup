@@ -25,3 +25,11 @@
 ## Workarounds that are run after start_simics is executed for the first time
 ##    to setup the sandbox
 ##
+
+echo "+++ Updating s1.act"
+mkdir -p $sb/simu/data/cec-chip
+cp $BACKING_BUILD/src/simu/data/cec-chip/s1.act $sb/simu/data/cec-chip
+
+## Added action for proc_start_clock_chiplets v1.10 and beyond
+echo "+++ Update actions for proc_start_clock_chiplets v1.10"
+patch -p0 $sb/simu/data/cec-chip/s1.act $HOSTBOOTROOT/src/build/citest/etc/patches/s1.act.proc_start_clock_chiplets_patch

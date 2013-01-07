@@ -1,27 +1,26 @@
-/*  IBM_PROLOG_BEGIN_TAG
- *  This is an automatically generated prolog.
- *
- *  $Source: src/usr/hwpf/hwp/nest_chiplets/proc_start_clocks_chiplets/proc_start_clocks_chiplets.H $
- *
- *  IBM CONFIDENTIAL
- *
- *  COPYRIGHT International Business Machines Corp. 2012
- *
- *  p1
- *
- *  Object Code Only (OCO) source materials
- *  Licensed Internal Code Source Materials
- *  IBM HostBoot Licensed Internal Code
- *
- *  The source code for this program is not published or other-
- *  wise divested of its trade secrets, irrespective of what has
- *  been deposited with the U.S. Copyright Office.
- *
- *  Origin: 30
- *
- *  IBM_PROLOG_END_TAG
- */
-// $Id: proc_start_clocks_chiplets.H,v 1.3 2012/02/19 15:40:41 jmcgill Exp $
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/usr/hwpf/hwp/nest_chiplets/proc_start_clocks_chiplets/proc_start_clocks_chiplets.H $ */
+/*                                                                        */
+/* IBM CONFIDENTIAL                                                       */
+/*                                                                        */
+/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/*                                                                        */
+/* p1                                                                     */
+/*                                                                        */
+/* Object Code Only (OCO) source materials                                */
+/* Licensed Internal Code Source Materials                                */
+/* IBM HostBoot Licensed Internal Code                                    */
+/*                                                                        */
+/* The source code for this program is not published or otherwise         */
+/* divested of its trade secrets, irrespective of what has been           */
+/* deposited with the U.S. Copyright Office.                              */
+/*                                                                        */
+/* Origin: 30                                                             */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
+// $Id: proc_start_clocks_chiplets.H,v 1.5 2012/12/07 18:15:17 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_start_clocks_chiplets.H,v $
 //------------------------------------------------------------------------------
 // *|
@@ -84,14 +83,13 @@ const uint8_t GP0_PERV_FENCE_BIT        = 63;
 const uint64_t PROC_START_CLOCKS_CHIPLETS_CLK_REGION_REG_START_NSL_ARY = 0x4FE0060000000000ull;
 const uint64_t PROC_START_CLOCKS_CHIPLETS_CLK_REGION_REG_START_ALL = 0x4FE00E0000000000ull;
 
-// Clock Status Register expected pattern
-// TODO: reconcile expected value wiht pervasive spreadsheet
-const uint64_t PROC_START_CLOCKS_CHIPLETS_XBUS_CLK_STATUS_REG_EXP = 0x0000001FFFFFFFFFull;
-const uint64_t PROC_START_CLOCKS_CHIPLETS_ABUS_CLK_STATUS_REG_EXP = 0x000007FFFFFFFFFFull;
-const uint64_t PROC_START_CLOCKS_CHIPLETS_PCIE_CLK_STATUS_REG_EXP = 0x000007FFFFFFFFFFull;
-
 // Chiplet FIR register expected pattern
 const uint64_t PROC_START_CLOCKS_CHIPLETS_CHIPLET_FIR_REG_EXP = 0x0000000000000000ull;
+
+
+// Input clock region vector mask (for bit manipulation of clock regions)
+const uint64_t PROC_START_CLOCKS_CHIPLETS_CLOCK_REGION_MANIPULATION = 0xF0000FFFFFFFFFFFull;
+
 
 //------------------------------------------------------------------------------
 // Function prototype

@@ -591,10 +591,6 @@ void*    call_dmi_io_dccal( void *io_pArgs )
         return l_StepError.getErrorHandle();
     }
 
-    // TODO: RTC 60627
-    // Reinstate this to enable dmi_io_dccal
-    return l_StepError.getErrorHandle();
-
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                "call_dmi_io_dccal entry" );
 

@@ -1,26 +1,26 @@
 #!/bin/sh "Use source to invoke this script"
-#  IBM_PROLOG_BEGIN_TAG
-#  This is an automatically generated prolog.
+# IBM_PROLOG_BEGIN_TAG
+# This is an automatically generated prolog.
 #
-#  $Source: src/build/vpo/Setup_Env $
+# $Source: src/build/vpo/Setup_Env $
 #
-#  IBM CONFIDENTIAL
+# IBM CONFIDENTIAL
 #
-#  COPYRIGHT International Business Machines Corp. 2012
+# COPYRIGHT International Business Machines Corp. 2012,2013
 #
-#  p1
+# p1
 #
-#  Object Code Only (OCO) source materials
-#  Licensed Internal Code Source Materials
-#  IBM HostBoot Licensed Internal Code
+# Object Code Only (OCO) source materials
+# Licensed Internal Code Source Materials
+# IBM HostBoot Licensed Internal Code
 #
-#  The source code for this program is not published or other-
-#  wise divested of its trade secrets, irrespective of what has
-#  been deposited with the U.S. Copyright Office.
+# The source code for this program is not published or otherwise
+# divested of its trade secrets, irrespective of what has been
+# deposited with the U.S. Copyright Office.
 #
-#  Origin: 30
+# Origin: 30
 #
-#  IBM_PROLOG_END_TAG
+# IBM_PROLOG_END_TAG
 
 ################################################################################
 #
@@ -47,6 +47,7 @@
 #
 # Version 1.5   10-09-2012 Added m_9_g/m_10_g/m_10_h models
 #
+# Version 1.6   01-03-2012 Updated for m_10_b, m_11_a
 ################################################################################
 
 # Define useful pointers to automated tests/scripts
@@ -89,18 +90,17 @@ unset HB_VBUPNOR_ADDR HB_SYSMVPD_ADDR HB_SYSSPD_ADDR
 Setup_MyEnv() {
 	
 	# Default Sprint release
-
-	sprint=hb0606a_1219.810
+	sprint=hb0107a_1250.810
 	
 	# Initialize HostBoot environment/cronus/tools - note new naming convention
 	export AUTOVBU_CRONUS_SIM=dev
 
-        export ISTEP_ARCHIVE=archives/12.11.15
+        export ISTEP_ARCHIVE=archives/13.01.08
 	export GLOBAL_DEBUG=8.VW.Vc.dG.F3.0I.E8.V
-	export HB_TOOLS=$AUTOVBU_HBTOOLS_BASEDIR/rel.20121126
+	export HB_TOOLS=$AUTOVBU_HBTOOLS_BASEDIR/rel.20130110
 
 	# Select default model -- choose either VBU or VPO versions
-	export VPO_MODEL=m_10_h; unset VBU_MODEL; VBUVPO=VPO
+	export VPO_MODEL=m_11_a; unset VBU_MODEL; VBUVPO=VPO
 	
 	# Default AWAN request time - shorter periods get AWAN faster
 
@@ -270,7 +270,13 @@ Setup_MyDynamic() {
 	# Set other defaults based upon MODEL
 	case "$VPO_MODEL$VBU_MODEL"
 	in
-                 s1_e8052_nA_p8_c0400_cen1_cen081_unopt_1|s1_e8052_c0400_cen1_cen081_unopt_1|s1_e8050_c0400_cen1_cen081_unopt_1|s1_e8050_nA_p8_c0400_cen1_cen081_unopt_1|m_9_a|m_9_g|m_10_g)
+                s1_e8042_c0400_cen1_cen0*|m_10_b|s1_e8053_n8_p8_c0400_cen1_cen081_unopt_1|m_11_a)
+                          export AUTOVBU_ECMD_VER=${AUTOVBU_ECMD_VER-p8s1}
+                          export AWAN_CONFIG=${AWAN_CONFIG-star8b}
+                          unset DEFAULT_LEVEL
+			  ;;
+
+		s1_e8052_nA_p8_c0400_cen1_cen081_unopt_1|s1_e8052_c0400_cen1_cen081_unopt_1|s1_e8050_c0400_cen1_cen081_unopt_1|s1_e8050_nA_p8_c0400_cen1_cen081_unopt_1|m_9_a|m_9_g|m_10_g)
                           export AUTOVBU_ECMD_VER=${AUTOVBU_ECMD_VER-p8s1}
                           export AWAN_CONFIG=${AWAN_CONFIG-star12b}
                           unset DEFAULT_LEVEL

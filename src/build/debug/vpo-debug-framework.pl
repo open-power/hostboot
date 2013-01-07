@@ -814,7 +814,6 @@ sub translateAddr
 #   Scom size is always 64-bit
 #
 # @param[in]    scom address to read
-# @param[in]    data size IN BYTES - currently ignored, assumed to be 8
 #
 # @return   hex string containing data read
 #
@@ -823,10 +822,10 @@ sub translateAddr
 sub readScom
 {
     my $addr = shift;
-    my $size = shift;
 
     my  $vpoaddr    =   ::translateAddr( $addr );
 
+    # Use simGETFAC to speed up VPO
     my  $cmd    =   "simGETFAC " .
                     "B0.C0.S0.P0.E8.TPC.FSI.FSI_MAILBOX.FSXCOMP." .
                     "FSXLOG.LBUS_MAILBOX.Q_$vpoaddr.NLC.L2  32";
@@ -839,18 +838,20 @@ sub readScom
     $result =~ s/\n//g;
 
     ## debug
-    ## ::userDisplay  "--- readScom: ",
-    ##     (sprintf("0x%x-->%s, 0x%x : %s", $addr,$vpoaddr,$size,$result)), "\n";
+    #::userDisplay  "--- readScom: ",
+    #    (sprintf("0x%x-->%s, %s", $addr,$vpoaddr,$result)), "\n";
 
     ##  comes in as a 32-bit #, need to shift 32 to match simics
-    return (hex ( "0x" . $result . "00000000" ));
+    my $scomvalue = "0x" . $result;
+    $scomvalue = hex($scomvalue);
+    $scomvalue <<= 32;
+    return ($scomvalue);
 }
 
 # @sub writeScom
 # @brief Write a scom address in VPO.
 #
 # @param[in] - scom address
-# @param[in] - data size IN BYTES - ignored, assumed to be 8
 # @param[in] - binary data value.  Scom value is aways assumed to be 64bits
 #
 # @return none
@@ -860,28 +861,13 @@ sub readScom
 sub writeScom
 {
     my $addr = shift;
-    my $size = shift;
     my $value = shift;
 
-    my $cmd =   "";
+    my  $addrstr = sprintf( "%08x", $addr );
+    my  $valuestr = sprintf( "%016x", $value );
 
-    my  $vpoaddr    =   ::translateAddr( $addr );
-
-    ## vpo takes a 32 bit value in the lower 32 bits
-    my  $value32    =   ( ( $value >> 32 ) & 0x00000000ffffffff );
-    my  $valuestr   =   sprintf( "0x%x", $value32 );
-
-    ## debug
-    ## ::userDisplay  "--- writeScom: ",
-    ##     (sprintf("0x%x-->%s, 0x%x, %s",$addr,$vpoaddr,$size,$valuestr)), "\n";
-
-    ##  now go ahead and write the real value
-    $cmd    =   "simSTKFAC " .
-                 "B0.C0.S0.P0.E8.TPC.FSI.FSI_MAILBOX.FSXCOMP." .
-                 "FSXLOG.LBUS_MAILBOX.Q_$vpoaddr.NLC.L2 $valuestr 32 -quiet";
-
-    ( system( $cmd ) == 0 )
-        or die "$cmd failed, $? : $! \n";
+    # Use putscom because simPUTFAC doesn't work consistenly
+    system("putscom pu $addrstr $valuestr -cft -quiet");
 
     return;
 }
@@ -898,7 +884,7 @@ sub checkContTrace()
     my  $SCRATCH_MBOX0  =   0x00050038;
     my  $contTrace      =   "";
 
-    $contTrace  =   ::readScom( $SCRATCH_MBOX0, 8 );
+    $contTrace  =   ::readScom( $SCRATCH_MBOX0 );
     if ( $contTrace != 0  )
     {
         ##  activate continuous trace

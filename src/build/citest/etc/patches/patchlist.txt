@@ -4,3 +4,11 @@ Brief description of the problem or reason for patch
 -CMVC: Defect/Req for checking the changes into fips810		
 -Files: list of files		
 -Coreq: list of associated changes, e.g. workarounds.presimsetup
+
+proc_start_clock_chiplets v1.10 requires some clock bits to be set in the clock status registers
+at the time when it runs. Action file need to be updated to set these bits when at the time when
+instructions are started
+-RTC: Task 61816 will remove this patch
+-CMVC: 865799
+-Files: s1.act_proc_start_clock_chiplets.patch
+-Coreq: None

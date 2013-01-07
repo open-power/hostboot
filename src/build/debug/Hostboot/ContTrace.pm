@@ -1,26 +1,26 @@
 #!/usr/bin/perl
-#  IBM_PROLOG_BEGIN_TAG
-#  This is an automatically generated prolog.
+# IBM_PROLOG_BEGIN_TAG
+# This is an automatically generated prolog.
 #
-#  $Source: src/build/debug/Hostboot/ContTrace.pm $
+# $Source: src/build/debug/Hostboot/ContTrace.pm $
 #
-#  IBM CONFIDENTIAL
+# IBM CONFIDENTIAL
 #
-#  COPYRIGHT International Business Machines Corp. 2012
+# COPYRIGHT International Business Machines Corp. 2012,2013
 #
-#  p1
+# p1
 #
-#  Object Code Only (OCO) source materials
-#  Licensed Internal Code Source Materials
-#  IBM HostBoot Licensed Internal Code
+# Object Code Only (OCO) source materials
+# Licensed Internal Code Source Materials
+# IBM HostBoot Licensed Internal Code
 #
-#  The source code for this program is not published or other-
-#  wise divested of its trade secrets, irrespective of what has
-#  been deposited with the U.S. Copyright Office.
+# The source code for this program is not published or otherwise
+# divested of its trade secrets, irrespective of what has been
+# deposited with the U.S. Copyright Office.
 #
-#  Origin: 30
+# Origin: 30
 #
-#  IBM_PROLOG_END_TAG
+# IBM_PROLOG_END_TAG
 use strict;
 
 package Hostboot::ContTrace;
@@ -91,7 +91,7 @@ sub main
         return;
     }
 
-    my $trigger = ::readScom(0x00050038,8);
+    my $trigger = ::readScom(0x00050038);
     if ($dbgMsg)
     {
         ::userDisplay("$trigger...\n");
@@ -129,7 +129,7 @@ sub main
         ::userDisplay("$cycles\n");
     }
 
-    ::writeScom(0x00050038, 8, 0x0);
+    ::writeScom(0x00050038, 0x0);
 
     open TRACE, ($args->{"fsp-trace"}." -s ".::getImgPath().
                 "hbotStringFile $fsptrace_options $fname |") || die;
