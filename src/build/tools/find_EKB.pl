@@ -6,7 +6,7 @@
 #
 # IBM CONFIDENTIAL
 #
-# COPYRIGHT International Business Machines Corp. 2012
+# COPYRIGHT International Business Machines Corp. 2012,2013
 #
 # p1
 #
@@ -23,6 +23,8 @@
 # IBM_PROLOG_END_TAG
 ##
 ##  @file   find_EKB.pl
+##  find and compare Hardware Procedure files in EKB against HostBoot files.
+##
 ##  find HostBoot files in $HBDIR (assume: $HB = src/usr/hwpf/hwp )
 ##  and compare "$Id $" version numbers against the like-named HWP files
 ##  in $topdir ( assume: $EKB = /afs/awd/projects/eclipz/KnowledgeBase/eclipz/chips/p8/working/procedures ).
@@ -205,7 +207,8 @@ my  $opt_justdiffs  =   0;
 my  $opt_topdir     =   "";
 my  $opt_infiles    =   "";
 my  $opt_long       =   0;
-my  $opt_verbose      =   0;
+my  $opt_verbose    =   0;
+my  $opt_lookuponly =   0;
 
 
 ##  input filenames, just the base name
@@ -252,7 +255,8 @@ GetOptions( "help|?"                    =>  \$opt_help,
             "long"                      =>  \$opt_long,         ## "long" format, prints path to HWP file
             "infiles=s"                 =>  \$opt_infiles,      ##  list of files to look for
             "verbose"                   =>  \$opt_verbose,      ##  print files that can't be found
-            "debug"                     =>  \$opt_debug,        ## print debug info
+            "debug"                     =>  \$opt_debug,        ##  print debug info
+            "lookuponly"                =>  \$opt_lookuponly,   ##  lookup & display topdir files whether they are in HB or not
 
           );
 
@@ -317,6 +321,7 @@ if ( $opt_debug )
     print   STDERR  "topdir             =   $opt_topdir\n";
     print   STDERR  "infiles            =   $opt_infiles\n";
     print   STDERR  "verbose            =   $opt_verbose\n";
+    print   STDERR  "lookuponly         =   $opt_lookuponly\n";
 
     ## dump files specified
     print   STDERR  "Files:\n";
@@ -357,10 +362,14 @@ foreach my $infile ( @InFiles )
     $maxcol = length($infile) if length($infile) > $maxcol;
 
     ##  search for the file in HostBoot
-    my  $hbfile         =   findFile( $HBDIR, $infile );
-    if ( ! -f $hbfile )
+    my  $hbfile     =   "";
+    if ( ! $opt_lookuponly )    ## skip finding HB file, we just want to list HWP versions
     {
-        next;
+        $hbfile         =   findFile( $HBDIR, $infile );
+        if ( ! -f $hbfile )
+        {
+            next;
+        }
     }
 
     ##
@@ -379,10 +388,19 @@ foreach my $infile ( @InFiles )
     }
 
     ##  find $Id from HostBoot tree
-    my  ( $fn1, $vn1 )   =   findId( $hbfile );
+    my  ( $fn1, $vn1 )   =   (" ", " " );     ## init
+    if ( $opt_lookuponly )
+    {
+        ( $fn1, $vn1 )  =   (" ", "(ignored)" );
+    }
+        else
+    {
+        ( $fn1, $vn1 )   =   findId( $hbfile );
+    }
 
     ##  find $Id from HWP tree
-    my  ( $fn2, $vn2 )   =   findId( $hwpfile );
+    my  ( $fn2, $vn2 )  =   ( " ", " ");
+    ( $fn2, $vn2 )   =   findId( $hwpfile );
 
     my  $diff   =   "";
     if ( $vn1 ne $vn2 )
@@ -412,6 +430,7 @@ print   STDOUT  "HB Version from $HBDIR\n";
 print   STDOUT  "HWP Version from dir(s):\n";
 foreach my $sd ( @SearchDirs ) {   print   STDOUT  "   $sd\n"; }
 print   STDOUT  "differing versions are marked with \'*\' .\n";
+print   STDOUT  "(none) means no version Id was found.\n";
 print   STDOUT  "---------------------------------------------------------------\n";
 
 my  $col4Hdr    =   "";
@@ -431,7 +450,7 @@ foreach ( @OutLines )
         $c4 =   "";
     }
 
-    printf   STDOUT  "%-*s\t%-12s\t%-12s\t%-12s\n", $maxcol, $c1, $c2, $c3, $c4 ;
+    printf   STDOUT  "%-*s\t%-12s\t%-12s\t%-12s\n", $maxcol+2, $c1, $c2, $c3, $c4 ;
 }
 
 
@@ -454,6 +473,7 @@ sub usage()
     print   STDOUT  "       [ --infiles ]           ( file containing filenames to compare )\n";
     print   STDOUT  "       [ --debug ]             ( print debug information )\n";
     print   STDOUT  "       [ --verbose ]           ( print files that can't be found )\n";
+    print   STDOUT  "       [ --lookuponly ]        ( print HWP versions only, no compare )\n";
     print   STDOUT  "       <files...>\n";
 }
 
@@ -547,7 +567,7 @@ sub findId( $ )
     my $filename  = shift;
     my $data;
     my  $fn =   "";
-    my  $vn =   "";
+    my  $vn =   "(none)";
 
     open( FH, $filename )   or die "cannot open $filename: $!";
 
