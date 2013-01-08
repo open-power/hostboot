@@ -110,8 +110,9 @@ enum BlockPriority
 /** Hardwired pointer to output SLW image in real mem */
 /** 128M + 32M  */
 /** SLW image must be on 1M boundary */
+/** set_pore_bars expects a region size in MB.  It must be a power of 2 */
 #define OUTPUT_PORE_IMG_ADDR        128*MEGABYTE + 32*MEGABYTE
-#define MAX_OUTPUT_PORE_IMG_SIZE    4*MEGABYTE
+#define MAX_OUTPUT_PORE_IMG_IN_MB   4
 
 
 /**

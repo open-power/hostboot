@@ -332,56 +332,81 @@ void*    call_host_build_winkle( void    *io_pArgs )
 
     // @@@@@    CUSTOM BLOCK:   @@@@@
 
-    //  @todo   Issue   61361
-    //  Should be a system-wide  constant stating the maximum number of procs
-    //  in the system.  In the meantime:
-    const   uint64_t    MAX_POSSIBLE_PROCS_IN_P8_SYSTEM  =   8;
-    l_RealMemSize  =    ( MAX_OUTPUT_PORE_IMG_SIZE *
-                                        MAX_POSSIBLE_PROCS_IN_P8_SYSTEM );
+    do  {
+        //  @todo   Issue   61361
+        //  Should be a system-wide  constant stating the maximum number of procs
+        //  in the system.  In the meantime:
+        const   uint64_t    MAX_POSSIBLE_PROCS_IN_P8_SYSTEM  =   8;
 
-    l_getAddrRc =   mm_linear_map(  l_pRealMemBase,
-                                    l_RealMemSize   );
-    if ( l_getAddrRc != 0 )
-    {
+        //  Get a chunk of real memory big enough to store all the possible
+        //  SLW images.
+        l_RealMemSize  =    ( (MAX_OUTPUT_PORE_IMG_IN_MB*1*MEGABYTE) *
+                              MAX_POSSIBLE_PROCS_IN_P8_SYSTEM );
+
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                   "ERROR:  could not get real mem." );
+                   "Got realmem to store all SLW images, size=0x%lx",
+                   l_RealMemSize    );
 
-        //  build userdata2, truncated pointer in hi, size in low
-        uint64_t    l_userdata2 =   (
-                            ( ( (reinterpret_cast<uint64_t>
-                              (l_pRealMemBase) )& 0x00000000ffffffff) << 32 )
-                        |
-                            l_RealMemSize );
-        /*@
-         * @errortype
-         * @reasoncode  ISTEP_GET_SLW_OUTPUT_BUFFER_FAILED
-         * @severity    ERRORLOG::ERRL_SEV_UNRECOVERABLE
-         * @moduleid    ISTEP_BUILD_WINKLE_IMAGES
-         * @userdata1   return code from mm_linear_map
-         * @userdata2   Hi 32 bits: Address of memory requested
-         *              Lo 32 bits: Size of memory requested
-         *
-         * @devdesc     Failed to get an address for PORE output buffer
-         *
-         */
-        l_errl =
+        l_getAddrRc =   mm_linear_map(  l_pRealMemBase,
+                                        l_RealMemSize   );
+        if ( l_getAddrRc != 0 )
+        {
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                       "ERROR:  could not get real mem." );
+
+            //  build userdata2, truncated pointer in hi, size in low
+            uint64_t    l_userdata2 =   (
+                                        ( ( (reinterpret_cast<uint64_t>
+                                             (l_pRealMemBase) )
+                                            & 0x00000000ffffffff) << 32 )
+                                        |
+                                        l_RealMemSize );
+            /*@
+             * @errortype
+             * @reasoncode  ISTEP_GET_SLW_OUTPUT_BUFFER_FAILED
+             * @severity    ERRORLOG::ERRL_SEV_UNRECOVERABLE
+             * @moduleid    ISTEP_BUILD_WINKLE_IMAGES
+             * @userdata1   return code from mm_linear_map
+             * @userdata2   Hi 32 bits: Address of memory requested
+             *              Lo 32 bits: Size of memory requested
+             * @devdesc     Failed to map in a real memory area to store the
+             *              SLW images for all possible processors
+             *
+             */
+            l_errl =
             new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                      ISTEP::ISTEP_BUILD_WINKLE_IMAGES,
                                      ISTEP::ISTEP_GET_SLW_OUTPUT_BUFFER_FAILED,
                                      l_getAddrRc,
                                      l_userdata2 );
-    }
-    else
-    {
+            /*@
+             * @errortype
+             * @reasoncode  ISTEP_GET_SLW_REALMEM_FAILED
+             * @severity    ERRORLOG::ERRL_SEV_UNRECOVERABLE
+             * @moduleid    ISTEP_HOST_BUILD_WINKLE
+             * @userdata1       bytes 0-1: plid identifying first error
+             *                  bytes 2-3: reason code of first error
+             * @userdata2       bytes 0-1: total number of elogs included
+             *                  bytes 2-3: N/A
+             * @devdesc     call to host_build_winkle has failed
+             *
+             */
+            l_StepError.addErrorDetails(ISTEP::ISTEP_GET_SLW_REALMEM_FAILED,
+                                        ISTEP::ISTEP_HOST_BUILD_WINKLE,
+                                        l_errl);
+            errlCommit( l_errl, HWPF_COMP_ID );
+
+            // Drop to bottom and exit with IStepError filled in
+            break;
+        }
+
+
+        //  Continue, build SLW images
+
         TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                    "Got real mem  buffer for 0x%08x cpu's = 0x%p",
                    MAX_POSSIBLE_PROCS_IN_P8_SYSTEM,
                    l_pRealMemBase  );
-    }
-
-    //  bail if we can't get any real mem
-    if ( !l_errl )
-    {
 
         //  Loop through all functional Procs and generate images for them.
         TARGETING::TargetHandleList l_procChips;
@@ -393,14 +418,16 @@ void*    call_host_build_winkle( void    *io_pArgs )
                    l_procChips.size()   );
 
         for ( TargetHandleList::iterator l_iter = l_procChips.begin();
-              l_iter != l_procChips.end();
-              ++l_iter )
+            l_iter != l_procChips.end();
+            ++l_iter )
         {
             TARGETING::Target * l_procChip  =   (*l_iter) ;
 
             do  {
 
                 //  dump physical path to proc target
+                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                           "Build SLW image for proc.." );
                 EntityPath l_path;
                 l_path  =   l_procChip->getAttr<ATTR_PHYS_PATH>();
                 l_path.dump();
@@ -414,25 +441,26 @@ void*    call_host_build_winkle( void    *io_pArgs )
                               "host_build_winkle ERROR : errorlog PLID=0x%x",
                               l_errl->plid() );
 
-                    // drop out of block with errorlog.
+                    // drop out of do block with errorlog.
                     break;
                 }
 
                 //  calculate size and location of the SLW output buffer
-                uint32_t l_procNum =
-                l_procChip->getAttr<TARGETING::ATTR_POSITION>();
-                uint64_t l_procRealMemAddr  =
-                ( reinterpret_cast<uint64_t>(l_pRealMemBase) +
-                  ( l_procNum * MAX_OUTPUT_PORE_IMG_SIZE )) ;
+                uint32_t    l_procNum =
+                    l_procChip->getAttr<TARGETING::ATTR_POSITION>();
+                uint64_t    l_procRealMemAddr  =
+                    ( reinterpret_cast<uint64_t>(l_pRealMemBase) +
+                      ( l_procNum * (MAX_OUTPUT_PORE_IMG_IN_MB*1*MEGABYTE) )) ;
                 void        *l_pImageOut = reinterpret_cast<void * const>
                                            ( l_procRealMemAddr );
-                uint32_t    l_sizeImageOut  =   MAX_OUTPUT_PORE_IMG_SIZE ;
+                uint32_t    l_sizeImageOut  =
+                                    (MAX_OUTPUT_PORE_IMG_IN_MB*1*MEGABYTE)  ;
 
                 //  set default values, p8_slw_build will provide actual size
                 l_procChip->setAttr<TARGETING::ATTR_SLW_IMAGE_ADDR>
-                ( l_procRealMemAddr );
+                                                        ( l_procRealMemAddr );
                 l_procChip->setAttr<TARGETING::ATTR_SLW_IMAGE_SIZE>
-                ( l_sizeImageOut ) ;
+                                                        ( l_sizeImageOut ) ;
 
                 TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                            "Real mem  buffer for cpu 0x%08x = 0x%p",
@@ -444,7 +472,7 @@ void*    call_host_build_winkle( void    *io_pArgs )
                                                 TARGET_TYPE_PROC_CHIP,
                                                 reinterpret_cast<void *>
                                                 (const_cast<TARGETING::Target*>
-                                                (l_procChip)) );
+                                                     (l_procChip)) );
 
                 //  call the HWP with each fapi::Target
                 FAPI_INVOKE_HWP( l_errl,
@@ -498,7 +526,7 @@ void*    call_host_build_winkle( void    *io_pArgs )
 
             // broke out due to an error, store all the details away, store
             //  the errlog in IStepError, and continue to next proc
-            if(l_errl)
+            if (l_errl)
             {
                 // Add all the details for this proc
                 ErrlUserDetailsTarget myDetails(l_procChip);
@@ -511,27 +539,28 @@ void*    call_host_build_winkle( void    *io_pArgs )
                  * @reasoncode  ISTEP_BUILD_WINKLE_IMAGES_FAILED
                  * @severity    ERRORLOG::ERRL_SEV_UNRECOVERABLE
                  * @moduleid    ISTEP_HOST_BUILD_WINKLE
-                 * @userdata1   bytes 0-1: plid identifying first error
-                 *              bytes 2-3: reason code of first error
-                 * @userdata2   bytes 0-1: total number of elogs included
-                 *              bytes 2-3: N/A
-                 * @devdesc     call to host_build_winkle has failed
+                 * @userdata1       bytes 0-1: plid identifying first error
+                 *                  bytes 2-3: reason code of first error
+                 * @userdata2       bytes 0-1: total number of elogs included
+                 *                  bytes 2-3: N/A
+                 * @devdesc     Call to host_build_winkle has failed.
+                 *              See user data for failing processor information
                  *
                  */
-                l_StepError.addErrorDetails(ISTEP_BUILD_WINKLE_IMAGES_FAILED,
-                                            ISTEP_HOST_BUILD_WINKLE,
-                                            l_errl);
-
+                l_StepError.addErrorDetails(
+                                        ISTEP::ISTEP_BUILD_WINKLE_IMAGES_FAILED,
+                                        ISTEP::ISTEP_HOST_BUILD_WINKLE,
+                                        l_errl );
                 errlCommit( l_errl, HWPF_COMP_ID );
             }
 
         } ;  // endfor
 
-    }
+    }  while (0);
     // @@@@@    END CUSTOM BLOCK:   @@@@@
 
 
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                "call_host_build_winkle exit" );
 
     // end task, returning any errorlogs to IStepDisp
@@ -562,17 +591,18 @@ void*    call_proc_set_pore_bar( void    *io_pArgs )
                "Found %d procs in system",
                l_procChips.size()   );
 
-        for ( TargetHandleList::iterator l_iter = l_procChips.begin();
-              l_iter != l_procChips.end();
-              ++l_iter )
+    for ( TargetHandleList::iterator l_iter = l_procChips.begin();
+          l_iter != l_procChips.end();
+          ++l_iter )
     {
         TARGETING::Target * l_procChip  =   (*l_iter) ;
 
         //  dump physical path to target
+        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                   "Set pore bar for .." );
         EntityPath l_path;
         l_path  =   l_procChip->getAttr<ATTR_PHYS_PATH>();
         l_path.dump();
-
 
         // cast OUR type of target to a FAPI type of target.
         const fapi::Target l_fapi_cpu_target(
@@ -595,9 +625,11 @@ void*    call_proc_set_pore_bar( void    *io_pArgs )
         l_procChip->getAttr<TARGETING::ATTR_SLW_IMAGE_ADDR>();
 
 
-        // Size in Meg of the image, this is rounded up to the nearest power
-        //  of 2.  So far our images are less than 1 meg so this is 1
-        uint64_t l_mem_size =  1;
+        //  Size (in MB) of the region where image is located.
+        //  This is rounded up to the nearest power of 2 by the HWP.
+        //  Easiest way to insure this works right is to set it to a power
+        //  of 2;  see vmmconst.H
+        uint64_t l_mem_size =  MAX_OUTPUT_PORE_IMG_IN_MB ;
 
         //  defined in p8_set_pore_bar.H
         uint32_t        l_mem_type  =   SLW_L3 ;
@@ -633,6 +665,10 @@ void*    call_proc_set_pore_bar( void    *io_pArgs )
              * @reasoncode       ISTEP_BUILD_WINKLE_IMAGES_FAILED
              * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE
              * @moduleid         ISTEP_PROC_SET_PORE_BAR
+             * @userdata1       bytes 0-1: plid identifying first error
+             *                  bytes 2-3: reason code of first error
+             * @userdata2       bytes 0-1: total number of elogs included
+             *                  bytes 2-3: N/A
              * @devdesc          call to proc_set_porebar has failed, see
              *                   error log identified by the plid in user
              *                   data section.
@@ -722,6 +758,10 @@ void*    call_p8_poreslw_init( void    *io_pArgs )
              * @reasoncode       ISTEP_P8_PORESLW_INIT_FAILED
              * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE
              * @moduleid         ISTEP_PROC_PORESLW_INIT
+             * @userdata1       bytes 0-1: plid identifying first error
+             *                  bytes 2-3: reason code of first error
+             * @userdata2       bytes 0-1: total number of elogs included
+             *                  bytes 2-3: N/A
              * @devdesc          call to proc_set_porebar has failed, see
              *                   error log identified by the plid in user
              *                   data section.
