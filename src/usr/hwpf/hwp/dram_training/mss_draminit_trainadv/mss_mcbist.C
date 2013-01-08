@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012                   */
+/* COPYRIGHT International Business Machines Corp. 2012,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_mcbist.C,v 1.23 2012/12/14 06:30:44 sasethur Exp $
+// $Id: mss_mcbist.C,v 1.25 2013/01/03 14:54:43 sasethur Exp $
 // *!***************************************************************************
 // *! (C) Copyright International Business Machines Corp. 1997, 1998
 // *!           All Rights Reserved -- Property of IBM
@@ -38,7 +38,9 @@
 //------------------------------------------------------------------------------
 // Version:|Author: | Date:  | Comment:
 // --------|--------|--------|--------------------------------------------------
-//   1.22  |aditya  |12/14/12|Updated FW review comments   
+//   1.25  |aditya  |01/03/12| Updated FW Comments 
+//   1.23  |aditya  |12/18/12| Updated Review Comments 
+//   1.22  |aditya  |12/14/12| Updated FW review comments   
 //   1.22  |aditya  |12/6/12 | Updated Review Comments
 //   1.21  |aditya  |11/15/12| Updated for FIRMWARE REVIEW COMMENTS
 //   1.20  |aditya  |10/29/12| updated fw review comments 
@@ -216,16 +218,20 @@ fapi::ReturnCode  cfg_mcb_dgen(const fapi::Target & i_target_mba,mcbist_data_gen
         l_var1 =0x0000FFFF0000FFFFull; 
         l_spare = 0xFF00FF00FF00FF00ull;
 		
-        rc_num = l_var_data_buffer_64.setDoubleWord(0,l_var);if (rc_num){ FAPI_ERR( "cfg_mcb_dgen:");rc.setEcmdError(rc_num);return rc;}  rc = fapiPutScom(i_target_mba, MBA01_MCBIST_MCBFD0Q_0x030106be, l_data_buffer_64); if(rc) return rc;
-        rc_num = l_var1_data_buffer_64.setDoubleWord(0,l_var1);  if (rc_num){ FAPI_ERR( "cfg_mcb_dgen:");rc.setEcmdError(rc_num);return rc;}rc = fapiPutScom(i_target_mba, MBA01_MCBIST_MCBFD1Q_0x030106bf, l_data_buffer_64); if(rc) return rc;
-        rc_num = l_var_data_buffer_64.setDoubleWord(0,l_var);  if (rc_num){ FAPI_ERR( "cfg_mcb_dgen:");rc.setEcmdError(rc_num);return rc;}rc = fapiPutScom(i_target_mba, MBA01_MCBIST_MCBFD2Q_0x030106c0, l_data_buffer_64); if(rc) return rc;
-	rc_num = l_var1_data_buffer_64.setDoubleWord(0,l_var1);  if (rc_num){ FAPI_ERR( "cfg_mcb_dgen:");rc.setEcmdError(rc_num);return rc;}rc = fapiPutScom(i_target_mba, MBA01_MCBIST_MCBFD3Q_0x030106c1, l_data_buffer_64); if(rc) return rc;
-	rc_num = l_var_data_buffer_64.setDoubleWord(0,l_var);  if (rc_num){ FAPI_ERR( "cfg_mcb_dgen:");rc.setEcmdError(rc_num);return rc;}rc = fapiPutScom(i_target_mba, MBA01_MCBIST_MCBFD4Q_0x030106c2, l_data_buffer_64); if(rc) return rc;
-	rc_num = l_var1_data_buffer_64.setDoubleWord(0,l_var1);  if (rc_num){ FAPI_ERR( "cfg_mcb_dgen:");rc.setEcmdError(rc_num);return rc;}rc = fapiPutScom(i_target_mba, MBA01_MCBIST_MCBFD5Q_0x030106c3, l_data_buffer_64); if(rc) return rc;
-	rc_num = l_var_data_buffer_64.setDoubleWord(0,l_var);  if (rc_num){ FAPI_ERR( "cfg_mcb_dgen:");rc.setEcmdError(rc_num);return rc;}rc = fapiPutScom(i_target_mba, MBA01_MCBIST_MCBFD6Q_0x030106c4, l_data_buffer_64); if(rc) return rc;	
-	rc_num = l_var1_data_buffer_64.setDoubleWord(0,l_var1);  if (rc_num){ FAPI_ERR( "cfg_mcb_dgen:");rc.setEcmdError(rc_num);return rc;}rc = fapiPutScom(i_target_mba, MBA01_MCBIST_MCBFD7Q_0x030106c5, l_data_buffer_64); if(rc) return rc;
-	rc_num = l_spare_data_buffer_64.setDoubleWord(0,l_spare);  if (rc_num){ FAPI_ERR( "cfg_mcb_dgen:");rc.setEcmdError(rc_num);return rc;}rc = fapiPutScom(i_target_mba, MBA01_MCBIST_MCBFDQ_0x030106c6 , l_data_buffer_64); if(rc) return rc;
-	rc_num = l_spare_data_buffer_64.setDoubleWord(0,l_spare);  if (rc_num){ FAPI_ERR( "cfg_mcb_dgen:");rc.setEcmdError(rc_num);return rc;}rc = fapiPutScom(i_target_mba, MBA01_MCBIST_MCBFDSPQ_0x030106c7 , l_data_buffer_64); if(rc) return rc;
+        rc_num = l_var_data_buffer_64.setDoubleWord(0,l_var);if (rc_num){ FAPI_ERR( "cfg_mcb_dgen:");rc.setEcmdError(rc_num);return rc;}
+		rc_num = l_var1_data_buffer_64.setDoubleWord(0,l_var1);  if (rc_num){ FAPI_ERR( "cfg_mcb_dgen:");rc.setEcmdError(rc_num);return rc;}
+		rc_num = l_spare_data_buffer_64.setDoubleWord(0,l_spare);  if (rc_num){ FAPI_ERR( "cfg_mcb_dgen:");rc.setEcmdError(rc_num);return rc;}
+		
+		rc = fapiPutScom(i_target_mba, MBA01_MCBIST_MCBFD0Q_0x030106be, l_var_data_buffer_64); if(rc) return rc;
+        rc = fapiPutScom(i_target_mba, MBA01_MCBIST_MCBFD1Q_0x030106bf, l_var1_data_buffer_64); if(rc) return rc;
+        rc = fapiPutScom(i_target_mba, MBA01_MCBIST_MCBFD2Q_0x030106c0, l_var_data_buffer_64); if(rc) return rc;
+	rc = fapiPutScom(i_target_mba, MBA01_MCBIST_MCBFD3Q_0x030106c1, l_var1_data_buffer_64); if(rc) return rc;
+	rc = fapiPutScom(i_target_mba, MBA01_MCBIST_MCBFD4Q_0x030106c2, l_var_data_buffer_64); if(rc) return rc;
+	rc = fapiPutScom(i_target_mba, MBA01_MCBIST_MCBFD5Q_0x030106c3, l_var1_data_buffer_64); if(rc) return rc;
+	rc = fapiPutScom(i_target_mba, MBA01_MCBIST_MCBFD6Q_0x030106c4, l_var_data_buffer_64); if(rc) return rc;	
+	rc = fapiPutScom(i_target_mba, MBA01_MCBIST_MCBFD7Q_0x030106c5, l_var1_data_buffer_64); if(rc) return rc;
+	rc = fapiPutScom(i_target_mba, MBA01_MCBIST_MCBFDQ_0x030106c6 , l_spare_data_buffer_64); if(rc) return rc;
+	rc = fapiPutScom(i_target_mba, MBA01_MCBIST_MCBFDSPQ_0x030106c7 , l_spare_data_buffer_64); if(rc) return rc;
 	
 	
 
@@ -242,17 +248,20 @@ fapi::ReturnCode  cfg_mcb_dgen(const fapi::Target & i_target_mba,mcbist_data_gen
     {
         l_var = 0xFFFFFFFFFFFFFFFFull;                                                                                                                                         
         l_var1 =0x0000000000000000ull;                                                                                                                                                                                                                                            
-        l_spare = 0xFFFF0000FFFF0000ull;                                                                                                                                
-        rc_num = l_var_data_buffer_64.setDoubleWord(0,l_var);  if (rc_num){ FAPI_ERR( "cfg_mcb_dgen:");rc.setEcmdError(rc_num);return rc;}rc = fapiPutScom(i_target_mba, MBA01_MCBIST_MCBFD0Q_0x030106be, l_data_buffer_64); if(rc) return rc; 
-        rc_num = l_var_data_buffer_64.setDoubleWord(0,l_var);  if (rc_num){ FAPI_ERR( "cfg_mcb_dgen:");rc.setEcmdError(rc_num);return rc;}rc = fapiPutScom(i_target_mba, MBA01_MCBIST_MCBFD1Q_0x030106bf, l_data_buffer_64); if(rc) return rc;  
-        rc_num = l_var1_data_buffer_64.setDoubleWord(0,l_var1);  if (rc_num){ FAPI_ERR( "cfg_mcb_dgen:");rc.setEcmdError(rc_num);return rc;}rc = fapiPutScom(i_target_mba, MBA01_MCBIST_MCBFD2Q_0x030106c0, l_data_buffer_64); if(rc) return rc;   
- 	rc_num = l_var1_data_buffer_64.setDoubleWord(0,l_var1);  if (rc_num){ FAPI_ERR( "cfg_mcb_dgen:");rc.setEcmdError(rc_num);return rc;}rc = fapiPutScom(i_target_mba, MBA01_MCBIST_MCBFD3Q_0x030106c1, l_data_buffer_64); if(rc) return rc;        
- 	rc_num = l_var_data_buffer_64.setDoubleWord(0,l_var);  if (rc_num){ FAPI_ERR( "cfg_mcb_dgen:");rc.setEcmdError(rc_num);return rc;}rc = fapiPutScom(i_target_mba, MBA01_MCBIST_MCBFD4Q_0x030106c2, l_data_buffer_64); if(rc) return rc;         
- 	rc_num = l_var_data_buffer_64.setDoubleWord(0,l_var);  if (rc_num){ FAPI_ERR( "cfg_mcb_dgen:");rc.setEcmdError(rc_num);return rc;}rc = fapiPutScom(i_target_mba, MBA01_MCBIST_MCBFD5Q_0x030106c3, l_data_buffer_64); if(rc) return rc;        
- 	rc_num = l_var1_data_buffer_64.setDoubleWord(0,l_var1);  if (rc_num){ FAPI_ERR( "cfg_mcb_dgen:");rc.setEcmdError(rc_num);return rc;}rc = fapiPutScom(i_target_mba, MBA01_MCBIST_MCBFD6Q_0x030106c4, l_data_buffer_64); if(rc) return rc;	    
- 	rc_num = l_var1_data_buffer_64.setDoubleWord(0,l_var1);  if (rc_num){ FAPI_ERR( "cfg_mcb_dgen:");rc.setEcmdError(rc_num);return rc;}rc = fapiPutScom(i_target_mba, MBA01_MCBIST_MCBFD7Q_0x030106c5, l_data_buffer_64); if(rc) return rc;      
- 	rc_num = l_spare_data_buffer_64.setDoubleWord(0,l_spare);  if (rc_num){ FAPI_ERR( "cfg_mcb_dgen:");rc.setEcmdError(rc_num);return rc;}rc = fapiPutScom(i_target_mba, MBA01_MCBIST_MCBFDQ_0x030106c6 , l_data_buffer_64); if(rc) return rc;     
- 	rc_num = l_spare_data_buffer_64.setDoubleWord(0,l_spare);  if (rc_num){ FAPI_ERR( "cfg_mcb_dgen:");rc.setEcmdError(rc_num);return rc;}rc = fapiPutScom(i_target_mba, MBA01_MCBIST_MCBFDSPQ_0x030106c7 , l_data_buffer_64); if(rc) return rc;    
+        l_spare = 0xFFFF0000FFFF0000ull;  
+rc_num = l_var_data_buffer_64.setDoubleWord(0,l_var);  if (rc_num){ FAPI_ERR( "cfg_mcb_dgen:");rc.setEcmdError(rc_num);return rc;}	
+ rc_num = l_var1_data_buffer_64.setDoubleWord(0,l_var1);  if (rc_num){ FAPI_ERR( "cfg_mcb_dgen:");rc.setEcmdError(rc_num);return rc;}	
+ rc_num = l_spare_data_buffer_64.setDoubleWord(0,l_spare);  if (rc_num){ FAPI_ERR( "cfg_mcb_dgen:");rc.setEcmdError(rc_num);return rc;}
+        rc = fapiPutScom(i_target_mba, MBA01_MCBIST_MCBFD0Q_0x030106be, l_var_data_buffer_64); if(rc) return rc; 
+        rc = fapiPutScom(i_target_mba, MBA01_MCBIST_MCBFD1Q_0x030106bf, l_var_data_buffer_64); if(rc) return rc;  
+       rc = fapiPutScom(i_target_mba, MBA01_MCBIST_MCBFD2Q_0x030106c0, l_var1_data_buffer_64); if(rc) return rc;   
+ 	rc = fapiPutScom(i_target_mba, MBA01_MCBIST_MCBFD3Q_0x030106c1, l_var1_data_buffer_64); if(rc) return rc;        
+ 	rc = fapiPutScom(i_target_mba, MBA01_MCBIST_MCBFD4Q_0x030106c2, l_var_data_buffer_64); if(rc) return rc;         
+ 	rc = fapiPutScom(i_target_mba, MBA01_MCBIST_MCBFD5Q_0x030106c3, l_var_data_buffer_64); if(rc) return rc;        
+ 	rc = fapiPutScom(i_target_mba, MBA01_MCBIST_MCBFD6Q_0x030106c4, l_var1_data_buffer_64); if(rc) return rc;	    
+ 	rc = fapiPutScom(i_target_mba, MBA01_MCBIST_MCBFD7Q_0x030106c5, l_var1_data_buffer_64); if(rc) return rc;      
+ 	rc = fapiPutScom(i_target_mba, MBA01_MCBIST_MCBFDQ_0x030106c6 , l_spare_data_buffer_64); if(rc) return rc;     
+ 	rc = fapiPutScom(i_target_mba, MBA01_MCBIST_MCBFDSPQ_0x030106c7 , l_spare_data_buffer_64); if(rc) return rc;    
  
  
     }
@@ -261,19 +270,25 @@ fapi::ReturnCode  cfg_mcb_dgen(const fapi::Target & i_target_mba,mcbist_data_gen
          
         l_var = 0xA5A5A5A5A5A5A5A5ull;                                                                                                                                      
         l_var1 =0x5A5A5A5A5A5A5A5Aull;                                                                                                                                  
-        l_spare = 0xA55AA55AA55AA55Aull;                                                                                                                                
-        rc_num = l_var_data_buffer_64.setDoubleWord(0,l_var);  if (rc_num){ FAPI_ERR( "cfg_mcb_dgen:");rc.setEcmdError(rc_num);return rc;}rc = fapiPutScom(i_target_mba, MBA01_MCBIST_MCBFD0Q_0x030106be, l_data_buffer_64); if(rc) return rc; 
-        rc_num = l_var1_data_buffer_64.setDoubleWord(0,l_var1);  if (rc_num){ FAPI_ERR( "cfg_mcb_dgen:");rc.setEcmdError(rc_num);return rc;}rc = fapiPutScom(i_target_mba, MBA01_MCBIST_MCBFD1Q_0x030106bf, l_data_buffer_64); if(rc) return rc;
-        rc_num = l_var_data_buffer_64.setDoubleWord(0,l_var);  if (rc_num){ FAPI_ERR( "cfg_mcb_dgen:");rc.setEcmdError(rc_num);return rc;}rc = fapiPutScom(i_target_mba, MBA01_MCBIST_MCBFD2Q_0x030106c0, l_data_buffer_64); if(rc) return rc; 
-  	rc_num = l_var1_data_buffer_64.setDoubleWord(0,l_var1);  if (rc_num){ FAPI_ERR( "cfg_mcb_dgen:");rc.setEcmdError(rc_num);return rc;}rc = fapiPutScom(i_target_mba, MBA01_MCBIST_MCBFD3Q_0x030106c1, l_data_buffer_64); if(rc) return rc;    
-  	rc_num = l_var_data_buffer_64.setDoubleWord(0,l_var);  if (rc_num){ FAPI_ERR( "cfg_mcb_dgen:");rc.setEcmdError(rc_num);return rc;}rc = fapiPutScom(i_target_mba, MBA01_MCBIST_MCBFD4Q_0x030106c2, l_data_buffer_64); if(rc) return rc;     
-  	rc_num = l_var1_data_buffer_64.setDoubleWord(0,l_var1);  if (rc_num){ FAPI_ERR( "cfg_mcb_dgen:");rc.setEcmdError(rc_num);return rc;}rc = fapiPutScom(i_target_mba, MBA01_MCBIST_MCBFD5Q_0x030106c3, l_data_buffer_64); if(rc) return rc;    
-  	rc_num = l_var_data_buffer_64.setDoubleWord(0,l_var);  if (rc_num){ FAPI_ERR( "cfg_mcb_dgen:");rc.setEcmdError(rc_num);return rc;}rc = fapiPutScom(i_target_mba, MBA01_MCBIST_MCBFD6Q_0x030106c4, l_data_buffer_64); if(rc) return rc;	    
-  	rc_num = l_var1_data_buffer_64.setDoubleWord(0,l_var1);  if (rc_num){ FAPI_ERR( "cfg_mcb_dgen:");rc.setEcmdError(rc_num);return rc;}rc = fapiPutScom(i_target_mba, MBA01_MCBIST_MCBFD7Q_0x030106c5, l_data_buffer_64); if(rc) return rc;    
-  	rc_num = l_spare_data_buffer_64.setDoubleWord(0,l_spare);  if (rc_num){ FAPI_ERR( "cfg_mcb_dgen:");rc.setEcmdError(rc_num);return rc;}rc = fapiPutScom(i_target_mba, MBA01_MCBIST_MCBFDQ_0x030106c6 , l_data_buffer_64); if(rc) return rc;   
-  	rc_num = l_spare_data_buffer_64.setDoubleWord(0,l_spare);  if (rc_num){ FAPI_ERR( "cfg_mcb_dgen:");rc.setEcmdError(rc_num);return rc;}rc = fapiPutScom(i_target_mba, MBA01_MCBIST_MCBFDSPQ_0x030106c7 , l_data_buffer_64); if(rc) return rc;    
+        l_spare = 0xA55AA55AA55AA55Aull; 
+        
+		rc_num = l_spare_data_buffer_64.setDoubleWord(0,l_spare);  if (rc_num){ FAPI_ERR( "cfg_mcb_dgen:");rc.setEcmdError(rc_num);return rc;}
+		rc_num = l_var_data_buffer_64.setDoubleWord(0,l_var);  if (rc_num){ FAPI_ERR( "cfg_mcb_dgen:");rc.setEcmdError(rc_num);return rc;}
+		rc_num = l_var1_data_buffer_64.setDoubleWord(0,l_var1);  if (rc_num){ FAPI_ERR( "cfg_mcb_dgen:");rc.setEcmdError(rc_num);return rc;}
+		
+        rc = fapiPutScom(i_target_mba, MBA01_MCBIST_MCBFD0Q_0x030106be, l_var_data_buffer_64); if(rc) return rc; 
+        rc = fapiPutScom(i_target_mba, MBA01_MCBIST_MCBFD1Q_0x030106bf, l_var1_data_buffer_64); if(rc) return rc;
+         rc = fapiPutScom(i_target_mba, MBA01_MCBIST_MCBFD2Q_0x030106c0, l_var_data_buffer_64); if(rc) return rc; 
+  	rc = fapiPutScom(i_target_mba, MBA01_MCBIST_MCBFD3Q_0x030106c1, l_var1_data_buffer_64); if(rc) return rc;    
+  	rc = fapiPutScom(i_target_mba, MBA01_MCBIST_MCBFD4Q_0x030106c2, l_var_data_buffer_64); if(rc) return rc;     
+  	rc = fapiPutScom(i_target_mba, MBA01_MCBIST_MCBFD5Q_0x030106c3, l_var1_data_buffer_64); if(rc) return rc;    
+  	rc = fapiPutScom(i_target_mba, MBA01_MCBIST_MCBFD6Q_0x030106c4, l_var_data_buffer_64); if(rc) return rc;	    
+  	rc = fapiPutScom(i_target_mba, MBA01_MCBIST_MCBFD7Q_0x030106c5, l_var1_data_buffer_64); if(rc) return rc;    
+  	rc = fapiPutScom(i_target_mba, MBA01_MCBIST_MCBFDQ_0x030106c6 , l_spare_data_buffer_64); if(rc) return rc;   
+  	rc = fapiPutScom(i_target_mba, MBA01_MCBIST_MCBFDSPQ_0x030106c7 , l_spare_data_buffer_64); if(rc) return rc;    
   
     }
+	
 	else if((i_datamode == DATA_GEN_DELTA_I) || (i_datamode == MCBIST_2D_CUP_PAT0))
     {
        
@@ -281,17 +296,21 @@ fapi::ReturnCode  cfg_mcb_dgen(const fapi::Target & i_target_mba,mcbist_data_gen
         l_var = 0xFFFFFFFFFFFFFFFFull;                                                                                                                                    
         l_var1 =0x0000000000000000ull;                                                                                                                                    
         l_spare = 0xFF00FF00FF00FF00ull;                                                                                                                                  
-        rc_num = l_var_data_buffer_64.setDoubleWord(0,l_var);  if (rc_num){ FAPI_ERR( "cfg_mcb_dgen:");rc.setEcmdError(rc_num);return rc;}rc = fapiPutScom(i_target_mba, MBA01_MCBIST_MCBFD0Q_0x030106be, l_data_buffer_64); if(rc) return rc;   
-        rc_num = l_var1_data_buffer_64.setDoubleWord(0,l_var1);  if (rc_num){ FAPI_ERR( "cfg_mcb_dgen:");rc.setEcmdError(rc_num);return rc;}rc = fapiPutScom(i_target_mba, MBA01_MCBIST_MCBFD1Q_0x030106bf, l_data_buffer_64); if(rc) return rc;  
-        rc_num = l_var_data_buffer_64.setDoubleWord(0,l_var);  if (rc_num){ FAPI_ERR( "cfg_mcb_dgen:");rc.setEcmdError(rc_num);return rc;}rc = fapiPutScom(i_target_mba, MBA01_MCBIST_MCBFD2Q_0x030106c0, l_data_buffer_64); if(rc) return rc;   
-	rc_num = l_var1_data_buffer_64.setDoubleWord(0,l_var1);  if (rc_num){ FAPI_ERR( "cfg_mcb_dgen:");rc.setEcmdError(rc_num);return rc;}rc = fapiPutScom(i_target_mba, MBA01_MCBIST_MCBFD3Q_0x030106c1, l_data_buffer_64); if(rc) return rc;       
-	rc_num = l_var_data_buffer_64.setDoubleWord(0,l_var);  if (rc_num){ FAPI_ERR( "cfg_mcb_dgen:");rc.setEcmdError(rc_num);return rc;}rc = fapiPutScom(i_target_mba, MBA01_MCBIST_MCBFD4Q_0x030106c2, l_data_buffer_64); if(rc) return rc;        
-	rc_num = l_var1_data_buffer_64.setDoubleWord(0,l_var1);  if (rc_num){ FAPI_ERR( "cfg_mcb_dgen:");rc.setEcmdError(rc_num);return rc;}rc = fapiPutScom(i_target_mba, MBA01_MCBIST_MCBFD5Q_0x030106c3, l_data_buffer_64); if(rc) return rc;       
-	rc_num = l_var_data_buffer_64.setDoubleWord(0,l_var);  if (rc_num){ FAPI_ERR( "cfg_mcb_dgen:");rc.setEcmdError(rc_num);return rc;}rc = fapiPutScom(i_target_mba, MBA01_MCBIST_MCBFD6Q_0x030106c4, l_data_buffer_64); if(rc) return rc;	       
-	rc_num = l_var1_data_buffer_64.setDoubleWord(0,l_var1);  if (rc_num){ FAPI_ERR( "cfg_mcb_dgen:");rc.setEcmdError(rc_num);return rc;}rc = fapiPutScom(i_target_mba, MBA01_MCBIST_MCBFD7Q_0x030106c5, l_data_buffer_64); if(rc) return rc;       
-	rc_num = l_spare_data_buffer_64.setDoubleWord(0,l_spare);  if (rc_num){ FAPI_ERR( "cfg_mcb_dgen:");rc.setEcmdError(rc_num);return rc;}rc = fapiPutScom(i_target_mba, MBA01_MCBIST_MCBFDQ_0x030106c6 , l_data_buffer_64); if(rc) return rc;      
-	rc_num = l_spare_data_buffer_64.setDoubleWord(0,l_spare);  if (rc_num){ FAPI_ERR( "cfg_mcb_dgen:");rc.setEcmdError(rc_num);return rc;}rc = fapiPutScom(i_target_mba, MBA01_MCBIST_MCBFDSPQ_0x030106c7 , l_data_buffer_64); if(rc) return rc;     
-                                                                                                                                                                        
+        rc_num = l_spare_data_buffer_64.setDoubleWord(0,l_spare);  if (rc_num){ FAPI_ERR( "cfg_mcb_dgen:");rc.setEcmdError(rc_num);return rc;}
+		rc_num = l_var_data_buffer_64.setDoubleWord(0,l_var);  if (rc_num){ FAPI_ERR( "cfg_mcb_dgen:");rc.setEcmdError(rc_num);return rc;}
+		rc_num = l_var1_data_buffer_64.setDoubleWord(0,l_var1);  if (rc_num){ FAPI_ERR( "cfg_mcb_dgen:");rc.setEcmdError(rc_num);return rc;}
+		
+        rc = fapiPutScom(i_target_mba, MBA01_MCBIST_MCBFD0Q_0x030106be, l_var_data_buffer_64); if(rc) return rc; 
+        rc = fapiPutScom(i_target_mba, MBA01_MCBIST_MCBFD1Q_0x030106bf, l_var1_data_buffer_64); if(rc) return rc;
+         rc = fapiPutScom(i_target_mba, MBA01_MCBIST_MCBFD2Q_0x030106c0, l_var_data_buffer_64); if(rc) return rc; 
+  	rc = fapiPutScom(i_target_mba, MBA01_MCBIST_MCBFD3Q_0x030106c1, l_var1_data_buffer_64); if(rc) return rc;    
+  	rc = fapiPutScom(i_target_mba, MBA01_MCBIST_MCBFD4Q_0x030106c2, l_var_data_buffer_64); if(rc) return rc;     
+  	rc = fapiPutScom(i_target_mba, MBA01_MCBIST_MCBFD5Q_0x030106c3, l_var1_data_buffer_64); if(rc) return rc;    
+  	rc = fapiPutScom(i_target_mba, MBA01_MCBIST_MCBFD6Q_0x030106c4, l_var_data_buffer_64); if(rc) return rc;	    
+  	rc = fapiPutScom(i_target_mba, MBA01_MCBIST_MCBFD7Q_0x030106c5, l_var1_data_buffer_64); if(rc) return rc;    
+  	rc = fapiPutScom(i_target_mba, MBA01_MCBIST_MCBFDQ_0x030106c6 , l_spare_data_buffer_64); if(rc) return rc;   
+  	rc = fapiPutScom(i_target_mba, MBA01_MCBIST_MCBFDSPQ_0x030106c7 , l_spare_data_buffer_64); if(rc) return rc;    
+                                                                                                                                                          
     }
 	
     else if(i_datamode == PSEUDORANDOM)
@@ -302,13 +321,14 @@ fapi::ReturnCode  cfg_mcb_dgen(const fapi::Target & i_target_mba,mcbist_data_gen
         {
             //l_rand_32 = rand();
 			l_rand_32 = 0xFFFFFFFF;//Hard Coded Temporary Fix till random function is fixed
-            rc_num =  l_data_buffer_32.insertFromRight(l_rand_32,0,32); 	 	
-            rc_num =  l_data_buffer_64.insert(l_data_buffer_32,0,32,0);
+            rc_num =  rc_num| l_data_buffer_32.insertFromRight(l_rand_32,0,32);	
+            rc_num =  rc_num|  l_data_buffer_64.insert(l_data_buffer_32,0,32,0);
             //l_rand_32 = rand();
 			l_rand_32 = 0xFFFFFFFF;
-            rc_num =  l_data_buffer_32.insertFromRight(l_rand_32,0,32);             
-            rc_num =  l_data_buffer_64.insert(l_data_buffer_32,32,32,0);
-	    if (rc_num){ FAPI_ERR( "cfg_mcb_dgen:");rc.setEcmdError(rc_num);return rc;}rc = fapiPutScom(i_target_mba, l_mba01_mcb_pseudo_random[l_index] , l_data_buffer_64); if(rc) return rc;
+            rc_num = rc_num| l_data_buffer_32.insertFromRight(l_rand_32,0,32);          
+            rc_num = rc_num| l_data_buffer_64.insert(l_data_buffer_32,32,32,0);
+	    if (rc_num){ FAPI_ERR( "cfg_mcb_dgen:");rc.setEcmdError(rc_num);return rc;}
+		rc = fapiPutScom(i_target_mba, l_mba01_mcb_pseudo_random[l_index] , l_data_buffer_64); if(rc) return rc;
         }
     }
     else
@@ -334,34 +354,40 @@ fapi::ReturnCode  cfg_mcb_dgen(const fapi::Target & i_target_mba,mcbist_data_gen
     	if (l_mbaPosition == 0)
 	{
 	    	//Writing MBS 01 pattern registers for comparison mode   
-	    	
-	                                                                                                                                  
-        rc_num = l_var_data_buffer_64.setDoubleWord(0,l_var);  if (rc_num){ FAPI_ERR( "cfg_mcb_dgen:");rc.setEcmdError(rc_num);return rc;}rc = fapiPutScom(i_target_centaur, MBS_MCBIST01_MBS_MCBFD0Q_0x02011681, l_data_buffer_64); if(rc) return rc;
-        rc_num = l_var1_data_buffer_64.setDoubleWord(0,l_var1); if (rc_num){ FAPI_ERR( "cfg_mcb_dgen:");rc.setEcmdError(rc_num);return rc;}rc = fapiPutScom(i_target_centaur, MBS_MCBIST01_MBS_MCBFD1Q_0x02011682, l_data_buffer_64); if(rc) return rc;
-        rc_num = l_var_data_buffer_64.setDoubleWord(0,l_var);  if (rc_num){ FAPI_ERR( "cfg_mcb_dgen:");rc.setEcmdError(rc_num);return rc;}rc = fapiPutScom(i_target_centaur, MBS_MCBIST01_MBS_MCBFD2Q_0x02011683, l_data_buffer_64); if(rc) return rc;
-    	rc_num = l_var1_data_buffer_64.setDoubleWord(0,l_var1); if (rc_num){ FAPI_ERR( "cfg_mcb_dgen:");rc.setEcmdError(rc_num);return rc;}rc = fapiPutScom(i_target_centaur, MBS_MCBIST01_MBS_MCBFD3Q_0x02011684, l_data_buffer_64); if(rc) return rc; 
-	    rc_num = l_var_data_buffer_64.setDoubleWord(0,l_var);  if (rc_num){ FAPI_ERR( "cfg_mcb_dgen:");rc.setEcmdError(rc_num);return rc;}rc = fapiPutScom(i_target_centaur, MBS_MCBIST01_MBS_MCBFD4Q_0x02011685, l_data_buffer_64); if(rc) return rc; 
-	    rc_num = l_var1_data_buffer_64.setDoubleWord(0,l_var1); if (rc_num){ FAPI_ERR( "cfg_mcb_dgen:");rc.setEcmdError(rc_num);return rc;}rc = fapiPutScom(i_target_centaur, MBS_MCBIST01_MBS_MCBFD5Q_0x02011686, l_data_buffer_64); if(rc) return rc; 
-	    rc_num = l_var_data_buffer_64.setDoubleWord(0,l_var);  if (rc_num){ FAPI_ERR( "cfg_mcb_dgen:");rc.setEcmdError(rc_num);return rc;}rc = fapiPutScom(i_target_centaur, MBS_MCBIST01_MBS_MCBFD6Q_0x02011687, l_data_buffer_64); if(rc) return rc;	
-	    rc_num = l_var1_data_buffer_64.setDoubleWord(0,l_var1); if (rc_num){ FAPI_ERR( "cfg_mcb_dgen:");rc.setEcmdError(rc_num);return rc;}rc = fapiPutScom(i_target_centaur, MBS_MCBIST01_MBS_MCBFD7Q_0x02011688, l_data_buffer_64); if(rc) return rc; 
-	    rc_num = l_spare_data_buffer_64.setDoubleWord(0,l_spare);if (rc_num){ FAPI_ERR( "cfg_mcb_dgen:");rc.setEcmdError(rc_num);return rc;}rc = fapiPutScom(i_target_centaur, MBS_MCBIST01_MBS_MCBFDQ_0x02011689,  l_data_buffer_64); if(rc) return rc; 
-	    rc_num = l_spare_data_buffer_64.setDoubleWord(0,l_spare);if (rc_num){ FAPI_ERR( "cfg_mcb_dgen:");rc.setEcmdError(rc_num);return rc;}rc = fapiPutScom(i_target_centaur, MBS_MCBIST01_MBS_MCBFDSPQ_0x0201168A,l_data_buffer_64); if(rc) return rc; 
+	    
+    rc_num = l_var_data_buffer_64.setDoubleWord(0,l_var);  if (rc_num){ FAPI_ERR( "cfg_mcb_dgen:");rc.setEcmdError(rc_num);return rc;}		
+	rc_num = l_var1_data_buffer_64.setDoubleWord(0,l_var1); if (rc_num){ FAPI_ERR( "cfg_mcb_dgen:");rc.setEcmdError(rc_num);return rc;}  
+    rc_num = l_spare_data_buffer_64.setDoubleWord(0,l_spare);if (rc_num){ FAPI_ERR( "cfg_mcb_dgen:");rc.setEcmdError(rc_num);return rc;}	
+	
+        rc = fapiPutScom(i_target_centaur, MBS_MCBIST01_MBS_MCBFD0Q_0x02011681, l_var_data_buffer_64); if(rc) return rc;
+        rc = fapiPutScom(i_target_centaur, MBS_MCBIST01_MBS_MCBFD1Q_0x02011682, l_var1_data_buffer_64); if(rc) return rc;
+        rc = fapiPutScom(i_target_centaur, MBS_MCBIST01_MBS_MCBFD2Q_0x02011683, l_var_data_buffer_64); if(rc) return rc;
+    	rc = fapiPutScom(i_target_centaur, MBS_MCBIST01_MBS_MCBFD3Q_0x02011684, l_var1_data_buffer_64); if(rc) return rc; 
+	    rc = fapiPutScom(i_target_centaur, MBS_MCBIST01_MBS_MCBFD4Q_0x02011685, l_var_data_buffer_64); if(rc) return rc; 
+	    rc = fapiPutScom(i_target_centaur, MBS_MCBIST01_MBS_MCBFD5Q_0x02011686, l_var1_data_buffer_64); if(rc) return rc; 
+	    rc = fapiPutScom(i_target_centaur, MBS_MCBIST01_MBS_MCBFD6Q_0x02011687, l_var_data_buffer_64); if(rc) return rc;	
+	    rc = fapiPutScom(i_target_centaur, MBS_MCBIST01_MBS_MCBFD7Q_0x02011688, l_var1_data_buffer_64); if(rc) return rc; 
+	    rc = fapiPutScom(i_target_centaur, MBS_MCBIST01_MBS_MCBFDQ_0x02011689,  l_spare_data_buffer_64); if(rc) return rc; 
+	    rc = fapiPutScom(i_target_centaur, MBS_MCBIST01_MBS_MCBFDSPQ_0x0201168A,l_spare_data_buffer_64); if(rc) return rc; 
                                                                                                                                                                             
 	}
 	else if (l_mbaPosition == 1)
 	{
 	    	//Writing MBS 23 pattern registers for comparison mode   
-	                                                                                                                                
-	    rc_num = l_var_data_buffer_64.setDoubleWord(0,l_var);  if (rc_num){ FAPI_ERR( "cfg_mcb_dgen:");rc.setEcmdError(rc_num);return rc;}rc = fapiPutScom(i_target_centaur, MBS_MCBIST23_MBS_MCBFD0Q_0x02011781, l_data_buffer_64); if(rc) return rc;
-	    rc_num = l_var1_data_buffer_64.setDoubleWord(0,l_var1); if (rc_num){ FAPI_ERR( "cfg_mcb_dgen:");rc.setEcmdError(rc_num);return rc;}rc = fapiPutScom(i_target_centaur, MBS_MCBIST23_MBS_MCBFD1Q_0x02011782, l_data_buffer_64); if(rc) return rc;
-	    rc_num = l_var_data_buffer_64.setDoubleWord(0,l_var);  if (rc_num){ FAPI_ERR( "cfg_mcb_dgen:");rc.setEcmdError(rc_num);return rc;}rc = fapiPutScom(i_target_centaur, MBS_MCBIST23_MBS_MCBFD2Q_0x02011783, l_data_buffer_64); if(rc) return rc;
-	    rc_num = l_var1_data_buffer_64.setDoubleWord(0,l_var1); if (rc_num){ FAPI_ERR( "cfg_mcb_dgen:");rc.setEcmdError(rc_num);return rc;}rc = fapiPutScom(i_target_centaur, MBS_MCBIST23_MBS_MCBFD3Q_0x02011784, l_data_buffer_64); if(rc) return rc; 
-	    rc_num = l_var_data_buffer_64.setDoubleWord(0,l_var);  if (rc_num){ FAPI_ERR( "cfg_mcb_dgen:");rc.setEcmdError(rc_num);return rc;}rc = fapiPutScom(i_target_centaur, MBS_MCBIST23_MBS_MCBFD4Q_0x02011785, l_data_buffer_64); if(rc) return rc;  
-	    rc_num = l_var1_data_buffer_64.setDoubleWord(0,l_var1); if (rc_num){ FAPI_ERR( "cfg_mcb_dgen:");rc.setEcmdError(rc_num);return rc;}rc = fapiPutScom(i_target_centaur, MBS_MCBIST23_MBS_MCBFD5Q_0x02011786, l_data_buffer_64); if(rc) return rc; 
-	    rc_num = l_var_data_buffer_64.setDoubleWord(0,l_var);  if (rc_num){ FAPI_ERR( "cfg_mcb_dgen:");rc.setEcmdError(rc_num);return rc;}rc = fapiPutScom(i_target_centaur, MBS_MCBIST23_MBS_MCBFD6Q_0x02011787, l_data_buffer_64); if(rc) return rc;   
-  	    rc_num = l_var1_data_buffer_64.setDoubleWord(0,l_var1); if (rc_num){ FAPI_ERR( "cfg_mcb_dgen:");rc.setEcmdError(rc_num);return rc;}rc = fapiPutScom(i_target_centaur, MBS_MCBIST23_MBS_MCBFD7Q_0x02011788, l_data_buffer_64); if(rc) return rc; 
-	    rc_num = l_spare_data_buffer_64.setDoubleWord(0,l_spare);if (rc_num){ FAPI_ERR( "cfg_mcb_dgen:");rc.setEcmdError(rc_num);return rc;}rc = fapiPutScom(i_target_centaur, MBS_MCBIST23_MBS_MCBFDQ_0x02011789,  l_data_buffer_64); if(rc) return rc; 
-	    rc_num = l_spare_data_buffer_64.setDoubleWord(0,l_spare);    if (rc_num){ FAPI_ERR( "cfg_mcb_dgen:");rc.setEcmdError(rc_num);return rc;}rc = fapiPutScom(i_target_centaur, MBS_MCBIST23_MBS_MCBFDSPQ_0x0201178A,l_data_buffer_64); if(rc) return rc; 
+	    rc_num = l_var_data_buffer_64.setDoubleWord(0,l_var);  if (rc_num){ FAPI_ERR( "cfg_mcb_dgen:");rc.setEcmdError(rc_num);return rc;}                                                                                                                            
+	    rc_num = l_var1_data_buffer_64.setDoubleWord(0,l_var1); if (rc_num){ FAPI_ERR( "cfg_mcb_dgen:");rc.setEcmdError(rc_num);return rc;}
+		rc_num = l_spare_data_buffer_64.setDoubleWord(0,l_spare);if (rc_num){ FAPI_ERR( "cfg_mcb_dgen:");rc.setEcmdError(rc_num);return rc;}
+		
+		rc = fapiPutScom(i_target_centaur, MBS_MCBIST23_MBS_MCBFD0Q_0x02011781, l_var_data_buffer_64); if(rc) return rc;
+	    rc = fapiPutScom(i_target_centaur, MBS_MCBIST23_MBS_MCBFD1Q_0x02011782, l_var1_data_buffer_64); if(rc) return rc;
+	    rc = fapiPutScom(i_target_centaur, MBS_MCBIST23_MBS_MCBFD2Q_0x02011783, l_var_data_buffer_64); if(rc) return rc;
+	    rc = fapiPutScom(i_target_centaur, MBS_MCBIST23_MBS_MCBFD3Q_0x02011784, l_var1_data_buffer_64); if(rc) return rc; 
+	    rc = fapiPutScom(i_target_centaur, MBS_MCBIST23_MBS_MCBFD4Q_0x02011785, l_var_data_buffer_64); if(rc) return rc;  
+	    rc = fapiPutScom(i_target_centaur, MBS_MCBIST23_MBS_MCBFD5Q_0x02011786, l_var1_data_buffer_64); if(rc) return rc; 
+	    rc = fapiPutScom(i_target_centaur, MBS_MCBIST23_MBS_MCBFD6Q_0x02011787, l_var_data_buffer_64); if(rc) return rc;   
+  	    rc = fapiPutScom(i_target_centaur, MBS_MCBIST23_MBS_MCBFD7Q_0x02011788, l_var1_data_buffer_64); if(rc) return rc; 
+	    rc = fapiPutScom(i_target_centaur, MBS_MCBIST23_MBS_MCBFDQ_0x02011789,  l_spare_data_buffer_64); if(rc) return rc; 
+	    rc = fapiPutScom(i_target_centaur, MBS_MCBIST23_MBS_MCBFDSPQ_0x0201178A,l_spare_data_buffer_64); if(rc) return rc; 
                                                                                                                                                                               
 	}
     }
@@ -373,34 +399,42 @@ fapi::ReturnCode  cfg_mcb_dgen(const fapi::Target & i_target_mba,mcbist_data_gen
 	if (l_mbaPosition == 0)
 	{
 	    	//Writing MBS 01 pattern registers for comparison mod
-                                                                                                                                             
-		rc_num = l_var_data_buffer_64.setDoubleWord(0,l_var);  if (rc_num){ FAPI_ERR( "cfg_mcb_dgen:");rc.setEcmdError(rc_num);return rc;}rc = fapiPutScom(i_target_centaur, MBS_MCBIST01_MBS_MCBFD0Q_0x02011681, l_data_buffer_64); if(rc) return rc; 
-		rc_num = l_var_data_buffer_64.setDoubleWord(0,l_var);  if (rc_num){ FAPI_ERR( "cfg_mcb_dgen:");rc.setEcmdError(rc_num);return rc;}rc = fapiPutScom(i_target_centaur, MBS_MCBIST01_MBS_MCBFD1Q_0x02011682, l_data_buffer_64); if(rc) return rc; 
-		rc_num = l_var1_data_buffer_64.setDoubleWord(0,l_var1); if (rc_num){ FAPI_ERR( "cfg_mcb_dgen:");rc.setEcmdError(rc_num);return rc;}rc = fapiPutScom(i_target_centaur, MBS_MCBIST01_MBS_MCBFD2Q_0x02011683, l_data_buffer_64); if(rc) return rc; 
-		rc_num = l_var1_data_buffer_64.setDoubleWord(0,l_var1);  if (rc_num){ FAPI_ERR( "cfg_mcb_dgen:");rc.setEcmdError(rc_num);return rc;}rc = fapiPutScom(i_target_centaur, MBS_MCBIST01_MBS_MCBFD3Q_0x02011684, l_data_buffer_64); if(rc) return rc; 
-		rc_num = l_var_data_buffer_64.setDoubleWord(0,l_var);   if (rc_num){ FAPI_ERR( "cfg_mcb_dgen:");rc.setEcmdError(rc_num);return rc;}rc = fapiPutScom(i_target_centaur, MBS_MCBIST01_MBS_MCBFD4Q_0x02011685, l_data_buffer_64); if(rc) return rc; 
-		rc_num = l_var_data_buffer_64.setDoubleWord(0,l_var);   if (rc_num){ FAPI_ERR( "cfg_mcb_dgen:");rc.setEcmdError(rc_num);return rc;}rc = fapiPutScom(i_target_centaur, MBS_MCBIST01_MBS_MCBFD5Q_0x02011686, l_data_buffer_64); if(rc) return rc; 
-		rc_num = l_var1_data_buffer_64.setDoubleWord(0,l_var1); 	if (rc_num){ FAPI_ERR( "cfg_mcb_dgen:");rc.setEcmdError(rc_num);return rc;}rc = fapiPutScom(i_target_centaur, MBS_MCBIST01_MBS_MCBFD6Q_0x02011687, l_data_buffer_64); if(rc) return rc; 
-		rc_num = l_var1_data_buffer_64.setDoubleWord(0,l_var1);  if (rc_num){ FAPI_ERR( "cfg_mcb_dgen:");rc.setEcmdError(rc_num);return rc;}rc = fapiPutScom(i_target_centaur, MBS_MCBIST01_MBS_MCBFD7Q_0x02011688, l_data_buffer_64); if(rc) return rc; 
-		rc_num = l_spare_data_buffer_64.setDoubleWord(0,l_spare); if (rc_num){ FAPI_ERR( "cfg_mcb_dgen:");rc.setEcmdError(rc_num);return rc;}rc = fapiPutScom(i_target_centaur, MBS_MCBIST01_MBS_MCBFDQ_0x02011689,  l_data_buffer_64); if(rc) return rc; 
-		rc_num = l_spare_data_buffer_64.setDoubleWord(0,l_spare);     if (rc_num){ FAPI_ERR( "cfg_mcb_dgen:");rc.setEcmdError(rc_num);return rc;}rc = fapiPutScom(i_target_centaur, MBS_MCBIST01_MBS_MCBFDSPQ_0x0201168A,l_data_buffer_64); if(rc) return rc;  	
-    	}
+     rc_num = l_var_data_buffer_64.setDoubleWord(0,l_var);  if (rc_num){ FAPI_ERR( "cfg_mcb_dgen:");rc.setEcmdError(rc_num);return rc;}		
+	rc_num = l_var1_data_buffer_64.setDoubleWord(0,l_var1); if (rc_num){ FAPI_ERR( "cfg_mcb_dgen:");rc.setEcmdError(rc_num);return rc;}  
+    rc_num = l_spare_data_buffer_64.setDoubleWord(0,l_spare);if (rc_num){ FAPI_ERR( "cfg_mcb_dgen:");rc.setEcmdError(rc_num);return rc;}	
+	
+        rc = fapiPutScom(i_target_centaur, MBS_MCBIST01_MBS_MCBFD0Q_0x02011681, l_var_data_buffer_64); if(rc) return rc;
+        rc = fapiPutScom(i_target_centaur, MBS_MCBIST01_MBS_MCBFD1Q_0x02011682, l_var_data_buffer_64); if(rc) return rc;
+        rc = fapiPutScom(i_target_centaur, MBS_MCBIST01_MBS_MCBFD2Q_0x02011683, l_var1_data_buffer_64); if(rc) return rc;
+    	rc = fapiPutScom(i_target_centaur, MBS_MCBIST01_MBS_MCBFD3Q_0x02011684, l_var1_data_buffer_64); if(rc) return rc; 
+	    rc = fapiPutScom(i_target_centaur, MBS_MCBIST01_MBS_MCBFD4Q_0x02011685, l_var_data_buffer_64); if(rc) return rc; 
+	    rc = fapiPutScom(i_target_centaur, MBS_MCBIST01_MBS_MCBFD5Q_0x02011686, l_var_data_buffer_64); if(rc) return rc; 
+	    rc = fapiPutScom(i_target_centaur, MBS_MCBIST01_MBS_MCBFD6Q_0x02011687, l_var1_data_buffer_64); if(rc) return rc;	
+	    rc = fapiPutScom(i_target_centaur, MBS_MCBIST01_MBS_MCBFD7Q_0x02011688, l_var1_data_buffer_64); if(rc) return rc; 
+	    rc = fapiPutScom(i_target_centaur, MBS_MCBIST01_MBS_MCBFDQ_0x02011689,  l_spare_data_buffer_64); if(rc) return rc; 
+	    rc = fapiPutScom(i_target_centaur, MBS_MCBIST01_MBS_MCBFDSPQ_0x0201168A,l_spare_data_buffer_64); if(rc) return rc;                                                                                                                                          
+		
+    }
     	else if (l_mbaPosition == 1)
     	{
 	    	//Writing MBS 23 pattern registers for comparison mod
       
+	  rc_num = l_var_data_buffer_64.setDoubleWord(0,l_var);  if (rc_num){ FAPI_ERR( "cfg_mcb_dgen:");rc.setEcmdError(rc_num);return rc;}                                                                                                                            
+	    rc_num = l_var1_data_buffer_64.setDoubleWord(0,l_var1); if (rc_num){ FAPI_ERR( "cfg_mcb_dgen:");rc.setEcmdError(rc_num);return rc;}
+		rc_num = l_spare_data_buffer_64.setDoubleWord(0,l_spare);if (rc_num){ FAPI_ERR( "cfg_mcb_dgen:");rc.setEcmdError(rc_num);return rc;}
+		
+		rc = fapiPutScom(i_target_centaur, MBS_MCBIST23_MBS_MCBFD0Q_0x02011781, l_var_data_buffer_64); if(rc) return rc;
+	    rc = fapiPutScom(i_target_centaur, MBS_MCBIST23_MBS_MCBFD1Q_0x02011782, l_var_data_buffer_64); if(rc) return rc;
+	    rc = fapiPutScom(i_target_centaur, MBS_MCBIST23_MBS_MCBFD2Q_0x02011783, l_var1_data_buffer_64); if(rc) return rc;
+	    rc = fapiPutScom(i_target_centaur, MBS_MCBIST23_MBS_MCBFD3Q_0x02011784, l_var1_data_buffer_64); if(rc) return rc; 
+	    rc = fapiPutScom(i_target_centaur, MBS_MCBIST23_MBS_MCBFD4Q_0x02011785, l_var_data_buffer_64); if(rc) return rc;  
+	    rc = fapiPutScom(i_target_centaur, MBS_MCBIST23_MBS_MCBFD5Q_0x02011786, l_var_data_buffer_64); if(rc) return rc; 
+	    rc = fapiPutScom(i_target_centaur, MBS_MCBIST23_MBS_MCBFD6Q_0x02011787, l_var1_data_buffer_64); if(rc) return rc;   
+  	    rc = fapiPutScom(i_target_centaur, MBS_MCBIST23_MBS_MCBFD7Q_0x02011788, l_var1_data_buffer_64); if(rc) return rc; 
+	    rc = fapiPutScom(i_target_centaur, MBS_MCBIST23_MBS_MCBFDQ_0x02011789,  l_spare_data_buffer_64); if(rc) return rc; 
+	    rc = fapiPutScom(i_target_centaur, MBS_MCBIST23_MBS_MCBFDSPQ_0x0201178A,l_spare_data_buffer_64); if(rc) return rc;
 		                                                                                                                                       
-		rc_num = l_var_data_buffer_64.setDoubleWord(0,l_var);   if (rc_num){ FAPI_ERR( "cfg_mcb_dgen:");rc.setEcmdError(rc_num);return rc;}rc = fapiPutScom(i_target_centaur, MBS_MCBIST23_MBS_MCBFD0Q_0x02011781, l_data_buffer_64); if(rc) return rc;  
-		rc_num = l_var_data_buffer_64.setDoubleWord(0,l_var);   if (rc_num){ FAPI_ERR( "cfg_mcb_dgen:");rc.setEcmdError(rc_num);return rc;}rc = fapiPutScom(i_target_centaur, MBS_MCBIST23_MBS_MCBFD1Q_0x02011782, l_data_buffer_64); if(rc) return rc;  
-		rc_num = l_var1_data_buffer_64.setDoubleWord(0,l_var1);  if (rc_num){ FAPI_ERR( "cfg_mcb_dgen:");rc.setEcmdError(rc_num);return rc;}rc = fapiPutScom(i_target_centaur, MBS_MCBIST23_MBS_MCBFD2Q_0x02011783, l_data_buffer_64); if(rc) return rc;  
-		rc_num = l_var1_data_buffer_64.setDoubleWord(0,l_var1);  if (rc_num){ FAPI_ERR( "cfg_mcb_dgen:");rc.setEcmdError(rc_num);return rc;}rc = fapiPutScom(i_target_centaur, MBS_MCBIST23_MBS_MCBFD3Q_0x02011784, l_data_buffer_64); if(rc) return rc;  
-		rc_num = l_var_data_buffer_64.setDoubleWord(0,l_var);   if (rc_num){ FAPI_ERR( "cfg_mcb_dgen:");rc.setEcmdError(rc_num);return rc;}rc = fapiPutScom(i_target_centaur, MBS_MCBIST23_MBS_MCBFD4Q_0x02011785, l_data_buffer_64); if(rc) return rc;  
-		rc_num = l_var_data_buffer_64.setDoubleWord(0,l_var);   if (rc_num){ FAPI_ERR( "cfg_mcb_dgen:");rc.setEcmdError(rc_num);return rc;}rc = fapiPutScom(i_target_centaur, MBS_MCBIST23_MBS_MCBFD5Q_0x02011786, l_data_buffer_64); if(rc) return rc;  
-		rc_num = l_var1_data_buffer_64.setDoubleWord(0,l_var1);  if (rc_num){ FAPI_ERR( "cfg_mcb_dgen:");rc.setEcmdError(rc_num);return rc;}rc = fapiPutScom(i_target_centaur, MBS_MCBIST23_MBS_MCBFD6Q_0x02011787, l_data_buffer_64); if(rc) return rc;  
-		rc_num = l_var1_data_buffer_64.setDoubleWord(0,l_var1);  if (rc_num){ FAPI_ERR( "cfg_mcb_dgen:");rc.setEcmdError(rc_num);return rc;}rc = fapiPutScom(i_target_centaur, MBS_MCBIST23_MBS_MCBFD7Q_0x02011788, l_data_buffer_64); if(rc) return rc;  
-		rc_num = l_spare_data_buffer_64.setDoubleWord(0,l_spare); if (rc_num){ FAPI_ERR( "cfg_mcb_dgen:");rc.setEcmdError(rc_num);return rc;}rc = fapiPutScom(i_target_centaur, MBS_MCBIST23_MBS_MCBFDQ_0x02011789,  l_data_buffer_64); if(rc) return rc;  
-		rc_num = l_spare_data_buffer_64.setDoubleWord(0,l_spare); if (rc_num){ FAPI_ERR( "cfg_mcb_dgen:");rc.setEcmdError(rc_num);return rc;}rc = fapiPutScom(i_target_centaur, MBS_MCBIST23_MBS_MCBFDSPQ_0x0201178A,l_data_buffer_64); if(rc) return rc;       
-
+		
 
         }
     }
@@ -413,33 +447,40 @@ fapi::ReturnCode  cfg_mcb_dgen(const fapi::Target & i_target_mba,mcbist_data_gen
          if (l_mbaPosition == 0)
 	 {
 	    	//Writing MBS 01 pattern registers for comparison mod
-        rc_num = l_var_data_buffer_64.setDoubleWord(0,l_var);  if (rc_num){ FAPI_ERR( "cfg_mcb_dgen:");rc.setEcmdError(rc_num);return rc;}rc = fapiPutScom(i_target_mba, MBS_MCBIST01_MBS_MCBFD0Q_0x02011681, l_data_buffer_64); if(rc) return rc;  
-		rc_num = l_var1_data_buffer_64.setDoubleWord(0,l_var1); if (rc_num){ FAPI_ERR( "cfg_mcb_dgen:");rc.setEcmdError(rc_num);return rc;}rc = fapiPutScom(i_target_mba, MBS_MCBIST01_MBS_MCBFD1Q_0x02011682, l_data_buffer_64); if(rc) return rc;  
-		rc_num = l_var_data_buffer_64.setDoubleWord(0,l_var);  if (rc_num){ FAPI_ERR( "cfg_mcb_dgen:");rc.setEcmdError(rc_num);return rc;}rc = fapiPutScom(i_target_mba, MBS_MCBIST01_MBS_MCBFD2Q_0x02011683, l_data_buffer_64); if(rc) return rc;  
-		rc_num = l_var1_data_buffer_64.setDoubleWord(0,l_var1); if (rc_num){ FAPI_ERR( "cfg_mcb_dgen:");rc.setEcmdError(rc_num);return rc;}rc = fapiPutScom(i_target_mba, MBS_MCBIST01_MBS_MCBFD3Q_0x02011684, l_data_buffer_64);  if(rc) return rc;     
-		rc_num = l_var_data_buffer_64.setDoubleWord(0,l_var);  if (rc_num){ FAPI_ERR( "cfg_mcb_dgen:");rc.setEcmdError(rc_num);return rc;}rc = fapiPutScom(i_target_mba, MBS_MCBIST01_MBS_MCBFD4Q_0x02011685, l_data_buffer_64); if(rc) return rc;      
-		rc_num = l_var1_data_buffer_64.setDoubleWord(0,l_var1); if (rc_num){ FAPI_ERR( "cfg_mcb_dgen:");rc.setEcmdError(rc_num);return rc;}rc = fapiPutScom(i_target_mba, MBS_MCBIST01_MBS_MCBFD5Q_0x02011686, l_data_buffer_64);  if(rc) return rc;     
-		rc_num = l_var_data_buffer_64.setDoubleWord(0,l_var);  if (rc_num){ FAPI_ERR( "cfg_mcb_dgen:");rc.setEcmdError(rc_num);return rc;}rc = fapiPutScom(i_target_mba, MBS_MCBIST01_MBS_MCBFD6Q_0x02011687, l_data_buffer_64); if(rc) return rc;      
-		rc_num = l_var1_data_buffer_64.setDoubleWord(0,l_var1); if (rc_num){ FAPI_ERR( "cfg_mcb_dgen:");rc.setEcmdError(rc_num);return rc;}rc = fapiPutScom(i_target_mba, MBS_MCBIST01_MBS_MCBFD7Q_0x02011688, l_data_buffer_64); if(rc) return rc;      
-		rc_num = l_spare_data_buffer_64.setDoubleWord(0,l_spare);if (rc_num){ FAPI_ERR( "cfg_mcb_dgen:");rc.setEcmdError(rc_num);return rc;}rc = fapiPutScom(i_target_mba, MBS_MCBIST01_MBS_MCBFDQ_0x02011689,  l_data_buffer_64);  if(rc) return rc;     
-		rc_num = l_spare_data_buffer_64.setDoubleWord(0,l_spare);    if (rc_num){ FAPI_ERR( "cfg_mcb_dgen:");rc.setEcmdError(rc_num);return rc;}rc = fapiPutScom(i_target_mba,MBS_MCBIST01_MBS_MCBFDSPQ_0x0201168A, l_data_buffer_64); if(rc) return rc;   
-         }
+	rc_num = l_var_data_buffer_64.setDoubleWord(0,l_var);  if (rc_num){ FAPI_ERR( "cfg_mcb_dgen:");rc.setEcmdError(rc_num);return rc;}		
+	rc_num = l_var1_data_buffer_64.setDoubleWord(0,l_var1); if (rc_num){ FAPI_ERR( "cfg_mcb_dgen:");rc.setEcmdError(rc_num);return rc;}  
+    rc_num = l_spare_data_buffer_64.setDoubleWord(0,l_spare);if (rc_num){ FAPI_ERR( "cfg_mcb_dgen:");rc.setEcmdError(rc_num);return rc;}	
+	
+        rc = fapiPutScom(i_target_centaur, MBS_MCBIST01_MBS_MCBFD0Q_0x02011681, l_var_data_buffer_64); if(rc) return rc;
+        rc = fapiPutScom(i_target_centaur, MBS_MCBIST01_MBS_MCBFD1Q_0x02011682, l_var1_data_buffer_64); if(rc) return rc;
+        rc = fapiPutScom(i_target_centaur, MBS_MCBIST01_MBS_MCBFD2Q_0x02011683, l_var_data_buffer_64); if(rc) return rc;
+    	rc = fapiPutScom(i_target_centaur, MBS_MCBIST01_MBS_MCBFD3Q_0x02011684, l_var1_data_buffer_64); if(rc) return rc; 
+	    rc = fapiPutScom(i_target_centaur, MBS_MCBIST01_MBS_MCBFD4Q_0x02011685, l_var_data_buffer_64); if(rc) return rc; 
+	    rc = fapiPutScom(i_target_centaur, MBS_MCBIST01_MBS_MCBFD5Q_0x02011686, l_var1_data_buffer_64); if(rc) return rc; 
+	    rc = fapiPutScom(i_target_centaur, MBS_MCBIST01_MBS_MCBFD6Q_0x02011687, l_var_data_buffer_64); if(rc) return rc;	
+	    rc = fapiPutScom(i_target_centaur, MBS_MCBIST01_MBS_MCBFD7Q_0x02011688, l_var1_data_buffer_64); if(rc) return rc; 
+	    rc = fapiPutScom(i_target_centaur, MBS_MCBIST01_MBS_MCBFDQ_0x02011689,  l_spare_data_buffer_64); if(rc) return rc; 
+	    rc = fapiPutScom(i_target_centaur, MBS_MCBIST01_MBS_MCBFDSPQ_0x0201168A,l_spare_data_buffer_64); if(rc) return rc; 
+     }
     	 else if (l_mbaPosition == 1)
     	 {
 	    	//Writing MBS 23 pattern registers for comparison mod
         	                                                                                                                                                                           	 
-		                                                                                                                                        
-		rc_num = l_var_data_buffer_64.setDoubleWord(0,l_var);  if (rc_num){ FAPI_ERR( "cfg_mcb_dgen:");rc.setEcmdError(rc_num);return rc;}rc = fapiPutScom(i_target_mba, MBS_MCBIST23_MBS_MCBFD0Q_0x02011781, l_data_buffer_64); if(rc) return rc;      
-		rc_num = l_var1_data_buffer_64.setDoubleWord(0,l_var1); if (rc_num){ FAPI_ERR( "cfg_mcb_dgen:");rc.setEcmdError(rc_num);return rc;}rc = fapiPutScom(i_target_mba, MBS_MCBIST23_MBS_MCBFD1Q_0x02011782, l_data_buffer_64); if(rc) return rc;      
-		rc_num = l_var_data_buffer_64.setDoubleWord(0,l_var);  if (rc_num){ FAPI_ERR( "cfg_mcb_dgen:");rc.setEcmdError(rc_num);return rc;}rc = fapiPutScom(i_target_mba, MBS_MCBIST23_MBS_MCBFD2Q_0x02011783, l_data_buffer_64); if(rc) return rc;      
-		rc_num = l_var1_data_buffer_64.setDoubleWord(0,l_var1); if (rc_num){ FAPI_ERR( "cfg_mcb_dgen:");rc.setEcmdError(rc_num);return rc;}rc = fapiPutScom(i_target_mba, MBS_MCBIST23_MBS_MCBFD3Q_0x02011784, l_data_buffer_64); if(rc) return rc;      
-		rc_num = l_var_data_buffer_64.setDoubleWord(0,l_var);  if (rc_num){ FAPI_ERR( "cfg_mcb_dgen:");rc.setEcmdError(rc_num);return rc;}rc = fapiPutScom(i_target_mba, MBS_MCBIST23_MBS_MCBFD4Q_0x02011785, l_data_buffer_64); if(rc) return rc;      
-		rc_num = l_var1_data_buffer_64.setDoubleWord(0,l_var1); if (rc_num){ FAPI_ERR( "cfg_mcb_dgen:");rc.setEcmdError(rc_num);return rc;}rc = fapiPutScom(i_target_mba, MBS_MCBIST23_MBS_MCBFD5Q_0x02011786, l_data_buffer_64); if(rc) return rc;      
-		rc_num = l_var_data_buffer_64.setDoubleWord(0,l_var);  if (rc_num){ FAPI_ERR( "cfg_mcb_dgen:");rc.setEcmdError(rc_num);return rc;}rc = fapiPutScom(i_target_mba, MBS_MCBIST23_MBS_MCBFD6Q_0x02011787, l_data_buffer_64); if(rc) return rc;      
-		rc_num = l_var1_data_buffer_64.setDoubleWord(0,l_var1); if (rc_num){ FAPI_ERR( "cfg_mcb_dgen:");rc.setEcmdError(rc_num);return rc;}rc = fapiPutScom(i_target_mba, MBS_MCBIST23_MBS_MCBFD7Q_0x02011788, l_data_buffer_64); if(rc) return rc;      
-		rc_num = l_spare_data_buffer_64.setDoubleWord(0,l_spare);if (rc_num){ FAPI_ERR( "cfg_mcb_dgen:");rc.setEcmdError(rc_num);return rc;}rc = fapiPutScom(i_target_mba, MBS_MCBIST23_MBS_MCBFDQ_0x02011789,  l_data_buffer_64); if(rc) return rc;      
-		rc_num = l_spare_data_buffer_64.setDoubleWord(0,l_spare);    if (rc_num){ FAPI_ERR( "cfg_mcb_dgen:");rc.setEcmdError(rc_num);return rc;}rc = fapiPutScom(i_target_mba, MBS_MCBIST23_MBS_MCBFDSPQ_0x0201178A,l_data_buffer_64); if(rc) return rc;      
-                                                                                                                                                                           	   			
+		rc_num = l_var_data_buffer_64.setDoubleWord(0,l_var);  if (rc_num){ FAPI_ERR( "cfg_mcb_dgen:");rc.setEcmdError(rc_num);return rc;}                                                                                                                            
+	    rc_num = l_var1_data_buffer_64.setDoubleWord(0,l_var1); if (rc_num){ FAPI_ERR( "cfg_mcb_dgen:");rc.setEcmdError(rc_num);return rc;}
+		rc_num = l_spare_data_buffer_64.setDoubleWord(0,l_spare);if (rc_num){ FAPI_ERR( "cfg_mcb_dgen:");rc.setEcmdError(rc_num);return rc;}
+		
+		rc = fapiPutScom(i_target_centaur, MBS_MCBIST23_MBS_MCBFD0Q_0x02011781, l_var_data_buffer_64); if(rc) return rc;
+	    rc = fapiPutScom(i_target_centaur, MBS_MCBIST23_MBS_MCBFD1Q_0x02011782, l_var1_data_buffer_64); if(rc) return rc;
+	    rc = fapiPutScom(i_target_centaur, MBS_MCBIST23_MBS_MCBFD2Q_0x02011783, l_var_data_buffer_64); if(rc) return rc;
+	    rc = fapiPutScom(i_target_centaur, MBS_MCBIST23_MBS_MCBFD3Q_0x02011784, l_var1_data_buffer_64); if(rc) return rc; 
+	    rc = fapiPutScom(i_target_centaur, MBS_MCBIST23_MBS_MCBFD4Q_0x02011785, l_var_data_buffer_64); if(rc) return rc;  
+	    rc = fapiPutScom(i_target_centaur, MBS_MCBIST23_MBS_MCBFD5Q_0x02011786, l_var1_data_buffer_64); if(rc) return rc; 
+	    rc = fapiPutScom(i_target_centaur, MBS_MCBIST23_MBS_MCBFD6Q_0x02011787, l_var_data_buffer_64); if(rc) return rc;   
+  	    rc = fapiPutScom(i_target_centaur, MBS_MCBIST23_MBS_MCBFD7Q_0x02011788, l_var1_data_buffer_64); if(rc) return rc; 
+	    rc = fapiPutScom(i_target_centaur, MBS_MCBIST23_MBS_MCBFDQ_0x02011789,  l_spare_data_buffer_64); if(rc) return rc; 
+	    rc = fapiPutScom(i_target_centaur, MBS_MCBIST23_MBS_MCBFDSPQ_0x0201178A,l_spare_data_buffer_64); if(rc) return rc;                                                                                                                                        
+		                                                                                                                                                                 	   			
          }
     }
     else if((i_datamode == DATA_GEN_DELTA_I) || (i_datamode == MCBIST_2D_CUP_PAT0))
@@ -451,37 +492,43 @@ fapi::ReturnCode  cfg_mcb_dgen(const fapi::Target & i_target_mba,mcbist_data_gen
 		if (l_mbaPosition == 0)
 		{
 	    	//Writing MBS 01 pattern registers for comparison mod
-        		
+        	rc_num = l_var_data_buffer_64.setDoubleWord(0,l_var);  if (rc_num){ FAPI_ERR( "cfg_mcb_dgen:");rc.setEcmdError(rc_num);return rc;}		
+	rc_num = l_var1_data_buffer_64.setDoubleWord(0,l_var1); if (rc_num){ FAPI_ERR( "cfg_mcb_dgen:");rc.setEcmdError(rc_num);return rc;}  
+    rc_num = l_spare_data_buffer_64.setDoubleWord(0,l_spare);if (rc_num){ FAPI_ERR( "cfg_mcb_dgen:");rc.setEcmdError(rc_num);return rc;}	
+	
+        rc = fapiPutScom(i_target_centaur, MBS_MCBIST01_MBS_MCBFD0Q_0x02011681, l_var_data_buffer_64); if(rc) return rc;
+        rc = fapiPutScom(i_target_centaur, MBS_MCBIST01_MBS_MCBFD1Q_0x02011682, l_var1_data_buffer_64); if(rc) return rc;
+        rc = fapiPutScom(i_target_centaur, MBS_MCBIST01_MBS_MCBFD2Q_0x02011683, l_var_data_buffer_64); if(rc) return rc;
+    	rc = fapiPutScom(i_target_centaur, MBS_MCBIST01_MBS_MCBFD3Q_0x02011684, l_var1_data_buffer_64); if(rc) return rc; 
+	    rc = fapiPutScom(i_target_centaur, MBS_MCBIST01_MBS_MCBFD4Q_0x02011685, l_var_data_buffer_64); if(rc) return rc; 
+	    rc = fapiPutScom(i_target_centaur, MBS_MCBIST01_MBS_MCBFD5Q_0x02011686, l_var1_data_buffer_64); if(rc) return rc; 
+	    rc = fapiPutScom(i_target_centaur, MBS_MCBIST01_MBS_MCBFD6Q_0x02011687, l_var_data_buffer_64); if(rc) return rc;	
+	    rc = fapiPutScom(i_target_centaur, MBS_MCBIST01_MBS_MCBFD7Q_0x02011688, l_var1_data_buffer_64); if(rc) return rc; 
+	    rc = fapiPutScom(i_target_centaur, MBS_MCBIST01_MBS_MCBFDQ_0x02011689,  l_spare_data_buffer_64); if(rc) return rc; 
+	    rc = fapiPutScom(i_target_centaur, MBS_MCBIST01_MBS_MCBFDSPQ_0x0201168A,l_spare_data_buffer_64); if(rc) return rc; 	
                                                                                                                                        	
-        rc_num = l_var_data_buffer_64.setDoubleWord(0,l_var);   if (rc_num){ FAPI_ERR( "cfg_mcb_dgen:");rc.setEcmdError(rc_num);return rc;}rc = fapiPutScom(i_target_centaur, MBS_MCBIST01_MBS_MCBFD0Q_0x02011681, l_data_buffer_64); if(rc) return rc;
-        rc_num = l_var1_data_buffer_64.setDoubleWord(0,l_var1);  if (rc_num){ FAPI_ERR( "cfg_mcb_dgen:");rc.setEcmdError(rc_num);return rc;}rc = fapiPutScom(i_target_centaur, MBS_MCBIST01_MBS_MCBFD1Q_0x02011682, l_data_buffer_64); if(rc) return rc;
-        rc_num = l_var_data_buffer_64.setDoubleWord(0,l_var);   if (rc_num){ FAPI_ERR( "cfg_mcb_dgen:");rc.setEcmdError(rc_num);return rc;}rc = fapiPutScom(i_target_centaur, MBS_MCBIST01_MBS_MCBFD2Q_0x02011683, l_data_buffer_64); if(rc) return rc;
-		rc_num = l_var1_data_buffer_64.setDoubleWord(0,l_var1);  if (rc_num){ FAPI_ERR( "cfg_mcb_dgen:");rc.setEcmdError(rc_num);return rc;}rc = fapiPutScom(i_target_centaur, MBS_MCBIST01_MBS_MCBFD3Q_0x02011684, l_data_buffer_64); if(rc) return rc;   
-		rc_num = l_var_data_buffer_64.setDoubleWord(0,l_var);   if (rc_num){ FAPI_ERR( "cfg_mcb_dgen:");rc.setEcmdError(rc_num);return rc;}rc = fapiPutScom(i_target_centaur, MBS_MCBIST01_MBS_MCBFD4Q_0x02011685, l_data_buffer_64); if(rc) return rc;   
-		rc_num = l_var1_data_buffer_64.setDoubleWord(0,l_var1);  if (rc_num){ FAPI_ERR( "cfg_mcb_dgen:");rc.setEcmdError(rc_num);return rc;}rc = fapiPutScom(i_target_centaur, MBS_MCBIST01_MBS_MCBFD5Q_0x02011686, l_data_buffer_64); if(rc) return rc;   
-		rc_num = l_var_data_buffer_64.setDoubleWord(0,l_var);   if (rc_num){ FAPI_ERR( "cfg_mcb_dgen:");rc.setEcmdError(rc_num);return rc;}rc = fapiPutScom(i_target_centaur, MBS_MCBIST01_MBS_MCBFD6Q_0x02011687, l_data_buffer_64); if(rc) return rc;   
-		rc_num = l_var1_data_buffer_64.setDoubleWord(0,l_var1);  if (rc_num){ FAPI_ERR( "cfg_mcb_dgen:");rc.setEcmdError(rc_num);return rc;}rc = fapiPutScom(i_target_centaur, MBS_MCBIST01_MBS_MCBFD7Q_0x02011688, l_data_buffer_64); if(rc) return rc;   
-		rc_num = l_spare_data_buffer_64.setDoubleWord(0,l_spare); if (rc_num){ FAPI_ERR( "cfg_mcb_dgen:");rc.setEcmdError(rc_num);return rc;}rc = fapiPutScom(i_target_centaur, MBS_MCBIST01_MBS_MCBFDQ_0x02011689,  l_data_buffer_64); if(rc) return rc;   
-		rc_num = l_spare_data_buffer_64.setDoubleWord(0,l_spare);     if (rc_num){ FAPI_ERR( "cfg_mcb_dgen:");rc.setEcmdError(rc_num);return rc;}rc = fapiPutScom(i_target_centaur, MBS_MCBIST01_MBS_MCBFDSPQ_0x0201168A,l_data_buffer_64); if(rc) return rc;   
-                                                                                                                                                                          	
+                                                                                                                                                                      	
 	
     	}
     	else if (l_mbaPosition == 1)
     	{
 	    	//Writing MBS 23 pattern registers for comparison mod
-        	                                                                                                                                                                    	         
+        	 rc_num = l_var_data_buffer_64.setDoubleWord(0,l_var);  if (rc_num){ FAPI_ERR( "cfg_mcb_dgen:");rc.setEcmdError(rc_num);return rc;}		
+	rc_num = l_var1_data_buffer_64.setDoubleWord(0,l_var1); if (rc_num){ FAPI_ERR( "cfg_mcb_dgen:");rc.setEcmdError(rc_num);return rc;}  
+    rc_num = l_spare_data_buffer_64.setDoubleWord(0,l_spare);if (rc_num){ FAPI_ERR( "cfg_mcb_dgen:");rc.setEcmdError(rc_num);return rc;}	
+	
+        rc = fapiPutScom(i_target_centaur, MBS_MCBIST01_MBS_MCBFD0Q_0x02011681, l_var_data_buffer_64); if(rc) return rc;
+        rc = fapiPutScom(i_target_centaur, MBS_MCBIST01_MBS_MCBFD1Q_0x02011682, l_var1_data_buffer_64); if(rc) return rc;
+        rc = fapiPutScom(i_target_centaur, MBS_MCBIST01_MBS_MCBFD2Q_0x02011683, l_var_data_buffer_64); if(rc) return rc;
+    	rc = fapiPutScom(i_target_centaur, MBS_MCBIST01_MBS_MCBFD3Q_0x02011684, l_var1_data_buffer_64); if(rc) return rc; 
+	    rc = fapiPutScom(i_target_centaur, MBS_MCBIST01_MBS_MCBFD4Q_0x02011685, l_var_data_buffer_64); if(rc) return rc; 
+	    rc = fapiPutScom(i_target_centaur, MBS_MCBIST01_MBS_MCBFD5Q_0x02011686, l_var1_data_buffer_64); if(rc) return rc; 
+	    rc = fapiPutScom(i_target_centaur, MBS_MCBIST01_MBS_MCBFD6Q_0x02011687, l_var_data_buffer_64); if(rc) return rc;	
+	    rc = fapiPutScom(i_target_centaur, MBS_MCBIST01_MBS_MCBFD7Q_0x02011688, l_var1_data_buffer_64); if(rc) return rc; 
+	    rc = fapiPutScom(i_target_centaur, MBS_MCBIST01_MBS_MCBFDQ_0x02011689,  l_spare_data_buffer_64); if(rc) return rc; 
+	    rc = fapiPutScom(i_target_centaur, MBS_MCBIST01_MBS_MCBFDSPQ_0x0201168A,l_spare_data_buffer_64); if(rc) return rc; 	                                                                                                                                                                    	         
 	                                                                                                                               	     
-		rc_num = l_var_data_buffer_64.setDoubleWord(0,l_var);    if (rc_num){ FAPI_ERR( "cfg_mcb_dgen:");rc.setEcmdError(rc_num);return rc;}rc = fapiPutScom(i_target_centaur, MBS_MCBIST23_MBS_MCBFD0Q_0x02011781, l_data_buffer_64); if(rc) return rc;
-		rc_num = l_var1_data_buffer_64.setDoubleWord(0,l_var1);   if (rc_num){ FAPI_ERR( "cfg_mcb_dgen:");rc.setEcmdError(rc_num);return rc;}rc = fapiPutScom(i_target_centaur, MBS_MCBIST23_MBS_MCBFD1Q_0x02011782, l_data_buffer_64); if(rc) return rc;
-		rc_num = l_var_data_buffer_64.setDoubleWord(0,l_var);    if (rc_num){ FAPI_ERR( "cfg_mcb_dgen:");rc.setEcmdError(rc_num);return rc;}rc = fapiPutScom(i_target_centaur, MBS_MCBIST23_MBS_MCBFD2Q_0x02011783, l_data_buffer_64); if(rc) return rc;
-		rc_num = l_var1_data_buffer_64.setDoubleWord(0,l_var1);   if (rc_num){ FAPI_ERR( "cfg_mcb_dgen:");rc.setEcmdError(rc_num);return rc;}rc = fapiPutScom(i_target_centaur, MBS_MCBIST23_MBS_MCBFD3Q_0x02011784, l_data_buffer_64); if(rc) return rc; 
-		rc_num = l_var_data_buffer_64.setDoubleWord(0,l_var);    if (rc_num){ FAPI_ERR( "cfg_mcb_dgen:");rc.setEcmdError(rc_num);return rc;}rc = fapiPutScom(i_target_centaur, MBS_MCBIST23_MBS_MCBFD4Q_0x02011785, l_data_buffer_64); if(rc) return rc; 
-		rc_num = l_var1_data_buffer_64.setDoubleWord(0,l_var1);   if (rc_num){ FAPI_ERR( "cfg_mcb_dgen:");rc.setEcmdError(rc_num);return rc;}rc = fapiPutScom(i_target_centaur, MBS_MCBIST23_MBS_MCBFD5Q_0x02011786, l_data_buffer_64); if(rc) return rc; 
-		rc_num = l_var_data_buffer_64.setDoubleWord(0,l_var);    if (rc_num){ FAPI_ERR( "cfg_mcb_dgen:");rc.setEcmdError(rc_num);return rc;}rc = fapiPutScom(i_target_centaur, MBS_MCBIST23_MBS_MCBFD6Q_0x02011787, l_data_buffer_64); if(rc) return rc; 
-		rc_num = l_var1_data_buffer_64.setDoubleWord(0,l_var1);   if (rc_num){ FAPI_ERR( "cfg_mcb_dgen:");rc.setEcmdError(rc_num);return rc;}rc = fapiPutScom(i_target_centaur, MBS_MCBIST23_MBS_MCBFD7Q_0x02011788, l_data_buffer_64); if(rc) return rc; 
-		rc_num = l_spare_data_buffer_64.setDoubleWord(0,l_spare);  if (rc_num){ FAPI_ERR( "cfg_mcb_dgen:");rc.setEcmdError(rc_num);return rc;}rc = fapiPutScom(i_target_centaur, MBS_MCBIST23_MBS_MCBFDQ_0x02011789,  l_data_buffer_64); if(rc) return rc; 
-		rc_num = l_spare_data_buffer_64.setDoubleWord(0,l_spare);      if (rc_num){ FAPI_ERR( "cfg_mcb_dgen:");rc.setEcmdError(rc_num);return rc;}rc = fapiPutScom(i_target_centaur, MBS_MCBIST23_MBS_MCBFDSPQ_0x0201178A,l_data_buffer_64); if(rc) return rc; 
-
+		
     	}
     }
 	

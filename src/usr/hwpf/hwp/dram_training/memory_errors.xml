@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- IBM CONFIDENTIAL                                                       -->
 <!--                                                                        -->
-<!-- COPYRIGHT International Business Machines Corp. 2012                   -->
+<!-- COPYRIGHT International Business Machines Corp. 2012,2013              -->
 <!--                                                                        -->
 <!-- p1                                                                     -->
 <!--                                                                        -->
@@ -213,92 +213,403 @@
 
   <hwpError>
     <rc>RC_MSS_MAINT_START_NOT_RESET</rc>
-    <description>MCMCCQ[0]: maint_cmd_start not reset by hw.</description>
+    <description>MBMCCQ[0]: maint_cmd_start not reset by hw.</description>
+    <!-- FFDC: Capture register we are checking -->    
+    <ffdc>MBMCC</ffdc>
+    <!-- FFDC: Capture command type we are trying to run -->        
+    <ffdc>CMD_TYPE</ffdc>    
+    <!-- FFDC: MBMCT[0:4] contains the cmd type set in hw -->
+    <ffdc>MBMCT</ffdc>                
+    <!-- Callout MBA HIGH -->
+    <callout><target>MBA</target><priority>HIGH</priority></callout>
+    <!-- Deconfigure MBA -->
+    <deconfigure><target>MBA</target></deconfigure>
+    <!-- Create GARD record for MASTER_CHIP -->    
+    <gard><target>MBA</target></gard>    
 </hwpError>
 
   <hwpError>
     <rc>RC_MSS_MAINT_STOP_NOT_RESET</rc>
-    <description>MCMCCQ[1]: maint_cmd_stop not reset by hw.</description>
+    <description>MBMCCQ[1]: maint_cmd_stop not reset by hw.</description>
+    <!-- FFDC: Capture register we are checking -->    
+    <ffdc>MBMCC</ffdc>
+    <!-- FFDC: Capture command type we are trying to run -->        
+    <ffdc>CMD_TYPE</ffdc>        
+    <!-- FFDC: MBMCT[0:4] contains the cmd type previously run -->
+    <ffdc>MBMCT</ffdc>                
+    <!-- Callout MBA HIGH -->
+    <callout><target>MBA</target><priority>HIGH</priority></callout>
+    <!-- Deconfigure MBA -->
+    <deconfigure><target>MBA</target></deconfigure>
+    <!-- Create GARD record for MASTER_CHIP -->    
+    <gard><target>MBA</target></gard>    
 </hwpError>
 
   <hwpError>
     <rc>RC_MSS_MAINT_CMD_IN_PROGRESS</rc>
     <description>MBMSRQ[0]: Can't start new cmd if previous cmd still in progress.</description>
+    <!-- FFDC: Capture register we are checking -->    
+    <ffdc>MBMSR</ffdc>
+    <!-- FFDC: Capture command type we are trying to run -->        
+    <ffdc>CMD_TYPE</ffdc>        
+    <!-- FFDC: MBMCT[0:4] contains the cmd type previously run -->
+    <ffdc>MBMCT</ffdc>                
+    <!-- TODO: Callout FW HIGH -->
+    <!-- Callout MBA LOW -->
+    <callout><target>MBA</target><priority>LOW</priority></callout>
+    <!-- Deconfigure MBA -->
+    <deconfigure><target>MBA</target></deconfigure>
+    <!-- Create GARD record for MASTER_CHIP -->    
+    <gard><target>MBA</target></gard>        
 </hwpError>
 
   <hwpError>
     <rc>RC_MSS_MAINT_NO_MEM_CNFG</rc>
     <description>MBAXCRn[0:3] = 0, meaning no memory configured behind this MBA.</description>
+    <!-- FFDC: MBA target -->    
+    <ffdc>MBA</ffdc>
+    <!-- FFDC: Capture register we are checking -->    
+    <ffdc>MBAXCR</ffdc>
+    <!-- TODO: Callout FW HIGH -->
 </hwpError>
 
   <hwpError>
     <rc>RC_MSS_MAINT_CCS_MUX_NOT_MAINLINE</rc>
     <description>CCS_MODEQ[29] = 1, meaning mux set for CCS instead of mainline.</description>
+    <!-- FFDC: MBA target -->    
+    <ffdc>MBA</ffdc>
+    <!-- FFDC: Capture register we are checking -->    
+    <ffdc>CCS_MODE</ffdc>
+    <!-- FFDC: Capture command type we are trying to run -->        
+    <ffdc>CMD_TYPE</ffdc>        
+    <!-- TODO: Callout FW HIGH -->
 </hwpError>
 
   <hwpError>
     <rc>RC_MSS_MAINT_ECC_DISABLED</rc>
     <description>MBSECC[0] non zero, meaning ECC check/correct disabled.</description>
+    <!-- FFDC: MBA target -->    
+    <ffdc>MBA</ffdc>
+    <!-- FFDC: Capture register we are checking -->    
+    <ffdc>MBSECC</ffdc>
+    <!-- FFDC: Capture command type we are trying to run -->        
+    <ffdc>CMD_TYPE</ffdc>        
+    <!-- TODO: Callout FW HIGH -->
 </hwpError>
 
   <hwpError>
     <rc>RC_MSS_MAINT_INVALID_CMD</rc>
     <description>MBAFIRQ[0], invalid_maint_cmd.</description>
+    <!-- FFDC: MBA target -->    
+    <ffdc>MBA</ffdc>
+    <!-- FFDC: Capture register we are checking -->    
+    <ffdc>MBAFIR</ffdc>
+    <!-- FFDC: Capture command type we are trying to run -->        
+    <ffdc>CMD_TYPE</ffdc>        
+    <!-- FFDC: MBMCT[0:4] contains the cmd type set in hw -->
+    <ffdc>MBMCT</ffdc>                
+    <!-- TODO: Callout FW HIGH -->
 </hwpError>
 
   <hwpError>
     <rc>RC_MSS_MAINT_INVALID_ADDR</rc>
     <description>MBAFIRQ[1], cmd started with invalid_maint_address.</description>
+    <!-- FFDC: MBA target -->    
+    <ffdc>MBA</ffdc>
+    <!-- FFDC: Capture register we are checking -->    
+    <ffdc>MBAFIR</ffdc>
+    <!-- FFDC: Capture command type we are trying to run -->        
+    <ffdc>CMD_TYPE</ffdc>        
+    <!-- FFDC: MBMCT[0:4] contains the cmd type set in hw -->
+    <ffdc>MBMCT</ffdc>                
+    <!-- Collect registers as FFDC -->
+    <collectRegisterFfdc>
+      <id>REG_FFDC_INVALID_ADDR</id>
+      <target>MBA</target>
+    </collectRegisterFfdc>
+    <!-- TODO: Callout FW HIGH -->    
 </hwpError>
+
+<registerFfdc>
+  <id>REG_FFDC_INVALID_ADDR</id>
+  <scomRegister>MBA01_MBMACAQ_0x0301060D</scomRegister>
+  <scomRegister>MBA01_MBMEAQ_0x0301060E</scomRegister>
+  <scomRegister>MBA01_MBA_MCBERRPTQ_0x030106e7</scomRegister>
+</registerFfdc>
+
 
   <hwpError>
     <rc>RC_MSS_MAINT_CMD_TIMEOUT</rc>
     <description>Maint cmd timeout.</description>
+    <!-- FFDC: Capture command type we are trying to run -->        
+    <ffdc>CMD_TYPE</ffdc>        
+    <!-- Collect MBA registers as FFDC -->
+    <collectRegisterFfdc>
+      <id>REG_FFDC_CMD_TIMEOUT_MBA_REGS</id>
+      <target>MBA</target>
+    </collectRegisterFfdc>
+    <!-- Collect MBS registers as FFDC -->
+    <collectRegisterFfdc>
+      <id>REG_FFDC_CMD_TIMEOUT_MBS_REGS</id>
+      <target>CENTAUR</target>
+    </collectRegisterFfdc>
+    <!-- TODO: Callout FW HIGH -->
+    <!-- Callout MBA LOW -->
+    <callout><target>MBA</target><priority>LOW</priority></callout>
+    <!-- Deconfigure MBA -->
+    <deconfigure><target>MBA</target></deconfigure>
+    <!-- Create GARD record for MASTER_CHIP -->    
+    <gard><target>MBA</target></gard>        
+</hwpError>
+
+<registerFfdc>
+  <id>REG_FFDC_CMD_TIMEOUT_MBA_REGS</id>
+  <!-- MBA Maintenance Command Type Register -->    
+  <scomRegister>MBA01_MBMCTQ_0x0301060A</scomRegister>
+  <!-- MBA Maintenance Command Control Register -->
+  <scomRegister>MBA01_MBMCCQ_0x0301060B</scomRegister>
+  <!-- MBA Maintenance Command Status Register -->
+  <scomRegister>MBA01_MBMSRQ_0x0301060C</scomRegister>
+  <!-- MBA Maintenance Command Address Register -->
+  <scomRegister>MBA01_MBMACAQ_0x0301060D</scomRegister>
+  <!-- MBA Maintenance Command End Address Register -->
+  <scomRegister>MBA01_MBMEAQ_0x0301060E</scomRegister>
+  <!-- MBA Memory Scrub/Read Control Register -->
+  <scomRegister>MBA01_MBASCTLQ_0x0301060F</scomRegister>
+  <!-- MBA Error Control Register -->
+  <scomRegister>MBA01_MBECTLQ_0x03010610</scomRegister>
+
+  <!-- MBA Special Attention Registers -->    
+  <scomRegister>MBA01_MBSPAQ_0x03010611</scomRegister>
+  <scomRegister>MBA01_MBSPAMSKQ_0x03010614</scomRegister>
+
+  <!-- MBA Fault Isolation Registers -->  
+  <scomRegister>MBA01_MBAFIRQ_0x03010600</scomRegister>  
+  <scomRegister>MBA01_MBAFIRMASK_0x03010603</scomRegister>  
+  <scomRegister>MBA01_MBAFIRACT0_0x03010606</scomRegister>  
+  <scomRegister>MBA01_MBAFIRACT1_0x03010607</scomRegister>  
+  <!-- MBA Error Report Register -->  
+  <scomRegister>MBA01_MBA_MCBERRPTQ_0x030106e7</scomRegister>  
+
+  <!-- MBA CAL FIR Registers -->  
+  <scomRegister>MBA01_MBACALFIR_0x03010400</scomRegister>  
+  <scomRegister>MBA01_MBACALFIR_MASK_0x03010403</scomRegister>  
+  <scomRegister>MBA01_MBACALFIR_ACTION0_0x03010406</scomRegister>  
+  <scomRegister>MBA01_MBACALFIR_ACTION1_0x03010407</scomRegister>  
+  <!-- MBA Error report register -->  
+  <scomRegister>MBA01_MBA_ERR_REPORTQ_0x0301041A</scomRegister>  
+</registerFfdc>
+
+<registerFfdc>
+  <id>REG_FFDC_CMD_TIMEOUT_MBS_REGS</id>
+  <!-- MBS ECC0 Decoder FIR Registers -->
+  <scomRegister>MBS_ECC0_MBECCFIR_0x02011440</scomRegister>
+  <scomRegister>MBS_ECC0_MBECCFIR_MASK_0x02011443</scomRegister>
+  <scomRegister>MBS_ECC0_MBECCFIR_ACTION0_0x02011446</scomRegister>
+  <scomRegister>MBS_ECC0_MBECCFIR_ACTION1_0x02011447</scomRegister>
+
+  <!-- MBS ECC1 Decoder FIR Registers -->
+  <scomRegister>MBS_ECC1_MBECCFIR_0x02011480</scomRegister>
+  <scomRegister>MBS_ECC1_MBECCFIR_MASK_0x02011483</scomRegister>
+  <scomRegister>MBS_ECC1_MBECCFIR_ACTION0_0x02011486</scomRegister>
+  <scomRegister>MBS_ECC1_MBECCFIR_ACTION1_0x02011487</scomRegister> 
+</registerFfdc>
+
+  <hwpError>
+    <rc>RC_MSS_MAINT_ZERO_DDR_FREQ</rc>
+    <description>ATTR_MSS_FREQ set to zero so can't calculate scrub rate.</description>
+    <!-- FFDC: MBA target -->    
+    <ffdc>MBA</ffdc>
+    <!-- FFDC: DDR_FREQ -->    
+    <ffdc>DDR_FREQ</ffdc>
+    <!-- FFDC: Capture command type we are trying to run -->        
+    <ffdc>CMD_TYPE</ffdc>        
+    <!-- TODO: Callout FW HIGH -->
 </hwpError>
 
   <hwpError>
     <rc>RC_MSS_MAINT_INVALID_DRAM_SIZE_WIDTH</rc>
     <description>Invalid dramSize or dramWidth in MBAXCRn.</description>
+    <!-- FFDC: MBA target -->    
+    <ffdc>MBA</ffdc>
+    <!-- FFDC: Capture register we are checking -->    
+    <ffdc>MBAXCR</ffdc>
+    <!-- TODO: Callout FW HIGH -->
 </hwpError>
 
   <hwpError>
     <rc>RC_MSS_MAINT_INVALID_DIMM_CNFG</rc>
     <description>MBAXCRn configured with invalid combination of configType, configSubType, slotConfig.</description>
+    <!-- FFDC: MBA target -->    
+    <ffdc>MBA</ffdc>
+    <!-- FFDC: Capture register we are checking -->    
+    <ffdc>MBAXCR</ffdc>
+    <!-- TODO: Callout FW HIGH -->
 </hwpError>
 
   <hwpError>
-    <rc>RC_MSS_MAINT_NO_X4_SYMBOL</rc>
+    <rc>RC_MSS_MAINT_X4_SYMBOL_ON_READ</rc>
     <description>Symbol mark not allowed in x4 mode.</description>
+    <!-- FFDC: MBA target -->    
+    <ffdc>MBA</ffdc>
+    <!-- FFDC: DRAM width (should be x4) -->    
+    <ffdc>DRAM_WIDTH</ffdc>
+    <!-- FFDC: RANK we are reading markstore for -->    
+    <ffdc>RANK</ffdc>
+    <!-- FFDC: Markstore with non-zero symbol entry -->    
+    <ffdc>MARKSTORE</ffdc>
+    <!-- TODO: Callout FW HIGH -->
 </hwpError>
 
   <hwpError>
     <rc>RC_MSS_MAINT_INVALID_MARKSTORE</rc>
     <description>Invalid galois field in markstore.</description>
+    <!-- FFDC: MBA target -->    
+    <ffdc>MBA</ffdc>
+    <!-- FFDC: DRAM width -->    
+    <ffdc>DRAM_WIDTH</ffdc>
+    <!-- FFDC: RANK we are reading markstore for -->    
+    <ffdc>RANK</ffdc>
+    <!-- FFDC: Markstore with invalid galois field  -->    
+    <ffdc>MARKSTORE</ffdc>
+    <!-- TODO: Callout FW HIGH -->
+</hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_MAINT_X4_SYMBOL_ON_WRITE</rc>
+    <description>Symbol mark not allowed in x4 mode.</description>
+    <!-- FFDC: MBA target -->    
+    <ffdc>MBA</ffdc>
+    <!-- FFDC: DRAM width (should be x4) -->    
+    <ffdc>DRAM_WIDTH</ffdc>
+    <!-- FFDC: RANK we are reading markstore for -->    
+    <ffdc>RANK</ffdc>
+    <!-- FFDC: Symbol mark we are trying to write to markstore -->    
+    <ffdc>SYMBOL_MARK</ffdc>
+    <!-- FFDC: Chip mark we are trying to write to markstore -->    
+    <ffdc>CHIP_MARK</ffdc>
+    <!-- TODO: Callout FW HIGH -->
 </hwpError>
 
   <hwpError>
     <rc>RC_MSS_MAINT_INVALID_SYMBOL_INDEX</rc>
     <description>Symbol index out of range.</description>
+    <!-- FFDC: MBA target -->    
+    <ffdc>MBA</ffdc>
+    <!-- FFDC: DRAM width -->    
+    <ffdc>DRAM_WIDTH</ffdc>
+    <!-- FFDC: RANK we are reading markstore for -->    
+    <ffdc>RANK</ffdc>
+    <!-- FFDC: Symbol mark we are trying to write to markstore -->    
+    <ffdc>SYMBOL_MARK</ffdc>
+    <!-- FFDC: Chip mark we are trying to write to markstore -->    
+    <ffdc>CHIP_MARK</ffdc>
+    <!-- TODO: Callout FW HIGH -->
 </hwpError>
 
   <hwpError>
     <rc>RC_MSS_MAINT_INVALID_CHIP_INDEX</rc>
     <description>Not first symbol index of a chip.</description>
+    <!-- FFDC: MBA target -->    
+    <ffdc>MBA</ffdc>
+    <!-- FFDC: DRAM width -->    
+    <ffdc>DRAM_WIDTH</ffdc>
+    <!-- FFDC: RANK we are reading markstore for -->    
+    <ffdc>RANK</ffdc>
+    <!-- FFDC: Symbol mark we are trying to write to markstore -->    
+    <ffdc>SYMBOL_MARK</ffdc>
+    <!-- FFDC: Chip mark we are trying to write to markstore -->    
+    <ffdc>CHIP_MARK</ffdc>
+    <!-- TODO: Callout FW HIGH -->
 </hwpError>
 
   <hwpError>
     <rc>RC_MSS_MAINT_MARKSTORE_WRITE_BLOCKED</rc>
     <description>Markstore write may have been blocked due to MPE FIR set.</description>
+    <!-- FFDC: MBA target -->    
+    <ffdc>MBA</ffdc>
+    <!-- FFDC: DRAM width -->    
+    <ffdc>DRAM_WIDTH</ffdc>
+    <!-- FFDC: RANK we are reading markstore for -->    
+    <ffdc>RANK</ffdc>
+    <!-- FFDC: Symbol mark we are trying to write to markstore -->    
+    <ffdc>SYMBOL_MARK</ffdc>
+    <!-- FFDC: Chip mark we are trying to write to markstore -->    
+    <ffdc>CHIP_MARK</ffdc>
+    <!-- FFDC: MBECCFIR showing MPE -->    
+    <ffdc>MBECCFIR</ffdc>
+</hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_MAINT_INVALID_STEER_MUX</rc>
+    <description>Steer mux index out of range</description>
+    <!-- FFDC: MBA target -->    
+    <ffdc>MBA</ffdc>
+    <!-- FFDC: DRAM width -->    
+    <ffdc>DRAM_WIDTH</ffdc>
+    <!-- FFDC: RANK we are reading steer mux for -->    
+    <ffdc>RANK</ffdc>
+    <!-- FFDC: MUX_TYPE: read or write -->    
+    <ffdc>MUX_TYPE</ffdc>
+    <!-- FFDC: Capture steer mux -->    
+    <ffdc>STEER_MUX</ffdc>
+    <!-- TODO: Callout FW HIGH -->    
 </hwpError>
 
   <hwpError>
     <rc>RC_MSS_MAINT_INVALID_SYMBOL_TO_STEER</rc>
     <description>Trying to steer invalid symbol.</description>
+    <!-- FFDC: MBA target -->    
+    <ffdc>MBA</ffdc>
+    <!-- FFDC: DRAM width -->    
+    <ffdc>DRAM_WIDTH</ffdc>
+    <!-- FFDC: RANK we are reading steer mux for -->    
+    <ffdc>RANK</ffdc>
+    <!-- FFDC: MUX_TYPE: read or write -->    
+    <ffdc>MUX_TYPE</ffdc>
+    <!-- FFDC: STEER_TYPE: port0, port1, or ecc spare -->    
+    <ffdc>STEER_TYPE</ffdc>
+    <!-- FFDC: SYMBOL: Symbol we are trying to steer -->    
+    <ffdc>SYMBOL</ffdc>
+    <!-- TODO: Callout FW HIGH -->    
 </hwpError>
 
   <hwpError>
     <rc>RC_MSS_MAINT_NO_X8_ECC_SPARE</rc>
     <description>Invalid to use ECC spare in x8 mode.</description>
+    <!-- FFDC: MBA target -->    
+    <ffdc>MBA</ffdc>
+    <!-- FFDC: DRAM width -->    
+    <ffdc>DRAM_WIDTH</ffdc>
+    <!-- FFDC: RANK we are reading steer mux for -->    
+    <ffdc>RANK</ffdc>
+    <!-- FFDC: MUX_TYPE: read or write -->    
+    <ffdc>MUX_TYPE</ffdc>
+    <!-- FFDC: STEER_TYPE: port0, port1, or ecc spare -->    
+    <ffdc>STEER_TYPE</ffdc>
+    <!-- FFDC: SYMBOL: Symbol we are trying to steer -->    
+    <ffdc>SYMBOL</ffdc>
+    <!-- TODO: Callout FW HIGH -->    
+</hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_MAINT_NO_UE_TRAP</rc>
+    <description>IPL UE trapping didn't work.</description>
+    <!-- FFDC: Capture UE trap contents -->
+    <ffdc>UE_TRAP0</ffdc>
+    <ffdc>UE_TRAP1</ffdc>
+    <!-- FFDC: MBMCT[0:4] contains the cmd type -->
+    <ffdc>MBMCT</ffdc>        
+    <!-- FFDC: MBMMR[4:7] contains the pattern index -->
+    <ffdc>MBMMR</ffdc>        
+    <!-- FFDC: MBSTR[59]: UE trap enable bit -->
+    <ffdc>MBSTR</ffdc>        
+    <!-- Callout MBA HIGH -->
+    <callout><target>MBA</target><priority>HIGH</priority></callout>
+    <!-- Deconfigure MBA -->
+    <deconfigure><target>MBA</target></deconfigure>
+    <!-- Create GARD record for MASTER_CHIP -->    
+    <gard><target>MBA</target></gard>    
 </hwpError>
 
   <hwpError>
@@ -411,21 +722,42 @@
   <hwpError>
     <rc>RC_MSS_DIMM_POWER_CURVE_DATA_LAB</rc>
     <description>DIMM power curve data is lab data not MSL</description>
+    <ffdc>FFDC_DATA_1</ffdc>	
+    <ffdc>FFDC_DATA_2</ffdc>	
+    <ffdc>FFDC_DATA_3</ffdc>	
+    <ffdc>FFDC_DATA_4</ffdc>	
+    <callout><target>MEM_CHIP</target><priority>HIGH</priority></callout>
 </hwpError>
 
   <hwpError>
     <rc>RC_MSS_DIMM_POWER_CURVE_DATA_INVALID</rc>
     <description>DIMM power curve data is invalid</description>
+    <ffdc>FFDC_DATA_1</ffdc>	
+    <ffdc>FFDC_DATA_2</ffdc>	
+    <ffdc>FFDC_DATA_3</ffdc>	
+    <ffdc>FFDC_DATA_4</ffdc>	
+    <callout><target>MEM_CHIP</target><priority>HIGH</priority></callout>
 </hwpError>
 
   <hwpError>
     <rc>RC_MSS_DIMM_NOT_FOUND_IN_POWER_TABLE</rc>
     <description>Unable to find matching entry in DIMM power table</description>
+    <ffdc>FFDC_DATA_1</ffdc>	
+    <ffdc>FFDC_DATA_2</ffdc>	
+    <ffdc>FFDC_DATA_3</ffdc>	
+    <callout><target>MEM_DIMM</target><priority>HIGH</priority></callout>
 </hwpError>
 
   <hwpError>
     <rc>RC_MSS_NOT_ENOUGH_AVAILABLE_DIMM_POWER</rc>
-    <description>Unable to find throttle setting that has DIMM power underneath the limit</description>
+    <description>Unable to find throttle setting that has DIMM power underneath the limit.  Callout Firmware.</description>
+    <ffdc>MEM_CHIP</ffdc>	
+    <ffdc>FFDC_DATA_1</ffdc>	
+    <ffdc>FFDC_DATA_2</ffdc>
+    <ffdc>FFDC_DATA_3</ffdc>
+    <ffdc>FFDC_DATA_4</ffdc>
+    <ffdc>FFDC_DATA_5</ffdc>
+    <!-- TODO:  callout firmware -->
 </hwpError>
 
 <hwpError>

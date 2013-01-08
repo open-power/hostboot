@@ -1,4 +1,4 @@
-#-- $Id: mbs_def.initfile,v 1.23 2012/10/23 14:29:41 yctschan Exp $
+#-- $Id: mbs_def.initfile,v 1.24 2012/12/18 23:26:51 yctschan Exp $
 #-- CHANGE HISTORY:
 #--------------------------------------------------------------------------------
 #-- Version:|Author: | Date:  | Comment:
@@ -82,9 +82,9 @@ define def_has_spare    =   (SYS.ATTR_IS_SIMULATION==0) ;
 #define def_ATTR_EFF_IBM_TYPE = 1;
 #define def_ATTR_EFF_NUM_DROPS_PER_PORT = 1;
 #define  def_ATTR_EFF_DRAM_2N_MODE = 0;
-#define def_ATTR_EFF_IBM_TYPE           = (SYS.ATTR_IS_SIMULATION==0) ;   # will evaluate to false
-#define def_ATTR_EFF_NUM_DROPS_PER_PORT = (SYS.ATTR_IS_SIMULATION==0) ;   # will evaluate to false
-define def_ATTR_EFF_DRAM_2N_MODE       = (SYS.ATTR_IS_SIMULATION==0) ;   # will evaluate to false
+#define def_ATTR_EFF_IBM_TYPE           = (SYS.CENTAUR.ATTR_MSS_FREQ == 1400) ;   # will evaluate to false
+#define def_ATTR_EFF_NUM_DROPS_PER_PORT = (SYS.CENTAUR.ATTR_MSS_FREQ == 1400) ;   # will evaluate to false
+define def_ATTR_EFF_DRAM_2N_MODE       = (CENTAUR.ATTR_MSS_FREQ == 1400) ;   # will evaluate to false
 
 define def_mba01_nomem        =  ((MBA0.ATTR_EFF_DIMM_RANKS_CONFIGED[0][0] == 0b00000000) && (MBA0.ATTR_EFF_DIMM_RANKS_CONFIGED[0][1] == 0b00000000));
 define def_mba23_nomem        =  ((MBA1.ATTR_EFF_DIMM_RANKS_CONFIGED[1][0] == 0b00000000) && (MBA1.ATTR_EFF_DIMM_RANKS_CONFIGED[1][1] == 0b00000000));
@@ -101,15 +101,15 @@ define def_mba01_1b_2socket        = (((((MBA0.ATTR_EFF_IBM_TYPE[0][0] == 2 ))) 
 ## 1C 1 and 2 sockets not supported
 #define def_mba01_1c_1socket   = 0;
 #define def_mba01_1c_2socket   = 0;
-define def_mba01_1c_1socket        = (SYS.ATTR_IS_SIMULATION==0) ;   # will evaluate to false
-define def_mba01_1c_2socket        = (SYS.ATTR_IS_SIMULATION==0) ;   # will evaluate to false
+define def_mba01_1c_1socket        = (ATTR_MSS_FREQ == 1400) ;   # will evaluate to false
+define def_mba01_1c_2socket        = (ATTR_MSS_FREQ == 1400) ;   # will evaluate to false
 define def_mba01_1c_cdimm          = ((((MBA0.ATTR_CHIP_UNIT_POS == 1 ) && (MBA0.ATTR_EFF_IBM_TYPE[1][0] == 3 )) || ((MBA0.ATTR_EFF_IBM_TYPE[0][0] == 3 ))) && (MBA0.ATTR_EFF_NUM_DROPS_PER_PORT == 2) && (MBA0.ATTR_EFF_DIMM_TYPE == 0));  # same as type1B 2 socket RDIMM cfg for DDR3/4
 
 ## Current they is no 1D IBM type in the attribute
 #define def_mba01_1d_1socket       = 0;
 #define def_mba01_1d_2socket       = 0;
-define def_mba01_1d_1socket        = (SYS.ATTR_IS_SIMULATION==0) ;   # will evaluate to false
-define def_mba01_1d_2socket        = (SYS.ATTR_IS_SIMULATION==0) ;   # will evaluate to false
+define def_mba01_1d_1socket        = (ATTR_MSS_FREQ == 1400) ;   # will evaluate to false
+define def_mba01_1d_2socket        = (ATTR_MSS_FREQ == 1400) ;   # will evaluate to false
 #define def_mba01_1d_1socket       = ((((MBA0.ATTR_EFF_IBM_TYPE[0][0] == 1 ))) && (MBA0.ATTR_EFF_NUM_DROPS_PER_PORT == 1));
 #define def_mba01_1d_2socket       = ((((MBA0.ATTR_EFF_IBM_TYPE[0][0] == 1 ))) && (MBA0.ATTR_EFF_NUM_DROPS_PER_PORT == 2));
 
@@ -197,15 +197,15 @@ define def_mba23_1b_2socket        = (((((MBA1.ATTR_EFF_IBM_TYPE[1][0] == 2 ))) 
 ## 1C 1 and 2 sockets not supported
 #define def_mba23_1c_1socket   = 0;
 #define def_mba23_1c_2socket   = 0;
-define def_mba23_1c_1socket        = (SYS.ATTR_IS_SIMULATION==0) ;   # will evaluate to false
-define def_mba23_1c_2socket        = (SYS.ATTR_IS_SIMULATION==0) ;   # will evaluate to false
+define def_mba23_1c_1socket        = (ATTR_MSS_FREQ == 1400) ;   # will evaluate to false
+define def_mba23_1c_2socket        = (ATTR_MSS_FREQ == 1400) ;   # will evaluate to false
 define def_mba23_1c_cdimm          = ((((MBA1.ATTR_EFF_IBM_TYPE[1][0] == 3 ))) && (MBA1.ATTR_EFF_NUM_DROPS_PER_PORT == 2) && (MBA1.ATTR_EFF_DIMM_TYPE == 0));  # same as type1B 2 socket RDIMM cfg for DDR3/4
 
 ## Current they is no 1D IBM type in the attribute
 #define def_mba23_1d_1socket       = 0;
 #define def_mba23_1d_2socket       = 0;
-define def_mba23_1d_1socket        = (SYS.ATTR_IS_SIMULATION==0) ;   # will evaluate to false
-define def_mba23_1d_2socket        = (SYS.ATTR_IS_SIMULATION==0) ;   # will evaluate to false
+define def_mba23_1d_1socket        = (ATTR_MSS_FREQ == 1400) ;   # will evaluate to false
+define def_mba23_1d_2socket        = (ATTR_MSS_FREQ == 1400) ;   # will evaluate to false
 #define def_mba23_1d_1socket       = ((((MBA1.ATTR_EFF_IBM_TYPE[1][0] == 1 ))) && (MBA1.ATTR_EFF_NUM_DROPS_PER_PORT == 1));
 #define def_mba23_1d_2socket       = ((((MBA1.ATTR_EFF_IBM_TYPE[1][0] == 1 ))) && (MBA1.ATTR_EFF_NUM_DROPS_PER_PORT == 2));
 
@@ -295,19 +295,19 @@ define def_mba01_mtype_3c = (def_mba01_3c_1socket_ddr4||def_mba01_3c_2socket_ddr
 #define def_mba01_mtype_4b = 0; # not supported
 #define def_mba01_mtype_4c = 0; # not supported
 #define def_mba01_mtype_5a = 0; # not supported
-define def_mba01_mtype_4a = (SYS.ATTR_IS_SIMULATION==0) ;   # will evaluate to false
-define def_mba01_mtype_4b = (SYS.ATTR_IS_SIMULATION==0) ;   # will evaluate to false
-define def_mba01_mtype_4c = (SYS.ATTR_IS_SIMULATION==0) ;   # will evaluate to false
-define def_mba01_mtype_5a = (SYS.ATTR_IS_SIMULATION==0) ;   # will evaluate to false
+define def_mba01_mtype_4a = (ATTR_MSS_FREQ == 1400) ;   # will evaluate to false
+define def_mba01_mtype_4b = (ATTR_MSS_FREQ == 1400) ;   # will evaluate to false
+define def_mba01_mtype_4c = (ATTR_MSS_FREQ == 1400) ;   # will evaluate to false
+define def_mba01_mtype_5a = (ATTR_MSS_FREQ == 1400) ;   # will evaluate to false
 define def_mba01_mtype_5b = ((def_mba01_5b_1socket     )||(def_mba01_5b_2socket));
 define def_mba01_mtype_5c = ((def_mba01_5c_1socket     )||(def_mba01_5c_2socket));
 define def_mba01_mtype_5d = ((def_mba01_5d_1socket     )||(def_mba01_5d_2socket));
 #define def_mba01_mtype_6a = 0; # not supported
 #define def_mba01_mtype_6b = 0; # not supported
 #define def_mba01_mtype_6c = 0; # not supported
-define def_mba01_mtype_6a = (SYS.ATTR_IS_SIMULATION==0) ;   # will evaluate to false
-define def_mba01_mtype_6b = (SYS.ATTR_IS_SIMULATION==0) ;   # will evaluate to false
-define def_mba01_mtype_6c = (SYS.ATTR_IS_SIMULATION==0) ;   # will evaluate to false
+define def_mba01_mtype_6a = (ATTR_MSS_FREQ == 1400) ;   # will evaluate to false
+define def_mba01_mtype_6b = (ATTR_MSS_FREQ == 1400) ;   # will evaluate to false
+define def_mba01_mtype_6c = (ATTR_MSS_FREQ == 1400) ;   # will evaluate to false
 define def_mba01_mtype_7a = (def_mba01_7a_1socket     ||def_mba01_7a_2socket     ||def_mba01_7a_1socket_ddr4||def_mba01_7a_2socket_ddr4);
 define def_mba01_mtype_7b = (def_mba01_7b_1socket     ||def_mba01_7b_2socket     ||def_mba01_7b_1socket_ddr4||def_mba01_7b_2socket_ddr4);
 define def_mba01_mtype_7c = (def_mba01_7c_1socket     ||def_mba01_7c_2socket     ||def_mba01_7c_1socket_ddr4||def_mba01_7c_2socket_ddr4);
@@ -325,19 +325,19 @@ define def_mba23_mtype_3c = (def_mba23_3c_1socket_ddr4||def_mba23_3c_2socket_ddr
 #define def_mba23_mtype_4b = 0; # not supported
 #define def_mba23_mtype_4c = 0; # not supported
 #define def_mba23_mtype_5a = 0; # not supported
-define def_mba23_mtype_4a = (SYS.ATTR_IS_SIMULATION==0) ;   # will evaluate to false
-define def_mba23_mtype_4b = (SYS.ATTR_IS_SIMULATION==0) ;   # will evaluate to false
-define def_mba23_mtype_4c = (SYS.ATTR_IS_SIMULATION==0) ;   # will evaluate to false
-define def_mba23_mtype_5a = (SYS.ATTR_IS_SIMULATION==0) ;   # will evaluate to false
+define def_mba23_mtype_4a = (ATTR_MSS_FREQ == 1400) ;   # will evaluate to false
+define def_mba23_mtype_4b = (ATTR_MSS_FREQ == 1400) ;   # will evaluate to false
+define def_mba23_mtype_4c = (ATTR_MSS_FREQ == 1400) ;   # will evaluate to false
+define def_mba23_mtype_5a = (ATTR_MSS_FREQ == 1400) ;   # will evaluate to false
 define def_mba23_mtype_5b = ((def_mba23_5b_1socket     )||(def_mba23_5b_2socket));
 define def_mba23_mtype_5c = ((def_mba23_5c_1socket     )||(def_mba23_5c_2socket));
 define def_mba23_mtype_5d = ((def_mba23_5d_1socket     )||(def_mba23_5d_2socket));
 #define def_mba23_mtype_6a = 0; # not supported
 #define def_mba23_mtype_6b = 0; # not supported
 #define def_mba23_mtype_6c = 0; # not supported
-define def_mba23_mtype_6a = (SYS.ATTR_IS_SIMULATION==0) ;   # will evaluate to false
-define def_mba23_mtype_6b = (SYS.ATTR_IS_SIMULATION==0) ;   # will evaluate to false
-define def_mba23_mtype_6c = (SYS.ATTR_IS_SIMULATION==0) ;   # will evaluate to false
+define def_mba23_mtype_6a = (ATTR_MSS_FREQ == 1400) ;   # will evaluate to false
+define def_mba23_mtype_6b = (ATTR_MSS_FREQ == 1400) ;   # will evaluate to false
+define def_mba23_mtype_6c = (ATTR_MSS_FREQ == 1400) ;   # will evaluate to false
 define def_mba23_mtype_7a = (def_mba23_7a_1socket     ||def_mba23_7a_2socket     ||def_mba23_7a_1socket_ddr4||def_mba23_7a_2socket_ddr4);
 define def_mba23_mtype_7b = (def_mba23_7b_1socket     ||def_mba23_7b_2socket     ||def_mba23_7b_1socket_ddr4||def_mba23_7b_2socket_ddr4);
 define def_mba23_mtype_7c = (def_mba23_7c_1socket     ||def_mba23_7c_2socket     ||def_mba23_7c_1socket_ddr4||def_mba23_7c_2socket_ddr4);

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012                   */
+/* COPYRIGHT International Business Machines Corp. 2012,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_maint_cmds.H,v 1.14 2012/11/21 21:21:42 gollub Exp $
+// $Id: mss_maint_cmds.H,v 1.15 2012/12/19 15:48:26 gollub Exp $
 //------------------------------------------------------------------------------
 // Don't forget to create CVS comments when you check in your changes!
 //------------------------------------------------------------------------------
@@ -48,6 +48,7 @@
 //   1.12  | 11/02/12 | gollub  | Updates from review.  
 //   1.13  | 11/08/12 | gollub  | Added timebase steer cleanup      
 //   1.14  | 11/21/12 | gollub  | Updates from review.
+//   1.15  | 12/19/12 | gollub  | Added UE isolation
 
 
 #ifndef _MSS_MAINT_CMDS_H
@@ -71,6 +72,31 @@
 //------------------------------------------------------------------------------
 // Constants and enums
 //------------------------------------------------------------------------------
+
+/**
+ * @brief For index into this table, use 1st symbol index of chip mark / 4.
+ */
+static const uint8_t mss_chip_mark_to_centaurDQ[18][2]={
+    // centaurDQ  port  1st symbol index of chip mark
+    {64,          1},   // 0
+    {64,          0},   // 4
+    {56,          1},   // 8
+    {48,          1},   // 12
+    {40,          1},   // 16    
+    {32,          1},   // 20    
+    {24,          1},   // 24    
+    {16,          1},   // 28       
+    {8,           1},   // 32    
+    {0,           1},   // 36    
+    {56,          0},   // 40    
+    {48,          0},   // 44    
+    {40,          0},   // 48    
+    {32,          0},   // 52    
+    {24,          0},   // 56    
+    {16,          0},   // 60    
+    {8,           0},   // 64    
+    {0,           0}};  // 68    
+
 
 /**
  * @brief Used to get addess range of all ranks from get_address_range()
@@ -136,7 +162,7 @@ class mss_MaintCmd
         PATTERN_5       = 5,  //0x55
         PATTERN_6       = 6,  //0xCC
         PATTERN_7       = 7,  //0x33
-        PATTERN_RANDOM  = 1,  // NOTE: Using PATTERN_1 as random seed
+        PATTERN_RANDOM  = 8,  // random seed
     };
 
     /**
@@ -179,8 +205,8 @@ class mss_MaintCmd
         // Stop on mark corrected error (error on chip already marked)
         STOP_ON_MCE =                        0x0200,        
         
-        // Stop on retry CE (UE that went away on retry)
-        STOP_ON_RETRY_CE =                   0x0100,        
+        // Stop on retry CE error threshold equal (UE that went away on retry)
+        STOP_ON_RETRY_CE_ETE =               0x0100,        
         
         // Stop on mark placed error (hw placed a chip mark)
         STOP_ON_MPE =                        0x0080,        
@@ -555,6 +581,8 @@ class mss_SuperFastRead : public mss_MaintCmd
     {fapi::ReturnCode l_rc; iv_savedData = i_savedData; return l_rc; }
     
     uint32_t getSavedData() { return iv_savedData; }
+
+    fapi::ReturnCode ueTrappingSetup();
 
   private: // Class variable(s)
 
@@ -960,6 +988,23 @@ fapi::ReturnCode mss_restore_DRAM_repairs( const fapi::Target & i_target,
  */
 
 uint8_t mss_centaurDQ_to_symbol( uint8_t i_dq, uint8_t i_port );
+
+
+/**
+ * @brief  This function compares trapped actual UE data to an expected
+ *         data pattern in order to identify the bits that contributed to
+ *         a UE encountered during IPL memory diagnostics.
+ *
+ * @param  i_target                MBA target
+ * @param  i_rank                  Rank containing the UE.
+ * @param  o_bad_bits              Map of bad bits (Centaur DQ format)
+ *                                 2 ports x 10 bytes
+ *
+ * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise. 
+ */
+fapi::ReturnCode mss_IPL_UE_isolation( const fapi::Target & i_target,
+                                       uint8_t i_rank,
+                                       uint8_t (&o_bad_bits)[2][10]);
 
 
 

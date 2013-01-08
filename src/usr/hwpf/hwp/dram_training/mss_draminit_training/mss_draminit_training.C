@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012                   */
+/* COPYRIGHT International Business Machines Corp. 2012,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_draminit_training.C,v 1.43 2012/12/07 13:46:10 bellows Exp $
+// $Id: mss_draminit_training.C,v 1.46 2013/01/03 23:15:35 jdsloat Exp $
 //------------------------------------------------------------------------------
 // Don't forget to create CVS comments when you check in your changes!
 //------------------------------------------------------------------------------
@@ -28,6 +28,9 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|------------------------------------------------
+//  1.46   | jdsloat  |03-JAN-13| RM temp edits to CAL0q and CAL1q; Cleared INIT_CAL_STATUS and INIT_CAL_ERROR Regs before every subtest, edited debug messages
+//  1.45   | gollub   |21-DEC-12| Calling mss_unmask_draminit_training_errors after mss_draminit_training_cloned
+//  1.43   | jdsloat  |20-DEC-12| Temporarily disabled RTT_NOM swap
 //  1.42   | bellows  |06-DEC-12| Fixed up review comments
 //  1.41   | jdsloat  |02-DEC-12| Fixed RTT_NOM swap for Port 1
 //  1.40   | jdsloat  |30-NOV-12| Temporarily comment Bad Bit Mask.
@@ -104,6 +107,7 @@
 #include <cen_scom_addresses.H>
 #include <mss_funcs.H>
 #include <dimmBadDqBitmapFuncs.H>
+#include <mss_unmask_errors.H>
 
 //------------End My Includes-------------------------------------------
 
@@ -138,6 +142,7 @@ extern "C" {
 using namespace fapi;
 
 ReturnCode mss_draminit_training(Target& i_target);
+ReturnCode mss_draminit_training_cloned(Target& i_target);
 ReturnCode mss_check_cal_status(Target& i_target, uint8_t i_port, uint8_t i_group,  mss_draminit_training_result& io_status);
 ReturnCode mss_check_error_status(Target& i_target, uint8_t i_port, uint8_t i_group,  mss_draminit_training_result& io_status);
 ReturnCode mss_rtt_nom_rtt_wr_swap( Target& i_target, uint32_t i_port_number, uint8_t i_rank, uint32_t i_rank_pair_group, uint32_t& io_ccs_inst_cnt);
@@ -146,7 +151,28 @@ ReturnCode setC4dq2reg(const Target &i_mba, const uint8_t i_port, const uint8_t 
 ReturnCode mss_set_bbm_regs (const fapi::Target & mba_target);
 ReturnCode mss_get_bbm_regs (const fapi::Target & mba_target);
 
+
 ReturnCode mss_draminit_training(Target& i_target)
+{
+    // Target is centaur.mba
+    
+    fapi::ReturnCode l_rc;
+    
+    l_rc = mss_draminit_training_cloned(i_target);
+    
+	// If mss_unmask_draminit_training_errors gets it's own bad rc,
+	// it will commit the passed in rc (if non-zero), and return it's own bad rc.
+	// Else if mss_unmask_draminit_training_errors runs clean, 
+	// it will just return the passed in rc.
+	//l_rc = mss_unmask_draminit_training_errors(i_target, l_rc); // TODO: uncomment after this can be tested on hw
+
+	return l_rc;
+}
+
+
+
+
+ReturnCode mss_draminit_training_cloned(Target& i_target)
 {
     // Target is centaur.mba
     //Enums and Constants
@@ -209,20 +235,6 @@ ReturnCode mss_draminit_training(Target& i_target)
 
     ecmdDataBufferBase data_buffer_64(64);
 
-    //TEMP MBA CAL REGS bit 12 = 0
-    rc = fapiGetScom(i_target, MBA01_MBA_CAL0Q_0x0301040F, data_buffer_64);
-    if(rc) return rc;
-    rc_num = rc_num | data_buffer_64.clearBit(12);
-    FAPI_INF("+++ TEMP setting bit 12 to 0+++");
-    rc = fapiPutScom(i_target, MBA01_MBA_CAL0Q_0x0301040F, data_buffer_64);
-    if(rc) return rc;
-
-    rc = fapiGetScom(i_target, MBA01_MBA_CAL1Q_0x03010410, data_buffer_64);
-    if(rc) return rc;
-    rc_num = rc_num | data_buffer_64.clearBit(12);
-    FAPI_INF("+++ TEMP setting bit 12 to 0+++");
-    rc = fapiPutScom(i_target, MBA01_MBA_CAL1Q_0x03010410, data_buffer_64);
-    if(rc) return rc;
 
     if(rc_num)
     {
@@ -310,8 +322,9 @@ ReturnCode mss_draminit_training(Target& i_target)
 	    if(primary_ranks_array[group][port] != INVALID)
 	    {
 
+		// Temporarily disable this function for HW debug
 	        // Change the RTT_NOM to RTT_WR, RTT_WR to RTT_NOM
-		rc = mss_rtt_nom_rtt_wr_swap(i_target, port, primary_ranks_array[group][port], group, instruction_number);
+		//rc = mss_rtt_nom_rtt_wr_swap(i_target, port, primary_ranks_array[group][port], group, instruction_number);
                 if(rc) return rc;
 
 
@@ -322,10 +335,56 @@ ReturnCode mss_draminit_training(Target& i_target)
 		rc_num = rc_num | rasn_buffer_1.flushTo1();
 		rc_num = rc_num | ddr_cal_enable_buffer_1.flushTo1(); //Init cal
 
-		FAPI_INF( "+++++++++++++++ Sending init cal on rank group: %d cal_steps: 0x%02X +++++++++++++++", group, cal_steps);
+		FAPI_INF( "+++ Setting up Init Cal on rank group: %d cal_steps: 0x%02X +++", group, cal_steps);
 
 		for(cur_cal_step = 1; cur_cal_step < MAX_CAL_STEPS; cur_cal_step++) //Cycle through all possible cal steps
 		{
+
+		    //Clearing any status or errors bits that may have occured in previous training subtest.
+		    if(port == 0)
+		    {
+			
+			rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_INIT_CAL_STATUS_P0_0x8000C0190301143F, data_buffer_64);
+			if(rc) return rc;
+
+			rc_num = rc_num | data_buffer_64.clearBit(48, 4);
+
+			rc = fapiPutScom(i_target, DPHY01_DDRPHY_PC_INIT_CAL_STATUS_P0_0x8000C0190301143F, data_buffer_64);
+			if(rc) return rc;
+			
+			rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_INIT_CAL_ERROR_P0_0x8000C0180301143F, data_buffer_64);
+			if(rc) return rc;
+
+			rc_num = rc_num | data_buffer_64.clearBit(48, 11);
+			rc_num = rc_num | data_buffer_64.clearBit(60, 4);
+
+			rc = fapiPutScom(i_target, DPHY01_DDRPHY_PC_INIT_CAL_ERROR_P0_0x8000C0180301143F, data_buffer_64);
+			if(rc) return rc;
+			
+
+		    }
+		    else
+		    {
+			rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_INIT_CAL_STATUS_P1_0x8001C0190301143F, data_buffer_64);
+			if(rc) return rc;
+
+			rc_num = rc_num | data_buffer_64.clearBit(48, 4);
+
+			rc = fapiPutScom(i_target, DPHY01_DDRPHY_PC_INIT_CAL_STATUS_P1_0x8001C0190301143F, data_buffer_64);
+			if(rc) return rc;
+
+			rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_INIT_CAL_ERROR_P1_0x8001C0180301143F, data_buffer_64);
+			if(rc) return rc;
+
+			rc_num = rc_num | data_buffer_64.clearBit(48, 11);
+			rc_num = rc_num | data_buffer_64.clearBit(60, 4);
+
+			rc = fapiPutScom(i_target, DPHY01_DDRPHY_PC_INIT_CAL_ERROR_P1_0x8001C0180301143F, data_buffer_64);
+			if(rc) return rc;
+
+
+		    }
+
 		    //Setup the Config Reg bit for the only cal step we want
 		    rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_INIT_CAL_CONFIG0_P0_0x8000C0160301143F, data_buffer_64);
 		    if(rc) return rc;
@@ -343,7 +402,7 @@ ReturnCode mss_draminit_training(Target& i_target)
 			 (cal_steps_8.isBitClear(4)) && (cal_steps_8.isBitClear(5)) &&
 			 (cal_steps_8.isBitClear(6)) && (cal_steps_8.isBitClear(7)) )
 		    {
-			FAPI_INF( "+++++ Sending ALL Cal Steps at the same time on rank group: %d +++++", group);
+			FAPI_INF( "+++ Executing ALL Cal Steps at the same time on rank group: %d +++", group);
 			rc_num = rc_num | data_buffer_64.setBit(48);
 			rc_num = rc_num | data_buffer_64.setBit(50);
 			rc_num = rc_num | data_buffer_64.setBit(51);
@@ -354,42 +413,42 @@ ReturnCode mss_draminit_training(Target& i_target)
 		    }
 		    else if ( (cur_cal_step == 1) && (cal_steps_8.isBitSet(1)) )
 		    {
-			FAPI_INF( "+++++ Sending Write Leveling (WR_LVL) on rank group: %d +++++", group);
+			FAPI_INF( "+++ Write Leveling (WR_LVL) on rank group: %d +++", group);
 			rc_num = rc_num | data_buffer_64.setBit(48);
 		    }
 		    else if ( (cur_cal_step == 2) && (cal_steps_8.isBitSet(2)) )
 		    {
-			FAPI_INF( "+++++ Sending DQS Align (DQS_ALIGN) on rank group: %d +++++", group);
+			FAPI_INF( "+++ DQS Align (DQS_ALIGN) on rank group: %d +++", group);
 			rc_num = rc_num | data_buffer_64.setBit(50);
 		    }
 		    else if ( (cur_cal_step == 3) && (cal_steps_8.isBitSet(3)) )
 		    {
-			FAPI_INF( "+++++ Sending RD CLK Align (RDCLK_ALIGN) on rank group: %d +++++", group);
+			FAPI_INF( "+++ RD CLK Align (RDCLK_ALIGN) on rank group: %d +++", group);
 			rc_num = rc_num | data_buffer_64.setBit(51);
 		    }
 		    else if ( (cur_cal_step == 4) && (cal_steps_8.isBitSet(4)) )
 		    {
-			FAPI_INF( "+++++ Sending Read Centering (READ_CTR) on rank group: %d +++++", group);
+			FAPI_INF( "+++ Read Centering (READ_CTR) on rank group: %d +++", group);
 			rc_num = rc_num | data_buffer_64.setBit(52);
 		    }
 		    else if ( (cur_cal_step == 5) && (cal_steps_8.isBitSet(5)) )
 		    {
-			FAPI_INF( "+++++ Sending Write Centering (WRITE_CTR) on rank group: %d +++++", group);
+			FAPI_INF( "+++ Write Centering (WRITE_CTR) on rank group: %d +++", group);
 			rc_num = rc_num | data_buffer_64.setBit(53);
 		    }
 		    else if ( (cur_cal_step == 6) && (cal_steps_8.isBitSet(6)) && (cal_steps_8.isBitClear(7)) )
 		    {
-			FAPI_INF( "+++++ Sending Initial Course Write (COURSE_WR) on rank group: %d +++++", group);
+			FAPI_INF( "+++ Initial Course Write (COURSE_WR) on rank group: %d +++", group);
 			rc_num = rc_num | data_buffer_64.setBit(54);
 		    }
 		    else if ( (cur_cal_step == 6) && (cal_steps_8.isBitClear(6)) && (cal_steps_8.isBitSet(7)) )
 		    {
-			FAPI_INF( "+++++ Sending Course Read (COURSE_RD) on rank group: %d +++++", group);
+			FAPI_INF( "+++ Course Read (COURSE_RD) on rank group: %d +++", group);
 			rc_num = rc_num | data_buffer_64.setBit(55);
 		    }
 		    else if ( (cur_cal_step == 6) && (cal_steps_8.isBitSet(6)) && (cal_steps_8.isBitSet(7)) )
 		    {
-			FAPI_INF( "+++++ Sending Initial Course Write (COURSE_WR) and Course Read (COURSE_RD) on rank group: %d +++++", group);
+			FAPI_INF( "+++ Initial Course Write (COURSE_WR) and Course Read (COURSE_RD) simultaneously on rank group: %d +++", group);
 			rc_num = rc_num | data_buffer_64.setBit(54);
 			rc_num = rc_num | data_buffer_64.setBit(55);
 		    }
@@ -448,8 +507,6 @@ ReturnCode mss_draminit_training(Target& i_target)
 
 			if(rc) return rc; //Error handling for mss_ccs_inst built into mss_funcs
 
-			FAPI_INF( "+++++++++++++++ Execute CCS array +++++++++++++++");
-
 			rc = mss_execute_ccs_inst_array( i_target, NUM_POLL, 60);
 			if(rc) return rc; //Error handling for mss_ccs_inst built into mss_funcs
 
@@ -474,8 +531,9 @@ ReturnCode mss_draminit_training(Target& i_target)
 		    }
 		}//end of step loop
 
+		// Temporarily disable this function for HW debug
 	        // Change the RTT_NOM to RTT_WR, RTT_WR to RTT_NOM
-		rc = mss_rtt_nom_rtt_wr_swap(i_target, port, primary_ranks_array[group][port], group, instruction_number);
+		//rc = mss_rtt_nom_rtt_wr_swap(i_target, port, primary_ranks_array[group][port], group, instruction_number);
 	    }
 	}//end of group loop
     }//end of port loop
@@ -490,13 +548,17 @@ ReturnCode mss_draminit_training(Target& i_target)
 
     if (complete_status == MSS_INIT_CAL_STALL)
     {
-	FAPI_ERR( "+++++++++++++++ Calibration on stalled! +++++++++++++++"); 
+	FAPI_ERR( "+++ Partial/Full calibration stall. Check Debug trace. +++"); 
 	FAPI_SET_HWP_ERROR(rc, RC_MSS_DRAMINIT_TRAINING_INIT_CAL_STALLED);
     }
     else if (error_status == MSS_INIT_CAL_FAIL)
     {
-	FAPI_ERR( "+++++++++++++++ Calibration on failed! +++++++++++++++");
+	FAPI_ERR( "+++ Partial/Full calibration fail. Check Debug trace. +++");
 	FAPI_SET_HWP_ERROR(rc, RC_MSS_DRAMINIT_TRAINING_INIT_CAL_FAILED);
+    }
+    else
+    {
+	FAPI_INF( "+++ Full calibration successful. +++");
     }
 
     return rc; 
@@ -510,14 +572,12 @@ ReturnCode mss_check_cal_status( Target& i_target,
 {
     ecmdDataBufferBase cal_status_buffer_64(64);
 
-    uint8_t cal_status_reg_offset = 0;
-    cal_status_reg_offset = 48 + i_group;  
-
     uint8_t poll_count = 1;
+    uint32_t cal_status_reg_offset;
+
+    cal_status_reg_offset = 48 + i_group;
 
     ReturnCode rc;
-
-    FAPI_INF( "+++++++++++++++ Check Cal Status on port: %d rank group: %d +++++++++++++++", i_port, i_group);
 
     if(i_port == 0)
     {
@@ -533,7 +593,7 @@ ReturnCode mss_check_cal_status( Target& i_target,
     while((!cal_status_buffer_64.isBitSet(cal_status_reg_offset)) &&
           (poll_count <= 20))
     {
-        FAPI_INF( "+++++++++++++++ Calibration on port: %d rank group: %d in progress. Poll count: %d +++++++++++++++", i_port, i_group, poll_count);
+        FAPI_INF( "+++ Calibration on port: %d rank group: %d in progress. Poll count: %d +++", i_port, i_group, poll_count);
 
         poll_count++;
         if(i_port == 0)
@@ -551,12 +611,12 @@ ReturnCode mss_check_cal_status( Target& i_target,
 
     if(cal_status_buffer_64.isBitSet(cal_status_reg_offset))
     {
-	FAPI_INF( "+++++++++++++++ Calibration on port: %d rank group: %d Completed! +++++++++++++++", i_port, i_group);
+	FAPI_INF( "+++ Calibration on port: %d rank group: %d finished. +++", i_port, i_group);
 	io_status = MSS_INIT_CAL_COMPLETE;
     }
     else
     {
-	FAPI_ERR( "+++++++++++++++ Calibration on port: %d rank group: %d has stalled! +++++++++++++++", i_port, i_group);
+	FAPI_ERR( "+++ Calibration on port: %d rank group: %d has stalled! +++", i_port, i_group);
 	io_status = MSS_INIT_CAL_STALL;
     }
 
@@ -571,13 +631,7 @@ ReturnCode mss_check_error_status( Target& i_target,
 {
 
     ecmdDataBufferBase cal_error_buffer_64(64);
-
-    uint8_t cal_error_reg_offset = 0;
-    cal_error_reg_offset = 60 + i_group;
-
     ReturnCode rc;
-
-    FAPI_INF( "+++++++++++++++ Check Error Status on port: %d rank group: %d +++++++++++++++", i_port, i_group);
 
     if(i_port == 0)
     {
@@ -590,51 +644,50 @@ ReturnCode mss_check_error_status( Target& i_target,
         if(rc) return rc;
     }
 
-    if(cal_error_buffer_64.isBitSet(cal_error_reg_offset))
+    if((cal_error_buffer_64.isBitSet(60)) || (cal_error_buffer_64.isBitSet(61)) || (cal_error_buffer_64.isBitSet(62)) || (cal_error_buffer_64.isBitSet(63)))
     {
-        FAPI_ERR( "+++++++++++++++ Calibration on port: %d rank group: %d failed! +++++++++++++++", i_port, i_group);
 	io_status = MSS_INIT_CAL_FAIL;
 
         if(cal_error_buffer_64.isBitSet(48))
         {
-            FAPI_ERR( "+++++++++++++++ Write leveling error occured on port: %d rank group: %d! +++++++++++++++", i_port, i_group);
+            FAPI_ERR( "+++ Write leveling error occured on port: %d rank group: %d! +++", i_port, i_group);
         }
         if(cal_error_buffer_64.isBitSet(50))
         {
-            FAPI_ERR( "+++++++++++++++ DQS Alignment error occured on port: %d rank group: %d! +++++++++++++++", i_port, i_group);
+            FAPI_ERR( "+++ DQS Alignment error occured on port: %d rank group: %d! +++", i_port, i_group);
         }
         if(cal_error_buffer_64.isBitSet(51))
         {
-            FAPI_ERR( "+++++++++++++++ RDCLK to SysClk alignment error occured on port: %d rank group: %d! +++++++++++++++", i_port, i_group);
+            FAPI_ERR( "+++ RDCLK to SysClk alignment error occured on port: %d rank group: %d! +++", i_port, i_group);
         }
         if(cal_error_buffer_64.isBitSet(52))
         {
-            FAPI_ERR( "+++++++++++++++ Read centering error occured on port: %d rank group: %d! +++++++++++++++", i_port, i_group);
+            FAPI_ERR( "+++ Read centering error occured on port: %d rank group: %d! +++", i_port, i_group);
         }
         if(cal_error_buffer_64.isBitSet(53))
         {
-            FAPI_ERR( "+++++++++++++++ Write centering error occured on port: %d rank group: %d! +++++++++++++++", i_port, i_group);
+            FAPI_ERR( "+++ Write centering error occured on port: %d rank group: %d! +++", i_port, i_group);
         }
         if(cal_error_buffer_64.isBitSet(55))
         {
-            FAPI_ERR( "+++++++++++++++ Coarse read centering error occured on port: %d rank group: %d! +++++++++++++++", i_port, i_group);
+            FAPI_ERR( "+++ Coarse read centering error occured on port: %d rank group: %d! +++", i_port, i_group);
         }
         if(cal_error_buffer_64.isBitSet(56))
         {
-            FAPI_ERR( "+++++++++++++++ Custom pattern read centering error occured on port: %d rank group: %d! +++++++++++++++", i_port, i_group);
+            FAPI_ERR( "+++ Custom pattern read centering error occured on port: %d rank group: %d! +++", i_port, i_group);
         }
         if(cal_error_buffer_64.isBitSet(57))
         {
-            FAPI_ERR( "+++++++++++++++ Custom pattern write centering error occured on port: %d rank group: %d! +++++++++++++++", i_port, i_group);
+            FAPI_ERR( "+++ Custom pattern write centering error occured on port: %d rank group: %d! +++", i_port, i_group);
         }
         if(cal_error_buffer_64.isBitSet(58))
         {
-            FAPI_ERR( "+++++++++++++++ Digital eye error occured on port: %d rank group: %d! +++++++++++++++", i_port, i_group);
+            FAPI_ERR( "+++ Digital eye error occured on port: %d rank group: %d! +++", i_port, i_group);
         }
     }
     else
     {
-	FAPI_INF( "+++++++++++++++ Calibration on port: %d rank group: %d was successful! +++++++++++++++", i_port, i_group);
+	FAPI_INF( "+++ Calibration on port: %d rank group: %d was successful. +++", i_port, i_group);
 	io_status = MSS_INIT_CAL_PASS;
     }
 

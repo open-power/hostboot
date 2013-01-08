@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012                   */
+/* COPYRIGHT International Business Machines Corp. 2012,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_access_delay_reg.C,v 1.10 2012/12/14 11:13:03 sasethur Exp $
+// $Id: mss_access_delay_reg.C,v 1.12 2012/12/18 15:31:39 sasethur Exp $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
 // *! All Rights Reserved -- Property of IBM
@@ -44,7 +44,10 @@
 //   1.6   | sauchadh |20-Nov-12| Made index to follow ISDIMM net for DQS and added glacier 2 suppport
 //   1.7   | sauchadh |30-Nov-12| Glacier 1 and 2 selected based on init file settings
 //   1.8   | sauchadh |5-Dec-12 | Fixed firmware comments and added DQS align DQS gate
-//   1.9   | sauchadh |14-Dec-12| Fixed Firmware comments 
+//   1.9   | sauchadh |14-Dec-12| Fixed Firmware comments
+//   1.10  | sauchadh |14-Dec-12| Fixed Firmware comments
+//   1.11  | sauchadh |18-Dec-12| Fixed Frimware comments and removed print statements in between
+//   1.12  | sauchadh |18-Dec-12| Added support for unused DQS in x8 mode
 
 
 //----------------------------------------------------------------------
@@ -74,11 +77,11 @@ extern "C" {
 //WR_DQ  - Write delay (DQ) registers
 //RD_DQS - DQS_CLK_ALIGN
 //WR_DQS - Write delay (DQS)registers
-//Input  : Target MBA=i_target_mba, i_access_type_e = READ or WRITE, i_port_u8=0 or 1, i_rank_u8=valid ranks,i_input_type_e=RD_DQ or RD_DQS or WR_DQ or WR_DQS or RAW_modes, i_input_index_u8=follow ISDIMMnet/C4 for non raw modes and supports raw modes   
+//Input  : Target MBA=i_target_mba, i_access_type_e = READ or WRITE, i_port_u8=0 or 1, i_rank_u8=valid ranks,i_input_type_e=RD_DQ or RD_DQS or WR_DQ or WR_DQS or RAW_modes, i_input_index_u8=follow ISDIMMnet/C4 for non raw modes and supports raw modes, i_verbose-extra print statements   
 //Output : delay value=io_value_u32 if i_access_type_e = READ else if i_access_type_e = WRITE no return value
 //******************************************************************************
 
-fapi::ReturnCode mss_access_delay_reg(const fapi::Target & i_target_mba, access_type_t i_access_type_e, uint8_t i_port_u8, uint8_t i_rank_u8, input_type_t i_input_type_e, uint8_t i_input_index_u8, uint32_t &io_value_u32)
+fapi::ReturnCode mss_access_delay_reg(const fapi::Target & i_target_mba, access_type_t i_access_type_e, uint8_t i_port_u8, uint8_t i_rank_u8, input_type_t i_input_type_e, uint8_t i_input_index_u8,uint8_t i_verbose,uint32_t &io_value_u32)
 {
    fapi::ReturnCode rc; 
     
@@ -113,11 +116,12 @@ fapi::ReturnCode mss_access_delay_reg(const fapi::Target & i_target_mba, access_
    
    rc = FAPI_ATTR_GET(ATTR_EFF_DRAM_WIDTH, &i_target_mba, l_dram_width); if(rc) return rc;
    rc = FAPI_ATTR_GET(ATTR_CHIP_UNIT_POS, &i_target_mba, l_mbapos);  if(rc) return rc;
-    
-   FAPI_INF("dimm type=%d",l_dimmtype);
    
-   FAPI_INF("rank pair=%d",l_rank_pair);       
-   
+   if(i_verbose==1)
+   {
+      FAPI_INF("dimm type=%d",l_dimmtype);
+      FAPI_INF("rank pair=%d",l_rank_pair);       
+   }
    if((i_port_u8 >1) || (l_mbapos>1))
    {
       FAPI_SET_HWP_ERROR(rc, RC_MSS_INPUT_ERROR);
@@ -127,8 +131,10 @@ fapi::ReturnCode mss_access_delay_reg(const fapi::Target & i_target_mba, access_
    
    if((l_dram_width ==fapi::ENUM_ATTR_EFF_DRAM_WIDTH_X4) || (l_dram_width ==fapi::ENUM_ATTR_EFF_DRAM_WIDTH_X8))   // Checking for dram width here so that checking can be skipped in called function
    {
-      FAPI_INF("dram width=%d",l_dram_width);
-      
+      if(i_verbose==1)
+      {
+         FAPI_INF("dram width=%d",l_dram_width);
+      }
    }
    
    else
@@ -171,13 +177,19 @@ fapi::ReturnCode mss_access_delay_reg(const fapi::Target & i_target_mba, access_
       }
       
          
-      rc=rosetta_map(i_target_mba,i_port_u8,l_type,i_input_index_u8,l_val); if(rc) return rc;
+      rc=rosetta_map(i_target_mba,i_port_u8,l_type,i_input_index_u8,i_verbose,l_val); if(rc) return rc;
       
-      FAPI_INF("C4 value is=%d",l_val);
-      rc=cross_coupled(i_target_mba,i_port_u8,l_rank_pair,i_input_type_e,l_val,l_out); if(rc) return rc;
-      FAPI_INF("scom_address=%llX",l_out.scom_addr);
-      FAPI_INF("start bit=%d",l_out.start_bit);
-      FAPI_INF("length=%d",l_out.bit_length); 
+      if(i_verbose==1)
+      {
+         FAPI_INF("C4 value is=%d",l_val);
+      }   
+      rc=cross_coupled(i_target_mba,i_port_u8,l_rank_pair,i_input_type_e,l_val,i_verbose,l_out); if(rc) return rc;
+      if(i_verbose==1)
+      {
+         FAPI_INF("scom_address=%llX",l_out.scom_addr);
+         FAPI_INF("start bit=%d",l_out.start_bit);
+         FAPI_INF("length=%d",l_out.bit_length);
+      }   
       l_scom_add=l_out.scom_addr;
       l_sbit=l_out.start_bit;
       l_len=l_out.bit_length;
@@ -203,12 +215,18 @@ fapi::ReturnCode mss_access_delay_reg(const fapi::Target & i_target_mba, access_
       }
       
       
-      rc=rosetta_map(i_target_mba,i_port_u8,l_type,i_input_index_u8,l_val); if(rc) return rc;
-      FAPI_INF("C4 value is=%d",l_val);
-      rc=cross_coupled(i_target_mba,i_port_u8,l_rank_pair,i_input_type_e,l_val,l_out); if(rc) return rc;
-      FAPI_INF("scom_address=%llX",l_out.scom_addr);
-      FAPI_INF("start bit=%d",l_out.start_bit);
-      FAPI_INF("length=%d",l_out.bit_length); 
+      rc=rosetta_map(i_target_mba,i_port_u8,l_type,i_input_index_u8,i_verbose,l_val); if(rc) return rc;
+      if(i_verbose==1)
+      {
+         FAPI_INF("C4 value is=%d",l_val);
+      }
+      rc=cross_coupled(i_target_mba,i_port_u8,l_rank_pair,i_input_type_e,l_val,i_verbose,l_out); if(rc) return rc;
+      if(i_verbose==1)
+      {
+         FAPI_INF("scom_address=%llX",l_out.scom_addr);
+         FAPI_INF("start bit=%d",l_out.start_bit);
+         FAPI_INF("length=%d",l_out.bit_length); 
+      }
       l_scom_add=l_out.scom_addr;
       l_sbit=l_out.start_bit;
       l_len=l_out.bit_length;   
@@ -251,15 +269,20 @@ fapi::ReturnCode mss_access_delay_reg(const fapi::Target & i_target_mba, access_
       }
      
       ip_type_t l_input=RAW_WR_DQ;
-      FAPI_INF("block=%d",l_block);
-      FAPI_INF("lane=%d",l_lane);
+      if(i_verbose==1)
+      {
+         FAPI_INF("block=%d",l_block);
+         FAPI_INF("lane=%d",l_lane);
+      }
       rc=get_address(i_target_mba,i_port_u8,l_rank_pair,l_input,l_block,l_lane,l_scom_add,l_start_bit,l_len8); if(rc) return rc;
       l_sbit=l_start_bit;    
       l_len=l_len8;
-      FAPI_INF("scom_address=%llX",l_scom_add);
-      FAPI_INF("start bit=%d",l_start_bit);
-      FAPI_INF("length=%d",l_len8); 
-      
+      if(i_verbose==1)
+      {
+         FAPI_INF("scom_address=%llX",l_scom_add);
+         FAPI_INF("start bit=%d",l_start_bit);
+         FAPI_INF("length=%d",l_len8); 
+      }
    }
    
    else if(i_input_type_e==RAW_RD_DQ_0 || i_input_type_e==RAW_RD_DQ_1 || i_input_type_e==RAW_RD_DQ_2 || i_input_type_e==RAW_RD_DQ_3 || i_input_type_e==RAW_RD_DQ_4)
@@ -295,15 +318,20 @@ fapi::ReturnCode mss_access_delay_reg(const fapi::Target & i_target_mba, access_
          return rc;      
       }
       ip_type_t l_input=RAW_RD_DQ;
-      FAPI_INF("block=%d",l_block);
-      FAPI_INF("lane=%d",l_lane);
+      if(i_verbose==1)
+      {
+         FAPI_INF("block=%d",l_block);
+         FAPI_INF("lane=%d",l_lane);
+      }
       rc=get_address(i_target_mba,i_port_u8,l_rank_pair,l_input,l_block,l_lane,l_scom_add,l_start_bit,l_len8); if(rc) return rc;
       l_sbit=l_start_bit;    
       l_len=l_len8;
-      FAPI_INF("scom_address=%llX",l_scom_add);
-      FAPI_INF("start bit=%d",l_start_bit);
-      FAPI_INF("length=%d",l_len8); 
-      
+      if(i_verbose==1)
+      {
+         FAPI_INF("scom_address=%llX",l_scom_add);
+         FAPI_INF("start bit=%d",l_start_bit);
+         FAPI_INF("length=%d",l_len8); 
+      }
    }
    
    else if(i_input_type_e==RAW_RD_DQS_0 || i_input_type_e==RAW_RD_DQS_1 || i_input_type_e==RAW_RD_DQS_2 || i_input_type_e==RAW_RD_DQS_3 || i_input_type_e==RAW_RD_DQS_4)
@@ -340,15 +368,20 @@ fapi::ReturnCode mss_access_delay_reg(const fapi::Target & i_target_mba, access_
       }
       
       ip_type_t l_input=RAW_RD_DQS;
-      FAPI_INF("block=%d",l_block);
-      FAPI_INF("lane=%d",l_lane);
+      if(i_verbose==1)
+      {
+         FAPI_INF("block=%d",l_block);
+         FAPI_INF("lane=%d",l_lane);
+      }
       rc=get_address(i_target_mba,i_port_u8,l_rank_pair,l_input,l_block,l_lane,l_scom_add,l_start_bit,l_len8); if(rc) return rc;
       l_sbit=l_start_bit;    
       l_len=l_len8;
-      FAPI_INF("scom_address=%llX",l_scom_add);
-      FAPI_INF("start bit=%d",l_start_bit);
-      FAPI_INF("length=%d",l_len8); 
-      
+      if(i_verbose==1)
+      {
+         FAPI_INF("scom_address=%llX",l_scom_add);
+         FAPI_INF("start bit=%d",l_start_bit);
+         FAPI_INF("length=%d",l_len8); 
+      }
    }
    
    else if(i_input_type_e==RAW_DQS_ALIGN_0 || i_input_type_e==RAW_DQS_ALIGN_1 || i_input_type_e==RAW_DQS_ALIGN_2 || i_input_type_e==RAW_DQS_ALIGN_3 || i_input_type_e==RAW_DQS_ALIGN_4)
@@ -384,15 +417,20 @@ fapi::ReturnCode mss_access_delay_reg(const fapi::Target & i_target_mba, access_
          return rc;      
       }
       ip_type_t l_input=RAW_DQS_ALIGN;
-      FAPI_INF("block=%d",l_block);
-      FAPI_INF("lane=%d",l_lane);
+      if(i_verbose==1)
+      {
+         FAPI_INF("block=%d",l_block);
+         FAPI_INF("lane=%d",l_lane);
+      }
       rc=get_address(i_target_mba,i_port_u8,l_rank_pair,l_input,l_block,l_lane,l_scom_add,l_start_bit,l_len8); if(rc) return rc;
       l_sbit=l_start_bit;    
       l_len=l_len8;
-      FAPI_INF("scom_address=%llX",l_scom_add);
-      FAPI_INF("start bit=%d",l_start_bit);
-      FAPI_INF("length=%d",l_len8); 
-      
+      if(i_verbose==1)
+      {
+         FAPI_INF("scom_address=%llX",l_scom_add);
+         FAPI_INF("start bit=%d",l_start_bit);
+         FAPI_INF("length=%d",l_len8); 
+      }
    }
    
    
@@ -429,15 +467,20 @@ fapi::ReturnCode mss_access_delay_reg(const fapi::Target & i_target_mba, access_
          return rc; 
       }
       ip_type_t l_input=RAW_WR_DQS;
-      FAPI_INF("block=%d",l_block);
-      FAPI_INF("lane=%d",l_lane);
+      if(i_verbose==1)
+      {
+         FAPI_INF("block=%d",l_block);
+         FAPI_INF("lane=%d",l_lane);
+      }
       rc=get_address(i_target_mba,i_port_u8,l_rank_pair,l_input,l_block,l_lane,l_scom_add,l_start_bit,l_len8); if(rc) return rc;
       l_sbit=l_start_bit;    
       l_len=l_len8;
-      FAPI_INF("scom_address=%llX",l_scom_add);
-      FAPI_INF("start bit=%d",l_start_bit);
-      FAPI_INF("length=%d",l_len8); 
-      
+      if(i_verbose==1)
+      {
+         FAPI_INF("scom_address=%llX",l_scom_add);
+         FAPI_INF("start bit=%d",l_start_bit);
+         FAPI_INF("length=%d",l_len8); 
+      }
    }
    else if(i_input_type_e==RAW_SYS_CLK_0 || i_input_type_e==RAW_SYS_CLK_1 || i_input_type_e==RAW_SYS_CLK_2 || i_input_type_e==RAW_SYS_CLK_3 || i_input_type_e==RAW_SYS_CLK_4)
    {
@@ -472,15 +515,20 @@ fapi::ReturnCode mss_access_delay_reg(const fapi::Target & i_target_mba, access_
          return rc; 
       }
       ip_type_t l_input=RAW_SYS_CLK;
-      FAPI_INF("block=%d",l_block);
-      FAPI_INF("lane=%d",l_lane);
+      if(i_verbose==1)
+      {
+         FAPI_INF("block=%d",l_block);
+         FAPI_INF("lane=%d",l_lane);
+      }
       rc=get_address(i_target_mba,i_port_u8,l_rank_pair,l_input,l_block,l_lane,l_scom_add,l_start_bit,l_len8); if(rc) return rc;
       l_sbit=l_start_bit;    
       l_len=l_len8;
-      FAPI_INF("scom_address=%llX",l_scom_add);
-      FAPI_INF("start bit=%d",l_start_bit);
-      FAPI_INF("length=%d",l_len8); 
-      
+      if(i_verbose==1)
+      {
+         FAPI_INF("scom_address=%llX",l_scom_add);
+         FAPI_INF("start bit=%d",l_start_bit);
+         FAPI_INF("length=%d",l_len8); 
+      }
    }
    
    else if(i_input_type_e==RAW_SYS_ADDR_CLK)
@@ -496,14 +544,19 @@ fapi::ReturnCode mss_access_delay_reg(const fapi::Target & i_target_mba, access_
          return rc; 
       }
       ip_type_t l_input=RAW_SYS_ADDR_CLKS0S1;
-      FAPI_INF("lane=%d",l_lane);
+      if(i_verbose==1)
+      {
+         FAPI_INF("lane=%d",l_lane);
+      }
       rc=get_address(i_target_mba,i_port_u8,l_rank_pair,l_input,l_block,l_lane,l_scom_add,l_start_bit,l_len8); if(rc) return rc;
       l_sbit=l_start_bit;    
       l_len=l_len8;
-      FAPI_INF("scom_address=%llX",l_scom_add);
-      FAPI_INF("start bit=%d",l_start_bit);
-      FAPI_INF("length=%d",l_len8); 
-      
+      if(i_verbose==1)
+      {
+         FAPI_INF("scom_address=%llX",l_scom_add);
+         FAPI_INF("start bit=%d",l_start_bit);
+         FAPI_INF("length=%d",l_len8); 
+      }
    }
    
    
@@ -540,15 +593,20 @@ fapi::ReturnCode mss_access_delay_reg(const fapi::Target & i_target_mba, access_
          return rc; 
       }
       ip_type_t l_input=RAW_WR_CLK;
-      FAPI_INF("block=%d",l_block);
-      FAPI_INF("lane=%d",l_lane);
+      if(i_verbose==1)
+      {
+         FAPI_INF("block=%d",l_block);
+         FAPI_INF("lane=%d",l_lane);
+      }
       rc=get_address(i_target_mba,i_port_u8,l_rank_pair,l_input,l_block,l_lane,l_scom_add,l_start_bit,l_len8); if(rc) return rc;
       l_sbit=l_start_bit;    
       l_len=l_len8;
-      FAPI_INF("scom_address=%llX",l_scom_add);
-      FAPI_INF("start bit=%d",l_start_bit);
-      FAPI_INF("length=%d",l_len8); 
-      
+      if(i_verbose==1)
+      {
+         FAPI_INF("scom_address=%llX",l_scom_add);
+         FAPI_INF("start bit=%d",l_start_bit);
+         FAPI_INF("length=%d",l_len8); 
+      }
    }
    
    else if(i_input_type_e==RAW_ADDR_0 || i_input_type_e==RAW_ADDR_1 || i_input_type_e==RAW_ADDR_2 || i_input_type_e==RAW_ADDR_3)
@@ -580,15 +638,20 @@ fapi::ReturnCode mss_access_delay_reg(const fapi::Target & i_target_mba, access_
          return rc; 
       }
       ip_type_t l_input=RAW_ADDR;
-      FAPI_INF("block=%d",l_block);
-      FAPI_INF("lane=%d",l_lane);
+      if(i_verbose==1)
+      {
+         FAPI_INF("block=%d",l_block);
+         FAPI_INF("lane=%d",l_lane);
+      }
       rc=get_address(i_target_mba,i_port_u8,l_rank_pair,l_input,l_block,l_lane,l_scom_add,l_start_bit,l_len8); if(rc) return rc;
       l_sbit=l_start_bit;    
       l_len=l_len8;
-      FAPI_INF("scom_address=%llX",l_scom_add);
-      FAPI_INF("start bit=%d",l_start_bit);
-      FAPI_INF("length=%d",l_len8); 
-      
+      if(i_verbose==1)
+      {
+         FAPI_INF("scom_address=%llX",l_scom_add);
+         FAPI_INF("start bit=%d",l_start_bit);
+         FAPI_INF("length=%d",l_len8); 
+      }
    }
   
    else if(i_input_type_e==RAW_DQS_GATE_0 || i_input_type_e==RAW_DQS_GATE_1 || i_input_type_e==RAW_DQS_GATE_2 || i_input_type_e==RAW_DQS_GATE_3 || i_input_type_e==RAW_DQS_GATE_4)
@@ -625,15 +688,20 @@ fapi::ReturnCode mss_access_delay_reg(const fapi::Target & i_target_mba, access_
          return rc; 
       }
       ip_type_t l_input=RAW_DQS_GATE;
-      FAPI_INF("block=%d",l_block);
-      FAPI_INF("lane=%d",l_lane);
+      if(i_verbose==1)
+      {
+         FAPI_INF("block=%d",l_block);
+         FAPI_INF("lane=%d",l_lane);
+      }
       rc=get_address(i_target_mba,i_port_u8,l_rank_pair,l_input,l_block,l_lane,l_scom_add,l_start_bit,l_len8); if(rc) return rc;
       l_sbit=l_start_bit;    
       l_len=l_len8;
-      FAPI_INF("scom_address=%llX",l_scom_add);
-      FAPI_INF("start bit=%d",l_start_bit);
-      FAPI_INF("length=%d",l_len8); 
-      
+      if(i_verbose==1)
+      {
+         FAPI_INF("scom_address=%llX",l_scom_add);
+         FAPI_INF("start bit=%d",l_start_bit);
+         FAPI_INF("length=%d",l_len8); 
+      }
    } 
    
    else
@@ -654,6 +722,7 @@ fapi::ReturnCode mss_access_delay_reg(const fapi::Target & i_target_mba, access_
         return rc;
       }    
       io_value_u32=l_output;
+      FAPI_INF("Delay value=%d",io_value_u32);
    }
    
    else if(i_access_type_e==WRITE)
@@ -677,8 +746,8 @@ fapi::ReturnCode mss_access_delay_reg(const fapi::Target & i_target_mba, access_
       }
       else
       {
-         FAPI_ERR("Wrong input value specified rc = 0x%08X (creator = %d)", uint32_t(rc), rc.getCreator());
          FAPI_SET_HWP_ERROR(rc, RC_MSS_INPUT_ERROR);
+         FAPI_ERR("Wrong input type specified rc = 0x%08X ", uint32_t(rc));
          return rc;      
       }
       rc=fapiGetScom(i_target_mba,l_scom_add,data_buffer_64);if(rc) return rc;	  
@@ -700,11 +769,11 @@ fapi::ReturnCode mss_access_delay_reg(const fapi::Target & i_target_mba, access_
 //******************************************************************************
 //Function name: cross_coupled()
 //Description:This function returns address,start bit and bit length for RD_DQ, WR_DQ, RD_DQS, WR_DQS
-//Input  : Target MBA=i_target_mba, i_port_u8=0 or 1, i_rank_pair=0 or 1 or 2 or 3, i_input_type_e=RD_DQ or RD_DQS or WR_DQ or WR_DQS,i_input_index_u8=0-79/0-71/0-8/0-19   
+//Input  : Target MBA=i_target_mba, i_port_u8=0 or 1, i_rank_pair=0 or 1 or 2 or 3, i_input_type_e=RD_DQ or RD_DQS or WR_DQ or WR_DQS,i_input_index_u8=0-79/0-71/0-8/0-19 , i_verbose-extra print statements  
 //Output : out (address,start bit and bit length)
 //******************************************************************************    
         
-fapi::ReturnCode cross_coupled(const fapi::Target & i_target_mba,uint8_t i_port, uint8_t i_rank_pair,input_type_t i_input_type_e,uint8_t i_input_index,scom_location& out)
+fapi::ReturnCode cross_coupled(const fapi::Target & i_target_mba,uint8_t i_port, uint8_t i_rank_pair,input_type_t i_input_type_e,uint8_t i_input_index,uint8_t i_verbose,scom_location& out)
 {    
    fapi::ReturnCode rc; 
    const uint8_t l_dqmax=80;
@@ -737,12 +806,18 @@ fapi::ReturnCode cross_coupled(const fapi::Target & i_target_mba,uint8_t i_port,
    uint8_t l_len=0;
    ip_type_t l_input_type;
    ecmdDataBufferBase data_buffer_64(64);
+   uint8_t l_dimmtype=0;
+   uint8_t l_swizzle=0;
+      
+   rc = FAPI_ATTR_GET(ATTR_MSS_DQS_SWIZZLE_TYPE, &i_target_mba, l_swizzle); if(rc) return rc;
       
    rc = FAPI_ATTR_GET(ATTR_CHIP_UNIT_POS, &i_target_mba, l_mbapos); if(rc) return rc;
+   
+   rc = FAPI_ATTR_GET(ATTR_EFF_DIMM_TYPE, &i_target_mba, l_dimmtype); if(rc) return rc;
          
    rc = FAPI_ATTR_GET(ATTR_EFF_DRAM_WIDTH, &i_target_mba, l_dram_width); if(rc) return rc;
    
-     
+      
    if(i_input_type_e==RD_DQ || i_input_type_e==WR_DQ)
    {
       if(i_port==0 && l_mbapos==0)
@@ -765,10 +840,12 @@ fapi::ReturnCode cross_coupled(const fapi::Target & i_target_mba,uint8_t i_port,
 	 l_lane=lane_dq_p3[i_input_index];
 	 l_block=block_p3[i_input_index];	
       }
-            
-      FAPI_INF("block=%d",l_block);
-      FAPI_INF("lane=%d",l_lane);
-       
+      
+      if(i_verbose==1)
+      {
+         FAPI_INF("block=%d",l_block);
+         FAPI_INF("lane=%d",l_lane);
+      } 
       if(i_input_type_e==RD_DQ)
       {
          l_input_type=RD_DQ_t;
@@ -809,12 +886,18 @@ fapi::ReturnCode cross_coupled(const fapi::Target & i_target_mba,uint8_t i_port,
          l_dq=dqs_dq_lane_p3[i_input_index];   
          l_block=block_dqs_p3[i_input_index]; 
       }
-         
-      FAPI_INF("block=%d",l_block);
-      FAPI_INF("dqs_dq_lane=%d",l_dq);
+       
+      if(i_verbose==1)
+      {
+         FAPI_INF("block=%d",l_block);
+         FAPI_INF("dqs_dq_lane=%d",l_dq);
+      }
       l_input_type=RD_CLK_t; 
       rc=get_address(i_target_mba,i_port,i_rank_pair, l_input_type,l_block,l_lane,l_scom_address_64,l_start_bit,l_len); if(rc) return rc;
-      FAPI_INF("read clock address=%llx",l_scom_address_64);
+      if(i_verbose==1)
+      {
+         FAPI_INF("read clock address=%llx",l_scom_address_64);
+      }
       rc=fapiGetScom(i_target_mba,l_scom_address_64,data_buffer_64);if(rc) return rc; 
             
       if(l_dram_width==fapi::ENUM_ATTR_EFF_DRAM_WIDTH_X4)
@@ -863,8 +946,11 @@ fapi::ReturnCode cross_coupled(const fapi::Target & i_target_mba,uint8_t i_port,
          {
             lane_dqs[l_index]=22;
             l_index++;
+         }
+         if(i_verbose==1)
+         {
+            FAPI_INF("array is=%d and %d and %d and %d",lane_dqs[0],lane_dqs[1],lane_dqs[2],lane_dqs[3]);
          }   
-         FAPI_INF("array is=%d and %d and %d and %d",lane_dqs[0],lane_dqs[1],lane_dqs[2],lane_dqs[3]);
          if(l_dq==0)
          {
             l_lane=lane_dqs[0];
@@ -881,9 +967,11 @@ fapi::ReturnCode cross_coupled(const fapi::Target & i_target_mba,uint8_t i_port,
          {
             l_lane=lane_dqs[3];
          }
-          
-         FAPI_INF("lane is=%d",l_lane); 
          
+         if(i_verbose==1)
+         {
+            FAPI_INF("lane is=%d",l_lane); 
+         }
       }			  
    
      
@@ -909,8 +997,10 @@ fapi::ReturnCode cross_coupled(const fapi::Target & i_target_mba,uint8_t i_port,
             lane_dqs[l_index]=22;
             l_index++; 		    
          }
-         FAPI_INF("array is=%d and %d",lane_dqs[0],lane_dqs[1]); 
-          
+         if(i_verbose==1)
+         {
+            FAPI_INF("array is=%d and %d",lane_dqs[0],lane_dqs[1]); 
+         } 
          if((l_dq==0) || (l_dq==4))
          {
             l_lane=lane_dqs[0];
@@ -920,8 +1010,177 @@ fapi::ReturnCode cross_coupled(const fapi::Target & i_target_mba,uint8_t i_port,
             l_lane=lane_dqs[1];
          }
          
-         FAPI_INF("lane is=%d",l_lane);
-      }
+         if(l_dimmtype==fapi::ENUM_ATTR_EFF_DIMM_TYPE_CDIMM)
+         {
+            if((i_input_index==1) || (i_input_index==3) || (i_input_index==5) || (i_input_index==7) || (i_input_index==9) || (i_input_index==11) || (i_input_index==13) || (i_input_index==15) || (i_input_index==17) || (i_input_index==19))
+            {
+               if(l_lane==16)
+               {
+                  l_lane=18;
+               }
+               else if(l_lane==18)
+               {
+                  l_lane=16;
+               }
+               
+               else if(l_lane==20)
+               {
+                  l_lane=22;
+               }
+               
+               else
+               {
+                  l_lane=20;
+               }
+               
+            }
+         }
+         
+         else
+         {
+            if((i_port==0) && (l_mbapos==0))
+            {
+               if(l_swizzle==1)
+               {
+                  if((i_input_index==3) || (i_input_index==1) || (i_input_index==4) || (i_input_index==17)|| (i_input_index==9) || (i_input_index==11) || (i_input_index==13) || (i_input_index==15) ||  (i_input_index==6))
+                  {
+                     if(l_lane==16)
+                     {
+                        l_lane=18;
+                     }
+                     else if(l_lane==18)
+                     {
+                        l_lane=16;
+                     }
+                     
+                     else if(l_lane==20)
+                     {
+                        l_lane=22;
+                     }
+                     
+                     else
+                     {
+                        l_lane=20;
+                     }
+                  
+                  }   
+               }
+                           
+               else
+               {
+                  if((i_input_index==3) || (i_input_index==1) || (i_input_index==5) || (i_input_index==7)|| (i_input_index==9) || (i_input_index==11) || (i_input_index==13) || (i_input_index==15) ||  (i_input_index==17))
+                  {
+                     if(l_lane==16)
+                     {
+                        l_lane=18;
+                     }
+                     else if(l_lane==18)
+                     {
+                        l_lane=16;
+                     }
+                       
+                     else if(l_lane==20)
+                     {
+                        l_lane=22;
+                     }
+                       
+                     else
+                     {
+                        l_lane=20;
+                     }
+                  }   
+                          
+               }
+            }   
+            
+            else if((i_port==1) && (l_mbapos==0))
+            {
+               if(l_swizzle==1)
+               {
+                  if((i_input_index==2) || (i_input_index==0) || (i_input_index==4) || (i_input_index==17)|| (i_input_index==9) || (i_input_index==11) || (i_input_index==13) || (i_input_index==15) ||  (i_input_index==7))
+                  {
+                     if(l_lane==16)
+                     {
+                        l_lane=18;
+                     }
+                     else if(l_lane==18)
+                     {
+                        l_lane=16;
+                     }
+                     
+                     else if(l_lane==20)
+                     {
+                        l_lane=22;
+                     }
+                  
+                     else
+                     {
+                        l_lane=20;
+                     }
+                  }   
+               }
+               
+               else
+               {
+                  if((i_input_index==1) || (i_input_index==3) || (i_input_index==5) || (i_input_index==7)|| (i_input_index==9) || (i_input_index==11) || (i_input_index==13) || (i_input_index==15) ||  (i_input_index==17))
+                  {
+                     if(l_lane==16)
+                     {
+                        l_lane=18;
+                     }
+                     else if(l_lane==18)
+                     {
+                        l_lane=16;
+                     }
+                     
+                     else if(l_lane==20)
+                     {
+                        l_lane=22;
+                     }
+                  
+                     else
+                     {
+                        l_lane=20;
+                     }
+                  }   
+               }
+            }
+                  
+                  
+            else
+            {
+               if((i_input_index==1) || (i_input_index==3) || (i_input_index==5) || (i_input_index==7)|| (i_input_index==9) || (i_input_index==11) || (i_input_index==13) || (i_input_index==15) ||  (i_input_index==17))
+               {
+                  if(l_lane==16)
+                  {
+                     l_lane=18;
+                  }
+                  else if(l_lane==18)
+                  {
+                     l_lane=16;
+                  }
+                  
+                  else if(l_lane==20)
+                  {
+                     l_lane=22;
+                  }
+                  
+                  else
+                  {
+                     l_lane=20;
+                  }
+               
+               }   
+            }
+            
+            
+            
+         }
+         if(i_verbose==1)
+         {
+            FAPI_INF("lane is=%d",l_lane);
+         }   
+      }  
       
       if (i_input_type_e==RD_DQS)
       {
@@ -968,9 +1227,11 @@ fapi::ReturnCode cross_coupled(const fapi::Target & i_target_mba,uint8_t i_port,
          l_block=block_dqs_p3[i_input_index]; 
       }
       
-      FAPI_INF("block=%d",l_block);
-      FAPI_INF("dqs_dq_lane=%d",l_dq);
-         
+      if(i_verbose==1)
+      {
+         FAPI_INF("block=%d",l_block);
+         FAPI_INF("dqs_dq_lane=%d",l_dq);
+      }   
       if(l_dq==0)
       {
          l_lane=16;
@@ -992,9 +1253,11 @@ fapi::ReturnCode cross_coupled(const fapi::Target & i_target_mba,uint8_t i_port,
       }  
      
       l_input_type=DQS_GATE_t;
-         
-      FAPI_INF("lane is=%d",l_lane);
-         
+      
+      if(i_verbose==1)
+      {
+         FAPI_INF("lane is=%d",l_lane);
+      }   
       rc=get_address(i_target_mba,i_port,i_rank_pair,l_input_type,l_block,l_lane,l_scom_address_64,l_start_bit,l_len); if(rc) return rc; 		 
       out.scom_addr=l_scom_address_64;
       out.start_bit=l_start_bit;
@@ -1016,11 +1279,11 @@ fapi::ReturnCode cross_coupled(const fapi::Target & i_target_mba,uint8_t i_port,
 //******************************************************************************
 //Function name: rosetta_map()
 //Description:This function returns C4 bit for the corresponding ISDIMM bit
-//Input  : Target MBA=i_target_mba, i_port_u8=0 or 1,i_input_type_e=RD_DQ or RD_DQS or WR_DQ or WR_DQS, i_input_index_u8=0-79/0-71/0-8/0-19   
+//Input  : Target MBA=i_target_mba, i_port_u8=0 or 1,i_input_type_e=RD_DQ or RD_DQS or WR_DQ or WR_DQS, i_input_index_u8=0-79/0-71/0-8/0-19, i_verbose-extra print statements    
 //Output : C4 bit=o_value
 //****************************************************************************** 
    
-fapi::ReturnCode rosetta_map(const fapi::Target & i_target_mba,uint8_t i_port,input_type i_input_type_e,uint8_t i_input_index,uint8_t &o_value) //This function is used by some other procedures
+fapi::ReturnCode rosetta_map(const fapi::Target & i_target_mba,uint8_t i_port,input_type i_input_type_e,uint8_t i_input_index,uint8_t i_verbose,uint8_t &o_value) //This function is used by some other procedures
 {                                                                                                                                              // Boundary check is done again 
    fapi::ReturnCode rc;
    
@@ -1050,8 +1313,12 @@ fapi::ReturnCode rosetta_map(const fapi::Target & i_target_mba,uint8_t i_port,in
    
    if(l_swizzle ==0 || l_swizzle ==1)
    {
-      FAPI_INF("swizzle type=%d",l_swizzle);
+      if(i_verbose==1)
+      {
+         FAPI_INF("swizzle type=%d",l_swizzle);
+      }   
    }
+   
    else
    {
       FAPI_SET_HWP_ERROR(rc, RC_MSS_INPUT_ERROR);

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012                   */
+/* COPYRIGHT International Business Machines Corp. 2012,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-//$Id: mss_access_delay_reg.H,v 1.5 2012/12/05 16:50:29 sasethur Exp $
+//$Id: mss_access_delay_reg.H,v 1.6 2012/12/18 12:02:33 sasethur Exp $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
 // *! All Rights Reserved -- Property of IBM
@@ -158,20 +158,20 @@ struct scom_location {
 };	
 
 
-typedef fapi::ReturnCode (*mss_access_delay_reg_FP_t)(const fapi::Target & i_target_mba, access_type_t i_access_type_e, uint8_t i_port_u8, uint8_t i_rank_u8, input_type_t i_input_type_e, uint8_t i_input_index_u8, uint32_t &io_value_u32);
+typedef fapi::ReturnCode (*mss_access_delay_reg_FP_t)(const fapi::Target & i_target_mba, access_type_t i_access_type_e, uint8_t i_port_u8, uint8_t i_rank_u8, input_type_t i_input_type_e, uint8_t i_input_index_u8,uint8_t i_verbose, uint32_t &io_value_u32);
 
 
 
 extern "C" {
 
 //------------------------------------------------------------------------------
-fapi::ReturnCode mss_access_delay_reg(const fapi::Target & i_target_mba, access_type_t i_access_type_e, uint8_t i_port_u8, uint8_t i_rank_u8, input_type_t i_input_type_e, uint8_t i_input_index_u8, uint32_t &io_value_u32);
+fapi::ReturnCode mss_access_delay_reg(const fapi::Target & i_target_mba, access_type_t i_access_type_e, uint8_t i_port_u8, uint8_t i_rank_u8, input_type_t i_input_type_e, uint8_t i_input_index_u8,uint8_t i_verbose, uint32_t &io_value_u32);
 
-fapi::ReturnCode cross_coupled(const fapi::Target & i_target_mba,uint8_t i_port, uint8_t i_rank_pair,input_type_t i_input_type_e,uint8_t i_input_index,scom_location& out);
+fapi::ReturnCode cross_coupled(const fapi::Target & i_target_mba,uint8_t i_port, uint8_t i_rank_pair,input_type_t i_input_type_e,uint8_t i_input_index,uint8_t i_verbose,scom_location& out);
 
 fapi::ReturnCode get_address(const fapi::Target & i_target_mba,uint8_t i_port, uint8_t i_rank_pair,ip_type_t i_input_type_e,uint8_t i_block,uint8_t i_lane,uint64_t &o_scom_address_64,uint8_t &o_start_bit,uint8_t &o_len);
 
-fapi::ReturnCode rosetta_map(const fapi::Target & i_target_mba,uint8_t i_port, input_type i_input_type_e ,uint8_t i_input_index,uint8_t &o_value); 
+fapi::ReturnCode rosetta_map(const fapi::Target & i_target_mba,uint8_t i_port, input_type i_input_type_e ,uint8_t i_input_index,uint8_t i_verbose,uint8_t &o_value); 
 
 fapi::ReturnCode mss_getrankpair(const fapi::Target & i_target_mba,uint8_t i_port,uint8_t i_rank,uint8_t *o_rank_pair,uint8_t o_rankpair_table[8]);
 } // extern "C"

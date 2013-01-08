@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012                   */
+/* COPYRIGHT International Business Machines Corp. 2012,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: cen_scom_addresses.H,v 1.45 2012/11/20 18:51:15 lapietra Exp $
+// $Id: cen_scom_addresses.H,v 1.46 2012/12/19 15:31:24 gollub Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/centaur/working/procedures/cen_scom_addresses.H,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
@@ -44,6 +44,22 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
+//  1.46   | gollub   |19-Dec-12| Added:
+//         |          |         | MCBERRPTQ
+//         |          |         | MBA_MAINT_BUFF
+//         |          |         | MBA_MAINT_BUFF_65TH_BYTE_64B_ECC
+//         |          |         | MBA_ERR_REPORTQ
+//         |          |         | MBSECCERR
+//         |          |         | MBMMRQ
+//         |          |         | MBS_MAINT_BUFF0_DATA
+//         |          |         | MBS_MAINT_BUFF0_DATA_ECC
+//         |          |         | MBSEC
+//         |          |         | MBSSYMEC
+//         |          |         | MBSEVRQ
+//         |          |         | MBNCERQ
+//         |          |         | MBRCERQ
+//         |          |         | MBMPERQ
+//         |          |         | MBUERQ
 //  1.44   | sglancy  |19-Nov-12| added ECID addresses
 //  1.42   | pardeik  |09-Nov-12| add N/M throttle register in (again)
 //  1.41   | gollub   |26-Oct-12| Added MBECCFIR AND/OR MASK registers
@@ -509,6 +525,11 @@ CONST_UINT64_T( MBA01_MBAFIRACT0_0x03010606        , ULL(0x03010606) );
 CONST_UINT64_T( MBA01_MBAFIRACT1_0x03010607        , ULL(0x03010607) );
 
 //------------------------------------------------------------------------------
+//      MBA Error Report Register
+//------------------------------------------------------------------------------
+CONST_UINT64_T( MBA01_MBA_MCBERRPTQ_0x030106e7     , ULL(0x030106e7) );
+
+//------------------------------------------------------------------------------
 //      MBA Maintenance Command Type Register
 //------------------------------------------------------------------------------
 CONST_UINT64_T( MBA01_MBMCTQ_0x0301060A           , ULL(0x0301060A) );
@@ -560,30 +581,50 @@ CONST_UINT64_T( MAINT0_MBA_MAINT_BUFF0_DATA0_0x03010655           , ULL(0x030106
 CONST_UINT64_T( MAINT0_MBA_MAINT_BUFF0_DATA1_0x03010656           , ULL(0x03010656) );
 CONST_UINT64_T( MAINT0_MBA_MAINT_BUFF0_DATA2_0x03010657           , ULL(0x03010657) );
 CONST_UINT64_T( MAINT0_MBA_MAINT_BUFF0_DATA3_0x03010658           , ULL(0x03010658) );
+CONST_UINT64_T( MAINT0_MBA_MAINT_BUFF0_DATA4_0x03010659           , ULL(0x03010659) );
+CONST_UINT64_T( MAINT0_MBA_MAINT_BUFF0_DATA5_0x0301065a           , ULL(0x0301065a) );
+CONST_UINT64_T( MAINT0_MBA_MAINT_BUFF0_DATA6_0x0301065b           , ULL(0x0301065b) );
+CONST_UINT64_T( MAINT0_MBA_MAINT_BUFF0_DATA7_0x0301065c           , ULL(0x0301065c) );
 
 // Maint Read Buffer1
 CONST_UINT64_T( MAINT0_MBA_MAINT_BUFF1_DATA0_0x03010665           , ULL(0x03010665) );
 CONST_UINT64_T( MAINT0_MBA_MAINT_BUFF1_DATA1_0x03010666           , ULL(0x03010666) );
 CONST_UINT64_T( MAINT0_MBA_MAINT_BUFF1_DATA2_0x03010667           , ULL(0x03010667) );
 CONST_UINT64_T( MAINT0_MBA_MAINT_BUFF1_DATA3_0x03010668           , ULL(0x03010668) );
+CONST_UINT64_T( MAINT0_MBA_MAINT_BUFF1_DATA4_0x03010669           , ULL(0x03010669) );
+CONST_UINT64_T( MAINT0_MBA_MAINT_BUFF1_DATA5_0x0301066a           , ULL(0x0301066a) );
+CONST_UINT64_T( MAINT0_MBA_MAINT_BUFF1_DATA6_0x0301066b           , ULL(0x0301066b) );
+CONST_UINT64_T( MAINT0_MBA_MAINT_BUFF1_DATA7_0x0301066c           , ULL(0x0301066c) );
 
 // Maint Read Buffer2
 CONST_UINT64_T( MAINT0_MBA_MAINT_BUFF2_DATA0_0x03010675           , ULL(0x03010675) );
 CONST_UINT64_T( MAINT0_MBA_MAINT_BUFF2_DATA1_0x03010676           , ULL(0x03010676) );
 CONST_UINT64_T( MAINT0_MBA_MAINT_BUFF2_DATA2_0x03010677           , ULL(0x03010677) );
 CONST_UINT64_T( MAINT0_MBA_MAINT_BUFF2_DATA3_0x03010678           , ULL(0x03010678) );
+CONST_UINT64_T( MAINT0_MBA_MAINT_BUFF2_DATA4_0x03010679           , ULL(0x03010679) );
+CONST_UINT64_T( MAINT0_MBA_MAINT_BUFF2_DATA5_0x0301067a           , ULL(0x0301067a) );
+CONST_UINT64_T( MAINT0_MBA_MAINT_BUFF2_DATA6_0x0301067b           , ULL(0x0301067b) );
+CONST_UINT64_T( MAINT0_MBA_MAINT_BUFF2_DATA7_0x0301067c           , ULL(0x0301067c) );
 
 // Maint Read Buffer3
 CONST_UINT64_T( MAINT0_MBA_MAINT_BUFF3_DATA0_0x03010685           , ULL(0x03010685) );
 CONST_UINT64_T( MAINT0_MBA_MAINT_BUFF3_DATA1_0x03010686           , ULL(0x03010686) );
 CONST_UINT64_T( MAINT0_MBA_MAINT_BUFF3_DATA2_0x03010687           , ULL(0x03010687) );
 CONST_UINT64_T( MAINT0_MBA_MAINT_BUFF3_DATA3_0x03010688           , ULL(0x03010688) );
+CONST_UINT64_T( MAINT0_MBA_MAINT_BUFF3_DATA4_0x03010689           , ULL(0x03010689) );
+CONST_UINT64_T( MAINT0_MBA_MAINT_BUFF3_DATA5_0x0301068a           , ULL(0x0301068a) );
+CONST_UINT64_T( MAINT0_MBA_MAINT_BUFF3_DATA6_0x0301068b           , ULL(0x0301068b) );
+CONST_UINT64_T( MAINT0_MBA_MAINT_BUFF3_DATA7_0x0301068c           , ULL(0x0301068c) );
 
 // Maint Read Buffers 65th Byte
 CONST_UINT64_T( MAINT0_MBA_MAINT_BUFF_65TH_BYTE_64B_ECC0_0x03010695 , ULL(0x03010695) );
 CONST_UINT64_T( MAINT0_MBA_MAINT_BUFF_65TH_BYTE_64B_ECC1_0x03010696 , ULL(0x03010696) );
 CONST_UINT64_T( MAINT0_MBA_MAINT_BUFF_65TH_BYTE_64B_ECC2_0x03010697 , ULL(0x03010697) );
 CONST_UINT64_T( MAINT0_MBA_MAINT_BUFF_65TH_BYTE_64B_ECC3_0x03010698 , ULL(0x03010698) );
+CONST_UINT64_T( MAINT0_MBA_MAINT_BUFF_65TH_BYTE_64B_ECC4_0x03010699 , ULL(0x03010699) );
+CONST_UINT64_T( MAINT0_MBA_MAINT_BUFF_65TH_BYTE_64B_ECC5_0x0301069a , ULL(0x0301069a) );
+CONST_UINT64_T( MAINT0_MBA_MAINT_BUFF_65TH_BYTE_64B_ECC6_0x0301069b , ULL(0x0301069b) );
+CONST_UINT64_T( MAINT0_MBA_MAINT_BUFF_65TH_BYTE_64B_ECC7_0x0301069c , ULL(0x0301069c) );
 
 
 //------------------------------------------------------------------------------
@@ -607,6 +648,11 @@ CONST_UINT64_T( MBA01_MBACALFIR_MASK_AND_0x03010404  , ULL(0x03010404) );
 CONST_UINT64_T( MBA01_MBACALFIR_MASK_OR_0x03010405   , ULL(0x03010405) );
 CONST_UINT64_T( MBA01_MBACALFIR_ACTION0_0x03010406   , ULL(0x03010406) );
 CONST_UINT64_T( MBA01_MBACALFIR_ACTION1_0x03010407   , ULL(0x03010407) );
+
+//------------------------------------------------------------------------------
+//      MBA Error report register
+//------------------------------------------------------------------------------
+CONST_UINT64_T( MBA01_MBA_ERR_REPORTQ_0x0301041A     , ULL(0x0301041A) );
 
 //------------------------------------------------------------------------------
 //      MBA WRD Mode Register
@@ -645,6 +691,14 @@ CONST_UINT64_T( MBS_ECC1_MBECCFIR_ACTION0_0x02011486   , ULL(0x02011486) );
 CONST_UINT64_T( MBS_ECC1_MBECCFIR_ACTION1_0x02011487   , ULL(0x02011487) );
 
 //------------------------------------------------------------------------------
+//      MBS ECC Error Report Hold Registers
+//------------------------------------------------------------------------------
+CONST_UINT64_T( MBS_ECC0_MBSECCERR0_0x02011466           , ULL(0x02011466) );
+CONST_UINT64_T( MBS_ECC0_MBSECCERR1_0x02011467           , ULL(0x02011467) );
+CONST_UINT64_T( MBS_ECC1_MBSECCERR0_0x020114A6           , ULL(0x020114A6) );
+CONST_UINT64_T( MBS_ECC1_MBSECCERR1_0x020114A7           , ULL(0x020114A7) );
+
+//------------------------------------------------------------------------------
 //      MBS Memory ECC Mark Store Registers
 //------------------------------------------------------------------------------
 CONST_UINT64_T( MBS_ECC0_MBMS0_0x0201144B           , ULL(0x0201144B) );
@@ -664,6 +718,12 @@ CONST_UINT64_T( MBS_ECC1_MBMS4_0x0201148F           , ULL(0x0201148F) );
 CONST_UINT64_T( MBS_ECC1_MBMS5_0x02011490           , ULL(0x02011490) );
 CONST_UINT64_T( MBS_ECC1_MBMS6_0x02011491           , ULL(0x02011491) );
 CONST_UINT64_T( MBS_ECC1_MBMS7_0x02011492           , ULL(0x02011492) );
+
+//------------------------------------------------------------------------------
+//      MBS Maintenance Mark Registers
+//------------------------------------------------------------------------------
+CONST_UINT64_T( MBS_ECC0_MBMMRQ_0x0201145B          , ULL(0x0201145B) );
+CONST_UINT64_T( MBS_ECC1_MBMMRQ_0x0201149B          , ULL(0x0201149B) );
 
 //------------------------------------------------------------------------------
 //      MBS Read Bit Steer Control Registers
@@ -696,11 +756,13 @@ CONST_UINT64_T( MAINT0_MBS_MAINT_BUFF0_DATA0_0x0201160A				, ULL(0x0201160A) );
 CONST_UINT64_T( MAINT0_MBS_MAINT_BUFF0_DATA1_0x0201160B				, ULL(0x0201160B) );
 CONST_UINT64_T( MAINT0_MBS_MAINT_BUFF0_DATA2_0x0201160C				, ULL(0x0201160C) );
 CONST_UINT64_T( MAINT0_MBS_MAINT_BUFF0_DATA3_0x0201160D				, ULL(0x0201160D) );
+CONST_UINT64_T( MAINT0_MBS_MAINT_BUFF0_DATA4_0x0201160E				, ULL(0x0201160E) );
 
 CONST_UINT64_T( MAINT0_MBS_MAINT_BUFF0_DATA_ECC0_0x02011612			, ULL(0x02011612) );
 CONST_UINT64_T( MAINT0_MBS_MAINT_BUFF0_DATA_ECC1_0x02011613			, ULL(0x02011613) );
 CONST_UINT64_T( MAINT0_MBS_MAINT_BUFF0_DATA_ECC2_0x02011614			, ULL(0x02011614) );
 CONST_UINT64_T( MAINT0_MBS_MAINT_BUFF0_DATA_ECC3_0x02011615			, ULL(0x02011615) );
+CONST_UINT64_T( MAINT0_MBS_MAINT_BUFF0_DATA_ECC4_0x02011616			, ULL(0x02011616) );
 
 // Maint Write Buffer 1
 CONST_UINT64_T( MAINT0_MBS_MAINT_BUFF1_DATA0_0x0201161A				, ULL(0x0201161A) );
@@ -751,11 +813,13 @@ CONST_UINT64_T( MAINT1_MBS_MAINT_BUFF0_DATA0_0x0201170A				, ULL(0x0201170A) );
 CONST_UINT64_T( MAINT1_MBS_MAINT_BUFF0_DATA1_0x0201170B				, ULL(0x0201170B) );
 CONST_UINT64_T( MAINT1_MBS_MAINT_BUFF0_DATA2_0x0201170C				, ULL(0x0201170C) );
 CONST_UINT64_T( MAINT1_MBS_MAINT_BUFF0_DATA3_0x0201170D				, ULL(0x0201170D) );
+CONST_UINT64_T( MAINT1_MBS_MAINT_BUFF0_DATA4_0x0201170E				, ULL(0x0201170E) );
 
 CONST_UINT64_T( MAINT1_MBS_MAINT_BUFF0_DATA_ECC0_0x02011712			, ULL(0x02011712) );
 CONST_UINT64_T( MAINT1_MBS_MAINT_BUFF0_DATA_ECC1_0x02011713			, ULL(0x02011713) );
 CONST_UINT64_T( MAINT1_MBS_MAINT_BUFF0_DATA_ECC2_0x02011714			, ULL(0x02011714) );
 CONST_UINT64_T( MAINT1_MBS_MAINT_BUFF0_DATA_ECC3_0x02011715			, ULL(0x02011715) );
+CONST_UINT64_T( MAINT1_MBS_MAINT_BUFF0_DATA_ECC4_0x02011716			, ULL(0x02011716) );
 
 // Maint Write Buffer 1
 CONST_UINT64_T( MAINT1_MBS_MAINT_BUFF1_DATA0_0x0201171A				, ULL(0x0201171A) );
@@ -807,6 +871,67 @@ CONST_UINT64_T( MBS_ECC1_MBSECCQ_0x0201148A           , ULL(0x0201148A) );
 //------------------------------------------------------------------------------
 CONST_UINT64_T( MBS01_MBSTRQ_0x02011655           , ULL(0x02011655) );
 CONST_UINT64_T( MBS23_MBSTRQ_0x02011755           , ULL(0x02011755) );
+
+//------------------------------------------------------------------------------
+//	    MBS Memory Scrub/Read Error Count Registers
+//------------------------------------------------------------------------------
+CONST_UINT64_T( MBS01_MBSEC0Q_0x02011653           , ULL(0x02011653) );
+CONST_UINT64_T( MBS01_MBSEC1Q_0x02011654           , ULL(0x02011654) );
+CONST_UINT64_T( MBS23_MBSEC0Q_0x02011753           , ULL(0x02011753) );
+CONST_UINT64_T( MBS23_MBSEC1Q_0x02011754           , ULL(0x02011754) );
+
+//------------------------------------------------------------------------------
+//      MBS Memory Scrub/Read Symbol Error Count Registers
+//------------------------------------------------------------------------------
+CONST_UINT64_T( MBS01_MBSSYMEC0Q_0x02011656           , ULL(0x02011656) );
+CONST_UINT64_T( MBS01_MBSSYMEC1Q_0x02011657           , ULL(0x02011657) );
+CONST_UINT64_T( MBS01_MBSSYMEC2Q_0x02011658           , ULL(0x02011658) );
+CONST_UINT64_T( MBS01_MBSSYMEC3Q_0x02011659           , ULL(0x02011659) );
+CONST_UINT64_T( MBS01_MBSSYMEC4Q_0x0201165A           , ULL(0x0201165A) );
+CONST_UINT64_T( MBS01_MBSSYMEC5Q_0x0201165B           , ULL(0x0201165B) );
+CONST_UINT64_T( MBS01_MBSSYMEC6Q_0x0201165C           , ULL(0x0201165C) );
+CONST_UINT64_T( MBS01_MBSSYMEC7Q_0x0201165D           , ULL(0x0201165D) );
+CONST_UINT64_T( MBS01_MBSSYMEC8Q_0x0201165E           , ULL(0x0201165E) );
+CONST_UINT64_T( MBS23_MBSSYMEC0Q_0x02011756           , ULL(0x02011756) );
+CONST_UINT64_T( MBS23_MBSSYMEC1Q_0x02011757           , ULL(0x02011757) );
+CONST_UINT64_T( MBS23_MBSSYMEC2Q_0x02011758           , ULL(0x02011758) );
+CONST_UINT64_T( MBS23_MBSSYMEC3Q_0x02011759           , ULL(0x02011759) );
+CONST_UINT64_T( MBS23_MBSSYMEC4Q_0x0201175A           , ULL(0x0201175A) );
+CONST_UINT64_T( MBS23_MBSSYMEC5Q_0x0201175B           , ULL(0x0201175B) );
+CONST_UINT64_T( MBS23_MBSSYMEC6Q_0x0201175C           , ULL(0x0201175C) );
+CONST_UINT64_T( MBS23_MBSSYMEC7Q_0x0201175D           , ULL(0x0201175D) );
+CONST_UINT64_T( MBS23_MBSSYMEC8Q_0x0201175E           , ULL(0x0201175E) );
+
+
+//------------------------------------------------------------------------------
+//      MBS Memory Error Vector Register
+//------------------------------------------------------------------------------
+CONST_UINT64_T( MBS01_MBSEVRQ_0x0201165F              , ULL(0x0201165F) );
+CONST_UINT64_T( MBS23_MBSEVRQ_0x0201175F              , ULL(0x0201175F) );
+
+//------------------------------------------------------------------------------
+//      MBS Memory NCE Error Address Register
+//------------------------------------------------------------------------------
+CONST_UINT64_T( MBS01_MBNCERQ_0x02011660              , ULL(0x02011660) );
+CONST_UINT64_T( MBS23_MBNCERQ_0x02011760              , ULL(0x02011760) );
+
+//------------------------------------------------------------------------------
+//      MBS Memory RCE Error Address Register
+//------------------------------------------------------------------------------
+CONST_UINT64_T( MBS01_MBRCERQ_0x02011661              , ULL(0x02011661) );
+CONST_UINT64_T( MBS23_MBRCERQ_0x02011761              , ULL(0x02011761) );
+
+//------------------------------------------------------------------------------
+//      MBS Memory MPE Error Address Register
+//------------------------------------------------------------------------------
+CONST_UINT64_T( MBS01_MBMPERQ_0x02011662              , ULL(0x02011662) );
+CONST_UINT64_T( MBS23_MBMPERQ_0x02011762              , ULL(0x02011762) );
+
+//------------------------------------------------------------------------------
+//      MBS Memory UE Error Address Register
+//------------------------------------------------------------------------------
+CONST_UINT64_T( MBS01_MBUERQ_0x02011663               , ULL(0x02011663) );
+CONST_UINT64_T( MBS23_MBUERQ_0x02011763               , ULL(0x02011763) );
 
 //------------------------------------------------------------------------------
 //      MBS FIR Registers
@@ -1363,6 +1488,25 @@ This section is automatically updated by CVS when you check in this file.
 Be sure to create CVS comments when you commit so that they can be included here.
 
 $Log: cen_scom_addresses.H,v $
+Revision 1.46  2012/12/19 15:31:24  gollub
+
+Added:
+MCBERRPTQ
+MBA_MAINT_BUFF
+MBA_MAINT_BUFF_65TH_BYTE_64B_ECC
+MBA_ERR_REPORTQ
+MBSECCERR
+MBMMRQ
+MBS_MAINT_BUFF0_DATA
+MBS_MAINT_BUFF0_DATA_ECC
+MBSEC
+MBSSYMEC
+MBSEVRQ
+MBNCERQ
+MBRCERQ
+MBMPERQ
+MBUERQ
+
 Revision 1.45  2012/11/20 18:51:15  lapietra
 Fixed errors in get_data
 

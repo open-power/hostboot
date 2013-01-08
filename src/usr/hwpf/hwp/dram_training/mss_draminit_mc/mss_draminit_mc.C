@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012                   */
+/* COPYRIGHT International Business Machines Corp. 2012,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_draminit_mc.C,v 1.26 2012/09/11 14:35:22 jdsloat Exp $
+// $Id: mss_draminit_mc.C,v 1.27 2012/12/21 20:39:08 gollub Exp $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
 // *! All Rights Reserved -- Property of IBM
@@ -44,6 +44,7 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
+//  1.27   | gollub   |21-DEC-12| Calling mss_unmask_maint_errors and mss_unmask_inband_errors after mss_draminit_mc_cloned
 //  1.25   | jdsloat  |11-SEP-12| Changed Periodic Cal to Execute via MBA regs depending upon the ZQ Cal and MEM Cal timer values; 0 = disabled
 //  1.24   | bellows  |16-JUL-12| added in Id tag
 //  1.22   | bellows  |13-JUL-12| Fixed periodic cal bit 61 being set. HW214829
@@ -88,6 +89,7 @@
 //  Centaur function Includes
 //----------------------------------------------------------------------
 #include <mss_funcs.H>
+#include <mss_unmask_errors.H>
 
 //----------------------------------------------------------------------
 //  Address Includes
@@ -103,6 +105,7 @@ using namespace fapi;
 //----------------------------------------------------------------------
 //  Subroutine declarations 
 //----------------------------------------------------------------------
+ReturnCode mss_draminit_mc_cloned(Target& i_target);
 ReturnCode mss_start_refresh (Target& i_mbatarget, Target& i_centarget);
 ReturnCode mss_enable_periodic_cal(Target& i_target);
 ReturnCode mss_set_iml_complete(Target& i_target);
@@ -111,9 +114,32 @@ ReturnCode mss_enable_control_bit_ecc(Target& i_target);
 ReturnCode mss_ccs_mode_reset(Target& i_target);
 
 
+ReturnCode mss_draminit_mc(Target& i_target)
+{
+    // Target is centaur.mba
+    
+    fapi::ReturnCode l_rc;
+    
+    l_rc = mss_draminit_mc_cloned(i_target);
+    
+	// If mss_unmask_maint_errors gets it's own bad rc,
+	// it will commit the passed in rc (if non-zero), and return it's own bad rc.
+	// Else if mss_unmask_maint_errors runs clean, 
+	// it will just return the passed in rc.
+	//l_rc = mss_unmask_maint_errors(i_target, l_rc); // TODO: uncomment after this can be tested on hw
+
+	// If mss_unmask_inband_errors gets it's own bad rc,
+	// it will commit the passed in rc (if non-zero), and return it's own bad rc.
+	// Else if mss_unmask_inband_errors runs clean, 
+	// it will just return the passed in rc.
+	//l_rc = mss_unmask_inband_errors(i_target, l_rc); // TODO: uncomment after this can be tested on hw
+
+	return l_rc;
+}
 
 
-ReturnCode mss_draminit_mc (Target& i_target)
+
+ReturnCode mss_draminit_mc_cloned(Target& i_target)
 {
 // Target is centaur
 //

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012                   */
+/* COPYRIGHT International Business Machines Corp. 2012,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_mcbist.H,v 1.17 2012/12/14 06:31:11 sasethur Exp $
+// $Id: mss_mcbist.H,v 1.20 2013/01/03 14:55:10 sasethur Exp $
 // *!***************************************************************************
 // *! (C) Copyright International Business Machines Corp. 1997, 1998
 // *!           All Rights Reserved -- Property of IBM
@@ -38,6 +38,8 @@
 //-------------------------------------------------------------------------------
 // Version:|Author: | Date:   | Comment:
 // --------|--------|---------|--------------------------------------------------
+//   1.20  |aditya  |01/03/12| Updated FW Comments 
+//   1.18  |aditya  |12/18/12| Updated Review Comments 
 //   1.17  |aditya  |12/14/12 |Updated FW review comments   
 //   1.16  |aditya  |12/6/12  | Updated Review Comments
 //   1.15  |aditya  |11/15/12 | Updated for FW REVIEW COMMENTS
@@ -153,7 +155,8 @@ enum mcbist_data_gen
     MCBIST_888_XFER,
     FIRST_XFER_X4MODE,
     MCBIST_LONG,
-    PSEUDORANDOM
+    PSEUDORANDOM,
+	CASTLE
 };
 
 enum mcbist_oper_type
@@ -257,6 +260,6 @@ fapi::ReturnCode cfg_byte_mask(const fapi::Target & i_target_mba,uint8_t i_rank,
 fapi::ReturnCode start_mcb(const fapi::Target & i_target_mba);
 fapi::ReturnCode setup_mcbist(const fapi::Target & i_target_mba, uint8_t i_port,mcbist_data_gen i_mcbpatt,mcbist_test_mem i_mcbtest,mcbist_byte_mask i_mcbbytemask,uint8_t i_mcbrotate,uint8_t i_pattern,uint8_t i_test_type,uint8_t i_rank);
 fapi::ReturnCode cfg_mcb_addr(const fapi::Target & i_target_mba,uint8_t i_rank,uint8_t i_port);
-fapi::ReturnCode  mcb_error_map_print(const fapi::Target & i_target_mba,uint8_t i_port,uint8_t i_rank,ecmdDataBufferBase & l_mcb_fail_320);
+fapi::ReturnCode  mcb_error_map_print(const fapi::Target & i_target_mba,uint8_t i_port,uint8_t i_rank,ecmdDataBufferBase & i_mcb_fail_320);
 }
 #endif

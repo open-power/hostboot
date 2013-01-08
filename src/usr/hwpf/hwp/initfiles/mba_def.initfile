@@ -1,5 +1,5 @@
 
-#-- $Id: mba_def.initfile,v 1.22 2012/12/04 16:03:26 mwuu Exp $
+#-- $Id: mba_def.initfile,v 1.24 2013/01/04 20:38:58 yctschan Exp $
 #-- CHANGE HISTORY:
 #--------------------------------------------------------------------------------
 #-- Version:|Author: | Date:  | Comment:
@@ -233,7 +233,7 @@ define def_has_spare    =   (SYS.ATTR_IS_SIMULATION==0) ;
 #define  def_ATTR_EFF_DRAM_2N_MODE = 0;
 #define def_ATTR_EFF_IBM_TYPE           = (SYS.ATTR_IS_SIMULATION==0) ;   # will evaluate to false
 #define def_ATTR_EFF_NUM_DROPS_PER_PORT = (SYS.ATTR_IS_SIMULATION==0) ;   # will evaluate to false
-define def_ATTR_EFF_DRAM_2N_MODE       = (SYS.ATTR_IS_SIMULATION==0) ;   # will evaluate to false
+define def_ATTR_EFF_DRAM_2N_MODE       = (CENTAUR.ATTR_MSS_FREQ == 1400) ;   # will evaluate to false
 
 define CENTAUR = TGT1;
 
@@ -251,15 +251,15 @@ define def_1b_2socket        = (((((ATTR_CHIP_UNIT_POS == 1 ) && (ATTR_EFF_IBM_T
 ## 1C 1 and 2 sockets not supported
 #define def_1c_1socket   = 0;
 #define def_1c_2socket   = 0;
-define def_1c_1socket        = (SYS.ATTR_IS_SIMULATION==0) ;   # will evaluate to false
-define def_1c_2socket        = (SYS.ATTR_IS_SIMULATION==0) ;   # will evaluate to false
+define def_1c_1socket        = (CENTAUR.ATTR_MSS_FREQ == 1400) ;   # will evaluate to false
+define def_1c_2socket        = (CENTAUR.ATTR_MSS_FREQ == 1400) ;   # will evaluate to false
 define def_1c_cdimm          = ((((ATTR_CHIP_UNIT_POS == 1 ) && (ATTR_EFF_IBM_TYPE[1][0] == 3 )) || ((ATTR_CHIP_UNIT_POS == 0 ) && (ATTR_EFF_IBM_TYPE[0][0] == 3 ))) && (ATTR_EFF_NUM_DROPS_PER_PORT == 2) && (ATTR_EFF_DIMM_TYPE == 0));  # same as type1B 2 socket RDIMM cfg for DDR3/4
 
 ## Current they is no 1D IBM type in the attribute
 #define def_1d_1socket       = 0;
 #define def_1d_2socket       = 0;
-#define def_1d_1socket        = (SYS.ATTR_IS_SIMULATION==0) ;   # will evaluate to false
-#define def_1d_2socket        = (SYS.ATTR_IS_SIMULATION==0) ;   # will evaluate to false
+#define def_1d_1socket        = (CENTAUR.ATTR_MSS_FREQ == 1400) ;   # will evaluate to false
+#define def_1d_2socket        = (CENTAUR.ATTR_MSS_FREQ == 1400) ;   # will evaluate to false
 define def_1d_1socket       = ((((ATTR_CHIP_UNIT_POS == 1 ) && (ATTR_EFF_IBM_TYPE[1][0] == 4 )) || ((ATTR_CHIP_UNIT_POS == 0 ) && (ATTR_EFF_IBM_TYPE[0][0] == 1 ))) && (ATTR_EFF_NUM_DROPS_PER_PORT == 1));
 define def_1d_2socket       = ((((ATTR_CHIP_UNIT_POS == 1 ) && (ATTR_EFF_IBM_TYPE[1][0] == 4 )) || ((ATTR_CHIP_UNIT_POS == 0 ) && (ATTR_EFF_IBM_TYPE[0][0] == 1 ))) && (ATTR_EFF_NUM_DROPS_PER_PORT == 2));
 
@@ -349,19 +349,19 @@ define def_mtype_3c = ((def_3c_1socket_ddr4)||(def_3c_2socket_ddr4)||(def_4c_ddr
 #define def_mtype_4b = 0; # not supported
 #define def_mtype_4c = 0; # not supported
 #define def_mtype_5a = 0; # not supported
-define def_mtype_4a = (SYS.ATTR_IS_SIMULATION==0) ;   # will evaluate to false
-define def_mtype_4b = (SYS.ATTR_IS_SIMULATION==0) ;   # will evaluate to false
-define def_mtype_4c = (SYS.ATTR_IS_SIMULATION==0) ;   # will evaluate to false
-define def_mtype_5a = (SYS.ATTR_IS_SIMULATION==0) ;   # will evaluate to false
+define def_mtype_4a = (CENTAUR.ATTR_MSS_FREQ == 1400) ;   # will evaluate to false
+define def_mtype_4b = (CENTAUR.ATTR_MSS_FREQ == 1400) ;   # will evaluate to false
+define def_mtype_4c = (CENTAUR.ATTR_MSS_FREQ == 1400) ;   # will evaluate to false
+define def_mtype_5a = (CENTAUR.ATTR_MSS_FREQ == 1400) ;   # will evaluate to false
 define def_mtype_5b = ((def_5b_1socket     )||(def_5b_2socket));
 define def_mtype_5c = ((def_5c_1socket     )||(def_5c_2socket));
 define def_mtype_5d = ((def_5d_1socket     )||(def_5d_2socket));
 #define def_mtype_6a = 0; # not supported
 #define def_mtype_6b = 0; # not supported
 #define def_mtype_6c = 0; # not supported
-define def_mtype_6a = (SYS.ATTR_IS_SIMULATION==0) ;   # will evaluate to false
-define def_mtype_6b = (SYS.ATTR_IS_SIMULATION==0) ;   # will evaluate to false
-define def_mtype_6c = (SYS.ATTR_IS_SIMULATION==0) ;   # will evaluate to false
+define def_mtype_6a = (CENTAUR.ATTR_MSS_FREQ == 1400) ;   # will evaluate to false
+define def_mtype_6b = (CENTAUR.ATTR_MSS_FREQ == 1400) ;   # will evaluate to false
+define def_mtype_6c = (CENTAUR.ATTR_MSS_FREQ == 1400) ;   # will evaluate to false
 define def_mtype_7a = ((def_7a_1socket     )||(def_7a_2socket     )||(def_7a_1socket_ddr4)||(def_7a_2socket_ddr4));
 define def_mtype_7b = ((def_7b_1socket     )||(def_7b_2socket     )||(def_7b_1socket_ddr4)||(def_7b_2socket_ddr4));
 define def_mtype_7c = ((def_7c_1socket     )||(def_7c_2socket     )||(def_7c_1socket_ddr4)||(def_7c_2socket_ddr4));
@@ -563,16 +563,16 @@ define  def_ddr4_1866_13_13_13_LR = ((ATTR_EFF_DRAM_GEN == 2 ) && ( CENTAUR.ATTR
 #define  def_ddr4_2133_13_13_13_2N = 0;
 #define  def_ddr4_2133_13_13_13_L2 = 0;
 #define  def_ddr4_2133_13_13_13_LR = 0;
-define  def_ddr4_2133_12_12_12    = (SYS.ATTR_IS_SIMULATION==0);
-define  def_ddr4_2133_12_12_12R   = (SYS.ATTR_IS_SIMULATION==0);
-define  def_ddr4_2133_12_12_12_2N = (SYS.ATTR_IS_SIMULATION==0);
-define  def_ddr4_2133_12_12_12_L2 = (SYS.ATTR_IS_SIMULATION==0);
-define  def_ddr4_2133_12_12_12_LR = (SYS.ATTR_IS_SIMULATION==0);
-define  def_ddr4_2133_13_13_13    = (SYS.ATTR_IS_SIMULATION==0);
-define  def_ddr4_2133_13_13_13R   = (SYS.ATTR_IS_SIMULATION==0);
-define  def_ddr4_2133_13_13_13_2N = (SYS.ATTR_IS_SIMULATION==0);
-define  def_ddr4_2133_13_13_13_L2 = (SYS.ATTR_IS_SIMULATION==0);
-define  def_ddr4_2133_13_13_13_LR = (SYS.ATTR_IS_SIMULATION==0);
+define  def_ddr4_2133_12_12_12    = (CENTAUR.ATTR_MSS_FREQ == 1400);
+define  def_ddr4_2133_12_12_12R   = (CENTAUR.ATTR_MSS_FREQ == 1400);
+define  def_ddr4_2133_12_12_12_2N = (CENTAUR.ATTR_MSS_FREQ == 1400);
+define  def_ddr4_2133_12_12_12_L2 = (CENTAUR.ATTR_MSS_FREQ == 1400);
+define  def_ddr4_2133_12_12_12_LR = (CENTAUR.ATTR_MSS_FREQ == 1400);
+define  def_ddr4_2133_13_13_13    = (CENTAUR.ATTR_MSS_FREQ == 1400);
+define  def_ddr4_2133_13_13_13R   = (CENTAUR.ATTR_MSS_FREQ == 1400);
+define  def_ddr4_2133_13_13_13_2N = (CENTAUR.ATTR_MSS_FREQ == 1400);
+define  def_ddr4_2133_13_13_13_L2 = (CENTAUR.ATTR_MSS_FREQ == 1400);
+define  def_ddr4_2133_13_13_13_LR = (CENTAUR.ATTR_MSS_FREQ == 1400);
 
 #define  def_ddr4_2133_12_12_12    = ((ATTR_EFF_DRAM_GEN == 2 ) && ( CENTAUR.ATTR_MSS_FREQ == 2133 ) && ( ATTR_EFF_DRAM_CL == 12 ) && ( ATTR_EFF_DRAM_TRCD == 12 ) && ( ATTR_EFF_DRAM_TRP == 12 ) && ( def_ATTR_EFF_DRAM_2N_MODE == 0 ) && (ATTR_EFF_DIMM_TYPE == 0 || ATTR_EFF_DIMM_TYPE == 2));
 #define  def_ddr4_2133_12_12_12R   = ((ATTR_EFF_DRAM_GEN == 2 ) && ( CENTAUR.ATTR_MSS_FREQ == 2133 ) && ( ATTR_EFF_DRAM_CL == 12 ) && ( ATTR_EFF_DRAM_TRCD == 12 ) && ( ATTR_EFF_DRAM_TRP == 12 ) && ( def_ATTR_EFF_DRAM_2N_MODE == 0 ) && (ATTR_EFF_DIMM_TYPE == 1 ));
@@ -596,16 +596,16 @@ define  def_ddr4_2133_13_13_13_LR = (SYS.ATTR_IS_SIMULATION==0);
 #define  def_ddr4_2400_14_14_14_2N = 0;
 #define  def_ddr4_2400_14_14_14_L2 = 0;
 #define  def_ddr4_2400_14_14_14_LR = 0;
-define  def_ddr4_2400_13_13_13    = (SYS.ATTR_IS_SIMULATION==0);
-define  def_ddr4_2400_13_13_13R   = (SYS.ATTR_IS_SIMULATION==0);
-define  def_ddr4_2400_13_13_13_2N = (SYS.ATTR_IS_SIMULATION==0);
-define  def_ddr4_2400_13_13_13_L2 = (SYS.ATTR_IS_SIMULATION==0);
-define  def_ddr4_2400_13_13_13_LR = (SYS.ATTR_IS_SIMULATION==0);
-define  def_ddr4_2400_14_14_14    = (SYS.ATTR_IS_SIMULATION==0);
-define  def_ddr4_2400_14_14_14R   = (SYS.ATTR_IS_SIMULATION==0);
-define  def_ddr4_2400_14_14_14_2N = (SYS.ATTR_IS_SIMULATION==0);
-define  def_ddr4_2400_14_14_14_L2 = (SYS.ATTR_IS_SIMULATION==0);
-define  def_ddr4_2400_14_14_14_LR = (SYS.ATTR_IS_SIMULATION==0);
+define  def_ddr4_2400_13_13_13    = (CENTAUR.ATTR_MSS_FREQ == 1400);
+define  def_ddr4_2400_13_13_13R   = (CENTAUR.ATTR_MSS_FREQ == 1400);
+define  def_ddr4_2400_13_13_13_2N = (CENTAUR.ATTR_MSS_FREQ == 1400);
+define  def_ddr4_2400_13_13_13_L2 = (CENTAUR.ATTR_MSS_FREQ == 1400);
+define  def_ddr4_2400_13_13_13_LR = (CENTAUR.ATTR_MSS_FREQ == 1400);
+define  def_ddr4_2400_14_14_14    = (CENTAUR.ATTR_MSS_FREQ == 1400);
+define  def_ddr4_2400_14_14_14R   = (CENTAUR.ATTR_MSS_FREQ == 1400);
+define  def_ddr4_2400_14_14_14_2N = (CENTAUR.ATTR_MSS_FREQ == 1400);
+define  def_ddr4_2400_14_14_14_L2 = (CENTAUR.ATTR_MSS_FREQ == 1400);
+define  def_ddr4_2400_14_14_14_LR = (CENTAUR.ATTR_MSS_FREQ == 1400);
 
 #define  def_ddr4_2400_13_13_13    = ((ATTR_EFF_DRAM_GEN == 2 ) && ( CENTAUR.ATTR_MSS_FREQ == 2400 ) && ( ATTR_EFF_DRAM_CL == 13 ) && ( ATTR_EFF_DRAM_TRCD == 13 ) && ( ATTR_EFF_DRAM_TRP == 13 ) && ( def_ATTR_EFF_DRAM_2N_MODE == 0 ) && (ATTR_EFF_DIMM_TYPE == 0 || ATTR_EFF_DIMM_TYPE == 2));
 #define  def_ddr4_2400_13_13_13R   = ((ATTR_EFF_DRAM_GEN == 2 ) && ( CENTAUR.ATTR_MSS_FREQ == 2400 ) && ( ATTR_EFF_DRAM_CL == 13 ) && ( ATTR_EFF_DRAM_TRCD == 13 ) && ( ATTR_EFF_DRAM_TRP == 13 ) && ( def_ATTR_EFF_DRAM_2N_MODE == 0 ) && (ATTR_EFF_DIMM_TYPE == 1 ));
@@ -2057,24 +2057,25 @@ scom 0x0301040A     {
     30:35   ,   0b010001    ,           1            ,    (def_mba_dsm0q_cfg_wrdata_dly17 == 1); # wrdata_dly		26
     30:35   ,   0b010010    ,           1            ,    (def_mba_dsm0q_cfg_wrdata_dly18 == 1); # wrdata_dly		26
     30:35   ,   0b010011    ,           1            ,    (def_mba_dsm0q_cfg_wrdata_dly19 == 1); # wrdata_dly		26
-    36:41   ,   0b001100    ,           1            ,    (def_mba_dsm0q_cfg_rdtag_dly12 == 1); # rdtag_dly		27
-    36:41   ,   0b001101    ,           1            ,    (def_mba_dsm0q_cfg_rdtag_dly13 == 1); # rdtag_dly		27
-    36:41   ,   0b001110    ,           1            ,    (def_mba_dsm0q_cfg_rdtag_dly14 == 1); # rdtag_dly		27
-    36:41   ,   0b001111    ,           1            ,    (def_mba_dsm0q_cfg_rdtag_dly15 == 1); # rdtag_dly		27
-    36:41   ,   0b010000    ,           1            ,    (def_mba_dsm0q_cfg_rdtag_dly16 == 1); # rdtag_dly		27
-    36:41   ,   0b010001    ,           1            ,    (def_mba_dsm0q_cfg_rdtag_dly17 == 1); # rdtag_dly		27
-    36:41   ,   0b010010    ,           1            ,    (def_mba_dsm0q_cfg_rdtag_dly18 == 1); # rdtag_dly		27
-    36:41   ,   0b010011    ,           1            ,    (def_mba_dsm0q_cfg_rdtag_dly19 == 1); # rdtag_dly		27
-    36:41   ,   0b010100    ,           1            ,    (def_mba_dsm0q_cfg_rdtag_dly20 == 1); # rdtag_dly		27
-    36:41   ,   0b010101    ,           1            ,    (def_mba_dsm0q_cfg_rdtag_dly21 == 1); # rdtag_dly		27
-    36:41   ,   0b010110    ,           1            ,    (def_mba_dsm0q_cfg_rdtag_dly22 == 1); # rdtag_dly		27
-    36:41   ,   0b010111    ,           1            ,    (def_mba_dsm0q_cfg_rdtag_dly23 == 1); # rdtag_dly		27
-    36:41   ,   0b011000    ,           1            ,    (def_mba_dsm0q_cfg_rdtag_dly24 == 1); # rdtag_dly		27
-    36:41   ,   0b011001    ,           1            ,    (def_mba_dsm0q_cfg_rdtag_dly25 == 1); # rdtag_dly		27
-    36:41   ,   0b011010    ,           1            ,    (def_mba_dsm0q_cfg_rdtag_dly26 == 1); # rdtag_dly		27
-    36:41   ,   0b011011    ,           1            ,    (def_mba_dsm0q_cfg_rdtag_dly27 == 1); # rdtag_dly		27
-    36:41   ,   0b011100    ,           1            ,    (def_mba_dsm0q_cfg_rdtag_dly28 == 1); # rdtag_dly		27
-    36:41   ,   0b011101    ,           1            ,    (def_mba_dsm0q_cfg_rdtag_dly29 == 1); # rdtag_dly		27
+#    36:41   ,   0b001100    ,           1            ,    (def_mba_dsm0q_cfg_rdtag_dly12 == 1); # rdtag_dly		27
+#    36:41   ,   0b001101    ,           1            ,    (def_mba_dsm0q_cfg_rdtag_dly13 == 1); # rdtag_dly		27
+#    36:41   ,   0b001110    ,           1            ,    (def_mba_dsm0q_cfg_rdtag_dly14 == 1); # rdtag_dly		27
+#    36:41   ,   0b001111    ,           1            ,    (def_mba_dsm0q_cfg_rdtag_dly15 == 1); # rdtag_dly		27
+#    36:41   ,   0b010000    ,           1            ,    (def_mba_dsm0q_cfg_rdtag_dly16 == 1); # rdtag_dly		27
+#    36:41   ,   0b010001    ,           1            ,    (def_mba_dsm0q_cfg_rdtag_dly17 == 1); # rdtag_dly		27
+#    36:41   ,   0b010010    ,           1            ,    (def_mba_dsm0q_cfg_rdtag_dly18 == 1); # rdtag_dly		27
+#    36:41   ,   0b010011    ,           1            ,    (def_mba_dsm0q_cfg_rdtag_dly19 == 1); # rdtag_dly		27
+#    36:41   ,   0b010100    ,           1            ,    (def_mba_dsm0q_cfg_rdtag_dly20 == 1); # rdtag_dly		27
+#    36:41   ,   0b010101    ,           1            ,    (def_mba_dsm0q_cfg_rdtag_dly21 == 1); # rdtag_dly		27
+#    36:41   ,   0b010110    ,           1            ,    (def_mba_dsm0q_cfg_rdtag_dly22 == 1); # rdtag_dly		27
+#    36:41   ,   0b010111    ,           1            ,    (def_mba_dsm0q_cfg_rdtag_dly23 == 1); # rdtag_dly		27
+#    36:41   ,   0b011000    ,           1            ,    (def_mba_dsm0q_cfg_rdtag_dly24 == 1); # rdtag_dly		27
+#    36:41   ,   0b011001    ,           1            ,    (def_mba_dsm0q_cfg_rdtag_dly25 == 1); # rdtag_dly		27
+#    36:41   ,   0b011010    ,           1            ,    (def_mba_dsm0q_cfg_rdtag_dly26 == 1); # rdtag_dly		27
+#    36:41   ,   0b011011    ,           1            ,    (def_mba_dsm0q_cfg_rdtag_dly27 == 1); # rdtag_dly		27
+#    36:41   ,   0b011100    ,           1            ,    (def_mba_dsm0q_cfg_rdtag_dly28 == 1); # rdtag_dly		27
+#    36:41   ,   0b011101    ,           1            ,    (def_mba_dsm0q_cfg_rdtag_dly29 == 1); # rdtag_dly		27
+    36:41   ,   0b100100    ,           1            ,    any                                 ; # rdtag_dly		36  temporary fix for testfloor
     43:48   ,   0b000101    ,           1            ,    (def_mba_dsm0q_CFG_RODT_BC4_END_DLY5 == 1); # CFG_RODT_BC4_END_DLY 28
     43:48   ,   0b000110    ,           1            ,    (def_mba_dsm0q_CFG_RODT_BC4_END_DLY6 == 1); # CFG_RODT_BC4_END_DLY 28
     43:48   ,   0b000111    ,           1            ,    (def_mba_dsm0q_CFG_RODT_BC4_END_DLY7 == 1); # CFG_RODT_BC4_END_DLY 28
@@ -2406,20 +2407,26 @@ scom 0x03010433      {
 }
 
 #define def_zqcal_timebase_in_ms=(16384*(1/CENTAUR.ATTR_MSS_FREQ)*.001)
-define def_zq_intv  = (ATTR_EFF_ZQCAL_INTERVAL / 16384);
+define def_zq_intv_sel10  = (ATTR_EFF_ZQCAL_INTERVAL / 16384);
+define def_zq_intv_sel11  = (ATTR_EFF_ZQCAL_INTERVAL / 16777216);
 #define def_memcal_timebase_in_ms=(16384*(1/CENTAUR.ATTR_MSS_FREQ)*.001)
-define def_mem_intv =  (ATTR_EFF_MEMCAL_INTERVAL / 16384);
+define def_mem_intv_sel10 =  (ATTR_EFF_MEMCAL_INTERVAL / 16384);
+define def_mem_intv_sel11 =  (ATTR_EFF_MEMCAL_INTERVAL / 16777216);
 #    ATTR_EFF_MEMCAL_INTERVAL are in clock cycles
 #    ATTR_EFF_ZQCAL_INTERVAL are in clock cycles
-
+#ATTR_EFF_MEMCAL_INTERVAL    u32    0x027b9fba
+#ATTR_EFF_ZQCAL_INTERVAL    u32    0x008798a
 # MBA_CAL0Q (this timer to be used for zq cal)
 #
 scom 0x0301040F    {
 
     bits    ,   scom_data        ,       ATTR_FUNCTIONAL,   expr;
     0       ,   0b0              ,          1            ,     any;    #disable timer initially
-    1:2     ,   0b10             ,          1            ,     any;    #timebase; use 16384 cycle timebase; zqcal_timebase_in_ms=16384*(1/DRAM_freq_in_MHz)*1e-3
-    3:11    ,   def_zq_intv      ,          1            ,     any;    #interval timer; computed using zq cal interval attribute; zq_intv=zq_cal_interval_attr/zqcal_timebase_in_ms (assumes attribute defined in milliseconds)
+    1:2     ,   0b10             ,          1            ,     (def_zq_intv_sel10 < 512);    #timebase; use 16384 cycle timebase if less than max of 512
+    1:2     ,   0b11             ,          1            ,     (def_zq_intv_sel10 > 511);    #timebase; use 16777216 cycle timebase if greater than max of 512
+    3:11    ,   def_zq_intv_sel10,          1            ,     (def_zq_intv_sel10 < 512);    #interval timer; computed using zq cal interval attribute; zq_intv=zq_cal_interval_attr/zqcal_timebase_in_ms (assumes attribute defined in milliseconds)
+    3:11    ,   0b000000001      ,          1            ,     (def_zq_intv_sel10 > 511) && (def_zq_intv_sel11 == 0);    #interval timer; computed using zq cal interval attribute; zq_intv=zq_cal_interval_attr/zqcal_timebase_in_ms (assumes attribute defined in milliseconds)
+    3:11    ,   def_zq_intv_sel11,          1            ,     (def_zq_intv_sel10 > 511) && (def_zq_intv_sel11 > 0);    #interval timer; computed using zq cal interval attribute; zq_intv=zq_cal_interval_attr/zqcal_timebase_in_ms (assumes attribute defined in milliseconds)
     12      ,   0b1              ,          1            ,     any;    #enable for type1
     13:16   ,   0b0100           ,          1            ,     any;    #select external zq cal for type1
     17      ,   0b1              ,          1            ,     any;    #wait for done from DDR for type1
@@ -2446,10 +2453,13 @@ scom 0x03010410    {
 
     bits    ,   scom_data                      ,       ATTR_FUNCTIONAL,   expr;
     0       ,   0b0                            ,          1            ,    any;    #disable timer initially
-    1:2     ,   0b10                           ,          1            ,    any;    #timebase; use 16384 cycle timebase; memcal_timebase_in_ms=16384*(1/DRAM_freq_in_MHz)*1e-3
-    3:11    ,   def_mem_intv                   ,          1            ,    any;    #interval timer; computed using zq cal interval attribute; mem_intv=mem_cal_interval_attr/memcal_timebase_in_ms (assumes attribute defined in milliseconds)
+    1:2     ,   0b10                           ,          1            ,    (def_mem_intv_sel10 < 512);    #timebase; use 16384 cycle timebase if less than max of 512
+    1:2     ,   0b11                           ,          1            ,    (def_mem_intv_sel10 > 511);    #timebase; use 16777216 cycle timebase if greater than max of 512
+    3:11    ,   def_mem_intv_sel10             ,          1            ,    (def_mem_intv_sel10 < 512);    #interval timer; computed using zq cal interval attribute; mem_intv=mem_cal_interval_attr/memcal_timebase_in_ms (assumes attribute defined in milliseconds)
+    3:11    ,   0b000000001                    ,          1            ,    (def_mem_intv_sel10 > 511) && (def_mem_intv_sel11 == 0);    #interval timer; computed using zq cal interval attribute; mem_intv=mem_cal_interval_attr/memcal_timebase_in_ms (assumes attribute defined in milliseconds)
+    3:11    ,   def_mem_intv_sel11             ,          1            ,    (def_mem_intv_sel10 > 511) && (def_mem_intv_sel11 > 0);    #interval timer; computed using zq cal interval attribute; mem_intv=mem_cal_interval_attr/memcal_timebase_in_ms (assumes attribute defined in milliseconds)
     12      ,   0b1                            ,          1            ,    any;    #enable for type1
-    13:16   ,   0b0100                         ,          1            ,    any;    #select external zq cal for type1
+    13:16   ,   0b0011                         ,          1            ,    any;    #select Periodic Calbration: Run SysClk, DQS and Read Eye all in parallel for type
     17      ,   0b1                            ,          1            ,    any;    #wait for done from DDR for type1
     18      ,   0b0                            ,          1            ,    any;    #disable type2 timer
     19:22   ,   0b0000                         ,          1            ,    any;    #type2 cal type

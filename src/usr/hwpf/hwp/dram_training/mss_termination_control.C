@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012                   */
+/* COPYRIGHT International Business Machines Corp. 2012,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_termination_control.C,v 1.12 2012/12/14 21:46:04 mwuu Exp $
+// $Id: mss_termination_control.C,v 1.13 2012/12/18 15:00:36 mwuu Exp $
 /* File is created by SARAVANAN SETHURAMAN on Thur 29 Sept 2011. */
 
 //------------------------------------------------------------------------------
@@ -43,6 +43,7 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
+//  1.13   | mwuu	  |18-Dec-12| Took out initialization of array_rcs in declaration.
 //  1.12   | mwuu	  |14-Dec-12| Updated additional fw review comments
 //  1.11   | sasethur |07-Dec-12| Updated for fw review comments
 //  1.10   | mwuu     |28-Nov-12| Added changes suggested from FW team.
@@ -853,7 +854,7 @@ fapi::ReturnCode mss_slew_cal(const fapi::Target &i_target)
 {
 	fapi::ReturnCode rc;
     uint32_t rc_ecmd = 0;
-	fapi::ReturnCode array_rcs[MAX_NUM_PORTS]={fapi::FAPI_RC_SUCCESS}; // capture rc per port loop
+	fapi::ReturnCode array_rcs[MAX_NUM_PORTS]; // capture rc per port loop
     uint32_t poll_count = 0;
 	uint8_t ports_valid = 0;
 	uint8_t is_sim = 0;

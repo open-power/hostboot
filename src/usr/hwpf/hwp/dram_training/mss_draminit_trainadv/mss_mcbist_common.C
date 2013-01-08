@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012                   */
+/* COPYRIGHT International Business Machines Corp. 2012,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_mcbist_common.C,v 1.10 2012/12/14 16:09:38 sasethur Exp $
+// $Id: mss_mcbist_common.C,v 1.13 2013/01/03 14:54:55 sasethur Exp $
 // *!***************************************************************************
 // *! (C) Copyright International Business Machines Corp. 1997, 1998
 // *!           All Rights Reserved -- Property of IBM
@@ -38,6 +38,7 @@
 //------------------------------------------------------------------------------
 // Version:|Author: | Date:  | Comment:
 // --------|--------|--------|--------------------------------------------------
+//   1.13  |aditya  |01/03/12| Updated FW Comments 
 //   1.10  |sasethur|12/14/12| Updated for warnings
 //   1.9   |aditya  |12/14/12| Updated FW review comments   
 //   1.8   |aditya  |12/6/12 | Updated Review Comments
@@ -120,8 +121,8 @@ fapi::ReturnCode  setup_mcbist(const fapi::Target & i_target_mba, uint8_t i_port
 	
     rc = mcb_reset_trap(i_target_mba); 
     if(rc) return rc;
-/*
-    rc = fapiGetScom(i_target_mba, MBA01_MCBIST_MCBMR0Q_0x030106a8,l_data_buffer_64); if(rc) return rc; 
+
+   /* rc = fapiGetScom(i_target_mba, MBA01_MCBIST_MCBMR0Q_0x030106a8,l_data_buffer_64); if(rc) return rc; 
     rc_num = rc_num | l_data_buffer_64.flushTo0();
     rc_num = rc_num | l_data_buffer_64.setBit(18); 
     rc_num = rc_num | l_data_buffer_64.setBit(27); 
@@ -143,15 +144,21 @@ fapi::ReturnCode  setup_mcbist(const fapi::Target & i_target_mba, uint8_t i_port
   */ 
     rc = fapiGetScom(i_target_mba,MBA01_CCS_MODEQ_0x030106a7, l_data_buffer_64);  if(rc) return rc;   
     rc_num =  l_data_buffer_64.clearBit(29); if (rc_num){FAPI_ERR( "Error in function setup_mcb:");rc.setEcmdError(rc_num);return rc;}
-   
+  
+ 
     rc = fapiPutScom(i_target_mba,MBA01_CCS_MODEQ_0x030106a7, l_data_buffer_64);  if(rc) return rc;   
+   //Hard coded to single address - Saravanan for debug 
+   /* rc = fapiGetScom(i_target_mba, MBA01_MCBIST_MCBSEARA0Q_0x030106d2,l_data_buffer_64);if(rc) return rc; 
+    rc_num = rc_num | l_data_buffer_64.flushTo0(); 
+    rc = fapiPutScom(i_target_mba, MBA01_MCBIST_MCBSEARA0Q_0x030106d2,l_data_buffer_64); if(rc) return rc; 
+    */
     //rc = print_pattern(i_target_mba);if(rc)return rc;
     if((i_test_type == 1) && (i_pattern == 1))
     {
 	FAPI_INF("User pattern and User test_type modes enabled");
 	rc = cfg_mcb_dgen(i_target_mba,USR_MODE,i_mcbrotate); if(rc) return rc;
 	FAPI_INF("Inside setup mcbist Entering cfg_mcb_addr");
-        //rc = cfg_mcb_addr(i_target_mba,i_rank,i_port);if(rc) return rc;
+        rc = cfg_mcb_addr(i_target_mba,i_rank,i_port);if(rc) return rc;
         rc = cfg_mcb_test_mem(i_target_mba,USER_MODE); if(rc) return rc; 
     }
     else if(i_pattern == 1) 
@@ -159,7 +166,7 @@ fapi::ReturnCode  setup_mcbist(const fapi::Target & i_target_mba, uint8_t i_port
         FAPI_INF("User pattern  mode enabled");
         rc = cfg_mcb_dgen(i_target_mba,USR_MODE,i_mcbrotate); if(rc) return rc;
         FAPI_INF("Inside setup mcbist Entering cfg_mcb_addr");
-        //rc = cfg_mcb_addr(i_target_mba,i_rank,i_port);if(rc) return rc;
+        rc = cfg_mcb_addr(i_target_mba,i_rank,i_port);if(rc) return rc;
         rc = cfg_mcb_test_mem(i_target_mba,i_mcbtest); if(rc) return rc;
     }
     else if(i_test_type == 1)
@@ -167,14 +174,14 @@ fapi::ReturnCode  setup_mcbist(const fapi::Target & i_target_mba, uint8_t i_port
 	FAPI_INF(" User test_type mode enabled");
 	rc = cfg_mcb_dgen(i_target_mba,i_mcbpatt,i_mcbrotate); if(rc) return rc;
         FAPI_INF("Inside setup mcbist Entering cfg_mcb_addr");
-        //rc = cfg_mcb_addr(i_target_mba,i_rank,i_port);if(rc) return rc;
+        rc = cfg_mcb_addr(i_target_mba,i_rank,i_port);if(rc) return rc;
         rc = cfg_mcb_test_mem(i_target_mba,USER_MODE); if(rc) return rc;
     }
     else
     {
 	rc = cfg_mcb_dgen(i_target_mba,i_mcbpatt,i_mcbrotate); if(rc) return rc;
 	FAPI_INF("Inside setup mcbist Entering cfg_mcb_addr");
-        //rc = cfg_mcb_addr(i_target_mba,i_rank,i_port);if(rc) return rc;
+        rc = cfg_mcb_addr(i_target_mba,i_rank,i_port);if(rc) return rc;
         rc = cfg_mcb_test_mem(i_target_mba,i_mcbtest); if(rc) return rc;
     }
 	
@@ -206,11 +213,13 @@ fapi::ReturnCode  mcb_reset_trap(const fapi::Target & i_target_mba)
     FAPI_INF("Using MCB Reset Trap Function -- This automatically resets error log RA, error counters, Status Reg and error map");
     
     rc = fapiGetScom(i_target_mba,MBA01_MCBIST_MCBCFGQ_0x030106e0,l_data_buffer_64);if(rc) return rc;
-    rc_num =  l_data_buffer_64.clearBit(60);if (rc_num){FAPI_ERR( "Error in function  mcb_reset_trap:");rc.setEcmdError(rc_num);return rc;}
-    rc = fapiPutScom(i_target_mba,MBA01_MCBIST_MCBCFGQ_0x030106e0,l_data_buffer_64);if(rc) return rc;
     rc_num =  l_data_buffer_64.setBit(60);if (rc_num){FAPI_ERR( "Error in function  mcb_reset_trap:");rc.setEcmdError(rc_num);return rc;}
+    rc = fapiDelay(DELAY_100US, DELAY_2000SIMCYCLES);if(rc) return rc; // wait 2000 simcycles (in sim mode) OR 100 uS (in hw mode)
     rc = fapiPutScom(i_target_mba,MBA01_MCBIST_MCBCFGQ_0x030106e0,l_data_buffer_64);if(rc) return rc;
     rc_num =  l_data_buffer_64.clearBit(60);if (rc_num){FAPI_ERR( "Error in function  mcb_reset_trap:");rc.setEcmdError(rc_num);return rc;}
+    rc = fapiPutScom(i_target_mba,MBA01_MCBIST_MCBCFGQ_0x030106e0,l_data_buffer_64);if(rc) return rc;
+    rc = fapiDelay(DELAY_100US, DELAY_2000SIMCYCLES);if(rc) return rc; // wait 2000 simcycles (in sim mode) OR 100 uS (in hw mode)
+    rc_num =  l_data_buffer_64.setBit(60);if (rc_num){FAPI_ERR( "Error in function  mcb_reset_trap:");rc.setEcmdError(rc_num);return rc;}
     rc = fapiPutScom(i_target_mba,MBA01_MCBIST_MCBCFGQ_0x030106e0,l_data_buffer_64);if(rc) return rc;
     //Reset MCB Maintanence register
     FAPI_INF("Clearing the MCBIST Maintenance ");
@@ -475,7 +484,14 @@ fapi::ReturnCode  mcb_error_map_print(const fapi::Target & i_target_mba,uint8_t 
 	uint8_t l_rank_pair = 0;
 	char l_str1[200] = "";
 	uint8_t l_index = 0;
+	uint8_t l_dimmtype = 0;
+	rc = FAPI_ATTR_GET(ATTR_EFF_DIMM_TYPE, &i_target_mba, l_dimmtype); if(rc) return rc;
+	// if(l_dimmtype==1)
+	// {
 	
+	// return rc;
+	
+	// }
 	if(i_port == 0)
 	{
 	FAPI_INF("################# PortA Error MAP #################");

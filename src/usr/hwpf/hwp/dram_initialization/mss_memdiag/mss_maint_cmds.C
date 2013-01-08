@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012                   */
+/* COPYRIGHT International Business Machines Corp. 2012,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_maint_cmds.C,v 1.16 2012/11/21 21:21:08 gollub Exp $
+// $Id: mss_maint_cmds.C,v 1.17 2012/12/19 15:48:48 gollub Exp $
 //------------------------------------------------------------------------------
 // Don't forget to create CVS comments when you check in your changes!
 //------------------------------------------------------------------------------
@@ -54,6 +54,7 @@
 //   1.15  | 11/08/12 | gollub  | Added timebase steer cleanup
 //         |          |         | Updates to traces.
 //   1.16  | 11/21/12 | gollub  | Updates from review.
+//   1.17  | 12/19/12 | gollub  | Added UE isolation
 
 //------------------------------------------------------------------------------
 //    Includes
@@ -106,7 +107,7 @@ const uint8_t MSS_X4_ECC_STEER_OPTIONS =              36;
 /**
  * @brief Max 8 patterns
  */ 
-const uint8_t MSS_MAX_PATTERNS =                      8;
+const uint8_t MSS_MAX_PATTERNS =                      9;
 
 
 namespace mss_MemConfig
@@ -183,6 +184,14 @@ static const uint32_t mss_markStoreRegs[8][2]={
     {MBS_ECC0_MBMS6_0x02011451,    MBS_ECC1_MBMS6_0x02011491},
     {MBS_ECC0_MBMS7_0x02011452,    MBS_ECC1_MBMS7_0x02011492}};
 
+static const uint32_t mss_mbstr[2]={
+    // port0/1                   port2/3
+    MBS01_MBSTRQ_0x02011655,     MBS23_MBSTRQ_0x02011755};
+
+static const uint32_t mss_mbmmr[2]={
+    // port0/1                   port2/3
+    MBS_ECC0_MBMMRQ_0x0201145B,  MBS_ECC1_MBMMRQ_0x0201149B};
+    
 static const uint32_t mss_readMuxRegs[8][2]={
     // port0/1                     port2/3
     {MBS_ECC0_MBSBS0_0x0201145E,   MBS_ECC1_MBSBS0_0x0201149E},
@@ -344,6 +353,27 @@ static const uint8_t mss_eccSpareIndex_to_symbol[MSS_X4_ECC_STEER_OPTIONS]={
 // TODO: Update with actual patterns from Luis Lastras when they are ready
 static const uint32_t mss_maintBufferData[MSS_MAX_PATTERNS][16][2]={
 
+// PATTERN_0 DEBUG
+/*
+   {{0x00000000, 0x10000000},
+    {0x01000000, 0x11000000},
+    {0x02000000, 0x12000000},
+    {0x03000000, 0x13000000},
+    {0x04000000, 0x14000000},
+    {0x05000000, 0x15000000},
+    {0x06000000, 0x16000000},
+    {0x07000000, 0x17000000},
+    {0x08000000, 0x18000000},
+    {0x09000000, 0x19000000},
+    {0x0a000000, 0x1a000000},
+    {0x0b000000, 0x1b000000},
+    {0x0c000000, 0x1c000000},
+    {0x0d000000, 0x1d000000},
+    {0x0e000000, 0x1e000000},
+    {0x0f000000, 0x1f000000}},
+*/
+
+
 // PATTERN_0
    {{0x00000000, 0x00000000},
     {0x00000000, 0x00000000},
@@ -486,7 +516,26 @@ static const uint32_t mss_maintBufferData[MSS_MAX_PATTERNS][16][2]={
     {0x33333333, 0x33333333},
     {0x33333333, 0x33333333},
     {0x33333333, 0x33333333},
-    {0x33333333, 0x33333333}}};
+    {0x33333333, 0x33333333}},
+
+// PATTERN_8: random seed
+   {{0x12345678, 0x87654321},
+    {0x12345678, 0x87654321},
+    {0x12345678, 0x87654321},
+    {0x12345678, 0x87654321},
+    {0x12345678, 0x87654321},
+    {0x12345678, 0x87654321},
+    {0x12345678, 0x87654321},
+    {0x12345678, 0x87654321},
+    {0x12345678, 0x87654321},
+    {0x12345678, 0x87654321},
+    {0x12345678, 0x87654321},
+    {0x12345678, 0x87654321},
+    {0x12345678, 0x87654321},
+    {0x12345678, 0x87654321},
+    {0x12345678, 0x87654321},
+    {0x12345678, 0x87654321}}};
+
 
 
 // TODO: Update with actual patterns from Luis Lastras when they are ready
@@ -494,53 +543,119 @@ static const uint8_t mss_65thByte[MSS_MAX_PATTERNS][4]={
 
 // bit1=tag0_2, bit2=tag1_3, bit3=MDI
 
-// PATTERN_0
+// PATTERN_0 - verified
    {0x00,   // 1st 64B of cachline: tag0=0, tag1=0, MDI=0
     0x00,   // 1st 64B of cachline: tag2=0, tag3=0, MDI=0
     0x00,   // 2nd 64B of cachline: tag0=0, tag1=0, MDI=0
     0x00},  // 2nd 64B of cachline: tag2=0, tag3=0, MDI=0
 
-// PATTERN_1
-   {0x70,   // 1st 64B of cachline: tag0=1, tag1=1, MDI=1
+// PATTERN_1 - verified
+   {0xF0,   // 1st 64B of cachline: tag0=1, tag1=1, MDI=1
     0x70,   // 1st 64B of cachline: tag2=1, tag3=1, MDI=1
-    0x70,   // 2nd 64B of cachline: tag0=1, tag1=1, MDI=1
+    0xF0,   // 2nd 64B of cachline: tag0=1, tag1=1, MDI=1
     0x70},  // 2nd 64B of cachline: tag2=1, tag3=1, MDI=1
 
-// PATTERN_2
+// PATTERN_2 - verified
    {0x70,   // 1st 64B of cachline: tag0=1, tag1=1, MDI=1
     0x00,   // 1st 64B of cachline: tag2=0, tag3=0, MDI=0
     0x70,   // 2nd 64B of cachline: tag0=1, tag1=1, MDI=1
     0x00},  // 2nd 64B of cachline: tag2=0, tag3=0, MDI=0
 
-// PATTERN_3
-   {0x00,   // 1st 64B of cachline: tag0=0, tag1=0, MDI=0
+// PATTERN_3 - verified
+   {0x80,   // 1st 64B of cachline: tag0=0, tag1=0, MDI=0
     0x70,   // 1st 64B of cachline: tag2=1, tag3=1, MDI=1
-    0x00,   // 2nd 64B of cachline: tag0=0, tag1=0, MDI=0
+    0x80,   // 2nd 64B of cachline: tag0=0, tag1=0, MDI=0
     0x70},  // 2nd 64B of cachline: tag2=1, tag3=1, MDI=1
 
-// PATTERN_4
-   {0x30,   // 1st 64B of cachline: tag0=0, tag1=1, MDI=1
-    0x50,   // 1st 64B of cachline: tag2=1, tag3=0, MDI=1
-    0x20,   // 2nd 64B of cachline: tag0=0, tag1=1, MDI=0
+// PATTERN_4 - verified
+   {0xB0,   // 1st 64B of cachline: tag0=0, tag1=1, MDI=1
+    0xD0,   // 1st 64B of cachline: tag2=1, tag3=0, MDI=1
+    0xA0,   // 2nd 64B of cachline: tag0=0, tag1=1, MDI=0
     0x40},  // 2nd 64B of cachline: tag2=1, tag3=0, MDI=0
 
-// PATTERN_5
-   {0x60,   // 1st 64B of cachline: tag0=1, tag1=0, MDI=0
+// PATTERN_5 - verified
+   {0xE0,   // 1st 64B of cachline: tag0=1, tag1=0, MDI=0
     0x20,   // 1st 64B of cachline: tag2=0, tag3=1, MDI=0
     0x50,   // 2nd 64B of cachline: tag0=1, tag1=0, MDI=1
     0x30},  // 2nd 64B of cachline: tag2=0, tag3=1, MDI=1
 
-// PATTERN_6
+// PATTERN_6 - verified
    {0x70,   // 1st 64B of cachline: tag0=1, tag1=1, MDI=1
-    0x40,   // 1st 64B of cachline: tag2=1, tag3=0, MDI=0
+    0xC0,   // 1st 64B of cachline: tag2=1, tag3=0, MDI=0
     0x60,   // 2nd 64B of cachline: tag0=1, tag1=1, MDI=0
     0x50},  // 2nd 64B of cachline: tag2=1, tag3=0, MDI=1
 
-// PATTERN_7
+// PATTERN_7 - verified
+   {0x20,   // 1st 64B of cachline: tag0=0, tag1=1, MDI=0
+    0x70,   // 1st 64B of cachline: tag2=1, tag3=1, MDI=1
+    0x30,   // 2nd 64B of cachline: tag0=0, tag1=1, MDI=1
+    0xE0},  // 2nd 64B of cachline: tag2=1, tag3=1, MDI=0
+
+// PATTERN_8: random seed
    {0x20,   // 1st 64B of cachline: tag0=0, tag1=1, MDI=0
     0x70,   // 1st 64B of cachline: tag2=1, tag3=1, MDI=1
     0x30,   // 2nd 64B of cachline: tag0=0, tag1=1, MDI=1
     0x60}}; // 2nd 64B of cachline: tag2=1, tag3=1, MDI=0
+
+// TODO: Update with actual patterns from Luis Lastras when they are ready
+static const uint32_t mss_ECC[MSS_MAX_PATTERNS][4]={
+
+// bit 4:15 ECC_c6_c5_c4, bit 16:31 ECC_c3_c2_c1_c0
+
+// PATTERN_0 - verified
+   {0x00000000,   // 1st 64B of cachline
+    0x00000000,   // 1st 64B of cachline
+    0x00000000,   // 2nd 64B of cachline
+    0x00000000},  // 2nd 64B of cachline
+
+// PATTERN_1 - verified
+   {0x0DA49500,   // 1st 64B of cachline
+    0x0234A60E,   // 1st 64B of cachline
+    0x0DA49500,   // 2nd 64B of cachline
+    0x0234A60E},  // 2nd 64B of cachline
+
+// PATTERN_2 - verified
+   {0x08A0AB54,   // 1st 64B of cachline
+    0x05CD9A13,   // 1st 64B of cachline
+    0x08A0AB54,   // 2nd 64B of cachline
+    0x05CD9A13},  // 2nd 64B of cachline
+
+// PATTERN_3 - verified
+   {0x05043E54,   // 1st 64B of cachline
+    0x07F93C1D,   // 1st 64B of cachline
+    0x05043E54,   // 2nd 64B of cachline
+    0x07F93C1D},  // 2nd 64B of cachline
+
+// PATTERN_4 - verified
+   {0x021C0F3D,   // 1st 64B of cachline
+    0x04332068,   // 1st 64B of cachline
+    0x0C33F1DA,   // 2nd 64B of cachline
+    0x0FF3F7AF},  // 2nd 64B of cachline
+
+// PATTERN_5 - verified
+   {0x04CA8334,   // 1st 64B of cachline
+    0x04F3D0DA,   // 1st 64B of cachline
+    0x019764DA,   // 2nd 64B of cachline
+    0x0DC751A1},  // 2nd 64B of cachline
+    
+// PATTERN_6 - verified
+   {0x0CF6B55C,   // 1st 64B of cachline
+    0x08CCE671,   // 1st 64B of cachline
+    0x02D94BBB,   // 2nd 64B of cachline
+    0x030C31B6},  // 2nd 64B of cachline
+    
+// PATTERN_7 - verified
+   {0x09150CD1,   // 1st 64B of cachline
+    0x0F9D48C9,   // 1st 64B of cachline
+    0x073AF236,   // 2nd 64B of cachline
+    0x045D9F0E},  // 2nd 64B of cachline
+    
+// PATTERN_8: random
+   {0x00000000,   // 1st 64B of cachline
+    0x00000000,   // 1st 64B of cachline
+    0x00000000,   // 2nd 64B of cachline
+    0x00000000}}; // 2nd 64B of cachline
+
 
 
 //------------------------------------------------------------------------------
@@ -594,6 +709,7 @@ fapi::ReturnCode mss_MaintCmd::preConditionCheck()
     ecmdDataBufferBase l_mbaxcr(64);
     ecmdDataBufferBase l_ccs_modeq(64);
     ecmdDataBufferBase l_mbsecc(64);
+    ecmdDataBufferBase l_mbmct(64);
 
     FAPI_INF("ENTER mss_MaintCmd::preConditionCheck()");
 
@@ -632,13 +748,28 @@ fapi::ReturnCode mss_MaintCmd::preConditionCheck()
     // Read MBSECC
     l_rc = fapiGetScom(iv_targetCentaur, mss_mbsecc[iv_mbaPosition], l_mbsecc);
     if(l_rc) return l_rc;
-
+    
+    // Read MBMCT[0:4], cmd type, for FFDC
+    l_rc = fapiGetScom(iv_target, MBA01_MBMCTQ_0x0301060A, l_mbmct);
+    if(l_rc) return l_rc;
+    
 
     // Check for MBMCCQ[0], maint_cmd_start, to be reset by hw.
     if (l_mbmccq.isBitSet(0))
     {
+
+        FAPI_ERR("MBMCCQ[0]: maint_cmd_start not reset by hw.");
+         
+        // Calling out MBA target high, deconfig, gard
+        const fapi::Target & MBA = iv_target;
+        // FFDC: Capture register we are checking
+        ecmdDataBufferBase & MBMCC = l_mbmccq;
+        // FFDC: Capture command type we are trying to run
+        const mss_MaintCmd::CmdType & CMD_TYPE = iv_cmdType;
+        // FFDC: MBMCT[0:4] contains the cmd type previously run
+        ecmdDataBufferBase & MBMCT = l_mbmct;  
+        
         // Create new log
-        FAPI_ERR("MCMCCQ[0]: maint_cmd_start not reset by hw.");
         FAPI_SET_HWP_ERROR(l_rc, RC_MSS_MAINT_START_NOT_RESET);
     }
 
@@ -648,8 +779,18 @@ fapi::ReturnCode mss_MaintCmd::preConditionCheck()
         // Log previous error before creating new log
         if (l_rc) fapiLogError(l_rc);
 
+        FAPI_ERR("MBMCCQ[1]: maint_cmd_stop not reset by hw.");
+        
+        // Calling out MBA target high, deconfig, gard
+        const fapi::Target & MBA = iv_target;
+        // FFDC: Capture register we are checking
+        ecmdDataBufferBase & MBMCC = l_mbmccq;
+        // FFDC: Capture command type we are trying to run
+        const mss_MaintCmd::CmdType & CMD_TYPE = iv_cmdType;
+        // FFDC: MBMCT[0:4] contains the cmd type previously run
+        ecmdDataBufferBase & MBMCT = l_mbmct;  
+        
         // Create new log
-        FAPI_ERR("MCMCCQ[1]: maint_cmd_stop not reset by hw.");
         FAPI_SET_HWP_ERROR(l_rc, RC_MSS_MAINT_STOP_NOT_RESET);
     }
 
@@ -659,8 +800,19 @@ fapi::ReturnCode mss_MaintCmd::preConditionCheck()
         // Log previous error before creating new log
         if (l_rc) fapiLogError(l_rc);
 
-        // Create new log
         FAPI_ERR("MBMSRQ[0]: Can't start new cmd if previous cmd still in progress.");
+
+        // TODO: Calling out FW high
+        // Calling out MBA target low, deconfig, gard
+        const fapi::Target & MBA = iv_target;
+        // FFDC: Capture register we are checking
+        ecmdDataBufferBase & MBMSR = l_mbmsrq;
+        // FFDC: Capture command type we are trying to run
+        const mss_MaintCmd::CmdType & CMD_TYPE = iv_cmdType;
+        // FFDC: MBMCT[0:4] contains the cmd type previously run
+        ecmdDataBufferBase & MBMCT = l_mbmct;  
+
+        // Create new log
         FAPI_SET_HWP_ERROR(l_rc, RC_MSS_MAINT_CMD_IN_PROGRESS);
     }
 
@@ -670,8 +822,15 @@ fapi::ReturnCode mss_MaintCmd::preConditionCheck()
         // Log previous error before creating new log
         if (l_rc) fapiLogError(l_rc);
 
-        // Create new log
         FAPI_ERR("MBAXCRn[0:3] = 0, meaning no memory configured behind this MBA.");
+
+        // TODO: Calling out FW high
+        // FFDC: MBA target
+        const fapi::Target & MBA = iv_target;
+        // FFDC: Capture register we are checking
+        ecmdDataBufferBase & MBAXCR = l_mbaxcr;
+
+        // Create new log
         FAPI_SET_HWP_ERROR(l_rc, RC_MSS_MAINT_NO_MEM_CNFG);
     }
 
@@ -681,8 +840,17 @@ fapi::ReturnCode mss_MaintCmd::preConditionCheck()
         // Log previous error before creating new log
         if (l_rc) fapiLogError(l_rc);
 
-        // Create new log
         FAPI_ERR("CCS_MODEQ[29] = 1, meaning mux set for CCS instead of mainline.");
+
+        // TODO: Calling out FW high
+        // FFDC: MBA target
+        const fapi::Target & MBA = iv_target;
+        // FFDC: Capture register we are checking
+        ecmdDataBufferBase & CCS_MODE = l_ccs_modeq;
+        // FFDC: Capture command type we are trying to run
+        const mss_MaintCmd::CmdType & CMD_TYPE = iv_cmdType;
+
+        // Create new log
         FAPI_SET_HWP_ERROR(l_rc, RC_MSS_MAINT_CCS_MUX_NOT_MAINLINE);
     }
 
@@ -692,8 +860,17 @@ fapi::ReturnCode mss_MaintCmd::preConditionCheck()
         // Log previous error before creating new log
         if (l_rc) fapiLogError(l_rc);
 
-        // Create new log
         FAPI_ERR("MBSECC[0] = 1, meaning ECC check/correct disabled.");
+
+        // TODO: Calling out FW high
+        // FFDC: MBA target
+        const fapi::Target & MBA = iv_target;
+        // FFDC: Capture register we are checking
+        ecmdDataBufferBase & MBSECC = l_mbsecc;
+        // FFDC: Capture command type we are trying to run
+        const mss_MaintCmd::CmdType & CMD_TYPE = iv_cmdType;
+
+        // Create new log
         FAPI_SET_HWP_ERROR(l_rc, RC_MSS_MAINT_ECC_DISABLED);
     }
 
@@ -844,7 +1021,7 @@ fapi::ReturnCode mss_MaintCmd::loadStopCondMask()
         l_ecmd_rc |= l_mbasctlq.setBit(6);
 
     // Stop on retry CE ETE
-    if ( 0 != (iv_stopCondition & STOP_ON_RETRY_CE) )
+    if ( 0 != (iv_stopCondition & STOP_ON_RETRY_CE_ETE) )
         l_ecmd_rc |= l_mbasctlq.setBit(7);
 
     // Stop on MPE
@@ -898,10 +1075,6 @@ fapi::ReturnCode mss_MaintCmd::startMaintCmd()
 
     FAPI_INF("ENTER mss_MaintCmd::startMaintCmd()");
 
-    // DEBUG - should be no special attentions before we start cmd
-    l_rc = fapiGetScom(iv_target, MBA01_MBSPAQ_0x03010611, l_data);
-    if(l_rc) return l_rc;
-
     l_rc = fapiGetScom(iv_target, MBA01_MBMCCQ_0x0301060B, l_data);
     if(l_rc) return l_rc;
 
@@ -926,7 +1099,8 @@ fapi::ReturnCode mss_MaintCmd::postConditionCheck()
     fapi::ReturnCode l_rc;
     ecmdDataBufferBase l_mbmccq(64);
     ecmdDataBufferBase l_mbafirq(64);
-
+    ecmdDataBufferBase l_mbmct(64);
+    
     FAPI_INF("ENTER mss_MaintCmd::postConditionCheck()");
 
     // Read MBMCCQ
@@ -937,11 +1111,25 @@ fapi::ReturnCode mss_MaintCmd::postConditionCheck()
     l_rc = fapiGetScom(iv_target, MBA01_MBAFIRQ_0x03010600, l_mbafirq);
     if(l_rc) return l_rc;
     
+    // Read MBMCT[0:4], cmd type, for FFDC
+    l_rc = fapiGetScom(iv_target, MBA01_MBMCTQ_0x0301060A, l_mbmct);
+    if(l_rc) return l_rc;    
+    
     // Check for MBMCCQ[0], maint_cmd_start, to be reset by hw.
     if (l_mbmccq.isBitSet(0))
     {
+        FAPI_ERR("MBMCCQ[0]: maint_cmd_start not reset by hw.");
+        
+        // Calling out MBA target high, deconfig, gard
+        const fapi::Target & MBA = iv_target;
+        // FFDC: Capture register we are checking
+        ecmdDataBufferBase & MBMCC = l_mbmccq;
+        // FFDC: Capture command type we are trying to run
+        const mss_MaintCmd::CmdType & CMD_TYPE = iv_cmdType;
+        // FFDC: MBMCT[0:4] contains the cmd type set in hw
+        ecmdDataBufferBase & MBMCT = l_mbmct;  
+        
         // Create new log
-        FAPI_ERR("MCMCCQ[0]: maint_cmd_start not reset by hw.");
         FAPI_SET_HWP_ERROR(l_rc, RC_MSS_MAINT_START_NOT_RESET);
     }
 
@@ -951,8 +1139,19 @@ fapi::ReturnCode mss_MaintCmd::postConditionCheck()
         // Log previous error before creating new log
         if (l_rc) fapiLogError(l_rc);
 
-        // Create new log
         FAPI_ERR("MBAFIRQ[0], invalid_maint_cmd.");
+        
+        // TODO: Calling out FW high
+        // FFDC: MBA target
+        const fapi::Target & MBA = iv_target;
+        // FFDC: Capture register we are checking
+        ecmdDataBufferBase & MBAFIR = l_mbafirq;
+        // FFDC: Capture command type we are trying to run
+        const mss_MaintCmd::CmdType & CMD_TYPE = iv_cmdType;
+        // FFDC: MBMCT[0:4] contains the cmd type set in hw
+        ecmdDataBufferBase & MBMCT = l_mbmct;  
+        
+        // Create new log        
         FAPI_SET_HWP_ERROR(l_rc, RC_MSS_MAINT_INVALID_CMD);
     }
 
@@ -962,8 +1161,20 @@ fapi::ReturnCode mss_MaintCmd::postConditionCheck()
         // Log previous error before creating new log
         if (l_rc) fapiLogError(l_rc);
 
-        // Create new log
         FAPI_ERR("MBAFIRQ[1], cmd started with invalid_maint_address.");
+
+        // TODO: Calling out FW high
+        // FFDC: MBA target
+        const fapi::Target & MBA = iv_target;
+        // FFDC: Capture register we are checking
+        ecmdDataBufferBase & MBAFIR = l_mbafirq;
+        // FFDC: Capture command type we are trying to run
+        const mss_MaintCmd::CmdType & CMD_TYPE = iv_cmdType;
+        // FFDC: MBMCT[0:4] contains the cmd type set in hw
+        ecmdDataBufferBase & MBMCT = l_mbmct;
+        // NOTE: List of additional FFDC regs specified in memory_errors.xml        
+        
+        // Create new log
         FAPI_SET_HWP_ERROR(l_rc, RC_MSS_MAINT_INVALID_ADDR);
     }
 
@@ -1019,9 +1230,19 @@ fapi::ReturnCode mss_MaintCmd::pollForMaintCmdComplete()
 
     if (count == loop_limit)
     {
-        // Create new log
         FAPI_ERR("Maint cmd timeout.");
-        FAPI_SET_HWP_ERROR(l_rc, RC_MSS_MAINT_CMD_TIMEOUT);
+        
+        // TODO: Calling out FW high
+        // Calling out MBA target low, deconfig, gard
+        const fapi::Target & MBA = iv_target;
+        // FFDC: Capture command type we are trying to run
+        const mss_MaintCmd::CmdType & CMD_TYPE = iv_cmdType;
+        // Specify CENTAUR target so we can read some FFDC regs from MBS
+        const fapi::Target & CENTAUR = iv_targetCentaur;
+        // NOTE: List of additional FFDC regs specified in memory_errors.xml        
+
+        // Create new log
+        FAPI_SET_HWP_ERROR(l_rc, RC_MSS_MAINT_CMD_TIMEOUT);        
     }
     else
     {
@@ -1156,39 +1377,44 @@ fapi::ReturnCode mss_MaintCmd::loadPattern(PatternIndex i_initPattern)
     FAPI_INF("ENTER mss_MaintCmd::loadPattern()");
 
     static const uint32_t maintBufferDataRegs[2][16][2]={
-    // port0/1
+    // port0
    {{MAINT0_MBS_MAINT_BUFF0_DATA0_0x0201160A, MAINT0_MBS_MAINT_BUFF0_DATA_ECC0_0x02011612},
-    {MAINT0_MBS_MAINT_BUFF0_DATA1_0x0201160B, MAINT0_MBS_MAINT_BUFF0_DATA_ECC1_0x02011613},
-    {MAINT0_MBS_MAINT_BUFF0_DATA2_0x0201160C, MAINT0_MBS_MAINT_BUFF0_DATA_ECC2_0x02011614},
-    {MAINT0_MBS_MAINT_BUFF0_DATA3_0x0201160D, MAINT0_MBS_MAINT_BUFF0_DATA_ECC3_0x02011615},
-    {MAINT0_MBS_MAINT_BUFF1_DATA0_0x0201161A, MAINT0_MBS_MAINT_BUFF1_DATA_ECC0_0x02011622},
-    {MAINT0_MBS_MAINT_BUFF1_DATA1_0x0201161B, MAINT0_MBS_MAINT_BUFF1_DATA_ECC1_0x02011623},
-    {MAINT0_MBS_MAINT_BUFF1_DATA2_0x0201161C, MAINT0_MBS_MAINT_BUFF1_DATA_ECC2_0x02011624},
-    {MAINT0_MBS_MAINT_BUFF1_DATA3_0x0201161D, MAINT0_MBS_MAINT_BUFF1_DATA_ECC3_0x02011625},
     {MAINT0_MBS_MAINT_BUFF2_DATA0_0x0201162A, MAINT0_MBS_MAINT_BUFF2_DATA_ECC0_0x02011632},
+    {MAINT0_MBS_MAINT_BUFF0_DATA1_0x0201160B, MAINT0_MBS_MAINT_BUFF0_DATA_ECC1_0x02011613},
     {MAINT0_MBS_MAINT_BUFF2_DATA1_0x0201162B, MAINT0_MBS_MAINT_BUFF2_DATA_ECC1_0x02011633},
+    {MAINT0_MBS_MAINT_BUFF0_DATA2_0x0201160C, MAINT0_MBS_MAINT_BUFF0_DATA_ECC2_0x02011614},
     {MAINT0_MBS_MAINT_BUFF2_DATA2_0x0201162C, MAINT0_MBS_MAINT_BUFF2_DATA_ECC2_0x02011634},
+    {MAINT0_MBS_MAINT_BUFF0_DATA3_0x0201160D, MAINT0_MBS_MAINT_BUFF0_DATA_ECC3_0x02011615},
     {MAINT0_MBS_MAINT_BUFF2_DATA3_0x0201162D, MAINT0_MBS_MAINT_BUFF2_DATA_ECC3_0x02011635},
+
+    // port1
+    {MAINT0_MBS_MAINT_BUFF1_DATA0_0x0201161A, MAINT0_MBS_MAINT_BUFF1_DATA_ECC0_0x02011622},
     {MAINT0_MBS_MAINT_BUFF3_DATA0_0x0201163A, MAINT0_MBS_MAINT_BUFF3_DATA_ECC0_0x02011642},
+    {MAINT0_MBS_MAINT_BUFF1_DATA1_0x0201161B, MAINT0_MBS_MAINT_BUFF1_DATA_ECC1_0x02011623},
     {MAINT0_MBS_MAINT_BUFF3_DATA1_0x0201163B, MAINT0_MBS_MAINT_BUFF3_DATA_ECC1_0x02011643},
+    {MAINT0_MBS_MAINT_BUFF1_DATA2_0x0201161C, MAINT0_MBS_MAINT_BUFF1_DATA_ECC2_0x02011624},
     {MAINT0_MBS_MAINT_BUFF3_DATA2_0x0201163C, MAINT0_MBS_MAINT_BUFF3_DATA_ECC2_0x02011644},
+    {MAINT0_MBS_MAINT_BUFF1_DATA3_0x0201161D, MAINT0_MBS_MAINT_BUFF1_DATA_ECC3_0x02011625},
     {MAINT0_MBS_MAINT_BUFF3_DATA3_0x0201163D, MAINT0_MBS_MAINT_BUFF3_DATA_ECC3_0x02011645}},
-    // port2/3
+
+    // port2
    {{MAINT1_MBS_MAINT_BUFF0_DATA0_0x0201170A, MAINT1_MBS_MAINT_BUFF0_DATA_ECC0_0x02011712},
-    {MAINT1_MBS_MAINT_BUFF0_DATA1_0x0201170B, MAINT1_MBS_MAINT_BUFF0_DATA_ECC1_0x02011713},
-    {MAINT1_MBS_MAINT_BUFF0_DATA2_0x0201170C, MAINT1_MBS_MAINT_BUFF0_DATA_ECC2_0x02011714},
-    {MAINT1_MBS_MAINT_BUFF0_DATA3_0x0201170D, MAINT1_MBS_MAINT_BUFF0_DATA_ECC3_0x02011715},
-    {MAINT1_MBS_MAINT_BUFF1_DATA0_0x0201171A, MAINT1_MBS_MAINT_BUFF1_DATA_ECC0_0x02011722},
-    {MAINT1_MBS_MAINT_BUFF1_DATA1_0x0201171B, MAINT1_MBS_MAINT_BUFF1_DATA_ECC1_0x02011723},
-    {MAINT1_MBS_MAINT_BUFF1_DATA2_0x0201171C, MAINT1_MBS_MAINT_BUFF1_DATA_ECC2_0x02011724},
-    {MAINT1_MBS_MAINT_BUFF1_DATA3_0x0201171D, MAINT1_MBS_MAINT_BUFF1_DATA_ECC3_0x02011725},
     {MAINT1_MBS_MAINT_BUFF2_DATA0_0x0201172A, MAINT1_MBS_MAINT_BUFF2_DATA_ECC0_0x02011732},
+    {MAINT1_MBS_MAINT_BUFF0_DATA1_0x0201170B, MAINT1_MBS_MAINT_BUFF0_DATA_ECC1_0x02011713},
     {MAINT1_MBS_MAINT_BUFF2_DATA1_0x0201172B, MAINT1_MBS_MAINT_BUFF2_DATA_ECC1_0x02011733},
+    {MAINT1_MBS_MAINT_BUFF0_DATA2_0x0201170C, MAINT1_MBS_MAINT_BUFF0_DATA_ECC2_0x02011714},
     {MAINT1_MBS_MAINT_BUFF2_DATA2_0x0201172C, MAINT1_MBS_MAINT_BUFF2_DATA_ECC2_0x02011734},
+    {MAINT1_MBS_MAINT_BUFF0_DATA3_0x0201170D, MAINT1_MBS_MAINT_BUFF0_DATA_ECC3_0x02011715},
     {MAINT1_MBS_MAINT_BUFF2_DATA3_0x0201172D, MAINT1_MBS_MAINT_BUFF2_DATA_ECC3_0x02011735},
+
+    // port3
+    {MAINT1_MBS_MAINT_BUFF1_DATA0_0x0201171A, MAINT1_MBS_MAINT_BUFF1_DATA_ECC0_0x02011722},
     {MAINT1_MBS_MAINT_BUFF3_DATA0_0x0201173A, MAINT1_MBS_MAINT_BUFF3_DATA_ECC0_0x02011742},
+    {MAINT1_MBS_MAINT_BUFF1_DATA1_0x0201171B, MAINT1_MBS_MAINT_BUFF1_DATA_ECC1_0x02011723},
     {MAINT1_MBS_MAINT_BUFF3_DATA1_0x0201173B, MAINT1_MBS_MAINT_BUFF3_DATA_ECC1_0x02011743},
+    {MAINT1_MBS_MAINT_BUFF1_DATA2_0x0201171C, MAINT1_MBS_MAINT_BUFF1_DATA_ECC2_0x02011724},
     {MAINT1_MBS_MAINT_BUFF3_DATA2_0x0201173C, MAINT1_MBS_MAINT_BUFF3_DATA_ECC2_0x02011744},
+    {MAINT1_MBS_MAINT_BUFF1_DATA3_0x0201171D, MAINT1_MBS_MAINT_BUFF1_DATA_ECC3_0x02011725},
     {MAINT1_MBS_MAINT_BUFF3_DATA3_0x0201173D, MAINT1_MBS_MAINT_BUFF3_DATA_ECC3_0x02011745}}};
 
 
@@ -1204,6 +1430,8 @@ fapi::ReturnCode mss_MaintCmd::loadPattern(PatternIndex i_initPattern)
     ecmdDataBufferBase l_data(64);
     ecmdDataBufferBase l_ecc(64);
     ecmdDataBufferBase l_65th(64);
+    ecmdDataBufferBase l_mbmmr(64);
+    ecmdDataBufferBase l_mbsecc(64);
     uint32_t loop = 0;
 
     FAPI_INF("pattern = 0x%.8X 0x%.8X",
@@ -1213,16 +1441,22 @@ fapi::ReturnCode mss_MaintCmd::loadPattern(PatternIndex i_initPattern)
     //----------------------------------------------------
     // Load the data: 16 loops x 64bits = 128B cacheline
     //----------------------------------------------------
+    FAPI_INF("Load the data: 16 loops x 64bits = 128B cacheline");
 
     // Set bit 9 so that hw will generate the fabric ECC.
     // This is an 8B ECC protecting the data moving on internal buses in
     // the Centaur.
     l_ecmd_rc |= l_ecc.flushTo0();
     l_ecmd_rc |= l_ecc.setBit(9);
+    if(l_ecmd_rc)
+    {
+        l_rc.setEcmdError(l_ecmd_rc);
+        return l_rc;
+    }
 
     for(loop=0; loop<16; loop++ )
     {
-        // A write to MAINT_BUFFx_DATAy will not update until the corresponding
+        // A write to MAINT_BUFFx_DATAy will not update until the corresponding 
         // MAINT_BUFFx_DATA_ECCy is written to.
         l_ecmd_rc |= l_data.insert(mss_maintBufferData[i_initPattern][loop][0], 0, 32, 0);
         l_ecmd_rc |= l_data.insert(mss_maintBufferData[i_initPattern][loop][1], 32, 32, 0);
@@ -1232,7 +1466,7 @@ fapi::ReturnCode mss_MaintCmd::loadPattern(PatternIndex i_initPattern)
             return l_rc;
         }
         l_rc = fapiPutScom(iv_targetCentaur, maintBufferDataRegs[iv_mbaPosition][loop][0], l_data);
-        if(l_rc) return l_rc;
+        if(l_rc) return l_rc;   
 
         l_rc = fapiPutScom(iv_targetCentaur, maintBufferDataRegs[iv_mbaPosition][loop][1], l_ecc);
         if(l_rc) return l_rc;
@@ -1241,6 +1475,7 @@ fapi::ReturnCode mss_MaintCmd::loadPattern(PatternIndex i_initPattern)
     //----------------------------------------------------
     // Load the 65th byte: 4 loops to fill in the two 65th bytes in cacheline
     //----------------------------------------------------
+    FAPI_INF("Load the 65th byte: 4 loops to fill in the two 65th bytes in the cacheline");
 
     l_ecmd_rc |= l_65th.flushTo0();
 
@@ -1264,7 +1499,40 @@ fapi::ReturnCode mss_MaintCmd::loadPattern(PatternIndex i_initPattern)
 
         l_rc = fapiPutScom(iv_targetCentaur, maintBuffer65thRegs[loop][iv_mbaPosition], l_65th);
         if(l_rc) return l_rc;
+    }  
+
+    //----------------------------------------------------
+    // Save i_initPattern in unused maint mark reg
+    // so we know what pattern was used when we do 
+    // UE isolation
+    //----------------------------------------------------
+
+    // No plans to use maint mark, but make sure it's disabled to be safe
+    l_rc = fapiGetScom(iv_targetCentaur, mss_mbsecc[iv_mbaPosition], l_mbsecc);
+    if(l_rc) return l_rc;
+    l_ecmd_rc |= l_mbsecc.clearBit(4);
+    if(l_ecmd_rc)
+    {
+        l_rc.setEcmdError(l_ecmd_rc);
+        return l_rc;
     }
+    l_rc = fapiPutScom(iv_targetCentaur, mss_mbsecc[iv_mbaPosition], l_mbsecc);
+    if(l_rc) return l_rc;
+
+
+    l_ecmd_rc |= l_mbmmr.flushTo0();
+    // Store i_initPattern, with range 0-8, in MBMMR bits 4-7
+    l_ecmd_rc |= l_mbmmr.insert((uint8_t)i_initPattern, 4, 4, 8-4);
+    if(l_ecmd_rc)
+    {
+        l_rc.setEcmdError(l_ecmd_rc);
+        return l_rc;
+    }
+    l_rc = fapiPutScom(iv_targetCentaur, mss_mbmmr[iv_mbaPosition] , l_mbmmr);
+    if(l_rc) return l_rc;
+
+
+
 
     FAPI_INF("EXIT mss_MaintCmd::loadPattern()");
 
@@ -1356,7 +1624,18 @@ fapi::ReturnCode mss_MaintCmd::loadSpeed(TimeBaseSpeed i_speed)
         // Make sure it's non-zero, to avoid divide by 0
         if (l_ddr_freq == 0)
         {
-            FAPI_SET_HWP_ERROR(l_rc, RC_MSS_UNSUPPORTED_FREQ_CALCULATED);
+            FAPI_ERR("ATTR_MSS_FREQ set to zero so can't calculate scrub rate.");
+                        
+            // TODO: Calling out FW high
+            // FFDC: MBA target
+            const fapi::Target & MBA = iv_target;
+            // FFDC: Capture l_ddr_freq
+            uint32_t DDR_FREQ = l_ddr_freq;
+            // FFDC: Capture command type we are trying to run
+            const mss_MaintCmd::CmdType & CMD_TYPE = iv_cmdType;
+
+            // Create new log            
+            FAPI_SET_HWP_ERROR(l_rc, RC_MSS_MAINT_ZERO_DDR_FREQ);
             return l_rc;
         }
         
@@ -1831,6 +2110,9 @@ fapi::ReturnCode mss_SuperFastRead::setupAndExecuteCmd()
     // Make sure maint logic in valid state to run new cmd
     l_rc = preConditionCheck(); if(l_rc) return l_rc;
 
+    // Setup required to trap UE actual data needed for IPL UE isolation
+    l_rc = ueTrappingSetup(); if(l_rc) return l_rc;
+
     // Load cmd type: MBMCTQ
     l_rc = loadCmdType(); if(l_rc) return l_rc;
 
@@ -1905,6 +2187,70 @@ fapi::ReturnCode mss_SuperFastRead::setupAndExecuteCmd()
 
 }
 
+fapi::ReturnCode mss_SuperFastRead::ueTrappingSetup()
+{
+
+    FAPI_INF("ENTER mss_SuperFastRead::ueTrappingSetup()");
+
+    fapi::ReturnCode l_rc;
+
+    static const uint32_t maintBufferDataRegs[2][2][2]={
+    // port0/1
+    {{MAINT0_MBS_MAINT_BUFF0_DATA0_0x0201160A, MAINT0_MBS_MAINT_BUFF0_DATA_ECC0_0x02011612},
+     {MAINT0_MBS_MAINT_BUFF0_DATA4_0x0201160E, MAINT0_MBS_MAINT_BUFF0_DATA_ECC4_0x02011616}},
+    // port2/3
+    {{MAINT1_MBS_MAINT_BUFF0_DATA0_0x0201170A, MAINT1_MBS_MAINT_BUFF0_DATA_ECC0_0x02011712},
+     {MAINT1_MBS_MAINT_BUFF0_DATA4_0x0201170E, MAINT1_MBS_MAINT_BUFF0_DATA_ECC4_0x02011716}}};
+
+    uint32_t l_ecmd_rc = 0;
+    ecmdDataBufferBase l_data(64);
+    ecmdDataBufferBase l_ecc(64);
+    ecmdDataBufferBase l_mbstr(64);
+    uint32_t loop = 0;
+
+    // Set bit 9 so that hw will generate the fabric ECC.
+    // This is an 8B ECC protecting the data moving on internal buses in
+    // the Centaur.
+    l_ecmd_rc |= l_ecc.flushTo0();
+    l_ecmd_rc |= l_ecc.setBit(9);
+
+
+    for(loop=0; loop<2; loop++ )
+    {
+        // Load unique pattern into both halves of the maint buffer,
+        // so we can tell which half contains a trapped UE.
+        l_ecmd_rc |= l_data.insert(0xFACEB00C, 0, 32, 0);
+        l_ecmd_rc |= l_data.insert(0xD15C0DAD, 32, 32, 0);
+        if(l_ecmd_rc)
+        {
+            l_rc.setEcmdError(l_ecmd_rc);
+            return l_rc;
+        }
+        l_rc = fapiPutScom(iv_targetCentaur, maintBufferDataRegs[iv_mbaPosition][loop][0], l_data);
+        if(l_rc) return l_rc;
+
+        // A write to MAINT_BUFFx_DATAy will not update until the corresponding
+        // MAINT_BUFFx_DATA_ECCy is written to.
+        l_rc = fapiPutScom(iv_targetCentaur, maintBufferDataRegs[iv_mbaPosition][loop][1], l_ecc);
+        if(l_rc) return l_rc;
+    }
+
+
+    // Enable UE trapping
+    l_rc = fapiGetScom(iv_targetCentaur, mss_mbstr[iv_mbaPosition], l_mbstr);
+    if(l_rc) return l_rc;
+    l_mbstr.setBit(59);
+    l_rc = fapiPutScom(iv_targetCentaur, mss_mbstr[iv_mbaPosition], l_mbstr);
+    if(l_rc) return l_rc;
+
+
+    FAPI_INF("EXIT mss_SuperFastRead::ueTrappingSetup()");
+
+    return l_rc;
+}
+
+
+
 fapi::ReturnCode mss_SuperFastRead::stopCmd()
 {
 
@@ -1930,6 +2276,7 @@ fapi::ReturnCode mss_SuperFastRead::cleanupCmd()
     FAPI_INF("ENTER mss_SuperFastRead::cleanupCmd()");
 
     fapi::ReturnCode l_rc;
+    ecmdDataBufferBase l_mbstr(64);
 
     // Clear maintenance command complete attention, scrub stats, etc...
 
@@ -1940,8 +2287,16 @@ fapi::ReturnCode mss_SuperFastRead::cleanupCmd()
     l_rc = fapiPutScom(iv_target, MBA01_MBA_RRQ0Q_0x0301040E, iv_saved_MBA_RRQ0);
     if(l_rc) return l_rc;
 
-    FAPI_INF("EXIT mss_SuperFastRead::cleanupCmd()");
+    // Disable UE trapping
+    l_rc = fapiGetScom(iv_targetCentaur, mss_mbstr[iv_mbaPosition], l_mbstr);
+    if(l_rc) return l_rc;
+    l_mbstr.clearBit(59);
+    l_rc = fapiPutScom(iv_targetCentaur, mss_mbstr[iv_mbaPosition], l_mbstr);
+    if(l_rc) return l_rc;
 
+
+    FAPI_INF("EXIT mss_SuperFastRead::cleanupCmd()");
+    
     return l_rc;
 }
 
@@ -2165,6 +2520,7 @@ fapi::ReturnCode mss_Display::setupAndExecuteCmd()
     {
         l_rc = fapiGetScom(iv_target, maintBufferReadDataRegs[loop], l_data);
         if(l_rc) return l_rc;
+        FAPI_INF("0x%.8X 0x%.8X", l_data.getWord(0), l_data.getWord(1));
     }
 
     //----------------------------------------------------
@@ -2176,6 +2532,7 @@ fapi::ReturnCode mss_Display::setupAndExecuteCmd()
     {
         l_rc = fapiGetScom(iv_target, maintBufferRead65thByteRegs[loop], l_data);
         if(l_rc) return l_rc;
+        FAPI_INF("0x%.8X 0x%.8X", l_data.getWord(0), l_data.getWord(1));
     }
 
     // Collect FFDC
@@ -2636,8 +2993,15 @@ fapi::ReturnCode mss_get_address_range( const fapi::Target & i_target,
     if(l_rc) return l_rc;
     if (l_data.isBitClear(0,4))
     {
-        // Create new log.
         FAPI_ERR("MBAXCRn[0:3] = 0, meaning no memory configured behind this MBA.");
+
+        // TODO: Calling out FW high
+        // FFDC: MBA target
+        const fapi::Target & MBA = i_target;
+        // FFDC: Capture register we are checking
+        ecmdDataBufferBase & MBAXCR = l_data;
+
+        // Create new log.
         FAPI_SET_HWP_ERROR(l_rc, RC_MSS_MAINT_NO_MEM_CNFG);
         return l_rc;
     }
@@ -2704,8 +3068,15 @@ fapi::ReturnCode mss_get_address_range( const fapi::Target & i_target,
     }
     else
     {
-        // Create new log. 
         FAPI_ERR("Invalid l_dramSize = %d or l_dramWidth = %d in MBAXCRn.", l_dramSize, l_dramWidth );
+
+        // TODO: Calling out FW high
+        // FFDC: MBA target
+        const fapi::Target & MBA = i_target;
+        // FFDC: Capture register we are checking
+        ecmdDataBufferBase & MBAXCR = l_data;
+        
+        // Create new log.        
         FAPI_SET_HWP_ERROR(l_rc, RC_MSS_MAINT_INVALID_DRAM_SIZE_WIDTH);
         return l_rc;
     }
@@ -2742,8 +3113,15 @@ fapi::ReturnCode mss_get_address_range( const fapi::Target & i_target,
 
     if ((l_end_master_rank == 0x0f) || (l_end_slave_rank == 0x0f))
     {
-        // Create new log.
         FAPI_ERR("MBAXCRn configured with unsupported combination of l_configType, l_configSubType, l_slotConfig");
+
+        // TODO: Calling out FW high
+        // FFDC: MBA target
+        const fapi::Target & MBA = i_target;
+        // FFDC: Capture register we are checking
+        ecmdDataBufferBase & MBAXCR = l_data;
+
+        // Create new log.
         FAPI_SET_HWP_ERROR(l_rc, RC_MSS_MAINT_INVALID_DIMM_CNFG);
         return l_rc;
     }
@@ -2986,9 +3364,20 @@ fapi::ReturnCode mss_get_mark_store( const fapi::Target & i_target,
     }
     else if (l_dramWidth == mss_MemConfig::X4)
     {
-        // Create new log. 
         FAPI_ERR("l_symbolMarkGalois invalid: symbol mark not allowed in x4 mode.");
-        FAPI_SET_HWP_ERROR(l_rc, RC_MSS_MAINT_NO_X4_SYMBOL);
+
+        // TODO: Calling out FW high
+        // FFDC: MBA target
+        const fapi::Target & MBA = i_target;
+        // FFDC: DRAM width
+        uint8_t DRAM_WIDTH = l_dramWidth;
+        // FFDC: Capure i_rank;
+        uint8_t RANK = i_rank;
+        // FFDC: Capture markstore
+        ecmdDataBufferBase & MARKSTORE = l_markstore;
+
+        // Create new log.
+        FAPI_SET_HWP_ERROR(l_rc, RC_MSS_MAINT_X4_SYMBOL_ON_READ);
         return l_rc;
     }
     else // Converted from galois field to symbol index
@@ -3005,8 +3394,19 @@ fapi::ReturnCode mss_get_mark_store( const fapi::Target & i_target,
 
         if ( MSS_SYMBOLS_PER_RANK <= o_symbolMark )
         {
-            // Create new log. 
             FAPI_ERR("Invalid galois field in markstore.");
+
+            // TODO: Calling out FW high
+            // FFDC: MBA target
+            const fapi::Target & MBA = i_target;
+            // FFDC: DRAM width
+            uint8_t DRAM_WIDTH = l_dramWidth;
+            // FFDC: Capure i_rank;
+            uint8_t RANK = i_rank;
+            // FFDC: Capture markstore
+            ecmdDataBufferBase & MARKSTORE = l_markstore;
+
+            // Create new log. 
             FAPI_SET_HWP_ERROR(l_rc, RC_MSS_MAINT_INVALID_MARKSTORE);
             return l_rc;
         }
@@ -3049,8 +3449,19 @@ fapi::ReturnCode mss_get_mark_store( const fapi::Target & i_target,
 
         if ( MSS_SYMBOLS_PER_RANK <= o_chipMark )
         {
-            // Create new log. 
             FAPI_ERR("Invalid galois field in markstore.");
+
+            // TODO: Calling out FW high
+            // FFDC: MBA target
+            const fapi::Target & MBA = i_target;
+            // FFDC: DRAM width
+            uint8_t DRAM_WIDTH = l_dramWidth;
+            // FFDC: Capure i_rank;
+            uint8_t RANK = i_rank;
+            // FFDC: Capture markstore
+            ecmdDataBufferBase & MARKSTORE = l_markstore;
+
+            // Create new log. 
             FAPI_SET_HWP_ERROR(l_rc, RC_MSS_MAINT_INVALID_MARKSTORE);
             return l_rc;
         }
@@ -3120,15 +3531,41 @@ fapi::ReturnCode mss_put_mark_store( const fapi::Target & i_target,
     }
     else if ( l_dramWidth == mss_MemConfig::X4 )
     {
-        // Create new log.
         FAPI_ERR("i_symbolMark invalid: symbol mark not allowed in x4 mode.");
-        FAPI_SET_HWP_ERROR(l_rc, RC_MSS_MAINT_NO_X4_SYMBOL);
+
+        // TODO: Calling out FW high
+        // FFDC: MBA target
+        const fapi::Target & MBA = i_target;
+        // FFDC: DRAM width
+        uint8_t DRAM_WIDTH = l_dramWidth;
+        // FFDC: Capure i_rank;
+        uint8_t RANK = i_rank;
+        // FFDC: Capure i_symbolMark;
+        uint8_t SYMBOL_MARK = i_symbolMark;
+        // FFDC: Capure i_chipMark;
+        uint8_t CHIP_MARK = i_chipMark;
+
+        // Create new log.
+        FAPI_SET_HWP_ERROR(l_rc, RC_MSS_MAINT_X4_SYMBOL_ON_WRITE);
         return l_rc;
     }
     else if ( MSS_SYMBOLS_PER_RANK <= i_symbolMark )
     {
-        // Create new log.
         FAPI_ERR("i_symbolMark invalid: symbol index out of range.");
+
+        // TODO: Calling out FW high
+        // FFDC: MBA target
+        const fapi::Target & MBA = i_target;
+        // FFDC: DRAM width
+        uint8_t DRAM_WIDTH = l_dramWidth;
+        // FFDC: Capure i_rank;
+        uint8_t RANK = i_rank;
+        // FFDC: Capure i_symbolMark;
+        uint8_t SYMBOL_MARK = i_symbolMark;
+        // FFDC: Capure i_chipMark;
+        uint8_t CHIP_MARK = i_chipMark;
+
+        // Create new log.
         FAPI_SET_HWP_ERROR(l_rc, RC_MSS_MAINT_INVALID_SYMBOL_INDEX);
         return l_rc;
     }
@@ -3142,29 +3579,68 @@ fapi::ReturnCode mss_put_mark_store( const fapi::Target & i_target,
     // Get l_chipMarkGalois
     if (i_chipMark == MSS_INVALID_SYMBOL) // No chip mark
     {
-    l_chipMarkGalois = 0x00;
+        l_chipMarkGalois = 0x00;
     }
     else if ( MSS_SYMBOLS_PER_RANK <= i_chipMark )
     {
-        // Create new log. 
         FAPI_ERR("i_chipMark invalid: symbol index out of range.");
+
+        // TODO: Calling out FW high
+        // FFDC: MBA target
+        const fapi::Target & MBA = i_target;
+        // FFDC: DRAM width
+        uint8_t DRAM_WIDTH = l_dramWidth;
+        // FFDC: Capure i_rank;
+        uint8_t RANK = i_rank;
+        // FFDC: Capure i_symbolMark;
+        uint8_t SYMBOL_MARK = i_symbolMark;
+        // FFDC: Capure i_chipMark;
+        uint8_t CHIP_MARK = i_chipMark;
+
+        // Create new log. 
         FAPI_SET_HWP_ERROR(l_rc, RC_MSS_MAINT_INVALID_SYMBOL_INDEX);
         return l_rc;
     }
     else if ((l_dramWidth == mss_MemConfig::X8) && (i_chipMark % 4) )
     {
-        // Create new log.
         FAPI_ERR("i_chipMark invalid: not first symbol index of a x8 chip.");
+
+        // TODO: Calling out FW high
+        // FFDC: MBA target
+        const fapi::Target & MBA = i_target;
+        // FFDC: DRAM width
+        uint8_t DRAM_WIDTH = l_dramWidth;
+        // FFDC: Capure i_rank;
+        uint8_t RANK = i_rank;
+        // FFDC: Capure i_symbolMark;
+        uint8_t SYMBOL_MARK = i_symbolMark;
+        // FFDC: Capure i_chipMark;
+        uint8_t CHIP_MARK = i_chipMark;
+
+        // Create new log.
         FAPI_SET_HWP_ERROR(l_rc, RC_MSS_MAINT_INVALID_CHIP_INDEX);
         return l_rc;
 
     }
     else if ((l_dramWidth == mss_MemConfig::X4) && (i_chipMark % 2) )
     {
-        // Create new log.
         FAPI_ERR("i_chipMark invalid: not first symbol index of a x4 chip.");
+
+        // TODO: Calling out FW high
+        // FFDC: MBA target
+        const fapi::Target & MBA = i_target;
+        // FFDC: DRAM width
+        uint8_t DRAM_WIDTH = l_dramWidth;
+        // FFDC: Capure i_rank;
+        uint8_t RANK = i_rank;
+        // FFDC: Capure i_symbolMark;
+        uint8_t SYMBOL_MARK = i_symbolMark;
+        // FFDC: Capure i_chipMark;
+        uint8_t CHIP_MARK = i_chipMark;
+
+        // Create new log.
         FAPI_SET_HWP_ERROR(l_rc, RC_MSS_MAINT_INVALID_CHIP_INDEX);
-           return l_rc;
+        return l_rc;
     }
     else // Convert from symbol index to galois field
     {
@@ -3181,15 +3657,32 @@ fapi::ReturnCode mss_put_mark_store( const fapi::Target & i_target,
     l_rc = fapiPutScom(l_targetCentaur, mss_markStoreRegs[i_rank][l_mbaPosition], l_markstore);
     if(l_rc) return l_rc;
 
-    // If MPE FIR for the given rank (scrub or fetch) is on after the read,
-    // we will return TBD fapi::ReturnCode to indicate write may not have worked.
+    // If MPE FIR for the given rank (scrub or fetch) is on after the write,
+    // we will return a fapi::ReturnCode to indicate write may not have worked.
     // Up to caller to read again if they want to see what new chip mark is.
     l_rc = fapiGetScom(l_targetCentaur, mss_mbeccfir[l_mbaPosition], l_mbeccfir);
     if(l_rc) return l_rc;
     if (l_mbeccfir.isBitSet(i_rank) || l_mbeccfir.isBitSet(20 + i_rank))
     {
-        // Create new log.
+        // TODO: Can FW distingish this rc from all the others
+        // so they know they just need to retry after clearing MPR FIR?
+        
         FAPI_ERR("Markstore write may have been blocked due to MPE FIR set.");
+
+        // FFDC: MBA target
+        const fapi::Target & MBA = i_target;
+        // FFDC: DRAM width
+        uint8_t DRAM_WIDTH = l_dramWidth;
+        // FFDC: Capure i_rank;
+        uint8_t RANK = i_rank;
+        // FFDC: Capure i_symbolMark;
+        uint8_t SYMBOL_MARK = i_symbolMark;
+        // FFDC: Capure i_chipMark;
+        uint8_t CHIP_MARK = i_chipMark;
+        // FFDC: Capture MBECCFIR
+        ecmdDataBufferBase & MBECCFIR = l_mbeccfir;
+        
+        // Create new log.
         FAPI_SET_HWP_ERROR(l_rc, RC_MSS_MAINT_MARKSTORE_WRITE_BLOCKED);
         return l_rc;
     }
@@ -3286,9 +3779,23 @@ fapi::ReturnCode mss_get_steer_mux( const fapi::Target & i_target,
     }
     else
     {
-        FAPI_ERR("l_dramSparePort0Index out of range.");
-        // Caller needs to recognize a symbol value of 0xfe as invalid.
-        o_dramSparePort0Symbol = 0xfe;
+        FAPI_ERR("Steer mux l_dramSparePort0Index out of range.");
+        
+        // TODO: Calling out FW high
+        // FFDC: MBA target
+        const fapi::Target & MBA = i_target;
+        // FFDC: DRAM width
+        uint8_t DRAM_WIDTH = l_dramWidth;
+        // FFDC: Capure i_rank;
+        uint8_t RANK = i_rank;
+        // FFDC: Capure i_muxType
+        uint8_t MUX_TYPE = i_muxType;       
+        // FFDC: Capture steer mux
+        ecmdDataBufferBase & STEER_MUX = l_steerMux;
+
+        // Create new log. 
+        FAPI_SET_HWP_ERROR(l_rc, RC_MSS_MAINT_INVALID_STEER_MUX);
+        return l_rc;        
     }
 
 
@@ -3312,9 +3819,23 @@ fapi::ReturnCode mss_get_steer_mux( const fapi::Target & i_target,
     }
     else
     {
-        FAPI_ERR("l_dramSparePort1Index out of range.");
-        // Caller needs to recognize a symbol value of 0xfe as invalid.
-        o_dramSparePort1Symbol = 0xfe;
+        FAPI_ERR("Steer mux l_dramSparePort1Index out of range.");
+        
+        // TODO: Calling out FW high
+        // FFDC: MBA target
+        const fapi::Target & MBA = i_target;
+        // FFDC: DRAM width
+        uint8_t DRAM_WIDTH = l_dramWidth;
+        // FFDC: Capure i_rank;
+        uint8_t RANK = i_rank;
+        // FFDC: Capure i_muxType
+        uint8_t MUX_TYPE = i_muxType;       
+        // FFDC: Capture steer mux
+        ecmdDataBufferBase & STEER_MUX = l_steerMux;
+
+        // Create new log. 
+        FAPI_SET_HWP_ERROR(l_rc, RC_MSS_MAINT_INVALID_STEER_MUX);
+        return l_rc;        
     }
 
 
@@ -3335,8 +3856,22 @@ fapi::ReturnCode mss_get_steer_mux( const fapi::Target & i_target,
     else
     {
         FAPI_ERR("o_eccSpareSymbol out of range.");
-        // Caller needs to recognize a symbol value of 0xfe as invalid.
-        o_eccSpareSymbol = 0xfe;
+        
+        // TODO: Calling out FW high
+        // FFDC: MBA target
+        const fapi::Target & MBA = i_target;
+        // FFDC: DRAM width
+        uint8_t DRAM_WIDTH = l_dramWidth;
+        // FFDC: Capure i_rank;
+        uint8_t RANK = i_rank;
+        // FFDC: Capure i_muxType
+        uint8_t MUX_TYPE = i_muxType;       
+        // FFDC: Capture steer mux
+        ecmdDataBufferBase & STEER_MUX = l_steerMux;
+
+        // Create new log. 
+        FAPI_SET_HWP_ERROR(l_rc, RC_MSS_MAINT_INVALID_STEER_MUX);
+        return l_rc;        
     }
 
     FAPI_INF("mss_get_steer_mux(): rank%d, port0 steer = %d, port1 steer = %d, ecc steer = %d",
@@ -3362,15 +3897,6 @@ fapi::ReturnCode mss_put_steer_mux( const fapi::Target & i_target,
 
 
 {
-
-    // TODO: i_symbol = MSS_INVALID_SYMBOL will result 0's entered in steer mux, which
-    // means no steer.
-    // Do I want to allow writing of no steer?
-
-    // TODO: i_symbol has to be first symbol in the chip for us to accept it.
-    // Do I want to allow any symbol as the input? 
-
-
     FAPI_INF("ENTER mss_put_steer_mux()");
 
 
@@ -3443,8 +3969,23 @@ fapi::ReturnCode mss_put_steer_mux( const fapi::Target & i_target,
 
             if ( MSS_X8_STEER_OPTIONS_PER_PORT <= l_dramSparePort0Index )
             {
-                // Create new log. 
                 FAPI_ERR("No match for i_symbol = %d in mss_x8dramSparePort0Index_to_symbol[].", i_symbol);
+                
+                // TODO: Calling out FW high
+                // FFDC: MBA target
+                const fapi::Target & MBA = i_target;
+                // FFDC: DRAM width
+                uint8_t DRAM_WIDTH = l_dramWidth;
+                // FFDC: Capure i_rank;
+                uint8_t RANK = i_rank;
+                // FFDC: Capure i_muxType
+                uint8_t MUX_TYPE = i_muxType;       
+                // FFDC: Capure i_muxType
+                uint8_t STEER_TYPE = i_steerType;       
+                // FFDC: Capure i_muxType
+                uint8_t SYMBOL = i_symbol;       
+
+                // Create new log.                 
                 FAPI_SET_HWP_ERROR(l_rc, RC_MSS_MAINT_INVALID_SYMBOL_TO_STEER);
                 return l_rc;
             }
@@ -3464,8 +4005,23 @@ fapi::ReturnCode mss_put_steer_mux( const fapi::Target & i_target,
 
             if ( MSS_X4_STEER_OPTIONS_PER_PORT0 <= l_dramSparePort0Index )
             {
-                // Create new log. 
                 FAPI_ERR("No match for i_symbol in mss_x4dramSparePort0Index_to_symbol[].");
+
+                // TODO: Calling out FW high
+                // FFDC: MBA target
+                const fapi::Target & MBA = i_target;
+                // FFDC: DRAM width
+                uint8_t DRAM_WIDTH = l_dramWidth;
+                // FFDC: Capure i_rank;
+                uint8_t RANK = i_rank;
+                // FFDC: Capure i_muxType
+                uint8_t MUX_TYPE = i_muxType;       
+                // FFDC: Capure i_muxType
+                uint8_t STEER_TYPE = i_steerType;       
+                // FFDC: Capure i_muxType
+                uint8_t SYMBOL = i_symbol;       
+
+                // Create new log. 
                 FAPI_SET_HWP_ERROR(l_rc, RC_MSS_MAINT_INVALID_SYMBOL_TO_STEER);
                 return l_rc;
             }
@@ -3492,8 +4048,23 @@ fapi::ReturnCode mss_put_steer_mux( const fapi::Target & i_target,
 
             if ( MSS_X8_STEER_OPTIONS_PER_PORT <= l_dramSparePort1Index )
             {
-                // Create new log. 
                 FAPI_ERR("No match for i_symbol in mss_x8dramSparePort1Index_to_symbol[].");
+
+                // TODO: Calling out FW high
+                // FFDC: MBA target
+                const fapi::Target & MBA = i_target;
+                // FFDC: DRAM width
+                uint8_t DRAM_WIDTH = l_dramWidth;
+                // FFDC: Capure i_rank;
+                uint8_t RANK = i_rank;
+                // FFDC: Capure i_muxType
+                uint8_t MUX_TYPE = i_muxType;       
+                // FFDC: Capure i_muxType
+                uint8_t STEER_TYPE = i_steerType;       
+                // FFDC: Capure i_muxType
+                uint8_t SYMBOL = i_symbol;       
+
+                // Create new log. 
                 FAPI_SET_HWP_ERROR(l_rc, RC_MSS_MAINT_INVALID_SYMBOL_TO_STEER);
                 return l_rc;
             }
@@ -3513,8 +4084,23 @@ fapi::ReturnCode mss_put_steer_mux( const fapi::Target & i_target,
 
             if ( MSS_X4_STEER_OPTIONS_PER_PORT1 <= l_dramSparePort1Index )
             {
-                // Create new log. 
                 FAPI_ERR("No match for i_symbol in mss_x4dramSparePort1Index_to_symbol[].");
+
+                // TODO: Calling out FW high
+                // FFDC: MBA target
+                const fapi::Target & MBA = i_target;
+                // FFDC: DRAM width
+                uint8_t DRAM_WIDTH = l_dramWidth;
+                // FFDC: Capure i_rank;
+                uint8_t RANK = i_rank;
+                // FFDC: Capure i_muxType
+                uint8_t MUX_TYPE = i_muxType;       
+                // FFDC: Capure i_muxType
+                uint8_t STEER_TYPE = i_steerType;       
+                // FFDC: Capure i_muxType
+                uint8_t SYMBOL = i_symbol;       
+
+                // Create new log. 
                 FAPI_SET_HWP_ERROR(l_rc, RC_MSS_MAINT_INVALID_SYMBOL_TO_STEER);
                 return l_rc;
             }
@@ -3542,17 +4128,46 @@ fapi::ReturnCode mss_put_steer_mux( const fapi::Target & i_target,
 
             if ( MSS_X4_ECC_STEER_OPTIONS <= l_eccSpareIndex )
             {
-                // Create new log. 
                 FAPI_ERR("No match for i_symbol in mss_eccSpareIndex_to_symbol[].");
+
+                // TODO: Calling out FW high
+                // FFDC: MBA target
+                const fapi::Target & MBA = i_target;
+                // FFDC: DRAM width
+                uint8_t DRAM_WIDTH = l_dramWidth;
+                // FFDC: Capure i_rank;
+                uint8_t RANK = i_rank;
+                // FFDC: Capure i_muxType
+                uint8_t MUX_TYPE = i_muxType;       
+                // FFDC: Capure i_muxType
+                uint8_t STEER_TYPE = i_steerType;       
+                // FFDC: Capure i_muxType
+                uint8_t SYMBOL = i_symbol;       
+
+                // Create new log. 
                 FAPI_SET_HWP_ERROR(l_rc, RC_MSS_MAINT_INVALID_SYMBOL_TO_STEER);
                 return l_rc;
             }
         }
         else if (l_dramWidth == mss_MemConfig::X8)
         {
+            FAPI_ERR("ECC_SPARE not valid with x8 mode.");
+
+            // TODO: Calling out FW high
+            // FFDC: MBA target
+            const fapi::Target & MBA = i_target;
+            // FFDC: DRAM width
+            uint8_t DRAM_WIDTH = l_dramWidth;
+            // FFDC: Capure i_rank;
+            uint8_t RANK = i_rank;
+            // FFDC: Capure i_muxType
+            uint8_t MUX_TYPE = i_muxType;       
+            // FFDC: Capure i_muxType
+            uint8_t STEER_TYPE = i_steerType;       
+            // FFDC: Capure i_muxType
+            uint8_t SYMBOL = i_symbol;       
 
             // Create new log. 
-            FAPI_ERR("ECC_SPARE not valid with x8 mode.");
             FAPI_SET_HWP_ERROR(l_rc, RC_MSS_MAINT_NO_X8_ECC_SPARE);
             return l_rc;
         }
@@ -4240,3 +4855,460 @@ uint8_t mss_centaurDQ_to_symbol( uint8_t i_dq, uint8_t i_port )
 
     return o_symbol;
 }
+
+//------------------------------------------------------------------------------
+// mss_IPL_UE_isolation
+//------------------------------------------------------------------------------
+
+fapi::ReturnCode mss_IPL_UE_isolation( const fapi::Target & i_target,
+                                       uint8_t i_rank,
+                                       uint8_t (&o_bad_bits)[2][10])
+
+{
+    FAPI_INF("ENTER mss_IPL_UE_isolation()");
+
+    fapi::ReturnCode l_rc;
+    uint32_t l_ecmd_rc = 0;
+
+    static const uint32_t maintBufferReadDataRegs[2][2][8]={
+
+    // UE trap 0:
+      // Port0                                    beat  double word
+    {{MAINT0_MBA_MAINT_BUFF0_DATA0_0x03010655, // 0     DW0
+      MAINT0_MBA_MAINT_BUFF2_DATA0_0x03010675, // 1     DW2
+      MAINT0_MBA_MAINT_BUFF0_DATA1_0x03010656, // 2     DW4
+      MAINT0_MBA_MAINT_BUFF2_DATA1_0x03010676, // 3     DW6
+      MAINT0_MBA_MAINT_BUFF0_DATA2_0x03010657, // 4     DW8
+      MAINT0_MBA_MAINT_BUFF2_DATA2_0x03010677, // 5     DW10
+      MAINT0_MBA_MAINT_BUFF0_DATA3_0x03010658, // 6     DW12
+      MAINT0_MBA_MAINT_BUFF2_DATA3_0x03010678},// 7     DW14
+
+      // Port1
+     {MAINT0_MBA_MAINT_BUFF1_DATA0_0x03010665, // 0     DW1
+      MAINT0_MBA_MAINT_BUFF3_DATA0_0x03010685, // 1     DW3
+      MAINT0_MBA_MAINT_BUFF1_DATA1_0x03010666, // 2     DW5
+      MAINT0_MBA_MAINT_BUFF3_DATA1_0x03010686, // 3     DW7
+      MAINT0_MBA_MAINT_BUFF1_DATA2_0x03010667, // 4     DW9
+      MAINT0_MBA_MAINT_BUFF3_DATA2_0x03010687, // 5     DW11
+      MAINT0_MBA_MAINT_BUFF1_DATA3_0x03010668, // 6     DW13
+      MAINT0_MBA_MAINT_BUFF3_DATA3_0x03010688}},//7     DW15
+      
+    // UE trap 1:
+      // Port0
+    {{MAINT0_MBA_MAINT_BUFF0_DATA4_0x03010659, // 0     DW0
+      MAINT0_MBA_MAINT_BUFF2_DATA4_0x03010679, // 1     DW2
+      MAINT0_MBA_MAINT_BUFF0_DATA5_0x0301065a, // 2     DW4
+      MAINT0_MBA_MAINT_BUFF2_DATA5_0x0301067a, // 3     DW6
+      MAINT0_MBA_MAINT_BUFF0_DATA6_0x0301065b, // 4     DW8
+      MAINT0_MBA_MAINT_BUFF2_DATA6_0x0301067b, // 5     DW10
+      MAINT0_MBA_MAINT_BUFF0_DATA7_0x0301065c, // 6     DW12
+      MAINT0_MBA_MAINT_BUFF2_DATA7_0x0301067c},// 7     DW14
+
+      // Port1
+     {MAINT0_MBA_MAINT_BUFF1_DATA4_0x03010669, // 0     DW1
+      MAINT0_MBA_MAINT_BUFF3_DATA4_0x03010689, // 1     DW3
+      MAINT0_MBA_MAINT_BUFF1_DATA5_0x0301066a, // 2     DW5
+      MAINT0_MBA_MAINT_BUFF3_DATA5_0x0301068a, // 3     DW7
+      MAINT0_MBA_MAINT_BUFF1_DATA6_0x0301066b, // 4     DW9
+      MAINT0_MBA_MAINT_BUFF3_DATA6_0x0301068b, // 5     DW11
+      MAINT0_MBA_MAINT_BUFF1_DATA7_0x0301066c, // 6     DW13
+      MAINT0_MBA_MAINT_BUFF3_DATA7_0x0301068c}}};//7    DW15
+
+
+    static const uint32_t maintBufferRead65thByteRegs[2][4]={
+    // UE trap 0
+     {MAINT0_MBA_MAINT_BUFF_65TH_BYTE_64B_ECC0_0x03010695,
+      MAINT0_MBA_MAINT_BUFF_65TH_BYTE_64B_ECC1_0x03010696,
+      MAINT0_MBA_MAINT_BUFF_65TH_BYTE_64B_ECC2_0x03010697,
+      MAINT0_MBA_MAINT_BUFF_65TH_BYTE_64B_ECC3_0x03010698},
+    // UE trap 1
+     {MAINT0_MBA_MAINT_BUFF_65TH_BYTE_64B_ECC4_0x03010699,
+      MAINT0_MBA_MAINT_BUFF_65TH_BYTE_64B_ECC5_0x0301069a,
+      MAINT0_MBA_MAINT_BUFF_65TH_BYTE_64B_ECC6_0x0301069b,
+      MAINT0_MBA_MAINT_BUFF_65TH_BYTE_64B_ECC7_0x0301069c}};
+
+
+    uint8_t l_UE_trap = 0; // 0,1, since UE can be in 1st or 2nd half of buffer
+    uint8_t l_port = 0;    // 0,1
+    uint8_t l_beat = 0;    // 0-7
+    uint8_t l_byte = 0;    // 0-9
+    uint8_t l_loop = 0;        
+    ecmdDataBufferBase l_data(64);
+    ecmdDataBufferBase l_UE_trap0_signature(64);
+    ecmdDataBufferBase l_UE_trap1_signature(64);
+    ecmdDataBufferBase l_mbmmr(64);
+    ecmdDataBufferBase l_mbmct(64);
+    ecmdDataBufferBase l_mbstr(64);    
+    uint8_t l_initPattern = 0;
+    uint8_t l_cmd_type = 0;
+    fapi::Target l_targetCentaur;
+    uint8_t l_mbaPosition = 0;
+    uint32_t l_tmp_data_diff[2];
+    uint8_t l_tag_MDI = 0;
+    uint8_t l_tmp_65th_byte_diff = 0;
+    ecmdDataBufferBase l_diff(64);
+    uint32_t l_ECC = 0;
+    uint32_t l_tmp_ECC_diff = 0;
+    ecmdDataBufferBase l_ECC_diff(32);
+    uint8_t l_ECC_c6_c5_c4_01 = 0;
+    uint8_t l_ECC_c6_c5_c4_23 = 0;
+    uint8_t l_ECC_c3_c2_c1_c0_01 = 0;
+    uint8_t l_ECC_c3_c2_c1_c0_23 = 0;
+    uint8_t l_dramSparePort0Symbol = MSS_INVALID_SYMBOL;
+    uint8_t l_dramSparePort1Symbol = MSS_INVALID_SYMBOL;
+    uint8_t l_eccSpareSymbol = MSS_INVALID_SYMBOL;  
+
+    //----------------------------------------------------
+    // Initialize o_bad_bits
+    //----------------------------------------------------
+
+    for(l_port=0; l_port<2; l_port++ )
+    {
+        for(l_byte=0; l_byte<10; l_byte++ )
+        {
+            o_bad_bits[l_port][l_byte] = 0;
+        }
+    }
+
+
+    //----------------------------------------------------
+    // Get the expected pattern (stored in mbmmr reg)
+    //----------------------------------------------------
+
+    // Get Centaur target for the given MBA
+    l_rc = fapiGetParentChip(i_target, l_targetCentaur);
+    if(l_rc)
+    {
+        FAPI_ERR("Error getting Centaur parent target for the given MBA");
+        return l_rc;
+    }
+
+    // Get MBA position: 0 = mba01, 1 = mba23
+    l_rc = FAPI_ATTR_GET(ATTR_CHIP_UNIT_POS, &i_target, l_mbaPosition);
+    if(l_rc)
+    {
+        FAPI_ERR("Error getting MBA position");
+        return l_rc;
+    }
+
+    // MBMMR[4:7] contains the pattern index
+    l_rc = fapiGetScom(l_targetCentaur, mss_mbmmr[l_mbaPosition], l_mbmmr);
+    if(l_rc) return l_rc;   
+    l_ecmd_rc |= l_mbmmr.extractPreserve(&l_initPattern, 4, 4, 8-4);
+    if(l_ecmd_rc)
+    {
+        l_rc.setEcmdError(l_ecmd_rc);
+        return l_rc;
+    }
+
+    // MBMCT[0:4] contains the cmd type
+    l_rc = fapiGetScom(i_target, MBA01_MBMCTQ_0x0301060A, l_mbmct);
+    if(l_rc) return l_rc;
+    l_ecmd_rc |= l_mbmct.extractPreserve(&l_cmd_type, 0, 5, 8-5);
+    if(l_ecmd_rc)
+    {
+        l_rc.setEcmdError(l_ecmd_rc);
+        return l_rc;
+    }
+
+    // No isolation if cmd is timebased steer cleanup, or pattern is random
+    if ((l_cmd_type == 2) || (l_initPattern == 8))
+    {
+        FAPI_ERR("No UE isolation for steer cleanup or random pattern");
+        return l_rc;
+    }
+
+
+    FAPI_INF("Expected pattern%d = 0x%.8X 0x%.8X",l_initPattern,
+    mss_maintBufferData[l_initPattern][0][0],
+    mss_maintBufferData[l_initPattern][0][1]);
+
+    //----------------------------------------------------
+    // Figure out which half of the buffer has the UE...
+    // Remember we had to first load the buffers with
+    // a hex signatue, and whichever gets overwritten
+    // has a UE trapped
+    //----------------------------------------------------
+    l_rc = fapiGetScom(i_target, MAINT0_MBA_MAINT_BUFF0_DATA0_0x03010655, l_UE_trap0_signature);
+    if(l_rc) return l_rc;
+    
+    l_rc = fapiGetScom(i_target, MAINT0_MBA_MAINT_BUFF0_DATA4_0x03010659, l_UE_trap1_signature);
+    if(l_rc) return l_rc;
+
+    // UE may be trapped in both halves of the buffer,
+    // but we will only use one.
+    if ((l_UE_trap0_signature.getWord(0) != 0xFACEB00C) &&
+        (l_UE_trap0_signature.getWord(0) != 0xD15C0DAD))
+    {
+        FAPI_INF("UE trapped in 1st half of maint buffer");
+        l_UE_trap = 0;
+    }
+    else if ((l_UE_trap1_signature.getWord(0) != 0xFACEB00C) &&
+             (l_UE_trap1_signature.getWord(0) != 0xD15C0DAD))
+    {
+        FAPI_INF("UE trapped in 2nd half of maint buffer");
+        l_UE_trap = 1;
+    }
+    else
+    {
+        FAPI_ERR("IPL UE trapping didn't work.");
+        
+        // Read for FFDC: MBSTR[59]: UE trap enable bit
+        l_rc = fapiGetScom(l_targetCentaur, mss_mbstr[l_mbaPosition], l_mbstr);
+        if(l_rc) return l_rc;
+                
+
+        // Calling out MBA target high, deconfig, gard
+        const fapi::Target & MBA = i_target;
+        // FFDC: Capture UE trap contents
+        ecmdDataBufferBase & UE_TRAP0 = l_UE_trap0_signature;
+        ecmdDataBufferBase & UE_TRAP1 = l_UE_trap1_signature;        
+        // FFDC: MBMCT[0:4] contains the cmd type
+        ecmdDataBufferBase & MBMCT = l_mbmct;  
+        // FFDC: MBMMR[4:7] contains the pattern index
+        ecmdDataBufferBase & MBMMR = l_mbmmr;  
+        // FFDC: MBSTR[59]: UE trap enable bit
+        ecmdDataBufferBase & MBSTR = l_mbstr;  
+        
+        // Create new log
+        FAPI_SET_HWP_ERROR(l_rc, RC_MSS_MAINT_NO_UE_TRAP);
+   
+        return l_rc;
+    }
+
+
+
+    //----------------------------------------------------
+    // DATA: Do XOR of expected and actual data to find stuck bits
+    //----------------------------------------------------
+
+    for(l_port=0; l_port<2; l_port++ )
+    {
+        l_tmp_data_diff[0] = 0;
+        l_tmp_data_diff[1] = 0;
+        
+        FAPI_INF("port%d", l_port);
+        for(l_beat=0; l_beat<8; l_beat++ )
+        {
+
+            l_rc = fapiGetScom(i_target, maintBufferReadDataRegs[l_UE_trap][l_port][l_beat], l_data);
+            if(l_rc) return l_rc;
+            FAPI_INF("Actual data, beat%d: 0x%.8X 0x%.8X", l_beat, l_data.getWord(0), l_data.getWord(1));
+
+            FAPI_INF("Expected pattern%d = 0x%.8X 0x%.8X",l_initPattern,
+            mss_maintBufferData[l_initPattern][l_port*8 + l_beat][0],
+            mss_maintBufferData[l_initPattern][l_port*8 + l_beat][1]);
+
+            // DO XOR of actual and expected data, and OR the result together for all 8 beats
+            l_tmp_data_diff[0] |= l_data.getWord(0) ^ mss_maintBufferData[l_initPattern][l_port*8 + l_beat][0];
+            l_tmp_data_diff[1] |= l_data.getWord(1) ^ mss_maintBufferData[l_initPattern][l_port*8 + l_beat][1];
+
+            FAPI_INF("***************************************** l_tmp_diff: 0x%.8X 0x%.8X", l_tmp_data_diff[0], l_tmp_data_diff[1]);
+        }
+
+        // Put l_tmp_diff into a ecmdDataBufferBase to make it easier 
+        // to get into o_bad_bits
+        l_ecmd_rc |= l_diff.insert(l_tmp_data_diff[0], 0, 32, 0);
+        l_ecmd_rc |= l_diff.insert(l_tmp_data_diff[1], 32, 32, 0);
+        if(l_ecmd_rc)
+        {
+            l_rc.setEcmdError(l_ecmd_rc);
+            return l_rc;
+        }
+
+        for(l_byte=0; l_byte<8; l_byte++ )
+        {
+            l_ecmd_rc |= l_diff.extractPreserve(&o_bad_bits[l_port][l_byte], 8*l_byte, 8, 0);
+        }
+        if(l_ecmd_rc)
+        {
+            l_rc.setEcmdError(l_ecmd_rc);
+            return l_rc;
+        }
+
+    } // End loop on ports
+
+
+
+    //----------------------------------------------------
+    // 65th byte: Do XOR of expected and actual 65th byte to find stuck bits
+    //----------------------------------------------------
+
+    for(l_loop=0; l_loop<4; l_loop++ )
+    {   
+        l_tag_MDI = 0;
+        l_tmp_65th_byte_diff = 0;
+
+        l_rc = fapiGetScom(i_target, maintBufferRead65thByteRegs[l_UE_trap][l_loop], l_data);
+        if(l_rc) return l_rc;
+
+        // Grab bit 0 = Checkbit0_1
+        // Grab bit 1 = Tag0_2
+        // Grab bit 2 = Tag1_3
+        // Grab bit 3 = MDI
+        l_ecmd_rc |= l_data.extractPreserve(&l_tag_MDI, 0, 4, 0);
+        if(l_ecmd_rc)
+        {
+            l_rc.setEcmdError(l_ecmd_rc);
+            return l_rc;
+        }
+
+        FAPI_INF("Actual:   bit0 (Checkbit0_1), bit1(Tag0_2), bit2(Tag1_3), bit3(MDI) = 0x%.2X", l_tag_MDI);
+
+        FAPI_INF("Expected: bit0 (Checkbit0_1), bit1(Tag0_2), bit2(Tag1_3), bit3(MDI) = 0x%.2X", mss_65thByte[l_initPattern][l_loop]);
+
+        // DO XOR of actual and expected data
+        l_tmp_65th_byte_diff = l_tag_MDI ^ mss_65thByte[l_initPattern][l_loop];
+        FAPI_INF("***************************************** l_tmp_65th_byte_diff: 0x%.2X", l_tmp_65th_byte_diff);
+
+
+        // Check for mismatch in bit 0: Checkbit0_1
+        if (l_tmp_65th_byte_diff & 0x80)
+        {
+            // Checkbit0_1 maps to port0 bit 64, which is on byte8
+            o_bad_bits[0][8] |= 0x80;
+        }        
+
+        // Check for mismatch in bit 1: Tag0_2
+        if (l_tmp_65th_byte_diff & 0x40)
+        {
+            // Tag0_2 maps to port0 bit 65, which is on byte8
+            o_bad_bits[0][8] |= 0x40;
+        }
+
+        // Check for mismatch in bit 2: Tag1_3
+        if (l_tmp_65th_byte_diff & 0x20)
+        {
+            // Tag1_3 maps to port0 bit 64, which is on byte8
+            o_bad_bits[0][8] |= 0x80;
+        }
+
+        // Check for mismatch in bit 3: MDI
+        if (l_tmp_65th_byte_diff & 0x10)
+        {
+            // MDI maps to port0 bit 65, which is on byte8
+            o_bad_bits[0][8] |= 0x40;
+        }
+    } // End loops through trapped 65th byte info
+
+
+    //----------------------------------------------------
+    // ECC: Do XOR of expected and actual ECC bits to find stuck bits
+    //----------------------------------------------------
+
+    for(l_loop=0; l_loop<4; l_loop++ )
+    {   
+        l_ECC = 0;
+
+        l_rc = fapiGetScom(i_target, maintBufferRead65thByteRegs[l_UE_trap][l_loop], l_data);
+        if(l_rc) return l_rc;
+
+        // Grab bits 4:15 = ECC_c6_c5_c4, and bits 16:31 = ECC_c3_c2_c1_c0
+        l_ecmd_rc |= l_data.extractPreserve(&l_ECC, 4, 28, 4);
+        if(l_ecmd_rc)
+        {
+            l_rc.setEcmdError(l_ecmd_rc);
+            return l_rc;
+        }
+
+        FAPI_INF("Actual:   ECC = 0x%.8X", l_ECC);
+
+        FAPI_INF("Expected: ECC = 0x%.8X", mss_ECC[l_initPattern][l_loop]);
+
+        // DO XOR of actual and expected data
+        l_tmp_ECC_diff |= l_ECC ^ mss_ECC[l_initPattern][l_loop];
+        FAPI_INF("***************************************** l_tmp_ECC_diff: 0x%.8X", l_tmp_ECC_diff);
+    }
+
+    // Put l_tmp_ECC_diff into a ecmdDataBufferBase to make it easier
+    // to get into o_bad_bits
+    l_ecmd_rc |= l_ECC_diff.insert(l_tmp_ECC_diff, 0, 32, 0);
+    if(l_ecmd_rc)
+    {
+        l_rc.setEcmdError(l_ecmd_rc);
+        return l_rc;
+    }
+
+    l_ecmd_rc |= l_ECC_diff.extractPreserve(&l_ECC_c6_c5_c4_01, 4, 6, 8-6);
+    l_ecmd_rc |= l_ECC_diff.extractPreserve(&l_ECC_c6_c5_c4_23, 10, 6, 8-6);
+    l_ecmd_rc |= l_ECC_diff.extractPreserve(&l_ECC_c3_c2_c1_c0_01, 16, 8, 0);
+    l_ecmd_rc |= l_ECC_diff.extractPreserve(&l_ECC_c3_c2_c1_c0_23, 24, 8, 0);
+    if(l_ecmd_rc)
+    {
+        l_rc.setEcmdError(l_ecmd_rc);
+        return l_rc;
+    }
+
+    // The 6 bits of ECC_c6_c5_c4 maps to byte8 on port0
+    o_bad_bits[0][8] |= l_ECC_c6_c5_c4_01 | l_ECC_c6_c5_c4_23;
+    // The 8 bits of ECC_c3_c2_c1_c0 maps to byte8 byte on port1
+    o_bad_bits[1][8] |= l_ECC_c3_c2_c1_c0_01 | l_ECC_c3_c2_c1_c0_23;
+    
+
+    //----------------------------------------------------
+    // Spare: Mark byte9 bad if bad bits found in position being steered
+    //----------------------------------------------------
+
+    // READ steer mux, which gets me a symbol for port0 and port1
+    l_rc = mss_get_steer_mux(i_target,
+                             i_rank,
+                             mss_SteerMux::READ_MUX,
+                             l_dramSparePort0Symbol,
+                             l_dramSparePort1Symbol,
+                             l_eccSpareSymbol);
+    if(l_rc) return l_rc;
+
+    // If steering on port0
+    if ( l_dramSparePort0Symbol != 0xff)
+    {
+        // Find the byte being steered
+        l_byte = mss_chip_mark_to_centaurDQ[l_dramSparePort0Symbol/4][0]/8;
+
+        // If that byte has any bad bits in it, copy them to byte9,
+        if (o_bad_bits[0][l_byte])
+        {
+            o_bad_bits[0][9] = o_bad_bits[0][l_byte];
+
+            // Clear byte being steered, since it did not contribute to UE
+            o_bad_bits[0][l_byte] = 0;
+        }
+    }
+
+    // If steering on port1
+    if ( l_dramSparePort1Symbol != 0xff)
+    {
+        // Find the byte being steered
+        l_byte = mss_chip_mark_to_centaurDQ[l_dramSparePort1Symbol/4][0]/8;
+
+        // If that byte has any bad bits in it, copy them to byte9,
+        if (o_bad_bits[1][l_byte])
+        {
+            o_bad_bits[1][9] = o_bad_bits[1][l_byte];
+
+            // Clear byte being steered, since it did not contribute to UE
+            o_bad_bits[1][l_byte] = 0;
+        }
+    }
+
+    //----------------------------------------------------
+    // Show results 
+    //----------------------------------------------------
+
+    for(l_port=0; l_port<2; l_port++ )
+    {
+        for(l_byte=0; l_byte<10; l_byte++ )
+        {
+            FAPI_INF("o_bad_bits[%d][%d] = %02x",
+                      l_port, l_byte, o_bad_bits[l_port][l_byte]);
+        }
+    }
+
+
+    FAPI_INF("EXIT mss_IPL_UE_isolation()");
+
+    return l_rc;
+
+
+}
+
+

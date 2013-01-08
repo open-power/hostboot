@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012                   */
+/* COPYRIGHT International Business Machines Corp. 2012,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_eff_config_termination.C,v 1.8 2012/12/06 13:45:57 bellows Exp $
+// $Id: mss_eff_config_termination.C,v 1.11 2012/12/23 02:29:44 asaetow Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/centaur/working/procedures/ipl/fapi/mss_eff_config_termination.C,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
@@ -42,7 +42,13 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
-//   1.9   |          |         |
+//   1.12  |          |         |
+//   1.11  | asaetow  |22-DEC-12| Added CDIMM workaround for EC10 ADR Centerlane race condition, subtract 32ticks.
+//         |          |         | NOTE: Need EC check for Centaur EC10 ADR Centerlane NWELL workaround.
+//   1.10  | asaetow  |22-DEC-12| Added Centaur EC10 ADR Centerlane PR=0x7F workaround for NWELL LVS issue.
+//         |          |         | NOTE: Need EC check for Centaur EC10 ADR Centerlane NWELL workaround.
+//         |          |         | Fixed (l_attr_is_simulation || 1) to (l_attr_is_simulation != 0) from v1.8 and v1.9.
+//   1.9   | bellows  |12-DEC-12| Changed phase rotators for sim to 0x40 for clocks
 //   1.8   | bellows  |06-DEC-12| Added sim leg for rotator values
 //   1.7   | asaetow  |18-NOV-12| Changed ATTR_MSS_CAL_STEP_ENABLE from 0x7F back to 0xFF. 
 //   1.6   | asaetow  |17-NOV-12| Fixed ATTR_EFF_ODT_WR for 4R RDIMMs.
@@ -892,6 +898,35 @@ fapi::ReturnCode mss_eff_config_termination(const fapi::Target i_target_mba) {
    for( int l_port = 0; l_port < PORT_SIZE; l_port += 1 ) {
       for( int l_pr_type_index = 0; l_pr_type_index < PR_TYPE_SIZE; l_pr_type_index += 1 ) {
          l_attr_eff_cen_phase_rot[l_pr_type_index][l_port] = PR_VALUE_U8ARRAY[l_port][l_pr_type_index][l_topo_index];
+         // AST HERE: Need EC check here for Centaur EC10 ADR Centerlane NWELL LVS issue PR=0x7F workaround.
+         if ((((l_target_mba_pos == 0) && (l_port == 0) && (l_pr_type_index == 16)) ||   // MA_CMD_A<12>
+              ((l_target_mba_pos == 0) && (l_port == 0) && (l_pr_type_index ==  4)) ||   // MA_CMS_A<0>
+              ((l_target_mba_pos == 0) && (l_port == 0) && (l_pr_type_index == 17)) ||   // MA_CMD_A<13>
+              ((l_target_mba_pos == 0) && (l_port == 0) && (l_pr_type_index == 20)) ||   // MA_CMD_BA<0>
+              ((l_target_mba_pos == 0) && (l_port == 1) && (l_pr_type_index == 34)) ||   // MB0_CNTL_CSN<2>
+              ((l_target_mba_pos == 0) && (l_port == 1) && (l_pr_type_index == 36)) ||   // MB0_CNTL_ODT<0>
+              ((l_target_mba_pos == 0) && (l_port == 1) && (l_pr_type_index == 15)) ||   // MB_CMD_A<11>
+              ((l_target_mba_pos == 0) && (l_port == 1) && (l_pr_type_index == 28)) ||   // MB0_CNTL_CKE<0>
+              ((l_target_mba_pos == 1) && (l_port == 0) && (l_pr_type_index ==  5)) ||   // MC_CMD_A<1>
+              ((l_target_mba_pos == 1) && (l_port == 0) && (l_pr_type_index == 10)) ||   // MC_CMD_A<6>
+              ((l_target_mba_pos == 1) && (l_port == 0) && (l_pr_type_index == 26)) ||   // MC_CMD_PAR
+              ((l_target_mba_pos == 1) && (l_port == 0) && (l_pr_type_index == 47)) ||   // MC1_CNTL_ODT<1>
+              ((l_target_mba_pos == 1) && (l_port == 1) && (l_pr_type_index == 32)) ||   // MD0_CNTL_CSN<0>
+              ((l_target_mba_pos == 1) && (l_port == 1) && (l_pr_type_index == 14)) ||   // MD_CMD_A<10>
+              ((l_target_mba_pos == 1) && (l_port == 1) && (l_pr_type_index == 44)) ||   // MD1_CNTL_CSN<2>
+              ((l_target_mba_pos == 1) && (l_port == 1) && (l_pr_type_index == 36))) &&  // MD0_CNTL_ODT<0>
+            (l_attr_is_simulation == 0)) {
+            FAPI_INF("WARNING: Centaur EC10 ADR Centerlane PR=0x7F workaround for NWELL LVS issue on CmdLaneIndex %d Port %d %s!", l_pr_type_index, l_port, i_target_mba.toEcmdString());
+            l_attr_eff_cen_phase_rot[l_pr_type_index][l_port] = 0x7F;
+         } else {
+            if (l_dimm_type_u8 == fapi::ENUM_ATTR_EFF_DIMM_TYPE_CDIMM) {
+               if ((l_attr_eff_cen_phase_rot[l_pr_type_index][l_port] - 32) >= 0) {
+                  l_attr_eff_cen_phase_rot[l_pr_type_index][l_port] = l_attr_eff_cen_phase_rot[l_pr_type_index][l_port] - 32;
+               } else {
+                  l_attr_eff_cen_phase_rot[l_pr_type_index][l_port] = 0;
+               }
+            }
+         }
       }
    }
 
@@ -920,14 +955,14 @@ fapi::ReturnCode mss_eff_config_termination(const fapi::Target i_target_mba) {
    rc = FAPI_ATTR_SET(ATTR_EFF_ODT_RD, &i_target_mba, l_attr_eff_odt_rd); if(rc) return rc;
    rc = FAPI_ATTR_SET(ATTR_EFF_ODT_WR, &i_target_mba, l_attr_eff_odt_wr); if(rc) return rc;
 
-   if(l_attr_is_simulation || 1) {
+   if(l_attr_is_simulation != 0) {
      FAPI_INF("In Sim Detected %s on %s value is %d", PROCEDURE_NAME, i_target_mba.toEcmdString(), l_attr_is_simulation);
 
      for(int i=0;i<2;i++) {
-       l_attr_eff_cen_phase_rot[0][i]=0;
-       l_attr_eff_cen_phase_rot[1][i]=0;
-       l_attr_eff_cen_phase_rot[2][i]=0;
-       l_attr_eff_cen_phase_rot[3][i]=0;
+       l_attr_eff_cen_phase_rot[0][i]=0x40;
+       l_attr_eff_cen_phase_rot[1][i]=0x40;
+       l_attr_eff_cen_phase_rot[2][i]=0x40;
+       l_attr_eff_cen_phase_rot[3][i]=0x40;
        l_attr_eff_cen_phase_rot[4][i]=0;
        l_attr_eff_cen_phase_rot[5][i]=0;
        l_attr_eff_cen_phase_rot[6][i]=0;
