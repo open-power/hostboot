@@ -1,26 +1,25 @@
-/*  IBM_PROLOG_BEGIN_TAG
- *  This is an automatically generated prolog.
- *
- *  $Source: src/usr/spd/test/spdtest.H $
- *
- *  IBM CONFIDENTIAL
- *
- *  COPYRIGHT International Business Machines Corp. 2012
- *
- *  p1
- *
- *  Object Code Only (OCO) source materials
- *  Licensed Internal Code Source Materials
- *  IBM HostBoot Licensed Internal Code
- *
- *  The source code for this program is not published or other-
- *  wise divested of its trade secrets, irrespective of what has
- *  been deposited with the U.S. Copyright Office.
- *
- *  Origin: 30
- *
- *  IBM_PROLOG_END_TAG
- */
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/usr/spd/test/spdtest.H $                                  */
+/*                                                                        */
+/* IBM CONFIDENTIAL                                                       */
+/*                                                                        */
+/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/*                                                                        */
+/* p1                                                                     */
+/*                                                                        */
+/* Object Code Only (OCO) source materials                                */
+/* Licensed Internal Code Source Materials                                */
+/* IBM HostBoot Licensed Internal Code                                    */
+/*                                                                        */
+/* The source code for this program is not published or otherwise         */
+/* divested of its trade secrets, irrespective of what has been           */
+/* deposited with the U.S. Copyright Office.                              */
+/*                                                                        */
+/* Origin: 30                                                             */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
 #ifndef __SPDTEST_H
 #define __SPDTEST_H
 
@@ -85,6 +84,7 @@ class SPDTest: public CxxTest::TestSuite
             errlHndl_t err = NULL;
             uint64_t cmds = 0x0;
             uint64_t fails = 0x0;
+            uint8_t * theData = NULL;
 
             TRACFCOMP( g_trac_spd,
                        ENTER_MRK"testSpdRead()" );
@@ -107,7 +107,6 @@ class SPDTest: public CxxTest::TestSuite
 
                 // Operate on first DIMM.
                 theTarget = dimmList[0];
-                uint8_t * theData = NULL;
                 size_t theSize = 0;
                 uint32_t entry = 0x0;
 
@@ -202,6 +201,12 @@ class SPDTest: public CxxTest::TestSuite
                 }
             } while( 0 );
 
+            if( NULL != theData )
+            {
+                free( theData );
+                theData = NULL;
+            }
+
             TRACFCOMP( g_trac_spd,
                        "testSpdRead - %d/%d fails",
                        fails, cmds );
@@ -215,6 +220,7 @@ class SPDTest: public CxxTest::TestSuite
             errlHndl_t err = NULL;
             uint64_t cmds = 0x0;
             uint64_t fails = 0x0;
+            uint8_t * theData = NULL;
 
             TRACFCOMP( g_trac_spd,
                        ENTER_MRK"testSpdWrite()" );
@@ -238,7 +244,6 @@ class SPDTest: public CxxTest::TestSuite
                 // Operate on first DIMM
                 cmds++;
                 theTarget = dimmList[0];
-                uint8_t * theData = NULL;
                 size_t theSize = 0;
 
                 // Get Memory Type
@@ -319,6 +324,12 @@ class SPDTest: public CxxTest::TestSuite
                     err = NULL;
                 }
             } while( 0 );
+
+            if( NULL != theData )
+            {
+                free( theData );
+                theData = NULL;
+            }
 
             TRACFCOMP( g_trac_spd,
                        "testSpdWrite - %d/%d fails",
@@ -497,7 +508,7 @@ class SPDTest: public CxxTest::TestSuite
                     err = NULL;
                 }
             } while( 0 );
-
+            
             TRACFCOMP( g_trac_spd,
                        "testSpdInvalidWrite - %d/%d fails",
                        fails, cmds );
@@ -514,6 +525,7 @@ class SPDTest: public CxxTest::TestSuite
             uint64_t fails = 0x0;
             uint8_t memType = 0x0;
             uint8_t modType = 0x0;
+            uint8_t * theData = NULL;
 
             TRACFCOMP( g_trac_spd,
                        ENTER_MRK"testspdDDR3ModSpecKwds()" );
@@ -536,7 +548,6 @@ class SPDTest: public CxxTest::TestSuite
 
                 // Operate on first DIMM.
                 theTarget = dimmList[0];
-                uint8_t * theData = NULL;
                 size_t theSize = 0;
                 uint32_t entry = 0x0;
 
@@ -668,6 +679,12 @@ class SPDTest: public CxxTest::TestSuite
                     }
                 }
             } while( 0 );
+
+            if( NULL != theData )
+            {
+                free( theData );
+                theData = NULL;
+            }
 
             TRACFCOMP( g_trac_spd,
                        "testspdDDR3ModSpecKwds - %d/%d fails",
