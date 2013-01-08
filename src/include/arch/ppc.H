@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2012              */
+/* COPYRIGHT International Business Machines Corp. 2011,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -175,6 +175,13 @@ inline void setDEC(uint64_t _dec)
 }
 
 ALWAYS_INLINE
+inline void setRPR(uint64_t _rpr)
+{
+    register uint64_t rpr = _rpr;
+    asm volatile("mtspr 186, %0" :: "r"(rpr));
+}
+
+ALWAYS_INLINE
 inline void sync()
 {
     asm volatile("sync" ::: "memory");
@@ -256,6 +263,13 @@ inline void setThreadPriorityHigh()
 {
     asm volatile("or 2,2,2");
 }
+
+ALWAYS_INLINE
+inline void setThreadPriorityVeryHigh()
+{
+    asm volatile("or 7,7,7");
+}
+
 
 ALWAYS_INLINE
 inline void dcbf(void* _ptr)

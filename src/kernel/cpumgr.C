@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2010,2012              */
+/* COPYRIGHT International Business Machines Corp. 2010,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -132,7 +132,7 @@ void CpuManager::requestShutdown(uint64_t i_status)
                     HeapManager::stats();
                 #endif
 
-              
+
             }
 
             void activeMainWork()
@@ -288,6 +288,7 @@ void CpuManager::activateCPU(cpu_t * i_cpu)
     msr |= 0x1000; // TODO: RTC: 51148 - Simics workaround for SW170137.
     kassert(WAKEUP_MSR_VALUE == msr);
     setLPCR(WAKEUP_LPCR_VALUE);
+    setRPR(WAKEUP_RPR_VALUE);
 }
 
 void CpuManager::deactivateCPU(cpu_t * i_cpu)
@@ -352,8 +353,12 @@ void CpuManager::executePeriodics(cpu_t * i_cpu)
                 public:
                     void masterPreWork()
                     {
+                        setThreadPriorityVeryHigh();
+
                         HeapManager::coalesce();
                         PageManager::coalesce();
+
+                        setThreadPriorityHigh();
                     }
             };
 

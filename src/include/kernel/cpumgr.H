@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2010,2012              */
+/* COPYRIGHT International Business Machines Corp. 2010,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -169,6 +169,19 @@ class CpuManager
          *  bit 61 - LPES(1) = 0 (P8 RFC02204 forces to 0)
          */
         static const uint64_t WAKEUP_LPCR_VALUE =   0x0000000000007008;
+
+        /** Desired value for RPR after wakeup.
+         *
+         *      Priority     Us    PHYP
+         *      Very Low      0      0
+         *      Low           1      1    <--- hostboot "low"
+         *      Med Low       3      3
+         *      Med          32      7    <--- hostboot "high"
+         *      Med High     33     15
+         *      High         34     31
+         *      Very High    63     63
+         */
+        static const uint64_t WAKEUP_RPR_VALUE =    0x0001032021223F;
 
     protected:
         CpuManager();
