@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012                   */
+/* COPYRIGHT International Business Machines Corp. 2012,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -251,12 +251,14 @@ fapi::ReturnCode determineMnfgRepairLanes(const fapi::Target   &i_tgtHandle,
                                           std::vector<uint8_t> &o_txFailLanes,
                                           std::vector<uint8_t> &o_rxFailLanes)
 {
-    uint32_t         l_numRepairs    = 0;
-    uint8_t          *l_vpdPtr       = NULL;
-    eRepairHeader    *l_vpdHeadPtr   = NULL;
-    uint32_t         l_loop          = 0;
-    uint32_t         l_bytesParsed   = 0;
-    fapi::TargetType l_tgtType       = fapi::TARGET_TYPE_NONE;
+    uint32_t         l_numRepairs         = 0;
+    uint8_t          *l_vpdPtr            = NULL;
+    eRepairHeader    *l_vpdHeadPtr        = NULL;
+    uint32_t         l_loop               = 0;
+    uint32_t         l_bytesParsed        = 0;
+    const uint32_t   l_memRepairDataSz    = sizeof(eRepairMemBus);
+    const uint32_t   l_fabricRepairDataSz = sizeof(eRepairPowerBus);
+    fapi::TargetType l_tgtType            = fapi::TARGET_TYPE_NONE;
     fapi::ReturnCode l_rc;
     fapi::ATTR_CHIP_UNIT_POS_Type l_busNum;
 
@@ -283,16 +285,18 @@ fapi::ReturnCode determineMnfgRepairLanes(const fapi::Target   &i_tgtHandle,
             eRepairPowerBus l_fabricBus;
 
             // Read Power bus eRepair data and get the failed lane numbers
-            for(l_loop = 0; l_loop < l_numRepairs; l_loop++)
+            for(l_loop = 0;
+                l_loop < l_numRepairs;
+                l_loop++, (l_vpdPtr += l_fabricRepairDataSz))
             {
                 // Make sure we are not parsing more data than the passed size
-                l_bytesParsed += sizeof(eRepairPowerBus);
+                l_bytesParsed += l_fabricRepairDataSz;
                 if(l_bytesParsed > i_bufSz)
                 {
                     break;
                 }
 
-                memcpy(&l_fabricBus, l_vpdPtr, sizeof(eRepairPowerBus));
+                memcpy(&l_fabricBus, l_vpdPtr, l_fabricRepairDataSz);
 
                 // Check if we have the correct Processor ID
                 // Get the MRU ID of the passed processor target and
@@ -335,10 +339,6 @@ fapi::ReturnCode determineMnfgRepairLanes(const fapi::Target   &i_tgtHandle,
                 {
                     o_rxFailLanes.push_back(l_fabricBus.failBit);
                 }
-
-                // Increment pointer to point to the next fabric repair data
-                l_vpdPtr += sizeof(eRepairPowerBus);
-
             } // end of for loop
         } // end of if(l_tgtType is XBus or ABus)
         else if(l_tgtType == fapi::TARGET_TYPE_MCS_CHIPLET)
@@ -347,16 +347,18 @@ fapi::ReturnCode determineMnfgRepairLanes(const fapi::Target   &i_tgtHandle,
             eRepairMemBus l_memBus;
 
             // Read Power bus eRepair data and get the failed lane numbers
-            for(l_loop = 0; l_loop < l_numRepairs; l_loop++)
+            for(l_loop = 0;
+                l_loop < l_numRepairs;
+                l_loop++, (l_vpdPtr += l_memRepairDataSz))
             {
                 // Make sure we are not parsing more data than the passed size
-                l_bytesParsed += sizeof(eRepairMemBus);
+                l_bytesParsed += l_memRepairDataSz;
                 if(l_bytesParsed > i_bufSz)
                 {
                     break;
                 }
 
-                memcpy(&l_memBus, l_vpdPtr, sizeof(eRepairMemBus));
+                memcpy(&l_memBus, l_vpdPtr, l_memRepairDataSz);
 
                 // Check if we have the correct Processor ID
                 // Get the MRU ID of the passed processor target and
@@ -398,10 +400,6 @@ fapi::ReturnCode determineMnfgRepairLanes(const fapi::Target   &i_tgtHandle,
                 {
                     o_rxFailLanes.push_back(l_memBus.failBit);
                 }
-
-                // Increment pointer to point to the next dmi repair data
-                l_vpdPtr += sizeof(eRepairMemBus);
-
             } // end of for loop
         } // end of if(l_tgtType is MCS)
 
