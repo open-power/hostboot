@@ -73,6 +73,7 @@ enum mvpdRecord
     LWPD        = 0x1f,
     LWPE        = 0x20,
     VWML        = 0x21,
+    MER0        = 0x22,
 
     // Last Record
     MVPD_LAST_RECORD,

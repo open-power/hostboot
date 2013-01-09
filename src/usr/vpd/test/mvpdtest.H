@@ -66,43 +66,19 @@ mvpdTestData mvpdData[] =
     { CRP0, ED },
     { CRP0, TE },
     { CRP0, DD },
-//    { CRP0, pdP }, // TODO - no #P in test data, pull for now RTC 51716
+//    { CRP0, pdP }, // TODO - no #P in test data
     { CRP0, ST },
-//    { CRP0, DN,     0x03 }, // TODO - This doesn't match documentation,
-//                                      pulling out for now
     { CP00, VD },
     { CP00, PG },
-//    { CP00, PK }, // TODO - no PK in test data. pull for now RTC 51716
+//    { CP00, PK }, // TODO - no PK in test data
     { CP00, pdR },
     { CP00, pdG },
     { CP00, pdV },
     { CP00, pdH },
-//    { CP00, pdP }, // TODO - no #P in test data, pull for now RTC 51716
+//    { CP00, pdP }, // TODO - no #P in test data
     { CP00, SB },
     { CP00, MK },
     { CP00, PB },
-/*                   // TODO no LRP0,LRP1,LRP2,LRP3 in test data, pull for now RTC 51716
-    { LRP0, VD },
-    { LRP0, pdV },
-    { LRP0, pdP },
-    { LRP0, pdM },
-    { LRP0, CH },
-    { LRP1, VD },
-    { LRP1, pdV },
-    { LRP1, pdP },
-    { LRP1, pdM },
-    { LRP1, CH },
-    { LRP2, VD },
-    { LRP2, pdV },
-    { LRP2, pdP },
-    { LRP2, pdM },
-    { LRP2, CH },
-    { LRP3, VD },
-    { LRP3, pdV },
-    { LRP3, pdP },
-    { LRP3, pdM },
-    { LRP3, CH },
-*/
     { LRP4, VD },
     { LRP4, pdV },
     { LRP4, pdP },
@@ -118,7 +94,7 @@ mvpdTestData mvpdData[] =
     { LRP6, pdP },
     { LRP6, pdM },
     { LRP6, CH },
-/*                   // TODO no LRP7,LRP8,LRP9,LRPA,LRPB,LWPO,LWP1,LWP2,LWP3 in test data, pull for now RTC 51716
+/*                   // TODO no LRP7,LRP8,LRP9,LRPA,LRPB,LWPO,LWP1,LWP2,LWP3 in test data
     { LRP7, VD },
     { LRP7, pdV },
     { LRP7, pdP },
@@ -188,7 +164,7 @@ mvpdTestData mvpdData[] =
     { LWP6, pd2 },
     { LWP6, pd3 },
     { LWP6, IN },
-/*                 // TODO no LWP7,LWP8,LWP9,LWPA,LWPB in test data, pull for now RTC 51716
+/*                 // TODO no LWP7,LWP8,LWP9,LWPA,LWPB in test data
     { LWP7, VD },
     { LWP7, pd2 },
     { LWP7, pd3 },
@@ -233,7 +209,10 @@ mvpdTestData mvpdData[] =
     { VINI, HE },
     { VINI, CT },
     { VINI, HW },
-    // TODO - Add VWML when available.
+
+    { VWML, pdI },
+
+    { MER0, pdI },
 };
 
 void getProcTargets( TargetHandleList & o_procList )
@@ -400,13 +379,16 @@ class MVPDTest: public CxxTest::TestSuite
             errlHndl_t err = NULL;
             uint64_t cmds = 0x0;
             uint64_t fails = 0x0;
+            uint8_t* testData = NULL;
+            uint8_t* origData = NULL;
+            uint8_t* verifyData = NULL;
 
             TRACFCOMP( g_trac_mvpd,
                        ENTER_MRK"testMvpdWrite()" );
 
             do
             {
-                TARGETING::Target * theTarget = NULL;
+                TARGETING::Target * theTgt = NULL;
 
                 // Get the processor targets
                 TargetHandleList procList;
@@ -422,11 +404,10 @@ class MVPDTest: public CxxTest::TestSuite
                 }
 
                 // Use the first Proc in the list
-                theTarget = procList[0];
+                theTgt = procList[0];
 
                 // check to see if the target is functional
-                if
-                    (!theTarget->getAttr<TARGETING::ATTR_HWAS_STATE>().functional)
+                if(!theTgt->getAttr<TARGETING::ATTR_HWAS_STATE>().functional)
                 {
 
                     TRACFCOMP( g_trac_mvpd,
@@ -435,34 +416,141 @@ class MVPDTest: public CxxTest::TestSuite
                     continue;  // add continue because target is non functional
                 }
 
-                size_t theSize = 1;
-                uint8_t * theData = new uint8_t[theSize];
-
+                // first figure out how big the keyword is
                 cmds++;
-                err = deviceWrite( theTarget,
-                                   theData,
-                                   theSize,
-                                   DEVICE_MVPD_ADDRESS( CRP0,
-                                                        pdP ) );
-
-                if( NULL == err )
+                size_t theSize = 0;                
+                err = deviceRead( theTgt,
+                                  testData,
+                                  theSize,
+                                  DEVICE_MVPD_ADDRESS(VWML,pdI) );
+                if( err )
                 {
                     fails++;
-                    TS_FAIL( "testMvpdWrite - Expected error from write "
-                             "attempt since its not supported!" );
-                }
-                else
-                {
-                    delete err;
-                    err = NULL;
+                    TRACFCOMP( g_trac_mvpd,
+                               ERR_MRK"testMvpdWrite() - failure getting size of VWML/#I, RC=%.4X",
+                               err->reasonCode() );
+                    TS_FAIL( "testMvpdWrite() - Failure calling deviceRead!" );
+                    errlCommit( err,
+                                VPD_COMP_ID );
+                    continue;
                 }
 
-                if( NULL != theData )
+                // save off the original data
+                origData = new uint8_t[theSize];
+                cmds++;
+                err = deviceRead( theTgt,
+                                  origData,
+                                  theSize,
+                                  DEVICE_MVPD_ADDRESS(VWML,pdI) );
+                if( err )
                 {
-                    delete theData;
-                    theData = NULL;
+                    fails++;
+                    TRACFCOMP( g_trac_mvpd,
+                               ERR_MRK"testMvpdWrite() - failure reading VWML/#I, RC=%.4X",
+                               err->reasonCode() );
+                    TS_FAIL( "testMvpdWrite() - Failure calling deviceRead!" );
+                    errlCommit( err,
+                                VPD_COMP_ID );
+                    continue;
                 }
+                TRACFBIN( g_trac_mvpd, "orig=", origData, theSize );
+
+                // fill it up with some dummy data
+                testData = new uint8_t[theSize];
+                for( size_t x=0; x<theSize; x++ )
+                {
+                    testData[x] = x;
+                }
+
+                // write the new data in
+                cmds++;
+                err = deviceWrite( theTgt,
+                                   testData,
+                                   theSize,
+                                   DEVICE_MVPD_ADDRESS(VWML,pdI) );
+                if( err )
+                {
+                    fails++;
+                    TRACFCOMP( g_trac_mvpd,
+                               ERR_MRK"testMvpdWrite() - failure writing VWML/#I, RC=%.4X",
+                               err->reasonCode() );
+                    TS_FAIL( "testMvpdWrite() - Failure calling deviceWrite!" );
+                    errlCommit( err,
+                                VPD_COMP_ID );
+                    continue;
+                } 
+
+                // verify the data got written
+                cmds++;
+                verifyData = new uint8_t[theSize];
+                err = deviceRead( theTgt,
+                                  verifyData,
+                                  theSize,
+                                  DEVICE_MVPD_ADDRESS(VWML,pdI) );
+                if( err )
+                {
+                    fails++;
+                    TRACFCOMP( g_trac_mvpd,
+                               ERR_MRK"testMvpdWrite() - failure reading VWML/#I to verify, RC=%.4X",
+                               err->reasonCode() );
+                    TS_FAIL( "testMvpdWrite() - Failure calling deviceRead!" );
+                    errlCommit( err,
+                                VPD_COMP_ID );
+                    continue;
+                }
+                TRACFBIN( g_trac_mvpd, "verif=", verifyData, theSize );
+
+                // compare what we read to what we wrote
+                if( memcmp( testData, verifyData, theSize ) )
+                {
+                    fails++;
+                    TRACFBIN( g_trac_mvpd, "wrote=", testData, theSize );
+                    TRACFBIN( g_trac_mvpd, "read=", verifyData, theSize );
+                    TS_FAIL( "testMvpdWrite - Data mismatch!" );
+                }
+
+                // put the original data back to be a good citizen
+                cmds++;
+                err = deviceWrite( theTgt,
+                                   origData,
+                                   theSize,
+                                   DEVICE_MVPD_ADDRESS(VWML,pdI) );
+                if( err )
+                {
+                    fails++;
+                    TRACFCOMP( g_trac_mvpd,
+                               ERR_MRK"testMvpdWrite() - failure writing original data back into VWML/#I, RC=%.4X",
+                               err->reasonCode() );
+                    TS_FAIL( "testMvpdWrite() - Failure calling deviceRead!" );
+                    errlCommit( err,
+                                VPD_COMP_ID );
+                    continue;
+                }
+                
             } while( 0 );
+
+            if( NULL != testData )
+            {
+                delete[] testData;
+                testData = NULL;
+            }
+
+            if( NULL != origData )
+            {
+                delete[] origData;
+                origData = NULL;
+            }
+
+            if( NULL != verifyData )
+            {
+                delete[] verifyData;
+                verifyData = NULL;
+            }
+
+            if( cmds == 0 )
+            {
+                TS_FAIL( "testMvpdWrite - No tests ran, something is wrong..." );
+            }
 
             TRACFCOMP( g_trac_mvpd,
                        "testMvpdWrite - %d/%d fails",

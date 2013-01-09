@@ -24,6 +24,7 @@
 #include <errl/errlentry.H>
 #include <errl/errlmanager.H>
 #include <errl/errludtarget.H>
+#include <vpd/vpdreasoncodes.H>
 #include "vpd.H"
 
 // ----------------------------------------------
@@ -261,12 +262,9 @@ errlHndl_t sendMboxWriteMsg ( size_t i_numBytes,
         msg->data[0] = i_record.data0;
         msg->data[1] = i_numBytes;
 
-        //should never need more than 4KB  @fixme
-        assert( i_numBytes < PAGESIZE);
-
+        //Copy the data into the message
         msg->extra_data = malloc( i_numBytes );
         memcpy( msg->extra_data, i_data, i_numBytes );
-        TRACFCOMP( g_trac_vpd, "extra_data=%p", msg->extra_data );
 
         TRACFCOMP( g_trac_vpd,
                    INFO_MRK"Send msg to FSP to write VPD type %.8X, record %d, offset 0x%X",

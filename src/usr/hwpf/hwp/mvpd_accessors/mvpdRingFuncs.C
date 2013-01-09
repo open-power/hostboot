@@ -1,26 +1,25 @@
- /*  IBM_PROLOG_BEGIN_TAG
- *  This is an automatically generated prolog.
- *
- *  $Source: src/usr/hwpf/hwp/mvpdRingFuncs.C $
- *
- *  IBM CONFIDENTIAL
- *
- *  COPYRIGHT International Business Machines Corp. 2012
- *
- *  p1
- *
- *  Object Code Only (OCO) source materials
- *  Licensed Internal Code Source Materials
- *  IBM HostBoot Licensed Internal Code
- *
- *  The source code for this program is not published or other-
- *  wise divested of its trade secrets, irrespective of what has
- *  been deposited with the U.S. Copyright Office.
- *
- *  Origin: 30
- *
- *  IBM_PROLOG_END_TAG
- */
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/usr/hwpf/hwp/mvpd_accessors/mvpdRingFuncs.C $             */
+/*                                                                        */
+/* IBM CONFIDENTIAL                                                       */
+/*                                                                        */
+/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/*                                                                        */
+/* p1                                                                     */
+/*                                                                        */
+/* Object Code Only (OCO) source materials                                */
+/* Licensed Internal Code Source Materials                                */
+/* IBM HostBoot Licensed Internal Code                                    */
+/*                                                                        */
+/* The source code for this program is not published or otherwise         */
+/* divested of its trade secrets, irrespective of what has been           */
+/* deposited with the U.S. Copyright Office.                              */
+/*                                                                        */
+/* Origin: 30                                                             */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
 /**
  *  @file mvpdRingFuncs.C
  *
@@ -273,16 +272,6 @@ fapi::ReturnCode mvpdRingFunc(  const mvpdRingFuncOp i_mvpdRingFuncOp,
                                       i_fapiTarget,
                                       l_recordBuf,
                                       l_recordLen );
-#if 0       // TODO remove once DD supports write RTC 39177,enable for unit test
-            if (l_fapirc == FAPI_RC_PLAT_ERR_SEE_DATA)
-            {
-                FAPI_DBG( "mvpdRingFunc: Fake that fapiSetMvpdField worked" );
-                TRACDBIN( g_fapiImpTd, "mvpdRingFunc: Dump Ring Buffer:",
-                      l_recordBuf,
-                      0x100 );
-                l_fapirc=FAPI_RC_SUCCESS;
-            }
-#endif     // RTC 39177
             if ( l_fapirc )
             {
                 FAPI_ERR("mvpdRingFunc: fapiSetMvpdField failed");
@@ -374,20 +363,21 @@ fapi::ReturnCode mvpdRingFuncFind( const uint8_t    i_chipletId,
                 break;
             }
             //  dump record info for debug
-            FAPI_DBG("mvpdRingFuncFind:%d ringId=0x%x chipletId=0x%x size=0x%x",
+            FAPI_DBG("mvpdRingFuncFind:%d ringId=0x%x chipletId=0x%x ringlen=0x%x size=0x%x",
                         l_offset,
                         l_pScanData->iv_ringId,
                         l_pScanData->iv_chipletId,
+                        FAPI_BE32TOH(l_pScanData->iv_length),
                         FAPI_BE32TOH(l_pScanData->iv_size)  );
 
 
             if (    (l_pScanData->iv_ringId == i_ringId)
                  && (l_pScanData->iv_chipletId == i_chipletId) )
             {
-                FAPI_DBG( "mvpdRingFuncFind: Found it: 0x%x.0x%x, 0x%x",
+                FAPI_DBG( "mvpdRingFuncFind: Found it: ring=0x%x, chiplet=0x%x, ringlen=0x%x",
                           i_ringId,
                           i_chipletId,
-                          FAPI_BE32TOH(l_pScanData->iv_size)  );
+                          FAPI_BE32TOH(l_pScanData->iv_length) );
 
                 if (l_offset+FAPI_BE32TOH(l_pScanData->iv_size)>i_recordBufLen) 
                 {

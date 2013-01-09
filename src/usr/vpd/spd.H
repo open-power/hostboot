@@ -52,7 +52,7 @@ enum
 
     // Basic Memory Type Enumerations
     SPD_DDR3 = 0xB,
-    SPD_DDR4 = 0xC,  // TODO - Proposed value from draft Spec.
+    SPD_DDR4 = 0xC,  // @todo - Proposed value from draft Spec. (RTC:61138)
 };
 
 /**

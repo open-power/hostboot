@@ -603,51 +603,7 @@ errlHndl_t spdWriteValue ( uint64_t i_keyword,
         }
 
         // Check write flag
-        if( entry->writable )
-        {
-            // Check the Size to be equal to entry written
-            err = spdCheckSize( io_buflen,
-                                entry->length,
-                                i_keyword );
-
-            if( err )
-            {
-                break;
-            }
-
-            //@todo: RTC:39177 - Need to handle writes that are not on a
-            // byte boundary by reading the rest of the byte first
-            assert( (entry->length)%8 == 0 );
-
-            // Write value
-            err = spdWriteData( entry->offset,
-                                io_buflen,
-                                io_buffer,
-                                i_target );
-
-            if( err )
-            {
-                break;
-            }
-
-            // Send mbox message with new data to Fsp
-            VPD::VpdWriteMsg_t msgdata;
-            msgdata.rec_num = i_target->getAttr<TARGETING::ATTR_VPD_REC_NUM>();
-            //XXXX=offset relative to whole section
-            memcpy( msgdata.record, "XXXX", 4 ); 
-            msgdata.offset = entry->offset;
-            err = VPD::sendMboxWriteMsg( io_buflen,
-                                         io_buffer,
-                                         i_target,
-                                         VPD::VPD_WRITE_DIMM,
-                                         msgdata );
-
-            if( err )
-            {
-                break;
-            }
-        }
-        else
+        if( !(entry->writable) )
         {
             // Error if not writable
             TRACFCOMP( g_trac_spd,
@@ -672,6 +628,77 @@ errlHndl_t spdWriteValue ( uint64_t i_keyword,
                                            TWO_UINT32_TO_UINT64( io_buflen,
                                                                  i_DDRRev ) );
 
+            break;
+        }
+
+        // Check the Size to be equal to entry written
+        err = spdCheckSize( io_buflen,
+                            entry->length,
+                            i_keyword );
+
+        if( err )
+        {
+            break;
+        }
+
+        // We are not handling writes that are not on a byte 
+        //   boundary until we absolutely need to.  There are
+        //   no writable keywords that are not on byte boundaries
+        if( entry->useBitMask )
+        {
+            // Error if not writable
+            TRACFCOMP( g_trac_spd,
+                       ERR_MRK"Trying to write keyword (0x%04x) that is not a full byte size",
+                       i_keyword );
+
+            /*@
+             * @errortype
+             * @reasoncode       VPD::VPD_UNSUPPORTED_WRITE
+             * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE
+             * @moduleid         VPD::VPD_SPD_WRITE_VALUE
+             * @userdata1        SPD Keyword
+             * @userdata2[0:15]  Keyword Length (in bytes)
+             * @userdata2[16:31] Keyword Bitmask
+             * @userdata2[32:63] Memory Type
+             * @devdesc          Writes to non-byte SPD keywords are unsupported.
+             */
+            err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                           VPD::VPD_SPD_WRITE_VALUE,
+                                           VPD::VPD_UNSUPPORTED_WRITE,
+                                           i_keyword,
+                                           TWO_UINT16_ONE_UINT32_TO_UINT64(
+                                                      entry->length,
+                                                      entry->bitMask,
+                                                      i_DDRRev ) );
+
+            break;
+        }
+
+        // Write value
+        err = spdWriteData( entry->offset,
+                            io_buflen,
+                            io_buffer,
+                            i_target );
+
+        if( err )
+        {
+            break;
+        }
+
+        // Send mbox message with new data to Fsp
+        VPD::VpdWriteMsg_t msgdata;
+        msgdata.rec_num = i_target->getAttr<TARGETING::ATTR_VPD_REC_NUM>();
+        //XXXX=offset relative to whole section
+        memcpy( msgdata.record, "XXXX", sizeof(msgdata.record) ); 
+        msgdata.offset = entry->offset;
+        err = VPD::sendMboxWriteMsg( io_buflen,
+                                     io_buffer,
+                                     i_target,
+                                     VPD::VPD_WRITE_DIMM,
+                                     msgdata );
+
+        if( err )
+        {
             break;
         }
     } while( 0 );

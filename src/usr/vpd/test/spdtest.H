@@ -207,6 +207,11 @@ class SPDTest: public CxxTest::TestSuite
                 theData = NULL;
             }
 
+            if( cmds == 0 )
+            {
+                TS_FAIL( "testSpdRead - No tests ran, something is wrong..." );
+            }
+
             TRACFCOMP( g_trac_spd,
                        "testSpdRead - %d/%d fails",
                        fails, cmds );
@@ -215,16 +220,17 @@ class SPDTest: public CxxTest::TestSuite
         /**
          * @brief Test a SPD Write
          */
-        void testSpdWrite ( void )
+        void testSpdWriteDQ ( void )
         {
             errlHndl_t err = NULL;
             uint64_t cmds = 0x0;
             uint64_t fails = 0x0;
-            uint8_t * theData = NULL;
+            uint8_t * testData = NULL;
             uint8_t * origData = NULL;
+            uint8_t * verifyData = NULL;
 
             TRACFCOMP( g_trac_spd,
-                       ENTER_MRK"testSpdWrite()" );
+                       ENTER_MRK"testSpdWriteDQ()" );
 
             do
             {
@@ -238,7 +244,7 @@ class SPDTest: public CxxTest::TestSuite
                     ( NULL == dimmList[0] ) )
                 {
                     TRACFCOMP( g_trac_spd,
-                               "testSpdWrite - No DIMMs found!" );
+                               "testSpdWriteDQ - No DIMMs found!" );
                     break;
                 }
 
@@ -255,7 +261,7 @@ class SPDTest: public CxxTest::TestSuite
                 if( err )
                 {
                     fails++;
-                    TS_FAIL( "testSpdWrite - failed to read memtype!" );
+                    TS_FAIL( "testSpdWriteDQ - failed to read memtype!" );
                     errlCommit( err,
                                 VPD_COMP_ID );
                     break;
@@ -279,97 +285,300 @@ class SPDTest: public CxxTest::TestSuite
                 {
                     fails++;
                     TRACFCOMP( g_trac_spd,
-                               "testSpdWrite - memory type: 0x%04x",
+                               "testSpdWriteDQ - memory type: 0x%04x",
                                memType );
-                    TS_FAIL( "testSpdWrite - Unsupported Memory Type!" );
+                    TS_FAIL( "testSpdWriteDQ - Unsupported Memory Type!" );
                     errlCommit( err,
                                 VPD_COMP_ID );
                     break;
                 }
 
                 // Allocate data buffer
-                theData = static_cast<uint8_t*>(malloc( theSize ));
+                origData = static_cast<uint8_t*>(malloc( theSize ));
 
                 // Read the data out first
                 err = deviceRead( theTarget,
-                                  theData,
+                                  origData,
                                   theSize,
                                   DEVICE_SPD_ADDRESS( DIMM_BAD_DQ_DATA ) );
 
                 if( err )
                 {
                     fails++;
-                    TS_FAIL( "testSpdWrite - failed to read DIMM Bad DQ data!" );
+                    TS_FAIL( "testSpdWriteDQ - failed to read DIMM Bad DQ data!" );
                     errlCommit( err,
                                 VPD_COMP_ID );
                     break;
                 }
 
-                origData = static_cast<uint8_t*>(malloc( theSize ));
-                memcpy( origData, theData, theSize );
+                // fill it up with some dummy data
+                testData = static_cast<uint8_t*>(malloc( theSize ));
+                for( size_t x=0; x<theSize; x++ )
+                {
+                    testData[x] = x;
+                }
 
-                // Write the data back
+                // Write the test data in
                 err = deviceWrite( theTarget,
-                                   theData,
+                                   testData,
                                    theSize,
                                    DEVICE_SPD_ADDRESS( DIMM_BAD_DQ_DATA ) );
 
                 if( err )
                 {
-                    // No error returned, failure
                     fails++;
-                    TS_FAIL( "testSpdWrite - Error writing data to DIMM Bad DQ "
+                    TS_FAIL( "testSpdWriteDQ - Error writing data to DIMM Bad DQ "
                              "data" );
                     break;
                 }
-                else
-                {
-                    delete err;
-                    err = NULL;
-                }
 
                 // Read the data out again to check it
+                verifyData = static_cast<uint8_t*>(malloc( theSize ));
                 err = deviceRead( theTarget,
-                                  theData,
+                                  verifyData,
                                   theSize,
                                   DEVICE_SPD_ADDRESS( DIMM_BAD_DQ_DATA ) );
 
                 if( err )
                 {
                     fails++;
-                    TS_FAIL( "testSpdWrite - failed to read DIMM Bad DQ data! [2]" );
+                    TS_FAIL( "testSpdWriteDQ - failed to read DIMM Bad DQ data! [2]" );
                     errlCommit( err,
                                 VPD_COMP_ID );
                     break;
                 }
 
-                if( memcmp( theData, origData, theSize ) )
+                if( memcmp( testData, verifyData, theSize ) )
                 {
                     fails++;
-                    TS_FAIL( "testSpdWrite - DIMM Bad DQ data does not match what we wrote!" );
-                    TRACFBIN( g_trac_spd, "orig=", origData, theSize );
-                    TRACFBIN( g_trac_spd, "read=", theData, theSize );
+                    TS_FAIL( "testSpdWriteDQ - DIMM Bad DQ data does not match what we wrote!" );
+                    TRACFBIN( g_trac_spd, "wrote=", testData, theSize );
+                    TRACFBIN( g_trac_spd, "read=", verifyData, theSize );
                 }
+
+                // put the original data back to be a good citizen
+                err = deviceWrite( theTarget,
+                                   origData,
+                                   theSize,
+                                   DEVICE_SPD_ADDRESS( DIMM_BAD_DQ_DATA ) );
+
+                if( err )
+                {
+                    fails++;
+                    TS_FAIL( "testSpdWriteDQ - Error writing original data back to DIMM Bad DQ "
+                             "data" );
+                    break;
+                }
+
 
             } while( 0 );
 
-            if( NULL != theData )
+            if( NULL != testData )
             {
-                free( theData );
-                theData = NULL;
+                delete testData;
+                testData = NULL;
             }
 
             if( NULL != origData )
             {
-                free( origData );
-                theData = NULL;
+                delete origData;
+                origData = NULL;
+            }
+
+            if( NULL != verifyData )
+            {
+                delete verifyData;
+                verifyData = NULL;
+            }
+
+            if( cmds == 0 )
+            {
+                TS_FAIL( "testSpdWriteDQ - No tests ran, something is wrong..." );
             }
 
             TRACFCOMP( g_trac_spd,
-                       "testSpdWrite - %d/%d fails",
+                       "testSpdWriteDQ - %d/%d fails",
                        fails, cmds );
         }
 
+        /**
+         * @brief Test a SPD Write to a value that is less than 1 byte
+         *
+         * Note - There are no writable keywords that fit this criteria
+         *   so this test is disabled by default.  To enable, modify the
+         *   table in spdDDR3.H to make something writable.
+         */
+        void _testSpdWriteSmall ( void )
+        {
+            errlHndl_t err = NULL;
+            uint64_t cmds = 0x0;
+            uint64_t fails = 0x0;
+            uint8_t* testData = NULL;
+            uint8_t* origData = NULL;
+
+            TRACFCOMP( g_trac_spd,
+                       ENTER_MRK"testSpdWriteSmall()" );
+
+            do
+            {
+                TARGETING::Target * theTarget = NULL;
+
+                // Get DIMM Targets
+                TargetHandleList dimmList;
+                getDIMMTargets( dimmList );
+
+                if( ( 0 == dimmList.size() ) ||
+                    ( NULL == dimmList[0] ) )
+                {
+                    TRACFCOMP( g_trac_spd,
+                               "testSpdWriteSmall - No DIMMs found!" );
+                    break;
+                }
+
+                // Operate on first DIMM
+                cmds++;
+                theTarget = dimmList[0];
+
+                // Get Memory Type
+                uint8_t memType = 0x0;
+                err = getMemType( theTarget,
+                                  memType );
+                if( err )
+                {
+                    fails++;
+                    TS_FAIL( "testSpdWriteSmall - failed to read memtype!" );
+                    errlCommit( err,
+                                VPD_COMP_ID );
+                    break;
+                }
+
+                // Get the size
+                size_t theSize = 0;
+                uint16_t theKeyword = INVALID_SPD_KEYWORD;
+                if( SPD_DDR3 == memType )
+                {
+                    for( uint32_t entry = 0;
+                         entry < (sizeof(ddr3Data)/sizeof(ddr3Data[0]));
+                         entry++ )
+                    {
+                        if( ddr3Data[entry].writable
+                            && ddr3Data[entry].useBitMask )
+                        {
+                            theSize = ddr3Data[entry].length;
+                            theKeyword = ddr3Data[entry].keyword;
+                            TRACFCOMP( g_trac_spd,
+                                       "testSpdWriteSmall - Using keyword 0x%04x",
+                                       theKeyword );
+                            break;
+                        }
+                    }
+                }
+                else
+                {
+                    fails++;
+                    TRACFCOMP( g_trac_spd,
+                               "testSpdWriteSmall - memory type: 0x%04x",
+                               memType );
+                    TS_FAIL( "testSpdWriteSmall - Unsupported Memory Type!" );
+                    errlCommit( err,
+                                VPD_COMP_ID );
+                    break;
+                }
+
+                cmds++;
+                if( theKeyword == INVALID_SPD_KEYWORD )
+                {
+                    fails++;
+                    TS_FAIL( "testSpdWriteSmall - Could not find a keyword to work with!" );
+                    break;
+                }
+
+                // Read the data out 
+                cmds++;
+                origData = new uint8_t[theSize];
+                err = deviceRead( theTarget,
+                                  origData,
+                                  theSize,
+                                  DEVICE_SPD_ADDRESS( theKeyword ) );
+                if( err )
+                {
+                    fails++;
+                    TS_FAIL( "testSpdWriteSmall - failed to read keyword!" );
+                    errlCommit( err,
+                                VPD_COMP_ID );
+                    break;
+                }
+
+                // fill test array up with some dummy data
+                testData = new uint8_t[theSize];
+                for( size_t x=0; x<theSize; x++ )
+                {
+                    testData[x] = 0x55;
+                }
+
+                // Write the test data 
+                cmds++;
+                err = deviceWrite( theTarget,
+                                   testData,
+                                   theSize,
+                                   DEVICE_SPD_ADDRESS( theKeyword ) );
+                if( !err )
+                {
+                    fails++;
+                    TS_FAIL( "testSpdWriteSmall - Did not get expected error writing data" );
+
+                    // Put the original data back to be a good citizen
+                    cmds++;
+                    err = deviceWrite( theTarget,
+                                       origData,
+                                       theSize,
+                                       DEVICE_SPD_ADDRESS( theKeyword ) );
+                    if( err )
+                    {
+                        fails++;
+                        TS_FAIL( "testSpdWriteSmall - Error writing original data back" );
+                    }
+
+                    break;
+                }
+                else
+                {
+                    cmds++;
+                    if( err->reasonCode() != VPD::VPD_UNSUPPORTED_WRITE )
+                    {
+                        fails++;
+                        TRACFCOMP( g_trac_spd,
+                                   "testSpdWriteSmall - RC from write = 0x%04x",
+                                   err->reasonCode() );
+                        TS_FAIL( "testSpdWriteSmall - Did not get VPD_UNSUPPORTED_WRITE error writing data" );
+                    }
+
+                    delete err;
+                }
+
+            } while( 0 );
+
+            if( NULL != testData )
+            {
+                delete[] testData;
+                testData = NULL;
+            }
+
+            if( NULL != origData )
+            {
+                delete[] origData;
+                origData = NULL;
+            }
+
+            if( cmds == 0 )
+            {
+                TS_FAIL( "testSpdWriteSmall - No tests ran, something is wrong..." );
+            }
+
+            TRACFCOMP( g_trac_spd,
+                       "testSpdWriteSmall - %d/%d fails",
+                       fails, cmds );
+        }
         /**
          * @brief Test an invalid Keyword to a DIMM target.
          */
@@ -542,7 +751,7 @@ class SPDTest: public CxxTest::TestSuite
                     err = NULL;
                 }
             } while( 0 );
-            
+
             TRACFCOMP( g_trac_spd,
                        "testSpdInvalidWrite - %d/%d fails",
                        fails, cmds );

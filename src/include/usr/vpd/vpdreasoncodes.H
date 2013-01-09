@@ -55,6 +55,8 @@ enum vpdModuleId
     VPD_MVPD_RETRIEVE_KEYWORD               = 0x37,
     VPD_MVPD_FETCH_DATA                     = 0x38,
     VPD_MVPD_CHECK_BUFFER_SIZE              = 0x39,
+    VPD_MVPD_WRITE_KEYWORD                  = 0x3A,
+    VPD_MVPD_FIND_KEYWORD_ADDR              = 0x3B,
 
     // DIMM SPD
     VPD_SPD_GET_KEYWORD_VALUE               = 0x61,
@@ -103,6 +105,7 @@ enum vpdReasonCode
     VPD_SIZE_MISMATCH                   = VPD_COMP_ID | 0x12,
     VPD_INVALID_WRITE_METHOD            = VPD_COMP_ID | 0x13,
     VPD_NULL_ENTRY                      = VPD_COMP_ID | 0x14,
+    VPD_UNSUPPORTED_WRITE               = VPD_COMP_ID | 0x15,
 };
 
 };  // end MVPD

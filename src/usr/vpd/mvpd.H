@@ -70,7 +70,7 @@ typedef struct
 typedef struct
 {
     mvpdRecord record;
-    char recordName[MVPD_LAST_RECORD];
+    char recordName[RECORD_BYTE_SIZE+1];
 } mvpdRecordInfo;
 
 /**
@@ -78,7 +78,7 @@ typedef struct
 typedef struct
 {
     mvpdKeyword keyword;
-    char keywordName[MVPD_LAST_KEYWORD];
+    char keywordName[KEYWORD_BYTE_SIZE+1];
 } mvpdKeywordInfo;
 
 
@@ -127,6 +127,7 @@ const mvpdRecordInfo mvpdRecords[] =
     { LWPD, "LWPD" },
     { LWPE, "LWPE" },
     { VWML, "VWML" },
+    { MER0, "MER0" },
     // -------------------------------------------------------------------
     // DO NOT USE!!  This is for test purposes ONLY!
     { MVPD_TEST_RECORD, "TEST" },
@@ -181,7 +182,7 @@ const mvpdKeywordInfo mvpdKeywords[] =
     { CH,  "CH" },
     // -------------------------------------------------------------------
     // DO NOT USE!!  This is for test purposes ONLY!
-    { MVPD_TEST_KEYWORD, "TEST" },
+    { MVPD_TEST_KEYWORD, "XX" },
     // -------------------------------------------------------------------
 };
 
@@ -372,6 +373,66 @@ errlHndl_t mvpdRetrieveKeyword ( const char * i_keywordName,
                                  TARGETING::Target * i_target,
                                  void * io_buffer,
                                  size_t & io_buflen,
+                                 input_args_t i_args );
+
+/**
+ * @brief This function will write the required keyword into the MVPD data.
+ *
+ * @param[in] i_keywordName - String representation of the keyword.
+ *
+ * @param[in] i_recordName - String representation of the record.
+ *
+ * @param[in] i_offset - The offset to start writing.
+ *
+ * @param[in] i_target - The target to write data for.
+ *
+ * @param[in] i_buffer - The buffer to pull the data from.
+ *
+ * @param[in] i_buflen - Length of the buffer to be written
+ *       to the target's VPD area.  This value should indicate the size of the
+ *       io_buffer parameter that has been allocated.  
+ *
+ * @param[in] i_args - The input arguments.
+ *
+ * @return errHndl_t - NULL if successful, otherwise a pointer to the
+ *      error log.
+ */
+errlHndl_t mvpdWriteKeyword ( const char * i_keywordName,
+                              const char * i_recordName,
+                              uint16_t i_offset,
+                              TARGETING::Target * i_target,
+                              void * i_buffer,
+                              size_t & i_buflen,
+                              input_args_t i_args );
+
+/**
+ * @brief This function will locate the byte address of a keyword
+ *   within its VPD section.
+ *
+ * @param[in] i_keywordName - String representation of the keyword.
+ *
+ * @param[in] i_recordName - String representation of the record.
+ *
+ * @param[in] i_offset - The offset to start writing.
+ *
+ * @param[in] i_target - The target to write data for.
+ *
+ * @param[out] o_keywordSize - Size of keyword in bytes.
+ *
+ * @param[out] o_byteAddr - Address of keyword, relative to this target's
+ *    section.
+ *
+ * @param[in] i_args - The original input arguments.
+ *
+ * @return errHndl_t - NULL if successful, otherwise a pointer to the
+ *      error log.
+ */
+errlHndl_t mvpdFindKeywordAddr ( const char * i_keywordName,
+                                 const char * i_recordName,
+                                 uint16_t i_offset,
+                                 TARGETING::Target * i_target,
+                                 size_t& o_keywordSize,
+                                 uint64_t& o_byteAddr,
                                  input_args_t i_args );
 
 

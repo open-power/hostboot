@@ -75,7 +75,7 @@ uint64_t g_mvpdPnorAddr = 0x0;
 
 // By setting to false, allows debug at a later time by allowing to
 // substitute a binary file (procmvpd.dat) into PNOR.
-const bool g_readPNOR = true;
+const bool g_usePNOR = true;
 
 
 /**
@@ -219,6 +219,9 @@ errlHndl_t mvpdWrite ( DeviceFW::OperationType i_opType,
                        va_list i_args )
 {
     errlHndl_t err = NULL;
+    const char * recordName = NULL;
+    const char * keywordName = NULL;
+    uint16_t recordOffset = 0x0;
     input_args_t args;
     args.record = ((mvpdRecord)va_arg( i_args, uint64_t ));
     args.keyword = ((mvpdKeyword)va_arg( i_args, uint64_t ));
@@ -228,26 +231,51 @@ errlHndl_t mvpdWrite ( DeviceFW::OperationType i_opType,
 
     do
     {
-        // TODO - This will be implemented with story 39177
-        TRACFCOMP( g_trac_mvpd,
-                   ERR_MRK"MVPD Writes are not supported yet!" );
+        // Get the Record/keyword names
+        err = mvpdTranslateRecord( args.record,
+                                   recordName );
 
-        /*@
-         * @errortype
-         * @reasoncode       VPD::VPD_OPERATION_NOT_SUPPORTED
-         * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE
-         * @moduleid         VPD::VPD_MVPD_WRITE
-         * @userdata1        Requested Record
-         * @userdata2        Requested Keyword
-         * @devdesc          MVPD Writes are not supported currently.
-         */
-        err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                       VPD::VPD_MVPD_WRITE,
-                                       VPD::VPD_OPERATION_NOT_SUPPORTED,
-                                       args.record,
-                                       args.keyword );
+        if( err )
+        {
+            break;
+        }
 
-        break;
+        err = mvpdTranslateKeyword( args.keyword,
+                                    keywordName );
+
+        if( err )
+        {
+            break;
+        }
+
+        TRACSCOMP( g_trac_mvpd,
+                   INFO_MRK"Write record (%s) and Keyword (%s)",
+                   recordName, keywordName );
+
+        // Get the offset of the record requested
+        err = mvpdFindRecordOffset( recordName,
+                                    recordOffset,
+                                    i_target,
+                                    args );
+
+        if( err )
+        {
+            break;
+        }
+
+        // use record offset to find/read the keyword
+        err = mvpdWriteKeyword( keywordName,
+                                recordName,
+                                recordOffset,
+                                i_target,
+                                io_buffer,
+                                io_buflen,
+                                args );
+
+        if( err )
+        {
+            break;
+        }
     } while( 0 );
 
     TRACSSCOMP( g_trac_mvpd,
@@ -497,220 +525,56 @@ errlHndl_t mvpdRetrieveKeyword ( const char * i_keywordName,
                                  input_args_t i_args )
 {
     errlHndl_t err = NULL;
-    uint16_t offset = i_offset;
-    uint16_t recordSize = 0x0;
-    uint16_t keywordSize = 0x0;
-    char record[RECORD_BYTE_SIZE] = { '\0' };
-    char keyword[KEYWORD_BYTE_SIZE] = { '\0' };
-    bool matchFound = false;
 
     TRACSSCOMP( g_trac_mvpd,
                 ENTER_MRK"mvpdRetrieveKeyword()" );
 
     do
     {
-        // Read size of Record
-        err = mvpdFetchData( offset,
-                             RECORD_ADDR_BYTE_SIZE,
-                             &recordSize,
-                             i_target );
-        offset += RECORD_ADDR_BYTE_SIZE;
-
+        // First go find the keyword in memory
+        size_t keywordSize = 0x0;
+        uint64_t byteAddr = 0x0;
+        err = mvpdFindKeywordAddr( i_keywordName,
+                                   i_recordName,
+                                   i_offset,
+                                   i_target,
+                                   keywordSize,
+                                   byteAddr,
+                                   i_args );
         if( err )
         {
             break;
         }
 
-        // Byte Swap
-        recordSize = le16toh( recordSize );
+        // If the buffer is NULL, return the keyword size in io_buflen
+        if( NULL == io_buffer )
+        {
+            io_buflen = keywordSize;
+            break;
+        }
 
-        // Skip 3 bytes - RT
-        // Read 4 bytes ( Record name ) - compare with expected
-        offset += RT_SKIP_BYTES;
-        err = mvpdFetchData( offset,
-                             RECORD_BYTE_SIZE,
-                             record,
-                             i_target );
-        offset += RECORD_BYTE_SIZE;
-
+        // check size of usr buffer with io_buflen
+        err = checkBufferSize( io_buflen,
+                               (size_t)keywordSize );
         if( err )
         {
             break;
         }
 
-        if( memcmp( record, i_recordName, RECORD_BYTE_SIZE ) )
-        {
-            TRACFCOMP( g_trac_mvpd,
-                       ERR_MRK"Record(%s) for offset (0x%04x) did not match "
-                       "expected record(%s)!",
-                       record,
-                       i_offset,
-                       i_recordName );
-
-            /*@
-             * @errortype
-             * @reasoncode       VPD::VPD_RECORD_MISMATCH
-             * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE
-             * @moduleid         VPD::VPD_MVPD_RETRIEVE_KEYWORD
-             * @userdata1        Current offset into MVPD
-             * @userdata2        Start of Record offset
-             * @devdesc          Record name does not match value expected for
-             *                   offset read.
-             */
-            err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                           VPD::VPD_MVPD_RETRIEVE_KEYWORD,
-                                           VPD::VPD_RECORD_MISMATCH,
-                                           offset,
-                                           i_offset );
-            // Add trace so we see what record was being compared
-            err->collectTrace( "MVPD" );
-
-            break;
-        }
-
-        // While size < size of record
-        // Size of record is the input offset, plus the record size, plus
-        // 2 bytes for the size value.
-        while( ( offset < (recordSize + i_offset + RECORD_ADDR_BYTE_SIZE) ) )
-        {
-            TRACDCOMP( g_trac_mvpd,
-                       INFO_MRK"Looking for keyword, reading offset: 0x%04x",
-                       offset );
-
-            // read keyword name (2 bytes)
-            err = mvpdFetchData( offset,
-                                 KEYWORD_BYTE_SIZE,
-                                 keyword,
-                                 i_target );
-            offset += KEYWORD_BYTE_SIZE;
-
-            if( err )
-            {
-                break;
-            }
-
-            TRACDCOMP( g_trac_mvpd,
-                       INFO_MRK"Read keyword name: %s",
-                       keyword );
-
-            // Check if we're reading a '#' keyword.  They have a 2 byte size
-            uint32_t keywordLength = KEYWORD_SIZE_BYTE_SIZE;
-            bool isPoundKwd = false;
-            if( !(memcmp( keyword, "#", 1 )) )
-            {
-                TRACDCOMP( g_trac_mvpd,
-                           INFO_MRK"Reading # keyword, adding 1 byte to size "
-                           "to read!" );
-                isPoundKwd = true;
-                keywordLength++;
-            }
-
-            // Read keyword size
-            err = mvpdFetchData( offset,
-                                 keywordLength,
-                                 &keywordSize,
-                                 i_target );
-            offset += keywordLength;
-
-            if( err )
-            {
-                break;
-            }
-
-            if( isPoundKwd )
-            {
-                // Swap it since 2 byte sizes are byte swapped.
-                keywordSize = le16toh( keywordSize );
-            }
-            else
-            {
-                keywordSize = keywordSize >> 8;
-            }
-
-            TRACDCOMP( g_trac_mvpd,
-                       INFO_MRK"Read keyword size: 0x%04x",
-                       keywordSize );
-
-            // if keyword equal i_keywordName
-            if( !(memcmp( keyword, i_keywordName, KEYWORD_BYTE_SIZE ) ) )
-            {
-                matchFound = true;
-
-                // If the buffer is NULL, return the keyword size in io_buflen
-                if( NULL == io_buffer )
-                {
-                    io_buflen = keywordSize;
-                    break;
-                }
-
-                // check size of usr buffer with io_buflen
-                err = checkBufferSize( io_buflen,
-                                       (size_t)keywordSize );
-
-                if( err )
-                {
-                    break;
-                }
-
-                // Read keyword data into io_buffer
-                err = mvpdFetchData( offset,
-                                     keywordSize,
-                                     io_buffer,
-                                     i_target );
-
-                if( err )
-                {
-                    break;
-                }
-                io_buflen = keywordSize;
-
-                // found our match, break out
-                break;
-            }
-            else
-            {
-                // set offset to next keyword (based on current keyword size)
-                offset += keywordSize;
-            }
-        }
-
-        if( err ||
-            matchFound )
+        // Read keyword data into io_buffer
+        err = mvpdFetchData( i_offset+byteAddr,
+                             keywordSize,
+                             io_buffer,
+                             i_target );
+        if( err )
         {
             break;
         }
-    } while( 0 );
 
-    // If keyword not found in expected Record, flag error.
-    if( !matchFound &&
-        NULL == err )
-    {
-        TRACFCOMP( g_trac_mvpd,
-                   ERR_MRK"No matching %s keyword found within %s record!",
-                   i_keywordName,
-                   i_recordName );
+        // Everything worked
+        io_buflen = keywordSize;
 
-        /*@
-         * @errortype
-         * @reasoncode       VPD::VPD_KEYWORD_NOT_FOUND
-         * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE
-         * @moduleid         VPD::VPD_MVPD_RETRIEVE_KEYWORD
-         * @userdata1        Start of Record Offset
-         * @userdata2[0:31]  Requested Record
-         * @userdata2[32:63] Requested Keyword
-         * @devdesc          Keyword was not found in Record starting at given
-         *                   offset.
-         */
-        err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                       VPD::VPD_MVPD_RETRIEVE_KEYWORD,
-                                       VPD::VPD_KEYWORD_NOT_FOUND,
-                                       i_offset,
-                                       TWO_UINT32_TO_UINT64( i_args.record,
-                                                             i_args.keyword ) );
-
-        // Add trace so we know what Record/Keyword was missing
-        err->collectTrace( "MVPD" );
-    }
+    } while(0);
 
     TRACSSCOMP( g_trac_mvpd,
                 EXIT_MRK"mvpdRetrieveKeyword()" );
@@ -734,7 +598,7 @@ errlHndl_t mvpdFetchData ( uint64_t i_byteAddr,
 
     do
     {
-        if( g_readPNOR )
+        if( likely( g_usePNOR ) )
         {
             // Call a function in the common VPD code 
             VPD::pnorInformation info;
@@ -945,5 +809,335 @@ bool compareKeywords ( const mvpdKeywordInfo e1,
         return false;
 }
 
+// ------------------------------------------------------------------
+// mvpdFindKeywordAddr
+// ------------------------------------------------------------------
+errlHndl_t mvpdFindKeywordAddr ( const char * i_keywordName,
+                                 const char * i_recordName,
+                                 uint16_t i_offset,
+                                 TARGETING::Target * i_target,
+                                 size_t& o_keywordSize,
+                                 uint64_t& o_byteAddr,
+                                 input_args_t i_args )
+{
+    errlHndl_t err = NULL;
+    uint16_t offset = i_offset;
+    uint16_t recordSize = 0x0;
+    uint16_t keywordSize = 0x0;
+    char record[RECORD_BYTE_SIZE] = { '\0' };
+    char keyword[KEYWORD_BYTE_SIZE] = { '\0' };
+    bool matchFound = false;
+
+    TRACSSCOMP( g_trac_mvpd,
+                ENTER_MRK"mvpdFindKeywordAddr()" );
+
+    do
+    {
+        // Read size of Record
+        err = mvpdFetchData( offset,
+                             RECORD_ADDR_BYTE_SIZE,
+                             &recordSize,
+                             i_target );
+        offset += RECORD_ADDR_BYTE_SIZE;
+
+        if( err )
+        {
+            break;
+        }
+
+        // Byte Swap
+        recordSize = le16toh( recordSize );
+
+        // Skip 3 bytes - RT
+        // Read 4 bytes ( Record name ) - compare with expected
+        offset += RT_SKIP_BYTES;
+        err = mvpdFetchData( offset,
+                             RECORD_BYTE_SIZE,
+                             record,
+                             i_target );
+        offset += RECORD_BYTE_SIZE;
+
+        if( err )
+        {
+            break;
+        }
+
+        if( memcmp( record, i_recordName, RECORD_BYTE_SIZE ) )
+        {
+            TRACFCOMP( g_trac_mvpd,
+                       ERR_MRK"Record(%s) for offset (0x%04x) did not match "
+                       "expected record(%s)!",
+                       record,
+                       i_offset,
+                       i_recordName );
+
+            /*@
+             * @errortype
+             * @reasoncode       VPD::VPD_RECORD_MISMATCH
+             * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE
+             * @moduleid         VPD::VPD_MVPD_FIND_KEYWORD_ADDR
+             * @userdata1        Current offset into MVPD
+             * @userdata2        Start of Record offset
+             * @devdesc          Record name does not match value expected for
+             *                   offset read.
+             */
+            err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                           VPD::VPD_MVPD_FIND_KEYWORD_ADDR,
+                                           VPD::VPD_RECORD_MISMATCH,
+                                           offset,
+                                           i_offset );
+            // Add trace so we see what record was being compared
+            err->collectTrace( "MVPD" );
+
+            break;
+        }
+
+        // While size < size of record
+        // Size of record is the input offset, plus the record size, plus
+        // 2 bytes for the size value.
+        while( ( offset < (recordSize + i_offset + RECORD_ADDR_BYTE_SIZE) ) )
+        {
+            TRACDCOMP( g_trac_mvpd,
+                       INFO_MRK"Looking for keyword, reading offset: 0x%04x",
+                       offset );
+
+            // read keyword name (2 bytes)
+            err = mvpdFetchData( offset,
+                                 KEYWORD_BYTE_SIZE,
+                                 keyword,
+                                 i_target );
+            offset += KEYWORD_BYTE_SIZE;
+
+            if( err )
+            {
+                break;
+            }
+
+            TRACDCOMP( g_trac_mvpd,
+                       INFO_MRK"Read keyword name: %s",
+                       keyword );
+
+            // Check if we're reading a '#' keyword.  They have a 2 byte size
+            uint32_t keywordLength = KEYWORD_SIZE_BYTE_SIZE;
+            bool isPoundKwd = false;
+            if( !(memcmp( keyword, "#", 1 )) )
+            {
+                TRACDCOMP( g_trac_mvpd,
+                           INFO_MRK"Reading # keyword, adding 1 byte to size "
+                           "to read!" );
+                isPoundKwd = true;
+                keywordLength++;
+            }
+
+            // Read keyword size
+            err = mvpdFetchData( offset,
+                                 keywordLength,
+                                 &keywordSize,
+                                 i_target );
+            offset += keywordLength;
+
+            if( err )
+            {
+                break;
+            }
+
+            if( isPoundKwd )
+            {
+                // Swap it since 2 byte sizes are byte swapped.
+                keywordSize = le16toh( keywordSize );
+            }
+            else
+            {
+                keywordSize = keywordSize >> 8;
+            }
+
+            TRACDCOMP( g_trac_mvpd,
+                       INFO_MRK"Read keyword size: 0x%04x",
+                       keywordSize );
+
+            // if keyword equal i_keywordName
+            if( !(memcmp( keyword, i_keywordName, KEYWORD_BYTE_SIZE ) ) )
+            {
+                // send back the relevant data
+                o_keywordSize = keywordSize;
+                o_byteAddr = offset - i_offset; //make address relative
+
+                // found our match, break out
+                matchFound = true;
+                break;
+            }
+            else
+            {
+                // set offset to next keyword (based on current keyword size)
+                offset += keywordSize;
+            }
+        }
+
+        if( err ||
+            matchFound )
+        {
+            break;
+        }
+    } while( 0 );
+
+    // If keyword not found in expected Record, flag error.
+    if( !matchFound &&
+        NULL == err )
+    {
+        TRACFCOMP( g_trac_mvpd,
+                   ERR_MRK"No matching %s keyword found within %s record!",
+                   i_keywordName,
+                   i_recordName );
+
+        /*@
+         * @errortype
+         * @reasoncode       VPD::VPD_KEYWORD_NOT_FOUND
+         * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE
+         * @moduleid         VPD::VPD_MVPD_FIND_KEYWORD_ADDR
+         * @userdata1        Start of Record Offset
+         * @userdata2[0:31]  Requested Record
+         * @userdata2[32:63] Requested Keyword
+         * @devdesc          Keyword was not found in Record starting at given
+         *                   offset.
+         */
+        err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                       VPD::VPD_MVPD_FIND_KEYWORD_ADDR,
+                                       VPD::VPD_KEYWORD_NOT_FOUND,
+                                       i_offset,
+                                       TWO_UINT32_TO_UINT64( i_args.record,
+                                                             i_args.keyword ) );
+
+        // Add trace so we know what Record/Keyword was missing
+        err->collectTrace( "MVPD" );
+    }
+
+    TRACSSCOMP( g_trac_mvpd,
+                EXIT_MRK"mvpdFindKeywordAddr()" );
+
+    return err;
+}
+
+
+// ------------------------------------------------------------------
+// mvpdWriteKeyword
+// ------------------------------------------------------------------
+errlHndl_t mvpdWriteKeyword ( const char * i_keywordName,
+                              const char * i_recordName,
+                              uint16_t i_offset,
+                              TARGETING::Target * i_target,
+                              void * i_buffer,
+                              size_t & i_buflen,
+                              input_args_t i_args )
+{
+    errlHndl_t err = NULL;
+
+    TRACSSCOMP( g_trac_mvpd,
+                ENTER_MRK"mvpdWriteKeyword()" );
+
+    do
+    {
+        // Note, there is no way to tell if a keyword is writable without
+        //  hardcoding it so we will just assume that the callers know
+        //  what they are doing
+
+        // First go find the keyword in memory
+        size_t keywordSize = 0x0;
+        uint64_t byteAddr = 0x0;
+        err = mvpdFindKeywordAddr( i_keywordName,
+                                   i_recordName,
+                                   i_offset,
+                                   i_target,
+                                   keywordSize,
+                                   byteAddr,
+                                   i_args );
+        if( err )
+        {
+            break;
+        }
+
+        // check size of usr buffer with io_buflen
+        err = checkBufferSize( i_buflen,
+                               keywordSize );
+        if( err )
+        {
+            break;
+        }
+
+        // Now write it out to PNOR
+        if( likely( g_usePNOR ) )
+        {
+            // Setup info needed to write from PNOR
+            VPD::pnorInformation info;
+            info.segmentSize = MVPD_SECTION_SIZE;
+            info.maxSegments = MVPD_MAX_SECTIONS;
+            info.pnorSection = PNOR::MODULE_VPD;
+            info.pnorSide = PNOR::CURRENT_SIDE;
+            err = VPD::writePNOR( i_offset+byteAddr,
+                                  keywordSize,
+                                  i_buffer,
+                                  i_target,
+                                  info,
+                                  g_mvpdPnorAddr,
+                                  &g_mvpdMutex );
+
+            if( err )
+            {
+                break;
+            }
+        }
+        else
+        {
+            TRACFCOMP( g_trac_mvpd,
+                       ERR_MRK"There is no way to write mvpd when not using PNOR!" );
+
+            /*@
+             * @errortype
+             * @reasoncode       VPD::VPD_INVALID_WRITE_METHOD
+             * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE
+             * @moduleid         VPD::VPD_MVPD_WRITE_KEYWORD
+             * @userdata1        Write Offset
+             * @userdata2        Number of Bytes to Write
+             * @devdesc          g_usePNOR is false, but there isn't an
+             *                   alternate way to write PNOR.
+             */
+            err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                           VPD::VPD_MVPD_WRITE_KEYWORD,
+                                           VPD::VPD_INVALID_WRITE_METHOD,
+                                           byteAddr,
+                                           keywordSize );
+
+            break;
+        }
+
+        VPD::VpdWriteMsg_t msgdata;
+
+        // Quick double-check that our constants agree with the values in the
+        //  VPD message structure
+        assert( sizeof(msgdata.record) == RECORD_BYTE_SIZE );
+        assert( sizeof(msgdata.keyword) == KEYWORD_BYTE_SIZE );
+
+        // Finally, send it down to the FSP
+        msgdata.rec_num = i_target->getAttr<TARGETING::ATTR_VPD_REC_NUM>();
+        memcpy( msgdata.record, i_recordName, RECORD_BYTE_SIZE ); 
+        memcpy( msgdata.keyword, i_keywordName, KEYWORD_BYTE_SIZE ); 
+        err = VPD::sendMboxWriteMsg( keywordSize,
+                                     i_buffer,
+                                     i_target,
+                                     VPD::VPD_WRITE_PROC,
+                                     msgdata );
+
+        if( err )
+        {
+            break;
+        }
+
+
+    } while(0);
+
+    TRACSSCOMP( g_trac_mvpd,
+                EXIT_MRK"mvpdWriteKeyword()" );
+
+    return err;
+}
 
 } // end namespace MVPD
