@@ -1,26 +1,25 @@
-/*  IBM_PROLOG_BEGIN_TAG
- *  This is an automatically generated prolog.
- *
- *  $Source: src/usr/initservice/istepdispatcher/istepdispatcher.C $
- *
- *  IBM CONFIDENTIAL
- *
- *  COPYRIGHT International Business Machines Corp. 2011,2012
- *
- *  p1
- *
- *  Object Code Only (OCO) source materials
- *  Licensed Internal Code Source Materials
- *  IBM HostBoot Licensed Internal Code
- *
- *  The source code for this program is not published or other-
- *  wise divested of its trade secrets, irrespective of what has
- *  been deposited with the U.S. Copyright Office.
- *
- *  Origin: 30
- *
- *  IBM_PROLOG_END_TAG
- */
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/usr/initservice/istepdispatcher/istepdispatcher.C $       */
+/*                                                                        */
+/* IBM CONFIDENTIAL                                                       */
+/*                                                                        */
+/* COPYRIGHT International Business Machines Corp. 2011,2013              */
+/*                                                                        */
+/* p1                                                                     */
+/*                                                                        */
+/* Object Code Only (OCO) source materials                                */
+/* Licensed Internal Code Source Materials                                */
+/* IBM HostBoot Licensed Internal Code                                    */
+/*                                                                        */
+/* The source code for this program is not published or otherwise         */
+/* divested of its trade secrets, irrespective of what has been           */
+/* deposited with the U.S. Copyright Office.                              */
+/*                                                                        */
+/* Origin: 30                                                             */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
 /**
  *  @file istepdispatcher.C
  *
@@ -110,7 +109,7 @@ IStepDispatcher::IStepDispatcher ()
     iv_curIStep = 0x0;
     iv_curSubStep = 0x0;
     iv_sync = false;
-    
+   
     // Save flag indicating whether we're in MPIPL mode
     iv_mpipl_mode = checkMpiplMode();
     TRACFCOMP( g_trac_initsvc, "MPIPL mode = %u",
@@ -938,6 +937,8 @@ bool IStepDispatcher::checkMpiplMode( ) const
     TargetService& l_targetService = targetService();
 
     (void)l_targetService.getTopLevelTarget( l_pTopLevel );
+
+
     if( l_pTopLevel == NULL )
     {
         TRACFCOMP( g_trac_initsvc,
@@ -946,7 +947,66 @@ bool IStepDispatcher::checkMpiplMode( ) const
     }
     else
     {
-        l_isMpiplMode = l_pTopLevel->getAttr<ATTR_IS_MPIPL_HB> ();
+        TARGETING::Target* l_pMasterProcChip = NULL;
+        TARGETING::targetService().masterProcChipTargetHandle(l_pMasterProcChip);
+
+        if( l_pMasterProcChip != NULL )
+        {
+
+            // Setting the MPIPL attribute..
+            // read the MBOX scratch reg 2 and if bit 0 is on then set the
+            // MPIPL attribute to 1 and return l_isMPIPLMode = true.
+            // if bit 0 is not on then set the attribute to 0 and return
+            // l_isMPIPLMode = false
+
+            errlHndl_t l_errl = NULL;
+            size_t  op_size = sizeof( uint64_t );
+            uint64_t data;
+
+            // Scratch register 2 is defined as 0x00050039.. accessing directly
+            // to avoid confusion as the Literals set have 0x00050039 mapped to
+            // MBOX_SCRATCH1 which is confusing.
+            l_errl = DeviceFW::deviceRead(l_pMasterProcChip,
+                                          &(data),
+                                          op_size,
+                                          DEVICE_SCOM_ADDRESS(0x00050039));
+
+            if (l_errl)
+            {
+
+                TRACFCOMP( g_trac_initsvc,
+                           "Read of the Scratch Register failed" );
+
+                // set the MPIPL attribute to 0 (not mpipl)
+                l_pTopLevel->setAttr<ATTR_IS_MPIPL_HB>(0);
+
+                // commit errorlog
+                errlCommit( l_errl,
+                            INITSVC_COMP_ID );
+
+            }
+            else
+            {
+                // If bit 0 is on.. indicates we are in MPIPL
+                if (data & 0x8000000000000000)
+                {
+                    // set the MPIPL attribute to 1 
+                    l_pTopLevel->setAttr<ATTR_IS_MPIPL_HB>(1);
+
+                    // set isMpiplMode to true
+                    l_isMpiplMode = true;
+
+                    TRACFCOMP( g_trac_initsvc,
+                               "IN MPIPL..Updated ATTR_IS_MPIPL_HB to 1" );
+                }
+                else
+                {
+                    // set the MPIPL attribute to 0 (not mpipl)
+                    l_pTopLevel->setAttr<ATTR_IS_MPIPL_HB>(0);
+                }
+            }
+        }
+        
     }
 
     return  l_isMpiplMode;
@@ -962,3 +1022,5 @@ bool IStepDispatcher::isMpiplMode( ) const
 }
 
 } // namespace
+
+
