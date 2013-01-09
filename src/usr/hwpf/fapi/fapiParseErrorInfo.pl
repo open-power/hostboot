@@ -6,7 +6,7 @@
 #
 # IBM CONFIDENTIAL
 #
-# COPYRIGHT International Business Machines Corp. 2011,2012
+# COPYRIGHT International Business Machines Corp. 2011,2013
 #
 # p1
 #
@@ -52,6 +52,7 @@
 #                                      Generate fapiCollectRegFfdc.C file
 #                  mjjones   10/23/12  Minor fix for Cronus compile failure
 #                  mjjones   11/09/12  Generate fapiSetSbeError.H
+#                  mjjones   01/09/13  Fix CFAM register capture
 #
 # End Change Log ******************************************************
 
@@ -594,7 +595,7 @@ foreach my $argnum (1 .. $#ARGV)
         foreach my $cfamRegister (@{$registerFfdc->{cfamRegister}})
         {
             # Extract the address
-            if ($cfamRegister =~ m/(0x\d+)/)
+            if ($cfamRegister =~ m/(0x[\dA-Fa-f]+)/)
             {
                 print CRFILE "            l_cfamAddresses.push_back($1);\n";
                 print CRFILE "            l_ffdcSize += sizeof(l_cfamData);\n";
@@ -610,7 +611,7 @@ foreach my $argnum (1 .. $#ARGV)
         foreach my $scomRegister (@{$registerFfdc->{scomRegister}})
         {
             # Extract the address
-            if ($scomRegister =~ m/(0x[\dA-Za-z]+)/)
+            if ($scomRegister =~ m/(0x[\dA-Fa-f]+)/)
             {
                 print CRFILE "            l_scomAddresses.push_back($1);\n";
                 print CRFILE "            l_ffdcSize += sizeof(l_scomData);\n";
