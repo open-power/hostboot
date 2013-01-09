@@ -1,35 +1,37 @@
 #!/usr/bin/perl
-#  IBM_PROLOG_BEGIN_TAG
-#  This is an automatically generated prolog.
+# IBM_PROLOG_BEGIN_TAG
+# This is an automatically generated prolog.
 #
-#  $Source: src/build/tools/hwp_id.pl $
+# $Source: src/build/tools/hwp_id.pl $
 #
-#  IBM CONFIDENTIAL
+# IBM CONFIDENTIAL
 #
-#  COPYRIGHT International Business Machines Corp. 2012
+# COPYRIGHT International Business Machines Corp. 2012,2013
 #
-#  p1
+# p1
 #
-#  Object Code Only (OCO) source materials
-#  Licensed Internal Code Source Materials
-#  IBM HostBoot Licensed Internal Code
+# Object Code Only (OCO) source materials
+# Licensed Internal Code Source Materials
+# IBM HostBoot Licensed Internal Code
 #
-#  The source code for this program is not published or other-
-#  wise divested of its trade secrets, irrespective of what has
-#  been deposited with the U.S. Copyright Office.
+# The source code for this program is not published or otherwise
+# divested of its trade secrets, irrespective of what has been
+# deposited with the U.S. Copyright Office.
 #
-#  Origin: 30
+# Origin: 30
 #
-#  IBM_PROLOG_END_TAG
+# IBM_PROLOG_END_TAG
 
 use strict;
 use File::Find ();
 use File::Path;
+use Cwd;
 
 # Variables
-my $DIR = ".";
 my $DEBUG = 0;
 my @outputFnVn;
+my $baseDir = ".";
+my @searchFiles;
 
 my $SHOW_INFO = 0;
 # a bit for each:
@@ -43,8 +45,9 @@ use constant SHOW_ONLYMISS   => 0x40;
 
 # directories that we'll check for files:
 my @dirList = (
-    "src/usr/hwpf/hwp",
-    "src/usr/pore/poreve/model",
+    "src/usr/hwpf/hwp",             # hostboot
+    "src/usr/pore/poreve/model",    # hostboot
+    "src/hwsv/server/hwpf/hwp",     # fsp, should be full tree
     ) ;
 
 # set defaults
@@ -59,9 +62,9 @@ while( $ARGV = shift )
     }
     elsif( $ARGV =~ m/-D/ )
     {
-        if ( $DIR = shift )
+        if ( $baseDir = shift )
         {
-            print("Using directory: $DIR\n");
+            print("Using directory: $baseDir\n");
         }
         else
         {
@@ -75,6 +78,13 @@ while( $ARGV = shift )
     elsif( $ARGV =~ m/-f/ )
     {
         $SHOW_INFO |= SHOW_FULLPATH;
+    }
+    elsif( $ARGV =~ m/-F/ )
+    {
+        # no directory, list of files
+        $baseDir = "";
+        @searchFiles = @ARGV;
+        last; # done with options
     }
     elsif( $ARGV =~ m/-I/ )
     {
@@ -124,16 +134,13 @@ while( $ARGV = shift )
     }
 }
 
-
-# make sure we're in the correct place
-chdir "$DIR";
-
 if ($SHOW_INFO & SHOW_ONLYMISS)
 {
     $SHOW_INFO &= ~SHOW_VERSION;
     $SHOW_INFO &= ~SHOW_SHORT;
     $SHOW_INFO &= ~SHOW_HTML;
 }
+
 # generate starting html if needed
 if ($SHOW_INFO & SHOW_HTML)
 {
@@ -174,7 +181,7 @@ if ($SHOW_INFO & SHOW_IMAGEID)
     if ($imageId eq "")
     {
         # copied from src/build/tools/addimgid:
-        $imageId = `git describe --dirty || echo Unknown-Image \`git rev-parse --short HEAD\``;
+        $imageId = `cd $baseDir; git describe --dirty || echo Unknown-Image \`git rev-parse --short HEAD\``;
         chomp $imageId;
         if (($imageId =~ m/Unknown-Image/) ||   # Couldn't find git describe tag.
             ($imageId =~ m/dirty/) ||           # Find 'dirty' commit.
@@ -193,42 +200,38 @@ if ($SHOW_INFO & SHOW_IMAGEID)
     }
 }
 
-# do the work - for each directory, check the files...
-foreach( @dirList )
+# if baseDir - recurse into directories
+if ($baseDir)
 {
-    if ($SHOW_INFO & SHOW_HTML)
-    {
-        print("<h2>HWP files in $_</h2>\n");
-    }
-    else
-    {
-        print("[HWP files in $_]\n");
-    }
+    # make sure we're in the correct place
+    chdir "$baseDir";
 
-    if ($SHOW_INFO & SHOW_SHORT)
+    # do the work - for each directory, check the files...
+    foreach( @dirList )
     {
-        print("[Procedure,Revision]\n" );
-    }
+        @outputFnVn = ();
+        checkDirs( $_ );
 
-    if ($SHOW_INFO & SHOW_HTML)
-    {
-        print "<table class='hwp_id'>\n";
-        print "    <tr>\n";
-        print "        <th>Filename</th>\n";
-        print "        <th>Version</th>\n";
-        print "    </tr>\n";
+        if (scalar(@outputFnVn) > 0)
+        {
+            outputFileInfo($_, @outputFnVn);
+        }
     }
-
+}
+else # list of files
+{
     @outputFnVn = ();
-    checkFiles( $_ );
-    foreach( sort(@outputFnVn) )
+
+    # do the work - for each file, check it
+    foreach( @searchFiles )
     {
-        print( "$_\n" );
+        findIdVersion( $_ );
     }
 
-    if ($SHOW_INFO & SHOW_HTML)
+    if (scalar(@outputFnVn) > 0)
     {
-        print "</table>\n";
+        my $pwd = getcwd();
+        outputFileInfo($pwd, @outputFnVn);
     }
 }
 
@@ -260,21 +263,145 @@ sub debugMsg
 
 ################################################################################
 #
-# checkFiles - find *.[hHcC] and *.initfile files that are hwp files
+# outputFileInfo - Print output, as options dictate
+#
+################################################################################
+
+sub outputFileInfo
+{
+    my $dir = shift;
+
+    if ($SHOW_INFO & SHOW_HTML)
+    {
+        print("<h2>HWP files in $dir</h2>\n");
+    }
+    else
+    {
+        print("[HWP files in $dir]\n");
+    }
+
+    if ($SHOW_INFO & SHOW_SHORT)
+    {
+        print("[Procedure,Revision]\n" );
+    }
+
+    if ($SHOW_INFO & SHOW_HTML)
+    {
+        print "<table class='hwp_id'>\n";
+        print "    <tr>\n";
+        print "        <th>Filename</th>\n";
+        print "        <th>Version</th>\n";
+        print "    </tr>\n";
+    }
+
+    foreach( sort(@_) )
+    {
+        print( "$_\n" );
+    }
+
+    if ($SHOW_INFO & SHOW_HTML)
+    {
+        print "</table>\n";
+    }
+}
+
+################################################################################
+#
+# findIdVersion - prints out filename and version from the $Id: string.
+#
+################################################################################
+
+sub findIdVersion
+{
+    my ($l_file) = @_;
+    debugMsg( "finding Id & Version from file: $l_file" );
+
+    local *FH;
+    open(FH, "$l_file") or die("Cannot open: $l_file: $!");
+    my $data;
+    read(FH, $data, -s FH) or die("Error reading $l_file: $!");
+    close FH;
+
+    # look for special string to skip file
+    if ($data =~ /HWP_IGNORE_VERSION_CHECK/ )
+    {
+        debugMsg( "findIdVersion: found HWP_IGNORE_VERSION_CHECK in: $l_file" );
+        next;
+    }
+
+    # look for 
+    # $Id: - means this IS an hwp - print version and continue
+    # else - missing!
+    if ($data =~ /\$Id: (.*),v ([0-9.]*) .* \$/mgo )
+    {
+        my $fn = $1; # filename
+        my $vn = $2; # version
+        my $display_name;
+        if ($SHOW_INFO & SHOW_FULLPATH)
+        {
+            $display_name = $l_file;
+        }
+        else
+        {
+            $display_name = $fn;
+        }
+        debugMsg( "File: $display_name  Version: $vn" );
+        if ($SHOW_INFO & SHOW_VERSION)
+        {
+            push( @outputFnVn, "File: $display_name  Version: $vn" );
+        }
+        elsif ($SHOW_INFO & SHOW_SHORT)
+        {
+            push( @outputFnVn, "$display_name,$vn" );
+        }
+        elsif ($SHOW_INFO & SHOW_HTML)
+        {
+            push( @outputFnVn, "<tr><td>$display_name</td><td>$vn</td></tr>" );
+        }
+    }
+    else
+    {
+        debugMsg( "findIdVersion: MISSING \$Id tag: $l_file" );
+        if ($SHOW_INFO & SHOW_MISSING)
+        {
+            if ($SHOW_INFO & SHOW_VERSION)
+            {
+                print( "File: $l_file  Version: \$Id is MISSING\n" );
+            }
+            elsif ($SHOW_INFO & SHOW_SHORT)
+            {
+                print( "$l_file,MISSING\n" );
+            }
+            elsif ($SHOW_INFO & SHOW_HTML)
+            {
+                print( "<tr><td>$l_file</td><td>\$Id is MISSING</td></tr>\n" );
+            }
+        }
+        elsif ($SHOW_INFO & SHOW_ONLYMISS)
+        {
+            print( "File: $l_file  Version: \$Id is MISSING\n" );
+        }
+    }
+}
+
+################################################################################
+#
+# checkDirs - find *.[hHcC] and *.initfile files that are hwp files
 # and prints out their filename and version from the $Id: string.
 # This recursively searches the input directory passed in for all files.
 #
 ################################################################################
 
-sub checkFiles
+sub checkDirs
 {
     my ($l_input_dir) = @_;
 
     debugMsg( "Getting Files for dir: $l_input_dir" );
 
     # Open the directory and read all entry names.
+            
     local *DH;
-    opendir(DH, $l_input_dir) or die("Cannot open $l_input_dir: $!");
+    opendir(DH, $l_input_dir) ;#or die("Cannot open $l_input_dir: $!");
     # skip the dots
     my @dir_entry;
     @dir_entry = grep { !/^\./ } readdir(DH);
@@ -284,91 +411,19 @@ sub checkFiles
         my $l_entry = shift(@dir_entry);
         my $full_path = "$l_input_dir/$l_entry";
 
-        debugMsg( "checkFiles: Full Path: $full_path" );
+        debugMsg( "checkDirs: Full Path: $full_path" );
 
         # if this is valid file:
         if (($l_entry =~ /\.[H|h|C|c]$/) ||
             ($l_entry =~ /\.initfile$/))
         {
-            local *FH;
-            open(FH, "$full_path") or die("Cannot open: $full_path: $!");
-            my $data;
-            read(FH, $data, -s FH) or die("Error reading $full_path: $!");
-            close FH;
-
-            # look for special string to skip file
-            if ($data =~ /HWP_IGNORE_VERSION_CHECK/ )
-            {
-                debugMsg( "checkFiles: found HWP_IGNORE_VERSION_CHECK in: $full_path" );
-                next;
-            }
-
-            # look for 
-            # $Id: - means this IS an hwp - print version and continue
-            # else - missing!
-            if ($data =~ /\$Id: (.*),v ([0-9.]*) .* \$/mgo )
-            {
-                my $fn = $1; # filename
-                my $vn = $2; # version
-                my $display_name;
-                if ($SHOW_INFO & SHOW_FULLPATH)
-                {
-                    $display_name = $full_path;
-                }
-                else
-                {
-                    $display_name = $fn;
-                }
-                debugMsg( "File: $display_name  Version: $vn" );
-                if ($SHOW_INFO & SHOW_VERSION)
-                {
-                    push( @outputFnVn, "File: $display_name  Version: $vn" );
-                }
-                elsif ($SHOW_INFO & SHOW_SHORT)
-                {
-                    push( @outputFnVn, "$display_name,$vn" );
-                }
-                elsif ($SHOW_INFO & SHOW_HTML)
-                {
-                    push( @outputFnVn, "<tr><td>$display_name</td><td>$vn</td></tr>" );
-                }
-
-                # sanity check that fn is how it's in hb
-                if ($fn ne $l_entry)
-                {
-                    print( "  note!! File: $fn in hostboot as: $full_path\n" );
-                }
-
-            }
-            else
-            {
-                debugMsg( "checkFiles: MISSING \$Id tag: $full_path" );
-                if ($SHOW_INFO & SHOW_MISSING)
-                {
-                    if ($SHOW_INFO & SHOW_VERSION)
-                    {
-                        print( "File: $full_path  Version: \$Id is MISSING\n" );
-                    }
-                    elsif ($SHOW_INFO & SHOW_SHORT)
-                    {
-                        print( "$full_path,MISSING\n" );
-                    }
-                    elsif ($SHOW_INFO & SHOW_HTML)
-                    {
-                        print( "<tr><td>$full_path</td><td>\$Id is MISSING</td></tr>\n" );
-                    }
-                }
-                elsif ($SHOW_INFO & SHOW_ONLYMISS)
-                {
-                    print( "File: $full_path  Version: \$Id is MISSING\n" );
-                }
-            }
+            findIdVersion($full_path);
         }
         # else if this is a directory
         elsif (-d $full_path)
         {
             # recursive here
-            checkFiles($full_path);
+            checkDirs($full_path);
         }
         # else we ignore the file.
     }
@@ -382,22 +437,23 @@ sub checkFiles
 
 sub usage
 {
-    print "Usage: $0 <option>\n";
+    print "Usage: $0 <option> [-F <files>]\n";
     print "\n";
     print "Default - show name and version for hwp files with \$Id string.\n";
-    print "-D dir  Use dir as top of build.\n";
-    print "-d      Enable Debug messages.\n";
-    print "-f      Show full hostboot pathname of all files.\n";
-    print "-h      Display usage message.\n";
-    print "-I lvl  Show hostboot ImageId value as supplied lvl\n";
-    print "-i      Show hostboot ImageId value.\n";
-    print "-m      Include files that are missing Id strings.\n";
+    print "-D dir    Use dir as top of build.\n";
+    print "-d        Enable Debug messages.\n";
+    print "-f        Show full pathname of all files.\n";
+    print "-F files  Search listed full-path files. Must be last parameter.\n";
+    print "-h        Display usage message.\n";
+    print "-I lvl    Show hostboot ImageId value as supplied lvl\n";
+    print "-i        Show hostboot ImageId value.\n";
+    print "-m        Include files that are missing Id strings.\n";
     print "\n";
     print " output is in one of 4 formats:\n";
-    print "-l      Output in html table.\n";
-    print "-s      Show short \"filename,version\" format.\n";
-    print "-v      Show longer \"File: f Version: v\" format. (default)\n";
-    print "-M      Only show files that are missing Id strings.\n";
+    print "-l        Output in html table.\n";
+    print "-s        Show short \"filename,version\" format.\n";
+    print "-v        Show longer \"File: f Version: v\" format. (default)\n";
+    print "-M        Only show files that are missing Id strings.\n";
     print "\n";
     exit 1;
 }
