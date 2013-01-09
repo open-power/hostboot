@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2012              */
+/* COPYRIGHT International Business Machines Corp. 2011,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -27,6 +27,7 @@
 #include <builtins.h>
 #include <limits.h>
 #include <errl/errlentry.H>
+#include <kernel/intmsghandler.H>
 #include <sys/msg.h>
 #include <sys/misc.h>
 #include <intr/interrupt.H>
@@ -143,7 +144,7 @@ namespace INTR
                 LINKC_OFFSET = 24,             //!< offset to LINKC register
                 XISR_MASK    = 0x00FFFFFF,     //!< XISR MASK in XIRR register
 
-                ICPBAR_EN    = 30,              //!< BAR enable bit pos 
+                ICPBAR_EN    = 30,              //!< BAR enable bit pos
                 ICPBAR_SCOM_ADDR = 0x020109ca,  //!< ICP BAR scom address
 
                 // MASK base ICP address
@@ -153,14 +154,6 @@ namespace INTR
             // If the interrupt can't be handled by the current chip there are
             // three link registers used provide targets to forward the
             // interrupt to.
-            // P7:
-            // [0] last
-            // [1] LoopTrip
-            // [2:18] Reserved
-            // [19:24] PChip
-            // [25:27] PCore
-            // [28:29] TSpec
-            // [30:31] LSpec
             //
             // P8:
             // [0] last
@@ -422,20 +415,7 @@ namespace INTR
             ALWAYS_INLINE
                 uint64_t cpuOffsetAddr(const PIR_t i_pir) const
                 {
-                    // TODO when P7 support is removed then change this
-                    // to use InterruptMsgHdlr::mmio_offset()
-                    uint64_t offset = (i_pir.nodeId  * 8) + i_pir.chipId;
-                    offset <<= 20;
-                    switch (cpu_core_type())
-                    {
-                        case CORE_POWER8_MURANO:
-                        case CORE_POWER8_VENICE:
-                        default:
-                            offset |= static_cast<uint64_t>(i_pir.coreId) << 15;
-                            break;
-                    }
-                    offset |= static_cast<uint64_t>(i_pir.threadId) << 12;
-                    return offset;
+                    return InterruptMsgHdlr::mmio_offset(i_pir.word);
                 }
 
             /**

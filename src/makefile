@@ -1,25 +1,25 @@
 # IBM_PROLOG_BEGIN_TAG
 # This is an automatically generated prolog.
-# 
+#
 # $Source: src/makefile $
-# 
+#
 # IBM CONFIDENTIAL
-# 
-# COPYRIGHT International Business Machines Corp. 2010,2012
-# 
+#
+# COPYRIGHT International Business Machines Corp. 2010,2013
+#
 # p1
-# 
+#
 # Object Code Only (OCO) source materials
 # Licensed Internal Code Source Materials
 # IBM HostBoot Licensed Internal Code
-# 
+#
 # The source code for this program is not published or otherwise
 # divested of its trade secrets, irrespective of what has been
 # deposited with the U.S. Copyright Office.
-# 
+#
 # Origin: 30
-# 
-# IBM_PROLOG_END_TAG 
+#
+# IBM_PROLOG_END_TAG
 
 ROOTPATH = ..
 
@@ -43,7 +43,7 @@ DIRECT_BOOT_OBJECTS = start.o kernel.o taskmgr.o cpumgr.o syscall.o \
                       syscall_mm.o init_main.o vfs_main.o sync.o futexmgr.o \
                       ptmgr.o segmentmgr.o basesegment.o devicesegment.o \
                       block.o cxxtest_data.o cpuid.o misc.o msghandler.o \
-                      blockmsghdlr.o stacksegment.o softpatch_p7.o \
+                      blockmsghdlr.o stacksegment.o softpatch_p8.o \
 		      shutdown.o forceattn_p8.o terminate.o 
 
 BASE_MODULES = trace errl devicefw scom xscom initservice \

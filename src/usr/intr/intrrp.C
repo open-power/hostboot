@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2012              */
+/* COPYRIGHT International Business Machines Corp. 2011,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -71,11 +71,7 @@ void IntrRp::init( errlHndl_t   &io_errlHndl_t )
 
 
 //  ICPBAR = INTP.ICP_BAR[0:25] in P8 = 0x3FFFF800 + (8*node) + procPos
-//  P7 Scom address 0x02011C09 P8 = 0x020109c9
-//  BaseAddress P7:
-//  BA[18:43] = ICPBAR  (P8 says [14:43] (30 bits))
-//  BA[47:49] = COREid (0-7)
-//  BA[50:51] = cpu thread (0-3)
+//  P8 Scom address = 0x020109c9
 //
 //  BaseAddress P8:
 //  BA[14:43] = ICPBAR (30 bits)
@@ -427,7 +423,7 @@ void IntrRp::msgHandler()
 
             case MSG_INTR_ENABLE_PSI_INTR:
                 {
-                    TARGETING::Target * target = 
+                    TARGETING::Target * target =
                         reinterpret_cast<TARGETING::Target *>(msg->data[0]);
                     errlHndl_t err = initIRSCReg(target);
                     msg->data[1] = reinterpret_cast<uint64_t>(err);

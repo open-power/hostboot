@@ -1,28 +1,28 @@
-#   IBM_PROLOG_BEGIN_TAG
-#   This is an automatically generated prolog.
-# 
-#   $Source: src/kernel/softpatch_p7.S $
-# 
-#   IBM CONFIDENTIAL
-# 
-#   COPYRIGHT International Business Machines Corp. 2011
-# 
-#   p1
-# 
-#   Object Code Only (OCO) source materials
-#   Licensed Internal Code Source Materials
-#   IBM HostBoot Licensed Internal Code
-# 
-#   The source code for this program is not published or other-
-#   wise divested of its trade secrets, irrespective of what has
-#   been deposited with the U.S. Copyright Office.
-# 
-#   Origin: 30
-# 
-#   IBM_PROLOG_END
+# IBM_PROLOG_BEGIN_TAG
+# This is an automatically generated prolog.
+#
+# $Source: src/kernel/softpatch_p8.S $
+#
+# IBM CONFIDENTIAL
+#
+# COPYRIGHT International Business Machines Corp. 2011,2013
+#
+# p1
+#
+# Object Code Only (OCO) source materials
+# Licensed Internal Code Source Materials
+# IBM HostBoot Licensed Internal Code
+#
+# The source code for this program is not published or otherwise
+# divested of its trade secrets, irrespective of what has been
+# deposited with the U.S. Copyright Office.
+#
+# Origin: 30
+#
+# IBM_PROLOG_END_TAG
 .include "kernel/ppcconsts.S"
 
-/** @fn p7_softpatch_denorm_assist
+/** @fn p8_softpatch_denorm_assist
  *  @brief Performs denormalization assistance for floating point operations.
  *
  *  Called by the softpatch exception when a denormalization assistance is
@@ -35,8 +35,8 @@
  *  Destroys the data in r4/r5.  This is safe by the ABI since these are
  *  parameter registers which are otherwise unused by this function.
  */
-.global p7_softpatch_denorm_assist
-p7_softpatch_denorm_assist:
+.global p8_softpatch_denorm_assist
+p8_softpatch_denorm_assist:
     mfmsr  r4                  # Load the MSR
     oris   r5,r4,0x2080        # Turn on FP,VSX available
     mtmsrd r5                  # Set the MSR

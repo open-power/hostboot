@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2010,2012              */
+/* COPYRIGHT International Business Machines Corp. 2010,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -207,7 +207,7 @@ void kernel_execute_fp_unavail()
 const uint64_t EXCEPTION_HSRR1_SOFTPATCH_MASK   = 0x0000000000100000;
 const uint64_t EXCEPTION_HSRR1_SOFTPATCH_DENORM = 0x0000000000100000;
 
-extern "C" void p7_softpatch_denorm_assist(context_fp_t*);
+extern "C" void p8_softpatch_denorm_assist(context_fp_t*);
 
 extern "C"
 void kernel_execute_softpatch()
@@ -225,10 +225,10 @@ void kernel_execute_softpatch()
 
         switch (CpuID::getCpuType())
         {
-            case CORE_POWER8_MURANO: // @TODO: Verify same procedure.
-            case CORE_POWER8_VENICE:  // @TODO: Verify same procedure.
+            case CORE_POWER8_MURANO:
+            case CORE_POWER8_VENICE:
             case CORE_UNKNOWN:
-                p7_softpatch_denorm_assist(t->fp_context);
+                p8_softpatch_denorm_assist(t->fp_context);
                 break;
         }
     }

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2010,2012              */
+/* COPYRIGHT International Business Machines Corp. 2010,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -77,8 +77,6 @@ void mmio_hmer_write(uint64_t value);
  *  mmio_scratch_read / mmio_scratch_write.
  *
  *  These values come from the Chip Pervasive Spec.
- *
- *  TODO: Verify that P7/P8 offsets are the same.
  */
 enum MMIO_Scratch_Register
 {
