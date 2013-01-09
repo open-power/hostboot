@@ -43,6 +43,7 @@
 #include    <initservice/istepdispatcherif.H>
 
 #include    <hwpisteperror.H>
+#include    <errl/errludtarget.H>
 
 //  targeting support
 #include    <targeting/common/commontargeting.H>
@@ -65,10 +66,13 @@
 #include    "p8_set_pore_bar.H"
 // #include    "host_activate_slave_cores/host_activate_slave_cores.H"
 #include    "proc_switch_cfsim.H"
+#include    "proc_switch_rec_attn.H"
+#include    "cen_switch_rec_attn.H"
 
 namespace   CORE_ACTIVATE
 {
 
+using   namespace   ERRORLOG;
 using   namespace   TARGETING;
 using   namespace   fapi;
 using   namespace   ISTEP;
@@ -313,11 +317,13 @@ void*    call_host_activate_slave_cores( void    *io_pArgs )
         TARGETING::TargetHandleList l_procTargetList;
         getAllChips(l_procTargetList, TYPE_PROC);
 
-        // loop thru all the cpu's
-        for ( uint8_t l_procNum=0; l_procNum < l_procTargetList.size(); l_procNum++)
+        // loop thru all the proc's
+        for ( TargetHandleList::iterator l_iter = l_procTargetList.begin();
+              l_iter != l_procTargetList.end();
+              ++l_iter )
         {
             //  make a local copy of the CPU target
-            TARGETING::Target*  l_proc_target = l_procTargetList[l_procNum];
+            TARGETING::Target*  l_proc_target = (*l_iter) ;
 
             //  dump physical path to target
             EntityPath l_path;
@@ -325,10 +331,10 @@ void*    call_host_activate_slave_cores( void    *io_pArgs )
             l_path.dump();
 
             // cast OUR type of target to a FAPI type of target.
-            fapi::Target l_fapi_proc_target(
-                                           TARGET_TYPE_PROC_CHIP,
-                                           reinterpret_cast<void *>
-                                           (const_cast<TARGETING::Target*>(l_proc_target)) );
+            fapi::Target l_fapi_proc_target( TARGET_TYPE_PROC_CHIP,
+                                             reinterpret_cast<void *>
+                                               (const_cast<TARGETING::Target*>
+                                                 (l_proc_target)) );
 
             //  reset pore bar notes:
             //  A mem_size of 0 means to ignore the image address
@@ -350,8 +356,10 @@ void*    call_host_activate_slave_cores( void    *io_pArgs )
                  * @reasoncode      ISTEP_RESET_PORE_BARS_FAILED
                  * @severity        ERRORLOG::ERRL_SEV_UNRECOVERABLE
                  * @moduleid        ISTEP_HOST_ACTIVATE_SLAVE_CORES
-                 * @userdata1       0
-                 * @userdata2       0
+                 * @userdata1       bytes 0-1: plid identifying first error
+                 *                  bytes 2-3: reason code of first error
+                 * @userdata2       bytes 0-1: total number of elogs included
+                 *                  bytes 2-3: N/A
                  * @devdesc         call to set_pore_bars failed.
                  *                  see error identified by the plid in
                  *                  user data field.
@@ -399,8 +407,7 @@ void*    call_host_ipl_complete( void    *io_pArgs )
                "call_host_ipl_complete entry" );
     do
     {
-        // We only need to do this to the master Processor.
-
+        // We only need to run cfsim on the master Processor.
         TARGETING::Target * l_masterProc =   NULL;
         (void)TARGETING::targetService().masterProcChipTargetHandle( l_masterProc );
 
@@ -414,6 +421,7 @@ void*    call_host_ipl_complete( void    *io_pArgs )
         EntityPath l_path;
         l_path  =   l_masterProc->getAttr<ATTR_PHYS_PATH>();
         l_path.dump();
+
 
         //  call proc_switch_cfsim
         FAPI_INVOKE_HWP(l_err, proc_switch_cfsim, l_fapi_proc_target,
@@ -437,6 +445,148 @@ void*    call_host_ipl_complete( void    *io_pArgs )
                        "SUCCESS: proc_switch_cfsim HWP( )" );
         }
 
+
+        //  Loop through all the centaurs in the system
+        //  and run cen_switch_rec_attn
+        TARGETING::TargetHandleList l_memTargetList;
+        getAllChips(l_memTargetList, TYPE_MEMBUF );
+
+        for ( TargetHandleList::iterator l_iter = l_memTargetList.begin();
+              l_iter != l_memTargetList.end();
+              ++l_iter )
+        {
+            TARGETING::Target * l_memChip  =   (*l_iter) ;
+
+            //  dump physical path to target
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                       "Running cen_switch_rec_attn HWP on ...");
+            EntityPath l_path;
+            l_path  =   l_memChip->getAttr<ATTR_PHYS_PATH>();
+            l_path.dump();
+
+
+            // cast OUR type of target to a FAPI type of target.
+            fapi::Target l_fapi_centaur_target( TARGET_TYPE_MEMBUF_CHIP,
+                                                l_memChip );
+            FAPI_INVOKE_HWP( l_err,
+                             cen_switch_rec_attn,
+                             l_fapi_centaur_target );
+            if (l_err)
+            {
+                // log error for this centaur and continue
+
+                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                          "ERROR 0x%.8X: cen_switch_rec_attn HWP( )",
+                          l_err->reasonCode() );
+
+                // Add all the details for this centaur
+                ErrlUserDetailsTarget myDetails(l_memChip);
+
+                // capture the target data in the elog
+                myDetails.addToLog(l_err);
+
+                /*@
+                 * @errortype
+                 * @reasoncode      ISTEP_CEN_REC_ATTN_FAILED
+                 * @severity        ERRORLOG::ERRL_SEV_UNRECOVERABLE
+                 * @moduleid        ISTEP_HOST_IPL_COMPLETE
+                 * @userdata1       bytes 0-1: plid identifying first error
+                 *                  bytes 2-3: reason code of first error
+                 * @userdata2       bytes 0-1: total number of elogs included
+                 *                  bytes 2-3: N/A
+                 * @devdesc         call to cen_switch_attn failed.
+                 *                  see
+                 *                  error identified by the plid in user data
+                 *                  field.
+                 */
+                l_stepError.addErrorDetails( ISTEP_CEN_REC_ATTN_FAILED,
+                                             ISTEP_HOST_IPL_COMPLETE,
+                                             l_err );
+
+                errlCommit( l_err, HWPF_COMP_ID );
+            }
+            else
+            {
+                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                           "SUCCESS: cen_switch_rec_attn HWP( )" );
+            }
+        }   // endfor
+
+
+        //  Loop through all the mcs in the system
+        //  and run proc_switch_rec_attn
+        TARGETING::TargetHandleList l_mcsTargetList;
+        getAllChiplets(l_mcsTargetList, TYPE_MCS);
+
+        for ( TargetHandleList::iterator l_iter = l_mcsTargetList.begin();
+            l_iter != l_mcsTargetList.end();
+            ++l_iter )
+        {
+            TARGETING::Target * l_mcsChiplet  =   (*l_iter) ;
+
+            //  dump physical path to target
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                        "Running proc_switch_rec_attn HWP on ...");
+            EntityPath l_path;
+            l_path  =   l_mcsChiplet->getAttr<ATTR_PHYS_PATH>();
+            l_path.dump();
+
+            // cast OUR type of target to a FAPI type of target.
+            fapi::Target l_fapi_mcs_target( TARGET_TYPE_MCS_CHIPLET,
+                                            l_mcsChiplet );
+
+            FAPI_INVOKE_HWP( l_err,
+                             proc_switch_rec_attn,
+                             l_fapi_mcs_target );
+            if (l_err)
+            {
+                // log error for this mcs and continue
+
+                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                          "ERROR 0x%.8X: proc_switch_rec_attn HWP( )",
+                          l_err->reasonCode() );
+
+                // Add all the details for this proc
+                ErrlUserDetailsTarget myDetails(l_mcsChiplet);
+
+                // capture the target data in the elog
+                myDetails.addToLog(l_err);
+
+                /*@
+                 * @errortype
+                 * @reasoncode      ISTEP_PROC_REC_ATTN_FAILED
+                 * @severity        ERRORLOG::ERRL_SEV_UNRECOVERABLE
+                 * @moduleid        ISTEP_HOST_IPL_COMPLETE
+                 * @userdata1       bytes 0-1: plid identifying first error
+                 *                  bytes 2-3: reason code of first error
+                 * @userdata2       bytes 0-1: total number of elogs included
+                 *                  bytes 2-3: N/A
+                 * @devdesc         call to cen_switch_attn failed.
+                 *                  see
+                 *                  error identified by the plid in user data
+                 *                  field.
+                 */
+                l_stepError.addErrorDetails( ISTEP_PROC_REC_ATTN_FAILED,
+                                             ISTEP_HOST_IPL_COMPLETE,
+                                             l_err );
+
+                errlCommit( l_err, HWPF_COMP_ID );
+            }
+            else
+            {
+                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                           "SUCCESS: proc_switch_rec_attn HWP( )" );
+            }
+
+        }   //  endfor
+
+
+        // check if any errors were collected above.  If so, drop out here.
+        if ( !l_stepError.isNull() )
+        {
+            break;
+        }
+
         // Sync attributes to Fsp
         l_err = syncAllAttributesToFsp();
 
@@ -454,6 +604,8 @@ void*    call_host_ipl_complete( void    *io_pArgs )
 
     if( l_err )
     {
+        // collect and log any remaining errors
+
         /*@
          * @errortype
          * @reasoncode      ISTEP_CORE_ACTIVATE_FAILED
@@ -474,9 +626,10 @@ void*    call_host_ipl_complete( void    *io_pArgs )
         errlCommit( l_err, HWPF_COMP_ID );
     }
 
+
+
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                "call_host_ipl_complete exit ");
-
 
     // end task, returning any errorlogs to IStepDisp
     return l_stepError.getErrorHandle();

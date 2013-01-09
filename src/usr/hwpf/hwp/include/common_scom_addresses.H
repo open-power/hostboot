@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012                   */
+/* COPYRIGHT International Business Machines Corp. 2012,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: common_scom_addresses.H,v 1.38 2012/11/17 19:53:05 jmcgill Exp $
+// $Id: common_scom_addresses.H,v 1.40 2013/01/08 18:24:16 koenig Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/common_scom_addresses.H,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
@@ -300,6 +300,7 @@ CONST_UINT64_T( I2CMS_MEMS0_STATUS_0x000A000B         , ULL(0x000A000B) );
 //------------------------------------------------------------------------------
 CONST_UINT64_T( PCBMS_0x000F0000                      , ULL(0x000F0000) );
 CONST_UINT64_T( PCBMS_DEVICE_ID_0x000F000F            , ULL(0x000F000F) );
+CONST_UINT64_T( PCB_TIMEOUT_0x000F0019                , ULL(0x000F0019) );
 CONST_UINT64_T( MASTER_PCB_INT_0x000F001A             , ULL(0x000F001A) );
 CONST_UINT64_T( PRV_PIB_PCBMS_RESET_REG_0x000F001D    , ULL(0x000F001D) );
 CONST_UINT64_T( MASTER_PCB_ERR_0x000F001F             , ULL(0x000F001F) );
@@ -331,6 +332,31 @@ CONST_UINT64_T( TP_TRACE_DATA_LO_0x01010401           , ULL(0x01010401) );
 //------------------------------------------------------------------------------
 //      TP ITR
 //------------------------------------------------------------------------------
+CONST_UINT64_T( TP_INTRPT_PRES_TYP1_0x01020000        , ULL(0x01020000) );
+CONST_UINT64_T( TP_INTRPT_PRES_TYP1_OR_0x01020001     , ULL(0x01020001) );
+CONST_UINT64_T( TP_INTRPT_PRES_TYP1_AND_0x01020002    , ULL(0x01020002) );
+CONST_UINT64_T( TP_INTRPT_PRES_TYP2_0x01020003        , ULL(0x01020003) );
+CONST_UINT64_T( TP_INTRPT_PRES_TYP2_OR_0x01020004     , ULL(0x01020004) );
+CONST_UINT64_T( TP_INTRPT_PRES_TYP2_AND_0x01020005    , ULL(0x01020005) );
+CONST_UINT64_T( TP_INTRPT_PRES_TYP3_0x01020006        , ULL(0x01020006) );
+CONST_UINT64_T( TP_INTRPT_PRES_TYP3_OR_0x01020007     , ULL(0x01020007) );
+CONST_UINT64_T( TP_INTRPT_PRES_TYP3_AND_0x01020008    , ULL(0x01020008) );
+CONST_UINT64_T( TP_INTRPT_PRES_TYP4_0x01020009        , ULL(0x01020009) );
+CONST_UINT64_T( TP_INTRPT_PRES_TYP4_OR_0x0102000A     , ULL(0x0102000A) );
+CONST_UINT64_T( TP_INTRPT_PRES_TYP4_AND_0x0102000B    , ULL(0x0102000B) );
+
+CONST_UINT64_T( TP_INTRPT_TYP_MSK_0x0102000C          , ULL(0x0102000C) );
+CONST_UINT64_T( TP_INTRPT_TYP_MSK_OR_0x0102000D       , ULL(0x0102000D) );
+CONST_UINT64_T( TP_INTRPT_TYP_MSK_AND_0x0102000E      , ULL(0x0102000E) );
+
+CONST_UINT64_T( TP_INTRPT_CONFIG_0x0102000F           , ULL(0x0102000F) );
+CONST_UINT64_T( TP_INTRPT_CONFIG_OR_0x01020010        , ULL(0x01020010) );
+CONST_UINT64_T( TP_INTRPT_CONFIG_AND_0x01020011       , ULL(0x01020011) );
+
+CONST_UINT64_T( TP_INTRPT_HOLD_0x01020012             , ULL(0x01020012) );
+CONST_UINT64_T( TP_IPOLL_MSK_0x01020013               , ULL(0x01020013) );
+CONST_UINT64_T( TP_ITR_ERR_STAT_0x01020014            , ULL(0x01020014) );
+CONST_UINT64_T( TP_OSCERR_HOLD_0x01020019             , ULL(0x01020019) );
 CONST_UINT64_T( TP_OSC_MSK_0x0102001A                 , ULL(0x0102001A) );
 
 //------------------------------------------------------------------------------
@@ -610,6 +636,12 @@ This section is automatically updated by CVS when you check in this file.
 Be sure to create CVS comments when you commit so that they can be included here.
 
 $Log: common_scom_addresses.H,v $
+Revision 1.40  2013/01/08 18:24:16  koenig
+Updates - AK
+
+Revision 1.39  2012/12/10 22:02:51  mfred
+Adding addresses for interrupt macro.
+
 Revision 1.38  2012/11/17 19:53:05  jmcgill
 add trace status registers
 

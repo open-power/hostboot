@@ -164,6 +164,10 @@ enum istepReasonCode
     ISTEP_GET_SLW_OUTPUT_BUFFER_FAILED          = ISTEP_COMP_ID | 0x27,
     ISTEP_GET_SLW_REALMEM_FAILED                = ISTEP_COMP_ID | 0x28,
 
+    ISTEP_CEN_REC_ATTN_FAILED                   = ISTEP_COMP_ID | 0x29,
+    ISTEP_PROC_REC_ATTN_FAILED                  = ISTEP_COMP_ID | 0x2A,
+
+
 };  // end ISTEP
 
 }

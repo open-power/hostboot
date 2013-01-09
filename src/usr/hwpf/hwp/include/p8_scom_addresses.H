@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012                   */
+/* COPYRIGHT International Business Machines Corp. 2012,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_scom_addresses.H,v 1.125 2012/12/12 04:55:22 stillgs Exp $
+// $Id: p8_scom_addresses.H,v 1.129 2013/01/10 01:17:27 stillgs Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/p8_scom_addresses.H,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
@@ -392,13 +392,13 @@ CONST_UINT64_T( PMC_PARAMETER_REG1_0x00062006         , ULL(0x00062006) );
 CONST_UINT64_T( PMC_STATUS_REG_0x00062009             , ULL(0x00062009) );
 CONST_UINT64_T( PMC_OCC_HEARTBEAT_REG_0x00062066      , ULL(0x00062066) );
 CONST_UINT64_T( PMC_CORE_DECONFIG_REG_0x0006200D      , ULL(0x0006200D) );
-CONST_UINT64_T( PMC_FSMSTATE_STATUS_REG_0x00062000    , ULL(0x00062020) );
+CONST_UINT64_T( PMC_FSMSTATE_STATUS_REG_0x00062020    , ULL(0x00062020) );
 CONST_UINT64_T( PMC_PORRR0_REG_0x0006208E             , ULL(0x0006208E) );
 CONST_UINT64_T( PMC_PORRR1_REG_0x0006208F             , ULL(0x0006208F) );
 CONST_UINT64_T( PMC_PORRS_REG_0x00062090              , ULL(0x00062090) );
 CONST_UINT64_T( PMC_DEEPEXIT_MASK_0x00062092          , ULL(0x00062092) );
 CONST_UINT64_T( PMC_DEEPEXIT_MASK_WAND_0x000620A0     , ULL(0x000620A0) );
-CONST_UINT64_T( PMC_DEEPEXIT_MASK_WOR_0x000620A0      , ULL(0x000620A1) );
+CONST_UINT64_T( PMC_DEEPEXIT_MASK_WOR_0x000620A1      , ULL(0x000620A1) );
 
 // SPIVID Controller
 CONST_UINT64_T( PMC_SPIV_CTRL_REG0A_0x00062040        , ULL(0x00062040) );
@@ -1491,6 +1491,16 @@ CONST_UINT64_T( EX_PERV_TCTL5_R_STAT_0x10013052       , ULL(0x10013052) );
 CONST_UINT64_T( EX_PERV_TCTL6_R_STAT_0x10013062       , ULL(0x10013062) );
 CONST_UINT64_T( EX_PERV_TCTL7_R_STAT_0x10013072       , ULL(0x10013072) );
 
+// TCTL POW Status (for each thread)
+CONST_UINT64_T( EX_PERV_TCTL0_POW_STAT_0x10013004     , ULL(0x10013004) );
+CONST_UINT64_T( EX_PERV_TCTL1_POW_STAT_0x10013014     , ULL(0x10013014) );
+CONST_UINT64_T( EX_PERV_TCTL2_POW_STAT_0x10013024     , ULL(0x10013024) );
+CONST_UINT64_T( EX_PERV_TCTL3_POW_STAT_0x10013034     , ULL(0x10013034) );
+CONST_UINT64_T( EX_PERV_TCTL4_POW_STAT_0x10013044     , ULL(0x10013044) );
+CONST_UINT64_T( EX_PERV_TCTL5_POW_STAT_0x10013054     , ULL(0x10013054) );
+CONST_UINT64_T( EX_PERV_TCTL6_POW_STAT_0x10013064     , ULL(0x10013064) );
+CONST_UINT64_T( EX_PERV_TCTL7_POW_STAT_0x10013074     , ULL(0x10013074) );
+
 // Thread Active Status
 CONST_UINT64_T( EX_PERV_THREAD_ACTIVE_0x1001310E      , ULL(0x1001310E) );
 
@@ -1791,6 +1801,18 @@ This section is automatically updated by CVS when you check in this file.
 Be sure to create CVS comments when you commit so that they can be included here.
 
 $Log: p8_scom_addresses.H,v $
+Revision 1.129  2013/01/10 01:17:27  stillgs
+Fix ID line typo
+
+Revision 1.128  2013/01/09 22:04:52  stillgs
+Fix PMC_FSMSTATE_STATU_REG name with correct value to match the address
+
+Revision 1.127  2013/01/09 16:21:54  stillgs
+Fix PMC_DEEPEXIT_MASK_WOR name typo --- make name match the actual address
+
+Revision 1.126  2012/12/20 18:55:31  stillgs
+Added PC POW STATUS regs
+
 Revision 1.125  2012/12/12 04:55:22  stillgs
 Added EX PCBS Slave Configuration register
 
