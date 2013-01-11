@@ -74,7 +74,8 @@ HWP_ERROR_XML_FILES = hwp/fapiHwpErrorInfo.xml   \
     hwp/runtime_errors/p8_poregpe_errors.xml \
     hwp/runtime_errors/p8_pba_init_errors.xml \
     hwp/dram_initialization/host_mpipl_service/proc_mpipl_chip_cleanup_errors.xml \
-    hwp/build_winkle_images/p8_set_pore_bar/p8_pfet_init_errors.xml
+    hwp/build_winkle_images/p8_set_pore_bar/p8_pfet_init_errors.xml \
+    hwp/poreve_errors.xml
     
 ## these get generated into obj/genfiles/AttributeIds.H
 HWP_ATTR_XML_FILES = hwp/memory_attributes.xml \

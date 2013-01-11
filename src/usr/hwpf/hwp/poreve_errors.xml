@@ -1,0 +1,136 @@
+<!-- IBM_PROLOG_BEGIN_TAG                                                   -->
+<!-- This is an automatically generated prolog.                             -->
+<!--                                                                        -->
+<!-- $Source: src/usr/hwpf/hwp/poreve_errors.xml $                          -->
+<!--                                                                        -->
+<!-- IBM CONFIDENTIAL                                                       -->
+<!--                                                                        -->
+<!-- COPYRIGHT International Business Machines Corp. 2013                   -->
+<!--                                                                        -->
+<!-- p1                                                                     -->
+<!--                                                                        -->
+<!-- Object Code Only (OCO) source materials                                -->
+<!-- Licensed Internal Code Source Materials                                -->
+<!-- IBM HostBoot Licensed Internal Code                                    -->
+<!--                                                                        -->
+<!-- The source code for this program is not published or otherwise         -->
+<!-- divested of its trade secrets, irrespective of what has been           -->
+<!-- deposited with the U.S. Copyright Office.                              -->
+<!--                                                                        -->
+<!-- Origin: 30                                                             -->
+<!--                                                                        -->
+<!-- IBM_PROLOG_END_TAG                                                     -->
+<!-- Errors from the POREVE -->
+<hwpErrors>
+  <!-- ******************************************************************** -->
+  <!-- ** Errors from pore.C                                                 -->
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_POREVE_NO_PIB_MODEL</rc>
+    <description>
+      Signalled by Pore::pibMaster(). This will never happen; The PoreVe has
+      not configured a PIB bus.
+    </description>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_POREVE_NO_OCI_MODEL</rc>
+    <description>
+      Signalled by Pore::ociMaster(). This will never happen; The PoreVe has
+      not configured an OCI bus.
+    </description>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_POREVE_PORE_OPERATION_ERROR</rc>
+    <description>
+      Signalled by Pore::operation(). An error occurred during an attempted
+      register access of the PORE model.
+    </description>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_POREVE_PORE_NOT_MAPPED_ON_BUS</rc>
+    <description>
+      Signalled by Bus::operation(). No bus slave claimed the transaction,
+      i.e., an attempted access of an unmapped address.
+    </description>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_POREVE_BUS_SLAVE_PERMISSION_DENIED</rc>
+    <description>
+      Signalled by Bus::operation(). The access mode was not permitted by the
+      slave permissions. See the FAPI_ERR() log for details.
+    </description>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_POREVE_HOOKMANAGER_INCONSISTENCY</rc>
+    <description>
+      Signalled by HookManager::runHooks(). An inconsistency in the HookManager
+      data structures was detected.  See the FAPI_ERR() log for details.
+    </description>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_POREVE_PIB2CFAM_ERROR</rc>
+    <description>
+      Signalled by Pib2Cfam::operation(). An error occurred during an access of
+      the virtual Pib2Cfam unit - either a read/write access error or an
+      attempted access of a non-modeled register.
+    </description>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_POREVE_FASTI2C_ERROR</rc>
+    <description>
+      Signalled by FastI2cController::operation(). An error occurred during an
+      access of a FastI2cController. To see the FAPI_ERR() log you may need to
+      recompile the PoreVe with -DDEBUG_FASTI2C=1.
+    </description>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_POREVE_LPC_ERROR</rc>
+    <description>
+      Signalled by LpcController::operation(). An error occurred during an
+      access of a LpcController. To see the FAPI_ERR() log you may need to
+      recompile the PoreVe with -DDEBUG_FASTI2C=1.
+    </description>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_POREVE_PIBMEM_CONTROL_ERROR</rc>
+    <description>
+      Signalled by Pibmem::operation(). An error occurred during an access of a
+      PIBMEM control register. See the FAPI_ERR() log for details.
+    </description>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_POREVE_PIB_MEMORY_ACCESS_ERROR</rc>
+    <description>
+      Signalled by PibMemory::operation(). An error occurred during an access
+      of a PibMemory. See the FAPI_ERR() log for details as well as the Model
+      Error state of the PoreVe.
+    </description>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_POREVE_OCI_MEMORY_ACCESS_ERROR</rc>
+    <description>
+      Signalled by OciMemory::operation(). An error occurred during an access
+      of an OciMemory. See the FAPI_ERR() log for details as well as the Model
+      Error state of the PoreVe.
+    </description>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_POREVE_OCI_SLAVE_ERROR</rc>
+    <description>
+      Signalled by OciSlave access methods. An error occurred during an access
+      of an Oci Slave.
+    </description>
+  </hwpError>
+</hwpErrors>
