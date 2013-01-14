@@ -167,7 +167,6 @@ fsp.tar_CONTENTS = \
     src/build/buildpnor/defaultPnorLayout.xml \
     img/simics_MURANO_targeting.bin \
     img/simics_VENICE_targeting.bin \
-    img/TULETA_targeting.bin \
     obj/genfiles/fapiAttributeIds.txt \
     obj/genfiles/fapiAttributeEnums.txt \
     $(addsuffix :targeting/,\

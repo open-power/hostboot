@@ -41,8 +41,6 @@ COMMON_TARGETING_MAKEFILE = \
 # Include the common targeting makefile for xmltohb verbatim
 include ${COMMON_TARGETING_MAKEFILE}
 
-XMLTOHB_SYSTEM_BINARIES += TULETA_targeting.bin
-
 VPATH = ${COMMON_TARGETING_REL_PATH}   
 
 FAPI_ATTR_SOURCE_DIR = ${ROOTPATH}/src/usr/hwpf/hwp
