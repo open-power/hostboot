@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012                   */
+/* COPYRIGHT International Business Machines Corp. 2012,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -33,7 +33,7 @@
 #include <attn/attn.H>
 #include <intr/interrupt.H>
 #include <errl/errlentry.H>
-#include <diag/prdf/common/prdfMain.H>
+#include <diag/prdf/prdfMain.H>
 #include <targeting/common/target.H>
 #include <vector>
 #include <builtins.h>

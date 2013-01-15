@@ -28,7 +28,7 @@
 prd_framework = \
  iipTemplates.o \
  prdfTrace.o \
- prdfMain.o
+ prdfMain_common.o prdfMain.o
 
 prd_util = \
  prdfBitString.o \

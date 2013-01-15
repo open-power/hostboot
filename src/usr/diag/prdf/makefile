@@ -46,6 +46,8 @@ VPATH =  \
     framework \
     framework/rule \
     framework/service \
+    plat \
+    plat/pegasus \
 
 #FIXME: we can remove most of these as well if we have them include correctly
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/hwpf/fapi

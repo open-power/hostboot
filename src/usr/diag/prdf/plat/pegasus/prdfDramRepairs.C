@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/diag/prdf/common/plat/pegasus/prdfDramRepairs.C $     */
+/* $Source: src/usr/diag/prdf/plat/pegasus/prdfDramRepairs.C $            */
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
@@ -23,14 +23,13 @@
 
 /** @file prdfDramRepairs.C */
 
-
-#include <prdfMain.H>
-#include <prdf_service_codes.H>
-#include <iipconst.h>
-#include <iipglobl.h>
-#include <prdfEnums.H>
-#include <prdfPlatServices.H>
-#include <prdfMemoryMru.H>
+#include <diag/prdf/prdfMain.H>
+#include <diag/prdf/common/prdf_service_codes.H>
+#include "common/iipconst.h"
+#include "common/iipglobl.h"
+#include "common/prdfEnums.H"
+#include "common/plat/prdfMemoryMru.H"
+#include "framework/service/prdfPlatServices.H"
 
 using namespace HWAS;
 using namespace std;

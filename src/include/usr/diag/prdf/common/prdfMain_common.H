@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/include/usr/diag/prdf/common/prdfMain.H $                 */
+/* $Source: src/include/usr/diag/prdf/common/prdfMain_common.H $          */
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2002,2012              */
+/* COPYRIGHT International Business Machines Corp. 2002,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -21,26 +21,18 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-#ifndef PRDF_MAIN_H
-#define PRDF_MAIN_H
+#ifndef __prdfMain_common_H
+#define __prdfMain_common_H
 
 /**
- * @file prdfMain.H
- * @brief Interface to Processor Run-time Diagnostics (PRD)
- * @par
- * This includes all type definitions, function interfaces/contracts and
- * return codes for PRD.
- * These prototypes specify the functions that can be called externally
- * from other binds.
+ * @file  prdfMain_common.H
+ * @brief PRD code used by external components.
+ *
+ * This file contains code that is strictly common between FSP and Hostboot. All
+ * platform specific code should be in the respective FSP only or Hostboot only
+ * files.
  */
 
-#ifdef __HOSTBOOT_MODULE
-  #include <errl/errlentry.H>
-#else
-  #include <errlentry.H>
-#endif
-
-#include <stdint.h>
 #include <targeting/common/target.H>
 
 namespace PRDF
@@ -143,6 +135,9 @@ enum prd_return_code_t
 
 };
 
+/** Indicates if PRD has been initialized. */
+extern bool g_initialized;
+
 /**
  * @brief Initialize PRD system model and data
  * @return Error log if error occurs
@@ -168,42 +163,6 @@ extern errlHndl_t main(ATTENTION_VALUE_TYPE i_attnType, const AttnList & i_attnL
  */
 extern void iplCleanup();
 
-//------------------------------------------------------------------------------
-//                     Hostboot specific functions
-//------------------------------------------------------------------------------
-
-#ifdef __HOSTBOOT_MODULE
-
-/**
- *  @brief initiate memory background scrubbing
- *  @param[in] i_pTarget - Target handle of System or Node
- *  @return Error log if error occurs
- */
-extern errlHndl_t startScrub(const TARGETING::TargetHandle_t i_pTarget);
-
-/**
- * @brief  Restores hardware DRAM repairs to reflect what is stored in VPD.
- * @param[in]  i_pTarget - Target handle of the memory controller
- * @return Non-SUCCESS if conditions are such that a callout had to be made, SUCCESS othewise.
- */
-extern int32_t restoreDramRepairs(const TARGETING::TargetHandle_t i_pTarget);
-
-#endif // __HOSTBOOT_MODULE
-
-//------------------------------------------------------------------------------
-//                          FSP specific functions
-//------------------------------------------------------------------------------
-
-#ifndef __HOSTBOOT_MODULE
-
-/**
- *  @brief handle service data collector sync over
- *  @return Error log if error occurs
- */
-extern errlHndl_t failoverComplete(void);
-
-#endif // not __HOSTBOOT_MODULE
-
 } // End namespace PRDF
 
-#endif // PRDF_MAIN_H
+#endif // __prdfMain_common_H

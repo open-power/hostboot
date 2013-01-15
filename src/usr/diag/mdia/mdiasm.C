@@ -36,7 +36,7 @@
 #include <hbotcompid.H>
 #include <fapi.H>
 #include <fapiPlatHwpInvoker.H>
-#include <diag/prdf/common/prdfMain.H>
+#include <diag/prdf/prdfMain.H>
 #include <devicefw/userif.H>
 
 using namespace TARGETING;

@@ -72,7 +72,7 @@
 // #include    "host_startprd_pbus/host_startprd_pbus.H"
 // #include    "host_attnlisten_proc/host_attnlisten_proc.H"
 #include    "proc_fab_iovalid/proc_fab_iovalid.H"
-#include    <diag/prdf/common/prdfMain.H>
+#include    <diag/prdf/prdfMain.H>
 #include    "fabric_io_dccal/fabric_io_dccal.H"
 #include    <intr/interrupt.H>
 
