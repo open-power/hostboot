@@ -1119,10 +1119,13 @@ bool isMnfgFlagSet( uint32_t i_flag )
 
 bool mfgMode()
 { return isMnfgFlagSet( MNFG_FLAG_BIT_MNFG_THRESHOLDS      ); }
+
 bool hdatAvpMode()
 { return isMnfgFlagSet( MNFG_FLAG_BIT_MNFG_HDAT_AVP_ENABLE ); }
+
 bool mnfgTerminate()
 { return isMnfgFlagSet( MNFG_FLAG_BIT_MNFG_SRC_TERM        ); }
+
 bool areDramRepairsDisabled()
 { return isMnfgFlagSet( MNFG_FLAG_BIT_MNFG_DISABLE_DRAM_REPAIRS ); }
 
@@ -1138,6 +1141,9 @@ bool isDramWidthX4(TARGETING::TargetHandle_t i_mbaTarget)
     }
     return isDramWidthX4;
 }
+
+bool mnfgSpareDramDeploy()
+{ return isMnfgFlagSet( MNFG_FLAG_BIT_MNFG_TEST_DRAM_REPAIRS ); }
 
 } // end namespace PlatServices
 

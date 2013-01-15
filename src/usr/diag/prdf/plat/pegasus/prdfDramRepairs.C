@@ -159,8 +159,6 @@ bool processRepairedRanks( TargetHandle_t i_mba, uint8_t i_repairedRankMask )
     // check the argument ranks for repairs
     // that violate RAS policy
 
-    errlHndl_t err = NULL;
-
     bool calloutMade = false;
 
     // check each rank for repairs
@@ -199,7 +197,6 @@ bool processRepairedRanks( TargetHandle_t i_mba, uint8_t i_repairedRankMask )
         {
             // skip this rank
 
-            PRDF_COMMIT_ERRL(err, ERRL_ACTION_REPORT);
             continue;
         }
 
@@ -393,6 +390,34 @@ bool processDq(TargetHandle_t i_mba)
     return 0 != calloutCount;
 }
 
+void deployDramSpares(TargetHandle_t i_mba)
+{
+    using namespace fapi;
+
+    bool x4 = PlatServices::isDramWidthX4(i_mba);
+
+    for ( uint8_t rankNumber = 0;
+            rankNumber < DIMM_DQ_MAX_MBAPORT_DIMMS * DIMM_DQ_MAX_DIMM_RANKS;
+            ++rankNumber )
+    {
+        // ignore errors from putSteerMux
+
+        static_cast<void>(
+                PlatServices::mssSetSteerMux(
+                    i_mba,
+                    rankNumber,
+                    0, false));
+
+        if( x4 ) {
+            static_cast<void>(
+                    PlatServices::mssSetSteerMux(
+                        i_mba,
+                        rankNumber,
+                        0, true));
+        }
+    }
+}
+
 //------------------------------------------------------------------------------
 // External functions - declared in prdfMain.H
 //------------------------------------------------------------------------------
@@ -414,12 +439,56 @@ int32_t restoreDramRepairs( TargetHandle_t i_mba )
             break;
         }
 
+        bool spareDramDeploy = PlatServices::mnfgSpareDramDeploy();
+
+        if(spareDramDeploy)
+        {
+            deployDramSpares(i_mba);
+        }
+
         // in mfg mode, check dq and don't restore anything
 
-        if(PlatServices::areDramRepairsDisabled()
-                && processDq(i_mba))
+        if(PlatServices::areDramRepairsDisabled())
         {
-            calloutMade = true;
+            if(processDq(i_mba))
+            {
+                calloutMade = true;
+            }
+
+            break;
+        }
+
+        if(spareDramDeploy)
+        {
+            // this is an error...the spare dram
+            // deploy bit was set but we weren't
+            // in mfg mode...log an error for MFG
+
+            errlHndl_t err = NULL;
+
+            PRDF_ERR( "[restoreDramRepairs] "
+                    "The specified combination of mfg policy flags is invalid");
+
+            /*@
+             * @errortype
+             * @reasoncode PRDF_INVALID_CONFIG
+             * @subsys EPUB_FIRMWARE_SUBSYS
+             * @moduleid PRDF_RESTORE_DRAM_REPAIR
+             * @devdesc The specified combination of policy flags is invalid.
+             */
+            PRDF_CREATE_ERRL(
+                    err,
+                    ERRL_SEV_PREDICTIVE,
+                    ERRL_ETYPE_NOT_APPLICABLE,
+                    SRCI_MACH_CHECK,
+                    SRCI_NO_ATTR,
+                    PRDF_RESTORE_DRAM_REPAIR,
+                    FSP_DEFAULT_REFCODE,
+                    PRDF_INVALID_CONFIG,
+                    0, 0, 0, 0);
+            PRDF_COMMIT_ERRL(err, ERRL_ACTION_REPORT);
+
+            // assume mfg mode (no repairs) ...
 
             break;
         }

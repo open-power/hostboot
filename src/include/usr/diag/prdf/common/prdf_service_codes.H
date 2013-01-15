@@ -117,6 +117,9 @@ enum ReasonCode
     // Error from an ecmdDataBuffer
     PRDF_ECMD_DATA_BUFFER_FAIL              = PRDF_COMP_ID | 0x81,
 
+    // general code for user error or unsupported configuration
+    PRDF_INVALID_CONFIG                     = PRDF_COMP_ID | 0x82,
+
     PRDF_LAST_REASONCODE                    = PRDF_COMP_ID | 0xFF,
 };
 
