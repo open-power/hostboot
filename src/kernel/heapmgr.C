@@ -1,25 +1,25 @@
-//  IBM_PROLOG_BEGIN_TAG
-//  This is an automatically generated prolog.
-//
-//  $Source: src/kernel/heapmgr.C $
-//
-//  IBM CONFIDENTIAL
-//
-//  COPYRIGHT International Business Machines Corp. 2010 - 2011
-//
-//  p1
-//
-//  Object Code Only (OCO) source materials
-//  Licensed Internal Code Source Materials
-//  IBM HostBoot Licensed Internal Code
-//
-//  The source code for this program is not published or other-
-//  wise divested of its trade secrets, irrespective of what has
-//  been deposited with the U.S. Copyright Office.
-//
-//  Origin: 30
-//
-//  IBM_PROLOG_END
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/kernel/heapmgr.C $                                        */
+/*                                                                        */
+/* IBM CONFIDENTIAL                                                       */
+/*                                                                        */
+/* COPYRIGHT International Business Machines Corp. 2010,2013              */
+/*                                                                        */
+/* p1                                                                     */
+/*                                                                        */
+/* Object Code Only (OCO) source materials                                */
+/* Licensed Internal Code Source Materials                                */
+/* IBM HostBoot Licensed Internal Code                                    */
+/*                                                                        */
+/* The source code for this program is not published or otherwise         */
+/* divested of its trade secrets, irrespective of what has been           */
+/* deposited with the U.S. Copyright Office.                              */
+/*                                                                        */
+/* Origin: 30                                                             */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
 #include <limits.h>
 #include <kernel/heapmgr.H>
 #include <util/singleton.H>
@@ -250,7 +250,7 @@ void HeapManager::newPage()
     size_t remaining = PAGESIZE;
 
 #ifdef HOSTBOOT_DEBUG
-    uint32_t idx = 
+    uint32_t idx =
 #endif
         __sync_fetch_and_add(&cv_smallheap_page_count,1);
 #ifdef HOSTBOOT_DEBUG
@@ -319,82 +319,125 @@ size_t HeapManager::bucketIndex(size_t i_sz)
 // all other processes must be quiesced
 void HeapManager::_coalesce()
 {
-    // Clean up the smaller heap
-    bool merged_one = false;
-    chunk_t head; head.next = NULL;
-    chunk_t * c = NULL;
+    chunk_t* head = NULL;
+    chunk_t* chunk = NULL;
 
     // make a chain out of all the free chunks
-    // OPTION: A priority queue sorted by address could be used.
-    // This would improve performance when searching for chunks to coalesce, but
-    // would require a minimum bucket size of 32 bytes.
-    // TODO: sort by address
     for(size_t bucket = 0; bucket < BUCKETS; ++bucket)
     {
-        while(NULL != (c = first_chunk[bucket].pop()))
+        chunk = NULL;
+        while(NULL != (chunk = first_chunk[bucket].pop()))
         {
-            c->next = head.next;
-            head.next = c;
+            chunk->next = head;
+            head = chunk;
         }
     }
 
+    // Merge the chunks together until we fail to find a buddy.
+    bool mergedChunks = false;
     do
     {
-        merged_one = false;
-        // look for chunks to coalesce
-        for(c = head.next; c!=NULL; c = c->next)
+        mergedChunks = false;
+        chunk = head;
+
+        // Iterate through the chain.
+        while(NULL != chunk)
         {
-            size_t s = bucketByteSize(c->bucket);
-            chunk_t * c_find = reinterpret_cast<chunk_t*>(((uint8_t*)c) + s);
+            bool incrementChunk = true;
 
-            // c_find must be in same page
-            if(reinterpret_cast<uint64_t>(c_find) <
-               ALIGN_PAGE(reinterpret_cast<uint64_t>(c)))
+            do
             {
-                if(c_find->free)
+                // This chunk might already be combined with a chunk earlier
+                // in the loop.
+                if(!chunk->free)
                 {
-                    // is combinable?
-                    size_t ns = s + bucketByteSize(c_find->bucket);
-                    size_t n_bucket = bucketIndex(ns);
-                    if(n_bucket < BUCKETS && bucketByteSize(n_bucket) == ns)
-                    {
-                        // find c_find in the free chain and remove it
-                        chunk_t * c_prev = &head;
-                        chunk_t * c_seek = head.next;
-                        while(c_seek != NULL)
-                        {
-                            if(c_find == c_seek) // found it -> merge
-                            {
-                                // new bigger chunk
-                                c->bucket = n_bucket;
-                                merged_one = true;
-                                ++cv_coalesce_count;
-
-                                // remove found elment from the chain
-                                c_prev->next = c_find->next;
-
-                                break;
-                            }
-                            c_prev = c_seek;
-                            c_seek = c_seek->next;
-                        }
-                    }
+                    break;
                 }
+
+                // Use the size of this chunk to find next chunk.
+                size_t size = bucketByteSize(chunk->bucket);
+                chunk_t* buddy = reinterpret_cast<chunk_t*>(
+                        reinterpret_cast<size_t>(chunk) + size);
+
+                // The two chunks have to be on the same page in order to
+                // be considered for merge.
+                if (ALIGN_PAGE_DOWN(reinterpret_cast<uint64_t>(buddy)) !=
+                    ALIGN_PAGE_DOWN(reinterpret_cast<uint64_t>(chunk)))
+                {
+                    break;
+                }
+
+                // Cannot merge if buddy is not free.
+                if (!buddy->free)
+                {
+                    break;
+                }
+
+                // Calculate the size of a combined chunk.
+                size_t newSize = size + bucketByteSize(buddy->bucket);
+                size_t newBucket = bucketIndex(newSize);
+
+                // If the combined chunk is not a bucket size, cannot merge.
+                if ((newBucket >= BUCKETS) ||
+                    (bucketByteSize(newBucket) != newSize))
+                {
+                    break;
+                }
+
+                // Do merge.
+                buddy->free = false;
+                chunk->bucket = newBucket;
+                incrementChunk = false;
+                mergedChunks = true;
+
+                cv_coalesce_count++;
+
+            } while(0);
+
+            if (incrementChunk)
+            {
+                chunk = chunk->next;
             }
         }
-    } while(merged_one); // repeat until nothing can be merged
+
+        // Remove all the non-free (merged) chunks from the list.
+        chunk_t* newHead = NULL;
+        chunk = head;
+        while (NULL != chunk)
+        {
+            if (chunk->free)
+            {
+                chunk_t* temp = chunk->next;
+                chunk->next = newHead;
+                newHead = chunk;
+
+                chunk=temp;
+            }
+            else
+            {
+                chunk = chunk->next;
+            }
+        }
+
+        head = newHead;
+
+    } while(mergedChunks);
+
 
     // restore the free buckets
     cv_free_chunks = 0;
     cv_free_bytes = 0;
-    c = head.next;
-    while(c != NULL)
+    chunk = head;
+    while(chunk != NULL)
     {
-        chunk_t * c_next = c->next;
-        push_bucket(c,c->bucket);
+        chunk_t * temp = chunk->next;
+
+        push_bucket(chunk,chunk->bucket);
+
         ++cv_free_chunks;
-        cv_free_bytes += bucketByteSize(c->bucket) - 8;
-        c = c_next;
+        cv_free_bytes += bucketByteSize(chunk->bucket) - 8;
+
+        chunk = temp;
     }
     printkd("HeapMgr coalesced total %d\n",cv_coalesce_count);
     test_pages(); /*no effect*/ // BEAM fix.
