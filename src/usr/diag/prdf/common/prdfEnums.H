@@ -31,11 +31,19 @@
     #ifndef __PRD_RULE_COMPILE
     #include <hwas/common/hwasCallout.H>
 
-    // FIXME: mapping from HWSV enums to HB ones
-    // eventually these HWAS will make it way to fips
-    #define HOM_NO_DECONFIG     HWAS::NO_DECONFIG
-    #define HOM_DECONFIG        HWAS::DECONFIG
-    #define HOM_DEFER_DECONFIG  HWAS::DELAYED_DECONFIG
+    // FIXME: RTC: 62867 will resolve this
+    namespace HWSV
+    {
+        enum
+        {
+            // homDeconfigEnum
+            // mapping from HWSV enums to HB ones
+            // eventually these HWAS will make it way to fips
+            HOM_NO_DECONFIG    = HWAS::NO_DECONFIG,
+            HOM_DECONFIG       = HWAS::DECONFIG,
+            HOM_DEFER_DECONFIG = HWAS::DELAYED_DECONFIG
+        };
+    };
 
     // FIXME: remove these mapping once the enums are made common
     #define EPUB_PRC_ALL_PROCS      HWAS::EPUB_PRC_ALL_PROCS
@@ -80,28 +88,39 @@
         SRCI_PRIORITY_HIGH  = 6,
         #endif
 
-        // homTermEnum
-        HOM_SYS_NO_TERMINATE = 0,
-
-        // homHCDBUpdate
-        HOM_HCDB_DO_UPDATE = 0,
-        HOM_HCDB_OVERRIDE,
-
-        // homGardEnum
-        HOM_NO_GARD = 0,
-        HOM_DECONFIG_GARD,
-
-        //homDeconfigSchedule
-        HOM_DECONFIG_IMMEDIATE = 0,
-        HOM_DECONFIG_DEFER,
-
         // ERRL Action Flag
         ERRL_ACTION_SA = 0,
         ERRL_ACTION_REPORT,
         ERRL_ACTION_CALL_HOME,
         ERRL_ACTION_HIDDEN,
         ERRL_ACTION_DONT_TERMINATE
+    };
 
+    namespace HWSV
+    {
+        typedef uint32_t hwsvHCDBUpdate;
+        typedef uint32_t homTermEnum;
+        typedef uint32_t homGardEnum;
+        typedef uint32_t homDeconfigEnum;
+        typedef uint32_t hwsvDeconfigSchedule;
+
+        enum
+        {
+            // homTermEnum
+            HOM_SYS_NO_TERMINATE = 0,
+
+            // hwsvHCDBUpdate
+            HWSV_HCDB_DO_UPDATE = 0,
+            HWSV_HCDB_OVERRIDE,
+
+            // homGardEnum
+            HOM_NO_GARD = 0,
+            HOM_DECONFIG_GARD,
+
+            //hwsvDeconfigSchedule
+            HWSV_DECONFIG_IMMEDIATE = 0,
+            HWSV_DECONFIG_DEFER
+        };
     };
 
 #else // if not __HOSTBOOT_MODULE

@@ -220,6 +220,13 @@ errlHndl_t PegasusConfigurator::addDomainChips( TARGETING::TYPE  i_type,
     {
         // Get all targets of specified type and add to given domain.
         TargetHandleList list = PlatServices::getFunctionalTargetList( i_type );
+
+        if ( 0 == list.size() )
+        {
+            PRDF_ERR( "[addDomainChips] getFunctionalTargetList "
+                      "returned empty list for i_type=%d", i_type );
+        }
+
         for ( TargetHandleList::const_iterator itr = list.begin();
               itr != list.end(); ++itr )
         {

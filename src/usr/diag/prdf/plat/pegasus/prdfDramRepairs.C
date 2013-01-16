@@ -79,7 +79,7 @@ bool commitRestoreCallout(bool (*i_func)(errlHndl_t &, void *), void * i_data)
     PRDF_HW_COMMIT_ERRL(
             term,
             err,
-            HOM_DECONFIG_DEFER,
+            HWSV::HWSV_DECONFIG_DEFER,
             ERRL_ACTION_REPORT,
             HOM_CONTINUE);
 
@@ -104,8 +104,8 @@ bool addMemMruCallout(errlHndl_t & io_log, void * i_memMru)
             o_term,
             *static_cast<PrdfMemoryMru *>(i_memMru),
             SRCI_PRIORITY_HIGH,
-            HOM_DECONFIG,
-            HOM_DECONFIG_GARD,
+            HWSV::HOM_DECONFIG,
+            HWSV::HOM_DECONFIG_GARD,
             io_log,
             false, // don't write src to vpd
             GARD_Predictive,
@@ -125,8 +125,8 @@ bool addDimmCallout(errlHndl_t & io_log, void * i_dimm)
             o_term,
             static_cast<TargetHandle_t>(i_dimm),
             SRCI_PRIORITY_HIGH,
-            HOM_DECONFIG,
-            HOM_DECONFIG_GARD,
+            HWSV::HOM_DECONFIG,
+            HWSV::HOM_DECONFIG_GARD,
             io_log,
             false, // don't write src to vpd
             GARD_Predictive,

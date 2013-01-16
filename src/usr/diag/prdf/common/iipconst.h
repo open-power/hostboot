@@ -32,9 +32,12 @@
 /*--------------------------------------------------------------------*/
 /*  Includes                                                          */
 /*--------------------------------------------------------------------*/
-
-#if !defined(PRDF_TYPES_H)
 #include <prdf_types.h>
+
+// FIXME: RTC: 51689 will address this issue
+// Need these attribute header files in x86.nfp
+#ifndef CONTEXT_x86_nfp
+  #include <targeting/common/attributes.H>
 #endif
 
 /*--------------------------------------------------------------------*/
@@ -49,8 +52,14 @@
 
 namespace PRDF
 {
-    // FIXME - These may be replaced by something that is globally available.
+    // FIXME: RTC: 51689 will address this issue
+    #ifndef CONTEXT_x86_nfp
+    typedef TARGETING::ATTR_HUID_type HUID;
+    #else
     typedef uint32_t HUID;
+    #endif
+
+    // FIXME: RTC: 62867 will resolve this
     enum { INVALID_HUID = 0 };
 
 /*--------------------------------------------------------------------*/

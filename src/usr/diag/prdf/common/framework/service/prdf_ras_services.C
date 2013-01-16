@@ -48,19 +48,12 @@
 #include <algorithm>
 #include <iipSystem.h>         //For RemoveStoppedChips
 
+// FIXME: RTC: 62866 will investigate the removal of CPTR
+#define CPTR_Identifier 0x43505452
+
 #ifdef __HOSTBOOT_MODULE
   #define htonl(foo) (foo) // no-op for HB
   #include <stdio.h>
-  //FIXME: CPTR_Identifier used to be defined in hutlCecSvrErrl.H
-  // it seems to me that we can delete this but leave it here for now
-  #define CPTR_Identifier 0x43505452
-  //FIXME: move these typedefs to somewhere
-  typedef uint32_t homHCDBUpdate;
-  typedef uint32_t homTermEnum;
-  typedef uint32_t homHCDBUpdate;
-  typedef uint32_t homGardEnum;
-  typedef uint32_t homDeconfigEnum;
-  typedef uint32_t homDeconfigSchedule;
 #else
   #include <srcisrc.H>
   #include <GardExtInt.H> //for GARD_ErrorType
@@ -262,8 +255,8 @@ errlHndl_t ErrDataService::GenerateSrcPfa(ATTENTION_TYPE attn_type,
     bool pldCheck = false;  // Default to not do the PLD check. Set it to true for  Machine Check
     uint8_t sdcSaveFlags = SDC_NO_SAVE_FLAGS;
     size_t  sz_uint8    = sizeof(uint8_t);
-    homTermEnum termFlag = HOM_SYS_NO_TERMINATE;
-    homDeconfigSchedule deconfigSched = HOM_DECONFIG_IMMEDIATE; //See src/hwsv/server/hwsvTypes.H
+    HWSV::homTermEnum termFlag = HWSV::HOM_SYS_NO_TERMINATE;
+    HWSV::hwsvDeconfigSchedule deconfigSched = HWSV::HWSV_DECONFIG_IMMEDIATE;
     uint8_t sdcBuffer[sdcBufferSize];  //buffer to use for sdc flatten
     errlSeverity severityParm = ERRL_SEV_RECOVERED;
 #endif
@@ -283,15 +276,15 @@ errlHndl_t ErrDataService::GenerateSrcPfa(ATTENTION_TYPE attn_type,
 
 
 
-    homHCDBUpdate hcdbUpdate = HOM_HCDB_DO_UPDATE;
+    HWSV::hwsvHCDBUpdate hcdbUpdate = HWSV::HWSV_HCDB_DO_UPDATE;
 
     //Use this SDC unless determined in Check Stop processing to use a Latent, UE, or SUE saved SDC
     sdc = i_sdc;
 
     GardResolution::ErrorType prdGardErrType;
-    homGardEnum gardState;  // homGardEnum in src/hwsv/server/hwsvTypes.H
+    HWSV::homGardEnum gardState;  // homGardEnum in src/hwsv/server/hwsvTypes.H
     GARD_ErrorType gardErrType = GARD_NULL;
-    homDeconfigEnum deconfigState = HOM_NO_DECONFIG;
+    HWSV::homDeconfigEnum deconfigState = HWSV::HOM_NO_DECONFIG;
 
     bool ReturnELog = false;
     bool ForceTerminate = false;
@@ -323,7 +316,8 @@ errlHndl_t ErrDataService::GenerateSrcPfa(ATTENTION_TYPE attn_type,
 
         if (terminateOnCheckstop)
         {
-            termFlag = HOM_SYS_TERMINATE_HW_CHECKSTOP; //Also need to return error log for machine check condition
+            //Also need to return error log for machine check condition
+            termFlag = HWSV::HOM_SYS_TERMINATE_HW_CHECKSTOP;
         }
 
         ReturnELog = true;
@@ -489,7 +483,7 @@ errlHndl_t ErrDataService::GenerateSrcPfa(ATTENTION_TYPE attn_type,
     // Set Gard Error Type and state
     //**************************************************************
 
-    gardState = HOM_DECONFIG_GARD;
+    gardState = HWSV::HOM_DECONFIG_GARD;
 
     // If gardErrType was determined during latent/UE/SUE processing for Check Stop,
     // use that and not determine gardErrType from the sdc values.
@@ -499,7 +493,7 @@ errlHndl_t ErrDataService::GenerateSrcPfa(ATTENTION_TYPE attn_type,
         switch (prdGardErrType)
         {
             case GardResolution::NoGard:
-                gardState = HOM_NO_GARD;
+                gardState =  HWSV::HOM_NO_GARD;
                 gardErrType = GARD_NULL;
                 break;
             case GardResolution::Predictive:
@@ -523,16 +517,16 @@ errlHndl_t ErrDataService::GenerateSrcPfa(ATTENTION_TYPE attn_type,
                 }
                 else
                 {
-                    gardState = HOM_NO_GARD;
+                    gardState =  HWSV::HOM_NO_GARD;
                     gardErrType = GARD_NULL;
                 }
                 break;
             case GardResolution::DeconfigNoGard:
-                gardState = HOM_NO_GARD;
+                gardState =  HWSV::HOM_NO_GARD;
                 gardErrType = GARD_NULL;
                 break;
             default:
-                gardState = HOM_NO_GARD;
+                gardState =  HWSV::HOM_NO_GARD;
                 gardErrType = GARD_NULL;
                 PRDF_DTRAC( PRDF_FUNC"Unknown prdGardErrType" );
                 break;
@@ -544,7 +538,7 @@ errlHndl_t ErrDataService::GenerateSrcPfa(ATTENTION_TYPE attn_type,
         // If NoGard was specified in this switched sdc, then keep the NoGard
         if ( sdc.QueryGard() == GardResolution::NoGard )
         {
-            gardState = HOM_NO_GARD;
+            gardState = HWSV::HOM_NO_GARD;
             gardErrType = GARD_NULL;
             prdGardErrType = GardResolution::NoGard;
         }
@@ -556,7 +550,7 @@ errlHndl_t ErrDataService::GenerateSrcPfa(ATTENTION_TYPE attn_type,
 
     if (sdc.IsThermalEvent() && (MACHINE_CHECK != attn_type) )
     {  //Force No Gard
-        gardState = HOM_NO_GARD;
+        gardState = HWSV::HOM_NO_GARD;
         gardErrType = GARD_NULL;
     }
 
@@ -719,7 +713,7 @@ errlHndl_t ErrDataService::GenerateSrcPfa(ATTENTION_TYPE attn_type,
         {
             deferDeconfig = true;
             deconfigState = HOM_DECONFIG;
-            deconfigSched = HOM_DECONFIG_DEFER;
+            deconfigSched = HWSV::HWSV_DECONFIG_DEFER;
         }
 
     }
@@ -764,7 +758,7 @@ errlHndl_t ErrDataService::GenerateSrcPfa(ATTENTION_TYPE attn_type,
 
     if (ERRL_ACTION_HIDDEN == actionFlag)
     {  //Change HCDB Update to not do the update for non-visible logs
-        hcdbUpdate = HOM_HCDB_OVERRIDE;
+        hcdbUpdate = HWSV::HWSV_HCDB_OVERRIDE;
     }
 
     //**************************************************************
@@ -781,20 +775,20 @@ errlHndl_t ErrDataService::GenerateSrcPfa(ATTENTION_TYPE attn_type,
             TargetHandle_t target = thiscallout.getTarget();
             // Don't deconfig a Memory Controller for Bus Errors (Mc and SuperNova
             // both in Callouts) for Mem Diag. Note still deconfg the SuperNova.
-            homDeconfigEnum thisDeconfigState = deconfigState;
+            HWSV::homDeconfigEnum thisDeconfigState = deconfigState;
             TYPE l_targetType = PlatServices::getTargetType(target);
-            if ( HOM_DECONFIG == deconfigState  &&
+            if ( HWSV::HOM_DECONFIG == deconfigState  &&
                  l_memBuffInCallouts            &&
                  (l_targetType  ==  TYPE_MCS)) //InP8 only 1:1 connection between Mem Buf and Mem ctrl
             {
-                thisDeconfigState = HOM_NO_DECONFIG;
+                thisDeconfigState = HWSV::HOM_NO_DECONFIG;
             }
 
             #ifdef __HOSTBOOT_MODULE
             // FIXME: this will change once mdia mode support is in
             if(true == iplDiagMode)
             {
-              thisDeconfigState = HOM_DEFER_DECONFIG; // DELAYED_DECONFIG;
+              thisDeconfigState = HWSV::HOM_DEFER_DECONFIG; // DELAYED_DECONFIG;
             }
             #endif
 
@@ -1295,7 +1289,7 @@ will also be removed. Need to confirm if this code is required anymore.
                             errLog,
                             deconfigSched,
                             actionFlag,
-                            HOM_CONTINUE);
+                            HWSV::HWSV_CONTINUE);
         if(true == l_sysTerm) // if sysTerm then we have to commit and delete the log
         {
             //Just commit the log

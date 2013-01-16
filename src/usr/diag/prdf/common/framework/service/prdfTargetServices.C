@@ -35,7 +35,7 @@
 #include <prdfGlobal.H>
 #include <prdfErrlUtil.H>
 #include <prdfTrace.H>
-
+#include <algorithm>
 #include <fapi.H>
 #include <targeting/common/targetservice.H>
 
@@ -678,11 +678,6 @@ TARGETING::TargetHandleList getFunctionalTargetList( TARGETING::TYPE i_type )
     {
         // Adding functional target to the vector.
         o_list.push_back( *l_filter );
-    }
-
-    if ( 0 == o_list.size() )
-    {
-        PRDF_ERR( "[getFunctionalTargetList] Failed: i_type=%d", i_type );
     }
 
     return o_list;
