@@ -45,12 +45,13 @@ namespace HWAS
  *
  *  It will call into hwas platform-specific functions.
  *
- * @param  none
+ * @param  i_pPredicate     restrict processing - only look at GARD records
+ *                          for targets that match the predicate (optional)
  *
  * @return errlHndl_t       valid errlHndl_t handle if there was an error
  *                          NULL if no errors;
  */
-errlHndl_t collectGard();
+errlHndl_t collectGard(const TARGETING::PredicateBase *i_pPredicate = NULL);
 
 /**
  * @brief Returns a reference to the DeconfigGard singleton.
@@ -153,6 +154,9 @@ public:
     /**
      * @brief Deconfigures Targets that have GARD Records in preparation to IPL.
      *
+     * @param  i_pPredicate     restrict processing - only look at GARD records
+     *                          for targets that match the predicate (optional)
+     *
      * Called by HWAS as part of initial IPL steps.
      *
      * If deconfiguring all such Targets will result in a configuration that is
@@ -161,7 +165,8 @@ public:
      *
      * @return errlHndl_t. Error log handle.
      */
-    errlHndl_t deconfigureTargetsFromGardRecordsForIpl();
+    errlHndl_t deconfigureTargetsFromGardRecordsForIpl(
+                const TARGETING::PredicateBase *i_pPredicate = NULL);
 
     /**
      * @brief Deconfigures a Target.

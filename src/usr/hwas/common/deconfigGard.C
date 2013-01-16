@@ -53,7 +53,7 @@ namespace HWAS
 
 using namespace HWAS::COMMON;
 
-errlHndl_t collectGard()
+errlHndl_t collectGard(const TARGETING::PredicateBase *i_pPredicate)
 {
     HWAS_INF("collectGard entry" );
 
@@ -66,7 +66,8 @@ errlHndl_t collectGard()
     }
     else
     {
-        errl = theDeconfigGard().deconfigureTargetsFromGardRecordsForIpl();
+        errl = theDeconfigGard().
+                    deconfigureTargetsFromGardRecordsForIpl(i_pPredicate);
 
         if (errl)
         {
@@ -118,7 +119,8 @@ errlHndl_t DeconfigGard::clearGardRecordsForReplacedTargets()
 }
 
 //******************************************************************************
-errlHndl_t DeconfigGard::deconfigureTargetsFromGardRecordsForIpl()
+errlHndl_t DeconfigGard::deconfigureTargetsFromGardRecordsForIpl(
+        const TARGETING::PredicateBase *i_pPredicate)
 {
     HWAS_INF("Usr Request: Deconfigure Targets from GARD Records for IPL");
     HWAS_MUTEX_LOCK(iv_mutex);
@@ -168,6 +170,17 @@ errlHndl_t DeconfigGard::deconfigureTargetsFromGardRecordsForIpl()
             }
             else
             {
+                if (i_pPredicate)
+                {
+                    // if this does NOT match, continue to next in loop
+                    if ((*i_pPredicate)(l_pTarget) == false)
+                    {
+                        HWAS_INF("skipping %.8X - predicate didn't match",
+                                TARGETING::get_huid(l_pTarget));
+                        continue;
+                    }
+                }
+
                 // Deconfigure the Target
                 _deconfigureTarget(*l_pTarget, (*l_itr).iv_errlogPlid,
                                    DECONFIG_CAUSE_GARD_RECORD);
@@ -274,7 +287,7 @@ void DeconfigGard::_deconfigureByAssoc(TARGETING::Target & i_target,
                                        const uint32_t i_errlPlid)
 {
     HWAS_INF("****TBD****: Deconfiguring by Association for: %.8X",
-                   i_target.getAttr<TARGETING::ATTR_HUID>());
+                   TARGETING::get_huid(&i_target));
 
     // TODO
 }
@@ -285,13 +298,13 @@ void DeconfigGard::_deconfigureTarget(TARGETING::Target & i_target,
                                       const DeconfigCause i_cause)
 {
     HWAS_INF("Deconfiguring Target %.8X",
-            i_target.getAttr<TARGETING::ATTR_HUID>());
+            TARGETING::get_huid(&i_target));
 
     if (!i_target.getAttr<TARGETING::ATTR_DECONFIG_GARDABLE>())
     {
         // Target is not Deconfigurable. Commit an error
         HWAS_ERR("Target %.8X not Deconfigurable",
-            i_target.getAttr<TARGETING::ATTR_HUID>());
+            TARGETING::get_huid(&i_target));
 
         /*@
          * @errortype
@@ -302,7 +315,7 @@ void DeconfigGard::_deconfigureTarget(TARGETING::Target & i_target,
          * @userdata1    HUID of input target
          */
         const uint64_t userdata1 = static_cast<uint64_t>
-                (i_target.getAttr<TARGETING::ATTR_HUID>()) << 32;
+                (TARGETING::get_huid(&i_target)) << 32;
         errlHndl_t l_pErr = hwasError(
             ERRL_SEV_INFORMATIONAL,
             HWAS::MOD_DECONFIG_GARD,
@@ -472,7 +485,7 @@ errlHndl_t DeconfigGard::_createGardRecord(const TARGETING::Target & i_target,
 
     TARGETING::EntityPath l_id = i_target.getAttr<TARGETING::ATTR_PHYS_PATH>();
     HWAS_INF("Creating GARD Record for %.8X",
-            i_target.getAttr<TARGETING::ATTR_HUID>());
+            TARGETING::get_huid(&i_target));
 
     do
     {
@@ -491,7 +504,7 @@ errlHndl_t DeconfigGard::_createGardRecord(const TARGETING::Target & i_target,
              * @userdata1    HUID of input target
              */
             const uint64_t userdata1 =
-                (uint64_t)i_target.getAttr<TARGETING::ATTR_HUID>() << 32;
+                (uint64_t)(TARGETING::get_huid(&i_target)) << 32;
             l_pErr = hwasError(
                 ERRL_SEV_UNRECOVERABLE,
                 HWAS::MOD_DECONFIG_GARD,
@@ -535,7 +548,7 @@ errlHndl_t DeconfigGard::_createGardRecord(const TARGETING::Target & i_target,
              * @userdata1    HUID of input target
              */
             const uint64_t userdata1 =
-                (uint64_t)i_target.getAttr<TARGETING::ATTR_HUID>() << 32;
+                (uint64_t)(TARGETING::get_huid(&i_target)) << 32;
             l_pErr = hwasError(
                 ERRL_SEV_UNRECOVERABLE,
                 HWAS::MOD_DECONFIG_GARD,
