@@ -8647,6 +8647,7 @@
         <id>FSI_OPTION_FLAGS</id>
         <default>0</default>
     </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>0</default></attribute>
     <attribute>
         <id>EEPROM_ADDR_INFO0</id>
         <default>
@@ -8762,6 +8763,7 @@
         <id>FSI_OPTION_FLAGS</id>
         <default>0</default>
     </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>1</default></attribute>
 </targetInstance>
 
 <!-- Centaur MBS affiliated with membuf1 -->
@@ -8859,6 +8861,7 @@
         <id>FSI_OPTION_FLAGS</id>
         <default>0</default>
     </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>2</default></attribute>
 </targetInstance>
 
 <!-- Centaur MBS affiliated with membuf2 -->
@@ -8956,6 +8959,7 @@
         <id>FSI_OPTION_FLAGS</id>
         <default>0</default>
     </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>3</default></attribute>
 </targetInstance>
 
 <!-- Centaur MBS affiliated with membuf3 -->
@@ -9053,6 +9057,7 @@
         <id>FSI_OPTION_FLAGS</id>
         <default>0</default>
     </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>4</default></attribute>
 </targetInstance>
 
 <!-- Centaur MBS affiliated with membuf4 -->
@@ -9150,6 +9155,7 @@
         <id>FSI_OPTION_FLAGS</id>
         <default>0</default>
     </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>5</default></attribute>
 </targetInstance>
 
 <!-- Centaur MBS affiliated with membuf5 -->
@@ -9247,6 +9253,7 @@
         <id>FSI_OPTION_FLAGS</id>
         <default>0</default>
     </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>6</default></attribute>
 </targetInstance>
 
 <!-- Centaur MBS affiliated with membuf6 -->
@@ -9344,6 +9351,7 @@
         <id>FSI_OPTION_FLAGS</id>
         <default>0</default>
     </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>7</default></attribute>
 </targetInstance>
 
 <!-- Centaur MBS affiliated with membuf7 -->
@@ -9441,6 +9449,7 @@
         <id>FSI_OPTION_FLAGS</id>
         <default>0</default>
     </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>8</default></attribute>
 </targetInstance>
 
 <!-- Centaur MBS affiliated with membuf8 -->
@@ -9538,6 +9547,7 @@
         <id>FSI_OPTION_FLAGS</id>
         <default>0</default>
     </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>9</default></attribute>
 </targetInstance>
 
 <!-- Centaur MBS affiliated with membuf9 -->
@@ -9635,6 +9645,7 @@
         <id>FSI_OPTION_FLAGS</id>
         <default>0</default>
     </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>10</default></attribute>
 </targetInstance>
 
 <!-- Centaur MBS affiliated with membuf10 -->
@@ -9732,6 +9743,7 @@
         <id>FSI_OPTION_FLAGS</id>
         <default>0</default>
     </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>11</default></attribute>
 </targetInstance>
 
 <!-- Centaur MBS affiliated with membuf11 -->
@@ -9829,6 +9841,7 @@
         <id>FSI_OPTION_FLAGS</id>
         <default>0</default>
     </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>12</default></attribute>
 </targetInstance>
 
 <!-- Centaur MBS affiliated with membuf12 -->
@@ -9926,6 +9939,7 @@
         <id>FSI_OPTION_FLAGS</id>
         <default>0</default>
     </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>13</default></attribute>
 </targetInstance>
 
 <!-- Centaur MBS affiliated with membuf13 -->
@@ -10023,6 +10037,7 @@
         <id>FSI_OPTION_FLAGS</id>
         <default>0</default>
     </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>14</default></attribute>
 </targetInstance>
 
 <!-- Centaur MBS affiliated with membuf14 -->
@@ -10120,6 +10135,7 @@
         <id>FSI_OPTION_FLAGS</id>
         <default>0</default>
     </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>15</default></attribute>
 </targetInstance>
 
 <!-- Centaur MBS affiliated with membuf15 -->
@@ -10217,6 +10233,7 @@
         <id>FSI_OPTION_FLAGS</id>
         <default>0</default>
     </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>16</default></attribute>
 </targetInstance>
 
 <!-- Centaur MBS affiliated with membuf16 -->
@@ -10314,6 +10331,7 @@
         <id>FSI_OPTION_FLAGS</id>
         <default>0</default>
     </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>17</default></attribute>
 </targetInstance>
 
 <!-- Centaur MBS affiliated with membuf17 -->
@@ -10411,6 +10429,7 @@
         <id>FSI_OPTION_FLAGS</id>
         <default>0</default>
     </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>18</default></attribute>
 </targetInstance>
 
 <!-- Centaur MBS affiliated with membuf18 -->
@@ -10508,6 +10527,7 @@
         <id>FSI_OPTION_FLAGS</id>
         <default>0</default>
     </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>19</default></attribute>
 </targetInstance>
 
 <!-- Centaur MBS affiliated with membuf19 -->
@@ -10605,6 +10625,7 @@
         <id>FSI_OPTION_FLAGS</id>
         <default>0</default>
     </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>20</default></attribute>
 </targetInstance>
 
 <!-- Centaur MBS affiliated with membuf20 -->
@@ -10702,6 +10723,7 @@
         <id>FSI_OPTION_FLAGS</id>
         <default>0</default>
     </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>21</default></attribute>
 </targetInstance>
 
 <!-- Centaur MBS affiliated with membuf21 -->
@@ -10799,6 +10821,7 @@
         <id>FSI_OPTION_FLAGS</id>
         <default>0</default>
     </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>22</default></attribute>
 </targetInstance>
 
 <!-- Centaur MBS affiliated with membuf22 -->
@@ -10896,6 +10919,7 @@
         <id>FSI_OPTION_FLAGS</id>
         <default>0</default>
     </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>23</default></attribute>
 </targetInstance>
 
 <!-- Centaur MBS affiliated with membuf23 -->
@@ -10993,6 +11017,7 @@
         <id>FSI_OPTION_FLAGS</id>
         <default>0</default>
     </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>24</default></attribute>
 </targetInstance>
 
 <!-- Centaur MBS affiliated with membuf24 -->
@@ -11090,6 +11115,7 @@
         <id>FSI_OPTION_FLAGS</id>
         <default>0</default>
     </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>25</default></attribute>
 </targetInstance>
 
 <!-- Centaur MBS affiliated with membuf25 -->
@@ -11187,6 +11213,7 @@
         <id>FSI_OPTION_FLAGS</id>
         <default>0</default>
     </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>26</default></attribute>
 </targetInstance>
 
 <!-- Centaur MBS affiliated with membuf26 -->
@@ -11284,6 +11311,7 @@
         <id>FSI_OPTION_FLAGS</id>
         <default>0</default>
     </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>27</default></attribute>
 </targetInstance>
 
 <!-- Centaur MBS affiliated with membuf27 -->
@@ -11381,6 +11409,7 @@
         <id>FSI_OPTION_FLAGS</id>
         <default>0</default>
     </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>28</default></attribute>
 </targetInstance>
 
 <!-- Centaur MBS affiliated with membuf28 -->
@@ -11478,6 +11507,7 @@
         <id>FSI_OPTION_FLAGS</id>
         <default>0</default>
     </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>29</default></attribute>
 </targetInstance>
 
 <!-- Centaur MBS affiliated with membuf29 -->
@@ -11575,6 +11605,7 @@
         <id>FSI_OPTION_FLAGS</id>
         <default>0</default>
     </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>30</default></attribute>
 </targetInstance>
 
 <!-- Centaur MBS affiliated with membuf30 -->
@@ -11672,6 +11703,7 @@
         <id>FSI_OPTION_FLAGS</id>
         <default>0</default>
     </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>31</default></attribute>
 </targetInstance>
 
 <!-- Centaur MBS affiliated with membuf31 -->
@@ -11769,6 +11801,7 @@
         <id>FSI_OPTION_FLAGS</id>
         <default>0</default>
     </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>32</default></attribute>
 </targetInstance>
 
 <!-- Centaur MBS affiliated with membuf32 -->
@@ -11866,6 +11899,7 @@
         <id>FSI_OPTION_FLAGS</id>
         <default>0</default>
     </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>33</default></attribute>
 </targetInstance>
 
 <!-- Centaur MBS affiliated with membuf33 -->
@@ -11963,6 +11997,7 @@
         <id>FSI_OPTION_FLAGS</id>
         <default>0</default>
     </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>34</default></attribute>
 </targetInstance>
 
 <!-- Centaur MBS affiliated with membuf34 -->
@@ -12060,6 +12095,7 @@
         <id>FSI_OPTION_FLAGS</id>
         <default>0</default>
     </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>35</default></attribute>
 </targetInstance>
 
 <!-- Centaur MBS affiliated with membuf35 -->
@@ -12157,6 +12193,7 @@
         <id>FSI_OPTION_FLAGS</id>
         <default>0</default>
     </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>36</default></attribute>
 </targetInstance>
 
 <!-- Centaur MBS affiliated with membuf36 -->
@@ -12254,6 +12291,7 @@
         <id>FSI_OPTION_FLAGS</id>
         <default>0</default>
     </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>37</default></attribute>
 </targetInstance>
 
 <!-- Centaur MBS affiliated with membuf37 -->
@@ -12351,6 +12389,7 @@
         <id>FSI_OPTION_FLAGS</id>
         <default>0</default>
     </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>38</default></attribute>
 </targetInstance>
 
 <!-- Centaur MBS affiliated with membuf38 -->
@@ -12448,6 +12487,7 @@
         <id>FSI_OPTION_FLAGS</id>
         <default>0</default>
     </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>39</default></attribute>
 </targetInstance>
 
 <!-- Centaur MBS affiliated with membuf39 -->
@@ -12545,6 +12585,7 @@
         <id>FSI_OPTION_FLAGS</id>
         <default>0</default>
     </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>40</default></attribute>
 </targetInstance>
 
 <!-- Centaur MBS affiliated with membuf40 -->
@@ -12642,6 +12683,7 @@
         <id>FSI_OPTION_FLAGS</id>
         <default>0</default>
     </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>41</default></attribute>
 </targetInstance>
 
 <!-- Centaur MBS affiliated with membuf41 -->
@@ -12739,6 +12781,7 @@
         <id>FSI_OPTION_FLAGS</id>
         <default>0</default>
     </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>42</default></attribute>
 </targetInstance>
 
 <!-- Centaur MBS affiliated with membuf42 -->
@@ -12836,6 +12879,7 @@
         <id>FSI_OPTION_FLAGS</id>
         <default>0</default>
     </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>43</default></attribute>
 </targetInstance>
 
 <!-- Centaur MBS affiliated with membuf43 -->
@@ -12933,6 +12977,7 @@
         <id>FSI_OPTION_FLAGS</id>
         <default>0</default>
     </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>44</default></attribute>
 </targetInstance>
 
 <!-- Centaur MBS affiliated with membuf44 -->
@@ -13030,6 +13075,7 @@
         <id>FSI_OPTION_FLAGS</id>
         <default>0</default>
     </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>45</default></attribute>
 </targetInstance>
 
 <!-- Centaur MBS affiliated with membuf45 -->
@@ -13127,6 +13173,7 @@
         <id>FSI_OPTION_FLAGS</id>
         <default>0</default>
     </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>46</default></attribute>
 </targetInstance>
 
 <!-- Centaur MBS affiliated with membuf46 -->
@@ -13224,6 +13271,7 @@
         <id>FSI_OPTION_FLAGS</id>
         <default>0</default>
     </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>47</default></attribute>
 </targetInstance>
 
 <!-- Centaur MBS affiliated with membuf47 -->
@@ -13321,6 +13369,7 @@
         <id>FSI_OPTION_FLAGS</id>
         <default>0</default>
     </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>48</default></attribute>
 </targetInstance>
 
 <!-- Centaur MBS affiliated with membuf48 -->
@@ -13418,6 +13467,7 @@
         <id>FSI_OPTION_FLAGS</id>
         <default>0</default>
     </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>49</default></attribute>
 </targetInstance>
 
 <!-- Centaur MBS affiliated with membuf49 -->
@@ -13515,6 +13565,7 @@
         <id>FSI_OPTION_FLAGS</id>
         <default>0</default>
     </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>50</default></attribute>
 </targetInstance>
 
 <!-- Centaur MBS affiliated with membuf50 -->
@@ -13612,6 +13663,7 @@
         <id>FSI_OPTION_FLAGS</id>
         <default>0</default>
     </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>51</default></attribute>
 </targetInstance>
 
 <!-- Centaur MBS affiliated with membuf51 -->
@@ -13709,6 +13761,7 @@
         <id>FSI_OPTION_FLAGS</id>
         <default>0</default>
     </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>52</default></attribute>
 </targetInstance>
 
 <!-- Centaur MBS affiliated with membuf52 -->
@@ -13806,6 +13859,7 @@
         <id>FSI_OPTION_FLAGS</id>
         <default>0</default>
     </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>53</default></attribute>
 </targetInstance>
 
 <!-- Centaur MBS affiliated with membuf53 -->
@@ -13903,6 +13957,7 @@
         <id>FSI_OPTION_FLAGS</id>
         <default>0</default>
     </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>54</default></attribute>
 </targetInstance>
 
 <!-- Centaur MBS affiliated with membuf54 -->
@@ -14000,6 +14055,7 @@
         <id>FSI_OPTION_FLAGS</id>
         <default>0</default>
     </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>55</default></attribute>
 </targetInstance>
 
 <!-- Centaur MBS affiliated with membuf55 -->
@@ -14097,6 +14153,7 @@
         <id>FSI_OPTION_FLAGS</id>
         <default>0</default>
     </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>56</default></attribute>
 </targetInstance>
 
 <!-- Centaur MBS affiliated with membuf56 -->
@@ -14194,6 +14251,7 @@
         <id>FSI_OPTION_FLAGS</id>
         <default>0</default>
     </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>57</default></attribute>
 </targetInstance>
 
 <!-- Centaur MBS affiliated with membuf57 -->
@@ -14291,6 +14349,7 @@
         <id>FSI_OPTION_FLAGS</id>
         <default>0</default>
     </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>58</default></attribute>
 </targetInstance>
 
 <!-- Centaur MBS affiliated with membuf58 -->
@@ -14388,6 +14447,7 @@
         <id>FSI_OPTION_FLAGS</id>
         <default>0</default>
     </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>59</default></attribute>
 </targetInstance>
 
 <!-- Centaur MBS affiliated with membuf59 -->
@@ -14485,6 +14545,7 @@
         <id>FSI_OPTION_FLAGS</id>
         <default>0</default>
     </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>60</default></attribute>
 </targetInstance>
 
 <!-- Centaur MBS affiliated with membuf60 -->
@@ -14582,6 +14643,7 @@
         <id>FSI_OPTION_FLAGS</id>
         <default>0</default>
     </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>61</default></attribute>
 </targetInstance>
 
 <!-- Centaur MBS affiliated with membuf61 -->
@@ -14679,6 +14741,7 @@
         <id>FSI_OPTION_FLAGS</id>
         <default>0</default>
     </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>62</default></attribute>
 </targetInstance>
 
 <!-- Centaur MBS affiliated with membuf62 -->
@@ -14776,6 +14839,7 @@
         <id>FSI_OPTION_FLAGS</id>
         <default>0</default>
     </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>63</default></attribute>
 </targetInstance>
 
 <!-- Centaur MBS affiliated with membuf63 -->

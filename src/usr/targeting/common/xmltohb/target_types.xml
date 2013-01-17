@@ -982,6 +982,7 @@
      <attribute><id>SBE_SEEPROM_I2C_PORT</id></attribute>
      <attribute><id>PNOR_I2C_ADDRESS_BYTES</id></attribute>
      <!-- End poreve_memory_attributes.xml -->
+    <attribute><id>VPD_REC_NUM</id></attribute>
 </targetType>
 
 <!-- Centaur MBS -->
