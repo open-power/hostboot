@@ -52,6 +52,7 @@
 #include <vfs/vfs.H>
 #include "sbe_centaur_init.H"
 #include <hwpisteperror.H>
+#include <errl/errludtarget.H>
 
 extern fapi::ReturnCode fapiPoreVe(const fapi::Target i_target,
 		   std::list<uint64_t> & io_sharedObjectArgs);
@@ -66,6 +67,7 @@ namespace   SBE_CENTAUR_INIT
 
 using   namespace   ISTEP;
 using   namespace   ISTEP_ERROR;
+using   namespace   ERRORLOG;
 using   namespace   TARGETING;
 using   namespace   fapi;
 using   namespace   vsbe;
@@ -157,21 +159,20 @@ void*    call_sbe_centaur_init( void *io_pArgs )
         myArgs.push_back(reinterpret_cast<uint64_t>(l_stateArg));
 
         // Loop thru all Centaurs in list
-        for ( size_t i = 0; i < l_membufTargetList.size(); i++ )
+        for (TargetHandleList::const_iterator
+                l_membuf_iter = l_membufTargetList.begin();
+                l_membuf_iter != l_membufTargetList.end();
+                ++l_membuf_iter)
         {
             // Create a FAPI Target
-            const TARGETING::Target*  l_membuf_target = l_membufTargetList[i];
+            const TARGETING::Target* l_membuf_target = *l_membuf_iter;
             const fapi::Target l_fapiTarget( fapi::TARGET_TYPE_MEMBUF_CHIP,
-                            reinterpret_cast<void *>
                             (const_cast<TARGETING::Target*>(l_membuf_target)));
 
             //  Put out info on target
             TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                    "Running call_sbe_centaur_init on Centaur entity path...");
-
-            EntityPath l_path;
-            l_path  =   l_membuf_target->getAttr<ATTR_PHYS_PATH>();
-            l_path.dump();
+                "Running call_sbe_centaur_init on Centaur "
+                "target HUID %.8X", TARGETING::get_huid(l_membuf_target));
 
             // Run the engine
             TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
@@ -185,6 +186,10 @@ void*    call_sbe_centaur_init( void *io_pArgs )
                      "ERROR 0x%.8X call_sbe_centaur_init - Error returned from"
                      " VSBE engine on this Centaur, l_rc 0x%llX",
                      l_errl->reasonCode());
+
+                // capture the target data in the elog
+                ErrlUserDetailsTarget(l_membuf_target).addToLog( l_errl );
+
                 /*@
                  * @errortype
                  * @reasoncode  ISTEP_SBE_CENTAUR_INIT_FAILED

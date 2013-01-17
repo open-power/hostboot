@@ -26,10 +26,6 @@
  *  Support file for IStep: nest_chiplets                                                    
  *   Nest Chiplets
  *
- *  *****************************************************************
- *  THIS FILE WAS GENERATED ON 2012-04-03:1952
- *  *****************************************************************
- *
  *  HWP_IGNORE_VERSION_CHECK
  *
  */
@@ -104,20 +100,18 @@ void*    call_proc_a_x_pci_dmi_pll_initf( void    *io_pArgs )
     TARGETING::TargetHandleList l_procTargetList;
     getAllChips(l_procTargetList, TYPE_PROC);
 
-    for ( TargetHandleList::iterator l_iter = l_procTargetList.begin();
-          l_iter != l_procTargetList.end(); ++l_iter )
+    for ( TargetHandleList::const_iterator
+          l_iter = l_procTargetList.begin();
+          l_iter != l_procTargetList.end();
+          ++l_iter )
     {
         const TARGETING::Target*  l_proc_target = *l_iter;
-        const fapi::Target l_fapi_proc_target(
-                            TARGET_TYPE_PROC_CHIP,
-                            reinterpret_cast<void *>
+        const fapi::Target l_fapi_proc_target( TARGET_TYPE_PROC_CHIP,
                             ( const_cast<TARGETING::Target*>(l_proc_target) ) );
 
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                   "Running proc_a_x_pci_dmi_pll_initf HWP");
-        EntityPath l_path;
-        l_path  =   l_proc_target->getAttr<ATTR_PHYS_PATH>();
-        l_path.dump();
+                "Running proc_a_x_pci_dmi_pll_initf HWP on "
+                "target HUID %.8X", TARGETING::get_huid(l_proc_target));
 
         //  call proc_a_x_pci_dmi_pll_initf
         FAPI_INVOKE_HWP(l_err, proc_a_x_pci_dmi_pll_initf,
@@ -134,10 +128,8 @@ void*    call_proc_a_x_pci_dmi_pll_initf( void    *io_pArgs )
                       " HWP returns error",
                       l_err->reasonCode());
 
-            ErrlUserDetailsTarget myDetails(l_proc_target);
-
             // capture the target data in the elog
-            myDetails.addToLog(l_err );
+            ErrlUserDetailsTarget(l_proc_target).addToLog( l_err );
 
             /*@
              * @errortype
@@ -185,21 +177,18 @@ void*    call_proc_a_x_pci_dmi_pll_setup( void    *io_pArgs )
     TARGETING::TargetHandleList l_procTargetList;
     getAllChips(l_procTargetList, TYPE_PROC);
 
-    for (TARGETING::TargetHandleList::iterator l_cpuIter =
-         l_procTargetList.begin(); l_cpuIter != l_procTargetList.end();
+    for (TARGETING::TargetHandleList::const_iterator
+         l_cpuIter = l_procTargetList.begin();
+         l_cpuIter != l_procTargetList.end();
          ++l_cpuIter)
     {
         const TARGETING::Target* l_proc_target = *l_cpuIter;
-        const fapi::Target l_fapi_proc_target(
-                TARGET_TYPE_PROC_CHIP,
-                reinterpret_cast<void *>
+        const fapi::Target l_fapi_proc_target( TARGET_TYPE_PROC_CHIP,
                 ( const_cast<TARGETING::Target*>(l_proc_target) ) );
 
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                    "Running proc_a_x_pci_dmi_pll_setup HWP on...");
-        EntityPath l_path;
-        l_path  =   l_proc_target->getAttr<ATTR_PHYS_PATH>();
-        l_path.dump();
+                "Running proc_a_x_pci_dmi_pll_setup HWP on "
+                "target HUID %.8X", TARGETING::get_huid(l_proc_target));
 
         //  call proc_a_x_pci_dmi_pll_setup
         FAPI_INVOKE_HWP(l_err, proc_a_x_pci_dmi_pll_setup,
@@ -216,10 +205,8 @@ void*    call_proc_a_x_pci_dmi_pll_setup( void    *io_pArgs )
                       HWP returns error",
                       l_err->reasonCode());
 
-            ErrlUserDetailsTarget myDetails(l_proc_target);
-
             // capture the target data in the elog
-            myDetails.addToLog(l_err );
+            ErrlUserDetailsTarget(l_proc_target).addToLog( l_err );
 
             /*@
              * @errortype
@@ -357,15 +344,14 @@ void*    call_proc_startclock_chiplets( void    *io_pArgs )
     TARGETING::TargetHandleList l_procTargetList;
     getAllChips(l_procTargetList, TYPE_PROC);
 
-    for ( TargetHandleList::iterator l_iter = l_procTargetList.begin();
-          l_iter != l_procTargetList.end(); ++l_iter )
+    for ( TargetHandleList::const_iterator
+          l_iter = l_procTargetList.begin();
+          l_iter != l_procTargetList.end();
+          ++l_iter )
     {
         const TARGETING::Target*  l_proc_target = *l_iter;
-        const fapi::Target l_fapi_proc_target(
-                TARGET_TYPE_PROC_CHIP,
-                reinterpret_cast<void *>
-                ( const_cast<TARGETING::Target*>(l_proc_target) )
-        );
+        const fapi::Target l_fapi_proc_target( TARGET_TYPE_PROC_CHIP,
+                ( const_cast<TARGETING::Target*>(l_proc_target) ));
 
         l_err = customizeChipRegions(*l_iter);
         if(l_err)
@@ -375,10 +361,8 @@ void*    call_proc_startclock_chiplets( void    *io_pArgs )
                       "returns error",
                       l_err->reasonCode());
 
-            ErrlUserDetailsTarget myDetails(l_proc_target);
-
             // capture the target data in the elog
-            myDetails.addToLog(l_err );
+            ErrlUserDetailsTarget(l_proc_target).addToLog( l_err );
 
             /*@
              * @errortype
@@ -401,11 +385,8 @@ void*    call_proc_startclock_chiplets( void    *io_pArgs )
         }
 
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, 
-                   "Running proc_startclock_chiplets HWP on..." );
-        //  dump physical path to targets
-        EntityPath l_path;
-        l_path  =   l_proc_target->getAttr<ATTR_PHYS_PATH>();
-        l_path.dump();
+                "Running proc_startclock_chiplets HWP on "
+                "target HUID %.8X", TARGETING::get_huid(l_proc_target));
 
         //  call the HWP with each fapi::Target
         FAPI_INVOKE_HWP(l_err, proc_start_clocks_chiplets,
@@ -420,10 +401,8 @@ void*    call_proc_startclock_chiplets( void    *io_pArgs )
                       "returns error",
                        l_err->reasonCode());
 
-            ErrlUserDetailsTarget myDetails(l_proc_target);
-
             // capture the target data in the elog
-            myDetails.addToLog(l_err );
+            ErrlUserDetailsTarget(l_proc_target).addToLog( l_err );
 
             /*@
              * @errortype
@@ -464,7 +443,6 @@ void*    call_proc_startclock_chiplets( void    *io_pArgs )
 void*    call_proc_chiplet_scominit( void    *io_pArgs )
 {
     errlHndl_t l_err = NULL;
-    fapi::ReturnCode rc;
     IStepError l_StepError;
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_proc_chiplet_scominit entry" );
@@ -478,30 +456,29 @@ void*    call_proc_chiplet_scominit( void    *io_pArgs )
         // Execute PROC_CHIPLET_SCOMINIT_FBC_IF initfile
         // ----------------------------------------------
 
-        for (TARGETING::TargetHandleList::iterator l_cpuIter =
-             l_cpuTargetList.begin(); l_cpuIter != l_cpuTargetList.end();
+        for (TARGETING::TargetHandleList::const_iterator
+             l_cpuIter = l_cpuTargetList.begin();
+             l_cpuIter != l_cpuTargetList.end();
              ++l_cpuIter)
         {
             const TARGETING::Target* l_cpu_target = *l_cpuIter;
-            const fapi::Target l_fapi_proc_target(
-                    TARGET_TYPE_PROC_CHIP,
-                    reinterpret_cast<void *>
+            const fapi::Target l_fapi_proc_target( TARGET_TYPE_PROC_CHIP,
                     ( const_cast<TARGETING::Target*>(l_cpu_target) ) );
 
-            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "Running proc_chiplet_scominit HWP on..." );
-            //  dump physical path to targets
-            EntityPath l_path;
-            l_path  = l_cpu_target->getAttr<ATTR_PHYS_PATH>();
-            l_path.dump();
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                "Running proc_chiplet_scominit HWP on "
+                "target HUID %.8X", TARGETING::get_huid(l_cpu_target));
 
             //  call the HWP with each fapi::Target
             FAPI_INVOKE_HWP(l_err, proc_chiplet_scominit, l_fapi_proc_target);
             if (l_err)
             {
                 TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, "ERROR 0x%.8X : "
-                 "proc_chiplet_scominit HWP returns error.  Target 0x%.8X",
+                 "proc_chiplet_scominit HWP returns error.  target HUID %.8X",
                         l_err->reasonCode(), TARGETING::get_huid(l_cpu_target));
-                ErrlUserDetailsTarget myDetails(l_cpu_target);
+
+                ErrlUserDetailsTarget(l_cpu_target).addToLog( l_err );
+
                 /*@
                  * @errortype
                  * @reasoncode       ISTEP_PROC_CHIPLET_SCOMINIT_FAILED
@@ -528,16 +505,17 @@ void*    call_proc_chiplet_scominit( void    *io_pArgs )
 
     return l_StepError.getErrorHandle();
 }
+
 //*****************************************************************************
 // wrapper function to call proc_xbus_scominit
 //******************************************************************************
 void* call_proc_xbus_scominit( void    *io_pArgs )
 {
     errlHndl_t l_err = NULL;
-    fapi::ReturnCode rc;
     IStepError l_StepError;
 
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_proc_xbus_scominit entry" );
+    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+        "call_proc_xbus_scominit entry" );
 
     TARGETING::TargetHandleList l_cpuTargetList;
     getAllChips(l_cpuTargetList, TYPE_PROC);
@@ -550,8 +528,9 @@ void* call_proc_xbus_scominit( void    *io_pArgs )
                                           l_XbusConnections, TYPE_XBUS, false);
         if (l_err)
         {
-            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, "ERROR 0x%.8X : getPbusConnections XBUS returns error",
-                      l_err->reasonCode());
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                    "ERROR 0x%.8X : getPbusConnections XBUS returns error",
+                    l_err->reasonCode());
 
             // TODO - RTC 57977
             // Need to discuss with Jamie on how to handle this:
@@ -563,24 +542,34 @@ void* call_proc_xbus_scominit( void    *io_pArgs )
             l_StepError.addErrorDetails(ISTEP_PROC_CHIPLET_SCOMINIT_FAILED,
                                         ISTEP_PROC_CHIPLET_SCOMINIT,
                                         l_err);
+            // Commit the error log
+            // Log should be deleted and set to NULL in errlCommit.
+            errlCommit(l_err, HWPF_COMP_ID);
 
             // Shouldn't continue on this fatal error (no XBUS), break out
             break;
         }
 
-        for (TARGETING::TargetHandleList::iterator l_cpuIter =
-             l_cpuTargetList.begin(); l_cpuIter != l_cpuTargetList.end();
-             ++l_cpuIter)
+        // Loop thru the proc
+        for (TargetHandleList::const_iterator
+                l_cpuIter = l_cpuTargetList.begin();
+                l_cpuIter != l_cpuTargetList.end();
+                ++l_cpuIter)
         {
-            const TARGETING::Target* l_cpu_target = *l_cpuIter;
+            const TARGETING::Target* l_cpuTarget = *l_cpuIter;
 
+            // Get the XBUS under this proc
             TARGETING::TargetHandleList l_xbusList;
-            getChildChiplets( l_xbusList, l_cpu_target, TYPE_XBUS );
+            getChildChiplets( l_xbusList, l_cpuTarget, TYPE_XBUS );
 
             // For each XBUS unit in this proc
-            for (size_t jj = 0; jj < l_xbusList.size(); jj++)
+            for (TargetHandleList::const_iterator
+                    l_xbus_iter = l_xbusList.begin();
+                    l_xbus_iter != l_xbusList.end();
+                    ++l_xbus_iter)
             {
-                TARGETING::Target * l_xbusTarget = l_xbusList[jj];
+                //  make a local copy of the target for ease of use
+                TARGETING::Target* l_xbusTarget = *l_xbus_iter;
                 EDI_EI_INITIALIZATION::TargetPairs_t::iterator l_itr =
                                 l_XbusConnections.find(l_xbusTarget);
                 if ( l_itr == l_XbusConnections.end() )
@@ -597,32 +586,28 @@ void* call_proc_xbus_scominit( void    *io_pArgs )
 
                 const fapi::Target l_fapi_xbus_target(
                        TARGET_TYPE_XBUS_ENDPOINT,
-                       reinterpret_cast<void *>
                        (const_cast<TARGETING::Target*>(l_xbusTarget)));
                 targets.push_back(l_fapi_xbus_target);
 
                 const fapi::Target l_fapi_this_cpu_target(
                        TARGET_TYPE_PROC_CHIP,
-                       reinterpret_cast<void *>
                        (const_cast<TARGETING::Target*>(
-                               l_cpu_target)));
+                               l_cpuTarget)));
                 targets.push_back(l_fapi_this_cpu_target);
 
                 const fapi::Target l_fapi_other_cpu_target(
                        TARGET_TYPE_PROC_CHIP,
-                       reinterpret_cast<void *>
                        (const_cast<TARGETING::Target*>(
                                l_pParent)));
                 targets.push_back(l_fapi_other_cpu_target);
 
                 // Call HW procedure
-                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "Running proc_xbus_scominit HWP on..." );
-                EntityPath l_path = l_xbusTarget->getAttr<ATTR_PHYS_PATH>();
-                l_path.dump();
-                l_path = l_cpu_target->getAttr<ATTR_PHYS_PATH>();
-                l_path.dump();
-                l_path = l_pParent->getAttr<ATTR_PHYS_PATH>();
-                l_path.dump();
+                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                    "Running proc_xbus_scominit HWP on "
+                    "xbus HUID %.8X this cpu HUID %.8X other cpu HUID %.8X",
+                    TARGETING::get_huid(l_xbusTarget),
+                    TARGETING::get_huid(l_cpuTarget),
+                    TARGETING::get_huid(l_pParent));
 
                 FAPI_INVOKE_HWP(l_err, proc_xbus_scominit,
                                 l_fapi_xbus_target,
@@ -630,13 +615,19 @@ void* call_proc_xbus_scominit( void    *io_pArgs )
                                 l_fapi_other_cpu_target);
                 if (l_err)
                 {
-                    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, "ERROR 0x%.8X : "
-                    "proc_xbus_scominit HWP returns error.  XBUS target 0x%.8X, "
-                    "This CPU target 0x%.8X, Other CPU target 0x%.8X",
-                    l_err->reasonCode(), TARGETING::get_huid(l_xbusTarget),
-                    TARGETING::get_huid(l_cpu_target),
-                    TARGETING::get_huid(l_pParent));
-                    ErrlUserDetailsTarget myDetails(l_xbusTarget);
+                    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                        "ERROR 0x%.8X : proc_xbus_scominit HWP returns error. "
+                        "xbus HUID %.8X this cpu HUID %.8X other cpu HUID %.8X",
+                        l_err->reasonCode(),
+                        TARGETING::get_huid(l_xbusTarget),
+                        TARGETING::get_huid(l_cpuTarget),
+                        TARGETING::get_huid(l_pParent));
+
+                    // capture the target data in the elog
+                    ErrlUserDetailsTarget(l_pParent).addToLog( l_err );
+                    ErrlUserDetailsTarget(l_cpuTarget).addToLog( l_err );
+                    ErrlUserDetailsTarget(l_xbusTarget).addToLog( l_err );
+
                     /*@
                      * @errortype
                      * @reasoncode       ISTEP_PROC_XBUS_SCOMINIT_FAILED
@@ -657,11 +648,8 @@ void* call_proc_xbus_scominit( void    *io_pArgs )
                     // after committing
                     errlCommit(l_err, HWPF_COMP_ID);
                 }
-
             }  // End xbus loop
-
         } // End cpu loop
-
     } while (0);
 
     return l_StepError.getErrorHandle();
@@ -674,10 +662,10 @@ void* call_proc_abus_scominit( void    *io_pArgs )
 {
 
     errlHndl_t l_err = NULL;
-    fapi::ReturnCode rc;
     IStepError l_StepError;
 
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_proc_abus_scominit entry" );
+    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+        "call_proc_abus_scominit entry" );
 
     TARGETING::TargetHandleList l_cpuTargetList;
     getAllChips(l_cpuTargetList, TYPE_PROC);
@@ -690,8 +678,9 @@ void* call_proc_abus_scominit( void    *io_pArgs )
                                           l_AbusConnections, TYPE_ABUS, false);
         if (l_err)
         {
-            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, "ERROR 0x%.8X : getPbusConnections ABUS returns error",
-                      l_err->reasonCode());
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                    "ERROR 0x%.8X : getPbusConnections ABUS returns error",
+                    l_err->reasonCode());
 
             // TODO - RTC 57977
             // Need to discuss with Jamie on how to handle this:
@@ -704,25 +693,34 @@ void* call_proc_abus_scominit( void    *io_pArgs )
                                         ISTEP_PROC_CHIPLET_SCOMINIT,
                                         l_err);
 
+            // Commit the error log
+            // Log should be deleted and set to NULL in errlCommit.
+            errlCommit(l_err, HWPF_COMP_ID);
+
             // Shouldn't continue on this fatal error (no ABUS), break out
             break;
         }
 
         // Loop thru the proc
-        for (TARGETING::TargetHandleList::iterator l_cpuIter =
-             l_cpuTargetList.begin(); l_cpuIter != l_cpuTargetList.end();
-             ++l_cpuIter)
+        for (TargetHandleList::const_iterator
+                l_cpuIter = l_cpuTargetList.begin();
+                l_cpuIter != l_cpuTargetList.end();
+                ++l_cpuIter)
         {
-            const TARGETING::Target* l_cpu_target = *l_cpuIter;
+            const TARGETING::Target* l_cpuTarget = *l_cpuIter;
 
             // Get the ABUS under this proc
             TARGETING::TargetHandleList l_abusList;
-            getChildChiplets( l_abusList, l_cpu_target, TYPE_ABUS );
+            getChildChiplets( l_abusList, l_cpuTarget, TYPE_ABUS );
 
             // For each ABUS unit in this proc
-            for (size_t ii = 0; ii < l_abusList.size(); ii++)
+            for (TargetHandleList::const_iterator
+                    l_abus_iter = l_abusList.begin();
+                    l_abus_iter != l_abusList.end();
+                    ++l_abus_iter)
             {
-                TARGETING::Target * l_abusTarget = l_abusList[ii];
+                //  make a local copy of the target for ease of use
+                TARGETING::Target* l_abusTarget = *l_abus_iter;
                 EDI_EI_INITIALIZATION::TargetPairs_t::iterator l_itr =
                                 l_AbusConnections.find(l_abusTarget);
                 if ( l_itr == l_AbusConnections.end() )
@@ -739,32 +737,28 @@ void* call_proc_abus_scominit( void    *io_pArgs )
 
                 const fapi::Target l_fapi_abus_target(
                        TARGET_TYPE_ABUS_ENDPOINT,
-                       reinterpret_cast<void *>
                        (const_cast<TARGETING::Target*>(l_abusTarget)));
                 targets.push_back(l_fapi_abus_target);
 
                 const fapi::Target l_fapi_this_cpu_target(
                        TARGET_TYPE_PROC_CHIP,
-                       reinterpret_cast<void *>
                        (const_cast<TARGETING::Target*>(
-                               l_cpu_target)));
+                               l_cpuTarget)));
                 targets.push_back(l_fapi_this_cpu_target);
 
                 const fapi::Target l_fapi_other_cpu_target(
                        TARGET_TYPE_PROC_CHIP,
-                       reinterpret_cast<void *>
                        (const_cast<TARGETING::Target*>(
                                l_pParent)));
                 targets.push_back(l_fapi_other_cpu_target);
 
                 // Call HW procedure
-                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "Running proc_abus_scominit HWP on..." );
-                EntityPath l_path = l_abusTarget->getAttr<ATTR_PHYS_PATH>();
-                l_path.dump();
-                l_path = l_cpu_target->getAttr<ATTR_PHYS_PATH>();
-                l_path.dump();
-                l_path = l_pParent->getAttr<ATTR_PHYS_PATH>();
-                l_path.dump();
+                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                    "Running proc_abus_scominit HWP on "
+                    "abus HUID %.8X this cpu HUID %.8X other cpu HUID %.8X",
+                    TARGETING::get_huid(l_abusTarget),
+                    TARGETING::get_huid(l_cpuTarget),
+                    TARGETING::get_huid(l_pParent));
 
                 FAPI_INVOKE_HWP(l_err, proc_abus_scominit,
                                 l_fapi_abus_target,
@@ -772,13 +766,19 @@ void* call_proc_abus_scominit( void    *io_pArgs )
                                 l_fapi_other_cpu_target);
                 if (l_err)
                 {
-                    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, "ERROR 0x%.8X : "
-                    "proc_abus_scominit HWP returns error.  ABUS target 0x%.8X, "
-                    "This CPU target 0x%.8X, Other CPU target 0x%.8X",
-                    l_err->reasonCode(), TARGETING::get_huid(l_abusTarget),
-                    TARGETING::get_huid(l_cpu_target),
-                    TARGETING::get_huid(l_pParent));
-                    ErrlUserDetailsTarget myDetails(l_abusTarget);
+                    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                        "ERROR %.8X : proc_abus_scominit HWP returns error. "
+                        "abus HUID %.8X this cpu HUID %.8X other cpu HUID %.8X",
+                        l_err->reasonCode(),
+                        TARGETING::get_huid(l_abusTarget),
+                        TARGETING::get_huid(l_cpuTarget),
+                        TARGETING::get_huid(l_pParent));
+
+                    // capture the target data in the elog
+                    ErrlUserDetailsTarget(l_pParent).addToLog( l_err );
+                    ErrlUserDetailsTarget(l_cpuTarget).addToLog( l_err );
+                    ErrlUserDetailsTarget(l_abusTarget).addToLog( l_err );
+
                     /*@
                      * @errortype
                      * @reasoncode       ISTEP_PROC_ABUS_SCOMINIT_FAILED
@@ -799,15 +799,11 @@ void* call_proc_abus_scominit( void    *io_pArgs )
                     // after committing
                     errlCommit(l_err, HWPF_COMP_ID);
                 }
-
             } // End abus list loop
-
         } // End cpu loop
-
     } while (0);
 
     return l_StepError.getErrorHandle();
-
 }
 
 
@@ -820,28 +816,23 @@ void*    call_proc_pcie_scominit( void    *io_pArgs )
     IStepError          l_StepError;
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                            "call_proc_pcie_scominit entry" );
+        "call_proc_pcie_scominit entry" );
 
     TARGETING::TargetHandleList l_procTargetList;
     getAllChips(l_procTargetList, TYPE_PROC);
 
-    for ( TargetHandleList::iterator l_iter = l_procTargetList.begin();
-          l_iter != l_procTargetList.end(); ++l_iter )
+    for ( TargetHandleList::const_iterator
+          l_iter = l_procTargetList.begin();
+          l_iter != l_procTargetList.end();
+          ++l_iter )
     {
         const TARGETING::Target*  l_proc_target = *l_iter;
-        const fapi::Target l_fapi_proc_target(
-                TARGET_TYPE_PROC_CHIP,
-                reinterpret_cast<void *>
-                ( const_cast<TARGETING::Target*>(l_proc_target) )
-        );
+        const fapi::Target l_fapi_proc_target( TARGET_TYPE_PROC_CHIP,
+                ( const_cast<TARGETING::Target*>(l_proc_target) ));
 
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                   "Running proc_pcie_scominit HWP on..." );
-
-        //  dump physical path to targets
-        EntityPath l_path;
-        l_path  =   l_proc_target->getAttr<ATTR_PHYS_PATH>();
-        l_path.dump();
+                "Running proc_pcie_scominit HWP on "
+                "target HUID %.8X", TARGETING::get_huid(l_proc_target));
 
         //  call the HWP with each fapi::Target
         FAPI_INVOKE_HWP(l_errl, proc_pcie_scominit, l_fapi_proc_target);
@@ -851,6 +842,9 @@ void*    call_proc_pcie_scominit( void    *io_pArgs )
             TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
                       "ERROR 0x%.8X : proc_pcie_scominit HWP returns error",
                       l_errl->reasonCode());
+
+            // capture the target data in the elog
+            ErrlUserDetailsTarget(l_proc_target).addToLog( l_errl );
 
             /*@
              * @errortype
@@ -866,9 +860,6 @@ void*    call_proc_pcie_scominit( void    *io_pArgs )
             l_StepError.addErrorDetails(ISTEP_NEST_CHIPLETS_FAILED,
                                         ISTEP_PROC_PCIE_SCOMINIT,
                                         l_errl);
-
-            // capture the target data in the elog
-            ErrlUserDetailsTarget(l_proc_target).addToLog( l_errl );
 
             errlCommit( l_errl, HWPF_COMP_ID );
 

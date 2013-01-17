@@ -92,10 +92,8 @@ void* call_proc_revert_sbe_mcs_setup(void *io_pArgs)
                   "ERROR : failed executing proc_revert_sbe_mcs_setup "
                   "returning error");
 
-        ErrlUserDetailsTarget myDetails(l_pProcTarget);
-
         // capture the target data in the elog
-        myDetails.addToLog( l_errl );
+        ErrlUserDetailsTarget(l_pProcTarget).addToLog( l_errl );
 
         /*@
          * @errortype
@@ -200,17 +198,17 @@ void* call_proc_check_slave_sbe_seeprom_complete( void *io_pArgs )
         "proc_check_slave_sbe_seeprom_complete: %d procs in the system.",
         l_procTargetList.size() );
 
-    //  @todo $$ convert to iterators - RTC 52905
     // loop thru all the cpu's
-    for ( uint8_t l_procNum=0; l_procNum < l_procTargetList.size(); l_procNum++)
+    for (TargetHandleList::const_iterator
+            l_proc_iter = l_procTargetList.begin();
+            l_proc_iter != l_procTargetList.end();
+            ++l_proc_iter)
     {
         //  make a local copy of the Processor target
-        TARGETING::Target*  l_pProcTarget = l_procTargetList[l_procNum];
+        TARGETING::Target* l_pProcTarget = *l_proc_iter;
 
-        //  dump physical path to proc target
-        EntityPath l_path;
-        l_path  =   l_pProcTarget->getAttr<ATTR_PHYS_PATH>();
-        l_path.dump();
+        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                "target HUID %.8X", TARGETING::get_huid(l_pProcTarget));
 
         if ( l_pProcTarget  ==  l_pMasterProcTarget )
         {
@@ -232,10 +230,8 @@ void* call_proc_check_slave_sbe_seeprom_complete( void *io_pArgs )
                       "ERROR : proc_check_slave_sbe_seeprom_complete",
                       "failed, returning errorlog" );
 
-            ErrlUserDetailsTarget myDetails(l_pProcTarget);
-
             // capture the target data in the elog
-            myDetails.addToLog( l_errl );
+            ErrlUserDetailsTarget(l_pProcTarget).addToLog( l_errl );
 
             /*@
              * @errortype

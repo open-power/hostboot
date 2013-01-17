@@ -107,7 +107,8 @@ void*    call_mss_getecid( void *io_pArgs )
     TARGETING::TargetHandleList l_membufTargetList;
     getAllChips(l_membufTargetList, TYPE_MEMBUF);
 
-    for (TargetHandleList::iterator l_membuf_iter = l_membufTargetList.begin();
+    for (TargetHandleList::const_iterator
+            l_membuf_iter = l_membufTargetList.begin();
             l_membuf_iter != l_membufTargetList.end();
             ++l_membuf_iter)
     {
@@ -115,17 +116,12 @@ void*    call_mss_getecid( void *io_pArgs )
         TARGETING::Target* l_pCentaur = *l_membuf_iter;
 
         // Dump current run on target
-        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                   "Running mss_get_cen_ecid HWP on..." );
-
-        EntityPath l_path;
-        l_path  =   l_pCentaur->getAttr<ATTR_PHYS_PATH>();
-        l_path.dump();
+        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                "Running mss_get_cen_ecid HWP on "
+                "target HUID %.8X", TARGETING::get_huid(l_pCentaur));
 
         // Cast to a FAPI type of target.
-        const fapi::Target l_fapi_centaur(
-                TARGET_TYPE_MEMBUF_CHIP,
-                reinterpret_cast<void *>
+        const fapi::Target l_fapi_centaur( TARGET_TYPE_MEMBUF_CHIP,
                 (const_cast<TARGETING::Target*>(l_pCentaur)) );
 
         //  call the HWP with each fapi::Target
@@ -141,10 +137,8 @@ void*    call_mss_getecid( void *io_pArgs )
                       "ERROR 0x%.8X: mss_get_cen_ecid HWP returns error",
                       l_err->reasonCode());
 
-            ErrlUserDetailsTarget myDetails(l_pCentaur);
-
             // capture the target data in the elog
-            myDetails.addToLog(l_err);
+            ErrlUserDetailsTarget(l_pCentaur).addToLog( l_err );
 
             /*@
              * @errortype
@@ -183,8 +177,8 @@ void*    call_mss_getecid( void *io_pArgs )
 
             uint8_t l_num_func_mbas = l_mbaTargetList.size();
 
-            for (TargetHandleList::iterator l_mba_iter =
-                    l_mbaTargetList.begin();
+            for (TargetHandleList::const_iterator
+                    l_mba_iter = l_mbaTargetList.begin();
                     l_mba_iter != l_mbaTargetList.end();
                     ++l_mba_iter)
             {
@@ -192,7 +186,7 @@ void*    call_mss_getecid( void *io_pArgs )
                 TARGETING::Target*  l_pMBA = *l_mba_iter;
 
                 // Get the MBA chip unit position
-                uint8_t l_pos = l_pMBA->getAttr<ATTR_CHIP_UNIT>();
+                ATTR_CHIP_UNIT_type l_pos = l_pMBA->getAttr<ATTR_CHIP_UNIT>();
 
                 // Check the DDR port status to see if this MBA should be
                 // set to nonfunctional.
@@ -272,21 +266,18 @@ void*    call_dmi_scominit( void *io_pArgs )
     getAllChiplets(l_mcsTargetList, TYPE_MCS);
 
     // Invoke dmi_scominit on each one
-    for (TargetHandleList::iterator l_mcs_iter = l_mcsTargetList.begin();
+    for (TargetHandleList::const_iterator
+            l_mcs_iter = l_mcsTargetList.begin();
             l_mcs_iter != l_mcsTargetList.end();
             ++l_mcs_iter)
     {
         const TARGETING::Target* l_pTarget = *l_mcs_iter;
-        const fapi::Target l_fapi_target(
-            TARGET_TYPE_MCS_CHIPLET,
-            reinterpret_cast<void *>
+        const fapi::Target l_fapi_target( TARGET_TYPE_MCS_CHIPLET,
                 (const_cast<TARGETING::Target*>(l_pTarget)));
 
         TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                    "Running dmi_scominit HWP on...");
-        EntityPath l_path;
-        l_path = l_pTarget->getAttr<ATTR_PHYS_PATH>();
-        l_path.dump();
+                "Running dmi_scominit HWP on "
+                "target HUID %.8X", TARGETING::get_huid(l_pTarget));
 
         FAPI_INVOKE_HWP(l_errl, dmi_scominit, l_fapi_target);
         if (l_errl)
@@ -302,7 +293,8 @@ void*    call_dmi_scominit( void *io_pArgs )
         }
         else
         {
-            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, "SUCCESS :  dmi_scominit HWP");
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                    "SUCCESS :  dmi_scominit HWP");
         }
     }
 
@@ -313,26 +305,25 @@ void*    call_dmi_scominit( void *io_pArgs )
         getAllChips(l_membufTargetList, TYPE_MEMBUF);
 
         // Invoke dmi_scominit on each one
-        for (TargetHandleList::iterator l_membuf_iter = l_membufTargetList.begin();
+        for (TargetHandleList::const_iterator
+                l_membuf_iter = l_membufTargetList.begin();
                 l_membuf_iter != l_membufTargetList.end();
                 ++l_membuf_iter)
         {
             const TARGETING::Target* l_pTarget = *l_membuf_iter;
-            const fapi::Target l_fapi_target(
-                TARGET_TYPE_MEMBUF_CHIP,
-                reinterpret_cast<void *>
+            const fapi::Target l_fapi_target( TARGET_TYPE_MEMBUF_CHIP,
                     (const_cast<TARGETING::Target*>(l_pTarget)));
 
-            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, "Running dmi_scominit HWP on...");
-            EntityPath l_path;
-            l_path = l_pTarget->getAttr<ATTR_PHYS_PATH>();
-            l_path.dump();
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                "Running dmi_scominit HWP on "
+                "target HUID %.8X", TARGETING::get_huid(l_pTarget));
 
             FAPI_INVOKE_HWP(l_errl, dmi_scominit, l_fapi_target);
             if (l_errl)
             {
-                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, "ERROR 0x%.8X : dmi_scominit HWP returns error",
-                          l_errl->reasonCode());
+                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                        "ERROR 0x%.8X : dmi_scominit HWP returns error",
+                        l_errl->reasonCode());
 
                 // capture the target data in the elog
                 ErrlUserDetailsTarget(l_pTarget).addToLog( l_errl );
@@ -341,7 +332,8 @@ void*    call_dmi_scominit( void *io_pArgs )
             }
             else
             {
-                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, "SUCCESS :  dmi_scominit HWP");
+                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                        "SUCCESS :  dmi_scominit HWP");
             }
         }
     }
@@ -393,23 +385,19 @@ void* call_dmi_erepair( void *io_pArgs )
 
     TargetHandleList           l_mcsTargetList;
     TargetHandleList           l_memTargetList;
-    TargetHandleList::iterator l_mcs_iter;
     TargetHandleList::iterator l_mem_iter;
-    TargetHandle_t             l_mcs_target;
-    TargetHandle_t             l_mem_target;
-    uint8_t l_mcsNum = 0;
-    uint8_t l_memNum = 0;
 
     // find all MCS chiplets of all procs
     getAllChiplets(l_mcsTargetList, TYPE_MCS);
 
-    for (l_mcs_iter = l_mcsTargetList.begin();
+    for (TargetHandleList::const_iterator
+         l_mcs_iter = l_mcsTargetList.begin();
          l_mcs_iter != l_mcsTargetList.end();
          ++l_mcs_iter)
     {
         // make a local copy of the MCS target
-        l_mcs_target = *l_mcs_iter;
-        l_mcsNum = l_mcs_target->getAttr<ATTR_CHIP_UNIT>();
+        TARGETING::Target *l_mcs_target = *l_mcs_iter;
+        ATTR_CHIP_UNIT_type l_mcsNum = l_mcs_target->getAttr<ATTR_CHIP_UNIT>();
 
         // find all the Centaurs that are associated with this MCS
         getAffinityChips(l_memTargetList, l_mcs_target, TYPE_MEMBUF);
@@ -423,8 +411,8 @@ void* call_dmi_erepair( void *io_pArgs )
         l_mem_iter = l_memTargetList.begin();
 
         // make a local copy of the MEMBUF target
-        l_mem_target = *l_mem_iter;
-        l_memNum = l_mem_target->getAttr<ATTR_POSITION>();
+        TARGETING::Target *l_mem_target = *l_mem_iter;
+        ATTR_POSITION_type l_memNum = l_mem_target->getAttr<ATTR_POSITION>();
 
         // struct containing custom parameters that is fed to HWP
         // call the HWP with each target(if parallel, spin off a task)
@@ -446,10 +434,8 @@ void* call_dmi_erepair( void *io_pArgs )
         {
             TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, "Unable to"
                       " retrieve DMI eRepair data from the VPD");
-
-            EntityPath l_path;
-            l_path = l_mem_target->getAttr<ATTR_AFFINITY_PATH>();  // TODO: verify this during testing
-            l_path.dump();
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                "target HUID %.8X", TARGETING::get_huid(l_mem_target));
 
             // Convert fapi returnCode to Error handle
             l_errPtr = fapiRcToErrl(l_rc);
@@ -503,6 +489,10 @@ void* call_dmi_erepair( void *io_pArgs )
                              l_errPtr->reasonCode(),
                              l_mcsNum,
                              l_memNum);
+
+                // capture the target data in the elog
+                ErrlUserDetailsTarget(l_mcs_target).addToLog(l_errPtr);
+
                 /*@
                  * @errortype
                  * @reasoncode  ISTEP_DMI_DRIVE_RESTORE_FAILED
@@ -548,6 +538,9 @@ void* call_dmi_erepair( void *io_pArgs )
                               l_errPtr->reasonCode(),
                               l_mcsNum,
                               l_memNum);
+
+                // capture the target data in the elog
+                ErrlUserDetailsTarget(l_mem_target).addToLog(l_errPtr);
 
                 /*@
                  * @errortype
@@ -604,29 +597,21 @@ void*    call_dmi_io_dccal( void *io_pArgs )
     // the MCS and MEMBUF pair in one call). Even though they don't have to be
     // in order, we should keep the pair concept here in case we need to send
     // in a pair in the future again.
-    for (TargetPairs_t::iterator l_itr = l_dmi_io_dccal_targets.begin();
-         l_itr != l_dmi_io_dccal_targets.end(); ++l_itr)
+    for (TargetPairs_t::const_iterator
+         l_itr = l_dmi_io_dccal_targets.begin();
+         l_itr != l_dmi_io_dccal_targets.end();
+         ++l_itr)
     {
-        const fapi::Target l_fapi_mcs_target(
-                TARGET_TYPE_MCS_CHIPLET,
-                reinterpret_cast<void *>
+        const fapi::Target l_fapi_mcs_target( TARGET_TYPE_MCS_CHIPLET,
                 (const_cast<TARGETING::Target*>(l_itr->first)));
 
-        const fapi::Target l_fapi_membuf_target(
-                TARGET_TYPE_MEMBUF_CHIP,
-                reinterpret_cast<void *>
+        const fapi::Target l_fapi_membuf_target( TARGET_TYPE_MEMBUF_CHIP,
                 (const_cast<TARGETING::Target*>(l_itr->second)));
 
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                 "===== Call dmi_io_dccal HWP( mcs 0x%.8X, mem 0x%.8X) : ",
                 TARGETING::get_huid(l_itr->first),
                 TARGETING::get_huid(l_itr->second));
-
-        EntityPath l_path;
-        l_path  =   l_itr->first->getAttr<ATTR_PHYS_PATH>();
-        l_path.dump();
-        l_path  =   l_itr->second->getAttr<ATTR_PHYS_PATH>();
-        l_path.dump();
 
         // Call on the MCS
         FAPI_INVOKE_HWP(l_errl, dmi_io_dccal, l_fapi_mcs_target);
@@ -730,7 +715,8 @@ void*    call_dmi_io_run_training( void *io_pArgs )
 
     ISTEP_ERROR::IStepError l_StepError;
 
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_dmi_io_run_training entry" );
+    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+            "call_dmi_io_run_training entry" );
 
     TargetPairs_t l_dmi_io_dccal_targets;
     get_dmi_io_targets(l_dmi_io_dccal_targets);
@@ -738,30 +724,21 @@ void*    call_dmi_io_run_training( void *io_pArgs )
     TARGETING::TargetHandleList l_cpuTargetList;
     getAllChips(l_cpuTargetList, TYPE_PROC);
 
-    TargetPairs_t::iterator l_itr;
-    for (l_itr = l_dmi_io_dccal_targets.begin();
-         (!l_err) && (l_itr != l_dmi_io_dccal_targets.end()); ++l_itr)
+    for (TargetPairs_t::const_iterator
+         l_itr = l_dmi_io_dccal_targets.begin();
+         (!l_err) && (l_itr != l_dmi_io_dccal_targets.end());
+         ++l_itr)
     {
-        const fapi::Target l_fapi_master_target(
-                TARGET_TYPE_MCS_CHIPLET,
-                reinterpret_cast<void *>
+        const fapi::Target l_fapi_master_target( TARGET_TYPE_MCS_CHIPLET,
                 (const_cast<TARGETING::Target*>(l_itr->first)));
 
-        const fapi::Target l_fapi_slave_target(
-                TARGET_TYPE_MEMBUF_CHIP,
-                reinterpret_cast<void *>
+        const fapi::Target l_fapi_slave_target( TARGET_TYPE_MEMBUF_CHIP,
                 (const_cast<TARGETING::Target*>(l_itr->second)));
 
        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                "===== Call dmi_io_run_training HWP(mcs 0x%x, mem 0x%x ) : ",
                TARGETING::get_huid(l_itr->first),
                TARGETING::get_huid(l_itr->second));
-
-        EntityPath l_path;
-        l_path  =   l_itr->first->getAttr<ATTR_PHYS_PATH>();
-        l_path.dump();
-        l_path  =   l_itr->second->getAttr<ATTR_PHYS_PATH>();
-        l_path.dump();
 
         FAPI_INVOKE_HWP(l_err, dmi_io_run_training,
                         l_fapi_master_target, l_fapi_slave_target);
@@ -796,7 +773,8 @@ void*    call_dmi_io_run_training( void *io_pArgs )
 
     }   // end target pair list
 
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_dmi_io_run_training exit" );
+    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                "call_dmi_io_run_training exit" );
 
     return l_StepError.getErrorHandle();
 }
@@ -827,29 +805,32 @@ void*    call_proc_cen_framelock( void *io_pArgs )
 
     IStepError l_StepError;
 
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_proc_cen_framework entry" );
+    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+            "call_proc_cen_framework entry" );
 
     //  get the mcs chiplets
     TARGETING::TargetHandleList l_mcsTargetList;
     getAllChiplets(l_mcsTargetList, TYPE_MCS);
 
-    for (TargetHandleList::iterator l_mcs_iter = l_mcsTargetList.begin();
+    for (TargetHandleList::const_iterator
+            l_mcs_iter = l_mcsTargetList.begin();
             l_mcs_iter != l_mcsTargetList.end();
             ++l_mcs_iter)
     {
         //  make a local copy of the MCS target
-        const TARGETING::Target*  l_mcs_target = *l_mcs_iter;
+        TARGETING::Target*  l_mcs_target = *l_mcs_iter;
 
         //  find all the Centaurs that are associated with this MCS
         TARGETING::TargetHandleList l_memTargetList;
         getAffinityChips(l_memTargetList, l_mcs_target, TYPE_MEMBUF);
 
-        for (TargetHandleList::iterator l_mem_iter = l_memTargetList.begin();
+        for (TargetHandleList::const_iterator
+                l_mem_iter = l_memTargetList.begin();
                 l_mem_iter != l_memTargetList.end();
                 ++l_mem_iter)
         {
             //  make a local copy of the MEMBUF target
-            const TARGETING::Target*  l_mem_target = *l_mem_iter;
+            TARGETING::Target*  l_mem_target = *l_mem_iter;
 
             uint8_t l_memNum = l_mem_target->getAttr<ATTR_POSITION>();
 
@@ -859,22 +840,15 @@ void*    call_proc_cen_framelock( void *io_pArgs )
             l_args.frtl_manual_pu       =   0;
             l_args.frtl_manual_mem      =   0;
 
-            fapi::Target l_fapiMcsTarget(
-                    TARGET_TYPE_MCS_CHIPLET,
-                    reinterpret_cast<void *>
-                      ( const_cast<TARGETING::Target*>(l_mcs_target) )
-                        );
-            fapi::Target l_fapiMemTarget(
-                    TARGET_TYPE_MEMBUF_CHIP,
-                    reinterpret_cast<void *>
-                        (const_cast<TARGETING::Target*>(l_mem_target))
-                    );
+            fapi::Target l_fapiMcsTarget( TARGET_TYPE_MCS_CHIPLET,
+                        (const_cast<TARGETING::Target*>(l_mcs_target)));
+            fapi::Target l_fapiMemTarget( TARGET_TYPE_MEMBUF_CHIP,
+                        (const_cast<TARGETING::Target*>(l_mem_target)));
 
-            EntityPath l_path;
-            l_path  =   l_mcs_target->getAttr<ATTR_PHYS_PATH>();
-            l_path.dump();
-            l_path  =   l_mem_target->getAttr<ATTR_PHYS_PATH>();
-            l_path.dump();
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                "mcs HUID %.8X mem HUID %.8X",
+                TARGETING::get_huid(l_mcs_target),
+                TARGETING::get_huid(l_mem_target));
 
             FAPI_INVOKE_HWP( l_err,
                              proc_cen_framelock,
@@ -973,20 +947,18 @@ void*    call_cen_set_inband_addr( void *io_pArgs )
     TARGETING::TargetHandleList l_mcsTargetList;
     getAllChiplets(l_mcsTargetList, TYPE_MCS);
 
-    for (TargetHandleList::iterator l_mcs_iter = l_mcsTargetList.begin();
+    for (TargetHandleList::const_iterator
+            l_mcs_iter = l_mcsTargetList.begin();
             l_mcs_iter != l_mcsTargetList.end();
             ++l_mcs_iter)
     {
-        const TARGETING::Target* l_pTarget = *l_mcs_iter;
+        TARGETING::Target* l_pTarget = *l_mcs_iter;
         const fapi::Target l_fapi_target( TARGET_TYPE_MCS_CHIPLET,
-                reinterpret_cast<void *>
                     (const_cast<TARGETING::Target*>(l_pTarget)));
 
         TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                    "Running cen_set_inband_addr HWP on...");
-        EntityPath l_path;
-        l_path = l_pTarget->getAttr<ATTR_PHYS_PATH>();
-        l_path.dump();
+                "Running cen_set_inband_addr HWP on "
+                "target HUID %.8X", TARGETING::get_huid(l_pTarget));
 
         errlHndl_t l_err = NULL;
         FAPI_INVOKE_HWP(l_err, proc_cen_set_inband_addr, l_fapi_target);
@@ -1044,8 +1016,10 @@ void get_dmi_io_targets(TargetPairs_t& o_dmi_io_targets)
     TARGETING::TargetHandleList l_cpuTargetList;
     getAllChips(l_cpuTargetList, TYPE_PROC);
 
-    for ( TargetHandleList::iterator l_iter = l_cpuTargetList.begin();
-          l_iter != l_cpuTargetList.end(); ++l_iter )
+    for ( TargetHandleList::const_iterator
+          l_iter = l_cpuTargetList.begin();
+          l_iter != l_cpuTargetList.end();
+          ++l_iter )
     {
         //  make a local copy of the CPU target
         const TARGETING::Target*  l_cpu_target = *l_iter;
@@ -1054,8 +1028,10 @@ void get_dmi_io_targets(TargetPairs_t& o_dmi_io_targets)
         TARGETING::TargetHandleList l_mcsTargetList;
         getChildChiplets( l_mcsTargetList, l_cpu_target, TYPE_MCS );
 
-        for ( TargetHandleList::iterator l_iterMCS = l_mcsTargetList.begin();
-              l_iterMCS != l_mcsTargetList.end(); ++l_iterMCS )
+        for ( TargetHandleList::const_iterator
+              l_iterMCS = l_mcsTargetList.begin();
+              l_iterMCS != l_mcsTargetList.end();
+              ++l_iterMCS )
         {
             //  make a local copy of the MCS target
             const TARGETING::Target*  l_mcs_target = *l_iterMCS;
@@ -1064,8 +1040,10 @@ void get_dmi_io_targets(TargetPairs_t& o_dmi_io_targets)
             TARGETING::TargetHandleList l_memTargetList;
             getAffinityChips(l_memTargetList, l_mcs_target, TYPE_MEMBUF);
 
-            for ( TargetHandleList::iterator l_iterMemBuf = l_memTargetList.begin();
-                    l_iterMemBuf != l_memTargetList.end(); ++l_iterMemBuf )
+            for ( TargetHandleList::const_iterator
+                    l_iterMemBuf = l_memTargetList.begin();
+                    l_iterMemBuf != l_memTargetList.end();
+                    ++l_iterMemBuf )
             {
                 //  make a local copy of the MEMBUF target
                 const TARGETING::Target*  l_mem_target = *l_iterMemBuf;

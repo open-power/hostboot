@@ -26,7 +26,6 @@
  *  Support file for IStep: dram_training
  *   Step 13 DRAM Training
  *
- *
  *  HWP_IGNORE_VERSION_CHECK
  *
  */
@@ -189,21 +188,21 @@ void*    call_mem_pll_setup( void *io_pArgs )
     TARGETING::TargetHandleList l_membufTargetList;
     getAllChips(l_membufTargetList, TYPE_MEMBUF);
 
-    for ( size_t i = 0; i < l_membufTargetList.size(); i++ )
+    for (TargetHandleList::const_iterator
+            l_membuf_iter = l_membufTargetList.begin();
+            l_membuf_iter != l_membufTargetList.end();
+            ++l_membuf_iter)
     {
-        const TARGETING::Target*  l_pCentaur = l_membufTargetList[i];
-        // Dump current run on target
+        //  make a local copy of the target for ease of use
+        const TARGETING::Target* l_pCentaur = *l_membuf_iter;
+
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                   "Running mem_pll_setup HWP on..." );
-        EntityPath l_path;
-        l_path  =   l_pCentaur->getAttr<ATTR_PHYS_PATH>();
-        l_path.dump();
+                "Running mem_pll_setup HWP on "
+                "target HUID %.8X", TARGETING::get_huid(l_pCentaur));
 
         // Cast to a FAPI type of target.
-        const fapi::Target l_fapi_centaur(
-                TARGET_TYPE_MEMBUF_CHIP,
-                reinterpret_cast<void *>
-                (const_cast<TARGETING::Target*>(l_pCentaur)) );
+        const fapi::Target l_fapi_centaur( TARGET_TYPE_MEMBUF_CHIP,
+                 (const_cast<TARGETING::Target*>(l_pCentaur)));
 
         //  call cen_mem_pll_initf to do pll init
         FAPI_INVOKE_HWP(l_err, cen_mem_pll_initf, l_fapi_centaur);
@@ -214,10 +213,8 @@ void*    call_mem_pll_setup( void *io_pArgs )
                       "ERROR 0x%.8X: mem_pll_initf HWP returns error",
                       l_err->reasonCode());
 
-            ErrlUserDetailsTarget myDetails(l_pCentaur);
-
             // capture the target data in the elog
-            myDetails.addToLog(l_err );
+            ErrlUserDetailsTarget(l_pCentaur).addToLog(l_err );
 
             break;
         }
@@ -236,10 +233,8 @@ void*    call_mem_pll_setup( void *io_pArgs )
                       "ERROR 0x%.8X: mem_pll_setup HWP returns error",
                       l_err->reasonCode());
 
-            ErrlUserDetailsTarget myDetails(l_pCentaur);
-
             // capture the target data in the elog
-            myDetails.addToLog(l_err );
+            ErrlUserDetailsTarget(l_pCentaur).addToLog(l_err);
 
             break;
         }
@@ -290,22 +285,21 @@ void*    call_mem_startclocks( void *io_pArgs )
     TARGETING::TargetHandleList l_membufTargetList;
     getAllChips(l_membufTargetList, TYPE_MEMBUF);
 
-    for ( size_t i = 0; i < l_membufTargetList.size(); i++ )
+    for (TargetHandleList::const_iterator
+            l_membuf_iter = l_membufTargetList.begin();
+            l_membuf_iter != l_membufTargetList.end();
+            ++l_membuf_iter)
     {
         //  make a local copy of the target for ease of use
-        const TARGETING::Target*  l_pCentaur = l_membufTargetList[i];
+        const TARGETING::Target* l_pCentaur = *l_membuf_iter;
 
         // Dump current run on target
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                   "Running cen_mem_startclocks HWP on..." );
-        EntityPath l_path;
-        l_path  =   l_pCentaur->getAttr<ATTR_PHYS_PATH>();
-        l_path.dump();
+                "Running cen_mem_startclocks HWP on "
+                "target HUID %.8X", TARGETING::get_huid(l_pCentaur));
 
         // Cast to a FAPI type of target.
-        const fapi::Target l_fapi_centaur(
-                TARGET_TYPE_MEMBUF_CHIP,
-                reinterpret_cast<void *>
+        const fapi::Target l_fapi_centaur( TARGET_TYPE_MEMBUF_CHIP,
                 (const_cast<TARGETING::Target*>(l_pCentaur)) );
 
         //  call the HWP with each fapi::Target
@@ -317,10 +311,8 @@ void*    call_mem_startclocks( void *io_pArgs )
                       "ERROR 0x%.8X: cen_mem_startclocks HWP returns error",
                       l_err->reasonCode());
 
-            ErrlUserDetailsTarget myDetails(l_pCentaur);
-
             // capture the target data in the elog
-            myDetails.addToLog(l_err );
+            ErrlUserDetailsTarget(l_pCentaur).addToLog(l_err);
 
             /*@
              * @errortype
@@ -338,7 +330,6 @@ void*    call_mem_startclocks( void *io_pArgs )
                                         l_err);
 
             errlCommit( l_err, HWPF_COMP_ID );
-
 
             break;
         }
@@ -361,7 +352,8 @@ void*    call_mem_startclocks( void *io_pArgs )
 //
 void*    call_host_enable_vddr( void *io_pArgs )
 {
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_host_enable_vddr entry" );
+    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+            "call_host_enable_vddr entry" );
 
     errlHndl_t l_err = NULL;
 
@@ -375,8 +367,8 @@ void*    call_host_enable_vddr( void *io_pArgs )
         if (l_err)
         {
             TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                          "ERROR 0x%.8X: call_host_enable_vddr to sendMsg returns error",
-                          l_err->reasonCode());
+                    "ERROR 0x%.8X: call_host_enable_vddr to sendMsg returns error",
+                    l_err->reasonCode());
             /*@
              * @errortype
              * @reasoncode  ISTEP_DRAM_TRAINING_FAILED
@@ -438,23 +430,21 @@ void*    call_mss_scominit( void *io_pArgs )
     TARGETING::TargetHandleList l_membufTargetList;
     getAllChips(l_membufTargetList, TYPE_MEMBUF);
 
-    for ( size_t i = 0; i < l_membufTargetList.size(); i++ )
+    for (TargetHandleList::const_iterator
+            l_membuf_iter = l_membufTargetList.begin();
+            l_membuf_iter != l_membufTargetList.end();
+            ++l_membuf_iter)
     {
         //  make a local copy of the target for ease of use
-        const TARGETING::Target*  l_pCentaur = l_membufTargetList[i];
+        const TARGETING::Target* l_pCentaur = *l_membuf_iter;
 
         // Dump current run on target
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                   "Running mss_scominit HWP on..." );
-
-        EntityPath l_path;
-        l_path  =   l_pCentaur->getAttr<ATTR_PHYS_PATH>();
-        l_path.dump();
+                "Running mss_scominit HWP on "
+                "target HUID %.8X", TARGETING::get_huid(l_pCentaur));
 
         // Cast to a FAPI type of target.
-        const fapi::Target l_fapi_centaur(
-                TARGET_TYPE_MEMBUF_CHIP,
-                reinterpret_cast<void *>
+        const fapi::Target l_fapi_centaur( TARGET_TYPE_MEMBUF_CHIP,
                 (const_cast<TARGETING::Target*>(l_pCentaur)) );
 
         //  call the HWP with each fapi::Target
@@ -465,6 +455,10 @@ void*    call_mss_scominit( void *io_pArgs )
             TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
                       "ERROR 0x%.8X: mss_scominit HWP returns error",
                       l_err->reasonCode());
+
+            // capture the target data in the elog
+            ErrlUserDetailsTarget(l_pCentaur).addToLog(l_err);
+
             /*@
              * @errortype
              * @reasoncode  ISTEP_DRAM_TRAINING_FAILED
@@ -514,43 +508,37 @@ void*  call_mss_ddr_phy_reset( void *io_pArgs )
     getAllChiplets(l_mbaTargetList, TYPE_MBA);
 
     // Limit the number of MBAs to run in VPO environment to save time.
-    uint8_t l_mbaLimit = UNLIMITED_RUN;
-    if (TARGETING::is_vpo() )
+    uint8_t l_mbaLimit = l_mbaTargetList.size();
+    if (TARGETING::is_vpo() && (VPO_NUM_OF_MBAS_TO_RUN < l_mbaLimit))
     {
-           l_mbaLimit = VPO_NUM_OF_MBAS_TO_RUN;
+        l_mbaLimit = VPO_NUM_OF_MBAS_TO_RUN;
     }
 
-    for (   uint8_t l_mbaNum=0 ;
-            (l_mbaNum < l_mbaLimit) && (l_mbaNum < l_mbaTargetList.size()) ;
-            l_mbaNum++   )
+    for ( uint8_t l_mbaNum=0; l_mbaNum < l_mbaLimit; l_mbaNum++ )
     {
         //  make a local copy of the target for ease of use
         const TARGETING::Target*  l_mba_target = l_mbaTargetList[l_mbaNum];
 
         // Dump current run on target
-        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "Running call_mss_ddr_phy_reset HWP on..." );
-        EntityPath l_path;
-        l_path  =   l_mba_target->getAttr<ATTR_PHYS_PATH>();
-        l_path.dump();
+        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                "Running call_mss_ddr_phy_reset HWP on "
+                "target HUID %.8X", TARGETING::get_huid(l_mba_target));
 
         // Cast to a FAPI type of target.
-        const fapi::Target l_fapi_mba_target(
-                TARGET_TYPE_MBA_CHIPLET,
-                reinterpret_cast<void *>
-        (const_cast<TARGETING::Target*>(l_mba_target)) );
+        const fapi::Target l_fapi_mba_target( TARGET_TYPE_MBA_CHIPLET,
+                        (const_cast<TARGETING::Target*>(l_mba_target)) );
 
         //  call the HWP with each fapi::Target
         FAPI_INVOKE_HWP(l_err, mss_ddr_phy_reset, l_fapi_mba_target);
 
         if (l_err)
         {
-            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, "ERROR 0x%.8X: mss_ddr_phy_reset HWP returns error",
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                    "ERROR 0x%.8X: mss_ddr_phy_reset HWP returns error",
                     l_err->reasonCode());
 
-            ErrlUserDetailsTarget myDetails(l_mba_target);
-
             // capture the target data in the elog
-            myDetails.addToLog(l_err );
+            ErrlUserDetailsTarget(l_mba_target).addToLog( l_err );
 
             /*@
              * @errortype
@@ -573,11 +561,13 @@ void*  call_mss_ddr_phy_reset( void *io_pArgs )
         }
         else
         {
-            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "SUCCESS :  call_mss_ddr_phy_reset HWP( )" );
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                    "SUCCESS :  call_mss_ddr_phy_reset HWP( )" );
         }
     } // end l_mbaNum loop
 
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mss_ddr_phy_reset exit" );
+    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+            "call_mss_ddr_phy_reset exit" );
 
     return l_stepError.getErrorHandle();
 }
@@ -599,29 +589,24 @@ void*    call_mss_draminit( void *io_pArgs )
     getAllChiplets(l_mbaTargetList, TYPE_MBA);
 
     // Limit the number of MBAs to run in VPO environment to save time.
-    uint8_t l_mbaLimit = UNLIMITED_RUN;
-    if (TARGETING::is_vpo() )
+    uint8_t l_mbaLimit = l_mbaTargetList.size();
+    if (TARGETING::is_vpo() && (VPO_NUM_OF_MBAS_TO_RUN < l_mbaLimit))
     {
-           l_mbaLimit = VPO_NUM_OF_MBAS_TO_RUN;
+        l_mbaLimit = VPO_NUM_OF_MBAS_TO_RUN;
     }
 
-    for (   uint8_t l_mbaNum=0 ;
-            (l_mbaNum < l_mbaLimit) && (l_mbaNum < l_mbaTargetList.size());
-            l_mbaNum++   )
+    for ( uint8_t l_mbaNum=0; l_mbaNum < l_mbaLimit; l_mbaNum++ )
     {
         // Make a local copy of the target for ease of use
         const TARGETING::Target*  l_mba_target = l_mbaTargetList[l_mbaNum];
 
         // Dump current run on target
-        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "Running mss_draminit HWP on...");
-        EntityPath l_path;
-        l_path  =   l_mba_target->getAttr<ATTR_PHYS_PATH>();
-        l_path.dump();
+        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                "Running mss_draminit HWP on "
+                "target HUID %.8X", TARGETING::get_huid(l_mba_target));
 
         // Cast to a FAPI type of target.
-        const fapi::Target l_fapi_mba_target(
-                TARGET_TYPE_MBA_CHIPLET,
-                reinterpret_cast<void *>
+        const fapi::Target l_fapi_mba_target( TARGET_TYPE_MBA_CHIPLET,
                 (const_cast<TARGETING::Target*>(l_mba_target)) );
 
         //  call the HWP with each fapi::Target
@@ -629,13 +614,12 @@ void*    call_mss_draminit( void *io_pArgs )
 
         if (l_err)
         {
-            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, "ERROR 0x%.8X : mss_draminit HWP returns error",
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                    "ERROR 0x%.8X : mss_draminit HWP returns error",
                     l_err->reasonCode());
 
-            ErrlUserDetailsTarget myDetails(l_mba_target);
-
             // capture the target data in the elog
-            myDetails.addToLog(l_err );
+            ErrlUserDetailsTarget(l_mba_target).addToLog(l_err);
 
             /*@
              *
@@ -659,7 +643,8 @@ void*    call_mss_draminit( void *io_pArgs )
         }
         else
         {
-            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "SUCCESS :  mss_draminit HWP( )" );
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                    "SUCCESS :  mss_draminit HWP( )" );
         }
 
     }   // endfor   mba's
@@ -686,30 +671,25 @@ void*    call_mss_draminit_training( void *io_pArgs )
     getAllChiplets(l_mbaTargetList, TYPE_MBA);
 
     // Limit the number of MBAs to run in VPO environment to save time.
-    uint8_t l_mbaLimit = UNLIMITED_RUN;
-    if (TARGETING::is_vpo() )
+    uint8_t l_mbaLimit = l_mbaTargetList.size();
+    if (TARGETING::is_vpo() && (VPO_NUM_OF_MBAS_TO_RUN < l_mbaLimit))
     {
-           l_mbaLimit = VPO_NUM_OF_MBAS_TO_RUN;
+        l_mbaLimit = VPO_NUM_OF_MBAS_TO_RUN;
     }
 
-    for (   uint8_t l_mbaNum=0 ;
-            (l_mbaNum < l_mbaLimit) && (l_mbaNum < l_mbaTargetList.size());
-            l_mbaNum++    )
+    for ( uint8_t l_mbaNum=0; l_mbaNum < l_mbaLimit; l_mbaNum++ )
     {
         //  make a local copy of the target for ease of use
         const TARGETING::Target*  l_mba_target = l_mbaTargetList[l_mbaNum];
 
         // Dump current run on target
-        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "Running mss_draminit_training HWP on..." );
-        EntityPath l_path;
-        l_path  =   l_mba_target->getAttr<ATTR_PHYS_PATH>();
-        l_path.dump();
+        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                "Running mss_draminit_training HWP on "
+                "target HUID %.8X", TARGETING::get_huid(l_mba_target));
 
         // Cast to a FAPI type of target.
-        const fapi::Target l_fapi_mba_target(
-                TARGET_TYPE_MBA_CHIPLET,
-                reinterpret_cast<void *>
-        (const_cast<TARGETING::Target*>(l_mba_target)) );
+        const fapi::Target l_fapi_mba_target( TARGET_TYPE_MBA_CHIPLET,
+                        (const_cast<TARGETING::Target*>(l_mba_target)) );
 
 
         //  call the HWP with each fapi::Target
@@ -717,13 +697,12 @@ void*    call_mss_draminit_training( void *io_pArgs )
 
         if (l_err)
         {
-            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, "ERROR 0x%.8X : mss_draminit_training HWP returns error",
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                    "ERROR 0x%.8X : mss_draminit_training HWP returns error",
                     l_err->reasonCode());
 
-            ErrlUserDetailsTarget myDetails(l_mba_target);
-
             // capture the target data in the elog
-            myDetails.addToLog(l_err );
+            ErrlUserDetailsTarget(l_mba_target).addToLog( l_err );
 
             /*@
              *
@@ -747,12 +726,14 @@ void*    call_mss_draminit_training( void *io_pArgs )
         }
         else
         {
-            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "SUCCESS :  mss_draminit_training HWP( )" );
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                    "SUCCESS :  mss_draminit_training HWP( )" );
         }
 
     }
 
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mss_draminit_training exit" );
+    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+            "call_mss_draminit_training exit" );
 
     return l_stepError.getErrorHandle();
 }
@@ -767,38 +748,33 @@ void*    call_mss_draminit_trainadv( void *io_pArgs )
     uint8_t l_pattern = 0;
     uint8_t l_test_type = 0;
 
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mss_draminit_trainadv entry" );
+    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+            "call_mss_draminit_trainadv entry" );
 
     // Get all MBA targets
     TARGETING::TargetHandleList l_mbaTargetList;
     getAllChiplets(l_mbaTargetList, TYPE_MBA);
 
     // Limit the number of MBAs to run in VPO environment to save time.
-    uint8_t l_mbaLimit = UNLIMITED_RUN;
-    if (TARGETING::is_vpo() )
+    uint8_t l_mbaLimit = l_mbaTargetList.size();
+    if (TARGETING::is_vpo() && (VPO_NUM_OF_MBAS_TO_RUN < l_mbaLimit))
     {
-           l_mbaLimit = VPO_NUM_OF_MBAS_TO_RUN;
+        l_mbaLimit = VPO_NUM_OF_MBAS_TO_RUN;
     }
 
-    uint8_t l_mbaNum = 0;
-    for (TargetHandleList::iterator l_mba_iter = l_mbaTargetList.begin();
-            (l_mbaNum < l_mbaLimit) && (l_mba_iter != l_mbaTargetList.end());
-            ++l_mba_iter, ++l_mbaNum)
+    for ( uint8_t l_mbaNum=0; l_mbaNum < l_mbaLimit; l_mbaNum++ )
     {
         //  make a local copy of the target for ease of use
-        const TARGETING::Target*  l_mba_target = *l_mba_iter;
+        const TARGETING::Target*  l_mba_target = l_mbaTargetList[l_mbaNum];
 
         // Dump current run on target
-        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "Running mss_draminit_training_advanced HWP on..." );
-        EntityPath l_path;
-        l_path  =   l_mba_target->getAttr<ATTR_PHYS_PATH>();
-        l_path.dump();
+        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                "Running mss_draminit_training_advanced HWP on "
+                "target HUID %.8X", TARGETING::get_huid(l_mba_target));
 
         // Cast to a FAPI type of target.
-        const fapi::Target l_fapi_mba_target(
-                TARGET_TYPE_MBA_CHIPLET,
-                reinterpret_cast<void *>
-        (const_cast<TARGETING::Target*>(l_mba_target)) );
+        const fapi::Target l_fapi_mba_target( TARGET_TYPE_MBA_CHIPLET,
+                    (const_cast<TARGETING::Target*>(l_mba_target)) );
 
         //  call the HWP with each fapi::Target
         FAPI_INVOKE_HWP(l_err, mss_draminit_training_advanced, l_fapi_mba_target,
@@ -810,10 +786,8 @@ void*    call_mss_draminit_trainadv( void *io_pArgs )
                 "ERROR 0x%.8X : mss_draminit_training_advanced HWP returns error",
                 l_err->reasonCode());
 
-            ErrlUserDetailsTarget myDetails(l_mba_target);
-
             // capture the target data in the elog
-            myDetails.addToLog(l_err );
+            ErrlUserDetailsTarget(l_mba_target).addToLog( l_err );
 
             /*@
              *
@@ -858,29 +832,23 @@ void*    call_mss_draminit_mc( void *io_pArgs )
     getAllChips(l_mBufTargetList, TYPE_MEMBUF);
 
     // Limit the number of MBAs to run in VPO environment to save time.
-    uint8_t l_memBufLimit = UNLIMITED_RUN;
-    if (TARGETING::is_vpo() )
+    uint8_t l_memBufLimit = l_mBufTargetList.size();
+    if (TARGETING::is_vpo() && (VPO_NUM_OF_MEMBUF_TO_RUN < l_memBufLimit))
     {
-        l_memBufLimit = VPO_NUM_OF_MEMBUF_TO_RUN ;
+        l_memBufLimit = VPO_NUM_OF_MEMBUF_TO_RUN;
     }
 
-    for (uint8_t l_mBufNum=0 ;
-        (l_mBufNum < l_memBufLimit) && (l_mBufNum < l_mBufTargetList.size());
-         l_mBufNum++)
+    for ( uint8_t l_mBufNum=0; l_mBufNum < l_memBufLimit; l_mBufNum++ )
     {
-
         const TARGETING::Target* l_membuf_target = l_mBufTargetList[l_mBufNum];
 
         // Dump current run on target
-        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "Running mss_draminit_mc HWP on..." );
-        EntityPath l_path;
-        l_path  =   l_membuf_target->getAttr<ATTR_PHYS_PATH>();
-        l_path.dump();
+        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                "Running mss_draminit_mc HWP on "
+                "target HUID %.8X", TARGETING::get_huid(l_membuf_target));
 
         // Cast to a fapi target
-        fapi::Target l_fapi_membuf_target(
-                TARGET_TYPE_MEMBUF_CHIP,
-                reinterpret_cast<void *>
+        fapi::Target l_fapi_membuf_target( TARGET_TYPE_MEMBUF_CHIP,
                 (const_cast<TARGETING::Target*>(l_membuf_target)) );
 
         //  call the HWP with each fapi::Target
@@ -888,13 +856,12 @@ void*    call_mss_draminit_mc( void *io_pArgs )
 
         if (l_err)
         {
-            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, "ERROR 0x%.8X : mss_draminit_mc HWP returns error",
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                    "ERROR 0x%.8X : mss_draminit_mc HWP returns error",
                     l_err->reasonCode());
 
-            ErrlUserDetailsTarget myDetails(l_membuf_target);
-
             // capture the target data in the elog
-            myDetails.addToLog(l_err );
+            ErrlUserDetailsTarget(l_membuf_target).addToLog( l_err );
 
             /*@
              *
@@ -919,7 +886,8 @@ void*    call_mss_draminit_mc( void *io_pArgs )
         }
         else
         {
-            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "SUCCESS :  mss_draminit_mc HWP( )" );
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                    "SUCCESS :  mss_draminit_mc HWP( )" );
         }
 
     } // End memBuf loop

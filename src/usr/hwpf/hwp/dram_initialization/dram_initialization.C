@@ -26,10 +26,6 @@
  *  Support file for IStep: dram_initialization
  *   Dram Initialization
  *
- *  *****************************************************************
- *  THIS FILE WAS GENERATED ON 2012-04-11:1608
- *  *****************************************************************
- *
  *  HWP_IGNORE_VERSION_CHECK
  *
  */
@@ -108,17 +104,13 @@ void*    call_host_startprd_dram( void    *io_pArgs )
     //  customize any other inputs
     //  set up loops to go through all targets (if parallel, spin off a task)
 
-    //  dump physical path to targets
-    EntityPath l_path;
-    l_path  =   l_@targetN_target->getAttr<ATTR_PHYS_PATH>();
-    l_path.dump();
+    //  write HUID of target
+    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+            "target HUID %.8X", TARGETING::get_huid(l_@targetN_target));
 
     // cast OUR type of target to a FAPI type of target.
-    const fapi::Target l_fapi_@targetN_target(
-                    TARGET_TYPE_MEMBUF_CHIP,
-                    reinterpret_cast<void *>
-                        (const_cast<TARGETING::
-                         Target*>(l_@targetN_target)) );
+    const fapi::Target l_fapi_@targetN_target( TARGET_TYPE_MEMBUF_CHIP,
+                        (const_cast<TARGETING::Target*>(l_@targetN_target)) );
 
     //  call the HWP with each fapi::Target
     FAPI_INVOKE_HWP( l_errl, host_startPRD_dram, _args_...);
@@ -285,15 +277,12 @@ void*    call_mss_scrub( void    *io_pArgs )
     //  customize any other inputs
     //  set up loops to go through all targets (if parallel, spin off a task)
 
-    //  dump physical path to targets
-    EntityPath l_path;
-    l_path  =   l_@targetN_target->getAttr<ATTR_PHYS_PATH>();
-    l_path.dump();
+    //  write HUID of target
+    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                "target HUID %.8X", TARGETING::get_huid(l));
 
     // cast OUR type of target to a FAPI type of target.
-    const fapi::Target l_fapi_@targetN_target(
-                    TARGET_TYPE_MEMBUF_CHIP,
-                    reinterpret_cast<void *>
+    const fapi::Target l_fapi_@targetN_target( TARGET_TYPE_MEMBUF_CHIP,
                         (const_cast<TARGETING::Target*>(l_@targetN_target)) );
 
     //  call the HWP with each fapi::Target
@@ -340,22 +329,20 @@ void*    call_mss_thermal_init( void    *io_pArgs )
     //  --------------------------------------------------------------------
     //  run mss_thermal_init on all Centaurs
     //  --------------------------------------------------------------------
-    for (TargetHandleList::iterator l_iter = l_memBufTargetList.begin();
+    for (TargetHandleList::const_iterator
+            l_iter = l_memBufTargetList.begin();
             l_iter != l_memBufTargetList.end();
             ++l_iter)
     {
         //  make a local copy of the target for ease of use
         const TARGETING::Target*  l_pCentaur = *l_iter;
 
-        //  dump physical path to targets
-        EntityPath l_path;
-        l_path  =   l_pCentaur->getAttr<ATTR_PHYS_PATH>();
-        l_path.dump();
+        //  write HUID of target
+        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                "target HUID %.8X", TARGETING::get_huid(l_pCentaur));
 
         // cast OUR type of target to a FAPI type of target.
-        const fapi::Target l_fapi_pCentaur(
-                TARGET_TYPE_MEMBUF_CHIP,
-                reinterpret_cast<void *>
+        const fapi::Target l_fapi_pCentaur( TARGET_TYPE_MEMBUF_CHIP,
                 (const_cast<TARGETING::Target*>(l_pCentaur)) );
 
         //  call the HWP with each fapi::Target
@@ -367,10 +354,8 @@ void*    call_mss_thermal_init( void    *io_pArgs )
                     "ERROR 0x%.8X: mss_thermal_init HWP returns error",
                     l_errl->reasonCode());
 
-            ErrlUserDetailsTarget myDetails(l_pCentaur);
-
             // capture the target data in the elog
-            myDetails.addToLog( l_errl );
+            ErrlUserDetailsTarget(l_pCentaur).addToLog( l_errl );
 
             /*@
              * @errortype
@@ -433,24 +418,22 @@ void*    call_proc_setup_bars( void    *io_pArgs )
     //  --------------------------------------------------------------------
     //  run mss_setup_bars on all CPUs.
     //  --------------------------------------------------------------------
-    for ( size_t i = 0; i < l_cpuTargetList.size(); i++ )
+    for (TargetHandleList::const_iterator
+            l_cpu_iter = l_cpuTargetList.begin();
+            l_cpu_iter != l_cpuTargetList.end();
+            ++l_cpu_iter)
     {
         //  make a local copy of the target for ease of use
-        const TARGETING::Target*  l_pCpuTarget = l_cpuTargetList[i];
+        const TARGETING::Target* l_pCpuTarget = *l_cpu_iter;
 
-        TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                   "mss_setup_bars: proc %d", i );
-        //  dump physical path to targets
-        EntityPath l_path;
-        l_path  =   l_pCpuTarget->getAttr<ATTR_PHYS_PATH>();
-        l_path.dump();
+        //  write HUID of target
+        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                "mss_setup_bars: proc "
+                "target HUID %.8X", TARGETING::get_huid(l_pCpuTarget));
 
         // cast OUR type of target to a FAPI type of target.
-        const fapi::Target l_fapi_pCpuTarget(
-                                            TARGET_TYPE_PROC_CHIP,
-                                            reinterpret_cast<void *>
-                                            (const_cast<TARGETING::Target*>
-                                             (l_pCpuTarget)) );
+        const fapi::Target l_fapi_pCpuTarget( TARGET_TYPE_PROC_CHIP,
+                           (const_cast<TARGETING::Target*> (l_pCpuTarget)) );
 
         //  call the HWP with each fapi::Target
         FAPI_INVOKE_HWP( l_errl,
@@ -459,6 +442,9 @@ void*    call_proc_setup_bars( void    *io_pArgs )
 
         if ( l_errl )
         {
+            // capture the target data in the elog
+            ErrlUserDetailsTarget(l_pCpuTarget).addToLog( l_errl );
+
             /*@
              * @errortype
              * @reasoncode      ISTEP_DRAM_INITIALIZATION_FAILED
@@ -492,24 +478,26 @@ void*    call_proc_setup_bars( void    *io_pArgs )
 
     if ( l_stepError.isNull() )
     {
-        //  -----------------------------------------------------------------------
+        //----------------------------------------------------------------------
         //  run proc_setup_bars on all CPUs
-        //  -----------------------------------------------------------------------
+        //----------------------------------------------------------------------
         std::vector<proc_setup_bars_proc_chip> l_proc_chips;
 
         TargetPairs_t l_abusLinks;
         l_errl = PbusLinkSvc::getTheInstance().getPbusConnections(
                                     l_abusLinks, TYPE_ABUS, false );
 
-        for ( size_t i = 0; i < l_cpuTargetList.size() && !l_errl; i++ )
+        for (TargetHandleList::const_iterator
+                l_cpu_iter = l_cpuTargetList.begin();
+                l_cpu_iter != l_cpuTargetList.end() && !l_errl;
+                ++l_cpu_iter)
         {
             //  make a local copy of the target for ease of use
-            const TARGETING::Target*  l_pCpuTarget = l_cpuTargetList[i];
+            const TARGETING::Target* l_pCpuTarget = *l_cpu_iter;
 
             // cast OUR type of target to a FAPI type of target.
             const fapi::Target l_fapi_pCpuTarget( TARGET_TYPE_PROC_CHIP,
-                   reinterpret_cast<void *> (const_cast<TARGETING::Target*>
-                                                             (l_pCpuTarget)) );
+                        (const_cast<TARGETING::Target*> (l_pCpuTarget)) );
 
             proc_setup_bars_proc_chip l_proc_chip ;
             l_proc_chip.this_chip  = l_fapi_pCpuTarget;
@@ -519,9 +507,12 @@ void*    call_proc_setup_bars( void    *io_pArgs )
             TARGETING::TargetHandleList l_abuses;
             getChildChiplets( l_abuses, l_pCpuTarget, TYPE_ABUS );
 
-            for (size_t j = 0; j < l_abuses.size(); j++)
+            for (TargetHandleList::const_iterator
+                    l_abus_iter = l_abuses.begin();
+                    l_abus_iter != l_abuses.end();
+                    ++l_abus_iter)
             {
-                TARGETING::Target * l_target = l_abuses[j];
+                const TARGETING::Target* l_target = *l_abus_iter;
                 uint8_t l_srcID = l_target->getAttr<ATTR_CHIP_UNIT>();
                 TargetPairs_t::iterator l_itr = l_abusLinks.find(l_target);
                 if ( l_itr == l_abusLinks.end() )
@@ -618,25 +609,29 @@ void*    call_proc_pcie_config( void    *io_pArgs )
     TARGETING::TargetHandleList l_procTargetList;
     getAllChips(l_procTargetList, TYPE_PROC );
 
-    for ( TargetHandleList::iterator l_iter = l_procTargetList.begin();
-          l_iter != l_procTargetList.end(); ++l_iter )
+    for ( TargetHandleList::const_iterator
+          l_iter = l_procTargetList.begin();
+          l_iter != l_procTargetList.end();
+          ++l_iter )
     {
         const TARGETING::Target* l_pTarget = *l_iter;
 
-        //  dump physical path to targets
-        EntityPath l_path;
-        l_path = l_pTarget->getAttr<ATTR_PHYS_PATH>();
-        l_path.dump();
+        //  write HUID of target
+        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                "target HUID %.8X", TARGETING::get_huid(l_pTarget));
 
         // build a FAPI type of target.
         const fapi::Target l_fapi_pTarget( TARGET_TYPE_PROC_CHIP,
-          reinterpret_cast<void*>(const_cast<TARGETING::Target*>(l_pTarget)) );
+                          (const_cast<TARGETING::Target*>(l_pTarget)) );
 
         //  call the HWP with each fapi::Target
         FAPI_INVOKE_HWP( l_errl, proc_pcie_config, l_fapi_pTarget );
 
         if ( l_errl )
         {
+            // capture the target data in the elog
+            ErrlUserDetailsTarget(l_pTarget).addToLog( l_errl );
+
             /*@
              * @errortype
              * @reasoncode      ISTEP_DRAM_INITIALIZATION_FAILED
@@ -652,9 +647,6 @@ void*    call_proc_pcie_config( void    *io_pArgs )
             l_stepError.addErrorDetails(ISTEP_DRAM_INITIALIZATION_FAILED,
                                         ISTEP_PROC_PCIE_CONFIG,
                                         l_errl );
-
-            // capture the target data in the elog
-            ErrlUserDetailsTarget(l_pTarget).addToLog( l_errl );
 
             errlCommit( l_errl, HWPF_COMP_ID );
 
@@ -793,23 +785,21 @@ void*   call_host_mpipl_service( void *io_pArgs )
     //  ---------------------------------------------------------------
     //  run proc_mpipl_chip_cleanup.C on all proc chips
     //  ---------------------------------------------------------------
-    for (TargetHandleList::iterator l_iter = l_procTargetList.begin();
-         l_iter != l_procTargetList.end(); ++l_iter)
+    for (TargetHandleList::const_iterator
+         l_iter = l_procTargetList.begin();
+         l_iter != l_procTargetList.end();
+         ++l_iter)
     {
         //  make a local copy of the target for ease of use
         const TARGETING::Target*  l_pProcTarget = *l_iter;
 
-        //  dump physical path to targets
-        EntityPath l_path;
-        l_path  =   l_pProcTarget->getAttr<ATTR_PHYS_PATH>();
-        l_path.dump();
+        //  write HUID of target
+        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                "target HUID %.8X", TARGETING::get_huid(l_pProcTarget));
 
         // cast OUR type of target to a FAPI type of target.
-        const fapi::Target l_fapi_pProcTarget(
-                                           TARGET_TYPE_PROC_CHIP,
-                                           reinterpret_cast<void *>
-                                           (const_cast<TARGETING::Target*>
-                                           (l_pProcTarget)) );
+        const fapi::Target l_fapi_pProcTarget( TARGET_TYPE_PROC_CHIP,
+                           (const_cast<TARGETING::Target*> (l_pProcTarget)) );
 
         //  call the HWP with each fapi::Target
         FAPI_INVOKE_HWP(l_err, proc_mpipl_chip_cleanup,

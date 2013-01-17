@@ -108,21 +108,16 @@ void*    call_host_activate_master( void    *io_pArgs )
         TARGETING::Target* l_cpu_target = const_cast<TARGETING::Target *>
                                           ( getParentChip( l_masterCore ) );
 
-        //  dump physical path to target
-        EntityPath l_path;
-        l_path  =   l_cpu_target->getAttr<ATTR_PHYS_PATH>();
-        l_path.dump();
+        //  trace HUID
+        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                "target HUID %.8X", TARGETING::get_huid(l_cpu_target));
 
         // cast OUR type of target to a FAPI type of target.
-        const fapi::Target l_fapi_cpu_target(
-                                            TARGET_TYPE_PROC_CHIP,
-                                            reinterpret_cast<void *>
-                                            (const_cast<TARGETING::Target*>
-                                                        (l_cpu_target)) );
+        const fapi::Target l_fapi_cpu_target( TARGET_TYPE_PROC_CHIP,
+                           (const_cast<TARGETING::Target*> (l_cpu_target)) );
 
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                "call_host_activate_master: call proc_prep_master_winkle." );
-
 
         //  call the HWP with each fapi::Target
         FAPI_INVOKE_HWP( l_errl,
@@ -134,6 +129,10 @@ void*    call_host_activate_master( void    *io_pArgs )
             TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
             "proc_prep_master_winkle ERROR : Returning errorlog, PLID=0x%x",
                 l_errl->plid() );
+
+            // capture the target data in the elog
+            ErrlUserDetailsTarget(l_cpu_target).addToLog( l_errl );
+
             break;
         }
         else
@@ -190,6 +189,10 @@ void*    call_host_activate_master( void    *io_pArgs )
             TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                        "proc_stop_deadman_timer ERROR : Returning errorlog, PLID=0x%x",
                        l_errl->plid() );
+
+            // capture the target data in the elog
+            ErrlUserDetailsTarget(l_cpu_target).addToLog( l_errl );
+
             break;
         }
         else
@@ -252,7 +255,8 @@ void*    call_host_activate_slave_cores( void    *io_pArgs )
     TargetHandleList l_cores;
     getAllChiplets(l_cores, TYPE_CORE);
 
-    for(TargetHandleList::const_iterator l_core = l_cores.begin();
+    for(TargetHandleList::const_iterator
+        l_core = l_cores.begin();
         l_core != l_cores.end();
         ++l_core)
     {
@@ -317,24 +321,22 @@ void*    call_host_activate_slave_cores( void    *io_pArgs )
         TARGETING::TargetHandleList l_procTargetList;
         getAllChips(l_procTargetList, TYPE_PROC);
 
-        // loop thru all the proc's
-        for ( TargetHandleList::iterator l_iter = l_procTargetList.begin();
-              l_iter != l_procTargetList.end();
-              ++l_iter )
+        // loop thru all the cpus
+        for (TargetHandleList::const_iterator
+                l_proc_iter = l_procTargetList.begin();
+                l_proc_iter != l_procTargetList.end();
+                ++l_proc_iter)
         {
             //  make a local copy of the CPU target
-            TARGETING::Target*  l_proc_target = (*l_iter) ;
+            const TARGETING::Target* l_proc_target = *l_proc_iter;
 
-            //  dump physical path to target
-            EntityPath l_path;
-            l_path  =   l_proc_target->getAttr<ATTR_PHYS_PATH>();
-            l_path.dump();
+            //  trace HUID
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                "target HUID %.8X", TARGETING::get_huid(l_proc_target));
 
             // cast OUR type of target to a FAPI type of target.
             fapi::Target l_fapi_proc_target( TARGET_TYPE_PROC_CHIP,
-                                             reinterpret_cast<void *>
-                                               (const_cast<TARGETING::Target*>
-                                                 (l_proc_target)) );
+                         (const_cast<TARGETING::Target*>(l_proc_target)) );
 
             //  reset pore bar notes:
             //  A mem_size of 0 means to ignore the image address
@@ -351,6 +353,9 @@ void*    call_host_activate_slave_cores( void    *io_pArgs )
                            );
             if ( l_errl )
             {
+                // capture the target data in the elog
+                ErrlUserDetailsTarget(l_proc_target).addToLog( l_errl );
+
                 /*@
                  * @errortype
                  * @reasoncode      ISTEP_RESET_PORE_BARS_FAILED
@@ -411,16 +416,12 @@ void*    call_host_ipl_complete( void    *io_pArgs )
         TARGETING::Target * l_masterProc =   NULL;
         (void)TARGETING::targetService().masterProcChipTargetHandle( l_masterProc );
 
-        const fapi::Target l_fapi_proc_target(
-                TARGET_TYPE_PROC_CHIP,
-                reinterpret_cast<void *>
+        const fapi::Target l_fapi_proc_target( TARGET_TYPE_PROC_CHIP,
                 ( const_cast<TARGETING::Target*>(l_masterProc) ) );
 
-        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                    "Running proc_switch_cfsim HWP on ...");
-        EntityPath l_path;
-        l_path  =   l_masterProc->getAttr<ATTR_PHYS_PATH>();
-        l_path.dump();
+        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                "Running proc_switch_cfsim HWP on "
+                "target HUID %.8X", TARGETING::get_huid(l_masterProc));
 
 
         //  call proc_switch_cfsim
@@ -437,6 +438,10 @@ void*    call_host_ipl_complete( void    *io_pArgs )
             TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
                       "ERROR 0x%.8X: proc_switch_cfsim HWP returns error",
                       l_err->reasonCode());
+
+            // capture the target data in the elog
+            ErrlUserDetailsTarget(l_masterProc).addToLog( l_err );
+
             break;
         }
         else

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012                   */
+/* COPYRIGHT International Business Machines Corp. 2012,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -26,10 +26,6 @@
  *
  *  Support file for IStep: activate_powerbus
  *   Activate PowerBus
- *
- *  *****************************************************************
- *  THIS FILE WAS GENERATED ON 2012-04-11:1607
- *  *****************************************************************
  *
  *  HWP_IGNORE_VERSION_CHECK
  *
@@ -58,7 +54,6 @@
 #include    "activate_powerbus.H"
 #include    <pbusLinkSvc.H>
 
-//  Uncomment these files as they become available:
 #include    "proc_build_smp/proc_build_smp.H"
 
 namespace   ACTIVATE_POWERBUS
@@ -98,6 +93,7 @@ void*    call_proc_build_smp( void    *io_pArgs )
             l_StepError.addErrorDetails(ISTEP_ACTIVATE_POWER_BUS_FAILED,
                                         ISTEP_PROC_BUILD_SMP,
                                         l_errl);
+            errlCommit( l_errl, HWPF_COMP_ID );
             break;
         }
 
@@ -110,6 +106,7 @@ void*    call_proc_build_smp( void    *io_pArgs )
             l_StepError.addErrorDetails(ISTEP_ACTIVATE_POWER_BUS_FAILED,
                                         ISTEP_PROC_BUILD_SMP,
                                         l_errl);
+            errlCommit( l_errl, HWPF_COMP_ID );
             break;
         }
 
@@ -120,17 +117,16 @@ void*    call_proc_build_smp( void    *io_pArgs )
         //   chip object of this A/X-bus endpoint for the procEntry
         std::vector<proc_build_smp_proc_chip> l_procChips;
 
-        for (TARGETING::TargetHandleList::iterator l_cpuIter =
-             l_cpuTargetList.begin(); l_cpuIter != l_cpuTargetList.end();
+        for (TARGETING::TargetHandleList::const_iterator
+             l_cpuIter = l_cpuTargetList.begin();
+             l_cpuIter != l_cpuTargetList.end();
              ++l_cpuIter)
         {
-            proc_build_smp_proc_chip l_procEntry;
             const TARGETING::Target* l_pTarget = *l_cpuIter;
-
             fapi::Target l_fapiproc_target( TARGET_TYPE_PROC_CHIP,
-                           reinterpret_cast<void *>
-                           (const_cast<TARGETING::Target*>(l_pTarget)) );
+                 (const_cast<TARGETING::Target*>(l_pTarget)));
 
+            proc_build_smp_proc_chip l_procEntry;
             l_procEntry.this_chip = l_fapiproc_target;
             l_procEntry.enable_f0  = false;
             l_procEntry.enable_f1  = false;
@@ -138,10 +134,12 @@ void*    call_proc_build_smp( void    *io_pArgs )
             TARGETING::TargetHandleList l_abuses;
             getChildChiplets( l_abuses, l_pTarget, TYPE_ABUS );
 
-            for (TARGETING::TargetHandleList::iterator l_abusIter =
-                 l_abuses.begin(); l_abusIter != l_abuses.end(); ++l_abusIter)
+            for (TARGETING::TargetHandleList::const_iterator
+                 l_abusIter = l_abuses.begin();
+                 l_abusIter != l_abuses.end();
+                 ++l_abusIter)
             {
-                TARGETING::Target * l_target = *l_abusIter;
+                const TARGETING::Target * l_target = *l_abusIter;
                 uint8_t l_srcID = l_target->getAttr<ATTR_CHIP_UNIT>();
                 TargetPairs_t::iterator l_itr = l_abusConnections.find(l_target);
                 if ( l_itr == l_abusConnections.end() )
@@ -151,7 +149,7 @@ void*    call_proc_build_smp( void    *io_pArgs )
 
                 const TARGETING::Target *l_pParent = NULL;
                 l_pParent = getParentChip(
-                                  (const_cast<TARGETING::Target*>(l_itr->second)));
+                        (const_cast<TARGETING::Target*>(l_itr->second)));
                 fapi::Target l_fapiproc_parent( TARGET_TYPE_PROC_CHIP,
                                              (void *)l_pParent );
 
@@ -164,18 +162,20 @@ void*    call_proc_build_smp( void    *io_pArgs )
                 }
 
                 l_procEntry.f0_node_id = static_cast<proc_fab_smp_node_id>(
-                             l_pTarget->getAttr<TARGETING::ATTR_FABRIC_NODE_ID>());
+                        l_pTarget->getAttr<TARGETING::ATTR_FABRIC_NODE_ID>());
                 l_procEntry.f1_node_id = static_cast<proc_fab_smp_node_id>(
-                             l_pParent->getAttr<TARGETING::ATTR_FABRIC_NODE_ID>());
+                        l_pParent->getAttr<TARGETING::ATTR_FABRIC_NODE_ID>());
             }
 
             TARGETING::TargetHandleList l_xbuses;
             getChildChiplets( l_xbuses, l_pTarget, TYPE_XBUS );
 
-            for (TARGETING::TargetHandleList::iterator l_xbusIter =
-                 l_xbuses.begin(); l_xbusIter != l_xbuses.end(); ++l_xbusIter)
+            for (TARGETING::TargetHandleList::const_iterator
+                 l_xbusIter = l_xbuses.begin();
+                 l_xbusIter != l_xbuses.end();
+                 ++l_xbusIter)
             {
-                TARGETING::Target * l_target = *l_xbusIter;
+                const TARGETING::Target * l_target = *l_xbusIter;
                 uint8_t l_srcID = l_target->getAttr<ATTR_CHIP_UNIT>();
                 TargetPairs_t::iterator l_itr = l_xbusConnections.find(l_target);
                 if ( l_itr == l_xbusConnections.end() )
@@ -185,7 +185,7 @@ void*    call_proc_build_smp( void    *io_pArgs )
 
                 const TARGETING::Target *l_pParent = NULL;
                 l_pParent = getParentChip(
-                                  (const_cast<TARGETING::Target*>(l_itr->second)));
+                            (const_cast<TARGETING::Target*>(l_itr->second)));
                 fapi::Target l_fapiproc_parent( TARGET_TYPE_PROC_CHIP,
                                              (void *)l_pParent );
 

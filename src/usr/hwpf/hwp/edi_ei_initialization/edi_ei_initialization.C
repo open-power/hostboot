@@ -1,26 +1,25 @@
-/*  IBM_PROLOG_BEGIN_TAG
- *  This is an automatically generated prolog.
- *
- *  $Source: src/usr/hwpf/hwp/edi_ei_initialization/edi_ei_initialization.C $
- *
- *  IBM CONFIDENTIAL
- *
- *  COPYRIGHT International Business Machines Corp. 2012
- *
- *  p1
- *
- *  Object Code Only (OCO) source materials
- *  Licensed Internal Code Source Materials
- *  IBM HostBoot Licensed Internal Code
- *
- *  The source code for this program is not published or other-
- *  wise divested of its trade secrets, irrespective of what has
- *  been deposited with the U.S. Copyright Office.
- *
- *  Origin: 30
- *
- *  IBM_PROLOG_END_TAG
- */
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/usr/hwpf/hwp/edi_ei_initialization/edi_ei_initialization.C $ */
+/*                                                                        */
+/* IBM CONFIDENTIAL                                                       */
+/*                                                                        */
+/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/*                                                                        */
+/* p1                                                                     */
+/*                                                                        */
+/* Object Code Only (OCO) source materials                                */
+/* Licensed Internal Code Source Materials                                */
+/* IBM HostBoot Licensed Internal Code                                    */
+/*                                                                        */
+/* The source code for this program is not published or otherwise         */
+/* divested of its trade secrets, irrespective of what has been           */
+/* deposited with the U.S. Copyright Office.                              */
+/*                                                                        */
+/* Origin: 30                                                             */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
 
 /**
  *  @file edi_ei_initialization.C
@@ -136,7 +135,7 @@ void*    call_fabric_erepair( void    *io_pArgs )
             errlCommit( l_errl, HWPF_COMP_ID );
         }
 
-        for (TargetPairs_t::iterator l_itr = l_PbusConnections.begin();
+        for (TargetPairs_t::const_iterator l_itr = l_PbusConnections.begin();
              (l_StepError.isNull()) && (l_itr != l_PbusConnections.end());
              ++l_itr)
         {
@@ -319,22 +318,15 @@ void*    call_fabric_io_dccal( void    *io_pArgs )
                                             l_PbusConnections, busSet[ii] );
 
         for (l_itr = l_PbusConnections.begin();
-             l_itr != l_PbusConnections.end(); ++l_itr)
+             l_itr != l_PbusConnections.end();
+             ++l_itr)
         {
             const fapi::Target l_fapi_endp1_target(
                    (ii ? TARGET_TYPE_XBUS_ENDPOINT : TARGET_TYPE_ABUS_ENDPOINT),
-                   reinterpret_cast<void *>
                    (const_cast<TARGETING::Target*>(l_itr->first)));
             const fapi::Target l_fapi_endp2_target(
                    (ii ? TARGET_TYPE_XBUS_ENDPOINT : TARGET_TYPE_ABUS_ENDPOINT),
-                   reinterpret_cast<void *>
                    (const_cast<TARGETING::Target*>(l_itr->second)));
-
-            EntityPath l_path;
-            l_path  =   l_itr->first->getAttr<ATTR_PHYS_PATH>();
-            l_path.dump();
-            l_path  =   l_itr->second->getAttr<ATTR_PHYS_PATH>();
-            l_path.dump();
 
             //  call the HWP with each bus connection
             FAPI_INVOKE_HWP( l_errl, fabric_io_dccal, l_fapi_endp1_target );
@@ -345,6 +337,9 @@ void*    call_fabric_io_dccal( void    *io_pArgs )
                         TARGETING::get_huid(l_itr->first) );
             if ( l_errl )
             {
+                // capture the target data in the elog
+                ErrlUserDetailsTarget(l_itr->first).addToLog( l_errl );
+
                 /*@
                  * @errortype
                  * @reasoncode  ISTEP_FABRIC_IO_DCCAL_ENDPOINT1_FAILED
@@ -376,6 +371,9 @@ void*    call_fabric_io_dccal( void    *io_pArgs )
                         TARGETING::get_huid(l_itr->second) );
             if ( l_errl )
             {
+                // capture the target data in the elog
+                ErrlUserDetailsTarget(l_itr->second).addToLog( l_errl );
+
                 /*@
                  * @errortype
                  * @reasoncode  ISTEP_FABRIC_IO_DCCAL_ENDPOINT2_FAILED
@@ -425,15 +423,12 @@ void*    call_fabric_pre_trainadv( void    *io_pArgs )
     //  customize any other inputs
     //  set up loops to go through all targets (if parallel, spin off a task)
 
-    //  dump physical path to targets
-    EntityPath l_path;
-    l_path  =   l_@targetN_target->getAttr<ATTR_PHYS_PATH>();
-    l_path.dump();
+    //  write HUID of target
+    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                "target HUID %.8X", TARGETING::get_huid(l));
 
     // cast OUR type of target to a FAPI type of target.
-    const fapi::Target l_fapi_@targetN_target(
-                    TARGET_TYPE_MEMBUF_CHIP,
-                    reinterpret_cast<void *>
+    const fapi::Target l_fapi_@targetN_target( TARGET_TYPE_MEMBUF_CHIP,
                         (const_cast<TARGETING::Target*>(l_@targetN_target)) );
 
     //  call the HWP with each fapi::Target
@@ -506,17 +501,15 @@ void*    call_fabric_io_run_training( void    *io_pArgs )
             errlCommit( l_errl, HWPF_COMP_ID );
         }
 
-        for (TargetPairs_t::iterator l_itr = l_PbusConnections.begin();
+        for (TargetPairs_t::const_iterator l_itr = l_PbusConnections.begin();
              (l_StepError.isNull()) && (l_itr != l_PbusConnections.end());
              ++l_itr)
         {
             const fapi::Target l_fapi_endp1_target(
                    (i ? TARGET_TYPE_ABUS_ENDPOINT : TARGET_TYPE_XBUS_ENDPOINT),
-                   reinterpret_cast<void *>
                    (const_cast<TARGETING::Target*>(l_itr->first)));
             const fapi::Target l_fapi_endp2_target(
                    (i ? TARGET_TYPE_ABUS_ENDPOINT : TARGET_TYPE_XBUS_ENDPOINT),
-                   reinterpret_cast<void *>
                    (const_cast<TARGETING::Target*>(l_itr->second)));
 
             //  call the HWP with each bus connection
@@ -581,15 +574,12 @@ void*    call_fabric_post_trainadv( void    *io_pArgs )
     //  customize any other inputs
     //  set up loops to go through all targets (if parallel, spin off a task)
 
-    //  dump physical path to targets
-    EntityPath l_path;
-    l_path  =   l_@targetN_target->getAttr<ATTR_PHYS_PATH>();
-    l_path.dump();
+    //  write HUID of target
+    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                "target HUID %.8X", TARGETING::get_huid(l));
 
     // cast OUR type of target to a FAPI type of target.
-    const fapi::Target l_fapi_@targetN_target(
-                    TARGET_TYPE_MEMBUF_CHIP,
-                    reinterpret_cast<void *>
+    const fapi::Target l_fapi_@targetN_target( TARGET_TYPE_MEMBUF_CHIP,
                         (const_cast<TARGETING::Target*>(l_@targetN_target)) );
 
     //  call the HWP with each fapi::Target
@@ -660,15 +650,12 @@ void*    call_host_attnlisten_proc( void    *io_pArgs )
     //  customize any other inputs
     //  set up loops to go through all targets (if parallel, spin off a task)
 
-    //  dump physical path to targets
-    EntityPath l_path;
-    l_path  =   l_@targetN_target->getAttr<ATTR_PHYS_PATH>();
-    l_path.dump();
+    //  write HUID of target
+    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                "target HUID %.8X", TARGETING::get_huid(l));
 
     // cast OUR type of target to a FAPI type of target.
-    const fapi::Target l_fapi_@targetN_target(
-                    TARGET_TYPE_MEMBUF_CHIP,
-                    reinterpret_cast<void *>
+    const fapi::Target l_fapi_@targetN_target( TARGET_TYPE_MEMBUF_CHIP,
                         (const_cast<TARGETING::Target*>(l_@targetN_target)) );
 
     //  call the HWP with each fapi::Target
@@ -746,7 +733,7 @@ void*    call_proc_fab_iovalid( void    *io_pArgs )
 
     std::vector<proc_fab_iovalid_proc_chip> l_smp;
 
-    for (TargetHandleList::iterator l_cpu_iter = l_cpuTargetList.begin();
+    for (TargetHandleList::const_iterator l_cpu_iter = l_cpuTargetList.begin();
          l_StepError.isNull() && (l_cpu_iter != l_cpuTargetList.end());
          ++l_cpu_iter)
     {
@@ -767,7 +754,7 @@ void*    call_proc_fab_iovalid( void    *io_pArgs )
         TARGETING::TargetHandleList l_abuses;
         getChildChiplets( l_abuses, l_pTarget, TYPE_ABUS );
 
-        for (TargetHandleList::iterator l_abus_iter = l_abuses.begin();
+        for (TargetHandleList::const_iterator l_abus_iter = l_abuses.begin();
             l_abus_iter != l_abuses.end();
             ++l_abus_iter)
         {
@@ -790,7 +777,7 @@ void*    call_proc_fab_iovalid( void    *io_pArgs )
         TARGETING::TargetHandleList l_xbuses;
         getChildChiplets( l_xbuses, l_pTarget, TYPE_XBUS );
 
-        for (TargetHandleList::iterator l_xbus_iter = l_xbuses.begin();
+        for (TargetHandleList::const_iterator l_xbus_iter = l_xbuses.begin();
             l_xbus_iter != l_xbuses.end();
             ++l_xbus_iter)
         {
@@ -862,6 +849,9 @@ void*    call_proc_fab_iovalid( void    *io_pArgs )
             l_errl = INTR::enablePsiIntr(l_proc_target); 
             if(l_errl)
             {
+                // capture the target data in the elog
+                ErrlUserDetailsTarget(l_proc_target).addToLog( l_errl );
+
                 break;
             }
 

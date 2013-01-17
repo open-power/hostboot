@@ -262,13 +262,14 @@ void activate_threads( errlHndl_t& io_rtaskRetErrl )
     uint64_t l_masterCoreID = (cpuid & 0x0078)>>3;
     uint64_t l_masterThreadID = (cpuid & 0x0007);
 
-    TARGETING::Target* l_masterCore = NULL;
-    for( TARGETING::TargetHandleList::iterator core_it
-             = l_coreTargetList.begin();
+    const TARGETING::Target* l_masterCore = NULL;
+    for( TARGETING::TargetHandleList::const_iterator
+         core_it = l_coreTargetList.begin();
          core_it != l_coreTargetList.end();
          ++core_it )
     {
-        uint8_t l_coreId = (*core_it)->getAttr<TARGETING::ATTR_CHIP_UNIT>();
+        TARGETING::ATTR_CHIP_UNIT_type l_coreId =
+                (*core_it)->getAttr<TARGETING::ATTR_CHIP_UNIT>();
         if( l_coreId == l_masterCoreID )
         {
             l_masterCore = (*core_it);
@@ -303,22 +304,15 @@ void activate_threads( errlHndl_t& io_rtaskRetErrl )
 
     TRACFCOMP( g_fapiTd,
                "Master CPU : c%d t%d (HUID=%.8X)",
-               l_masterCoreID, l_masterThreadID, TARGETING::get_huid(l_masterCore) );
-
-    //  dump physical path to core target
-    TARGETING::EntityPath l_path;
-    l_path = l_masterCore->getAttr<TARGETING::ATTR_PHYS_PATH>();
-    l_path.dump();
+               l_masterCoreID, l_masterThreadID,
+               TARGETING::get_huid(l_masterCore) );
 
     // cast OUR type of target to a FAPI type of target.
-    const fapi::Target l_fapiCore(
-               fapi::TARGET_TYPE_EX_CHIPLET,
-               reinterpret_cast<void *>
-               (const_cast<TARGETING::Target*>(l_masterCore))
-               );
+    const fapi::Target l_fapiCore( fapi::TARGET_TYPE_EX_CHIPLET,
+               (const_cast<TARGETING::Target*>(l_masterCore)));
 
     // loop around threads 0-6, SBE starts thread 7
-    uint64_t max_threads = cpu_thread_count();
+    const uint64_t max_threads = cpu_thread_count();
     for( uint64_t thread = 0; thread < max_threads; thread++ )
     {
         // Skip the thread that we're running on

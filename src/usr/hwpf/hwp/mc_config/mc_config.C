@@ -1,26 +1,25 @@
-/*  IBM_PROLOG_BEGIN_TAG
- *  This is an automatically generated prolog.
- *
- *  $Source: src/usr/hwpf/hwp/mc_config/mc_config.C $
- *
- *  IBM CONFIDENTIAL
- *
- *  COPYRIGHT International Business Machines Corp. 2012
- *
- *  p1
- *
- *  Object Code Only (OCO) source materials
- *  Licensed Internal Code Source Materials
- *  IBM HostBoot Licensed Internal Code
- *
- *  The source code for this program is not published or other-
- *  wise divested of its trade secrets, irrespective of what has
- *  been deposited with the U.S. Copyright Office.
- *
- *  Origin: 30
- *
- *  IBM_PROLOG_END_TAG
- */
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/usr/hwpf/hwp/mc_config/mc_config.C $                      */
+/*                                                                        */
+/* IBM CONFIDENTIAL                                                       */
+/*                                                                        */
+/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/*                                                                        */
+/* p1                                                                     */
+/*                                                                        */
+/* Object Code Only (OCO) source materials                                */
+/* Licensed Internal Code Source Materials                                */
+/* IBM HostBoot Licensed Internal Code                                    */
+/*                                                                        */
+/* The source code for this program is not published or otherwise         */
+/* divested of its trade secrets, irrespective of what has been           */
+/* deposited with the U.S. Copyright Office.                              */
+/*                                                                        */
+/* Origin: 30                                                             */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
 /**
  *  @file mc_config.C
  *
@@ -114,10 +113,13 @@ void*   call_mss_volt( void *io_pArgs )
     //get a list of unique VmemIds
     std::vector<TARGETING::ATTR_VMEM_ID_type> l_VmemList;
 
-    for (size_t i = 0; i < l_membufTargetList.size(); i++ )
+    for (TargetHandleList::const_iterator
+            l_membuf_iter = l_membufTargetList.begin();
+            l_membuf_iter != l_membufTargetList.end();
+            ++l_membuf_iter)
     {
         TARGETING::ATTR_VMEM_ID_type l_VmemID =
-                            l_membufTargetList[i]->getAttr<ATTR_VMEM_ID>();
+                            (*l_membuf_iter)->getAttr<ATTR_VMEM_ID>();
         l_VmemList.push_back(l_VmemID);     
     }
 
@@ -127,39 +129,36 @@ void*   call_mss_volt( void *io_pArgs )
     objItr=std::unique(l_VmemList.begin(), l_VmemList.end());
     l_VmemList.erase(objItr,l_VmemList.end());
 
-
     //for each unique VmemId filter it out of the list of membuf targets
     //to create a subsetlist of membufs with just that vmemid
-    for(size_t i = 0; i < l_VmemList.size(); i++)
+    std::vector<TARGETING::ATTR_VMEM_ID_type>::iterator l_vmem_iter;
+    for (l_vmem_iter = l_VmemList.begin();
+            l_vmem_iter != l_VmemList.end();
+            ++l_vmem_iter)
     {
-
         //  declare a vector of fapi targets to pass to mss_volt
         std::vector<fapi::Target> l_membufFapiTargets;
 
-        for (size_t j = 0; j < l_membufTargetList.size(); j++)
+        for (TargetHandleList::const_iterator
+                l_membuf_iter = l_membufTargetList.begin();
+                l_membuf_iter != l_membufTargetList.end();
+                ++l_membuf_iter)
         {
-            if (l_membufTargetList[j]->getAttr<ATTR_VMEM_ID>()==l_VmemList[i])
+            //  make a local copy of the target for ease of use
+            const TARGETING::Target*  l_membuf_target = *l_membuf_iter;
+            if (l_membuf_target->getAttr<ATTR_VMEM_ID>()==*l_vmem_iter)
             {
-                //  make a local copy of the target for ease of use
-                const TARGETING::Target*  l_membuf_target = 
-                                            l_membufTargetList[j];
                 TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                    "=====  add to fapi::Target vector vmem_id=0x%08X...",
-                    l_membuf_target->getAttr<ATTR_VMEM_ID>());
-
-                EntityPath l_path;
-                l_path  =   l_membuf_target->getAttr<ATTR_PHYS_PATH>();
-                l_path.dump();
+                    "=====  add to fapi::Target vector vmem_id=0x%08X "
+                    "target HUID %.8X",
+                    l_membuf_target->getAttr<ATTR_VMEM_ID>(),
+                    TARGETING::get_huid(l_membuf_target));
     
-                fapi::Target l_membuf_fapi_target(
-                        TARGET_TYPE_MEMBUF_CHIP,
-                        reinterpret_cast<void *>
+                fapi::Target l_membuf_fapi_target( TARGET_TYPE_MEMBUF_CHIP,
                         (const_cast<TARGETING::Target*>(l_membuf_target)) );
 
                 l_membufFapiTargets.push_back( l_membuf_fapi_target );
-
             }
-
         }
         
         //now have the a list of fapi membufs with just the one VmemId
@@ -220,23 +219,23 @@ void*    call_mss_freq( void *io_pArgs )
     TARGETING::TargetHandleList l_membufTargetList;
     getAllChips(l_membufTargetList, TYPE_MEMBUF);
 
-    for ( size_t i = 0; i < l_membufTargetList.size(); i++ )
+    for (TargetHandleList::const_iterator
+            l_membuf_iter = l_membufTargetList.begin();
+            l_membuf_iter != l_membufTargetList.end();
+            ++l_membuf_iter)
     {
         //  make a local copy of the target for ease of use
-        const TARGETING::Target*  l_membuf_target = l_membufTargetList[i];
+        const TARGETING::Target* l_membuf_target = *l_membuf_iter;
 
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                "=====  mss_freq HWP( %d )", i );
-        EntityPath l_path;
-        l_path  =   l_membuf_target->getAttr<ATTR_PHYS_PATH>();
-        l_path.dump();
+                "=====  mss_freq HWP "
+                "target HUID %.8X",
+                TARGETING::get_huid(l_membuf_target));
 
         //  call the HWP with each target   ( if parallel, spin off a task )
         // $$const fapi::Target l_fapi_membuf_target(
-        fapi::Target l_fapi_membuf_target(
-                TARGET_TYPE_MEMBUF_CHIP,
-                reinterpret_cast<void *>
-        (const_cast<TARGETING::Target*>(l_membuf_target)) );
+        fapi::Target l_fapi_membuf_target( TARGET_TYPE_MEMBUF_CHIP,
+                    (const_cast<TARGETING::Target*>(l_membuf_target)) );
 
         FAPI_INVOKE_HWP(l_err, mss_freq, l_fapi_membuf_target);
 
@@ -244,14 +243,11 @@ void*    call_mss_freq( void *io_pArgs )
         if ( l_err )
         {
             TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                     "ERROR 0x%.8X:  mss_freq HWP( %d ) ",
-                     l_err->reasonCode(),
-                     i );
-
-            ErrlUserDetailsTarget myDetails(l_membuf_target);
+                     "ERROR 0x%.8X:  mss_freq HWP ",
+                     l_err->reasonCode());
 
             // capture the target data in the elog
-            myDetails.addToLog(l_err );
+            ErrlUserDetailsTarget(l_membuf_target).addToLog( l_err );
 
             /*@
              * @errortype
@@ -276,7 +272,7 @@ void*    call_mss_freq( void *io_pArgs )
         else
         {
             TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                     "SUCCESS :  mss_freq HWP( %d )", i );
+                     "SUCCESS :  mss_freq HWP");
         }
     } // End memBuf loop
 
@@ -292,41 +288,42 @@ errlHndl_t call_mss_eff_grouping()
     TARGETING::TargetHandleList l_procsList;
     getAllChips(l_procsList, TYPE_PROC);
 
-    for ( size_t i = 0; i < l_procsList.size(); i++ )
+    for (TargetHandleList::const_iterator
+            l_proc_iter = l_procsList.begin();
+            l_proc_iter != l_procsList.end();
+            ++l_proc_iter)
     {
         //  make a local copy of the target for ease of use
-        const TARGETING::Target*  l_cpu_target = l_procsList[i];
+        const TARGETING::Target* l_cpu_target = *l_proc_iter;
 
-        //  print call to hwp and dump physical path of the target(s)
+        //  print call to hwp and write HUID of the target(s)
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                "=====  mss_eff_grouping HWP( cpu %d )", i );
-        //  dump physical path to targets
-        EntityPath l_path;
-        l_path  =   l_cpu_target->getAttr<ATTR_PHYS_PATH>();
-        l_path.dump();
+                "=====  mss_eff_grouping HWP cpu "
+                "target HUID %.8X",
+                TARGETING::get_huid(l_cpu_target));
 
         // cast OUR type of target to a FAPI type of target.
-        const fapi::Target l_fapi_cpu_target(
-                TARGET_TYPE_PROC_CHIP,
-                reinterpret_cast<void *>
-        (const_cast<TARGETING::Target*>(l_cpu_target)) );
+        const fapi::Target l_fapi_cpu_target( TARGET_TYPE_PROC_CHIP,
+                    (const_cast<TARGETING::Target*>(l_cpu_target)) );
 
         TARGETING::TargetHandleList l_membufsList;
         getAffinityChips(l_membufsList, l_cpu_target, TYPE_MEMBUF);
         std::vector<fapi::Target> l_associated_centaurs;
 
-        size_t j = 0;
-        for ( ; j < l_membufsList.size(); j++ )
+        for (TargetHandleList::const_iterator
+                l_membuf_iter = l_membufsList.begin();
+                l_membuf_iter != l_membufsList.end();
+                ++l_membuf_iter)
         {
-            // cast OUR type of target to a FAPI type of target.
-            const fapi::Target l_fapi_centaur_target(
-                    TARGET_TYPE_MEMBUF_CHIP,
-                    reinterpret_cast<void *>
-                   (const_cast<TARGETING::Target*>(l_membufsList[j])) );
+            //  make a local copy of the target for ease of use
+            const TARGETING::Target* l_pTarget = *l_membuf_iter;
 
-            EntityPath l_path;
-            l_path  =   l_membufsList[j]->getAttr<ATTR_PHYS_PATH>();
-            l_path.dump();
+            // cast OUR type of target to a FAPI type of target.
+            const fapi::Target l_fapi_centaur_target( TARGET_TYPE_MEMBUF_CHIP,
+                   (const_cast<TARGETING::Target*>(l_pTarget)) );
+
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                "target HUID %.8X", TARGETING::get_huid(l_pTarget));
 
             l_associated_centaurs.push_back(l_fapi_centaur_target);
         }
@@ -338,20 +335,18 @@ errlHndl_t call_mss_eff_grouping()
         if ( l_err )
         {
             TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                       "ERROR 0x%.8X:  mss_eff_grouping HWP( cpu %d centaur %d ) ",
-                        l_err->reasonCode(), i, j );
-
-            ErrlUserDetailsTarget myDetails(l_cpu_target);
+                       "ERROR 0x%.8X:  mss_eff_grouping HWP",
+                        l_err->reasonCode());
 
             // capture the target data in the elog
-            myDetails.addToLog(l_err );
+            ErrlUserDetailsTarget(l_cpu_target).addToLog(l_err);
 
             break; // break out mba loop
         }
         else
         {
             TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-               "SUCCESS :  mss_eff_grouping HWP( cpu %d )", i );
+               "SUCCESS :  mss_eff_grouping HWP");
         }
     }   // endfor
 
@@ -367,15 +362,16 @@ errlHndl_t call_opt_memmap()
 
     std::vector<fapi::Target> l_fapi_procs;
 
-    for ( TARGETING::TargetHandleList::iterator l_iter = l_procs.begin();
-          l_iter != l_procs.end(); ++l_iter )
+    for ( TARGETING::TargetHandleList::const_iterator
+          l_iter = l_procs.begin();
+          l_iter != l_procs.end();
+          ++l_iter )
     {
         //  make a local copy of the target for ease of use
         const TARGETING::Target*  l_target = *l_iter;
 
         // cast OUR type of target to a FAPI type of target.
         const fapi::Target l_fapi_target( TARGET_TYPE_PROC_CHIP,
-                    reinterpret_cast<void *>
                     (const_cast<TARGETING::Target*>(l_target)) );
 
         l_fapi_procs.push_back(l_fapi_target);
@@ -411,25 +407,23 @@ void*    call_mss_eff_config( void *io_pArgs )
     TARGETING::TargetHandleList l_mbaTargetList;
     getAllChiplets(l_mbaTargetList, TYPE_MBA);
 
-    for ( size_t i = 0; i < l_mbaTargetList.size(); i++ )
+    for (TargetHandleList::const_iterator
+            l_mba_iter = l_mbaTargetList.begin();
+            l_mba_iter != l_mbaTargetList.end();
+            ++l_mba_iter)
     {
         //  make a local copy of the target for ease of use
-        const TARGETING::Target*  l_mba_target = l_mbaTargetList[i];
+        const TARGETING::Target* l_mba_target = *l_mba_iter;
 
         //  print call to hwp and dump physical path of the target(s)
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                "=====  mss_eff_config HWP( mba %d )", i );
-        //  dump physical path to targets
-        EntityPath l_path;
-        l_path  =   l_mba_target->getAttr<ATTR_PHYS_PATH>();
-        l_path.dump();
-
+                "=====  mss_eff_config HWP "
+                "target HUID %.8X",
+                TARGETING::get_huid(l_mba_target));
 
         // cast OUR type of target to a FAPI type of target.
-        const fapi::Target l_fapi_mba_target(
-                TARGET_TYPE_MBA_CHIPLET,
-                reinterpret_cast<void *>
-        (const_cast<TARGETING::Target*>(l_mba_target)) );
+        const fapi::Target l_fapi_mba_target( TARGET_TYPE_MBA_CHIPLET,
+                    (const_cast<TARGETING::Target*>(l_mba_target)) );
 
         //  call the HWP with each fapi::Target
         FAPI_INVOKE_HWP(l_err, mss_eff_config, l_fapi_mba_target);
@@ -438,8 +432,8 @@ void*    call_mss_eff_config( void *io_pArgs )
         if ( l_err )
         {
             TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                    "ERROR 0x%.8X:  mss_eff_config HWP( mba %d ) ",
-                    l_err->reasonCode(), i );
+                    "ERROR 0x%.8X:  mss_eff_config HWP ",
+                    l_err->reasonCode());
 
             ErrlUserDetailsTarget myDetails(l_mba_target);
 
@@ -451,15 +445,17 @@ void*    call_mss_eff_config( void *io_pArgs )
         else
         {
             TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                     "SUCCESS :  mss_eff_config HWP( mba %d )", i );
+                     "SUCCESS :  mss_eff_config HWP");
         }
     }   // endfor
 
     TARGETING::TargetHandleList l_procs;
     getAllChips(l_procs, TYPE_PROC);
 
-    for (TARGETING::TargetHandleList::iterator l_iter = l_procs.begin();
-         l_iter != l_procs.end() && !l_err; ++l_iter)
+    for (TARGETING::TargetHandleList::const_iterator
+         l_iter = l_procs.begin();
+         l_iter != l_procs.end() && !l_err;
+         ++l_iter)
     {
         TARGETING::Target*  l_target = *l_iter;
 

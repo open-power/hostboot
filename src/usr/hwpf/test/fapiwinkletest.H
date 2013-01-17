@@ -1,26 +1,25 @@
-/*  IBM_PROLOG_BEGIN_TAG
- *  This is an automatically generated prolog.
- *
- *  $Source: src/usr/hwpf/test/fapiwinkletest.H $
- *
- *  IBM CONFIDENTIAL
- *
- *  COPYRIGHT International Business Machines Corp. 2012
- *
- *  p1
- *
- *  Object Code Only (OCO) source materials
- *  Licensed Internal Code Source Materials
- *  IBM HostBoot Licensed Internal Code
- *
- *  The source code for this program is not published or other-
- *  wise divested of its trade secrets, irrespective of what has
- *  been deposited with the U.S. Copyright Office.
- *
- *  Origin: 30
- *
- *  IBM_PROLOG_END_TAG
- */
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/usr/hwpf/test/fapiwinkletest.H $                          */
+/*                                                                        */
+/* IBM CONFIDENTIAL                                                       */
+/*                                                                        */
+/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/*                                                                        */
+/* p1                                                                     */
+/*                                                                        */
+/* Object Code Only (OCO) source materials                                */
+/* Licensed Internal Code Source Materials                                */
+/* IBM HostBoot Licensed Internal Code                                    */
+/*                                                                        */
+/* The source code for this program is not published or otherwise         */
+/* divested of its trade secrets, irrespective of what has been           */
+/* deposited with the U.S. Copyright Office.                              */
+/*                                                                        */
+/* Origin: 30                                                             */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
 
 #ifndef __FAPIWINKLETEST_H
 #define __FAPIWINKLETEST_H
@@ -76,15 +75,14 @@ public:
 
 
         // loop thru all the cpu's
-        for (uint8_t l_cpuNum=0; l_cpuNum < l_cpuTargetList.size(); l_cpuNum++ )
+        for (TargetHandleList::iterator l_cpu_iter = l_cpuTargetList.begin();
+                l_cpu_iter != l_cpuTargetList.end();
+                ++l_cpu_iter)
         {
             //  make a local copy of the CPU target
-            TARGETING::Target*  l_cpu_target = l_cpuTargetList[l_cpuNum];
+            TARGETING::Target* l_cpu_target = *l_cpu_iter;
 
-            //  dump physical path to target
-            EntityPath l_path;
-            l_path  =   l_cpu_target->getAttr<ATTR_PHYS_PATH>();
-            l_path.dump();
+            TS_TRACE( "target HUID %.8X", TARGETING::get_huid(l_cpu_target));
 
             // cast OUR type of target to a FAPI type of target.
             fapi::Target l_fapi_cpu_target(
@@ -174,17 +172,16 @@ public:
         getAllChips(l_cpuTargetList, TYPE_PROC);
 
         // loop thru all the cpu's
-        for (uint8_t l_cpuNum=0; l_cpuNum < l_cpuTargetList.size(); l_cpuNum++ )
+        for (TargetHandleList::iterator l_cpu_iter = l_cpuTargetList.begin();
+                l_cpu_iter != l_cpuTargetList.end();
+                ++l_cpu_iter)
         {
             //  make a local copy of the CPU target
-            TARGETING::Target*  l_cpu_target = l_cpuTargetList[l_cpuNum];
+            TARGETING::Target* l_cpu_target = *l_cpu_iter;
 
-            TS_TRACE( "testRepairRings: cpuNum = 0x%x ", l_cpuNum );
-
-            //  dump physical path to target
-            EntityPath l_path;
-            l_path  =   l_cpu_target->getAttr<ATTR_PHYS_PATH>();
-            l_path.dump();
+            TS_TRACE( "testRepairRings: "
+                "target HUID %.8X",
+                TARGETING::get_huid(l_cpu_target));
 
             // cast OUR type of target to a FAPI type of target.
             fapi::Target l_fapi_cpu_target(
