@@ -7,13 +7,6 @@ $hb_machine = (shell "env | grep 'GFW_P8_.*_PROC_CCIN' | sed 's/GFW_P8_\\(.*\\)_
 $hb_machine = (python "\""+$hb_machine+"\".lower()")
 python "os.environ['HB_MACHINE'] = \""+$hb_machine+"\""
 
-# Preload VPD in PNOR
-try {
-    run-python-file (lookup-file hbfw/hb-pnor-vpd-preload.py)
-    fpga0.sfc_master_mem.load-file ./sysmvpd.dat 0x3E0A000
-    fpga0.sfc_master_mem.load-file ./sysspd.dat 0x3DCA000
-} except { echo "ERROR: Failed to preload VPD into PNOR." }
-
 # Load HB debug tools.
 try {
     run-python-file (lookup-file hbfw/simics-debug-framework.py)

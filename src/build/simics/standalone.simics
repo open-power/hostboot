@@ -1,5 +1,12 @@
 p8Proc0.proc_fsi2host_mbox->responder_enable=1
 
+# Preload VPD in PNOR
+try {
+    run-python-file (lookup-file hbfw/hb-pnor-vpd-preload.py)
+    fpga0.sfc_master_mem.load-file ./sysmvpd.dat 0x3E0A000
+    fpga0.sfc_master_mem.load-file ./sysspd.dat 0x3DCA000
+} except { echo "ERROR: Failed to preload VPD into PNOR." }
+
 #Trigger a power on to cec-chip
 @SIM_get_interface(conf.p8Proc0.proc_chip, "signal").signal_raise(conf.p8Proc0.proc_chip)
 
