@@ -110,7 +110,7 @@ sub main
         my $buffer = ::read64($serviceAddr + 8*$i);
         my $page = ::read64($buffer + BUFFER_FIRST_PAGE_OFFSET);
 
-        readPage($page, BUFFER_PAGE_NEXT_OFFSET, \@bufferPages);
+        readPage($page, BUFFER_PAGE_PREV_OFFSET, \@bufferPages);
     }
 
     while(@bufferPages)
