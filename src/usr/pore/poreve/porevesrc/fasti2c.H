@@ -1,30 +1,29 @@
-/*  IBM_PROLOG_BEGIN_TAG
- *  This is an automatically generated prolog.
- *
- *  $Source: src/usr/pore/poreve/porevesrc/fasti2c.H $
- *
- *  IBM CONFIDENTIAL
- *
- *  COPYRIGHT International Business Machines Corp. 2012
- *
- *  p1
- *
- *  Object Code Only (OCO) source materials
- *  Licensed Internal Code Source Materials
- *  IBM HostBoot Licensed Internal Code
- *
- *  The source code for this program is not published or other-
- *  wise divested of its trade secrets, irrespective of what has
- *  been deposited with the U.S. Copyright Office.
- *
- *  Origin: 30
- *
- *  IBM_PROLOG_END_TAG
- */
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/usr/pore/poreve/porevesrc/fasti2c.H $                     */
+/*                                                                        */
+/* IBM CONFIDENTIAL                                                       */
+/*                                                                        */
+/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/*                                                                        */
+/* p1                                                                     */
+/*                                                                        */
+/* Object Code Only (OCO) source materials                                */
+/* Licensed Internal Code Source Materials                                */
+/* IBM HostBoot Licensed Internal Code                                    */
+/*                                                                        */
+/* The source code for this program is not published or otherwise         */
+/* divested of its trade secrets, irrespective of what has been           */
+/* deposited with the U.S. Copyright Office.                              */
+/*                                                                        */
+/* Origin: 30                                                             */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
 #ifndef __VSBE_FASTI2C_H
 #define __VSBE_FASTI2C_H
 
-// $Id: fasti2c.H,v 1.6 2012/05/23 19:51:40 bcbrock Exp $
+// $Id: fasti2c.H,v 1.7 2012/10/05 23:20:32 bcbrock Exp $
 
 /// \file fasti2c.H
 /// \brief The "fast-mode" I2C controllers and memory models used
@@ -391,7 +390,7 @@ public:
         ADDRESS_WRITE_ONGOING,
         DATA_READ_ONGOING,
         DATA_AVAILABLE,
-        WRITE_DATA_EXPECTED,
+        WRITE_COMMAND_EXPECTED,
         DATA_WRITE_ONGOING
     };
 
@@ -417,8 +416,8 @@ public:
     /// ME_AMBIGUOUS_CONFIGURATION.
     ModelError
     attachMemory(I2cMemory* i_memory, 
-                 const uint8_t i_port, 
-                 const uint8_t i_deviceAddress);
+                 const unsigned i_port, 
+                 const unsigned i_deviceAddress);
 
     /// Handle a PIB transaction
     ///
@@ -495,8 +494,12 @@ protected:
     /// The last value generated in the status register
     FastI2cStatusRegister iv_status;
 
+    /// The last value written to the data register
+    uint64_t iv_data;
+
     /// The data FIFO.  Data is left-justified in this register.
     uint64_t iv_fifo;
+
 
     ///////////////////////////// Safety //////////////////////////////////
 
@@ -514,11 +517,12 @@ private:
 /// Simplified model of the LPC controller as a fast-mode I2C controller
 ///
 /// The LPC controller appears as a pseudo-FastI2cController with a couple of
-/// extra specializations.  The fast-mode I2C controller specification
-/// is extended with two extra registers : The ECC start and stop
-/// addresses. We do not model ECC in our model, therefore this model only
-/// allows accesses that fall within the ECC window.  The SBE will never
-/// address outside of the ECC window.
+/// extra specializations.  
+///
+/// - The fast-mode I2C controller specification is extended with two extra
+/// registers : The ECC start and stop addresses. We do not model ECC in our
+/// model, therefore this model only allows accesses that fall within the ECC
+/// window.  The SBE will never address outside of the ECC window.
 
 class
 vsbe::LpcController : public FastI2cController

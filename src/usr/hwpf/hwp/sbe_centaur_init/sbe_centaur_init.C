@@ -1,26 +1,25 @@
-/*  IBM_PROLOG_BEGIN_TAG
- *  This is an automatically generated prolog.
- *
- *  $Source: src/usr/hwpf/hwp/sbe_centaur_init/sbe_centaur_init.C $
- *
- *  IBM CONFIDENTIAL
- *
- *  COPYRIGHT International Business Machines Corp. 2012
- *
- *  p1
- *
- *  Object Code Only (OCO) source materials
- *  Licensed Internal Code Source Materials
- *  IBM HostBoot Licensed Internal Code
- *
- *  The source code for this program is not published or other-
- *  wise divested of its trade secrets, irrespective of what has
- *  been deposited with the U.S. Copyright Office.
- *
- *  Origin: 30
- *
- *  IBM_PROLOG_END_TAG
- */
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/usr/hwpf/hwp/sbe_centaur_init/sbe_centaur_init.C $        */
+/*                                                                        */
+/* IBM CONFIDENTIAL                                                       */
+/*                                                                        */
+/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/*                                                                        */
+/* p1                                                                     */
+/*                                                                        */
+/* Object Code Only (OCO) source materials                                */
+/* Licensed Internal Code Source Materials                                */
+/* IBM HostBoot Licensed Internal Code                                    */
+/*                                                                        */
+/* The source code for this program is not published or otherwise         */
+/* divested of its trade secrets, irrespective of what has been           */
+/* deposited with the U.S. Copyright Office.                              */
+/*                                                                        */
+/* Origin: 30                                                             */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
 /**
  *  @file sbe_centaur_init.C
  *
@@ -54,9 +53,10 @@
 #include "sbe_centaur_init.H"
 #include <hwpisteperror.H>
 
-// Extern function declaration
 extern fapi::ReturnCode fapiPoreVe(const fapi::Target i_target,
-                   std::vector<vsbe::FapiPoreVeArg *> & io_sharedObjectArgs);
+		   std::list<uint64_t> & io_sharedObjectArgs);
+
+
 // Constants
 // Memory Relocation Register for Centaur SBE image
 const uint64_t CENTAUR_SBE_PNOR_MRR = 0;
@@ -132,7 +132,7 @@ void*    call_sbe_centaur_init( void *io_pArgs )
         }
 
         // Setup args
-        std::vector<FapiPoreVeArg *> myArgs;
+        std::list<uint64_t> myArgs;
 
         // Set FapiPoreVeOtherArg: run unlimited instructions
         FapiPoreVeOtherArg *l_otherArg =
@@ -140,7 +140,7 @@ void*    call_sbe_centaur_init( void *io_pArgs )
         // Entry point
         l_otherArg->iv_entryPoint = const_cast<char*>("pnor::_sbe_pnor_start");
         l_otherArg->iv_mrr = CENTAUR_SBE_PNOR_MRR;
-        myArgs.push_back(l_otherArg);
+        myArgs.push_back(reinterpret_cast<uint64_t>(l_otherArg));
 
         // Set FapiPoreVeMemArg for pnor option, base address = 0
         uint32_t base_addr = 0;
@@ -148,13 +148,13 @@ void*    call_sbe_centaur_init( void *io_pArgs )
         FapiPoreVeMemArg* l_memArg = new FapiPoreVeMemArg(ARG_PNOR,
                                                base_addr, l_sbePnorSize,
                                                static_cast<void*>(l_dataPnor));
-        myArgs.push_back(l_memArg);
+        myArgs.push_back(reinterpret_cast<uint64_t>(l_memArg));
 
         // Create state argument to dump out state for debugging purpose
         FapiPoreVeStateArg *l_stateArg = new FapiPoreVeStateArg(NULL);
         l_stateArg->iv_installState = false;
         l_stateArg->iv_extractState = true;
-        myArgs.push_back(l_stateArg);
+        myArgs.push_back(reinterpret_cast<uint64_t>(l_stateArg));
 
         // Loop thru all Centaurs in list
         for ( size_t i = 0; i < l_membufTargetList.size(); i++ )

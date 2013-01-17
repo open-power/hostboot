@@ -1,27 +1,26 @@
-/*  IBM_PROLOG_BEGIN_TAG
- *  This is an automatically generated prolog.
- *
- *  $Source: src/usr/pore/poreve/porevesrc/poreve.C $
- *
- *  IBM CONFIDENTIAL
- *
- *  COPYRIGHT International Business Machines Corp. 2012
- *
- *  p1
- *
- *  Object Code Only (OCO) source materials
- *  Licensed Internal Code Source Materials
- *  IBM HostBoot Licensed Internal Code
- *
- *  The source code for this program is not published or other-
- *  wise divested of its trade secrets, irrespective of what has
- *  been deposited with the U.S. Copyright Office.
- *
- *  Origin: 30
- *
- *  IBM_PROLOG_END_TAG
- */
-// $Id: poreve.C,v 1.24 2012/06/18 23:38:37 bcbrock Exp $
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/usr/pore/poreve/porevesrc/poreve.C $                      */
+/*                                                                        */
+/* IBM CONFIDENTIAL                                                       */
+/*                                                                        */
+/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/*                                                                        */
+/* p1                                                                     */
+/*                                                                        */
+/* Object Code Only (OCO) source materials                                */
+/* Licensed Internal Code Source Materials                                */
+/* IBM HostBoot Licensed Internal Code                                    */
+/*                                                                        */
+/* The source code for this program is not published or otherwise         */
+/* divested of its trade secrets, irrespective of what has been           */
+/* deposited with the U.S. Copyright Office.                              */
+/*                                                                        */
+/* Origin: 30                                                             */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
+// $Id: poreve.C,v 1.27 2012/12/06 18:03:52 bcbrock Exp $
 
 /// \file poreve.C
 /// \brief The PORE Virtual Environment
@@ -29,6 +28,7 @@
 #include "poreve.H"
 
 using namespace vsbe;
+using namespace fapi;
 
 
 ////////////////////////////////////////////////////////////////////////////
@@ -74,20 +74,16 @@ PoreVeBase::PoreVeBase(const PoreIbufId i_id,
         // for use with Centaur targets; See the documentation for
         // iv_pnorI2cParam and the code for the reset() method.
 
-#ifdef __USE_POREVE_ATTRIBUTES__
-
-        iv_constructorRc = FAPI_ATTR_GET_(ATTR_PNOR_I2C_ADDRESS_BYTES, 
+        iv_constructorRc = FAPI_ATTR_GET(ATTR_PNOR_I2C_ADDRESS_BYTES, 
                                           &iv_masterTarget,
                                           pnorI2cAddressBytes);
         if (iv_constructorRc) {
             FAPI_ERR("Unable to get ATTR_PNOR_I2C_ADDRESS_BYTES");
             break;
         }
-#else
 
-        pnorI2cAddressBytes = 4;
-
-#endif
+        FAPI_DBG("ATTR_PNOR_I2C_ADDRESS_BYTES attribute = %u",
+                 pnorI2cAddressBytes);
 
         iv_pnorController.configure(&iv_masterTarget,
                                     &iv_dataBuffer,
@@ -102,6 +98,14 @@ PoreVeBase::PoreVeBase(const PoreIbufId i_id,
         iv_pnorController.attachMemory(&iv_pnorMemory,
                                        PNOR_I2C_PORT,
                                        PNOR_I2C_DEVICE_ADDRESS);
+
+        memset(iv_lpcRegisterSpace, 0, LPC_REGISTER_SPACE_SIZE);
+
+        iv_pnorMemory.map(LPC_REGISTER_SPACE_BASE,
+                          LPC_REGISTER_SPACE_SIZE,
+                          ACCESS_MODE_READ | ACCESS_MODE_WRITE,
+                          &iv_lpcRegisterSpace,
+                          0);
 
         iv_pnorI2cParam.val = 0;
         iv_pnorI2cParam.i2c_engine_identifier = (PNOR_PIB_BASE >> 16) & 0xf;
@@ -139,24 +143,19 @@ PoreVeBase::reset(fapi::Target i_slaveTarget)
     // Centaur PNOR image to execute.  This is only done for Centaur since
     // Centaur SBE code is always run virtually.
 
-#ifdef __USE_POREVE_ATTRIBUTES__
-
     /// \bug This does not work yet, but it doesn't hurt (much) to go ahead
     /// and initialize the register.
 
     uint8_t name;
-    rc = FAPI_ATTR_GET_PRIVILEGED(ATTR_NAME, i_slaveTarget, name);
+    rc = FAPI_ATTR_GET_PRIVILEGED(ATTR_NAME, &i_slaveTarget, name);
     if (!rc) {
+
+        FAPI_DBG("ATTR_NAME attribute = %u\n", name);
+
         if (name == ENUM_ATTR_NAME_CENTAUR) {
             iv_pore.registerWrite(PORE_I2C_E0_PARAM, iv_pnorI2cParam.val);
         }
     }
-
-#else
-
-    iv_pore.registerWrite(PORE_I2C_E0_PARAM, iv_pnorI2cParam.val);
-
-#endif
 
     return rc;
 }
@@ -303,40 +302,41 @@ PoreVe::PoreVe(const PoreIbufId i_id,
 
         seepromConfig = (i_useSecondarySeepromConfig ? 1 : 0);
 
-#ifdef __USE_POREVE_ATTRIBUTES__
-
-        iv_constructorRc = FAPI_ATTR_GET(ATTR_SEEPROM_I2C_ADDRESS_BYTES, 
+        iv_constructorRc = FAPI_ATTR_GET(ATTR_SBE_SEEPROM_I2C_ADDRESS_BYTES, 
                                          &iv_masterTarget,
                                          seepromI2cAddressBytes);
         if (iv_constructorRc) {
-            FAPI_ERR("Unable to get ATTR_SEEPROM_I2C_ADDRESS_BYTES");
+            FAPI_ERR("Unable to get ATTR_SBE_SEEPROM_I2C_ADDRESS_BYTES");
             break;
         }
+        FAPI_DBG("ATTR_SBE_SEEPROM_I2C_ADDRESS_BYTES attribute = %u",
+                 seepromI2cAddressBytes);
 
-        iv_constructorRc = FAPI_ATTR_GET(ATTR_SEEPROM_I2C_DEVICE_ADDRESS,
+
+        iv_constructorRc = FAPI_ATTR_GET(ATTR_SBE_SEEPROM_I2C_DEVICE_ADDRESS,
                                          &iv_masterTarget,
-                                         seepromI2cDeviceAddtess);
+                                         seepromI2cDeviceAddress);
         if (iv_constructorRc) {
-            FAPI_ERR("Unable to get ATTR_SEEPROM_I2C_DEVICE_ADDRESS");
+            FAPI_ERR("Unable to get ATTR_SBE_SEEPROM_I2C_DEVICE_ADDRESS");
             break;
         }
+        FAPI_DBG("ATTR_SBE_SEEPROM_I2C_DEVICE_ADDRESS attribute = "
+                 "{0x%02x, 0x%02x}",
+                 seepromI2cDeviceAddress[0],
+                 seepromI2cDeviceAddress[1]);
 
 
-        iv_constructorRc = FAPI_ATTR_GET(ATTR_SEEPROM_I2C_PORT,
+        iv_constructorRc = FAPI_ATTR_GET(ATTR_SBE_SEEPROM_I2C_PORT,
                                          &iv_masterTarget,
                                          seepromI2cPort);
         if (iv_constructorRc) {
-            FAPI_ERR("Unable to get ATTR_SEEPROM_I2C_PORT");
+            FAPI_ERR("Unable to get ATTR_SBE_SEEPROM_I2C_PORT");
             break;
         }
-
-#else
-
-        seepromI2cAddressBytes = 2; // Murano primary configuration
-        seepromI2cDeviceAddress[0] = 0x56;
-        seepromI2cPort[0] = 0;            
-
-#endif
+        FAPI_DBG("ATTR_SBE_SEEPROM_I2C_PORT attribute = "
+                 "{%u, %u}", 
+                 seepromI2cPort[0],
+                 seepromI2cPort[1]);
 
         iv_seepromController.configure(&iv_slaveTarget,
                                        &iv_dataBuffer,
@@ -347,8 +347,6 @@ PoreVe::PoreVe(const PoreIbufId i_id,
         iv_pib.attachPrimarySlave(&iv_seepromController);
 
         iv_seepromMemory.configure(seepromI2cAddressBytes);
-
-        // printf("ATTACHING MEMORY\n");
 
         iv_seepromController.
             attachMemory(&iv_seepromMemory,
@@ -448,13 +446,14 @@ PoreVe::~PoreVe()
 }
 
 
+ModelError
+PoreVe::detachSlave(Slave* i_slave)
+{
+    ModelError me;
 
-    
-
-    
-
-
-    
-    
-    
-
+    me = iv_pib.detachSlave(i_slave);
+    if (me) {
+        me = iv_oci.detachSlave(i_slave);
+    }
+    return me;
+}

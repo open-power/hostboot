@@ -1,0 +1,113 @@
+<!-- IBM_PROLOG_BEGIN_TAG                                                   -->
+<!-- This is an automatically generated prolog.                             -->
+<!--                                                                        -->
+<!-- $Source: src/usr/hwpf/hwp/poreve_memory_attributes.xml $               -->
+<!--                                                                        -->
+<!-- IBM CONFIDENTIAL                                                       -->
+<!--                                                                        -->
+<!-- COPYRIGHT International Business Machines Corp. 2013                   -->
+<!--                                                                        -->
+<!-- p1                                                                     -->
+<!--                                                                        -->
+<!-- Object Code Only (OCO) source materials                                -->
+<!-- Licensed Internal Code Source Materials                                -->
+<!-- IBM HostBoot Licensed Internal Code                                    -->
+<!--                                                                        -->
+<!-- The source code for this program is not published or otherwise         -->
+<!-- divested of its trade secrets, irrespective of what has been           -->
+<!-- deposited with the U.S. Copyright Office.                              -->
+<!--                                                                        -->
+<!-- Origin: 30                                                             -->
+<!--                                                                        -->
+<!-- IBM_PROLOG_END_TAG                                                     -->
+<!-- $Id: poreve_memory_attributes.xml,v 1.3 2013/01/04 21:42:27 farrugia Exp $ -->
+<!-- 
+     Attributes related to SEEPROM and PNOR configuration required by the
+     PoreVe 
+     
+     The PoreVe implements a system model of the PORE-SBE and attached
+     memory devices that must be configured accoding to the actual chip- and
+     system-specific configuration in order to correctly execute PORE
+     firmware. 
+
+     Each chip has access to 2 SEEPROM memories containing PORE
+     code.  These memories appear on different I2C addresses and/or I2C
+     controller ports depending on the chip.  The size of the memory
+     (specified as the number of address bytes) is also a required parameter
+     of the controller. 
+
+     The PNOR memory is managed as a pseudo-I2C device so it also requires
+     the memory size specification.  Only "master" chips in the system have
+     PNOR memories attached and non-0 memory address-byte specifications. As
+     a side effect, the PoreVe will only be able to be configured and run
+     on a chip with a PNOR attached. In the case of the PNOR the I2C device
+     and port numbers are not required as they are ignored by the PgP
+     hardware. 
+--> 
+<attributes>
+  <!-- *********************************************************************
+       -->
+  <attribute>
+    <id>ATTR_SBE_SEEPROM_I2C_ADDRESS_BYTES</id>
+    <targetType>TARGET_TYPE_PROC_CHIP, TARGET_TYPE_MEMBUF_CHIP</targetType>
+    <description>
+      The number of address bytes required to address the SEEPROM memory
+      device that contains SBE IPL code.  This will vary by device based on
+      the device capacity, and must be either 1, 2, 3 or 4.
+
+      Provided by the Machine Readable Workbook
+    </description>
+    <valueType>uint8</valueType>
+    <platInit/>
+    <persistRuntime/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_SBE_SEEPROM_I2C_DEVICE_ADDRESS</id>
+    <targetType>TARGET_TYPE_PROC_CHIP, TARGET_TYPE_MEMBUF_CHIP</targetType>
+    <description>
+      A 2-element array containing the I2C device address of the primary (0)
+      and secondary (1) SEEPROM devices containing SBE IPL code.
+
+      Provided by the Machine Readable Workbook
+    </description>
+    <valueType>uint8</valueType>
+    <array>2</array>
+    <platInit/>
+    <persistRuntime/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_SBE_SEEPROM_I2C_PORT</id>
+    <targetType>TARGET_TYPE_PROC_CHIP, TARGET_TYPE_MEMBUF_CHIP</targetType>
+    <description>
+      A 2-element array containing the I2C controller port number of the
+      primary (0) and secondary (1) SEEPROM devices containing SBE IPL code.
+
+      Provided by the Machine Readable Workbook
+    </description>
+    <valueType>uint8</valueType>
+    <array>2</array>
+    <platInit/>
+    <persistRuntime/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PNOR_I2C_ADDRESS_BYTES</id>
+    <targetType>TARGET_TYPE_PROC_CHIP, TARGET_TYPE_MEMBUF_CHIP</targetType>
+    <description>
+      The number of address bytes required to address the PNOR memory device
+      via the pseudo-I2C (LPC, ECCAX) controller.  This will vary by device
+      based on the device capacity, and must be either 0, 1, 2, 3 or 4.
+
+      This attribute will be set to 0 for chips with no PNOR attached
+      (PoreVe will never run on these chips).
+
+      Provided by the Machine Readable Workbook
+    </description>
+    <valueType>uint8</valueType>
+    <platInit/>
+    <persistRuntime/>
+  </attribute>
+  <!-- ********************************************************************* -->
+</attributes>

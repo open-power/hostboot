@@ -1,25 +1,25 @@
-<!--  IBM_PROLOG_BEGIN_TAG
-     This is an automatically generated prolog.
-   
-     $Source: src/usr/pore/fapiporeve/fapiPoreVe_errors.xml $
-   
-     IBM CONFIDENTIAL
-   
-     COPYRIGHT International Business Machines Corp. 2012
-   
-     p1
-   
-     Object Code Only (OCO) source materials
-     Licensed Internal Code Source Materials
-     IBM HostBoot Licensed Internal Code
-   
-     The source code for this program is not published or other-
-     wise divested of its trade secrets, irrespective of what has
-     been deposited with the U.S. Copyright Office.
-   
-     Origin: 30
-   
-     IBM_PROLOG_END_TAG -->
+<!-- IBM_PROLOG_BEGIN_TAG                                                   -->
+<!-- This is an automatically generated prolog.                             -->
+<!--                                                                        -->
+<!-- $Source: src/usr/pore/fapiporeve/fapiPoreVe_errors.xml $               -->
+<!--                                                                        -->
+<!-- IBM CONFIDENTIAL                                                       -->
+<!--                                                                        -->
+<!-- COPYRIGHT International Business Machines Corp. 2012,2013              -->
+<!--                                                                        -->
+<!-- p1                                                                     -->
+<!--                                                                        -->
+<!-- Object Code Only (OCO) source materials                                -->
+<!-- Licensed Internal Code Source Materials                                -->
+<!-- IBM HostBoot Licensed Internal Code                                    -->
+<!--                                                                        -->
+<!-- The source code for this program is not published or otherwise         -->
+<!-- divested of its trade secrets, irrespective of what has been           -->
+<!-- deposited with the U.S. Copyright Office.                              -->
+<!--                                                                        -->
+<!-- Origin: 30                                                             -->
+<!--                                                                        -->
+<!-- IBM_PROLOG_END_TAG                                                     -->
 <!-- Error definitions for fapiPoreVe procedure -->
 <hwpErrors>
   <!-- *********************************************************************** -->
@@ -46,6 +46,12 @@
   <hwpError>
     <rc>RC_FAPIPOREVE_UNKNOWN_ARG_TYPE</rc>
     <description>Found an unknown arg type</description>
+    <ffdc>TYPE</ffdc>
+  </hwpError>
+  <hwpError>
+    <rc>RC_FAPIPOREVE_ERROR_DETACHING_SLAVE</rc>
+    <description>Model error detaching a pib slave</description>
+    <ffdc>ERROR</ffdc>
     <ffdc>TYPE</ffdc>
   </hwpError>
   <hwpError>
@@ -124,53 +130,5 @@
   <hwpError>
     <rc>RC_FAPIPOREVE_ERROR_EXTRACTING_STATE</rc>
     <description>Model error extracting state</description>
-  </hwpError>
-  <hwpError>
-    <rc>RC_POREVE_PIB2CFAM_ME_NOT_MAPPED_IN_MEMORY</rc>
-    <description>pib2cfam error. Not mapped in memory</description>
-  </hwpError>
-  <hwpError>
-    <rc>RC_POREVE_PIB2CFAM_ME_BUS_SLAVE_PERMISSION_DENIED</rc>
-    <description>Bus slave permission denied</description>
-  </hwpError>
-  <hwpError>
-    <rc>RC_POREVE_FASTI2C_OPERATION_ERROR</rc>
-    <description>Fasti2c operation error</description>
-  </hwpError>
-  <hwpError>
-    <rc>RC_POREVE_BUS_ME_NOT_MAPPED_IN_BUS</rc>
-    <description>Bus error. Not mapped in bus</description>
-  </hwpError>
-  <hwpError>
-    <rc>RC_POREVE_ME_NO_BUS_MODEL</rc>
-    <description>Error. No pibmaster bus model</description>
-  </hwpError>
-  <hwpError>
-    <rc>RC_POREVE_LPC_OPERATION_ERROR</rc>
-    <description>Lpc operation error</description>
-  </hwpError>
-  <hwpError>
-    <rc>RC_POREVE_PIBMEM_OPERATION_ERROR</rc>
-    <description>pibmem operation error</description>
-  </hwpError>
-  <hwpError>
-    <rc>RC_POREVE_BUS_OPERATION_ERROR</rc>
-    <description>bus operation error</description>
-  </hwpError>
-  <hwpError>
-    <rc>RC_POREVE_BUS_OCI_SLAVE_READ_NOT_SUPPORTED</rc>
-    <description>OCI slave read not supported</description>
-  </hwpError>
-  <hwpError>
-    <rc>RC_POREVE_BUS_OCI_SLAVE_WRITE_NOT_SUPPORTED</rc>
-    <description>OCI slave read not supported</description>
-  </hwpError>
-  <hwpError>
-    <rc>RC_POREVE_PIBMEM_BAD_MODE</rc>
-    <description>Bad Mode specified in pibmem transaction</description>
-  </hwpError>
-  <hwpError>
-    <rc>RC_POREVE_PIBMEM_BAD_OFFSET</rc>
-    <description>Bad Offset specified in pibmem transaction</description>
   </hwpError>
 </hwpErrors>

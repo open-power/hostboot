@@ -9744,4 +9744,100 @@ Measured in GB</description>
     </hwpfToHbAttrMap>
 </attribute>
 
+<!-- ===== Supporting poreve_memory_attributes.xml ===== -->
+
+<attribute>
+    <id>SBE_SEEPROM_I2C_ADDRESS_BYTES</id>
+    <description>
+      The number of address bytes required to address the SEEPROM memory
+      device that contains SBE IPL code.  This will vary by device based on
+      the device capacity, and must be either 1, 2, 3 or 4.
+    </description>
+    <simpleType>
+        <uint8_t>
+            <default>4</default>
+        </uint8_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_SBE_SEEPROM_I2C_ADDRESS_BYTES</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>SBE_SEEPROM_I2C_DEVICE_ADDRESS</id>
+    <description>
+      A 2-element array containing the I2C device address of the primary (0)
+      and secondary (1) SEEPROM devices containing SBE IPL code.
+      Provided by the Machine Readable Workbook
+    </description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+        <array>2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_SBE_SEEPROM_I2C_DEVICE_ADDRESS</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>SBE_SEEPROM_I2C_PORT</id>
+    <description>
+      A 2-element array containing the I2C controller port number of the
+      primary (0) and secondary (1) SEEPROM devices containing SBE IPL code.
+      Provided by the Machine Readable Workbook
+    </description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+        <array>2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_SBE_SEEPROM_I2C_PORT</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>PNOR_I2C_ADDRESS_BYTES</id>
+    <description>
+      The number of address bytes required to address the PNOR memory device
+      via the pseudo-I2C (LPC, ECCAX) controller.  This will vary by device
+      based on the device capacity, and must be either 0, 1, 2, 3 or 4.
+
+      This attribute will be set to 0 for chips with no PNOR attached
+      (PoreVe will never run on these chips).
+
+      Provided by the Machine Readable Workbook
+    </description>
+    <simpleType>
+        <uint8_t>
+            <default>4</default>
+        </uint8_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_PNOR_I2C_ADDRESS_BYTES</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<!-- ===== End supporting poreve_memory_attributes.xml ===== -->
+
+
 </attributes>

@@ -1,25 +1,25 @@
-//  IBM_PROLOG_BEGIN_TAG
-//  This is an automatically generated prolog.
-//
-//  $Source: src/usr/pore/poreve/pore_model/ibuf/pore_fi2c.c $
-//
-//  IBM CONFIDENTIAL
-//
-//  COPYRIGHT International Business Machines Corp. 2012
-//
-//  p1
-//
-//  Object Code Only (OCO) source materials
-//  Licensed Internal Code Source Materials
-//  IBM HostBoot Licensed Internal Code
-//
-//  The source code for this program is not published or other-
-//  wise divested of its trade secrets, irrespective of what has
-//  been deposited with the U.S. Copyright Office.
-//
-//  Origin: 30
-//
-//  IBM_PROLOG_END
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/usr/pore/poreve/pore_model/ibuf/pore_fi2c.c $             */
+/*                                                                        */
+/* IBM CONFIDENTIAL                                                       */
+/*                                                                        */
+/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/*                                                                        */
+/* p1                                                                     */
+/*                                                                        */
+/* Object Code Only (OCO) source materials                                */
+/* Licensed Internal Code Source Materials                                */
+/* IBM HostBoot Licensed Internal Code                                    */
+/*                                                                        */
+/* The source code for this program is not published or otherwise         */
+/* divested of its trade secrets, irrespective of what has been           */
+/* deposited with the U.S. Copyright Office.                              */
+/*                                                                        */
+/* Origin: 30                                                             */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
 /******************************************************************************
  *
  * Virtual PORe Engine
@@ -241,7 +241,6 @@ static int finalDataWrite(struct fi2c *p, const uint8_t *buf, unsigned int len)
 	return me;
 }
 
-// Modeling notes:
 //
 // o  The RESET register is not modeled here
 //
@@ -251,21 +250,30 @@ static int finalDataWrite(struct fi2c *p, const uint8_t *buf, unsigned int len)
 //    read of the status register.  This is done to simplify the PORE
 //    engine model.
 //
-// o  Only the follwing types of control register actions are modeled:
-//    *  Address write : with_start; with_address; !with_continue; with_stop;
-//                       data_length == 0
-//    *  Data read : with_start; with_address; !with_continue; with_stop;
-//                   data_length == [4,8]
-//    *  Data write : with_start; with_address; !with_continue; with_stop;
-//                   data_length == 8
+// o  Only the following types of control register actions are modeled:
 //
-// o  The memory models hold the last address written
+//    *  Set address : with_start; with_address; !with_continue; with_stop;
+//                     RNW == 1; Data_length == [4, 8];
+//                     Address length != 0; Address provided
+//                     Setting the address also fetches data and increments
+//                     the address stored in memory
+//
+//    *  Data Read   : with_start; with_address; !with_continue; with_stop;
+//                     RNW == 1; Data_length == [4, 8];
+//                      Address length == 0; No address provided
+//                     This operation fetches data and increments the address
+//                     stored in memory.
+//
+//    *  Data write  : with_start; with_address; !with_continue; with_stop;
+//                     RNW == 0; Data_length == 8
+//                     Addrress length != 0; Address provided
+//
+// o  The memory models hold the last address written and implement the
+//    address auto-increment after every read or write
 //
 // o  Redundant reads of the STATUS register are allowed
 //
-// o  PORE only does 4/8 byte reads and 8 byte writes, so any other data
-//    access is considered an error (although the models could easily be
-//    extended to allow them).
+// o  PORE only allows 4/8 byte reads and 8 byte writes.
 
 static int fi2c_read(struct pore_bus *b, uint64_t addr,
 		     uint8_t *buf, unsigned int len,
@@ -448,13 +456,6 @@ static int fi2c_write(struct pore_bus *b, uint64_t addr,
 				rc = PORE_ERR_FASTI2C_CONTROL_ERROR;
 				break;
 			}
-			if (p->control.data_length == 0) {
-				rc = addressWrite(p);
-				if (rc < 0)
-					break;
-				rc = len;
-				break;
-			}
 			if (p->control.data_length != 8) {
 				BUG();
 				p->state = ERROR;
@@ -465,7 +466,6 @@ static int fi2c_write(struct pore_bus *b, uint64_t addr,
 			if (rc == PORE_SUCCESS)
 				rc = len;
 			break;
-
 		} else {
 			if ((p->control.data_length != 4) &&
 			    (p->control.data_length != 8)) {
@@ -473,6 +473,11 @@ static int fi2c_write(struct pore_bus *b, uint64_t addr,
 				p->state = ERROR;
 				rc = PORE_ERR_FASTI2C_CONTROL_ERROR;
 				break;
+			}
+			if (p->control.address_range != 0) {
+				rc = addressWrite(p);
+				if (rc < 0)
+					break;
 			}
 			rc = dataRead(p);
 			break;

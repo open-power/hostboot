@@ -76,8 +76,8 @@ FAPI_ATTR_SOURCES =          \
     dmi_training/proc_cen_set_inband_addr/proc_cen_set_inband_addr_attributes.xml \
     common_attributes.xml \
     build_winkle_images/p8_slw_build/proc_pll_ring_attributes.xml \
-    build_winkle_images/p8_slw_build/p8_xip_customize_attributes.xml
-
+    build_winkle_images/p8_slw_build/p8_xip_customize_attributes.xml \
+    poreve_memory_attributes.xml
 
 XMLTOHB_GENERIC_XML     = generic.xml
 XMLTOHB_FAPI_XML        = fapiattrs.xml

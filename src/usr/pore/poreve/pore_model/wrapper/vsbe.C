@@ -1,25 +1,25 @@
-//  IBM_PROLOG_BEGIN_TAG
-//  This is an automatically generated prolog.
-//
-//  $Source: src/usr/pore/poreve/pore_model/wrapper/vsbe.C $
-//
-//  IBM CONFIDENTIAL
-//
-//  COPYRIGHT International Business Machines Corp. 2012
-//
-//  p1
-//
-//  Object Code Only (OCO) source materials
-//  Licensed Internal Code Source Materials
-//  IBM HostBoot Licensed Internal Code
-//
-//  The source code for this program is not published or other-
-//  wise divested of its trade secrets, irrespective of what has
-//  been deposited with the U.S. Copyright Office.
-//
-//  Origin: 30
-//
-//  IBM_PROLOG_END
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/usr/pore/poreve/pore_model/wrapper/vsbe.C $               */
+/*                                                                        */
+/* IBM CONFIDENTIAL                                                       */
+/*                                                                        */
+/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/*                                                                        */
+/* p1                                                                     */
+/*                                                                        */
+/* Object Code Only (OCO) source materials                                */
+/* Licensed Internal Code Source Materials                                */
+/* IBM HostBoot Licensed Internal Code                                    */
+/*                                                                        */
+/* The source code for this program is not published or otherwise         */
+/* divested of its trade secrets, irrespective of what has been           */
+/* deposited with the U.S. Copyright Office.                              */
+/*                                                                        */
+/* Origin: 30                                                             */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
 /******************************************************************************
  *
  * \file vsbe.C
@@ -342,19 +342,19 @@ ModelError Vsbe::registerRead(const vsbe::PoreRegisterOffset i_offset,
 ModelError Vsbe::registerWrite(const vsbe::PoreRegisterOffset i_offset,
 			       const uint64_t i_data, const size_t i_size)
 {
+        int rc;
+
 	pore_reg_t reg =
 		PoreRegOffs_to_pore(vsbe::PoreRegisterOffset(i_offset & ~0x7));
 
 	if (((i_offset & 0x7) == 0x4) && (i_size == 4)) { // lower 32-bit
-		pore_writeReg(iv_engine, reg, i_data, PORE_BITS_32_63);
-		return ME_SUCCESS;
-	}
-	if (((i_offset & 0x7) == 0x0) && (i_size == 4)) { // upper 32-bit
-		pore_writeReg(iv_engine, reg, i_data << 32, PORE_BITS_0_31);
-		return ME_SUCCESS;
-	}
-	pore_writeReg(iv_engine, reg, i_data, PORE_BITS_0_63);
-	return ME_SUCCESS;
+		rc = pore_writeReg(iv_engine, reg, i_data, PORE_BITS_32_63);
+	} else if (((i_offset & 0x7) == 0x0) && (i_size == 4)) { // upper 32-bit
+                rc = pore_writeReg(iv_engine, reg, i_data << 32, PORE_BITS_0_31);
+	} else {
+         	rc = pore_writeReg(iv_engine, reg, i_data, PORE_BITS_0_63);
+        }
+        return (rc ? ME_REGISTER_WRITE_ERROR : ME_SUCCESS);
 }
 
 ModelError Vsbe::registerReadRaw(const vsbe::PoreRegisterOffset i_offset,
@@ -381,19 +381,19 @@ ModelError Vsbe::registerReadRaw(const vsbe::PoreRegisterOffset i_offset,
 ModelError Vsbe::registerWriteRaw(const vsbe::PoreRegisterOffset i_offset,
 			       const uint64_t i_data, const size_t i_size)
 {
+        int rc;
+ 
 	pore_reg_t reg =
 		PoreRegOffs_to_pore(vsbe::PoreRegisterOffset(i_offset & ~0x7));
 
 	if (((i_offset & 0x7) == 0x4) && (i_size == 4)) { // lower 32-bit
-		pore_writeRegRaw(iv_engine, reg, i_data, PORE_BITS_32_63);
-		return ME_SUCCESS;
-	}
-	if (((i_offset & 0x7) == 0x0) && (i_size == 4)) { // upper 32-bit
-		pore_writeRegRaw(iv_engine, reg, i_data << 32, PORE_BITS_0_31);
-		return ME_SUCCESS;
-	}
-	pore_writeRegRaw(iv_engine, reg, i_data, PORE_BITS_0_63);
-	return ME_SUCCESS;
+		rc = pore_writeRegRaw(iv_engine, reg, i_data, PORE_BITS_32_63);
+	} else if (((i_offset & 0x7) == 0x0) && (i_size == 4)) { // upper 32-bit
+		rc =  pore_writeRegRaw(iv_engine, reg, i_data << 32, PORE_BITS_0_31);
+	} else {
+                rc = pore_writeRegRaw(iv_engine, reg, i_data, PORE_BITS_0_63);
+        }
+        return (rc ? ME_REGISTER_WRITE_ERROR : ME_SUCCESS);
 }
 
 ModelError Vsbe::enableHookInstruction(bool i_enable)

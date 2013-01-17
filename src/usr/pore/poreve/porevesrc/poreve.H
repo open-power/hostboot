@@ -1,30 +1,29 @@
-/*  IBM_PROLOG_BEGIN_TAG
- *  This is an automatically generated prolog.
- *
- *  $Source: src/usr/pore/poreve/porevesrc/poreve.H $
- *
- *  IBM CONFIDENTIAL
- *
- *  COPYRIGHT International Business Machines Corp. 2012
- *
- *  p1
- *
- *  Object Code Only (OCO) source materials
- *  Licensed Internal Code Source Materials
- *  IBM HostBoot Licensed Internal Code
- *
- *  The source code for this program is not published or other-
- *  wise divested of its trade secrets, irrespective of what has
- *  been deposited with the U.S. Copyright Office.
- *
- *  Origin: 30
- *
- *  IBM_PROLOG_END_TAG
- */
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/usr/pore/poreve/porevesrc/poreve.H $                      */
+/*                                                                        */
+/* IBM CONFIDENTIAL                                                       */
+/*                                                                        */
+/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/*                                                                        */
+/* p1                                                                     */
+/*                                                                        */
+/* Object Code Only (OCO) source materials                                */
+/* Licensed Internal Code Source Materials                                */
+/* IBM HostBoot Licensed Internal Code                                    */
+/*                                                                        */
+/* The source code for this program is not published or otherwise         */
+/* divested of its trade secrets, irrespective of what has been           */
+/* deposited with the U.S. Copyright Office.                              */
+/*                                                                        */
+/* Origin: 30                                                             */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
 #ifndef __VSBE_POREVE_H
 #define __VSBE_POREVE_H
 
-// $Id: poreve.H,v 1.25 2012/06/18 23:38:37 bcbrock Exp $
+// $Id: poreve.H,v 1.28 2012/10/24 23:44:06 bcbrock Exp $
 
 /// \file poreve.H
 /// \brief The PORE Virtual Environment
@@ -168,6 +167,12 @@ namespace vsbe {
 
     /// The PNOR I2C Device Address
     const unsigned PNOR_I2C_DEVICE_ADDRESS = 0;
+
+    /// LPC Controller register address space
+    const uint32_t LPC_REGISTER_SPACE_BASE = 0xc0012000;
+
+    /// LPC Controller register area size
+    const uint32_t LPC_REGISTER_SPACE_SIZE = 0x1000;
 
 
     //////////////////////////////////////////////////////////////////////
@@ -464,6 +469,15 @@ protected:
     /// scenes in the reset() method.
     pore_i2c_en_param_reg iv_pnorI2cParam;
 
+    
+    /// A memory to model the LPC controller register address space
+    ///
+    /// We do not model any behavior of the LPC controller. Instead we simply
+    /// provide a suitably-sized memory buffer so that reads/writes to the LPC
+    /// controller address space will succeed.  This memory buffer is
+    /// statically mapped into the iv_PnorMemory.
+    uint8_t iv_lpcRegisterSpace[LPC_REGISTER_SPACE_SIZE];
+
 
     ///////////////////////////// Safety //////////////////////////////////
 
@@ -535,6 +549,41 @@ public:
                           const fapi::Target i_masterTarget,
                           const void* i_arg);
 
+    ////////////////////  Simulation Interface    /////////////////////////
+
+    /// Detach a slave from its bus
+    ///
+    /// \param[in] i_slave A pointer to one of the Slave subclass data members
+    /// of the PoreVe.  If the \a i_slave is attached to any simulated bus in
+    /// the PoreVe it will be removed from the bus model by this call.
+    ///
+    /// The PoreVe object is always configured for full virtual simulation of
+    /// all bus slaves, most of which are memory models. For many lab and
+    /// verification cases it is desirable to configure some of the memory
+    /// models to use the real memory, e.g., by doing virtual simulation of
+    /// all memories except the PNOR.  The detachSlave() method detaches a
+    /// virtual slave from its bus model, so that for example PIB addresses
+    /// normaly handled by the virtual slave would now pass through into the
+    /// real hardware. 
+    ///
+    /// It was felt that this idea of eliminating slaves from a full
+    /// configuration was a more convenient abstraction than the alternatives
+    /// of requiring the application to explicitly specify which slaves to
+    /// simulate as constructor parameters or via attributes. The simple PIB
+    /// and OCI memories also support a 'pass-through' option that
+    /// automatically passes accesses to the real hardware memory for unmapped
+    /// addresses. However pass-through mechanisms do not exist (or make
+    /// complete sense) for the indirect I2C-like memories, so detachSlave()
+    /// was added as a general solution to meet the partial-simulation
+    /// requirement.
+    ///
+    /// \retval 0 Success; The slave was located and detached from its bus.
+    ///
+    /// \retval ME_FAILURE The slave was not attached to any bus in the PoreVe.
+    virtual ModelError 
+    detachSlave(Slave* i_slave);
+
+
     //////////////////// Public Implementation ////////////////////////////
 
     /// The OTPROM controller model
@@ -580,25 +629,7 @@ public:
     /// The sbeVital PIB Slave
     SbeVital iv_sbeVital;
 
-#ifdef VBU_HACKS
-    /// The Broadside Scan components for each EX
-  //    Bsscan iv_bsscan_ex00;
-    Bsscan iv_bsscan_ex01;
-    Bsscan iv_bsscan_ex02;
-    Bsscan iv_bsscan_ex03;
-    Bsscan iv_bsscan_ex04;
-    Bsscan iv_bsscan_ex05;
-    Bsscan iv_bsscan_ex06;
-  //    Bsscan iv_bsscan_ex07;
-  //    Bsscan iv_bsscan_ex08;
-    Bsscan iv_bsscan_ex09;
-    Bsscan iv_bsscan_ex10;
-    Bsscan iv_bsscan_ex11;
-    Bsscan iv_bsscan_ex12;
-    Bsscan iv_bsscan_ex13;
-    Bsscan iv_bsscan_ex14;
-  //    Bsscan iv_bsscan_ex15;
-#endif
+
     ///////////////////////////// Safety //////////////////////////////////
 
 private:

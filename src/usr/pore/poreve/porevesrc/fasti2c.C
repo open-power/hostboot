@@ -1,27 +1,26 @@
-/*  IBM_PROLOG_BEGIN_TAG
- *  This is an automatically generated prolog.
- *
- *  $Source: src/usr/pore/poreve/porevesrc/fasti2c.C $
- *
- *  IBM CONFIDENTIAL
- *
- *  COPYRIGHT International Business Machines Corp. 2012
- *
- *  p1
- *
- *  Object Code Only (OCO) source materials
- *  Licensed Internal Code Source Materials
- *  IBM HostBoot Licensed Internal Code
- *
- *  The source code for this program is not published or other-
- *  wise divested of its trade secrets, irrespective of what has
- *  been deposited with the U.S. Copyright Office.
- *
- *  Origin: 30
- *
- *  IBM_PROLOG_END_TAG
- */
-// $Id: fasti2c.C,v 1.6 2012/05/23 19:51:39 bcbrock Exp $
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/usr/pore/poreve/porevesrc/fasti2c.C $                     */
+/*                                                                        */
+/* IBM CONFIDENTIAL                                                       */
+/*                                                                        */
+/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/*                                                                        */
+/* p1                                                                     */
+/*                                                                        */
+/* Object Code Only (OCO) source materials                                */
+/* Licensed Internal Code Source Materials                                */
+/* IBM HostBoot Licensed Internal Code                                    */
+/*                                                                        */
+/* The source code for this program is not published or otherwise         */
+/* divested of its trade secrets, irrespective of what has been           */
+/* deposited with the U.S. Copyright Office.                              */
+/*                                                                        */
+/* Origin: 30                                                             */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
+// $Id: fasti2c.C,v 1.11 2012/12/06 18:03:51 bcbrock Exp $
 
 /// \file fasti2c.C
 /// \brief The "fast-mode" I2C controllers and I2C memory models used
@@ -68,6 +67,9 @@ I2cMemory::addressWrite(const size_t i_bytes, const uint32_t i_address)
 
     if (i_bytes != iv_addressBytes) {
         BUG();
+        FAPI_ERR("I2cMemory::addressWrite() failed, "
+                 "address has %zu bytes, device supports %zu-byte addresses",
+                 i_bytes, iv_addressBytes);
         me = ME_I2CMEMORY_ILLEGAL_ADDRESS;
     } else {
         me = ME_SUCCESS;
@@ -133,8 +135,8 @@ FastI2cController::~FastI2cController()
 
 ModelError
 FastI2cController::attachMemory(I2cMemory* i_memory,
-                                const uint8_t i_port,
-                                const uint8_t i_deviceAddress)
+                                const unsigned i_port,
+                                const unsigned i_deviceAddress)
 {
     ModelError me = ME_SUCCESS;
     FastI2cControlRegister control; // Used to validate i_Port and i_deviceId
@@ -176,7 +178,9 @@ FastI2cController::attachMemory(I2cMemory* i_memory,
 
 // Modeling notes:
 //
-// o  The RESET register is not modeled here
+// o Writing the RESET register clears the STATUS register if bit 0 is set,
+// however we require that writes to the RESET register only occur when the
+// state machine is idle.
 //
 // o  Our models ignore the I2C Speed
 //
@@ -185,20 +189,29 @@ FastI2cController::attachMemory(I2cMemory* i_memory,
 //    engine model.
 //
 // o  Only the following types of control register actions are modeled:
-//    *  Address write : with_start; with_address; !with_continue; with_stop;
-//                       data_length == 0
-//    *  Data read : with_start; with_address; !with_continue; with_stop;
-//                   data_length == [4,8]
-//    *  Data write : with_start; with_address; !with_continue; with_stop;
-//                   data_length == 8
 //
-// o  The memory models hold the last address written
+//    *  Set address : with_start; with_address; !with_continue; with_stop;
+//                     RNW == 1; Data_length == [4, 8]; 
+//                     Address length != 0; Address provided
+//                     Setting the address also fetches data and increments
+//                     the address stored in memory
+//
+//    *  Data Read   : with_start; with_address; !with_continue; with_stop;
+//                     RNW == 1; Data_length == [4, 8]; 
+//                      Address length == 0; No address provided
+//                     This operation fetches data and increments the address
+//                     stored in memory.
+//
+//    *  Data write  : with_start; with_address; !with_continue; with_stop;
+//                     RNW == 0; Data_length == 8
+//                     Addrress length != 0; Address provided
+//
+// o  The memory models hold the last address written and implement the
+//    address auto-increment after every read or write
 //
 // o  Redundant reads of the STATUS register are allowed
 //
-// o  PORE only does 4/8 byte reads and 8 byte writes, so any other data
-//    access is considered an error (although the models could easily be
-//    extended to allow them).
+// o  PORE only allows 4/8 byte reads and 8 byte writes.
 
 fapi::ReturnCode
 FastI2cController::operation(Transaction& io_transaction)
@@ -219,57 +232,95 @@ FastI2cController::operation(Transaction& io_transaction)
 
     switch (io_transaction.iv_offset) {
 
+    case FASTI2C_RESET_OFFSET:
+
+        if (iv_state != IDLE) {
+            BUG();
+            me = ME_FASTI2C_SEQUENCE_ERROR;
+        } else if (io_transaction.iv_data & BE64_BIT(0)) {
+            iv_status.value = 0;
+            me = ME_SUCCESS;
+        } else {
+            me = ME_SUCCESS;
+        }
+        break;
+
+
     case FASTI2C_CONTROL_OFFSET:
 
         if (io_transaction.iv_mode != ACCESS_MODE_WRITE) {
             BUG();
             me = ME_WRITE_ONLY_REGISTER;
+            break;
+        }
+        
+        iv_control.value = io_transaction.iv_data;
 
-        } else if (iv_state != IDLE) {
+        if (!iv_control.fields.with_start   ||
+            !iv_control.fields.with_address ||
+            iv_control.fields.read_continue ||
+            !iv_control.fields.with_stop) {
             BUG();
-            me = ME_FASTI2C_SEQUENCE_ERROR;
+            me = ME_FASTI2C_CONTROL_ERROR;
+            break;
+        }
+
+        if (iv_control.fields.read_not_write == 0) {
+
+            // A WRITE command is only allowed in the WRITE_COMMAND_EXPECTED
+            // state.
+
+            if (iv_state != WRITE_COMMAND_EXPECTED) {
+                BUG();
+                me = ME_FASTI2C_SEQUENCE_ERROR;
+            }
+                
+            if ((iv_control.fields.address_range == 0) ||
+                (iv_control.fields.data_length != 8)) {
+                BUG();
+                me = ME_FASTI2C_CONTROL_ERROR;
+                break;
+            }
+
+            me = addressWrite();
+            if (me) break;
+            me = initialDataWrite();
+            if (me) break;
+            me = finalDataWrite(iv_data);
+            if (me) break;
+
+            iv_state = DATA_WRITE_ONGOING;
+            break;
 
         } else {
             
-            iv_control.value = io_transaction.iv_data;
+            // A READ command is only expected in the IDLE state
 
-            if (!iv_control.fields.with_start   ||
-                !iv_control.fields.with_address ||
-                iv_control.fields.read_continue ||
-                !iv_control.fields.with_stop) {
+            if (iv_state != IDLE) {
+                BUG();
+                me = ME_FASTI2C_SEQUENCE_ERROR;
+                break;
+            }
+                
+            if ((iv_control.fields.data_length != 4) &&
+                (iv_control.fields.data_length != 8)) {
                 BUG();
                 me = ME_FASTI2C_CONTROL_ERROR;
-
-            } else if (iv_control.fields.read_not_write == 0) {
-                
-                if (iv_control.fields.address_range == 0) {
-                    BUG();
-                    me = ME_FASTI2C_CONTROL_ERROR;
-
-                } else {
-                    if (iv_control.fields.data_length == 0) {
-                        me = addressWrite();
-
-                    } else if (iv_control.fields.data_length != 8) {
-                        BUG();
-                        me = ME_FASTI2C_CONTROL_ERROR;
-
-                    } else {
-                        me = initialDataWrite();
-                    }
-                }
-            } else {
-                if ((iv_control.fields.data_length != 4) &&
-                    (iv_control.fields.data_length != 8)) {
-                    BUG();
-                    me = ME_FASTI2C_CONTROL_ERROR;
-                } else {
-                    me = dataRead();
-                }
+                break;
             }
-        }
-        break;
 
+            if (iv_control.fields.address_range != 0) {
+                me = addressWrite();
+                if (me) break;
+                iv_state = ADDRESS_WRITE_ONGOING;
+            }
+
+            me = dataRead();
+            if (me) break;
+
+            iv_state = DATA_READ_ONGOING;
+            break;
+        }
 
     case FASTI2C_STATUS_OFFSET:
 
@@ -319,6 +370,8 @@ FastI2cController::operation(Transaction& io_transaction)
         if ((io_transaction.iv_mode == ACCESS_MODE_READ) ||
             (io_transaction.iv_mode == ACCESS_MODE_EXECUTE)) {
 
+            // DATA reads must follow a command and status poll
+
             switch (iv_state) {
 
             case DATA_AVAILABLE:
@@ -332,18 +385,22 @@ FastI2cController::operation(Transaction& io_transaction)
                 me = ME_FASTI2C_SEQUENCE_ERROR;
                 break;
             }
+
         } else {
 
-            switch (iv_state) {
+            // DATA writes must occur in the idle state, and be followed by a
+            // command and data poll.
 
-            case WRITE_DATA_EXPECTED:
-                me = finalDataWrite(io_transaction.iv_data);
-                iv_state = DATA_WRITE_ONGOING;
+            if (iv_state == IDLE) {
 
-            default:
+                iv_data = io_transaction.iv_data;
+                iv_state = WRITE_COMMAND_EXPECTED;
+                me = ME_SUCCESS;
+
+            } else {
+
                 BUG();
                 me = ME_FASTI2C_SEQUENCE_ERROR;
-                break;
             }
         }
         break;
@@ -357,7 +414,7 @@ FastI2cController::operation(Transaction& io_transaction)
 
     if (me != 0) {
         iv_state = ERROR;
-        FAPI_SET_HWP_ERROR(rc, RC_POREVE_FASTI2C_OPERATION_ERROR);
+        FAPI_SET_HWP_ERROR(rc, RC_POREVE_FASTI2C_ERROR);
     }
     io_transaction.busError(me);
     return rc;
@@ -419,7 +476,6 @@ FastI2cController::addressWrite()
     } else {
         me = p->iv_memory->addressWrite(addressBytes,
                                         getI2cAddress(iv_control));
-        iv_state = ADDRESS_WRITE_ONGOING;
     }
     return me;
 }
@@ -442,7 +498,6 @@ FastI2cController::dataRead()
     } else {
         me = p->iv_memory->dataRead(dataBytes, data);
         iv_fifo = data << (64 - (dataBytes * 8));
-        iv_state = DATA_READ_ONGOING;
     }
     return me;
 }
@@ -465,7 +520,6 @@ FastI2cController::initialDataWrite()
                            63) << 
             ((4 - addressBytes) * 8);
     }
-    iv_state = WRITE_DATA_EXPECTED;
     return ME_SUCCESS;
 }
 
@@ -492,7 +546,6 @@ FastI2cController::finalDataWrite(const uint64_t i_data)
         me = ME_NOT_MAPPED_ON_FASTI2C_CONTROLLER;
     } else {
         me = p->iv_memory->dataWrite(8, iv_fifo);
-        iv_state = DATA_WRITE_ONGOING;
     }
     return me;
 }
@@ -590,7 +643,7 @@ LpcController::operation(Transaction& io_transaction)
     }
     if (!handledBySuperclass) {
         if (me != 0) {
-            FAPI_SET_HWP_ERROR(rc, RC_POREVE_LPC_OPERATION_ERROR);
+            FAPI_SET_HWP_ERROR(rc, RC_POREVE_LPC_ERROR);
         }
         io_transaction.busError(me);
     }

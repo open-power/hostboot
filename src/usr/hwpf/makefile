@@ -101,7 +101,8 @@ HWP_ATTR_XML_FILES = hwp/memory_attributes.xml \
                      hwp/nest_chiplets/proc_pcie_scominit/proc_pcie_scominit_attributes.xml \
                      hwp/dmi_training/proc_cen_set_inband_addr/proc_cen_set_inband_addr_attributes.xml \
                      hwp/build_winkle_images/p8_slw_build/proc_pll_ring_attributes.xml \
-                     hwp/build_winkle_images/p8_slw_build/p8_xip_customize_attributes.xml
+                     hwp/build_winkle_images/p8_slw_build/p8_xip_customize_attributes.xml \
+                     hwp/poreve_memory_attributes.xml
 
 #------------------------------------------------------------------------------
 # Initfiles

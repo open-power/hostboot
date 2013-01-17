@@ -1,28 +1,27 @@
-/*  IBM_PROLOG_BEGIN_TAG
- *  This is an automatically generated prolog.
- *
- *  $Source: src/usr/pore/fapiporeve/fapiPoreVe.C $
- *
- *  IBM CONFIDENTIAL
- *
- *  COPYRIGHT International Business Machines Corp. 2012
- *
- *  p1
- *
- *  Object Code Only (OCO) source materials
- *  Licensed Internal Code Source Materials
- *  IBM HostBoot Licensed Internal Code
- *
- *  The source code for this program is not published or other-
- *  wise divested of its trade secrets, irrespective of what has
- *  been deposited with the U.S. Copyright Office.
- *
- *  Origin: 30
- *
- *  IBM_PROLOG_END_TAG
- */
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/usr/pore/fapiporeve/fapiPoreVe.C $                        */
+/*                                                                        */
+/* IBM CONFIDENTIAL                                                       */
+/*                                                                        */
+/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/*                                                                        */
+/* p1                                                                     */
+/*                                                                        */
+/* Object Code Only (OCO) source materials                                */
+/* Licensed Internal Code Source Materials                                */
+/* IBM HostBoot Licensed Internal Code                                    */
+/*                                                                        */
+/* The source code for this program is not published or otherwise         */
+/* divested of its trade secrets, irrespective of what has been           */
+/* deposited with the U.S. Copyright Office.                              */
+/*                                                                        */
+/* Origin: 30                                                             */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
 // -*- mode: C++; c-file-style: "linux";  -*-
-// $Id: fapiPoreVe.C,v 1.27 2012/04/26 21:30:31 jeshua Exp $
+// $Id: fapiPoreVe.C,v 1.29 2012/09/05 20:11:16 jeshua Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/poreve/working/fapiporeve/fapiPoreVe.C,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
@@ -45,6 +44,7 @@
 //   Install start state, if passed in
 //   Install hooks
 //   Install each memory image passed in
+//   Deconfigure missing memories
 //   Set entry point
 //   Set break point
 //   Run the requested number of instructions
@@ -64,44 +64,6 @@
 //For hooks
 #ifndef __HOSTBOOT_MODULE
 #include <dlfcn.h>
-
-typedef struct {
-  char * name;
-  PoreRegisterOffset offset;
-} poreReg_t;
-
-poreReg_t poreRegs[] = {
-    { "PORE_STATUS", PORE_STATUS },
-    { "PORE_CONTROL", PORE_CONTROL },
-    { "PORE_RESET", PORE_RESET },
-    { "PORE_ERROR_MASK", PORE_ERROR_MASK },
-    { "PORE_PRV_BASE_ADDR0", PORE_PRV_BASE_ADDR0 },
-    { "PORE_PRV_BASE_ADDR1", PORE_PRV_BASE_ADDR1 },
-    { "PORE_OCI_MEMORY_BASE_ADDR0", PORE_OCI_MEMORY_BASE_ADDR0 },
-    { "PORE_OCI_MEMORY_BASE_ADDR1", PORE_OCI_MEMORY_BASE_ADDR1 },
-    { "PORE_TABLE_BASE_ADDR", PORE_TABLE_BASE_ADDR },
-    { "PORE_EXE_TRIGGER", PORE_EXE_TRIGGER },
-    { "PORE_SCRATCH0", PORE_SCRATCH0 },
-    { "PORE_SCRATCH1", PORE_SCRATCH1 },
-    { "PORE_SCRATCH2", PORE_SCRATCH2 },
-    { "PORE_IBUF_01", PORE_IBUF_01 },
-    { "PORE_IBUF_2", PORE_IBUF_2 },
-    { "PORE_DBG0", PORE_DBG0 },
-    { "PORE_DBG1", PORE_DBG1 },
-    { "PORE_PC_STACK0", PORE_PC_STACK0 },
-    { "PORE_PC_STACK1", PORE_PC_STACK1 },
-    { "PORE_ID_FLAGS", PORE_ID_FLAGS },
-    { "PORE_DATA0", PORE_DATA0 },
-    { "PORE_MEM_RELOC", PORE_MEM_RELOC },
-    { "PORE_I2C_E0_PARAM", PORE_I2C_E0_PARAM },
-    { "PORE_I2C_E1_PARAM", PORE_I2C_E1_PARAM },
-    { "PORE_I2C_E2_PARAM", PORE_I2C_E2_PARAM },
-    { "PORE_HIDDEN_STATE_0", PORE_HIDDEN_STATE_0 },
-    { "PORE_HIDDEN_STATE_1", PORE_HIDDEN_STATE_1 },
-    { "PORE_HIDDEN_STATE_2", PORE_HIDDEN_STATE_2 },
-    { "PORE_HIDDEN_STATE_3", PORE_HIDDEN_STATE_3 },
-    { "PORE_HIDDEN_STATE_4", PORE_HIDDEN_STATE_4 },
-};
 #endif
 #include "hookmanager.H"
 
@@ -119,21 +81,27 @@ const uint32_t MBOX_SBEVITAL_0x0005001C = 0x0005001C;
 //******************************************************************************
 fapi::ReturnCode fapiPoreVe(
     const fapi::Target i_target,
-    std::vector<FapiPoreVeArg *> & io_sharedObjectArgs)
+    std::list<uint64_t> & io_sharedObjectArgs)
 {
-    fapi::ReturnCode rc;
+    fapi::ReturnCode rc = fapi::FAPI_RC_SUCCESS;
     PoreVe *poreve = NULL;
     FapiPoreVeOtherArg *pOtherArg = NULL;
+    bool haveOTPROM  = false;
+    bool havePNOR    = false;
+    bool haveSEEPROM = false;
+    bool haveMAINMEM = false;
+    bool haveSRAM    = false;
+    bool havePIBMEM  = false;
 
     //----------------------------------------------------------------------
     // Find the PORE type
     //----------------------------------------------------------------------
-    std::vector<FapiPoreVeArg *>::iterator itr;
+    std::list<uint64_t>::iterator itr;
     for( itr = io_sharedObjectArgs.begin();
          (itr != io_sharedObjectArgs.end()) && (poreve == NULL);
          itr++ )
     {
-        FapiPoreVeArg *arg = *itr;
+        FapiPoreVeArg *arg = reinterpret_cast<FapiPoreVeArg *>(*itr);
 
         //----------------------------------------------------------------------
         // Use PORE type and pdbgArg to create poreve
@@ -142,7 +110,7 @@ fapi::ReturnCode fapiPoreVe(
         {
             FapiPoreVeOtherArg *thisArg = (FapiPoreVeOtherArg *)arg;
             pOtherArg = thisArg;
-            fapi::Target masterTarget = i_target;
+            fapi::Target masterTarget = i_target; //JDS TODO - get this from an attribute
             poreve = PoreVe::create( thisArg->iv_poreType,
                              masterTarget,
                              thisArg->iv_pdbgArgs );
@@ -150,10 +118,11 @@ fapi::ReturnCode fapiPoreVe(
     }
     if( poreve == NULL )
     {
-        FAPI_ERR( "Failed to create poreve" );
+        FAPI_ERR( "Failed to create poreve\n" );
         FAPI_SET_HWP_ERROR(rc, RC_FAPIPOREVE_FAILED_TO_CREATE_POREVE);
+    } else {
+        rc = poreve->constructorRc();
     }
-        
 
     //----------------------------------------------------------------------
     // Reset the PoreVe and set slave target
@@ -169,7 +138,7 @@ fapi::ReturnCode fapiPoreVe(
     for( itr = io_sharedObjectArgs.begin();
          (itr != io_sharedObjectArgs.end()) && rc.ok(); itr++ )
     {
-        FapiPoreVeArg *arg = *itr;
+        FapiPoreVeArg *arg = reinterpret_cast<FapiPoreVeArg *>(*itr);
 
         //----------------------------------------------------------------------
         // Install the start state (if passed in)
@@ -192,7 +161,7 @@ fapi::ReturnCode fapiPoreVe(
                     stateArg->iv_fd = fopen( stateArg->iv_filename, "r" );
                     if( stateArg->iv_fd == NULL )
                     {
-                        FAPI_ERR( "Failed to open state file %s",
+                        FAPI_ERR( "Failed to open state file %s\n",
                                   stateArg->iv_filename );
                         // char & FILENAME = stateArg->iv_filename;
                         FAPI_SET_HWP_ERROR(rc,
@@ -212,18 +181,75 @@ fapi::ReturnCode fapiPoreVe(
                                 char* reg = strtok( line, " =" );
 
                                 PoreRegisterOffset reg_offset;
-                                size_t i = 0;
-                                while (i < (sizeof(poreRegs)/sizeof(poreReg_t)))
-                                {
-                                    if( strcmp( reg, poreRegs[i].name ) == 0 )
-                                    {
-                                        reg_offset = poreRegs[i].offset;
-                                        break;
-                                    }
-                                    i++;
-                                }
+                                if( strcmp( reg, "PORE_STATUS" ) == 0 ) {
+                                    reg_offset = PORE_STATUS;
+                                } else if( strcmp( reg, "PORE_CONTROL" ) == 0 ) {
+                                    reg_offset = PORE_CONTROL;
+                                } else if( strcmp( reg, "PORE_RESET" ) == 0 ) {
+                                    reg_offset = PORE_RESET;
+                                } else if( strcmp( reg, "PORE_ERROR_MASK" ) == 0 ) {
+                                    reg_offset = PORE_ERROR_MASK;
+                                } else if( strcmp( reg, "PORE_PRV_BASE_ADDR0" ) == 0 ) {
+                                    reg_offset = PORE_PRV_BASE_ADDR0;
+                                } else if( strcmp( reg, "PORE_PRV_BASE_ADDR1" ) == 0 ) {
+                                    reg_offset = PORE_PRV_BASE_ADDR1;
+                                } else if( strcmp( reg, "PORE_OCI_MEMORY_BASE_ADDR0" ) == 0 ) {
+                                    reg_offset = PORE_OCI_MEMORY_BASE_ADDR0;
+                                } else if( strcmp( reg, "PORE_OCI_MEMORY_BASE_ADDR1" ) == 0 ) {
+                                    reg_offset = PORE_OCI_MEMORY_BASE_ADDR1;
+                                } else if( strcmp( reg, "PORE_TABLE_BASE_ADDR" ) == 0 ) {
+                                    reg_offset = PORE_TABLE_BASE_ADDR;
+                                } else if( strcmp( reg, "PORE_EXE_TRIGGER" ) == 0 ) {
+                                    reg_offset = PORE_EXE_TRIGGER;
+                                } else if( strcmp( reg, "PORE_SCRATCH0" ) == 0 ) {
+                                    reg_offset = PORE_SCRATCH0;
+                                } else if( strcmp( reg, "PORE_SCRATCH1" ) == 0 ) {
+                                    reg_offset = PORE_SCRATCH1;
+                                } else if( strcmp( reg, "PORE_SCRATCH2" ) == 0 ) {
+                                    reg_offset = PORE_SCRATCH2;
+                                } else if( strcmp( reg, "PORE_IBUF_01" ) == 0 ) {
+                                    reg_offset = PORE_IBUF_01;
+                                } else if( strcmp( reg, "PORE_IBUF_2" ) == 0 ) {
+                                    reg_offset = PORE_IBUF_2;
+                                } else if( strcmp( reg, "PORE_DBG0" ) == 0 ) {
+                                    reg_offset = PORE_DBG0;
+                                } else if( strcmp( reg, "PORE_DBG1" ) == 0 ) {
+                                    reg_offset = PORE_DBG1;
+                                } else if( strcmp( reg, "PORE_PC_STACK0" ) == 0 ) {
+                                    reg_offset = PORE_PC_STACK0;
+                                } else if( strcmp( reg, "PORE_PC_STACK1" ) == 0 ) {
+                                    reg_offset = PORE_PC_STACK1;
+                                } else if( strcmp( reg, "PORE_PC_STACK2" ) == 0 ) {
+                                    reg_offset = PORE_PC_STACK2;
+                                } else if( strcmp( reg, "PORE_ID_FLAGS" ) == 0 ) {
+                                    reg_offset = PORE_ID_FLAGS;
+                                } else if( strcmp( reg, "PORE_DATA0" ) == 0 ) {
+                                    reg_offset = PORE_DATA0;
+                                } else if( strcmp( reg, "PORE_MEM_RELOC" ) == 0 ) {
+                                    reg_offset = PORE_MEM_RELOC;
+                                } else if( strcmp( reg, "PORE_I2C_E0_PARAM" ) == 0 ) {
+                                    reg_offset = PORE_I2C_E0_PARAM;
+                                } else if( strcmp( reg, "PORE_I2C_E1_PARAM" ) == 0 ) {
+                                    reg_offset = PORE_I2C_E1_PARAM;
+                                } else if( strcmp( reg, "PORE_I2C_E2_PARAM" ) == 0 ) {
+                                    reg_offset = PORE_I2C_E2_PARAM;
+                                } else if( strcmp( reg, "PORE_HIDDEN_STATE_0" ) == 0) {
+                                    reg_offset = PORE_HIDDEN_STATE_0;
+                                } else if( strcmp( reg, "PORE_HIDDEN_STATE_1" ) == 0) {
+                                    reg_offset = PORE_HIDDEN_STATE_1;
+                                } else if( strcmp( reg, "PORE_HIDDEN_STATE_2" ) == 0) {
+                                    reg_offset = PORE_HIDDEN_STATE_2;
+                                } else if( strcmp( reg, "PORE_HIDDEN_STATE_3" ) == 0) {
+                                    reg_offset = PORE_HIDDEN_STATE_3;
+                                } else if( strcmp( reg, "PORE_HIDDEN_STATE_4" ) == 0) {
+                                    reg_offset = PORE_HIDDEN_STATE_4;
+                                } else {
+                                    FAPI_ERR("Unknown reg name %s on line %i\n",
+                                             reg, linenum );
+                                    reg = NULL;
+                                } //strcmp reg vs regname
 
-                                if (i != (sizeof(poreRegs)/sizeof(poreReg_t)))
+                                if( reg != NULL )
                                 {
                                     //get the register value
                                     char* value = strtok( NULL, " =" );
@@ -247,7 +273,7 @@ fapi::ReturnCode fapiPoreVe(
                                         FAPI_ERR( "Error parsing value of %s "
                                                  "on line %i\n", reg, linenum );
                                     }
-                                }
+                                } //if reg != NULL
                             } //if state_rc != NULL
                         } while ( state_rc != NULL ); //able to read a line
                         fclose( stateArg->iv_fd );
@@ -256,7 +282,7 @@ fapi::ReturnCode fapiPoreVe(
                 else
                 {
                     FAPI_INF( "State pointer was passed in, "
-                              "so not reading state from file" );
+                              "so not reading state from file\n" );
                 }
 #endif
                 if (rc.ok())
@@ -264,7 +290,7 @@ fapi::ReturnCode fapiPoreVe(
                     ModelError me = poreve->iv_pore.installState( *p_state );
                     if( me != ME_SUCCESS )
                     {
-                        FAPI_ERR( "Model error installing state. Errno(%i)",
+                        FAPI_ERR( "Model error installing state. Errno(%i)\n",
                                   (int)me);
                         ModelError & ERROR = me;
                         FAPI_SET_HWP_ERROR(rc,
@@ -317,6 +343,7 @@ fapi::ReturnCode fapiPoreVe(
                                              (ACCESS_MODE_READ),
                                              thisArg->iv_data,
                                              thisArg->iv_crcEnable );
+                haveOTPROM = true;
             }
 
             //PNOR
@@ -327,6 +354,7 @@ fapi::ReturnCode fapiPoreVe(
                                            (ACCESS_MODE_READ|ACCESS_MODE_WRITE),
                                            thisArg->iv_data,
                                            thisArg->iv_crcEnable );
+                havePNOR = true;
             }
 
             //SEEPROM
@@ -337,6 +365,7 @@ fapi::ReturnCode fapiPoreVe(
                                               (ACCESS_MODE_READ),
                                               thisArg->iv_data,
                                               thisArg->iv_crcEnable );
+                haveSEEPROM = true;
             }
 
             //MAINMEM
@@ -347,6 +376,7 @@ fapi::ReturnCode fapiPoreVe(
                                            (ACCESS_MODE_READ|ACCESS_MODE_WRITE),
                                            thisArg->iv_data,
                                            thisArg->iv_crcEnable );
+                haveMAINMEM = true;
             }
 
             //SRAM
@@ -357,22 +387,24 @@ fapi::ReturnCode fapiPoreVe(
                                            (ACCESS_MODE_READ|ACCESS_MODE_WRITE),
                                            thisArg->iv_data,
                                            thisArg->iv_crcEnable );
+                haveSRAM = true;
             }
 
             //PIBMEM
             else if( thisArg->iv_type == ARG_PIBMEM )
             {
                 poreve->iv_pibmemMemory.map( thisArg->iv_base,
-                                           thisArg->iv_size,
-                                           (ACCESS_MODE_READ|ACCESS_MODE_WRITE),
-                                           thisArg->iv_data,
-                                           thisArg->iv_crcEnable );
+                                             thisArg->iv_size,
+                                             (ACCESS_MODE_READ|ACCESS_MODE_WRITE),
+                                             thisArg->iv_data,
+                                             thisArg->iv_crcEnable );
+                havePIBMEM = true;
             }
 
             //Unknown type
             else if( thisArg->iv_type != ARG_OTHER )
             {
-                FAPI_ERR( "Got an arg of an unknown type");
+                FAPI_ERR( "Got an arg of an unknown type (type=%d)\n", thisArg->iv_type);
                 FapiPoreVeArg_t const& TYPE = thisArg->iv_type;
                 FAPI_SET_HWP_ERROR(rc, RC_FAPIPOREVE_UNKNOWN_ARG_TYPE);
             }
@@ -380,11 +412,85 @@ fapi::ReturnCode fapiPoreVe(
     } //end parse options
 
     //----------------------------------------------------------------------
+    // Disconnect virtual controllers for memories we don't have
+    // (allows access to real hardware for those memory types)
+    //----------------------------------------------------------------------
+    if( rc.ok() )
+    {
+        if( !haveOTPROM )
+        {
+            ModelError me = poreve->detachSlave(&poreve->iv_otprom);
+            if( me != ME_SUCCESS )
+            {
+                FAPI_ERR("Model error detaching OTPROM. Errno(%i)\n",(int)me);
+                ModelError & ERROR = me;
+                FapiPoreVeArg_t TYPE = ARG_OTPROM;
+                FAPI_SET_HWP_ERROR(rc, RC_FAPIPOREVE_ERROR_DETACHING_SLAVE);
+            }
+        }
+        if( !havePNOR )
+        {
+            ModelError me = poreve->detachSlave(&poreve->iv_pnorController);
+            if( me != ME_SUCCESS )
+            {
+                FAPI_ERR("Model error detaching PNOR. Errno(%i)\n",(int)me);
+                ModelError & ERROR = me;
+                FapiPoreVeArg_t TYPE = ARG_PNOR;
+                FAPI_SET_HWP_ERROR(rc, RC_FAPIPOREVE_ERROR_DETACHING_SLAVE);
+            }
+        }
+        if( !haveSEEPROM )
+        {
+            ModelError me = poreve->detachSlave(&poreve->iv_seepromController);
+            if( me != ME_SUCCESS )
+            {
+                FAPI_ERR("Model error detaching SEEPROM. Errno(%i)\n",(int)me);
+                ModelError & ERROR = me;
+                FapiPoreVeArg_t TYPE = ARG_SEEPROM;
+                FAPI_SET_HWP_ERROR(rc, RC_FAPIPOREVE_ERROR_DETACHING_SLAVE);
+            }
+        }
+        if( !haveMAINMEM )
+        {
+            ModelError me = poreve->detachSlave(&poreve->iv_main);
+            if( me != ME_SUCCESS )
+            {
+                FAPI_ERR("Model error detaching MAINMEM. Errno(%i)\n",(int)me);
+                ModelError & ERROR = me;
+                FapiPoreVeArg_t TYPE = ARG_MAINMEM;
+                FAPI_SET_HWP_ERROR(rc, RC_FAPIPOREVE_ERROR_DETACHING_SLAVE);
+            }
+        }
+        if( !haveSRAM )
+        {
+            ModelError me = poreve->detachSlave(&poreve->iv_sram);
+            if( me != ME_SUCCESS )
+            {
+                FAPI_ERR("Model error detaching SRAM. Errno(%i)\n",(int)me);
+                ModelError & ERROR = me;
+                FapiPoreVeArg_t TYPE = ARG_SRAM;
+                FAPI_SET_HWP_ERROR(rc, RC_FAPIPOREVE_ERROR_DETACHING_SLAVE);
+            }
+        }
+        if( !havePIBMEM )
+        {
+            ModelError me = poreve->detachSlave(&poreve->iv_pibmem);
+            if( me != ME_SUCCESS )
+            {
+                FAPI_ERR("Model error detaching PIBMEM. Errno(%i)\n",(int)me);
+                ModelError & ERROR = me;
+                FapiPoreVeArg_t TYPE = ARG_PIBMEM;
+                FAPI_SET_HWP_ERROR(rc, RC_FAPIPOREVE_ERROR_DETACHING_SLAVE);
+            }
+        }
+    }
+
+    //----------------------------------------------------------------------
     // Set entry point
     //----------------------------------------------------------------------
-    if( pOtherArg->iv_entryPoint != NULL )
+    if( (pOtherArg->iv_entryPoint != NULL) && rc.ok() )
     {
-        FAPI_INF( "Looking up entry point %s", pOtherArg->iv_entryPoint );
+        FAPI_INF( "Looking up entry point %s\n", pOtherArg->iv_entryPoint );
                 
         GlobalSymbolInfo epInfo;
         bool symbolFound = false;
@@ -395,8 +501,8 @@ fapi::ReturnCode fapiPoreVe(
         if( !symbolFound || (he != HOOK_OK) )
         {
             FAPI_ERR( "Failed to find entry point \"%s\" in hooks file. "
-                      "HookError = %d", pOtherArg->iv_entryPoint, (int)he);
-            // char & POINT = pOtherArg->iv_entryPoint;
+                      "HookError = %d\n", pOtherArg->iv_entryPoint, (int)he);
+//            char & POINT = pOtherArg->iv_entryPoint;
             HookError &  ERROR = he;
             FAPI_SET_HWP_ERROR(rc, RC_FAPIPOREVE_ENTRY_POINT_NOT_FOUND);
             HookManager::report();
@@ -406,7 +512,7 @@ fapi::ReturnCode fapiPoreVe(
             //Make sure entry point is a valid type
             if( epInfo.iv_type != 'T' )
             {
-                FAPI_ERR("Entry point is of ivalid type %c", epInfo.iv_type);
+                FAPI_ERR("Entry point is of ivalid type %c\n", epInfo.iv_type);
                 char & TYPE = epInfo.iv_type;
                 FAPI_SET_HWP_ERROR(rc, RC_FAPIPOREVE_INVALID_ENTRY_POINT_TYPE);
             }
@@ -417,7 +523,7 @@ fapi::ReturnCode fapiPoreVe(
                     poreve->iv_pore.setPc( epInfo.iv_address );
                 if( me != ME_SUCCESS )
                 {
-                    FAPI_ERR( "Model error setting PC. Errno(%i)", (int)me);
+                    FAPI_ERR( "Model error setting PC. Errno(%i)\n", (int)me);
                     PoreAddress & ADDRESS = epInfo.iv_address;
                     ModelError & ERROR = me;
                     FAPI_SET_HWP_ERROR(rc, RC_FAPIPOREVE_ERROR_SETTING_PC);
@@ -429,9 +535,9 @@ fapi::ReturnCode fapiPoreVe(
     //----------------------------------------------------------------------
     // Set breakpoint
     //----------------------------------------------------------------------
-    if( pOtherArg->iv_breakpoint != NULL )
+    if( (pOtherArg->iv_breakpoint != NULL) && rc.ok() )
     {
-        FAPI_INF( "Looking up breakpoint %s", pOtherArg->iv_breakpoint );
+        FAPI_INF( "Looking up breakpoint %s\n", pOtherArg->iv_breakpoint );
                 
         GlobalSymbolInfo bpInfo;
         bool symbolFound = false;
@@ -442,7 +548,7 @@ fapi::ReturnCode fapiPoreVe(
         if( !symbolFound || (he != HOOK_OK) )
         {
             FAPI_ERR( "Failed to find breakpoint \"%s\" in hooks file."
-                      "HookError = %d", pOtherArg->iv_breakpoint, (int)he);
+                      "HookError = %d\n", pOtherArg->iv_breakpoint, (int)he);
             // char & POINT = pOtherArg->iv_breakpoint;
             HookError &  ERROR = he;
             FAPI_SET_HWP_ERROR(rc, RC_FAPIPOREVE_BREAKPOINT_NOT_FOUND);
@@ -453,7 +559,7 @@ fapi::ReturnCode fapiPoreVe(
             //Make sure break point is a valid type
             if( bpInfo.iv_type != 'T' )
             {
-                FAPI_ERR("Break point is of ivalid type %c", bpInfo.iv_type);
+                FAPI_ERR("Break point is of ivalid type %c\n", bpInfo.iv_type);
                 char & TYPE = bpInfo.iv_type;
                 FAPI_SET_HWP_ERROR(rc, RC_FAPIPOREVE_INVALID_BREAK_POINT_TYPE);
             }
@@ -464,7 +570,7 @@ fapi::ReturnCode fapiPoreVe(
                     poreve->iv_pore.setBreakpoint( bpInfo.iv_address );
                 if( me != ME_SUCCESS )
                 {
-                    FAPI_ERR( "Model error setting breakpoint. Errno(%i)",
+                    FAPI_ERR( "Model error setting breakpoint. Errno(%i)\n",
                               (int)me);
                     PoreAddress & ADDRESS = bpInfo.iv_address;
                     ModelError & ERROR = me;
@@ -478,7 +584,7 @@ fapi::ReturnCode fapiPoreVe(
     //----------------------------------------------------------------------
     // Set MRR
     //----------------------------------------------------------------------
-    if( pOtherArg->iv_mrr != 0 )
+    if( (pOtherArg->iv_mrr != 0) && rc.ok() )
     {
         FAPI_INF( "Setting MRR to 0x%016llX", pOtherArg->iv_mrr );
                 
@@ -486,7 +592,7 @@ fapi::ReturnCode fapiPoreVe(
                 pOtherArg->iv_mrr & 0x00000003fffffc00ull, sizeof(uint64_t) );
         if( me != ME_SUCCESS )
         {
-            FAPI_ERR( "Model error setting MRR. Errno(%i)", (int)me);
+            FAPI_ERR( "Model error setting MRR. Errno(%i)\n", (int)me);
             uint64_t & MRR = pOtherArg->iv_mrr;
             ModelError & ERROR = me;
             FAPI_SET_HWP_ERROR(rc, RC_FAPIPOREVE_ERROR_SETTING_MRR);
@@ -495,12 +601,13 @@ fapi::ReturnCode fapiPoreVe(
 
     //----------------------------------------------------------------------
     // Run the requested number of instructions
+    // JDS TODO - check poreve->poreRc() to get run-time FAPI return codes
     //----------------------------------------------------------------------
     if( rc.ok() ) {
         uint64_t o_actualNumInstructionsRun = 0;
         int runStatus = poreve->run( pOtherArg->iv_instructionCount,
                                      o_actualNumInstructionsRun );
-        FAPI_INF( "PORE ran %llu instructions, and returned status 0x%X",
+        FAPI_INF( "PORE ran %llu instructions, and returned status 0x%X\n",
                   o_actualNumInstructionsRun, runStatus);
 
         if( runStatus != 0 )
@@ -508,7 +615,7 @@ fapi::ReturnCode fapiPoreVe(
             //Parse out each status bit
             if( runStatus & PORE_STATUS_HALTED )
             {
-                FAPI_INF( "PORE is stopped at a HALT instruction");
+                FAPI_INF( "PORE is stopped at a HALT instruction\n");
                 runStatus &= ~PORE_STATUS_HALTED;
 
                 //Check the SBE VITAL reg halt code for success
@@ -524,20 +631,21 @@ fapi::ReturnCode fapiPoreVe(
                         uint32_t haltcode = (data_64 >> 48) & 0x0000000F;
                         if( haltcode != 0xF )
                         {
-                            FAPI_ERR( "Halt code is 0x%x (ERROR)", haltcode );
+                            FAPI_ERR( "Halt code is 0x%x (ERROR)\n", haltcode );
                             uint32_t & ERROR = haltcode;
                             FAPI_SET_HWP_ERROR(rc,
                                               RC_FAPIPOREVE_HALTED_WITH_ERROR);
                         }
                         else
                         {
-                            FAPI_INF( "Halt code is 0x%x (SUCCESS)",haltcode);
+                            FAPI_INF( "Halt code is 0x%x (SUCCESS)\n",haltcode);
+                            rc = fapi::FAPI_RC_SUCCESS;
                         }
                     }
                     else
                     {
                         FAPI_ERR("PIB error getting halt code "
-                                 "(error code %i)", pib_rc );
+                                 "(error code %i)\n", pib_rc );
                         int & ERROR = pib_rc;
                         FAPI_SET_HWP_ERROR(rc,
                                      RC_FAPIPOREVE_PIB_ERROR_READING_SBEVITAL);
@@ -545,7 +653,7 @@ fapi::ReturnCode fapiPoreVe(
                 }
                 else
                 {
-                    FAPI_ERR( "Model error getting halt code (me=0x%x)", me );
+                    FAPI_ERR( "Model error getting halt code (me=0x%x)\n", me );
                     ModelError & ERROR = me;
                     FAPI_SET_HWP_ERROR(rc,
                                   RC_FAPIPOREVE_MODEL_ERROR_GETTING_HALT_CODE);
@@ -553,29 +661,29 @@ fapi::ReturnCode fapiPoreVe(
             }
             if( runStatus & PORE_STATUS_ERROR_HALT )
             {
-                FAPI_ERR( "PORE is stopped due to an architected error");
+                FAPI_ERR( "PORE is stopped due to an architected error\n");
                 runStatus &= ~PORE_STATUS_ERROR_HALT;
                 FAPI_SET_HWP_ERROR(rc, RC_FAPIPOREVE_ARCHITECTED_ERROR);
-                poreve->iv_pore.dump(); 
+                poreve->iv_pore.dump();
             }
             if( runStatus & PORE_STATUS_HARDWARE_STOP )
             {
-                FAPI_INF( "PORE is stopped");
+                FAPI_INF( "PORE is stopped\n");
                 runStatus &= ~PORE_STATUS_HARDWARE_STOP;
             }
             if( runStatus & PORE_STATUS_BREAKPOINT )
             {
-                FAPI_INF( "PORE is stopped at a breakpoint");
+                FAPI_INF( "PORE is stopped at a breakpoint\n");
                 runStatus &= ~PORE_STATUS_BREAKPOINT;
             }
             if( runStatus & PORE_STATUS_TRAP )
             {
-                FAPI_INF( "PORE is stopped at a TRAP instruction");
+                FAPI_INF( "PORE is stopped at a TRAP instruction\n");
                 runStatus &= ~PORE_STATUS_TRAP;
             }
             if( runStatus & PORE_STATUS_MODEL_ERROR )
             {
-                FAPI_ERR( "PORE is stopped due to a modeling error");
+                FAPI_ERR( "PORE is stopped due to a modeling error\n");
                 runStatus &= ~PORE_STATUS_MODEL_ERROR;
                 FAPI_SET_HWP_ERROR(rc, RC_FAPIPOREVE_MODELING_ERROR);
                 poreve->iv_pore.dump();
@@ -583,27 +691,27 @@ fapi::ReturnCode fapiPoreVe(
             if( runStatus & PORE_STATUS_DEBUG_STOP )
             {
                 FAPI_INF( "PORE is stopped due to a user request "
-                          "(probably a hook)");
+                          "(probably a hook)\n");
                 runStatus &= ~PORE_STATUS_DEBUG_STOP;
             }
             //If we still have bits set, we missed something
             if( runStatus )
             {
-                FAPI_ERR( "PORE is stopped with an unknown status code:0x%X",
+                FAPI_ERR( "PORE is stopped with an unknown status code:0x%X\n",
                           runStatus);
                 int & STATUS = runStatus;
                 FAPI_SET_HWP_ERROR(rc, RC_FAPIPOREVE_UNKNOWN_STATUS_ERROR);
             }
         } else { //runStatus == 0
             FAPI_IMP( "PORE ran the requested number of instructions "
-                      "without hitting any stop conditions");
+                      "without hitting any stop conditions\n");
         }
 
         if( (pOtherArg->iv_instructionCount != RUN_UNLIMITED) &&
             (pOtherArg->iv_instructionCount != o_actualNumInstructionsRun) )
         {
             FAPI_IMP( "PORE only ran %llu of the %llu instructions you "
-                      "requested", o_actualNumInstructionsRun,
+                      "requested\n", o_actualNumInstructionsRun,
                       pOtherArg->iv_instructionCount );
         }
     } //if( rc.ok() )
@@ -611,7 +719,7 @@ fapi::ReturnCode fapiPoreVe(
     //----------------------------------------------------------------------
     // Extract end state
     //----------------------------------------------------------------------
-    if( stateArg != NULL && stateArg->iv_extractState )
+    if( (stateArg != NULL) && stateArg->iv_extractState && rc.ok() )
     {
         ModelError me;
         PoreState * p_state = (PoreState *)stateArg->iv_data;
@@ -709,7 +817,7 @@ fapi::ReturnCode fapiPoreVe(
 #endif
         if( me != ME_SUCCESS )
         {
-            FAPI_ERR( "Model error extracting state. Errno(%i)", (int)me);
+            FAPI_ERR( "Model error extracting state. Errno(%i)\n", (int)me);
             FAPI_SET_HWP_ERROR(rc, RC_FAPIPOREVE_ERROR_EXTRACTING_STATE);
         }
     } //if extract state
@@ -732,6 +840,13 @@ This section is automatically updated by CVS when you check in this file.
 Be sure to create CVS comments when you commit so that they are included here.
 
 $Log: fapiPoreVe.C,v $
+Revision 1.29  2012/09/05 20:11:16  jeshua
+More robust return code handling
+Cosmetic updates for things like line length
+
+Revision 1.28  2012/09/05 18:32:42  jeshua
+Disconnect missing memories
+
 Revision 1.27  2012/04/26 21:30:31  jeshua
 file renamed from ../../../fapiporeve/working/fapiPoreVe.C to fapiPoreVe.C
 

@@ -1,30 +1,29 @@
-/*  IBM_PROLOG_BEGIN_TAG
- *  This is an automatically generated prolog.
- *
- *  $Source: src/usr/pore/poreve/porevesrc/pore.H $
- *
- *  IBM CONFIDENTIAL
- *
- *  COPYRIGHT International Business Machines Corp. 2012
- *
- *  p1
- *
- *  Object Code Only (OCO) source materials
- *  Licensed Internal Code Source Materials
- *  IBM HostBoot Licensed Internal Code
- *
- *  The source code for this program is not published or other-
- *  wise divested of its trade secrets, irrespective of what has
- *  been deposited with the U.S. Copyright Office.
- *
- *  Origin: 30
- *
- *  IBM_PROLOG_END_TAG
- */
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/usr/pore/poreve/porevesrc/pore.H $                        */
+/*                                                                        */
+/* IBM CONFIDENTIAL                                                       */
+/*                                                                        */
+/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/*                                                                        */
+/* p1                                                                     */
+/*                                                                        */
+/* Object Code Only (OCO) source materials                                */
+/* Licensed Internal Code Source Materials                                */
+/* IBM HostBoot Licensed Internal Code                                    */
+/*                                                                        */
+/* The source code for this program is not published or otherwise         */
+/* divested of its trade secrets, irrespective of what has been           */
+/* deposited with the U.S. Copyright Office.                              */
+/*                                                                        */
+/* Origin: 30                                                             */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
 #ifndef __VSBE_PORE_H
 #define __VSBE_PORE_H
 
-// $Id: pore.H,v 1.15 2012/02/29 20:58:39 bcbrock Exp $
+// $Id: pore.H,v 1.16 2013/01/07 16:35:18 bcbrock Exp $
 
 /// \file pore.H
 /// \brief The implementation of the PoreInterface for the PoreVe environment
@@ -47,19 +46,11 @@ namespace vsbe {
 
     /// This is the putative tick frequency of the simulation environment,
     /// used to model the wait() method.
-#ifndef __HOSTBOOT_MODULE
     const double SIMULATOR_TICK_FREQUENCY = 12e9;
-#else
-    const uint64_t SIMULATOR_TICK_FREQUENCY = 12000000000ull;
-#endif
 
     /// This is the expected operating frequency of the PORE hardware engine,
     /// used to model the wait() method.
-#ifndef __HOSTBOOT_MODULE
     const double PORE_FREQUENCY = 600e6;
-#else
-    const uint64_t PORE_FREQUENCY = 600000000ull;
-#endif
 };
 
 
@@ -232,7 +223,11 @@ public:
     fapi::ReturnCode
     getFapiReturnCode();
 
-    /// Dump the state of the engine using FAPI_DBG
+    /// Dump the state of the engine using FAPI_ERR
+    ///
+    /// The dump is made using FAPI_ERR() because this is currently the only
+    /// way to guarantee that the dump will appear regardless of the Cronus
+    /// debug settings.
     void
     dump();
 

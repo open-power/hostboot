@@ -1,27 +1,26 @@
-/*  IBM_PROLOG_BEGIN_TAG
- *  This is an automatically generated prolog.
- *
- *  $Source: src/usr/pore/poreve/porevesrc/hookmanager.C $
- *
- *  IBM CONFIDENTIAL
- *
- *  COPYRIGHT International Business Machines Corp. 2012
- *
- *  p1
- *
- *  Object Code Only (OCO) source materials
- *  Licensed Internal Code Source Materials
- *  IBM HostBoot Licensed Internal Code
- *
- *  The source code for this program is not published or other-
- *  wise divested of its trade secrets, irrespective of what has
- *  been deposited with the U.S. Copyright Office.
- *
- *  Origin: 30
- *
- *  IBM_PROLOG_END_TAG
- */
-// $Id: hookmanager.C,v 1.12 2012/01/06 21:25:25 bcbrock Exp $
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/usr/pore/poreve/porevesrc/hookmanager.C $                 */
+/*                                                                        */
+/* IBM CONFIDENTIAL                                                       */
+/*                                                                        */
+/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/*                                                                        */
+/* p1                                                                     */
+/*                                                                        */
+/* Object Code Only (OCO) source materials                                */
+/* Licensed Internal Code Source Materials                                */
+/* IBM HostBoot Licensed Internal Code                                    */
+/*                                                                        */
+/* The source code for this program is not published or otherwise         */
+/* divested of its trade secrets, irrespective of what has been           */
+/* deposited with the U.S. Copyright Office.                              */
+/*                                                                        */
+/* Origin: 30                                                             */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
+// $Id: hookmanager.C,v 1.15 2012/12/06 18:03:51 bcbrock Exp $
 
 /// \file hookmanager.C
 /// \brief A portable symbol table and hook execution facility
@@ -32,7 +31,7 @@
 #include "hookmanager.H"
 
 using namespace vsbe;
-
+using namespace fapi;
 
 #ifndef ULL
 /// The printf() checker for 64-bit GCC throws a warning if a uint64_t is
@@ -103,7 +102,7 @@ HookManager::runInstructionHook(const PoreAddress& i_address,
 
     ihmi = instance()->iv_instructionHookMap.find(i_hook);
     if (ihmi == instance()->iv_instructionHookMap.end()) {
-        rc = 0;
+        rc = FAPI_RC_SUCCESS;
     } else {
         rc = (ihmi->second)(i_address, i_hook, i_parameter, io_pore, i_target);
     }
@@ -493,6 +492,13 @@ HookManager::clearError()
 
 ////////////////////////// Implementation ////////////////////////////
 
+// This routine checks to see if the i_address is mapped in the table, and if
+// so, looks for a hook of the indicated type associated with that address.
+// It is possible that the search may beningnly fail even though the address is
+// mapped, e.g. we may be looking for a read hook but the hook mapped to the
+// address is a write hook. We may want to consider a more efficient structure
+// (multi-key map?) to avoid this.
+
 fapi::ReturnCode
 HookManager::runHooks(const HookType i_interactiveType,
                       const HookType i_extractedType,
@@ -535,7 +541,7 @@ HookManager::runHooks(const HookType i_interactiveType,
                              i_address.iv_offset,
                              exHook->iv_file);
                     instance()->iv_error = HOOK_TABLE_MISSING;
-                    rc = 1;     /// \todo Define this error
+                    FAPI_SET_HWP_ERROR(rc, RC_POREVE_HOOKMANAGER_INCONSISTENCY);
 
                 } else {
 
@@ -553,7 +559,8 @@ HookManager::runHooks(const HookType i_interactiveType,
                                  hfmi->first, exHook->iv_index,
                                  table->iv_entries);
                         instance()->iv_error = HOOK_INDEX_FAILURE;
-                        rc = 1; /// \todo Define this error
+                        FAPI_SET_HWP_ERROR(rc, 
+                                            RC_POREVE_HOOKMANAGER_INCONSISTENCY);
 
                     } else {
 
@@ -562,12 +569,6 @@ HookManager::runHooks(const HookType i_interactiveType,
                             (i_address, i_extractedType, io_pore, i_target);
                     }
                 }
-            } else {
-
-                FAPI_ERR("%s : Bug in HookManager - Unexpected type",
-                         __FUNCTION__);
-                instance()->iv_error = HOOK_BUG;
-                rc = 1;         /// \todo Define this error
             }
             if (!rc.ok()) break;
         }

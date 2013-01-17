@@ -27,8 +27,6 @@
      HOST BOOT TARGETS
      Contains the definition of the different types of targets
      ================================================================= -->
-
-
 <targetType>
     <id>base</id>
     <attribute><id>CLASS</id></attribute>
@@ -327,6 +325,12 @@
      <attribute><id>PM_PBAX_SND_RETRY_THRESHOLD</id></attribute>
      <attribute><id>PM_PBAX_SND_RESERV_TIMEOUT</id></attribute>
      <!-- End pm_attributes_all_hwp.xml -->
+     <!-- Begin poreve_memory_attributes.xml -->
+     <attribute><id>SBE_SEEPROM_I2C_ADDRESS_BYTES</id></attribute>
+     <attribute><id>SBE_SEEPROM_I2C_DEVICE_ADDRESS</id></attribute>
+     <attribute><id>SBE_SEEPROM_I2C_PORT</id></attribute>
+     <attribute><id>PNOR_I2C_ADDRESS_BYTES</id></attribute>
+     <!-- End Supporting poreve_memory_attributes.xml -->
 </targetType>
 
 <targetType>
@@ -972,6 +976,12 @@
     <attribute><id>MSS_CACHE_ENABLE</id></attribute>
     <attribute><id>VMEM_ID</id></attribute>
     <attribute><id>EI_BUS_TX_LANE_INVERT</id></attribute>
+     <!-- Begin poreve_memory_attributes.xml -->
+     <attribute><id>SBE_SEEPROM_I2C_ADDRESS_BYTES</id></attribute>
+     <attribute><id>SBE_SEEPROM_I2C_DEVICE_ADDRESS</id></attribute>
+     <attribute><id>SBE_SEEPROM_I2C_PORT</id></attribute>
+     <attribute><id>PNOR_I2C_ADDRESS_BYTES</id></attribute>
+     <!-- End poreve_memory_attributes.xml -->
 </targetType>
 
 <!-- Centaur MBS -->

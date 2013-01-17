@@ -1,27 +1,26 @@
-/*  IBM_PROLOG_BEGIN_TAG
- *  This is an automatically generated prolog.
- *
- *  $Source: src/usr/pore/poreve/porevesrc/pibmem.C $
- *
- *  IBM CONFIDENTIAL
- *
- *  COPYRIGHT International Business Machines Corp. 2012
- *
- *  p1
- *
- *  Object Code Only (OCO) source materials
- *  Licensed Internal Code Source Materials
- *  IBM HostBoot Licensed Internal Code
- *
- *  The source code for this program is not published or other-
- *  wise divested of its trade secrets, irrespective of what has
- *  been deposited with the U.S. Copyright Office.
- *
- *  Origin: 30
- *
- *  IBM_PROLOG_END_TAG
- */
-// $Id: pibmem.C,v 1.1 2012/02/29 20:58:38 bcbrock Exp $
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/usr/pore/poreve/porevesrc/pibmem.C $                      */
+/*                                                                        */
+/* IBM CONFIDENTIAL                                                       */
+/*                                                                        */
+/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/*                                                                        */
+/* p1                                                                     */
+/*                                                                        */
+/* Object Code Only (OCO) source materials                                */
+/* Licensed Internal Code Source Materials                                */
+/* IBM HostBoot Licensed Internal Code                                    */
+/*                                                                        */
+/* The source code for this program is not published or otherwise         */
+/* divested of its trade secrets, irrespective of what has been           */
+/* deposited with the U.S. Copyright Office.                              */
+/*                                                                        */
+/* Origin: 30                                                             */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
+// $Id: pibmem.C,v 1.3 2012/12/06 18:03:51 bcbrock Exp $
 
 /// \file pibmem.C
 /// \brief A model of the P8 "PIB-attached Memory"
@@ -139,7 +138,9 @@ Pibmem::operation(Transaction& io_transaction)
                 break;
 
             default:
-                FAPI_SET_HWP_ERROR(rc, RC_POREVE_PIBMEM_BAD_OFFSET); // Bug
+                FAPI_ERR("PIBMEM: Can't read register at offset 0x%08x\n",
+                         io_transaction.iv_offset);
+                FAPI_SET_HWP_ERROR(rc, RC_POREVE_PIBMEM_CONTROL_ERROR);
                 break;
             }
 
@@ -159,10 +160,6 @@ Pibmem::operation(Transaction& io_transaction)
             case PIBMEM_ADDRESS:
                 iv_address.value = 
                     io_transaction.iv_data & PIBMEM_ADDRESS_DEFINED;
-                break;
-
-            case PIBMEM_STATUS:
-                // Read-only
                 break;
 
             case PIBMEM_RESET:
@@ -203,14 +200,18 @@ Pibmem::operation(Transaction& io_transaction)
                 break;
 
             default:
-                FAPI_SET_HWP_ERROR(rc, RC_POREVE_PIBMEM_BAD_OFFSET); // Bug
+                FAPI_ERR("PIBMEM: Can't write register at offset 0x%08x\n",
+                         io_transaction.iv_offset);
+                FAPI_SET_HWP_ERROR(rc, RC_POREVE_PIBMEM_CONTROL_ERROR);
                 break;
             }
 
             break;
 
         default:
-            FAPI_SET_HWP_ERROR(rc, RC_POREVE_PIBMEM_BAD_MODE); // Bug
+            FAPI_ERR("PIBMEM: Transaction mode is illegal - %d\n", 
+                     io_transaction.iv_mode);
+            FAPI_SET_HWP_ERROR(rc, RC_POREVE_PIBMEM_CONTROL_ERROR);
             break;
         }
         
@@ -243,7 +244,7 @@ Pibmem::memoryOperation(Transaction& io_transaction,
                         const bool i_direct)
 {
     fapi::ReturnCode rc;
-    uint32_t saveOffset;
+    uint32_t saveAddress, saveOffset;
 
     if (i_direct) {
         if (io_transaction.iv_offset >= iv_memorySize) {
@@ -261,6 +262,10 @@ Pibmem::memoryOperation(Transaction& io_transaction,
 
             rc = PibMemory::operation(io_transaction);
 
+            if (rc) {
+                FAPI_ERR("The previous error was from a direct "
+                         "PIBMEM operation to the indicated address");
+            }
         }
 
     } else {
@@ -272,11 +277,24 @@ Pibmem::memoryOperation(Transaction& io_transaction,
                 PCB_PACKET_ERROR;
         } else {
 
+            saveAddress = io_transaction.iv_address;
             saveOffset = io_transaction.iv_offset;
+
+            io_transaction.iv_address = iv_address.fields.address_pointer;
             io_transaction.iv_offset = iv_address.fields.address_pointer;
+
             rc = PibMemory::operation(io_transaction);
+
+            io_transaction.iv_address = saveAddress;
             io_transaction.iv_offset = saveOffset;
 
+            if (rc) {
+                FAPI_ERR("The previous error was from a PIBMEM operation "
+                         "targeting the indicated address, issued "
+                         "indirectly through the PIBMEM control "
+                         "register 0x%08x",
+                         saveAddress);
+            }
         }
     }
 

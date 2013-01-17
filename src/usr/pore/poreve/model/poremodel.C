@@ -1,27 +1,26 @@
-/*  IBM_PROLOG_BEGIN_TAG
- *  This is an automatically generated prolog.
- *
- *  $Source: src/usr/pore/poreve/model/poremodel.C $
- *
- *  IBM CONFIDENTIAL
- *
- *  COPYRIGHT International Business Machines Corp. 2012
- *
- *  p1
- *
- *  Object Code Only (OCO) source materials
- *  Licensed Internal Code Source Materials
- *  IBM HostBoot Licensed Internal Code
- *
- *  The source code for this program is not published or other-
- *  wise divested of its trade secrets, irrespective of what has
- *  been deposited with the U.S. Copyright Office.
- *
- *  Origin: 30
- *
- *  IBM_PROLOG_END_TAG
- */
-// $Id: poremodel.C,v 1.22 2012/06/18 13:56:57 bcbrock Exp $
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/usr/pore/poreve/model/poremodel.C $                       */
+/*                                                                        */
+/* IBM CONFIDENTIAL                                                       */
+/*                                                                        */
+/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/*                                                                        */
+/* p1                                                                     */
+/*                                                                        */
+/* Object Code Only (OCO) source materials                                */
+/* Licensed Internal Code Source Materials                                */
+/* IBM HostBoot Licensed Internal Code                                    */
+/*                                                                        */
+/* The source code for this program is not published or otherwise         */
+/* divested of its trade secrets, irrespective of what has been           */
+/* deposited with the U.S. Copyright Office.                              */
+/*                                                                        */
+/* Origin: 30                                                             */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
+// $Id: poremodel.C,v 1.24 2012/08/06 15:11:06 jeshua Exp $
 
 /// \file poremodel.C
 /// \brief The PORE hardware engine model and interface to the virtual
@@ -51,7 +50,7 @@ PoreModel::restart()
 
     // Begin bug workaround
 
-    registerWriteRaw(PORE_STATUS, 0);
+    registerWriteRaw(PORE_STATUS, 0x0001000000000000ull); // Stack empty
 
     if (iv_ibufId == PORE_SLW) {
         registerWriteRaw(PORE_CONTROL,0x8005ffffffffffffull);
@@ -69,7 +68,7 @@ PoreModel::restart()
     registerWriteRaw(PORE_OCI_MEMORY_BASE_ADDR1,0);
 
     if (iv_ibufId == PORE_SBE) {
-        registerWriteRaw(PORE_TABLE_BASE_ADDR, 0x0000000100040020ull);
+        registerWriteRaw(PORE_TABLE_BASE_ADDR, 0x0000000100040028ull);
     } else {
         registerWriteRaw(PORE_TABLE_BASE_ADDR, 0);
     }
@@ -169,8 +168,7 @@ PoreModel::run(const uint64_t i_instructions, uint64_t& o_ran)
             }
             o_ran++;
             iv_instructions++;
-            me = getModelError();
-            if (me != 0) {
+            if ((me = getModelError()) != 0) {
                 break;
             }
         }

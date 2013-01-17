@@ -1,30 +1,29 @@
-/*  IBM_PROLOG_BEGIN_TAG
- *  This is an automatically generated prolog.
- *
- *  $Source: src/usr/pore/poreve/porevesrc/bus.H $
- *
- *  IBM CONFIDENTIAL
- *
- *  COPYRIGHT International Business Machines Corp. 2012
- *
- *  p1
- *
- *  Object Code Only (OCO) source materials
- *  Licensed Internal Code Source Materials
- *  IBM HostBoot Licensed Internal Code
- *
- *  The source code for this program is not published or other-
- *  wise divested of its trade secrets, irrespective of what has
- *  been deposited with the U.S. Copyright Office.
- *
- *  Origin: 30
- *
- *  IBM_PROLOG_END_TAG
- */
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/usr/pore/poreve/porevesrc/bus.H $                         */
+/*                                                                        */
+/* IBM CONFIDENTIAL                                                       */
+/*                                                                        */
+/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/*                                                                        */
+/* p1                                                                     */
+/*                                                                        */
+/* Object Code Only (OCO) source materials                                */
+/* Licensed Internal Code Source Materials                                */
+/* IBM HostBoot Licensed Internal Code                                    */
+/*                                                                        */
+/* The source code for this program is not published or otherwise         */
+/* divested of its trade secrets, irrespective of what has been           */
+/* deposited with the U.S. Copyright Office.                              */
+/*                                                                        */
+/* Origin: 30                                                             */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
 #ifndef __VSBE_BUS_H
 #define __VSBE_BUS_H
 
-// $Id: bus.H,v 1.14 2011/12/16 21:47:59 bcbrock Exp $
+// $Id: bus.H,v 1.16 2012/12/06 18:03:51 bcbrock Exp $
 
 /// \file bus.H
 /// \brief PoreVe bus and base device models
@@ -72,6 +71,10 @@ public:
     is not mapped on the bus at all. */
     /// Secondary Slaves are searched only if a Primary Slave did not support the Transaction Address
     void attachSecondarySlave(Slave* i_slave);
+
+    /*! Detach the slave from the bus if it is mapped on either the primary or
+      secondary bus; Otherwise return the generic error ME_FAILURE */
+    ModelError detachSlave(Slave* i_slave);
                               
     /*!
     The PrimarySlaves attached to the bus are checked to find one that handles the  
@@ -112,6 +115,8 @@ protected:
     /// The Secondary list is used when the Primary list fails to contain a Transaction address
     Slave* iv_secondarySlaves;
 
+    /// Detach a slave from a slave list or else return ME_FAILURE.
+    ModelError removeSlaveFromList(Slave* i_slave, Slave** i_slaves);
 };
 
 //-----------------------------------------------------------------------------
@@ -190,7 +195,7 @@ public:
     PibSlave();
     virtual ~PibSlave();
 
-    /// Overriding Slave::operation
+    /// Inherits Slave::operation implementation
     virtual fapi::ReturnCode operation(Transaction& io_transaction);
 
 protected:
@@ -441,6 +446,9 @@ public:
     /// true if iv_originalCrc == current crc, or if iv_crcEnable == false
     virtual bool checkCrc();
 
+    /// Dump this memory image to the FAPI_ERR stream.
+    virtual void dump(void);
+
     /// base address associated with iv_image in the system (not real address of iv_image)
     uint32_t iv_base;
 
@@ -625,10 +633,11 @@ public:
                              uint64_t i_data,
                              size_t i_size);
 
-private:
+    /// Dump the list of memory images to the FAPI_ERR stream.
+    virtual void dump(void);
+
     /// Pointer to first MemoryImage in a circularly linked list
     MemoryImage* iv_images;
-public:
     
 #if POREVE_STATISTICS
 

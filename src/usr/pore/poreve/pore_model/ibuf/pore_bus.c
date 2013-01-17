@@ -1,25 +1,25 @@
-//  IBM_PROLOG_BEGIN_TAG
-//  This is an automatically generated prolog.
-//
-//  $Source: src/usr/pore/poreve/pore_model/ibuf/pore_bus.c $
-//
-//  IBM CONFIDENTIAL
-//
-//  COPYRIGHT International Business Machines Corp. 2012
-//
-//  p1
-//
-//  Object Code Only (OCO) source materials
-//  Licensed Internal Code Source Materials
-//  IBM HostBoot Licensed Internal Code
-//
-//  The source code for this program is not published or other-
-//  wise divested of its trade secrets, irrespective of what has
-//  been deposited with the U.S. Copyright Office.
-//
-//  Origin: 30
-//
-//  IBM_PROLOG_END
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/usr/pore/poreve/pore_model/ibuf/pore_bus.c $              */
+/*                                                                        */
+/* IBM CONFIDENTIAL                                                       */
+/*                                                                        */
+/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/*                                                                        */
+/* p1                                                                     */
+/*                                                                        */
+/* Object Code Only (OCO) source materials                                */
+/* Licensed Internal Code Source Materials                                */
+/* IBM HostBoot Licensed Internal Code                                    */
+/*                                                                        */
+/* The source code for this program is not published or otherwise         */
+/* divested of its trade secrets, irrespective of what has been           */
+/* deposited with the U.S. Copyright Office.                              */
+/*                                                                        */
+/* Origin: 30                                                             */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
 /******************************************************************************
  *
  * Virtual PORe Engine
@@ -49,7 +49,25 @@
 #include "pore_model.h"
 #include "pore_ibuf.h"
 
+/**
+ * When running against hardware-simulated I2C memories, the PORE model needs
+ * to honor the timeout specified in the I2C0 parameter register, as it may
+ * take a large number of polls for the transaction to complete.  In no event
+ * however do we ever poll more than 2^29 times.
+ *
+ * ** HACK FIX ME **
+ */
+#if 1
+#define I2C_COMMAND_COMPLETION ({				     \
+	int __pollThreshold = ((p->i2c_e_param[0].val >> 32) & 0xf); \
+	if (__pollThreshold == 0) {				     \
+		__pollThreshold = 15;				     \
+	}							     \
+	1u << ((__pollThreshold * 2) - 1);			     \
+})
+#else
 #define I2C_COMMAND_COMPLETION  16 /* MAX iterations before aborting I2C */
+#endif
 
 /*** OCI Bus access **********************************************************/
 
@@ -90,7 +108,7 @@ static int oci_read(struct pore_bus *b, uint64_t addr, uint8_t *buf,
 /// the fetch buffer is empty, it does an OCI interface read and
 /// populates the buffer before returning the word.
 
-static int fetchInstructionWordOci(struct pore_bus *b, PoreAddress *pc,
+static int fetchInstructionWordOci(struct pore_bus *b, _PoreAddress *pc,
 				   uint32_t *word, int *err_code)
 {
 	int me = 0;
@@ -131,7 +149,7 @@ static int oci_fetch(struct pore_bus *b, uint64_t _pc,
 {
 	int me;
 	uint32_t i_word;
-	PoreAddress pc;
+	_PoreAddress pc;
 	pore_model_t p = b->pore;
 
 	if (!b || !ibuf_01 || !ibuf_2 || !size || !err_code)
@@ -207,81 +225,35 @@ struct pore_fi2cm {
 };
 
 /**
- * Convert a PoreAddress + I2C register offset into a PIB address
+ * Convert a _PoreAddress + I2C register offset into a PIB address
  */
 static uint32_t
-i2cPibAddress(PoreAddress *address, uint16_t offset)
+i2cPibAddress(_PoreAddress *address, uint16_t offset)
 {
 	return ((address->memorySpace & 0x3fff) << 16) + offset;
 }
 
-static int fi2cm_setAddress(struct pore_bus *b, uint64_t addr, int *err_code)
-{
-	int rc;
-	unsigned int count;
-	pore_model_t p = b->pore;
-	struct pore_fi2cm *fi2cm = (struct pore_fi2cm *)poreb_get_priv(b);
-	pore_i2c_en_param_reg *i2cp = fi2cm->i2c_param;
-	PoreAddress address;
-	fasti2c_control_reg control;
-	fasti2c_status_reg status;
-	uint32_t pib_addr;
-
-	iprintf(p, "############ I2C SET ADDRESS #########################\n");
-
-	/* 4.7.3.1 Set Address */
-	address.val = addr;
-
-	/* 1. Write fast I2C Control Register at PRV address */
-	control.val = 0;
-	control.with_start     = 1;
-	control.with_address   = 1;
-	control.with_stop      = 1;
-	control.read_continue  = 0;
-	control.data_length    = 0; /* mark this as address write */
-	control.device_address = i2cp->i2c_engine_device_id;
-	control.read_not_write = 0; /* address write */
-	control.speed	       = i2cp->i2c_engine_speed;
-	control.port_number    = i2cp->i2c_engine_port;
-	control.address_range  = i2cp->i2c_engine_address_range;
-
-	/* Add required address bytes to control register */
-	control.val |= (address.offset <<
-			((4 - i2cp->i2c_engine_address_range)*8));
-
-	pib_addr = i2cPibAddress(&address, FASTI2C_CONTROL_OFFSET);
-	rc = pore_pib_write(p, pib_addr, (uint8_t *)&control.val,
-			    sizeof(control.val), err_code);
-	if (rc < 0)
-		return rc;
-
-	/* 2. Wait for Data fill-level is 4/8 Bytes by polling fast
-	 *    I2C status register at PRV address
-	 */
-	pib_addr = i2cPibAddress(&address, FASTI2C_STATUS_OFFSET);
-	for (count = 0; count < I2C_COMMAND_COMPLETION; count++) {
-
-		rc = pore_pib_read(p, pib_addr, (uint8_t *)&status.val,
-				   sizeof(status.val), err_code);
-		if (rc != sizeof(status.val))
-			break;
-
-		iprintf(p, "I2C_COMMAND_STATUS=%016llx count=%d\n"
-			"  i2c_command_complete = %x\n"
-			"  i2c_fifo_entry_count = %x\n",
-			(long long)status.val, count,
-			(unsigned int)status.i2c_command_complete,
-			(unsigned int)status.i2c_fifo_entry_count);
-
-		if (status.i2c_command_complete)
-			break;
-	}
-	/* Check for timeout or error */
-	if (count == I2C_COMMAND_COMPLETION || (rc < 0))
-		return pore_handleErrEvent(p, 1, PORE_ERR_I2C_POLLING);
-
-	return rc;
-}
+/* Modeling Notes
+ *
+ * The PORE engine optimizes read access to "fast I2C" memories by using two
+ * types of read transactions: The first, "Set Address", establishes an
+ * address in the memory, returns 4 or 8 bytes of data, and effectively
+ * increments the address in memory. The second, "Read Data", returns data and
+ * increments the stored address.  When fetching instructions the PORE engine
+ * first establishes the fetch address (and gets the first instruction) with
+ * "Set Address" and then continues to fetch using "Read Data" until a branch
+ * is encountered.
+ *
+ * This optimization is currently _not_ modeled here. Instead all reads are
+ * performed using the "Set Address" type operation.  There is no functional
+ * difference between this model and the real hardware other than the fact
+ * that it is not as efficient as the real hardware, but this would only be
+ * noticed when running the virtual PORE against a real fast I2C memory
+ * controller.
+ *
+ * The PORE engine does not optimize fast I2C writes.  Each write operation
+ * always includes the address and data.
+ */
 
 static int fi2cm_read(struct pore_bus *b, uint64_t addr, uint8_t *buf,
 		      unsigned int size, int *err_code)
@@ -291,7 +263,7 @@ static int fi2cm_read(struct pore_bus *b, uint64_t addr, uint8_t *buf,
 	pore_model_t p = b->pore;
 	struct pore_fi2cm *fi2cm = (struct pore_fi2cm *)poreb_get_priv(b);
 	pore_i2c_en_param_reg *i2cp = fi2cm->i2c_param;
-	PoreAddress address;
+	_PoreAddress address;
 	fasti2c_control_reg control;
 	fasti2c_status_reg status;
 	uint32_t pib_addr;
@@ -301,10 +273,6 @@ static int fi2cm_read(struct pore_bus *b, uint64_t addr, uint8_t *buf,
 	    ((i2cp->i2c_engine_address_range != 2) &&
 	     (i2cp->i2c_engine_address_range != 4)))
 		return PORE_ERR_INVALID_PARAM;
-
-	rc = fi2cm_setAddress(b, addr, err_code);
-	if (rc < 0)
-		return rc;
 
 	iprintf(p, "############ I2C READ (len=%d) #######################\n",
 		size);
@@ -386,22 +354,25 @@ static int fi2cm_read(struct pore_bus *b, uint64_t addr, uint8_t *buf,
 
 /**
  * I2C Write
- *  o Fill control register with required data. If i2c_engine_address_range
- *    allows, we need to fill the first few bytes into the control register.
+ *  o Fill control register with the address and the required data. If
+ *    the i2c_engine_address_range allows, we need to fill the first few bytes
+ *    of data into the control register behind the address bytes.
  *  o Write the data register with the remaining bytes.
+ *  o Write the control register.
  *  o Poll for completion of the operation.
  */
 static int fi2cm_write(struct pore_bus *b, uint64_t addr,
 		       const uint8_t *buf, unsigned int size,
 		       int *err_code)
 {
-	int rc, count;
+	int rc;
+	unsigned int count;
 	pore_model_t p = b->pore;
 	struct pore_fi2cm *fi2cm = (struct pore_fi2cm *)poreb_get_priv(b);
 	pore_i2c_en_param_reg *i2cp = fi2cm->i2c_param;
 	fasti2c_control_reg control;
 	fasti2c_status_reg status;
-	PoreAddress address;
+	_PoreAddress address;
 	uint32_t pib_addr;
 	uint64_t write_data;
 
@@ -410,17 +381,13 @@ static int fi2cm_write(struct pore_bus *b, uint64_t addr,
 	     (i2cp->i2c_engine_address_range != 4)))
 		return PORE_ERR_INVALID_PARAM;
 
-	rc = fi2cm_setAddress(b, addr, err_code);
-	if (rc < 0)
-		return rc;
-
 	iprintf(p, "############ I2C WRITE ###############################\n");
 
 	/* 4.7.3.3 Write Data (8 byte, SBE memory interface only) */
 	address.val = addr;
 	write_data = *((uint64_t *)buf);
 
-	/* 1. Write fast I2C Control Register at PRV address */
+	/* 1. Set up fast I2C Control Register */
 	control.val = 0;
 	control.with_start     = 1;
 	control.with_address   = 1;
@@ -442,14 +409,7 @@ static int fi2cm_write(struct pore_bus *b, uint64_t addr,
 		control.val |= (write_data >>
 				(64 - ((4-i2cp->i2c_engine_address_range)*8)));
 
-	pib_addr = i2cPibAddress(&address, FASTI2C_CONTROL_OFFSET);
-	rc = pore_pib_write(p, pib_addr, (uint8_t *)&control.val,
-			    sizeof(control.val), err_code);
-	if (rc < 0)
-		return rc;
-
 	/* 2. Write fast I2C Data Register at PRV address */
-
 	/* Write remaining data bytes to data register (left algined)*/
 	write_data = write_data << ((4 - i2cp->i2c_engine_address_range) * 8);
 
@@ -459,8 +419,15 @@ static int fi2cm_write(struct pore_bus *b, uint64_t addr,
 	if (rc < 0)
 		return rc;
 
+	/* 3. Write fast I2C Control Register at PRV address */
+	pib_addr = i2cPibAddress(&address, FASTI2C_CONTROL_OFFSET);
+	rc = pore_pib_write(p, pib_addr, (uint8_t *)&control.val,
+			    sizeof(control.val), err_code);
+	if (rc < 0)
+		return rc;
+
 	/**
-	 * 3. Wait and poll fast I2C status register for operation to
+	 * 4. Wait and poll fast I2C status register for operation to
 	 * complete at PRV address
 	 */
 	/* FIXME Check instead bit 44 (which is not right in my
@@ -518,7 +485,7 @@ static int fi2c_read(struct pore_bus *b, uint64_t addr, uint8_t *buf,
 	int i;
 	uint32_t port;
 	pore_model_t p = b->pore;
-	PoreAddress address;
+	_PoreAddress address;
 
 	bprintf(p, "  %-12s: %s(%p, 0x%llx, %p, %x)\n", b->name, __func__, b,
 		(long long)addr, buf, len);
@@ -557,7 +524,7 @@ static int fi2c_write(struct pore_bus *b, uint64_t addr,
 	int i;
 	uint32_t port;
 	pore_model_t p = b->pore;
-	PoreAddress address;
+	_PoreAddress address;
 
 	address.val = addr;
 	port = address.memorySpace & 0xf; /* must match i2c_engine_id */
@@ -593,7 +560,7 @@ static int fi2c_fetch(struct pore_bus *b, uint64_t _pc,
 {
 	int me = PORE_SUCCESS;
 	uint32_t i_word;
-	PoreAddress pc;
+	_PoreAddress pc;
 	pore_model_t p = b->pore;
 
 	if (!b || !ibuf_01 || !ibuf_2 || !size || !err_code)
