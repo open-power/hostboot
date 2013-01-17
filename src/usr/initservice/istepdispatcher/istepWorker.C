@@ -35,6 +35,7 @@
 #include <string.h>
 
 #include <sys/msg.h>
+#include <vfs/vfs.H>
 
 #include <errl/errlentry.H>
 
@@ -65,6 +66,8 @@ namespace   INITSERVICE
 extern trace_desc_t *g_trac_initsvc;
 
 bool getSyncEnabledAttribute();
+void loadModules( uint32_t istep );
+void unLoadModules( uint32_t istep );
 
 // ----------------------------------------------------------------------------
 // startIStepWorkerThread
@@ -98,6 +101,7 @@ void iStepWorkerThread ( void * i_msgQ )
     msg_t * theMsg          =   NULL;
     uint32_t istep          =   0x0;
     uint32_t substep        =   0x0;
+    uint32_t prevStep       =   0x0;
     uint64_t progressCode   =   0x0;
     bool first              =   true;
 
@@ -150,6 +154,7 @@ void iStepWorkerThread ( void * i_msgQ )
         istep = ((theMsg->data[0] & 0xFF00) >> 8);
         substep = (theMsg->data[0] & 0xFF);
 
+
         // Post the Progress Code
         // TODO - Covered with RTC: 34046
         InitService::getTheInstance().setProgressCode( progressCode );
@@ -158,12 +163,23 @@ void iStepWorkerThread ( void * i_msgQ )
         const TaskInfo * theStep = findTaskInfo( istep,
                                                  substep );
 
+        if( prevStep != istep )
+        {
+            // unload the modules from the previous step
+            unLoadModules( prevStep );
+            // load modules for this step
+            loadModules( istep );
+            prevStep = istep;
+        }
+
+
         if( NULL != theStep )
         {
             TRACFCOMP( g_trac_initsvc,
                     "IStepDispatcher (worker): Run Istep (%d), substep(%d), "
                     "- %s",
                        istep, substep, theStep->taskname );
+
 
             err = InitService::getTheInstance().executeFn( theStep,
                                                            NULL );
@@ -213,6 +229,7 @@ void iStepWorkerThread ( void * i_msgQ )
                                theStep->taskname);
                 }
             }
+
         }
         else
         {
@@ -263,6 +280,89 @@ void iStepWorkerThread ( void * i_msgQ )
                ENTER_MRK"iStepWorkerThread()" );
 }
 
+
+// load module routine used in simple temp solution
+// for module management
+void loadModules( uint32_t istepNumber )
+{
+    errlHndl_t l_errl = NULL;
+    do
+    {
+        //  if no dep modules then just exit out, let the call to
+        //  executeFN load the module based on the function being
+        //  called.
+        if( g_isteps[istepNumber].depModules == NULL)
+        {
+            TRACDCOMP( g_trac_initsvc,
+                    "g_isteps[%d].depModules == NULL",
+                    i_IStep );
+            break;
+        }
+        uint32_t i = 0;
+
+        while( ( l_errl == NULL ) &&
+                ( g_isteps[istepNumber].depModules->modulename[i][0] != 0) )
+        {
+            TRACFCOMP( g_trac_initsvc,
+                    "loading [%s]",
+                    g_isteps[istepNumber].depModules->modulename[i]);
+
+            l_errl = VFS::module_load(
+                    g_isteps[istepNumber].depModules->modulename[i] );
+            i++;
+        }
+
+        if( l_errl )
+        {
+            errlCommit( l_errl, ISTEP_COMP_ID );
+            assert(0);
+        }
+
+    }while(0);
+}
+
+
+// unload module routine used in simple temp solution
+// for module management
+void unLoadModules( uint32_t istepNumber )
+{
+    errlHndl_t l_errl = NULL;
+
+    do
+    {
+        //  if no dep modules then just exit out
+        if( g_isteps[istepNumber].depModules == NULL)
+        {
+            TRACDCOMP( g_trac_initsvc,
+                    "g_isteps[%d].depModules == NULL",
+                    i_IStep );
+            break;
+        }
+        uint32_t i = 0;
+
+        while( ( l_errl == NULL ) &&
+                ( g_isteps[istepNumber].depModules->modulename[i][0] != 0) )
+        {
+            TRACFCOMP( g_trac_initsvc,
+                    "unloading [%s]",
+                    g_isteps[istepNumber].depModules->modulename[i]);
+
+            l_errl = VFS::module_unload(
+                    g_isteps[istepNumber].depModules->modulename[i] );
+
+            i++;
+        }
+
+        if( l_errl )
+        {
+            TRACFCOMP( g_trac_initsvc,
+                    " failed to unload module, commit error and move on");
+            errlCommit(l_errl, INITSVC_COMP_ID );
+            l_errl = NULL;
+        }
+
+    }while(0);
+}
 
 // ----------------------------------------------------------------------------
 // findTaskInfo()

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012                   */
+/* COPYRIGHT International Business Machines Corp. 2012,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -107,11 +107,20 @@ namespace   INITSERVICE
         //  END OF LIST!
 };
 
+const DepModInfo  g_istep16Dependancies = {
+    {
+        DEP_LIB(libcore_activate.so),
+        DEP_LIB(libbuild_winkle_images.so),
+        { 0 },
+    }
+};
+
+
 // make a struct from the above with the number of items included
 const   ExtTaskInfo g_istep16TaskList    =   {
         &(g_istep16[0]),
         ( sizeof(g_istep16)/sizeof(TaskInfo) ),
-        NULL    //  later, depModules struct
+        &g_istep16Dependancies    //  later, depModules struct
 };
 
 };  // end namespace

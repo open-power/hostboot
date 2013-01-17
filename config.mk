@@ -398,6 +398,9 @@ ifdef OBJS
 	rm ${OBJS:.o=.gcno} ${OBJS:.o=.gcda} -f
 endif
 
+check_istep_modules: ${OBJS}
+	listdeps.pl ${IMGDIR}  -v
+
 cleanud :
 	rm -f ${UD_OBJS}
 

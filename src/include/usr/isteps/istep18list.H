@@ -1,26 +1,25 @@
-/*  IBM_PROLOG_BEGIN_TAG
- *  This is an automatically generated prolog.
- *
- *  $Source: src/include/usr/isteps/istep18list.H $
- *
- *  IBM CONFIDENTIAL
- *
- *  COPYRIGHT International Business Machines Corp. 2012
- *
- *  p1
- *
- *  Object Code Only (OCO) source materials
- *  Licensed Internal Code Source Materials
- *  IBM HostBoot Licensed Internal Code
- *
- *  The source code for this program is not published or other-
- *  wise divested of its trade secrets, irrespective of what has
- *  been deposited with the U.S. Copyright Office.
- *
- *  Origin: 30
- *
- *  IBM_PROLOG_END_TAG
- */
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/include/usr/isteps/istep18list.H $                        */
+/*                                                                        */
+/* IBM CONFIDENTIAL                                                       */
+/*                                                                        */
+/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/*                                                                        */
+/* p1                                                                     */
+/*                                                                        */
+/* Object Code Only (OCO) source materials                                */
+/* Licensed Internal Code Source Materials                                */
+/* IBM HostBoot Licensed Internal Code                                    */
+/*                                                                        */
+/* The source code for this program is not published or otherwise         */
+/* divested of its trade secrets, irrespective of what has been           */
+/* deposited with the U.S. Copyright Office.                              */
+/*                                                                        */
+/* Origin: 30                                                             */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
 #ifndef __ISTEPS_ISTEP18LIST_H
 #define __ISTEPS_ISTEP18LIST_H
 
@@ -178,11 +177,18 @@ namespace   INITSERVICE
         //  END OF LIST!
 };
 
+const DepModInfo  g_istep18Dependancies = {
+    {
+        DEP_LIB(libestablish_system_smp.so),
+        { 0 },
+    }
+};
+
 // make a struct from the above with the number of items included
 const   ExtTaskInfo g_istep18TaskList    =   {
         &(g_istep18[0]),
         ( sizeof(g_istep18)/sizeof(TaskInfo) ),
-        NULL    //  later, depModules struct
+        &g_istep18Dependancies    //  later, depModules struct
 };
 
 };  // end namespace

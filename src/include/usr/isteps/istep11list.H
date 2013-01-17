@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2012              */
+/* COPYRIGHT International Business Machines Corp. 2011,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -210,11 +210,20 @@ const   TaskInfo    g_istep11[]  =   {
         //  END OF LIST!
 };
 
+const DepModInfo  g_istep11Dependancies = {
+    {
+        DEP_LIB(libdmi_training.so),
+        DEP_LIB(libedi_ei_initialization.so),
+        { 0 },
+    }
+};
+
+
 // make a struct from the above with the number of items included
 const   ExtTaskInfo g_istep11TaskList    =   {
         &(g_istep11[0]),
         ( sizeof(g_istep11)/sizeof(TaskInfo) ),
-        NULL
+        &g_istep11Dependancies
 };
 
 };  // end namespace

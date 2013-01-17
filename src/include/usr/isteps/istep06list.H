@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2012              */
+/* COPYRIGHT International Business Machines Corp. 2011,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -213,12 +213,21 @@ const   TaskInfo    g_istep06[]  =   {
         //  END OF LIST!
 };
 
+
+const DepModInfo  g_istep06Dependancies = {
+    {
+      DEP_LIB(libslave_sbe.so),
+      { 0 },
+    }
+};
+
 // make a struct from the above with the number of items included
 const   ExtTaskInfo g_istep06TaskList    =   {
         &(g_istep06[0]),
         ( sizeof(g_istep06)/sizeof(TaskInfo) ),
-        NULL
-};
+         &(g_istep06Dependancies),
+        };
+
 
 };  // end namespace
 

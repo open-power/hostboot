@@ -176,16 +176,10 @@ const TaskInfo g_exttaskinfolist[]   =   {
                EXT_IMAGE,                         // Extended Module
             }
         },
-
-// TODO: Added this in order to successfull init.. Need to remove this and put
-// the module load and unload from a the istep dispatcher
-// PW - Is this really TODO?  Don't we need the hwas module from errl to do
-//      gard / deconfig?
         /**
          * @brief   HWAS,
+         * need the hwas module for errl dependency gard / deconfig
          */
-
-
         {
             "libhwas.so" ,                                  // taskname
             NULL,                                           // no pointer to fn
@@ -194,8 +188,6 @@ const TaskInfo g_exttaskinfolist[]   =   {
                 EXT_IMAGE,                                  // Extended Module
             }
         },
-// end TODO
-
         /**
          * @brief   ecmddatabuffer task,
          */
@@ -264,31 +256,6 @@ const TaskInfo g_exttaskinfolist[]   =   {
             }
         },
 
-// TODO: Should these be automatically loaded / unloaded by istepdispatcher?
-        /**
-         * @brief VSBE FAPI interface code library.
-         */
-        {
-            "libfapiporeve.so" ,                   // taskname
-            NULL,                                  // no pointer to fn
-            {
-                INIT_TASK,                         // task type
-                EXT_IMAGE,                         // Extended Module
-            }
-        },
-
-        /**
-         * @brief VSBE code library
-         */
-        {
-            "libporeve.so" ,                    // taskname
-            NULL,                                  // no pointer to fn
-            {
-               INIT_TASK,                         // task type
-               EXT_IMAGE,                         // Extended Module
-            }
-        },
-
         /**
          * @brief  bus_training library.
          */
@@ -336,9 +303,6 @@ const TaskInfo g_exttaskinfolist[]   =   {
                EXT_IMAGE,                         // Extended Module
             }
         },
-
-
-// end TODO.
 
         //  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         // NOTE: libistepdisp.so needs to always be last in this list!!
