@@ -182,6 +182,7 @@ void CpuManager::startCPU(ssize_t i)
     {
         printk("Starting CPU %ld...", i);
         cpu_t* cpu = cv_cpus[nodeId][cpuId] = new cpu_t;
+        memset(cpu, 0x0, sizeof(cpu_t));
 
         // Initialize CPU.
         cpu->cpu = i;
