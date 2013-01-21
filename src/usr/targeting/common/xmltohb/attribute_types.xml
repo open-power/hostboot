@@ -6479,7 +6479,7 @@ firmware notes: Used as override attribute for pstate procedure
         <uint8_t>
             <default>0</default>
         </uint8_t>
-        <array>2</array> 
+        <array>2</array>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
     <readable/>
@@ -9952,4 +9952,79 @@ Measured in GB</description>
     </hwpfToHbAttrMap>
 </attribute>
 <!-- End support for sync_attributes.xml -->
+
+<!--    Support for proc_select_boot_master -->
+
+<enumerationType>
+    <id>PROC_SELECT_BOOT_MASTER</id>
+    <description>Enumeration indicating which chip should be used as the PROC_SELECT_BOOT_MASTER</description>
+    <enumerator>
+        <name>PRIMARY</name>
+        <value>1</value>
+    </enumerator>
+    <enumerator>
+        <name>SECONDARY</name>
+        <value>2</value>
+    </enumerator>
+</enumerationType>
+
+<attribute>
+  <id>PROC_SELECT_BOOT_MASTER</id>
+  <description>
+    Specifies which chip should be used as the boot master
+    Initialized by the platform.
+      PRIMARY  - the primary master is used for the BOOT
+      SECONDARY  - the alternate master is used for the BOOT
+      Platforms are expected to set this to PRIMARY in normal operation
+  </description>
+  <simpleType>
+    <uint8_t>
+      <default>1</default>
+    </uint8_t>
+  </simpleType>
+  <persistency>volatile</persistency>
+  <readable/>
+  <writeable/>
+  <hwpfToHbAttrMap>
+      <id>ATTR_PROC_SELECT_BOOT_MASTER</id>
+      <macro>DIRECT</macro>
+  </hwpfToHbAttrMap>
+</attribute>
+
+
+<enumerationType>
+    <id>PROC_SELECT_SEEPROM_IMAGE</id>
+    <description>Enumeration indicating which SEEPROM image should be used for the boot master</description>
+    <enumerator>
+        <name>FIRST</name>
+        <value>1</value>
+    </enumerator>
+    <enumerator>
+        <name>SECOND</name>
+        <value>2</value>
+    </enumerator>
+</enumerationType>
+
+<attribute>
+  <id>PROC_SELECT_SEEPROM_IMAGE</id>
+  <description>
+    Specifies which SEEPROM image should be used for the boot master.
+      FIRST  - the first image was selected
+      SECOND - the second image was selected
+      Platforms are expected to set this to FIRST in normal operation
+  </description>
+  <simpleType>
+      <uint8_t>
+        <default>1</default>
+      </uint8_t>
+  </simpleType>
+  <persistency>volatile</persistency>
+  <readable/>
+  <writeable/>
+  <hwpfToHbAttrMap>
+      <id>ATTR_PROC_SELECT_SEEPROM_IMAGE</id>
+      <macro>DIRECT</macro>
+  </hwpfToHbAttrMap>
+</attribute>
+
 </attributes>
