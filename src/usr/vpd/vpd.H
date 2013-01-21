@@ -25,13 +25,6 @@
 
 #include <pnor/pnorif.H>
 
-// ------------------------
-// Macros for unit testing
-//#define TRACUCOMP(args...)  TRACFCOMP(args)
-#define TRACUCOMP(args...)
-//#define TRACSSCOMP(args...)  TRACFCOMP(args)
-#define TRACSSCOMP(args...)
-
 namespace VPD
 {
 

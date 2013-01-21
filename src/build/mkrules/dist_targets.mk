@@ -60,6 +60,7 @@ COPY_FILES = \
     img/isteplist.csv:tools,vpo \
     img/dimmspd.dat:vpo \
     img/procmvpd.dat:vpo \
+    img/cvpd.dat:vpo \
     obj/genfiles/fapiAttributeIds.txt:vpo \
     obj/genfiles/fapiAttributeEnums.txt:vpo \
     src/build/hwpf/prcd_compile.tcl:tools \
@@ -150,6 +151,7 @@ simics.tar_CONTENTS = \
     src/build/simics/hb-pnor-vpd-preload.pl \
     img/dimmspd.dat \
     img/procmvpd.dat \
+    img/cvpd.dat \
     obj/genfiles/fapiAttributeIds.txt \
     obj/genfiles/fapiAttributeEnums.txt \
 

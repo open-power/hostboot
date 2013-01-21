@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/vpd/test/mvpdtest.H $                                 */
+/* $Source: src/usr/vpd/test/cvpdtest.H $                                 */
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/* COPYRIGHT International Business Machines Corp. 2013                   */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,13 +20,13 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-#ifndef __MVPDTEST_H
-#define __MVPDTEST_H
+#ifndef __CVPDTEST_H
+#define __CVPDTEST_H
 
 /**
- *  @file mvpdtest.H
+ *  @file cvpdtest.H
  *
- *  @brief Test cases for MVPD code
+ *  @brief Test cases for CVPD code
  */
 #include <sys/time.h>
 
@@ -36,9 +36,9 @@
 #include <devicefw/driverif.H>
 #include <targeting/common/predicates/predicatectm.H>
 
-#include <vpd/mvpdenums.H>
+#include <vpd/cvpdenums.H>
 #include <vpd/vpdreasoncodes.H>
-#include "../mvpd.H"
+#include "../cvpd.H"
 #include "../ipvpd.H"
 
 
@@ -47,176 +47,27 @@ extern trace_desc_t* g_trac_vpd;
 using namespace TARGETING;
 
 /**
- * @brief Structure to define record/keyword pairs for MVPD tests.
+ * @brief Structure to define record/keyword pairs for CVPD tests.
  */
-struct mvpdTestData
+struct cvpdTestData
 {
     IpVpdFacade::ipVpdRecord record;
     IpVpdFacade::ipVpdRecord keyword;
 };
 
 /**
- * @brief Data sample to be used for MVPD testing.
+ * @brief Data sample to be used for CVPD testing.
  *      NOTE: By reading this entire list, it also validates that the records
  *      and keywords that we expect to be there are actually there...
  */
-mvpdTestData mvpdData[] =
+cvpdTestData cvpdData[] =
 {
-    { MVPD::CRP0, MVPD::VD },
-    { MVPD::CRP0, MVPD::ED },
-    { MVPD::CRP0, MVPD::TE },
-    { MVPD::CRP0, MVPD::DD },
-    //{ MVPD::CRP0, pdP }, // no #P in test data
-    { MVPD::CRP0, MVPD::ST },
-    { MVPD::CP00, MVPD::VD },
-    { MVPD::CP00, MVPD::PG },
-    //    { MVPD::CP00, MVPD::PK }, // no PK in test data
-    { MVPD::CP00, MVPD::pdR },
-    { MVPD::CP00, MVPD::pdG },
-    { MVPD::CP00, MVPD::pdV },
-    { MVPD::CP00, MVPD::pdH },
-    //    { MVPD::CP00, pdP }, // no #P in test data
-    { MVPD::CP00, MVPD::SB },
-    { MVPD::CP00, MVPD::MK },
-    { MVPD::CP00, MVPD::PB },
-    { MVPD::LRP4, MVPD::VD },
-    { MVPD::LRP4, MVPD::pdV },
-    { MVPD::LRP4, MVPD::pdP },
-    { MVPD::LRP4, MVPD::pdM },
-    { MVPD::LRP4, MVPD::CH },
-    { MVPD::LRP5, MVPD::VD },
-    { MVPD::LRP5, MVPD::pdV },
-    { MVPD::LRP5, MVPD::pdP },
-    { MVPD::LRP5, MVPD::pdM },
-    { MVPD::LRP5, MVPD::CH },
-    { MVPD::LRP6, MVPD::VD },
-    { MVPD::LRP6, MVPD::pdV },
-    { MVPD::LRP6, MVPD::pdP },
-    { MVPD::LRP6, MVPD::pdM },
-    { MVPD::LRP6, MVPD::CH },
-    /*         // no LRP7,LRP8,LRP9,LRPA,LRPB,LWPO,LWP1,LWP2,LWP3
-                      in test data
-     { MVPD::LRP7, VD },
-     { MVPD::LRP7, MVPD::pdV },
-     { MVPD::LRP7, MVPD::pdP },
-     { MVPD::LRP7, MVPD::pdM },
-     { MVPD::LRP7, MVPD::CH },
-     { MVPD::LRP8, MVPD::VD },
-     { MVPD::LRP8, MVPD::pdV },
-     { MVPD::LRP8, MVPD::pdP },
-     { MVPD::LRP8, MVPD::pdM },
-     { MVPD::LRP8, MVPD::CH },
-     { MVPD::LRP9, MVPD::VD },
-     { MVPD::LRP9, MVPD::pdV },
-     { MVPD::LRP9, MVPD::pdP },
-     { MVPD::LRP9, MVPD::pdM },
-     { MVPD::LRP9, MVPD::CH },
-     { MVPD::LRPA, MVPD::VD },
-     { MVPD::LRPA, MVPD::pdV },
-     { MVPD::LRPA, MVPD::pdP },
-     { MVPD::LRPA, MVPD::pdM },
-     { MVPD::LRPA, MVPD::CH },
-     { MVPD::LRPB, MVPD::VD },
-     { MVPD::LRPB, MVPD::pdV },
-     { MVPD::LRPB, MVPD::pdP },
-     { MVPD::LRPB, MVPD::pdM },
-     { MVPD::LRPB, MVPD::CH },
-     { MVPD::LRPC, MVPD::VD },
-     { MVPD::LRPC, MVPD::pdV },
-     { MVPD::LRPC, MVPD::pdP },
-     { MVPD::LRPC, MVPD::pdM },
-     { MVPD::LRPC, MVPD::CH },
-     { MVPD::LRPD, MVPD::VD },
-     { MVPD::LRPD, MVPD::pdV },
-     { MVPD::LRPD, MVPD::pdP },
-     { MVPD::LRPD, MVPD::pdM },
-     { MVPD::LRPD, MVPD::CH },
-     { MVPD::LRPE, MVPD::VD },
-     { MVPD::LRPE, MVPD::pdV },
-     { MVPD::LRPE, MVPD::pdP },
-     { MVPD::LRPE, MVPD::pdM },
-     { MVPD::LRPE, MVPD::CH },
-     { MVPD::LWP0, MVPD::VD },
-     { MVPD::LWP0, MVPD::pd2 },
-     { MVPD::LWP0, MVPD::pd3 },
-     { MVPD::LWP0, MVPD::IN },
-     { MVPD::LWP1, MVPD::VD },
-     { MVPD::LWP1, MVPD::pd2 },
-     { MVPD::LWP1, MVPD::pd3 },
-     { MVPD::LWP1, MVPD::IN },
-     { MVPD::LWP2, MVPD::VD },
-     { MVPD::LWP2, MVPD::pd2 },
-     { MVPD::LWP2, MVPD::pd3 },
-     { MVPD::LWP2, MVPD::IN },
-     { MVPD::LWP3, MVPD::VD },
-     { MVPD::LWP3, MVPD::pd2 },
-     { MVPD::LWP3, MVPD::pd3 },
-     { MVPD::LWP3, MVPD::IN },
-     */
-    { MVPD::LWP4, MVPD::VD },
-    { MVPD::LWP4, MVPD::pd2 },
-    { MVPD::LWP4, MVPD::pd3 },
-    { MVPD::LWP4, MVPD::IN },
-    { MVPD::LWP5, MVPD::VD },
-    { MVPD::LWP5, MVPD::pd2 },
-    { MVPD::LWP5, MVPD::pd3 },
-    { MVPD::LWP5, MVPD::IN },
-    { MVPD::LWP6, MVPD::VD },
-    { MVPD::LWP6, MVPD::pd2 },
-    { MVPD::LWP6, MVPD::pd3 },
-    { MVPD::LWP6, MVPD::IN },
-    /*                 // no LWP7,LWP8,LWP9,LWPA,LWPB in test data
-     { MVPD::LWP7, MVPD::VD },
-     { MVPD::LWP7, MVPD::pd2 },
-     { MVPD::LWP7, MVPD::pd3 },
-     { MVPD::LWP7, MVPD::IN },
-     { MVPD::LWP8, MVPD::VD },
-     { MVPD::LWP8, MVPD::pd2 },
-     { MVPD::LWP8, MVPD::pd3 },
-     { MVPD::LWP8, MVPD::IN },
-     { MVPD::LWP9, MVPD::VD },
-     { MVPD::LWP9, MVPD::pd2 },
-     { MVPD::LWP9, MVPD::pd3 },
-     { MVPD::LWP9, MVPD::IN },
-     { MVPD::LWPA, MVPD::VD },
-     { MVPD::LWPA, MVPD::pd2 },
-     { MVPD::LWPA, MVPD::pd3 },
-     { MVPD::LWPA, MVPD::IN },
-     { MVPD::LWPB, MVPD::VD },
-     { MVPD::LWPB, MVPD::pd2 },
-     { MVPD::LWPB, MVPD::pd3 },
-     { MVPD::LWPB, MVPD::IN },
-     { MVPD::LWPC, MVPD::VD },
-     { MVPD::LWPC, MVPD::pd2 },
-     { MVPD::LWPC, MVPD::pd3 },
-     { MVPD::LWPC, MVPD::IN },
-     { MVPD::LWPD, MVPD::VD },
-     { MVPD::LWPD, MVPD::pd2 },
-     { MVPD::LWPD, MVPD::pd3 },
-     { MVPD::LWPD, MVPD::IN },
-     { MVPD::LWPE, MVPD::VD },
-     { MVPD::LWPE, MVPD::pd2 },
-     { MVPD::LWPE, MVPD::pd3 },
-     { MVPD::LWPE, MVPD::IN },
-     */
-    { MVPD::VINI, MVPD::DR },
-    { MVPD::VINI, MVPD::VZ },
-    { MVPD::VINI, MVPD::CC },
-    { MVPD::VINI, MVPD::CE },
-    { MVPD::VINI, MVPD::FN },
-    { MVPD::VINI, MVPD::PN },
-    { MVPD::VINI, MVPD::SN },
-    { MVPD::VINI, MVPD::PR },
-    { MVPD::VINI, MVPD::HE },
-    { MVPD::VINI, MVPD::CT },
-    { MVPD::VINI, MVPD::HW },
+    { CVPD::VEIR, CVPD::pdI },
+    { CVPD::MER0, CVPD::pdI },
 
-    { MVPD::VWML, MVPD::pdI },
-
-    { MVPD::MER0, MVPD::pdI },
 };
 
-void getProcTargets( TargetHandleList & o_procList )
+void getMembufTargets( TargetHandleList & o_membufList )
 {
     // Get top level system target
     TARGETING::TargetService & tS = TARGETING::targetService();
@@ -224,44 +75,44 @@ void getProcTargets( TargetHandleList & o_procList )
     tS.getTopLevelTarget( sysTarget );
     assert( sysTarget != NULL );
 
-    // Get a Proc Target
-    TARGETING::PredicateCTM predProc( TARGETING::CLASS_CHIP,
-                                      TARGETING::TYPE_PROC );
-    tS.getAssociated( o_procList,
+    // Get a Membuf Target
+    TARGETING::PredicateCTM predMemb( TARGETING::CLASS_CHIP,
+                                      TARGETING::TYPE_MEMBUF );
+    tS.getAssociated( o_membufList,
                       sysTarget,
                       TARGETING::TargetService::CHILD,
                       TARGETING::TargetService::ALL,
-                      &predProc );
+                      &predMemb );
 
     TRACDCOMP( g_trac_vpd,
-               "getProcTargets() - found %d Processors",
-               o_procList.size() );
+               "getMembufTargets() - found %d Memory Buffers",
+               o_membufList.size() );
 
     return;
 }
 
-TARGETING::Target* getFunctionalProcTarget()
+TARGETING::Target* getFunctionalMembufTarget()
 {
     TARGETING::Target * theTarget = NULL;
     TRACDCOMP( g_trac_vpd,
-               "getFunctionalProcTarget() - Finding a processor" );
+               "getFunctionalMembufTarget() - Finding a membuf" );
 
     do {
-        // Get the Processor targets
-        TargetHandleList procList;
-        getProcTargets( procList );
+        // Get the Memory Buffer targets
+        TargetHandleList membufList;
+        getMembufTargets( membufList );
 
-        if( ( 0 == procList.size() ) ||
-            ( NULL == procList[0] ) )
+        if( ( 0 == membufList.size() ) ||
+            ( NULL == membufList[0] ) )
         {
-            continue;  // add continue because have no Proc targets
+            continue;  // add continue because have no Membuf targets
         }
 
-        for(uint32_t i=0; i<procList.size(); i++)
+        for(uint32_t i=0; i<membufList.size(); i++)
         {
-            if(procList[i]->getAttr<TARGETING::ATTR_HWAS_STATE>().functional)
+            if(membufList[i]->getAttr<TARGETING::ATTR_HWAS_STATE>().functional)
             {
-                theTarget = procList[i];
+                theTarget = membufList[i];
                 break;
             }
         }
@@ -271,16 +122,14 @@ TARGETING::Target* getFunctionalProcTarget()
 
 }
 
-
-class MVPDTest: public CxxTest::TestSuite
+class CVPDTest: public CxxTest::TestSuite
 {
     public:
 
-
         /**
-         * @brief This function will test MVPD reads.
+         * @brief This function will test CVPD reads.
          */
-        void testMvpdRead ( void )
+        void testCvpdRead ( void )
         {
             errlHndl_t err = NULL;
             uint64_t cmds = 0x0;
@@ -289,40 +138,40 @@ class MVPDTest: public CxxTest::TestSuite
             uint64_t theKeyword = 0x0;
 
             TRACFCOMP( g_trac_vpd,
-                       ENTER_MRK"testMvpdRead()" );
+                       ENTER_MRK"testCvpdRead()" );
 
             do
             {
-                TARGETING::Target * theTarget = getFunctionalProcTarget();
+                TARGETING::Target * theTarget = getFunctionalMembufTarget();
                 if(theTarget == NULL)
                 {
-                    TS_FAIL("testMvpdRead() - No Functional Targets found!");
+                    TS_FAIL("testCvpdRead() - No Functional Targets found!");
                     break;
                 }
 
                 uint8_t * theData = NULL;
                 size_t theSize = 0;
-                const uint32_t numCmds = sizeof(mvpdData)/sizeof(mvpdData[0]);
+                const uint32_t numCmds = sizeof(cvpdData)/sizeof(cvpdData[0]);
                 for( uint32_t curCmd = 0; curCmd < numCmds; curCmd++ )
                 {
                     cmds++;
-                    theRecord = (uint64_t)mvpdData[curCmd].record;
-                    theKeyword = (uint64_t)mvpdData[curCmd].keyword;
+                    theRecord = (uint64_t)cvpdData[curCmd].record;
+                    theKeyword = (uint64_t)cvpdData[curCmd].keyword;
                     err = deviceRead( theTarget,
                                       NULL,
                                       theSize,
-                                      DEVICE_MVPD_ADDRESS( theRecord,
+                                      DEVICE_CVPD_ADDRESS( theRecord,
                                                            theKeyword ) );
 
                     if( err )
                     {
                         fails++;
                         TRACFCOMP( g_trac_vpd,
-                                   ERR_MRK"testMvpdRead() - failure reading "
+                                   ERR_MRK"testCvpdRead() - failure reading "
                                    "keyword size!!  rec: 0x%04x, kwd: 0x%04x",
                                    theRecord,
                                    theKeyword );
-                        TS_FAIL("testMvpdRead() -Failure reading keyword size!");
+                        TS_FAIL( "testCvpdRead() - Failure reading keyword size!" );
                         errlCommit( err,
                                     VPD_COMP_ID );
                         continue;
@@ -334,20 +183,20 @@ class MVPDTest: public CxxTest::TestSuite
                     err = deviceRead( theTarget,
                                       theData,
                                       theSize,
-                                      DEVICE_MVPD_ADDRESS( theRecord,
+                                      DEVICE_CVPD_ADDRESS( theRecord,
                                                            theKeyword ) );
 
                     if( err )
                     {
                         fails++;
                         TRACFCOMP( g_trac_vpd,
-                                   ERR_MRK"testMvpdRead() - Failure on Record: "
+                                   ERR_MRK"testCvpdRead() - Failure on Record: "
                                    "0x%04x, keyword: 0x%04x, of size: 0x%04x "
                                    "- test %d",
                                    theRecord,
                                    theKeyword,
                                    theSize, curCmd );
-                        TS_FAIL( "testMvpdRead() - Failure during MVPD read!" );
+                        TS_FAIL( "testCvpdRead() - Failure during CVPD read!" );
                         errlCommit( err,
                                     VPD_COMP_ID );
 
@@ -361,7 +210,7 @@ class MVPDTest: public CxxTest::TestSuite
                     }
 
                     TRACDCOMP( g_trac_vpd,
-                               INFO_MRK"testMvpdRead Results:" );
+                               INFO_MRK"testCvpdRead Results:" );
                     for( uint32_t i = 0; i < theSize; i++ )
                     {
                         TRACDCOMP( g_trac_vpd,
@@ -379,14 +228,14 @@ class MVPDTest: public CxxTest::TestSuite
             } while( 0 );
 
             TRACFCOMP( g_trac_vpd,
-                       "testMvpdRead - %d/%d fails",
+                       "testCvpdRead - %d/%d fails",
                        fails, cmds );
         }
 
         /**
-         * @brief This function will test MVPD writes.
+         * @brief This function will test CVPD writes.
          */
-        void testMvpdWrite ( void )
+        void testCvpdWrite ( void )
         {
             errlHndl_t err = NULL;
             uint64_t cmds = 0x0;
@@ -396,14 +245,14 @@ class MVPDTest: public CxxTest::TestSuite
             uint8_t* verifyData = NULL;
 
             TRACFCOMP( g_trac_vpd,
-                       ENTER_MRK"testMvpdWrite()" );
+                       ENTER_MRK"testCvpdWrite()" );
 
             do
             {
-                TARGETING::Target * theTarget = getFunctionalProcTarget();
+                TARGETING::Target * theTarget = getFunctionalMembufTarget();
                 if(theTarget == NULL)
                 {
-                    TS_FAIL("testMvpdWrite() - No Functional Targets found!");
+                    TS_FAIL("testCvpdWrite() - No Functional Targets found!");
                     break;
                 }
 
@@ -413,14 +262,14 @@ class MVPDTest: public CxxTest::TestSuite
                 err = deviceRead( theTarget,
                                   testData,
                                   theSize,
-                                  DEVICE_MVPD_ADDRESS(MVPD::VWML,MVPD::pdI) );
+                                  DEVICE_CVPD_ADDRESS(CVPD::VEIR,CVPD::pdI) );
                 if( err )
                 {
                     fails++;
                     TRACFCOMP( g_trac_vpd,
-                               ERR_MRK"testMvpdWrite() - failure getting size of VWML/#I, RC=%.4X",
+                               ERR_MRK"testCvpdWrite() - failure getting size of VEIR/#I, RC=%.4X",
                                err->reasonCode() );
-                    TS_FAIL( "testMvpdWrite() - Failure calling deviceRead!" );
+                    TS_FAIL( "testCvpdWrite() - Failure calling deviceRead!" );
                     errlCommit( err,
                                 VPD_COMP_ID );
                     continue;
@@ -432,19 +281,19 @@ class MVPDTest: public CxxTest::TestSuite
                 err = deviceRead( theTarget,
                                   origData,
                                   theSize,
-                                  DEVICE_MVPD_ADDRESS(MVPD::VWML,MVPD::pdI) );
+                                  DEVICE_CVPD_ADDRESS(CVPD::VEIR,CVPD::pdI) );
                 if( err )
                 {
                     fails++;
                     TRACFCOMP( g_trac_vpd,
-                               ERR_MRK"testMvpdWrite() - failure reading VWML/#I, RC=%.4X",
+                               ERR_MRK"testCvpdWrite() - failure reading VEIR/#I, RC=%.4X",
                                err->reasonCode() );
-                    TS_FAIL( "testMvpdWrite() - Failure calling deviceRead!" );
+                    TS_FAIL( "testCvpdWrite() - Failure calling deviceRead!" );
                     errlCommit( err,
                                 VPD_COMP_ID );
                     continue;
                 }
-                TRACFBIN( g_trac_vpd, "testMvpdWrite() - orig=",
+                TRACFBIN( g_trac_vpd, "testCvpdWrite() - orig=",
                           origData, theSize );
 
                 // fill it up with some dummy data
@@ -459,14 +308,14 @@ class MVPDTest: public CxxTest::TestSuite
                 err = deviceWrite( theTarget,
                                    testData,
                                    theSize,
-                                   DEVICE_MVPD_ADDRESS(MVPD::VWML,MVPD::pdI) );
+                                   DEVICE_CVPD_ADDRESS(CVPD::VEIR,CVPD::pdI) );
                 if( err )
                 {
                     fails++;
                     TRACFCOMP( g_trac_vpd,
-                               ERR_MRK"testMvpdWrite() - failure writing VWML/#I, RC=%.4X",
+                               ERR_MRK"testCvpdWrite() - failure writing VEIR/#I, RC=%.4X",
                                err->reasonCode() );
-                    TS_FAIL( "testMvpdWrite() - Failure calling deviceWrite!" );
+                    TS_FAIL( "testCvpdWrite() - Failure calling deviceWrite!" );
                     errlCommit( err,
                                 VPD_COMP_ID );
                     continue;
@@ -478,30 +327,30 @@ class MVPDTest: public CxxTest::TestSuite
                 err = deviceRead( theTarget,
                                   verifyData,
                                   theSize,
-                                  DEVICE_MVPD_ADDRESS(MVPD::VWML,MVPD::pdI) );
+                                  DEVICE_CVPD_ADDRESS(CVPD::VEIR,CVPD::pdI) );
                 if( err )
                 {
                     fails++;
                     TRACFCOMP( g_trac_vpd,
-                               ERR_MRK"testMvpdWrite() - failure reading VWML/#I to verify, RC=%.4X",
+                               ERR_MRK"testCvpdWrite() - failure reading VEIR/#I to verify, RC=%.4X",
                                err->reasonCode() );
-                    TS_FAIL( "testMvpdWrite() - Failure calling deviceRead!" );
+                    TS_FAIL( "testCvpdWrite() - Failure calling deviceRead!" );
                     errlCommit( err,
                                 VPD_COMP_ID );
                     continue;
                 }
-                TRACFBIN( g_trac_vpd, "testMvpdWrite() - verif=",
+                TRACFBIN( g_trac_vpd, "testCvpdWrite() - verif=",
                           verifyData, theSize );
 
                 // compare what we read to what we wrote
                 if( memcmp( testData, verifyData, theSize ) )
                 {
                     fails++;
-                    TRACFBIN( g_trac_vpd, "testMvpdWrite() - wrote=",
+                    TRACFBIN( g_trac_vpd, "testCvpdWrite() - wrote=",
                               testData, theSize );
-                    TRACFBIN( g_trac_vpd, "testMvpdWrite() - read=",
+                    TRACFBIN( g_trac_vpd, "testCvpdWrite() - read=",
                               verifyData, theSize );
-                    TS_FAIL( "testMvpdWrite - Data mismatch!" );
+                    TS_FAIL( "testCvpdWrite - Data mismatch!" );
                 }
 
                 // put the original data back to be a good citizen
@@ -509,14 +358,14 @@ class MVPDTest: public CxxTest::TestSuite
                 err = deviceWrite( theTarget,
                                    origData,
                                    theSize,
-                                   DEVICE_MVPD_ADDRESS(MVPD::VWML,MVPD::pdI) );
+                                   DEVICE_CVPD_ADDRESS(CVPD::VEIR,CVPD::pdI) );
                 if( err )
                 {
                     fails++;
                     TRACFCOMP( g_trac_vpd,
-                               ERR_MRK"testMvpdWrite() - failure writing original data back into VWML/#I, RC=%.4X",
+                               ERR_MRK"testCvpdWrite() - failure writing original data back into VEIR/#I, RC=%.4X",
                                err->reasonCode() );
-                    TS_FAIL( "testMvpdWrite() - Failure calling deviceRead!" );
+                    TS_FAIL( "testCvpdWrite() - Failure calling deviceRead!" );
                     errlCommit( err,
                                 VPD_COMP_ID );
                     continue;
@@ -544,11 +393,11 @@ class MVPDTest: public CxxTest::TestSuite
 
             if( cmds == 0 )
             {
-                TS_FAIL( "testMvpdWrite - No tests ran, something is wrong..." );
+                TS_FAIL(x"testCvpdWrite - No tests ran, something is wrong...");
             }
 
             TRACFCOMP( g_trac_vpd,
-                       "testMvpdWrite - %d/%d fails",
+                       "testCvpdWrite - %d/%d fails",
                        fails, cmds );
         }
 
@@ -557,23 +406,24 @@ class MVPDTest: public CxxTest::TestSuite
          *      record is passed in that cannot be found in the structure
          *      that defines the Records string representation.
          */
-        void testMvpdInvalidRecord ( void )
+        void testCvpdInvalidRecord ( void )
         {
             errlHndl_t err = NULL;
             uint64_t cmds = 0x0;
             uint64_t fails = 0x0;
 
             TRACFCOMP( g_trac_vpd,
-                       ENTER_MRK"testMvpdInvalidRecord()" );
+                       ENTER_MRK"testCvpdInvalidRecord()" );
 
             do
             {
-                TARGETING::Target * theTarget = getFunctionalProcTarget();
+                TARGETING::Target * theTarget = getFunctionalMembufTarget();
                 if(theTarget == NULL)
                 {
-                    TS_FAIL("testMvpdInvalidRecord() - No Functional Targets found!");
+                    TS_FAIL("testCvpdInvalidRecord() - No Functional Targets found!");
                     break;
                 }
+
 
                 size_t theSize = 1;
                 uint8_t * theData = new uint8_t[theSize];
@@ -582,16 +432,16 @@ class MVPDTest: public CxxTest::TestSuite
                 err = deviceRead( theTarget,
                                   theData,
                                   theSize,
-                                  DEVICE_MVPD_ADDRESS( MVPD::MVPD_LAST_RECORD,
-                                                       MVPD::pdP ) );
+                                  DEVICE_CVPD_ADDRESS( CVPD::CVPD_LAST_RECORD,
+                                                       CVPD::pdI ) );
 
                 if( NULL == err )
                 {
                     fails++;
-                    TS_FAIL( "testMvpdInvalidRecord() - Error expected with "
-                             "record of type MVPD_LAST_RECORD (0x%04x), but "
+                    TS_FAIL( "testCvpdInvalidRecord() - Error expected with "
+                             "record of type CVPD_LAST_RECORD (0x%04x), but "
                              "no error returned!",
-                             MVPD::MVPD_LAST_RECORD );
+                             CVPD::CVPD_LAST_RECORD );
                 }
                 else
                 {
@@ -607,29 +457,29 @@ class MVPDTest: public CxxTest::TestSuite
             } while( 0 );
 
             TRACFCOMP( g_trac_vpd,
-                       "testMvpdInvalidRecord - %d/%d fails",
+                       "testCvpdInvalidRecord - %d/%d fails",
                        fails, cmds );
         }
 
         /**
          * @brief This function will test for a record which is not in the TOC
-         *       of the MVPD area.
+         *      of the CVPD area.
          */
-        void testMvpdMissingRecord ( void )
+        void testCvpdMissingRecord ( void )
         {
             errlHndl_t err = NULL;
             uint64_t cmds = 0x0;
             uint64_t fails = 0x0;
 
             TRACFCOMP( g_trac_vpd,
-                       ENTER_MRK"testMvpdMissingRecord()" );
+                       ENTER_MRK"testCvpdMissingRecord()" );
 
             do
             {
-                TARGETING::Target * theTarget = getFunctionalProcTarget();
+                TARGETING::Target * theTarget = getFunctionalMembufTarget();
                 if(theTarget == NULL)
                 {
-                    TS_FAIL("testMvpdMissingRecord() - No Functional Targets found!");
+                    TS_FAIL("testCvpdMissingRecord() - No Functional Targets found!");
                     break;
                 }
 
@@ -640,13 +490,13 @@ class MVPDTest: public CxxTest::TestSuite
                 err = deviceRead( theTarget,
                                   theData,
                                   theSize,
-                                  DEVICE_MVPD_ADDRESS( MVPD::MVPD_TEST_RECORD,
-                                                       MVPD::pdP ) );
+                                  DEVICE_CVPD_ADDRESS( CVPD::CVPD_TEST_RECORD,
+                                                       CVPD::pdI ) );
 
                 if( NULL == err )
                 {
                     fails++;
-                    TS_FAIL( "testMvpdMissingRecord() - ");
+                    TS_FAIL( "testCvpdMissingRecord() - ");
                 }
                 else
                 {
@@ -662,7 +512,7 @@ class MVPDTest: public CxxTest::TestSuite
             } while( 0 );
 
             TRACFCOMP( g_trac_vpd,
-                       "testMvpdMissingRecord - %d/%d fails",
+                       "testCvpdMissingRecord - %d/%d fails",
                        fails, cmds );
         }
 
@@ -670,21 +520,21 @@ class MVPDTest: public CxxTest::TestSuite
          * @brief This function will test for a keyword that cannot be found
          *      in the expected record
          */
-        void testMvpdMissingKeyword ( void )
+        void testCvpdMissingKeyword ( void )
         {
             errlHndl_t err = NULL;
             uint64_t cmds = 0x0;
             uint64_t fails = 0x0;
 
             TRACFCOMP( g_trac_vpd,
-                       ENTER_MRK"testMvpdMissingKeyword()" );
+                       ENTER_MRK"testCvpdMissingKeyword()" );
 
             do
             {
-                TARGETING::Target * theTarget = getFunctionalProcTarget();
+                TARGETING::Target * theTarget = getFunctionalMembufTarget();
                 if(theTarget == NULL)
                 {
-                    TS_FAIL("testMvpdMissingKeyword() - No Functional Targets found!");
+                    TS_FAIL("testCvpdMissingKeyword() - No Functional Targets found!");
                     break;
                 }
 
@@ -695,13 +545,13 @@ class MVPDTest: public CxxTest::TestSuite
                 err = deviceRead(theTarget,
                                  theData,
                                  theSize,
-                                 DEVICE_MVPD_ADDRESS(MVPD::MVPD_FIRST_RECORD,
-                                                     MVPD::MVPD_TEST_KEYWORD));
+                                 DEVICE_CVPD_ADDRESS(CVPD::CVPD_FIRST_RECORD,
+                                                     CVPD::CVPD_TEST_KEYWORD));
 
                 if( NULL == err )
                 {
                     fails++;
-                    TS_FAIL("testMvpdMissingKeyword() - Expected error from "
+                    TS_FAIL("testCvpdMissingKeyword() - Expected error from "
                             "invalid Keyword missing from associated record!");
                 }
                 else
@@ -718,7 +568,7 @@ class MVPDTest: public CxxTest::TestSuite
             } while( 0 );
 
             TRACFCOMP( g_trac_vpd,
-                       "testMvpdMissingKeyword - %d/%d fails",
+                       "testCvpdMissingKeyword - %d/%d fails",
                        fails, cmds );
         }
 
@@ -727,21 +577,21 @@ class MVPDTest: public CxxTest::TestSuite
          *      keyword is passed in that cannot be found in the structure
          *      that defines the Keywords string representation.
          */
-        void testMvpdInvalidKeyword ( void )
+        void testCvpdInvalidKeyword ( void )
         {
             errlHndl_t err = NULL;
             uint64_t cmds = 0x0;
             uint64_t fails = 0x0;
 
             TRACFCOMP( g_trac_vpd,
-                       ENTER_MRK"testMvpdInvalidKeyword()" );
+                       ENTER_MRK"testCvpdInvalidKeyword()" );
 
             do
             {
-                TARGETING::Target * theTarget = getFunctionalProcTarget();
+                TARGETING::Target * theTarget = getFunctionalMembufTarget();
                 if(theTarget == NULL)
                 {
-                    TS_FAIL("testMvpdInvalidKeyword() - No Functional Targets found!");
+                    TS_FAIL("testCvpdInvalidKeyword() - No Functional Targets found!");
                     break;
                 }
 
@@ -752,16 +602,16 @@ class MVPDTest: public CxxTest::TestSuite
                 err = deviceRead(theTarget,
                                  theData,
                                  theSize,
-                                 DEVICE_MVPD_ADDRESS(MVPD::CRP0,
-                                                     MVPD::MVPD_LAST_KEYWORD));
+                                 DEVICE_CVPD_ADDRESS(CVPD::VEIR,
+                                                     CVPD::CVPD_LAST_KEYWORD));
 
                 if( NULL == err )
                 {
                     fails++;
-                    TS_FAIL( "testMvpdInvalidKeyword() - Error expected with "
-                             "keyword of type MVPD_LAST_KEYWORD (0x%04x), but "
+                    TS_FAIL( "testCvpdInvalidKeyword() - Error expected with "
+                             "keyword of type CVPD_LAST_KEYWORD (0x%04x), but "
                              "no error returned!",
-                             MVPD::MVPD_LAST_KEYWORD );
+                             CVPD::CVPD_LAST_KEYWORD );
                 }
                 else
                 {
@@ -777,7 +627,7 @@ class MVPDTest: public CxxTest::TestSuite
             } while( 0 );
 
             TRACFCOMP( g_trac_vpd,
-                       "testMvpdInvalidKeyword - %d/%d fails",
+                       "testCvpdInvalidKeyword - %d/%d fails",
                        fails, cmds );
         }
 
@@ -786,21 +636,21 @@ class MVPDTest: public CxxTest::TestSuite
          *      buffer that has an insufficient size is passed in to read a
          *      record/keyword.
          */
-        void testMvpdInvalidBufferSize ( void )
+        void testCvpdInvalidBufferSize ( void )
         {
             errlHndl_t err = NULL;
             uint64_t cmds = 0x0;
             uint64_t fails = 0x0;
 
             TRACFCOMP( g_trac_vpd,
-                       ENTER_MRK"testMvpdInvalidBufferSize()" );
+                       ENTER_MRK"testCvpdInvalidBufferSize()" );
 
             do
             {
-                TARGETING::Target * theTarget = getFunctionalProcTarget();
+                TARGETING::Target * theTarget = getFunctionalMembufTarget();
                 if(theTarget == NULL)
                 {
-                    TS_FAIL("testMvpdInvalidBufferSize() - No Functional Targets found!");
+                    TS_FAIL("testCvpdInvalidBufferSize() - No Functional Targets found!");
                     break;
                 }
 
@@ -811,14 +661,14 @@ class MVPDTest: public CxxTest::TestSuite
                 err = deviceRead( theTarget,
                                   theData,
                                   theSize,
-                                  DEVICE_MVPD_ADDRESS( MVPD::CRP0,
-                                                       MVPD::DD ) );
+                                  DEVICE_CVPD_ADDRESS( CVPD::VEIR,
+                                                       CVPD::pdI ) );
 
                 if( NULL == err )
                 {
                     fails++;
-                    TS_FAIL( "testMvpdInvalidBufferSize() - Error was expected "
-                             "for an invalid size of 0x0 for a MVPD read!" );
+                    TS_FAIL( "testCvpdInvalidBufferSize() - Error was expected "
+                             "for an invalid size of 0x0 for a CVPD read!" );
                 }
                 else
                 {
@@ -834,60 +684,59 @@ class MVPDTest: public CxxTest::TestSuite
             } while( 0 );
 
             TRACFCOMP( g_trac_vpd,
-                       "testMvpdInvalidBufferSize - %d/%d fails",
+                       "testCvpdInvalidBufferSize - %d/%d fails",
                        fails, cmds );
         }
 
         /**
-         * @brief This function will test the numerical order of the mvpdRecords
-         *      and mvpdKeywords structures.
+         * @brief This function will test the numerical order of the cvpdRecords
+         *      and cvpdKeywords structures.
          */
-        void testMvpdCheckStructOrder ( void )
+        void testCvpdCheckStructOrder ( void )
         {
             uint64_t fails = 0x0;
-            IpVpdFacade::ipVpdRecord prevRecord = MVPD::MVPD_FIRST_RECORD;
-            IpVpdFacade::ipVpdKeyword prevKeyword = MVPD::MVPD_FIRST_KEYWORD;
+            IpVpdFacade::ipVpdRecord prevRecord = CVPD::CVPD_FIRST_RECORD;
+            IpVpdFacade::ipVpdKeyword prevKeyword = CVPD::CVPD_FIRST_KEYWORD;
 
             TRACFCOMP( g_trac_vpd,
-                       ENTER_MRK"testMvpdCheckStructOrder()" );
+                       ENTER_MRK"testCvpdCheckStructOrder()" );
 
-            // Check the mvpdRecords structure for proper order
+            // Check the cvpdRecords structure for proper order
             uint32_t entry = 0x0;
             for( entry = 0;
-                 entry < (sizeof(MVPD::mvpdRecords)/
-                          sizeof(MVPD::mvpdRecords[0]));
+                 entry < (sizeof(CVPD::cvpdRecords)/
+                          sizeof(CVPD::cvpdRecords[0]));
                  entry++ )
             {
-                if( !(MVPD::mvpdRecords[entry].record >= prevRecord) )
+                if( !(CVPD::cvpdRecords[entry].record >= prevRecord) )
                 {
                     fails++;
-                    TS_FAIL( "testMvpdCheckStructOrder() - Record table out of "
+                    TS_FAIL( "testCvpdCheckStructOrder() - Record table out of "
                              "order! Cur Record: 0x%04x, Prev Record: 0x%04x",
-                             MVPD::mvpdRecords[entry].record,
+                             CVPD::cvpdRecords[entry].record,
                              prevRecord );
                 }
-                prevRecord = MVPD::mvpdRecords[entry].record;
+                prevRecord = CVPD::cvpdRecords[entry].record;
             }
 
-            // Check the mvpdKeywords structure for proper order
+            // Check the cvpdKeywords structure for proper order
             for( entry = 0;
-                 entry < (sizeof(MVPD::mvpdKeywords)/\
-                          sizeof(MVPD::mvpdKeywords[0]));
+                 entry < (sizeof(CVPD::cvpdKeywords)/
+                          sizeof(CVPD::cvpdKeywords[0]));
                  entry++ )
             {
-                if( !(MVPD::mvpdKeywords[entry].keyword >= prevKeyword) )
+                if( !(CVPD::cvpdKeywords[entry].keyword >= prevKeyword) )
                 {
                     fails++;
-                    TS_FAIL("testMvpdCheckStructOrder() - Keyword table out of "
-                            "order! Cur Keyword: 0x%04x, Prev Keyword: 0x%04x",
-                            MVPD::mvpdKeywords[entry].keyword,
-                            prevKeyword );
+                    TS_FAIL( "testCvpdCheckStructOrder() - Keyword table out of order! Cur Keyword: 0x%04x, Prev Keyword: 0x%04x",
+                             CVPD::cvpdKeywords[entry].keyword,
+                             prevKeyword );
                 }
-                prevKeyword = MVPD::mvpdKeywords[entry].keyword;
+                prevKeyword = CVPD::cvpdKeywords[entry].keyword;
             }
 
             TRACFCOMP( g_trac_vpd,
-                       "testMvpdCheckStructOrder - %d fails",
+                       "testCvpdCheckStructOrder - %d fails",
                        fails );
         }
 };

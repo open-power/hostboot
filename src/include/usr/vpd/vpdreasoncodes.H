@@ -40,23 +40,17 @@ namespace VPD
 */
 enum vpdModuleId
 {
-    VPD_INVALID_MODULE                  = 0x00,
+    VPD_INVALID_MODULE                      = 0x00,
 
     // Common VPD
-    
 
-    // Proc MVPD
-    VPD_MVPD_READ_BINARY_FILE               = 0x31,
-    VPD_MVPD_READ                           = 0x32,
-    VPD_MVPD_WRITE                          = 0x33,
-    VPD_MVPD_TRANSLATE_RECORD               = 0x34,
-    VPD_MVPD_TRANSLATE_KEYWORD              = 0x35,
-    VPD_MVPD_FIND_RECORD_OFFSET             = 0x36,
-    VPD_MVPD_RETRIEVE_KEYWORD               = 0x37,
-    VPD_MVPD_FETCH_DATA                     = 0x38,
-    VPD_MVPD_CHECK_BUFFER_SIZE              = 0x39,
-    VPD_MVPD_WRITE_KEYWORD                  = 0x3A,
-    VPD_MVPD_FIND_KEYWORD_ADDR              = 0x3B,
+    // IPVPD
+    VPD_IPVPD_TRANSLATE_RECORD              = 0x20,
+    VPD_IPVPD_TRANSLATE_KEYWORD             = 0x21,
+    VPD_IPVPD_FIND_RECORD_OFFSET            = 0x22,
+    VPD_IPVPD_FIND_KEYWORD_ADDR             = 0x23,
+    VPD_IPVPD_CHECK_BUFFER_SIZE             = 0x24,
+
 
     // DIMM SPD
     VPD_SPD_GET_KEYWORD_VALUE               = 0x61,
@@ -67,10 +61,9 @@ enum vpdModuleId
     VPD_SPD_SPECIAL_CASES                   = 0x66,
     VPD_SPD_PRESENCE_DETECT                 = 0x67,
     VPD_SPD_CHECK_MODULE_SPECIFIC_KEYWORD   = 0x68,
-    VPD_SPD_GET_PNOR_ADDR                   = 0x69,
-    VPD_SPD_WRITE_VALUE                     = 0x6A,
-    VPD_SPD_GET_KEYWORD_ENTRY               = 0x6B,
-    VPD_SPD_WRITE_DATA                      = 0x6C,
+    VPD_SPD_WRITE_VALUE                     = 0x69,
+    VPD_SPD_GET_KEYWORD_ENTRY               = 0x6A,
+    VPD_SPD_WRITE_DATA                      = 0x6B,
 
     // Centaur FRU VPD
 
@@ -84,7 +77,7 @@ enum vpdModuleId
  */
 enum vpdReasonCode
 {
-    VPD_INVALID_REASONCODE              = VPD_COMP_ID | 0x00,   // Invalid Reasoncode
+    VPD_INVALID_REASONCODE              = VPD_COMP_ID | 0x00,   // Invalid RC
     VPD_INSUFFICIENT_FILE_SIZE          = VPD_COMP_ID | 0x01,
     VPD_OPERATION_NOT_SUPPORTED         = VPD_COMP_ID | 0x02,
     VPD_RECORD_NOT_FOUND                = VPD_COMP_ID | 0x03,

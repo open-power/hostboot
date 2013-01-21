@@ -5,6 +5,7 @@ try {
     run-python-file (lookup-file hbfw/hb-pnor-vpd-preload.py)
     fpga0.sfc_master_mem.load-file ./sysmvpd.dat 0x3E0A000
     fpga0.sfc_master_mem.load-file ./sysspd.dat 0x3DCA000
+    fpga0.sfc_master_mem.load-file ./syscvpd.dat 0x3E8A000
 } except { echo "ERROR: Failed to preload VPD into PNOR." }
 
 #Trigger a power on to cec-chip

@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/vpd/mvpd.H $                                          */
+/* $Source: src/usr/vpd/cvpd.H $                                          */
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
@@ -20,30 +20,40 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-/* File mvpdnew.H created by ADAM R. MUHLE on Tue Jan 29 2013. */
+#ifndef __CVPD_H
+#define __CVPD_H
 
-/* Change Activity: */
-/* End Change Activity */
 
-#ifndef _MVPD_H
-#define _MVPD_H
+/**
+ * @file cvpd.H
+ *
+ * @brief Provides the interfaces for the CVPD device driver
+ *
+ */
 
-#include <vpd/mvpdenums.H>
+// ----------------------------------------------
+// Includes
+// ----------------------------------------------
+#include <errl/errlentry.H>
+#include <vpd/cvpdenums.H>
 
 #include "ipvpd.H"
 
-namespace MVPD
+namespace CVPD
 {
-    // ----------------------------------------------
-    // Defines
-    // ----------------------------------------------
+
     enum
     {
-        SECTION_SIZE       = 0x10000, //64KB VPD per processor
-        MAX_SECTIONS       = 8,  //8 Processors in PNOR
+        SECTION_SIZE       = 0x1000,
+        MAX_SECTIONS       = 64,
     };
 
-    const IpVpdFacade::recordInfo mvpdRecords[] =
+
+    /**
+     * @brief Conversion of CVPD Records to corresponding character
+     *        representation.
+     */
+    const IpVpdFacade::recordInfo cvpdRecords[] =
     {
         // -------------------------------------------------------------------
         // NOTE: This list must remain an ordered list!  There will be a
@@ -51,52 +61,20 @@ namespace MVPD
         //      list, be sure that the keyword in each entry (value 0)
         //      are in ascending order.
         // -------------------------------------------------------------------
-        { CRP0, "CRP0" },
-        { CP00, "CP00" },
-        { VINI, "VINI" },
-        { LRP0, "LRP0" },
-        { LRP1, "LRP1" },
-        { LRP2, "LRP2" },
-        { LRP3, "LRP3" },
-        { LRP4, "LRP4" },
-        { LRP5, "LRP5" },
-        { LRP6, "LRP6" },
-        { LRP7, "LRP7" },
-        { LRP8, "LRP8" },
-        { LRP9, "LRP9" },
-        { LRPA, "LRPA" },
-        { LRPB, "LRPB" },
-        { LRPC, "LRPC" },
-        { LRPD, "LRPD" },
-        { LRPE, "LRPE" },
-        { LWP0, "LWP0" },
-        { LWP1, "LWP1" },
-        { LWP2, "LWP2" },
-        { LWP3, "LWP3" },
-        { LWP4, "LWP4" },
-        { LWP5, "LWP5" },
-        { LWP6, "LWP6" },
-        { LWP7, "LWP7" },
-        { LWP8, "LWP8" },
-        { LWP9, "LWP9" },
-        { LWPA, "LWPA" },
-        { LWPB, "LWPB" },
-        { LWPC, "LWPC" },
-        { LWPD, "LWPD" },
-        { LWPE, "LWPE" },
-        { VWML, "VWML" },
+        { VEIR, "VEIR" },
+        { VER0, "VER0" },  //Not currently used, but keep support
         { MER0, "MER0" },
         // -------------------------------------------------------------------
         // DO NOT USE!!  This is for test purposes ONLY!
-        { MVPD_TEST_RECORD, "TEST" },
+        { CVPD_TEST_RECORD, "TEST" },
         // -------------------------------------------------------------------
     };
 
     /**
-     * @brief Conversion of MVPD Keywords to corresponding character
+     * @brief Conversion of CVPD Keywords to corresponding character
      *        representation.
      */
-    const IpVpdFacade::keywordInfo mvpdKeywords[] =
+    const IpVpdFacade::keywordInfo cvpdKeywords[] =
     {
         // -------------------------------------------------------------------
         // NOTE: This list must remain an ordered list!  There will be a
@@ -104,59 +82,24 @@ namespace MVPD
         //      the list, be sure that the keyword in each entry (value 0)
         //      are in ascending order.
         // -------------------------------------------------------------------
-        { VD,  "VD" },
-        { ED,  "ED" },
-        { TE,  "TE" },
-        { DD,  "DD" },
-        { pdP, "#P" },
-        { ST,  "ST" },
-        { DN,  "DN" },
-        { PG,  "PG" },
-        { PK,  "PK" },
-        { pdR, "#R" },
-        { pdV, "#V" },
-        { pdH, "#H" },
-        { SB,  "SB" },
-        { DR,  "DR" },
-        { VZ,  "VZ" },
-        { CC,  "CC" },
-        { CE,  "CE" },
-        { FN,  "FN" },
-        { PN,  "PN" },
-        { SN,  "SN" },
-        { PR,  "PR" },
-        { HE,  "HE" },
-        { CT,  "CT" },
-        { HW,  "HW" },
-        { pdM, "#M" },
-        { IN,  "IN" },
-        { pd2, "#2" },
-        { pd3, "#3" },
-        { OC,  "OC" },
-        { FO,  "FO" },
         { pdI, "#I" },
-        { pdG, "#G" },
-        { MK,  "MK" },
-        { PB,  "PB" },
-        { CH,  "CH" },
+        { PF,  "PF" },
         // -------------------------------------------------------------------
         // DO NOT USE!!  This is for test purposes ONLY!
-        { MVPD_TEST_KEYWORD, "XX" },
+        { CVPD_TEST_KEYWORD, "XX" },
         // -------------------------------------------------------------------
     };
 
-} //end namespace MVPD
+}; // end CVPD namespace
 
-class MvpdFacade: public IpVpdFacade
+class CvpdFacade: public IpVpdFacade
 {
   public:
 
     /**
      * @brief Constructor
      */
-    MvpdFacade( );
+    CvpdFacade( );
 
 };
-
-#endif /* _MVPD_H */
-
+#endif  // __CVPD_H

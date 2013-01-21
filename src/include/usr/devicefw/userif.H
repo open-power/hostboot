@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2012              */
+/* COPYRIGHT International Business Machines Corp. 2011,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -49,6 +49,7 @@ namespace DeviceFW
         FSI,
         SPD,
         MVPD,
+        CVPD,
         SCAN,
 
         LAST_ACCESS_TYPE,
@@ -106,6 +107,16 @@ namespace DeviceFW
      */
     #define DEVICE_MVPD_ADDRESS( i_record, i_keyword )\
         DeviceFW::MVPD, static_cast<uint64_t>(( i_record )),\
+            static_cast<uint64_t>(( i_keyword ))
+
+    /**
+     * Construct the device addressing parameters for the CVPD device ops.
+     * @param[in] i_record - The enumeration of the CVPD record to access.
+     * @param[in] i_keyword - The enumeration of the CVPD keyword, located
+     *      within the i_record Record to access.
+     */
+    #define DEVICE_CVPD_ADDRESS( i_record, i_keyword )\
+        DeviceFW::CVPD, static_cast<uint64_t>(( i_record )),\
             static_cast<uint64_t>(( i_keyword ))
 
     /**

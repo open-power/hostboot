@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/vpd/mvpd.C $                                          */
+/* $Source: src/usr/vpd/cvpd.C $                                          */
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
@@ -32,16 +32,15 @@
 #include <devicefw/driverif.H>
 #include <vfs/vfs.H>
 #include <vpd/vpdreasoncodes.H>
-#include <vpd/mvpdenums.H>
-
-#include "mvpd.H"
-#include "ipvpd.H"
+#include <vpd/cvpdenums.H>
+#include "cvpd.H"
 #include "vpd.H"
 
 // ----------------------------------------------
 // Trace definitions
 // ----------------------------------------------
 extern trace_desc_t* g_trac_vpd;
+
 
 // ------------------------
 // Macros for unit testing
@@ -50,17 +49,20 @@ extern trace_desc_t* g_trac_vpd;
 //#define TRACSSCOMP(args...)  TRACFCOMP(args)
 #define TRACSSCOMP(args...)
 
-
-namespace MVPD
+namespace CVPD
 {
-// ----------------------------------------------
-// Globals
-// ----------------------------------------------
+    // ----------------------------------------------
+    // Globals
+    // ----------------------------------------------
     mutex_t g_mutex = MUTEX_INITIALIZER;
+
+
+
+
 
     /**
      * @brief This function will perform the steps required to do a read from
-     *      the Hostboot MVPD data.
+     *      the Hostboot CVPD data.
      *
      * @param[in] i_opType - Operation Type - See DeviceFW::OperationType in
      *       driververif.H
@@ -87,7 +89,7 @@ namespace MVPD
      * @return errlHndl_t - NULL if successful, otherwise a pointer to the
      *       error log.
      */
-    errlHndl_t mvpdRead ( DeviceFW::OperationType i_opType,
+    errlHndl_t cvpdRead ( DeviceFW::OperationType i_opType,
                           TARGETING::Target * i_target,
                           void * io_buffer,
                           size_t & io_buflen,
@@ -96,25 +98,24 @@ namespace MVPD
     {
         errlHndl_t err = NULL;
         IpVpdFacade::input_args_t args;
-        args.record = ((mvpdRecord)va_arg( i_args, uint64_t ));
-        args.keyword = ((mvpdKeyword)va_arg( i_args, uint64_t ));
+        args.record = ((cvpdRecord)va_arg( i_args, uint64_t ));
+        args.keyword = ((cvpdKeyword)va_arg( i_args, uint64_t ));
 
         TRACSSCOMP( g_trac_vpd,
-                    ENTER_MRK"mvpdRead()" );
+                    ENTER_MRK"cvpdRead()" );
 
-        err = Singleton<MvpdFacade>::instance().read(i_target,
-                                                  io_buffer,
-                                                  io_buflen,
-                                                  args);
+        err = Singleton<CvpdFacade>::instance().read(i_target,
+                                                     io_buffer,
+                                                     io_buflen,
+                                                     args);
 
         return err;
     }
 
 
-
     /**
      * @brief This function will perform the steps required to do a write to
-     *      the Hostboot MVPD data.
+     *      the Hostboot CVPD data.
      *
      * @param[in] i_opType - Operation Type - See DeviceFW::OperationType in
      *       driververif.H
@@ -140,7 +141,7 @@ namespace MVPD
      * @return errlHndl_t - NULL if successful, otherwise a pointer to the
      *       error log.
      */
-    errlHndl_t mvpdWrite ( DeviceFW::OperationType i_opType,
+    errlHndl_t cvpdWrite ( DeviceFW::OperationType i_opType,
                            TARGETING::Target * i_target,
                            void * io_buffer,
                            size_t & io_buflen,
@@ -149,48 +150,50 @@ namespace MVPD
     {
         errlHndl_t err = NULL;
         IpVpdFacade::input_args_t args;
-        args.record = ((mvpdRecord)va_arg( i_args, uint64_t ));
-        args.keyword = ((mvpdKeyword)va_arg( i_args, uint64_t ));
+        args.record = ((cvpdRecord)va_arg( i_args, uint64_t ));
+        args.keyword = ((cvpdKeyword)va_arg( i_args, uint64_t ));
 
         TRACSSCOMP( g_trac_vpd,
-                    ENTER_MRK"mvpdWrite()" );
+                    ENTER_MRK"cvpdWrite()" );
 
-        err = Singleton<MvpdFacade>::instance().write(i_target,
-                                                   io_buffer,
-                                                   io_buflen,
-                                                   args);
+
+        err = Singleton<CvpdFacade>::instance().write(i_target,
+                                                      io_buffer,
+                                                      io_buflen,
+                                                      args);
 
         return err;
     }
 
     // Register with the routing code
     DEVICE_REGISTER_ROUTE( DeviceFW::READ,
-                           DeviceFW::MVPD,
-                           TARGETING::TYPE_PROC,
-                           mvpdRead );
+                           DeviceFW::CVPD,
+                           TARGETING::TYPE_MEMBUF,
+                           cvpdRead );
     DEVICE_REGISTER_ROUTE( DeviceFW::WRITE,
-                           DeviceFW::MVPD,
-                           TARGETING::TYPE_PROC,
-                           mvpdWrite );
-
-}; // end MVPD namespace
+                           DeviceFW::CVPD,
+                           TARGETING::TYPE_MEMBUF,
+                           cvpdWrite );
 
 
 
-//MVPD Class Functions
+}; // end namespace CVPD
+
+//CVPD Class Functions
 /**
  * @brief  Constructor
  */
-MvpdFacade::MvpdFacade() :
-IpVpdFacade(MVPD::SECTION_SIZE,
-            MVPD::MAX_SECTIONS,
-            MVPD::mvpdRecords,
-            (sizeof(MVPD::mvpdRecords)/sizeof(MVPD::mvpdRecords[0])),
-            MVPD::mvpdKeywords,
-            (sizeof(MVPD::mvpdKeywords)/sizeof(MVPD::mvpdKeywords[0])),
-            PNOR::MODULE_VPD,
-            MVPD::g_mutex,
-            VPD::VPD_WRITE_PROC)
+CvpdFacade::CvpdFacade() :
+IpVpdFacade(CVPD::SECTION_SIZE,
+            CVPD::MAX_SECTIONS,
+            CVPD::cvpdRecords,
+            (sizeof(CVPD::cvpdRecords)/sizeof(CVPD::cvpdRecords[0])),
+            CVPD::cvpdKeywords,
+            (sizeof(CVPD::cvpdKeywords)/sizeof(CVPD::cvpdKeywords[0])),
+            PNOR::CENTAUR_VPD,
+            CVPD::g_mutex,
+            VPD::VPD_WRITE_MEMBUF)
 {
-    TRACUCOMP(g_trac_vpd, "MvpdFacade::MvpdFacade> " );
+    TRACUCOMP(g_trac_vpd, "CvpdFacade::CvpdFacade> " );
+
 }

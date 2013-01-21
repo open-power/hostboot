@@ -33,6 +33,13 @@
 trace_desc_t* g_trac_vpd = NULL;
 TRAC_INIT( & g_trac_vpd, "VPD", KILOBYTE );
 
+// ------------------------
+// Macros for unit testing
+//#define TRACUCOMP(args...)  TRACFCOMP(args)
+#define TRACUCOMP(args...)
+//#define TRACSSCOMP(args...)  TRACFCOMP(args)
+#define TRACSSCOMP(args...)
+
 namespace VPD
 {
 
@@ -44,15 +51,15 @@ errlHndl_t getVpdLocation ( int64_t & o_vpdLocation,
 {
     errlHndl_t err = NULL;
 
-    TRACSSCOMP( g_trac_spd,
+    TRACSSCOMP( g_trac_vpd,
                 ENTER_MRK"getVpdLocation()" );
 
     o_vpdLocation = i_target->getAttr<TARGETING::ATTR_VPD_REC_NUM>();
-    TRACUCOMP( g_trac_spd,
+    TRACUCOMP( g_trac_vpd,
                INFO_MRK"Using VPD location: %d",
                o_vpdLocation );
 
-    TRACSSCOMP( g_trac_spd,
+    TRACSSCOMP( g_trac_vpd,
                 EXIT_MRK"getVpdLocation()" );
 
     return err;
@@ -267,7 +274,7 @@ errlHndl_t sendMboxWriteMsg ( size_t i_numBytes,
         memcpy( msg->extra_data, i_data, i_numBytes );
 
         TRACFCOMP( g_trac_vpd,
-                   INFO_MRK"Send msg to FSP to write VPD type %.8X, record %d, offset 0x%X",
+                   INFO_MRK"sendMboxWriteMsg: Send msg to FSP to write VPD type %.8X, record %d, offset 0x%X",
                    i_type,
                    i_record.rec_num,
                    i_record.offset );
@@ -293,14 +300,6 @@ errlHndl_t sendMboxWriteMsg ( size_t i_numBytes,
             if( VPD_WRITE_DIMM == i_type )
             {
                 l_err->collectTrace("SPD",1024);
-            }
-            else if( VPD_WRITE_PROC == i_type )
-            {
-                l_err->collectTrace("MVPD",1024);
-            }
-            else if( VPD_WRITE_MEMBUF == i_type )
-            {
-                //l_err->collectTrace("CVPD",1024);  @TODO-Fill in with RTC:44009
             }
 
             // just commit the log and move on, nothing else to do           
