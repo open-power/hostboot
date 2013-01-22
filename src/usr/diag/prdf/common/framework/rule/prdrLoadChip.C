@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2004,2012              */
+/* COPYRIGHT International Business Machines Corp. 2004,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -38,6 +38,11 @@
 
 namespace Prdr
 {
+
+// 'using namespace PRDF' added so that the Hostboot error log parser can find
+// the moduleid and reasoncode in the error log tags. The alternative is to add
+// 'PRDF::' before the moduleid and reasoncode in the error log tags
+using namespace PRDF;
 
 void ReadExpr(UtilStream & i_stream, Expr & o_expr);
 

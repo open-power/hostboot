@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2012              */
+/* COPYRIGHT International Business Machines Corp. 2011,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -103,9 +103,9 @@ public:
         {
             /*@
              * @errortype
-             * @reasoncode  HBERRL_TEST_REASON_CODE
+             * @reasoncode  ERRL_TEST_REASON_CODE
              * @severity    ERRORLOG::ERRL_SEV_INFORMATIONAL
-             * @moduleid    HBERRL_TEST_MOD_ID
+             * @moduleid    ERRL_TEST_MOD_ID
              * @devdesc     Errl test. Error with non-decoded string
              *              and lots of trace buffers.
              */
@@ -113,8 +113,8 @@ public:
             // Create an error log
             errlHndl_t l_err = new ERRORLOG::ErrlEntry(
                                     ERRORLOG::ERRL_SEV_INFORMATIONAL,
-                                    HBERRL_TEST_MOD_ID,
-                                    HBERRL_TEST_REASON_CODE,
+                                    ERRL_TEST_MOD_ID,
+                                    ERRL_TEST_REASON_CODE,
                                     l_userData1,
                                     l_userData2);
 
@@ -206,7 +206,7 @@ public:
 
 
             // Add null data.
-            pffdc = l_err->addFFDC( HBERRL_COMP_ID, NULL, 0,  9, 10 );
+            pffdc = l_err->addFFDC( ERRL_COMP_ID, NULL, 0,  9, 10 );
             if ( NULL != pffdc )
             {
                 TS_FAIL("testErrl1: addFFDC() returned non null");
@@ -220,7 +220,7 @@ public:
                 break;
             }
 
-            if (l_err->reasonCode() != HBERRL_TEST_REASON_CODE)
+            if (l_err->reasonCode() != ERRL_TEST_REASON_CODE)
             {
                 TS_FAIL("testErrl1: createErrlLog() returns incorrect reason code!");
                 break;
@@ -287,8 +287,8 @@ public:
         // Create an error log
         errlHndl_t l_err = new ERRORLOG::ErrlEntry(
                                 ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                HBERRL_TEST_MOD_ID,
-                                HBERRL_TEST_REASON_CODE,
+                                ERRL_TEST_MOD_ID,
+                                ERRL_TEST_REASON_CODE,
                                 l_userData1,
                                 l_userData2);
 
@@ -399,8 +399,8 @@ public:
             // Create an error log
             errlHndl_t errl = new ERRORLOG::ErrlEntry(
                                     ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                    HBERRL_TEST_MOD_ID,
-                                    HBERRL_TEST_REASON_CODE);
+                                    ERRL_TEST_MOD_ID,
+                                    ERRL_TEST_REASON_CODE);
 
             // test the different callout types
             TS_TRACE( "test callout pProc %p", *pProc);

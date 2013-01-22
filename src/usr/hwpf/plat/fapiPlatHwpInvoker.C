@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2012              */
+/* COPYRIGHT International Business Machines Corp. 2011,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -30,7 +30,7 @@
 #include <fapiReturnCode.H>
 #include <fapiPlatTrace.H>
 #include <fapiErrorInfo.H>
-#include <fapiPlatReasonCodes.H>
+#include <hwpf/hwpf_reasoncodes.H>
 #include <errl/errlentry.H>
 
 namespace fapi
@@ -180,7 +180,7 @@ errlHndl_t fapiRcToErrl(ReturnCode & io_rc)
             l_reasonCode &= 0xff;
             l_reasonCode |= HWPF_COMP_ID;
 
-            // HostBoot errlog tags for FAPI errors are in fapiPlatReasonCodes.H
+            // HostBoot errlog tags for FAPI errors are in hwpfReasonCodes.H
             l_pError = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                                MOD_FAPI_RC_TO_ERRL,
                                                l_reasonCode);

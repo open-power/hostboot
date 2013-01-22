@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2012              */
+/* COPYRIGHT International Business Machines Corp. 2011,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -140,8 +140,8 @@ public:
                  TS_FAIL("testXscom1: XSCom read back doesn't match write!");
                  /*@
                   * @errortype
-                  * @moduleid     XSCOM_TEST_XSCOM1
-                  * @reasoncode   XSCOM_DATA_UNMATCHED
+                  * @moduleid     XSCOM::XSCOM_TEST_XSCOM1
+                  * @reasoncode   XSCOM::XSCOM_DATA_UNMATCHED
                   * @userdata1    Write value
                   * @userdata2    Read back value
                   * @devdesc      Read back value doesn't match write
@@ -267,8 +267,8 @@ public:
                 TS_FAIL("testXscom2: XSCom read back doesn't match write!");
                 /*@
                  * @errortype
-                 * @moduleid     XSCOM_TEST_XSCOM2
-                 * @reasoncode   XSCOM_DATA_UNMATCHED
+                 * @moduleid     XSCOM::XSCOM_TEST_XSCOM2
+                 * @reasoncode   XSCOM::XSCOM_DATA_UNMATCHED
                  * @userdata1    Write value
                  * @userdata2    Read back value
                  * @devdesc      Read back value doesn't match write

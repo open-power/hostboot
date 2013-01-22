@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/include/usr/hwpf/hwp/hwpistepudparserfactory.H $          */
+/* $Source: src/usr/errl/plugins/errludcallout.H $                        */
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012                   */
+/* COPYRIGHT International Business Machines Corp. 2012,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,49 +20,64 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-#ifndef __ISTEP_UDPARSERFACTORY_H
-#define __ISTEP_UDPARSERFACTORY_H
-
-#ifdef PARSER
+#ifndef ERRL_UDCALLOU_H
+#define ERRL_UDCALLOU_H
 
 /**
- *  @file initsvcudparserfactory.H
+ *  @file errludcallout.H
  *
- *  Defines the IStepUserDetailsParserFactory.H class
-*/
-#include <hwpf/istepvcreasoncodes.H>
-#include <errl/errludparserfactory.H>
+ *  Defines the ErrlUserDetailsParserCallout class that parses
+ *  callout user detail in an error log
+ */
 
-namespace INITSERVICE
+#include "errluserdetails.H"
+
+namespace ERRORLOG
 {
 
 /**
- * @class IStepUserDetailsParserFactory
+ * @class ErrlUserDetailsCallout
  *
- * This factory produces ErrlUserDetailsParser objects to parse the specified
- * InitService user detail data.
-*/
-class IStepUserDetailsParserFactory : public ERRORLOG::ErrlUserDetailsParserFactory
+ * Parses Callout user detail in an error log
+ */
+class ErrlUserDetailsParserCallout : public ErrlUserDetailsParser
 {
 public:
-
     /**
      *  @brief Constructor
      */
-    IStepUserDetailsParserFactory()
+    ErrlUserDetailsParserCallout() {}
+
+    /**
+     *  @brief Destructor
+     */
+    virtual ~ErrlUserDetailsParserCallout() {}
+
+    /**
+     *  @brief Parses callout user detail data from an error log
+     *
+     *  @param  i_version Version of the data
+     *  @param  i_parse   ErrlUsrParser object for outputting information
+     *  @param  i_pBuffer Pointer to buffer containing detail data
+     *  @param  i_buflen  Length of the buffer
+     */
+    virtual void parse(errlver_t i_version,
+                       ErrlUsrParser & i_parser,
+                       void * i_pBuffer,
+                       const uint32_t i_buflen) const
     {
-        registerParser<IStepUserDetailsParserIstep>( ISTEP_UDT_PLID );
+        // TODO fix when parser fixed
+        // RTC 41707
     }
 
 private:
-
     // Disabled
-    IStepUserDetailsParserFactory(const IStepUserDetailsParserFactory &);
-    IStepUserDetailsParserFactory & operator=(
-        const IStepUserDetailsParserFactory &);
+    ErrlUserDetailsParserCallout(const ErrlUserDetailsParserCallout &);
+    ErrlUserDetailsParserCallout & operator=(
+        const ErrlUserDetailsParserCallout &);
 };
 
 }
 
 #endif
-#endif
+

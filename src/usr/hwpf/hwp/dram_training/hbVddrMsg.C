@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012                   */
+/* COPYRIGHT International Business Machines Corp. 2012,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -161,7 +161,14 @@ errlHndl_t HBVddrMsg::sendMsg(uint32_t i_msgType) const
             TRACFCOMP(g_trac_volt, ERR_MRK "hbVddrMsg::send msg with non-"
                       "valid msg type%08X",i_msgType);
             //generate errorLog;    
-            /*@
+            // TODO RTC 62849 The reason code is in hbVddrMsg.H and does not
+            // include a component ID. The component ID is essential to
+            // distinguish errors between components. Error log reason codes and
+            // module ids should also be in a file called <comp>reasoncodes.H.
+            // This error causes the scanforsrcs parser to error out. I removed
+            // '@' from the next line to stop the parser from seeing the tag.
+            // Add '@' back after this is all fixed
+            /*
              *   @errortype
              *   @moduleid      VDDR_SEND_MSG
              *   @reasoncode    INCORRECT_MSG_TYPE
@@ -262,7 +269,14 @@ errlHndl_t  HBVddrMsg::processVDDRmsg(msg_t* i_recvMsg) const
             //an error occred in obtaining the extra data from the response msg 
             TRACFCOMP( g_trac_volt, ERR_MRK "HBVddrMsg::processVDDRmsg: l_extraData = NULL");
             //create an errorlog
-            /*@
+            // TODO RTC 62849 The reason code is in hbVddrMsg.H and does not
+            // include a component ID. The component ID is essential to
+            // distinguish errors between components. Error log reason codes and
+            // module ids should also be in a file called <comp>reasoncodes.H.
+            // This error causes the scanforsrcs parser to error out. I removed
+            // '@' from the next line to stop the parser from seeing the tag.
+            // Add '@' back after this is all fixed
+            /*
             *   @errortype
             *   @moduleid      VDDR_PROC_VDDR_MSG
             *   @reasoncode    VDDR_EMPTY_MSG
@@ -303,7 +317,14 @@ errlHndl_t  HBVddrMsg::processVDDRmsg(msg_t* i_recvMsg) const
                 TRACFCOMP( g_trac_volt, ERR_MRK "HBVddrMsg::processVDDRmsg: error occured "
                             "on the powr function called in hwsv");
                 //create an errorlog
-                /*@
+                // TODO RTC 62849 The reason code is in hbVddrMsg.H and does not
+                // include a component ID. The component ID is essential to
+                // distinguish errors between components. Error log reason codes and
+                // module ids should also be in a file called <comp>reasoncodes.H.
+                // This error causes the scanforsrcs parser to error out. I removed
+                // '@' from the next line to stop the parser from seeing the tag.
+                // Add '@' back after this is all fixed
+                /*
                 *   @errortype
                 *   @moduleid      VDDR_PROC_VDDR_MSG
                 *   @reasoncode    VDDR_POWR_ERR
@@ -360,7 +381,14 @@ errlHndl_t HBVddrMsg::processMsg(msg_t* i_Msg) const
             {
                 TRACFCOMP( g_trac_volt, ERR_MRK "HBVddrMsg::processMsg recv'd a non valid type");
                 //generate errorLog;    
-                /*@
+                // TODO RTC 62849 The reason code is in hbVddrMsg.H and does not
+                // include a component ID. The component ID is essential to
+                // distinguish errors between components. Error log reason codes and
+                // module ids should also be in a file called <comp>reasoncodes.H.
+                // This error causes the scanforsrcs parser to error out. I removed
+                // '@' from the next line to stop the parser from seeing the tag.
+                // Add '@' back after this is all fixed
+                /*
                  *   @errortype
                  *   @moduleid      VDDR_PROC_MSG
                  *   @reasoncode    INCORRECT_MSG_TYPE
@@ -378,7 +406,14 @@ errlHndl_t HBVddrMsg::processMsg(msg_t* i_Msg) const
             //an error occurred so should stop the IPL
             TRACFCOMP( g_trac_volt, ERR_MRK "HBVddrMsg::RecvMsgHndlr recv'd an error message" );
             //generate an errorlog
-            /*@
+            // TODO RTC 62849 The reason code is in hbVddrMsg.H and does not
+            // include a component ID. The component ID is essential to
+            // distinguish errors between components. Error log reason codes and
+            // module ids should also be in a file called <comp>reasoncodes.H.
+            // This error causes the scanforsrcs parser to error out. I removed
+            // '@' from the next line to stop the parser from seeing the tag.
+            // Add '@' back after this is all fixed
+            /*
              *   @errortype
              *   @moduleid      VDDR_PROC_MSG
              *   @reasoncode    VDDR_ERROR_MSG

@@ -1,26 +1,25 @@
-/*  IBM_PROLOG_BEGIN_TAG
- *  This is an automatically generated prolog.
- *
- *  $Source: src/include/usr/mbox/mbox_reasoncodes.H $
- *
- *  IBM CONFIDENTIAL
- *
- *  COPYRIGHT International Business Machines Corp. 2012
- *
- *  p1
- *
- *  Object Code Only (OCO) source materials
- *  Licensed Internal Code Source Materials
- *  IBM HostBoot Licensed Internal Code
- *
- *  The source code for this program is not published or other-
- *  wise divested of its trade secrets, irrespective of what has
- *  been deposited with the U.S. Copyright Office.
- *
- *  Origin: 30
- *
- *  IBM_PROLOG_END_TAG
- */
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/include/usr/mbox/mbox_reasoncodes.H $                     */
+/*                                                                        */
+/* IBM CONFIDENTIAL                                                       */
+/*                                                                        */
+/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/*                                                                        */
+/* p1                                                                     */
+/*                                                                        */
+/* Object Code Only (OCO) source materials                                */
+/* Licensed Internal Code Source Materials                                */
+/* IBM HostBoot Licensed Internal Code                                    */
+/*                                                                        */
+/* The source code for this program is not published or otherwise         */
+/* divested of its trade secrets, irrespective of what has been           */
+/* deposited with the U.S. Copyright Office.                              */
+/*                                                                        */
+/* Origin: 30                                                             */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
 #ifndef __MBOX_REASONCODES_H
 #define __MBOX_REASONCODES_H
 
@@ -45,22 +44,22 @@ namespace MBOX
 
     enum MBOXReasonCode
     {
-        RC_INVALID_LENGTH            = HBMBOX_COMP_ID | 0x01,
-        RC_INVALID_MESSAGE_TYPE      = HBMBOX_COMP_ID | 0x02,
-        RC_NO_PERM_TO_SEND           = HBMBOX_COMP_ID | 0x03,
-        RC_MSG_PENDING               = HBMBOX_COMP_ID | 0x04,
-        RC_INVALID_QUEUE             = HBMBOX_COMP_ID | 0x05,
-        RC_RETRY_FAILED              = HBMBOX_COMP_ID | 0x06,
-        RC_ALREADY_REGISTERED        = HBMBOX_COMP_ID | 0x07,
-        RC_UNREGISTERED_MSG_QUEUE    = HBMBOX_COMP_ID | 0x08,
-        RC_ILLEGAL_OP                = HBMBOX_COMP_ID | 0x09,
-        RC_DATA_WRITE_ERR            = HBMBOX_COMP_ID | 0x0A,
-        RC_PARITY_ERR                = HBMBOX_COMP_ID | 0x0B,
-        RC_INVALID_MBOX_MSG_TYPE     = HBMBOX_COMP_ID | 0x0C,
-        RC_MBOX_SERVICE_NOT_READY    = HBMBOX_COMP_ID | 0x0D,
-        RC_INVALID_DMA_LENGTH        = HBMBOX_COMP_ID | 0x0E,
-        RC_KERNEL_REG_FAILED         = HBMBOX_COMP_ID | 0x0F,
-        RC_MAILBOX_DISABLED          = HBMBOX_COMP_ID | 0x10,
+        RC_INVALID_LENGTH            = MBOX_COMP_ID | 0x01,
+        RC_INVALID_MESSAGE_TYPE      = MBOX_COMP_ID | 0x02,
+        RC_NO_PERM_TO_SEND           = MBOX_COMP_ID | 0x03,
+        RC_MSG_PENDING               = MBOX_COMP_ID | 0x04,
+        RC_INVALID_QUEUE             = MBOX_COMP_ID | 0x05,
+        RC_RETRY_FAILED              = MBOX_COMP_ID | 0x06,
+        RC_ALREADY_REGISTERED        = MBOX_COMP_ID | 0x07,
+        RC_UNREGISTERED_MSG_QUEUE    = MBOX_COMP_ID | 0x08,
+        RC_ILLEGAL_OP                = MBOX_COMP_ID | 0x09,
+        RC_DATA_WRITE_ERR            = MBOX_COMP_ID | 0x0A,
+        RC_PARITY_ERR                = MBOX_COMP_ID | 0x0B,
+        RC_INVALID_MBOX_MSG_TYPE     = MBOX_COMP_ID | 0x0C,
+        RC_MBOX_SERVICE_NOT_READY    = MBOX_COMP_ID | 0x0D,
+        RC_INVALID_DMA_LENGTH        = MBOX_COMP_ID | 0x0E,
+        RC_KERNEL_REG_FAILED         = MBOX_COMP_ID | 0x0F,
+        RC_MAILBOX_DISABLED          = MBOX_COMP_ID | 0x10,
     };
 
 
@@ -69,7 +68,7 @@ namespace MBOX
      */
     enum mboxUserDetailDataSubsection
     {
-        MBOX_UDT_MBOXMSG_DATA = 1,
+        MBOX_UDT_MBOXMSG_DATA = 0x01,
     };
 
 };

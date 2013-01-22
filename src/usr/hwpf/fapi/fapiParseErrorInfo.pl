@@ -23,10 +23,7 @@
 # IBM_PROLOG_END_TAG
 #
 # Purpose:  This perl script will parse HWP Error XML files and create required
-#           FAPI code. The FAPI files created are:
-#
-#           1/ fapiHwpReturnCodes.H   - HwpReturnCode enumeration
-#           2/ fapiHwpErrorInfo.H     - Error Information macros
+#           FAPI code.
 #
 # Author: CamVan Nguyen and Mike Jones
 #

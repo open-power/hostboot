@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012                   */
+/* COPYRIGHT International Business Machines Corp. 2012,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -26,22 +26,17 @@
 /**
  *  @file initsvcudistep.H
  *
- *  Defines the following classes:
- *
- *  IStepUserDetailsIstep: Adds IStep FFDC to an error log as user detail data
- *  IStepUserDetailsParserIstep: Parses IStep FFDC user detail in an error log
+ *  Defines the HwpUserDetailsIstep class that adds IStep FFDC to an
+ *  error log as user detail data
  */
 
 #include <errl/errluserdetails.H>
-
-// user data type for istep error details
-static const uint32_t HWP_UDT_STEP_ERROR_DETAILS =    0x01;
 
 namespace   ISTEP_ERROR
 {
 
     /**
-     * @struct IStepUserDetailsIstepData
+     * @struct HwpUserDetailsIstepErrorData
      *
      * Defines the user detail data
      */
@@ -51,10 +46,8 @@ namespace   ISTEP_ERROR
         uint32_t reasoncode;
     };
 
-#ifndef PARSER
-
     /**
-     * @class IStepUserDetailsIstep
+     * @class HwpUserDetailsIstep
      *
      * Adds IStep FFDC to an error log as user detail data
      */
@@ -83,61 +76,7 @@ namespace   ISTEP_ERROR
             HwpUserDetailsIstep(const HwpUserDetailsIstep &);
             HwpUserDetailsIstep & operator=(const HwpUserDetailsIstep &);
     };
-
-#else // (if PARSER defined)
-
-    /**
-     * @class IStepUserDetailsParserIstep
-     *
-     * Parses Istep user detail in an error log
-     */
-    class HwpUserDetailsParserIstep : public ERRORLOG::ErrlUserDetailsParser
-    {
-        public:
-            /**
-             *  @brief Constructor
-             */
-            HwpUserDetailsParserIstep() {}
-
-            /**
-             *  @brief Destructor
-             */
-            virtual ~HwpUserDetailsParserIstep() {}
-
-            /**
-             *  @brief Parses Istep user detail data from an error log
-             *
-             *  @param  i_version Version of the data
-             *  @param  i_parse   ErrlUsrParser object for outputting
-             *                    information
-             *  @param  i_pBuffer Pointer to buffer containing detail data
-             *  @param  i_buflen  Length of the buffer
-             */
-            virtual void parse(errlver_t i_version,
-                    ErrlUsrParser & i_parser,
-                    void * i_pBuffer,
-                    const uint32_t i_buflen) const
-            {
-                HwpUserDetailsIstepErrorData * l_pData =
-                    static_cast<HwpUserDetailsIstepErrorData *>(i_pBuffer);
-
-                i_parser.PrintNumber("See error log ID:","0x%X",
-                                     ntohl(l_pData->eid));
-
-                i_parser.PrintNumber("Reasoncode:","0x%X",
-                                      ntohl(l_pData->reasoncode) );
-            }
-
-        private:
-            // Disabled
-            HwpUserDetailsParserIstep(const HwpUserDetailsParserIstep &);
-            HwpUserDetailsParserIstep & operator=(
-                    const HwpUserDetailsParserIstep &);
-    };
-#endif
-
 }
 
 #endif
-
 

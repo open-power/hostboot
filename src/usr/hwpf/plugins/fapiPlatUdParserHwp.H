@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/include/usr/hwpf/plat/fapiPlatUdParserHwp.H $             */
+/* $Source: src/usr/hwpf/plugins/fapiPlatUdParserHwp.H $                  */
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012                   */
+/* COPYRIGHT International Business Machines Corp. 2013                   */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -23,8 +23,6 @@
 #ifndef FAPIPLATUDPARSERHWP_H
 #define FAPIPLATUDPARSERHWP_H
 
-#ifdef PARSER
-
 /**
  *  @file fapiPlatUdParserHwp.H
  *
@@ -35,8 +33,8 @@
  *  the user detail data because it is created by the platform neutral
  *  fapi::ReturnCode
  */
-#include <errl/errluserdetails.H>
-#include <fapiPlatHwpErrParser.H>
+#include "errluserdetails.H"
+#include "fapiPlatHwpErrParser.H"
 
 namespace fapi
 {
@@ -127,6 +125,5 @@ private:
 
 }
 
-#endif
 #endif
 

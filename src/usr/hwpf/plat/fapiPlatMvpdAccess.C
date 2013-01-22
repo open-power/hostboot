@@ -30,8 +30,8 @@
 #include    <errl/errlentry.H>
 
 //  fapi support
-#include <hwpf/plat/fapiPlatReasonCodes.H>
 #include <fapiMvpdAccess.H>
+#include <hwpf/hwpf_reasoncodes.H>
 
 //  MVPD
 #include <devicefw/userif.H>

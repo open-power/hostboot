@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/include/usr/hwpf/plat/fapiPlatUdParserFactory.H $         */
+/* $Source: src/usr/errl/plugins/errludparserfactoryerrl.H $              */
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012                   */
+/* COPYRIGHT International Business Machines Corp. 2012,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,51 +20,57 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-#ifndef FAPIPLATUDPARSERFACTORY_H
-#define FAPIPLATUDPARSERFACTORY_H
-
-#ifdef PARSER
+#ifndef ERRL_UDPARSERFACTORYERRL_H
+#define ERRL_UDPARSERFACTORYERRL_H
 
 /**
- *  @file fapiPlatHwpUdDecode.H
+ *  @file errludparserfactoryerrl.H
  *
- *  Defines the PlatUserDetailsParserFactory class
- */
-#include <hwpf/plat/fapiPlatUdParserHwp.H>
-#include <hwpf/plat/fapiPlatReasonCodes.H>
-#include <errl/errludparserfactory.H>
+ *  Defines the errlUserDetailsParserFactoryErrl.H class
+*/
+#include "errludparserfactory.H"
+#include "errludstring.H"
+#include "errludtarget.H"
+#include "errludbacktrace.H"
+#include "errludattribute.H"
+#include "errludlogregister.H"
+#include "errludcallout.H"
 
-namespace fapi
+namespace ERRORLOG
 {
 
 /**
- * @class PlatUserDetailsParserFactory
+ * @class ErrlUserDetailsParserFactoryErrl
  *
  * This factory produces ErrlUserDetailsParser objects to parse the specified
- * PLAT user detail data.
-*/
-class PlatUserDetailsParserFactory : public ERRORLOG::ErrlUserDetailsParserFactory
+ * ERRL user detail data.
+ */
+class ErrlUserDetailsParserFactoryErrl : public ErrlUserDetailsParserFactory
 {
 public:
 
     /**
      *  @brief Constructor
      */
-    PlatUserDetailsParserFactory()
+    ErrlUserDetailsParserFactoryErrl()
     {
-        registerParser<PlatUserDetailsParserHwpRcValue>(HWPF_UDT_HWP_RCVALUE);
-        registerParser<PlatUserDetailsParserHwpFfdc>(HWPF_UDT_HWP_FFDC);
+        registerParser<ErrlUserDetailsParserString>(ERRL_UDT_STRING);
+        registerParser<ErrlUserDetailsParserTarget>(ERRL_UDT_TARGET);
+        registerParser<ErrlUserDetailsParserBackTrace>(ERRL_UDT_BACKTRACE);
+        registerParser<ErrlUserDetailsParserAttribute>(ERRL_UDT_ATTRIBUTE);
+        registerParser<ErrlUserDetailsParserLogRegister>(ERRL_UDT_LOGREGISTER);
+        registerParser<ErrlUserDetailsParserCallout>(ERRL_UDT_CALLOUT);
     }
 
 private:
+
     // Disabled
-    PlatUserDetailsParserFactory(const PlatUserDetailsParserFactory &);
-    PlatUserDetailsParserFactory & operator=(
-        const PlatUserDetailsParserFactory &);
+    ErrlUserDetailsParserFactoryErrl(const ErrlUserDetailsParserFactoryErrl &);
+    ErrlUserDetailsParserFactoryErrl & operator=(
+        const ErrlUserDetailsParserFactoryErrl &);
 };
 
 }
 
-#endif
 #endif
 

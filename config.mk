@@ -32,6 +32,7 @@ ifdef MODULE
 OBJDIR = ${ROOTPATH}/obj/modules/${MODULE}
 BEAMDIR = ${ROOTPATH}/obj/beam/${MODULE}
 GENDIR = ${ROOTPATH}/obj/genfiles
+GENDIR_PLUGINS = ${ROOTPATH}/obj/genfiles/plugins
 IMGDIR = ${ROOTPATH}/img
 GCOVNAME = ${MODULE}.lcov
 EXTRACOMMONFLAGS += -fPIC -Bsymbolic -Bsymbolic-functions 
@@ -52,6 +53,7 @@ else
 OBJDIR = ${ROOTPATH}/obj/core
 BEAMDIR = ${ROOTPATH}/obj/beam/core
 GENDIR = ${ROOTPATH}/obj/genfiles
+GENDIR_PLUGINS = ${ROOTPATH}/obj/genfiles/plugins
 IMGDIR = ${ROOTPATH}/img
 EXTRAINCDIR += ${GENDIR}
 GCOVNAME = $(notdir $(shell pwd)).lcov
@@ -354,9 +356,11 @@ endif
 
 gen_pass:
 	mkdir -p ${GENDIR}
+	mkdir -p ${GENDIR_PLUGINS}
 	${MAKE} GEN_PASS
 
 _GENFILES = $(addprefix ${GENDIR}/, $(GENFILES))
+_GENFILES += $(addprefix ${GENDIR_PLUGINS}/, $(GENFILES_PLUGINS))
 GEN_PASS: $(_GENFILES) $(_BINARYFILES) ${SUBDIRS:.d=.gen_pass}
 
 GENTARGET = $(addprefix %/, $(1))

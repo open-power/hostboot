@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2012              */
+/* COPYRIGHT International Business Machines Corp. 2011,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -146,7 +146,7 @@ errlHndl_t VfsRp::_init()
              * @userdata1       returncode from mm_alloc_block()
              * @userdata2       0
              *
-             * @defdesc         Could not allocate virtual memory.
+             * @devdesc         Could not allocate virtual memory.
              *
              */
             err = new ERRORLOG::ErrlEntry
@@ -320,7 +320,7 @@ void VfsRp::_load_unload(msg_t * i_msg)
              * @userdata1       returncode from mm_set_permission()
              * @userdata2       0
              *
-             * @defdesc         Could not set permissions on virtual memory.
+             * @devdesc         Could not set permissions on virtual memory.
              *
              */
             err = new ERRORLOG::ErrlEntry
@@ -354,7 +354,7 @@ void VfsRp::_load_unload(msg_t * i_msg)
              * @userdata1       first 8 bytes of module name
              * @userdata2       next 8 bytes of module name
              *
-             * @defdesc         Requested Module does not exist.
+             * @devdesc         Requested Module does not exist.
              *
              */
             err = new ERRORLOG::ErrlEntry
@@ -520,7 +520,7 @@ errlHndl_t VFS::module_load_unload(const char * i_module, VfsMessages i_msgtype)
          * @userdata1       returncode from msg_sendrecv()
          * @userdata2       VfsMessages type [LOAD | UNLOAD]
          *
-         * @defdesc         Could not load/unload module.
+         * @devdesc         Could not load/unload module.
          *
          */
         err = new ERRORLOG::ErrlEntry
@@ -570,7 +570,7 @@ errlHndl_t VFS::module_address(const char * i_name, const char *& o_address, siz
          * @userdata1       0
          * @userdata2       0
          *
-         * @defdesc         Module is not a data module
+         * @devdesc         Module is not a data module
          *
          */
         err = new ERRORLOG::ErrlEntry

@@ -40,7 +40,6 @@
 /******************************************************************************/
 #include    <stdint.h>
 #include    <map>
-#include    <hwpf/plat/fapiPlatReasonCodes.H>
 
 #include    <trace/interface.H>
 #include    <initservice/taskargs.H>

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2012              */
+/* COPYRIGHT International Business Machines Corp. 2011,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -41,20 +41,6 @@
  * @brief Pointer to an ErrlEntry object
  */
 namespace ERRORLOG { class ErrlEntry; };
-
-// Identifiers for Hostboot ERRL user-defined data sections.
-// Range: 0 .. 255
-enum errlUserDataType_t
-{
-    HBERRL_UDT_NOFORMAT         = 0,
-    HBERRL_UDT_STRING           = 1,
-    HBERRL_UDT_TARGET           = 2,
-    HBERRL_UDT_BACKTRACE        = 3,
-    HBERRL_UDT_ATTRIBUTE        = 4,
-    HBERRL_UDT_LOGREGISTER      = 5,
-    HBERRL_UDT_CALLOUT          = 6,
-};
-
 
 /**
  * @brief Macros to store different numbers into uint64_t

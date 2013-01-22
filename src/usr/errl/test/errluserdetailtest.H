@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2012              */
+/* COPYRIGHT International Business Machines Corp. 2011,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -67,16 +67,16 @@ public:
         /*@
         * @errortype
         * @severity ERRORLOG_SEV_INFORMATIONAL
-        * @moduleid HBERRL_USERDATA_TEST_MOD_ID
-        * @reasoncode HBERRL_TEST_STRING_UD
+        * @moduleid ERRL_USERDATA_TEST_MOD_ID
+        * @reasoncode ERRL_TEST_STRING_UD
         * @userdata1 Test data 1
         * @userdata2 Test data 2
         * @devdesc  User Details unit test - create string user detail data
         */
         errl = new ErrlEntry(
                 ERRL_SEV_INFORMATIONAL,
-                HBERRL_USERDATA_TEST_MOD_ID,
-                HBERRL_TEST_STRING_UD,
+                ERRL_USERDATA_TEST_MOD_ID,
+                ERRL_TEST_STRING_UD,
                 0x1234567890,                   //  user1
                 0x9876543210 );                 //  user2
 
@@ -105,16 +105,16 @@ public:
         /*@
         * @errortype
         * @severity ERRORLOG_SEV_INFORMATIONAL
-        * @moduleid HBERRL_USERDATA_TEST_MOD_ID
-        * @reasoncode HBERRL_TEST_ATTRIBUTE_UD
+        * @moduleid ERRL_USERDATA_TEST_MOD_ID
+        * @reasoncode ERRL_TEST_ATTRIBUTE_UD
         * @userdata1 Test data 1
         * @userdata2 Test data 2
         * @devdesc  User Details unit test - create string user detail data
         */
         errl = new ErrlEntry(
                 ERRL_SEV_INFORMATIONAL,
-                HBERRL_USERDATA_TEST_MOD_ID,
-                HBERRL_TEST_ATTRIBUTE_UD,
+                ERRL_USERDATA_TEST_MOD_ID,
+                ERRL_TEST_ATTRIBUTE_UD,
                 0x0001002300450067,
                 0x008900AB00CD00EF);
 
@@ -264,16 +264,16 @@ public:
         /*@
         * @errortype
         * @severity ERRORLOG_SEV_INFORMATIONAL
-        * @moduleid HBERRL_USERDATA_TEST_MOD_ID
-        * @reasoncode HBERRL_TEST_LOGREGISTER_UD
+        * @moduleid ERRL_USERDATA_TEST_MOD_ID
+        * @reasoncode ERRL_TEST_LOGREGISTER_UD
         * @userdata1 Test data 1
         * @userdata2 Test data 2
         * @devdesc User Details unit test - create log register user detail data
         */
         errl = new ERRORLOG::ErrlEntry(
                 ERRORLOG::ERRL_SEV_INFORMATIONAL,
-                HBERRL_USERDATA_TEST_MOD_ID,
-                HBERRL_TEST_LOGREGISTER_UD,
+                ERRL_USERDATA_TEST_MOD_ID,
+                ERRL_TEST_LOGREGISTER_UD,
                 0x008900AB00CD00EF,                   //  user1
                 0x0001002300450067 );                 //  user2
 
@@ -507,16 +507,16 @@ public:
             /*@
             * @errortype
             * @severity ERRORLOG_SEV_INFORMATIONAL
-            * @moduleid HBERRL_USERDATA_TEST_MOD_ID
-            * @reasoncode HBERRL_TEST_CALLOUT_UD
+            * @moduleid ERRL_USERDATA_TEST_MOD_ID
+            * @reasoncode ERRL_TEST_CALLOUT_UD
             * @userdata1 Test data 1
             * @userdata2 Test data 2
             * @devdesc User Details unit test - create callout user detail data
             */
             errl = new ERRORLOG::ErrlEntry(
                     ERRORLOG::ERRL_SEV_INFORMATIONAL,
-                    HBERRL_USERDATA_TEST_MOD_ID,
-                    HBERRL_TEST_CALLOUT_UD,
+                    ERRL_USERDATA_TEST_MOD_ID,
+                    ERRL_TEST_CALLOUT_UD,
                     0x0001002300450067,                   //  user1
                     0x008900AB00CD00EF );                 //  user2
 

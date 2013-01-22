@@ -49,8 +49,8 @@
 //  fapi support
 #include    <fapi.H>
 #include    <fapiPlatHwpInvoker.H>
-#include    <hwpf/plat/fapiPlatReasonCodes.H>
 #include    <hwpf/plat/fapiPlatTrace.H>
+#include    <hwpf/hwpf_reasoncodes.H>
 
 #include    <pnor/pnorif.H>
 #include    <vpd/mvpdenums.H>

@@ -6,7 +6,7 @@
 #
 # IBM CONFIDENTIAL
 #
-# COPYRIGHT International Business Machines Corp. 2012
+# COPYRIGHT International Business Machines Corp. 2012,2013
 #
 # p1
 #
@@ -119,6 +119,7 @@ foreach my $argnum (1 .. $#ARGV)
         my $errHash24Bit = substr($errHash128Bit, 0, 6);
 
         print TGFILE "    case 0x$errHash24Bit:\n";
+        print TGFILE "        i_parser.PrintString(\"HwpReturnCode\", \"$err->{rc}\");\n";
         print TGFILE "        i_parser.PrintString(\"HWP Error description\", \"$desc\");\n";
         print TGFILE "        break;\n";
     }
@@ -179,13 +180,13 @@ foreach my $argnum (1 .. $#ARGV)
             # the same way as fapiParseErrorInfo.pl. This code must be kept in
             # sync
             #------------------------------------------------------------------
-            my $ffdcName = $err->{rc} . "_";
-            $ffdcName = $ffdcName . $ffdc;
+            my $ffdcName = $err->{rc} . "_" . $ffdc;
             my $ffdcHash128Bit = md5_hex($ffdcName);
             my $ffdcHash32Bit = substr($ffdcHash128Bit, 0, 8);
 
             print TGFILE "    case 0x$ffdcHash32Bit:\n";
-            print TGFILE "        i_parser.PrintString(\"FFDC:\", \"$ffdcName\");\n";
+            print TGFILE "        i_parser.PrintString(\"HwpReturnCode\", \"$err->{rc}\");\n";
+            print TGFILE "        i_parser.PrintString(\"FFDC:\", \"$ffdc\");\n";
             print TGFILE "        if (l_buflen) ";
             print TGFILE "{i_parser.PrintHexDump(l_pBuffer, l_buflen);}\n";
             print TGFILE "        break;\n";

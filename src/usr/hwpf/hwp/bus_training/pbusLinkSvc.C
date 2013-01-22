@@ -21,6 +21,7 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 #include    "pbusLinkSvc.H"
+#include    <hwpf/hwpf_reasoncodes.H>
 
 namespace   EDI_EI_INITIALIZATION
 {

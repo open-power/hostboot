@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012                   */
+/* COPYRIGHT International Business Machines Corp. 2012,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -86,7 +86,7 @@ namespace TRACEDAEMON
                                             iv_service->iv_daemon->iv_queue);
             if (l_errl)
             {
-                errlCommit(l_errl, HBTRACE_COMP_ID);
+                errlCommit(l_errl, TRACE_COMP_ID);
             }
         }
 
@@ -455,7 +455,7 @@ namespace TRACEDAEMON
                 errlHndl_t l_errl = MBOX::send(MBOX::FSP_TRACE_MSGQ, msg);
                 if (l_errl)
                 {
-                    errlCommit(l_errl, HBTRACE_COMP_ID);
+                    errlCommit(l_errl, TRACE_COMP_ID);
                     free(i_buffer);
                     msg_free(msg);
                 }
@@ -487,7 +487,7 @@ namespace TRACEDAEMON
         errlHndl_t l_errl = MBOX::send(MBOX::FSP_TRACE_MSGQ, msg);
         if (l_errl)
         {
-            errlCommit(l_errl, HBTRACE_COMP_ID);
+            errlCommit(l_errl, TRACE_COMP_ID);
             free(i_buffer);
             msg_free(msg);
         }
@@ -765,7 +765,7 @@ namespace TRACEDAEMON
 
         if (l_errl)
         {
-            errlCommit(l_errl, HBTRACE_COMP_ID);
+            errlCommit(l_errl, TRACE_COMP_ID);
         }
     }
 
@@ -781,7 +781,7 @@ namespace TRACEDAEMON
 
         if (l_errl)
         {
-            errlCommit(l_errl, HBTRACE_COMP_ID);
+            errlCommit(l_errl, TRACE_COMP_ID);
         }
 
         return value;

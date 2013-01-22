@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2012              */
+/* COPYRIGHT International Business Machines Corp. 2011,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -52,10 +52,10 @@
 #include <fapiHwAccess.H>
 #include <fapiPlatTrace.H>
 #include <fapiPlatHwAccess.H>
+#include <hwpf/hwpf_reasoncodes.H>
 #include <errl/errlentry.H>
 #include <devicefw/userif.H>
 #include <ecmdDataBufferBase.H>
-#include <fapiPlatReasonCodes.H>
 #include <targeting/common/predicates/predicates.H>
 #include <targeting/common/targetservice.H>
 #include <scan/scanif.H>
@@ -237,8 +237,8 @@ static errlHndl_t verifyCfamAccessTarget(const fapi::Target& i_target)
 
         /*@
          * @errortype
-         * @moduleid     MOD_VERIFY_CFAM_ACCESS_TARGET
-         * @reasoncode   RC_CFAM_ACCESS_ON_PROC_ERR
+         * @moduleid     fapi::MOD_VERIFY_CFAM_ACCESS_TARGET
+         * @reasoncode   fapi::RC_CFAM_ACCESS_ON_PROC_ERR
          * @userdata1    Target type
          * @devdesc      Attempt to access CFAM register on a processor chip
          */
@@ -294,8 +294,8 @@ static errlHndl_t getCfamChipTarget(const TARGETING::Target* i_target,
             FAPI_ERR("getCfamChipTarget: Invalid number of parent chip for this target chiplet - # parent chips %d", l_list.size());
             /*@
              * @errortype
-             * @moduleid     MOD_GET_CFAM_CHIP_TARGET
-             * @reasoncode   RC_INVALID_NUM_PARENT_CHIP
+             * @moduleid     fapi::MOD_GET_CFAM_CHIP_TARGET
+             * @reasoncode   fapi::RC_INVALID_NUM_PARENT_CHIP
              * @userdata1    Number of parent chip found
              * @devdesc      Invalid num of parent chip found for input CFAM target chiplet
              */

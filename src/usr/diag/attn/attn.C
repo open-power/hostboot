@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012                   */
+/* COPYRIGHT International Business Machines Corp. 2012,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -146,7 +146,7 @@ errlHndl_t checkForIplAttentions()
 
         if(err)
         {
-            errlCommit(err, HBATTN_COMP_ID);
+            errlCommit(err, ATTN_COMP_ID);
         }
     }
 

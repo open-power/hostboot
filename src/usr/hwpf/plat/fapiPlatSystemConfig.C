@@ -30,7 +30,7 @@
 
 #include <fapiPlatTrace.H>
 #include <fapiSystemConfig.H>
-#include <fapiPlatReasonCodes.H>
+#include <hwpf/hwpf_reasoncodes.H>
 #include <errl/errlentry.H>
 #include <targeting/common/commontargeting.H>
 #include <targeting/common/utilFilter.H>
@@ -69,8 +69,8 @@ fapi::ReturnCode fapiGetOtherSideOfMemChannel(
                      l_targetList.size());
             /*@
              * @errortype
-             * @moduleid     fapi:MOD_FAPI_GET_OTHER_SIDE_OF_MEM_CHANNEL
-             * @reasoncode   fapi:RC_NO_SINGLE_MCS
+             * @moduleid     fapi::MOD_FAPI_GET_OTHER_SIDE_OF_MEM_CHANNEL
+             * @reasoncode   fapi::RC_NO_SINGLE_MCS
              * @userdata1    Type of input target
              * @devdesc      fapiGetOtherSideOfMemChannel could not find exactly
              *               one target on the other side of the correct state
@@ -104,8 +104,8 @@ fapi::ReturnCode fapiGetOtherSideOfMemChannel(
                      l_targetList.size());
             /*@
              * @errortype
-             * @moduleid     fapi:MOD_FAPI_GET_OTHER_SIDE_OF_MEM_CHANNEL
-             * @reasoncode   fapi:RC_NO_SINGLE_MEMBUFF
+             * @moduleid     fapi::MOD_FAPI_GET_OTHER_SIDE_OF_MEM_CHANNEL
+             * @reasoncode   fapi::RC_NO_SINGLE_MEMBUFF
              * @userdata1    Type of input target
              * @devdesc      fapiGetOtherSideOfMemChannel could not find exactly
              *               one target on the other side of the correct state
@@ -204,8 +204,8 @@ fapi::ReturnCode fapiGetChildChiplets(
                  i_chip.getType());
         /*@
          * @errortype
-         * @moduleid     MOD_FAPI_GET_CHILD_CHIPLETS
-         * @reasoncode   RC_INVALID_REQUEST
+         * @moduleid     fapi::MOD_FAPI_GET_CHILD_CHIPLETS
+         * @reasoncode   fapi::RC_INVALID_REQUEST
          * @userdata1    Type of input target
          * @devdesc      fapiGetChildChiplets request for non-chip
          */
@@ -248,8 +248,8 @@ fapi::ReturnCode fapiGetChildChiplets(
                      i_chipletType);
             /*@
              * @errortype
-             * @moduleid     MOD_FAPI_GET_CHILD_CHIPLETS
-             * @reasoncode   RC_UNSUPPORTED_REQUEST
+             * @moduleid     fapi::MOD_FAPI_GET_CHILD_CHIPLETS
+             * @reasoncode   fapi::RC_UNSUPPORTED_REQUEST
              * @userdata1    Type of requested chiplet
              * @devdesc      fapiGetChildChiplets request for unsupported
              *               or invalid chiplet type
@@ -275,8 +275,8 @@ fapi::ReturnCode fapiGetChildChiplets(
                 FAPI_ERR("fapiGetChildChiplets. Embedded NULL target pointer");
                 /*@
                  * @errortype
-                 * @moduleid     MOD_FAPI_GET_CHILD_CHIPLETS
-                 * @reasoncode   RC_EMBEDDED_NULL_TARGET_PTR
+                 * @moduleid     fapi::MOD_FAPI_GET_CHILD_CHIPLETS
+                 * @reasoncode   fapi::RC_EMBEDDED_NULL_TARGET_PTR
                  * @devdesc      fapi target has embedded null target pointer
                  */
                 errlHndl_t l_pError = new ERRORLOG::ErrlEntry(
@@ -345,8 +345,8 @@ fapi::ReturnCode fapiGetAssociatedDimms(
         FAPI_ERR("fapiGetAssociatedDimms. Embedded NULL target pointer");
         /*@
          * @errortype
-         * @moduleid     MOD_FAPI_GET_ASSOCIATE_DIMMS
-         * @reasoncode   RC_EMBEDDED_NULL_TARGET_PTR
+         * @moduleid     fapi::MOD_FAPI_GET_ASSOCIATE_DIMMS
+         * @reasoncode   fapi::RC_EMBEDDED_NULL_TARGET_PTR
          * @devdesc      fapi target has embedded null target pointer
          */
         errlHndl_t l_pError = new ERRORLOG::ErrlEntry(
@@ -414,8 +414,8 @@ fapi::ReturnCode fapiGetParentChip(
 
         /*@
          * @errortype
-         * @moduleid     MOD_FAPI_GET_PARENT_CHIP
-         * @reasoncode   RC_INVALID_REQUEST
+         * @moduleid     fapi::MOD_FAPI_GET_PARENT_CHIP
+         * @reasoncode   fapi::RC_INVALID_REQUEST
          * @userdata1    Type of input target
          * @devdesc      fapiGetParentChip request for non-chiplet
          */
@@ -438,8 +438,8 @@ fapi::ReturnCode fapiGetParentChip(
         {
             /*@
              * @errortype
-             * @moduleid     MOD_FAPI_GET_PARENT_CHIP
-             * @reasoncode   RC_EMBEDDED_NULL_TARGET_PTR
+             * @moduleid     fapi::MOD_FAPI_GET_PARENT_CHIP
+             * @reasoncode   fapi::RC_EMBEDDED_NULL_TARGET_PTR
              * @devdesc      fapi target has embedded null target pointer
              */
             errlHndl_t l_pError = new ERRORLOG::ErrlEntry(
@@ -461,8 +461,8 @@ fapi::ReturnCode fapiGetParentChip(
                 FAPI_ERR("fapiGetParentChip. Parent not found");
                 /*@
                  * @errortype
-                 * @moduleid     MOD_FAPI_GET_PARENT_CHIP
-                 * @reasoncode   RC_NO_SINGLE_PARENT
+                 * @moduleid     fapi::MOD_FAPI_GET_PARENT_CHIP
+                 * @reasoncode   fapi::RC_NO_SINGLE_PARENT
                  * @devdesc      fapiGetParentChip request did not find one parent
                  */
                 errlHndl_t l_pError = new ERRORLOG::ErrlEntry(

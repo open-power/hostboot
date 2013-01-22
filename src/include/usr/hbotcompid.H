@@ -52,12 +52,12 @@ const compId_t MY_COMP_ID = 0x0000;
 const char MY_COMP_NAME[] = "myname";
 //@}
 
-/** @name HBERRL
+/** @name ERRL
  *  Error Logging component.
  */
 //@{
-const compId_t HBERRL_COMP_ID = 0x0100;
-const char HBERRL_COMP_NAME[] = "hberrl";
+const compId_t ERRL_COMP_ID = 0x0100;
+const char ERRL_COMP_NAME[] = "errl";
 //@}
 
 /** @name DEVFW
@@ -172,12 +172,12 @@ const char INTR_COMP_NAME[] = "intr";
 
 // 0x1000 - open to reclaim
 
-/** @name HBMBOX
+/** @name MBOX
  *  MBOX component
  */
 //@{
-const compId_t HBMBOX_COMP_ID = 0x1100;
-const char HBMBOX_COMP_NAME[] = "mbox";
+const compId_t MBOX_COMP_ID = 0x1100;
+const char MBOX_COMP_NAME[] = "mbox";
 //@}
 
 // 0x1200 - open to reclaim
@@ -186,24 +186,24 @@ const char HBMBOX_COMP_NAME[] = "mbox";
  *  PRDF component
  */
 //@{
-const compId_t HBPRDF_COMP_ID = 0x1300; //FIXME working with ERRL owner to resolve errl parsing issue
-const char HBPRDF_COMP_NAME[] = "prdf"; //FIXME
+const compId_t PRDF_COMP_ID = 0x1300;
+const char PRDF_COMP_NAME[] = "prdf";
 //@}
 
 /** @name MDIA
  *  MDIA memory diagnostics component
  */
 //@{
-const compId_t HBMDIA_COMP_ID = 0x1400;
-const char HBMDIA_COMP_NAME[] = "mdia";
+const compId_t MDIA_COMP_ID = 0x1400;
+const char MDIA_COMP_NAME[] = "mdia";
 //@}
 
 /** @name TRACE
  *  Trace component
  */
 //@{
-const compId_t HBTRACE_COMP_ID = 0x1500;
-const char HBTRACE_COMP_NAME[] = "trace";
+const compId_t TRACE_COMP_ID = 0x1500;
+const char TRACE_COMP_NAME[] = "trace";
 //@}
 
 /** @name UTIL
@@ -221,12 +221,12 @@ const char UTIL_COMP_NAME[] = "util";
 const compId_t ISTEP_COMP_ID = 0x1700;
 const char ISTEP_COMP_NAME[] = "istep";
 
-/** @name HBATTN
- *  HBATTN attention service component
+/** @name ATTN
+ *  ATTN attention service component
  */
 //@{
-const compId_t HBATTN_COMP_ID = 0x1800;
-const char HBATTN_COMP_NAME[] = "attn";
+const compId_t ATTN_COMP_ID = 0x1800;
+const char ATTN_COMP_NAME[] = "attn";
 //@}
 
 /** @name SCAN

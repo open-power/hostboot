@@ -53,6 +53,7 @@
 //  fapi support
 #include    <fapi.H>
 #include    <fapiPlatHwpInvoker.H>
+#include    <hwpf/hwpf_reasoncodes.H>
 
 #include    "dram_initialization.H"
 #include    <pbusLinkSvc.H>
@@ -69,7 +70,6 @@
 #include    "proc_setup_bars/proc_setup_bars.H"
 #include    "proc_pcie_config/proc_pcie_config.H"
 #include    "proc_exit_cache_contained/proc_exit_cache_contained.H"
-#include    <hwpf/plat/fapiPlatReasonCodes.H>
 //remove these once memory setup workaround is removed
 #include <devicefw/driverif.H>
 #include <vpd/spdenums.H>
@@ -845,7 +845,7 @@ void*   call_host_mpipl_service( void *io_pArgs )
          * @errortype
          * @reasoncode      ISTEP_DRAM_INITIALIZATION_FAILED
          * @severity        ERRORLOG::ERRL_SEV_UNRECOVERABLE
-         * @moduleid        TARGETING::ISTEP_HOST_MPIPL_SERVICE
+         * @moduleid        ISTEP_HOST_MPIPL_SERVICE
          * @userdata1       bytes 0-1: plid identifying first error
          *                  bytes 2-3: reason code of first error
          * @userdata2       bytes 0-1: total number of elogs

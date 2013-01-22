@@ -174,7 +174,7 @@ void resolveMcs(uint64_t i_mcs, void * i_data)
 
     if(err)
     {
-        errlCommit(err, HBATTN_COMP_ID);
+        errlCommit(err, ATTN_COMP_ID);
     }
     else
     {

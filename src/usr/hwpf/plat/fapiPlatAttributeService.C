@@ -35,7 +35,7 @@
 #include <targeting/common/targetservice.H>
 #include <errl/errlentry.H>
 #include <hwpf/plat/fapiPlatAttributeService.H>
-#include <hwpf/plat/fapiPlatReasonCodes.H>
+#include <hwpf/hwpf_reasoncodes.H>
 #include <vpd/spdenums.H>
 #include <devicefw/driverif.H>
 #include <hwas/common/hwas.H>

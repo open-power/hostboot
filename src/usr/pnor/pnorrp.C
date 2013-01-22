@@ -105,8 +105,8 @@ void PnorRP::init( errlHndl_t   &io_rtaskRetErrl )
     {
         /*@     errorlog tag
          *  @errortype      ERRL_SEV_CRITICAL_SYS_TERM
-         *  @moduleid       MOD_PNORRP_DIDSTARTUPFAIL
-         *  @reasoncode     RC_BAD_STARTUP_RC
+         *  @moduleid       PNOR::MOD_PNORRP_DIDSTARTUPFAIL
+         *  @reasoncode     PNOR::RC_BAD_STARTUP_RC
          *  @userdata1      return code
          *  @userdata2      0
          *

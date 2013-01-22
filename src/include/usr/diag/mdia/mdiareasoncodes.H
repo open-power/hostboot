@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012                   */
+/* COPYRIGHT International Business Machines Corp. 2012,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -55,8 +55,8 @@ enum ModuleId
  */
 enum ReasonCode
 {
-    INVALID_REASONCODE           = HBMDIA_COMP_ID | 0x00,   // Invalid Reasoncode
-    MAINT_COMMAND_TIMED_OUT      = HBMDIA_COMP_ID | 0x01,
+    INVALID_REASONCODE           = MDIA_COMP_ID | 0x00,   // Invalid Reasoncode
+    MAINT_COMMAND_TIMED_OUT      = MDIA_COMP_ID | 0x01,
 };
 
 }

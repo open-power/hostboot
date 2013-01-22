@@ -1,35 +1,34 @@
-//  IBM_PROLOG_BEGIN_TAG
-//  This is an automatically generated prolog.
-//
-//  $Source: src/include/usr/errl/errludparserfactory.H $
-//
-//  IBM CONFIDENTIAL
-//
-//  COPYRIGHT International Business Machines Corp. 2012
-//
-//  p1
-//
-//  Object Code Only (OCO) source materials
-//  Licensed Internal Code Source Materials
-//  IBM HostBoot Licensed Internal Code
-//
-//  The source code for this program is not published or other-
-//  wise divested of its trade secrets, irrespective of what has
-//  been deposited with the U.S. Copyright Office.
-//
-//  Origin: 30
-//
-//  IBM_PROLOG_END
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/usr/errl/plugins/errludparserfactory.H $                  */
+/*                                                                        */
+/* IBM CONFIDENTIAL                                                       */
+/*                                                                        */
+/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/*                                                                        */
+/* p1                                                                     */
+/*                                                                        */
+/* Object Code Only (OCO) source materials                                */
+/* Licensed Internal Code Source Materials                                */
+/* IBM HostBoot Licensed Internal Code                                    */
+/*                                                                        */
+/* The source code for this program is not published or otherwise         */
+/* divested of its trade secrets, irrespective of what has been           */
+/* deposited with the U.S. Copyright Office.                              */
+/*                                                                        */
+/* Origin: 30                                                             */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
 #ifndef ERRL_UDPARSERFACTORY_H
 #define ERRL_UDPARSERFACTORY_H
-
-#ifdef PARSER
 
 /**
  *  @file errludparserfactory.H
  *
  *  Defines the ErrlUserDetailsParserFactory base class
  */
+#include "errluserdetails.H"
 #include <map>
 
 namespace ERRORLOG
@@ -43,8 +42,6 @@ namespace ERRORLOG
  * all of its ErrlUserDetailsParser classes with it. The parse file in the
  * plugins directory can then call the factory to create parser objects to parse
  * any user detail data.
- *
- * This class is only compiled when PARSER is defined
  */
 class ErrlUserDetailsParserFactory
 {
@@ -129,6 +126,5 @@ private:
 
 }
 
-#endif
 #endif
 

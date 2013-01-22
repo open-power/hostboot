@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012                   */
+/* COPYRIGHT International Business Machines Corp. 2012,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -27,7 +27,7 @@
  */
 #include <hbotcompid.H>
 #include <hwpistepud.H>
-#include <hwpf/istepreasoncodes.H>
+#include <hwpf/hwpf_reasoncodes.H>
 
 using namespace ISTEP_ERROR;
 
@@ -45,7 +45,7 @@ HwpUserDetailsIstep::HwpUserDetailsIstep( errlHndl_t i_err )
     // Set up ErrlUserDetails instance variables
     iv_CompId = HWPF_COMP_ID;
     iv_Version = 1;
-    iv_SubSection = HWP_UDT_STEP_ERROR_DETAILS;
+    iv_SubSection = fapi::HWPF_UDT_STEP_ERROR_DETAILS;
 }
 
 //------------------------------------------------------------------------------

@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/include/usr/hwpf/plat/fapiPlatReasonCodes.H $             */
+/* $Source: src/include/usr/hwpf/hwpf_reasoncodes.H $                     */
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2013              */
+/* COPYRIGHT International Business Machines Corp. 2013                   */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,15 +20,15 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-#ifndef FAPIPLATREASONCODES_H_
-#define FAPIPLATREASONCODES_H_
+#ifndef HWPFREASONCODES_H_
+#define HWPFREASONCODES_H_
 
 #include <hbotcompid.H>
 
 namespace fapi
 {
     /**
-     * @brief Defines the HWPF::PLAT error log module IDs
+     * @brief Defines the HWPF error log module IDs
      */
     enum hwpfModuleId
     {
@@ -83,7 +83,7 @@ namespace fapi
     };
 
     /**
-     * @brief Defines the HWPF::PLAT error log reason codes
+     * @brief Defines the HWPF error log reason codes
      */
     enum hwpfReasonCode
     {
@@ -121,13 +121,13 @@ namespace fapi
     };
 
     /**
-     * @brief Defines the HWPF::PLAT (Hostboot) error log user detail data
-     *        sections
+     * @brief Defines the HWPF error log user detail data sections
      */
     enum hwpfUserDetailDataSubSection
     {
-        HWPF_UDT_HWP_RCVALUE = 1,
-        HWPF_UDT_HWP_FFDC    = 2,
+        HWPF_UDT_HWP_RCVALUE        = 0x01,
+        HWPF_UDT_HWP_FFDC           = 0x02,
+        HWPF_UDT_STEP_ERROR_DETAILS = 0x03,
     };
 };
 

@@ -1,26 +1,26 @@
 #!/usr/bin/perl
-# IBM_PROLOG_BEGIN_TAG 
-# This is an automatically generated prolog. 
-#  
-# $Source: src/usr/targeting/common/xmltohb/xmltohb.pl $ 
-#  
-# IBM CONFIDENTIAL 
-#  
-# COPYRIGHT International Business Machines Corp. 2011,2012 
-#  
-# p1 
-#  
-# Object Code Only (OCO) source materials 
-# Licensed Internal Code Source Materials 
-# IBM HostBoot Licensed Internal Code 
-#  
-# The source code for this program is not published or otherwise 
-# divested of its trade secrets, irrespective of what has been 
-# deposited with the U.S. Copyright Office. 
-#  
-# Origin: 30 
-#  
-# IBM_PROLOG_END_TAG 
+# IBM_PROLOG_BEGIN_TAG
+# This is an automatically generated prolog.
+#
+# $Source: src/usr/targeting/common/xmltohb/xmltohb.pl $
+#
+# IBM CONFIDENTIAL
+#
+# COPYRIGHT International Business Machines Corp. 2011,2013
+#
+# p1
+#
+# Object Code Only (OCO) source materials
+# Licensed Internal Code Source Materials
+# IBM HostBoot Licensed Internal Code
+#
+# The source code for this program is not published or otherwise
+# divested of its trade secrets, irrespective of what has been
+# deposited with the U.S. Copyright Office.
+#
+# Origin: 30
+#
+# IBM_PROLOG_END_TAG
 
 #
 # Purpose:
@@ -1507,6 +1507,7 @@ sub writeAttrErrlCFile {
     print $outFile "#include <stdio.h>\n";
     print $outFile "#include <string.h>\n";
     print $outFile "#include <errludattribute.H>\n";
+    print $outFile "#include <errl/errlreasoncodes.H>\n";
     print $outFile "#include <targeting/common/targetservice.H>\n";
     print $outFile "#include <targeting/common/trace.H>\n";
     print $outFile "\n";
@@ -1684,9 +1685,9 @@ sub writeAttrErrlCFile {
     print $outFile "    : iv_pTarget(i_pTarget), iv_dataSize(0)\n";
     print $outFile "{\n";
     print $outFile "    // Set up ErrlUserDetails instance variables\n";
-    print $outFile "    iv_CompId = HBERRL_COMP_ID;\n";
+    print $outFile "    iv_CompId = ERRL_COMP_ID;\n";
     print $outFile "    iv_Version = 1;\n";
-    print $outFile "    iv_SubSection = HBERRL_UDT_ATTRIBUTE;\n";
+    print $outFile "    iv_SubSection = ERRL_UDT_ATTRIBUTE;\n";
     print $outFile "    iv_merge = true;\n";
     print $outFile "\n";
     print $outFile "    // first, write out the HUID\n";
@@ -1704,9 +1705,9 @@ sub writeAttrErrlCFile {
     print $outFile "    : iv_pTarget(i_pTarget), iv_dataSize(0)\n";
     print $outFile "{\n";
     print $outFile "    // Set up ErrlUserDetails instance variables\n";
-    print $outFile "    iv_CompId = HBERRL_COMP_ID;\n";
+    print $outFile "    iv_CompId = ERRL_COMP_ID;\n";
     print $outFile "    iv_Version = 1;\n";
-    print $outFile "    iv_SubSection = HBERRL_UDT_ATTRIBUTE;\n";
+    print $outFile "    iv_SubSection = ERRL_UDT_ATTRIBUTE;\n";
     print $outFile "    // override the default of false\n";
     print $outFile "    iv_merge = true;\n";
     print $outFile "\n";
@@ -1759,9 +1760,9 @@ sub writeAttrErrlHFile {
     print $outFile "#ifndef ERRL_UDATTRIBUTE_H\n";
     print $outFile "#define ERRL_UDATTRIBUTE_H\n";
     print $outFile "\n";
-    print $outFile "#include <errl/errluserdetails.H>\n";
-    print $outFile "\n";
     print $outFile "#ifndef PARSER\n";
+    print $outFile "\n";
+    print $outFile "#include <errl/errluserdetails.H>\n";
     print $outFile "\n";
     print $outFile "namespace TARGETING // Forward reference\n";
     print $outFile "{ class Target; }\n";
@@ -1790,6 +1791,8 @@ sub writeAttrErrlHFile {
     print $outFile "};\n";
     print $outFile "}\n";
     print $outFile "#else // if PARSER defined\n";
+    print $outFile "\n";
+    print $outFile "#include \"errluserdetails.H\"\n";
     print $outFile "\n";
     print $outFile "namespace ERRORLOG\n";
     print $outFile "{\n";

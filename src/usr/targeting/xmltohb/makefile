@@ -5,7 +5,7 @@
 #
 # IBM CONFIDENTIAL
 #
-# COPYRIGHT International Business Machines Corp. 2011,2012
+# COPYRIGHT International Business Machines Corp. 2011,2013
 #
 # p1
 #
@@ -73,6 +73,8 @@ VMM_CONSTS_FILE = \
 
 GENFILES = ${XMLTOHB_TARGETS}
 
+GENFILES_PLUGINS = errludattribute.H
+
 #debug :
 #	@echo COMMON_TARGETING_PATH_PREFIX = ${COMMON_TARGETING_PATH_PREFIX}
 #	@echo COMMON_TARGETING_REL_PATH = ${COMMON_TARGETING_REL_PATH}
@@ -131,6 +133,7 @@ $(call GENTARGET,$(XMLTOHB_TARGETS)) : \
        $(addprefix --fapi-attributes-xml-file=,${GENDIR}/${XMLTOHB_FAPI_XML}) \
          --src-output-dir=$(dir $@) --img-output-dir=none \
          --img-output-file=none
+	cp ${GENDIR}/errludattribute.H ${GENDIR_PLUGINS}
 
 # system-specific XML needs the generic plus the xxx.system.xml file + the
 # MRW file

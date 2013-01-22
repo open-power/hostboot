@@ -1,26 +1,25 @@
-/*  IBM_PROLOG_BEGIN_TAG
- *  This is an automatically generated prolog.
- *
- *  $Source: src/usr/diag/attn/attnsvc.C $
- *
- *  IBM CONFIDENTIAL
- *
- *  COPYRIGHT International Business Machines Corp. 2012
- *
- *  p1
- *
- *  Object Code Only (OCO) source materials
- *  Licensed Internal Code Source Materials
- *  IBM HostBoot Licensed Internal Code
- *
- *  The source code for this program is not published or other-
- *  wise divested of its trade secrets, irrespective of what has
- *  been deposited with the U.S. Copyright Office.
- *
- *  Origin: 30
- *
- *  IBM_PROLOG_END_TAG
- */
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/usr/diag/attn/attnsvc.C $                                 */
+/*                                                                        */
+/* IBM CONFIDENTIAL                                                       */
+/*                                                                        */
+/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/*                                                                        */
+/* p1                                                                     */
+/*                                                                        */
+/* Object Code Only (OCO) source materials                                */
+/* Licensed Internal Code Source Materials                                */
+/* IBM HostBoot Licensed Internal Code                                    */
+/*                                                                        */
+/* The source code for this program is not published or otherwise         */
+/* divested of its trade secrets, irrespective of what has been           */
+/* deposited with the U.S. Copyright Office.                              */
+/*                                                                        */
+/* Origin: 30                                                             */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
 /**
  * @file attnsvc.C
  *
@@ -351,7 +350,7 @@ void Service::processIntrQMsg(msg_t & i_msg)
 
     if(err)
     {
-        errlCommit(err, HBATTN_COMP_ID);
+        errlCommit(err, ATTN_COMP_ID);
     }
     else if(!newAttentions.empty())
     {
@@ -439,7 +438,7 @@ void Service::processAttentions(const AttentionList & i_attentions)
 
     if(err)
     {
-        errlCommit(err, HBATTN_COMP_ID);
+        errlCommit(err, ATTN_COMP_ID);
     }
 
     do {
@@ -476,7 +475,7 @@ void Service::processAttentions(const AttentionList & i_attentions)
 
     if(err)
     {
-        errlCommit(err, HBATTN_COMP_ID);
+        errlCommit(err, ATTN_COMP_ID);
     }
 }
 
@@ -502,7 +501,7 @@ errlHndl_t Service::stop()
 
         if(err)
         {
-            errlCommit(err, HBATTN_COMP_ID);
+            errlCommit(err, ATTN_COMP_ID);
         }
 
         msg_t * shutdownMsg = msg_allocate();
@@ -600,7 +599,7 @@ errlHndl_t Service::start()
 
         if(err2)
         {
-            errlCommit(err2, HBATTN_COMP_ID);
+            errlCommit(err2, ATTN_COMP_ID);
         }
     }
     else
@@ -627,7 +626,7 @@ Service::~Service()
 
     if(err)
     {
-        errlCommit(err, HBATTN_COMP_ID);
+        errlCommit(err, ATTN_COMP_ID);
     }
 
     sync_cond_destroy(&iv_cond);

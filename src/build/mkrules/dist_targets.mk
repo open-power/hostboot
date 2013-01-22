@@ -180,7 +180,15 @@ fsp.tar_CONTENTS = \
 	$(call ROOTPATH_WILDCARD_RECURSIVE,src/usr/pnor/common)) \
     src/include/kernel/hbdescriptor.H \
     src/include/kernel/hbterminatetypes.H \
-    src/build/tools/hwp_id.pl
+    src/build/tools/hwp_id.pl \
+    obj/genfiles/plugins/makefile:plugins/ \
+    obj/genfiles/plugins/hbfwUdIds.H:plugins/ \
+    obj/genfiles/plugins/fapiPlatHwpErrParser.H:plugins/ \
+    obj/genfiles/plugins/errludattribute.H:plugins/ \
+    $(addsuffix :plugins/,\
+        $(call ROOTPATH_WILDCARD,obj/genfiles/plugins/hbfwSrcParse*.C)) \
+    $(addsuffix :plugins/,\
+        $(call ROOTPATH_WILDCARD,src/usr/*/plugins/*))
 
 #
 # Portions of the FSP sandbox which must be rebuilt based on file changes.

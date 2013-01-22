@@ -585,7 +585,7 @@ errlHndl_t IntrRp::initXIVR(enum ISNvalue_t i_isn, bool i_enable)
              * @userdata1  Interrupt type to register
              * @userdata2  0
              *
-             * @defdesc    Unsupported ISN Requested
+             * @devdesc    Unsupported ISN Requested
              *
              */
             err = new ERRORLOG::ErrlEntry
@@ -705,7 +705,7 @@ errlHndl_t IntrRp::registerInterruptXISR(msg_q_t i_msgQ,
              * @userdata1       XISR
              * @userdata2       0
              *
-             * @defdesc         Interrupt type already registered
+             * @devdesc         Interrupt type already registered
              *
              */
             err = new ERRORLOG::ErrlEntry
@@ -875,7 +875,7 @@ errlHndl_t IntrRp::checkAddress(uint64_t i_addr)
          * @userdata1       The bad virtual address
          * @userdata2       0
          *
-         * @defdesc         The virutal address is not a valid IO address
+         * @devdesc         The virutal address is not a valid IO address
          *
          */
         err = new ERRORLOG::ErrlEntry
@@ -1026,7 +1026,7 @@ errlHndl_t INTR::registerMsgQ(msg_q_t i_msgQ,
          * @userdata1       Interrupt type to register
          * @userdata2       0
          *
-         * @defdesc         Interrupt resource provider not initialized yet.
+         * @devdesc         Interrupt resource provider not initialized yet.
          *
          */
         err = new ERRORLOG::ErrlEntry
@@ -1097,7 +1097,7 @@ errlHndl_t INTR::enableExternalInterrupts()
          * @userdata1       MSG_INTR_ENABLE
          * @userdata2       0
          *
-         * @defdesc         Interrupt resource provider not initialized yet.
+         * @devdesc         Interrupt resource provider not initialized yet.
          *
          */
         err = new ERRORLOG::ErrlEntry
@@ -1139,7 +1139,7 @@ errlHndl_t INTR::disableExternalInterrupts()
          * @userdata1       MSG_INTR_DISABLE
          * @userdata2       0
          *
-         * @defdesc         Interrupt resource provider not initialized yet.
+         * @devdesc         Interrupt resource provider not initialized yet.
          *
          */
         err = new ERRORLOG::ErrlEntry
@@ -1178,7 +1178,7 @@ errlHndl_t INTR::enablePsiIntr(TARGETING::Target * i_target)
          * @userdata1       MSG_INTR_ENABLE_PSI_INTR
          * @userdata2       0
          *
-         * @defdesc         Interrupt resource provider not initialized yet.
+         * @devdesc         Interrupt resource provider not initialized yet.
          *
          */
         err = new ERRORLOG::ErrlEntry

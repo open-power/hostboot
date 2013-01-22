@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2003,2012              */
+/* COPYRIGHT International Business Machines Corp. 2003,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -33,10 +33,6 @@
 
 #include <hbotcompid.H>
 
-// FIXME: Will need to make a change in hbotcompid.H later
-#define PRDF_COMP_ID   HBPRDF_COMP_ID
-#define PRDF_COMP_NAME HBPRDF_COMP_NAME
-
 #else
 
 #include <fips_comp_id.H>
@@ -51,7 +47,7 @@ namespace PRDF
  *         Each module Id corresponds to a particular
  *         method in a class or an individual function.
  */
-enum ModId
+enum ModuleId
 {
     PRDF_MAIN                     = 0x01,
     PRDF_HOM_HOM_TYPE             = 0x02, // FIXME: May be deprecated
@@ -81,7 +77,7 @@ enum ModId
 /**
  *  @brief Enum specifying Reason Codes (Refcodes), range 0xE501 to 0xE5FF
  */
-enum
+enum ReasonCode
 {
     PRDF_FIRST_REASONCODE                   = PRDF_COMP_ID | 0x01,
 

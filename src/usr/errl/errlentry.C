@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2012              */
+/* COPYRIGHT International Business Machines Corp. 2011,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -37,6 +37,7 @@
 #include <errl/errlmanager.H>
 #include <errl/errludbacktrace.H>
 #include <errl/errludcallout.H>
+#include <errl/errlreasoncodes.H>
 #include <trace/interface.H>
 #include <arch/ppc.H>
 #include <hwas/common/hwasCallout.H>
@@ -305,9 +306,9 @@ void ErrlEntry::commit( compId_t  i_committerComponent )
                 it++ )
         {
             // if this is a CALLOUT
-            if ((HBERRL_COMP_ID     == (*it)->iv_header.iv_compId) &&
+            if ((ERRL_COMP_ID     == (*it)->iv_header.iv_compId) &&
                 (1                  == (*it)->iv_header.iv_ver) &&
-                (HBERRL_UDT_CALLOUT == (*it)->iv_header.iv_sst))
+                (ERRL_UDT_CALLOUT == (*it)->iv_header.iv_sst))
             {
                 // call HWAS to have this processed
                 (*pFn)(plid(),(*it)->iv_pData, (*it)->iv_Size);
