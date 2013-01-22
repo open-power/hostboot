@@ -143,10 +143,10 @@ errlHndl_t Service::configureInterrupts(
             IPOLL::forEach(~0, &mask, &getMask);
 
             err = modifyScom(
-                             *it,
-                             IPOLL::address,
-                             i_mode == UP ? mask : ~mask,
-                             i_mode == UP ? SCOM_OR : SCOM_AND);
+                    *it,
+                    IPOLL::address,
+                    i_mode == UP ? ~mask : mask,
+                    i_mode == UP ? SCOM_AND : SCOM_OR);
 
             if(err)
             {

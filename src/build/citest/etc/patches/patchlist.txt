@@ -11,3 +11,9 @@ Action file need to be updated to set these bits when Centaur SBE code expects t
 -CMVC: SW182865
 -Files: centaur.act.centaur_sbe_patch
 -Coreq: None
+
+Ipoll mask register actions are inverted
+-RTC: Issue 62864 will remove this patch
+-CMVC: SW183465
+-Files: ipoll-inverted.patch
+-Coreq: None

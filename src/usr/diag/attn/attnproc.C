@@ -48,7 +48,7 @@ errlHndl_t ProcOps::mask(const AttnData & i_data)
     IPOLL::getCheckbits(i_data.attnType, ipollMaskWriteBits);
 
     err = modifyScom(i_data.targetHndl, IPOLL::address,
-            ~ipollMaskWriteBits, SCOM_AND);
+            ipollMaskWriteBits, SCOM_OR);
 
     return err;
 }
@@ -62,7 +62,7 @@ errlHndl_t ProcOps::unmask(const AttnData & i_data)
     IPOLL::getCheckbits(i_data.attnType, ipollMaskWriteBits);
 
     err = modifyScom(i_data.targetHndl, IPOLL::address,
-                ipollMaskWriteBits, SCOM_OR);
+                ~ipollMaskWriteBits, SCOM_AND);
     return err;
 }
 
@@ -127,7 +127,7 @@ errlHndl_t ProcOps::resolve(
 
         IPOLL::getCheckbits(type, mask);
 
-        if(mask & ~i_typeMask)
+        if(!(mask & ~i_typeMask))
         {
             // this attention type is masked
 

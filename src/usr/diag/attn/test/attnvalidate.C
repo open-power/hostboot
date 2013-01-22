@@ -1,26 +1,25 @@
-/*  IBM_PROLOG_BEGIN_TAG
- *  This is an automatically generated prolog.
- *
- *  $Source: src/usr/diag/attn/test/attnvalidate.C $
- *
- *  IBM CONFIDENTIAL
- *
- *  COPYRIGHT International Business Machines Corp. 2012
- *
- *  p1
- *
- *  Object Code Only (OCO) source materials
- *  Licensed Internal Code Source Materials
- *  IBM HostBoot Licensed Internal Code
- *
- *  The source code for this program is not published or other-
- *  wise divested of its trade secrets, irrespective of what has
- *  been deposited with the U.S. Copyright Office.
- *
- *  Origin: 30
- *
- *  IBM_PROLOG_END_TAG
- */
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/usr/diag/attn/test/attnvalidate.C $                       */
+/*                                                                        */
+/* IBM CONFIDENTIAL                                                       */
+/*                                                                        */
+/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/*                                                                        */
+/* p1                                                                     */
+/*                                                                        */
+/* Object Code Only (OCO) source materials                                */
+/* Licensed Internal Code Source Materials                                */
+/* IBM HostBoot Licensed Internal Code                                    */
+/*                                                                        */
+/* The source code for this program is not published or otherwise         */
+/* divested of its trade secrets, irrespective of what has been           */
+/* deposited with the U.S. Copyright Office.                              */
+/*                                                                        */
+/* Origin: 30                                                             */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
 /**
  * @file attnvalidate.C
  *
@@ -68,7 +67,7 @@ errlHndl_t Validator::processPutAttention(
         target = getTargetService().getProc(i_attention.targetHndl);
     }
 
-    bool masked = ~i_sys.getReg(target, IPOLL::address) & ipollCheckbits;
+    bool masked = i_sys.getReg(target, IPOLL::address) & ipollCheckbits;
 
     if(!masked)
     {
@@ -217,7 +216,7 @@ errlHndl_t Validator::processPutReg(
 
     // these bits turned off
 
-    IPOLL::forEach(i_new & ~i_old, &args, &appendOuterLoop);
+    IPOLL::forEach(i_old & ~i_new, &args, &appendOuterLoop);
 
     AttnList::iterator it = args.list.begin();
 
@@ -231,7 +230,7 @@ errlHndl_t Validator::processPutReg(
 
     // these bits turned on
 
-    IPOLL::forEach(i_old & ~i_new, &args, &appendOuterLoop);
+    IPOLL::forEach(i_new & ~i_old, &args, &appendOuterLoop);
 
     it = args.list.begin();
 

@@ -1,26 +1,25 @@
-/*  IBM_PROLOG_BEGIN_TAG
- *  This is an automatically generated prolog.
- *
- *  $Source: src/usr/diag/attn/test/attntestmem.H $
- *
- *  IBM CONFIDENTIAL
- *
- *  COPYRIGHT International Business Machines Corp. 2012
- *
- *  p1
- *
- *  Object Code Only (OCO) source materials
- *  Licensed Internal Code Source Materials
- *  IBM HostBoot Licensed Internal Code
- *
- *  The source code for this program is not published or other-
- *  wise divested of its trade secrets, irrespective of what has
- *  been deposited with the U.S. Copyright Office.
- *
- *  Origin: 30
- *
- *  IBM_PROLOG_END_TAG
- */
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/usr/diag/attn/test/attntestmem.H $                        */
+/*                                                                        */
+/* IBM CONFIDENTIAL                                                       */
+/*                                                                        */
+/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/*                                                                        */
+/* p1                                                                     */
+/*                                                                        */
+/* Object Code Only (OCO) source materials                                */
+/* Licensed Internal Code Source Materials                                */
+/* IBM HostBoot Licensed Internal Code                                    */
+/*                                                                        */
+/* The source code for this program is not published or otherwise         */
+/* divested of its trade secrets, irrespective of what has been           */
+/* deposited with the U.S. Copyright Office.                              */
+/*                                                                        */
+/* Origin: 30                                                             */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
 #ifndef __TEST_ATTNTESTMEM_H
 #define __TEST_ATTNTESTMEM_H
 
@@ -101,7 +100,7 @@ class AttnMemTest: public CxxTest::TestSuite
                     break;
                 }
 
-                randomData = randomData | maskbits;
+                randomData = randomData & ~maskbits;
 
                 err = putScom(
                         proc,
@@ -132,13 +131,13 @@ class AttnMemTest: public CxxTest::TestSuite
                 // verify that the attn was masked, and that
                 // other bits weren't touched
 
-                if(!(~data & maskbits))
+                if(!(data & maskbits))
                 {
                     TS_FAIL("attention not masked");
                     break;
                 }
 
-                if((data | maskbits) != randomData)
+                if((data & ~maskbits) != randomData)
                 {
                     TS_FAIL("unexpected data in mask register");
                     break;
@@ -212,7 +211,7 @@ class AttnMemTest: public CxxTest::TestSuite
                     break;
                 }
 
-                randomData = randomData & ~maskbits;
+                randomData = randomData | maskbits;
 
                 err = putScom(proc, IPOLL::address, randomData);
                 if(err)
@@ -240,13 +239,13 @@ class AttnMemTest: public CxxTest::TestSuite
                 // verify that the attn was masked, and that
                 // other bits weren't touched
 
-                if(!(data & maskbits))
+                if(!(~data & maskbits))
                 {
                     TS_FAIL("attention not unmasked");
                     break;
                 }
 
-                if((data & ~maskbits) != randomData)
+                if((data | maskbits) != randomData)
                 {
                     TS_FAIL("unexpected data in mask register");
                     break;

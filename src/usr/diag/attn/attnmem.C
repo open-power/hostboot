@@ -63,7 +63,7 @@ errlHndl_t MemOps::mask(const AttnData & i_data)
             IPOLL::getCheckbits(HOST, ipollMaskWriteBits);
 
             err = modifyScom(proc, IPOLL::address,
-                    ~ipollMaskWriteBits, SCOM_AND);
+                    ipollMaskWriteBits, SCOM_OR);
 
             if(err)
             {
@@ -105,7 +105,7 @@ errlHndl_t MemOps::unmask(const AttnData & i_data)
             IPOLL::getCheckbits(HOST, ipollMaskWriteBits);
 
             err = modifyScom(proc, IPOLL::address,
-                    ipollMaskWriteBits, SCOM_OR);
+                    ~ipollMaskWriteBits, SCOM_AND);
 
             if(err)
             {
@@ -230,7 +230,7 @@ errlHndl_t MemOps::resolve(
 
     do {
 
-        if(hostMask & ~i_typeMask)
+        if(hostMask & i_typeMask)
         {
             // host attentions are masked....
 
