@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_mcbist.C,v 1.25 2013/01/03 14:54:43 sasethur Exp $
+// $Id: mss_mcbist.C,v 1.29 2013/01/16 15:38:02 sasethur Exp $
 // *!***************************************************************************
 // *! (C) Copyright International Business Machines Corp. 1997, 1998
 // *!           All Rights Reserved -- Property of IBM
@@ -38,7 +38,11 @@
 //------------------------------------------------------------------------------
 // Version:|Author: | Date:  | Comment:
 // --------|--------|--------|--------------------------------------------------
-//   1.25  |aditya  |01/03/12| Updated FW Comments 
+//   1.29  |aditya  |01/11/16|Updated  cfg_mcb_dgen function
+//   1.28  |aditya  |01/11/16|Updated  cfg_mcb_dgen function
+//   1.27  |aditya  |01/11/13|Updated  cfg_mcb_dgen function
+//   1.26  |aditya  |01/07/13|Updated Review Comments
+//   1.25  |aditya  |01/03/13| Updated FW Comments 
 //   1.23  |aditya  |12/18/12| Updated Review Comments 
 //   1.22  |aditya  |12/14/12| Updated FW review comments   
 //   1.22  |aditya  |12/6/12 | Updated Review Comments
@@ -87,8 +91,8 @@ fapi::ReturnCode  cfg_mcb_test_mem(const fapi::Target & i_target_mba,mcbist_test
 
     if(i_test_type == CENSHMOO)
     {                                                 
-        rc = mcb_write_test_mem(i_target_mba,MBA01_MCBIST_MCBMR0Q_0x030106a8,W,0,SF,FIX,0,DEFAULT,PORTA0_SEQ,0);  if(rc) return rc;
-        rc = mcb_write_test_mem(i_target_mba,MBA01_MCBIST_MCBMR0Q_0x030106a8,R,0,SF,FIX,1,DEFAULT,PORTA0_SEQ,1);  if(rc) return rc;
+        rc = mcb_write_test_mem(i_target_mba,MBA01_MCBIST_MCBMR0Q_0x030106a8,W,0,SF,FIX,0,DEFAULT,FIX_ADDR,0);  if(rc) return rc;
+        rc = mcb_write_test_mem(i_target_mba,MBA01_MCBIST_MCBMR0Q_0x030106a8,R,0,SF,FIX,1,DEFAULT,FIX_ADDR,1);  if(rc) return rc;
     }
     
     else if(i_test_type == MEMWRITE)
@@ -351,13 +355,17 @@ rc_num = l_var_data_buffer_64.setDoubleWord(0,l_var);  if (rc_num){ FAPI_ERR( "c
 	  l_var = 0xFFFF0000FFFF0000ull;                                                                                                                                      
       l_var1 =0x0000FFFF0000FFFFull;                                                                                                                                  
       l_spare = 0xFF00FF00FF00FF00ull; 
+	  
+	rc_num = l_var_data_buffer_64.setDoubleWord(0,l_var);  if (rc_num){ FAPI_ERR( "cfg_mcb_dgen:");rc.setEcmdError(rc_num);return rc;}		
+	rc_num = l_var1_data_buffer_64.setDoubleWord(0,l_var1); if (rc_num){ FAPI_ERR( "cfg_mcb_dgen:");rc.setEcmdError(rc_num);return rc;}  
+    rc_num = l_spare_data_buffer_64.setDoubleWord(0,l_spare);if (rc_num){ FAPI_ERR( "cfg_mcb_dgen:");rc.setEcmdError(rc_num);return rc;}
+	  
+	  
     	if (l_mbaPosition == 0)
 	{
 	    	//Writing MBS 01 pattern registers for comparison mode   
 	    
-    rc_num = l_var_data_buffer_64.setDoubleWord(0,l_var);  if (rc_num){ FAPI_ERR( "cfg_mcb_dgen:");rc.setEcmdError(rc_num);return rc;}		
-	rc_num = l_var1_data_buffer_64.setDoubleWord(0,l_var1); if (rc_num){ FAPI_ERR( "cfg_mcb_dgen:");rc.setEcmdError(rc_num);return rc;}  
-    rc_num = l_spare_data_buffer_64.setDoubleWord(0,l_spare);if (rc_num){ FAPI_ERR( "cfg_mcb_dgen:");rc.setEcmdError(rc_num);return rc;}	
+    	
 	
         rc = fapiPutScom(i_target_centaur, MBS_MCBIST01_MBS_MCBFD0Q_0x02011681, l_var_data_buffer_64); if(rc) return rc;
         rc = fapiPutScom(i_target_centaur, MBS_MCBIST01_MBS_MCBFD1Q_0x02011682, l_var1_data_buffer_64); if(rc) return rc;
@@ -374,9 +382,7 @@ rc_num = l_var_data_buffer_64.setDoubleWord(0,l_var);  if (rc_num){ FAPI_ERR( "c
 	else if (l_mbaPosition == 1)
 	{
 	    	//Writing MBS 23 pattern registers for comparison mode   
-	    rc_num = l_var_data_buffer_64.setDoubleWord(0,l_var);  if (rc_num){ FAPI_ERR( "cfg_mcb_dgen:");rc.setEcmdError(rc_num);return rc;}                                                                                                                            
-	    rc_num = l_var1_data_buffer_64.setDoubleWord(0,l_var1); if (rc_num){ FAPI_ERR( "cfg_mcb_dgen:");rc.setEcmdError(rc_num);return rc;}
-		rc_num = l_spare_data_buffer_64.setDoubleWord(0,l_spare);if (rc_num){ FAPI_ERR( "cfg_mcb_dgen:");rc.setEcmdError(rc_num);return rc;}
+	  
 		
 		rc = fapiPutScom(i_target_centaur, MBS_MCBIST23_MBS_MCBFD0Q_0x02011781, l_var_data_buffer_64); if(rc) return rc;
 	    rc = fapiPutScom(i_target_centaur, MBS_MCBIST23_MBS_MCBFD1Q_0x02011782, l_var1_data_buffer_64); if(rc) return rc;
@@ -396,12 +402,16 @@ rc_num = l_var_data_buffer_64.setDoubleWord(0,l_var);  if (rc_num){ FAPI_ERR( "c
 	l_var = 0xFFFFFFFFFFFFFFFFull;                                                                                                                                              
 	l_var1 =0x0000000000000000ull;                                                                                                                                          
     l_spare = 0xFFFF0000FFFF0000ull; 
+	
+	rc_num = l_var_data_buffer_64.setDoubleWord(0,l_var);  if (rc_num){ FAPI_ERR( "cfg_mcb_dgen:");rc.setEcmdError(rc_num);return rc;}		
+	rc_num = l_var1_data_buffer_64.setDoubleWord(0,l_var1); if (rc_num){ FAPI_ERR( "cfg_mcb_dgen:");rc.setEcmdError(rc_num);return rc;}  
+    rc_num = l_spare_data_buffer_64.setDoubleWord(0,l_spare);if (rc_num){ FAPI_ERR( "cfg_mcb_dgen:");rc.setEcmdError(rc_num);return rc;}
+	
 	if (l_mbaPosition == 0)
 	{
 	    	//Writing MBS 01 pattern registers for comparison mod
-     rc_num = l_var_data_buffer_64.setDoubleWord(0,l_var);  if (rc_num){ FAPI_ERR( "cfg_mcb_dgen:");rc.setEcmdError(rc_num);return rc;}		
-	rc_num = l_var1_data_buffer_64.setDoubleWord(0,l_var1); if (rc_num){ FAPI_ERR( "cfg_mcb_dgen:");rc.setEcmdError(rc_num);return rc;}  
-    rc_num = l_spare_data_buffer_64.setDoubleWord(0,l_spare);if (rc_num){ FAPI_ERR( "cfg_mcb_dgen:");rc.setEcmdError(rc_num);return rc;}	
+   
+  
 	
         rc = fapiPutScom(i_target_centaur, MBS_MCBIST01_MBS_MCBFD0Q_0x02011681, l_var_data_buffer_64); if(rc) return rc;
         rc = fapiPutScom(i_target_centaur, MBS_MCBIST01_MBS_MCBFD1Q_0x02011682, l_var_data_buffer_64); if(rc) return rc;
@@ -419,9 +429,7 @@ rc_num = l_var_data_buffer_64.setDoubleWord(0,l_var);  if (rc_num){ FAPI_ERR( "c
     	{
 	    	//Writing MBS 23 pattern registers for comparison mod
       
-	  rc_num = l_var_data_buffer_64.setDoubleWord(0,l_var);  if (rc_num){ FAPI_ERR( "cfg_mcb_dgen:");rc.setEcmdError(rc_num);return rc;}                                                                                                                            
-	    rc_num = l_var1_data_buffer_64.setDoubleWord(0,l_var1); if (rc_num){ FAPI_ERR( "cfg_mcb_dgen:");rc.setEcmdError(rc_num);return rc;}
-		rc_num = l_spare_data_buffer_64.setDoubleWord(0,l_spare);if (rc_num){ FAPI_ERR( "cfg_mcb_dgen:");rc.setEcmdError(rc_num);return rc;}
+	  
 		
 		rc = fapiPutScom(i_target_centaur, MBS_MCBIST23_MBS_MCBFD0Q_0x02011781, l_var_data_buffer_64); if(rc) return rc;
 	    rc = fapiPutScom(i_target_centaur, MBS_MCBIST23_MBS_MCBFD1Q_0x02011782, l_var_data_buffer_64); if(rc) return rc;
@@ -444,12 +452,15 @@ rc_num = l_var_data_buffer_64.setDoubleWord(0,l_var);  if (rc_num){ FAPI_ERR( "c
 		l_var1 =0x5A5A5A5A5A5A5A5Aull;                                                                                                                                      
 		l_spare = 0xA55AA55AA55AA55Aull;                                                                                                                                    
 		
+	rc_num = l_var_data_buffer_64.setDoubleWord(0,l_var);  if (rc_num){ FAPI_ERR( "cfg_mcb_dgen:");rc.setEcmdError(rc_num);return rc;}		
+	rc_num = l_var1_data_buffer_64.setDoubleWord(0,l_var1); if (rc_num){ FAPI_ERR( "cfg_mcb_dgen:");rc.setEcmdError(rc_num);return rc;}  
+    rc_num = l_spare_data_buffer_64.setDoubleWord(0,l_spare);if (rc_num){ FAPI_ERR( "cfg_mcb_dgen:");rc.setEcmdError(rc_num);return rc;}
+		
+		
          if (l_mbaPosition == 0)
 	 {
 	    	//Writing MBS 01 pattern registers for comparison mod
-	rc_num = l_var_data_buffer_64.setDoubleWord(0,l_var);  if (rc_num){ FAPI_ERR( "cfg_mcb_dgen:");rc.setEcmdError(rc_num);return rc;}		
-	rc_num = l_var1_data_buffer_64.setDoubleWord(0,l_var1); if (rc_num){ FAPI_ERR( "cfg_mcb_dgen:");rc.setEcmdError(rc_num);return rc;}  
-    rc_num = l_spare_data_buffer_64.setDoubleWord(0,l_spare);if (rc_num){ FAPI_ERR( "cfg_mcb_dgen:");rc.setEcmdError(rc_num);return rc;}	
+	
 	
         rc = fapiPutScom(i_target_centaur, MBS_MCBIST01_MBS_MCBFD0Q_0x02011681, l_var_data_buffer_64); if(rc) return rc;
         rc = fapiPutScom(i_target_centaur, MBS_MCBIST01_MBS_MCBFD1Q_0x02011682, l_var1_data_buffer_64); if(rc) return rc;
@@ -466,9 +477,7 @@ rc_num = l_var_data_buffer_64.setDoubleWord(0,l_var);  if (rc_num){ FAPI_ERR( "c
     	 {
 	    	//Writing MBS 23 pattern registers for comparison mod
         	                                                                                                                                                                           	 
-		rc_num = l_var_data_buffer_64.setDoubleWord(0,l_var);  if (rc_num){ FAPI_ERR( "cfg_mcb_dgen:");rc.setEcmdError(rc_num);return rc;}                                                                                                                            
-	    rc_num = l_var1_data_buffer_64.setDoubleWord(0,l_var1); if (rc_num){ FAPI_ERR( "cfg_mcb_dgen:");rc.setEcmdError(rc_num);return rc;}
-		rc_num = l_spare_data_buffer_64.setDoubleWord(0,l_spare);if (rc_num){ FAPI_ERR( "cfg_mcb_dgen:");rc.setEcmdError(rc_num);return rc;}
+		
 		
 		rc = fapiPutScom(i_target_centaur, MBS_MCBIST23_MBS_MCBFD0Q_0x02011781, l_var_data_buffer_64); if(rc) return rc;
 	    rc = fapiPutScom(i_target_centaur, MBS_MCBIST23_MBS_MCBFD1Q_0x02011782, l_var1_data_buffer_64); if(rc) return rc;
@@ -489,12 +498,16 @@ rc_num = l_var_data_buffer_64.setDoubleWord(0,l_var);  if (rc_num){ FAPI_ERR( "c
         	l_var = 0xFFFFFFFFFFFFFFFFull;                                                                                                                                    	
         	l_var1 =0x0000000000000000ull;                                                                                                                                    	
         	l_spare = 0xFF00FF00FF00FF00ull;  
+		
+		    	rc_num = l_var_data_buffer_64.setDoubleWord(0,l_var);  if (rc_num){ FAPI_ERR( "cfg_mcb_dgen:");rc.setEcmdError(rc_num);return rc;}		
+	rc_num = l_var1_data_buffer_64.setDoubleWord(0,l_var1); if (rc_num){ FAPI_ERR( "cfg_mcb_dgen:");rc.setEcmdError(rc_num);return rc;}  
+    rc_num = l_spare_data_buffer_64.setDoubleWord(0,l_spare);if (rc_num){ FAPI_ERR( "cfg_mcb_dgen:");rc.setEcmdError(rc_num);return rc;}	
+	
+		
 		if (l_mbaPosition == 0)
 		{
 	    	//Writing MBS 01 pattern registers for comparison mod
-        	rc_num = l_var_data_buffer_64.setDoubleWord(0,l_var);  if (rc_num){ FAPI_ERR( "cfg_mcb_dgen:");rc.setEcmdError(rc_num);return rc;}		
-	rc_num = l_var1_data_buffer_64.setDoubleWord(0,l_var1); if (rc_num){ FAPI_ERR( "cfg_mcb_dgen:");rc.setEcmdError(rc_num);return rc;}  
-    rc_num = l_spare_data_buffer_64.setDoubleWord(0,l_spare);if (rc_num){ FAPI_ERR( "cfg_mcb_dgen:");rc.setEcmdError(rc_num);return rc;}	
+   
 	
         rc = fapiPutScom(i_target_centaur, MBS_MCBIST01_MBS_MCBFD0Q_0x02011681, l_var_data_buffer_64); if(rc) return rc;
         rc = fapiPutScom(i_target_centaur, MBS_MCBIST01_MBS_MCBFD1Q_0x02011682, l_var1_data_buffer_64); if(rc) return rc;
@@ -513,9 +526,7 @@ rc_num = l_var_data_buffer_64.setDoubleWord(0,l_var);  if (rc_num){ FAPI_ERR( "c
     	else if (l_mbaPosition == 1)
     	{
 	    	//Writing MBS 23 pattern registers for comparison mod
-        	 rc_num = l_var_data_buffer_64.setDoubleWord(0,l_var);  if (rc_num){ FAPI_ERR( "cfg_mcb_dgen:");rc.setEcmdError(rc_num);return rc;}		
-	rc_num = l_var1_data_buffer_64.setDoubleWord(0,l_var1); if (rc_num){ FAPI_ERR( "cfg_mcb_dgen:");rc.setEcmdError(rc_num);return rc;}  
-    rc_num = l_spare_data_buffer_64.setDoubleWord(0,l_spare);if (rc_num){ FAPI_ERR( "cfg_mcb_dgen:");rc.setEcmdError(rc_num);return rc;}	
+   
 	
         rc = fapiPutScom(i_target_centaur, MBS_MCBIST01_MBS_MCBFD0Q_0x02011681, l_var_data_buffer_64); if(rc) return rc;
         rc = fapiPutScom(i_target_centaur, MBS_MCBIST01_MBS_MCBFD1Q_0x02011682, l_var1_data_buffer_64); if(rc) return rc;

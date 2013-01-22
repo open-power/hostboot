@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_generic_shmoo.C,v 1.18 2012/12/18 15:23:47 sasethur Exp $
+// $Id: mss_generic_shmoo.C,v 1.23 2013/01/18 12:04:57 sasethur Exp $
 // *!***************************************************************************
 // *! (C) Copyright International Business Machines Corp. 1997, 1998
 // *!           All Rights Reserved -- Property of IBM
@@ -39,6 +39,9 @@
 //------------------------------------------------------------------------------
 // Version:|Author: | Date:   | Comment:
 // --------|--------|---------|--------------------------------------------------
+//   1.21  |sasethur|01/17/13 | Updated for sanity mcbist function
+//   1.20  |abhijith|01/11/13 | Updated for change in setup_mcbist function
+//   1.19  |aditya  |01/07/13 | Updated for change in setup_mcbist function
 //   1.18  |sasethur|14-DEC-12| Updated for change in access delay function 
 //   1.16  |sasethur|14-DEC-12| Updated for Warning 
 //   1.15  |abhijit |13-DEC-12| Updated for FW review comments 
@@ -160,6 +163,7 @@ fapi::ReturnCode generic_shmoo::run(const fapi::Target & i_target,uint32_t *o_ri
     fapi::ReturnCode rc;  
     uint8_t num_ranks_per_dimm[2][2];
     uint8_t l_attr_eff_dimm_type_u8=0;
+	uint8_t l_attr_schmoo_test_type_u8=0;
     uint8_t rank_pair=0;
     uint16_t l_sp_mask=0x00ff;
     ecmdDataBufferBase l_data_buffer1_64(64);
@@ -167,14 +171,14 @@ fapi::ReturnCode generic_shmoo::run(const fapi::Target & i_target,uint32_t *o_ri
     
     rc = FAPI_ATTR_GET(ATTR_EFF_NUM_RANKS_PER_DIMM, &i_target, num_ranks_per_dimm); if(rc) return rc;
     rc = FAPI_ATTR_GET(ATTR_EFF_DIMM_TYPE, &i_target, l_attr_eff_dimm_type_u8); if(rc) return rc; 
+    rc = FAPI_ATTR_GET(ATTR_EFF_SCHMOO_TEST_VALID, &i_target, l_attr_schmoo_test_type_u8); if(rc) return rc; 
     iv_MAX_RANKS=num_ranks_per_dimm[iv_port][0]+num_ranks_per_dimm[iv_port][1];
     iv_pattern=i_pattern;
     iv_test_type=i_test_type;
-    
+    //FAPI_INF("\n abhijit the test type %d \n",l_attr_schmoo_test_type_u8);
     if ( l_attr_eff_dimm_type_u8 == 0 )
     {
-	iv_MAX_BYTES=10;
-	
+	iv_MAX_BYTES=8;
     }
     else
     {
@@ -205,12 +209,23 @@ fapi::ReturnCode generic_shmoo::run(const fapi::Target & i_target,uint32_t *o_ri
     rc = mss_getrankpair(i_target,iv_port,0,&rank_pair,valid_rank);if(rc) return rc; 
     FAPI_DBG("mss_generic_shmoo : run() for shmoo type %d",shmoo_mask);
      // Check if all bytes/bits are in a pass condition initially .Otherwise quit
-    rc=sanity_check(i_target); // Run MCBIST on default state to make sure everything is fine
+    if(l_attr_schmoo_test_type_u8 == 0){
+	FAPI_INF("This procedure wont change any delay settings");
+	}
+    if(l_attr_schmoo_test_type_u8 == 1){
+	rc=sanity_check(i_target); // Run MCBIST only when ATTR_EFF_SCHMOO_TEST_VALID is mcbist only 
     if(!rc.ok())
     {
     FAPI_ERR("generic_shmoo::run MSS Generic Shmoo failed initial Sanity Check. Memory not in an all pass Condition");
     return rc; 
     }
+	}else{
+	// rc=sanity_check(i_target); // Run MCBIST by  default before for every schmoo to check if memory is in good condition. 
+    // if(!rc.ok())
+    // {
+    // FAPI_ERR("generic_shmoo::run MSS Generic Shmoo failed initial Sanity Check. Memory not in an all pass Condition");
+    // return rc; 
+    // }
     // If memory is OK then we continue to gather nominals and config values
     //  Now Read nominal values for all knobs configured
     // FAPI_DBG("mss_generic_shmoo : run() :read nominal values ");
@@ -222,11 +237,10 @@ fapi::ReturnCode generic_shmoo::run(const fapi::Target & i_target,uint32_t *o_ri
     //Find the margins in Ps i.e setup margin ,hold margin,Eye width 
     rc=get_margin(i_target);if(rc) return rc;
     //It is used to find the lowest of setup and hold margin
-     //rc=get_min_margin(i_target,o_right_min_margin,o_left_min_margin);if(rc) return rc;
+    rc=get_min_margin(i_target,o_right_min_margin,o_left_min_margin);if(rc) return rc;
     // It is used to print the schmoo report
-	#ifdef char
-    //rc=print_report(i_target);if(rc) return rc;
-	#endif
+    rc=print_report(i_target);if(rc) return rc;
+	}
     return rc;
 }
 /*------------------------------------------------------------------------------
@@ -250,6 +264,9 @@ fapi::ReturnCode generic_shmoo::sanity_check(const fapi::Target & i_target){
     uint64_t l_original_end_address1 = 0x0000000000000000;
     uint64_t l_original_start_address2 = 0x0000000000000000;
     uint64_t l_original_end_address2 = 0x0000000000000000;
+	uint64_t l_start =0x0000000000000000ull; 
+    uint64_t l_end = 0x0000000000000000ull; 
+	uint64_t l_time = 0x0000000000000000ull;
     ecmdDataBufferBase l_data_bufferx1_64(64); 
     ecmdDataBufferBase l_data_bufferx2_64(64);
     ecmdDataBufferBase l_data_bufferx3_64(64); 
@@ -277,12 +294,12 @@ fapi::ReturnCode generic_shmoo::sanity_check(const fapi::Target & i_target){
 	}	
 	FAPI_INF("  entering set_up mcbist now and rank %d",l_rank_valid);
 	
-	rc = setup_mcbist(i_target, iv_port, MCBIST_2D_CUP_PAT8, MEMWRITE, UNMASK_ALL, 0,iv_pattern,iv_test_type,l_rank_valid);if(rc) return rc;  //send shmoo mode to vary the address range
+	rc = setup_mcbist(i_target, iv_port, MCBIST_2D_CUP_PAT8, CENSHMOO, UNMASK_ALL, 0,iv_pattern,iv_test_type,l_rank_valid,0,l_start,l_end);if(rc) return rc;  //send shmoo mode to vary the address range
 
 	FAPI_INF("  starting  mcbist now");
 	rc=start_mcb(i_target);if(rc) return rc;
 	FAPI_INF("  polling   mcbist now");
-	rc=poll_mcb(i_target,false,&l_mcb_status);if(rc) return rc;
+	rc=poll_mcb(i_target,false,&l_mcb_status,l_time);if(rc) return rc;
 	FAPI_INF("  checking error map ");
 	rc=mcb_error_map(i_target,mcbist_error_map,iv_port,l_rank_valid);if(rc) return rc;
 	for(l_byte = 0; l_byte < iv_MAX_BYTES; l_byte++)
@@ -347,7 +364,9 @@ fapi::ReturnCode generic_shmoo::do_mcbist_test(const fapi::Target & i_target,uin
     ecmdDataBufferBase l_data_bufferx2_64(64);
     ecmdDataBufferBase l_data_bufferx3_64(64); 
     ecmdDataBufferBase l_data_bufferx4_64(64);
-	
+	uint64_t l_start =0x0000000000000000ull; 
+    uint64_t l_end = 0x0000000000000000ull; 
+	uint64_t l_time = 0x0000000000000000ull;
 	rc = fapiGetScom(i_target,MBA01_MCBIST_MCBSSARA0Q_0x030106d0,l_data_bufferx1_64); if(rc) return rc;
 	rc = fapiGetScom(i_target,MBA01_MCBIST_MCBSEARA0Q_0x030106d2,l_data_bufferx2_64); if(rc) return rc;
 	rc = fapiGetScom(i_target,MBA01_MCBIST_MCBSSARA1Q_0x030106d1,l_data_bufferx3_64); if(rc) return rc;    
@@ -368,7 +387,7 @@ fapi::ReturnCode generic_shmoo::do_mcbist_test(const fapi::Target & i_target,uin
     
 	
     
-   rc = setup_mcbist(i_target, iv_port, MCBIST_2D_CUP_PAT8, MEMWRITE, UNMASK_ALL, 0, iv_pattern,iv_test_type,i_rank); if(rc) return rc;
+   rc = setup_mcbist(i_target, iv_port, MCBIST_2D_CUP_PAT5, CENSHMOO, UNMASK_ALL, 0,iv_pattern,iv_test_type,i_rank,0,l_start,l_end);if(rc) return rc;  //send shmoo mode to vary the address range
    
    rc = start_mcb(i_target);
     if(rc)
@@ -377,7 +396,7 @@ fapi::ReturnCode generic_shmoo::do_mcbist_test(const fapi::Target & i_target,uin
 				
         return rc;
     }
-    rc=poll_mcb(i_target,false,&l_mcb_status);
+    rc=poll_mcb(i_target,false,&l_mcb_status,l_time);
     if(rc)
     {
         FAPI_ERR("generic_shmoo::do_mcbist_test: POLL MCBIST failed !!");  
@@ -427,12 +446,12 @@ void  generic_shmoo::check_error_map(uint8_t i_rank,uint8_t i_byte,uint8_t i_nib
     
     if( mcbist_error_map [iv_port][i_rank][i_byte][i_nibble] == 1){
         pass=0;
-        FAPI_INF("We are in error1");
+       // FAPI_INF("We are in error1");
     }
     else
     {
         pass=1;
-        FAPI_INF("We are in error2");
+        //FAPI_INF("We are in error2");
     }
     
 }
@@ -570,8 +589,8 @@ fapi::ReturnCode generic_shmoo::knob_update(const fapi::Target & i_target,bound_
     ecmdDataBufferBase data_buffer_64(64);
     ecmdDataBufferBase data_buffer_64_1(64);
     uint32_t l_current_val=0;
-    uint32_t l_left_del=2;
-    uint32_t l_right_del=10;
+    uint32_t l_left_del=1;
+    uint32_t l_right_del=1;
     uint32_t l_max_value=0;
     uint32_t l_min_value=0;
     uint16_t l_nibb_err_chk=2*byte+nibble;
@@ -608,8 +627,8 @@ fapi::ReturnCode generic_shmoo::knob_update(const fapi::Target & i_target,bound_
 	    l_min_value=SHMOO[scenario].static_knob.min_val;
 	    for(l_current_val=SHMOO[scenario].MBA.P[iv_port].S[rank].K.nom_val[l_dq][l_rp];((l_current_val >= l_left_del)&&(pass==1));l_current_val-=l_left_del)
 	    {
-		FAPI_DBG("  The current value inside left bound for dq=%d and rp=%d  is %d  ",l_dq,l_rp,l_current_val);
-		rc=mss_access_delay_reg(i_target,l_access_type_e,iv_port,rank,l_input_type_e,l_dq,0,l_current_val);if(rc) return rc;
+		FAPI_INF("  The current value inside left bound for dq=%d and rp=%d  is %d  ",l_dq,l_rp,l_current_val);
+		rc=mss_access_delay_reg(i_target,l_access_type_e,iv_port,rank,l_input_type_e,l_dq,1,l_current_val);if(rc) return rc;
 		rc=do_mcbist_test(i_target,rank,byte,nibble,pass);
 		if(rc)
 		{   
@@ -691,7 +710,7 @@ fapi::ReturnCode generic_shmoo::knob_update(const fapi::Target & i_target,bound_
 	    }
 	    if(!pass)
 	    {
-		SHMOO[scenario].MBA.P[iv_port].S[rank].K.lb_regval[l_dq][l_rp]=l_current_val;
+		SHMOO[scenario].MBA.P[iv_port].S[rank].K.lb_regval[l_dq][l_rp]=l_current_val+l_left_del;
 	    }
 	    else
 	    {
@@ -709,8 +728,8 @@ fapi::ReturnCode generic_shmoo::knob_update(const fapi::Target & i_target,bound_
 	    l_max_value=SHMOO[scenario].static_knob.max_val;
 	    for(l_current_val=SHMOO[scenario].MBA.P[iv_port].S[rank].K.nom_val[l_dq][l_rp];((l_current_val<l_max_value)&&(pass==1));l_current_val+=l_right_del)
 	    {
-		FAPI_DBG("  The current value inside right bound dq=%d and rp=%d  is %d  ",l_dq,l_rp,l_current_val);
-		rc=mss_access_delay_reg(i_target,l_access_type_e,iv_port,rank,l_input_type_e,l_dq,0,l_current_val);if(rc) return rc;
+		FAPI_INF("  The current value inside right bound dq=%d and rp=%d  is %d  ",l_dq,l_rp,l_current_val);
+		rc=mss_access_delay_reg(i_target,l_access_type_e,iv_port,rank,l_input_type_e,l_dq,1,l_current_val);if(rc) return rc;
 		rc=do_mcbist_test(i_target,rank,byte,nibble,pass);
 		if(rc)
 		{   
@@ -797,13 +816,13 @@ fapi::ReturnCode generic_shmoo::knob_update(const fapi::Target & i_target,bound_
 	    }
 	    if(!pass)
 	    {
-		SHMOO[scenario].MBA.P[iv_port].S[rank].K.rb_regval[l_dq][l_rp]=l_current_val;
+		SHMOO[scenario].MBA.P[iv_port].S[rank].K.rb_regval[l_dq][l_rp]=l_current_val-l_right_del;
 	    }
 	    else
 	    {
 		SHMOO[scenario].MBA.P[iv_port].S[rank].K.rb_regval[l_dq][l_rp]=l_current_val-l_right_del;
 	    }
-	    FAPI_INF("   the right bound %d ",SHMOO[scenario].MBA.P[iv_port].S[rank].K.rb_regval[l_dq][l_rp]);
+	    FAPI_INF(" the right bound  for dq=%d is %d ",l_dq,SHMOO[scenario].MBA.P[iv_port].S[rank].K.rb_regval[l_dq][l_rp]);
 	    l_current_val=SHMOO[scenario].MBA.P[iv_port].S[rank].K.nom_val[l_dq][l_rp];
 		FAPI_INF("  the restoring nominal value for rank=%d dq=%d and rp=%d is %d",rank,l_dq,l_rp,l_current_val);
 	    rc=mss_access_delay_reg(i_target,l_access_type_e,iv_port,rank,l_input_type_e,l_dq,0,l_current_val);if(rc) return rc;
@@ -917,15 +936,13 @@ fapi::ReturnCode generic_shmoo::find_bound(const fapi::Target & i_target,bound_t
     uint8_t l_rnk,l_byte,l_nibble,l_bit;
     fapi::ReturnCode rc;
     
-    uint8_t i_scenario = 0;
     uint8_t i_rank=0;
     bool flag=false;
     
     
     
     FAPI_INF("generic_shmoo::find_bound running find_bound function ");
-    for(i_scenario=0;i_scenario<MAX_SHMOO;++i_scenario)
-    {
+    
         
         for (l_rnk=0;l_rnk<iv_MAX_RANKS;++l_rnk)
         {// Byte loop
@@ -943,17 +960,16 @@ fapi::ReturnCode generic_shmoo::find_bound(const fapi::Target & i_target,bound_t
 			
 			
 			if(iv_DQS_ON==1)
-			rc=knob_update_dqs(i_target,bound,i_scenario,i_rank,l_byte,l_nibble,l_bit,1);if(rc) return rc;
+			rc=knob_update_dqs(i_target,bound,iv_shmoo_type,i_rank,l_byte,l_nibble,l_bit,1);if(rc) return rc;
 			else
-			rc=knob_update(i_target,bound,i_scenario,i_rank,l_byte,l_nibble,l_bit,1,flag); if(rc) return rc;   
+			rc=knob_update(i_target,bound,iv_shmoo_type,i_rank,l_byte,l_nibble,l_bit,1,flag); if(rc) return rc;   
                     }
                 }
             }
         }
-    }
     return rc;
 }
-#ifdef char
+//#ifdef char
 /*------------------------------------------------------------------------------
  * Function: print_report
  * Description  : This function is used to print the information needed such as freq,voltage etc, and also the right,left and total margin 
@@ -1001,7 +1017,7 @@ fapi::ReturnCode generic_shmoo::print_report(const fapi::Target & i_target)
     FAPI_INF("num_ranks  = %d on %s.", iv_MAX_RANKS,i_target.toEcmdString());
     FAPI_INF("dram_width = %d on %s. \n\n", l_attr_eff_dram_width_u8, i_target.toEcmdString());
     FAPI_INF("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
-    FAPI_INF("Schmoo\tPOS\tPort\tRank\tByte\tnibble\tbit\tNominal\t\tSetup_Limit\tHold_Limit\tWrD_Setup(ps)\tWrD_Hold(ps)\tEye_Width(ps)\tBitRate  ");
+    FAPI_INF("Schmoo  POS\tPort\tRank\tByte\tnibble\tbit\tNominal\t\tSetup_Limit\tHold_Limit\tWrD_Setup(ps)\tWrD_Hold(ps)\tEye_Width(ps)\tBitRate  ");
     
     
         
@@ -1021,7 +1037,7 @@ fapi::ReturnCode generic_shmoo::print_report(const fapi::Target & i_target)
 
 			    if(iv_shmoo_type==0)
 			    {
-				FAPI_INF("WR_EYE\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t\t%d\t\t%d\t\t%d\t\t%d\t\t%d\t\t%d\n ",iv_port,l_mbapos,i_rank,l_byte,l_nibble,l_bit,SHMOO[iv_shmoo_type].MBA.P[iv_port].S[i_rank].K.nom_val[l_dq][l_rp],SHMOO[iv_shmoo_type].MBA.P[iv_port].S[i_rank].K.rb_regval[l_dq][l_rp],SHMOO[iv_shmoo_type].MBA.P[iv_port].S[i_rank].K.lb_regval[l_dq][l_rp],SHMOO[iv_shmoo_type].MBA.P[iv_port].S[i_rank].K.right_margin_val[l_dq][l_rp],SHMOO[iv_shmoo_type].MBA.P[iv_port].S[i_rank].K.left_margin_val[l_dq][l_rp],SHMOO[iv_shmoo_type].MBA.P[iv_port].S[i_rank].K.total_margin[l_dq][l_rp],l_attr_mss_freq_u32);
+				FAPI_INF("WR_EYE %d\t%d\t%d\t%d\t%d\t%d\t%d\t\t%d\t\t%d\t\t%d\t\t%d\t\t%d\t\t%d\n ",iv_port,l_mbapos,i_rank,l_byte,l_nibble,l_bit,SHMOO[iv_shmoo_type].MBA.P[iv_port].S[i_rank].K.nom_val[l_dq][l_rp],SHMOO[iv_shmoo_type].MBA.P[iv_port].S[i_rank].K.rb_regval[l_dq][l_rp],SHMOO[iv_shmoo_type].MBA.P[iv_port].S[i_rank].K.lb_regval[l_dq][l_rp],SHMOO[iv_shmoo_type].MBA.P[iv_port].S[i_rank].K.right_margin_val[l_dq][l_rp],SHMOO[iv_shmoo_type].MBA.P[iv_port].S[i_rank].K.left_margin_val[l_dq][l_rp],SHMOO[iv_shmoo_type].MBA.P[iv_port].S[i_rank].K.total_margin[l_dq][l_rp],l_attr_mss_freq_u32);
 			    }
 			    if(iv_shmoo_type==2)
 			    {
@@ -1036,7 +1052,7 @@ fapi::ReturnCode generic_shmoo::print_report(const fapi::Target & i_target)
     
     return rc;
  }
-#endif
+//#endif
 /*------------------------------------------------------------------------------
  * Function: get_margin
  * Description  : This function is used to get margin for setup,hold and total eye width in Ps by using frequency  
@@ -1049,19 +1065,23 @@ fapi::ReturnCode generic_shmoo::get_margin(const fapi::Target & i_target)
     uint8_t l_rnk,l_byte,l_nibble,l_bit;
     uint32_t l_attr_mss_freq_margin_u32 = 0;
     uint32_t l_freq=0;
+	uint64_t l_cyc = 1000000000000000ULL;
     uint8_t l_dq=0;
     uint8_t  l_rp=0;
     uint8_t i_rank=0;
-    uint32_t l_factor=0;
+    uint64_t l_factor=0;
+	uint64_t l_factor_ps=1000000000;
     
+	//FAPI_INF("   the factor is % llu ",l_cyc);
     
     fapi::Target l_target_centaur;
     rc = fapiGetParentChip(i_target, l_target_centaur); if(rc) return rc;
     rc = FAPI_ATTR_GET(ATTR_MSS_FREQ, &l_target_centaur, l_attr_mss_freq_margin_u32); if(rc) return rc;
     l_freq=l_attr_mss_freq_margin_u32/2;
-    l_freq=1000000/l_freq;
-    l_factor=l_freq/128;
-    FAPI_INF("   the factor is %d  ",l_factor);
+    l_cyc=l_cyc/l_freq;// converting to zepto to get more accurate data  
+    l_factor=l_cyc/128;
+	//FAPI_INF("l_factor is % llu ",l_factor);
+    
     
         	
 	    for (l_rnk=0;l_rnk<iv_MAX_RANKS;++l_rnk)
@@ -1078,8 +1098,8 @@ fapi::ReturnCode generic_shmoo::get_margin(const fapi::Target & i_target)
 			{
 			    l_dq=8*l_byte+4*l_nibble+l_bit;
 			    //FAPI_INF("  the right bound = %d and nominal = %d",SHMOO[iv_shmoo_type].MBA.P[iv_port].S[i_rank].K.rb_regval[l_dq][l_rp],SHMOO[iv_shmoo_type].MBA.P[iv_port].S[i_rank].K.nom_val[l_dq][l_rp]);
-			    SHMOO[iv_shmoo_type].MBA.P[iv_port].S[i_rank].K.right_margin_val[l_dq][l_rp]=(SHMOO[iv_shmoo_type].MBA.P[iv_port].S[i_rank].K.rb_regval[l_dq][l_rp]-SHMOO[iv_shmoo_type].MBA.P[iv_port].S[i_rank].K.nom_val[l_dq][l_rp])*l_factor;
-                            SHMOO[iv_shmoo_type].MBA.P[iv_port].S[i_rank].K.left_margin_val[l_dq][l_rp]= (SHMOO[iv_shmoo_type].MBA.P[iv_port].S[i_rank].K.nom_val[l_dq][l_rp]-SHMOO[iv_shmoo_type].MBA.P[iv_port].S[i_rank].K.lb_regval[l_dq][l_rp])*l_factor;//((1/uint32_t_freq*1000000)/128);
+			    SHMOO[iv_shmoo_type].MBA.P[iv_port].S[i_rank].K.right_margin_val[l_dq][l_rp]=((SHMOO[iv_shmoo_type].MBA.P[iv_port].S[i_rank].K.rb_regval[l_dq][l_rp]-SHMOO[iv_shmoo_type].MBA.P[iv_port].S[i_rank].K.nom_val[l_dq][l_rp])*l_factor)/l_factor_ps;
+                            SHMOO[iv_shmoo_type].MBA.P[iv_port].S[i_rank].K.left_margin_val[l_dq][l_rp]= ((SHMOO[iv_shmoo_type].MBA.P[iv_port].S[i_rank].K.nom_val[l_dq][l_rp]-SHMOO[iv_shmoo_type].MBA.P[iv_port].S[i_rank].K.lb_regval[l_dq][l_rp])*l_factor)/l_factor_ps;//((1/uint32_t_freq*1000000)/128);
 			    SHMOO[iv_shmoo_type].MBA.P[iv_port].S[i_rank].K.total_margin[l_dq][l_rp]=SHMOO[iv_shmoo_type].MBA.P[iv_port].S[i_rank].K.right_margin_val[l_dq][l_rp]+SHMOO[iv_shmoo_type].MBA.P[iv_port].S[i_rank].K.left_margin_val[l_dq][l_rp];
                         }
                     }

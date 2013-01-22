@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_draminit_mc.C,v 1.27 2012/12/21 20:39:08 gollub Exp $
+// $Id: mss_draminit_mc.C,v 1.29 2013/01/14 19:29:25 jdsloat Exp $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
 // *! All Rights Reserved -- Property of IBM
@@ -29,7 +29,7 @@
 // *! TITLE : cen_draminit_mc.C
 // *! DESCRIPTION : Procedure for handing over control to the MC
 // *! OWNER NAME :  David Cadigan   Email: dcadiga@us.ibm.com
-// *! BACKUP NAME : Mark Bellows   Email: bellows@us.ibm.com
+// *! BACKUP NAME : Jacob Sloat   Email: jdsloat@us.ibm.com
 // #! ADDITIONAL COMMENTS :
 //
 //
@@ -44,8 +44,11 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
+//  1.29   | jdsloat  |14-JAN-13| Owner changed to Dave Cadigan.
+//  1.28   | bellows  |01-JAN-13| Added ECC Enable 64-byte data/checkbit inversion (from jdsloat)
 //  1.27   | gollub   |21-DEC-12| Calling mss_unmask_maint_errors and mss_unmask_inband_errors after mss_draminit_mc_cloned
-//  1.25   | jdsloat  |11-SEP-12| Changed Periodic Cal to Execute via MBA regs depending upon the ZQ Cal and MEM Cal timer values; 0 = disabled
+//  1.26   | jdsloat  |21-NOV-12| Changed Periodic Cal to Execute via MBA regs depending upon the ZQ Cal and MEM Cal timer values; 0 = disabled
+//  1.25   | jdsloat  |11-SEP-12| Calling mss_unmask_maint_errors and mss_unmask_inband_errors after mss_draminit_mc_cloned
 //  1.24   | bellows  |16-JUL-12| added in Id tag
 //  1.22   | bellows  |13-JUL-12| Fixed periodic cal bit 61 being set. HW214829
 //  1.20   | jdsloat  |21-MAY-12| Typo fix, addresses moved to cen_scom_addresses.H, moved per cal settings to initfile
@@ -351,12 +354,14 @@ ReturnCode mss_enable_control_bit_ecc (Target& i_target)
     // are set in previous precedures or initfile. 
     rc_num = rc_num | ecc0_data_buffer_64.clearBit(0);
     rc_num = rc_num | ecc0_data_buffer_64.clearBit(1);
+    rc_num = rc_num | ecc0_data_buffer_64.setBit(3);
 
     // Enable Memory ECC Check/Correct for MBA23
     // This assumes that all other settings of this register
     // are set in previous precedures or initfile. 
     rc_num = rc_num | ecc1_data_buffer_64.clearBit(0);
     rc_num = rc_num | ecc1_data_buffer_64.clearBit(1);
+    rc_num = rc_num | ecc1_data_buffer_64.setBit(3);
 
     if (rc_num)
     {

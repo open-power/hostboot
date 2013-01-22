@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012                   */
+/* COPYRIGHT International Business Machines Corp. 2012,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_draminit_training_advanced.C,v 1.23 2012/12/14 16:27:23 sasethur Exp $
+// $Id: mss_draminit_training_advanced.C,v 1.24 2013/01/17 20:55:31 sasethur Exp $
 /* File is created by SARAVANAN SETHURAMAN on Thur 29 Sept 2011. */
 
 //------------------------------------------------------------------------------
@@ -63,6 +63,7 @@
 //  1.21   | sasethur |11-Nov-12| Updated for new SI attribute change, fw review comments
 //  1.22   | sasethur |07-Dec-12| Updated for FW review comments - multiple changes
 //  1.23   | sasethur |14-Dec-12| Updated for FW review comments 
+//  1.24   | sasethur |17-Jan-13| Updated for mss_mcbist_common.C include file 
 
 // This procedure Schmoo's DRV_IMP, SLEW, VREF (DDR, CEN), RCV_IMP based on attribute from effective config procedure
 // DQ & DQS Driver impedance, Slew rate, WR_Vref shmoo would call only write_eye shmoo for margin calculation
@@ -86,6 +87,7 @@
 #include <mss_generic_shmoo.H>
 #include <mss_draminit_training_advanced.H>
 #include <mss_unmask_errors.H>
+//#include <mss_mcbist_common.C>
 
 
 const uint32_t MASK = 1;
@@ -960,7 +962,7 @@ fapi::ReturnCode delay_shmoo(const fapi::Target & i_target_mba, uint8_t i_port,
 		       uint8_t i_test_type)
 {
     fapi::ReturnCode rc;
-    FAPI_INF(" Inside the delay shmoo "); 
+   // FAPI_INF(" Inside the delay shmoo "); 
     //Constructor CALL: generic_shmoo::generic_shmoo(uint8_t i_port, uint32_t shmoo_mask,shmoo_algorithm_t shmoo_algorithm)
     generic_shmoo mss_shmoo=generic_shmoo(i_port,i_shmoo_type_valid,SEQ_LIN);
     rc = mss_shmoo.run(i_target_mba, o_left_margin, o_right_margin,i_pattern,i_test_type);

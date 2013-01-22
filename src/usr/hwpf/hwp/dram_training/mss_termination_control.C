@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_termination_control.C,v 1.13 2012/12/18 15:00:36 mwuu Exp $
+// $Id: mss_termination_control.C,v 1.15 2013/01/14 23:41:58 mwuu Exp $
 /* File is created by SARAVANAN SETHURAMAN on Thur 29 Sept 2011. */
 
 //------------------------------------------------------------------------------
@@ -43,6 +43,9 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
+//  1.15   | mwuu	  |14-Jan-13| Altered error message for unsupported slew rate
+//  1.14   | mwuu	  |14-Jan-13| Removed error messages from slew cal fail when
+//         |          |         | in SIM and using unsupported slew rates.
 //  1.13   | mwuu	  |18-Dec-12| Took out initialization of array_rcs in declaration.
 //  1.12   | mwuu	  |14-Dec-12| Updated additional fw review comments
 //  1.11   | sasethur |07-Dec-12| Updated for fw review comments
@@ -491,7 +494,7 @@ fapi::ReturnCode config_slew_rate(const fapi::Target & i_target_mba,
 
 	if (slew_cal_value > MAX_SLEW_VALUE)
 	{
-	    FAPI_ERR("!! Slew rate(0x%02x) unsupported, but continuining... !!",
+	    FAPI_INF("!! Slew rate(0x%02x) unsupported, but continuing... !!",
 				slew_cal_value);
 		slew_cal_value = slew_cal_value & 0x0F;
 	}
@@ -617,7 +620,7 @@ fapi::ReturnCode config_slew_rate(const fapi::Target & i_target_mba,
 
     if (slew_cal_value > MAX_SLEW_VALUE)
 	{
-	    FAPI_ERR("!! Slew rate(0x%02x) unsupported, but continuing... !!",
+	    FAPI_INF("!! Slew rate(0x%02x) unsupported, but continuing... !!",
 				slew_cal_value);
 	    slew_cal_value = slew_cal_value & 0x0F;
 	}
@@ -1168,34 +1171,46 @@ fapi::ReturnCode mss_slew_cal(const fapi::Target &i_target)
 					{
 						FAPI_INF("WARNING: occurred during slew "
 								"calibration, continuing...");
+
+						cal_slew = cal_slew & 0x80;	// clear bits 6:0
+						rc_ecmd = stat_reg.extractPreserve(&cal_slew, 60, 4);
+						if (rc_ecmd)
+						{
+							FAPI_ERR("Error getting calibration output "
+									"slew value");
+							rc.setEcmdError(rc_ecmd);
+							return rc;
+						}
+						calibrated_slew[data_adr][l_port][imp][slew] = cal_slew;
 					}
 					else
 					{
-						if (cal_status == 1)
-						{
-							FAPI_ERR("Error occurred during slew calibration");
-						}
-						else
-						{
-							FAPI_ERR("Slew calibration timed out");
-						}
-						FAPI_ERR("Slew calibration failed on %s slew: imp_idx="
-								"%d, slew_idx=%d, slew_table=0x%02X, "
-								"status=0x%04X on %s!",
-								(data_adr ? "ADR" : "DATA"), imp, slew,
-								cal_slew, stat_reg.getHalfWord(3),
-								i_target.toEcmdString());
-						
 						if (is_sim) {
 							// Calibration fails in sim since bb_lock not
 							// possible in cycle simulator, putting initial
 							// to be cal'd value in output table
-							FAPI_INF("In SIM setting calibrated slew array");
+							FAPI_INF("In SIM setting input slew value in array"
+									", status(%i) NOT clean.", cal_status);
 							calibrated_slew[data_adr][l_port][imp][slew] =
 								cal_slew;
 						}
 						else
 						{
+							if (cal_status == 1)
+							{
+								FAPI_ERR("Error occurred during slew calibration");
+							}
+							else
+							{
+								FAPI_ERR("Slew calibration timed out");
+							}
+							FAPI_ERR("Slew calibration failed on %s slew: imp_idx="
+							"%d, slew_idx=%d, slew_table=0x%02X, "
+							"status=0x%04X on %s!",
+							(data_adr ? "ADR" : "DATA"), imp, slew,
+							cal_slew, stat_reg.getHalfWord(3),
+							i_target.toEcmdString());
+
 							FAPI_SET_HWP_ERROR(rc, RC_MSS_SLEW_CAL_ERROR);
 							//return rc;
 							array_rcs[l_port]=rc;

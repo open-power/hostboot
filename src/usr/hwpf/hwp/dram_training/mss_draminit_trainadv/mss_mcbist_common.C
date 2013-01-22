@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_mcbist_common.C,v 1.13 2013/01/03 14:54:55 sasethur Exp $
+// $Id: mss_mcbist_common.C,v 1.17 2013/01/16 15:16:15 sasethur Exp $
 // *!***************************************************************************
 // *! (C) Copyright International Business Machines Corp. 1997, 1998
 // *!           All Rights Reserved -- Property of IBM
@@ -38,7 +38,11 @@
 //------------------------------------------------------------------------------
 // Version:|Author: | Date:  | Comment:
 // --------|--------|--------|--------------------------------------------------
-//   1.13  |aditya  |01/03/12| Updated FW Comments 
+//   1.17  |aditya  |01/11/16|Updated setup_mcbist function 
+//   1.16  |aditya  |01/11/13|Updated function headers 
+//   1.15  |aditya  |01/11/13|added  parameters to setup_mcbist function
+//   1.14  |aditya  |01/07/13|Updated Review Comments  
+//   1.13  |aditya  |01/03/13| Updated FW Comments 
 //   1.10  |sasethur|12/14/12| Updated for warnings
 //   1.9   |aditya  |12/14/12| Updated FW review comments   
 //   1.8   |aditya  |12/6/12 | Updated Review Comments
@@ -74,7 +78,7 @@ const uint8_t MAX_DRAM = 20;
 //const uint8_t MAX_RANK = 8;
 //const uint8_t MAX_NIBBLE = 1;
 const uint8_t MCB_TEST_NUM = 16;
-const uint8_t MCB_MAX_TIMEOUT = 100;
+const uint64_t MCB_MAX_TIMEOUT = 3000000000000000ull;
 const uint64_t  DELAY_100US = 100000;   // general purpose 100 usec delay for HW mode (2000000 sim cycles if simclk = 20ghz)
 const uint64_t  DELAY_2000SIMCYCLES     = 2000;     // general purpose 2000 sim cycle delay for sim mode     (100 ns if simclk = 20Ghz)
 //const uint64_t END_ADDRESS = 0x0000000004;  //Will be fixed later, once the address generation function is ready
@@ -101,11 +105,14 @@ const uint64_t FOUR = 0x0000000000000004ull;
 
 //     uint8_t i_pattern                Data Pattern
 //     uint8_t i_test_type              Subtest Type
-//     uint8_t i_rank                   Current Rank      
+//     uint8_t i_rank                   Current Rank   
+//     ,uint8_t i_bit32                 Flag to set bit 32 of register 02011674   
+//uint64_t i_start                      Flag to set start address
+// uint64_t i_end                       Flag to set End address  
 //****************************************************************/
 
 
-fapi::ReturnCode  setup_mcbist(const fapi::Target & i_target_mba, uint8_t i_port,mcbist_data_gen i_mcbpatt,mcbist_test_mem i_mcbtest,mcbist_byte_mask i_mcbbytemask,uint8_t i_mcbrotate,uint8_t i_pattern,uint8_t i_test_type,uint8_t i_rank)
+fapi::ReturnCode  setup_mcbist(const fapi::Target & i_target_mba, uint8_t i_port,mcbist_data_gen i_mcbpatt,mcbist_test_mem i_mcbtest,mcbist_byte_mask i_mcbbytemask,uint8_t i_mcbrotate,uint8_t i_pattern,uint8_t i_test_type,uint8_t i_rank,uint8_t i_bit32,uint64_t i_start,uint64_t i_end)
 {
     
     fapi::ReturnCode  rc;
@@ -117,11 +124,28 @@ fapi::ReturnCode  setup_mcbist(const fapi::Target & i_target_mba, uint8_t i_port
     ecmdDataBufferBase l_data_bufferx3_64(64); 
     ecmdDataBufferBase l_data_bufferx4_64(64);
     //ecmdDataBufferBase l_data_buffer_64_1(64);
-    
+   // FAPI_INF("Value  of Start is %016llX and end %016llX ",i_start,i_end);
 	
     rc = mcb_reset_trap(i_target_mba); 
     if(rc) return rc;
 
+	if(i_bit32 == 1)
+	{
+	
+	rc = fapiGetScom(i_target_mba,0x02011674,l_data_buffer_64);if(rc) return rc;
+    rc_num =  l_data_buffer_64.setBit(32);if (rc_num){FAPI_ERR( "Error in function  setup_mcbist:");rc.setEcmdError(rc_num);return rc;}
+    
+    rc = fapiPutScom(i_target_mba,0x02011674,l_data_buffer_64);if(rc) return rc;
+    
+    rc = fapiGetScom(i_target_mba,0x02011774,l_data_buffer_64);if(rc) return rc;
+    rc_num =  l_data_buffer_64.setBit(32);if (rc_num){FAPI_ERR( "Error in function  setup_mcbist:");rc.setEcmdError(rc_num);return rc;}
+    
+    rc = fapiPutScom(i_target_mba,0x02011774,l_data_buffer_64);if(rc) return rc;
+	
+	}
+	
+	
+	
    /* rc = fapiGetScom(i_target_mba, MBA01_MCBIST_MCBMR0Q_0x030106a8,l_data_buffer_64); if(rc) return rc; 
     rc_num = rc_num | l_data_buffer_64.flushTo0();
     rc_num = rc_num | l_data_buffer_64.setBit(18); 
@@ -158,7 +182,7 @@ fapi::ReturnCode  setup_mcbist(const fapi::Target & i_target_mba, uint8_t i_port
 	FAPI_INF("User pattern and User test_type modes enabled");
 	rc = cfg_mcb_dgen(i_target_mba,USR_MODE,i_mcbrotate); if(rc) return rc;
 	FAPI_INF("Inside setup mcbist Entering cfg_mcb_addr");
-        rc = cfg_mcb_addr(i_target_mba,i_rank,i_port);if(rc) return rc;
+        rc = cfg_mcb_addr(i_target_mba,i_rank,i_port,i_start,i_end);if(rc) return rc;
         rc = cfg_mcb_test_mem(i_target_mba,USER_MODE); if(rc) return rc; 
     }
     else if(i_pattern == 1) 
@@ -166,7 +190,7 @@ fapi::ReturnCode  setup_mcbist(const fapi::Target & i_target_mba, uint8_t i_port
         FAPI_INF("User pattern  mode enabled");
         rc = cfg_mcb_dgen(i_target_mba,USR_MODE,i_mcbrotate); if(rc) return rc;
         FAPI_INF("Inside setup mcbist Entering cfg_mcb_addr");
-        rc = cfg_mcb_addr(i_target_mba,i_rank,i_port);if(rc) return rc;
+        rc = cfg_mcb_addr(i_target_mba,i_rank,i_port,i_start,i_end);if(rc) return rc;
         rc = cfg_mcb_test_mem(i_target_mba,i_mcbtest); if(rc) return rc;
     }
     else if(i_test_type == 1)
@@ -174,14 +198,14 @@ fapi::ReturnCode  setup_mcbist(const fapi::Target & i_target_mba, uint8_t i_port
 	FAPI_INF(" User test_type mode enabled");
 	rc = cfg_mcb_dgen(i_target_mba,i_mcbpatt,i_mcbrotate); if(rc) return rc;
         FAPI_INF("Inside setup mcbist Entering cfg_mcb_addr");
-        rc = cfg_mcb_addr(i_target_mba,i_rank,i_port);if(rc) return rc;
+        rc = cfg_mcb_addr(i_target_mba,i_rank,i_port,i_start,i_end);if(rc) return rc;
         rc = cfg_mcb_test_mem(i_target_mba,USER_MODE); if(rc) return rc;
     }
     else
     {
 	rc = cfg_mcb_dgen(i_target_mba,i_mcbpatt,i_mcbrotate); if(rc) return rc;
 	FAPI_INF("Inside setup mcbist Entering cfg_mcb_addr");
-        rc = cfg_mcb_addr(i_target_mba,i_rank,i_port);if(rc) return rc;
+        rc = cfg_mcb_addr(i_target_mba,i_rank,i_port,i_start,i_end);if(rc) return rc;
         rc = cfg_mcb_test_mem(i_target_mba,i_mcbtest); if(rc) return rc;
     }
 	
@@ -214,11 +238,11 @@ fapi::ReturnCode  mcb_reset_trap(const fapi::Target & i_target_mba)
     
     rc = fapiGetScom(i_target_mba,MBA01_MCBIST_MCBCFGQ_0x030106e0,l_data_buffer_64);if(rc) return rc;
     rc_num =  l_data_buffer_64.setBit(60);if (rc_num){FAPI_ERR( "Error in function  mcb_reset_trap:");rc.setEcmdError(rc_num);return rc;}
-    rc = fapiDelay(DELAY_100US, DELAY_2000SIMCYCLES);if(rc) return rc; // wait 2000 simcycles (in sim mode) OR 100 uS (in hw mode)
+    //rc = fapiDelay(DELAY_100US, DELAY_2000SIMCYCLES);if(rc) return rc; // wait 2000 simcycles (in sim mode) OR 100 uS (in hw mode)
     rc = fapiPutScom(i_target_mba,MBA01_MCBIST_MCBCFGQ_0x030106e0,l_data_buffer_64);if(rc) return rc;
     rc_num =  l_data_buffer_64.clearBit(60);if (rc_num){FAPI_ERR( "Error in function  mcb_reset_trap:");rc.setEcmdError(rc_num);return rc;}
     rc = fapiPutScom(i_target_mba,MBA01_MCBIST_MCBCFGQ_0x030106e0,l_data_buffer_64);if(rc) return rc;
-    rc = fapiDelay(DELAY_100US, DELAY_2000SIMCYCLES);if(rc) return rc; // wait 2000 simcycles (in sim mode) OR 100 uS (in hw mode)
+    //rc = fapiDelay(DELAY_100US, DELAY_2000SIMCYCLES);if(rc) return rc; // wait 2000 simcycles (in sim mode) OR 100 uS (in hw mode)
     rc_num =  l_data_buffer_64.setBit(60);if (rc_num){FAPI_ERR( "Error in function  mcb_reset_trap:");rc.setEcmdError(rc_num);return rc;}
     rc = fapiPutScom(i_target_mba,MBA01_MCBIST_MCBCFGQ_0x030106e0,l_data_buffer_64);if(rc) return rc;
     //Reset MCB Maintanence register
@@ -332,34 +356,49 @@ fapi::ReturnCode  start_mcb(const fapi::Target & i_target_mba)
 // Input Parameters :
 //    const fapi::Target &             Centaur.mba
 //    bool           i_mcb_stop_on_fail       Whether MCBIST should stop on fail or not
+//    uint64_t i_time                          Sets the max Time out value  
 // Output Parameter :
 //    uint32    status  = 1                 MCBIST done with fail or MCBIST not complete (default value)
 //                      = 0                 MCBIST Done without fail
 //****************************************************************/
-fapi::ReturnCode  poll_mcb(const fapi::Target & i_target_mba,bool i_mcb_stop_on_fail,uint8_t *o_mcb_status)
+fapi::ReturnCode  poll_mcb(const fapi::Target & i_target_mba,bool i_mcb_stop_on_fail,uint8_t *o_mcb_status,uint64_t i_time)
 {
     fapi::ReturnCode  rc;             // return value after each SCOM access/buffer modification
     uint32_t rc_num = 0;
     ecmdDataBufferBase l_data_buffer_64(64);
+	ecmdDataBufferBase l_data_buffer1_64(64);
     ecmdDataBufferBase l_stop_on_fail_buffer_64(64);
     //Current status of the MCB (done, fail, in progress)
     uint8_t l_mcb_done = 0;
     uint8_t l_mcb_fail = 0;
     uint8_t l_mcb_ip = 0;
     //Time out variables
-    uint32_t l_mcb_timeout = 0;
+    uint64_t l_mcb_timeout = 0;
     uint32_t l_count = 0;
-
     // Clear to register to zero;
     
+	/*uint8_t  l_out_4(8);
+    uint32_t  l_out_20(20); 
+	uint64_t  l_out_40(40);*/
+    
+	
     FAPI_INF("Function Poll_MCBIST");
-   
-    while ((l_mcb_done == 0) && (l_mcb_timeout <= MCB_MAX_TIMEOUT))
+    
+    if(i_time <= 0x0000000000000000)
     {
+
+	i_time = MCB_MAX_TIMEOUT;
+	
+    }    
+	//FAPI_INF("Value  of max time %016llX",i_time);
+	
+    while ((l_mcb_done == 0) && (l_mcb_timeout <= i_time))
+    {
+        rc = fapiDelay(DELAY_100US, DELAY_2000SIMCYCLES);if(rc) return rc; // wait 2000 simcycles (in sim mode) OR 100 uS (in hw mode)
         rc = fapiGetScom(i_target_mba,MBA01_MCBIST_MCB_CNTLSTATQ_0x030106dc,l_data_buffer_64);  if(rc) return rc;
         if(l_data_buffer_64.isBitSet(0))          
         {
-            FAPI_INF("MCBIST is in progress_inside poll_mcb");
+            //FAPI_INF("MCBIST is in progress_inside poll_mcb");
             l_mcb_ip = 1;
         }
         if(l_data_buffer_64.isBitSet(1))         
@@ -393,7 +432,7 @@ fapi::ReturnCode  poll_mcb(const fapi::Target & i_target_mba,bool i_mcb_stop_on_
             }
         }
         l_mcb_timeout++;
-        if (l_mcb_timeout >= MCB_MAX_TIMEOUT)
+        if (l_mcb_timeout >= i_time)
         {
             FAPI_ERR( "poll_mcb:Maximun time out");  	
             FAPI_SET_HWP_ERROR(rc,RC_MSS_MCBIST_TIMEOUT_ERROR);		
@@ -433,7 +472,7 @@ fapi::ReturnCode  poll_mcb(const fapi::Target & i_target_mba,bool i_mcb_stop_on_
         FAPI_INF("*************************************************");
         #endif
     }
-    else if((l_mcb_done == 0) && (l_mcb_ip == 1) && (l_mcb_timeout == MCB_MAX_TIMEOUT))
+    else if((l_mcb_done == 0) && (l_mcb_ip == 1) && (l_mcb_timeout == i_time))
     {
         *o_mcb_status = 1;//fail;                
         #ifdef MCB_DEBUG2
@@ -450,6 +489,24 @@ fapi::ReturnCode  poll_mcb(const fapi::Target & i_target_mba,bool i_mcb_stop_on_
 	if (*o_mcb_status == 1)
     {
         FAPI_ERR( "poll_mcb:MCBIST failed");  	
+		//rc = fapiGetScom(i_target_mba,0x03010665,l_data_buffer1_64);  if(rc) return rc;
+	/*l_sbit = 0;
+	l_len = 4;
+	rc_num= rc_num | l_data_buffer1_64.extractToRight(&l_out_4,l_sbit,l_len);
+	l_sbit = 5;
+	l_len = 19;
+	rc_num= rc_num | l_data_buffer1_64.extractToRight(&l_out_20,l_sbit,l_len);
+	
+	
+	l_sbit = 25;
+	l_len = 39;
+	rc_num= rc_num | l_data_buffer1_64.extractToRight(&l_out_40,l_sbit,l_len);
+	
+	FAPI_ERR(" FAILURE DETAILS ");
+	
+	FAPI_ERR(" subtest_num(0:4) :%X",l_out_4 );
+	FAPI_ERR(" cmd number  :%05lX",l_out_20 );
+	FAPI_ERR(" trap addr(0:38)  :%08llX",l_out_40 );*/
         FAPI_SET_HWP_ERROR(rc,RC_MSS_MCBIST_ERROR);		
         return rc;
     }
@@ -484,8 +541,10 @@ fapi::ReturnCode  mcb_error_map_print(const fapi::Target & i_target_mba,uint8_t 
 	uint8_t l_rank_pair = 0;
 	char l_str1[200] = "";
 	uint8_t l_index = 0;
-	uint8_t l_dimmtype = 0;
-	rc = FAPI_ATTR_GET(ATTR_EFF_DIMM_TYPE, &i_target_mba, l_dimmtype); if(rc) return rc;
+	uint8_t l_mbaPosition = 0;
+	rc = FAPI_ATTR_GET(ATTR_CHIP_UNIT_POS, &i_target_mba, l_mbaPosition);
+	//uint8_t l_dimmtype = 0;
+	//rc = FAPI_ATTR_GET(ATTR_EFF_DIMM_TYPE, &i_target_mba, l_dimmtype); if(rc) return rc;
 	// if(l_dimmtype==1)
 	// {
 	
@@ -494,12 +553,34 @@ fapi::ReturnCode  mcb_error_map_print(const fapi::Target & i_target_mba,uint8_t 
 	// }
 	if(i_port == 0)
 	{
-	FAPI_INF("################# PortA Error MAP #################");
+	if(l_mbaPosition ==0)
+	{
+	FAPI_INF("################# PortA Error MAP #################\n");
+	FAPI_INF("################# MBA01 ###########################\n");
+	}
+	else
+	{
+	FAPI_INF("################# PortA Error MAP #################\n");
+	FAPI_INF("################# MBA023 ###########################\n");
+	}
+	
 	}
 	if(i_port == 1)
 	{
-	FAPI_INF("################# PortB Error MAP #################");
-    }
+	
+	if(l_mbaPosition ==0)
+	{
+	FAPI_INF("################# PortB Error MAP #################\n");
+	FAPI_INF("################# MBA01 ###########################\n");
+	}
+	else
+	{
+	FAPI_INF("################# PortB Error MAP #################\n");
+	FAPI_INF("################# MBA023 ###########################\n");
+	}
+    
+	
+	}
 	
     FAPI_INF("Byte      00112233445566778899");
     FAPI_INF("          --------------------");
@@ -569,7 +650,8 @@ return rc;
 // Description  : Reads the nibblewise Error map registers into o_error_map   
 // Input Parameters :
 //    const fapi::Target &             Centaur.mba
-//    
+//    uint8_t i_port                   Current port
+//    uint8_t i_rank                   Current Rank 
 // Output Parameter :
 //    uint8_t o_error_map[][8][10][2]   Contains the error map      
 //****************************************************************/
@@ -579,6 +661,7 @@ fapi::ReturnCode  mcb_error_map(const fapi::Target & i_target_mba, uint8_t  o_er
     ecmdDataBufferBase l_mcbem2ab(64);
     ecmdDataBufferBase l_mcbem3ab(64);
 	ecmdDataBufferBase l_data_buffer_64(64);
+	ecmdDataBufferBase l_data_buffer1_64(64);
     ecmdDataBufferBase l_mcb_fail_320(320);
    
     
@@ -683,7 +766,15 @@ fapi::ReturnCode  mcb_error_map(const fapi::Target & i_target_mba, uint8_t  o_er
     }
 	
    
-     
+    /* rc = fapiGetScom(i_target_mba,0x03010665,l_data_buffer1_64);  if(rc) return rc;
+	 rc = fapiGetScom(i_target_mba,0x03010666,l_data_buffer1_64);  if(rc) return rc;
+	 rc = fapiGetScom(i_target_mba,0x03010667,l_data_buffer1_64);  if(rc) return rc;
+	 rc = fapiGetScom(i_target_mba,0x03010668,l_data_buffer1_64);  if(rc) return rc;
+	 rc = fapiGetScom(i_target_mba,0x03010669,l_data_buffer1_64);  if(rc) return rc;
+	 rc = fapiGetScom(i_target_mba,0x0301066a,l_data_buffer1_64);  if(rc) return rc;
+	 rc = fapiGetScom(i_target_mba,0x0301066b,l_data_buffer1_64);  if(rc) return rc;
+	 rc = fapiGetScom(i_target_mba,0x0301066c,l_data_buffer1_64);  if(rc) return rc;*/
+	 
     return rc;
 }
 /*****************************************************************/
@@ -769,7 +860,7 @@ fapi::ReturnCode  cfg_byte_mask(const fapi::Target & i_target_mba,uint8_t i_rank
     uint8_t l_dimm=0;
     ecmdDataBufferBase l_data_buffer1_64(64);
     ecmdDataBufferBase l_data_buffer2_64(64);
-	ecmdDataBufferBase l_data_buffer3_64(64);
+    ecmdDataBufferBase l_data_buffer3_64(64);
    
 
     fapi::ReturnCode  rc;
@@ -847,13 +938,14 @@ fapi::ReturnCode  cfg_byte_mask(const fapi::Target & i_target_mba,uint8_t i_rank
 //    uint64_t &io_end_address                   End address of MCBIST   
 //    uint64_t &io_start_address                 Start address of MCBIST
 //    uint8_t i_rank                            Current Rank
+//    uint8_t i_port                            Current Port
 //****************************************************************/
 
 fapi::ReturnCode  addr_gen_func(const fapi::Target & i_target_mba, mcbist_addr_mode i_addr_mode, uint8_t i_attr_eff_schmoo_addr_mode ,uint64_t &io_end_address,uint64_t &io_start_address,uint8_t i_rank,uint8_t i_port)
 {
     fapi::ReturnCode  rc;  
-    uint8_t l_rank = 0;	
-    uint8_t l_cur_rank = 0;
+    //uint8_t l_rank = 0;	
+   // uint8_t l_cur_rank = 0;
     uint8_t l_rankpair_table[8];
     FAPI_INF("Function mss_address_gen");
     uint64_t l_end_address = io_end_address;
@@ -872,6 +964,8 @@ fapi::ReturnCode  addr_gen_func(const fapi::Target & i_target_mba, mcbist_addr_m
     l_max_rank=l_num_ranks_per_dimm[i_port][0]+l_num_ranks_per_dimm[i_port][1];	
     rc = mss_getrankpair(i_target_mba,i_port,0,&l_rank_pair,l_rankpair_table);  if(rc) return rc;
 	
+	//FAPI_INF("FLAG 111  value of start and end addr is %016llX and %016llX",io_start_address,io_end_address);
+	
 	if(l_max_rank > MAX_RANK)
 	{
 	 FAPI_ERR(" Maximum ranks available exceeded 8");
@@ -880,15 +974,15 @@ fapi::ReturnCode  addr_gen_func(const fapi::Target & i_target_mba, mcbist_addr_m
 	}
 	
 	
-    for(l_cur_rank = 0;l_cur_rank < l_max_rank;l_cur_rank++)
+   /* for(l_cur_rank = 0;l_cur_rank < l_max_rank;l_cur_rank++)
 	{
 	    if(i_rank == l_rankpair_table[l_cur_rank])
 		{
 		l_rank = l_cur_rank;
 		break;
 		} 
-	}
-	//FAPI_INF(" Addressing mode is %d ",i_attr_eff_schmoo_addr_mode);
+	} */
+	FAPI_INF("Shmoo Addressing mode is %d ",i_attr_eff_schmoo_addr_mode);
 	//l_cur_rank = 0;
 	
 	if(i_addr_mode == SF)
@@ -922,8 +1016,8 @@ fapi::ReturnCode  addr_gen_func(const fapi::Target & i_target_mba, mcbist_addr_m
 		//FAPI_INF("Value 1 of Start is %016llX and Diff %016llX",l_addr1,l_addr2);
 		
 		//l_addr1 += (END_ADDRESS * l_rank);
-		l_addr1 += ((START_ADDRESS + l_diff_address) * l_rank);
-		
+		//l_addr1 += ((START_ADDRESS + l_diff_address) * l_rank);
+		l_addr1 += ((START_ADDRESS + l_diff_address) * i_rank);
 		l_addr2 = l_addr1 + FEW_INTERVAL;
         //FAPI_INF("Value 2 of Start is %016llX and Diff %016llX",l_addr1,l_addr2);
 		
@@ -950,7 +1044,8 @@ fapi::ReturnCode  addr_gen_func(const fapi::Target & i_target_mba, mcbist_addr_m
 				//FAPI_INF("Value 3 of Start is %016llX and Diff %016llX",l_addr1,l_addr2);
 				
 				//l_addr1 += ((START_ADDRESS+l_diff_address) * l_rank);
-				l_addr1 += ((START_ADDRESS + l_diff_address) * l_rank);
+				//l_addr1 += ((START_ADDRESS + l_diff_address) * l_rank);
+				l_addr1 += ((START_ADDRESS + l_diff_address) * i_rank);
 				l_addr2 = l_addr1 + l_diff_address1;
 				
 				
@@ -979,7 +1074,8 @@ fapi::ReturnCode  addr_gen_func(const fapi::Target & i_target_mba, mcbist_addr_m
 				} */
 				//FAPI_INF("Value 5 of Start is %016llX and Diff %016llX",l_addr1,l_addr2);
 				//l_addr1 += ((START_ADDRESS+l_diff_address) * l_rank);
-				l_addr1 += ((START_ADDRESS + l_diff_address) * l_rank);
+				//l_addr1 += ((START_ADDRESS + l_diff_address) * l_rank);
+				l_addr1 += ((START_ADDRESS + l_diff_address) * i_rank);
 				l_addr2 = l_addr1 + l_diff_address1;
 				//FAPI_INF("Value 6 of Start is %016llX and Diff %016llX",l_addr1,l_addr2);
 			}
@@ -997,7 +1093,8 @@ fapi::ReturnCode  addr_gen_func(const fapi::Target & i_target_mba, mcbist_addr_m
 			}*/
 			
 		   // l_addr1 += ((START_ADDRESS+l_diff_address) * l_rank);
-		    l_addr1 += ((START_ADDRESS + l_diff_address) * l_rank);
+		   // l_addr1 += ((START_ADDRESS + l_diff_address) * l_rank);
+		   l_addr1 += ((START_ADDRESS + l_diff_address) * i_rank);
 			l_addr2 = l_addr1 + l_diff_address;
 			
 		}
@@ -1028,8 +1125,11 @@ fapi::ReturnCode  addr_gen_func(const fapi::Target & i_target_mba, mcbist_addr_m
 // Input Parameters :
 //    const fapi::Target &                     Centaur.mba
 //    uint8_t i_rank                            Current Rank Being Passed
+//    uint8_t i_port                             Current port
+//    uint64_t i_start                          Flag to set start address
+//    uint64_t i_end                            Flag to set end address 
 //************************************************************************/
-fapi::ReturnCode  cfg_mcb_addr(const fapi::Target & i_target_mba,uint8_t rank,uint8_t i_port)
+fapi::ReturnCode  cfg_mcb_addr(const fapi::Target & i_target_mba,uint8_t rank,uint8_t i_port,uint64_t i_start,uint64_t i_end)
 {
     fapi::ReturnCode  rc;             // return value after each SCOM access/buffer modification
     uint32_t rc_num = 0; 
@@ -1047,6 +1147,10 @@ fapi::ReturnCode  cfg_mcb_addr(const fapi::Target & i_target_mba,uint8_t rank,ui
     uint64_t end_address = 0;
 	
     
+	
+	
+	
+	
     rc = FAPI_ATTR_GET(ATTR_EFF_SCHMOO_ADDR_MODE, &i_target_mba, l_attr_eff_schmoo_addr_mode); if(rc) return rc;
     rc = FAPI_ATTR_GET(ATTR_EFF_NUM_RANKS_PER_DIMM, &i_target_mba, l_num_ranks_per_dimm); if(rc) return rc;
     FAPI_INF("Function cfg_mcb_addr");
@@ -1057,6 +1161,7 @@ fapi::ReturnCode  cfg_mcb_addr(const fapi::Target & i_target_mba,uint8_t rank,ui
     FAPI_INF("Num ranks per dimm :%d ", l_num_ranks_per_dimm[1][0]);
     FAPI_INF("Num ranks per dimm :%d ", l_num_ranks_per_dimm[1][1]);    
 
+	//FAPI_INF("FLAG 111  value of start and end addr is %016llX and %016llX",i_start,i_end);
     
 
     if( ( l_attr_eff_schmoo_addr_mode == FEW_ADDR) || ( l_attr_eff_schmoo_addr_mode == QUARTER_ADDR) ||( l_attr_eff_schmoo_addr_mode == HALF_ADDR) ||( l_attr_eff_schmoo_addr_mode == FULL_ADDR))
@@ -1072,12 +1177,21 @@ fapi::ReturnCode  cfg_mcb_addr(const fapi::Target & i_target_mba,uint8_t rank,ui
 	    rc = fapiGetScom(i_target_mba,MBA01_MCBIST_MCBSEARA0Q_0x030106d2,l_data_buffer2_64); if(rc) return rc;
             start_address = l_data_buffer_64.getDoubleWord (0);
             end_address = l_data_buffer2_64.getDoubleWord (0);
-				  
-        	  
-        
-		
-	    FAPI_INF(" value of start and end addr is %016llX and %016llX",start_address,end_address);
-            rc=addr_gen_func(i_target_mba,SF, l_attr_eff_schmoo_addr_mode,end_address,start_address,rank,i_port);if(rc)return rc; 
+			if((i_start >= 0x0000000000000000) && (i_end > 0x0000000000000000) )
+	        {      	  
+        	   //FAPI_INF("FLAG 111  value of start and end addr is %016llX and %016llX",i_start,i_end);
+			   rc=addr_gen_func(i_target_mba,SF, l_attr_eff_schmoo_addr_mode,i_end,i_start,rank,i_port);if(rc)return rc;  
+				start_address = i_start;
+			    end_address = i_end;
+				FAPI_INF(" value of start and end addr is %016llX and %016llX",start_address,end_address);
+            }
+		     else
+			 {
+			  FAPI_INF(" value of start and end addr is %016llX and %016llX",start_address,end_address);
+			  rc=addr_gen_func(i_target_mba,SF, l_attr_eff_schmoo_addr_mode,end_address,start_address,rank,i_port);if(rc)return rc;
+			 } 
+	    
+             
 
 
         //rc_num=rc_num|l_data_buffer_64.insert(io_value_u32,l_sbit,l_len,l_start);
@@ -1105,8 +1219,21 @@ fapi::ReturnCode  cfg_mcb_addr(const fapi::Target & i_target_mba,uint8_t rank,ui
             start_address = l_data_buffer_64.getDoubleWord (0);
             end_address = l_data_buffer2_64.getDoubleWord (0);
 	    FAPI_INF(" value of start and end addr is %016llX and %016llX",start_address,end_address);
-            rc=addr_gen_func(i_target_mba,SF, l_attr_eff_schmoo_addr_mode,end_address,start_address,rank,i_port); if(rc)return rc;  
-	    rc_num  = rc_num| l_data_buffer_64.setDoubleWord(0,start_address);
+            
+			
+			if((i_start >= 0x0000000000000000) && (i_end > 0x0000000000000000) )
+	        {      	  
+              // FAPI_INF("FLAG 111  value of start and end addr is %016llX and %016llX",i_start,i_end);         	   
+			   rc=addr_gen_func(i_target_mba,SF, l_attr_eff_schmoo_addr_mode,i_end,i_start,rank,i_port); if(rc)return rc;  
+            start_address = i_start;
+			end_address = i_end;
+			FAPI_INF(" value of start and end addr is %016llX and %016llX",start_address,end_address);
+			}
+			else
+			{
+			rc=addr_gen_func(i_target_mba,SF, l_attr_eff_schmoo_addr_mode,end_address,start_address,rank,i_port); if(rc)return rc;  
+            }	    
+		rc_num  = rc_num| l_data_buffer_64.setDoubleWord(0,start_address);
 	    rc_num  =  rc_num|l_data_buffer2_64.setDoubleWord(0,end_address);
 		if (rc_num){FAPI_ERR( "Error in function  cfg_mcb_addr:");rc.setEcmdError(rc_num);return rc;}
 	        

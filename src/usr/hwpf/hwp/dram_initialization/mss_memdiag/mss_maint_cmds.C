@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_maint_cmds.C,v 1.17 2012/12/19 15:48:48 gollub Exp $
+// $Id: mss_maint_cmds.C,v 1.18 2013/01/15 23:05:48 gollub Exp $
 //------------------------------------------------------------------------------
 // Don't forget to create CVS comments when you check in your changes!
 //------------------------------------------------------------------------------
@@ -55,7 +55,8 @@
 //         |          |         | Updates to traces.
 //   1.16  | 11/21/12 | gollub  | Updates from review.
 //   1.17  | 12/19/12 | gollub  | Added UE isolation
-
+//   1.18  | 01/15/13 | gollub  | Added check for valid dimm before calling 
+//         |          |         | dimmGetBadDqBitmap
 //------------------------------------------------------------------------------
 //    Includes
 //------------------------------------------------------------------------------
@@ -1196,12 +1197,12 @@ fapi::ReturnCode mss_MaintCmd::pollForMaintCmdComplete()
     uint32_t count = 0;
 
     // 1 ms delay for HW mode
-    const uint64_t  HW_MODE_DELAY = 1000000;
+    const uint64_t  HW_MODE_DELAY = 100000000;
 
     // 200000 sim cycle delay for SIM mode
     const uint64_t  SIM_MODE_DELAY = 200000;
 
-    uint32_t loop_limit = 500;
+    uint32_t loop_limit = 50000;
 
     do
     {
@@ -4240,6 +4241,8 @@ fapi::ReturnCode mss_restore_DRAM_repairs( const fapi::Target & i_target,
     bool l_spare_used = false;
     bool l_chip_mark_used = false;
     bool l_symbol_mark_used = false;
+    uint8_t l_valid_dimms  = 0;
+    uint8_t l_valid_dimm[2][2];
 
 
     // TODO: Fake this to show spares exist until attribute ready
@@ -4302,519 +4305,535 @@ fapi::ReturnCode mss_restore_DRAM_repairs( const fapi::Target & i_target,
         return l_rc;
     }
 
+	// Find out which dimms are functional
+    l_rc = FAPI_ATTR_GET(ATTR_MSS_EFF_DIMM_FUNCTIONAL_VECTOR, &i_target, l_valid_dimms);
+    if (l_rc)
+    {
+        FAPI_ERR("Failed to get attribute: ATTR_MSS_EFF_DIMM_FUNCTIONAL_VECTOR");
+        return l_rc;
+    }
+    l_valid_dimm[0][0] = (l_valid_dimms & 0x80); // port0, dimm0
+    l_valid_dimm[0][1] = (l_valid_dimms & 0x40); // port0, dimm1
+    l_valid_dimm[1][0] = (l_valid_dimms & 0x08); // port1, dimm0
+    l_valid_dimm[1][1] = (l_valid_dimms & 0x04); // port1, dimm1
+
+
     // For each port in the given MBA:0,1
     for(l_port=0; l_port<DIMM_DQ_MAX_MBA_PORTS; l_port++ )
     {
         // For each DIMM select on the given port:0,1
         for(l_dimm=0; l_dimm<DIMM_DQ_MAX_MBAPORT_DIMMS; l_dimm++ )
-        {
-            // For each rank select on the given DIMM select:0,1,2,3
-            for(l_rank=0; l_rank<DIMM_DQ_MAX_DIMM_RANKS; l_rank++ )
+        {         
+            if (l_valid_dimm[l_port][l_dimm])
             {
-
-
-                // Get the bad DQ Bitmap for l_port, l_dimm, l_rank
-                l_rc = dimmGetBadDqBitmap(i_target,
-                                          l_port,
-                                          l_dimm,
-                                          l_rank,
-                                          l_dqBitmap);
-                if (l_rc)
-                {
-                    FAPI_ERR("Error from dimmGetBadDqBitmap");
-                    return l_rc;
-                }
-
-                // x8 ECC
-                // x8 bit chip mark, x2 bit symbol mark, spare x8 DRAM if CDIMM
-                if (l_dramWidth == mss_MemConfig::X8)
+                // For each rank select on the given DIMM select:0,1,2,3
+                for(l_rank=0; l_rank<DIMM_DQ_MAX_DIMM_RANKS; l_rank++ )
                 {
 
-                    // Determine if spare x8 DRAM exists
-                    l_spare_exists = l_spare_dram[l_port][l_dimm][l_rank] == mss_MemConfig::FULL_BYTE;
 
-                    // Start with spare not used
-                    l_spare_used = false;
-                    l_byte_being_steered = MSS_INVALID_SYMBOL;
-
-                    // Read mark store
-                    l_rc = mss_get_mark_store(
-
-                        i_target,               // MBA
-                        4*l_dimm + l_rank,      // Master rank: 0-7
-                        l_symbol_mark,          // MSS_INVALID_SYMBOL if no symbol mark
-                        l_chip_mark );          // MSS_INVALID_SYMBOL if no chip mark
-
+                    // Get the bad DQ Bitmap for l_port, l_dimm, l_rank
+                    l_rc = dimmGetBadDqBitmap(i_target,
+                                              l_port,
+                                              l_dimm,
+                                              l_rank,
+                                              l_dqBitmap);
                     if (l_rc)
                     {
-                        FAPI_ERR("Error reading markstore");
+                        FAPI_ERR("Error from dimmGetBadDqBitmap");
                         return l_rc;
                     }
 
-                    // Check if chip mark used (may have been used on other port)
-                    l_chip_mark_used = l_chip_mark != MSS_INVALID_SYMBOL;
-
-                    // Check if symbol mark used (may have been used on other port)
-                    l_symbol_mark_used = l_symbol_mark != MSS_INVALID_SYMBOL;
-
-                    // Initialize to no bad dq pair found yet
-                    l_bad_dq_pair = 0xff;
-
-                    // For each byte 0-9, where 9 is the spare
-                    for(l_byte=0; l_byte<DIMM_DQ_RANK_BITMAP_SIZE; l_byte++ )
+                    // x8 ECC
+                    // x8 bit chip mark, x2 bit symbol mark, spare x8 DRAM if CDIMM
+                    if (l_dramWidth == mss_MemConfig::X8)
                     {
-                        if ((l_byte == 9) && !l_spare_exists)
+
+                        // Determine if spare x8 DRAM exists
+                        l_spare_exists = l_spare_dram[l_port][l_dimm][l_rank] == mss_MemConfig::FULL_BYTE;
+
+                        // Start with spare not used
+                        l_spare_used = false;
+                        l_byte_being_steered = MSS_INVALID_SYMBOL;
+
+                        // Read mark store
+                        l_rc = mss_get_mark_store(
+
+                            i_target,               // MBA
+                            4*l_dimm + l_rank,      // Master rank: 0-7
+                            l_symbol_mark,          // MSS_INVALID_SYMBOL if no symbol mark
+                            l_chip_mark );          // MSS_INVALID_SYMBOL if no chip mark
+
+                        if (l_rc)
                         {
-                            // Don't look at byte 9 if spare doesn't exist
-                            break;
+                            FAPI_ERR("Error reading markstore");
+                            return l_rc;
                         }
 
-                        if (l_dqBitmap[l_byte] == 0)
+                        // Check if chip mark used (may have been used on other port)
+                        l_chip_mark_used = l_chip_mark != MSS_INVALID_SYMBOL;
+
+                        // Check if symbol mark used (may have been used on other port)
+                        l_symbol_mark_used = l_symbol_mark != MSS_INVALID_SYMBOL;
+
+                        // Initialize to no bad dq pair found yet
+                        l_bad_dq_pair = 0xff;
+
+                        // For each byte 0-9, where 9 is the spare
+                        for(l_byte=0; l_byte<DIMM_DQ_RANK_BITMAP_SIZE; l_byte++ )
                         {
-                            // Don't bother analyzing if byte is clean
-                            continue;
-                        }
-
-                        // Mask initialized to look at first dq pair in byte
-                        l_dq_pair_mask = 0xC0;
-
-                        // Start with no bad dq pairs counted for this byte
-                        l_bad_dq_pair_count = 0;
-
-                        // For each of the 4 dq pairs in the byte
-                        for(l_dq_pair_index=0; l_dq_pair_index<4; l_dq_pair_index++ )
-                        {
-
-                            // If any bad bits in this dq pair
-                            if (l_dqBitmap[l_byte] & l_dq_pair_mask)
+                            if ((l_byte == 9) && !l_spare_exists)
                             {
-                                // Increment bad symbol count
-                                l_bad_dq_pair_count++;
-
-                                // Record bad dq pair - just most recent if multiple bad
-                                l_bad_dq_pair_index = l_dq_pair_index;
-                                l_bad_dq_pair = 8*l_byte + 2*l_bad_dq_pair_index;
-                            }
-
-                            // Shift mask to next symbol
-                            l_dq_pair_mask = l_dq_pair_mask >> 2;
-                        }
-
-                        // If spare is bad but not used, not valid to try repair 
-                        if ( l_spare_exists && (l_byte==9) && (l_bad_dq_pair_count > 0) && !l_spare_used)
-                        {
-                            FAPI_INF("port=%d, dimm=%d, rank=%d, l_dqBitmap[%d] = %02x, Bad unused spare - no valid repair",
-                            l_port, l_dimm, l_rank, l_byte, l_dqBitmap[l_byte]);
-
-                            break;
-                        }
-
-                        // If more than one dq pair is bad
-                        if(l_bad_dq_pair_count > 1)
-                        {
-
-                            // If spare x8 DRAM exists and not used yet,
-                            if (l_spare_exists && !l_spare_used)
-                            {
-                                l_bad_symbol = mss_centaurDQ_to_symbol(8*l_byte,l_port) - 3;
-
-                                // Update read mux
-                                l_rc = mss_put_steer_mux(
-
-                                    i_target,               // MBA
-                                    4*l_dimm + l_rank,      // Master rank: 0-7
-                                    mss_SteerMux::READ_MUX, // read mux
-                                    l_port,                 // l_port: 0,1
-                                    l_bad_symbol);          // First symbol index of byte to steer
-
-                                if (l_rc)
-                                {
-                                    FAPI_ERR("Error updating read mux");
-                                    return l_rc;
-
-                                }
-
-                                // Update write mux
-                                l_rc = mss_put_steer_mux(
-
-                                    i_target,               // MBA
-                                    4*l_dimm + l_rank,      // Master rank: 0-7
-                                    mss_SteerMux::WRITE_MUX,// write mux
-                                    l_port,                 // l_port: 0,1
-                                    l_bad_symbol);          // First symbol index of byte to steer
-
-                                if (l_rc)
-                                {
-                                    FAPI_ERR("Error updating write mux");
-                                    return l_rc;
-                                }
-
-                                // Spare now used on this port,dimm,rank
-                                l_spare_used = true;
-
-                                // Remember which byte is being steered
-                                // so we know where to apply chip or symbol mark
-                                // if spare turns out to be bad 
-                                l_byte_being_steered = l_byte;
-
-                                // Update which rank 0-7 has had repairs applied
-                                o_repairs_applied |= l_repairs_applied_translation[4*l_dimm + l_rank];
-
-                                l_repair_status[l_port][l_dimm][l_rank]=MSS_REPAIRS_APPLIED;
-
-                                // If port1 repairs applied and port0 had repairs exceeded, say port1 repairs exceeded too
-                                if ((l_repair_status[1][l_dimm][l_rank] == MSS_REPAIRS_APPLIED) && (l_repair_status[0][l_dimm][l_rank] == MSS_REPAIRS_EXCEEDED))
-                                {
-                                    o_repairs_exceeded |= l_repairs_exceeded_translation[1][l_dimm];
-                                }
-
-                                FAPI_INF("port=%d, dimm=%d, rank=%d, l_dqBitmap[%d] = %02x, dq %d-%d, symbols %d-%d, FIXED CHIP WITH X8 STEER",
-                                l_port, l_dimm, l_rank, l_byte, l_dqBitmap[l_byte], 8*l_byte, 8*l_byte+7,l_bad_symbol, l_bad_symbol+3 );
-
-
-                            }
-
-                            // Else if chip mark not used yet, update mark store with chip mark
-                            else if (!l_chip_mark_used)
-                            {
-                                // NOTE: Have to do a read/modify/write so we
-                                // only update chip mark, and don't overwrite
-                                // symbol mark.
-
-                                // Read mark store
-                                l_rc = mss_get_mark_store(
-
-                                    i_target,               // MBA
-                                    4*l_dimm + l_rank,      // Master rank: 0-7
-                                    l_symbol_mark,          // Reading this just to write it back
-                                    l_chip_mark );          // Expecting MSS_INVALID_SYMBOL since no chip mark
-
-                                if (l_rc)
-                                {
-                                    FAPI_ERR("Error reading markstore");
-                                    return l_rc;
-                                }
-
-
-                                // Special case:
-                                // If this is a bad spare byte we are analying
-                                // the chip mark goes on the byte being steered
-                                if (l_byte==9)
-                                {
-                                    l_chip_mark = mss_centaurDQ_to_symbol(8*l_byte_being_steered,l_port) - 3;
-                                    FAPI_INF("Bad spare so chip mark goes on l_byte_being_steered = %d", l_byte_being_steered);
-                                }
-
-                                else
-                                {
-                                    l_chip_mark = mss_centaurDQ_to_symbol(8*l_byte,l_port) - 3;
-                                }
-
-                                // Write mark store
-                                l_rc = mss_put_mark_store(
-
-                                    i_target,               // MBA
-                                    4*l_dimm + l_rank,      // Master rank: 0-7
-                                    l_symbol_mark,          // Writting back exactly what we read
-                                    l_chip_mark );          // First symbol index of byte getting chip mark
-
-                                if (l_rc)
-                                {
-                                    FAPI_ERR("Error updating markstore");
-                                    return l_rc;
-                                }
-
-                                // Chip mark now used on this rank
-                                l_chip_mark_used = true;
-
-                                // Update which rank 0-7 has had repairs applied
-                                o_repairs_applied |= l_repairs_applied_translation[4*l_dimm + l_rank];
-
-                                l_repair_status[l_port][l_dimm][l_rank]=MSS_REPAIRS_APPLIED;
-
-                                // If port1 repairs applied and port0 had repairs exceeded, say port1 repairs exceeded too
-                                if ((l_repair_status[1][l_dimm][l_rank] == MSS_REPAIRS_APPLIED) && (l_repair_status[0][l_dimm][l_rank] == MSS_REPAIRS_EXCEEDED))
-                                {
-                                    o_repairs_exceeded |= l_repairs_exceeded_translation[1][l_dimm];
-                                }
-
-                                FAPI_INF("port=%d, dimm=%d, rank=%d, l_dqBitmap[%d] = %02x, dq %d-%d, symbols %d-%d, FIXED CHIP WITH X8 CHIP MARK",
-                                l_port, l_dimm, l_rank, l_byte, l_dqBitmap[l_byte], 8*l_byte, 8*l_byte+7,l_chip_mark, l_chip_mark+3 );
-
-                            }
- 
-                            // Else, more bad bits than we can repair so update o_repairs_exceeded
-                            else
-                            {
-                                o_repairs_exceeded |= l_repairs_exceeded_translation[l_port][l_dimm]; 
-
-                                l_repair_status[l_port][l_dimm][l_rank]=MSS_REPAIRS_EXCEEDED; 
-
-                                // If port1 repairs exceeded and port0 had a repair, say port0 repairs exceeded too
-                                if ((l_repair_status[1][l_dimm][l_rank] == MSS_REPAIRS_EXCEEDED) && (l_repair_status[0][l_dimm][l_rank] == MSS_REPAIRS_APPLIED))
-                                {
-                                    o_repairs_exceeded |= l_repairs_exceeded_translation[0][l_dimm];
-                                }
-
-                                FAPI_INF("port=%d, dimm=%d, rank=%d, l_dqBitmap[%d] = %02x, dq %d-%d, REPAIRS EXCEEDED",
-                                l_port, l_dimm, l_rank, l_byte, l_dqBitmap[l_byte], 8*l_byte, 8*l_byte+7);
-
-
-                                // Break out of loop on bytes
-                                break;
-                            }
-                        } // End If bad symbol count > 1 
-
-
-                        //Else if bad symbol count = 1
-                        else if(l_bad_dq_pair_count == 1)
-                        {
-                            // If symbol mark not used yet, update mark store with symbol mark
-                            if (!l_symbol_mark_used)
-                            {
-
-                                // NOTE: Have to do a read/modify/write so we 
-                                // only update symbol mark, and don't overwrite
-                                // chip mark.
-
-                                // Read mark store
-                                l_rc = mss_get_mark_store(
-
-                                    i_target,               // MBA
-                                    4*l_dimm + l_rank,      // Master rank: 0-7
-                                    l_symbol_mark,          // Expecting MSS_INVALID_SYMBOL since no symbol mark
-                                    l_chip_mark );          // Reading this just to write it back
-
-                                if (l_rc)
-                                {
-                                    FAPI_ERR("Error reading markstore");
-                                    return l_rc;
-                                }
-
-                                // Special case:
-                                // If this is a bad spare byte we are analying
-                                // the symbol mark goes on the byte being steered
-                                if (l_byte==9)
-                                {
-                                    l_symbol_mark = mss_centaurDQ_to_symbol(8*l_byte_being_steered + 2*l_bad_dq_pair_index,l_port);
-                                    FAPI_INF("Bad spare so symbol mark goes on l_byte_being_steered = %d", l_byte_being_steered);
-                                }
-
-                                else
-                                {
-                                    l_symbol_mark = mss_centaurDQ_to_symbol(8*l_byte + 2*l_bad_dq_pair_index,l_port);
-                                }
-
-
-                                // Update mark store
-                                l_rc = mss_put_mark_store(
-
-                                    i_target,               // MBA
-                                    4*l_dimm + l_rank,      // Master rank: 0-7
-                                    l_symbol_mark,          // Single bad symbol found on this byte
-                                    l_chip_mark );          // Writting back exactly what we read
-
-                                if (l_rc)
-                                {
-                                    FAPI_ERR("Error updating markstore");
-                                    return l_rc;
-                                }
-
-                                // Symbol mark now used on this rank
-                                l_symbol_mark_used = true;
-
-                                // Update which rank 0-7 has had repairs applied
-                                o_repairs_applied |= l_repairs_applied_translation[4*l_dimm + l_rank];
-
-                                l_repair_status[l_port][l_dimm][l_rank]=MSS_REPAIRS_APPLIED;
-
-                                // If port1 repairs applied and port0 had repairs exceeded, say port1 repairs exceeded too
-                                if ((l_repair_status[1][l_dimm][l_rank] == MSS_REPAIRS_APPLIED) && (l_repair_status[0][l_dimm][l_rank] == MSS_REPAIRS_EXCEEDED))
-                                {
-                                    o_repairs_exceeded |= l_repairs_exceeded_translation[1][l_dimm];
-                                }
-
-                                FAPI_INF("port=%d, dimm=%d, rank=%d, l_dqBitmap[%d] = %02x, dq %d-%d, symbol %d, FIXED SYMBOL WITH X2 SYMBOL MARK",
-                                l_port, l_dimm, l_rank, l_byte, l_dqBitmap[l_byte], 
-                                8*l_byte + 2*l_bad_dq_pair_index, 8*l_byte + 2*l_bad_dq_pair_index + 1,
-                                l_symbol_mark );
-
-                            }
-
-
-                            // Else if spare x8 DRAM exists and not used yet, update steer mux
-                            else if (l_spare_exists && !l_spare_used)
-                            {
-
-                                l_bad_symbol = mss_centaurDQ_to_symbol(8*l_byte,l_port) - 3;
-
-                                // Update read mux
-                                l_rc = mss_put_steer_mux(
-
-                                    i_target,               // MBA
-                                    4*l_dimm + l_rank,      // Master rank: 0-7
-                                    mss_SteerMux::READ_MUX, // read mux
-                                    l_port,                 // l_port: 0,1
-                                    l_bad_symbol );         // First symbol index of byte to steer
-
-                                if (l_rc)
-                                {
-                                    FAPI_ERR("Error updating read mux");
-                                    return l_rc;
-
-                                }
-
-                                // Update write mux
-                                l_rc = mss_put_steer_mux(
-
-                                    i_target,               // MBA
-                                    4*l_dimm + l_rank,      // Master rank: 0-7
-                                    mss_SteerMux::WRITE_MUX,// write mux
-                                    l_port,                 // l_port: 0,1
-                                    l_bad_symbol );         // First symbol index of byte to steer
-
-                                if (l_rc)
-                                {
-                                    FAPI_ERR("Error updating write mux");
-                                    return l_rc;
-                                }
-
-                                // Spare now used on this port,dimm,rank
-                                l_spare_used = true;
-
-                                // Remember which byte is being steered
-                                // so we where to apply chip or symbol mark
-                                // if spare turns out to be bad 
-                                l_byte_being_steered = l_byte;
-
-                                // Update which rank 0-7 has had repairs applied
-                                o_repairs_applied |= l_repairs_applied_translation[4*l_dimm + l_rank];
-
-                                l_repair_status[l_port][l_dimm][l_rank]=MSS_REPAIRS_APPLIED;
-
-                                // If port1 repairs applied and port0 had repairs exceeded, say port1 repairs exceeded too
-                                if ((l_repair_status[1][l_dimm][l_rank] == MSS_REPAIRS_APPLIED) && (l_repair_status[0][l_dimm][l_rank] == MSS_REPAIRS_EXCEEDED))
-                                {
-                                    o_repairs_exceeded |= l_repairs_exceeded_translation[1][l_dimm];
-                                }
-
-                                FAPI_INF("port=%d, dimm=%d, rank=%d, l_dqBitmap[%d] = %02x, dq %d-%d, symbols %d-%d, FIXED SYMBOL WITH X8 STEER",
-                                l_port, l_dimm, l_rank, l_byte, l_dqBitmap[l_byte], 
-                                8*l_byte + 2*l_bad_dq_pair_index, 8*l_byte + 2*l_bad_dq_pair_index + 1,
-                                l_bad_symbol,
-                                l_bad_symbol + 3);
-
-                            }
-
-                            // Else if chip mark not used yet, update mark store with chip mark
-                            else if (!l_chip_mark_used)
-                            {
-
-                                // NOTE: Have to do a read/modify/write so we 
-                                // only update chip mark, and don't overwrite
-                                // symbol mark.
-
-                                // Read mark store
-                                l_rc = mss_get_mark_store(
-
-                                    i_target,               // MBA
-                                    4*l_dimm + l_rank,      // Master rank: 0-7
-                                    l_symbol_mark,          // Reading this just to write it back
-                                    l_chip_mark );          // Expecting MSS_INVALID_SYMBOL since no chip mark
-
-                                if (l_rc)
-                                {
-                                    FAPI_ERR("Error reading markstore");
-                                    return l_rc;
-                                }
-
-
-                                // Special case:
-                                // If this is a bad spare byte we are analying
-                                // the chip mark goes on the byte being steered
-                                if (l_byte==9)
-                                {
-                                    l_chip_mark = mss_centaurDQ_to_symbol(8*l_byte_being_steered,l_port) - 3;
-                                    FAPI_INF("Bad spare so chip mark goes on l_byte_being_steered = %d", l_byte_being_steered);
-                                }
-
-                                else
-                                {
-                                    l_chip_mark = mss_centaurDQ_to_symbol(8*l_byte,l_port) - 3;
-                                }
-
-                                // Update mark store
-                                l_rc = mss_put_mark_store(
-
-                                    i_target,               // MBA
-                                    4*l_dimm + l_rank,      // Master rank: 0-7
-                                    l_symbol_mark,          // Writting back exactly what we read
-                                    l_chip_mark );          // First symbol index of byte getting chip mark
-
-                                if (l_rc)
-                                {
-                                    FAPI_ERR("Error updating markstore");
-                                    return l_rc;
-                                }
-
-                                // Chip mark now used on this rank
-                                l_chip_mark_used = true;
-
-                                // Update which rank 0-7 has had repairs applied
-                                o_repairs_applied |= l_repairs_applied_translation[4*l_dimm + l_rank];
-
-                                l_repair_status[l_port][l_dimm][l_rank]=MSS_REPAIRS_APPLIED;
-
-                                // If port1 repairs applied and port0 had repairs exceeded, say port1 repairs exceeded too
-                                if ((l_repair_status[1][l_dimm][l_rank] == MSS_REPAIRS_APPLIED) && (l_repair_status[0][l_dimm][l_rank] == MSS_REPAIRS_EXCEEDED))
-                                {
-                                    o_repairs_exceeded |= l_repairs_exceeded_translation[1][l_dimm];
-                                }
-
-                                FAPI_INF("port=%d, dimm=%d, rank=%d, l_dqBitmap[%d] = %02x, dq %d-%d, symbols %d-%d, FIXED SYMBOL WITH X8 CHIP MARK",
-                                l_port, l_dimm, l_rank, l_byte, l_dqBitmap[l_byte], 
-                                8*l_byte + 2*l_bad_dq_pair_index, 8*l_byte + 2*l_bad_dq_pair_index + 1,
-                                l_chip_mark,
-                                l_chip_mark + 3);
-
-                            }
-
-
-                            // Else, more bad bits than we can repair so update o_repairs_exceeded
-                            else
-                            {
-
-                                o_repairs_exceeded |= l_repairs_exceeded_translation[l_port][l_dimm];
-
-                                l_repair_status[l_port][l_dimm][l_rank]=MSS_REPAIRS_EXCEEDED;
-
-                                // If port1 repairs exceeded and port0 had a repair, say port0 repairs exceeded too
-                                if ((l_repair_status[1][l_dimm][l_rank] == MSS_REPAIRS_EXCEEDED) && (l_repair_status[0][l_dimm][l_rank] == MSS_REPAIRS_APPLIED))
-                                {
-                                    o_repairs_exceeded |= l_repairs_exceeded_translation[0][l_dimm];
-                                }
-
-                                FAPI_INF("port=%d, dimm=%d, rank=%d, l_dqBitmap[%d] = %02x, dq %d-%d, REPAIRS EXCEEDED",
-                                l_port, l_dimm, l_rank, l_byte, l_dqBitmap[l_byte],
-                                8*l_byte + 2*l_bad_dq_pair_index, 8*l_byte + 2*l_bad_dq_pair_index + 1);
-
-                                // Break out of loop on bytes
+                                // Don't look at byte 9 if spare doesn't exist
                                 break;
                             }
 
-                        } // End If bad symbol count = 1
+                            if (l_dqBitmap[l_byte] == 0)
+                            {
+                                // Don't bother analyzing if byte is clean
+                                continue;
+                            }
 
-                    } // End For each byte 0-9, where 9 is the spare
+                            // Mask initialized to look at first dq pair in byte
+                            l_dq_pair_mask = 0xC0;
 
-                } // End x8 ECC
+                            // Start with no bad dq pairs counted for this byte
+                            l_bad_dq_pair_count = 0;
 
-                // x4 ECC
-                // x4 chip mark, x4 ECC steer, spare x4 DRAM if CDIMM
-                else if (l_dramWidth == mss_MemConfig::X4)
-                {
-                } // End x4 ECC
+                            // For each of the 4 dq pairs in the byte
+                            for(l_dq_pair_index=0; l_dq_pair_index<4; l_dq_pair_index++ )
+                            {
 
-            } // End loop on rank
+                                // If any bad bits in this dq pair
+                                if (l_dqBitmap[l_byte] & l_dq_pair_mask)
+                                {
+                                    // Increment bad symbol count
+                                    l_bad_dq_pair_count++;
+
+                                    // Record bad dq pair - just most recent if multiple bad
+                                    l_bad_dq_pair_index = l_dq_pair_index;
+                                    l_bad_dq_pair = 8*l_byte + 2*l_bad_dq_pair_index;
+                                }
+
+                                // Shift mask to next symbol
+                                l_dq_pair_mask = l_dq_pair_mask >> 2;
+                            }
+
+                            // If spare is bad but not used, not valid to try repair 
+                            if ( l_spare_exists && (l_byte==9) && (l_bad_dq_pair_count > 0) && !l_spare_used)
+                            {
+                                FAPI_INF("port=%d, dimm=%d, rank=%d, l_dqBitmap[%d] = %02x, Bad unused spare - no valid repair",
+                                l_port, l_dimm, l_rank, l_byte, l_dqBitmap[l_byte]);
+
+                                break;
+                            }
+
+                            // If more than one dq pair is bad
+                            if(l_bad_dq_pair_count > 1)
+                            {
+
+                                // If spare x8 DRAM exists and not used yet,
+                                if (l_spare_exists && !l_spare_used)
+                                {
+                                    l_bad_symbol = mss_centaurDQ_to_symbol(8*l_byte,l_port) - 3;
+
+                                    // Update read mux
+                                    l_rc = mss_put_steer_mux(
+
+                                        i_target,               // MBA
+                                        4*l_dimm + l_rank,      // Master rank: 0-7
+                                        mss_SteerMux::READ_MUX, // read mux
+                                        l_port,                 // l_port: 0,1
+                                        l_bad_symbol);          // First symbol index of byte to steer
+
+                                    if (l_rc)
+                                    {
+                                        FAPI_ERR("Error updating read mux");
+                                        return l_rc;
+
+                                    }
+
+                                    // Update write mux
+                                    l_rc = mss_put_steer_mux(
+
+                                        i_target,               // MBA
+                                        4*l_dimm + l_rank,      // Master rank: 0-7
+                                        mss_SteerMux::WRITE_MUX,// write mux
+                                        l_port,                 // l_port: 0,1
+                                        l_bad_symbol);          // First symbol index of byte to steer
+
+                                    if (l_rc)
+                                    {
+                                        FAPI_ERR("Error updating write mux");
+                                        return l_rc;
+                                    }
+
+                                    // Spare now used on this port,dimm,rank
+                                    l_spare_used = true;
+
+                                    // Remember which byte is being steered
+                                    // so we know where to apply chip or symbol mark
+                                    // if spare turns out to be bad 
+                                    l_byte_being_steered = l_byte;
+
+                                    // Update which rank 0-7 has had repairs applied
+                                    o_repairs_applied |= l_repairs_applied_translation[4*l_dimm + l_rank];
+
+                                    l_repair_status[l_port][l_dimm][l_rank]=MSS_REPAIRS_APPLIED;
+
+                                    // If port1 repairs applied and port0 had repairs exceeded, say port1 repairs exceeded too
+                                    if ((l_repair_status[1][l_dimm][l_rank] == MSS_REPAIRS_APPLIED) && (l_repair_status[0][l_dimm][l_rank] == MSS_REPAIRS_EXCEEDED))
+                                    {
+                                        o_repairs_exceeded |= l_repairs_exceeded_translation[1][l_dimm];
+                                    }
+
+                                    FAPI_INF("port=%d, dimm=%d, rank=%d, l_dqBitmap[%d] = %02x, dq %d-%d, symbols %d-%d, FIXED CHIP WITH X8 STEER",
+                                    l_port, l_dimm, l_rank, l_byte, l_dqBitmap[l_byte], 8*l_byte, 8*l_byte+7,l_bad_symbol, l_bad_symbol+3 );
+
+
+                                }
+
+                                // Else if chip mark not used yet, update mark store with chip mark
+                                else if (!l_chip_mark_used)
+                                {
+                                    // NOTE: Have to do a read/modify/write so we
+                                    // only update chip mark, and don't overwrite
+                                    // symbol mark.
+
+                                    // Read mark store
+                                    l_rc = mss_get_mark_store(
+
+                                        i_target,               // MBA
+                                        4*l_dimm + l_rank,      // Master rank: 0-7
+                                        l_symbol_mark,          // Reading this just to write it back
+                                        l_chip_mark );          // Expecting MSS_INVALID_SYMBOL since no chip mark
+
+                                    if (l_rc)
+                                    {
+                                        FAPI_ERR("Error reading markstore");
+                                        return l_rc;
+                                    }
+
+
+                                    // Special case:
+                                    // If this is a bad spare byte we are analying
+                                    // the chip mark goes on the byte being steered
+                                    if (l_byte==9)
+                                    {
+                                        l_chip_mark = mss_centaurDQ_to_symbol(8*l_byte_being_steered,l_port) - 3;
+                                        FAPI_INF("Bad spare so chip mark goes on l_byte_being_steered = %d", l_byte_being_steered);
+                                    }
+
+                                    else
+                                    {
+                                        l_chip_mark = mss_centaurDQ_to_symbol(8*l_byte,l_port) - 3;
+                                    }
+
+                                    // Write mark store
+                                    l_rc = mss_put_mark_store(
+
+                                        i_target,               // MBA
+                                        4*l_dimm + l_rank,      // Master rank: 0-7
+                                        l_symbol_mark,          // Writting back exactly what we read
+                                        l_chip_mark );          // First symbol index of byte getting chip mark
+
+                                    if (l_rc)
+                                    {
+                                        FAPI_ERR("Error updating markstore");
+                                        return l_rc;
+                                    }
+
+                                    // Chip mark now used on this rank
+                                    l_chip_mark_used = true;
+
+                                    // Update which rank 0-7 has had repairs applied
+                                    o_repairs_applied |= l_repairs_applied_translation[4*l_dimm + l_rank];
+
+                                    l_repair_status[l_port][l_dimm][l_rank]=MSS_REPAIRS_APPLIED;
+
+                                    // If port1 repairs applied and port0 had repairs exceeded, say port1 repairs exceeded too
+                                    if ((l_repair_status[1][l_dimm][l_rank] == MSS_REPAIRS_APPLIED) && (l_repair_status[0][l_dimm][l_rank] == MSS_REPAIRS_EXCEEDED))
+                                    {
+                                        o_repairs_exceeded |= l_repairs_exceeded_translation[1][l_dimm];
+                                    }
+
+                                    FAPI_INF("port=%d, dimm=%d, rank=%d, l_dqBitmap[%d] = %02x, dq %d-%d, symbols %d-%d, FIXED CHIP WITH X8 CHIP MARK",
+                                    l_port, l_dimm, l_rank, l_byte, l_dqBitmap[l_byte], 8*l_byte, 8*l_byte+7,l_chip_mark, l_chip_mark+3 );
+
+                                }
+     
+                                // Else, more bad bits than we can repair so update o_repairs_exceeded
+                                else
+                                {
+                                    o_repairs_exceeded |= l_repairs_exceeded_translation[l_port][l_dimm]; 
+
+                                    l_repair_status[l_port][l_dimm][l_rank]=MSS_REPAIRS_EXCEEDED; 
+
+                                    // If port1 repairs exceeded and port0 had a repair, say port0 repairs exceeded too
+                                    if ((l_repair_status[1][l_dimm][l_rank] == MSS_REPAIRS_EXCEEDED) && (l_repair_status[0][l_dimm][l_rank] == MSS_REPAIRS_APPLIED))
+                                    {
+                                        o_repairs_exceeded |= l_repairs_exceeded_translation[0][l_dimm];
+                                    }
+
+                                    FAPI_INF("port=%d, dimm=%d, rank=%d, l_dqBitmap[%d] = %02x, dq %d-%d, REPAIRS EXCEEDED",
+                                    l_port, l_dimm, l_rank, l_byte, l_dqBitmap[l_byte], 8*l_byte, 8*l_byte+7);
+
+
+                                    // Break out of loop on bytes
+                                    break;
+                                }
+                            } // End If bad symbol count > 1 
+
+
+                            //Else if bad symbol count = 1
+                            else if(l_bad_dq_pair_count == 1)
+                            {
+                                // If symbol mark not used yet, update mark store with symbol mark
+                                if (!l_symbol_mark_used)
+                                {
+
+                                    // NOTE: Have to do a read/modify/write so we 
+                                    // only update symbol mark, and don't overwrite
+                                    // chip mark.
+
+                                    // Read mark store
+                                    l_rc = mss_get_mark_store(
+
+                                        i_target,               // MBA
+                                        4*l_dimm + l_rank,      // Master rank: 0-7
+                                        l_symbol_mark,          // Expecting MSS_INVALID_SYMBOL since no symbol mark
+                                        l_chip_mark );          // Reading this just to write it back
+
+                                    if (l_rc)
+                                    {
+                                        FAPI_ERR("Error reading markstore");
+                                        return l_rc;
+                                    }
+
+                                    // Special case:
+                                    // If this is a bad spare byte we are analying
+                                    // the symbol mark goes on the byte being steered
+                                    if (l_byte==9)
+                                    {
+                                        l_symbol_mark = mss_centaurDQ_to_symbol(8*l_byte_being_steered + 2*l_bad_dq_pair_index,l_port);
+                                        FAPI_INF("Bad spare so symbol mark goes on l_byte_being_steered = %d", l_byte_being_steered);
+                                    }
+
+                                    else
+                                    {
+                                        l_symbol_mark = mss_centaurDQ_to_symbol(8*l_byte + 2*l_bad_dq_pair_index,l_port);
+                                    }
+
+
+                                    // Update mark store
+                                    l_rc = mss_put_mark_store(
+
+                                        i_target,               // MBA
+                                        4*l_dimm + l_rank,      // Master rank: 0-7
+                                        l_symbol_mark,          // Single bad symbol found on this byte
+                                        l_chip_mark );          // Writting back exactly what we read
+
+                                    if (l_rc)
+                                    {
+                                        FAPI_ERR("Error updating markstore");
+                                        return l_rc;
+                                    }
+
+                                    // Symbol mark now used on this rank
+                                    l_symbol_mark_used = true;
+
+                                    // Update which rank 0-7 has had repairs applied
+                                    o_repairs_applied |= l_repairs_applied_translation[4*l_dimm + l_rank];
+
+                                    l_repair_status[l_port][l_dimm][l_rank]=MSS_REPAIRS_APPLIED;
+
+                                    // If port1 repairs applied and port0 had repairs exceeded, say port1 repairs exceeded too
+                                    if ((l_repair_status[1][l_dimm][l_rank] == MSS_REPAIRS_APPLIED) && (l_repair_status[0][l_dimm][l_rank] == MSS_REPAIRS_EXCEEDED))
+                                    {
+                                        o_repairs_exceeded |= l_repairs_exceeded_translation[1][l_dimm];
+                                    }
+
+                                    FAPI_INF("port=%d, dimm=%d, rank=%d, l_dqBitmap[%d] = %02x, dq %d-%d, symbol %d, FIXED SYMBOL WITH X2 SYMBOL MARK",
+                                    l_port, l_dimm, l_rank, l_byte, l_dqBitmap[l_byte], 
+                                    8*l_byte + 2*l_bad_dq_pair_index, 8*l_byte + 2*l_bad_dq_pair_index + 1,
+                                    l_symbol_mark );
+
+                                }
+
+
+                                // Else if spare x8 DRAM exists and not used yet, update steer mux
+                                else if (l_spare_exists && !l_spare_used)
+                                {
+
+                                    l_bad_symbol = mss_centaurDQ_to_symbol(8*l_byte,l_port) - 3;
+
+                                    // Update read mux
+                                    l_rc = mss_put_steer_mux(
+
+                                        i_target,               // MBA
+                                        4*l_dimm + l_rank,      // Master rank: 0-7
+                                        mss_SteerMux::READ_MUX, // read mux
+                                        l_port,                 // l_port: 0,1
+                                        l_bad_symbol );         // First symbol index of byte to steer
+
+                                    if (l_rc)
+                                    {
+                                        FAPI_ERR("Error updating read mux");
+                                        return l_rc;
+
+                                    }
+
+                                    // Update write mux
+                                    l_rc = mss_put_steer_mux(
+
+                                        i_target,               // MBA
+                                        4*l_dimm + l_rank,      // Master rank: 0-7
+                                        mss_SteerMux::WRITE_MUX,// write mux
+                                        l_port,                 // l_port: 0,1
+                                        l_bad_symbol );         // First symbol index of byte to steer
+
+                                    if (l_rc)
+                                    {
+                                        FAPI_ERR("Error updating write mux");
+                                        return l_rc;
+                                    }
+
+                                    // Spare now used on this port,dimm,rank
+                                    l_spare_used = true;
+
+                                    // Remember which byte is being steered
+                                    // so we where to apply chip or symbol mark
+                                    // if spare turns out to be bad 
+                                    l_byte_being_steered = l_byte;
+
+                                    // Update which rank 0-7 has had repairs applied
+                                    o_repairs_applied |= l_repairs_applied_translation[4*l_dimm + l_rank];
+
+                                    l_repair_status[l_port][l_dimm][l_rank]=MSS_REPAIRS_APPLIED;
+
+                                    // If port1 repairs applied and port0 had repairs exceeded, say port1 repairs exceeded too
+                                    if ((l_repair_status[1][l_dimm][l_rank] == MSS_REPAIRS_APPLIED) && (l_repair_status[0][l_dimm][l_rank] == MSS_REPAIRS_EXCEEDED))
+                                    {
+                                        o_repairs_exceeded |= l_repairs_exceeded_translation[1][l_dimm];
+                                    }
+
+                                    FAPI_INF("port=%d, dimm=%d, rank=%d, l_dqBitmap[%d] = %02x, dq %d-%d, symbols %d-%d, FIXED SYMBOL WITH X8 STEER",
+                                    l_port, l_dimm, l_rank, l_byte, l_dqBitmap[l_byte], 
+                                    8*l_byte + 2*l_bad_dq_pair_index, 8*l_byte + 2*l_bad_dq_pair_index + 1,
+                                    l_bad_symbol,
+                                    l_bad_symbol + 3);
+
+                                }
+
+                                // Else if chip mark not used yet, update mark store with chip mark
+                                else if (!l_chip_mark_used)
+                                {
+
+                                    // NOTE: Have to do a read/modify/write so we 
+                                    // only update chip mark, and don't overwrite
+                                    // symbol mark.
+
+                                    // Read mark store
+                                    l_rc = mss_get_mark_store(
+
+                                        i_target,               // MBA
+                                        4*l_dimm + l_rank,      // Master rank: 0-7
+                                        l_symbol_mark,          // Reading this just to write it back
+                                        l_chip_mark );          // Expecting MSS_INVALID_SYMBOL since no chip mark
+
+                                    if (l_rc)
+                                    {
+                                        FAPI_ERR("Error reading markstore");
+                                        return l_rc;
+                                    }
+
+
+                                    // Special case:
+                                    // If this is a bad spare byte we are analying
+                                    // the chip mark goes on the byte being steered
+                                    if (l_byte==9)
+                                    {
+                                        l_chip_mark = mss_centaurDQ_to_symbol(8*l_byte_being_steered,l_port) - 3;
+                                        FAPI_INF("Bad spare so chip mark goes on l_byte_being_steered = %d", l_byte_being_steered);
+                                    }
+
+                                    else
+                                    {
+                                        l_chip_mark = mss_centaurDQ_to_symbol(8*l_byte,l_port) - 3;
+                                    }
+
+                                    // Update mark store
+                                    l_rc = mss_put_mark_store(
+
+                                        i_target,               // MBA
+                                        4*l_dimm + l_rank,      // Master rank: 0-7
+                                        l_symbol_mark,          // Writting back exactly what we read
+                                        l_chip_mark );          // First symbol index of byte getting chip mark
+
+                                    if (l_rc)
+                                    {
+                                        FAPI_ERR("Error updating markstore");
+                                        return l_rc;
+                                    }
+
+                                    // Chip mark now used on this rank
+                                    l_chip_mark_used = true;
+
+                                    // Update which rank 0-7 has had repairs applied
+                                    o_repairs_applied |= l_repairs_applied_translation[4*l_dimm + l_rank];
+
+                                    l_repair_status[l_port][l_dimm][l_rank]=MSS_REPAIRS_APPLIED;
+
+                                    // If port1 repairs applied and port0 had repairs exceeded, say port1 repairs exceeded too
+                                    if ((l_repair_status[1][l_dimm][l_rank] == MSS_REPAIRS_APPLIED) && (l_repair_status[0][l_dimm][l_rank] == MSS_REPAIRS_EXCEEDED))
+                                    {
+                                        o_repairs_exceeded |= l_repairs_exceeded_translation[1][l_dimm];
+                                    }
+
+                                    FAPI_INF("port=%d, dimm=%d, rank=%d, l_dqBitmap[%d] = %02x, dq %d-%d, symbols %d-%d, FIXED SYMBOL WITH X8 CHIP MARK",
+                                    l_port, l_dimm, l_rank, l_byte, l_dqBitmap[l_byte], 
+                                    8*l_byte + 2*l_bad_dq_pair_index, 8*l_byte + 2*l_bad_dq_pair_index + 1,
+                                    l_chip_mark,
+                                    l_chip_mark + 3);
+
+                                }
+
+
+                                // Else, more bad bits than we can repair so update o_repairs_exceeded
+                                else
+                                {
+
+                                    o_repairs_exceeded |= l_repairs_exceeded_translation[l_port][l_dimm];
+
+                                    l_repair_status[l_port][l_dimm][l_rank]=MSS_REPAIRS_EXCEEDED;
+
+                                    // If port1 repairs exceeded and port0 had a repair, say port0 repairs exceeded too
+                                    if ((l_repair_status[1][l_dimm][l_rank] == MSS_REPAIRS_EXCEEDED) && (l_repair_status[0][l_dimm][l_rank] == MSS_REPAIRS_APPLIED))
+                                    {
+                                        o_repairs_exceeded |= l_repairs_exceeded_translation[0][l_dimm];
+                                    }
+
+                                    FAPI_INF("port=%d, dimm=%d, rank=%d, l_dqBitmap[%d] = %02x, dq %d-%d, REPAIRS EXCEEDED",
+                                    l_port, l_dimm, l_rank, l_byte, l_dqBitmap[l_byte],
+                                    8*l_byte + 2*l_bad_dq_pair_index, 8*l_byte + 2*l_bad_dq_pair_index + 1);
+
+                                    // Break out of loop on bytes
+                                    break;
+                                }
+
+                            } // End If bad symbol count = 1
+
+                        } // End For each byte 0-9, where 9 is the spare
+
+                    } // End x8 ECC
+
+                    // x4 ECC
+                    // x4 chip mark, x4 ECC steer, spare x4 DRAM if CDIMM
+                    else if (l_dramWidth == mss_MemConfig::X4)
+                    {
+                    } // End x4 ECC
+
+                } // End loop on rank
+            } // End if valid dimm
         } // End loop on dimm
     } // End loop on port
 

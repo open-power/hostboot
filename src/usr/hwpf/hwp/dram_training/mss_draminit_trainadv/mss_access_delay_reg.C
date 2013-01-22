@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_access_delay_reg.C,v 1.12 2012/12/18 15:31:39 sasethur Exp $
+// $Id: mss_access_delay_reg.C,v 1.14 2013/01/10 14:32:39 sasethur Exp $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
 // *! All Rights Reserved -- Property of IBM
@@ -48,6 +48,8 @@
 //   1.10  | sauchadh |14-Dec-12| Fixed Firmware comments
 //   1.11  | sauchadh |18-Dec-12| Fixed Frimware comments and removed print statements in between
 //   1.12  | sauchadh |18-Dec-12| Added support for unused DQS in x8 mode
+//   1.13  | sauchadh |7-Jan-12 | Added DQSCLK and RDCLK in phase select register
+//   1.14  | sauchadh |8-Jan-12 | Fixed Firmware comments 
 
 
 //----------------------------------------------------------------------
@@ -196,7 +198,7 @@ fapi::ReturnCode mss_access_delay_reg(const fapi::Target & i_target_mba, access_
 	 
    }
     
-   else if (i_input_type_e==RD_DQS || i_input_type_e==WR_DQS || i_input_type_e==DQS_ALIGN ||  i_input_type_e==DQS_GATE)	    
+   else if (i_input_type_e==RD_DQS || i_input_type_e==WR_DQS || i_input_type_e==DQS_ALIGN ||  i_input_type_e==DQS_GATE || i_input_type_e==RDCLK || i_input_type_e==DQSCLK)	    
    {
      
       if(l_dimmtype==fapi::ENUM_ATTR_EFF_DIMM_TYPE_CDIMM)
@@ -233,7 +235,115 @@ fapi::ReturnCode mss_access_delay_reg(const fapi::Target & i_target_mba, access_
          
    }
    
-        
+   
+   else if(i_input_type_e==RAW_RDCLK_0 || i_input_type_e==RAW_RDCLK_1 || i_input_type_e==RAW_RDCLK_2 || i_input_type_e==RAW_RDCLK_3 || i_input_type_e==RAW_RDCLK_4) 
+   {
+      if(i_input_type_e==RAW_RDCLK_0)
+      {
+         l_block=0;
+      }
+      
+      else if(i_input_type_e==RAW_RDCLK_1)
+      {
+         l_block=1;
+      }
+      
+      else if(i_input_type_e==RAW_RDCLK_2)
+      {
+         l_block=2;
+      }
+      
+      else if(i_input_type_e==RAW_RDCLK_3)
+      {
+         l_block=3;
+      }
+      
+      else
+      {
+         l_block=4;
+      }
+      if(i_input_index_u8<=3) // 4 delay values for RDCLK 
+      {
+         l_lane=i_input_index_u8;
+      }
+      
+      else
+      {
+         FAPI_SET_HWP_ERROR(rc, RC_MSS_INPUT_ERROR);
+         FAPI_ERR("Wrong input index specified rc = 0x%08X ", uint32_t(rc));
+         return rc;      
+      }
+     
+      ip_type_t l_input=RAW_RDCLK;
+      if(i_verbose==1)
+      {
+         FAPI_INF("block=%d",l_block);
+      }
+      rc=get_address(i_target_mba,i_port_u8,l_rank_pair,l_input,l_block,l_lane,l_scom_add,l_start_bit,l_len8); if(rc) return rc;
+      l_sbit=l_start_bit;    
+      l_len=l_len8;
+      if(i_verbose==1)
+      {
+         FAPI_INF("scom_address=%llX",l_scom_add);
+         FAPI_INF("start bit=%d",l_start_bit);
+         FAPI_INF("length=%d",l_len8); 
+      }
+   }
+   
+   else if(i_input_type_e==RAW_DQSCLK_0 || i_input_type_e==RAW_DQSCLK_1 || i_input_type_e==RAW_DQSCLK_2 || i_input_type_e==RAW_DQSCLK_3 || i_input_type_e==RAW_DQSCLK_4)
+   {
+      if(i_input_type_e==RAW_DQSCLK_0)
+      {
+         l_block=0;
+      }
+      
+      else if(i_input_type_e==RAW_DQSCLK_1)
+      {
+         l_block=1;
+      }
+      
+      else if(i_input_type_e==RAW_DQSCLK_2)
+      {
+         l_block=2;
+      }
+      
+      else if(i_input_type_e==RAW_DQSCLK_3)
+      {
+         l_block=3;
+      }
+      
+      else
+      {
+         l_block=4;
+      }
+      if(i_input_index_u8<=3) // 4 delay values for DQSCLK
+      {
+         l_lane=i_input_index_u8;
+      }
+      
+      else
+      {
+         FAPI_SET_HWP_ERROR(rc, RC_MSS_INPUT_ERROR);
+         FAPI_ERR("Wrong input index specified rc = 0x%08X ", uint32_t(rc));
+         return rc;      
+      }
+      ip_type_t l_input=RAW_DQSCLK;
+      if(i_verbose==1)
+      {
+         FAPI_INF("block=%d",l_block);
+      }
+      rc=get_address(i_target_mba,i_port_u8,l_rank_pair,l_input,l_block,l_lane,l_scom_add,l_start_bit,l_len8); if(rc) return rc;
+      l_sbit=l_start_bit;    
+      l_len=l_len8;
+      if(i_verbose==1)
+      {
+         FAPI_INF("scom_address=%llX",l_scom_add);
+         FAPI_INF("start bit=%d",l_start_bit);
+         FAPI_INF("length=%d",l_len8); 
+      }
+   }
+   
+         
    else if(i_input_type_e==RAW_WR_DQ_0 || i_input_type_e==RAW_WR_DQ_1 || i_input_type_e==RAW_WR_DQ_2 || i_input_type_e==RAW_WR_DQ_3 || i_input_type_e==RAW_WR_DQ_4)
    {
       if(i_input_type_e==RAW_WR_DQ_0)
@@ -744,6 +854,12 @@ fapi::ReturnCode mss_access_delay_reg(const fapi::Target & i_target_mba, access_
       {
          l_start=29;
       }
+      
+      else if(i_input_type_e==RAW_RDCLK_0 || i_input_type_e==RAW_RDCLK_1 || i_input_type_e==RAW_RDCLK_2 || i_input_type_e==RAW_RDCLK_3 || i_input_type_e==RAW_RDCLK_4 || i_input_type_e==RDCLK || i_input_type_e==RAW_DQSCLK_0 || i_input_type_e==RAW_DQSCLK_1 || i_input_type_e==RAW_DQSCLK_2 || i_input_type_e==RAW_DQSCLK_3 || i_input_type_e==RAW_DQSCLK_4 || i_input_type_e==DQSCLK)
+      {
+         l_start=30;  
+      }
+      
       else
       {
          FAPI_SET_HWP_ERROR(rc, RC_MSS_INPUT_ERROR);
@@ -1202,7 +1318,7 @@ fapi::ReturnCode cross_coupled(const fapi::Target & i_target_mba,uint8_t i_port,
    }   
       
     
-   else if (i_input_type_e==DQS_GATE)	    
+   else if (i_input_type_e==DQS_GATE || i_input_type_e==RDCLK || i_input_type_e==DQSCLK)	    
    {
 	   
       if(i_port==0 && l_mbapos==0)
@@ -1251,8 +1367,21 @@ fapi::ReturnCode cross_coupled(const fapi::Target & i_target_mba,uint8_t i_port,
       {
          l_lane=22;
       }  
-     
-      l_input_type=DQS_GATE_t;
+      
+      if (i_input_type_e==DQS_GATE)
+      {
+         l_input_type=DQS_GATE_t;   
+      }
+      
+      else if(i_input_type_e==RDCLK)
+      {
+         l_input_type=RDCLK_t;
+      }
+      
+      else
+      {
+         l_input_type=DQSCLK_t;
+      }
       
       if(i_verbose==1)
       {
@@ -1489,6 +1618,7 @@ fapi::ReturnCode get_address(const fapi::Target & i_target_mba,uint8_t i_port, u
    const uint64_t l_adr02_st=0x8000400000000000ull;
    const uint64_t l_adr13_st=0x8001400000000000ull;
    const uint64_t l_dqs_gate_en=0x130301143full;
+   const uint64_t l_dqsclk_en=0x090301143full;
    rc = FAPI_ATTR_GET(ATTR_CHIP_UNIT_POS, &i_target_mba, l_mbapos); if(rc) return rc;
    
    if(i_input_type_e==WR_DQ_t || i_input_type_e==RAW_WR_DQ)
@@ -1701,6 +1831,120 @@ fapi::ReturnCode get_address(const fapi::Target & i_target_mba,uint8_t i_port, u
      
    }
    
+   else if(i_input_type_e==RDCLK_t || i_input_type_e==RAW_RDCLK) 
+   {
+      if(i_input_type_e==RAW_RDCLK) 
+      {
+         if(i_lane==0)
+         {
+            i_lane=16;   
+         }
+         else if(i_lane==1)
+         {
+            i_lane=18;   
+         }
+         else if(i_lane==2)
+         {
+            i_lane=20;   
+         }
+         else
+         {
+            i_lane=22;   
+         }
+      }   
+      if(i_lane==16)
+      {
+         o_start_bit=50;    
+      }
+      else if(i_lane==18)
+      {
+	 o_start_bit=54;     
+      }
+      else if(i_lane==20)
+      {
+         o_start_bit=58;   	    
+      }
+      else 
+      {
+         o_start_bit=62;  	    
+      }
+   
+      l_temp|=(i_block*4)<<8;     
+      l_temp|=i_rank_pair<<8;     
+      l_temp=l_temp<<32;
+      
+      if((i_port==0 && l_mbapos==0) || (i_port==0 && l_mbapos==1))
+      {
+         l_scom_address_64|= l_port01_st | l_temp | l_dqsclk_en;
+      }
+      else 
+      { 
+         l_scom_address_64|= l_port23_st | l_temp | l_dqsclk_en;
+      }
+             
+      o_len=2;  
+      o_scom_address_64=l_scom_address_64; 
+     
+   }
+   
+    else if(i_input_type_e==DQSCLK_t || i_input_type_e==RAW_DQSCLK) 
+   {
+      if(i_input_type_e==RAW_DQSCLK) 
+      {
+         if(i_lane==0)
+         {
+            i_lane=16;   
+         }
+         else if(i_lane==1)
+         {
+            i_lane=18;   
+         }
+         else if(i_lane==2)
+         {
+            i_lane=20;   
+         }
+         else
+         {
+            i_lane=22;   
+         }
+      }
+           
+      if(i_lane==16)
+      {
+         o_start_bit=48;    
+      }
+      else if(i_lane==18)
+      {
+	 o_start_bit=52;     
+      }
+      else if(i_lane==20)
+      {
+         o_start_bit=56;   	    
+      }
+      else 
+      {
+         o_start_bit=60;  	    
+      }
+   
+      l_temp|=(i_block*4)<<8;     
+      l_temp|=i_rank_pair<<8;     
+      l_temp=l_temp<<32;
+      
+      if((i_port==0 && l_mbapos==0) || (i_port==0 && l_mbapos==1))
+      {
+         l_scom_address_64|= l_port01_st | l_temp | l_dqsclk_en;
+      }
+      else 
+      { 
+         l_scom_address_64|= l_port23_st | l_temp | l_dqsclk_en;
+      }
+             
+      o_len=2;  
+      o_scom_address_64=l_scom_address_64; 
+     
+   }
+   
+     
    else if(i_input_type_e==DQS_ALIGN_t || i_input_type_e==RAW_DQS_ALIGN) 
    {
       

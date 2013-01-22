@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_draminit_training.C,v 1.46 2013/01/03 23:15:35 jdsloat Exp $
+// $Id: mss_draminit_training.C,v 1.50 2013/01/16 20:18:41 jdsloat Exp $
 //------------------------------------------------------------------------------
 // Don't forget to create CVS comments when you check in your changes!
 //------------------------------------------------------------------------------
@@ -28,6 +28,10 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|------------------------------------------------
+//  1.50   | jdsloat  |16-JAN-13| Fixed rank group enable within PC_INIT_CAL reg
+//  1.49   | jdsloat  |08-JAN-13| Added clearing RD PHASE SELECT values post Read Centering Workaround.
+//  1.48   | jdsloat  |08-JAN-13| Cleared Cal Config in PC_INIT_CAL on opposing port.  
+//  1.47   | jdsloat  |08-JAN-13| Fixed port 1 cal setup RMW and fixed doing individual rank pairs.  Both in PC_INIT_CAL_CONFIG0 regs.
 //  1.46   | jdsloat  |03-JAN-13| RM temp edits to CAL0q and CAL1q; Cleared INIT_CAL_STATUS and INIT_CAL_ERROR Regs before every subtest, edited debug messages
 //  1.45   | gollub   |21-DEC-12| Calling mss_unmask_draminit_training_errors after mss_draminit_training_cloned
 //  1.43   | jdsloat  |20-DEC-12| Temporarily disabled RTT_NOM swap
@@ -235,7 +239,6 @@ ReturnCode mss_draminit_training_cloned(Target& i_target)
 
     ecmdDataBufferBase data_buffer_64(64);
 
-
     if(rc_num)
     {
         rc.setEcmdError(rc_num);
@@ -248,6 +251,11 @@ ReturnCode mss_draminit_training_cloned(Target& i_target)
     uint8_t cal_steps = 0;
     uint8_t cur_cal_step = 0;
     ecmdDataBufferBase cal_steps_8(8);
+    uint64_t ADDR_0 = 0;
+    uint64_t ADDR_1 = 0;
+    uint64_t ADDR_2 = 0;
+    uint64_t ADDR_3 = 0;
+    uint64_t ADDR_4 = 0;
     
     enum mss_draminit_training_result cur_complete_status = MSS_INIT_CAL_COMPLETE;
     enum mss_draminit_training_result cur_error_status = MSS_INIT_CAL_PASS;
@@ -343,52 +351,86 @@ ReturnCode mss_draminit_training_cloned(Target& i_target)
 		    //Clearing any status or errors bits that may have occured in previous training subtest.
 		    if(port == 0)
 		    {
-			
+			//clear status reg
 			rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_INIT_CAL_STATUS_P0_0x8000C0190301143F, data_buffer_64);
 			if(rc) return rc;
-
 			rc_num = rc_num | data_buffer_64.clearBit(48, 4);
-
 			rc = fapiPutScom(i_target, DPHY01_DDRPHY_PC_INIT_CAL_STATUS_P0_0x8000C0190301143F, data_buffer_64);
 			if(rc) return rc;
-			
+
+			//clear error reg
 			rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_INIT_CAL_ERROR_P0_0x8000C0180301143F, data_buffer_64);
 			if(rc) return rc;
-
 			rc_num = rc_num | data_buffer_64.clearBit(48, 11);
 			rc_num = rc_num | data_buffer_64.clearBit(60, 4);
-
 			rc = fapiPutScom(i_target, DPHY01_DDRPHY_PC_INIT_CAL_ERROR_P0_0x8000C0180301143F, data_buffer_64);
 			if(rc) return rc;
-			
+
+                        //clear other port
+			rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_INIT_CAL_CONFIG0_P1_0x8001C0160301143F, data_buffer_64);
+			if(rc) return rc;
+			rc_num = rc_num | data_buffer_64.clearBit(48);
+			rc_num = rc_num | data_buffer_64.clearBit(50);
+			rc_num = rc_num | data_buffer_64.clearBit(51);
+			rc_num = rc_num | data_buffer_64.clearBit(52);
+			rc_num = rc_num | data_buffer_64.clearBit(53);
+			rc_num = rc_num | data_buffer_64.clearBit(54);
+			rc_num = rc_num | data_buffer_64.clearBit(55);
+			rc_num = rc_num | data_buffer_64.clearBit(58);
+			rc_num = rc_num | data_buffer_64.clearBit(60);
+			rc_num = rc_num | data_buffer_64.clearBit(61);
+			rc_num = rc_num | data_buffer_64.clearBit(62);
+			rc_num = rc_num | data_buffer_64.clearBit(63);
+			rc = fapiPutScom(i_target, DPHY01_DDRPHY_PC_INIT_CAL_CONFIG0_P1_0x8001C0160301143F, data_buffer_64);
+			if(rc) return rc;
+
+		        //Setup the Config Reg bit for the only cal step we want
+			rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_INIT_CAL_CONFIG0_P0_0x8000C0160301143F, data_buffer_64);
+			if(rc) return rc;
 
 		    }
 		    else
 		    {
+			//clear status reg
 			rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_INIT_CAL_STATUS_P1_0x8001C0190301143F, data_buffer_64);
 			if(rc) return rc;
-
 			rc_num = rc_num | data_buffer_64.clearBit(48, 4);
-
 			rc = fapiPutScom(i_target, DPHY01_DDRPHY_PC_INIT_CAL_STATUS_P1_0x8001C0190301143F, data_buffer_64);
 			if(rc) return rc;
 
+			//clear error reg
 			rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_INIT_CAL_ERROR_P1_0x8001C0180301143F, data_buffer_64);
 			if(rc) return rc;
-
 			rc_num = rc_num | data_buffer_64.clearBit(48, 11);
 			rc_num = rc_num | data_buffer_64.clearBit(60, 4);
-
 			rc = fapiPutScom(i_target, DPHY01_DDRPHY_PC_INIT_CAL_ERROR_P1_0x8001C0180301143F, data_buffer_64);
 			if(rc) return rc;
 
+                        //clear other port
+			rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_INIT_CAL_CONFIG0_P0_0x8000C0160301143F, data_buffer_64);
+			if(rc) return rc;
+			rc_num = rc_num | data_buffer_64.clearBit(48);
+			rc_num = rc_num | data_buffer_64.clearBit(50);
+			rc_num = rc_num | data_buffer_64.clearBit(51);
+			rc_num = rc_num | data_buffer_64.clearBit(52);
+			rc_num = rc_num | data_buffer_64.clearBit(53);
+			rc_num = rc_num | data_buffer_64.clearBit(54);
+			rc_num = rc_num | data_buffer_64.clearBit(55);
+			rc_num = rc_num | data_buffer_64.clearBit(58);
+			rc_num = rc_num | data_buffer_64.clearBit(60);
+			rc_num = rc_num | data_buffer_64.clearBit(61);
+			rc_num = rc_num | data_buffer_64.clearBit(62);
+			rc_num = rc_num | data_buffer_64.clearBit(63);
+			rc = fapiPutScom(i_target, DPHY01_DDRPHY_PC_INIT_CAL_CONFIG0_P0_0x8000C0160301143F, data_buffer_64);
+			if(rc) return rc;
+
+		        //Setup the Config Reg bit for the only cal step we want
+			rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_INIT_CAL_CONFIG0_P1_0x8001C0160301143F, data_buffer_64);
+			if(rc) return rc;
 
 		    }
 
-		    //Setup the Config Reg bit for the only cal step we want
-		    rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_INIT_CAL_CONFIG0_P0_0x8000C0160301143F, data_buffer_64);
-		    if(rc) return rc;
-
+		    //Clear training cnfg
 		    rc_num = rc_num | data_buffer_64.clearBit(48);
 		    rc_num = rc_num | data_buffer_64.clearBit(50);
 		    rc_num = rc_num | data_buffer_64.clearBit(51);
@@ -396,6 +438,27 @@ ReturnCode mss_draminit_training_cloned(Target& i_target)
 		    rc_num = rc_num | data_buffer_64.clearBit(53);
 		    rc_num = rc_num | data_buffer_64.clearBit(54);
 		    rc_num = rc_num | data_buffer_64.clearBit(55);
+		    rc_num = rc_num | data_buffer_64.clearBit(60);
+		    rc_num = rc_num | data_buffer_64.clearBit(61);
+		    rc_num = rc_num | data_buffer_64.clearBit(62);
+		    rc_num = rc_num | data_buffer_64.clearBit(63);
+
+		    //Set stop on error
+		    rc_num = rc_num | data_buffer_64.setBit(58);
+
+		    //cnfg rank groups
+		    if(group == 0){
+			rc_num = rc_num | data_buffer_64.setBit(60);
+		    }
+		    else if(group == 1){
+			rc_num = rc_num | data_buffer_64.setBit(61);
+		    }
+		    else if(group == 2){
+			rc_num = rc_num | data_buffer_64.setBit(62);
+		    }
+		    else if(group == 3){
+			rc_num = rc_num | data_buffer_64.setBit(63);
+		    }
 
 		    if ( (cur_cal_step == 1) && (cal_steps_8.isBitClear(0)) && (cal_steps_8.isBitClear(1)) &&
 			 (cal_steps_8.isBitClear(2)) && (cal_steps_8.isBitClear(3)) &&
@@ -526,6 +589,119 @@ ReturnCode mss_draminit_training_cloned(Target& i_target)
 			if (cur_error_status == MSS_INIT_CAL_FAIL)
 			{
 			    error_status = cur_error_status;
+			}
+
+			if ( (cur_cal_step == 4) && (cal_steps_8.isBitSet(5)) )
+			{
+			    FAPI_INF( "+++ Read Centering Workaround on rank group: %d +++", group);
+			    FAPI_INF( "+++ Clearing values from RD PHASE SELECT regs. +++");
+
+			    if ( port == 0 )
+			    {
+				if ( group == 0 )
+				{
+				    ADDR_0 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR0_P0_0_0x800000090301143F;
+				    ADDR_1 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR0_P0_1_0x800004090301143F;
+				    ADDR_2 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR0_P0_2_0x800008090301143F;
+				    ADDR_3 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR0_P0_3_0x80000C090301143F;
+				    ADDR_4 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR0_P0_4_0x800010090301143F;
+				}
+				else if ( group == 1 )
+				{
+				    ADDR_0 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR1_P0_0_0x800001090301143F;
+				    ADDR_1 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR1_P0_1_0x800005090301143F;
+				    ADDR_2 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR1_P0_2_0x800009090301143F;
+				    ADDR_3 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR1_P0_3_0x80000D090301143F;
+				    ADDR_4 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR1_P0_4_0x800011090301143F;	
+				}
+				else if ( group == 2 )
+				{
+				    ADDR_0 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR2_P0_0_0x800002090301143F;
+				    ADDR_1 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR2_P0_1_0x800006090301143F;
+				    ADDR_2 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR2_P0_2_0x80000A090301143F;
+				    ADDR_3 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR2_P0_3_0x80000E090301143F;
+				    ADDR_4 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR2_P0_4_0x800012090301143F;
+				}
+				else if ( group == 3 )
+				{
+				    ADDR_0 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR2_P0_0_0x800002090301143F;
+				    ADDR_1 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR2_P0_1_0x800006090301143F;
+				    ADDR_2 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR2_P0_2_0x80000A090301143F;
+				    ADDR_3 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR2_P0_3_0x80000E090301143F;
+				    ADDR_4 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR2_P0_4_0x800012090301143F;
+				}
+			    }
+			    else if (port == 1 )
+			    {
+				if ( group == 0 )
+				{
+				    ADDR_0 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR0_P1_0_0x800100090301143F;
+				    ADDR_1 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR0_P1_1_0x800104090301143F;
+				    ADDR_2 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR0_P1_2_0x800108090301143F;
+				    ADDR_3 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR0_P1_3_0x80010C090301143F;
+				    ADDR_4 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR0_P1_4_0x800110090301143F;
+				}
+				else if ( group == 1 )
+				{
+				    ADDR_0 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR1_P1_0_0x800101090301143F;
+				    ADDR_1 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR1_P1_1_0x800105090301143F;
+				    ADDR_2 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR1_P1_2_0x800109090301143F;
+				    ADDR_3 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR1_P1_3_0x80010D090301143F;
+				    ADDR_4 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR1_P1_4_0x800111090301143F;	
+				}
+				else if ( group == 2 )
+				{
+				    ADDR_0 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR2_P1_0_0x800102090301143F;
+				    ADDR_1 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR2_P1_1_0x800106090301143F;
+				    ADDR_2 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR2_P1_2_0x80010A090301143F;
+				    ADDR_3 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR2_P1_3_0x80010E090301143F;
+				    ADDR_4 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR2_P1_4_0x800112090301143F;
+				}
+				else if ( group == 3 )
+				{
+				    ADDR_0 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR3_P1_0_0x800103090301143F;
+				    ADDR_1 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR3_P1_1_0x800107090301143F;
+				    ADDR_2 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR3_P1_2_0x80010B090301143F;
+				    ADDR_3 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR3_P1_3_0x80010F090301143F;
+				    ADDR_4 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR3_P1_4_0x800113090301143F;
+				}
+			    }
+
+			    rc = fapiGetScom(i_target, ADDR_0, data_buffer_64);
+			    rc_num = rc_num | data_buffer_64.clearBit(50, 2);
+			    rc_num = rc_num | data_buffer_64.clearBit(54, 2);
+			    rc_num = rc_num | data_buffer_64.clearBit(58, 2);
+			    rc_num = rc_num | data_buffer_64.clearBit(62, 2);
+			    rc = fapiPutScom(i_target, ADDR_0, data_buffer_64);
+
+			    rc = fapiGetScom(i_target, ADDR_1, data_buffer_64);
+			    rc_num = rc_num | data_buffer_64.clearBit(50, 2);
+			    rc_num = rc_num | data_buffer_64.clearBit(54, 2);
+			    rc_num = rc_num | data_buffer_64.clearBit(58, 2);
+			    rc_num = rc_num | data_buffer_64.clearBit(62, 2);
+			    rc = fapiPutScom(i_target, ADDR_1, data_buffer_64);
+
+			    rc = fapiGetScom(i_target, ADDR_2, data_buffer_64);
+			    rc_num = rc_num | data_buffer_64.clearBit(50, 2);
+			    rc_num = rc_num | data_buffer_64.clearBit(54, 2);
+			    rc_num = rc_num | data_buffer_64.clearBit(58, 2);
+			    rc_num = rc_num | data_buffer_64.clearBit(62, 2);
+			    rc = fapiPutScom(i_target, ADDR_2, data_buffer_64);
+
+			    rc = fapiGetScom(i_target, ADDR_3, data_buffer_64);
+			    rc_num = rc_num | data_buffer_64.clearBit(50, 2);
+			    rc_num = rc_num | data_buffer_64.clearBit(54, 2);
+			    rc_num = rc_num | data_buffer_64.clearBit(58, 2);
+			    rc_num = rc_num | data_buffer_64.clearBit(62, 2);
+			    rc = fapiPutScom(i_target, ADDR_3, data_buffer_64);
+
+			    rc = fapiGetScom(i_target, ADDR_4, data_buffer_64);
+			    rc_num = rc_num | data_buffer_64.clearBit(50, 2);
+			    rc_num = rc_num | data_buffer_64.clearBit(54, 2);
+			    rc_num = rc_num | data_buffer_64.clearBit(58, 2);
+			    rc_num = rc_num | data_buffer_64.clearBit(62, 2);
+			    rc = fapiPutScom(i_target, ADDR_4, data_buffer_64);
+
 			}
 
 		    }

@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-//$Id: mss_access_delay_reg.H,v 1.6 2012/12/18 12:02:33 sasethur Exp $
+//$Id: mss_access_delay_reg.H,v 1.7 2013/01/07 17:16:49 sasethur Exp $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
 // *! All Rights Reserved -- Property of IBM
@@ -29,7 +29,6 @@
 // *! TITLE       : mss_demo_access_delay_reg.H
 // *! DESCRIPTION : Header file for mss_access_delay_reg.
 // *! OWNER NAME  : Saurabh Chadha    Email: sauchadh@in.ibm.com
-// *! BACKUP NAME : Jacob Sloat       Email: jdsloat@us.ibm.com
 // *! ADDITIONAL COMMENTS :
 //
 //
@@ -56,7 +55,6 @@
 // Includes
 //------------------------------------------------------------------------------
 #include <fapi.H>
-
 
 
 //----------------------------------------------------------------------
@@ -119,6 +117,18 @@ enum input_type_t {
    RAW_DQS_ALIGN_2,
    RAW_DQS_ALIGN_3,
    RAW_DQS_ALIGN_4,
+   RAW_RDCLK_0,
+   RAW_RDCLK_1,
+   RAW_RDCLK_2,
+   RAW_RDCLK_3,
+   RAW_RDCLK_4,
+   RDCLK,
+   RAW_DQSCLK_0,
+   RAW_DQSCLK_1,
+   RAW_DQSCLK_2,
+   RAW_DQSCLK_3,
+   RAW_DQSCLK_4,
+   DQSCLK
    };
 
 enum ip_type_t {
@@ -139,6 +149,10 @@ enum ip_type_t {
    RAW_DQS_GATE,
    DQS_ALIGN_t,
    RAW_DQS_ALIGN,
+   RDCLK_t,
+   RAW_RDCLK,
+   DQSCLK_t,
+   RAW_DQSCLK
 };
 
 
