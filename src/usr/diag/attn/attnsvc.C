@@ -68,15 +68,6 @@ errlHndl_t Service::configureInterrupts(
                                  ATTENTION,
                                  INTR::ISN_LCL_ERR);
     }
-    else
-    {
-        if(NULL == INTR::unRegisterMsgQ(INTR::ISN_LCL_ERR))
-        {
-            ATTN_ERR("INTR did not find isn: 0x%07x",
-                     INTR::ISN_LCL_ERR);
-        }
-    }
-
 
     //Issue scoms to allow attentions to flow via INTR
     if(!err)
@@ -163,6 +154,15 @@ errlHndl_t Service::configureInterrupts(
             }
 
             ++it;
+        }
+
+        if(!err && i_mode == DOWN)
+        {
+            if(NULL == INTR::unRegisterMsgQ(INTR::ISN_LCL_ERR))
+            {
+                ATTN_ERR("INTR did not find isn: 0x%07x",
+                        INTR::ISN_LCL_ERR);
+            }
         }
     }
     return err;
