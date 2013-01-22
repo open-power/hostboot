@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/diag/prdf/common/plat/pegasus/prdfCenMbaDataBundle.H $ */
+/* $Source: src/usr/diag/prdf/common/plat/pegasus/prdfCenMbaAddress.C $   */
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/* COPYRIGHT International Business Machines Corp. 2008,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -21,66 +21,20 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-#ifndef prdfCenMbaDataBundle_H
-#define prdfCenMbaDataBundle_H
+#include <prdfCenMbaAddress.H>
 
-/** @file  prdfCenMbaDataBundle.H
- *  @brief Contains the data bundle for a PRD Centaur MBA object.
- */
-
-#include <prdfExtensibleChip.H>
-
-//------------------------------------------------------------------------------
+// FIXME : via RTC 65231
+// Needs to revisit this file
+// There will be changes specific to P8 Addressing scheme
+// Currently This file only have skeleton code
 
 namespace PRDF
 {
-
-/**
- * @brief The P7 Centaur MBA data bundle.
- */
-class CenMbaDataBundle : public DataBundle
-{
-  public: // functions
-
-    /**
-     * @brief Constructor.
-     * @param i_mbaChip The MBA chip.
-     */
-    explicit CenMbaDataBundle( ExtensibleChip * i_mbaChip ) :
-        iv_sendCmdCompleteMsg(false)
-    {}
-
-    /**
-     * @brief Destructor.
-     */
-    ~CenMbaDataBundle() {}
-
-  private: // functions
-
-    CenMbaDataBundle( const CenMbaDataBundle & );
-    const CenMbaDataBundle & operator=( const CenMbaDataBundle & );
-
-  public: // instance variables
-
-    /** TRUE if a maintenance command complete message needs to be sent in the
-     *  post analysis plugin, FALSE otherwise. */
-    bool iv_sendCmdCompleteMsg;
-
-};
-
 //------------------------------------------------------------------------------
 
-/**
- * @brief  Wrapper function for the CenMbaDataBundle.
- * @param  i_mbaChip The MBA chip.
- * @return This MBA's data bundle.
- */
-inline CenMbaDataBundle * getMbaDataBundle( ExtensibleChip * i_mbaChip )
+uint8_t CenMbaRank::toUint8() const
 {
-    return static_cast<CenMbaDataBundle *>(i_mbaChip->getDataBundle());
+    uint8_t temp = 0;
+    return temp;
 }
-
-} // end namespace PRDF
-
-#endif // prdfCenMbaDataBundle_H
-
+}

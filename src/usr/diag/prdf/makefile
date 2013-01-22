@@ -71,6 +71,7 @@ EXTRAINCDIR += ${PRD_USR_PATH}/common/framework/rule
 EXTRAINCDIR += ${PRD_USR_PATH}/common/plat
 EXTRAINCDIR += ${PRD_USR_PATH}/common/plat/pegasus
 EXTRAINCDIR += ${PRD_USR_PATH}/framework/service
+EXTRAINCDIR += ${PRD_USR_PATH}/plat/pegasus
 
 # Conditionally enables profiling of flyweight register and resolution object
 ifeq ($(PRD_PROFILER),1)
