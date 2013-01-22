@@ -9884,4 +9884,52 @@ Measured in GB</description>
 <!-- ===== End supporting poreve_memory_attributes.xml ===== -->
 
 
+<!-- ===== Supporting A/X bus enable in p8_xip_customize_attributes.xml ===== -->
+<attribute>
+    <id>PROC_A_ENABLE</id>
+    <description>ABUS chiplet partial good control
+                      creator: platform
+                      firmware notes:
+                      must track ATTR_CHIP_REGIONS_TO_ENABLE
+    </description>
+    <simpleType>
+        <uint8_t>
+<!-- Hostboot doesn't support A/X regional partial good ===== -->
+            <default>1</default>
+        </uint8_t>
+    </simpleType>
+    <persistency>volatile</persistency>    
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_PROC_A_ENABLE</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>PROC_X_ENABLE</id>
+    <description>XBUS chiplet partial good control
+                      creator: platform
+                      firmware notes:
+                      must track ATTR_CHIP_REGIONS_TO_ENABLE
+    </description>
+    <simpleType>
+        <uint8_t>
+<!-- Hostboot doesn't support A/X regional partial good ===== -->
+            <default>1</default>
+        </uint8_t>
+    </simpleType>
+    <persistency>volatile</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_PROC_X_ENABLE</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<!-- ===== End supporting A/X bus enable in p8_xip_customize_attributes.xml ===== -->
+
+
 </attributes>

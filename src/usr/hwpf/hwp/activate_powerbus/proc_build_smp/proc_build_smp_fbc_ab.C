@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012                   */
+/* COPYRIGHT International Business Machines Corp. 2012,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_build_smp_fbc_ab.C,v 1.3 2012/09/24 05:00:55 jmcgill Exp $
+// $Id: proc_build_smp_fbc_ab.C,v 1.5 2013/01/21 03:11:32 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_build_smp_fbc_ab.C,v $
 //------------------------------------------------------------------------------
 // *|
@@ -119,7 +119,7 @@ fapi::ReturnCode proc_build_smp_get_f_owpack_config(
 
     do
     {
-        // read PB A Link Framer Configuration register
+        // read PB F Link Framer Configuration register
         rc = fapiGetScom(i_smp_chip.chip->this_chip,
                          PB_F_FMR_CFG_0x09010813,
                          data);
@@ -746,19 +746,19 @@ fapi::ReturnCode proc_build_smp_set_pb_hp_mode(
     uint8_t a_id[PROC_FAB_SMP_NUM_A_LINKS];
     uint8_t f_id[PROC_FAB_SMP_NUM_F_LINKS];
     // per-link address disable values
-    bool a_addr_dis[PROC_FAB_SMP_NUM_A_LINKS];
-    bool f_addr_dis[PROC_FAB_SMP_NUM_F_LINKS];
+    bool a_addr_dis[PROC_FAB_SMP_NUM_A_LINKS] = { false, false, false };
+    bool f_addr_dis[PROC_FAB_SMP_NUM_F_LINKS] = { false, false };
     // aggregate link settings
-    bool a_link_aggregate;
-    bool f_link_aggregate;
+    bool a_link_aggregate = false;
+    bool f_link_aggregate = false;
     // link ow pack settings
-    bool a_link_owpack;
-    bool a_link_owpack_priority;
-    bool f_link_owpack;
-    bool f_link_owpack_priority;
+    bool a_link_owpack = false;
+    bool a_link_owpack_priority = false;
+    bool f_link_owpack = false;
+    bool f_link_owpack_priority = false;
     // link command rates
-    uint8_t a_cmd_rate;
-    uint8_t f_cmd_rate;
+    uint8_t a_cmd_rate = 0x00;
+    uint8_t f_cmd_rate = 0x00;
 
     // mark function entry
     FAPI_DBG("proc_build_smp_set_pb_hp_mode: Start");
@@ -773,6 +773,13 @@ fapi::ReturnCode proc_build_smp_set_pb_hp_mode(
         {
             // determine link enable
             a_en[l] = (a_target[l]->getType() != fapi::TARGET_TYPE_NONE);
+            if (a_en[l] && !i_smp_chip.a_enabled)
+            {
+                FAPI_ERR("proc_build_smp_set_pb_hp_mode: Partial good attribute error (A)");
+                FAPI_SET_HWP_ERROR(rc, RC_PROC_BUILD_SMP_A_PARTIAL_GOOD_ERR);
+                break;
+            }
+
             // determine link ID
             proc_fab_smp_node_id dest_node_id = FBC_NODE_ID_0;
             if (a_en[l])
@@ -798,80 +805,102 @@ fapi::ReturnCode proc_build_smp_set_pb_hp_mode(
         f_en[1] = i_smp_chip.chip->enable_f1;
         f_id[1] = i_smp_chip.chip->f1_node_id;
 
-        // determine address/data assignents & aggregate mode programming
-        rc = proc_build_smp_calc_link_setup(i_smp_chip,
-                                            PROC_FAB_SMP_NUM_A_LINKS,
-                                            PROC_FAB_SMP_NUM_NODE_IDS,
-                                            PB_A_MODE_0x0801080A,
-                                            PB_A_MODE_LINK_DELAY_START_BIT,
-                                            PB_A_MODE_LINK_DELAY_END_BIT,
-                                            a_en,
-                                            a_id,
-                                            a_addr_dis,
-                                            a_link_aggregate);
+        for (uint8_t l = 0; l < PROC_FAB_SMP_NUM_F_LINKS; l++)
+        {
+            if (f_en[l] && !i_smp_chip.pcie_enabled)
+            {
+                FAPI_ERR("proc_build_smp_set_pb_hp_mode: Partial good attribute error (PCIE)");
+                FAPI_SET_HWP_ERROR(rc, RC_PROC_BUILD_SMP_PCIE_PARTIAL_GOOD_ERR);
+                break;
+            }
+        }
         if (rc)
         {
-            FAPI_ERR("proc_build_smp_set_pb_hp_mode: Error from proc_build_smp_calc_link_setup (A)");
             break;
         }
 
-        rc = proc_build_smp_calc_link_setup(i_smp_chip,
-                                            PROC_FAB_SMP_NUM_F_LINKS,
-                                            PROC_FAB_SMP_NUM_NODE_IDS,
-                                            PB_IOF_MODE_0x09011C0A,
-                                            PB_IOF_MODE_LINK_DELAY_START_BIT,
-                                            PB_IOF_MODE_LINK_DELAY_END_BIT,
-                                            f_en,
-                                            f_id,
-                                            f_addr_dis,
-                                            f_link_aggregate);
-        if (rc)
+        // determine address/data assignents, aggregate mode programming &
+        // link command rates (A)
+        if (i_smp_chip.a_enabled)
         {
-            FAPI_ERR("proc_build_smp_set_pb_hp_mode: Error from proc_build_smp_calc_link_setup (F)");
-            break;
-        }
+            rc = proc_build_smp_calc_link_setup(i_smp_chip,
+                                                PROC_FAB_SMP_NUM_A_LINKS,
+                                                PROC_FAB_SMP_NUM_NODE_IDS,
+                                                PB_A_MODE_0x0801080A,
+                                                PB_A_MODE_LINK_DELAY_START_BIT,
+                                                PB_A_MODE_LINK_DELAY_END_BIT,
+                                                a_en,
+                                                a_id,
+                                                a_addr_dis,
+                                                a_link_aggregate);
+            if (rc)
+            {
+                FAPI_ERR("proc_build_smp_set_pb_hp_mode: Error from proc_build_smp_calc_link_setup (A)");
+                break;
+            }
 
-        // determine link command rates
-        rc = proc_build_smp_get_a_owpack_config(i_smp_chip,
+            rc = proc_build_smp_get_a_owpack_config(i_smp_chip,
+                                                    a_link_owpack,
+                                                    a_link_owpack_priority);
+            if (rc)
+            {
+                FAPI_ERR("proc_build_smp_set_pb_hp_mode: Error from proc_build_smp_get_a_owpack_config");
+                break;
+            }
+
+            rc = proc_build_smp_calc_a_cmd_rate(i_smp.freq_a,
+                                                i_smp.freq_pb,
                                                 a_link_owpack,
-                                                a_link_owpack_priority);
-        if (rc)
-        {
-            FAPI_ERR("proc_build_smp_set_pb_hp_mode: Error from proc_build_smp_get_a_owpack_config");
-            break;
+                                                a_link_owpack_priority,
+                                                a_link_aggregate,
+                                                a_cmd_rate);
+            if (rc)
+            {
+                FAPI_ERR("proc_build_smp_set_pb_hp_mode: Error from proc_build_smp_calc_a_cmd_rate");
+                break;
+            }
         }
 
-        rc = proc_build_smp_calc_a_cmd_rate(i_smp.freq_a,
-                                            i_smp.freq_pb,
-                                            a_link_owpack,
-                                            a_link_owpack_priority,
-                                            a_link_aggregate,
-                                            a_cmd_rate);
-        if (rc)
+        if (i_smp_chip.pcie_enabled)
         {
-            FAPI_ERR("proc_build_smp_set_pb_hp_mode: Error from proc_build_smp_calc_a_cmd_rate");
-            break;
-        }
+            // determine address/data assignents, aggregate mode programming &
+            // link command rates (F)
+            rc = proc_build_smp_calc_link_setup(i_smp_chip,
+                                                PROC_FAB_SMP_NUM_F_LINKS,
+                                                PROC_FAB_SMP_NUM_NODE_IDS,
+                                                PB_IOF_MODE_0x09011C0A,
+                                                PB_IOF_MODE_LINK_DELAY_START_BIT,
+                                                PB_IOF_MODE_LINK_DELAY_END_BIT,
+                                                f_en,
+                                                f_id,
+                                                f_addr_dis,
+                                                f_link_aggregate);
+            if (rc)
+            {
+                FAPI_ERR("proc_build_smp_set_pb_hp_mode: Error from proc_build_smp_calc_link_setup (F)");
+                break;
+            }
 
-        rc = proc_build_smp_get_f_owpack_config(i_smp_chip,
+            rc = proc_build_smp_get_f_owpack_config(i_smp_chip,
+                                                    f_link_owpack,
+                                                    f_link_owpack_priority);
+            if (rc)
+            {
+                FAPI_ERR("proc_build_smp_set_pb_hp_mode: Error from proc_build_smp_get_f_owpack_config");
+                break;
+            }
+
+            rc = proc_build_smp_calc_f_cmd_rate(i_smp.freq_pcie,
+                                                i_smp.freq_pb,
                                                 f_link_owpack,
-                                                f_link_owpack_priority);
-        if (rc)
-        {
-            FAPI_ERR("proc_build_smp_set_pb_hp_mode: Error from proc_build_smp_get_f_owpack_config");
-            break;
-        }
-
-        rc = proc_build_smp_calc_f_cmd_rate(i_smp.freq_pcie,
-                                            i_smp.freq_pb,
-                                            f_link_owpack,
-                                            f_link_owpack_priority,
-                                            f_link_aggregate,
-                                            f_cmd_rate);
-        if (rc)
-        {
-            FAPI_ERR("proc_build_smp_set_pb_hp_mode: Error from proc_build_smp_calc_a_cmd_rate");
-            break;
+                                                f_link_owpack_priority,
+                                                f_link_aggregate,
+                                                f_cmd_rate);
+            if (rc)
+            {
+                FAPI_ERR("proc_build_smp_set_pb_hp_mode: Error from proc_build_smp_calc_f_cmd_rate");
+                break;
+            }
         }
 
         // build data buffer with per-link values
@@ -1105,11 +1134,11 @@ fapi::ReturnCode proc_build_smp_set_pb_hpx_mode(
     // per-link destination IDs
     uint8_t x_id[PROC_FAB_SMP_NUM_X_LINKS];
     // per-link address disable values
-    bool x_addr_dis[PROC_FAB_SMP_NUM_X_LINKS];
+    bool x_addr_dis[PROC_FAB_SMP_NUM_X_LINKS] = { false, false, false, false };
     // aggregate link setting
-    bool x_link_aggregate;
+    bool x_link_aggregate = false;
     // link command rate
-    uint8_t x_cmd_rate;
+    uint8_t x_cmd_rate = 0x00;
 
     // mark function entry
     FAPI_DBG("proc_build_smp_set_pb_hpx_mode: Start");
@@ -1125,6 +1154,13 @@ fapi::ReturnCode proc_build_smp_set_pb_hpx_mode(
         {
             // determine link enable
             x_en[l] = (x_target[l]->getType() != fapi::TARGET_TYPE_NONE);
+            if (x_en[l] && !i_smp_chip.x_enabled)
+            {
+                FAPI_ERR("proc_build_smp_set_pb_hpx_mode: Partial good attribute error (X)");
+                FAPI_SET_HWP_ERROR(rc, RC_PROC_BUILD_SMP_X_PARTIAL_GOOD_ERR);
+                break;
+            }
+
             // determine link ID
             proc_fab_smp_chip_id dest_chip_id = FBC_CHIP_ID_0;
             if (x_en[l])
@@ -1143,33 +1179,36 @@ fapi::ReturnCode proc_build_smp_set_pb_hpx_mode(
             break;
         }
 
-        // determine address/data assignents & aggregate mode programming
-        rc = proc_build_smp_calc_link_setup(i_smp_chip,
-                                            PROC_FAB_SMP_NUM_X_LINKS,
-                                            PROC_FAB_SMP_NUM_CHIP_IDS,
-                                            PB_X_MODE_0x04010C0A,
-                                            PB_X_MODE_LINK_DELAY_START_BIT,
-                                            PB_X_MODE_LINK_DELAY_END_BIT,
-                                            x_en,
-                                            x_id,
-                                            x_addr_dis,
-                                            x_link_aggregate);
-        if (rc)
+        if (i_smp_chip.x_enabled)
         {
-            FAPI_ERR("proc_build_smp_set_pb_hpx_mode: Error from proc_build_smp_calc_link_setup (X)");
-            break;
-        }
+            // determine address/data assignents & aggregate mode programming
+            rc = proc_build_smp_calc_link_setup(i_smp_chip,
+                                                PROC_FAB_SMP_NUM_X_LINKS,
+                                                PROC_FAB_SMP_NUM_CHIP_IDS,
+                                                PB_X_MODE_0x04010C0A,
+                                                PB_X_MODE_LINK_DELAY_START_BIT,
+                                                PB_X_MODE_LINK_DELAY_END_BIT,
+                                                x_en,
+                                                x_id,
+                                                x_addr_dis,
+                                                x_link_aggregate);
+            if (rc)
+            {
+                FAPI_ERR("proc_build_smp_set_pb_hpx_mode: Error from proc_build_smp_calc_link_setup (X)");
+                break;
+            }
 
-        // determine link command rate
-        rc = proc_build_smp_calc_x_cmd_rate(i_smp.freq_x,
-                                            i_smp.freq_pb,
-                                            i_smp.x_bus_8B,
-                                            x_link_aggregate,
-                                            x_cmd_rate);
-        if (rc)
-        {
-            FAPI_ERR("proc_build_smp_set_pb_hpx_mode: Error from proc_build_smp_calc_x_cmd_rate");
-            break;
+            // determine link command rate
+            rc = proc_build_smp_calc_x_cmd_rate(i_smp.freq_x,
+                                                i_smp.freq_pb,
+                                                i_smp.x_bus_8B,
+                                                x_link_aggregate,
+                                                x_cmd_rate);
+            if (rc)
+            {
+                FAPI_ERR("proc_build_smp_set_pb_hpx_mode: Error from proc_build_smp_calc_x_cmd_rate");
+                break;
+            }
         }
 
         // build data buffer with per-link values

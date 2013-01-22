@@ -1,233 +1,3 @@
-#-- $Id: edi.io.define,v 1.3 2012/07/09 22:31:54 ttnguyen Exp $
-#-- CHANGE HISTORY:
-#--------------------------------------------------------------------------------
-#-- Version:|Author: | Date:  | Comment:
-#-- --------|--------|--------|--------------------------------------------------
-#--     1.1 |thomsen |06/11/12|Created initial version
-#-- --------|--------|--------|--------------------------------------------------
-#--------------------------------------------------------------------------------
-# End of revision history
-#--------------------------------------------------------------------------------
-define tx_mode_pl=010000000; 	       #080
-define tx_cntl_stat_pl=010000001; 	       #081
-define tx_spare_mode_pl=010000010; 	       #082
-#define #tx_id_pl=010000100; 	       #084
-define tx_bist_stat_pl=010000101; 	       #085
-define tx_prbs_mode_pl=010000110; 	       #086
-define tx_data_cntl_gcrmsg_pl=010000111; 	       #087
-define tx_sync_pattern_gcrmsg_pl=010001000; 	       #088
-define tx_fir_pl=010001010; 	       #08A
-define tx_fir_mask_pl=010001011; 	       #08B
-define tx_fir_error_inject_pl=010001100; 	       #08C
-define tx_mode_fast_pl=010001101; 	       #08D
-define tx_tdr_stat_pl=010001110; 	       #08E
-define tx_cntl_gcrmsg_pl=010001111; 	       #08F
-define tx_clk_mode_pg=110000000; 	       #180
-define tx_spare_mode_pg=110000001; 	       #181
-define tx_cntl_stat_pg=110000010; 	       #182
-define tx_mode_pg=110000011; 	       #183
-define tx_reset_act_pg=110001000; 	       #188
-define tx_bist_stat_pg=110001001; 	       #189
-define tx_fir_pg=110001010; 	       #18A
-define tx_fir_mask_pg=110001011; 	       #18B
-define tx_fir_error_inject_pg=110001100; 	       #18C
-define tx_id1_pg=110010010; 	       #192
-define tx_id2_pg=110010011; 	       #193
-define tx_id3_pg=110010100; 	       #194
-define tx_clk_cntl_gcrmsg_pg=110011000; 	       #198
-define tx_ffe_mode_pg=110011001; 	       #199
-define tx_ffe_main_pg=110011010; 	       #19A
-define tx_ffe_post_pg=110011011; 	       #19B
-define tx_ffe_margin_pg=110011100; 	       #19C
-define tx_bad_lane_enc_gcrmsg_pg=110011101; 	       #19D
-define tx_ber_cntl_pg=110011110; 	       #19E
-define tx_sls_lane_enc_gcrmsg_pg=110011111; 	       #19F
-define tx_wt_seg_enable_pg=110100000; 	       #1A0
-define tx_lane_disabled_vec_0_15_pg=110100011; 	       #1A3
-define tx_lane_disabled_vec_16_31_pg=110100100; 	       #1A4
-define tx_sls_lane_mux_gcrmsg_pg=110100101; 	       #1A5
-define tx_dyn_rpr_pg=110100110; 	       #1A6
-define tx_slv_mv_sls_ln_req_gcrmsg_pg=110100111; 	       #1A7
-define tx_wiretest_pp=111010000; 	       #1D0
-define tx_mode_pp=111010001; 	       #1D1
-define tx_sls_gcrmsg_pp=111010010; 	       #1D2
-define tx_ber_cntl_a_pp=111010011; 	       #1D3
-define tx_ber_cntl_b_pp=111010100; 	       #1D4
-define tx_dyn_recal_timeouts_pp=111010101; 	       #1D5
-define tx_bist_cntl_pp=111010110; 	       #1D6
-define tx_ber_cntl_sls_pp=111010111; 	       #1D7
-define tx_cntl_pp=111011000; 	       #1D8
-define tx_reset_cfg_pp=111011001; 	       #1D9
-define tx_tdr_cntl1_pp=111011010; 	       #1DA
-define tx_tdr_cntl2_pp=111011011; 	       #1DB
-define tx_tdr_cntl3_pp=111011100; 	       #1DC
-define tx_impcal_pb=111100000; 	       #1E0
-define tx_impcal_nval_pb=111100001; 	       #1E1
-define tx_impcal_pval_pb=111100010; 	       #1E2
-define tx_impcal_p_4x_pb=111100011; 	       #1E3
-define tx_impcal_swo1_pb=111100100; 	       #1E4
-define tx_impcal_swo2_pb=111100101; 	       #1E5
-define tx_analog_iref_pb=111100110; 	       #1E6
-define tx_minikerf_pb=111100111; 	       #1E7
-define tx_init_version_pb=111101000; 	       #1E8
-define tx_scratch_reg_pb=111101001; 	       #1E9
-define rx_mode_pl=000000000; 	       #000
-define rx_cntl_pl=000000001; 	       #001
-define rx_spare_mode_pl=000000010; 	       #002
-define rx_prot_edge_status_pl=000000011; 	       #003
-#define #rx_prot_gb_status_pl=000000100; 	       #004
-define rx_bist_stat_pl=000000101; 	       #005
-#define #rx_eyeopt_stat_pl=000000111; 	       #007
-define rx_offset_even_pl=000001000; 	       #008
-define rx_offset_odd_pl=000001001; 	       #009
-define rx_amp_val_pl=000001010; 	       #00A
-define rx_amp_cntl_pl=000001011; 	       #00B
-define rx_prot_status_pl=000001100; 	       #00C
-define rx_prot_mode_pl=000001101; 	       #00D
-define rx_prot_cntl_pl=000001110; 	       #00E
-#define #rx_wiretest_stat_pl=000001110; 	       #00E
-define rx_fifo_stat_pl=000001111; 	       #00F
-define rx_ap_pl =000010000; 	       #010
-define rx_an_pl =000010001; 	       #011
-define rx_amin_pl=000010010; 	       #012
-define rx_h1_even_pl=000010011; 	       #013
-define rx_h1_odd_pl=000010100; 	       #014
-define rx_prbs_mode_pl=000010110; 	       #016
-define rx_stat_pl=000011000; 	       #018
-define rx_deskew_stat_pl=000011001; 	       #019
-define rx_fir_pl=000011010; 	       #01A
-define rx_fir_mask_pl=000011011; 	       #01B
-define rx_fir_error_inject_pl=000011100; 	       #01C
-define rx_sls_pl=000011101; 	       #01D
-define rx_wt_status_pl=000011110; 	       #01E
-define rx_fifo_cntl_pl=000011111; 	       #01F
-define rx_ber_status_pl=000100000; 	       #020
-define rx_ber_timer_0_15_pl=000100001; 	       #021
-define rx_ber_timer_16_31_pl=000100010; 	       #022
-define rx_ber_timer_32_39_pl=000100011; 	       #023
-define rx_servo_cntl_pl=000100100; 	       #024
-define rx_fifo_diag_0_15_pl=000100101; 	       #025
-define rx_fifo_diag_16_31_pl=000100110; 	       #026
-define rx_fifo_diag_32_47_pl=000100111; 	       #027
-define rx_eye_width_status_pl=000101000; 	       #028
-define rx_eye_width_cntl_pl=000101001; 	       #029
-define rx_dfe_clkadj_pl=000101010; 	       #02A
-define rx_trace_pl=000101011; 	       #02B
-define rx_servo_ber_count_pl=000101100; 	       #02C
-define rx_eye_opt_stat_pl=000101101; 	       #02D
-define rx_clk_mode_pg=100000000; 	       #100
-define rx_spare_mode_pg=100000001; 	       #101
-define rx_stop_cntl_stat_pg=100000010; 	       #102
-define rx_mode_pg=100000011; 	       #103
-define rx_stop_addr_lsb_pg=100000111; 	       #107
-define rx_stop_mask_lsb_pg=100001000; 	       #108
-define rx_reset_act_pg=100001001; 	       #109
-define rx_id1_pg=100001010; 	       #10A
-define rx_id2_pg=100001011; 	       #10B
-define rx_id3_pg=100001100; 	       #10C
-define rx_minikerf_pg=100001101; 	       #10D
-define rx_dyn_rpr_debug2_pg=100001110; 	       #10E
-define rx_sls_mode_pg=100001111; 	       #10F
-define rx_training_start_pg=100010000; 	       #110
-define rx_training_status_pg=100010001; 	       #111
-define rx_recal_status_pg=100010010; 	       #112
-define rx_timeout_sel_pg=100010011; 	       #113
-define rx_fifo_mode_pg=100010100; 	       #114
-#define #rx_state_debug_pg=100010101; 	       #115
-#define #rx_state_val_pg=100010110; 	       #116
-define rx_sls_status_pg=100010111; 	       #117
-define rx_fir1_pg=100011010; 	       #11A
-define rx_fir2_pg=100011011; 	       #11B
-define rx_fir1_mask_pg=100011100; 	       #11C
-define rx_fir2_mask_pg=100011101; 	       #11D
-define rx_fir1_error_inject_pg=100011110; 	       #11E
-define rx_fir2_error_inject_pg=100011111; 	       #11F
-define rx_fir_training_pg=100100000; 	       #120
-define rx_fir_training_mask_pg=100100001; 	       #121
-define rx_timeout_sel1_pg=100100010; 	       #122
-define rx_lane_bad_vec_0_15_pg=100100011; 	       #123
-define rx_lane_bad_vec_16_31_pg=100100100; 	       #124
-define rx_lane_disabled_vec_0_15_pg=100100101; 	       #125
-define rx_lane_disabled_vec_16_31_pg=100100110; 	       #126
-define rx_lane_swapped_vec_0_15_pg=100100111; 	       #127
-define rx_lane_swapped_vec_16_31_pg=100101000; 	       #128
-define rx_init_state_pg=100101001; 	       #129
-define rx_wiretest_state_pg=100101010; 	       #12A
-define rx_wiretest_laneinfo_pg=100101011; 	       #12B
-define rx_wiretest_gcrmsgs_pg=100101100; 	       #12C
-define rx_deskew_gcrmsgs_pg=100101101; 	       #12D
-define rx_deskew_state_pg=100101110; 	       #12E
-define rx_deskew_mode_pg=100101111; 	       #12F
-define rx_deskew_status_pg=100110000; 	       #130
-define rx_bad_lane_enc_gcrmsg_pg=100110001; 	       #131
-define rx_static_repair_state_pg=100110010; 	       #132
-define rx_tx_bus_info_pg=100110011; 	       #133
-define rx_sls_lane_enc_gcrmsg_pg=100110100; 	       #134
-define rx_fence_pg=100110101; 	       #135
-define rx_timeout_sel2_pg=100110111; 	       #137
-define rx_misc_analog_pg=100111000; 	       #138
-define rx_dyn_rpr_pg=100111001; 	       #139
-define rx_dyn_rpr_gcrmsg_pg=100111010; 	       #13A
-define rx_dyn_rpr_err_tallying1_pg=100111011; 	       #13B
-define rx_eo_final_l2u_gcrmsgs_pg=100111100; 	       #13C
-define rx_gcr_msg_debug_dest_ids_pg=100111101; 	       #13D
-define rx_gcr_msg_debug_src_ids_pg=100111110; 	       #13E
-define rx_gcr_msg_debug_dest_addr_pg=100111111; 	       #13F
-define rx_gcr_msg_debug_write_data_pg=101000000; 	       #140
-define rx_dyn_recal_pg=101000001; 	       #141
-define rx_wt_clk_status_pg=101000010; 	       #142
-define rx_dyn_recal_config_pg=101000011; 	       #143
-define rx_wt_config_pg=101000100; 	       #144
-define rx_dyn_recal_gcrmsg_pg=101000101; 	       #145
-define rx_wiretest_pll_cntl_pg=101000110; 	       #146
-define rx_eo_step_cntl_pg=101000111; 	       #147
-define rx_eo_step_stat_pg=101001000; 	       #148
-define rx_eo_step_fail_pg=101001001; 	       #149
-define rx_ap_pg =101001010; 	       #14A
-define rx_an_pg =101001011; 	       #14B
-define rx_amin_pg=101001100; 	       #14C
-define rx_amax_pg=101001101; 	       #14D
-define rx_amp_val_pg=101001110; 	       #14E
-define rx_amp_offset_pg=101001111; 	       #14F
-define rx_eo_convergence_pg=101010000; 	       #150
-define rx_sls_rcvy_pg=101010001; 	       #151
-define rx_sls_rcvy_gcrmsg_pg=101010010; 	       #152
-define rx_tx_lane_info_gcrmsg_pg=101010011; 	       #153
-define rx_err_tallying_gcrmsg_pg=101010100; 	       #154
-define rx_trace_pg=101010101; 	       #155
-define rx_rc_step_cntl_pg=101010111; 	       #157
-define rx_eo_recal_pg=101011000; 	       #158
-define rx_servo_ber_count_pg=101011001; 	       #159
-define rx_func_state_pg=101011010; 	       #15A
-define rx_dyn_rpr_debug_pg=101011011; 	       #15B
-define rx_dyn_rpr_err_tallying2_pg=101011100; 	       #15C
-define rx_result_chk_pg=101011101; 	       #15D
-define rx_ber_chk_pg=101011110; 	       #15E
-define rx_sls_rcvy_fin_gcrmsg_pg=101011111; 	       #15F
-#define #rx_wiretest_pp=101100000; 	       #160
-define rx_mode1_pp=101100001; 	       #161
-define rx_cntl_fast_pp=101100010; 	       #162
-define rx_dyn_recal_timeouts_pp=101101000; 	       #168
-define rx_ber_cntl_pp=101101010; 	       #16A
-define rx_ber_mode_pp=101101011; 	       #16B
-define rx_servo_to1_pp=101101100; 	       #16C
-define rx_servo_to2_pp=101101101; 	       #16D
-define rx_servo_to3_pp=101101110; 	       #16E
-define rx_dfe_config_pp=101101111; 	       #16F
-define rx_dfe_timers_pp=101110000; 	       #170
-define rx_reset_cfg_pp=101110001; 	       #171
-define rx_recal_to1_pp=101110010; 	       #172
-define rx_recal_to2_pp=101110011; 	       #173
-define rx_recal_to3_pp=101110100; 	       #174
-define rx_recal_cntl_pp=101110101; 	       #175
-define rx_mode2_pp=101110110; 	       #176
-define rx_bist_gcrmsg_pp=101110111; 	       #177
-define rx_scope_cntl_pp=101111000; 	       #178
-define rx_fir_reset_pb=111110000; 	       #1F0
-define rx_fir_pb=111110001; 	       #1F1
-define rx_fir_mask_pb=111110010; 	       #1F2
-define rx_fir_error_inject_pb=111110011; 	       #1F3
-define rx_fir_msg_pb=111111111; 	       #1FF
 define tx_mode_pl_full_reg=48:63; 	 #start_bit=48, number_of_bit=16
 define tx_lane_pdwn=48:48; 	 #start_bit=48, number_of_bit=1
 define tx_lane_invert=49:49; 	 #start_bit=49, number_of_bit=1
@@ -261,10 +31,8 @@ define tx_prbs_tap_id=48:50; 	 #start_bit=48, number_of_bit=3
 define tx_drv_data_pattern_gcrmsg=48:51; 	 #start_bit=48, number_of_bit=4
 define tx_drv_func_data_gcrmsg=52:52; 	 #start_bit=52, number_of_bit=1
 define tx_sls_lane_sel_gcrmsg=53:53; 	 #start_bit=53, number_of_bit=1
-define tx_drv_sync_patt_gcrmsg=49:49; 	 #start_bit=49, number_of_bit=1
-define tx_err_inject=48:51; 	 #start_bit=48, number_of_bit=4
-define tx_err_inj_A_enable=52:52; 	 #start_bit=52, number_of_bit=1
-define tx_err_inj_B_enable=53:53; 	 #start_bit=53, number_of_bit=1
+define tx_err_inj_a_enable=52:52; 	 #start_bit=52, number_of_bit=1
+define tx_err_inj_b_enable=53:53; 	 #start_bit=53, number_of_bit=1
 define tx_tdr_capt_val=48:48; 	 #start_bit=48, number_of_bit=1
 define tx_clk_pdwn=48:48; 	 #start_bit=48, number_of_bit=1
 define tx_clk_invert=49:49; 	 #start_bit=49, number_of_bit=1
@@ -282,11 +50,9 @@ define tx_pg_spare_mode_7=55:55; 	 #start_bit=55, number_of_bit=1
 define tx_clk_bist_err=49:49; 	 #start_bit=49, number_of_bit=1
 define tx_clk_bist_done=51:51; 	 #start_bit=51, number_of_bit=1
 #define #tx_cntl_stat_pg_spare=48:48; 	 #start_bit=48, number_of_bit=1
-define tx_fifo_init=49:49; 	 #start_bit=49, number_of_bit=1
 define tx_max_bad_lanes=48:52; 	 #start_bit=48, number_of_bit=5
 define tx_msbswap=53:53; 	 #start_bit=53, number_of_bit=1
 define tx_pdwn_lite_disable=54:54; 	 #start_bit=54, number_of_bit=1
-define tx_reset_cfg_ena=48:48; 	 #start_bit=48, number_of_bit=1
 define tx_clr_par_errs=62:62; 	 #start_bit=62, number_of_bit=1
 define tx_fir_reset=63:63; 	 #start_bit=63, number_of_bit=1
 define tx_pg_fir_errs_full_reg=48:63; 	 #start_bit=48, number_of_bit=16
@@ -376,15 +142,12 @@ define tx_enable_reduced_scramble=48:48; 	 #start_bit=48, number_of_bit=1
 define tx_reset_cfg_hld=48:63; 	 #start_bit=48, number_of_bit=16
 define tx_tdr_dac_cntl=48:55; 	 #start_bit=48, number_of_bit=8
 define tx_tdr_phase_sel=57:57; 	 #start_bit=57, number_of_bit=1
-#define #tx_tdr_capt_val=63:63; 	 #start_bit=63, number_of_bit=1
 define tx_tdr_pulse_offset=48:59; 	 #start_bit=48, number_of_bit=12
 define tx_tdr_pulse_width=48:59; 	 #start_bit=48, number_of_bit=12
 #define #tx_zcal_spare=48:48; 	 #start_bit=48, number_of_bit=1
-define tx_zcal_req=49:49; 	 #start_bit=49, number_of_bit=1
 define tx_zcal_done=50:50; 	 #start_bit=50, number_of_bit=1
 define tx_zcal_error=51:51; 	 #start_bit=51, number_of_bit=1
 define tx_zcal_busy=52:52; 	 #start_bit=52, number_of_bit=1
-define tx_zcal_force_sample=53:53; 	 #start_bit=53, number_of_bit=1
 define tx_zcal_cmp_out=54:54; 	 #start_bit=54, number_of_bit=1
 define tx_zcal_sample_cnt=55:63; 	 #start_bit=55, number_of_bit=9
 define tx_zcal_n=48:56; 	 #start_bit=48, number_of_bit=9
@@ -440,10 +203,6 @@ define rx_amp_adj_all_done_b=49:49; 	 #start_bit=49, number_of_bit=1
 #define #rx_lane_inverted=49:49; 	 #start_bit=49, number_of_bit=1
 #define #rx_lane_fault_details=52:54; 	 #start_bit=52, number_of_bit=3
 define rx_fifo_l2u_dly=48:51; 	 #start_bit=48, number_of_bit=4
-define rx_fifo_init=52:52; 	 #start_bit=52, number_of_bit=1
-define rx_fifo_inc_l2u_dly=48:48; 	 #start_bit=48, number_of_bit=1
-define rx_fifo_dec_l2u_dly=49:49; 	 #start_bit=49, number_of_bit=1
-define rx_clr_skew_valid=50:50; 	 #start_bit=50, number_of_bit=1
 #define #rx_fifo_cntl_spare=51:51; 	 #start_bit=51, number_of_bit=1
 define rx_bad_block_lock=48:48; 	 #start_bit=48, number_of_bit=1
 define rx_bad_skew=49:49; 	 #start_bit=49, number_of_bit=1
@@ -493,8 +252,6 @@ define rx_bump_left_half_ui=48:48; 	 #start_bit=48, number_of_bit=1
 define rx_bump_right_half_ui=49:49; 	 #start_bit=49, number_of_bit=1
 define rx_bump_one_ui=50:50; 	 #start_bit=50, number_of_bit=1
 define rx_bump_two_ui=51:51; 	 #start_bit=51, number_of_bit=1
-define rx_ext_sr=52:52; 	 #start_bit=52, number_of_bit=1
-define rx_ext_sl=53:53; 	 #start_bit=53, number_of_bit=1
 define rx_phaserot_offset=50:55; 	 #start_bit=50, number_of_bit=6
 define rx_phaserot_val=50:55; 	 #start_bit=50, number_of_bit=6
 define rx_phaserot_ddc_complete=56:56; 	 #start_bit=56, number_of_bit=1
@@ -506,7 +263,6 @@ define rx_phaserot_right_edge=56:61; 	 #start_bit=56, number_of_bit=6
 define rx_eye_width=50:55; 	 #start_bit=50, number_of_bit=6
 define rx_hist_min_eye_width_valid=56:56; 	 #start_bit=56, number_of_bit=1
 define rx_hist_min_eye_width=58:63; 	 #start_bit=58, number_of_bit=6
-define rx_reset_hist_eye_width_min=48:48; 	 #start_bit=48, number_of_bit=1
 define rx_ber_count=48:55; 	 #start_bit=48, number_of_bit=8
 define rx_ber_count_saturated=56:56; 	 #start_bit=56, number_of_bit=1
 define rx_ber_count_frozen_by_lane=57:57; 	 #start_bit=57, number_of_bit=1
@@ -531,14 +287,14 @@ define rx_pg_spare_mode_1=49:49; 	 #start_bit=49, number_of_bit=1
 define rx_pg_spare_mode_2=50:50; 	 #start_bit=50, number_of_bit=1
 define rx_pg_spare_mode_3=51:51; 	 #start_bit=51, number_of_bit=1
 define rx_pg_spare_mode_4=52:52; 	 #start_bit=52, number_of_bit=1
-define rx_pg_spare_mode_5=53:53; 	 #start_bit=53, number_of_bit=1
-define rx_pg_spare_mode_6=54:54; 	 #start_bit=54, number_of_bit=1
-define rx_pg_spare_mode_7=55:55; 	 #start_bit=55, number_of_bit=1
+#define #rx_pg_spare_mode_5=53:53; 	 #start_bit=53, number_of_bit=1
+#define #rx_pg_spare_mode_6=54:54; 	 #start_bit=54, number_of_bit=1
+#define #rx_pg_spare_mode_7=55:55; 	 #start_bit=55, number_of_bit=1
+define rx_sls_extend_sel=53:55; 	 #start_bit=53, number_of_bit=3
 define rx_master_mode=48:48; 	 #start_bit=48, number_of_bit=1
 define rx_disable_fence_reset=49:49; 	 #start_bit=49, number_of_bit=1
 define rx_pdwn_lite_disable=50:50; 	 #start_bit=50, number_of_bit=1
 define rx_use_sls_as_spr=51:51; 	 #start_bit=51, number_of_bit=1
-define rx_reset_cfg_ena=48:48; 	 #start_bit=48, number_of_bit=1
 define rx_clr_par_errs=62:62; 	 #start_bit=62, number_of_bit=1
 define rx_fir_reset=63:63; 	 #start_bit=63, number_of_bit=1
 define rx_bus_id=48:53; 	 #start_bit=48, number_of_bit=6
@@ -771,6 +527,7 @@ define rx_gcr_msg_debug_write_data=48:63; 	 #start_bit=48, number_of_bit=16
 define rx_servo_recal_ip=48:48; 	 #start_bit=48, number_of_bit=1
 define rx_dyn_recal_main_state=50:55; 	 #start_bit=50, number_of_bit=6
 define rx_dyn_recal_hndshk_state=57:63; 	 #start_bit=57, number_of_bit=7
+#define #rx_eye_opt_state=48:55; 	 #start_bit=48, number_of_bit=8
 define rx_eye_opt_state=48:55; 	 #start_bit=48, number_of_bit=8
 define rx_recal_state=56:63; 	 #start_bit=56, number_of_bit=8
 define rx_wt_clk_lane_inverted=49:49; 	 #start_bit=49, number_of_bit=1
@@ -849,7 +606,6 @@ define rx_tx_bad_lane_cntr_gcrmsg=48:49; 	 #start_bit=48, number_of_bit=2
 define rx_dis_synd_tallying_gcrmsg=48:48; 	 #start_bit=48, number_of_bit=1
 define rx_trc_mode=48:51; 	 #start_bit=48, number_of_bit=4
 define rx_trc_grp=54:59; 	 #start_bit=54, number_of_bit=6
-define rx_dyn_rpr_bad_lane_valid_debug=48:48; 	 #start_bit=48, number_of_bit=1
 define rx_dyn_rpr_enc_bad_data_lane_debug=49:55; 	 #start_bit=49, number_of_bit=7
 define rx_bad_bus_err_cntr=57:63; 	 #start_bit=57, number_of_bit=7
 define rx_bad_bus_lane_err_cntr_dis_clr=48:48; 	 #start_bit=48, number_of_bit=1
@@ -863,7 +619,6 @@ define rx_min_eye_height=56:63; 	 #start_bit=56, number_of_bit=8
 define rx_max_ber_check_count=56:63; 	 #start_bit=56, number_of_bit=8
 define rx_stop_state_enable=48:48; 	 #start_bit=48, number_of_bit=1
 define rx_state_stopped=49:49; 	 #start_bit=49, number_of_bit=1
-define rx_resume_from_stop=50:50; 	 #start_bit=50, number_of_bit=1
 define rx_stop_addr_msb=56:59; 	 #start_bit=56, number_of_bit=4
 define rx_stop_mask_msb=60:63; 	 #start_bit=60, number_of_bit=4
 define rx_stop_addr_lsb=48:63; 	 #start_bit=48, number_of_bit=16
@@ -892,31 +647,29 @@ define rx_pp_trc_mode=48:50; 	 #start_bit=48, number_of_bit=3
 define rx_bist_jitter_pulse_sel=51:52; 	 #start_bit=51, number_of_bit=2
 define rx_bist_min_eye_width=54:59; 	 #start_bit=54, number_of_bit=6
 define rx_wt_pattern_length=61:62; 	 #start_bit=61, number_of_bit=2
-define rx_servo_timeout_sel_A=48:51; 	 #start_bit=48, number_of_bit=4
-define rx_servo_timeout_sel_B=52:55; 	 #start_bit=52, number_of_bit=4
-define rx_servo_timeout_sel_C=56:59; 	 #start_bit=56, number_of_bit=4
-define rx_servo_timeout_sel_D=60:63; 	 #start_bit=60, number_of_bit=4
-define rx_servo_timeout_sel_E=48:51; 	 #start_bit=48, number_of_bit=4
-define rx_servo_timeout_sel_F=52:55; 	 #start_bit=52, number_of_bit=4
-define rx_servo_timeout_sel_G=56:59; 	 #start_bit=56, number_of_bit=4
-define rx_servo_timeout_sel_H=60:63; 	 #start_bit=60, number_of_bit=4
-define rx_servo_timeout_sel_I=48:51; 	 #start_bit=48, number_of_bit=4
-define rx_servo_timeout_sel_J=52:55; 	 #start_bit=52, number_of_bit=4
-define rx_servo_timeout_sel_K=56:59; 	 #start_bit=56, number_of_bit=4
-define rx_servo_timeout_sel_L=60:63; 	 #start_bit=60, number_of_bit=4
-define rx_recal_timeout_sel_A=48:51; 	 #start_bit=48, number_of_bit=4
-define rx_recal_timeout_sel_B=52:55; 	 #start_bit=52, number_of_bit=4
-define rx_recal_timeout_sel_G=56:59; 	 #start_bit=56, number_of_bit=4
-define rx_recal_timeout_sel_H=60:63; 	 #start_bit=60, number_of_bit=4
-define rx_recal_timeout_sel_I=48:51; 	 #start_bit=48, number_of_bit=4
-define rx_recal_timeout_sel_J=52:55; 	 #start_bit=52, number_of_bit=4
-define rx_recal_timeout_sel_K=56:59; 	 #start_bit=56, number_of_bit=4
-define rx_recal_timeout_sel_L=60:63; 	 #start_bit=60, number_of_bit=4
+define rx_servo_timeout_sel_a=48:51; 	 #start_bit=48, number_of_bit=4
+define rx_servo_timeout_sel_b=52:55; 	 #start_bit=52, number_of_bit=4
+define rx_servo_timeout_sel_c=56:59; 	 #start_bit=56, number_of_bit=4
+define rx_servo_timeout_sel_d=60:63; 	 #start_bit=60, number_of_bit=4
+define rx_servo_timeout_sel_e=48:51; 	 #start_bit=48, number_of_bit=4
+define rx_servo_timeout_sel_f=52:55; 	 #start_bit=52, number_of_bit=4
+define rx_servo_timeout_sel_g=56:59; 	 #start_bit=56, number_of_bit=4
+define rx_servo_timeout_sel_h=60:63; 	 #start_bit=60, number_of_bit=4
+define rx_servo_timeout_sel_i=48:51; 	 #start_bit=48, number_of_bit=4
+define rx_servo_timeout_sel_j=52:55; 	 #start_bit=52, number_of_bit=4
+define rx_servo_timeout_sel_k=56:59; 	 #start_bit=56, number_of_bit=4
+define rx_servo_timeout_sel_l=60:63; 	 #start_bit=60, number_of_bit=4
+define rx_recal_timeout_sel_a=48:51; 	 #start_bit=48, number_of_bit=4
+define rx_recal_timeout_sel_b=52:55; 	 #start_bit=52, number_of_bit=4
+define rx_recal_timeout_sel_g=56:59; 	 #start_bit=56, number_of_bit=4
+define rx_recal_timeout_sel_h=60:63; 	 #start_bit=60, number_of_bit=4
+define rx_recal_timeout_sel_i=48:51; 	 #start_bit=48, number_of_bit=4
+define rx_recal_timeout_sel_j=52:55; 	 #start_bit=52, number_of_bit=4
+define rx_recal_timeout_sel_k=56:59; 	 #start_bit=56, number_of_bit=4
+define rx_recal_timeout_sel_l=60:63; 	 #start_bit=60, number_of_bit=4
 #define #rx_block_lock=48:48; 	 #start_bit=48, number_of_bit=1
 define rx_prbs_check_sync=49:49; 	 #start_bit=49, number_of_bit=1
 define rx_enable_reduced_scramble=50:50; 	 #start_bit=50, number_of_bit=1
-define rx_prbs_inc=51:51; 	 #start_bit=51, number_of_bit=1
-define rx_prbs_dec=52:52; 	 #start_bit=52, number_of_bit=1
 define rx_recal_in_progress=48:48; 	 #start_bit=48, number_of_bit=1
 define rx_dyn_recal_interval_timeout_sel=49:51; 	 #start_bit=49, number_of_bit=3
 define rx_dyn_recal_status_rpt_timeout_sel=52:53; 	 #start_bit=52, number_of_bit=2
@@ -935,18 +688,14 @@ define rx_dac_bo_cfg=58:60; 	 #start_bit=58, number_of_bit=3
 define rx_prot_cfg=61:62; 	 #start_bit=61, number_of_bit=2
 define rx_reset_cfg_hld=48:63; 	 #start_bit=48, number_of_bit=16
 define rx_scope_control=48:49; 	 #start_bit=48, number_of_bit=2
-define rx_bump_scope=50:50; 	 #start_bit=50, number_of_bit=1
 define rx_bist_en=48:48; 	 #start_bit=48, number_of_bit=1
 define rx_ber_en=48:48; 	 #start_bit=48, number_of_bit=1
-define rx_ber_count_clr=49:49; 	 #start_bit=49, number_of_bit=1
-define rx_ber_timer_clr=50:50; 	 #start_bit=50, number_of_bit=1
 define rx_ber_timer_freeze_en=48:48; 	 #start_bit=48, number_of_bit=1
 define rx_ber_count_freeze_en=49:49; 	 #start_bit=49, number_of_bit=1
 define rx_ber_count_sel=51:53; 	 #start_bit=51, number_of_bit=3
 define rx_ber_timer_sel=54:56; 	 #start_bit=54, number_of_bit=3
 define rx_ber_clr_count_on_read_en=57:57; 	 #start_bit=57, number_of_bit=1
 define rx_ber_clr_timer_on_read_en=58:58; 	 #start_bit=58, number_of_bit=1
-define rx_fir_msg=48:55; 	 #start_bit=48, number_of_bit=8
 define rx_pb_clr_par_errs=62:62; 	 #start_bit=62, number_of_bit=1
 define rx_pb_fir_reset=63:63; 	 #start_bit=63, number_of_bit=1
 define rx_pb_fir_errs_full_reg=48:57; 	 #start_bit=48, number_of_bit=10
@@ -985,6 +734,226 @@ define rx_pb_fir_err_inj_gcrs_ld_sm2=54:54; 	 #start_bit=54, number_of_bit=1
 define rx_pb_fir_err_inj_gcrs_unld_sm0=55:55; 	 #start_bit=55, number_of_bit=1
 define rx_pb_fir_err_inj_gcrs_unld_sm1=56:56; 	 #start_bit=56, number_of_bit=1
 define rx_pb_fir_err_inj_gcrs_unld_sm2=57:57; 	 #start_bit=57, number_of_bit=1
+define tx_mode_pl=010000000; 	       #080
+define tx_cntl_stat_pl=010000001; 	       #081
+define tx_spare_mode_pl=010000010; 	       #082
+#define #tx_id_pl=010000100; 	       #084
+define tx_bist_stat_pl=010000101; 	       #085
+define tx_prbs_mode_pl=010000110; 	       #086
+define tx_data_cntl_gcrmsg_pl=010000111; 	       #087
+define tx_sync_pattern_gcrmsg_pl=010001000; 	       #088
+define tx_fir_pl=010001010; 	       #08A
+define tx_fir_mask_pl=010001011; 	       #08B
+define tx_fir_error_inject_pl=010001100; 	       #08C
+define tx_mode_fast_pl=010001101; 	       #08D
+define tx_tdr_stat_pl=010001110; 	       #08E
+define tx_cntl_gcrmsg_pl=010001111; 	       #08F
+define tx_clk_mode_pg=110000000; 	       #180
+define tx_spare_mode_pg=110000001; 	       #181
+define tx_cntl_stat_pg=110000010; 	       #182
+define tx_mode_pg=110000011; 	       #183
+define tx_reset_act_pg=110001000; 	       #188
+define tx_bist_stat_pg=110001001; 	       #189
+define tx_fir_pg=110001010; 	       #18A
+define tx_fir_mask_pg=110001011; 	       #18B
+define tx_fir_error_inject_pg=110001100; 	       #18C
+define tx_id1_pg=110010010; 	       #192
+define tx_id2_pg=110010011; 	       #193
+define tx_id3_pg=110010100; 	       #194
+define tx_clk_cntl_gcrmsg_pg=110011000; 	       #198
+define tx_ffe_mode_pg=110011001; 	       #199
+define tx_ffe_main_pg=110011010; 	       #19A
+define tx_ffe_post_pg=110011011; 	       #19B
+define tx_ffe_margin_pg=110011100; 	       #19C
+define tx_bad_lane_enc_gcrmsg_pg=110011101; 	       #19D
+define tx_ber_cntl_pg=110011110; 	       #19E
+define tx_sls_lane_enc_gcrmsg_pg=110011111; 	       #19F
+define tx_wt_seg_enable_pg=110100000; 	       #1A0
+define tx_lane_disabled_vec_0_15_pg=110100011; 	       #1A3
+define tx_lane_disabled_vec_16_31_pg=110100100; 	       #1A4
+define tx_sls_lane_mux_gcrmsg_pg=110100101; 	       #1A5
+define tx_dyn_rpr_pg=110100110; 	       #1A6
+define tx_slv_mv_sls_ln_req_gcrmsg_pg=110100111; 	       #1A7
+define tx_wiretest_pp=111010000; 	       #1D0
+define tx_mode_pp=111010001; 	       #1D1
+define tx_sls_gcrmsg_pp=111010010; 	       #1D2
+define tx_ber_cntl_a_pp=111010011; 	       #1D3
+define tx_ber_cntl_b_pp=111010100; 	       #1D4
+define tx_dyn_recal_timeouts_pp=111010101; 	       #1D5
+define tx_bist_cntl_pp=111010110; 	       #1D6
+define tx_ber_cntl_sls_pp=111010111; 	       #1D7
+define tx_cntl_pp=111011000; 	       #1D8
+define tx_reset_cfg_pp=111011001; 	       #1D9
+define tx_tdr_cntl1_pp=111011010; 	       #1DA
+define tx_tdr_cntl2_pp=111011011; 	       #1DB
+define tx_tdr_cntl3_pp=111011100; 	       #1DC
+define tx_impcal_pb=111100000; 	       #1E0
+define tx_impcal_nval_pb=111100001; 	       #1E1
+define tx_impcal_pval_pb=111100010; 	       #1E2
+define tx_impcal_p_4x_pb=111100011; 	       #1E3
+define tx_impcal_swo1_pb=111100100; 	       #1E4
+define tx_impcal_swo2_pb=111100101; 	       #1E5
+define tx_analog_iref_pb=111100110; 	       #1E6
+define tx_minikerf_pb=111100111; 	       #1E7
+define tx_init_version_pb=111101000; 	       #1E8
+define tx_scratch_reg_pb=111101001; 	       #1E9
+define rx_mode_pl=000000000; 	       #000
+define rx_cntl_pl=000000001; 	       #001
+define rx_spare_mode_pl=000000010; 	       #002
+define rx_prot_edge_status_pl=000000011; 	       #003
+#define #rx_prot_gb_status_pl=000000100; 	       #004
+define rx_bist_stat_pl=000000101; 	       #005
+#define #rx_eyeopt_stat_pl=000000111; 	       #007
+define rx_offset_even_pl=000001000; 	       #008
+define rx_offset_odd_pl=000001001; 	       #009
+define rx_amp_val_pl=000001010; 	       #00A
+define rx_amp_cntl_pl=000001011; 	       #00B
+define rx_prot_status_pl=000001100; 	       #00C
+define rx_prot_mode_pl=000001101; 	       #00D
+define rx_prot_cntl_pl=000001110; 	       #00E
+#define #rx_wiretest_stat_pl=000001110; 	       #00E
+define rx_fifo_stat_pl=000001111; 	       #00F
+define rx_ap_pl =000010000; 	       #010
+define rx_an_pl =000010001; 	       #011
+define rx_amin_pl=000010010; 	       #012
+define rx_h1_even_pl=000010011; 	       #013
+define rx_h1_odd_pl=000010100; 	       #014
+define rx_prbs_mode_pl=000010110; 	       #016
+define rx_stat_pl=000011000; 	       #018
+define rx_deskew_stat_pl=000011001; 	       #019
+define rx_fir_pl=000011010; 	       #01A
+define rx_fir_mask_pl=000011011; 	       #01B
+define rx_fir_error_inject_pl=000011100; 	       #01C
+define rx_sls_pl=000011101; 	       #01D
+define rx_wt_status_pl=000011110; 	       #01E
+define rx_fifo_cntl_pl=000011111; 	       #01F
+define rx_ber_status_pl=000100000; 	       #020
+define rx_ber_timer_0_15_pl=000100001; 	       #021
+define rx_ber_timer_16_31_pl=000100010; 	       #022
+define rx_ber_timer_32_39_pl=000100011; 	       #023
+define rx_servo_cntl_pl=000100100; 	       #024
+define rx_fifo_diag_0_15_pl=000100101; 	       #025
+define rx_fifo_diag_16_31_pl=000100110; 	       #026
+define rx_fifo_diag_32_47_pl=000100111; 	       #027
+define rx_eye_width_status_pl=000101000; 	       #028
+define rx_eye_width_cntl_pl=000101001; 	       #029
+define rx_dfe_clkadj_pl=000101010; 	       #02A
+define rx_trace_pl=000101011; 	       #02B
+define rx_servo_ber_count_pl=000101100; 	       #02C
+define rx_eye_opt_stat_pl=000101101; 	       #02D
+define rx_clk_mode_pg=100000000; 	       #100
+define rx_spare_mode_pg=100000001; 	       #101
+define rx_stop_cntl_stat_pg=100000010; 	       #102
+define rx_mode_pg=100000011; 	       #103
+define rx_stop_addr_lsb_pg=100000111; 	       #107
+define rx_stop_mask_lsb_pg=100001000; 	       #108
+define rx_reset_act_pg=100001001; 	       #109
+define rx_id1_pg=100001010; 	       #10A
+define rx_id2_pg=100001011; 	       #10B
+define rx_id3_pg=100001100; 	       #10C
+define rx_minikerf_pg=100001101; 	       #10D
+define rx_dyn_rpr_debug2_pg=100001110; 	       #10E
+define rx_sls_mode_pg=100001111; 	       #10F
+define rx_training_start_pg=100010000; 	       #110
+define rx_training_status_pg=100010001; 	       #111
+define rx_recal_status_pg=100010010; 	       #112
+define rx_timeout_sel_pg=100010011; 	       #113
+define rx_fifo_mode_pg=100010100; 	       #114
+#define #rx_state_debug_pg=100010101; 	       #115
+#define #rx_state_val_pg=100010110; 	       #116
+define rx_sls_status_pg=100010111; 	       #117
+define rx_fir1_pg=100011010; 	       #11A
+define rx_fir2_pg=100011011; 	       #11B
+define rx_fir1_mask_pg=100011100; 	       #11C
+define rx_fir2_mask_pg=100011101; 	       #11D
+define rx_fir1_error_inject_pg=100011110; 	       #11E
+define rx_fir2_error_inject_pg=100011111; 	       #11F
+define rx_fir_training_pg=100100000; 	       #120
+define rx_fir_training_mask_pg=100100001; 	       #121
+define rx_timeout_sel1_pg=100100010; 	       #122
+define rx_lane_bad_vec_0_15_pg=100100011; 	       #123
+define rx_lane_bad_vec_16_31_pg=100100100; 	       #124
+define rx_lane_disabled_vec_0_15_pg=100100101; 	       #125
+define rx_lane_disabled_vec_16_31_pg=100100110; 	       #126
+define rx_lane_swapped_vec_0_15_pg=100100111; 	       #127
+define rx_lane_swapped_vec_16_31_pg=100101000; 	       #128
+define rx_init_state_pg=100101001; 	       #129
+define rx_wiretest_state_pg=100101010; 	       #12A
+define rx_wiretest_laneinfo_pg=100101011; 	       #12B
+define rx_wiretest_gcrmsgs_pg=100101100; 	       #12C
+define rx_deskew_gcrmsgs_pg=100101101; 	       #12D
+define rx_deskew_state_pg=100101110; 	       #12E
+define rx_deskew_mode_pg=100101111; 	       #12F
+define rx_deskew_status_pg=100110000; 	       #130
+define rx_bad_lane_enc_gcrmsg_pg=100110001; 	       #131
+define rx_static_repair_state_pg=100110010; 	       #132
+define rx_tx_bus_info_pg=100110011; 	       #133
+define rx_sls_lane_enc_gcrmsg_pg=100110100; 	       #134
+define rx_fence_pg=100110101; 	       #135
+define rx_timeout_sel2_pg=100110111; 	       #137
+define rx_misc_analog_pg=100111000; 	       #138
+define rx_dyn_rpr_pg=100111001; 	       #139
+define rx_dyn_rpr_gcrmsg_pg=100111010; 	       #13A
+define rx_dyn_rpr_err_tallying1_pg=100111011; 	       #13B
+define rx_eo_final_l2u_gcrmsgs_pg=100111100; 	       #13C
+define rx_gcr_msg_debug_dest_ids_pg=100111101; 	       #13D
+define rx_gcr_msg_debug_src_ids_pg=100111110; 	       #13E
+define rx_gcr_msg_debug_dest_addr_pg=100111111; 	       #13F
+define rx_gcr_msg_debug_write_data_pg=101000000; 	       #140
+define rx_dyn_recal_pg=101000001; 	       #141
+define rx_wt_clk_status_pg=101000010; 	       #142
+define rx_dyn_recal_config_pg=101000011; 	       #143
+define rx_wt_config_pg=101000100; 	       #144
+define rx_dyn_recal_gcrmsg_pg=101000101; 	       #145
+define rx_wiretest_pll_cntl_pg=101000110; 	       #146
+define rx_eo_step_cntl_pg=101000111; 	       #147
+define rx_eo_step_stat_pg=101001000; 	       #148
+define rx_eo_step_fail_pg=101001001; 	       #149
+define rx_ap_pg =101001010; 	       #14A
+define rx_an_pg =101001011; 	       #14B
+define rx_amin_pg=101001100; 	       #14C
+define rx_amax_pg=101001101; 	       #14D
+define rx_amp_val_pg=101001110; 	       #14E
+define rx_amp_offset_pg=101001111; 	       #14F
+define rx_eo_convergence_pg=101010000; 	       #150
+define rx_sls_rcvy_pg=101010001; 	       #151
+define rx_sls_rcvy_gcrmsg_pg=101010010; 	       #152
+define rx_tx_lane_info_gcrmsg_pg=101010011; 	       #153
+define rx_err_tallying_gcrmsg_pg=101010100; 	       #154
+define rx_trace_pg=101010101; 	       #155
+define rx_rc_step_cntl_pg=101010111; 	       #157
+define rx_eo_recal_pg=101011000; 	       #158
+define rx_servo_ber_count_pg=101011001; 	       #159
+define rx_func_state_pg=101011010; 	       #15A
+define rx_dyn_rpr_debug_pg=101011011; 	       #15B
+define rx_dyn_rpr_err_tallying2_pg=101011100; 	       #15C
+define rx_result_chk_pg=101011101; 	       #15D
+define rx_ber_chk_pg=101011110; 	       #15E
+define rx_sls_rcvy_fin_gcrmsg_pg=101011111; 	       #15F
+#define #rx_wiretest_pp=101100000; 	       #160
+define rx_mode1_pp=101100001; 	       #161
+define rx_cntl_fast_pp=101100010; 	       #162
+define rx_dyn_recal_timeouts_pp=101101000; 	       #168
+define rx_ber_cntl_pp=101101010; 	       #16A
+define rx_ber_mode_pp=101101011; 	       #16B
+define rx_servo_to1_pp=101101100; 	       #16C
+define rx_servo_to2_pp=101101101; 	       #16D
+define rx_servo_to3_pp=101101110; 	       #16E
+define rx_dfe_config_pp=101101111; 	       #16F
+define rx_dfe_timers_pp=101110000; 	       #170
+define rx_reset_cfg_pp=101110001; 	       #171
+define rx_recal_to1_pp=101110010; 	       #172
+define rx_recal_to2_pp=101110011; 	       #173
+define rx_recal_to3_pp=101110100; 	       #174
+define rx_recal_cntl_pp=101110101; 	       #175
+define rx_mode2_pp=101110110; 	       #176
+define rx_bist_gcrmsg_pp=101110111; 	       #177
+define rx_scope_cntl_pp=101111000; 	       #178
+define rx_fir_reset_pb=111110000; 	       #1F0
+define rx_fir_pb=111110001; 	       #1F1
+define rx_fir_mask_pb=111110010; 	       #1F2
+define rx_fir_error_inject_pb=111110011; 	       #1F3
+define rx_fir_msg_pb=111111111; 	       #1FF
 define abus_gcr_addr=08010C3F;
 define dmi0_gcr_addr=02011A3F;
 define dmi1_gcr_addr=02011E3F;
@@ -997,7 +966,7 @@ define tx_grp0=100000;       # 0x20
 define tx_grp1=100001;       # 0x21
 define tx_grp2=100010;       # 0x22
 define tx_grp3=100011;       # 0x23
-define lane_na=00000;       # 0x00
+define lane_na=00000;        # 0x00
 define lane_0=00000;
 define lane_1=00001;
 define lane_2=00010;
@@ -1038,4 +1007,3 @@ define tx_prbs_tap_id_pattern_e=0b100;
 define tx_prbs_tap_id_pattern_f=0b101;
 define tx_prbs_tap_id_pattern_g=0b110;
 define tx_prbs_tap_id_pattern_h=0b111;
-

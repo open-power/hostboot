@@ -1,27 +1,26 @@
-/*  IBM_PROLOG_BEGIN_TAG
- *  This is an automatically generated prolog.
- *
- *  $Source: src/usr/hwpf/hwp/edi_ei_initialization/proc_fab_iovalid/proc_fab_iovalid.C $
- *
- *  IBM CONFIDENTIAL
- *
- *  COPYRIGHT International Business Machines Corp. 2012
- *
- *  p1
- *
- *  Object Code Only (OCO) source materials
- *  Licensed Internal Code Source Materials
- *  IBM HostBoot Licensed Internal Code
- *
- *  The source code for this program is not published or other-
- *  wise divested of its trade secrets, irrespective of what has
- *  been deposited with the U.S. Copyright Office.
- *
- *  Origin: 30
- *
- *  IBM_PROLOG_END_TAG
- */
-// $Id: proc_fab_iovalid.C,v 1.8 2012/07/23 14:15:51 jmcgill Exp $
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/usr/hwpf/hwp/edi_ei_initialization/proc_fab_iovalid/proc_fab_iovalid.C $ */
+/*                                                                        */
+/* IBM CONFIDENTIAL                                                       */
+/*                                                                        */
+/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/*                                                                        */
+/* p1                                                                     */
+/*                                                                        */
+/* Object Code Only (OCO) source materials                                */
+/* Licensed Internal Code Source Materials                                */
+/* IBM HostBoot Licensed Internal Code                                    */
+/*                                                                        */
+/* The source code for this program is not published or otherwise         */
+/* divested of its trade secrets, irrespective of what has been           */
+/* deposited with the U.S. Copyright Office.                              */
+/*                                                                        */
+/* Origin: 30                                                             */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
+// $Id: proc_fab_iovalid.C,v 1.9 2013/01/21 01:42:45 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_fab_iovalid.C,v $
 //------------------------------------------------------------------------------
 // *|
@@ -141,6 +140,9 @@ fapi::ReturnCode proc_fab_iovalid_manage_x_links(
     uint32_t rc_ecmd = 0;
     fapi::ReturnCode rc;
 
+    // partial good attribute
+    uint8_t xbus_enable_attr;
+
     // mark function entry
     FAPI_DBG("proc_fab_iovalid_manage_x_links: Start");
 
@@ -152,6 +154,23 @@ fapi::ReturnCode proc_fab_iovalid_manage_x_links(
             i_proc_chip.x2 ||
             i_proc_chip.x3)
         {
+            // query XBUS partial good attribute
+            rc = FAPI_ATTR_GET(ATTR_PROC_X_ENABLE,
+                               &(i_proc_chip.this_chip),
+                               xbus_enable_attr);
+            if (!rc.ok())
+            {
+                FAPI_ERR("proc_fab_iovalid_manage_x_links: Error querying ATTR_PROC_X_ENABLE");
+                break;
+            }
+
+            if (xbus_enable_attr != fapi::ENUM_ATTR_PROC_X_ENABLE_ENABLE)
+            {
+                FAPI_ERR("proc_fab_iovalid_manage_x_links: Partial good attribute error");
+                FAPI_SET_HWP_ERROR(rc, RC_PROC_FAB_IOVALID_X_PARTIAL_GOOD_ERR);
+                break;
+            }
+
             if (i_proc_chip.x0)
             {
                 FAPI_DBG("proc_fab_iovalid_manage_x_links: Adding link X0 to active link mask");
@@ -222,6 +241,9 @@ fapi::ReturnCode proc_fab_iovalid_manage_a_links(
     uint32_t rc_ecmd = 0;
     fapi::ReturnCode rc;
 
+    // partial good attribute
+    uint8_t abus_enable_attr;
+
     // mark function entry
     FAPI_DBG("proc_fab_iovalid_manage_a_links: Start");
 
@@ -232,6 +254,23 @@ fapi::ReturnCode proc_fab_iovalid_manage_a_links(
             i_proc_chip.a1 ||
             i_proc_chip.a2)
         {
+            // query ABUS partial good attribute
+            rc = FAPI_ATTR_GET(ATTR_PROC_A_ENABLE,
+                               &(i_proc_chip.this_chip),
+                               abus_enable_attr);
+            if (!rc.ok())
+            {
+                FAPI_ERR("proc_fab_iovalid_manage_a_links: Error querying ATTR_PROC_A_ENABLE");
+                break;
+            }
+
+            if (abus_enable_attr != fapi::ENUM_ATTR_PROC_A_ENABLE_ENABLE)
+            {
+                FAPI_ERR("proc_fab_iovalid_manage_a_links: Partial good attribute error");
+                FAPI_SET_HWP_ERROR(rc, RC_PROC_FAB_IOVALID_A_PARTIAL_GOOD_ERR);
+                break;
+            }
+
             if (i_proc_chip.a0)
             {
                 FAPI_DBG("proc_fab_iovalid_manage_a_links: Adding link A0 to active link mask");

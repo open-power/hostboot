@@ -112,6 +112,8 @@ enum istepModuleId
     ISTEP_VDDR_DISABLE                                  = 0x40,
     ISTEP_DMI_IO_DCCAL                                  = 0x41,
     ISTEP_FABRIC_IO_DCCAL                               = 0x42,
+    ISTEP_PROC_XBUS_SCOMINIT                            = 0x43,
+    ISTEP_PROC_ABUS_SCOMINIT                            = 0x44,
 };
 
 /**
@@ -163,11 +165,10 @@ enum istepReasonCode
     ISTEP_CUSTOMIZE_CHIP_REGIONS_FAILED         = ISTEP_COMP_ID | 0x26,
     ISTEP_GET_SLW_OUTPUT_BUFFER_FAILED          = ISTEP_COMP_ID | 0x27,
     ISTEP_GET_SLW_REALMEM_FAILED                = ISTEP_COMP_ID | 0x28,
-
     ISTEP_CEN_REC_ATTN_FAILED                   = ISTEP_COMP_ID | 0x29,
     ISTEP_PROC_REC_ATTN_FAILED                  = ISTEP_COMP_ID | 0x2A,
-
-
+    ISTEP_PROC_XBUS_SCOMINIT_FAILED             = ISTEP_COMP_ID | 0x2B,
+    ISTEP_PROC_ABUS_SCOMINIT_FAILED             = ISTEP_COMP_ID | 0x2C,
 };  // end ISTEP
 
 }

@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- IBM CONFIDENTIAL                                                       -->
 <!--                                                                        -->
-<!-- COPYRIGHT International Business Machines Corp. 2012                   -->
+<!-- COPYRIGHT International Business Machines Corp. 2012,2013              -->
 <!--                                                                        -->
 <!-- p1                                                                     -->
 <!--                                                                        -->
@@ -108,5 +108,17 @@
     <rc>RC_PROC_BUILD_SMP_ADU_STATUS_MISMATCH</rc>
     <description>Status mismatch detected on ADU operation executed for SMP configuration.</description>
     <ffdc>STATUS_DATA</ffdc>
+  </hwpError>
+  <hwpError>
+    <rc>RC_PROC_BUILD_SMP_X_PARTIAL_GOOD_ERR</rc>
+    <description>X bus partial good attribute state does not allow for action on target.</description>
+  </hwpError>
+  <hwpError>
+    <rc>RC_PROC_BUILD_SMP_A_PARTIAL_GOOD_ERR</rc>
+    <description>A bus partial good attribute state does not allow for action on target.</description>
+  </hwpError>
+  <hwpError>
+    <rc>RC_PROC_BUILD_SMP_PCIE_PARTIAL_GOOD_ERR</rc>
+    <description>PCIE partial good attribute state does not allow for action on target.</description>
   </hwpError>
 </hwpErrors>

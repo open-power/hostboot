@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012                   */
+/* COPYRIGHT International Business Machines Corp. 2012,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_build_smp.H,v 1.6 2012/09/24 04:59:17 jmcgill Exp $
+// $Id: proc_build_smp.H,v 1.8 2013/01/21 03:11:30 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_build_smp.H,v $
 //------------------------------------------------------------------------------
 // *|
@@ -130,6 +130,11 @@ struct proc_build_smp_chip
     // fabric chip/node ID
     proc_fab_smp_chip_id chip_id;
     proc_fab_smp_node_id node_id;
+    // partial good attributes
+    bool nx_enabled;
+    bool x_enabled;
+    bool a_enabled;
+    bool pcie_enabled;
     // node/system master designation (curr)
     bool master_chip_node_curr;
     bool master_chip_sys_curr;

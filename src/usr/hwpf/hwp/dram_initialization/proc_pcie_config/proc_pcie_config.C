@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012                   */
+/* COPYRIGHT International Business Machines Corp. 2012,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_pcie_config.C,v 1.3 2012/12/11 23:59:02 jmcgill Exp $
+// $Id: proc_pcie_config.C,v 1.4 2013/01/20 19:28:14 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_pcie_config.C,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2012
@@ -198,6 +198,10 @@ fapi::ReturnCode proc_pcie_config(
                 FAPI_ERR("proc_pcie_config: Error from proc_pcie_config_pbcq_fir");
                 break;
             }
+        }
+        else
+        {
+            FAPI_DBG("proc_pcie_scominit: Skipping initialization (partial good)");
         }
 
     } while(0);

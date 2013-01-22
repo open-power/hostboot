@@ -1,9 +1,11 @@
-#-- $Id: p8.dmi.scom.initfile,v 1.10 2012/10/02 15:58:53 ttnguyen Exp $
+#-- $Id: p8.dmi.scom.initfile,v 1.11 2013/01/22 02:46:58 thomsen Exp $
 #-- CHANGE HISTORY:
 #--------------------------------------------------------------------------------
 #-- Version:|Author: | Date:  | Comment:
 #-- --------|--------|--------|--------------------------------------------------
-#--     2.0 |pmegan  |10/02/12|Removed rx_sls_extend_sel entry since its needed for slave chip only (Processor is always master on DMI)
+#--    1.11 |thomsen |01/21/13|Removed ATTR_EI_BUS_RX_MSB_LSB_SWAP & ATTR_EI_BUS_TX_MSB_LSB_SWAP as those are old now
+#--         |        |        |Removed non-mirrored mode settings in PRBS tap id's                                   
+#--    1.10 |pmegan  |10/02/12|Removed rx_sls_extend_sel entry since its needed for slave chip only (Processor is always master on DMI)
 #--     1.9 |pmegan  |09/27/12|Set rx_sls_timeout_sel entry to 0b001 per defect HW220752
 #--                           |Set rx_sls_extend_sel entry to 0b100 per defect HW220806
 #--     1.8 |thomsen |07/13/12|Updated non-mirrored PRBS_TAP_ID's to have abcdefgabcdefgabc... pattern
@@ -27,12 +29,10 @@
 #--  the p8.chipunit.scominfo file. It is used to be able to select a specific clock group number.
 #--  Chip     UNIT_POS  DMI_UNIT  CLOCKGRP
 #--  ----     --------  --------  --------
-#--  Venice:  0-3       DMI0      0-3
-#--           4-7       DMI1      0-3
-#--  Murano:  4-7       DMI1      0-3
+#--  Venice:  0-3       DMI0      3-0
+#--           4-7       DMI1      3-0
+#--  Murano:  4-7       DMI1      3-0
 
-#-- ATTR_EI_BUS_RX_MSB_LSB_SWAP is 0 for setting RX PRBS TapID's to Non-Mirrored Mode and 1 for setting to Mirrored Mode. It comes from the MRW.
-#-- ATTR_EI_BUS_TX_MSB_LSB_SWAP is 0 for setting TX PRBS TapID's to Non-Mirrored Mode and 1 for setting to Mirrored Mode. It comes from the MRW.
 
 SyntaxVersion = 1
 
@@ -60,11 +60,6 @@ define def_bus_id3 = ((ATTR_CHIP_UNIT_POS == 0) || (ATTR_CHIP_UNIT_POS == 4));
 define def_bus_id2 = ((ATTR_CHIP_UNIT_POS == 1) || (ATTR_CHIP_UNIT_POS == 5));
 define def_bus_id1 = ((ATTR_CHIP_UNIT_POS == 2) || (ATTR_CHIP_UNIT_POS == 6));
 define def_bus_id0 = ((ATTR_CHIP_UNIT_POS == 3) || (ATTR_CHIP_UNIT_POS == 7));
-
-define def_rx_mirrored_mode     = (ATTR_EI_BUS_RX_MSB_LSB_SWAP == 1);    # Mirrored mode
-define def_rx_non_mirrored_mode = (ATTR_EI_BUS_RX_MSB_LSB_SWAP == 0);    # Non-Mirrored mode
-define def_tx_mirrored_mode     = (ATTR_EI_BUS_TX_MSB_LSB_SWAP == 1);    # Mirrored mode
-define def_tx_non_mirrored_mode = (ATTR_EI_BUS_TX_MSB_LSB_SWAP == 0);    # Non-Mirrored mode
 
 # See p8.chipunit.scominfo file for details of how SCOM addresses are translated by Cronus and FW based on the target unit number
 define def_rx_base_grp = rx_grp3;   # Venice and Murano wire clkgrp3 to Cen0, clkgrp2 to Cen1, clkgrp1 to Cen2 and clkgrp0 to Cen3
@@ -253,124 +248,100 @@ scom 0x800.0b(rx_mode_pg)(def_rx_base_grp)(lane_na).0x(dmi0_gcr_addr){
 #-- rx_prbs_mode_pl: rx_prbs_tap_id
 #--*********************************************************************************************
 scom 0x800.0b(rx_prbs_mode_pl)(def_rx_base_grp)(lane_0).0x(dmi0_gcr_addr){
-        bits,                  scom_data,                 expr;
-        rx_prbs_tap_id,        rx_prbs_tap_id_pattern_a,  (def_rx_mirrored_mode);
-        rx_prbs_tap_id,        rx_prbs_tap_id_pattern_a,  (def_rx_non_mirrored_mode);
+        bits,                  scom_data;
+        rx_prbs_tap_id,        rx_prbs_tap_id_pattern_a;
 }
 scom 0x800.0b(rx_prbs_mode_pl)(def_rx_base_grp)(lane_1).0x(dmi0_gcr_addr){
-        bits,                  scom_data,                 expr;
-        rx_prbs_tap_id,        rx_prbs_tap_id_pattern_b,  (def_rx_mirrored_mode);    
-        rx_prbs_tap_id,        rx_prbs_tap_id_pattern_b,  (def_rx_non_mirrored_mode);    
+        bits,                  scom_data;
+        rx_prbs_tap_id,        rx_prbs_tap_id_pattern_b;    
 }
 scom 0x800.0b(rx_prbs_mode_pl)(def_rx_base_grp)(lane_2).0x(dmi0_gcr_addr){
-        bits,                  scom_data,                 expr;
-        rx_prbs_tap_id,        rx_prbs_tap_id_pattern_c,  (def_rx_mirrored_mode);    
-        rx_prbs_tap_id,        rx_prbs_tap_id_pattern_c,  (def_rx_non_mirrored_mode);    
+        bits,                  scom_data;
+        rx_prbs_tap_id,        rx_prbs_tap_id_pattern_c;    
 }
 scom 0x800.0b(rx_prbs_mode_pl)(def_rx_base_grp)(lane_3).0x(dmi0_gcr_addr){
-        bits,                  scom_data,                 expr;
-        rx_prbs_tap_id,        rx_prbs_tap_id_pattern_d,  (def_rx_mirrored_mode);    
-        rx_prbs_tap_id,        rx_prbs_tap_id_pattern_d,  (def_rx_non_mirrored_mode);    
+        bits,                  scom_data;
+        rx_prbs_tap_id,        rx_prbs_tap_id_pattern_d;    
 }
 scom 0x800.0b(rx_prbs_mode_pl)(def_rx_base_grp)(lane_4).0x(dmi0_gcr_addr){
-        bits,                  scom_data,                 expr;
-        rx_prbs_tap_id,        rx_prbs_tap_id_pattern_e,  (def_rx_mirrored_mode);    
-        rx_prbs_tap_id,        rx_prbs_tap_id_pattern_e,  (def_rx_non_mirrored_mode);    
+        bits,                  scom_data;
+        rx_prbs_tap_id,        rx_prbs_tap_id_pattern_e;    
 }
 scom 0x800.0b(rx_prbs_mode_pl)(def_rx_base_grp)(lane_5).0x(dmi0_gcr_addr){
-        bits,                  scom_data,                 expr;
-        rx_prbs_tap_id,        rx_prbs_tap_id_pattern_f,  (def_rx_mirrored_mode);    
-        rx_prbs_tap_id,        rx_prbs_tap_id_pattern_f,  (def_rx_non_mirrored_mode);    
+        bits,                  scom_data;
+        rx_prbs_tap_id,        rx_prbs_tap_id_pattern_f;    
 }
 scom 0x800.0b(rx_prbs_mode_pl)(def_rx_base_grp)(lane_6).0x(dmi0_gcr_addr){
-        bits,                  scom_data,                 expr;
-        rx_prbs_tap_id,        rx_prbs_tap_id_pattern_g,  (def_rx_mirrored_mode);    
-        rx_prbs_tap_id,        rx_prbs_tap_id_pattern_g,  (def_rx_non_mirrored_mode);    
+        bits,                  scom_data;
+        rx_prbs_tap_id,        rx_prbs_tap_id_pattern_g;    
 }
 scom 0x800.0b(rx_prbs_mode_pl)(def_rx_base_grp)(lane_7).0x(dmi0_gcr_addr){
-        bits,                  scom_data,                 expr;
-        rx_prbs_tap_id,        rx_prbs_tap_id_pattern_h,  (def_rx_mirrored_mode);    
-        rx_prbs_tap_id,        rx_prbs_tap_id_pattern_h,  (def_rx_non_mirrored_mode);    
+        bits,                  scom_data;
+        rx_prbs_tap_id,        rx_prbs_tap_id_pattern_h;    
 }
 scom 0x800.0b(rx_prbs_mode_pl)(def_rx_base_grp)(lane_8).0x(dmi0_gcr_addr){
-        bits,                  scom_data,                 expr;
-        rx_prbs_tap_id,        rx_prbs_tap_id_pattern_a,  (def_rx_mirrored_mode);    
-        rx_prbs_tap_id,        rx_prbs_tap_id_pattern_a,  (def_rx_non_mirrored_mode);    
+        bits,                  scom_data;
+        rx_prbs_tap_id,        rx_prbs_tap_id_pattern_a;    
 }
 scom 0x800.0b(rx_prbs_mode_pl)(def_rx_base_grp)(lane_9).0x(dmi0_gcr_addr){
-        bits,                  scom_data,                 expr;
-        rx_prbs_tap_id,        rx_prbs_tap_id_pattern_b,  (def_rx_mirrored_mode);    
-        rx_prbs_tap_id,        rx_prbs_tap_id_pattern_b,  (def_rx_non_mirrored_mode);    
+        bits,                  scom_data;
+        rx_prbs_tap_id,        rx_prbs_tap_id_pattern_b;    
 }
 scom 0x800.0b(rx_prbs_mode_pl)(def_rx_base_grp)(lane_10).0x(dmi0_gcr_addr){
-        bits,                  scom_data,                 expr;
-        rx_prbs_tap_id,        rx_prbs_tap_id_pattern_c,  (def_rx_mirrored_mode);    
-        rx_prbs_tap_id,        rx_prbs_tap_id_pattern_c,  (def_rx_non_mirrored_mode);    
+        bits,                  scom_data;
+        rx_prbs_tap_id,        rx_prbs_tap_id_pattern_c;    
 }
 scom 0x800.0b(rx_prbs_mode_pl)(def_rx_base_grp)(lane_11).0x(dmi0_gcr_addr){
-        bits,                  scom_data,                 expr;
-        rx_prbs_tap_id,        rx_prbs_tap_id_pattern_d,  (def_rx_mirrored_mode);    
-        rx_prbs_tap_id,        rx_prbs_tap_id_pattern_d,  (def_rx_non_mirrored_mode);    
+        bits,                  scom_data;
+        rx_prbs_tap_id,        rx_prbs_tap_id_pattern_d;    
 }
 scom 0x800.0b(rx_prbs_mode_pl)(def_rx_base_grp)(lane_12).0x(dmi0_gcr_addr){
-        bits,                  scom_data,                 expr;
-        rx_prbs_tap_id,        rx_prbs_tap_id_pattern_d,  (def_rx_mirrored_mode);    
-        rx_prbs_tap_id,        rx_prbs_tap_id_pattern_e,  (def_rx_non_mirrored_mode);    
+        bits,                  scom_data;
+        rx_prbs_tap_id,        rx_prbs_tap_id_pattern_d;    
 }
 scom 0x800.0b(rx_prbs_mode_pl)(def_rx_base_grp)(lane_13).0x(dmi0_gcr_addr){
-        bits,                  scom_data,                 expr;
-        rx_prbs_tap_id,        rx_prbs_tap_id_pattern_c,  (def_rx_mirrored_mode);    
-        rx_prbs_tap_id,        rx_prbs_tap_id_pattern_f,  (def_rx_non_mirrored_mode);    
+        bits,                  scom_data;
+        rx_prbs_tap_id,        rx_prbs_tap_id_pattern_c;    
 }
 scom 0x800.0b(rx_prbs_mode_pl)(def_rx_base_grp)(lane_14).0x(dmi0_gcr_addr){
-        bits,                  scom_data,                 expr;
-        rx_prbs_tap_id,        rx_prbs_tap_id_pattern_b,  (def_rx_mirrored_mode);    
-        rx_prbs_tap_id,        rx_prbs_tap_id_pattern_g,  (def_rx_non_mirrored_mode);    
+        bits,                  scom_data;
+        rx_prbs_tap_id,        rx_prbs_tap_id_pattern_b;    
 }
 scom 0x800.0b(rx_prbs_mode_pl)(def_rx_base_grp)(lane_15).0x(dmi0_gcr_addr){
-        bits,                  scom_data,                 expr;
-        rx_prbs_tap_id,        rx_prbs_tap_id_pattern_a,  (def_rx_mirrored_mode);    
-        rx_prbs_tap_id,        rx_prbs_tap_id_pattern_h,  (def_rx_non_mirrored_mode);    
+        bits,                  scom_data;
+        rx_prbs_tap_id,        rx_prbs_tap_id_pattern_a;    
 }
 scom 0x800.0b(rx_prbs_mode_pl)(def_rx_base_grp)(lane_16).0x(dmi0_gcr_addr){
-        bits,                  scom_data,                 expr;
-        rx_prbs_tap_id,        rx_prbs_tap_id_pattern_h,  (def_rx_mirrored_mode);    
-        rx_prbs_tap_id,        rx_prbs_tap_id_pattern_a,  (def_rx_non_mirrored_mode);    
+        bits,                  scom_data;
+        rx_prbs_tap_id,        rx_prbs_tap_id_pattern_h;    
 }
 scom 0x800.0b(rx_prbs_mode_pl)(def_rx_base_grp)(lane_17).0x(dmi0_gcr_addr){
-        bits,                  scom_data,                 expr;
-        rx_prbs_tap_id,        rx_prbs_tap_id_pattern_g,  (def_rx_mirrored_mode);    
-        rx_prbs_tap_id,        rx_prbs_tap_id_pattern_b,  (def_rx_non_mirrored_mode);    
+        bits,                  scom_data;
+        rx_prbs_tap_id,        rx_prbs_tap_id_pattern_g;    
 }
 scom 0x800.0b(rx_prbs_mode_pl)(def_rx_base_grp)(lane_18).0x(dmi0_gcr_addr){
-        bits,                  scom_data,                 expr;
-        rx_prbs_tap_id,        rx_prbs_tap_id_pattern_f,  (def_rx_mirrored_mode);    
-        rx_prbs_tap_id,        rx_prbs_tap_id_pattern_c,  (def_rx_non_mirrored_mode);    
+        bits,                  scom_data;
+        rx_prbs_tap_id,        rx_prbs_tap_id_pattern_f;    
 }
 scom 0x800.0b(rx_prbs_mode_pl)(def_rx_base_grp)(lane_19).0x(dmi0_gcr_addr){
-        bits,                  scom_data,                 expr;
-        rx_prbs_tap_id,        rx_prbs_tap_id_pattern_e,  (def_rx_mirrored_mode);    
-        rx_prbs_tap_id,        rx_prbs_tap_id_pattern_d,  (def_rx_non_mirrored_mode);    
+        bits,                  scom_data;
+        rx_prbs_tap_id,        rx_prbs_tap_id_pattern_e;    
 }
 scom 0x800.0b(rx_prbs_mode_pl)(def_rx_base_grp)(lane_20).0x(dmi0_gcr_addr){
-        bits,                  scom_data,                 expr;
-        rx_prbs_tap_id,        rx_prbs_tap_id_pattern_d,  (def_rx_mirrored_mode);    
-        rx_prbs_tap_id,        rx_prbs_tap_id_pattern_e,  (def_rx_non_mirrored_mode);    
+        bits,                  scom_data;
+        rx_prbs_tap_id,        rx_prbs_tap_id_pattern_d;    
 }
 scom 0x800.0b(rx_prbs_mode_pl)(def_rx_base_grp)(lane_21).0x(dmi0_gcr_addr){
-        bits,                  scom_data,                 expr;
-        rx_prbs_tap_id,        rx_prbs_tap_id_pattern_c,  (def_rx_mirrored_mode);    
-        rx_prbs_tap_id,        rx_prbs_tap_id_pattern_f,  (def_rx_non_mirrored_mode);    
+        bits,                  scom_data;
+        rx_prbs_tap_id,        rx_prbs_tap_id_pattern_c;    
 }
 scom 0x800.0b(rx_prbs_mode_pl)(def_rx_base_grp)(lane_22).0x(dmi0_gcr_addr){
-        bits,                  scom_data,                 expr;
-        rx_prbs_tap_id,        rx_prbs_tap_id_pattern_b,  (def_rx_mirrored_mode);    
-        rx_prbs_tap_id,        rx_prbs_tap_id_pattern_g,  (def_rx_non_mirrored_mode);    
+        bits,                  scom_data;
+        rx_prbs_tap_id,        rx_prbs_tap_id_pattern_b;    
 }
 scom 0x800.0b(rx_prbs_mode_pl)(def_rx_base_grp)(lane_23).0x(dmi0_gcr_addr){
-        bits,                  scom_data,                 expr;
-        rx_prbs_tap_id,        rx_prbs_tap_id_pattern_a,  (def_rx_mirrored_mode);    
-        rx_prbs_tap_id,        rx_prbs_tap_id_pattern_h,  (def_rx_non_mirrored_mode);    
+        bits,                  scom_data;
+        rx_prbs_tap_id,        rx_prbs_tap_id_pattern_a;    
 }
 #-------------------------------------------------------------------------------------
 # PER-LANE (TX: 17 lanes)
@@ -379,89 +350,72 @@ scom 0x800.0b(rx_prbs_mode_pl)(def_rx_base_grp)(lane_23).0x(dmi0_gcr_addr){
 #-- tx_prbs_mode_pl: tx_prbs_tap_id
 #--*********************************************************************************************
 scom 0x800.0b(tx_prbs_mode_pl)(def_tx_base_grp)(lane_0).0x(dmi0_gcr_addr){
-        bits,                  scom_data,                 expr;
-        tx_prbs_tap_id,        tx_prbs_tap_id_pattern_a,  (def_tx_mirrored_mode);
-        tx_prbs_tap_id,        tx_prbs_tap_id_pattern_a,  (def_tx_non_mirrored_mode);
+        bits,                  scom_data;
+        tx_prbs_tap_id,        tx_prbs_tap_id_pattern_a;
 }
 scom 0x800.0b(tx_prbs_mode_pl)(def_tx_base_grp)(lane_1).0x(dmi0_gcr_addr){
-        bits,                  scom_data,                 expr;
-        tx_prbs_tap_id,        tx_prbs_tap_id_pattern_b,  (def_tx_mirrored_mode);    
-        tx_prbs_tap_id,        tx_prbs_tap_id_pattern_b,  (def_tx_non_mirrored_mode);
+        bits,                  scom_data;
+        tx_prbs_tap_id,        tx_prbs_tap_id_pattern_b;    
 }
 scom 0x800.0b(tx_prbs_mode_pl)(def_tx_base_grp)(lane_2).0x(dmi0_gcr_addr){
-        bits,                  scom_data,                 expr;
-        tx_prbs_tap_id,        tx_prbs_tap_id_pattern_c,  (def_tx_mirrored_mode);    
-        tx_prbs_tap_id,        tx_prbs_tap_id_pattern_c,  (def_tx_non_mirrored_mode);
+        bits,                  scom_data;
+        tx_prbs_tap_id,        tx_prbs_tap_id_pattern_c;    
 }
 scom 0x800.0b(tx_prbs_mode_pl)(def_tx_base_grp)(lane_3).0x(dmi0_gcr_addr){
-        bits,                  scom_data,                 expr;
-        tx_prbs_tap_id,        tx_prbs_tap_id_pattern_d,  (def_tx_mirrored_mode);    
-        tx_prbs_tap_id,        tx_prbs_tap_id_pattern_d,  (def_tx_non_mirrored_mode);
+        bits,                  scom_data;
+        tx_prbs_tap_id,        tx_prbs_tap_id_pattern_d;    
 }
 scom 0x800.0b(tx_prbs_mode_pl)(def_tx_base_grp)(lane_4).0x(dmi0_gcr_addr){
-        bits,                  scom_data,                 expr;
-        tx_prbs_tap_id,        tx_prbs_tap_id_pattern_e,  (def_tx_mirrored_mode);    
-        tx_prbs_tap_id,        tx_prbs_tap_id_pattern_e,  (def_tx_non_mirrored_mode);
+        bits,                  scom_data;
+        tx_prbs_tap_id,        tx_prbs_tap_id_pattern_e;    
 }
 scom 0x800.0b(tx_prbs_mode_pl)(def_tx_base_grp)(lane_5).0x(dmi0_gcr_addr){
-        bits,                  scom_data,                 expr;
-        tx_prbs_tap_id,        tx_prbs_tap_id_pattern_f,  (def_tx_mirrored_mode);    
-        tx_prbs_tap_id,        tx_prbs_tap_id_pattern_f,  (def_tx_non_mirrored_mode);
+        bits,                  scom_data;
+        tx_prbs_tap_id,        tx_prbs_tap_id_pattern_f;    
 }
 scom 0x800.0b(tx_prbs_mode_pl)(def_tx_base_grp)(lane_6).0x(dmi0_gcr_addr){
-        bits,                  scom_data,                 expr;
-        tx_prbs_tap_id,        tx_prbs_tap_id_pattern_g,  (def_tx_mirrored_mode);    
-        tx_prbs_tap_id,        tx_prbs_tap_id_pattern_g,  (def_tx_non_mirrored_mode);
+        bits,                  scom_data;
+        tx_prbs_tap_id,        tx_prbs_tap_id_pattern_g;    
 }
 scom 0x800.0b(tx_prbs_mode_pl)(def_tx_base_grp)(lane_7).0x(dmi0_gcr_addr){
-        bits,                  scom_data,                 expr;
-        tx_prbs_tap_id,        tx_prbs_tap_id_pattern_h,  (def_tx_mirrored_mode);    
-        tx_prbs_tap_id,        tx_prbs_tap_id_pattern_h,  (def_tx_non_mirrored_mode);
+        bits,                  scom_data;
+        tx_prbs_tap_id,        tx_prbs_tap_id_pattern_h;    
 }
 scom 0x800.0b(tx_prbs_mode_pl)(def_tx_base_grp)(lane_8).0x(dmi0_gcr_addr){
-        bits,                  scom_data,                 expr;
-        tx_prbs_tap_id,        tx_prbs_tap_id_pattern_a,  (def_tx_mirrored_mode);    
-        tx_prbs_tap_id,        tx_prbs_tap_id_pattern_a,  (def_tx_non_mirrored_mode);
+        bits,                  scom_data;
+        tx_prbs_tap_id,        tx_prbs_tap_id_pattern_a;    
 }
 scom 0x800.0b(tx_prbs_mode_pl)(def_tx_base_grp)(lane_9).0x(dmi0_gcr_addr){
-        bits,                  scom_data,                 expr;
-        tx_prbs_tap_id,        tx_prbs_tap_id_pattern_h,  (def_tx_mirrored_mode);    
-        tx_prbs_tap_id,        tx_prbs_tap_id_pattern_b,  (def_tx_non_mirrored_mode);
+        bits,                  scom_data;
+        tx_prbs_tap_id,        tx_prbs_tap_id_pattern_h;    
 }
 scom 0x800.0b(tx_prbs_mode_pl)(def_tx_base_grp)(lane_10).0x(dmi0_gcr_addr){
-        bits,                  scom_data,                 expr;
-        tx_prbs_tap_id,        tx_prbs_tap_id_pattern_g,  (def_tx_mirrored_mode);    
-        tx_prbs_tap_id,        tx_prbs_tap_id_pattern_c,  (def_tx_non_mirrored_mode);
+        bits,                  scom_data;
+        tx_prbs_tap_id,        tx_prbs_tap_id_pattern_g;    
 }
 scom 0x800.0b(tx_prbs_mode_pl)(def_tx_base_grp)(lane_11).0x(dmi0_gcr_addr){
-        bits,                  scom_data,                 expr;
-        tx_prbs_tap_id,        tx_prbs_tap_id_pattern_f,  (def_tx_mirrored_mode);    
-        tx_prbs_tap_id,        tx_prbs_tap_id_pattern_d,  (def_tx_non_mirrored_mode);
+        bits,                  scom_data;
+        tx_prbs_tap_id,        tx_prbs_tap_id_pattern_f;    
 }
 scom 0x800.0b(tx_prbs_mode_pl)(def_tx_base_grp)(lane_12).0x(dmi0_gcr_addr){
-        bits,                  scom_data,                 expr;
-        tx_prbs_tap_id,        tx_prbs_tap_id_pattern_e,  (def_tx_mirrored_mode);    
-        tx_prbs_tap_id,        tx_prbs_tap_id_pattern_e,  (def_tx_non_mirrored_mode);
+        bits,                  scom_data;
+        tx_prbs_tap_id,        tx_prbs_tap_id_pattern_e;    
 }
 scom 0x800.0b(tx_prbs_mode_pl)(def_tx_base_grp)(lane_13).0x(dmi0_gcr_addr){
-        bits,                  scom_data,                 expr;
-        tx_prbs_tap_id,        tx_prbs_tap_id_pattern_d,  (def_tx_mirrored_mode);    
-        tx_prbs_tap_id,        tx_prbs_tap_id_pattern_f,  (def_tx_non_mirrored_mode);
+        bits,                  scom_data;
+        tx_prbs_tap_id,        tx_prbs_tap_id_pattern_d;    
 }
 scom 0x800.0b(tx_prbs_mode_pl)(def_tx_base_grp)(lane_14).0x(dmi0_gcr_addr){
-        bits,                  scom_data,                 expr;
-        tx_prbs_tap_id,        tx_prbs_tap_id_pattern_c,  (def_tx_mirrored_mode);    
-        tx_prbs_tap_id,        tx_prbs_tap_id_pattern_g,  (def_tx_non_mirrored_mode);
+        bits,                  scom_data;
+        tx_prbs_tap_id,        tx_prbs_tap_id_pattern_c;    
 }
 scom 0x800.0b(tx_prbs_mode_pl)(def_tx_base_grp)(lane_15).0x(dmi0_gcr_addr){
-        bits,                  scom_data,                 expr;
-        tx_prbs_tap_id,        tx_prbs_tap_id_pattern_b,  (def_tx_mirrored_mode);    
-        tx_prbs_tap_id,        tx_prbs_tap_id_pattern_h,  (def_tx_non_mirrored_mode);
+        bits,                  scom_data;
+        tx_prbs_tap_id,        tx_prbs_tap_id_pattern_b;    
 }
 scom 0x800.0b(tx_prbs_mode_pl)(def_tx_base_grp)(lane_16).0x(dmi0_gcr_addr){
-        bits,                  scom_data,                 expr;
-        tx_prbs_tap_id,        tx_prbs_tap_id_pattern_a,  (def_tx_mirrored_mode);    
-        tx_prbs_tap_id,        tx_prbs_tap_id_pattern_a,  (def_tx_non_mirrored_mode);
+        bits,                  scom_data;
+        tx_prbs_tap_id,        tx_prbs_tap_id_pattern_a;    
 }
 #-------------------------------------------------------------------------------------
 #     ____  __    __

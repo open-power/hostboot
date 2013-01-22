@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012                   */
+/* COPYRIGHT International Business Machines Corp. 2012,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_build_smp.C,v 1.4 2012/09/24 10:55:02 jmcgill Exp $
+// $Id: proc_build_smp.C,v 1.6 2013/01/21 03:11:23 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_build_smp.C,v $
 //------------------------------------------------------------------------------
 // *|
@@ -368,7 +368,7 @@ fapi::ReturnCode proc_build_smp_process_system(
         }
 
         // retrieve safe mode attribute
-        // if user overrides is set, it will take presedence over write above
+        // if user overrides is set, it will take precedence over write above
         rc = FAPI_ATTR_GET(ATTR_PROC_FABRIC_ASYNC_SAFE_MODE,
                            NULL,
                            temp_attr);
@@ -473,6 +473,10 @@ fapi::ReturnCode proc_build_smp_process_chip(
 {
     // return code
     fapi::ReturnCode rc;
+    uint8_t pcie_enabled;
+    uint8_t nx_enabled;
+    uint8_t x_enabled;
+    uint8_t a_enabled;
 
     // mark function entry
     FAPI_DBG("proc_build_smp_process_chip: Start");
@@ -515,6 +519,59 @@ fapi::ReturnCode proc_build_smp_process_chip(
             FAPI_ERR("proc_build_smp_process_chip: Error from proc_fab_smp_get_chip_id_attr");
             break;
         }
+
+        // query NX partial good attribute
+        rc = FAPI_ATTR_GET(ATTR_PROC_NX_ENABLE,
+                           &(io_smp_chip.chip->this_chip),
+                           nx_enabled);
+        if (!rc.ok())
+        {
+            FAPI_ERR("proc_setup_bars_process_chip: Error querying ATTR_PROC_NX_ENABLE");
+            break;
+        }
+
+        // query X partial good attribute
+        rc = FAPI_ATTR_GET(ATTR_PROC_X_ENABLE,
+                           &(io_smp_chip.chip->this_chip),
+                           x_enabled);
+        if (!rc.ok())
+        {
+            FAPI_ERR("proc_setup_bars_process_chip: Error querying ATTR_PROC_X_ENABLE");
+            break;
+        }
+
+        // query A partial good attribute
+        rc = FAPI_ATTR_GET(ATTR_PROC_A_ENABLE,
+                           &(io_smp_chip.chip->this_chip),
+                           a_enabled);
+        if (!rc.ok())
+        {
+            FAPI_ERR("proc_setup_bars_process_chip: Error querying ATTR_PROC_A_ENABLE");
+            break;
+        }
+
+        // query PCIE partial good attribute
+        rc = FAPI_ATTR_GET(ATTR_PROC_PCIE_ENABLE,
+                           &(io_smp_chip.chip->this_chip),
+                           pcie_enabled);
+        if (!rc.ok())
+        {
+            FAPI_ERR("proc_setup_bars_process_chip: Error querying ATTR_PROC_PCIE_ENABLE");
+            break;
+        }
+
+        io_smp_chip.nx_enabled =
+            (nx_enabled == fapi::ENUM_ATTR_PROC_NX_ENABLE_ENABLE);
+
+        io_smp_chip.x_enabled =
+            (x_enabled == fapi::ENUM_ATTR_PROC_X_ENABLE_ENABLE);
+
+        io_smp_chip.a_enabled =
+            (a_enabled == fapi::ENUM_ATTR_PROC_A_ENABLE_ENABLE);
+
+        io_smp_chip.pcie_enabled =
+            (pcie_enabled == fapi::ENUM_ATTR_PROC_PCIE_ENABLE_ENABLE);
+
     } while(0);
 
     // mark function exit

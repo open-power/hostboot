@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012                   */
+/* COPYRIGHT International Business Machines Corp. 2012,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_build_smp_fbc_nohp.C,v 1.3 2012/09/05 03:13:17 jmcgill Exp $
+// $Id: proc_build_smp_fbc_nohp.C,v 1.5 2013/01/21 03:11:34 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_build_smp_fbc_nohp.C,v $
 //------------------------------------------------------------------------------
 // *|
@@ -648,13 +648,13 @@ fapi::ReturnCode proc_build_smp_set_f_trace(
 
         if (!rc.ok())
         {
-            FAPI_ERR("proc_build_smp_set_a_trace: fapiPutScom error (PB_F_TRACE_0x09010812)");
+            FAPI_ERR("proc_build_smp_set_f_trace: fapiPutScom error (PB_F_TRACE_0x09010812)");
             break;
         }
     } while(0);
 
     // mark function exit
-    FAPI_DBG("proc_build_smp_set_f_traec: End");
+    FAPI_DBG("proc_build_smp_set_f_trace: End");
     return rc;
 }
 
@@ -679,6 +679,8 @@ fapi::ReturnCode proc_build_smp_set_fbc_nohp(
              (p_iter != n_iter->second.chips.end()) && (rc.ok());
              p_iter++)
         {
+            fapi::Target target = p_iter->second.chip->this_chip;
+
             // PB Mode register
             rc = proc_build_smp_set_pb_mode(p_iter->second,
                                             i_smp);
@@ -698,27 +700,36 @@ fapi::ReturnCode proc_build_smp_set_fbc_nohp(
             }
 
             // X link trace setup
-            rc = proc_build_smp_set_x_trace(p_iter->second);
-            if (!rc.ok())
+            if (p_iter->second.x_enabled)
             {
-                FAPI_ERR("proc_build_smp_set_fbc_nohp: Error from proc_build_smp_set_x_trace");
-                break;
+                rc = proc_build_smp_set_x_trace(p_iter->second);
+                if (!rc.ok())
+                {
+                    FAPI_ERR("proc_build_smp_set_fbc_nohp: Error from proc_build_smp_set_x_trace");
+                    break;
+                }
             }
 
             // A link trace setup
-            rc = proc_build_smp_set_a_trace(p_iter->second);
-            if (!rc.ok())
+            if (p_iter->second.a_enabled)
             {
-                FAPI_ERR("proc_build_smp_set_fbc_nohp: Error from proc_build_smp_set_a_trace");
-                break;
+                rc = proc_build_smp_set_a_trace(p_iter->second);
+                if (!rc.ok())
+                {
+                    FAPI_ERR("proc_build_smp_set_fbc_nohp: Error from proc_build_smp_set_a_trace");
+                    break;
+                }
             }
 
             // F link trace setup
-            rc = proc_build_smp_set_f_trace(p_iter->second);
-            if (!rc.ok())
+            if (p_iter->second.pcie_enabled)
             {
-                FAPI_ERR("proc_build_smp_set_fbc_nohp: Error from proc_build_smp_set_f_trace");
-                break;
+                rc = proc_build_smp_set_f_trace(p_iter->second);
+                if (!rc.ok())
+                {
+                    FAPI_ERR("proc_build_smp_set_fbc_nohp: Error from proc_build_smp_set_f_trace");
+                    break;
+                }
             }
         }
     }

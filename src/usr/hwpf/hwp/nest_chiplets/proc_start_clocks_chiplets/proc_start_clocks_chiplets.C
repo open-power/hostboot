@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_start_clocks_chiplets.C,v 1.10 2012/12/12 10:43:10 rkoester Exp $
+// $Id: proc_start_clocks_chiplets.C,v 1.13 2013/01/20 19:26:07 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_start_clocks_chiplets.C,v $
 //------------------------------------------------------------------------------
 // *|
@@ -298,8 +298,6 @@ fapi::ReturnCode proc_start_clocks_get_partial_good_vector(
 
         }
 
-        FAPI_DBG("proc_start_clocks_get_partial_good_vector: picked partial good regions vector is (%016llX)", *o_chiplet_reg_vec);
-
 
     } while(0);
 
@@ -438,8 +436,6 @@ fapi::ReturnCode proc_start_clocks_chiplet_check_clk_status_reg(
             break;
         }
 
-        // intialize reference databuffer
-        rc_ecmd |= vec_data.flushTo0();
         // load it with reference data
         rc_ecmd |= vec_data.setDoubleWord(0, i_chiplet_clkreg_vec);
         // generate expected value databuffer
@@ -717,7 +713,7 @@ fapi::ReturnCode proc_start_clocks_generic_chiplet(
                                                        );
         if (rc)
         {
-            FAPI_ERR("proc_start_clocks_partial_good_vector: Error getting partial good region vector");
+            FAPI_ERR("proc_start_clocks_generic_chiplet: Error getting partial good region vector");
             break;
         }
 
@@ -793,6 +789,9 @@ fapi::ReturnCode proc_start_clocks_chiplets(const fapi::Target& i_target,
                                             bool xbus, bool abus, bool pcie)
 {
     fapi::ReturnCode rc;
+    uint8_t xbus_enable_attr;
+    uint8_t abus_enable_attr;
+    uint8_t pcie_enable_attr;
 
     // mark HWP entry
     FAPI_IMP("proc_start_clocks_chiplets: Entering ...");
@@ -801,37 +800,91 @@ fapi::ReturnCode proc_start_clocks_chiplets(const fapi::Target& i_target,
     {
         if (xbus)
         {
-            FAPI_DBG("Starting X bus chiplet clocks ...");
-            rc = proc_start_clocks_generic_chiplet(
-                i_target,
-                X_BUS_CHIPLET_0x04000000);
-            if (rc)
+            // query XBUS partial good attribute
+            rc = FAPI_ATTR_GET(ATTR_PROC_X_ENABLE,
+                               &i_target,
+                               xbus_enable_attr);
+            if (!rc.ok())
             {
+                FAPI_ERR("proc_start_clocks_chiplets: Error querying ATTR_PROC_X_ENABLE");
                 break;
+            }
+
+            if (xbus_enable_attr == fapi::ENUM_ATTR_PROC_X_ENABLE_ENABLE)
+            {
+                FAPI_DBG("Starting X bus chiplet clocks ...");
+                rc = proc_start_clocks_generic_chiplet(
+                    i_target,
+                    X_BUS_CHIPLET_0x04000000);
+                if (rc)
+                {
+                    FAPI_ERR("proc_start_clocks_chiplets: Error from proc_start_clocks_generic_chiplet (X)");
+                    break;
+                }
+            }
+            else
+            {
+                FAPI_DBG("Skipping XBUS chiplet clock start (partial good).");
             }
         }
 
         if (abus)
         {
-            FAPI_DBG("Starting A bus chiplet clocks ...");
-            rc = proc_start_clocks_generic_chiplet(
-                i_target,
-                A_BUS_CHIPLET_0x08000000);
-            if (rc)
+            // query ABUS partial good attribute
+            rc = FAPI_ATTR_GET(ATTR_PROC_A_ENABLE,
+                               &i_target,
+                               abus_enable_attr);
+            if (!rc.ok())
             {
+                FAPI_ERR("proc_start_clocks_chiplets: Error querying ATTR_PROC_A_ENABLE");
                 break;
+            }
+
+            if (abus_enable_attr == fapi::ENUM_ATTR_PROC_A_ENABLE_ENABLE)
+            {
+                FAPI_DBG("Starting A bus chiplet clocks ...");
+                rc = proc_start_clocks_generic_chiplet(
+                    i_target,
+                    A_BUS_CHIPLET_0x08000000);
+                if (rc)
+                {
+                    FAPI_ERR("proc_start_clocks_chiplets: Error from proc_start_clocks_generic_chiplet (A)");
+                    break;
+                }
+            }
+            else
+            {
+                FAPI_DBG("Skipping ABUS chiplet clock start (partial good).");
             }
         }
 
         if (pcie)
         {
-            FAPI_DBG("Starting PCIE chiplet clocks ...");
-            rc = proc_start_clocks_generic_chiplet(
-                i_target,
-                PCIE_CHIPLET_0x09000000);
-            if (rc)
+            // query PCIE partial good attribute
+            rc = FAPI_ATTR_GET(ATTR_PROC_PCIE_ENABLE,
+                               &i_target,
+                               pcie_enable_attr);
+            if (!rc.ok())
             {
+                FAPI_ERR("proc_start_clocks_chiplets: Error querying ATTR_PROC_PCIE_ENABLE");
                 break;
+            }
+
+            if (pcie_enable_attr == fapi::ENUM_ATTR_PROC_PCIE_ENABLE_ENABLE)
+            {
+                FAPI_DBG("Starting PCIE chiplet clocks ...");
+                rc = proc_start_clocks_generic_chiplet(
+                    i_target,
+                    PCIE_CHIPLET_0x09000000);
+                if (rc)
+                {
+                    FAPI_ERR("proc_start_clocks_chiplets: Error from proc_start_clocks_generic_chiplet (PCIE)");
+                    break;
+                }
+            }
+            else
+            {
+                FAPI_DBG("Skipping PCIE chiplet clock start (partial good).");
             }
         }
 

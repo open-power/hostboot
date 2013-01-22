@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/hwpf/hwp/nest_chiplets/proc_chiplet_scominit/proc_chiplet_scominit.H $ */
+/* $Source: src/usr/hwpf/hwp/nest_chiplets/proc_chiplet_scominit/proc_xbus_scominit.H $ */
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/* COPYRIGHT International Business Machines Corp. 2013                   */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,15 +20,15 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_chiplet_scominit.H,v 1.8 2013/01/20 19:30:37 jmcgill Exp $
-// $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_chiplet_scominit.H,v $
+// $Id: proc_xbus_scominit.H,v 1.1 2012/08/11 18:24:30 jmcgill Exp $
+// $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_xbus_scominit.H,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2012
 // *! All Rights Reserved -- Property of IBM
 // *! *** IBM Confidential ***
 //------------------------------------------------------------------------------
-// *! TITLE       : proc_chiplet_scominit.H
-// *! DESCRIPTION : Invoke initfiles for proc_chiplet_scominit istep (FAPI)
+// *! TITLE       : proc_xbus_scominit.H
+// *! DESCRIPTION : Invoke XBUS initfile (FAPI)
 // *!
 // *! OWNER NAME  : Mike Jones        Email: mjjones@us.ibm.com
 // *! BACKUP NAME : Joe McGill        Email: jmcgill@us.ibm.com
@@ -37,8 +37,8 @@
 // *!
 //------------------------------------------------------------------------------
 
-#ifndef PROC_CHIPLET_SCOMINIT_H_
-#define PROC_CHIPLET_SCOMINIT_H_
+#ifndef PROC_XBUS_SCOMINIT_H_
+#define PROC_XBUS_SCOMINIT_H_
 
 //------------------------------------------------------------------------------
 // Includes
@@ -48,11 +48,7 @@
 //------------------------------------------------------------------------------
 // Constant definitions
 //------------------------------------------------------------------------------
-
-const char * const PROC_CHIPLET_SCOMINIT_FBC_IF = "p8.fbc.scom.if";
-const char * const PROC_CHIPLET_SCOMINIT_NX_IF  = "p8.nx.scom.if";
-const char * const PROC_CHIPLET_SCOMINIT_AS_IF  = "p8.as.scom.if";
-const char * const PROC_CHIPLET_SCOMINIT_MCS_IF = "p8.mcs.scom.if";
+const char * const XBUS_IF = "p8.xbus.scom.if";
 
 //------------------------------------------------------------------------------
 // Structure definitions
@@ -60,7 +56,9 @@ const char * const PROC_CHIPLET_SCOMINIT_MCS_IF = "p8.mcs.scom.if";
 
 // function pointer typedef definition for HWP call support
 typedef fapi::ReturnCode
-(*proc_chiplet_scominit_FP_t)(const fapi::Target & i_target);
+(*proc_xbus_scominit_FP_t)(const fapi::Target & i_target,
+                           const fapi::Target & i_this_pu_target,
+                           const fapi::Target & i_other_pu_target);
 
 extern "C" {
 
@@ -69,23 +67,27 @@ extern "C" {
 //------------------------------------------------------------------------------
 
 /**
- * @brief HWP which invokes initfiles for proc_chiplet_scominit istep
+ * @brief HWP that calls the XBUS SCOM initfiles
  *
- * Should be called with all functional proc chips. It invokes initfiles
- * on chiplets.
+ * Should be called for all valid/connected XBUS endpoints
  *
- * @param[in] i_target Reference to target
- *                     If TARGET_TYPE_PROC_CHIP, calls:
- *                     - p8.fbc.scom.initfile
- *                     - p8.nx.scom.initfile
- *                     - p8.as.scom.initfile
- *                     - p8.mcs.scom.initfile for each functional MCS chiplet
+ * @param[in] i_xbus_target     Reference to XBUS target
+ *            i_this_pu_target  Reference to enclosing chip target
+ *            i_other_pu_target Reference to connected chip target
+ *                              If i_xbus_target is TARGET_TYPE_XBUS_ENDPOINT,
+ *                                 i_this_pu_target is TARGET_TYPE_PROC_CHIP,
+ *                                 i_other_pu_target is TARGET_TYPE_PROC_CHIP,
+ *                              calls:
+ *                              - p8.xbus.scom.initfile
  *
  * @return ReturnCode
  */
-fapi::ReturnCode proc_chiplet_scominit(const fapi::Target & i_target);
+fapi::ReturnCode proc_xbus_scominit(
+    const fapi::Target & i_xbus_target,
+    const fapi::Target & i_this_pu_target,
+    const fapi::Target & i_other_pu_target);
 
 
 } // extern "C"
 
-#endif // PROC_CHIPLET_SCOMINIT_H_
+#endif // PROC_XBUS_SCOMINIT_H_

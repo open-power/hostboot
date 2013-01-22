@@ -75,7 +75,11 @@ HWP_ERROR_XML_FILES = hwp/fapiHwpErrorInfo.xml   \
     hwp/runtime_errors/p8_pba_init_errors.xml \
     hwp/dram_initialization/host_mpipl_service/proc_mpipl_chip_cleanup_errors.xml \
     hwp/build_winkle_images/p8_set_pore_bar/p8_pfet_init_errors.xml \
-    hwp/poreve_errors.xml
+    hwp/poreve_errors.xml \
+    hwp/proc_fab_iovalid_errors.xml \
+    hwp/nest_chiplets/proc_chiplet_scominit/proc_abus_scominit_errors.xml \
+    hwp/nest_chiplets/proc_chiplet_scominit/proc_xbus_scominit_errors.xml
+    
     
 ## these get generated into obj/genfiles/AttributeIds.H
 HWP_ATTR_XML_FILES = hwp/memory_attributes.xml \
@@ -117,7 +121,10 @@ HWP_INITFILES = hwp/initfiles/sample.initfile \
                 hwp/initfiles/p8.pe.phase1.scom.initfile \
                 hwp/initfiles/p8.pe.phase2.scom.initfile \
                 hwp/initfiles/p8.abus.scom.initfile \
-                hwp/initfiles/p8.xbus.scom.initfile 
+                hwp/initfiles/p8.xbus.scom.initfile \
+                hwp/initfiles/p8.mcs.scom.initfile \
+                hwp/initfiles/p8.as.scom.initfile \
+                hwp/initfiles/p8.nx.scom.initfile
 
 HWP_IF_DEFINE_DIR = hwp/initfiles
 

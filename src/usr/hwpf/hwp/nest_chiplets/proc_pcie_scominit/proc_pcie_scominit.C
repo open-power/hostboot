@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012                   */
+/* COPYRIGHT International Business Machines Corp. 2012,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_pcie_scominit.C,v 1.1 2012/11/05 21:52:40 jmcgill Exp $
+// $Id: proc_pcie_scominit.C,v 1.3 2013/01/20 19:27:41 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_pcie_scominit.C,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2012
@@ -356,6 +356,7 @@ fapi::ReturnCode proc_pcie_scominit(
     const fapi::Target & i_target)
 {
     fapi::ReturnCode rc;
+    uint8_t pcie_enabled;
 
     // mark HWP entry
     FAPI_INF("proc_pcie_scominit: Start");
@@ -370,26 +371,44 @@ fapi::ReturnCode proc_pcie_scominit(
             break;
         }
 
-        // initialize/configure/finalize IOP programming
-        rc = proc_pcie_scominit_iop_init(i_target);
+        // query PCIE partial good attribute
+        rc = FAPI_ATTR_GET(ATTR_PROC_PCIE_ENABLE,
+                           &i_target,
+                           pcie_enabled);
         if (!rc.ok())
         {
-            FAPI_ERR("proc_pcie_scominit: Error from proc_pcie_scominit_iop_init");
+            FAPI_ERR("proc_pcie_scominit: Error querying ATTR_PROC_PCIE_ENABLE");
             break;
         }
 
-        rc = proc_pcie_scominit_iop_config(i_target);
-        if (!rc.ok())
+        // initialize/configure/finalize IOP programming (only if partial good
+        // attribute is set)
+        if (pcie_enabled == fapi::ENUM_ATTR_PROC_PCIE_ENABLE_ENABLE)
         {
-            FAPI_ERR("proc_pcie_scominit: Error from proc_pcie_scominit_iop_config");
-            break;
-        }
+            rc = proc_pcie_scominit_iop_init(i_target);
+            if (!rc.ok())
+            {
+                FAPI_ERR("proc_pcie_scominit: Error from proc_pcie_scominit_iop_init");
+                break;
+            }
 
-        rc = proc_pcie_scominit_iop_complete(i_target);
-        if (!rc.ok())
+            rc = proc_pcie_scominit_iop_config(i_target);
+            if (!rc.ok())
+            {
+                FAPI_ERR("proc_pcie_scominit: Error from proc_pcie_scominit_iop_config");
+                break;
+            }
+
+            rc = proc_pcie_scominit_iop_complete(i_target);
+            if (!rc.ok())
+            {
+                FAPI_ERR("proc_pcie_scominit: Error from proc_pcie_scominit_iop_complete");
+                break;
+            }
+        }
+        else
         {
-            FAPI_ERR("proc_pcie_scominit: Error from proc_pcie_scominit_iop_complete");
-            break;
+            FAPI_DBG("proc_pcie_scominit: Skipping initialization (partial good)");
         }
 
     } while(0);

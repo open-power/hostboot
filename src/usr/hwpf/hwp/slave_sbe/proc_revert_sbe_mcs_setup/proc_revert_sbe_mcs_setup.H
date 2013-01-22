@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012                   */
+/* COPYRIGHT International Business Machines Corp. 2012,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_revert_sbe_mcs_setup.H,v 1.2 2012/07/23 14:16:07 jmcgill Exp $
+// $Id: proc_revert_sbe_mcs_setup.H,v 1.3 2013/01/20 15:55:45 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_revert_sbe_mcs_setup.H,v $
 //------------------------------------------------------------------------------
 // *|
@@ -55,6 +55,10 @@
 //------------------------------------------------------------------------------
 // Constant definitions
 //------------------------------------------------------------------------------
+
+// Nest GP0 register constants
+const uint32_t NEST_GP0_MCL_FENCE_B_BIT = 51;
+const uint32_t NEST_GP0_MCR_FENCE_B_BIT = 52;
 
 // MCFGP register constants
 const uint32_t MCFGP_VALID_BIT = 0;

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012                   */
+/* COPYRIGHT International Business Machines Corp. 2012,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_revert_sbe_mcs_setup.C,v 1.5 2012/11/16 04:48:35 jmcgill Exp $
+// $Id: proc_revert_sbe_mcs_setup.C,v 1.6 2013/01/20 15:55:42 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_revert_sbe_mcs_setup.C,v $
 //------------------------------------------------------------------------------
 // *|
@@ -51,14 +51,32 @@ extern "C"
 
 
 //------------------------------------------------------------------------------
+// function: translate base SCOM address to chiplet specific offset
+// parameters: i_input_addr   => input SCOM address
+//             i_mcs_unit_num => chip unit number
+// returns: translated SCOM address
+//------------------------------------------------------------------------------
+uint64_t proc_revert_sbe_mcs_setup_xlate_address(
+    const uint64_t i_input_addr,
+    const uint8_t i_mcs_unit_num)
+{
+    return(i_input_addr +
+           (0x400 * (i_mcs_unit_num / 4)) +
+           (0x80 * (i_mcs_unit_num % 4)));
+}
+
+
+//------------------------------------------------------------------------------
 // function: reset MCFGP BAR valid bit, base address and size fields to restore
 //           register flush state
-// parameters: i_target => MCS chiplet target
+// parameters: i_target       => chip target
+//             i_mcs_unit_num => chip unit number
 // returns: FAPI_RC_SUCCESS if register write is successful,
 //          else failing return code
 //------------------------------------------------------------------------------
 fapi::ReturnCode proc_revert_sbe_mcs_setup_reset_mcfgp(
-    const fapi::Target& i_target)
+    const fapi::Target& i_target,
+    const uint8_t i_mcs_unit_num)
 {
     fapi::ReturnCode rc;
     uint32_t rc_ecmd = 0x0;
@@ -100,13 +118,17 @@ fapi::ReturnCode proc_revert_sbe_mcs_setup_reset_mcfgp(
         }
 
         // write register
-        rc = fapiPutScomUnderMask(i_target,
-                                  MCS_MCFGP_0x02011800,
-                                  mcfgp_data,
-                                  mcfgp_mask);
+        rc = fapiPutScomUnderMask(
+            i_target,
+            proc_revert_sbe_mcs_setup_xlate_address(MCS_MCFGP_0x02011800,
+                                                    i_mcs_unit_num),
+            mcfgp_data,
+            mcfgp_mask);
         if (!rc.ok())
         {
-            FAPI_ERR("proc_revert_sbe_mcs_setup_reset_mcfgp: fapiPutScomUnderMask error (MCS_MCFGP_0x02011800)");
+            FAPI_ERR("proc_revert_sbe_mcs_setup_reset_mcfgp: fapiPutScomUnderMask error (MCS_MCFGP_0x%08llX)",
+                     proc_revert_sbe_mcs_setup_xlate_address(MCS_MCFGP_0x02011800,
+                                                             i_mcs_unit_num));
             break;
         }
     } while(0);
@@ -120,12 +142,14 @@ fapi::ReturnCode proc_revert_sbe_mcs_setup_reset_mcfgp(
 //------------------------------------------------------------------------------
 // function: set MCI FIR Mask channel timeout bit, to restore register flush
 //           state
-// parameters: i_target => MCS chiplet target
+// parameters: i_target       => chip target
+//             i_mcs_unit_num => chip unit number
 // returns: FAPI_RC_SUCCESS if register write is successful,
 //          else failing return code
 //------------------------------------------------------------------------------
 fapi::ReturnCode proc_revert_sbe_mcs_setup_reset_mcifirmask(
-    const fapi::Target& i_target)
+    const fapi::Target& i_target,
+    const uint8_t i_mcs_unit_num)
 {
     fapi::ReturnCode rc;
     uint32_t rc_ecmd = 0x0;
@@ -150,12 +174,16 @@ fapi::ReturnCode proc_revert_sbe_mcs_setup_reset_mcifirmask(
         }
 
         // write register
-        rc = fapiPutScom(i_target,
-                         MCS_MCIFIRMASK_OR_0x02011845,
-                         mcifirmask_or_data);
+        rc = fapiPutScom(
+            i_target,
+            proc_revert_sbe_mcs_setup_xlate_address(MCS_MCIFIRMASK_OR_0x02011845,
+                                                    i_mcs_unit_num),
+            mcifirmask_or_data);
         if (!rc.ok())
         {
-            FAPI_ERR("proc_revert_sbe_mcs_setup_reset_mcifirmask: fapiPutScom error (MCS_MCIFIRMASK_OR_0x02011845)");
+            FAPI_ERR("proc_revert_sbe_mcs_setup_reset_mcifirmask: fapiPutScom error (MCS_MCIFIRMASK_OR_0x%08llX)",
+                     proc_revert_sbe_mcs_setup_xlate_address(MCS_MCIFIRMASK_OR_0x02011845,
+                                                             i_mcs_unit_num));
             break;
         }
     } while(0);
@@ -174,7 +202,10 @@ fapi::ReturnCode proc_revert_sbe_mcs_setup(
     const fapi::Target& i_target)
 {
     fapi::ReturnCode rc;
+    ecmdDataBufferBase gp0_data(64);
     ecmdDataBufferBase mcsmode1_reset_data(64);
+    bool mc_fenced[2] = { true, true };
+    uint8_t mcs_unit_id = 0x0;
 
     // vector to hold MCS chiplet targets
     std::vector<fapi::Target> mcs_chiplets;
@@ -184,12 +215,24 @@ fapi::ReturnCode proc_revert_sbe_mcs_setup(
 
     do
     {
-        // loop over all functional MCS chiplets, revert SBE configuration
+        // read GP0 to determine MCL/MCR partial good state
+        rc = fapiGetScom(i_target, NEST_GP0_0x02000000, gp0_data);
+
+        if (!rc.ok())
+        {
+            FAPI_ERR("proc_revert_sbe_mcs_setup: fapiGetScom error (NEST_GP0_0x02000000)");
+            break;
+        }
+
+        mc_fenced[0] = gp0_data.isBitClear(NEST_GP0_MCL_FENCE_B_BIT);
+        mc_fenced[1] = gp0_data.isBitClear(NEST_GP0_MCR_FENCE_B_BIT);
+
+        // loop over all present MCS chiplets, revert SBE configuration
         // of BAR/FIR mask registers back to flush state
         rc = fapiGetChildChiplets(i_target,
                                   fapi::TARGET_TYPE_MCS_CHIPLET,
                                   mcs_chiplets,
-                                  fapi::TARGET_STATE_FUNCTIONAL);
+                                  fapi::TARGET_STATE_PRESENT);
         if (!rc.ok())
         {
             FAPI_ERR("proc_revert_sbe_mcs_setup: Error from fapiGetChildChiplets");
@@ -200,28 +243,50 @@ fapi::ReturnCode proc_revert_sbe_mcs_setup(
              i != mcs_chiplets.end();
              i++)
         {
-            rc = proc_revert_sbe_mcs_setup_reset_mcfgp(*i);
+            // read chip unit number
+            rc = FAPI_ATTR_GET(ATTR_CHIP_UNIT_POS,
+                               &(*i),
+                               mcs_unit_id);
+
             if (!rc.ok())
             {
-                FAPI_ERR("proc_revert_sbe_mcs_setup: Error from proc_revert_sbe_mcs_setup_reset_mcfgp");
+                FAPI_ERR("proc_revert_sbe_mcs_setup: Error from FAPI_ATTR_GET (ATTR_CHIP_UNIT_POS)");
                 break;
             }
 
-            FAPI_DBG("proc_revert_sbe_mcs_setup: reset MCSMODE1");
-            rc = fapiPutScom(*i,
-                             MCS_MCSMODE1_0x02011808,
-                             mcsmode1_reset_data);
-            if (!rc.ok())
+            // reset all chiplets which are present (based on GP0 partial good data)
+            // this handles the case of reverting configuration which was written
+            // by SBE code for chiplets which are not considered functional by platform
+            if (!mc_fenced[mcs_unit_id / 4])
             {
-                FAPI_ERR("proc_revert_sbe_mcs_setup: fapiPutScom error (MCS_MCSMODE1_0x02011808)");
-                break;
-            }
+                rc = proc_revert_sbe_mcs_setup_reset_mcfgp(i_target,
+                                                           mcs_unit_id);
+                if (!rc.ok())
+                {
+                    FAPI_ERR("proc_revert_sbe_mcs_setup: Error from proc_revert_sbe_mcs_setup_reset_mcfgp");
+                    break;
+                }
 
-            rc = proc_revert_sbe_mcs_setup_reset_mcifirmask(*i);
-            if (!rc.ok())
-            {
-                FAPI_ERR("proc_revert_sbe_mcs_setup: Error from proc_revert_sbe_mcs_setup_reset_mcfgp");
-                break;
+                FAPI_DBG("proc_revert_sbe_mcs_setup: reset MCSMODE1");
+                rc = fapiPutScom(
+                    i_target,
+                    proc_revert_sbe_mcs_setup_xlate_address(MCS_MCSMODE1_0x02011808,
+                                                            mcs_unit_id),
+                    mcsmode1_reset_data);
+                if (!rc.ok())
+                {
+                    FAPI_ERR("proc_revert_sbe_mcs_setup: fapiPutScom error (MCS_MCSMODE1_0x%08llX)",
+                             proc_revert_sbe_mcs_setup_xlate_address(MCS_MCSMODE1_0x02011808, mcs_unit_id));
+                    break;
+                }
+
+                rc = proc_revert_sbe_mcs_setup_reset_mcifirmask(i_target,
+                                                                mcs_unit_id);
+                if (!rc.ok())
+                {
+                    FAPI_ERR("proc_revert_sbe_mcs_setup: Error from proc_revert_sbe_mcs_setup_reset_mcfgp");
+                    break;
+                }
             }
         }
     } while(0);

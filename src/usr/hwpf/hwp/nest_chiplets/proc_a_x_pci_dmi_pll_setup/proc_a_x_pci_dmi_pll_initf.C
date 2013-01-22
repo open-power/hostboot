@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012                   */
+/* COPYRIGHT International Business Machines Corp. 2012,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -21,7 +21,7 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 // -*- mode: C++; c-file-style: "linux";  -*-
-// $Id: proc_a_x_pci_dmi_pll_initf.C,v 1.4 2012/08/27 15:29:03 mfred Exp $
+// $Id: proc_a_x_pci_dmi_pll_initf.C,v 1.9 2013/01/20 19:21:03 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_a_x_pci_dmi_pll_initf.C,v $
 //------------------------------------------------------------------------------
 // *|
@@ -51,10 +51,6 @@
 #include "proc_a_x_pci_dmi_pll_initf.H"
 #include <fapi.H>
 
-#define RING_LENGTH_AB_BNDY_PLL      536
-#define RING_LENGTH_PB_BNDY_DMIPLL  1234
-#define RING_LENGTH_PCI_BNDY_PLL     565
-
 using namespace fapi;
 
 
@@ -67,43 +63,6 @@ const uint64_t OPCG_REG0_FOR_SETPULSE  = 0x818C000000000000ull;
 const uint64_t OPCG_REG2_FOR_SETPULSE  = 0x0000000000002000ull;
 const uint64_t OPCG_REG3_FOR_SETPULSE  = 0x6000000000000000ull;
 const uint64_t CLK_REGION_FOR_SETPULSE = 0x0010040000000000ull;
-
-// PLL Settings for simulation from Johannes Koesters  20 July 2012
-// TPFLEX.PLLNESTFLT.PLLCTL.C_PLL_CNTRL_LEAF		= x"13C54402001C000B 0008000000000000 00"
-// TPFLEX.PLLEMFLT.PLLCTL.C_PLL_CNTRL_LEAF 		= x"13C54402001C000B 0008000000000000 00"
-// TPFLEX.PLLXB.PLLCTL.C_PLL_CNTRL_LEAF			= x"174B1402001C0009 0008000000000000 00"
-// TPFLEX.PLLNEST.PLLCTL.C_PLL_CNTRL_LEAF		= x"10CB1402001C0009 0008000000000000 00"
-// IOMC1.TX_WRAP.PLL_MCIO.CWRAP.PLLCTL.C_PLL_CNTRL_LEAF	= x"10CB1402001C0009 0008000000000000 00"
-// ABUS.TX_WRAP.PLL_A.CWRAP.PLLCTL.C_PLL_CNTRL_LEAF	= x"1F4CB402000C0009 0008000000000000 00"
-// TPFLEX.PLLPCIE.PLLCTL.C_PLL_CNTRL_LEAF		= x"128000000A0060DB B000000200000000 00"
-
-
-// Settings for A Bus PLL  //
-// const uint64_t ABUS_PLL_CONFIG_RING_CNTRL0         = 0x0745D402001C000Bull;     version 06/22/12
-const uint64_t ABUS_PLL_CONFIG_RING_CNTRL0            = 0x10C5D402000C0008ull;
-const uint64_t ABUS_PLL_CONFIG_RING_CNTRL1            = 0x0008000000000000ull;
-const uint8_t  ABUS_PLL_CONFIG_RING_CNTRL2            = 0x00;
-const uint64_t ABUS_PLL_CONFIG_RING_CNTRL0_FOR_SIM    = 0x10C5D402001C0009ull;    // TODO turn fastlock bit (63) OFF when new PLL model is available.
-const uint64_t ABUS_PLL_CONFIG_RING_CNTRL1_FOR_SIM    = 0x0008000000000000ull;
-const uint8_t  ABUS_PLL_CONFIG_RING_CNTRL2_FOR_SIM    = 0x00;
-
-// Settings for DMI PLLs  //
-// const uint64_t DMI_PLL_CONFIG_RING_CNTRL0          = 0x074B1402001C000Bull;     version 06/22/12
-const uint64_t DMI_PLL_CONFIG_RING_CNTRL0             = 0x10CB1402001C0008ull;
-const uint64_t DMI_PLL_CONFIG_RING_CNTRL1             = 0x0008000000000000ull;
-const uint8_t  DMI_PLL_CONFIG_RING_CNTRL2             = 0x00;
-const uint64_t DMI_PLL_CONFIG_RING_CNTRL0_FOR_SIM     = 0x10CB1402000C0009ull;    // TODO turn fastlock bit (63) OFF when new PLL model is available.
-const uint64_t DMI_PLL_CONFIG_RING_CNTRL1_FOR_SIM     = 0x0008000000000000ull;
-const uint8_t  DMI_PLL_CONFIG_RING_CNTRL2_FOR_SIM     = 0x00;
-
-// Settings for PCIE PLL  //
-const uint64_t PCIE_PLL_CONFIG_RING_CNTRL0            = 0x128000000A00789Aull;
-const uint64_t PCIE_PLL_CONFIG_RING_CNTRL1            = 0xA000000000000000ull;
-const uint8_t  PCIE_PLL_CONFIG_RING_CNTRL2            = 0x00;
-const uint64_t PCIE_PLL_CONFIG_RING_CNTRL0_FOR_SIM    = 0x128000000A0010DBull;
-const uint64_t PCIE_PLL_CONFIG_RING_CNTRL1_FOR_SIM    = 0xB000000200000000ull;
-const uint8_t  PCIE_PLL_CONFIG_RING_CNTRL2_FOR_SIM    = 0x00;
-
 
 
 
@@ -133,16 +92,18 @@ extern "C"
     {
         // data buffer to hold register values
         ecmdDataBufferBase scom_data(64);
-        ecmdDataBufferBase rxpll_data(47);
-        ecmdDataBufferBase pll_data(136);
         ecmdDataBufferBase ring_data;
+        uint8_t            pcie_enable_attr;
+        uint8_t            abus_enable_attr;
+        uint32_t           ring_length     = 0;
+        uint8_t            attrABRingData[80]  ={0};  // Set to 80 bytes to match length in XML file, not actual scan ring length.
+        uint8_t            attrDMIRingData[192]={0};  // Set to 192 bytes to match length in XML file, not actual scan ring length.
+        uint8_t            attrPCIRingData[80] ={0};  // Set to 80 bytes to match length in XML file, not actual scan ring length.
 
         // return codes
         uint32_t rc_ecmd = 0;
         fapi::ReturnCode rc;
 
-        // locals
-        uint8_t         is_simulation = 0;
 
 
         // mark function entry
@@ -154,30 +115,17 @@ extern "C"
         do
         {
 
-            //---------------------------//
-            // Common code for all PLLs  //
-            //---------------------------//
-            // Read the ATTR_IS_SIMULATION attribute
-            rc = FAPI_ATTR_GET( ATTR_IS_SIMULATION, NULL, is_simulation);
-            if (rc)
-            {
-                FAPI_ERR("Failed to get attribute: ATTR_IS_SIMULATION.");
-                break;
-            }
-
-
-
             //------------//
             // X Bus PLL  //
             //------------//
             if (!i_startX)
             {
-                FAPI_DBG("X BUS PLL not selected for setup in this routine.\n");
+                FAPI_DBG("X BUS PLL not selected for setup in this routine.");
             }
             else
             {
-                FAPI_INF("This routine does not do X-BUS PLL setup at this time!.\n");
-                FAPI_INF("It is assumed that the X-BUS PLL is already set up in synchronous mode for use with the NEST logic.\n");
+                FAPI_INF("This routine does not do X-BUS PLL setup at this time!.");
+                FAPI_INF("It is assumed that the X-BUS PLL is already set up in synchronous mode for use with the NEST logic.");
             }
             // end X-bus PLL setup
 
@@ -187,85 +135,67 @@ extern "C"
             //------------//
             // A Bus PLL  //
             //------------//
+
+            // query ABUS partial good attribute
+            rc = FAPI_ATTR_GET(ATTR_PROC_A_ENABLE,
+                               &i_target,
+                               abus_enable_attr);
+            if (!rc.ok())
+            {
+                FAPI_ERR("Error querying ATTR_PROC_A_ENABLE");
+                break;
+            }
+
             if (!i_startA)
             {
-                FAPI_DBG("A BUS PLL not selected for setup in this routine.\n");
+                FAPI_DBG("A BUS PLL not selected for setup in this routine.");
+            }
+            else if (abus_enable_attr != fapi::ENUM_ATTR_PROC_A_ENABLE_ENABLE)
+            {
+                FAPI_DBG("A BUS PLL setup skipped (partial good).");
             }
             else
             {
-                FAPI_DBG("Loading the config bits into A BUS PLL\n");
-                if (is_simulation)
+                FAPI_DBG("Loading the config bits into A BUS PLL");
+
+                //---------------------------------------------------------------------------
+                //  Get ring data from cronus attribute and put it into eCmdDataBufferBase
+                //---------------------------------------------------------------------------
+
+                // Read the ring length attribute value.
+                rc = FAPI_ATTR_GET( ATTR_PROC_AB_BNDY_PLL_LENGTH, &i_target, ring_length);
+                if (rc)
                 {
-                    rc_ecmd |= pll_data.setDoubleWord( 0, ABUS_PLL_CONFIG_RING_CNTRL0_FOR_SIM);
-                    rc_ecmd |= pll_data.setDoubleWord( 1, ABUS_PLL_CONFIG_RING_CNTRL1_FOR_SIM);
-                    rc_ecmd |= pll_data.setByte(      16, ABUS_PLL_CONFIG_RING_CNTRL2_FOR_SIM);
-                }
-                else
-                {
-                    rc_ecmd |= pll_data.setDoubleWord( 0, ABUS_PLL_CONFIG_RING_CNTRL0);
-                    rc_ecmd |= pll_data.setDoubleWord( 1, ABUS_PLL_CONFIG_RING_CNTRL1);
-                    rc_ecmd |= pll_data.setByte(      16, ABUS_PLL_CONFIG_RING_CNTRL2);
-                }
-                if (rc_ecmd)
-                {
-                    FAPI_ERR("Error (0x%x) setting up ecmdDataBufferBase", rc_ecmd);
-                    rc.setEcmdError(rc_ecmd);
+                    FAPI_ERR("Failed to get attribute: ATTR_PROC_AB_BNDY_PLL_LENGTH.");
                     break;
                 }
-                // Set bit 17 of the controller for the ABus Cleanup PLLs
-                rc_ecmd |= rxpll_data.flushTo0();
-                rc_ecmd |= rxpll_data.setBit(17);
-                if(rc_ecmd)
+                FAPI_DBG("ATTR_PROC_AB_BNDY_PLL_LENGTH attribute is set to : %d.", ring_length);
+
+
+                // Read the ring data attribute value.
+                rc = FAPI_ATTR_GET( ATTR_PROC_AB_BNDY_PLL_DATA, &i_target, attrABRingData);
+                if (rc)
                 {
-                    FAPI_ERR("Error (0x%x) setting up ecmdDataBufferBase", rc_ecmd);
-                    rc.setEcmdError(rc_ecmd);
+                    FAPI_ERR("Failed to get attribute: ATTR_PROC_AB_BNDY_PLL_DATA.");
                     break;
                 }
 
 
-
-                //---------------------------------------------------------------------------
-                //  Scan out the original contents from ring and modify it with new settings.
-                //---------------------------------------------------------------------------
-                FAPI_DBG("Loading PLL settings into scan ring ab_bndy_pll for A-Bus PLL.");
-
-                // The scan chain that we need to modify is:  Name = ab_bndy_pll  Address = {0x08030088}
-                // This chain is 536 bits long.
-                // RX2 clean up PLL control bits (47) go into positions  58 - 104
-                // RX1 clean up PLL control bits (47) go into positions 105 - 151
-                // RX0 clean up PLL control bits (47) go into positions 152 - 198
-                // A-BUS PLL control bits       (136) go into positions 200 - 335
-
-                rc_ecmd |= ring_data.setBitLength(RING_LENGTH_AB_BNDY_PLL);   // This length needs to match the length in the scandef file (Required for hostboot.)
+                // Set the ring_data buffer to the right length for the ring data
+                rc_ecmd |= ring_data.setBitLength(ring_length);   // This length needs to match the real scan length in the scandef file (Required for hostboot.)
                 if (rc_ecmd)
                 {
                     FAPI_ERR("Error 0x%x setting ecmd data buffer length. Buffer must be set to length of scan chain.",  rc_ecmd);
                     rc.setEcmdError(rc_ecmd);
                     break;
                 }
-                rc = fapiGetRing(i_target, 0x08030088, ring_data);
-                if (rc)
-                {
-                    FAPI_ERR("fapiGetRing failed with rc = 0x%x", (uint32_t)rc);
-                    break;
-                }
-                // Reverse the bits in the pll data buffers so they match the order of the bits in the scan chain
-                rc_ecmd |= pll_data.reverse( );
-                rc_ecmd |= rxpll_data.reverse( );
+
+
+                // Put the ring data from the attribute into the buffer
+                rc_ecmd |= ring_data.insert(attrABRingData, 0, ring_length, 0);
                 if (rc_ecmd)
                 {
-                    FAPI_ERR("Error (0x%x) reversing the bits in the pll data buffer", rc_ecmd);
-                    rc.setEcmdError(rc_ecmd);
-                    break;
-                }
-                // Insert the PLL settings in to the scan ring.
-                rc_ecmd |= ring_data.insert( rxpll_data,  58, 47);
-                rc_ecmd |= ring_data.insert( rxpll_data, 105, 47);
-                rc_ecmd |= ring_data.insert( rxpll_data, 152, 47);
-                rc_ecmd |= ring_data.insert( pll_data,   200, 136);
-                if (rc_ecmd)
-                {
-                    FAPI_ERR("Error (0x%x) inserting config bits into ring_data buffer", rc_ecmd);
+                    FAPI_ERR("Error 0x%x loading scan chain attribute data into buffer.",  rc_ecmd);
                     rc.setEcmdError(rc_ecmd);
                     break;
                 }
@@ -342,7 +272,7 @@ extern "C"
 
 
                 //-----------------------------------------------------
-                //  Scan new ring data back into ab_bndy_pll scan ring.
+                //  Scan new ring data into ab_bndy_pll scan ring.
                 //-----------------------------------------------------
                 rc = fapiPutRing(i_target, 0x08030088, ring_data, RING_MODE_SET_PULSE);
                 if (rc)
@@ -350,7 +280,7 @@ extern "C"
                     FAPI_ERR("fapiPutRing failed with rc = 0x%x", (uint32_t)rc);
                     break;
                 }
-                FAPI_DBG("Loading of the config bits for A-BUS PLL is done.\n");
+                FAPI_DBG("Loading of the config bits for A-BUS PLL is done.");
 
 
 
@@ -390,8 +320,8 @@ extern "C"
                 }
 
 
-                FAPI_DBG("Loading of the config bits for A BUS PLL is done.\n");
-                FAPI_INF("Done setting up A-Bus PLL. \n");
+                FAPI_DBG("Loading of the config bits for A BUS PLL is done.");
+                FAPI_INF("Done setting up A-Bus PLL. ");
             }  // end A PLL
 
 
@@ -401,85 +331,50 @@ extern "C"
             //----------//
             if (!i_startDMI)
             {
-                FAPI_DBG("DMI PLL not selected for setup in this routine.\n");
+                FAPI_DBG("DMI PLL not selected for setup in this routine.");
             }
             else
             {
-                FAPI_DBG("Loading the config bits into DMI PLL\n");
-                if (is_simulation)
+                FAPI_DBG("Loading the config bits into DMI PLL");
+
+                //---------------------------------------------------------------------------
+                //  Get ring data from cronus attribute and put it into eCmdDataBufferBase
+                //---------------------------------------------------------------------------
+
+                // Read the ring length attribute value.
+                rc = FAPI_ATTR_GET( ATTR_PROC_PB_BNDY_DMIPLL_LENGTH, &i_target, ring_length);
+                if (rc)
                 {
-                     rc_ecmd |= pll_data.setDoubleWord( 0, DMI_PLL_CONFIG_RING_CNTRL0_FOR_SIM);
-                     rc_ecmd |= pll_data.setDoubleWord( 1, DMI_PLL_CONFIG_RING_CNTRL1_FOR_SIM);
-                     rc_ecmd |= pll_data.setByte(      16, DMI_PLL_CONFIG_RING_CNTRL2_FOR_SIM);
-                }
-                else
-                {
-                     rc_ecmd |= pll_data.setDoubleWord( 0, DMI_PLL_CONFIG_RING_CNTRL0);
-                     rc_ecmd |= pll_data.setDoubleWord( 1, DMI_PLL_CONFIG_RING_CNTRL1);
-                     rc_ecmd |= pll_data.setByte(      16, DMI_PLL_CONFIG_RING_CNTRL2);
-                }
-                if (rc_ecmd)
-                {
-                    FAPI_ERR("Error (0x%x) setting up ecmdDataBufferBase", rc_ecmd);
-                    rc.setEcmdError(rc_ecmd);
+                    FAPI_ERR("Failed to get attribute: ATTR_PROC_PB_BNDY_DMIPLL_LENGTH.");
                     break;
                 }
-                // Set bit 17 of the controller for the DMI Cleanup PLLs
-                rc_ecmd |= rxpll_data.flushTo0();
-                rc_ecmd |= rxpll_data.setBit(17);
-                if(rc_ecmd)
+                FAPI_DBG("ATTR_PROC_PB_BNDY_DMIPLL_LENGTH attribute is set to : %d.", ring_length);
+
+
+                // Read the ring data attribute value.
+                rc = FAPI_ATTR_GET( ATTR_PROC_PB_BNDY_DMIPLL_DATA, &i_target, attrDMIRingData);
+                if (rc)
                 {
-                    FAPI_ERR("Error (0x%x) setting up ecmdDataBufferBase", rc_ecmd);
-                    rc.setEcmdError(rc_ecmd);
+                    FAPI_ERR("Failed to get attribute: ATTR_PROC_PB_BNDY_DMIPLL_DATA.");
                     break;
                 }
 
 
-
-                //---------------------------------------------------------------------------
-                //  Scan out the original contents from ring and modify it with new settings.
-                //---------------------------------------------------------------------------
-                FAPI_DBG("Loading PLL settings into scan ring pb_bndy_dmipll for DMI PLL.");
-
-                // The scan chain that we need to modify is:  Name = pb_bndy_dmipll  Address = {0x02030088}
-                // This chain is 1234 bits long.
-                // RX3 clean up PLL control bits (47) go into positions 314 - 360
-                // RX2 clean up PLL control bits (47) go into positions 361 - 407
-                // RX1 clean up PLL control bits (47) go into positions 408 - 454
-                // RX0 clean up PLL control bits (47) go into positions 455 - 501
-                // DMI PLL control bits         (136) go into positions 502 - 637
-
-                rc_ecmd |= ring_data.setBitLength(RING_LENGTH_PB_BNDY_DMIPLL);   // This length needs to match the length in the scandef file (Required for hostboot.)
+                // Set the ring_data buffer to the right length for the ring data
+                rc_ecmd |= ring_data.setBitLength(ring_length);   // This length needs to match the real scan length in the scandef file (Required for hostboot.)
                 if (rc_ecmd)
                 {
                     FAPI_ERR("Error 0x%x setting ecmd data buffer length. Buffer must be set to length of scan chain.",  rc_ecmd);
                     rc.setEcmdError(rc_ecmd);
                     break;
                 }
-                rc = fapiGetRing(i_target, 0x02030088, ring_data);
-                if (rc)
-                {
-                    FAPI_ERR("fapiGetRing failed with rc = 0x%x", (uint32_t)rc);
-                    break;
-                }
-                // Reverse the bits in the pll data buffers so they match the order of the bits in the scan chain
-                rc_ecmd |= pll_data.reverse( );
-                rc_ecmd |= rxpll_data.reverse( );
+
+
+                // Put the ring data from the attribute into the buffer
+                rc_ecmd |= ring_data.insert(attrDMIRingData, 0, ring_length, 0);
                 if (rc_ecmd)
                 {
-                    FAPI_ERR("Error (0x%x) reversing the bits in the pll data buffer", rc_ecmd);
-                    rc.setEcmdError(rc_ecmd);
-                    break;
-                }
-                // Insert the PLL settings in to the scan ring.
-                rc_ecmd |= ring_data.insert( rxpll_data, 314, 47);
-                rc_ecmd |= ring_data.insert( rxpll_data, 361, 47);
-                rc_ecmd |= ring_data.insert( rxpll_data, 408, 47);
-                rc_ecmd |= ring_data.insert( rxpll_data, 455, 47);
-                rc_ecmd |= ring_data.insert( pll_data,   502, 136);
-                if (rc_ecmd)
-                {
-                    FAPI_ERR("Error (0x%x) inserting config bits into ring_data buffer", rc_ecmd);
+                    FAPI_ERR("Error 0x%x loading scan chain attribute data into buffer.",  rc_ecmd);
                     rc.setEcmdError(rc_ecmd);
                     break;
                 }
@@ -556,7 +451,7 @@ extern "C"
 
 
                 //-----------------------------------------------------
-                //  Scan new ring data back into pb_bndy_dmipll scan ring.
+                //  Scan new ring data into pb_bndy_dmipll scan ring.
                 //-----------------------------------------------------
                 rc = fapiPutRing(i_target, 0x02030088, ring_data, RING_MODE_SET_PULSE);
                 if (rc)
@@ -564,7 +459,7 @@ extern "C"
                     FAPI_ERR("fapiPutRing failed with rc = 0x%x", (uint32_t)rc);
                     break;
                 }
-                FAPI_DBG("Loading of the config bits for DMI PLL is done.\n");
+                FAPI_DBG("Loading of the config bits for DMI PLL is done.");
 
 
 
@@ -603,7 +498,7 @@ extern "C"
                     break;
                 }
 
-                FAPI_INF("Done setting up DMI PLL. \n");
+                FAPI_INF("Done setting up DMI PLL. ");
             }  // end DMI PLL
 
 
@@ -611,70 +506,67 @@ extern "C"
             //-----------//
             // PCIE PLL  //
             //-----------//
+
+            // query PCIE partial good attribute
+            rc = FAPI_ATTR_GET(ATTR_PROC_PCIE_ENABLE,
+                               &i_target,
+                               pcie_enable_attr);
+            if (!rc.ok())
+            {
+                FAPI_ERR("Error querying ATTR_PROC_PCIE_ENABLE");
+                break;
+            }
+
             if (!i_startPCIE)
             {
-                FAPI_DBG("PCIE PLL not selected for setup in this routine.\n");
+                FAPI_DBG("PCIE PLL not selected for setup in this routine.");
+            }
+            else if (pcie_enable_attr != fapi::ENUM_ATTR_PROC_PCIE_ENABLE_ENABLE)
+            {
+                FAPI_DBG("PCIE PLL setup skipped (partial good).");
             }
             else
             {
-                FAPI_DBG("Starting PLL setup for PCIE PLL ...\n");
-                FAPI_DBG("Loading the config bits into PCIE BUS PLL\n");
-                if (is_simulation)
+                FAPI_DBG("Loading the config bits into PCIE BUS PLL");
+
+                //---------------------------------------------------------------------------
+                //  Get ring data from cronus attribute and put it into eCmdDataBufferBase
+                //---------------------------------------------------------------------------
+
+                // Read the ring length attribute value.
+                rc = FAPI_ATTR_GET( ATTR_PROC_PCI_BNDY_PLL_LENGTH, &i_target, ring_length);
+                if (rc)
                 {
-                    rc_ecmd |= pll_data.setDoubleWord( 0, PCIE_PLL_CONFIG_RING_CNTRL0_FOR_SIM);
-                    rc_ecmd |= pll_data.setDoubleWord( 1, PCIE_PLL_CONFIG_RING_CNTRL1_FOR_SIM);
-                    rc_ecmd |= pll_data.setByte(      16, PCIE_PLL_CONFIG_RING_CNTRL2_FOR_SIM);
+                    FAPI_ERR("Failed to get attribute: ATTR_PROC_PCI_BNDY_PLL_LENGTH.");
+                    break;
                 }
-                else
+                FAPI_DBG("ATTR_PROC_PCI_BNDY_PLL_LENGTH attribute is set to : %d.", ring_length);
+
+
+                // Read the ring data attribute value.
+                rc = FAPI_ATTR_GET( ATTR_PROC_PCI_BNDY_PLL_DATA, &i_target, attrPCIRingData);
+                if (rc)
                 {
-                    rc_ecmd |= pll_data.setDoubleWord( 0, PCIE_PLL_CONFIG_RING_CNTRL0);
-                    rc_ecmd |= pll_data.setDoubleWord( 1, PCIE_PLL_CONFIG_RING_CNTRL1);
-                    rc_ecmd |= pll_data.setByte(      16, PCIE_PLL_CONFIG_RING_CNTRL2);
-                }
-                if (rc_ecmd)
-                {
-                    FAPI_ERR("Error (0x%x) setting up ecmdDataBufferBase", rc_ecmd);
-                    rc.setEcmdError(rc_ecmd);
+                    FAPI_ERR("Failed to get attribute: ATTR_PROC_PCI_BNDY_PLL_DATA.");
                     break;
                 }
 
 
-
-                //---------------------------------------------------------------------------
-                //  Scan out the original contents from ring and modify it with new settings.
-                //---------------------------------------------------------------------------
-                FAPI_DBG("Loading PLL settings into scan ring pci_bndy_pll for DMI PLL.");
-
-                // The scan chain that we need to modify is:  Name = pci_bndy_pll  Address = {0x09030088}
-                // This chain is 565 bits long.
-                // PCIE PLL control bits       (136) go into positions 258 - 393
-
-                rc_ecmd |= ring_data.setBitLength(RING_LENGTH_PCI_BNDY_PLL);   // This length needs to match the length in the scandef file (Required for hostboot.)
+                // Set the ring_data buffer to the right length for the ring data
+                rc_ecmd |= ring_data.setBitLength(ring_length);   // This length needs to match the real scan length in the scandef file (Required for hostboot.)
                 if (rc_ecmd)
                 {
                     FAPI_ERR("Error 0x%x setting ecmd data buffer length. Buffer must be set to length of scan chain.",  rc_ecmd);
                     rc.setEcmdError(rc_ecmd);
                     break;
                 }
-                rc = fapiGetRing(i_target, 0x09030088, ring_data);
-                if (rc)
-                {
-                    FAPI_ERR("fapiGetRing failed with rc = 0x%x", (uint32_t)rc);
-                    break;
-                }
-                // Reverse the bits in the pll data buffers so they match the order of the bits in the scan chain
-                rc_ecmd |= pll_data.reverse( );
+
+
+                // Put the ring data from the attribute into the buffer
+                rc_ecmd |= ring_data.insert(attrPCIRingData, 0, ring_length, 0);
                 if (rc_ecmd)
                 {
-                    FAPI_ERR("Error (0x%x) reversing the bits in the pll data buffer", rc_ecmd);
-                    rc.setEcmdError(rc_ecmd);
-                    break;
-                }
-                // Insert the PLL settings in to the scan ring.
-                rc_ecmd |= ring_data.insert( pll_data,   258, 136);
-                if (rc_ecmd)
-                {
-                    FAPI_ERR("Error (0x%x) inserting config bits into ring_data buffer", rc_ecmd);
+                    FAPI_ERR("Error 0x%x loading scan chain attribute data into buffer.",  rc_ecmd);
                     rc.setEcmdError(rc_ecmd);
                     break;
                 }
@@ -751,7 +643,7 @@ extern "C"
 
 
                 //-----------------------------------------------------
-                //  Scan new ring data back into pci_bndy_pll scan ring.
+                //  Scan new ring data into pci_bndy_pll scan ring.
                 //-----------------------------------------------------
                 rc = fapiPutRing(i_target, 0x09030088, ring_data, RING_MODE_SET_PULSE);
                 if (rc)
@@ -759,7 +651,7 @@ extern "C"
                     FAPI_ERR("fapiPutRing failed with rc = 0x%x", (uint32_t)rc);
                     break;
                 }
-                FAPI_DBG("Loading of the config bits for PCIE PLL is done.\n");
+                FAPI_DBG("Loading of the config bits for PCIE PLL is done.");
 
 
 
@@ -799,7 +691,7 @@ extern "C"
                 }
 
 
-                FAPI_INF("Done setting up PCIE PLL. \n");
+                FAPI_INF("Done setting up PCIE PLL. ");
             }  // end PCIE PLL
 
 
@@ -818,6 +710,18 @@ extern "C"
 This section is automatically updated by CVS when you check in this file.
 Be sure to create CVS comments when you commit so that they can be included here.
 $Log: proc_a_x_pci_dmi_pll_initf.C,v $
+Revision 1.9  2013/01/20 19:21:03  jmcgill
+update for A chiplet partial good support
+
+Revision 1.8  2013/01/10 14:42:53  jmcgill
+add partial good support
+
+Revision 1.6  2012/12/07 17:09:39  mfred
+fix to add DMI PLL settings for MC1 for Venice.
+
+Revision 1.5  2012/12/06 22:59:18  mfred
+adjust DMI PLL settings based on chip type.
+
 Revision 1.4  2012/08/27 15:29:03  mfred
 Fixed some findings from the latest FW code review.
 

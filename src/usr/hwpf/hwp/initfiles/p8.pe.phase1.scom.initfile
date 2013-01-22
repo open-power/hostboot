@@ -1,4 +1,4 @@
-#-- $Id: p8.pe.phase1.scom.initfile,v 1.1 2012/11/05 21:39:30 jmcgill Exp $
+#-- $Id: p8.pe.phase1.scom.initfile,v 1.2 2013/01/02 03:18:01 jmcgill Exp $
 #-------------------------------------------------------------------------------
 #--
 #-- (C) Copyright International Business Machines Corp. 2011
@@ -65,6 +65,102 @@ scom 0x800008800901143F {
 scom 0x800008810901143F {
     bits,     scom_data;
     48:63,    ATTR_PROC_PCIE_IOP_PCS_CONTROL1[0];
+}
+
+#-- TX FIFO Control Register (A0)
+scom 0x800004000901143F {
+    bits,     scom_data;
+    53:56,    0b1111;
+}
+
+#-- TX FIFO Control Register (A1)
+scom 0x800004400901143F {
+    bits,     scom_data;
+    53:56,    0b1111;
+}
+
+#-- TX FIFO Control Register (A2)
+scom 0x800004800901143F {
+    bits,     scom_data;
+    53:56,    0b1111;
+}
+
+#-- TX FIFO Control Register (A3)
+scom 0x800004C00901143F {
+    bits,     scom_data;
+    53:56,    0b1111;
+}
+
+#-- TX FIFO Control Register (A4)
+scom 0x800005000901143F {
+    bits,     scom_data;
+    53:56,    0b1111;
+}
+
+#-- TX FIFO Control Register (A5)
+scom 0x800005400901143F {
+    bits,     scom_data;
+    53:56,    0b1111;
+}
+
+#-- TX FIFO Control Register (A6)
+scom 0x800005800901143F {
+    bits,     scom_data;
+    53:56,    0b1111;
+}
+
+#-- TX FIFO Control Register (A7)
+scom 0x800005C00901143F {
+    bits,     scom_data;
+    53:56,    0b1111;
+}
+
+#-- TX FIFO Control Register (B0)
+scom 0x800006000901143F {
+    bits,     scom_data;
+    53:56,    0b1111;
+}
+
+#-- TX FIFO Control Register (B1)
+scom 0x800006400901143F {
+    bits,     scom_data;
+    53:56,    0b1111;
+}
+
+#-- TX FIFO Control Register (B2)
+scom 0x800006800901143F {
+    bits,     scom_data;
+    53:56,    0b1111;
+}
+
+#-- TX FIFO Control Register (B3)
+scom 0x800006C00901143F {
+    bits,     scom_data;
+    53:56,    0b1111;
+}
+
+#-- TX FIFO Control Register (B4)
+scom 0x800007000901143F {
+    bits,     scom_data;
+    53:56,    0b1111;
+}
+
+#-- TX FIFO Control Register (B5)
+scom 0x800007400901143F {
+    bits,     scom_data;
+    53:56,    0b1111;
+}
+
+#-- TX FIFO Control Register (B6)
+scom 0x800007800901143F {
+    bits,     scom_data;
+    53:56,    0b1111;
+}
+
+#-- TX FIFO Control Register (B7)
+scom 0x800007C00901143F {
+    bits,     scom_data;
+    53:56,    0b1111;
 }
 
 #-- TX FIFO Offset Register (A0)
@@ -694,6 +790,102 @@ scom 0x800008800901187F {
 scom 0x800008810901187F {
     bits,     scom_data;
     48:63,    ATTR_PROC_PCIE_IOP_PCS_CONTROL1[1];
+}
+
+#-- TX FIFO Control Register (A0)
+scom 0x800004000901187F {
+    bits,     scom_data;
+    53:56,    0b1111;
+}
+
+#-- TX FIFO Control Register (A1)
+scom 0x800004400901187F {
+    bits,     scom_data;
+    53:56,    0b1111;
+}
+
+#-- TX FIFO Control Register (A2)
+scom 0x800004800901187F {
+    bits,     scom_data;
+    53:56,    0b1111;
+}
+
+#-- TX FIFO Control Register (A3)
+scom 0x800004C00901187F {
+    bits,     scom_data;
+    53:56,    0b1111;
+}
+
+#-- TX FIFO Control Register (A4)
+scom 0x800005000901187F {
+    bits,     scom_data;
+    53:56,    0b1111;
+}
+
+#-- TX FIFO Control Register (A5)
+scom 0x800005400901187F {
+    bits,     scom_data;
+    53:56,    0b1111;
+}
+
+#-- TX FIFO Control Register (A6)
+scom 0x800005800901187F {
+    bits,     scom_data;
+    53:56,    0b1111;
+}
+
+#-- TX FIFO Control Register (A7)
+scom 0x800005C00901187F {
+    bits,     scom_data;
+    53:56,    0b1111;
+}
+
+#-- TX FIFO Control Register (B0)
+scom 0x800006000901187F {
+    bits,     scom_data;
+    53:56,    0b1111;
+}
+
+#-- TX FIFO Control Register (B1)
+scom 0x800006400901187F {
+    bits,     scom_data;
+    53:56,    0b1111;
+}
+
+#-- TX FIFO Control Register (B2)
+scom 0x800006800901187F {
+    bits,     scom_data;
+    53:56,    0b1111;
+}
+
+#-- TX FIFO Control Register (B3)
+scom 0x800006C00901187F {
+    bits,     scom_data;
+    53:56,    0b1111;
+}
+
+#-- TX FIFO Control Register (B4)
+scom 0x800007000901187F {
+    bits,     scom_data;
+    53:56,    0b1111;
+}
+
+#-- TX FIFO Control Register (B5)
+scom 0x800007400901187F {
+    bits,     scom_data;
+    53:56,    0b1111;
+}
+
+#-- TX FIFO Control Register (B6)
+scom 0x800007800901187F {
+    bits,     scom_data;
+    53:56,    0b1111;
+}
+
+#-- TX FIFO Control Register (B7)
+scom 0x800007C00901187F {
+    bits,     scom_data;
+    53:56,    0b1111;
 }
 
 #-- TX FIFO Offset Register (A0)

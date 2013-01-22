@@ -1,0 +1,337 @@
+#-- $Id: p8.nx.scom.initfile,v 1.2 2013/01/10 21:31:50 johnre Exp $
+#-------------------------------------------------------------------------------
+#--
+#-- (C) Copyright International Business Machines Corp. 2011
+#-- All Rights Reserved -- Property of IBM
+#-- *** IBM Confidential ***
+#--
+#-- TITLE       : p8.nx.scom.initfile
+#-- DESCRIPTION : Perform NX configuration
+#--
+#-- OWNER NAME  : John Reilly             Email: johnre@us.ibm.com
+#--
+#--------------------------------------------------------------------------------
+
+SyntaxVersion = 1
+
+#--------------------------------------------------------------------------------
+#-- Includes
+#--------------------------------------------------------------------------------
+
+#--------------------------------------------------------------------------------
+#-- Defines
+#--------------------------------------------------------------------------------
+define eft_ci  = ( ((8*ATTR_FABRIC_NODE_ID) + (ATTR_FABRIC_CHIP_ID) + 1) * 4) ;
+define sym_ci  = ( ((8*ATTR_FABRIC_NODE_ID) + (ATTR_FABRIC_CHIP_ID) + 1) * 4) ;
+define asym_ci = ( ((8*ATTR_FABRIC_NODE_ID) + (ATTR_FABRIC_CHIP_ID) + 1) * 16);
+
+
+#--------------------------------------------------------------------------------
+#-- SCOM initializations
+#--------------------------------------------------------------------------------
+
+#-- Engine Enable Register (0x02013041)
+scom 0x02013041 {
+    bits  ,  scom_data      ;
+    53    ,  0b1            ;  #-- ch7 ASYM enable
+    54    ,  0b1            ;  #-- ch6 ASYM enable
+    55    ,  0b1            ;  #-- ch5 ASYM enable
+    56    ,  0b1            ;  #-- ch4 ASYM enable
+    57    ,  0b1            ;  #-- ch3 SYM enable
+    58    ,  0b1            ;  #-- ch2 SYM enable
+    62    ,  0b1            ;  #-- ch1 842 enable
+    63    ,  0b1            ;  #-- ch0 842 enable
+}
+
+
+#-- DMA Config Register (0x02013042)
+scom 0x02013042 {
+    bits  ,  scom_data      ;
+    23    ,  0b1            ;  #-- 842 comp prefetch hint enable
+    24    ,  0b1            ;  #-- 842 decomp prefetch hint enable
+    25:28 ,  0b0011         ;  #-- max sym reads
+    29:32 ,  0b0001         ;  #-- max amf reads
+    33:36 ,  0b1101         ;  #-- max comp reads
+    37:40 ,  0b0111         ;  #-- max decomp reads
+    41:42 ,  0b01           ;  #-- sym csb write type      01:128B cache inject
+    43:44 ,  0b01           ;  #-- sym comp write type     01:128B cache inject
+    45:46 ,  0b10           ;  #-- sym cpb write type      10:128B cache inject
+    47    ,  0b0            ;  #-- sym data write type      0:DMA write
+    49:50 ,  0b01           ;  #-- amf csb write type      01:128B cache inject
+    51:52 ,  0b01           ;  #-- amf comp write type     01:128B cache inject
+    55    ,  0b0            ;  #-- amf data write type      0:DMA write
+    56    ,  0b0            ;  #-- 842 spbc write enable
+    57:58 ,  0b01           ;  #-- 842 csb write type      01:128B cache inject
+    59:60 ,  0b01           ;  #-- 842 comp write type     01:128B cache inject
+    61:62 ,  0b10           ;  #-- 842 cpb write type      10:128B cache inject
+    63    ,  0b0            ;  #-- 842 data write type      0:DMA write
+}
+
+
+#-- Symmetric Coprocessor Config Register (0x0201308A)
+scom 0x0201308A {
+    bits  ,  scom_data      ;
+     2:14 ,  sym_ci         ;  #-- sym CI. function of node, chip id
+    18:23 ,  0b000001       ;  #-- sym CT
+    32:39 ,  0b10110010     ;  #-- sym FC mask.  enable 0,2,3,6
+    63    ,  0b1            ;  #-- sym enable
+}
+
+
+#-- Asymmetric Coprocessor Config Register (0x0201308B)
+scom 0x0201308B {
+    bits  ,  scom_data      ;
+     2:14 ,  asym_ci        ;  #-- asym CI. function of node, chip id
+    18:23 ,  0b000010       ;  #-- asym CT
+    32:55 ,  0xfffff8       ;  #-- asym FC mask. enable 0-20
+    63    ,  0b1            ;  #-- asym enable
+}
+
+
+#-- 842 Coprocessor Config Register (0x0201308C)
+scom 0x0201308C {
+    bits  ,  scom_data      ;
+     2:14 ,  eft_ci         ;  #-- 842 CI. function of node, chip id
+    18:23 ,  0b000000       ;  #-- 842 CT
+    32:36 ,  0b11111        ;  #-- 842 FC mask.  enable 0-4
+    63    ,  0b1            ;  #-- 842 enable
+}
+
+
+#-- RNG Config Register (0x02013092)
+scom 0x02013092 {
+    bits  ,  scom_data      ;
+    46:61 ,  0x07cf         ;  #-- RNG pacing.  0x07CF=1999. 2000 cycles between samples
+    63    ,  0b1            ;  #-- RNG enable
+}
+
+
+#-- ICS Lite Config Register (0x02013093)
+scom 0x02013093 {
+    bits  ,  scom_data      ;
+     8:15 ,  0x00           ;  #-- trusted interrupt priority
+    16:31 ,  0x0000         ;  #-- trusted interrupt server
+    44:47 ,  0b1100         ;  #-- time to wait before resending returned interrupts. average 12*856ns
+    54:63 ,  0b0            ;  #-- number of returns before issuing trusted interrupt.  0=never
+}
+
+
+#-- NX BUID Config Register (0x0201308E)
+scom 0x0201308E {
+    bits  ,  scom_data           ;
+     0    ,  0b0                 ;  #-- BUID enable
+     1:2  ,  ATTR_FABRIC_NODE_ID ;  #-- BUID Base(0:1) Node Id  ????
+     3:5  ,  ATTR_FABRIC_CHIP_ID ;  #-- BUID Base(2:4) Chip Id  ????
+     6:19 ,  0x00000             ;  #-- BUID Base(5:18)   ????
+    20:32 ,  0b0000              ;  #-- BUID Mask(6:18).  Mask(0:5)=0b111111
+}
+
+
+#-- NX Cop_Req Input Queue Config Register (0x0201308F)
+scom 0x0201308F {
+    bits  ,  scom_data      ;
+     0:2  ,  0b001          ;  #-- SYM max extra queue entries.  2 total = 1 dedicated + 1 floating
+     3:5  ,  0b000          ;  #-- ASYM max extra queue entries. 1 total = just 1 dedicated
+}
+
+
+#-- PowerBus Epsilon Config Register (0x0201309D)
+scom 0x0201309D {
+    bits  ,  scom_data      ;
+     0:5  ,  0b000101       ;  #-- epsilon count value.  number * 7 clock cycles.
+     6    ,  0b0            ;  #-- disable epsilon counter
+}
+
+
+#-- NX Miscellaneous Control Register (0x020130A8)
+#scom 0x020130A8 {
+#    bits  ,  scom_data     ;
+#     0    ,  0b1           ;  #-- enable NX interrupts to PowerBus. reset value = 0b1
+#     1    ,  0b1           ;  #-- enable AS interrupts to PowerBus. reset value = 0b1
+#}
+
+
+#-- PBI FIR Mask Register (0x02013083)
+scom 0x02013083 {
+    bits  ,  scom_data      ;
+     0    ,   0b0           ;   #--           PBI internal parity error
+     1    ,   0b0           ;   #--           PowerBus CE error
+     2    ,   0b0           ;   #--           PowerBus UE error
+     3    ,   0b1           ;   #-- mask      PowerBus SUE error
+     4    ,   0b0           ;   #--           Inbound array CE error
+     5    ,   0b0           ;   #--           Inbound array UE error
+     6    ,   0b0           ;   #--           PowerBus data hang error
+     7    ,   0b1           ;   #-- mask      PowerBus command hang error
+     8    ,   0b0           ;   #--           PowerBus read address error
+     9    ,   0b0           ;   #--           PowerBus write address error
+    10    ,   0b0           ;   #--           PowerBus miscellaneous error
+    11    ,   0b0           ;   #--           MMIO BAR parity error
+    12    ,   0b0           ;   #--           CRB kill ISN received while holding ISN with UE error
+    13    ,   0b0           ;   #--           ACK_DEAD cresp received by read command
+    14    ,   0b0           ;   #--           ACK_DEAD cresp received by write command
+    15    ,   0b0           ;   #--           Link check aborted while waiting on data
+    16    ,   0b0           ;   #--           Hang poll time expired on internal transfer
+    17    ,   0b1           ;   #-- mask      FIR/SCOM satellite parity error
+    18    ,   0b1           ;   #-- mask      FIR/SCOM satellite parity error duplicate
+}
+
+
+#-- PBI FIR Action0,1 Register (0x02013086,7)
+#--   action0,1 = 00 : checkstop
+#--               01 : recoverable
+#--               10 : unused
+#--               11 : local checkstop
+scom 0x02013086 {
+    bits  ,  scom_data      ;   #--Action
+     0    ,   0b0           ;   #-- 0b00      PBI internal parity error
+     1    ,   0b0           ;   #-- 0b01      PowerBus CE error
+     2    ,   0b0           ;   #-- 0b01      PowerBus UE error
+     3    ,   0b0           ;   #-- 0b00 mask PowerBus SUE error
+     4    ,   0b0           ;   #-- 0b01      Inbound array CE error
+     5    ,   0b0           ;   #-- 0b01      Inbound array UE error
+     6    ,   0b0           ;   #-- 0b01      PowerBus data hang error
+     7    ,   0b0           ;   #-- 0b00 mask PowerBus command hang error
+     8    ,   0b0           ;   #-- 0b00      PowerBus read address error
+     9    ,   0b0           ;   #-- 0b00      PowerBus write address error
+    10    ,   0b0           ;   #-- 0b01      PowerBus miscellaneous error
+    11    ,   0b0           ;   #-- 0b01      MMIO BAR parity error
+    12    ,   0b1           ;   #-- 0b11      CRB kill ISN received while holding ISN with UE error
+    13    ,   0b0           ;   #-- 0b01      ACK_DEAD cresp received by read command
+    14    ,   0b0           ;   #-- 0b01      ACK_DEAD cresp received by write command
+    15    ,   0b0           ;   #-- 0b01      Link check aborted while waiting on data
+    16    ,   0b0           ;   #-- 0b01      Hang poll time expired on internal transfer
+    17    ,   0b0           ;   #-- 0b00 mask FIR/SCOM satellite parity error
+    18    ,   0b0           ;   #-- 0b00 mask FIR/SCOM satellite parity error duplicate
+}
+scom 0x02013087 {
+    bits  ,  scom_data      ;   #--Action
+     0    ,   0b0           ;   #-- 0b00      PBI internal parity error
+     1    ,   0b1           ;   #-- 0b01      PowerBus CE error
+     2    ,   0b1           ;   #-- 0b01      PowerBus UE error
+     3    ,   0b0           ;   #-- 0b00 mask PowerBus SUE error
+     4    ,   0b1           ;   #-- 0b01      Inbound array CE error
+     5    ,   0b1           ;   #-- 0b01      Inbound array UE error
+     6    ,   0b1           ;   #-- 0b01      PowerBus data hang error
+     7    ,   0b0           ;   #-- 0b00 mask PowerBus command hang error
+     8    ,   0b0           ;   #-- 0b00      PowerBus read address error
+     9    ,   0b0           ;   #-- 0b00      PowerBus write address error
+    10    ,   0b1           ;   #-- 0b01      PowerBus miscellaneous error
+    11    ,   0b1           ;   #-- 0b01      MMIO BAR parity error
+    12    ,   0b1           ;   #-- 0b11      CRB kill ISN received while holding ISN with UE error
+    13    ,   0b1           ;   #-- 0b01      ACK_DEAD cresp received by read command
+    14    ,   0b1           ;   #-- 0b01      ACK_DEAD cresp received by write command
+    15    ,   0b1           ;   #-- 0b01      Link check aborted while waiting on data
+    16    ,   0b1           ;   #-- 0b01      Hang poll time expired on internal transfer
+    17    ,   0b0           ;   #-- 0b00 mask FIR/SCOM satellite parity error
+    18    ,   0b0           ;   #-- 0b00 mask FIR/SCOM satellite parity error duplicate
+}
+
+
+#-- DMA/Engine FIR Mask Register (0x02013103)
+scom 0x02013103 {
+    bits  ,  scom_data      ;
+     0    ,  0b1            ;   #-- mask      Reserved
+     1    ,  0b0            ;   #--           ICS invalid state error FIR bit
+     2:3  ,  0b11           ;   #-- mask      Reserved
+     4    ,  0b0            ;   #--           Channel 0 842 array corrected ECC error FIR bit" ;
+     5    ,  0b0            ;   #--           Channel 0 842 array uncorrectable ECC error FIR bit" ;
+     6    ,  0b0            ;   #--           Channel 1 842 array corrected ECC error FIR bit" ;
+     7    ,  0b0            ;   #--           Channel 1 842 array uncorrectable ECC error FIR bit" ;
+     8    ,  0b1            ;   #-- mask      DMA non-zero CSB CC detected FIR bit.  Programming error." ;
+     9    ,  0b0            ;   #--           DMA array correctable ECC error FIR bit" ;
+    10    ,  0b0            ;   #--           DMA outbound write/inbound read correctable ECC error FIR bit" ;
+    11:13 ,  0b000          ;   #--           Channel 5,6,7 AMF array corrected ECC error FIR bit" ;
+    14    ,  0b1            ;   #-- mask      Error from other SCOM satellites FIR bit" ;
+    15    ,  0b0            ;   #--           DMA invalid state error FIR bit.  Unrecoverable despite name" ;
+    16    ,  0b0            ;   #--           DMA invalid state error FIR bit" ;
+    17    ,  0b0            ;   #--           DMA array uncorrectable ECC error FIR bit" ;
+    18    ,  0b0            ;   #--           DMA outbound write/inbound read uncorrectable ECC error FIR bit" ;
+    19    ,  0b0            ;   #--           DMA inbound read error FIR bit" ;
+    20:27 ,  0b00000000     ;   #--           Channel 0-7 invalid state error FIR bit" ;
+    28:30 ,  0b000          ;   #--           Channel 5,6,7 AMF array uncorrectable ECC error FIR bit" ;
+    31    ,  0b0            ;   #--           UE error on CRB(CSB address, CCB) FIR bit" ;
+    32    ,  0b0            ;   #--           SUE error on CRB(CSB address, CCB) FIR bit" ;
+    33    ,  0b1            ;   #-- mask      SUE error on something other than CRB(CSB address, CCB) FIR bit" ;
+    34    ,  0b1            ;   #-- mask      Reserved
+    35    ,  0b1            ;   #-- mask      Reserved
+    36    ,  0b0            ;   #--           Channel 4 AMF array corrected ECC error FIR bit" ;
+    37    ,  0b0            ;   #--           Channel 4 AMF array uncorrectable ECC error FIR bit" ;
+    38:47 ,  0b1111111111   ;   #-- mask      Reserved
+    48    ,  0b1            ;   #-- mask      FIR/SCOM satellite parity error FIR bit" ;
+    49    ,  0b1            ;   #-- mask      FIR/SCOM satellite parity error FIR bit duplicate"
+}
+
+
+#-- DMA/Engine Action0/1 Registers (0x02013106,07)
+#--   action0,1 = 00 : checkstop
+#--               01 : recoverable
+#--               10 : unused
+#--               11 : local checkstop
+scom 0x02013106 {
+    bits  ,  scom_data      ;   #--Action
+     0    ,  0b0            ;   #-- 0b00 mask Reserved
+     1    ,  0b1            ;   #-- 0b11      ICS invalid state error FIR bit
+     2:3  ,  0b00           ;   #-- 0b00 mask Reserved
+     4    ,  0b0            ;   #-- 0b01      Channel 0 842 array corrected ECC error FIR bit" ;
+     5    ,  0b0            ;   #-- 0b01      Channel 0 842 array uncorrectable ECC error FIR bit" ;
+     6    ,  0b0            ;   #-- 0b01      Channel 1 842 array corrected ECC error FIR bit" ;
+     7    ,  0b0            ;   #-- 0b01      Channel 1 842 array uncorrectable ECC error FIR bit" ;
+     8    ,  0b0            ;   #-- 0b00 mask DMA non-zero CSB CC detected FIR bit.  Programming error." ;
+     9    ,  0b0            ;   #-- 0b01      DMA array correctable ECC error FIR bit" ;
+    10    ,  0b0            ;   #-- 0b01      DMA outbound write/inbound read correctable ECC error FIR bit" ;
+    11:13 ,  0b000          ;   #-- 0b01      Channel 5,6,7 AMF array corrected ECC error FIR bit" ;
+    14    ,  0b0            ;   #-- 0b00 mask Error from other SCOM satellites FIR bit" ;
+    15    ,  0b1            ;   #-- 0b11      DMA invalid state error FIR bit.  Unrecoverable despite name" ;
+    16    ,  0b1            ;   #-- 0b11      DMA invalid state error FIR bit" ;
+    17    ,  0b0            ;   #-- 0b01      DMA array uncorrectable ECC error FIR bit" ;
+    18    ,  0b0            ;   #-- 0b01      DMA outbound write/inbound read uncorrectable ECC error FIR bit" ;
+    19    ,  0b0            ;   #-- 0b01      DMA inbound read error FIR bit" ;
+    20:27 ,  0b11111111     ;   #-- 0b11      Channel 0-7 invalid state error FIR bit" ;
+    28:30 ,  0b000          ;   #-- 0b01      Channel 5,6,7 AMF array uncorrectable ECC error FIR bit" ;
+    31    ,  0b1            ;   #-- 0b11      UE error on CRB(CSB address, CCB) FIR bit" ;
+    32    ,  0b1            ;   #-- 0b11      SUE error on CRB(CSB address, CCB) FIR bit" ;
+    33    ,  0b0            ;   #-- 0b00 mask SUE error on something other than CRB(CSB address, CCB) FIR bit" ;
+    34    ,  0b0            ;   #-- 0b00 mask Reserved
+    35    ,  0b0            ;   #-- 0b00 mask Reserved
+    36    ,  0b0            ;   #-- 0b01      Channel 4 AMF array corrected ECC error FIR bit" ;
+    37    ,  0b0            ;   #-- 0b01      Channel 4 AMF array uncorrectable ECC error FIR bit" ;
+    38:47 ,  0b0000000000   ;   #-- 0b00 mask Reserved
+    48    ,  0b0            ;   #-- 0b00 mask FIR/SCOM satellite parity error FIR bit" ;
+    49    ,  0b0            ;   #-- 0b00 mask FIR/SCOM satellite parity error FIR bit duplicate"
+}
+scom 0x02013107 {
+    bits  ,  scom_data      ;   #--Action
+     0    ,  0b0            ;   #-- 0b00 mask Reserved
+     1    ,  0b1            ;   #-- 0b11      ICS invalid state error FIR bit
+     2:3  ,  0b00           ;   #-- 0b00 mask Reserved
+     4    ,  0b1            ;   #-- 0b01      Channel 0 842 array corrected ECC error FIR bit" ;
+     5    ,  0b1            ;   #-- 0b01      Channel 0 842 array uncorrectable ECC error FIR bit" ;
+     6    ,  0b1            ;   #-- 0b01      Channel 1 842 array corrected ECC error FIR bit" ;
+     7    ,  0b1            ;   #-- 0b01      Channel 1 842 array uncorrectable ECC error FIR bit" ;
+     8    ,  0b0            ;   #-- 0b00 mask DMA non-zero CSB CC detected FIR bit.  Programming error." ;
+     9    ,  0b1            ;   #-- 0b01      DMA array correctable ECC error FIR bit" ;
+    10    ,  0b1            ;   #-- 0b01      DMA outbound write/inbound read correctable ECC error FIR bit" ;
+    11:13 ,  0b111          ;   #-- 0b01      Channel 5,6,7 AMF array corrected ECC error FIR bit" ;
+    14    ,  0b0            ;   #-- 0b00 mask Error from other SCOM satellites FIR bit" ;
+    15    ,  0b1            ;   #-- 0b11      DMA invalid state error FIR bit.  Unrecoverable despite name" ;
+    16    ,  0b1            ;   #-- 0b11      DMA invalid state error FIR bit" ;
+    17    ,  0b1            ;   #-- 0b01      DMA array uncorrectable ECC error FIR bit" ;
+    18    ,  0b1            ;   #-- 0b01      DMA outbound write/inbound read uncorrectable ECC error FIR bit" ;
+    19    ,  0b1            ;   #-- 0b01      DMA inbound read error FIR bit" ;
+    20:27 ,  0b11111111     ;   #-- 0b11      Channel 0-7 invalid state error FIR bit" ;
+    28:30 ,  0b111          ;   #-- 0b01      Channel 5,6,7 AMF array uncorrectable ECC error FIR bit" ;
+    31    ,  0b1            ;   #-- 0b11      UE error on CRB(CSB address, CCB) FIR bit" ;
+    32    ,  0b1            ;   #-- 0b11      SUE error on CRB(CSB address, CCB) FIR bit" ;
+    33    ,  0b0            ;   #-- 0b00 mask SUE error on something other than CRB(CSB address, CCB) FIR bit" ;
+    34    ,  0b0            ;   #-- 0b00 mask Reserved
+    35    ,  0b0            ;   #-- 0b00 mask Reserved
+    36    ,  0b1            ;   #-- 0b01      Channel 4 AMF array corrected ECC error FIR bit" ;
+    37    ,  0b1            ;   #-- 0b01      Channel 4 AMF array uncorrectable ECC error FIR bit" ;
+    38:47 ,  0b0000000000   ;   #-- 0b00 mask Reserved
+    48    ,  0b0            ;   #-- 0b00 mask FIR/SCOM satellite parity error FIR bit" ;
+    49    ,  0b0            ;   #-- 0b00 mask FIR/SCOM satellite parity error FIR bit duplicate"
+}
+
+
+
+

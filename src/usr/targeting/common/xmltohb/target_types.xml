@@ -331,6 +331,11 @@
      <attribute><id>SBE_SEEPROM_I2C_PORT</id></attribute>
      <attribute><id>PNOR_I2C_ADDRESS_BYTES</id></attribute>
      <!-- End Supporting poreve_memory_attributes.xml -->
+     <!-- ===== Begin supporting A/X bus enable in p8_xip_customize_attributes.xml ===== -->
+     <attribute><id>PROC_A_ENABLE</id></attribute>
+     <attribute><id>PROC_X_ENABLE</id></attribute>
+     <!-- ===== End supporting A/X bus enable in p8_xip_customize_attributes.xml ===== -->
+     
 </targetType>
 
 <targetType>

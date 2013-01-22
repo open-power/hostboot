@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- IBM CONFIDENTIAL                                                       -->
 <!--                                                                        -->
-<!-- COPYRIGHT International Business Machines Corp. 2012                   -->
+<!-- COPYRIGHT International Business Machines Corp. 2012,2013              -->
 <!--                                                                        -->
 <!-- p1                                                                     -->
 <!--                                                                        -->
@@ -55,6 +55,34 @@
     <id>ATTR_PROC_L3_ENABLE</id>
     <targetType>TARGET_TYPE_EX_CHIPLET</targetType>
     <description>L3 partial good control
+      creator: platform
+      firmware notes:
+        must track ATTR_CHIP_REGIONS_TO_ENABLE
+    </description>
+    <valueType>uint8</valueType>
+    <enum>DISABLE = 0x0, ENABLE = 0x1</enum>
+    <platInit/>
+    <persistRuntime/>
+  </attribute>
+ <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PROC_A_ENABLE</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>ABUS chiplet partial good control
+      creator: platform
+      firmware notes:
+        must track ATTR_CHIP_REGIONS_TO_ENABLE
+    </description>
+    <valueType>uint8</valueType>
+    <enum>DISABLE = 0x0, ENABLE = 0x1</enum>
+    <platInit/>
+    <persistRuntime/>
+  </attribute>
+ <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PROC_X_ENABLE</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>XBUS chiplet partial good control
       creator: platform
       firmware notes:
         must track ATTR_CHIP_REGIONS_TO_ENABLE
