@@ -1,25 +1,25 @@
-<!--  IBM_PROLOG_BEGIN_TAG
-     This is an automatically generated prolog.
-   
-     $Source: src/build/buildpnor/pnorLayout.xml $
-   
-     IBM CONFIDENTIAL
-   
-     COPYRIGHT International Business Machines Corp. 2012
-   
-     p1
-   
-     Object Code Only (OCO) source materials
-     Licensed Internal Code Source Materials
-     IBM HostBoot Licensed Internal Code
-   
-     The source code for this program is not published or other-
-     wise divested of its trade secrets, irrespective of what has
-     been deposited with the U.S. Copyright Office.
-   
-     Origin: 30
-   
-     IBM_PROLOG_END_TAG -->
+<!-- IBM_PROLOG_BEGIN_TAG                                                   -->
+<!-- This is an automatically generated prolog.                             -->
+<!--                                                                        -->
+<!-- $Source: src/build/buildpnor/pnorLayoutVpo.xml $                       -->
+<!--                                                                        -->
+<!-- IBM CONFIDENTIAL                                                       -->
+<!--                                                                        -->
+<!-- COPYRIGHT International Business Machines Corp. 2012,2013              -->
+<!--                                                                        -->
+<!-- p1                                                                     -->
+<!--                                                                        -->
+<!-- Object Code Only (OCO) source materials                                -->
+<!-- Licensed Internal Code Source Materials                                -->
+<!-- IBM HostBoot Licensed Internal Code                                    -->
+<!--                                                                        -->
+<!-- The source code for this program is not published or otherwise         -->
+<!-- divested of its trade secrets, irrespective of what has been           -->
+<!-- deposited with the U.S. Copyright Office.                              -->
+<!--                                                                        -->
+<!-- Origin: 30                                                             -->
+<!--                                                                        -->
+<!-- IBM_PROLOG_END_TAG                                                     -->
 <pnor>
     <metadata>
         <imageSize>0x400000</imageSize>
@@ -36,7 +36,7 @@
         <sideless>no</sideless>
     </section>
     <section>
-        <!-- NOTE: smaller that official layout  for fake-PNOR  -->
+        <!-- NOTE: smaller than official layout  for fake-PNOR  -->
         <description>Module VPD (256K) -only supports 4 processors</description>
         <eyeCatch>MVPD</eyeCatch>
         <physicalOffset>0x1000</physicalOffset>
@@ -47,7 +47,7 @@
         <sideless>yes</sideless>
     </section>
     <section>
-        <!-- NOTE: smaller that official layout  for fake-PNOR  -->
+        <!-- NOTE: smaller than official layout  for fake-PNOR  -->
         <description>DIMM JEDEC (128K) -only supports 4 processors</description>
         <eyeCatch>DJVPD</eyeCatch>
         <physicalOffset>0x41000</physicalOffset>
@@ -58,19 +58,31 @@
         <sideless>yes</sideless>
     </section>
     <section>
-        <description>Hostboot Extended image (2752K)</description>
-        <eyeCatch>HBI</eyeCatch>
+        <!-- NOTE: smaller than official layout  for fake-PNOR  -->
+        <description>Centaur VPD (128K) -only supports 4 processors</description>
+        <eyeCatch>CVPD</eyeCatch>
         <physicalOffset>0x61000</physicalOffset>
-        <physicalRegionSize>0x2B0000</physicalRegionSize>
+        <physicalRegionSize>0x20000</physicalRegionSize>
+        <actualRegionSize>0x20000</actualRegionSize>
+        <ecc>no</ecc>
+        <source>Blank</source>
+        <sideless>yes</sideless>
+    </section>
+    <section>
+        <!-- NOTE: smaller than official layout  for fake-PNOR  -->
+        <description>Hostboot Extended image (3MB)</description>
+        <eyeCatch>HBI</eyeCatch>
+        <physicalOffset>0x81000</physicalOffset>
+        <physicalRegionSize>0x300000</physicalRegionSize>
         <ecc>no</ecc>
         <source>File</source>
         <sideless>no</sideless>
     </section>
     <section>
-        <!-- NOTE: smaller that official layout  for fake-PNOR  -->
+        <!-- NOTE: smaller than official layout  for fake-PNOR  -->
         <description>Sleep Winkle Ref Image (196K) </description>
         <eyeCatch>WINK</eyeCatch>
-        <physicalOffset>0x311000</physicalOffset>
+        <physicalOffset>0x381000</physicalOffset>
         <physicalRegionSize>0x31000</physicalRegionSize>
         <actualRegionSize>0x30000</actualRegionSize>
         <ecc>no</ecc>
@@ -78,10 +90,10 @@
         <sideless>no</sideless>
     </section>
     <section>
-        <!-- NOTE: smaller that official layout  for fake-PNOR  -->
+        <!-- NOTE: smaller than official layout  for fake-PNOR  -->
         <description>Hostboot Error Logs (64K)</description>
         <eyeCatch>HBEL</eyeCatch>
-        <physicalOffset>0x342000</physicalOffset>
+        <physicalOffset>0x3B2000</physicalOffset>
         <physicalRegionSize>0x10000</physicalRegionSize>
         <actualRegionSize>0x10000</actualRegionSize>
         <ecc>no</ecc>
@@ -89,12 +101,22 @@
         <sideless>no</sideless>
     </section>
     <section>
+        <!-- NOTE: smaller than official layout  for fake-PNOR  -->
         <description>Attribute Data (128k)</description>
         <eyeCatch>HBD</eyeCatch>
-        <physicalOffset>0x352000</physicalOffset>
+        <physicalOffset>0x3C2000</physicalOffset>
         <physicalRegionSize>0x20000</physicalRegionSize>
         <ecc>no</ecc>
         <source>File</source>
         <sideless>no</sideless>
    </section>
+    <section>
+        <description>Guard Data (16K)</description>
+        <eyeCatch>GUARD</eyeCatch>
+        <physicalOffset>0x3E2000</physicalOffset>
+        <physicalRegionSize>0x4000</physicalRegionSize>
+        <ecc>no</ecc>
+        <source>Blank</source>
+        <sideless>no</sideless>
+    </section>
 </pnor>

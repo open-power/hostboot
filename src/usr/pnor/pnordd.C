@@ -337,13 +337,12 @@ mutex_t PnorDD::cv_mutex = MUTEX_INITIALIZER;
 uint64_t PnorDD::iv_vpoMode = 0;
 
 //
-// @note    fake pnor is moved up and shrunk by 1/2 meg to make room for
-//          the SLW image, it must be at a 1 M boundary.
-//          See build_winkle_images for more info.
+// @note    fake pnor no longer needs to allow from for SLW
+//          image so it is now 4MB.
 //
-#define FAKE_PNOR_START 4*MEGABYTE+512*KILOBYTE
-#define FAKE_PNOR_END 8*MEGABYTE
-#define FAKE_PNOR_SIZE 3*MEGABYTE+512*KILOBYTE
+#define FAKE_PNOR_START (4*MEGABYTE)
+#define FAKE_PNOR_END (8*MEGABYTE)
+#define FAKE_PNOR_SIZE (FAKE_PNOR_END-FAKE_PNOR_START)
 
 /**
  * @brief  Constructor
