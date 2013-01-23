@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012                   */
+/* COPYRIGHT International Business Machines Corp. 2012,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -36,6 +36,9 @@
 
     enum KernelReasonCode
     {
+        //NOTE: RC_ASSERT and RC_SHUTDOWN must be used in one unique
+        //  locationto maintain uniqueness as they will be used
+        //  without a MODULE ID.
         RC_ASSERT            = KERNEL_COMP_ID | 0x01, /**< Assert */
         RC_SHUTDOWN          = KERNEL_COMP_ID | 0x02, /**< Shutdown */
     };

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012                   */
+/* COPYRIGHT International Business Machines Corp. 2012,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -72,30 +72,34 @@ public:
 
                 uint64_t l_data0 = new_errl->getUserData1();
 
-                uint32_t eid = ( l_data0  & 0xFFFFFFF00000000) >> 32;
+                uint32_t eid = ( l_data0  & 0xFFFFFFFF00000000) >> 32;
                 uint32_t reason = (uint32_t)(l_data0 & 0x00000000FFFFFFFF);
 
                 if( eid != l_errl->eid() )
                 {
-                    TS_FAIL("expected eid == l_errl->eid() "
-                              "eid rebuilt from user data of "
-                              "IStepError did not match original error eid");
+                    TS_FAIL("testIstepError1: expected"
+                            "eid[0x%.8x] == l_errl->eid()[0x%.8x] "
+                            "eid rebuilt from user data of "
+                            "IStepError did not match original error eid",
+                            eid, l_errl->eid());
                 }
                 else
                 {
-                    TS_TRACE("passed: eid == l_errl->eid()");
+                    TS_TRACE("testIstepError1: passed: eid == l_errl->eid()");
                 }
 
                 if( reason != l_errl->reasonCode() )
                 {
-                    TS_FAIL("expected reasonCode == l_errl->reasonCode() \
+                    TS_FAIL("testIstepError1: "
+                            "expected reasonCode == l_errl->reasonCode() \
                               reasonCode rebuilt from user data of \
                               IStepError did not match original reasoncode");
 
                 }
                 else
                 {
-                    TS_TRACE("passed: reason == l_errl->reasonCode()");
+                    TS_TRACE("testIstepError1: passed: "
+                             "reason == l_errl->reasonCode()");
                 }
 
 
@@ -179,30 +183,34 @@ public:
 
                 uint64_t l_data0 = new_errl->getUserData1();
 
-                uint32_t eid = ( l_data0  & 0xFFFFFFF00000000) >> 32;
+                uint32_t eid = ( l_data0  & 0xFFFFFFFF00000000) >> 32;
                 uint32_t reason = (uint32_t)(l_data0 & 0x00000000FFFFFFFF);
 
                 if( eid != l_errl->eid() )
                 {
-                    TS_FAIL("expected eid == l_errl->eid() "
-                              "eid rebuilt from user data of "
-                              "IStepError did not match original error eid");
+                    TS_FAIL("testIStepError2: expected "
+                            "eid[0x%.8x] == l_errl->eid()[0x%.8x] "
+                            "eid rebuilt from user data of "
+                            "IStepError did not match original error eid",
+                            eid, l_errl->eid());
                 }
                 else
                 {
-                    TS_TRACE("passed: eid == l_errl->eid()");
+                    TS_TRACE("testIStepError2: passed: eid == l_errl->eid()");
                 }
 
                 if( reason != l_errl->reasonCode() )
                 {
-                    TS_FAIL("expected reasonCode == l_errl->reasonCode()"
-                              "reasonCode rebuilt from user data of"
-                              "IStepError did not match original reasoncode");
+                    TS_FAIL("testIStepError2: "
+                            "expected reasonCode == l_errl->reasonCode()"
+                            "reasonCode rebuilt from user data of"
+                            "IStepError did not match original reasoncode");
 
                 }
                 else
                 {
-                    TS_TRACE("passed: reason == l_errl->reasonCode()");
+                    TS_TRACE("testIStepError2: passed: "
+                             "reason == l_errl->reasonCode()");
                 }
 
                 // verify that we counted the error we added

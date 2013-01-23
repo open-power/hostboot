@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2012              */
+/* COPYRIGHT International Business Machines Corp. 2011,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -371,52 +371,61 @@ errlHndl_t PnorRP::readTOC()
 
         //TODO: verify checksum of header  RTC: 44147
 
-        TRACFCOMP(g_trac_pnor, "PnorRp::readTOC:  FFS Block size = 0x%.8X, Partition Table Size = 0x%.8x, entry_count=%d", l_ffs_hdr->block_size, l_ffs_hdr->size, l_ffs_hdr->entry_count);
+        TRACFCOMP(g_trac_pnor, "PnorRp::readTOC:  FFS Block size = 0x%.8X, Partition Table Size = 0x%.8x, entry_count=%d",
+                  l_ffs_hdr->block_size, l_ffs_hdr->size, l_ffs_hdr->entry_count);
+
+        uint64_t spaceUsed = (sizeof(ffs_entry))*l_ffs_hdr->entry_count;
 
         /* Checking FFS Header to make sure it looks valid */
-        //TODO: Leave FFDC Breadcrumbs before issuing critical assert in the checks below..  RTC: 44146.
+        bool header_good = true;
         if(l_ffs_hdr->magic != FFS_MAGIC)
         {
-            TRACFCOMP(g_trac_pnor, "E>PnorRp::readTOC:  Invalid magic number in FFS header: 0x%.4X", l_ffs_hdr->magic);
-            crit_assert(0);
+            TRACFCOMP(g_trac_pnor, "E>PnorRp::readTOC:  Invalid magic number in FFS header: 0x%.4X",
+                      l_ffs_hdr->magic);
+            header_good = false;
         }
-
-        if(l_ffs_hdr->version != SUPPORTED_FFS_VERSION)
+        else if(l_ffs_hdr->version != SUPPORTED_FFS_VERSION)
         {
-            TRACFCOMP(g_trac_pnor, "E>PnorRp::readTOC:  Unsupported FFS Header version: 0x%.4X", l_ffs_hdr->version);
-            crit_assert(0);
+            TRACFCOMP(g_trac_pnor, "E>PnorRp::readTOC:  Unsupported FFS Header version: 0x%.4X",
+                      l_ffs_hdr->version);
+            header_good = false;
         }
-
-        if(l_ffs_hdr->entry_size != sizeof(ffs_entry))
+        else if(l_ffs_hdr->entry_size != sizeof(ffs_entry))
         {
             TRACFCOMP(g_trac_pnor, "E>PnorRp::readTOC:  Unexpected entry_size(0x%.8x) in FFS header: 0x%.4X", l_ffs_hdr->entry_size);
-            crit_assert(0);
+            header_good = false;
         }
-
-        if(l_ffs_hdr->entries == NULL)
+        else if(l_ffs_hdr->entries == NULL)
         {
             TRACFCOMP(g_trac_pnor, "E>PnorRp::readTOC:  FFS Header pointer to entries is NULL.");
-            crit_assert(0);
+            header_good = false;
         }
-
-        if(l_ffs_hdr->block_size != PAGESIZE)
+        else if(l_ffs_hdr->block_size != PAGESIZE)
         {
-            TRACFCOMP(g_trac_pnor, "E>PnorRp::readTOC:  Unsupported Block Size(0x%.4X). PNOR Blocks must be 4k", l_ffs_hdr->block_size);
-            crit_assert(0);
+            TRACFCOMP(g_trac_pnor, "E>PnorRp::readTOC:  Unsupported Block Size(0x%.4X). PNOR Blocks must be 4k",
+                      l_ffs_hdr->block_size);
+            header_good = false;
         }
-
-        if(l_ffs_hdr->block_count == 0)
+        else if(l_ffs_hdr->block_count == 0)
         {
-            TRACFCOMP(g_trac_pnor, "E>PnorRp::readTOC:  Unsupported BLock COunt(0x%.4X). Device cannot be zero blocks in length.", l_ffs_hdr->block_count);
-            crit_assert(0);
+            TRACFCOMP(g_trac_pnor, "E>PnorRp::readTOC:  Unsupported BLock COunt(0x%.4X). Device cannot be zero blocks in length.",
+                      l_ffs_hdr->block_count);
+            header_good = false;
         }
-
         //Make sure all the entries fit in specified partition table size.
-        uint64_t spaceUsed = (sizeof(ffs_entry))*l_ffs_hdr->entry_count;
-        if(spaceUsed > ((l_ffs_hdr->block_size * l_ffs_hdr->size) - sizeof(ffs_hdr)))
+        else if(spaceUsed >
+                ((l_ffs_hdr->block_size * l_ffs_hdr->size) - sizeof(ffs_hdr)))
         {
-            TRACFCOMP(g_trac_pnor, "E>PnorRp::readTOC:  FFS Entries (0x%.16X) go past end of FFS Table.", spaceUsed);
+            TRACFCOMP(g_trac_pnor, "E>PnorRp::readTOC:  FFS Entries (0x%.16X) go past end of FFS Table.",
+                      spaceUsed);
             crit_assert(0);
+        }
+
+        if(!header_good)
+        {
+            //Shutdown if we detected a partition table issue for any reason
+            INITSERVICE::doShutdown( PNOR::RC_PARTITION_TABLE_INVALID);
+            while(1) { task_yield(); }
         }
 
         ffs_hb_user_t* ffsUserData = NULL;
@@ -480,8 +489,10 @@ errlHndl_t PnorRP::readTOC()
 
             if((iv_TOC[cur_side][secId].flashAddr + iv_TOC[cur_side][secId].size) > (l_ffs_hdr->block_count*PAGESIZE))
             {
-                TRACFCOMP(g_trac_pnor, "E>PnorRp::readTOC:  Partition(%s) at base address (0x%.8x) extends past end of flash device", cur_entry->name, iv_TOC[cur_side][secId].flashAddr);
-                crit_assert(0);
+                TRACFCOMP(g_trac_pnor, "E>PnorRp::readTOC:  Partition(%s) at base address (0x%.8x) extends past end of flash device",
+                          cur_entry->name, iv_TOC[cur_side][secId].flashAddr);
+                INITSERVICE::doShutdown( PNOR::RC_PARTITION_TABLE_INVALID);
+                while(1) { task_yield(); }
             }
 
             cur_entry++;

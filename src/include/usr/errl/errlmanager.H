@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2012              */
+/* COPYRIGHT International Business Machines Corp. 2011,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -173,6 +173,22 @@ private:
         ERRLOG_SEND_TO_FSP_TYPE            = 0x00000031 | MBOX::FIRST_SECURE_MSG, 
         ERRLOG_COMMITTED_ACK_RESPONSE_TYPE = 0x00000032 | MBOX::FIRST_UNSECURE_MSG,
         ERRLOG_SHUTDOWN                    = 0x00000033 | MBOX::FIRST_SECURE_MSG, 
+    };
+
+    /**
+     * @enum  ERRORLOG_PLID_OFFSET
+     *
+     * Base ID of Hostboot PLIDs.  The hostboot plid range is 0x90 to 0x93
+     * (For each instance running on a multinode system.  Eventually the
+     * offset will need to be offset for the proper node and possibly some
+     * other initializer sent from FSP to keep PLIDs unique across IPLs.
+     *
+     * NOTE: Changes to this define may require changes to
+     *       CpuManager::requestShutdown
+     */
+    enum ERRORLOG_PLID_OFFSET
+    {
+        ERRLOG_PLID_BASE    = 0x90000000, /**< Hostboot Base PLID Offset */
     };
 
     /**

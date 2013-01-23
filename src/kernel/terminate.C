@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012                   */
+/* COPYRIGHT International Business Machines Corp. 2012,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -64,7 +64,7 @@ void termWriteSRC(uint16_t i_source, uint16_t i_reasoncode,uint64_t i_failAddr)
     kernel_TIDataArea.src.ID = 0xBC;
     kernel_TIDataArea.src.subsystem = 0x11;
     kernel_TIDataArea.src.reasoncode = i_reasoncode;
-    kernel_TIDataArea.src.moduleID = MOD_KERNEL_TERMINATE;
+    kernel_TIDataArea.src.moduleID = 0;
     kernel_TIDataArea.src.iType = TI_WITH_SRC;
 
     // Update User Data with address of fail location

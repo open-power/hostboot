@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2012              */
+/* COPYRIGHT International Business Machines Corp. 2011,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -622,10 +622,10 @@ int main( int argc,  char *argv[] )
             }
             else
             {
-                int c = sscanf( argv[i], "%d", &ulLogId );
+                int c = sscanf( argv[i], "%x", &ulLogId );
                 if( c != 1 )
                 {
-                  fprintf( stdout, "Provide -d <decimal log ID>\n" );
+                  fprintf( stdout, "Provide -d <hex log ID>\n" );
                   exit( 2 );
                 }
             }
@@ -893,7 +893,7 @@ int main( int argc,  char *argv[] )
                 printf( "%s\n", szDivider );
                 fListHead  = 1;
             }
-            printf( "%-16s %8d\n",
+            printf( "%-16s 0X%8X\n",
                     FindComp(pPrivateHdr->sectionheader.compId),
                     pPrivateHdr->eid );
         }
@@ -901,7 +901,7 @@ int main( int argc,  char *argv[] )
         {
             // Write the native PEL to a temporary file
             // for x86 errl tool to display.
-            sprintf( szTmpFilename, "/tmp/pel%d.bin", pPrivateHdr->eid );
+            sprintf( szTmpFilename, "/tmp/pel%X.bin", pPrivateHdr->eid );
 
             int fd = open( szTmpFilename,  O_RDWR | O_CREAT , 0664 );
             if( -1 == fd )
@@ -974,7 +974,7 @@ int main( int argc,  char *argv[] )
         if( fExtractPEL )
         {
             // Write the native PEL to a temporary file for debug later.
-            sprintf( szTmpFilename, "%s/pel%d.bin", pszOutputDir, pPrivateHdr->eid );
+            sprintf( szTmpFilename, "%s/pel%X.bin", pszOutputDir, pPrivateHdr->eid );
 
             int fd = open( szTmpFilename,  O_RDWR | O_CREAT , 0664 );
             if( -1 == fd )

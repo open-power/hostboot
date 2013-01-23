@@ -171,7 +171,7 @@ Examples: \n
 new_command("hb-errl",
     (lambda logid, logidStr, flg_l, flg_d:
         run_hb_debug_framework("Errl",
-                ("display="+(str(logid) if logid else logidStr) if flg_d else ""
+                ("display="+(("0x%x" % logid) if logid else logidStr) if flg_d else ""
                 ),
                 outputFile = "hb-errl.output")),
     [ arg(int_t, "logid", "?", None),

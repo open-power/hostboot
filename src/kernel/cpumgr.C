@@ -111,11 +111,21 @@ void CpuManager::requestShutdown(uint64_t i_status)
     cv_shutdown_requested = true;
 
     // If the shutdown was not called with a Good shutdown status
-    // then we know we are shutting down due to error and the
-    // status passed back is instead a PLID
+    // then we know we are shutting down due to error.  We need to
+    // figure out if the error provided is a PLID or reasoncode
+    // and write it appropriately.
+    // Hostboot PLIDs always start with 0x9 (32-bit)
+    static const uint64_t PLID_MASK = 0x0000000090000000;
     if (i_status != SHUTDOWN_STATUS_GOOD)
     {
-        termWritePlid(TI_SHUTDOWN, i_status);
+        if ((i_status & 0x00000000F0000000) == PLID_MASK)
+        {
+            termWritePlid(TI_SHUTDOWN, i_status);
+        }
+        else
+        {
+            termWriteSRC(TI_SHUTDOWN,i_status, 0);
+        }
 
         printk("TI initiated on all threads (shutdown)\n");
     }

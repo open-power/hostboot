@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2012              */
+/* COPYRIGHT International Business Machines Corp. 2011,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -74,13 +74,12 @@ char* g_ErrlStorage = new char[ ERRL_STORAGE_SIZE ];
 #define POINTER2OFFSET(p) ((reinterpret_cast<char*>(p))-(g_ErrlStorage))
 
 
-
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
 ErrlManager::ErrlManager()
 {
     // PNOR will be reinitialized every time hostboot runs
-    iv_currLogId = 0;
+    iv_currLogId = ERRLOG_PLID_BASE;
 
     iv_hwasProcessCalloutFn = NULL;
 

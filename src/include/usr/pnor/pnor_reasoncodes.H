@@ -66,6 +66,9 @@ namespace PNOR
         RC_BAD_STARTUP_RC            = PNOR_COMP_ID | 0x09,
         RC_UNSUPORTED_HARDWARE       = PNOR_COMP_ID | 0x0A,
         RC_MICRON_INCOMPLETE         = PNOR_COMP_ID | 0x0B,
+        //RC_PARTITION_TABLE_INVALID Must be Unique by itself
+        //   for Shutdown path  
+        RC_PARTITION_TABLE_INVALID   = PNOR_COMP_ID | 0x0C,
     };
 };
 
