@@ -55,17 +55,18 @@ BASE_ECC_IMAGE = hostboot.bin.ecc
 
 cp_hbfiles: .SPECTARG
 	${BASE_IMAGES:@image@cp -f -u ${SRCPATH:F${image}} ${image};@}
-	echo "000000000018000000000000080000000000000000081000" | xxd -r -ps - sbe.header
+	echo "00000000001800000000000008000000000000000007EF80" | xxd -r -ps - sbe.header
 	dd if=/dev/zero of=secureboot.header bs=1 count=4K
-	cat sbe.header secureboot.header ${BASE_IMAGE} > ${BASE_W_HEADER_IMAGE}
+	dd if=/dev/zero of=hbb.footer bs=1 count=128K
+	cat sbe.header secureboot.header ${BASE_IMAGE} hbb.footer > hostboot.stage.bin
+	head -c 524288  hostboot.stage.bin > ${BASE_W_HEADER_IMAGE}
 	currentsb -chain
 	ecc --inject ${BASE_IMAGE} --output ${BASE_ECC_IMAGE} --p8
 	ecc --inject ${BASE_W_HEADER_IMAGE} --output ${BASE_W_HEADER_ECC_IMAGE} --p8
 
-
 clobber_cp_hbfiles:
 	rm -f ${BASE_IMAGES} ${BASE_W_HEADER_IMAGE} {BASE_W_HEADER_ECC_IMAGE} \
-	      sbe.header secureboot.header
+	      sbe.header secureboot.header hb.footer hostboot.stage.bin
 
 
 #################################################
