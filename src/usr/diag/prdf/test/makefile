@@ -64,8 +64,10 @@ TESTS = prdfTest_ABus.H \
         prdfTest_Mba.H  \
         prdfTest_Mcs.H  \
         prdfTest_Proc.H  \
-        prdfTest_XBus.H
-
-
+        prdfTest_XBus.H \
+        prdfTest_McsMciFir.H \
+        prdfTest_ProcCentFir.H \
+        prdfTest_ProcMbsFir.H \
+        prdfTest_ProcTpLFir.H
 
 include ${ROOTPATH}/config.mk

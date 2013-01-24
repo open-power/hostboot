@@ -21,112 +21,43 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
+/**
+ * @file    prdfRuleChip.H
+ * @brief   Models a physical target say a Proc or Ex
+ *
+ *          Each instance of RuleChip is associated with a particular target.As
+ *          an example, all the procs in the system are modeled by PRD with a
+ *          unique instance of RuleChip object.Design of class is based on
+ *          following two facts about all the RuleChips modelling target of same
+ *          type
+ *              - contain an identical set of registers and resolutions
+ *              - share a common mechansim to analyze attention
+ *          Based on above two facts, all RuleChips modelling target of same
+ *          type, share a common instance of RuleMetaData. RuleMetaData models
+ *          all the regisers and resolutions associated with a RuleChip of
+ *          particular type.
+ *          Sharing of RuleMetaData instance reduces the memory usage
+ *          and is key to address the scaling issue.
+ */
 #ifndef __PRDFRULECHIP_H
 #define __PRDFRULECHIP_H
 
 #include <iipchip.h>
-#include <prdfErrlSmartPtr.H>
-
-#include <iipsdbug.h> // for ATTENTION_TYPE
 #include <prdfExtensibleChip.H>
 #include <prdfPluginDef.H>
-
 #include <string.h>
 #include <vector>
 #include <map>
 #include <iipResetErrorRegister.h>
-#include "prdrCommon.H" //@jl02 Added this to get the constant value from the enum.
-#include <iipCaptureData.h> // @jl04 Added this for the RegType used for register = "PRIMARY" or "SECONDARY"
-//---------------------------------------
-// Forward decls.
-
-namespace Prdr
-{
-
-class Chip;
-class Expr;
-
-} // end namespace PRDR
+#include "prdrCommon.H"
+#include <iipCaptureData.h>
+#include <prdfRuleMetaData.H>
 
 namespace PRDF
 {
 
-class SCAN_COMM_REGISTER_CLASS;
-class ScanFacility;
-class ResolutionFactory;
-class STEP_CODE_DATA_STRUCT;
-class CaptureData;
-class ErrorRegisterType;
-class Resolution;
-class Group;
-
-
-typedef std::pair<ResetAndMaskErrorRegister::ResetRegisterVector,
-                       ResetAndMaskErrorRegister::ResetRegisterVector>
-        ResetAndMaskPair;
-
-// x86 compile wants this here - not forward declaired dgilbert
-class CaptureRequirement
-{
-    public:
-        CaptureRequirement() :
-            cv_TargetType(TARGETING::TYPE_NA), cv_TargetIndex(0), cv_func(NULL) { };
-
-        uint32_t cv_TargetType;
-        uint32_t cv_TargetIndex;
-        ExtensibleChipFunction * cv_func;
-
-        inline bool operator!=(const CaptureRequirement & r)
-        {
-            return ( (cv_TargetType != r.cv_TargetType)   ||
-                     (cv_TargetIndex != r.cv_TargetIndex) ||
-                     (cv_func != r.cv_func) );
-        };
-};
-
-//--------------------------------------
-// @jl04 a Start.
-// Adding capture requirement type for transporting data.
-class CaptureType
-{
-    public:
-        RegType cv_regType;
-        // if (reg == 1) reg = PRIMARY;
-        // if (reg == 2) reg = SECONDARY;
-        CaptureType(RegType reg = PRIMARY):cv_regType(reg){};
-};
-// @jl04 a Stop.
-//--------------------------------------
-
-
 class RuleChip : public ExtensibleChip
 {
-    public:
-
-        typedef std::map<uint32_t, SCAN_COMM_REGISTER_CLASS *> RegMap_t;
-        typedef std::map<uint32_t, ErrorRegisterType *>        GroupMap_t;
-        typedef std::map<uint32_t, Resolution *>               ActionMap_t;
-        typedef std::map<uint32_t, ResetAndMaskPair>       Reset_t;
-        typedef std::map<uint32_t, Resolution *>               SharedThreshold_t;
-
-        struct RuleFileData
-        {
-            RegMap_t & cv_regMap;
-            GroupMap_t & cv_groupMap;
-            ActionMap_t & cv_actionMap;
-
-            ScanFacility & cv_scanFactory;
-            ResolutionFactory & cv_reslFactory;
-
-            TARGETING::TargetHandle_t cv_chipHandle;
-            Prdr::Chip *& cv_loadChip;        // pw01
-
-            Reset_t & cv_resets;
-            ResetAndMaskPair & cv_currentResets;
-
-            SharedThreshold_t & cv_sharedThresholds;
-
-        };
 
     public:
 
@@ -138,81 +69,81 @@ class RuleChip : public ExtensibleChip
        encapsulated by PRDF_LOCK_CHIP_SCOPE */
 
         // TODO : add parameter for parent domains, connected chip classes.
-        RuleChip(const char * i_fileName,
-                     TARGETING::TargetHandle_t   i_pTargetHandle,
-                     ScanFacility & i_scanFactory,
-                     ResolutionFactory & i_reslFactory
-                    )
-                : ExtensibleChip(i_pTargetHandle),
-                  cv_fileName(i_fileName),
-                  cv_dumpType(0),  //@ecdf
-                  cv_dataBundle(NULL)
-            {
-                this->loadRuleFile(i_scanFactory, i_reslFactory);
-            };
+        /**
+         * @brief       constructor
+         * @param[in]   i_fileName        name of Rule file
+         * @param[in]   i_pTargetHandle   Target associated with RuleChip
+         * @param[in]   i_scanFactory     instance of register factory
+         * @param[in]   i_reslFactory     instance of resolution factory
+         * @param[o]    o_errl            error log handle
+         */
+        RuleChip( const char * i_fileName ,
+                TARGETING::TargetHandle_t   i_pTargetHandle,
+                ScanFacility & i_scanFactory,
+                ResolutionFactory & i_reslFactory,
+                errlHndl_t & o_errl );
+        /**
+         * @brief         Destructor
+         */
 
         ~RuleChip();
+        /**
+         * @brief       Analyzes attention in a RuleChip
+         * @param[io]   io_serviceData    Reference to STEP_CODE_DATA_STRUCT
+         * @param[in]   i_attn            attention reported by RuleChip
+         * @return      returns SUCCESS or FAIL
+         */
 
-        int32_t Analyze(STEP_CODE_DATA_STRUCT &, ATTENTION_TYPE);
-        int32_t CaptureErrorData(CaptureData &, int i_group = 1);
-        /*Note
-          functions like MaskError(),getDataBundle(),getSignatureOffset()
-          just return a constant or a member variable. These function don't need
-          to call any other functions of RuleChip.Hence,despite the fact that
-          these functions are public,we are not using macro PRDF_LOCK_CHIP_SCOPE
-          in these function.
-        */
+        int32_t Analyze( STEP_CODE_DATA_STRUCT & io_serviceData,
+                     ATTENTION_TYPE i_attn );
+
+        /**
+         * @brief       Masks error
+         * @return      returns SUCCESS or FAIL
+         */
         int32_t MaskError(uint32_t i) { return SUCCESS; };
+        /**
+         * @brief       Returns plugin function pointer
+         * @param[in]   i_func         name of  plugin function
+         * @param[in]   i_expectNull   availability status of plugin function
+         * @return      returns pointer to plugin function
+         */
 
-        ExtensibleChipFunction *
-                getExtensibleFunction(const char *, bool = false);
-        SCAN_COMM_REGISTER_CLASS * getRegister(const char *, bool = false);
+        ExtensibleChipFunction *getExtensibleFunction(
+                    const char * i_func, bool i_expectNull = false );
+        /**
+         * @brief       Returns register instance
+         * @param[in]   i_func         name of  plugin function
+         * @param[in]   i_expectNull   availability status of plugin function
+         * @return      returns pointer to plugin function
+         */
+        SCAN_COMM_REGISTER_CLASS * getRegister(
+                const char * i_func, bool i_expectNull = false );
 
+        /**
+         * @brief       Returns data bundle instance
+         * @return      returns DataBundle&
+         */
         DataBundle *& getDataBundle() { return cv_dataBundle; };
 
-        uint32_t getSignatureOffset() const { return iv_sigOff; };
+        /**
+         * @brief       Captures  register  data
+         * @param[io]   io_cap     reference to instance of CaptureData
+         * @param[in]   i_group    group id for register capture group
+         * @return      returns capture status ( SUCCESS|FAIL)
+         */
+        virtual int32_t CaptureErrorData(
+                    CaptureData& io_cap , int i_group = 1 ) ;
+        /**
+         * @brief       Initializes the RuleChip instance
+         */
+        void init( );
 
-    private:
-        const char * cv_fileName;
-        ErrlSmartPtr cv_errl;
-
-        uint32_t cv_dumpType;  //@ecdf
-
-        uint32_t iv_sigOff;
-
-        std::map<uint16_t, SCAN_COMM_REGISTER_CLASS *> cv_hwRegs;
-
-        typedef std::map<uint32_t, std::vector<SCAN_COMM_REGISTER_CLASS *> > HwCaptureGroup_t;
-        HwCaptureGroup_t cv_hwCaptureGroups;
-
-        typedef std::map<SCAN_COMM_REGISTER_CLASS *, CaptureRequirement> HwCaptureReq_t;
-        HwCaptureReq_t cv_hwCaptureReq;
-
+    private:    //data
+        RuleMetaData * iv_pRuleData ;
         //Adding another std::map for passing some data to capture stuff.
-        typedef std::map<SCAN_COMM_REGISTER_CLASS *, CaptureType> HwCaptureType_t;
-        HwCaptureType_t cv_hwCaptureType;
 
         DataBundle * cv_dataBundle;
-        ErrorRegisterType * cv_groupAttn[Prdr::NUM_GROUP_ATTN];
-
-        void loadRuleFile(ScanFacility &,
-                          ResolutionFactory &);
-
-        SCAN_COMM_REGISTER_CLASS *
-            createVirtualRegister(Prdr::Expr *,
-                                  RuleFileData &);
-
-        Resolution *
-            createActionClass(uint32_t,
-                              RuleFileData &);
-
-        Resolution *
-            createResolution(Prdr::Expr *,
-                             RuleFileData &);
-
-        void createGroup(Group *,
-                         uint32_t,
-                         RuleFileData &);
 };
 
 } // end namespace PRDF

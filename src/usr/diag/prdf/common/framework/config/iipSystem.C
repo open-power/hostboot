@@ -49,6 +49,7 @@
 #include <iipResolutionFactory.h>
 #include <prdfPlatServices.H>
 #include <prdfGlobal.H>
+#include <prdfRuleMetaData.H>
 
 #ifndef __HOSTBOOT_MODULE
   #include <prdfMfgThresholdMgr.H>
@@ -112,6 +113,14 @@ System::~System(void)
 
     // clear the threshold policies
     ThresholdResolution::reset();
+    //clears list of all the RuleMetaData instances
+    for( RuleMetaDataList::iterator l_itMetaData = iv_listRuleData.begin();
+            l_itMetaData != iv_listRuleData.end(); l_itMetaData++ )
+    {
+        delete( l_itMetaData->second );
+    }
+    iv_listRuleData.clear();
+
 }
 
 CHIP_CLASS * System::GetChip(TARGETING::TargetHandle_t i_pchipHandle )
@@ -334,6 +343,22 @@ int System::Analyze(STEP_CODE_DATA_STRUCT & serviceData,
     }
 
     return(rc);
+}
+
+RuleMetaData* System::getChipMetaData( TARGETING::TYPE i_type,
+                                        const char *i_fileName,
+                                        ScanFacility & i_scanFactory,
+                                        ResolutionFactory & i_reslFactory,
+                                        errlHndl_t & o_errl )
+{
+    if( NULL == iv_listRuleData[i_type] )
+    {
+        iv_listRuleData[i_type] = new RuleMetaData( i_fileName,i_scanFactory,
+                                                    i_reslFactory,i_type,
+                                                    o_errl );
+    }
+    return iv_listRuleData[i_type];
+
 }
 
 } // end namespace PRDF

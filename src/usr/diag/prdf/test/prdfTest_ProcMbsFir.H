@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/diag/prdf/test/prdfTest_XBus.H $                      */
+/* $Source: src/usr/diag/prdf/test/prdfTest_ProcMbsFir.H $                */
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
@@ -20,8 +20,9 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-#ifndef __TEST_PRDFXBUSTEST_H
-#define __TEST_PRDFXBUSTEST_H
+
+#ifndef __TEST_PRDFMBSFIR_H
+#define __TEST_PRDFMBSFIR_H
 
 #ifdef __HOSTBOOT_MODULE
   #include <cxxtest/TestSuite.H>
@@ -37,52 +38,41 @@
 #include <prdfMain.H>
 #include "prdfsimMacros.H"
 
-class XBUSFIR:public CxxTest::TestSuite
+class MBSFIR:public CxxTest::TestSuite
 {
     public:
 
         void TestRecoverable(void)
         {
-            PRDS_BEGIN("XBUSFIR Recoverable attention");
-            PRDS_ERROR_ENTRY("NODE{0}:PROC{0}", PRDF::RECOVERABLE);
-            PRDS_EXPECTED_SIGNATURE("NODE{0}:PROC{0}", 0xdb010000);
-            // GLOBAL_RE_FIR set bit 4
-            PRDS_SCR_WRITE("NODE{0}:PROC{0}", 0x570F001B , 0x0800000000000000);
-            // XBUS_CHIPLET_RE_FIR set bit 1
-            PRDS_SCR_WRITE("NODE{0}:PROC{0}", 0x04040001, 0x4000000000000000);
-            // set bit 0
-            PRDS_SCR_WRITE("NODE{0}:PROC{0}", 0x0404000a, 0x8000000000000000);
-            // ACT1
-            PRDS_SCR_WRITE("NODE{0}:PROC{0}", 0x04040011, 0xFFFFFFFFFFFFFFFF);
+            PRDS_BEGIN("Centaur Nest MBS Recoverable attention");
+
+            PRDS_ERROR_ENTRY("NODE{0}:MEMBUF{4}", PRDF::RECOVERABLE);
+
+            PRDS_EXPECTED_SIGNATURE("NODE{0}:MEMBUF{4}", 0xa5a10000);
+
+            //GLOBAL_RE_FIR
+            PRDS_SCR_WRITE("NODE{0}:MEMBUF{4}", 0x570F001B, 0x2000000000000000);
+
+            //NEST_CHIPLET_RE_FIR
+            PRDS_SCR_WRITE("NODE{0}:MEMBUF{4}", 0x02040001, 0x0400000000000000);
+
+            //MBSFIR
+            PRDS_SCR_WRITE("NODE{0}:MEMBUF{4}", 0x02011400, 0x8000000000000000);
+
+            //MBSFIR_ACT1
+            PRDS_SCR_WRITE("NODE{0}:MEMBUF{4}", 0x02011407, 0xFFFFFFFFFFFFFFFF);
+
+            //MBSFIR_mask
+            PRDS_SCR_WRITE("NODE{0}:MEMBUF{4}", 0x02011405, 0x8000000000000000);
+
+            //MBSFIR_reset
+            PRDS_SCR_WRITE("NODE{0}:MEMBUF{4}", 0x02011401, 0x7FFFFFFFFFFFFFFF);
+
             PRDS_START_SIM();
-            if(!(PRDS_END()))
-            {
-                TS_FAIL("Expected Signature Failed XBUSFIR Recoverable attention");
-            }
+
+            PRDS_END();
 
         }
 
-
-        void TestCheckstop(void)
-        {
-            /*
-            PRDS_BEGIN("XBUSFIR Checkstop attention");
-            PRDS_ERROR_ENTRY("NODE{0}:PROC{0}", PRDF::CHECK_STOP);
-            PRDS_EXPECTED_SIGNATURE("NODE{0}:PROC{0}:XBUS{1}", 0xdb010002);
-            // GLOBAL_RE_FIR set bit 4
-            PRDS_SCR_WRITE("NODE{0}:PROC{0}", 0x570F001C , 0x0800000000000000);
-            // XBUS_CHIPLET_RE_FIR set bit 3
-            PRDS_SCR_WRITE("NODE{0}:PROC{0}:XBUS{1}", 0x04040000, 0x1000000000000000);
-            // set bit 2
-            PRDS_SCR_WRITE("NODE{0}:PROC{0}:XBUS{1}", 0x0404000a, 0x2000000000000000);
-            // ACT1
-            PRDS_SCR_WRITE("NODE{0}:PROC{0}:XBUS{1}", 0x04040011, 0x0000000000000000);
-            PRDS_START_SIM();
-            if(!(PRDS_END()))
-            {
-                TS_FAIL("Expected Signature Failed XBUSFIR Checkstop attention");
-            }
-            */
-        }
 };
 #endif

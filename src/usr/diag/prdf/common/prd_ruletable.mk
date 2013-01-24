@@ -33,6 +33,7 @@ PRDR_RULE_TABLE_TARGETS = ${PRDR_RULE_TABLE_FILES:.rule=.prf}
 prd_ruletable = \
  prdrLoadChip.o \
  prdrLoadChipCache.o \
+ prdfRuleMetaData.o \
  prdfRuleChip.o \
  prdfGroup.o \
  prdfPluginMap.o \

@@ -362,7 +362,7 @@ public:
   bool BitStringIsZero()
   { return GetBitString()->IsZero(); }
    /**
-    *@brief    Returns TYPE_NA as type of Target associated with register.Acutal
+    *@brief    Returns TYPE_NA as type of Target associated with register.Actual
     *          implementation is expected in derived class
      *@return   TYPE_NA
    */

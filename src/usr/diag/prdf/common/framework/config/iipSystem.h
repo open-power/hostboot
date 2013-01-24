@@ -83,6 +83,7 @@
 // End Class Specification *********************************************
 
 #include <vector>
+#include <map>
 
 #ifndef IIPCONST_H
 #include <iipconst.h>   //TARGETING::TargetHandle_t, DOMAIN_ID_TYPE
@@ -97,7 +98,12 @@ namespace PRDF
 class CHIP_CLASS;
 class Domain;
 class Resolution;
+class RuleMetaData ;
+class ScanFacility;
+class ResolutionFactory;
+
 struct STEP_CODE_DATA_STRUCT;
+typedef std::map< TARGETING::TYPE ,RuleMetaData *> RuleMetaDataList ;
 
 class System
   {
@@ -296,6 +302,25 @@ class System
   //        Domains at attention, then the error code
   //        NO_DOMAINS_AT_ATTENTION(0xDD21) is returned.
   //
+
+   /**
+    * @brief        Get instance of RuleMetaData associated with given target
+    *               type.
+    * @param[in]    i_type          target type associated with RuleMetaData.
+    * @param[in]    i_fileName      name of RuleFile associated
+    * @param[in]    i_scanFactory   reference to factory class which
+    *                               creates register instance.
+    * @param[in]    i_reslFactory   reference to factory which creates
+    *                               resolution instance.
+    * @param[o]     o_errl          error log handle
+    */
+
+    RuleMetaData* getChipMetaData( TARGETING::TYPE i_type,
+                                const char *i_fileName,
+                                ScanFacility & i_scanFactory,
+                                ResolutionFactory & i_reslFactory,
+                                errlHndl_t & o_errl );
+
   // End Function Specification ****************************************
 
   private:
@@ -309,6 +334,7 @@ class System
     DomainContainerType           prioritizedDomains;
 
     Resolution & noAttnResolution;
+    RuleMetaDataList iv_listRuleData ;
   };
 
 } // end namespace PRDF

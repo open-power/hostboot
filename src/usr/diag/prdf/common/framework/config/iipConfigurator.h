@@ -68,11 +68,6 @@
 // defintions in another translation unit.
 //----------------------------------------------------------------------
 
-// Includes
-#if (!defined(_CPU_H) && !defined(CPU_H))
-//#include <cpu.h>
-#endif
-
 #include <prdfMain.H>
 
 #include <vector>
@@ -85,7 +80,6 @@ namespace PRDF
 /*--------------------------------------------------------------------*/
 class CHIP_CLASS;
 class Domain;
-class System;
 
 class Configurator
 {
@@ -109,7 +103,12 @@ public:
     //## Destructor (generated)
   virtual ~Configurator();
 
-  virtual System * build()=0;
+   /**
+    * @brief  Creates the PRD system object, all chip instances, and all domain
+    *         instances.
+    * @return error log handle
+    */
+  virtual errlHndl_t build() = 0;
   // Function Specification ********************************************
   //
   // Purpose:  Builds chipList and domainList and system

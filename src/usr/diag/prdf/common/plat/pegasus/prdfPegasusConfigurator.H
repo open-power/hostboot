@@ -36,10 +36,8 @@ namespace PRDF
 {
 
 class RuleChipDomain;
-
-typedef std::vector< PRDF::PllDomain  *> PllDomainList;
+typedef std::vector< PllDomain  *> PllDomainList;
 typedef std::vector< CHIP_CLASS *> PllChipList;
-
 /** @brief PRD configurator for Pegasus (P8 systems) */
 class PegasusConfigurator : public Configurator
 {
@@ -63,11 +61,11 @@ class PegasusConfigurator : public Configurator
     /**
      * @brief  Create the PRD system object, all chip instances, and all domain
      *         instances.
-     * @return Pointer to configured system.
+     * @return error log handle
      * @note   The caller of this function owns the responsiblity of deleting
      *         the system object created.
      */
-    virtual System * build();
+    virtual errlHndl_t   build();
 
   private: // functions
 
@@ -79,13 +77,14 @@ class PegasusConfigurator : public Configurator
 
     /**
      * @brief Will add all chips of a given type to a domain.
-     * @parm  i_type    The specified target type.
-     * @parm  io_domain The associated domain.
-     * @parm  io_pllDomains The associated PLL domain (optional for some)
+     * @parm    i_type    The specified target type.
+     * @parm    io_domain The associated domain.
+     * @parm    io_pllDomains The associated PLL domain (optional for some)
+     * @return  error log handle
      */
-    void addDomainChips( TARGETING::TYPE  i_type,
-                         RuleChipDomain * io_domain,
-                         PllDomainList  * io_pllDomains = NULL );
+    errlHndl_t addDomainChips( TARGETING::TYPE  i_type,
+                            RuleChipDomain * io_domain,
+                            PllDomainList  * io_pllDomains = NULL );
 
     /**
      *  @brief  Add chip to its Pll Domain.
@@ -116,7 +115,6 @@ class PegasusConfigurator : public Configurator
   private: // data
 
     static CallAttnResolution noAttnResolution;
-
 };
 
 } // end namespace PRDF

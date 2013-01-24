@@ -93,14 +93,16 @@ uint32_t _getNodePosition( TARGETING::TargetHandle_t i_pTarget )
 
 //------------------------------------------------------------------------------
 
-System * PegasusConfigurator::build()
+errlHndl_t PegasusConfigurator::build()
 {
     using namespace TARGETING;
 
     PRDF_ENTER( "PegasusConfigurator::build()" );
 
+    errlHndl_t errl = NULL;
+
     // Create System object to populate with domains.
-    System * l_system = new System(noAttnResolution);
+    systemPtr = new System(noAttnResolution);
 
     // Create domains.
     FabricDomain * l_procDomain   = new FabricDomain( FABRIC_DOMAIN );
@@ -115,56 +117,84 @@ System * PegasusConfigurator::build()
     PllDomainList l_fabricPllDomains(l_maxNodeCount, NULL);
     PllDomainList l_membPllDomains(  l_maxNodeCount, NULL);
 
-    // Add chips to domains.
-    addDomainChips( TYPE_PROC,   l_procDomain,   &l_fabricPllDomains );
-    addDomainChips( TYPE_EX,     l_exDomain     );
-    addDomainChips( TYPE_MCS,    l_mcsDomain    );
-    addDomainChips( TYPE_MEMBUF, l_membufDomain, &l_membPllDomains );
-    addDomainChips( TYPE_MBA,    l_mbaDomain    );
+    do
+    {
+        // Add chips to domains.
+        errl = addDomainChips( TYPE_PROC, l_procDomain, &l_fabricPllDomains );
+        if ( NULL != errl ) break;
 
-    // Add Pll domains to domain list.
-    addPllDomainsToSystem( l_fabricPllDomains, l_membPllDomains );
+        errl = addDomainChips( TYPE_EX, l_exDomain );
+        if ( NULL != errl ) break;
 
-    // Add domains to domain list. NOTE: Order is important because this is the
-    // order the domains will be analyzed.
-    sysDmnLst.push_back( l_procDomain   );
-    sysDmnLst.push_back( l_exDomain     );
-    sysDmnLst.push_back( l_mcsDomain    );
-    sysDmnLst.push_back( l_membufDomain );
-    sysDmnLst.push_back( l_mbaDomain    );
+        errl = addDomainChips( TYPE_MCS, l_mcsDomain );
+        if ( NULL != errl ) break;
 
-    // Add chips to the system.
-    Configurator::chipList & chips = getChipList();
-    l_system->AddChips( chips.begin(), chips.end() );
+        errl = addDomainChips( TYPE_MEMBUF, l_membufDomain, &l_membPllDomains );
+        if ( NULL != errl ) break;
 
-    // Add domains to the system.
-    Configurator::domainList & domains = getDomainList();
-    l_system->AddDomains( domains.begin(), domains.end() );
+        errl = addDomainChips( TYPE_MBA, l_mbaDomain );
+        if ( NULL != errl ) break;
 
-#ifdef FLYWEIGHT_PROFILING
+        // Add Pll domains to domain list.
+        addPllDomainsToSystem( l_fabricPllDomains, l_membPllDomains );
 
-    ScanFacility      & scanFac = ScanFacility::Access();
-    PRDF_TRAC( "printing flyweight register and resolution objects ");
-    scanFac.printStats();
-    PRDF_TRAC("total chips in the system %d ",chips.size());
-    ResolutionFactory & resol = ResolutionFactory::Access( );
-    resol.printStats();
-#endif
+        // Add domains to domain list. NOTE: Order is important because this is
+        // the order the domains will be analyzed.
+        sysDmnLst.push_back( l_procDomain   );
+        sysDmnLst.push_back( l_exDomain     );
+        sysDmnLst.push_back( l_mcsDomain    );
+        sysDmnLst.push_back( l_membufDomain );
+        sysDmnLst.push_back( l_mbaDomain    );
+
+        // Add chips to the system.
+        Configurator::chipList & chips = getChipList();
+        systemPtr->AddChips( chips.begin(), chips.end() );
+
+        // Add domains to the system.
+        Configurator::domainList & domains = getDomainList();
+        systemPtr->AddDomains( domains.begin(), domains.end() );
+
+        #ifdef FLYWEIGHT_PROFILING
+
+        ScanFacility & scanFac = ScanFacility::Access();
+        PRDF_TRAC( "printing flyweight register and resolution objects ");
+        scanFac.printStats();
+        PRDF_TRAC("total chips in the system %d ",chips.size());
+        ResolutionFactory & resol = ResolutionFactory::Access( );
+        resol.printStats();
+
+        #endif // FLYWEIGHT_PROFILING
+
+        // The underlying list of chips and domains will not be cleaned up until
+        // the configurator goes out of scope at the end of PRDF::initialize().
+        // It was observed that clearing these lists here will greatly reduced
+        // the peak memory usage for the duration of the PRDF::initialize()
+        // function.
+        chips.clear();
+        domains.clear();
+
+    } while (0);
+
+    if ( NULL != errl )
+    {
+        PRDF_ERR( "PegasusConfigurator::build() failed to build"
+                  " object model" );
+    }
 
     PRDF_EXIT( "PegasusConfigurator::build()" );
 
-    return l_system;
+    return errl;
 }
 
 //------------------------------------------------------------------------------
 
-void PegasusConfigurator::addDomainChips( TARGETING::TYPE  i_type,
+errlHndl_t PegasusConfigurator::addDomainChips( TARGETING::TYPE  i_type,
                                           RuleChipDomain * io_domain,
                                           PllDomainList  * io_pllDomains )
 {
     using namespace TARGETING;
-
     int32_t l_rc = SUCCESS;
+    errlHndl_t l_errl = NULL ;
 
     // Get references to factory objects.
     ScanFacility      & scanFac = ScanFacility::Access();
@@ -196,7 +226,11 @@ void PegasusConfigurator::addDomainChips( TARGETING::TYPE  i_type,
             if ( NULL == *itr ) continue;
 
             RuleChip * chip = new RuleChip( fileName, *itr,
-                                            scanFac, resFac );
+                                            scanFac, resFac,l_errl );
+            if( NULL != l_errl )
+            {
+                break;
+            }
             sysChipLst.push_back( chip );
             io_domain->AddChip(   chip );
 
@@ -228,6 +262,8 @@ void PegasusConfigurator::addDomainChips( TARGETING::TYPE  i_type,
         Prdr::LoadChipCache::flushCache();
 
     }
+
+    return  l_errl;
 }
 
 void PegasusConfigurator::addChipsToPllDomain(

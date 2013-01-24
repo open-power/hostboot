@@ -40,7 +40,6 @@ class ExtensibleChip : public CHIP_CLASS
     ExtensibleChip( TARGETING::TargetHandle_t i_target ) :
         CHIP_CLASS(i_target)
     {}
-
     virtual ExtensibleChipFunction * getExtensibleFunction(
                                             const char * i_func,
                                             bool i_expectNull = false ) = 0;
@@ -50,15 +49,15 @@ class ExtensibleChip : public CHIP_CLASS
                                             bool i_expectNull = false ) = 0;
 
     virtual DataBundle *& getDataBundle() = 0;
-
     /**
-     * Add Capture data to the Capture Data object
-     * @param Capture data object (I/O)
-     * @param Capture group
+     * @brief       Add Capture data to the Capture Data object
+     * @param[in]   i_cap   Capture data object (I/O)
+     * @param[in]   i_group Capture group
+     * @return      SUCCESS|FAIL
      */
-    virtual int32_t CaptureErrorData( CaptureData &, int i_group = 1 ) = 0;
+    virtual int32_t CaptureErrorData( CaptureData & i_cap,
+                               int i_group = 1 ) = 0;
 
-    virtual uint32_t getSignatureOffset() const = 0;
 };
 
 class DataBundle

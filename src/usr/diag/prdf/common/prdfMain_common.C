@@ -116,7 +116,6 @@ errlHndl_t initialize()
         //saved SDC and sdc errl commit, if found???
         bool isSavedSdc = false;
         ServiceDataCollector thisSavedSdc;
-
         RestoreAnalysis(thisSavedSdc, isSavedSdc);
         if (isSavedSdc)
         {
@@ -149,11 +148,16 @@ errlHndl_t initialize()
         // -- finished clearing out old chip persistency (for CCM).
 
 #endif
-
         CcAutoDeletePointer<Configurator> configuratorPtr
             (SystemSpecific::getConfiguratorPtr());
 
-        systemPtr = configuratorPtr->build();   // build PRD system model
+        errlHndl_t l_errBuild = configuratorPtr->build();//build object model
+        if( NULL != l_errBuild )
+        {
+            //there is some problem in building RuleMetaData object
+            g_prd_errlHndl = l_errBuild;
+        }
+        //systemPtr is populated in configurator
         if(systemPtr != NULL)
         {
             systemPtr->Initialize(); // Hardware initialization & start scrub
@@ -161,6 +165,7 @@ errlHndl_t initialize()
         }
         else // something bad happend.
         {
+            PRDF_ERR("PRDF::initialize() failed to buid object model");
             g_initialized = false;
         }
 
