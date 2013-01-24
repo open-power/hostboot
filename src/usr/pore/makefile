@@ -23,6 +23,5 @@
 ROOTPATH = ../../..
 
 SUBDIRS = fapiporeve.d poreve.d test.d
-# hb cacheadd --local img/centaur.sbe_pnor.bin "Centaur SBE PNOR image Sim 01-16-2013"
-BINARY_FILES = $(IMGDIR)/centaur.sbe_pnor.bin:47912539ea0a25271749256b43ef4328cc3985fa
+BINARY_FILES = $(IMGDIR)/centaur.sbe_pnor.bin:d532ebcca1b967c86ea76ac8608eeeb4ad9d514f
 include ${ROOTPATH}/config.mk

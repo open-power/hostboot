@@ -28,6 +28,6 @@ OBJS = vpd.o spd.o mvpd.o dimmPres.o
 SUBDIRS = test.d
 
 BINARY_FILES = $(IMGDIR)/procmvpd.dat:fd9fac85d9132c287f81468045c79f1c98409811
-BINARY_FILES += $(IMGDIR)/dimmspd.dat:4ff2e1b8616d10de13b63f56ca4eaa077ae6cdd8
+BINARY_FILES += $(IMGDIR)/dimmspd.dat:9a6e6b6a7f6d3fc77a12d38537279d402124d699
 
 include ${ROOTPATH}/config.mk
