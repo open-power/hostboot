@@ -990,81 +990,19 @@ bool IStepDispatcher::spLess ( void )
 bool IStepDispatcher::checkMpiplMode( ) const
 {
     using namespace TARGETING;
+
     Target* l_pTopLevel = NULL;
     bool l_isMpiplMode = false;
-    TargetService& l_targetService = targetService();
 
+    TargetService& l_targetService = targetService();
     (void)l_targetService.getTopLevelTarget( l_pTopLevel );
 
-
-    if( l_pTopLevel == NULL )
+    uint8_t is_mpipl = 0;
+    if(l_pTopLevel &&
+       l_pTopLevel->tryGetAttr<ATTR_IS_MPIPL_HB>(is_mpipl) &&
+       is_mpipl)
     {
-        TRACFCOMP( g_trac_initsvc,
-                   "Top level handle was NULL" );
-        l_isMpiplMode = false;
-    }
-    else
-    {
-        TARGETING::Target* l_pMasterProcChip = NULL;
-        TARGETING::targetService().masterProcChipTargetHandle(l_pMasterProcChip);
-
-        if( l_pMasterProcChip != NULL )
-        {
-
-            // Setting the MPIPL attribute..
-            // read the MBOX scratch reg 2 and if bit 0 is on then set the
-            // MPIPL attribute to 1 and return l_isMPIPLMode = true.
-            // if bit 0 is not on then set the attribute to 0 and return
-            // l_isMPIPLMode = false
-
-            errlHndl_t l_errl = NULL;
-            size_t  op_size = sizeof( uint64_t );
-            uint64_t data;
-
-            // Scratch register 2 is defined as 0x00050039.. accessing directly
-            // to avoid confusion as the Literals set have 0x00050039 mapped to
-            // MBOX_SCRATCH1 which is confusing.
-            l_errl = DeviceFW::deviceRead(l_pMasterProcChip,
-                                          &(data),
-                                          op_size,
-                                          DEVICE_SCOM_ADDRESS(0x00050039));
-
-            if (l_errl)
-            {
-
-                TRACFCOMP( g_trac_initsvc,
-                           "Read of the Scratch Register failed" );
-
-                // set the MPIPL attribute to 0 (not mpipl)
-                l_pTopLevel->setAttr<ATTR_IS_MPIPL_HB>(0);
-
-                // commit errorlog
-                errlCommit( l_errl,
-                            INITSVC_COMP_ID );
-
-            }
-            else
-            {
-                // If bit 0 is on.. indicates we are in MPIPL
-                if (data & 0x8000000000000000)
-                {
-                    // set the MPIPL attribute to 1 
-                    l_pTopLevel->setAttr<ATTR_IS_MPIPL_HB>(1);
-
-                    // set isMpiplMode to true
-                    l_isMpiplMode = true;
-
-                    TRACFCOMP( g_trac_initsvc,
-                               "IN MPIPL..Updated ATTR_IS_MPIPL_HB to 1" );
-                }
-                else
-                {
-                    // set the MPIPL attribute to 0 (not mpipl)
-                    l_pTopLevel->setAttr<ATTR_IS_MPIPL_HB>(0);
-                }
-            }
-        }
-        
+        l_isMpiplMode = true;
     }
 
     return  l_isMpiplMode;

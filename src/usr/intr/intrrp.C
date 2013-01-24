@@ -50,6 +50,27 @@
 using namespace INTR;
 using namespace TARGETING;
 
+const uint32_t IntrRp::cv_PE_IRSN_COMP_SCOM_LIST[] =
+{
+    PE0_IRSN_COMP_SCOM_ADDR,
+    PE1_IRSN_COMP_SCOM_ADDR,
+    PE2_IRSN_COMP_SCOM_ADDR
+};
+
+const uint32_t IntrRp::cv_PE_IRSN_MASK_SCOM_LIST[] =
+{
+    PE0_IRSN_MASK_SCOM_ADDR,
+    PE1_IRSN_MASK_SCOM_ADDR,
+    PE2_IRSN_MASK_SCOM_ADDR
+};
+
+const uint32_t IntrRp::cv_PE_BAR_SCOM_LIST[] =
+{
+    PE0_BAREN_SCOM_ADDR,
+    PE1_BAREN_SCOM_ADDR,
+    PE2_BAREN_SCOM_ADDR
+};
+
 trace_desc_t * g_trac_intr = NULL;
 TRAC_INIT(&g_trac_intr, INTR_TRACE_NAME, KILOBYTE, TRACE::BUFFER_SLOW);
 
@@ -147,7 +168,7 @@ errlHndl_t IntrRp::_init()
     TARGETING::targetService().masterProcChipTargetHandle( procTarget );
 
     uint64_t barValue = 0;
-    procTarget->tryGetAttr<TARGETING::ATTR_INTP_BASE_ADDR>(barValue);
+    barValue = procTarget->getAttr<TARGETING::ATTR_INTP_BASE_ADDR>();
 
     // Mask off node & chip id to get base address
     uint64_t realAddr = barValue & ICPBAR_BASE_ADDRESS_MASK;
@@ -170,6 +191,22 @@ errlHndl_t IntrRp::_init()
 
     if(!err)
     {
+        uint8_t is_mpipl = 0;
+        TARGETING::Target * sys = NULL;
+        TARGETING::targetService().getTopLevelTarget(sys);
+        if(sys &&
+           sys->tryGetAttr<TARGETING::ATTR_IS_MPIPL_HB>(is_mpipl) &&
+           is_mpipl)
+        {
+            TRACFCOMP(g_trac_intr,"Disable interupts for MPIPL");
+            err = hw_disableIntrMpIpl();
+
+            if(err)
+            {
+                errlCommit(err,INTR_COMP_ID);
+                err = NULL;
+            }
+        }
 
         // Set up the interrupt provider registers
         // NOTE: It's only possible to set up the master core at this point.
@@ -186,7 +223,9 @@ errlHndl_t IntrRp::_init()
             // Skip threads that we shouldn't be starting
             if( !(en_threads & (0x8000000000000000>>thread)) )
             {
-                TRACDCOMP(g_trac_intr,"IntrRp::_init: Skipping thread %d : en_threads=%X",thread,en_threads);
+                TRACDCOMP(g_trac_intr,
+                          "IntrRp::_init: Skipping thread %d : en_threads=%X",
+                          thread,en_threads);
                 continue;
             } 
             pir.threadId = thread;
@@ -286,7 +325,9 @@ void IntrRp::msgHandler()
                     // Use the XISR as the type (for now)
                     type = static_cast<ext_intr_t>(xirr & XISR_MASK);
 
-                    TRACFCOMP(g_trac_intr,"External Interrupt recieved, Type=%x",type);
+                    TRACFCOMP(g_trac_intr,
+                              "External Interrupt recieved, Type=%x",
+                              type);
 
                     // Acknowlege msg
                     msg->data[1] = 0;
@@ -510,7 +551,7 @@ errlHndl_t IntrRp::setBAR(TARGETING::Target * i_target,
     errlHndl_t err = NULL;
 
     uint64_t barValue = 0;
-    i_target->tryGetAttr<TARGETING::ATTR_INTP_BASE_ADDR>(barValue);
+    barValue = i_target->getAttr<TARGETING::ATTR_INTP_BASE_ADDR>();
 
     barValue <<= 14;
     barValue |= 1ULL << (63 - ICPBAR_EN);
@@ -545,8 +586,8 @@ errlHndl_t IntrRp::initIRSCReg(TARGETING::Target * i_target)
         uint8_t chip = 0;
         uint8_t node = 0;
 
-        i_target->tryGetAttr<ATTR_FABRIC_NODE_ID>(node);
-        i_target->tryGetAttr<ATTR_FABRIC_CHIP_ID>(chip);
+        node = i_target->getAttr<ATTR_FABRIC_NODE_ID>();
+        chip = i_target->getAttr<ATTR_FABRIC_CHIP_ID>();
 
         size_t scom_len = sizeof(uint64_t);
 
@@ -771,8 +812,8 @@ errlHndl_t IntrRp::registerInterruptISN(msg_q_t i_msgQ,
         {
             uint8_t chip = 0;
             uint8_t node = 0;
-            (*target_itr)->tryGetAttr<ATTR_FABRIC_NODE_ID>(node);
-            (*target_itr)->tryGetAttr<ATTR_FABRIC_CHIP_ID>(chip);
+            node = (*target_itr)->getAttr<ATTR_FABRIC_NODE_ID>();
+            chip = (*target_itr)->getAttr<ATTR_FABRIC_CHIP_ID>();
 
             PIR_t pir(0);
             pir.nodeId = node;
@@ -845,8 +886,8 @@ msg_q_t IntrRp::unregisterInterruptISN(ISNvalue_t i_intr_type)
         {
             uint8_t chip = 0;
             uint8_t node = 0;
-            (*target_itr)->tryGetAttr<ATTR_FABRIC_NODE_ID>(node);
-            (*target_itr)->tryGetAttr<ATTR_FABRIC_CHIP_ID>(chip);
+            node = (*target_itr)->getAttr<ATTR_FABRIC_NODE_ID>();
+            chip = (*target_itr)->getAttr<ATTR_FABRIC_CHIP_ID>();
 
             PIR_t pir(0);
             pir.nodeId = node;
@@ -921,7 +962,7 @@ void IntrRp::initInterruptPresenter(const PIR_t i_pir) const
 
 
 
-void IntrRp::deconfigureInterruptPresenter(const PIR_t i_pir) const
+void IntrRp::disableInterruptPresenter(const PIR_t i_pir) const
 {
     uint64_t baseAddr = iv_baseAddr + cpuOffsetAddr(i_pir);
     uint8_t * cppr =
@@ -931,7 +972,7 @@ void IntrRp::deconfigureInterruptPresenter(const PIR_t i_pir) const
 
     // non- side effect xirr register
     uint32_t * xirrAddr =
-        reinterpret_cast<uint32_t *>(baseAddr) + XIRR_RO_OFFSET;
+        reinterpret_cast<uint32_t *>(baseAddr + XIRR_RO_OFFSET);
 
     uint32_t xirr = *xirrAddr & 0x00FFFFFF;
 
@@ -1090,10 +1131,411 @@ void IntrRp::shutDown()
                 continue;
             } 
             pir.threadId = thread;
-            deconfigureInterruptPresenter(pir);
+            disableInterruptPresenter(pir);
         }
     }
     TRACFCOMP(g_trac_intr,INFO_MRK,"INTR is shutdown");
+}
+
+//----------------------------------------------------------------------------
+
+errlHndl_t IntrRp::hw_disableRouting(TARGETING::Target * i_proc,
+                                     INTR_ROUTING_t i_rx_tx)
+{
+    errlHndl_t err = NULL;
+    do
+    {
+        size_t scom_len = sizeof(uint64_t);
+
+        // PSI
+        PSIHB_ISRN_REG_t reg;
+
+        err = deviceRead
+            (
+             i_proc,
+             &reg,
+             scom_len,
+             DEVICE_SCOM_ADDRESS(PSIHB_ISRN_REG_t::PSIHB_ISRN_REG)
+            );
+
+        if(err)
+        {
+            break;
+        }
+
+        switch(i_rx_tx)
+        {
+            case INTR_UPSTREAM:
+                reg.uie = 0;   //upstream interrupt enable = 0 (disable)
+                break;
+
+            case INTR_DOWNSTREAM:
+                reg.die = 0;  //downstream interrupt enable = 0 (disable)
+                break;
+        }
+
+        scom_len = sizeof(uint64_t);
+        err = deviceWrite
+            (
+             i_proc,
+             &reg,
+             scom_len,
+             DEVICE_SCOM_ADDRESS(PSIHB_ISRN_REG_t::PSIHB_ISRN_REG)
+            );
+
+        if(err)
+        {
+            break;
+        }
+
+        for(size_t i = 0;
+            i < sizeof(cv_PE_BAR_SCOM_LIST)/sizeof(cv_PE_BAR_SCOM_LIST[0]);
+            ++i)
+        {
+            uint64_t reg = 0;
+            scom_len = sizeof(uint64_t);
+            err = deviceRead
+                (
+                 i_proc,
+                 &reg,
+                 scom_len,
+                 DEVICE_SCOM_ADDRESS(cv_PE_BAR_SCOM_LIST[i])
+                );
+
+            if(err)
+            {
+                break;
+            }
+
+            switch(i_rx_tx)
+            {
+                case INTR_UPSTREAM:
+                    // reset bit PE_IRSN_RX
+                    reg &= ~((1ull << (63-PE_IRSN_RX)));
+                    break;
+
+                case INTR_DOWNSTREAM:
+                    // reset bit PE_IRSN_TX
+                    reg &= ~((1ull << (63-PE_IRSN_TX)));
+                    break;
+            }
+
+            scom_len = sizeof(uint64_t);
+            err = deviceWrite
+                (
+                 i_proc,
+                 &reg,
+                 scom_len,
+                 DEVICE_SCOM_ADDRESS(cv_PE_BAR_SCOM_LIST[i])
+                );
+
+            if(err)
+            {
+                break;
+            }
+        }
+        if(err)
+        {
+            break;
+        }
+
+        //NX has no up/down stream enable bit - just one enable bit.
+        //The NX should be cleared as part of an MPIPL so no
+        //interrupts should be pending from this unit.
+        if(i_rx_tx == INTR_UPSTREAM)
+        {
+            uint64_t reg = 0;
+            scom_len = sizeof(uint64_t);
+            err = deviceRead
+                (
+                 i_proc,
+                 &reg,
+                 scom_len,
+                 DEVICE_SCOM_ADDRESS(NX_BUID_SCOM_ADDR)
+                );
+            if(err)
+            {
+                break;
+            }
+
+            // reset bit NX_BUID_ENABLE
+            reg &= ~(1ull << (63-NX_BUID_ENABLE));
+
+            scom_len = sizeof(uint64_t);
+            err = deviceWrite
+                (
+                 i_proc,
+                 &reg,
+                 scom_len,
+                 DEVICE_SCOM_ADDRESS(NX_BUID_SCOM_ADDR)
+                );
+            if(err)
+            {
+                break;
+            }
+        }
+
+    } while(0);
+    return err;
+}
+
+//----------------------------------------------------------------------------
+
+errlHndl_t IntrRp::hw_resetIRSNregs(TARGETING::Target * i_proc)
+{
+    errlHndl_t err = NULL;
+    size_t scom_len = sizeof(uint64_t);
+    do
+    {
+        // PSI
+        PSIHB_ISRN_REG_t reg1; // zeros self
+        reg1.irsn -= 1;  // default all '1's according to scom spec
+        // all other fields = 0
+
+        err = deviceWrite
+            (
+             i_proc,
+             &reg1,
+             scom_len,
+             DEVICE_SCOM_ADDRESS(PSIHB_ISRN_REG_t::PSIHB_ISRN_REG)
+            );
+        if(err)
+        {
+            break;
+        }
+
+        // PE
+        for(size_t i = 0;
+            i < sizeof(cv_PE_BAR_SCOM_LIST)/sizeof(cv_PE_BAR_SCOM_LIST[0]);
+            ++i)
+        {
+            uint64_t reg = 0;
+            scom_len = sizeof(uint64_t);
+            // Note: no default value specified in scom spec - assume 0
+            err = deviceWrite
+                (
+                 i_proc,
+                 &reg,
+                 scom_len,
+                 DEVICE_SCOM_ADDRESS(cv_PE_IRSN_COMP_SCOM_LIST[i])
+                );
+            if(err)
+            {
+                break;
+            }
+
+            scom_len = sizeof(uint64_t);
+            // Note: no default value specified in scom spec - assume 0
+            err = deviceWrite
+                (
+                 i_proc,
+                 &reg,
+                 scom_len,
+                 DEVICE_SCOM_ADDRESS(cv_PE_IRSN_MASK_SCOM_LIST[i])
+                );
+            if(err)
+            {
+                break;
+            }
+        }
+        if(err)
+        {
+            break;
+        }
+
+        // NX [1:19] is BUID [20:32] mask
+        // No default value specified in scom spec. assume 0
+        uint64_t reg = 0;
+        scom_len = sizeof(uint64_t);
+        err = deviceWrite
+            (
+             i_proc,
+             &reg,
+             scom_len,
+             DEVICE_SCOM_ADDRESS(NX_BUID_SCOM_ADDR)
+            );
+        if(err)
+        {
+            break;
+        }
+    } while(0);
+    return err;
+}
+
+
+//----------------------------------------------------------------------------
+
+errlHndl_t IntrRp::hw_disableIntrMpIpl()
+{
+    errlHndl_t err = NULL;
+    do
+    {
+        TARGETING::TargetHandleList procChips;
+        getAllChips(procChips, TYPE_PROC);
+
+        TARGETING::TargetHandleList procCores;
+        getAllChiplets(procCores, TYPE_CORE);
+
+        // Disable upstream intr routing on all processor chips
+        for(TARGETING::TargetHandleList::iterator proc = procChips.begin();
+            proc != procChips.end();
+            ++proc)
+        {
+            // disable upstream intr routing
+            err = hw_disableRouting(*proc,INTR_UPSTREAM);
+            if(err)
+            {
+                break;
+            }
+        }
+        if(err)
+        {
+            break;
+        }
+
+        // Set interrupt presenter to allow all interrupts
+        for(TARGETING::TargetHandleList::iterator 
+            core = procCores.begin();
+            core != procCores.end();
+            ++core)
+        {
+            const TARGETING::Target * proc = getParentChip(*core);
+
+            FABRIC_CHIP_ID_ATTR chip = proc->getAttr<ATTR_FABRIC_CHIP_ID>();
+            FABRIC_NODE_ID_ATTR node = proc->getAttr<ATTR_FABRIC_NODE_ID>();
+            CHIP_UNIT_ATTR coreId = 
+                (*core)->getAttr<TARGETING::ATTR_CHIP_UNIT>();
+
+            PIR_t pir(0);
+            pir.nodeId = node;
+            pir.chipId = chip;
+            pir.coreId = coreId;
+
+            size_t threads = cpu_thread_count();
+            for(size_t thread = 0; thread < threads; ++thread)
+            {
+                pir.threadId = thread;
+                uint64_t cpprAddr=cpuOffsetAddr(pir)+iv_baseAddr+CPPR_OFFSET;
+                uint8_t *cppr = reinterpret_cast<uint8_t*>(cpprAddr);
+                *cppr = 0xff; // allow all interrupts
+            }
+        }
+
+        // Now look for interrupts
+        bool interrupt_found = false;
+        size_t retryCount = 10;
+
+        do
+        {
+            interrupt_found = false;
+            nanosleep(0,1000000);   // 1 ms
+
+            for(TARGETING::TargetHandleList::iterator 
+                core = procCores.begin();
+                core != procCores.end();
+                ++core)
+            {
+                const TARGETING::Target * proc = getParentChip(*core);
+
+                FABRIC_CHIP_ID_ATTR chip = 
+                    proc->getAttr<ATTR_FABRIC_CHIP_ID>();
+                FABRIC_NODE_ID_ATTR node = 
+                    proc->getAttr<ATTR_FABRIC_NODE_ID>();
+                CHIP_UNIT_ATTR coreId = 
+                    (*core)->getAttr<TARGETING::ATTR_CHIP_UNIT>();
+
+                PIR_t pir(0);
+                pir.nodeId = node;
+                pir.chipId = chip;
+                pir.coreId = coreId;
+
+                size_t threads = cpu_thread_count();
+                for(size_t thread = 0; thread < threads; ++thread)
+                {
+                    pir.threadId = thread;
+                    uint64_t xirrAddr = iv_baseAddr +
+                        cpuOffsetAddr(pir) + XIRR_RO_OFFSET;
+                    uint32_t * xirrPtr = 
+                        reinterpret_cast<uint32_t*>(xirrAddr);
+                    uint32_t xirr = *xirrPtr & 0x00FFFFFF;
+                    if(xirr) // pending interrupt
+                    {
+                        // Found pending interrupt!
+                        interrupt_found = true;
+
+                        TRACFCOMP(g_trac_intr,
+                                  ERR_MRK
+                                  "Pending interrupt found on MPIPL."
+                                  " CpuId:0x%x XIRR:0x%x",
+                                  pir.word,
+                                  xirr);
+                        // Signal EOI - read then write xirr value
+                        ++xirrPtr;        // move to RW XIRR reg
+                        volatile uint32_t xirr_rw = *xirrPtr;
+                        *xirrPtr = xirr_rw;
+                        --xirrPtr;      // back to RO XIRR reg
+                    }
+                }
+            }
+        } while(interrupt_found == true && --retryCount != 0);
+
+        if(interrupt_found && (retryCount == 0))
+        {
+            // traces above should identify stuck interrupt
+            INITSERVICE::doShutdown(INTR::RC_PERSISTANT_INTERRUPTS);
+        }
+
+        // Disable all interrupt presenters
+        for(TARGETING::TargetHandleList::iterator 
+            core = procCores.begin();
+            core != procCores.end();
+            ++core)
+        {
+            const TARGETING::Target * proc = getParentChip(*core);
+
+            FABRIC_CHIP_ID_ATTR  chip = proc->getAttr<ATTR_FABRIC_CHIP_ID>();
+            FABRIC_NODE_ID_ATTR node = proc->getAttr<ATTR_FABRIC_NODE_ID>();
+            CHIP_UNIT_ATTR coreId =
+                (*core)->getAttr<TARGETING::ATTR_CHIP_UNIT>();
+
+            PIR_t pir(0);
+            pir.nodeId = node;
+            pir.chipId = chip;
+            pir.coreId = coreId;
+
+            size_t threads = cpu_thread_count();
+            for(size_t thread = 0; thread < threads; ++thread)
+            {
+                pir.threadId = thread;
+                disableInterruptPresenter(pir);
+            }
+        }
+
+        // disable downstream routing and clean up IRSN regs
+        for(TARGETING::TargetHandleList::iterator proc = procChips.begin();
+            proc != procChips.end();
+            ++proc)
+        {
+            // disable downstream routing
+            err = hw_disableRouting(*proc,INTR_DOWNSTREAM);
+            if(err)
+            {
+                break;
+            }
+
+            // reset IRSN values
+            err = hw_resetIRSNregs(*proc);
+            if(err)
+            {
+                break;
+            }
+        }
+        if(err)
+        {
+            break;
+        }
+    } while(0);
+    return err;
 }
 
 //----------------------------------------------------------------------------
@@ -1307,5 +1749,4 @@ errlHndl_t INTR::enablePsiIntr(TARGETING::Target * i_target)
     }
     return err;
 }
-
 

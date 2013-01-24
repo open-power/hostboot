@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2012              */
+/* COPYRIGHT International Business Machines Corp. 2011,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -46,6 +46,7 @@ namespace INTR
         RC_RP_NOT_INITIALIZED         = INTR_COMP_ID | 0x03,
         RC_BAD_VIRTUAL_IO_ADDRESS     = INTR_COMP_ID | 0x04,
         RC_BAD_ISN                    = INTR_COMP_ID | 0x05,
+        RC_PERSISTANT_INTERRUPTS      = INTR_COMP_ID | 0x06,
     };
 };
 

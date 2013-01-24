@@ -149,7 +149,35 @@ namespace INTR
 
                 // MASK base ICP address
                 ICPBAR_BASE_ADDRESS_MASK = 0xFFFFFFFFFC000000ULL,
-           };
+
+
+                // The interrupt resource number ctr regs
+                // Used to enable/disable and control interrupt routing
+                NX_BUID_SCOM_ADDR       = 0x0201308E, //INTR CTRL for NX
+                NX_BUID_ENABLE          = 0,          //INTR Enable bit for NX
+
+                PE0_IRSN_COMP_SCOM_ADDR = 0x0201201A, //INTR IRSN compare
+                PE0_IRSN_MASK_SCOM_ADDR = 0x0201201B, //INTR IRSN mask
+                PE0_BAREN_SCOM_ADDR     = 0x02012045, //INTR enable/disable
+
+                PE1_IRSN_COMP_SCOM_ADDR = 0x0201241A, //INTR IRSN compare
+                PE1_IRSN_MASK_SCOM_ADDR = 0x0201241B, //INTR IRSN mask
+                PE1_BAREN_SCOM_ADDR     = 0x02012445, //INTR enable/disable
+
+                PE2_IRSN_COMP_SCOM_ADDR = 0x0201281A, //INTR IRSN compare
+                PE2_IRSN_MASK_SCOM_ADDR = 0x0201281B, //INTR IRSN mask
+                PE2_BAREN_SCOM_ADDR     = 0x02012845, //INTR enable/disable
+
+                // Bit pos in PEx_BAREN_SCOM register
+                PE_IRSN_RX = 3,         // upstream enable
+                PE_IRSN_TX = 4,         // downstream enable
+            };
+
+            enum INTR_ROUTING_t 
+            {
+                INTR_UPSTREAM,
+                INTR_DOWNSTREAM,
+            };
 
             // If the interrupt can't be handled by the current chip there are
             // three link registers used provide targets to forward the
@@ -299,6 +327,10 @@ namespace INTR
             typedef std::map<PIR_t, IPI_Info_t> IPI_Pending_t;
             IPI_Pending_t iv_ipisPending;  //!< Pending IPIs.
 
+            // PE regs
+            static const uint32_t cv_PE_IRSN_COMP_SCOM_LIST[]; //IRSN comp regs
+            static const uint32_t cv_PE_IRSN_MASK_SCOM_LIST[]; //IRSN mask regs
+            static const uint32_t cv_PE_BAR_SCOM_LIST[];       //IRSN enable
 
         private:        //functions
 
@@ -367,10 +399,10 @@ namespace INTR
             void initInterruptPresenter(const PIR_t i_pir) const;
 
             /**
-             * Deconfigure the interrupt presenter registers
+             * Disable the interrupt presenter
              * @param[in] i_pir, the PIR value for the presenter
              */
-            void deconfigureInterruptPresenter(const PIR_t i_pir) const;
+            void disableInterruptPresenter(const PIR_t i_pir) const;
 
             /**
              * Issue IPI to a thread.
@@ -409,6 +441,27 @@ namespace INTR
              * @return error handle
              */
             errlHndl_t maskXIVR(TARGETING::Target * i_target);
+
+            /*
+             * Disable HW from recieving interrupts
+             * @param i_proc  The processor chip target to disable
+             * @param i_rx_tx [INTR_UPSTREAM | INTR_DOWNSTREAM]
+             * @return an error handle on error
+             */
+            errlHndl_t hw_disableRouting(TARGETING::Target * i_proc,
+                                         INTR_ROUTING_t i_rx_tx);
+
+            /**
+             * Reset ISRN value in hardware regs
+             * @param i_proc  The target processor
+             * @return an error handle on error
+             */
+            errlHndl_t hw_resetIRSNregs(TARGETING::Target * i_proc);
+
+            /**
+             * disableHwMpIpl
+             */
+            errlHndl_t hw_disableIntrMpIpl();
 
             /**
              * Shutdown procedure
