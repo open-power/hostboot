@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2012              */
+/* COPYRIGHT International Business Machines Corp. 2011,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -551,7 +551,7 @@ void InitService::init( void *io_ptr )
         // Set the shutdown status to be the plid to force a TI
         l_shutdownStatus = l_errl->plid();
 
-        errlCommit( l_errl, INITSVC_COMP_ID ); 
+        errlCommit( l_errl, INITSVC_COMP_ID );
 
     }
 
@@ -619,6 +619,11 @@ void doShutdown ( uint64_t i_status,
     Singleton<InitService>::instance().doShutdown( i_status,
                                                    i_payload_base,
                                                    i_payload_entry );
+
+    while(1)
+    {
+        task_yield();
+    };
 }
 
 void InitService::doShutdown(uint64_t i_status,
@@ -673,7 +678,7 @@ void InitService::doShutdown(uint64_t i_status,
         }
         l_rb_iter++;
     }
-    
+
     shutdown(i_status, i_payload_base, i_payload_entry);
 }
 

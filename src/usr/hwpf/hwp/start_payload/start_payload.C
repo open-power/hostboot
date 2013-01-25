@@ -358,13 +358,6 @@ errlHndl_t callShutdown ( void )
                                  payloadBase,
                                  payloadEntry );
 
-        // Hang out here until shutdown happens
-        int status = 0x0;
-        while( 1 )
-        {
-            task_wait( &status,
-                       NULL );
-        }
     } while( 0 );
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,

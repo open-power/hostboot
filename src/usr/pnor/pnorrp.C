@@ -425,7 +425,6 @@ errlHndl_t PnorRP::readTOC()
         {
             //Shutdown if we detected a partition table issue for any reason
             INITSERVICE::doShutdown( PNOR::RC_PARTITION_TABLE_INVALID);
-            while(1) { task_yield(); }
         }
 
         ffs_hb_user_t* ffsUserData = NULL;
@@ -492,7 +491,6 @@ errlHndl_t PnorRP::readTOC()
                 TRACFCOMP(g_trac_pnor, "E>PnorRp::readTOC:  Partition(%s) at base address (0x%.8x) extends past end of flash device",
                           cur_entry->name, iv_TOC[cur_side][secId].flashAddr);
                 INITSERVICE::doShutdown( PNOR::RC_PARTITION_TABLE_INVALID);
-                while(1) { task_yield(); }
             }
 
             cur_entry++;
