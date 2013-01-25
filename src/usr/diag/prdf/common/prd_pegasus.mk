@@ -43,5 +43,3 @@ prd_pegasus_specific = \
     prdfPegasusConfigurator.o \
     prdfRegisterData.o
 
-prd_pegasus_specific_HB = \
-    prdfDramRepairs.o

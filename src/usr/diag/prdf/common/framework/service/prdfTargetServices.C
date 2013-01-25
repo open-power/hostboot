@@ -32,17 +32,11 @@
 
 #include <prdfTargetServices.H>
 
-#include <algorithm>
-
-#include <iipbits.h>
-#include <iipsdbug.h>
 #include <iipglobl.h>
 #include <prdfTrace.H>
 
-#include <errlentry.H>
 #include <fapi.H>
 #include <targeting/common/targetservice.H>
-#include <attributeenums.H>
 
 using namespace TARGETING;
 
@@ -816,33 +810,6 @@ uint32_t getNodePosition( TARGETING::TargetHandle_t i_target )
     }
 
     return o_pos;
-}
-
-//##############################################################################
-//##
-//##                       DUMP and Runtime Deconfig support code
-//##
-//##############################################################################
-
-//------------------------------------------------------------------------------
-
-errlHndl_t dumpHWURequest(errlHndl_t i_errl, HUID i_huid )
-{
-    // FIXME : need to implement this once P8 DUMP support is in
-    PRDF_ERR( "[dumpHWURequest] i_huid=0x%08x - Function not implemented yet", i_huid );
-
-    return NULL;
-}
-
-//------------------------------------------------------------------------------
-
-errlHndl_t runtimeDeconfig( HUID i_huid )
-{
-    // FIXME : need to implement this once Story 42422
-    //        in CEC HW Enablement is done
-    PRDF_ERR( "[runtimeDeconfig] i_huid=0x%08x - Function not implemented yet", i_huid );
-
-    return NULL;
 }
 
 //##############################################################################

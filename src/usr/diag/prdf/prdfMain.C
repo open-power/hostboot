@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/diag/prdf/common/prdfMain.C $                         */
+/* $Source: ./prdfMain.C $                                                */
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */

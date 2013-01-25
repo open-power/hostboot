@@ -181,7 +181,6 @@ bool processRepairedRanks(
         if(SUCCESS != PlatServices::mssGetSteerMux(
                 i_mba,
                 rankNumber,
-                mss_SteerMux::READ_MUX,
                 sp0, sp1, sp))
         {
             // skip this rank

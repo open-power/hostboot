@@ -368,8 +368,9 @@ class System;
 
 #endif
 
-// ----------- Hostboot macros begin -----------
 #ifdef  __HOSTBOOT_MODULE
+
+// ----------- Hostboot macros begin -------------------------------------------
 
 /**
  * @brief function to create an error log.
@@ -442,18 +443,21 @@ class System;
  * @brief Interface to request a Hardware Unit dump collection
  */
 // FIXME - need to implement in Hostboot
-#define PRDF_HWUDUMP(io_dumpErrl, i_errl,   \
-                     i_content, i_dumpHuid)
+#define PRDF_HWUDUMP( i_errl, i_content, i_huid ) \
+  SUCCESS
 
 /**
  * @brief Interface to deconfig target at Runtime (Not valid in Hostboot)
  */
-#define PRDF_RUNTIME_DECONFIG(io_errl, i_pTarget)
+// FIXME - need to implement in Hostboot
+#define PRDF_RUNTIME_DECONFIG( i_pTarget ) \
+  SUCCESS
 
-// ----------- Hostboot macros end   -----------
+// ----------- Hostboot macros end   -------------------------------------------
 
-// ----------- FSP macros begin -----------
 #else
+
+// ----------- FSP macros begin ------------------------------------------------
 
 /**
  * @brief function to create an error log.
@@ -541,22 +545,17 @@ class System;
 /**
  * @brief Interface to request a Hardware Unit dump collection
  */
-#define PRDF_HWUDUMP(io_dumpErrl, i_errl,   \
-                     i_content, i_dumpHuid) \
-  SrciSrc l_src(*(i_errl->getSRC(0)));          \
-  io_dumpErrl= PlatServices::dumpHWURequest( i_content, \
-                                             PRDF_COMP_ID,  \
-                                             i_errl->plid(),\
-                                             l_src,         \
-                                             i_dumpHuid );
+#define PRDF_HWUDUMP( i_errl, i_content, i_huid ) \
+  PlatServices::dumpHWURequest( i_errl, i_content, i_huid )
 
 /**
  * @brief Interface to deconfig target at Runtime
  */
-#define PRDF_RUNTIME_DECONFIG( io_errl, i_target ) \
-    io_errl = PlatServices::runtimeDeconfig( i_target );
+#define PRDF_RUNTIME_DECONFIG( i_target ) \
+    PlatServices::runtimeDeconfig( i_target )
 
-// ----------- FSP macros end   -----------
-#endif
+// ----------- FSP macros end   ------------------------------------------------
 
-#endif
+#endif // not __HOSTBOOT_MODULE
+
+#endif // IIPGLOBL_H

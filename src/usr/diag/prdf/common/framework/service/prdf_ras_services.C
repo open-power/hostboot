@@ -1223,72 +1223,56 @@ will also be removed. Need to confirm if this code is required anymore.
         delete errLog;
         errLog = NULL;
     }
-    else if (!ReturnELog && !ForceTerminate && !i_sdc.IsMpFatal() && !i_sdc.Terminate())
+    else if ( !ReturnELog        && !ForceTerminate &&
+              !i_sdc.IsMpFatal() && !i_sdc.Terminate() )
     {
-        //Check to see if we need to do a Proc Core dump
-        if (sdc.IsUnitCS() && (!sdc.IsUsingSavedSdc() ) )
+        // Check to see if we need to do a Proc Core dump
+        if ( sdc.IsUnitCS() && !sdc.IsUsingSavedSdc() )
         {
-            if (l_targetType == TYPE_PROC)
+            if ( l_targetType == TYPE_PROC )
             {
                 // NX Unit Checktop - runtime deconfig each accelerator
-                errlHndl_t dumpErrl = NULL;
+                int32_t l_rc = SUCCESS;
                 SDC_MRU_LIST mrulist = sdc.GetMruList();
-                for (SDC_MRU_LIST::iterator i = mrulist.begin();
-                     i < mrulist.end(); ++i)
+                for ( SDC_MRU_LIST::iterator i = mrulist.begin();
+                      i < mrulist.end(); ++i )
                 {
-                    //FIXME: need to add accelerators runtime deconfig
-/*
-                    TargetHandle_t  l_acceleratorHandle = (*i).callout.getMruValues();
-                    if (TYPE_CORE == PlatServices::getTargetType(l_acceleratorHandle))
+                    /* FIXME: need to add accelerators runtime deconfig
+                    TargetHandle_t accelTarget = i->callout.getMruValues();
+                    if ( TYPE_CORE == PlatServices::getTargetType(accelTarget) )
                     {
-                        dumpErrl = PlatServices::runtimeDeconfig(PlatServices::getHuid(l_acceleratorHandle));
-                        if  (dumpErrl != NULL)
+                        l_rc = PRDF_RUNTIME_DECONFIG( accelTarget );
+                        if ( SUCCESS != l_rc )
                             break;
                     }
-*/
+                    */
                 }
 
-                if  (dumpErrl != NULL)
+                if ( SUCCESS == l_rc )
                 {
-                    PRDF_COMMIT_ERRL(dumpErrl, ERRL_ACTION_REPORT);
-                }
-                else
-                {
-                    PRDF_HWUDUMP(dumpErrl, errLog, CONTENT_HWNXLCL,
-                                 pfaData.MsDumpInfo.DumpId);
-                    if  (dumpErrl != NULL)
-                    {
-                        PRDF_COMMIT_ERRL(dumpErrl, ERRL_ACTION_REPORT);
-                    }
+                    l_rc = PRDF_HWUDUMP( errLog, CONTENT_HWNXLCL,
+                                         pfaData.MsDumpInfo.DumpId );
                 }
             }
             else
             {
-                errlHndl_t dumpErrl =NULL;
-                PRDF_RUNTIME_DECONFIG(dumpErrl, l_dumpHandle);
-                if  (dumpErrl != NULL)
+                int32_t l_rc = PRDF_RUNTIME_DECONFIG( l_dumpHandle );
+                if ( SUCCESS == l_rc )
                 {
-                    PRDF_COMMIT_ERRL(dumpErrl, ERRL_ACTION_REPORT);
-                }
-                else
-                {   //Call Dump for Proc Core CS
-                    if (TYPE_CORE == l_targetType)
+                    // Call Dump for Proc Core CS
+                    if ( TYPE_CORE == l_targetType )
                     {
-                         PRDF_HWUDUMP(dumpErrl, errLog, CONTENT_SINGLE_CORE_CHECKSTOP,
-                                      pfaData.MsDumpInfo.DumpId);
+                        l_rc = PRDF_HWUDUMP( errLog,
+                                             CONTENT_SINGLE_CORE_CHECKSTOP,
+                                             pfaData.MsDumpInfo.DumpId );
                     }
-                    // remove dump CONTENT_HWGAL2LCL since no IOHUB dump
-                    // is supported in P8
-                    // FIXME : will need to add Centaur DMI channel checkstop support later
+                    // FIXME: Will need to add Centaur DMI channel checkstop
+                    //        support later.
                     else
-                    {  //This is not Proc ..ie. it is Galaxy 2
-                        PRDF_ERR( PRDF_FUNC"Unsupported dump for DumpId: %x, TargetType: %x",
-                                       pfaData.MsDumpInfo.DumpId, l_targetType );
+                    {
+                        PRDF_ERR( PRDF_FUNC"Unsupported dump for target 0x%08x",
+                                  pfaData.MsDumpInfo.DumpId );
                     }
-                }
-                if  (dumpErrl != NULL)
-                {
-                    PRDF_COMMIT_ERRL(dumpErrl, ERRL_ACTION_REPORT);
                 }
             }
         }

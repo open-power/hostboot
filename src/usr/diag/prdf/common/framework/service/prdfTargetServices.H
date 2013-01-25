@@ -26,25 +26,18 @@
 
 /**
  * @file  prdfTargetServices.H
- * @brief Wrapper code for things PRD needs from target services.
+ * @brief Wrapper code for external interfaces used by PRD.
+ *
+ * This file should only contain targeting external interfaces, which are
+ * strictly common between FSP and Hostboot. All other interfaces should be in
+ * prdfPlatServices.H.
+ *
+ * Also, this file should not be included directly. Instead, include
+ * prdfPlatServices.H, which includes this file.
  */
 
-//------------------------------------------------------------------------------
-// Includes
-//------------------------------------------------------------------------------
-
 #include <iipconst.h>
-#include <prdfTimer.H>
-#include <algorithm>
 #include <targeting/common/target.H>
-#include <targeting/common/entitypath.H>
-#include <errlentry.H>
-
-#ifdef __HOSTBOOT_MODULE
-
-#else
-
-#endif
 
 //------------------------------------------------------------------------------
 
@@ -243,32 +236,6 @@ uint32_t getTargetPosition( TARGETING::TargetHandle_t i_target );
  * @return  The position of the connected node.
  */
 uint32_t getNodePosition( TARGETING::TargetHandle_t i_target );
-
-//##############################################################################
-//##
-//##                       DUMP and Runtime Deconfig support code
-//##
-//##############################################################################
-
-/**
- * Interface to request a Hardware Unit dump collection.
- *
- * @param[in] i_errl input error log handle
- * @param[in] i_huid The HUID of Failing target to dump
- *
- * @return NULL on success, else error log
- */
-errlHndl_t dumpHWURequest(errlHndl_t i_errl, HUID i_huid );
-
-/**
-* Change the state of the given HUID at runtime.
-*
-* @param   i_huid The HUID of a target
-*
-* @return NULL on success, else error log
-*/
-errlHndl_t runtimeDeconfig( HUID i_huid );
-
 
 //##############################################################################
 //##

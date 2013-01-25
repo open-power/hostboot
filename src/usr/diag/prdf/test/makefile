@@ -42,6 +42,7 @@ EXTRAINCDIR += ${PRD_USR_PATH}/common/framework/config
 EXTRAINCDIR += ${PRD_USR_PATH}/common/framework/rule
 EXTRAINCDIR += ${PRD_USR_PATH}/common/plat
 EXTRAINCDIR += ${PRD_USR_PATH}/common/plat/pegasus
+EXTRAINCDIR += ${PRD_USR_PATH}/framework/service
 EXTRAINCDIR += ${PRD_USR_PATH}/mnfgtools
 EXTRAINCDIR += ${PRD_USR_PATH}/test
 

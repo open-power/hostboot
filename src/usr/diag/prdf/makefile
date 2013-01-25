@@ -45,6 +45,7 @@ VPATH =  \
     common/framework/rule \
     framework \
     framework/rule \
+    framework/service \
 
 #FIXME: we can remove most of these as well if we have them include correctly
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/hwpf/fapi
@@ -67,27 +68,29 @@ EXTRAINCDIR += ${PRD_USR_PATH}/common/framework/config
 EXTRAINCDIR += ${PRD_USR_PATH}/common/framework/rule
 EXTRAINCDIR += ${PRD_USR_PATH}/common/plat
 EXTRAINCDIR += ${PRD_USR_PATH}/common/plat/pegasus
-#conditionally enables profiling of flyweight register and resolution object
+EXTRAINCDIR += ${PRD_USR_PATH}/framework/service
+
+# Conditionally enables profiling of flyweight register and resolution object
 ifeq ($(PRD_PROFILER),1)
 CUSTOMFLAGS += -DFLYWEIGHT_PROFILING
 endif
+
 #------------------------------------------------------------------------------
 # objects
 #------------------------------------------------------------------------------
+
 include common/prd_framework.mk
 include common/prd_ruletable.mk
 include common/prd_pegasus.mk
+include prdf_hb_only.mk
 
-OBJS = ${prd_framework} \
-	   ${prd_util} \
-	   ${prd_register} \
-	   ${prd_resolution} \
-	   ${prd_ruletable} \
-	   ${prd_service} \
-	   ${prd_env_service} \
-	   ${prd_config} \
-	   ${prd_pegasus_specific} ${prd_pegasus_specific_HB} \
-	   ${PRDF_RULE_PLUGINS_PEGASUS_WSIM} \
-	   ${PRDF_RULE_PLUGINS_PEGASUS}
+OBJS = \
+ ${prd_object_files} \
+ ${prd_object_files_no_sim} \
+ ${prd_ruletable} \
+ ${prd_pegasus_specific} \
+ ${prd_pegasus_specific_HB} \
+ ${PRDF_RULE_PLUGINS_PEGASUS} \
+ ${PRDF_RULE_PLUGINS_PEGASUS_WSIM} \
 
 include ${ROOTPATH}/config.mk

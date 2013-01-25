@@ -21,20 +21,14 @@
 #
 # IBM_PROLOG_END_TAG
 
-# Object files for prd shared library
-
-######## Framework ########
+################################################################################
+# PRD object files (common Hostboot and FSP).
+################################################################################
 
 prd_framework = \
  iipTemplates.o \
  prdfTrace.o \
  prdfMain.o
-
-prd_framework_includes = \
- prdfMain.H \
- prdf_service_codes.H
-
-######## Util ########
 
 prd_util = \
  prdfBitString.o \
@@ -44,11 +38,6 @@ prd_util = \
  prdfErrlSmartPtr.o \
  prdfFilters.o \
  prdfAssert.o
-
-prd_util_includes = \
- prdfCompressBuffer.H
-
-######## Config ########
 
 prd_config = \
  iipchip.o \
@@ -62,43 +51,14 @@ prd_config = \
  iipSystem.o \
  prdfExtensibleDomain.o \
 
-prd_config_FSP = \
- prdfChipPersist.o \
- prdfSystemData.o
-
-prd_config_includes = \
-
-######## Service ########
-
 prd_service = \
  prdfServiceDataCollector.o \
  prdf_ras_services.o \
  prdfTargetServices.o \
  xspprdsdbug.o
 
-prd_service_FSP = \
- prdfSdcFileControl.o
-
-prd_service_includes = \
-
-######## Platform Specfic Services ########
-
-prd_env_service = \
- prdfHomRegisterAccess.o \
- prdfPlatServices.o
-
-prd_env_service_includes = \
-
-######## Chip ########
-
 prd_ss = \
  prdfMemoryMru.o
-
-prd_ss_includes = \
- prdfMemoryMru.H \
- prdfRepairHealth.H
-
-######## Resolution ########
 
 prd_resolution = \
  iipResolution.o \
@@ -111,10 +71,6 @@ prd_resolution = \
  prdfClockResolution.o \
  prdfCaptureResolution.o
 
-prd_resolution_includes = \
-
-######## Register ########
-
 prd_register = \
  iipscr.o \
  prdfErrorRegister.o \
@@ -126,16 +82,20 @@ prd_register = \
  prdfCaptureData.o \
  prdfScanFacility.o
 
+prd_object_files = \
+ ${prd_framework} \
+ ${prd_util} \
+ ${prd_config} \
+ ${prd_service} \
+ ${prd_ss} \
+ ${prd_resolution} \
+ ${prd_register} \
 
-prd_register_includes = \
+################################################################################
+# PRD object files common to Hostboot and FSP, but not to PRD simulator.
+################################################################################
 
-######## Threshold ########
+prd_object_files_no_sim = \
+ prdfHomRegisterAccess.o \
+ prdfPlatServices_common.o prdfPlatServices.o
 
-prd_mnfgtools = \
- prdfMfgThresholdFile.o \
- prdfMfgThresholdMgr.o \
- prdfMesThresholds.o
-
-prd_mnfgtools_includes = \
- prdfMfgThresholds.H \
- prdfMesThresholds.H

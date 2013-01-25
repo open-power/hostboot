@@ -22,11 +22,14 @@
 /* IBM_PROLOG_END_TAG                                                     */
 
 #include <prdfGroup.H>
-#include <prdfBitString.H>
-#include <prdfResolutionMap.H>
+
+#include <algorithm>
+
 #include <iipResetErrorRegister.h>
-#include <prdfMain.H>
 #include <iipServiceDataCollector.h>
+#include <prdfBitString.H>
+#include <prdfMain.H>
+#include <prdfResolutionMap.H>
 
 namespace PRDF
 {
