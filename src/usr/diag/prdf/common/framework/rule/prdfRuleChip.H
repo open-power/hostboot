@@ -141,8 +141,6 @@ class RuleChip : public ExtensibleChip
 
     private:    //data
         RuleMetaData * iv_pRuleData ;
-        //Adding another std::map for passing some data to capture stuff.
-
         DataBundle * cv_dataBundle;
 };
 

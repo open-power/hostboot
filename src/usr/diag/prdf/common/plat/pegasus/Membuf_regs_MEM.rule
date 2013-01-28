@@ -94,6 +94,7 @@
         capture     type secondary;
         capture     group default;
         capture     group FirRegs;
+        capture     req nonzero("MEM_LFIR");
     };
 
     register MEM_LFIR_ACT1
@@ -103,6 +104,7 @@
         capture     type secondary;
         capture     group default;
         capture     group FirRegs;
+        capture     req nonzero("MEM_LFIR");
     };
 
     ############################################################################

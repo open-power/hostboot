@@ -100,6 +100,7 @@
         scomaddr    0x01040010;
         capture     type secondary;
         capture     group never;
+        capture     req nonzero("TP_LFIR");
     };
 
     register TP_LFIR_ACT1
@@ -108,6 +109,7 @@
         scomaddr    0x01040011;
         capture     type secondary;
         capture     group never;
+        capture     req nonzero("TP_LFIR");
     };
 
     ############################################################################
@@ -136,6 +138,7 @@
         scomaddr    0x01010806;
         capture     type secondary;
         capture     group default;
+        capture     req nonzero("OCCFIR");
     };
 
     register OCCFIR_ACT1
@@ -144,6 +147,7 @@
         scomaddr    0x01010807;
         capture     type secondary;
         capture     group default;
+        capture     req nonzero("OCCFIR");
     };
 
     ############################################################################
@@ -172,6 +176,7 @@
         scomaddr    0x01010c06;
         capture     type secondary;
         capture     group default;
+        capture     req nonzero("PBAMFIR");
     };
 
     register PBAMFIR_ACT1
@@ -180,6 +185,7 @@
         scomaddr    0x01010c07;
         capture     type secondary;
         capture     group default;
+        capture     req nonzero("PBAMFIR");
     };
 
     ############################################################################
@@ -208,6 +214,7 @@
         scomaddr    0x01010846;
         capture     type secondary;
         capture     group default;
+        capture     req nonzero("PMCFIR");
     };
 
     register PMCFIR_ACT1
@@ -216,5 +223,6 @@
         scomaddr    0x01010847;
         capture     type secondary;
         capture     group default;
+        capture     req nonzero("PMCFIR");
     };
 

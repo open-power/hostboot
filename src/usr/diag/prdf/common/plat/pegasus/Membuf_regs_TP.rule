@@ -92,6 +92,7 @@
         capture     type secondary;
         capture     group default;
         capture     group FirRegs;
+        capture     req nonzero("TP_LFIR");
     };
 
     register TP_LFIR_ACT1
@@ -101,6 +102,7 @@
         capture     type secondary;
         capture     group default;
         capture     group FirRegs;
+        capture     req nonzero("TP_LFIR");
     };
 
     ############################################################################

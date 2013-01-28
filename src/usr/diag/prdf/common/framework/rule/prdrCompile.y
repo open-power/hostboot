@@ -134,6 +134,7 @@ using namespace PRDR_COMPILER;
 %token PRDR_ACT_CAPTURE
 
 %token PRDR_CONNECTED
+%token PRDR_ACT_NONZERO
 %token PRDR_ALTERNATE
 %token PRDR_PROCEDURE
 
@@ -416,6 +417,16 @@ regline:    { $$ = NULL; }
         // Define funccall requirement.
         CaptureReqStruct tmp;
         tmp.type = CaptureReqStruct::PRDR_CAPTURE_FUNC;
+        tmp.str = *$5;
+
+        $$->cv_captures.push_back(tmp);
+    }
+        | PRDR_ACT_CAPTURE PRDR_REQUIRED_KW PRDR_ACT_NONZERO '(' PRDR_STRING ')'
+    {
+        $$ = new Register();
+
+        CaptureReqStruct tmp;
+        tmp.type = CaptureReqStruct::PRDR_CAPTURE_NONZERO;
         tmp.str = *$5;
 
         $$->cv_captures.push_back(tmp);

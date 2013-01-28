@@ -99,6 +99,7 @@ chip Mcs
         capture     type secondary;
         capture     group default;
         capture     group FirRegs;
+        capture     req nonzero("MCIFIR");
     };
 
     register MCIFIR_ACT1
@@ -108,6 +109,7 @@ chip Mcs
         capture     type secondary;
         capture     group default;
         capture     group FirRegs;
+        capture     req nonzero("MCIFIR");
     };
 
     ############################################################################

@@ -86,6 +86,7 @@
         scomaddr    0x02040010;
         capture     type secondary;
         capture     group default;
+        capture     req nonzero("PB_LFIR");
     };
 
     register PB_LFIR_ACT1
@@ -94,6 +95,7 @@
         scomaddr    0x02040011;
         capture     type secondary;
         capture     group default;
+        capture     req nonzero("PB_LFIR");
     };
 
     ############################################################################
@@ -122,6 +124,7 @@
         scomaddr    0x02013106;
         capture     type secondary;
         capture     group default;
+        capture     req nonzero("NXDMAENGFIR");
     };
 
     register NXDMAENGFIR_ACT1
@@ -130,6 +133,7 @@
         scomaddr    0x02013107;
         capture     type secondary;
         capture     group default;
+        capture     req nonzero("NXDMAENGFIR");
     };
 
     ############################################################################
@@ -158,6 +162,7 @@
         scomaddr    0x02013086;
         capture     type secondary;
         capture     group default;
+        capture     req nonzero("NXCQFIR");
     };
 
     register NXCQFIR_ACT1
@@ -166,6 +171,7 @@
         scomaddr    0x02013087;
         capture     type secondary;
         capture     group default;
+        capture     req nonzero("NXCQFIR");
     };
 
     ############################################################################
@@ -194,6 +200,7 @@
         scomaddr    0x020130c6;
         capture     type secondary;
         capture     group default;
+        capture     req nonzero("NXASFIR");
     };
 
     register NXASFIR_ACT1
@@ -202,6 +209,7 @@
         scomaddr    0x020130c7;
         capture     type secondary;
         capture     group default;
+        capture     req nonzero("NXASFIR");
     };
 
     ############################################################################
@@ -230,6 +238,7 @@
         scomaddr    0x02013006;
         capture     type secondary;
         capture     group default;
+        capture     req nonzero("NXCXAFIR");
     };
 
     register NXCXAFIR_ACT1
@@ -238,6 +247,7 @@
         scomaddr    0x02013007;
         capture     type secondary;
         capture     group default;
+        capture     req nonzero("NXCXAFIR");
     };
 
     ############################################################################
@@ -266,6 +276,7 @@
         scomaddr    0x02013406;
         capture     type secondary;
         capture     group default;
+        capture     req nonzero("MCDFIR");
     };
 
     register MCDFIR_ACT1
@@ -274,6 +285,7 @@
         scomaddr    0x02013407;
         capture     type secondary;
         capture     group default;
+        capture     req nonzero("MCDFIR");
     };
 
     ############################################################################
@@ -302,6 +314,7 @@
         scomaddr    0x02010c06;
         capture     type secondary;
         capture     group default;
+        capture     req nonzero("PBWESTFIR");
     };
 
     register PBWESTFIR_ACT1
@@ -310,6 +323,7 @@
         scomaddr    0x02010c07;
         capture     type secondary;
         capture     group default;
+        capture     req nonzero("PBWESTFIR");
     };
 
     ############################################################################
@@ -338,6 +352,7 @@
         scomaddr    0x02010c47;
         capture     type secondary;
         capture     group default;
+        capture     req nonzero("PBCENTFIR");
     };
 
     register PBCENTFIR_ACT0
@@ -346,6 +361,7 @@
         scomaddr    0x02010c46;
         capture     type secondary;
         capture     group default;
+        capture     req nonzero("PBCENTFIR");
     };
 
     ############################################################################
@@ -374,6 +390,7 @@
         scomaddr    0x02010c86;
         capture     type secondary;
         capture     group default;
+        capture     req nonzero("PBEASTFIR");
     };
 
     register PBEASTFIR_ACT1
@@ -382,6 +399,7 @@
         scomaddr    0x02010c87;
         capture     type secondary;
         capture     group default;
+        capture     req nonzero("PBEASTFIR");
     };
 
     ############################################################################
@@ -428,6 +446,7 @@
         scomaddr    0x02010906;
         capture     type secondary;
         capture     group default;
+        capture     req nonzero("PSIFIR");
     };
 
     register PSIHBFIR_ACT1
@@ -436,6 +455,7 @@
         scomaddr    0x02010907;
         capture     type secondary;
         capture     group default;
+        capture     req nonzero("PSIFIR");
     };
 
     ############################################################################
@@ -464,6 +484,7 @@
         scomaddr    0x020109c6;
         capture     type secondary;
         capture     group default;
+        capture     req nonzero("ICPFIR");
     };
 
     register ICPFIR_ACT1
@@ -472,6 +493,7 @@
         scomaddr    0x020109c7;
         capture     type secondary;
         capture     group default;
+        capture     req nonzero("ICPFIR");
     };
 
     ############################################################################
@@ -500,6 +522,7 @@
         scomaddr    0x02010846;
         capture     type secondary;
         capture     group default;
+        capture     req nonzero("PBAFIR");
     };
 
     register PBAFIR_ACT1
@@ -508,6 +531,7 @@
         scomaddr    0x02010847;
         capture     type secondary;
         capture     group default;
+        capture     req nonzero("PBAFIR");
     };
 
     ############################################################################
@@ -536,6 +560,7 @@
         scomaddr    0x02010986;
         capture     type secondary;
         capture     group default;
+        capture     req nonzero("EHHCAFIR");
     };
 
     register EHHCAFIR_ACT1
@@ -544,6 +569,7 @@
         scomaddr    0x02010987;
         capture     type secondary;
         capture     group default;
+        capture     req nonzero("EHHCAFIR");
     };
 
     ############################################################################
@@ -572,6 +598,7 @@
         scomaddr    0x02010946;
         capture     type secondary;
         capture     group default;
+        capture     req nonzero("ENHCAFIR");
     };
 
     register ENHCAFIR_ACT1
@@ -580,6 +607,7 @@
         scomaddr    0x02010947;
         capture     type secondary;
         capture     group default;
+        capture     req nonzero("ENHCAFIR");
     };
 
     ############################################################################
@@ -608,6 +636,7 @@
         scomaddr    0x02012006;
         capture     type secondary;
         capture     group default;
+        capture     req nonzero("PCINESTFIR_0");
     };
 
     register PCINESTFIR_0_ACT1
@@ -616,6 +645,7 @@
         scomaddr    0x02012007;
         capture     type secondary;
         capture     group default;
+        capture     req nonzero("PCINESTFIR_0");
     };
 
     ############################################################################
@@ -644,6 +674,7 @@
         scomaddr    0x02012406;
         capture     type secondary;
         capture     group default;
+        capture     req nonzero("PCINESTFIR_1");
     };
 
     register PCINESTFIR_1_ACT1
@@ -652,6 +683,7 @@
         scomaddr    0x02012407;
         capture     type secondary;
         capture     group default;
+        capture     req nonzero("PCINESTFIR_1");
     };
 
     ############################################################################
@@ -680,6 +712,7 @@
         scomaddr    0x02012806;
         capture     type secondary;
         capture     group default;
+        capture     req nonzero("PCINESTFIR_2");
     };
 
     register PCINESTFIR_2_ACT1
@@ -688,6 +721,7 @@
         scomaddr    0x02012807;
         capture     type secondary;
         capture     group default;
+        capture     req nonzero("PCINESTFIR_2");
     };
 
     ############################################################################
@@ -722,6 +756,7 @@
         scomaddr    0x02011E06;
         capture     type secondary;
         capture     group default;
+        capture     req nonzero("IOMCFIR_1");
     };
 
     register IOMCFIR_1_ACT1
@@ -730,5 +765,6 @@
         scomaddr    0x02011E07;
         capture     type secondary;
         capture     group default;
+        capture     req nonzero("IOMCFIR_1");
     };
 

@@ -195,6 +195,14 @@ errlHndl_t RuleMetaData::loadRuleFile( ScanFacility & i_scanFactory ,
                                             i_scanFactory,
                                             l_chip->cv_registers[i].cv_scomLen,
                                             i_type ) );
+            l_id++;
+
+        }
+
+        // create capture struct for registers.
+        for (int i = 0; i < l_chip->cv_regCount; i++)
+        {
+            uint16_t hashId = l_chip->cv_registers[i].cv_name;
 
             //This flag signifies that a mapping IS or ISN'T created between a
             //uint32_t mapping and a vector of SCAN_COMM_REGISTER_CLASS pointers
@@ -205,7 +213,8 @@ errlHndl_t RuleMetaData::loadRuleFile( ScanFacility & i_scanFactory ,
             // Copy into capture groups.
             std::vector<Prdr::Register::CaptureInfoStruct>::const_iterator
             l_capturesEnd = l_chip->cv_registers[i].cv_captures.end();
-            //For each capture in this register save a Group Type or Requirement.
+            //For each capture in this register save a Group Type or
+            //Requirement.
             for(std::vector<Prdr::Register::CaptureInfoStruct>::const_iterator
                     j = l_chip->cv_registers[i].cv_captures.begin();
                     j != l_capturesEnd;
@@ -213,29 +222,31 @@ errlHndl_t RuleMetaData::loadRuleFile( ScanFacility & i_scanFactory ,
             {
                 if ('G' == (*j).op)
                 {
-                    cv_hwCaptureGroups[(*j).data[0]].push_back(l_regMap[l_id]);
+                    cv_hwCaptureGroups[(*j).data[0]].push_back(
+                                                        cv_hwRegs[hashId]);
                     //Added statement below this to indicate group was created.
                     l_group_is_created = true;
                 }
-                // @jl04 a  Start.
                 // This else if was added for a new capture "type" for registers
                 // primary/secondary.
                 // Cannot put the "type" in with the G group otherwise it will
                 // show up as a i_group of 2 which is not called.
                 else if('T' == (*j).op)
                 {
-                    //@jl06. d Deleted temporary declaration of CaptureType in
-                    // favor of an anonymous declaration.  Calls ctor twice.
-                    cv_hwCaptureType[l_regMap[l_id]] =
-                    CaptureType((RegType)(*j).data[0]); //@jl06 c.
+                    cv_hwCaptureType[cv_hwRegs[hashId]] =
+                                            CaptureType((RegType)(*j).data[0]);
                 }
-                // @jl04 a Stop.
                 else if ('f' == (*j).op)
                 {
                     CaptureRequirement req;
                     req.cv_func = this->getExtensibleFunction(j->func);
 
-                    cv_hwCaptureReq[l_regMap[l_id]] = req;
+                    cv_hwCaptureReq[cv_hwRegs[hashId]] = req;
+                }
+                else if ('P' == (*j).op)
+                {
+                    cv_hwCaptureNonzero[ cv_hwRegs[hashId] ] =
+                                                cv_hwRegs[(*j).data[0]];
                 }
                 else // 'C'
                 {
@@ -244,17 +255,14 @@ errlHndl_t RuleMetaData::loadRuleFile( ScanFacility & i_scanFactory ,
                     req.cv_TargetIndex = (*j).data[1];
                     req.cv_func = NULL;
 
-                    cv_hwCaptureReq[l_regMap[l_id]] = req;
+                    cv_hwCaptureReq[cv_hwRegs[hashId]] = req;
                 }
             }
-            if (!l_group_is_created)  // @jl06 c Add to default group if none there.
+            if (!l_group_is_created)  // Add to default group if none there.
             {
                 // Add to default if no group specified.
-                cv_hwCaptureGroups[1].push_back(l_regMap[l_id]);
+                cv_hwCaptureGroups[1].push_back(cv_hwRegs[hashId]);
             }
-
-            l_id++;
-
         }
 
         for (int i = 0; i < l_chip->cv_ruleCount; i++)
@@ -487,6 +495,26 @@ int32_t RuleMetaData::CaptureErrorData( CaptureData & io_cap,
                 }
                 if( false == l_indexValid )
                 {
+                    continue;
+                }
+            }
+        }
+
+        HwCaptureNonzero_t::const_iterator  l_primRegIter =
+                                                cv_hwCaptureNonzero.find(*i);
+        if(l_primRegIter != cv_hwCaptureNonzero.end())
+        {
+            SCAN_COMM_REGISTER_CLASS * l_primReg =
+                                        (l_primRegIter)->second;
+
+            if( l_primReg )
+            {
+                const BIT_STRING_CLASS *l_bitStringPtr =
+                                        l_primReg->GetBitString();
+                if(l_bitStringPtr->IsZero())
+                {
+                    //skip capture data if corresponding primary FIR is
+                    //zero.
                     continue;
                 }
             }

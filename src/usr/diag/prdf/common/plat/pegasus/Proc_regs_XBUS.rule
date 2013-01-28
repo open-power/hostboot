@@ -72,6 +72,7 @@
         scomaddr    0x04040010;
         capture     type secondary;
         capture     group default;
+        capture     req nonzero("XBUS_LFIR");
     };
 
     register XBUS_LFIR_ACT1
@@ -80,6 +81,7 @@
         scomaddr    0x04040011;
         capture     type secondary;
         capture     group default;
+        capture     req nonzero("XBUS_LFIR");
     };
 
     ############################################################################
@@ -108,6 +110,7 @@
         scomaddr    0x04010c06;
         capture     type secondary;
         capture     group default;
+        capture     req nonzero("PBENFIR");
     };
 
     register PBENFIR_ACT1
@@ -116,6 +119,7 @@
         scomaddr    0x04010c07;
         capture     type secondary;
         capture     group default;
+        capture     req nonzero("PBENFIR");
     };
 
     ############################################################################
@@ -180,6 +184,7 @@
         scomaddr    0x04011406;
         capture     type secondary;
         capture     group default;
+        capture     req nonzero("IOXFIR_1");
     };
 
     register IOXFIR_1_ACT1
@@ -188,6 +193,7 @@
         scomaddr    0x04011407;
         capture     type secondary;
         capture     group default;
+        capture     req nonzero("IOXFIR_1");
     };
 
     ############################################################################

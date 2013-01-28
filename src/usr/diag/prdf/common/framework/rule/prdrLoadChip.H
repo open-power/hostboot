@@ -97,7 +97,7 @@ namespace Prdr
             {
                 uint8_t op;
                 uint32_t data[2];
-                char * func;
+                char* func;
 
                 friend UtilStream& operator>>(UtilStream& i_left,
                                               CaptureInfoStruct & i_right)
@@ -108,6 +108,7 @@ namespace Prdr
                     {
                         case 'G':
                         case 'T':
+                        case 'P':
                             loopMax = 1;
                             break;
 
@@ -124,6 +125,7 @@ namespace Prdr
                         i_left >> i_right.data[i];
 
                     i_right.func = NULL;
+
                     if ('f' == i_right.op)
                     {
                         ReadString(i_left, i_right.func);

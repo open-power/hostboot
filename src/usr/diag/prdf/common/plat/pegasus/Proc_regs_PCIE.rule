@@ -86,6 +86,7 @@
         scomaddr    0x09040010;
         capture     type secondary;
         capture     group default;
+        capture     req nonzero("PCIE_LFIR");
     };
 
     register PCIE_LFIR_ACT1
@@ -94,6 +95,7 @@
         scomaddr    0x09040011;
         capture     type secondary;
         capture     group default;
+        capture     req nonzero("PCIE_LFIR");
     };
 
 # FIXME: RTC 67200 We are currently unable to SCOM to the PCICLOCKFIRs during
@@ -235,6 +237,7 @@
         scomaddr    0x09010806;
         capture     type secondary;
         capture     group default;
+        capture     req nonzero("PBFFIR");
     };
 
     register PBFFIR_ACT1
@@ -243,6 +246,7 @@
         scomaddr    0x09010807;
         capture     type secondary;
         capture     group default;
+        capture     req nonzero("PBFFIR");
     };
 
     ############################################################################
@@ -271,6 +275,7 @@
         scomaddr    0x09011406;
         capture     type secondary;
         capture     group default;
+        capture     req nonzero("IOPPCIFIR_0");
     };
 
     register IOPPCIFIR_0_ACT1
@@ -279,6 +284,7 @@
         scomaddr    0x09011407;
         capture     type secondary;
         capture     group default;
+        capture     req nonzero("IOPPCIFIR_0");
     };
 
     ############################################################################
@@ -307,6 +313,7 @@
         scomaddr    0x09011846;
         capture     type secondary;
         capture     group default;
+        capture     req nonzero("IOPPCIFIR_1");
     };
 
     register IOPPCIFIR_1_ACT1
@@ -315,5 +322,6 @@
         scomaddr    0x09011847;
         capture     type secondary;
         capture     group default;
+        capture     req nonzero("IOPPCIFIR_1");
     };
 

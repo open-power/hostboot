@@ -83,6 +83,7 @@ chip Mba
         name        "MBU.MBA01.MBA_MCBIST.SCOMFIR.MBAFIRACT0";
         scomaddr    0x03010606;
         capture     group FirRegs;
+        capture     req nonzero("MBAFIR");
     };
 
     register MBAFIR_ACT1
@@ -90,6 +91,7 @@ chip Mba
         name        "MBU.MBA01.MBA_MCBIST.SCOMFIR.MBAFIRACT1";
         scomaddr    0x03010607;
         capture     group FirRegs;
+        capture     req nonzero("MBAFIR");
     };
 
     ############################################################################
@@ -138,6 +140,7 @@ chip Mba
         name        "DPHY01.PHY01_DDRPHY_FIR_ACTION0_REG";
         scomaddr    0x800200960301143F;
         capture     group FirRegs;
+        capture     req nonzero("MBADDRPHYFIR");
     };
 
     register MBADDRPHYFIR_ACT1
@@ -145,6 +148,7 @@ chip Mba
         name        "DPHY01.PHY01_DDRPHY_FIR_ACTION1_REG";
         scomaddr    0x800200970301143F;
         capture     group FirRegs;
+        capture     req nonzero("MBADDRPHYFIR");
     };
 
     ############################################################################
@@ -172,6 +176,7 @@ chip Mba
         name        "MBU.MBA01.MBA_SRQ.MBACALFIR_ACTION0";
         scomaddr    0x03010406;
         capture     group FirRegs;
+        capture     req nonzero("MBACALFIR");
     };
 
     register MBACALFIR_ACT1
@@ -179,6 +184,7 @@ chip Mba
         name        "MBU.MBA01.MBA_SRQ.MBACALFIR_ACTION1";
         scomaddr    0x03010407;
         capture     group FirRegs;
+        capture     req nonzero("MBACALFIR");
     };
 
     ############################################################################

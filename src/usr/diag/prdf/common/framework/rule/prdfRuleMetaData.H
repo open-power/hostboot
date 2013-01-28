@@ -228,17 +228,26 @@ class RuleMetaData
         uint32_t cv_dumpType; // dump type
         uint32_t iv_sigOff;   // signature offset for  registers
         std::map<uint16_t, SCAN_COMM_REGISTER_CLASS *> cv_hwRegs;
+
         typedef std::vector<SCAN_COMM_REGISTER_CLASS *> scomRegisterList_t ;
+
         typedef std::map< uint32_t,scomRegisterList_t > HwCaptureGroup_t;
         HwCaptureGroup_t cv_hwCaptureGroups; //capture group associated
         typedef std::map<SCAN_COMM_REGISTER_CLASS *,
                                             CaptureRequirement> HwCaptureReq_t;
         HwCaptureReq_t cv_hwCaptureReq;
+
         //Adding another std::map for passing some data to capture stuff.
         typedef std::map<SCAN_COMM_REGISTER_CLASS *,
                                                 CaptureType> HwCaptureType_t;
         HwCaptureType_t cv_hwCaptureType; // capture type
         std::vector <ErrorRegisterType *> iv_groupList;
+
+        // A std::map to capture secondary register and its corresponding
+        // Primary register.
+        typedef std::map<SCAN_COMM_REGISTER_CLASS *, SCAN_COMM_REGISTER_CLASS *>
+                                                            HwCaptureNonzero_t;
+        HwCaptureNonzero_t cv_hwCaptureNonzero;
 
     private: //operations
 

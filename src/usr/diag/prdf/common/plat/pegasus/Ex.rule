@@ -130,6 +130,7 @@ chip Ex
         scomaddr    0x10040010;
         capture     type secondary;
         capture     group default;
+        capture     req nonzero("EX_LFIR");
     };
 
     register EX_LFIR_ACT1
@@ -138,6 +139,7 @@ chip Ex
         scomaddr    0x10040011;
         capture     type secondary;
         capture     group default;
+        capture     req nonzero("EX_LFIR");
     };
 
     ############################################################################
@@ -166,6 +168,7 @@ chip Ex
         scomaddr    0x10013106;
         capture     type secondary;
         capture     group default;
+        capture     req nonzero("COREFIR");
     };
 
     register COREFIR_ACT1
@@ -174,6 +177,7 @@ chip Ex
         scomaddr    0x10013107;
         capture     type secondary;
         capture     group default;
+        capture     req nonzero("COREFIR");
     };
 
     ############################################################################
@@ -202,6 +206,7 @@ chip Ex
         scomaddr    0x10012806;
         capture     type secondary;
         capture     group default;
+        capture     req nonzero("L2FIR");
     };
 
     register L2FIR_ACT1
@@ -210,6 +215,7 @@ chip Ex
         scomaddr    0x10012807;
         capture     type secondary;
         capture     group default;
+        capture     req nonzero("L2FIR");
     };
 
     ############################################################################
@@ -238,6 +244,7 @@ chip Ex
         scomaddr    0x10010806;
         capture     type secondary;
         capture     group default;
+        capture     req nonzero("L3FIR");
     };
 
     register L3FIR_ACT1
@@ -246,6 +253,7 @@ chip Ex
         scomaddr    0x10010807;
         capture     type secondary;
         capture     group default;
+        capture     req nonzero("L3FIR");
     };
 
     ############################################################################
@@ -274,6 +282,7 @@ chip Ex
         scomaddr    0x10010c06;
         capture     type secondary;
         capture     group default;
+        capture     req nonzero("NCUFIR");
     };
 
     register NCUFIR_ACT1
@@ -282,6 +291,7 @@ chip Ex
         scomaddr    0x10010c07;
         capture     type secondary;
         capture     group default;
+        capture     req nonzero("NCUFIR");
     };
 
     ############################################################################

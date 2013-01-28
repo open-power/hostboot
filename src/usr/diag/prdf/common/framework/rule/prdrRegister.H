@@ -93,6 +93,7 @@ struct CaptureReqStruct
         PRDR_CAPTURE_CONN    = 'C',
         PRDR_CAPTURE_FUNC    = 'f',
         PRDR_CAPTURE_TYPE    = 'T', // Added this for storing a register's type in the capture struct.
+        PRDR_CAPTURE_NONZERO = 'P' // Added this to specify non zero register.
     };
 
     void output(FILE * l_file)
@@ -114,6 +115,7 @@ struct CaptureReqStruct
                 break;
 
             case PRDR_CAPTURE_FUNC:
+            case PRDR_CAPTURE_NONZERO:
                 loopMax = 0;
                 break;
         }
@@ -123,11 +125,23 @@ struct CaptureReqStruct
             l_tmp32 = htonl(data[i]);
             PRDR_FWRITE(&l_tmp32, 4, 1, l_file);
         }
+
         if (type == PRDR_CAPTURE_FUNC)
         {
             if ('"' == (str)[0])
                 str = str.substr(1, str.size() - 2);
             PRDR_FWRITE(str.c_str(), str.size() + 1, 1, l_file);
+        }
+
+        if (type == PRDR_CAPTURE_NONZERO )
+        {
+            if ('"' == (str)[0])
+            {
+                // remove double quotes from the string
+                str = str.substr(1, str.size() - 2);
+            }
+            l_tmp32 = htonl(PRDF::Util::hashString(str.c_str()));
+            fwrite(&l_tmp32, sizeof(l_tmp32), 1, l_file);
         }
     };
 };
