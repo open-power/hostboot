@@ -64,7 +64,8 @@
 #include    "dmi_training.H"
 #include    "proc_cen_framelock.H"
 #include    "dmi_io_run_training.H"
-#include    "dmi_scominit.H"
+#include    "proc_dmi_scominit.H"
+#include    "cen_dmi_scominit.H"
 #include    "proc_cen_set_inband_addr.H"
 #include    "mss_get_cen_ecid.H"
 #include    "io_restore_erepair.H"
@@ -96,6 +97,9 @@ void*    call_mss_getecid( void *io_pArgs )
     errlHndl_t l_err = NULL;
     IStepError l_StepError;
     uint8_t    l_ddr_port_status = 0;
+    uint8_t    l_cache_enable = 0;
+    uint8_t    l_centaur_sub_revision = 0;
+    
 
     mss_get_cen_ecid_ddr_status l_mbaBadMask[2] =
        { MSS_GET_CEN_ECID_DDR_STATUS_MBA0_BAD,
@@ -129,8 +133,8 @@ void*    call_mss_getecid( void *io_pArgs )
         //  updates the attribute ATTR_MSS_ECID and returns the DDR port status
         //  which is a portion of the ECID data.
         FAPI_INVOKE_HWP(l_err, mss_get_cen_ecid,
-                        l_fapi_centaur, l_ddr_port_status);
-
+                        l_fapi_centaur, l_ddr_port_status,
+                        l_cache_enable, l_centaur_sub_revision);
         if (l_err)
         {
             TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
@@ -240,26 +244,10 @@ void*    call_mss_getecid( void *io_pArgs )
 //
 void*    call_proc_dmi_scominit( void *io_pArgs )
 {
-    errlHndl_t l_err = NULL;
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_proc_dmi_scominit entry" );
-
-    // call proc_dmi_scominit.C
-
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_proc_dmi_scominit exit" );
-
-    return l_err;
-}
-
-
-//
-//  Wrapper function to call dmi_scominit
-//
-void*    call_dmi_scominit( void *io_pArgs )
-{
     errlHndl_t l_errl = NULL;
     IStepError l_StepError;
 
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_dmi_scominit entry" );
+    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_proc_dmi_scominit entry" );
 
     // Get all functional MCS chiplets
     TARGETING::TargetHandleList l_mcsTargetList;
@@ -276,14 +264,14 @@ void*    call_dmi_scominit( void *io_pArgs )
                 (const_cast<TARGETING::Target*>(l_pTarget)));
 
         TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                "Running dmi_scominit HWP on "
+                "Running proc_dmi_scominit HWP on "
                 "target HUID %.8X", TARGETING::get_huid(l_pTarget));
 
-        FAPI_INVOKE_HWP(l_errl, dmi_scominit, l_fapi_target);
+        FAPI_INVOKE_HWP(l_errl, proc_dmi_scominit, l_fapi_target);
         if (l_errl)
         {
             TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                        "ERROR 0x%.8X : dmi_scominit HWP returns error",
+                        "ERROR 0x%.8X : proc_dmi_scominit HWP returns error",
                         l_errl->reasonCode());
 
             // capture the target data in the elog
@@ -293,48 +281,83 @@ void*    call_dmi_scominit( void *io_pArgs )
         }
         else
         {
-            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                    "SUCCESS :  dmi_scominit HWP");
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, "SUCCESS :  proc_dmi_scominit HWP");
         }
     }
 
-    if ( l_StepError.isNull() )
+    if( l_errl )
     {
-        // Get all functional membuf chips
-        TARGETING::TargetHandleList l_membufTargetList;
-        getAllChips(l_membufTargetList, TYPE_MEMBUF);
+        /*@
+         * @errortype
+         * @reasoncode  ISTEP_DMI_TRAINING_FAILED
+         * @severity    ERRORLOG::ERRL_SEV_UNRECOVERABLE
+         * @moduleid    ISTEP_PROC_DMI_SCOMINIT
+         * @userdata1   bytes 0-1: plid identifying first error
+         *              bytes 2-3: reason code of first error
+         * @userdata2   bytes 0-1: total number of elogs included
+         *              bytes 2-3: N/A
+         * @devdesc     call to proc_dmi_scominit has failed, target data
+         *              is included in the error logs listed in the
+         *              user data section of this error log.
+         *
+         */
+        l_StepError.addErrorDetails(ISTEP_DMI_TRAINING_FAILED,
+                                    ISTEP_PROC_DMI_SCOMINIT,
+                                    l_errl);
 
-        // Invoke dmi_scominit on each one
-        for (TargetHandleList::const_iterator
-                l_membuf_iter = l_membufTargetList.begin();
-                l_membuf_iter != l_membufTargetList.end();
-                ++l_membuf_iter)
+        errlCommit( l_errl, HWPF_COMP_ID );
+    }
+
+    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_proc_dmi_scominit exit" );
+
+    // end task, returning any errorlogs to IStepDisp
+    return l_StepError.getErrorHandle();
+}
+
+//
+//  Wrapper function to call dmi_scominit
+//
+void*    call_dmi_scominit( void *io_pArgs )
+{
+    errlHndl_t l_errl = NULL;
+    IStepError l_StepError;
+
+    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_dmi_scominit entry" );
+
+    // Get all functional membuf chips
+    TARGETING::TargetHandleList l_membufTargetList;
+    getAllChips(l_membufTargetList, TYPE_MEMBUF);
+
+    // Invoke dmi_scominit on each one
+    for (TargetHandleList::iterator l_membuf_iter = l_membufTargetList.begin();
+            l_membuf_iter != l_membufTargetList.end();
+            ++l_membuf_iter)
+    {
+        const TARGETING::Target* l_pTarget = *l_membuf_iter;
+        const fapi::Target l_fapi_target(
+            TARGET_TYPE_MEMBUF_CHIP,
+            reinterpret_cast<void *>
+                (const_cast<TARGETING::Target*>(l_pTarget)));
+
+        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, "Running cen_dmi_scominit HWP on...");
+        EntityPath l_path;
+        l_path = l_pTarget->getAttr<ATTR_PHYS_PATH>();
+        l_path.dump();
+
+        FAPI_INVOKE_HWP(l_errl, cen_dmi_scominit, l_fapi_target);
+        if (l_errl)
         {
-            const TARGETING::Target* l_pTarget = *l_membuf_iter;
-            const fapi::Target l_fapi_target( TARGET_TYPE_MEMBUF_CHIP,
-                    (const_cast<TARGETING::Target*>(l_pTarget)));
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, "ERROR 0x%.8X : cen_dmi_scominit HWP returns error",
+                      l_errl->reasonCode());
 
-            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                "Running dmi_scominit HWP on "
-                "target HUID %.8X", TARGETING::get_huid(l_pTarget));
+            // capture the target data in the elog
+            ErrlUserDetailsTarget(l_pTarget).addToLog( l_errl );
 
-            FAPI_INVOKE_HWP(l_errl, dmi_scominit, l_fapi_target);
-            if (l_errl)
-            {
-                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                        "ERROR 0x%.8X : dmi_scominit HWP returns error",
-                        l_errl->reasonCode());
-
-                // capture the target data in the elog
-                ErrlUserDetailsTarget(l_pTarget).addToLog( l_errl );
-
-                break;
-            }
-            else
-            {
-                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                        "SUCCESS :  dmi_scominit HWP");
-            }
+            break;
+        }
+        else
+        {
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, "SUCCESS :  dmi_scominit HWP");
         }
     }
 
@@ -349,7 +372,7 @@ void*    call_dmi_scominit( void *io_pArgs )
          *              bytes 2-3: reason code of first error
          * @userdata2   bytes 0-1: total number of elogs included
          *              bytes 2-3: N/A
-         * @devdesc     call to dmi_scominit has failed, target data
+         * @devdesc     call to cen_dmi_scominit has failed, target data
          *              is included in the error logs listed in the
          *              user data section of this error log.
          *

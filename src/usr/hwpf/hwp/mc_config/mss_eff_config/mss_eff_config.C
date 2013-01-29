@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012                   */
+/* COPYRIGHT International Business Machines Corp. 2012,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_eff_config.C,v 1.15 2012/11/16 14:44:04 asaetow Exp $
+// $Id: mss_eff_config.C,v 1.16 2013/01/24 18:33:16 bellows Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/
 //          centaur/working/procedures/ipl/fapi/mss_eff_config.C,v $
 //------------------------------------------------------------------------------
@@ -44,7 +44,9 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
-//   1.16  |          |         |
+//   1.17  |          |         |
+//   1.16  | bellows  |24-JAN-13| Added in CUSTOM bit of SPD and CUSTOM Attr
+//         |          |         | settings.  
 //   1.15  | asaetow  |15-NOV-12| Added call to mss_eff_config_cke_map().
 //         |          |         | NOTE: DO NOT pick-up without
 //         |          |         | mss_eff_config_cke_map.C v1.3 or newer.
@@ -179,6 +181,7 @@ struct mss_eff_config_spd_data
 {
     uint8_t dram_device_type[PORT_SIZE][DIMM_SIZE];
     uint8_t module_type[PORT_SIZE][DIMM_SIZE];
+    uint8_t custom[PORT_SIZE][DIMM_SIZE];
     uint8_t sdram_banks[PORT_SIZE][DIMM_SIZE];
     uint8_t sdram_density[PORT_SIZE][DIMM_SIZE];
     uint8_t sdram_rows[PORT_SIZE][DIMM_SIZE];
@@ -246,6 +249,7 @@ struct mss_eff_config_atts
     uint8_t eff_dimm_size[PORT_SIZE][DIMM_SIZE];
     uint8_t eff_dimm_spare[PORT_SIZE][DIMM_SIZE][RANK_SIZE];
     uint8_t eff_dimm_type;
+    uint8_t eff_custom_dimm;
     uint8_t eff_dram_al; // initialized to 1
     uint8_t eff_dram_asr;
     uint8_t eff_dram_bl;
@@ -423,6 +427,9 @@ fapi::ReturnCode mss_eff_config_read_spd_data(fapi::Target i_target_dimm,
         if(rc) break;
         rc = FAPI_ATTR_GET(ATTR_SPD_MODULE_TYPE, &i_target_dimm,
             p_o_spd_data->module_type[i_port][i_dimm]);
+        if(rc) break;
+        rc = FAPI_ATTR_GET(ATTR_SPD_CUSTOM, &i_target_dimm,
+            p_o_spd_data->custom[i_port][i_dimm]);
         if(rc) break;
         rc = FAPI_ATTR_GET(ATTR_SPD_SDRAM_BANKS, &i_target_dimm,
             p_o_spd_data->sdram_banks[i_port][i_dimm]);
@@ -1076,25 +1083,18 @@ fapi::ReturnCode mss_eff_config_setup_eff_atts(
     {
         case fapi::ENUM_ATTR_SPD_MODULE_TYPE_CDIMM:
             p_o_atts->eff_dimm_type = fapi::ENUM_ATTR_EFF_DIMM_TYPE_CDIMM;
+            FAPI_ERR("ATTR_SPD_MODULE_TYPE_CDIMM is obsolete.  Check your VPD for correct definition on %s!", i_target_mba.toEcmdString());
             break;
         case fapi::ENUM_ATTR_SPD_MODULE_TYPE_RDIMM:
             p_o_atts->eff_dimm_type = fapi::ENUM_ATTR_EFF_DIMM_TYPE_RDIMM;
             break;
         case fapi::ENUM_ATTR_SPD_MODULE_TYPE_UDIMM:
-            // TODO RTC Task 60572
-            // DIMM SPD Module Type in byte 3 can be 0x82.
-            // 0x80 is CDIMM, 0x02 is unbuffered
-            // Problem 1: Firmware SPD DD only returns the lower 4 bits because
-            //   the top 4 bits are reserved in the spec. There needs to be a
-            //   new SPD attribute for the top bit that can be queried by this
-            //   HWP. HW team to provide updated dimm_spd_attributes.xml. FW
-            //   team to support the new attribute.
-            // Problem 2: This HWP and mss_eff_config_termination fail if
-            //   eff_dimm_type is not CDIMM or RDIMM. Depending on the fix for
-            //   Problem 1, the HWPs need fixing to recognize Unbuffered-CDIMM
-            // The workaround is to treat UDIMM(0x02) as a CDIMM
-            //OLD: p_o_atts->eff_dimm_type = fapi::ENUM_ATTR_EFF_DIMM_TYPE_UDIMM;
-            p_o_atts->eff_dimm_type = fapi::ENUM_ATTR_EFF_DIMM_TYPE_CDIMM;
+            if(p_i_data->custom[0][0]) {
+              p_o_atts->eff_dimm_type = fapi::ENUM_ATTR_EFF_DIMM_TYPE_CDIMM;
+            }
+            else {
+              p_o_atts->eff_dimm_type = fapi::ENUM_ATTR_EFF_DIMM_TYPE_UDIMM;
+            }
             break;
         case fapi::ENUM_ATTR_SPD_MODULE_TYPE_LRDIMM:
             p_o_atts->eff_dimm_type = fapi::ENUM_ATTR_EFF_DIMM_TYPE_LRDIMM;
@@ -1103,6 +1103,13 @@ fapi::ReturnCode mss_eff_config_setup_eff_atts(
             FAPI_ERR("Unknown DIMM type on %s!", i_target_mba.toEcmdString());
             FAPI_SET_HWP_ERROR(rc, RC_MSS_PLACE_HOLDER_ERROR);
             return rc;
+    }
+//------------------------------------------------------------------------------
+    if(p_i_data->custom[0][0] == fapi::ENUM_ATTR_SPD_CUSTOM_YES) {
+      p_o_atts->eff_custom_dimm = fapi::ENUM_ATTR_EFF_CUSTOM_DIMM_YES;
+    }
+    else {
+      p_o_atts->eff_custom_dimm = fapi::ENUM_ATTR_EFF_CUSTOM_DIMM_NO;
     }
 //------------------------------------------------------------------------------
     switch(p_i_data->sdram_banks[0][0])
@@ -1733,6 +1740,9 @@ fapi::ReturnCode mss_eff_config_write_eff_atts(
         if(rc) break;
         rc = FAPI_ATTR_SET(ATTR_EFF_DIMM_TYPE, &i_target_mba,
                 p_i_atts->eff_dimm_type);
+        if(rc) break;
+        rc = FAPI_ATTR_SET(ATTR_EFF_CUSTOM_DIMM, &i_target_mba,
+                p_i_atts->eff_custom_dimm);
         if(rc) break;
         rc = FAPI_ATTR_SET(ATTR_EFF_DRAM_AL, &i_target_mba,
                 p_i_atts->eff_dram_al);

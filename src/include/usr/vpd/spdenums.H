@@ -111,6 +111,7 @@ enum
     DIMM_BAD_DQ_DATA                = SPD_FIRST_NORM_KEYWORD | 0x3f,
     SDRAM_DIE_COUNT                 = SPD_FIRST_NORM_KEYWORD | 0x40,
     SDRAM_DEVICE_TYPE_SIGNAL_LOADING = SPD_FIRST_NORM_KEYWORD | 0x41,
+    CUSTOM                           = SPD_FIRST_NORM_KEYWORD | 0x42,
     SPD_LAST_NORM_KEYWORD,
 
     // ==============================================================

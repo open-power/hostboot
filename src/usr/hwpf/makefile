@@ -78,9 +78,10 @@ HWP_ERROR_XML_FILES = hwp/fapiHwpErrorInfo.xml   \
     hwp/poreve_errors.xml \
     hwp/proc_fab_iovalid_errors.xml \
     hwp/nest_chiplets/proc_chiplet_scominit/proc_abus_scominit_errors.xml \
-    hwp/nest_chiplets/proc_chiplet_scominit/proc_xbus_scominit_errors.xml
-
-
+    hwp/nest_chiplets/proc_chiplet_scominit/proc_xbus_scominit_errors.xml \
+    hwp/dmi_training/proc_dmi_scominit_errors.xml \
+    hwp/dmi_training/cen_dmi_scominit_errors.xml
+    
 ## these get generated into obj/genfiles/AttributeIds.H
 HWP_ATTR_XML_FILES = hwp/memory_attributes.xml \
                      hwp/L2_L3_attributes.xml \
@@ -125,7 +126,9 @@ HWP_INITFILES = hwp/initfiles/sample.initfile \
                 hwp/initfiles/p8.xbus.scom.initfile \
                 hwp/initfiles/p8.mcs.scom.initfile \
                 hwp/initfiles/p8.as.scom.initfile \
-                hwp/initfiles/p8.nx.scom.initfile
+                hwp/initfiles/p8.nx.scom.initfile \
+                hwp/initfiles/p8.dmi.custom.scom.initfile \
+		hwp/initfiles/cen.dmi.custom.scom.initfile
 
 HWP_IF_DEFINE_DIR = hwp/initfiles
 

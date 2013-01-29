@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/hwpf/hwp/dmi_training/mss_getecid/mss_get_cen_ecid.H $ */
+/* $Source: src/usr/hwpf/hwp/dmi_training/proc_dmi_scominit/proc_dmi_scominit.H $ */
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/* COPYRIGHT International Business Machines Corp. 2013                   */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,49 +20,45 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_get_cen_ecid.H,v 1.6 2013/01/21 17:11:37 bellows Exp $
+// $Id: proc_dmi_scominit.H,v 1.3 2013/01/24 20:20:34 thomsen Exp $
+// $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_dmi_scominit.H,v $
 //------------------------------------------------------------------------------
-// *|
 // *! (C) Copyright International Business Machines Corp. 2012
 // *! All Rights Reserved -- Property of IBM
 // *! *** IBM Confidential ***
-// *|
-// *! TITLE       : mss_get_cen_ecid.H
-// *! DESCRIPTION : Get ECID string from target using SCOM's
+//------------------------------------------------------------------------------
+// *! TITLE       : proc_dmi_scominit.H
+// *! DESCRIPTION : Invoke DMI initfile (FAPI)
 // *!
-// *! OWNER NAME  : Mark Bellows Email: bellows@us.ibm.com
-// *! Copied From : Joe McGill's proc_cleanup code 
+// *! OWNER NAME  : Mike Jones        Email: mjjones@us.ibm.com
+// *! BACKUP NAME : Joe McGill        Email: jmcgill@us.ibm.com
 // *!
-// *! ADDITIONAL COMMENTS:
-// *!
+// *! ADDITIONAL COMMENTS :
 // *!
 //------------------------------------------------------------------------------
-// CHANGE HISTORY:
 //------------------------------------------------------------------------------
-// Version:|  Author: |  Date:  | Comment:
-//---------|----------|---------|-----------------------------------------------
-//   1.6   | bellows  |21-JAN-13| added in sub revision reader
-//   1.5   | bellows  |15-JAN-13| moved Cache Enable Information to the caller
-// 1.1-1.4 | various  |07-DEC-12| Original Program
+//  Version		Date		Owner		Description
+//------------------------------------------------------------------------------
+//    1.3	   	01/23/13	thomsen		Added separate calls to base & customized scominit files. Removed separate calls to SIM vs. HW scominit files
+//    1.2	   	01/10/13	thomsen		Added SIM and HW scominit filename strings
+//										Added *_OVERRIDE_IF to allow initfile overrides for specific bus instances
+//                                      CO-REQs required: p8.dmi.vbu.scom.initfile v1.1 and p8.dmi.hw.scom.initfile v1.1
+//    1.1       8/11/12     jmcgill		Initial release
+//------------------------------------------------------------------------------
 
-#ifndef _MSS_GET_CEN_ECID_H_
-#define _MSS_GET_CEN_ECID_H_
+#ifndef PROC_DMI_SCOMINIT_H_
+#define PROC_DMI_SCOMINIT_H_
 
 //------------------------------------------------------------------------------
 // Includes
 //------------------------------------------------------------------------------
-
 #include <fapi.H>
-#include "cen_scom_addresses.H"
 
-//defines enumerators
-enum mss_get_cen_ecid_ddr_status
-{
-   MSS_GET_CEN_ECID_DDR_STATUS_ALL_GOOD = 0,
-   MSS_GET_CEN_ECID_DDR_STATUS_MBA1_BAD = 1,
-   MSS_GET_CEN_ECID_DDR_STATUS_MBA0_BAD = 2,
-   MSS_GET_CEN_ECID_DDR_STATUS_ALL_BAD = 3,
-};
+//------------------------------------------------------------------------------
+// Constant definitions
+//------------------------------------------------------------------------------
+const char * const MCS_DMI_BASE_IF   = "p8.dmi.scom.if";
+const char * const MCS_DMI_CUSTOM_IF = "p8.dmi.custom.scom.if";
 
 //------------------------------------------------------------------------------
 // Structure definitions
@@ -70,33 +66,28 @@ enum mss_get_cen_ecid_ddr_status
 
 // function pointer typedef definition for HWP call support
 typedef fapi::ReturnCode
-(*mss_get_cen_ecid_FP_t)(const fapi::Target& i_target, uint8_t & ddr_port_status, uint8_t & cache_enable_o,      uint8_t & centaur_sub_revision_o
-);
+(*proc_dmi_scominit_FP_t)(const fapi::Target & i_target);
 
+extern "C" {
 
 //------------------------------------------------------------------------------
 // Function prototypes
 //------------------------------------------------------------------------------
 
-extern "C"
-{
+/**
+ * @brief HWP that calls the DMI SCOM initfiles
+ *
+ * Should be called with all functional MCS chiplets
+ *
+ * @param[in] i_target Reference to target
+ *                     If TARGET_TYPE_MCS_CHIPLET, calls:
+ *                     - p8.dmi.scom.initfile
+ *
+ * @return ReturnCode
+ */
+fapi::ReturnCode proc_dmi_scominit(const fapi::Target & i_target);
 
-// function: FAPI mss_get_cen_ecid HWP entry point
-// parameters: i_target => cen chip target
-//             &ddr_port_status => indicates if the MBA's are bad, with MBA 1 being the rightmost bit and MBA 0 being the next to right most bit
-//             &cache_enable_o => what it would have set the cache enable attribute to if it sets attributes
-// returns: FAPI_RC_SUCCESS if FBC stop is deasserted at end of execution
-//          else FAPI getscom/putscom return code for failing operation
-// Updates attributes: ATTR_MSS_ECID[2] -> bits 1-64 and 65-128 of the ECID
-//                     ATTR_MSS_CACHE_ENABLE -> Stores which parts of the eDRAM are enabled
-fapi::ReturnCode mss_get_cen_ecid(
-    const fapi::Target& i_target,
-    uint8_t & ddr_port_status,
-    uint8_t & cache_enable_o,
-    uint8_t & centaur_sub_revision_o
-
-    );
 
 } // extern "C"
 
-#endif // _MSS_GET_CEN_ECID_H_
+#endif // PROC_DMI_SCOMINIT_H_

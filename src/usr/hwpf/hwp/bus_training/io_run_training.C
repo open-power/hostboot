@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012                   */
+/* COPYRIGHT International Business Machines Corp. 2012,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: io_run_training.C,v 1.25 2012/12/04 08:29:17 varkeykv Exp $
+// $Id: io_run_training.C,v 1.28 2013/01/28 20:19:06 jaswamin Exp $
 // *!***************************************************************************
 // *! (C) Copyright International Business Machines Corp. 1997, 1998
 // *!           All Rights Reserved -- Property of IBM
@@ -39,6 +39,7 @@
 //------------------------------------------------------------------------------
 // Version:|Author: | Date:  | Comment:
 // --------|--------|--------|--------------------------------------------------
+//  1.27   |jaswamin|01/28/13|Changed fatal errors to warning prints to allow training to continue
 //   1.0   |varkeykv|09/27/11|Initial check in . Have to modify targets once bus target is defined and available.Not tested in any way other than in unit SIM IOTK
 //   1.1   |varkeykv|11/16/11|Fixed header files & dependencies
 //------------------------------------------------------------------------------
@@ -70,6 +71,9 @@ ReturnCode io_run_training(const Target &master_target,const Target &slave_targe
           slave_group=0;
           // Workaround - HW 220654 -- Need to split WDERF into WDE + RF due to sync problem
           rc=init1.run_training(master_target,master_interface,master_group,slave_target,slave_interface,slave_group);
+          if(rc){
+               return rc;
+          }
           rc=init2.run_training(master_target,master_interface,master_group,slave_target,slave_interface,slave_group);
      }
      //This is an X Bus
@@ -84,18 +88,14 @@ ReturnCode io_run_training(const Target &master_target,const Target &slave_targe
                if(!is_master){
                      //Swap master and slave targets !!
                      FAPI_DBG("X Bus ..target swap performed");
-                     rc=init.run_training(slave_target,slave_interface,slave_group,master_target,master_interface,master_group);
-                     //If one clock group cannot be trained.. bus cannot be used..so return rc to plat
-                     if(!rc.ok()){
-                         return(rc);
-                     }
-			   }
+                    rc=init1.run_training(slave_target,slave_interface,slave_group,master_target,master_interface,master_group);
+                    if(rc) return rc;
+                    rc=init2.run_training(slave_target,slave_interface,slave_group,master_target,master_interface,master_group);
+	       }
                else{
-                     rc=init.run_training(master_target,master_interface,master_group,slave_target,slave_interface,slave_group);
-                     //If one clock group cannot be trained.. bus cannot be used..so return rc to plat
-                     if(!rc.ok()){
-                         return(rc);
-                     }
+                    rc=init1.run_training(master_target,master_interface,master_group,slave_target,slave_interface,slave_group);
+                    if(rc) return rc;
+                    rc=init2.run_training(master_target,master_interface,master_group,slave_target,slave_interface,slave_group);
                }
           }
      }
@@ -111,11 +111,15 @@ ReturnCode io_run_training(const Target &master_target,const Target &slave_targe
                if(!is_master)
                {
                     FAPI_DBG("A Bus ..target swap performed");
-                    rc=init.run_training(slave_target,slave_interface,slave_group,master_target,master_interface,master_group);
+                    rc=init1.run_training(slave_target,slave_interface,slave_group,master_target,master_interface,master_group);
+                    if(rc) return rc;
+                    rc=init2.run_training(slave_target,slave_interface,slave_group,master_target,master_interface,master_group);
                }
                else
                {
-                    rc=init.run_training(master_target,master_interface,master_group,slave_target,slave_interface,slave_group);
+                    rc=init1.run_training(master_target,master_interface,master_group,slave_target,slave_interface,slave_group);
+                    if(rc) return rc;
+                    rc=init2.run_training(master_target,master_interface,master_group,slave_target,slave_interface,slave_group);
                }
           }
      }

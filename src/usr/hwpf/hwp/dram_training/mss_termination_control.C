@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_termination_control.C,v 1.15 2013/01/14 23:41:58 mwuu Exp $
+// $Id: mss_termination_control.C,v 1.16 2013/01/24 20:56:09 mwuu Exp $
 /* File is created by SARAVANAN SETHURAMAN on Thur 29 Sept 2011. */
 
 //------------------------------------------------------------------------------
@@ -43,6 +43,7 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
+//  1.16   | mwuu	  |24-Jan-13| Fixed cal_slew extraction of bits.
 //  1.15   | mwuu	  |14-Jan-13| Altered error message for unsupported slew rate
 //  1.14   | mwuu	  |14-Jan-13| Removed error messages from slew cal fail when
 //         |          |         | in SIM and using unsupported slew rates.
@@ -853,7 +854,7 @@ fapi::ReturnCode config_rd_cen_vref (const fapi::Target & i_target_mba, uint8_t 
  * Parameters: target: mba;
  * ---------------------------------------------------------------------------*/
 
-fapi::ReturnCode mss_slew_cal(const fapi::Target &i_target)
+fapi::ReturnCode mss_slew_cal(const fapi::Target &i_target_mba)
 {
 	fapi::ReturnCode rc;
     uint32_t rc_ecmd = 0;
@@ -945,13 +946,14 @@ fapi::ReturnCode mss_slew_cal(const fapi::Target &i_target)
 	const uint8_t BB_LOCK_BIT = 56;
 	// general purpose 100 ns delay for HW mode  (2000 sim cycles if simclk = 20ghz)
 	const uint16_t	DELAY_100NS		= 100;
+	const uint16_t	DELAY_2000NCLKS	= 4000;		// roughly 2000 nclks if DDR freq >= 1066
 	// normally 2000, but since cal doesn't work in SIM, setting to 1
 	const uint16_t	DELAY_SIMCYCLES	= 1;	
 	const uint8_t	MAX_POLL_LOOPS	= 20;
 
 	// verify which ports are functional
 	rc = FAPI_ATTR_GET(ATTR_MSS_EFF_DIMM_FUNCTIONAL_VECTOR,
-			&i_target, ports_valid);
+			&i_target_mba, ports_valid);
 	if (rc)
 	{
 		FAPI_ERR("Failed to get attribute: "
@@ -967,7 +969,7 @@ fapi::ReturnCode mss_slew_cal(const fapi::Target &i_target)
 		return rc;
 	}
 	// Get DDR type (DDR3 or DDR4)
-	rc = FAPI_ATTR_GET(ATTR_EFF_DRAM_GEN, &i_target, ddr_type);
+	rc = FAPI_ATTR_GET(ATTR_EFF_DRAM_GEN, &i_target_mba, ddr_type);
 	if (rc)
 	{
 		FAPI_ERR("Failed to get attribute: ATTR_EFF_DRAM_GEN");
@@ -980,19 +982,19 @@ fapi::ReturnCode mss_slew_cal(const fapi::Target &i_target)
 		ddr_idx = 0;
 	} else {	// EMPTY ?? how to handle?
 		FAPI_ERR("Invalid ATTR_DRAM_DRAM_GEN = %d, %s!", ddr_type,
-				i_target.toEcmdString());
+				i_target_mba.toEcmdString());
 		FAPI_SET_HWP_ERROR(rc, RC_MSS_INVALID_DRAM_GEN);
 		return rc;
 	}
 
 	// get freq from parent
-	rc = fapiGetParentChip(i_target, l_target_centaur); if(rc) return rc;
+	rc = fapiGetParentChip(i_target_mba, l_target_centaur); if(rc) return rc;
 	rc = FAPI_ATTR_GET(ATTR_MSS_FREQ, &l_target_centaur, ddr_freq);
 	if(rc) return rc;
 
 	if (ddr_freq == 0) {
 		FAPI_ERR("Invalid ATTR_MSS_FREQ = %d on %s!", ddr_freq,
-				i_target.toEcmdString());
+				i_target_mba.toEcmdString());
 		FAPI_SET_HWP_ERROR(rc, RC_MSS_INVALID_FREQ);
 		return rc;
 	}
@@ -1007,9 +1009,6 @@ fapi::ReturnCode mss_slew_cal(const fapi::Target &i_target)
 		freq_idx = 0;		// for 1066-
 	}
 
-	FAPI_INF("Enabling slew calibration engine... dram=DDR%i(%u), freq=%u(%u)",
-			(ddr_type+2), ddr_idx, ddr_freq, freq_idx);
-
 	for (uint8_t l_port=0; l_port < MAX_NUM_PORTS; l_port++)
 	{
 		uint8_t port_val = (ports_valid & (0xF0 >> (4 * l_port)));
@@ -1022,7 +1021,7 @@ fapi::ReturnCode mss_slew_cal(const fapi::Target &i_target)
 		}
 	//	Step A: Configure ADR registers and MCLK detect (done in ddr_phy_reset)
 	// DPHY01_DDRPHY_ADR_SLEW_CAL_CNTL_P0_ADR32S0_0x800080390301143F + port
-		rc = fapiGetScom(i_target, slew_cal_cntl[l_port], ctl_reg);
+		rc = fapiGetScom(i_target_mba, slew_cal_cntl[l_port], ctl_reg);
 		if (rc)
 		{
 			FAPI_ERR("Error reading DDRPHY_ADR_SLEW_CAL_CNTL register.");
@@ -1039,18 +1038,28 @@ fapi::ReturnCode mss_slew_cal(const fapi::Target &i_target)
 			return rc;
 		}
 
+		FAPI_INF("%s: Enabling slew calibration engine on Port %i: DDR%i(%u) "
+			   "%u(%u)", i_target_mba.toEcmdString(), l_port, (ddr_type+2),
+			   ddr_idx, ddr_freq, freq_idx);
+
 		// DPHY01_DDRPHY_ADR_SLEW_CAL_CNTL_P0_ADR32S0_0x800080390301143F + port
-		rc = fapiPutScom(i_target, slew_cal_cntl[l_port], ctl_reg);
+		rc = fapiPutScom(i_target_mba, slew_cal_cntl[l_port], ctl_reg);
 		if (rc)
 		{
 			FAPI_ERR("Error enabling slew calibration engine in "
 					"DDRPHY_ADR_SLEW_CAL_CNTL register.");
 			return rc;
 		}
+		// Note: must be 2000 nclks+ after setting enable bit
+		rc = fapiDelay(DELAY_2000NCLKS, 1);
+		if (rc) {
+			FAPI_ERR("Error executing fapiDelay of 2000 nclks or 1 simcycle");
+			return rc;
+		}
 
 		//---------------------------------------------------------------------/
 		//	Step 1. Check for BB lock.
-		FAPI_INF("Wait for BB lock in status register, bit %u", BB_LOCK_BIT);
+		FAPI_DBG("Wait for BB lock in status register, bit %u", BB_LOCK_BIT);
 		for (poll_count=0; poll_count < MAX_POLL_LOOPS; poll_count++)
 		{
 			rc = fapiDelay(DELAY_100NS, DELAY_SIMCYCLES);
@@ -1059,7 +1068,7 @@ fapi::ReturnCode mss_slew_cal(const fapi::Target &i_target)
 				return rc;
 			}
 	// DPHY01_DDRPHY_ADR_SYSCLK_PR_VALUE_RO_P0_ADR32S0_0x800080340301143F + port
-			rc = fapiGetScom(i_target, slew_cal_stat[l_port], stat_reg);
+			rc = fapiGetScom(i_target_mba, slew_cal_stat[l_port], stat_reg);
 			if (rc)
 			{
 				FAPI_ERR("Error reading DDRPHY_ADR_SYSCLK_PR_VALUE_RO register "
@@ -1073,7 +1082,13 @@ fapi::ReturnCode mss_slew_cal(const fapi::Target &i_target)
 		}
 
 		if (poll_count == MAX_POLL_LOOPS) {
-			FAPI_INF("Timeout on polling BB_Lock, continuing...");
+			FAPI_INF("WARNING: Timeout on polling BB_Lock, continuing...");
+//			return rc;
+		}
+		else
+		{
+			FAPI_DBG("polling finished in %i loops (%u ns)",
+					poll_count, (100*poll_count));
 		}
 
 		//---------------------------------------------------------------------/
@@ -1095,7 +1110,6 @@ fapi::ReturnCode mss_slew_cal(const fapi::Target &i_target)
 					// slew_table[ddr3/4][dq/adr][freq][impedance][slew_rate]
 					rc_ecmd |= ctl_reg.insertFromRight(cal_slew, 59, 5);
 
-					// Note: must be 2000 nclks+ after setting enable bit
 					rc_ecmd |= ctl_reg.setBit(START_BIT);	// set start bit(48)
 					FAPI_DBG("%s Slew cntl_reg(48:63)=0x%04X, i_slew=%i,0x%02x "
 						"(59:63)", (data_adr ? "ADR" : "DATA"),
@@ -1111,7 +1125,7 @@ fapi::ReturnCode mss_slew_cal(const fapi::Target &i_target)
 					FAPI_INF("Starting slew calibration, ddr_idx=%i, "
 						"data_adr=%i, imp=%i, slewrate=%i", ddr_idx, data_adr,
 						imp, (slew+3));
-					rc = fapiPutScom(i_target, slew_cal_cntl[l_port], ctl_reg);
+					rc = fapiPutScom(i_target_mba, slew_cal_cntl[l_port], ctl_reg);
 					if (rc)
 					{
 						FAPI_ERR("Error starting slew calibration.");
@@ -1122,10 +1136,8 @@ fapi::ReturnCode mss_slew_cal(const fapi::Target &i_target)
 					for (poll_count=0; poll_count < MAX_POLL_LOOPS;
 							poll_count++)
 					{
-						FAPI_INF("polling for calibration status, count=%i",
-								poll_count);
 	// DPHY01_DDRPHY_ADR_SYSCLK_PR_VALUE_RO_P0_ADR32S0_0x800080340301143F + port
-						rc = fapiGetScom(i_target, slew_cal_stat[l_port],
+						rc = fapiGetScom(i_target_mba, slew_cal_stat[l_port],
 								stat_reg);
 						if (rc)
 						{
@@ -1152,28 +1164,25 @@ fapi::ReturnCode mss_slew_cal(const fapi::Target &i_target)
 						}
 					}
 
-					if (cal_status == 3)
+					if (cal_status > 1)
 					{
-						FAPI_INF("slew calibration completed successfully");
-
-						cal_slew = cal_slew & 0x80;	// clear bits 6:0
-						rc_ecmd = stat_reg.extractPreserve(&cal_slew, 60, 4);
-						if (rc_ecmd)
+						if (cal_status == 3)
 						{
-							FAPI_ERR("Error getting calibration output "
-									"slew value");
-							rc.setEcmdError(rc_ecmd);
-							return rc;
+							FAPI_DBG("slew calibration completed successfully,"
+								" loop=%i input=0x%02x",	poll_count, 
+								(cal_slew & 0x1F));
 						}
-						calibrated_slew[data_adr][l_port][imp][slew] = cal_slew;
-					}
-					else if (cal_status == 2)
-					{
-						FAPI_INF("WARNING: occurred during slew "
-								"calibration, continuing...");
-
+						else if (cal_status == 2)
+						{
+							FAPI_INF("WARNING: occurred during slew "
+								"calibration, imp=%i, slew=%i, input=0x%x "
+								"continuing...", imp, slew, (cal_slew & 0x1F));
+						}
 						cal_slew = cal_slew & 0x80;	// clear bits 6:0
-						rc_ecmd = stat_reg.extractPreserve(&cal_slew, 60, 4);
+						rc_ecmd = stat_reg.extractPreserve(&cal_slew, 60, 4, 4);
+						FAPI_DBG("MSS_SLEW_RATE_%s port[%i]imp[%i]slew[%i] = "
+								"0x%02x",	(data_adr ? "ADR" : "DATA"), l_port,
+								imp, slew, (cal_slew & 0xF));
 						if (rc_ecmd)
 						{
 							FAPI_ERR("Error getting calibration output "
@@ -1202,14 +1211,15 @@ fapi::ReturnCode mss_slew_cal(const fapi::Target &i_target)
 							}
 							else
 							{
-								FAPI_ERR("Slew calibration timed out");
+								FAPI_ERR("Slew calibration timed out, loop=%i",
+										poll_count);
 							}
 							FAPI_ERR("Slew calibration failed on %s slew: imp_idx="
 							"%d, slew_idx=%d, slew_table=0x%02X, "
 							"status=0x%04X on %s!",
 							(data_adr ? "ADR" : "DATA"), imp, slew,
 							cal_slew, stat_reg.getHalfWord(3),
-							i_target.toEcmdString());
+							i_target_mba.toEcmdString());
 
 							FAPI_SET_HWP_ERROR(rc, RC_MSS_SLEW_CAL_ERROR);
 							//return rc;
@@ -1223,7 +1233,7 @@ fapi::ReturnCode mss_slew_cal(const fapi::Target &i_target)
 
 		// disable calibration engine for port
 		ctl_reg.clearBit(ENABLE_BIT);
-		rc = fapiPutScom(i_target, slew_cal_cntl[l_port], ctl_reg);
+		rc = fapiPutScom(i_target_mba, slew_cal_cntl[l_port], ctl_reg);
 		if (rc)
 		{
 			FAPI_ERR("Error disabling slew calibration engine in "
@@ -1242,14 +1252,14 @@ fapi::ReturnCode mss_slew_cal(const fapi::Target &i_target)
 	}
 	FAPI_INF("Setting output slew tables ATTR_MSS_SLEW_RATE_DATA/ADR");
 	// ATTR_MSS_SLEW_RATE_DATA [2][4][4]	port, imped, slew_rate
-	rc = FAPI_ATTR_SET(ATTR_MSS_SLEW_RATE_DATA, &i_target, calibrated_slew[0]);
+	rc = FAPI_ATTR_SET(ATTR_MSS_SLEW_RATE_DATA, &i_target_mba, calibrated_slew[0]);
 	if (rc)
 	{
 		FAPI_ERR("Failed to set attribute: ATTR_MSS_SLEW_RATE_DATA");
 		return rc;
 	}
 	// ATTR_MSS_SLEW_RATE_ADR [2][4][4]		port, imped, slew_rate
-	rc = FAPI_ATTR_SET(ATTR_MSS_SLEW_RATE_ADR, &i_target, calibrated_slew[1]);
+	rc = FAPI_ATTR_SET(ATTR_MSS_SLEW_RATE_ADR, &i_target_mba, calibrated_slew[1]);
 	if (rc)
 	{
 		FAPI_ERR("Failed to set attribute: ATTR_MSS_SLEW_RATE_ADR");
@@ -1264,14 +1274,14 @@ fapi::ReturnCode mss_slew_cal(const fapi::Target &i_target)
 	};
 
 	// Get desired dq/dqs slew rate & impedance from attribute
-	rc = FAPI_ATTR_GET(ATTR_EFF_CEN_SLEW_RATE_DQ_DQS, &i_target,
+	rc = FAPI_ATTR_GET(ATTR_EFF_CEN_SLEW_RATE_DQ_DQS, &i_target_mba,
 			slew_imp_val[SLEW_TYPE_DATA][SLEW]);
 	if (rc)
 	{
 		FAPI_ERR("Failed to get attribute: ATTR_EFF_CEN_SLEW_RATE_DQ_DQS");
 		return rc;
 	}
-	rc = FAPI_ATTR_GET(ATTR_EFF_CEN_DRV_IMP_DQ_DQS, &i_target,
+	rc = FAPI_ATTR_GET(ATTR_EFF_CEN_DRV_IMP_DQ_DQS, &i_target_mba,
 			slew_imp_val[SLEW_TYPE_DATA][IMP]);
 	if (rc)
 	{
@@ -1310,19 +1320,24 @@ fapi::ReturnCode mss_slew_cal(const fapi::Target &i_target)
 			case fapi::ENUM_ATTR_EFF_CEN_DRV_IMP_DQ_DQS_OHM40_FFE120:
 				slew_imp_val[SLEW_TYPE_DATA][IMP][j]=40;
 				break;
+			default:
+				FAPI_INF("WARNING: EFF_CEN_DRV_IMP_DQ_DQS attribute "
+						"invalid, using value of 0");
+//				FAPI_SET_HWP_ERROR(rc, RC_MSS_IMP_INPUT_ERROR);
+//				return rc;
 		}
 		FAPI_DBG("switched imp to value of %u",
 				slew_imp_val[SLEW_TYPE_DATA][IMP][j]);
 	}
 	// Get desired ADR control slew rate & impedance from attribute
-	rc = FAPI_ATTR_GET(ATTR_EFF_CEN_SLEW_RATE_CNTL, &i_target,
+	rc = FAPI_ATTR_GET(ATTR_EFF_CEN_SLEW_RATE_CNTL, &i_target_mba,
 			slew_imp_val[SLEW_TYPE_ADR_CNTL][SLEW]);
 	if (rc)
 	{
 		FAPI_ERR("Failed to get attribute: ATTR_EFF_CEN_SLEW_RATE_CNTL");
 		return rc;
 	}
-	rc = FAPI_ATTR_GET(ATTR_EFF_CEN_DRV_IMP_CNTL, &i_target,
+	rc = FAPI_ATTR_GET(ATTR_EFF_CEN_DRV_IMP_CNTL, &i_target_mba,
 			slew_imp_val[SLEW_TYPE_ADR_CNTL][IMP]);
 	if (rc)
 	{
@@ -1330,14 +1345,14 @@ fapi::ReturnCode mss_slew_cal(const fapi::Target &i_target)
 		return rc;
 	}
 	// Get desired ADR command slew rate & impedance from attribute
-	rc = FAPI_ATTR_GET(ATTR_EFF_CEN_SLEW_RATE_ADDR, &i_target,
+	rc = FAPI_ATTR_GET(ATTR_EFF_CEN_SLEW_RATE_ADDR, &i_target_mba,
 			slew_imp_val[SLEW_TYPE_ADR_ADDR][SLEW]);
 	if (rc)
 	{
 		FAPI_ERR("Failed to get attribute: ATTR_EFF_CEN_SLEW_RATE_ADDR");
 		return rc;
 	}
-	rc = FAPI_ATTR_GET(ATTR_EFF_CEN_DRV_IMP_ADDR, &i_target,
+	rc = FAPI_ATTR_GET(ATTR_EFF_CEN_DRV_IMP_ADDR, &i_target_mba,
 			slew_imp_val[SLEW_TYPE_ADR_ADDR][IMP]);
 	if (rc)
 	{
@@ -1345,14 +1360,14 @@ fapi::ReturnCode mss_slew_cal(const fapi::Target &i_target)
 		return rc;
 	}
 	// Get desired ADR clock slew rate & impedance from attribute
-	rc = FAPI_ATTR_GET(ATTR_EFF_CEN_SLEW_RATE_CLK, &i_target,
+	rc = FAPI_ATTR_GET(ATTR_EFF_CEN_SLEW_RATE_CLK, &i_target_mba,
 			slew_imp_val[SLEW_TYPE_ADR_CLK][SLEW]);
 	if (rc)
 	{
 		FAPI_ERR("Failed to get attribute: ATTR_EFF_CEN_SLEW_RATE_CLK");
 		return rc;
 	}
-	rc = FAPI_ATTR_GET(ATTR_EFF_CEN_DRV_IMP_CLK, &i_target,
+	rc = FAPI_ATTR_GET(ATTR_EFF_CEN_DRV_IMP_CLK, &i_target_mba,
 			slew_imp_val[SLEW_TYPE_ADR_CLK][IMP]);
 	if (rc)
 	{
@@ -1360,14 +1375,14 @@ fapi::ReturnCode mss_slew_cal(const fapi::Target &i_target)
 		return rc;
 	}
 	// Get desired ADR Spare clock slew rate & impedance from attribute
-	rc = FAPI_ATTR_GET(ATTR_EFF_CEN_SLEW_RATE_SPCKE, &i_target,
+	rc = FAPI_ATTR_GET(ATTR_EFF_CEN_SLEW_RATE_SPCKE, &i_target_mba,
 			slew_imp_val[SLEW_TYPE_ADR_SPCKE][SLEW]);
 	if (rc)
 	{
 		FAPI_ERR("Failed to get attribute: ATTR_EFF_CEN_SLEW_RATE_SPCKE");
 		return rc;
 	}
-	rc = FAPI_ATTR_GET(ATTR_EFF_CEN_DRV_IMP_SPCKE, &i_target,
+	rc = FAPI_ATTR_GET(ATTR_EFF_CEN_DRV_IMP_SPCKE, &i_target_mba,
 			slew_imp_val[SLEW_TYPE_ADR_SPCKE][IMP]);
 	if (rc)
 	{
@@ -1394,7 +1409,7 @@ fapi::ReturnCode mss_slew_cal(const fapi::Target &i_target)
 				slew_imp_val[slew_type][IMP][l_port],
 				slew_imp_val[slew_type][SLEW][l_port]);
 
-			config_slew_rate(i_target, l_port, slew_type,
+			config_slew_rate(i_target_mba, l_port, slew_type,
 					slew_imp_val[slew_type][IMP][l_port],
 					slew_imp_val[slew_type][SLEW][l_port]);
 		}

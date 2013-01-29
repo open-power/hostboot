@@ -35,6 +35,7 @@
  * ------   --------------  ----------  ----------- ----------------------------
  *                          mjjones     06/27/2011  Created.
  *                          bofferdn    09/13/2011  Support fapi->hb mapping
+ *                          thi         01/28/2013  Add SPD CUSTOM attr
  */
 
 #ifndef FAPIPLATATTRIBUTESERVICE_H_
@@ -494,6 +495,8 @@ fapi::ReturnCode fapiPlatGetProcPcieBarSize (
     fapi::platAttrSvc::fapiPlatGetSpdAttr( PTARGET, SPD::SDRAM_DEVICE_TYPE, &(VAL), sizeof(VAL) )
 #define ATTR_SPD_SDRAM_DEVICE_TYPE_SIGNAL_LOADING_GETMACRO(ID, PTARGET, VAL) \
     fapi::platAttrSvc::fapiPlatGetSpdAttr( PTARGET, SPD::SDRAM_DEVICE_TYPE_SIGNAL_LOADING, &(VAL), sizeof(VAL) )
+#define ATTR_SPD_CUSTOM_GETMACRO(ID, PTARGET, VAL) \
+    fapi::platAttrSvc::fapiPlatGetSpdAttr( PTARGET, SPD::CUSTOM, &(VAL), sizeof(VAL) )
 #define ATTR_SPD_SDRAM_DIE_COUNT_GETMACRO(ID, PTARGET, VAL) \
     fapi::platAttrSvc::fapiPlatGetSpdAttr( PTARGET, SPD::SDRAM_DIE_COUNT, &(VAL), sizeof(VAL) )
 #define ATTR_SPD_FINE_OFFSET_TCKMIN_GETMACRO(ID, PTARGET, VAL) \

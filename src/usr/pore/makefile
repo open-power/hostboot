@@ -23,5 +23,5 @@
 ROOTPATH = ../../..
 
 SUBDIRS = fapiporeve.d poreve.d test.d
-BINARY_FILES = $(IMGDIR)/centaur.sbe_pnor.bin:d532ebcca1b967c86ea76ac8608eeeb4ad9d514f
+BINARY_FILES = $(IMGDIR)/centaur.sbe_pnor.bin:3a1eb6f314797eccb14376cd368b6b41f070ac4e
 include ${ROOTPATH}/config.mk

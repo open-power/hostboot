@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012                   */
+/* COPYRIGHT International Business Machines Corp. 2012,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_generic_shmoo.H,v 1.10 2012/12/14 08:48:13 lapietra Exp $
+// $Id: mss_generic_shmoo.H,v 1.11 2013/01/21 12:36:52 sasethur Exp $
 // *!***************************************************************************
 // *! (C) Copyright International Business Machines Corp. 1997, 1998
 // *!           All Rights Reserved -- Property of IBM
@@ -39,6 +39,7 @@
 //------------------------------------------------------------------------------
 // Version:|Author: | Date:  | Comment:
 // --------|--------|--------|--------------------------------------------------
+//   1.11  |abhijit |1/21/13 |fixed constructor definition  
 //   1.9   |abhijit |06/12/12|fixed fw review comments 
 //   1.4   |abhijit |09/27/11|made changes according to new design
 //   1.5   |abhijit |10/29/12|made changes after target and returncode 
@@ -83,7 +84,7 @@ class generic_shmoo
         shmoo_algorithm_t algorithm;
         shmoo_mode mcbist_mode;
         uint8_t mcbist_error_map[MAX_PORT][MAX_RANK][MAX_BYTE][MAX_NIBBLES];
-		uint32_t shmoo_mask;
+		shmoo_type_t shmoo_mask;
 	uint8_t iv_port;
 	uint8_t iv_MAX_RANKS;
 	uint8_t iv_MAX_BYTES;
@@ -102,7 +103,7 @@ class generic_shmoo
 	
         enum bound_t { LEFT , RIGHT};    
      
-        generic_shmoo(uint8_t iv_port,uint32_t shmoo_mask,shmoo_algorithm_t shmoo_algorithm);// Constructor
+        generic_shmoo(uint8_t iv_port,shmoo_type_t shmoo_mask,shmoo_algorithm_t shmoo_algorithm);// Constructor
         generic_shmoo(){};
         ~generic_shmoo(){};  // Destructor
         void  init_multi_array(uint32_t (&array)[MAX_DQ][MAX_RPS],uint32_t init_val); //initialize multi dim arrays to known value

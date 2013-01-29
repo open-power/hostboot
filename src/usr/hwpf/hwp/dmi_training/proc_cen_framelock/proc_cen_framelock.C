@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012                   */
+/* COPYRIGHT International Business Machines Corp. 2012,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-/// $Id: proc_cen_framelock.C,v 1.9 2012/12/03 22:25:37 baysah Exp $
+/// $Id: proc_cen_framelock.C,v 1.11 2013/01/28 03:31:02 baysah Exp $
 
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_cen_framelock.C,v $
 //------------------------------------------------------------------------------
@@ -563,7 +563,7 @@ fapi::ReturnCode proc_cen_framelock_run_framelock(
     if (rc)
     {
         FAPI_ERR("proc_cen_framelock_run_framelock: Error clearing P8 MCI FIR regs");
-       // break;
+        return rc;
     }
 
 
@@ -572,7 +572,7 @@ fapi::ReturnCode proc_cen_framelock_run_framelock(
     if (rc)
     {
         FAPI_ERR("proc_cen_framelock_run_framelock: Error clearing P8 MCI Status regs");
-       // break;
+        return rc;
     }
 
 
@@ -595,14 +595,14 @@ fapi::ReturnCode proc_cen_framelock_run_framelock(
         FAPI_ERR("proc_cen_framelock_run_framelock: Error 0x%x setting up data buffers to set init timeout",
                  rc_ecmd);
         rc.setEcmdError(rc_ecmd);
-       // break;
+        return rc;
     }
 
     rc = proc_cen_framelock_set_pu_mci_cfg_reg(i_pu_target, data, mask);
     if (rc)
     {
         FAPI_ERR("proc_cen_framelock_run_framelock: Error writing P8 MCI Configuration register to set init timeout");
-      //  break;
+        return rc;
     }
 
     // start framelock
@@ -615,14 +615,14 @@ fapi::ReturnCode proc_cen_framelock_run_framelock(
         FAPI_ERR("proc_cen_framelock_run_framelock: Error 0x%x setting up data buffers to initiate framelock",
                  rc_ecmd);
         rc.setEcmdError(rc_ecmd);
-       // break;
+        return rc;
     }
 
     rc = proc_cen_framelock_set_pu_mci_cfg_reg(i_pu_target, data, mask);
     if (rc)
     {
         FAPI_ERR("proc_cen_framelock_run_framelock: Error writing P8 MCI Configuration register to initiate framelock");
-       // break;
+        return rc;
     }
 
     // poll until framelock operation is finished, a timeout is deemed to
@@ -637,7 +637,7 @@ fapi::ReturnCode proc_cen_framelock_run_framelock(
         if (rc)
         {
             FAPI_ERR("proc_cen_framelock_run_framelock: Error reading P8 MCI Status Register");
-            break;
+            return rc;
         }
 
         // Read P8 MCI FIR Register
@@ -646,7 +646,7 @@ fapi::ReturnCode proc_cen_framelock_run_framelock(
         if (rc)
         {
             FAPI_ERR("proc_cen_framelock_run_framelock: Error reading P8 MCI FIR Register");
-            break;
+            return rc;
         }
 
 
@@ -663,7 +663,7 @@ fapi::ReturnCode proc_cen_framelock_run_framelock(
         {
             fl_fail = 1;
             FAPI_ERR("proc_cen_framelock_run_framelock: Framelock fail. P8 MCI STAT OR FIR errors set");
-            //FAPI_SET_HWP_ERROR(rc, RC_PROC_CEN_FRAMELOCK_FL_P8_FAIL_ERR);
+
             break;
         }
 
@@ -681,7 +681,10 @@ fapi::ReturnCode proc_cen_framelock_run_framelock(
         if (polls >= PROC_CEN_FRAMELOCK_MAX_FRAMELOCK_POLLS)
         {
             // Loop count has expired, timeout
-            break;
+            FAPI_ERR("!!!! NO FRAME LOCK STATUS DETECTED !!!!");
+            FAPI_SET_HWP_ERROR(rc, RC_PROC_CEN_FRAMELOCK_FL_TIMEOUT_ERR);
+            return rc;
+
         }
         else
         {
@@ -690,7 +693,8 @@ fapi::ReturnCode proc_cen_framelock_run_framelock(
             FAPI_DBG("proc_cen_framelock_run_framelock: Loop %d of %d ...",
                      polls, PROC_CEN_FRAMELOCK_MAX_FRAMELOCK_POLLS);
         }
-    }
+
+    } // End While
 
     return rc;
 }
@@ -754,7 +758,7 @@ fapi::ReturnCode proc_cen_framelock_run_frtl(
          FAPI_ERR("proc_cen_framelock_run_frtl: Error 0x%x setting up data buffers to initiate FRTL",
                   rc_ecmd);
          rc.setEcmdError(rc_ecmd);
-        // break;
+         return rc;
      }
 
      rc = proc_cen_framelock_set_pu_mci_cfg_reg(i_pu_target, data, mask);
@@ -762,7 +766,7 @@ fapi::ReturnCode proc_cen_framelock_run_frtl(
      if (rc)
      {
          FAPI_ERR("proc_cen_framelock_run_frtl: Error writing P8 MCI Configuration register to initiate FRTL");
-        // break;
+         return rc;
      }
 
      // Poll until FRTL operation is finished, a timeout is deemed to
@@ -777,7 +781,7 @@ fapi::ReturnCode proc_cen_framelock_run_frtl(
          if (rc)
          {
              FAPI_ERR("proc_cen_framelock_run_frtl: Error reading P8 MCI Status Register");
-             break;
+             return rc;
          }
 
          // Read P8 MCI FIR Register
@@ -785,7 +789,7 @@ fapi::ReturnCode proc_cen_framelock_run_frtl(
          if (rc)
          {
              FAPI_ERR("proc_cen_framelock_run_frtl: Error reading P8 MCI FIR Register");
-             break;
+             return rc;
          }
 
 
@@ -802,7 +806,7 @@ fapi::ReturnCode proc_cen_framelock_run_frtl(
          {
              frtl_fail = 1;
              FAPI_ERR("proc_cen_framelock_run_frtl: FRTL fail. P8 MCI STAT OR FIR errors set");
-             // FAPI_SET_HWP_ERROR(rc, RC_PROC_CEN_FRAMELOCK_FRTL_P8_FAIL_ERR);
+
              break;
          }
 
@@ -819,17 +823,11 @@ fapi::ReturnCode proc_cen_framelock_run_frtl(
          if (polls >= PROC_CEN_FRAMELOCK_MAX_FRTL_POLLS)
          {
              // Loop count has expired, timeout
-             if (mci_stat.isBitClear(MCI_STAT_FRTL_PASS_BIT))
-             {
-                 FAPI_ERR("proc_cen_framelock_run_frtl: FRTL timeout (auto) waiting on pass/fail indication in P8 MCI Status Register!");
-             }
-             if (mci_stat.isBitClear(MCI_STAT_CHANNEL_INTERLOCK_PASS_BIT))
-             {
-                 FAPI_ERR("proc_cen_framelock_run_frtl: InterLock timeout (auto) waiting on pass/fail indication in P8 MCI Status Register!");
-             }
-            // FAPI_SET_HWP_ERROR(rc,
-            //                    RC_PROC_CEN_FRAMELOCK_FRTL_TIMEOUT_ERR);
-             break;
+            FAPI_ERR("!!!! NO FRAME LOCK STATUS DETECTED !!!!");
+            FAPI_SET_HWP_ERROR(rc, RC_PROC_CEN_FRAMELOCK_FRTL_TIMEOUT_ERR);
+            return rc;
+
+
          }
          else
          {
@@ -838,7 +836,9 @@ fapi::ReturnCode proc_cen_framelock_run_frtl(
              FAPI_DBG("proc_cen_framelock_run_frtl: Loop %d of %d ...\n",
                       polls, PROC_CEN_FRAMELOCK_MAX_FRTL_POLLS);
          }
-     }
+
+
+     } // End While
 
 
     return rc;
@@ -913,14 +913,14 @@ fapi::ReturnCode proc_cen_framelock_run_errstate_framelock(
         FAPI_ERR("proc_cen_framelock_run_errstate_framelock: Error 0x%x clearing MBI force channel fail bit",
                  rc_ecmd);
         rc.setEcmdError(rc_ecmd);
-      //  break;
+        return rc;
     }
 
     rc = proc_cen_framelock_set_cen_mbi_cfg_reg(i_mem_target, data,  mask);
     if (rc)
     {
         FAPI_ERR("proc_cen_framelock_run_errstate_framelock: Error writing Centaur MBI Configuration Register to clear the force channel fail bit");
-       // break;
+        return rc;
     }
 
 
@@ -934,13 +934,14 @@ fapi::ReturnCode proc_cen_framelock_run_errstate_framelock(
         FAPI_ERR("proc_cen_framelock_run_errstate_framelock: Error 0x%x clearing MCI force channel fail bit",
                  rc_ecmd);
         rc.setEcmdError(rc_ecmd);
-       // break;
+        return rc;
     }
+
     rc = proc_cen_framelock_set_pu_mci_cfg_reg(i_pu_target, data, mask);
     if (rc)
     {
         FAPI_ERR("proc_cen_framelock_run_errstate_framelock: Error writing P8 MCI Configuration register to clear the force channel fail bit");
-      //  break;
+        return rc;
     }
 
 
@@ -949,7 +950,7 @@ fapi::ReturnCode proc_cen_framelock_run_errstate_framelock(
     if (rc)
     {
         FAPI_ERR("proc_cen_framelock_run_errstate_framelock: Error clearing Centaur MBI FIR regs");
-       // break;
+        return rc;
     }
 
 
@@ -958,7 +959,7 @@ fapi::ReturnCode proc_cen_framelock_run_errstate_framelock(
     if (rc)
     {
         FAPI_ERR("proc_cen_framelock_run_errstate_framelock: Error clearing Centaur MBI Status regs");
-       // break;
+        return rc;
     }
 
 
@@ -967,7 +968,7 @@ fapi::ReturnCode proc_cen_framelock_run_errstate_framelock(
     if (rc)
     {
         FAPI_ERR("proc_cen_framelock_run_errstate_framelock: Error clearing P8 MCI FIR regs");
-       // break;
+        return rc;
     }
 
 
@@ -976,7 +977,7 @@ fapi::ReturnCode proc_cen_framelock_run_errstate_framelock(
     if (rc)
     {
         FAPI_ERR("proc_cen_framelock_run_errstate_framelock: Error clearing P8 MCI Status regs");
-       // break;
+        return rc;
     }
 
 
@@ -1000,14 +1001,14 @@ fapi::ReturnCode proc_cen_framelock_run_errstate_framelock(
         FAPI_ERR("proc_cen_framelock_run_errstate_framelock: Error 0x%x setting up data buffers to set init timeout",
                  rc_ecmd);
         rc.setEcmdError(rc_ecmd);
-       // break;
+        return rc;
     }
 
     rc = proc_cen_framelock_set_pu_mci_cfg_reg(i_pu_target, data, mask);
     if (rc)
     {
         FAPI_ERR("proc_cen_framelock_run_errstate_framelock: Error writing P8 MCI Configuration register to set init timeout");
-      //  break;
+        return rc;
     }
 
 
@@ -1021,14 +1022,14 @@ fapi::ReturnCode proc_cen_framelock_run_errstate_framelock(
         FAPI_ERR("proc_cen_framelock_run_errstate_framelock: Error 0x%x setting up data buffers to force framelock",
                  rc_ecmd);
         rc.setEcmdError(rc_ecmd);
-      //  break;
+        return rc;
     }
 
     rc = proc_cen_framelock_set_cen_mbi_cfg_reg(i_mem_target, data, mask);
     if (rc)
     {
         FAPI_ERR("proc_cen_framelock_run_errstate_framelock: Error writing Centaur MBI Configuration Register to force framelock");
-      //  break;
+        return rc;
     }
 
 
@@ -1042,14 +1043,14 @@ fapi::ReturnCode proc_cen_framelock_run_errstate_framelock(
         FAPI_ERR("proc_cen_framelock_run_errstate_framelock: Error 0x%x setting up data buffers to initiate framelock",
                  rc_ecmd);
         rc.setEcmdError(rc_ecmd);
-       // break;
+        return rc;
     }
 
     rc = proc_cen_framelock_set_pu_mci_cfg_reg(i_pu_target, data, mask);
     if (rc)
     {
         FAPI_ERR("proc_cen_framelock_run_errstate_framelock: Error writing P8 MCI Configuration register to initiate framelock");
-      //  break;
+        return rc;
     }
 
     // poll until framelock operation is finished, a timeout is deemed to
@@ -1064,7 +1065,7 @@ fapi::ReturnCode proc_cen_framelock_run_errstate_framelock(
         if (rc)
         {
             FAPI_ERR("proc_cen_framelock_run_errstate_framelock: Error reading Centaur MBI status Register");
-            break;
+            return rc;
         }
 
         // Read CEN MBI FIR Register
@@ -1072,7 +1073,7 @@ fapi::ReturnCode proc_cen_framelock_run_errstate_framelock(
         if (rc)
         {
             FAPI_ERR("proc_cen_framelock_run_errstate_framelock: Error reading Centaur MBI FIR Register");
-            break;
+            return rc;
         }
 
 
@@ -1083,7 +1084,7 @@ fapi::ReturnCode proc_cen_framelock_run_errstate_framelock(
         if (rc)
         {
             FAPI_ERR("proc_cen_framelock_run_errstate_framelock: Error reading P8 MCI Status Register");
-            break;
+            return rc;
         }
 
         // Read P8 MCI FIR Register
@@ -1091,7 +1092,7 @@ fapi::ReturnCode proc_cen_framelock_run_errstate_framelock(
         if (rc)
         {
             FAPI_ERR("proc_cen_framelock_run_errstate_framelock: Error reading P8 MCI FIR Register");
-            break;
+            return rc;
         }
 
 
@@ -1108,7 +1109,7 @@ fapi::ReturnCode proc_cen_framelock_run_errstate_framelock(
         {
             fl_fail = 1;
             FAPI_ERR("proc_cen_framelock_run_errstate_framelock: Framelock fail. Centaur MBI STAT OR FIR errors set");
-            //FAPI_SET_HWP_ERROR(rc, RC_PROC_CEN_FRAMELOCK_FL_CEN_FAIL_ERR);
+
             break;
         }
 
@@ -1126,7 +1127,7 @@ fapi::ReturnCode proc_cen_framelock_run_errstate_framelock(
         {
             fl_fail = 1;
             FAPI_ERR("proc_cen_framelock_run_errstate_framelock: Framelock fail. P8 MCI STAT OR FIR errors set");
-            // FAPI_SET_HWP_ERROR(rc, RC_PROC_CEN_FRAMELOCK_FL_P8_FAIL_ERR);
+
             break;
         }
 
@@ -1142,8 +1143,10 @@ fapi::ReturnCode proc_cen_framelock_run_errstate_framelock(
 
         if (polls >= PROC_CEN_FRAMELOCK_MAX_FRAMELOCK_POLLS)
         {
-            //FAPI_SET_HWP_ERROR(rc, RC_PROC_CEN_FRAMELOCK_FL_TIMEOUT_ERR);
-            break;
+            FAPI_ERR("!!!! NO FRAME LOCK STATUS DETECTED !!!!");
+            FAPI_SET_HWP_ERROR(rc, RC_PROC_CEN_FRAMELOCK_FL_TIMEOUT_ERR);
+            return rc;
+
         }
         else
         {
@@ -1152,7 +1155,9 @@ fapi::ReturnCode proc_cen_framelock_run_errstate_framelock(
             FAPI_DBG("proc_cen_framelock_run_errstate_framelock: Loop %d of %d ...",
                      polls, PROC_CEN_FRAMELOCK_MAX_FRAMELOCK_POLLS);
         }
-    }
+
+
+    } // End While
 
     return rc;
 }
@@ -1217,14 +1222,14 @@ fapi::ReturnCode proc_cen_framelock_run_errstate_frtl(
         FAPI_ERR("proc_cen_framelock_run_errstate_frtl: Error 0x%x setting up data buffers to force FRTL",
                  rc_ecmd);
         rc.setEcmdError(rc_ecmd);
-       // break;
+        return rc;
     }
 
     rc = proc_cen_framelock_set_cen_mbi_cfg_reg(i_mem_target, data, mask);
     if (rc)
     {
         FAPI_ERR("proc_cen_framelock_run_errstate_frtl: Error writing Centaur MBI Configuration Register to force FRTL");
-       // break;
+        return rc;
     }
 
 
@@ -1238,14 +1243,15 @@ fapi::ReturnCode proc_cen_framelock_run_errstate_frtl(
         FAPI_ERR("proc_cen_framelock_run_errstate_frtl: Error 0x%x setting up data buffers to initiate FRTL",
                  rc_ecmd);
         rc.setEcmdError(rc_ecmd);
-       // break;
+        return rc;
     }
 
     rc = proc_cen_framelock_set_pu_mci_cfg_reg(i_pu_target, data, mask);
     if (rc)
     {
         FAPI_ERR("proc_cen_framelock_run_errstate_frtl: Error writing P8 MCI Configuration register to initiate FRTL");
-       // break;
+        rc.setEcmdError(rc);
+        return rc;
     }
 
     // Poll until FRTL operation is finished, a timeout is deemed to
@@ -1259,7 +1265,7 @@ fapi::ReturnCode proc_cen_framelock_run_errstate_frtl(
         if (rc)
         {
             FAPI_ERR("proc_cen_framelock_run_errstate_frtl: Error reading Centaur MBI Status Register");
-            break;
+            return rc;
         }
 
         // Read Centaur MBI FIR Register
@@ -1267,7 +1273,7 @@ fapi::ReturnCode proc_cen_framelock_run_errstate_frtl(
         if (rc)
         {
             FAPI_ERR("proc_cen_framelock_run_errstate_frtl: Error reading Centaur MBI FIR Register");
-            break;
+            return rc;
         }
 
         // Read P8 MCI Status Register
@@ -1275,7 +1281,7 @@ fapi::ReturnCode proc_cen_framelock_run_errstate_frtl(
         if (rc)
         {
             FAPI_ERR("proc_cen_framelock_run_errstate_frtl: Error reading P8 MCI Status Register");
-            break;
+            return rc;
         }
 
         // Read P8 MCI FIR Register
@@ -1283,7 +1289,7 @@ fapi::ReturnCode proc_cen_framelock_run_errstate_frtl(
         if (rc)
         {
             FAPI_ERR("proc_cen_framelock_run_errstate_frtl: Error reading P8 MCI FIR Register");
-            break;
+            return rc;
         }
 
 
@@ -1300,7 +1306,7 @@ fapi::ReturnCode proc_cen_framelock_run_errstate_frtl(
         {
             frtl_fail = 1;
             FAPI_ERR("proc_cen_framelock_run_errstate_frtl: FRTL fail. Centaur MBI STAT OR FIR errors set");
-            // FAPI_SET_HWP_ERROR(rc, RC_PROC_CEN_FRAMELOCK_FRTL_CEN_FAIL_ERR);
+
             break;
         }
 
@@ -1318,8 +1324,8 @@ fapi::ReturnCode proc_cen_framelock_run_errstate_frtl(
         {
             frtl_fail = 1;
             FAPI_ERR("proc_cen_framelock_run_errstate_frtl: FRTL fail. P8 MCI STAT OR FIR errors set");
-           // FAPI_SET_HWP_ERROR(rc, RC_PROC_CEN_FRAMELOCK_FRTL_P8_FAIL_ERR);
-           break;
+
+            break;
         }
 
 
@@ -1341,8 +1347,10 @@ fapi::ReturnCode proc_cen_framelock_run_errstate_frtl(
         if (polls >= PROC_CEN_FRAMELOCK_MAX_FRTL_POLLS)
         {
             // Loop count has expired, timeout
-            //FAPI_SET_HWP_ERROR(rc, RC_PROC_CEN_FRAMELOCK_FRTL_TIMEOUT_ERR);
-            break;
+            FAPI_ERR("!!!! NO FRAME LOCK STATUS DETECTED !!!!");
+            FAPI_SET_HWP_ERROR(rc, RC_PROC_CEN_FRAMELOCK_FRTL_TIMEOUT_ERR);
+            return rc;
+
         }
         else
         {
@@ -1352,7 +1360,8 @@ fapi::ReturnCode proc_cen_framelock_run_errstate_frtl(
                      polls, PROC_CEN_FRAMELOCK_MAX_FRTL_POLLS);
         }
 
-    }   // End While
+
+    }  // End While
 
 
     return rc;
@@ -1431,14 +1440,14 @@ fapi::ReturnCode proc_cen_framelock_run_manual_frtl(
         FAPI_ERR("proc_cen_framelock_run_manual_frtl: Error 0x%x setting up data buffers to disable Centaur auto FRTL mode",
                  rc_ecmd);
         rc.setEcmdError(rc_ecmd);
-      //  break;
+        return rc;
     }
 
     rc = proc_cen_framelock_set_cen_mbi_cfg_reg(i_mem_target, data, mask);
     if (rc)
     {
         FAPI_ERR("proc_cen_framelock_run_manual_frtl: Error writing Centaur MBI Configuration register to disable auto FRTL mode");
-       // break;
+        return rc;
     }
 
     // write specified FRTL value into Centaur MBI Configuration
@@ -1450,7 +1459,7 @@ fapi::ReturnCode proc_cen_framelock_run_manual_frtl(
                  i_args.frtl_manual_mem);
         const proc_cen_framelock_args & ARGS = i_args;
         FAPI_SET_HWP_ERROR(rc, RC_PROC_CEN_FRAMELOCK_INVALID_ARGS);
-       // break;
+        return rc;
     }
 
     rc_ecmd |= data.flushTo0();
@@ -1471,14 +1480,14 @@ fapi::ReturnCode proc_cen_framelock_run_manual_frtl(
         FAPI_ERR("proc_cen_framelock_run_manual_frtl: Error 0x%x setting up data buffers to set Centaur manual FRTL value",
                  rc_ecmd);
         rc.setEcmdError(rc_ecmd);
-       // break;
+        return rc;
     }
 
     rc = proc_cen_framelock_set_cen_mbi_cfg_reg(i_mem_target, data, mask);
     if (rc)
     {
         FAPI_ERR("proc_cen_framelock_run_manual_frtl: Error writing Centaur MBI Configuration register to set manual FRTL value");
-       // break;
+        return rc;
     }
 
 
@@ -1503,14 +1512,14 @@ fapi::ReturnCode proc_cen_framelock_run_manual_frtl(
         FAPI_ERR("proc_cen_framelock_run_manual_frtl: Error 0x%x setting up data buffers to disable P8 auto FRTL mode",
                  rc_ecmd);
         rc.setEcmdError(rc_ecmd);
-      //  break;
+        return rc;
     }
 
     rc = proc_cen_framelock_set_pu_mci_cfg_reg(i_pu_target, data, mask);
     if (rc)
     {
         FAPI_ERR("proc_cen_framelock_run_manual_frtl: Error writing P8 MCI Configuration register to disable auto FRTL mode");
-       // break;
+        return rc;
     }
 
     // write specified FRTL value into P8 MCI Configuration Register
@@ -1521,7 +1530,7 @@ fapi::ReturnCode proc_cen_framelock_run_manual_frtl(
                  i_args.frtl_manual_pu);
         const proc_cen_framelock_args & ARGS = i_args;
         FAPI_SET_HWP_ERROR(rc, RC_PROC_CEN_FRAMELOCK_INVALID_ARGS);
-       // break;
+        return rc;
     }
     rc_ecmd |= data.flushTo0();
     rc_ecmd |= mask.flushTo0();
@@ -1541,14 +1550,15 @@ fapi::ReturnCode proc_cen_framelock_run_manual_frtl(
         FAPI_ERR("proc_cen_framelock_run_manual_frtl: Error 0x%x setting up data buffers to set P8 manual FRTL value",
                  rc_ecmd);
         rc.setEcmdError(rc_ecmd);
-       // break;
+        return rc;
     }
 
     rc = proc_cen_framelock_set_pu_mci_cfg_reg(i_pu_target, data, mask);
     if (rc)
     {
         FAPI_ERR("proc_cen_framelock_run_manual_frtl: Error writing P8 MCI Configuration register to set manual FRTL value");
-       // break;
+        rc.setEcmdError(rc_ecmd);
+        return rc;
     }
 
 
@@ -1563,14 +1573,14 @@ fapi::ReturnCode proc_cen_framelock_run_manual_frtl(
         FAPI_ERR( "proc_cen_framelock_run_manual_frtl: Error 0x%x setting up data buffers to set Centaur manual FRTL done",
                   rc_ecmd);
         rc.setEcmdError(rc_ecmd);
-       // break;
+        return rc;
     }
 
     rc = proc_cen_framelock_set_cen_mbi_cfg_reg(i_mem_target, data, mask);
     if (rc)
     {
         FAPI_ERR("proc_cen_framelock_run_manual_frtl: Error writing Centaur MBI Configuration register to set manual FRTL done");
-       // break;
+        return rc;
     }
 
     // write FRTL manual done bit into P8 MCI Configuration Register
@@ -1583,14 +1593,14 @@ fapi::ReturnCode proc_cen_framelock_run_manual_frtl(
         FAPI_ERR("proc_cen_framelock_run_manual_frtl: Error 0x%x setting up data buffers to write P8 manual FRTL done",
                  rc_ecmd);
         rc.setEcmdError(rc_ecmd);
-       // break;
+        return rc;
     }
 
     rc = proc_cen_framelock_set_pu_mci_cfg_reg(i_pu_target, data, mask);
     if (rc)
     {
         FAPI_ERR("proc_cen_framelock_run_manual_frtl: Error writing P8 MCI Configuration register to set manual FRTL done");
-       // break;
+        return rc;
     }
 
 
@@ -1607,7 +1617,7 @@ fapi::ReturnCode proc_cen_framelock_run_manual_frtl(
         if (rc)
         {
             FAPI_ERR("proc_cen_framelock_run_manual_frtl: Error reading Centaur MBI Status Register");
-            break;
+            return rc;
         }
 
         // Read Centaur MBI FIR Register
@@ -1615,7 +1625,7 @@ fapi::ReturnCode proc_cen_framelock_run_manual_frtl(
         if (rc)
         {
             FAPI_ERR("proc_cen_framelock_run_manual_frtl: Error reading Centaur MBI FIR Register");
-            break;
+            return rc;
         }
 
         // Read P8 MCI Status Register
@@ -1623,7 +1633,7 @@ fapi::ReturnCode proc_cen_framelock_run_manual_frtl(
         if (rc)
         {
             FAPI_ERR("proc_cen_framelock_run_manual_frtl: Error reading P8 MCI Status Register");
-            break;
+            return rc;
         }
 
         // Read P8 MCI FIR Register
@@ -1631,7 +1641,7 @@ fapi::ReturnCode proc_cen_framelock_run_manual_frtl(
         if (rc)
         {
             FAPI_ERR("proc_cen_framelock_run_manual_frtl: Error reading P8 MCI FIR Register");
-            break;
+            return rc;
         }
 
 
@@ -1685,9 +1695,11 @@ fapi::ReturnCode proc_cen_framelock_run_manual_frtl(
         if (polls >= PROC_CEN_FRAMELOCK_MAX_FRTL_POLLS)
         {
             // Loop count has expired, timeout
-            //FAPI_SET_HWP_ERROR(rc, RC_PROC_CEN_FRAMELOCK_FRTL_TIMEOUT_ERR);
+            FAPI_ERR("!!!! NO FRAME LOCK STATUS DETECTED !!!!");
+            FAPI_SET_HWP_ERROR(rc, RC_PROC_CEN_FRAMELOCK_FRTL_TIMEOUT_ERR);
+            return rc;
 
-            break;
+
         }
         else
         {
@@ -1696,7 +1708,10 @@ fapi::ReturnCode proc_cen_framelock_run_manual_frtl(
             FAPI_DBG("proc_cen_framelock_run_manual_frtl: Loop %d of %d ...\n",
                      polls, PROC_CEN_FRAMELOCK_MAX_FRTL_POLLS);
         }
-    }
+
+
+
+    } // End While
 
     return rc;
 }
@@ -1765,7 +1780,7 @@ fapi::ReturnCode proc_cen_framelock(const fapi::Target& i_pu_target,
                      i_args.frtl_manual_mem);
             const proc_cen_framelock_args & ARGS = i_args;
             FAPI_SET_HWP_ERROR(l_rc, RC_PROC_CEN_FRAMELOCK_INVALID_ARGS);
-            break;
+            return l_rc;
         }
 
         if (i_args.frtl_manual_pu > MCI_CFG_MANUAL_FRTL_FIELD_MASK)
@@ -1774,7 +1789,7 @@ fapi::ReturnCode proc_cen_framelock(const fapi::Target& i_pu_target,
                      i_args.frtl_manual_pu);
             const proc_cen_framelock_args & ARGS = i_args;
             FAPI_SET_HWP_ERROR(l_rc, RC_PROC_CEN_FRAMELOCK_INVALID_ARGS);
-            break;
+            return l_rc;
         }
 
 
@@ -1789,7 +1804,7 @@ fapi::ReturnCode proc_cen_framelock(const fapi::Target& i_pu_target,
                                                  i_args);
            if (l_rc)
            {
-               break;
+              return l_rc;
            }
 
         }
@@ -1809,7 +1824,8 @@ fapi::ReturnCode proc_cen_framelock(const fapi::Target& i_pu_target,
                                                  i_args);
                 if (l_rc)
                 {
-                    break;
+
+                    return l_rc;
                 }
 
             }
@@ -1822,7 +1838,8 @@ fapi::ReturnCode proc_cen_framelock(const fapi::Target& i_pu_target,
                                                          i_args);
                if (l_rc)
                {
-                   break;
+
+                   return l_rc;
                }
 
             } // end else
@@ -1851,14 +1868,14 @@ fapi::ReturnCode proc_cen_framelock(const fapi::Target& i_pu_target,
                 FAPI_ERR("proc_cen_framelock: Error 0x%x setting up data buffers to force MBI in channel fail state",
                          l_ecmdRc);
                 l_rc.setEcmdError(l_ecmdRc);
-                break;
+                return l_rc;
             }
 
             l_rc = proc_cen_framelock_set_cen_mbi_cfg_reg(i_mem_target, mbi_data,  mbi_mask);
             if (l_rc)
             {
                 FAPI_ERR("proc_cen_framelock: Error writing Centaur MBI Configuration Register to force framelock");
-                break;
+                return l_rc;
             }
 
 
@@ -1871,13 +1888,14 @@ fapi::ReturnCode proc_cen_framelock(const fapi::Target& i_pu_target,
                 FAPI_ERR("proc_cen_framelock: Error 0x%x setting up data buffers to force MCI in channel fail state",
                          l_ecmdRc);
                 l_rc.setEcmdError(l_ecmdRc);
-                break;
+                return l_rc;
             }
+
             l_rc = proc_cen_framelock_set_pu_mci_cfg_reg(i_pu_target, mci_data, mci_mask);
             if (l_rc)
             {
-                FAPI_ERR("proc_cen_framelock: Error writing P8 MCI Configuration register to force MCI in channel fail state");
-                break;
+                 FAPI_ERR("proc_cen_framelock: Error writing P8 MCI Configuration register to force MCI in channel fail state");
+                 return l_rc;
             }
 
 
@@ -1894,7 +1912,8 @@ fapi::ReturnCode proc_cen_framelock(const fapi::Target& i_pu_target,
                                                             i_args);
            if (l_rc)
            {
-               break;
+
+               return l_rc;
            }
 
 
@@ -1908,7 +1927,8 @@ fapi::ReturnCode proc_cen_framelock(const fapi::Target& i_pu_target,
                                                            i_args);
                if (l_rc)
                {
-                   break;
+
+                   return l_rc;
                }
 
            }
@@ -1921,7 +1941,8 @@ fapi::ReturnCode proc_cen_framelock(const fapi::Target& i_pu_target,
                                                         i_args);
               if (l_rc)
               {
-                  break;
+
+                  return l_rc;
               }
 
            } // end if .... else
@@ -1935,11 +1956,12 @@ fapi::ReturnCode proc_cen_framelock(const fapi::Target& i_pu_target,
         fapiDelay(1000000, 200);    //fapiDelay(nanoseconds, simcycles)
 
 
-        if ( (num_try > 3) && ((fl_fail == 1) || (frtl_fail == 1)) )
+       if ( (num_try > 3) && ((fl_fail == 1) || (frtl_fail == 1)) )   // assumes the DMI toggle before this procedure is started.
         {
 
-           FAPI_SET_HWP_ERROR(l_rc, RC_PROC_CEN_FRAMELOCK_FRTL_TIMEOUT_ERR);
-
+            FAPI_ERR("!!!! Maximum Retry Attempts Exceeded !!!!");
+            FAPI_SET_HWP_ERROR(l_rc, RC_PROC_CEN_FRAMELOCK_FRTL_TIMEOUT_ERR);
+            return l_rc;
 
         }
 
@@ -1949,7 +1971,6 @@ fapi::ReturnCode proc_cen_framelock(const fapi::Target& i_pu_target,
          //FAPI_DBG("Frame Lock Fail at Value End of Loop: %d", fl_fail);
          //FAPI_DBG("FRTL Pass Value at End of Loop: %d", frtl_pass);
          //FAPI_DBG("FRTL Fail Value at End of Loop: %d", frtl_fail);
-
 
     }  // End While
 
@@ -1967,7 +1988,7 @@ fapi::ReturnCode proc_cen_framelock(const fapi::Target& i_pu_target,
         if (l_rc)
         {
             FAPI_ERR("proc_cen_framelock: Error clearing P8 MCI FIR regs");
-           // break;
+            return l_rc;
         }
 
         // Clear Centaur MBI FIR registers
@@ -1975,16 +1996,32 @@ fapi::ReturnCode proc_cen_framelock(const fapi::Target& i_pu_target,
         if (l_rc)
         {
             FAPI_ERR("proc_cen_framelock: Error clearing Centaur MBI FIR regs");
-           // break;
+            return l_rc;
         }
 
     }
 
 
+    // Return bad code from while loops here, before the get overwritten by the procedure EXIT scoms below
+    if (l_rc)
+    {
+        //FAPI_DBG(" HELLO...THIS IS A BAD RETURN CODE");
+        return l_rc;
+    }
 
 
     // EXIT Procedure
     // by setting the MCI and MBI fir mask and action registers according to PRD requirements.
+
+
+      // (Action0, Action1, Mask)
+      // ------------------------
+      // (0,0,0) = Checkstop
+      // (0,1,0) = Recoverable
+      // (1,0,x) = Report Unused
+      // (1,1,0) = Machine Check
+      // (x,x,1) = MASKED
+      // (1,0,0) = Use this setting for non-implemented bits
 
 
         // Set P8 MCI FIR Mask
@@ -2002,6 +2039,7 @@ fapi::ReturnCode proc_cen_framelock(const fapi::Target& i_pu_target,
         l_ecmdRc |= mci_data.setBit(17);    //Centaur Maintenance Complete
         l_ecmdRc |= mci_data.setBit(20);    //SCOM Register Parity Error
         l_ecmdRc |= mci_data.setBit(22);    //MCICFGQ Parity Error
+        l_ecmdRc |= mci_data.setBit(23);    //Replay Buffer Overrun
         l_ecmdRc |= mci_data.setBit(40);    //MCS Channel Timeout Error
         l_ecmdRc |= mci_data.copy(mci_mask);
         l_ecmdRc |= mci_data.clearBit(0);     //Replay Timeout
@@ -2017,20 +2055,21 @@ fapi::ReturnCode proc_cen_framelock(const fapi::Target& i_pu_target,
         l_ecmdRc |= mci_data.clearBit(17);    //Centaur Maintenance Complete
         l_ecmdRc |= mci_data.clearBit(20);    //SCOM Register Parity Error
         l_ecmdRc |= mci_data.clearBit(22);    //MCICFGQ Parity Error
+        l_ecmdRc |= mci_data.clearBit(23);    //Replay Buffer Overrun
         l_ecmdRc |= mci_data.clearBit(40);    //MCS Channel Timeout Error
         if (l_ecmdRc)
         {
             FAPI_ERR("proc_cen_framelock: Error 0x%x setting up data buffers to mask MCI FIRs",
                      l_ecmdRc);
             l_rc.setEcmdError(l_ecmdRc);
-           // break;
+            // return l_rc;
         }
 
         l_rc = proc_cen_framelock_set_pu_mci_firmask_reg(i_pu_target, mci_data, mci_mask);
         if (l_rc)
         {
             FAPI_ERR("proc_cen_framelock: Error writing P8 MCI Fir Mask Register");
-           // break;
+            //return l_rc;
         }
 
 
@@ -2047,14 +2086,14 @@ fapi::ReturnCode proc_cen_framelock(const fapi::Target& i_pu_target,
             FAPI_ERR("proc_cen_framelock: Error 0x%x setting up data buffers to set MCI FIR actions",
                      l_ecmdRc);
             l_rc.setEcmdError(l_ecmdRc);
-           // break;
+            // return l_rc;
         }
 
         l_rc = proc_cen_framelock_set_pu_mci_firact0_reg(i_pu_target, mci_data, mci_mask);
         if (l_rc)
         {
             FAPI_ERR("proc_cen_framelock: Error writing P8 MCI Fir Action0 Register");
-           // break;
+            // return l_rc;
         }
 
 
@@ -2071,6 +2110,7 @@ fapi::ReturnCode proc_cen_framelock(const fapi::Target& i_pu_target,
         l_ecmdRc |= mci_data.setBit(10);    //CRC Performance Degradation
         l_ecmdRc |= mci_data.setBit(20);    //Scom Register parity error
         l_ecmdRc |= mci_data.setBit(22);    //mcicfgq parity error
+        l_ecmdRc |= mci_data.setBit(23);    //Replay Buffer Overrun
         l_ecmdRc |= mci_data.setBit(40);    //MCS Channel Timeout Error
         l_ecmdRc |= mci_data.copy(mci_mask);
         if (l_ecmdRc)
@@ -2078,14 +2118,14 @@ fapi::ReturnCode proc_cen_framelock(const fapi::Target& i_pu_target,
             FAPI_ERR("proc_cen_framelock: Error 0x%x setting up data buffers to set MCI FIR actions",
                      l_ecmdRc);
             l_rc.setEcmdError(l_ecmdRc);
-           // break;
+            //return l_rc;
         }
 
         l_rc = proc_cen_framelock_set_pu_mci_firact1_reg(i_pu_target, mci_data, mci_mask);
         if (l_rc)
         {
             FAPI_ERR("proc_cen_framelock: Error writing P8 MCI Fir Action1 Register");
-           // break;
+            //return l_rc;
         }
 
 
@@ -2105,14 +2145,14 @@ fapi::ReturnCode proc_cen_framelock(const fapi::Target& i_pu_target,
             FAPI_ERR("proc_cen_framelock: Error 0x%x setting up data buffers to set MCS Mode4 Register",
                      l_ecmdRc);
             l_rc.setEcmdError(l_ecmdRc);
-           // break;
+            //return l_rc;
         }
 
         l_rc = proc_cen_framelock_set_pu_mcs_mode4_reg(i_pu_target, mci_data, mci_mask);
         if (l_rc)
         {
             FAPI_ERR("proc_cen_framelock: Error writing P8 MCS Mode4 Register");
-           // break;
+            //return l_rc;
         }
 
 
@@ -2130,6 +2170,7 @@ fapi::ReturnCode proc_cen_framelock(const fapi::Target& i_pu_target,
         l_ecmdRc |= mbi_data.setBit(10);    //CRC Performance Degradation
         l_ecmdRc |= mbi_data.setBit(16);    //SCOM Register parity
         l_ecmdRc |= mbi_data.setBit(19);    //MBICFGQ Parity Error
+        l_ecmdRc |= mbi_data.setBit(20);    //Replay Buffer Overrun Error
         l_ecmdRc |= mbi_data.copy(mbi_mask);
         l_ecmdRc |= mbi_data.clearBit(0);     //Replay Timeout
         l_ecmdRc |= mbi_data.clearBit(4);     //Seqid ooo
@@ -2140,19 +2181,20 @@ fapi::ReturnCode proc_cen_framelock(const fapi::Target& i_pu_target,
         l_ecmdRc |= mbi_data.clearBit(10);    //CRC Performance Degradation
         l_ecmdRc |= mbi_data.clearBit(16);    //SCOM Register parity
         l_ecmdRc |= mbi_data.clearBit(19);    //MBICFGQ Parity Error
+        l_ecmdRc |= mbi_data.clearBit(20);    //Replay Buffer Overrun Error
         if (l_ecmdRc)
         {
             FAPI_ERR("proc_cen_framelock: Error 0x%x setting up data buffers to mask MBI FIRs",
                      l_ecmdRc);
             l_rc.setEcmdError(l_ecmdRc);
-           // break;
+            // return l_rc;
         }
 
         l_rc = proc_cen_framelock_set_cen_mbi_firmask_reg(i_mem_target, mbi_data, mbi_mask);
         if (l_rc)
         {
             FAPI_ERR("proc_cen_framelock: Error writing Centaur MBI Fir Mask Register");
-           // break;
+            //return l_rc;
         }
 
 
@@ -2170,24 +2212,24 @@ fapi::ReturnCode proc_cen_framelock(const fapi::Target& i_pu_target,
             FAPI_ERR("proc_cen_framelock: Error 0x%x setting up data buffers to set MBI FIR actions",
                      l_ecmdRc);
             l_rc.setEcmdError(l_ecmdRc);
-           // break;
+            //return l_rc;
         }
 
         l_rc = proc_cen_framelock_set_cen_mbi_firact1_reg(i_mem_target, mbi_data, mbi_mask);
         if (l_rc)
         {
             FAPI_ERR("proc_cen_framelock: Error writing Centaur MBI Fir Action1 Register");
-           // break;
+            //return l_rc;
         }
-
 
 
 
     // mark HWP exit
     FAPI_IMP("proc_cen_framelock: Exiting ...");
-    return l_rc;
-}
 
+    return l_rc;
+
+}   // End While
 
 
 

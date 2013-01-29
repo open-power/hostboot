@@ -114,6 +114,7 @@ enum istepModuleId
     ISTEP_FABRIC_IO_DCCAL                               = 0x42,
     ISTEP_PROC_XBUS_SCOMINIT                            = 0x43,
     ISTEP_PROC_ABUS_SCOMINIT                            = 0x44,
+    ISTEP_PROC_DMI_SCOMINIT                             = 0x45,
 };
 
 /**

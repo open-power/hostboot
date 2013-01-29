@@ -123,6 +123,7 @@ KeywordData ddr3Data[] =
     { DIMM_BAD_DQ_DATA,              0xb0,   0x50,   false,  0x00,   0x00, false, true,  NA },
     { SDRAM_DIE_COUNT,               0x21,   0x01,   true,   0x70,   0x04, false, false, NA },
     { SDRAM_DEVICE_TYPE_SIGNAL_LOADING,0x21, 0x01,   true,   0x03,   0x00, false, false, NA },
+    { CUSTOM,                        0x03,   0x01,   true,   0x80,   0x07, false, false, NA },
     { MODSPEC_COM_NOM_HEIGHT_MAX,    0x3c,   0x01,   true,   0x0f,   0x00, false, false, ALL },
     { MODSPEC_COM_MAX_THICK_BACK,    0x3d,   0x01,   true,   0xf0,   0x04, false, false, ALL },
     { MODSPEC_COM_MAX_THICK_FRONT,   0x3d,   0x01,   true,   0x0f,   0x00, false, false, ALL },

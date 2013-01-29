@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012                   */
+/* COPYRIGHT International Business Machines Corp. 2012,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: io_funcs.C,v 1.13 2012/12/04 08:28:37 varkeykv Exp $
+// $Id: io_funcs.C,v 1.14 2013/01/28 20:19:06 jaswamin Exp $
 // *!***************************************************************************
 // *! (C) Copyright International Business Machines Corp. 1997, 1998
 // *!           All Rights Reserved -- Property of IBM
@@ -39,6 +39,7 @@
 //------------------------------------------------------------------------------
 // Version:|Author: | Date:  | Comment:
 // --------|--------|--------|--------------------------------------------------
+//  1.14   |jaswamin|01/28/12| Changed fatal errors to warning prints to allow training to continue
 //   1.0   |varkeykv|01/19/12| Initial check in to solve linker problems in host
 //			       boot..moved in from io_run_training
 //------------------------------------------------------------------------------
@@ -241,7 +242,7 @@ ReturnCode  edi_training::training_function_status(const Target&  master_chip_ta
                                     if (status_data.getHalfWord(0) & fail_bit)
                                     {
                                        FAPI_ERR("io_run_training: the wiretest training state reported a fail  \n");
-				       FAPI_SET_HWP_ERROR(rc, IO_RUN_TRAINING_FAIL_WIRETEST_RC);
+				       //FAPI_SET_HWP_ERROR(rc, IO_RUN_TRAINING_FAIL_WIRETEST_RC);
                                        wire_test_status =  FAILED ;
                                        rx_wderf_failed[WIRE_TEST]=true;
                                       // Run First FAILED Data Capture for Wire Test for FAILED bus
@@ -269,7 +270,7 @@ ReturnCode  edi_training::training_function_status(const Target&  master_chip_ta
                                     {
                                             rx_wderf_failed[DESKEW]=true;
                                             FAPI_ERR("io_run_training : deskew training state reported a fail  \n");
-                                            FAPI_SET_HWP_ERROR(rc, IO_RUN_TRAINING_FAIL_DESKEW_RC);
+                                            //FAPI_SET_HWP_ERROR(rc, IO_RUN_TRAINING_FAIL_DESKEW_RC);
                                             desckew_status =  FAILED ;
 					    break;
                                     }
@@ -292,7 +293,7 @@ ReturnCode  edi_training::training_function_status(const Target&  master_chip_ta
                                     if (status_data.getHalfWord(0) & fail_bit)
                                     {
                                              FAPI_ERR("io_run_training : eye_opt_ training state reported a fail\n");
-                                             FAPI_SET_HWP_ERROR(rc, IO_RUN_TRAINING_FAIL_EYE_OPT_RC);
+                                             //FAPI_SET_HWP_ERROR(rc, IO_RUN_TRAINING_FAIL_EYE_OPT_RC);
                                              rx_wderf_failed[EYE_OPT]=true;
                                              eye_opt_status =  FAILED ;
 					     break;
@@ -317,7 +318,7 @@ ReturnCode  edi_training::training_function_status(const Target&  master_chip_ta
                                     {
                                              FAPI_DBG("io_run_training: static repair encountered an error    \n");
                                              rx_wderf_failed[REPAIR]=true;
-                                             FAPI_SET_HWP_ERROR(rc, IO_RUN_TRAINING_FAIL_REPAIR_RC);
+                                             //FAPI_SET_HWP_ERROR(rc, IO_RUN_TRAINING_FAIL_REPAIR_RC);
                                              repair_status =  FAILED ;
 					     break;
                                     }
@@ -343,7 +344,7 @@ ReturnCode  edi_training::training_function_status(const Target&  master_chip_ta
                                     {
                                              FAPI_DBG("io_run_training:   rx_func_mode_failed    \n");
                                              rx_wderf_failed[FUNCTIONAL]=true;
-                                             FAPI_SET_HWP_ERROR(rc, IO_RUN_TRAINING_FAIL_FUNC_MODE_RC);
+                                             //FAPI_SET_HWP_ERROR(rc, IO_RUN_TRAINING_FAIL_FUNC_MODE_RC);
                                              functional_status =   FAILED ;
 					     break;
                                     }
@@ -384,27 +385,27 @@ ReturnCode  edi_training::training_function_status(const Target&  master_chip_ta
 			    if (wire_test_selected && wire_test_status== RUNNING)
 			    {
 			    FAPI_ERR("io_run_training: wiretest timeout");
-			    FAPI_SET_HWP_ERROR(rc, IO_RUN_TRAINING_WIRETEST_TIMEOUT_RC);
+			    //FAPI_SET_HWP_ERROR(rc, IO_RUN_TRAINING_WIRETEST_TIMEOUT_RC);
 			    }
 			    else if (desckew_selected && desckew_status == RUNNING)
 			    {
 			    FAPI_ERR("io_run_training: deskew timeout");
-			    FAPI_SET_HWP_ERROR(rc, IO_RUN_TRAINING_DESKEW_TIMEOUT_RC);
+			    //FAPI_SET_HWP_ERROR(rc, IO_RUN_TRAINING_DESKEW_TIMEOUT_RC);
 			    }
 			    else if (repair_selected && repair_status == RUNNING)
 			    {
 			    FAPI_ERR("io_run_training: repair timeout");
-			    FAPI_SET_HWP_ERROR(rc, IO_RUN_TRAINING_REPAIR_TIMEOUT_RC);
+			    //FAPI_SET_HWP_ERROR(rc, IO_RUN_TRAINING_REPAIR_TIMEOUT_RC);
 			    }
 			    else if (eye_opt_selected && eye_opt_status == RUNNING)
 			    {
 			    FAPI_ERR("io_run_training: eyeopt timeout");
-			    FAPI_SET_HWP_ERROR(rc, IO_RUN_TRAINING_EYE_OPT_TIMEOUT_RC);
+			    //FAPI_SET_HWP_ERROR(rc, IO_RUN_TRAINING_EYE_OPT_TIMEOUT_RC);
 			    }
 			    else
 			    {
 			    FAPI_ERR("io_run_training: func timeout");
-			    FAPI_SET_HWP_ERROR(rc, IO_RUN_TRAINING_FUNC_MODE_TIMEOUT_RC);
+			    //FAPI_SET_HWP_ERROR(rc, IO_RUN_TRAINING_FUNC_MODE_TIMEOUT_RC);
 			    }
 			    break;
                     }

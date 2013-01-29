@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_draminit_mc.C,v 1.29 2013/01/14 19:29:25 jdsloat Exp $
+// $Id: mss_draminit_mc.C,v 1.31 2013/01/21 16:47:20 lapietra Exp $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
 // *! All Rights Reserved -- Property of IBM
@@ -44,6 +44,8 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
+//  1.31   | dcadiga  |21-JAN-13| Fixed variable name for memcal_interval (coded as memcal_iterval...)
+//  1.30   | dcadiga  |21-JAN-13| Hardcoded memcal interval to 0 (disabled) until attribute for EC is available
 //  1.29   | jdsloat  |14-JAN-13| Owner changed to Dave Cadigan.
 //  1.28   | bellows  |01-JAN-13| Added ECC Enable 64-byte data/checkbit inversion (from jdsloat)
 //  1.27   | gollub   |21-DEC-12| Calling mss_unmask_maint_errors and mss_unmask_inband_errors after mss_draminit_mc_cloned
@@ -247,6 +249,10 @@ ReturnCode mss_enable_periodic_cal (Target& i_target)
     uint32_t memcal_iterval; //  00 = Disable
     rc = FAPI_ATTR_GET(ATTR_EFF_MEMCAL_INTERVAL, &i_target, memcal_iterval);
     if(rc) return rc;
+    //dcadigan workaround for rd phase select issue.  Hardcoded until we have an attribute for chip EC
+    FAPI_INF("+++ RD Phase Select Workaround, DISABLING MEMCAL VIA HARDCODE +++");
+    memcal_iterval = 0;
+
 
     uint32_t zq_cal_iterval; //  00 = Disable
     rc = FAPI_ATTR_GET(ATTR_EFF_ZQCAL_INTERVAL, &i_target, zq_cal_iterval);

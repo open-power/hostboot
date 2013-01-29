@@ -1,4 +1,4 @@
-#-- $Id: p8.nx.scom.initfile,v 1.2 2013/01/10 21:31:50 johnre Exp $
+#-- $Id: p8.nx.scom.initfile,v 1.3 2013/01/25 16:23:46 johnre Exp $
 #-------------------------------------------------------------------------------
 #--
 #-- (C) Copyright International Business Machines Corp. 2011
@@ -122,8 +122,8 @@ scom 0x0201308E {
      0    ,  0b0                 ;  #-- BUID enable
      1:2  ,  ATTR_FABRIC_NODE_ID ;  #-- BUID Base(0:1) Node Id  ????
      3:5  ,  ATTR_FABRIC_CHIP_ID ;  #-- BUID Base(2:4) Chip Id  ????
-     6:19 ,  0x00000             ;  #-- BUID Base(5:18)   ????
-    20:32 ,  0b0000              ;  #-- BUID Mask(6:18).  Mask(0:5)=0b111111
+     6:19 ,  0b00000000000000    ;  #-- BUID Base(5:18)   ????
+    20:32 ,   0b1111111100000    ;  #-- BUID Mask(6:18).  Mask(0:5) implied 0b111111
 }
 
 

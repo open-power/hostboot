@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012                   */
+/* COPYRIGHT International Business Machines Corp. 2012,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: io_dccal.C,v 1.14 2012/12/07 13:43:57 varkeykv Exp $
+// $Id: io_dccal.C,v 1.18 2013/01/26 17:35:09 jaswamin Exp $
 // *!***************************************************************************
 // *! (C) Copyright International Business Machines Corp. 1997, 1998
 // *!           All Rights Reserved -- Property of IBM
@@ -39,8 +39,9 @@
 //------------------------------------------------------------------------------
 // Version:|Author: | Date:  | Comment:
 // --------|--------|--------|--------------------------------------------------
+//   1.18  |jaswamin|01/26/11| Commented out offset cal for X and A bus
 //   1.0   |varkeykv|09/27/11|Initial check in . Have to modify targets once bus target is defined and available.Not tested in any way other than in unit SIM IOTK
-//   1.1   |varkeykv |17/11/11|Code cleanup . Fixed header files. Changed fAPI API 
+//   1.1   |varkeykv |17/11/11|Code cleanup . Fixed header files. Changed fAPI API
 //------------------------------------------------------------------------------
 
 #include <fapi.H>
@@ -94,7 +95,6 @@ uint32_t  BinaryRound(uint32_t val, uint32_t numTruncBits, uint32_t center) {
   return newVal;
 }
 
-
 // Offset cal doesnt do anything in VBU/sim ...
 ReturnCode run_offset_cal(const Target &target,io_interface_t master_interface,uint32_t master_group){
 // Assuming I will receive a target and slave_target from the Invoker. 
@@ -105,12 +105,47 @@ ReturnCode run_offset_cal(const Target &target,io_interface_t master_interface,u
  
     ecmdDataBufferBase set_bits(16);
     ecmdDataBufferBase clear_bits(16);
-     io_interface_t chip_interface=master_interface;//first we run on master chip
+    
+    FAPI_DBG("In the Dccal procedure");
+    io_interface_t chip_interface=master_interface;//first we run on master chip
     uint32_t group=master_group;
     const Target *target_ptr=&target; // Assuming I am allowed to do this . 
- 
-    for(int i=0;i<2;++i){ // master and slave side looper
+
         FAPI_DBG("IO_DCCAL : Starting Offset Calibration on interface %d group %d",chip_interface,group);
+        // read and save rx_pdwn_lite_disable
+        int read_bit=rx_pdwn_lite_disable;
+        rc= GCR_read(*target_ptr,master_interface,rx_mode_pg ,group,0,data_buffer);if (rc) {return(rc);}
+        int rx_pdwn_lite_value=data_buffer.getHalfWord(0) & read_bit;
+        
+        // read and save rx_wt_timeout_sel
+        read_bit=rx_wt_timeout_sel_tap7; //find the 3 bit value of the field. need it to be all 1's to do an &
+        rc= GCR_read(*target_ptr,master_interface,rx_timeout_sel_pg ,group,0,data_buffer);if (rc) {return(rc);}
+        int rx_wt_timeout_value=data_buffer.getHalfWord(0) & read_bit;
+        
+        // set power down lite disable, rx_pdwn_lite_disable
+        bits=rx_pdwn_lite_disable;
+        rc_ecmd|=set_bits.insert(bits,0,16);
+        bits=rx_pdwn_lite_disable_clear;
+        rc_ecmd|=clear_bits.insert(bits,0,16);
+        if(rc_ecmd)
+        {
+            rc.setEcmdError(rc_ecmd);
+            return(rc);
+        }
+        rc=GCR_write(*target_ptr,chip_interface,rx_mode_pg,group,0,set_bits ,clear_bits);if (rc) {return(rc);}
+        
+        // write rx_wt_timeout_sel to '111'
+        bits=rx_wt_timeout_sel_tap7;
+        rc_ecmd|=set_bits.insert(bits,0,16);
+        bits=rx_wt_timeout_sel_clear;
+        rc_ecmd|=clear_bits.insert(bits,0,16);
+        if(rc_ecmd)
+        {
+            rc.setEcmdError(rc_ecmd);
+            return(rc);
+        }
+        rc=GCR_write(*target_ptr,chip_interface,rx_timeout_sel_pg,group,0,set_bits ,clear_bits);if (rc) {return(rc);}
+        
         bits=rx_start_offset_cal;
         rc_ecmd|=set_bits.insert(bits,0,16);
         bits=rx_start_offset_cal_clear;
@@ -130,7 +165,7 @@ ReturnCode run_offset_cal(const Target &target,io_interface_t master_interface,u
         bool fail= data_buffer.getHalfWord(0) & fail_bit;
         bool done = data_buffer.getHalfWord(0)& done_bit;
         int timeoutCnt = 0;
-        while ( ( !done ) && ( timeoutCnt < 150 ) && !fail )
+        while ( ( !done ) && ( timeoutCnt < 1000 ) && !fail )
         {
                 // wait for 80000 time units
                 // Time units may be something for simulation, and something else (or nothing) for hardware
@@ -150,7 +185,7 @@ ReturnCode run_offset_cal(const Target &target,io_interface_t master_interface,u
                 return rc;
         }
         // Check for errors
-        else if ( timeoutCnt >= 100 && !done && !fail )
+        else if ( timeoutCnt >= 1000 && !done && !fail )
         {
                 FAPI_ERR("Timed out waiting for Done bit to be set");
                 //Set HWP error
@@ -161,7 +196,49 @@ ReturnCode run_offset_cal(const Target &target,io_interface_t master_interface,u
         {
              FAPI_DBG("IO Offset cal Completed on interface %d",chip_interface);
         }
-    }
+        
+        // clear eye opt offset cal done bit, rx_eo_latch_offset_done
+        bits=0x0000;
+        rc_ecmd|=set_bits.insert(bits,0,16);
+        bits=rx_eo_latch_offset_done_clear;
+        rc_ecmd|=clear_bits.insert(bits,0,16);
+        if(rc_ecmd)
+        {
+            rc.setEcmdError(rc_ecmd);
+            return(rc);
+        }
+        rc=GCR_write(*target_ptr,chip_interface,rx_eo_step_stat_pg,group,0,set_bits ,clear_bits);if (rc) {return(rc);}
+        
+        //restore rx_pdwn_lite_disable to saved value
+        
+        bits=rx_pdwn_lite_value;
+        rc_ecmd|=set_bits.insert(bits,0,16);
+        bits=rx_pdwn_lite_disable_clear;
+        rc_ecmd|=clear_bits.insert(bits,0,16);
+        if(rc_ecmd)
+        {
+            rc.setEcmdError(rc_ecmd);
+            return(rc);
+        }
+        rc=GCR_write(*target_ptr,chip_interface,rx_mode_pg,group,0,set_bits ,clear_bits);if (rc) {return(rc);}
+        
+        // restore rx_wt_timeout_sel to saved value
+        
+        bits=rx_wt_timeout_value;
+        rc_ecmd|=set_bits.insert(bits,0,16);
+        bits=rx_wt_timeout_sel_clear;
+        rc_ecmd|=clear_bits.insert(bits,0,16);
+        if(rc_ecmd)
+        {
+            rc.setEcmdError(rc_ecmd);
+            return(rc);
+        }
+        rc=GCR_write(*target_ptr,chip_interface,rx_timeout_sel_pg,group,0,set_bits ,clear_bits);if (rc) {return(rc);}
+        
+    
+    
+    
+    
     return(rc);
 }
 
@@ -349,58 +426,51 @@ ReturnCode run_zcal(const Target& target,io_interface_t master_interface,uint32_
         FAPI_DBG("main_n value %d",main_n);
         FAPI_DBG("post_n value %d",post_n);
         FAPI_DBG("margin_n value %d",margin_n);
-
-        //p segments
-        rc_ecmd|=set_bits.insert(main_p,0,7,25);
-        bits=tx_ffe_main_p_enc_clear;
-        rc_ecmd|=clear_bits.insert(bits,0,16);
+        
+              
+        rc_ecmd|=set_bits.flushTo0();
+        rc_ecmd|=clear_bits.flushTo0(); // I dont want to clear anything by default
         if(rc_ecmd)
         {
             rc.setEcmdError(rc_ecmd);
             return(rc);
         }
-        rc=GCR_write(*target_ptr,chip_interface,tx_ffe_main_pg ,group,0,set_bits,clear_bits);if (rc) {return(rc);}
-        rc_ecmd|=set_bits.insert(post_p,0,5,27);
-        bits=tx_ffe_post_p_enc_clear;
-        rc_ecmd|=clear_bits.insert(bits,0,16);
-        if(rc_ecmd)
-        {
-            rc.setEcmdError(rc_ecmd);
-            return(rc);
-        }
-        rc=GCR_write(*target_ptr,chip_interface,tx_ffe_post_pg ,group,0,set_bits,clear_bits);if (rc) {return(rc);}
-        rc_ecmd|=set_bits.insert(margin_p,0,5,27);
-        bits=tx_ffe_margin_p_enc_clear;
-        rc_ecmd|=clear_bits.insert(bits,0,16);
-        if(rc_ecmd)
-        {
-            rc.setEcmdError(rc_ecmd);
-            return(rc);
-        }
-        rc=GCR_write(*target_ptr,chip_interface,tx_ffe_margin_pg  ,group,0,set_bits,clear_bits);if (rc) {return(rc);}
-
         //N segments
-        rc_ecmd|=set_bits.insert(main_n,0,7,25);
-        bits=tx_ffe_main_n_enc_clear;
-        rc_ecmd|=clear_bits.insert(bits,0,16);
+        rc_ecmd|=set_bits.insert(main_p,1,7,25);
+        rc_ecmd|=set_bits.insert(main_n,9,7,25);
+
         if(rc_ecmd)
         {
             rc.setEcmdError(rc_ecmd);
             return(rc);
         }
         rc=GCR_write(*target_ptr,chip_interface,tx_ffe_main_pg ,group,0,set_bits,clear_bits);if (rc) {return(rc);}
-        rc_ecmd|=set_bits.insert(post_n,0,5,27);
-        bits=tx_ffe_post_n_enc_clear;
-        rc_ecmd|=clear_bits.insert(bits,0,16);
+        
+        rc_ecmd|=set_bits.flushTo0();
+        rc_ecmd|=clear_bits.flushTo0(); // I dont want to clear anything by default
+        if(rc_ecmd)
+        {
+            rc.setEcmdError(rc_ecmd);
+            return(rc);
+        }
+        rc_ecmd|=set_bits.insert(post_p,3,5,27);
+        rc_ecmd|=set_bits.insert(post_n,11,5,27);
         if(rc_ecmd)
         {
             rc.setEcmdError(rc_ecmd);
             return(rc);
         }
         rc=GCR_write(*target_ptr,chip_interface,tx_ffe_post_pg ,group,0,set_bits,clear_bits);if (rc) {return(rc);}
-        rc_ecmd|=set_bits.insert(margin_n,0,5,27);
-        bits=tx_ffe_margin_n_enc_clear;
-        rc_ecmd|=clear_bits.insert(bits,0,16);
+        
+        rc_ecmd|=set_bits.flushTo0();
+        rc_ecmd|=clear_bits.flushTo0(); // I dont want to clear anything by default
+        if(rc_ecmd)
+        {
+            rc.setEcmdError(rc_ecmd);
+            return(rc);
+        }
+        rc_ecmd|=set_bits.insert(margin_p,3,5,27);
+        rc_ecmd|=set_bits.insert(margin_n,11,5,27);
         if(rc_ecmd)
         {
             rc.setEcmdError(rc_ecmd);
@@ -455,7 +525,7 @@ ReturnCode io_dccal(const Target& target){
       // Z cal doesnt require group since its a per bus feature , but to satisfy PLAT swapped translation requirements we pass group=3 on master
       rc=run_zcal(target,master_interface,master_group);if (rc) {return(rc);};
       // Offset cal requires group address
-      rc=run_offset_cal(target,master_interface,master_group);if (rc) {return(rc);};
+     // rc=run_offset_cal(target,master_interface,master_group);if (rc) {return(rc);};
     }
     else if( (target.getType() ==  fapi::TARGET_TYPE_MEMBUF_CHIP)){
       FAPI_DBG("This is a Centaur DMI bus using base DMI scom address");
@@ -465,7 +535,7 @@ ReturnCode io_dccal(const Target& target){
       // Z cal doesnt require group since its a per bus feature , but to satisfy PLAT swapped translation requirements we pass group=3 on master
       rc=run_zcal(target,master_interface,master_group);if (rc) {return(rc);};
       // Offset cal requires group address
-      rc=run_offset_cal(target,master_interface,master_group);if (rc) {return(rc);};
+      //rc=run_offset_cal(target,master_interface,master_group);if (rc) {return(rc);};
     }
     //This is an X Bus
     else if( (target.getType() == fapi::TARGET_TYPE_XBUS_ENDPOINT  )){
@@ -476,7 +546,7 @@ ReturnCode io_dccal(const Target& target){
           // No Z cal in EI4/X bus design
           for(int i=0;i<5;++i){
              master_group=i;
-              rc=run_offset_cal(target,master_interface,master_group);if (rc) {return(rc);};            
+              //rc=run_offset_cal(target,master_interface,master_group);if (rc) {return(rc);};            
           }
       }
     }
@@ -486,8 +556,8 @@ ReturnCode io_dccal(const Target& target){
       master_interface=CP_FABRIC_A0; // base scom for A bus , assume translation to A1 by PLAT 
       master_group=0; // Design requires us to do this as per scom map and layout
                 // EDI-A bus needs both impedance cal and offset cal 
-       rc=run_zcal(target,master_interface,master_group);if (rc) {return(rc);};
-       rc=run_offset_cal(target,master_interface,master_group);if (rc) {return(rc);};
+      rc=run_zcal(target,master_interface,master_group);if (rc) {return(rc);};
+       //rc=run_offset_cal(target,master_interface,master_group);if (rc) {return(rc);};
     }
     else{
       FAPI_ERR("Invalid io_dccal HWP invocation . Target doesnt belong to DMI/X/A instances");

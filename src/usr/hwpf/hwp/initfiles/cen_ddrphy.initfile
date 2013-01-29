@@ -1,8 +1,14 @@
-#-- $Id: cen_ddrphy.initfile,v 1.19 2012/12/12 20:46:54 mwuu Exp $
+#-- $Id: cen_ddrphy.initfile,v 1.20 2013/01/16 21:07:47 mwuu Exp $
 #-- CHANGE HISTORY:
 #--------------------------------------------------------------------------------
 #-- Version:|Author: | Date:  | Comment:
 #-- --------|--------|--------|--------------------------------------------------
+#--     1.20|mwuu    |01/16/12|Updated TWTR & TRTP define for FW_WR_RD field in
+#           |        |        |WC_CONFIG0 and FW_RD_WR in WC_CONFIG2 in 0W spec.
+#           |        |        |Thin Oxide hibernation disabled in ATEST & BIT_DIR1
+#           |		 |		  |registers.
+#			|		 |		  |Changed Bang-Bang Margin in ADR32_SYSCLK_ROT_OVERRIDE
+#			|		 |		  |field of DPHY01_DDRPHY_ADR_SYSCLK_CNTL_PR_P0_ADR32S0
 #--     1.19|mwuu    |12/12/12|Commented out settings for SIM, changed attribute
 #           |        |        |to CEN.ATTR_CENTAUR_EC_WRITE_FIR_MASK_FEATURE
 #--		1.18|mwuu	 |12/03/12|Changed DP18_PLL_CONFIG1 VCO setting
@@ -261,11 +267,13 @@ define def_cdi_spcke_ohm40_p1	=	(ATTR_EFF_CEN_DRV_IMP_SPCKE[1] == ENUM_ATTR_EFF_
 # SIMPLIFY
 # ================================================================================
 # test if AL is disabled
-define def_AL_ena	= (ATTR_EFF_DRAM_AL != 0);		#!! need to fix if AL == 0 then formulas below have problems
+define def_AL_ena	= (ATTR_EFF_DRAM_AL != 0);
+define def_AL_dis	= (ATTR_EFF_DRAM_AL == 0);
 
 # for calculating FW_RD_WR delay...  NOTE: AL could be disabled(=0)
-define def_TWTR_PLUS_8	= (ATTR_EFF_DRAM_TWTR + 8)	;
-define def_TRTP_PLUS_AL	= (ATTR_EFF_DRAM_TRTP + ATTR_EFF_DRAM_CL - ATTR_EFF_DRAM_AL)	;
+define def_TWTR_PLUS_OFF = (ATTR_EFF_DRAM_TWTR + 11)	;	# change from +8 on reg spec 
+define def_TRTP_PLUS_AL	= (ATTR_EFF_DRAM_TRTP + ATTR_EFF_DRAM_CL - ATTR_EFF_DRAM_AL + 3)	;
+define def_TRTP_PLUS_NOAL = (ATTR_EFF_DRAM_TRTP + 3)	;
 
 # for ODT on/off time calculation
 # 2tCK = DDR4 feature for extended write preamble, should be defined by attribute if used.
@@ -2388,8 +2396,8 @@ scom 0x80003C060301143f {	# _P[0:1]_[0:4] via broadcast
 	60		,	0b0			,	any				;	# else (DDR3), POD=0.5*VDD
 	61		,	0b0			,	any				;	# 1=DISABLE_TERMINATION, for dq/dqs pins
 	# READ_CENTERING_MODE
-	# (00=MPR_PATTERN_BIT or staggered, custom [01=serial, 10=parallel, 11=custom] using SEQ rd/wr data
-	62:63	,	0b11		,	def_is_ddr4		;	# for DDR4
+	# (00=MPR_PATTERN_BIT or staggered, custom [11=snooped, 00=custom] using SEQ rd/wr data
+	62:63	,	0b11		,	(def_is_ddr4)	;	# for DDR4
 	62:63	,	0b00		,	any				;	#
 }
 
@@ -2422,8 +2430,8 @@ scom 0x80013C060301143f {	# _P1_[0:4] via broadcast
 	60		,	0b0			,	any				;	# else (DDR3), POD=0.5*VDD
 	61		,	0b0			,	any				;	# 1=DISABLE_TERMINATION, for dq/dqs pins
 	# READ_CENTERING_MODE
-	# (00=MPR_PATTERN_BIT or staggered, custom [01=serial, 10=parallel, 11=custom] using SEQ rd/wr data
-	62:63	,	0b11		,	def_is_ddr4		;	# for DDR4
+	# (00=MPR_PATTERN_BIT or staggered, custom [11=snooped, 00=custom] using SEQ rd/wr data
+	62:63	,	0b11		,	(def_is_ddr4)	;	# for DDR4
 	62:63	,	0b00		,	any				;	#
 }
 
@@ -2597,24 +2605,41 @@ scom 0x8001c0150301143f {
 # beats. Each bit lane can have a different pattern, but the composite pattern should have
 # transitions at each beat.
 #
+#	48:63	,	0x0000		,	(def_is_sim)	;	# to match dials
+#
+#  in DDR3 only bits 48:55 are used as pattern, and 56:63 must match 48:55.
 #						    [0:1]
 # DPHY01_DDRPHY_SEQ_RD_WR_DATA0_P0		0x000-0x001		0x8000c4000301143f
-# DPHY01_DDRPHY_SEQ_RD_WR_DATA1_P0
 # PHYW.PHYX.SYNTHX.D3SIDEA.SEQX.U_SEQ_APB.RD_WR_DATA0_L2
-scom 0x8000c40(0,1)0301143f {
+scom 0x8000c4000301143f {
 	bits	,	scom_data	,	expr			;	#				beat 12345678
 #	0:47	,	0x000000000000,	any				;	# reserved
-#	48:63	,	0x0000		,	(def_is_sim)	;	# to match dials
+# if DDR4 = 0:7 (MPR0), 8:15 (MPR1)
+	48:63	,	0x5555		,	any				;	# MPR_PATTERN_BIT of 0F0F0F0F pattern
+#	48:63	,	0xD896		,	any				;	# 1st half-nibble of EA0CA653 pattern
+}
+# DPHY01_DDRPHY_SEQ_RD_WR_DATA1_P0
+scom 0x8000c4010301143f {
+	bits	,	scom_data	,	expr			;	#				beat 12345678
+#	0:47	,	0x000000000000,	any				;	# reserved
+# if DDR4 = 0:7 (MPR2), 8:15 (MPR3)
 	48:63	,	0x5555		,	any				;	# MPR_PATTERN_BIT of 0F0F0F0F pattern
 #	48:63	,	0xD896		,	any				;	# 1st half-nibble of EA0CA653 pattern
 }
 
 # DPHY01_DDRPHY_SEQ_RD_WR_DATA0_P1
-# DPHY01_DDRPHY_SEQ_RD_WR_DATA1_P1
-scom 0x8001c40(0,1)0301143f {
+scom 0x8001c4000301143f {
 	bits	,	scom_data	,	expr			;	#				beat 12345678
 #	0:47	,	0x000000000000,	any				;	# reserved
-#	48:63	,	0x0000		,	(def_is_sim)	;	# to match dials
+# if DDR4 = 0:7 (MPR0), 8:15 (MPR1)
+	48:63	,	0x5555		,	any				;	# MPR_PATTERN_BIT of 0F0F0F0F pattern
+#	48:63	,	0xCD03		,	any				;	# 2st half-nibble of EA0CA653 pattern
+}
+# DPHY01_DDRPHY_SEQ_RD_WR_DATA1_P1
+scom 0x8001c4010301143f {
+	bits	,	scom_data	,	expr			;	#				beat 12345678
+#	0:47	,	0x000000000000,	any				;	# reserved
+# if DDR4 = 0:7 (MPR2), 8:15 (MPR3)
 	48:63	,	0x5555		,	any				;	# MPR_PATTERN_BIT of 0F0F0F0F pattern
 #	48:63	,	0xCD03		,	any				;	# 2st half-nibble of EA0CA653 pattern
 }
@@ -3005,6 +3030,8 @@ scom 0x800(0,1)3C370301143f {	# _P[0:1]_[0:4]
 # leveling algorithm does not reset this register. The write eye centering algorithm uses this
 # register value as a starting point for the algorithm.
 #
+# Note: This register must be reset prior to re-running initial calibration.
+#
 # DPHY01_DP18_WR_DELAY_VALUE_0_RP0_REG_P0_0		0x038-0x04F		0x800000380301143f
 # PHYW.PHYX.GEN_DP#0.DPX.HC.HC.D3PHY_WRDP18WRAP.D3PHY_WRDP18CNTL_MAC.DP18_WR_DELAY_VALUE_0_RP0_REG_L2
 #
@@ -3061,9 +3088,9 @@ scom 0x800(0,1)3C370301143f {	# _P[0:1]_[0:4]
 #
 
 # ---------------------------------------------------------------------------------------
-# DP18 Read Diagnostic Configuration 3 Register		!! need to set this?
+# DP18 Read Diagnostic Configuration 3 Register		default=0x0806	!! need to set this?
 #
-# !! can't find address in DB
+# DDRPHY_DP18_RD_DIA_CONFIG3		0x06D		0x8000
 
 # ---------------------------------------------------------------------------------------
 # Initial calibration sequence Config0 register		default=0	sim = 0xBF2?
@@ -3155,7 +3182,7 @@ scom 0x800(0,1)C0170301143F {	# _P[0:1]
 #	0:47	,	0x000000000000	,	any				;	# reserved
 	48:51	,	0b0000			,	any				;	# REFRESH_COUNT, num of refreshes before cal
 	52:53	,	0b00			,	any				;	# REFRESH_CONTROL during initial calibration
-	54		,	0b0				,	any				;	# REFRESH_ALL_RANKS, during calibration
+	54		,	0b0				,	any				;	# REFRESH_ALL_RANKS, 1 issued to each rank seq.
 #	55:56	,	0b00			,	any				;	# reserved
 	# REFRESH_INTERVAL, defaults to 6 if value < 6, value*256=num clks between refreshes
 	# ATTR_EFF_DRAM_TRFI = refresh interval in clocks
@@ -3185,16 +3212,17 @@ scom 0x8000C00B0301143F {	# Port 0
 
 	52		,	0b1			,	any						;	# PER_ENA_ZCAL
 	53		,	0b1			,	any						;	# PER_ENA_SYSCLK_ALIGN
-	54		,	0b1			,	any						;	# ENA_PER_RDCLK_ALIGN
-	55		,	0b1			,	any						;	# ENA_PER_DQS_ALIGN
-	56		,	0b1			,	any						;	# ENA_PER_READ_CTR
+	54		,	0b1			,	any						;	# ENA_PER_READ_CTR
+	55		,	0b1			,	any						;	# ENA_PER_RDCLK_ALIGN
+	56		,	0b1			,	any						;	# ENA_PER_DQS_ALIGN
 	57:58	,	0b00		,	any						;	# PER_NEXT_RANK_PAIR
 	59		,	0b1			,	(def_FAST_SIM_PC==1)	;	# FAST_SIM_PER_CNTR
 	59		,	0b0			,	(def_FAST_SIM_PC==0)	;	# FAST_SIM_PER_CNTR
 	60		,	0b0			,	any						;	# START_INIT_CAL
 	61		,	0b0			,	any						;	# START_PER_CAL
 	62		,	0b0			,	any						;	# ABORT_ON_ERR_EN
-	63		,	0b0			,	any						;	# ZCAL_UPDATE_MODE
+	63		,	0b0			,	any						;	# DD2_FIX_DIS
+#63		,	0b0			,	any						;	# ZCAL_UPDATE_MODE
 }
 # DPHY01.DDRPHY_PC_PER_CAL_CONFIG_P1
 scom 0x8001C00B0301143F {	# Port 1
@@ -3653,10 +3681,10 @@ scom 0x800(0,1)C8000301143F {	# _P[0:1]
 	#
 	# min GPO = 5 + max(rndUp(System_delay)) - RLO + ADVANCE_RD_VALID + SPAM_EN
 	# max GPO = 11 if in 2:1, 13 if in 4:1
-	48:51	,	0b0101		,	any				;	# GLOBAL_PHY_OFFSET (GPO), 2:1 max=11, 4:1 max=13
+	48:51	,	0b0101		,	any				;	# GLOBAL_PHY_OFFSET (GPO), ideally 2:1 max=11, 4:1 max=13
 	52		,	0b0			,	any				;	# ADVANCE_RD_VALID	ask Yuen
-	53		,	0b0			,	any				;	# ERS_MODE, reserved
-	54:56	,	0b000		,	any				;	# PER_REPEAT_COUNT, (value+1)=num bits per peridic cal
+	53		,	0b0			,	any				;	# PER_DUTY_CYCLE_SW, 0=rd cmds 50% duty cycle during per.cal, 1=continuously 
+	54:56	,	0b000		,	any				;	# NUM_PERIODIC_CAL, (value+1)=num bits per peridic cal
 	57		,	0b0			,	any				;	# SINGLE_BIT_MPR_RP0
 	58		,	0b0			,	any				;	# SINGLE_BIT_MPR_RP1
 	59		,	0b0			,	any				;	# SINGLE_BIT_MPR_RP2
@@ -3664,7 +3692,7 @@ scom 0x800(0,1)C8000301143F {	# _P[0:1]
 	61		,	0b0			,	any				;	# ALIGN_ON_EVEN_CYCLES
 # !! switched to '1' to match SIM
 	62		,	0b1			,	any				;	# PERFORM_RDCLK_ALIGN
-	63		,	0b0			,	any				;	# STAGGERED_PATTERN
+	63		,	0b0			,	any				;	# STAGGERED_PATTERN		# for DDR4, 0=serial, 1=staggered
 }
 
 # ---------------------------------------------------------------------------------------
@@ -3749,8 +3777,8 @@ scom 0x800(0,1)C4020301143F {	# _P[0:1]
 	50:53	,	0b0000			;	# MR_MASK_EN (mode register[0:3] mask during calibration)
 	54		,	0b0				;	# DELAYED_PARITY (only for DDR4, DDR3 don't care)
 	55		,	0b0				;	# LRDIMM_CONTEXT
-	56		,	0b0				;	# FORCE_RESERVED
-	57		,	0b0				;	# HALT_ROTATION
+	56		,	0b0				;	# FORCE_RESERVED	# for DDR4
+	57		,	0b0				;	# HALT_ROTATION, for DDR4 staggered pattern
 	58		,	0b0				;	# FORCE_MPR
 #	59:63	,	0b00000			;	# reserved
 }
@@ -3847,7 +3875,7 @@ scom 0x800(0,1)C4120301143F {	# _P[0:1]
 #
 # 	[01:23]					   [0:2] [0:1]
 # DPHY01_DDRPHY_SEQ_MEM_TIMING_PARAM1_P0	CTL	0x013	0x8000c4130301143f
-# PHYW.PHYX.SYNTHX.D3SIDEA.SEQX.U_SEQ_APB.MEM_TIMING_PARAM1_L2
+# PHYW.PHYX.SYNHX.D3SIDEA.SEQX.U_SEQ_APB.MEM_TIMING_PARAM1_L2T
 scom 0x800(0,1)C4130301143F {	# _P[0:1]
 	bits	,	scom_data	,	expr											;
 #	0:47	,	0x000000000000,	any												;	# reserved
@@ -3981,11 +4009,18 @@ scom 0x800(0,1)CC000301143F {	# _P[0:1]
 	#48:55	,	0x1B				,	any										;	# TWLO_TWLOE = 27
 	#48:55	,	(25+ldqs+ldq)		,	(CEN.ATTR_MSS_FREQ > 1460)				;	# TWLO_TWLOE	(> 1333)
 	56		,	0b1					,	any										;	# WL_ONE_DQS_PULSE = enable
-	# FW_WR_RD = max(tWTR+8,AL+tRTP), AL=ATTR_EFF_DRAM_CL-ATTR_EFF_DRAM_AL when ATTR_EFF_DRAM_AL != 0
+
+	# FW_WR_RD = max(tWTR+11,AL+tRTP+3), ATTR_EFF_DRAM_AL(0,1,2)
 	57:62	,	0b000000			,	(def_is_sim)							;
-	57:62	,	0b010001			,	any										;	# same as DD0, right aligned here, 17d
-	57:62	,	(def_TWTR_PLUS_8)	,	(def_TWTR_PLUS_8 >= def_TRTP_PLUS_AL)	;	# TWTR + 8 >= TRTP + AL
-	57:62	,	(def_TRTP_PLUS_AL)	,	(def_TWTR_PLUS_8 < def_TRTP_PLUS_AL)	;	# TWTR + 8 < TRTP + AL
+	57:62	,	0b010001			,	any										;	# same as dd0
+	
+	# AL={1,2};	max (TWTR + 11, TRTP + AL + 3)
+	57:62	,	(def_TWTR_PLUS_OFF)	,	(def_AL_ena && (def_TWTR_PLUS_OFF >= def_TRTP_PLUS_AL) )	;	# TWTR + 11
+	57:62	,	(def_TRTP_PLUS_AL)	,	(def_AL_ena && (def_TWTR_PLUS_OFF < def_TRTP_PLUS_AL) )		;	# TRTP + AL + 3
+
+	# AL=0, 	max (TWTR + 11, TRTP + 3)
+	57:62	,	(def_TWTR_PLUS_OFF)	,	(def_AL_dis && (def_TWTR_PLUS_OFF >= def_TRTP_PLUS_NOAL) )	;	# TWTR + 11
+	57:62	,	(def_TRTP_PLUS_NOAL),	(def_AL_dis && (def_TWTR_PLUS_OFF < def_TRTP_PLUS_NOAL)	)	;	# TRTP + 3
 
 	63		,	0b0					,	any										;	# CUSTOM_INIT_WRITE
 }
@@ -4016,19 +4051,18 @@ scom 0x800(0,1)CC020301143F {	# _P[0:1]
 	48:51	,	0x3					,	(def_is_sim)	;	# NUM_VALID_SAMPLES = 3 (changed from defaults)
 	48:51	,	0x5					,	any				;	# NUM_VALID_SAMPLES = 5 (defaults)
 
-	# FW_RD_WR = max(tWTR+8,AL+tRTP), AL=ATTR_EFF_DRAM_CL-ATTR_EFF_DRAM_AL when ATTR_EFF_DRAM_AL != 0
-	52:57	,	(def_TWTR_PLUS_8)	,	(def_TWTR_PLUS_8 >= def_TRTP_PLUS_AL)	;	# TWTR + 8 >= TRTP + AL
-	52:57	,	(def_TRTP_PLUS_AL)	,	(def_TWTR_PLUS_8 < def_TRTP_PLUS_AL)	;	# TWTR + 8 < TRTP + AL
+	# FW_RD_WR = max(tWTR+11,AL+tRTP+3), AL=ATTR_EFF_DRAM_CL-ATTR_EFF_DRAM_AL when ATTR_EFF_DRAM_AL != 0
+	# AL={1,2};	max (TWTR + 11, TRTP + AL + 3)
+	52:57	,	(def_TWTR_PLUS_OFF)	,	(def_AL_ena && (def_TWTR_PLUS_OFF >= def_TRTP_PLUS_AL) )	;	# TWTR + 11
+	52:57	,	(def_TRTP_PLUS_AL)	,	(def_AL_ena && (def_TWTR_PLUS_OFF < def_TRTP_PLUS_AL) )		;	# TRTP + AL + 3
 
-# RL=CL+AL, WL=CWL+AL	!! Need to fix
-# = CL + 2tCK + tCCD/x   x=1 if
-# Read to write = RL + tCCD + 2tCK - WL (in DDR3 JEDEC for Read BL8 to Write BL8)
-# Read to write = RL + tCCD/2 + 2tCK - WL (in DDR3 JEDEC for Read BC4 to Write BC4/BL8 OTF)
-#	52:57	,	def_fw_rd_wr,		,	(def_TWTR_PLUS_8 < def_TRTP_PLUS_AL)	;	# TWTR + 8 < TRTP + AL
+	# AL=0, 	max (TWTR + 11, TRTP + 3)
+	52:57	,	(def_TWTR_PLUS_OFF)	,	(def_AL_dis && (def_TWTR_PLUS_OFF >= def_TRTP_PLUS_NOAL) )	;	# TWTR + 11
+	52:57	,	(def_TRTP_PLUS_NOAL),	(def_AL_dis && (def_TWTR_PLUS_OFF < def_TRTP_PLUS_NOAL)	)	;	# TRTP + 3
 
-
-#	58:62	,	0b00000				,	any				;	# reserved
-
+#	58:61	,	0b00000				,	any				;	# reserved
+	# DD2_FIX_DIS
+	62		,	0b0					,	any				;	# 0=disable 1=enable DD2 fixes in WC logic
 	# DP18_WR_DELAY_VALUE_{0-23}_RP{0-3}_REG are reset to 0 at the start of WL cal for rank pair 0 when '1'
 	63		,	0b0					,	any				;	# EN_RESET_WR_DELAY_WL = disabled
 }
@@ -4072,7 +4106,9 @@ scom 0x800(0,1)CC050301143F {	# _P[0:1]
 scom 0x800(0,1)3C030301143f {	# DIR1_P[0:1]_[0:4] via broadcast
 	bits	,	scom_data	,	expr			;
 #	0:47	,	0x000000000000,	any				;	# reserved
-#	48:54	,	0b0000000	,	any				;	# reserved... used to be DATA_BIT_DIR_16_23
+#	48:52	,	0b000000	,	any				;	# reserved... used to be DATA_BIT_DIR_16_23
+	53		,	0b0			,	any				;	# DD2_FIX_DIS
+	54		,	0b1			,	any				;	# TOXDRV_HIBERNATE	# Thin oxide driver hibernation disable.
 	55		,	0b0			,	any				;	# ATEST_MUX_CTL_EN
 	56		,	0b0			,	any				;	# WL_ADVANCE_DISABLE
 	57		,	0b0			,	any				;	# DISABLE_PING_PONG
@@ -4081,6 +4117,28 @@ scom 0x800(0,1)3C030301143f {	# DIR1_P[0:1]_[0:4] via broadcast
 	60:63	,	0b0000		,	any				;	# ATEST_MUX_CTL[0:3]
 }
 
+# ---------------------------------------------------------------------------------------
+# ADR Output Driver Force and ATEST Control Register
+# 
+# DPHY01_DDRPHY_ADR_OUTPUT_FORCE_ATEST_CNTL_P0_ADR32S0	0x035	0x800080350301143f
+#scom 0x800(0,1)(80,84)350301143f {	# P[0:1]_ADR32S[0:1]
+scom 0x800(0,1)BC350301143f {	# DIR1_P[0:1]_[0:4] via broadcast
+	bits	,	scom_data	,	expr			;
+#	0:47	,	0x000000000000,	any				;	# reserved
+#	48		,	0b0			,	any				;	# FLUSH control to ANALOG during Manufacturing Macro Test - reserved.
+#	49		,	0b0			,	any				;	# FORCE_EN			output Force Enable Bit.
+	50		,	0b1			,	any				;	# TOXDRV_HIBERNATE	thin oxide driver hibernation disable.
+#	51		,	0b0			,	any				;	# ATEST1CTL_EN		Enable ATEST1 output.
+#	52:55	,	0b0000		,	any				;	# HS_PROBE_A_SEL	High Speed Probe A Select - reserved.
+#	56:59	,	0b0000		,	any				;	# HS_PROBE_B_SEL	High Speed Probe B Select - reserved.
+#	60		,	0b0			,	any				;	# ATEST1CTL0		bit 0 of ATEST1CTL value  - reserved
+#	61		,	0b0			,	any				;	# ATEST1CTL1		bit 1 of ATEST1CTL value  - reserved
+#	62		,	0b0			,	any				;	# ATEST1CTL2		bit 2 of ATEST1CTL value  - reserved.
+#	63		,	0b0			,	any				;	# ATEST1CTL3		bit 3 of ATEST1CTL value  - reserved.
+}
+
+#
+#
 # ---------------------------------------------------------------------------------------
 # DP18 Data Bit Enable 0	(defaults to 0's)	Affects ALL Ranks
 #
@@ -4773,7 +4831,7 @@ scom 0x800(0,1)BC320301143F {		# _P[0:1]_ADR32S[0:1] via broadcast
 # old dials value = 0x0080
 	48		,	0b1			,	any				;	# ADR32_SYSCLK_ENABLE
 
-	49:55	,	0b0000000	,	any				;	# ADR32_SYSCLK_ROT_OVERRIDE
+	49:55	,	0b0000010	,	any				;	# ADR32_SYSCLK_ROT_OVERRIDE
 
 	56		,	0b0			,	any				;	# ADR32_SYSCLK_ROT_OVERRIDE_EN
 

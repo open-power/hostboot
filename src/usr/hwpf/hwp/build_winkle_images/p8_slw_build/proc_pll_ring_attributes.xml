@@ -43,7 +43,7 @@
       firmware notes:
     </description>
     <valueType>uint8</valueType>
-    <array>192</array>
+    <array>231</array>
     <platInit/>
     <persistRuntime/>
   </attribute>

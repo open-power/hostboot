@@ -17,3 +17,10 @@ Ipoll mask register actions are inverted
 -CMVC: SW183465
 -Files: ipoll-inverted.patch
 -Coreq: None
+
+S1 requires action for dmi pll lock
+Action file need to be updated to set these bits when proc_a_x_pci_dmi_pll_setup needs them
+-RTC: Task 63307 will remove this patch
+-CMVC: SW185124
+-Files: s1.act.dmi_pll_lock_patch
+-Coreq: None

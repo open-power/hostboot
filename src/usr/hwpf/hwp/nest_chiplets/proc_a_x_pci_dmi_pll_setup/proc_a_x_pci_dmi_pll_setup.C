@@ -21,7 +21,7 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 // -*- mode: C++; c-file-style: "linux";  -*-
-// $Id: proc_a_x_pci_dmi_pll_setup.C,v 1.9 2013/01/20 19:22:44 jmcgill Exp $
+// $Id: proc_a_x_pci_dmi_pll_setup.C,v 1.10 2013/01/25 19:30:22 mfred Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_a_x_pci_dmi_pll_setup.C,v $
 //------------------------------------------------------------------------------
 // *|
@@ -61,6 +61,7 @@ const uint8_t GP3_PLL_RESET = 4;
 const uint8_t GP3_PLL_BYPASS = 5;
 const uint8_t FSI_GP4_PLL_TEST_BYPASS1 = 22;
 const uint8_t PLLLOCK = 0;
+const uint8_t PLLLOCK2 = 1;
 
 
 
@@ -219,6 +220,24 @@ extern "C"
 
 
 
+                FAPI_INF("ABUS GP3: Release PLL bypass of A-BUS ");
+                rc_ecmd |= gp_data.flushTo1();
+                rc_ecmd |= gp_data.clearBit(GP3_PLL_BYPASS);
+                if (rc_ecmd)
+                {
+                    FAPI_ERR("Error 0x%x setting up data buffer to clear GP3_PLL_BYPASS", rc_ecmd);
+                    rc.setEcmdError(rc_ecmd);
+                    break;
+                }
+                rc = fapiPutScom(i_target, A_GP3_AND_0x080F0013, gp_data);
+                if (rc)
+                {
+                    FAPI_ERR("fapiPutScom error (A_GP3_AND_0x080F0013)");
+                    break;
+                }
+
+
+
                 FAPI_INF("CHIPLET PLLLK: Check the PLL lock of A-BUS ");
                 num = 0;
                 do
@@ -245,24 +264,6 @@ extern "C"
                     break;
                 }
                 FAPI_INF("A-Bus PLL is locked.");
-
-
-
-                FAPI_INF("ABUS GP3: Release PLL bypass of A-BUS ");
-                rc_ecmd |= gp_data.flushTo1();
-                rc_ecmd |= gp_data.clearBit(GP3_PLL_BYPASS);
-                if (rc_ecmd)
-                {
-                    FAPI_ERR("Error 0x%x setting up data buffer to clear GP3_PLL_BYPASS", rc_ecmd);
-                    rc.setEcmdError(rc_ecmd);
-                    break;
-                }
-                rc = fapiPutScom(i_target, A_GP3_AND_0x080F0013, gp_data);
-                if (rc)
-                {
-                    FAPI_ERR("fapiPutScom error (A_GP3_AND_0x080F0013)");
-                    break;
-                }
 
 
 
@@ -319,6 +320,24 @@ extern "C"
 
 
 
+                FAPI_INF("NEST GP3: Release PLL bypass of for DMI PLL.");
+                rc_ecmd |= gp_data.flushTo1();
+                rc_ecmd |= gp_data.clearBit(GP3_PLL_BYPASS);
+                if (rc_ecmd)
+                {
+                    FAPI_ERR("Error 0x%x setting up data buffer to clear GP3_PLL_BYPASS", rc_ecmd);
+                    rc.setEcmdError(rc_ecmd);
+                    break;
+                }
+                rc = fapiPutScom(i_target, NEST_GP3_AND_0x020F0013, gp_data);
+                if (rc)
+                {
+                    FAPI_ERR("fapiPutScom error (NEST_GP3_AND_0x020F0013)");
+                    break;
+                }
+
+
+
                 FAPI_INF("CHIPLET PLLLK: Check the PLL lock of DMI PLL.");
                 num = 0;
                 do
@@ -336,7 +355,10 @@ extern "C"
                         break;
                     }
                     // sleep (10); // not accurate anymore for P8
-                } while ( !timeout && !gp_data.isBitSet(PLLLOCK) ); // Poll until PLL is locked or max count is reached.
+
+                    // Check two lock bits because there are two DMI PLLs in Venice.   Unused bit defaults to '1' in Murano.
+                } while ( !timeout && ( !gp_data.isBitSet(PLLLOCK) || !gp_data.isBitSet(PLLLOCK2) ) ); // Poll until PLL is locked or max count is reached.
+
                 if (rc) break;    // Go to end of proc if error found inside polling loop.
                 if (timeout)
                 {
@@ -345,24 +367,6 @@ extern "C"
                     break;
                 }
                 FAPI_INF("DMI PLL is locked.");
-
-
-
-                FAPI_INF("NEST GP3: Release PLL bypass of for DMI PLL.");
-                rc_ecmd |= gp_data.flushTo1();
-                rc_ecmd |= gp_data.clearBit(GP3_PLL_BYPASS);
-                if (rc_ecmd)
-                {
-                    FAPI_ERR("Error 0x%x setting up data buffer to clear GP3_PLL_BYPASS", rc_ecmd);
-                    rc.setEcmdError(rc_ecmd);
-                    break;
-                }
-                rc = fapiPutScom(i_target, NEST_GP3_AND_0x020F0013, gp_data);
-                if (rc)
-                {
-                    FAPI_ERR("fapiPutScom error (NEST_GP3_AND_0x020F0013)");
-                    break;
-                }
 
 
 
@@ -500,6 +504,9 @@ extern "C"
 This section is automatically updated by CVS when you check in this file.
 Be sure to create CVS comments when you commit so that they can be included here.
 $Log: proc_a_x_pci_dmi_pll_setup.C,v $
+Revision 1.10  2013/01/25 19:30:22  mfred
+Release PLLs from bypass before checking for PLL lock.  Also, check for two lock bits on DMI PLL to support Venice.
+
 Revision 1.9  2013/01/20 19:22:44  jmcgill
 update for A chiplet partial good support
 

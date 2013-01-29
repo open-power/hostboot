@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_build_smp.C,v 1.6 2013/01/21 03:11:23 jmcgill Exp $
+// $Id: proc_build_smp.C,v 1.7 2013/01/28 14:45:45 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_build_smp.C,v $
 //------------------------------------------------------------------------------
 // *|
@@ -124,12 +124,12 @@ fapi::ReturnCode proc_build_smp_process_system(
 
         // get core floor frequency attribute
         FAPI_DBG("proc_build_smp_process_system: Querying core floor frequency attribute");
-        rc = FAPI_ATTR_GET(ATTR_FREQ_CORE_FLOOR,
+        rc = FAPI_ATTR_GET(ATTR_BOOT_FREQ_MHZ,
                            NULL,
                            io_smp.freq_core_floor);
         if (!rc.ok())
         {
-            FAPI_ERR("proc_build_smp_process_system: Error from FAPI_ATTR_GET (ATTR_FREQ_CORE_FLOOR");
+            FAPI_ERR("proc_build_smp_process_system: Error from FAPI_ATTR_GET (ATTR_BOOT_FREQ_MHZ");
             break;
         }
 

@@ -1,0 +1,551 @@
+#-- $Id: p8.dmi.custom.scom.initfile,v 1.2 2013/01/24 23:46:35 thomsen Exp $
+#-- CHANGE HISTORY:
+#--------------------------------------------------------------------------------
+#-- Version:|Author: | Date:  | Comment:
+#-- --------|--------|--------|--------------------------------------------------
+#--     1.2 |thomsen |01/24/13|Fixed tx_msbswap for groups 1,2,3
+#--     1.1 |thomsen |01/23/13|Created initial version
+#-- --------|--------|--------|--------------------------------------------------
+#--------------------------------------------------------------------------------
+# End of revision history
+#--------------------------------------------------------------------------------
+
+#--Master list of variables that can be used in this file is at:
+#--<Attribute Definition Location>
+
+#-- TGT1.ATTR_CHIP_UNIT_POS is the MCS unit number (0-7 on Venice, 4-7 on Murano) and corresponds to the scom address translation done in
+#--  the p8.chipunit.scominfo file. It is used to be able to select a specific clock group number.
+#--  Chip     UNIT_POS  DMI_UNIT  CLOCKGRP
+#--  ----     --------  --------  --------
+#--  Venice:  0-3       DMI0      3-0
+#--           4-7       DMI1      3-0
+#--  Murano:  4-7       DMI1      3-0
+
+
+SyntaxVersion = 1
+
+#-- -----------------------------------------------------------------------------
+#--******************************************************************************
+#-- -----------------------------------------------------------------------------
+#--
+#-- Includes
+#-- Note:  Must include the path to the .define file.
+#-- -----------------------------------------------------------------------------
+#--******************************************************************************
+#-- -----------------------------------------------------------------------------
+include edi.io.define
+
+#-- -----------------------------------------------------------------------------
+#--******************************************************************************
+#-- -----------------------------------------------------------------------------
+#--
+#-- Defines
+#--
+#-- -----------------------------------------------------------------------------
+#--******************************************************************************
+#-- -----------------------------------------------------------------------------
+
+# ./iotk put rx_fence=1
+# 0x
+scom 0x800.0b(rx_fence_pg)(rx_grp0,rx_grp1,rx_grp2,rx_grp3)(lane_na).0x(dmi1_gcr_addr) {
+bits,                     scom_data;
+rx_fence,                 0b1;
+}
+
+# ./iotk put rx_c4_sel=00
+# ./iotk put rx_prot_speed_slct=1
+# 0x8009C00002011E3F 
+scom 0x800.0b(rx_misc_analog_pg)(rx_grp0,rx_grp1,rx_grp2,rx_grp3)(lane_na).0x(dmi1_gcr_addr) {
+bits,                     scom_data;
+rx_c4_sel,                0b00;
+rx_prot_speed_slct,       0b1;
+}
+# ./iotk put rx_servo_timeout_sel_D=1001
+# 0x800B600002011E3F 
+scom 0x800.0b(rx_servo_to1_pp)(rx_grp0,rx_grp1,rx_grp2,rx_grp3)(lane_na).0x(dmi1_gcr_addr) {
+bits,                     scom_data;
+rx_servo_timeout_sel_d,   0b1001;
+}
+# ./iotk put rx_servo_timeout_sel_H=1110
+# 0x800B680002011E3F 
+scom 0x800.0b(rx_servo_to2_pp)(rx_grp0,rx_grp1,rx_grp2,rx_grp3)(lane_na).0x(dmi1_gcr_addr) {
+bits,                     scom_data;
+rx_servo_timeout_sel_h,   0b1110;
+}
+# ./iotk put rx_servo_timeout_sel_I=1011
+# ./iotk put rx_servo_timeout_sel_J=1100
+# 0x800B700002011E3F 
+scom 0x800.0b(rx_servo_to3_pp)(rx_grp0,rx_grp1,rx_grp2,rx_grp3)(lane_na).0x(dmi1_gcr_addr) {
+bits,                     scom_data;
+rx_servo_timeout_sel_i,   0b1011;
+rx_servo_timeout_sel_j,   0b1100;
+rx_servo_timeout_sel_k,   0b1101;
+}
+# ./iotk put rx_wt_timeout_sel=111
+# ./iotk put rx_ds_bl_timeout_sel=101
+# ./iotk put rx_ds_timeout_sel=110
+#./iotk put rx_sls_timeout_sel=111
+# 0x8008980002011E3F 
+scom 0x800.0b(rx_timeout_sel_pg)(rx_grp0,rx_grp1,rx_grp2,rx_grp3)(lane_na).0x(dmi1_gcr_addr) {
+bits,                     scom_data;
+rx_wt_timeout_sel,        0b111;
+rx_ds_bl_timeout_sel,     0b101;
+rx_ds_timeout_sel,        0b110;
+rx_sls_timeout_sel,       0b001;
+}
+
+# ./iotk put rx_bit_lock_timeout_sel=110
+# 0x800B080002011E3F 
+scom 0x800.0b(rx_mode1_pp)(rx_grp0,rx_grp1,rx_grp2,rx_grp3)(lane_na).0x(dmi1_gcr_addr) {
+bits,                     scom_data;
+rx_bit_lock_timeout_sel,  0b110;
+}
+# ./iotk put rx_eo_offset_timeout_sel=111
+# ./iotk put rx_eo_amp_timeout_sel=111
+# ./iotk put rx_eo_ctle_timeout_sel=111
+# ./iotk put rx_eo_h1ap_timeout_sel=111
+# ./iotk put rx_eo_ddc_timeout_sel=111
+# 0x8009100002011E3F 
+scom 0x800.0b(rx_timeout_sel1_pg)(rx_grp0,rx_grp1,rx_grp2,rx_grp3)(lane_na).0x(dmi1_gcr_addr) {
+bits,                     scom_data;
+rx_eo_offset_timeout_sel, 0b111;
+rx_eo_amp_timeout_sel,    0b111;
+rx_eo_ctle_timeout_sel,   0b111;
+rx_eo_h1ap_timeout_sel,   0b111;
+rx_eo_ddc_timeout_sel,    0b111;
+}
+
+#./iotk put tx_zcal_sm_min_val=0010101
+#./iotk put tx_zcal_sm_max_val=1000110
+# 0x800F2C0002011E3F 
+scom 0x800.0b(tx_impcal_swo2_pb)(tx_grp0,tx_grp1,tx_grp2,tx_grp3)(lane_na).0x(dmi1_gcr_addr) {
+bits,                     scom_data;
+tx_zcal_sm_min_val,       0b0010101;
+tx_zcal_sm_max_val,       0b1000110;
+}
+#./iotk put tx_zcal_p_4x=00100
+# 0x800F1C0002011E3F 
+scom 0x800.0b(tx_impcal_p_4x_pb)(tx_grp0,tx_grp1,tx_grp2,tx_grp3)(lane_na).0x(dmi1_gcr_addr) {
+bits,                     scom_data;
+tx_zcal_p_4x,             0b00100;
+}
+
+# 800A380002011E3F
+scom 0x800.0b(rx_eo_step_cntl_pg)(rx_grp0,rx_grp1,rx_grp2,rx_grp3)(lane_na).0x(dmi1_gcr_addr) {
+bits,                               scom_data;
+rx_eo_enable_latch_offset_cal,      0b1;
+rx_eo_enable_ctle_cal,              0b1;
+rx_eo_enable_vga_cal,               0b1;
+rx_eo_enable_dfe_h1_cal,            0b1;
+rx_eo_enable_h1ap_tweak,            0b1;
+rx_eo_enable_ddc,                   0b1;
+rx_eo_enable_final_l2u_adj,         0b1;
+rx_eo_enable_ber_test,              0b1;
+rx_eo_enable_result_check,          0b1;
+}
+
+scom 0x800.0b(rx_eo_convergence_pg)(rx_grp0,rx_grp1,rx_grp2,rx_grp3)(lane_na).0x(dmi1_gcr_addr) {
+bits,                               scom_data;
+rx_eo_converged_end_count,          0b111;
+}
+
+# 0x800AB80002011E3F
+scom 0x800.0b(rx_rc_step_cntl_pg)(rx_grp0,rx_grp1,rx_grp2,rx_grp3)(lane_na).0x(dmi1_gcr_addr) {
+bits,                               scom_data;
+rx_rc_enable_latch_offset_cal,      0b1;
+rx_rc_enable_ctle_cal,              0b1;
+rx_rc_enable_vga_cal,               0b1;
+rx_rc_enable_h1ap_tweak,            0b1;
+rx_rc_enable_ddc,                   0b1;
+rx_rc_enable_ber_test,              0b1;
+rx_rc_enable_result_check,          0b1;
+#rx_rc_enable_dfe_h1_cal,           0b0; # Leave DFE off during recal for now
+}
+
+
+#--******************************************************************************
+#-------------------------------------------------------------------------------------
+#   _______  __    __    ___    _   ________   _____   ___    ____________  ______
+#  /_  __/ |/ /   / /   /   |  / | / / ____/  /  _/ | / / |  / / ____/ __ \/_  __/
+#   / /  |   /   / /   / /| | /  |/ / __/     / //  |/ /| | / / __/ / /_/ / / /   
+#  / /  /   |   / /___/ ___ |/ /|  / /___   _/ // /|  / | |/ / /___/ _, _/ / /    
+# /_/  /_/|_|  /_____/_/  |_/_/ |_/_____/  /___/_/ |_/  |___/_____/_/ |_| /_/     
+#                                        figlet -fslant
+#-------------------------------------------------------------------------------------
+#--******************************************************************************
+
+# These need to come as attributes from the MRW rather than be hardcoded here
+define  def_EI_TX_LANE_INVERT_VEC_MCS4 = 0x00F80000;  # MSBSWAP=0 ON TULETA  # TX3
+define  def_EI_TX_LANE_INVERT_VEC_MCS5 = 0xF7FF8000;  # MSBSWAP=1 ON TULETA  # TX2
+#define  def_EI_TX_LANE_INVERT_VEC_MCS5 = 0x7FF40000;  # MSBSWAP=1 ON TULETA
+define  def_EI_TX_LANE_INVERT_VEC_MCS6 = 0xFEFF8000;  # MSBSWAP=1 ON TULETA  # TX1
+define  def_EI_TX_LANE_INVERT_VEC_MCS7 = 0x96CF8000;  # MSBSWAP=1 ON TULETA  # TX0
+
+# These only do a scom if the invert attribute is set (saves scom's). The default scanflush value of tx_lane_invert for each lane is '0'.
+# Lane 0
+# 0x8004040002011E3F
+scom 0x800.0b(tx_mode_pl)(tx_grp3)(lane_0).0x(dmi1_gcr_addr) {
+bits,            scom_data, expr;
+tx_lane_invert,  0b1,       ((def_EI_TX_LANE_INVERT_VEC_MCS4 & 0x80000000) > 0) && TGT1.ATTR_CHIP_UNIT_POS%4==0; 
+}
+scom 0x800.0b(tx_mode_pl)(tx_grp2)(lane_0).0x(dmi1_gcr_addr) {
+bits,            scom_data, expr;
+tx_lane_invert,  0b1,       ((def_EI_TX_LANE_INVERT_VEC_MCS5 & 0x80000000) > 0) && TGT1.ATTR_CHIP_UNIT_POS%4==1; 
+}
+scom 0x800.0b(tx_mode_pl)(tx_grp1)(lane_0).0x(dmi1_gcr_addr) {
+bits,            scom_data, expr;
+tx_lane_invert,  0b1,       ((def_EI_TX_LANE_INVERT_VEC_MCS6 & 0x80000000) > 0) && TGT1.ATTR_CHIP_UNIT_POS%4==2; 
+}
+scom 0x800.0b(tx_mode_pl)(tx_grp0)(lane_0).0x(dmi1_gcr_addr) {
+bits,            scom_data, expr;
+tx_lane_invert,  0b1,       ((def_EI_TX_LANE_INVERT_VEC_MCS7 & 0x80000000) > 0) && TGT1.ATTR_CHIP_UNIT_POS%4==3; 
+#tx_lane_invert,  0b1,       (TGT1.ATTR_EI_TX_LANE_INVERT && 0x80000000) > 0; 
+}
+# Lane 1
+# 0x8004040102011E3F
+scom 0x800.0b(tx_mode_pl)(tx_grp3)(lane_1).0x(dmi1_gcr_addr) {
+bits,            scom_data, expr;
+tx_lane_invert,  0b1,       ((def_EI_TX_LANE_INVERT_VEC_MCS4 & 0x40000000) > 0) && TGT1.ATTR_CHIP_UNIT_POS%4==0; 
+}
+scom 0x800.0b(tx_mode_pl)(tx_grp2)(lane_1).0x(dmi1_gcr_addr) {
+bits,            scom_data, expr;
+tx_lane_invert,  0b1,       ((def_EI_TX_LANE_INVERT_VEC_MCS5 & 0x40000000) > 0) && TGT1.ATTR_CHIP_UNIT_POS%4==1; 
+}
+scom 0x800.0b(tx_mode_pl)(tx_grp1)(lane_1).0x(dmi1_gcr_addr) {
+bits,            scom_data, expr;
+tx_lane_invert,  0b1,       ((def_EI_TX_LANE_INVERT_VEC_MCS6 & 0x40000000) > 0) && TGT1.ATTR_CHIP_UNIT_POS%4==2; 
+}
+scom 0x800.0b(tx_mode_pl)(tx_grp0)(lane_1).0x(dmi1_gcr_addr) {
+bits,            scom_data, expr;
+tx_lane_invert,  0b1,       ((def_EI_TX_LANE_INVERT_VEC_MCS7 & 0x40000000) > 0) && TGT1.ATTR_CHIP_UNIT_POS%4==3; 
+#tx_lane_invert,  0b1,       (TGT1.ATTR_EI_TX_LANE_INVERT && 0x40000000) > 0; 
+}
+# Lane 2
+# 0x8004040202011E3F 
+scom 0x800.0b(tx_mode_pl)(tx_grp3)(lane_2).0x(dmi1_gcr_addr) {
+bits,            scom_data, expr;
+tx_lane_invert,  0b1,       ((def_EI_TX_LANE_INVERT_VEC_MCS4 & 0x20000000) > 0) && TGT1.ATTR_CHIP_UNIT_POS%4==0; 
+}
+scom 0x800.0b(tx_mode_pl)(tx_grp2)(lane_2).0x(dmi1_gcr_addr) {
+bits,            scom_data, expr;
+tx_lane_invert,  0b1,       ((def_EI_TX_LANE_INVERT_VEC_MCS5 & 0x20000000) > 0) && TGT1.ATTR_CHIP_UNIT_POS%4==1; 
+}
+scom 0x800.0b(tx_mode_pl)(tx_grp1)(lane_2).0x(dmi1_gcr_addr) {
+bits,            scom_data, expr;
+tx_lane_invert,  0b1,       ((def_EI_TX_LANE_INVERT_VEC_MCS6 & 0x20000000) > 0) && TGT1.ATTR_CHIP_UNIT_POS%4==2; 
+}
+scom 0x800.0b(tx_mode_pl)(tx_grp0)(lane_2).0x(dmi1_gcr_addr) {
+bits,            scom_data, expr;
+tx_lane_invert,  0b1,       ((def_EI_TX_LANE_INVERT_VEC_MCS7 & 0x20000000) > 0) && TGT1.ATTR_CHIP_UNIT_POS%4==3; 
+#tx_lane_invert,  0b1,       (TGT1.ATTR_EI_TX_LANE_INVERT && 0x20000000) > 0; 
+}
+# Lane 3
+# 0x8004040302011E3F 
+scom 0x800.0b(tx_mode_pl)(tx_grp3)(lane_3).0x(dmi1_gcr_addr) {
+bits,            scom_data, expr;
+tx_lane_invert,  0b1,       ((def_EI_TX_LANE_INVERT_VEC_MCS4 & 0x10000000) > 0) && TGT1.ATTR_CHIP_UNIT_POS%4==0; 
+}
+scom 0x800.0b(tx_mode_pl)(tx_grp2)(lane_3).0x(dmi1_gcr_addr) {
+bits,            scom_data, expr;
+tx_lane_invert,  0b1,       ((def_EI_TX_LANE_INVERT_VEC_MCS5 & 0x10000000) > 0) && TGT1.ATTR_CHIP_UNIT_POS%4==1; 
+}
+scom 0x800.0b(tx_mode_pl)(tx_grp1)(lane_3).0x(dmi1_gcr_addr) {
+bits,            scom_data, expr;
+tx_lane_invert,  0b1,       ((def_EI_TX_LANE_INVERT_VEC_MCS6 & 0x10000000) > 0) && TGT1.ATTR_CHIP_UNIT_POS%4==2; 
+}
+scom 0x800.0b(tx_mode_pl)(tx_grp0)(lane_3).0x(dmi1_gcr_addr) {
+bits,            scom_data, expr;
+tx_lane_invert,  0b1,       ((def_EI_TX_LANE_INVERT_VEC_MCS7 & 0x10000000) > 0) && TGT1.ATTR_CHIP_UNIT_POS%4==3; 
+#tx_lane_invert,  0b1,       (TGT1.ATTR_EI_TX_LANE_INVERT && 0x10000000) > 0; 
+}
+# Lane 4
+# 0x8004040402011E3F 
+scom 0x800.0b(tx_mode_pl)(tx_grp3)(lane_4).0x(dmi1_gcr_addr) {
+bits,            scom_data, expr;
+tx_lane_invert,  0b1,       ((def_EI_TX_LANE_INVERT_VEC_MCS4 & 0x08000000) > 0) && TGT1.ATTR_CHIP_UNIT_POS%4==0; 
+}
+scom 0x800.0b(tx_mode_pl)(tx_grp2)(lane_4).0x(dmi1_gcr_addr) {
+bits,            scom_data, expr;
+tx_lane_invert,  0b1,       ((def_EI_TX_LANE_INVERT_VEC_MCS5 & 0x08000000) > 0) && TGT1.ATTR_CHIP_UNIT_POS%4==1; 
+}
+scom 0x800.0b(tx_mode_pl)(tx_grp1)(lane_4).0x(dmi1_gcr_addr) {
+bits,            scom_data, expr;
+tx_lane_invert,  0b1,       ((def_EI_TX_LANE_INVERT_VEC_MCS6 & 0x08000000) > 0) && TGT1.ATTR_CHIP_UNIT_POS%4==2; 
+}
+scom 0x800.0b(tx_mode_pl)(tx_grp0)(lane_4).0x(dmi1_gcr_addr) {
+bits,            scom_data, expr;
+tx_lane_invert,  0b1,       ((def_EI_TX_LANE_INVERT_VEC_MCS7 & 0x08000000) > 0) && TGT1.ATTR_CHIP_UNIT_POS%4==3; 
+#tx_lane_invert,  0b1,       (TGT1.ATTR_EI_TX_LANE_INVERT && 0x08000000) > 0; 
+}
+# Lane 5
+# 0x8004040502011E3F 
+scom 0x800.0b(tx_mode_pl)(tx_grp3)(lane_5).0x(dmi1_gcr_addr) {
+bits,            scom_data, expr;
+tx_lane_invert,  0b1,       ((def_EI_TX_LANE_INVERT_VEC_MCS4 & 0x04000000) > 0) && TGT1.ATTR_CHIP_UNIT_POS%4==0; 
+}
+scom 0x800.0b(tx_mode_pl)(tx_grp2)(lane_5).0x(dmi1_gcr_addr) {
+bits,            scom_data, expr;
+tx_lane_invert,  0b1,       ((def_EI_TX_LANE_INVERT_VEC_MCS5 & 0x04000000) > 0) && TGT1.ATTR_CHIP_UNIT_POS%4==1; 
+}
+scom 0x800.0b(tx_mode_pl)(tx_grp1)(lane_5).0x(dmi1_gcr_addr) {
+bits,            scom_data, expr;
+tx_lane_invert,  0b1,       ((def_EI_TX_LANE_INVERT_VEC_MCS6 & 0x04000000) > 0) && TGT1.ATTR_CHIP_UNIT_POS%4==2; 
+}
+scom 0x800.0b(tx_mode_pl)(tx_grp0)(lane_5).0x(dmi1_gcr_addr) {
+bits,            scom_data, expr;
+tx_lane_invert,  0b1,       ((def_EI_TX_LANE_INVERT_VEC_MCS7 & 0x04000000) > 0) && TGT1.ATTR_CHIP_UNIT_POS%4==3; 
+#tx_lane_invert,  0b1,       (TGT1.ATTR_EI_TX_LANE_INVERT && 0x04000000) > 0; 
+}
+# Lane 6
+# 0x8004040602011E3F 
+scom 0x800.0b(tx_mode_pl)(tx_grp3)(lane_6).0x(dmi1_gcr_addr) {
+bits,            scom_data, expr;
+tx_lane_invert,  0b1,       ((def_EI_TX_LANE_INVERT_VEC_MCS4 & 0x02000000) > 0) && TGT1.ATTR_CHIP_UNIT_POS%4==0; 
+}
+scom 0x800.0b(tx_mode_pl)(tx_grp2)(lane_6).0x(dmi1_gcr_addr) {
+bits,            scom_data, expr;
+tx_lane_invert,  0b1,       ((def_EI_TX_LANE_INVERT_VEC_MCS5 & 0x02000000) > 0) && TGT1.ATTR_CHIP_UNIT_POS%4==1; 
+}
+scom 0x800.0b(tx_mode_pl)(tx_grp1)(lane_6).0x(dmi1_gcr_addr) {
+bits,            scom_data, expr;
+tx_lane_invert,  0b1,       ((def_EI_TX_LANE_INVERT_VEC_MCS6 & 0x02000000) > 0) && TGT1.ATTR_CHIP_UNIT_POS%4==2; 
+}
+scom 0x800.0b(tx_mode_pl)(tx_grp0)(lane_6).0x(dmi1_gcr_addr) {
+bits,            scom_data, expr;
+tx_lane_invert,  0b1,       ((def_EI_TX_LANE_INVERT_VEC_MCS7 & 0x02000000) > 0) && TGT1.ATTR_CHIP_UNIT_POS%4==3; 
+#tx_lane_invert,  0b1,       (TGT1.ATTR_EI_TX_LANE_INVERT && 0x02000000) > 0; 
+}
+# Lane 7
+# 0x8004040702011E3F 
+scom 0x800.0b(tx_mode_pl)(tx_grp3)(lane_7).0x(dmi1_gcr_addr) {
+bits,            scom_data, expr;
+tx_lane_invert,  0b1,       ((def_EI_TX_LANE_INVERT_VEC_MCS4 & 0x01000000) > 0) && TGT1.ATTR_CHIP_UNIT_POS%4==0; 
+}
+scom 0x800.0b(tx_mode_pl)(tx_grp2)(lane_7).0x(dmi1_gcr_addr) {
+bits,            scom_data, expr;
+tx_lane_invert,  0b1,       ((def_EI_TX_LANE_INVERT_VEC_MCS5 & 0x01000000) > 0) && TGT1.ATTR_CHIP_UNIT_POS%4==1; 
+}
+scom 0x800.0b(tx_mode_pl)(tx_grp1)(lane_7).0x(dmi1_gcr_addr) {
+bits,            scom_data, expr;
+tx_lane_invert,  0b1,       ((def_EI_TX_LANE_INVERT_VEC_MCS6 & 0x01000000) > 0) && TGT1.ATTR_CHIP_UNIT_POS%4==2; 
+}
+scom 0x800.0b(tx_mode_pl)(tx_grp0)(lane_7).0x(dmi1_gcr_addr) {
+bits,            scom_data, expr;
+tx_lane_invert,  0b1,       ((def_EI_TX_LANE_INVERT_VEC_MCS7 & 0x01000000) > 0) && TGT1.ATTR_CHIP_UNIT_POS%4==3; 
+#tx_lane_invert,  0b1,       (TGT1.ATTR_EI_TX_LANE_INVERT && 0x01000000) > 0; 
+}
+# Lane 8
+# 0x8004040802011E3F 
+scom 0x800.0b(tx_mode_pl)(tx_grp3)(lane_8).0x(dmi1_gcr_addr) {
+bits,            scom_data, expr;
+tx_lane_invert,  0b1,       ((def_EI_TX_LANE_INVERT_VEC_MCS4 & 0x00800000) > 0) && TGT1.ATTR_CHIP_UNIT_POS%4==0; 
+}
+scom 0x800.0b(tx_mode_pl)(tx_grp2)(lane_8).0x(dmi1_gcr_addr) {
+bits,            scom_data, expr;
+tx_lane_invert,  0b1,       ((def_EI_TX_LANE_INVERT_VEC_MCS5 & 0x00800000) > 0) && TGT1.ATTR_CHIP_UNIT_POS%4==1; 
+}
+scom 0x800.0b(tx_mode_pl)(tx_grp1)(lane_8).0x(dmi1_gcr_addr) {
+bits,            scom_data, expr;
+tx_lane_invert,  0b1,       ((def_EI_TX_LANE_INVERT_VEC_MCS6 & 0x00800000) > 0) && TGT1.ATTR_CHIP_UNIT_POS%4==2; 
+}
+scom 0x800.0b(tx_mode_pl)(tx_grp0)(lane_8).0x(dmi1_gcr_addr) {
+bits,            scom_data, expr;
+tx_lane_invert,  0b1,       ((def_EI_TX_LANE_INVERT_VEC_MCS7 & 0x00800000) > 0) && TGT1.ATTR_CHIP_UNIT_POS%4==3; 
+#tx_lane_invert,  0b1,       (TGT1.ATTR_EI_TX_LANE_INVERT && 0x00800000) > 0; 
+}
+# Lane 9
+# 0x8004040902011E3F {
+scom 0x800.0b(tx_mode_pl)(tx_grp3)(lane_9).0x(dmi1_gcr_addr) {
+bits,            scom_data, expr;
+tx_lane_invert,  0b1,       ((def_EI_TX_LANE_INVERT_VEC_MCS4 & 0x00400000) > 0) && TGT1.ATTR_CHIP_UNIT_POS%4==0; 
+}
+scom 0x800.0b(tx_mode_pl)(tx_grp2)(lane_9).0x(dmi1_gcr_addr) {
+bits,            scom_data, expr;
+tx_lane_invert,  0b1,       ((def_EI_TX_LANE_INVERT_VEC_MCS5 & 0x00400000) > 0) && TGT1.ATTR_CHIP_UNIT_POS%4==1; 
+}
+scom 0x800.0b(tx_mode_pl)(tx_grp1)(lane_9).0x(dmi1_gcr_addr) {
+bits,            scom_data, expr;
+tx_lane_invert,  0b1,       ((def_EI_TX_LANE_INVERT_VEC_MCS6 & 0x00400000) > 0) && TGT1.ATTR_CHIP_UNIT_POS%4==2; 
+}
+scom 0x800.0b(tx_mode_pl)(tx_grp0)(lane_9).0x(dmi1_gcr_addr) {
+bits,            scom_data, expr;
+tx_lane_invert,  0b1,       ((def_EI_TX_LANE_INVERT_VEC_MCS7 & 0x00400000) > 0) && TGT1.ATTR_CHIP_UNIT_POS%4==3; 
+#tx_lane_invert,  0b1,       (TGT1.ATTR_EI_TX_LANE_INVERT && 0x00400000) > 0; 
+}
+# Lane 10
+# 0x8004040A02011E3F 
+scom 0x800.0b(tx_mode_pl)(tx_grp3)(lane_10).0x(dmi1_gcr_addr) {
+bits,            scom_data, expr;
+tx_lane_invert,  0b1,       ((def_EI_TX_LANE_INVERT_VEC_MCS4 & 0x00200000) > 0) && TGT1.ATTR_CHIP_UNIT_POS%4==0; 
+}
+scom 0x800.0b(tx_mode_pl)(tx_grp2)(lane_10).0x(dmi1_gcr_addr) {
+bits,            scom_data, expr;
+tx_lane_invert,  0b1,       ((def_EI_TX_LANE_INVERT_VEC_MCS5 & 0x00200000) > 0) && TGT1.ATTR_CHIP_UNIT_POS%4==1; 
+}
+scom 0x800.0b(tx_mode_pl)(tx_grp1)(lane_10).0x(dmi1_gcr_addr) {
+bits,            scom_data, expr;
+tx_lane_invert,  0b1,       ((def_EI_TX_LANE_INVERT_VEC_MCS6 & 0x00200000) > 0) && TGT1.ATTR_CHIP_UNIT_POS%4==2; 
+}
+scom 0x800.0b(tx_mode_pl)(tx_grp0)(lane_10).0x(dmi1_gcr_addr) {
+bits,            scom_data, expr;
+tx_lane_invert,  0b1,       ((def_EI_TX_LANE_INVERT_VEC_MCS7 & 0x00200000) > 0) && TGT1.ATTR_CHIP_UNIT_POS%4==3; 
+#tx_lane_invert,  0b1,       (TGT1.ATTR_EI_TX_LANE_INVERT && 0x00200000) > 0; 
+}
+# Lane 11
+# 0x8004040B02011E3F 
+scom 0x800.0b(tx_mode_pl)(tx_grp3)(lane_11).0x(dmi1_gcr_addr) {
+bits,            scom_data, expr;
+tx_lane_invert,  0b1,       ((def_EI_TX_LANE_INVERT_VEC_MCS4 & 0x00100000) > 0) && TGT1.ATTR_CHIP_UNIT_POS%4==0; 
+}
+scom 0x800.0b(tx_mode_pl)(tx_grp2)(lane_11).0x(dmi1_gcr_addr) {
+bits,            scom_data, expr;
+tx_lane_invert,  0b1,       ((def_EI_TX_LANE_INVERT_VEC_MCS5 & 0x00100000) > 0) && TGT1.ATTR_CHIP_UNIT_POS%4==1; 
+}
+scom 0x800.0b(tx_mode_pl)(tx_grp1)(lane_11).0x(dmi1_gcr_addr) {
+bits,            scom_data, expr;
+tx_lane_invert,  0b1,       ((def_EI_TX_LANE_INVERT_VEC_MCS6 & 0x00100000) > 0) && TGT1.ATTR_CHIP_UNIT_POS%4==2; 
+}
+scom 0x800.0b(tx_mode_pl)(tx_grp0)(lane_11).0x(dmi1_gcr_addr) {
+bits,            scom_data, expr;
+tx_lane_invert,  0b1,       ((def_EI_TX_LANE_INVERT_VEC_MCS7 & 0x00100000) > 0) && TGT1.ATTR_CHIP_UNIT_POS%4==3; 
+#tx_lane_invert,  0b1,       (TGT1.ATTR_EI_TX_LANE_INVERT && 0x00100000) > 0; 
+}
+# Lane 12
+# 0x8004040C02011E3F 
+scom 0x800.0b(tx_mode_pl)(tx_grp3)(lane_12).0x(dmi1_gcr_addr) {
+bits,            scom_data, expr;
+tx_lane_invert,  0b1,       ((def_EI_TX_LANE_INVERT_VEC_MCS4 & 0x00080000) > 0) && TGT1.ATTR_CHIP_UNIT_POS%4==0; 
+}
+scom 0x800.0b(tx_mode_pl)(tx_grp2)(lane_12).0x(dmi1_gcr_addr) {
+bits,            scom_data, expr;
+tx_lane_invert,  0b1,       ((def_EI_TX_LANE_INVERT_VEC_MCS5 & 0x00080000) > 0) && TGT1.ATTR_CHIP_UNIT_POS%4==1; 
+}
+scom 0x800.0b(tx_mode_pl)(tx_grp1)(lane_12).0x(dmi1_gcr_addr) {
+bits,            scom_data, expr;
+tx_lane_invert,  0b1,       ((def_EI_TX_LANE_INVERT_VEC_MCS6 & 0x00080000) > 0) && TGT1.ATTR_CHIP_UNIT_POS%4==2; 
+}
+scom 0x800.0b(tx_mode_pl)(tx_grp0)(lane_12).0x(dmi1_gcr_addr) {
+bits,            scom_data, expr;
+tx_lane_invert,  0b1,       ((def_EI_TX_LANE_INVERT_VEC_MCS7 & 0x00080000) > 0) && TGT1.ATTR_CHIP_UNIT_POS%4==3; 
+#tx_lane_invert,  0b1,       (TGT1.ATTR_EI_TX_LANE_INVERT && 0x00080000) > 0; 
+}
+# Lane 13
+# 0x8004040D02011E3F 
+scom 0x800.0b(tx_mode_pl)(tx_grp3)(lane_13).0x(dmi1_gcr_addr) {
+bits,            scom_data, expr;
+tx_lane_invert,  0b1,       ((def_EI_TX_LANE_INVERT_VEC_MCS4 & 0x00040000) > 0) && TGT1.ATTR_CHIP_UNIT_POS%4==0; 
+}
+scom 0x800.0b(tx_mode_pl)(tx_grp2)(lane_13).0x(dmi1_gcr_addr) {
+bits,            scom_data, expr;
+tx_lane_invert,  0b1,       ((def_EI_TX_LANE_INVERT_VEC_MCS5 & 0x00040000) > 0) && TGT1.ATTR_CHIP_UNIT_POS%4==1; 
+}
+scom 0x800.0b(tx_mode_pl)(tx_grp1)(lane_13).0x(dmi1_gcr_addr) {
+bits,            scom_data, expr;
+tx_lane_invert,  0b1,       ((def_EI_TX_LANE_INVERT_VEC_MCS6 & 0x00040000) > 0) && TGT1.ATTR_CHIP_UNIT_POS%4==2; 
+}
+scom 0x800.0b(tx_mode_pl)(tx_grp0)(lane_13).0x(dmi1_gcr_addr) {
+bits,            scom_data, expr;
+tx_lane_invert,  0b1,       ((def_EI_TX_LANE_INVERT_VEC_MCS7 & 0x00040000) > 0) && TGT1.ATTR_CHIP_UNIT_POS%4==3; 
+#tx_lane_invert,  0b1,       (TGT1.ATTR_EI_TX_LANE_INVERT && 0x00040000) > 0; 
+}
+# Lane 14
+# 0x8004040E02011E3F 
+scom 0x800.0b(tx_mode_pl)(tx_grp3)(lane_14).0x(dmi1_gcr_addr) {
+bits,            scom_data, expr;
+tx_lane_invert,  0b1,       ((def_EI_TX_LANE_INVERT_VEC_MCS4 & 0x00020000) > 0) && TGT1.ATTR_CHIP_UNIT_POS%4==0; 
+}
+scom 0x800.0b(tx_mode_pl)(tx_grp2)(lane_14).0x(dmi1_gcr_addr) {
+bits,            scom_data, expr;
+tx_lane_invert,  0b1,       ((def_EI_TX_LANE_INVERT_VEC_MCS5 & 0x00020000) > 0) && TGT1.ATTR_CHIP_UNIT_POS%4==1; 
+}
+scom 0x800.0b(tx_mode_pl)(tx_grp1)(lane_14).0x(dmi1_gcr_addr) {
+bits,            scom_data, expr;
+tx_lane_invert,  0b1,       ((def_EI_TX_LANE_INVERT_VEC_MCS6 & 0x00020000) > 0) && TGT1.ATTR_CHIP_UNIT_POS%4==2; 
+}
+scom 0x800.0b(tx_mode_pl)(tx_grp0)(lane_14).0x(dmi1_gcr_addr) {
+bits,            scom_data, expr;
+tx_lane_invert,  0b1,       ((def_EI_TX_LANE_INVERT_VEC_MCS7 & 0x00020000) > 0) && TGT1.ATTR_CHIP_UNIT_POS%4==3; 
+#tx_lane_invert,  0b1,       (TGT1.ATTR_EI_TX_LANE_INVERT && 0x00020000) > 0; 
+}
+# Lane 15
+# 0x8004040F02011E3F 
+scom 0x800.0b(tx_mode_pl)(tx_grp3)(lane_15).0x(dmi1_gcr_addr) {
+bits,            scom_data, expr;
+tx_lane_invert,  0b1,       ((def_EI_TX_LANE_INVERT_VEC_MCS4 & 0x00010000) > 0) && TGT1.ATTR_CHIP_UNIT_POS%4==0; 
+}
+scom 0x800.0b(tx_mode_pl)(tx_grp2)(lane_15).0x(dmi1_gcr_addr) {
+bits,            scom_data, expr;
+tx_lane_invert,  0b1,       ((def_EI_TX_LANE_INVERT_VEC_MCS5 & 0x00010000) > 0) && TGT1.ATTR_CHIP_UNIT_POS%4==1; 
+}
+scom 0x800.0b(tx_mode_pl)(tx_grp1)(lane_15).0x(dmi1_gcr_addr) {
+bits,            scom_data, expr;
+tx_lane_invert,  0b1,       ((def_EI_TX_LANE_INVERT_VEC_MCS6 & 0x00010000) > 0) && TGT1.ATTR_CHIP_UNIT_POS%4==2; 
+}
+scom 0x800.0b(tx_mode_pl)(tx_grp0)(lane_15).0x(dmi1_gcr_addr) {
+bits,            scom_data, expr;
+tx_lane_invert,  0b1,       ((def_EI_TX_LANE_INVERT_VEC_MCS7 & 0x00010000) > 0) && TGT1.ATTR_CHIP_UNIT_POS%4==3; 
+#tx_lane_invert,  0b1,       (TGT1.ATTR_EI_TX_LANE_INVERT && 0x00010000) > 0; 
+}
+# Lane 16
+# 0x8004041002011E3F 
+scom 0x800.0b(tx_mode_pl)(tx_grp3)(lane_16).0x(dmi1_gcr_addr) {
+bits,            scom_data, expr;
+tx_lane_invert,  0b1,       ((def_EI_TX_LANE_INVERT_VEC_MCS4 & 0x00008000) > 0) && TGT1.ATTR_CHIP_UNIT_POS%4==0; 
+}
+scom 0x800.0b(tx_mode_pl)(tx_grp2)(lane_16).0x(dmi1_gcr_addr) {
+bits,            scom_data, expr;
+tx_lane_invert,  0b1,       ((def_EI_TX_LANE_INVERT_VEC_MCS5 & 0x00008000) > 0) && TGT1.ATTR_CHIP_UNIT_POS%4==1; 
+}
+scom 0x800.0b(tx_mode_pl)(tx_grp1)(lane_16).0x(dmi1_gcr_addr) {
+bits,            scom_data, expr;
+tx_lane_invert,  0b1,       ((def_EI_TX_LANE_INVERT_VEC_MCS6 & 0x00008000) > 0) && TGT1.ATTR_CHIP_UNIT_POS%4==2; 
+}
+scom 0x800.0b(tx_mode_pl)(tx_grp0)(lane_16).0x(dmi1_gcr_addr) {
+bits,            scom_data, expr;
+tx_lane_invert,  0b1,       ((def_EI_TX_LANE_INVERT_VEC_MCS7 & 0x00008000) > 0) && TGT1.ATTR_CHIP_UNIT_POS%4==3; 
+#tx_lane_invert,  0b1,       (TGT1.ATTR_EI_TX_LANE_INVERT && 0x00008000) > 0; 
+}
+
+#--***********************************************************************************
+#-------------------------------------------------------------------------------------
+#     __  ________ ____     _____                   
+#    /  |/  / ___// __ )   / ___/      ______ _____ 
+#   / /|_/ /\__ \/ __  |   \__ \ | /| / / __ `/ __ \
+#  / /  / /___/ / /_/ /   ___/ / |/ |/ / /_/ / /_/ /
+# /_/  /_//____/_____/   /____/|__/|__/\__,_/ .___/ 
+#                                         /_/      
+#                                        figlet -fslant
+#-------------------------------------------------------------------------------------
+#--***********************************************************************************
+
+# TX_MSBSWAP setting via manaual SCOM overrides
+# ./iotk put tx_msbswap=1 (only when p# mod 4 = 3 for centaur or mcs mod 4 = 0, ie. grp0)
+# 0x800C1C0002011E3F 
+scom 0x800.0b(tx_mode_pg)(tx_grp3)(lane_na).0x(dmi1_gcr_addr) {
+bits,                     scom_data, expr;
+tx_msbswap,               0b0,       (TGT1.ATTR_CHIP_UNIT_POS % 4 == 0); # MCS4
+#tx_msbswap,               0b1,       (TGT1.ATTR_CHIP_UNIT_POS % 4 == 1); # MCS5
+#tx_msbswap,               0b1,       (TGT1.ATTR_CHIP_UNIT_POS % 4 == 2); # MCS6
+#tx_msbswap,               0b1,       (TGT1.ATTR_CHIP_UNIT_POS % 4 == 3); # MCS7
+#tx_msbswap,               0b1,       (ATTR_EI_BUS_TX_MSBSWAP == 0x01);
+}
+scom 0x800.0b(tx_mode_pg)(tx_grp2)(lane_na).0x(dmi1_gcr_addr) {
+bits,                     scom_data, expr;
+tx_msbswap,               0b1,       (TGT1.ATTR_CHIP_UNIT_POS % 4 == 1); # MCS5
+#tx_msbswap,               0b1,       (ATTR_EI_BUS_TX_MSBSWAP == 0x01);
+}
+scom 0x800.0b(tx_mode_pg)(tx_grp1)(lane_na).0x(dmi1_gcr_addr) {
+bits,                     scom_data, expr;
+tx_msbswap,               0b1,       (TGT1.ATTR_CHIP_UNIT_POS % 4 == 2); # MCS6
+#tx_msbswap,               0b1,       (ATTR_EI_BUS_TX_MSBSWAP == 0x01);
+}
+scom 0x800.0b(tx_mode_pg)(tx_grp0)(lane_na).0x(dmi1_gcr_addr) {
+bits,                     scom_data, expr;
+tx_msbswap,               0b1,       (TGT1.ATTR_CHIP_UNIT_POS % 4 == 3); # MCS7
+#tx_msbswap,               0b1,       (ATTR_EI_BUS_TX_MSBSWAP == 0x01);
+}
+
+
+############################################################################################
+# END OF FILE
+############################################################################################

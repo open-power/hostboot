@@ -21,7 +21,7 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 // -*- mode: C++; c-file-style: "linux";  -*-
-// $Id: proc_a_x_pci_dmi_pll_initf.C,v 1.9 2013/01/20 19:21:03 jmcgill Exp $
+// $Id: proc_a_x_pci_dmi_pll_initf.C,v 1.11 2013/01/24 16:34:45 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_a_x_pci_dmi_pll_initf.C,v $
 //------------------------------------------------------------------------------
 // *|
@@ -97,7 +97,7 @@ extern "C"
         uint8_t            abus_enable_attr;
         uint32_t           ring_length     = 0;
         uint8_t            attrABRingData[80]  ={0};  // Set to 80 bytes to match length in XML file, not actual scan ring length.
-        uint8_t            attrDMIRingData[192]={0};  // Set to 192 bytes to match length in XML file, not actual scan ring length.
+        uint8_t            attrDMIRingData[231]={0};  // Set to 231 bytes to match length in XML file, not actual scan ring length.
         uint8_t            attrPCIRingData[80] ={0};  // Set to 80 bytes to match length in XML file, not actual scan ring length.
 
         // return codes
@@ -710,6 +710,12 @@ extern "C"
 This section is automatically updated by CVS when you check in this file.
 Be sure to create CVS comments when you commit so that they can be included here.
 $Log: proc_a_x_pci_dmi_pll_initf.C,v $
+Revision 1.11  2013/01/24 16:34:45  jmcgill
+fix comment as well...
+
+Revision 1.10  2013/01/24 16:33:40  jmcgill
+adjust for DMI attribute change
+
 Revision 1.9  2013/01/20 19:21:03  jmcgill
 update for A chiplet partial good support
 

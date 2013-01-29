@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_generic_shmoo.C,v 1.23 2013/01/18 12:04:57 sasethur Exp $
+// $Id: mss_generic_shmoo.C,v 1.27 2013/01/22 17:31:26 sasethur Exp $
 // *!***************************************************************************
 // *! (C) Copyright International Business Machines Corp. 1997, 1998
 // *!           All Rights Reserved -- Property of IBM
@@ -39,8 +39,10 @@
 //------------------------------------------------------------------------------
 // Version:|Author: | Date:   | Comment:
 // --------|--------|---------|--------------------------------------------------
+//   1.26  |abhijit	|01/21/13 | fixed fw comments  
+//   1.25  |abhijit	|01/21/13 | fixed the constructor definition 
 //   1.21  |sasethur|01/17/13 | Updated for sanity mcbist function
-//   1.20  |abhijith|01/11/13 | Updated for change in setup_mcbist function
+//   1.20  |abhijit |01/11/13 | Updated for change in setup_mcbist function
 //   1.19  |aditya  |01/07/13 | Updated for change in setup_mcbist function
 //   1.18  |sasethur|14-DEC-12| Updated for change in access delay function 
 //   1.16  |sasethur|14-DEC-12| Updated for Warning 
@@ -72,9 +74,9 @@ using namespace fapi;
  *
  * Parameters: i_target: mba;		iv_port: 0, 1
  * ---------------------------------------------------------------------------*/
-generic_shmoo:: generic_shmoo(uint8_t prt,uint32_t shmoo_mask,shmoo_algorithm_t shmoo_algorithm)
+generic_shmoo:: generic_shmoo(uint8_t prt,shmoo_type_t shmoo_mask,shmoo_algorithm_t shmoo_algorithm)
 {
-    this->shmoo_mask=shmoo_mask; //! Sets what Shmoos the caller wants to run
+    //this->shmoo_mask=shmoo_mask; //! Sets what Shmoos the caller wants to run
     this->algorithm=shmoo_algorithm ;
     this->iv_port=prt ;
     
@@ -92,8 +94,18 @@ generic_shmoo:: generic_shmoo(uint8_t prt,uint32_t shmoo_mask,shmoo_algorithm_t 
     }
     
     FAPI_DBG("mss_generic_shmoo : constructor running for shmoo type %d",shmoo_mask);
-    
-    
+    iv_shmoo_type = 0;
+	SHMOO[iv_shmoo_type].static_knob.min_val=0;
+    SHMOO[iv_shmoo_type].static_knob.max_val=512; 
+	
+	
+	if(shmoo_mask & TEST_NONE)
+    {
+        FAPI_DBG("mss_generic_shmoo : WR_EYE selected %d",shmoo_mask);
+        iv_shmoo_type = 0;
+        SHMOO[0].static_knob.min_val=0;
+        SHMOO[0].static_knob.max_val=512;   
+    }
     
     if(shmoo_mask & WR_EYE)
     {
@@ -175,7 +187,7 @@ fapi::ReturnCode generic_shmoo::run(const fapi::Target & i_target,uint32_t *o_ri
     iv_MAX_RANKS=num_ranks_per_dimm[iv_port][0]+num_ranks_per_dimm[iv_port][1];
     iv_pattern=i_pattern;
     iv_test_type=i_test_type;
-    //FAPI_INF("\n abhijit the test type %d \n",l_attr_schmoo_test_type_u8);
+    
     if ( l_attr_eff_dimm_type_u8 == 0 )
     {
 	iv_MAX_BYTES=8;
@@ -211,9 +223,11 @@ fapi::ReturnCode generic_shmoo::run(const fapi::Target & i_target,uint32_t *o_ri
      // Check if all bytes/bits are in a pass condition initially .Otherwise quit
     if(l_attr_schmoo_test_type_u8 == 0){
 	FAPI_INF("This procedure wont change any delay settings");
+	return rc;
 	}
-    if(l_attr_schmoo_test_type_u8 == 1){
+	if(l_attr_schmoo_test_type_u8 == 1){
 	rc=sanity_check(i_target); // Run MCBIST only when ATTR_EFF_SCHMOO_TEST_VALID is mcbist only 
+
     if(!rc.ok())
     {
     FAPI_ERR("generic_shmoo::run MSS Generic Shmoo failed initial Sanity Check. Memory not in an all pass Condition");
@@ -316,7 +330,7 @@ fapi::ReturnCode generic_shmoo::sanity_check(const fapi::Target & i_target){
 		    {
 			l_dqBitmap[l_byte] = 0x0f;
 		    }	
-		    rc = dimmSetBadDqBitmap(i_target,iv_port,l_socket, l_rank_valid, l_dqBitmap);if(rc) return rc;
+		    //rc = dimmSetBadDqBitmap(i_target,iv_port,l_socket, l_rank_valid, l_dqBitmap);if(rc) return rc;
 		}
 	    }    
         }
@@ -387,7 +401,7 @@ fapi::ReturnCode generic_shmoo::do_mcbist_test(const fapi::Target & i_target,uin
     
 	
     
-   rc = setup_mcbist(i_target, iv_port, MCBIST_2D_CUP_PAT5, CENSHMOO, UNMASK_ALL, 0,iv_pattern,iv_test_type,i_rank,0,l_start,l_end);if(rc) return rc;  //send shmoo mode to vary the address range
+   rc = setup_mcbist(i_target, iv_port, ABLE_FIVE, CENSHMOO, UNMASK_ALL, 0,iv_pattern,iv_test_type,i_rank,0,l_start,l_end);if(rc) return rc;  //send shmoo mode to vary the address range
    
    rc = start_mcb(i_target);
     if(rc)
@@ -708,14 +722,10 @@ fapi::ReturnCode generic_shmoo::knob_update(const fapi::Target & i_target,bound_
 			}
 		}	
 	    }
-	    if(!pass)
-	    {
+	    
 		SHMOO[scenario].MBA.P[iv_port].S[rank].K.lb_regval[l_dq][l_rp]=l_current_val+l_left_del;
-	    }
-	    else
-	    {
-		SHMOO[scenario].MBA.P[iv_port].S[rank].K.lb_regval[l_dq][l_rp]=l_current_val+l_left_del;
-	    }
+	    
+	    
 	    l_current_val=SHMOO[scenario].MBA.P[iv_port].S[rank].K.nom_val[l_dq][l_rp];
 		FAPI_INF("  the restoring nominal value for rank=%d dq=%d and rp=%d is %d",rank,l_dq,l_rp,l_current_val);
 	    rc=mss_access_delay_reg(i_target,l_access_type_e,iv_port,rank,l_input_type_e,l_dq,0,l_current_val);if(rc) return rc;
@@ -814,14 +824,9 @@ fapi::ReturnCode generic_shmoo::knob_update(const fapi::Target & i_target,bound_
 		    }
 		}
 	    }
-	    if(!pass)
-	    {
+	    
 		SHMOO[scenario].MBA.P[iv_port].S[rank].K.rb_regval[l_dq][l_rp]=l_current_val-l_right_del;
-	    }
-	    else
-	    {
-		SHMOO[scenario].MBA.P[iv_port].S[rank].K.rb_regval[l_dq][l_rp]=l_current_val-l_right_del;
-	    }
+	    
 	    FAPI_INF(" the right bound  for dq=%d is %d ",l_dq,SHMOO[scenario].MBA.P[iv_port].S[rank].K.rb_regval[l_dq][l_rp]);
 	    l_current_val=SHMOO[scenario].MBA.P[iv_port].S[rank].K.nom_val[l_dq][l_rp];
 		FAPI_INF("  the restoring nominal value for rank=%d dq=%d and rp=%d is %d",rank,l_dq,l_rp,l_current_val);

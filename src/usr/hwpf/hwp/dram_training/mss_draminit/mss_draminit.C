@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012                   */
+/* COPYRIGHT International Business Machines Corp. 2012,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_draminit.C,v 1.43 2012/12/07 13:44:07 bellows Exp $
+// $Id: mss_draminit.C,v 1.44 2013/01/25 15:16:21 jdsloat Exp $
 //------------------------------------------------------------------------------
 // Don't forget to create CVS comments when you check in your changes!
 //------------------------------------------------------------------------------
@@ -28,6 +28,7 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
+//  1.44   | jdsloat  | 01/25/13| Address Mirror Mode added for dual drop CDIMMs
 //  1.43   | bellows  | 12/06/12| Fixed Review Comment
 //  1.42   | jdsloat  | 12/02/12| SHADOW REG PRINT OUT FIX
 //  1.41   | jdsloat  | 11/19/12| RCD Bit order fix.
@@ -152,6 +153,7 @@ ReturnCode mss_draminit_cloned(Target& i_target)
     uint8_t dram_gen; 
     uint8_t dimm_type;
     uint8_t rank_pair_group = 0;
+    uint8_t bit_position = 0;
     ecmdDataBufferBase data_buffer_64(64);
     ecmdDataBufferBase mrs0(16); 
     ecmdDataBufferBase mrs1(16);
@@ -161,7 +163,12 @@ ReturnCode mss_draminit_cloned(Target& i_target)
     uint16_t MRS1 = 0;
     uint16_t MRS2 = 0;
     uint16_t MRS3 = 0;
+    uint8_t num_drops_per_port;
     uint8_t primary_ranks_array[4][2]; //primary_ranks_array[group][port]
+    uint8_t secondary_ranks_array[4][2]; //secondary_ranks_array[group][port]
+    uint8_t tertiary_ranks_array[4][2]; //tertiary_ranks_array[group][port]
+    uint8_t quaternary_ranks_array[4][2]; //quaternary_ranks_array[group][port]
+    
  
     //populate primary_ranks_arrays_array
     rc = FAPI_ATTR_GET(ATTR_EFF_PRIMARY_RANK_GROUP0, &i_target, primary_ranks_array[0]);
@@ -172,13 +179,194 @@ ReturnCode mss_draminit_cloned(Target& i_target)
     if(rc) return rc;
     rc = FAPI_ATTR_GET(ATTR_EFF_PRIMARY_RANK_GROUP3, &i_target, primary_ranks_array[3]);
     if(rc) return rc;
+    rc = FAPI_ATTR_GET(ATTR_EFF_SECONDARY_RANK_GROUP0, &i_target, secondary_ranks_array[0]);
+    if(rc) return rc;
+    rc = FAPI_ATTR_GET(ATTR_EFF_SECONDARY_RANK_GROUP1, &i_target, secondary_ranks_array[1]);
+    if(rc) return rc;
+    rc = FAPI_ATTR_GET(ATTR_EFF_SECONDARY_RANK_GROUP2, &i_target, secondary_ranks_array[2]);
+    if(rc) return rc;
+    rc = FAPI_ATTR_GET(ATTR_EFF_SECONDARY_RANK_GROUP3, &i_target, secondary_ranks_array[3]);
+    if(rc) return rc;
+    rc = FAPI_ATTR_GET(ATTR_EFF_TERTIARY_RANK_GROUP0, &i_target, tertiary_ranks_array[0]);
+    if(rc) return rc;
+    rc = FAPI_ATTR_GET(ATTR_EFF_TERTIARY_RANK_GROUP1, &i_target, tertiary_ranks_array[1]);
+    if(rc) return rc;
+    rc = FAPI_ATTR_GET(ATTR_EFF_TERTIARY_RANK_GROUP2, &i_target, tertiary_ranks_array[2]);
+    if(rc) return rc;
+    rc = FAPI_ATTR_GET(ATTR_EFF_TERTIARY_RANK_GROUP3, &i_target, tertiary_ranks_array[3]);
+    if(rc) return rc;
+    rc = FAPI_ATTR_GET(ATTR_EFF_QUATERNARY_RANK_GROUP0, &i_target, quaternary_ranks_array[0]);
+    if(rc) return rc;
+    rc = FAPI_ATTR_GET(ATTR_EFF_QUATERNARY_RANK_GROUP1, &i_target, quaternary_ranks_array[1]);
+    if(rc) return rc;
+    rc = FAPI_ATTR_GET(ATTR_EFF_QUATERNARY_RANK_GROUP2, &i_target, quaternary_ranks_array[2]);
+    if(rc) return rc;
+    rc = FAPI_ATTR_GET(ATTR_EFF_QUATERNARY_RANK_GROUP3, &i_target, quaternary_ranks_array[3]);
+    if(rc) return rc;
 
 
+
+    rc = FAPI_ATTR_GET(ATTR_EFF_NUM_DROPS_PER_PORT, &i_target, num_drops_per_port);
+    if(rc) return rc;
     rc = FAPI_ATTR_GET(ATTR_EFF_DRAM_GEN, &i_target, dram_gen);
     if(rc) return rc;
     rc = FAPI_ATTR_GET(ATTR_EFF_DIMM_TYPE, &i_target, dimm_type);
     if(rc) return rc;
 
+    // Check to see if it's Dual drop and needs address mirror mode.  Set the approriate flag. 
+    if (   (dimm_type == ENUM_ATTR_EFF_DIMM_TYPE_CDIMM)
+	&& (num_drops_per_port == ENUM_ATTR_EFF_NUM_DROPS_PER_PORT_DUAL)
+	&& (dram_gen == ENUM_ATTR_EFF_DRAM_GEN_DDR3) )
+    {
+
+	FAPI_INF( "Setting Address Mirroring in the PHY");
+
+	//Set the Address and BA bits affected by mirroring
+	rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_RANK_GROUP_P0_0x8000C0110301143F, data_buffer_64);
+	if(rc) return rc;
+	rc_num = rc_num | data_buffer_64.setBit(58);
+	rc_num = rc_num | data_buffer_64.setBit(59);
+	rc_num = rc_num | data_buffer_64.setBit(60);
+	rc_num = rc_num | data_buffer_64.setBit(62);
+	rc = fapiPutScom(i_target, DPHY01_DDRPHY_PC_RANK_GROUP_P0_0x8000C0110301143F, data_buffer_64);
+	if(rc) return rc;
+
+	rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_RANK_GROUP_P1_0x8001C0110301143F, data_buffer_64);
+	if(rc) return rc;
+	rc_num = rc_num | data_buffer_64.setBit(58);
+	rc_num = rc_num | data_buffer_64.setBit(59);
+	rc_num = rc_num | data_buffer_64.setBit(60);
+	rc_num = rc_num | data_buffer_64.setBit(62);
+	rc = fapiPutScom(i_target, DPHY01_DDRPHY_PC_RANK_GROUP_P1_0x8001C0110301143F, data_buffer_64);
+	if(rc) return rc;
+
+	for ( port_number = 0; port_number < MAX_NUM_PORTS; port_number++)
+	{
+	    for ( rank_pair_group = 0; rank_pair_group < MAX_NUM_RANK_PAIR; rank_pair_group++)
+	    {
+		// Set the rank pairs that will be affected.
+		if ( port_number == 0 )
+		{
+		    if ( ( primary_ranks_array[rank_pair_group][port_number] == 0x04) ||
+			 ( primary_ranks_array[rank_pair_group][port_number] == 0x05) ||
+			 ( primary_ranks_array[rank_pair_group][port_number] == 0x06) ||
+			 ( primary_ranks_array[rank_pair_group][port_number] == 0x07) )
+		    {
+			FAPI_INF( "Address Mirroring on PORT%d RANKPAIR%d RANK%d", port_number, rank_pair_group, primary_ranks_array[rank_pair_group][port_number]);
+			bit_position = 2 * rank_pair_group + 48;
+			FAPI_INF( "Setting bit %d", bit_position);
+			rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_RANK_GROUP_P0_0x8000C0110301143F, data_buffer_64);
+			if(rc) return rc;
+			rc_num = rc_num | data_buffer_64.setBit(bit_position);
+			rc = fapiPutScom(i_target, DPHY01_DDRPHY_PC_RANK_GROUP_P0_0x8000C0110301143F, data_buffer_64);
+			if(rc) return rc;
+		    }
+		    if ( ( secondary_ranks_array[rank_pair_group][port_number] == 0x04) ||
+			 ( secondary_ranks_array[rank_pair_group][port_number] == 0x05) ||
+			 ( secondary_ranks_array[rank_pair_group][port_number] == 0x06) ||
+			 ( secondary_ranks_array[rank_pair_group][port_number] == 0x07) )
+		    {
+			FAPI_INF( "Address Mirroring on PORT%d RANKPAIR%d RANK%d", port_number, rank_pair_group, primary_ranks_array[rank_pair_group][port_number]);
+			bit_position = 2 * rank_pair_group + 49;
+			FAPI_INF( "Setting bit %d", bit_position);
+			rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_RANK_GROUP_P0_0x8000C0110301143F, data_buffer_64);
+			if(rc) return rc;
+			rc_num = rc_num | data_buffer_64.setBit(bit_position);
+			rc = fapiPutScom(i_target, DPHY01_DDRPHY_PC_RANK_GROUP_P0_0x8000C0110301143F, data_buffer_64);
+			if(rc) return rc;
+		    }
+		    if ( ( tertiary_ranks_array[rank_pair_group][port_number] == 0x04) ||
+			 ( tertiary_ranks_array[rank_pair_group][port_number] == 0x05) ||
+			 ( tertiary_ranks_array[rank_pair_group][port_number] == 0x06) ||
+			 ( tertiary_ranks_array[rank_pair_group][port_number] == 0x07) )
+		    {
+			FAPI_INF( "Address Mirroring on PORT%d RANKPAIR%d RANK%d", port_number, rank_pair_group, primary_ranks_array[rank_pair_group][port_number]);
+			bit_position = 2 * rank_pair_group + 48;
+			FAPI_INF( "Setting bit %d", bit_position);
+			rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_RANK_GROUP_EXT_P0_0x8000C0350301143F, data_buffer_64);
+			if(rc) return rc;
+			rc_num = rc_num | data_buffer_64.setBit(bit_position);
+			rc = fapiPutScom(i_target, DPHY01_DDRPHY_PC_RANK_GROUP_EXT_P0_0x8000C0350301143F, data_buffer_64);
+			if(rc) return rc;
+		    }
+		    if ( ( quaternary_ranks_array[rank_pair_group][port_number] == 0x04) ||
+			 ( quaternary_ranks_array[rank_pair_group][port_number] == 0x05) ||
+			 ( quaternary_ranks_array[rank_pair_group][port_number] == 0x06) ||
+			 ( quaternary_ranks_array[rank_pair_group][port_number] == 0x07) )
+		    {
+			FAPI_INF( "Address Mirroring on PORT%d RANKPAIR%d RANK%d", port_number, rank_pair_group, primary_ranks_array[rank_pair_group][port_number]);
+			bit_position = 2 * rank_pair_group + 49;
+			FAPI_INF( "Setting bit %d", bit_position);
+			rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_RANK_GROUP_EXT_P0_0x8000C0350301143F, data_buffer_64);
+			if(rc) return rc;
+			rc_num = rc_num | data_buffer_64.setBit(bit_position);
+			rc = fapiPutScom(i_target, DPHY01_DDRPHY_PC_RANK_GROUP_EXT_P0_0x8000C0350301143F, data_buffer_64);
+			if(rc) return rc;
+		    }
+		}
+		if ( port_number == 1 )
+		{
+		    if ( ( primary_ranks_array[rank_pair_group][port_number] == 0x04) ||
+			 ( primary_ranks_array[rank_pair_group][port_number] == 0x05) ||
+			 ( primary_ranks_array[rank_pair_group][port_number] == 0x06) ||
+			 ( primary_ranks_array[rank_pair_group][port_number] == 0x07) )
+		    {
+			FAPI_INF( "Address Mirroring on PORT%d RANKPAIR%d RANK%d", port_number, rank_pair_group, primary_ranks_array[rank_pair_group][port_number]);
+			bit_position = 2 * rank_pair_group + 48;
+			FAPI_INF( "Setting bit %d", bit_position);
+			rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_RANK_GROUP_P1_0x8001C0110301143F, data_buffer_64);
+			if(rc) return rc;
+			rc_num = rc_num | data_buffer_64.setBit(bit_position);
+			rc = fapiPutScom(i_target, DPHY01_DDRPHY_PC_RANK_GROUP_P1_0x8001C0110301143F, data_buffer_64);
+			if(rc) return rc;
+		    }
+		    if ( ( secondary_ranks_array[rank_pair_group][port_number] == 0x04) ||
+			 ( secondary_ranks_array[rank_pair_group][port_number] == 0x05) ||
+			 ( secondary_ranks_array[rank_pair_group][port_number] == 0x06) ||
+			 ( secondary_ranks_array[rank_pair_group][port_number] == 0x07) )
+		    {
+			FAPI_INF( "Address Mirroring on PORT%d RANKPAIR%d RANK%d", port_number, rank_pair_group, primary_ranks_array[rank_pair_group][port_number]);
+			bit_position = 2 * rank_pair_group + 49;
+			FAPI_INF( "Setting bit %d", bit_position);
+			rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_RANK_GROUP_P1_0x8001C0110301143F, data_buffer_64);
+			if(rc) return rc;
+			rc_num = rc_num | data_buffer_64.setBit(bit_position);
+			rc = fapiPutScom(i_target, DPHY01_DDRPHY_PC_RANK_GROUP_P1_0x8001C0110301143F, data_buffer_64);
+			if(rc) return rc;
+		    }
+		    if ( ( tertiary_ranks_array[rank_pair_group][port_number] == 0x04) ||
+			 ( tertiary_ranks_array[rank_pair_group][port_number] == 0x05) ||
+			 ( tertiary_ranks_array[rank_pair_group][port_number] == 0x06) ||
+			 ( tertiary_ranks_array[rank_pair_group][port_number] == 0x07) )
+		    {
+			FAPI_INF( "Address Mirroring on PORT%d RANKPAIR%d RANK%d", port_number, rank_pair_group, primary_ranks_array[rank_pair_group][port_number]);
+			bit_position = 2 * rank_pair_group + 48;
+			FAPI_INF( "Setting bit %d", bit_position);
+			rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_RANK_GROUP_EXT_P1_0x8001C0350301143F, data_buffer_64);
+			if(rc) return rc;
+			rc_num = rc_num | data_buffer_64.setBit(bit_position);
+			rc = fapiPutScom(i_target, DPHY01_DDRPHY_PC_RANK_GROUP_EXT_P1_0x8001C0350301143F, data_buffer_64);
+			if(rc) return rc;
+		    }
+		    if ( ( quaternary_ranks_array[rank_pair_group][port_number] == 0x04) ||
+			 ( quaternary_ranks_array[rank_pair_group][port_number] == 0x05) ||
+			 ( quaternary_ranks_array[rank_pair_group][port_number] == 0x06) ||
+			 ( quaternary_ranks_array[rank_pair_group][port_number] == 0x07) )
+		    {
+			FAPI_INF( "Address Mirroring on PORT%d RANKPAIR%d RANK%d", port_number, rank_pair_group, primary_ranks_array[rank_pair_group][port_number]);
+			bit_position = 2 * rank_pair_group + 49;
+			FAPI_INF( "Setting bit %d", bit_position);
+			rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_RANK_GROUP_EXT_P1_0x8001C0350301143F, data_buffer_64);
+			if(rc) return rc;
+			rc_num = rc_num | data_buffer_64.setBit(bit_position);
+			rc = fapiPutScom(i_target, DPHY01_DDRPHY_PC_RANK_GROUP_EXT_P1_0x8001C0350301143F, data_buffer_64);
+			if(rc) return rc;
+		    }
+		}
+
+	    }
+	}
+    }
 
     if ((!(dimm_type == ENUM_ATTR_EFF_DIMM_TYPE_LRDIMM)) && (dram_gen == ENUM_ATTR_EFF_DRAM_GEN_DDR3))
     {
@@ -777,7 +965,8 @@ ReturnCode mss_mrs_load(
     uint32_t rc_num = 0;
 
     ecmdDataBufferBase data_buffer_64(64);
-
+    ecmdDataBufferBase address_pre_AMM_16(16);
+    ecmdDataBufferBase bank_pre_AMM_3(3);
     ecmdDataBufferBase address_16(16);
     ecmdDataBufferBase bank_3(3);
     ecmdDataBufferBase activate_1(1);
@@ -812,6 +1001,10 @@ ReturnCode mss_mrs_load(
     uint16_t MRS2 = 0;
     uint16_t MRS3 = 0;
 
+    uint16_t mirror_mode_ba = 0;
+    uint16_t mirror_mode_ad  = 0;
+
+
     uint16_t num_ranks = 0;
 
     FAPI_INF( "+++++++++++++++++++++ LOADING MRS SETTINGS FOR PORT %d +++++++++++++++++++++", i_port_number);
@@ -819,6 +1012,11 @@ ReturnCode mss_mrs_load(
     uint8_t num_ranks_array[2][2]; //[port][dimm]
     rc = FAPI_ATTR_GET(ATTR_EFF_NUM_RANKS_PER_DIMM, &i_target, num_ranks_array);
     if(rc) return rc;
+
+    uint8_t dimm_type;
+    rc = FAPI_ATTR_GET(ATTR_EFF_DIMM_TYPE, &i_target, dimm_type);
+    if(rc) return rc;
+
 
     //Lines commented out in the following section are waiting for xml attribute adds
     //MRS0
@@ -1262,33 +1460,75 @@ ReturnCode mss_mrs_load(
                         // Setting the bank address
                         if (mrs_number == 0)
                         {
-                            rc_num = rc_num | address_16.insert(mrs2, 0, 16, 0);
-			    rc_num = rc_num | bank_3.insert((uint8_t) MRS2_BA, 0, 1, 7);
-                            rc_num = rc_num | bank_3.insert((uint8_t) MRS2_BA, 1, 1, 6);
-                            rc_num = rc_num | bank_3.insert((uint8_t) MRS2_BA, 2, 1, 5);
+                            rc_num = rc_num | address_pre_AMM_16.insert(mrs2, 0, 16, 0);
+			    rc_num = rc_num | bank_pre_AMM_3.insert((uint8_t) MRS2_BA, 0, 1, 7);
+                            rc_num = rc_num | bank_pre_AMM_3.insert((uint8_t) MRS2_BA, 1, 1, 6);
+                            rc_num = rc_num | bank_pre_AMM_3.insert((uint8_t) MRS2_BA, 2, 1, 5);
                         }
                         else if ( mrs_number == 1)
                         {
-                            rc_num = rc_num | address_16.insert(mrs3, 0, 16, 0);
-			    rc_num = rc_num | bank_3.insert((uint8_t) MRS3_BA, 0, 1, 7);
-                            rc_num = rc_num | bank_3.insert((uint8_t) MRS3_BA, 1, 1, 6);
-                            rc_num = rc_num | bank_3.insert((uint8_t) MRS3_BA, 2, 1, 5);
+                            rc_num = rc_num | address_pre_AMM_16.insert(mrs3, 0, 16, 0);
+			    rc_num = rc_num | bank_pre_AMM_3.insert((uint8_t) MRS3_BA, 0, 1, 7);
+                            rc_num = rc_num | bank_pre_AMM_3.insert((uint8_t) MRS3_BA, 1, 1, 6);
+                            rc_num = rc_num | bank_pre_AMM_3.insert((uint8_t) MRS3_BA, 2, 1, 5);
                         }
                         else if ( mrs_number == 2)
                         {
-                            rc_num = rc_num | address_16.insert(mrs1, 0, 16, 0);
-			    rc_num = rc_num | bank_3.insert((uint8_t) MRS1_BA, 0, 1, 7);
-                            rc_num = rc_num | bank_3.insert((uint8_t) MRS1_BA, 1, 1, 6);
-                            rc_num = rc_num | bank_3.insert((uint8_t) MRS1_BA, 2, 1, 5);
+                            rc_num = rc_num | address_pre_AMM_16.insert(mrs1, 0, 16, 0);
+			    rc_num = rc_num | bank_pre_AMM_3.insert((uint8_t) MRS1_BA, 0, 1, 7);
+                            rc_num = rc_num | bank_pre_AMM_3.insert((uint8_t) MRS1_BA, 1, 1, 6);
+                            rc_num = rc_num | bank_pre_AMM_3.insert((uint8_t) MRS1_BA, 2, 1, 5);
                         }
                         else if ( mrs_number == 3)
                         {
-                            rc_num = rc_num | address_16.insert(mrs0, 0, 16, 0);
-			    rc_num = rc_num | bank_3.insert((uint8_t) MRS0_BA, 0, 1, 7);
-                            rc_num = rc_num | bank_3.insert((uint8_t) MRS0_BA, 1, 1, 6);
-                            rc_num = rc_num | bank_3.insert((uint8_t) MRS0_BA, 2, 1, 5);
+                            rc_num = rc_num | address_pre_AMM_16.insert(mrs0, 0, 16, 0);
+			    rc_num = rc_num | bank_pre_AMM_3.insert((uint8_t) MRS0_BA, 0, 1, 7);
+                            rc_num = rc_num | bank_pre_AMM_3.insert((uint8_t) MRS0_BA, 1, 1, 6);
+                            rc_num = rc_num | bank_pre_AMM_3.insert((uint8_t) MRS0_BA, 2, 1, 5);
                         }
-                
+
+			if ( (dimm_type == ENUM_ATTR_EFF_DIMM_TYPE_CDIMM) && (dimm_number == 1) )
+			{
+			    FAPI_INF( "ADDRESS MIRRORING ON PORT%d DIMM%d RANK%d", i_port_number, dimm_number, rank_number);
+
+			    rc_num = rc_num | address_pre_AMM_16.extractPreserve(&mirror_mode_ad, 0, 16, 0);
+			    FAPI_INF( "PRE - MIRROR MODE ADDRESS: 0x%04X", mirror_mode_ad);
+			    rc_num = rc_num | bank_pre_AMM_3.extractPreserve(&mirror_mode_ba, 0, 3, 0);
+			    FAPI_INF( "PRE - MIRROR MODE BANK ADDRESS: 0x%04X", mirror_mode_ba);
+
+			    //Initialize address and bank address as the same pre mirror mode swizzle
+			    rc_num = rc_num | address_16.insert(address_pre_AMM_16, 0, 16, 0);
+			    rc_num = rc_num | bank_3.insert(bank_pre_AMM_3, 0, 3, 0);
+
+			    //Swap A3 and A4
+			    rc_num = rc_num | address_16.insert(address_pre_AMM_16, 4, 1, 3);
+			    rc_num = rc_num | address_16.insert(address_pre_AMM_16, 3, 1, 4);
+
+			    //Swap A5 and A6
+			    rc_num = rc_num | address_16.insert(address_pre_AMM_16, 6, 1, 5);
+			    rc_num = rc_num | address_16.insert(address_pre_AMM_16, 5, 1, 6);
+
+			    //Swap A7 and A8
+			    rc_num = rc_num | address_16.insert(address_pre_AMM_16, 8, 1, 7);
+			    rc_num = rc_num | address_16.insert(address_pre_AMM_16, 7, 1, 8);
+
+			    //Swap BA0 and BA1
+			    rc_num = rc_num | bank_3.insert(bank_pre_AMM_3, 1, 1, 0);
+			    rc_num = rc_num | bank_3.insert(bank_pre_AMM_3, 0, 1, 1);
+
+			    rc_num = rc_num | address_16.extractPreserve(&mirror_mode_ad, 0, 16, 0);
+			    FAPI_INF( "POST - MIRROR MODE ADDRESS: 0x%04X", mirror_mode_ad);
+			    rc_num = rc_num | bank_3.extractPreserve(&mirror_mode_ba, 0, 3, 0);
+			    FAPI_INF( "POST - MIRROR MODE BANK ADDRESS: 0x%04X", mirror_mode_ba);
+
+			}
+			else
+			{
+			    // No need to worry about swizzle
+			    rc_num = rc_num | address_16.insert(address_pre_AMM_16, 0, 16, 0);
+			    rc_num = rc_num | bank_3.insert(bank_pre_AMM_3, 0, 3, 0);
+			}
+
                         if (rc_num)
                         {
                             FAPI_ERR( "mss_mrs_load: Error setting up buffers");

@@ -145,6 +145,7 @@
     <!-- End proc_select_boot_master attributes  -->
 
     <attribute><id>ENABLED_THREADS</id></attribute>
+    <attribute><id>MSS_ZSERIES</id></attribute>
 </targetType>
 
 <targetType>
@@ -343,7 +344,7 @@
      <attribute><id>PROC_A_ENABLE</id></attribute>
      <attribute><id>PROC_X_ENABLE</id></attribute>
      <!-- ===== End supporting A/X bus enable in p8_xip_customize_attributes.xml ===== -->
-
+     
 </targetType>
 
 <targetType>
@@ -684,6 +685,7 @@
     <attribute><id>EFF_DIMM_RANKS_CONFIGED</id></attribute>
     <attribute><id>EFF_NUM_RANKS_PER_DIMM</id></attribute>
     <attribute><id>EFF_DIMM_TYPE</id></attribute>
+    <attribute><id>EFF_CUSTOM_DIMM</id></attribute>
     <attribute><id>EFF_DRAM_WIDTH</id></attribute>
     <attribute><id>EFF_DRAM_GEN</id></attribute>
     <attribute><id>EFF_PRIMARY_RANK_GROUP0</id></attribute>
@@ -996,6 +998,8 @@
      <attribute><id>PNOR_I2C_ADDRESS_BYTES</id></attribute>
      <!-- End poreve_memory_attributes.xml -->
     <attribute><id>VPD_REC_NUM</id></attribute>
+    <attribute><id>MSS_PSRO</id></attribute>
+    <attribute><id>MSS_NWELL_MISPLACEMENT</id></attribute>
 </targetType>
 
 <!-- Centaur MBS -->

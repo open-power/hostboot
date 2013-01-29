@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012                   */
+/* COPYRIGHT International Business Machines Corp. 2012,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_get_cen_ecid.C,v 1.8 2012/12/10 17:49:53 lapietra Exp $
+// $Id: mss_get_cen_ecid.C,v 1.13 2013/01/24 18:29:59 bellows Exp $
 //------------------------------------------------------------------------------
 // *|
 // *! (C) Copyright International Business Machines Corp. 2012
@@ -39,10 +39,16 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
+//   1.13  | bellows  |24-JAN-13| Cache Disable Valid bit is ecid_128, made bit
+//         |          |         | number consistent
+//   1.12  | bellows  |23-JAN-13| PSRO attriubute is available in cronus dev
+//   1.11  | bellows  |21-JAN-13| fixed log comment
+//   1.10  | bellows  |21-JAN-13| chip sub id read, psro shell added
+//   1.9   | bellows  |15-JAN-13| moved Cache Enable Information to the caller
 //   1.8   | sglancy  |10-DEC-12| Corrected typo
-//   1.7   | sglancy  |6-DEC-12| Updated to coincide with firmware updates to ECID attribute
-//   1.6   | sglancy  |5-DEC-12| Updated to coincide with firmware change requests
-//   1.5-1 | sglancy  |5-DEC-12| Lost due to no update log
+//   1.7   | sglancy  | 6-DEC-12| Updated to coincide with firmware updates to ECID attribute
+//   1.6   | sglancy  | 5-DEC-12| Updated to coincide with firmware change requests
+//   1.5-1 | sglancy  | 5-DEC-12| Lost due to no update log
 
 //------------------------------------------------------------------------------
 // Includes
@@ -60,12 +66,15 @@ extern "C" {
 // HWP entry point
 fapi::ReturnCode mss_get_cen_ecid(
     const fapi::Target& i_target,
-    uint8_t & ddr_port_status
+    uint8_t & ddr_port_status,
+    uint8_t & cache_enable_o,
+    uint8_t & centaur_sub_revision_o
     )
 {
     // return code
     fapi::ReturnCode rc;
     uint64_t data[2];
+    uint32_t rc_ecmd;
     // mark HWP entry
 
     ecmdDataBufferBase scom(64);
@@ -93,28 +102,47 @@ fapi::ReturnCode mss_get_cen_ecid(
         FAPI_ERR("mss_get_cen_ecid: set ATTR_MSS_ECID" );
         return rc;
     }
-    
-    //gets bits 113 and 114 to determine the state of the cache
-    uint8_t bit113_114=0;
-    uint32_t rc_ecmd = scom.extract(&bit113_114,48,2);
-    bit113_114 = bit113_114 >> 6;
-    uint8_t t;
+
+    //get bit128
+    uint8_t bit128=0;
+    rc_ecmd = scom.extract(&bit128,63,1);
+    bit128 = bit128 >> 7;
     if(rc_ecmd) {
-       FAPI_ERR("mss_get_cen_ecid: could not extract cache data" );
-       rc.setEcmdError(rc_ecmd);
-       return rc;
+      FAPI_ERR("mss_get_cen_ecid: could not extract cache data_valid bit" );
+      rc.setEcmdError(rc_ecmd);
+      return rc;
     }
+
+    if(bit128 == 1) { // Cache enable bit is valid
+
+    //gets bits 113 and 114 to determine the state of the cache
+      uint8_t bit113_114=0;
+      rc_ecmd = scom.extract(&bit113_114,48,2);
+      bit113_114 = bit113_114 >> 6;
+      uint8_t t;
+      if(rc_ecmd) {
+        FAPI_ERR("mss_get_cen_ecid: could not extract cache data" );
+        rc.setEcmdError(rc_ecmd);
+        return rc;
+      }
     //determines the state of the cache
-    if(bit113_114 == 0) t = fapi::ENUM_ATTR_MSS_CACHE_ENABLE_ON;
-    else if(bit113_114 == 1) t = fapi::ENUM_ATTR_MSS_CACHE_ENABLE_HALF_A;
-    else if(bit113_114 == 2) t = fapi::ENUM_ATTR_MSS_CACHE_ENABLE_HALF_B;
-    else t = fapi::ENUM_ATTR_MSS_CACHE_ENABLE_OFF;
-    //sets the cache attribute and error checks
-    rc = FAPI_ATTR_SET(ATTR_MSS_CACHE_ENABLE, &i_target, t);
-    if (!rc.ok()) {
-       FAPI_ERR("mss_get_cen_ecid: could not set ATTR_MSS_CACHE_ENABLE" );
-       return rc;
+      if(bit113_114 == 0) t = fapi::ENUM_ATTR_MSS_CACHE_ENABLE_ON;
+      else if(bit113_114 == 1) t = fapi::ENUM_ATTR_MSS_CACHE_ENABLE_HALF_A;
+      else if(bit113_114 == 2) t = fapi::ENUM_ATTR_MSS_CACHE_ENABLE_HALF_B;
+      else t = fapi::ENUM_ATTR_MSS_CACHE_ENABLE_OFF;
+      cache_enable_o = t;
     }
+    else {
+      FAPI_INF("Cache Dissbled because eDRAM data bits are assumed to be bad");
+      cache_enable_o = fapi::ENUM_ATTR_MSS_CACHE_ENABLE_OFF;
+    }
+
+//    //sets the cache attribute and error checks
+//    rc = FAPI_ATTR_SET(ATTR_MSS_CACHE_ENABLE, &i_target, t);
+//    if (!rc.ok()) {
+//       FAPI_ERR("mss_get_cen_ecid: could not set ATTR_MSS_CACHE_ENABLE" );
+//       return rc;
+//    }
     
     //reads in the ECID info for whether a DDR port side is good or bad
     rc_ecmd = scom.extract(&ddr_port_status,50,2);
@@ -125,7 +153,33 @@ fapi::ReturnCode mss_get_cen_ecid(
        return rc;
     }
     
-    // mark HWP exit
+     //116..123         average PSRO from 85C wafer test
+    uint8_t bit117_124=0;
+    rc_ecmd = scom.extract(&bit117_124,52,8);
+    if(rc_ecmd) {
+       FAPI_ERR("mss_get_cen_ecid: could not extract PSRO" );
+       rc.setEcmdError(rc_ecmd);
+       return rc;
+    }
+    rc = FAPI_ATTR_SET(ATTR_MSS_PSRO, &i_target, bit117_124);
+    if (!rc.ok()) {
+       FAPI_ERR("mss_get_cen_ecid: could not set ATTR_MSS_PSRO" );
+       return rc;
+    }
+
+    // read the bit in the ecid to see if we are a DD1.01
+   // Bit 124 DD1.01  Indicator Bit. Set to '1' for DD1.01 devices
+    uint8_t bit125 =0;
+    rc_ecmd = scom.extract(&bit125,60,1);
+    bit125 = bit125 >> 7;
+    if(rc_ecmd) {
+       FAPI_ERR("mss_get_cen_ecid: could not extract dd1.01 indicator bit" );
+       rc.setEcmdError(rc_ecmd);
+       return rc;
+    }
+    centaur_sub_revision_o=bit125;
+
+   // mark HWP exit
     FAPI_IMP("Exiting mss_get_cen_ecid....");
     return rc;
 }

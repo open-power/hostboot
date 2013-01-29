@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012                   */
+/* COPYRIGHT International Business Machines Corp. 2012,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_setup_bars.C,v 1.7 2012/10/09 15:31:38 jmcgill Exp $
+// $Id: proc_setup_bars.C,v 1.8 2012/12/11 23:59:28 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_setup_bars.C,v $
 //------------------------------------------------------------------------------
 // *|
@@ -1138,6 +1138,8 @@ fapi::ReturnCode proc_setup_bars_process_chip(
 {
     // return code
     fapi::ReturnCode rc;
+    uint8_t pcie_enabled;
+    uint8_t nx_enabled;
 
     // mark function entry
     FAPI_DBG("proc_setup_bars_process_chip: Start");
@@ -1180,6 +1182,32 @@ fapi::ReturnCode proc_setup_bars_process_chip(
             FAPI_ERR("proc_setup_bars_process_chip: Error from proc_fab_smp_get_chip_id_attr");
             break;
         }
+
+        // query NX partial good attribute
+        rc = FAPI_ATTR_GET(ATTR_PROC_NX_ENABLE,
+                           &(io_smp_chip.chip->this_chip),
+                           nx_enabled);
+        if (!rc.ok())
+        {
+            FAPI_ERR("proc_setup_bars_process_chip: Error querying ATTR_PROC_NX_ENABLE");
+            break;
+        }
+
+        // query PCIE partial good attribute
+        rc = FAPI_ATTR_GET(ATTR_PROC_PCIE_ENABLE,
+                           &(io_smp_chip.chip->this_chip),
+                           pcie_enabled);
+        if (!rc.ok())
+        {
+            FAPI_ERR("proc_setup_bars_process_chip: Error querying ATTR_PROC_PCIE_ENABLE");
+            break;
+        }
+
+        io_smp_chip.nx_enabled =
+            (nx_enabled == fapi::ENUM_ATTR_PROC_NX_ENABLE_ENABLE);
+
+        io_smp_chip.pcie_enabled =
+            (pcie_enabled == fapi::ENUM_ATTR_PROC_PCIE_ENABLE_ENABLE);
 
         // get BAR attributes
         rc = proc_setup_bars_get_bar_attrs(io_smp_chip);
@@ -2321,7 +2349,7 @@ proc_setup_bars_write_local_chip_region_bars(
         }
 
         // NX (MMIO)
-        if (i_smp_chip.nx_mmio_range.enabled)
+        if (i_smp_chip.nx_mmio_range.enabled && i_smp_chip.nx_enabled)
         {
             FAPI_DBG("proc_setup_bars_write_local_chip_region_bars: Writing NX MMIO BAR register");
             rc = proc_setup_bars_common_write_bar_reg(
@@ -2337,7 +2365,7 @@ proc_setup_bars_write_local_chip_region_bars(
         }
 
         // NX (non-mirrored)
-        if (i_smp_chip.non_mirrored_range.enabled)
+        if (i_smp_chip.non_mirrored_range.enabled && i_smp_chip.nx_enabled)
         {
             FAPI_DBG("proc_setup_bars_write_local_chip_region_bars: Writing NX APC Nodal Non-Mirrored BAR register");
             rc = proc_setup_bars_common_write_bar_reg(
@@ -2365,7 +2393,7 @@ proc_setup_bars_write_local_chip_region_bars(
         }
 
         // NX (mirrored)
-        if (i_smp_chip.mirrored_range.enabled)
+        if (i_smp_chip.mirrored_range.enabled && i_smp_chip.nx_enabled)
         {
             FAPI_DBG("proc_setup_bars_write_local_chip_region_bars: Writing NX APC Nodal Mirrored BAR register");
             rc = proc_setup_bars_common_write_bar_reg(
@@ -2457,24 +2485,30 @@ proc_setup_bars_write_local_chip_region_bars(
         }
 
         // PCIe (non-mirrored/mirrored)
-        rc = proc_setup_bars_pcie_write_local_chip_memory_bars(
-            i_smp_chip.chip->this_chip,
-            i_smp_chip.non_mirrored_range,
-            i_smp_chip.mirrored_range);
-        if (!rc.ok())
+        if (i_smp_chip.pcie_enabled)
         {
-            FAPI_ERR("proc_setup_bars_write_local_chip_region_bars: Error from proc_setup_bars_pcie_write_local_chip_memory_bars");
-            break;
+            rc = proc_setup_bars_pcie_write_local_chip_memory_bars(
+                i_smp_chip.chip->this_chip,
+                i_smp_chip.non_mirrored_range,
+                i_smp_chip.mirrored_range);
+            if (!rc.ok())
+            {
+                FAPI_ERR("proc_setup_bars_write_local_chip_region_bars: Error from proc_setup_bars_pcie_write_local_chip_memory_bars");
+                break;
+            }
         }
 
         // PCIe (IO)
-        rc = proc_setup_bars_pcie_write_io_bar_regs(
-            i_smp_chip.chip->this_chip,
-            i_smp_chip.pcie_ranges);
-        if (!rc.ok())
+        if (i_smp_chip.pcie_enabled)
         {
-            FAPI_ERR("proc_setup_bars_write_local_chip_region_bars: Error from proc_setup_bars_pcie_write_io_bar_regs");
-            break;
+            rc = proc_setup_bars_pcie_write_io_bar_regs(
+                i_smp_chip.chip->this_chip,
+                i_smp_chip.pcie_ranges);
+            if (!rc.ok())
+            {
+                FAPI_ERR("proc_setup_bars_write_local_chip_region_bars: Error from proc_setup_bars_pcie_write_io_bar_regs");
+                break;
+            }
         }
     } while(0);
 
@@ -2528,7 +2562,7 @@ proc_setup_bars_write_local_node_region_bars(
     do
     {
         // NX (non-mirrored)
-        if (i_smp_node.non_mirrored_range.enabled)
+        if (i_smp_node.non_mirrored_range.enabled && i_smp_chip.nx_enabled)
         {
             FAPI_DBG("proc_setup_bars_write_local_node_region_bars: Writing NX APC Group Non-Mirrored BAR register");
             rc = proc_setup_bars_common_write_bar_reg(
@@ -2556,7 +2590,7 @@ proc_setup_bars_write_local_node_region_bars(
         }
 
         // NX (mirrored)
-        if (i_smp_node.mirrored_range.enabled)
+        if (i_smp_node.mirrored_range.enabled && i_smp_chip.nx_enabled)
         {
             FAPI_DBG("proc_setup_bars_write_local_node_region_bars: Writing NX APC Group Mirrored BAR register");
             rc = proc_setup_bars_common_write_bar_reg(
@@ -2616,14 +2650,17 @@ proc_setup_bars_write_local_node_region_bars(
         }
 
         // PCIe (non-mirrored/mirrored)
-        rc = proc_setup_bars_pcie_write_local_node_memory_bars(
-            i_smp_chip.chip->this_chip,
-            i_smp_node.non_mirrored_range,
-            i_smp_node.mirrored_range);
-        if (!rc.ok())
+        if (i_smp_chip.pcie_enabled)
         {
-            FAPI_ERR("proc_setup_bars_write_local_node_region_bars: Error from proc_setup_bars_pcie_write_local_node_memory_bars");
-            break;
+            rc = proc_setup_bars_pcie_write_local_node_memory_bars(
+                i_smp_chip.chip->this_chip,
+                i_smp_node.non_mirrored_range,
+                i_smp_node.mirrored_range);
+            if (!rc.ok())
+            {
+                FAPI_ERR("proc_setup_bars_write_local_node_region_bars: Error from proc_setup_bars_pcie_write_local_node_memory_bars");
+                break;
+            }
         }
     } while(0);
 
@@ -2848,15 +2885,18 @@ proc_setup_bars_write_foreign_region_bars(
         };
 
         // PCIe (near/far)
-        rc = proc_setup_bars_pcie_write_foreign_memory_bars(
-            i_smp_chip.chip->this_chip,
-            process_links,
-            i_smp_chip.foreign_near_ranges,
-            i_smp_chip.foreign_far_ranges);
-        if (!rc.ok())
+        if (i_smp_chip.pcie_enabled)
         {
-            FAPI_ERR("proc_setup_bars_write_foreign_region_bars: Error from proc_setup_bars_pcie_write_foreign_memory_bars");
-            break;
+            rc = proc_setup_bars_pcie_write_foreign_memory_bars(
+                i_smp_chip.chip->this_chip,
+                process_links,
+                i_smp_chip.foreign_near_ranges,
+                i_smp_chip.foreign_far_ranges);
+            if (!rc.ok())
+            {
+                FAPI_ERR("proc_setup_bars_write_foreign_region_bars: Error from proc_setup_bars_pcie_write_foreign_memory_bars");
+                break;
+            }
         }
 
         // process ranges
@@ -2880,7 +2920,7 @@ proc_setup_bars_write_foreign_region_bars(
                     i_smp_chip.foreign_near_ranges[r]);
                 if (!rc.ok())
                 {
-                    FAPI_ERR("proc_setup_bars_write_local_chip_region_bars: Error from proc_setup_bars_common_write_bar_reg");
+                    FAPI_ERR("proc_setup_bars_write_foreign_region_bars: Error from proc_setup_bars_common_write_bar_reg");
                     break;
                 }
 
@@ -2896,7 +2936,7 @@ proc_setup_bars_write_foreign_region_bars(
                     i_smp_chip.foreign_near_ranges[r]);
                 if (!rc.ok())
                 {
-                    FAPI_ERR("proc_setup_bars_write_local_chip_region_bars: Error from proc_setup_bars_common_write_bar_reg");
+                    FAPI_ERR("proc_setup_bars_write_foreign_region_bars: Error from proc_setup_bars_common_write_bar_reg");
                     break;
                 }
 
@@ -2912,40 +2952,46 @@ proc_setup_bars_write_foreign_region_bars(
                     i_smp_chip.foreign_near_ranges[r]);
                 if (!rc.ok())
                 {
-                    FAPI_ERR("proc_setup_bars_write_local_chip_region_bars: Error from proc_setup_bars_common_write_bar_reg");
+                    FAPI_ERR("proc_setup_bars_write_foreign_region_bars: Error from proc_setup_bars_common_write_bar_reg");
                     break;
                 }
 
                 // NX APC (near)
-                FAPI_DBG("proc_setup_bars_write_foreign_region_bars: Writing NX APC F%d Near BAR register",
-                         r);
-                rc = proc_setup_bars_common_write_bar_reg(
-                    i_smp_chip.chip->this_chip,
-                    (r == 0)?
-                    NX_APC_NEAR_BAR_F0_0x02013031:
-                    NX_APC_NEAR_BAR_F1_0x02013033,
-                    common_f_scope_bar_reg_def,
-                    i_smp_chip.foreign_near_ranges[r]);
-                if (!rc.ok())
+                if (i_smp_chip.nx_enabled)
                 {
-                    FAPI_ERR("proc_setup_bars_write_local_chip_region_bars: Error from proc_setup_bars_common_write_bar_reg");
-                    break;
+                    FAPI_DBG("proc_setup_bars_write_foreign_region_bars: Writing NX APC F%d Near BAR register",
+                             r);
+                    rc = proc_setup_bars_common_write_bar_reg(
+                        i_smp_chip.chip->this_chip,
+                        (r == 0)?
+                        NX_APC_NEAR_BAR_F0_0x02013031:
+                        NX_APC_NEAR_BAR_F1_0x02013033,
+                        common_f_scope_bar_reg_def,
+                        i_smp_chip.foreign_near_ranges[r]);
+                    if (!rc.ok())
+                    {
+                        FAPI_ERR("proc_setup_bars_write_foreign_region_bars: Error from proc_setup_bars_common_write_bar_reg");
+                        break;
+                    }
                 }
 
                 // NX (near)
-                FAPI_DBG("proc_setup_bars_write_foreign_region_bars: Writing NX F%d Near BAR register",
-                         r);
-                rc = proc_setup_bars_common_write_bar_reg(
-                    i_smp_chip.chip->this_chip,
-                    (r == 0)?
-                    NX_NEAR_BAR_F0_0x02013099:
-                    NX_NEAR_BAR_F1_0x0201309B,
-                    common_f_scope_bar_reg_def,
-                    i_smp_chip.foreign_near_ranges[r]);
-                if (!rc.ok())
+                if (i_smp_chip.nx_enabled)
                 {
-                    FAPI_ERR("proc_setup_bars_write_local_chip_region_bars: Error from proc_setup_bars_common_write_bar_reg");
-                    break;
+                    FAPI_DBG("proc_setup_bars_write_foreign_region_bars: Writing NX F%d Near BAR register",
+                             r);
+                    rc = proc_setup_bars_common_write_bar_reg(
+                        i_smp_chip.chip->this_chip,
+                        (r == 0)?
+                        NX_NEAR_BAR_F0_0x02013099:
+                        NX_NEAR_BAR_F1_0x0201309B,
+                        common_f_scope_bar_reg_def,
+                        i_smp_chip.foreign_near_ranges[r]);
+                    if (!rc.ok())
+                    {
+                        FAPI_ERR("proc_setup_bars_write_foreign_region_bars: Error from proc_setup_bars_common_write_bar_reg");
+                        break;
+                    }
                 }
 
                 // MCD (near only)
@@ -2962,7 +3008,7 @@ proc_setup_bars_write_foreign_region_bars(
                     i_smp_chip.foreign_near_ranges[r]);
                 if (!rc.ok())
                 {
-                    FAPI_ERR("proc_setup_bars_write_local_chip_region_bars: Error from proc_setup_bars_common_write_bar_reg");
+                    FAPI_ERR("proc_setup_bars_write_foreign_region_bars: Error from proc_setup_bars_common_write_bar_reg");
                     break;
                 }
             }
@@ -2983,7 +3029,7 @@ proc_setup_bars_write_foreign_region_bars(
                     i_smp_chip.foreign_far_ranges[r]);
                 if (!rc.ok())
                 {
-                    FAPI_ERR("proc_setup_bars_write_local_chip_region_bars: Error from proc_setup_bars_common_write_bar_reg");
+                    FAPI_ERR("proc_setup_bars_write_foreign_region_bars: Error from proc_setup_bars_common_write_bar_reg");
                     break;
                 }
 
@@ -2999,7 +3045,7 @@ proc_setup_bars_write_foreign_region_bars(
                     i_smp_chip.foreign_far_ranges[r]);
                 if (!rc.ok())
                 {
-                    FAPI_ERR("proc_setup_bars_write_local_chip_region_bars: Error from proc_setup_bars_common_write_bar_reg");
+                    FAPI_ERR("proc_setup_bars_write_foreign_region_bars: Error from proc_setup_bars_common_write_bar_reg");
                     break;
                 }
 
@@ -3015,40 +3061,46 @@ proc_setup_bars_write_foreign_region_bars(
                     i_smp_chip.foreign_far_ranges[r]);
                 if (!rc.ok())
                 {
-                    FAPI_ERR("proc_setup_bars_write_local_chip_region_bars: Error from proc_setup_bars_common_write_bar_reg");
+                    FAPI_ERR("proc_setup_bars_write_foreign_region_bars: Error from proc_setup_bars_common_write_bar_reg");
                     break;
                 }
 
                 // NX APC (far)
-                FAPI_DBG("proc_setup_bars_write_foreign_region_bars: Writing NX APC F%d Far BAR register",
-                         r);
-                rc = proc_setup_bars_common_write_bar_reg(
-                    i_smp_chip.chip->this_chip,
-                    (r == 0)?
-                    NX_APC_FAR_BAR_F0_0x02013032:
-                    NX_APC_FAR_BAR_F1_0x02013034,
-                    common_f_scope_bar_reg_def,
-                    i_smp_chip.foreign_far_ranges[r]);
-                if (!rc.ok())
+                if (i_smp_chip.nx_enabled)
                 {
-                    FAPI_ERR("proc_setup_bars_write_local_chip_region_bars: Error from proc_setup_bars_common_write_bar_reg");
-                    break;
+                    FAPI_DBG("proc_setup_bars_write_foreign_region_bars: Writing NX APC F%d Far BAR register",
+                             r);
+                    rc = proc_setup_bars_common_write_bar_reg(
+                        i_smp_chip.chip->this_chip,
+                        (r == 0)?
+                        NX_APC_FAR_BAR_F0_0x02013032:
+                        NX_APC_FAR_BAR_F1_0x02013034,
+                        common_f_scope_bar_reg_def,
+                        i_smp_chip.foreign_far_ranges[r]);
+                    if (!rc.ok())
+                    {
+                        FAPI_ERR("proc_setup_bars_write_foreign_region_bars: Error from proc_setup_bars_common_write_bar_reg");
+                        break;
+                    }
                 }
 
                 // NX (far)
-                FAPI_DBG("proc_setup_bars_write_foreign_region_bars: Writing NX F%d Far BAR register",
-                         r);
-                rc = proc_setup_bars_common_write_bar_reg(
-                    i_smp_chip.chip->this_chip,
-                    (r == 0)?
-                    NX_FAR_BAR_F0_0x0201309A:
-                    NX_FAR_BAR_F1_0x0201309C,
-                    common_f_scope_bar_reg_def,
-                    i_smp_chip.foreign_far_ranges[r]);
-                if (!rc.ok())
+                if (i_smp_chip.nx_enabled)
                 {
-                    FAPI_ERR("proc_setup_bars_write_local_chip_region_bars: Error from proc_setup_bars_common_write_bar_reg");
-                    break;
+                    FAPI_DBG("proc_setup_bars_write_foreign_region_bars: Writing NX F%d Far BAR register",
+                             r);
+                    rc = proc_setup_bars_common_write_bar_reg(
+                        i_smp_chip.chip->this_chip,
+                        (r == 0)?
+                        NX_FAR_BAR_F0_0x0201309A:
+                        NX_FAR_BAR_F1_0x0201309C,
+                        common_f_scope_bar_reg_def,
+                        i_smp_chip.foreign_far_ranges[r]);
+                    if (!rc.ok())
+                    {
+                        FAPI_ERR("proc_setup_bars_write_foreign_region_bars: Error from proc_setup_bars_common_write_bar_reg");
+                        break;
+                    }
                 }
             }
         }
@@ -3090,7 +3142,7 @@ proc_setup_bars_find_node(
                                            node_id);
         if (!rc.ok())
         {
-            FAPI_ERR("proc_setup_bars_process_chip: Error from proc_fab_smp_get_node_id_attr");
+            FAPI_ERR("proc_setup_bars_find_node: Error from proc_fab_smp_get_node_id_attr");
             break;
         }
 
@@ -3102,7 +3154,7 @@ proc_setup_bars_find_node(
         // no match node found, exit
         if (n_iter == i_smp.nodes.end())
         {
-            FAPI_ERR("proc_setup_bars_process_chip: insert_chip: Error encountered finding node in SMP");
+            FAPI_ERR("proc_setup_bars_find_node: insert_chip: Error encountered finding node in SMP");
             FAPI_SET_HWP_ERROR(rc,
                 RC_PROC_SETUP_BARS_NODE_FIND_INTERNAL_ERR);
             break;
