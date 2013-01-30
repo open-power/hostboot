@@ -400,7 +400,8 @@ void* call_dmi_erepair( void *io_pArgs )
         ATTR_CHIP_UNIT_type l_mcsNum = l_mcs_target->getAttr<ATTR_CHIP_UNIT>();
 
         // find all the Centaurs that are associated with this MCS
-        getAffinityChips(l_memTargetList, l_mcs_target, TYPE_MEMBUF);
+        getChildAffinityTargets(l_memTargetList, l_mcs_target, 
+                       CLASS_CHIP, TYPE_MEMBUF);
 
         if(l_memTargetList.size() != EREPAIR_MAX_CENTAUR_PER_MCS)
         {
@@ -822,7 +823,8 @@ void*    call_proc_cen_framelock( void *io_pArgs )
 
         //  find all the Centaurs that are associated with this MCS
         TARGETING::TargetHandleList l_memTargetList;
-        getAffinityChips(l_memTargetList, l_mcs_target, TYPE_MEMBUF);
+        getChildAffinityTargets(l_memTargetList, l_mcs_target, 
+                 CLASS_CHIP, TYPE_MEMBUF);
 
         for (TargetHandleList::const_iterator
                 l_mem_iter = l_memTargetList.begin();
@@ -1038,7 +1040,8 @@ void get_dmi_io_targets(TargetPairs_t& o_dmi_io_targets)
 
             //  find all the Centaurs that are associated with this MCS
             TARGETING::TargetHandleList l_memTargetList;
-            getAffinityChips(l_memTargetList, l_mcs_target, TYPE_MEMBUF);
+            getChildAffinityTargets(l_memTargetList, l_mcs_target,
+                     CLASS_CHIP, TYPE_MEMBUF);
 
             for ( TargetHandleList::const_iterator
                     l_iterMemBuf = l_memTargetList.begin();

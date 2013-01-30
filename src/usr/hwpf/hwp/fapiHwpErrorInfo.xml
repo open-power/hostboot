@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- IBM CONFIDENTIAL                                                       -->
 <!--                                                                        -->
-<!-- COPYRIGHT International Business Machines Corp. 2011,2012              -->
+<!-- COPYRIGHT International Business Machines Corp. 2011,2013              -->
 <!--                                                                        -->
 <!-- p1                                                                     -->
 <!--                                                                        -->
@@ -145,6 +145,11 @@
   <hwpError>
     <rc>RC_HWP_ATTR_UNIT_TEST_FAIL</rc>
     <description>HWP Attribute Unit Test failed</description>
+  </hwpError>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_TEST_WRONG_MCS_RETURNED</rc>
+    <description>HWP Config Unit Test returned wrong MCS for memory buffer</description>
   </hwpError>
   <!-- *********************************************************************** -->
 </hwpErrors>

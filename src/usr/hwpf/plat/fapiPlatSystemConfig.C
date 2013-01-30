@@ -32,12 +32,155 @@
 #include <fapiSystemConfig.H>
 #include <fapiPlatReasonCodes.H>
 #include <errl/errlentry.H>
+#include <targeting/common/commontargeting.H>
 #include <targeting/common/utilFilter.H>
 #include <targeting/common/targetservice.H>
 #include <targeting/common/predicates/predicatectm.H>
 
 extern "C"
 {
+using   namespace   TARGETING;
+
+//******************************************************************************
+// fapiGetOtherSideOfMemChannel function
+//******************************************************************************
+fapi::ReturnCode fapiGetOtherSideOfMemChannel(
+    const fapi::Target& i_target,
+    fapi::Target & o_target,
+    const fapi::TargetState i_state)
+{
+    fapi::ReturnCode l_rc;
+    TargetHandleList l_targetList;
+
+    FAPI_INF(ENTER_MRK "fapiGetOtherSideOfMemChannel. State: 0x%x",
+             i_state);
+    if (i_target.getType() == fapi::TARGET_TYPE_MCS_CHIPLET)
+    {
+        TargetHandle_t   l_mcs_target =
+           reinterpret_cast<TargetHandle_t>(i_target.get());
+
+        // find the Centaur that is associated with this MCS
+        getChildAffinityTargets(l_targetList, l_mcs_target,
+                        CLASS_CHIP, TYPE_MEMBUF, false);
+
+        if(l_targetList.size() != 1) // one and only one expected
+        {
+            FAPI_ERR("fapiGetOtherSideOfMemChannel. expect 1 Centaur %d",
+                     l_targetList.size());
+            /*@
+             * @errortype
+             * @moduleid     fapi:MOD_FAPI_GET_OTHER_SIDE_OF_MEM_CHANNEL
+             * @reasoncode   fapi:RC_NO_SINGLE_MCS
+             * @userdata1    Type of input target
+             * @devdesc      fapiGetOtherSideOfMemChannel could not find exactly
+             *               one target on the other side of the correct state
+             */
+            errlHndl_t l_pError = new ERRORLOG::ErrlEntry(
+                ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                fapi::MOD_FAPI_GET_OTHER_SIDE_OF_MEM_CHANNEL,
+                fapi::RC_NO_SINGLE_MCS,
+                l_targetList.size());
+
+            // Attach the error log to the fapi::ReturnCode
+            l_rc.setPlatError(reinterpret_cast<void *> (l_pError));
+
+        } else {
+            o_target.setType(fapi::TARGET_TYPE_MEMBUF_CHIP);
+            o_target.set(reinterpret_cast<void *>(l_targetList[0]));
+        }
+
+    } else if (i_target.getType() == fapi::TARGET_TYPE_MEMBUF_CHIP)
+    {
+        TargetHandle_t   l_mem_target =
+           reinterpret_cast<TargetHandle_t>(i_target.get());
+
+        // find the MCS that is associated with this Centaur
+        getParentAffinityTargets (l_targetList, l_mem_target,
+                           CLASS_UNIT, TYPE_MCS, false);
+
+        if(l_targetList.size() != 1) // one and only one expected
+        {
+            FAPI_ERR("fapiGetOtherSideOfMemChannel. expect 1 MCS %d",
+                     l_targetList.size());
+            /*@
+             * @errortype
+             * @moduleid     fapi:MOD_FAPI_GET_OTHER_SIDE_OF_MEM_CHANNEL
+             * @reasoncode   fapi:RC_NO_SINGLE_MEMBUFF
+             * @userdata1    Type of input target
+             * @devdesc      fapiGetOtherSideOfMemChannel could not find exactly
+             *               one target on the other side of the correct state
+             */
+            errlHndl_t l_pError = new ERRORLOG::ErrlEntry(
+                ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                fapi::MOD_FAPI_GET_OTHER_SIDE_OF_MEM_CHANNEL,
+                fapi::RC_NO_SINGLE_MEMBUFF,
+                l_targetList.size());
+
+            // Attach the error log to the fapi::ReturnCode
+            l_rc.setPlatError(reinterpret_cast<void *> (l_pError));
+
+        } else {
+            o_target.setType(fapi::TARGET_TYPE_MCS_CHIPLET);
+            o_target.set(reinterpret_cast<void *>(l_targetList[0]));
+        }
+
+    } else {
+
+      FAPI_ERR("fapiGetOtherSideOfMemChannel. target 0x%x not supported",
+                     i_target.getType());
+        /*@
+         * @errortype
+         * @moduleid     fapi::MOD_FAPI_GET_OTHER_SIDE_OF_MEM_CHANNEL
+         * @reasoncode   fapi::RC_UNSUPPORTED_REQUEST
+         * @userdata1    Type of requested chiplet
+         * @devdesc      fapiGetOtherSideOfMemChannel  request for unsupported
+         *               or invalid target type
+         */
+        errlHndl_t l_pError = new ERRORLOG::ErrlEntry(
+                ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                fapi::MOD_FAPI_GET_OTHER_SIDE_OF_MEM_CHANNEL,
+                fapi::RC_UNSUPPORTED_REQUEST,
+                i_target.getType());
+
+        // Attach the error log to the fapi::ReturnCode
+        l_rc.setPlatError(reinterpret_cast<void *> (l_pError));
+    }
+
+    if (!l_rc)  // OK so far, check that state is as requested 
+    {
+       HwasState l_state =
+                l_targetList[0]->getAttr<ATTR_HWAS_STATE>();
+
+       if (((i_state == fapi::TARGET_STATE_PRESENT) && !l_state.present) ||
+           ((i_state == fapi::TARGET_STATE_FUNCTIONAL) && !l_state.functional))
+       {
+           FAPI_ERR("fapiGetOtherSideOfMemChannel. state mismatch 0x%x",
+                     l_state);
+           /*@
+            * @errortype
+            * @moduleid     fapi::MOD_FAPI_GET_OTHER_SIDE_OF_MEM_CHANNEL
+            * @reasoncode   fapi::RC_STATE_MISMATCH
+            * @userdata1    Type of requested chiplet
+            * @devdesc      fapiGetOtherSideOfMemChannel  target not present or
+            *               functional as requested
+            */
+           errlHndl_t l_pError = new ERRORLOG::ErrlEntry(
+                ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                fapi::MOD_FAPI_GET_OTHER_SIDE_OF_MEM_CHANNEL,
+                fapi::RC_STATE_MISMATCH,
+                i_state);
+
+           // Attach the error log to the fapi::ReturnCode
+           l_rc.setPlatError(reinterpret_cast<void *> (l_pError));
+       }
+
+    }
+
+    FAPI_INF(EXIT_MRK "fapiGetOtherSideOfMemChannel. rc = 0x%x",
+           static_cast<uint32_t>(l_rc));
+
+    return l_rc;
+}
 
 //******************************************************************************
 // fapiGetChildChiplets function

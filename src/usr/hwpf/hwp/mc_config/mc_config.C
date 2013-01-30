@@ -307,7 +307,8 @@ errlHndl_t call_mss_eff_grouping()
                     (const_cast<TARGETING::Target*>(l_cpu_target)) );
 
         TARGETING::TargetHandleList l_membufsList;
-        getAffinityChips(l_membufsList, l_cpu_target, TYPE_MEMBUF);
+        getChildAffinityTargets(l_membufsList, l_cpu_target, 
+                   CLASS_CHIP, TYPE_MEMBUF);
         std::vector<fapi::Target> l_associated_centaurs;
 
         for (TargetHandleList::const_iterator

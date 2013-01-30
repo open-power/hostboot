@@ -1,26 +1,25 @@
-/*  IBM_PROLOG_BEGIN_TAG
- *  This is an automatically generated prolog.
- *
- *  $Source: src/usr/targeting/common/utilFilter.C $
- *
- *  IBM CONFIDENTIAL
- *
- *  COPYRIGHT International Business Machines Corp. 2012
- *
- *  p1
- *
- *  Object Code Only (OCO) source materials
- *  Licensed Internal Code Source Materials
- *  IBM HostBoot Licensed Internal Code
- *
- *  The source code for this program is not published or other-
- *  wise divested of its trade secrets, irrespective of what has
- *  been deposited with the U.S. Copyright Office.
- *
- *  Origin: 30
- *
- *  IBM_PROLOG_END_TAG
- */
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/usr/targeting/common/utilFilter.C $                       */
+/*                                                                        */
+/* IBM CONFIDENTIAL                                                       */
+/*                                                                        */
+/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/*                                                                        */
+/* p1                                                                     */
+/*                                                                        */
+/* Object Code Only (OCO) source materials                                */
+/* Licensed Internal Code Source Materials                                */
+/* IBM HostBoot Licensed Internal Code                                    */
+/*                                                                        */
+/* The source code for this program is not published or otherwise         */
+/* divested of its trade secrets, irrespective of what has been           */
+/* deposited with the U.S. Copyright Office.                              */
+/*                                                                        */
+/* Origin: 30                                                             */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
 //******************************************************************************
 // Includes
 //******************************************************************************
@@ -146,39 +145,59 @@ void getChildChiplets( TARGETING::TargetHandleList& o_vector,
 
 }
 
-
-void getAffinityChips( TARGETING::TargetHandleList& o_vector,
-                 const Target * i_chiplet, TYPE i_type, bool i_functional )
+void getAffinityTargets ( TARGETING::TargetHandleList& o_vector,
+                 const Target * i_target, CLASS i_class, TYPE i_type,
+                 TARGETING::TargetService::ASSOCIATION_TYPE i_association,
+                  bool i_functional )
 {
-    //  find all the chip that are affinity-associated with i_chiplet
-    TARGETING::PredicateCTM l_chipFilter(CLASS_CHIP, i_type);
+    //  find all the targets that are affinity-associated with i_target
+    TARGETING::PredicateCTM l_targetFilter(i_class, i_type);
 
     o_vector.clear();
     if (i_functional)
     {
         //  Use PredicateIsFunctional to filter only functional chips
         TARGETING::PredicateIsFunctional l_functional;
-        TARGETING::PredicatePostfixExpr l_functionalChips;
-        l_functionalChips.push(&l_chipFilter).push(&l_functional).And();
+        TARGETING::PredicatePostfixExpr l_functionalTargets;
+        l_functionalTargets.push(&l_targetFilter).push(&l_functional).And();
         TARGETING::targetService().getAssociated(
                 o_vector,
-                i_chiplet,
-                TARGETING::TargetService::CHILD_BY_AFFINITY,
+                i_target,
+                i_association,
                 TARGETING::TargetService::ALL,
-                &l_functionalChips );
+                &l_functionalTargets );
     }
     else
     {
         TARGETING::targetService().getAssociated(
                 o_vector,
-                i_chiplet,
-                TARGETING::TargetService::CHILD_BY_AFFINITY,
+                i_target,
+                i_association,
                 TARGETING::TargetService::ALL,
-                &l_chipFilter );
+                &l_targetFilter );
     }
 
 }
 
+void getChildAffinityTargets ( TARGETING::TargetHandleList& o_vector,
+		 const Target * i_target, CLASS i_class, TYPE i_type, 
+		 bool i_functional )
+{
+    getAffinityTargets (o_vector, i_target, i_class, i_type,
+			TARGETING::TargetService::CHILD_BY_AFFINITY, 
+			i_functional); 
+}
+
+
+void getParentAffinityTargets ( TARGETING::TargetHandleList& o_vector,
+		 const Target * i_target, CLASS i_class, TYPE i_type,
+		 bool i_functional )
+{
+
+    getAffinityTargets (o_vector, i_target, i_class, i_type,
+			TARGETING::TargetService::PARENT_BY_AFFINITY,
+			i_functional); 
+}
 
 const Target * getParentChip( const Target * i_pChiplet )
 {

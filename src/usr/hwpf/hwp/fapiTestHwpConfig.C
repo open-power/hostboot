@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2012              */
+/* COPYRIGHT International Business Machines Corp. 2011,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -58,61 +58,91 @@ fapi::ReturnCode hwpTestConfig(const fapi::Target & i_chip)
     fapi::ReturnCode l_rc;
     std::vector<fapi::Target> l_targets;
 
-    // Call fapiGetChildChiplets to get the child MCS chiplets
-    l_rc = fapiGetChildChiplets(i_chip, fapi::TARGET_TYPE_MCS_CHIPLET,
+    do {
+
+       // Call fapiGetChildChiplets to get the child MCS chiplets
+       l_rc = fapiGetChildChiplets(i_chip, fapi::TARGET_TYPE_MCS_CHIPLET,
                                 l_targets);
 
-    if (l_rc)
-    {
-        FAPI_ERR("hwpTestConfig: Error from fapiGetChildChiplets");
-    }
-    else
-    {
-        FAPI_INF("hwpTestConfig: %d MCS chiplets", l_targets.size());
+       if (l_rc)
+       {
+           FAPI_ERR("hwpTestConfig: Error from fapiGetChildChiplets");
+           break;
+       }
 
-        if (l_targets.size() == 0)
-        {
-            FAPI_ERR("hwpTestConfig: No MCS chiplets");
-            FAPI_SET_HWP_ERROR(l_rc, RC_TEST_CONFIG_NO_MCS_CHIPLETS);
-        }
-        else
-        {
-            // Save the first MCS target
-            fapi::Target l_mcs = l_targets[0];
+       FAPI_INF("hwpTestConfig: %d MCS chiplets", l_targets.size());
 
-            // Call fapiGetAssociatedDimms to get the dimms for this MCS
-            l_rc = fapiGetAssociatedDimms(l_mcs, l_targets);
+       if (l_targets.size() == 0)
+       {
+           FAPI_ERR("hwpTestConfig: No MCS chiplets");
+           FAPI_SET_HWP_ERROR(l_rc, RC_TEST_CONFIG_NO_MCS_CHIPLETS);
+           break;
+       }
 
-            if (l_rc)
-            {
-                FAPI_ERR("hwpTestConfig: Error from fapiGetAssociatedDimms");
-            }
-            else
-            {
-                FAPI_INF("hwpTestConfig: %d dimms", l_targets.size());
+       // Save the first MCS target
+       fapi::Target l_mcs = l_targets[0];
 
-                // Call fapiGetParentChip to get the parent of the MCS
-                fapi::Target l_chip;
+       // Call fapiGetAssociatedDimms to get the dimms for this MCS
+       l_rc = fapiGetAssociatedDimms(l_mcs, l_targets);
 
-                l_rc = fapiGetParentChip(l_mcs, l_chip);
+       if (l_rc)
+       {
+           FAPI_ERR("hwpTestConfig: Error from fapiGetAssociatedDimms");
+           break;
+       }
 
-                if (l_rc)
-                {
-                    FAPI_ERR("hwpTestConfig: Error from fapiGetParentChip");
-                }
-                else
-                {
-                    // Check that the parent chip is is same as the input chip
-                    if (i_chip != l_chip)
-                    {
-                        FAPI_ERR("hwpTestConfig: Chip mismatch");
-                        FAPI_SET_HWP_ERROR(l_rc,
-                            RC_TEST_CONFIG_PARENT_CHIP_MISMATCH);
-                    }
-                }
-            }
-        }
-    }
+       FAPI_INF("hwpTestConfig: %d dimms", l_targets.size());
+
+       // Call fapiGetParentChip to get the parent of the MCS
+       fapi::Target l_chip;
+
+       l_rc = fapiGetParentChip(l_mcs, l_chip);
+
+       if (l_rc)
+       {
+           FAPI_ERR("hwpTestConfig: Error from fapiGetParentChip");
+           break;
+       }
+
+       // Check that the parent chip is is same as the input chip
+       if (i_chip != l_chip)
+       {
+           FAPI_ERR("hwpTestConfig: Chip mismatch");
+           FAPI_SET_HWP_ERROR(l_rc, RC_TEST_CONFIG_PARENT_CHIP_MISMATCH);
+           break;
+       }
+
+       // Call  fapiGetOtherSideOfDmiBus to get mem buffer
+       fapi::Target l_mb;
+       fapi::Target l_mcs2;
+
+       FAPI_INF("hwpTestConfig: mcs: %s", l_mcs.toEcmdString());
+            
+       l_rc = fapiGetOtherSideOfMemChannel(l_mcs, l_mb);
+       if (l_rc)
+       {
+           FAPI_ERR("hwpTestConfig: Error from fapiGetOtherSideOfDmiBus");
+           break;
+       }
+       FAPI_INF("hwpTestConfig: mem buf: %s", l_mb.toEcmdString());
+
+       // Call  fapiGetOtherSideOfDmiBus to get back to the same mcs
+       l_rc = fapiGetOtherSideOfMemChannel(l_mb, l_mcs2);
+       if (l_rc)
+       {
+           FAPI_ERR("hwpTestConfig: Error from fapiGetOtherSideOfDmiBus");
+           break;
+       }
+       FAPI_INF("hwpTestConfig: mcs: %s", l_mcs2.toEcmdString());
+
+       if (l_mcs != l_mcs2) 
+       {
+           FAPI_ERR("hwpTestConfig: fapiGetOtherSideOfDmiBus wrong mcs");
+           FAPI_SET_HWP_ERROR(l_rc, RC_TEST_WRONG_MCS_RETURNED);
+           break;
+       }
+
+    } while (0);
 
     FAPI_INF("hwpTestConfig: End HWP");
     return l_rc;

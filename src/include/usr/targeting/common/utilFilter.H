@@ -1,26 +1,25 @@
-/*  IBM_PROLOG_BEGIN_TAG
- *  This is an automatically generated prolog.
- *
- *  $Source: src/include/usr/targeting/common/utilFilter.H $
- *
- *  IBM CONFIDENTIAL
- *
- *  COPYRIGHT International Business Machines Corp. 2012
- *
- *  p1
- *
- *  Object Code Only (OCO) source materials
- *  Licensed Internal Code Source Materials
- *  IBM HostBoot Licensed Internal Code
- *
- *  The source code for this program is not published or other-
- *  wise divested of its trade secrets, irrespective of what has
- *  been deposited with the U.S. Copyright Office.
- *
- *  Origin: 30
- *
- *  IBM_PROLOG_END_TAG
- */
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/include/usr/targeting/common/utilFilter.H $               */
+/*                                                                        */
+/* IBM CONFIDENTIAL                                                       */
+/*                                                                        */
+/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/*                                                                        */
+/* p1                                                                     */
+/*                                                                        */
+/* Object Code Only (OCO) source materials                                */
+/* Licensed Internal Code Source Materials                                */
+/* IBM HostBoot Licensed Internal Code                                    */
+/*                                                                        */
+/* The source code for this program is not published or otherwise         */
+/* divested of its trade secrets, irrespective of what has been           */
+/* deposited with the U.S. Copyright Office.                              */
+/*                                                                        */
+/* Origin: 30                                                             */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
 #ifndef __TARGETING_COMMON_UTIL_FILTER_H
 #define __TARGETING_COMMON_UTIL_FILTER_H
 
@@ -80,18 +79,36 @@ void getChildChiplets(TARGETING::TargetHandleList & o_vector,
                const Target * i_chip, TYPE i_type, bool i_functional = true );
 
 /**
- * @brief Populate the o_vector with chip target object pointers which is
- *        affinity child of the input chiplet
+ * @brief Populate the o_vector with target object pointers which are
+ *        affinity children of the input target
  *
  * @parm[out] o_vector, reference of vector of target pointers.
- * @parm[in]  i_chiplet, the chiplet target for retrieving affinity-child chip
- * @parm[in]  i_type, the type of the chip target to be obtained
+ * @parm[in]  i_target, the target for retrieving affinity-child targets
+ * @parm[in]  i_class, the class of the target to be obtained
+ * @parm[in]  i_type, the type of the target to be obtained
  * @parm[in]  i_functional, set to true to return only functional targets
  *
  * @return N/A
  */
-void getAffinityChips( TARGETING::TargetHandleList& o_vector,
-           const Target * i_chiplet, TYPE i_type, bool i_functional = true );
+void getChildAffinityTargets ( TARGETING::TargetHandleList& o_vector,
+           const Target * i_target, CLASS i_class, TYPE i_type, 
+           bool i_functional = true );
+
+/**
+ * @brief Populate the o_vector with target object pointers which are
+ *        affinity parents of the input target
+ *
+ * @parm[out] o_vector, reference of vector of target pointers.
+ * @parm[in]  i_target, the target for retrieving affinity-parent targets
+ * @parm[in]  i_class, the class of the target to be obtained
+ * @parm[in]  i_type, the type of the target to be obtained
+ * @parm[in]  i_functional, set to true to return only functional targets
+ *
+ * @return N/A
+ */
+void getParentAffinityTargets ( TARGETING::TargetHandleList& o_vector,
+           const Target * i_target, CLASS i_class, TYPE i_type, 
+           bool i_functional = true );
 
 /**
  * @brief return the parent chip target of the specified input chiplet

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2012              */
+/* COPYRIGHT International Business Machines Corp. 2011,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -78,6 +78,8 @@ namespace fapi
         MOD_MVPD_ACCESS                            = 0x27,
         MOD_EXIT_CACHE_CONTAINED                   = 0x28,
         MOD_GET_CACHE_DECONFIG                     = 0x29,
+        MOD_FAPI_GET_OTHER_SIDE_OF_MEM_CHANNEL     = 0x2A,
+
     };
 
     /**
@@ -113,6 +115,9 @@ namespace fapi
         RC_INVALID_KEYWORD            = HWPF_COMP_ID | 0x22,
         RC_MM_EXTEND_FAILED           = HWPF_COMP_ID | 0x23,
         RC_INCORRECT_KEWORD_SIZE      = HWPF_COMP_ID | 0x24,
+        RC_NO_SINGLE_MCS              = HWPF_COMP_ID | 0x25,
+        RC_NO_SINGLE_MEMBUFF          = HWPF_COMP_ID | 0x26,
+        RC_STATE_MISMATCH             = HWPF_COMP_ID | 0x27,
     };
 
     /**

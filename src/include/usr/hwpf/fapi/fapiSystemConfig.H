@@ -1,25 +1,25 @@
-//  IBM_PROLOG_BEGIN_TAG
-//  This is an automatically generated prolog.
-//
-//  $Source: src/include/usr/hwpf/fapi/fapiSystemConfig.H $
-//
-//  IBM CONFIDENTIAL
-//
-//  COPYRIGHT International Business Machines Corp. 2011
-//
-//  p1
-//
-//  Object Code Only (OCO) source materials
-//  Licensed Internal Code Source Materials
-//  IBM HostBoot Licensed Internal Code
-//
-//  The source code for this program is not published or other-
-//  wise divested of its trade secrets, irrespective of what has
-//  been deposited with the U.S. Copyright Office.
-//
-//  Origin: 30
-//
-//  IBM_PROLOG_END
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/include/usr/hwpf/fapi/fapiSystemConfig.H $                */
+/*                                                                        */
+/* IBM CONFIDENTIAL                                                       */
+/*                                                                        */
+/* COPYRIGHT International Business Machines Corp. 2011,2013              */
+/*                                                                        */
+/* p1                                                                     */
+/*                                                                        */
+/* Object Code Only (OCO) source materials                                */
+/* Licensed Internal Code Source Materials                                */
+/* IBM HostBoot Licensed Internal Code                                    */
+/*                                                                        */
+/* The source code for this program is not published or otherwise         */
+/* divested of its trade secrets, irrespective of what has been           */
+/* deposited with the U.S. Copyright Office.                              */
+/*                                                                        */
+/* Origin: 30                                                             */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
 /**
  *  @file fapiSystemConfig.H
  *
@@ -47,6 +47,25 @@
 
 extern "C"
 {
+
+/**
+* @brief Gets the Target on the other side of the memory channel
+* - Input MEMBUF_CHIP, Output MCS_CHIPLET
+* - Input MCS_CHIPLET, Output MEMBUF_CHIP
+*
+* @param[in] i_target Input MCS_CHIPLET or MEMBUF_CHIP Target
+* @param[out] o_target Reference to Target that is set to the Target on
+* the other side of the memory channel, if there is no such
+* Target in the specified state then an error is returned
+* @param[in] i_state Only return a target in the specified state. Either
+* present or functional (default)
+*
+* @return ReturnCode. Zero on success, else error
+*/
+fapi::ReturnCode fapiGetOtherSideOfMemChannel(
+    const fapi::Target& i_target,
+    fapi::Target & o_target,
+    const fapi::TargetState i_state = fapi::TARGET_STATE_FUNCTIONAL);
 
 /** 
  * @brief Gets the chiplets that are children of the input chip
