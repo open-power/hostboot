@@ -440,7 +440,11 @@ sub getPhysicalAddr
                 ::userDisplay (sprintf
                                "   VirtualToPhy: Did not find a block for v addr:   %X\n" , $vaddr);
 
-                die;
+                ##  Don't die here, return NotPresent.
+                ##  @TODO   Issue RTC 63901 will review this and provide a
+                ##  a permanent fix.
+                return NotPresent;
+
             }
 
             # get the physical address from SPTE entry in this block
