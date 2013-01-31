@@ -44,6 +44,7 @@
   #include <errlentry.H>
   #include <hwsvSvrErrl.H>
   #include <utilsingleton.H>
+  #include <srcisrc.H>
   // FIXME: uncomment dump include when Adriana's fix is in
   //#include <dumpHWURequest_applet.H>
 #endif

@@ -43,6 +43,8 @@
 #include <dimmConsts.H>         // for DIMM_DQ_RANK_BITMAP_SIZE
 #include <fapiPlatHwpInvoker.H> // for fapi::fapiRcToErrl()
 
+class mss_MaintCmd;
+
 #define PRD_FAPI_TO_ERRL(ERRHNDL, FUNC, _args_...) \
     { \
         fapi::ReturnCode l_rc = FUNC(_args_); \
@@ -208,6 +210,89 @@ getMembufRawCardType( TARGETING::TargetHandle_t i_memTarget );
 /* TODO - See .C
 getDimmPlugCardType( TARGETING::TargetHandle_t i_dimmTarget );
 */
+
+//##############################################################################
+//##
+//##                           Maintance command  wrapper code
+//##
+//##############################################################################
+
+/**
+ * @brief This is a wrapper class for underlying maintainance class object
+ *
+ * By this class, we will hide underlying maintainance class dependency
+ * from rest of code. All public function mss_MaintCmd used by prd should
+ * be defined here also.
+ */
+
+class mss_MaintCmdWrapper
+{
+
+  public:  //function
+
+    /**
+     * @brief Constructor
+     *
+     * @param i_maintCmd Underlying maintainance command object
+     */
+    mss_MaintCmdWrapper( mss_MaintCmd * i_maintCmd );
+
+    /**
+     * @brief Destructor
+     */
+    virtual ~mss_MaintCmdWrapper();
+
+
+    /**
+     * @brief  Stops running maint cmd, and saves the address it stopped at.
+     * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
+     */
+    int32_t stopCmd();
+
+
+    /**
+     * @brief  Saves any settings that need to be restored when command is done.
+     *         Loads the setup parameters into the hardware. Starts the command,
+     *         then either polls for complete or exits with command running.
+     * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
+     */
+     int32_t setupAndExecuteCmd();
+
+    /**
+     * @brief  Called once a command is done if we need to restore settings that
+     *         had to be modified to run a specific command type, or clear error
+     *         data in the hw that is no longer relevant.
+     * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
+     */
+     int32_t cleanupCmd();
+
+  protected:
+
+    // Underlying maintainance command object pointer
+    mss_MaintCmd * iv_cmd;
+
+}; // class mss_MaintCmdWrapper
+
+/**
+ * @brief  Create Time base scrub object, wrap i around mss_MaintCmdWrapper
+ *         object
+ * @param  i_target MBA target
+ * @param  i_startAddr Start address for scrubbing
+ * @param  i_endAddr End address for scrubbing
+ * @param  i_isFastSpeed (false = slow (12 H) , true = fast)
+ * @param  i_stopCondition bit mask for conditions on which scrubbing should
+ *         stop
+ * @return mss_MaintCmdWrapper object
+ * @note   This function allocates memory on heap for mss_MaintCmdWrapper
+ *         object. Its caller responsibilty to delete this object.
+ */
+mss_MaintCmdWrapper * createTimeBaseScrub (
+                       const TARGETING::TargetHandle_t i_target,
+                       uint64_t i_startAddr,
+                       uint64_t i_endAddr,
+                       bool i_isFastSpeed,
+                       uint32_t i_stopCondition );
+
 
 } // end namespace PlatServices
 

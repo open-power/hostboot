@@ -33,6 +33,7 @@
 #include <prdfPlatServices.H>
 
 #include <iipglobl.h>
+#include <prdfAssert.h>
 #include <prdfTrace.H>
 
 #include <dimmBadDqBitmapFuncs.H> // for dimm[S|G]etBadDqBitmap()
@@ -247,6 +248,122 @@ getDimmPlugCardType()
 {
 }
 */
+
+//##############################################################################
+//##
+//##                           Maintance command  wrapper code
+//##
+//##############################################################################
+
+mss_MaintCmdWrapper::mss_MaintCmdWrapper( mss_MaintCmd * i_maintCmd ) :
+    iv_cmd(i_maintCmd)
+{}
+
+//------------------------------------------------------------------------------
+
+mss_MaintCmdWrapper::~mss_MaintCmdWrapper()
+{
+    delete iv_cmd;
+}
+
+//------------------------------------------------------------------------------
+
+int32_t mss_MaintCmdWrapper::stopCmd()
+{
+    PRDF_ASSERT( NULL != iv_cmd );
+    int32_t o_rc = SUCCESS;
+    fapi::ReturnCode l_rc = iv_cmd->stopCmd();
+
+    //  convert FAPI RC to error handle
+    errlHndl_t err = fapi::fapiRcToErrl(l_rc);
+
+    if (NULL != err)
+    {
+        PRDF_GET_REASONCODE(err, o_rc);
+        PRDF_ERR( "mss_MaintCmdWrapper::stopCmd failed: [0x%X]", o_rc);
+        PRDF_COMMIT_ERRL( err, ERRL_ACTION_REPORT );
+        o_rc = FAIL;
+    }
+    return o_rc;
+}
+
+//------------------------------------------------------------------------------
+
+int32_t mss_MaintCmdWrapper::setupAndExecuteCmd()
+{
+    PRDF_ASSERT( NULL != iv_cmd );
+    int32_t o_rc = SUCCESS;
+    fapi::ReturnCode l_rc = iv_cmd->setupAndExecuteCmd();
+
+    //  convert FAPI RC to error handle
+    errlHndl_t err = fapi::fapiRcToErrl(l_rc);
+
+    if (NULL != err)
+    {
+        PRDF_GET_REASONCODE(err, o_rc);
+        PRDF_ERR( "mss_MaintCmdWrapper::setupAndExecuteCmd "
+                   "failed: [0x%X]", o_rc);
+        PRDF_COMMIT_ERRL( err, ERRL_ACTION_REPORT );
+        o_rc = FAIL;
+    }
+    return o_rc;
+}
+
+//------------------------------------------------------------------------------
+
+int32_t mss_MaintCmdWrapper::cleanupCmd()
+{
+    PRDF_ASSERT( NULL != iv_cmd );
+    int32_t o_rc = SUCCESS;
+    fapi::ReturnCode l_rc = iv_cmd->cleanupCmd();
+
+    //  convert FAPI RC to error handle
+    errlHndl_t err = fapi::fapiRcToErrl(l_rc);
+
+    if (NULL != err)
+    {
+        PRDF_GET_REASONCODE(err, o_rc);
+        PRDF_ERR( "mss_MaintCmdWrapper::cleanupCmd failed: [0x%X]", o_rc);
+        PRDF_COMMIT_ERRL( err, ERRL_ACTION_REPORT );
+        o_rc = FAIL;
+    }
+    return o_rc;
+}
+
+//------------------------------------------------------------------------------
+
+mss_MaintCmdWrapper* createTimeBaseScrub (
+                       const TARGETING::TargetHandle_t i_target,
+                       uint64_t i_startAddr,
+                       uint64_t i_endAddr,
+                       bool  i_isFastSpeed,
+                       uint32_t i_stopCondition )
+{
+    ecmdDataBufferBase ecmdStartAddr(64);
+    ecmdDataBufferBase ecmdEndAddr(64);
+
+    mss_MaintCmd::TimeBaseSpeed cmdSpeed = mss_MaintCmd::SLOW_12H;
+
+    if (true == i_isFastSpeed)
+    {
+        cmdSpeed = mss_MaintCmd::FAST_AS_POSSIBLE;
+    }
+    // Fill up emd structures for maint cmd
+    ecmdStartAddr.setDoubleWord(0, i_startAddr);
+    ecmdEndAddr.setDoubleWord(0, i_endAddr);
+
+    mss_MaintCmd *cmd = new mss_TimeBaseScrub(
+                                     fapi::Target(fapi::TARGET_TYPE_MBA_CHIPLET,
+                                                  i_target ),
+                                     ecmdStartAddr,
+                                     ecmdEndAddr,
+                                     cmdSpeed,
+                                     i_stopCondition,
+                                     false);
+    mss_MaintCmdWrapper *cmdWrapper = new mss_MaintCmdWrapper(cmd);
+    return cmdWrapper;
+
+}
 
 } // end namespace PlatServices
 
