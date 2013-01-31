@@ -5,7 +5,7 @@
 #
 # IBM CONFIDENTIAL
 #
-# COPYRIGHT International Business Machines Corp. 2011,2012
+# COPYRIGHT International Business Machines Corp. 2011,2013
 #
 # p1
 #
@@ -29,7 +29,7 @@ exec tclsh "$0" "$@"
 # Based on if_server.tcl by Doug Gilbert
 
 
-set version "1.3"
+set version "1.4"
 
 ############################################################################
 # Accept is called when a new client request comes in
@@ -65,7 +65,9 @@ proc AquireData { sock } {
     global running
     global driver
     global keepsandbox
+    global client_version
     global fulldirectory
+    global fips_dir
 
     if { [eof $sock] || [catch {gets $sock line}] } {
         puts "ERROR: Client closed unexpectedly"
@@ -78,16 +80,42 @@ proc AquireData { sock } {
             puts $log "$sock: hw procedure compiler server is terminating"
             CloseOut $sock
             set forever 0
-        } elseif {[regexp {:DRIVER +(.+)} $line a b] } {
+        } elseif {[regexp {:DRIVER +(.+) +(.+)} $line a b c] } {
 
             ################################################################
             # Make a unique sandbox backed to the driver specified
             # Do a workon to the sandbox.
             ################################################################
-            set driver $b
-            set release ""  
-            puts $log "$sock: Input driver $driver"
-            flush $log
+            set fipslevel $b
+            set driver $c
+            puts $log "$sock: Input: fipslevel \"$fipslevel\", driver \"$driver\""
+
+            # if either is default, determine proper.
+            if {[string compare $fipslevel "default"] == 0} {
+                if {[string compare $driver "default"] == 0} {
+                    set driver master
+                 }
+            } else {
+                set lvl [ string trimleft $fipslevel 'abcdefghijklmnopqrstuvwxyz0123456789_' ]
+                set lvl [ string trimleft $lvl '.' ]
+                set fips_dir "/esw/fips$lvl/Builds/$fipslevel/"
+                if {[string compare $driver "default"] == 0} {
+                    # use the fips build to determine the hostboot driver
+                    set fips_notes "$fips_dir/src/hbfw/releaseNotes.html"
+                    if { [catch {set driver [ exec sed -n "s%<h1>Level: %%p" $fips_notes ] } ] } {
+                        puts $sock "ERROR: bad FIPS level - can't find $fips_notes\n"
+                        puts $log "$sock: bad FIPS level - can't find $fips_notes\n)"
+                        flush $log
+                        CloseOut $sock
+                        return
+                    } else {
+                        set pos [ string last "</h1>" $driver ]
+                        incr pos -1
+                        set driver [ string range $driver 0 $pos ]
+                    }
+                }
+            }
+            puts $log "$sock: Using: fipslevel \"$fipslevel\", driver \"$driver\""
 
             ################################################################
             # create git repository
@@ -96,6 +124,7 @@ proc AquireData { sock } {
 
             puts $sock "$sbname($sock)"
             puts $log "$sock: $sbname($sock)"
+            flush $log
 
             # Make sure sandbox dir exists
             if {[catch {file mkdir "$sb_dir/$sbname($sock)"} res ] } {
@@ -109,6 +138,7 @@ proc AquireData { sock } {
 
                 ExtractSandbox $sock $git_sh($sock)
             }
+
         } elseif {[regexp {:HWP_FILE +(.+) +(.+)} $line a b c] } {
 
             ################################################################
@@ -317,6 +347,14 @@ proc AquireData { sock } {
                 puts $log "$sock: DONE"
                 flush $sock
             }
+            if { [catch {SendPnorFiles $sock "$sb_dir/$sbname($sock)/prcd_fsp/obj/ppc/hbfw/img"} res]} {
+                puts $log "$sock: ERROR: SendPnorFiles interrupted: $res\n"
+                flush $log
+            } else {
+                puts $sock ":DONE"
+                puts $log "$sock: DONE"
+                flush $sock
+            }
         } elseif {[string compare $line ":HWP_FULL_DIRECTORY"] == 0} {
             puts $log "$sock: HWP_FULL_DIRECTORY"
             puts $log "$sock: DONE"
@@ -329,14 +367,16 @@ proc AquireData { sock } {
             puts $log "$sock: DONE"
             CloseOut $sock
             set line ""
-        } elseif {[regexp {:INFO +(.+)} $line a b] } {
+        } elseif {[regexp {:INFO keepsandbox} $line a] } {
             puts $sock ":DONE"
-            puts $log "$sock: $b"
-            if {[regexp {keepsandbox} $b aa] } {
-                set keepsandbox 1
-            } else {
-                set keepsandbox 0
-            }
+            puts $log "$sock: $a"
+            set keepsandbox 1
+            flush $sock
+            flush $log
+        } elseif {[regexp {:INFO userid +(.+) version +(.+)} $line a b c ] } {
+            puts $sock ":DONE"
+            puts $log "$sock: $a"
+            set client_version $c
             flush $sock
             flush $log
         } else {
@@ -381,10 +421,8 @@ proc CloseOut { sock } {
     unset socklist(addr,$sock)
     if {[info exists git_sh($sock)] } {
         if { $keepsandbox != 1 } {
-            # Comment out next line to avoid deleting the sandbox
             eval {exec} "rm -rf $sb_dir/$sbname($sock)"
         }
-        eval {exec} "rm -rf $sb_dir/$sbname($sock)"
         unset git_sh($sock)
         #unset sandbox($sbname($sock))
     }
@@ -411,8 +449,8 @@ proc ExtractSandbox { sock git_sh} {
     ############################################################
     puts $git_sh "cd $sb_dir/$sbname($sock)"
     puts $git_sh {git init}
-    puts $git_sh {git remote add gerrit ssh://gfw160.austin.ibm.com:29418/hostboot}
-    puts $git_sh {unlog}
+    puts $git_sh {git remote add gerrit ssh://jenkins.localhost/hostboot}
+    #puts $git_sh {git remote add gerrit ssh://hostboot.gerrit/hostboot}
     puts $git_sh {git fetch gerrit}
     puts $git_sh {git fetch gerrit --tags}
 
@@ -431,13 +469,13 @@ proc ExtractSandbox { sock git_sh} {
     flush $git_sh
 
     ############################################################
-    ## if the git_sh is not done by 30 sec, it probably crashed
+    ## if the git_sh is not done by 60 sec, it probably crashed
     ## keep a list of running sandboxes
     ## hopefully processes timeout in the same order they were started
-    ## Kick off an event that waits 30 sec then executes
+    ## Kick off an event that waits 60 sec then executes
     ############################################################
     lappend running $sbname($sock)
-    set timoutid [after 30000 {
+    set timoutid [after 60000 {
         set sandbox([lindex $running 0]) crashed
         lreplace $running 0 0
     } ]
@@ -481,11 +519,29 @@ proc SendSandbox { sock git_sh} {
     global running
     global sbname
     global log
+    global fips_dir
 
     ##################################################################
     # Start Compile
     ##################################################################
-    puts $git_sh "source env.bash; make -j4" 
+
+    if {[string length $fips_dir ] > 0} {
+        # need to overwrite bbuild
+        puts $git_sh "echo $fips_dir > src/build/citest/etc/bbuild;"
+    }
+
+    puts $git_sh "source env.bash;\
+                  make -j4;"
+
+    # hack for now. need to point to 'current' version of hb, not built, since
+    # older versions doesn't support the new fipssetup command.
+    # when this is ready merge, i'll copy the corrected 'hb' into the hostboot
+    # projects directory.
+    puts $git_sh "rm -f hb;ln -s /gsa/ausgsa/home/h/o/hortonb/hb2/src/build/tools/hb;"
+
+    puts $git_sh "export SANDBOXROOT=`pwd`; export SANDBOXNAME=prcd_fsp;\
+                  echo \"./hb fipssetup && ./hb prime\" > hbdo; chmod +x hbdo;\
+                  SHELL=./hbdo ./hb workon;"
 
     ##################################################################
     # tell the workon shell to terminate
@@ -494,13 +550,13 @@ proc SendSandbox { sock git_sh} {
     flush $git_sh
 
     ##################################################################
-    ## if the git_sh is not done by 360 sec, it probably crashed
+    ## if the git_sh is not done by 600 sec, it probably crashed
     ## keep a list of running sandboxes
     ## hopefully processes timeout in the same order they were started
     ## Kick off an event that waits 360 sec then executes
     ##################################################################
     lappend running $sbname($sock)
-    set timoutid [after 360000 {
+    set timoutid [after 600000 {
        set sandbox([lindex $running 0]) crashed
        lreplace $running 0 0
     } ]
@@ -555,13 +611,13 @@ proc SendSandboxNew { sock git_sh} {
     flush $git_sh
 
     ##################################################################
-    ## if the git_sh is not done by 360 sec, it probably crashed
+    ## if the git_sh is not done by 600 sec, it probably crashed
     ## keep a list of running sandboxes
     ## hopefully processes timeout in the same order they were started
-    ## Kick off an event that waits 360 sec then executes
+    ## Kick off an event that waits 600 sec then executes
     ##################################################################
     lappend running $sbname($sock)
-    set timoutid [after 360000 {
+    set timoutid [after 600000 {
        set sandbox([lindex $running 0]) crashed
        lreplace $running 0 0
     } ]
@@ -665,14 +721,43 @@ proc IfResult { git_sh sock sbname_sock } {
 proc SendObjFiles { sock obj_dir } {
     global log
 
-    set hbi_files {}
+    set img_files {}
 
     # Send the image files
-    if {[catch {set hbi_files [glob -dir $obj_dir hbi*syms hbi*bin hbi*list hbi*modinfo *pnor *dat hbotStringFile errlparser isteplist.csv]} res]} {
+    if {[catch {set img_files [glob -dir $obj_dir hbi*syms hbi*list hbi*modinfo *pnor *dat hbotStringFile errlparser isteplist.csv]} res]} {
         puts $sock "ERROR: Needed image files not found in $obj_dir"
         puts $log "$sock: Needed image files not found in $obj_dir"
     } else {
-        SendFiles $sock $hbi_files
+        SendFiles "OBJ_FILE" $sock $img_files
+    }
+
+    flush $sock
+    flush $log
+}
+
+##################################################################
+#  back to the client
+##################################################################
+proc SendPnorFiles { sock obj_dir } {
+    global log
+    global version
+    global client_version
+
+    set pnor_files {}
+
+    # Send the image files
+    if {[catch {set pnor_files [glob -dir $obj_dir hostboot.header.bin hostboot_extended.bin hostboot.stage.bin]} res]} {
+        puts $sock "ERROR: Needed image files not found in $obj_dir"
+        puts $log "$sock: Needed image files not found in $obj_dir"
+    } else {
+        if { $client_version < $version } {
+            # client can't handle PNOR_FILE type, so just send the files
+            #  back and they'll get put into the <outputdir>
+            SendFiles "OBJ_FILE" $sock $pnor_files
+        } else {
+            # tell client to put these in <outputdir>/pnor
+            SendFiles "PNOR_FILE" $sock $pnor_files
+        }
     }
 
     flush $sock
@@ -682,13 +767,13 @@ proc SendObjFiles { sock obj_dir } {
 ##################################################################
 # Send a file to the client
 ##################################################################
-proc SendFiles { sock files } {
+proc SendFiles { type sock files } {
     global log
 
     foreach f $files {
         set size [file size $f]
-        puts $sock ":OBJ_FILE [file tail $f] $size"
-        puts $log "$sock: :OBJ_FILE [file tail $f] $size"
+        puts $sock ":$type [file tail $f] $size"
+        puts $log "$sock: :$type [file tail $f] $size"
         fconfigure $sock -translation binary
         set fp [open $f r]
         fconfigure $fp -translation binary
@@ -709,7 +794,9 @@ set home_dir $::env(HOME)
 set logfile "$home_dir/prcd_server.log"
 set log {}
 set keepsandbox 0
+set client_version 0
 set fulldirectory 0
+set fips_dir ""
 
 # Where are we running?
 foreach {host site c d} [split [exec hostname] .]  break

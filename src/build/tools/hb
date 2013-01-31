@@ -70,6 +70,23 @@ hb_helptext()
         echo "  See also:"
         echo "      customrc"
         ;;
+    fipssetup)
+        echo "  Topic 'fipssetup'"
+        echo
+        echo "  Usage:"
+        echo "      hb fipssetup"
+        echo
+        echo "  Creates a simics workspace (FSP sandbox) in the directed"
+        echo "  location."
+        echo
+        echo "  FSP backing build are chosen as directed"
+        echo "  by the CI test files (src/build/citest/etc)."
+        echo
+        echo "  Environment Variables:"
+        echo "      SANDBOXROOT: Root directory of where the sandboxes"
+        echo "                   should go."
+        echo "      SANDBOXNAME: Desired name of the hostboot sandbox."
+        ;;
     simsetup)
         echo "  Topic 'simsetup'"
         echo
@@ -224,7 +241,7 @@ hb_helptext()
         echo
         echo "  Available Commands:"
         echo "      workon, simsetup, prime, startsimics, rsync, objsizes,"
-        echo "      copyright_check, errlparser, cachesync, cacheadd"
+        echo "      copyright_check, errlparser, cachesync, cacheadd, fipssetup"
         echo
         echo "  Additional Help Topics:"
         echo "      customrc"
@@ -271,7 +288,7 @@ hb_prime()
     DRIVER=`cat ${HOSTBOOTROOT}/src/build/citest/etc/bbuild`
 
     if [ ${SBDRIVER} != ${DRIVER} ]; then
-        echo "Driver mismatch between sandbox and src/build/citest/etc/bbuild."
+        echo "ERROR: Driver mismatch between sandbox and src/build/citest/etc/bbuild."
         echo "Sandbox at ${SBDRIVER}"
         echo "Update sandbox with 'hb simsetup'."
         exit -1
@@ -280,7 +297,7 @@ hb_prime()
     hbDistribute $*
 }
 
-hb_simsetup()
+hb_fipssetup()
 {
     [ -z "${SANDBOXBASE}" ] && echo "Missing SANDBOXBASE." && exit -1
     [ -z "${SANDBOXROOT}" ] && echo "Missing SANDBOXROOT." && exit -1
@@ -300,14 +317,21 @@ hb_simsetup()
         mkdir -p ${SANDBOXROOT}
     fi
 
+    if [ ! -d "${DRIVER}" ]; then
+        echo "ERROR: Backing build in src/build/citest/etc/bbuild not found!"
+        exit -1
+    fi
+
     echo "Creating new sandbox."
     mksb -rc ${SANDBOXRC} -dir ${SANDBOXROOT} -back $DRIVER \
          -sb ${SANDBOXNAME} -m ppc
+}
 
-    echo "Running workarounds (presimsetup)."
-    cp ${HOSTBOOTROOT}/src/build/citest/etc/workarounds.presimsetup ${SANDBOXBASE}/src
-    execute_in_sandbox "export BACKING_BUILD=\$bb && ./workarounds.presimsetup"  "ppc"
-    rm ${SANDBOXBASE}/src/workarounds.presimsetup
+hb_simsetup()
+{
+    hb_fipssetup
+
+    DRIVER=`cat ${HOSTBOOTROOT}/src/build/citest/etc/bbuild`
 
     needs_machine_variable
     execute_in_sandbox "start_simics -no_start -machine ${MACHINE}"  "ppc"
@@ -442,7 +466,7 @@ hb_cachesync()
 
 hb_cacheadd()
 {
-    [ -z "${HOSTBOOTROOT}" ] && echo "Missing HOSTBOOTROOT." && exit -1    
+    [ -z "${HOSTBOOTROOT}" ] && echo "Missing HOSTBOOTROOT." && exit -1
 
     CACHE_PATH=/gsa/ausgsa/projects/h/hostboot/.binary_cache/
     FILE=$1
@@ -490,6 +514,9 @@ workon)
     ;;
 prime)
     hb_prime $*
+    ;;
+fipssetup)
+    hb_fipssetup $*
     ;;
 simsetup)
     hb_simsetup $*

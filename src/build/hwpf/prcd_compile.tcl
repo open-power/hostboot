@@ -6,7 +6,7 @@
 #
 # IBM CONFIDENTIAL
 #
-# COPYRIGHT International Business Machines Corp. 2011,2012
+# COPYRIGHT International Business Machines Corp. 2011,2013
 #
 # p1
 #
@@ -263,7 +263,7 @@ proc start_patch_server_on_fsp { fspip fsppassword } {
 set userid $::env(USER)
 set home $::env(HOME)
 set domain [exec hostname -d]
-set version "1.3"
+set version "1.4"
 
 set files [list]
 set directories [list]
@@ -282,13 +282,14 @@ foreach arg $argv {
                 -quit { set cmds [list quit] }
                 -D    { set state directory }
                 -d    { set state driverflag }
+                -f    { set state fipslevelflag }
 # NOT SUPPORTED -s    { set state fspflag }
 # NOT SUPPORTED -p    { set state portflag }
                 -v    { set verbose 1 }
                 -o    { set state outputflag }
                 -n    { set newfiles 1 }
                 -k    { set keepsandbox 1 }
-                -*h* { puts {prcd_compile.tcl [--help] [-d <drivername>] [-o <ouput dir> ] [-n] [ <filename> | -D <directory] }
+                -*h* { puts {prcd_compile.tcl [--help] [-f <fipslevel> | -d <drivername>] [-o <ouput dir> ] [-n] [ <filename> | -D <directory] }
                        puts {}
                        puts {For existing files, this only supports *.{c,C,h,H,initfile,xml} files in the following hostboot directory trees: }
                        puts {    src/usr/hwpf/hwp }
@@ -297,9 +298,9 @@ foreach arg $argv {
                        puts {The files can either be in the local current working directory, or in a local sub-directory mirroring the hostboot tree. }
                        puts {}
                        puts {examples }
-                       puts {> prcd_compile.tcl -d b0218a_2012_Sprint9 -o ./output fapiTestHwp.C fapiTestHwp.C sample.initfile}
-                       puts {> prcd_compile.tcl -d b0218a_2012_Sprint9 -o ./output/ proc_cen_framelock.C }
-                       puts {> prcd_compile.tcl -d b0218a_2012_Sprint9 -o output dmi_training/proc_cen_framelock/proc_cen_framelock.H }
+                       puts {> prcd_compile.tcl -d hb0216a_1307.810 -o ./output fapiTestHwp.C fapiTestHwp.C sample.initfile}
+                       puts {> prcd_compile.tcl -d hb0216a_1307.810 -o ./output/ proc_cen_framelock.C }
+                       puts {> prcd_compile.tcl -f b0211a_1307.810 -o output dmi_training/proc_cen_framelock/proc_cen_framelock.H }
                        puts {}
                        puts {Without the -n parameter, the file MUST be an existing files in the hostboot sandbox.}
                        puts {If they are not found in the sandbox, an error will be returned.}
@@ -336,6 +337,10 @@ foreach arg $argv {
         }
         driverflag {
             set driver $arg
+            set state flag
+        }
+        fipslevelflag {
+            set fipslevel $arg
             set state flag
         }
         directory {
@@ -400,18 +405,13 @@ if { [info exists fspip] } {
 }
 
 
-if { ![info exists driver] } {
-    # default to the master for the driver
-    set driver "master"
-}
-
 if { ![info exists output_dir] } {
     # default to PWD for output
     set output_dir "./"
 }
 
 # Make the output directory
-eval {exec} "mkdir -p $output_dir"
+eval {exec} "mkdir -p $output_dir/pnor"
 
 lappend cmds ":INFO userid $userid version $version"
 
@@ -419,7 +419,15 @@ if {[info exists keepsandbox]}  {
     lappend cmds ":INFO keepsandbox"
 }
 
-lappend cmds ":DRIVER $driver"
+if { ![info exists driver] } {
+    set driver "default"
+}
+
+if { ![info exists fipslevel] } {
+    set fipslevel "default"
+}
+
+lappend cmds ":DRIVER $fipslevel $driver"
 
 if {[info exists newfiles]}  {
   set hwp_file_cmd ":HWP_FILE_NEW"
@@ -534,6 +542,14 @@ if {[llength $cmds] > 0 } {
                     fconfigure $sockid -translation binary
                     lappend xfer_file_list $b
                     set fp [open "$output_dir/$b" w]
+                    fconfigure $fp -translation binary
+                    fcopy $sockid $fp -size $c
+                    close $fp
+                    fconfigure $sockid -translation auto
+                } elseif {[regexp {^:PNOR_FILE +(.+) +(.+)\n*} $line a b c] } {
+                    fconfigure $sockid -translation binary
+                    lappend xfer_file_list $b
+                    set fp [open "$output_dir/pnor/$b" w]
                     fconfigure $fp -translation binary
                     fcopy $sockid $fp -size $c
                     close $fp
