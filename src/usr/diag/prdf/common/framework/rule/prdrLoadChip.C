@@ -357,24 +357,37 @@ void ReadExpr(UtilStream & i_stream, Expr & o_expr)
             break;
 
         case ACT_THRES:
-            o_expr.cv_value[0].i = PRDF::ThresholdResolution::cv_fieldDefault.interval;
-            o_expr.cv_value[1].i = PRDF::ThresholdResolution::cv_fieldDefault.threshold;
-            o_expr.cv_value[2].i = PRDF::ThresholdResolution::cv_mnfgDefault.interval;
-            o_expr.cv_value[3].i = PRDF::ThresholdResolution::cv_mnfgDefault.threshold;
-            //The syntax of thresholds in rule file is
+
+            // The values which different parameter will have
+            // cv_value[0, 1]:  error frequency and time in sec for field
+            //                  threshold
+            // cv_value[4]:     true if mnfg threshols needs to be picked up
+            //                  from mnfg file, false otherwise
+            // cv_value [2, 3]: error frequency and time in sec for mnfg
+            //                  threshold if cv_value[4] is false
+            //                  otherwise cv_value[3] tells which threshold
+            //                  needs to pick up from mnfg file
+            // cv_value[5]      mask id if shared threshold
+
+            //default values
+            o_expr.cv_value[0].i = PRDF::ThresholdResolution::
+                                                cv_fieldDefault.threshold;
+            o_expr.cv_value[1].i = PRDF::ThresholdResolution::
+                                                cv_fieldDefault.interval;
+            o_expr.cv_value[2].i = PRDF::ThresholdResolution::
+                                                cv_mnfgDefault.threshold;
+            o_expr.cv_value[3].i = PRDF::ThresholdResolution::
+                                                cv_mnfgDefault.interval;
+            // The syntax of thresholds in rule file is
             // op field_threshold field_intervale
-            //optional fields (mnfg_threshold, mnfg_interval } | mnfg_ilr_threshold | maskid
+            // optional fields (mnfg_threshold, mnfg_interval } 
+            // | mnfg_ilr_threshold | maskid
             i_stream >> l_tmpChar;
             l_tmpBool = (0x40 == (0x40 & l_tmpChar));
             l_tmpChar &= (~0x40);
             o_expr.cv_value[4].i = (0x20 == (0x20 & l_tmpChar));
             l_tmpChar &= (~0x20);
-            // The values which different parameter will have
-            // cv_value[0,1] error frequency and time in sec for field threshold
-            //cv_value[4] true if mnfg threshols needs to be picked up from mnfg file, false otherwise
-            // cv_value [2, 3]: error frequency and time in sec for mnfg threshold if cv_value[4] is false
-            // otherwise cv_value[3] tells which threshold needs to pick up from mnfg file
-            // cv_value[5] maski id if shared threshold
+
             if (0 != l_tmpChar)
                 for (uint8_t i = 0; i < l_tmpChar; i++)
                 {
