@@ -35,9 +35,9 @@
 /******************************************************************************/
 #include    <stdint.h>
 
-#include    <sys/misc.h>                        //  cpu_thread_count()
-#include    <vfs/vfs.H>                         // PORE image
-#include    <sys/mm.h>                          //  mm_linear_map
+#include    <sys/misc.h>            //  cpu_thread_count(), P8_MAX_PROCS
+#include    <vfs/vfs.H>             // PORE image
+#include    <sys/mm.h>              //  mm_linear_map
 
 #include    <trace/interface.H>
 #include    <initservice/taskargs.H>
@@ -95,9 +95,6 @@ using   namespace   DeviceFW;
  *  @param[out] -   size of the PORE image
  *
  *  @return      NULL if success, errorlog if failure
- *
- *  @todo   $$ Add code to UNload this image/module when all the
- *          HWP's are finished.
  *
  */
 errlHndl_t  loadPoreImage( const TARGETING::Target  *i_CpuTarget,
@@ -259,7 +256,7 @@ errlHndl_t  applyPoreGenCpuRegs(   TARGETING::Target *i_cpuTarget,
             if( !(en_threads & (0x8000000000000000>>l_threadId)) )
             {
                 continue;
-            } 
+            }
 
             TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                        "applyPoreGenCpuRegs: core=0x%x,thread=0x%x: ",
@@ -324,7 +321,6 @@ void*    call_host_build_winkle( void    *io_pArgs )
     size_t      l_poreSize      =   0;
     void        *l_pRealMemBase =
                         reinterpret_cast<void * const>( OUTPUT_PORE_IMG_ADDR ) ;
-
     ISTEP_ERROR::IStepError     l_StepError;
 
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
@@ -333,15 +329,10 @@ void*    call_host_build_winkle( void    *io_pArgs )
     // @@@@@    CUSTOM BLOCK:   @@@@@
 
     do  {
-        //  @todo   Issue   61361
-        //  Should be a system-wide  constant stating the maximum number of procs
-        //  in the system.  In the meantime:
-        const   uint64_t    MAX_POSSIBLE_PROCS_IN_P8_SYSTEM  =   8;
-
         //  Get a chunk of real memory big enough to store all the possible
         //  SLW images.
-        const uint64_t l_RealMemSize = ( (MAX_OUTPUT_PORE_IMG_IN_MB*1*MEGABYTE) *
-                              MAX_POSSIBLE_PROCS_IN_P8_SYSTEM );
+        const uint64_t l_RealMemSize = ((MAX_OUTPUT_PORE_IMG_IN_MB*1*MEGABYTE) *
+                              P8_MAX_PROCS );
 
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                    "Got realmem to store all SLW images, size=0x%lx",
@@ -594,7 +585,7 @@ void*    call_proc_set_pore_bar( void    *io_pArgs )
 
         // write the HUID of the core we are writing to
         TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                "Set pore bar for " 
+                "Set pore bar for "
                 "target HUID %.8X", TARGETING::get_huid(l_procChip));
 
         // cast OUR type of target to a FAPI type of target.

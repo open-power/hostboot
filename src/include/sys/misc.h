@@ -26,6 +26,24 @@
 #include <stdint.h>
 
 /**
+ *  @enum   p8SystemConsts
+ *
+ *  system-wide constants:
+ *  - please add as necessary
+ *
+ */
+
+enum    p8SystemConsts
+{
+    /// max possible processors in a P8 system
+    P8_MAX_PROCS        =   8,
+    /// max EX (cores available in a processor )
+    P8_MAX_EX_PER_PROC  =   16,
+
+};
+
+
+/**
  * @enum ShutdownStatus
  *
  * Shutdown values for shutdown command.

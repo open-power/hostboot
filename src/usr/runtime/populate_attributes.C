@@ -27,6 +27,7 @@
  *  @brief Populate attributes for runtime HostServices code
  */
 
+#include <sys/misc.h>
 #include <trace/interface.H>
 #include <errl/errlentry.H>
 #include <fapi.H>
@@ -160,14 +161,12 @@ struct system_data_t
 struct node_data_t
 {
     enum {
-        MAX_PROCS = 8,
-        MAX_PROCS_RSV = 16, //leave space for double
-        MAX_EX_PER_PROC = 16,
-        MAX_EX_RSV = MAX_PROCS_RSV*MAX_EX_PER_PROC,
+        MAX_PROCS_RSV = P8_MAX_PROCS*2, //leave space for double
+        MAX_EX_RSV = MAX_PROCS_RSV*P8_MAX_EX_PER_PROC,
         NUM_PROC_ATTRIBUTES = 125,
         NUM_EX_ATTRIBUTES = 10,
         MAX_ATTRIBUTES = MAX_PROCS_RSV*NUM_PROC_ATTRIBUTES +
-                         MAX_PROCS_RSV*MAX_EX_PER_PROC*NUM_EX_ATTRIBUTES
+                         MAX_EX_RSV*NUM_EX_ATTRIBUTES
     };
 
     // header data that HostServices uses
@@ -175,9 +174,9 @@ struct node_data_t
 
     // actual data content
     hsvc_proc_header_t procs[MAX_PROCS_RSV];
-    hsvc_ex_header_t ex[MAX_PROCS_RSV*MAX_EX_PER_PROC];
+    hsvc_ex_header_t ex[MAX_EX_RSV];
     hsvc_attr_header_t procAttrHeaders[MAX_PROCS_RSV][NUM_PROC_ATTRIBUTES];
-    hsvc_attr_header_t exAttrHeaders[MAX_PROCS_RSV*MAX_EX_PER_PROC][NUM_EX_ATTRIBUTES];
+    hsvc_attr_header_t exAttrHeaders[MAX_EX_RSV][NUM_EX_ATTRIBUTES];
     char attributes[MAX_ATTRIBUTES*sizeof(uint32_t)];
 };
 
@@ -417,7 +416,7 @@ errlHndl_t populate_node_attributes( uint64_t i_nodeNum )
             EMPTY_ATTRIBUTE;
 
             TRACFCOMP( g_trac_runtime, "populate_node_attributes> PROC:%d (%.8X) : numAttr=%d", procid, TARGETING::get_huid(all_procs[p]), node_data->procs[p].numAttr );
-            
+
             // Make sure we don't overrun our space
             assert( *_num_attr < node_data_t::NUM_PROC_ATTRIBUTES );
 
