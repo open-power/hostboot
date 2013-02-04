@@ -1,26 +1,26 @@
 #!/usr/bin/perl
-#  IBM_PROLOG_BEGIN_TAG
-#  This is an automatically generated prolog.
+# IBM_PROLOG_BEGIN_TAG
+# This is an automatically generated prolog.
 #
-#  $Source: src/build/buildpnor/buildpnor.pl $
+# $Source: src/build/buildpnor/buildpnor.pl $
 #
-#  IBM CONFIDENTIAL
+# IBM CONFIDENTIAL
 #
-#  COPYRIGHT International Business Machines Corp. 2012
+# COPYRIGHT International Business Machines Corp. 2012,2013
 #
-#  p1
+# p1
 #
-#  Object Code Only (OCO) source materials
-#  Licensed Internal Code Source Materials
-#  IBM HostBoot Licensed Internal Code
+# Object Code Only (OCO) source materials
+# Licensed Internal Code Source Materials
+# IBM HostBoot Licensed Internal Code
 #
-#  The source code for this program is not published or other-
-#  wise divested of its trade secrets, irrespective of what has
-#  been deposited with the U.S. Copyright Office.
+# The source code for this program is not published or otherwise
+# divested of its trade secrets, irrespective of what has been
+# deposited with the U.S. Copyright Office.
 #
-#  Origin: 30
+# Origin: 30
 #
-#  IBM_PROLOG_END_TAG
+# IBM_PROLOG_END_TAG
 #Builds a PNOR image based on pnorLayout XML file.
 #See usage function at bottom of file for details on how to use this script
 
@@ -33,6 +33,7 @@ use strict;
 use XML::Simple;
 use Data::Dumper;
 use File::Basename;
+use Digest::SHA1;
 
 ################################################################################
 # Set PREFERRED_PARSER to XML::Parser. Otherwise it uses XML::SAX which contains
@@ -99,6 +100,38 @@ for (my $i=0; $i < $#ARGV + 1; $i++)
     }
 }
 
+#TODO: Remove with RTC: 63500
+#check for new ffs exec.  Use to trigger using new parms.
+my $use_newFFSParms = 0;
+my $ffsPath = "";
+my $ffs_fh;
+#Need a get complete path to ffs exec if none given
+if(index($g_ffsCmd, '/',0) < 0)
+{
+    $ffsPath = `which $g_ffsCmd`;
+}
+else
+{
+    $ffsPath = $g_ffsCmd;
+}
+
+unless (open $ffs_fh, $ffsPath)
+{
+    traceErr("Unable to locate/open ffs exec: $g_ffsCmd.  Exiting.");
+    exit 1;
+}
+
+my $sha1 = Digest::SHA1->new;
+$sha1->addfile($ffs_fh);
+my $sha_val = $sha1->hexdigest;
+close $ffs_fh;
+
+if($sha_val ne "b3b2110d73df1ac3f326762808a347ed2dc96323")
+{
+    trace(1, "New ffs exec detected (SHA1=$sha_val)");
+    $use_newFFSParms = 1;
+}
+#end TODO remove with RTC: 63500
 
 #Load PNOR Layout XML file
 my $rc = loadPnorLayout($pnorLayoutFile, \%pnorLayout);
@@ -280,9 +313,17 @@ sub createPnorImage
     #Offset of Partition Table A in PNOR
     my $sideAOffset =  $$i_pnorLayoutRef{metadata}{sideAOffset};
 
-    #create the PNOR image
-    #myffs --create tuleta.pnor --partition-offset 0 --size 8MiB --block 4KiB --force
-    my $ffsOut = `$g_ffsCmd --create $i_pnorBinName --partition-offset $sideAOffset --size $imageSize --block $blockSize --force`;
+     # TODO: clean up with RTC: 63500
+    if($use_newFFSParms == 1)
+    {
+        #ffs --create --target tuleta.pnor --partition-offset 0 --size 8MiB --block 4KiB --force
+        my $ffsOut = `$g_ffsCmd --create --target $i_pnorBinName --partition-offset $sideAOffset --size $imageSize --block $blockSize --force`;
+    }
+    else
+    {
+        #ffs --create tuleta.pnor --partition-offset 0 --size 8MiB --block 4KiB --force
+        my $ffsOut = `$g_ffsCmd --create $i_pnorBinName --partition-offset $sideAOffset --size $imageSize --block $blockSize --force`;
+    }
     $rc = $?;
     if($rc)
     {
@@ -330,8 +371,22 @@ sub createPnorImage
                 exit 1;
             }
 
-            #myffs --add    tuleta.pnor --partition-offset 0 --offset 0x1000   --size 0x280000 --name HBI   --type data    --flags 0x0
-            my $ffsOut = `$g_ffsCmd --add $i_pnorBinName --partition-offset $sideAOffset --offset $physicalOffset --size $physicalRegionSize --name $eyeCatch --type data --flags 0x0`;
+            # TODO: clean up with RTC: 63500
+            if($use_newFFSParms == 1)
+            {
+                #Create partition
+                #ffs --add --target tuleta.pnor --partition-offset 0 --offset 0x1000   --size 0x280000 --name HBI --flags 0x0
+                my $ffsOut = `$g_ffsCmd --add --target $i_pnorBinName --partition-offset $sideAOffset --offset $physicalOffset --size $physicalRegionSize --name $eyeCatch --flags 0x0`;
+                #Force Actual Size = Partition size  (implicit when trunc is called with no value)
+                #ffs --target tuleta.pnor --partition-offset 0 --name HBI --trunc
+                my $ffsRc = `$g_ffsCmd --target $i_pnorBinName --partition-offset $sideAOffset --name $eyeCatch  --trunc`;
+
+            }
+            else
+            {
+                #ffs --add tuleta.pnor --partition-offset 0 --offset 0x1000 --size 0x280000 --name HBI --type data --flags 0x0
+                my $ffsOut = `$g_ffsCmd --add $i_pnorBinName --partition-offset $sideAOffset --offset $physicalOffset --size $physicalRegionSize --name $eyeCatch --type data --flags 0x0`;
+            }
             $rc = $?;
             if($rc)
             {
@@ -351,8 +406,17 @@ sub createPnorImage
             last;
         }
 
-        #myffs --modify tuleta.pnor --partition-offset 0 --name HBI --user 0 --value 0x12345678
-        my $ffsRc = `$g_ffsCmd --modify $i_pnorBinName --partition-offset $sideAOffset --name $eyeCatch  --user 0 --value $actualRegionSize`;
+        # TODO: clean up with RTC: 63500
+        if($use_newFFSParms == 1)
+        {
+            #ffs --target tuleta.pnor --partition-offset 0 --name HBI --user 0 --value 0x12345678
+            my $ffsRc = `$g_ffsCmd --target $i_pnorBinName --partition-offset $sideAOffset --name $eyeCatch  --user 0 --value $actualRegionSize`;
+        }
+        else
+        {
+            #ffs --modify tuleta.pnor --partition-offset 0 --name HBI --user 0 --value 0x12345678
+            my $ffsRc = `$g_ffsCmd --modify $i_pnorBinName --partition-offset $sideAOffset --name $eyeCatch  --user 0 --value $actualRegionSize`;
+        }
         $rc = $?;
         if($rc)
         {
@@ -368,8 +432,17 @@ sub createPnorImage
             $miscInfo = $miscInfo | 0x00004000;
         }
 
-        #myffs --modify tuleta.pnor --partition-offset 0 --name HBI --user 1 --value 0x12345678
-        my $ffsRc = `$g_ffsCmd --modify $i_pnorBinName --partition-offset $sideAOffset --name $eyeCatch  --user 1 --value $miscInfo`;
+        # TODO: clean up with RTC: 63500
+        if($use_newFFSParms == 1)
+        {
+            #ffs --target tuleta.pnor --partition-offset 0 --name HBI --user 1 --value 0x12345678
+            my $ffsRc = `$g_ffsCmd --target $i_pnorBinName --partition-offset $sideAOffset --name $eyeCatch  --user 1 --value $miscInfo`;
+        }
+        else
+        {
+            #ffs --modify tuleta.pnor --partition-offset 0 --name HBI --user 1 --value 0x12345678
+            my $ffsRc = `$g_ffsCmd --modify $i_pnorBinName --partition-offset $sideAOffset --name $eyeCatch  --user 1 --value $miscInfo`;
+        }
         $rc = $?;
         if($rc)
         {
@@ -603,8 +676,17 @@ sub fillPnorImage
         }
 
         trace(5, "$this_func: populating section $eyeCatch, filename=$inputFile");
-        #myffs --write tuleta.pnor --partition-offset 0 --name HBI --pad 0xff --data hostboot_extended.bin
-        my $ffsRc = `$g_ffsCmd --write $i_pnorBinName --partition-offset $sideAOffset --name $eyeCatch  --pad 0xff --data $inputFile`;
+        # TODO: clean up with RTC: 63500
+        if($use_newFFSParms == 1)
+        {
+            #ffs --target tuleta.pnor --partition-offset 0 --name HBI --write hostboot_extended.bin
+            my $ffsRc = `$g_ffsCmd --target $i_pnorBinName --partition-offset $sideAOffset --name $eyeCatch  --write $inputFile`;
+        }
+        else
+        {
+            #ffs --write tuleta.pnor --partition-offset 0 --name HBI --pad 0xff --data hostboot_extended.bin
+            my $ffsRc = `$g_ffsCmd --write $i_pnorBinName --partition-offset $sideAOffset --name $eyeCatch  --pad 0xff --data $inputFile`;
+        }
         $rc = $?;
         if($rc)
         {
