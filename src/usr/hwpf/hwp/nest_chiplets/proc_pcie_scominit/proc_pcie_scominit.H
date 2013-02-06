@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012                   */
+/* COPYRIGHT International Business Machines Corp. 2012,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_pcie_scominit.H,v 1.1 2012/11/05 21:52:43 jmcgill Exp $
+// $Id: proc_pcie_scominit.H,v 1.2 2013/02/04 23:58:46 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_pcie_scominit.H,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2012
@@ -67,6 +67,13 @@ const uint32_t PCIE_GP0_PHB_IOVALID_BIT[PROC_PCIE_SCOMINIT_NUM_PHB] =
     48,
     49,
     50
+};
+
+const uint32_t PCIE_GP0_PHB_REFCLOCK_DRIVE_EN_BIT[PROC_PCIE_SCOMINIT_NUM_PHB] =
+{
+    52,
+    53,
+    54
 };
 
 // PCIe GP4 register field/bit definitions

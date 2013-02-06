@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_pcie_scominit.C,v 1.3 2013/01/20 19:27:41 jmcgill Exp $
+// $Id: proc_pcie_scominit.C,v 1.4 2013/02/04 23:58:47 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_pcie_scominit.C,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2012
@@ -184,6 +184,9 @@ fapi::ReturnCode proc_pcie_scominit_iop_init(
         {
             rc_ecmd |= gp0_data.writeBit(
                 PCIE_GP0_PHB_IOVALID_BIT[i],
+                phb_active[i]);
+            rc_ecmd |= gp0_data.writeBit(
+                PCIE_GP0_PHB_REFCLOCK_DRIVE_EN_BIT[i],
                 phb_active[i]);
         }
         if (rc_ecmd)

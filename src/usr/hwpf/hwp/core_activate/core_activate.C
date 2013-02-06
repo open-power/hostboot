@@ -429,6 +429,9 @@ void*    call_host_ipl_complete( void    *io_pArgs )
 
 
         //  call proc_switch_cfsim
+	// TODO - Comment out to work around Centaur FSI scom issue during BU
+	// RTC 64136 is opened to undo this when in-band scoms are available.
+#if 0
         FAPI_INVOKE_HWP(l_err, proc_switch_cfsim, l_fapi_proc_target,
                         true, // RESET
                         true, // RESET_OPB_SWITCH
@@ -437,6 +440,7 @@ void*    call_host_ipl_complete( void    *io_pArgs )
                         true, // FENCE_PIB_H
                         true, // FENCE_FSI1
                         true); // FENCE_PIB_SW1
+#endif
         if (l_err)
         {
             TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,

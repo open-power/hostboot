@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012                   */
+/* COPYRIGHT International Business Machines Corp. 2012,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: io_funcs.H,v 1.12 2012/12/04 08:28:39 varkeykv Exp $
+// $Id: io_funcs.H,v 1.13 2013/02/06 09:34:19 varkeykv Exp $
 // *!***************************************************************************
 // *! (C) Copyright International Business Machines Corp. 1997, 1998
 // *!           All Rights Reserved -- Property of IBM
@@ -75,8 +75,8 @@ public:
 	bus_status    eye_opt_status;
 	bus_status    repair_status;
 	bus_status    functional_status;
-
-	static const uint32_t      max_poll_cycles=100;
+        //Updating max cycles to suit 100ms theoretical max timeout as per Mike Spear
+	static const uint32_t      max_poll_cycles=100000;
 	static const uint32_t      increment_poll_cycles=1;
 	uint32_t endpoints_set; // How many end points have we accessed so far
 

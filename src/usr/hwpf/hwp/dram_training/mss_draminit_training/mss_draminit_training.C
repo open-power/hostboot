@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_draminit_training.C,v 1.50 2013/01/16 20:18:41 jdsloat Exp $
+// $Id: mss_draminit_training.C,v 1.51 2013/01/31 22:33:54 gollub Exp $
 //------------------------------------------------------------------------------
 // Don't forget to create CVS comments when you check in your changes!
 //------------------------------------------------------------------------------
@@ -28,6 +28,7 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|------------------------------------------------
+//  1.51   | gollub   |31-JAN-13| Uncommenting mss_unmask_draminit_training_errors
 //  1.50   | jdsloat  |16-JAN-13| Fixed rank group enable within PC_INIT_CAL reg
 //  1.49   | jdsloat  |08-JAN-13| Added clearing RD PHASE SELECT values post Read Centering Workaround.
 //  1.48   | jdsloat  |08-JAN-13| Cleared Cal Config in PC_INIT_CAL on opposing port.  
@@ -168,7 +169,7 @@ ReturnCode mss_draminit_training(Target& i_target)
 	// it will commit the passed in rc (if non-zero), and return it's own bad rc.
 	// Else if mss_unmask_draminit_training_errors runs clean, 
 	// it will just return the passed in rc.
-	//l_rc = mss_unmask_draminit_training_errors(i_target, l_rc); // TODO: uncomment after this can be tested on hw
+	l_rc = mss_unmask_draminit_training_errors(i_target, l_rc);
 
 	return l_rc;
 }
