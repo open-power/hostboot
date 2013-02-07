@@ -344,6 +344,7 @@ bool StateMachine::executeWorkItem(WorkFlowProperties * i_wfp)
         mutex_unlock(&iv_mutex);
 
         errlHndl_t err = 0;
+        int32_t rc = 0;
 
         switch(workItem)
         {
@@ -351,7 +352,8 @@ bool StateMachine::executeWorkItem(WorkFlowProperties * i_wfp)
 
             case RESTORE_DRAM_REPAIRS:
 
-                PRDF::restoreDramRepairs(getTarget(*i_wfp));
+                rc = PRDF::restoreDramRepairs(getTarget(*i_wfp));
+
                 break;
 
             case START_PATTERN_0:
@@ -375,7 +377,7 @@ bool StateMachine::executeWorkItem(WorkFlowProperties * i_wfp)
 
         mutex_lock(&iv_mutex);
 
-        if(err)
+        if(err || rc)
         {
             // stop the workFlow for this target
 
