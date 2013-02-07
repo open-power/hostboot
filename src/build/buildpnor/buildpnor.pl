@@ -100,38 +100,25 @@ for (my $i=0; $i < $#ARGV + 1; $i++)
     }
 }
 
-#TODO: Remove with RTC: 63500
-#check for new ffs exec.  Use to trigger using new parms.
-my $use_newFFSParms = 0;
-my $ffsPath = "";
-my $ffs_fh;
-#Need a get complete path to ffs exec if none given
-if(index($g_ffsCmd, '/',0) < 0)
+#Extract ffs version number from help text.
+#Use to trigger using proper input parms..
+my $ffsParms = 0;  
+my $ffsVersion = `$g_ffsCmd 2>&1  | grep "Partition Tool" `;
+$ffsVersion =~ s/.*(v[0-9\.]*).*/\1/;
+$ffsVersion = $1;
+
+if($ffsVersion eq "v1.0.0")
 {
-    $ffsPath = `which $g_ffsCmd`;
+    #use v1.0.0 parms
+    $ffsParms = 100;
+    trace(1, "ffs exec version: $ffsVersion, ffsParms=$ffsParms");
 }
 else
 {
-    $ffsPath = $g_ffsCmd;
+    #use v2.0.0 parms
+    $ffsParms = 200;
+    trace(1, "ffs exec version: $ffsVersion, ffsParms=$ffsParms");
 }
-
-unless (open $ffs_fh, $ffsPath)
-{
-    traceErr("Unable to locate/open ffs exec: $g_ffsCmd.  Exiting.");
-    exit 1;
-}
-
-my $sha1 = Digest::SHA1->new;
-$sha1->addfile($ffs_fh);
-my $sha_val = $sha1->hexdigest;
-close $ffs_fh;
-
-if($sha_val ne "b3b2110d73df1ac3f326762808a347ed2dc96323")
-{
-    trace(1, "New ffs exec detected (SHA1=$sha_val)");
-    $use_newFFSParms = 1;
-}
-#end TODO remove with RTC: 63500
 
 #Load PNOR Layout XML file
 my $rc = loadPnorLayout($pnorLayoutFile, \%pnorLayout);
@@ -313,8 +300,7 @@ sub createPnorImage
     #Offset of Partition Table A in PNOR
     my $sideAOffset =  $$i_pnorLayoutRef{metadata}{sideAOffset};
 
-     # TODO: clean up with RTC: 63500
-    if($use_newFFSParms == 1)
+    if($ffsParms == 200)
     {
         #ffs --create --target tuleta.pnor --partition-offset 0 --size 8MiB --block 4KiB --force
         my $ffsOut = `$g_ffsCmd --create --target $i_pnorBinName --partition-offset $sideAOffset --size $imageSize --block $blockSize --force`;
@@ -371,10 +357,9 @@ sub createPnorImage
                 exit 1;
             }
 
-            # TODO: clean up with RTC: 63500
-            if($use_newFFSParms == 1)
+            #Add Partition
+            if($ffsParms == 200)
             {
-                #Create partition
                 #ffs --add --target tuleta.pnor --partition-offset 0 --offset 0x1000   --size 0x280000 --name HBI --flags 0x0
                 my $ffsOut = `$g_ffsCmd --add --target $i_pnorBinName --partition-offset $sideAOffset --offset $physicalOffset --size $physicalRegionSize --name $eyeCatch --flags 0x0`;
                 #Force Actual Size = Partition size  (implicit when trunc is called with no value)
@@ -406,8 +391,7 @@ sub createPnorImage
             last;
         }
 
-        # TODO: clean up with RTC: 63500
-        if($use_newFFSParms == 1)
+        if($ffsParms == 200)
         {
             #ffs --target tuleta.pnor --partition-offset 0 --name HBI --user 0 --value 0x12345678
             my $ffsRc = `$g_ffsCmd --target $i_pnorBinName --partition-offset $sideAOffset --name $eyeCatch  --user 0 --value $actualRegionSize`;
@@ -432,8 +416,7 @@ sub createPnorImage
             $miscInfo = $miscInfo | 0x00004000;
         }
 
-        # TODO: clean up with RTC: 63500
-        if($use_newFFSParms == 1)
+        if($ffsParms == 200)
         {
             #ffs --target tuleta.pnor --partition-offset 0 --name HBI --user 1 --value 0x12345678
             my $ffsRc = `$g_ffsCmd --target $i_pnorBinName --partition-offset $sideAOffset --name $eyeCatch  --user 1 --value $miscInfo`;
@@ -676,8 +659,7 @@ sub fillPnorImage
         }
 
         trace(5, "$this_func: populating section $eyeCatch, filename=$inputFile");
-        # TODO: clean up with RTC: 63500
-        if($use_newFFSParms == 1)
+        if($ffsParms == 200)
         {
             #ffs --target tuleta.pnor --partition-offset 0 --name HBI --write hostboot_extended.bin
             my $ffsRc = `$g_ffsCmd --target $i_pnorBinName --partition-offset $sideAOffset --name $eyeCatch  --write $inputFile`;
