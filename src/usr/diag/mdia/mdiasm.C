@@ -37,11 +37,13 @@
 #include <fapi.H>
 #include <fapiPlatHwpInvoker.H>
 #include <diag/prdf/common/prdfMain.H>
+#include <devicefw/userif.H>
 
 using namespace TARGETING;
 using namespace ERRORLOG;
 using namespace std;
 using namespace fapi;
+using namespace DeviceFW;
 
 namespace MDIA
 {
@@ -436,13 +438,14 @@ errlHndl_t StateMachine::doMaintCommand(WorkFlowProperties & i_wfp)
 
     do {
 
-        FAPI_INVOKE_HWP(
-                err,
-                mss_get_address_range,
+        // assume the full range for now
+
+        ReturnCode fapirc = mss_get_address_range(
                 fapiMba,
                 MSS_ALL_RANKS,
                 startAddr,
                 endAddr);
+        err = fapiRcToErrl(fapirc);
 
         if(err)
         {
@@ -452,70 +455,105 @@ errlHndl_t StateMachine::doMaintCommand(WorkFlowProperties & i_wfp)
 
         if(restart)
         {
+            // bump the starting address if we are restarting
+            // a command
+
             cmd = new mss_IncrementAddress(fapiMba);
 
             MDIA_FAST("sm: increment address on: %p", targetMba);
-        }
-        else
-        {
-            switch(workItem)
+
+            fapirc = cmd->setupAndExecuteCmd();
+
+            delete cmd;
+            cmd = NULL;
+
+            err = fapiRcToErrl(fapirc);
+
+            if(err)
             {
-                case START_RANDOM_PATTERN:
-                    cmd = new mss_SuperFastRandomInit(
-                            fapiMba,
-                            startAddr,
-                            endAddr,
-                            mss_MaintCmd::PATTERN_RANDOM,
-                            stopCondition,
-                            false);
-
-                    MDIA_FAST("sm: random init on: %p", targetMba);
-                    break;
-
-                case START_SCRUB:
-                    cmd = new mss_SuperFastRead(
-                            fapiMba,
-                            startAddr,
-                            endAddr,
-                            stopCondition,
-                            false);
-
-                    MDIA_FAST("sm: scrub on: %p", targetMba);
-                    break;
-
-                case START_PATTERN_0:
-                case START_PATTERN_1:
-                case START_PATTERN_2:
-                case START_PATTERN_3:
-                case START_PATTERN_4:
-                case START_PATTERN_5:
-                case START_PATTERN_6:
-                case START_PATTERN_7:
-
-                    cmd = new mss_SuperFastInit(
-                            fapiMba,
-                            startAddr,
-                            endAddr,
-                            static_cast<mss_MaintCmd::PatternIndex>(workItem),
-                            stopCondition,
-                            false);
-
-                    MDIA_FAST("sm: init on: %p", targetMba);
-                    break;
-
-                default:
-                    break;
-            }
-
-            if(!cmd)
-            {
-                MDIA_ERR("unrecognized maint command type %d on: %p",
-                        workItem, targetMba);
+                MDIA_FAST("sm: setupAndExecuteCmd failed");
                 break;
             }
+
+            // read the address out so it can be passed
+            // to the command being restarted
+
+            uint64_t address;
+            size_t size = sizeof(address);
+
+            err = deviceRead(
+                    targetMba,
+                    &address,
+                    size,
+                    DEVICE_SCOM_ADDRESS(MBA01_MBMACAQ));
+
+            if(err)
+            {
+                MDIA_FAST("sm: reading address failed");
+
+                break;
+            }
+
+            startAddr.setDoubleWord(0, address);
         }
 
-        ReturnCode fapirc = cmd->setupAndExecuteCmd();
+        switch(workItem)
+        {
+            case START_RANDOM_PATTERN:
+                cmd = new mss_SuperFastRandomInit(
+                        fapiMba,
+                        startAddr,
+                        endAddr,
+                        mss_MaintCmd::PATTERN_RANDOM,
+                        stopCondition,
+                        false);
+
+                MDIA_FAST("sm: random init on: %p", targetMba);
+                break;
+
+            case START_SCRUB:
+                cmd = new mss_SuperFastRead(
+                        fapiMba,
+                        startAddr,
+                        endAddr,
+                        stopCondition,
+                        false);
+
+                MDIA_FAST("sm: scrub on: %p", targetMba);
+                break;
+
+            case START_PATTERN_0:
+            case START_PATTERN_1:
+            case START_PATTERN_2:
+            case START_PATTERN_3:
+            case START_PATTERN_4:
+            case START_PATTERN_5:
+            case START_PATTERN_6:
+            case START_PATTERN_7:
+
+                cmd = new mss_SuperFastInit(
+                        fapiMba,
+                        startAddr,
+                        endAddr,
+                        static_cast<mss_MaintCmd::PatternIndex>(workItem),
+                        stopCondition,
+                        false);
+
+                MDIA_FAST("sm: init on: %p", targetMba);
+                break;
+
+            default:
+                break;
+        }
+
+        if(!cmd)
+        {
+            MDIA_ERR("unrecognized maint command type %d on: %p",
+                    workItem, targetMba);
+            break;
+        }
+
+        fapirc = cmd->setupAndExecuteCmd();
         err = fapiRcToErrl(fapirc);
 
         if(err || !cmd)

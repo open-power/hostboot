@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012                   */
+/* COPYRIGHT International Business Machines Corp. 2012,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -66,6 +66,17 @@ enum DiagMode
     ONE_PATTERN,
     FOUR_PATTERNS,
     NINE_PATTERNS,
+};
+
+/**
+ * @brief misc constants
+ */
+enum
+{
+    /**
+     * @brief maint command address register
+     */
+    MBA01_MBMACAQ = 0x0301060D,
 };
 
 /**
