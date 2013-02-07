@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012                   */
+/* COPYRIGHT International Business Machines Corp. 2012,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -39,13 +39,25 @@ errlHndl_t getMbaDiagnosticMode(
         TargetHandle_t i_mba,
         DiagMode & o_mode)
 {
-    // TODO ... stubbed
-
-    // make hardware changed service queries here...
-
-    // check mfg / user / system policy here...
-
     o_mode = INIT_ONLY;
+
+    if(MNFG_FLAG_BIT_MNFG_ENABLE_EXHAUSTIVE_PATTERN_TEST
+            & i_globals.mfgPolicy)
+    {
+        o_mode = NINE_PATTERNS;
+    }
+
+    else if(MNFG_FLAG_BIT_MNFG_ENABLE_STANDARD_PATTERN_TEST
+            & i_globals.mfgPolicy)
+    {
+        o_mode = FOUR_PATTERNS;
+    }
+
+    else if(MNFG_FLAG_BIT_MNFG_ENABLE_MINIMUM_PATTERN_TEST
+            & i_globals.mfgPolicy)
+    {
+        o_mode = ONE_PATTERN;
+    }
 
     return 0;
 }
