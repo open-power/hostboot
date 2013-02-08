@@ -5,7 +5,7 @@
 #
 # IBM CONFIDENTIAL
 #
-# COPYRIGHT International Business Machines Corp. 2012
+# COPYRIGHT International Business Machines Corp. 2012,2013
 #
 # p1
 #
@@ -151,14 +151,14 @@ chip Ex
         name        "EX00.EC.PC.PC_NE.FIR.CORE_FIR";
         scomaddr    0x10013100;
         reset       (&, 0x10013101);
-        mask        (|, 0x10013108);
+        mask        (|, 0x10013105);
         capture     group default;
     };
 
     register COREFIR_MASK
     {
         name        "EX00.EC.PC.PC_NE.FIR.CORE_FIRMASK";
-        scomaddr    0x10013106;
+        scomaddr    0x10013103;
         capture     type secondary;
         capture     group default;
     };
@@ -166,7 +166,7 @@ chip Ex
     register COREFIR_ACT0
     {
         name        "EX00.EC.PC.PC_NE.FIR.CORE_ACTION0";
-        scomaddr    0x10013103;
+        scomaddr    0x10013106;
         capture     type secondary;
         capture     group default;
     };
@@ -174,7 +174,7 @@ chip Ex
     register COREFIR_ACT1
     {
         name        "EX00.EC.PC.PC_NE.FIR.CORE_ACTION1";
-        scomaddr    0x10013104;
+        scomaddr    0x10013107;
         capture     type secondary;
         capture     group default;
     };
