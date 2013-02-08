@@ -372,7 +372,8 @@ fapi::ReturnCode platGetCfamRegister(const fapi::Target& i_target,
         }
         if (l_ecmdRc)
         {
-            FAPI_ERR("platGetCfamRegister: ecmdDataBufferBase setBitLength() or setWord() returns error, ecmdRc 0x%.8X",
+            FAPI_ERR("platGetCfamRegister: ecmdDataBufferBase setBitLength()"
+                     " or setWord() returns error, ecmdRc 0x%.8X",
                      l_ecmdRc);
             l_rc.setEcmdError(l_ecmdRc);
         }

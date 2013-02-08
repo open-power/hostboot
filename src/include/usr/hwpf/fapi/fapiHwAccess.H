@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2012              */
+/* COPYRIGHT International Business Machines Corp. 2011,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -43,10 +43,15 @@
  *                          mjjones     07/12/2012  Add mode options to Ring funcs
  *                          rjknight    09/20/2012  Update fapiSpy interfaces to
  *                                                  allow string inputs for cronus
+ *                          jknight     04/02/2013  Add fapi get/setSpyImage
  */
 
 #ifndef FAPIHWACCESS_H_
 #define FAPIHWACCESS_H_
+
+#ifdef FAPI_SUPPORT_SPY_AS_ENUM
+#include <fapiSpyIds.H>
+#endif
 
 #include <stdint.h>
 #include <ecmdDataBufferBase.H>
@@ -222,11 +227,11 @@ fapi::ReturnCode fapiModifyRing(const fapi::Target& i_target,
  * @note:  The string version is only supported for cronus.
  *
  *         The fapi design to support both FSP and cronus use of get and
- *         put spy funcions is dependant on the SPY names being expanded
+ *         put spy functions is dependant on the SPY names being expanded
  *         to resemble a valid C identifier. This design places some
  *         restrictions on the SPY names which can be used.
  *
- *         1. if the spy name contains a # procedure writers should replade it
+ *         1. if the spy name contains a # procedure writers should replace it
  *         with an __P__ for example -
  *
  *         ABUS.RX0.RXPACKS#0.RXPACK.RD.LC.LC.ACT_DIS
@@ -234,7 +239,7 @@ fapi::ReturnCode fapiModifyRing(const fapi::Target& i_target,
  *         ABUS.RX0.RXPACKS__P__0.RXPACK.RD.LC.LC.ACT_DIS
  *
  *         2. if the spy name has a number following a "." it must have an
- *         uinderscore prepended to the number.
+ *         underscore prepended to the number.
  *
  *         EH.TPCHIP.2KX100_ARY_CLK_EDGES_DLY
  *         becomes
@@ -281,11 +286,11 @@ fapi::ReturnCode _fapiGetSpy(const fapi::Target& i_target,
  * @note:  The string version is only supported for cronus.
  *
  *         The fapi design to support both FSP and cronus use of get and
- *         put spy funcions is dependant on the SPY names being expanded
+ *         put spy functions is dependent on the SPY names being expanded
  *         to resemble a valid C identifier. This design places some
  *         restrictions on the SPY names which can be used.
  *
- *         1. if the spy name contains a # procedure writers should replade it
+ *         1. if the spy name contains a # procedure writers should replace it
  *         with an __P__ for example -
  *
  *         ABUS.RX0.RXPACKS#0.RXPACK.RD.LC.LC.ACT_DIS
@@ -293,7 +298,7 @@ fapi::ReturnCode _fapiGetSpy(const fapi::Target& i_target,
  *         ABUS.RX0.RXPACKS__P__0.RXPACK.RD.LC.LC.ACT_DIS
  *
  *         2. if the spy name has a number following a "." it must have an
- *         uinderscore prepended to the number.
+ *         underscore prepended to the number.
  *
  *         EH.TPCHIP.2KX100_ARY_CLK_EDGES_DLY
  *         becomes
@@ -322,7 +327,88 @@ fapi::ReturnCode _fapiPutSpy(const fapi::Target& i_target,
 fapi::ReturnCode _fapiPutSpy(const fapi::Target& i_target,
                             const char* const i_spyId,
                             ecmdDataBufferBase & i_data);
+
 #endif
+
+#ifdef FAPI_SUPPORT_SPY_AS_ENUM
+/**
+ * @brief Writes data into a ring image
+ * @param[in]   i_target      Target to operate on
+ * @param[in]   i_spyId       The spy's id
+ * @param[in]   i_data        ecmdDataBufferBase object that holds data to
+ *                            be written
+ * @param[out]  o_imageData   ecmdDataBufferBase object that holds data to
+ *                            write into
+ * @return ReturnCode. Zero on success, else platform specified error
+ *
+ * @note:  The string version is only supported for cronus.
+ *
+ *         The fapi design to support both FSP and cronus use of get and
+ *         put spy functions is dependent on the SPY names being expanded
+ *         to resemble a valid C identifier. This design places some
+ *         restrictions on the SPY names which can be used.
+ *
+ *         See fapiPutSpy for details on spy id specifics.
+ */
+#define fapiPutSpyImage(TARGET, ID, DATA1, DATA2) _fapiPutSpyImage(TARGET, \
+                                                    FAPI_SPY_NAMES::ID.value, \
+                                                    DATA1, DATA2)
+fapi::ReturnCode _fapiPutSpyImage(const fapi::Target& i_target,
+                                  const uint32_t i_spyId,
+                                  const ecmdDataBufferBase & i_data,
+                                  ecmdDataBufferBase & o_imageData);
+#endif
+
+#ifdef FAPI_SUPPORT_SPY_AS_STRING
+// fapiPutSpyImage function Cronus version
+#define fapiPutSpyImage(TARGET, ID, DATA1, DATA2) _fapiPutSpyImage(TARGET, #ID,\
+                                                             DATA1,DATA2)
+fapi::ReturnCode _fapiPutSpyImage(const fapi::Target& i_target,
+                                  const char* const i_spyId,
+                                  const ecmdDataBufferBase & i_data,
+                                  ecmdDataBufferBase & o_imageData);
+#endif
+
+#ifdef FAPI_SUPPORT_SPY_AS_ENUM
+/**
+ * @brief Reads data from a ring image
+ * @param[in]   i_target      Target to operate on
+ * @param[in]   i_spyId       The spy's id
+ * @param[out]  o_data        ecmdDataBufferBase object where data is
+ *                            returned
+ * @param[in]   i_imageData   ecmdDataBufferBase object that holds ring image
+ *                            to read data from
+ * @return ReturnCode. Zero on success, else platform specified error
+ *
+ * @note:  The string version is only supported for cronus.
+ *
+ *         The fapi design to support both FSP and cronus use of get and
+ *         put spy functions is dependent on the SPY names being expanded
+ *         to resemble a valid C identifier. This design places some
+ *         restrictions on the SPY names which can be used.
+ *
+ *         See fapiPutSpy for details on spy id specifics.
+ */
+#define fapiGetSpyImage(TARGET, ID, DATA1, DATA2) _fapiGetSpyImage(TARGET, \
+                                            FAPI_SPY_NAMES::ID.value, \
+                                            DATA1, DATA2)
+fapi::ReturnCode _fapiGetSpyImage(const fapi::Target& i_target,
+                                  const uint32_t i_spyId,
+                                  ecmdDataBufferBase & o_data,
+                                  const ecmdDataBufferBase & i_imageData);
+#endif
+
+#ifdef FAPI_SUPPORT_SPY_AS_STRING
+// fapiGetSpyImage function Cronus version
+#define fapiGetSpyImage(TARGET, ID, DATA1, DATA2) _fapiGetSpyImage(TARGET,\
+                                                    #ID, DATA1,DATA2)
+
+fapi::ReturnCode _fapiGetSpyImage(const fapi::Target& i_target,
+                                  const char* const i_spyId,
+                                  ecmdDataBufferBase & o_data,
+                                  const ecmdDataBufferBase & i_imageData);
+#endif
+
 
 } // extern "C"
 
