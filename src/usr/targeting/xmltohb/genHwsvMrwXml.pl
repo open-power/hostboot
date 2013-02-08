@@ -81,12 +81,119 @@ if ($outFile ne "")
 
 my $SYSNAME = uc($sysname);
 
-open (FH, "<$mrwdir/${sysname}-temp-hwsv-attrs.xml") ||
-    die "ERROR: unable to open $mrwdir/${sysname}-temp-hwsv-attrs.xml\n";
+open (FH, "<$mrwdir/${sysname}-system-policy.xml") ||
+    die "ERROR: unable to open $mrwdir/${sysname}-system-policy.xml\n";
 close (FH);
 
-my $FapiAttrs = XMLin("$mrwdir/${sysname}-temp-hwsv-attrs.xml",
-                          ForceArray => ['value']);
+my $policy = XMLin("$mrwdir/${sysname}-system-policy.xml");
+
+my $SystemAttrs = XMLin("$mrwdir/${sysname}-system-policy.xml",
+                      forcearray=>['required-policy-settings']);
+my @systemAttr;
+
+use constant SYS_ATTR_START_INDEX=>0;
+
+foreach my $i (@{$SystemAttrs->{'required-policy-settings'}})
+{
+    my $freqA = sprintf("0x%04X",$i->{'proc_a_frequency'}->{content});
+    my $freqPB = sprintf("0x%04X",$i->{'proc_pb_frequency'}->{content});
+    my $freqPCIE = sprintf("0x%04X",$i->{'proc_pcie_frequency'}->{content});
+    my $freqX = sprintf("0x%04X",$i->{'proc_x_frequency'}->{content});
+
+    #TODO: SW187611 remove the hard core value for FREQ_CORE_FLOOR
+
+    push @systemAttr, ["ALL_MCS_IN_INTERLEAVING_GROUP",
+                       $i->{all_mcs_in_interleaving_group},
+                       "FREQ_A",
+                       $freqA,
+                       "FREQ_CORE_FLOOR",
+                       "0x2580",  
+                       "FREQ_PB",
+                       $freqPB,
+                       "FREQ_PCIE",
+                       $freqPCIE,
+                       "FREQ_X",
+                       $freqX,
+                       "MSS_CLEANER_ENABLE",
+                       $i->{mss_cleaner_enable},
+                       "MSS_MBA_ADDR_INTERLEAVE_BIT",
+                       $i->{mss_mba_addr_interleave_bit},
+                       "MSS_MBA_CACHELINE_INTERLEAVE_MODE",
+                       $i->{mss_mba_cacheline_interleave_mode},
+                       "MSS_MCA_HASH_MODE",
+                       $i->{mss_mca_hash_mode},
+                       "MSS_PREFETCH_ENABLE",
+                       $i->{mss_prefetch_enable},
+                       "PROC_EPS_TABLE_TYPE",
+                       $i->{proc_eps_table_type},
+                       "PROC_FABRIC_PUMP_MODE",
+                       $i->{proc_fabric_pump_mode},
+                       "PROC_X_BUS_WIDTH",
+                       $i->{proc_x_bus_width}];
+}
+
+open (FH, "<$mrwdir/${sysname}-proc-pcie-settings.xml") ||
+    die "ERROR: unable to open $mrwdir/${sysname}-proc-pcie-settings.xml\n";
+close (FH);
+
+my $ProcPcie = XMLin("$mrwdir/${sysname}-proc-pcie-settings.xml");
+
+use constant PCIE_NODE_INDEX => 0;
+use constant PCIE_POS_INDEX  => 1;
+#the constant below is used in the addProcPcieAttrs() function. Reason to start
+#at 2 is because the first two entries are not part of the loop to print out
+#the pcie data
+
+use constant PCIE_START_INDEX =>2;
+
+my @procPcie;
+foreach my $i (@{$ProcPcie->{'processor-settings'}})
+{
+    push @procPcie, [$i->{target}->{node},
+                     $i->{target}->{position},
+                     "PROC_PCIE_IOP_G2_PLL_CONTROL0",
+                     $i->{proc_pcie_iop_g2_pll_control0_iop0},
+                     $i->{proc_pcie_iop_g2_pll_control0_iop1},
+                     "PROC_PCIE_IOP_G3_PLL_CONTROL0",
+                     $i->{proc_pcie_iop_g3_pll_control0_iop0},
+                     $i->{proc_pcie_iop_g3_pll_control0_iop1},
+                     "PROC_PCIE_IOP_PCS_CONTROL0",
+                     $i->{proc_pcie_iop_pcs_control0_iop0},
+                     $i->{proc_pcie_iop_pcs_control0_iop1},
+                     "PROC_PCIE_IOP_PCS_CONTROL1",
+                     $i->{proc_pcie_iop_pcs_control1_iop0},
+                     $i->{proc_pcie_iop_pcs_control1_iop1},
+                     "PROC_PCIE_IOP_PLL_GLOBAL_CONTROL0",
+                     $i->{proc_pcie_iop_pll_global_control0_iop0},
+                     $i->{proc_pcie_iop_pll_global_control0_iop1},
+                     "PROC_PCIE_IOP_PLL_GLOBAL_CONTROL1",
+                     $i->{proc_pcie_iop_pll_global_control1_iop0},
+                     $i->{proc_pcie_iop_pll_global_control1_iop1},
+                     "PROC_PCIE_IOP_RX_PEAK",
+                     $i->{proc_pcie_iop_rx_peak_iop0},
+                     $i->{proc_pcie_iop_rx_peak_iop1},
+                     "PROC_PCIE_IOP_RX_SDL",
+                     $i->{proc_pcie_iop_rx_sdl_iop0},
+                     $i->{proc_pcie_iop_rx_sdl_iop1},
+                     "PROC_PCIE_IOP_RX_VGA_CONTROL2",
+                     $i->{proc_pcie_iop_rx_vga_control2_iop0},
+                     $i->{proc_pcie_iop_rx_vga_control2_iop1},
+                     "PROC_PCIE_IOP_TX_BWLOSS1",
+                     $i->{proc_pcie_iop_tx_bwloss1_iop0},
+                     $i->{proc_pcie_iop_tx_bwloss1_iop1},
+                     "PROC_PCIE_IOP_TX_FIFO_OFFSET",
+                     $i->{proc_pcie_iop_tx_fifo_offset_iop0},
+                     $i->{proc_pcie_iop_tx_fifo_offset_iop1},
+                     "PROC_PCIE_IOP_TX_RCVRDETCNTL",
+                     $i->{proc_pcie_iop_tx_rcvrdetcntl_iop0},
+                     $i->{proc_pcie_iop_tx_rcvrdetcntl_iop1},
+                     "PROC_PCIE_IOP_ZCAL_CONTROL",
+                     $i->{proc_pcie_iop_zcal_control_iop0},
+                     $i->{proc_pcie_iop_zcal_control_iop1}];
+}
+
+
+my @SortedPcie = sort byPcieNodePos @procPcie;
 
 open (FH, "<$mrwdir/${sysname}-chip-ids.xml") ||
     die "ERROR: unable to open $mrwdir/${sysname}-chip-ids.xml\n";
@@ -394,10 +501,6 @@ foreach my $pcie_bus (@{$pcie_buses->{'pcie-bus'}})
 }
 
 
-open (FH, "<$mrwdir/${sysname}-system-policy.xml") ||
-    die "ERROR: unable to open $mrwdir/${sysname}-system-policy.xml\n";
-close (FH);
-
 my %sbe_i2c_paths;
 foreach my $i2c_device (@{$i2c_devices->{'i2c-device'}})
 {
@@ -430,7 +533,6 @@ foreach my $i2c_device (@{$i2c_devices->{'i2c-device'}})
     }
 }
 
-my $policy = XMLin("$mrwdir/${sysname}-system-policy.xml");
 
 open (FH, "<$mrwdir/${sysname}-targets.xml") ||
     die "ERROR: unable to open $mrwdir/${sysname}-targets.xml\n";
@@ -486,7 +588,8 @@ open (FH, "<$mrwdir/${sysname}-psi-busses.xml") ||
     die "ERROR: unable to open $mrwdir/${sysname}-psi-busses.xml\n";
 close (FH);
 
-my $psiBus = XMLin("$mrwdir/${sysname}-psi-busses.xml");
+my $psiBus = XMLin("$mrwdir/${sysname}-psi-busses.xml",
+                      forcearray=>['psi-bus']);
 
 # Capture all PSI connections into the @PSIs array
 use constant PSI_FSP_INSTANCE_PATH_FIELD     => 0;
@@ -542,6 +645,7 @@ use constant CFSI_LINK_FIELD      => 4;
 use constant BUS_NODE_FIELD       => 5;
 use constant BUS_POS_FIELD        => 6;
 use constant BUS_ORDINAL_FIELD    => 7;
+use constant DIMM_POS_FIELD       => 8;
 
 my @Membuses;
 foreach my $i (@{$memBus->{'memory-bus'}})
@@ -554,7 +658,8 @@ foreach my $i (@{$memBus->{'memory-bus'}})
          "n$i->{dimm}->{target}->{node}:p$i->{dimm}->{target}->{position}",
          $i->{dimm}->{'instance-path'}, $i->{'fsi-link'},
          $i->{mcs}->{target}->{node},
-         $i->{mcs}->{target}->{position}, 0 ];
+         $i->{mcs}->{target}->{position}, 0,
+         $i->{dimm}->{'instance-path'} ]; 
 }
 
 # Sort the memory busses, based on their Node, Pos & instance paths
@@ -991,6 +1096,9 @@ for my $i ( 0 .. $#SMembuses )
     my $dimm = $SMembuses[$i][DIMM_PATH_FIELD];
     $dimm =~ s/.*dimm-(.*)/$1/;
     my $relativeDimmRid = $dimm;
+    my $dimmPos = $SMembuses[$i][DIMM_POS_FIELD];
+    $dimmPos =~ s/.*dimm-(.*)/$1/;
+    my $relativePos = $dimmPos;
     print "\n<!-- C-DIMM n${node}:p${pos} -->\n";
     for my $id ( 0 .. 7 )
     {
@@ -1000,7 +1108,7 @@ for my $i ( 0 .. $#SMembuses )
         $dimmid = sprintf ("%d", $dimmid);
         generate_dimm( $proc, $mcs, $ctaur, $pos, $dimmid, $id,
                              ($SMembuses[$i][BUS_ORDINAL_FIELD]*8)+$id,
-                              $relativeDimmRid);
+                              $relativeDimmRid,$relativePos);
     }
 }
 
@@ -1198,6 +1306,37 @@ sub byPnorNodePos($$)
          if(int($lhsInstance_pos) eq int($rhsInstance_pos))
          {
                 die "ERROR: Duplicate pnor positions: 2 pnors with same
+                    node and position, \
+                    NODE: $lhsInstance_node POSITION: $lhsInstance_pos\n";
+         }
+         elsif(int($lhsInstance_pos) > int($rhsInstance_pos))
+         {
+             $retVal = 1;
+         }
+    }
+    elsif(int($lhsInstance_node) > int($rhsInstance_node))
+    {
+        $retVal = 1;
+    }
+    return $retVal;
+}
+
+################################################################################
+# Compares two proc pcie instances based on the node and position #
+################################################################################
+sub byPcieNodePos($$)
+{
+    my $retVal = -1;
+
+    my $lhsInstance_node = $_[0][PCIE_NODE_INDEX];
+    my $rhsInstance_node = $_[1][PCIE_NODE_INDEX];
+    if(int($lhsInstance_node) eq int($rhsInstance_node))
+    {
+         my $lhsInstance_pos = $_[0][PCIE_POS_INDEX];
+         my $rhsInstance_pos = $_[1][PCIE_POS_INDEX];
+         if(int($lhsInstance_pos) eq int($rhsInstance_pos))
+         {
+                die "ERROR: Duplicate pcie positions: 2 pcie with same
                     node and position, \
                     NODE: $lhsInstance_node POSITION: $lhsInstance_pos\n";
          }
@@ -1822,7 +1961,7 @@ sub generate_proc
     # end PHYP Memory Map
 
     print "    <!-- PROC_PCIE_ attributes -->\n";
-    addProcPcieAttrs( $proc );
+    addProcPcieAttrs( $proc, $node );
     print "    <!-- End PROC_PCIE_ attributes -->\n";
 
     print "
@@ -2516,7 +2655,7 @@ sub generate_mba
 # of the MBA0 chiplet.
 sub generate_dimm
 {
-    my ($proc, $mcs, $ctaur, $pos, $dimm, $id, $ordinalId, $relativeDimmRid)
+    my ($proc, $mcs, $ctaur, $pos, $dimm, $id, $ordinalId, $relativeDimmRid, $relativePos)
         = @_;
 
     my $x = $id;
@@ -2557,7 +2696,7 @@ sub generate_dimm
     # Adjust offset basedon processor value
     $vpdRec = ($proc * 64) + $vpdRec;
 
-    my $dimmHex=sprintf("0xD0%02X",$relativeDimmRid);
+    my $dimmHex=sprintf("0xD0%02X",$relativePos);
     print "
 <targetInstance>
     <id>sys${sys}node${node}dimm$dimm</id>
@@ -2665,55 +2804,50 @@ sub generate_pnor
 
 sub addSysAttrs
 {
-    my $sys = $FapiAttrs->{sys};
-    foreach my $Fapikey (sort keys %{$sys->{attribute}})
+    for my $i (0 .. $#systemAttr)
     {
-        my $delimit = "            ";
-        my $Key = $Fapikey;
-        $Key =~ s/^ATTR_//g;
-        print "    <attribute>\n";
-        print "        <id>$Key</id>\n";
-        print "        <default>\n";
-        foreach my $value (@{$sys->{attribute}{$Fapikey}->{value}})
+        my $j =0;
+        my $sysAttrArraySize=$#{$systemAttr[$i]};
+        while ($j<$sysAttrArraySize)
         {
-            print "${delimit}$value";
-            $delimit = ",";
+            print "    <attribute>\n";
+            print "        <id>$systemAttr[$i][SYS_ATTR_START_INDEX+$j]</id>\n";
+            $j++;
+            print "        <default>\n";
+            print "            $systemAttr[$i][SYS_ATTR_START_INDEX+$j]\n";
+            print "        </default>\n";
+            print "    </attribute>\n";
+            $j++;
         }
-        print "\n";
-        print "        </default>\n";
-        print "    </attribute>\n";
     }
 }
 
 sub addProcPcieAttrs
 {
-    my ($position) = @_;
-    foreach my $pu (@{$FapiAttrs->{pu}})
+    my ($position,$nodeId) = @_;
+
+    for my $i (0 .. $#SortedPcie)
     {
-        if ( $position == $pu->{position} )
+        if (($SortedPcie[$i][PCIE_POS_INDEX] == $position) &&
+            ($SortedPcie[$i][PCIE_NODE_INDEX] == $node) )
         {
-            foreach my $Fapikey (sort keys %{$pu->{attribute}})
+            #found the corresponding proc and node
+            my $j =0;
+            #subtract to from the size because the start position is 2 over
+            my $pcieArraySize=$#{$SortedPcie[$i]}-PCIE_START_INDEX;
+            while ($j<$pcieArraySize)
             {
-                if ($Fapikey =~ /^ATTR_PROC_PCIE/)
-                {
-                    my $delimit = "            ";
-                    my $Key = $Fapikey;
-                    $Key =~ s/^ATTR_//g;
-                    print "    <attribute>\n";
-                    print "        <id>$Key</id>\n";
-                    print "        <default>\n";
-                    foreach my $iop (@{$pu->{attribute}{$Fapikey}->{iop}})
-                    {
-                        foreach my $value (@{$iop->{value}})
-                        {
-                            print "${delimit}$value";
-                            $delimit = ",";
-                        }
-                    }
-                    print "\n";
-                    print "        </default>\n";
-                    print "    </attribute>\n";
-                }
+                print "    <attribute>\n";
+                print "        <id>$SortedPcie[$i][PCIE_START_INDEX+$j]</id>\n";
+                $j++;
+                print "        <default>\n";
+                print "            $SortedPcie[$i][PCIE_START_INDEX+$j]";
+                print ",";
+                $j++;
+                print "$SortedPcie[$i][PCIE_START_INDEX+$j]\n";
+                print "        </default>\n";
+                print "    </attribute>\n";
+                $j++;
             }
         }
     }
