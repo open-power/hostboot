@@ -329,5 +329,32 @@ void iplCleanup()
     return;
 }
 
+//------------------------------------------------------------------------------
+
+errlHndl_t refresh()
+{
+    PRDF_ENTER("PRDF::refresh()");
+
+    errlHndl_t l_errl = NULL;
+
+    if((false == g_initialized) || (NULL == systemPtr))
+    {
+        l_errl = initialize();
+    }
+    else
+    {
+        // System was built so just check and
+        // remove any non-functional chips
+        systemPtr->RemoveNonFunctionalChips();
+    }
+
+    PRDF_EXIT("PRDF::refresh()");
+
+    return l_errl;
+}
+
+//------------------------------------------------------------------------------
+
+
 } // end namespace PRDF
 

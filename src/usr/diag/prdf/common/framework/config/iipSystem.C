@@ -179,6 +179,8 @@ void System::AddDomains(DomainContainerIterator begin,
 
 void System::RemoveStoppedChips(TARGETING::TargetHandle_t i_pchipHandle)
 {
+    PRDF_TRAC("System::RemoveStoppedChips chip: 0x%08x",
+                  PlatServices::getHuid(i_pchipHandle));
     for(DomainContainerType::iterator domainIterator = prioritizedDomains.begin();
         domainIterator != prioritizedDomains.end(); domainIterator++)
     {

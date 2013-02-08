@@ -38,6 +38,7 @@
 #include <initservice/isteps_trace.H>
 
 #include <targeting/attrsync.H>
+#include <diag/prdf/prdfMain.H>
 
 namespace HWAS
 {
@@ -176,7 +177,15 @@ void* host_prd_hwreconfig( void *io_pArgs )
 
     errlHndl_t errl = NULL;
 
-    // stub -- nothing here currently
+    // Call PRDF to remove non-function chips from its system model
+    errl = PRDF::refresh();
+
+    if (errl)
+    {
+        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                  "host_prd_hwreconfig ERROR 0x%.8X returned from"
+                  "  call to PRDF::refresh", errl->reasonCode());
+    }
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                 "host_prd_hwreconfig exit" );

@@ -163,6 +163,13 @@ extern errlHndl_t main(ATTENTION_VALUE_TYPE i_attnType, const AttnList & i_attnL
  */
 extern void iplCleanup();
 
+/**
+ *  @brief Remove non-functional chips from PRD config model
+ *
+ *  @return Error log if error occurs
+ */
+extern errlHndl_t refresh();
+
 } // End namespace PRDF
 
 #endif // __prdfMain_common_H
