@@ -52,11 +52,6 @@ gen_pass:  mkdirs  ${GENDIR}/comps.C ${ERRLPARSE_TARGETS}
 
 code_pass: ${IMGDIR}/errlparser
 
-# errlparserbase and errlusrparser are plugins stuff, not errlparser. 
-# OBJFILES = ${OBJDIR}/errlparserbase.o	${OBJDIR}/errlusrparser.o
-# %.o : %.C
-# 	$(CC) -c  $(CFLAGS) -o $@  $<
-
 mkdirs:
 	mkdir -p ${OBJDIR}
 	mkdir -p ${GENDIR}

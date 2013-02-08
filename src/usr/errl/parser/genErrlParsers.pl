@@ -737,14 +737,19 @@ print OFILE "\# Do not modify this file in the FSP tree, it is provided by\n";
 print OFILE "\# Hostboot and will be overwritten\n";
 print OFILE "\#\n";
 print OFILE "CFLAGS += -DPARSER\n\n";
+print OFILE "EXPLIBS =\n\n";
 
 print OFILE "\#-------------------------------------------------------------\n";
 print OFILE "\# SRC Parsers\n";
 print OFILE "\#-------------------------------------------------------------\n";
 foreach my $compValue (keys %compValueToParseHash)
 {
-    print OFILE "libB-$compValue" . "00.so_OFILES = hbfwSrcParse$compValue.o\n";
-    print OFILE "libB-$compValue" . "00.so_EXTRA_LIBS = libbase.so\n\n";
+    print OFILE ".if ( \$(CONTEXT) != \"x86.nfp\" )\n";
+    print OFILE "\tlibB-$compValue" . "00.so_OFILES = hbfwSrcParse$compValue.o\n";
+    print OFILE "\tlibB-$compValue" . "00.so_EXTRA_LIBS = libbase.so\n\n";
+    print OFILE ".else\n";
+    print OFILE "\tlibB-$compValue" . "00.a_OFILES = hbfwSrcParse$compValue.o\n";
+    print OFILE ".endif\n";
 }
 
 print OFILE "\#-------------------------------------------------------------\n";
@@ -752,18 +757,39 @@ print OFILE "\# User Detail Data Parsers\n";
 print OFILE "\#-------------------------------------------------------------\n";
 foreach my $compValue (keys %compValToUdFilesHash)
 {
-    print OFILE "libB-$compValue" . "00.so_OFILES += $compValToUdFilesHash{$compValue}\n\n";
+        print OFILE ".if ( \$(CONTEXT) != \"x86.nfp\" )\n";
+        print OFILE "libB-$compValue" . "00.so_OFILES += $compValToUdFilesHash{$compValue}\n";
+        print OFILE ".else\n";
+        print OFILE "libB-$compValue" . "00.a_OFILES += $compValToUdFilesHash{$compValue}\n";
+        print OFILE ".endif\n";
+
 }
 
+print OFILE ".if ( \$(CONTEXT) != \"x86.nfp\" )\n";
 print OFILE "\#-------------------------------------------------------------\n";
 print OFILE "\# Shared library for each component\n";
 print OFILE "\#-------------------------------------------------------------\n";
 print OFILE "SHARED_LIBRARIES = ";
-
 foreach my $compValue (keys %compValueToParseHash)
 {
     print OFILE "libB-$compValue" . "00.so ";
 }
+print OFILE "\n.else\n";
+print OFILE "\#-------------------------------------------------------------\n";
+print OFILE "\# x86 mode generate an archive file for each component\n";
+print OFILE "\#-------------------------------------------------------------\n";
+print OFILE "LIBRARIES = ";
+foreach my $compValue (keys %compValueToParseHash)
+{
+    print OFILE "libB-$compValue" . "00.a ";
+}
+print OFILE "\nEXPLIBS = ";
+foreach my $compValue (keys %compValueToParseHash)
+{
+    print OFILE "libB-$compValue" . "00.a ";
+}
+print OFILE "\n.endif\n";
+
 
 print OFILE "\n\n.include<\${RULES_MK}>\n";
 

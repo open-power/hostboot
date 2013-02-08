@@ -37,15 +37,18 @@ OBJECTS_SUBDIRS  += plugins
 EXPLIB_SUBDIRS   += plugins
 EXPSHLIB_SUBDIRS += targeting plugins
 STANDARD_SUBDIRS += targeting plugins
-RUNBVT_SUBDIRS   += 
+RUNBVT_SUBDIRS   +=
 
 INCLUDES = hbdescriptor.H \
            hbterminatetypes.H \
 
 .elseif(${CONTEXT} == "x86.nfp")
 
-.include "makefile.nfp"
-
+EXPINC_SUBDIRS   += plugins
+OBJECTS_SUBDIRS  += plugins
+EXPLIB_SUBDIRS   += plugins
+EXPSHLIB_SUBDIRS += plugins
+STANDARD_SUBDIRS += plugins
 .endif
 
 .include <${RULES_MK}>

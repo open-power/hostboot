@@ -1,26 +1,26 @@
 #!/bin/sh
-#  IBM_PROLOG_BEGIN_TAG
-#  This is an automatically generated prolog.
+# IBM_PROLOG_BEGIN_TAG
+# This is an automatically generated prolog.
 #
-#  $Source: src/build/tools/hb $
+# $Source: src/build/tools/hb $
 #
-#  IBM CONFIDENTIAL
+# IBM CONFIDENTIAL
 #
-#  COPYRIGHT International Business Machines Corp. 2011-2012
+# COPYRIGHT International Business Machines Corp. 2011,2013
 #
-#  p1
+# p1
 #
-#  Object Code Only (OCO) source materials
-#  Licensed Internal Code Source Materials
-#  IBM HostBoot Licensed Internal Code
+# Object Code Only (OCO) source materials
+# Licensed Internal Code Source Materials
+# IBM HostBoot Licensed Internal Code
 #
-#  The source code for this program is not published or other-
-#  wise divested of its trade secrets, irrespective of what has
-#  been deposited with the U.S. Copyright Office.
+# The source code for this program is not published or otherwise
+# divested of its trade secrets, irrespective of what has been
+# deposited with the U.S. Copyright Office.
 #
-#  Origin: 30
+# Origin: 30
 #
-#  IBM_PROLOG_END_TAG
+# IBM_PROLOG_END_TAG
 execute_in_sandbox()
 {
     [ -z "${SANDBOXBASE}" ] && echo "Missing SANDBOXBASE." && exit -1
@@ -383,121 +383,42 @@ hb_copyright_check()
     git diff HEAD~1 --name-only | xargs addCopyright.pl validate
 }
 
-
 hb_errlparser()
 {
-    [ -z "${HOSTBOOTROOT}" ] && echo "Missing HOSTBOOTROOT." && exit -1
     [ -z "${SANDBOXBASE}" ] && echo "Missing SANDBOXBASE." && exit -1
-    [ -z "${SANDBOXNAME}" ] && echo "Missing SANDBOXNAME." && exit -1
     [ -z "${SANDBOXROOT}" ] && echo "Missing SANDBOXROOT." && exit -1
+    [ -z "${SANDBOXNAME}" ] && echo "Missing SANDBOXNAME." && exit -1
+    [ -z "${HOSTBOOTROOT}" ] && echo "Missing HOSTBOOTROOT." && exit -1
 
     DRIVER=`cat ${HOSTBOOTROOT}/src/build/citest/etc/bbuild`
 
-    # sanity checks 
+    # sanity checks
     if [ ! -f ${DRIVER}/src/makefile ]; then
         echo "Cannot reach backing build: $DRIVER. You may need tokens."
         exit -1
     fi
 
-    if [ !  -f  ${HOSTBOOTROOT}/src/include/usr/hbotcompid.H ]; then 
-        echo "Missing \$HOSTBOOTROOT/src/include/usr/hbotcompid.H"
-        exit -1
-    fi
-
-    if [ !  -f  ${HOSTBOOTROOT}/src/include/usr/errl/hberrltypes.H ]; then 
-        echo "Missing \$HOSTBOOTROOT/src/include/usr/errl/hberrltypes.H"
-        exit -1
-    fi
-
-    if [ !  -f  ${HOSTBOOTROOT}/obj/genfiles/hostBootSrcParse.H ]; then 
-        echo "Missing \$HOSTBOOTROOT/obj/genfiles/hostBootSrcParse.H"
-        echo "This is a generated file produced during a Hostboot build."
-        exit -1
-    fi
-
-    # Copy hbotcompid.H to $sb/src/fstp/fsp
-    mkdir -p ${SANDBOXBASE}/src/fstp/fsp
-    cp ${HOSTBOOTROOT}/src/include/usr/hbotcompid.H  ${SANDBOXBASE}/src/fstp/fsp
-
-    # Symlink hbotcompid.H into the export trees. 
-    # TODO: Eventually, this will be done by src/fstp/nfp/makefile, and when 
-    # that's ready, it will require a mk of fstp instead of this.
-    mkdir -p  ${SANDBOXBASE}/export/x86.nfp/fips/include 
-    cd  ${SANDBOXBASE}/export/x86.nfp/fips/include 
-    ln -sf ../../../../src/fstp/fsp/hbotcompid.H
-
-    mkdir -p  ${SANDBOXBASE}/export/ppc/fips/include 
-    cd  ${SANDBOXBASE}/export/ppc/fips/include 
-    ln -sf ../../../../src/fstp/fsp/hbotcompid.H
-
-    # One-time preparation and x86.nfp full build of epub and errl. 
-    if [ !  -f  ${SANDBOXBASE}/src/errl/makefile  ]; then 
-        # First time running 'hb errlparser' 
-        echo "Preparing sandbox ..."
-        rm -fr  ${SANDBOXBASE}/src/epub ;  mkdir -p ${SANDBOXBASE}/src/epub
-        rm -fr  ${SANDBOXBASE}/src/errl ;  mkdir -p ${SANDBOXBASE}/src/errl
-
-        # TODO When the backing build has Hostboot awareness, remove this
-        # copying from Monte's public directory. Requirement SW105241.
-        if [ -d /gsa/ausgsa/home/c/o/copelanm/public/mamatha/errl ]; then
-            # Copy patch version of epub_service_codes.H 
-            cp -a ${DRIVER}/src/epub/*   ${SANDBOXBASE}/src/epub
-            cp  /gsa/ausgsa/home/c/o/copelanm/public/mamatha/epub/fsp/epub_service_codes.H   ${SANDBOXBASE}/src/epub/fsp
-
-            # Copy errl patch.
-            cp -a /gsa/ausgsa/home/c/o/copelanm/public/mamatha/errl/* ${SANDBOXBASE}/src/errl
-        else
-            # Populate with stuff from backing build.
-            cp -a ${DRIVER}/src/epub/*   ${SANDBOXBASE}/src/epub
-            cp -a ${DRIVER}/src/errl/*   ${SANDBOXBASE}/src/errl
-        fi    
-
-        # Trigger a full local build this one time.  
-        # Next time can be a partial build.
-        execute_in_sandbox "cd ${SANDBOXBASE}/src/epub && mk -a"  "x86.nfp"
-        execute_in_sandbox "cd ${SANDBOXBASE}/src/errl && mk -a"  "x86.nfp"
-    fi
-
-    # (Re-)Copy Hostboot plugins sources so they are up to date. 
-    rm -fr ${SANDBOXBASE}/src/plugins
-    mkdir -p ${SANDBOXBASE}/src/plugins
-
-    # Locate and copy plugins directories for Hostboot components.
-    PLUGDIRS=`find  ${HOSTBOOTROOT}/src/usr -name plugins -type d`
-    ALLCOMPS=""
-
-    for D in $PLUGDIRS; do 
-        COMP=`echo $D | sed 's/^.*\/src\/usr\///' | awk '-F/' '{print $1}' `
-        mkdir  ${SANDBOXBASE}/src/plugins/$COMP
-        cp -a  ${HOSTBOOTROOT}/src/usr/$COMP/plugins/*   ${SANDBOXBASE}/src/plugins/$COMP
-        ALLCOMPS="$ALLCOMPS $COMP"
-    done
-
-    # Build a src/plugins/makefile with the component names found above.
-    echo "# This file auto-generated from  ${HOSTBOOTROOT}/src/usr/errl/plugins/makefile.fips" >${SANDBOXBASE}/src/plugins/makefile
-    echo "HBCOMPS=$ALLCOMPS"  >>${SANDBOXBASE}/src/plugins/makefile
-    grep -v "^ *#"  ${HOSTBOOTROOT}/src/usr/errl/plugins/fips.mk >>${SANDBOXBASE}/src/plugins/makefile
-
-    # Copy common plugins.mk included by all plugins makefiles.
-    cp  ${HOSTBOOTROOT}/src/usr/errl/plugins/plugins.mk ${SANDBOXBASE}/src/plugins
-
-    # Clean any libB* symlinks in the export tree.
-    find  ${SANDBOXBASE}/export/x86.nfp/fips/lib -name "libB*" -exec rm {} \;  2>/dev/null
-
-    # Build all libB* plugins from scratch every time. This should not take long.
-    execute_in_sandbox "cd ${SANDBOXBASE}/src/plugins && mk -a" "x86.nfp"
-    
-    # Ensure the errl binary is gone in order to trigger 
-    # a relink to pick up changed libB*.a files 
+    # make sure the srci and errl dirs are present
+    # x86.nfp context
+    mkdir -p ${SANDBOXBASE}/src/srci
     mkdir -p ${SANDBOXBASE}/src/errl
-    mkdir -p ${SANDBOXBASE}/obj/x86.nfp/errl/nfp/tool
-    rm -f ${SANDBOXBASE}/obj/x86.nfp/errl/nfp/tool/errl
-    execute_in_sandbox "cd ${SANDBOXBASE}/src/errl && mk"  "x86.nfp"
-   
-    # Get the x86 errl tool to simics directory 
-    # cp  $SANDBOXBASE/obj/x86.nfp/errl/nfp/tool/errl   $SANDBOXBASE/simics
+
+    # Trigger a build of the hostboot plugins we shipped with the
+    # hb prime cmd.
+    execute_in_sandbox "cd ${SANDBOXBASE}/src/hbfw/ \
+                                             && mk -a "  "x86.nfp"
+
+    # build srci in x86 context
+    execute_in_sandbox "cd ${SANDBOXBASE}/src/srci \
+                                             && mk -a "  "x86.nfp"
+
+    # build errl in x86 context, to pick-up the parser libs from
+    # hostboot.
+    execute_in_sandbox "cd ${SANDBOXBASE}/src/errl \
+                                             && mk -a "  "x86.nfp"
+
     cd ${SANDBOXBASE}/simics
-    ln -sf ../obj/x86.nfp/errl/nfp/tool/errl
+    tar -xvf  $SANDBOXBASE/obj/x86.nfp/errl/nfp/tool/errl.tar  errl
 }
 
 hb_cachesync()
