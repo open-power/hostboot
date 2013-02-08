@@ -169,7 +169,7 @@ namespace Systemcalls
         s->returnRunnable();
         s->setNextRunnable();
 
-        // TODO: Issue 44523 - Temporary workaround for live-lock situation.
+        // This call prevents a live-lock situation.
         CpuManager::executePeriodics(CpuManager::getCurrentCPU());
     }
 
