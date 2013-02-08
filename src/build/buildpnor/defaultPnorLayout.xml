@@ -1,167 +1,156 @@
-<!--  IBM_PROLOG_BEGIN_TAG
-     This is an automatically generated prolog.
-   
-     $Source: src/build/buildpnor/pnorLayout.xml $
-   
-     IBM CONFIDENTIAL
-   
-     COPYRIGHT International Business Machines Corp. 2012
-   
-     p1
-   
-     Object Code Only (OCO) source materials
-     Licensed Internal Code Source Materials
-     IBM HostBoot Licensed Internal Code
-   
-     The source code for this program is not published or other-
-     wise divested of its trade secrets, irrespective of what has
-     been deposited with the U.S. Copyright Office.
-   
-     Origin: 30
-   
-     IBM_PROLOG_END_TAG -->
+<!-- IBM_PROLOG_BEGIN_TAG                                                   -->
+<!-- This is an automatically generated prolog.                             -->
+<!--                                                                        -->
+<!-- $Source: src/build/buildpnor/defaultPnorLayout.xml $                   -->
+<!--                                                                        -->
+<!-- IBM CONFIDENTIAL                                                       -->
+<!--                                                                        -->
+<!-- COPYRIGHT International Business Machines Corp. 2012,2013              -->
+<!--                                                                        -->
+<!-- p1                                                                     -->
+<!--                                                                        -->
+<!-- Object Code Only (OCO) source materials                                -->
+<!-- Licensed Internal Code Source Materials                                -->
+<!-- IBM HostBoot Licensed Internal Code                                    -->
+<!--                                                                        -->
+<!-- The source code for this program is not published or otherwise         -->
+<!-- divested of its trade secrets, irrespective of what has been           -->
+<!-- deposited with the U.S. Copyright Office.                              -->
+<!--                                                                        -->
+<!-- Origin: 30                                                             -->
+<!--                                                                        -->
+<!-- IBM_PROLOG_END_TAG                                                     -->
+<!--
+Layout Description
+<metadata> Element -> Contains high-level information about
+   the PNOR layout.
+    <imageSize> -> Size of PNOR image in bytes.
+    <blockSize> -> size of erase blocks in bytes.
+    <sideAOffset> -> Location of Side A Partition Table
+    <sideBOffset> -> Location of Side B Partition Table
+<section> -> Contains information about a PNOR Partition
+    <description> -> Text description of the partition.
+                     Does not have to be machine readable.
+    <eyeCatch> -> Name of the Partition
+    <physicalOffset> -> Offset of the Partition in PNOR
+                        in bytes.
+    <physicalSize> -> Size of the Partition in bytes.
+    <side> -> Side the partition should be associated with.
+              This determines if the partition should be
+              added to the partition table at <sideAOffset>
+              or <sideBOffset>
+    <testonly/> Indicates partition is used for internal
+                testing only.  Partition should be skipped 
+                 in production environments.
+-->
+
 <pnor>
     <metadata>
         <imageSize>0x4000000</imageSize>
         <blockSize>0x1000</blockSize>
-        <partTableSize>0x1</partTableSize>
-	<sideAOffset>0x0</sideAOffset>
+        <sideAOffset>0x0</sideAOffset>
+        <sideBOffset>0x8000</sideBOffset>
     </metadata>
-    <section>
-        <description>Table of Contents (4K)</description>
-        <eyeCatch>part</eyeCatch>
-        <physicalOffset>0</physicalOffset>
-        <physicalRegionSize>0x1000</physicalRegionSize>
-        <ecc>no</ecc>
-        <source>Blank</source>
-        <sideless>no</sideless>
-    </section>
     <section>
         <description>Hostboot Extended image (5MB)</description>
         <eyeCatch>HBI</eyeCatch>
         <physicalOffset>0x10000</physicalOffset>
         <physicalRegionSize>0x500000</physicalRegionSize>
-        <ecc>no</ecc>
-        <source>File</source>
-        <sideless>no</sideless>
+        <side>A</side>  <!-- Choices: A, B -->
     </section>
     <section>
         <description>Centaur SBE (512K)</description>
         <eyeCatch>SBEC</eyeCatch>
         <physicalOffset>0xA10000</physicalOffset>
         <physicalRegionSize>0x80000</physicalRegionSize>
-        <ecc>no</ecc>
-        <source>Blank</source>
-        <sideless>no</sideless>
+        <side>A</side>  <!-- Choices: A, B -->
     </section>
     <section>
         <description>SBE-IPL (Staging Area) (256K)</description>
         <eyeCatch>SBE</eyeCatch>
         <physicalOffset>0xB10000</physicalOffset>
         <physicalRegionSize>0x40000</physicalRegionSize>
-        <ecc>no</ecc>
-        <source>Blank</source>
-        <sideless>no</sideless>
+        <side>A</side>  <!-- Choices: A, B -->
     </section>
     <section>
         <description>Sleep Winkle Ref Image (1MB)</description>
         <eyeCatch>WINK</eyeCatch>
         <physicalOffset>0xB90000</physicalOffset>
         <physicalRegionSize>0x100000</physicalRegionSize>
-        <ecc>no</ecc>
-        <source>Blank</source>
-        <sideless>no</sideless>
+        <side>A</side>  <!-- Choices: A, B -->
     </section>
     <section>
         <description>Payload (20MB)</description>
         <eyeCatch>PAYLOAD</eyeCatch>
         <physicalOffset>0xD90000</physicalOffset>
         <physicalRegionSize>0x1400000</physicalRegionSize>
-        <ecc>no</ecc>
-        <source>Blank</source>
-        <sideless>no</sideless>
+        <side>A</side>  <!-- Choices: A, B -->
     </section>
     <section>
         <description>Special PNOR Test Space (32K)</description>
         <eyeCatch>TEST</eyeCatch>
         <physicalOffset>0x3590000</physicalOffset>
         <physicalRegionSize>0x8000</physicalRegionSize>
-        <ecc>no</ecc>
-        <source>Blank</source>
-        <sideless>no</sideless>
-        <testonly>yes</testonly>
+        <side>A</side>  <!-- Choices: A, B -->
+        <testonly/>
     </section>
     <section>
         <description>Hostboot Data (1M)</description>
         <eyeCatch>HBD</eyeCatch>
         <physicalOffset>0x3B82000</physicalOffset>
         <physicalRegionSize>0x100000</physicalRegionSize>
-        <ecc>no</ecc>
-        <source>File</source>
-        <sideless>no</sideless>
+        <side>A</side>  <!-- Choices: A, B -->
     </section>
     <section>
         <description>Guard Data (16K)</description>
         <eyeCatch>GUARD</eyeCatch>
         <physicalOffset>0x3D82000</physicalOffset>
         <physicalRegionSize>0x4000</physicalRegionSize>
-        <ecc>no</ecc>
-        <source>Blank</source>
-        <sideless>no</sideless>
+        <side>A</side>  <!-- Choices: A, B -->
     </section>
     <section>
         <description>Hostboot Error Logs (128K)</description>
         <eyeCatch>HBEL</eyeCatch>
         <physicalOffset>0x3D8A000</physicalOffset>
         <physicalRegionSize>0x20000</physicalRegionSize>
-        <ecc>no</ecc>
-        <source>Blank</source>
-        <sideless>no</sideless>
+        <side>A</side>  <!-- Choices: A, B -->
     </section>
     <section>
         <description>DIMM JEDEC (256K)</description>
         <eyeCatch>DJVPD</eyeCatch>
-        <physicalOffset>0x3DCA000</physicalOffset>
+      	<!--NOTE: MUST update standalone.simics if offset changes -->
+         <physicalOffset>0x3DCA000</physicalOffset>
         <physicalRegionSize>0x40000</physicalRegionSize>
-        <ecc>no</ecc>
-        <source>Blank</source>
-        <sideless>yes</sideless>
+        <side>A</side>  <!-- Choices: A, B -->
     </section>
     <section>
         <description>Module VPD (512K)</description>
         <eyeCatch>MVPD</eyeCatch>
+       	<!--NOTE: MUST update standalone.simics if offset changes -->
         <physicalOffset>0x3E0A000</physicalOffset>
         <physicalRegionSize>0x80000</physicalRegionSize>
-        <ecc>no</ecc>
-        <source>Blank</source>
-        <sideless>yes</sideless>
+        <side>A</side>  <!-- Choices: A, B -->
     </section>
     <section>
         <description>Centaur VPD (256K)</description>
         <eyeCatch>CVPD</eyeCatch>
+    	<!--NOTE: MUST update standalone.simics if offset changes -->
         <physicalOffset>0x3E8A000</physicalOffset>
         <physicalRegionSize>0x40000</physicalRegionSize>
-        <ecc>no</ecc>
-        <source>Blank</source>
-        <sideless>yes</sideless>
+        <side>A</side>  <!-- Choices: A, B -->
     </section>
     <section>
         <description>Hostboot Base (576K)</description>
         <eyeCatch>HBB</eyeCatch>
-	<!--NOTE: MUST update standalone.simics if offset changes -->
         <physicalOffset>0x3ECE000</physicalOffset>
         <physicalRegionSize>0x90000</physicalRegionSize>
-        <ecc>no</ecc>
-        <source>File</source>
-        <sideless>no</sideless>
+        <side>A</side>  <!-- Choices: A, B -->
     </section>
     <section>
         <description>Global Data (36K)</description>
         <eyeCatch>GLOBAL</eyeCatch>
         <physicalOffset>0x3FEE000</physicalOffset>
         <physicalRegionSize>0x9000</physicalRegionSize>
-        <ecc>no</ecc>
-        <source>Blank</source>
-        <sideless>no</sideless>
+        <side>A</side>  <!-- Choices: A, B -->
     </section>
 </pnor>

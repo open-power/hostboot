@@ -147,22 +147,6 @@ if($rc != 0)
     exit 1;
 }
 
-#collect Actual image sizes
-$rc = collectActSizes(\%pnorLayout, \%binFiles);
-if($rc != 0)
-{
-    trace(0, "Error detected from call to collectActSizes().  Exiting");
-    exit 1;
-}
-
-#calculates the acutal size of the TOC data and stores it away
-$rc = fillTocActSize($tocVersion, \%pnorLayout);
-if($rc != 0)
-{
-    trace(0, "Error detected from call to fillTocActSize().  Exiting");
-    exit 1;
-}
-
 $rc = checkSpaceConstraints(\%pnorLayout, \%binFiles);
 if($rc != 0)
 {
@@ -212,19 +196,16 @@ sub loadPnorLayout
     {
         my $imageSize = $metadataEl->{imageSize}[0];
         my $blockSize = $metadataEl->{blockSize}[0];
-        my $partTableSize = $metadataEl->{partTableSize}[0];
         my $sideAOffset = $metadataEl->{sideAOffset}[0];
 
-        trace(3, "$this_func: metadata: imageSize = $imageSize, blockSize=$blockSize, partTableSize=$partTableSize, sideAOffset=$sideAOffset");
+        trace(3, "$this_func: metadata: imageSize = $imageSize, blockSize=$blockSize, sideAOffset=$sideAOffset");
 
         $imageSize = getNumber($imageSize);
         $blockSize = getNumber($blockSize);
-        $partTableSize = getNumber($partTableSize);
         $sideAOffset = getNumber($sideAOffset);
 
         $$i_pnorLayoutRef{metadata}{imageSize} = $imageSize;
         $$i_pnorLayoutRef{metadata}{blockSize} = $blockSize;
-        $$i_pnorLayoutRef{metadata}{partTableSize} = $partTableSize;
         $$i_pnorLayoutRef{metadata}{sideAOffset} = $sideAOffset;
     }
 
@@ -236,23 +217,14 @@ sub loadPnorLayout
         my $eyeCatch = $sectionEl->{eyeCatch}[0];
         my $physicalOffset = $sectionEl->{physicalOffset}[0];
         my $physicalRegionSize = $sectionEl->{physicalRegionSize}[0];
-        my $ecc = $sectionEl->{ecc}[0];
-        my $source = $sectionEl->{source}[0];
-        my $sideless = $sectionEl->{sideless}[0];
+        my $side = $sectionEl->{side}[0];
 
         if (($emitTestSections == 0) && ($sectionEl->{testonly}[0] eq "yes"))
         {
             next;
         }
 
-        my $actualRegionSize = 0;
-        if(exists($sectionEl->{actualRegionSize}[0]))
-        {
-            $actualRegionSize = $sectionEl->{actualRegionSize}[0];
-            $actualRegionSize = getNumber($actualRegionSize);
-        }
-
-        trace(3, "$this_func: description = $description, eyeCatch=$eyeCatch, physicalOffset = $physicalOffset, physicalRegionSize=$physicalRegionSize, ecc=$ecc, source=$source, actualRegionSize=$actualRegionSize");
+        trace(3, "$this_func: description = $description, eyeCatch=$eyeCatch, physicalOffset = $physicalOffset, physicalRegionSize=$physicalRegionSize, side=$side");
 
         $physicalOffset = getNumber($physicalOffset);
         $physicalRegionSize = getNumber($physicalRegionSize);
@@ -263,10 +235,7 @@ sub loadPnorLayout
         $$i_pnorLayoutRef{sections}{$physicalOffset}{eyeCatch} = $eyeCatch;
         $$i_pnorLayoutRef{sections}{$physicalOffset}{physicalOffset} = $physicalOffset;
         $$i_pnorLayoutRef{sections}{$physicalOffset}{physicalRegionSize} = $physicalRegionSize;
-        $$i_pnorLayoutRef{sections}{$physicalOffset}{actualRegionSize} = $actualRegionSize;
-        $$i_pnorLayoutRef{sections}{$physicalOffset}{ecc} = $ecc;
-        $$i_pnorLayoutRef{sections}{$physicalOffset}{source} = $source;
-        $$i_pnorLayoutRef{sections}{$physicalOffset}{sideless} = $sideless;
+        $$i_pnorLayoutRef{sections}{$physicalOffset}{side} = $side;
 
     }
 
@@ -328,7 +297,6 @@ sub createPnorImage
         my $eyeCatch = "UNDEF";
         my $physicalOffset = 0xFFFFFFFF;
         my $physicalRegionSize = 0xFFFFFFFF;
-        my $actualRegionSize = 0xFFFFFFFF;
 
         # eyecatcher
         my $eyeCatch = $sectionHash{$key}{eyeCatch};
@@ -380,96 +348,27 @@ sub createPnorImage
             }
         }
 
-        # fill in user words 
-        #User Word 1 - Actual size actual size
-        my $actualRegionSize = $sectionHash{$key}{actualRegionSize};
-        #verify number consumes less than 32 bits
-        if($actualRegionSize > 0xFFFFFFFF)
-        {
-            trace(0, "value=".$actualRegionSize.".  This is greater than 32 bits in hex and not currently supported!. \n Aborting program");
-            $rc = -1;
-            last;
-        }
+        #Disable usewords for now.  Will get re-enabled and fixed up as
+        #we add support for underlying functions
 
-        if($ffsParms == 200)
-        {
+#        if($ffsParms == 200)
+#        {
             #ffs --target tuleta.pnor --partition-offset 0 --name HBI --user 0 --value 0x12345678
-            my $ffsRc = `$g_ffsCmd --target $i_pnorBinName --partition-offset $sideAOffset --name $eyeCatch  --user 0 --value $actualRegionSize`;
-        }
-        else
-        {
+#            my $ffsRc = `$g_ffsCmd --target $i_pnorBinName --partition-offset $sideAOffset --name $eyeCatch  --user 0 --value $actualRegionSize`;
+#        }
+#        else
+#        {
             #ffs --modify tuleta.pnor --partition-offset 0 --name HBI --user 0 --value 0x12345678
-            my $ffsRc = `$g_ffsCmd --modify $i_pnorBinName --partition-offset $sideAOffset --name $eyeCatch  --user 0 --value $actualRegionSize`;
-        }
-        $rc = $?;
-        if($rc)
-        {
-            trace(0, "$this_func: Call to ffs setting user 0 for partition $eyeCatch failed.  rc=$rc.  Aborting!");
-            last;
-        }
+#            my $ffsRc = `$g_ffsCmd --modify $i_pnorBinName --partition-offset $sideAOffset --name $eyeCatch  --user 0 --value $actualRegionSize`;
+#        }
+#        $rc = $?;
+#        if($rc)
+#        {
+#            trace(0, "$this_func: Call to ffs setting user 0 for partition $eyeCatch failed.  rc=$rc.  Aborting!");
+#            last;
+#        }
 
-        #User Word 2-3: Miscellaneous information.
-        #User Word 2, bit 18 indicates sideless.
-        my $miscInfo = 0x00000000;
-        if($sectionHash{$key}{sideless} =~ "yes")
-        {
-            $miscInfo = $miscInfo | 0x00004000;
-        }
-
-        if($ffsParms == 200)
-        {
-            #ffs --target tuleta.pnor --partition-offset 0 --name HBI --user 1 --value 0x12345678
-            my $ffsRc = `$g_ffsCmd --target $i_pnorBinName --partition-offset $sideAOffset --name $eyeCatch  --user 1 --value $miscInfo`;
-        }
-        else
-        {
-            #ffs --modify tuleta.pnor --partition-offset 0 --name HBI --user 1 --value 0x12345678
-            my $ffsRc = `$g_ffsCmd --modify $i_pnorBinName --partition-offset $sideAOffset --name $eyeCatch  --user 1 --value $miscInfo`;
-        }
-        $rc = $?;
-        if($rc)
-        {
-            trace(0, "$this_func: Call to ffs setting user 1 for partition $eyeCatch failed.  rc=$rc.  Aborting!");
-            last;
-        }
     }
-
-    return $rc;
-}
-
-################################################################################
-# fillTocActSize - Fill in the toc actual size record based on number of PNOR records
-################################################################################
-sub fillTocActSize
-{
-    #Note: tocVersion is passed in because the toc Layout version could influence the
-    #rules regarding how the size is calculated.
-    my($i_tocVersion, $i_pnorLayoutRef) = @_;
-    my $this_func = (caller(0))[3];
-    my $rc = 0;
-    my $ffsHeaderSize = 9*4;
-    my $ffsEntrySize = getFFSEntrySize($i_tocVersion, $i_pnorLayoutRef);
-
-    my %sectionHash = %{$$i_pnorLayoutRef{sections}};
-    my $recordCount = scalar keys %sectionHash;
-    my $size = ($recordCount*$ffsEntrySize)+$ffsHeaderSize;
-
-    my $tocLayoutKey = findLayoutKeyByEyeCatch($g_TOCEyeCatch, \%$i_pnorLayoutRef);
-    if( $tocLayoutKey == -1)
-    {
-        trace(0, "$this_func: Unable to find EyeCatcher=$g_TOCEyeCatch in PNOR layout for TOC entry. ");
-        $rc = 1;
-        last;
-    }
-
-    if($$i_pnorLayoutRef{sections}{$tocLayoutKey}{ecc} =~ "yes")
-    {
-        $size=$size*(9/8);
-    }
-
-    trace(2, "$this_func: PNOR FFS contains $recordCount records, total Size=$size");
-    $$i_pnorLayoutRef{sections}{$tocLayoutKey}{actualRegionSize}=$size;
-
 
     return $rc;
 }
@@ -486,37 +385,6 @@ sub robustifyImgs
     #@TODO: maybe a little SHA hashing?
 
     return 0;
-}
-
-################################################################################
-# collectActSizes - walk through all the images and set their actual sizes in the layout
-################################################################################
-sub collectActSizes
-{
-    my ($i_pnorLayoutRef, $i_binFiles) = @_;
-    my $this_func = (caller(0))[3];
-    my $key;
-    my $rc = 0;
-
-    for $key ( keys %{$i_binFiles})
-    {
-        my $filesize = -s $$i_binFiles{$key};
-
-        my $layoutKey = findLayoutKeyByEyeCatch($key, \%$i_pnorLayoutRef);
-        if( $layoutKey == -1)
-        {
-            trace(0, "$this_func: entry not found in PNOR layout for file $$i_binFiles{$key}, under eyecatcher $key");
-            $rc = 1;
-            last;
-        }
-
-        $$i_pnorLayoutRef{sections}{$layoutKey}{actualRegionSize} = $filesize;
-
-        trace(2, "$this_func: $$i_binFiles{$key} size = $$i_pnorLayoutRef{sections}{$layoutKey}{actualRegionSize}");
-
-    }
-
-    return $rc;
 }
 
 ################################################################################
@@ -542,8 +410,7 @@ sub findLayoutKeyByEyeCatch
 }
 
 ################################################################################
-# verifyFilesExist - Verify all the input files exist, and there are files
-#        provided for each PNOR section
+# verifyFilesExist - Verify all the input files exist
 ################################################################################
 sub verifyFilesExist
 {
@@ -574,30 +441,6 @@ sub verifyFilesExist
 
     my %sectionHash = %{$$i_pnorLayoutRef{sections}};
 
-    #Verify there is an input file for each section of PNOR
-    for $key ( keys %sectionHash)
-    {
-        my $eyeCatch = $sectionHash{$key}{eyeCatch};
-
-        #Ignore sections that are marked as blank
-        if($sectionHash{$key}{source} =~ "Blank")
-        {
-            next;
-        }
-        #check if binFiles list has a file for eyeCatcher
-        unless(exists($$i_binFiles{$eyeCatch}))
-        {
-            my $inputFile = $$i_binFiles{$eyeCatch};
-            trace(0, "Input file not provided for PNOR section with eyeCatcher=$eyeCatch.  Aborting!");
-            $rc = 1;
-            last;
-        }
-        else
-        {
-            trace(10, "$this_func: Input file ($$i_binFiles{$eyeCatch}) provided for section $eyeCatch");
-        }
-    }
-
     return $rc;
 }
 
@@ -612,16 +455,25 @@ sub checkSpaceConstraints
     my $key;
 
     my %sectionHash = %{$$i_pnorLayoutRef{sections}};
-    #Verify there is an input file for each section of PNOR
-    for $key ( keys %sectionHash)
-    {
-        my $eyeCatch = $sectionHash{$key}{eyeCatch};
-        my $physicalRegionSize = $sectionHash{$key}{physicalRegionSize};
-        my $actualRegionSize = $sectionHash{$key}{actualRegionSize};
 
-        if($actualRegionSize > $physicalRegionSize)
+    for $key ( keys %{$i_binFiles})
+    {
+        my $filesize = -s $$i_binFiles{$key};
+
+        my $layoutKey = findLayoutKeyByEyeCatch($key, \%$i_pnorLayoutRef);
+        if( $layoutKey == -1)
         {
-            trace(0, "$this_func: Image provided ($$i_binFiles{$eyeCatch}) has size ($actualRegionSize) which is greater than allocated space ($physicalRegionSize) for section=$eyeCatch.  Aborting!");
+            trace(0, "$this_func: entry not found in PNOR layout for file $$i_binFiles{$key}, under eyecatcher $key");
+            $rc = 1;
+            last;
+        }
+
+        my $eyeCatch = $sectionHash{$layoutKey}{eyeCatch};
+        my $physicalRegionSize = $sectionHash{$layoutKey}{physicalRegionSize};
+
+        if($filesize > $physicalRegionSize)
+        {
+            trace(0, "$this_func: Image provided ($$i_binFiles{$eyeCatch}) has size ($filesize) which is greater than allocated space ($physicalRegionSize) for section=$eyeCatch.  Aborting!");
             $rc = 1;
         }
 
@@ -630,7 +482,8 @@ sub checkSpaceConstraints
     return $rc;
 }
 
-################################################################################
+
+###############################################################################
 # fillPnorImage - Load actual PNOR image with data using the provided input images
 ################################################################################
 sub fillPnorImage
@@ -650,10 +503,14 @@ sub fillPnorImage
         trace(3, "$this_func: key=$key");
         my $eyeCatch = $sectionHash{$key}{eyeCatch};
         my $physicalOffset = $sectionHash{$key}{physicalOffset};
-        my $inputFile = $$i_binFiles{$eyeCatch};
+        my $inputFile = "";
 
-        #Ignore sections that are marked as blank
-        if($sectionHash{$key}{source} =~ "Blank")
+        #Only populate sections with input files provided
+        if(exists $$i_binFiles{$eyeCatch})
+        {
+            $inputFile = $$i_binFiles{$eyeCatch};
+        }
+        else
         {
             next;
         }
