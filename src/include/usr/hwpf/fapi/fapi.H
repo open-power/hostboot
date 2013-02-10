@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2012              */
+/* COPYRIGHT International Business Machines Corp. 2011,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -57,5 +57,6 @@
 #include <fapiSetSbeError.H>    // Generated file
 #include <ecmdDataBufferBase.H>
 #include <fapiMvpdAccess.H>
+#include <fapiMBvpdAccess.H>
 
 #endif // FAPI_H_

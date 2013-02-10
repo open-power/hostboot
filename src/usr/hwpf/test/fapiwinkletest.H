@@ -36,7 +36,6 @@
 
 #include    <fapi.H>
 #include    <fapiPlatHwpInvoker.H>
-#include    <hwpf/fapi/fapiMvpdAccess.H>
 
 #include    <targeting/common/commontargeting.H>
 #include    <targeting/common/utilFilter.H>
@@ -60,21 +59,33 @@ class FapiWinkleTest: public CxxTest::TestSuite
 public:
 
     /**
-     * @brief   call fapiGetMvpdField to fetch a #R record.
+     * @brief   call fapiGetMvpdField to fetch a mvpd records.
      *
      */
-    void    testGetMvpdPdr()
+    void    testGetMvpd()
     {
         fapi::ReturnCode    l_fapirc( fapi::FAPI_RC_SUCCESS );
         uint8_t             *l_pdRRecord            =   NULL;
         uint32_t            l_pdRLen                =   0;
 
-        TS_TRACE( "testGetMvpdPdr entry" );
+        // list of MVPD records to test. Need to be in PNOR or procmvpd.dat
+        // when g_usePNOR is false.
+        struct _testMvpdRecords {
+            fapi::MvpdRecord record;
+            fapi::MvpdKeyword keyword;
+        }  l_mvpdRecords[] = {
+            { MVPD_RECORD_CP00, MVPD_KEYWORD_PDG},
+            { MVPD_RECORD_MER0, MVPD_KEYWORD_PDI},
+//          { MVPD_RECORD_VER0, MVPD_KEYWORD_PDI}, //VER0 in spec,not supported
+            { MVPD_RECORD_VWML, MVPD_KEYWORD_PDI},
+        };
+
+        TS_TRACE( "testGetMvpd entry" );
 
         TARGETING::TargetHandleList l_cpuTargetList;
         getAllChips(l_cpuTargetList, TYPE_PROC);
         
-        TS_TRACE( "testGetMvpdPdr l_cpuTargetList.size()= 0x%x ",
+        TS_TRACE( "testGetMvpd l_cpuTargetList.size()= 0x%x ",
                                       l_cpuTargetList.size() );
 
 
@@ -94,48 +105,170 @@ public:
                                           reinterpret_cast<void *>
                    (const_cast<TARGETING::Target*>(l_cpu_target)) );
 
-            TS_TRACE( "call fapiGetMvpdField with NULL pointer" );
+            // loop through mvpd records of interest
+            const uint32_t numRecords =
+                    sizeof(l_mvpdRecords)/sizeof(l_mvpdRecords[0]);
+            for (uint8_t i=0;i<numRecords;i++) {
 
-            //  call fapiGetMvpdField once with a NULL pointer to get the 
-            //  buffer size should return no error now.
-            l_fapirc = fapiGetMvpdField(fapi::MVPD_RECORD_CP00,
-                                        fapi::MVPD_KEYWORD_PDR,
+                TS_TRACE( "record = 0x%x keyword = 0x%x",
+                   l_mvpdRecords[i].record,
+                   l_mvpdRecords[i].keyword);
+
+                TS_TRACE( "call fapiGetMvpdField with NULL pointer" );
+
+                //  call fapiGetMvpdField once with a NULL pointer to get the 
+                //  buffer size should return no error now.
+                l_fapirc = fapiGetMvpdField(l_mvpdRecords[i].record,
+                                        l_mvpdRecords[i].keyword,
                                         l_fapi_cpu_target,
                                         NULL,
                                         l_pdRLen );
-            if ( l_fapirc != fapi::FAPI_RC_SUCCESS )
-            {
-                TS_FAIL( "fapiGetMvpdField:  expected FAPI_RC_SUCCESS" );
-                fapiLogError(l_fapirc);
-                return;
-            }
+                if ( l_fapirc != fapi::FAPI_RC_SUCCESS )
+                {
+                    TS_FAIL( "fapiGetMvpdField:  expected FAPI_RC_SUCCESS" );
+                    fapiLogError(l_fapirc);
+                    return;
+                }
 
-            TS_TRACE( "fapiGetMvpdField: size or #R record = 0x%x",
+                TS_TRACE( "fapiGetMvpdField: size of record = 0x%x",
                       l_pdRLen );
 
-            //  do a malloc instead of a new just for variety
-            l_pdRRecord =   reinterpret_cast<uint8_t *>(malloc(l_pdRLen) );
+                //  do a malloc instead of a new just for variety
+                l_pdRRecord =   reinterpret_cast<uint8_t *>(malloc(l_pdRLen) );
 
-            //  call fapiGetMvpdField once with a valid pointer
-            l_fapirc = fapiGetMvpdField(fapi::MVPD_RECORD_CP00,
-                                        fapi::MVPD_KEYWORD_PDR,
+                //  call fapiGetMvpdField once with a valid pointer
+                l_fapirc = fapiGetMvpdField(l_mvpdRecords[i].record,
+                                        l_mvpdRecords[i].keyword,
                                         l_fapi_cpu_target,
                                         l_pdRRecord,
                                         l_pdRLen );
-            if ( l_fapirc != fapi::FAPI_RC_SUCCESS )
-            {
-                TS_FAIL( "fapiGetMvpdField:  expected FAPI_RC_SUCCESS" );
-                fapiLogError(l_fapirc);
+                if ( l_fapirc != fapi::FAPI_RC_SUCCESS )
+                {
+                    TS_FAIL( "fapiGetMvpdField:  expected FAPI_RC_SUCCESS" );
+                    fapiLogError(l_fapirc);
+                    free( l_pdRRecord );
+                    return;
+                }
+
+                //  clean up memory
                 free( l_pdRRecord );
-                return;
             }
-
-
-            //  clean up memory
-            free( l_pdRRecord );
         }
 
-        TS_TRACE( "testGetMvpdPdr exit" );
+        TS_TRACE( "testGetMvpd exit" );
+    }
+
+    /**
+     * @brief  call fapiGetMBvpdField to fetch memory buffer vpd records.
+     *
+     */
+    void    testGetMBvpd()
+    {
+        fapi::ReturnCode    l_fapirc( fapi::FAPI_RC_SUCCESS );
+        uint8_t             *l_pRecord            =   NULL;
+        uint32_t            l_len                =   0;
+
+        // list of MBVPD records to test
+        struct _testMBvpdRecords {
+            fapi::MBvpdRecord record;
+            fapi::MBvpdKeyword keyword;
+        }  l_mbvpdRecords[] = {
+            { MBVPD_RECORD_VEIR, MBVPD_KEYWORD_PDI},
+//          { MBVPD_RECORD_VER0, MBVPD_KEYWORD_PDI},//in spec, not supported
+            { MBVPD_RECORD_MER0, MBVPD_KEYWORD_PDI},
+        };
+
+        TS_TRACE( "testGetMBvpd entry" );
+
+        TARGETING::TargetHandleList l_memBufList;
+        getAllChips(l_memBufList, TYPE_MEMBUF);
+
+        TS_TRACE( "testGetMBvpd l_memBufList.size()= 0x%x ",
+                                      l_memBufList.size() );
+
+        // loop thru all the memory buffers
+        for (uint8_t l_mbNum=0; l_mbNum < l_memBufList.size(); l_mbNum++ )
+        {
+            //  make a local copy of the memory buffer target
+            TARGETING::Target*  l_mb_target = l_memBufList[l_mbNum];
+
+            //  dump physical path to target
+            EntityPath l_path;
+            l_path  =   l_mb_target->getAttr<ATTR_PHYS_PATH>();
+            l_path.dump();
+
+            // cast OUR type of target to a FAPI type of target.
+            fapi::Target l_fapi_mb_target(
+                                          TARGET_TYPE_MEMBUF_CHIP,
+                                          reinterpret_cast<void *>
+                   (const_cast<TARGETING::Target*>(l_mb_target)) );
+
+            // loop through mvpd records of interest
+            const uint32_t numRecords =
+                    sizeof(l_mbvpdRecords)/sizeof(l_mbvpdRecords[0]);
+            for (uint8_t i=0;i<numRecords;i++) {
+
+                TS_TRACE( "record = 0x%x keyword = 0x%x",
+                   l_mbvpdRecords[i].record,
+                   l_mbvpdRecords[i].keyword);
+
+                TS_TRACE( "call fapiGetMBvpdField with NULL pointer" );
+
+                //  call fapiGetMvpdField once with a NULL pointer to get the 
+                //  buffer size should return no error now.
+                l_fapirc = fapiGetMBvpdField(l_mbvpdRecords[i].record,
+                                        l_mbvpdRecords[i].keyword,
+                                        l_fapi_mb_target,
+                                        NULL,
+                                        l_len );
+                if ( l_fapirc != fapi::FAPI_RC_SUCCESS )
+                {
+                    TS_FAIL( "fapiGetMBvpdField:  expected FAPI_RC_SUCCESS" );
+                    fapiLogError(l_fapirc);
+                    return;
+                }
+
+                TS_TRACE( "fapiGetMBvpdField: size of record = 0x%x",
+                      l_len );
+
+                //  do a malloc instead of a new just for variety
+                l_pRecord =   reinterpret_cast<uint8_t *>(malloc(l_len) );
+
+                //  call fapiGetMvpdField once with a valid pointer
+                l_fapirc = fapiGetMBvpdField(l_mbvpdRecords[i].record,
+                                        l_mbvpdRecords[i].keyword,
+                                        l_fapi_mb_target,
+                                        l_pRecord,
+                                        l_len );
+                if ( l_fapirc != fapi::FAPI_RC_SUCCESS )
+                {
+                    TS_FAIL( "fapiGetMBvpdField:  expected FAPI_RC_SUCCESS" );
+                    fapiLogError(l_fapirc);
+                    free( l_pRecord );
+                    return;
+                }
+
+                //  call fapiSetMvpdField
+                l_fapirc = fapiSetMBvpdField(l_mbvpdRecords[i].record,
+                                        l_mbvpdRecords[i].keyword,
+                                        l_fapi_mb_target,
+                                        l_pRecord,
+                                        l_len );
+                if ( l_fapirc != fapi::FAPI_RC_SUCCESS )
+                {
+                    TS_FAIL( "fapiSetMBvpdField:  expected FAPI_RC_SUCCESS" );
+                    fapiLogError(l_fapirc);
+                    free( l_pRecord );
+                    return;
+                }
+
+                //  clean up memory
+                free( l_pRecord );
+            }
+        }
+
+        TS_TRACE( "testGetMBvpd exit" );
+
     }
 
     // Structure used to save/restore the VPD
@@ -148,7 +281,7 @@ public:
     } saveRestoreData_t;
 
     /**
-     * @brief Fetch Repair Rings
+     * @brief Test get and set of Repair Rings
      */
     void testRepairRings()
     {
@@ -319,7 +452,8 @@ public:
             //  ringId/chipletId, should return error with correct length
             //  and invalid size return code..
             //  ----------------------------------------------------------------
-            TS_TRACE( "testRepairRings: pass buffer too small %d ", i );
+            TS_TRACE( "testRepairRings: pass buffer too small %d ", 
+                    VALID_INDEX );
             l_ringBufsize   =   0x0;
             l_ringId        =   l_ringModifiers[VALID_INDEX].ringIdval;
             l_chipletId     =   l_ringModifiers[VALID_INDEX].chipletIdval;
@@ -337,7 +471,8 @@ public:
             if ( l_fapirc != fapi::RC_REPAIR_RING_INVALID_SIZE )
             {
                 //  note:  "uint32_t" below is an _operator_ of fapi::ReturnCode
-                TS_FAIL("testRepairRings: expect invalid size FAIL: exp=0x%x, act=0x%x, ring=0x%X",
+                TS_FAIL("testRepairRings: expect invalid size FAIL: exp=0x%x,"
+                         " act=0x%x, ring=0x%X",
                          fapi::RC_REPAIR_RING_INVALID_SIZE,
                          static_cast<uint32_t>(l_fapirc),
                          l_ringId);
@@ -346,7 +481,8 @@ public:
             }
             else if ( l_ringBufsize != l_ringModifiers[VALID_INDEX].size )
             {
-                TS_FAIL( "testRepairRings: size mismatch FAIL1 on ring 0x%X: exp=0x%x, act=0x%x",
+                TS_FAIL( "testRepairRings: size mismatch FAIL1 on ring 0x%X:"
+                         " exp=0x%x, act=0x%x",
                          l_ringId,
                          l_ringModifiers[VALID_INDEX].size,
                          l_ringBufsize  );
@@ -356,7 +492,7 @@ public:
             //  Pass in a NULL pointer with a valid ringId/chipletId, should 
             //  return with correct length and successful return code.
             //  ----------------------------------------------------------------
-            TS_TRACE( "testRepairRings: get size of ring %d ", i );
+            TS_TRACE( "testRepairRings: get size of ring %d ", VALID_INDEX );
             l_ringBufsize   =   0x0;
             l_ringId        =   l_ringModifiers[VALID_INDEX].ringIdval;
             l_chipletId     =   l_ringModifiers[VALID_INDEX].chipletIdval;
@@ -382,7 +518,8 @@ public:
             }
             else if ( l_ringBufsize != l_ringModifiers[VALID_INDEX].size )
             {
-                TS_FAIL( "testRepairRings: size mismatch FAIL2 on ring 0x%X: exp=0x%x, act=0x%x",
+                TS_FAIL( "testRepairRings: size mismatch FAIL2 on ring 0x%X:"
+                         " exp=0x%x, act=0x%x",
                          l_ringId,
                          l_ringModifiers[VALID_INDEX].size,
                          l_ringBufsize  );
@@ -412,7 +549,8 @@ public:
                 if ( l_fapirc != l_ringModifiers[i].rc )
                 {
                     // note: uint32_t below is an _operator_ of fapi::ReturnCode
-                    TS_FAIL( "testRepairRings: getMvpdRing rc FAIL 1: rc=0x%x, ring=0x%X, chiplet=0x%X, i=%d",
+                    TS_FAIL( "testRepairRings: getMvpdRing rc FAIL 1: rc=0x%x,"
+                             " ring=0x%X, chiplet=0x%X, i=%d",
                              static_cast<uint32_t>(l_fapirc),
                              l_ringId,
                              l_chipletId,
@@ -428,7 +566,8 @@ public:
 
                 if ( l_ringBufsize != l_ringModifiers[i].size )
                 {
-                    TS_FAIL( "testRepairRings: size mismatch FAIL3 on ring %X: exp=0x%x, act=0x%x",
+                    TS_FAIL( "testRepairRings: size mismatch FAIL3 on ring %X:"
+                             " exp=0x%x, act=0x%x",
                              l_ringId,
                              l_ringModifiers[i].size,
                              l_ringBufsize  );
@@ -464,7 +603,8 @@ public:
             TRACDBIN( g_trac_test, "testRepairRings: updated ring data:",
                       l_pRingBuf,
                       l_ringBufsize );
-            l_fapirc    =   setMvpdRing(  MVPD_RECORD_CP00,
+            setMvpdRing_FP_t (l_setMvpdRing) = &setMvpdRing; //verify typedef
+            l_fapirc    =   (*l_setMvpdRing)(  MVPD_RECORD_CP00,
                                           l_ringModifiers[TEST_INDEX].keyword,
                                           l_fapi_cpu_target,
                                           l_chipletId,
@@ -475,7 +615,8 @@ public:
             if ( l_fapirc != fapi::FAPI_RC_SUCCESS )
             {
                 //  note:  "uint32_t" below is an _operator_ of fapi::ReturnCode
-                TS_FAIL( "testRepairRings: setMvpdRing rc FAIL 1: exp=0x%x, rc=0x%x",
+                TS_FAIL( "testRepairRings: setMvpdRing rc FAIL 1: exp=0x%x,"
+                         " rc=0x%x",
                          fapi::FAPI_RC_SUCCESS,
                          static_cast<uint32_t>(l_fapirc) );            
                 fapiLogError(l_fapirc);
@@ -510,7 +651,8 @@ public:
             if ( l_fapirc != fapi::FAPI_RC_SUCCESS )
             {
                 //  note:  "uint32_t" below is an _operator_ of fapi::ReturnCode
-                TS_FAIL( "testRepairRings: setMvpdRing rc FAIL 2: exp=0x%x, rc=0x%x",
+                TS_FAIL( "testRepairRings: setMvpdRing rc FAIL 2:"
+                         " exp=0x%x, rc=0x%x",
                          fapi::FAPI_RC_SUCCESS,
                          static_cast<uint32_t>(l_fapirc) );
             
@@ -546,7 +688,8 @@ public:
             if ( l_fapirc != fapi::FAPI_RC_SUCCESS )
             {
                 //  note:  "uint32_t" below is an _operator_ of fapi::ReturnCode
-                TS_FAIL( "testRepairRings: setMvpdRing rc FAIL 3: exp=0x%x, rc=0x%x",
+                TS_FAIL( "testRepairRings: setMvpdRing rc FAIL 3: exp=0x%x,"
+                         " rc=0x%x",
                          fapi::FAPI_RC_SUCCESS,
                          static_cast<uint32_t>(l_fapirc) );
             
@@ -588,7 +731,8 @@ public:
             if ( l_fapirc != fapi::FAPI_RC_SUCCESS )
             {
                 //  note:  "uint32_t" below is an _operator_ of fapi::ReturnCode
-                TS_FAIL( "testRepairRings: setMvpdRing rc FAIL 4: exp=0x%x, rc=0x%x",
+                TS_FAIL( "testRepairRings: setMvpdRing rc FAIL 4: exp=0x%x,"
+                         " rc=0x%x",
                          fapi::FAPI_RC_SUCCESS,
                          static_cast<uint32_t>(l_fapirc) );
             
@@ -693,7 +837,8 @@ public:
             if ( l_fapirc != fapi::RC_MVPD_RING_FUNC_INVALID_PARAMETER )
             {
                 //  note:  "uint32_t" below is an _operator_ of fapi::ReturnCode
-                TS_FAIL("testRepairRings:invalid ring size rc FAIL: exp=0x%x, act=0x%x",
+                TS_FAIL("testRepairRings:invalid ring size rc FAIL:"
+                         " exp=0x%x, act=0x%x",
                          fapi::RC_REPAIR_RING_INVALID_SIZE,
                          static_cast<uint32_t>(l_fapirc));
 
@@ -732,7 +877,8 @@ public:
             //  Pass in a NULL pointer with a valid ringId/chipletId, should 
             //  return with correct length and successful return code.
             //  ----------------------------------------------------------------
-            TS_TRACE( "testRepairRings: get size of ring(from set) %d ", TEST_INDEX );
+            TS_TRACE( "testRepairRings: get size of ring(from set) %d ",
+                     TEST_INDEX );
             l_ringBufsize   =   0x0;
             l_ringId        =   l_ringModifiers[TEST_INDEX].ringIdval;
             l_chipletId     =   l_ringModifiers[TEST_INDEX].chipletIdval;
@@ -751,7 +897,8 @@ public:
             if ( l_fapirc != fapi::RC_MVPD_RING_FUNC_INVALID_PARAMETER )
             {
                 //  note:  "uint32_t" below is an _operator_ of fapi::ReturnCode
-                TS_FAIL( "testRepairRings: setMvpdRing rc FAIL 5: exp=0x%x, act=0x%x",
+                TS_FAIL( "testRepairRings: setMvpdRing rc FAIL 5:"
+                         " exp=0x%x, act=0x%x",
                          fapi::RC_MVPD_RING_FUNC_INVALID_PARAMETER,
                          static_cast<uint32_t>(l_fapirc));
 
@@ -764,7 +911,8 @@ public:
             l_ringBufsize   =   l_bufsize;
             l_ringId        =   l_ringModifiers[TEST_INDEX].ringIdval;
             l_chipletId     =   0x22;
-            TS_TRACE("testRepairRing:invalid chiplet ring=0x%X chiplet=0x%X size=0x%x",
+            TS_TRACE("testRepairRing:invalid chiplet ring=0x%X chiplet=0x%X"
+                      " size=0x%x",
                       l_ringId,
                       l_chipletId,
                       l_ringBufsize );
@@ -779,7 +927,8 @@ public:
             if ( l_fapirc != fapi::RC_REPAIR_RING_NOT_FOUND )
             {
                 //  note:  "uint32_t" below is an _operator_ of fapi::ReturnCode
-                TS_FAIL("testRepairRings:invalid chipletid rc FAIL: exp=0x%x, act=0x%x",
+                TS_FAIL("testRepairRings:invalid chipletid rc FAIL:"
+                         " exp=0x%x, act=0x%x",
                          fapi::RC_REPAIR_RING_NOT_FOUND,
                          static_cast<uint32_t>(l_fapirc));
 
@@ -804,7 +953,7 @@ public:
                                         sv->CP00_pdG,
                                         sv->CP00_pdG_size,
                                         DEVICE_MVPD_ADDRESS( MVPD_RECORD_CP00,
-                                                             MVPD_KEYWORD_PDG ) );
+                                                          MVPD_KEYWORD_PDG ) );
                 if( l_errhdl )
                 {
                     TS_FAIL("Error restoring CP00/#G to %.8X",
@@ -821,7 +970,7 @@ public:
                                         sv->CP00_pdR,
                                         sv->CP00_pdR_size,
                                         DEVICE_MVPD_ADDRESS( MVPD_RECORD_CP00,
-                                                             MVPD_KEYWORD_PDR ) );
+                                                          MVPD_KEYWORD_PDR ) );
                 if( l_errhdl )
                 {
                     TS_FAIL("Error restoring CP00/#R to %.8X",

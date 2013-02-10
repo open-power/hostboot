@@ -79,7 +79,7 @@ namespace fapi
         MOD_EXIT_CACHE_CONTAINED                   = 0x28,
         MOD_GET_CACHE_DECONFIG                     = 0x29,
         MOD_FAPI_GET_OTHER_SIDE_OF_MEM_CHANNEL     = 0x2A,
-
+        MOD_MBVPD_ACCESS                           = 0x2B,
     };
 
     /**

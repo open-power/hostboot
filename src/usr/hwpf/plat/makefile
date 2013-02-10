@@ -5,7 +5,7 @@
 #
 # IBM CONFIDENTIAL
 #
-# COPYRIGHT International Business Machines Corp. 2011,2012
+# COPYRIGHT International Business Machines Corp. 2011,2013
 #
 # p1
 #
@@ -36,6 +36,7 @@ OBJS = fapiPlatHwAccess.o \
        fapiPlatUtil.o \
        fapiPlatAttributeService.o \
        fapiPlatMvpdAccess.o \
+       fapiPlatMBvpdAccess.o \
        fapiPlatTask.o \
        fapiPlatAttrOverrideSync.o
 

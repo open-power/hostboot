@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/hwpf/plat/fapiPlatMvpdAccess.C $                      */
+/* $Source: src/usr/hwpf/plat/fapiPlatMBvpdAccess.C $                      */
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
@@ -21,190 +21,126 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 /**
- *  @file fapiPlatMvpdAccess.C
+ *  @file fapiPlatMBvpdAccess.C
  *
- *  @brief Implements the fapiMvpdAccess.H functions
+ *  @brief Implements the fapiMBvpdAccess.H functions
  */
 
 #include    <stdint.h>
 #include    <errl/errlentry.H>
 
 //  fapi support
-#include <fapiMvpdAccess.H>
 #include <hwpf/hwpf_reasoncodes.H>
+#include <fapiMBvpdAccess.H>
 
-//  MVPD
+//  MBVPD
 #include <devicefw/userif.H>
-#include <vpd/mvpdenums.H>
+#include <vpd/cvpdenums.H>
 
 
 namespace fapi
 {
 
 //******************************************************************************
-// MvpdRecordXlate
-// Translates a FAPI MVPD Record enumerator into a Hostboot MVPD Record
+// MBvpdRecordXlate
+// Translates a FAPI MBVPD Record enumerator into a Hostboot MBVPD Record
 // enumerator
 //******************************************************************************
-fapi::ReturnCode MvpdRecordXlate(const fapi::MvpdRecord i_fapiRecord,
-                                 MVPD::mvpdRecord & o_hbRecord)
+fapi::ReturnCode MBvpdRecordXlate(const fapi::MBvpdRecord i_fapiRecord,
+                                 CVPD::cvpdRecord & o_hbRecord)
 {
-    // Create a lookup table for converting a FAPI MVPD record enumerator to a
-    // Hostboot MVPD record enumerator. This is a simple array and relies on
+    // Create a lookup table for converting a FAPI MBVPD record enumerator to a
+    // Hostboot CVPD record enumerator. This is a simple array and relies on
     // the FAPI record enumerators starting at zero and incrementing.
-    static const MVPD::mvpdRecord mvpdFapiRecordToHbRecord[] =
+    static const CVPD::cvpdRecord
+                  mbvpdFapiRecordToHbRecord[] =
     {
-        MVPD::CRP0,
-        MVPD::CP00,
-        MVPD::VINI,
-        MVPD::LRP0,
-        MVPD::LRP1,
-        MVPD::LRP2,
-        MVPD::LRP3,
-        MVPD::LRP4,
-        MVPD::LRP5,
-        MVPD::LRP6,
-        MVPD::LRP7,
-        MVPD::LRP8,
-        MVPD::LRP9,
-        MVPD::LRPA,
-        MVPD::LRPB,
-        MVPD::LRPC,
-        MVPD::LRPD,
-        MVPD::LRPE,
-        MVPD::LWP0,
-        MVPD::LWP1,
-        MVPD::LWP2,
-        MVPD::LWP3,
-        MVPD::LWP4,
-        MVPD::LWP5,
-        MVPD::LWP6,
-        MVPD::LWP7,
-        MVPD::LWP8,
-        MVPD::LWP9,
-        MVPD::LWPA,
-        MVPD::LWPB,
-        MVPD::LWPC,
-        MVPD::LWPD,
-        MVPD::LWPE,
-        MVPD::VWML,
-        MVPD::MER0,
+        CVPD::VEIR,
+        CVPD::VER0,
+        CVPD::MER0,
     };
-    const uint8_t NUM_MVPD_RECORDS = 
-           sizeof(mvpdFapiRecordToHbRecord)/sizeof(mvpdFapiRecordToHbRecord[0]);
-    
+    const uint8_t NUM_MBVPD_RECORDS =
+        sizeof(mbvpdFapiRecordToHbRecord)/sizeof(mbvpdFapiRecordToHbRecord[0]);
+
     fapi::ReturnCode l_rc;
-    
+
     uint8_t l_index = static_cast<uint8_t>(i_fapiRecord);
-    
-    if (l_index >= NUM_MVPD_RECORDS)
+
+    if (l_index >= NUM_MBVPD_RECORDS)
     {
-        FAPI_ERR("MvpdRecordXlate: Invalid MVPD Record: 0x%x", i_fapiRecord);
+        FAPI_ERR("MBvpdRecordXlate: Invalid MBVPD Record: 0x%x", i_fapiRecord);
         /*@
          * @errortype
-         * @moduleid     MOD_MVPD_ACCESS
+         * @moduleid     MOD_MBVPD_ACCESS
          * @reasoncode   RC_INVALID_RECORD
          * @userdata1    Record enumerator
          * @devdesc      Attempt to read an MVPD field using an invalid record
          */
         errlHndl_t l_errl = new ERRORLOG::ErrlEntry(
             ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-            fapi::MOD_MVPD_ACCESS,
-            fapi::RC_INVALID_RECORD,
+            MOD_MBVPD_ACCESS,
+            RC_INVALID_RECORD,
             i_fapiRecord);
-        
+
         // Add the error log pointer as data to the ReturnCode
         l_rc.setPlatError(reinterpret_cast<void *> (l_errl));
     }
     else
     {
-        o_hbRecord = mvpdFapiRecordToHbRecord[l_index];
+        o_hbRecord = mbvpdFapiRecordToHbRecord[l_index];
     }
-    
+
     return l_rc;
 }
 
 //******************************************************************************
-// MvpdKeywordXlate
-// Translates a FAPI MVPD Keyword enumerator into a Hostboot MVPD Keyword
+// MBvpdKeywordXlate
+// Translates a FAPI MBVPD Keyword enumerator into a Hostboot CVPD Keyword
 // enumerator
 //******************************************************************************
-fapi::ReturnCode MvpdKeywordXlate(const fapi::MvpdKeyword i_fapiKeyword,
-                                  MVPD::mvpdKeyword & o_hbKeyword)
+fapi::ReturnCode MBvpdKeywordXlate(const fapi::MBvpdKeyword i_fapiKeyword,
+                                  CVPD::cvpdKeyword & o_hbKeyword)
 {
-    // Create a lookup table for converting a FAPI MVPD keyword enumerator to a
-    // Hostboot MVPD keyword enumerator. This is a simple array and relies on
+    // Create a lookup table for converting a FAPI MBVPD keyword enumerator to a
+    // Hostboot CVPD keyword enumerator. This is a simple array and relies on
     // the FAPI record enumerators starting at zero and incrementing.
-    static const MVPD::mvpdKeyword
-        mvpdFapiKeywordToHbKeyword[] =
+    static const CVPD::cvpdKeyword
+        mbvpdFapiKeywordToHbKeyword[] =
     {
-        MVPD::VD,
-        MVPD::ED,
-        MVPD::TE,
-        MVPD::DD,
-        MVPD::pdP,
-        MVPD::ST,
-        MVPD::DN,
-        MVPD::PG,
-        MVPD::PK,
-        MVPD::pdR,
-        MVPD::pdV,
-        MVPD::pdH,
-        MVPD::SB,
-        MVPD::DR,
-        MVPD::VZ,
-        MVPD::CC,
-        MVPD::CE,
-        MVPD::FN,
-        MVPD::PN,
-        MVPD::SN,
-        MVPD::PR,
-        MVPD::HE,
-        MVPD::CT,
-        MVPD::HW,
-        MVPD::pdM,
-        MVPD::IN,
-        MVPD::pd2,
-        MVPD::pd3,
-        MVPD::OC,
-        MVPD::FO,
-        MVPD::pdI,
-        MVPD::pdG,
-        MVPD::MK,
-        MVPD::PB,
-        MVPD::CH,
+        CVPD::pdI,
     };
-    const uint8_t NUM_MVPD_KEYWORDS = 
-       sizeof(mvpdFapiKeywordToHbKeyword)/sizeof(mvpdFapiKeywordToHbKeyword[0]);
-    
+    const uint8_t NUM_MBVPD_KEYWORDS =
+     sizeof(mbvpdFapiKeywordToHbKeyword)/sizeof(mbvpdFapiKeywordToHbKeyword[0]);
+
     fapi::ReturnCode l_rc;
-    
+
     uint8_t l_index = static_cast<uint8_t>(i_fapiKeyword);
-    
-    if (l_index >= NUM_MVPD_KEYWORDS)
+
+    if (l_index >= NUM_MBVPD_KEYWORDS)
     {
-        FAPI_ERR("MvpdKeywordXlate: Invalid MVPD Keyword: 0x%x", i_fapiKeyword);
+        FAPI_ERR("MbvpdKeywordXlate: Invalid MVPD Keyword: 0x%x",
+                i_fapiKeyword);
         /*@
          * @errortype
-         * @moduleid     MOD_MVPD_ACCESS
+         * @moduleid     MOD_MBVPD_ACCESS
          * @reasoncode   RC_INVALID_KEYWORD
          * @userdata1    Keyword enumerator
          * @devdesc      Attempt to read an MVPD field using an invalid keyword
          */
         errlHndl_t l_errl = new ERRORLOG::ErrlEntry(
             ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-            fapi::MOD_MVPD_ACCESS,
-            fapi::RC_INVALID_KEYWORD,
+            MOD_MBVPD_ACCESS,
+            RC_INVALID_KEYWORD,
             i_fapiKeyword);
-        
+
         // Add the error log pointer as data to the ReturnCode
         l_rc.setPlatError(reinterpret_cast<void *> (l_errl));
     }
     else
     {
-        o_hbKeyword = mvpdFapiKeywordToHbKeyword[l_index];
+        o_hbKeyword = mbvpdFapiKeywordToHbKeyword[l_index];
     }
-    
+
     return l_rc;
 }
 
@@ -214,52 +150,52 @@ extern "C"
 {
 
 //******************************************************************************
-// fapiGetMvpdField
+// fapiGetMBvpdField
 //******************************************************************************
-fapi::ReturnCode fapiGetMvpdField(const fapi::MvpdRecord i_record,
-                                  const fapi::MvpdKeyword i_keyword,
-                                  const fapi::Target &i_procTarget,
+fapi::ReturnCode fapiGetMBvpdField(const fapi::MBvpdRecord i_record,
+                                  const fapi::MBvpdKeyword i_keyword,
+                                  const fapi::Target &i_memBufTarget,
                                   uint8_t * const i_pBuffer,
                                   uint32_t &io_fieldSize)
 {
     fapi::ReturnCode l_rc;
-    FAPI_DBG("fapiGetMvpdField entry");
+    FAPI_DBG("fapiGetMBvpdField entry");
 
     do
     {
         // Translate the FAPI record to a Hostboot record
-        MVPD::mvpdRecord l_hbRecord = MVPD::MVPD_INVALID_RECORD;
-        
-        l_rc = fapi::MvpdRecordXlate(i_record, l_hbRecord);
-        
+        CVPD::cvpdRecord l_hbRecord = CVPD::CVPD_INVALID_RECORD;
+
+        l_rc = fapi::MBvpdRecordXlate(i_record, l_hbRecord);
+
         if (l_rc)
         {
             break;
         }
-        
+
         // Translate the FAPI keyword to a Hostboot keyword
-        MVPD::mvpdKeyword l_hbKeyword = MVPD::INVALID_MVPD_KEYWORD;
-        
-        l_rc = fapi::MvpdKeywordXlate(i_keyword, l_hbKeyword);
-        
+        CVPD::cvpdKeyword l_hbKeyword = CVPD::CVPD_INVALID_KEYWORD;
+
+        l_rc = fapi::MBvpdKeywordXlate(i_keyword, l_hbKeyword);
+
         if (l_rc)
         {
             break;
         }
-                
+
         // Similarly to this function, deviceRead will return the size of the
         // field if the pointer is NULL
         size_t l_fieldLen = io_fieldSize;
 
         errlHndl_t l_errl = deviceRead(
-            reinterpret_cast< TARGETING::Target*>(i_procTarget.get()),
+            reinterpret_cast< TARGETING::Target*>(i_memBufTarget.get()),
             i_pBuffer,
             l_fieldLen,
-            DEVICE_MVPD_ADDRESS(l_hbRecord, l_hbKeyword));
-        
+            DEVICE_CVPD_ADDRESS(l_hbRecord, l_hbKeyword));
+ 
         if (l_errl)
         {
-            FAPI_ERR("fapiGetMvpdField: ERROR: deviceRead : errorlog PLID=0x%x",
+            FAPI_ERR("fapGetMBvpdField: ERROR: deviceRead : errorlog PLID=0x%x",
                      l_errl->plid());
 
             // Add the error log pointer as data to the ReturnCode
@@ -271,60 +207,60 @@ fapi::ReturnCode fapiGetMvpdField(const fapi::MvpdRecord i_record,
         // Success, update callers io_fieldSize for the case where the pointer
         // is NULL and deviceRead returned the actual size
         io_fieldSize = l_fieldLen;
-        FAPI_DBG("fapiGetMvpdField: returning field len=0x%x", io_fieldSize);
+        FAPI_DBG("fapGetMBvpdField: returning field len=0x%x", io_fieldSize);
 
     } while(0);
 
-    FAPI_DBG( "fapiGetMvpdField: exit" );
+    FAPI_DBG( "fapGetMBvpdField: exit" );
 
     return  l_rc;
 }
 
 //******************************************************************************
-// fapiSetMvpdField
+// fapSetMBvpdField
 //******************************************************************************
-fapi::ReturnCode fapiSetMvpdField(const fapi::MvpdRecord i_record,
-                                  const fapi::MvpdKeyword i_keyword,
-                                  const fapi::Target &i_procTarget,
+fapi::ReturnCode fapiSetMBvpdField(const fapi::MBvpdRecord i_record,
+                                  const fapi::MBvpdKeyword i_keyword,
+                                  const fapi::Target &i_memBufTarget,
                                   const uint8_t * const i_pBuffer,
                                   const uint32_t i_fieldSize)
 {
     fapi::ReturnCode l_rc;
-    FAPI_DBG("fapiSetMvpdField entry");
+    FAPI_DBG("fapiSetMBvpdField entry");
 
     do
     {
         // Translate the FAPI record to a Hostboot record
-        MVPD::mvpdRecord l_hbRecord = MVPD::MVPD_INVALID_RECORD;
-        
-        l_rc = fapi::MvpdRecordXlate(i_record, l_hbRecord);
-        
+        CVPD::cvpdRecord l_hbRecord = CVPD::CVPD_INVALID_RECORD;
+
+        l_rc = fapi::MBvpdRecordXlate(i_record, l_hbRecord);
+
         if (l_rc)
         {
             break;
         }
-        
+
         // Translate the FAPI keyword to a Hostboot keyword
-        MVPD::mvpdKeyword l_hbKeyword = MVPD::INVALID_MVPD_KEYWORD;
-        
-        l_rc = fapi::MvpdKeywordXlate(i_keyword, l_hbKeyword);
-        
+        CVPD::cvpdKeyword l_hbKeyword = CVPD::CVPD_INVALID_KEYWORD;
+
+        l_rc = fapi::MBvpdKeywordXlate(i_keyword, l_hbKeyword);
+ 
         if (l_rc)
         {
             break;
         }
-                
+
         size_t l_fieldLen = i_fieldSize;
 
         errlHndl_t l_errl = deviceWrite(
-            reinterpret_cast< TARGETING::Target*>(i_procTarget.get()),
+            reinterpret_cast< TARGETING::Target*>(i_memBufTarget.get()),
             const_cast<uint8_t *>(i_pBuffer),
             l_fieldLen,
-            DEVICE_MVPD_ADDRESS(l_hbRecord, l_hbKeyword));
-        
+            DEVICE_CVPD_ADDRESS(l_hbRecord, l_hbKeyword));
+
         if (l_errl)
         {
-            FAPI_ERR("fapiSetMvpdField: ERROR: deviceWrite : errorlog PLID=0x%x",
+            FAPI_ERR("fapSetMBvpdField: ERROR:deviceWrite : errorlog PLID=0x%x",
                      l_errl->plid());
 
             // Add the error log pointer as data to the ReturnCode
@@ -335,7 +271,7 @@ fapi::ReturnCode fapiSetMvpdField(const fapi::MvpdRecord i_record,
 
     } while(0);
 
-    FAPI_DBG( "fapiSetMvpdField: exit" );
+    FAPI_DBG( "fapSetMBvpdField: exit" );
 
     return  l_rc;
 }
