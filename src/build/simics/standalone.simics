@@ -18,3 +18,25 @@ p8Proc0.proc_lbus_map.write 0x28e0 0x0000FBFF  #NonFunc EX (only 5 is good)
 p8Proc0.proc_lbus_map.write 0x2848 0x00000FFF  #GP3 0x2812 (flush) 
 p8Proc0.proc_lbus_map.write 0x2870 0x10000000  #SBE Vital 0x281C (load) 
 p8Proc0.proc_lbus_map.write 0x2870 0x90000000  #SBE Vital 0x281C (start)
+
+###################################
+#Configure SFC (mimmic FSP Setup)
+###################################
+echo "Configure SFC"
+
+#Direct Read window config
+fpga0.sfc_master->regs_OADRNB = 0xC000000
+fpga0.sfc_master->regs_ADRCBF = 0x0
+fpga0.sfc_master->regs_ADRCMF = 0xF
+
+#Direct Access Cache Disable 
+fpga0.sfc_master->regs_CONF = 0x00000002
+
+#Small Erase op code
+fpga0.sfc_master->regs_CONF4 = 0x00000020
+#Erase Size
+fpga0.sfc_master->regs_CONF5 = 0x1000
+
+#Enable 4 byte address mode - must write via memory to trigger 
+#model behavior
+fpga0.fsi_local_lbus_map.write 0xC40 0x00006E00

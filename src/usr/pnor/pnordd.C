@@ -42,6 +42,7 @@
 #include <pnor/pnorif.H>
 #include <pnor/pnor_reasoncodes.H>
 #include <sys/time.h>
+#include <initservice/initserviceif.H>
 
 // Uncomment this to enable smart writing
 //#define SMART_WRITE
@@ -435,6 +436,35 @@ void PnorDD::sfcInit( )
 
         if(!cv_sfcInitDone)
         {
+#define PNORDD_FSPATTACHED
+#ifdef PNORDD_FSPATTACHED
+
+            //TODO: Remove with RTC: 64398.
+            //Delayed removing until FSP performs this setup.
+            l_err = writeRegSfc(SFC_CMD_SPACE,
+                                SFC_REG_CONF,
+                                conf_init);
+            if(l_err) { break; }
+            //END TODO: RTC: 64398
+
+            //Determine NOR Flash type - triggers vendor specific workarounds
+            //We also use the chipID in some FFDC situations.
+            l_err = getNORChipId(cv_nor_chipid);
+            TRACFCOMP(g_trac_pnor,
+                      "PnorDD::sfcInit: cv_nor_chipid=0x%.8x> ",
+                      cv_nor_chipid );
+
+
+            l_err = readRegSfc(SFC_CMD_SPACE,
+                                SFC_REG_ERASMS,
+                               iv_erasesize_bytes);
+            if(l_err) { break; }
+
+            cv_sfcInitDone = true;
+
+#else
+//SPLESS system - not official supported, but keeping framework in place
+//for possible future use.
             l_err = writeRegSfc(SFC_CMD_SPACE,
                                 SFC_REG_OADRNB,
                                 oadrnb_init);
@@ -466,11 +496,8 @@ void PnorDD::sfcInit( )
                       "PnorDD::sfcInit: cv_nor_chipid=0x%.8x> ",
                       cv_nor_chipid );
 
-            //TODO: Need to add support for VPO (RTC: 42325), 
-            //      Spansion NOR (RTC: 42326),, Macronix (RTC: 42330)
-            //      There will probably be some overlap between those 
-            //      stories, but keeping them all separate for now to
-            //      ensure everything is covered
+            //A proper SPLESS implementation would require enhancements for
+            //Supported NOR Vendors
             if(MICRON_NOR_ID == cv_nor_chipid)  /* Simics currently Micron */
             {
                 TRACFCOMP(g_trac_pnor,
@@ -509,26 +536,19 @@ void PnorDD::sfcInit( )
             }
             else
             {
-                TRACFCOMP( g_trac_pnor, "PnorDD::sfcInit> Unsupported NOR type detected : cv_nor_chipid=%.4X", cv_nor_chipid );
-                /*@
-                 * @errortype
-                 * @moduleid     PNOR::MOD_PNORDD_SFCINIT
-                 * @reasoncode   PNOR::RC_UNSUPORTED_HARDWARE
-                 * @userdata1    NOR Flash Chip ID
-                 * @userdata2    <not used>
-                 * @devdesc      PnorDD::sfcInit>
-                 */
-                l_err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                                PNOR::MOD_PNORDD_SFCINIT,
-                                                PNOR::RC_UNSUPORTED_HARDWARE,
-                                                TO_UINT64(cv_nor_chipid));
-                //@todo: Leave FFDC Breadcrumbs and assert on unsupported chip...  RTC: 44146.
+                TRACFCOMP( g_trac_pnor,  ERR_MRK
+                           "PnorDD::sfcInit> Unsupported NOR type detected : cv_nor_chipid=%.4X",
+                           cv_nor_chipid );
+
+                //Shutdown if we detect unsupported Hardware
+                INITSERVICE::doShutdown( PNOR::RC_UNSUPORTED_HARDWARE);
+
                 //Set chip ID back to zero to avoid later chip specific logic.
                 cv_nor_chipid = 0;
             }
 
             cv_sfcInitDone = true;
-
+#endif
         }
 
     }while(0);
@@ -569,18 +589,34 @@ errlHndl_t PnorDD::writeRegSfc(SfcRange i_range,
     errlHndl_t l_err = NULL;
     uint32_t lpc_addr;
 
-    if(SFC_CMD_SPACE == i_range)
+    switch(i_range)
     {
-        lpc_addr = LPC_SFC_CMDREG_OFFSET | i_addr;
-    }
-    else if (SFC_CMDBUF_SPACE == i_range)
-    {
-        lpc_addr = LPC_SFC_CMDBUF_OFFSET | i_addr;
-    }
-    else
-    {
-        lpc_addr = LPC_SFC_MMIO_OFFSET | i_addr;
-    }
+    case SFC_MMIO_SPACE:
+        {
+            lpc_addr = LPC_SFC_MMIO_OFFSET | i_addr;
+            break;
+        }
+    case SFC_CMD_SPACE:
+        {
+            lpc_addr = LPC_SFC_CMDREG_OFFSET | i_addr;
+            break;
+        }
+    case SFC_CMDBUF_SPACE:
+        {
+            lpc_addr = LPC_SFC_CMDBUF_OFFSET | i_addr;
+            break;
+        }
+    default:
+        {
+            TRACFCOMP(g_trac_pnor, ERR_MRK
+                      "PnorDD::writeRegSfc> Unsupported SFC Address Range: i_range=0x%.16X, i_addr=0x%.8X",
+                      i_range, i_addr);
+
+            //Can't function without PNOR, initiate shutdown.
+            INITSERVICE::doShutdown( PNOR::RC_UNSUPPORTED_SFCRANGE);
+            break;
+        }
+    } //end switch
 
     TRACDCOMP( g_trac_pnor, "PnorDD::writeRegSfc> lpc_addr=0x%.8x, i_data=0x%.8x",
                lpc_addr, i_data );
@@ -599,18 +635,34 @@ errlHndl_t PnorDD::readRegSfc(SfcRange i_range,
     errlHndl_t l_err = NULL;
     uint32_t lpc_addr;
 
-    if(SFC_CMD_SPACE == i_range)
+    switch(i_range)
     {
-        lpc_addr = LPC_SFC_CMDREG_OFFSET | i_addr;
-    }
-    else if (SFC_CMDBUF_SPACE == i_range)
-    {
-        lpc_addr = LPC_SFC_CMDBUF_OFFSET | i_addr;
-    }
-    else
-    {
-        lpc_addr = LPC_SFC_MMIO_OFFSET | i_addr;
-    }
+    case SFC_MMIO_SPACE:
+        {
+            lpc_addr = LPC_SFC_MMIO_OFFSET | i_addr;
+            break;
+        }
+    case SFC_CMD_SPACE:
+        {
+            lpc_addr = LPC_SFC_CMDREG_OFFSET | i_addr;
+            break;
+        }
+    case SFC_CMDBUF_SPACE:
+        {
+            lpc_addr = LPC_SFC_CMDBUF_OFFSET | i_addr;
+            break;
+        }
+    default:
+        {
+            TRACFCOMP(g_trac_pnor, ERR_MRK
+                      "PnorDD::readRegSfc> Unsupported SFC Address Range: i_range=0x%.16X, i_addr=0x%.8X",
+                      i_range, i_addr);
+
+            //Can't function without PNOR, initiate shutdown.
+            INITSERVICE::doShutdown( PNOR::RC_UNSUPPORTED_SFCRANGE);
+            break;
+        }
+    } //end switch
 
     l_err = readLPC(lpc_addr, o_data);
     TRACDCOMP( g_trac_pnor, "PnorDD::readRegSfc> lpc_addr=0x%.8x, o_data=0x%.8x",
@@ -1026,13 +1078,6 @@ errlHndl_t PnorDD::bufferedSfcRead(uint32_t i_addr,
 
         switch(iv_mode)
         {
-        case MODEL_LPC_MEM:
-            {
-                read_fake_pnor( i_addr,
-                                o_data,
-                                i_size );
-                break;
-            }
         case MODEL_REAL_MMIO:
             {
                 //Read directly from MMIO space
@@ -1050,9 +1095,8 @@ errlHndl_t PnorDD::bufferedSfcRead(uint32_t i_addr,
 
                 break;
             }
-        default:
+        case MODEL_REAL_CMD:
             {
-                // Note: If we get here then iv_mode is MODEL_REAL_CMD
 
                 // Command based reads are buffered 256 bytes at a time.
                 uint32_t chunk_size = 0;
@@ -1078,8 +1122,27 @@ errlHndl_t PnorDD::bufferedSfcRead(uint32_t i_addr,
 
                     addr += chunk_size;
                 }
+                break;
             }
-        }
+        case MODEL_LPC_MEM:
+            {
+                read_fake_pnor( i_addr,
+                                o_data,
+                                i_size );
+                break;
+            }
+        default:
+            {
+                TRACFCOMP(g_trac_pnor, ERR_MRK
+                          "PnorDD::bufferedSfcRead> Unsupported mode: iv_mode=0x%.16X, i_addr=0x%.8X",
+                          iv_mode, i_addr);
+
+                //Can't function without PNOR, initiate shutdown.
+                INITSERVICE::doShutdown( PNOR::RC_UNSUPPORTED_MODE);
+                break;
+            }
+        } //end switch
+
     }while(0);
 
     return l_err;
@@ -1103,16 +1166,11 @@ errlHndl_t PnorDD::bufferedSfcWrite(uint32_t i_addr,
     do{
         switch(iv_mode)
         {
-        case MODEL_LPC_MEM:
+        case MODEL_REAL_CMD:
+        case MODEL_REAL_MMIO:
             {
-                write_fake_pnor( i_addr,
-                                 i_data,
-                                 i_size );
-                break;
-            }
-        default:
-            {
-                // Note: If we got here then iv_mode is MODEL_REAL_CMD or MODEL_REAL_MMIO
+                // Note: MODEL_REAL_CMD or MODEL_REAL_MMIO both used command
+                //     based writes, thus the common code path here
 
                 // Command based reads are buffered 256 bytes at a time.
                 uint32_t chunk_size = 0;
@@ -1138,6 +1196,23 @@ errlHndl_t PnorDD::bufferedSfcWrite(uint32_t i_addr,
 
                     addr += chunk_size;
                 }
+                break;
+            }
+        case MODEL_LPC_MEM:
+            {
+                write_fake_pnor( i_addr,
+                                 i_data,
+                                 i_size );
+                break;
+            }
+        default:
+            {
+                TRACFCOMP(g_trac_pnor, ERR_MRK
+                          "PnorDD::bufferedSfcWrite> Unsupported mode: iv_mode=0x%.16X, i_addr=0x%.8X",
+                          iv_mode, i_addr);
+
+                //Can't function without PNOR, initiate shutdown.
+                INITSERVICE::doShutdown( PNOR::RC_UNSUPPORTED_MODE);
             }
         }
     }while(0);
