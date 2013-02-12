@@ -5,7 +5,7 @@
 #
 # IBM CONFIDENTIAL
 #
-# COPYRIGHT International Business Machines Corp. 2012
+# COPYRIGHT International Business Machines Corp. 2012,2013
 #
 # p1
 #
@@ -680,7 +680,12 @@ group gMbaSpa attntype SPECIAL filter singlebit
     /** MBASPA[8]
      *  MBSPAQ_WAT_DEBUG_ATTN
      */
-    (MbaSpa, bit(8)) ? TBDDefaultCallout;
+    # WORKAROUND: HW217608
+    # For Centaur DD1.0, the hardware team will utilize the WAT logic to look
+    # for a command complete and trigger this bit. Note that the HW will still
+    # trigger MBASPA[0], however, that bit should be masked for this
+    # workaround.
+    (MbaSpa, bit(8)) ? analyzeMaintCmdComplete;
 
     /** MBASPA[9]
      *  MBSPAQ_SPARE_ATTN1
