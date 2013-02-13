@@ -37,6 +37,7 @@ EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/include
 OBJS =  gcr_funcs.o io_funcs.o io_run_training.o pbusLinkSvc.o proc_fab_smp.o \
         io_dccal.o \
         io_power_down_lanes.o   \
+        io_read_erepair.o   \
 
 
 ##  NOTE: add a new directory onto the vpaths when you add a new HWP
