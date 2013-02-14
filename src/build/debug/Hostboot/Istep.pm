@@ -6,7 +6,7 @@
 #
 # IBM CONFIDENTIAL
 #
-# COPYRIGHT International Business Machines Corp. 2011,2012
+# COPYRIGHT International Business Machines Corp. 2011,2013
 #
 # p1
 #
@@ -672,8 +672,8 @@ sub getStatus()
     $statusLo   =   ::readScom( MBOX_SCRATCH1, 8 );
     if ( $opt_debug )   {   ::userDisplay   "===  statusLo: $statusLo \n";  }
 
-    $status =   (   (  (hex $statusHi) & 0xffffffff00000000 )
-                  | (( (hex $statusLo) & 0xffffffff00000000 ) >> 32)
+    $status =   (   (  ( $statusHi) & 0xffffffff00000000 )
+                  | (( ( $statusLo) & 0x7fffffff00000000 ) >> 32)
                 );
 
     if ( $opt_debug )
