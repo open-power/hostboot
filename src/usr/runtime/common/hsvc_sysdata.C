@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012                   */
+/* COPYRIGHT International Business Machines Corp. 2012,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,9 +20,10 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// Generated on Wed Oct 17 08:41:32 CDT 2012 by dcrowell from 
+// Generated on Thu Feb 14 14:54:31 CST 2013 by dcrowell from 
 // -- Input: src/usr/runtime/common/extra_runtime_attributes.xml --
-// No attributes found
+HSVC_LOAD_ATTR( ATTR_FREQ_PB );
+HSVC_LOAD_ATTR( ATTR_SCRATCH_UINT32_1 );
 // -- Input: src/usr/hwpf/hwp/runtime_attributes/pm_attributes_all_plat.xml --
 HSVC_LOAD_ATTR( ATTR_FREQ_CORE_MAX );
 HSVC_LOAD_ATTR( ATTR_PROC_DPLL_DIVIDER );
@@ -30,4 +31,6 @@ HSVC_LOAD_ATTR( ATTR_PROC_R_DISTLOSS );
 HSVC_LOAD_ATTR( ATTR_PROC_R_LOADLINE );
 HSVC_LOAD_ATTR( ATTR_PROC_VRM_VOFFSET );
 // -- Input: src/usr/hwpf/hwp/runtime_attributes/pm_attributes_all_hwp.xml --
+// No attributes found
+// -- Input: src/usr/hwpf/hwp/chip_attributes.xml --
 // No attributes found

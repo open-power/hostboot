@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012                   */
+/* COPYRIGHT International Business Machines Corp. 2012,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// Generated on Wed Oct 17 08:41:32 CDT 2012 by dcrowell from 
+// Generated on Thu Feb 14 14:54:31 CST 2013 by dcrowell from 
 // -- Input: src/usr/runtime/common/extra_runtime_attributes.xml --
 HSVC_LOAD_ATTR( ATTR_CHIP_UNIT_POS );
 HSVC_LOAD_ATTR( ATTR_FUNCTIONAL );
@@ -30,3 +30,5 @@ HSVC_LOAD_ATTR( ATTR_FUNCTIONAL );
 HSVC_LOAD_ATTR( ATTR_PM_SPWUP_FSP );
 HSVC_LOAD_ATTR( ATTR_PM_SPWUP_OCC );
 HSVC_LOAD_ATTR( ATTR_PM_SPWUP_PHYP );
+// -- Input: src/usr/hwpf/hwp/chip_attributes.xml --
+// No attributes found

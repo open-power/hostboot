@@ -6,7 +6,7 @@
 #
 # IBM CONFIDENTIAL
 #
-# COPYRIGHT International Business Machines Corp. 2012
+# COPYRIGHT International Business Machines Corp. 2012,2013
 #
 # p1
 #
@@ -181,7 +181,7 @@ foreach my $ifile (@input_files)
 
     # sysdata
     print SYS_FILE "// -- Input: $ifile --\n";
-    if( $#sys > 0 )
+    if( $#sys >= 0 )
     {
         @sys = sort(@sys);
         foreach my $attr (@sys)
@@ -197,9 +197,9 @@ foreach my $ifile (@input_files)
 
     # procdata
     print PROC_FILE "// -- Input: $ifile --\n";
-    if( $#proc > 0 )
+    if( $#proc >= 0 )
     {
-        @sys = sort(@proc);
+        @proc = sort(@proc);
         foreach my $attr (@proc)
         {
             # HSVC_LOAD_ATTR( ATTR_FREQ_PB );	
@@ -213,9 +213,9 @@ foreach my $ifile (@input_files)
 
     # exdata
     print EX_FILE "// -- Input: $ifile --\n";
-    if( $#ex > 0 )
+    if( $#ex >= 0 )
     {
-        @sys = sort(@ex);
+        @ex = sort(@ex);
         foreach my $attr (@ex)
         {
             # HSVC_LOAD_ATTR( ATTR_FREQ_PB );	
