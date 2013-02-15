@@ -1,0 +1,352 @@
+<!-- IBM_PROLOG_BEGIN_TAG                                                   -->
+<!-- This is an automatically generated prolog.                             -->
+<!--                                                                        -->
+<!-- $Source: src/usr/hwpf/hwp/runtime_attributes/pm_plat_attributes.xml $  -->
+<!--                                                                        -->
+<!-- IBM CONFIDENTIAL                                                       -->
+<!--                                                                        -->
+<!-- COPYRIGHT International Business Machines Corp. 2012,2013              -->
+<!--                                                                        -->
+<!-- p1                                                                     -->
+<!--                                                                        -->
+<!-- Object Code Only (OCO) source materials                                -->
+<!-- Licensed Internal Code Source Materials                                -->
+<!-- IBM HostBoot Licensed Internal Code                                    -->
+<!--                                                                        -->
+<!-- The source code for this program is not published or otherwise         -->
+<!-- divested of its trade secrets, irrespective of what has been           -->
+<!-- deposited with the U.S. Copyright Office.                              -->
+<!--                                                                        -->
+<!-- Origin: 30                                                             -->
+<!--                                                                        -->
+<!-- IBM_PROLOG_END_TAG                                                     -->
+<!--
+    XML file specifying Power Management HWPF attributes.
+    These attributes are initialized by the platform.
+-->
+
+<attributes>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PM_EXTERNAL_VRM_STEPSIZE</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+      Step size (binary in microvolts) to take upon external VRM voltage
+      transitions. The value set here must take into account where internal
+      VRMs are enabled or not as, when they are enabled, the step size must
+      account for the tracking (eg PFET strength recalculation) for the step.
+
+      Consumer: proc_build_pstate_tables.C, proc_pmc_init.C -config
+
+      Provided by the Machine Readable Workbook after system characterization.
+    </description>
+    <valueType>uint8</valueType>
+    <platInit/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PM_EXTERNAL_VRM_STEPDELAY</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+      Step delay (binary in microseconds) after a voltage change
+
+      Consumer: proc_pmc_init -config
+
+      Provided by the Machine Readable Workbook after system characterization.
+    </description>
+    <valueType>uint32</valueType>
+    <platInit/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PM_PSTATE_UNDERVOLTING_MINIMUM</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      Minimum frequency for which undervolting is allowed.  Will be internally
+      rounded to the nearest ATTR_PROC_REFCLK_FREQUENCY / 8 value.
+
+      Consumer: OCC FW; OCC Lab Tools
+
+      Provided by the Machine Readable Workbook.
+    </description>
+    <valueType>uint8</valueType>
+    <platInit/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PM_PSTATE_UNDERVOLTING_MAXIMUM</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      Maximum frequency for which undervolting is allowed.  Will be internally
+      rounded to the nearest ATTR_PROC_REFCLK_FREQUENCY / 8 value.
+
+      Consumer: OCC FW; OCC Lab Tools
+
+      Provided by the Machine Readable Workbook.
+    </description>
+    <valueType>uint8</valueType>
+    <platInit/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PM_SPIVID_FREQUENCY</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+      SPI Clock Frequency (binary in MHz)
+
+      Consumer: proc_pm_effective
+
+      Produces ATTR_PM_SPIVID_CLOCK_DIVIDER
+
+      Provided by the Machine Readable Workbook.
+    </description>
+    <valueType>uint32</valueType>
+    <platInit/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PM_SPIVID_PORT_ENABLE</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      Defines the configuration of the SPIVID ports from the target.
+      - NONE means that no VRM is attached.
+      - PORTxNONRED means that the indicated port is used in a non-redundant
+                    configuration.
+      - REDUNDANT means that all three are connected and considered redundant.
+
+      Provided by the Machine Readable Workbook.
+    </description>
+    <valueType>uint8</valueType>
+    <enum>NONE = 0x00, PORT0NONRED = 0x04, PORT1NONRED = 0x02, PORT2NONRED = 0x01, REDUNDANT = 0x07</enum>
+    <platInit/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PM_SAFE_FREQUENCY</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+      Indicates the frequency that the cores will be moved to in the event of
+      the loss of the OCC Heartbead.  This value needs to be at or below the
+      nominal frequency to make sure safe operation of all chiplets.
+
+      Valid Values:-128 thru 127
+
+      The value is translated to the Pstate space.
+
+      Consumer: proc_pm_effective.C
+
+      DYNAMIC_ATTRIBUTE: ATTR_PM_SAFE_PSTATE
+
+      Consumer: proc_pcbs_init.C
+
+      TODO: Dean said this may either be provided by the Machine Readable
+            Workbook or Todd R's power management def file.
+    </description>
+    <valueType>uint8</valueType>
+    <platInit/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PM_RESONANT_CLOCK_FULL_CLOCK_SECTOR_BUFFER_FREQUENCY</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+      Frequency (binary in MHz) for the point at which clock sector buffers
+      should be at full strength.  This is to support Vmin operation.
+      Setting cannot overlap the Low or High bands.
+
+      Provided by the Machine Readable Workbook after system characterization.
+    </description>
+    <valueType>uint32</valueType>
+    <platInit/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PM_RESONANT_CLOCK_LOW_BAND_LOWER_FREQUENCY</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+      Frequency (binary in MHz)) for the lower end of the Low Frequency
+      Resonant band
+
+      Provided by the Machine Readable Workbook after system characterization.
+    </description>
+    <valueType>uint32</valueType>
+    <platInit/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PM_RESONANT_CLOCK_LOW_BAND_UPPER_FREQUENCY</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+      Frequency (binary in MHz) for the upper end of the Low Frequency
+      Resonant band
+
+      Provided by the Machine Readable Workbook after system characterization.
+    </description>
+    <valueType>uint32</valueType>
+    <platInit/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PM_RESONANT_CLOCK_HIGH_BAND_LOWER_FREQUENCY</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+      Frequency (binary in MHz) for the lower end of the High Frequency
+      Resonant band
+
+      Provided by the Machine Readable Workbook after system characterization.
+    </description>
+    <valueType>uint32</valueType>
+    <platInit/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PM_RESONANT_CLOCK_HIGH_BAND_UPPER_FREQUENCY</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+      Frequency (binary in MHz)) for the upper end of the High Frequency
+      Resonant band
+
+      Provided by the Machine Readable Workbook after system characterization.
+    </description>
+    <valueType>uint32</valueType>
+    <platInit/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PM_SPIPSS_FREQUENCY</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+      SPIPSS Clock Frequency (binary in MHz)
+
+      Valid range: 0.5MHz to 25MHz
+
+      Consumer: proc_pmc_init
+
+      Provided by the Machine Readable Workbook.
+    </description>
+    <valueType>uint32</valueType>
+    <platInit/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PM_APSS_CHIP_SELECT</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      Defines which of the PSS chip selects that the APSS is connected
+
+      Provided by the Machine Readable Workbook.
+    </description>
+    <valueType>uint8</valueType>
+    <enum>NONE = 0xFF, CS0 = 0x00, CS1 = 0x01</enum>
+    <platInit/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PM_PBAX_NODEID</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      Receive PBAX Nodeid. Value that indicates this PBA's PBAX Node affinity.
+      This is matched to pbax_nodeid of the PMISC Address phase.
+
+      Provided by the Machine Readable Workbook.
+    </description>
+    <valueType>uint8</valueType>
+    <platInit/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PM_PBAX_CHIPID</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      Receive PBAX Chipid. Value that indicates this PBA's PBAX Chipid within
+      the PBAX node.  Is matched to pbax_chipid of the Address phase if
+      pbax_type=unicast.
+
+      Provided by the Machine Readable Workbook.
+    </description>
+    <valueType>uint8</valueType>
+    <platInit/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PM_PBAX_BRDCST_ID_VECTOR</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      Receive PBAX Broadcast Group. Vector that is indexed when decoded PMISC
+      pbax_type=broadcast with the decoded PMISC pbax_chipid value.  If the
+      bit in this vector at the decoded bit location is a 1, then this receive
+      engine will participate in the broadcast operation.
+
+      Provided by the Machine Readable Workbook.
+    </description>
+    <valueType>uint8</valueType>
+    <platInit/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PROC_R_LOADLINE</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+      Impedance (binary microOhms) of the load line from a processor VRM to the
+      Processor Module pins.  This value is applied to each processor instance.
+
+      Consumers: proc_build_gpstate_table.C
+
+      Provided by the Machine Readable Workbook (via the power subsystem design
+      per system)
+    </description>
+    <valueType>uint32</valueType>
+    <platInit/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PROC_R_DISTLOSS</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+      Impedance (binary in microOhms) of the distribution loss the sense point
+      to the circuit. This value is applied to each processor instance.
+
+      Consumers: proc_build_gpstate_table.C
+
+      Provided by the Machine Readable Workbook (via the power subsystem design
+      per system)
+    </description>
+    <valueType>uint32</valueType>
+    <platInit/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PROC_VRM_VOFFSET</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+      Offset voltage (binary in microvolts) to apply to the VRM distribution to
+      the processor module.  This value is applied to each processor instance.
+
+      Consumers: proc_build_gpstate_table.C
+
+      Provided by the Machine Readable Workbook (via the power subsystem design
+      per system)
+    </description>
+    <valueType>uint32</valueType>
+    <platInit/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_FREQ_CORE_MAX</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+      Maximum frequency (binary in MHz) that any processor in the system will
+      run. Used to define the top end of the PState range in the frequency space.
+      From this, the ATTR_PROCPM_PSTATE0_FREQUENCY is computed using
+      ATTR_SYSTEM_REFCLK_FREQUENCY to determine the step size.
+
+      Consumers: proc_build_gpstate_table.C (among others)
+
+      TODO: Dean's proposal is that each platform will iterate over all chips,
+            reading the super-turbo frequency from MVPD #V and set this attribute
+            to the lowest value.
+    </description>
+    <valueType>uint32</valueType>
+    <platInit/>
+  </attribute>
+</attributes>

@@ -20,15 +20,16 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// Generated on Thu Feb 14 14:54:31 CST 2013 by dcrowell from 
+// Generated on Wed Feb 20 15:44:15 CST 2013 by dcrowell from 
+//  src/usr/runtime/common/create_hsvc_data.pl src/usr/runtime/common/extra_runtime_attributes.xml src/usr/hwpf/hwp/chip_attributes.xml src/usr/hwpf/hwp/runtime_attributes/pm_plat_attributes.xml src/usr/hwpf/hwp/runtime_attributes/pm_hwp_attributes.xml -w -d
 // -- Input: src/usr/runtime/common/extra_runtime_attributes.xml --
 HSVC_LOAD_ATTR( ATTR_CHIP_UNIT_POS );
 HSVC_LOAD_ATTR( ATTR_FUNCTIONAL );
-// -- Input: src/usr/hwpf/hwp/runtime_attributes/pm_attributes_all_plat.xml --
+// -- Input: src/usr/hwpf/hwp/chip_attributes.xml --
 // No attributes found
-// -- Input: src/usr/hwpf/hwp/runtime_attributes/pm_attributes_all_hwp.xml --
+// -- Input: src/usr/hwpf/hwp/runtime_attributes/pm_plat_attributes.xml --
+// No attributes found
+// -- Input: src/usr/hwpf/hwp/runtime_attributes/pm_hwp_attributes.xml --
 HSVC_LOAD_ATTR( ATTR_PM_SPWUP_FSP );
 HSVC_LOAD_ATTR( ATTR_PM_SPWUP_OCC );
 HSVC_LOAD_ATTR( ATTR_PM_SPWUP_PHYP );
-// -- Input: src/usr/hwpf/hwp/chip_attributes.xml --
-// No attributes found

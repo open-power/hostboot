@@ -144,7 +144,7 @@ namespace RUNTIME
 struct system_data_t
 {
     enum {
-        MAX_ATTRIBUTES = 20
+        MAX_ATTRIBUTES = 25
     };
 
     // header data that HostServices uses

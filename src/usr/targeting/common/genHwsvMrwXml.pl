@@ -1482,6 +1482,53 @@ sub generate_sys
     </attribute>";
     generate_max_config();
 
+    #todo-RTC:52835
+    print "
+    <!-- Start pm_plat_attributes.xml -->
+    <attribute><id>PROC_R_LOADLINE</id>
+        <default>890</default>
+    </attribute>
+    <attribute><id>PROC_R_DISTLOSS</id>
+        <default>100</default>
+    </attribute>
+    <attribute><id>PROC_VRM_VOFFSET</id>
+        <default>1000</default>
+    </attribute>
+    <attribute><id>FREQ_CORE_MAX</id>
+        <default>4000</default>
+    </attribute>
+    <attribute><id>PM_EXTERNAL_VRM_STEPSIZE</id>
+        <default>2500</default>
+    </attribute>
+    <attribute><id>PM_EXTERNAL_VRM_STEPDELAY</id>
+        <default>10</default>
+    </attribute>
+    <attribute><id>PM_RESONANT_CLOCK_FULL_CLOCK_SECTOR_BUFFER_FREQUENCY</id>
+        <default>2000</default>
+    </attribute>
+    <attribute><id>PM_RESONANT_CLOCK_LOW_BAND_LOWER_FREQUENCY</id>
+        <default>2300</default>
+    </attribute>
+    <attribute><id>PM_RESONANT_CLOCK_LOW_BAND_UPPER_FREQUENCY</id>
+        <default>3000</default>
+    </attribute>
+    <attribute><id>PM_RESONANT_CLOCK_HIGH_BAND_LOWER_FREQUENCY</id>
+        <default>3050</default>
+    </attribute>
+    <attribute><id>PM_RESONANT_CLOCK_HIGH_BAND_UPPER_FREQUENCY</id>
+        <default>4800</default>
+    </attribute>
+    <attribute><id>PM_SAFE_FREQUENCY</id>
+        <default>3200</default>
+    </attribute>
+    <attribute><id>PM_SPIPSS_FREQUENCY</id>
+        <default>10</default>
+    </attribute>
+    <attribute><id>PM_SPIVID_FREQUENCY</id>
+        <default>0b11</default>
+    </attribute>
+";
+
     # call to do any fsp per-sys attributes
     do_plugin('fsp_sys', $sys, $sysname, 0);
 
@@ -1806,8 +1853,55 @@ sub generate_proc
     <attribute>
         <id>PROC_PCIE_PHB_ACTIVE</id>
         <default>0</default>
+    </attribute>\n";
+
+    #@todo-RTC:52835
+    print "
+    <!-- Start pm_plat_attributes.xml -->
+    <attribute><id>PM_PSTATE_UNDERVOLTING_MINIMUM</id>
+        <default>900</default>
     </attribute>
-</targetInstance>\n";
+    <attribute><id>PM_PSTATE_UNDERVOLTING_MAXIMUM</id>
+        <default>1250</default>
+    </attribute>
+    <attribute><id>PM_SLEEP_TYPE</id>
+        <default>1</default><!-- DEEP -->
+    </attribute>
+    <attribute><id>PM_PBAX_NODEID</id>
+        <default>0</default>
+    </attribute>
+    <attribute><id>PM_PBAX_CHIPID</id>
+        <default>$logid</default>
+    </attribute>
+    <attribute><id>PM_PBAX_BRDCST_ID_VECTOR</id>
+        <default>$lognode</default>
+    </attribute>
+    <attribute><id>PM_SPIVID_PORT_ENABLE</id>\n";
+    if( $proc % 2 == 0 ) # proc0 of DCM
+    {
+        print "        <default>0b100</default><!-- PORT0NONRED -->";
+    }
+    else # proc1 of DCM
+    {
+        print "        <default>0b000</default><!-- NONE -->";
+    }
+    print "
+    </attribute>
+    <attribute><id>PM_APSS_CHIP_SELECT</id>\n";
+    if( $proc % 2 == 0 ) # proc0 of DCM
+    {
+        print "        <default>0x00</default><!-- CS0 -->";
+    }
+    else # proc1 of DCM
+    {
+        print "        <default>0xFF</default><!-- NONE -->";
+    }
+    print "       
+    </attribute>
+    <!-- End pm_plat_attributes.xml -->\n";
+
+
+    print "    </targetInstance>\n";
 
 }
 

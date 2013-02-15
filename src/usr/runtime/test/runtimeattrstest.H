@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012                   */
+/* COPYRIGHT International Business Machines Corp. 2012,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -86,19 +86,22 @@ class RuntimeAttrsTest: public CxxTest::TestSuite
         {
             TS_FAIL("Error getting fapi::ATTR_FREQ_PB");
         }
+        bool freq_found = false;
 
-        fapi::ATTR_PROC_R_LOADLINE_Type spivid = 0;
-        l_rc = FAPI_ATTR_GET(ATTR_PROC_R_LOADLINE,NULL,spivid);
+        fapi::ATTR_PROC_R_LOADLINE_Type loadline = 0;
+        l_rc = FAPI_ATTR_GET(ATTR_PROC_R_LOADLINE,NULL,loadline);
         if( l_rc )
         {
             TS_FAIL("Error getting fapi::ATTR_PROC_R_LOADLINE");
         }
+        bool loadline_found = false;
 
         uint64_t attr = 0;
         while( headers[attr].id != hsvc_attr_header_t::NO_ATTRIBUTE )
         {
             if( headers[attr].id == fapi::ATTR_FREQ_PB )
             {
+                freq_found = true;
                 if( headers[attr].sizeBytes !=
                     sizeof(fapi::ATTR_FREQ_PB_Type) )
                 {
@@ -119,6 +122,7 @@ class RuntimeAttrsTest: public CxxTest::TestSuite
             }
             else if( headers[attr].id == fapi::ATTR_PROC_R_LOADLINE )
             {
+                loadline_found = true;
                 if( headers[attr].sizeBytes !=
                     sizeof(fapi::ATTR_PROC_R_LOADLINE_Type) )
                 {
@@ -127,23 +131,32 @@ class RuntimeAttrsTest: public CxxTest::TestSuite
                 }
                 else
                 {
-                    fapi::ATTR_PROC_R_LOADLINE_Type* spivid_act =
+                    fapi::ATTR_PROC_R_LOADLINE_Type* loadline_act =
                       reinterpret_cast<fapi::ATTR_PROC_R_LOADLINE_Type*>
                       (beginning+headers[attr].offset);
-                    if( *spivid_act != spivid )
+                    if( *loadline_act != loadline )
                     {
-                        TRACFCOMP( g_trac_runtime, "Expected=%X, Actual=%X", spivid, *spivid_act );
+                        TRACFCOMP( g_trac_runtime, "Expected=%X, Actual=%X", loadline, *loadline_act );
                         TS_FAIL("fapi::ATTR_PROC_R_LOADLINE data is wrong");
                     }
                 }
             }
             attr++;
-        }
+        }        
 
         if( attr != sysdata->numAttr )
         {
             TRACFCOMP( g_trac_runtime, "numAttr=%d, found attr=%d", sysdata->numAttr, attr );
             TS_FAIL("testVerifySystemAttributes> Number of attributes found doesn't match expected value");
+        }
+
+        if( !freq_found )
+        {
+            TS_FAIL("Never found FREQ_PB in system attributes");
+        }
+        if( !loadline_found )
+        {
+            TS_FAIL("Never found ATTR_PROC_R_LOADLINE in system attributes");
         }
 
         TRACFCOMP( g_trac_runtime, "testVerifySystemAttributes> finish" );
@@ -207,6 +220,7 @@ class RuntimeAttrsTest: public CxxTest::TestSuite
             {
                 TS_FAIL("Error getting fapi::ATTR_CHIP_ID");
             }
+            bool tmp1_found = false;
 
             fapi::ATTR_PM_PVSAFE_PSTATE_Type tmp2 = 0;
             l_rc = FAPI_ATTR_GET(ATTR_PM_PVSAFE_PSTATE,proc,tmp2);
@@ -214,12 +228,14 @@ class RuntimeAttrsTest: public CxxTest::TestSuite
             {
                 TS_FAIL("Error getting fapi::ATTR_PM_PVSAFE_PSTATE");
             }
+            bool tmp2_found = false;
 
             uint64_t attr = 0;
             while( headers[attr].id != hsvc_attr_header_t::NO_ATTRIBUTE )
             {
                 if( headers[attr].id == fapi::ATTR_CHIP_ID )
                 {
+                    tmp1_found = true;
                     if( headers[attr].sizeBytes !=
                         sizeof(fapi::ATTR_CHIP_ID_Type) )
                     {
@@ -240,6 +256,7 @@ class RuntimeAttrsTest: public CxxTest::TestSuite
                 }
                 else if( headers[attr].id == fapi::ATTR_PM_PVSAFE_PSTATE )
                 {
+                    tmp2_found = true;
                     if( headers[attr].sizeBytes !=
                         sizeof(fapi::ATTR_PM_PVSAFE_PSTATE_Type) )
                     {
@@ -264,6 +281,15 @@ class RuntimeAttrsTest: public CxxTest::TestSuite
             {
                 TRACFCOMP( g_trac_runtime, "procid=%d: numAttr=%d, found attr=%d", curproc->procid, curproc->numAttr, attr );
                 TS_FAIL("testVerifyNodeAttributes> Number of attributes found doesn't match expected value");
+            }
+
+            if( !tmp1_found )
+            {
+                TS_FAIL("Never found ATTR_PM_PVSAFE_PSTATE for procid=%d",curproc->procid);
+            }
+            if( !tmp2_found )
+            {
+                TS_FAIL("Never found ATTR_PM_PVSAFE_PSTATE for procid=%d",curproc->procid);
             }
 
             delete proc;
@@ -304,6 +330,7 @@ class RuntimeAttrsTest: public CxxTest::TestSuite
                 errlHndl_t errhdl = fapiRcToErrl(l_rc);
                 errlCommit(errhdl,RUNTIME_COMP_ID);
             }
+            bool tmp1_found = false;
 
             fapi::ATTR_FUNCTIONAL_Type tmp2 = 0;
             l_rc = FAPI_ATTR_GET(ATTR_FUNCTIONAL,ex,tmp2);
@@ -313,12 +340,14 @@ class RuntimeAttrsTest: public CxxTest::TestSuite
                 errlHndl_t errhdl = fapiRcToErrl(l_rc);
                 errlCommit(errhdl,RUNTIME_COMP_ID);
             }
+            bool tmp2_found = false;
 
             uint64_t attr = 0;
             while( headers[attr].id != hsvc_attr_header_t::NO_ATTRIBUTE )
             {
                 if( headers[attr].id == fapi::ATTR_CHIP_UNIT_POS )
                 {
+                    tmp1_found = true;
                     if( headers[attr].sizeBytes !=
                         sizeof(fapi::ATTR_CHIP_UNIT_POS_Type) )
                     {
@@ -339,6 +368,7 @@ class RuntimeAttrsTest: public CxxTest::TestSuite
                 }
                 else if( headers[attr].id == fapi::ATTR_FUNCTIONAL )
                 {
+                    tmp2_found = true;
                     if( headers[attr].sizeBytes !=
                         sizeof(fapi::ATTR_FUNCTIONAL_Type) )
                     {
@@ -363,6 +393,17 @@ class RuntimeAttrsTest: public CxxTest::TestSuite
             {
                 TRACFCOMP( g_trac_runtime, "procid=%d: numAttr=%d, found attr=%d", curproc->procid, curex->numAttr, attr );
                 TS_FAIL("Number of attributes found doesn't match expected value");
+            }
+
+            if( !tmp1_found )
+            {
+                TS_FAIL("Never found ATTR_CHIP_UNIT_POS for procid=%d, ex=%d",
+                        curproc->procid,curex->chiplet);
+            }
+            if( !tmp2_found )
+            {
+                TS_FAIL("Never found ATTR_FUNCTIONAL for procid=%d, ex=%d",
+                        curproc->procid,curex->chiplet);
             }
 
             delete ex;
@@ -462,9 +503,10 @@ class RuntimeAttrsTest: public CxxTest::TestSuite
             uint32_t chiplet = all_ex[e]->getAttr<TARGETING::ATTR_CHIP_UNIT>();
             if( chiplet == i_chiplet )
             {
-                return( new fapi::Target( fapi::TARGET_TYPE_PROC_CHIP,
-                                          reinterpret_cast<void *>
-                                          (const_cast<TARGETING::Target*>(all_ex[e])) ) );
+                return( new fapi::Target(
+                            fapi::TARGET_TYPE_PROC_CHIP,
+                            reinterpret_cast<void *>
+                            (const_cast<TARGETING::Target*>(all_ex[e])) ) );
             }
         }
         return NULL;

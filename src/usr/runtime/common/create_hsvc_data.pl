@@ -37,6 +37,8 @@ my $debug = 0;
 my $warning = 0;
 my @input_files;
 
+my $fullcmd = $0 . " " . (join " ", @ARGV);
+
 for (my $i=0; $i < $#ARGV + 1; $i++)
 {
     if ($ARGV[$i] =~ /-h/)
@@ -70,18 +72,21 @@ if( -e "hsvc_sysdata.C" ) {
 }
 open SYS_FILE, ">hsvc_sysdata.C", or die("Could not create hsvc_sysdata.C\n");
 print SYS_FILE "// Generated on $date by $user from \n";
+print SYS_FILE "//  $fullcmd\n\n";
 
 if( -e "hsvc_procdata.C" ) {
-    die("hsvc_procdata.C file already exists\n");
+    die("hsvc_procdata.C file already exists\n\n");
 }
 open PROC_FILE, ">hsvc_procdata.C", or die("Could not create hsvc_procdata.C\n");
 print PROC_FILE "// Generated on $date by $user from \n";
+print PROC_FILE "//  $fullcmd\n";
 
 if( -e "hsvc_exdata.C" ) {
-    die("hsvc_exdata.C file already exists\n");
+    die("hsvc_exdata.C file already exists\n\n");
 }
 open EX_FILE, ">hsvc_exdata.C", or die("Could not create hsvc_exdata.C\n");
 print EX_FILE "// Generated on $date by $user from \n";
+print EX_FILE "//  $fullcmd\n";
 
 # Keep a list for each type of attribute ever to find dupes
 my @sys_all;

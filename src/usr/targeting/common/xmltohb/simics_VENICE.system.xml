@@ -40,7 +40,7 @@
       relationship to the FSI ports:
         cMFSI Port 0-7 = Logical MCS Port 4,5,6,7,0,1,2,3
 
-     Values for pm_attributes_all_plat.xml attributes was provided by 
+     Values for pm_plat_attributes.xml attributes were provided by 
          Greg Still on 10/17/1012.
      ================================================================= -->
 
@@ -140,7 +140,7 @@
         <id>MSS_CLEANER_ENABLE</id>
         <default>1</default>
     </attribute>
-    <!-- Start pm_attributes_all_plat.xml -->
+    <!-- Start pm_plat_attributes.xml -->
     <attribute><id>PROC_R_LOADLINE</id>
         <default>890</default>
     </attribute>
@@ -153,10 +153,37 @@
     <attribute><id>FREQ_CORE_MAX</id>
         <default>4000</default>
     </attribute>
-    <attribute><id>PROC_DPLL_DIVIDER</id>
+    <attribute><id>PM_EXTERNAL_VRM_STEPSIZE</id>
+        <default>2500</default>
+    </attribute>
+    <attribute><id>PM_EXTERNAL_VRM_STEPDELAY</id>
         <default>10</default>
     </attribute>
-    <!-- End pm_attributes_all_plat.xml -->
+    <attribute><id>PM_RESONANT_CLOCK_FULL_CLOCK_SECTOR_BUFFER_FREQUENCY</id>
+        <default>2000</default>
+    </attribute>
+    <attribute><id>PM_RESONANT_CLOCK_LOW_BAND_LOWER_FREQUENCY</id>
+        <default>2300</default>
+    </attribute>
+    <attribute><id>PM_RESONANT_CLOCK_LOW_BAND_UPPER_FREQUENCY</id>
+        <default>3000</default>
+    </attribute>
+    <attribute><id>PM_RESONANT_CLOCK_HIGH_BAND_LOWER_FREQUENCY</id>
+        <default>3050</default>
+    </attribute>
+    <attribute><id>PM_RESONANT_CLOCK_HIGH_BAND_UPPER_FREQUENCY</id>
+        <default>4800</default>
+    </attribute>
+    <attribute><id>PM_SAFE_FREQUENCY</id>
+        <default>3200</default>
+    </attribute>
+    <attribute><id>PM_SPIPSS_FREQUENCY</id>
+        <default>10</default>
+    </attribute>
+    <attribute><id>PM_SPIVID_FREQUENCY</id>
+        <default>10</default>
+    </attribute>
+    <!-- End pm_plat_attributes.xml -->
 </targetInstance>
 
 <!-- System node 0 -->
@@ -231,27 +258,15 @@
     <attribute><id>RNG_BASE_ADDR</id>
         <default>0x0003FFFF40000000</default>
     </attribute>
-    <!-- Start pm_attributes_all_plat.xml -->
     <attribute><id>PROC_DCM_INSTALLED</id>
         <default>0</default>
     </attribute>
-    <attribute><id>PM_EXTERNAL_VRM_STEPSIZE</id>
-        <default>2500</default>
-    </attribute>
-    <attribute><id>PM_EXTERNAL_VRM_STEPDELAY</id>
-        <default>10</default>
-    </attribute>
-    <attribute><id>PM_SAFE_VOLTAGE</id>
-        <default>1100</default>
-    </attribute>
+    <!-- Start pm_plat_attributes.xml -->
     <attribute><id>PM_PSTATE_UNDERVOLTING_MINIMUM</id>
         <default>900</default>
     </attribute>
     <attribute><id>PM_PSTATE_UNDERVOLTING_MAXIMUM</id>
         <default>1250</default>
-    </attribute>
-    <attribute><id>PM_SPIVID_FREQUENCY</id>
-        <default>10</default>
     </attribute>
     <attribute><id>PM_SPIVID_PORT_ENABLE</id>
         <default>0b111</default><!-- REDUNDANT -->
@@ -265,36 +280,6 @@
     <attribute><id>PM_SLEEP_TYPE</id>
         <default>1</default><!-- DEEP -->
     </attribute>
-    <attribute><id>PM_WINKLE_ENTRY</id>
-        <default>1</default><!-- ASSISTED -->
-    </attribute>
-    <attribute><id>PM_WINKLE_EXIT</id>
-        <default>1</default><!-- ASSISTED -->
-    </attribute>
-    <attribute><id>PM_WINKLE_TYPE</id>
-        <default>1</default><!-- DEEP -->
-    </attribute>
-    <attribute><id>PM_SAFE_FREQUENCY</id>
-        <default>3200</default>
-    </attribute>
-    <attribute><id>PM_RESONANT_CLOCK_FULL_CLOCK_SECTOR_BUFFER_FREQUENCY</id>
-        <default>2000</default>
-    </attribute>
-    <attribute><id>PM_RESONANT_CLOCK_LOW_BAND_LOWER_FREQUENCY</id>
-        <default>2300</default>
-    </attribute>
-    <attribute><id>PM_RESONANT_CLOCK_LOW_BAND_UPPER_FREQUENCY</id>
-        <default>3000</default>
-    </attribute>
-    <attribute><id>PM_RESONANT_CLOCK_HIGH_BAND_LOWER_FREQUENCY</id>
-        <default>3050</default>
-    </attribute>
-    <attribute><id>PM_RESONANT_CLOCK_HIGH_BAND_UPPER_FREQUENCY</id>
-        <default>4800</default>
-    </attribute>
-    <attribute><id>PM_SPIPSS_FREQUENCY</id>
-        <default>10</default>
-    </attribute>
     <attribute><id>PM_APSS_CHIP_SELECT</id>
         <default>0x00</default><!-- CS0 -->
     </attribute>
@@ -307,7 +292,7 @@
     <attribute><id>PM_PBAX_BRDCST_ID_VECTOR</id>
         <default>0</default>
     </attribute>
-    <!-- End pm_attributes_all_plat.xml -->
+    <!-- End pm_plat_attributes.xml -->
 
     <!-- PROC_PCIE_ attributes -->
     <attribute>
@@ -1289,27 +1274,15 @@
     <attribute><id>RNG_BASE_ADDR</id>
         <default>0x0003FFFF40001000</default>
     </attribute>
-    <!-- Start pm_attributes_all_plat.xml -->
     <attribute><id>PROC_DCM_INSTALLED</id>
         <default>0</default>
     </attribute>
-    <attribute><id>PM_EXTERNAL_VRM_STEPSIZE</id>
-        <default>2500</default>
-    </attribute>
-    <attribute><id>PM_EXTERNAL_VRM_STEPDELAY</id>
-        <default>10</default>
-    </attribute>
-    <attribute><id>PM_SAFE_VOLTAGE</id>
-        <default>1100</default>
-    </attribute>
+    <!-- Start pm_plat_attributes.xml -->
     <attribute><id>PM_PSTATE_UNDERVOLTING_MINIMUM</id>
         <default>900</default>
     </attribute>
     <attribute><id>PM_PSTATE_UNDERVOLTING_MAXIMUM</id>
         <default>1250</default>
-    </attribute>
-    <attribute><id>PM_SPIVID_FREQUENCY</id>
-        <default>10</default>
     </attribute>
     <attribute><id>PM_SPIVID_PORT_ENABLE</id>
         <default>0b111</default><!-- REDUNDANT -->
@@ -1323,36 +1296,6 @@
     <attribute><id>PM_SLEEP_TYPE</id>
         <default>1</default><!-- DEEP -->
     </attribute>
-    <attribute><id>PM_WINKLE_ENTRY</id>
-        <default>1</default><!-- ASSISTED -->
-    </attribute>
-    <attribute><id>PM_WINKLE_EXIT</id>
-        <default>1</default><!-- ASSISTED -->
-    </attribute>
-    <attribute><id>PM_WINKLE_TYPE</id>
-        <default>1</default><!-- DEEP -->
-    </attribute>
-    <attribute><id>PM_SAFE_FREQUENCY</id>
-        <default>3200</default>
-    </attribute>
-    <attribute><id>PM_RESONANT_CLOCK_FULL_CLOCK_SECTOR_BUFFER_FREQUENCY</id>
-        <default>2000</default>
-    </attribute>
-    <attribute><id>PM_RESONANT_CLOCK_LOW_BAND_LOWER_FREQUENCY</id>
-        <default>2300</default>
-    </attribute>
-    <attribute><id>PM_RESONANT_CLOCK_LOW_BAND_UPPER_FREQUENCY</id>
-        <default>3000</default>
-    </attribute>
-    <attribute><id>PM_RESONANT_CLOCK_HIGH_BAND_LOWER_FREQUENCY</id>
-        <default>3050</default>
-    </attribute>
-    <attribute><id>PM_RESONANT_CLOCK_HIGH_BAND_UPPER_FREQUENCY</id>
-        <default>4800</default>
-    </attribute>
-    <attribute><id>PM_SPIPSS_FREQUENCY</id>
-        <default>10</default>
-    </attribute>
     <attribute><id>PM_APSS_CHIP_SELECT</id>
         <default>0x00</default><!-- CS0 -->
     </attribute>
@@ -1365,7 +1308,7 @@
     <attribute><id>PM_PBAX_BRDCST_ID_VECTOR</id>
         <default>0</default>
     </attribute>
-    <!-- End pm_attributes_all_plat.xml -->
+    <!-- End pm_plat_attributes.xml -->
 
     <!-- PROC_PCIE_ attributes -->
     <attribute>
@@ -2347,27 +2290,15 @@
     <attribute><id>RNG_BASE_ADDR</id>
         <default>0x0003FFFF40002000</default>
     </attribute>
-    <!-- Start pm_attributes_all_plat.xml -->
     <attribute><id>PROC_DCM_INSTALLED</id>
         <default>0</default>
     </attribute>
-    <attribute><id>PM_EXTERNAL_VRM_STEPSIZE</id>
-        <default>2500</default>
-    </attribute>
-    <attribute><id>PM_EXTERNAL_VRM_STEPDELAY</id>
-        <default>10</default>
-    </attribute>
-    <attribute><id>PM_SAFE_VOLTAGE</id>
-        <default>1100</default>
-    </attribute>
+    <!-- Start pm_plat_attributes.xml -->
     <attribute><id>PM_PSTATE_UNDERVOLTING_MINIMUM</id>
         <default>900</default>
     </attribute>
     <attribute><id>PM_PSTATE_UNDERVOLTING_MAXIMUM</id>
         <default>1250</default>
-    </attribute>
-    <attribute><id>PM_SPIVID_FREQUENCY</id>
-        <default>10</default>
     </attribute>
     <attribute><id>PM_SPIVID_PORT_ENABLE</id>
         <default>0b111</default><!-- REDUNDANT -->
@@ -2381,36 +2312,6 @@
     <attribute><id>PM_SLEEP_TYPE</id>
         <default>1</default><!-- DEEP -->
     </attribute>
-    <attribute><id>PM_WINKLE_ENTRY</id>
-        <default>1</default><!-- ASSISTED -->
-    </attribute>
-    <attribute><id>PM_WINKLE_EXIT</id>
-        <default>1</default><!-- ASSISTED -->
-    </attribute>
-    <attribute><id>PM_WINKLE_TYPE</id>
-        <default>1</default><!-- DEEP -->
-    </attribute>
-    <attribute><id>PM_SAFE_FREQUENCY</id>
-        <default>3200</default>
-    </attribute>
-    <attribute><id>PM_RESONANT_CLOCK_FULL_CLOCK_SECTOR_BUFFER_FREQUENCY</id>
-        <default>2000</default>
-    </attribute>
-    <attribute><id>PM_RESONANT_CLOCK_LOW_BAND_LOWER_FREQUENCY</id>
-        <default>2300</default>
-    </attribute>
-    <attribute><id>PM_RESONANT_CLOCK_LOW_BAND_UPPER_FREQUENCY</id>
-        <default>3000</default>
-    </attribute>
-    <attribute><id>PM_RESONANT_CLOCK_HIGH_BAND_LOWER_FREQUENCY</id>
-        <default>3050</default>
-    </attribute>
-    <attribute><id>PM_RESONANT_CLOCK_HIGH_BAND_UPPER_FREQUENCY</id>
-        <default>4800</default>
-    </attribute>
-    <attribute><id>PM_SPIPSS_FREQUENCY</id>
-        <default>10</default>
-    </attribute>
     <attribute><id>PM_APSS_CHIP_SELECT</id>
         <default>0x00</default><!-- CS0 -->
     </attribute>
@@ -2423,7 +2324,7 @@
     <attribute><id>PM_PBAX_BRDCST_ID_VECTOR</id>
         <default>0</default>
     </attribute>
-    <!-- End pm_attributes_all_plat.xml -->
+    <!-- End pm_plat_attributes.xml -->
 
     <!-- PROC_PCIE_ attributes -->
     <attribute>
@@ -3405,27 +3306,15 @@
     <attribute><id>RNG_BASE_ADDR</id>
         <default>0x0003FFFF40003000</default>
     </attribute>
-    <!-- Start pm_attributes_all_plat.xml -->
     <attribute><id>PROC_DCM_INSTALLED</id>
         <default>0</default>
     </attribute>
-    <attribute><id>PM_EXTERNAL_VRM_STEPSIZE</id>
-        <default>2500</default>
-    </attribute>
-    <attribute><id>PM_EXTERNAL_VRM_STEPDELAY</id>
-        <default>10</default>
-    </attribute>
-    <attribute><id>PM_SAFE_VOLTAGE</id>
-        <default>1100</default>
-    </attribute>
+    <!-- Start pm_plat_attributes.xml -->
     <attribute><id>PM_PSTATE_UNDERVOLTING_MINIMUM</id>
         <default>900</default>
     </attribute>
     <attribute><id>PM_PSTATE_UNDERVOLTING_MAXIMUM</id>
         <default>1250</default>
-    </attribute>
-    <attribute><id>PM_SPIVID_FREQUENCY</id>
-        <default>10</default>
     </attribute>
     <attribute><id>PM_SPIVID_PORT_ENABLE</id>
         <default>0b111</default><!-- REDUNDANT -->
@@ -3439,36 +3328,6 @@
     <attribute><id>PM_SLEEP_TYPE</id>
         <default>1</default><!-- DEEP -->
     </attribute>
-    <attribute><id>PM_WINKLE_ENTRY</id>
-        <default>1</default><!-- ASSISTED -->
-    </attribute>
-    <attribute><id>PM_WINKLE_EXIT</id>
-        <default>1</default><!-- ASSISTED -->
-    </attribute>
-    <attribute><id>PM_WINKLE_TYPE</id>
-        <default>1</default><!-- DEEP -->
-    </attribute>
-    <attribute><id>PM_SAFE_FREQUENCY</id>
-        <default>3200</default>
-    </attribute>
-    <attribute><id>PM_RESONANT_CLOCK_FULL_CLOCK_SECTOR_BUFFER_FREQUENCY</id>
-        <default>2000</default>
-    </attribute>
-    <attribute><id>PM_RESONANT_CLOCK_LOW_BAND_LOWER_FREQUENCY</id>
-        <default>2300</default>
-    </attribute>
-    <attribute><id>PM_RESONANT_CLOCK_LOW_BAND_UPPER_FREQUENCY</id>
-        <default>3000</default>
-    </attribute>
-    <attribute><id>PM_RESONANT_CLOCK_HIGH_BAND_LOWER_FREQUENCY</id>
-        <default>3050</default>
-    </attribute>
-    <attribute><id>PM_RESONANT_CLOCK_HIGH_BAND_UPPER_FREQUENCY</id>
-        <default>4800</default>
-    </attribute>
-    <attribute><id>PM_SPIPSS_FREQUENCY</id>
-        <default>10</default>
-    </attribute>
     <attribute><id>PM_APSS_CHIP_SELECT</id>
         <default>0x00</default><!-- CS0 -->
     </attribute>
@@ -3481,7 +3340,7 @@
     <attribute><id>PM_PBAX_BRDCST_ID_VECTOR</id>
         <default>0</default>
     </attribute>
-    <!-- End pm_attributes_all_plat.xml -->
+    <!-- End pm_plat_attributes.xml -->
 
     <!-- PROC_PCIE_ attributes -->
     <attribute>
@@ -4461,27 +4320,15 @@
     <attribute><id>RNG_BASE_ADDR</id>
         <default>0x0003FFFF40004000</default>
     </attribute>
-    <!-- Start pm_attributes_all_plat.xml -->
     <attribute><id>PROC_DCM_INSTALLED</id>
         <default>0</default>
     </attribute>
-    <attribute><id>PM_EXTERNAL_VRM_STEPSIZE</id>
-        <default>2500</default>
-    </attribute>
-    <attribute><id>PM_EXTERNAL_VRM_STEPDELAY</id>
-        <default>10</default>
-    </attribute>
-    <attribute><id>PM_SAFE_VOLTAGE</id>
-        <default>1100</default>
-    </attribute>
+    <!-- Start pm_plat_attributes.xml -->
     <attribute><id>PM_PSTATE_UNDERVOLTING_MINIMUM</id>
         <default>900</default>
     </attribute>
     <attribute><id>PM_PSTATE_UNDERVOLTING_MAXIMUM</id>
         <default>1250</default>
-    </attribute>
-    <attribute><id>PM_SPIVID_FREQUENCY</id>
-        <default>10</default>
     </attribute>
     <attribute><id>PM_SPIVID_PORT_ENABLE</id>
         <default>0b111</default><!-- REDUNDANT -->
@@ -4495,36 +4342,6 @@
     <attribute><id>PM_SLEEP_TYPE</id>
         <default>1</default><!-- DEEP -->
     </attribute>
-    <attribute><id>PM_WINKLE_ENTRY</id>
-        <default>1</default><!-- ASSISTED -->
-    </attribute>
-    <attribute><id>PM_WINKLE_EXIT</id>
-        <default>1</default><!-- ASSISTED -->
-    </attribute>
-    <attribute><id>PM_WINKLE_TYPE</id>
-        <default>1</default><!-- DEEP -->
-    </attribute>
-    <attribute><id>PM_SAFE_FREQUENCY</id>
-        <default>3200</default>
-    </attribute>
-    <attribute><id>PM_RESONANT_CLOCK_FULL_CLOCK_SECTOR_BUFFER_FREQUENCY</id>
-        <default>2000</default>
-    </attribute>
-    <attribute><id>PM_RESONANT_CLOCK_LOW_BAND_LOWER_FREQUENCY</id>
-        <default>2300</default>
-    </attribute>
-    <attribute><id>PM_RESONANT_CLOCK_LOW_BAND_UPPER_FREQUENCY</id>
-        <default>3000</default>
-    </attribute>
-    <attribute><id>PM_RESONANT_CLOCK_HIGH_BAND_LOWER_FREQUENCY</id>
-        <default>3050</default>
-    </attribute>
-    <attribute><id>PM_RESONANT_CLOCK_HIGH_BAND_UPPER_FREQUENCY</id>
-        <default>4800</default>
-    </attribute>
-    <attribute><id>PM_SPIPSS_FREQUENCY</id>
-        <default>10</default>
-    </attribute>
     <attribute><id>PM_APSS_CHIP_SELECT</id>
         <default>0x00</default><!-- CS0 -->
     </attribute>
@@ -4537,7 +4354,7 @@
     <attribute><id>PM_PBAX_BRDCST_ID_VECTOR</id>
         <default>0</default>
     </attribute>
-    <!-- End pm_attributes_all_plat.xml -->
+    <!-- End pm_plat_attributes.xml -->
 
     <!-- PROC_PCIE_ attributes -->
     <attribute>
@@ -5519,27 +5336,15 @@
     <attribute><id>RNG_BASE_ADDR</id>
         <default>0x0003FFFF40005000</default>
     </attribute>
-    <!-- Start pm_attributes_all_plat.xml -->
     <attribute><id>PROC_DCM_INSTALLED</id>
         <default>0</default>
     </attribute>
-    <attribute><id>PM_EXTERNAL_VRM_STEPSIZE</id>
-        <default>2500</default>
-    </attribute>
-    <attribute><id>PM_EXTERNAL_VRM_STEPDELAY</id>
-        <default>10</default>
-    </attribute>
-    <attribute><id>PM_SAFE_VOLTAGE</id>
-        <default>1100</default>
-    </attribute>
+    <!-- Start pm_plat_attributes.xml -->
     <attribute><id>PM_PSTATE_UNDERVOLTING_MINIMUM</id>
         <default>900</default>
     </attribute>
     <attribute><id>PM_PSTATE_UNDERVOLTING_MAXIMUM</id>
         <default>1250</default>
-    </attribute>
-    <attribute><id>PM_SPIVID_FREQUENCY</id>
-        <default>10</default>
     </attribute>
     <attribute><id>PM_SPIVID_PORT_ENABLE</id>
         <default>0b111</default><!-- REDUNDANT -->
@@ -5553,36 +5358,6 @@
     <attribute><id>PM_SLEEP_TYPE</id>
         <default>1</default><!-- DEEP -->
     </attribute>
-    <attribute><id>PM_WINKLE_ENTRY</id>
-        <default>1</default><!-- ASSISTED -->
-    </attribute>
-    <attribute><id>PM_WINKLE_EXIT</id>
-        <default>1</default><!-- ASSISTED -->
-    </attribute>
-    <attribute><id>PM_WINKLE_TYPE</id>
-        <default>1</default><!-- DEEP -->
-    </attribute>
-    <attribute><id>PM_SAFE_FREQUENCY</id>
-        <default>3200</default>
-    </attribute>
-    <attribute><id>PM_RESONANT_CLOCK_FULL_CLOCK_SECTOR_BUFFER_FREQUENCY</id>
-        <default>2000</default>
-    </attribute>
-    <attribute><id>PM_RESONANT_CLOCK_LOW_BAND_LOWER_FREQUENCY</id>
-        <default>2300</default>
-    </attribute>
-    <attribute><id>PM_RESONANT_CLOCK_LOW_BAND_UPPER_FREQUENCY</id>
-        <default>3000</default>
-    </attribute>
-    <attribute><id>PM_RESONANT_CLOCK_HIGH_BAND_LOWER_FREQUENCY</id>
-        <default>3050</default>
-    </attribute>
-    <attribute><id>PM_RESONANT_CLOCK_HIGH_BAND_UPPER_FREQUENCY</id>
-        <default>4800</default>
-    </attribute>
-    <attribute><id>PM_SPIPSS_FREQUENCY</id>
-        <default>10</default>
-    </attribute>
     <attribute><id>PM_APSS_CHIP_SELECT</id>
         <default>0x00</default><!-- CS0 -->
     </attribute>
@@ -5595,7 +5370,7 @@
     <attribute><id>PM_PBAX_BRDCST_ID_VECTOR</id>
         <default>0</default>
     </attribute>
-    <!-- End pm_attributes_all_plat.xml -->
+    <!-- End pm_plat_attributes.xml -->
 
     <!-- PROC_PCIE_ attributes -->
     <attribute>
@@ -6575,27 +6350,15 @@
     <attribute><id>RNG_BASE_ADDR</id>
         <default>0x0003FFFF40006000</default>
     </attribute>
-    <!-- Start pm_attributes_all_plat.xml -->
     <attribute><id>PROC_DCM_INSTALLED</id>
         <default>0</default>
     </attribute>
-    <attribute><id>PM_EXTERNAL_VRM_STEPSIZE</id>
-        <default>2500</default>
-    </attribute>
-    <attribute><id>PM_EXTERNAL_VRM_STEPDELAY</id>
-        <default>10</default>
-    </attribute>
-    <attribute><id>PM_SAFE_VOLTAGE</id>
-        <default>1100</default>
-    </attribute>
+    <!-- Start pm_plat_attributes.xml -->
     <attribute><id>PM_PSTATE_UNDERVOLTING_MINIMUM</id>
         <default>900</default>
     </attribute>
     <attribute><id>PM_PSTATE_UNDERVOLTING_MAXIMUM</id>
         <default>1250</default>
-    </attribute>
-    <attribute><id>PM_SPIVID_FREQUENCY</id>
-        <default>10</default>
     </attribute>
     <attribute><id>PM_SPIVID_PORT_ENABLE</id>
         <default>0b111</default><!-- REDUNDANT -->
@@ -6609,36 +6372,6 @@
     <attribute><id>PM_SLEEP_TYPE</id>
         <default>1</default><!-- DEEP -->
     </attribute>
-    <attribute><id>PM_WINKLE_ENTRY</id>
-        <default>1</default><!-- ASSISTED -->
-    </attribute>
-    <attribute><id>PM_WINKLE_EXIT</id>
-        <default>1</default><!-- ASSISTED -->
-    </attribute>
-    <attribute><id>PM_WINKLE_TYPE</id>
-        <default>1</default><!-- DEEP -->
-    </attribute>
-    <attribute><id>PM_SAFE_FREQUENCY</id>
-        <default>3200</default>
-    </attribute>
-    <attribute><id>PM_RESONANT_CLOCK_FULL_CLOCK_SECTOR_BUFFER_FREQUENCY</id>
-        <default>2000</default>
-    </attribute>
-    <attribute><id>PM_RESONANT_CLOCK_LOW_BAND_LOWER_FREQUENCY</id>
-        <default>2300</default>
-    </attribute>
-    <attribute><id>PM_RESONANT_CLOCK_LOW_BAND_UPPER_FREQUENCY</id>
-        <default>3000</default>
-    </attribute>
-    <attribute><id>PM_RESONANT_CLOCK_HIGH_BAND_LOWER_FREQUENCY</id>
-        <default>3050</default>
-    </attribute>
-    <attribute><id>PM_RESONANT_CLOCK_HIGH_BAND_UPPER_FREQUENCY</id>
-        <default>4800</default>
-    </attribute>
-    <attribute><id>PM_SPIPSS_FREQUENCY</id>
-        <default>10</default>
-    </attribute>
     <attribute><id>PM_APSS_CHIP_SELECT</id>
         <default>0x00</default><!-- CS0 -->
     </attribute>
@@ -6651,7 +6384,7 @@
     <attribute><id>PM_PBAX_BRDCST_ID_VECTOR</id>
         <default>0</default>
     </attribute>
-    <!-- End pm_attributes_all_plat.xml -->
+    <!-- End pm_plat_attributes.xml -->
 
     <!-- PROC_PCIE_ attributes -->
     <attribute>
@@ -7632,27 +7365,15 @@
     <attribute><id>RNG_BASE_ADDR</id>
         <default>0x0003FFFF40007000</default>
     </attribute>
-    <!-- Start pm_attributes_all_plat.xml -->
     <attribute><id>PROC_DCM_INSTALLED</id>
         <default>0</default>
     </attribute>
-    <attribute><id>PM_EXTERNAL_VRM_STEPSIZE</id>
-        <default>2500</default>
-    </attribute>
-    <attribute><id>PM_EXTERNAL_VRM_STEPDELAY</id>
-        <default>10</default>
-    </attribute>
-    <attribute><id>PM_SAFE_VOLTAGE</id>
-        <default>1100</default>
-    </attribute>
+    <!-- Start pm_plat_attributes.xml -->
     <attribute><id>PM_PSTATE_UNDERVOLTING_MINIMUM</id>
         <default>900</default>
     </attribute>
     <attribute><id>PM_PSTATE_UNDERVOLTING_MAXIMUM</id>
         <default>1250</default>
-    </attribute>
-    <attribute><id>PM_SPIVID_FREQUENCY</id>
-        <default>10</default>
     </attribute>
     <attribute><id>PM_SPIVID_PORT_ENABLE</id>
         <default>0b111</default><!-- REDUNDANT -->
@@ -7666,36 +7387,6 @@
     <attribute><id>PM_SLEEP_TYPE</id>
         <default>1</default><!-- DEEP -->
     </attribute>
-    <attribute><id>PM_WINKLE_ENTRY</id>
-        <default>1</default><!-- ASSISTED -->
-    </attribute>
-    <attribute><id>PM_WINKLE_EXIT</id>
-        <default>1</default><!-- ASSISTED -->
-    </attribute>
-    <attribute><id>PM_WINKLE_TYPE</id>
-        <default>1</default><!-- DEEP -->
-    </attribute>
-    <attribute><id>PM_SAFE_FREQUENCY</id>
-        <default>3200</default>
-    </attribute>
-    <attribute><id>PM_RESONANT_CLOCK_FULL_CLOCK_SECTOR_BUFFER_FREQUENCY</id>
-        <default>2000</default>
-    </attribute>
-    <attribute><id>PM_RESONANT_CLOCK_LOW_BAND_LOWER_FREQUENCY</id>
-        <default>2300</default>
-    </attribute>
-    <attribute><id>PM_RESONANT_CLOCK_LOW_BAND_UPPER_FREQUENCY</id>
-        <default>3000</default>
-    </attribute>
-    <attribute><id>PM_RESONANT_CLOCK_HIGH_BAND_LOWER_FREQUENCY</id>
-        <default>3050</default>
-    </attribute>
-    <attribute><id>PM_RESONANT_CLOCK_HIGH_BAND_UPPER_FREQUENCY</id>
-        <default>4800</default>
-    </attribute>
-    <attribute><id>PM_SPIPSS_FREQUENCY</id>
-        <default>10</default>
-    </attribute>
     <attribute><id>PM_APSS_CHIP_SELECT</id>
         <default>0x00</default><!-- CS0 -->
     </attribute>
@@ -7708,7 +7399,7 @@
     <attribute><id>PM_PBAX_BRDCST_ID_VECTOR</id>
         <default>0</default>
     </attribute>
-    <!-- End pm_attributes_all_plat.xml -->
+    <!-- End pm_plat_attributes.xml -->
 
     <!-- PROC_PCIE_ attributes -->
     <attribute>
@@ -14966,27 +14657,15 @@
     <attribute><id>RNG_BASE_ADDR</id>
         <default>0x0003FFFF40000000</default>
     </attribute>
-    <!-- Start pm_attributes_all_plat.xml -->
     <attribute><id>PROC_DCM_INSTALLED</id>
         <default>0</default>
     </attribute>
-    <attribute><id>PM_EXTERNAL_VRM_STEPSIZE</id>
-        <default>2500</default>
-    </attribute>
-    <attribute><id>PM_EXTERNAL_VRM_STEPDELAY</id>
-        <default>10</default>
-    </attribute>
-    <attribute><id>PM_SAFE_VOLTAGE</id>
-        <default>1100</default>
-    </attribute>
+    <!-- Start pm_plat_attributes.xml -->
     <attribute><id>PM_PSTATE_UNDERVOLTING_MINIMUM</id>
         <default>900</default>
     </attribute>
     <attribute><id>PM_PSTATE_UNDERVOLTING_MAXIMUM</id>
         <default>1250</default>
-    </attribute>
-    <attribute><id>PM_SPIVID_FREQUENCY</id>
-        <default>10</default>
     </attribute>
     <attribute><id>PM_SPIVID_PORT_ENABLE</id>
         <default>0b111</default><!-- REDUNDANT -->
@@ -15000,36 +14679,6 @@
     <attribute><id>PM_SLEEP_TYPE</id>
         <default>1</default><!-- DEEP -->
     </attribute>
-    <attribute><id>PM_WINKLE_ENTRY</id>
-        <default>1</default><!-- ASSISTED -->
-    </attribute>
-    <attribute><id>PM_WINKLE_EXIT</id>
-        <default>1</default><!-- ASSISTED -->
-    </attribute>
-    <attribute><id>PM_WINKLE_TYPE</id>
-        <default>1</default><!-- DEEP -->
-    </attribute>
-    <attribute><id>PM_SAFE_FREQUENCY</id>
-        <default>3200</default>
-    </attribute>
-    <attribute><id>PM_RESONANT_CLOCK_FULL_CLOCK_SECTOR_BUFFER_FREQUENCY</id>
-        <default>2000</default>
-    </attribute>
-    <attribute><id>PM_RESONANT_CLOCK_LOW_BAND_LOWER_FREQUENCY</id>
-        <default>2300</default>
-    </attribute>
-    <attribute><id>PM_RESONANT_CLOCK_LOW_BAND_UPPER_FREQUENCY</id>
-        <default>3000</default>
-    </attribute>
-    <attribute><id>PM_RESONANT_CLOCK_HIGH_BAND_LOWER_FREQUENCY</id>
-        <default>3050</default>
-    </attribute>
-    <attribute><id>PM_RESONANT_CLOCK_HIGH_BAND_UPPER_FREQUENCY</id>
-        <default>4800</default>
-    </attribute>
-    <attribute><id>PM_SPIPSS_FREQUENCY</id>
-        <default>10</default>
-    </attribute>
     <attribute><id>PM_APSS_CHIP_SELECT</id>
         <default>0x00</default><!-- CS0 -->
     </attribute>
@@ -15042,7 +14691,7 @@
     <attribute><id>PM_PBAX_BRDCST_ID_VECTOR</id>
         <default>0</default>
     </attribute>
-    <!-- End pm_attributes_all_plat.xml -->
+    <!-- End pm_plat_attributes.xml -->
 </targetInstance>
 
 

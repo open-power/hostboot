@@ -28,27 +28,50 @@ xml files and procedures
 Parser only requires attribute, id and targetType tags.
 -->
 
+<!-- from common_attributes.xml -->
 <attribute>
     <id>ATTR_FUNCTIONAL</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
 </attribute>
 
+<!-- from common_attributes.xml -->
 <attribute>
     <id>ATTR_CHIP_UNIT_POS</id>
     <targetType>TARGET_TYPE_EX_CHIPLET</targetType>
 </attribute>
 
+<!-- from common_attributes.xml -->
 <attribute>
     <id>ATTR_FUNCTIONAL</id>
     <targetType>TARGET_TYPE_EX_CHIPLET</targetType>
 </attribute>
 
+<!-- from freq_attributes.xml -->
 <attribute>
     <id>ATTR_FREQ_PB</id>
     <targetType>TARGET_TYPE_SYSTEM</targetType>
 </attribute>
 
+<!-- from scratch_attributes.xml -->
 <attribute>
     <id>ATTR_SCRATCH_UINT32_1</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+</attribute>
+
+<!-- from system_attributes.xml -->
+<attribute>
+    <id>ATTR_EXECUTION_PLATFORM</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+</attribute>
+
+<!-- from freq_attributes.xml -->
+<attribute>
+    <id>ATTR_FREQ_PROC_REFCLOCK</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+</attribute>
+
+<!-- from system_attributes.xml -->
+<attribute>
+    <id>ATTR_IS_SIMULATION</id>
     <targetType>TARGET_TYPE_SYSTEM</targetType>
 </attribute>

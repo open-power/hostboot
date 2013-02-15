@@ -122,13 +122,22 @@
     <attribute><id>L3_W_EPS</id></attribute>
     <attribute><id>NOMINAL_FREQ_MHZ</id></attribute>
     <attribute><id>MNFG_FLAGS</id></attribute>
-    <!-- Start pm_attributes_all_plat.xml -->
-    <attribute><id>PROC_R_LOADLINE</id></attribute>
-    <attribute><id>PROC_R_DISTLOSS</id></attribute>
-    <attribute><id>PROC_VRM_VOFFSET</id></attribute>
+    <!-- Start pm_plat_attributes.xml -->
     <attribute><id>FREQ_CORE_MAX</id></attribute>
-    <attribute><id>PROC_DPLL_DIVIDER</id></attribute>
-    <!-- End pm_attributes_all_plat.xml -->
+    <attribute><id>PM_EXTERNAL_VRM_STEPDELAY</id></attribute>
+    <attribute><id>PM_EXTERNAL_VRM_STEPSIZE</id></attribute>
+    <attribute><id>PM_RESONANT_CLOCK_FULL_CLOCK_SECTOR_BUFFER_FREQUENCY</id></attribute>
+    <attribute><id>PM_RESONANT_CLOCK_HIGH_BAND_LOWER_FREQUENCY</id></attribute>
+    <attribute><id>PM_RESONANT_CLOCK_HIGH_BAND_UPPER_FREQUENCY</id></attribute>
+    <attribute><id>PM_RESONANT_CLOCK_LOW_BAND_LOWER_FREQUENCY</id></attribute>
+    <attribute><id>PM_RESONANT_CLOCK_LOW_BAND_UPPER_FREQUENCY</id></attribute>
+    <attribute><id>PM_SAFE_FREQUENCY</id></attribute>
+    <attribute><id>PM_SPIPSS_FREQUENCY</id></attribute>
+    <attribute><id>PM_SPIVID_FREQUENCY</id></attribute>
+    <attribute><id>PROC_R_DISTLOSS</id></attribute>
+    <attribute><id>PROC_R_LOADLINE</id></attribute>
+    <attribute><id>PROC_VRM_VOFFSET</id></attribute>
+    <!-- End pm_plat_attributes.xml -->
     <!--    sbe_config_update attributes    -->
     <attribute><id>NEST_FREQ_MHZ</id></attribute>
     <attribute><id>BOOT_FREQ_MHZ</id></attribute>
@@ -261,102 +270,90 @@
      <attribute><id>MSS_INTERLEAVE_ENABLE</id></attribute>
      <attribute><id>MSS_MCS_GROUP_32</id></attribute>
      <attribute><id>MSS_MEM_IPL_COMPLETE</id></attribute>
-     <!-- Start pm_attributes_all_plat.xml -->
-     <attribute><id>PM_EXTERNAL_VRM_STEPSIZE</id></attribute>
-     <attribute><id>PM_EXTERNAL_VRM_STEPDELAY</id></attribute>
-     <attribute><id>PM_SAFE_VOLTAGE</id></attribute>
-     <attribute><id>PM_PSTATE_UNDERVOLTING_MINIMUM</id></attribute>
-     <attribute><id>PM_PSTATE_UNDERVOLTING_MAXIMUM</id></attribute>
-     <attribute><id>PM_SPIVID_FREQUENCY</id></attribute>
-     <attribute><id>PM_SPIVID_PORT_ENABLE</id></attribute>
-     <attribute><id>PM_SLEEP_ENTRY</id></attribute>
-     <attribute><id>PM_SLEEP_EXIT</id></attribute>
-     <attribute><id>PM_SLEEP_TYPE</id></attribute>
-     <attribute><id>PM_WINKLE_ENTRY</id></attribute>
-     <attribute><id>PM_WINKLE_EXIT</id></attribute>
-     <attribute><id>PM_WINKLE_TYPE</id></attribute>
-     <attribute><id>PM_SAFE_FREQUENCY</id></attribute>
-     <attribute><id>PM_RESONANT_CLOCK_FULL_CLOCK_SECTOR_BUFFER_FREQUENCY</id></attribute>
-     <attribute><id>PM_RESONANT_CLOCK_LOW_BAND_LOWER_FREQUENCY</id></attribute>
-     <attribute><id>PM_RESONANT_CLOCK_LOW_BAND_UPPER_FREQUENCY</id></attribute>
-     <attribute><id>PM_RESONANT_CLOCK_HIGH_BAND_LOWER_FREQUENCY</id></attribute>
-     <attribute><id>PM_RESONANT_CLOCK_HIGH_BAND_UPPER_FREQUENCY</id></attribute>
-     <attribute><id>PM_SPIPSS_FREQUENCY</id></attribute>
+     <!-- Start pm_plat_attributes.xml -->
      <attribute><id>PM_APSS_CHIP_SELECT</id></attribute>
-     <attribute><id>PM_PBAX_NODEID</id></attribute>
-     <attribute><id>PM_PBAX_CHIPID</id></attribute>
      <attribute><id>PM_PBAX_BRDCST_ID_VECTOR</id></attribute>
-     <!-- End pm_attributes_all_plat.xml -->
-     <!-- Start pm_attributes_all_hwp.xml -->
-     <attribute><id>PM_POWER_PROXY_TRACE_TIMER</id></attribute>
-     <attribute><id>PM_PPT_TIMER_MATCH_VALUE</id></attribute>
-     <attribute><id>PM_PPT_TIMER_TICK</id></attribute>
-     <attribute><id>PM_AISS_TIMEOUT</id></attribute>
-     <attribute><id>PM_PSTATE_STEPSIZE</id></attribute>
-     <attribute><id>PM_EXTERNAL_VRM_STEPDELAY_RANGE</id></attribute>
-     <attribute><id>PM_EXTERNAL_VRM_STEPDELAY_VALUE</id></attribute>
-     <attribute><id>PM_PMC_HANGPULSE_DIVIDER</id></attribute>
-     <attribute><id>PM_PVSAFE_PSTATE</id></attribute>
-     <attribute><id>PM_SPIVID_FRAME_SIZE</id></attribute>
-     <attribute><id>PM_SPIVID_IN_DELAY_FRAME1</id></attribute>
-     <attribute><id>PM_SPIVID_IN_DELAY_FRAME2</id></attribute>
-     <attribute><id>PM_SPIVID_CLOCK_POLARITY</id></attribute>
-     <attribute><id>PM_SPIVID_CLOCK_PHASE</id></attribute>
-     <attribute><id>PM_SPIVID_CLOCK_DIVIDER</id></attribute>
-     <attribute><id>PM_SPIVID_INTERFRAME_DELAY_WRITE_STATUS</id></attribute>
-     <attribute><id>PM_SPIVID_INTERFRAME_DELAY_WRITE_STATUS_VALUE</id></attribute>
-     <attribute><id>PM_SPIVID_INTER_RETRY_DELAY_VALUE</id></attribute>
-     <attribute><id>PM_SPIVID_INTER_RETRY_DELAY</id></attribute>
-     <attribute><id>PM_SPIVID_CRC_GEN_ENABLE</id></attribute>
-     <attribute><id>PM_SPIVID_CRC_CHECK_ENABLE</id></attribute>
-     <attribute><id>PM_SPIVID_MAJORITY_VOTE_ENABLE</id></attribute>
-     <attribute><id>PM_SPIVID_MAX_RETRIES</id></attribute>
-     <attribute><id>PM_SPIVID_CRC_POLYNOMIAL_ENABLES</id></attribute>
-     <attribute><id>PM_OCC_HEARTBEAT_TIME</id></attribute>
-     <attribute><id>PM_SLEEP_WINKLE_REQUEST_TIMEOUT</id></attribute>
-     <attribute><id>PM_PFET_POWERUP_CORE_DELAY0</id></attribute>
-     <attribute><id>PM_PFET_POWERUP_CORE_DELAY1</id></attribute>
-     <attribute><id>PM_PFET_POWERUP_CORE_DELAY0_VALUE</id></attribute>
-     <attribute><id>PM_PFET_POWERUP_CORE_DELAY1_VALUE</id></attribute>
-     <attribute><id>PM_PFET_POWERUP_CORE_SEQUENCE_DELAY_SELECT</id></attribute>
-     <attribute><id>PM_PFET_POWERDOWN_CORE_DELAY0</id></attribute>
-     <attribute><id>PM_PFET_POWERDOWN_CORE_DELAY1</id></attribute>
-     <attribute><id>PM_PFET_POWERDOWN_CORE_DELAY0_VALUE</id></attribute>
-     <attribute><id>PM_PFET_POWERDOWN_CORE_DELAY1_VALUE</id></attribute>
-     <attribute><id>PM_PFET_POWERDOWN_CORE_SEQUENCE_DELAY_SELECT</id></attribute>
-     <attribute><id>PM_PFET_POWERUP_ECO_DELAY0</id></attribute>
-     <attribute><id>PM_PFET_POWERUP_ECO_DELAY1</id></attribute>
-     <attribute><id>PM_PFET_POWERUP_ECO_DELAY0_VALUE</id></attribute>
-     <attribute><id>PM_PFET_POWERUP_ECO_DELAY1_VALUE</id></attribute>
-     <attribute><id>PM_PFET_POWERUP_ECO_SEQUENCE_DELAY_SELECT</id></attribute>
-     <attribute><id>PM_PFET_POWERDOWN_ECO_DELAY0</id></attribute>
-     <attribute><id>PM_PFET_POWERDOWN_ECO_DELAY1</id></attribute>
-     <attribute><id>PM_PFET_POWERDOWN_ECO_DELAY0_VALUE</id></attribute>
-     <attribute><id>PM_PFET_POWERDOWN_ECO_DELAY1_VALUE</id></attribute>
-     <attribute><id>PM_PFET_POWERDOWN_ECO_SEQUENCE_DELAY_SELECT</id></attribute>
-     <attribute><id>PM_PSTATE0_FREQUENCY</id></attribute>
-     <attribute><id>PM_IVRMS_ENABLED</id></attribute>
-     <attribute><id>PM_SAFE_PSTATE</id></attribute>
-     <attribute><id>PM_RESONANT_CLOCK_ENABLE</id></attribute>
-     <attribute><id>PM_RESONANT_CLOCK_FULL_CSB_PSTATE</id></attribute>
-     <attribute><id>PM_RESONANT_CLOCK_LFRLOW_PSTATE</id></attribute>
-     <attribute><id>PM_RESONANT_CLOCK_LFRUPPER_PSTATE</id></attribute>
-     <attribute><id>PM_RESONANT_CLOCK_HFRLOW_PSTATE</id></attribute>
-     <attribute><id>PM_RESONANT_CLOCK_HFRHIGH_PSTATE</id></attribute>
-     <attribute><id>PM_SPIPSS_FRAME_SIZE</id></attribute>
-     <attribute><id>PM_SPIPSS_OUT_COUNT</id></attribute>
-     <attribute><id>PM_SPIPSS_IN_DELAY</id></attribute>
-     <attribute><id>PM_SPIPSS_IN_COUNT</id></attribute>
-     <attribute><id>PM_SPIPSS_CLOCK_POLARITY</id></attribute>
-     <attribute><id>PM_SPIPSS_CLOCK_PHASE</id></attribute>
-     <attribute><id>PM_SPIPSS_CLOCK_DIVIDER</id></attribute>
-     <attribute><id>PM_SPIPSS_INTER_FRAME_DELAY_SETTING</id></attribute>
-     <attribute><id>PM_SPIPSS_INTER_FRAME_DELAY</id></attribute>
-     <attribute><id>PM_PBAX_RCV_RESERV_TIMEOUT</id></attribute>
-     <attribute><id>PM_PBAX_SND_RETRY_COUNT_OVERCOMMIT_ENABLE</id></attribute>
-     <attribute><id>PM_PBAX_SND_RETRY_THRESHOLD</id></attribute>
-     <attribute><id>PM_PBAX_SND_RESERV_TIMEOUT</id></attribute>
-     <!-- End pm_attributes_all_hwp.xml -->
+     <attribute><id>PM_PBAX_CHIPID</id></attribute>
+     <attribute><id>PM_PBAX_NODEID</id></attribute>
+     <attribute><id>PM_PSTATE_UNDERVOLTING_MAXIMUM</id></attribute>
+     <attribute><id>PM_PSTATE_UNDERVOLTING_MINIMUM</id></attribute>
+     <attribute><id>PM_SPIVID_PORT_ENABLE</id></attribute>
+     <!-- End pm_plat_attributes.xml -->
+     <!-- Start pm_hwp_attributes.xml -->
+    <attribute><id>PM_AISS_TIMEOUT</id></attribute>
+    <attribute><id>PM_EXTERNAL_VRM_STEPDELAY_RANGE</id></attribute>
+    <attribute><id>PM_EXTERNAL_VRM_STEPDELAY_VALUE</id></attribute>
+    <attribute><id>PM_IVRMS_ENABLED</id></attribute>
+    <attribute><id>PM_OCC_HEARTBEAT_TIME</id></attribute>
+    <attribute><id>PM_PBAX_RCV_RESERV_TIMEOUT</id></attribute>
+    <attribute><id>PM_PBAX_SND_RESERV_TIMEOUT</id></attribute>
+    <attribute><id>PM_PBAX_SND_RETRY_COUNT_OVERCOMMIT_ENABLE</id></attribute>
+    <attribute><id>PM_PBAX_SND_RETRY_THRESHOLD</id></attribute>
+    <attribute><id>PM_PFET_POWERDOWN_CORE_DELAY0</id></attribute>
+    <attribute><id>PM_PFET_POWERDOWN_CORE_DELAY0_VALUE</id></attribute>
+    <attribute><id>PM_PFET_POWERDOWN_CORE_DELAY1</id></attribute>
+    <attribute><id>PM_PFET_POWERDOWN_CORE_DELAY1_VALUE</id></attribute>
+    <attribute><id>PM_PFET_POWERDOWN_CORE_SEQUENCE_DELAY_SELECT</id></attribute>
+    <attribute><id>PM_PFET_POWERDOWN_ECO_DELAY0</id></attribute>
+    <attribute><id>PM_PFET_POWERDOWN_ECO_DELAY0_VALUE</id></attribute>
+    <attribute><id>PM_PFET_POWERDOWN_ECO_DELAY1</id></attribute>
+    <attribute><id>PM_PFET_POWERDOWN_ECO_DELAY1_VALUE</id></attribute>
+    <attribute><id>PM_PFET_POWERDOWN_ECO_SEQUENCE_DELAY_SELECT</id></attribute>
+    <attribute><id>PM_PFET_POWERUP_CORE_DELAY0</id></attribute>
+    <attribute><id>PM_PFET_POWERUP_CORE_DELAY0_VALUE</id></attribute>
+    <attribute><id>PM_PFET_POWERUP_CORE_DELAY1</id></attribute>
+    <attribute><id>PM_PFET_POWERUP_CORE_DELAY1_VALUE</id></attribute>
+    <attribute><id>PM_PFET_POWERUP_CORE_SEQUENCE_DELAY_SELECT</id></attribute>
+    <attribute><id>PM_PFET_POWERUP_ECO_DELAY0</id></attribute>
+    <attribute><id>PM_PFET_POWERUP_ECO_DELAY0_VALUE</id></attribute>
+    <attribute><id>PM_PFET_POWERUP_ECO_DELAY1</id></attribute>
+    <attribute><id>PM_PFET_POWERUP_ECO_DELAY1_VALUE</id></attribute>
+    <attribute><id>PM_PFET_POWERUP_ECO_SEQUENCE_DELAY_SELECT</id></attribute>
+    <attribute><id>PM_PMC_HANGPULSE_DIVIDER</id></attribute>
+    <attribute><id>PM_POWER_PROXY_TRACE_TIMER</id></attribute>
+    <attribute><id>PM_PPT_TIMER_MATCH_VALUE</id></attribute>
+    <attribute><id>PM_PPT_TIMER_TICK</id></attribute>
+    <attribute><id>PM_PSTATE0_FREQUENCY</id></attribute>
+    <attribute><id>PM_PSTATE_STEPSIZE</id></attribute>
+    <attribute><id>PM_PVSAFE_PSTATE</id></attribute>
+    <attribute><id>PM_RESONANT_CLOCK_ENABLE</id></attribute>
+    <attribute><id>PM_RESONANT_CLOCK_FULL_CSB_PSTATE</id></attribute>
+    <attribute><id>PM_RESONANT_CLOCK_HFRHIGH_PSTATE</id></attribute>
+    <attribute><id>PM_RESONANT_CLOCK_HFRLOW_PSTATE</id></attribute>
+    <attribute><id>PM_RESONANT_CLOCK_LFRLOW_PSTATE</id></attribute>
+    <attribute><id>PM_RESONANT_CLOCK_LFRUPPER_PSTATE</id></attribute>
+    <attribute><id>PM_SAFE_PSTATE</id></attribute>
+    <attribute><id>PM_SLEEP_ENTRY</id></attribute>
+    <attribute><id>PM_SLEEP_EXIT</id></attribute>
+    <attribute><id>PM_SLEEP_TYPE</id></attribute>
+    <attribute><id>PM_SLEEP_WINKLE_REQUEST_TIMEOUT</id></attribute>
+    <attribute><id>PM_SPIPSS_CLOCK_DIVIDER</id></attribute>
+    <attribute><id>PM_SPIPSS_CLOCK_PHASE</id></attribute>
+    <attribute><id>PM_SPIPSS_CLOCK_POLARITY</id></attribute>
+    <attribute><id>PM_SPIPSS_FRAME_SIZE</id></attribute>
+    <attribute><id>PM_SPIPSS_INTER_FRAME_DELAY</id></attribute>
+    <attribute><id>PM_SPIPSS_INTER_FRAME_DELAY_SETTING</id></attribute>
+    <attribute><id>PM_SPIPSS_IN_COUNT</id></attribute>
+    <attribute><id>PM_SPIPSS_IN_DELAY</id></attribute>
+    <attribute><id>PM_SPIPSS_OUT_COUNT</id></attribute>
+    <attribute><id>PM_SPIVID_CLOCK_DIVIDER</id></attribute>
+    <attribute><id>PM_SPIVID_CLOCK_PHASE</id></attribute>
+    <attribute><id>PM_SPIVID_CLOCK_POLARITY</id></attribute>
+    <attribute><id>PM_SPIVID_CRC_CHECK_ENABLE</id></attribute>
+    <attribute><id>PM_SPIVID_CRC_GEN_ENABLE</id></attribute>
+    <attribute><id>PM_SPIVID_CRC_POLYNOMIAL_ENABLES</id></attribute>
+    <attribute><id>PM_SPIVID_FRAME_SIZE</id></attribute>
+    <attribute><id>PM_SPIVID_INTERFRAME_DELAY_WRITE_STATUS</id></attribute>
+    <attribute><id>PM_SPIVID_INTERFRAME_DELAY_WRITE_STATUS_VALUE</id></attribute>
+    <attribute><id>PM_SPIVID_INTER_RETRY_DELAY</id></attribute>
+    <attribute><id>PM_SPIVID_INTER_RETRY_DELAY_VALUE</id></attribute>
+    <attribute><id>PM_SPIVID_IN_DELAY_FRAME1</id></attribute>
+    <attribute><id>PM_SPIVID_IN_DELAY_FRAME2</id></attribute>
+    <attribute><id>PM_SPIVID_MAJORITY_VOTE_ENABLE</id></attribute>
+    <attribute><id>PM_SPIVID_MAX_RETRIES</id></attribute>
+    <attribute><id>PM_WINKLE_TYPE</id></attribute>
+    <attribute><id>PROC_DPLL_DIVIDER</id></attribute>
+     <!-- End pm_hwp_attributes.xml -->
      <!-- Begin poreve_memory_attributes.xml -->
      <attribute><id>SBE_SEEPROM_I2C_ADDRESS_BYTES</id></attribute>
      <attribute><id>SBE_SEEPROM_I2C_DEVICE_ADDRESS</id></attribute>
@@ -498,10 +495,11 @@
         <id>TYPE</id>
         <default>EX</default>
     </attribute>
-    <!-- Start pm_attributes_all_hwp.xml -->
+    <!-- Start pm_hwp_attributes.xml -->
     <attribute><id>PM_SPWUP_FSP</id></attribute>
     <attribute><id>PM_SPWUP_OCC</id></attribute>
     <attribute><id>PM_SPWUP_PHYP</id></attribute>
+    <!-- End pm_hwp_attributes.xml -->
     <attribute><id>OVERRIDE_MVPD_NOM_FREQ_MHZ</id></attribute>
     <attribute><id>OVERRIDE_MVPD_V_NEST_NOM_VOLTAGE</id></attribute>
     <attribute><id>OVERRIDE_MVPD_I_NEST_NOM_CURRENT</id></attribute>
@@ -527,7 +525,6 @@
     <attribute><id>OVERRIDE_MVPD_I_NEST_LAB_CURRENT</id></attribute>
     <attribute><id>OVERRIDE_MVPD_V_CS_LAB_VOLTAGE</id></attribute>
     <attribute><id>OVERRIDE_MVPD_I_CS_LAB_CURRENT</id></attribute>
-    <!-- End pm_attributes_all_hwp.xml -->
 </targetType>
 
 <targetType>

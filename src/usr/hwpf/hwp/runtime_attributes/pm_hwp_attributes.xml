@@ -1,0 +1,894 @@
+<!-- IBM_PROLOG_BEGIN_TAG                                                   -->
+<!-- This is an automatically generated prolog.                             -->
+<!--                                                                        -->
+<!-- $Source: src/usr/hwpf/hwp/runtime_attributes/pm_hwp_attributes.xml $   -->
+<!--                                                                        -->
+<!-- IBM CONFIDENTIAL                                                       -->
+<!--                                                                        -->
+<!-- COPYRIGHT International Business Machines Corp. 2012,2013              -->
+<!--                                                                        -->
+<!-- p1                                                                     -->
+<!--                                                                        -->
+<!-- Object Code Only (OCO) source materials                                -->
+<!-- Licensed Internal Code Source Materials                                -->
+<!-- IBM HostBoot Licensed Internal Code                                    -->
+<!--                                                                        -->
+<!-- The source code for this program is not published or otherwise         -->
+<!-- divested of its trade secrets, irrespective of what has been           -->
+<!-- deposited with the U.S. Copyright Office.                              -->
+<!--                                                                        -->
+<!-- Origin: 30                                                             -->
+<!--                                                                        -->
+<!-- IBM_PROLOG_END_TAG                                                     -->
+<!--
+    XML file specifying Power Management HWPF attributes.
+    These attributes are initialized to zero by the platform and set to a
+    meaningful value by a HWP
+-->
+
+<attributes>
+<!-- *********************************************************************** -->
+
+<attribute>
+    <id>ATTR_PROC_DPLL_DIVIDER</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>The product of the DPLL internal prescalar divide (CD_DIV124_DC) and the output divider(CD_DPLLOUT124_DC).  This estalishes the step size of the DPLL in terms of this number divided into the processor reference clock.
+    </description>
+    <valueType>uint32</valueType>
+    <writeable/>
+</attribute>
+
+<attribute>
+    <id>ATTR_PM_POWER_PROXY_TRACE_TIMER</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>The  Power Proxy Trace timer (binary in microseconds) defines the time between Power Proxy Trace records when no other event that would otherwise produce a record has occured.  Values must be within a range of 32us to 64ms.
+    </description>
+    <valueType>uint32</valueType>
+    <writeable/>
+</attribute>
+
+<attribute>
+    <id>ATTR_PM_PPT_TIMER_MATCH_VALUE</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>The delay is 32us * ATTR_PM_PPT_TIMER_MATCH_VALUE
+    </description>
+    <valueType>uint32</valueType>
+    <writeable/>
+</attribute>
+
+<attribute>
+    <id>ATTR_PM_PPT_TIMER_TICK</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>Defines the Power Proxy Trace interval timer tick (0=25us, 1=0.5us, 2=1us, and 3=2us)
+    </description>
+    <valueType>uint32</valueType>
+    <writeable/>
+</attribute>
+
+<attribute>
+    <id>ATTR_PM_AISS_TIMEOUT</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>Defines the timeout value for the Architected Idle State Sequencer (AISS).
+    </description>
+    <valueType>uint8</valueType>
+    <enum>1MS=0,  2MS=1,  4MS=2,  8MS=3, 16MS=4, 32MS=5, 64MS=6, 128MS=7, 256MS=8, 512MS=9</enum>
+    <writeable/>
+</attribute>
+
+<attribute>
+    <id>ATTR_PM_PSTATE_STEPSIZE</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>Unsigned 7 bit (baby-) stepsize for Pstate transitions between the Global Pstate Actual and the Global Pstate Target. Only non-zero values are supported for this dial.
+
+Used to setup the PMC voltage controller
+
+Producer: proc_build_pstate_tables.C
+
+Consumer: OCC pstate_init()
+    </description>
+    <valueType>uint8</valueType>
+    <writeable/>
+</attribute>
+
+<attribute>
+    <id>ATTR_PM_EXTERNAL_VRM_STEPDELAY_RANGE</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>Selects the resolution for the step delay count after a voltage change (decimal value N for this field divides the prv clock by 2^(N+3))
+
+A 4 bit field  selects one of the the upper 16bit of a 19bit counter (16+3) incremented in the nest/4 domain
+
+Consumer: proc_pm.scominit
+    </description>
+    <valueType>uint8</valueType>
+    <writeable/>
+</attribute>
+
+<attribute>
+    <id>ATTR_PM_EXTERNAL_VRM_STEPDELAY_VALUE</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>Step delay after a voltage change in increments of vrm_stepdelay_range.  Setting this dial to a value N causes a delay of N cycles of the divided nest clk (see dial vrm_stepdelay_range). The closed formula is as follows: Delay_seconds = vrm_stepdelay_value * ( 2^(3 + vrm_stepdelay_range) / (Nest_frequency_Hz/4))
+
+Consumer: proc_pm.scominit
+    </description>
+    <valueType>uint8</valueType>
+    <writeable/>
+</attribute>
+
+<attribute>
+    <id>ATTR_PM_PMC_HANGPULSE_DIVIDER</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>Divides the hang pulse to PMC to achieve XXXX. Note that this needs to be set according to the description of dial pmc_occ_heartbeat_time
+
+Producer:  proc_pm_init
+
+Consumer: proc_pm.scominit
+    </description>
+    <valueType>uint8</valueType>
+    <writeable/>
+</attribute>
+
+<attribute>
+    <id>ATTR_PM_PVSAFE_PSTATE</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+Pstate that is invoked in the PMC voltage controller upon the loss of the OCC Heartbeat..
+
+Producer:  proc_pm_init.C
+
+Consumer: proc_pm.scominit
+    </description>
+    <valueType>uint8</valueType>
+    <writeable/>
+</attribute>
+
+<attribute>
+    <id>ATTR_PM_SPIVID_FRAME_SIZE</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>Number of data bits per individual SPIVID transaction (also referred to as frame) during chip select assertion
+
+Supported values: 0x20 (32d)
+
+Chip Select assertion duration is spi_frame_size + 2
+    </description>
+    <valueType>uint8</valueType>
+    <writeable/>
+</attribute>
+
+<attribute>
+    <id>ATTR_PM_SPIVID_IN_DELAY_FRAME1</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>Number of SPIVID clocks after chip select to wait before capturing MISO input in frame 1
+
+Supported values: 0x00 to spi_frame_size.  Values beyond spi_frame_size result in the input never being captured
+    </description>
+    <valueType>uint8</valueType>
+    <writeable/>
+</attribute>
+
+<attribute>
+    <id>ATTR_PM_SPIVID_IN_DELAY_FRAME2</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>Number of SPI clocks after chip select to wait before capturing MISO input in frame 2
+
+Supported values: 0x00 to spi_frame_size.  Values beyond spi_frame_size result in the input never being captured
+    </description>
+    <valueType>uint8</valueType>
+    <writeable/>
+</attribute>
+
+<attribute>
+    <id>ATTR_PM_SPIVID_CLOCK_POLARITY</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>SPVID Clock Polarity  (CPOL=0 means that clk idle is deasserted, CPOL=1 means that clk idle is asserted)
+    </description>
+    <valueType>uint8</valueType>
+    <enum>IDLELOW=0, IDLEHIGH = 1</enum>
+    <writeable/>
+</attribute>
+
+<attribute>
+    <id>ATTR_PM_SPIVID_CLOCK_PHASE</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>SPI clock phase (CPHA=0 means to change/sample values of data signals on first edge, otherwise on 2nd)
+    </description>
+    <valueType>uint8</valueType>
+    <enum>FIRSTEDGE=0, 
+SECONDEDGE=1</enum>
+    <writeable/>
+</attribute>
+
+<attribute>
+    <id>ATTR_PM_SPIVID_CLOCK_DIVIDER</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>SPIVID clock speed divider to divide the nest_nclk/4 mesh clock, which results in a divider = (nest_freq/ (SPI_freq*8))-1
+For a 2.4GHz nest clock, this means that the SPI clk can be theoretically adjusted between 600MHz and 0.29MHz (cycle time 1.66ns...3.41us, in 1.66ns steps). However, a practical range is 0.5...25MHz.
+    </description>
+    <valueType>uint32</valueType>
+    <writeable/>
+</attribute>
+
+<attribute>
+    <id>ATTR_PM_SPIVID_INTERFRAME_DELAY_WRITE_STATUS</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>Delay between command and status frames of a SPIVID WRITE operation (binary in nanoseconds)
+Consumer: proc_pmc_init
+    </description>
+    <valueType>uint32</valueType>
+    <writeable/>
+</attribute>
+
+<attribute>
+    <id>ATTR_PM_SPIVID_INTERFRAME_DELAY_WRITE_STATUS_VALUE</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>Delay between two frames of a Write command as measured from the end of the last bit of the first frame until the chip select of the second frame, which contains the status, is asserted.  This delay allows for the checking and status data production in the SPIVID chip.
+
+Delay is computed as:  (value * ~100ns_hang_pulse)  +0/-~100ns_hang_pulse time
+
+0x00000: Wait 1 SPI Clock
+0x00001 - 0x1FFFF: value = number of ~100ns_hang_pulses
+
+For values greater than 0x00000, the actual delay is 1 SPI Clock + the time delay designated by the value defined. Max. delay at 0x1FFFF: 13.1ms + 1 SPI clock cycle.
+    </description>
+    <valueType>uint32</valueType>
+    <writeable/>
+</attribute>
+
+<attribute>
+    <id>ATTR_PM_SPIVID_INTER_RETRY_DELAY_VALUE</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>Delay between command retry attempts.
+
+Delay is computed as:  (value * ~100ns_hang_pulse)  +0/-~100ns_hang_pulse time
+
+0x0000: Wait 1 SPI Clock
+0x0001 - 0xFFFF: value = number of ~100ns_hang_pulses
+
+For values greater than 0x00000, the actual delay is 1 SPI Clock + the time delay designated by the value defined. Max. delay at 0x1FFFF: 13.1ms + 1 SPI clock cycle.
+    </description>
+    <valueType>uint32</valueType>
+    <writeable/>
+</attribute>
+
+<attribute>
+    <id>ATTR_PM_SPIVID_INTER_RETRY_DELAY</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>Delay between SPIVID reture attempts when WRITE command status indicates an error (binary in nanoseconds)
+Consumer: proc_pmc_init
+    </description>
+    <valueType>uint32</valueType>
+    <writeable/>
+</attribute>
+
+<attribute>
+    <id>ATTR_PM_SPIVID_CRC_GEN_ENABLE</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>EnableS CRC generation from processor to VRM device. This will produce an 8b CRC per the enabled polynomial. If CRC generation is disabled, the full 32 bits at the data input of the SPI master are transmitted.
+    </description>
+    <valueType>uint8</valueType>
+    <enum>TRUE = 1, FALSE = 0</enum>
+    <writeable/>
+</attribute>
+
+<attribute>
+    <id>ATTR_PM_SPIVID_CRC_CHECK_ENABLE</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>Enables CRC checking in the processor of frames from the VRM device.
+    </description>
+    <valueType>uint8</valueType>
+    <enum>TRUE = 1, FALSE = 0</enum>
+    <writeable/>
+</attribute>
+
+<attribute>
+    <id>ATTR_PM_SPIVID_MAJORITY_VOTE_ENABLE</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>enables the a majority vote on the 3B of status payload on a frame received by the master as each of these have a 1 byte status field replicated three (3) times by the slave.
+    </description>
+    <valueType>uint8</valueType>
+    <enum>TRUE = 1, FALSE = 0</enum>
+    <writeable/>
+</attribute>
+
+<attribute>
+    <id>ATTR_PM_SPIVID_MAX_RETRIES</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>Number retries upon detected errors.
+
+0x00: No retry
+0x01 to 0x1F: 1 to 31 respectively
+    </description>
+    <valueType>uint8</valueType>
+    <writeable/>
+</attribute>
+
+<attribute>
+    <id>ATTR_PM_SPIVID_CRC_POLYNOMIAL_ENABLES</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>CRC8 Polynomial Enables
+
+An 8 bit mask vector to enable XORs in the CRC generation and checking LFSRs at the respective bit position. MSB (x^8) is omitted since it is always enabled, so the mask layout is (x^7,x^6,x^5,x^4,x^3,x^2,x^1,1)
+
+Planned CRC8 polynomial: x^8 + x^7 + x^6 + x^4 + x^2 + 1
+Value to enable planned polynomial: 0b1101_0101 (=0xD5)
+    </description>
+    <valueType>uint8</valueType>
+    <writeable/>
+</attribute>
+
+<attribute>
+    <id>ATTR_PM_OCC_HEARTBEAT_TIME</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>Time within which the OCC firmware must access the PMC or the OCC will be considered faulty whereby  FIRs and malfunction alerts will be produced . (binary in nanoseconds)
+Consumer: OCC FW
+    </description>
+    <valueType>uint32</valueType>
+    <writeable/>
+</attribute>
+
+<attribute>
+    <id>ATTR_PM_SLEEP_WINKLE_REQUEST_TIMEOUT</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>Time (binary in ns) that will be the threshold value for the PMC PORE request timeout.
+
+Consumer: proc_pmc_init.C.  Will be translated to a DYNAMIC ATTRIBUTE for use by proc_pm..scominit  as a multiple of PM hang pulses.. Counter starts at 0, is increased with every tp_pmc_hang_pulse as long as PORE is busy and set the PMC local FIR bit 19 when count = threshold.
+    </description>
+    <valueType>uint32</valueType>
+    <writeable/>
+</attribute>
+
+<attribute>
+    <id>ATTR_PM_SLEEP_ENTRY</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>Setting depends on di/dt charateristics of the system.
+
+Set Assisted if power off serialization is needed and SLEEP_TYPE=Fast;  Set to Hardware if the system can handle the unrelated powering off between cores.  Hardware setting decreases entry latency
+
+Producer: MRWB
+
+Consumer:  proc_pm_init and proc_pcbs_init
+    </description>
+    <valueType>uint8</valueType>
+    <enum>HARDWARE=0, ASSISTED=1</enum>
+    <writeable/>
+</attribute>
+
+<attribute>
+    <id>ATTR_PM_SLEEP_EXIT</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>Setting depends on di/dt charateristics of the system and the setting of ATTR_PM_SLEEP_TYPE.
+
+Set to Assisted if power on serialization is needed and SLEEP_TYPE=Fast;  Set to Hardware if the system can handle the unrelated powering off between cores.  Hardware setting decreases entry latency
+Must be set to Assisted if ATTR_PM_SLEEP_TYPE=Deep as this necessary for restore.
+
+Setting to Hardware is a test mode for Fast only.
+
+Producer: MRWB
+
+Consumer:  proc_pm_init and proc_pcbs_init.
+    </description>
+    <valueType>uint8</valueType>
+    <enum>HARDWARE=0, ASSISTED=1</enum>
+    <writeable/>
+</attribute>
+
+<attribute>
+    <id>ATTR_PM_SLEEP_TYPE</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>Sleep Power Off Select:
+Selects which voltage level to place the Core domain PFETs upon Sleep entry. 0 = Vret (Fast Sleep Mode), 1 = Voff (Deep Sleep Mode)
+
+Producer: MRWB
+
+Consumer:  proc_pm_init and proc_pcbs_init
+    </description>
+    <valueType>uint8</valueType>
+    <enum>FAST=0, DEEP=1</enum>
+    <writeable/>
+</attribute>
+
+<attribute>
+    <id>ATTR_PM_WINKLE_TYPE</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>Winkle Power Off Select:
+Selects which voltage level to place the Core and ECO domain PFETs upon Winkle entry. 0 = Vret (Fast Winkle Mode), 1 = Voff (Deep Winkle Mode)
+    </description>
+    <valueType>uint8</valueType>
+    <enum>FAST=0, DEEP=1</enum>
+    <writeable/>
+</attribute>
+
+<attribute>
+    <id>ATTR_PM_PFET_POWERUP_CORE_DELAY0</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>Delay (binary in nanoseconds) after a step in the Core power-up  PFET sequence.  Enabled per step by the vector defined in ATTR_PM_PFET_POWERUP_CORE_SEQUENCE_DELAY_SELECT
+    </description>
+    <valueType>uint32</valueType>
+    <platInit/>
+</attribute>
+
+<attribute>
+    <id>ATTR_PM_PFET_POWERUP_CORE_DELAY1</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>Delay (binary in nanoseconds) after a step in the Core power-up  PFET sequence.  Enabled per step by the vector defined in ATTR_PM_PFET_POWERUP_CORE_SEQUENCE_DELAY_SELECT
+    </description>
+    <valueType>uint32</valueType>
+    <platInit/>
+</attribute>
+
+<attribute>
+    <id>ATTR_PM_PFET_POWERUP_CORE_DELAY0_VALUE</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>Delay value 0  between any step in the Core power-up  PFET sequence.
+    </description>
+    <valueType>uint8</valueType>
+    <writeable/>
+</attribute>
+
+<attribute>
+    <id>ATTR_PM_PFET_POWERUP_CORE_DELAY1_VALUE</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>Delay value 1  between any step in the Core power-up  PFET sequence.
+    </description>
+    <valueType>uint8</valueType>
+    <writeable/>
+</attribute>
+
+<attribute>
+    <id>ATTR_PM_PFET_POWERUP_CORE_SEQUENCE_DELAY_SELECT</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>Binary vector where the most significant bits (0:11) identify the delay to be used for that step of the sequence.  Power up goes from 11, then 10, then 9,.... then 0.
+
+0 in the bit position:  use ATTR_PM_PFET_POWERUP_CORE_DELAY0;
+
+1 in the bit position:  use ATTR_PM_PFET_POWERUP_CORE_DELAY1
+    </description>
+    <valueType>uint32</valueType>
+    <writeable/>
+</attribute>
+
+<attribute>
+    <id>ATTR_PM_PFET_POWERDOWN_CORE_DELAY0</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>Delay (binary in nanoseconds) between a step in the Core power-down  PFET sequence.  Enabled per step by the vector defined in ATTR_PM_PFET_POWERDOWN_CORE_SEQUENCE_DELAY_SELECT
+    </description>
+    <valueType>uint32</valueType>
+    <platInit/>
+</attribute>
+
+<attribute>
+    <id>ATTR_PM_PFET_POWERDOWN_CORE_DELAY1</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>Delay (binary in nanoseconds) between a step in the Core power-down  PFET sequence.  Enabled per step by the vector defined in ATTR_PM_PFET_POWERDOWN_CORE_SEQUENCE_DELAY_SELECT
+    </description>
+    <valueType>uint32</valueType>
+    <platInit/>
+</attribute>
+
+<attribute>
+    <id>ATTR_PM_PFET_POWERDOWN_CORE_DELAY0_VALUE</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>Delay value 0  between any step in the Core power-up  PFET sequence.
+    </description>
+    <valueType>uint8</valueType>
+    <writeable/>
+</attribute>
+
+<attribute>
+    <id>ATTR_PM_PFET_POWERDOWN_CORE_DELAY1_VALUE</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>Delay value 1  between any step in the Core power-up  PFET sequence.
+    </description>
+    <valueType>uint8</valueType>
+    <writeable/>
+</attribute>
+
+<attribute>
+    <id>ATTR_PM_PFET_POWERDOWN_CORE_SEQUENCE_DELAY_SELECT</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>Binary vector where the most significant bits (0:11) identify the delay to be used for that step of the sequence.  Power up goes from 11, then 10, then 9,.... then 0.
+
+0 in the bit position:  use ATTR_PM_PFET_POWERUP_CORE_DELAY0;
+
+1 in the bit position:  use ATTR_PM_PFET_POWERUP_CORE_DELAY1
+    </description>
+    <valueType>uint32</valueType>
+    <writeable/>
+</attribute>
+
+<attribute>
+    <id>ATTR_PM_PFET_POWERUP_ECO_DELAY0</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>Delay (binary in nanoseconds) after a step in the ECO power-up  PFET sequence.  Enabled per step by the vector defined in ATTR_PM_PFET_POWERUP_ECO_SEQUENCE_DELAY_SELECT
+    </description>
+    <valueType>uint32</valueType>
+    <platInit/>
+</attribute>
+
+<attribute>
+    <id>ATTR_PM_PFET_POWERUP_ECO_DELAY1</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>Delay (binary in nanoseconds) after a step in the ECO power-up  PFET sequence.  Enabled per step by the vector defined in ATTR_PM_PFET_POWERUP_ECO_SEQUENCE_DELAY_SELECT
+    </description>
+    <valueType>uint32</valueType>
+    <platInit/>
+</attribute>
+
+<attribute>
+    <id>ATTR_PM_PFET_POWERUP_ECO_DELAY0_VALUE</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>Delay value 0  between any step in the ECO power-up  PFET sequence.
+    </description>
+    <valueType>uint8</valueType>
+    <writeable/>
+</attribute>
+
+<attribute>
+    <id>ATTR_PM_PFET_POWERUP_ECO_DELAY1_VALUE</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>Delay value 1  between any step in the ECO power-up  PFET sequence.
+    </description>
+    <valueType>uint8</valueType>
+    <writeable/>
+</attribute>
+
+<attribute>
+    <id>ATTR_PM_PFET_POWERUP_ECO_SEQUENCE_DELAY_SELECT</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>Binary vector where the most significant bits (0:11) identify the delay to be used for that step of the sequence.  Power up goes from 11, then 10, then 9,.... then 0.
+
+0 in the bit position:  use ATTR_PM_PFET_POWERUP_ECO_DELAY0;
+
+1 in the bit position:  use ATTR_PM_PFET_POWERUP_ECO_DELAY1
+    </description>
+    <valueType>uint32</valueType>
+    <writeable/>
+</attribute>
+
+<attribute>
+    <id>ATTR_PM_PFET_POWERDOWN_ECO_DELAY0</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>Delay (binary in nanoseconds) between a step in the ECO power-down  PFET sequence.  Enabled per step by the vector defined in ATTR_PM_PFET_POWERDOWN_ECO_SEQUENCE_DELAY_SELECT
+    </description>
+    <valueType>uint32</valueType>
+    <platInit/>
+</attribute>
+
+<attribute>
+    <id>ATTR_PM_PFET_POWERDOWN_ECO_DELAY1</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>Delay (binary in nanoseconds) between a step in the ECO power-down  PFET sequence.  Enabled per step by the vector defined in ATTR_PM_PFET_POWERDOWN_ECO_SEQUENCE_DELAY_SELECT
+    </description>
+    <valueType>uint32</valueType>
+    <platInit/>
+</attribute>
+
+<attribute>
+    <id>ATTR_PM_PFET_POWERDOWN_ECO_DELAY0_VALUE</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>Delay value 0  between any step in the ECO power-up  PFET sequence.
+    </description>
+    <valueType>uint8</valueType>
+    <writeable/>
+</attribute>
+
+<attribute>
+    <id>ATTR_PM_PFET_POWERDOWN_ECO_DELAY1_VALUE</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>Delay value 1  between any step in the ECO power-up  PFET sequence.
+    </description>
+    <valueType>uint8</valueType>
+    <writeable/>
+</attribute>
+
+<attribute>
+    <id>ATTR_PM_PFET_POWERDOWN_ECO_SEQUENCE_DELAY_SELECT</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>Binary vector where the most significant bits (0:11) identify the delay to be used for that step of the ECO power up sequence.  Power up goes from 11, then 10, then 9,.... then 0.  0 in the bit position:  use ATTR_PM_PFET_POWERUP_ECO_DELAY0;  1 in the bit position:  use ATTR_PM_PFET_POWERUP_ECO_DELAY1
+    </description>
+    <valueType>uint32</valueType>
+    <writeable/>
+</attribute>
+
+<attribute>
+    <id>ATTR_PM_PSTATE0_FREQUENCY</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>Defines the center point of the Pstate space in the frequency domain.  Binary in Khz.
+
+Producer: proc_build_gpstate.C
+
+Consumers: proc_pcbs_init.C, proc_pcbs_lpst_init.C, 
+    </description>
+    <valueType>uint32</valueType>
+    <writeable/>
+</attribute>
+
+<attribute>
+    <id>ATTR_PM_IVRMS_ENABLED</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>Indicates whether available internal voltage regulation macros (iVRMs) are to enabled.  This indicates that module VPD has valid #M keywords available.
+    </description>
+    <valueType>uint8</valueType>
+    <enum>TRUE = 1, FALSE = 0</enum>
+    <writeable/>
+</attribute>
+
+<attribute>
+    <id>ATTR_PM_SAFE_PSTATE</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>Safe Pstate
+
+Valid Values:-128 thru 127
+
+Producer: proc_pm_init.C
+
+DYNAMIC_ATTRIBUTE
+
+Consumer: proc_pcbs_init.C
+
+Establishes the Pstate that the core chiplet will take on if:
+psafe less-than-or-equal PMSR[global_actual_pstate]
+AND any of the following conditions are true:
+Loss of OCC Heartbeat if occ_heartbeat_en is set
+PMGP0[force_safe_mode] is set
+
+If psafe greater-than PMSR[global_actual_pstate], the  global_actual_pstate is forced.
+
+The value of Psafe needs to be at or below the nominal Pstate to make sure safe operation of all chiplets.
+    </description>
+    <valueType>uint8</valueType>
+    <writeable/>
+</attribute>
+
+<attribute>
+    <id>ATTR_PM_RESONANT_CLOCK_ENABLE</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>Resonant Clock Enable
+    </description>
+    <valueType>uint8</valueType>
+    <writeable/>
+</attribute>
+
+<attribute>
+    <id>ATTR_PM_RESONANT_CLOCK_FULL_CSB_PSTATE</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>FCSB  Full Clock Sector Buffer (8b in terms of Pstate)
+Defines the Pstate for the point at which clock sector buffers should be at full strength.  This is to support Vmin operation.
+</description>
+    <valueType>uint8</valueType>
+    <writeable/>
+</attribute>
+
+<attribute>
+    <id>ATTR_PM_RESONANT_CLOCK_LFRLOW_PSTATE</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>LFRLower  Low Frequency Resonant Lower.  Defines the Pstate for the lower end of the Low Frequency Resonant band
+    </description>
+    <valueType>uint8</valueType>
+    <writeable/>
+</attribute>
+
+<attribute>
+    <id>ATTR_PM_RESONANT_CLOCK_LFRUPPER_PSTATE</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>LFRUpper  Low Frequency Resonant Upper. Defines the Pstate for the upper end of the Low Frequency Resonant band
+    </description>
+    <valueType>uint8</valueType>
+    <writeable/>
+</attribute>
+
+<attribute>
+    <id>ATTR_PM_RESONANT_CLOCK_HFRLOW_PSTATE</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>HFRLower  High Frequency Resonant Low. Defines the Pstate for the lower end of the High Frequency Resonant band
+    </description>
+    <valueType>uint8</valueType>
+    <writeable/>
+</attribute>
+
+<attribute>
+    <id>ATTR_PM_RESONANT_CLOCK_HFRHIGH_PSTATE</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>HFRUpper  High Frequency Resonant Upper. Defines the Pstate for the upper end of the High Frequency Resonant band
+    </description>
+    <valueType>uint8</valueType>
+    <writeable/>
+</attribute>
+
+<attribute>
+    <id>ATTR_PM_SPIPSS_FRAME_SIZE</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>Number of data bits per individual SPIPSS transaction (also referred to as frame) during chip select assertion
+
+Supported values: 0x10 (16d),
+
+Chip Select assertion duration is spi_frame_size + 2
+    </description>
+    <valueType>uint8</valueType>
+    <writeable/>
+</attribute>
+
+<attribute>
+    <id>ATTR_PM_SPIPSS_OUT_COUNT</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>Number of bits sent out MOSI of the frame
+
+Supported values: 0x000 to spi_frame_size.  Values beyond spi_frame_size are ignored.
+    </description>
+    <valueType>uint8</valueType>
+    <writeable/>
+</attribute>
+
+<attribute>
+    <id>ATTR_PM_SPIPSS_IN_DELAY</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>Number of SPI clocks after chip select to wait before capturing MISO input
+
+Supported values: 0x000 to spi_frame_size.  Values beyond spi_frame_size result in the input never being captured
+    </description>
+    <valueType>uint8</valueType>
+    <writeable/>
+</attribute>
+
+<attribute>
+    <id>ATTR_PM_SPIPSS_IN_COUNT</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>Number of bits captured on MISO input
+
+Supported values: 0x000 to spi_frame_size.  The actual number of bits captured is spi_frame_size - spi_in_delay
+    </description>
+    <valueType>uint8</valueType>
+    <writeable/>
+</attribute>
+
+<attribute>
+    <id>ATTR_PM_SPIPSS_CLOCK_POLARITY</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>SPIPSS Clock Polarity  (CPOL=0 means that clk idle is deasserted, CPOH=1 means that clk idle is asserted)
+    </description>
+    <valueType>uint8</valueType>
+    <enum>CPOL=0, CPOH=1</enum>
+    <writeable/>
+</attribute>
+
+<attribute>
+    <id>ATTR_PM_SPIPSS_CLOCK_PHASE</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>SPIPSS clock phase (CPHA=0 means to change/sample values of data signals on first edge, otherwise on 2nd)
+    </description>
+    <valueType>uint8</valueType>
+    <enum>FIRSTEDGE=0, SECONDEDGE=1</enum>
+    <writeable/>
+</attribute>
+
+<attribute>
+    <id>ATTR_PM_SPIPSS_CLOCK_DIVIDER</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>SPI clock speed divider to divide the nest_nclk/4 mesh clock, which results in a divider = (nest_freq/ (SPI_freq*8))-1
+    </description>
+    <valueType>uint8</valueType>
+    <writeable/>
+</attribute>
+
+<attribute>
+    <id>ATTR_PM_SPIPSS_INTER_FRAME_DELAY_SETTING</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+Delay is computed as:  (value * ~100ns_hang_pulse)  +0/-~100ns_hang_pulse time
+
+0x00000: Wait 1 PSS Clock
+0x00001 - 0x1FFFF: value = number of ~100ns_hang_pulses
+
+For values greater than 0x00000, the actual delay is 1 PSS Clock + the time delay designated by the value defined. Max. delay at 0x1FFFF: 13.1ms + 1 PSSI clock cycle.
+
+Producer: proc_pm_init
+
+Consumer: proc_pss_init
+    </description>
+    <valueType>uint32</valueType>
+    <writeable/>
+</attribute>
+
+<attribute>
+    <id>ATTR_PM_SPIPSS_INTER_FRAME_DELAY</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>Delay between two frames of a P2S command as measured from the end of the last bit of the first frame until the chip select of the second frame.  (binary in nanoseconds)
+
+Consumer: proc_pm_init
+
+Produces ATTR_PM_SPIPSS_INTER_FRAME_DELAY_SETTING
+    </description>
+    <valueType>uint32</valueType>
+    <writeable/>
+</attribute>
+
+<attribute>
+    <id>ATTR_PM_PBAX_RCV_RESERV_TIMEOUT</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>PBAX Data Timeout Divider
+Divider for the 1us PBAX hang pulse.  A hang is detected after two divided hang pulses are received under the following conditions:
+ Data Hi packet accepted and timeout waiting for Data Lo packet.
+ Reservation aquired and timeout waiting for Data Hi packet.
+
+00000  Data Timeout is Disabled
+00001  divided hang pulse = PBAX hang pulse
+00010  divided hang pulse = PBAX hang pulse/2
+00011  divided hang pulse = PBAX hang pulse/3
+. . .
+11111   divided hang pulse = PBAX hang pulse/31
+    </description>
+    <valueType>uint8</valueType>
+    <writeable/>
+</attribute>
+
+<attribute>
+    <id>ATTR_PM_PBAX_SND_RETRY_COUNT_OVERCOMMIT_ENABLE</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>PBAX Send Retry count overcommit
+Mode bit to count overcommit retries for the send retry threshold when sending PBAX commands on the powerbus.
+    </description>
+    <valueType>uint8</valueType>
+    <writeable/>
+</attribute>
+
+<attribute>
+    <id>ATTR_PM_PBAX_SND_RETRY_THRESHOLD</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>PBAX Send Retry Threshold
+Defines the maximum number of retry attempts by the Send Engine for any phase of the PBAX transaction set before the operation is dropped and status bit are set.  This does not count PowerBus overcommit retries unless snd_retry_count_overcom bit is set.
+
+0x00 :  No Timeout
+0x01 :  1 attempt
+0x02 :   2 attempts
+.etc.
+0xFF :  255 attempts
+    </description>
+    <valueType>uint8</valueType>
+    <writeable/>
+</attribute>
+
+<attribute>
+    <id>ATTR_PM_PBAX_SND_RESERV_TIMEOUT</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>PBAX Send Reservation Timeout Divider
+Divider for the 1us PBAX hang pulse.  A hang is detected after two divided hang pulses are received after attempting to acquire a reservation with the PBAX Receive engine before declaring a Send Reservation Timeout error.
+
+00000  Send Reservation Timeout is Disabled
+00001  divided hang pulse = PBAX hang pulse
+00010  divided hang pulse = PBAX hang pulse/2
+00011  divided hang pulse = PBAX hang pulse/3
+. . .
+11111   divided hang pulse = PBAX hang pulse/31
+    </description>
+    <valueType>uint8</valueType>
+    <writeable/>
+</attribute>
+
+<attribute>
+    <id>ATTR_PM_SPWUP_FSP</id>
+    <targetType>TARGET_TYPE_EX_CHIPLET</targetType>
+    <description>Arbitration Attribute for FSP special wakeups:  upon set, increment, upon clear, decrement;   hardware bit only cleared upon attribute being 0.
+    </description>
+    <valueType>uint32</valueType>
+    <writeable/>
+</attribute>
+
+<attribute>
+    <id>ATTR_PM_SPWUP_OCC</id>
+    <targetType>TARGET_TYPE_EX_CHIPLET</targetType>
+    <description>Arbitration Attribute for OCC special wakeups:  upon set, increment, upon clear, decrement;   hardware bit only cleared upon attribute being 0.
+    </description>
+    <valueType>uint32</valueType>
+    <writeable/>
+</attribute>
+
+<attribute>
+    <id>ATTR_PM_SPWUP_PHYP</id>
+    <targetType>TARGET_TYPE_EX_CHIPLET</targetType>
+    <description>Arbitration Attribute for PHUP special wakeups:  upon set, increment, upon clear, decrement;   hardware bit only cleared upon attribute being 0.
+    </description>
+    <valueType>uint32</valueType>
+    <writeable/>
+</attribute>
+
+</attributes>
+
