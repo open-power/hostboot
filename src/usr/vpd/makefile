@@ -29,6 +29,6 @@ SUBDIRS = test.d
 
 BINARY_FILES = $(IMGDIR)/dimmspd.dat:9a6e6b6a7f6d3fc77a12d38537279d402124d699
 BINARY_FILES += $(IMGDIR)/procmvpd.dat:dc85f0e2f7b26f3928c817be3f0c37a9cc0e0bed
-BINARY_FILES += $(IMGDIR)/cvpd.dat:92edad6c4ecac1bc544fcd02e53e90f66cf7f5cf
+BINARY_FILES += $(IMGDIR)/cvpd.dat:199b4db0140c2021c82c73b88d7516dde52a2718
 
 include ${ROOTPATH}/config.mk
