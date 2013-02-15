@@ -32,6 +32,7 @@ my $dataPath = ".";
 my $outputPath = ".";
 my $machine = "MURANO";
 my $procConfig = "uninit";
+my $centConfig = "uninit";
 my $maxProcs = 8;
 
 # Create temp file for MVPD
@@ -104,6 +105,21 @@ while( $ARGV = shift )
     {
         $procConfig = shift;
     }
+    elsif( $ARGV =~ m/--forceCent/ ||
+           $ARGV =~ m/-fc/ )
+    {
+        $centConfig = shift;
+        if(length($centConfig) != $MAX_MCS)
+        {
+            print "\nERROR: --forceCent/-fc arg must define presence for all $MAX_MCS Centaurs\n\n\n";
+            usage();
+        }
+    }
+    elsif( $ARGV =~ m/--examples/ ||
+           $ARGV =~ m/-e/ )
+    {
+        examples();
+    }
     else
     {
         usage();
@@ -151,21 +167,49 @@ exit 0;
 #====================================================================
 sub usage
 {
-    print "Usage: $0 --numProcs <value> --numCentPerProc <value>\n";
+    print "Usage: $0 --numProcs <value> [--numCentPerProc <value>]\n";
     print "         [--dataPath <path> ] [-m | --machine <value>]\n";
-    print "         [-mp | --maxProcs <value>\n";
-    print "         [-fp | --forceProc <value ] [-h | --help]\n";
+    print "         [-mp | --maxProcs <value>]\n";
+    print "         [-fp | --forceProc <value ] [-fc | -forceCent <value>]\n";
+    print "         [-h | --help]\n";
     print "\n";
     print "  -np    --numProcs        Number of Processors in the drawer.\n";
     print "  -mp    --maxProcs        Max number of Proc records created.\n";
     print "  -fp    --forceProc       Force specific procs to be present.\n";
     print "  -ncpp  --numCentPerProc  Number of Centaurs per Processor.\n";
+    print "                             not required with --forceCent.\n";
+    print "  -fc    --forceCent       Force specifc Centaurs to be present\n";
+    print "                           behind each processor. Must always\n";
+    print "                           contain info for 8 Centaurs\n";
+    print "                           --numCentPerProc\n";
     print "  -m     --machine         Text machine to build data for.\n";
     print "                              Default: MURANO\n";
     print "  -dp    --dataPath        Path to VPD data files.\n";
     print "  -op    --outputPath      Path where VPD files should end up.\n";
     print "                              Default: ./\n";
     print "  -h  --help               Help/Usage.\n";
+    print "  -e  --examples           List some example use cases.\n";
+    print "\n\n";
+    exit 1;
+}
+
+#====================================================================
+# Examples Message
+#====================================================================
+sub examples
+{
+    print "Following are some Examples of common use-cases for this tool\n";
+    print "\n";
+    print "Create System Specfic image with standard plugging:\n";
+    print "$0 --numProcs 2 --numCentPerProc 2 --machine MURANO";
+    print "   --dataPath <path to input dat files>\n";
+    print "\n";
+    print "Create a VPO image with explicit Proc and Centaur plugging\n";
+    print "   This will result in VPD for the first to proc and Centuars\n";
+    print "   behind MCS0 and MCS1 on each processor\n";
+    print "   NOTE: for VPO, maxProcs must be set to 4\n";
+    print "$0 --maxProcs 4 --forceProc 1100 --forceCent 11000000";
+    print "   --dataPath <path to input dat files>\n";
     print "\n\n";
     exit 1;
 }
@@ -374,74 +418,92 @@ sub getCentaurConfig
 {
     debugMsg( "getCentaurConfig $machine" );
 
-    for( my $mcs = 0; $mcs < $MAX_MCS; $mcs++ )
+    #First check if explicit Centaur Plugging rules were provided
+    if( $centConfig !~ m/uninit/ )
     {
-        debugMsg( "Mcs: $mcs" );
-        if( $machine eq "MURANO" )
+        for( my $mcs = 0; $mcs < $MAX_MCS; $mcs++ )
         {
-            # Plugging order is:
-            #   Processor 0 - 3
-            #   MCS 4 - 7 (1 Centaur/MCS)
-            if( $mcs >= 4 &&
-                $mcs <= (4 + ($numCentPerProc - 1)) )
+            if( substr($centConfig,$mcs,1) =~ /1/ )
             {
                 $mcsArray[$mcs] = 1;
+            }
+            else
+            {
+                $mcsArray[$mcs] = 0;
             }
         }
-        elsif( $machine eq "VENICE" )
+    }
+    else
+    {
+        #use pre-defined Centaur Plugging order
+        for( my $mcs = 0; $mcs < $MAX_MCS; $mcs++ )
         {
-            # Plugging order is:
-            #   Processor 0 - 7
-            #   MCS 4 - 7, then 0 - 3
-            if( ($numCentPerProc <= 4) &&
-                ($mcs >= 4) &&
-                ($mcs <= (4 + ($numCentPerProc - 1))) )
+            debugMsg( "Mcs: $mcs" );
+            if( $machine eq "MURANO" )
             {
-                $mcsArray[$mcs] = 1;
-            }
-            elsif( $numCentPerProc > 4 )
-            {
+                # Plugging order is:
+                #   Processor 0 - 3
+                #   MCS 4 - 7 (1 Centaur/MCS)
                 if( $mcs >= 4 &&
-                    $mcs <= 7 )
+                    $mcs <= (4 + ($numCentPerProc - 1)) )
                 {
                     $mcsArray[$mcs] = 1;
                 }
-                elsif( $mcs >= 0 &&
-                       $mcs < ($numCentPerProc - 4) )
-                   {
-                       $mcsArray[$mcs] = 1;
-                   }
             }
-        }
-        elsif( $machine eq "TULETA" )
-        {
-            # Plugging order is:
-            #   Processor 0 - 3
-            #   MCS 4 - 7, then 0 - 3 (1 Centaur/MCS)
-            if( ($numCentPerProc <= 4) &&
-                ($mcs >= 4) &&
-                ($mcs <= (4 + ($numCentPerProc - 1))) )
+            elsif( $machine eq "VENICE" )
             {
-                $mcsArray[$mcs] = 1;
-            }
-            elsif( $numCentPerProc > 4 )
-            {
-                if( $mcs >= 4 &&
-                    $mcs <= 7 )
+                # Plugging order is:
+                #   Processor 0 - 7
+                #   MCS 4 - 7, then 0 - 3
+                if( ($numCentPerProc <= 4) &&
+                    ($mcs >= 4) &&
+                    ($mcs <= (4 + ($numCentPerProc - 1))) )
                 {
                     $mcsArray[$mcs] = 1;
                 }
-                elsif( $mcs >= 0 &&
-                       $mcs < ($numCentPerProc - 4) )
-                   {
-                       $mcsArray[$mcs] = 1;
-                   }
+                elsif( $numCentPerProc > 4 )
+                {
+                    if( $mcs >= 4 &&
+                        $mcs <= 7 )
+                    {
+                        $mcsArray[$mcs] = 1;
+                    }
+                    elsif( $mcs >= 0 &&
+                           $mcs < ($numCentPerProc - 4) )
+                    {
+                        $mcsArray[$mcs] = 1;
+                    }
+                }
             }
-        }
-        else
-        {
-            die "Invalid machine ($machine)!!!  Cannot preload DIMM VPD \
-            data...exiting.";
+            elsif( $machine eq "TULETA" )
+            {
+                # Plugging order is:
+                #   Processor 0 - 3
+                #   MCS 4 - 7, then 0 - 3 (1 Centaur/MCS)
+                if( ($numCentPerProc <= 4) &&
+                    ($mcs >= 4) &&
+                    ($mcs <= (4 + ($numCentPerProc - 1))) )
+                {
+                    $mcsArray[$mcs] = 1;
+                }
+                elsif( $numCentPerProc > 4 )
+                {
+                    if( $mcs >= 4 &&
+                        $mcs <= 7 )
+                    {
+                        $mcsArray[$mcs] = 1;
+                    }
+                    elsif( $mcs >= 0 &&
+                           $mcs < ($numCentPerProc - 4) )
+                    {
+                        $mcsArray[$mcs] = 1;
+                    }
+                }
+            }
+            else
+            {
+                die "Invalid machine ($machine)!!!  Cannot preload DIMM VPD data...exiting.";
+            }
         }
     }
 
