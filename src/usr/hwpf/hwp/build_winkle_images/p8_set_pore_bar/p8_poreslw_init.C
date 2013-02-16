@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012                   */
+/* COPYRIGHT International Business Machines Corp. 2012,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,9 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_poreslw_init.C,v 1.8_Thi_hack 2012/12/12 04:25:54 stillgs Exp $
-// Search for @thi to see HACK of minor issues in order to compile
-// RTC 60779 is opened to make sure a revised version is worked on by Greg
+// $Id: p8_poreslw_init.C,v 1.9 2012/12/20 05:21:05 stillgs Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/p8_poreslw_init.C,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
@@ -68,10 +66,8 @@
 #include "p8_pfet_init.H"
 #include "p8_pmc_deconfig_setup.H"
 
-//#ifdef FAPIECMD
-extern "C" {
-//#endif
 
+extern "C" {
 
 using namespace fapi;
 
@@ -170,7 +166,7 @@ poreslw_init(const Target& i_target)
             break;
         }
 
-        FAPI_DBG("Activate the PMC Idle seequencer by making sure the Halt bit is clear"); // @thi - Hack
+        FAPI_DBG("Activate the PMC Idle seequencer by making sure the Halt bit is clear");
         const uint32_t HALT_IDLE_STATE_MASTER_FSM = 14;
         l_rc = fapiGetScom(i_target, PMC_MODE_REG_0x00062000, data);
         if(!l_rc.ok())
@@ -193,8 +189,8 @@ poreslw_init(const Target& i_target)
             FAPI_ERR("Scom error writing PMC_MODE");
             break;
         }
-
-        FAPI_DBG("Activate the PMC Idle seequencer by making sure the Halt bit is clear"); // @thi - Hack
+             
+        FAPI_DBG("Activate the PMC Idle seequencer by making sure the Halt bit is clear");
 
         // Setup up each of the EX chiplets
         l_rc = poreslw_ex_setup(i_target);
@@ -352,7 +348,7 @@ poreslw_ex_setup(const Target& i_target)
     const uint32_t                  PM_WINKLE_POWER_UP_EN_BIT   = 4;
     const uint32_t                  PM_WINKLE_POWER_OFF_SEL_BIT = 5;
 
-    // Warning: this need removal once mutli-core IPL function in SBE code is available
+
     const uint32_t IDLE_STATE_OVERRIDE_EN = 6;
     const uint32_t PM_DISABLE = 0;
 
@@ -614,7 +610,9 @@ poreslw_ex_setup(const Target& i_target)
 
                     FAPI_INF("\tDisable the PCBS Heartbeat EX %x", l_ex_number);
                     address = EX_SLAVE_CONFIG_0x100F001E + (l_ex_number * 0x01000000);
-                    l_rc = fapiGetScom(l_exChiplets[j], EX_OHA_MODE_REG_RWx1002000D, data);
+//@thi - Temporary workaround.  Greg Still agreed to fix this in his next version
+//                    l_rc = fapiGetScom(l_exChiplets[j], address, data);
+                    l_rc = fapiGetScom(i_target, address, data);
                     if(!l_rc.ok())
                     {
                         FAPI_ERR("Scom error reading PCBS Slave Config");
@@ -636,77 +634,98 @@ poreslw_ex_setup(const Target& i_target)
                         break;
                     }
 
-                    // >>>> Start: Move to SBE/SLW code with multi-core winkle function (proc_sbe_ex_scominit.S)
                     // --------------------------------------
-                    // Clear the OHA Idle State Override
-                    FAPI_INF("\tClear the OHA Idle State Override for EX %x", l_ex_number);
-
+                    // Check if SBE code has already cleard the OHA override.
+                    // As chiplets may be enabled but offline (eg in Winkle)
+                    // treat SCOM errors as off-line (eg skip it).  If online 
+                    // and set, clear the override.                    
                     l_rc = fapiGetScom(l_exChiplets[j], EX_OHA_MODE_REG_RWx1002000D, data);
-                    if(!l_rc.ok())
-                    {
-                        FAPI_ERR("Scom error reading OHA_MODE");
-                        break;
+                    if(l_rc.ok())
+                    {                   
+                        if (data.isBitSet(IDLE_STATE_OVERRIDE_EN))
+                        {
+
+                            FAPI_INF("\tClear the OHA Idle State Override for EX %x", l_ex_number);
+                            e_rc |= data.clearBit(IDLE_STATE_OVERRIDE_EN);
+                            if (e_rc)
+                            {
+                                FAPI_ERR("Error (0x%x) setting up ecmdDataBufferBase", e_rc);
+                                l_rc.setEcmdError(e_rc);
+                                break;
+                            }
+
+                            l_rc = fapiPutScom(l_exChiplets[j], EX_OHA_MODE_REG_RWx1002000D, data);
+                            if(!l_rc.ok())
+                            {
+                                FAPI_ERR("Scom error writing OHA_MODE");
+                                break;
+                            }
+                        }
                     }
-
-                    e_rc |= data.clearBit(IDLE_STATE_OVERRIDE_EN);
-                    if (e_rc)
-                    {
-                        FAPI_ERR("Error (0x%x) setting up ecmdDataBufferBase", e_rc);
-                        l_rc.setEcmdError(e_rc);
-                        break;
-                    }
-
-                    l_rc = fapiPutScom(l_exChiplets[j], EX_OHA_MODE_REG_RWx1002000D, data);
-                    if(!l_rc.ok())
-                    {
-                        FAPI_ERR("Scom error writing OHA_MODE");
-                        break;
-                    }
-
-                    // >>>> End: Move to SBE/SLW code with multi-core winkle function (proc_sbe_ex_scominit.S)
-
-                    // >>>> Start: Move to proc_sbe_
+                    
                     // --------------------------------------
-                    // Activate the PCBS-PM macro by clearing the PM_DISABLE bit
-                    FAPI_INF("\tActivate the PCBS-PM for EX %x", l_ex_number);
-
-                    e_rc |= data.flushTo1();
-                    e_rc |= data.clearBit(PM_DISABLE);
-                    if (e_rc)
-                    {
-                        FAPI_ERR("Error (0x%x) setting up ecmdDataBufferBase", e_rc);
-                        l_rc.setEcmdError(e_rc);
-                        break;
-                    }
-
-                    address = EX_PMGP0_AND_0x100F0101 + (l_ex_number * 0x01000000);
-                    l_rc=fapiPutScom(i_target, address, data);
+                    // Check that PM function is enabled (eg not disabled).
+                    // If not, remove the disable
+                    address = EX_PMGP0_0x100F0100 + (l_ex_number * 0x01000000);
+                    l_rc=fapiGetScom(i_target, address, data);
                     if(!l_rc.ok())
                     {
-                        FAPI_ERR("Scom error writing EX_PMGP0_OR");
+                        FAPI_ERR("Scom error reading PMGP0");
                         break;
+                    }
+                    
+                    if (data.isBitSet(PM_DISABLE))
+                    {
+                    
+                        // Activate the PCBS-PM macro by clearing the PM_DISABLE bit
+                        FAPI_INF("\tActivate the PCBS-PM for EX %x", l_ex_number);
+
+                        e_rc |= data.flushTo1();
+                        e_rc |= data.clearBit(PM_DISABLE);
+                        if (e_rc)
+                        {
+                            FAPI_ERR("Error (0x%x) setting up ecmdDataBufferBase", e_rc);
+                            l_rc.setEcmdError(e_rc);
+                            break;
+                        }
+
+                        address = EX_PMGP0_AND_0x100F0101 + (l_ex_number * 0x01000000);
+                        l_rc=fapiPutScom(i_target, address, data);
+                        if(!l_rc.ok())
+                        {
+                            FAPI_ERR("Scom error writing EX_PMGP0_OR");
+                            break;
+                        }
                     }
 
                     // --------------------------------------
                     // Clear OCC Special Wake-up bit - only 1 bit in the register
-                    FAPI_INF("\tClear OCC Special Wake-up for EX %x", l_ex_number);
-                    e_rc |= data.flushTo0();
-                    if (e_rc)
-                    {
-                        FAPI_ERR("Error (0x%x) setting up ecmdDataBufferBase", e_rc);
-                        l_rc.setEcmdError(e_rc);
-                        break;
-                    }
-
                     address = EX_PMSpcWkupOCC_REG_0x100F010C + (l_ex_number * 0x01000000);
-                    l_rc=fapiPutScom(i_target, address, data);
+                    l_rc=fapiGetScom(i_target, address, data);
                     if(!l_rc.ok())
                     {
                         FAPI_ERR("Scom error clearing EX_OCC_SPWKUP");
                         break;
                     }
-                    // >>>> End: Move to proc_sbe_
+                    
+                    if (data.isBitSet(0))
+                    {
+                        FAPI_INF("\tClear OCC Special Wake-up for EX %x", l_ex_number);
+                        e_rc |= data.flushTo0();
+                        if (e_rc)
+                        {
+                            FAPI_ERR("Error (0x%x) setting up ecmdDataBufferBase", e_rc);
+                            l_rc.setEcmdError(e_rc);
+                            break;
+                        }
 
+                        l_rc=fapiPutScom(i_target, address, data);
+                        if(!l_rc.ok())
+                        {
+                            FAPI_ERR("Scom error clearing EX_OCC_SPWKUP");
+                            break;
+                        }
+                    }
                     core_flag =  true;
                 }  // Chiplet Enabled
                 else  // Not Functional so skip it

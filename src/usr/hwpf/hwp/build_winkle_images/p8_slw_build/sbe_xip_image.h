@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012                   */
+/* COPYRIGHT International Business Machines Corp. 2012,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -23,7 +23,7 @@
 #ifndef __SBE_XIP_IMAGE_H
 #define __SBE_XIP_IMAGE_H
 
-// $Id: sbe_xip_image.h,v 1.18 2012/07/06 20:03:09 bcbrock Exp $
+// $Id: sbe_xip_image.h,v 1.20 2013/02/06 04:48:45 bcbrock Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/sbe/sbe_xip_image.h,v $
 //-----------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
@@ -74,7 +74,7 @@
 /// @{
 
 // -*- DO NOT REORDER OR EDIT THIS SET OF CONSTANTS WITHOUT ALSO EDITING -*-
-// -*- THE ASSEMBLER LAYOUT IN sbe_xip_header.S.                         -*-
+// -*- THE ASSEMBLER LAYOUT IN sbe_xip_header.H.                         -*-
 
 #define SBE_XIP_SECTION_HEADER      0
 #define SBE_XIP_SECTION_FIXED       1
@@ -90,8 +90,8 @@
 #define SBE_XIP_SECTION_PIBMEM1    11
 #define SBE_XIP_SECTION_RINGS      12
 #define SBE_XIP_SECTION_SLW        13
-#define SBE_XIP_SECTION_RESERVED_1 14
-#define SBE_XIP_SECTION_RESERVED_0 15
+#define SBE_XIP_SECTION_FIT        14
+#define SBE_XIP_SECTION_FFDC       15
 
 #define SBE_XIP_SECTIONS 16
 
@@ -116,8 +116,8 @@
         ".pibmem1",                             \
         ".rings",                               \
         ".slw",                                 \
-        ".reserved_1",                          \
-        ".reserved_0"                           \
+        ".fit",                                 \
+        ".ffdc",                                \
     }
 
 /// Applications can use this macro to safely index the array of section
@@ -1091,6 +1091,8 @@ int
 sbe_xip_delete_section(void* io_image, const int i_sectionId);
 
 
+#ifndef PPC_HYP
+
 /// Duplicate a section from an SBE-XIP image in host memory
 ///
 /// \param[in,out] i_image A pointer to an SBE-XIP image in host memory.  The
@@ -1122,6 +1124,8 @@ sbe_xip_duplicate_section(const void* i_image,
                           const int i_sectionId,
                           void** o_duplicate,
                           uint32_t* o_size);
+
+#endif // PPC_HYP
 
 
 /// Append binary data to an SBE-XIP image held in host memory

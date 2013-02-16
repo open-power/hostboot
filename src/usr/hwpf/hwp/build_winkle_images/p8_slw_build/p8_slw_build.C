@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_slw_build.C,v 1.9 2013/01/02 02:54:19 cmolsen Exp $
+// $Id: p8_slw_build.C,v 1.10 2013/02/08 02:48:58 cmolsen Exp $
 /*------------------------------------------------------------------------------*/
 /* *! TITLE : p8_slw_build                                                      */
 /* *! DESCRIPTION : Extracts and decompresses delta ring states from EPROM      */
@@ -34,7 +34,7 @@
 /* *! USAGE : To build (for Hostboot) -                                         */
 //              buildfapiprcd  -C "p8_image_help.C,p8_image_help_base.C,p8_scan_compression.C"  -c "sbe_xip_image.c,pore_inline_assembler.c" -e "../../xml/error_info/p8_slw_build_errors.xml"  p8_slw_build.C
 //            To build (for command-line) -
-//              buildfapiprcd  -r ver-13-0  -C "p8_image_help.C,p8_image_help_base.C,p8_scan_compression.C"  -c "sbe_xip_image.c,pore_inline_assembler.c" -e "../../xml/error_info/p8_slw_build_errors.xml"  -u "SLW_COMMAND_LINE,IMGBUILD_PPD_IGNORE_XIPC"  p8_slw_build.C
+//              buildfapiprcd  -r ver-13-0  -C "p8_image_help.C,p8_image_help_base.C,p8_scan_compression.C"  -c "sbe_xip_image.c,pore_inline_assembler.c" -e "../../xml/error_info/p8_slw_build_errors.xml"  -u "SLW_COMMAND_LINE,IMGBUILD_PPD_IGNORE_XIPC,IMGBUILD_PPD_WF_POLLING_PROT"  p8_slw_build.C
 //            Other Pre-Processor Directive (PPD) options - 
 //            To debug WF programs:
 //              -u "IMGBUILD_PPD_DEBUG_WF"
@@ -410,7 +410,6 @@ ReturnCode p8_slw_build( const fapi::Target    &i_target,
 	  }
 		else  {
 			FAPI_ERR("ERROR: Nope, couldn't wing it.");
-      //if (deltaRingDxed)  free(deltaRingDxed);
       if (buf2)  free(buf2);
 		  uint32_t & RC_LOCAL=rcLoc;
 		  FAPI_SET_HWP_ERROR(rc, RC_PROC_SLWB_UNKNOWN_XIP_ERROR);
@@ -424,17 +423,36 @@ ReturnCode p8_slw_build( const fapi::Target    &i_target,
 		FAPI_INF("Continuing...\n");
 	}
 
+#ifdef IMGBUILD_PPD_ENFORCE_SCAN_DELAY
+  uint64_t waitsScanDelay=10;
+  // Temporary support for enforcing delay after scan WF scoms.
+  // Also remove all references and usages of waitsScanDelay in this file and in
+  //   p8_image_help.C.
+  rcLoc = sbe_xip_get_scalar( (void*)i_imageIn, "waits_delay_for_scan", &waitsScanDelay);
+  if (rcLoc)  {
+		FAPI_ERR("Error obtaining waits_delay_for_scan keyword.\n");
+    if (buf2)  free(buf2);
+	  uint32_t & RC_LOCAL=rcLoc;
+	  FAPI_SET_HWP_ERROR(rc, RC_PROC_SLWB_UNKNOWN_XIP_ERROR);
+	  return rc;
+  }
+#endif
+
 	wfInline = (uint32_t*)buf1;
 	wfInlineLenInWords = sizeBuf1/4;
-  //rcLoc = create_wiggle_flip_prg( (uint32_t*)deltaRingDxed, 
   rcLoc = create_wiggle_flip_prg( (uint32_t*)buf2, 
                                   ringBitLen,
                                   myRev32(deltaRingRS4->iv_scanSelect),
                                   (uint32_t)deltaRingRS4->iv_chipletId,
                                   &wfInline, 
                                   &wfInlineLenInWords,
+#ifdef IMGBUILD_PPD_ENFORCE_SCAN_DELAY
+																	(uint32_t)scanMaxRotate,
+                                  (uint32_t)waitsScanDelay);
+#else
 																	(uint32_t)scanMaxRotate);
-  if (rcLoc)  {
+#endif
+	if (rcLoc)  {
     FAPI_ERR("create_wiggle_flip_prg() failed w/rcLoc=%i",rcLoc);
     //if (deltaRingDxed)  free(deltaRingDxed);
     if (buf1)  free(buf1);

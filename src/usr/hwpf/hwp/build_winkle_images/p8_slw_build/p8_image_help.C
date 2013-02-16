@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_image_help.C,v 1.35 2013/01/02 23:00:00 cmolsen Exp $
+// $Id: p8_image_help.C,v 1.48 2013/02/13 00:22:12 cmolsen Exp $
 //
 /*------------------------------------------------------------------------------*/
 /* *! TITLE : p8_image_help.C                                                   */
@@ -47,6 +47,601 @@
 #endif
 extern "C"  {
 
+
+
+// calc_ring_delta_state() parms:
+// i_init - init (flush) ring state
+// i_alter - altered (desired) ring state
+// o_delta - ring delta state, caller allocates buffer
+// i_ringLen - length of ring in bits
+int calc_ring_delta_state( const uint32_t  *i_init, 
+													 const uint32_t  *i_alter, 
+													 uint32_t        *o_delta,
+													 const uint32_t  i_ringLen )
+{
+  int      i=0, count=0, bit=0, remainder=0, remainingBits=0;
+  uint32_t init, alter;
+  uint32_t mask=0;
+
+  // Do some checking of input parms
+  if ( (i_init==NULL) || (i_alter==NULL) || (o_delta==NULL) || (i_ringLen==0) )  {
+  	MY_ERR("Bad input arguments.\n");
+    return IMGBUILD_BAD_ARGS;
+  }
+
+  // Check how many 32-bit shift ops are needed and if we need final shift of remaining bit.
+  count = i_ringLen/32;
+  remainder = i_ringLen%32;
+	if (remainder>0)
+	    count = count + 1;
+	remainingBits = i_ringLen;
+	MY_DBG("count=%i  rem=%i  remBits=%i\n",count,remainder,remainingBits);
+
+  // XOR flush and init values 32 bits at a time.  Store result in o_delta buffer.
+	for (i=0; i<count; i++)  {
+
+		if (remainingBits<=0)  {
+			MY_ERR("remaingBits can not be negative.\n");
+			return IMGBUILD_ERR_CHECK_CODE;
+		}
+
+    init  = i_init[i];
+    alter = i_alter[i];
+
+    if (remainingBits>=32)
+      remainingBits = remainingBits-32;
+	  else  {  //If remaining bits are less than 32 bits, mask unused bits
+	    mask = 0;
+	    for (bit=0; bit<(32-remainingBits); bit++)  {
+	      mask = mask << 1;
+	      mask = mask + 1;
+	    }
+		  MY_DBG("remainingBits=%i<32. Padding w/zeros. True bit length unaltered. (@word count=%i)\n",remainingBits,count);
+	    mask  = ~mask;
+	    init  = init & mask;
+	    alter = alter & mask;
+	    remainingBits = 0;
+	  }
+	  
+    // Do the XORing.
+		o_delta[i]  = init ^ alter;
+	}
+
+  return IMGBUILD_SUCCESS;
+}
+
+
+
+// create_wiggle_flip_prg() function
+// Notes:
+// - WF routine implements dynamic P1 multicast bit set based on P0 status.
+// - WF routine checks header word on scan complete.
+// - WF routine is 8-byte aligned.
+int create_wiggle_flip_prg( uint32_t *i_deltaRing,          // scan ring delta state (in BE format)
+                            uint32_t i_ringBitLen,          // length of ring
+                            uint32_t i_scanSelectData,      // Scan ring modifier data
+                            uint32_t i_chipletID,           // Chiplet ID
+                            uint32_t **o_wfInline,          // location of the PORE instructions data stream
+                            uint32_t *o_wfInlineLenInWords, // final length of data stream
+#ifdef IMGBUILD_PPD_ENFORCE_SCAN_DELAY
+														uint32_t i_scanMaxRotate,       // Max rotate bit len on 38xxx, or polling threshold on 39xxx.
+                            uint32_t i_waitsScanDelay)      // Temporary debug support.
+#else
+														uint32_t i_scanMaxRotate)       // Max rotate bit len on 38xxx, or polling threshold on 39xxx.
+#endif
+{
+  uint32_t rc=0;
+  uint32_t i=0;
+  uint32_t scanSelectAddr=0;
+  uint32_t scanRing_baseAddr=0, scanRing_baseAddr_long=0;
+  uint32_t scanRing_poreAddr=0;
+  uint32_t scanRingCheckWord=0;
+  uint32_t bitShift=0;
+  uint32_t count=0;
+  uint32_t rotateLen=0, remainder=0, remainingBits=0;
+  uint32_t clear_excess_dirty_bits_mask=0xffffffff;
+  uint32_t clean_up_shift_reg_mask=0xffffffff;
+  uint64_t pore_imm64b=0;
+  uint32_t maxWfInlineLenInWords;
+  PoreInlineContext ctx;
+
+	maxWfInlineLenInWords = *o_wfInlineLenInWords;
+	
+  pore_inline_context_create(&ctx, *o_wfInline, maxWfInlineLenInWords * 4, 0, 0);
+  
+  //
+  // Set Default scanselq addr and scanring addr vars
+  //
+
+  // 0x00030007: port 3 - clock cotrol endpt, x07- scanselq (regin & types)
+  scanSelectAddr = P8_PORE_CLOCK_CONTROLLER_REG;  
+  
+  // Addr of clock control SCOM register(s) for short and long rotates.
+  //
+  // Short: 0x00038000: port 3, addr bit 16 must be set to 1 and bit 19 to 0.
+  scanRing_baseAddr = P8_PORE_SHIFT_REG; 
+  scanRing_poreAddr = scanRing_baseAddr;
+  // Long (poll): 0x00039000: port 3, addr bit 16 must be set to 1 and bit 19 to 1.
+  scanRing_baseAddr_long = P8_PORE_SHIFT_REG | 0x00001000;
+  
+  // Header check word for checking ring write was successful
+  scanRingCheckWord = P8_SCAN_CHECK_WORD;
+  
+  // This fix is a direct copy of the setp1_mcreadand macro in ./ipl/sbe/p8_slw.H 
+  uint64_t CLEAR_MC_TYPE_MASK=0x47;
+  PoreInlineLocation src1=0, src2=0, tgt1=0, tgt2=0;
+  pore_MR( &ctx, D1, P0);
+  pore_ANDI( &ctx, D1, D1, BIT(57));
+  PORE_LOCATION( &ctx, src1);
+  pore_BRANZ( &ctx, D1, src1);
+  pore_MR( &ctx, P1, P0);
+  PORE_LOCATION( &ctx, src2);
+  pore_BRA( &ctx, tgt2);
+  PORE_LOCATION( &ctx, tgt1);
+  pore_MR( &ctx, D1, P0);
+  pore_ANDI( &ctx, D1, D1, CLEAR_MC_TYPE_MASK);
+  pore_ORI( &ctx, D1, D1, BIT(60));
+  pore_MR( &ctx, P1, D1);
+  PORE_LOCATION( &ctx, tgt2);
+  if (ctx.error > 0)  {
+    MY_ERR("***setp1_mcreadand rc = %d", ctx.error);
+    return ctx.error;
+  }
+  pore_inline_branch_fixup( &ctx, src1, tgt1);
+  if (ctx.error > 0)  {
+    MY_ERR("***inline_branch_fixup error (1) rc = %d", ctx.error);
+    return ctx.error;
+  }
+  pore_inline_branch_fixup( &ctx, src2, tgt2);
+  if (ctx.error > 0)  {
+    MY_ERR("***inline_branch_fixup error (2) rc = %d", ctx.error);
+    return ctx.error;
+  }
+  
+	// We can assume that atomic lock is already in effect prior to WF calls.
+	// It can probably also be assumed that functional clocks are stopped, but
+	//   let's do it and check for it anyway.
+/* CMO: 20120927 - Not working - Being debugged by EPM
+  PoreInlineLocation  src0=0,tgt0=0;
+  pore_imm64b = uint64_t(0x8C200E00)<<32;
+	pore_STI(&ctx, P8_PORE_CLOCK_REGION_0x00030006, P0, pore_imm64b);
+	pore_LD(&ctx, D1, P8_PORE_CLOCK_STATUS_0x00030008, P1);
+	pore_imm64b = uint64_t(0xFFFFFFFF)<<32 | uint64_t(0xFFFFFFFF);
+  pore_XORI( &ctx, D1, D1, pore_imm64b);
+  PORE_LOCATION( &ctx, src0);
+  pore_BRAZ( &ctx, D1, src0);
+	pore_HALT( &ctx);
+  PORE_LOCATION( &ctx, tgt0);
+  pore_inline_branch_fixup( &ctx, src0, tgt0);
+  if (ctx.error > 0)  {
+    MY_ERR("***inline_branch_fixup error (0) rc = %d", ctx.error);
+    return ctx.error;
+  }
+*/
+
+  // Program scanselq reg for scan clock control setup before ring scan
+  pore_imm64b = ((uint64_t)i_scanSelectData) << 32;
+  pore_STI(&ctx, scanSelectAddr, P0, pore_imm64b);
+  if (ctx.error > 0)  {
+    MY_ERR("***STI rc = %d", ctx.error);
+    return ctx.error;
+  }
+
+#ifdef IMGBUILD_PPD_WF_WORST_CASE_PIB
+  uint32_t poreCTR=0;
+	// Save CTR value and restore it when done.
+/*
+  pore_MV(&ctx, A1, CTR);
+  if (ctx.error > 0)  {
+    MY_ERR("***WORST CASE PIB(1) rc = %d", ctx.error);
+    return ctx.error;
+  }
+*/
+#endif
+
+	// Preload the scan data/shift reg with the scan header check word.
+  //
+  pore_imm64b = ((uint64_t)scanRingCheckWord) << 32;
+//  pore_LI(&ctx, D0, pore_imm64b );
+//  pore_STD(&ctx, D0, scanRing_baseAddr, P0);
+	pore_STI(&ctx, scanRing_baseAddr, P0, pore_imm64b);
+#ifdef IMGBUILD_PPD_ENFORCE_SCAN_DELAY
+  pore_WAITS(&ctx, i_waitsScanDelay);
+#endif
+  if (ctx.error > 0)  {
+    MY_ERR("***STI(1) rc = %d", ctx.error);
+    return ctx.error;
+  }
+  
+  // Check how many 32-bit shift ops are needed and if we need final shift of remaining bit.
+  count = i_ringBitLen/32;
+  remainder = i_ringBitLen%32;
+  if (remainder >0)
+      count = count + 1;
+
+  // From P7+: skip first 32 bits associated with FSI engine
+  //TODO: check with perv design team if FSI 32 bit assumption is still valid in p8
+  //remainingBits=i_ringBitLen-32;
+  // CMO: I changed the following to not skip the first 32-bit.
+  //remainingBits = i_ringBitLen-32;  //Yong impl.
+  remainingBits = i_ringBitLen;   //Mike impl.
+  
+  MY_DBG("count=%i  rem=%i  remBits=%i",count,remainder,remainingBits);
+
+  // Read and compare init and flush values 32 bits at a time.  Store delta in 
+  // o_delta buffer.
+  for (i=0; i<count; i++)  {
+    
+    if (i==(count-1))  {
+      // Cleanup any leftover bits in dirty buffer. (Only applies to last word.)
+      MY_DBG("Clearing any dirty bits in last WF word:\n");
+      MY_DBG("i_deltaRing[%i] (before)     = 0x%08x\n",i,i_deltaRing[i]);
+      MY_DBG("remainingBits                = %i\n",remainingBits);
+      clear_excess_dirty_bits_mask = 0xffffffff>>(32-remainingBits);
+      i_deltaRing[i] = i_deltaRing[i]&clear_excess_dirty_bits_mask;
+      MY_DBG("clear_excess_dirty_bits_mask = 0x%08x\n",clear_excess_dirty_bits_mask);
+      MY_DBG("i_deltaRing[%i] (after)      = 0x%08x\n",i,i_deltaRing[i]);
+    }
+
+    //====================================================================================
+    // If flush & init values are identical, increase the read count, no code needed.
+    // When the discrepancy is found, read (rotate the ring) up to current address 
+    // then scan/write in the last 32 bits
+    //====================================================================================
+    if (i_deltaRing[i] > 0)  {
+
+      if (rotateLen > 0)  {
+
+#ifdef IMGBUILD_PPD_WF_POLLING_PROT
+				uint32_t  nwait1=0;
+				PoreInlineLocation  srcp1=0,tgtp1=0;
+        
+        pore_imm64b = uint64_t(rotateLen)<<32;
+//        pore_LI(&ctx, D0, pore_imm64b);
+//        pore_STD(&ctx, D0, scanRing_baseAddr_long, P0);
+				pore_STI(&ctx, scanRing_baseAddr_long, P0, pore_imm64b);
+        
+        nwait1 = rotateLen / 20 + 1; // 20x over sampling.
+				PORE_LOCATION(&ctx, tgtp1);
+				pore_WAITS(&ctx, nwait1);
+				pore_LD(&ctx, D0, GENERIC_GP1_0x00000001, P1);
+				pore_ANDI(&ctx, D0, D0, P8_SCAN_POLL_MASK_BIT15);
+				PORE_LOCATION(&ctx, srcp1);
+				pore_BRAZ(&ctx, D0, tgtp1);
+				pore_inline_branch_fixup(&ctx, srcp1, tgtp1);
+        if (ctx.error > 0)  {
+          MY_ERR("***POLLING PROT(2) rc = %d", ctx.error);
+          return ctx.error;
+        }
+#else
+#ifdef IMGBUILD_PPD_WF_WORST_CASE_PIB
+				PoreInlineLocation  srcwc1=0,tgtwc1=0;
+				poreCTR = rotateLen/i_scanMaxRotate-1;
+				if (poreCTR>=0)  {
+					scanRing_poreAddr = scanRing_baseAddr | i_scanMaxRotate;
+					pore_LS(&ctx, CTR, poreCTR);
+					PORE_LOCATION(&ctx, tgtwc1);
+        	pore_LD(&ctx, D0, scanRing_poreAddr, P1);
+					PORE_LOCATION(&ctx, srcwc1);
+					pore_LOOP(&ctx, tgtwc1);
+					pore_inline_branch_fixup(&ctx, srcwc1, tgtwc1);
+				}
+				scanRing_poreAddr = scanRing_baseAddr | (rotateLen-i_scanMaxRotate*(poreCTR+1));
+        pore_LD(&ctx, D0, scanRing_poreAddr, P1);
+        if (ctx.error > 0)  {
+          MY_ERR("***WORST CASE PIB(1) rc = %d", ctx.error);
+          return ctx.error;
+        }  
+#else
+        scanRing_poreAddr = scanRing_baseAddr | rotateLen;
+        pore_LD(&ctx, D0, scanRing_poreAddr, P1);
+#ifdef IMGBUILD_PPD_ENFORCE_SCAN_DELAY
+//        pore_WAITS(&ctx, i_waitsScanDelay);
+#endif
+        if (ctx.error > 0)  {
+          MY_ERR("***LD D0 rc = %d", ctx.error);
+          return ctx.error;
+        }  
+#endif
+#endif
+
+      } // End of if (rotateLen>0)
+
+      //
+      // Shift in the delta state word, or parts of it if last word.
+      //
+      if (remainingBits>32)
+        bitShift = 32;
+      else
+        bitShift = remainingBits;
+      scanRing_poreAddr = scanRing_baseAddr | bitShift;
+
+      if (i==(count-1) && bitShift<32)  {
+        // --------------------------------------------------------------------
+        // Be very careful shifting in last word content as it can mess up the
+        //   current shift register content when loaded.
+        // --------------------------------------------------------------------
+        // Take snapshot of present content of shift reg and put in D1.
+        pore_LD(&ctx, D1, scanRing_baseAddr, P1);
+#ifdef IMGBUILD_PPD_ENFORCE_SCAN_DELAY
+//        pore_WAITS(&ctx, i_waitsScanDelay);
+#endif
+        // Calculate shift reg cleanup mask and put in D0. The intent is to
+        //   clear bit in the ring data positions while keeping any header
+        //   check word content untouched.
+        clean_up_shift_reg_mask = 0xffffffff>>bitShift;
+        pore_imm64b = ((uint64_t)clean_up_shift_reg_mask) << 32;
+        pore_LI(&ctx, D0, pore_imm64b );
+        // Cleanup shift register snapshot and put in D1.
+        pore_AND(&ctx, D1, D0, D1);
+        // Put ring data in D0. Note, any dirty content was removed earlier.
+        pore_imm64b = ((uint64_t)myRev32(i_deltaRing[i])) << 32;
+        pore_LI(&ctx, D0, pore_imm64b );
+        // Finally, combine the ring data and the shift reg content and put in D0.
+        pore_OR(&ctx, D0, D0, D1);
+				pore_STD(&ctx, D0, scanRing_poreAddr, P0);
+      }
+      else  {
+        // --------------------------------------------------------------------
+        // Not the last word OR the last word has exactly 32-bit of ring data.
+        // --------------------------------------------------------------------
+        pore_imm64b = ((uint64_t)myRev32(i_deltaRing[i])) << 32;
+//        pore_LI(&ctx, D0, pore_imm64b );
+				pore_STI(&ctx, scanRing_poreAddr, P0, pore_imm64b);
+      }
+      // Shift it in by bitShift bits.
+//      pore_STD(&ctx, D0, scanRing_poreAddr, P0);
+#ifdef IMGBUILD_PPD_ENFORCE_SCAN_DELAY
+      pore_WAITS(&ctx, i_waitsScanDelay);
+#endif
+      if (ctx.error > 0)  {
+        MY_ERR("***STI(2) (or STD) rc = %d", ctx.error);
+        return ctx.error;
+      }
+
+      rotateLen=0;  //reset rotate length
+
+		}
+    else  {  // i_deltaRing[i]==0 (i.e., init and alter states are identical).
+      if (remainingBits>32)
+        rotateLen = rotateLen + 32;
+      else
+        rotateLen = rotateLen + remainingBits;
+      
+#ifdef IMGBUILD_PPD_WF_POLLING_PROT
+			uint32_t nwait2=0;
+			PoreInlineLocation  srcp2=0,tgtp2=0;
+      
+      // Max rotate length is 2^20-1, i.e., data BITS(12-31)=>0x000FFFFF 
+			if (rotateLen>=SCAN_MAX_ROTATE_LONG)  {
+			  MY_INF("Scanning should never be here since max possible ring length is\n");
+        MY_INF("480,000 bits but MAX_LONG_ROTATE=0x%0x and rotateLen=0x%0x\n",
+                 SCAN_MAX_ROTATE_LONG, rotateLen);
+        pore_imm64b = uint64_t(SCAN_MAX_ROTATE_LONG)<<32;
+//        pore_LI(&ctx, D0, pore_imm64b);
+//        pore_STD(&ctx, D0, scanRing_baseAddr_long, P0);
+				pore_STI(&ctx, scanRing_baseAddr_long, P0, pore_imm64b);
+		  	nwait2 = rotateLen / 20 + 1; // 20x over sampling.
+			  PORE_LOCATION(&ctx, tgtp2);
+  			pore_WAITS(&ctx, nwait2);
+	  		pore_LD(&ctx, D0, GENERIC_GP1_0x00000001, P1);
+		  	pore_ANDI(&ctx, D0, D0, P8_SCAN_POLL_MASK_BIT15);
+			 	PORE_LOCATION(&ctx, srcp2);
+			  pore_BRAZ(&ctx, D0, tgtp2);
+  			pore_inline_branch_fixup(&ctx, srcp2, tgtp2);
+	      if (ctx.error > 0)  {
+	        MY_ERR("***POLLING PROT(3) rc = %d", ctx.error);
+	        return ctx.error;
+	      }
+        rotateLen = rotateLen - SCAN_MAX_ROTATE_LONG;
+	  	}
+#else
+#ifdef IMGBUILD_PPD_WF_WORST_CASE_PIB
+      // There is no max rotateLen issue in this case since we rotate 32 bits
+			// at a time.
+#else
+      if (rotateLen>i_scanMaxRotate)  {
+        //scanRing_poreAddr = scanRing_baseAddr | rotateLen;
+        scanRing_poreAddr = scanRing_baseAddr | i_scanMaxRotate;
+        pore_LD(&ctx, D0, scanRing_poreAddr, P1);
+#ifdef IMGBUILD_PPD_ENFORCE_SCAN_DELAY
+//        pore_WAITS(&ctx, i_waitsScanDelay);
+#endif
+        if (ctx.error > 0)  {
+          MY_ERR("***LD D0 rc = %d", ctx.error);
+          return ctx.error;
+        }
+        //rotateLen = 0;
+        rotateLen = rotateLen - i_scanMaxRotate;
+      }
+#endif
+#endif
+
+    } //end of else (i_deltaRing==0)
+
+    if (remainingBits>32)
+      remainingBits = remainingBits - 32;
+    else
+      remainingBits = 0;
+
+  } // End of for loop
+       
+  // If the scan ring has not been rotated to the original position
+  // shift the ring by remaining shift bit length.
+  if (rotateLen>0)  {
+#ifdef IMGBUILD_PPD_WF_POLLING_PROT
+		uint32_t nwait3=0;
+		PoreInlineLocation  srcp3=0,tgtp3=0;
+    
+    pore_imm64b = uint64_t(rotateLen)<<32;
+//    pore_LI(&ctx, D0, pore_imm64b);
+//    pore_STD(&ctx, D0, scanRing_baseAddr_long, P0);
+		pore_STI(&ctx, scanRing_baseAddr_long, P0, pore_imm64b);
+    
+    nwait3 = rotateLen / 20 + 1; // 20x over sampling.
+    PORE_LOCATION(&ctx, tgtp3);
+	  pore_WAITS(&ctx, nwait3);
+  	pore_LD(&ctx, D0, GENERIC_GP1_0x00000001, P1);
+	 	pore_ANDI(&ctx, D0, D0, P8_SCAN_POLL_MASK_BIT15);
+	 	PORE_LOCATION(&ctx, srcp3);
+	  pore_BRAZ(&ctx, D0, tgtp3);
+  	pore_inline_branch_fixup(&ctx, srcp3, tgtp3);
+    if (ctx.error > 0)  {
+      MY_ERR("***POLLING PROT(4) rc = %d", ctx.error);
+      return ctx.error;
+    }
+		rotateLen=0;
+#else
+#ifdef IMGBUILD_PPD_WF_WORST_CASE_PIB
+		PoreInlineLocation  srcwc2=0,tgtwc2=0;
+		poreCTR = rotateLen/i_scanMaxRotate-1;
+		if (poreCTR>=0)  {
+			scanRing_poreAddr = scanRing_baseAddr | i_scanMaxRotate;
+			pore_LS(&ctx, CTR, poreCTR);
+			PORE_LOCATION(&ctx, tgtwc2);
+    	pore_LD(&ctx, D0, scanRing_poreAddr, P1);
+			PORE_LOCATION(&ctx, srcwc2);
+			pore_LOOP(&ctx, tgtwc2);
+			pore_inline_branch_fixup(&ctx, srcwc2, tgtwc2);
+		}
+		scanRing_poreAddr = scanRing_baseAddr | (rotateLen-i_scanMaxRotate*(poreCTR+1));
+    pore_LD(&ctx, D0, scanRing_poreAddr, P1);
+    if (ctx.error > 0)  {
+      MY_ERR("***WORST CASE PIB(2) rc = %d", ctx.error);
+      return ctx.error;
+    }
+		rotateLen=0;
+#else
+    scanRing_poreAddr=scanRing_baseAddr | rotateLen;
+    pore_LD(&ctx, D0, scanRing_poreAddr, P1);
+#ifdef IMGBUILD_PPD_ENFORCE_SCAN_DELAY
+//    pore_WAITS(&ctx, i_waitsScanDelay);
+#endif
+    if (ctx.error > 0)  {
+      MY_ERR("***LD D0 rc = %d", ctx.error);
+      return ctx.error;
+    }
+    rotateLen=0;
+#endif
+#endif
+  }
+
+/*
+#ifdef IMGBUILD_PPD_WF_WORST_CASE_PIB
+  // Restore CTR value.
+	pore_MV(&ctx, CTR, A1);
+  if (ctx.error > 0)  {
+    MY_ERR("***WORST CASE PIB(5) rc = %d", ctx.error);
+    return ctx.error;
+  }
+#endif
+*/
+
+  // Finally, check that our header check word went through in one piece.
+  // Note, we first do the MC-READ-AND check, then the MC-READ-OR check
+  //
+  // ...First, do the MC-READ-AND check
+  //    (Reference: setp1_mcreadand macro in ./ipl/sbe/p8_slw.H)
+  //
+  PoreInlineLocation src3=0, src5=0, src7=0, src8=0, tgt3=0, tgt5=0, tgt7=0, tgt8=0;
+  pore_MR( &ctx, D1, P0);
+  pore_ANDI( &ctx, D1, D1, BIT(57));
+  PORE_LOCATION( &ctx, src3);
+  pore_BRANZ( &ctx, D1, src3);
+  pore_MR( &ctx, P1, P0); // If here, MC=0. Omit MC check in OR case.
+  PORE_LOCATION( &ctx, src7);
+  pore_BRA( &ctx, tgt7);
+  PORE_LOCATION( &ctx, tgt3);
+  pore_MR( &ctx, D1, P0);
+  pore_ANDI( &ctx, D1, D1, CLEAR_MC_TYPE_MASK);
+  pore_ORI( &ctx, D1, D1, BIT(60));
+  pore_MR( &ctx, P1, D1); 
+  if (ctx.error > 0)  { 
+    MY_ERR("***setp1_mcreadand rc = %d", ctx.error);
+    return ctx.error;
+  }
+  pore_inline_branch_fixup( &ctx, src3, tgt3);
+  if (ctx.error > 0)  {
+    MY_ERR("***inline_branch_fixup error (3) rc = %d", ctx.error);
+    return ctx.error;
+  }
+  // ...Load the output check word...
+  pore_LD(&ctx, D0, scanRing_baseAddr, P1);
+#ifdef IMGBUILD_PPD_ENFORCE_SCAN_DELAY
+//  pore_WAITS(&ctx, i_waitsScanDelay);
+#endif
+  // Compare against the reference header check word...
+  pore_XORI( &ctx, D0, D0, ((uint64_t)scanRingCheckWord) << 32);
+  PORE_LOCATION( &ctx, src5);
+  pore_BRAZ( &ctx, D0, tgt5);
+  pore_HALT( &ctx);
+  PORE_LOCATION( &ctx, tgt5);
+  if (ctx.error > 0)  {
+    MY_ERR("***LD, XORI, BRANZ, RET or HALT went wrong  rc = %d", ctx.error);
+    return ctx.error;
+  }
+  pore_inline_branch_fixup( &ctx, src5, tgt5);
+  if (ctx.error > 0)  {
+    MY_ERR("***inline_branch_fixup error (5) rc = %d", ctx.error);
+    return ctx.error;
+  }
+  //
+  // ...Now do the MC-READ-OR check
+  //    (Reference: setp1_mcreador macro in ./ipl/sbe/p8_slw.H)
+  //    Note. If we made is this far, we know that MC=1 already, so don't check for it.
+  //
+  pore_MR( &ctx, D1, P0);
+  pore_ANDI( &ctx, D1, D1, CLEAR_MC_TYPE_MASK); // This also clears bit-60.
+  pore_MR( &ctx, P1, D1);
+  PORE_LOCATION( &ctx, tgt7);
+  if (ctx.error > 0)  {
+    MY_ERR("***setp1_mcreadand rc = %d", ctx.error);
+    return ctx.error;
+  }
+  pore_inline_branch_fixup( &ctx, src7, tgt7);
+  if (ctx.error > 0)  {
+    MY_ERR("***inline_branch_fixup error (7) rc = %d", ctx.error);
+    return ctx.error;
+  }
+  // ...Load the output check word...
+  pore_LD(&ctx, D0, scanRing_baseAddr, P1);
+  pore_XORI( &ctx, D0, D0, ((uint64_t)scanRingCheckWord) << 32);
+  PORE_LOCATION( &ctx, src8);
+  pore_BRAZ( &ctx, D0, tgt8);
+  pore_HALT( &ctx);
+  PORE_LOCATION( &ctx, tgt8);
+//  pore_LI( &ctx, D0, 0x0);  // Do shadowing by setpulse.
+//	pore_STD( &ctx, D0, GENERIC_CLK_SCAN_UPDATEDR_0x0003A000, P0);
+	pore_STI(&ctx, GENERIC_CLK_SCAN_UPDATEDR_0x0003A000, P0, 0x0);
+	pore_RET( &ctx);
+  if (ctx.error > 0)  {
+    MY_ERR("***LD, XORI, BRANZ, RET or HALT went wrong  rc = %d", ctx.error);
+    return ctx.error;
+  }
+  pore_inline_branch_fixup( &ctx, src8, tgt8);
+  if (ctx.error > 0)  {
+    MY_ERR("***inline_branch_fixup error (8) rc = %d", ctx.error);
+    return ctx.error;
+  }
+
+  *o_wfInlineLenInWords = ctx.lc/4;
+
+  // 8-byte align code, just as a precaution.
+  if ((*o_wfInlineLenInWords*4)%8)  {
+    // Insert 4-byte NOP at end.
+    pore_NOP( &ctx);
+    if (ctx.error > 0)  {
+      MY_ERR("***NOP went wrong rc = %d", ctx.error);
+      return ctx.error;
+    }
+    *o_wfInlineLenInWords = ctx.lc/4;
+  }
+
+  return rc;
+}
+
+
+#if !(defined IMGBUILD_PPD_CEN_XIP_CUSTOMIZE)
 
 // get_ring_layout_from_image()
 //
@@ -197,539 +792,6 @@ int get_ring_layout_from_image( const void  *i_imageIn,
   }
 
   return rcLoc;
-}
-
-
-
-// create_wiggle_flip_prg() function
-// Notes:
-// - WF routine implements dynamic P1 multicast bit set based on P0 status.
-// - WF routine checks header word on scan complete.
-// - WF routine is 8-byte aligned.
-int create_wiggle_flip_prg( uint32_t *i_deltaRing,          // scan ring delta state (in BE format)
-                            uint32_t i_ringBitLen,          // length of ring
-                            uint32_t i_scanSelectData,      // Scan ring modifier data
-                            uint32_t i_chipletID,            // Chiplet ID
-                            uint32_t **o_wfInline,       // location of the PORE instructions data stream
-                            uint32_t *o_wfInlineLenInWords,   // final length of data stream
-														uint32_t i_scanMaxRotate)       // Max rotate bit len on 38xxx
-{
-  uint32_t rc=0;  //defined in p8_pore_api_const.h
-  uint32_t i=0;
-  uint32_t scanSelectAddr=0;
-  uint32_t scanRing_baseAddr=0;
-  uint32_t scanRing_poreAddr=0;
-  uint32_t scanRingCheckWord=0;
-  uint32_t count=0;
-  uint32_t rotateLen=0, remainder=0, remainingBits=0;
-  uint64_t pore_imm64b=0;
-  //uint32_t maxWfInlineLenInWords = 3*MAX_RING_SIZE/32;
-  uint32_t maxWfInlineLenInWords;
-  PoreInlineContext ctx;
-
-	maxWfInlineLenInWords = *o_wfInlineLenInWords;
-	
-  pore_inline_context_create(&ctx, *o_wfInline, maxWfInlineLenInWords * 4, 0, 0);
-  
-  // Get chiplet and Ring Addr info.
-  // --------------------------------------------------------------------------
-
-  // Set Default scanselq addr and scanring addr vars
-  scanSelectAddr=P8_PORE_CLOCK_CONTROLLER_REG;  // 0x00030007: port 3 - clock cotrol endpt, x07- scanselq (regin & types)
-                                                // Descr: Addr of clock control SCOM reg.
-  scanRing_baseAddr=P8_PORE_SHIFT_REG;          // 0x00038000: port 3, addr bit 16 must be set to 1
-                                                // Also called GENERIC_CLK_SCANDATA0
-                                                // Descr: SCOM reg for scan ring shifting.
-  scanRing_poreAddr=scanRing_baseAddr;          // Init scan ring rotate addr
-  scanRingCheckWord=P8_SCAN_CHECK_WORD;          // Header check word for checking ring write was successful
-  
-  // This fix is a direct copy of the setp1_mcreadand macro in ./ipl/sbe/p8_slw.H 
-  uint64_t CLEAR_MC_TYPE_MASK=0x47;
-  PoreInlineLocation src1=0, src2=0, tgt1=0, tgt2=0;
-  pore_MR( &ctx, D1, P0);
-  pore_ANDI( &ctx, D1, D1, BIT(57));
-  PORE_LOCATION( &ctx, src1);
-  pore_BRANZ( &ctx, D1, src1);
-  pore_MR( &ctx, P1, P0);
-  PORE_LOCATION( &ctx, src2);
-  pore_BRA( &ctx, tgt2);
-  PORE_LOCATION( &ctx, tgt1);
-  pore_MR( &ctx, D1, P0);
-  pore_ANDI( &ctx, D1, D1, CLEAR_MC_TYPE_MASK);
-  pore_ORI( &ctx, D1, D1, BIT(60));
-  pore_MR( &ctx, P1, D1);
-  PORE_LOCATION( &ctx, tgt2);
-  if (ctx.error > 0)  {
-    MY_ERR("***setp1_mcreadand rc = %d", ctx.error);
-    return ctx.error;
-  }
-  pore_inline_branch_fixup( &ctx, src1, tgt1);
-  if (ctx.error > 0)  {
-    MY_ERR("***inline_branch_fixup error (1) rc = %d", ctx.error);
-    return ctx.error;
-  }
-  pore_inline_branch_fixup( &ctx, src2, tgt2);
-  if (ctx.error > 0)  {
-    MY_ERR("***inline_branch_fixup error (2) rc = %d", ctx.error);
-    return ctx.error;
-  }
-  
-	// We can assume that atomic lock is already in effect prior to WF calls.
-	// It can probably also be assumed that functional clocks are stopped, but
-	//   let's do it and check for it anyway.
-/* CMO: 20120927 - Not working - Being debugged by EPM
-  PoreInlineLocation  src0=0,tgt0=0;
-  pore_imm64b = uint64_t(0x8C200E00)<<32;
-	pore_STI(&ctx, P8_PORE_CLOCK_REGION_0x00030006, P0, pore_imm64b);
-	pore_LD(&ctx, D1, P8_PORE_CLOCK_STATUS_0x00030008, P1);
-	pore_imm64b = uint64_t(0xFFFFFFFF)<<32 | uint64_t(0xFFFFFFFF);
-  pore_XORI( &ctx, D1, D1, pore_imm64b);
-  PORE_LOCATION( &ctx, src0);
-  pore_BRAZ( &ctx, D1, src0);
-	pore_HALT( &ctx);
-  PORE_LOCATION( &ctx, tgt0);
-  pore_inline_branch_fixup( &ctx, src0, tgt0);
-  if (ctx.error > 0)  {
-    MY_ERR("***inline_branch_fixup error (0) rc = %d", ctx.error);
-    return ctx.error;
-  }
-*/
-
-  // Program scanselq reg for scan clock control setup before ring scan
-  pore_imm64b = ((uint64_t)i_scanSelectData) << 32;
-  pore_STI(&ctx, scanSelectAddr, P0, pore_imm64b);
-  if (ctx.error > 0)  {
-    MY_ERR("***STI rc = %d", ctx.error);
-    return ctx.error;
-  }
-
-#ifdef IMGBUILD_PPD_WF_POLLING_PROT
-	// Setup On Product Clock Generator (OPCG) for polling.
-	pore_imm64b = uint64_t(0x01800000)<<32;
-	pore_STI(&ctx, P8_PORE_OPCG_CTRL_REG0_0x00030002, P0, pore_imm64b);
-	pore_imm64b = uint64_t(0x11480000)<<32 | uint64_t(0x00014800);
-	pore_STI(&ctx, P8_PORE_OPCG_CTRL_REG1_0x00030003, P0, pore_imm64b);
-	pore_imm64b = uint64_t(0x00000000)<<32 | uint64_t(0x0fff2800);
-	pore_STI(&ctx, P8_PORE_OPCG_CTRL_REG2_0x00030004, P0, pore_imm64b);
-	pore_imm64b = uint64_t(0x00000000);
-	pore_STI(&ctx, P8_PORE_OPCG_START_REG3_0x00030005, P0, pore_imm64b);
-  if (ctx.error > 0)  {
-    MY_ERR("***POLLING PROT(1) rc = %d", ctx.error);
-    return ctx.error;
-  }
-#endif
-
-
-#ifdef IMGBUILD_PPD_WF_WORST_CASE_PIB
-  uint32_t poreCTR=0;
-	// Save CTR value and restore it when done.
-/*
-  pore_MV(&ctx, A1, CTR);
-  if (ctx.error > 0)  {
-    MY_ERR("***WORST CASE PIB(1) rc = %d", ctx.error);
-    return ctx.error;
-  }
-*/
-#endif
-
-	// Preload the scan data/shift reg with the scan header check word.
-  //
-  pore_imm64b = ((uint64_t)scanRingCheckWord) << 32;
-  pore_LI(&ctx, D0, pore_imm64b );
-  if (ctx.error > 0)  {
-    MY_ERR("***(1)LI D0 rc = %d", ctx.error);
-    return ctx.error;
-  }
-  pore_STD(&ctx, D0, scanRing_baseAddr, P0);
-  if (ctx.error > 0)  {
-    MY_ERR("***STD D0 rc = %d", ctx.error);
-    return ctx.error;
-  }
-  
-  // Check how many 32-bit shift ops are needed and if we need final shift of remaining bit.
-  count = i_ringBitLen/32;
-  remainder = i_ringBitLen%32;
-  if (remainder >0)
-      count = count + 1;
-
-  // From P7+: skip first 32 bits associated with FSI engine
-  //TODO: check with perv design team if FSI 32 bit assumption is still valid in p8
-  //remainingBits=i_ringBitLen-32;
-  // CMO: I changed the following to not skip the first 32-bit.
-  //remainingBits = i_ringBitLen-32;  //Yong impl.
-  remainingBits = i_ringBitLen;   //Mike impl.
-  
-  MY_DBG("count=%i  rem=%i  remBits=%i",count,remainder,remainingBits);
-
-  // Compare 32 bit data at a time then shift ring (p7+ reqmt)
-
-  // Read and compare init and flush values 32 bits at a time.  Store delta in o_delta buffer.
-  //for (i=1; i<count; i++)  {   //Yong impl
-  for (i=0; i<count; i++)  {   //Mike impl
-    
-    //====================================================================================
-    // If flush & init values are identical, increase the read count, no code needed.
-    // When the discrepancy is found, read (rotate the ring) up to current address 
-    // then scan/write in the last 32 bits
-    //====================================================================================
-    // Note: For PORE scan instruction, set Port to 3.  Bit 16 Must be set to 1.
-
-    if (i_deltaRing[i] > 0)  {
-
-      if (rotateLen > 0)  {
-        //--------------------------------------------------------------------------
-        // Rotate scan ring by the current rotate length
-        // rotate length is equivalent to current rotate addr - previous rotate addr
-        //
-        // Note space overflow is checked by inline assembler in P8
-        // TODO: Not useing SCR1RDA : check with perv team
-        // TODO: what to do with 1st 32 bit for FSI??
-        //--------------------------------------------------------------------------
-
-#ifdef IMGBUILD_PPD_WF_POLLING_PROT
-				uint32_t  nwait1=0;
-				PoreInlineLocation  srcp1=0,tgtp1=0;
-				if (rotateLen>0x20)  {
-        	scanRing_poreAddr=scanRing_baseAddr | 0x20;
-        	pore_LD(&ctx, D0, scanRing_poreAddr, P1);
-					rotateLen = rotateLen-0x20;
-					nwait1 = rotateLen * OPCG_SCAN_RATIO / 20 + 1; // 20x over sampling.
-					pore_STI(&ctx, P8_PORE_OPCG_CTRL_REG0_0x00030002, P0,
-									         P8_OPCG_SCAN_RATIO_BITS|P8_OPCG_GO_BITS|uint64_t(rotateLen-1));
-					PORE_LOCATION(&ctx, tgtp1);
-					pore_WAITS(&ctx, nwait1);
-					pore_LD(&ctx, D0, GENERIC_GP1_0x00000001, P1);
-					pore_ANDI(&ctx, D0, D0, P8_SCAN_POLL_MASK_BIT15);
-					PORE_LOCATION(&ctx, srcp1);
-					pore_BRAZ(&ctx, D0, tgtp1);
-					pore_inline_branch_fixup(&ctx, srcp1, tgtp1);
-				}
-				else  {
-        	scanRing_poreAddr=scanRing_baseAddr | rotateLen;
-        	pore_LD(&ctx, D0, scanRing_poreAddr, P1);
-				}
-        if (ctx.error > 0)  {
-          MY_ERR("***POLLING PROT(2) rc = %d", ctx.error);
-          return ctx.error;
-        }
-#else
-#ifdef IMGBUILD_PPD_WF_WORST_CASE_PIB
-				PoreInlineLocation  srcwc1=0,tgtwc1=0;
-				poreCTR = rotateLen/i_scanMaxRotate-1;
-				if (poreCTR>=0)  {
-					scanRing_poreAddr = scanRing_baseAddr | i_scanMaxRotate;
-					pore_LS(&ctx, CTR, poreCTR);
-					PORE_LOCATION(&ctx, tgtwc1);
-        	pore_LD(&ctx, D0, scanRing_poreAddr, P1);
-					PORE_LOCATION(&ctx, srcwc1);
-					pore_LOOP(&ctx, tgtwc1);
-					pore_inline_branch_fixup(&ctx, srcwc1, tgtwc1);
-				}
-				scanRing_poreAddr = scanRing_baseAddr | (rotateLen-i_scanMaxRotate*(poreCTR+1));
-        pore_LD(&ctx, D0, scanRing_poreAddr, P1);
-        if (ctx.error > 0)  {
-          MY_ERR("***WORST CASE PIB(1) rc = %d", ctx.error);
-          return ctx.error;
-        }  
-#else
-        scanRing_poreAddr = scanRing_baseAddr | rotateLen;
-        pore_LD(&ctx, D0, scanRing_poreAddr, P1);
-        if (ctx.error > 0)  {
-          MY_ERR("***LD D0 rc = %d", ctx.error);
-          return ctx.error;
-        }  
-#endif
-#endif
-
-      } // End of if (rotateLen>0)
-
-      if (remainingBits>32)
-        scanRing_poreAddr = scanRing_baseAddr | 32;
-      else
-        scanRing_poreAddr = scanRing_baseAddr | remainingBits;
-
-      pore_imm64b = ((uint64_t)myRev32(i_deltaRing[i])) << 32;
-
-      pore_LI(&ctx, D0, pore_imm64b );
-      if (ctx.error > 0)  {
-        MY_ERR("***(2)LI D0 rc = %d", ctx.error);
-        return ctx.error;
-      }
-
-      pore_STD(&ctx, D0, scanRing_poreAddr, P0);
-      if (ctx.error > 0)  {
-        MY_ERR("***STD D0 rc = %d", ctx.error);
-        return ctx.error;
-      }
-
-      rotateLen=0;  //reset rotate length
-
-		}
-    else  {
-      // i_deltaRing[i]==0 (i.e., init and alter states are identical).
-      // Increase rotate length by remaining scan bits (32 by default).
-      
-			// Increase rotate length by remaining scan bits (default 32 bits)
-      if (remainingBits>32)
-        rotateLen = rotateLen + 32;
-      else
-        rotateLen = rotateLen + remainingBits;
-      
-#ifdef IMGBUILD_PPD_WF_POLLING_PROT
-			uint32_t nwait2=0;
-			PoreInlineLocation  srcp2=0,tgtp2=0;
-			// Max loop count is 16^7-1, so make sure we never exceed that.
-			if (rotateLen>=0xFFFFFE0)  {
-			  MY_DBG("/n/nScanning should never be here, should it?/n/n");
-       	scanRing_poreAddr=scanRing_baseAddr | 0x20;
-       	pore_LD(&ctx, D0, scanRing_poreAddr, P1);
-				rotateLen = rotateLen-0x20;
-				nwait2 = rotateLen * OPCG_SCAN_RATIO / 20 + 1; // 20x over sampling.
-				pore_STI(&ctx, P8_PORE_OPCG_CTRL_REG0_0x00030002, P0,
-									         P8_OPCG_SCAN_RATIO_BITS|P8_OPCG_GO_BITS|uint64_t(rotateLen-1));
-				PORE_LOCATION(&ctx, tgtp2);
-				pore_WAITS(&ctx, nwait2);
-				pore_LD(&ctx, D0, GENERIC_GP1_0x00000001, P1);
-				pore_ANDI(&ctx, D0, D0, P8_SCAN_POLL_MASK_BIT15);
-				PORE_LOCATION(&ctx, srcp2);
-				pore_BRAZ(&ctx, D0, tgtp2);
-				pore_inline_branch_fixup(&ctx, srcp2, tgtp2);
-	      if (ctx.error > 0)  {
-	        MY_ERR("***POLLING PROT(3) rc = %d", ctx.error);
-	        return ctx.error;
-	      }
-				rotateLen=0;
-			}
-#else
-#ifdef IMGBUILD_PPD_WF_WORST_CASE_PIB
-      // There is no max rotateLen issue in this case since we rotate 32 bits
-			// at a time.
-#else
-			// PORE does not release PIB/PCB until CC acks, thus limiting bandwidth.
-      // It will time out if more than 4095 bits need to be rotated.
-      // If rotate length is more than 4032 (allows to rotate up to 4064 bits)
-      // rotate the chain and reset rotate length counter.
-      if (rotateLen>0xFC0)  {
-        scanRing_poreAddr = scanRing_baseAddr | rotateLen;
-        pore_LD(&ctx, D0, scanRing_poreAddr, P1);
-        if (ctx.error > 0)  {
-          MY_ERR("***LD D0 rc = %d", ctx.error);
-          return ctx.error;
-        }
-        rotateLen=0;
-      }
-#endif
-#endif
-
-    } //end of else (i_deltaRing==0)
-
-    if (remainingBits>32)
-      remainingBits = remainingBits - 32;
-    else
-      remainingBits = 0;
-
-  } // End of for loop
-       
-  // If the scan ring has not been rotated to the original position
-  // shift the ring by remaining shift bit length. (No need to do polling here.)
-  if (rotateLen>0)  {
-#ifdef IMGBUILD_PPD_WF_POLLING_PROT
-		uint32_t nwait3=0;
-		PoreInlineLocation  srcp3=0,tgtp3=0;
-    if (rotateLen>0x20)  {
-		  scanRing_poreAddr=scanRing_baseAddr | 0x20;
-      pore_LD(&ctx, D0, scanRing_poreAddr, P1);
-			rotateLen = rotateLen-0x20;
-			nwait3 = rotateLen * OPCG_SCAN_RATIO / 20 + 1; // 20x over sampling.
-			pore_STI(&ctx, P8_PORE_OPCG_CTRL_REG0_0x00030002, P0,
-							         P8_OPCG_SCAN_RATIO_BITS|P8_OPCG_GO_BITS|uint64_t(rotateLen-1));
-			PORE_LOCATION(&ctx, tgtp3);
-			pore_WAITS(&ctx, nwait3);
-			pore_LD(&ctx, D0, GENERIC_GP1_0x00000001, P1);
-			pore_ANDI(&ctx, D0, D0, P8_SCAN_POLL_MASK_BIT15);
-			PORE_LOCATION(&ctx, srcp3);
-			pore_BRAZ(&ctx, D0, tgtp3);
-			pore_inline_branch_fixup(&ctx, srcp3, tgtp3);
-		}
-		else  {
-		  scanRing_poreAddr=scanRing_baseAddr | rotateLen;
-      pore_LD(&ctx, D0, scanRing_poreAddr, P1);
-		}
-    if (ctx.error > 0)  {
-      MY_ERR("***POLLING PROT(4) rc = %d", ctx.error);
-      return ctx.error;
-    }
-		rotateLen=0;
-#else
-#ifdef IMGBUILD_PPD_WF_WORST_CASE_PIB
-		PoreInlineLocation  srcwc2=0,tgtwc2=0;
-		poreCTR = rotateLen/i_scanMaxRotate-1;
-		if (poreCTR>=0)  {
-			scanRing_poreAddr = scanRing_baseAddr | i_scanMaxRotate;
-			pore_LS(&ctx, CTR, poreCTR);
-			PORE_LOCATION(&ctx, tgtwc2);
-    	pore_LD(&ctx, D0, scanRing_poreAddr, P1);
-			PORE_LOCATION(&ctx, srcwc2);
-			pore_LOOP(&ctx, tgtwc2);
-			pore_inline_branch_fixup(&ctx, srcwc2, tgtwc2);
-		}
-		scanRing_poreAddr = scanRing_baseAddr | (rotateLen-i_scanMaxRotate*(poreCTR+1));
-    pore_LD(&ctx, D0, scanRing_poreAddr, P1);
-    if (ctx.error > 0)  {
-      MY_ERR("***WORST CASE PIB(2) rc = %d", ctx.error);
-      return ctx.error;
-    }
-		rotateLen=0;
-#else
-    scanRing_poreAddr=scanRing_baseAddr | rotateLen;
-    pore_LD(&ctx, D0, scanRing_poreAddr, P1);
-    if (ctx.error > 0)  {
-      MY_ERR("***LD D0 rc = %d", ctx.error);
-      return ctx.error;
-    }
-    rotateLen=0;
-#endif
-#endif
-  }
-
-/*
-#ifdef IMGBUILD_PPD_WF_WORST_CASE_PIB
-  // Restore CTR value.
-	pore_MV(&ctx, CTR, A1);
-  if (ctx.error > 0)  {
-    MY_ERR("***WORST CASE PIB(5) rc = %d", ctx.error);
-    return ctx.error;
-  }
-#endif
-*/
-
-  // Finally, check that our header check word went through in one piece.
-  // Note, we first do the MC-READ-AND check, then the MC-READ-OR check
-  //
-  // ...First, do the MC-READ-AND check
-  //    (Reference: setp1_mcreadand macro in ./ipl/sbe/p8_slw.H)
-  //
-  PoreInlineLocation src3=0, src5=0, src7=0, src8=0, tgt3=0, tgt5=0, tgt7=0, tgt8=0;
-  pore_MR( &ctx, D1, P0);
-  pore_ANDI( &ctx, D1, D1, BIT(57));
-  PORE_LOCATION( &ctx, src3);
-  pore_BRANZ( &ctx, D1, src3);
-  pore_MR( &ctx, P1, P0); // If here, MC=0. Omit MC check in OR case.
-  PORE_LOCATION( &ctx, src7);
-  pore_BRA( &ctx, tgt7);
-  PORE_LOCATION( &ctx, tgt3);
-  pore_MR( &ctx, D1, P0);
-  pore_ANDI( &ctx, D1, D1, CLEAR_MC_TYPE_MASK);
-  pore_ORI( &ctx, D1, D1, BIT(60));
-  pore_MR( &ctx, P1, D1); 
-  if (ctx.error > 0)  { 
-    MY_ERR("***setp1_mcreadand rc = %d", ctx.error);
-    return ctx.error;
-  }
-  pore_inline_branch_fixup( &ctx, src3, tgt3);
-  if (ctx.error > 0)  {
-    MY_ERR("***inline_branch_fixup error (3) rc = %d", ctx.error);
-    return ctx.error;
-  }
-  // ...Load the output check word...
-  pore_LD(&ctx, D0, scanRing_baseAddr, P1);
-  // Compare against the reference header check word...
-  pore_XORI( &ctx, D0, D0, ((uint64_t)scanRingCheckWord) << 32);
-#ifdef IMGBUILD_PPD_DEBUG_WF
-pore_LI( &ctx, D1, ((uint64_t)scanRingCheckWord)<<32);
-#endif
-  PORE_LOCATION( &ctx, src5);
-  pore_BRAZ( &ctx, D0, tgt5);
-#ifdef IMGBUILD_PPD_DEBUG_WF
-if (i_scanSelectData==0x00200800 || i_scanSelectData==0x04000800)  {
-pore_LD(&ctx, D1, scanRing_baseAddr, P1);
-if (i_scanSelectData==0x00200800)  {
-  pore_XORI( &ctx, D1, D1, ((uint64_t)0x00000001)<<32); // Yields B in last nibble.
-}
-if (i_scanSelectData==0x04000800)  {
-  pore_XORI( &ctx, D1, D1, ((uint64_t)0x00000006)<<32); // Yields C in last nibble.
-}
-pore_RET( &ctx);
-}
-#endif
-  pore_HALT( &ctx);
-  PORE_LOCATION( &ctx, tgt5);
-  if (ctx.error > 0)  {
-    MY_ERR("***LD, XORI, BRANZ, RET or HALT went wrong  rc = %d", ctx.error);
-    return ctx.error;
-  }
-  pore_inline_branch_fixup( &ctx, src5, tgt5);
-  if (ctx.error > 0)  {
-    MY_ERR("***inline_branch_fixup error (5) rc = %d", ctx.error);
-    return ctx.error;
-  }
-  //
-  // ...Now do the MC-READ-OR check
-  //    (Reference: setp1_mcreador macro in ./ipl/sbe/p8_slw.H)
-  //    Note. If we made is this far, we know that MC=1 already, so don't check for it.
-  //
-  pore_MR( &ctx, D1, P0);
-  pore_ANDI( &ctx, D1, D1, CLEAR_MC_TYPE_MASK); // This also clears bit-60.
-  pore_MR( &ctx, P1, D1);
-  PORE_LOCATION( &ctx, tgt7);
-  if (ctx.error > 0)  {
-    MY_ERR("***setp1_mcreadand rc = %d", ctx.error);
-    return ctx.error;
-  }
-  pore_inline_branch_fixup( &ctx, src7, tgt7);
-  if (ctx.error > 0)  {
-    MY_ERR("***inline_branch_fixup error (7) rc = %d", ctx.error);
-    return ctx.error;
-  }
-  // ...Load the output check word...
-  pore_LD(&ctx, D0, scanRing_baseAddr, P1);
-  pore_XORI( &ctx, D0, D0, ((uint64_t)scanRingCheckWord) << 32);
-#ifdef IMGBUILD_PPD_DEBUG_WF
-pore_LI( &ctx, D1, ((uint64_t)scanRingCheckWord)<<32);
-#endif
-  PORE_LOCATION( &ctx, src8);
-  pore_BRAZ( &ctx, D0, tgt8);
-#ifdef IMGBUILD_PPD_DEBUG_WF
-if (i_scanSelectData==0x00200800 || i_scanSelectData==0x04000800)  {
-pore_LD(&ctx, D1, scanRing_baseAddr, P1);
-if (i_scanSelectData==0x00200800)  {
-  pore_XORI( &ctx, D1, D1, ((uint64_t)0x00000001)<<32); // Yields B in last nibble.
-}
-if (i_scanSelectData==0x04000800)  {
-  pore_XORI( &ctx, D1, D1, ((uint64_t)0x00000006)<<32); // Yields C in last nibble.
-}
-pore_RET( &ctx);
-}
-#endif
-  pore_HALT( &ctx);
-  PORE_LOCATION( &ctx, tgt8);
-  pore_LI( &ctx, D0, 0x0);  // Do shadowing by setpulse.
-	pore_STD( &ctx, D0, GENERIC_CLK_SCAN_UPDATEDR_0x0003A000, P0);
-	pore_RET( &ctx);
-  if (ctx.error > 0)  {
-    MY_ERR("***LD, XORI, BRANZ, RET or HALT went wrong  rc = %d", ctx.error);
-    return ctx.error;
-  }
-  pore_inline_branch_fixup( &ctx, src8, tgt8);
-  if (ctx.error > 0)  {
-    MY_ERR("***inline_branch_fixup error (8) rc = %d", ctx.error);
-    return ctx.error;
-  }
-
-  *o_wfInlineLenInWords = ctx.lc/4;
-
-  // 8-byte align code, just as a precaution.
-  if ((*o_wfInlineLenInWords*4)%8)  {
-    // Insert 4-byte NOP at end.
-    pore_NOP( &ctx);
-    if (ctx.error > 0)  {
-      MY_ERR("***NOP went wrong rc = %d", ctx.error);
-      return ctx.error;
-    }
-    *o_wfInlineLenInWords = ctx.lc/4;
-  }
-
-  return rc;
 }
 
 
@@ -925,20 +987,22 @@ int write_wiggle_flip_to_image( void *io_imageOut,
 
 // append_empty_section()
 int append_empty_section( void      *io_image,
-                          uint32_t  *i_sizeImageMaxNew,
+                          int       *i_sizeImageMaxNew,
                           uint32_t  i_sectionId,
-                          uint32_t  i_sizeSection)
+                          int       *i_sizeSection,
+													uint8_t   i_bFixed)
 {
-  uint32_t rc=0;
-  uint32_t sizeImageIn=0, sizeImageOutThis=0, sizeImageOutThisEst=0;
+  int      rc=0;
+  uint32_t sizeImageIn=0, sizeImageOutThis=0;
+	int      sizeImageOutThisEst=0;
   uint32_t offsetCheck=1;
-  void *bufEmpty=NULL;
+ 	SbeXipSection xipSection;
 
   SBE_XIP_ERROR_STRINGS(errorStrings);
 
   rc = 0;
   
-  if (i_sizeSection==0)  {
+  if (*i_sizeSection==0)  {
     MY_INF("INFO : Requested append size = 0. Nothing to do.");
     return rc;
   }
@@ -947,7 +1011,10 @@ int append_empty_section( void      *io_image,
   //
   sbe_xip_image_size( io_image, &sizeImageIn);
   // ...estimate max size of new image
-  sizeImageOutThisEst = sizeImageIn + i_sizeSection + SBE_XIP_MAX_SECTION_ALIGNMENT;
+	if (i_bFixed)
+  	sizeImageOutThisEst = sizeImageIn + *i_sizeSection;
+  else
+		sizeImageOutThisEst = sizeImageIn + *i_sizeSection + SBE_XIP_MAX_SECTION_ALIGNMENT;
   if (sizeImageOutThisEst>*i_sizeImageMaxNew)  {
     MY_ERR("Estimated new image size (=%i) would exceed max allowed size (=%i).",
       sizeImageOutThisEst, *i_sizeImageMaxNew);
@@ -955,36 +1022,34 @@ int append_empty_section( void      *io_image,
     return IMGBUILD_ERR_IMAGE_TOO_LARGE;
   }
   
-  // Add the 0-initialized buffer as a section append.
+  // Add the NULL buffer as a section append. sbe_xip_append() initializes with 0s.
   //
-  bufEmpty = calloc( i_sizeSection, 1);
   rc = sbe_xip_append( io_image, 
                        i_sectionId, 
-                       bufEmpty,
-                       i_sizeSection,
+                       NULL,
+                       *i_sizeSection,
                        sizeImageOutThisEst,
                        &offsetCheck);
   if (rc)  {
     MY_ERR("xip_append() failed: %s\n",SBE_XIP_ERROR_STRING(errorStrings, rc));
-    if (bufEmpty)
-      free(bufEmpty);
     return DSLWB_SLWB_IMAGE_ERROR;
   }
   if (offsetCheck)
     MY_INF("INFO : Section was not empty at time of xip_append(). It contained %i bytes.",offsetCheck);
   // ...get new image size, update return size, and test if successful update.
   sbe_xip_image_size( io_image, &sizeImageOutThis);
-  MY_DBG("Output image size (final)\t=%i",sizeImageOutThis);
+  MY_DBG("Output image size (after section append) = %i\n",sizeImageOutThis);
   *i_sizeImageMaxNew = sizeImageOutThis;
   rc = sbe_xip_validate( io_image, sizeImageOutThis);
   if (rc)   {
     MY_ERR("xip_validate() of output image failed: %s", SBE_XIP_ERROR_STRING(errorStrings, rc));
-    if (bufEmpty)  free(bufEmpty);
     return IMGBUILD_ERR_XIP_MISC;
   }
-  
-  if (bufEmpty)
-    free(bufEmpty);
+ 	
+	// Return final section size.
+	//
+  rc = sbe_xip_get_section( io_image, i_sectionId, &xipSection);
+ 	*i_sizeSection = xipSection.iv_size;
 
   return rc;
 }
@@ -1002,6 +1067,7 @@ int initialize_slw_section( void      *io_image,
   PoreInlineContext ctx;
   SbeXipSection  xipSection;
   SbeXipItem     xipTocItem;
+	int    sizeSectionChk=0;
   void   *hostScomTableNext, *hostScomVectorNext;
 	void   *hostScomVectorFirstNC, *hostScomVectorFirstL2, *hostScomVectorFirstL3;
 	void   *hostScomTableNC, *hostScomTableL2, *hostScomTableL3;
@@ -1010,12 +1076,19 @@ int initialize_slw_section( void      *io_image,
 
   SBE_XIP_ERROR_STRINGS(errorStrings);
 
+  sizeSectionChk = FIXED_SLW_SECTION_SIZE;
   rc = append_empty_section( io_image,
-                             i_sizeImageMaxNew,
+                             (int*)i_sizeImageMaxNew,
                              SBE_XIP_SECTION_SLW,
-                             SLW_RAM_TABLE_SIZE + SLW_SCOM_TABLE_SIZE_ALL);
+                             &sizeSectionChk,
+														 0);
   if (rc)
     return rc;
+  if (sizeSectionChk!=FIXED_SLW_SECTION_SIZE)  {
+    MY_ERR("Section size of .slw (=%i) not equal to requested size (=%i).\n",
+      sizeSectionChk, FIXED_SLW_SECTION_SIZE);
+    return IMGBUILD_ERR_SECTION_SIZING;
+  }
 
   //
   // Ramming table:  Nothing to do.  Already 0-initialized in append_empty_section().
@@ -1116,6 +1189,237 @@ int initialize_slw_section( void      *io_image,
 
 
 
+// create_and_initialize_fixed_image()
+// - swell image to fixed size of 1MB by:
+//   - appending elastic section .fit
+//   - appending fixed section .slw
+//     - allocate space for Ramming and Scomming
+//   - appending fixed section .ffdc
+// - populate Scomming table with ret/nop/nop/nop (RNNN) inline asm instructions
+// - update Scomming vector
+int create_and_initialize_fixed_image( void      *io_image)
+{
+  int      rc=0;
+  uint32_t i_coreId=0, i_iis=0;
+  uint32_t sizeImageIn=0;
+	int      sizeImageChk=0;
+  int      sizeSectionFit=0, sizeSectionReq=0, sizeSectionChk=0;
+  PoreInlineContext ctx;
+  SbeXipSection  xipSection;
+  SbeXipItem     xipTocItem;
+  void   *hostRamVectorFirst, *hostRamVectorNext, *hostRamTable;
+	void   *hostScomVectorFirstNC, *hostScomVectorFirstL2, *hostScomVectorFirstL3;
+	void   *hostScomVectorNext;
+	void   *hostScomTableNC, *hostScomTableL2, *hostScomTableL3;
+	void   *hostScomTableNext;
+  uint64_t xipRamTable, xipScomTableNC, xipScomTableL2, xipScomTableL3;
+  uint8_t  bufRNNN[XIPSIZE_SCOM_ENTRY];
+
+  SBE_XIP_ERROR_STRINGS(errorStrings);
+
+  sbe_xip_image_size( io_image, &sizeImageIn);
+
+	// Ensure, to play it safe, that last two sections (.slw & .ffdc) are both on
+	// 128-byte boundaries. The max [fixed] image size must itself already be
+	// 128-byte aligned.
+  sizeSectionFit  = (int) ( FIXED_SLW_IMAGE_SIZE - 
+                    				sizeImageIn - 
+                    				FIXED_SLW_SECTION_SIZE -
+                    				FIXED_FFDC_SECTION_SIZE );
+  if (sizeSectionFit<0)  {
+    MY_ERR("Size of .fit section (=%i) can not be negative.\n",sizeSectionFit);
+    MY_ERR("Size of fixed image   = %i\n",FIXED_SLW_IMAGE_SIZE);
+    MY_ERR("Size of input image   = %i\n",sizeImageIn);
+    MY_ERR("Size of .slw section  = %i\n",FIXED_SLW_SECTION_SIZE);
+    MY_ERR("Size of .ffdc section = %i\n",FIXED_FFDC_SECTION_SIZE);
+    return IMGBUILD_ERR_SECTION_SIZING;
+  }
+  
+  // Append .fit
+  //
+  sizeImageChk = FIXED_SLW_IMAGE_SIZE;
+	sizeSectionReq = sizeSectionFit;
+	sizeSectionChk = sizeSectionReq;
+	MY_INF("Appending .fit w/size=%i\n",sizeSectionReq);
+  rc = append_empty_section( io_image,
+                             &sizeImageChk,
+                             SBE_XIP_SECTION_FIT,
+                             &sizeSectionChk,
+														 1);
+  if (rc)
+    return rc;
+	if (sizeSectionChk!=sizeSectionReq)  {
+		MY_ERR("Section size of .fit (=%i) not equal to requested size (=%i).\n",
+		  sizeSectionChk, sizeSectionReq);
+		return IMGBUILD_ERR_SECTION_SIZING;
+	}
+  
+  // Append .slw
+  //
+  sizeImageChk = FIXED_SLW_IMAGE_SIZE;
+	sizeSectionReq = FIXED_SLW_SECTION_SIZE;
+	sizeSectionChk = sizeSectionReq;
+	MY_INF("Appending .slw w/size=%i\n",sizeSectionReq);
+  rc = append_empty_section( io_image,
+                             &sizeImageChk,
+                             SBE_XIP_SECTION_SLW,
+                             &sizeSectionChk,
+														 1);
+  if (rc)
+    return rc;
+	if (sizeSectionChk!=sizeSectionReq)  {
+		MY_INF("Section size of .slw (=%i) not equal to requested size (=%i).\n",
+		  sizeSectionChk, sizeSectionReq);
+		return IMGBUILD_ERR_SECTION_SIZING;
+	}
+		
+
+  // Append .ffdc
+  // 
+  sizeImageChk = FIXED_SLW_IMAGE_SIZE;
+	sizeSectionReq = FIXED_FFDC_SECTION_SIZE;
+	sizeSectionChk = sizeSectionReq;
+	MY_ERR("Appending .ffdc w/size=%i\n",sizeSectionReq);
+  rc = append_empty_section( io_image,
+                             &sizeImageChk,
+                             SBE_XIP_SECTION_FFDC,
+                             &sizeSectionChk,
+														 1);
+  if (rc)
+    return rc;
+	if (sizeSectionChk!=sizeSectionReq)  {
+		MY_ERR("Section size of .ffdc (=%i) not equal to requested size (=%i).\n",
+		  sizeSectionChk, sizeSectionReq);
+		return IMGBUILD_ERR_SECTION_SIZING;
+	}
+
+  // --------------------------------------------------------------------------
+  // Ramming table:   Already 0-initialized in append_empty_section().
+  // --------------------------------------------------------------------------
+
+  // ... calc host ptr to Ram table in .slw section.
+  rc = sbe_xip_get_section( io_image, SBE_XIP_SECTION_SLW, &xipSection);
+  if (rc)   {
+    MY_ERR("sbe_xip_get_section() failed: %s", SBE_XIP_ERROR_STRING(errorStrings, rc));
+    MY_ERR("Probable cause:");
+    MY_ERR("\tThe section (=SBE_XIP_SECTION_SLW=%i) was not found.",SBE_XIP_SECTION_SLW);
+    return IMGBUILD_ERR_KEYWORD_NOT_FOUND;
+  }
+  hostRamTable = (void*)((uintptr_t)io_image + xipSection.iv_offset);
+	
+	// ... get location of Ram vector.
+  rc = sbe_xip_find( io_image, SLW_HOST_REG_VECTOR_TOC_NAME, &xipTocItem);
+  if (rc)  {
+    MY_ERR("sbe_xip_find() failed w/rc=%i and %s", rc, SBE_XIP_ERROR_STRING(errorStrings, rc));
+    MY_ERR("Probable cause:");
+    MY_ERR("\tThe keyword (=%s) was not found.",SLW_HOST_REG_VECTOR_TOC_NAME);
+    return IMGBUILD_ERR_KEYWORD_NOT_FOUND;
+  }
+  sbe_xip_pore2host( io_image, xipTocItem.iv_address, &hostRamVectorFirst);
+
+  // ... update Ram vector.
+	sbe_xip_host2pore( io_image, hostRamTable, &xipRamTable);
+  for (i_coreId=0; i_coreId<SLW_MAX_CORES; i_coreId++)  {
+    hostRamVectorNext = (void*)( (uint64_t*)hostRamVectorFirst + i_coreId);
+    *(uint64_t*)hostRamVectorNext = myRev64( xipRamTable +
+                                              SLW_RAM_TABLE_SPACE_PER_CORE*i_coreId);
+  }
+
+  // --------------------------------------------------------------------------
+  // Scomming table:  Fill with RNNN (16-byte) instruction sequences.
+  // --------------------------------------------------------------------------
+
+  // ... create RNNN instruction sequence.
+  pore_inline_context_create( &ctx, (void*)bufRNNN, XIPSIZE_SCOM_ENTRY, 0, 0);
+  pore_RET( &ctx);
+  pore_NOP( &ctx);
+  pore_NOP( &ctx);
+  pore_NOP( &ctx);
+  if (ctx.error > 0)  {
+    MY_ERR("***_RET or _NOP generated rc = %d", ctx.error);
+    return IMGBUILD_ERR_PORE_INLINE_ASM;
+  }
+ 	
+	// ... calc host ptr to Scom NC subsection.
+	// Note that we will assume, further down, that the NC section goes first,
+	//   then the L2 section and then the L3 section.
+  rc = sbe_xip_get_section( io_image, SBE_XIP_SECTION_SLW, &xipSection);
+  if (rc)   {
+    MY_ERR("sbe_xip_get_section() failed: %s", SBE_XIP_ERROR_STRING(errorStrings, rc));
+    MY_ERR("Probable cause:");
+    MY_ERR("\tThe section (=SBE_XIP_SECTION_SLW=%i) was not found.",SBE_XIP_SECTION_SLW);
+    return IMGBUILD_ERR_KEYWORD_NOT_FOUND;
+  }
+  hostScomTableNC = (void*)((uintptr_t)io_image + xipSection.iv_offset + SLW_RAM_TABLE_SIZE);
+
+  // ... populate entire Scom table with RNNN IIS, incl NC, L2 and L3 sections.
+  for (i_iis=0; i_iis<SLW_SCOM_TABLE_SIZE_ALL; i_iis=i_iis+XIPSIZE_SCOM_ENTRY)  {
+    hostScomTableNext = (void*)( (uintptr_t)hostScomTableNC + i_iis);
+    memcpy( hostScomTableNext, (void*)bufRNNN, XIPSIZE_SCOM_ENTRY);
+  }
+
+	hostScomTableL2 = (void*)((uintptr_t)hostScomTableNC + SLW_SCOM_TABLE_SIZE_NC);
+	hostScomTableL3 = (void*)((uintptr_t)hostScomTableL2 + SLW_SCOM_TABLE_SIZE_L2);
+  
+	// ... get location of  ----> Scom NC <----  vector from TOC.
+  rc = sbe_xip_find( io_image, SLW_HOST_SCOM_NC_VECTOR_TOC_NAME, &xipTocItem);
+  if (rc)  {
+    MY_ERR("sbe_xip_find() failed w/rc=%i and %s", rc, SBE_XIP_ERROR_STRING(errorStrings, rc));
+    MY_ERR("Probable cause:");
+    MY_ERR("\tThe keyword (=%s) was not found.",SLW_HOST_SCOM_NC_VECTOR_TOC_NAME);
+    return IMGBUILD_ERR_KEYWORD_NOT_FOUND;
+  }
+  sbe_xip_pore2host( io_image, xipTocItem.iv_address, &hostScomVectorFirstNC);
+
+  // ... update Scom NC vector.
+	sbe_xip_host2pore( io_image, hostScomTableNC, &xipScomTableNC);
+  for (i_coreId=0; i_coreId<SLW_MAX_CORES; i_coreId++)  {
+    hostScomVectorNext = (void*)( (uint64_t*)hostScomVectorFirstNC + i_coreId);
+    *(uint64_t*)hostScomVectorNext = myRev64( xipScomTableNC +
+                                              SLW_SCOM_TABLE_SPACE_PER_CORE_NC*i_coreId);
+  }
+
+	// ... get location of  ----> Scom L2 <----  vector from TOC.
+  rc = sbe_xip_find( io_image, SLW_HOST_SCOM_L2_VECTOR_TOC_NAME, &xipTocItem);
+  if (rc)  {
+    MY_ERR("sbe_xip_find() failed w/rc=%i and %s", rc, SBE_XIP_ERROR_STRING(errorStrings, rc));
+    MY_ERR("Probable cause:");
+    MY_ERR("\tThe keyword (=%s) was not found.",SLW_HOST_SCOM_L2_VECTOR_TOC_NAME);
+    return IMGBUILD_ERR_KEYWORD_NOT_FOUND;
+  }
+  sbe_xip_pore2host( io_image, xipTocItem.iv_address, &hostScomVectorFirstL2);
+
+  // ... update Scom L2 vector.
+	sbe_xip_host2pore( io_image, hostScomTableL2, &xipScomTableL2);
+  for (i_coreId=0; i_coreId<SLW_MAX_CORES; i_coreId++)  {
+    hostScomVectorNext = (void*)( (uint64_t*)hostScomVectorFirstL2 + i_coreId);
+    *(uint64_t*)hostScomVectorNext = myRev64( xipScomTableL2 +
+                                              SLW_SCOM_TABLE_SPACE_PER_CORE_L2*i_coreId);
+  }
+
+	// ... get location of  ----> Scom L3 <----  vector from TOC.
+  rc = sbe_xip_find( io_image, SLW_HOST_SCOM_L3_VECTOR_TOC_NAME, &xipTocItem);
+  if (rc)  {
+    MY_ERR("sbe_xip_find() failed w/rc=%i and %s", rc, SBE_XIP_ERROR_STRING(errorStrings, rc));
+    MY_ERR("Probable cause:");
+    MY_ERR("\tThe keyword (=%s) was not found.",SLW_HOST_SCOM_L3_VECTOR_TOC_NAME);
+    return IMGBUILD_ERR_KEYWORD_NOT_FOUND;
+  }
+  sbe_xip_pore2host( io_image, xipTocItem.iv_address, &hostScomVectorFirstL3);
+
+  // ... update Scom L3 vector.
+	sbe_xip_host2pore( io_image, hostScomTableL3, &xipScomTableL3);
+  for (i_coreId=0; i_coreId<SLW_MAX_CORES; i_coreId++)  {
+    hostScomVectorNext = (void*)( (uint64_t*)hostScomVectorFirstL3 + i_coreId);
+    *(uint64_t*)hostScomVectorNext = myRev64( xipScomTableL3 +
+                                              SLW_SCOM_TABLE_SPACE_PER_CORE_L3*i_coreId);
+  }
+
+  return rc;
+}
+
+
+
 // update_runtime_scom_pointer()
 // - reprogram host_runtime_scom data to point to sub_slw_runtime_scom
 // - reprogram ex_enable_runtime_scom data to point to sub_slw_ex_enable_runtime_scom
@@ -1123,7 +1427,7 @@ int update_runtime_scom_pointer( void *io_image)
 {
   int rc=0;
   uint64_t xipSlwRuntimeAddr;
-	uint64_t xipSlwExEnableRuntimeAddr;
+//	uint64_t xipSlwExEnableRuntimeAddr;
 
   SBE_XIP_ERROR_STRINGS(errorStrings);
 
@@ -1147,7 +1451,8 @@ int update_runtime_scom_pointer( void *io_image)
 		return IMGBUILD_ERR_KEYWORD_NOT_FOUND;
   }
 
-	// Get address of sub_slw_ex_enable_runtime_scom subroutine.
+/*
+  // Get address of sub_slw_ex_enable_runtime_scom subroutine.
 	//
 	rc = sbe_xip_get_scalar( io_image, SLW_EX_ENABLE_RUNTIME_SCOM_TOC_NAME, &xipSlwExEnableRuntimeAddr);
   if (rc)  {
@@ -1168,6 +1473,7 @@ int update_runtime_scom_pointer( void *io_image)
 			return IMGBUILD_ERR_KEYWORD_NOT_FOUND;
 	  }
 	}
+*/
 
   return 0;
 }
@@ -1358,7 +1664,8 @@ int write_vpd_ring_to_slw_image(void			*io_image,
 															  uint8_t   i_sysPhase,
 															  char 			*i_ringName,
 															  void      *i_bufTmp,              // HB buf2
-															  uint32_t  i_sizeBufTmp)
+															  uint32_t  i_sizeBufTmp,
+																uint8_t 	i_bWcSpace)
 {
 	uint32_t rc=0, bufLC;
 	uint8_t  chipletId, idxVector=0;
@@ -1415,6 +1722,18 @@ int write_vpd_ring_to_slw_image(void			*io_image,
 		MY_INF("scanMaxRotate set to 0x%llx; ", scanMaxRotate);
 		MY_INF("Continuing...; ");
 	}
+
+#ifdef IMGBUILD_PPD_ENFORCE_SCAN_DELAY
+  uint64_t waitsScanDelay=10;
+  // Temporary support for enforcing delay after scan WF scoms.
+  // Also remove all references and usages of waitsScanDelay in this file.
+  rc = sbe_xip_get_scalar( io_image, "waits_delay_for_scan", &waitsScanDelay);
+  if (rc)  {
+    MY_ERR("Error obtaining waits_delay_for_scan keyword.\n");
+	  return IMGBUILD_ERR_XIP_MISC;
+  }
+#endif
+
 	wfInline = (uint32_t*)i_bufRs4Ring;  // Reuse this buffer (HB buf1) for wiggle-flip prg.
 	wfInlineLenInWords = i_sizeBufTmp/4; // Assuming same size of both HB buf1 and buf2.
 	rc = create_wiggle_flip_prg((uint32_t*)i_bufTmp,
@@ -1423,7 +1742,12 @@ int write_vpd_ring_to_slw_image(void			*io_image,
 	                            (uint32_t)i_bufRs4Ring->iv_chipletId,
 	                            &wfInline,
 	                            &wfInlineLenInWords, // Is 8-byte aligned on return.
+#ifdef IMGBUILD_PPD_ENFORCE_SCAN_DELAY
+	                            (uint32_t)scanMaxRotate,
+                              (uint32_t)waitsScanDelay);
+#else
 	                            (uint32_t)scanMaxRotate);
+#endif
 	if (rc)  {
 	  MY_ERR("create_wiggle_flip_prg() failed w/rc=%i; ",rc);
 	  return IMGBUILD_ERR_WF_CREATE;
@@ -1441,8 +1765,23 @@ int write_vpd_ring_to_slw_image(void			*io_image,
   entryOffsetWfRingBlock      = calc_ring_layout_entry_offset( 1, 0);
   bufWfRingBlock->entryOffset = myRev64(entryOffsetWfRingBlock);
   bufWfRingBlock->backItemPtr	= 0; // Will be updated below, as we don't know yet.
-	sizeWfRingBlock     	      =	entryOffsetWfRingBlock +  // Must be 8-byte aligned.
-  												      wfInlineLenInWords*4;     // Must be 8-byte aligned.
+	
+	// Allocate either fitted or worst-case space for the ring.  For example, the 
+	// rings, ex_repr_core/eco, need worst-case space allocation.
+	if (i_bWcSpace==0)  {
+		// Fitted space sizing.
+		sizeWfRingBlock =	entryOffsetWfRingBlock +  // Must be 8-byte aligned.
+  									  wfInlineLenInWords*4;     // Must be 8-byte aligned.
+	}
+	else  {  
+		// Worst-case space sizing.
+		sizeWfRingBlock = ((sizeRingRaw-1)/32 + 1) * 4 * WF_WORST_CASE_SIZE_FAC + 
+											WF_ENCAP_SIZE;
+		sizeWfRingBlock = (uint32_t)myByteAlign(8, sizeWfRingBlock);
+    memset((void*)((uint64_t)bufWfRingBlock+entryOffsetWfRingBlock), 
+            0, 
+            sizeWfRingBlock-entryOffsetWfRingBlock);
+	}
 	// Quick check to see if final ring block size will fit in HB buffer.
 	if (sizeWfRingBlock>sizeWfRingBlockMax)  {
 	  MY_ERR("WF ring block size (=%i) exceeds HB buf2 size (=%i).",
@@ -1491,68 +1830,17 @@ int write_vpd_ring_to_slw_image(void			*io_image,
 }
 
 
-// calc_ring_delta_state() parms:
-// i_init - init (flush) ring state
-// i_alter - altered (desired) ring state
-// o_delta - ring delta state, caller allocates buffer
-// i_ringLen - length of ring in bits
-int calc_ring_delta_state( const uint32_t  *i_init, 
-													 const uint32_t  *i_alter, 
-													 uint32_t        *o_delta,
-													 const uint32_t  i_ringLen )
-{
-  int      i=0, count=0, bit=0, remainder=0, remainingBits=0;
-  uint32_t init, alter;
-  uint32_t mask=0;
-
-  // Do some checking of input parms
-  if ( (i_init==NULL) || (i_alter==NULL) || (o_delta==NULL) || (i_ringLen==0) )  {
-  	MY_ERR("Bad input arguments.\n");
-    return IMGBUILD_BAD_ARGS;
-  }
-
-  // Check how many 32-bit shift ops are needed and if we need final shift of remaining bit.
-  count = i_ringLen/32;
-  remainder = i_ringLen%32;
-	if (remainder>0)
-	    count = count + 1;
-	remainingBits = i_ringLen;
-	MY_DBG("count=%i  rem=%i  remBits=%i\n",count,remainder,remainingBits);
-
-  // XOR flush and init values 32 bits at a time.  Store result in o_delta buffer.
-	for (i=0; i<count; i++)  {
-
-		if (remainingBits<=0)  {
-			MY_ERR("remaingBits can not be negative.\n");
-			return IMGBUILD_ERR_CHECK_CODE;
-		}
-
-    init  = i_init[i];
-    alter = i_alter[i];
-
-    if (remainingBits>=32)
-      remainingBits = remainingBits-32;
-	  else  {  //If remaining bits are less than 32 bits, mask unused bits
-	    mask = 0;
-	    for (bit=0; bit<(32-remainingBits); bit++)  {
-	      mask = mask << 1;
-	      mask = mask + 1;
-	    }
-		  MY_DBG("remainingBits=%i<32. Padding w/zeros. True bit length unaltered. (@word count=%i)\n",remainingBits,count);
-	    mask  = ~mask;
-	    init  = init & mask;
-	    alter = alter & mask;
-	    remainingBits = 0;
-	  }
-	  
-    // Do the XORing.
-		o_delta[i]  = init ^ alter;
-	}
-
-  return IMGBUILD_SUCCESS;
-}
-
-
+// CMO-20130208: Not used in:
+// - p8_image_help.C
+// - p8_image_help_base.C
+// - cen_xip_customize.C
+// - p8_pore_table_gen_api.C
+// - p8_slw_repair.C
+// - ???
+// It is used in:
+// - p8_delta_scan_w
+// - p8_delta_scan_r
+// - ???
 void cleanup( void *buf1, 
               void *buf2, 
               void *buf3,
@@ -1566,5 +1854,6 @@ void cleanup( void *buf1,
   if (buf5) free(buf5);
 }
 
+#endif // End of !(defined IMGBUILD_PPD_CEN_XIP_CUSTOMIZE)
 
 }

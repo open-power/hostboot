@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_delta_scan_rw.h,v 1.29 2013/01/02 03:03:10 cmolsen Exp $
+// $Id: p8_delta_scan_rw.h,v 1.35 2013/02/13 00:24:08 cmolsen Exp $
 #define OVERRIDE_OFFSET 8            // Byte offset of forward pointer's addr relative 
                                      //   to base forward pointer's addr.
 #define SIZE_IMAGE_BUF_MAX      5000000 // Max ~50MB image buffer size.
@@ -33,11 +33,14 @@
 
 /*****  Xip customize support ****/
 #define COMBINED_GOOD_VECTORS_TOC_NAME    "combined_good_vectors"
+#define L2_SINGLE_MEMBER_ENABLE_TOC_NAME  "l2_single_member_enable_mask"
 #define PROC_PIB_REPR_VECTOR_TOC_NAME     "proc_sbe_pibmem_repair_vector"
 #define NEST_SKEWADJUST_VECTOR_TOC_NAME   "proc_sbe_nest_skewadjust_vector"
 #define MAX_PLL_RING_SIZE                 128 // Bytes
 #define PERV_BNDY_PLL_RING_TOC_NAME       "perv_bndy_pll_ring"
 #define PERV_BNDY_PLL_RING_ALT_TOC_NAME   "perv_bndy_pll_ring_alt"
+#define MAX_CEN_PLL_RING_SIZE             80 // Bytes
+#define TP_PLL_BNDY_RING_ALT_TOC_NAME     "tp_pll_bndy_ring_alt"
 
 /*****  Scan setting  *****/
 #define OPCG_SCAN_RATIO                     4
@@ -82,10 +85,12 @@
 #define IMGBUILD_ERR_CHECK_CODE               9  // Coding or image data problem.
 #define IMGBUILD_INVALID_IMAGE               10  // Invalid image.
 #define IMGBUILD_IMAGE_SIZE_MISMATCH         11  // Mismatch between image sizes.
+#define IMGBUILD_IMAGE_SIZE_MESS             12  // Messed up image or section sizes.
 #define IMGBUILD_ERR_PORE_INLINE             20  // Pore inline error.
 #define IMGBUILD_ERR_PORE_INLINE_ASM         21  // Err assoc w/inline assembler.
 #define IMGBUILD_ERR_WF_CREATE               45  // Err assoc w/create_wiggle_flip_prg.
 #define IMGBUILD_ERR_RING_WRITE_TO_IMAGE     46  // Err assoc w/wr_ring_block_to_img.
+#define IMGBUILD_ERR_SECTION_SIZING          48  // Err assoc w/section sizing.
 #define IMGBUILD_ERR_GET_SECTION             49  // Err assoc w/getting section ID.
 #define IMGBUILD_ERR_SECTION_DELETE          50  // Err assoc w/deleting ELF section.
 #define IMGBUILD_ERR_APPEND                  51  // Err assoc w/appending to ELF section.
@@ -125,9 +130,9 @@
 #define MY_DBG(_fmt_, _args_...) FAPI_DBG(_fmt_, ##_args_)
 #else  // End of __FAPI
 #ifdef SLW_COMMAND_LINE
-#define MY_INF(_fmt_, _args_...) fprintf(stdout, _fmt_, ##_args_)
-#define MY_ERR(_fmt_, _args_...) fprintf(stderr, _fmt_, ##_args_)
-#define MY_DBG(_fmt_, _args_...) fprintf(stdout, _fmt_, ##_args_)
+#define MY_INF(_fmt_, _args_...) printf(_fmt_, ##_args_)
+#define MY_ERR(_fmt_, _args_...) printf(_fmt_, ##_args_)
+#define MY_DBG(_fmt_, _args_...) printf(_fmt_, ##_args_)
 #else  // End of SLW_COMMAND_LINE
 #define MY_INF(_fmt_, _args_...)
 #define MY_ERR(_fmt_, _args_...)
@@ -165,7 +170,8 @@
 
 #include <p8_image_help_base.H>
 
-#ifndef SLW_COMMAND_LINE_RAM  // We don't need this include for ramming.
+#if !(defined __P8_PORE_TABLE_GEN_API_C) && !(defined __CEN_XIP_CUSTOMIZE_C) && !(defined SLW_COMMAND_LINE_RAM)
+// We don't need this include for gen_cpureg/scom or slw ramming.
 #include <p8_scan_compression.H>
 #endif
 
@@ -179,7 +185,7 @@ extern "C" {
 #endif
 
 
-#ifndef SLW_COMMAND_LINE_RAM
+#if !(defined __P8_PORE_TABLE_GEN_API_C) && !(defined SLW_COMMAND_LINE_RAM)
 
 // Info:
 // DeltaRingLayout describes the sequential order of the content in the compressed delta
@@ -214,6 +220,41 @@ typedef struct {
   char     data[];
 } MetaData;
 
+int calc_ring_delta_state(  
+              const uint32_t  *i_init,
+							const uint32_t  *i_alter,
+							uint32_t        *o_delta,
+							const uint32_t  i_ringLen);
+
+int  create_wiggle_flip_prg(  
+              uint32_t   *i_deltaRing,
+              uint32_t   i_ringBitLen,
+              uint32_t   i_scanSelectData,
+              uint32_t   i_chipletID,
+              uint32_t   **o_wfInline,
+              uint32_t   *o_wfInlineLenInWords,
+#ifdef IMGBUILD_PPD_ENFORCE_SCAN_DELAY
+							uint32_t   i_scanMaxRotate,
+              uint32_t   i_waitsScanDelay);
+#else
+							uint32_t   i_scanMaxRotate);
+#endif
+
+uint64_t calc_ring_layout_entry_offset(
+							uint8_t  i_typeRingLayout,
+							uint32_t i_sizeMetaData);
+
+int write_ring_block_to_image(  
+							void             *io_image,
+							const char       *i_ringName,    // NULL if no name.
+              DeltaRingLayout  *i_ringBlock,
+							const uint8_t    i_idxVector,   // [0-15] - Ignored if ringName==NULL
+							const uint8_t    i_override,    // [0,1]  - Ignored if ringName==NULL
+							const uint8_t    i_overridable, // [0,1]  - Ignored if ringName==NULL
+              const uint32_t   i_sizeImageMax);
+
+#if !(defined __CEN_XIP_CUSTOMIZE_C)
+
 int p8_centaur_build( 
 							void      *i_imageIn,
               uint32_t  i_ddLevel,
@@ -233,27 +274,12 @@ int get_ring_layout_from_image2(
               DeltaRingLayout  **o_rs4RingLayout,
               void        **nextRing);
 
-int write_ring_block_to_image(  
-							void             *io_image,
-							const char       *i_ringName,    // NULL if no name.
-              DeltaRingLayout  *i_ringBlock,
-							const uint8_t    i_idxVector,   // [0-15] - Ignored if ringName==NULL
-							const uint8_t    i_override,    // [0,1]  - Ignored if ringName==NULL
-							const uint8_t    i_overridable, // [0,1]  - Ignored if ringName==NULL
-              const uint32_t   i_sizeImageMax);
-
 int gen_ring_delta_state(  
               uint32_t   bitLen, 
               uint32_t   *i_init, 
               uint32_t   *i_alter,
               uint32_t   *o_delta,
               uint32_t   verbose);
-
-int calc_ring_delta_state(  
-              const uint32_t  *i_init,
-							const uint32_t  *i_alter,
-							uint32_t        *o_delta,
-							const uint32_t  i_ringLen);
 
 int write_rs4_ring_to_ref_image(  
               char       *i_fnImage,
@@ -286,7 +312,8 @@ int write_vpd_ring_to_slw_image(
 							uint8_t    i_sysPhase,
               char       *i_ringName,
 							void       *i_bufTmp,
-							uint32_t   i_sizeBufTmp);
+							uint32_t   i_sizeBufTmp,
+              uint8_t    i_bWcSpace);
 
 int get_delta_ring_from_image(
               char       *i_fnImage,
@@ -312,31 +339,22 @@ int get_ring_layout_from_image(
               DeltaRingLayout  *o_rs4RingLayout,
               void       **nextRing);
 
-int  create_wiggle_flip_prg(  
-              uint32_t   *i_deltaRing,
-              uint32_t   i_ringBitLen,
-              uint32_t   i_scanSelectData,
-              uint32_t   i_chipletID,
-              uint32_t   **o_wfInline,
-              uint32_t   *o_wfInlineLenInWords,
-							uint32_t   i_scanMaxRotate);
-
 int append_empty_section(
               void      *io_image,
-              uint32_t  *i_sizeImageMaxNew,
+              int       *i_sizeImageMaxNew,
               uint32_t  i_sectionId,
-              uint32_t  i_sizeSection);
+              int       *i_sizeSection,
+							uint8_t   i_bFixed);
 
 int initialize_slw_section(
               void      *io_image,
               uint32_t  *i_sizeImageMaxNew);
 
+int create_and_initialize_fixed_image(
+              void      *io_image);
+
 int update_runtime_scom_pointer(
 							void			*io_image);
-
-uint64_t calc_ring_layout_entry_offset(
-							uint8_t  i_typeRingLayout,
-							uint32_t i_sizeMetaData);
 
 void cleanup(
               void *buf1=NULL,
@@ -345,7 +363,9 @@ void cleanup(
               void *buf4=NULL,
               void *buf5=NULL);
               
-#endif  // End of not(SLW_COMMAND_LINE_RAM)
+#endif  // End of !(defined __CEN_XIP_CUSTOMIZE_C)
+
+#endif  // End of !(defined __P8_PORE_TABLE_GEN_API_C) && !(defined SLW_COMMAND_LINE_RAM)
 
 // Byte-reverse a 32-bit integer if on an LE machine
 inline uint32_t myRev32(const uint32_t i_x)

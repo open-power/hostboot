@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- IBM CONFIDENTIAL                                                       -->
 <!--                                                                        -->
-<!-- COPYRIGHT International Business Machines Corp. 2012                   -->
+<!-- COPYRIGHT International Business Machines Corp. 2012,2013              -->
 <!--                                                                        -->
 <!-- p1                                                                     -->
 <!--                                                                        -->
@@ -151,4 +151,18 @@
     <array>32</array>
     <platInit/>
   </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_EX_L2_SINGLE_MEMBER_ENABLE</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      Vector to communicate to SBE which EX chiplets must be configured with L2 in single member mode.
+      One bit per EX chiplet, bit location aligned to chiplet ID
+      (bit 16: EX00, bit 17: EX01, bit 18: EX02 ... bit 31: EX15)
+      EX chiplets whose L2 must run in single member mode are marked by a '1'.
+    </description>
+    <valueType>uint32</valueType>
+    <platInit/>
+  </attribute>
+  <!-- ********************************************************************* -->
 </attributes>

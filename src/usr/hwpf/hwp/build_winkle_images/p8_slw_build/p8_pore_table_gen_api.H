@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012                   */
+/* COPYRIGHT International Business Machines Corp. 2012,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_pore_table_gen_api.H,v 1.15 2012/10/17 19:06:54 cmolsen Exp $
+// $Id: p8_pore_table_gen_api.H,v 1.19 2013/01/31 21:10:10 cmolsen Exp $
 /*------------------------------------------------------------------------------*/
 /* *! (C) Copyright International Business Machines Corp. 2012                  */
 /* *! All Rights Reserved -- Property of IBM                                    */
@@ -156,10 +156,11 @@ CONST_UINT64_T( SCRATCH0_RESET_VALUE,           (0xABBA99EBBA33DADA) );
 
 
 //#include <stdio.h>
-// Temporarily include this to support malloc until Host services supplies buffers in their calls.
 #include <stdlib.h>
-//#include <stdint.h>
+#ifndef __P8_PORE_TABLE_GEN_API_C
 #include <p8_pore_api_custom.h>
+#endif
+//#include <stdint.h>
 
 //#include <pore_bitmanip.H>
 // Defining local versions of BITS and BIT
@@ -202,8 +203,9 @@ CONST_UINT64_T( SCRATCH0_RESET_VALUE,           (0xABBA99EBBA33DADA) );
 #define SLW_EX_ENABLE_RUNTIME_SCOM_TOC_NAME  "sub_slw_ex_enable_runtime_scom"
 
 #define SCAN_MAX_ROTATE_38XXX_NAME           "scan_max_rotate_38xxx"
-#define SCAN_ROTATE_DEFAULT                  0xFE0
-#define SCAN_MAX_ROTATE                      0x1FFF
+#define SCAN_ROTATE_DEFAULT                  110 // Limit suggested by Tilman.
+#define SCAN_MAX_ROTATE                      0x00000FE0
+#define SCAN_MAX_ROTATE_LONG                 0x000FFFFF // BITS 12->31.
 
 // RAM table defines
 #define XIPSIZE_RAM_ENTRY       ( (sizeof(RamTableEntry)+7)/8*8 )
@@ -258,8 +260,19 @@ enum  {
 #define SLW_SCOM_TABLE_OFFSET_L3    (SLW_SCOM_TABLE_OFFSET_L2 + SLW_SCOM_TABLE_SIZE_L2)
 #define SLW_TABLE_SIZE_ALL          (SLW_RAM_TABLE_SIZE + SLW_SCOM_TABLE_SIZE_ALL)
 
-// FFDC section
-#define FFDC_SECTION_SIZE       256
+// Enumeration of Scom sections in .slw section.
+enum  {
+  P8_SCOM_SECTION_NC        =  0,
+  P8_SCOM_SECTION_L2        =  1,
+  P8_SCOM_SECTION_L3        =  2,
+  P8_SCOM_SECTION_MAX_VALUE =  2
+};
+
+// SLW section size (Ensure 128-byte alignment.)
+#define FIXED_SLW_SECTION_SIZE      (SLW_TABLE_SIZE_ALL/128+(SLW_TABLE_SIZE_ALL%128+127)/128)*128
+
+// FFDC section size (Ensure 128-byte alignment.)
+#define FIXED_FFDC_SECTION_SIZE     256*(SLW_MAX_CORES+1)
 
 // SCOM/CID masks and ranges
 #define P8_CID_EX_LOW         0x10        // Lowest EX chiplet addr
@@ -274,6 +287,15 @@ enum  {
 #define P8_PORE_SCOM_NOOP     4  // Replace existing Scom PORE NOP instruction
 #define P8_PORE_SCOM_RESET    5  // Delete all entries for given coreID. Repl w/RNNN IIS
 #define P8_PORE_SCOM_LAST_OP  5  // Keep track of the last op for checking correctness of op input
+
+
+// Enumeration of SLW image build modes.
+enum  {
+  P8_SLW_MODEBUILD_IPL       = 0,
+  P8_SLW_MODEBUILD_REBUILD   = 1,
+  P8_SLW_MODEBUILD_SRAM      = 2,
+  P8_SLW_MODEBUILD_MAX_VALUE = 2
+};
 
 
 // Return codes
@@ -323,7 +345,7 @@ extern const int SLW_SPR_REGS_SIZE;
  *                    i_threadId  - the thread ID to operate on
  */
 uint32_t p8_pore_gen_cpureg(void      *io_image,
-                            uint32_t  i_sizeImage, 
+                            uint32_t  i_sizeImage,
                             uint32_t  i_regName,
                             uint64_t  i_regData,
                             uint32_t  i_coreId,
@@ -340,12 +362,48 @@ uint32_t p8_pore_gen_cpureg(void      *io_image,
  *                    i_section   - SCOM section [0,2,3]
  */
 uint32_t p8_pore_gen_scom(void      *io_image,
-                          uint32_t  i_sizeImage, 
+                          uint32_t  i_sizeImage,
                           uint32_t  i_scomAddr,
                           uint32_t  i_coreId,
                           uint64_t  i_scomData,
                           uint32_t  i_operation,
-  												uint32_t  i_section);
+                          uint32_t  i_section);
+
+
+/*  Name:             p8_pore_gen_cpureg_fixed()
+ *  Description:      Populates ramming entries in the .slw section
+ *  Parameter list:   i_image     - pointer to SLW mainstore image
+ *                    i_modeBuild - 0: HB/IPL mode, 1: PHYP/Rebuild mode, 2: SRAM mode.
+ *                    i_sizeImage - size of SLW mainstore image
+ *                    i_regName   - unswizzled SPR register value
+ *                    i_regData   - data to write to SPR register
+ *                    i_coreId    - the core ID to operate on
+ *                    i_threadId  - the thread ID to operate on
+ */
+uint32_t p8_pore_gen_cpureg_fixed(void      *io_image,
+                            uint8_t   i_modeBuild, 
+                            uint32_t  i_regName,
+                            uint64_t  i_regData,
+                            uint32_t  i_coreId,
+                            uint32_t  i_threadId);
+
+/*  Name:             p8_pore_gen_scom_fixed()
+ *  Description:      Populates scom entries in the .slw section
+ *  Parameter list:   i_image     - pointer to SLW mainstore image
+ *                    i_modeBuild - 0: HB/IPL mode, 1: PHYP/Rebuild mode, 2: SRAM mode.
+ *                    i_scomAddr  - scom register address
+ *                    i_coreId    - the core ID [0:15]
+ *                    i_scomData  - 64-bit data to put in scom register
+ *                    i_operation - what to do with the scom data [0:5]
+ *                    i_section   - 0: General Scoms, 1: L2 cache, 2: L3 cache
+ */
+uint32_t p8_pore_gen_scom_fixed(void      *io_image,
+                          uint8_t   i_modeBuild, 
+                          uint32_t  i_scomAddr,
+                          uint32_t  i_coreId,
+                          uint64_t  i_scomData,
+                          uint32_t  i_operation,
+                          uint32_t  i_section);
 
 #ifdef __cplusplus
 }

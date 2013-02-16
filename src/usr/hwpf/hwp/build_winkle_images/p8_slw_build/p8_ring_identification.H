@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012                   */
+/* COPYRIGHT International Business Machines Corp. 2012,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_ring_identification.H,v 1.6 2012/11/13 16:39:12 cmolsen Exp $
+// $Id: p8_ring_identification.H,v 1.7 2013/02/12 17:33:12 cmolsen Exp $
 /*------------------------------------------------------------------------------*/
 /* *! (C) Copyright International Business Machines Corp. 2012                  */
 /* *! All Rights Reserved -- Property of IBM                                    */
@@ -34,16 +34,17 @@
 #include <p8_pore_api_custom.h>
 #include <string.h> // Why isn't this included in p8_pore_api_custom.h? PHYP
                     //   said back in Aug that strcmp() is allowed. But it is
-										//   not in p8_pore_api_custom.h.
+                    //   not in p8_pore_api_custom.h.
 
 // Ring ID list structure.
 typedef struct {
   const char  *ringName;
   uint8_t     ringId;
-	uint8_t     chipIdMin;
-	uint8_t     chipIdMax;
-	const char  *ringNameImg; // Ring name in image: ringName + "_ring"
-	uint8_t     vpdKeyword;
+  uint8_t     chipIdMin;    // the min chipletId
+  uint8_t     chipIdMax;    // the max chipletId
+  const char  *ringNameImg; // Ring name in image: ringName + "_ring"
+  uint8_t     vpdKeyword;
+  uint8_t      bWcSpace;     // 0: fitted  1: worst-case space (3 x ring length)
 } RingIdList;
 
 extern const RingIdList  RING_ID_LIST_PG[], RING_ID_LIST_PR[];
@@ -57,12 +58,12 @@ extern const uint32_t    RING_ID_LIST_SIZE;
 //       these values need to be translated in xip_customize when passing the
 //       mvpdKeyword to getMvpdRing();
 enum VpdKeyword  {
-	VPD_KEYWORD_PDG,
-	VPD_KEYWORD_PDR,
-	NUM_OF_VPD_TYPES
+  VPD_KEYWORD_PDG,
+  VPD_KEYWORD_PDR,
+  NUM_OF_VPD_TYPES
 };
 
 int get_vpd_ring_list_entry(const char *i_ringName,
                             const uint8_t i_ringId,
-														RingIdList **i_ringIdList);
+                            RingIdList **i_ringIdList);
 

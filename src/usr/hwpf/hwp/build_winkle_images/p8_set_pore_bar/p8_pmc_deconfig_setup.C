@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012                   */
+/* COPYRIGHT International Business Machines Corp. 2012,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_pmc_deconfig_setup.C,v 1.6 2012/09/28 15:24:33 stillgs Exp $
+// $Id: p8_pmc_deconfig_setup.C,v 1.7 2012/12/19 09:52:36 pchatnah Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/p8_pmc_deconfig_setup.C,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
@@ -148,10 +148,12 @@ p8_pmc_deconfig_setup(const Target& i_target)
                     break;
                 }
 
+		FAPI_INF(" Working on ex chiplet number %d", l_ex_number);
+
                 l_rc=fapiGetScom(i_target, (EX_GP3_0x100F0012+(l_ex_number*0x01000000)), data);
                 if(l_rc)
                 {
-                    FAPI_ERR("GetScom error");
+                    FAPI_ERR("GetScom error ");
                     break;
                 }
 

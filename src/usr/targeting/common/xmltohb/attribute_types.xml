@@ -10243,4 +10243,83 @@ Measured in GB</description>
     <readable/>
 </attribute>
 
+<!-- TODO: RTC story 64824: Need to review this attribute.  Per John F, it calls VPD func to provide the value -->
+<attribute>
+    <id>EX_L2_SINGLE_MEMBER_ENABLE</id>
+    <description>
+      Vector to communicate to SBE which EX chiplets must be configured with L2 in single member mode.
+      One bit per EX chiplet, bit location aligned to chiplet ID
+      (bit 16: EX00, bit 17: EX01, bit 18: EX02 ... bit 31: EX15)
+      EX chiplets whose L2 must run in single member mode are marked by a '1'.
+    </description>
+    <simpleType>
+        <uint32_t></uint32_t>
+    </simpleType>
+    <persistency>volatile</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EX_L2_SINGLE_MEMBER_ENABLE</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<!-- Note: This attribute is only used by FSP -->
+<attribute>
+    <id>DMI_REFCLOCK_SWIZZLE</id>
+    <description>
+      Defines Murano/Venice FSI GP8 refclock enable field bit offset (0:7) associated with this MCS chip unit.
+    </description>
+    <simpleType>
+      <uint8_t>
+        <default>0</default>
+      </uint8_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_DMI_REFCLOCK_SWIZZLE</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<!-- TODO: RTC story 64824: Need to review this attribute and handle MRW data properly -->
+<attribute>
+    <id>EI_BUS_TX_MSBSWAP</id>
+    <description>
+        Source: MRW: Downstream MSB Swap and Upstream MSB Swap
+		Usage:  TX_MSBSWAP initfile setting for DMI and A buses
+
+		This attribute represents whether or not a single clock group bus such as DMI and A bus was wired by the board designer using a feature
+		called MSB Swap where lane 0 of the TX chip wires to lane n-1 on the RX chip where 'n' is the width of the bus. A basic description
+		of this capability is that the board designer can save layers on the board wiring by crossing the wiring between the two chips in
+		a prescribed manner. In a non-MSB Swapped bus Lane 0 on the TX chip wires to lane 0 on the RX chip, lane 1 to lane 1 and so on.
+		If a bus is MSB Swapped then lane 0 of the TX chip wires to lane 'n-1' of the RX chip, lane 1 to lane 'n-2', etc. Random or 
+		arbitrary wiring of TX to RX lanes on different chips is NOT ALLOWED.
+
+        The Master Chip of two connected chips is defined as the chip with the smaller value of (100*Node + Pos).
+		The Slave Chip of two connected chips is defined as the chip with the larger value of (100*Node + Pos).
+		The Downstream direction is defined as the direction from the Master chip to the Slave chip.
+		The Upstream direction is defined as the direction from the Slave chip to the Master chip.
+
+		The Downstream TX_MSBSWAP from the MRW is a uint8 value. 0x01 means the Downstream bus is wired msb to lsb etc. and
+		0x00 means the bus is wired normally, msb to msb, lsb to lsb (lane0 to lane0).
+		
+		The Upstream TX_MSBSWAP from the MRW is a uint8 value. 0x01 means the Upstream bus is wired msb to lsb etc. and
+		0x00 means the bus is wired normally, msb to msb, lsb to lsb (lane0 to lane0).
+		
+		It is up to the platform code to set up each ATTR_EI_BUS_TX_MSBSWAP value for the correct target endpoints.
+		 
+    </description>
+    <simpleType>
+      <uint8_t>
+      </uint8_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EI_BUS_TX_MSBSWAP</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
 </attributes>
