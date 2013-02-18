@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- IBM CONFIDENTIAL                                                       -->
 <!--                                                                        -->
-<!-- COPYRIGHT International Business Machines Corp. 2011,2012              -->
+<!-- COPYRIGHT International Business Machines Corp. 2011,2013              -->
 <!--                                                                        -->
 <!-- p1                                                                     -->
 <!--                                                                        -->
@@ -81,6 +81,10 @@
         MNFG_ENABLE_EXHAUSTIVE_PATTERN_TEST = 0x0000000000000100,
         MNFG_ENABLE_STANDARD_PATTERN_TEST   = 0x0000000000000200,
         MNFG_ENABLE_MINIMUM_PATTERN_TEST    = 0x0000000000000400,
+        MNFG_DISABLE_FABRIC_eREPAIR         = 0x0000000000000800,
+        MNFG_DISABLE_MEMORY_eREPAIR         = 0x0000000000001000,
+        MNFG_FABRIC_DEPLOY_LANE_SPARES      = 0x0000000000002000,
+        MNFG_DMI_DEPLOY_LANE_SPARES         = 0x0000000000004000,        
     </enum>
     <platInit/>
   </attribute>

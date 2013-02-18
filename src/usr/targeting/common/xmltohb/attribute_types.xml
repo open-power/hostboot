@@ -2560,6 +2560,22 @@
         <name>MNFG_ENABLE_MINIMUM_PATTERN_TEST</name>
         <value>0x00000400</value>
     </enumerator>
+    <enumerator>
+        <name>MNFG_DISABLE_FABRIC_eREPAIR</name>
+        <value>0x00000800</value>
+    </enumerator>
+    <enumerator>
+        <name>MNFG_DISABLE_MEMORY_eREPAIR</name>
+        <value>0x00001000</value>
+    </enumerator>
+    <enumerator>
+        <name>MNFG_FABRIC_DEPLOY_LANE_SPARES</name>
+        <value>0x00002000</value>
+    </enumerator>
+    <enumerator>
+        <name>MNFG_DMI_DEPLOY_LANE_SPARES</name>
+        <value>0x00004000</value>
+    </enumerator>    
 </enumerationType>
 
 <!-- Support for pm_attributes_all_hwp.xml -->
