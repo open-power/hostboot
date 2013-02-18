@@ -114,7 +114,8 @@ bool isInMdiaMode()
 
 //------------------------------------------------------------------------------
 
-int32_t mdiaSendCmdComplete( TargetHandle_t i_mbaTarget )
+int32_t mdiaSendEventMsg( TargetHandle_t i_mbaTarget,
+                          MDIA::MaintCommandEventType i_eventType )
 {
     int32_t o_rc = SUCCESS;
 
@@ -132,8 +133,9 @@ int32_t mdiaSendCmdComplete( TargetHandle_t i_mbaTarget )
 
         // Send command complete to MDIA.
         MDIA::MaintCommandEvent l_mdiaEvent;
-        l_mdiaEvent.type   = MDIA::COMMAND_COMPLETE;
+
         l_mdiaEvent.target = i_mbaTarget;
+        l_mdiaEvent.type = i_eventType;
 
         errlHndl_t errl = MDIA::processEvent( l_mdiaEvent );
         if ( NULL != errl )

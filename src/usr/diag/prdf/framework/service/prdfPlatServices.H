@@ -32,6 +32,8 @@
  * is common between FSP and Hostboot should be in the respective common file.
  */
 
+#include <diag/mdia/mdia.H>
+
 // This must be included after all other includes. This will take care of cases
 // where a file must be included in the common code, but the include paths are
 // different between FSP and Hostboot.
@@ -64,11 +66,13 @@ namespace PlatServices
 bool isInMdiaMode();
 
 /**
- * @brief  Sends a command complete message to MDIA.
+ * @brief  Sends a maintenance command message to MDIA.
  * @param  i_mbaTarget An MBA target.
+ * @param  i_eventType MDIA event type
  * @return Non-SUCCESS in internal function fails, SUCCESS otherwise.
  */
-int32_t mdiaSendCmdComplete( TARGETING::TargetHandle_t i_mbaTarget );
+int32_t mdiaSendEventMsg( TARGETING::TargetHandle_t i_mbaTarget,
+                          MDIA::MaintCommandEventType i_eventType );
 
 /**
  * @brief  Invokes the restore DRAM repairs hardware procedure.

@@ -74,21 +74,29 @@ int32_t PostAnalysis( ExtensibleChip * i_mbaChip,
 
     using namespace TARGETING;
 
-    // In hostboot, we need to clear MCI Fir bits. Do we will get the mcs
-    // chiplet connected with Mba and call its plugin to clear those FIR bits
+    // In hostboot, we need to clear associated bits in the MCIFIR bits.
     int32_t l_rc = MemUtil::clearHostAttns( i_mbaChip, i_sc );
     if ( SUCCESS != l_rc )
         PRDF_ERR( "[Mba::PostAnalysis] MemUtil::clearHostAttns failed" );
 
     // Send command complete to MDIA.
     // This must be done in post analysis after attentions have been cleared.
-    if ( PlatServices::isInMdiaMode() )
-    {
-        TargetHandle_t mbaTarget = i_mbaChip->GetChipHandle();
-        CenMbaDataBundle * mbadb = getMbaDataBundle( i_mbaChip );
 
+    TargetHandle_t mbaTarget = i_mbaChip->GetChipHandle();
+    CenMbaDataBundle * mbadb = getMbaDataBundle( i_mbaChip );
+
+    if ( mbadb->iv_sendCmdCompleteMsg )
+    {
         mbadb->iv_sendCmdCompleteMsg = false;
-        PlatServices::mdiaSendCmdComplete( mbaTarget );
+
+        l_rc = PlatServices::mdiaSendEventMsg( mbaTarget,
+                                               mbadb->iv_cmdCompleteMsgData );
+
+        if ( l_rc )
+        {
+            PRDF_ERR( "[Mba::PostAnalysis] PlatServices::mdiaSendEventMsg"
+                      " failed" );
+        }
     }
 
     #endif // __HOSTBOOT_MODULE
@@ -121,9 +129,47 @@ int32_t MaintCmdComplete( ExtensibleChip * i_mbaChip,
     {
         #ifdef __HOSTBOOT_MODULE
 
-        // TODO: Will need to change design once this for error path.
-        CenMbaDataBundle * mbadb = getMbaDataBundle( i_mbaChip );
-        mbadb->iv_sendCmdCompleteMsg = true;
+        if ( PlatServices::isInMdiaMode() )
+        {
+            // Immediately inform mdia that the command
+            // has finished.
+
+            l_rc = PlatServices::mdiaSendEventMsg( mbaTarget,
+                    MDIA::RESET_TIMER );
+
+            if(l_rc)
+            {
+                PRDF_ERR( "[Mba::MaintCmdComplete] "
+                        "PlatServices::mdiaSendEventMsg"
+                        " failed" );
+
+                // keep going
+            }
+
+            // Determine for mdia whether or not the command
+            // finished at the end of the last rank or if
+            // the command will need to be restarted.
+            // Tuck this away until PostAnalysis.
+
+            CenMbaDataBundle * mbadb = getMbaDataBundle( i_mbaChip );
+
+            SCAN_COMM_REGISTER_CLASS * MBMACA =
+                i_mbaChip->getRegister("MBMACA");
+            SCAN_COMM_REGISTER_CLASS * MBMEA = i_mbaChip->getRegister("MBMEA");
+
+            l_rc = MBMACA->Read();
+            if (l_rc != SUCCESS) break;
+
+            l_rc = MBMEA->Read();
+            if (l_rc != SUCCESS) break;
+
+            mbadb->iv_sendCmdCompleteMsg = true;
+            mbadb->iv_cmdCompleteMsgData =
+                (MBMACA->GetBitFieldJustified(0, 40)
+                 == MBMEA->GetBitFieldJustified(0, 40))
+                ? MDIA::COMMAND_COMPLETE
+                : MDIA::COMMAND_STOPPED;
+        }
 
         #endif // __HOSTBOOT_MODULE
 
@@ -136,7 +182,7 @@ int32_t MaintCmdComplete( ExtensibleChip * i_mbaChip,
         CalloutUtil::defaultError( i_sc );
     }
 
-    return SUCCESS;
+    return l_rc;
 }
 PRDF_PLUGIN_DEFINE( Mba, MaintCmdComplete );
 

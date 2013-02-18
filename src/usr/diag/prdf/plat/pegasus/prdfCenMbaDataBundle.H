@@ -30,6 +30,8 @@
 
 #include <prdfCenMbaDataBundle_common.H>
 
+#include <diag/mdia/mdia.H>
+
 //------------------------------------------------------------------------------
 
 namespace PRDF
@@ -47,9 +49,9 @@ class CenMbaDataBundle : public CenMbaDataBundleCommon
      * @param i_mbaChip The MBA chip.
      */
     explicit CenMbaDataBundle( ExtensibleChip * i_mbaChip ) :
-        CenMbaDataBundleCommon( i_mbaChip ), iv_sendCmdCompleteMsg(false)
-    {
-    }
+        CenMbaDataBundleCommon(i_mbaChip), iv_sendCmdCompleteMsg(false),
+        iv_cmdCompleteMsgData()
+    {}
 
     /**
      * @brief Destructor.
@@ -68,6 +70,11 @@ class CenMbaDataBundle : public CenMbaDataBundleCommon
     /** TRUE if a maintenance command complete message needs to be sent in the
      *  post analysis plugin, FALSE otherwise. */
     bool iv_sendCmdCompleteMsg;
+
+    /**
+     * Maintenance command message to send.
+     */
+    MDIA::MaintCommandEventType iv_cmdCompleteMsgData;
 
 };
 

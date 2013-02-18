@@ -227,6 +227,25 @@ chip Mba
         capture     type secondary;
         capture     group default;
     };
+
+    ############################################################################
+    # Maintenance command addresses
+    ############################################################################
+
+    register MBMACA
+    {
+        name        "MBU.MBA01.MBA_MCBIST.SCOMFIR.MBMACAQ";
+        scomaddr    0x0301060D;
+        capture     group default;
+    };
+
+    register MBMEA
+    {
+        name        "MBU.MBA01.MBA_MCBIST.SCOMFIR.MBMEAQ";
+        scomaddr    0x0301060E;
+        capture     group default;
+    };
+
 };
 
  ##############################################################################

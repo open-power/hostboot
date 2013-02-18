@@ -1,0 +1,204 @@
+--- a/simu/data/cec-chip/centaur.chip
++++ b/simu/data/cec-chip/centaur.chip
+@@ -11,6 +11,7 @@
+ #  uy01  859534    yadlapat  10/31/12  Correct p1 include file
+ #        858520    cphan     11/02/12  Add VPO_ACTIONS
+ #  uy01  859534    yadlapat  11/02/12  Correct p1 include file
++#        871945    bradleyb  03/01/13  add prd/mdia logic regs
+ 
+ 
+ VERSION 1		# .chip file format ID
+@@ -73,4 +74,17 @@ END
+ INTERNALREGS           # List all scom registers
+    0xFF00000F, 64       # Simics workaround
+ END
++
++INTERNALREGS           # prd / mdia testing
++   0xFF010000, 64       # mba0 maint cmd counter
++   0xFF010001, 64       # mba0 maint cmd error inject
++   0xFF010002, 64       # mba0 maint cmd to inject
++   # ...
++   0xFF018000, 64       # mba1 maint cmd counter
++   0xFF018001, 64       # mba1 maint cmd error inject
++   0xFF018002, 64       # mba1 maint cmd to inject
++   # ...
++   #0xFF01FFFF, 64
++END
++
+ DONE
+--- a/simu/data/cec-chip/centaur.act
++++ b/simu/data/cec-chip/centaur.act
+@@ -36,6 +36,7 @@
+ #        SW176884  bradleyb  12/15/12  re-enable command complete
+ #        SW180168  vanlee    01/02/13  Centaur Mem PLL lock action
+ #        SW182865  thi       01/18/13  Action file for Centaur SBE
++#        SW189255  bradleyb  03/01/13  Add test logic to maint cmds
+ #********************************************************************
+ #
+ 
+@@ -215,83 +216,115 @@ CAUSE_EFFECT {
+ }
+ 
+ #******************************************
+-#   BEGIN - Maintenance Command Complete
++#   BEGIN - Maintenance Commands 
+ #******************************************
+ 
+-#Set command in progress
+ CAUSE_EFFECT {
+-  LABEL=[Maint Cmd Complete MBA0]
+-  WATCH=[REG(0x0301060B)]  #MBMCC=0301060B
+-  CAUSE: TARGET=[REG(0x0301060B)] OP=[BIT,ON] BIT=[0]    # Command Started
+-  EFFECT: TARGET=[REG(0x0301060B)] OP=[BIT,OFF] BIT=[0]  # Clear Command Valid
+-  EFFECT: TARGET=[REG(0x0301060C)] OP=[BIT,ON] BIT=[0]   # Set Command in progress
++  LABEL=[Abort Maint Cmd - MBA0]
++  WATCH=[REG(0x0301060B)] #mbmcc
++  CAUSE: TARGET=[REG(0x0301060B)] OP=[BIT,ON] BIT=[1] #stop_cmd
++  EFFECT: TARGET=[REG(0x0301060C)] OP=[BIT,OFF] BIT=[0] #cmd_nip
++  EFFECT: TARGET=[REG(0x0301060B)] OP=[BIT,OFF] BIT=[1] #reset stop_cmd
+ }
+ 
+-# Set Cmd not in progress
+ CAUSE_EFFECT {
+-  LABEL=[Maint Cmd Stopped MBA0]
+-  WATCH=[REG(0x0301060B)]  #MBMCC=0301060B
+-  CAUSE: TARGET=[REG(0x0301060B)] OP=[BIT,ON] BIT=[1]    # Initiate stopping cmd
+-  EFFECT: TARGET=[REG(0x0301060B)] OP=[BIT,OFF] BIT=[1]  # Clear request to stop cmd
+-  EFFECT: TARGET=[REG(0x0301060C)] OP=[BIT,OFF] BIT=[0]  # Set cmd not in progress
++  LABEL=[Start Maint Cmd - MBA0]
++  WATCH=[REG(0x0301060B)] #mbmcc
++  CAUSE: TARGET=[REG(0x0301060B)] OP=[BIT,ON] BIT=[0] #start_cmd
++  EFFECT: TARGET=[REG(0x0301060B)] OP=[BIT,OFF] BIT=[0] #reset start_cmd
++  #testing counter
++  EFFECT: TARGET=[LOGIC(0xFF010000)] OP=[INCREMENT,MASK] INCVAL=[1] MASK=[LITERAL(64,FFFFFFFF 00000000)]
++  EFFECT: TARGET=[REG(0x0301060C)] OP=[BIT,ON] BIT=[0] #cmd_ip
+ }
+ 
+-# Set maint cmd complete on reaching end address
+ CAUSE_EFFECT {
+-  LABEL=[Maint Cmd Complete on end addr MBA0]
+-  WATCH=[REG(0x0301060C)]  #MBMSR=0301060C
+-  CAUSE: TARGET=[REG(0x0301060C)] OP=[BIT,ON] BIT=[0]    # Command Complete
+-  CAUSE: TARGET=[REG(0x0301060F)] OP=[BIT,ON] BIT=[10]   # Stop on end address
+-  EFFECT: TARGET=[REG(0x0301060C)] OP=[BIT,OFF] BIT=[0]  # Clear when maint cmd complete
++  # Set logical Centaur register 0xff010001 (first word) to the nth
++  # command that should not reach mbmea.  For example:
++  # p8Centaur03.membuf_chip.regwrite "LOGIC" 0xff010001 "00000002" 32
++  LABEL=[Maint Cmd Error Inject - MBA0]
++  WATCH=[REG(0x0301060C)] #mbmsr
++  CAUSE: TARGET=[REG(0x0301060C)] OP=[BIT,ON] BIT=[0] #cmd_ip
++  #error inject
++  CAUSE: TARGET=[LOGIC(0xFF010000)] OP=[EQUALTO,BUF,ON] DATA=[LOGIC(0xFF010001)]
++  EFFECT: TARGET=[REG(0x0301060C)] OP=[BIT,OFF] BIT=[0] #cmd_nip
+ }
+ 
+-# trigger special attention on maint cmd complete
+ CAUSE_EFFECT {
+-  LABEL=[Maint Cmd Complete Special Attention MBA0]
+-  WATCH=[REG(0x0301060C)]  #MBMSR=0301060C
+-  CAUSE: TARGET=[REG(0x0301060C)] OP=[BIT,OFF] BIT=[0]   # Maint Cmd Complete
+-  CAUSE: TARGET=[REG(0x0301060F)] OP=[BIT,ON] BIT=[11]   # Enable Special attn
+-  EFFECT: TARGET=[REG(0x03010611)] OP=[BIT,ON] BIT=[0]   # Set Special attn bit
++  # Set logical Centaur register 0xff010002 to the nth
++  # command that should never finish
++  LABEL=[Maint Cmd Done - MBA0]
++  WATCH=[REG(0x0301060C)] #mbmsr
++  CAUSE: TARGET=[REG(0x0301060C)] OP=[BIT,ON] BIT=[0] #cmd_ip
++  #no error inject
++  CAUSE: TARGET=[LOGIC(0xFF010000)] OP=[EQUALTO,BUF,OFF] DATA=[LOGIC(0xFF010001)]
++  CAUSE: TARGET=[LOGIC(0xFF010000)] OP=[EQUALTO,BUF,OFF] DATA=[LOGIC(0xFF010002)]
++  EFFECT: TARGET=[REG(0x0301060D)] OP=[EQUALTO,BUF] DATA=[REG(0x0301060E)] #mbmaca
++  EFFECT: TARGET=[REG(0x0301060C)] OP=[BIT,OFF] BIT=[0] #cmd_nip
+ }
+ 
+-#Set command in progress
+ CAUSE_EFFECT {
+-  LABEL=[Maint Cmd Complete MBA1]
+-  WATCH=[REG(0x03010E0B)]  #MBMCC=03010E0B
+-  CAUSE: TARGET=[REG(0x03010E0B)] OP=[BIT,ON] BIT=[0]    # Command Started
+-  EFFECT: TARGET=[REG(0x03010E0B)] OP=[BIT,OFF] BIT=[0]  # Clear Command Valid
+-  EFFECT: TARGET=[REG(0x03010E0C)] OP=[BIT,ON] BIT=[0]   # Set Command in progress
++  LABEL=[Maint Cmd Complete Special Attention - MBA0]
++  WATCH=[REG(0x0301060C)] #mbmsr
++  CAUSE: TARGET=[REG(0x0301060C)] OP=[BIT,OFF] BIT=[0] #cmd_nip
++  CAUSE: TARGET=[REG(0x0301060F)] OP=[BIT,ON] BIT=[11] #enabled
++  EFFECT: TARGET=[REG(0x03010611)] OP=[BIT,ON] BIT=[0] #set special attn bit
++  EFFECT: TARGET=[REG(0x03010611)] OP=[BIT,ON] BIT=[8] #set wat_debug_attn
+ }
+ 
+-# Set Cmd not in progress
+ CAUSE_EFFECT {
+-  LABEL=[Maint Cmd Stopped MBA1]
+-  WATCH=[REG(0x03010E0B)]  #MBMCC=03010E0B
+-  CAUSE: TARGET=[REG(0x03010E0B)] OP=[BIT,ON] BIT=[1]    # Initiate stopping cmd
+-  EFFECT: TARGET=[REG(0x03010E0B)] OP=[BIT,OFF] BIT=[1]  # Clear request to stop cmd
+-  EFFECT: TARGET=[REG(0x03010E0C)] OP=[BIT,OFF] BIT=[0]  # Set cmd not in progress
++  LABEL=[Abort Maint Cmd - MBA1]
++  WATCH=[REG(0x03010E0B)] #mbmcc
++  CAUSE: TARGET=[REG(0x03010E0B)] OP=[BIT,ON] BIT=[1] #stop_cmd
++  EFFECT: TARGET=[REG(0x03010E0C)] OP=[BIT,OFF] BIT=[0] #cmd_nip
++  EFFECT: TARGET=[REG(0x03010E0B)] OP=[BIT,OFF] BIT=[1] #reset stop_cmd
+ }
+ 
+-# Set maint cmd complete on reaching end address
+ CAUSE_EFFECT {
+-  LABEL=[Maint Cmd Complete on end addr MBA1]
+-  WATCH=[REG(0x03010E0C)]  #MBMSR=03010E0C
+-  CAUSE: TARGET=[REG(0x03010E0C)] OP=[BIT,ON] BIT=[0]    # Command Complete
+-  CAUSE: TARGET=[REG(0x03010E0F)] OP=[BIT,ON] BIT=[10]   # Stop on end address
+-  EFFECT: TARGET=[REG(0x03010E0C)] OP=[BIT,OFF] BIT=[0]  # Clear when maint cmd complete
++  LABEL=[Start Maint Cmd - MBA1]
++  WATCH=[REG(0x03010E0B)] #mbmcc
++  CAUSE: TARGET=[REG(0x03010E0B)] OP=[BIT,ON] BIT=[0] #start_cmd
++  EFFECT: TARGET=[REG(0x03010E0B)] OP=[BIT,OFF] BIT=[0] #reset start_cmd
++  #testing counter
++  EFFECT: TARGET=[LOGIC(0xFF018000)] OP=[INCREMENT,MASK] INCVAL=[1] MASK=[LITERAL(64,FFFFFFFF 00000000)]
++  EFFECT: TARGET=[REG(0x03010E0C)] OP=[BIT,ON] BIT=[0] #cmd_ip
+ }
+ 
+-# trigger special attention on maint cmd complete
+ CAUSE_EFFECT {
+-  LABEL=[Maint Cmd Complete Special Attention MBA1]
+-  WATCH=[REG(0x03010E0C)]  #MBMSR=03010E0C
+-  CAUSE: TARGET=[REG(0x03010E0C)] OP=[BIT,OFF] BIT=[0]   # Maint Cmd Complete
+-  CAUSE: TARGET=[REG(0x03010E0F)] OP=[BIT,ON] BIT=[11]   # Enable Special attn
+-  EFFECT: TARGET=[REG(0x03010E11)] OP=[BIT,ON] BIT=[0]   # Set Special attn bit
++  # Set logical Centaur register 0xff018001 (first word) to the nth
++  # command that should not reach mbmea.  For example:
++  # p8Centaur03.membuf_chip.regwrite "LOGIC" 0xff018001 "00000002" 32
++  LABEL=[Maint Cmd Error Inject - MBA1]
++  WATCH=[REG(0x03010E0C)] #mbmsr
++  CAUSE: TARGET=[REG(0x03010E0C)] OP=[BIT,ON] BIT=[0] #cmd_ip
++  #error inject
++  CAUSE: TARGET=[LOGIC(0xFF018000)] OP=[EQUALTO,BUF,ON] DATA=[LOGIC(0xFF018001)]
++  EFFECT: TARGET=[REG(0x03010E0C)] OP=[BIT,OFF] BIT=[0] #cmd_nip
++}
++
++CAUSE_EFFECT {
++  # Set logical Centaur register 0xff018002 to the nth
++  # command that should never finish
++  LABEL=[Maint Cmd Done - MBA1]
++  WATCH=[REG(0x03010E0C)] #mbmsr
++  CAUSE: TARGET=[REG(0x03010E0C)] OP=[BIT,ON] BIT=[0] #cmd_ip
++  #no error inject
++  CAUSE: TARGET=[LOGIC(0xFF018000)] OP=[EQUALTO,BUF,OFF] DATA=[LOGIC(0xFF018001)]
++  CAUSE: TARGET=[LOGIC(0xFF018000)] OP=[EQUALTO,BUF,OFF] DATA=[LOGIC(0xFF018002)]
++  EFFECT: TARGET=[REG(0x03010E0D)] OP=[EQUALTO,BUF] DATA=[REG(0x03010E0E)] #mbmaca
++  EFFECT: TARGET=[REG(0x03010E0C)] OP=[BIT,OFF] BIT=[0] #cmd_nip
++}
++
++CAUSE_EFFECT {
++  LABEL=[Maint Cmd Complete Special Attention - MBA1]
++  WATCH=[REG(0x03010E0C)] #mbmsr
++  CAUSE: TARGET=[REG(0x03010E0C)] OP=[BIT,OFF] BIT=[0] #cmd_nip
++  CAUSE: TARGET=[REG(0x03010E0F)] OP=[BIT,ON] BIT=[11] #enabled
++  EFFECT: TARGET=[REG(0x03010E11)] OP=[BIT,ON] BIT=[0] #set special attn bit
++  EFFECT: TARGET=[REG(0x03010E11)] OP=[BIT,ON] BIT=[8] #set wat_debug_attn
+ }
+ 
+ #***************************************
+-#   END - Maintenance Command Complete
++#   END - Maintenance Commands
+ #***************************************
+ 
+ #***************************************
