@@ -175,6 +175,18 @@ TARGETING::TargetHandleList getConnected( TARGETING::TargetHandle_t i_target,
                                           TARGETING::TYPE i_connType );
 
 /**
+ * @brief   Returns a functional target of a given type and given target
+ *          position that is associated with the given target.
+ * @param   i_target    The given target.
+ * @param   i_connType  Type of target(s) return in list
+ * @param   i_position  Target position index
+ * @return  The requested target handle, otherwise NULL
+ */
+TARGETING::TargetHandle_t getConnectedPos( TARGETING::TargetHandle_t i_target,
+                                           TARGETING::TYPE i_type,
+                                           uint32_t i_position );
+
+/**
  * @brief   Returns the target of a PROC that is connected via the given
  *          target's XBUS or ABUS.
  * @param   i_procTarget Target of TYPE_PROC.
@@ -186,6 +198,16 @@ TARGETING::TargetHandle_t getConnectedPeerProc(
                                          TARGETING::TargetHandle_t i_procTarget,
                                          TARGETING::TYPE i_busType,
                                          uint32_t i_busPos );
+
+/**
+ * @brief   Returns the connected peer target using ATTR_PEER_TARGET
+ * @param   i_tgt Source target
+ * @return  Connected peer target, or NULL
+ * @note    Only works if ATTR_PEER_TARGET is defined.
+ *          Currently only X and A bus targets.
+ */
+TARGETING::TargetHandle_t getConnectedPeerTarget(
+                                  TARGETING::TargetHandle_t i_tgt);
 
 /**
  * @brief   Returns the system target.

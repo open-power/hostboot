@@ -88,6 +88,43 @@ chip Membuf
 .include "Membuf_regs_NEST.rule"
 .include "Membuf_regs_MEM.rule"
 
+    ########################################################################
+    #
+    #	Non-existant Registers for Capture
+    #
+    ########################################################################
+    register VPD_FAILED_LANES_0TO63
+    {
+        name        "Bit map 0-63 of failed lanes read from VPD";
+        scomaddr    0xFFFF0001;
+
+        capture     group never;
+    };
+
+    register VPD_FAILED_LANES_64TO127
+    {
+        name        "Bit map 64-127 of failed lanes read from VPD";
+        scomaddr    0xFFFF0002;
+
+        capture     group never;
+    };
+
+    register NEW_FAILED_LANES_0TO63
+    {
+        name        "Bit map 0-63 of failed lanes from io_read_erepair";
+        scomaddr    0xFFFF0003;
+
+        capture     group never;
+    };
+
+    register NEW_FAILED_LANES_64TO127
+    {
+        name        "Bit map 64-127 of failed lanes from io_read_erepair";
+        scomaddr    0xFFFF0004;
+
+        capture     group never;
+    };
+
 };
 
  ##############################################################################

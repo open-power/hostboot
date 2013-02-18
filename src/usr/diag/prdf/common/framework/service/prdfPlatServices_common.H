@@ -124,6 +124,60 @@ fapi::Target getFapiTarget( TARGETING::TargetHandle_t i_target );
 //##############################################################################
 
 //##############################################################################
+//##                       Lane Repair functions /*  */
+//##############################################################################
+/**
+ * @brief   Calls HWP to read newly failed bus lanes
+ * @param   i_rxBusTgt    Target of the receiving end of the bus
+ * @param   o_rxFailLanes Vector of failed lanes
+ * @return  Non-SUCCESS if an internal function fails, SUCCESS otherwise.
+ */
+int32_t readErepair(TARGETING::TargetHandle_t i_rxBusTgt,
+                    std::vector<uint8_t> &o_rxFailLanes);
+
+/**
+ * @brief   Calls HWP to clear FIRs after a lane repair event
+ * @param   i_rxBusTgt    Target of the receiving end of the bus
+ * @return  Non-SUCCESS if an internal function fails, SUCCESS otherwise.
+ */
+int32_t clearIOFirs(TARGETING::TargetHandle_t i_rxBusTgt);
+
+/**
+ * @brief   Calls HWP to power down failed lanes
+ * @param   i_rxBusTgt    Target of the receiving end of the bus
+ * @param   i_rxFailLanes Vector of  rx failed lanes
+ * @param   i_txFailLanes Vector of  tx failed lanes
+ * @return  Non-SUCCESS if an internal function fails, SUCCESS otherwise.
+ */
+int32_t powerDownLanes(TARGETING::TargetHandle_t i_rxBusTgt,
+                       const std::vector<uint8_t> &i_rxFailLanes,
+                       const std::vector<uint8_t> &i_txFailLanes);
+
+/**
+ * @brief   Calls erepair accessor procedure get failed lanes from VPD
+ * @param   i_rxBusTgt    Target of the receiving end of the bus
+ * @param   o_rxFailLanes Vector of  rx failed lanes
+ * @param   o_txFailLanes Vector of  tx failed lanes
+ * @return  Non-SUCCESS if an internal function fails, SUCCESS otherwise.
+ */
+int32_t getVpdFailedLanes(TARGETING::TargetHandle_t i_rxBusTgt,
+                          std::vector<uint8_t> &o_rxFailLanes,
+                          std::vector<uint8_t> &o_txFailLanes);
+
+/**
+ * @brief   Calls erepair prcd to set failed lanes in vpd and check threshold
+ * @param   i_rxBusTgt    Target of the receiving end of the bus
+ * @param   i_txBusTgt    Target of the tranmitting end of the bus
+ * @param   i_rxFailLanes Vector of  rx failed lanes
+ * @param   o_thrExceeded True if these failed lanes exceeded erepair threshold
+ * @return  Non-SUCCESS if an internal function fails, SUCCESS otherwise.
+ */
+int32_t setVpdFailedLanes(TARGETING::TargetHandle_t i_rxBusTgt,
+                          TARGETING::TargetHandle_t i_txBusTgt,
+                          std::vector<uint8_t> &i_rxFailLanes,
+                          bool & o_thrExceeded);
+
+//##############################################################################
 //##                        Memory specific functions
 //##############################################################################
 

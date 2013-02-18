@@ -32,6 +32,9 @@
 #include <prdfPluginMap.H>
 #include <prdfGlobal.H>
 #include <iipSystem.h>
+#include <prdfLaneRepair.H>
+
+using namespace TARGETING;
 
 #include <prdfCenMembufDataBundle.H>
 
@@ -265,6 +268,72 @@ int32_t PostAnalysis( ExtensibleChip * i_mbChip, STEP_CODE_DATA_STRUCT & i_sc )
     #undef PRDF_FUNC
 }
 PRDF_PLUGIN_DEFINE( Membuf, PostAnalysis );
+
+/**
+ * @brief Handle DMI Bus 0-1 spare deployed
+ * @param i_chip Mem Buf chip
+ * @param i_sc   The step code data struct
+ * @returns Failure or Success
+ */
+int32_t dmiBus0SpareDeployed(  ExtensibleChip * i_chip,
+                               STEP_CODE_DATA_STRUCT & i_sc )
+{
+    return LaneRepair::handleLaneRepairEvent(i_chip, TYPE_MEMBUF, 0, i_sc,
+                                             true);
+}
+PRDF_PLUGIN_DEFINE( Membuf, dmiBus0SpareDeployed );
+
+int32_t dmiBus1SpareDeployed(  ExtensibleChip * i_chip,
+                               STEP_CODE_DATA_STRUCT & i_sc )
+{
+    return LaneRepair::handleLaneRepairEvent(i_chip, TYPE_MEMBUF, 1, i_sc,
+                                             true);
+}
+PRDF_PLUGIN_DEFINE( Membuf, dmiBus1SpareDeployed );
+
+/**
+ * @brief Handle DMI Bus 0-1 spares exceeded
+ * @param i_chip Mem Buf chip
+ * @param i_sc   The step code data struct
+ * @returns Failure or Success
+ */
+int32_t dmiBus0SparesExceeded(  ExtensibleChip * i_chip,
+                                STEP_CODE_DATA_STRUCT & i_sc )
+{
+    return LaneRepair::handleLaneRepairEvent(i_chip, TYPE_MEMBUF, 0, i_sc,
+                                             false);
+}
+PRDF_PLUGIN_DEFINE( Membuf, dmiBus0SparesExceeded );
+
+int32_t dmiBus1SparesExceeded(  ExtensibleChip * i_chip,
+                                STEP_CODE_DATA_STRUCT & i_sc )
+{
+    return LaneRepair::handleLaneRepairEvent(i_chip, TYPE_MEMBUF, 1, i_sc,
+                                             false);
+}
+PRDF_PLUGIN_DEFINE( Membuf, dmiBus1SparesExceeded );
+
+/**
+ * @brief Handle DMI Bus 0-1 Too Many Bus Errors
+ * @param i_chip Mem Buf chip
+ * @param i_sc   The step code data struct
+ * @returns Failure or Success
+ */
+int32_t dmiBus0TooManyErrors(  ExtensibleChip * i_chip,
+                               STEP_CODE_DATA_STRUCT & i_sc )
+{
+    return LaneRepair::handleLaneRepairEvent(i_chip, TYPE_MEMBUF, 0, i_sc,
+                                             false);
+}
+PRDF_PLUGIN_DEFINE( Membuf, dmiBus0TooManyErrors );
+
+int32_t dmiBus1TooManyErrors(  ExtensibleChip * i_chip,
+                               STEP_CODE_DATA_STRUCT & i_sc )
+{
+    return LaneRepair::handleLaneRepairEvent(i_chip, TYPE_MEMBUF, 1, i_sc,
+                                             false);
+}
+PRDF_PLUGIN_DEFINE( Membuf, dmiBus1TooManyErrors );
 
 } // end namespace Membuf
 } // end namespace PRDF

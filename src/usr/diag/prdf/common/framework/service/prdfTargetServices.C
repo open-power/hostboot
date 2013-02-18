@@ -523,6 +523,46 @@ TARGETING::TargetHandleList getConnected( TARGETING::TargetHandle_t i_target,
     return o_list;
 }
 
+TargetHandle_t getConnectedPos( TargetHandle_t i_target, TYPE i_type,
+                                uint32_t i_position )
+{
+    TargetHandle_t o_tgt = NULL;
+
+    TargetHandleList list = getConnected(i_target, i_type);
+
+    for (TargetHandleList::iterator i = list.begin();
+         i != list.end(); ++i)
+    {
+        if ( i_position == getTargetPosition(*i) )
+        {
+            o_tgt = *i;
+            break;
+        }
+    }
+    if ( NULL == o_tgt )
+    {
+        PRDF_ERR( "[getConnectedPos] "
+                  "Couldn't find connected target 0x%08x, type %d pos %d",
+                  getHuid(i_target), i_type, i_position);
+    }
+
+    return o_tgt;
+}
+
+// note - This function only works if ATTR_PEER_TARGET is defined.
+//        Currently only X and A bus targets.
+TargetHandle_t getConnectedPeerTarget(TargetHandle_t i_tgt)
+{
+    TargetHandle_t o_tgt = NULL;
+    if ( !i_tgt->tryGetAttr<ATTR_PEER_TARGET>(o_tgt) )
+    {
+        PRDF_ERR( "[getConnectedPeerTarget] "
+                  "Couldn't find connected peer target 0x%08x",
+                  getHuid(i_tgt));
+    }
+
+    return o_tgt;
+}
 //------------------------------------------------------------------------------
 
 TARGETING::TargetHandle_t getConnectedPeerProc(

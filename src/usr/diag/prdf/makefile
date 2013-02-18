@@ -56,6 +56,7 @@ EXTRAINCDIR += ${ROOTPATH}/src/include/usr/hwpf/hwp
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/util
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/errl
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/ecmddatabuffer
+EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/bus_training
 
 #FIXME: once we fix the PRD includes, we can move most of the prd subdirs below
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/diag/prdf

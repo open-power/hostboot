@@ -44,5 +44,5 @@ prd_pegasus_specific = \
     prdfPegasusConfigurator.o \
     prdfCenMbaCaptureData.o \
     prdfMemoryMru.o \
-    prdfRegisterData.o
-
+    prdfRegisterData.o \
+    prdfLaneRepair.o

@@ -359,12 +359,12 @@ group gIoaFir filter singlebit
     /** IOAFIR[9]
      *  FIR_RX_BUS0_SPARE_DEPLOYED
      */
-    (IoaFir, bit(9)) ? TBDDefaultCallout;
+    (IoaFir, bit(9)) ? abus0SpareDeployed;
 
     /** IOAFIR[10]
      *  FIR_RX_BUS0_MAX_SPARES_EXCEEDED
      */
-    (IoaFir, bit(10)) ? TBDDefaultCallout;
+    (IoaFir, bit(10)) ? abus0MaxSparesExceeded;
 
     /** IOAFIR[11]
      *  FIR_RX_BUS0_RECAL_OR_DYN_REPAIR_ERROR
@@ -374,7 +374,7 @@ group gIoaFir filter singlebit
     /** IOAFIR[12]
      *  FIR_RX_BUS0_TOO_MANY_BUS_ERRORS
      */
-    (IoaFir, bit(12)) ? TBDDefaultCallout;
+    (IoaFir, bit(12)) ? abus0TooManyBusErrors;
 
     /** IOAFIR[13|14|15]
      *  Reserved
@@ -389,12 +389,12 @@ group gIoaFir filter singlebit
     /** IOAFIR[17]
      *  FIR_RX_BUS1_SPARE_DEPLOYED
      */
-    (IoaFir, bit(17)) ? TBDDefaultCallout;
+    (IoaFir, bit(17)) ? abus1SpareDeployed;
 
     /** IOAFIR[18]
      *  FIR_RX_BUS1_MAX_SPARES_EXCEEDED
      */
-    (IoaFir, bit(18)) ? TBDDefaultCallout;
+    (IoaFir, bit(18)) ? abus1MaxSparesExceeded;
 
     /** IOAFIR[19]
      *  FIR_RX_BUS1_RECAL_OR_DYN_REPAIR_ERROR
@@ -404,7 +404,7 @@ group gIoaFir filter singlebit
     /** IOAFIR[20]
      *  FIR_RX_BUS1_TOO_MANY_BUS_ERRORS
      */
-    (IoaFir, bit(20)) ? TBDDefaultCallout;
+    (IoaFir, bit(20)) ? abus1TooManyBusErrors;
 
     /** IOAFIR[21|22|23]
      *  Reserved
@@ -419,12 +419,12 @@ group gIoaFir filter singlebit
     /** IOAFIR[25]
      *  FIR_RX_BUS2_SPARE_DEPLOYED
      */
-    (IoaFir, bit(25)) ? TBDDefaultCallout;
+    (IoaFir, bit(25)) ? abus2SpareDeployed;
 
     /** IOAFIR[26]
      *  FIR_RX_BUS2_MAX_SPARES_EXCEEDED
      */
-    (IoaFir, bit(26)) ? TBDDefaultCallout;
+    (IoaFir, bit(26)) ? abus2MaxSparesExceeded;
 
     /** IOAFIR[27]
      *  FIR_RX_BUS2_RECAL_OR_DYN_REPAIR_ERROR
@@ -434,7 +434,7 @@ group gIoaFir filter singlebit
     /** IOAFIR[28]
      *  FIR_RX_BUS2_TOO_MANY_BUS_ERRORS
      */
-    (IoaFir, bit(28)) ? TBDDefaultCallout;
+    (IoaFir, bit(28)) ? abus2TooManyBusErrors;
 
     /** IOAFIR[29|30|31]
      *  Reserved
@@ -516,3 +516,65 @@ group gIoaFir filter singlebit
 # Actions specific to ABUS chiplet
 ################################################################################
 
+# A Bus 0-2 Spare Deployed
+actionclass abus0SpareDeployed
+{
+    callout(procedure(PassiveFabric_OffNode_ENUM), MRU_LOW);
+    funccall("abus0SpareDeployed");
+};
+
+actionclass abus1SpareDeployed
+{
+    callout(procedure(PassiveFabric_OffNode_ENUM), MRU_LOW);
+    funccall("abus1SpareDeployed");
+};
+
+actionclass abus2SpareDeployed
+{
+    callout(procedure(PassiveFabric_OffNode_ENUM), MRU_LOW);
+    funccall("abus2SpareDeployed");
+};
+
+# A Bus 0-2 Spares Exceeded
+actionclass abus0MaxSparesExceeded
+{
+    callout(procedure(PassiveFabric_OffNode_ENUM), MRU_LOW);
+    funccall("abus0SparesExceeded");
+    threshold1;
+};
+
+actionclass abus1MaxSparesExceeded
+{
+    callout(procedure(PassiveFabric_OffNode_ENUM), MRU_LOW);
+    funccall("abus1SparesExceeded");
+    threshold1;
+};
+
+actionclass abus2MaxSparesExceeded
+{
+    callout(procedure(PassiveFabric_OffNode_ENUM), MRU_LOW);
+    funccall("abus2SparesExceeded");
+    threshold1;
+};
+
+# A bus 0-2 Too Many bus errors
+actionclass abus0TooManyBusErrors
+{
+    callout(procedure(PassiveFabric_OffNode_ENUM), MRU_LOW);
+    funccall("abus0TooManyErrors");
+    threshold1;
+};
+
+actionclass abus1TooManyBusErrors
+{
+    callout(procedure(PassiveFabric_OffNode_ENUM), MRU_LOW);
+    funccall("abus1TooManyErrors");
+    threshold1;
+};
+
+actionclass abus2TooManyBusErrors
+{
+    callout(procedure(PassiveFabric_OffNode_ENUM), MRU_LOW);
+    funccall("abus2TooManyErrors");
+    threshold1;
+};

@@ -39,6 +39,14 @@
 
 #include <dimmBadDqBitmapFuncs.H> // for dimm[S|G]etBadDqBitmap()
 
+//FIXME RTC:64173 - erepair code not in FSP yet
+#ifdef __HOSTBOOT_MODULE
+#include <io_read_erepair.H>
+#include <io_power_down_lanes.H>
+#include <io_clear_firs.H>
+#include <erepairAccessorHwpFuncs.H>
+#endif
+
 using namespace TARGETING;
 
 //------------------------------------------------------------------------------
@@ -94,6 +102,140 @@ fapi::Target getFapiTarget( TARGETING::TargetHandle_t i_target )
 //##############################################################################
 //##                       Processor specific functions
 //##############################################################################
+
+//##############################################################################
+//##                       Lane Repair functions
+//##############################################################################
+
+int32_t readErepair(TargetHandle_t i_rxBusTgt,
+                    std::vector<uint8_t> &o_rxFailLanes)
+{
+    int32_t o_rc = SUCCESS;
+    errlHndl_t err = NULL;
+
+    //FIXME RTC:64173 - erepair code not in FSP yet
+#ifdef __HOSTBOOT_MODULE
+    PRD_FAPI_TO_ERRL(err,
+                     io_read_erepair,
+                     getFapiTarget(i_rxBusTgt),
+                     o_rxFailLanes);
+#endif
+
+     if(NULL != err)
+    {
+        PRDF_ERR( "[PlatServices::readErepair] HUID: 0x%08x io_read_erepair "
+                  "failed", getHuid(i_rxBusTgt) );
+        PRDF_COMMIT_ERRL( err, ERRL_ACTION_REPORT );
+        o_rc = FAIL;
+    }
+
+    return o_rc;
+}
+
+int32_t clearIOFirs(TargetHandle_t i_rxBusTgt)
+{
+    int32_t o_rc = SUCCESS;
+    errlHndl_t err = NULL;
+
+    //FIXME RTC:64173 - erepair code not in FSP yet
+#ifdef __HOSTBOOT_MODULE
+    PRD_FAPI_TO_ERRL(err,
+                     io_clear_firs,
+                     getFapiTarget(i_rxBusTgt));
+#endif
+
+    if(NULL != err)
+    {
+        PRDF_ERR( "[PlatServices::clearIOFirs] HUID: 0x%08x io_clear_firs "
+                  "failed", getHuid(i_rxBusTgt) );
+        PRDF_COMMIT_ERRL( err, ERRL_ACTION_REPORT );
+        o_rc = FAIL;
+    }
+
+    return o_rc;
+}
+
+int32_t powerDownLanes(TargetHandle_t i_rxBusTgt,
+                       const std::vector<uint8_t> &i_rxFailLanes,
+                       const std::vector<uint8_t> &i_txFailLanes)
+{
+    int32_t o_rc = SUCCESS;
+    errlHndl_t err = NULL;
+
+    //FIXME RTC:64173 - erepair code not in FSP yet
+#ifdef __HOSTBOOT_MODULE
+    PRD_FAPI_TO_ERRL(err,
+                     io_power_down_lanes,
+                     getFapiTarget(i_rxBusTgt),
+                     i_txFailLanes,
+                     i_rxFailLanes);
+#endif
+
+    if(NULL != err)
+    {
+        PRDF_ERR( "[PlatServices::powerDownLanes] HUID: 0x%08x "
+                  "io_power_down_lanes failed", getHuid(i_rxBusTgt) );
+        PRDF_COMMIT_ERRL( err, ERRL_ACTION_REPORT );
+        o_rc = FAIL;
+    }
+    return o_rc;
+}
+
+
+int32_t getVpdFailedLanes(TargetHandle_t i_rxBusTgt,
+                          std::vector<uint8_t> &o_rxFailLanes,
+                          std::vector<uint8_t> &o_txFailLanes)
+{
+    int32_t o_rc = SUCCESS;
+    errlHndl_t err = NULL;
+
+    //FIXME RTC:64173 - erepair code not in FSP yet
+#ifdef __HOSTBOOT_MODULE
+    PRD_FAPI_TO_ERRL(err,
+                     erepairGetFailedLanes,
+                     getFapiTarget(i_rxBusTgt),
+                     o_rxFailLanes,
+                     o_txFailLanes);
+#endif
+
+    if(NULL != err)
+    {
+        PRDF_ERR( "[PlatServices::getVpdFailedLanes] HUID: 0x%08x "
+                  "erepairGetFailedLanes failed",
+                  getHuid(i_rxBusTgt));
+        PRDF_COMMIT_ERRL( err, ERRL_ACTION_REPORT );
+        o_rc = FAIL;
+    }
+    return o_rc;
+}
+
+int32_t setVpdFailedLanes(TargetHandle_t i_rxBusTgt,
+                          TargetHandle_t i_txBusTgt,
+                          std::vector<uint8_t> &i_rxFailLanes,
+                          bool & o_thrExceeded)
+{
+    int32_t o_rc = SUCCESS;
+    errlHndl_t err = NULL;
+
+    //FIXME interface being updated in RTC59554
+    /*
+    PRD_FAPI_TO_ERRL(err,
+                    erepairSetFailedLanes,
+                    getFapiTarget(i_rxBusTgt),
+                    getFapiTarget(i_txBusTgt),
+                    o_rxFailLanes,
+                    o_thrExceeded);
+     */
+    if(NULL != err)
+    {
+        PRDF_ERR( "[PlatServices::setVpdFailedLanes] rxHUID: 0x%08x "
+                  "txHUID: 0x%08x erepairSetFailedLanes failed",
+                  getHuid(i_rxBusTgt), getHuid(i_txBusTgt));
+        PRDF_COMMIT_ERRL( err, ERRL_ACTION_REPORT );
+        o_rc = FAIL;
+    }
+    return o_rc;
+}
 
 //##############################################################################
 //##                        Memory specific functions

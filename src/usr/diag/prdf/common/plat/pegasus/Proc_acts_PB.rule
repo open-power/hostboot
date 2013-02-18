@@ -2751,12 +2751,12 @@ group gIomcFir_1 filter singlebit
     /** IOMCFIR_1[9]
      *  FIR_RX_BUS0_SPARE_DEPLOYED
      */
-    (IomcFir_1, bit(9)) ? TBDDefaultCallout;
+    (IomcFir_1, bit(9)) ? dmiBus0SpareDeployed;
 
     /** IOMCFIR_1[10]
      *  FIR_RX_BUS0_MAX_SPARES_EXCEEDED
      */
-    (IomcFir_1, bit(10)) ? TBDDefaultCallout;
+    (IomcFir_1, bit(10)) ? dmiBus0MaxSparesExceeded;
 
     /** IOMCFIR_1[11]
      *  FIR_RX_BUS0_RECAL_OR_DYN_REPAIR_ERROR
@@ -2766,7 +2766,7 @@ group gIomcFir_1 filter singlebit
     /** IOMCFIR_1[12]
      *  FIR_RX_BUS0_TOO_MANY_BUS_ERRORS
      */
-    (IomcFir_1, bit(12)) ? TBDDefaultCallout;
+    (IomcFir_1, bit(12)) ? dmiBus0TooManyBusErrors;
 
     /** IOMCFIR_1[13|14|15]
      *  Reserved
@@ -2781,12 +2781,12 @@ group gIomcFir_1 filter singlebit
     /** IOMCFIR_1[17]
      *  FIR_RX_BUS1_SPARE_DEPLOYED
      */
-    (IomcFir_1, bit(17)) ? TBDDefaultCallout;
+    (IomcFir_1, bit(17)) ? dmiBus1SpareDeployed;
 
     /** IOMCFIR_1[18]
      *  FIR_RX_BUS1_MAX_SPARES_EXCEEDED
      */
-    (IomcFir_1, bit(18)) ? TBDDefaultCallout;
+    (IomcFir_1, bit(18)) ? dmiBus1MaxSparesExceeded;
 
     /** IOMCFIR_1[19]
      *  FIR_RX_BUS1_RECAL_OR_DYN_REPAIR_ERROR
@@ -2796,7 +2796,7 @@ group gIomcFir_1 filter singlebit
     /** IOMCFIR_1[20]
      *  FIR_RX_BUS1_TOO_MANY_BUS_ERRORS
      */
-    (IomcFir_1, bit(20)) ? TBDDefaultCallout;
+    (IomcFir_1, bit(20)) ? dmiBus1TooManyBusErrors;
 
     /** IOMCFIR_1[21|22|23]
      *  Reserved
@@ -2811,12 +2811,12 @@ group gIomcFir_1 filter singlebit
     /** IOMCFIR_1[25]
      *  FIR_RX_BUS2_SPARE_DEPLOYED
      */
-    (IomcFir_1, bit(25)) ? TBDDefaultCallout;
+    (IomcFir_1, bit(25)) ? dmiBus2SpareDeployed;
 
     /** IOMCFIR_1[26]
      *  FIR_RX_BUS2_MAX_SPARES_EXCEEDED
      */
-    (IomcFir_1, bit(26)) ? TBDDefaultCallout;
+    (IomcFir_1, bit(26)) ? dmiBus2MaxSparesExceeded;
 
     /** IOMCFIR_1[27]
      *  FIR_RX_BUS2_RECAL_OR_DYN_REPAIR_ERROR
@@ -2826,7 +2826,7 @@ group gIomcFir_1 filter singlebit
     /** IOMCFIR_1[28]
      *  FIR_RX_BUS2_TOO_MANY_BUS_ERRORS
      */
-    (IomcFir_1, bit(28)) ? TBDDefaultCallout;
+    (IomcFir_1, bit(28)) ? dmiBus2TooManyBusErrors;
 
     /** IOMCFIR_1[29|30|31]
      *  Reserved
@@ -2841,12 +2841,12 @@ group gIomcFir_1 filter singlebit
     /** IOMCFIR_1[33]
      *  FIR_RX_BUS3_SPARE_DEPLOYED
      */
-    (IomcFir_1, bit(33)) ? TBDDefaultCallout;
+    (IomcFir_1, bit(33)) ? dmiBus3SpareDeployed;
 
     /** IOMCFIR_1[34]
      *  FIR_RX_BUS3_MAX_SPARES_EXCEEDED
      */
-    (IomcFir_1, bit(34)) ? TBDDefaultCallout;
+    (IomcFir_1, bit(34)) ? dmiBus3MaxSparesExceeded;
 
     /** IOMCFIR_1[35]
      *  FIR_RX_BUS3_RECAL_OR_DYN_REPAIR_ERROR
@@ -2856,7 +2856,7 @@ group gIomcFir_1 filter singlebit
     /** IOMCFIR_1[36]
      *  FIR_RX_BUS3_TOO_MANY_BUS_ERRORS
      */
-    (IomcFir_1, bit(36)) ? TBDDefaultCallout;
+    (IomcFir_1, bit(36)) ? dmiBus3TooManyBusErrors;
 
     /** IOMCFIR_1[37|38|39]
      *  Reserved
@@ -2915,4 +2915,88 @@ actionclass analyzeMpIPL
 {
     TBDDefaultCallout;
     funccall("analyzeMpIPL");
+};
+
+
+# DMI Bus 0-3 Spare Deployed
+actionclass dmiBus0SpareDeployed
+{
+    callout(procedure(MEMBUS_ERROR_ENUM), MRU_LOW);
+    funccall("dmiBus0SpareDeployed");
+};
+
+actionclass dmiBus1SpareDeployed
+{
+    callout(procedure(MEMBUS_ERROR_ENUM), MRU_LOW);
+    funccall("dmiBus1SpareDeployed");
+};
+
+actionclass dmiBus2SpareDeployed
+{
+    callout(procedure(MEMBUS_ERROR_ENUM), MRU_LOW);
+    funccall("dmiBus2SpareDeployed");
+};
+
+actionclass dmiBus3SpareDeployed
+{
+    callout(procedure(MEMBUS_ERROR_ENUM), MRU_LOW);
+    funccall("dmiBus3SpareDeployed");
+};
+
+# DMI Bus 0-3 Spares Exceeded
+actionclass dmiBus0MaxSparesExceeded
+{
+    callout(procedure(MEMBUS_ERROR_ENUM), MRU_LOW);
+    funccall("dmiBus0SparesExceeded");
+    threshold1;
+};
+
+actionclass dmiBus1MaxSparesExceeded
+{
+    callout(procedure(MEMBUS_ERROR_ENUM), MRU_LOW);
+    funccall("dmiBus1SparesExceeded");
+    threshold1;
+};
+
+actionclass dmiBus2MaxSparesExceeded
+{
+    callout(procedure(MEMBUS_ERROR_ENUM), MRU_LOW);
+    funccall("dmiBus2SparesExceeded");
+    threshold1;
+};
+
+actionclass dmiBus3MaxSparesExceeded
+{
+    callout(procedure(MEMBUS_ERROR_ENUM), MRU_LOW);
+    funccall("dmiBus3SparesExceeded");
+    threshold1;
+};
+
+# DMI Bus 0-3 Too Many bus errors
+actionclass dmiBus0TooManyBusErrors
+{
+    callout(procedure(MEMBUS_ERROR_ENUM), MRU_LOW);
+    funccall("dmiBus0TooManyErrors");
+    threshold1;
+};
+
+actionclass dmiBus1TooManyBusErrors
+{
+    callout(procedure(MEMBUS_ERROR_ENUM), MRU_LOW);
+    funccall("dmiBus1TooManyErrors");
+    threshold1;
+};
+
+actionclass dmiBus2TooManyBusErrors
+{
+    callout(procedure(MEMBUS_ERROR_ENUM), MRU_LOW);
+    funccall("dmiBus2TooManyErrors");
+    threshold1;
+};
+
+actionclass dmiBus3TooManyBusErrors
+{
+    callout(procedure(MEMBUS_ERROR_ENUM), MRU_LOW);
+    funccall("dmiBus3TooManyErrors");
+    threshold1;
 };

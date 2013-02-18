@@ -179,12 +179,12 @@ group gDmiFir filter singlebit
     /** DMIFIR[9]
      *  FIR_RX_BUS0_SPARE_DEPLOYED
      */
-    (DmiFir, bit(9)) ? TBDDefaultCallout;
+    (DmiFir, bit(9)) ? bus0SpareDeployed;
 
     /** DMIFIR[10]
      *  FIR_RX_BUS0_MAX_SPARES_EXCEEDED
      */
-    (DmiFir, bit(10)) ? TBDDefaultCallout;
+    (DmiFir, bit(10)) ? bus0MaxSparesExceeded;
 
     /** DMIFIR[11]
      *  FIR_RX_BUS0_RECAL_OR_DYN_REPAIR_ERROR
@@ -194,7 +194,7 @@ group gDmiFir filter singlebit
     /** DMIFIR[12]
      *  FIR_RX_BUS0_TOO_MANY_BUS_ERRORS
      */
-    (DmiFir, bit(12)) ? TBDDefaultCallout;
+    (DmiFir, bit(12)) ? bus0TooManyBusErrors;
 
     /** DMIFIR[16]
      *  FIR_RX_BUS1_TRAINING_ERROR
@@ -308,7 +308,7 @@ group gDmiFir filter singlebit
 };
 
 ################################################################################
-#  NEST Chiplet DMIFIR
+#  NEST Chiplet SensorCacheFir
 ################################################################################
 
 rule SensorCacheFir
@@ -1170,3 +1170,22 @@ group gMbsSecureFir filter singlebit
 # Actions specific to NEST chiplet
 ################################################################################
 
+actionclass bus0SpareDeployed
+{
+    callout(procedure(MEMBUS_ERROR_ENUM), MRU_LOW);
+    funccall("dmiBus0SpareDeployed");
+};
+
+actionclass bus0MaxSparesExceeded
+{
+    callout(procedure(MEMBUS_ERROR_ENUM), MRU_LOW);
+    funccall("dmiBus0SparesExceeded");
+    threshold1;
+};
+
+actionclass bus0TooManyBusErrors
+{
+    callout(procedure(MEMBUS_ERROR_ENUM), MRU_LOW);
+    funccall("dmiBus0TooManyErrors");
+    threshold1;
+};

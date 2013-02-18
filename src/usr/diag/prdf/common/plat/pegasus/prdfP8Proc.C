@@ -29,6 +29,7 @@
 #include <prdfExtensibleChip.H>
 #include <prdfPlatServices.H>
 #include <prdfPluginMap.H>
+#include <prdfLaneRepair.H>
 
 using namespace TARGETING;
 
@@ -408,6 +409,230 @@ int32_t analyzeMpIPL( ExtensibleChip * i_chip,
     return l_rc;
 }
 PRDF_PLUGIN_DEFINE( Proc, analyzeMpIPL );
+
+
+/**
+ * @brief Handle XBUS 1 spare deployed
+ * @param i_chip P8 chip
+ * @param i_sc   The step code data struct
+ * @returns Failure or Success
+ */
+int32_t xbus1SpareDeployed(  ExtensibleChip * i_chip,
+                             STEP_CODE_DATA_STRUCT & i_sc )
+{
+    return LaneRepair::handleLaneRepairEvent(i_chip, TYPE_XBUS, 1, i_sc, true);
+}
+PRDF_PLUGIN_DEFINE( Proc, xbus1SpareDeployed );
+
+/**
+ * @brief Handle XBUS 1 spares exceeded
+ * @param i_chip P8 chip
+ * @param i_sc   The step code data struct
+ * @returns Failure or Success
+ */
+int32_t xbus1SparesExceeded(  ExtensibleChip * i_chip,
+                              STEP_CODE_DATA_STRUCT & i_sc )
+{
+    return LaneRepair::handleLaneRepairEvent(i_chip, TYPE_XBUS, 1, i_sc, false);
+}
+PRDF_PLUGIN_DEFINE( Proc, xbus1SparesExceeded );
+
+/**
+ * @brief Handle XBUS 1 Too Many Bus Errors
+ * @param i_chip P8 chip
+ * @param i_sc   The step code data struct
+ * @returns Failure or Success
+ */
+int32_t xbus1TooManyErrors(  ExtensibleChip * i_chip,
+                             STEP_CODE_DATA_STRUCT & i_sc )
+{
+    return LaneRepair::handleLaneRepairEvent(i_chip, TYPE_XBUS, 1, i_sc, false);
+}
+PRDF_PLUGIN_DEFINE( Proc, xbus1TooManyErrors );
+
+/**
+ * @brief Handle ABUS 0-2 spare deployed
+ * @param i_chip P8 chip
+ * @param i_sc The step code data struct
+ * @returns Failure or Success
+ */
+int32_t abus0SpareDeployed(  ExtensibleChip * i_chip,
+                             STEP_CODE_DATA_STRUCT & i_sc )
+{
+    return LaneRepair::handleLaneRepairEvent(i_chip, TYPE_ABUS, 0, i_sc, true);
+}
+PRDF_PLUGIN_DEFINE( Proc, abus0SpareDeployed );
+
+int32_t abus1SpareDeployed(  ExtensibleChip * i_chip,
+                             STEP_CODE_DATA_STRUCT & i_sc )
+{
+    return LaneRepair::handleLaneRepairEvent(i_chip, TYPE_ABUS, 1, i_sc, true);
+}
+PRDF_PLUGIN_DEFINE( Proc, abus1SpareDeployed );
+
+int32_t abus2SpareDeployed(  ExtensibleChip * i_chip,
+                             STEP_CODE_DATA_STRUCT & i_sc )
+{
+    return LaneRepair::handleLaneRepairEvent(i_chip, TYPE_ABUS, 2, i_sc, true);
+}
+PRDF_PLUGIN_DEFINE( Proc, abus2SpareDeployed );
+
+/**
+ * @brief Handle ABUS 0-2 spares exceeded
+ * @param i_chip P8 chip
+ * @param i_sc The step code data struct
+ * @returns Failure or Success
+ */
+int32_t abus0SparesExceeded(  ExtensibleChip * i_chip,
+                              STEP_CODE_DATA_STRUCT & i_sc )
+{
+    return LaneRepair::handleLaneRepairEvent(i_chip, TYPE_ABUS, 0, i_sc, false);
+}
+PRDF_PLUGIN_DEFINE( Proc, abus0SparesExceeded );
+
+int32_t abus1SparesExceeded(  ExtensibleChip * i_chip,
+                              STEP_CODE_DATA_STRUCT & i_sc )
+{
+    return LaneRepair::handleLaneRepairEvent(i_chip, TYPE_ABUS, 1, i_sc, false);
+}
+PRDF_PLUGIN_DEFINE( Proc, abus1SparesExceeded );
+
+int32_t abus2SparesExceeded(  ExtensibleChip * i_chip,
+                              STEP_CODE_DATA_STRUCT & i_sc )
+{
+    return LaneRepair::handleLaneRepairEvent(i_chip, TYPE_ABUS, 2, i_sc, false);
+}
+PRDF_PLUGIN_DEFINE( Proc, abus2SparesExceeded );
+
+/**
+ * @brief Handle ABUS 0-2 too many bus errors
+ * @param i_chip P8 chip
+ * @param i_sc The step code data struct
+ * @returns Failure or Success
+ */
+int32_t abus0TooManyErrors(  ExtensibleChip * i_chip,
+                             STEP_CODE_DATA_STRUCT & i_sc )
+{
+    return LaneRepair::handleLaneRepairEvent(i_chip, TYPE_ABUS, 0, i_sc, false);
+}
+PRDF_PLUGIN_DEFINE( Proc, abus0TooManyErrors );
+
+int32_t abus1TooManyErrors(  ExtensibleChip * i_chip,
+                             STEP_CODE_DATA_STRUCT & i_sc )
+{
+    return LaneRepair::handleLaneRepairEvent(i_chip, TYPE_ABUS, 1, i_sc, false);
+}
+PRDF_PLUGIN_DEFINE( Proc, abus1TooManyErrors );
+
+int32_t abus2TooManyErrors(  ExtensibleChip * i_chip,
+                             STEP_CODE_DATA_STRUCT & i_sc )
+{
+    return LaneRepair::handleLaneRepairEvent(i_chip, TYPE_ABUS, 2, i_sc, false);
+}
+PRDF_PLUGIN_DEFINE( Proc, abus2TooManyErrors );
+
+/**
+ * @brief Handle DMI bus 0-3 spare deployed
+ * @param i_chip P8 chip
+ * @param i_sc   The step code data struct
+ * @returns Failure or Success
+ */
+int32_t dmiBus0SpareDeployed(  ExtensibleChip * i_chip,
+                               STEP_CODE_DATA_STRUCT & i_sc )
+{
+    return LaneRepair::handleLaneRepairEvent(i_chip, TYPE_MCS, 4, i_sc, true);
+}
+PRDF_PLUGIN_DEFINE( Proc, dmiBus0SpareDeployed );
+
+int32_t dmiBus1SpareDeployed(  ExtensibleChip * i_chip,
+                               STEP_CODE_DATA_STRUCT & i_sc )
+{
+    return LaneRepair::handleLaneRepairEvent(i_chip, TYPE_MCS, 5, i_sc, true);
+}
+PRDF_PLUGIN_DEFINE( Proc, dmiBus1SpareDeployed );
+
+int32_t dmiBus2SpareDeployed(  ExtensibleChip * i_chip,
+                               STEP_CODE_DATA_STRUCT & i_sc )
+{
+    return LaneRepair::handleLaneRepairEvent(i_chip, TYPE_MCS, 6, i_sc, true);
+}
+PRDF_PLUGIN_DEFINE( Proc, dmiBus2SpareDeployed );
+
+int32_t dmiBus3SpareDeployed(  ExtensibleChip * i_chip,
+                               STEP_CODE_DATA_STRUCT & i_sc )
+{
+    return LaneRepair::handleLaneRepairEvent(i_chip, TYPE_MCS, 7, i_sc, true);
+}
+PRDF_PLUGIN_DEFINE( Proc, dmiBus3SpareDeployed );
+
+/**
+ * @brief Handle DMI Bus 0-3 spares exceeded
+ * @param i_chip P8 chip
+ * @param i_sc The step code data struct
+ * @returns Failure or Success
+ */
+int32_t dmiBus0SparesExceeded(  ExtensibleChip * i_chip,
+                                STEP_CODE_DATA_STRUCT & i_sc )
+{
+    return LaneRepair::handleLaneRepairEvent(i_chip, TYPE_MCS, 4, i_sc, false);
+}
+PRDF_PLUGIN_DEFINE( Proc, dmiBus0SparesExceeded );
+
+int32_t dmiBus1SparesExceeded(  ExtensibleChip * i_chip,
+                                STEP_CODE_DATA_STRUCT & i_sc )
+{
+    return LaneRepair::handleLaneRepairEvent(i_chip, TYPE_MCS, 5, i_sc, false);
+}
+PRDF_PLUGIN_DEFINE( Proc, dmiBus1SparesExceeded );
+
+int32_t dmiBus2SparesExceeded(  ExtensibleChip * i_chip,
+                                STEP_CODE_DATA_STRUCT & i_sc )
+{
+    return LaneRepair::handleLaneRepairEvent(i_chip, TYPE_MCS, 6, i_sc, false);
+}
+PRDF_PLUGIN_DEFINE( Proc, dmiBus2SparesExceeded );
+
+int32_t dmiBus3SparesExceeded(  ExtensibleChip * i_chip,
+                                STEP_CODE_DATA_STRUCT & i_sc )
+{
+    return LaneRepair::handleLaneRepairEvent(i_chip, TYPE_MCS, 7, i_sc, false);
+}
+PRDF_PLUGIN_DEFINE( Proc, dmiBus3SparesExceeded );
+
+
+/**
+ * @brief Handle DMI Bus 0-3 too many bus errors
+ * @param i_chip P8 chip
+ * @param i_sc The step code data struct
+ * @returns Failure or Success
+ */
+int32_t dmiBus0TooManyErrors(  ExtensibleChip * i_chip,
+                               STEP_CODE_DATA_STRUCT & i_sc )
+{
+    return LaneRepair::handleLaneRepairEvent(i_chip, TYPE_MCS, 4, i_sc, false);
+}
+PRDF_PLUGIN_DEFINE( Proc, dmiBus0TooManyErrors );
+
+int32_t dmiBus1TooManyErrors(  ExtensibleChip * i_chip,
+                               STEP_CODE_DATA_STRUCT & i_sc )
+{
+    return LaneRepair::handleLaneRepairEvent(i_chip, TYPE_MCS, 5, i_sc, false);
+}
+PRDF_PLUGIN_DEFINE( Proc, dmiBus1TooManyErrors );
+
+int32_t dmiBus2TooManyErrors(  ExtensibleChip * i_chip,
+                               STEP_CODE_DATA_STRUCT & i_sc )
+{
+    return LaneRepair::handleLaneRepairEvent(i_chip, TYPE_MCS, 6, i_sc, false);
+}
+PRDF_PLUGIN_DEFINE( Proc, dmiBus2TooManyErrors );
+
+int32_t dmiBus3TooManyErrors(  ExtensibleChip * i_chip,
+                               STEP_CODE_DATA_STRUCT & i_sc )
+{
+    return LaneRepair::handleLaneRepairEvent(i_chip, TYPE_MCS, 7, i_sc, false);
+}
+PRDF_PLUGIN_DEFINE( Proc, dmiBus3TooManyErrors );
 
 } // end namespace Proc
 } // end namespace PRDF

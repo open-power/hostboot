@@ -322,12 +322,12 @@ group gIoxFir_1 filter singlebit
     /** IOXFIR_1[17]
      *  FIR_RX_BUS1_SPARE_DEPLOYED
      */
-    (IoxFir_1, bit(17)) ? TBDDefaultCallout;
+    (IoxFir_1, bit(17)) ? xbus1SpareDeployed;
 
     /** IOXFIR_1[18]
      *  FIR_RX_BUS1_MAX_SPARES_EXCEEDED
      */
-    (IoxFir_1, bit(18)) ? TBDDefaultCallout;
+    (IoxFir_1, bit(18)) ? xbus1MaxSparesExceeded;
 
     /** IOXFIR_1[19]
      *  FIR_RX_BUS1_RECAL_OR_DYN_REPAIR_ERROR
@@ -337,7 +337,7 @@ group gIoxFir_1 filter singlebit
     /** IOXFIR_1[20]
      *  FIR_RX_BUS1_TOO_MANY_BUS_ERRORS
      */
-    (IoxFir_1, bit(20)) ? TBDDefaultCallout;
+    (IoxFir_1, bit(20)) ? xbus1TooManyBusErrors;
 
     /** IOXFIR_1[21|22|23]
      *  Reserved
@@ -449,3 +449,22 @@ group gIoxFir_1 filter singlebit
 # Actions specific to XBUS chiplet
 ################################################################################
 
+actionclass xbus1SpareDeployed
+{
+    callout(procedure(PassiveFabric_OnNode_ENUM), MRU_LOW);
+    funccall("xbus1SpareDeployed");
+};
+
+actionclass xbus1MaxSparesExceeded
+{
+    callout(procedure(PassiveFabric_OnNode_ENUM), MRU_LOW);
+    funccall("xbus1SparesExceeded");
+    threshold1;
+};
+
+actionclass xbus1TooManyBusErrors
+{
+    callout(procedure(PassiveFabric_OnNode_ENUM), MRU_LOW);
+    funccall("xbus1TooManyErrors");
+    threshold1;
+};
