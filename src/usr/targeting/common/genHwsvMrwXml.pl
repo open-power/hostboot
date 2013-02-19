@@ -157,7 +157,19 @@ foreach my $i (@{$SystemAttrs->{'required-policy-settings'}})
                        "PROC_FABRIC_PUMP_MODE",
                        $i->{proc_fabric_pump_mode},
                        "PROC_X_BUS_WIDTH",
-                       $i->{proc_x_bus_width}];
+                       $i->{proc_x_bus_width},
+                       "X_EREPAIR_THRESHOLD_FIELD",
+                       $i->{"x-erepair-threshold-field"},
+                       "A_EREPAIR_THRESHOLD_FIELD",
+                       $i->{"a-erepair-threshold-field"},
+                       "DMI_EREPAIR_THRESHOLD_FIELD",
+                       $i->{"dmi-erepair-threshold-field"},
+                       "X_EREPAIR_THRESHOLD_MNFG",
+                       $i->{"x-erepair-threshold-mnfg"},
+                       "A_EREPAIR_THRESHOLD_MNFG",
+                       $i->{"a-erepair-threshold-mnfg"},
+                       "DMI_EREPAIR_THRESHOLD_MNFG",
+                       $i->{"dmi-erepair-threshold-mnfg"},];
 }
 
 open (FH, "<$mrwdir/${sysname}-proc-pcie-settings.xml") ||

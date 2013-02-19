@@ -1,0 +1,104 @@
+<!-- IBM_PROLOG_BEGIN_TAG                                                   -->
+<!-- This is an automatically generated prolog.                             -->
+<!--                                                                        -->
+<!-- $Source: src/usr/hwpf/hwp/erepair_thresholds.xml $                     -->
+<!--                                                                        -->
+<!-- IBM CONFIDENTIAL                                                       -->
+<!--                                                                        -->
+<!-- COPYRIGHT International Business Machines Corp. 2013                   -->
+<!--                                                                        -->
+<!-- p1                                                                     -->
+<!--                                                                        -->
+<!-- Object Code Only (OCO) source materials                                -->
+<!-- Licensed Internal Code Source Materials                                -->
+<!-- IBM HostBoot Licensed Internal Code                                    -->
+<!--                                                                        -->
+<!-- The source code for this program is not published or otherwise         -->
+<!-- divested of its trade secrets, irrespective of what has been           -->
+<!-- deposited with the U.S. Copyright Office.                              -->
+<!--                                                                        -->
+<!-- Origin: 30                                                             -->
+<!--                                                                        -->
+<!-- IBM_PROLOG_END_TAG                                                     -->
+<!--
+    XML file specifying eRepair threshold attributes.
+    These are platInit attributes associated with the system.
+    These attributes are not associated with particular targets.
+    Each execution platform must initialize.
+-->
+
+<attributes>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_X_EREPAIR_THRESHOLD_FIELD</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+        Firmware specified eRepair threshold limit of X Bus for Field usage
+        This value must be initialized by platforms by reading the value
+        from System Model - x_threshold_field of system_policy_table
+    </description>
+    <valueType>uint8</valueType>
+    <platInit/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_X_EREPAIR_THRESHOLD_MNFG</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+        Firmware specified eRepair threshold limit of X Bus for MNFG usage
+        This value must be initialized by platforms by reading the value
+        from System Model - x_threshold_mnfg of system_policy_table
+    </description>
+    <valueType>uint8</valueType>
+    <platInit/>
+  </attribute>
+  <!-- ********************************************************************* -->  
+  <attribute>
+    <id>ATTR_A_EREPAIR_THRESHOLD_FIELD</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+        Firmware specified eRepair threshold limit of A Bus for Field usage
+        This value must be initialized by platforms by reading the value
+        from System Model - a_threshold_field of system_policy_table
+    </description>
+    <valueType>uint8</valueType>
+    <platInit/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_A_EREPAIR_THRESHOLD_MNFG</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+        Firmware specified eRepair threshold limit of A Bus for MNFG usage
+        This value must be initialized by platforms by reading the value
+        from System Model - a_threshold_mnfg of system_policy_table
+    </description>
+    <valueType>uint8</valueType>
+    <platInit/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_DMI_EREPAIR_THRESHOLD_FIELD</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+        Firmware specified eRepair threshold limit of Memory Bus for Field usage
+        This value must be initialized by platforms by reading the value
+        from System Model - dmi_threshold_field of system_policy_table
+    </description>
+    <valueType>uint8</valueType>
+    <platInit/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_DMI_EREPAIR_THRESHOLD_MNFG</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+        Firmware specified eRepair threshold limit of Memory Bus for MNFG usage
+        This value must be initialized by platforms by reading the value
+        from System Model - dmi_threshold_mnfg of system_policy_table
+    </description>
+    <valueType>uint8</valueType>
+    <platInit/>
+  </attribute>
+  <!-- ********************************************************************* -->
+</attributes>

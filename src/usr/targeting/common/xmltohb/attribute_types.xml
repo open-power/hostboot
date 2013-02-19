@@ -10670,4 +10670,126 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
     </hwpfToHbAttrMap>
 </attribute>
 
+<!-- === Attributes supporting erepair_thresholds.xml HWPF Attributes === -->
+<attribute>
+    <id>X_EREPAIR_THRESHOLD_FIELD</id>
+    <description>
+      This attribute represents the eRepair threshold value of X-Bus used
+      in the field.
+      creator: platform (generated based on MRW data)
+      See defintion in erepair_thresholds.xml for more information.
+    </description>
+    <simpleType>
+      <uint8_t>
+      </uint8_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_X_EREPAIR_THRESHOLD_FIELD</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>A_EREPAIR_THRESHOLD_FIELD</id>
+    <description>
+      This attribute represents the eRepair threshold value of A-Bus used
+      in the field.
+      creator: platform (generated based on MRW data)
+      See defintion in erepair_thresholds.xml for more information.
+    </description>
+    <simpleType>
+      <uint8_t>
+      </uint8_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_A_EREPAIR_THRESHOLD_FIELD</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>DMI_EREPAIR_THRESHOLD_FIELD</id>
+    <description>
+      This attribute represents the eRepair threshold value of DMI-Bus used
+      in the field.
+      creator: platform (generated based on MRW data)
+      See defintion in erepair_thresholds.xml for more information.
+    </description>
+    <simpleType>
+      <uint8_t>
+      </uint8_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_DMI_EREPAIR_THRESHOLD_FIELD</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>X_EREPAIR_THRESHOLD_MNFG</id>
+    <description>
+      This attribute represents the eRepair threshold value of X-Bus used
+      by Manufacturing.
+      creator: platform (generated based on MRW data)
+      See defintion in erepair_thresholds.xml for more information.
+    </description>
+    <simpleType>
+      <uint8_t>
+      </uint8_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_X_EREPAIR_THRESHOLD_MNFG</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>A_EREPAIR_THRESHOLD_MNFG</id>
+    <description>
+      This attribute represents the eRepair threshold value of A-Bus used
+      by Manufacturing.
+      creator: platform (generated based on MRW data)
+      See defintion in erepair_thresholds.xml for more information.
+    </description>
+    <simpleType>
+      <uint8_t>
+      </uint8_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_A_EREPAIR_THRESHOLD_MNFG</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>DMI_EREPAIR_THRESHOLD_MNFG</id>
+    <description>
+      This attribute represents the eRepair threshold value of DMI-Bus used
+      by Manufacturing.
+      creator: platform (generated based on MRW data)
+      See defintion in erepair_thresholds.xml for more information.
+    </description>
+    <simpleType>
+      <uint8_t>
+      </uint8_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_DMI_EREPAIR_THRESHOLD_MNFG</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+<!-- ===== End Attributes supporting erepair_thresholds.xml HWPF Attributes ===== -->
+
 </attributes>

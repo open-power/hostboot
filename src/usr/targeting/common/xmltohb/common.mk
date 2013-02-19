@@ -84,7 +84,8 @@ FAPI_ATTR_SOURCES =          \
     sync_attributes.xml   \
     poreve_memory_attributes.xml \
     mcbist_attributes.xml \
-    proc_winkle_scan_override_attributes.xml
+    proc_winkle_scan_override_attributes.xml \
+    erepair_thresholds.xml
 
 XMLTOHB_GENERIC_XML     = generic.xml
 XMLTOHB_FAPI_XML        = fapiattrs.xml

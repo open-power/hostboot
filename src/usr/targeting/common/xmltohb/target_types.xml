@@ -143,6 +143,14 @@
     <attribute><id>PROC_SELECT_BOOT_MASTER</id></attribute>
     <attribute><id>PROC_SELECT_SEEPROM_IMAGE</id></attribute>
     <!-- End proc_select_boot_master attributes  -->
+    <!-- Start erepair_thresholds.xml -->
+    <attribute><id>X_EREPAIR_THRESHOLD_FIELD</id></attribute>
+    <attribute><id>A_EREPAIR_THRESHOLD_FIELD</id></attribute>
+    <attribute><id>DMI_EREPAIR_THRESHOLD_FIELD</id></attribute>
+    <attribute><id>X_EREPAIR_THRESHOLD_MNFG</id></attribute>
+    <attribute><id>A_EREPAIR_THRESHOLD_MNFG</id></attribute>
+    <attribute><id>DMI_EREPAIR_THRESHOLD_MNFG</id></attribute>
+    <!-- End erepair_thresholds.xml -->
 
     <attribute><id>ENABLED_THREADS</id></attribute>
     <attribute><id>MSS_ZSERIES</id></attribute>
