@@ -1,25 +1,25 @@
-#   IBM_PROLOG_BEGIN_TAG
-#  This is an automatically generated prolog.
+# IBM_PROLOG_BEGIN_TAG
+# This is an automatically generated prolog.
 #
-#  $Source: src/usr/diag/mdia/makefile $
+# $Source: src/usr/diag/mdia/makefile $
 #
-#  IBM CONFIDENTIAL
+# IBM CONFIDENTIAL
 #
-#  COPYRIGHT International Business Machines Corp. 2012
+# COPYRIGHT International Business Machines Corp. 2012,2013
 #
-#  p1
+# p1
 #
-#  Object Code Only (OCO) source materials
-#  Licensed Internal Code Source Materials
-#  IBM HostBoot Licensed Internal Code
+# Object Code Only (OCO) source materials
+# Licensed Internal Code Source Materials
+# IBM HostBoot Licensed Internal Code
 #
-#  The source code for this program is not published or other-
-#  wise divested of its trade secrets, irrespective of what has
-#  been deposited with the U.S. Copyright Office.
+# The source code for this program is not published or otherwise
+# divested of its trade secrets, irrespective of what has been
+# deposited with the U.S. Copyright Office.
 #
-#  Origin: 30
+# Origin: 30
 #
-#  IBM_PROLOG_END_TAG
+# IBM_PROLOG_END_TAG
 ROOTPATH = ../../../..
 
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/diag
@@ -40,9 +40,5 @@ MODULE = mdia
 OBJS =  mdiamonitor.o mdiatrace.o mdiaworkitem.o mdiamba.o mdia.o mdiasm.o
 
 SUBDIRS = test.d
-
-ifdef MDIA_POLLING
-    CUSTOMFLAGS += -DMDIA_DO_POLLING=1
-endif
 
 include ${ROOTPATH}/config.mk

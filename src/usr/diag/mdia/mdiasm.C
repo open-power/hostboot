@@ -573,15 +573,6 @@ errlHndl_t StateMachine::doMaintCommand(WorkFlowProperties & i_wfp)
         getMonitor().removeMonitor(monitorId);
     }
 
-#ifdef MDIA_DO_POLLING
-    else
-    {
-        MDIA_FAST("sm: polling on: %p", targetMba);
-
-        getMonitor().startPolling(targetMba);
-    }
-#endif
-
     mutex_unlock(&iv_mutex);
 
     return err;
