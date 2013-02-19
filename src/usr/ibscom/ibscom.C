@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012                   */
+/* COPYRIGHT International Business Machines Corp. 2012,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -178,8 +178,6 @@ errlHndl_t getTargetVirtualAddress(Target* i_target,
 
             //Get MMIO Offset from parent MCS attribute.
 
-            uint64_t  mcsUnit = 0;
-
             //Get the parent MCS
             Target* parentMCS = NULL;
 
@@ -216,7 +214,6 @@ errlHndl_t getTargetVirtualAddress(Target* i_target,
                                                      get_huid(i_target),
                                                      0),
                                 0);
-
                 break;
             }
             parentMCS = *(mcs_list.begin());
@@ -228,70 +225,6 @@ errlHndl_t getTargetVirtualAddress(Target* i_target,
                       "getTargetVirtualAddress: From Attribute query l_IBScomBaseAddr=0x%llX, i_target=0x%.8x",
                       l_IBScomBaseAddr,
                       i_target->getAttr<ATTR_HUID>());
-
-            //TODO: Remove this workaround when cen_set_inband_addr procedure
-            //      is delivered
-            /*  -- Start Workaround -> Remove with RTC: 52898  -- */
-
-            //Since the cen_set_inband_addr procedure has not been delivered,
-            // setting the bar on demand here so inband scoms will work
-            const uint64_t barAddrs[] = {
-                0x02011802, /* MC0.MCS0.LEFT.LEFT.MCFGPRQ */
-                0x02011882, /* MC0.MCS1.LEFT.LEFT.MCFGPRQ */
-                0x02011902, /* MC1.MCS0.LEFT.LEFT.MCFGPRQ */
-                0x02011982, /* MC1.MCS1.LEFT.LEFT.MCFGPRQ */
-                0x02011C02, /* MC2.MCS0.LEFT.LEFT.MCFGPRQ */
-                0x02011C82, /* MC2.MCS1.LEFT.LEFT.MCFGPRQ */
-                0x02011D02, /* MC3.MCS0.LEFT.LEFT.MCFGPRQ */
-                0x02011D82, /* MC3.MCS1.LEFT.LEFT.MCFGPRQ */
-            };
-
-            //Get the parent processor
-            Target* parentProcChip = NULL;
-
-            PredicateCTM l_proc(CLASS_CHIP,
-                                TYPE_PROC,
-                                MODEL_NA);
-
-            TargetHandleList proc_list;
-            targetService().
-              getAssociated(proc_list,
-                            i_target,
-                            TargetService::PARENT_BY_AFFINITY,
-                            TargetService::ALL,
-                            &l_proc);
-
-            if( proc_list.size() != 1 )
-            {
-                //Since this code is temporary, just assert
-                TRACFCOMP(g_trac_ibscom, ERR_MRK
-                          "getTargetVirtualAddress:  mcs_list size is zero");
-                crit_assert(0);
-            }
-            parentProcChip = *(proc_list.begin());
-
-            mcsUnit =
-              parentMCS->getAttr<ATTR_CHIP_UNIT>();
-
-            TRACDCOMP(g_trac_ibscom, INFO_MRK
-                      "getTargetVirtualAddress: Setting IBSCOM Bar : barAddr=0x%X, l_IBScomBaseAddr=0x%llX",
-                      barAddrs[mcsUnit], l_IBScomBaseAddr );
-
-            size_t op_size = sizeof(uint64_t);
-            l_err = deviceOp( DeviceFW::WRITE,
-                              parentProcChip,
-                              &l_IBScomBaseAddr,
-                              op_size,
-                              DEVICE_SCOM_ADDRESS(barAddrs[mcsUnit]) );
-
-            if( l_err )
-            {
-                TRACFCOMP(g_trac_ibscom, ERR_MRK
-                          "getTargetVirtualAddress: Error programming IBSCOM Bar : barAddr=0x%X, l_IBScomBaseAddr=0x%llX",
-                          barAddrs[mcsUnit], l_IBScomBaseAddr );
-                break;
-            }
-            /*  -- END Workaround -> Remove with RTC: 52898  -- */
 
             // Map target's virtual address
             //NOTE: mmio_dev_map only supports 32 GB Allocation.  Technically,
