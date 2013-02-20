@@ -61,65 +61,96 @@ void StateMachine::processCommandTimeout(const MonitorIDs & i_monitorIDs)
 {
     MDIA_FAST("sm: processCommandTimeout");
     WorkFlowProperties *wkflprop = NULL;
+    errlHndl_t err = NULL;
+
+    vector<mss_MaintCmd *> stopCmds;
 
     mutex_lock(&iv_mutex);
 
-    if(!iv_shutdown)
+    for(MonitorIDs::const_iterator monitorIt = i_monitorIDs.begin();
+            monitorIt != i_monitorIDs.end();
+            ++monitorIt)
     {
-        for(MonitorIDs::const_iterator monitorIt = i_monitorIDs.begin();
-                monitorIt != i_monitorIDs.end();
-                ++monitorIt)
+        for(WorkFlowPropertiesIterator wit = iv_workFlowProperties.begin();
+                wit != iv_workFlowProperties.end();
+                ++wit)
         {
-            for(WorkFlowPropertiesIterator wit = iv_workFlowProperties.begin();
-                    wit != iv_workFlowProperties.end();
-                    ++wit)
+            if((*wit)->timer == *monitorIt)
             {
-                if((*wit)->timer == *monitorIt)
-                {
-                    (*wit)->status = COMMAND_TIMED_OUT;
-                    wkflprop = *wit;
+                stopCmds.push_back(static_cast<mss_MaintCmd *>((*wit)->data));
+                (*wit)->data = NULL;
 
-                    // log a timeout event
+                (*wit)->status = COMMAND_TIMED_OUT;
+                wkflprop = *wit;
 
-                    TargetHandle_t target = getTarget(**wit);
+                // log a timeout event
 
-                    MDIA_ERR("command %d timed out on: %p",
-                            *((*wit)->workItem),
-                            target);
+                TargetHandle_t target = getTarget(**wit);
 
-                    /*@
-                     * @errortype
-                     * @reasoncode       MDIA::MAINT_COMMAND_TIMED_OUT
-                     * @severity         ERRORLOG::ERRL_SEV_INFORMATIONAL
-                     * @moduleid         MDIA::PROCESS_COMMAND_TIMEOUT
-                     * @userData1        Associated memory diag work item
-                     * @devdesc          A maint command timed out
-                     */
-                    errlHndl_t err = new ErrlEntry(
-                            ERRL_SEV_INFORMATIONAL,
-                            PROCESS_COMMAND_TIMEOUT,
-                            MAINT_COMMAND_TIMED_OUT,
-                            *((*wit)->workItem), 0);
+                MDIA_ERR("sm: command %p: %d timed out on: %p",
+                        stopCmds.back(),
+                        *((*wit)->workItem),
+                        target);
 
-                    err->addHwCallout(target,
-                            HWAS::SRCI_PRIORITY_HIGH,
-                            HWAS::DECONFIG,
-                            HWAS::GARD_NULL);
+                /*@
+                 * @errortype
+                 * @reasoncode       MDIA::MAINT_COMMAND_TIMED_OUT
+                 * @severity         ERRORLOG::ERRL_SEV_INFORMATIONAL
+                 * @moduleid         MDIA::PROCESS_COMMAND_TIMEOUT
+                 * @userData1        Associated memory diag work item
+                 * @devdesc          A maint command timed out
+                 */
+                err = new ErrlEntry(
+                        ERRL_SEV_INFORMATIONAL,
+                        PROCESS_COMMAND_TIMEOUT,
+                        MAINT_COMMAND_TIMED_OUT,
+                        *((*wit)->workItem), 0);
 
-                    errlCommit(err, MDIA_COMP_ID);
+                err->addHwCallout(target,
+                        HWAS::SRCI_PRIORITY_HIGH,
+                        HWAS::DECONFIG,
+                        HWAS::GARD_NULL);
 
-                    break;
-                }
+                errlCommit(err, MDIA_COMP_ID);
+
+                break;
             }
         }
 
-        //Satisfies last/one target remaining to run maint cmds.
-        //If no match found, implies SM has already processed event(s).
+        // if this is the very last command(s), schedule must be called
+        // so the waiting istep thread is signaled that we are done.
+
+        // If no match is found (wkflprop), all the attentions came
+        // in before the timeout(s) could be processed.  the prd thread
+        // will have already started the next command(s), if any.
+
         if(wkflprop)
+        {
             scheduleWorkItem(*wkflprop);
+        }
     }
 
     mutex_unlock(&iv_mutex);
+
+    // try and stop the commands that timed out.
+
+    for(vector<mss_MaintCmd *>::iterator cit = stopCmds.begin();
+            cit != stopCmds.end();
+            ++cit)
+    {
+        MDIA_FAST("sm: stopping command: %p", *cit);
+
+        ReturnCode fapirc = (*cit)->stopCmd();
+        err = fapiRcToErrl(fapirc);
+
+        if(err)
+        {
+            MDIA_ERR("sm: mss_MaintCmd::stopCmd failed");
+            errlCommit(err, MDIA_COMP_ID);
+        }
+
+        delete (*cit);
+    }
 }
 
 errlHndl_t StateMachine::run(const WorkFlowAssocMap & i_list)
@@ -182,6 +213,7 @@ void StateMachine::setup(const WorkFlowAssocMap & i_list)
         p->timer = 0;
         p->restartCommand = false;
         p->memSize = 0; // TODO
+        p->data = NULL;
 
         iv_workFlowProperties.push_back(p);
     }
@@ -431,6 +463,7 @@ errlHndl_t StateMachine::doMaintCommand(WorkFlowProperties & i_wfp)
     workItem = *i_wfp.workItem;
     restart = i_wfp.restartCommand;
     targetMba = getTarget(i_wfp);
+    cmd = static_cast<mss_MaintCmd *>(i_wfp.data);
 
     mutex_unlock(&iv_mutex);
 
@@ -438,6 +471,7 @@ errlHndl_t StateMachine::doMaintCommand(WorkFlowProperties & i_wfp)
 
     do {
 
+        // setup the address range.
         // assume the full range for now
 
         ReturnCode fapirc = mss_get_address_range(
@@ -458,14 +492,11 @@ errlHndl_t StateMachine::doMaintCommand(WorkFlowProperties & i_wfp)
             // bump the starting address if we are restarting
             // a command
 
-            cmd = new mss_IncrementAddress(fapiMba);
+            mss_IncrementAddress incrementCmd(fapiMba);
 
             MDIA_FAST("sm: increment address on: %p", targetMba);
 
-            fapirc = cmd->setupAndExecuteCmd();
-
-            delete cmd;
-            cmd = NULL;
+            fapirc = incrementCmd.setupAndExecuteCmd();
 
             err = fapiRcToErrl(fapirc);
 
@@ -497,68 +528,82 @@ errlHndl_t StateMachine::doMaintCommand(WorkFlowProperties & i_wfp)
             startAddr.setDoubleWord(0, address);
         }
 
-        switch(workItem)
+        else
         {
-            case START_RANDOM_PATTERN:
-                cmd = new mss_SuperFastRandomInit(
-                        fapiMba,
-                        startAddr,
-                        endAddr,
-                        mss_MaintCmd::PATTERN_RANDOM,
-                        stopCondition,
-                        false);
+            // new command...use the full range
 
-                MDIA_FAST("sm: random init on: %p", targetMba);
+            switch(workItem)
+            {
+                case START_RANDOM_PATTERN:
+                    cmd = new mss_SuperFastRandomInit(
+                            fapiMba,
+                            startAddr,
+                            endAddr,
+                            mss_MaintCmd::PATTERN_RANDOM,
+                            stopCondition,
+                            false);
+
+                    MDIA_FAST("sm: random init %p on: %p", cmd, targetMba);
+                    break;
+
+                case START_SCRUB:
+                    cmd = new mss_SuperFastRead(
+                            fapiMba,
+                            startAddr,
+                            endAddr,
+                            stopCondition,
+                            false);
+
+                    MDIA_FAST("sm: scrub %p on: %p", cmd, targetMba);
+                    break;
+
+                case START_PATTERN_0:
+                case START_PATTERN_1:
+                case START_PATTERN_2:
+                case START_PATTERN_3:
+                case START_PATTERN_4:
+                case START_PATTERN_5:
+                case START_PATTERN_6:
+                case START_PATTERN_7:
+
+                    cmd = new mss_SuperFastInit(
+                            fapiMba,
+                            startAddr,
+                            endAddr,
+                            static_cast<mss_MaintCmd::PatternIndex>(workItem),
+                            stopCondition,
+                            false);
+
+                    MDIA_FAST("sm: init %p on: %p", cmd, targetMba);
+                    break;
+
+                default:
+                    break;
+            }
+
+            if(!cmd)
+            {
+                MDIA_ERR("unrecognized maint command type %d on: %p",
+                        workItem, targetMba);
                 break;
-
-            case START_SCRUB:
-                cmd = new mss_SuperFastRead(
-                        fapiMba,
-                        startAddr,
-                        endAddr,
-                        stopCondition,
-                        false);
-
-                MDIA_FAST("sm: scrub on: %p", targetMba);
-                break;
-
-            case START_PATTERN_0:
-            case START_PATTERN_1:
-            case START_PATTERN_2:
-            case START_PATTERN_3:
-            case START_PATTERN_4:
-            case START_PATTERN_5:
-            case START_PATTERN_6:
-            case START_PATTERN_7:
-
-                cmd = new mss_SuperFastInit(
-                        fapiMba,
-                        startAddr,
-                        endAddr,
-                        static_cast<mss_MaintCmd::PatternIndex>(workItem),
-                        stopCondition,
-                        false);
-
-                MDIA_FAST("sm: init on: %p", targetMba);
-                break;
-
-            default:
-                break;
+            }
         }
 
-        if(!cmd)
-        {
-            MDIA_ERR("unrecognized maint command type %d on: %p",
-                    workItem, targetMba);
-            break;
-        }
+        mutex_lock(&iv_mutex);
+
+        i_wfp.data = cmd;
+
+        mutex_unlock(&iv_mutex);
+
+        // Command and address configured.
+        // Invoke the command.
 
         fapirc = cmd->setupAndExecuteCmd();
         err = fapiRcToErrl(fapirc);
 
-        if(err || !cmd)
+        if(err)
         {
-            MDIA_FAST("sm: setupAndExecuteCmd failed");
+            MDIA_FAST("sm: setupAndExecuteCmd %p failed", cmd);
             break;
         }
 
@@ -571,9 +616,16 @@ errlHndl_t StateMachine::doMaintCommand(WorkFlowProperties & i_wfp)
         MDIA_FAST("sm: Running Maint Cmd failed");
 
         getMonitor().removeMonitor(monitorId);
+
+        i_wfp.data = NULL;
     }
 
     mutex_unlock(&iv_mutex);
+
+    if(err && cmd)
+    {
+        delete cmd;
+    }
 
     return err;
 }
@@ -595,6 +647,8 @@ bool StateMachine::processMaintCommandEvent(const MaintCommandEvent & i_event)
 {
     bool resume = true, dispatched = false;
 
+    mss_MaintCmd * cmd = NULL;
+
     mutex_lock(&iv_mutex);
 
     WorkFlowPropertiesIterator wit = iv_workFlowProperties.begin();
@@ -611,7 +665,13 @@ bool StateMachine::processMaintCommandEvent(const MaintCommandEvent & i_event)
     {
         MDIA_ERR("sm: did not find target");
     }
-    else if(!iv_shutdown)
+
+    // if a command finishes (just) after the
+    // timeout and we haven't had a chance to stop the
+    // command yet, it may end up here.  Ignore it
+    // and let the timeout thread do its job.
+
+    else if((**wit).status != COMMAND_TIMED_OUT)
     {
         WorkFlowProperties & wfp = **wit;
 
@@ -619,7 +679,7 @@ bool StateMachine::processMaintCommandEvent(const MaintCommandEvent & i_event)
 
         getMonitor().removeMonitor(wfp.timer);
 
-        MDIA_FAST("sm: processing event for: %p", getTarget(wfp));
+        MDIA_FAST("sm: processing %p event for: %p", wfp.data, getTarget(wfp));
 
         switch(i_event.type)
         {
@@ -632,6 +692,11 @@ bool StateMachine::processMaintCommandEvent(const MaintCommandEvent & i_event)
                 // move to the next command
 
                 ++wfp.workItem;
+
+                // done with this maint command
+
+                cmd = static_cast<mss_MaintCmd *>(wfp.data);
+                wfp.data = NULL;
 
                 break;
 
@@ -649,6 +714,11 @@ bool StateMachine::processMaintCommandEvent(const MaintCommandEvent & i_event)
 
                 wfp.status = COMPLETE;
 
+                // done with this maint command
+
+                cmd = static_cast<mss_MaintCmd *>(wfp.data);
+                wfp.data = NULL;
+
                 break;
 
             case RESET_TIMER:
@@ -662,11 +732,16 @@ bool StateMachine::processMaintCommandEvent(const MaintCommandEvent & i_event)
 
         // schedule the next work item
 
-        if(resume)
+        if(resume && !iv_shutdown)
             dispatched = scheduleWorkItem(wfp);
     }
 
     mutex_unlock(&iv_mutex);
+
+    if(cmd)
+    {
+        delete cmd;
+    }
 
     return dispatched;
 }
