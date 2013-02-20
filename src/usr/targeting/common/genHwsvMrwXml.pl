@@ -1310,7 +1310,8 @@ sub generate_sys
         <id>MSS_CLEANER_ENABLE</id>
         <default>1</default>
     </attribute>";
-
+    generate_max_config();
+    
     # call to do any fsp per-sys attributes
     do_plugin('fsp_sys', $sys, $sysname, 0);
 
@@ -1318,6 +1319,96 @@ print "
 </targetInstance>
 
 ";
+}
+
+sub generate_max_config
+{
+    my $maxMcs_Per_System = 0;
+    my $maxChiplets_Per_Proc = 0;
+    my $maxProcChip_Per_Node =0;
+    my $maxEx_Per_Proc =0;
+    my $maxDimm_Per_MbaPort =0;
+    my $maxMbaPort_Per_Mba =0;
+    my $maxMba_Per_MemBuf =0;
+    
+    # MBA Ports Per MBA is 2 in P8 and is hard coded here
+    use constant MBA_PORTS_PER_MBA => 2;
+    
+    # MAX Chiplets Per Proc is 32 and is hard coded here
+    use constant CHIPLETS_PER_PROC => 32;
+    
+    # MAX Mba Per MemBuf is 2 and is hard coded here
+    # PNEW_TODO to change if P9 different
+    use constant MAX_MBA_PER_MEMBUF => 2;
+    
+    # MAX Dimms Per MBA PORT is 2 and is hard coded here
+    # PNEW_TODO to change if P9 different
+    use constant MAX_DIMMS_PER_MBAPORT => 2;
+    
+    for (my $i = 0; $i < $#STargets; $i++)
+    {
+        if ($STargets[$i][NAME_FIELD] eq "pu")
+        {   
+            if ($node == 0)
+            {
+                $maxProcChip_Per_Node += 1;
+            }
+        }
+        elsif ($STargets[$i][NAME_FIELD] eq "ex")
+        {
+            my $proc = $STargets[$i][POS_FIELD];
+            if (($proc == 0) && ($node == 0))
+            {
+                $maxEx_Per_Proc += 1;
+            }
+        }
+        elsif ($STargets[$i][NAME_FIELD] eq "mcs")
+        {
+            $maxMcs_Per_System += 1;
+        }
+    }
+    
+    # loading the hard coded value
+    $maxMbaPort_Per_Mba = MBA_PORTS_PER_MBA;
+    
+    # loading the hard coded value
+    $maxChiplets_Per_Proc = CHIPLETS_PER_PROC;
+    
+    # loading the hard coded value
+    $maxMba_Per_MemBuf = MAX_MBA_PER_MEMBUF;
+    
+    # loading the hard coded value
+    $maxDimm_Per_MbaPort = MAX_DIMMS_PER_MBAPORT;
+    
+    print "
+    <attribute>
+        <id>MAX_PROC_CHIPS_PER_NODE</id>
+        <default>$maxProcChip_Per_Node</default>
+    </attribute>
+    <attribute>
+        <id>MAX_EXS_PER_PROC_CHIP</id>
+        <default>$maxEx_Per_Proc</default>
+    </attribute>
+    <attribute>
+        <id>MAX_MBAS_PER_MEMBUF_CHIP</id>
+        <default>$maxMba_Per_MemBuf</default>
+    </attribute>
+    <attribute>
+        <id>MAX_MBA_PORTS_PER_MBA</id>
+        <default>$maxMbaPort_Per_Mba</default>
+    </attribute>
+    <attribute>
+        <id>MAX_DIMMS_PER_MBA_PORT</id>
+        <default>$maxDimm_Per_MbaPort</default>
+    </attribute>
+    <attribute>
+        <id>MAX_CHIPLETS_PER_PROC</id>
+        <default>$maxChiplets_Per_Proc</default>
+    </attribute>
+    <attribute>
+        <id>MAX_MCS_PER_SYSTEM</id>
+        <default>$maxMcs_Per_System</default>
+    </attribute>";
 }
 
 sub generate_system_node

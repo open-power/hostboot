@@ -146,6 +146,17 @@
 
     <attribute><id>ENABLED_THREADS</id></attribute>
     <attribute><id>MSS_ZSERIES</id></attribute>
+
+    <!-- Max/min config attributes -->
+    <attribute><id>MAX_PROC_CHIPS_PER_NODE</id></attribute>
+    <attribute><id>MAX_EXS_PER_PROC_CHIP</id></attribute>
+    <attribute><id>MAX_DIMMS_PER_MBA_PORT</id></attribute>
+    <attribute><id>MAX_MBA_PORTS_PER_MBA</id></attribute>
+    <attribute><id>MAX_MBAS_PER_MEMBUF_CHIP</id></attribute>
+    <attribute><id>MAX_CHIPLETS_PER_PROC</id></attribute>
+    <attribute><id>MAX_MCS_PER_SYSTEM</id></attribute>
+    <!-- End max/min config attributes -->
+
 </targetType>
 
 <targetType>

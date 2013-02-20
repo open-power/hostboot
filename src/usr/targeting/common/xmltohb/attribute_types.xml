@@ -10145,4 +10145,102 @@ Measured in GB</description>
     <writeable/>
 </attribute>
 
+<attribute>
+    <id>MAX_PROC_CHIPS_PER_NODE</id>
+    <description>
+        System attribute.
+        The max proc chips per node available in the system.
+    </description>
+    <simpleType>
+        <uint8_t>
+        </uint8_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+</attribute>
+
+<attribute>
+    <id>MAX_EXS_PER_PROC_CHIP</id>
+    <description>
+        System attribute.
+        The max EX units per proc chip available in the system.
+    </description>
+    <simpleType>
+        <uint8_t>
+        </uint8_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+</attribute>
+
+<attribute>
+    <id>MAX_DIMMS_PER_MBA_PORT</id>
+    <description>
+        System attribute.
+        The max DIMMs per MBA Port available in the system.
+    </description>
+    <simpleType>
+        <uint8_t>
+        </uint8_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+</attribute>
+
+<attribute>
+    <id>MAX_MBA_PORTS_PER_MBA</id>
+    <description>
+        System attribute.
+        The max MBA ports per MBA available in the system.
+    </description>
+    <simpleType>
+        <uint8_t>
+        </uint8_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+</attribute>
+
+<attribute>
+    <id>MAX_MBAS_PER_MEMBUF_CHIP</id>
+    <description>
+        System attribute.
+        The max MBAS per membuf available in the system.
+    </description>
+    <simpleType>
+        <uint8_t>
+        </uint8_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+</attribute>
+
+<attribute>
+    <id>MAX_CHIPLETS_PER_PROC</id>
+    <description>
+        System attribute.
+        The max chiplets per proc available in the system.
+    </description>
+    <simpleType>
+        <uint8_t>
+        </uint8_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+</attribute>
+
+<attribute>
+    <id>MAX_MCS_PER_SYSTEM</id>
+    <description>
+        System attribute.
+        The max MCS units available in the system.
+    </description>
+    <simpleType>
+        <uint8_t>
+        </uint8_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+</attribute>
+
 </attributes>
