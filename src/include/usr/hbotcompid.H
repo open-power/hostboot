@@ -182,13 +182,7 @@ const char MBOX_COMP_NAME[] = "mbox";
 
 // 0x1200 - open to reclaim
 
-/** @name PRDF
- *  PRDF component
- */
-//@{
-const compId_t PRDF_COMP_ID = 0x1300;
-const char PRDF_COMP_NAME[] = "prdf";
-//@}
+// 0x1300 - open to reclaim
 
 /** @name MDIA
  *  MDIA memory diagnostics component
@@ -286,6 +280,17 @@ const char HSVC_COMP_NAME[] = "hsvc";
 //@{
 const compId_t FIPS_ERRL_COMP_ID = 0x3100;
 const char FIPS_ERRL_COMP_NAME[] = "hb-trace";
+//@}
+
+/** @name PRDF
+ *  PRDF component
+ *  @Note PRDF_COMP_ID=0xE500 matches with what
+ *  defined in fips_comp_id.H for PRDF which is
+ *  common between Hostboot and FSP
+ */
+//@{
+const compId_t PRDF_COMP_ID = 0xE500;
+const char PRDF_COMP_NAME[] = "prdf";
 //@}
 
 //  ----------------------------------------------------------
