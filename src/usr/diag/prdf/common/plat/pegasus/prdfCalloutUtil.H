@@ -24,6 +24,8 @@
 #ifndef prdfCalloutUtil_H
 #define prdfCalloutUtil_H
 
+#include <prdfPlatServices.H>
+
 /** @file  prdfCalloutUtil.H
  *  @brief Utility functions for common, non-trivial callouts.
  */
@@ -31,6 +33,7 @@
 namespace PRDF
 {
 
+class CenRank;
 struct STEP_CODE_DATA_STRUCT;
 
 namespace CalloutUtil
@@ -44,7 +47,32 @@ namespace CalloutUtil
  */
 void defaultError( STEP_CODE_DATA_STRUCT & i_sc );
 
+/**
+ * @param  i_mba  The target MBA.
+ * @param  i_rank The target rank.
+ * @return A list of DIMMs connected to the MBA and rank.
+ */
+TARGETING::TargetHandleList getConnectedDimms( TARGETING::TargetHandle_t i_mba,
+                                               const CenRank & i_rank );
+
+/**
+ * @param  i_mba The target MBA.
+ * @return A list of DIMMs connected to the MBA.
+ */
+TARGETING::TargetHandleList getConnectedDimms(TARGETING::TargetHandle_t i_mba);
+
+/**
+ * @param  i_mba  The target MBA.
+ * @param  i_rank The target rank.
+ * @param  i_port MBA port.
+ * @return A list of DIMMs connected to the MBA and rank on a port.
+ */
+TARGETING::TargetHandleList getConnectedDimms( TARGETING::TargetHandle_t i_mba,
+                                               const CenRank & i_rank,
+                                               uint8_t i_port );
+
 } // end namespace CalloutUtil
+
 } // end namespace PRDF
 
 #endif // prdfCalloutUtil_H

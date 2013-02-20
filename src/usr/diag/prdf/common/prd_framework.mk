@@ -57,9 +57,6 @@ prd_service = \
  prdfTargetServices.o \
  xspprdsdbug.o
 
-prd_ss = \
- prdfMemoryMru.o
-
 prd_resolution = \
  iipResolution.o \
  iipResolutionFactory.o \
@@ -87,7 +84,6 @@ prd_object_files = \
  ${prd_util} \
  ${prd_config} \
  ${prd_service} \
- ${prd_ss} \
  ${prd_resolution} \
  ${prd_register} \
 

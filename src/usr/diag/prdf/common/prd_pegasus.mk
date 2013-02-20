@@ -43,5 +43,6 @@ prd_pegasus_specific = \
     prdfLineDelete.o \
     prdfPegasusConfigurator.o \
     prdfCenMbaCaptureData.o \
+    prdfMemoryMru.o \
     prdfRegisterData.o
 

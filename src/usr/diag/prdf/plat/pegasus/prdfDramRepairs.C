@@ -31,7 +31,8 @@
 #include <prdfErrlUtil.H>
 #include "common/prdfEnums.H"
 #include "common/plat/pegasus/prdfCenMbaCaptureData.H"
-#include "common/plat/prdfMemoryMru.H"
+#include "common/plat/pegasus/prdfCenSymbol.H"
+#include "common/plat/pegasus/prdfMemoryMru.H"
 #include "framework/service/prdfPlatServices.H"
 
 using namespace HWAS;
@@ -104,17 +105,27 @@ bool addMemMruCallout(errlHndl_t & io_log, void * i_memMru)
 
     bool o_term = false;
 
-    PRDF_HW_ADD_MEMMRU_CALLOUT(
-            o_term,
-            *static_cast<PrdfMemoryMru *>(i_memMru),
-            SRCI_PRIORITY_HIGH,
-            HWSV::HOM_DECONFIG,
-            HWSV::HOM_DECONFIG_GARD,
-            io_log,
-            false, // don't write src to vpd
-            GARD_Predictive,
-            ERRL_SEV_PREDICTIVE,
-            false); // don't update hcdb
+    if ( NULL != i_memMru )
+    {
+        MemoryMru *memMru = static_cast<MemoryMru *>(i_memMru);
+
+        TargetHandleList partList = memMru->getCalloutList();
+        for ( TargetHandleList::iterator it = partList.begin();
+              it != partList.end(); it++ )
+        {
+            PRDF_HW_ADD_CALLOUT(
+                        o_term,
+                        *it,
+                        SRCI_PRIORITY_HIGH,
+                        HWSV::HOM_DECONFIG,
+                        HWSV::HOM_DECONFIG_GARD,
+                        io_log,
+                        false, // don't write src to vpd
+                        GARD_Predictive,
+                        ERRL_SEV_PREDICTIVE,
+                        false); // don't update hcdb
+        }
+    }
 
     return o_term;
 }
@@ -140,9 +151,7 @@ bool addDimmCallout(errlHndl_t & io_log, void * i_dimm)
     return o_term;
 }
 
-bool processRepairedRanks(
-        TargetHandle_t i_mba,
-        uint8_t i_repairedRankMask)
+bool processRepairedRanks( TargetHandle_t i_mba, uint8_t i_repairedRankMask )
 {
     PRDF_DENTER("processRepairedRanks: %p, 0x%02x",
             i_mba, i_repairedRankMask);
@@ -194,29 +203,29 @@ bool processRepairedRanks(
             continue;
         }
 
-        if((validSymbol(sp0) || validSymbol(sp1) || validSymbol(sp))
-                && validSymbol(cm))
+        if ( (validSymbol(sp0) || validSymbol(sp1) || validSymbol(sp)) &&
+             validSymbol(cm) )
         {
-            // this rank has both a steer
-            // and a chip mark
+            // This rank has both a steer and a chip mark. Call out the DIMM
+            // with the chip mark.
 
-            // FIXME replace with a real memory mru
+            CenRank rank ( rankNumber );
 
-            struct GetMemoryMru
+            CenSymbol symbol;
+            int32_t rc = CenSymbol::fromSymbol( i_mba, rank, cm,
+                                                CenSymbol::BOTH_SYMBOL_DQS,
+                                                symbol );
+            if ( SUCCESS != rc )
             {
-                PrdfMemoryMru * operator()(
-                        TargetHandle_t i_mba,
-                        uint8_t i_rank,
-                        uint8_t i_symbol)
-                {
-                    return NULL;
-                }
+                PRDF_ERR( "[processRepairedRanks] CenSymbol::fromSymbol() "
+                          "failed: HUID=0x%08x rank=%d symbol=%d",
+                          PlatServices::getHuid(i_mba), rank.flatten(), cm );
+                continue;
+            }
 
-            } getMemoryMru;
+            MemoryMru  memoryMru( i_mba, rank, symbol );
 
-            PrdfMemoryMru * memoryMru = getMemoryMru(i_mba, rankNumber, cm);
-
-            commitRestoreCallout( &addMemMruCallout, memoryMru, i_mba );
+            commitRestoreCallout( &addMemMruCallout, &memoryMru, i_mba );
 
             calloutMade = true;
         }

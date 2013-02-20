@@ -136,7 +136,7 @@ void ServiceDataCollector::SetCallout( PRDcallout mru,
 {
     bool found = false;
 
-    if ( PRDcallout::TYPE_TARGET == mru.getType() )
+    if ( PRDcalloutData::TYPE_TARGET == mru.getType() )
     {
         // Ensuring target is not NULL
         if ( NULL == mru.getTarget() )
@@ -296,6 +296,8 @@ uint32_t ServiceDataCollector::Flatten(uint8_t * i_buffer, uint32_t & io_size) c
 ServiceDataCollector & ServiceDataCollector::operator=(
                                                     const uint8_t * i_flatdata )
 {
+    using namespace PRDcalloutData;
+
     error_signature.setChipId( buffer_get32(i_flatdata) );
     error_signature.setSigId(  buffer_get32(i_flatdata) );
 
@@ -303,9 +305,9 @@ ServiceDataCollector & ServiceDataCollector::operator=(
     uint32_t value = buffer_get32(i_flatdata); // number of callouts
     for ( uint32_t i = 0; i < value; ++i )
     {
-        PRDcallout::MruType mt = (PRDcallout::MruType) buffer_get32(i_flatdata);
-        uint32_t mru           = buffer_get32(i_flatdata);
-        PRDpriority priority   = (PRDpriority) buffer_get32(i_flatdata);
+        MruType mt           = (MruType) buffer_get32(i_flatdata);
+        uint32_t mru         = buffer_get32(i_flatdata);
+        PRDpriority priority = (PRDpriority) buffer_get32(i_flatdata);
 
         PRDcallout callout( mru, mt );
         xMruList.push_back( SdcCallout(callout, priority) );

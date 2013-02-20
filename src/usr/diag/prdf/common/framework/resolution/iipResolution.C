@@ -117,12 +117,10 @@ int32_t CalloutResolution::Resolve( STEP_CODE_DATA_STRUCT & io_serviceData )
     reduce memory utilization.
     */
 
-    if( PRDcallout::TYPE_TARGET == xMruCallout.getType( ) )
+    if ( PRDcalloutData::TYPE_TARGET == xMruCallout.getType() )
     {
-        PRDcallout l_targetCallout(
-                            ServiceDataCollector::getTargetAnalyzed( ) );
-
-        io_serviceData.service_data->SetCallout( l_targetCallout ,xPriority );
+        PRDcallout l_targetCallout( ServiceDataCollector::getTargetAnalyzed() );
+        io_serviceData.service_data->SetCallout( l_targetCallout, xPriority );
     }
     else
     {

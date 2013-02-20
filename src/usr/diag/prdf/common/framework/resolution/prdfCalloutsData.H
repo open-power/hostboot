@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/diag/prdf/common/plat/prdfMemoryMru.C $               */
+/* $Source: src/usr/diag/prdf/common/framework/resolution/prdfCalloutsData.H $ */
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2008,2013              */
+/* COPYRIGHT International Business Machines Corp. 2013                   */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -21,18 +21,32 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-#include <prdfMemoryMru.H>
+/** @file  prdfCalloutsData.H
+ *  @brief This is specifically designed to be included in both functional and
+ *         error log parsing code (i.e. must be able to compile in PPC and
+ *         x86.nfp contexts).
+ */
 
-//------------------------------------------------------------------------------
+#ifndef __prdfCalloutsData_H
+#define __prdfCalloutsData_H
 
-#ifndef PRDF_ERRL_PARSER
-
-TARGETING::TargetHandleList PrdfMemoryMru::getCalloutList() const
+namespace PRDF
 {
-    TARGETING::TargetHandleList o_dimmList;
 
-    return o_dimmList;
-}
+namespace PRDcalloutData
+{
 
-#endif
+enum MruType
+{
+    TYPE_NONE,
+    TYPE_TARGET,
+    TYPE_MEMMRU,
+    TYPE_SYMFRU,
+};
+
+} // end namespace PRDcalloutData
+
+} // end namespace PRDF
+
+#endif // __prdfCalloutsData_H
 

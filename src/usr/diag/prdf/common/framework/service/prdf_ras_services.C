@@ -572,7 +572,7 @@ errlHndl_t ErrDataService::GenerateSrcPfa(ATTENTION_TYPE attn_type,
     for (SDC_MRU_LIST::iterator i = fspmrulist.begin(); i < fspmrulist.end(); ++i)
     {
         thiscallout = i->callout;
-        if ( PRDcallout::TYPE_SYMFRU == thiscallout.getType() )
+        if ( PRDcalloutData::TYPE_SYMFRU == thiscallout.getType() )
         {
             if ( (EPUB_PRC_SP_CODE   == thiscallout.flatten()) ||
                  (EPUB_PRC_PHYP_CODE == thiscallout.flatten()) )
@@ -588,12 +588,10 @@ errlHndl_t ErrDataService::GenerateSrcPfa(ATTENTION_TYPE attn_type,
                 SecondLevel = true;
             }
         }
-        else if ( PRDcallout::TYPE_MEMMRU == thiscallout.getType() )
+        else if ( PRDcalloutData::TYPE_MEMMRU == thiscallout.getType() )
         {
-            PrdfMemoryMru memMru = thiscallout.getMemMru();
+            MemoryMru memMru (thiscallout.flatten());
             SrcWord9 = memMru.toUint32(); // Get MemMru value
-
-/* FIXME: RTC 47288 Add support after refactoring PrdfMemoryMru
 
             TargetHandleList partList = memMru.getCalloutList();
             uint32_t partCount = partList.size();
@@ -604,7 +602,7 @@ errlHndl_t ErrDataService::GenerateSrcPfa(ATTENTION_TYPE attn_type,
             // If we are in Concurrent Maintenance Mode, we will need to disable
             // the Deferred Deconfig, if the callouts are not HOM_CM_FUNCTIONAL.
 
-            // FIXME PlatServices::inCMMode() not available yet
+            /* FIXME: RTC 50063 PlatServices::inCMMode() not available yet
             if (PlatServices::inCMMode())
             {
                 if (partCount < 1)
@@ -628,9 +626,9 @@ errlHndl_t ErrDataService::GenerateSrcPfa(ATTENTION_TYPE attn_type,
                     }
                 }
             }
-*/
+            */
         }
-        else // PRDcallout::TYPE_TARGET
+        else // PRDcalloutData::TYPE_TARGET
         {
             HW = true; // Hardware callout
 
@@ -741,7 +739,7 @@ errlHndl_t ErrDataService::GenerateSrcPfa(ATTENTION_TYPE attn_type,
     //**************************************************************
     //  Add SDC Capture data to Error Log User Data here only if
     //    there are 4 or more callouts,
-    //    (including Dimm callouts in the PrdfMemoryMru).
+    //    (including Dimm callouts in the MemoryMru).
     //**************************************************************
     bool capDataAdded = false;
     if (calloutsPlusDimms > 3)
@@ -763,11 +761,12 @@ errlHndl_t ErrDataService::GenerateSrcPfa(ATTENTION_TYPE attn_type,
     //**************************************************************
     fspmrulist = sdc.GetMruList();
     uint32_t calloutcount = fspmrulist.size();
-    for (SDC_MRU_LIST::iterator i = fspmrulist.begin(); i < fspmrulist.end(); ++i)
+    for ( SDC_MRU_LIST::iterator i = fspmrulist.begin();
+          i < fspmrulist.end(); ++i )
     {
         thispriority = (*i).priority;
         thiscallout = (*i).callout;
-        if ( PRDcallout::TYPE_TARGET == thiscallout.getType() )
+        if ( PRDcalloutData::TYPE_TARGET == thiscallout.getType() )
         {
             TargetHandle_t target = thiscallout.getTarget();
             // Don't deconfig a Memory Controller for Bus Errors (Mc and SuperNova
@@ -801,23 +800,27 @@ errlHndl_t ErrDataService::GenerateSrcPfa(ATTENTION_TYPE attn_type,
                                 hcdbUpdate);
 
         }
-        else if ( PRDcallout::TYPE_MEMMRU == thiscallout.getType() )
+        else if ( PRDcalloutData::TYPE_MEMMRU == thiscallout.getType() )
         {
-            // FIXME: RTC 47288 PrdfMemoryMru will need refactor later
-            PrdfMemoryMru memMru = thiscallout.getMemMru();
+            MemoryMru memMru (thiscallout.flatten());
 
-            PRDF_HW_ADD_MEMMRU_CALLOUT(ForceTerminate,
-                                       memMru,
-                                       thispriority,
-                                       deconfigState,
-                                       gardState,
-                                       errLog,
-                                       writeVPD,
-                                       gardErrType,
-                                       severityParm,
-                                       hcdbUpdate);
+            TargetHandleList partList = memMru.getCalloutList();
+            for ( TargetHandleList::iterator it = partList.begin();
+                  it != partList.end(); it++ )
+            {
+                PRDF_HW_ADD_CALLOUT( ForceTerminate,
+                                     *it,
+                                     thispriority,
+                                     deconfigState,
+                                     gardState,
+                                     errLog,
+                                     writeVPD,
+                                     gardErrType,
+                                     severityParm,
+                                     hcdbUpdate );
+            }
         }
-        else if ( PRDcallout::TYPE_SYMFRU == thiscallout.getType() )
+        else if ( PRDcalloutData::TYPE_SYMFRU == thiscallout.getType() )
         {
             thisProcedureID = epubProcedureID(thiscallout.flatten());
 

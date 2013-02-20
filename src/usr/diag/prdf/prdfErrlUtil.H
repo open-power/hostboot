@@ -209,16 +209,6 @@
                         (const HWAS::GARD_ErrorType)i_gardErrType)
 
 /**
- * @brief Error log interface to add a HW callout to an existing error log.
- */
-// FIXME:RTC: 65609 will address this issue.
-// will need to implement later
-#define PRDF_HW_ADD_MEMMRU_CALLOUT(io_sysTerm, i_memMRU, i_priority,         \
-                                   i_deconfigState, i_gardState,             \
-                                   io_errl, i_writeVpd,                    \
-                                   i_gardErrType, i_severity, i_hcdb_update)
-
-/**
  * @brief Process's pending deconfig and GARD service actions
  *        and thencommits and deletes the error log.
  */
