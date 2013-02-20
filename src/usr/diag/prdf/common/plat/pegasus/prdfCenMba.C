@@ -30,6 +30,8 @@
 #include <prdfExtensibleChip.H>
 #include <prdfPlatServices.H>
 #include <prdfPluginMap.H>
+
+#include <prdfCenMbaCaptureData.H>
 #include <prdfCenMbaDataBundle.H>
 
 namespace PRDF
@@ -173,6 +175,9 @@ int32_t MaintCmdComplete( ExtensibleChip * i_mbaChip,
         }
 
         #endif // __HOSTBOOT_MODULE
+
+        // Get DRAM repairs capture data
+        CenMbaCaptureData::addDramRepairsData( mbaTarget, i_sc );
 
     } while (0);
 

@@ -30,6 +30,7 @@
 #include <prdfTrace.H>
 #include <prdfErrlUtil.H>
 #include "common/prdfEnums.H"
+#include "common/plat/pegasus/prdfCenMbaCaptureData.H"
 #include "common/plat/prdfMemoryMru.H"
 #include "framework/service/prdfPlatServices.H"
 
@@ -47,7 +48,8 @@ bool validSymbol(uint8_t i_symbol)
     return i_symbol != INVALID_SYMBOL;
 }
 
-bool commitRestoreCallout(bool (*i_func)(errlHndl_t &, void *), void * i_data)
+bool commitRestoreCallout( bool (*i_func)(errlHndl_t &, void *), void * i_data,
+                           TargetHandle_t i_mba )
 {
     PRDF_DENTER("commitRestoreCallout");
 
@@ -75,6 +77,8 @@ bool commitRestoreCallout(bool (*i_func)(errlHndl_t &, void *), void * i_data)
     }
 
     bool term = false;
+
+    CenMbaCaptureData::addDramRepairsData( i_mba, err );
 
     PRDF_HW_COMMIT_ERRL(
             term,
@@ -212,7 +216,7 @@ bool processRepairedRanks(
 
             PrdfMemoryMru * memoryMru = getMemoryMru(i_mba, rankNumber, cm);
 
-            commitRestoreCallout(&addMemMruCallout, memoryMru);
+            commitRestoreCallout( &addMemMruCallout, memoryMru, i_mba );
 
             calloutMade = true;
         }
@@ -296,7 +300,7 @@ bool processBadDimms(TargetHandle_t i_mba, uint8_t i_badDimmMask)
         if(match)
         {
             ++calloutCount;
-            commitRestoreCallout(&addDimmCallout, *dit);
+            commitRestoreCallout( &addDimmCallout, *dit, i_mba );
         }
     }
 
@@ -371,7 +375,7 @@ bool processDq(TargetHandle_t i_mba)
         if(badDq)
         {
             ++calloutCount;
-            commitRestoreCallout(&addDimmCallout, *dit);
+            commitRestoreCallout( &addDimmCallout, *dit, i_mba );
         }
     }
 

@@ -266,10 +266,11 @@ uint32_t getMemChnl( TARGETING::TargetHandle_t i_memTarget );
 /**
  * @brief   Determines if a given target is associated with a memory buffer that
  *          is located on the DIMM card.
- * @param   i_target Any memory target or parent.
- * @return  TRUE if target is associated with buffered DIMMs, FALSE otherwise.
+ * @param   i_target Any memory target or parent or a mba
+ * @param   o_memBuf true if associated MBA is non IS MBA
+ * @return  FAIL if internal function fails. Success otherwise
  */
-bool isMembufOnDimm( TARGETING::TargetHandle_t i_memTarget );
+int32_t isMembufOnDimm( TARGETING::TargetHandle_t i_memTarget, bool &o_memBuf);
 
 /**
  * @brief   Obtain the MBA port select for the given Dimm.
@@ -287,6 +288,14 @@ int32_t getMbaPort( TARGETING::TargetHandle_t i_dimmTarget, uint8_t & o_port );
  * @return  Non-SUCCESS if internal functions fail, SUCCESS otherwise.
  */
 int32_t getMbaDimm( TARGETING::TargetHandle_t i_dimmTarget, uint8_t & o_dimm );
+
+
+/**
+ * @brief   checks dram widh ( x4 ) for mba
+ * @param   i_mbaTarget MBA target
+ * @return  true if DRAM with is X4 false otherwise
+ */
+bool isDramWidthX4(TARGETING::TargetHandle_t i_mbaTarget);
 
 //##############################################################################
 //##

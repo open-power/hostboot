@@ -127,7 +127,7 @@ class ErrDataService
       @post None.
       @exception None.
       */
-    void AddCapData(ServiceDataCollector & i_sdc, errlHndl_t i_errHdl);
+    static void AddCapData( CaptureData & i_cd, errlHndl_t i_errHdl);
 
     static void SetTerminateOnCheckstop(bool setting)
     {

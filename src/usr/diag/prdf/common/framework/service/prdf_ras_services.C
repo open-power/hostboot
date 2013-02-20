@@ -746,7 +746,7 @@ errlHndl_t ErrDataService::GenerateSrcPfa(ATTENTION_TYPE attn_type,
     bool capDataAdded = false;
     if (calloutsPlusDimms > 3)
     {
-        AddCapData(sdc,errLog);
+        AddCapData(sdc.GetCaptureData(),errLog);
         capDataAdded = true;
     }
 
@@ -1195,7 +1195,7 @@ will also be removed. Need to confirm if this code is required anymore.
     // Check to make sure Capture Data wasn't added earlier.
     if (!capDataAdded)
     {
-        AddCapData(sdc,errLog);
+        AddCapData(sdc.GetCaptureData() ,errLog);
     }
 
     // Note moved the code from here, that was associated with checking for the last
@@ -1541,7 +1541,7 @@ void RasServices::MnfgTrace(ErrorSignature * l_esig )
 
 // ----------------------------------------------------------------------------
 
-void ErrDataService::AddCapData(ServiceDataCollector & i_sdc, errlHndl_t i_errHdl)
+void ErrDataService::AddCapData( CaptureData & i_cd, errlHndl_t i_errHdl)
 {
     // As CaptureDataClass has large array inside, allocate it on heap
     CaptureDataClass  *l_CapDataBuf = new CaptureDataClass() ;
@@ -1551,9 +1551,8 @@ void ErrDataService::AddCapData(ServiceDataCollector & i_sdc, errlHndl_t i_errHd
         l_CapDataBuf->CaptureData[ii] = 0xFF;
     }
 
-    uint32_t thisCapDataSize =  i_sdc.GetCaptureData().Copy(
-                                                     l_CapDataBuf->CaptureData,
-                                                     CaptureDataSize );
+    uint32_t thisCapDataSize =  i_cd.Copy( l_CapDataBuf->CaptureData,
+                                           CaptureDataSize );
 
     do
     {

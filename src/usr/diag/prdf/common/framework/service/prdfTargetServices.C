@@ -907,32 +907,26 @@ int32_t isMembufOnDimm( TARGETING::TargetHandle_t i_memTarget,
 
     do
     {
-        // The DIMMs in an node should either all be buffered or all not. So we
-        // can check the attribute from ANY MBA.
-        TargetHandleList list = getConnected( i_memTarget, TYPE_MBA );
-        if ( 0 == list.size() )
+        TargetHandle_t mbaTarget = NULL;
+
+        if ( TYPE_MBA == getTargetType(i_memTarget) )
         {
-            PRDF_ERR( "[isMembufOnDimm] Couldn't find an MBA target" );
-            break;
+            mbaTarget = i_memTarget;
+        }
+        else
+        {
+            // The DIMMs in an node should either all be buffered or all not. So
+            // we can check the attribute from ANY MBA.
+            TargetHandleList list = getConnected( i_memTarget, TYPE_MBA );
+            if ( 0 == list.size() )
+            {
+                PRDF_ERR( "[isMembufOnDimm] Couldn't find an MBA target" );
+                break;
+            }
+            mbaTarget = list[0];
         }
 
-        // FIXME - Currently TARGETING::ATTR_EFF_DIMM_TYPE is mapped to
-        //         fapi::ATTR_EFF_DIMM_TYPE, but there is no guarantee it will
-        //         stay mapped. The values of this attribute is mapped in a fapi
-        //         enum, but we are encouraged to use the TARGETING attribute.
-        //         Either we need to use fapi::ATTR_EFF_DIMM_TYPE (no preferred)
-        //         or get a TARGETING enum (preferred).
-        // FIXME - dimmtype should be of an enum type.
-        uint8_t dimmtype;
-        if ( !list[0]->tryGetAttr<ATTR_EFF_DIMM_TYPE>(dimmtype) )
-        {
-            PRDF_ERR( "[isMembufOnDimm] Failed to get DIMM type" );
-            break;
-        }
-
-        // FIXME - See note above.
-        if ( fapi::ENUM_ATTR_EFF_DIMM_TYPE_CDIMM == dimmtype )
-            o_isBuffered = true;
+        o_isBuffered = mbaTarget->getAttr<ATTR_EFF_CUSTOM_DIMM>();
 
         o_rc = SUCCESS;
 
@@ -1095,6 +1089,18 @@ bool mnfgTerminate()
 bool areDramRepairsDisabled()
 { return isMnfgFlagSet( MNFG_FLAG_BIT_MNFG_DISABLE_DRAM_REPAIRS ); }
 
+bool isDramWidthX4(TARGETING::TargetHandle_t i_mbaTarget)
+{
+    using namespace TARGETING;
+    bool isDramWidthX4 = false;
+
+    if ( fapi::ENUM_ATTR_EFF_DRAM_WIDTH_X4 ==
+                        i_mbaTarget->getAttr<ATTR_EFF_DRAM_WIDTH>())
+    {
+        isDramWidthX4 = true;
+    }
+    return isDramWidthX4;
+}
 
 } // end namespace PlatServices
 

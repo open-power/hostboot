@@ -48,6 +48,7 @@ EXTRAINCDIR += ${PRD_USR_PATH}/test
 
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/ecmddatabuffer
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/errl
+EXTRAINCDIR += ${ROOTPATH}/src/include/usr/util
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/hwpf/fapi
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/hwpf/plat
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/hwpf/hwp

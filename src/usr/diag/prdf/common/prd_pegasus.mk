@@ -41,5 +41,6 @@ prd_pegasus_specific = \
     prdfCenMbaAddress.o \
     prdfLineDelete.o \
     prdfPegasusConfigurator.o \
+    prdfCenMbaCaptureData.o \
     prdfRegisterData.o
 
