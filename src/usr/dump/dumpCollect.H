@@ -24,64 +24,14 @@
 #define __DUMPCOLLECT_H
 
 #include <errl/errlentry.H>
-
+#include <dump/dumpif.H>
 /** @file  dumpCollect.H
- *  @brief Provides the interfaces to copy dump data from src to destination
+ *  @brief Provides the interfaces to get the host data pointers for the
+ *        dump tables.
  */
 
 namespace DUMP
 {
-
-    //These structures are defined in the HDAT spec
-    //The MDST and MDDT have this format.
-    struct dumpEntry
-    {
-        uint64_t dataAddr;
-        uint64_t dataSize;
-    };
-
-    
-    //The MDRT has this format.
-    struct resultsEntry
-    {
-        uint64_t srcAddr;
-        uint64_t destAddr;
-        uint64_t dataSize;
-    };
-
-
-    /**
-     * @brief This function is a wrapper function that calls
-     *   getHostDataPtrs to get the MDDT, MDST, MDRT pointers
-     *   and then passes those values to the copySrcToDest
-     *   routine that performs the copy
-     *
-     * @param[in]   void
-     *
-     * @return  errlHndl_t
-     */                    
-     errlHndl_t doDumpCollect(void);
-
-     /**
-      * @brief This function copies the data and sizes retrieved from the
-      * MDST(source table) to the addresses indicated by the MDDT(destination
-      * table).   Each write is then logged in the MDRT (results table) with
-      * source addr, destination addr and size
-      *
-      * @param[in]   srcTableEntry     Ptr to the first MDST entry                           
-      * @param[in]   srcTableSize      Size of the entire MDST
-      *
-      * @param[in]   destTableAddr     Ptr to the first MDDT entry                     
-      * @param[in]   destTableSize     Size of the entire MDDT
-      *
-      * @param[in]   resultsTableAddr  Ptr to the first MDRT entry                           
-      * @param[in]   resultsTableSize  Size of the entire MDRT
-      *
-      * @return  errlHndl_t
-      */
-     errlHndl_t copySrcToDest(dumpEntry *srcTableEntry, uint64_t srcTableSize,
-                              dumpEntry *destTableEntry, uint64_t destTableSize,
-                              resultsEntry *resultsTableEntry, uint64_t resultsTableSize);
 
      /**
       * @brief This routine retrieves first entry of the MDST, MDDT and
@@ -103,7 +53,7 @@ namespace DUMP
                                 resultsEntry *resultsTableEntry,uint64_t &resultsTableSize);
 
 
-}
+}; // end of namespace
 
 
 #endif

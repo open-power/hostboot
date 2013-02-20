@@ -35,13 +35,12 @@
 #include <errl/errlentry.H>
 #include <devicefw/userif.H>
 #include <targeting/common/util.H>
-#include "../dumpCollect.H"
 #include <runtime/runtime.H>
-#include <usr/vmmconst.h>
 #include <sys/mmio.h>
 #include <util/align.H>
 #include <sys/mm.h>
-
+#include <dump/dumpif.H>
+#include <vfs/vfs.H>
 
 extern trace_desc_t* g_trac_dump;
 
@@ -49,6 +48,35 @@ class DumpTest: public CxxTest::TestSuite
 {
   public:
 
+    // Load the dump module as it is loaded on demand
+    DumpTest(): CxxTest::TestSuite()
+    {
+        errlHndl_t l_err = VFS::module_load( "libdump.so" );
+
+        if (l_err)
+        {
+            TRACFCOMP(g_trac_dump, "DumpTest:DumpTest> got an error back from moduleLoad : RC=%X",l_err->reasonCode() );
+            TS_FAIL( "DumpTest::DumpTest ERROR : Unexpected error log from moduleLoad" );
+            errlCommit(l_err,DUMP_COMP_ID);
+
+        }
+    };
+
+     // unload the dump module
+    ~DumpTest()
+    {
+        // Need to unload the dump module regardless of whether we have
+        // an error or not.
+        errlHndl_t l_err = VFS::module_unload( "libdump.so" );
+
+        if (l_err)
+        {
+            TRACFCOMP(g_trac_dump, "DumpTest:~DumpTest> got an error back from moduleUnLoad : RC=%X",l_err->reasonCode() );
+            TS_FAIL( "DumpTest::DumpTest ERROR : Unexpected error log from moduleUnLoad" );
+            errlCommit(l_err,DUMP_COMP_ID);
+
+        }
+    };
 
     /**
      * @brief Basic dump test that has sequential src addresses to
@@ -1041,7 +1069,7 @@ class DumpTest: public CxxTest::TestSuite
             TRACFCOMP(g_trac_dump, "DumpTest::DumpCollectUnevenSRC:1 : Results Data mismatch rc = %d", result_rc);
             TS_FAIL( "DumpTest::DumpCollectUnevenSrc ERROR : Unexpected error data mismatch in results table" );
         }
-
+        
 
         TRACFCOMP( g_trac_dump, "dumpTest::test_dumpCollectUnevenSrc COMPLETE" );
     }
@@ -1049,7 +1077,9 @@ class DumpTest: public CxxTest::TestSuite
 
     /**
      * @brief Basic dump test that forces an error condition that does not have
-     *     enough destination space to hold the src size
+     *     enough destination space to hold the src size.
+     *     This testcase also verifies that we can send a mbox message with
+     *     dump status to the FSP. 
      *
      */
 
@@ -1164,23 +1194,42 @@ class DumpTest: public CxxTest::TestSuite
             index+=2;
         }
 
+        l_err = DUMP::sendMboxMsg(DUMP::DUMP_MSG_START_MSG_TYPE);
+        // On the end message queue we need to add the results talble..
+        if (l_err)
+        {
+            TRACFCOMP(g_trac_dump,
+                      "DumpTest::DumpCollectNotEnoughDest ERROR : Got an errorlog back from sendMboxMsg-start");
+            TS_FAIL(
+                    "DumpTest::DumpCollectNotEnoughDest ERROR : Got an errorlog back from sendMboxMsg-start" );
+            errlCommit(l_err,DUMP_COMP_ID);
+        }
 
         srcTableEntry = reinterpret_cast<DUMP::dumpEntry *>(srcTableAddr);
         destTableEntry = reinterpret_cast<DUMP::dumpEntry *>(dstTableAddr);
         resultsTableEntry = reinterpret_cast<DUMP::resultsEntry *>(resultsTableAddr);
 
-
         l_err = DUMP::copySrcToDest(srcTableEntry,srcTableSize,
                                     destTableEntry,dstTableSize,
                                     resultsTableEntry,resultsTableSize);
 
-
         // this testcase expects an error returned.
         if( l_err )
         {
+
             TRACFCOMP(g_trac_dump,
                       "DumpTest::DumpCollectNotEnoughDest got an EXPECTED error back from copySrcToDest : RC=%X",l_err->reasonCode() );
             delete l_err;
+
+            // Send an Error mbox msg to FSP that we got an error
+            l_err = DUMP::sendMboxMsg(DUMP::DUMP_MSG_ERROR_MSG_TYPE);
+
+            if (l_err)
+            {
+                TRACFCOMP(g_trac_dump,
+                          "DumpTest::DumpCollectNotEnoughDest ERROR : Got an errorlog back from sendMboxMsg-error");
+                TS_FAIL( "DumpTest::DumpCollectNotEnoughDest ERROR : Got an errorlog back from sendMboxMsg-error" );
+            }
         }
         else
         {
@@ -1189,6 +1238,21 @@ class DumpTest: public CxxTest::TestSuite
             TS_FAIL( "DumpTest::DumpCollectNotEnoughDest ERROR : DID not get expected error on too small dest entry" );
         }
 
+
+        // This call is just to verify we can call MSG_END .. even though with
+        // this flow we already sent a msg ERROR.
+                          
+      
+        // Successful so send mbox message indicating the dump is complete and successful
+        l_err = DUMP::sendMboxMsg(DUMP::DUMP_MSG_END_MSG_TYPE);
+
+        if (l_err)
+        {
+            TRACFCOMP(g_trac_dump,
+                      "DumpTest::DumpCollectNotEnoughDest ERROR : Got an errorlog back from sendMboxMsg-END");
+            TS_FAIL( "DumpTest::DumpCollectNotEnoughDest ERROR : Got an errorlog back from sendMboxMsg-END" );
+        }
+   
 
         TRACFCOMP( g_trac_dump, "dumpTest::test_dumpCollectNotEnoughDest COMPLETE" );
 

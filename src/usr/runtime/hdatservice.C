@@ -31,6 +31,7 @@
 #include <util/align.H>
 #include "hdatstructs.H"
 #include "fakepayload.H"
+#include <dump/dumpif.H>
 
 extern trace_desc_t* g_trac_runtime;
 

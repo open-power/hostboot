@@ -31,6 +31,7 @@ namespace DUMP
     {
         DUMP_COLLECT_INVALID         = 0x00,
         DUMP_COLLECT                 = 0x01,
+        DUMP_SEND_MBOX_MSG           = 0x02,
     };
 
     enum dumpReasonCode

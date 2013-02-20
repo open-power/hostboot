@@ -34,7 +34,10 @@
 #include <runtime/runtime.H>
 #include <util/align.H>
 #include <sys/mm.h>
+#include <dump/dumpif.H>
 
+#include    <sys/msg.h>                     //  message Q's
+#include    <mbox/mbox_queues.H>            // 
 
 // Trace definition
 trace_desc_t* g_trac_dump = NULL;
@@ -43,7 +46,6 @@ TRAC_INIT(&g_trac_dump, "DUMP", 4*KILOBYTE);
 
 namespace DUMP
 {
-
 
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -67,29 +69,29 @@ namespace DUMP
 
         do
         {
-        // Get the Data pointers to the locations we need from HDAT
-        //     MS_DUMP_SRC_TBL, < MDST: Memory Dump Source Table
-        //     MS_DUMP_DST_TBL, < MDDT: Memory Dump Destination Table
-        //     MS_DUMP_RESULTS_TBL,  <MDRT:Memory Dump Results Table
-        l_err = getHostDataPtrs(srcTableEntry, srcTableSize,
-                                destTableEntry, destTableSize,
-                                resultsTableEntry, resultsTableSize);
+            // Get the Data pointers to the locations we need from HDAT
+            //     MS_DUMP_SRC_TBL, < MDST: Memory Dump Source Table
+            //     MS_DUMP_DST_TBL, < MDDT: Memory Dump Destination Table
+            //     MS_DUMP_RESULTS_TBL,  <MDRT:Memory Dump Results Table
+            l_err = getHostDataPtrs(srcTableEntry, srcTableSize,
+                                    destTableEntry, destTableSize,
+                                    resultsTableEntry, resultsTableSize);
 
-        if (l_err)
-        {
-            TRACFCOMP(g_trac_dump, "doDumpCollect: Got an error back from getHostDataPtrs");
-            break;
-        }
+            if (l_err)
+            {
+                TRACFCOMP(g_trac_dump, "doDumpCollect: Got an error back from getHostDataPtrs");
+                break;
+            }
 
-        l_err = copySrcToDest(srcTableEntry,srcTableSize,
-                              destTableEntry,destTableSize,
-                              resultsTableEntry,resultsTableSize);
+            l_err = copySrcToDest(srcTableEntry,srcTableSize,
+                                  destTableEntry,destTableSize,
+                                  resultsTableEntry,resultsTableSize);
 
-        if (l_err)
-        {
-            TRACFCOMP(g_trac_dump, "doDumpCollect: Got an error back from copySrcToDest");
-            break;
-        }
+            if (l_err)
+            {
+                TRACFCOMP(g_trac_dump, "doDumpCollect: Got an error back from copySrcToDest");
+                break;
+            }
 
         }while (0);
 
@@ -97,8 +99,8 @@ namespace DUMP
     }
 
 
-///////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////////////////////////////
 
     errlHndl_t copySrcToDest(dumpEntry *srcTableEntry, uint64_t srcTableSize,
                              dumpEntry *destTableEntry, uint64_t destTableSize,
@@ -188,13 +190,13 @@ namespace DUMP
 
             vaMapSrcTableAddr =
               (static_cast<uint64_t*>(mmio_dev_map(reinterpret_cast<void*>(ALIGN_PAGE_DOWN(curSrcTableAddr)),
-                                      THIRTYTWO_GB)));
+                                                   THIRTYTWO_GB)));
 
             vaSrcTableAddr = vaMapSrcTableAddr;
 
             vaMapDestTableAddr =
               (static_cast<uint64_t*>(mmio_dev_map(reinterpret_cast<void*>(ALIGN_PAGE_DOWN(curDestTableAddr)),
-                                      THIRTYTWO_GB)));
+                                                   THIRTYTWO_GB)));
 
             vaDestTableAddr = vaMapDestTableAddr;
 
@@ -271,9 +273,9 @@ namespace DUMP
 
                     // map the MDST entry to a device such that we can read and write from that memory
                     // address
-                     vaMapSrcTableAddr =
-                       (static_cast<uint64_t*>(mmio_dev_map(reinterpret_cast<void*>(ALIGN_PAGE_DOWN(curSrcTableAddr)),
-                                                            THIRTYTWO_GB)));
+                    vaMapSrcTableAddr =
+                      (static_cast<uint64_t*>(mmio_dev_map(reinterpret_cast<void*>(ALIGN_PAGE_DOWN(curSrcTableAddr)),
+                                                           THIRTYTWO_GB)));
 
                     vaSrcTableAddr = vaMapSrcTableAddr;
 
@@ -392,7 +394,7 @@ namespace DUMP
                             //  size.. Perhaps put the bad destination entry
                             //  there as well       
                         }
-                        
+
                         break;
                     }
 
@@ -603,7 +605,7 @@ namespace DUMP
                 // Invalid size or address
                 TRACFCOMP(g_trac_dump,
                           "HBDumpGetHostData address or size invalie for MDDT: addr =0x%X, size =0x%X," ,
-                           destTableAddr, destTableSize);
+                          destTableAddr, destTableSize);
 
                 l_section = RUNTIME::MS_DUMP_DST_TBL;
                 l_addr = destTableAddr;
@@ -636,7 +638,7 @@ namespace DUMP
                 // Invalid size or address
                 TRACFCOMP(g_trac_dump,
                           "HBDumpGetHostData address or size invalid for MDRT: addr =0x%X, size =0x%X," ,
-                           resultsTableAddr, resultsTableSize);
+                          resultsTableAddr, resultsTableSize);
 
                 l_section = RUNTIME::MS_DUMP_RESULTS_TBL;
                 l_addr = resultsTableAddr;
@@ -678,4 +680,166 @@ namespace DUMP
     }
 
 
-}
+    // ------------------------------------------------------------------
+    // sendMboxMsg
+    // ------------------------------------------------------------------
+    errlHndl_t sendMboxMsg(DUMP_MSG_TYPE i_type)
+
+    {
+        errlHndl_t l_err = NULL;
+        msg_t* msg = NULL;
+        TRACFCOMP( g_trac_dump,
+                   ENTER_MRK"sendMboxMsg()" );
+
+        do
+        {
+            
+            //Create a mailbox message to send to FSP
+            msg = msg_allocate();
+            msg->type = i_type;
+
+            // If this is not a dump start message, need to collect the
+            // Results table and size as well as the results table itself.
+            if (i_type != DUMP_MSG_START_MSG_TYPE)
+            {
+                uint64_t resultsTableAddr = 0;
+                uint64_t resultsTableSize = 0;
+
+                // Get the Results Table Address
+                l_err =
+                  RUNTIME::get_host_data_section(RUNTIME::MS_DUMP_RESULTS_TBL,
+                                                 0,
+                                                 resultsTableAddr,
+                                                 resultsTableSize);
+
+
+                if (l_err)
+                {
+                    // Got an errorlog back from get_host_data_sections
+                    TRACFCOMP(g_trac_dump, "HBDumpGetHostData get_host_data_sections for MDDT failed rc=0x%X", l_err->reasonCode());
+                }
+                // If the address or size is zero - error out
+                else if ((resultsTableSize == 0) || (resultsTableAddr == 0))
+                {
+                    // Invalid size or address
+                    TRACFCOMP(g_trac_dump,
+                              "HBDumpGetHostData address or size invalid for MDRT: addr =0x%X, size =0x%X," ,
+                              resultsTableAddr, resultsTableSize);
+
+
+                    // Create an errorlog and change the type to error and add
+                    // the plid to the data section.
+
+                    /*@
+                     * @errortype
+                     * @moduleid     DUMP::DUMP_SEND_MBOX_MSG
+                     * @reasoncode   DUMP::DUMP_NO_HDAT_ADDR
+                     * @userdata1    Address returned
+                     * @userdata2    Table type Requested
+                     * @devdesc      Invalid address and size returned from HDAT
+                     */
+                    l_err =
+                      new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                              DUMP_SEND_MBOX_MSG,
+                                              DUMP_NO_HDAT_ADDR,
+                                              resultsTableAddr,
+                                              i_type);
+
+                }
+
+                // if no error then collect as expected. 
+                if (!l_err)
+                {
+
+                    // TODO:  Issue RTC 67082 - fix sending the MDRT
+                    // to FSP once we have a design that can send the
+                    // entire table.. Max size is 512K - truncating to
+                    // 32K for the time being. 
+                    uint64_t l_resultsTableSize = resultsTableSize;
+
+                    // If the results table is greater than 32K truncate it.
+                    if (resultsTableSize > (32*KILOBYTE))
+                    {
+                        // Set the results table size to only include up to
+                        // 32K
+                        l_resultsTableSize = (32*KILOBYTE);
+
+                        TRACFCOMP( g_trac_dump,
+                                   INFO_MRK"Truncating the RESULTS table to 32K for dump msg type =. %.8X,",
+                                   i_type);
+
+                    }
+
+                    // TODO:  RTC 67082 - Need to make sure we put the physical
+                    // Address here.
+
+                    // Address of the results table
+                    msg->data[0] = resultsTableAddr;
+
+                    // Number of bytes in the results table
+                    msg->data[1] = l_resultsTableSize;
+
+                    //Copy the Results table into the message
+                    msg->extra_data = malloc( l_resultsTableSize );
+
+                    memcpy( msg->extra_data,
+                            reinterpret_cast<uint64_t*>(resultsTableAddr),
+                            l_resultsTableSize);
+
+
+                }
+                else
+                {
+                    TRACFCOMP( g_trac_dump,
+                               INFO_MRK"Got an error trying to send msg. %.8X,",
+                               i_type);
+
+                    // change the msg type to be error type
+                    i_type = DUMP_MSG_ERROR_MSG_TYPE;
+
+                    l_err->collectTrace("DUMP",1024);
+
+                    // Put a default value into the data[0] indicating plid to in data[1]
+                    msg->data[0] = 0xFFFF;
+
+                    msg->data[1] = l_err->plid(); // plid
+
+                    // just commit the log from failure on Read.. and
+                    // send an error msg to FSP.          
+                    errlCommit( l_err, DUMP_COMP_ID );
+                    l_err = NULL;
+
+                }
+            }
+
+
+            TRACFCOMP( g_trac_dump,
+                       INFO_MRK"Send msg to FSP about DUMP %.8X,",
+                       i_type);
+
+            // Send the message
+            l_err = MBOX::send( MBOX::FSP_DUMP_MSGQ_ID, msg );
+
+            // got an error.. Free the msg space allocated above.
+            if( l_err )
+            {
+                TRACFCOMP(g_trac_dump,
+                          ERR_MRK "Failed sending DUMP to FSP for %.8X",i_type);
+
+                l_err->collectTrace("DUMP",1024);
+
+                free( msg->extra_data );
+                msg->extra_data = NULL;
+                msg_free( msg );
+            }
+        } while( 0 );
+
+
+        TRACFCOMP( g_trac_dump,
+                   EXIT_MRK"sendMboxMsg()" );
+
+        return l_err;
+    }
+
+
+}; // end of namespace

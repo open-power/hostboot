@@ -182,6 +182,7 @@ namespace   INITSERVICE
 const DepModInfo  g_istep14Dependancies = {
     {
         DEP_LIB(libdram_initialization.so),
+        DEP_LIB(libdump.so),
         { 0 },
     }
 };
