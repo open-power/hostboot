@@ -1,26 +1,26 @@
 #!/bin/sh
-#  IBM_PROLOG_BEGIN_TAG
-#  This is an automatically generated prolog.
+# IBM_PROLOG_BEGIN_TAG
+# This is an automatically generated prolog.
 #
-#  $Source: src/build/tools/setupgithooks.sh $
+# $Source: src/build/tools/setupgithooks.sh $
 #
-#  IBM CONFIDENTIAL
+# IBM CONFIDENTIAL
 #
-#  COPYRIGHT International Business Machines Corp. 2011
+# COPYRIGHT International Business Machines Corp. 2011,2013
 #
-#  p1
+# p1
 #
-#  Object Code Only (OCO) source materials
-#  Licensed Internal Code Source Materials
-#  IBM HostBoot Licensed Internal Code
+# Object Code Only (OCO) source materials
+# Licensed Internal Code Source Materials
+# IBM HostBoot Licensed Internal Code
 #
-#  The source code for this program is not published or other-
-#  wise divested of its trade secrets, irrespective of what has
-#  been deposited with the U.S. Copyright Office.
+# The source code for this program is not published or otherwise
+# divested of its trade secrets, irrespective of what has been
+# deposited with the U.S. Copyright Office.
 #
-#  Origin: 30
+# Origin: 30
 #
-#  IBM_PROLOG_END
+# IBM_PROLOG_END_TAG
 
 #   each developer runs this from the git_repo base dir.  
 #   will copy the scripts into .git/hooks/ dir and make them runnable
@@ -36,10 +36,12 @@ then
     then
         echo "copy files into .git/hooks dir..."
         cp -v $ROOTDIR/src/build/tools/pre-commit          $ROOTDIR/.git/hooks/.
+        cp -v $ROOTDIR/src/build/tools/pre-commit          $ROOTDIR/.git/hooks/pre-applypatch
         cp -v $ROOTDIR/src/build/tools/$preCommitScript    $ROOTDIR/.git/hooks/.
         cp -v $ROOTDIR/src/build/tools/$addCopyrightScript $ROOTDIR/.git/hooks/.
         
         chmod u+x $ROOTDIR/.git/hooks/pre-commit
+        chmod u+x $ROOTDIR/.git/hooks/pre-applypatch
         chmod u+x $ROOTDIR/.git/hooks/$preCommitScript
         chmod u+x $ROOTDIR/.git/hooks/addCopyright.pl
         
