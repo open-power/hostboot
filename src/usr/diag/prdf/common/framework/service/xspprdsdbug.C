@@ -49,10 +49,11 @@
 #include <iipstep.h>
 #include <iipServiceDataCollector.h>
 #include <iipsdbug.h>
-#include <iipglobl.h>
+#include <prdfGlobal.H>
 #include <prdf_service_codes.H>
 #include <prdfBitString.H>
 #include <prdfPlatServices.H>
+#include <prdfErrlUtil.H>
 
 #undef xspprdsdbug_C
 

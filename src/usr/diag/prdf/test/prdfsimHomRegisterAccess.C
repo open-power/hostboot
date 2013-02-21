@@ -24,7 +24,7 @@
 #include "prdfsimHomRegisterAccess.H"
 #include "prdfsimServices.H"
 #include "prdfsimScrDB.H"
-
+#include <prdfTrace.H>
 
 namespace PRDF
 {

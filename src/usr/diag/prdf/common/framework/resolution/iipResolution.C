@@ -35,7 +35,7 @@
 #include <iipconst.h>
 #include <CcAutoDeletePointer.h>
 #include <iipSystem.h>
-#include <iipglobl.h>
+#include <prdfGlobal.H>
 //#include <iipCalloutMap.h>
 #include <iipCalloutResolution.h>
 #include <iipstep.h>

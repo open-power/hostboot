@@ -28,11 +28,13 @@
 #define prdfAssert_C
 
 #include <prdfAssert.h>
-#include <iipglobl.h>
+#include <prdfGlobal.H>
+#include <prdfTrace.H>
 #include <stdlib.h>
 #include <errlentry.H>
 #include <prdf_service_codes.H>
 #include <prdfMain.H>
+#include <prdfErrlUtil.H>
 
 #ifdef  __HOSTBOOT_MODULE
   #include <assert.h>

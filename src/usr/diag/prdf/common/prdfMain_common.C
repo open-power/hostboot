@@ -33,7 +33,7 @@
 #include <prdfMain.H>
 
 #include <CcAutoDeletePointer.h>
-#include <iipglobl.h>
+#include <prdfErrlUtil.H>
 #include <iipResolutionFactory.h>
 #include <iipSystem.h>
 #include <prdrLoadChipCache.H>  // To flush chip-file cache.

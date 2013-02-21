@@ -47,7 +47,7 @@
 #include <iipErrorRegister.h>
 
 #include <iipconst.h>
-#include <iipglobl.h>
+#include <prdfGlobal.H>
 #undef iipErrorRegister_C
 
 namespace PRDF

@@ -35,6 +35,7 @@
 #include <prdfFlyWeight.H>
 #include <tracinterface.H>
 #include <prdfHeapBucketSize.H>
+#include <prdfTrace.H>
 
 #undef prdfFlyWeight_C
 //----------------------------------------------------------------------

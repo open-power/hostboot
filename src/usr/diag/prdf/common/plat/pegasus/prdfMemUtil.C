@@ -26,7 +26,7 @@
 #include <prdfMemUtil.H>
 
 #include <iipconst.h>
-#include <iipglobl.h>
+#include <prdfGlobal.H>
 #include <iipSystem.h>
 #include <iipServiceDataCollector.h>
 #include <prdfExtensibleChip.H>

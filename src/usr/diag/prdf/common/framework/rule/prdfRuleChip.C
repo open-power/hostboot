@@ -27,7 +27,8 @@
   #include <prdfSdcFileControl.H> //for SyncAnalysis
 #endif
 
-#include <iipglobl.h> // for SystemPtr.
+#include <prdfGlobal.H> // for SystemPtr.
+#include <prdfErrlUtil.H>
 
 #include <prdfRuleChip.H>
 #include <prdrLoadChip.H>

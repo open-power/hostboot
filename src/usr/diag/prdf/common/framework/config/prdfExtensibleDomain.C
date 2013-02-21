@@ -28,7 +28,8 @@
 #include <prdf_service_codes.H>
 #include <errlentry.H>
 #include <prdfPfa5Data.h>
-#include <iipglobl.h>
+#include <prdfErrlUtil.H>
+#include <prdfGlobal.H>
 
 namespace PRDF
 {

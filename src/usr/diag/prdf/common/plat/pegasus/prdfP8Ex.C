@@ -25,7 +25,7 @@
  *  @brief Contains all the plugin code for the PRD P8 EX chiplet
  */
 
-#include <iipglobl.h>
+#include <prdfGlobal.H>
 #include <prdfPluginDef.H>
 #include <iipServiceDataCollector.h>
 #include <prdfExtensibleChip.H>

@@ -47,8 +47,8 @@
 #include <iipDomain.h>
 #include <iipServiceDataCollector.h>
 #include <iipResolutionFactory.h>
-#include <iipglobl.h>
 #include <prdfPlatServices.H>
+#include <prdfGlobal.H>
 
 #ifndef __HOSTBOOT_MODULE
   #include <prdfMfgThresholdMgr.H>

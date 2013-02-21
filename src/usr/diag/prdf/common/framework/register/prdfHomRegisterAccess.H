@@ -36,8 +36,8 @@
 #include <iipMopRegisterAccess.h>
 #include <vector>
 #include <prdfPlatServices.H>
-#include <iipglobl.h>
-
+#include <prdfErrlUtil.H>
+#include <prdfGlobal.H>
 //--------------------------------------------------------------------
 //  Forward References
 //--------------------------------------------------------------------

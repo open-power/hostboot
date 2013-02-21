@@ -29,7 +29,7 @@
 #include <map>
 #include <targeting/common/target.H>
 #include <iipbits.h>
-#include <iipglobl.h>
+#include <prdfGlobal.H>
 #include <prdfScanFacility.H>
 #include <prdfScomRegisterAccess.H>
 

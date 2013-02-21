@@ -51,7 +51,7 @@
 //--------------------------------------------------------------------
 
 #include <iipconst.h>
-#include <iipglobl.h>
+#include <prdfGlobal.H>
 #include <prdfFlyWeight.H>                                   // dg01
 #include <prdfFlyWeightS.H>
 #include <iipCalloutResolution.h>

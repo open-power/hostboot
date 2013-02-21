@@ -25,7 +25,7 @@
 #define _SimServices_H
 
 #include <prdfMain.H>
-#include <iipglobl.h>
+#include <prdfGlobal.H>
 #include "prdfsimScrDB.H"
 
 namespace PRDF

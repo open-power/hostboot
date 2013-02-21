@@ -32,7 +32,7 @@
 //  Includes
 //----------------------------------------------------------------------
 
-#include <iipglobl.h>
+#include <prdfGlobal.H>
 #include <iipDomain.h>
 #include <prdfPllDomain.H>
 

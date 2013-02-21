@@ -25,7 +25,7 @@
 #include <prdfPlatServices.H>
 #include <prdfMain.H>
 #include <prdfTrace.H>
-#include <iipglobl.h>
+#include <prdfGlobal.H>
 
 #include "prdfsimUtil.H"
 #include "prdsimSignatureParser.H"

@@ -32,7 +32,8 @@
 #include <time.h>
 #include <iipServiceDataCollector.h>
 #include <prdf_service_codes.H>
-#include <iipglobl.h>
+#include <prdfGlobal.H>
+#include <prdfErrlUtil.H>
 #include <prdfCallouts.H>
 #include <prdfPlatServices.H>
 

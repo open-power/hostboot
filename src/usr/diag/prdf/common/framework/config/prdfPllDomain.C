@@ -34,7 +34,7 @@
 #include <iipResolution.h>
 #include <prdfPlatServices.H>
 #include <prdfPluginDef.H>
-#include <iipglobl.h>
+#include <prdfGlobal.H>
 #include <iipSystem.h>
 
 namespace PRDF

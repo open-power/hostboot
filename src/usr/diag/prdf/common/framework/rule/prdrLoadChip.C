@@ -31,9 +31,9 @@
 
 #include <prdf_service_codes.H>
 #include <prdfThresholdResolutions.H>
-#include <iipglobl.h>
+#include <prdfGlobal.H>
 #include <UtilHash.H> // for Util::hashString
-
+#include <prdfErrlUtil.H>
 #include <algorithm> // for std::generate_n
 
 namespace Prdr

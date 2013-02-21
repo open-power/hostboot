@@ -32,7 +32,7 @@
 //----------------------------------------------------------------------
 #define prdfFabricDomain_C
 
-#include <iipglobl.h>
+#include <prdfGlobal.H>
 #include <iipstep.h>
 #include <iipsdbug.h>
 #include <iipErrorRegister.h>

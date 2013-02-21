@@ -32,7 +32,7 @@
 #include <prdfBitString.H>
 #include <iipscr.h>
 #include <prdfPlatServices.H>
-#include <iipglobl.h>
+#include <prdfGlobal.H>
 #include <iipSystem.h>
 
 namespace PRDF

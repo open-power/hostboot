@@ -22,7 +22,8 @@
 /* IBM_PROLOG_END_TAG                                                     */
 
 #include <prdfErrlSmartPtr.H>
-#include <iipglobl.h>
+#include <prdfGlobal.H>
+#include <prdfErrlUtil.H>
 
 namespace PRDF
 {

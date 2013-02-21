@@ -32,9 +32,10 @@
 
 #include <prdfPlatServices.H>
 
-#include <iipglobl.h>
+#include <prdfGlobal.H>
 #include <prdfAssert.h>
 #include <prdfTrace.H>
+#include <prdfErrlUtil.H>
 
 #include <dimmBadDqBitmapFuncs.H> // for dimm[S|G]etBadDqBitmap()
 #include <dram_initialization/mss_memdiag/mss_maint_cmds.H>

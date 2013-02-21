@@ -25,7 +25,7 @@
 // Includes
 //------------------------------------------------------------------------------
 
-#include <iipglobl.h>
+#include <prdfGlobal.H>
 #include <prdfPegasusConfigurator.H>
 #include <prdfRuleFiles.H>
 

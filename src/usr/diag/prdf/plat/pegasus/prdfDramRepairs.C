@@ -26,7 +26,9 @@
 #include <diag/prdf/prdfMain.H>
 #include <diag/prdf/common/prdf_service_codes.H>
 #include "common/iipconst.h"
-#include "common/iipglobl.h"
+#include <prdfGlobal.H>
+#include <prdfTrace.H>
+#include <prdfErrlUtil.H>
 #include "common/prdfEnums.H"
 #include "common/plat/prdfMemoryMru.H"
 #include "framework/service/prdfPlatServices.H"

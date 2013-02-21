@@ -46,10 +46,11 @@
 #include <prdfHomRegisterAccess.H>
 #include <prdf_service_codes.H>
 #include <iipbits.h>
-#include <iipglobl.h>
 #include <prdfMain.H>
 #include <prdfPlatServices.H>
-
+#include <prdfGlobal.H>
+#include <prdfErrlUtil.H>
+#include <prdfTrace.H>
 #undef prdfHomRegisterAccess_C
 
 

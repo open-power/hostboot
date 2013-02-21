@@ -32,7 +32,8 @@
 
 #include <prdfTargetServices.H>
 
-#include <iipglobl.h>
+#include <prdfGlobal.H>
+#include <prdfErrlUtil.H>
 #include <prdfTrace.H>
 
 #include <fapi.H>

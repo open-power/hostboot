@@ -22,7 +22,7 @@
 /* IBM_PROLOG_END_TAG                                                     */
 
 #include <prdfSystemSpecific.H>
-#include <iipglobl.h>
+#include <prdfGlobal.H>
 #include <prdfPegasusConfigurator.H>
 #include <prdfPlatServices.H>
 
