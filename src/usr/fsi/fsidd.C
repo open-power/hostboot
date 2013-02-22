@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2012              */
+/* COPYRIGHT International Business Machines Corp. 2011,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -36,6 +36,8 @@
 #include <trace/interface.H>
 #include <errl/errlentry.H>
 #include <errl/errlmanager.H>
+#include <errl/errludlogregister.H>
+#include <errl/errludtarget.H>
 #include <initservice/taskargs.H>
 #include <sys/time.h>
 #include <string.h>
@@ -235,7 +237,7 @@ errlHndl_t initializeHardware()
 /**
  * @brief Retrieves the status of a given port
  */
-bool isSlavePresent( const TARGETING::Target* i_fsiMaster,
+bool isSlavePresent( TARGETING::Target* i_fsiMaster,
                      TARGETING::FSI_MASTER_TYPE i_type,
                      uint8_t i_port )
 {
@@ -255,7 +257,7 @@ bool isSlavePresent( const TARGETING::Target* i_fsiMaster,
 /**
  * @brief Retrieves the FSI status of a given chip
  */
-bool isSlavePresent( const TARGETING::Target* i_target )
+bool isSlavePresent( TARGETING::Target* i_target )
 {
     if( i_target == NULL )
     {
@@ -280,7 +282,7 @@ bool isSlavePresent( const TARGETING::Target* i_target )
 /**
  * @brief Performs an FSI Read Operation to a relative address
  */
-errlHndl_t FsiDD::read(const TARGETING::Target* i_target,
+errlHndl_t FsiDD::read(TARGETING::Target* i_target,
                        uint64_t i_address,
                        uint32_t* o_buffer)
 {
@@ -335,7 +337,7 @@ errlHndl_t FsiDD::read(const TARGETING::Target* i_target,
 /**
  * @brief Performs an FSI Write Operation to a relative address
  */
-errlHndl_t FsiDD::write(const TARGETING::Target* i_target,
+errlHndl_t FsiDD::write(TARGETING::Target* i_target,
                         uint64_t i_address,
                         uint32_t* o_buffer)
 {
@@ -405,25 +407,25 @@ errlHndl_t FsiDD::initializeHardware()
         typedef struct {
             TARGETING::Target* targ;
             FsiDD::FsiChipInfo_t info;
-        } remote_master_t ;
+        } target_chipInfo_t ;
 
         // list of ports off of local MFSI
-        remote_master_t local_mfsi[MAX_SLAVE_PORTS];
+        target_chipInfo_t local_mfsi[MAX_SLAVE_PORTS];
         for( uint8_t mfsi=0; mfsi<MAX_SLAVE_PORTS; mfsi++ ) {
             local_mfsi[mfsi].targ = NULL;
         }
 
         // list of possible ports off of local cMFSI
-        FsiChipInfo_t local_cmfsi[MAX_SLAVE_PORTS];
+        target_chipInfo_t local_cmfsi[MAX_SLAVE_PORTS];
         for( uint8_t cmfsi=0; cmfsi<MAX_SLAVE_PORTS; cmfsi++ ) {
-            local_cmfsi[cmfsi].master = NULL;
+            local_cmfsi[cmfsi].targ = NULL;
         }
 
         // array of possible ports to initialize : [mfsi port][cmfsi port]
-        FsiChipInfo_t remote_cmfsi[MAX_SLAVE_PORTS][MAX_SLAVE_PORTS];
+        target_chipInfo_t remote_cmfsi[MAX_SLAVE_PORTS][MAX_SLAVE_PORTS];
         for( uint8_t mfsi=0; mfsi<MAX_SLAVE_PORTS; mfsi++ ) {
             for( uint8_t cmfsi=0; cmfsi<MAX_SLAVE_PORTS; cmfsi++ ) {
-                remote_cmfsi[mfsi][cmfsi].master = NULL;
+                remote_cmfsi[mfsi][cmfsi].targ = NULL;
             }
         }
 
@@ -451,15 +453,17 @@ errlHndl_t FsiDD::initializeHardware()
                 }
                 else if( info.type == TARGETING::FSI_MASTER_TYPE_CMFSI )
                 {
-                      if( info.master == iv_master )
-                      {
-                          local_cmfsi[info.port] = info;
-                      }
-                      else
-                      {
-                          FsiChipInfo_t info2 = getFsiInfo(info.master);
-                          remote_cmfsi[info2.port][info.port] = info;
-                      }
+                    if( info.master == iv_master )
+                    {
+                        local_cmfsi[info.port].targ = *t_itr;
+                        local_cmfsi[info.port].info = info;
+                    }
+                    else
+                    {
+                        FsiChipInfo_t info2 = getFsiInfo(info.master);
+                        remote_cmfsi[info2.port][info.port].info = info;
+                        remote_cmfsi[info2.port][info.port].targ = *t_itr;
+                    }
                 }
             }
 
@@ -477,12 +481,17 @@ errlHndl_t FsiDD::initializeHardware()
             // initialize all of the local MFSI ports
             for( uint8_t mfsi=0; mfsi<MAX_SLAVE_PORTS; mfsi++ )
             {
+
                 bool slave_present = false;
                 l_err = initPort( local_mfsi[mfsi].info,
                                   slave_present );
                 if( l_err )
                 {
-                    //@todo - append the actual slave target to FFDC
+                    // append the actual slave target to FFDC
+                    ERRORLOG::ErrlUserDetailsTarget(
+                            local_mfsi[mfsi].targ
+                        ).addToLog(l_err);
+                 
                     // commit the log here so that we can move on to next port
                     errlCommit(l_err,FSI_COMP_ID);
 
@@ -494,6 +503,7 @@ errlHndl_t FsiDD::initializeHardware()
 
                 // the slave wasn't present so we can't do anything with the
                 //   downstream ports
+
                 if( !slave_present )
                 {
                     continue;
@@ -505,7 +515,7 @@ errlHndl_t FsiDD::initializeHardware()
                 for( uint8_t cmfsi=0; cmfsi<MAX_SLAVE_PORTS; cmfsi++ )
                 {
                     // skip ports that have no possible slaves
-                    if( remote_cmfsi[mfsi][cmfsi].master == NULL )
+                    if( remote_cmfsi[mfsi][cmfsi].targ == NULL )
                     {
                         continue;
                     }
@@ -528,11 +538,15 @@ errlHndl_t FsiDD::initializeHardware()
                     }
 
                     // initialize the port/slave
-                    l_err = initPort( remote_cmfsi[mfsi][cmfsi],
+                    l_err = initPort( remote_cmfsi[mfsi][cmfsi].info,
                                       slave_present );
                     if( l_err )
                     {
-                        //@todo - append the actual slave target to FFDC
+                        // append the actual slave target to FFDC
+                        ERRORLOG::ErrlUserDetailsTarget(
+                                remote_cmfsi[mfsi][cmfsi].targ
+                            ).addToLog(l_err);
+
                         // commit the log here so that we can move on to next port
                         errlCommit(l_err,FSI_COMP_ID);
                     }
@@ -553,17 +567,21 @@ errlHndl_t FsiDD::initializeHardware()
             for( uint8_t cmfsi=0; cmfsi<MAX_SLAVE_PORTS; cmfsi++ )
             {
                 // skip ports that have no possible slaves
-                if( local_cmfsi[cmfsi].master == NULL )
+                if( local_cmfsi[cmfsi].targ == NULL )
                 {
                     continue;
                 }
 
                 bool slave_present = false;
-                l_err = initPort( local_cmfsi[cmfsi],
+                l_err = initPort( local_cmfsi[cmfsi].info,
                                   slave_present );
                 if( l_err )
                 {
-                    //@todo - append the actual slave target to FFDC
+                    // append the actual slave target to FFDC
+                    ERRORLOG::ErrlUserDetailsTarget(
+                            local_cmfsi[cmfsi].targ
+                        ).addToLog(l_err);
+
                     // commit the log here so that we can move on to next port
                     errlCommit(l_err,FSI_COMP_ID);
                 }
@@ -656,7 +674,7 @@ errlHndl_t FsiDD::write(uint64_t i_address,
 /**
  * @brief Performs an FSI Read Operation
  */
-errlHndl_t FsiDD::read(const FsiAddrInfo_t& i_addrInfo,
+errlHndl_t FsiDD::read(FsiAddrInfo_t& i_addrInfo,
                        uint32_t* o_buffer)
 {
     TRACDCOMP(g_trac_fsi, "FsiDD::read(relAddr=0x%llx,absAddr=0x%11x)> ", i_addrInfo.relAddr, i_addrInfo.absAddr );
@@ -725,7 +743,7 @@ errlHndl_t FsiDD::read(const FsiAddrInfo_t& i_addrInfo,
 /**
  * @brief Write FSI Register
  */
-errlHndl_t FsiDD::write(const FsiAddrInfo_t& i_addrInfo,
+errlHndl_t FsiDD::write(FsiAddrInfo_t& i_addrInfo,
                         uint32_t* i_buffer)
 {
     TRACDCOMP(g_trac_fsi, "FsiDD::write(relAddr=0x%.llX,absAddr=0x%.11X)> ", i_addrInfo.relAddr, i_addrInfo.absAddr );
@@ -799,7 +817,7 @@ errlHndl_t FsiDD::write(const FsiAddrInfo_t& i_addrInfo,
 /**
  * @brief Analyze error bits and recover hardware as needed
  */
-errlHndl_t FsiDD::handleOpbErrors(const FsiAddrInfo_t& i_addrInfo,
+errlHndl_t FsiDD::handleOpbErrors(FsiAddrInfo_t& i_addrInfo,
                                   uint32_t i_opbStatReg)
 {
     errlHndl_t l_err = NULL;
@@ -833,6 +851,11 @@ errlHndl_t FsiDD::handleOpbErrors(const FsiAddrInfo_t& i_addrInfo,
             uint32_t data = 0;
             errlHndl_t l_err2 = NULL;
 
+            // Add data to main error log 'l_err' where possible
+            size_t l_data_size = sizeof(data);
+            ERRORLOG::ErrlUserDetailsLogRegister 
+                    l_eud_fsiT(i_addrInfo.fsiTarg);
+
             l_err2 = read( 0x31D0, &data );
             if( l_err2 )
             {
@@ -841,6 +864,9 @@ errlHndl_t FsiDD::handleOpbErrors(const FsiAddrInfo_t& i_addrInfo,
             else
             {
                 TRACFCOMP( g_trac_fsi, "MESRB0(1D0) = %.8X", data );
+                l_eud_fsiT.addDataBuffer(&data, l_data_size,
+                                         DEVICE_FSI_ADDRESS(0x31D0ull));
+
             }
 
             l_err2 = read( 0x31D4, &data );
@@ -851,6 +877,8 @@ errlHndl_t FsiDD::handleOpbErrors(const FsiAddrInfo_t& i_addrInfo,
             else
             {
                 TRACFCOMP( g_trac_fsi, "MCSCSB0(1D4) = %.8X", data );
+                l_eud_fsiT.addDataBuffer(&data, l_data_size,
+                                         DEVICE_FSI_ADDRESS(0x31D4ull));
             }
 
             l_err2 = read( 0x31D8, &data );
@@ -861,6 +889,8 @@ errlHndl_t FsiDD::handleOpbErrors(const FsiAddrInfo_t& i_addrInfo,
             else
             {
                 TRACFCOMP( g_trac_fsi, "MATRB0(1D8) = %.8X", data );
+                l_eud_fsiT.addDataBuffer(&data, l_data_size,
+                                         DEVICE_FSI_ADDRESS(0x31D8ull));
             }
 
             l_err2 = read( 0x31DC, &data );
@@ -871,16 +901,24 @@ errlHndl_t FsiDD::handleOpbErrors(const FsiAddrInfo_t& i_addrInfo,
             else
             {
                 TRACFCOMP( g_trac_fsi, "MDTRB0(1DC) = %.8X", data );
+                l_eud_fsiT.addDataBuffer(&data, l_data_size,
+                                         DEVICE_FSI_ADDRESS(0x31DCull));
             }
+
+            // Push details to error log
+            l_eud_fsiT.addToLog(l_err);
 
             //MAGIC_INSTRUCTION(MAGIC_BREAK);
 
             iv_ffdcTask = 0;
         }
 
+
+        // Add opbTarg to original error log
+        ERRORLOG::ErrlUserDetailsTarget(i_addrInfo.opbTarg).addToLog(l_err);
+
         l_err->collectTrace("FSI");
         l_err->collectTrace("FSIR");
-        //@todo - figure out best data to log
 
         //@todo - implement recovery and callout code (Story 35287)
 
@@ -892,7 +930,7 @@ errlHndl_t FsiDD::handleOpbErrors(const FsiAddrInfo_t& i_addrInfo,
 /**
  * @brief  Poll for completion of a FSI operation, return data on read
  */
-errlHndl_t FsiDD::pollForComplete(const FsiAddrInfo_t& i_addrInfo,
+errlHndl_t FsiDD::pollForComplete(FsiAddrInfo_t& i_addrInfo,
                                   uint32_t* o_readData)
 {
     errlHndl_t l_err = NULL;
@@ -916,7 +954,15 @@ errlHndl_t FsiDD::pollForComplete(const FsiAddrInfo_t& i_addrInfo,
             if( l_err )
             {
                 TRACFCOMP(g_trac_fsi, "FsiDD::pollForComplete> Error from device 2 : RC=%X", l_err->reasonCode() );
-                break;
+                // Save both targets in i_addrInfo to error log
+                ERRORLOG::ErrlUserDetailsTarget(
+                        i_addrInfo.fsiTarg
+                    ).addToLog(l_err);
+                ERRORLOG::ErrlUserDetailsTarget(
+                        i_addrInfo.opbTarg
+                    ).addToLog(l_err);
+
+               break;
             }
 
             // check for completion or error
@@ -932,6 +978,7 @@ errlHndl_t FsiDD::pollForComplete(const FsiAddrInfo_t& i_addrInfo,
             elapsed_time_ns += 10000;
         } while( elapsed_time_ns <= MAX_OPB_TIMEOUT_NS ); // hardware has 1ms limit
         if( l_err ) { break; }
+
 
         // we should never timeout because the hardware should set an error
         if( elapsed_time_ns > MAX_OPB_TIMEOUT_NS )
@@ -955,6 +1002,15 @@ errlHndl_t FsiDD::pollForComplete(const FsiAddrInfo_t& i_addrInfo,
                                             TWO_UINT32_TO_UINT64(
                                                 read_data[0],
                                                 read_data[1]) );
+
+            // Save both targets in i_addrInfo to error log
+            ERRORLOG::ErrlUserDetailsTarget(
+                    i_addrInfo.fsiTarg
+                ).addToLog(l_err);
+            ERRORLOG::ErrlUserDetailsTarget(
+                    i_addrInfo.opbTarg
+                ).addToLog(l_err);
+
             l_err->collectTrace("FSI");
             l_err->collectTrace("FSIR");
             break;
@@ -991,6 +1047,15 @@ errlHndl_t FsiDD::pollForComplete(const FsiAddrInfo_t& i_addrInfo,
                                                 TWO_UINT32_TO_UINT64(
                                                     read_data[0],
                                                     read_data[1]) );
+
+                // Save both targets in i_addrInfo to error log
+                ERRORLOG::ErrlUserDetailsTarget(
+                        i_addrInfo.fsiTarg
+                    ).addToLog(l_err);
+                ERRORLOG::ErrlUserDetailsTarget(
+                        i_addrInfo.opbTarg
+                    ).addToLog(l_err);
+
                 l_err->collectTrace("FSI");
                 l_err->collectTrace("FSIR");
                 break;
@@ -1154,7 +1219,7 @@ errlHndl_t FsiDD::genFullFsiAddr(FsiAddrInfo_t& io_addrInfo)
  * @brief Generate a valid SCOM address to access the OPB, this will
  *    choose the correct master
  */
-uint64_t FsiDD::genOpbScomAddr(const FsiAddrInfo_t& i_addrInfo,
+uint64_t FsiDD::genOpbScomAddr(FsiAddrInfo_t& i_addrInfo,
                                uint64_t i_opbOffset)
 {
     //@todo: handle redundant FSI ports, always using zero for now (Story 35041)
@@ -1563,7 +1628,7 @@ uint64_t FsiDD::getPortOffset(TARGETING::FSI_MASTER_TYPE i_type,
 /**
  * @brief Retrieve the slave enable index
  */
-uint64_t FsiDD::getSlaveEnableIndex( const TARGETING::Target* i_master,
+uint64_t FsiDD::getSlaveEnableIndex( TARGETING::Target* i_master,
                                      TARGETING::FSI_MASTER_TYPE i_type )
 {
     if( i_master == NULL )
@@ -1592,7 +1657,7 @@ uint64_t FsiDD::getSlaveEnableIndex( const TARGETING::Target* i_master,
  * @brief Retrieve the connection information needed to access FSI
  *        registers within the given chip target
  */
-FsiDD::FsiChipInfo_t FsiDD::getFsiInfo( const TARGETING::Target* i_target )
+FsiDD::FsiChipInfo_t FsiDD::getFsiInfo( TARGETING::Target* i_target )
 {
     FsiChipInfo_t info;
     info.master = NULL;
@@ -1673,7 +1738,7 @@ FsiDD::FsiChipInfo_t FsiDD::getFsiInfo( const TARGETING::Target* i_target )
 /**
  * @brief Retrieves the status of a given port
  */
-bool FsiDD::isSlavePresent( const TARGETING::Target* i_fsiMaster,
+bool FsiDD::isSlavePresent( TARGETING::Target* i_fsiMaster,
                             TARGETING::FSI_MASTER_TYPE i_type,
                             uint8_t i_port )
 {
@@ -1700,7 +1765,7 @@ bool FsiDD::isSlavePresent( const TARGETING::Target* i_fsiMaster,
 /**
  * @brief Retrieves the FSI status of a given chip
  */
-bool FsiDD::isSlavePresent( const TARGETING::Target* i_target )
+bool FsiDD::isSlavePresent( TARGETING::Target* i_target )
 {
     // look up the FSI information for this target
     FsiChipInfo_t info = getFsiInfo(i_target);

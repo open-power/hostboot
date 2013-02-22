@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2012              */
+/* COPYRIGHT International Business Machines Corp. 2011,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -60,7 +60,7 @@ class FsiDD
      *
      * @return errlHndl_t  NULL on success
      */
-    errlHndl_t read(const TARGETING::Target* i_target,
+    errlHndl_t read(TARGETING::Target* i_target,
                     uint64_t i_address,
                     uint32_t* o_buffer);
 
@@ -73,7 +73,7 @@ class FsiDD
      *
      * @return errlHndl_t  NULL on success
      */
-    errlHndl_t write(const TARGETING::Target* i_target,
+    errlHndl_t write(TARGETING::Target* i_target,
                      uint64_t i_address,
                      uint32_t* i_buffer);
 
@@ -87,7 +87,7 @@ class FsiDD
      * 
      * @return bool  true if port sensed as active during FSI initialization
      */
-    bool isSlavePresent( const TARGETING::Target* i_fsiMaster,
+    bool isSlavePresent( TARGETING::Target* i_fsiMaster,
                          TARGETING::FSI_MASTER_TYPE i_type,
                          uint8_t i_port );
 
@@ -98,7 +98,7 @@ class FsiDD
      * 
      * @return bool  true if port sensed as active during FSI initialization
      */
-    bool isSlavePresent( const TARGETING::Target* i_target );
+    bool isSlavePresent( TARGETING::Target* i_target );
 
   protected:
     /**
@@ -143,13 +143,13 @@ class FsiDD
      *   current FSI operation 
      */
     struct FsiAddrInfo_t {
-        const TARGETING::Target* fsiTarg; ///< Target of FSI operation
+        TARGETING::Target* fsiTarg; ///< Target of FSI operation
         TARGETING::Target* opbTarg; ///< OPB control reg target
         uint32_t relAddr; ///< Input FSI address (relative to fsiTarg)
         uint32_t absAddr; ///< Absolute FSI address (relative to opbTarg)
 
         /** Input Arg Constructor */
-        FsiAddrInfo_t( const TARGETING::Target* i_target,
+        FsiAddrInfo_t( TARGETING::Target* i_target,
                        uint64_t i_address ) :
           fsiTarg(i_target), opbTarg(NULL),
         relAddr(i_address), absAddr(0xFFFFFFFF)
@@ -171,7 +171,7 @@ class FsiDD
      *
      * @return errlHndl_t  NULL on success
      */
-    errlHndl_t read(const FsiAddrInfo_t& i_addrInfo,
+    errlHndl_t read(FsiAddrInfo_t& i_addrInfo,
                     uint32_t* o_buffer);
 
     /**
@@ -182,7 +182,7 @@ class FsiDD
      *
      * @return errlHndl_t  NULL on success
      */
-    errlHndl_t write(const FsiAddrInfo_t& i_addrInfo,
+    errlHndl_t write(FsiAddrInfo_t& i_addrInfo,
                      uint32_t* i_buffer);
 
     /**
@@ -245,7 +245,7 @@ class FsiDD
      *
      * @return errlHndl_t  NULL on success
      */
-    errlHndl_t handleOpbErrors(const FsiAddrInfo_t& i_addrInfo,
+    errlHndl_t handleOpbErrors(FsiAddrInfo_t& i_addrInfo,
                                uint32_t i_opbStatReg);
 
     /**
@@ -257,7 +257,7 @@ class FsiDD
      *
      * @return errlHndl_t  NULL on success
      */
-    errlHndl_t pollForComplete(const FsiAddrInfo_t& i_addrInfo,
+    errlHndl_t pollForComplete(FsiAddrInfo_t& i_addrInfo,
                                uint32_t* o_readData);
 
     /**
@@ -282,7 +282,7 @@ class FsiDD
      *
      * @return uint64_t  Fully qualified OPB SCOM address
      */
-    uint64_t genOpbScomAddr(const FsiAddrInfo_t& i_addrInfo,
+    uint64_t genOpbScomAddr(FsiAddrInfo_t& i_addrInfo,
                             uint64_t i_opbOffset);
 
 
@@ -425,7 +425,7 @@ class FsiDD
      * @param[in] i_type  Type of FSI interface
      * @return uint64_t  Index into iv_slaves array
      */
-    uint64_t getSlaveEnableIndex( const TARGETING::Target* i_master,
+    uint64_t getSlaveEnableIndex( TARGETING::Target* i_master,
                                   TARGETING::FSI_MASTER_TYPE i_type );
 
     /**
@@ -436,7 +436,7 @@ class FsiDD
      *
      * @return FsiChipInfo_t  FSI Chip Information
      */
-    FsiChipInfo_t getFsiInfo( const TARGETING::Target* i_target );
+    FsiChipInfo_t getFsiInfo( TARGETING::Target* i_target );
 
 
     /********************************************
