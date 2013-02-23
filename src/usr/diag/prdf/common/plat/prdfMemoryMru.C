@@ -25,7 +25,7 @@
 
 //------------------------------------------------------------------------------
 
-#ifndef CONTEXT_x86_nfp
+#ifndef PRDF_ERRL_PARSER
 
 TARGETING::TargetHandleList PrdfMemoryMru::getCalloutList() const
 {

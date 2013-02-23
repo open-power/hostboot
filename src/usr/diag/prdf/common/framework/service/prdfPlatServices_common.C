@@ -51,6 +51,37 @@ namespace PlatServices
 {
 
 //##############################################################################
+//##                     Utility Functions (for this file only)
+//##############################################################################
+
+fapi::TargetType getFapiType( TARGETING::TargetHandle_t i_target )
+{
+    fapi::TargetType o_type = fapi::TARGET_TYPE_NONE;
+
+    switch ( getTargetType(i_target) )
+    {
+        case TYPE_PROC:   o_type = fapi::TARGET_TYPE_PROC_CHIP;     break;
+        case TYPE_EX:     o_type = fapi::TARGET_TYPE_EX_CHIPLET;    break;
+        case TYPE_ABUS:   o_type = fapi::TARGET_TYPE_ABUS_ENDPOINT; break;
+        case TYPE_XBUS:   o_type = fapi::TARGET_TYPE_XBUS_ENDPOINT; break;
+        case TYPE_MCS:    o_type = fapi::TARGET_TYPE_MCS_CHIPLET;   break;
+        case TYPE_MEMBUF: o_type = fapi::TARGET_TYPE_MEMBUF_CHIP;   break;
+        case TYPE_MBA:    o_type = fapi::TARGET_TYPE_MBA_CHIPLET;   break;
+        case TYPE_DIMM:   o_type = fapi::TARGET_TYPE_DIMM;          break;
+        default: ;
+    }
+
+    return o_type;
+}
+
+//------------------------------------------------------------------------------
+
+fapi::Target getFapiTarget( TARGETING::TargetHandle_t i_target )
+{
+    return fapi::Target( getFapiType(i_target), i_target );
+}
+
+//##############################################################################
 //##                     System Level Utility Functions
 //##############################################################################
 
@@ -76,8 +107,7 @@ int32_t getBadDqBitmap( TargetHandle_t i_mbaTarget, const uint8_t i_portSlct,
 
     errlHndl_t errl = NULL;
 
-    PRD_FAPI_TO_ERRL( errl, dimmGetBadDqBitmap,
-                      fapi::Target(fapi::TARGET_TYPE_MBA_CHIPLET, i_mbaTarget),
+    PRD_FAPI_TO_ERRL( errl, dimmGetBadDqBitmap, getFapiTarget(i_mbaTarget),
                       i_portSlct, i_dimmSlct, i_rankSlct, o_data );
 
     if ( NULL != errl )
@@ -102,8 +132,7 @@ int32_t setBadDqBitmap( TargetHandle_t i_mbaTarget, const uint8_t i_portSlct,
 
     errlHndl_t errl = NULL;
 
-    PRD_FAPI_TO_ERRL( errl, dimmSetBadDqBitmap,
-                      fapi::Target(fapi::TARGET_TYPE_MBA_CHIPLET, i_mbaTarget),
+    PRD_FAPI_TO_ERRL( errl, dimmSetBadDqBitmap, getFapiTarget(i_mbaTarget),
                       i_portSlct, i_dimmSlct, i_rankSlct, i_data );
 
     if ( NULL != errl )
@@ -127,8 +156,7 @@ int32_t mssGetMarkStore( TargetHandle_t i_mbaTarget, uint8_t i_rank,
 
     errlHndl_t errl = NULL;
 
-    PRD_FAPI_TO_ERRL( errl, mss_get_mark_store,
-                      fapi::Target(fapi::TARGET_TYPE_MBA_CHIPLET, i_mbaTarget),
+    PRD_FAPI_TO_ERRL( errl, mss_get_mark_store, getFapiTarget(i_mbaTarget),
                       i_rank, o_chipMark, o_symbolMark );
 
     if ( NULL != errl )
@@ -156,8 +184,7 @@ int32_t mssSetMarkStore( TargetHandle_t i_mbaTarget, uint8_t i_rank,
     //       to mark store was circumvented by hardware. Will need to check this
     //       return code.
 
-    PRD_FAPI_TO_ERRL( errl, mss_put_mark_store,
-                      fapi::Target(fapi::TARGET_TYPE_MBA_CHIPLET, i_mbaTarget),
+    PRD_FAPI_TO_ERRL( errl, mss_put_mark_store, getFapiTarget(i_mbaTarget),
                       i_rank, i_chipMark, i_symbolMark );
 
     if ( NULL != errl )
@@ -183,8 +210,7 @@ int32_t mssGetSteerMux( TargetHandle_t i_mbaTarget, uint8_t i_rank,
 /* TODO: Marc is creating a new interface.
     errlHndl_t errl = NULL;
 
-    PRD_FAPI_TO_ERRL( errl, TODO,
-                      fapi::Target(fapi::TARGET_TYPE_MBA_CHIPLET, i_mbaTarget),
+    PRD_FAPI_TO_ERRL( errl, TODO, getFapiTarget(i_mbaTarget),
                       i_rank, o_port0Spare, o_port1Spare, o_eccSpare );
 
     if ( NULL != errl )
@@ -211,8 +237,7 @@ int32_t mssSetSteerMux( TargetHandle_t i_mbaTarget, uint8_t i_rank,
 /* TODO: Marc is creating a new interface.
     errlHndl_t errl = NULL;
 
-    PRD_FAPI_TO_ERRL( errl, TODO,
-                      fapi::Target(fapi::TARGET_TYPE_MBA_CHIPLET, i_mbaTarget),
+    PRD_FAPI_TO_ERRL( errl, TODO, getFapiTarget(i_mbaTarget),
                       i_rank, i_symbol, i_x4EccSpare );
 
     if ( NULL != errl )
@@ -251,9 +276,7 @@ getDimmPlugCardType()
 */
 
 //##############################################################################
-//##
-//##                           Maintance command  wrapper code
-//##
+//##                    Maintance Command class wrapper
 //##############################################################################
 
 mss_MaintCmdWrapper::mss_MaintCmdWrapper( mss_MaintCmd * i_maintCmd ) :
@@ -333,37 +356,29 @@ int32_t mss_MaintCmdWrapper::cleanupCmd()
 
 //------------------------------------------------------------------------------
 
-mss_MaintCmdWrapper* createTimeBaseScrub (
-                       const TARGETING::TargetHandle_t i_target,
-                       uint64_t i_startAddr,
-                       uint64_t i_endAddr,
-                       bool  i_isFastSpeed,
-                       uint32_t i_stopCondition )
+mss_MaintCmdWrapper * createTimeBaseScrub(
+                        const TARGETING::TargetHandle_t i_mba,
+                        uint64_t i_startAddr, uint64_t i_endAddr,
+                        bool  i_isFastSpeed, uint32_t i_stopCondition )
 {
     ecmdDataBufferBase ecmdStartAddr(64);
     ecmdDataBufferBase ecmdEndAddr(64);
 
-    mss_MaintCmd::TimeBaseSpeed cmdSpeed = mss_MaintCmd::SLOW_12H;
-
-    if (true == i_isFastSpeed)
-    {
-        cmdSpeed = mss_MaintCmd::FAST_AS_POSSIBLE;
-    }
-    // Fill up emd structures for maint cmd
     ecmdStartAddr.setDoubleWord(0, i_startAddr);
     ecmdEndAddr.setDoubleWord(0, i_endAddr);
 
-    mss_MaintCmd *cmd = new mss_TimeBaseScrub(
-                                     fapi::Target(fapi::TARGET_TYPE_MBA_CHIPLET,
-                                                  i_target ),
-                                     ecmdStartAddr,
-                                     ecmdEndAddr,
-                                     cmdSpeed,
-                                     i_stopCondition,
-                                     false);
-    mss_MaintCmdWrapper *cmdWrapper = new mss_MaintCmdWrapper(cmd);
-    return cmdWrapper;
+    mss_MaintCmd::TimeBaseSpeed cmdSpeed = mss_MaintCmd::SLOW_12H;
+    if ( i_isFastSpeed )
+        cmdSpeed = mss_MaintCmd::FAST_AS_POSSIBLE;
 
+    mss_MaintCmd * cmd = new mss_TimeBaseScrub( getFapiTarget(i_mba),
+                                                ecmdStartAddr, ecmdEndAddr,
+                                                cmdSpeed, i_stopCondition,
+                                                false );
+
+    mss_MaintCmdWrapper * cmdWrapper = new mss_MaintCmdWrapper(cmd);
+
+    return cmdWrapper;
 }
 
 } // end namespace PlatServices

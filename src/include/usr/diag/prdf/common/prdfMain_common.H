@@ -154,7 +154,8 @@ extern errlHndl_t initialize();
  * containing the analysis; otherwise, for other attention types, PRD
  * commits the error log itself and NULL is returned.
  */
-extern errlHndl_t main(ATTENTION_VALUE_TYPE i_attnType, const AttnList & i_attnList);
+extern errlHndl_t main( ATTENTION_VALUE_TYPE i_attnType,
+                        const AttnList & i_attnList );
 
 /**
  *  @brief Clean up pieces of PRD for fresh IPLs.

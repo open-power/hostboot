@@ -380,11 +380,15 @@ bool processDq(TargetHandle_t i_mba)
     return 0 != calloutCount;
 }
 
-int32_t restoreDramRepairs(TargetHandle_t i_mba)
-{
-    bool calloutMade = false;
+//------------------------------------------------------------------------------
+// External functions - declared in prdfMain.H
+//------------------------------------------------------------------------------
 
-    PRDF_DENTER("restoreDramRepairs: %p", i_mba);
+int32_t restoreDramRepairs( TargetHandle_t i_mba )
+{
+    PRDF_ENTER( "restoreDramRepairs(0x%08x)", PlatServices::getHuid(i_mba) );
+
+    bool calloutMade = false;
 
     uint8_t repairedRankMask = 0, badDimmMask = 0;
 
@@ -442,7 +446,7 @@ int32_t restoreDramRepairs(TargetHandle_t i_mba)
 
     } while(0);
 
-    PRDF_DEXIT("restoreDramRepairs");
+    PRDF_EXIT( "restoreDramRepairs(0x%08x)", PlatServices::getHuid(i_mba) );
 
     return calloutMade ? FAIL : SUCCESS;
 }

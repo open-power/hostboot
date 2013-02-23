@@ -212,9 +212,7 @@ getDimmPlugCardType( TARGETING::TargetHandle_t i_dimmTarget );
 */
 
 //##############################################################################
-//##
-//##                           Maintance command  wrapper code
-//##
+//##                    Maintance Command class wrapper
 //##############################################################################
 
 /**
@@ -228,7 +226,7 @@ getDimmPlugCardType( TARGETING::TargetHandle_t i_dimmTarget );
 class mss_MaintCmdWrapper
 {
 
-  public:  //function
+  public: // functions
 
     /**
      * @brief Constructor
@@ -242,13 +240,11 @@ class mss_MaintCmdWrapper
      */
     virtual ~mss_MaintCmdWrapper();
 
-
     /**
      * @brief  Stops running maint cmd, and saves the address it stopped at.
      * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
      */
     int32_t stopCmd();
-
 
     /**
      * @brief  Saves any settings that need to be restored when command is done.
@@ -266,7 +262,7 @@ class mss_MaintCmdWrapper
      */
      int32_t cleanupCmd();
 
-  protected:
+  private: // instance variables
 
     // Underlying maintainance command object pointer
     mss_MaintCmd * iv_cmd;
@@ -276,18 +272,18 @@ class mss_MaintCmdWrapper
 /**
  * @brief  Create Time base scrub object, wrap i around mss_MaintCmdWrapper
  *         object
- * @param  i_target MBA target
- * @param  i_startAddr Start address for scrubbing
- * @param  i_endAddr End address for scrubbing
- * @param  i_isFastSpeed (false = slow (12 H) , true = fast)
- * @param  i_stopCondition bit mask for conditions on which scrubbing should
- *         stop
+ * @param  i_mba           An MBA target.
+ * @param  i_startAddr     Start address for scrubbing.
+ * @param  i_endAddr       End address for scrubbing.
+ * @param  i_isFastSpeed   false = slow (12 H) , true = fast
+ * @param  i_stopCondition Bit mask for conditions on which scrubbing should
+ *                         stop.
  * @return mss_MaintCmdWrapper object
  * @note   This function allocates memory on heap for mss_MaintCmdWrapper
- *         object. Its caller responsibilty to delete this object.
+ *         object. It is the caller's responsibilty to delete this object.
  */
-mss_MaintCmdWrapper * createTimeBaseScrub (
-                       const TARGETING::TargetHandle_t i_target,
+mss_MaintCmdWrapper * createTimeBaseScrub(
+                       const TARGETING::TargetHandle_t i_mba,
                        uint64_t i_startAddr,
                        uint64_t i_endAddr,
                        bool i_isFastSpeed,

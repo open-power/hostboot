@@ -27,11 +27,11 @@
 /** @file prdfRegisterCache.H */
 
 #include <map>
-#include <targeting/common/target.H>
 #include <iipbits.h>
 #include <prdfGlobal.H>
 #include <prdfScanFacility.H>
 #include <prdfScomRegisterAccess.H>
+#include <prdfTargetFwdRef.H>
 
 class BIT_STRING_CLASS;
 

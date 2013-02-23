@@ -66,8 +66,8 @@ void prdfAssert( const char * i_exp, const char * i_file, int i_line )
      * @userdata2  Line number of the assert
      * @userdata3  0
      * @userdata4  PRD Return code
-     * @devdesc PRD assert
-     * @procedure EPUB_PRC_SP_CODE
+     * @devdesc    PRD assert
+     * @procedure  EPUB_PRC_SP_CODE
      */
     PRDF_CREATE_ERRL(errl,
                      ERRL_SEV_PREDICTIVE,         // error on diagnostic

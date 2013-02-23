@@ -35,6 +35,7 @@
 #include <prdfGlobal.H>
 #include <prdfErrlUtil.H>
 #include <prdfCallouts.H>
+#include <prdfMemoryMru.H>
 #include <prdfPlatServices.H>
 
 // For compression routines

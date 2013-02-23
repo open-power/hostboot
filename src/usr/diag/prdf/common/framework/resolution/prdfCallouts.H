@@ -34,14 +34,15 @@
 
 #endif
 
-#if defined(PRD_SIM)
-#include <iipException.h>    // for throwing things
-#endif
-
 #include <prdfCalloutMap.H>
 #include <prdfEnums.H>
 #include <prdfMemoryMru.H>
-#include <prdfPlatServices.H>
+
+#ifdef PRDF_ERRL_PARSER
+  #include <prdfTargetFwdRef.H>
+#else
+  #include <prdfPlatServices.H>
+#endif
 
 namespace PRDF
 {
@@ -86,6 +87,8 @@ class PRDcallout
     PRDcallout( SymbolicFru i_symfru ) : iv_type(TYPE_SYMFRU)
     { iv_meldValue.symfru = i_symfru; }
 
+#ifndef PRDF_ERRL_PARSER
+
     /** @brief Constructor from raw data */
     PRDcallout( uint32_t i_val, MruType i_type ) : iv_type(i_type)
     {
@@ -101,6 +104,8 @@ class PRDcallout
                 iv_meldValue.u32 = 0;
         }
     }
+
+#endif
 
     /** @brief Assignment from TargetHandle_t */
     PRDcallout & operator=( TARGETING::TargetHandle_t i_target )
@@ -165,6 +170,8 @@ class PRDcallout
     /** @returns Returns the PrdfMemoryMru. */
     PrdfMemoryMru getMemMru() const { return PrdfMemoryMru(iv_meldValue.u32); }
 
+#ifndef PRDF_ERRL_PARSER
+
     /** @brief Returns a uint32_t representation of the callout */
     uint32_t flatten() const
     {
@@ -179,6 +186,8 @@ class PRDcallout
                 return 0;
         }
     }
+
+#endif
 
   private:
 
@@ -196,3 +205,4 @@ class PRDcallout
 } // end namespace PRDF
 
 #endif /* prdfCallouts_H */
+

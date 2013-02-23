@@ -34,7 +34,7 @@
 //--------------------------------------------------------------------
 
 #include <stdint.h>
-#include <targeting/common/target.H>
+#include <prdfTargetFwdRef.H>
 #include <errlentry.H>
 
 namespace PRDF

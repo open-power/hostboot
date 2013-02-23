@@ -51,6 +51,8 @@
   #include <prdfSdcFileControl.H>       // for RestoreAnalysis()
 #endif
 
+using namespace TARGETING;
+
 namespace PRDF
 {
 
@@ -66,7 +68,7 @@ bool g_initialized = false;
 // Function definitions
 //------------------------------------------------------------------------------
 
-void unInitialize(void)
+void unInitialize()
 {
     PRDF_ENTER( "PRDF::unInitialize()" );
 
@@ -91,7 +93,7 @@ errlHndl_t initialize()
 {
     PRDF_ENTER( "PRDF::initialize()" );
 
-    g_prd_errlHndl = NULL;  // This forces any previous errls to be committed dg09a
+    g_prd_errlHndl = NULL; // This forces any previous errls to be committed
 
     // Synchronize SCOM access to hardware
     // Start un-synchronized so hardware is accessed
@@ -121,7 +123,8 @@ errlHndl_t initialize()
         {
             PRDF_INF("PRDF::initialize() Used Saved ReSync'd SDC for an errl");
             thisSavedSdc.SetFlag(ServiceDataCollector::USING_SAVED_SDC);
-            errlHndl_t errl = serviceGenerator.GenerateSrcPfa(RECOVERABLE, thisSavedSdc);
+            errlHndl_t errl = serviceGenerator.GenerateSrcPfa( RECOVERABLE,
+                                                               thisSavedSdc );
             if (NULL != errl)
             {
                 PRDF_COMMIT_ERRL(errl, ERRL_ACTION_REPORT);
@@ -129,7 +132,7 @@ errlHndl_t initialize()
         }
 
         // Clear out old chip persistency (for CCM).
-        TARGETING::TargetHandleList l_oldChips;
+        TargetHandleList l_oldChips;
         for(ChipPersist::iterator i = ChipPersist::getInstance()->begin();
             i != ChipPersist::getInstance()->end();
             ++i)
@@ -139,12 +142,11 @@ errlHndl_t initialize()
         }
         // This must be done afterwards otherwise the delete operation destroys
         // the ChipPersist::iterator.
-        for(TARGETING::TargetHandleList::iterator i = l_oldChips.begin();
-            i != l_oldChips.end();
-            ++i)
+        for ( TargetHandleList::iterator i = l_oldChips.begin();
+              i != l_oldChips.end(); ++i )
         {
             ChipPersist::getInstance()->deleteEntry(*i);
-        };
+        }
         // -- finished clearing out old chip persistency (for CCM).
 
 #endif
@@ -160,7 +162,7 @@ errlHndl_t initialize()
         //systemPtr is populated in configurator
         if(systemPtr != NULL)
         {
-            systemPtr->Initialize(); // Hardware initialization & start scrub
+            systemPtr->Initialize(); // Hardware initialization
             g_initialized = true;
         }
         else // something bad happend.
@@ -180,10 +182,10 @@ errlHndl_t initialize()
 
 //------------------------------------------------------------------------------
 
-errlHndl_t main(ATTENTION_VALUE_TYPE i_attentionType, const AttnList & i_attnList)
+errlHndl_t main( ATTENTION_VALUE_TYPE i_attentionType,
+                 const AttnList & i_attnList )
 {
     PRDF_ENTER( "PRDF::main() Global attnType=%04X", i_attentionType );
-    using namespace TARGETING;
 
     g_prd_errlHndl = NULL;
 
@@ -208,24 +210,26 @@ errlHndl_t main(ATTENTION_VALUE_TYPE i_attentionType, const AttnList & i_attnLis
 
     sysdebug.Reinitialize(i_attnList); //Refresh sysdebug with latest Attn data
 
-    ///////////////////////////////////////////////////////////////////////////////////
-    // Normalize global attn type (ie 11,12,13,....) to (CHECKSTOP,RECOVERED,SPECIAL..)
-    ////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////
+    // Normalize global attn type (ie 11,12,13,....) to (CHECKSTOP, RECOVERED,
+    // SPECIAL..)
+    ////////////////////////////////////////////////////////////////////////////
 
-    if(i_attentionType == INVALID_ATTENTION_TYPE || i_attentionType >= END_ATTENTION_TYPE)
+    if ( i_attentionType == INVALID_ATTENTION_TYPE ||
+         i_attentionType >= END_ATTENTION_TYPE )
     {
         rc = PRD_INVALID_ATTENTION_TYPE;
-        PRDF_ERR("PrdMain: Invalid attention type! Global:%x" ,i_attentionType );
+        PRDF_ERR( "PrdMain: Invalid attention type! Global:%x",
+                  i_attentionType );
         i_attentionType = RECOVERABLE; // This will prevent RAS service problems
     }
-
 
     // link to the right service Generator
     ServiceGeneratorClass & serviceGenerator =
         ServiceGeneratorClass::ThisServiceGenerator();
 
     // check for something wrong
-    if(g_initialized == false || rc != SUCCESS || systemPtr == NULL)
+    if ( g_initialized == false || rc != SUCCESS || systemPtr == NULL )
     {
         if(rc == SUCCESS)
         {
@@ -235,7 +239,8 @@ errlHndl_t main(ATTENTION_VALUE_TYPE i_attentionType, const AttnList & i_attnLis
         // we are not going to do an analysis - so fill out the Service Data
         (serviceData.GetErrorSignature())->setSigId(rc);
         serviceData.SetCallout(SP_CODE);
-        serviceData.SetThresholdMaskId(0); // Sets AT_THRESHOLD, DEGRADED, SERVICE_CALL
+        serviceData.SetThresholdMaskId(0); // Sets AT_THRESHOLD, DEGRADED,
+                                           // SERVICE_CALL
     }
     else  // do the analysis
     {
@@ -245,15 +250,16 @@ errlHndl_t main(ATTENTION_VALUE_TYPE i_attentionType, const AttnList & i_attnLis
         serviceData.SetAttentionType(i_attentionType);
 
         // Check to see if this is a latent machine check.- capture time of day
-        serviceGenerator.SetErrorTod(i_attentionType, &latent_check_stop,serviceData);
+        serviceGenerator.SetErrorTod( i_attentionType, &latent_check_stop,
+                                      serviceData );
 
         if(serviceGenerator.QueryLoggingBufferFull())
         {
             serviceData.SetFlooding();
         }
 
-        // If the checkstop is latent than Service Generator Will use the scd from the last call
-        // to PRD - no further analysis needed.
+        // If the checkstop is latent than Service Generator Will use the scd
+        // from the last call to PRD - no further analysis needed.
         if (!latent_check_stop)
         {
             int32_t analyzeRc = systemPtr->Analyze(sdc, i_attentionType);
@@ -266,11 +272,14 @@ errlHndl_t main(ATTENTION_VALUE_TYPE i_attentionType, const AttnList & i_attnLis
             SystemSpecific::postAnalysisWorkarounds(sdc);
             if(analyzeRc != SUCCESS && g_prd_errlHndl == NULL)
             {
-                // We have a bad RC, but no error log - Fill out SDC and have service generator make one
-                (serviceData.GetErrorSignature())->setErrCode((uint16_t)analyzeRc);
+                // We have a bad RC, but no error log - Fill out SDC and have
+                // service generator make one
+                (serviceData.GetErrorSignature())->setErrCode(
+                                                        (uint16_t)analyzeRc );
                 serviceData.SetCallout(SP_CODE);
                 serviceData.SetServiceCall();
-                //mk438901 a We don't want to gard unless we have a good return code
+                // mk438901 a We don't want to gard unless we have a good
+                // return code
                 serviceData.Gard(GardResolution::NoGard);
             }
         }
@@ -279,7 +288,8 @@ errlHndl_t main(ATTENTION_VALUE_TYPE i_attentionType, const AttnList & i_attnLis
     if(g_prd_errlHndl != NULL)
     {
         PRDF_INF("PRDTRACE: PrdMain: g_prd_errlHndl != NULL");
-        PRDF_ADD_PROCEDURE_CALLOUT(g_prd_errlHndl, SRCI_PRIORITY_MED, EPUB_PRC_SP_CODE);
+        PRDF_ADD_PROCEDURE_CALLOUT( g_prd_errlHndl, SRCI_PRIORITY_MED,
+                                    EPUB_PRC_SP_CODE );
 
         // This forces any previous errls to be committed
         g_prd_errlHndl = NULL;
@@ -288,11 +298,13 @@ errlHndl_t main(ATTENTION_VALUE_TYPE i_attentionType, const AttnList & i_attnLis
         serviceData.Gard(GardResolution::NoGard);
     }
 
-    g_prd_errlHndl = serviceGenerator.GenerateSrcPfa(i_attentionType, serviceData);
+    g_prd_errlHndl = serviceGenerator.GenerateSrcPfa( i_attentionType,
+                                                      serviceData );
 
     //FIXME need delay to  let attention lines  settle
 
-    // mk461813 a Sleep for 20msec to let attention lines settle if we are at threshold
+    // mk461813 a Sleep for 20msec to let attention lines settle if we are at
+    // threshold
     //if ((g_prd_errlHndl == NULL) && serviceData.IsAtThreshold())
     //{
         //may need to call some function to manage some delay

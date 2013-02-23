@@ -29,8 +29,8 @@
 
 #include <stdint.h>
 
-#ifndef CONTEXT_x86_nfp
-    #include <targeting/common/target.H>
+#ifndef PRDF_ERRL_PARSER
+  #include <prdfPlatServices.H>
 #endif
 
 // FIXME: RTC 47288 Will need to wrap this in PRDF namespace once external
@@ -92,7 +92,7 @@ class PrdfMemoryMru
     virtual uint32_t toUint32() const
     { return iv_memMruUint32; }
 
-#ifndef CONTEXT_x86_nfp
+#ifndef PRDF_ERRL_PARSER
 
     /**
      * @brief  Returns a list of targets that are represented by this

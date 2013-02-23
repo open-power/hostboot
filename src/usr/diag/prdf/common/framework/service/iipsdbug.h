@@ -52,7 +52,7 @@
 
 #include <stdint.h>
 #include <prdfMain.H>
-#include <targeting/common/target.H>
+#include <prdfTargetFwdRef.H>
 
 namespace PRDF
 {

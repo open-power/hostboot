@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/include/usr/diag/prdf/prdfMain.H $                        */
+/* $Source: src/usr/diag/prdf/common/prdfTargetFwdRef.H $                 */
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/* COPYRIGHT International Business Machines Corp. 2013                   */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -21,36 +21,23 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-#ifndef __prdfMain_H
-#define __prdfMain_H
-
-/**
- * @file  prdfMain.H
- * @brief PRD code used by external components.
+/** @file  prdfTargetFwdRef.H
+ *  @brief Forward references for the targeting code.
  *
- * This file contains code that is strictly specific to Hostboot. All code that
- * is common between FSP and Hostboot should be in the respective common file.
+ *  Allows the ability to use things like TargetHandle_t in header files without
+ *  being required to include targeting/common/target.H.
  */
 
-#include <errl/errlmanager.H> // for errlHndl_t
+#ifndef __prdfTargetFwdRef_H
+#define __prdfTargetFwdRef_H
 
-// This must be included after all other includes. This will take care of cases
-// where a file must be included in the common code, but the include paths are
-// different between FSP and Hostboot.
-#include <diag/prdf/common/prdfMain_common.H>
-
-namespace PRDF
+namespace TARGETING
 {
+    class Target;
 
-/**
- * @brief  Restores hardware DRAM repairs to reflect what is stored in VPD.
- * @param  i_mba An MBA target.
- * @return Non-SUCCESS if conditions are such that a callout had to be made,
- *         SUCCESS otherwise.
- */
-extern int32_t restoreDramRepairs( const TARGETING::TargetHandle_t i_mba );
+    typedef const Target* ConstTargetHandle_t;
+    typedef       Target* TargetHandle_t;
+}
 
-} // end namespace PRDF
-
-#endif // __prdfMain_H
+#endif // __prdfTargetFwdRef_H
 
