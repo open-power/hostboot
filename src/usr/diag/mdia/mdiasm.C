@@ -410,7 +410,7 @@ bool StateMachine::executeWorkItem(WorkFlowProperties * i_wfp)
 errlHndl_t StateMachine::doMaintCommand(WorkFlowProperties & i_wfp)
 {
     // uint64_t timeout = i_wfp.memSize / 1024; // TODO RTC 47590
-    uint64_t timeout = 1500000000;
+    uint64_t timeout = 60000000000;
     errlHndl_t err = NULL;
 
     uint64_t stopCondition = mss_MaintCmd::STOP_ON_END_ADDRESS
