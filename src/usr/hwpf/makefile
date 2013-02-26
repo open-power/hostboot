@@ -50,7 +50,7 @@ HWP_ERROR_XML_FILES = hwp/fapiHwpErrorInfo.xml   \
     hwp/activate_powerbus/proc_build_smp/proc_build_smp_errors.xml \
     hwp/activate_powerbus/proc_build_smp/proc_adu_utils_errors.xml \
     hwp/thread_activate/proc_thread_control/proc_thread_control.xml \
-    hwp/erepair_errors.xml \
+    hwp/bus_training/erepair_errors.xml \
     hwp/nest_chiplets/proc_pcie_scominit/proc_pcie_scominit_errors.xml \
     hwp/dram_initialization/proc_pcie_config/proc_pcie_config_errors.xml \
     hwp/build_winkle_images/p8_set_pore_bar/p8_set_pore_bar_errors.xml  \

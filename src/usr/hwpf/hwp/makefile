@@ -41,9 +41,6 @@ OBJS = fapiTestHwp.o \
        fapiHwpExecInitFile.o \
        dimmBadDqBitmapFuncs.o \
        dimmBadDqBitmapAccessHwp.o \
-       erepairAccessorHwpFuncs.o \
-       erepairGetFailedLanesHwp.o \
-       erepairGetMnfgFailedLanesHwp.o \
        hwpisteperror.o  \
        hwpistepud.o
 
@@ -55,6 +52,5 @@ SUBDIRS	=   dmi_training.d  sbe_centaur_init.d mc_config.d \
 
 include mvpd_accessors/mvpd.mk
 include utility_procedures/utils.mk
-include io_restore_erepair/restore.mk
 
 include ${ROOTPATH}/config.mk

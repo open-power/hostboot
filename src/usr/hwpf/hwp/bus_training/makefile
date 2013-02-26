@@ -39,6 +39,10 @@ OBJS =  gcr_funcs.o io_funcs.o io_run_training.o pbusLinkSvc.o proc_fab_smp.o \
         io_power_down_lanes.o   \
         io_read_erepair.o   \
         io_clear_firs.o \
+        io_restore_erepair.o \
+        erepairAccessorHwpFuncs.o \
+        erepairGetFailedLanesHwp.o \
+        erepairGetMnfgFailedLanesHwp.o
 
 
 ##  NOTE: add a new directory onto the vpaths when you add a new HWP
