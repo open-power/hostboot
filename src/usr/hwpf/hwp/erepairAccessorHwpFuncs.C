@@ -151,13 +151,16 @@ fapi::ReturnCode geteRepairThreshold(const fapi::Target &i_endp_target,
  *                             lanes of the target passed as first param
  * @param [out] o_rxFaillanes  Reference to the vector having the Rx side fail
  *                             lanes of the target passed as first param
- *
- * @return bool  If TRUE, indicates that there were spare lanes in the VPD.
- *               If FALSE, indicates that there were no spare lanes in the VPD
+ * @param [out] o_sparesFound  If TRUE, indicates that there were spare lanes
+ *                             in the VPD.
+ *                             If FALSE, indicates that there were no spare
+ *                             lanes in the VPD
+ * @return ReturnCode
  */
-bool removeSpareLanes(const fapi::Target   &i_endp_target,
-                      std::vector<uint8_t> &o_txFaillanes,
-                      std::vector<uint8_t> &o_rxFaillanes);
+fapi::ReturnCode removeSpareLanes(const fapi::Target   &i_endp_target,
+                                  std::vector<uint8_t> &o_txFaillanes,
+                                  std::vector<uint8_t> &o_rxFaillanes,
+                                  bool                 &o_sparesFound);
 
 
 /**
@@ -639,9 +642,18 @@ fapi::ReturnCode erepairGetRestoreLanes(const fapi::Target &i_endp1_target,
         if(o_endp1_txFaillanes.size() || o_endp1_rxFaillanes.size())
         {
             l_sparesFound = false;
-            l_sparesFound = removeSpareLanes(l_endp1_target,
-                                             o_endp1_txFaillanes,
-                                             o_endp1_rxFaillanes);
+            l_rc = removeSpareLanes(l_endp1_target,
+                                    o_endp1_txFaillanes,
+                                    o_endp1_rxFaillanes,
+                                    l_sparesFound);
+
+            if(l_rc)
+            {
+                FAPI_ERR("erepairGetRestoreLanes: Error from"
+                         " removeSpareLanes(endp1)");
+                break;
+            }
+
             if(l_sparesFound)
             {
                 FAPI_SET_HWP_ERROR(l_rc, RC_EREPAIR_RESTORE_SPARE_LANES_IN_VPD);
@@ -654,9 +666,18 @@ fapi::ReturnCode erepairGetRestoreLanes(const fapi::Target &i_endp1_target,
         if(o_endp2_rxFaillanes.size() || o_endp2_txFaillanes.size())
         {
             l_sparesFound = false;
-            l_sparesFound = removeSpareLanes(l_endp2_target,
-                                             o_endp2_rxFaillanes,
-                                             o_endp2_txFaillanes);
+            l_rc = removeSpareLanes(l_endp2_target,
+                                    o_endp2_rxFaillanes,
+                                    o_endp2_txFaillanes,
+                                    l_sparesFound);
+
+            if(l_rc)
+            {
+                FAPI_ERR("erepairGetRestoreLanes: Error from"
+                         " removeSpareLanes(endp2)");
+                break;
+            }
+
             if(l_sparesFound)
             {
                 FAPI_SET_HWP_ERROR(l_rc, RC_EREPAIR_RESTORE_SPARE_LANES_IN_VPD);
@@ -672,9 +693,18 @@ fapi::ReturnCode erepairGetRestoreLanes(const fapi::Target &i_endp1_target,
         if(o_endp2_txFaillanes.size() || o_endp2_rxFaillanes.size())
         {
             l_sparesFound = false;
-            l_sparesFound = removeSpareLanes(l_endp2_target,
-                                             o_endp2_txFaillanes,
-                                             o_endp2_rxFaillanes);
+            l_rc = removeSpareLanes(l_endp2_target,
+                                    o_endp2_txFaillanes,
+                                    o_endp2_rxFaillanes,
+                                    l_sparesFound);
+
+            if(l_rc)
+            {
+                FAPI_ERR("erepairGetRestoreLanes: Error from"
+                         " removeSpareLanes(endp2)");
+                break;
+            }
+
             if(l_sparesFound)
             {
                 FAPI_SET_HWP_ERROR(l_rc, RC_EREPAIR_RESTORE_SPARE_LANES_IN_VPD);
@@ -840,20 +870,25 @@ void getCornerTestingLanes(const fapi::TargetType i_tgtType,
     }while(0);
 }
 
-bool removeSpareLanes(const fapi::Target   &i_endp_target,
-                      std::vector<uint8_t> &o_txFaillanes,
-                      std::vector<uint8_t> &o_rxFaillanes)
+fapi::ReturnCode removeSpareLanes(const fapi::Target   &i_endp_target,
+                                  std::vector<uint8_t> &o_txFaillanes,
+                                  std::vector<uint8_t> &o_rxFaillanes,
+                                  bool                 &o_sparesFound)
 {
+    fapi::ReturnCode  l_rc;
     fapi::TargetType  l_tgtType     = fapi::TARGET_TYPE_NONE;
-    bool              l_sparesFound = false;
     uint8_t           l_spareIndx   = 0;
     uint8_t           l_maxSpares   = 0;
+    uint8_t           l_xBusWidth   = 0;
     uint8_t           *l_txSparePtr = NULL;
     uint8_t           *l_rxSparePtr = NULL;
     std::vector<uint8_t>::iterator l_it;
 
-    uint8_t l_xSpareLanes[XBUS_MAXSPARES_IN_HW] = {XBUS_8_SPARE_LANE_1,
-                                                   XBUS_8_SPARE_LANE_2};
+    uint8_t l_x8ByteSpareLanes[XBUS_MAXSPARES_IN_HW] = {XBUS_8_SPARE_LANE_1,
+                                                        XBUS_8_SPARE_LANE_2};
+
+    uint8_t l_x4ByteSpareLanes[XBUS_MAXSPARES_IN_HW] = {XBUS_4_SPARE_LANE_1,
+                                                        XBUS_4_SPARE_LANE_2};
 
     uint8_t l_aSpareLanes[ABUS_MAXSPARES_IN_HW] = {ABUS_SPARE_LANE_1};
 
@@ -867,17 +902,31 @@ bool removeSpareLanes(const fapi::Target   &i_endp_target,
 
     do
     {
-        // TODO: RTC: 59542
-        // Determine whether the system is a 8byte mode or a 4byte mode system,
-        // and accordingly remove the correct X-Bus spare lanes.
-        // Assuming that for this power ON it will be a 8 byte mode system.
         l_tgtType = i_endp_target.getType();
+        o_sparesFound = false;
 
         switch(l_tgtType)
         {
             case fapi::TARGET_TYPE_XBUS_ENDPOINT:
+
+                l_rc = FAPI_ATTR_GET(ATTR_PROC_X_BUS_WIDTH, NULL, l_xBusWidth);
+
+                if(l_rc)
+                {
+                    FAPI_ERR("removeSpareLanes: Unable to read attribute"
+                             " - ATTR_PROC_X_BUS_WIDTH");
+                    break;
+                }
+
                 l_maxSpares = XBUS_MAXSPARES_IN_HW;
-                l_txSparePtr = l_rxSparePtr = l_xSpareLanes;
+                if(l_xBusWidth == TARGETING::PROC_X_BUS_WIDTH_W4BYTE)
+                {
+                    l_txSparePtr = l_rxSparePtr = l_x4ByteSpareLanes;
+                }
+                else if(l_xBusWidth == TARGETING::PROC_X_BUS_WIDTH_W8BYTE)
+                {
+                    l_txSparePtr = l_rxSparePtr = l_x8ByteSpareLanes;
+                }
                 break;
 
             case fapi::TARGET_TYPE_ABUS_ENDPOINT:
@@ -902,6 +951,11 @@ bool removeSpareLanes(const fapi::Target   &i_endp_target,
                 break;
         };
 
+        if(l_rc)
+        {
+            break;
+        }
+
         for(l_spareIndx = 0; l_spareIndx < l_maxSpares; l_spareIndx++)
         {
             // Find if there are spares as faillanes on Tx side,
@@ -916,7 +970,7 @@ bool removeSpareLanes(const fapi::Target   &i_endp_target,
                         " cannot be repaired",
                         l_txSparePtr[l_spareIndx]);
 
-                l_sparesFound = true;
+                o_sparesFound = true;
                 o_txFaillanes.erase(l_it, o_txFaillanes.end());
             }
 
@@ -932,13 +986,13 @@ bool removeSpareLanes(const fapi::Target   &i_endp_target,
                          " cannot be repaired",
                          l_rxSparePtr[l_spareIndx]);
 
-                l_sparesFound = true;
+                o_sparesFound = true;
                 o_rxFaillanes.erase(l_it, o_rxFaillanes.end());
             }
         }
     }while(0);
 
-    return (l_sparesFound);
+    return (l_rc);
 }
 
 fapi::ReturnCode geteRepairThreshold(const fapi::Target &i_endp_target,
