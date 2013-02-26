@@ -125,6 +125,8 @@ sub verifyFileLine
     {
         # Allow trace statements to slide.
         if (($line =~ m/TRAC[DSF]/) ||
+            ($line =~m/TS_FAIL/) ||
+            ($line =~m/printk/) ||
             ($line =~ m/FAPI_(INF|IMP|ERR|DBG|SCAN)/))
         {
         }

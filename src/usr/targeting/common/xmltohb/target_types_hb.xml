@@ -1,11 +1,11 @@
 <!-- IBM_PROLOG_BEGIN_TAG                                                   -->
 <!-- This is an automatically generated prolog.                             -->
 <!--                                                                        -->
-<!-- $Source: src/usr/targeting/common/xmltohb/target_types.xml $           -->
+<!-- $Source: src/usr/targeting/common/xmltohb/target_types_hb.xml $        -->
 <!--                                                                        -->
 <!-- IBM CONFIDENTIAL                                                       -->
 <!--                                                                        -->
-<!-- COPYRIGHT International Business Machines Corp. 2011,2012              -->
+<!-- COPYRIGHT International Business Machines Corp. 2011,2013              -->
 <!--                                                                        -->
 <!-- p1                                                                     -->
 <!--                                                                        -->
@@ -86,6 +86,9 @@
     </attribute>
     <attribute>
         <id>IBSCOM_VIRTUAL_ADDR</id>
+    </attribute>
+    <attribute>
+        <id>IBSCOM_MUTEX</id>
     </attribute>
     <attribute>
         <id>I2C_ENGINE_MUTEX_0</id>

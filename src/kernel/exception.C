@@ -233,16 +233,104 @@ void kernel_execute_softpatch()
     }
 }
 
+const uint64_t EXCEPTION_MSR_PR_BIT_MASK       = 0x0000000000004000;
+const uint64_t EXCEPTION_SRR1_LOADSTORE_ERR    = 0x0000000000200000;
+const uint64_t EXCEPTION_DSISR_LDX_UE_INTERRUPT = 0x0000000000008000;
+const uint32_t EXCEPTION_LDX_INSTR_MASK        = 0xFC0007FE;
+const uint32_t EXCEPTION_LDX_INSTR             = 0x7C00002A;
+const uint32_t EXCEPTION_RA_MASK               = 0x001F0000;
+const uint32_t EXCEPTION_RB_MASK               = 0x0000F800;
+const uint32_t EXCEPTION_RT_MASK               = 0x03E00000;
+
 extern "C"
 void kernel_execute_machine_check()
 {
     task_t* t = TaskManager::getCurrentTask();
-    printk("Machine check in %d on %ld:\n"
+
+    //PR (bit 49) = 0 indicates hypervisor mode
+    //  Which indicates kernel mode in Hostboot env.
+    if(!(getSRR1() & EXCEPTION_MSR_PR_BIT_MASK))
+    {
+        //Not much we can do to recover in Kernel, just assert
+        printk("Kernel Space Machine check in %d on %ld:\n"
+               "\tSRR0 = %lx, SRR1 = %lx\n"
+               "\tDSISR = %lx, DAR = %lx\n",
+               t->tid, getPIR(),
+               getSRR0(), getSRR1(), getDSISR(), getDAR());
+        kassert(false);
+    }
+
+    //User Space MC
+    printk("User Space Machine check in %d on %ld:\n"
            "\tSRR0 = %lx, SRR1 = %lx\n"
            "\tDSISR = %lx, DAR = %lx\n",
            t->tid, getPIR(),
            getSRR0(), getSRR1(), getDSISR(), getDAR());
-    kassert(false);
+
+
+    //Determine if this Machine Check was triggered by a SUE on
+    //CI (Cache Inhibited) Load.
+    if(!((getSRR1() & EXCEPTION_SRR1_LOADSTORE_ERR) &&
+         (getDSISR() & EXCEPTION_DSISR_LDX_UE_INTERRUPT)))
+    {
+        //SUE not caused by CI Load, unhandled exception.
+        TaskManager::endTask(t, NULL, TASK_STATUS_CRASHED);
+    }
+
+    //Get instruction that caused the SUE
+    uint64_t phys_addr = VmmManager::findKernelAddress(
+               reinterpret_cast<uint64_t>(t->context.nip));
+
+    sync();
+    uint32_t* instruction = reinterpret_cast<uint32_t*>(phys_addr);
+
+    if(!((*instruction & EXCEPTION_LDX_INSTR_MASK) ==
+         EXCEPTION_LDX_INSTR))
+    {
+        //Not an LDX instruction, unhandled exception
+        printk("kernel_execute_machine_check: Instruction 0x%.8x not an LDX instruction.  Ending task\n", *instruction);
+        TaskManager::endTask(t, NULL, TASK_STATUS_CRASHED);
+
+    }
+
+    //Compute the accessed address
+    uint32_t rA = (*instruction & EXCEPTION_RA_MASK) >> 16;
+    uint32_t rB = (*instruction & EXCEPTION_RB_MASK) >> 11;
+
+    uint64_t vaddr = 0;
+    if(rA != 0)
+    {
+        vaddr = t->context.gprs[rA] +
+          t->context.gprs[rB];
+    }
+    else
+    {
+        vaddr = t->context.gprs[rB];
+    }
+
+    uint64_t phys = VmmManager::findPhysicalAddress(vaddr);
+
+    //Check if address is in IBSCOM MMIO Range.
+    if( (phys >= MMIO_IBSCOM_START) &&
+        (phys <= MMIO_IBSCOM_END) )
+    {
+        //Read occured during IBSCOM read.  Indicate error to caller
+        //by setting known pattern (ascii SCOMFAIL) in rT
+        uint32_t rT = (*instruction & EXCEPTION_RT_MASK) >> 21;
+
+        //set rT = MMIO_IBSCOM_UE_DETECTED
+        t->context.gprs[rT] = MMIO_IBSCOM_UE_DETECTED;
+        //Advance to next instruction
+        uint32_t* nextInst = reinterpret_cast<uint32_t*>(t->context.nip);
+        nextInst++;
+        t->context.nip = reinterpret_cast<void*>(nextInst);
+    }
+    else
+    {
+        printk("kernel_execute_machine_check: Unrecognized memory address(%lx) - ending Task\n",
+               phys);
+        TaskManager::endTask(t, NULL, TASK_STATUS_CRASHED);
+    }
 }
 
 extern "C"

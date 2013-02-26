@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012                   */
+/* COPYRIGHT International Business Machines Corp. 2012,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -47,13 +47,10 @@ class IBscomTest: public CxxTest::TestSuite
 
     /**
      * @brief inband scom test #1
-     *        Write value and read back to verify
+     *        Write values and read back to verify
      */
     void test_IBscom(void)
     {
-
-        //TODO Enable and improve test cases  RTC: 52900
-        return;
 
         uint64_t fails = 0;
         uint64_t total = 0;
@@ -88,76 +85,145 @@ class IBscomTest: public CxxTest::TestSuite
         }
         l_testTarget = *(centaur_list.begin());
 
-        uint64_t addr = 0x03010E03;
-        uint64_t orig_data = 0;
-        uint64_t data = 0x12345678FEEDB0B0;
+        TRACDCOMP(g_trac_ibscom,
+                  "IBscomTest::test_IBscom> Read orignal data from Centaur");
+
+
+        const uint64_t addrs[] = {0x0201164F, 0x0301069A};
+        uint64_t orig_data[2] = {0};
+        uint64_t new_data[] = {0x1234567ABABABA00, 0xFEEDB0B0FEDCBA00};
+        uint64_t read_data[2] = {0};
+        uint64_t read_data_fsi[2] = {0};
         size_t op_size = sizeof(uint64_t);
 
         //Save of initial register content
-        l_err = deviceRead( l_testTarget,
-                            &orig_data,
-                            op_size,
-                            DEVICE_SCOM_ADDRESS(addr) );
-        if( l_err )
+        for(uint32_t i=0; i<2; i++)
         {
-            TRACFCOMP(g_trac_ibscom,
-                      "IBscomTest::test_IBscom> Orig Read: Error from device : addr=0x%X, RC=%X",
-                      addr, l_err->reasonCode() );
-            TS_FAIL( "test_IBscom1> ERROR : Unexpected error log from read1" );
-            fails++;
-            errlCommit(l_err,IBSCOM_COMP_ID);
+            op_size = sizeof(uint64_t);
+            l_err = deviceRead( l_testTarget,
+                                &orig_data[i],
+                                op_size,
+                                DEVICE_SCOM_ADDRESS(addrs[i]) );
+            if( l_err )
+            {
+                TRACFCOMP(g_trac_ibscom,"IBscomTest::test_IBscom> Orig Read: Error from device : addr=0x%X, RC=%X",
+                          addrs[i], l_err->reasonCode() );
+                TS_FAIL( "test_IBscom1> ERROR : Unexpected error log from saving original data." );
+                fails++;
+                errlCommit(l_err,IBSCOM_COMP_ID);
+            }
+            total++;
+
         }
 
-        l_err = deviceOp( DeviceFW::WRITE,
-                          l_testTarget,
-                          &data,
-                          op_size,
-                          DEVICE_IBSCOM_ADDRESS(addr) );
-        if( l_err )
+        //Write in some new data
+        for(uint32_t i=0; i<2; i++)
         {
-            TRACFCOMP(g_trac_ibscom,
-                      "IBscomTest::test_IBscom> Write: Error from device : addr=0x%X, RC=%X",
-                      addr, l_err->reasonCode() );
-            TS_FAIL( "ScomTest::test_IBscom> ERROR : Error log from write1" );
-            fails++;
-            errlCommit(l_err,IBSCOM_COMP_ID);
+            TRACDCOMP(g_trac_ibscom,"IBscomTest::test_IBscom> Write new pattern: 0x%.16X", new_data[i]);
+
+            op_size = sizeof(uint64_t);
+            l_err = deviceOp( DeviceFW::WRITE,
+                              l_testTarget,
+                              &new_data[i],
+                              op_size,
+                              DEVICE_IBSCOM_ADDRESS(addrs[i]) );
+            if( l_err )
+            {
+                TRACFCOMP(g_trac_ibscom,"IBscomTest::test_IBscom> Write: Error from device : addr=0x%X, RC=%X",
+                          addrs[i], l_err->reasonCode() );
+                TS_FAIL( "ScomTest::test_IBscom> ERROR : Error log from IBSCOM Write" );
+                fails++;
+                errlCommit(l_err,IBSCOM_COMP_ID);
+            }
+
+            total++;
         }
 
-        total++;
-
-        l_err = deviceOp( DeviceFW::READ,
-                          l_testTarget,
-                          &data,
-                          op_size,
-                          DEVICE_IBSCOM_ADDRESS(addr) );
-        if( l_err )
+        //Read the data back with IBSCOM
+        for(uint32_t i=0; i<2; i++)
         {
-            TRACFCOMP(g_trac_ibscom,
-                      "IBscomTest::test_IBscom> Read: Error from device : addr=0x%X, RC=%X",
-                      addr, l_err->reasonCode() );
-            TS_FAIL( "test_IBscom> ERROR : Error log from read2" );
-            fails++;
-            errlCommit(l_err,IBSCOM_COMP_ID);
+            TRACDCOMP(g_trac_ibscom,
+                      "IBscomTest::test_IBscom> Read data back");
+
+            //reset size
+            op_size = sizeof(uint64_t);
+            l_err = deviceOp( DeviceFW::READ,
+                              l_testTarget,
+                              &read_data[i],
+                              op_size,
+                              DEVICE_IBSCOM_ADDRESS(addrs[i]) );
+            if( l_err )
+            {
+                TRACFCOMP(g_trac_ibscom,"IBscomTest::test_IBscom> Read: Error from device : addr=0x%X, RC=%X",
+                          addrs[i], l_err->reasonCode() );
+                TS_FAIL( "test_IBscom> ERROR : Error log from IBSCOM read" );
+                fails++;
+                errlCommit(l_err,IBSCOM_COMP_ID);
+            }
+
+            if(new_data[i] != read_data[i])
+            {
+                TS_FAIL( "test_IBscom> ERROR : Data miss-match on IBSCOM read-back check." );
+
+                TRACFCOMP(g_trac_ibscom,"IBscomTest::test_IBscom>ERROR: addr=0x%.8x: Write data=0x%.16X, IBSCOM read data=0x%.16X",
+                          addrs[i], new_data[i], read_data[i]);
+                fails++;
+            }
+
+            total++;
         }
 
-        total++;
+        //Read the data back with FSISCOM
+        for(uint32_t i=0; i<2; i++)
+        {
+            TRACDCOMP(g_trac_ibscom,
+                      "IBscomTest::test_IBscom> Read data back");
+
+            //reset size
+            op_size = sizeof(uint64_t);
+            l_err = deviceOp( DeviceFW::READ,
+                              l_testTarget,
+                              &read_data_fsi[i],
+                              op_size,
+                              DEVICE_FSISCOM_ADDRESS(addrs[i]) );
+            if( l_err )
+            {
+                TRACFCOMP(g_trac_ibscom, "IBscomTest::test_IBscom> Read: Error from device : addr=0x%X, RC=%X",
+                          addrs[i], l_err->reasonCode() );
+                TS_FAIL( "test_IBscom> ERROR : Error log from FSI Read" );
+                fails++;
+                errlCommit(l_err,IBSCOM_COMP_ID);
+            }
+
+            if(new_data[i] != read_data_fsi[i])
+            {
+                TS_FAIL( "test_IBscom> ERROR : Data miss-match on FSI read-back check." );
+
+                TRACFCOMP(g_trac_ibscom, "IBscomTest::test_IBscom>ERROR: addr=0x%.8x: Write data=0x%.16X, FSI read data=0x%.16X",
+                          addrs[i], new_data[i], read_data_fsi[i]);
+                fails++;
+            }
+            total++;
+        }
 
         //Restore original data.
-          l_err = deviceWrite( l_testTarget,
-                               &orig_data,
-                               op_size,
-                               DEVICE_SCOM_ADDRESS(addr) );
-
-        if( l_err )
+        for(uint32_t i=0; i<2; i++)
         {
-            TRACFCOMP(g_trac_ibscom,
-                      "IBscomTest::test_IBscom> Write Orig Data: Error from device : addr=0x%X, RC=%X",
-                      addr, l_err->reasonCode() );
-            TS_FAIL( "test_IBscom> ERROR : Error log from write2" );
-            fails++;
-            errlCommit(l_err,IBSCOM_COMP_ID);
-        }
+            op_size = sizeof(uint64_t);
+            l_err = deviceWrite( l_testTarget,
+                                 &orig_data[i],
+                                 op_size,
+                                 DEVICE_SCOM_ADDRESS(addrs[i]) );
 
+            if( l_err )
+            {
+                TRACFCOMP(g_trac_ibscom,"IBscomTest::test_IBscom> Write Orig Data: Error from device : addr=0x%X, RC=%X",
+                          addrs[i], l_err->reasonCode() );
+                TS_FAIL( "test_IBscom> ERROR : Error log from write2" );
+                fails++;
+                errlCommit(l_err,IBSCOM_COMP_ID);
+            }
+        }
 
         TS_TRACE("test_IBscom runs successfully!");
         TRACFCOMP(g_trac_ibscom,
@@ -167,7 +233,8 @@ class IBscomTest: public CxxTest::TestSuite
         return;
     }
 
-
+    //TODO RTC: 68733: Add error path test cases when simics support
+    //is available
 
 };
 

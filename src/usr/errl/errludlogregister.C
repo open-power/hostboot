@@ -126,6 +126,7 @@ void ErrlUserDetailsLogRegister::readRegister(
         case DeviceFW::SPD:         // userif.H
         case DeviceFW::XSCOM:       // driverif.H
         case DeviceFW::FSISCOM:     // driverif.H
+        case DeviceFW::IBSCOM:     // driverif.H
         {
             numAddressArgs = 1;
             break;
@@ -207,6 +208,7 @@ void ErrlUserDetailsLogRegister::copyRegisterData(
         case DeviceFW::SPD:         // userif.H
         case DeviceFW::XSCOM:       // driverif.H
         case DeviceFW::FSISCOM:     // driverif.H
+        case DeviceFW::IBSCOM:     // driverif.H
         {
             numAddressArgs = 1;
             break;

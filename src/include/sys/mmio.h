@@ -144,6 +144,17 @@ void mmio_scratch_write(uint64_t which, uint64_t value);
  */
 mutex_t * mmio_xscom_mutex();
 
+/** Constant used by kernel to signal to IBSCOM device driver
+ *  that a UE was triggered during the IBSCOM Read operation
+ *  Value is "SCOMFAIL" in ASCII.
+ */
+static const uint64_t MMIO_IBSCOM_UE_DETECTED = 0x53434F4D4641494C;
+
+/** Constants used to define IBSCOM MMIO address range
+*/
+static const uint64_t MMIO_IBSCOM_START = 0x0003E00000000000;
+static const uint64_t MMIO_IBSCOM_END = 0x0003F02000000000;
+
 #ifdef __cplusplus
 }
 #endif

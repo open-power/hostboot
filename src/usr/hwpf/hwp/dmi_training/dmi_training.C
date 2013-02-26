@@ -1026,69 +1026,111 @@ void*    call_host_attnlisten_cen( void *io_pArgs )
 void*    call_cen_set_inband_addr( void *io_pArgs )
 {
     IStepError l_StepError;
+    errlHndl_t l_err = NULL;;
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-            "call_cen_set_inband_addr entry" );
+               "call_cen_set_inband_addr entry" );
 
-    //  get the mcs chiplets
-    TARGETING::TargetHandleList l_mcsTargetList;
-    getAllChiplets(l_mcsTargetList, TYPE_MCS);
+    do{
+        //  get the mcs chiplets
+        TARGETING::TargetHandleList l_mcsTargetList;
+        getAllChiplets(l_mcsTargetList, TYPE_MCS);
 
-    for (TargetHandleList::const_iterator
-            l_mcs_iter = l_mcsTargetList.begin();
-            l_mcs_iter != l_mcsTargetList.end();
-            ++l_mcs_iter)
-    {
-        TARGETING::Target* l_pTarget = *l_mcs_iter;
-        const fapi::Target l_fapi_target( TARGET_TYPE_MCS_CHIPLET,
-                    (const_cast<TARGETING::Target*>(l_pTarget)));
-
-        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                "Running cen_set_inband_addr HWP on "
-                "target HUID %.8X", TARGETING::get_huid(l_pTarget));
-
-        errlHndl_t l_err = NULL;
-        FAPI_INVOKE_HWP(l_err, proc_cen_set_inband_addr, l_fapi_target);
-        if ( l_err )
+        for (TargetHandleList::const_iterator
+             l_mcs_iter = l_mcsTargetList.begin();
+             l_mcs_iter != l_mcsTargetList.end();
+             ++l_mcs_iter)
         {
-            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-            "ERROR 0x%.8X : proc_cen_set_inband_addr HWP", l_err->reasonCode());
+            TARGETING::Target* l_pTarget = *l_mcs_iter;
+            const fapi::Target
+              l_fapi_target( TARGET_TYPE_MCS_CHIPLET,
+                             (const_cast<TARGETING::Target*>(l_pTarget)));
 
-            // capture the target data in the elog
-            ErrlUserDetailsTarget(l_pTarget).addToLog( l_err );
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                      "Running cen_set_inband_addr HWP on "
+                      "target HUID %.8X", TARGETING::get_huid(l_pTarget));
 
-            /*@
-             * @errortype
-             * @reasoncode  ISTEP_DMI_TRAINING_FAILED
-             * @severity    ERRORLOG::ERRL_SEV_UNRECOVERABLE
-             * @moduleid    ISTEP_PROC_CEN_SET_INBAND_ADDR
-             * @userdata1   bytes 0-1: plid identifying first error
-             *              bytes 2-3: reason code of first error
-             * @userdata2   bytes 0-1: total number of elogs included
-             *              bytes 2-3: N/A
-             * @devdesc     call to proc_cen_set_inband_addr has failed
-             *
-             */
-            l_StepError.addErrorDetails(ISTEP_DMI_TRAINING_FAILED,
-                                        ISTEP_PROC_CEN_SET_INBAND_ADDR,
-                                        l_err);
+            FAPI_INVOKE_HWP(l_err, proc_cen_set_inband_addr, l_fapi_target);
+            if ( l_err )
+            {
+                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                           "ERROR 0x%.8X : proc_cen_set_inband_addr HWP",
+                           l_err->reasonCode());
 
-            errlCommit( l_err, HWPF_COMP_ID );
+                // capture the target data in the elog
+                ErrlUserDetailsTarget(l_pTarget).addToLog( l_err );
 
-            break; // break out of mcs loop
-        }
-        else
+                /*@
+                 * @errortype
+                 * @reasoncode  ISTEP_DMI_TRAINING_FAILED
+                 * @severity    ERRORLOG::ERRL_SEV_UNRECOVERABLE
+                 * @moduleid    ISTEP_PROC_CEN_SET_INBAND_ADDR
+                 * @userdata1   bytes 0-1: plid identifying first error
+                 *              bytes 2-3: reason code of first error
+                 * @userdata2   bytes 0-1: total number of elogs included
+                 *              bytes 2-3: N/A
+                 * @devdesc     call to proc_cen_set_inband_addr has failed
+                 *
+                 */
+                l_StepError.addErrorDetails(ISTEP_DMI_TRAINING_FAILED,
+                                            ISTEP_PROC_CEN_SET_INBAND_ADDR,
+                                            l_err);
+
+                errlCommit( l_err, HWPF_COMP_ID );
+
+                break; // break out of mcs loop
+            }
+            else
+            {
+                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                           "SUCCESS :  proc_cen_set_inband_addr HWP");
+            }
+        }   // end for mcs
+
+        l_err = l_StepError.getErrorHandle();
+        if(l_err)
         {
-            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                    "SUCCESS :  proc_cen_set_inband_addr HWP");
+            break;
         }
-    }   // end for mcs
 
+/* TODO enable with RTC: 68733
+        //Now enable Inband SCOM for all membuf chips.
+        TARGETING::TargetHandleList membufChips;
+        getAllChips(membufChips, TYPE_MEMBUF, true);
+
+        for(uint32_t i=0; i<membufChips.size(); i++)
+        {
+            // If the membuf chip supports IBSCOM..
+            if (membufChips[i]->getAttr<ATTR_PRIMARY_CAPABILITIES>()
+                .supportsInbandScom)
+            {
+                ScomSwitches l_switches =
+                  membufChips[i]->getAttr<ATTR_SCOM_SWITCHES>();
+
+                // If Inband Scom is not already enabled.
+                if ((l_switches.useInbandScom != 1) ||
+                    (l_switches.useFsiScom != 0))
+                {
+                    l_switches.useFsiScom = 0;
+                    l_switches.useInbandScom = 1;
+
+                    // Turn off FSI scom and turn on Inband Scom.
+                    membufChips[i]->setAttr<ATTR_SCOM_SWITCHES>(l_switches);
+
+                    TRACDCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                              "Enable IBSCOM on target HUID %.8X",
+                              TARGETING::get_huid(membufChips[i]));
+
+                }
+            }
+        }
+*/
+    }while(0);
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-            "call_cen_set_inband_addr exit" );
+               "call_cen_set_inband_addr exit" );
 
-    return l_StepError.getErrorHandle();
+    return l_err;
 }
 
 //
