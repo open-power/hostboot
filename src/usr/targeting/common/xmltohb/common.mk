@@ -29,19 +29,21 @@
 #
 ################################################################################
 
-XMLTOHB_HEADER_TARGETS = \
-    attributeenums.H     \
-    attributestrings.H   \
-    attributetraits.H    \
-    attributestructs.H   \
-    pnortargeting.H      \
-    fapiplatattrmacros.H \
-    errludattribute.H
+XMLTOHB_HEADER_TARGETS =        \
+    attributeenums.H            \
+    attributestrings.H          \
+    attributetraits.H           \
+    attributestructs.H          \
+    pnortargeting.H             \
+    fapiplatattrmacros.H        \
+    plugins/errludattribute.H   \
+    plugins/errludtarget.H
 
 XMLTOHB_SOURCE_TARGETS = \
     attributestrings.C   \
     attributedump.C      \
-    errludattribute.C
+    errludattribute.C    \
+    errludtarget.C
 
 XMLTOHB_SYSTEM_BINARIES =       \
    vbu_targeting.bin            \

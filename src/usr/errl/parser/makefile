@@ -61,7 +61,7 @@ CODE_PASS: ${IMGDIR}/errlparser
 
 mkdirs:
 	mkdir -p ${OBJDIR}
-	mkdir -p ${GENDIR}
+	mkdir -p ${GENDIR}/plugins
 
 # Generate error log parser code
 ${ERRLPARSE_TARGETS} : gen_errl_parsers

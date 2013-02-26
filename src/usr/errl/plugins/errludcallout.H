@@ -31,6 +31,8 @@
  */
 
 #include "errluserdetails.H"
+#include "errludtarget.H" // for errlud_parse_entity_path()
+#include "../hwas/common/hwasCallout.H"
 
 namespace ERRORLOG
 {
@@ -66,9 +68,141 @@ public:
                        void * i_pBuffer,
                        const uint32_t i_buflen) const
     {
-        // TODO fix when parser fixed
-        // RTC 41707
-    }
+        HWAS::callout_ud_t *pData;
+        pData = static_cast<HWAS::callout_ud_t *>(i_pBuffer);
+
+        switch (pData->type)
+        {
+            case HWAS::HW_CALLOUT:
+            {
+                i_parser.PrintString( "Callout type", "Hardware Callout");
+
+                // what follows the pData structure is an entity path
+                // print it first
+                uint8_t *l_ptr = reinterpret_cast<uint8_t *>(pData+1);
+                if (*l_ptr == 0xF0)
+                {
+                    i_parser.PrintString("Target",
+                                "MASTER_PROCESSOR_CHIP_TARGET_SENTINEL");
+                }
+                else
+                {
+                    char outString[128];
+                    l_ptr = errlud_parse_entity_path(l_ptr, outString);
+                    i_parser.PrintString("Target", outString);
+                }
+
+                i_parser.PrintNumber( "CPU id", "0x%X", ntohl(pData->cpuid) );
+
+                switch (ntohl(pData->deconfigState))
+                {
+#define case_DECONFIG_STATE(_type) \
+case HWAS::_type: i_parser.PrintString( "Deconfig State", #_type); break;
+                    case_DECONFIG_STATE(NO_DECONFIG)
+                    case_DECONFIG_STATE(DECONFIG)
+                    case_DECONFIG_STATE(DELAYED_DECONFIG)
+                    default:
+                        i_parser.PrintNumber( "Deconfig State", "UNKNOWN: 0x%X",
+                                        ntohl(pData->deconfigState) );
+                        break;
+                } // switch deconfigState
+
+                switch (ntohl(pData->gardErrorType))
+                {
+#define case_GARD_ERROR_TYPE(_type) \
+case HWAS::_type: i_parser.PrintString( "GARD Error Type", #_type); break;
+                    case_GARD_ERROR_TYPE(GARD_NULL)
+                    case_GARD_ERROR_TYPE(GARD_Pending)
+                    case_GARD_ERROR_TYPE(GARD_PendingCmplt)
+                    case_GARD_ERROR_TYPE(GARD_Unrecoverable)
+                    case_GARD_ERROR_TYPE(GARD_Fatal)
+                    case_GARD_ERROR_TYPE(GARD_Fabric)
+                    case_GARD_ERROR_TYPE(GARD_Computation)
+                    case_GARD_ERROR_TYPE(GARD_ComputationCmplt)
+                    case_GARD_ERROR_TYPE(GARD_Predictive)
+                    case_GARD_ERROR_TYPE(GARD_PredictiveCmplt)
+                    case_GARD_ERROR_TYPE(GARD_ByAssociation)
+                    case_GARD_ERROR_TYPE(GARD_ResourceRecovery)
+                    case_GARD_ERROR_TYPE(GARD_Cmplt)
+                    case_GARD_ERROR_TYPE(GARD_Func)
+                    case_GARD_ERROR_TYPE(GARD_FuncCmplt)
+                    case_GARD_ERROR_TYPE(GARD_DmaRecoverable)
+                    case_GARD_ERROR_TYPE(GARD_DmaUnrecoverable)
+                    case_GARD_ERROR_TYPE(GARD_Tod)
+                    case_GARD_ERROR_TYPE(GARD_TodCmplt)
+                    case_GARD_ERROR_TYPE(GARD_Slb)
+                    case_GARD_ERROR_TYPE(GARD_SlbCmplt)
+                    case_GARD_ERROR_TYPE(GARD_ProcRecoverable)
+                    case_GARD_ERROR_TYPE(GARD_ProcRecoverableCmplt)
+                    case_GARD_ERROR_TYPE(GARD_TimeFac)
+                    case_GARD_ERROR_TYPE(GARD_TimeFacCmplt)
+                    case_GARD_ERROR_TYPE(GARD_GxBusError)
+                    case_GARD_ERROR_TYPE(GARD_PowerBusError)
+                    case_GARD_ERROR_TYPE(GARD_Withheld)
+                    case_GARD_ERROR_TYPE(GARD_PoreError)
+                    case_GARD_ERROR_TYPE(GARD_NxError)
+                    case_GARD_ERROR_TYPE(GARD_Void)
+                    default:
+                        i_parser.PrintNumber( "Deconfig State", "UNKNOWN: 0x%X",
+                                        ntohl(pData->gardErrorType) );
+                        break;
+                } // switch deconfigState
+
+                break; // HW_CALLOUT
+            }
+            case HWAS::PROCEDURE_CALLOUT:
+                i_parser.PrintString( "Callout type", "Procedure Callout");
+                switch (ntohl(pData->procedure))
+                {
+#define case_PROCEDURE(_type) \
+case HWAS::_type: i_parser.PrintString( "Procedure", #_type); break;
+                    case_PROCEDURE(EPUB_PRC_NONE)
+                    case_PROCEDURE(EPUB_PRC_FIND_DECONFIGURED_PART)
+                    case_PROCEDURE(EPUB_PRC_SP_CODE)
+                    case_PROCEDURE(EPUB_PRC_PHYP_CODE)
+                    case_PROCEDURE(EPUB_PRC_ALL_PROCS)
+                    case_PROCEDURE(EPUB_PRC_ALL_MEMCRDS)
+                    case_PROCEDURE(EPUB_PRC_INVALID_PART)
+                    case_PROCEDURE(EPUB_PRC_LVL_SUPP)
+                    case_PROCEDURE(EPUB_PRC_PROCPATH)
+                    case_PROCEDURE(EPUB_PRC_NO_VPD_FOR_FRU)
+                    case_PROCEDURE(EPUB_PRC_MEMORY_PLUGGING_ERROR)
+                    case_PROCEDURE(EPUB_PRC_FSI_PATH)
+                    case_PROCEDURE(EPUB_PRC_PROC_AB_BUS)
+                    case_PROCEDURE(EPUB_PRC_PROC_XYZ_BUS)
+                    case_PROCEDURE(EPUB_PRC_MEMBUS_ERROR)
+                    case_PROCEDURE(EPUB_PRC_EIBUS_ERROR)
+                    case_PROCEDURE(EPUB_PRC_POWER_ERROR)
+                    case_PROCEDURE(EPUB_PRC_PERFORMANCE_DEGRADED)
+                    case_PROCEDURE(EPUB_PRC_HB_CODE)
+                    default:
+                        i_parser.PrintNumber( "Procedure", "UNKNOWN: 0x%X",
+                                        ntohl(pData->procedure) );
+                        break;
+                } // switch procedure
+                break; // PROCEDURE_CALLOUT
+            default:
+                i_parser.PrintNumber( "Callout type", "UNKNOWN: 0x%X",
+                                            ntohl(pData->type) );
+                break;
+        } // switch type
+
+        switch (ntohl(pData->priority))
+        {
+#define case_PRIORITY(_type) \
+case HWAS::_type: i_parser.PrintString( "Priority", #_type); break;
+            case_PRIORITY(SRCI_PRIORITY_LOW)
+            case_PRIORITY(SRCI_PRIORITY_MEDC)
+            case_PRIORITY(SRCI_PRIORITY_MEDB)
+            case_PRIORITY(SRCI_PRIORITY_MEDA)
+            case_PRIORITY(SRCI_PRIORITY_MED)
+            case_PRIORITY(SRCI_PRIORITY_HIGH)
+        default:
+            i_parser.PrintNumber( "Priority", "UNKNOWN: 0x%X",
+                                    ntohl(pData->priority) );
+            break;
+        } // switch priority
+    } // parse
 
 private:
     // Disabled

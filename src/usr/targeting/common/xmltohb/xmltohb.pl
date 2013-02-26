@@ -218,12 +218,26 @@ if( !($cfgSrcOutputDir =~ "none") )
     writeAttrErrlCFile($attributes,$attrErrlCFile);
     close $attrErrlCFile;
 
-    open(ATTR_ATTRERRL_H_FILE,">$cfgSrcOutputDir"."errludattribute.H")
+    open(ATTR_ATTRERRL_H_FILE,">$cfgSrcOutputDir"."errl/errludattribute.H")
       or fatal ("Attribute errlog H file: \"$cfgSrcOutputDir"
-		. "errludattribute.H\" could not be opened.");
+		. "errl/errludattribute.H\" could not be opened.");
     my $attrErrlHFile = *ATTR_ATTRERRL_H_FILE;
     writeAttrErrlHFile($attributes,$attrErrlHFile);
     close $attrErrlHFile;
+
+    open(ATTR_TARGETERRL_C_FILE,">$cfgSrcOutputDir"."errludtarget.C")
+      or fatal ("Target errlog C file: \"$cfgSrcOutputDir"
+		. "errludtarget.C\" could not be opened.");
+    my $targetErrlCFile = *ATTR_TARGETERRL_C_FILE;
+    writeTargetErrlCFile($attributes,$targetErrlCFile);
+    close $targetErrlCFile;
+
+    open(ATTR_TARGETERRL_H_FILE,">$cfgSrcOutputDir"."errl/errludtarget.H")
+      or fatal ("Target errlog H file: \"$cfgSrcOutputDir"
+		. "errl/errludtarget.H\" could not be opened.");
+    my $targetErrlHFile = *ATTR_TARGETERRL_H_FILE;
+    writeTargetErrlHFile($attributes,$targetErrlHFile);
+    close $targetErrlHFile;
 
 }
 
@@ -1506,7 +1520,7 @@ sub writeAttrErrlCFile {
     print $outFile "#include <stdint.h>\n";
     print $outFile "#include <stdio.h>\n";
     print $outFile "#include <string.h>\n";
-    print $outFile "#include <errludattribute.H>\n";
+    print $outFile "#include <errl/errludattribute.H>\n";
     print $outFile "#include <errl/errlreasoncodes.H>\n";
     print $outFile "#include <targeting/common/targetservice.H>\n";
     print $outFile "#include <targeting/common/trace.H>\n";
@@ -1516,127 +1530,12 @@ sub writeAttrErrlCFile {
     print $outFile "using namespace TARGETING;\n";
     print $outFile "extern TARG_TD_t g_trac_errl;\n";
 
-    # loop through every attribute to create the local dump function
-    foreach my $attribute (@{$attributes->{attribute}})
-    {
-        # things we'll skip:
-        if(!(exists $attribute->{readable}) ||  # write-only attributes
-           !(exists $attribute->{writeable}) || # read-only attributes
-           (exists $attribute->{simpleType} && (exists $attribute->{simpleType}->{hbmutex})) # mutex attributes
-          ) {
-            next;
-        }
-        # any complicated types just get dumped as raw hex binary
-        elsif(exists $attribute->{complexType}) {
-            #print $outFile "uint32_t dump_ATTR_",$attribute->{id},"(const Target * i_pTarget, char *i_buffer)\n";
-            #print $outFile "{   //complexType\n";
-            #print $outFile "    uint32_t retSize = 0;\n";
-            #print $outFile "    AttributeTraits<ATTR_",$attribute->{id},">::Type tmp;\n";
-            #print $outFile "    if( i_pTarget->tryGetAttr<ATTR_",$attribute->{id},">(tmp) ) {\n";
-            #print $outFile "        retSize = 1 + sprintf(i_buffer, \" \", &tmp, sizeof(tmp));\n";
-            #print $outFile "    }\n";
-            #print $outFile "    return(retSize);\n";
-            #print $outFile "}\n";
-            print $outFile "uint32_t dump_ATTR_",$attribute->{id},"(const Target * i_pTarget, char *i_buffer)\n";
-            print $outFile "{   //complexType\n";
-            print $outFile "    TRACDCOMP( g_trac_errl, \"ErrlUserDetailsAttribute: ",$attribute->{id}," skipped -- complexType\");\n";
-            print $outFile "    return(0);\n";
-            print $outFile "}\n";
-        }
-        # Enums
-        elsif(exists $attribute->{simpleType} && (exists $attribute->{simpleType}->{enumeration}) ) {
-            print $outFile "uint32_t dump_ATTR_",$attribute->{id},"(const Target * i_pTarget, char *i_buffer)\n";
-            print $outFile "{   //simpleType:enum\n";
-            print $outFile "    //TRACDCOMP( g_trac_errl, \"ErrlUserDetailsAttribute: ",$attribute->{id}," entry\");\n";
-            print $outFile "    uint32_t retSize = 0;\n";
-            print $outFile "    AttributeTraits<ATTR_",$attribute->{id},">::Type tmp;\n";
-            print $outFile "    if( i_pTarget->tryGetAttr<ATTR_",$attribute->{id},">(tmp) ) {\n";
-            print $outFile "        memcpy(i_buffer, &tmp, sizeof(tmp));\n";
-            print $outFile "        retSize = sizeof(tmp);\n";
-            print $outFile "    }\n";
-            print $outFile "    return(retSize);\n";
-            print $outFile "}\n";
-        }
-        # signed and unsigned ints
-        elsif(exists $attribute->{simpleType} &&
-              ( (exists $attribute->{simpleType}->{uint8_t}) ||
-                (exists $attribute->{simpleType}->{uint16_t}) ||
-                (exists $attribute->{simpleType}->{uint32_t}) ||
-                (exists $attribute->{simpleType}->{uint64_t}) ||
-                (exists $attribute->{simpleType}->{int8_t}) ||
-                (exists $attribute->{simpleType}->{int16_t}) ||
-                (exists $attribute->{simpleType}->{int32_t}) ||
-                (exists $attribute->{simpleType}->{int64_t})
-              )
-             )
-        {
-            print $outFile "uint32_t dump_ATTR_",$attribute->{id},"(const Target * i_pTarget, char *i_buffer)\n";
-            print $outFile "{   //simpleType:uint :int\n";
-            print $outFile "    //TRACDCOMP( g_trac_errl, \"ErrlUserDetailsAttribute: ",$attribute->{id}," entry\");\n";
-            print $outFile "    uint32_t retSize = 0;\n";
-            print $outFile "    AttributeTraits<ATTR_",$attribute->{id},">::Type tmp;\n";
-            print $outFile "    if( i_pTarget->tryGetAttr<ATTR_",$attribute->{id},">(tmp) ) {\n";
-            print $outFile "        memcpy(i_buffer, &tmp, sizeof(tmp));\n";
-            print $outFile "        retSize = sizeof(tmp);\n";
-            print $outFile "    }\n";
-            print $outFile "    return(retSize);\n";
-            print $outFile "}\n";
-        }
-        # dump the enums for EntityPaths
-        elsif(exists $attribute->{nativeType} && ($attribute->{nativeType}->{name} eq "EntityPath")) {
-            print $outFile "uint32_t dump_ATTR_",$attribute->{id},"(const Target * i_pTarget, char *i_buffer)\n";
-            print $outFile "{   //nativeType:EntityPath\n";
-            print $outFile "    //TRACDCOMP( g_trac_errl, \"ErrlUserDetailsAttribute: ",$attribute->{id}," entry\");\n";
-            print $outFile "    uint32_t retSize = 0;\n";
-            print $outFile "    AttributeTraits<ATTR_",$attribute->{id},">::Type tmp;\n";
-            print $outFile "    if( i_pTarget->tryGetAttr<ATTR_",$attribute->{id},">(tmp) ) {\n";
-            print $outFile "        // data is PATH_TYPE, Number of elements, [ Element, Instance# ]\n";
-            print $outFile "        EntityPath::PATH_TYPE lPtype = tmp.type();\n";
-            print $outFile "        memcpy(i_buffer + retSize,&lPtype,sizeof(lPtype));\n";
-            print $outFile "        retSize += sizeof(lPtype);\n";
-            print $outFile "        uint8_t lSize = tmp.size();\n";
-            print $outFile "        memcpy(i_buffer + retSize,&lSize,sizeof(lSize));\n";
-            print $outFile "        retSize += sizeof(lSize);\n";
-            print $outFile "        for (uint32_t i=0;i<lSize;i++) {\n";
-            print $outFile "            EntityPath::PathElement lType = tmp[i];\n";
-            print $outFile "            memcpy(i_buffer + retSize,&tmp[i],sizeof(tmp[i]));\n";
-            print $outFile "            retSize += sizeof(tmp[i]);\n";
-            print $outFile "        }\n";
-            print $outFile "    }\n";
-            print $outFile "    return(retSize);\n";
-            print $outFile "}\n";
-        }
-        # any other nativeTypes are just decimals...  (I never saw one)
-        elsif(exists $attribute->{nativeType}) {
-            print $outFile "uint32_t dump_ATTR_",$attribute->{id},"(const Target * i_pTarget, char *i_buffer)\n";
-            print $outFile "{   //nativeType\n";
-            print $outFile "    //TRACDCOMP( g_trac_errl, \"ErrlUserDetailsAttribute: ",$attribute->{id}," entry\");\n";
-            print $outFile "    uint32_t retSize = 0;\n";
-            print $outFile "    AttributeTraits<ATTR_",$attribute->{id},">::Type tmp;\n";
-            print $outFile "    if( i_pTarget->tryGetAttr<ATTR_",$attribute->{id},">(tmp) ) {\n";
-            print $outFile "        memcpy(i_buffer, &tmp, sizeof(tmp));\n";
-            print $outFile "        retSize = sizeof(tmp);\n";
-            print $outFile "    }\n";
-            print $outFile "    return(retSize);\n";
-            print $outFile "}\n";
-        }
-        # just in case, add a dummy function
-        else
-        {
-            print $outFile "uint32_t dump_ATTR_",$attribute->{id},"(const Target * i_pTarget, char *i_buffer)\n";
-            print $outFile "{   //unknown attributes\n";
-            print $outFile "    TRACDCOMP( g_trac_errl, \"ErrlUserDetailsAttribute: ",$attribute->{id}," UNKNOWN\");\n";
-            print $outFile "    return(0);\n";
-            print $outFile "}\n";
-        }
-    }
-
     # build function that takes adds 1 attribute to the output
     print $outFile "\n";
     print $outFile "void ErrlUserDetailsAttribute::addData(\n";
     print $outFile "    uint32_t i_attr)\n";
     print $outFile "{\n";
-    print $outFile "    char *tmpBuffer = new char[1024];\n";
+    print $outFile "    char *tmpBuffer = NULL;\n";
     print $outFile "    uint32_t attrSize = 0;\n";
     print $outFile "\n";
     print $outFile "    switch (i_attr) {\n";
@@ -1652,9 +1551,89 @@ sub writeAttrErrlCFile {
             print $outFile "        case (ATTR_",$attribute->{id},"): { break; }\n";
             next;
         }
-        print $outFile "        case (ATTR_",$attribute->{id},"): {\n";
-        print $outFile "            attrSize = dump_ATTR_",$attribute->{id},"(iv_pTarget,tmpBuffer); break;\n";
-        print $outFile "        }\n";
+        # any complicated types just get dumped as raw hex binary
+        elsif(exists $attribute->{complexType}) {
+            print $outFile "        case (ATTR_",$attribute->{id},"): {\n";
+            print $outFile "            TRACDCOMP( g_trac_errl, \"ErrlUserDetailsAttribute: ",$attribute->{id}," skipped -- complexType\");\n";
+            print $outFile "            attrSize = 0;\n";
+            print $outFile "            break;\n";
+            print $outFile "        }\n";
+        }
+        # Enums
+        elsif(exists $attribute->{simpleType} && (exists $attribute->{simpleType}->{enumeration}) ) {
+            print $outFile "        case (ATTR_",$attribute->{id},"): { // simpleType:enum\n";
+            print $outFile "            //TRACDCOMP( g_trac_errl, \"ErrlUserDetailsAttribute: ",$attribute->{id}," entry\");\n";
+            print $outFile "            AttributeTraits<ATTR_",$attribute->{id},">::Type tmp;\n";
+            print $outFile "            if( iv_pTarget->tryGetAttr<ATTR_",$attribute->{id},">(tmp) ) {\n";
+            print $outFile "                tmpBuffer = new char[sizeof(tmp)];\n";
+            print $outFile "                memcpy(tmpBuffer, &tmp, sizeof(tmp));\n";
+            print $outFile "                attrSize = sizeof(tmp);\n";
+            print $outFile "            }\n";
+            print $outFile "            break;\n";
+            print $outFile "        }\n";
+        }
+        # signed and unsigned ints
+
+        elsif(exists $attribute->{simpleType} &&
+              ( (exists $attribute->{simpleType}->{uint8_t}) ||
+                (exists $attribute->{simpleType}->{uint16_t}) ||
+                (exists $attribute->{simpleType}->{uint32_t}) ||
+                (exists $attribute->{simpleType}->{uint64_t}) ||
+                (exists $attribute->{simpleType}->{int8_t}) ||
+                (exists $attribute->{simpleType}->{int16_t}) ||
+                (exists $attribute->{simpleType}->{int32_t}) ||
+                (exists $attribute->{simpleType}->{int64_t})
+              )
+             )
+        {
+            print $outFile "        case (ATTR_",$attribute->{id},"): { //simpleType:uint, :int...\n";
+            print $outFile "            //TRACDCOMP( g_trac_errl, \"ErrlUserDetailsAttribute: ",$attribute->{id}," entry\");\n";
+            print $outFile "            AttributeTraits<ATTR_",$attribute->{id},">::Type tmp;\n";
+            print $outFile "            if( iv_pTarget->tryGetAttr<ATTR_",$attribute->{id},">(tmp) ) {\n";
+            print $outFile "                tmpBuffer = new char[sizeof(tmp)];\n";
+            print $outFile "                memcpy(tmpBuffer, &tmp, sizeof(tmp));\n";
+            print $outFile "                attrSize = sizeof(tmp);\n";
+            print $outFile "            }\n";
+            print $outFile "            break;\n";
+            print $outFile "        }\n";
+        }
+        # dump the enums for EntityPaths
+        elsif(exists $attribute->{nativeType} && ($attribute->{nativeType}->{name} eq "EntityPath")) {
+            print $outFile "        case (ATTR_",$attribute->{id},"): { //nativeType:EntityPath\n";
+            print $outFile "            //TRACDCOMP( g_trac_errl, \"ErrlUserDetailsAttribute: ",$attribute->{id}," entry\");\n";
+            print $outFile "            AttributeTraits<ATTR_",$attribute->{id},">::Type tmp;\n";
+            print $outFile "            if( iv_pTarget->tryGetAttr<ATTR_",$attribute->{id},">(tmp) ) {\n";
+            print $outFile "                // data is PATH_TYPE, Number of elements, [ Element, Instance# ]\n";
+            print $outFile "                EntityPath::PATH_TYPE lPtype = tmp.type();\n";
+            print $outFile "                uint8_t lSize = tmp.size();\n";
+            print $outFile "                tmpBuffer = new char[sizeof(lPtype) + lSize + lSize * sizeof(EntityPath::PathElement)];\n";
+            print $outFile "                memcpy(tmpBuffer + attrSize,&lPtype,sizeof(lPtype));\n";
+            print $outFile "                attrSize += sizeof(lPtype);\n";
+            print $outFile "                memcpy(tmpBuffer + attrSize,&lSize,sizeof(lSize));\n";
+            print $outFile "                attrSize += sizeof(lSize);\n";
+            print $outFile "                for (uint32_t i=0;i<lSize;i++) {\n";
+            print $outFile "                    EntityPath::PathElement lType = tmp[i];\n";
+            print $outFile "                    memcpy(tmpBuffer + attrSize,&tmp[i],sizeof(tmp[i]));\n";
+            print $outFile "                    attrSize += sizeof(tmp[i]);\n";
+            print $outFile "                }\n";
+            print $outFile "            }\n";
+            print $outFile "            break;\n";
+            print $outFile "        }\n";
+            print $outFile "}\n";
+        }
+        # any other nativeTypes are just decimals...  (I never saw one)
+        elsif(exists $attribute->{nativeType}) {
+            print $outFile "        case (ATTR_",$attribute->{id},"): { nativeType\n";
+            print $outFile "            //TRACDCOMP( g_trac_errl, \"ErrlUserDetailsAttribute: ",$attribute->{id}," entry\");\n";
+            print $outFile "            AttributeTraits<ATTR_",$attribute->{id},">::Type tmp;\n";
+            print $outFile "            if( iv_pTarget->tryGetAttr<ATTR_",$attribute->{id},">(tmp) ) {\n";
+            print $outFile "                tmpBuffer = new char[sizeof(tmp)];\n";
+            print $outFile "                memcpy(tmpBuffer, &tmp, sizeof(tmp));\n";
+            print $outFile "                attrSize = sizeof(tmp);\n";
+            print $outFile "            }\n";
+            print $outFile "            break;\n";
+            print $outFile "        }\n";
+        }
     }
 
     print $outFile "        default: { //Shouldn't be anything here!!\n";
@@ -1688,6 +1667,7 @@ sub writeAttrErrlCFile {
     print $outFile "    iv_CompId = ERRL_COMP_ID;\n";
     print $outFile "    iv_Version = 1;\n";
     print $outFile "    iv_SubSection = ERRL_UDT_ATTRIBUTE;\n";
+    print $outFile "    // override the default of false\n";
     print $outFile "    iv_merge = true;\n";
     print $outFile "\n";
     print $outFile "    // first, write out the HUID\n";
@@ -1802,25 +1782,28 @@ sub writeAttrErrlHFile {
     print $outFile "    ErrlUserDetailsParserAttribute() {}\n";
     print $outFile "\n";
     print $outFile "    virtual ~ErrlUserDetailsParserAttribute() {}\n";
-    print $outFile "/**\n";
-    print $outFile " *  \@brief Parses Attribute user detail data from an error log\n";
-    print $outFile " *  \@param  i_version Version of the data\n";
-    print $outFile " *  \@param  i_parse   ErrlUsrParser object for outputting information\n";
-    print $outFile " *  \@param  i_pBuffer Pointer to buffer containing detail data\n";
-    print $outFile " *  \@param  i_buflen  Length of the buffer\n";
-    print $outFile " */\n";
+    print $outFile "  /**\n";
+    print $outFile "   *  \@brief Parses Attribute user detail data from an error log\n";
+    print $outFile "   *  \@param  i_version Version of the data\n";
+    print $outFile "   *  \@param  i_parse   ErrlUsrParser object for outputting information\n";
+    print $outFile "   *  \@param  i_pBuffer Pointer to buffer containing detail data\n";
+    print $outFile "   *  \@param  i_buflen  Length of the buffer\n";
+    print $outFile "   */\n";
     print $outFile "  virtual void parse(errlver_t i_version,\n";
     print $outFile "                        ErrlUsrParser & i_parser,\n";
     print $outFile "                        void * i_pBuffer,\n";
     print $outFile "                        const uint32_t i_buflen) const\n";
     print $outFile "  {\n";
-    print $outFile "    const char *pLabel;\n";
+    print $outFile "    const char *pLabel = NULL;\n";
     print $outFile "    uint8_t *l_ptr = static_cast<uint8_t *>(i_pBuffer);\n";
-    print $outFile "    std::vector<char> l_traceEntry(128);\n";
+    print $outFile "    std::vector<char> l_traceEntry(64);\n";
+    print $outFile "    i_parser.PrintString(\"Target Attributes\", NULL);\n";
     print $outFile "\n";
+
+    print $outFile "    for (; (l_ptr + sizeof(uint32_t)) <= ((uint8_t*)i_pBuffer + i_buflen); )\n";
+    print $outFile "    {\n";
     print $outFile "        // first 4 bytes is the attr enum\n";
-    print $outFile "        uint32_t attrEnum = *(uint32_t *)l_ptr;\n";
-    print $outFile "        uint32_t dataSize = 0;\n";
+    print $outFile "        uint32_t attrEnum = ntohl(*(uint32_t *)l_ptr);\n";
     print $outFile "        l_ptr += sizeof(attrEnum);\n";
     print $outFile "\n";
     print $outFile "        switch (attrEnum) {\n";
@@ -1841,7 +1824,7 @@ sub writeAttrErrlHFile {
         # Enums have strings defined already, use them
         elsif(exists $attribute->{simpleType} && (exists $attribute->{simpleType}->{enumeration}) ) {
             print $outFile "              //simpleType:enum\n";
-            print $outFile "              pLabel = \"ATTR_",$attribute->{id},"\";\n";
+            print $outFile "              pLabel = \"",$attribute->{id},"\";\n";
             foreach my $enumerationType (@{$attributes->{enumerationType}})
             {
                 if ($enumerationType->{id} eq $attribute->{id})
@@ -1852,8 +1835,8 @@ sub writeAttrErrlHFile {
                     my $enumName = $attribute->{id} . "_" . $enumerator->{name};
                     my $enumHex = sprintf "0x%08X", enumNameToValue($enumerationType,$enumerator->{name});
                     print $outFile "                  case ",$enumHex,": {\n";
-                    print $outFile "                      // get the length and add one for the null terminator ";
-                    print $outFile "                      dataSize = 1  + sprintf(&(l_traceEntry[0]), \"",$enumName,"\");\n";
+                    print $outFile "                      sprintf(&(l_traceEntry[0]), \"",$enumName,"\");\n";
+                    print $outFile "                      l_ptr += sizeof(uint32_t);\n";
                     print $outFile "                      break;\n";
                     print $outFile "                  }\n";
                 }
@@ -1871,7 +1854,7 @@ sub writeAttrErrlHFile {
             #print $outFile "         //complexType\n";
             #print $outFile "         uint32_t<ATTR_",$attribute->{id},">::Type tmp;\n";
             #print $outFile "         if( i_pTarget->tryGetAttr<ATTR_",$attribute->{id},">(tmp) ) {\n";
-            #print $outFile "           dataSize = sprintf(i_buffer, \" \", &tmp, sizeof(tmp));\n";
+            #print $outFile "           sprintf(i_buffer, \" \", &tmp, sizeof(tmp));\n";
             #print $outFile "         }\n";
             print $outFile "              //complexType - skipping\n";
         }
@@ -1889,41 +1872,100 @@ sub writeAttrErrlHFile {
              )
         {
             print $outFile "              //simpleType:uint\n";
-            print $outFile "              pLabel = \"ATTR_",$attribute->{id},"\";\n";
+            print $outFile "              pLabel = \"",$attribute->{id},"\";\n";
+            my @bounds;
+            if(exists $attribute->{simpleType}->{array})
+            {
+                    @bounds = split(/,/,$attribute->{simpleType}->{array});
+            }
+            else
+            {
+                $bounds[0] = 1;
+            }
+            my $total_count = 1;
+            foreach my $bound (@bounds)
+            {
+                $total_count *= $bound;
+            }
+            my $size = scalar(@bounds);
+            if (($size == 1) && ( $bounds[0] > 1))
+            {
+                print $outFile "              uint32_t offset = sprintf(&(l_traceEntry[0]), \"[$bounds[0]]:\");\n";
+            }
+            elsif ($size == 2)
+            {
+                print $outFile "              uint32_t offset = sprintf(&(l_traceEntry[0]), \"[$bounds[0]][$bounds[1]]:\");\n";
+            }
+            elsif ($size == 3)
+            {
+                print $outFile "              uint32_t offset = sprintf(&(l_traceEntry[0]), \"[$bounds[0]][$bounds[1]][$bounds[2]]:\");\n";
+            }
+            else
+            {
+                print $outFile "              uint32_t offset = 0;\n";
+            }
             if (exists $attribute->{simpleType}->{uint8_t}) 
             {
-                print $outFile "              dataSize = 1 + sprintf(&(l_traceEntry[0]), \"0x%.2X\", *((uint8_t *)l_ptr));\n";
+                print $outFile "              l_traceEntry.resize(10+offset + $total_count * 5);\n";
+                print $outFile "              for (uint32_t i = 0;i<$total_count;i++) {\n";
+                print $outFile "                  sprintf(&(l_traceEntry[offset+i*5]), \"0x%.2X \", *((uint8_t *)l_ptr)+i);\n";
+                print $outFile "              }\n";
+                print $outFile "              l_ptr += $total_count * sizeof(uint8_t);\n";
             }
             elsif (exists $attribute->{simpleType}->{uint16_t}) {
-                print $outFile "              dataSize = 1 + sprintf(&(l_traceEntry[0]), \"0x%.4X\", *((uint16_t *)l_ptr));\n";
+                print $outFile "              l_traceEntry.resize(10+offset + $total_count * 7);\n";
+                print $outFile "              for (uint32_t i = 0;i<$total_count;i++) {\n";
+                print $outFile "                  sprintf(&(l_traceEntry[offset+i*7]), \"0x%.4X \", ntohs(*((uint16_t *)l_ptr)+i));\n";
+                print $outFile "              }\n";
+                print $outFile "              l_ptr += $total_count * sizeof(uint16_t);\n";
             }
             elsif (exists $attribute->{simpleType}->{uint32_t}) {
-                print $outFile "              dataSize = 1 + sprintf(&(l_traceEntry[0]), \"0x%.8X\", *((uint32_t *)l_ptr));\n";
+                print $outFile "              l_traceEntry.resize(10+offset + $total_count * 11);\n";
+                print $outFile "              for (uint32_t i = 0;i<$total_count;i++) {\n";
+                print $outFile "                  sprintf(&(l_traceEntry[offset+i*11]), \"0x%.8X \", ntohl(*((uint32_t *)l_ptr)+i));\n";
+                print $outFile "              }\n";
+                print $outFile "              l_ptr += $total_count * sizeof(uint32_t);\n";
             }
             elsif (exists $attribute->{simpleType}->{uint64_t}) {
-                print $outFile "              dataSize = 1 + sprintf(&(l_traceEntry[0]), \"0x%.16llX\", *((uint64_t *)l_ptr));\n";
+                print $outFile "              l_traceEntry.resize(10+offset + $total_count * 19);\n";
+                print $outFile "              for (uint32_t i = 0;i<$total_count;i++) {\n";
+                print $outFile "                  sprintf(&(l_traceEntry[offset+i*19]), \"0x%.16llX \", ntohll(*((uint64_t *)l_ptr)+i));\n";
+                print $outFile "              }\n";
+                print $outFile "              l_ptr += $total_count * sizeof(uint64_t);\n";
             }
             elsif (exists $attribute->{simpleType}->{int8_t}) {
-                print $outFile "              dataSize = 1 + sprintf(&(l_traceEntry[0]), \"%d\", *((int8_t *)l_ptr));\n";
+                print $outFile "              l_traceEntry.resize(10+offset + $total_count * 5);\n";
+                print $outFile "              for (uint32_t i = 0;i<$total_count;i++) {\n";
+                print $outFile "                  sprintf(&(l_traceEntry[offset+i*5]), \"0x%.2X \", *((uint8_t *)l_ptr)+i);\n";
+                print $outFile "              }\n";
+                print $outFile "              l_ptr += $total_count * sizeof(uint8_t);\n";
             }
             elsif (exists $attribute->{simpleType}->{int16_t}) {
-                print $outFile "              dataSize = 1 + sprintf(&(l_traceEntry[0]), \"%d\", *((int16_t *)l_ptr));\n";
+                print $outFile "              l_traceEntry.resize(10+offset + $total_count * 7);\n";
+                print $outFile "              for (uint32_t i = 0;i<$total_count;i++) {\n";
+                print $outFile "                  sprintf(&(l_traceEntry[offset+i*7]), \"0x%.4X \", ntohs(*((int16_t *)l_ptr)+i));\n";
+                print $outFile "              }\n";
+                print $outFile "              l_ptr += $total_count * sizeof(int16_t);\n";
             }
             elsif (exists $attribute->{simpleType}->{int32_t}) {
-                print $outFile "              dataSize = 1 + sprintf(&(l_traceEntry[0]), \"%d\", *((int32_t *)l_ptr));\n";
+                print $outFile "              l_traceEntry.resize(10+offset + $total_count * 11);\n";
+                print $outFile "              for (uint32_t i = 0;i<$total_count;i++) {\n";
+                print $outFile "                  sprintf(&(l_traceEntry[offset+i*11]), \"0x%.8X \", ntohl(*((int32_t *)l_ptr)+i));\n";
+                print $outFile "              }\n";
+                print $outFile "              l_ptr += $total_count * sizeof(int32_t);\n";
             }
             elsif (exists $attribute->{simpleType}->{int64_t}) {
-                print $outFile "              dataSize = 1 + sprintf(&(l_traceEntry[0]), \"%d\", *((int64_t *)l_ptr));\n";
-            }
-            if(exists $attribute->{array})
-            {
-                ### need to do loop for types that are ARRAYS!
+                print $outFile "              l_traceEntry.resize(10+offset + $total_count * 19);\n";
+                print $outFile "              for (uint32_t i = 0;i<$total_count;i++) {\n";
+                print $outFile "                  sprintf(&(l_traceEntry[offset+i*19]), \"0x%.16llX \", ntohll(*((int64_t *)l_ptr)+i));\n";
+                print $outFile "              }\n";
+                print $outFile "              l_ptr += $total_count * sizeof(int64_t);\n";
             }
         }
         # EntityPaths
         elsif(exists $attribute->{nativeType} && ($attribute->{nativeType}->{name} eq "EntityPath")) {
             print $outFile "              //nativeType:EntityPath\n";
-            print $outFile "              pLabel = \"ATTR_",$attribute->{id},"\";\n";
+            print $outFile "              pLabel = \"",$attribute->{id},"\";\n";
             # data is PATH_TYPE, Number of elements, [ Element, Instance# ]
             # output is PathType:/ElementInstance/ElementInstance/ElementInstance
             print $outFile "              const char *pathString;\n";
@@ -1936,48 +1978,48 @@ sub writeAttrErrlHFile {
             print $outFile "                  case 0x04: pathString = \"Power:\"; break;\n";
             print $outFile "                  default:   pathString = \"Unknown:\"; break;\n";
             print $outFile "              }\n";
-            print $outFile "              dataSize = sprintf(&(l_traceEntry[0]), \"%s\",pathString);\n";
+            print $outFile "              l_traceEntry.resize(strlen(pathString) + 128);\n";
+            print $outFile "              uint32_t dataSize = sprintf(&(l_traceEntry[0]), \"%s\",pathString);\n";
             print $outFile "              const uint8_t lSize = *(l_ptr + 1); // number of elements\n";
             print $outFile "              uint8_t *lElementInstance = (l_ptr + 2);\n";
             print $outFile "              for (uint32_t i=0;i<lSize;i += 2) {\n";
             print $outFile "                  switch (lElementInstance[i]) {\n";
-
-            # TODO: RTC 50828: make these build-time dynamic based
-            #  on values in obj/genfiles/attributeenums.H
-            print $outFile "                      case 0x01: pathString = \"/Sys\"; break;\n";
-            print $outFile "                      case 0x02: pathString = \"/Node\"; break;\n";
-            print $outFile "                      case 0x03: pathString = \"/DIMM\"; break;\n";
-            print $outFile "                      case 0x04: pathString = \"/Membuf\"; break;\n";
-            print $outFile "                      case 0x05: pathString = \"/Proc\"; break;\n";
-            print $outFile "                      case 0x06: pathString = \"/EX\"; break;\n";
-            print $outFile "                      case 0x07: pathString = \"/Core\"; break;\n";
-            print $outFile "                      case 0x08: pathString = \"/L2\"; break;\n";
-            print $outFile "                      case 0x09: pathString = \"/L3\"; break;\n";
-            print $outFile "                      case 0x0A: pathString = \"/L4\"; break;\n";
-            print $outFile "                      case 0x0B: pathString = \"/MCS\"; break;\n";
-            print $outFile "                      case 0x0C: pathString = \"/MBS\"; break;\n";
-            print $outFile "                      case 0x0D: pathString = \"/MBA\"; break;\n";
-            print $outFile "                      case 0x0E: pathString = \"/XBUS\"; break;\n";
-            print $outFile "                      case 0x0F: pathString = \"/ABUS\"; break;\n";
-            print $outFile "                      case 0x10: pathString = \"/PCI\"; break;\n";
-            print $outFile "                      case 0x11: pathString = \"/DPSS\"; break;\n";
-            print $outFile "                      case 0x12: pathString = \"/APSS\"; break;\n";
-            print $outFile "                      case 0x13: pathString = \"/OCC\"; break;\n";
-            print $outFile "                      case 0x14: pathString = \"/PSI\"; break;\n";
-            print $outFile "                      case 0x15: pathString = \"/FSP\"; break;\n";
-            print $outFile "                      case 0x16: pathString = \"/PNOR\"; break;\n";
-            print $outFile "                      default: pathString = \"/Unknown\"; break;\n";
+            foreach my $enumerationType (@{$attributes->{enumerationType}})
+            {
+                if( $enumerationType->{id} eq "TYPE" ) {
+                    foreach my $enumerator (@{$enumerationType->{enumerator}})
+                    {
+                        my $enumHex = sprintf "0x%02X",
+                            enumNameToValue($enumerationType,$enumerator->{name});
+                        my $enumName = $enumerator->{name};
+                        if ($enumName eq "SYS") {
+                            $enumName = "Sys";
+                        } elsif ($enumName eq "PROC") {
+                            $enumName = "Proc";
+                        } elsif ($enumName eq "NODE") {
+                            $enumName = "Node";
+                        } elsif ($enumName eq "CORE") {
+                            $enumName = "Core";
+                        } elsif ($enumName eq "MEMBUF") {
+                            $enumName = "Membuf";
+                        }
+                        print $outFile "                      case $enumHex: { pathString = \"/$enumName\"; break; }\n";
+                    }
+                }
+            } # enumerationType
+            print $outFile "                      default:   { pathString = \"/UNKNOWN\"; break; }\n";
             print $outFile "                  } // switch\n";
             print $outFile "                  // copy next part in, overwritting previous terminator\n";
             print $outFile "                  dataSize += sprintf(&(l_traceEntry[0]) + dataSize, \"%s%d\",pathString,lElementInstance[i+1]);\n";
+            print $outFile "                  l_ptr += 2 * sizeof(uint8_t);\n";
             print $outFile "              } // for\n";
-            print $outFile "              dataSize++; // account for last NULL terminator\n";
         }
         # any other nativeTypes are just decimals...  (I never saw one)
         elsif(exists $attribute->{nativeType}) {
             print $outFile "              //nativeType\n";
-            print $outFile "              pLabel = \"ATTR_",$attribute->{id},"\";\n";
-            print $outFile "              dataSize = 1 + sprintf(&(l_traceEntry[0]), \"%d\", *((int32_t *)l_ptr));\n";
+            print $outFile "              pLabel = \"",$attribute->{id},"\";\n";
+            print $outFile "              sprintf(&(l_traceEntry[0]), \"%d\", *((int32_t *)l_ptr));\n";
+            print $outFile "              l_ptr += sizeof(uint32_t);\n";
         }
         # just in case, nothing..
         else
@@ -1996,14 +2038,11 @@ sub writeAttrErrlHFile {
     print $outFile "        } // switch\n";
     print $outFile "\n";
     print $outFile "        // pointing to something - print it.\n";
-    print $outFile "        if (dataSize != 0) {\n";
-    print $outFile "            if (l_traceEntry.size() < dataSize + 2) {\n";
-    print $outFile "                l_traceEntry.resize(dataSize + 2);\n";
-    print $outFile "            }\n";
+    print $outFile "        if (pLabel != NULL) {\n";
     print $outFile "            i_parser.PrintString(pLabel, &(l_traceEntry[0]));\n";
     print $outFile "        }\n";
-    print $outFile "        l_ptr += dataSize;\n";
-    print $outFile "    } // for\n\n";
+    print $outFile "    } // for\n";
+    print $outFile "  } // parse\n\n";
     print $outFile "private:\n";
     print $outFile "\n";
     print $outFile "// Disabled\n";
@@ -2014,6 +2053,293 @@ sub writeAttrErrlHFile {
     print $outFile "#endif\n";
     print $outFile "#endif\n";
 } # sub writeAttrErrlHFile
+
+######
+#Create a .C file to put target into the errlog
+#####
+sub writeTargetErrlCFile {
+    my($attributes,$outFile) = @_;
+
+    #First setup the includes and function definition
+    print $outFile "#include <stdint.h>\n";
+    print $outFile "#include <stdio.h>\n";
+    print $outFile "#include <string.h>\n";
+    print $outFile "#include <errl/errludtarget.H>\n";
+    print $outFile "#include <errl/errlreasoncodes.H>\n";
+    print $outFile "#include <targeting/common/target.H>\n";
+    print $outFile "#include <targeting/common/targetservice.H>\n";
+    print $outFile "#include <targeting/common/trace.H>\n";
+    print $outFile "\n";
+    print $outFile "namespace ERRORLOG\n";
+    print $outFile "{\n";
+    print $outFile "using namespace TARGETING;\n";
+    print $outFile "extern TARG_TD_t g_trac_errl;\n";
+
+    print $outFile "//------------------------------------------------------------------------------\n";
+    print $outFile "ErrlUserDetailsTarget::ErrlUserDetailsTarget(\n";
+    print $outFile "    const Target * i_pTarget)\n";
+    print $outFile "{\n";
+    print $outFile "    // Set up ErrlUserDetails instance variables\n";
+    print $outFile "    iv_CompId = ERRL_COMP_ID;\n";
+    print $outFile "    iv_Version = 1;\n";
+    print $outFile "    iv_SubSection = ERRL_UDT_TARGET;\n";
+    print $outFile "    // override the default of false\n";
+    print $outFile "    iv_merge = true;\n";
+    print $outFile "\n";
+    print $outFile "    if (i_pTarget == TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL) {\n";
+    print $outFile "        uint32_t *pBuffer = reinterpret_cast<uint32_t *>(\n";
+    print $outFile "                                reallocUsrBuf(sizeof(uint32_t)));\n";
+    print $outFile "        // copy 0xFFFFFFFF to indicate MASTER just as gethuid() does\n";
+    print $outFile "        *pBuffer = 0xFFFFFFFF;\n";
+    print $outFile "    } else {\n";
+    print $outFile "        uint32_t bufSize = 0;\n";
+    print $outFile "        uint8_t *pTargetString = i_pTarget->targetFFDC(bufSize);\n";
+    print $outFile "        uint8_t *pBuffer = reinterpret_cast<uint8_t *>(reallocUsrBuf(bufSize));\n";
+    print $outFile "        memcpy(pBuffer, pTargetString, bufSize);\n";
+    print $outFile "        free (pTargetString);\n";
+    print $outFile "    }\n";
+    print $outFile "}\n";
+    print $outFile "\n";
+
+    print $outFile "\n";
+
+    print $outFile "//------------------------------------------------------------------------------\n";
+    print $outFile "ErrlUserDetailsTarget::~ErrlUserDetailsTarget()\n";
+    print $outFile "{ }\n";
+    print $outFile "} // namespace\n";
+} # sub writeTargetErrlCFile
+
+
+######
+#Create a .H file to parse attributes out of the errlog
+#####
+sub writeTargetErrlHFile {
+    my($attributes,$outFile) = @_;
+
+    #First setup the includes and function definition
+    print $outFile "\n";
+    print $outFile "#ifndef ERRL_UDTARGET_H\n";
+    print $outFile "#define ERRL_UDTARGET_H\n";
+    print $outFile "\n";
+    print $outFile "#ifndef PARSER\n";
+    print $outFile "\n";
+    print $outFile "#include <errl/errluserdetails.H>\n";
+    print $outFile "\n";
+    print $outFile "namespace TARGETING // Forward reference\n";
+    print $outFile "{ class Target; }\n";
+    print $outFile "\n";
+    print $outFile "namespace ERRORLOG\n";
+    print $outFile "{\n";
+    print $outFile "class ErrlUserDetailsTarget : public ErrlUserDetails {\n";
+    print $outFile "public:\n";
+    print $outFile "\n";
+    print $outFile "    ErrlUserDetailsTarget(const TARGETING::Target * i_pTarget);\n";
+    print $outFile "    virtual ~ErrlUserDetailsTarget();\n";
+    print $outFile "\n";
+    print $outFile "private:\n";
+    print $outFile "\n";
+    print $outFile "    // Disabled\n";
+    print $outFile "    ErrlUserDetailsTarget(const ErrlUserDetailsTarget &);\n";
+    print $outFile "    ErrlUserDetailsTarget & operator=(const ErrlUserDetailsTarget &);\n";
+    print $outFile "};\n";
+    print $outFile "}\n";
+    print $outFile "#else // if PARSER defined\n";
+    print $outFile "\n";
+    print $outFile "#include \"errluserdetails.H\"\n";
+    print $outFile "#include <string.h>\n";
+    print $outFile "\n";
+    print $outFile "namespace ERRORLOG\n";
+    print $outFile "{\n";
+
+    # local function used by Target and Callout to print the entity path
+
+    print $outFile "  static uint8_t *errlud_parse_entity_path(uint8_t *i_ptr, char *o_ptr)\n";
+    print $outFile "  {\n";
+    print $outFile "      uint8_t *l_ptr = i_ptr;\n";
+
+    print $outFile "      // from targeting/common/entitypath.[CH]\n";
+    print $outFile "      // entityPath is PATH_TYPE:4, NumberOfElements:4, \n";
+    print $outFile "      //          [Element, Instance#]\n";
+    print $outFile "      // PATH_TYPE\n";
+    print $outFile "      const char *pathString;\n";
+    print $outFile "      const uint8_t pathTypeLength = *l_ptr;\n";
+    print $outFile "      l_ptr++;\n";
+    print $outFile "      const uint8_t pathType = (pathTypeLength & 0xF0) >> 4;\n";
+    print $outFile "      switch (pathType) {\n";
+    print $outFile "          case 0x01: pathString = \"Logical:\"; break;\n";
+    print $outFile "          case 0x02: pathString = \"Physical:\"; break;\n";
+    print $outFile "          case 0x03: pathString = \"Device:\"; break;\n";
+    print $outFile "          case 0x04: pathString = \"Power:\"; break;\n";
+    print $outFile "          default:   pathString = \"Unknown:\"; break;\n";
+    print $outFile "      }\n";
+    print $outFile "      uint32_t dataSize = sprintf(o_ptr, \"%s\",pathString);\n";
+    print $outFile "      const uint8_t pathSize = (pathTypeLength & 0x0F) * 2;\n";
+    print $outFile "      uint8_t *lElementInstance = l_ptr;\n";
+    print $outFile "      l_ptr += pathSize * sizeof(uint8_t);\n";
+    print $outFile "      for (uint32_t j=0;j<pathSize;j += 2) {\n";
+    print $outFile "          switch (lElementInstance[j]) {\n";
+    foreach my $enumerationType (@{$attributes->{enumerationType}})
+    {
+      if( $enumerationType->{id} eq "TYPE" ) {
+        foreach my $enumerator (@{$enumerationType->{enumerator}})
+        {
+            my $enumHex = sprintf "0x%02X",
+                enumNameToValue($enumerationType,$enumerator->{name});
+            #my $enumName = $enumerationType->{id} . "_" . $enumerator->{name};
+            my $enumName = $enumerator->{name};
+            if ($enumName eq "SYS") {
+                $enumName = "Sys";
+            } elsif ($enumName eq "PROC") {
+                $enumName = "Proc";
+            } elsif ($enumName eq "NODE") {
+                $enumName = "Node";
+            } elsif ($enumName eq "CORE") {
+                $enumName = "Core";
+            } elsif ($enumName eq "MEMBUF") {
+                $enumName = "Membuf";
+            }
+            print $outFile "              case $enumHex: { pathString = \"/$enumName\"; break; }\n";
+        }
+      }
+    } # enumerationType
+    print $outFile "              default:   { pathString = \"/UKNOWN\"; break; }\n";
+
+    print $outFile "          } // switch\n";
+    print $outFile "          // copy next part in, overwritting previous terminator\n";
+    print $outFile "          dataSize += sprintf(o_ptr + dataSize,\n";
+    print $outFile "                              \"%s%d\", pathString,\n";
+    print $outFile "                              lElementInstance[j+1]);\n";
+    print $outFile "      } // for\n";
+    print $outFile "      return l_ptr;\n";
+    print $outFile "} // errlud_parse_entity_path \n";
+
+    print $outFile "class ErrlUserDetailsParserTarget : public ErrlUserDetailsParser {\n";
+    print $outFile "public:\n";
+    print $outFile "\n";
+    print $outFile "    ErrlUserDetailsParserTarget() {}\n";
+    print $outFile "\n";
+    print $outFile "    virtual ~ErrlUserDetailsParserTarget() {}\n";
+    print $outFile "/**\n";
+    print $outFile " *  \@brief Parses Target user detail data from an error log\n";
+    print $outFile " *  \@param  i_version Version of the data\n";
+    print $outFile " *  \@param  i_parse   ErrlUsrParser object for outputting information\n";
+    print $outFile " *  \@param  i_pBuffer Pointer to buffer containing detail data\n";
+    print $outFile " *  \@param  i_buflen  Length of the buffer\n";
+    print $outFile " */\n";
+    print $outFile "  virtual void parse(errlver_t i_version,\n";
+    print $outFile "                        ErrlUsrParser & i_parser,\n";
+    print $outFile "                        void * i_pBuffer,\n";
+    print $outFile "                        const uint32_t i_buflen) const\n";
+    print $outFile "  {\n";
+    print $outFile "    const char *attrData;\n";
+    print $outFile "    uint32_t *l_ptr32 = reinterpret_cast<uint32_t *>(i_pBuffer);\n";
+    print $outFile "    // while there is still at least 1 word of data left\n";
+    print $outFile "    for (; (l_ptr32 + 1) <= (uint32_t *)((uint8_t*)i_pBuffer + i_buflen); )\n";
+    print $outFile "    {\n";
+    print $outFile "      if (*l_ptr32 == 0xFFFFFFFF) { // special - master\n";
+    print $outFile "        i_parser.PrintString(\"Target\", \"MASTER_PROCESSOR_CHIP_TARGET_SENTINEL\");\n";
+    print $outFile "        l_ptr32++; // past the marker\n";
+    print $outFile "      } else { \n";
+
+    print $outFile "        // first 4 are always the same\n";
+    print $outFile "        if ((l_ptr32 + 4) <= (uint32_t *)((uint8_t*)i_pBuffer + i_buflen)) {\n";
+    print $outFile "            i_parser.PrintNumber( \"Target\", \"HUID = 0x%08X\", ntohl(*l_ptr32) );\n";
+    print $outFile "            l_ptr32++;\n";
+
+    # find CLASS
+    print $outFile "            switch (ntohl(*l_ptr32)) { // CLASS\n";
+    foreach my $enumerationType (@{$attributes->{enumerationType}})
+    {
+      if( $enumerationType->{id} eq "CLASS" ) {
+        foreach my $enumerator (@{$enumerationType->{enumerator}})
+        {
+            my $enumHex = sprintf "0x%02X",
+                enumNameToValue($enumerationType,$enumerator->{name});
+            my $enumName = $enumerationType->{id} . "_" . $enumerator->{name};
+            print $outFile "                case $enumHex: { attrData = \"$enumName\"; break; }\n";
+        }
+      }
+    } # enumerationType
+    print $outFile "                default:   { attrData = \"UNKNOWN_CLASS\"; break; }\n";
+    print $outFile "            } // switch\n";
+    print $outFile "            i_parser.PrintString(\"  ATTR_CLASS\", attrData);\n";
+    print $outFile "            l_ptr32++;\n";
+
+    # find TYPE
+    print $outFile "            switch (ntohl(*l_ptr32)) { // TYPE\n";
+    foreach my $enumerationType (@{$attributes->{enumerationType}})
+    {
+      if( $enumerationType->{id} eq "TYPE" ) {
+        foreach my $enumerator (@{$enumerationType->{enumerator}})
+        {
+            my $enumHex = sprintf "0x%02X",
+                enumNameToValue($enumerationType,$enumerator->{name});
+            my $enumName = $enumerationType->{id} . "_" . $enumerator->{name};
+            print $outFile "                case $enumHex: { attrData = \"$enumName\"; break; }\n";
+        }
+      }
+    } # enumerationType
+    print $outFile "                default:   { attrData = \"UNKNOWN_TYPE\"; break; }\n";
+    print $outFile "            } // switch\n";
+    print $outFile "            i_parser.PrintString(\"  ATTR_TYPE\", attrData);\n";
+    print $outFile "            l_ptr32++;\n";
+
+    # find MODEL
+    print $outFile "            switch (ntohl(*l_ptr32)) { // MODEL\n";
+    foreach my $enumerationType (@{$attributes->{enumerationType}})
+    {
+      if( $enumerationType->{id} eq "MODEL" ) {
+        foreach my $enumerator (@{$enumerationType->{enumerator}})
+        {
+            my $enumHex = sprintf "0x%02X",
+                enumNameToValue($enumerationType,$enumerator->{name});
+            my $enumName = $enumerationType->{id} . "_" . $enumerator->{name};
+            print $outFile "                case $enumHex: { attrData = \"$enumName\"; break; }\n";
+        }
+      }
+    } # enumerationType
+    print $outFile "                default:   { attrData = \"UNKNOWN_MODEL\"; break; }\n";
+    print $outFile "            } // switch\n";
+    print $outFile "            i_parser.PrintString(\"  ATTR_MODEL\", attrData);\n";
+    print $outFile "            l_ptr32++;\n";
+    print $outFile "            // 2 Entity Paths next\n";
+    print $outFile "            for (uint32_t k = 0;k < 2; k++)\n";
+    print $outFile "            {\n";
+    print $outFile "                uint32_t l_pathType = ntohl(*l_ptr32);\n";
+    print $outFile "                if ((l_pathType == 0x15) || // ATTR_PHYS_PATH\n";
+    print $outFile "                    (l_pathType == 0x16))   // ATTR_AFFINITY_PATH\n";
+    print $outFile "                {\n";
+    print $outFile "                    l_ptr32++;\n";
+    print $outFile "                    uint8_t *l_ptr = reinterpret_cast<uint8_t *>(l_ptr32);\n";
+    print $outFile "                    char outString[128];\n";
+    print $outFile "                    l_ptr = errlud_parse_entity_path(l_ptr,outString);\n";
+    print $outFile "                    if (l_pathType == 0x15)\n";
+    print $outFile "                    {\n";
+    print $outFile "                      i_parser.PrintString(\"  ATTR_PHYS_PATH\", outString);\n";
+    print $outFile "                    }\n";
+    print $outFile "                    if (l_pathType == 0x16)\n";
+    print $outFile "                    {\n";
+    print $outFile "                      i_parser.PrintString(\"  ATTR_AFFINITY_PATH\", outString);\n";
+    print $outFile "                    } // else don't print anything\n";
+    print $outFile "                    l_ptr32 = reinterpret_cast<uint32_t *>(l_ptr);\n";
+    print $outFile "                } else {\n";
+    print $outFile "                    l_ptr32++;\n";
+    print $outFile "                }\n";
+    print $outFile "            } // for\n";
+    print $outFile "        } // if\n";
+    print $outFile "      }\n";
+    print $outFile "    } // for\n";
+    print $outFile "  } // parse()\n\n";
+    print $outFile "private:\n";
+    print $outFile "\n";
+    print $outFile "// Disabled\n";
+    print $outFile "ErrlUserDetailsParserTarget(const ErrlUserDetailsParserTarget &);\n";
+    print $outFile "ErrlUserDetailsParserTarget & operator=(const ErrlUserDetailsParserTarget &);\n";
+    print $outFile "};\n";
+    print $outFile "} // namespace\n";
+    print $outFile "#endif\n";
+    print $outFile "#endif\n";
+} # sub writeTargetErrlHFile
 
 
 

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2012              */
+/* COPYRIGHT International Business Machines Corp. 2011,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -30,10 +30,14 @@
 #ifndef __DEVICEFW_DRIVERIF
 #define __DEVICEFW_DRIVERIF
 
+#ifndef PARSER
+
 #include <devicefw/userif.H>
 #include <stdarg.h>
 #include <builtins.h>
 #include <targeting/common/targetservice.H>
+
+#endif // not PARSER
 
 namespace DeviceFW
 {
@@ -74,6 +78,7 @@ namespace DeviceFW
         WILDCARD = -1,
     };
 
+#ifndef PARSER
     /** Construct the device addressing parameters for FSISCOM device ops.
      *  @param[in] i_address - FSISCOM address to operate on.
      */
@@ -344,6 +349,7 @@ namespace DeviceFW
                           TARGETING::Target* i_target,
                           void* io_buffer, size_t& io_buflen,
                           AccessType_DriverOnly i_accessType, va_list i_args);
+#endif // not PARSER
 };
 
 #endif

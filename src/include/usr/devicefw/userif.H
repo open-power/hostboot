@@ -31,9 +31,11 @@
 #ifndef __DEVICEFW_USERIF
 #define __DEVICEFW_USERIF
 
+#ifndef PARSER
 #include <stdint.h>
 #include <errl/errlentry.H>
 #include <targeting/common/targetservice.H>
+#endif // not PARSER
 
 namespace DeviceFW
 {
@@ -55,6 +57,7 @@ namespace DeviceFW
         LAST_ACCESS_TYPE,
     };
 
+#ifndef PARSER
     /** Construct the device addressing parameters for SCOM device ops.
      *  @param[in] i_address - Scom address to operate on.
      */
@@ -193,6 +196,7 @@ namespace DeviceFW
     errlHndl_t deviceWrite(TARGETING::Target* i_target,
                            void* i_buffer, size_t& io_buflen,
                            AccessType i_accessType, ...);
+#endif // not PARSER
 
 };
 

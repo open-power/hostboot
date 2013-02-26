@@ -32,6 +32,9 @@
 
 #include "errluserdetails.H"
 
+#include <../devicefw/userif.H>
+#include <../devicefw/driverif.H>
+
 namespace ERRORLOG
 {
 
@@ -66,9 +69,143 @@ public:
                        void * i_pBuffer,
                        const uint32_t i_buflen) const
     {
-        // TODO fix when parser if fix
-        // RTC 41707
-    }
+        uint8_t *pBuf = reinterpret_cast<uint8_t *>(i_pBuffer);
+
+        // while there is still at least 1 word of data left
+        for (; (pBuf + sizeof(uint32_t)) <= ((uint8_t*)i_pBuffer + i_buflen); )
+        {
+            // first is the HUID
+            uint32_t *pData = reinterpret_cast<uint32_t *>(pBuf);
+            if (ntohl(*pData) == 0xFFFFFFFF)
+            {
+                i_parser.PrintString("LogRegister",
+                            "Target: MASTER_PROCESSOR_CHIP_TARGET_SENTINEL");
+            }
+            else
+            {
+                i_parser.PrintNumber( "LogRegister",
+                            "Target: HUID = 0x%08X", ntohl(*pData) );
+            }
+            pData++;
+            pBuf += sizeof(*pData);
+
+            // next is the count of registers to dump
+            const uint8_t count = *pBuf;
+            pBuf++;
+
+            for (uint32_t i = 0; i < count;i++)
+            {
+                // format of data in the buffer is:
+                // i_accessType, regParam[i], uint8_t(i_dataSize), i_dataBuf
+                uint8_t l_accessType = *pBuf;
+                pBuf++;
+                int32_t numArgs = -1;
+                std::vector <const char *> addrParams;
+                switch (l_accessType)
+                {
+                    // one parameter
+                    case DeviceFW::SCOM:        // userif.H
+                        i_parser.PrintString("AccessType", "DeviceFW::SCOM");
+                        numArgs = 1;
+                        addrParams.push_back("  Scom address");
+                        break;
+                    case DeviceFW::FSI:         // userif.H
+                        i_parser.PrintString("AccessType", "DeviceFW::FSI");
+                        numArgs = 1;
+                        addrParams.push_back("  FSI address");
+                        break;
+                    case DeviceFW::SPD:         // userif.H
+                        i_parser.PrintString("AccessType", "DeviceFW::SPD");
+                        numArgs = 1;
+                        addrParams.push_back("  SPD keyword enumaration");
+                        break;
+                    case DeviceFW::XSCOM:       // driverif.H
+                        i_parser.PrintString("AccessType", "DeviceFW::XSCOM");
+                        numArgs = 1;
+                        addrParams.push_back("  XScom address");
+                        break;
+                    case DeviceFW::FSISCOM:     // driverif.H
+                        i_parser.PrintString("AccessType", "DeviceFW::FSISCOM");
+                        numArgs = 1;
+                        addrParams.push_back("  FSISCOM address");
+                        break;
+                    // two parameters
+                    case DeviceFW::MVPD:        // userif.H
+                        i_parser.PrintString("AccessType", "DeviceFW::MVPD");
+                        numArgs = 2;
+                        addrParams.push_back("  MVPD record");
+                        addrParams.push_back("  MVPD keyword");
+                        break;
+                    case DeviceFW::EEPROM:      // driverif.H
+                        i_parser.PrintString("AccessType", "DeviceFW::EEPROM");
+                        numArgs = 2;
+                        addrParams.push_back("  I2C slave device address");
+                        addrParams.push_back("  EEPROM chip number");
+                        break;
+                    // three parameters
+                    case DeviceFW::I2C:         // driverif.H
+                        i_parser.PrintString("AccessType", "DeviceFW::I2C");
+                        numArgs = 3;
+                        addrParams.push_back("  I2C port");
+                        addrParams.push_back("  I2C master engine");
+                        addrParams.push_back("  Device address");
+                        break;
+                    // not logged!
+                    case DeviceFW::PRESENT:     // userif.H
+                        i_parser.PrintString("AccessType", "DeviceFW::PRESENT "
+                                                    "- not logged");
+                        break;
+                    case DeviceFW::PNOR:        // userif.H
+                        i_parser.PrintString("AccessType", "DeviceFW::PNOR "
+                                                    "- not logged");
+                        break;
+                    case DeviceFW::MAILBOX:     // userif.H
+                        i_parser.PrintString("AccessType", "DeviceFW::MAILBOX "
+                                                    "- not logged");
+                        break;
+                    case DeviceFW::CVPD:     // userif.H
+                        i_parser.PrintString("AccessType", "DeviceFW::CVPD "
+                                                    "- not logged");
+                        break;
+                    case DeviceFW::SCAN:     // userif.H
+                        i_parser.PrintString("AccessType", "DeviceFW::SCAN "
+                                                    "- not logged");
+                        break;
+                    case DeviceFW::IBSCOM:     // userif.H
+                        i_parser.PrintString("AccessType", "DeviceFW::IBSCOM "
+                                                    "- not logged");
+                        break;
+                    default:
+                        i_parser.PrintNumber("AccessType", "UNKNOWN 0x%X"
+                                                    "- not logged",
+                                                    l_accessType);
+                        break;
+                } // switch l_accessType
+
+                if (numArgs != -1)
+                {
+                    uint64_t *pData64 = reinterpret_cast<uint64_t *>(pBuf);
+                    for (int32_t i = 0;i < numArgs;i++)
+                    {
+                        std::vector<char> l_traceEntry(20);
+                        sprintf(&(l_traceEntry[0]),"0x%016llX", ntohll(*pData64));
+                        i_parser.PrintString(addrParams[i], &(l_traceEntry[0]));
+
+                        pData64++;
+                        pBuf += sizeof(*pData64);
+                    }
+                    const uint8_t dataSize = *pBuf;
+                    i_parser.PrintNumber("  Register data", "size: 0x%X bytes",
+                                            dataSize);
+                    pBuf++;
+
+                    pData64 = reinterpret_cast<uint64_t *>(pBuf);
+                    i_parser.PrintHexDump( pData64, dataSize);
+                    pBuf += dataSize;
+                } // numArgs
+            } // for count
+        } // for
+    } // parse
 
 private:
     // Disabled

@@ -39,7 +39,7 @@
 #include <errl/errludtarget.H>
 #include <errl/errludlogregister.H>
 #include <errl/errludcallout.H>
-#include <errludattribute.H>
+#include <errl/errludattribute.H>
 #include <targeting/common/targetservice.H>
 #include <targeting/common/iterators/rangefilter.H>
 #include <targeting/common/predicates/predicates.H>
@@ -142,17 +142,17 @@ public:
         c_target = *pProc;
         TS_TRACE( "testAttribute pProc %p", c_target);
         ErrlUserDetailsTarget(c_target).addToLog(errl);
-        ErrlUserDetailsTarget(
-            TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL).addToLog(errl);
 
         // all attributes
         ErrlUserDetailsAttribute(c_target).addToLog(errl);
 
         // HUID repeated for each addToLog()
+        ErrlUserDetailsTarget(c_target).addToLog(errl);
         ErrlUserDetailsAttribute(c_target,ATTR_EC).addToLog(errl);
         ErrlUserDetailsAttribute(c_target,ATTR_CHIP_ID).addToLog(errl);
 
         // 1 HUID only
+        ErrlUserDetailsTarget(c_target).addToLog(errl);
         ErrlUserDetailsAttribute(c_target,ATTR_HUID).addToLog(errl);
 
         // HUID only - not there
@@ -234,7 +234,7 @@ public:
         // done - write it out
         pDimmEUDA.addToLog(errl);
 
-#if 1
+#if 0
         // extended test
         uint32_t i = 0;
         for (TargetIterator target = targetService().begin();
@@ -561,7 +561,7 @@ public:
             gardCount++;
 
             ErrlUserDetailsCallout(
-                        HWAS::EPUB_PRC_MEMORY_UE,
+                        HWAS::EPUB_PRC_FSI_PATH,
                         HWAS::SRCI_PRIORITY_HIGH).addToLog(errl);
 
             // commit the errorlog

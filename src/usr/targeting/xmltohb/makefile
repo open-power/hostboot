@@ -96,7 +96,15 @@ CLEAN_TARGETS += $(addprefix $(GENDIR)/, ${XMLTOHB_SYSTEM_BINARIES}) \
           $(addprefix $(GENDIR)/, ${XMLTOHB_SYSTEM_BINARIES:.bin=.xml}) \
               ${GENDIR}/${XMLTOHB_GENERIC_XML} ${GENDIR}/${XMLTOHB_FAPI_XML} \
               ${GENDIR}/${XMLTOHB_MERGED_COMMON_TARGET_SOURCES} \
-	      ${GENDIR_PLUGINS}/errludattribute.H
+              ${GENDIR}/errl/errludattribute.H \
+              ${GENDIR}/errl/errludtarget.H
+
+GENDIR_ERRL = $(ROOTPATH)/obj/genfiles/errl
+
+.PHONY: make_gendir_errl
+make_gendir_errl:
+	@mkdir -p $(GENDIR_ERRL)
+GEN_PASS_PRE += make_gendir_errl
 
 include ${ROOTPATH}/config.mk
 
@@ -131,7 +139,8 @@ call_xmltohb_compiler: ${XMLTOHB_COMPILER_SCRIPT} \
        $(addprefix --fapi-attributes-xml-file=,${GENDIR}/${XMLTOHB_FAPI_XML}) \
          --src-output-dir=$(GENDIR) --img-output-dir=none \
          --img-output-file=none
-	cp ${GENDIR}/errludattribute.H ${GENDIR_PLUGINS}
+	cp ${GENDIR_ERRL}/errludattribute.H ${GENDIR_PLUGINS}
+	cp ${GENDIR_ERRL}/errludtarget.H ${GENDIR_PLUGINS}
 
 # system-specific XML needs the generic plus the xxx.system.xml file + the
 # MRW file

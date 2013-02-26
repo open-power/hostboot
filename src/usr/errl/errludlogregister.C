@@ -53,10 +53,15 @@ void ErrlUserDetailsLogRegister::setStateLogHUID()
 
     // write the HUID of the target into the error log buffer
     uint32_t attrHuid = get_huid(iv_pTarget);
-    char *pBuf;
-    pBuf = reinterpret_cast<char *>(reallocUsrBuf(sizeof(attrHuid)));
-    memcpy(pBuf, &attrHuid, sizeof(attrHuid));
-    iv_dataSize += sizeof(attrHuid);
+    uint8_t *pBuf = reinterpret_cast<uint8_t *>
+            (reallocUsrBuf(sizeof(uint32_t) + sizeof(uint8_t)));
+    memcpy(pBuf, &attrHuid, sizeof(uint32_t));
+    iv_dataSize += sizeof(uint32_t);
+
+    // add space for the count and initialize to 0
+#define REGISTER_COUNT_OFFSET (sizeof(uint32_t))
+    *(pBuf + REGISTER_COUNT_OFFSET) = 0;
+    iv_dataSize += sizeof(uint8_t);
 
 } // setStateLogHUID
 
@@ -97,6 +102,10 @@ void ErrlUserDetailsLogRegister::writeRegisterData(
         memcpy(pBuf + iv_dataSize, i_dataBuf, i_dataSize);
         iv_dataSize += i_dataSize;
     }
+
+    // increment the count
+    *(pBuf + REGISTER_COUNT_OFFSET) += 1;
+
 } // writeRegisterData
 
 // internal function:
@@ -107,7 +116,7 @@ void ErrlUserDetailsLogRegister::readRegister(
     //  (DeviceFW::PRESENT is an example, but we chose not to log that type)
     int32_t numAddressArgs = -1;
 
-    // do we do the deviceOpValist or not, and how many 
+    // do we do the deviceOpValist or not, and how many
     //  parameters are there to be logged
     switch (i_accessType)
     {
@@ -165,14 +174,17 @@ void ErrlUserDetailsLogRegister::readRegister(
                         i_accessType);
             delete errl; // eat the error - just delete it
 
-            reg_size = 0; // in case deviceOpValist didn't reset
+            // nothing gets written out
         }
-
-        // internal worker function to put reg data into the log
-        writeRegisterData(&reg_data, reg_size, numAddressArgs,
-                i_accessType, i_args);
-        TRACDCOMP(g_trac_errl, "LogRegister: iv_dataSize %d", iv_dataSize);
+        else
+        {
+            // internal worker function to put reg data into the log
+            writeRegisterData(&reg_data, reg_size, numAddressArgs,
+                    i_accessType, i_args);
+            TRACDCOMP(g_trac_errl, "LogRegister: iv_dataSize %d", iv_dataSize);
+        }
     }
+    // else: nothing gets written out
 } // readRegister
 
 // internal function:
@@ -184,7 +196,7 @@ void ErrlUserDetailsLogRegister::copyRegisterData(
     //  (DeviceFW::PRESENT is an example, but we chose not to log that type)
     int32_t numAddressArgs = -1;
 
-    // do we do the deviceOpValist or not, and how many 
+    // do we do the deviceOpValist or not, and how many
     //  parameters are there to be logged
     switch (i_accessType)
     {
@@ -230,6 +242,7 @@ void ErrlUserDetailsLogRegister::copyRegisterData(
                 i_accessType, i_args);
         TRACDCOMP(g_trac_errl, "LogRegister: iv_dataSize %d", iv_dataSize);
     }
+    // else: nothing gets written out
 } // copyRegisterData
 
 //------------------------------------------------------------------------------

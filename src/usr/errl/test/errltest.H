@@ -435,7 +435,7 @@ public:
             // SENTINEL not logged properly // deconfigCount++;
 
             errl->addProcedureCallout(
-                    HWAS::EPUB_PRC_MEMORY_UE,
+                    HWAS::EPUB_PRC_MEMORY_PLUGGING_ERROR,
                     HWAS::SRCI_PRIORITY_HIGH);
 
             errlCommit(errl, CXXTEST_COMP_ID);

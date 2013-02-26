@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2012              */
+/* COPYRIGHT International Business Machines Corp. 2011,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -229,7 +229,7 @@ uint8_t * Target::targetFFDC( uint32_t & o_size ) const
     AttributeTraits<ATTR_CLASS>::Type attrClass = getAttr<ATTR_CLASS>();
     AttributeTraits<ATTR_TYPE>::Type  attrType  = getAttr<ATTR_TYPE>();
     AttributeTraits<ATTR_MODEL>::Type attrModel = getAttr<ATTR_MODEL>();
-    uint32_t headerSize = sizeof(uint8_t) + sizeof(attrHuid) + 
+    uint32_t headerSize = sizeof(attrHuid) + 
                             sizeof(attrClass) + sizeof(attrType) + 
                             sizeof(attrModel);
 
@@ -257,14 +257,12 @@ uint8_t * Target::targetFFDC( uint32_t & o_size ) const
     pFFDC = static_cast<uint8_t*>(
         malloc(  headerSize
                + pathPhysSize 
-               + (pathPhysSize ? sizeof(attrEnum) : 0)
+               + sizeof(attrEnum)
                + pathAffSize
-               + (pathAffSize ? sizeof(attrEnum) : 0)));
+               + sizeof(attrEnum)));
 
-    // we'll send down a '0' then HUID CLASS TYPE and MODEL
+    // we'll send down HUID CLASS TYPE and MODEL
     uint32_t bSize = 0; // size of data in the buffer
-    *pFFDC = 0;
-    bSize++;
     memcpy(pFFDC + bSize, &attrHuid, sizeof(attrHuid) );
     bSize += sizeof(attrHuid);
     memcpy(pFFDC + bSize, &attrClass, sizeof(attrClass) );
@@ -282,6 +280,13 @@ uint8_t * Target::targetFFDC( uint32_t & o_size ) const
         memcpy(pFFDC + bSize, &pathPhys, pathPhysSize);
         bSize += pathPhysSize;
     }
+    else
+    {
+        // write 0x00 indicating no PHYS_PATH
+        attrEnum = 0x00;
+        memcpy(pFFDC + bSize, &attrEnum, sizeof(attrEnum));
+        bSize += sizeof(attrEnum);
+    }
 
     if( pathAffSize > 0)
     {
@@ -290,6 +295,13 @@ uint8_t * Target::targetFFDC( uint32_t & o_size ) const
         bSize += sizeof(attrEnum);
         memcpy(pFFDC + bSize, &pathAff, pathAffSize);
         bSize += pathAffSize;
+    }
+    else
+    {
+        // write 0x00 indicating no AFFINITY_PATH
+        attrEnum = 0x00;
+        memcpy(pFFDC + bSize, &attrEnum, sizeof(attrEnum));
+        bSize += sizeof(attrEnum);
     }
 
     o_size = bSize;
