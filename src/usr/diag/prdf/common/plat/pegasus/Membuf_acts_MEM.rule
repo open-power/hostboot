@@ -222,8 +222,17 @@ group gMemFbistFir filter singlebit
 ################################################################################
 
 /** Analyze connected MBA0 */
-actionclass analyzeMba0 { analyze(connected(TYPE_MBA, 0)); };
+actionclass analyzeMba0
+{
+    try ( funccall("MBA1_Starvation"),
+          analyze(connected(TYPE_MBA, 0)) );
+};
 
 /** Analyze connected MBA1 */
-actionclass analyzeMba1 { analyze(connected(TYPE_MBA, 1)); };
+# No need to address starvation issue here
+# because MBA0 is not at attention
+actionclass analyzeMba1
+{
+    analyze(connected(TYPE_MBA, 1));
+};
 
