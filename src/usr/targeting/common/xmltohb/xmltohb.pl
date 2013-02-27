@@ -670,12 +670,28 @@ sub writeFapiPlatAttrMacrosHeaderFileContent {
                                       "it must be DIRECT");
                             }
 
-                            if ($attribute->{persistency} ne "volatile-zeroed")
+                            if ( (exists $fapiAttr->{persistent}))
                             {
-                                fatal("FAPI non-platInit attr " .
+                                if ($attribute->{persistency} ne "non-volatile")
+                                {
+                                    fatal("FAPI non-platInit attr " .
+                                          "'$hwpfToHbAttrMap->{id}' is " .
+                                          "'$attribute->{persistency}', " .
+                                          "it must be non-volatile");
+                                }
+                            }
+                            else
+                            {
+                                # Check that platInit attributes
+                                # have a non-volatile persistency
+                                if($attribute->{persistency} ne
+                                   "volatile-zeroed")
+                                {
+                                     fatal("FAPI non-platInit attr " .
                                       "'$hwpfToHbAttrMap->{id}' is " .
                                       "'$attribute->{persistency}', " .
                                       "it must be volatile-zeroed");
+                                }
                             }
 
                         }
@@ -1311,8 +1327,8 @@ VERBATIM
     my $attributeIdEnumeration = getAttributeIdEnumeration($attributes);
     foreach my $enumerator (@{$attributeIdEnumeration->{enumerator}})
     {
-        $attrId = $enumerator->{name};
         $hexVal = $enumerator->{value};
+        $attrId = $enumerator->{name};
         write;
     }
 
@@ -2546,7 +2562,8 @@ sub getAttributeIdEnumeration {
         my $attributeHexVal28bit =substr($attributeHexVal,0,7);
         if(exists($attrValHash{$attributeHexVal28bit}))
         {
-            fatal("Error:Duplicate AttributeId hashvalue for $attribute->{id}" );
+             fatal(
+               "Error:Duplicate AttributeId hashvalue for $attribute->{id}");
         }
         $attrValHash{$attributeHexVal28bit}=1;
         $enumeration->{enumerator}->[$attributeValue]->{name}

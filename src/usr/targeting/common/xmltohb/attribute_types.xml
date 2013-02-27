@@ -11852,4 +11852,21 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
     <writeable/>
 </attribute>
 
+<attribute>
+    <id>DUMMY_PERSISTENCY</id>
+    <description>Cached value to test persistency</description>
+    <simpleType>
+       <uint8_t>
+          <default>0</default>
+       </uint8_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_DUMMY_PERSISTENCY</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
 </attributes>

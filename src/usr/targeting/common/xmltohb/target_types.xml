@@ -179,6 +179,7 @@
     <attribute><id>MRW_SAFEMODE_MEM_THROTTLE_NUMERATOR_PER_CHIP</id></attribute>
     <attribute><id>MRW_THERMAL_MEMORY_POWER_LIMIT</id></attribute>
     <attribute><id>PLCK_IPL_ATTR_OVERRIDES_EXIST</id></attribute>
+    <attribute><id>DUMMY_PERSISTENCY</id></attribute>
 </targetType>
 
 <targetType>
@@ -1172,6 +1173,7 @@
     <attribute><id>EEPROM_ADDR_INFO0</id></attribute>
 
     <attribute><id>VPD_REC_NUM</id></attribute>
+
 </targetType>
 
 <targetType>

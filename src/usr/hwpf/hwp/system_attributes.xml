@@ -241,4 +241,17 @@
     <platInit/>
     <writeable/>
   </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_DUMMY_PERSISTENCY</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+     Cached value to test persistency
+    </description>
+    <valueType>uint8</valueType>
+    <persistent/>
+    <readable/>
+    <writeable/>
+  </attribute>
+
 </attributes>
