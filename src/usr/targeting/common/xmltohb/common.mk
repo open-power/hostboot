@@ -46,7 +46,8 @@ XMLTOHB_SOURCE_TARGETS = \
     errludtarget.C
 
 XMLTOHB_SYSTEM_BINARIES =       \
-   vbu_targeting.bin            \
+   vbu_VENICE_targeting.bin     \
+   vbu_MURANO_targeting.bin     \
    simics_VENICE_targeting.bin  \
    simics_MURANO_targeting.bin
 

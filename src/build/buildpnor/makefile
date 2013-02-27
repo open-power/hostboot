@@ -31,7 +31,7 @@ ROOTPATH = ../../..
 .DEFAULT_GOAL := buildpnor
 
 
-PNOR_VBU_TARGETS = vbu
+PNOR_VBU_TARGETS = vbu_MURANO vbu_VENICE
 
 define PNOR_vbu_template
 $${IMGDIR}/$(1).pnor: $${IMGDIR}/hbicore_extended.bin $${IMGDIR}/$(1)_targeting.bin

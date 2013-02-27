@@ -78,7 +78,8 @@ COPY_RENAME_FILES = \
     hbicore.bin:img/hbicore$(UNDERSCORE_TEST).bin:vpo \
     img/hostboot.bin:img/hbicore$(UNDERSCORE_TEST).bin:fsp \
     img/hostboot_extended.bin:img/hbicore$(UNDERSCORE_TEST)_extended.bin:fsp \
-    vbu.pnor:img/vbu$(UNDERSCORE_TEST).pnor:vpo \
+    vbu_MURANO.pnor:img/vbu$(UNDERSCORE_TEST)_MURANO.pnor:vpo \
+    vbu_VENICE.pnor:img/vbu$(UNDERSCORE_TEST)_VENICE.pnor:vpo \
     hbicore.syms:img/hbicore$(UNDERSCORE_TEST).syms:tools,vpo \
     hbicore.list:img/hbicore$(UNDERSCORE_TEST).list:tools,vpo \
     hbicore.bin.modinfo:img/hbicore$(UNDERSCORE_TEST).bin.modinfo:tools,vpo \
