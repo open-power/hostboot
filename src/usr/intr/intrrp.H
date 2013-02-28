@@ -403,6 +403,14 @@ namespace INTR
             errlHndl_t initXIVR(enum ISNvalue_t i_isn, bool i_enable);
 
             /**
+             * Setup XIVR with intr masked and isn & destination set for
+             * xivr/isn that hostboot uses.
+             * @param i_target : The target processor chip
+             * @return error handle
+             */
+            errlHndl_t maskXIVR(TARGETING::Target * i_target);
+
+            /**
              * Shutdown procedure
              */
             void shutDown();

@@ -550,6 +550,13 @@ errlHndl_t IntrRp::initIRSCReg(TARGETING::Target * i_target)
 
         size_t scom_len = sizeof(uint64_t);
 
+        // Mask off interrupts from isn's on this target
+        // This also sets the source isn and PIR destination
+        // such that if an interrupt is pending when when the ISRN
+        // is written, simics get the right destination for the
+        // interrupt.
+        err = maskXIVR(i_target);
+
         // Setup PHBISR
         // EN.TPC.PSIHB.PSIHB_ISRN_REG set to 0x00030003FFFF0000
         PSIHB_ISRN_REG_t reg;
@@ -696,7 +703,53 @@ errlHndl_t IntrRp::initXIVR(enum ISNvalue_t i_isn, bool i_enable)
     return err;
 }
 
+//----------------------------------------------------------------------------
 
+// Set priority highest (disabled) ,but with valid PIR
+errlHndl_t IntrRp::maskXIVR(TARGETING::Target *i_target)
+{
+    struct XIVR_INFO
+    {
+        ISNvalue_t  isn:8;
+        uint32_t addr;
+    };
+
+    static  const XIVR_INFO xivr_info[] =
+    {
+        {ISN_OCC,       PsiHbXivr::OCC_XIVR_ADRR},
+        {ISN_FSI,       PsiHbXivr::FSI_XIVR_ADRR},
+        {ISN_LPC,       PsiHbXivr::LPC_XIVR_ADRR},
+        {ISN_LCL_ERR,   PsiHbXivr::LCL_ERR_XIVR_ADDR},
+        {ISN_HOST,      PsiHbXivr::HOST_XIVR_ADRR}
+    };
+
+    errlHndl_t err = NULL;
+    size_t scom_len = sizeof(uint64_t);
+    PIR_t pir = intrDestCpuId();
+    PsiHbXivr xivr;
+
+    xivr.pir = pir.word;
+    xivr.priority = PsiHbXivr::PRIO_DISABLED;
+
+    for(size_t i = 0; i < sizeof(xivr_info)/sizeof(xivr_info[0]); ++i)
+    {
+        xivr.source = xivr_info[i].isn;
+
+        err = deviceWrite
+            (i_target,
+             &xivr,
+             scom_len,
+             DEVICE_SCOM_ADDRESS(xivr_info[i].addr));
+
+        if(err)
+        {
+            break;
+        }
+    }
+    return err;
+}
+
+//----------------------------------------------------------------------------
 
 errlHndl_t IntrRp::registerInterruptISN(msg_q_t i_msgQ,
                                      uint32_t i_msg_type,
