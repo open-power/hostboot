@@ -1,25 +1,25 @@
-#   IBM_PROLOG_BEGIN_TAG
-#  This is an automatically generated prolog.
+# IBM_PROLOG_BEGIN_TAG
+# This is an automatically generated prolog.
 #
-#  $Source: src/build/mkrules/dist_rules.mk $
+# $Source: src/build/mkrules/dist.rules.mk $
 #
-#  IBM CONFIDENTIAL
+# IBM CONFIDENTIAL
 #
-#  COPYRIGHT International Business Machines Corp. 2012
+# COPYRIGHT International Business Machines Corp. 2012,2013
 #
-#  p1
+# p1
 #
-#  Object Code Only (OCO) source materials
-#  Licensed Internal Code Source Materials
-#  IBM HostBoot Licensed Internal Code
+# Object Code Only (OCO) source materials
+# Licensed Internal Code Source Materials
+# IBM HostBoot Licensed Internal Code
 #
-#  The source code for this program is not published or other-
-#  wise divested of its trade secrets, irrespective of what has
-#  been deposited with the U.S. Copyright Office.
+# The source code for this program is not published or otherwise
+# divested of its trade secrets, irrespective of what has been
+# deposited with the U.S. Copyright Office.
 #
-#  Origin: 30
+# Origin: 30
 #
-#  IBM_PROLOG_END_TAG
+# IBM_PROLOG_END_TAG
 
 #
 # Makefile rules defining all the actions for the Hostboot content delivery.
@@ -74,7 +74,7 @@ $(TESTVAR_CHANGED_FILE):
 
 # ------------- File searching directives ----------------------
 # ROOTPATH_WILDCARD and ROOTPATH_WILDCARD_RECURSIVE are useful functions
-# for defining targets (in dist_targets.mk) where a .../path/* is wanted.
+# for defining targets (in dist.targets.mk) where a .../path/* is wanted.
 #
 # ROOTPATH_WILDCARD takes a file-path-pattern relative to the ROOTPATH and
 # returns all the files matching it.  (Ex. src/build/debug/Hostboot/*.pm).
@@ -134,13 +134,13 @@ endif
 
 #
 # __SOURCE_FOR_TARGET utility function takes a three-tuple of
-# [ 1=target, 2=source, 3=comma-separated-targets ].  
+# [ 1=target, 2=source, 3=comma-separated-targets ].
 #
 # If the current target (1) is in the list (3) then the source is returned.
 # If the list (3) contains 'all' then the source is returned, unless the
 # current target (1) is 'tools'.
 #
-# Ex: 
+# Ex:
 #     __SOURCE_FOR_TARGET("fsp", "foobar", "vpo,tools") => ""
 #     __SOURCE_FOR_TARGET("fsp", "foobar", "fsp,vpo") => "foobar"
 #     __SOURCE_FOR_TARGET("fsp", "foobar", "all") => "foobar"
@@ -155,7 +155,7 @@ __SOURCE_FOR_TARGET = $(if $(findstring tools,$(1)), \
 		       )
 # ------------- COPY_FILE directives ----------------------
 # COPY_FILES format is <source file>:<comma separated targets>
-# 
+#
 # For each file in COPY_FILES and target, we need to create a recipe of:
 # $(TARGET_DIR)$(TARGET)/$(FILE) depends on $(ROOTPATH)/$(FILE)
 #
@@ -187,7 +187,7 @@ $(foreach targ,$(COPY_FILES), \
 # ------------- COPY_RENAME_FILE directives ----------------------
 # COPY_RENAME_FILES format is:
 #     <dest file>:<source file>:<comma separated targets>
-# 
+#
 # For each file in COPY_RENAME_FILES and target, we need to create a recipe:
 # $(TARGET_DIR)$(TARGET)/$(DEST) depends on $(ROOTPATH)/$(SOURCE)
 #
@@ -219,7 +219,7 @@ $(foreach targ,$(COPY_RENAME_FILES), \
 # ------------- LINK_FILE directives ----------------------
 # LINK_FILES format is:
 #     <dest link>:<source file>:<comma separated targets>
-# 
+#
 # For each file in LINK_FILES and target, we need to create a recipe:
 # $(TARGET_DIR)$(TARGET)/$(DEST) depends on $(TARGET_DIR)$(TARGET)/$(SOURCE)
 #
@@ -252,15 +252,15 @@ $(foreach targ,$(LINK_FILES), \
 # ------------- TAR file directives ----------------------
 # <TARFILE>_CONTENTS format is:
 #     <file>[:<kept root of path>]
-# 
+#
 # For each file in TAR_FILES and target, we need to create a recipe:
 # $(TARGET_DIR)$(TARGET)/$(TARFILE) depends on [a bunch of content].
 #
 # The content is determined by iterating through all of the files listed
-# in <TARFILE>_CONTENTS and calling TAR_CONTENT_SOURCEFILE.  
+# in <TARFILE>_CONTENTS and calling TAR_CONTENT_SOURCEFILE.
 #
 # Since there is potential renaming going on as part of the TAR creation
-# process, the recipe template for creating a TAR is longer than the others. 
+# process, the recipe template for creating a TAR is longer than the others.
 # We need to create a temporary directory, populate it with the content,
 # create the TAR file, and then remove the temporary directory.
 #
@@ -311,7 +311,7 @@ $(TARGET_DIR)$(2)/$(1): $$(foreach file, $$($(1)_CONTENTS), \
 		       $$(call TAR_CONTENT_DESTFILE, $$(file)))) ;\
 	    )
 	@tar --create --file $$@ -C $$(TAR_TEMP_DIR)/ .
-	@touch $$@	
+	@touch $$@
 	@rm -rf $$(TAR_TEMP_DIR)
 endef
 define TAR_TARGET_RULE
@@ -330,7 +330,7 @@ $(foreach targ,$(TAR_FILES), \
 # that calls into the ODE sandbox and performs a 'mk' operation.  In
 # order to reduce the number of 'mk' calls done we allow the ODE_REMAKE
 # directives to be dependent upon something created for the target (such
-# as a tarfile).  __ODE_REMAKE_TARGET is a function that creates a 
+# as a tarfile).  __ODE_REMAKE_TARGET is a function that creates a
 # filename to touch based on the sandbox subdirectory and context where the
 # 'mk' operation is being performed.
 #
@@ -381,7 +381,7 @@ ODE_REMAKE_RULE = $(eval $(call __ODE_REMAKE_RULE,,$(2)))\
 #
 # Building a target is 3 simple stages:
 #     1) Print a "Starting <TARGET>" message.
-#     2) Build all of the target dependencies 
+#     2) Build all of the target dependencies
 #             (based on the <TARGET>_<ACTION> variables).
 #     3) Print a "Completed <TARGET>" message.
 #
@@ -429,7 +429,7 @@ $(1)_TARGET: \
     $$(addprefix $$(TARGET_DIR)/,$$($(1)_TAR_FILE)) \
     $$(addprefix $$(TARGET_DIR)/,$$($(1)_ODE_REMAKE_DEPS))
 	@echo TARGET $(1) complete.
-	
+
 $(1)_TARGET_AS_SUBDIR: \
     $(1)_TARGET_ECHO_START \
     $$(addprefix $$(TARGET_DIR)/$(1)/,$$(notdir $$($(1)_COPY_FILE))) \

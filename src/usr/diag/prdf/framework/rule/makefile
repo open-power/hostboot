@@ -65,7 +65,7 @@ include ../../common/prd_ruletable.mk # for PRDR_RULE_TABLE_TARGETS
 EXTRA_PARTS = $(addprefix ${IMGDIR}/, ${PRDR_RULE_TABLE_TARGETS})
 
 # Clean up the auto generate source files
-EXTRA_CLEAN = ${PRDR_CMP_PATH} \
+CLEAN_TARGETS += ${PRDR_CMP_PATH} \
 			  ${PRDR_CMP_o_PATH} \
 			  ${PRDR_CMP_YACC_o_PATH} \
 			  ${PRDR_CMP_YACC_C_PATH} \

@@ -25,12 +25,11 @@ ROOTPATH = ..
 
 SUBDIRS = kernel.d lib.d libc++.d sys.d usr.d build.d
 IMGS = hbicore hbicore_test
-EXTRA_LIDS = dslid
 
 BASE_OBJECTS = console.o spinlock.o string.o string_ext.o stdlib.o ctype.o \
                assert.o stdio.o builtins.o vfs_init.o heapmgr.o pagemgr.o \
                math.o barrier.o idebug.o intmsghandler.o deferred.o \
-	       idletask.o splaytree.o
+               idletask.o splaytree.o
 
 ifdef HOSTBOOT_PROFILE
 BASE_OBJECTS += gcov.o
@@ -44,7 +43,7 @@ DIRECT_BOOT_OBJECTS = start.o kernel.o taskmgr.o cpumgr.o syscall.o \
                       ptmgr.o segmentmgr.o basesegment.o devicesegment.o \
                       block.o cxxtest_data.o cpuid.o misc.o msghandler.o \
                       blockmsghdlr.o stacksegment.o softpatch_p8.o \
-		      shutdown.o forceattn_p8.o terminate.o 
+                      shutdown.o forceattn_p8.o terminate.o 
 
 BASE_MODULES = trace errl devicefw scom xscom initservice \
                pnor vfs
@@ -90,16 +89,12 @@ hbicore_DATA_MODULES =  sample.if p8.dmi.scom.if cen.dmi.scom.if \
                         p8.as.scom.if p8.nx.scom.if p8.dmi.custom.scom.if \
                         cen.dmi.custom.scom.if
 
-hbicore_LIDNUMBER = 80f00100
-
 hbicore_test_OBJECTS = ${hbicore_OBJECTS}
 hbicore_test_MODULES = ${hbicore_MODULES}
 hbicore_test_EXTENDED_MODULES = ${hbicore_EXTENDED_MODULES} ${TESTCASE_MODULES}
 hbicore_test_DATA_MODULES = ${hbicore_DATA_MODULES} testdata
 
-dslid_LIDNUMBER = 80f001fe
-
-IMAGE_EXTRA_TARGETS = buildpnor
+IMAGE_PASS_BODY += buildpnor
 
 include ${ROOTPATH}/config.mk
 

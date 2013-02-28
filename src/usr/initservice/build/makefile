@@ -1,25 +1,25 @@
-#  IBM_PROLOG_BEGIN_TAG
-#  This is an automatically generated prolog.
+# IBM_PROLOG_BEGIN_TAG
+# This is an automatically generated prolog.
 #
-#  $Source: src/usr/initservice/build/makefile $
+# $Source: src/usr/initservice/build/makefile $
 #
-#  IBM CONFIDENTIAL
+# IBM CONFIDENTIAL
 #
-#  COPYRIGHT International Business Machines Corp. 2011
+# COPYRIGHT International Business Machines Corp. 2011,2013
 #
-#  p1
+# p1
 #
-#  Object Code Only (OCO) source materials
-#  Licensed Internal Code Source Materials
-#  IBM HostBoot Licensed Internal Code
+# Object Code Only (OCO) source materials
+# Licensed Internal Code Source Materials
+# IBM HostBoot Licensed Internal Code
 #
-#  The source code for this program is not published or other-
-#  wise divested of its trade secrets, irrespective of what has
-#  been deposited with the U.S. Copyright Office.
+# The source code for this program is not published or otherwise
+# divested of its trade secrets, irrespective of what has been
+# deposited with the U.S. Copyright Office.
 #
-#  Origin: 30
+# Origin: 30
 #
-#  IBM_PROLOG_END
+# IBM_PROLOG_END_TAG
 #
 # makefile for initialization service build tasks.
 #    1.  create isteplist.csv file for spless
@@ -33,11 +33,11 @@ include ${ROOTPATH}/src/usr/parser.mk
 
 OBJFILES=
 
-all: gen_pass code_pass
+all: GEN_PASS CODE_PASS
 
-gen_pass:
+GEN_PASS:
 
-code_pass: ${IMGDIR}/isteplist.csv
+CODE_PASS: GEN_PASS ${IMGDIR}/isteplist.csv
 
 ## find all the ISTEPNAME( #,#,name ) macros in the istep lists and generate 
 ##	the isteplist.csv file for hb-istep 
@@ -56,5 +56,6 @@ debug:
 	ls -l ${OBJDIR} 
 	ls -l ${IMGDIR}
 	
-beam:
-	## dummy
+BEAM_PASS:
+IMAGE_PASS:
+CLEAN_PASS: clean

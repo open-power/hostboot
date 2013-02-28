@@ -46,18 +46,28 @@ ERRLPARSE_TARGETS = \
 CC=i686-mcp6-g++ -m32
 CFLAGS:=-g -O0   -I $(ROOTPATH)/src/include/usr -I ${GENDIR}
 
-all: gen_pass code_pass
+all: GEN_PASS CODE_PASS
 
-gen_pass:  mkdirs  ${GENDIR}/comps.C ${ERRLPARSE_TARGETS}
+GEN_PASS:  mkdirs  ${GENDIR}/comps.C ${ERRLPARSE_TARGETS}
 
-code_pass: ${IMGDIR}/errlparser
+ifeq ($(MAKECMDGOALS),all)
+CODE_PASS: GEN_PASS
+endif
+ifeq ($(MAKECMDGOALS),)
+CODE_PASS: GEN_PASS
+endif
+
+CODE_PASS: ${IMGDIR}/errlparser
 
 mkdirs:
 	mkdir -p ${OBJDIR}
 	mkdir -p ${GENDIR}
 
 # Generate error log parser code
-${ERRLPARSE_TARGETS} ::
+${ERRLPARSE_TARGETS} : gen_errl_parsers
+
+.PHONY: gen_errl_parsers
+gen_errl_parsers:
 	./genErrlParsers.pl -b ${ROOTPATH} -o ${GENDIR}/plugins
 
 ${GENDIR}/comps.C: ${ROOTPATH}/src/include/usr/hbotcompid.H
@@ -85,5 +95,6 @@ debug:
 	ls -l	${OBJDIR} 
 	ls -l	${IMGDIR}
 	
-beam:
-	# dummy
+BEAM_PASS:
+IMAGE_PASS:
+CLEAN_PASS: clean

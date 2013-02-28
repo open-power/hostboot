@@ -228,7 +228,7 @@ $(call GENTARGET, ${FAPI_ERROR_TARGETS}) : \
 #------------------------------------------------------------------------------
 # The PLAT HWP RC and FFDC parser file generated from Error XML files
 #------------------------------------------------------------------------------
-$(call GENTARGET, ${PLAT_HWP_ERR_PARSER}) : \
+$(call GENPLUGINTARGET, ${PLAT_HWP_ERR_PARSER}) : \
         plat/fapiPlatCreateHwpErrParser.pl ${HWP_ERROR_XML_FILES}
 	$< $(dir $@) ${HWP_ERROR_XML_FILES}
 
@@ -258,7 +258,7 @@ $(foreach initfile,${HWP_INITFILES}, \
 	$(eval $(call HWP_IF_RECIPE,$(initfile))))
 
 ${EXTRA_PARTS}: ${IMGDIR}/% : ${GENDIR}/%
-	cp -f $^ $@
+	cp -f $< $@
 
 #------------------------------------------------------------------------------
 # The FAPI Initfile attribute service

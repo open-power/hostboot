@@ -112,11 +112,11 @@ LINK_FILES = \
 #     <file>[:<kept root of path>]
 #
 # Examples:
-#     src/hbfw/simics/makefile on FSP is created from 
+#     src/hbfw/simics/makefile on FSP is created from
 #     src/build/mkrules/hbfw/simics/makefile on Hostboot and is added to the
 #     root of the simics.tar file.
 #         simics.tar_CONTENTS += src/build/mkrules/hbfw/simics/makefile
-#     
+#
 #     src/hbfw/fsp/targeting/common/target.C on FSP is created from
 #     src/usr/targeting/common/target.C on Hostboot and is added to the
 #     fsp.tar at targeting/common.
@@ -209,4 +209,4 @@ fsp_ODE_REMAKES = \
     hbfw/img:update_images_for_sandbox:ppc:FORCE_ALWAYS \
     hbfw/simics:NOTARGET:ppc:$(TARGET_DIR)/simics.tar
 
-include dist_rules.mk
+include dist.rules.mk

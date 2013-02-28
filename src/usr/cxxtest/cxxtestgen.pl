@@ -6,7 +6,7 @@
 #
 # IBM CONFIDENTIAL
 #
-# COPYRIGHT International Business Machines Corp. 2011,2012
+# COPYRIGHT International Business Machines Corp. 2011,2013
 #
 # p1
 #
@@ -727,9 +727,6 @@ sub write_start() {
   ## $$TODO print   "\tusing namespace TASKARGS;\n";
 
   print   "\n";
-  print   "trace_desc_t *g_trac_test = NULL;\n";
-##  Use same trace buffer for all unit tests, i.e. "UNIT_TEST"
-  print   "TRAC_INIT(&g_trac_test, \"", "UNIT_TEST", "\", 4*KILOBYTE);\n";
 
 
   print   "\n\n";

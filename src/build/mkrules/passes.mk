@@ -1,11 +1,11 @@
 # IBM_PROLOG_BEGIN_TAG
 # This is an automatically generated prolog.
 #
-# $Source: src/build/linker/makefile $
+# $Source: src/build/mkrules/passes.mk $
 #
 # IBM CONFIDENTIAL
 #
-# COPYRIGHT International Business Machines Corp. 2011,2013
+# COPYRIGHT International Business Machines Corp. 2013
 #
 # p1
 #
@@ -20,18 +20,14 @@
 # Origin: 30
 #
 # IBM_PROLOG_END_TAG
-linker: linker.C
-	i686-mcp6-g++ -O3 -g linker.C -o linker -lbfd -liberty -lz
 
-all: CODE_PASS
+# File: passes.mk
+# Description:
+#     Root of the passes for the build system.
+#
+# These are handled at the end (after the other env/rules files) because there
+# are many variables defined in earlier makefiles that are needed to properly
+# create the passes.
 
-CODE_PASS: linker
-
-GEN_PASS:
-
-clean:
-	(rm -f linker)
-
-BEAM_PASS:
-IMAGE_PASS:
-CLEAN_PASS: clean
+include $(MKRULESDIR)/passes.env.mk
+include $(MKRULESDIR)/passes.rules.mk

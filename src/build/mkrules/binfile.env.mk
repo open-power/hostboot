@@ -1,11 +1,11 @@
 # IBM_PROLOG_BEGIN_TAG
 # This is an automatically generated prolog.
 #
-# $Source: src/build/linker/makefile $
+# $Source: src/build/mkrules/binfile.env.mk $
 #
 # IBM CONFIDENTIAL
 #
-# COPYRIGHT International Business Machines Corp. 2011,2013
+# COPYRIGHT International Business Machines Corp. 2013
 #
 # p1
 #
@@ -20,18 +20,11 @@
 # Origin: 30
 #
 # IBM_PROLOG_END_TAG
-linker: linker.C
-	i686-mcp6-g++ -O3 -g linker.C -o linker -lbfd -liberty -lz
 
-all: CODE_PASS
+# File: binfile.env.mk
+# Description:
+#     Configuration of the binary file-cache settings.
 
-CODE_PASS: linker
+BINFILE_CACHE_LOCALDIR = $(ROOTPATH)/.git/hb_cache/data/
+BINFILE_CACHE_REMOTEDIR = /gsa/ausgsa/projects/h/hostboot/.binary_cache/data/
 
-GEN_PASS:
-
-clean:
-	(rm -f linker)
-
-BEAM_PASS:
-IMAGE_PASS:
-CLEAN_PASS: clean
