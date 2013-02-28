@@ -25,7 +25,9 @@
 #include <fsi/fsiif.H>
 #include <fsi/fsi_reasoncodes.H>
 #include <vpd/mvpdenums.H>
+#include <vpd/cvpdenums.H>
 #include <errl/errlmanager.H>
+#include <hwas/common/hwasCallout.H>
 #include <targeting/common/predicates/predicatectm.H>
 
 extern trace_desc_t* g_trac_fsi;
@@ -60,6 +62,7 @@ errlHndl_t procPresenceDetect(DeviceFW::OperationType i_opType,
                               va_list i_args)
 {
     errlHndl_t l_errl = NULL;
+    uint32_t l_saved_plid = 0;
 
     if (unlikely(io_buflen < sizeof(bool)))
     {
@@ -98,9 +101,10 @@ errlHndl_t procPresenceDetect(DeviceFW::OperationType i_opType,
         fsi_present = isSlavePresent(i_target);
     }
 
-    // Next look for valid Module VPD by reading the PG record
+    // Next look for valid Module VPD 
     bool mvpd_present = false;
     size_t theSize = 0;
+
     l_errl = deviceRead( i_target,
                          NULL,
                          theSize,
@@ -110,6 +114,9 @@ errlHndl_t procPresenceDetect(DeviceFW::OperationType i_opType,
     {
         if( fsi_present )
         {
+            // Save this plid to use later
+            l_saved_plid = l_errl->plid();
+
             // commit this log because we expected to have VPD
             errlCommit( l_errl,
                         FSI_COMP_ID );
@@ -133,6 +140,10 @@ errlHndl_t procPresenceDetect(DeviceFW::OperationType i_opType,
         {
             if( fsi_present )
             {
+
+                // Save this plid to use later
+                l_saved_plid = l_errl->plid();
+
                 // commit this log because we expected to have VPD
                 errlCommit( l_errl,
                             FSI_COMP_ID );
@@ -168,12 +179,22 @@ errlHndl_t procPresenceDetect(DeviceFW::OperationType i_opType,
                 new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                         FSI::MOD_FSIPRES_PROCPRESENCEDETECT,
                                         FSI::RC_FSI_MVPD_MISMATCH,
+                                        TARGETING::get_huid(i_target),
                                         TWO_UINT32_TO_UINT64(
                                             fsi_present,
                                             mvpd_present));
 
-        //@todo-callout the processor
-        //l_errl->addHwCallout( i_target, LOW, NO_DECONFIG, NO_GARD );
+        // Callout the processor
+        l_errl->addHwCallout( i_target, 
+                              HWAS::SRCI_PRIORITY_LOW, 
+                              HWAS::NO_DECONFIG, 
+                              HWAS::GARD_NULL );
+
+        // if there is a saved PLID, apply it to this error log
+        if (l_saved_plid)
+        {
+            l_errl->plid(l_saved_plid);
+        }
 
         // commit this log and move on
         errlCommit( l_errl,
@@ -214,6 +235,7 @@ errlHndl_t membPresenceDetect(DeviceFW::OperationType i_opType,
                               va_list i_args)
 {
     errlHndl_t l_errl = NULL;
+    uint32_t l_saved_plid = 0;
 
     if (unlikely(io_buflen < sizeof(bool)))
     {
@@ -239,56 +261,74 @@ errlHndl_t membPresenceDetect(DeviceFW::OperationType i_opType,
     // First look for FSI presence bits
     bool fsi_present = isSlavePresent(i_target);
 
+    // Next look for memb FRU VPD
+    bool cvpd_present = false;
+    size_t theSize = 0;
 
-    //@todo-RTC:44254 : Switch to FRU VPD (vs DIMM)
+    l_errl = deviceRead( i_target,
+                         NULL,
+                         theSize,
+                         DEVICE_CVPD_ADDRESS( CVPD::VEIR,
+                                              CVPD::PF ) );
 
-    // Next look for some associated DIMM VPD
-    bool vpd_present = false;
-
-    // find all of the CDIMMs associated with this membuf
-    TARGETING::PredicateCTM l_dimm(TARGETING::CLASS_LOGICAL_CARD,
-                                   TARGETING::TYPE_DIMM,
-                                   TARGETING::MODEL_CDIMM);
-    TARGETING::PredicatePostfixExpr dimm_query;
-    dimm_query.push(&l_dimm);
-
-    TARGETING::TargetHandleList dimm_list;
-    TARGETING::targetService().getAssociated(dimm_list,
-                                  i_target,
-                                  TARGETING::TargetService::CHILD_BY_AFFINITY,
-                                  TARGETING::TargetService::ALL,
-                                  &dimm_query);
-
-    if( dimm_list.empty() )
+    if( l_errl )
     {
-        vpd_present = false;
-    }
-    else
-    {        
-        size_t presentSize = sizeof(vpd_present);
-        for( TARGETING::TargetHandleList::iterator dimm = dimm_list.begin();
-             (dimm != dimm_list.end()) && !vpd_present && !l_errl;
-             ++dimm )
+ 
+        if( fsi_present )
         {
-            l_errl = deviceRead(*dimm,
-                                &vpd_present,
-                                presentSize,
-                                DEVICE_PRESENT_ADDRESS());
-        }
-        if( l_errl )
-        {
-            // commit this log because we never expect this call to fail
+            // Save this plid to use later
+            l_saved_plid = l_errl->plid();    
+
+            // commit this log because we expected to have VPD
             errlCommit( l_errl,
                         FSI_COMP_ID );
         }
+        else
+        {
+            // just delete this
+            delete l_errl;
+        }
     }
 
-    // Finally compare the 2 methods
-    if( fsi_present != vpd_present )
+    if( theSize > 0 )
     {
+        uint8_t theData[theSize];
+        l_errl = deviceRead( i_target,
+                             theData,
+                             theSize,
+                             DEVICE_CVPD_ADDRESS( CVPD::VEIR,
+                                                  CVPD::PF ) );
+        if( l_errl )
+        {
+
+            if( fsi_present )
+            {
+                // Save this plid to use later
+                l_saved_plid = l_errl->plid();
+
+                // commit this log because we expected to have VPD
+                errlCommit( l_errl,
+                            FSI_COMP_ID );
+            }
+            else
+            {
+                // just delete this
+                delete l_errl;
+            }
+        }
+        else
+        {
+            cvpd_present = true;
+        }
+    }
+ 
+    // Finally compare the 2 methods
+    if( fsi_present != cvpd_present )
+    {
+
         TRACFCOMP(g_trac_fsi,
                   ERR_MRK "FSI::membPresenceDetect> FSI (=%d) and VPD (=%d) do not agree for %.8X",
-                  fsi_present, vpd_present, TARGETING::get_huid(i_target));
+                  fsi_present, cvpd_present, TARGETING::get_huid(i_target));
         /*@
          * @errortype
          * @moduleid     FSI::MOD_FSIPRES_MEMBPRESENCEDETECT
@@ -302,19 +342,29 @@ errlHndl_t membPresenceDetect(DeviceFW::OperationType i_opType,
                 new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                         FSI::MOD_FSIPRES_MEMBPRESENCEDETECT,
                                         FSI::RC_FSI_MVPD_MISMATCH,
+                                        TARGETING::get_huid(i_target),
                                         TWO_UINT32_TO_UINT64(
                                             fsi_present,
-                                            vpd_present));
+                                            cvpd_present));
 
-        //@todo-callout the membuf
-        //l_errl->addHwCallout( i_target, LOW, NO_DECONFIG, NO_GARD );
+        // Callout the membuf
+        l_errl->addHwCallout( i_target, 
+                              HWAS::SRCI_PRIORITY_LOW, 
+                              HWAS::NO_DECONFIG, 
+                              HWAS::GARD_NULL );
+
+        // if there is a saved PLID, apply it to this error log
+        if (l_saved_plid)
+        {
+            l_errl->plid(l_saved_plid);
+        }
 
         // commit this log and move on
         errlCommit( l_errl,
                     FSI_COMP_ID );
     }
     
-    bool present = fsi_present & vpd_present;
+    bool present = fsi_present & cvpd_present;
     memcpy(io_buffer, &present, sizeof(present));
     io_buflen = sizeof(present);
 
