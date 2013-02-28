@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2010,2012              */
+/* COPYRIGHT International Business Machines Corp. 2010,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -33,6 +33,8 @@
 #include <kernel/misc.H>
 #include <sys/syscall.h>
 #include <assert.h>
+#include <kernel/memstate.H>
+
 
 size_t PageManager::cv_coalesce_count = 0;
 size_t PageManager::cv_low_page_count = -1;
@@ -208,6 +210,9 @@ PageManager::PageManager()
     length -= RESERVED_PAGES;
 
     iv_heap.addMemory( addr, length );
+
+    KernelMemState::setMemScratchReg(KernelMemState::MEM_CONTAINED_L3,
+                                     KernelMemState::HALF_CACHE);
 
     // Statistics
     iv_pagesTotal = length;

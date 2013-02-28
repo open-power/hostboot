@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2012              */
+/* COPYRIGHT International Business Machines Corp. 2011,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -32,6 +32,7 @@
 #include <kernel/console.H>
 #include <kernel/pagemgr.H>
 #include <kernel/spte.H>
+#include <kernel/memstate.H>
 
 BaseSegment::~BaseSegment()
 {
@@ -279,6 +280,11 @@ int BaseSegment::_mmExtend(void)
     // Update the physical Memory size to now be 32MEG. by adding the extended
     // block size to the physical mem size.
     iv_physMemSize += VMM_EXTEND_BLOCK_SIZE;
+
+
+    // Call to set the Hostboot MemSize and location needed for DUMP.
+    KernelMemState::setMemScratchReg(KernelMemState::MEM_CONTAINED_MS,
+                                     KernelMemState::MS_32MEG);
 
     return 0;
 }

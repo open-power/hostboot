@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2012              */
+/* COPYRIGHT International Business Machines Corp. 2011,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -31,6 +31,8 @@
 #include <usr/vmmconst.h>
 #include <kernel/deferred.H>
 #include <kernel/task.H>
+#include <kernel/memstate.H>
+#include <sys/mmio.h>
 
 namespace KernelMisc
 {
@@ -111,5 +113,24 @@ namespace KernelMisc
      *                     (This address is not dcbz'd itself)
      */
     void populate_cache_lines(uint64_t* i_start, uint64_t* i_end);
+
+    /** @fn set
+     *
+     *  @brief Update value of scratch register to specified data.
+     *
+     *  This is used to update any core scratch reg defined by the enum
+     *      MMIO_SCRATCH_REG with the data passed in.
+     *
+     *     NOTE: This function is a wrapper function for writeScratchReg that
+     *     takes care of modifying the scratch register address value depending
+     *     on the getCPUType.   The writeScratchReg takes the scratch address 
+     *     passed in and puts that date in that register using assembly code
+     *
+     *  @param[in] uint64_t - scratch_addr
+     *  @param[in] uint64_t - Data 
+     */
+    void updateScratchReg(MMIO_Scratch_Register scratch_addr, uint64_t data);
+
+
 };
 #endif

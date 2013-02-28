@@ -33,6 +33,7 @@
 #include <errno.h>
 #include <kernel/pagemgr.H>
 #include <kernel/vmmmgr.H>              // INITIAL_MEM_SIZE
+#include <kernel/memstate.H>
 
 extern "C"
     void kernel_shutdown(size_t, uint64_t, uint64_t, uint64_t) NO_RETURN;
@@ -65,20 +66,9 @@ namespace KernelMisc
                        status);
             }
 
-            register uint64_t scratch_address = 0; // Values from PervSpec
-            switch(CpuID::getCpuType())
-            {
-              case CORE_POWER8_MURANO:
-              case CORE_POWER8_VENICE:
-              case CORE_UNKNOWN:
-                scratch_address = 0x40;
-                break;
-            }
+            // Call to set the Core Scratch Reg 0 with the status 
+            updateScratchReg(MMIO_SCRATCH_PROGRESS_CODE, status);
 
-            asm volatile("mtspr 276, %0\n"
-                         "isync\n"
-                         "mtspr 277, %1"
-                         :: "r" (scratch_address), "r" (status));
         }
 
         // If the Shutdown was called with a status of GOOD then
@@ -269,6 +259,10 @@ namespace KernelMisc
         }
 
         executed = true;
+
+        KernelMemState::setMemScratchReg(KernelMemState::MEM_CONTAINED_L3,
+                                         KernelMemState::FULL_CACHE);
+
         return 0;
     }
 
@@ -282,4 +276,45 @@ namespace KernelMisc
             i_start += cache_line_size;
         }
     }
+
+    void updateScratchReg(MMIO_Scratch_Register scratch_addr,
+                          uint64_t data)
+    {
+
+        uint64_t l_scratch_addr = static_cast<uint64_t>(scratch_addr);
+
+        switch(CpuID::getCpuType())
+        {
+          case CORE_POWER8_MURANO:
+          case CORE_POWER8_VENICE:
+          case CORE_UNKNOWN:
+            l_scratch_addr = l_scratch_addr + 0x40;
+            break;
+        }
+
+        writeScratchReg(l_scratch_addr, data);
+    };
+
+
+};
+
+namespace KernelMemState
+{
+
+    void setMemScratchReg(MemLocation i_location,
+                         MemSize i_size)
+    {
+        mem_location l_MemData;
+
+        l_MemData.memMode = i_location;
+        l_MemData.reserved = 0;
+        l_MemData.memSize = i_size;
+
+        KernelMisc::updateScratchReg(MMIO_SCRATCH_MEMORY_STATE,
+                                   l_MemData.Scratch6Data);
+
+    }
+
+
+
 };

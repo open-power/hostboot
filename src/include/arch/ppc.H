@@ -317,6 +317,19 @@ inline size_t getCacheLineWords()
     return getCacheLineBytes() / sizeof(uint64_t);
 }
 
+ALWAYS_INLINE
+inline void writeScratchReg(uint64_t _scratch_addr, uint64_t _data)
+{
+    register uint64_t scratch_addr = _scratch_addr;
+    register uint64_t data = _data;
+
+    asm volatile("mtspr 276, %0\n"
+                 "isync\n"
+                 "mtspr 277, %1"
+                 :: "r" (scratch_addr), "r" (data));
+
+}
+
 /** @brief  This is a special assembler instruction that is a nop on
  *  regular hardware, but has special meaning to Simics.  Code that
  *  executes this instruction in Simics will cause a "hap," a

@@ -209,13 +209,14 @@ scom 0x0000000015013288              {
 #--******************************************************************************
 #-- Complex SCOM with Bit Support, associated attributes and logical operators
 #--******************************************************************************
-scom 0x0000000015013289              {
-  bits,  scom_data,               MBA1.ATTR_CHIP_UNIT_POS, expr;
-  23,    0b0,                     1,                       MBA0.ATTR_CHIP_UNIT_POS == 1;
-  23,    MBA1.ATTR_CHIP_UNIT_POS, 1,                       MBA0.ATTR_CHIP_UNIT_POS == 0;
-  24:25, 0b10,                    0,                       any;
-  24:25, 0b01,                    1,                       SYS.ATTR_SCRATCH_UINT8_ARRAY_1[2] == SYS.ATTR_SCRATCH_UINT8_1;
-}
+# TODO:  RTC:Issue 66579   remove this register as it is now being used by dump
+#scom 0x0000000015013289              {
+#  bits,  scom_data,               MBA1.ATTR_CHIP_UNIT_POS, expr;
+#  23,    0b0,                     1,                       MBA0.ATTR_CHIP_UNIT_POS == 1;
+#  23,    MBA1.ATTR_CHIP_UNIT_POS, 1,                       MBA0.ATTR_CHIP_UNIT_POS == 0;
+#  24:25, 0b10,                    0,                       any;
+#  24:25, 0b01,                    1,                       SYS.ATTR_SCRATCH_UINT8_ARRAY_1[2] == SYS.ATTR_SCRATCH_UINT8_1;
+#}
 
 #--******************************************************************************
 #-- Basic SCOM with Multiple Arrays/Address Ranges
