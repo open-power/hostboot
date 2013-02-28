@@ -44,17 +44,14 @@
 #include <prdfSystemSpecific.H>
 #include <prdfMfgThresholdMgr.H>
 
-// For some odd reason when compile in FSP, these includes have to be down here
-// or there will be some weird compiling error in iipResolutionFactory.h
-#ifndef __HOSTBOOT_MODULE
-  #include <prdfChipPersist.H>          // for ChipPersist
-  #include <prdfSdcFileControl.H>       // for RestoreAnalysis()
-#endif
-
-using namespace TARGETING;
-
 namespace PRDF
 {
+
+//------------------------------------------------------------------------------
+// Forward references
+//------------------------------------------------------------------------------
+
+extern void initPlatSpecific();
 
 //------------------------------------------------------------------------------
 // Global Variables
@@ -96,6 +93,7 @@ errlHndl_t initialize()
     // Synchronize SCOM access to hardware
     // Start un-synchronized so hardware is accessed
     RegDataCache::getCachedRegisters().flush();
+
     if(g_initialized == true && systemPtr != NULL)
     {
         // This means we are being re-initialized (and we were in a good state)
@@ -107,47 +105,12 @@ errlHndl_t initialize()
     {
         // Initialize the Service Generator
         ServiceGeneratorClass & serviceGenerator =
-            ServiceGeneratorClass::ThisServiceGenerator();
+                    ServiceGeneratorClass::ThisServiceGenerator();
         serviceGenerator.Initialize();
 
-#ifndef __HOSTBOOT_MODULE
+        // Perform platform specific initialization.
+        initPlatSpecific();
 
-        //FIXME RTC64373 Is this the correct place to add the check for the
-        //saved SDC and sdc errl commit, if found???
-        bool isSavedSdc = false;
-        ServiceDataCollector thisSavedSdc;
-        RestoreAnalysis(thisSavedSdc, isSavedSdc);
-        if (isSavedSdc)
-        {
-            PRDF_INF("PRDF::initialize() Used Saved ReSync'd SDC for an errl");
-            thisSavedSdc.SetFlag(ServiceDataCollector::USING_SAVED_SDC);
-            errlHndl_t errl = serviceGenerator.GenerateSrcPfa( RECOVERABLE,
-                                                               thisSavedSdc );
-            if (NULL != errl)
-            {
-                PRDF_COMMIT_ERRL(errl, ERRL_ACTION_REPORT);
-            }
-        }
-
-        // Clear out old chip persistency (for CCM).
-        TargetHandleList l_oldChips;
-        for(ChipPersist::iterator i = ChipPersist::getInstance()->begin();
-            i != ChipPersist::getInstance()->end();
-            ++i)
-        {
-            if (!PlatServices::isFunctional(*i))
-                l_oldChips.push_back(*i);
-        }
-        // This must be done afterwards otherwise the delete operation destroys
-        // the ChipPersist::iterator.
-        for ( TargetHandleList::iterator i = l_oldChips.begin();
-              i != l_oldChips.end(); ++i )
-        {
-            ChipPersist::getInstance()->deleteEntry(*i);
-        }
-        // -- finished clearing out old chip persistency (for CCM).
-
-#endif
         CcAutoDeletePointer<Configurator> configuratorPtr
             (SystemSpecific::getConfiguratorPtr());
 
@@ -192,13 +155,14 @@ errlHndl_t main( ATTENTION_VALUE_TYPE i_attentionType,
 
     uint32_t rc =  SUCCESS;
     // clears all the chips saved to stack during last analysis
-    ServiceDataCollector::clearChipStack( );
+    ServiceDataCollector::clearChipStack();
 
     if(( g_initialized == false)&&(NULL ==systemPtr))
     {
         g_prd_errlHndl = initialize();
         if(g_prd_errlHndl != NULL) rc = PRD_NOT_INITIALIZED;
     }
+
     //FIXME enterCCMMode ,isInCCM  function not available in wrapper
     //    if (SystemData::getInstance()->isInCCM())
     //        PlatServices::enterCCMMode();
@@ -317,35 +281,6 @@ errlHndl_t main( ATTENTION_VALUE_TYPE i_attentionType,
 
 //------------------------------------------------------------------------------
 
-void iplCleanup()
-{
-    PRDF_ENTER( "PRDF::iplCleanup()" );
-
-#ifndef __HOSTBOOT_MODULE
-
-    ChipPersist::getInstance()->clearData();
-
-    if(PlatServices::isMasterFSP()) //only write registry key on primary
-    {
-        uint8_t  l_allZeros = 0;
-        errlHndl_t errl = UtilReg::write("prdf/RasServices",
-                                         &l_allZeros,
-                                         sizeof(uint8_t));
-        if (NULL != errl)
-        {
-            PRDF_COMMIT_ERRL(errl, ERRL_ACTION_REPORT);
-        }
-    }
-
-#endif
-
-    PRDF_EXIT( "PRDF::iplCleanup()" );
-
-    return;
-}
-
-//------------------------------------------------------------------------------
-
 errlHndl_t refresh()
 {
     PRDF_ENTER("PRDF::refresh()");
@@ -369,7 +304,6 @@ errlHndl_t refresh()
 }
 
 //------------------------------------------------------------------------------
-
 
 } // end namespace PRDF
 

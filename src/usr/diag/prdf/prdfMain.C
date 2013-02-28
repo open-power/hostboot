@@ -34,4 +34,13 @@
 namespace PRDF
 {
 
+//------------------------------------------------------------------------------
+// Platform specific helper function for PRDF::initialize()
+//------------------------------------------------------------------------------
+
+void initPlatSpecific()
+{
+    // Currently no-op in Hostboot.
+}
+
 } // end namespace PRDF

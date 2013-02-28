@@ -46,18 +46,7 @@
 
 class prdfTest: public CxxTest::TestSuite
 {
-  public:
 
-    void testPrdIplCleanup(void)
-    {
-        TS_TRACE(ENTER_MRK "testPrdIplCleanup()");
-        PRDF_ENTER( "testPrdIplCleanup()" );
-
-        PRDF::iplCleanup();
-
-        PRDF_EXIT( "testPrdIplCleanup()" );
-        TS_TRACE(EXIT_MRK "testPrdIplCleanup()");
-    }
 };
 #endif
 
