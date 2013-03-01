@@ -61,7 +61,7 @@ namespace KernelMisc
             // errorlog that caused the failure
             else
             {
-                printk("Shutdown Requested. PLID = %ld (due to failure)\n",
+                printk("Shutdown Requested. PLID = %lx (due to failure)\n",
                        status);
             }
 
