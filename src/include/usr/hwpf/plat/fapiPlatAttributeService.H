@@ -203,6 +203,20 @@ fapi::ReturnCode fapiPlatGetFunctional(const fapi::Target * i_pTarget,
 fapi::ReturnCode fapiPlatGetTargetPos(const fapi::Target * i_pFapiTarget,
                                       uint32_t & o_pos);
 
+/**
+ * @brief This function is called by the FAPI_ATTR_GET macro when getting
+ * ATTR_PROC_NX_ENABLE, ATTR_PROC_PCIE_ENABLE, ATTR_PROC_L3_ENABLE,
+ * ATTR_PROC_A_ENABLE, and ATTR_PROC_X_ENABLE.
+ *  It should not be called directly
+ *
+ * @param[in]  i_id          Fapi Attribute Id
+ * @param[in]  i_pFapiTarget Target pointer
+ * @param[out] o_enable      Output enable state
+ * @return ReturnCode.   Zero on success, else platform specified error
+ */
+fapi::ReturnCode fapiPlatGetEnableAttr( fapi::AttributeId i_id,
+    const fapi::Target * i_pFapiTarget, uint8_t & o_enable );
+
 //------------------------------------------------------------------------------
 // Prototypes to support  proc_setup_bars_memory_attributes
 //  See proc_setup_bars_memory_attributes.xml for detailed descriptions
@@ -607,6 +621,18 @@ fapi::ReturnCode fapiPlatGetProcPcieBarSize (
 //  MACROS to support proc_fab_smp_fabric_attributes.xml
 //------------------------------------------------------------------------------
 
-
+//------------------------------------------------------------------------------
+//  MACROS to support enable attributes in p8_xip_customize_attributes.xml
+//------------------------------------------------------------------------------
+#define ATTR_PROC_NX_ENABLE_GETMACRO( ID, PTARGET, VAL )   \
+    fapi::platAttrSvc::fapiPlatGetEnableAttr ( fapi::ID, PTARGET, VAL )
+#define ATTR_PROC_PCIE_ENABLE_GETMACRO( ID, PTARGET, VAL )   \
+    fapi::platAttrSvc::fapiPlatGetEnableAttr ( fapi::ID, PTARGET, VAL )
+#define ATTR_PROC_L3_ENABLE_GETMACRO( ID, PTARGET, VAL )   \
+    fapi::platAttrSvc::fapiPlatGetEnableAttr ( fapi::ID, PTARGET, VAL )
+#define ATTR_PROC_A_ENABLE_GETMACRO( ID, PTARGET, VAL )   \
+    fapi::platAttrSvc::fapiPlatGetEnableAttr ( fapi::ID, PTARGET, VAL )
+#define ATTR_PROC_X_ENABLE_GETMACRO( ID, PTARGET, VAL )   \
+    fapi::platAttrSvc::fapiPlatGetEnableAttr ( fapi::ID, PTARGET, VAL )
 
 #endif // FAPIPLATATTRIBUTESERVICE_H_

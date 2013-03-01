@@ -33,13 +33,12 @@
 
 #include <hwpf/fapi/fapiTarget.H>
 #include <targeting/common/targetservice.H>
+#include <targeting/common/utilFilter.H>
 #include <errl/errlentry.H>
 #include <hwpf/plat/fapiPlatAttributeService.H>
 #include <hwpf/hwpf_reasoncodes.H>
 #include <vpd/spdenums.H>
 #include <devicefw/driverif.H>
-#include <hwas/common/hwas.H>
-#include <hwas/common/hwasCommon.H>
 
 // The following file checks at compile time that all HWPF attributes are
 // handled by Hostboot. This is done to ensure that the HTML file listing
@@ -1421,6 +1420,51 @@ fapi::ReturnCode fapiPlatGetProcPcieBarSize (
 
 
     return  l_fapirc;
+}
+
+fapi::ReturnCode fapiPlatGetEnableAttr ( fapi::AttributeId i_id,
+     const fapi::Target * i_pTarget, uint8_t & o_enable )
+{
+    fapi::ReturnCode l_rc;
+    TARGETING::Target * l_pTarget = NULL;
+
+    // Get the Hostboot Target
+    l_rc = getHostbootTarget(i_pTarget, l_pTarget);
+
+    if (l_rc.ok())
+    {
+        TARGETING::TargetHandleList l_buses;
+        switch (i_id)
+        {
+            case fapi::ATTR_PROC_NX_ENABLE:
+            case fapi::ATTR_PROC_L3_ENABLE:
+                // The enable flag is based on the target's functional state
+                TARGETING::HwasState hwasState;
+                hwasState = l_pTarget->getAttr<TARGETING::ATTR_HWAS_STATE>();
+                o_enable = hwasState.functional;
+                break;
+            case fapi::ATTR_PROC_PCIE_ENABLE:
+                // The enable flag is 1 if one of the pci target is functional
+                getChildChiplets( l_buses, l_pTarget, TARGETING::TYPE_PCI );
+                o_enable = l_buses.size() ? 1 : 0;
+                break;
+            case fapi::ATTR_PROC_A_ENABLE:
+                // The enable flag is 1 if one of the abus target is functional
+                getChildChiplets( l_buses, l_pTarget, TARGETING::TYPE_ABUS );
+                o_enable = l_buses.size() ? 1 : 0;
+                break;
+            case fapi::ATTR_PROC_X_ENABLE:
+                // The enable flag is 1 if one of the xbus target is functioanl
+                getChildChiplets( l_buses, l_pTarget, TARGETING::TYPE_XBUS );
+                o_enable = l_buses.size() ? 1 : 0;
+                break;
+            default:
+                o_enable = 0;
+                break;
+        }
+    }
+
+    return l_rc;
 }
 
 } // End platAttrSvc namespace

@@ -351,10 +351,6 @@
      <attribute><id>SBE_SEEPROM_I2C_PORT</id></attribute>
      <attribute><id>PNOR_I2C_ADDRESS_BYTES</id></attribute>
      <!-- End Supporting poreve_memory_attributes.xml -->
-     <!-- ===== Begin supporting A/X bus enable in p8_xip_customize_attributes.xml ===== -->
-     <attribute><id>PROC_A_ENABLE</id></attribute>
-     <attribute><id>PROC_X_ENABLE</id></attribute>
-     <!-- ===== End supporting A/X bus enable in p8_xip_customize_attributes.xml ===== -->
      
 </targetType>
 
@@ -400,8 +396,6 @@
     <attribute><id>PROC_PCIE_IOP_ZCAL_CONTROL</id></attribute>
     <attribute><id>PROC_DCM_INSTALLED</id></attribute>
     <attribute><id>CHIP_REGIONS_TO_ENABLE</id></attribute>
-    <attribute><id>PROC_NX_ENABLE</id></attribute>
-    <attribute><id>PROC_PCIE_ENABLE</id></attribute>
     <attribute><id>PROC_ADU_UNTRUSTED_BAR_BASE_ADDR</id></attribute>
     <attribute><id>PROC_ADU_UNTRUSTED_BAR_SIZE</id></attribute>
     <attribute><id>PROC_PSI_UNTRUSTED_BAR0_BASE_ADDR</id></attribute>
@@ -519,7 +513,6 @@
     <attribute><id>OVERRIDE_MVPD_V_CS_LAB_VOLTAGE</id></attribute>
     <attribute><id>OVERRIDE_MVPD_I_CS_LAB_CURRENT</id></attribute>
     <!-- End pm_attributes_all_hwp.xml -->
-    <attribute><id>PROC_L3_ENABLE</id></attribute>
 </targetType>
 
 <targetType>

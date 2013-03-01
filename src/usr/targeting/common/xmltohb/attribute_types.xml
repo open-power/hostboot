@@ -5558,25 +5558,6 @@ firmware notes: Used as override attribute for pstate procedure
 </attribute>
 
 <attribute>
-    <id>PROC_NX_ENABLE</id>
-    <description>
-      NX partial good control
-      creator: platform
-      firmware notes:
-        must track ATTR_CHIP_REGIONS_TO_ENABLE
-    </description>
-    <simpleType>
-        <uint8_t></uint8_t>
-    </simpleType>
-    <persistency>volatile</persistency>
-    <readable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_PROC_NX_ENABLE</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
     <id>BOOT_FREQ_MHZ</id>
     <description>
        Boot frequency in MHZ.  Default is 50% of nominal.
@@ -5591,25 +5572,6 @@ firmware notes: Used as override attribute for pstate procedure
     <writeable/>
     <hwpfToHbAttrMap>
         <id>ATTR_BOOT_FREQ_MHZ</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
-    <id>PROC_PCIE_ENABLE</id>
-    <description>
-      PCIE partial good control
-      creator: platform
-      firmware notes:
-        must track ATTR_CHIP_REGIONS_TO_ENABLE
-    </description>
-    <simpleType>
-        <uint8_t><default>1</default></uint8_t>
-    </simpleType>
-    <persistency>volatile</persistency>
-    <readable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_PROC_PCIE_ENABLE</id>
         <macro>DIRECT</macro>
     </hwpfToHbAttrMap>
 </attribute>
@@ -5632,25 +5594,6 @@ firmware notes: Used as override attribute for pstate procedure
     <writeable/>
     <hwpfToHbAttrMap>
         <id>ATTR_EX_GARD_BITS</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
-    <id>PROC_L3_ENABLE</id>
-    <description>
-      L3 partial good control
-      creator: platform
-      firmware notes:
-        must track ATTR_CHIP_REGIONS_TO_ENABLE
-    </description>
-    <simpleType>
-        <uint8_t></uint8_t>
-    </simpleType>
-    <persistency>volatile</persistency>
-    <readable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_PROC_L3_ENABLE</id>
         <macro>DIRECT</macro>
     </hwpfToHbAttrMap>
 </attribute>
@@ -9985,53 +9928,6 @@ Measured in GB</description>
 </attribute>
 
 <!-- ===== End supporting poreve_memory_attributes.xml ===== -->
-
-<!-- ===== Supporting A/X bus enable in p8_xip_customize_attributes.xml ===== -->
-<attribute>
-    <id>PROC_A_ENABLE</id>
-    <description>ABUS chiplet partial good control
-                      creator: platform
-                      firmware notes:
-                      must track ATTR_CHIP_REGIONS_TO_ENABLE
-    </description>
-    <simpleType>
-        <uint8_t>
-<!-- Hostboot doesn't support A/X regional partial good ===== -->
-            <default>1</default>
-        </uint8_t>
-    </simpleType>
-    <persistency>volatile</persistency>
-    <readable/>
-    <writeable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_PROC_A_ENABLE</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
-    <id>PROC_X_ENABLE</id>
-    <description>XBUS chiplet partial good control
-                      creator: platform
-                      firmware notes:
-                      must track ATTR_CHIP_REGIONS_TO_ENABLE
-    </description>
-    <simpleType>
-        <uint8_t>
-<!-- Hostboot doesn't support A/X regional partial good ===== -->
-            <default>1</default>
-        </uint8_t>
-    </simpleType>
-    <persistency>volatile</persistency>
-    <readable/>
-    <writeable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_PROC_X_ENABLE</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<!-- ===== End supporting A/X bus enable in p8_xip_customize_attributes.xml ===== -->
 
 <!-- Support for sync_attributes.xml -->
 <attribute>

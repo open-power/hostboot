@@ -91,6 +91,20 @@ if ($outFile ne "")
 
 my $SYSNAME = uc($sysname);
 
+# Quick patch to support platform specific setting for DMI_REFCLOCK_SWIZZLE
+# attributes for MCS target. This quick patch assumes all procs have the
+# same swizzled wiring
+# TODO. This will be remove when MRW provide the settings in system specific
+# xml file. RTC 65460
+my @DmiRefClockSwizzle = [ 0, 1, 2, 3, 4, 5, 6, 7 ];
+if ($SYSNAME eq "TULETA")
+{
+    $DmiRefClockSwizzle[4] = 7;
+    $DmiRefClockSwizzle[5] = 6;
+    $DmiRefClockSwizzle[6] = 5;
+    $DmiRefClockSwizzle[7] = 4;
+}
+
 open (FH, "<$mrwdir/${sysname}-system-policy.xml") ||
     die "ERROR: unable to open $mrwdir/${sysname}-system-policy.xml\n";
 close (FH);
@@ -1722,6 +1736,9 @@ sub generate_mcs
     <attribute><id>IBSCOM_MCS_BASE_ADDR</id>
         <!-- baseAddr = 0x0003E00000000000, 128GB per MCS -->
         <default>$mscStr</default>
+    </attribute>
+    <attribute><id>DMI_REFCLOCK_SWIZZLE</id>
+        <default>$DmiRefClockSwizzle[$mcs]</default>
     </attribute>
     <!-- TODO When MRW provides the information, these two attributes
          should be included. values of X come from MRW.
