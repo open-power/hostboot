@@ -1,0 +1,300 @@
+#!/usr/bin/perl
+# IBM_PROLOG_BEGIN_TAG
+# This is an automatically generated prolog.
+#
+# $Source: src/build/tools/verify-commit $
+#
+# IBM CONFIDENTIAL
+#
+# COPYRIGHT International Business Machines Corp. 2013
+#
+# p1
+#
+# Object Code Only (OCO) source materials
+# Licensed Internal Code Source Materials
+# IBM HostBoot Licensed Internal Code
+#
+# The source code for this program is not published or otherwise
+# divested of its trade secrets, irrespective of what has been
+# deposited with the U.S. Copyright Office.
+#
+# Origin: 30
+#
+# IBM_PROLOG_END_TAG
+
+use strict;
+
+my $issueFound = 0;
+my $errorFound = 0;
+
+verifyPatchSet();       # Verify the patch contents.
+verifyCommitMsg();      # Verify the commit message.
+
+# Finish out the divider.
+if ($issueFound)
+{
+    print "------------------------------------------------------------\n";
+}
+
+# Return a bad RC if we found an error.  Let warnings pass.
+exit ($errorFound ? -1 : 0);
+
+
+########################### Subroutines ################################
+
+# @sub verifyPatchSet
+#
+# Extract the contents (lines changed) from the patch set and verify.
+#
+sub verifyPatchSet
+{
+    # git-diff options:
+    #   * Diff against the previous commit (HEAD~1)
+    #   * Filter only added and modified files (AM).
+    #   * Show only the lines changed, with no context (U0).
+    # Grep only the lines marked with "+" (instead of "-") to find just the
+    # actions done by this patchset and not the content removed.
+    open PATCH_CONTENTS, "git diff HEAD~1 --diff-filter=AM -U0 | grep \"^+\" |";
+
+    my %fileContents = ();
+
+    my $lastFile = "";
+    my $fileLines = ();
+    my $lineCount = 0;
+    while (my $line = <PATCH_CONTENTS>)
+    {
+        chomp $line;
+
+        # Line starting with "+++ b/path/to/file" indicate a new file.
+        if ($line =~ m/^\+\+\+ b\/(.*)/)
+        {
+            # Save previous file into the map.
+            if ($lastFile ne "")
+            {
+                $fileContents{$lastFile} = $fileLines;
+                $fileLines = ();
+                $lineCount = 0;
+            }
+            $lastFile = $1;
+        }
+        else
+        {
+            $line =~ s/^\+//; # filter off the leading + symbol.
+            $lineCount++;
+            push @{$fileLines}, [$line, $lineCount];
+        }
+    }
+    if ($lastFile ne "") # Save last file into the map.
+    {
+        $fileContents{$lastFile} = $fileLines;
+        $fileLines = ();
+    }
+
+    # Verify each line of each file.
+    foreach my $file (sort keys %fileContents)
+    {
+        foreach my $line (@{$fileContents{$file}})
+        {
+            verifyFileLine($file, @{$line}[0], @{$line}[1]);
+        }
+    }
+}
+
+# @sub verifyFileLine
+#
+# Checks a particular line of the file for the following issues:
+#     * Warning: Lines longer than 80 characters, except in trace statement.
+#     * Warning: Trailing whitespace.
+#     * Warning: Tab characters outside of makefiles.
+#     * Warning: TODO or FIXME type tag without a corresponding RTC number.
+#     * Warning: NOMERGE tag found.
+#
+sub verifyFileLine
+{
+    my ($file,$line,$count) = @_;
+
+    # Check line length.
+    if (length($line) > 80)
+    {
+        # Allow trace statements to slide.
+        if (($line =~ m/TRAC[DSF]/) ||
+            ($line =~ m/FAPI_(INF|IMP|ERR|DBG|SCAN)/))
+        {
+        }
+        else
+        {
+            warning($file,$line,$count,
+                    (sprintf "Length is more than 80 characters (%d).",
+                     length($line))
+                   );
+        }
+    }
+
+    # Check trailing whitespace.
+    if ($line =~ m/\s$/)
+    {
+        warning($file,$line,$count,
+                "Trailing whitespace found.");
+    }
+
+    # Check tabs.
+    if ($line =~ m/\t/)
+    {
+        # Makefiles are ok (require tabs).
+        if (not (($file =~ m/makefile/) || ($file =~ m/\.mk/)))
+        {
+            warning($file,$line,$count,
+                    "Tab character found.");
+        }
+    }
+
+    # Check "TODO" or "FIXME" type comments.
+    if (($line =~ m/TODO/i) || ($line =~ m/FIXME/i))
+    {
+        if (not ($line =~ m/RTC[\s:]*[0-9]*/))
+        {
+            warning($file,$line,$count,
+                    "TODO/FIXME tag without corresponding RTC number.");
+        }
+    }
+
+    # Check "NOMERGE" type comment.
+    if ($line =~ m/NOMERGE/i)
+    {
+        warning($file,$line,$count,
+                "NOMERGE tag found.");
+    }
+}
+
+# @sub verifyCommitMsg
+#
+# Looks at the commit message to verify the following items:
+#    * Topic is exactly 1 line long.
+#    * Lines are less than 80 characters.
+#    * No trailing whitespace.
+#    * Tags, such as 'RTC:', are only found in the footer.
+#    * Untagged lines are not found in the footer.
+#    * RTC tag is formatted correctly.
+#    * Warning for lacking RTC tag.
+#
+sub verifyCommitMsg
+{
+    open COMMIT_CONTENTS, "git log -n1 --pretty=format:%B |";
+    my $lineCount = 0;
+    my $rtcTag = "";
+    my $taggedLine = "";
+    my $untaggedLine = "";
+
+    while (my $line = <COMMIT_CONTENTS>)
+    {
+        $lineCount++;
+        chomp $line;
+
+        # Check line length over 80 characters.
+        if (length($line) > 80)
+        {
+            error("Commit Message",$line,$lineCount,
+                    (sprintf "Length is more than 80 characters (%d).",
+                     length($line))
+                 );
+        }
+
+        # Check trailing whitespace.
+        if ($line =~ m/[^\s]+\s$/)
+        {
+            error("Commit Message",$line,$lineCount,
+                  "Trailing whitespace found.");
+        }
+
+        # Blank line indicates a new "section".
+        if ($line =~ m/^$/)
+        {
+            # Check for tags outside of the footer.
+            # (new section implies previous section was not a footer)
+            if ("" ne $taggedLine)
+            {
+                error("Commit Message",$taggedLine,$lineCount,
+                      "Tagged line found outside commit-msg footer.");
+            }
+
+            $rtcTag = "";
+            $untaggedLine = "";
+            $taggedLine = "";
+        }
+        else
+        {
+            # Check for multi-line topic.
+            if ($lineCount == 2)
+            {
+                error("Commit Message",$line,$lineCount,
+                      "Topic must be only one line long.");
+            }
+        }
+
+        # Verify format of RTC message.
+        if ($line =~ m/^\s*RTC:\s*[0-9]+(.*)/)
+        {
+            $rtcTag = $line;
+            if ("" ne $1)
+            {
+                error("Commit Message",$line,$lineCount,
+                        (sprintf "RTC tag format incorrect (%s).", $1));
+            }
+        }
+
+        # Identify if this is a tagged line or a non-tagged line and store
+        # away.
+        if ($line =~ m/^\s*[A-Za-z0-9\-_]+:/)
+        {
+            # We allow lines that look like tags in the topic like...
+            # "FOO: Adding support for BAR."
+            if ($lineCount > 1)
+            {
+                $taggedLine = $line;
+            }
+        }
+        else
+        {
+            $untaggedLine = $line;
+        }
+    }
+
+    # Warn for missing RTC tag.
+    if ("" eq $rtcTag)
+    {
+        warning("Commit Message","<end-of-file>",$lineCount,
+                "RTC tag not found.");
+    }
+
+    # Error for a mix of tag / untagged in the last section (ie. untagged
+    # lines in the footer).
+    if (("" ne $untaggedLine) && ("" ne $taggedLine))
+    {
+        error("Commit Message",$untaggedLine,$lineCount,
+                "Untagged line found in footer.");
+    }
+}
+
+sub warning
+{
+    my ($file, $line, $count, $statement) = @_;
+    print "------------------------------------------------------------\n";
+    print "WARNING: $statement\n";
+    print "  $file:$count\n";
+    print "    $line\n";
+
+    $issueFound = 1;
+}
+
+sub error
+{
+    my ($file, $line, $count, $statement) = @_;
+    print "------------------------------------------------------------\n";
+    print "ERROR: $statement\n";
+    print "  $file:$count\n";
+    print "    $line\n";
+
+    $issueFound = 1;
+    $errorFound = 1;
+}
+

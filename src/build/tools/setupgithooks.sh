@@ -37,11 +37,13 @@ then
         echo "copy files into .git/hooks dir..."
         cp -v $ROOTDIR/src/build/tools/pre-commit          $ROOTDIR/.git/hooks/.
         cp -v $ROOTDIR/src/build/tools/pre-commit          $ROOTDIR/.git/hooks/pre-applypatch
+        cp -v $ROOTDIR/src/build/tools/post-commit         $ROOTDIR/.git/hooks/.
         cp -v $ROOTDIR/src/build/tools/$preCommitScript    $ROOTDIR/.git/hooks/.
         cp -v $ROOTDIR/src/build/tools/$addCopyrightScript $ROOTDIR/.git/hooks/.
         
         chmod u+x $ROOTDIR/.git/hooks/pre-commit
         chmod u+x $ROOTDIR/.git/hooks/pre-applypatch
+        chmod u+x $ROOTDIR/.git/hooks/post-commit
         chmod u+x $ROOTDIR/.git/hooks/$preCommitScript
         chmod u+x $ROOTDIR/.git/hooks/addCopyright.pl
         

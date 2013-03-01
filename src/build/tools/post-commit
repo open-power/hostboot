@@ -1,0 +1,4 @@
+. git-sh-setup
+export GIT_DIR=$GIT_DIR
+
+$GIT_DIR/../src/build/tools/verify-commit
