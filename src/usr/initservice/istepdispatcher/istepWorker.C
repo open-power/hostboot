@@ -295,7 +295,7 @@ void loadModules( uint32_t istepNumber )
         {
             TRACDCOMP( g_trac_initsvc,
                     "g_isteps[%d].depModules == NULL",
-                    i_IStep );
+                    istepNumber );
             break;
         }
         uint32_t i = 0;
@@ -335,7 +335,7 @@ void unLoadModules( uint32_t istepNumber )
         {
             TRACDCOMP( g_trac_initsvc,
                     "g_isteps[%d].depModules == NULL",
-                    i_IStep );
+                    istepNumber );
             break;
         }
         uint32_t i = 0;

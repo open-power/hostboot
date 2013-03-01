@@ -42,19 +42,6 @@
 namespace HWAS
 {
 
-class RegisterHWASFunctions
-{
-    public:
-    RegisterHWASFunctions()
-    {
-        // HWAS is awake - register our processCallout function
-        HWAS_DBG("module load: calling errlog::setHwasProcessCalloutFn");
-        ERRORLOG::ErrlManager::setHwasProcessCalloutFn((processCalloutFn)(&processCallout));
-    }
-};
-// this causes the function to get run at module load.
-RegisterHWASFunctions registerHWASFunctions;
-
 void processCallout(const uint32_t i_errlPlid,
         uint8_t *i_pData,
         uint64_t i_Size)
@@ -105,10 +92,12 @@ void processCallout(const uint32_t i_errlPlid,
                 break;
             }
 
-            HWAS_INF("HW callout; pTarget %p", pTarget);
             const DeconfigEnum deconfigState = pCalloutUD->deconfigState;
             const GARD_ErrorType gardErrorType = pCalloutUD->gardErrorType;
             //const callOutPriority priority = pCalloutUD->priority;
+
+            HWAS_INF("HW callout; pTarget %p gardErrorType %x deconfigState %x",
+                    pTarget, gardErrorType, deconfigState);
             switch (gardErrorType)
             {
                 case (GARD_NULL):
@@ -124,6 +113,7 @@ void processCallout(const uint32_t i_errlPlid,
                     break;
                 }
             } // switch gardErrorType
+
             switch (deconfigState)
             {
                 case (NO_DECONFIG):
@@ -139,10 +129,9 @@ void processCallout(const uint32_t i_errlPlid,
                 }
                 case (DELAYED_DECONFIG):
                 {
-                    // call HWAS common function
-                    // TODO RTC: 45781
-                    //errl = HWAS::theDeconfigGard().registerDelayedDeconfigure(*pTarget,
-                                //i_errlPlid);
+                    // do nothing -- the deconfig information was already put
+                    // on a queue and will be processed separately, when the
+                    // time is right.
                     break;
                 }
             } // switch deconfigState

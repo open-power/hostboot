@@ -73,6 +73,7 @@ enum    InitServiceReasonCode
     NO_MSG_PRESENT              =   INITSVC_COMP_ID | 0x12,
     ISTEP_INVALID_ISTEP         =   INITSVC_COMP_ID | 0x13,
     ISTEP_FAPI_ATTR_READ_FAILED =   INITSVC_COMP_ID | 0x14,
+    ISTEP_DELAYED_DECONFIG      =   INITSVC_COMP_ID | 0x15,
 
 };
 

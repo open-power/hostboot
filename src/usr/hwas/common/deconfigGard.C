@@ -53,6 +53,11 @@ namespace HWAS
 
 using namespace HWAS::COMMON;
 
+bool processDelayedDeconfig()
+{
+    return HWAS::theDeconfigGard()._processDelayedDeconfig();
+} // processDelayedDeconfig
+
 errlHndl_t collectGard(const TARGETING::PredicateBase *i_pPredicate)
 {
     HWAS_INF("collectGard entry" );
@@ -92,7 +97,8 @@ DeconfigGard & theDeconfigGard()
 DeconfigGard::DeconfigGard()
 : iv_nextGardRecordId(0),
   iv_maxGardRecords(0),
-  iv_pGardRecords(NULL)
+  iv_pGardRecords(NULL),
+  iv_delayedDeconfig(false)
 {
     HWAS_INF("DeconfigGard Constructor");
     HWAS_MUTEX_INIT(iv_mutex);
@@ -210,6 +216,17 @@ errlHndl_t DeconfigGard::deconfigureTarget(TARGETING::Target & i_target,
 
     HWAS_MUTEX_UNLOCK(iv_mutex);
     return NULL;
+}
+
+//******************************************************************************
+void DeconfigGard::registerDelayedDeconfigure(const TARGETING::Target & i_target,
+                                           const uint32_t i_errlPlid)
+{
+    HWAS_INF("Usr Request: registerDelayedDeconfigure Target");
+
+    // for now, just put a mark on the wall.
+    // TODO: RTC 45781
+    iv_delayedDeconfig = true;
 }
 
 //******************************************************************************
@@ -800,5 +817,20 @@ void DeconfigGard::_GardRecordIdSetup(uint32_t i_size)
                  iv_maxGardRecords, iv_nextGardRecordId, l_numGardRecords);
     }
 }
+
+bool DeconfigGard::_processDelayedDeconfig()
+{
+    HWAS_INF("_processDelayedDeconfig entry. ");
+
+    // we're going to return the current setting
+    bool rc = iv_delayedDeconfig;
+
+    // for now, clear the mark on the wall.
+    iv_delayedDeconfig = false;
+
+    HWAS_INF("_processDelayedDeconfig exit rc %d", rc);
+    return rc;
+} // _processDelayedDeconfig
+
 
 } // namespce HWAS

@@ -28,6 +28,7 @@
 
 #include <hwas/common/hwas.H>
 #include <hwas/common/hwasCommon.H>
+#include <hwas/common/hwasCallout.H>
 #include <hwas/common/deconfigGard.H>
 
 #include <devicefw/driverif.H>
@@ -40,6 +41,22 @@
 
 namespace HWAS
 {
+
+class RegisterHWASFunctions
+{
+    public:
+    RegisterHWASFunctions()
+    {
+        // HWAS is awake
+        
+        // register processCallout function for ErrlEntry::commit
+        HWAS_DBG("module load: calling errlog::setHwasProcessCalloutFn");
+        ERRORLOG::ErrlManager::setHwasProcessCalloutFn(
+                    (processCalloutFn)(&processCallout));
+    }
+};
+// this causes the function to get run at module load.
+RegisterHWASFunctions registerHWASFunctions;
 
 using   namespace   TARGETING;
 

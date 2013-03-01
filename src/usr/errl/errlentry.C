@@ -41,6 +41,7 @@
 #include <trace/interface.H>
 #include <arch/ppc.H>
 #include <hwas/common/hwasCallout.H>
+#include <hwas/common/deconfigGard.H>
 #include <targeting/common/targetservice.H>
 
 namespace ERRORLOG
@@ -268,6 +269,14 @@ void ErrlEntry::addHwCallout(const TARGETING::Target *i_target,
         ErrlUserDetailsCallout(&ep, sizeof(ep),
                 i_priority, i_deconfigState, i_gardErrorType).addToLog(this);
     }
+
+    if (i_deconfigState == HWAS::DELAYED_DECONFIG)
+    {
+        // call HWAS function to register this action.
+        HWAS::theDeconfigGard().registerDelayedDeconfigure(
+                                *i_target, plid());
+    }
+
 } // addHwCallout
 
 

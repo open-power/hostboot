@@ -179,7 +179,10 @@ public:
      *  @retval false if not in  MPIPL mode
      *          true if in MPIPL mode
      */
-    bool isMpiplMode( void ) const;
+    bool isMpiplMode( void ) const
+    {
+        return iv_mpipl_mode;
+    }
 
     /**
      * @brief   getIStepMode - return value of IStep Mode

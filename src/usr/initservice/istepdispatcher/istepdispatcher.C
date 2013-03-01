@@ -59,6 +59,7 @@
 #include    <mbox/mboxif.H>                 // register mailbox
 
 #include    <isteps/istepmasterlist.H>
+#include    <hwas/common/deconfigGard.H>
 
 #include    "istepdispatcher.H"
 #include    "istepWorker.H"
@@ -337,13 +338,55 @@ errlHndl_t IStepDispatcher::executeAllISteps ( void )
                              theMsg );
 
                 theMsg = NULL;
+            } // for substep < (g_isteps[istep].numitems + 1)
+
+            // check to see if there were any delayed deconfigure callouts
+            // call HWAS to have this processed
+            bool callouts = HWAS::processDelayedDeconfig();
+
+            // for now, force a TI if there were callouts
+            // TODO RTC: 45781
+            if (callouts)
+            {
+                TRACFCOMP(g_trac_initsvc,
+                    INFO_MRK"HWAS has delayed deconfigs!");
+
+                // we are going to return an errl so that we TI
+                //  but if there is an error already (and it's very likely,
+                //  since that's how deconfigure callouts happen) we want
+                //  go send that one along
+                if (err)
+                {
+                    TRACFCOMP( g_trac_initsvc,
+                       "istepDispatcher, committing errorlog, PLID = 0x%x",
+                       err->plid() );
+                    errlCommit( err, INITSVC_COMP_ID );
+                    // err is now NULL
+                }
+
+                /*@
+                 * @errortype
+                 * @reasoncode       ISTEP_DELAYED_DECONFIG
+                 * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE
+                 * @moduleid         ISTEP_INITSVC_MOD_ID
+                 * @userdata1        Current Istep
+                 * @userdata2        Current SubStep
+                 * @devdesc          a delayed deconfigure callup was
+                 *                   encountered;
+                 */
+                err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                                ISTEP_INITSVC_MOD_ID,
+                                                ISTEP_DELAYED_DECONFIG,
+                                                ((iv_Msg->type & 0xFF00) >> 8),
+                                                (iv_Msg->type & 0xFF) );
+                break;
             }
 
             if( err )
             {
                 break;
             }
-        }
+        } // for istep < MaxISteps;
 
         if( err )
         {
@@ -1025,15 +1068,6 @@ bool IStepDispatcher::checkMpiplMode( ) const
     }
 
     return  l_isMpiplMode;
-}
-
-
-// ----------------------------------------------------------------------------
-// IStepDispatcher::isMpiplMode()
-// ----------------------------------------------------------------------------
-bool IStepDispatcher::isMpiplMode( ) const
-{
-    return iv_mpipl_mode;
 }
 
 } // namespace

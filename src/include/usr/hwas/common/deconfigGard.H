@@ -41,6 +41,17 @@ namespace HWAS
 {
 
 /**
+ *  @brief processDelayedDeconfig process any delayed deconfigure callouts
+ *              that might have been 'queued' up.
+ *
+ *  This is outside of the DeconfigGard class because it is called
+ *
+ *  @return bool true if there were delayed deconfigure callouts;
+ *               false if there were NO delayed deconfigure callouts;
+ */
+bool processDelayedDeconfig();
+
+/**
  * @brief   collectGard   Common HWAS function to collect the GARD info
  *
  *  It will call into hwas platform-specific functions.
@@ -171,7 +182,8 @@ public:
     /**
      * @brief Deconfigures a Target.
      *
-     * Called by ErrlManager when committing an error log containing a
+     * Called from processCallout, which is called
+     * by ErrlManager when committing an error log containing a
      * Deconfigure request.
      * 
      * This will Deconfigure the Target (set state to non-functional, do any
@@ -185,6 +197,24 @@ public:
      * @return errlHndl_t. Error log handle.
      */
     errlHndl_t deconfigureTarget(TARGETING::Target & i_target,
+                                 const uint32_t i_errlPlid);
+
+    /**
+     * @brief Registers a Delayed Deconfigure
+     *
+     * Called from errludcallout, which is called
+     * by hwasCallout when the user requests a 
+     * Delayed Deconfigure request.
+     * 
+     * For now, just put a mark on the wall indicating that we got a delayed
+     * deconfigure callout
+     * TODO RTC: 45781
+     *
+     * @param[in] i_target   Reference to Target to deconfigure.
+     * @param[in] i_errlPlid Error log PLID to store in Deconfigure Record.
+     *
+     */
+    void registerDelayedDeconfigure(const TARGETING::Target & i_target,
                                  const uint32_t i_errlPlid);
 
     /**
@@ -366,6 +396,17 @@ public:
      */
     void _clearDeconfigureRecords(const TARGETING::EntityPath * i_pTargetId);
     
+
+    /**
+     *  @brief _processDelayedDeconfig process any delayed deconfigure callouts
+     *              that might have been 'queued' up.
+     *
+     *
+     *  @return bool true if there were delayed deconfigure callouts;
+     *               false if there were NO delayed deconfigure callouts;
+     */
+    bool _processDelayedDeconfig();
+
 private:
     /**
      * @brief Gets the specified Deconfigure Records.
@@ -455,6 +496,8 @@ private:
     // The Deconfigure Records
     DeconfigureRecords_t iv_deconfigureRecords;
 
+    // are there any delayed deconfigure records
+    bool iv_delayedDeconfig;
 
 }; // DeconfigGard
 HWAS_DECLARE_SINGLETON(HWAS::DeconfigGard,theDeconfigGardSingleton);
