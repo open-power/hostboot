@@ -26,24 +26,3 @@
 ##    to setup the sandbox
 ##
 
-echo "+++ Updating centaur.act"
-mkdir -p $sb/simu/data/cec-chip
-cp $BACKING_BUILD/src/simu/data/cec-chip/centaur.act $sb/simu/data/cec-chip
-
-## Added action for proc_start_clock_chiplets v1.10 and beyond
-echo "+++ Update actions for Centaur SBE image"
-patch -p0 $sb/simu/data/cec-chip/centaur.act $HOSTBOOTROOT/src/build/citest/etc/patches/centaur.act.centaur_sbe_patch
-
-echo "+++ Update actions inverted ipoll"
-cp $BACKING_BUILD/src/simu/data/cec-chip/p8_mba.act $sb/simu/data/cec-chip
-cp $BACKING_BUILD/src/simu/data/cec-chip/s1_mba.act $sb/simu/data/cec-chip
-patch -p0 $sb/simu/data/cec-chip/p8_mba.act $HOSTBOOTROOT/src/build/citest/etc/patches/ipoll-inverted.patch
-patch -p0 $sb/simu/data/cec-chip/s1_mba.act $HOSTBOOTROOT/src/build/citest/etc/patches/ipoll-inverted.patch
-
-echo "+++ Updating s1.act"
-mkdir -p $sb/simu/data/cec-chip
-cp $BACKING_BUILD/src/simu/data/cec-chip/s1.act $sb/simu/data/cec-chip
-
-## Added action for dmi pll lock
-echo "+++ Update actions for S1 dmi pll lock"
-patch -p0 $sb/simu/data/cec-chip/s1.act $HOSTBOOTROOT/src/build/citest/etc/patches/s1.act.dmi_pll_lock_patch

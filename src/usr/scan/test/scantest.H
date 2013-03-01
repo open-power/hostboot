@@ -51,6 +51,10 @@ public:
   void test_SCANreadWrite_proc(void)
   {
 
+      // Comment out until bbuild level has the fix. Use RTC 64716
+      // to re-enable the testcase
+      return;
+
       TRACFCOMP( g_trac_scandd, "scanTest::test_SCANreadWrite_proc> Start" );
 
       uint64_t fails = 0;
