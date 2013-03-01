@@ -123,12 +123,13 @@ ${GENDIR}/${XMLTOHB_FAPI_XML}: ${XMLTOHB_MERGE_SCRIPT} \
 	$< $^ > $@
 
 # create the header files, only needs generic xml
-$(call GENTARGET,$(XMLTOHB_TARGETS)) : \
-    ${XMLTOHB_COMPILER_SCRIPT} ${GENDIR}/${XMLTOHB_GENERIC_XML} \
-        ${GENDIR}/${XMLTOHB_FAPI_XML}
+$(call GENTARGET,$(XMLTOHB_TARGETS)) : call_xmltohb_compiler
+.PHONY: call_xmltohb_compiler
+call_xmltohb_compiler: ${XMLTOHB_COMPILER_SCRIPT} \
+    ${GENDIR}/${XMLTOHB_GENERIC_XML} ${GENDIR}/${XMLTOHB_FAPI_XML}
 	$< $(addprefix --hb-xml-file=,${GENDIR}/${XMLTOHB_GENERIC_XML}) \
        $(addprefix --fapi-attributes-xml-file=,${GENDIR}/${XMLTOHB_FAPI_XML}) \
-         --src-output-dir=$(dir $@) --img-output-dir=none \
+         --src-output-dir=$(GENDIR) --img-output-dir=none \
          --img-output-file=none
 	cp ${GENDIR}/errludattribute.H ${GENDIR_PLUGINS}
 
