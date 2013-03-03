@@ -1,0 +1,294 @@
+#-- $Id: p8.abus.custom.scom.initfile,v 1.1 2013/02/11 04:26:41 jmcgill Exp $
+#-- CHANGE HISTORY:
+#--------------------------------------------------------------------------------
+#-- Version:|Author: | Date:  | Comment:
+#-- --------|--------|--------|--------------------------------------------------
+#--     1.1 |thomsen |01/29/13|Created initial version
+#-- --------|--------|--------|--------------------------------------------------
+#--------------------------------------------------------------------------------
+# End of revision history
+#--------------------------------------------------------------------------------
+
+#--Master list of variables that can be used in this file is at:
+#--<Attribute Definition Location>
+
+SyntaxVersion = 1
+
+
+#--******************************************************************************
+#-- -----------------------------------------------------------------------------
+#--
+#-- Includes
+#-- Note:  Must include the path to the .define file.
+#--
+#-- -----------------------------------------------------------------------------
+#--******************************************************************************
+
+include edi.io.define
+
+
+#--******************************************************************************
+#-- -----------------------------------------------------------------------------
+#--
+#-- Defines
+#--
+#-- -----------------------------------------------------------------------------
+#--******************************************************************************
+
+define def_all_lanes=11111;
+
+
+#--******************************************************************************
+#--------------------------------------------------------------------------------
+#     __                        ____                             __  __
+#    / /   ____ _____  ___     / __ \____ _      _____  _____   / / / /___
+#   / /   / __ `/ __ \/ _ \   / /_/ / __ \ | /| / / _ \/ ___/  / / / / __ \
+#  / /___/ /_/ / / / /  __/  / ____/ /_/ / |/ |/ /  __/ /     / /_/ / /_/ /
+# /_____/\__,_/_/ /_/\___/  /_/    \____/|__/|__/\___/_/      \____/ .___/
+#                                                                 /_/
+#--------------------------------------------------------------------------------
+#--******************************************************************************
+
+### # rx_lane_pdwn
+### scom 0x800.0b(rx_mode_pl)(tx_grp0)(def_all_lanes).0x(abus_gcr_addr) {
+###    bits,                  scom_data;
+###    rx_lane_pdwn,          0b0;
+### }
+
+
+### # tx_lane_pdwn
+### scom 0x800.0b(tx_mode_pl)(tx_grp0)(def_all_lanes).0x(abus_gcr_addr) {
+###    bits,                  scom_data;
+###   tx_lane_pdwn,          0b0;
+### }
+
+
+#--******************************************************************************
+#--------------------------------------------------------------------------------
+#   _______  __    __    ___    _   ________   _____   ___    ____________  ______
+#  /_  __/ |/ /   / /   /   |  / | / / ____/  /  _/ | / / |  / / ____/ __ \/_  __/
+#   / /  |   /   / /   / /| | /  |/ / __/     / //  |/ /| | / / __/ / /_/ / / /
+#  / /  /   |   / /___/ ___ |/ /|  / /___   _/ // /|  / | |/ / /___/ _, _/ / /
+# /_/  /_/|_|  /_____/_/  |_/_/ |_/_____/  /___/_/ |_/  |___/_____/_/ |_| /_/
+#                                        figlet -fslant
+#--------------------------------------------------------------------------------
+#--******************************************************************************
+
+# These only do a scom if the invert attribute is set (saves scom's).
+# The default scanflush value of tx_lane_invert for each lane is '0'.
+
+# Lane 0
+# 0x8004040008010C3F
+scom 0x800.0b(tx_mode_pl)(tx_grp0)(lane_0).0x(abus_gcr_addr) {
+    bits,            scom_data, expr;
+    tx_lane_invert,  0b1,       ((ATTR_EI_BUS_TX_LANE_INVERT & 0x80000000) > 0);
+}
+
+#
+# Lane 1
+# 0x8004040108010C3F
+scom 0x800.0b(tx_mode_pl)(tx_grp0)(lane_1).0x(abus_gcr_addr) {
+    bits,            scom_data, expr;
+    tx_lane_invert,  0b1,       ((ATTR_EI_BUS_TX_LANE_INVERT & 0x40000000) > 0);
+}
+
+#
+# Lane 2
+# 0x8004040208010C3F
+scom 0x800.0b(tx_mode_pl)(tx_grp0)(lane_2).0x(abus_gcr_addr) {
+    bits,            scom_data, expr;
+    tx_lane_invert,  0b1,       ((ATTR_EI_BUS_TX_LANE_INVERT & 0x20000000) > 0);
+}
+
+#
+# Lane 3
+# 0x8004040308010C3F
+scom 0x800.0b(tx_mode_pl)(tx_grp0)(lane_3).0x(abus_gcr_addr) {
+    bits,            scom_data, expr;
+    tx_lane_invert,  0b1,       ((ATTR_EI_BUS_TX_LANE_INVERT & 0x10000000) > 0);
+}
+
+#
+# Lane 4
+# 0x8004040408010C3F
+scom 0x800.0b(tx_mode_pl)(tx_grp0)(lane_4).0x(abus_gcr_addr) {
+    bits,            scom_data, expr;
+    tx_lane_invert,  0b1,       ((ATTR_EI_BUS_TX_LANE_INVERT & 0x08000000) > 0);
+}
+
+#
+# Lane 5
+# 0x8004040508010C3F
+scom 0x800.0b(tx_mode_pl)(tx_grp0)(lane_5).0x(abus_gcr_addr) {
+    bits,            scom_data, expr;
+    tx_lane_invert,  0b1,       ((ATTR_EI_BUS_TX_LANE_INVERT & 0x04000000) > 0);
+}
+
+#
+# Lane 6
+# 0x8004040608010C3F
+scom 0x800.0b(tx_mode_pl)(tx_grp0)(lane_6).0x(abus_gcr_addr) {
+    bits,            scom_data, expr;
+    tx_lane_invert,  0b1,       ((ATTR_EI_BUS_TX_LANE_INVERT & 0x02000000) > 0);
+}
+
+#
+# Lane 7
+# 0x8004040708010C3F
+scom 0x800.0b(tx_mode_pl)(tx_grp0)(lane_7).0x(abus_gcr_addr) {
+    bits,            scom_data, expr;
+    tx_lane_invert,  0b1,       ((ATTR_EI_BUS_TX_LANE_INVERT & 0x01000000) > 0);
+}
+
+#
+# Lane 8
+# 0x8004040808010C3F
+scom 0x800.0b(tx_mode_pl)(tx_grp0)(lane_8).0x(abus_gcr_addr) {
+    bits,            scom_data, expr;
+    tx_lane_invert,  0b1,       ((ATTR_EI_BUS_TX_LANE_INVERT & 0x00800000) > 0);
+}
+
+#
+# Lane 9
+# 0x8004040908010C3F{
+scom 0x800.0b(tx_mode_pl)(tx_grp0)(lane_9).0x(abus_gcr_addr) {
+    bits,            scom_data, expr;
+    tx_lane_invert,  0b1,       ((ATTR_EI_BUS_TX_LANE_INVERT & 0x00400000) > 0);
+}
+
+#
+# Lane 10
+# 0x8004040A08010C3F
+scom 0x800.0b(tx_mode_pl)(tx_grp0)(lane_10).0x(abus_gcr_addr) {
+    bits,            scom_data, expr;
+    tx_lane_invert,  0b1,       ((ATTR_EI_BUS_TX_LANE_INVERT & 0x00200000) > 0);
+}
+
+# Lane 11
+# 0x8004040B08010C3F
+scom 0x800.0b(tx_mode_pl)(tx_grp0)(lane_11).0x(abus_gcr_addr) {
+    bits,            scom_data, expr;
+    tx_lane_invert,  0b1,       ((ATTR_EI_BUS_TX_LANE_INVERT & 0x00100000) > 0);
+}
+
+#
+# Lane 12
+# 0x8004040C08010C3F
+scom 0x800.0b(tx_mode_pl)(tx_grp0)(lane_12).0x(abus_gcr_addr) {
+    bits,            scom_data, expr;
+    tx_lane_invert,  0b1,       ((ATTR_EI_BUS_TX_LANE_INVERT & 0x00080000) > 0);
+}
+
+#
+# Lane 13
+# 0x8004040D08010C3F
+scom 0x800.0b(tx_mode_pl)(tx_grp0)(lane_13).0x(abus_gcr_addr) {
+    bits,            scom_data, expr;
+    tx_lane_invert,  0b1,       ((ATTR_EI_BUS_TX_LANE_INVERT & 0x00040000) > 0);
+}
+
+#
+# Lane 14
+# 0x8004040E08010C3F
+scom 0x800.0b(tx_mode_pl)(tx_grp0)(lane_14).0x(abus_gcr_addr) {
+    bits,            scom_data, expr;
+    tx_lane_invert,  0b1,       ((ATTR_EI_BUS_TX_LANE_INVERT & 0x00020000) > 0);
+}
+
+#
+# Lane 15
+# 0x8004040F08010C3F
+scom 0x800.0b(tx_mode_pl)(tx_grp0)(lane_15).0x(abus_gcr_addr) {
+    bits,            scom_data, expr;
+    tx_lane_invert,  0b1,       ((ATTR_EI_BUS_TX_LANE_INVERT & 0x00010000) > 0);
+}
+
+#
+# Lane 16
+# 0x8004041008010C3F
+scom 0x800.0b(tx_mode_pl)(tx_grp0)(lane_16).0x(abus_gcr_addr) {
+    bits,            scom_data, expr;
+    tx_lane_invert,  0b1,       ((ATTR_EI_BUS_TX_LANE_INVERT & 0x00008000) > 0);
+}
+
+# Lane 17
+# 0x8004042008010C3F
+scom 0x800.0b(tx_mode_pl)(tx_grp0)(lane_17).0x(abus_gcr_addr) {
+    bits,            scom_data, expr;
+    tx_lane_invert,  0b1,       ((ATTR_EI_BUS_TX_LANE_INVERT & 0x00004000) > 0);
+}
+
+# Lane 18
+# 0x8004043008010C3F
+scom 0x800.0b(tx_mode_pl)(tx_grp0)(lane_18).0x(abus_gcr_addr) {
+    bits,            scom_data, expr;
+    tx_lane_invert,  0b1,       ((ATTR_EI_BUS_TX_LANE_INVERT & 0x00002000) > 0);
+}
+
+# Lane 19
+# 0x8004044008010C3F
+scom 0x800.0b(tx_mode_pl)(tx_grp0)(lane_19).0x(abus_gcr_addr) {
+    bits,            scom_data, expr;
+    tx_lane_invert,  0b1,       ((ATTR_EI_BUS_TX_LANE_INVERT & 0x00001000) > 0);
+}
+
+# Lane 20
+# 0x8004045008010C3F
+scom 0x800.0b(tx_mode_pl)(tx_grp0)(lane_20).0x(abus_gcr_addr) {
+    bits,            scom_data, expr;
+    tx_lane_invert,  0b1,       ((ATTR_EI_BUS_TX_LANE_INVERT & 0x00000800) > 0);
+}
+
+# Lane 21
+# 0x8004046008010C3F
+scom 0x800.0b(tx_mode_pl)(tx_grp0)(lane_21).0x(abus_gcr_addr) {
+    bits,            scom_data, expr;
+    tx_lane_invert,  0b1,       ((ATTR_EI_BUS_TX_LANE_INVERT & 0x00000400) > 0);
+}
+
+# Lane 22
+# 0x8004047008010C3F
+scom 0x800.0b(tx_mode_pl)(tx_grp0)(lane_22).0x(abus_gcr_addr) {
+    bits,            scom_data, expr;
+    tx_lane_invert,  0b1,       ((ATTR_EI_BUS_TX_LANE_INVERT & 0x00000200) > 0);
+}
+
+#--******************************************************************************
+#--------------------------------------------------------------------------------
+#   _____ _  _     _______     _  _     ___                      _
+#  /_  __/ |/ /   / ____/ /   / //_/   /  _/___ _   _____  _____/ /
+#   / /  |   /   / /   / /   / ,<      / // __ \ | / / _ \/ ___/ __/
+#  / /  /   |   / /___/ /___/ /| |   _/ // / / / |/ /  __/ /  / /
+# /_/  /_/|_|   \____/_____/_/ |_|  /___/_/ /_/|___/\___/_/   \__/
+#                                        figlet -fslant
+#--------------------------------------------------------------------------------
+#--******************************************************************************
+# CLK Lane (assigned to bit 31 of TX Lane Invert Attribute)
+# 0x800???7008010C3F
+scom 0x800.0b(tx_clk_mode_pg)(tx_grp0)(lane_na).0x(abus_gcr_addr) {
+    bits,            scom_data, expr;
+    tx_lane_invert,  0b1,       ((ATTR_EI_BUS_TX_LANE_INVERT & 0x00000001) > 0);
+}
+
+#--******************************************************************************
+#--------------------------------------------------------------------------------
+#     __  ________ ____     _____
+#    /  |/  / ___// __ )   / ___/      ______ _____
+#   / /|_/ /\__ \/ __  |   \__ \ | /| / / __ `/ __ \
+#  / /  / /___/ / /_/ /   ___/ / |/ |/ / /_/ / /_/ /
+# /_/  /_//____/_____/   /____/|__/|__/\__,_/ .___/
+#                                         /_/
+#                                        figlet -fslant
+#--------------------------------------------------------------------------------
+#--******************************************************************************
+
+# 0x800C1C0008010C3F
+scom 0x800.0b(tx_mode_pg)(tx_grp0)(lane_na).0x(abus_gcr_addr) {
+    bits,                     scom_data;
+    tx_msbswap,               (ATTR_EI_BUS_TX_MSBSWAP & 0x01);
+}
+
+
+############################################################################################
+# END OF FILE
+############################################################################################

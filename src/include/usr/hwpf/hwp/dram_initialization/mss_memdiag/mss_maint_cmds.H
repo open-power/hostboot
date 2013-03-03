@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_maint_cmds.H,v 1.15 2012/12/19 15:48:26 gollub Exp $
+// $Id: mss_maint_cmds.H,v 1.16 2013/01/31 22:27:57 gollub Exp $
 //------------------------------------------------------------------------------
 // Don't forget to create CVS comments when you check in your changes!
 //------------------------------------------------------------------------------
@@ -49,6 +49,10 @@
 //   1.13  | 11/08/12 | gollub  | Added timebase steer cleanup      
 //   1.14  | 11/21/12 | gollub  | Updates from review.
 //   1.15  | 12/19/12 | gollub  | Added UE isolation
+//   1.16  | 01/31/13 | gollub  | Added mss_check_steering
+//         |          |         | Added mss_do_steering
+//         |          |         | Added mss_stopCmd
+//         |          |         | Changed setupAndExecuteCmd to pure virtual
 
 
 #ifndef _MSS_MAINT_CMDS_H
@@ -296,18 +300,20 @@ class mss_MaintCmd
     // class. 
     //----------------------------------------------------------------------
 
-    /**
-     * @brief  Stops running maint cmd, and saves the address it stopped at.
-     * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
-     * @note   NOT YET IMPLEMENTED     
-     */
-    virtual fapi::ReturnCode stopCmd() = 0;
 
     /**
      * @brief  Gets the cmd type of a given object
      * @return CmdType
      */
     virtual CmdType getCmdType() const = 0;
+
+    /**
+     * @brief  Saves any settings that need to be restored when command is done.
+     *         Loads the setup parameters into the hardware. Starts the command,
+     *         then either polls for complete or exits with command running.
+     * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.     
+     */
+    virtual fapi::ReturnCode setupAndExecuteCmd() = 0;
 
 
 
@@ -317,12 +323,10 @@ class mss_MaintCmd
     //----------------------------------------------------------------------
         
     /**
-     * @brief  Saves any settings that need to be restored when command is done.
-     *         Loads the setup parameters into the hardware. Starts the command,
-     *         then either polls for complete or exits with command running.
-     * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.     
+     * @brief  Stops running maint cmd, and saves the address it stopped at.
+     * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
      */
-    virtual fapi::ReturnCode setupAndExecuteCmd();
+    virtual fapi::ReturnCode stopCmd();
 
     /**
      * @brief  Called once a command is done if we need to restore settings that
@@ -448,12 +452,10 @@ class mss_SuperFastInit : public mss_MaintCmd
   public:
 
     fapi::ReturnCode setupAndExecuteCmd();
-    fapi::ReturnCode stopCmd();
     CmdType getCmdType() const { return cv_cmdType; }
 
     // This class's implementation of parent class functions that can be 
     // overridden.
-    fapi::ReturnCode cleanupCmd();
 
     void setStartAddr(ecmdDataBufferBase i_startAddr) 
     { iv_startAddr = i_startAddr; }
@@ -503,7 +505,6 @@ class mss_SuperFastRandomInit : public mss_MaintCmd
   public:
 
     fapi::ReturnCode setupAndExecuteCmd();
-    fapi::ReturnCode stopCmd();
     CmdType getCmdType() const { return cv_cmdType; }
 
     // This class's implementation of parent class functions that can be 
@@ -559,7 +560,6 @@ class mss_SuperFastRead : public mss_MaintCmd
   public:
 
     fapi::ReturnCode setupAndExecuteCmd();
-    fapi::ReturnCode stopCmd();
     CmdType getCmdType() const { return cv_cmdType; }
 
     // This class's implementation of parent class functions that can be 
@@ -615,7 +615,6 @@ class mss_AtomicInject : public mss_MaintCmd
   public:
 
     fapi::ReturnCode setupAndExecuteCmd();
-    fapi::ReturnCode stopCmd();
     CmdType getCmdType() const { return cv_cmdType; }
 
     void setStartAddr(ecmdDataBufferBase i_startAddr) 
@@ -660,7 +659,6 @@ class mss_Display : public mss_MaintCmd
   public: // Function declaration(s)
 
     fapi::ReturnCode setupAndExecuteCmd();
-    fapi::ReturnCode stopCmd();
     CmdType getCmdType() const { return cv_cmdType; }
 
     void setStartAddr(const ecmdDataBufferBase & i_startAddr) 
@@ -700,7 +698,6 @@ class mss_IncrementAddress : public mss_MaintCmd
   public:
 
     fapi::ReturnCode setupAndExecuteCmd();
-    fapi::ReturnCode stopCmd();
     CmdType getCmdType() const { return cv_cmdType; }
 
   private:
@@ -726,14 +723,10 @@ class mss_TimeBaseScrub : public mss_MaintCmd
   public:
 
     fapi::ReturnCode setupAndExecuteCmd();
-    fapi::ReturnCode stopCmd();
     CmdType getCmdType() const { return cv_cmdType; }
 
     // This class's implementation of parent class functions that can be 
     // overridden.
-    fapi::ReturnCode cleanupCmd();
-
-
 
     void setStartAddr(ecmdDataBufferBase i_startAddr) 
     { iv_startAddr = i_startAddr; }
@@ -783,14 +776,10 @@ class mss_TimeBaseSteerCleanup : public mss_MaintCmd
   public:
 
     fapi::ReturnCode setupAndExecuteCmd();
-    fapi::ReturnCode stopCmd();
     CmdType getCmdType() const { return cv_cmdType; }
 
     // This class's implementation of parent class functions that can be 
     // overridden.
-    fapi::ReturnCode cleanupCmd();
-
-
 
     void setStartAddr(ecmdDataBufferBase i_startAddr) 
     { iv_startAddr = i_startAddr; }
@@ -889,7 +878,6 @@ fapi::ReturnCode mss_put_mark_store( const fapi::Target & i_target,
                                      uint8_t i_symbolMark,
                                      uint8_t i_chipMark );
                                     
-
 /**
  * @brief  Gets either the read or write steer mux control register for the 
  *         given rank, and converts from steer code to x8/x4 dram index to 
@@ -937,7 +925,42 @@ fapi::ReturnCode mss_put_steer_mux( const fapi::Target & i_target,
                                     uint8_t i_steerType,
                                     uint8_t i_symbol );
 
+/**
+ * @brief  Reads the steer muxes for the given rank
+ *
+ * @param  i_target                 MBA target
+ * @param  i_rank                   Rank we want to read steer mux for.
+ * @param  o_dramSparePort0Symbol   First symbol index of the DRAM fixed by the 
+ *                                  spare on port0 (if no steer, return 0xff)
+ * @param  o_dramSparePort1Symbol   First symbol index of the DRAM fixed by the
+ *                                  spare on port1 (if no steer, return 0xff)
+ * @param  o_eccSpareSymbol         First symbol index of the DRAM fixed by the
+ *                                  ECC spare, which can be used on either port0
+ *                                  or port1 (if no steer, return 0xff)
+ * @note   The ECC spare is available only with x4 mode ECC.
+ * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise. 
+ */
+fapi::ReturnCode mss_check_steering(const fapi::Target & i_target,
+                                    uint8_t i_rank,
+                                    uint8_t & o_dramSparePort0Symbol,
+                                    uint8_t & o_dramSparePort1Symbol,
+                                    uint8_t & o_eccSpareSymbol );
 
+/**
+ * @brief  Set write mux, wait for periodic cal, set read mux, for the given rank.
+ *
+ * @param  i_target                MBA target
+ * @param  i_rank                  Rank we want to write steer mux for.
+ * @param  i_symbol                First symbol index of the DRAM to steer 
+ *                                 around.
+ * @param i_x4EccSpare             If true, writes the x4 ECC Spare. Otherwise,
+ *                                 writes the DRAM spare (default).
+ * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
+ */
+fapi::ReturnCode mss_do_steering(const fapi::Target & i_target,
+                                 uint8_t i_rank,
+                                 uint8_t i_symbol,
+                                 bool i_x4EccSpare = false );
 
 
 /**

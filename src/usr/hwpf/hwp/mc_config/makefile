@@ -1,25 +1,25 @@
-#   IBM_PROLOG_BEGIN_TAG
-#  This is an automatically generated prolog.
+# IBM_PROLOG_BEGIN_TAG
+# This is an automatically generated prolog.
 #
-#  $Source: src/usr/hwpf/hwp/mc_config/makefile $
+# $Source: src/usr/hwpf/hwp/mc_config/makefile $
 #
-#  IBM CONFIDENTIAL
+# IBM CONFIDENTIAL
 #
-#  COPYRIGHT International Business Machines Corp. 2012
+# COPYRIGHT International Business Machines Corp. 2012,2013
 #
-#  p1
+# p1
 #
-#  Object Code Only (OCO) source materials
-#  Licensed Internal Code Source Materials
-#  IBM HostBoot Licensed Internal Code
+# Object Code Only (OCO) source materials
+# Licensed Internal Code Source Materials
+# IBM HostBoot Licensed Internal Code
 #
-#  The source code for this program is not published or other-
-#  wise divested of its trade secrets, irrespective of what has
-#  been deposited with the U.S. Copyright Office.
+# The source code for this program is not published or otherwise
+# divested of its trade secrets, irrespective of what has been
+# deposited with the U.S. Copyright Office.
 #
-#  Origin: 30
+# Origin: 30
 #
-#  IBM_PROLOG_END_TAG
+# IBM_PROLOG_END_TAG
 ROOTPATH = ../../../../..
 
 MODULE = mc_config
@@ -51,8 +51,9 @@ OBJS =  mc_config.o			\
         mss_eff_config_rank_group.o     \
         mss_eff_config_cke_map.o        \
         mss_bulk_pwr_throttles.o        \
-        mss_throttle_to_power.o
-	
+        mss_throttle_to_power.o		\
+	mss_eff_config_shmoo.o
+
 ##  NOTE: add a new directory onto the vpaths when you add a new HWP
 ##@ VPATH += ${ROOTPATH}/src/usr/hwpf/hwp/???
 VPATH += ${ROOTPATH}/src/usr/hwpf/hwp/mc_config/mss_eff_config

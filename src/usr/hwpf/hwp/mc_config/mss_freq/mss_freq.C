@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012                   */
+/* COPYRIGHT International Business Machines Corp. 2012,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_freq.C,v 1.18 2012/09/07 22:22:08 jdsloat Exp $
+// $Id: mss_freq.C,v 1.20 2013/02/12 15:20:47 jdsloat Exp $
 /* File mss_volt.C created by JEFF SABROWSKI on Fri 21 Oct 2011. */
 
 //------------------------------------------------------------------------------
@@ -58,6 +58,8 @@
 //  1.16   | jdsloat  | 06/08/12 | Updates per Firware request
 //  1.17   | bellows  | 07/16/12 | added in Id tag
 //  1.18   | jdsloat  | 09/07/12 | Added FTB offset to TAA and TCK
+//  1.19   | jdsloat  | 01/30/13 | Added Check for l_spd_min_tck_max
+//  1.20   | jdsloat  | 02/12/13 | Added path for freq_override
 //
 // This procedure takes CENTAUR as argument.  for each DIMM (under each MBA)
 // DIMM SPD attributes are read to determine optimal DRAM frequency
@@ -122,6 +124,8 @@ fapi::ReturnCode mss_freq(const fapi::Target &i_target_memb)
   uint8_t module_type_all = 0;
   uint8_t num_ranks = 0;
   uint8_t num_ranks_total = 0;
+  uint32_t  l_freq_override = 0;
+  uint8_t l_override_path = 0;
 
   // Get associated MBA's on this centaur                                                                                      
   l_rc=fapiGetChildChiplets(i_target_memb, fapi::TARGET_TYPE_MBA_CHIPLET, l_mbaChiplets);
@@ -177,49 +181,49 @@ fapi::ReturnCode mss_freq(const fapi::Target &i_target_memb)
 	      break;
 	    }
 
-	  l_rc = FAPI_ATTR_GET(ATTR_MBA_PORT,  &l_dimm_targets[j], cur_mba_port); if(l_rc) return l_rc;
+	  l_rc = FAPI_ATTR_GET(ATTR_MBA_PORT,  &l_dimm_targets[j], cur_mba_port);
 	  if (l_rc)
 	    {
 	      FAPI_ERR("Unable to read the Port Info in order to determine configuration.");
 	      break;
 	    }
-	  l_rc = FAPI_ATTR_GET(ATTR_MBA_DIMM,  &l_dimm_targets[j], cur_mba_dimm); if(l_rc) return l_rc;
+	  l_rc = FAPI_ATTR_GET(ATTR_MBA_DIMM,  &l_dimm_targets[j], cur_mba_dimm);
 	  if (l_rc)
 	    {
 	      FAPI_ERR("Unable to read the DIMM Info in order to determine configuration.");
 	      break;
 	    }
-	  l_rc = FAPI_ATTR_GET(ATTR_SPD_MODULE_TYPE,  &l_dimm_targets[j], module_type); if(l_rc) return l_rc;
+	  l_rc = FAPI_ATTR_GET(ATTR_SPD_MODULE_TYPE,  &l_dimm_targets[j], module_type);
 	  if (l_rc)
 	  {
 	      FAPI_ERR("Unable to read the SPD module type.");
 	      break;
 	  }
-	  l_rc = FAPI_ATTR_GET(ATTR_SPD_NUM_RANKS,  &l_dimm_targets[j], num_ranks); if(l_rc) return l_rc;
+	  l_rc = FAPI_ATTR_GET(ATTR_SPD_NUM_RANKS,  &l_dimm_targets[j], num_ranks);
 	  if (l_rc)
 	  {
 	      FAPI_ERR("Unable to read the SPD number of ranks");
 	      break;
 	  }
-	  l_rc = FAPI_ATTR_GET(ATTR_SPD_FINE_OFFSET_TAAMIN,  &l_dimm_targets[j], l_spd_taa_offset_FTB); if(l_rc) return l_rc;
+	  l_rc = FAPI_ATTR_GET(ATTR_SPD_FINE_OFFSET_TAAMIN,  &l_dimm_targets[j], l_spd_taa_offset_FTB); 
 	  if (l_rc)
 	  {
 	      FAPI_ERR("Unable to read the SPD TAA offset (FTB)");
 	      break;
 	  }
-	  l_rc = FAPI_ATTR_GET(ATTR_SPD_FINE_OFFSET_TCKMIN,  &l_dimm_targets[j], l_spd_tck_offset_FTB); if(l_rc) return l_rc;
+	  l_rc = FAPI_ATTR_GET(ATTR_SPD_FINE_OFFSET_TCKMIN,  &l_dimm_targets[j], l_spd_tck_offset_FTB);
 	  if (l_rc)
 	  {
 	      FAPI_ERR("Unable to read the SPD TCK offset (FTB)");
 	      break;
 	  }
-	  l_rc = FAPI_ATTR_GET(ATTR_SPD_FTB_DIVIDEND,  &l_dimm_targets[j], l_spd_ftb_dividend); if(l_rc) return l_rc;
+	  l_rc = FAPI_ATTR_GET(ATTR_SPD_FTB_DIVIDEND,  &l_dimm_targets[j], l_spd_ftb_dividend);
 	  if (l_rc)
 	  {
 	      FAPI_ERR("Unable to read the SPD FTB dividend");
 	      break;
 	  }
-	  l_rc = FAPI_ATTR_GET(ATTR_SPD_FTB_DIVISOR,  &l_dimm_targets[j], l_spd_ftb_divisor); if(l_rc) return l_rc;
+	  l_rc = FAPI_ATTR_GET(ATTR_SPD_FTB_DIVISOR,  &l_dimm_targets[j], l_spd_ftb_divisor);
 	  if (l_rc)
 	  {
 	      FAPI_ERR("Unable to read the SPD FTB divisor");
@@ -358,7 +362,46 @@ fapi::ReturnCode mss_freq(const fapi::Target &i_target_memb)
       l_spd_min_tck_max = 1500;
   }
 
+  if ( l_spd_min_tck_max == 0)
+  {
+      FAPI_ERR("l_spd_min_tck_max = 0 unable to calculate freq or cl.  Possibly no centaurs configured. ");
+      FAPI_SET_HWP_ERROR(l_rc, RC_MSS_UNSUPPORTED_SPD_DATA);
+  }
+
   FAPI_INF( "PLUG CONFIG: %d Type O' Dimm: 0x%02X Num Ranks: %d",  plug_config, module_type, num_ranks);
+   
+
+  l_rc = FAPI_ATTR_GET(ATTR_MSS_FREQ_OVERRIDE,  &i_target_memb, l_freq_override); 
+  if ( l_freq_override != 0)
+  {
+      // The relationship is as such
+      // l_dimm_freq_min = 2000000 / l_spd_min_tck_max
+
+      if (l_freq_override == 1866)
+      {
+	  l_dimm_freq_min = 1866;
+	  l_spd_min_tck_max = 1072;
+      }
+
+      if (l_freq_override == 1600)
+      {
+	  l_dimm_freq_min = 1600;
+	  l_spd_min_tck_max = 1250;
+      }
+
+      if (l_freq_override == 1333)
+      {
+	  l_dimm_freq_min = 1333;
+	  l_spd_min_tck_max = 1500;
+      }
+
+      if (l_freq_override == 1066)
+      {
+	  l_dimm_freq_min = 1066;
+	  l_spd_min_tck_max = 1875;
+      }
+
+  }
 
   if ((l_spd_cas_lat_supported_all == 0) && (!l_rc))
   {
@@ -379,7 +422,10 @@ fapi::ReturnCode mss_freq(const fapi::Target &i_target_memb)
 
       // If the CL proposed is not supported or the TAA exceeds TAA max
       // Spec defines tAAmax as 20 ns for all DDR3 speed grades.
-      while ((!( l_spd_cas_lat_supported_all & (0x00000001<<(l_cas_latency-4)))) || (l_cl_mult_tck > 20000))
+      // Break loop if we have an override condition without a solution.
+
+      while (    ( (!( l_spd_cas_lat_supported_all & (0x00000001<<(l_cas_latency-4)))) || (l_cl_mult_tck > 20000) )
+	      && ( l_override_path = 0 ) )
       {
           // If not supported, increment the CL up to 18 (highest supported CL) looking for Supported CL 
 	  while ((!( l_spd_cas_lat_supported_all & (0x00000001<<(l_cas_latency-4))))&&(l_cas_latency < 18))
@@ -390,7 +436,9 @@ fapi::ReturnCode mss_freq(const fapi::Target &i_target_memb)
           // If still not supported CL or TAA is > 20 ns ... pick a slower TCK and start again
 	  l_cl_mult_tck = l_cas_latency * l_spd_min_tck_max;
 
-	  if ((!( l_spd_cas_lat_supported_all & (0x00000001<<(l_cas_latency-4)))) || (l_cl_mult_tck > 20000))
+	  // Do not move freq if using an override freq.  Just continue.  Hence the overide in this if statement
+	  if ( ( (!( l_spd_cas_lat_supported_all & (0x00000001<<(l_cas_latency-4)))) || (l_cl_mult_tck > 20000) )
+	      && ( l_freq_override == 0) )
 	  {
 	      if (l_spd_min_tck_max < 1500)
 	      {
@@ -425,6 +473,13 @@ fapi::ReturnCode mss_freq(const fapi::Target &i_target_memb)
 	      l_cl_mult_tck = l_cas_latency * l_spd_min_tck_max;
 	      l_dimm_freq_min = 2000000 / l_spd_min_tck_max;
 
+	  }
+	  // Need to break the loop in case we reach this condition because no longer modify freq and CL
+	  // With an overrride
+	  if ( ( (!( l_spd_cas_lat_supported_all & (0x00000001<<(l_cas_latency-4)))) || (l_cl_mult_tck > 20000) )
+	      && ( l_freq_override == 1) )
+	  {
+	      l_override_path = 1;
 	  }
       }
   }

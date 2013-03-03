@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_draminit_training_advanced.C,v 1.24 2013/01/17 20:55:31 sasethur Exp $
+// $Id: mss_draminit_training_advanced.C,v 1.25 2013/01/31 15:54:58 sasethur Exp $
 /* File is created by SARAVANAN SETHURAMAN on Thur 29 Sept 2011. */
 
 //------------------------------------------------------------------------------
@@ -64,6 +64,8 @@
 //  1.22   | sasethur |07-Dec-12| Updated for FW review comments - multiple changes
 //  1.23   | sasethur |14-Dec-12| Updated for FW review comments 
 //  1.24   | sasethur |17-Jan-13| Updated for mss_mcbist_common.C include file 
+//  1.25   | abhijsau |31-Jan-13| removed  mss_mcbist_common.C include file , needs to be included while compiling 
+
 
 // This procedure Schmoo's DRV_IMP, SLEW, VREF (DDR, CEN), RCV_IMP based on attribute from effective config procedure
 // DQ & DQS Driver impedance, Slew rate, WR_Vref shmoo would call only write_eye shmoo for margin calculation
@@ -82,7 +84,7 @@
 //Centaur functions
 //----------------------------------------------------------------------
 #include <mss_termination_control.H>
-#include <mss_mcbist.H>
+#include "mss_mcbist.H"
 #include <mss_shmoo_common.H>
 #include <mss_generic_shmoo.H>
 #include <mss_draminit_training_advanced.H>
@@ -272,7 +274,7 @@ fapi::ReturnCode mss_draminit_training_advanced_cloned(const fapi::Target & i_ta
     {
     	    if (( l_num_ranks_per_dimm_u8array[l_port][0] > 0 ) || (l_num_ranks_per_dimm_u8array[l_port][1] > 0))
             {
-    		if(l_shmoo_param_valid != PARAM_NONE)
+    		if((l_shmoo_param_valid != PARAM_NONE) || (l_shmoo_type_valid != TEST_NONE)) 
     		{
     		    if((l_shmoo_param_valid & DRV_IMP) != 0)
     		    { 
@@ -319,7 +321,7 @@ fapi::ReturnCode mss_draminit_training_advanced_cloned(const fapi::Target & i_ta
     			    return rc;
     			}
     		    }
-    		    if ((l_shmoo_param_valid & DELAY_REG) != 0)
+    		    if (((l_shmoo_param_valid & DELAY_REG) != 0) || (l_shmoo_type_valid != 0))
     		    {
     			rc = delay_shmoo(i_target_mba, l_port, l_shmoo_type_valid, &l_left_margin, &l_right_margin,i_pattern,i_test_type); 
     			if (rc)
@@ -962,9 +964,10 @@ fapi::ReturnCode delay_shmoo(const fapi::Target & i_target_mba, uint8_t i_port,
 		       uint8_t i_test_type)
 {
     fapi::ReturnCode rc;
-   // FAPI_INF(" Inside the delay shmoo "); 
+    FAPI_INF(" Inside the delay shmoo " );
     //Constructor CALL: generic_shmoo::generic_shmoo(uint8_t i_port, uint32_t shmoo_mask,shmoo_algorithm_t shmoo_algorithm)
-    generic_shmoo mss_shmoo=generic_shmoo(i_port,i_shmoo_type_valid,SEQ_LIN);
+    //generic_shmoo mss_shmoo=generic_shmoo(i_port,2,SEQ_LIN);
+	generic_shmoo mss_shmoo=generic_shmoo(i_port,i_shmoo_type_valid,SEQ_LIN);
     rc = mss_shmoo.run(i_target_mba, o_left_margin, o_right_margin,i_pattern,i_test_type);
     if(rc)
     {

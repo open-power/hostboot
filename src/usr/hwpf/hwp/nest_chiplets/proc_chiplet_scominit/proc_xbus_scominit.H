@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_xbus_scominit.H,v 1.1 2012/08/11 18:24:30 jmcgill Exp $
+// $Id: proc_xbus_scominit.H,v 1.2 2013/02/04 23:08:13 thomsen Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_xbus_scominit.H,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2012
@@ -36,6 +36,15 @@
 // *! ADDITIONAL COMMENTS :
 // *!
 //------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+//  Version		Date		Owner		Description
+//------------------------------------------------------------------------------
+//    1.2	   	02/04/13	thomsen		Added separate calls to base & customized scominit files. Removed separate calls to SIM vs. HW scominit files
+//           	01/09/13	thomsen		Added SIM and HW scominit filename strings
+//										Added *_OVERRIDE_IF to allow DMI initfile overrides for specific bus instances
+//                                      Changed passed targets in order to match scominit file updates.
+//    1.1       8/11/12     jmcgill		Initial release
+//------------------------------------------------------------------------------
 
 #ifndef PROC_XBUS_SCOMINIT_H_
 #define PROC_XBUS_SCOMINIT_H_
@@ -48,7 +57,8 @@
 //------------------------------------------------------------------------------
 // Constant definitions
 //------------------------------------------------------------------------------
-const char * const XBUS_IF = "p8.xbus.scom.if";
+const char * const XBUS_BASE_IF   = "p8.xbus.scom.if";
+const char * const XBUS_CUSTOM_IF = "p8.xbus.custom.scom.if";
 
 //------------------------------------------------------------------------------
 // Structure definitions
@@ -56,9 +66,8 @@ const char * const XBUS_IF = "p8.xbus.scom.if";
 
 // function pointer typedef definition for HWP call support
 typedef fapi::ReturnCode
-(*proc_xbus_scominit_FP_t)(const fapi::Target & i_target,
-                           const fapi::Target & i_this_pu_target,
-                           const fapi::Target & i_other_pu_target);
+(*proc_xbus_scominit_FP_t)(const fapi::Target & i_xbus_target,
+                           const fapi::Target & i_connected_xbus_target);
 
 extern "C" {
 
@@ -71,12 +80,10 @@ extern "C" {
  *
  * Should be called for all valid/connected XBUS endpoints
  *
- * @param[in] i_xbus_target     Reference to XBUS target
- *            i_this_pu_target  Reference to enclosing chip target
- *            i_other_pu_target Reference to connected chip target
+ * @param[in] i_xbus_target            Reference to XBUS target
+ *            i_connected_abus_target  Reference to connected ABUS target
  *                              If i_xbus_target is TARGET_TYPE_XBUS_ENDPOINT,
- *                                 i_this_pu_target is TARGET_TYPE_PROC_CHIP,
- *                                 i_other_pu_target is TARGET_TYPE_PROC_CHIP,
+ *                                 i_connected_abus_target is TARGET_TYPE_ABUS_ENDPOINT,
  *                              calls:
  *                              - p8.xbus.scom.initfile
  *
@@ -84,8 +91,7 @@ extern "C" {
  */
 fapi::ReturnCode proc_xbus_scominit(
     const fapi::Target & i_xbus_target,
-    const fapi::Target & i_this_pu_target,
-    const fapi::Target & i_other_pu_target);
+    const fapi::Target & i_connected_xbus_target);
 
 
 } // extern "C"

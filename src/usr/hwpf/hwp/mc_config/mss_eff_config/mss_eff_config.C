@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_eff_config.C,v 1.16 2013/01/24 18:33:16 bellows Exp $
+// $Id: mss_eff_config.C,v 1.20 2013/02/28 21:36:08 asaetow Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/
 //          centaur/working/procedures/ipl/fapi/mss_eff_config.C,v $
 //------------------------------------------------------------------------------
@@ -44,7 +44,12 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
-//   1.17  |          |         |
+//   1.21  |          |         | 
+//   1.20  | asaetow  |28-Feb-13| Changed temporary ATTR_EFF_ZQCAL_INTERVAL and ATTR_EFF_MEMCAL_INTERVAL to disable.
+//         |          |         | NOTE: Temporary until we get timeout error fixed.
+//   1.19  | sauchadh |26-Feb-13| Added MCBIST related attributes
+//   1.18  | asaetow  |12-FEB-13| Changed eff_dram_tdqs from 1 to 0.
+//   1.17  | asaetow  |30-JAN-13| Changed "ATTR_SPD_MODULE_TYPE_CDIMM is obsolete..." message from error to warning.
 //   1.16  | bellows  |24-JAN-13| Added in CUSTOM bit of SPD and CUSTOM Attr
 //         |          |         | settings.  
 //   1.15  | asaetow  |15-NOV-12| Added call to mss_eff_config_cke_map().
@@ -128,6 +133,8 @@
 #include <mss_eff_config_cke_map.H>
 #include <mss_eff_config_termination.H>
 #include <mss_eff_config_thermal.H>
+#include <mss_eff_config_shmoo.H>
+
 
 //------------------------------------------------------------------------------
 // Includes
@@ -1083,7 +1090,7 @@ fapi::ReturnCode mss_eff_config_setup_eff_atts(
     {
         case fapi::ENUM_ATTR_SPD_MODULE_TYPE_CDIMM:
             p_o_atts->eff_dimm_type = fapi::ENUM_ATTR_EFF_DIMM_TYPE_CDIMM;
-            FAPI_ERR("ATTR_SPD_MODULE_TYPE_CDIMM is obsolete.  Check your VPD for correct definition on %s!", i_target_mba.toEcmdString());
+            FAPI_INF("WARNING: ATTR_SPD_MODULE_TYPE_CDIMM is obsolete.  Check your VPD for correct definition on %s!", i_target_mba.toEcmdString());
             break;
         case fapi::ENUM_ATTR_SPD_MODULE_TYPE_RDIMM:
             p_o_atts->eff_dimm_type = fapi::ENUM_ATTR_EFF_DIMM_TYPE_RDIMM;
@@ -1185,7 +1192,7 @@ fapi::ReturnCode mss_eff_config_setup_eff_atts(
     {
         p_o_atts->eff_dram_width = fapi::ENUM_ATTR_EFF_DRAM_WIDTH_X8;
         // NOTE: TDQS enable MR1(A11) is only avaliable for X8 in DDR3
-        p_o_atts->eff_dram_tdqs = 1;
+        p_o_atts->eff_dram_tdqs = 0;
     }
     else if (p_i_data->dram_width[0][0]
             == fapi::ENUM_ATTR_SPD_DRAM_WIDTH_W16)
@@ -1518,12 +1525,16 @@ fapi::ReturnCode mss_eff_config_setup_eff_atts(
     //            0.5
     //  ------------------------------ = 13.333ms 
     //  (1.5 * 10) + (0.15 * 150)
-    p_o_atts->eff_zqcal_interval = ( 13333 *
-            p_i_mss_eff_config_data->mss_freq) / 2;
+
+    p_o_atts->eff_zqcal_interval = 0;
+    //p_o_atts->eff_zqcal_interval = ( 13333 *
+    //        p_i_mss_eff_config_data->mss_freq) / 2;
 //------------------------------------------------------------------------------
     // Calculate MEMCAL Interval based on 1sec interval across all bits per DP18
-    p_o_atts->eff_memcal_interval = (62500 *
-            p_i_mss_eff_config_data->mss_freq) / 2;
+
+    p_o_atts->eff_memcal_interval = 0;
+    //p_o_atts->eff_memcal_interval = (62500 *
+    //        p_i_mss_eff_config_data->mss_freq) / 2;
 //------------------------------------------------------------------------------
     // Calculate tRFI
     p_o_atts->eff_dram_trfi = (3900 *
@@ -2075,6 +2086,7 @@ fapi::ReturnCode mss_eff_config(const fapi::Target i_target_mba)
         rc = mss_eff_config_cke_map(i_target_mba); if(rc) break;
         rc = mss_eff_config_termination(i_target_mba); if(rc) break;
         rc = mss_eff_config_thermal(i_target_mba); if(rc) break;
+        rc = mss_eff_config_shmoo(i_target_mba); if(rc) break;
 
 
         FAPI_INF("%s on %s COMPLETE\n", PROCEDURE_NAME,

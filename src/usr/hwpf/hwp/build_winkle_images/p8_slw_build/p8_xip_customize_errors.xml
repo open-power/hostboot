@@ -24,9 +24,16 @@
 <hwpErrors>
 <!-- *********************************************************************** -->
 <hwpError>
-  <rc>RC_PROC_XIPC_INPUT_IMAGE_SIZE_MESS</rc>
-  <description>Supplied max image size is too small or image too large.</description>
-  <ffdc>DATA_IMG_SIZE_INP</ffdc>
+  <rc>RC_PROC_XIPC_IMAGE_WORK_SPACE_MESS</rc>
+  <description>Max work space for output image is not equal to FIXED_SEEPROM_WORK_SPACE.</description>
+  <ffdc>DATA_IMG_SIZE_MAX</ffdc>
+  <ffdc>DATA_IMG_SIZE_WORK_SPACE</ffdc>
+</hwpError>
+<!-- *********************************************************************** -->
+<hwpError>
+  <rc>RC_PROC_XIPC_IMAGE_SIZE_MESS</rc>
+  <description>Supplied max image size is smaller than input image.</description>
+  <ffdc>DATA_IMG_SIZE</ffdc>
   <ffdc>DATA_IMG_SIZE_MAX</ffdc>
 </hwpError>
 <!-- *********************************************************************** -->
@@ -66,6 +73,12 @@
   <rc>RC_PROC_XIPC_UNEXPECTED_FIELD_SIZE</rc>
   <description>Expected field size of 4 bytes. Got something else from fapiGetMvpdField().</description>
   <ffdc>DATA_SIZE_VPD_FIELD</ffdc>
+</hwpError>
+<!-- *********************************************************************** -->
+<hwpError>
+  <rc>RC_PROC_XIPC_GEN_SCOM_ERROR</rc>
+  <description>Updating Scom NC table w/L2 or L3 data failed. Check rc code in p8_delta_scan_rw.h</description>
+  <ffdc>RC_LOCAL</ffdc>
 </hwpError>
 <!-- *********************************************************************** -->
 <hwpError>
@@ -177,6 +190,30 @@
   <rc>RC_PROC_XIPC_WRITE_VPD_RING_TO_IMAGE_ERROR</rc>
   <description>Error occured during write_vpd_ring_to_{ipl,slw}_image()</description>
   <ffdc>RC_LOCAL</ffdc>
+</hwpError>
+<!-- *********************************************************************** -->
+<hwpError>
+  <rc>RC_PROC_XIPC_CREATE_FIXED_IMAGE_ERROR</rc>
+  <description>Error associated with creating and initializing fixed image and fixed .slw and .ffdc sections.</description>
+  <ffdc>RC_LOCAL</ffdc>
+</hwpError>
+<!-- *********************************************************************** -->
+<hwpError>
+  <rc>RC_PROC_XIPC_MAX_IMAGE_SIZE_EXCEEDED</rc>
+  <description>New image size exceeds max allowed size.</description>
+  <ffdc>DATA_IMG_SIZE_NEW</ffdc>
+  <ffdc>DATA_IMG_SIZE_MAX</ffdc>
+</hwpError>
+<!-- *********************************************************************** -->
+<hwpError>
+  <rc>RC_PROC_XIPC_APPEND_SLW_SECTION_ERROR</rc>
+  <description>Error associated with adding empty SLW section for ram and scom tables.</description>
+  <ffdc>RC_LOCAL</ffdc>
+</hwpError>
+<!-- *********************************************************************** -->
+<hwpError>
+  <rc>RC_PROC_XIPC_BAD_CODE_OR_PARM</rc>
+  <description>Shouldn't be in this code section or invalid parm.</description>
 </hwpError>
 <!-- *********************************************************************** -->
 <hwpError>

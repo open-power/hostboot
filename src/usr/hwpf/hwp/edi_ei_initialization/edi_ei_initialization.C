@@ -74,7 +74,6 @@
 #include    "proc_fab_iovalid/proc_fab_iovalid.H"
 #include    <diag/prdf/prdfMain.H>
 #include    "fabric_io_dccal/fabric_io_dccal.H"
-#include    <intr/interrupt.H>
 
 // eRepair Restore
 #include <erepairAccessorHwpFuncs.H>
@@ -807,55 +806,6 @@ void*    call_proc_fab_iovalid( void    *io_pArgs )
         TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
                 "%s : proc_fab_iovalid HWP.",
                 (l_errl ? "ERROR" : "SUCCESS"));
-    }
-
-    // no errors during the proc_fabric_iovalid so switch to XSCOM
-    if(!l_errl)
-    {
-        // At the point where we can now change the proc chips to use
-        // XSCOM rather than FSISCOM which is the default.
-
-        TARGETING::TargetHandleList procChips;
-        getAllChips(procChips, TYPE_PROC);
-
-        TARGETING::TargetHandleList::iterator curproc = procChips.begin();
-
-        // Loop through all proc chips
-        while(curproc != procChips.end())
-        {
-            TARGETING::Target*  l_proc_target = *curproc;
-
-            // If the proc chip supports xscom..
-            if (l_proc_target->getAttr<ATTR_PRIMARY_CAPABILITIES>()
-                .supportsXscom)
-            {
-                ScomSwitches l_switches =
-                  l_proc_target->getAttr<ATTR_SCOM_SWITCHES>();
-
-                // If Xscom is not already enabled.
-                if ((l_switches.useXscom != 1) || (l_switches.useFsiScom != 0))
-                {
-                    l_switches.useFsiScom = 0;
-                    l_switches.useXscom = 1;
-
-                    // Turn off FSI scom and turn on Xscom.
-                    l_proc_target->setAttr<ATTR_SCOM_SWITCHES>(l_switches);
-                }
-            }
-
-            // Enable PSI interrupts even if can't Xscom as
-            // Pbus is up and interrupts can flow
-            l_errl = INTR::enablePsiIntr(l_proc_target); 
-            if(l_errl)
-            {
-                // capture the target data in the elog
-                ErrlUserDetailsTarget(l_proc_target).addToLog( l_errl );
-
-                break;
-            }
-
-            ++curproc;
-        }
     }
 
     if (l_errl)

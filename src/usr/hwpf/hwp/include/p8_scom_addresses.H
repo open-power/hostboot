@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_scom_addresses.H,v 1.129 2013/01/10 01:17:27 stillgs Exp $
+// $Id: p8_scom_addresses.H,v 1.135 2013/03/01 03:05:38 pchatnah Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/p8_scom_addresses.H,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
@@ -135,6 +135,9 @@ CONST_UINT64_T( ALL_CORES_AND_0x4A000000              , ULL(0x4A000000) );
 CONST_UINT64_T( ALL_CORES_BITX_0x52000000             , ULL(0x52000000) );
 CONST_UINT64_T( ALL_CORES_COMP_0x62000000             , ULL(0x62000000) );
 CONST_UINT64_T( ALL_CORES_WRITE_0x6A000000            , ULL(0x6A000000) );
+
+
+CONST_UINT64_T( DEVICE_ID_REG_0x000F000F            , ULL(0x000F000F) );
 
 
 /******************************************************************************/
@@ -399,6 +402,14 @@ CONST_UINT64_T( PMC_PORRS_REG_0x00062090              , ULL(0x00062090) );
 CONST_UINT64_T( PMC_DEEPEXIT_MASK_0x00062092          , ULL(0x00062092) );
 CONST_UINT64_T( PMC_DEEPEXIT_MASK_WAND_0x000620A0     , ULL(0x000620A0) );
 CONST_UINT64_T( PMC_DEEPEXIT_MASK_WOR_0x000620A1      , ULL(0x000620A1) );
+CONST_UINT64_T( PMC_INTCHP_COMMAND_REG_0x00062014        , ULL(0x00062014) );
+CONST_UINT64_T( PMC_INTCHP_STATUS_REG_0x00062013                    , ULL(0x00062013) );
+CONST_UINT64_T( PMC_PORE_REQ_REG0_0x0006208E                   , ULL(0x0006208E) );
+CONST_UINT64_T( PMC_PARAMETER_REG0_0x00062005         , ULL(0x00062005) );
+CONST_UINT64_T( PMC_O2P_CTRL_STATUS_REG_0x00062061  , ULL (0x00062061));
+
+CONST_UINT64_T( OCB_OCI_OIMR1_0x0006a014                    , ULL(0x0006a014) );
+CONST_UINT64_T( OCB_OCI_OIMR0_0x0006a004                    , ULL(0x0006a004) );
 
 // SPIVID Controller
 CONST_UINT64_T( PMC_SPIV_CTRL_REG0A_0x00062040        , ULL(0x00062040) );
@@ -1020,6 +1031,8 @@ CONST_UINT64_T( X_GP0_0x04000000                      , ULL(0x04000000) );
 CONST_UINT64_T( X_GP1_0x04000001                      , ULL(0x04000001) );
 CONST_UINT64_T( X_GP2_0x04000002                      , ULL(0x04000002) );
 
+CONST_UINT64_T( X_CLK_ADJ_SET_0x040F0016              , ULL(0x040F0016) );
+
 //------------------------------------------------------------------------------
 //      X-BUS SCOM
 //            ring 1 = Trace 0
@@ -1408,6 +1421,8 @@ CONST_UINT64_T( EX_L3_FIR_MASK_REG_0x10010803         , ULL(0x10010803) );
 CONST_UINT64_T( EX_L3_FIR_ACTION0_REG_0x10010806      , ULL(0x10010806) );
 CONST_UINT64_T( EX_L3_FIR_ACTION1_REG_0x10010807      , ULL(0x10010807) );
 CONST_UINT64_T( EX_L3_MODE_REG1_0x1001080A            , ULL(0x1001080A) );
+CONST_UINT64_T( EX_L3_CERRS_RD_EPS_REG_0x10010829     , ULL(0x10010829) );
+CONST_UINT64_T( EX_L3_CERRS_WR_EPS_REG_0x1001082A     , ULL(0x1001082A) );
 CONST_UINT64_T( EX_L3_MODE_REG0_0x1001082B            , ULL(0x1001082B) );
 CONST_UINT64_T( EX_L3_PRD_PURGE_REG_0x1001080E        , ULL(0x1001080E) );
 CONST_UINT64_T( EX_L3_HA_DIRTY_ADDR_WR_PTR_0x10010832 , ULL(0x10010832) );
@@ -1427,6 +1442,7 @@ CONST_UINT64_T( EX_L2_FIR_OR_REG_0x10012802           , ULL(0x10012802) );
 CONST_UINT64_T( EX_L2_FIR_MASK_REG_0x10012803         , ULL(0x10012803) );
 CONST_UINT64_T( EX_L2_FIR_ACTION0_REG_0x10012806      , ULL(0x10012806) );
 CONST_UINT64_T( EX_L2_FIR_ACTION1_REG_0x10012807      , ULL(0x10012807) );
+CONST_UINT64_T( EX_L2_CERRS_RD_EPS_REG_0x10012814     , ULL(0x10012814) );
 CONST_UINT64_T( EX_L2_CERRS_REG0_0x10012815           , ULL(0x10012815) );
 CONST_UINT64_T( EX_L2_CERRS_REG1_0x10012816           , ULL(0x10012816) );
 CONST_UINT64_T( EX_L2_MODE_REG0_0x1001280A            , ULL(0x1001280A) );
@@ -1590,7 +1606,7 @@ CONST_UINT64_T( EX_THERM_0x10050000                   , ULL(0x10050000) );
 //------------------------------------------------------------------------------
 //      EX Security
 //------------------------------------------------------------------------------
-CONST_UINT64_T( EX_TRUSTED_BOOT_EN_0x10050000         , ULL(0x10013C03) );
+CONST_UINT64_T( EX_TRUSTED_BOOT_EN_0x10013C03         , ULL(0x10013C03) );
 
 //------------------------------------------------------------------------------
 //      EX PCB SLAVE
@@ -1801,6 +1817,21 @@ This section is automatically updated by CVS when you check in this file.
 Be sure to create CVS comments when you commit so that they can be included here.
 
 $Log: p8_scom_addresses.H,v $
+Revision 1.135  2013/03/01 03:05:38  pchatnah
+adding device_id register
+
+Revision 1.134  2013/02/20 19:04:32  cmolsen
+Added L2/L3 Epsilon registers.
+
+Revision 1.133  2013/02/05 14:33:50  koenig
+Added XBus skew adjust register - AK
+
+Revision 1.132  2013/01/23 15:46:10  pchatnah
+fixing address mistakes
+
+Revision 1.130  2013/01/17 11:39:08  pchatnah
+updating the pmc_init registers
+
 Revision 1.129  2013/01/10 01:17:27  stillgs
 Fix ID line typo
 

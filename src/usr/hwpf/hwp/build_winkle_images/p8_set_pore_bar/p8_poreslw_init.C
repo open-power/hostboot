@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_poreslw_init.C,v 1.9 2012/12/20 05:21:05 stillgs Exp $
+// $Id: p8_poreslw_init.C,v 1.11 2013/02/19 15:37:34 stillgs Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/p8_poreslw_init.C,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
@@ -65,6 +65,7 @@
 #include "p8_poreslw_init.H"
 #include "p8_pfet_init.H"
 #include "p8_pmc_deconfig_setup.H"
+#include "p8_pcb_scom_errors.H"
 
 
 extern "C" {
@@ -331,6 +332,8 @@ poreslw_ex_setup(const Target& i_target)
     uint64_t                        address;
     bool                            core_flag = false;
     bool                            error_flag = false;
+    //@thi - fixed compiler error - Greg will fix this in next version
+    //uint32_t                        fsierror = 0;
 
     uint8_t                         pm_sleep_type;
     uint8_t                         pm_sleep_entry ;
@@ -346,11 +349,11 @@ poreslw_ex_setup(const Target& i_target)
     const uint32_t                  PM_SLEEP_POWER_OFF_SEL_BIT  = 2;
     const uint32_t                  PM_WINKLE_POWER_DOWN_EN_BIT = 3;
     const uint32_t                  PM_WINKLE_POWER_UP_EN_BIT   = 4;
-    const uint32_t                  PM_WINKLE_POWER_OFF_SEL_BIT = 5;
+    const uint32_t                  PM_WINKLE_POWER_OFF_SEL_BIT = 5;    
 
-
-    const uint32_t IDLE_STATE_OVERRIDE_EN = 6;
-    const uint32_t PM_DISABLE = 0;
+    //@thi - fixed compiler error - Greg will fix this in next version
+    //const uint32_t                  IDLE_STATE_OVERRIDE_EN = 6;
+    const uint32_t                  PM_DISABLE = 0;
 
     do
     {
@@ -475,12 +478,15 @@ poreslw_ex_setup(const Target& i_target)
                     FAPI_INF("\tWARNING:  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
 
 
-                    pm_sleep_entry      = 1;   // 0=HW, 1=assisted
-                    pm_sleep_exit       = 1;   // 0=HW, 1=assisted
+                    pm_sleep_entry      = 0;   // 0=assisted, 1=HW
+                    pm_sleep_exit       = 0;   // 0=assisted, 1=HW
                     pm_sleep_type       = 1;   // 0=fast, 1=deep
 
-                    pm_winkle_entry     = 1;   // 0=HW, 1=assisted
-                    pm_winkle_exit      = 1;   // 0=HW, 1=assisted
+                    // Due to L3 Hight Availability Write Pointers that must be
+                    // saved upon a Deep Winkle Entry, this transition must be
+                    // assisted.
+                    pm_winkle_entry     = 0;   // 0=assisted, 1=HW
+                    pm_winkle_exit      = 0;   // 0=assisted, 1=HW
                     pm_winkle_type      = 1;   // 0=fast, 1=deep
 
 
@@ -508,28 +514,26 @@ poreslw_ex_setup(const Target& i_target)
                     e_rc |= clear_data.flushTo1();  // Set to 1s to be used for WAND
                     e_rc |= set_data.flushTo0();    // Set to 0s to be used for WOR
 
-                    // If   sleep entry = 1 (assisted), sleep power down enable = 0
-                    // else sleep entry = 0 (hardware), sleep power down enable = 1
+                    // If   sleep entry = 1 (hardware), sleep power down enable = 1
+                    // else sleep entry = 0 (assisted), sleep power down enable = 0
                     if (pm_sleep_entry)
-                    {
-                        e_rc |= clear_data.clearBit(PM_SLEEP_POWER_DOWN_EN_BIT);
-
-                    }
-                    else
-                    {
+                    {                        
                         e_rc |= set_data.setBit(PM_SLEEP_POWER_DOWN_EN_BIT);
                     }
+                    else
+                    {
+                        e_rc |= clear_data.clearBit(PM_SLEEP_POWER_DOWN_EN_BIT);
+                    }
 
-                    // If   sleep exit  = 1 (assisted), sleep power up enable = 0
-                    // else sleep exit  = 0 (hardware), sleep power up enable = 1
+                    // If   sleep exit  = 1 (hardware), sleep power up enable = 1
+                    // else sleep exit  = 0 (assisted), sleep power up enable = 0
                     if (pm_sleep_exit)
                     {
-                        e_rc |= clear_data.clearBit(PM_SLEEP_POWER_UP_EN_BIT);
-
+                        e_rc |= set_data.setBit(PM_SLEEP_POWER_UP_EN_BIT);
                     }
                     else
                     {
-                        e_rc |= set_data.setBit(PM_SLEEP_POWER_UP_EN_BIT);
+                        e_rc |= clear_data.clearBit(PM_SLEEP_POWER_UP_EN_BIT);
                     }
 
                     // If   sleep type  = 1 (deep), sleep power up sel = 1
@@ -544,28 +548,26 @@ poreslw_ex_setup(const Target& i_target)
                         e_rc |= clear_data.clearBit(PM_SLEEP_POWER_OFF_SEL_BIT);
                     }
 
-                    // If   winkle entry = 1 (assisted), winkle power down enable = 0
-                    // else winkle entry = 0 (hardware), winkle power down enable = 1
+                    // If   winkle entry = 1 (hardware), winkle power down enable = 1
+                    // else winkle entry = 0 (assisted), winkle power down enable = 0
                     if (pm_winkle_entry)
                     {
-                        e_rc |= clear_data.clearBit(PM_WINKLE_POWER_DOWN_EN_BIT);
-
+                        e_rc |= set_data.setBit(PM_WINKLE_POWER_DOWN_EN_BIT);                        
                     }
                     else
                     {
-                        e_rc |= set_data.setBit(PM_WINKLE_POWER_DOWN_EN_BIT);
+                        e_rc |= clear_data.clearBit(PM_WINKLE_POWER_DOWN_EN_BIT);
                     }
 
-                    // If   winkle exit  = 1 (assisted), winkle power up enable = 0
-                    // else winkle exit  = 0 (hardware), winkle power up enable = 1
+                    // If   winkle exit  = 1 (hardware), winkle power up enable = 1
+                    // else winkle exit  = 0 (assisted), winkle power up enable = 0
                     if (pm_winkle_exit)
                     {
-                        e_rc |= clear_data.clearBit(PM_WINKLE_POWER_UP_EN_BIT);
-
+                        e_rc |= set_data.setBit(PM_WINKLE_POWER_UP_EN_BIT);                        
                     }
                     else
                     {
-                        e_rc |= set_data.setBit(PM_WINKLE_POWER_UP_EN_BIT);
+                        e_rc |= clear_data.clearBit(PM_WINKLE_POWER_UP_EN_BIT);
                     }
 
                     // If   winkle type  = 1 (deep), winkle power up sel = 1
@@ -610,8 +612,6 @@ poreslw_ex_setup(const Target& i_target)
 
                     FAPI_INF("\tDisable the PCBS Heartbeat EX %x", l_ex_number);
                     address = EX_SLAVE_CONFIG_0x100F001E + (l_ex_number * 0x01000000);
-//@thi - Temporary workaround.  Greg Still agreed to fix this in his next version
-//                    l_rc = fapiGetScom(l_exChiplets[j], address, data);
                     l_rc = fapiGetScom(i_target, address, data);
                     if(!l_rc.ok())
                     {
@@ -635,13 +635,45 @@ poreslw_ex_setup(const Target& i_target)
                     }
 
                     // --------------------------------------
-                    // Check if SBE code has already cleard the OHA override.
+                    // Check if SBE code has already cleared the OHA override.
                     // As chiplets may be enabled but offline (eg in Winkle)
                     // treat SCOM errors as off-line (eg skip it).  If online 
-                    // and set, clear the override.                    
+                    // and set, clear the override. 
+                    
+                    /* GSS:  removed as Cronus always puts a message out of (PCB_OFFLINE)
+                        even though this code is meant to handle it. As this messge
+                        can cause confusion in the lab, the check is being removed.
+                    bool oha_accessible = true;                  
                     l_rc = fapiGetScom(l_exChiplets[j], EX_OHA_MODE_REG_RWx1002000D, data);
-                    if(l_rc.ok())
-                    {                   
+                    if(!l_rc.ok())
+                    {                                      
+                        l_rc = fapiGetCfamRegister( i_target, CFAM_FSI_STATUS_0x00001007, data );
+                        if(!l_rc.ok())
+                        {
+                            FAPI_ERR("Error reading CFAM FSI Status Register");
+                            break;
+                        }
+                        FAPI_INF( "CFAM_FSI_STATUS_0x00001007: 0x%X", data.getWord(0));
+                        e_rc |= data.extractToRight( &fsierror, 17, 3 );
+                        if ( e_rc ) 
+                        { 
+                            l_rc.setEcmdError(e_rc); 
+                            break;
+                        }
+                        if (fsierror == PIB_OFFLINE_ERROR) 
+                        {
+                            FAPI_INF( "Chiplet offline error detected. Skipping OHA Override clearing"); 
+                            oha_accessible = false;
+                        }
+                        else
+                        {
+                            FAPI_ERR("Scom reading OHA_MODE");
+                            break;
+                        }
+                    }
+                    // Process if OHA accessible.
+                    if (oha_accessible)
+                    {
                         if (data.isBitSet(IDLE_STATE_OVERRIDE_EN))
                         {
 
@@ -662,10 +694,13 @@ poreslw_ex_setup(const Target& i_target)
                             }
                         }
                     }
+                    End of check removal
+                    */  
                     
                     // --------------------------------------
                     // Check that PM function is enabled (eg not disabled).
                     // If not, remove the disable
+
                     address = EX_PMGP0_0x100F0100 + (l_ex_number * 0x01000000);
                     l_rc=fapiGetScom(i_target, address, data);
                     if(!l_rc.ok())
@@ -739,7 +774,6 @@ poreslw_ex_setup(const Target& i_target)
 
     return l_rc;
 }
-
 
 } //end extern
 

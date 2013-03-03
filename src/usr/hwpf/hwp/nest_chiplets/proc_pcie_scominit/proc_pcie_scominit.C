@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_pcie_scominit.C,v 1.4 2013/02/04 23:58:47 jmcgill Exp $
+// $Id: proc_pcie_scominit.C,v 1.5 2013/02/19 23:26:52 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_pcie_scominit.C,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2012
@@ -71,6 +71,8 @@ fapi::ReturnCode proc_pcie_scominit_iop_init(
     uint8_t iop_swap[PROC_PCIE_SCOMINIT_NUM_IOP];
     uint8_t phb_active_mask;
     bool    phb_active[PROC_PCIE_SCOMINIT_NUM_PHB];
+    uint8_t refclock_active_mask;
+    bool    refclock_active[PROC_PCIE_SCOMINIT_NUM_PHB];
 
     // data buffers for GP4/GP0 accesses
     ecmdDataBufferBase gp4_data(64);
@@ -164,7 +166,7 @@ fapi::ReturnCode proc_pcie_scominit_iop_init(
             break;
         }
 
-        // retrieve active PHB attribute and check value received
+        // retrieve active PHB/refclock enable attributes and check value received
         FAPI_DBG("proc_pcie_scominit_iop_init: Querying PHB active attribute");
         rc = FAPI_ATTR_GET(ATTR_PROC_PCIE_PHB_ACTIVE,
                            &i_target,
@@ -174,12 +176,24 @@ fapi::ReturnCode proc_pcie_scominit_iop_init(
             FAPI_ERR("proc_pcie_scominit_iop_init: Error from FAPI_ATTR_GET (ATTR_PROC_PCIE_PHB_ACTIVE)");
             break;
         }
+
+        FAPI_DBG("proc_pcie_scominit_iop_init: Querying refclock enable attribute");
+        rc = FAPI_ATTR_GET(ATTR_PROC_PCIE_REFCLOCK_ENABLE,
+                           &i_target,
+                           refclock_active_mask);
+        if (!rc.ok())
+        {
+            FAPI_ERR("proc_pcie_scominit_iop_init: Error from FAPI_ATTR_GET (ATTR_PROC_PCIE_REFCLOCK_ENABLE)");
+            break;
+        }
+
         for (size_t i = 0; (i < PROC_PCIE_SCOMINIT_NUM_PHB); i++)
         {
             phb_active[i] = ((phb_active_mask >> (7-i)) & 0x1)?(true):(false);
+            refclock_active[i] = ((refclock_active_mask >> (7-i)) & 0x1)?(true):(false);
         }
 
-        // set PCIe GP0 mask for PHB iovalid
+        // set PCIe GP0 mask for PHB iovalid/refclock enable
         for (size_t i = 0; (i < PROC_PCIE_SCOMINIT_NUM_PHB) && !rc_ecmd; i++)
         {
             rc_ecmd |= gp0_data.writeBit(
@@ -187,7 +201,7 @@ fapi::ReturnCode proc_pcie_scominit_iop_init(
                 phb_active[i]);
             rc_ecmd |= gp0_data.writeBit(
                 PCIE_GP0_PHB_REFCLOCK_DRIVE_EN_BIT[i],
-                phb_active[i]);
+                refclock_active[i]);
         }
         if (rc_ecmd)
         {
@@ -198,7 +212,7 @@ fapi::ReturnCode proc_pcie_scominit_iop_init(
         }
 
         // write PCIe GP0 data via OR mask register
-        FAPI_DBG("proc_pcie_scominit_iop_init: Writing PCIe GP0 to set PHB iovalids");
+        FAPI_DBG("proc_pcie_scominit_iop_init: Writing PCIe GP0 to set PHB iovalids and refclock drive enables");
         rc = fapiPutScom(i_target, PCIE_GP0_OR_0x09000005, gp0_data);
         if (!rc.ok())
         {

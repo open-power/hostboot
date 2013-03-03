@@ -1,45 +1,46 @@
-#-- $Id: p8.abus.scom.initfile,v 1.6 2013/01/22 02:57:21 thomsen Exp $
-#-- CHANGE HISTORY:
-#--------------------------------------------------------------------------------
-#-- Version:|Author: | Date:  | Comment:
-#-- --------|--------|--------|--------------------------------------------------
-#--     1.6 |thomsen |01/21/13|Removed ATTR_EI_BUS_RX_MSB_LSB_SWAP & ATTR_EI_BUS_TX_MSB_LSB_SWAP as those are old now
-#--         |        |        |Removed non-mirrored mode settings in PRBS tap id's                                   
-#--     1.5 |pmegan  |09/27/12|Set rx_sls_timeout_sel to 0b001 per defect HW220752
-#--         |        |        |Set rx_sls_extend_sel  to 0b100 on slave chip per defect  HW220806
-#--     1.4 |jmcgill |07/28/12|Simplify master/slave logic (node ID always unique)
-#--     1.3 |jmcgill |07/27/12|Edits to match scan initfle
-#--     1.2 |pmegan  |07/11/12|Added ID in file header
-#--     1.1 |pmegan  |07/09/12|Created initial version
-#-- --------|--------|--------|--------------------------------------------------
-#--------------------------------------------------------------------------------
-# End of revision history
-#--------------------------------------------------------------------------------
+#-- $Id: p8.abus.scom.initfile,v 1.7 2013/02/11 04:26:41 jmcgill Exp $ 
 
-#--Master list of variables that can be used in this file is at:
-#--<Attribute Definition Location>
+
+####################################################################
+##  
+##  Auto-genrated by fig2scominit.pl
+##      Based on SETUP_ID_MODE A_BUS_TR_HW
+##      from ../../logic/mesa_sim/fusion/run/IODUV_ABUS_WRAP.IODUV_ABUS_WRAP.figdb
+##
+##   Created on Thu Jan 24 14:48:09 EST 2013, by derrin
+####################################################################
+
+## -- CHANGE HISTORY:
+ ## --------------------------------------------------------------------------------
+ ## -- VersionID: |Author:  | Date:  | Comment:
+ ## -- -----------|---------|--------|-------------------------------------------------
+ ## -- mbs13011802| mbs     |01-18-13| Added rx_fence to run_mode dial (HW236326)
+ ## -- mbs12121100| mbs     |12-11-12| Added rx_prot_speed_slct and rx_c4_sel
+ ## -- smr12112700| SMR     |11-27-12| Added rx_dyn_recal_overall_timeout_sel init to 0b001
+ ## -- jfg12112101| jfg     |11-21-12| Added Zcal inits
+ ## -- jfg12112100| jfg     |11-21-12| Added CU pll modes
+ ## -- 12111300| berger  |11-13-12| Updated with HW eyeopt and recal settings
+ ## -- 12062500| SMR     |06-25-12| HW210654: Added rx_sls_timeout_sel default of 1
+ ## -- jfg12041600 |jfg     |- HW193450,HW197325,HW196562,HW197324 clkdist Layout updates
+ ## -- 11012500| mbs     |01-25-12| Swizzle and typo fixes for HW191494, HW191518, HW188304
+ ## -- 12011900| RJR     |01-18-12| Added RX_CTL2_REGS FILE REFERENCES    Issue HW164277
+ ## -- 12011800| berger  |01-19-12| Added SETUP_ID_MODE dials
+ ## -- 11112900| mbs     |11-29-11| Fixed RX scramble mirror taps (HW186689)
+ ## -- 11121600| mbs     |12-16-11| Initial version (copied from version 11112900 of iodsh_abus_wrap.fig)
+ ## --------------------------------------------------------------------------------
+
 
 SyntaxVersion = 1
 
-#-- -----------------------------------------------------------------------------
-#--******************************************************************************
-#-- -----------------------------------------------------------------------------
-#--
-#-- Includes
-#-- Note:  Must include the path to the .define file.
-#-- -----------------------------------------------------------------------------
-#--******************************************************************************
-#-- -----------------------------------------------------------------------------
+
+
+####################################################################
+#  Define File
+####################################################################
 include edi.io.define
-#-- -----------------------------------------------------------------------------
-#--******************************************************************************
-#-- -----------------------------------------------------------------------------
-#--
-#-- Defines
-#--
-#-- -----------------------------------------------------------------------------
-#--******************************************************************************
-#-- -----------------------------------------------------------------------------
+
+define def_IS_HW  = SYS.ATTR_IS_SIMULATION == 0;
+define def_IS_VBU = SYS.ATTR_IS_SIMULATION == 1;
 
 define def_bus_id0 = (ATTR_CHIP_UNIT_POS == 0);
 define def_bus_id1 = (ATTR_CHIP_UNIT_POS == 1);
@@ -48,162 +49,8 @@ define def_bus_id2 = (ATTR_CHIP_UNIT_POS == 2);
 define def_is_master = (TGT1.ATTR_FABRIC_NODE_ID < TGT2.ATTR_FABRIC_NODE_ID);
 define def_is_slave  = (TGT1.ATTR_FABRIC_NODE_ID > TGT2.ATTR_FABRIC_NODE_ID);
 
-# See p8.chipunit.scominfo file for details of how SCOM addresses are translated by Cronus and FW based on the target unit number
-define def_rx_base_grp = rx_grp0;   # 
-define def_tx_base_grp = tx_grp0;   # 
 
-#--******************************************************************************
-#-------------------------------------------------------------------------------------
-#    _____      __                 ________
-#   / ___/___  / /___  ______     /  _/ __ \
-#   \__ \/ _ \/ __/ / / / __ \    / // / / /
-#  ___/ /  __/ /_/ /_/ / /_/ /  _/ // /_/ /
-# /____/\___/\__/\__,_/ .___/  /___/_____/
-#                    /_/                    banner2 -fslant
-#-------------------------------------------------------------------------------------
-#--******************************************************************************
-#### X bus -> 4 CG's, 20 lanes, A bus -> 3 CG's, 23 lanes , DMI bus -> 4 CG's, 24 lanes
-#
-# Target unit number based address translation method - fAPI translates group address and lower scom address based on target unit num passed in
-#      - So the scom address group number must be 000011 for RX and 100011 for TX and lower 32-bits of scom address needs to be DMI0 address
-#--********************************************************************************************
-#-- rx_bus_id, tx_bus_id
-#--********************************************************************************************
-scom 0x800.0b(rx_id1_pg)(def_rx_base_grp)(lane_na).0x(abus_gcr_addr){
-        bits,                    scom_data,            expr;
-        rx_bus_id ,              0b000000,             (def_bus_id0);    #
-        rx_bus_id ,              0b000001,             (def_bus_id1);    #
-        rx_bus_id ,              0b000010,             (def_bus_id2);    #
-        rx_group_id,             0b000000,             any;              # GroupID is always 000000 on all RX Abus clk groups
-}
-scom 0x800.0b(tx_id1_pg)(def_tx_base_grp)(lane_na).0x(abus_gcr_addr){
-        bits,                    scom_data,            expr;
-        tx_bus_id ,              0b000000,             (def_bus_id0);    #
-        tx_bus_id ,              0b000001,             (def_bus_id1);    #
-        tx_bus_id ,              0b000010,             (def_bus_id2);    #
-        tx_group_id,             0b100000,             any;              # GroupID is always 100000 on all TX Abus channels
-}
-#--********************************************************************************************
-#-- rx_last_group_id, tx_last_group_id
-#--********************************************************************************************
-scom 0x800.0b(rx_id2_pg)(def_rx_base_grp)(lane_na).0x(abus_gcr_addr){
-        bits,                   scom_data;
-        rx_last_group_id ,      0b000000;                               # Every clk group is 000000 for RX
-}
-scom 0x800.0b(tx_id2_pg)(def_tx_base_grp)(lane_na).0x(abus_gcr_addr){
-        bits,                   scom_data;
-        tx_last_group_id ,      0b100000;                               # Every clk group is 100000 for TX	
-}
-#--*********************************************************************************************
-#-- rx_start_lane_id, rx_end_lane_id
-#--*********************************************************************************************
-# 23-bits
-scom 0x800.0b(rx_id3_pg)(def_rx_base_grp)(lane_na).0x(abus_gcr_addr){
-        bits,                   scom_data;
-        rx_start_lane_id ,      0b0000000;    # Each RX CG on Abus starts with lane 0
-        rx_end_lane_id,         0b0010110;    # Each RX CG on ABus ends with lane 22
-}
-scom 0x800.0b(tx_id3_pg)(def_tx_base_grp)(lane_na).0x(abus_gcr_addr){
-        bits,                   scom_data;
-        tx_start_lane_id ,      0b0000000;    # Each TX CG on Abus starts with lane 0
-        tx_end_lane_id,         0b0010110;    # Each TX CG on Abus ends with lane 22
-}
-#--*********************************************************************************************
-#-- rx_tx_bus_width, rx_rx_bus_width
-#--*********************************************************************************************
-# 23-bits
-scom 0x800.0b(rx_tx_bus_info_pg)(def_rx_base_grp)(lane_na).0x(abus_gcr_addr){
-        bits,                   scom_data;
-        rx_tx_bus_width,        0b0010111;    # Each TX CG on Abus is 23-bits
-        rx_rx_bus_width,        0b0010111;    # Each RX CG on Abus is 23-bits
-}
-#-----------------------------------------------------------------------------------------------
-#     ______
-#    / ____/__  ____  ________                  #### TODO: This needs to be set in the scaninit file and io_hard_reset factored into all reinit scenarios
-#   / /_  / _ \/ __ \/ ___/ _ \
-#  / __/ /  __/ / / / /__/  __/
-# /_/    \___/_/ /_/\___/\___/  banner2 -fslant
-#----------------------------------------------------------------------------------------------
-scom 0x800.0b(rx_fence_pg)(def_rx_base_grp)(lane_na).0x(abus_gcr_addr){
-        bits ,         scom_data;
-        rx_fence,       0b1;
-}
-#----------------------------------------------------------------------------------------------
-#     __                        ____  _            __    __
-#    / /   ____ _____  ___     / __ \(_)________ _/ /_  / /__  _____
-#   / /   / __ `/ __ \/ _ \   / / / / / ___/ __ `/ __ \/ / _ \/ ___/
-#  / /___/ /_/ / / / /  __/  / /_/ / (__  ) /_/ / /_/ / /  __(__  )
-# /_____/\__,_/_/ /_/\___/  /_____/_/____/\__,_/_.___/_/\___/____/   banner2 -fslant
-#----------------------------------------------------------------------------------------------
-#--*********************************************************************************************
-#-- rx_lane_disabled_vec_0_15, rx_lane_disabled_vec_16_31
-#--*********************************************************************************************
-# RX = 23-bits
-scom 0x800.0b(rx_lane_disabled_vec_0_15_pg)(def_rx_base_grp)(lane_na).0x(abus_gcr_addr){
-        bits,                        scom_data;
-        rx_lane_disabled_vec_0_15,   0b0000000000000000;    # Each RX CG on Abus has lanes 0-15 enabled (ie. disabled=0)
-}
-scom 0x800.0b(rx_lane_disabled_vec_16_31_pg)(def_rx_base_grp)(lane_na).0x(abus_gcr_addr){
-        bits,                        scom_data;
-        rx_lane_disabled_vec_16_31,  0b0000000111111111;    # Each RX CG on Abus has lanes 16-22 enabled (ie. disabled=0)
-}
-#--*********************************************************************************************
-#-- tx_lane_disabled_vec_0_15, tx_lane_disabled_vec_16_31
-#--*********************************************************************************************
-# TX = 23-bits
-scom 0x800.0b(tx_lane_disabled_vec_0_15_pg)(def_tx_base_grp)(lane_na).0x(abus_gcr_addr){
-        bits,                        scom_data;
-        tx_lane_disabled_vec_0_15,   0b0000000000000000;    # Each RX CG on Abus has lanes 0-15 enabled (ie. disabled=0)
-}
-scom 0x800.0b(tx_lane_disabled_vec_16_31_pg)(def_tx_base_grp)(lane_na).0x(abus_gcr_addr){
-        bits,                        scom_data;
-        tx_lane_disabled_vec_16_31,  0b0000000111111111;    # Each RX CG on Abus has lanes 16-22 enabled (ie. disabled=0)
-}
-#-------------------------------------------------------------------------------------
-#     __  ___              ____            __   __
-#    /  |/  /___ __  __   / __ )____ _____/ /  / /   ____ _____  ___  _____
-#   / /|_/ / __ `/ |/_/  / __  / __ `/ __  /  / /   / __ `/ __ \/ _ \/ ___/
-#  / /  / / /_/ />  <   / /_/ / /_/ / /_/ /  / /___/ /_/ / / / /  __(__  )
-# /_/  /_/\__,_/_/|_|  /_____/\__,_/\__,_/  /_____/\__,_/_/ /_/\___/____/  banner2 -fslant
-#-------------------------------------------------------------------------------------
-#--*********************************************************************************************
-#-- rx_wtr_max_bad_lanes, tx_max_bad_lanes
-#--*********************************************************************************************
-# RX = 1 spare
-scom 0x800.0b(rx_wiretest_laneinfo_pg)(def_rx_base_grp)(lane_na).0x(abus_gcr_addr){
-        bits,                        scom_data;
-        rx_wtr_max_bad_lanes,        0b00001;    # Each RX CG on Abus  has 1 spare lane
-}
-# TX = 1 spare
-scom 0x800.0b(tx_mode_pg)(def_tx_base_grp)(lane_na).0x(abus_gcr_addr){
-        bits,                        scom_data;
-        tx_max_bad_lanes,            0b00001;    # Each TX CG on Abus  has 1 spare lane
-}
-#-------------------------------------------------------------------------------------
-#     ____                 ____                   _         ______      ____      _
-#    / __ \__  ______     / __ \___  ____  ____ _(_)____   /_  __/___ _/ / /_  __(_)___  ____ _
-#   / / / / / / / __ \   / /_/ / _ \/ __ \/ __ `/ / ___/    / / / __ `/ / / / / / / __ \/ __ `/
-#  / /_/ / /_/ / / / /  / _, _/  __/ /_/ / /_/ / / /       / / / /_/ / / / /_/ / / / / / /_/ /
-# /_____/\__, /_/ /_/  /_/ |_|\___/ .___/\__,_/_/_/       /_/  \__,_/_/_/\__, /_/_/ /_/\__, /
-#       /____/                   /_/                                    /____/        /____/   banner2 -fslant
-#-------------------------------------------------------------------------------------
-#--*********************************************************************************************
-#-- rx_dyn_rpr_err_tallying1_pg: rx_dyn_rpr_bad_lane_max, rx_dyn_rpr_err_cntr1_duration, rx_dyn_rpr_enc_bad_data_lane_width
-#--*********************************************************************************************
-scom 0x800.0b(rx_dyn_rpr_err_tallying1_pg)(def_rx_base_grp)(lane_na).0x(abus_gcr_addr){
-        bits,                               scom_data;
-        rx_dyn_rpr_bad_lane_max,            0b0001111;    #
-        rx_dyn_rpr_err_cntr1_duration,      0b1001;       # tap 9
-        rx_dyn_rpr_enc_bad_data_lane_width, 0b101;        #
-}
-#--*********************************************************************************************
-#-- rx_dyn_rpr_err_tallying2_pg: rx_dyn_rpr_bad_bus_max, rx_dyn_rpr_err_cntr2_duration
-#--*********************************************************************************************
-scom 0x800.0b(rx_dyn_rpr_err_tallying2_pg)(def_rx_base_grp)(lane_na).0x(abus_gcr_addr){
-        bits,                               scom_data;
-        rx_dyn_rpr_bad_bus_max,             0b0011111;    #
-        rx_dyn_rpr_err_cntr2_duration,      0b0110;       # tap 6
-}
+
 #-------------------------------------------------------------------------------------
 #     __  ___           __               __  ___          __
 #    /  |/  /___ ______/ /____  _____   /  |/  /___  ____/ /__
@@ -214,281 +61,544 @@ scom 0x800.0b(rx_dyn_rpr_err_tallying2_pg)(def_rx_base_grp)(lane_na).0x(abus_gcr
 #--*********************************************************************************************
 #-- rx_mode_pg: rx_master_mode
 #--*********************************************************************************************
-scom 0x800.0b(rx_mode_pg)(def_rx_base_grp)(lane_na).0x(abus_gcr_addr){
+scom 0x800.0b(rx_mode_pg)(rx_grp0)(lane_na).0x(abus_gcr_addr){
         bits,                               scom_data,   expr;
         rx_master_mode,                     0b1,         (def_is_master);
         rx_master_mode,                     0b0,         (def_is_slave);
 }
-#-------------------------------------------------------------------------------------
-#     ____  ____  ____ _____    ______               _____      __          __
-#    / __ \/ __ \/ __ ) ___/   /_  __/___ _____     / ___/___  / /__  _____/ /______
-#   / /_/ / /_/ / __  \__ \     / / / __ `/ __ \    \__ \/ _ \/ / _ \/ ___/ __/ ___/
-#  / ____/ _, _/ /_/ /__/ /    / / / /_/ / /_/ /   ___/ /  __/ /  __/ /__/ /_(__  )
-# /_/   /_/ |_/_____/____/    /_/  \__,_/ .___/   /____/\___/_/\___/\___/\__/____/  banner2 -fslant
-#                                      /_/
-#-------------------------------------------------------------------------------------
-# PER-LANE (RX)
-#-------------------------------------------------------------------------------------
-#--*********************************************************************************************
-#-- rx_prbs_mode_pl: rx_prbs_tap_id
-#--*********************************************************************************************
-scom 0x800.0b(rx_prbs_mode_pl)(def_rx_base_grp)(lane_0).0x(abus_gcr_addr){
-        bits,           scom_data;
-        rx_prbs_tap_id, rx_prbs_tap_id_pattern_a;
-}
-scom 0x800.0b(rx_prbs_mode_pl)(def_rx_base_grp)(lane_1).0x(abus_gcr_addr){
-        bits,           scom_data;
-        rx_prbs_tap_id, rx_prbs_tap_id_pattern_b;
-}
-scom 0x800.0b(rx_prbs_mode_pl)(def_rx_base_grp)(lane_2).0x(abus_gcr_addr){
-        bits,           scom_data;
-        rx_prbs_tap_id, rx_prbs_tap_id_pattern_c;
-}
-scom 0x800.0b(rx_prbs_mode_pl)(def_rx_base_grp)(lane_3).0x(abus_gcr_addr){
-        bits,           scom_data;
-        rx_prbs_tap_id, rx_prbs_tap_id_pattern_d;
-}
-scom 0x800.0b(rx_prbs_mode_pl)(def_rx_base_grp)(lane_4).0x(abus_gcr_addr){
-        bits,           scom_data;
-        rx_prbs_tap_id, rx_prbs_tap_id_pattern_e;
-}
-scom 0x800.0b(rx_prbs_mode_pl)(def_rx_base_grp)(lane_5).0x(abus_gcr_addr){
-        bits,           scom_data;
-        rx_prbs_tap_id, rx_prbs_tap_id_pattern_f;
-}
-scom 0x800.0b(rx_prbs_mode_pl)(def_rx_base_grp)(lane_6).0x(abus_gcr_addr){
-        bits,           scom_data;
-        rx_prbs_tap_id, rx_prbs_tap_id_pattern_g;
-}
-scom 0x800.0b(rx_prbs_mode_pl)(def_rx_base_grp)(lane_7).0x(abus_gcr_addr){
-        bits,           scom_data;
-        rx_prbs_tap_id, rx_prbs_tap_id_pattern_h;
-}
-scom 0x800.0b(rx_prbs_mode_pl)(def_rx_base_grp)(lane_8).0x(abus_gcr_addr){
-        bits,           scom_data;
-        rx_prbs_tap_id, rx_prbs_tap_id_pattern_a;
-}
-scom 0x800.0b(rx_prbs_mode_pl)(def_rx_base_grp)(lane_9).0x(abus_gcr_addr){
-        bits,           scom_data;
-        rx_prbs_tap_id, rx_prbs_tap_id_pattern_b;
-}
-scom 0x800.0b(rx_prbs_mode_pl)(def_rx_base_grp)(lane_10).0x(abus_gcr_addr){
-        bits,           scom_data;
-        rx_prbs_tap_id, rx_prbs_tap_id_pattern_c;
-}
-scom 0x800.0b(rx_prbs_mode_pl)(def_rx_base_grp)(lane_11).0x(abus_gcr_addr){
-        bits,           scom_data;
-        rx_prbs_tap_id, rx_prbs_tap_id_pattern_d;
-}
-scom 0x800.0b(rx_prbs_mode_pl)(def_rx_base_grp)(lane_12).0x(abus_gcr_addr){
-        bits,           scom_data;
-        rx_prbs_tap_id, rx_prbs_tap_id_pattern_d;
-}
-scom 0x800.0b(rx_prbs_mode_pl)(def_rx_base_grp)(lane_13).0x(abus_gcr_addr){
-        bits,           scom_data;
-        rx_prbs_tap_id, rx_prbs_tap_id_pattern_c;
-}
-scom 0x800.0b(rx_prbs_mode_pl)(def_rx_base_grp)(lane_14).0x(abus_gcr_addr){
-        bits,           scom_data;
-        rx_prbs_tap_id, rx_prbs_tap_id_pattern_b;
-}
-scom 0x800.0b(rx_prbs_mode_pl)(def_rx_base_grp)(lane_15).0x(abus_gcr_addr){
-        bits,           scom_data;
-        rx_prbs_tap_id, rx_prbs_tap_id_pattern_a;
-}
-scom 0x800.0b(rx_prbs_mode_pl)(def_rx_base_grp)(lane_16).0x(abus_gcr_addr){
-        bits,           scom_data;
-        rx_prbs_tap_id, rx_prbs_tap_id_pattern_h;
-}
-scom 0x800.0b(rx_prbs_mode_pl)(def_rx_base_grp)(lane_17).0x(abus_gcr_addr){
-        bits,           scom_data;
-        rx_prbs_tap_id, rx_prbs_tap_id_pattern_g;
-}
-scom 0x800.0b(rx_prbs_mode_pl)(def_rx_base_grp)(lane_18).0x(abus_gcr_addr){
-        bits,           scom_data;
-        rx_prbs_tap_id, rx_prbs_tap_id_pattern_f;
-}
-scom 0x800.0b(rx_prbs_mode_pl)(def_rx_base_grp)(lane_19).0x(abus_gcr_addr){
-        bits,           scom_data;
-        rx_prbs_tap_id, rx_prbs_tap_id_pattern_e;
-}
-scom 0x800.0b(rx_prbs_mode_pl)(def_rx_base_grp)(lane_20).0x(abus_gcr_addr){
-        bits,           scom_data;
-        rx_prbs_tap_id, rx_prbs_tap_id_pattern_d;
-}
-scom 0x800.0b(rx_prbs_mode_pl)(def_rx_base_grp)(lane_21).0x(abus_gcr_addr){
-        bits,           scom_data;
-        rx_prbs_tap_id, rx_prbs_tap_id_pattern_c;
-}
-scom 0x800.0b(rx_prbs_mode_pl)(def_rx_base_grp)(lane_22).0x(abus_gcr_addr){
-        bits,           scom_data;
-        rx_prbs_tap_id, rx_prbs_tap_id_pattern_b;
-}
-scom 0x800.0b(rx_prbs_mode_pl)(def_rx_base_grp)(lane_23).0x(abus_gcr_addr){
-        bits,           scom_data;
-        rx_prbs_tap_id, rx_prbs_tap_id_pattern_a;
-}
-#-------------------------------------------------------------------------------------
-# PER-LANE (TX)
-#-------------------------------------------------------------------------------------
-#--*********************************************************************************************
-#-- tx_prbs_mode_pl: tx_prbs_tap_id
-#--*********************************************************************************************
-scom 0x800.0b(tx_prbs_mode_pl)(def_tx_base_grp)(lane_0).0x(abus_gcr_addr){
-        bits,           scom_data;
-        tx_prbs_tap_id, tx_prbs_tap_id_pattern_a;
-}
-scom 0x800.0b(tx_prbs_mode_pl)(def_tx_base_grp)(lane_1).0x(abus_gcr_addr){
-        bits,           scom_data;
-        tx_prbs_tap_id, tx_prbs_tap_id_pattern_b;
-}
-scom 0x800.0b(tx_prbs_mode_pl)(def_tx_base_grp)(lane_2).0x(abus_gcr_addr){
-        bits,           scom_data;
-        tx_prbs_tap_id, tx_prbs_tap_id_pattern_c;
-}
-scom 0x800.0b(tx_prbs_mode_pl)(def_tx_base_grp)(lane_3).0x(abus_gcr_addr){
-        bits,           scom_data;
-        tx_prbs_tap_id, tx_prbs_tap_id_pattern_d;
-}
-scom 0x800.0b(tx_prbs_mode_pl)(def_tx_base_grp)(lane_4).0x(abus_gcr_addr){
-        bits,           scom_data;
-        tx_prbs_tap_id, tx_prbs_tap_id_pattern_e;
-}
-scom 0x800.0b(tx_prbs_mode_pl)(def_tx_base_grp)(lane_5).0x(abus_gcr_addr){
-        bits,           scom_data;
-        tx_prbs_tap_id, tx_prbs_tap_id_pattern_f;
-}
-scom 0x800.0b(tx_prbs_mode_pl)(def_tx_base_grp)(lane_6).0x(abus_gcr_addr){
-        bits,           scom_data;
-        tx_prbs_tap_id, tx_prbs_tap_id_pattern_g;
-}
-scom 0x800.0b(tx_prbs_mode_pl)(def_tx_base_grp)(lane_7).0x(abus_gcr_addr){
-        bits,           scom_data;
-        tx_prbs_tap_id, tx_prbs_tap_id_pattern_h;
-}
-scom 0x800.0b(tx_prbs_mode_pl)(def_tx_base_grp)(lane_8).0x(abus_gcr_addr){
-        bits,           scom_data;
-        tx_prbs_tap_id, tx_prbs_tap_id_pattern_a;
-}
-scom 0x800.0b(tx_prbs_mode_pl)(def_tx_base_grp)(lane_9).0x(abus_gcr_addr){
-        bits,           scom_data;
-        tx_prbs_tap_id, tx_prbs_tap_id_pattern_b;
-}
-scom 0x800.0b(tx_prbs_mode_pl)(def_tx_base_grp)(lane_10).0x(abus_gcr_addr){
-        bits,           scom_data;
-        tx_prbs_tap_id, tx_prbs_tap_id_pattern_c;
-}
-scom 0x800.0b(tx_prbs_mode_pl)(def_tx_base_grp)(lane_11).0x(abus_gcr_addr){
-        bits,           scom_data;
-        tx_prbs_tap_id, tx_prbs_tap_id_pattern_d;
-}
-scom 0x800.0b(tx_prbs_mode_pl)(def_tx_base_grp)(lane_12).0x(abus_gcr_addr){
-        bits,           scom_data;
-        tx_prbs_tap_id, tx_prbs_tap_id_pattern_d;
-}
-scom 0x800.0b(tx_prbs_mode_pl)(def_tx_base_grp)(lane_13).0x(abus_gcr_addr){
-        bits,           scom_data;
-        tx_prbs_tap_id, tx_prbs_tap_id_pattern_c;
-}
-scom 0x800.0b(tx_prbs_mode_pl)(def_tx_base_grp)(lane_14).0x(abus_gcr_addr){
-        bits,           scom_data;
-        tx_prbs_tap_id, tx_prbs_tap_id_pattern_b;
-}
-scom 0x800.0b(tx_prbs_mode_pl)(def_tx_base_grp)(lane_15).0x(abus_gcr_addr){
-        bits,           scom_data;
-        tx_prbs_tap_id, tx_prbs_tap_id_pattern_a;
-}
-scom 0x800.0b(tx_prbs_mode_pl)(def_tx_base_grp)(lane_16).0x(abus_gcr_addr){
-        bits,           scom_data;
-        tx_prbs_tap_id, tx_prbs_tap_id_pattern_h;
-}
-scom 0x800.0b(tx_prbs_mode_pl)(def_tx_base_grp)(lane_17).0x(abus_gcr_addr){
-        bits,           scom_data;
-        tx_prbs_tap_id, tx_prbs_tap_id_pattern_g;
-}
-scom 0x800.0b(tx_prbs_mode_pl)(def_tx_base_grp)(lane_18).0x(abus_gcr_addr){
-        bits,           scom_data;
-        tx_prbs_tap_id, tx_prbs_tap_id_pattern_f;
-}
-scom 0x800.0b(tx_prbs_mode_pl)(def_tx_base_grp)(lane_19).0x(abus_gcr_addr){
-        bits,           scom_data;
-        tx_prbs_tap_id, tx_prbs_tap_id_pattern_e;
-}
-scom 0x800.0b(tx_prbs_mode_pl)(def_tx_base_grp)(lane_20).0x(abus_gcr_addr){
-        bits,           scom_data;
-        tx_prbs_tap_id, tx_prbs_tap_id_pattern_d;
-}
-scom 0x800.0b(tx_prbs_mode_pl)(def_tx_base_grp)(lane_21).0x(abus_gcr_addr){
-        bits,           scom_data;
-        tx_prbs_tap_id, tx_prbs_tap_id_pattern_c;
-}
-scom 0x800.0b(tx_prbs_mode_pl)(def_tx_base_grp)(lane_22).0x(abus_gcr_addr){
-        bits,           scom_data;
-        tx_prbs_tap_id, tx_prbs_tap_id_pattern_b;
-}
-scom 0x800.0b(tx_prbs_mode_pl)(def_tx_base_grp)(lane_23).0x(abus_gcr_addr){
-        bits,           scom_data;
-        tx_prbs_tap_id, tx_prbs_tap_id_pattern_a;
+
+
+#RX0.RXCTL.RX_CTL_REGS.RX_DFE_CONFIG_PP
+scom 0x800B780008010C3F {
+	bits, scom_data, expr;
+     rx_amin_cfg,  0b010,   def_IS_HW;
+     rx_amin_cfg,  0b000,  def_IS_VBU;
+     rx_anap_cfg,  0b10,   def_IS_HW;
+     rx_anap_cfg,  0b00,  def_IS_VBU;
+     rx_h1ap_cfg,  0b011,   def_IS_HW;
+     rx_h1ap_cfg,  0b000,  def_IS_VBU;
+     rx_peak_cfg,  0b10,   def_IS_HW;
+     rx_peak_cfg,  0b00,  def_IS_VBU;
 }
 
-#-------------------------------------------------------------------------------------
-#     ____  __    __
-#    / __ \/ /   / /
-#   / /_/ / /   / /
-#  / ____/ /___/ /___
-# /_/   /_____/_____/  banner2 -fslant
-#-------------------------------------------------------------------------------------
-#--*********************************************************************************************
-#-- rx_wiretest_pll_cntl_pg: rx_wt_cu_pll_reset, rx_wt_cu_pll_pgooddly
-#--*********************************************************************************************
-scom 0x800.0b(rx_wiretest_pll_cntl_pg)(def_rx_base_grp)(lane_na).0x(abus_gcr_addr){
-        bits,                  scom_data;
-        rx_wt_cu_pll_reset,    0b0;    # Put PLL in disabled state until Wiretest is started.
-        rx_wt_cu_pll_pgooddly, 0b001;  # 50ns delay
-}
-#-------------------------------------------------------------------------------------
-#     ____       _               __________      ____        __  __
-#    / __ \_____(_)   _____     / ____/ / /__   / __ \____ _/ /_/ /____  _________
-#   / / / / ___/ / | / / _ \   / /   / / //_/  / /_/ / __ `/ __/ __/ _ \/ ___/ __ \
-#  / /_/ / /  / /| |/ /  __/  / /___/ / ,<    / ____/ /_/ / /_/ /_/  __/ /  / / / /
-# /_____/_/  /_/ |___/\___/   \____/_/_/|_|  /_/    \__,_/\__/\__/\___/_/  /_/ /_/
-#-------------------------------------------------------------------------------------
-#--*********************************************************************************************
-#-- tx_clk_cntl_gcrmsg_pg: tx_drv_clk_pattern_gcrmsg
-#--*********************************************************************************************
-scom 0x800.0b(tx_clk_cntl_gcrmsg_pg)(def_tx_base_grp)(lane_na).0x(abus_gcr_addr){
-        bits,                         scom_data;
-        tx_drv_clk_pattern_gcrmsg,    0b00;    # Drive 0's to start out
-}
-#-------------------------------------------------------------------------------------
-#    ____ _  __    _______                        _____      __
-#   / __ \ |/ /   /_  __(_)___ ___  ___  _____   / ___/___  / /
-#  / /_/ /   /     / / / / __ `__ \/ _ \/ ___/   \__ \/ _ \/ /
-# / _, _/   |     / / / / / / / / /  __/ /      ___/ /  __/ /
-#/_/ |_/_/|_|    /_/ /_/_/ /_/ /_/\___/_/      /____/\___/_/
-#-------------------------------------------------------------------------------------
-#--*********************************************************************************************
-#-- rx_timeout_sel_pg: rx_sls_timeout_sel
-#--*********************************************************************************************
-scom 0x800.0b(rx_timeout_sel_pg)(def_rx_base_grp)(lane_na).0x(abus_gcr_addr){
-        bits,                   scom_data;
-        rx_sls_timeout_sel,     0b001;    # Set this entry to 0b001 per defect HW220752
-}
-#-------------------------------------------------------------------------------------
-#    ____ _  __    _____ __   _____    ______     __                 __   _____      __
-#   / __ \ |/ /   / ___// /  / ___/   / ____/  __/ /____  ____  ____/ /  / ___/___  / /
-#  / /_/ /   /    \__ \/ /   \__ \   / __/ | |/_/ __/ _ \/ __ \/ __  /   \__ \/ _ \/ /
-# / _, _/   |    ___/ / /______/ /  / /____>  </ /_/  __/ / / / /_/ /   ___/ /  __/ /
-#/_/ |_/_/|_|   /____/_____/____/  /_____/_/|_|\__/\___/_/ /_/\__,_/   /____/\___/_/
-#-------------------------------------------------------------------------------------
-#--*********************************************************************************************
-#-- rx_spare_mode_pg: rx_sls_extend_sel
-#--*********************************************************************************************
-scom 0x800.0b(rx_spare_mode_pg)(def_rx_base_grp)(lane_na).0x(abus_gcr_addr){
-        bits,                  scom_data,                  expr;
-        rx_sls_extend_sel,     0b100,                      (def_is_slave);          #Set this entry to 0b100 per defect HW220806
+#RX0.RXCTL.RX_CTL_REGS.RX_DFE_TIMERS_PP
+scom 0x800B800008010C3F {
+	bits, scom_data, expr;
+     rx_init_tmr_cfg,  0b100,   def_IS_HW;
+     rx_init_tmr_cfg,  0b000,  def_IS_VBU;
 }
 
-############################################################################################
-# END OF FILE
-############################################################################################
+#RX0.RXCTL.RX_CTL_REGS.RX_DYN_RECAL_CONFIG_PG
+scom 0x800A180008010C3F {
+	bits, scom_data;
+	rx_dyn_recal_overall_timeout_sel, 0b001;
+}
+
+#RX0.RXCTL.RX_CTL_REGS.RX_DYN_RPR_ERR_TALLYING1_PG
+scom 0x8009D80008010C3F {
+	bits, scom_data;
+	rx_dyn_rpr_bad_lane_max, 0b0001111;
+	rx_dyn_rpr_enc_bad_data_lane_width, 0b101;
+	rx_dyn_rpr_err_cntr1_duration, 0b1001;
+}
+
+#RX0.RXCTL.RX_CTL_REGS.RX_DYN_RPR_ERR_TALLYING2_PG
+scom 0x800AE00008010C3F {
+	bits, scom_data;
+	rx_dyn_rpr_bad_bus_max, 0b0011111;
+	rx_dyn_rpr_err_cntr2_duration, 0b0110;
+}
+
+#RX0.RXCTL.RX_CTL_REGS.RX_EO_STEP_CNTL_PG
+scom 0x800A380008010C3F {
+	bits, scom_data, expr;
+     rx_eo_enable_ber_test,  0b1,   def_IS_HW;
+     rx_eo_enable_ber_test,  0b0,  def_IS_VBU;
+     rx_eo_enable_ctle_cal,  0b1,   def_IS_HW;
+     rx_eo_enable_ctle_cal,  0b0,  def_IS_VBU;
+     rx_eo_enable_ddc,  0b1,   def_IS_HW;
+     rx_eo_enable_ddc,  0b0,  def_IS_VBU;
+	rx_eo_enable_dfe_h1_cal, 0b0, any;
+	rx_eo_enable_final_l2u_adj, 0b1, any;
+     rx_eo_enable_h1ap_tweak,  0b1,   def_IS_HW;
+     rx_eo_enable_h1ap_tweak,  0b0,  def_IS_VBU;
+     rx_eo_enable_latch_offset_cal,  0b1,   def_IS_HW;
+     rx_eo_enable_latch_offset_cal,  0b0,  def_IS_VBU;
+     rx_eo_enable_result_check,  0b1,   def_IS_HW;
+     rx_eo_enable_result_check,  0b0,  def_IS_VBU;
+     rx_eo_enable_vga_cal,  0b1,   def_IS_HW;
+     rx_eo_enable_vga_cal,  0b0,  def_IS_VBU;
+}
+
+#RX0.RXCTL.RX_CTL_REGS.RX_FENCE_PG
+scom 0x8009A80008010C3F {
+	bits, scom_data;
+	rx_fence, 0b1;
+}
+
+#RX0.RXCTL.RX_CTL_REGS.RX_ID1_PG
+scom 0x8008500008010C3F {
+	bits, scom_data, expr;
+	rx_bus_id, 0b000010, def_bus_id2;
+	rx_bus_id, 0b000001, def_bus_id1;
+	rx_bus_id, 0b000000, def_bus_id0;
+	rx_group_id, 0b000000, any;
+}
+
+#RX0.RXCTL.RX_CTL_REGS.RX_ID2_PG
+scom 0x8008580008010C3F {
+	bits, scom_data;
+	rx_last_group_id, 0b000000;
+}
+
+#RX0.RXCTL.RX_CTL_REGS.RX_ID3_PG
+scom 0x8008600008010C3F {
+	bits, scom_data;
+	rx_end_lane_id, 0b0010110;
+	rx_start_lane_id, 0b0000000;
+}
+
+#RX0.RXCTL.RX_CTL_REGS.RX_LANE_DISABLED_VEC_0_15_PG
+scom 0x8009280008010C3F {
+	bits, scom_data;
+	rx_lane_disabled_vec_0_15, 0b0000000000000000;
+}
+
+#RX0.RXCTL.RX_CTL_REGS.RX_LANE_DISABLED_VEC_16_31_PG
+scom 0x8009300008010C3F {
+	bits, scom_data;
+	rx_lane_disabled_vec_16_31, 0b0000000111111111;
+}
+
+#RX0.RXCTL.RX_CTL_REGS.RX_MISC_ANALOG_PG
+scom 0x8009C00008010C3F {
+	bits, scom_data, expr;
+     rx_c4_sel,  0b00,   def_IS_HW;
+     rx_c4_sel,  0b11,  def_IS_VBU;
+     rx_prot_speed_slct,  0b0,   def_IS_HW;
+     rx_prot_speed_slct,  0b1,  def_IS_VBU;
+}
+
+#RX0.RXCTL.RX_CTL_REGS.RX_RC_STEP_CNTL_PG
+scom 0x800AB80008010C3F {
+	bits, scom_data, expr;
+     rx_rc_enable_ber_test,  0b1,   def_IS_HW;
+     rx_rc_enable_ber_test,  0b0,  def_IS_VBU;
+     rx_rc_enable_ctle_cal,  0b1,   def_IS_HW;
+     rx_rc_enable_ctle_cal,  0b0,  def_IS_VBU;
+     rx_rc_enable_ddc,  0b1,   def_IS_HW;
+     rx_rc_enable_ddc,  0b0,  def_IS_VBU;
+	rx_rc_enable_dfe_h1_cal, 0b0, any;
+     rx_rc_enable_h1ap_tweak,  0b1,   def_IS_HW;
+     rx_rc_enable_h1ap_tweak,  0b0,  def_IS_VBU;
+     rx_rc_enable_latch_offset_cal,  0b1,   def_IS_HW;
+     rx_rc_enable_latch_offset_cal,  0b0,  def_IS_VBU;
+     rx_rc_enable_result_check,  0b1,   def_IS_HW;
+     rx_rc_enable_result_check,  0b0,  def_IS_VBU;
+     rx_rc_enable_vga_cal,  0b1,   def_IS_HW;
+     rx_rc_enable_vga_cal,  0b0,  def_IS_VBU;
+}
+
+#RX0.RXCTL.RX_CTL_REGS.RX_RECAL_TO2_PP
+scom 0x800B980008010C3F {
+	bits, scom_data, expr;
+     rx_recal_timeout_sel_g,  0b0111,   def_IS_HW;
+     rx_recal_timeout_sel_g,  0b0110,  def_IS_VBU;
+     rx_recal_timeout_sel_h,  0b0110,   def_IS_HW;
+     rx_recal_timeout_sel_h,  0b1000,  def_IS_VBU;
+}
+
+#RX0.RXCTL.RX_CTL_REGS.RX_RECAL_TO3_PP
+scom 0x800BA00008010C3F {
+	bits, scom_data, expr;
+     rx_recal_timeout_sel_i,  0b0111,   def_IS_HW;
+     rx_recal_timeout_sel_i,  0b1000,  def_IS_VBU;
+     rx_recal_timeout_sel_l,  0b0100,   def_IS_HW;
+     rx_recal_timeout_sel_l,  0b0110,  def_IS_VBU;
+}
+
+#RX0.RXCTL.RX_CTL_REGS.RX_SERVO_TO1_PP
+scom 0x800B600008010C3F {
+	bits, scom_data, expr;
+     rx_servo_timeout_sel_d,  0b1010,   def_IS_HW;
+     rx_servo_timeout_sel_d,  0b1000,  def_IS_VBU;
+}
+
+#RX0.RXCTL.RX_CTL_REGS.RX_SERVO_TO2_PP
+scom 0x800B680008010C3F {
+	bits, scom_data, expr;
+     rx_servo_timeout_sel_f,  0b0001,   def_IS_HW;
+     rx_servo_timeout_sel_f,  0b0110,  def_IS_VBU;
+     rx_servo_timeout_sel_g,  0b0111,   def_IS_HW;
+     rx_servo_timeout_sel_g,  0b0100,  def_IS_VBU;
+}
+
+#RX0.RXCTL.RX_CTL_REGS.RX_SERVO_TO3_PP
+scom 0x800B700008010C3F {
+	bits, scom_data, expr;
+     rx_servo_timeout_sel_i,  0b0111,   def_IS_HW;
+     rx_servo_timeout_sel_i,  0b1000,  def_IS_VBU;
+     rx_servo_timeout_sel_k,  0b0111,   def_IS_HW;
+     rx_servo_timeout_sel_k,  0b1000,  def_IS_VBU;
+}
+
+#RX0.RXCTL.RX_CTL_REGS.RX_TIMEOUT_SEL_PG
+scom 0x8008980008010C3F {
+	bits, scom_data;
+	rx_sls_timeout_sel, 0b001;
+}
+
+#RX0.RXCTL.RX_CTL_REGS.RX_TX_BUS_INFO_PG
+scom 0x8009980008010C3F {
+	bits, scom_data;
+	rx_rx_bus_width, 0b0010111;
+	rx_tx_bus_width, 0b0010111;
+}
+
+#RX0.RXCTL.RX_CTL_REGS.RX_WIRETEST_LANEINFO_PG
+scom 0x8009580008010C3F {
+	bits, scom_data;
+	rx_wtr_max_bad_lanes, 0b00001;
+}
+
+#RX0.RXCTL.RX_CTL_REGS.RX_WIRETEST_PLL_CNTL_PG
+scom 0x800A300008010C3F {
+	bits, scom_data, expr;
+     rx_wt_cu_pll_pgooddly,  0b001,   def_IS_HW;
+     rx_wt_cu_pll_pgooddly,  0b000,  def_IS_VBU;
+     rx_wt_cu_pll_reset,  0b0,   def_IS_HW;
+     rx_wt_cu_pll_reset,  0b1,  def_IS_VBU;
+}
+
+#RX0.RXPACKS#0.RXPACK.RD.SLICE#0.RD.RX_BIT_REGS.RX_PRBS_MODE_PL
+scom 0x8000B01508010C3F {
+	bits, scom_data;
+	rx_prbs_tap_id, 0b001;
+}
+
+#RX0.RXPACKS#0.RXPACK.RD.SLICE#1.RD.RX_BIT_REGS.RX_PRBS_MODE_PL
+scom 0x8000B01408010C3F {
+	bits, scom_data;
+	rx_prbs_tap_id, 0b010;
+}
+
+#RX0.RXPACKS#0.RXPACK.RD.SLICE#2.RD.RX_BIT_REGS.RX_PRBS_MODE_PL
+scom 0x8000B01608010C3F {
+	bits, scom_data;
+	rx_prbs_tap_id, 0b000;
+}
+
+#RX0.RXPACKS#0.RXPACK.RD.SLICE#3.RD.RX_BIT_REGS.RX_PRBS_MODE_PL
+scom 0x8000B00A08010C3F {
+	bits, scom_data;
+	rx_prbs_tap_id, 0b010;
+}
+
+#RX0.RXPACKS#0.RXPACK.RD.SLICE#4.RD.RX_BIT_REGS.RX_PRBS_MODE_PL
+scom 0x8000B00B08010C3F {
+	bits, scom_data;
+	rx_prbs_tap_id, 0b011;
+}
+
+#RX0.RXPACKS#0.RXPACK.RD.SLICE#5.RD.RX_BIT_REGS.RX_PRBS_MODE_PL
+scom 0x8000B00908010C3F {
+	bits, scom_data;
+	rx_prbs_tap_id, 0b001;
+}
+
+#RX0.RXPACKS#1.RXPACK.RD.SLICE#0.RD.RX_BIT_REGS.RX_PRBS_MODE_PL
+scom 0x8000B01208010C3F {
+	bits, scom_data;
+	rx_prbs_tap_id, 0b100;
+}
+
+#RX0.RXPACKS#1.RXPACK.RD.SLICE#1.RD.RX_BIT_REGS.RX_PRBS_MODE_PL
+scom 0x8000B01708010C3F {
+	bits, scom_data;
+	rx_prbs_tap_id, 0b000;
+}
+
+#RX0.RXPACKS#1.RXPACK.RD.SLICE#2.RD.RX_BIT_REGS.RX_PRBS_MODE_PL
+scom 0x8000B00708010C3F {
+	bits, scom_data;
+	rx_prbs_tap_id, 0b111;
+}
+
+#RX0.RXPACKS#1.RXPACK.RD.SLICE#3.RD.RX_BIT_REGS.RX_PRBS_MODE_PL
+scom 0x8000B01308010C3F {
+	bits, scom_data;
+	rx_prbs_tap_id, 0b011;
+}
+
+#RX0.RXPACKS#1.RXPACK.RD.SLICE#4.RD.RX_BIT_REGS.RX_PRBS_MODE_PL
+scom 0x8000B00608010C3F {
+	bits, scom_data;
+	rx_prbs_tap_id, 0b110;
+}
+
+#RX0.RXPACKS#1.RXPACK.RD.SLICE#5.RD.RX_BIT_REGS.RX_PRBS_MODE_PL
+scom 0x8000B00808010C3F {
+	bits, scom_data;
+	rx_prbs_tap_id, 0b000;
+}
+
+#RX0.RXPACKS#2.RXPACK.RD.SLICE#0.RD.RX_BIT_REGS.RX_PRBS_MODE_PL
+scom 0x8000B00508010C3F {
+	bits, scom_data;
+	rx_prbs_tap_id, 0b101;
+}
+
+#RX0.RXPACKS#2.RXPACK.RD.SLICE#1.RD.RX_BIT_REGS.RX_PRBS_MODE_PL
+scom 0x8000B00308010C3F {
+	bits, scom_data;
+	rx_prbs_tap_id, 0b011;
+}
+
+#RX0.RXPACKS#2.RXPACK.RD.SLICE#2.RD.RX_BIT_REGS.RX_PRBS_MODE_PL
+scom 0x8000B01108010C3F {
+	bits, scom_data;
+	rx_prbs_tap_id, 0b101;
+}
+
+#RX0.RXPACKS#2.RXPACK.RD.SLICE#3.RD.RX_BIT_REGS.RX_PRBS_MODE_PL
+scom 0x8000B00408010C3F {
+	bits, scom_data;
+	rx_prbs_tap_id, 0b100;
+}
+
+#RX0.RXPACKS#2.RXPACK.RD.SLICE#4.RD.RX_BIT_REGS.RX_PRBS_MODE_PL
+scom 0x8000B01008010C3F {
+	bits, scom_data;
+	rx_prbs_tap_id, 0b110;
+}
+
+#RX0.RXPACKS#2.RXPACK.RD.SLICE#5.RD.RX_BIT_REGS.RX_PRBS_MODE_PL
+scom 0x8000B00F08010C3F {
+	bits, scom_data;
+	rx_prbs_tap_id, 0b111;
+}
+
+#RX0.RXPACKS#3.RXPACK.RD.SLICE#0.RD.RX_BIT_REGS.RX_PRBS_MODE_PL
+scom 0x8000B00008010C3F {
+	bits, scom_data;
+	rx_prbs_tap_id, 0b000;
+}
+
+#RX0.RXPACKS#3.RXPACK.RD.SLICE#1.RD.RX_BIT_REGS.RX_PRBS_MODE_PL
+scom 0x8000B00208010C3F {
+	bits, scom_data;
+	rx_prbs_tap_id, 0b010;
+}
+
+#RX0.RXPACKS#3.RXPACK.RD.SLICE#2.RD.RX_BIT_REGS.RX_PRBS_MODE_PL
+scom 0x8000B00108010C3F {
+	bits, scom_data;
+	rx_prbs_tap_id, 0b001;
+}
+
+#RX0.RXPACKS#3.RXPACK.RD.SLICE#3.RD.RX_BIT_REGS.RX_PRBS_MODE_PL
+scom 0x8000B00E08010C3F {
+	bits, scom_data;
+	rx_prbs_tap_id, 0b000;
+}
+
+#RX0.RXPACKS#3.RXPACK.RD.SLICE#4.RD.RX_BIT_REGS.RX_PRBS_MODE_PL
+scom 0x8000B00C08010C3F {
+	bits, scom_data;
+	rx_prbs_tap_id, 0b010;
+}
+
+#RX0.RXPACKS#3.RXPACK.RD.SLICE#5.RD.RX_BIT_REGS.RX_PRBS_MODE_PL
+scom 0x8000B00D08010C3F {
+	bits, scom_data;
+	rx_prbs_tap_id, 0b001;
+}
+
+#TX_WRAP.TX0.TXCTL.TX_CTL_REGS.TX_CLK_CNTL_GCRMSG_PG
+scom 0x800CC40008010C3F {
+	bits, scom_data;
+	tx_drv_clk_pattern_gcrmsg, 0b00;
+}
+
+#TX_WRAP.TX0.TXCTL.TX_CTL_REGS.TX_ID1_PG
+scom 0x800C940008010C3F {
+	bits, scom_data, expr;
+	tx_bus_id, 0b000010, def_bus_id2;
+	tx_bus_id, 0b000001, def_bus_id1;
+	tx_bus_id, 0b000000, def_bus_id0;
+	tx_group_id, 0b100000, any;
+}
+
+#TX_WRAP.TX0.TXCTL.TX_CTL_REGS.TX_ID2_PG
+scom 0x800C9C0008010C3F {
+	bits, scom_data;
+	tx_last_group_id, 0b100000;
+}
+
+#TX_WRAP.TX0.TXCTL.TX_CTL_REGS.TX_ID3_PG
+scom 0x800CA40008010C3F {
+	bits, scom_data;
+	tx_end_lane_id, 0b0010110;
+	tx_start_lane_id, 0b0000000;
+}
+
+#TX_WRAP.TX0.TXCTL.TX_CTL_REGS.TX_LANE_DISABLED_VEC_0_15_PG
+scom 0x800D1C0008010C3F {
+	bits, scom_data;
+	tx_lane_disabled_vec_0_15, 0b0000000000000000;
+}
+
+#TX_WRAP.TX0.TXCTL.TX_CTL_REGS.TX_LANE_DISABLED_VEC_16_31_PG
+scom 0x800D240008010C3F {
+	bits, scom_data;
+	tx_lane_disabled_vec_16_31, 0b0000000111111111;
+}
+
+#TX_WRAP.TX0.TXCTL.TX_CTL_REGS.TX_MODE_PG
+scom 0x800C1C0008010C3F {
+	bits, scom_data;
+	tx_max_bad_lanes, 0b00001;
+}
+
+#TX_WRAP.TX0.TXPACKS#0.TXPACK_DEFAULT.TXPACK.DD.SLICE#0.TD.TX_BIT_REGS.TX_PRBS_MODE_PL
+scom 0x8004341108010C3F {
+	bits, scom_data;
+	tx_prbs_tap_id, 0b101;
+}
+
+#TX_WRAP.TX0.TXPACKS#0.TXPACK_DEFAULT.TXPACK.DD.SLICE#1.TD.TX_BIT_REGS.TX_PRBS_MODE_PL
+scom 0x8004341208010C3F {
+	bits, scom_data;
+	tx_prbs_tap_id, 0b100;
+}
+
+#TX_WRAP.TX0.TXPACKS#0.TXPACK_DEFAULT.TXPACK.DD.SLICE#2.TD.TX_BIT_REGS.TX_PRBS_MODE_PL
+scom 0x8004341608010C3F {
+	bits, scom_data;
+	tx_prbs_tap_id, 0b000;
+}
+
+#TX_WRAP.TX0.TXPACKS#0.TXPACK_DEFAULT.TXPACK.DD.SLICE#3.TD.TX_BIT_REGS.TX_PRBS_MODE_PL
+scom 0x8004340008010C3F {
+	bits, scom_data;
+	tx_prbs_tap_id, 0b000;
+}
+
+#TX_WRAP.TX0.TXPACKS#1.TXPACK_DEFAULT.TXPACK.DD.SLICE#0.TD.TX_BIT_REGS.TX_PRBS_MODE_PL
+scom 0x8004341008010C3F {
+	bits, scom_data;
+	tx_prbs_tap_id, 0b110;
+}
+
+#TX_WRAP.TX0.TXPACKS#1.TXPACK_DEFAULT.TXPACK.DD.SLICE#1.TD.TX_BIT_REGS.TX_PRBS_MODE_PL
+scom 0x8004340108010C3F {
+	bits, scom_data;
+	tx_prbs_tap_id, 0b001;
+}
+
+#TX_WRAP.TX0.TXPACKS#1.TXPACK_DEFAULT.TXPACK.DD.SLICE#2.TD.TX_BIT_REGS.TX_PRBS_MODE_PL
+scom 0x8004341408010C3F {
+	bits, scom_data;
+	tx_prbs_tap_id, 0b010;
+}
+
+#TX_WRAP.TX0.TXPACKS#1.TXPACK_DEFAULT.TXPACK.DD.SLICE#3.TD.TX_BIT_REGS.TX_PRBS_MODE_PL
+scom 0x8004341508010C3F {
+	bits, scom_data;
+	tx_prbs_tap_id, 0b001;
+}
+
+#TX_WRAP.TX0.TXPACKS#2.TXPACK_DEFAULT.TXPACK.DD.SLICE#0.TD.TX_BIT_REGS.TX_PRBS_MODE_PL
+scom 0x8004340E08010C3F {
+	bits, scom_data;
+	tx_prbs_tap_id, 0b000;
+}
+
+#TX_WRAP.TX0.TXPACKS#2.TXPACK_DEFAULT.TXPACK.DD.SLICE#1.TD.TX_BIT_REGS.TX_PRBS_MODE_PL
+scom 0x8004340908010C3F {
+	bits, scom_data;
+	tx_prbs_tap_id, 0b001;
+}
+
+#TX_WRAP.TX0.TXPACKS#2.TXPACK_DEFAULT.TXPACK.DD.SLICE#2.TD.TX_BIT_REGS.TX_PRBS_MODE_PL
+scom 0x8004340208010C3F {
+	bits, scom_data;
+	tx_prbs_tap_id, 0b010;
+}
+
+#TX_WRAP.TX0.TXPACKS#2.TXPACK_DEFAULT.TXPACK.DD.SLICE#3.TD.TX_BIT_REGS.TX_PRBS_MODE_PL
+scom 0x8004341308010C3F {
+	bits, scom_data;
+	tx_prbs_tap_id, 0b011;
+}
+
+#TX_WRAP.TX0.TXPACKS#3.TXPACK_DEFAULT.TXPACK.DD.SLICE#0.TD.TX_BIT_REGS.TX_PRBS_MODE_PL
+scom 0x8004340308010C3F {
+	bits, scom_data;
+	tx_prbs_tap_id, 0b011;
+}
+
+#TX_WRAP.TX0.TXPACKS#3.TXPACK_DEFAULT.TXPACK.DD.SLICE#1.TD.TX_BIT_REGS.TX_PRBS_MODE_PL
+scom 0x8004340508010C3F {
+	bits, scom_data;
+	tx_prbs_tap_id, 0b101;
+}
+
+#TX_WRAP.TX0.TXPACKS#3.TXPACK_DEFAULT.TXPACK.DD.SLICE#2.TD.TX_BIT_REGS.TX_PRBS_MODE_PL
+scom 0x8004340408010C3F {
+	bits, scom_data;
+	tx_prbs_tap_id, 0b100;
+}
+
+#TX_WRAP.TX0.TXPACKS#3.TXPACK_DEFAULT.TXPACK.DD.SLICE#3.TD.TX_BIT_REGS.TX_PRBS_MODE_PL
+scom 0x8004340D08010C3F {
+	bits, scom_data;
+	tx_prbs_tap_id, 0b001;
+}
+
+#TX_WRAP.TX0.TXPACKS#4.TXPACK_DEFAULT.TXPACK.DD.SLICE#0.TD.TX_BIT_REGS.TX_PRBS_MODE_PL
+scom 0x8004340808010C3F {
+	bits, scom_data;
+	tx_prbs_tap_id, 0b000;
+}
+
+#TX_WRAP.TX0.TXPACKS#4.TXPACK_DEFAULT.TXPACK.DD.SLICE#1.TD.TX_BIT_REGS.TX_PRBS_MODE_PL
+scom 0x8004340608010C3F {
+	bits, scom_data;
+	tx_prbs_tap_id, 0b110;
+}
+
+#TX_WRAP.TX0.TXPACKS#4.TXPACK_DEFAULT.TXPACK.DD.SLICE#2.TD.TX_BIT_REGS.TX_PRBS_MODE_PL
+scom 0x8004340708010C3F {
+	bits, scom_data;
+	tx_prbs_tap_id, 0b111;
+}
+
+#TX_WRAP.TX0.TXPACKS#4.TXPACK_DEFAULT.TXPACK.DD.SLICE#3.TD.TX_BIT_REGS.TX_PRBS_MODE_PL
+scom 0x8004340C08010C3F {
+	bits, scom_data;
+	tx_prbs_tap_id, 0b010;
+}
+
+#TX_WRAP.TX0.TXPACKS#5.TXPACK_5.TXPACK.DD.SLICE#0.TD.TX_BIT_REGS.TX_PRBS_MODE_PL
+scom 0x8004340B08010C3F {
+	bits, scom_data;
+	tx_prbs_tap_id, 0b011;
+}
+
+#TX_WRAP.TX0.TXPACKS#5.TXPACK_5.TXPACK.DD.SLICE#1.TD.TX_BIT_REGS.TX_PRBS_MODE_PL
+scom 0x8004340A08010C3F {
+	bits, scom_data;
+	tx_prbs_tap_id, 0b010;
+}
+
+#TX_WRAP.TX0.TXPACKS#5.TXPACK_5.TXPACK.DD.SLICE#2.TD.TX_BIT_REGS.TX_PRBS_MODE_PL
+scom 0x8004340F08010C3F {
+	bits, scom_data;
+	tx_prbs_tap_id, 0b111;
+}
+
+
+######################################
+##      END OF FILE
+#######################################

@@ -1,0 +1,144 @@
+#-- $Id: p8.xbus.custom.scom.initfile,v 1.1 2013/02/04 19:52:00 thomsen Exp $
+#-- CHANGE HISTORY:
+#--------------------------------------------------------------------------------
+#-- Version:|Author: | Date:  | Comment:
+#-- --------|--------|--------|--------------------------------------------------
+#--     1.1 |thomsen |01/29/13|Created initial version
+#-- --------|--------|--------|--------------------------------------------------
+#--------------------------------------------------------------------------------
+# End of revision history
+#--------------------------------------------------------------------------------
+
+#--Master list of variables that can be used in this file is at:
+#--<Attribute Definition Location>
+
+SyntaxVersion = 1
+
+#-- -----------------------------------------------------------------------------
+#--******************************************************************************
+#-- -----------------------------------------------------------------------------
+#--
+#-- Includes
+#-- Note:  Must include the path to the .define file.
+#-- -----------------------------------------------------------------------------
+#--******************************************************************************
+#-- -----------------------------------------------------------------------------
+include ei4.io.define
+
+#-- -----------------------------------------------------------------------------
+#--******************************************************************************
+#-- -----------------------------------------------------------------------------
+#--
+#-- Defines
+#--
+#-- -----------------------------------------------------------------------------
+#--******************************************************************************
+#-- -----------------------------------------------------------------------------
+
+## ./iotk put rx_fence=1
+## 0x
+#scom 0x800.0b(rx_fence_pg)(rx_grp0,rx_grp1,rx_grp2,rx_grp3)(lane_na).0x(xbus0_gcr_addr,xbus1_gcr_addr,xbus2_gcr_addr,xbus3_gcr_addr) {
+#bits,                     scom_data;
+#rx_fence,                 0b1;
+#}
+#
+## ./iotk put rx_c4_sel=00
+## ./iotk put rx_prot_speed_slct=1
+## 0x8009C00002011E3F 
+#scom 0x800.0b(rx_misc_analog_pg)(rx_grp0,rx_grp1,rx_grp2,rx_grp3)(lane_na).0x(xbus0_gcr_addr,xbus1_gcr_addr,xbus2_gcr_addr,xbus3_gcr_addr) {
+#bits,                     scom_data;
+#rx_c4_sel,                0b00;
+#rx_prot_speed_slct,       0b1;
+#}
+## ./iotk put rx_servo_timeout_sel_D=1001
+## 0x800B600002011E3F 
+#scom 0x800.0b(rx_servo_to1_pp)(rx_grp0,rx_grp1,rx_grp2,rx_grp3)(lane_na).0x(xbus0_gcr_addr,xbus1_gcr_addr,xbus2_gcr_addr,xbus3_gcr_addr) {
+#bits,                     scom_data;
+#rx_servo_timeout_sel_d,   0b1001;
+#}
+## ./iotk put rx_servo_timeout_sel_H=1110
+## 0x800B680002011E3F 
+#scom 0x800.0b(rx_servo_to2_pp)(rx_grp0,rx_grp1,rx_grp2,rx_grp3)(lane_na).0x(xbus0_gcr_addr,xbus1_gcr_addr,xbus2_gcr_addr,xbus3_gcr_addr) {
+#bits,                     scom_data;
+#rx_servo_timeout_sel_h,   0b1110;
+#}
+## ./iotk put rx_servo_timeout_sel_I=1011
+## ./iotk put rx_servo_timeout_sel_J=1100
+## 0x800B700002011E3F 
+#scom 0x800.0b(rx_servo_to3_pp)(rx_grp0,rx_grp1,rx_grp2,rx_grp3)(lane_na).0x(xbus0_gcr_addr,xbus1_gcr_addr,xbus2_gcr_addr,xbus3_gcr_addr) {
+#bits,                     scom_data;
+#rx_servo_timeout_sel_i,   0b1011;
+#rx_servo_timeout_sel_j,   0b1100;
+#rx_servo_timeout_sel_k,   0b1101;
+#}
+## ./iotk put rx_wt_timeout_sel=111
+## ./iotk put rx_ds_bl_timeout_sel=101
+## ./iotk put rx_ds_timeout_sel=110
+##./iotk put rx_sls_timeout_sel=111
+## 0x8008980002011E3F 
+#scom 0x800.0b(rx_timeout_sel_pg)(rx_grp0,rx_grp1,rx_grp2,rx_grp3)(lane_na).0x(xbus0_gcr_addr,xbus1_gcr_addr,xbus2_gcr_addr,xbus3_gcr_addr) {
+#bits,                     scom_data;
+#rx_wt_timeout_sel,        0b111;
+#rx_ds_bl_timeout_sel,     0b101;
+#rx_ds_timeout_sel,        0b110;
+#rx_sls_timeout_sel,       0b001;
+#}
+#
+## ./iotk put rx_bit_lock_timeout_sel=110
+## 0x800B080002011E3F 
+#scom 0x800.0b(rx_mode1_pp)(rx_grp0,rx_grp1,rx_grp2,rx_grp3)(lane_na).0x(xbus0_gcr_addr,xbus1_gcr_addr,xbus2_gcr_addr,xbus3_gcr_addr) {
+#bits,                     scom_data;
+#rx_bit_lock_timeout_sel,  0b110;
+#}
+## ./iotk put rx_eo_offset_timeout_sel=111
+## ./iotk put rx_eo_amp_timeout_sel=111
+## ./iotk put rx_eo_ctle_timeout_sel=111
+## ./iotk put rx_eo_h1ap_timeout_sel=111
+## ./iotk put rx_eo_ddc_timeout_sel=111
+## 0x8009100002011E3F 
+#scom 0x800.0b(rx_timeout_sel1_pg)(rx_grp0,rx_grp1,rx_grp2,rx_grp3)(lane_na).0x(xbus0_gcr_addr,xbus1_gcr_addr,xbus2_gcr_addr,xbus3_gcr_addr) {
+#bits,                     scom_data;
+#rx_eo_offset_timeout_sel, 0b111;
+#rx_eo_amp_timeout_sel,    0b111;
+#rx_eo_ctle_timeout_sel,   0b111;
+#rx_eo_h1ap_timeout_sel,   0b111;
+#rx_eo_ddc_timeout_sel,    0b111;
+#}
+#
+#
+## 800A380002011E3F
+#scom 0x800.0b(rx_eo_step_cntl_pg)(rx_grp0,rx_grp1,rx_grp2,rx_grp3)(lane_na).0x(xbus0_gcr_addr,xbus1_gcr_addr,xbus2_gcr_addr,xbus3_gcr_addr) {
+#bits,                               scom_data;
+#rx_eo_enable_latch_offset_cal,      0b1;
+#rx_eo_enable_ctle_cal,              0b1;
+#rx_eo_enable_vga_cal,               0b1;
+#rx_eo_enable_dfe_h1_cal,            0b1;
+#rx_eo_enable_h1ap_tweak,            0b1;
+#rx_eo_enable_ddc,                   0b1;
+#rx_eo_enable_final_l2u_adj,         0b1;
+#rx_eo_enable_ber_test,              0b1;
+#rx_eo_enable_result_check,          0b1;
+#}
+#
+#scom 0x800.0b(rx_eo_convergence_pg)(rx_grp0,rx_grp1,rx_grp2,rx_grp3)(lane_na).0x(xbus0_gcr_addr,xbus1_gcr_addr,xbus2_gcr_addr,xbus3_gcr_addr) {
+#bits,                               scom_data;
+#rx_eo_converged_end_count,          0b111;
+#}
+#
+## 0x800AB80002011E3F
+#scom 0x800.0b(rx_rc_step_cntl_pg)(rx_grp0,rx_grp1,rx_grp2,rx_grp3)(lane_na).0x(xbus0_gcr_addr,xbus1_gcr_addr,xbus2_gcr_addr,xbus3_gcr_addr) {
+#bits,                               scom_data;
+#rx_rc_enable_latch_offset_cal,      0b1;
+#rx_rc_enable_ctle_cal,              0b1;
+#rx_rc_enable_vga_cal,               0b1;
+#rx_rc_enable_h1ap_tweak,            0b1;
+#rx_rc_enable_ddc,                   0b1;
+#rx_rc_enable_ber_test,              0b1;
+#rx_rc_enable_result_check,          0b1;
+##rx_rc_enable_dfe_h1_cal,           0b0; # Leave DFE off during recal for now
+#}
+
+
+############################################################################################
+# END OF FILE
+############################################################################################

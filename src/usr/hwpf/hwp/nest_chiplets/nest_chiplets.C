@@ -517,9 +517,6 @@ void* call_proc_xbus_scominit( void    *io_pArgs )
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
         "call_proc_xbus_scominit entry" );
 
-    TARGETING::TargetHandleList l_cpuTargetList;
-    getAllChips(l_cpuTargetList, TYPE_PROC);
-
     do
     {
         EDI_EI_INITIALIZATION::TargetPairs_t l_XbusConnections;
@@ -550,106 +547,66 @@ void* call_proc_xbus_scominit( void    *io_pArgs )
             break;
         }
 
-        // Loop thru the proc
-        for (TargetHandleList::const_iterator
-                l_cpuIter = l_cpuTargetList.begin();
-                l_cpuIter != l_cpuTargetList.end();
-                ++l_cpuIter)
+        for (EDI_EI_INITIALIZATION::TargetPairs_t::const_iterator
+                        l_itr = l_XbusConnections.begin();
+             l_itr != l_XbusConnections.end(); ++l_itr)
         {
-            const TARGETING::Target* l_cpuTarget = *l_cpuIter;
+            const TARGETING::Target* l_thisXbusTarget = l_itr->first;
+            const TARGETING::Target* l_connectedXbusTarget = l_itr->second;
 
-            // Get the XBUS under this proc
-            TARGETING::TargetHandleList l_xbusList;
-            getChildChiplets( l_xbusList, l_cpuTarget, TYPE_XBUS );
+            // Call HW procedure
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                "Running proc_xbus_scominit HWP on "
+                "This XBUS target %.8X - Connected XBUS target  %.8X",
+                TARGETING::get_huid(l_thisXbusTarget),
+                TARGETING::get_huid(l_connectedXbusTarget));
 
-            // For each XBUS unit in this proc
-            for (TargetHandleList::const_iterator
-                    l_xbus_iter = l_xbusList.begin();
-                    l_xbus_iter != l_xbusList.end();
-                    ++l_xbus_iter)
-            {
-                //  make a local copy of the target for ease of use
-                TARGETING::Target* l_xbusTarget = *l_xbus_iter;
-                EDI_EI_INITIALIZATION::TargetPairs_t::iterator l_itr =
-                                l_XbusConnections.find(l_xbusTarget);
-                if ( l_itr == l_XbusConnections.end() )
-                {
-                    continue;
-                }
-
-                const TARGETING::Target *l_pParent =
-                      getParentChip(
-                         (const_cast<TARGETING::Target*>(l_itr->second)));
-
-                // Targets to pass in HW procedure
-                std::vector<fapi::Target> targets;
-
-                const fapi::Target l_fapi_xbus_target(
+             const fapi::Target l_thisXbusFapiTarget(
                        TARGET_TYPE_XBUS_ENDPOINT,
-                       (const_cast<TARGETING::Target*>(l_xbusTarget)));
-                targets.push_back(l_fapi_xbus_target);
+                       (const_cast<TARGETING::Target*>(l_thisXbusTarget)));
 
-                const fapi::Target l_fapi_this_cpu_target(
-                       TARGET_TYPE_PROC_CHIP,
-                       (const_cast<TARGETING::Target*>(
-                               l_cpuTarget)));
-                targets.push_back(l_fapi_this_cpu_target);
+             const fapi::Target l_connectedXbusFapiTarget(
+                       TARGET_TYPE_XBUS_ENDPOINT,
+                       (const_cast<TARGETING::Target*>(l_connectedXbusTarget)));
 
-                const fapi::Target l_fapi_other_cpu_target(
-                       TARGET_TYPE_PROC_CHIP,
-                       (const_cast<TARGETING::Target*>(
-                               l_pParent)));
-                targets.push_back(l_fapi_other_cpu_target);
+            FAPI_INVOKE_HWP(l_err, proc_xbus_scominit,
+                            l_thisXbusFapiTarget, l_connectedXbusFapiTarget);
+            if (l_err)
+            {
+                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                    "ERROR 0x%.8X : proc_xbus_scominit HWP returns error. "
+                    "This XBUS target %.8X - Connected XBUS target  %.8X",
+                    l_err->reasonCode(),
+                    TARGETING::get_huid(l_thisXbusTarget),
+                    TARGETING::get_huid(l_connectedXbusTarget));
 
-                // Call HW procedure
-                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                    "Running proc_xbus_scominit HWP on "
-                    "xbus HUID %.8X this cpu HUID %.8X other cpu HUID %.8X",
-                    TARGETING::get_huid(l_xbusTarget),
-                    TARGETING::get_huid(l_cpuTarget),
-                    TARGETING::get_huid(l_pParent));
+                // capture the target data in the elog
+                ErrlUserDetailsTarget(l_thisXbusTarget).addToLog( l_err );
+                ErrlUserDetailsTarget(l_connectedXbusTarget).addToLog( l_err );
 
-                FAPI_INVOKE_HWP(l_err, proc_xbus_scominit,
-                                l_fapi_xbus_target,
-                                l_fapi_this_cpu_target,
-                                l_fapi_other_cpu_target);
-                if (l_err)
-                {
-                    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                        "ERROR 0x%.8X : proc_xbus_scominit HWP returns error. "
-                        "xbus HUID %.8X this cpu HUID %.8X other cpu HUID %.8X",
-                        l_err->reasonCode(),
-                        TARGETING::get_huid(l_xbusTarget),
-                        TARGETING::get_huid(l_cpuTarget),
-                        TARGETING::get_huid(l_pParent));
+                /*@
+                 * @errortype
+                 * @reasoncode       ISTEP_PROC_XBUS_SCOMINIT_FAILED
+                 * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE
+                 * @moduleid         ISTEP_PROC_XBUS_SCOMINIT
+                 * @userdata1        bytes 0-1: plid identifying first error
+                 *                   bytes 2-3: reason code of first error
+                 * @userdata2        bytes 0-1: total number of elogs included
+                 *                   bytes 2-3: N/A
+                 * @devdesc          call to proc_xbus_scominit has failed
+                 */
+                l_StepError.addErrorDetails(ISTEP_PROC_XBUS_SCOMINIT_FAILED,
+                                            ISTEP_PROC_XBUS_SCOMINIT,
+                                            l_err );
+                // We want to continue to the next target instead of exiting,
+                // Commit the error log and move on
+                // Note: Error log should already be deleted and set to NULL
+                // after committing
+                errlCommit(l_err, HWPF_COMP_ID);
+            }
 
-                    // capture the target data in the elog
-                    ErrlUserDetailsTarget(l_pParent).addToLog( l_err );
-                    ErrlUserDetailsTarget(l_cpuTarget).addToLog( l_err );
-                    ErrlUserDetailsTarget(l_xbusTarget).addToLog( l_err );
+        }
 
-                    /*@
-                     * @errortype
-                     * @reasoncode       ISTEP_PROC_XBUS_SCOMINIT_FAILED
-                     * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE
-                     * @moduleid         ISTEP_PROC_XBUS_SCOMINIT
-                     * @userdata1        bytes 0-1: plid identifying first error
-                     *                   bytes 2-3: reason code of first error
-                     * @userdata2        bytes 0-1: total number of elogs included
-                     *                   bytes 2-3: N/A
-                     * @devdesc          call to proc_xbus_scominit has failed
-                     */
-                    l_StepError.addErrorDetails(ISTEP_PROC_XBUS_SCOMINIT_FAILED,
-                                                ISTEP_PROC_XBUS_SCOMINIT,
-                                                l_err );
-                    // We want to continue to the next target instead of exiting,
-                    // Commit the error log and move on
-                    // Note: Error log should already be deleted and set to NULL
-                    // after committing
-                    errlCommit(l_err, HWPF_COMP_ID);
-                }
-            }  // End xbus loop
-        } // End cpu loop
     } while (0);
 
     return l_StepError.getErrorHandle();

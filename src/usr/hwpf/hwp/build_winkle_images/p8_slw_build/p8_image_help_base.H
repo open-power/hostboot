@@ -20,17 +20,23 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_image_help_base.H,v 1.12 2013/02/12 21:02:38 cmolsen Exp $
+// $Id: p8_image_help_base.H,v 1.15 2013/03/01 21:55:24 cmolsen Exp $
 //------------------------------------------------------------------------------
 //  Title:  p8_image_help_base.H
 //  Description:  Contains the most basic structures and defines needed for 
 //                image building and interpretation.
 //------------------------------------------------------------------------------
 
-const uint32_t  MAX_REF_IMAGE_SIZE      = 5000000; // Max reference image size.
+//
+// Various image/ring buffer sizes. Must be used by all users (VBU, FSP, HB, HBI, Cronus)
+//
+const uint32_t  MAX_REF_IMAGE_SIZE      =   5000000; // Max reference image size.
+const uint32_t  FIXED_SEEPROM_WORK_SPACE=  128*1024; // Max work space for Seeprom img.
+const uint32_t  MAX_SEEPROM_IMAGE_SIZE  =   56*1024; // Max Seeprom image size.
 // Fixed SLW image size (Ensure 128-byte alignment.)
-const uint32_t  FIXED_SLW_IMAGE_SIZE    = 1024*1024; // Fixed SLW image size assumed by HB, PHYP and slw_build().
-const uint32_t  FIXED_RING_BUF_SIZE     = 60000; // Fixed ring buffer size assumed by HB, PHYP and slw_build(). Only use when emulating FAPI calls and for command-line utilities.
+const uint32_t  FIXED_SLW_IMAGE_SIZE    = 1024*1024; // Fixed SLW image size for _fixed.
+const uint32_t  FIXED_RING_BUF_SIZE     =     60000; // Fixed ring buf size for _fixed.
+
 const uint8_t   MAX_VPD_TYPES           =   2;   // #G and #R, so far.
 #define         CHIPLET_ID_MIN            0x00 
 #define         CHIPLET_ID_MAX            0x1F 
@@ -38,8 +44,9 @@ const uint8_t   MAX_CHIPLETS            = CHIPLET_ID_MAX-CHIPLET_ID_MIN+1;
 const uint32_t  ASM_RS4_LAUNCH_BUF_SIZE =  24; // Byte size of RS4 launch buffer. 
 const uint32_t  WF_ENCAP_SIZE           = 400; // Byte size of WF encapsulation.
                                                // (Actually, only 304B but may change.)
-const uint32_t  WF_WORST_CASE_SIZE_FAC  =   3; // WC WF size = 3x ring length.
+const uint32_t  WF_WORST_CASE_SIZE_FAC  =   4; // WC WF size = 3x ring length.
                                                // (Assumes 12B per write.)
+                                               // (4x w/waits instructions.)
 const uint32_t  LISTING_STRING_SIZE     = 256;
 const uint64_t  MAX_UINT64_T            = (uint64_t)0xFFFFFFFF<<32 | (uint64_t)0xFFFFFFFF;
 

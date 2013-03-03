@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_maint_cmds.C,v 1.18 2013/01/15 23:05:48 gollub Exp $
+// $Id: mss_maint_cmds.C,v 1.19 2013/01/31 22:27:22 gollub Exp $
 //------------------------------------------------------------------------------
 // Don't forget to create CVS comments when you check in your changes!
 //------------------------------------------------------------------------------
@@ -57,6 +57,13 @@
 //   1.17  | 12/19/12 | gollub  | Added UE isolation
 //   1.18  | 01/15/13 | gollub  | Added check for valid dimm before calling 
 //         |          |         | dimmGetBadDqBitmap
+//   1.19  | 01/31/13 | gollub  | Updated MDI bits for random pattern so 
+//         |          |         | don't get SUEs
+//         |          |         | Added mss_check_steering
+//         |          |         | Added mss_do_steering
+//         |          |         | Added mss_stopCmd
+//         |          |         | Removed cleanupCmd for cmds that didn't use it
+
 //------------------------------------------------------------------------------
 //    Includes
 //------------------------------------------------------------------------------
@@ -594,9 +601,9 @@ static const uint8_t mss_65thByte[MSS_MAX_PATTERNS][4]={
 
 // PATTERN_8: random seed
    {0x20,   // 1st 64B of cachline: tag0=0, tag1=1, MDI=0
-    0x70,   // 1st 64B of cachline: tag2=1, tag3=1, MDI=1
+    0x60,   // 1st 64B of cachline: tag2=1, tag3=1, MDI=0
     0x30,   // 2nd 64B of cachline: tag0=0, tag1=1, MDI=1
-    0x60}}; // 2nd 64B of cachline: tag2=1, tag3=1, MDI=0
+    0x70}}; // 2nd 64B of cachline: tag2=1, tag3=1, MDI=1
 
 // TODO: Update with actual patterns from Luis Lastras when they are ready
 static const uint32_t mss_ECC[MSS_MAX_PATTERNS][4]={
@@ -682,6 +689,82 @@ mss_MaintCmd::mss_MaintCmd(const fapi::Target & i_target,
     iv_cmdType(i_cmdType){}
 
 
+//---------------------------------------------------------
+// mss_stopCmd
+//---------------------------------------------------------
+fapi::ReturnCode mss_MaintCmd::stopCmd()
+{
+    fapi::ReturnCode l_rc;
+    uint32_t l_ecmd_rc = 0;    
+    ecmdDataBufferBase l_mbmsrq(64);
+    ecmdDataBufferBase l_mbmccq(64);
+    ecmdDataBufferBase l_mbmacaq(64);    
+        
+    FAPI_INF("ENTER mss_MaintCmd::stopCmd()");
+    
+    // Read MBMSRQ
+    l_rc = fapiGetScom(iv_target, MBA01_MBMSRQ_0x0301060C, l_mbmsrq);
+    if(l_rc) return l_rc;
+    
+    // If MBMSRQ[0], maint_cmd_in_progress, stop the cmd
+    if (l_mbmsrq.isBitSet(0))
+    {
+        // Read MBMCCQ
+        l_rc = fapiGetScom(iv_target, MBA01_MBMCCQ_0x0301060B, l_mbmccq);
+        if(l_rc) return l_rc;
+
+        // Set bit 1 to force the cmd to stop
+        l_ecmd_rc |= l_mbmccq.setBit(1);
+        if(l_ecmd_rc)
+        {
+            l_rc.setEcmdError(l_ecmd_rc);
+            return l_rc;
+        }
+
+        // Write MBMCCQ
+        l_rc = fapiPutScom(iv_target, MBA01_MBMCCQ_0x0301060B, l_mbmccq);
+        if(l_rc) return l_rc;
+        
+        // Read MBMSRQ
+        l_rc = fapiGetScom(iv_target, MBA01_MBMSRQ_0x0301060C, l_mbmsrq);
+        if(l_rc) return l_rc;
+        
+        // If cmd didn't stop as expected
+        if (l_mbmsrq.isBitSet(0))
+        {
+            FAPI_ERR("MBMSRQ[0] = 1, unsuccessful forced maint cmd stop.");
+             
+            // Calling out MBA target high, deconfig, gard
+            const fapi::Target & MBA = iv_target;
+            // FFDC: Capture register we used to stop cmd
+            ecmdDataBufferBase & MBMCC = l_mbmccq;
+            // FFDC: Capture register we are checking
+            ecmdDataBufferBase & MBMSR = l_mbmsrq;
+            // FFDC: Capture command type we are trying to run
+            const mss_MaintCmd::CmdType & CMD_TYPE = iv_cmdType;
+            
+            // Create new log
+            FAPI_SET_HWP_ERROR(l_rc, RC_MSS_MAINT_UNSUCCESSFUL_FORCED_MAINT_CMD_STOP);
+            return l_rc;                        
+        }        
+    }
+    
+    // Store the address we stopped at in iv_startAddr
+    l_rc = fapiGetScom(iv_target, MBA01_MBMACAQ_0x0301060D, iv_startAddr);
+    if(l_rc) return l_rc;
+
+    // Only 0-36 are valid address bits so clear the rest, 37-63
+    l_ecmd_rc |= iv_startAddr.clearBit(37,27);
+    if(l_ecmd_rc)
+    {
+        l_rc.setEcmdError(l_ecmd_rc);
+        return l_rc;
+    }
+    
+    
+    FAPI_INF("EXIT mss_MaintCmd::stopCmd()");
+    return l_rc;
+}
 
 
 //---------------------------------------------------------
@@ -692,7 +775,7 @@ fapi::ReturnCode mss_MaintCmd::cleanupCmd()
     fapi::ReturnCode l_rc;
     FAPI_INF("ENTER mss_MaintCmd::cleanupCmd()");
     
-    // Clear maintenance command complete attention, scrub stats, etc...
+
     
     FAPI_INF("EXIT mss_MaintCmd::cleanupCmd()");
     return l_rc;
@@ -1278,13 +1361,13 @@ fapi::ReturnCode mss_MaintCmd::collectFFDC()
     FAPI_DBG("MBMACAQ = 0x%.8X 0x%.8X", l_data.getWord(0), l_data.getWord(1));
 
     // Print out error status bits from MBMACAQ
-    if (l_data.isBitSet(40)) FAPI_ERR("MBMACAQ error status: 40:NCE");
-    if (l_data.isBitSet(41)) FAPI_ERR("MBMACAQ error status: 41:SCE");
-    if (l_data.isBitSet(42)) FAPI_ERR("MBMACAQ error status: 42:MCE");
-    if (l_data.isBitSet(43)) FAPI_ERR("MBMACAQ error status: 43:RCE");
-    if (l_data.isBitSet(44)) FAPI_ERR("MBMACAQ error status: 44:MPE");
-    if (l_data.isBitSet(45)) FAPI_ERR("MBMACAQ error status: 45:UE");
-    if (l_data.isBitSet(46)) FAPI_ERR("MBMACAQ error status: 46:SUE");
+    if (l_data.isBitSet(40)) FAPI_DBG("MBMACAQ error status: 40:NCE");
+    if (l_data.isBitSet(41)) FAPI_DBG("MBMACAQ error status: 41:SCE");
+    if (l_data.isBitSet(42)) FAPI_DBG("MBMACAQ error status: 42:MCE");
+    if (l_data.isBitSet(43)) FAPI_DBG("MBMACAQ error status: 43:RCE");
+    if (l_data.isBitSet(44)) FAPI_DBG("MBMACAQ error status: 44:MPE");
+    if (l_data.isBitSet(45)) FAPI_DBG("MBMACAQ error status: 45:UE");
+    if (l_data.isBitSet(46)) FAPI_DBG("MBMACAQ error status: 46:SUE");
 
     l_rc = fapiGetScom(iv_target, MBA01_MBMEAQ_0x0301060E, l_data);
     if(l_rc) return l_rc;
@@ -1319,20 +1402,20 @@ fapi::ReturnCode mss_MaintCmd::collectFFDC()
     FAPI_DBG("MBECCFIR = 0x%.8X 0x%.8X", l_data.getWord(0), l_data.getWord(1));
 
     // Print out maint ECC FIR bits from MBECCFIR
-    if (l_data.isBitSet(20)) FAPI_ERR("20:Maint MPE, rank0");
-    if (l_data.isBitSet(21)) FAPI_ERR("21:Maint MPE, rank1");
-    if (l_data.isBitSet(22)) FAPI_ERR("22:Maint MPE, rank2");
-    if (l_data.isBitSet(23)) FAPI_ERR("23:Maint MPE, rank3");
-    if (l_data.isBitSet(24)) FAPI_ERR("24:Maint MPE, rank4");
-    if (l_data.isBitSet(25)) FAPI_ERR("25:Maint MPE, rank5");
-    if (l_data.isBitSet(26)) FAPI_ERR("26:Maint MPE, rank6");
-    if (l_data.isBitSet(27)) FAPI_ERR("27:Maint MPE, rank7");
-    if (l_data.isBitSet(36)) FAPI_ERR("36: Maint NCE");
-    if (l_data.isBitSet(37)) FAPI_ERR("37: Maint SCE");
-    if (l_data.isBitSet(38)) FAPI_ERR("38: Maint MCE");
-    if (l_data.isBitSet(39)) FAPI_ERR("39: Maint RCE");
-    if (l_data.isBitSet(40)) FAPI_ERR("40: Maint SUE");
-    if (l_data.isBitSet(41)) FAPI_ERR("41: Maint UE");
+    if (l_data.isBitSet(20)) FAPI_DBG("20:Maint MPE, rank0");
+    if (l_data.isBitSet(21)) FAPI_DBG("21:Maint MPE, rank1");
+    if (l_data.isBitSet(22)) FAPI_DBG("22:Maint MPE, rank2");
+    if (l_data.isBitSet(23)) FAPI_DBG("23:Maint MPE, rank3");
+    if (l_data.isBitSet(24)) FAPI_DBG("24:Maint MPE, rank4");
+    if (l_data.isBitSet(25)) FAPI_DBG("25:Maint MPE, rank5");
+    if (l_data.isBitSet(26)) FAPI_DBG("26:Maint MPE, rank6");
+    if (l_data.isBitSet(27)) FAPI_DBG("27:Maint MPE, rank7");
+    if (l_data.isBitSet(36)) FAPI_DBG("36: Maint NCE");
+    if (l_data.isBitSet(37)) FAPI_DBG("37: Maint SCE");
+    if (l_data.isBitSet(38)) FAPI_DBG("38: Maint MCE");
+    if (l_data.isBitSet(39)) FAPI_DBG("39: Maint RCE");
+    if (l_data.isBitSet(40)) FAPI_DBG("40: Maint SUE");
+    if (l_data.isBitSet(41)) FAPI_DBG("41: Maint UE");
 
     FAPI_DBG("Markstore");
     for ( uint8_t i = 0; i < MSS_MAX_RANKS; i++ )
@@ -1355,9 +1438,8 @@ fapi::ReturnCode mss_MaintCmd::collectFFDC()
     FAPI_DBG("Steer MUXES");
     for ( uint8_t i = 0; i < MSS_MAX_RANKS; i++ )
     {
-        l_rc = mss_get_steer_mux(iv_target,
+        l_rc = mss_check_steering(iv_target,
                                  i,
-                                 mss_SteerMux::READ_MUX,
                                  l_dramSparePort0Symbol,
                                  l_dramSparePort1Symbol,
                                  l_eccSpareSymbol);
@@ -1763,22 +1845,6 @@ fapi::ReturnCode mss_MaintCmd::loadSpeed(TimeBaseSpeed i_speed)
 }
 
 
-//---------------------------------------------------------
-// mss_setupAndExecuteCmd
-//---------------------------------------------------------
-fapi::ReturnCode mss_MaintCmd::setupAndExecuteCmd()
-{
-
-    FAPI_INF("ENTER mss_MaintCmd::setupAndExecuteCmd()");
-    fapi::ReturnCode l_rc;
-    FAPI_INF("EXIT mss_MaintCmd::setupAndExecuteCmd()");
-
-    return l_rc;
-}
-
-
-
-
 
 
 
@@ -1883,42 +1949,6 @@ fapi::ReturnCode mss_SuperFastInit::setupAndExecuteCmd()
 }
 
 
-
-
-fapi::ReturnCode mss_SuperFastInit::stopCmd()
-{
-
-    FAPI_INF("ENTER mss_SuperFastInit::stopCmd()");
-
-    fapi::ReturnCode l_rc;
-
-    // Stop the maintenace command if it is running.
-
-    // Update the iv_startAddr to the addr the maintenenance command 
-    // stopped on. For testing purposes we will just set an abitrary number.
-    //iv_startAddr = 0x0000dead0000beefll;
-    //printf( "addr stopped on: 0x%016llx\n", iv_startAddr );
-
-    FAPI_INF("EXIT mss_SuperFastInit::stopCmd()");
-
-    return l_rc;
-}
-
-fapi::ReturnCode mss_SuperFastInit::cleanupCmd()
-{
-
-    FAPI_INF("ENTER mss_SuperFastInit::cleanupCmd()");
-
-    fapi::ReturnCode l_rc;
-
-    // Clear maintenance command complete attention, scrub stats, etc...
-
-    // Restore the saved data.
-
-    FAPI_INF("EXIT mss_SuperFastInit::cleanupCmd()");
-
-    return l_rc;
-}
 
 
 //------------------------------------------------------------------------------
@@ -2028,27 +2058,6 @@ fapi::ReturnCode mss_SuperFastRandomInit::setupAndExecuteCmd()
     return l_rc;
 }
 
-
-
-
-fapi::ReturnCode mss_SuperFastRandomInit::stopCmd()
-{
-
-    FAPI_INF("ENTER mss_SuperFastRandomInit::stopCmd()");
-
-    fapi::ReturnCode l_rc;
-
-    // Stop the maintenace command if it is running.
-
-    // Update the iv_startAddr to the addr the maintenenance command 
-    // stopped on. For testing purposes we will just set an abitrary number.
-    //iv_startAddr = 0x0000dead0000beefll;
-    //printf( "addr stopped on: 0x%016llx\n", iv_startAddr );
-
-    FAPI_INF("EXIT mss_SuperFastRandomInit::stopCmd()");
-
-    return l_rc;
-}
 
 fapi::ReturnCode mss_SuperFastRandomInit::cleanupCmd()
 {
@@ -2251,26 +2260,6 @@ fapi::ReturnCode mss_SuperFastRead::ueTrappingSetup()
 }
 
 
-
-fapi::ReturnCode mss_SuperFastRead::stopCmd()
-{
-
-    FAPI_INF("ENTER mss_SuperFastRead::stopCmd()");
-
-    fapi::ReturnCode l_rc;
-
-    // Stop the maintenace command if it is running.
-
-    // Update the iv_startAddr to the addr the maintenenance command 
-    // stopped on. For testing purposes we will just set an abitrary number.
-    //iv_startAddr = 0x0000dead0000beefll;
-    //printf( "addr stopped on: 0x%016llx\n", iv_startAddr );
-
-    FAPI_INF("EXIT mss_SuperFastRead::stopCmd()");
-
-    return l_rc;
-}
-
 fapi::ReturnCode mss_SuperFastRead::cleanupCmd()
 {
 
@@ -2403,18 +2392,6 @@ fapi::ReturnCode mss_AtomicInject::setupAndExecuteCmd()
 
 }
 
-fapi::ReturnCode mss_AtomicInject::stopCmd()
-{
-
-    FAPI_INF("ENTER mss_AtomicInject::stopCmd()");
-    fapi::ReturnCode l_rc;
-    FAPI_INF("EXIT mss_AtomicInject::stopCmd()");
-
-    return l_rc;
-}
-
-
-
 
 //------------------------------------------------------------------------------
 // Display
@@ -2545,17 +2522,6 @@ fapi::ReturnCode mss_Display::setupAndExecuteCmd()
 
 }
 
-fapi::ReturnCode mss_Display::stopCmd()
-{
-
-    FAPI_INF("ENTER mss_Display::stopCmd()");
-    fapi::ReturnCode l_rc;
-    FAPI_INF("EXIT mss_Display::stopCmd()");
-
-    return l_rc;
-}
-
-
 
 //------------------------------------------------------------------------------
 // Increment MBMACA Address
@@ -2619,17 +2585,6 @@ fapi::ReturnCode mss_IncrementAddress::setupAndExecuteCmd()
     l_rc = collectFFDC(); if(l_rc) return l_rc;
 
     FAPI_INF("EXIT mss_IncrementAddress::setupAndExecuteCmd()");
-
-    return l_rc;
-}
-
-
-fapi::ReturnCode mss_IncrementAddress::stopCmd()
-{
-
-    FAPI_INF("ENTER mss_IncrementAddress::stopCmd()");
-    fapi::ReturnCode l_rc;
-    FAPI_INF("EXIT mss_IncrementAddress::stopCmd()");
 
     return l_rc;
 }
@@ -2737,42 +2692,6 @@ fapi::ReturnCode mss_TimeBaseScrub::setupAndExecuteCmd()
 
 }
 
-fapi::ReturnCode mss_TimeBaseScrub::stopCmd()
-{
-
-    FAPI_INF("ENTER mss_TimeBaseScrub::stopCmd()");
-
-    fapi::ReturnCode l_rc;
-
-    // Stop the maintenace command if it is running.
-
-    // Update the iv_startAddr to the addr the maintenenance command 
-    // stopped on. For testing purposes we will just set an abitrary number.
-    //iv_startAddr = 0x0000dead0000beefll;
-    //printf( "addr stopped on: 0x%016llx\n", iv_startAddr );
-
-    FAPI_INF("EXIT mss_TimeBaseScrub::stopCmd()");
-
-    return l_rc;
-}
-
-fapi::ReturnCode mss_TimeBaseScrub::cleanupCmd()
-{
-
-    FAPI_INF("ENTER mss_TimeBaseScrub::cleanupCmd()");
-
-    fapi::ReturnCode l_rc;
-
-    // Clear maintenance command complete attention, scrub stats, etc...
-
-    // Restore the saved data.
-    //printf( "Saved data: 0x%08x\n", getSavedData() );
-
-    FAPI_INF("EXIT mss_TimeBaseScrub::cleanupCmd()");
-
-    return l_rc;
-}
-
 
 //------------------------------------------------------------------------------
 // mss_TimeBaseSteerCleanup
@@ -2864,41 +2783,6 @@ fapi::ReturnCode mss_TimeBaseSteerCleanup::setupAndExecuteCmd()
 
 }
 
-fapi::ReturnCode mss_TimeBaseSteerCleanup::stopCmd()
-{
-
-    FAPI_INF("ENTER mss_TimeBaseSteerCleanup::stopCmd()");
-
-    fapi::ReturnCode l_rc;
-
-    // Stop the maintenace command if it is running.
-
-    // Update the iv_startAddr to the addr the maintenenance command
-    // stopped on. For testing purposes we will just set an abitrary number.
-    //iv_startAddr = 0x0000dead0000beefll;
-    //printf( "addr stopped on: 0x%016llx\n", iv_startAddr );
-
-    FAPI_INF("EXIT mss_TimeBaseSteerCleanup::stopCmd()");
-
-    return l_rc;
-}
-
-fapi::ReturnCode mss_TimeBaseSteerCleanup::cleanupCmd()
-{
-
-    FAPI_INF("ENTER mss_TimeBaseSteerCleanup::cleanupCmd()");
-
-    fapi::ReturnCode l_rc;
-
-    // Clear maintenance command complete attention, scrub stats, etc...
-
-    // Restore the saved data.
-    //printf( "Saved data: 0x%08x\n", getSavedData() );
-
-    FAPI_INF("EXIT mss_TimeBaseSteerCleanup::cleanupCmd()");
-
-    return l_rc;
-}
 
 
 //------------------------------------------------------------------------------
@@ -3196,9 +3080,23 @@ fapi::ReturnCode mss_get_address_range( const fapi::Target & i_target,
     {
         FAPI_INF("Get address range for master rank = %d\n", i_rank );
 
+        // Check for i_rank out of range
+        if (i_rank>=8)
+        {
+            FAPI_ERR("i_rank input to mss_get_address_range out of range");
+            // TODO: Calling out FW high
+            // FFDC: MBA target
+            const fapi::Target & MBA = i_target;
+            // FFDC: Capture i_rank;
+            uint8_t RANK = i_rank;
+
+            // Create new log. 
+            FAPI_SET_HWP_ERROR(l_rc, RC_MSS_MAINT_GET_ADDRESS_RANGE_BAD_INPUT);
+            return l_rc;        
+        }
+
         // NOTE: If this rank is not valid, we should see MBAFIR[1]: invalid
         // maint address, when cmd started
-
 
         // DEBUG - run on last few address of the rank
         /*
@@ -3335,6 +3233,21 @@ fapi::ReturnCode mss_get_mark_store( const fapi::Target & i_target,
     {
         FAPI_ERR("Error getting DRAM width");
         return l_rc;
+    }
+
+    // Check for i_rank out of range
+    if (i_rank>=8)
+    {
+        FAPI_ERR("i_rank input to mss_get_mark_store out of range");
+        // TODO: Calling out FW high
+        // FFDC: MBA target
+        const fapi::Target & MBA = i_target;
+        // FFDC: Capture i_rank;
+        uint8_t RANK = i_rank;
+
+        // Create new log. 
+        FAPI_SET_HWP_ERROR(l_rc, RC_MSS_MAINT_GET_MARK_STORE_BAD_INPUT);
+        return l_rc;        
     }
 
     // Read markstore register for the given rank
@@ -3524,6 +3437,21 @@ fapi::ReturnCode mss_put_mark_store( const fapi::Target & i_target,
         FAPI_ERR("Error getting DRAM width");
         return l_rc;
     }
+    
+    // Check for i_rank out of range
+    if (i_rank>=8)
+    {
+        FAPI_ERR("i_rank input to mss_put_mark_store out of range");
+        // TODO: Calling out FW high
+        // FFDC: MBA target
+        const fapi::Target & MBA = i_target;
+        // FFDC: Capture i_rank;
+        uint8_t RANK = i_rank;
+
+        // Create new log. 
+        FAPI_SET_HWP_ERROR(l_rc, RC_MSS_MAINT_PUT_MARK_STORE_BAD_INPUT);
+        return l_rc;        
+    }    
 
     // Get l_symbolMarkGalois
     if (i_symbolMark == MSS_INVALID_SYMBOL) // No symbol mark
@@ -3694,6 +3622,7 @@ fapi::ReturnCode mss_put_mark_store( const fapi::Target & i_target,
 
 
 
+
 //------------------------------------------------------------------------------
 // mss_get_steer_mux
 //------------------------------------------------------------------------------
@@ -3745,6 +3674,26 @@ fapi::ReturnCode mss_get_steer_mux( const fapi::Target & i_target,
         FAPI_ERR("Error getting DRAM width");
         return l_rc;
     }
+
+
+    // Check for i_rank or i_muxType out of range
+    if ((i_rank>=8) || 
+       !((i_muxType==mss_SteerMux::READ_MUX) || (i_muxType==mss_SteerMux::WRITE_MUX)))
+    {
+        FAPI_ERR("i_rank or i_muxType input to mss_get_steer_mux out of range");       
+        // TODO: Calling out FW high
+        // FFDC: MBA target
+        const fapi::Target & MBA = i_target;
+        // FFDC: Capture i_rank;
+        uint8_t RANK = i_rank;
+        // FFDC: Capure i_muxType
+        uint8_t MUX_TYPE = i_muxType;       
+
+        // Create new log. 
+        FAPI_SET_HWP_ERROR(l_rc, RC_MSS_MAINT_GET_STEER_MUX_BAD_INPUT);
+        return l_rc;        
+    }
+
 
     // Read steer mux register for the given rank and mux type (read or write).
     if (i_muxType == mss_SteerMux::READ_MUX)
@@ -3885,6 +3834,8 @@ fapi::ReturnCode mss_get_steer_mux( const fapi::Target & i_target,
 
 
 
+
+
 //------------------------------------------------------------------------------
 // mss_put_steer_mux
 //------------------------------------------------------------------------------
@@ -3938,6 +3889,31 @@ fapi::ReturnCode mss_put_steer_mux( const fapi::Target & i_target,
     }
 
 
+    // Check for i_rank or i_muxType or i_steerType or i_symbol out of range
+    if ((i_rank>=8) || 
+       !((i_muxType==mss_SteerMux::READ_MUX) || (i_muxType==mss_SteerMux::WRITE_MUX)) ||
+       !((i_steerType == mss_SteerMux::DRAM_SPARE_PORT0) || (i_steerType == mss_SteerMux::DRAM_SPARE_PORT1) || (i_steerType == mss_SteerMux::ECC_SPARE)) ||
+        (i_symbol >= 72))
+    {
+        FAPI_ERR("i_rank or i_muxType or i_steerType or i_symbol input to mss_get_steer_mux out of range");       
+        // TODO: Calling out FW high
+        // FFDC: MBA target
+        const fapi::Target & MBA = i_target;
+        // FFDC: Capture i_rank;
+        uint8_t RANK = i_rank;
+        // FFDC: Capure i_muxType
+        uint8_t MUX_TYPE = i_muxType;       
+        // FFDC: Capure i_steerType
+        uint8_t STEER_TYPE = i_steerType;       
+        // FFDC: Capure i_symbol
+        uint8_t SYMBOL = i_symbol;       
+
+        // Create new log. 
+        FAPI_SET_HWP_ERROR(l_rc, RC_MSS_MAINT_PUT_STEER_MUX_BAD_INPUT);
+        return l_rc;        
+    }
+
+
     // Read steer mux register for the given rank and mux type (read or write).
     if (i_muxType == mss_SteerMux::READ_MUX)
     {
@@ -3981,9 +3957,9 @@ fapi::ReturnCode mss_put_steer_mux( const fapi::Target & i_target,
                 uint8_t RANK = i_rank;
                 // FFDC: Capure i_muxType
                 uint8_t MUX_TYPE = i_muxType;       
-                // FFDC: Capure i_muxType
+                // FFDC: Capure i_steerType
                 uint8_t STEER_TYPE = i_steerType;       
-                // FFDC: Capure i_muxType
+                // FFDC: Capure i_symbol
                 uint8_t SYMBOL = i_symbol;       
 
                 // Create new log.                 
@@ -4017,9 +3993,9 @@ fapi::ReturnCode mss_put_steer_mux( const fapi::Target & i_target,
                 uint8_t RANK = i_rank;
                 // FFDC: Capure i_muxType
                 uint8_t MUX_TYPE = i_muxType;       
-                // FFDC: Capure i_muxType
+                // FFDC: Capure i_steerType
                 uint8_t STEER_TYPE = i_steerType;       
-                // FFDC: Capure i_muxType
+                // FFDC: Capure i_symbol
                 uint8_t SYMBOL = i_symbol;       
 
                 // Create new log. 
@@ -4060,9 +4036,9 @@ fapi::ReturnCode mss_put_steer_mux( const fapi::Target & i_target,
                 uint8_t RANK = i_rank;
                 // FFDC: Capure i_muxType
                 uint8_t MUX_TYPE = i_muxType;       
-                // FFDC: Capure i_muxType
+                // FFDC: Capure i_steerType
                 uint8_t STEER_TYPE = i_steerType;       
-                // FFDC: Capure i_muxType
+                // FFDC: Capure i_symbol
                 uint8_t SYMBOL = i_symbol;       
 
                 // Create new log. 
@@ -4096,9 +4072,9 @@ fapi::ReturnCode mss_put_steer_mux( const fapi::Target & i_target,
                 uint8_t RANK = i_rank;
                 // FFDC: Capure i_muxType
                 uint8_t MUX_TYPE = i_muxType;       
-                // FFDC: Capure i_muxType
+                // FFDC: Capure i_steerType
                 uint8_t STEER_TYPE = i_steerType;       
-                // FFDC: Capure i_muxType
+                // FFDC: Capure i_symbol
                 uint8_t SYMBOL = i_symbol;       
 
                 // Create new log. 
@@ -4140,9 +4116,9 @@ fapi::ReturnCode mss_put_steer_mux( const fapi::Target & i_target,
                 uint8_t RANK = i_rank;
                 // FFDC: Capure i_muxType
                 uint8_t MUX_TYPE = i_muxType;       
-                // FFDC: Capure i_muxType
+                // FFDC: Capure i_steerType
                 uint8_t STEER_TYPE = i_steerType;       
-                // FFDC: Capure i_muxType
+                // FFDC: Capure i_symbol
                 uint8_t SYMBOL = i_symbol;       
 
                 // Create new log. 
@@ -4163,9 +4139,9 @@ fapi::ReturnCode mss_put_steer_mux( const fapi::Target & i_target,
             uint8_t RANK = i_rank;
             // FFDC: Capure i_muxType
             uint8_t MUX_TYPE = i_muxType;       
-            // FFDC: Capure i_muxType
+            // FFDC: Capure i_steerType
             uint8_t STEER_TYPE = i_steerType;       
-            // FFDC: Capure i_muxType
+            // FFDC: Capure i_symbol
             uint8_t SYMBOL = i_symbol;       
 
             // Create new log. 
@@ -4205,6 +4181,141 @@ fapi::ReturnCode mss_put_steer_mux( const fapi::Target & i_target,
 }
 
 
+//------------------------------------------------------------------------------
+// mss_check_steering
+//------------------------------------------------------------------------------
+
+fapi::ReturnCode mss_check_steering(const fapi::Target & i_target,
+                                    uint8_t i_rank,
+                                    uint8_t & o_dramSparePort0Symbol,
+                                    uint8_t & o_dramSparePort1Symbol,
+                                    uint8_t & o_eccSpareSymbol )
+{
+
+    // Get the read steer mux, with the assuption
+    // that the write mux will be the same.
+    return mss_get_steer_mux(i_target,
+                             i_rank,
+                             mss_SteerMux::READ_MUX,
+                             o_dramSparePort0Symbol,
+                             o_dramSparePort1Symbol,
+                             o_eccSpareSymbol);
+}
+
+
+//------------------------------------------------------------------------------
+// mss_do_steering
+//------------------------------------------------------------------------------
+
+fapi::ReturnCode mss_do_steering(const fapi::Target & i_target,
+                                 uint8_t i_rank,
+                                 uint8_t i_symbol,
+                                 bool i_x4EccSpare)
+{
+    FAPI_INF("ENTER mss_do_steering()");
+
+
+    fapi::ReturnCode l_rc;
+    uint8_t l_steerType = 0; // 0 = DRAM_SPARE_PORT0, Spare DRAM on port0
+                             // 1 = DRAM_SPARE_PORT1, Spare DRAM on port1
+                             // 2 = ECC_SPARE, ECC spare (used in x4 mode only)
+    
+
+    // Check for i_rank or i_symbol out of range
+    if ((i_rank>=8) || (i_symbol>=72))
+    {
+        FAPI_ERR("i_rank or i_symbol input to mss_do_steer out of range");
+        // TODO: Calling out FW high
+        // FFDC: MBA target
+        const fapi::Target & MBA = i_target;
+        // FFDC: Capture i_rank;
+        uint8_t RANK = i_rank;
+        // FFDC: Capture i_symbol;
+        uint8_t SYMBOL = i_symbol;
+        // FFDC: Capture i_x4EccSpare
+        uint8_t X4ECCSPARE = i_x4EccSpare;       
+
+        // Create new log. 
+        FAPI_SET_HWP_ERROR(l_rc, RC_MSS_MAINT_DO_STEER_INPUT_OUT_OF_RANGE);
+        return l_rc;        
+    }
+
+    //------------------------------------------------------
+    // Determine l_steerType
+    //------------------------------------------------------    
+    if (i_x4EccSpare)
+    {
+        l_steerType = mss_SteerMux::ECC_SPARE;
+    }
+    else
+    {
+        // Symbols 71-40, 7-4 come from port0   
+        if (((i_symbol<=71)&&(i_symbol>=40)) || ((i_symbol<=7)&&(i_symbol>=4)))
+        {
+            l_steerType = mss_SteerMux::DRAM_SPARE_PORT0;
+        }
+        // Symbols 39-8, 3-0 come from port1   
+        else
+        {
+            l_steerType = mss_SteerMux::DRAM_SPARE_PORT1;        
+        }        
+    }
+
+    //------------------------------------------------------
+    // Update write mux
+    //------------------------------------------------------
+    l_rc = mss_put_steer_mux(
+    
+        i_target,               // MBA
+        i_rank,                 // Master rank: 0-7
+        mss_SteerMux::WRITE_MUX,// write mux
+        l_steerType,            // DRAM_SPARE_PORT0/DRAM_SPARE_PORT1/ECC_SPARE
+        i_symbol);              // First symbol index of DRAM to steer around
+    
+    if (l_rc)
+    {
+        FAPI_ERR("Error updating write mux");
+        return l_rc;
+    }
+
+    //------------------------------------------------------
+    // Wait for a periodic cal.
+    //------------------------------------------------------    
+
+    // 250 ms delay for HW mode
+    const uint64_t  HW_MODE_DELAY = 250000000;
+    
+    // 200000 sim cycle delay for SIM mode  
+    const uint64_t  SIM_MODE_DELAY = 200000; 
+    
+    fapiDelay(HW_MODE_DELAY, SIM_MODE_DELAY);
+    
+    // TODO: Could be precise and find cal interval from:
+    // ATTR_EFF_ZQCAL_INTERVAL (in clocks... so still have to know freq)
+    // ATTR_EFF_MEMCAL_INTERVAL (in clocks... so still have to know freq)                
+
+    //------------------------------------------------------
+    // Update read mux
+    //------------------------------------------------------    
+    l_rc = mss_put_steer_mux(
+    
+        i_target,               // MBA
+        i_rank,                 // Master rank: 0-7
+        mss_SteerMux::READ_MUX, // read mux
+        l_steerType,            // DRAM_SPARE_PORT0/DRAM_SPARE_PORT1/ECC_SPARE
+        i_symbol);              // First symbol index of DRAM to steer around
+    
+    if (l_rc)
+    {
+        FAPI_ERR("Error updating read mux");
+        return l_rc;
+
+    }
+
+    FAPI_INF("EXIT mss_do_steering()");
+
+    return l_rc;
+}
 
 //------------------------------------------------------------------------------
 // mss_restore_DRAM_repairs
@@ -4421,7 +4532,7 @@ fapi::ReturnCode mss_restore_DRAM_repairs( const fapi::Target & i_target,
                             // If spare is bad but not used, not valid to try repair 
                             if ( l_spare_exists && (l_byte==9) && (l_bad_dq_pair_count > 0) && !l_spare_used)
                             {
-                                FAPI_INF("port=%d, dimm=%d, rank=%d, l_dqBitmap[%d] = %02x, Bad unused spare - no valid repair",
+                                FAPI_ERR("WARNING: port=%d, dimm=%d, rank=%d, l_dqBitmap[%d] = %02x, Bad unused spare - no valid repair",
                                 l_port, l_dimm, l_rank, l_byte, l_dqBitmap[l_byte]);
 
                                 break;
@@ -4486,7 +4597,7 @@ fapi::ReturnCode mss_restore_DRAM_repairs( const fapi::Target & i_target,
                                         o_repairs_exceeded |= l_repairs_exceeded_translation[1][l_dimm];
                                     }
 
-                                    FAPI_INF("port=%d, dimm=%d, rank=%d, l_dqBitmap[%d] = %02x, dq %d-%d, symbols %d-%d, FIXED CHIP WITH X8 STEER",
+                                    FAPI_ERR("WARNING: port=%d, dimm=%d, rank=%d, l_dqBitmap[%d] = %02x, dq %d-%d, symbols %d-%d, FIXED CHIP WITH X8 STEER",
                                     l_port, l_dimm, l_rank, l_byte, l_dqBitmap[l_byte], 8*l_byte, 8*l_byte+7,l_bad_symbol, l_bad_symbol+3 );
 
 
@@ -4515,12 +4626,12 @@ fapi::ReturnCode mss_restore_DRAM_repairs( const fapi::Target & i_target,
 
 
                                     // Special case:
-                                    // If this is a bad spare byte we are analying
+                                    // If this is a bad spare byte we are analyzing
                                     // the chip mark goes on the byte being steered
                                     if (l_byte==9)
                                     {
                                         l_chip_mark = mss_centaurDQ_to_symbol(8*l_byte_being_steered,l_port) - 3;
-                                        FAPI_INF("Bad spare so chip mark goes on l_byte_being_steered = %d", l_byte_being_steered);
+                                        FAPI_ERR("WARNING: Bad spare so chip mark goes on l_byte_being_steered = %d", l_byte_being_steered);
                                     }
 
                                     else
@@ -4556,7 +4667,7 @@ fapi::ReturnCode mss_restore_DRAM_repairs( const fapi::Target & i_target,
                                         o_repairs_exceeded |= l_repairs_exceeded_translation[1][l_dimm];
                                     }
 
-                                    FAPI_INF("port=%d, dimm=%d, rank=%d, l_dqBitmap[%d] = %02x, dq %d-%d, symbols %d-%d, FIXED CHIP WITH X8 CHIP MARK",
+                                    FAPI_ERR("WARNING: port=%d, dimm=%d, rank=%d, l_dqBitmap[%d] = %02x, dq %d-%d, symbols %d-%d, FIXED CHIP WITH X8 CHIP MARK",
                                     l_port, l_dimm, l_rank, l_byte, l_dqBitmap[l_byte], 8*l_byte, 8*l_byte+7,l_chip_mark, l_chip_mark+3 );
 
                                 }
@@ -4574,7 +4685,7 @@ fapi::ReturnCode mss_restore_DRAM_repairs( const fapi::Target & i_target,
                                         o_repairs_exceeded |= l_repairs_exceeded_translation[0][l_dimm];
                                     }
 
-                                    FAPI_INF("port=%d, dimm=%d, rank=%d, l_dqBitmap[%d] = %02x, dq %d-%d, REPAIRS EXCEEDED",
+                                    FAPI_ERR("WARNING: port=%d, dimm=%d, rank=%d, l_dqBitmap[%d] = %02x, dq %d-%d, REPAIRS EXCEEDED",
                                     l_port, l_dimm, l_rank, l_byte, l_dqBitmap[l_byte], 8*l_byte, 8*l_byte+7);
 
 
@@ -4615,7 +4726,7 @@ fapi::ReturnCode mss_restore_DRAM_repairs( const fapi::Target & i_target,
                                     if (l_byte==9)
                                     {
                                         l_symbol_mark = mss_centaurDQ_to_symbol(8*l_byte_being_steered + 2*l_bad_dq_pair_index,l_port);
-                                        FAPI_INF("Bad spare so symbol mark goes on l_byte_being_steered = %d", l_byte_being_steered);
+                                        FAPI_ERR("WARNING: Bad spare so symbol mark goes on l_byte_being_steered = %d", l_byte_being_steered);
                                     }
 
                                     else
@@ -4652,7 +4763,7 @@ fapi::ReturnCode mss_restore_DRAM_repairs( const fapi::Target & i_target,
                                         o_repairs_exceeded |= l_repairs_exceeded_translation[1][l_dimm];
                                     }
 
-                                    FAPI_INF("port=%d, dimm=%d, rank=%d, l_dqBitmap[%d] = %02x, dq %d-%d, symbol %d, FIXED SYMBOL WITH X2 SYMBOL MARK",
+                                    FAPI_ERR("WARNING: port=%d, dimm=%d, rank=%d, l_dqBitmap[%d] = %02x, dq %d-%d, symbol %d, FIXED SYMBOL WITH X2 SYMBOL MARK",
                                     l_port, l_dimm, l_rank, l_byte, l_dqBitmap[l_byte], 
                                     8*l_byte + 2*l_bad_dq_pair_index, 8*l_byte + 2*l_bad_dq_pair_index + 1,
                                     l_symbol_mark );
@@ -4716,7 +4827,7 @@ fapi::ReturnCode mss_restore_DRAM_repairs( const fapi::Target & i_target,
                                         o_repairs_exceeded |= l_repairs_exceeded_translation[1][l_dimm];
                                     }
 
-                                    FAPI_INF("port=%d, dimm=%d, rank=%d, l_dqBitmap[%d] = %02x, dq %d-%d, symbols %d-%d, FIXED SYMBOL WITH X8 STEER",
+                                    FAPI_ERR("WARNING: port=%d, dimm=%d, rank=%d, l_dqBitmap[%d] = %02x, dq %d-%d, symbols %d-%d, FIXED SYMBOL WITH X8 STEER",
                                     l_port, l_dimm, l_rank, l_byte, l_dqBitmap[l_byte], 
                                     8*l_byte + 2*l_bad_dq_pair_index, 8*l_byte + 2*l_bad_dq_pair_index + 1,
                                     l_bad_symbol,
@@ -4753,7 +4864,7 @@ fapi::ReturnCode mss_restore_DRAM_repairs( const fapi::Target & i_target,
                                     if (l_byte==9)
                                     {
                                         l_chip_mark = mss_centaurDQ_to_symbol(8*l_byte_being_steered,l_port) - 3;
-                                        FAPI_INF("Bad spare so chip mark goes on l_byte_being_steered = %d", l_byte_being_steered);
+                                        FAPI_ERR("WARNING: Bad spare so chip mark goes on l_byte_being_steered = %d", l_byte_being_steered);
                                     }
 
                                     else
@@ -4789,7 +4900,7 @@ fapi::ReturnCode mss_restore_DRAM_repairs( const fapi::Target & i_target,
                                         o_repairs_exceeded |= l_repairs_exceeded_translation[1][l_dimm];
                                     }
 
-                                    FAPI_INF("port=%d, dimm=%d, rank=%d, l_dqBitmap[%d] = %02x, dq %d-%d, symbols %d-%d, FIXED SYMBOL WITH X8 CHIP MARK",
+                                    FAPI_ERR("WARNING: port=%d, dimm=%d, rank=%d, l_dqBitmap[%d] = %02x, dq %d-%d, symbols %d-%d, FIXED SYMBOL WITH X8 CHIP MARK",
                                     l_port, l_dimm, l_rank, l_byte, l_dqBitmap[l_byte], 
                                     8*l_byte + 2*l_bad_dq_pair_index, 8*l_byte + 2*l_bad_dq_pair_index + 1,
                                     l_chip_mark,
@@ -4812,7 +4923,7 @@ fapi::ReturnCode mss_restore_DRAM_repairs( const fapi::Target & i_target,
                                         o_repairs_exceeded |= l_repairs_exceeded_translation[0][l_dimm];
                                     }
 
-                                    FAPI_INF("port=%d, dimm=%d, rank=%d, l_dqBitmap[%d] = %02x, dq %d-%d, REPAIRS EXCEEDED",
+                                    FAPI_ERR("WARNING: port=%d, dimm=%d, rank=%d, l_dqBitmap[%d] = %02x, dq %d-%d, REPAIRS EXCEEDED",
                                     l_port, l_dimm, l_rank, l_byte, l_dqBitmap[l_byte],
                                     8*l_byte + 2*l_bad_dq_pair_index, 8*l_byte + 2*l_bad_dq_pair_index + 1);
 
@@ -5030,10 +5141,17 @@ fapi::ReturnCode mss_IPL_UE_isolation( const fapi::Target & i_target,
         return l_rc;
     }
 
-    // No isolation if cmd is timebased steer cleanup, or pattern is random
-    if ((l_cmd_type == 2) || (l_initPattern == 8))
+    // No isolation if cmd is timebased steer cleanup
+    if (l_cmd_type == 2)
     {
-        FAPI_ERR("No UE isolation for steer cleanup or random pattern");
+        FAPI_ERR("WARNING: rank%d maint UE during steer cleanup - no bad bit isolation possible.", i_rank);
+        return l_rc;
+    }
+
+    // No isolation if pattern is random
+    if (l_initPattern == 8)
+    {
+        FAPI_ERR("WARNING: rank%d maint UE with random pattern - no bad bit isolation possible.", i_rank);
         return l_rc;
     }
 
@@ -5269,9 +5387,8 @@ fapi::ReturnCode mss_IPL_UE_isolation( const fapi::Target & i_target,
     //----------------------------------------------------
 
     // READ steer mux, which gets me a symbol for port0 and port1
-    l_rc = mss_get_steer_mux(i_target,
+    l_rc = mss_check_steering(i_target,
                              i_rank,
-                             mss_SteerMux::READ_MUX,
                              l_dramSparePort0Symbol,
                              l_dramSparePort1Symbol,
                              l_eccSpareSymbol);
@@ -5313,11 +5430,13 @@ fapi::ReturnCode mss_IPL_UE_isolation( const fapi::Target & i_target,
     // Show results 
     //----------------------------------------------------
 
+    FAPI_ERR("WARNING: IPL UE isolation results for rank = %d.", i_rank);
+    FAPI_ERR("WARNING: Expected pattern = 0x%.8X", mss_maintBufferData[l_initPattern][0][0]);
     for(l_port=0; l_port<2; l_port++ )
     {
         for(l_byte=0; l_byte<10; l_byte++ )
         {
-            FAPI_INF("o_bad_bits[%d][%d] = %02x",
+            FAPI_ERR("WARNING: o_bad_bits[port%d][byte%d] = %02x",
                       l_port, l_byte, o_bad_bits[l_port][l_byte]);
         }
     }

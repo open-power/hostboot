@@ -108,7 +108,8 @@ HWP_ATTR_XML_FILES = hwp/memory_attributes.xml \
                      hwp/dmi_training/proc_cen_set_inband_addr/proc_cen_set_inband_addr_attributes.xml \
                      hwp/build_winkle_images/p8_slw_build/proc_pll_ring_attributes.xml \
                      hwp/build_winkle_images/p8_slw_build/p8_xip_customize_attributes.xml \
-                     hwp/poreve_memory_attributes.xml
+                     hwp/poreve_memory_attributes.xml \
+                     hwp/mcbist_attributes.xml
 
 #------------------------------------------------------------------------------
 # Initfiles
@@ -128,7 +129,9 @@ HWP_INITFILES = hwp/initfiles/sample.initfile \
                 hwp/initfiles/p8.as.scom.initfile \
                 hwp/initfiles/p8.nx.scom.initfile \
                 hwp/initfiles/p8.dmi.custom.scom.initfile \
-		hwp/initfiles/cen.dmi.custom.scom.initfile
+                hwp/initfiles/cen.dmi.custom.scom.initfile \
+                hwp/initfiles/p8.abus.custom.scom.initfile \
+                hwp/initfiles/p8.xbus.custom.scom.initfile
 
 HWP_IF_DEFINE_DIR = hwp/initfiles
 

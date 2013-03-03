@@ -1,0 +1,196 @@
+<!-- IBM_PROLOG_BEGIN_TAG                                                   -->
+<!-- This is an automatically generated prolog.                             -->
+<!--                                                                        -->
+<!-- $Source: src/usr/hwpf/hwp/mcbist_attributes.xml $                      -->
+<!--                                                                        -->
+<!-- IBM CONFIDENTIAL                                                       -->
+<!--                                                                        -->
+<!-- COPYRIGHT International Business Machines Corp. 2013                   -->
+<!--                                                                        -->
+<!-- p1                                                                     -->
+<!--                                                                        -->
+<!-- Object Code Only (OCO) source materials                                -->
+<!-- Licensed Internal Code Source Materials                                -->
+<!-- IBM HostBoot Licensed Internal Code                                    -->
+<!--                                                                        -->
+<!-- The source code for this program is not published or otherwise         -->
+<!-- divested of its trade secrets, irrespective of what has been           -->
+<!-- deposited with the U.S. Copyright Office.                              -->
+<!--                                                                        -->
+<!-- Origin: 30                                                             -->
+<!--                                                                        -->
+<!-- IBM_PROLOG_END_TAG                                                     -->
+<attributes>
+
+<attribute>
+    <id>ATTR_MCBIST_PATTERN</id>
+    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
+    <description>Enables mcbist data pattern selection.</description>
+    <valueType>uint32</valueType>
+    <writeable/>
+    <odmVisable/>
+</attribute>
+
+<attribute>
+    <id>ATTR_MCBIST_TEST_TYPE</id>
+    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
+    <description>Enables mcbist test type selection.</description>
+    <valueType>uint32</valueType>
+    <writeable/>
+    <odmVisable/>
+</attribute>
+
+<attribute>
+    <id>ATTR_MCBIST_ADDR_MODES</id>
+    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
+    <description>Can choose mcbist address mode for full,half or quarter addressing mode.</description>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <odmVisable/>
+</attribute>
+
+<attribute>
+    <id>ATTR_MCBIST_RANK</id>
+    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
+    <description></description>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <odmVisable/>
+</attribute>
+
+<attribute>
+    <id>ATTR_MCBIST_START_ADDR</id>
+    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
+    <description>Defines the start address for the Mcbist address range</description>
+    <valueType>uint64</valueType>
+    <writeable/>
+    <odmVisable/>
+</attribute>
+
+<attribute>
+    <id>ATTR_MCBIST_END_ADDR</id>
+    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
+    <description>Defines the end address for the Mcbist address range</description>
+    <valueType>uint64</valueType>
+    <writeable/>
+    <odmVisable/>
+</attribute>
+
+<attribute>
+    <id>ATTR_MCBIST_ERROR_CAPTURE</id>
+    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
+    <description>Enables error capture; basically a flag.</description>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <odmVisable/>
+</attribute>
+
+<attribute>
+    <id>ATTR_MCBIST_MAX_TIMEOUT</id>
+    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
+    <description>Define mcbist Max timeout</description>
+    <valueType>uint64</valueType>
+    <writeable/>
+    <odmVisable/>
+</attribute>
+
+<attribute>
+    <id>ATTR_MCBIST_PRINT_PORT</id>
+    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
+    <description>Enable which port prints are required.</description>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <odmVisable/>
+</attribute>
+
+<attribute>
+    <id>ATTR_MCBIST_STOP_ON_ERROR</id>
+    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
+    <description>Flag to stop Mcbist on Error.</description>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <odmVisable/>
+</attribute>
+
+<attribute>
+    <id>ATTR_MCBIST_DATA_SEED</id>
+    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
+    <description>Define data seed for the random data pattern or test</description>
+    <valueType>uint32</valueType>
+    <writeable/>
+    <odmVisable/>
+</attribute>
+
+<attribute>
+    <id>ATTR_MCBIST_ADDR_INTER</id>
+    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
+    <description>The address interleave map with user cases or deafult cases of BANK_RANK,RANK_BANK,BANK_ONLY,RANK_ONLYRANKS_DIMM0,RANKS_DIMM1,USER_PATTERN.</description>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <odmVisable/>
+</attribute>
+
+<attribute>
+    <id>ATTR_MCBIST_ADDR_NUM_ROWS</id>
+    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
+    <description>User defined constraint for limiting number of rows for addressing.</description>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <odmVisable/>
+</attribute>
+
+<attribute>
+    <id>ATTR_MCBIST_ADDR_NUM_COLS</id>
+    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
+    <description>User defined constraint for limiting number of columns for addressing.</description>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <odmVisable/>
+</attribute>
+
+<attribute>
+    <id>ATTR_MCBIST_ADDR_RANK</id>
+    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
+    <description>User defined constraint for limiting number of ranks for addressing.</description>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <odmVisable/>
+</attribute>
+
+<attribute>
+    <id>ATTR_MCBIST_ADDR_BANK</id>
+    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
+    <description>User defined constraint for limiting number of banks for addressing.</description>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <odmVisable/>
+</attribute>
+
+<attribute>
+    <id>ATTR_MCBIST_ADDR_SLAVE_RANK_ON</id>
+    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
+    <description>If slave ranks exists;Restrict usage or enable addressing on them as well.</description>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <odmVisable/>
+</attribute>
+
+<attribute>
+    <id>ATTR_MCBIST_ADDR_STR_MAP</id>
+    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
+    <description>To Define custom addressing map ; Input by user.</description>
+    <valueType>uint64</valueType>
+    <writeable/>
+    <odmVisable/>
+</attribute>
+
+<attribute>
+    <id>ATTR_MCBIST_ADDR_RAND</id>
+    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
+    <description>Flag for Addressing to go sequential manner or random.</description>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <odmVisable/>
+</attribute>
+
+</attributes>

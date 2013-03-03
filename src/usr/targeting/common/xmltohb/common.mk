@@ -80,7 +80,8 @@ FAPI_ATTR_SOURCES =          \
     build_winkle_images/p8_slw_build/proc_pll_ring_attributes.xml \
     build_winkle_images/p8_slw_build/p8_xip_customize_attributes.xml \
     sync_attributes.xml   \
-    poreve_memory_attributes.xml
+    poreve_memory_attributes.xml \
+    mcbist_attributes.xml
 
 
 XMLTOHB_GENERIC_XML     = generic.xml

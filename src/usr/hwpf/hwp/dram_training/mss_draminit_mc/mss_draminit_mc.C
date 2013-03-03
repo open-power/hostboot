@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_draminit_mc.C,v 1.31 2013/01/21 16:47:20 lapietra Exp $
+// $Id: mss_draminit_mc.C,v 1.33 2013/02/04 20:04:51 lapietra Exp $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
 // *! All Rights Reserved -- Property of IBM
@@ -44,6 +44,8 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
+//  1.33   | dcadiga  |04-FEB-13| For some reason the main procedure call was commented out in the last commit... commenting it back in
+//  1.32   | gollub   |31-JAN-13| Uncommenting mss_unmask_maint_errors and mss_unmask_inband_errors
 //  1.31   | dcadiga  |21-JAN-13| Fixed variable name for memcal_interval (coded as memcal_iterval...)
 //  1.30   | dcadiga  |21-JAN-13| Hardcoded memcal interval to 0 (disabled) until attribute for EC is available
 //  1.29   | jdsloat  |14-JAN-13| Owner changed to Dave Cadigan.
@@ -124,20 +126,20 @@ ReturnCode mss_draminit_mc(Target& i_target)
     // Target is centaur.mba
     
     fapi::ReturnCode l_rc;
-    
+   //Commented back in by dcadiga 
     l_rc = mss_draminit_mc_cloned(i_target);
     
 	// If mss_unmask_maint_errors gets it's own bad rc,
 	// it will commit the passed in rc (if non-zero), and return it's own bad rc.
 	// Else if mss_unmask_maint_errors runs clean, 
 	// it will just return the passed in rc.
-	//l_rc = mss_unmask_maint_errors(i_target, l_rc); // TODO: uncomment after this can be tested on hw
+	l_rc = mss_unmask_maint_errors(i_target, l_rc);
 
 	// If mss_unmask_inband_errors gets it's own bad rc,
 	// it will commit the passed in rc (if non-zero), and return it's own bad rc.
 	// Else if mss_unmask_inband_errors runs clean, 
 	// it will just return the passed in rc.
-	//l_rc = mss_unmask_inband_errors(i_target, l_rc); // TODO: uncomment after this can be tested on hw
+	l_rc = mss_unmask_inband_errors(i_target, l_rc);
 
 	return l_rc;
 }

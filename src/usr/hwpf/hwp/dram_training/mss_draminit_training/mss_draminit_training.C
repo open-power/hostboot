@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_draminit_training.C,v 1.51 2013/01/31 22:33:54 gollub Exp $
+// $Id: mss_draminit_training.C,v 1.55 2013/02/25 19:05:31 jdsloat Exp $
 //------------------------------------------------------------------------------
 // Don't forget to create CVS comments when you check in your changes!
 //------------------------------------------------------------------------------
@@ -28,6 +28,13 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|------------------------------------------------
+//  1.55   | jdsloat  |25-FEB-13| Added MBA/Port info to debug messages.
+//  1.54   | jdsloat  |22-FEB-13| Edited WRITE_READ workaround to also edit DQSCLK PHASE
+//  1.53   | jdsloat  |14-FEB-13| Fixed WRITE_READ workaround so it will execute in a partial substep case
+//         |          |         | Edited mss_rtt_nom_rtt_wr_swap to only write rtt_nom with rtt_wr or supplied rtt_nom
+//         |          |         | Moved location of mss_rtt_nom_rtt_wr_swap around wr_lvl substep
+//         |          |         | Added Address Mirror Mode.
+//  1.52   | jdsloat  |07-FEB-13| Fixed address typo for RP3 in WRITE_READ workaround.
 //  1.51   | gollub   |31-JAN-13| Uncommenting mss_unmask_draminit_training_errors
 //  1.50   | jdsloat  |16-JAN-13| Fixed rank group enable within PC_INIT_CAL reg
 //  1.49   | jdsloat  |08-JAN-13| Added clearing RD PHASE SELECT values post Read Centering Workaround.
@@ -150,7 +157,8 @@ ReturnCode mss_draminit_training(Target& i_target);
 ReturnCode mss_draminit_training_cloned(Target& i_target);
 ReturnCode mss_check_cal_status(Target& i_target, uint8_t i_port, uint8_t i_group,  mss_draminit_training_result& io_status);
 ReturnCode mss_check_error_status(Target& i_target, uint8_t i_port, uint8_t i_group,  mss_draminit_training_result& io_status);
-ReturnCode mss_rtt_nom_rtt_wr_swap( Target& i_target, uint32_t i_port_number, uint8_t i_rank, uint32_t i_rank_pair_group, uint32_t& io_ccs_inst_cnt);
+ReturnCode mss_rtt_nom_rtt_wr_swap( Target& i_target, uint32_t i_port_number, uint8_t i_rank, uint32_t i_rank_pair_group, uint32_t& io_ccs_inst_cnt, uint8_t& io_dram_rtt_nom_original);
+
 ReturnCode getC4dq2reg(const Target &i_mba, const uint8_t i_port, const uint8_t i_dimm, const uint8_t i_rank, ecmdDataBufferBase &o_reg);
 ReturnCode setC4dq2reg(const Target &i_mba, const uint8_t i_port, const uint8_t i_dimm, const uint8_t i_rank, ecmdDataBufferBase &o_reg);
 ReturnCode mss_set_bbm_regs (const fapi::Target & mba_target);
@@ -252,17 +260,25 @@ ReturnCode mss_draminit_training_cloned(Target& i_target)
     uint8_t cal_steps = 0;
     uint8_t cur_cal_step = 0;
     ecmdDataBufferBase cal_steps_8(8);
-    uint64_t ADDR_0 = 0;
-    uint64_t ADDR_1 = 0;
-    uint64_t ADDR_2 = 0;
-    uint64_t ADDR_3 = 0;
-    uint64_t ADDR_4 = 0;
+    uint64_t DQSCLK_RD_PHASE_ADDR_0 = 0;
+    uint64_t DQSCLK_RD_PHASE_ADDR_1 = 0;
+    uint64_t DQSCLK_RD_PHASE_ADDR_2 = 0;
+    uint64_t DQSCLK_RD_PHASE_ADDR_3 = 0;
+    uint64_t DQSCLK_RD_PHASE_ADDR_4 = 0;
+    uint8_t l_value_u8 = 0;
+    uint8_t l_new_value_u8 = 0;
+    uint8_t l_nwell_misplacement = 0;
+
+    uint8_t dram_rtt_nom_original = 0;
     
     enum mss_draminit_training_result cur_complete_status = MSS_INIT_CAL_COMPLETE;
     enum mss_draminit_training_result cur_error_status = MSS_INIT_CAL_PASS;
 
     enum mss_draminit_training_result complete_status = MSS_INIT_CAL_COMPLETE;
     enum mss_draminit_training_result error_status = MSS_INIT_CAL_PASS;
+
+    fapi::Target l_target_centaur;
+    rc = fapiGetParentChip(i_target, l_target_centaur); if(rc) return rc;
 
     //populate primary_ranks_arrays_array
     rc = FAPI_ATTR_GET(ATTR_EFF_PRIMARY_RANK_GROUP0, &i_target, primary_ranks_array[0]);
@@ -274,9 +290,22 @@ ReturnCode mss_draminit_training_cloned(Target& i_target)
     rc = FAPI_ATTR_GET(ATTR_EFF_PRIMARY_RANK_GROUP3, &i_target, primary_ranks_array[3]);
     if(rc) return rc;
 
+    rc = FAPI_ATTR_GET(ATTR_MSS_NWELL_MISPLACEMENT, &l_target_centaur, l_nwell_misplacement);
+    if(rc) return rc;
+
+    uint8_t mbaPosition;
+    // Get MBA position: 0 = mba01, 1 = mba23
+    rc = FAPI_ATTR_GET(ATTR_CHIP_UNIT_POS, &i_target, mbaPosition);
+    if(rc)
+    {
+        FAPI_ERR("Error getting MBA position");
+        return rc;
+    }
+
     //Get which training steps we are to run
     rc = FAPI_ATTR_GET(ATTR_MSS_CAL_STEP_ENABLE, &i_target, cal_steps);
     if(rc) return rc;
+
     rc_num = rc_num | cal_steps_8.insert(cal_steps, 0, 8, 0);
 
     //Set up CCS Mode Reg for Init cal
@@ -310,7 +339,7 @@ ReturnCode mss_draminit_training_cloned(Target& i_target)
 	   (cal_steps_8.isBitClear(4)) && (cal_steps_8.isBitClear(5)) &&
 	   (cal_steps_8.isBitClear(6)) && (cal_steps_8.isBitClear(7)) ))
     {
-	FAPI_INF( "Performing External ZQ Calibration.");
+	FAPI_INF( "Performing External ZQ Calibration on MBA %d.", mbaPosition);
 
         //Execute ZQ_CAL
 	for(port = 0; port < MAX_NUM_PORT; port++)
@@ -331,12 +360,6 @@ ReturnCode mss_draminit_training_cloned(Target& i_target)
 	    if(primary_ranks_array[group][port] != INVALID)
 	    {
 
-		// Temporarily disable this function for HW debug
-	        // Change the RTT_NOM to RTT_WR, RTT_WR to RTT_NOM
-		//rc = mss_rtt_nom_rtt_wr_swap(i_target, port, primary_ranks_array[group][port], group, instruction_number);
-                if(rc) return rc;
-
-
 	        //Set up for Init Cal - Done per port pair
 		rc_num = rc_num | test_buffer_4.setBit(0, 2); //Init Cal test = 11XX
 		rc_num = rc_num | wen_buffer_1.flushTo1(); //Init Cal ras/cas/we = 1/1/1
@@ -344,7 +367,7 @@ ReturnCode mss_draminit_training_cloned(Target& i_target)
 		rc_num = rc_num | rasn_buffer_1.flushTo1();
 		rc_num = rc_num | ddr_cal_enable_buffer_1.flushTo1(); //Init cal
 
-		FAPI_INF( "+++ Setting up Init Cal on rank group: %d cal_steps: 0x%02X +++", group, cal_steps);
+		FAPI_INF( "+++ Setting up Init Cal on MBA: %d Port: %d rank group: %d cal_steps: 0x%02X +++", mbaPosition, port, group, cal_steps);
 
 		for(cur_cal_step = 1; cur_cal_step < MAX_CAL_STEPS; cur_cal_step++) //Cycle through all possible cal steps
 		{
@@ -466,7 +489,7 @@ ReturnCode mss_draminit_training_cloned(Target& i_target)
 			 (cal_steps_8.isBitClear(4)) && (cal_steps_8.isBitClear(5)) &&
 			 (cal_steps_8.isBitClear(6)) && (cal_steps_8.isBitClear(7)) )
 		    {
-			FAPI_INF( "+++ Executing ALL Cal Steps at the same time on rank group: %d +++", group);
+			FAPI_INF( "+++ Executing ALL Cal Steps at the same time on MBA: %d Port: %d rank group: %d +++", mbaPosition, port, group);
 			rc_num = rc_num | data_buffer_64.setBit(48);
 			rc_num = rc_num | data_buffer_64.setBit(50);
 			rc_num = rc_num | data_buffer_64.setBit(51);
@@ -477,42 +500,42 @@ ReturnCode mss_draminit_training_cloned(Target& i_target)
 		    }
 		    else if ( (cur_cal_step == 1) && (cal_steps_8.isBitSet(1)) )
 		    {
-			FAPI_INF( "+++ Write Leveling (WR_LVL) on rank group: %d +++", group);
+			FAPI_INF( "+++ Write Leveling (WR_LVL) on MBA: %d Port %d rank group: %d +++", mbaPosition, port, group);
 			rc_num = rc_num | data_buffer_64.setBit(48);
 		    }
 		    else if ( (cur_cal_step == 2) && (cal_steps_8.isBitSet(2)) )
 		    {
-			FAPI_INF( "+++ DQS Align (DQS_ALIGN) on rank group: %d +++", group);
+			FAPI_INF( "+++ DQS Align (DQS_ALIGN) on MBA: %d Port: %d rank group: %d +++", mbaPosition, port, group);
 			rc_num = rc_num | data_buffer_64.setBit(50);
 		    }
 		    else if ( (cur_cal_step == 3) && (cal_steps_8.isBitSet(3)) )
 		    {
-			FAPI_INF( "+++ RD CLK Align (RDCLK_ALIGN) on rank group: %d +++", group);
+			FAPI_INF( "+++ RD CLK Align (RDCLK_ALIGN) on MBA: %d Port: %d rank group: %d +++", mbaPosition, port, group);
 			rc_num = rc_num | data_buffer_64.setBit(51);
 		    }
 		    else if ( (cur_cal_step == 4) && (cal_steps_8.isBitSet(4)) )
 		    {
-			FAPI_INF( "+++ Read Centering (READ_CTR) on rank group: %d +++", group);
+			FAPI_INF( "+++ Read Centering (READ_CTR) on MBA: %d Port: %d rank group: %d +++", mbaPosition, port, group);
 			rc_num = rc_num | data_buffer_64.setBit(52);
 		    }
 		    else if ( (cur_cal_step == 5) && (cal_steps_8.isBitSet(5)) )
 		    {
-			FAPI_INF( "+++ Write Centering (WRITE_CTR) on rank group: %d +++", group);
+			FAPI_INF( "+++ Write Centering (WRITE_CTR) on MBA: %d Port: %d rank group: %d +++", mbaPosition, port, group);
 			rc_num = rc_num | data_buffer_64.setBit(53);
 		    }
 		    else if ( (cur_cal_step == 6) && (cal_steps_8.isBitSet(6)) && (cal_steps_8.isBitClear(7)) )
 		    {
-			FAPI_INF( "+++ Initial Course Write (COURSE_WR) on rank group: %d +++", group);
+			FAPI_INF( "+++ Initial Course Write (COURSE_WR) on MBA: %d Port: %d rank group: %d +++", mbaPosition, port, group);
 			rc_num = rc_num | data_buffer_64.setBit(54);
 		    }
 		    else if ( (cur_cal_step == 6) && (cal_steps_8.isBitClear(6)) && (cal_steps_8.isBitSet(7)) )
 		    {
-			FAPI_INF( "+++ Course Read (COURSE_RD) on rank group: %d +++", group);
+			FAPI_INF( "+++ Course Read (COURSE_RD) on MBA: %d Port: %d rank group: %d +++", mbaPosition, port, group);
 			rc_num = rc_num | data_buffer_64.setBit(55);
 		    }
 		    else if ( (cur_cal_step == 6) && (cal_steps_8.isBitSet(6)) && (cal_steps_8.isBitSet(7)) )
 		    {
-			FAPI_INF( "+++ Initial Course Write (COURSE_WR) and Course Read (COURSE_RD) simultaneously on rank group: %d +++", group);
+			FAPI_INF( "+++ Initial Course Write (COURSE_WR) and Course Read (COURSE_RD) simultaneously on MBA: %d Port: %d rank group: %d +++", mbaPosition, port, group);
 			rc_num = rc_num | data_buffer_64.setBit(54);
 			rc_num = rc_num | data_buffer_64.setBit(55);
 		    }
@@ -525,6 +548,20 @@ ReturnCode mss_draminit_training_cloned(Target& i_target)
 
 		    if ( !( data_buffer_64.isBitClear(48, 8) ) ) // Only execute if we are doing a Cal Step
 		    {
+
+		        // Before WR_LVL --- Change the RTT_NOM to RTT_WR pre-WR_LVL
+			if (cur_cal_step == 1)
+			{
+			    dram_rtt_nom_original = 0;
+			    rc = mss_rtt_nom_rtt_wr_swap(i_target,
+							 port,
+							 primary_ranks_array[group][port],
+							 group,
+							 instruction_number,
+							 dram_rtt_nom_original);
+			    if(rc) return rc;
+			}
+
 
 		        //Set the config register
 			if(port == 0)
@@ -571,6 +608,7 @@ ReturnCode mss_draminit_training_cloned(Target& i_target)
 
 			if(rc) return rc; //Error handling for mss_ccs_inst built into mss_funcs
 
+
 			rc = mss_execute_ccs_inst_array( i_target, NUM_POLL, 60);
 			if(rc) return rc; //Error handling for mss_ccs_inst built into mss_funcs
 
@@ -592,125 +630,196 @@ ReturnCode mss_draminit_training_cloned(Target& i_target)
 			    error_status = cur_error_status;
 			}
 
-			if ( (cur_cal_step == 4) && (cal_steps_8.isBitSet(5)) )
+			// Following WR_LVL -- Restore RTT_NOM to orignal value post-wr_lvl
+			if (cur_cal_step == 1)
+			{
+			    rc = mss_rtt_nom_rtt_wr_swap(i_target,
+							 port,
+							 primary_ranks_array[group][port],
+							 group,
+							 instruction_number,
+							 dram_rtt_nom_original);
+			    if(rc) return rc;
+
+			}
+
+			// Following Read Centering -- Enter into READ CENTERING WORKAROUND
+			// Adding a switch in anticipation of depending on the NWELL state.
+			// Currently will execute in either case
+			if  ( (cur_cal_step == 4) &&
+			    ( ( l_nwell_misplacement == fapi::ENUM_ATTR_MSS_NWELL_MISPLACEMENT_TRUE  )
+			    ||( l_nwell_misplacement == fapi::ENUM_ATTR_MSS_NWELL_MISPLACEMENT_FALSE ) ) )
 			{
 			    FAPI_INF( "+++ Read Centering Workaround on rank group: %d +++", group);
 			    FAPI_INF( "+++ Clearing values from RD PHASE SELECT regs. +++");
+			    FAPI_INF( "+++ Incrementing by 2 values from DQS CLK PHASE SELECT regs. +++");
 
 			    if ( port == 0 )
 			    {
 				if ( group == 0 )
 				{
-				    ADDR_0 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR0_P0_0_0x800000090301143F;
-				    ADDR_1 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR0_P0_1_0x800004090301143F;
-				    ADDR_2 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR0_P0_2_0x800008090301143F;
-				    ADDR_3 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR0_P0_3_0x80000C090301143F;
-				    ADDR_4 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR0_P0_4_0x800010090301143F;
+				    DQSCLK_RD_PHASE_ADDR_0 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR0_P0_0_0x800000090301143F;
+				    DQSCLK_RD_PHASE_ADDR_1 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR0_P0_1_0x800004090301143F;
+				    DQSCLK_RD_PHASE_ADDR_2 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR0_P0_2_0x800008090301143F;
+				    DQSCLK_RD_PHASE_ADDR_3 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR0_P0_3_0x80000C090301143F;
+				    DQSCLK_RD_PHASE_ADDR_4 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR0_P0_4_0x800010090301143F;
+
 				}
 				else if ( group == 1 )
 				{
-				    ADDR_0 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR1_P0_0_0x800001090301143F;
-				    ADDR_1 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR1_P0_1_0x800005090301143F;
-				    ADDR_2 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR1_P0_2_0x800009090301143F;
-				    ADDR_3 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR1_P0_3_0x80000D090301143F;
-				    ADDR_4 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR1_P0_4_0x800011090301143F;	
+				    DQSCLK_RD_PHASE_ADDR_0 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR1_P0_0_0x800001090301143F;
+				    DQSCLK_RD_PHASE_ADDR_1 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR1_P0_1_0x800005090301143F;
+				    DQSCLK_RD_PHASE_ADDR_2 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR1_P0_2_0x800009090301143F;
+				    DQSCLK_RD_PHASE_ADDR_3 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR1_P0_3_0x80000D090301143F;
+				    DQSCLK_RD_PHASE_ADDR_4 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR1_P0_4_0x800011090301143F;
+
 				}
 				else if ( group == 2 )
 				{
-				    ADDR_0 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR2_P0_0_0x800002090301143F;
-				    ADDR_1 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR2_P0_1_0x800006090301143F;
-				    ADDR_2 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR2_P0_2_0x80000A090301143F;
-				    ADDR_3 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR2_P0_3_0x80000E090301143F;
-				    ADDR_4 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR2_P0_4_0x800012090301143F;
+				    DQSCLK_RD_PHASE_ADDR_0 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR2_P0_0_0x800002090301143F;
+				    DQSCLK_RD_PHASE_ADDR_1 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR2_P0_1_0x800006090301143F;
+				    DQSCLK_RD_PHASE_ADDR_2 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR2_P0_2_0x80000A090301143F;
+				    DQSCLK_RD_PHASE_ADDR_3 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR2_P0_3_0x80000E090301143F;
+				    DQSCLK_RD_PHASE_ADDR_4 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR2_P0_4_0x800012090301143F;
+
 				}
 				else if ( group == 3 )
 				{
-				    ADDR_0 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR2_P0_0_0x800002090301143F;
-				    ADDR_1 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR2_P0_1_0x800006090301143F;
-				    ADDR_2 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR2_P0_2_0x80000A090301143F;
-				    ADDR_3 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR2_P0_3_0x80000E090301143F;
-				    ADDR_4 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR2_P0_4_0x800012090301143F;
+				    DQSCLK_RD_PHASE_ADDR_0 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR3_P0_0_0x800003090301143F;
+				    DQSCLK_RD_PHASE_ADDR_1 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR3_P0_1_0x800007090301143F;
+				    DQSCLK_RD_PHASE_ADDR_2 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR3_P0_2_0x80000B090301143F;
+				    DQSCLK_RD_PHASE_ADDR_3 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR3_P0_3_0x80000F090301143F;
+				    DQSCLK_RD_PHASE_ADDR_4 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR3_P0_4_0x800013090301143F;
+
 				}
 			    }
 			    else if (port == 1 )
 			    {
 				if ( group == 0 )
 				{
-				    ADDR_0 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR0_P1_0_0x800100090301143F;
-				    ADDR_1 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR0_P1_1_0x800104090301143F;
-				    ADDR_2 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR0_P1_2_0x800108090301143F;
-				    ADDR_3 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR0_P1_3_0x80010C090301143F;
-				    ADDR_4 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR0_P1_4_0x800110090301143F;
+				    DQSCLK_RD_PHASE_ADDR_0 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR0_P1_0_0x800100090301143F;
+				    DQSCLK_RD_PHASE_ADDR_1 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR0_P1_1_0x800104090301143F;
+				    DQSCLK_RD_PHASE_ADDR_2 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR0_P1_2_0x800108090301143F;
+				    DQSCLK_RD_PHASE_ADDR_3 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR0_P1_3_0x80010C090301143F;
+				    DQSCLK_RD_PHASE_ADDR_4 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR0_P1_4_0x800110090301143F;
+
 				}
 				else if ( group == 1 )
 				{
-				    ADDR_0 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR1_P1_0_0x800101090301143F;
-				    ADDR_1 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR1_P1_1_0x800105090301143F;
-				    ADDR_2 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR1_P1_2_0x800109090301143F;
-				    ADDR_3 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR1_P1_3_0x80010D090301143F;
-				    ADDR_4 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR1_P1_4_0x800111090301143F;	
+				    DQSCLK_RD_PHASE_ADDR_0 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR1_P1_0_0x800101090301143F;
+				    DQSCLK_RD_PHASE_ADDR_1 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR1_P1_1_0x800105090301143F;
+				    DQSCLK_RD_PHASE_ADDR_2 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR1_P1_2_0x800109090301143F;
+				    DQSCLK_RD_PHASE_ADDR_3 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR1_P1_3_0x80010D090301143F;
+				    DQSCLK_RD_PHASE_ADDR_4 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR1_P1_4_0x800111090301143F;
+
+	
 				}
 				else if ( group == 2 )
 				{
-				    ADDR_0 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR2_P1_0_0x800102090301143F;
-				    ADDR_1 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR2_P1_1_0x800106090301143F;
-				    ADDR_2 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR2_P1_2_0x80010A090301143F;
-				    ADDR_3 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR2_P1_3_0x80010E090301143F;
-				    ADDR_4 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR2_P1_4_0x800112090301143F;
+				    DQSCLK_RD_PHASE_ADDR_0 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR2_P1_0_0x800102090301143F;
+				    DQSCLK_RD_PHASE_ADDR_1 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR2_P1_1_0x800106090301143F;
+				    DQSCLK_RD_PHASE_ADDR_2 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR2_P1_2_0x80010A090301143F;
+				    DQSCLK_RD_PHASE_ADDR_3 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR2_P1_3_0x80010E090301143F;
+				    DQSCLK_RD_PHASE_ADDR_4 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR2_P1_4_0x800112090301143F;
+
 				}
 				else if ( group == 3 )
 				{
-				    ADDR_0 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR3_P1_0_0x800103090301143F;
-				    ADDR_1 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR3_P1_1_0x800107090301143F;
-				    ADDR_2 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR3_P1_2_0x80010B090301143F;
-				    ADDR_3 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR3_P1_3_0x80010F090301143F;
-				    ADDR_4 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR3_P1_4_0x800113090301143F;
+				    DQSCLK_RD_PHASE_ADDR_0 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR3_P1_0_0x800103090301143F;
+				    DQSCLK_RD_PHASE_ADDR_1 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR3_P1_1_0x800107090301143F;
+				    DQSCLK_RD_PHASE_ADDR_2 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR3_P1_2_0x80010B090301143F;
+				    DQSCLK_RD_PHASE_ADDR_3 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR3_P1_3_0x80010F090301143F;
+				    DQSCLK_RD_PHASE_ADDR_4 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR3_P1_4_0x800113090301143F;
+
 				}
 			    }
 
-			    rc = fapiGetScom(i_target, ADDR_0, data_buffer_64);
+			    // Set Read Phase to 0.
+                            //Increment dqs clk 2. 4 is the limit, wrap around (IE 5 = 1, 6 = 2)
+			    rc = fapiGetScom(i_target, DQSCLK_RD_PHASE_ADDR_0, data_buffer_64);
+			    if (rc) return rc;
 			    rc_num = rc_num | data_buffer_64.clearBit(50, 2);
 			    rc_num = rc_num | data_buffer_64.clearBit(54, 2);
 			    rc_num = rc_num | data_buffer_64.clearBit(58, 2);
 			    rc_num = rc_num | data_buffer_64.clearBit(62, 2);
-			    rc = fapiPutScom(i_target, ADDR_0, data_buffer_64);
 
-			    rc = fapiGetScom(i_target, ADDR_1, data_buffer_64);
-			    rc_num = rc_num | data_buffer_64.clearBit(50, 2);
-			    rc_num = rc_num | data_buffer_64.clearBit(54, 2);
-			    rc_num = rc_num | data_buffer_64.clearBit(58, 2);
-			    rc_num = rc_num | data_buffer_64.clearBit(62, 2);
-			    rc = fapiPutScom(i_target, ADDR_1, data_buffer_64);
+			    for ( uint8_t l_element_u8 = 0; l_element_u8 < 4; l_element_u8 += 1 ) {
+				l_value_u8 = 0;
+				data_buffer_64.extractToRight(&l_value_u8, (48 + (l_element_u8 * 4)), 2);
+				l_new_value_u8 = (l_value_u8 + 2) % 4;
+				data_buffer_64.insertFromRight(&l_new_value_u8, (48 + (l_element_u8 * 4)), 2);
+			    }
+			    rc = fapiPutScom(i_target, DQSCLK_RD_PHASE_ADDR_0, data_buffer_64);
+			    if (rc) return rc;
 
-			    rc = fapiGetScom(i_target, ADDR_2, data_buffer_64);
+			    rc = fapiGetScom(i_target, DQSCLK_RD_PHASE_ADDR_1, data_buffer_64);
+			    if (rc) return rc;
 			    rc_num = rc_num | data_buffer_64.clearBit(50, 2);
 			    rc_num = rc_num | data_buffer_64.clearBit(54, 2);
 			    rc_num = rc_num | data_buffer_64.clearBit(58, 2);
 			    rc_num = rc_num | data_buffer_64.clearBit(62, 2);
-			    rc = fapiPutScom(i_target, ADDR_2, data_buffer_64);
 
-			    rc = fapiGetScom(i_target, ADDR_3, data_buffer_64);
-			    rc_num = rc_num | data_buffer_64.clearBit(50, 2);
-			    rc_num = rc_num | data_buffer_64.clearBit(54, 2);
-			    rc_num = rc_num | data_buffer_64.clearBit(58, 2);
-			    rc_num = rc_num | data_buffer_64.clearBit(62, 2);
-			    rc = fapiPutScom(i_target, ADDR_3, data_buffer_64);
+			    for ( uint8_t l_element_u8 = 0; l_element_u8 < 4; l_element_u8 += 1 ) {
+				l_value_u8 = 0;
+				data_buffer_64.extractToRight(&l_value_u8, (48 + (l_element_u8 * 4)), 2);
+				l_new_value_u8 = (l_value_u8 + 2) % 4;
+				data_buffer_64.insertFromRight(&l_new_value_u8, (48 + (l_element_u8 * 4)), 2);
+			    }
+			    rc = fapiPutScom(i_target, DQSCLK_RD_PHASE_ADDR_1, data_buffer_64);
+			    if (rc) return rc;
 
-			    rc = fapiGetScom(i_target, ADDR_4, data_buffer_64);
+			    rc = fapiGetScom(i_target, DQSCLK_RD_PHASE_ADDR_2, data_buffer_64);
+			    if (rc) return rc;
 			    rc_num = rc_num | data_buffer_64.clearBit(50, 2);
 			    rc_num = rc_num | data_buffer_64.clearBit(54, 2);
 			    rc_num = rc_num | data_buffer_64.clearBit(58, 2);
 			    rc_num = rc_num | data_buffer_64.clearBit(62, 2);
-			    rc = fapiPutScom(i_target, ADDR_4, data_buffer_64);
+
+			    for ( uint8_t l_element_u8 = 0; l_element_u8 < 4; l_element_u8 += 1 ) {
+				l_value_u8 = 0;
+				data_buffer_64.extractToRight(&l_value_u8, (48 + (l_element_u8 * 4)), 2);
+				l_new_value_u8 = (l_value_u8 + 2) % 4;
+				data_buffer_64.insertFromRight(&l_new_value_u8, (48 + (l_element_u8 * 4)), 2);
+			    }
+			    rc = fapiPutScom(i_target, DQSCLK_RD_PHASE_ADDR_2, data_buffer_64);
+			    if (rc) return rc;
+
+			    rc = fapiGetScom(i_target, DQSCLK_RD_PHASE_ADDR_3, data_buffer_64);
+			    if (rc) return rc;
+			    rc_num = rc_num | data_buffer_64.clearBit(50, 2);
+			    rc_num = rc_num | data_buffer_64.clearBit(54, 2);
+			    rc_num = rc_num | data_buffer_64.clearBit(58, 2);
+			    rc_num = rc_num | data_buffer_64.clearBit(62, 2);
+
+			    for ( uint8_t l_element_u8 = 0; l_element_u8 < 4; l_element_u8 += 1 ) {
+				l_value_u8 = 0;
+				data_buffer_64.extractToRight(&l_value_u8, (48 + (l_element_u8 * 4)), 2);
+				l_new_value_u8 = (l_value_u8 + 2) % 4;
+				data_buffer_64.insertFromRight(&l_new_value_u8, (48 + (l_element_u8 * 4)), 2);
+			    }
+			    rc = fapiPutScom(i_target, DQSCLK_RD_PHASE_ADDR_3, data_buffer_64);
+			    if (rc) return rc;
+
+			    rc = fapiGetScom(i_target, DQSCLK_RD_PHASE_ADDR_4, data_buffer_64);
+			    if (rc) return rc;
+			    rc_num = rc_num | data_buffer_64.clearBit(50, 2);
+			    rc_num = rc_num | data_buffer_64.clearBit(54, 2);
+			    rc_num = rc_num | data_buffer_64.clearBit(58, 2);
+			    rc_num = rc_num | data_buffer_64.clearBit(62, 2);
+
+			    for ( uint8_t l_element_u8 = 0; l_element_u8 < 4; l_element_u8 += 1 ) {
+				l_value_u8 = 0;
+				data_buffer_64.extractToRight(&l_value_u8, (48 + (l_element_u8 * 4)), 2);
+				l_new_value_u8 = (l_value_u8 + 2) % 4;
+				data_buffer_64.insertFromRight(&l_new_value_u8, (48 + (l_element_u8 * 4)), 2);
+			    }
+			    rc = fapiPutScom(i_target, DQSCLK_RD_PHASE_ADDR_4, data_buffer_64);
+			    if (rc) return rc;
 
 			}
 
 		    }
 		}//end of step loop
-
-		// Temporarily disable this function for HW debug
-	        // Change the RTT_NOM to RTT_WR, RTT_WR to RTT_NOM
-		//rc = mss_rtt_nom_rtt_wr_swap(i_target, port, primary_ranks_array[group][port], group, instruction_number);
 	    }
 	}//end of group loop
     }//end of port loop
@@ -876,9 +985,17 @@ ReturnCode mss_rtt_nom_rtt_wr_swap(
             uint32_t i_port_number,
             uint8_t i_rank,
 	    uint32_t i_rank_pair_group,
-            uint32_t& io_ccs_inst_cnt
+            uint32_t& io_ccs_inst_cnt,
+	    uint8_t& io_dram_rtt_nom_original
             )
 {
+    // Target MBA level
+    // This is a function written specifically for mss_draminit_training
+    // Meant for placing RTT_WR into RTT_NOM within MR1 before wr_lvl
+    // If the function argument dram_rtt_nom_original is 0 it will put the original rtt_nom there
+    // and write rtt_wr to the rtt_nom value
+    // If the function argument dram_rtt_nom_original has a value it will write that value to rtt_nom.
+
 
     ReturnCode rc;  
     ReturnCode rc_buff;
@@ -886,6 +1003,8 @@ ReturnCode mss_rtt_nom_rtt_wr_swap(
 
     ecmdDataBufferBase address_16(16);
     ecmdDataBufferBase bank_3(3);
+    ecmdDataBufferBase address_pre_AMM_16(16);
+    ecmdDataBufferBase bank_pre_AMM_3(3);
     ecmdDataBufferBase activate_1(1);
     ecmdDataBufferBase rasn_1(1);
     rc_num = rc_num | rasn_1.clearBit(0);
@@ -916,6 +1035,16 @@ ReturnCode mss_rtt_nom_rtt_wr_swap(
 
     uint16_t MRS1 = 0;
     uint16_t MRS2 = 0;
+    uint16_t mirror_mode_ba = 0;
+    uint16_t mirror_mode_ad  = 0;
+
+    uint8_t dimm_type;
+    rc = FAPI_ATTR_GET(ATTR_EFF_DIMM_TYPE, &i_target, dimm_type);
+    if(rc) return rc;
+
+    uint8_t is_sim = 0;
+    rc = FAPI_ATTR_GET(ATTR_IS_SIMULATION, NULL, is_sim);
+    if(rc) return rc;
 
     // Raise CKE high with NOPS, waiting min Reset CKE exit time (tXPR) - 400 cycles
     rc_num = rc_num | csn_8.setBit(0,8);
@@ -964,11 +1093,27 @@ ReturnCode mss_rtt_nom_rtt_wr_swap(
     {
 	rc_num = rc_num | csn_8.clearBit(3);
     }
+    else if (i_rank == 4)
+    {
+	rc_num = rc_num | csn_8.clearBit(4);
+    }
+    else if (i_rank == 5)
+    {
+	rc_num = rc_num | csn_8.clearBit(5);
+    }
+    else if (i_rank == 6)
+    {
+	rc_num = rc_num | csn_8.clearBit(6);
+    }
+    else if (i_rank == 7)
+    {
+	rc_num = rc_num | csn_8.clearBit(7);
+    }
 
     // MRS CMD to CMD spacing = 12 cycles
     rc_num = rc_num | num_idles_16.insertFromRight((uint32_t) 12, 0, 16);
 
-    FAPI_INF( "SWAPPING RTT_NOM AND RTT_WR FOR PORT%d RP%d", i_port_number, i_rank_pair_group);
+    FAPI_INF( "Editing RTT_NOM during wr_lvl for PORT%d RP%d", i_port_number, i_rank_pair_group);
 
     //MRS1
     // Get contents of MRS 1 Shadow Reg
@@ -1013,7 +1158,7 @@ ReturnCode mss_rtt_nom_rtt_wr_swap(
     rc_num = rc_num | data_buffer_64.reverse();
     rc_num = rc_num | mrs1_16.insert(data_buffer_64, 0, 16, 0);
     rc_num = rc_num | mrs1_16.extractPreserve(&MRS1, 0, 16, 0);
-    FAPI_INF( "ORIGINAL MRS 1: 0x%04X", MRS1);
+    FAPI_INF( "CURRENT MRS 1: 0x%04X", MRS1);
 
     uint8_t dll_enable = 0x00; //DLL Enable 
     if (mrs1_16.isBitSet(0))
@@ -1039,44 +1184,45 @@ ReturnCode mss_rtt_nom_rtt_wr_swap(
 	out_drv_imp_cntl = 0x80;
     }
 
-    uint8_t dram_rtt_wr = 0x00;
+    uint8_t dram_rtt_nom = 0x00;
     if ( (mrs1_16.isBitClear(2)) && (mrs1_16.isBitClear(6)) && (mrs1_16.isBitClear(9)) )
     {
 	// RTT_NOM set to disabled
-        //RTT WR Disabled
-	dram_rtt_wr = 0x00;
+	FAPI_INF( "DRAM_RTT_NOM orignally set to Disabled.");
+	dram_rtt_nom = 0x00;
+
     }
     else if ( (mrs1_16.isBitClear(2)) && (mrs1_16.isBitClear(6)) && (mrs1_16.isBitSet(9)) )
     {
 	// RTT_NOM set to 20
-        //RTT WR 60 OHM
-	dram_rtt_wr = 0x80;
+	FAPI_INF( "DRAM_RTT_NOM orignally set to 20 Ohm.");
+	dram_rtt_nom = 0x20;
     }
     else if ( (mrs1_16.isBitSet(2)) && (mrs1_16.isBitClear(6)) && (mrs1_16.isBitSet(9)) )
     {
 	// RTT_NOM set to 30
-        //RTT WR 60 OHM
-	dram_rtt_wr = 0x80;
+	FAPI_INF( "DRAM_RTT_NOM orignally set to 30 Ohm.");
+	dram_rtt_nom = 0xA0;
     }
     else if ( (mrs1_16.isBitSet(2)) && (mrs1_16.isBitSet(6)) && (mrs1_16.isBitClear(9)) )
     {
 	// RTT_NOM set to 40
-	//RTT WR 60 OHM
-	dram_rtt_wr = 0x80;
+	FAPI_INF( "DRAM_RTT_NOM orignally set to 40 Ohm.");
+	dram_rtt_nom = 0xC0;
     }
     else if ( (mrs1_16.isBitSet(2)) && (mrs1_16.isBitSet(6)) && (mrs1_16.isBitClear(9)) )
     {
         // RTT_NOM set to 60
-        //RTT WR 60 OHM
-	dram_rtt_wr = 0x80;
+	FAPI_INF( "DRAM_RTT_NOM orignally set to 60 Ohm.");
+	dram_rtt_nom = 0x80;
     }
     else if ( (mrs1_16.isBitClear(2)) && (mrs1_16.isBitSet(6)) && (mrs1_16.isBitClear(9)) )
     {
 	// RTT_NOM set to 120
-	// RTT_WR set to 120
-	dram_rtt_wr = 0x40;
+	FAPI_INF( "DRAM_RTT_NOM orignally set to 120 Ohm.");
+	dram_rtt_nom = 0x40;
     }
-    
+
     uint8_t dram_al = 0x00;
     if ( (mrs1_16.isBitClear(3)) && (mrs1_16.isBitClear(4)) )
     {
@@ -1130,11 +1276,8 @@ ReturnCode mss_rtt_nom_rtt_wr_swap(
         q_off = 0x00;
     }
 
-    //MRS2
-    // MRS CMD to CMD spacing = 12 cycles
-    rc_num = rc_num | num_idles_16.insertFromRight((uint32_t) 12, 0, 16);
 
-    // Get contents of MRS 1 Shadow Reg
+    // Get contents of MRS 2 Shadow Reg
     if (i_port_number == 0){
     	if (i_rank_pair_group == 0)
     	{
@@ -1175,135 +1318,98 @@ ReturnCode mss_rtt_nom_rtt_wr_swap(
     rc_num = rc_num | data_buffer_64.reverse();
     rc_num = rc_num | mrs2_16.insert(data_buffer_64, 0, 16, 0);
     rc_num = rc_num | mrs2_16.extractPreserve(&MRS2, 0, 16, 0);
-    FAPI_INF( "ORIGINAL MRS 2: 0x%04X", MRS2);
+    FAPI_INF( "MRS 2: 0x%04X", MRS2);
 
-    uint8_t pt_arr_sr = 0x00; //Partial Array Self Refresh  
-    if ( (mrs2_16.isBitClear(0)) && (mrs2_16.isBitClear(1)) && (mrs2_16.isBitClear(2)) )
-    {
-	//PASR FULL
-        pt_arr_sr = 0x00;
-    }
-    else if ( (mrs2_16.isBitSet(0)) && (mrs2_16.isBitClear(1)) && (mrs2_16.isBitClear(2)) )
-    {
-	//PASR FIRST HALF
-        pt_arr_sr = 0x80;
-    }
-    else if ( (mrs2_16.isBitClear(0)) && (mrs2_16.isBitSet(1)) && (mrs2_16.isBitClear(2)) )
-    {
-	// PASR FIRST QUARTER
-        pt_arr_sr = 0x40;
-    }
-    else if ( (mrs2_16.isBitSet(0)) && (mrs2_16.isBitSet(1)) && (mrs2_16.isBitClear(2)) )
-    {
-	// PASR FIRST EIGHTH
-        pt_arr_sr = 0xC0;
-    }
-    else if ( (mrs2_16.isBitClear(0)) && (mrs2_16.isBitClear(1)) && (mrs2_16.isBitSet(2)) )
-    {
-	// PASR LAST FOURTH
-        pt_arr_sr = 0x20;
-    }
-    else if ( (mrs2_16.isBitSet(0)) && (mrs2_16.isBitClear(1)) && (mrs2_16.isBitSet(2)) )
-    {
-	// PASR LAST HALF
-        pt_arr_sr = 0xA0;
-    }
-    else if ( (mrs2_16.isBitClear(0)) && (mrs2_16.isBitSet(1)) && (mrs2_16.isBitSet(2)) )
-    {
-	// PASR LAST QUARTER
-        pt_arr_sr = 0x60;
-    }
-    else if ( (mrs2_16.isBitSet(0)) && (mrs2_16.isBitSet(1)) && (mrs2_16.isBitSet(2)) )
-    {
-	// PASR LAST EIGHTH
-        pt_arr_sr = 0xE0;
-    }
-
-    uint8_t cwl = 0x00; // CAS Write Latency 
-    if ( (mrs2_16.isBitClear(3)) && (mrs2_16.isBitClear(4)) && (mrs2_16.isBitClear(5)) )
-    {
-	// CWL = 5
-        cwl = 0x00;
-    }
-    else if ( (mrs2_16.isBitSet(3)) && (mrs2_16.isBitClear(4)) && (mrs2_16.isBitClear(5)) )
-    {
-	// CWL = 6
-        cwl = 0x80;
-    }
-    else if ( (mrs2_16.isBitClear(3)) && (mrs2_16.isBitSet(4)) && (mrs2_16.isBitClear(5)) )
-    {
-	// CWL = 7
-        cwl = 0x40;
-    }
-    else if ( (mrs2_16.isBitSet(3)) && (mrs2_16.isBitSet(4)) && (mrs2_16.isBitClear(5)) )
-    {
-	// CWL = 8
-        cwl = 0xC0;
-    }
-    else if ( (mrs2_16.isBitClear(3)) && (mrs2_16.isBitClear(4)) && (mrs2_16.isBitSet(5)) )
-    {
-	// CWL = 9
-        cwl = 0x20;
-    }
-    else if ( (mrs2_16.isBitSet(3)) && (mrs2_16.isBitClear(4)) && (mrs2_16.isBitSet(5)) )
-    {
-	// CWL = 10
-        cwl = 0xA0;
-    }
-    else if ( (mrs2_16.isBitClear(3)) && (mrs2_16.isBitSet(4)) && (mrs2_16.isBitSet(5)) )
-    {
-	// CWL = 11
-        cwl = 0x60;
-    }
-    else if ( (mrs2_16.isBitSet(3)) && (mrs2_16.isBitSet(4)) && (mrs2_16.isBitSet(5)) )
-    {
-	// CWL = 12
-        cwl = 0xE0;
-    }
-
-    uint8_t auto_sr = 0x00; // Auto Self-Refresh
-    if ( (mrs2_16.isBitClear(6)) )
-    {
-	//AUTO SR = SRT
-        auto_sr = 0x00;
-    }
-    else if ( (mrs2_16.isBitSet(6)) )
-    {
-	//AUTO SR = ASR ENABLE
-        auto_sr = 0xFF;
-    }
-
-    uint8_t sr_temp = 0x00; // Self-Refresh Temp Range
-    if ( (mrs2_16.isBitClear(7)) )
-    {
-	//SRT NORMAL
-        sr_temp = 0x00;
-    }
-    else if ( (mrs2_16.isBitSet(7)) )
-    {
-	//SRT EXTEND
-        sr_temp = 0xFF;
-    }
-
-    uint8_t dram_rtt_nom = 0x00;
+    uint8_t dram_rtt_wr = 0x00;
     if ( (mrs2_16.isBitClear(9)) && (mrs2_16.isBitClear(10)) )
     {
 	//RTT WR DISABLE
-	// RTT_NOM set to disabled
-	dram_rtt_nom = 0x00;
+	FAPI_INF( "DRAM_RTT_WR currently set to disable.");
+	dram_rtt_wr = 0x00;
+
+	//RTT NOM CODE FOR THIS VALUE IS 
+	// dram_rtt_nom = 0x00
+
     }
     else if ( (mrs2_16.isBitSet(9)) && (mrs2_16.isBitClear(10)) )
     {
 	//RTT WR 60 OHM
-        // RTT_NOM set to 60
-	dram_rtt_nom = 0x80;
+	FAPI_INF( "DRAM_RTT_WR currently set to 60 Ohm.");
+	dram_rtt_wr = 0x80;
+
+        //RTT NOM CODE FOR THIS VALUE IS 
+	// dram_rtt_nom = 0x80
+
     }
     else if ( (mrs2_16.isBitClear(9)) && (mrs2_16.isBitSet(10)) )
     {
 	//RTT WR 120 OHM
-	// RTT_NOM set to 120
-	dram_rtt_nom = 0x40;
+	FAPI_INF( "DRAM_RTT_WR currently set to 120 Ohm.");
+	dram_rtt_wr = 0x40;
+
+        //RTT NOM CODE FOR THIS VALUE IS 
+	// dram_rtt_nom = 0x40
+
     }
+
+
+    // If you have a 0 value in dram_rtt_nom_orignal
+    // you will use dram_rtt_nom_original to save the original value
+    if (io_dram_rtt_nom_original  == 0)
+    {
+	io_dram_rtt_nom_original = dram_rtt_nom;
+	dram_rtt_nom = dram_rtt_wr;
+
+	if (dram_rtt_wr == 0x00)
+	{
+	    FAPI_INF( "DRAM_RTT_NOM to be set to DRAM_RTT_WR which is disable.");
+	}
+	else if (dram_rtt_wr == 0x80)
+	{
+	    FAPI_INF( "DRAM_RTT_NOM to be set to DRAM_RTT_WR which is 60 Ohm.");
+	}
+	else if (dram_rtt_wr == 0x40)
+	{
+	    FAPI_INF( "DRAM_RTT_NOM to be set to DRAM_RTT_WR which is 120 Ohm.");
+	}
+    }
+    else if (io_dram_rtt_nom_original != 0)
+    {
+	dram_rtt_nom = io_dram_rtt_nom_original;
+
+	if ( dram_rtt_nom == 0x00 )
+	{
+	    // RTT_NOM set to disabled
+	    FAPI_INF( "DRAM_RTT_NOM being set back to Disabled.");
+
+	}
+	else if ( dram_rtt_nom == 0x20 )
+	{
+	    // RTT_NOM set to 20
+	    FAPI_INF( "DRAM_RTT_NOM being set back to 20 Ohm.");
+	}
+	else if ( dram_rtt_nom == 0xA0 )
+	{
+	    // RTT_NOM set to 30
+	    FAPI_INF( "DRAM_RTT_NOM being set back to 30 Ohm.");
+	}
+	else if ( dram_rtt_nom == 0xC0 )
+	{
+	    // RTT_NOM set to 40
+	    FAPI_INF( "DRAM_RTT_NOM being set back to 40 Ohm.");
+	}
+	else if ( dram_rtt_nom == 0x80 )
+	{
+	    // RTT_NOM set to 60
+	    FAPI_INF( "DRAM_RTT_NOM being set back to 60 Ohm.");
+	}
+	else if ( dram_rtt_nom == 0x40 )
+	{
+	    // RTT_NOM set to 120
+	    FAPI_INF( "DRAM_RTT_NOM being set back to 120 Ohm.");
+	}
+    }
+
 
     rc_num = rc_num | mrs1_16.insert((uint8_t) dll_enable, 0, 1, 0);
     rc_num = rc_num | mrs1_16.insert((uint8_t) out_drv_imp_cntl, 1, 1, 0);
@@ -1322,10 +1428,55 @@ ReturnCode mss_rtt_nom_rtt_wr_swap(
     rc_num = rc_num | mrs1_16.extractPreserve(&MRS1, 0, 16, 0);
     FAPI_INF( "NEW MRS 1: 0x%04X", MRS1);
 
-    rc_num = rc_num | address_16.insert(mrs1_16, 0, 16, 0);
-    rc_num = rc_num | bank_3.insert((uint8_t) MRS1_BA, 0, 1, 7);
-    rc_num = rc_num | bank_3.insert((uint8_t) MRS1_BA, 1, 1, 6);
-    rc_num = rc_num | bank_3.insert((uint8_t) MRS1_BA, 2, 1, 5);
+    // Copying the current MRS into address buffer matching the MRS_array order
+    // Setting the bank address
+
+    rc_num = rc_num | address_pre_AMM_16.insert(mrs1_16, 0, 16, 0);
+    rc_num = rc_num | bank_pre_AMM_3.insert((uint8_t) MRS1_BA, 0, 1, 7);
+    rc_num = rc_num | bank_pre_AMM_3.insert((uint8_t) MRS1_BA, 1, 1, 6);
+    rc_num = rc_num | bank_pre_AMM_3.insert((uint8_t) MRS1_BA, 2, 1, 5);
+
+    if ( (dimm_type == ENUM_ATTR_EFF_DIMM_TYPE_CDIMM) && (i_rank > 3) && (is_sim == 0))
+    {
+	FAPI_INF( "MUST USE ADDRESS MIRRORING ON PORT%d RANK%d", i_port_number, i_rank);
+
+	rc_num = rc_num | address_pre_AMM_16.extractPreserve(&mirror_mode_ad, 0, 16, 0);
+	FAPI_INF( "PRE - MIRROR MODE ADDRESS: 0x%04X", mirror_mode_ad);
+	rc_num = rc_num | bank_pre_AMM_3.extractPreserve(&mirror_mode_ba, 0, 3, 0);
+	FAPI_INF( "PRE - MIRROR MODE BANK ADDRESS: 0x%04X", mirror_mode_ba);
+
+	//Initialize address and bank address as the same pre mirror mode swizzle
+	rc_num = rc_num | address_16.insert(address_pre_AMM_16, 0, 16, 0);
+	rc_num = rc_num | bank_3.insert(bank_pre_AMM_3, 0, 3, 0);
+
+	//Swap A3 and A4
+	rc_num = rc_num | address_16.insert(address_pre_AMM_16, 4, 1, 3);
+	rc_num = rc_num | address_16.insert(address_pre_AMM_16, 3, 1, 4);
+
+	//Swap A5 and A6
+	rc_num = rc_num | address_16.insert(address_pre_AMM_16, 6, 1, 5);
+	rc_num = rc_num | address_16.insert(address_pre_AMM_16, 5, 1, 6);
+
+	//Swap A7 and A8
+	rc_num = rc_num | address_16.insert(address_pre_AMM_16, 8, 1, 7);
+	rc_num = rc_num | address_16.insert(address_pre_AMM_16, 7, 1, 8);
+
+	//Swap BA0 and BA1
+	rc_num = rc_num | bank_3.insert(bank_pre_AMM_3, 1, 1, 0);
+	rc_num = rc_num | bank_3.insert(bank_pre_AMM_3, 0, 1, 1);
+
+	rc_num = rc_num | address_16.extractPreserve(&mirror_mode_ad, 0, 16, 0);
+	FAPI_INF( "POST - MIRROR MODE ADDRESS: 0x%04X", mirror_mode_ad);
+	rc_num = rc_num | bank_3.extractPreserve(&mirror_mode_ba, 0, 3, 0);
+	FAPI_INF( "POST - MIRROR MODE BANK ADDRESS: 0x%04X", mirror_mode_ba);
+
+    }
+    else
+    {
+	// No need to worry about swizzle
+	rc_num = rc_num | address_16.insert(address_pre_AMM_16, 0, 16, 0);
+	rc_num = rc_num | bank_3.insert(bank_pre_AMM_3, 0, 3, 0);
+    }
 
     if (rc_num)
     {
@@ -1333,6 +1484,8 @@ ReturnCode mss_rtt_nom_rtt_wr_swap(
 	rc_buff.setEcmdError(rc_num);
 	return rc_buff;
     }
+
+    ccs_end_1.setBit(0);
 
     // Send out to the CCS array 
     rc = mss_ccs_inst_arry_0( i_target,
@@ -1359,58 +1512,12 @@ ReturnCode mss_rtt_nom_rtt_wr_swap(
 			      ddr_cal_enable_1,
 			      ccs_end_1);
     if(rc) return rc;
-    io_ccs_inst_cnt++;	
 
+    uint32_t NUM_POLL = 100;
+    rc = mss_execute_ccs_inst_array( i_target, NUM_POLL, 60);
+    if(rc) return rc; //Error handling for mss_ccs_inst built into mss_funcs
 
-    rc_num = rc_num | mrs2_16.insert((uint8_t) pt_arr_sr, 0, 3);
-    rc_num = rc_num | mrs2_16.insert((uint8_t) cwl, 3, 3);
-    rc_num = rc_num | mrs2_16.insert((uint8_t) auto_sr, 6, 1);
-    rc_num = rc_num | mrs2_16.insert((uint8_t) sr_temp, 7, 1);
-    rc_num = rc_num | mrs2_16.insert((uint8_t) 0x00, 8, 1);
-    rc_num = rc_num | mrs2_16.insert((uint8_t) dram_rtt_wr, 9, 2);
-    rc_num = rc_num | mrs2_16.insert((uint8_t) 0x00, 10, 6);
-
-    rc_num = rc_num | mrs2_16.extractPreserve(&MRS2, 0, 16, 0);
-    FAPI_INF( "NEW MRS 2: 0x%04X", MRS2);
-
-    rc_num = rc_num | address_16.insert(mrs2_16, 0, 16, 0);
-    rc_num = rc_num | bank_3.insert((uint8_t) MRS2_BA, 0, 1, 7);
-    rc_num = rc_num | bank_3.insert((uint8_t) MRS2_BA, 1, 1, 6);
-    rc_num = rc_num | bank_3.insert((uint8_t) MRS2_BA, 2, 1, 5);
-
-    if (rc_num)
-    {
-	FAPI_ERR( "mss_mrs_load: Error setting up buffers");
-	rc_buff.setEcmdError(rc_num);
-	return rc_buff;
-    }
-
-    // Send out to the CCS array 
-    rc = mss_ccs_inst_arry_0( i_target,
-			      io_ccs_inst_cnt,
-			      address_16,
-			      bank_3,
-			      activate_1,
-			      rasn_1,
-			      casn_1,
-			      wen_1,
-			      cke_4,
-			      csn_8,
-			      odt_4,
-			      ddr_cal_type_4,
-			      i_port_number);
-    if(rc) return rc;
-    rc = mss_ccs_inst_arry_1( i_target,
-			      io_ccs_inst_cnt,
-			      num_idles_16,
-			      num_repeat_16,
-			      data_20,
-			      read_compare_1,
-			      rank_cal_4,
-			      ddr_cal_enable_1,
-			      ccs_end_1);
-    if(rc) return rc;
-    io_ccs_inst_cnt++;
+    io_ccs_inst_cnt = 0;	
 
     return rc;
 

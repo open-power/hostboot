@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_xbus_scominit.C,v 1.2 2013/01/20 19:24:27 jmcgill Exp $
+// $Id: proc_xbus_scominit.C,v 1.4 2013/02/06 22:21:31 thomsen Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_xbus_scominit.C,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2012
@@ -36,6 +36,15 @@
 // *! ADDITIONAL COMMENTS :
 // *!
 //------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+//  Version		Date		Owner		Description
+//------------------------------------------------------------------------------
+//    1.3	   	01/31/13	thomsen		Added separate calls to base & customized scominit files. Removed separate calls to SIM vs. HW scominit files
+//    1.2	   	01/09/13	thomsen		Added separate calls to SIM vs. HW scominit files
+//                                      Added parent chip and connected targets to vector of passed targets. This is to match scominit file updates.
+//    									Added commented-out call to OVERRIDE initfile for system/bus/lane specific inits
+//    1.1       8/11/12     jmcgill		Initial release
+//------------------------------------------------------------------------------
 
 //------------------------------------------------------------------------------
 //  Includes
@@ -50,13 +59,13 @@ extern "C" {
 //------------------------------------------------------------------------------
 
 // HWP entry point, comments in header
-fapi::ReturnCode proc_xbus_scominit(
-    const fapi::Target & i_xbus_target,
-    const fapi::Target & i_this_pu_target,
-    const fapi::Target & i_other_pu_target)
+fapi::ReturnCode proc_xbus_scominit( const fapi::Target & i_xbus_target,
+                                     const fapi::Target & i_connected_xbus_target)
 {
     fapi::ReturnCode rc;
     std::vector<fapi::Target> targets;
+    fapi::Target i_this_pu_target;
+    fapi::Target i_connected_pu_target;
     uint8_t xbus_enable_attr;
 
     // mark HWP entry
@@ -64,6 +73,17 @@ fapi::ReturnCode proc_xbus_scominit(
 
     do
     {
+  
+	    // Get parent chip targets
+        rc = fapiGetParentChip(i_xbus_target, i_this_pu_target); if(rc) return rc;
+        rc = fapiGetParentChip(i_connected_xbus_target, i_connected_pu_target); if(rc) return rc;
+
+		// populate targets vector
+        targets.push_back(i_xbus_target);
+        targets.push_back(i_this_pu_target);
+        targets.push_back(i_connected_xbus_target);
+        targets.push_back(i_connected_pu_target);
+       
         // query XBUS partial good attribute
         rc = FAPI_ATTR_GET(ATTR_PROC_X_ENABLE,
                            &i_this_pu_target,
@@ -81,25 +101,38 @@ fapi::ReturnCode proc_xbus_scominit(
             break;
         }
 
-        // obtain target type to determine which initfile(s) to execute
-        targets.push_back(i_xbus_target);
-        targets.push_back(i_this_pu_target);
-        targets.push_back(i_other_pu_target);
-
-        // processor XBUS chiplet target
-        if ((i_xbus_target.getType() == fapi::TARGET_TYPE_XBUS_ENDPOINT) &&
-            (i_this_pu_target.getType() == fapi::TARGET_TYPE_PROC_CHIP) &&
-            (i_other_pu_target.getType() == fapi::TARGET_TYPE_PROC_CHIP))
+        // processor target, processor MCS chiplet target
+        // test target types to confirm correct before calling initfile(s) to execute
+        if ((i_this_pu_target.getType()        == fapi::TARGET_TYPE_PROC_CHIP)     &&
+            (i_xbus_target.getType()           == fapi::TARGET_TYPE_XBUS_ENDPOINT) &&
+            (i_connected_pu_target.getType()   == fapi::TARGET_TYPE_PROC_CHIP)     &&
+            (i_connected_xbus_target.getType() == fapi::TARGET_TYPE_XBUS_ENDPOINT))
         {
-            FAPI_INF("proc_xbus_scominit: Executing %s on %s",
-                     XBUS_IF, i_xbus_target.toEcmdString());
-            FAPI_EXEC_HWP(rc, fapiHwpExecInitFile, targets, XBUS_IF);
+		    // Call BASE DMI SCOMINIT
+            FAPI_INF("proc_xbus_scominit: fapiHwpExecInitfile executing %s on %s, %s, %s, %s",
+                     XBUS_BASE_IF, i_this_pu_target.toEcmdString(), i_xbus_target.toEcmdString(),
+			    	                 i_connected_pu_target.toEcmdString(), i_connected_xbus_target.toEcmdString());
+            FAPI_EXEC_HWP(rc, fapiHwpExecInitFile, targets, XBUS_BASE_IF);
             if (!rc.ok())
             {
-                FAPI_ERR("proc_xbus_scominit: Error from fapiHwpExecInitfile executing %s on %s",
-                         XBUS_IF, i_xbus_target.toEcmdString());
+                FAPI_ERR("proc_xbus_scominit: Error with fapiHwpExecInitfile executing %s on %s, %s, %s, %s",
+                     XBUS_BASE_IF, i_this_pu_target.toEcmdString(), i_xbus_target.toEcmdString(),
+			 	                 i_connected_pu_target.toEcmdString(), i_connected_xbus_target.toEcmdString());
                 break;
             }
+		    // Call CUSTOMIZED DMI SCOMINIT (system specific)
+			FAPI_INF("proc_xbus_scominit: fapiHwpExecInitfile executing %s on %s, %s, %s, %s",
+                     XBUS_CUSTOM_IF, i_this_pu_target.toEcmdString(), i_xbus_target.toEcmdString(),
+			    	                 i_connected_pu_target.toEcmdString(), i_connected_xbus_target.toEcmdString());
+            FAPI_EXEC_HWP(rc, fapiHwpExecInitFile, targets, XBUS_CUSTOM_IF);
+            if (!rc.ok())
+            {
+                FAPI_ERR("proc_xbus_scominit: Error with fapiHwpExecInitfile executing %s on %s, %s, %s, %s",
+                     XBUS_CUSTOM_IF, i_this_pu_target.toEcmdString(), i_xbus_target.toEcmdString(),
+			 	                 i_connected_pu_target.toEcmdString(), i_connected_xbus_target.toEcmdString());
+                break;
+            }
+
         }
         // unsupported target type
         else
@@ -109,6 +142,7 @@ fapi::ReturnCode proc_xbus_scominit(
             break;
         }
     } while (0);
+
 
     // mark HWP exit
     FAPI_INF("proc_xbus_scominit: End");

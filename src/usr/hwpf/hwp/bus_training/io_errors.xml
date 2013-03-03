@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- IBM CONFIDENTIAL                                                       -->
 <!--                                                                        -->
-<!-- COPYRIGHT International Business Machines Corp. 2012                   -->
+<!-- COPYRIGHT International Business Machines Corp. 2012,2013              -->
 <!--                                                                        -->
 <!-- p1                                                                     -->
 <!--                                                                        -->
@@ -148,5 +148,81 @@
   <hwpError>
     <rc>IO_DCCAL_ZCAL_M_LOW_RC</rc>
     <description>Margin Ratio is less than 50 percent</description>
+  </hwpError>
+     <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>IO_CLEAR_FIRS_INVALID_INVOCATION_RC</rc>
+    <description>io clear firs hwp invoked with wrong pair of targets</description>
+  </hwpError>
+  <!-- *********************************************************************** -->
+  <hwpError>
+     <rc>IO_FIR_LANE_RX_PARITY_ERROR_RC</rc>
+     <description>io lane level rx parity error set</description>
+     <ffdc>CHIP_TARGET</ffdc>
+     <ffdc>LANE_ID</ffdc>
+     <ffdc>RX_ERROR_REG</ffdc>
+  </hwpError>
+              <!-- *********************************************************************** -->
+  <hwpError>
+     <rc>IO_FIR_GROUP_RX_PARITY_ERROR_RC</rc>
+     <description>io group level rx parity error set</description>
+     <ffdc>CHIP_TARGET</ffdc>
+     <ffdc>RX_ERROR_REG</ffdc>
+  </hwpError>
+              <!-- *********************************************************************** -->
+  <hwpError>
+     <rc>IO_FIR_BUS_RX_PARITY_ERROR_RC</rc>
+     <description>io bus level rx parity error set</description>
+     <ffdc>CHIP_TARGET</ffdc>
+     <ffdc>RX_ERROR_REG</ffdc>
+  </hwpError>
+              <!-- *********************************************************************** -->
+  <hwpError>
+     <rc>IO_FIR_LANE_TX_PARITY_ERROR_RC</rc>
+     <description>io lane level tx parity error set</description>
+     <ffdc>CHIP_TARGET</ffdc>
+     <ffdc>LANE_ID</ffdc>
+     <ffdc>TX_ERROR_REG</ffdc>
+  </hwpError>
+              <!-- *********************************************************************** -->
+  <hwpError>
+     <rc>IO_FIR_GROUP_TX_PARITY_ERROR_RC</rc>
+     <description>io group level tx parity error set</description>
+     <ffdc>CHIP_TARGET</ffdc>
+     <ffdc>TX_ERROR_REG</ffdc>
+  </hwpError>
+              <!-- *********************************************************************** -->
+  <hwpError>
+     <rc>IO_FIR_SPARES_DEPLOYED_FIR_RC</rc>
+     <description>A spare has been deployed</description>
+     <ffdc>CHIP_TARGET</ffdc>
+     <ffdc>SPARE_ERROR_REG</ffdc>
+  </hwpError>
+              <!-- *********************************************************************** -->
+  <hwpError>
+     <rc>IO_FIR_MAX_SPARES_EXCEEDED_FIR_RC</rc>
+     <description>maximum spares possible to deploy exceeded</description>
+     <ffdc>CHIP_TARGET</ffdc>
+     <ffdc>SPARE_ERROR_REG</ffdc>
+  </hwpError>
+              <!-- *********************************************************************** -->
+  <hwpError>
+     <rc>IO_FIR_GCR_HANG_ERROR_RC</rc>
+     <description>gcr hang error detected</description>
+     <ffdc>CHIP_TARGET</ffdc>
+  </hwpError>
+              <!-- *********************************************************************** -->
+  <hwpError>
+     <rc>IO_FIR_RECALIBRATION_ERROR_RC</rc>
+     <description>recalibration or a repair error has been detected</description>
+     <ffdc>CHIP_TARGET</ffdc>
+     <ffdc>RECAL_ERROR_REG</ffdc>
+  </hwpError>
+              <!-- *********************************************************************** -->
+  <hwpError>
+     <rc>IO_FIR_TOO_MANY_BUS_ERROR_RC</rc>
+     <description>A bus has experienced too many random lane errors</description>
+     <ffdc>CHIP_TARGET</ffdc>
+     <ffdc>BUS_ERROR_REG</ffdc>
   </hwpError>
 </hwpErrors>

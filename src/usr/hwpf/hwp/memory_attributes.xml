@@ -37,6 +37,19 @@ firmware notes: none</description>
     <odmVisable/>
 </attribute>
 
+  <attribute>
+    <id>ATTR_MSS_FREQ_OVERRIDE</id>
+    <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
+    <description>FOR LAB USE ONLY: Frequency override of this memory channel in MHz, comprising of up to three DIMMs.  Set by config file or an attribute writing program.  Consumed by mss_freq.  The default of AUTO means mss_freq will find the best frequencies given the DIMMs plugged in and other rules.  Otherwise, this is the system frequency.
+firmware notes: Platforms should initialize this attribute to AUTO (0)</description>
+    <valueType>uint32</valueType>
+    <enum>AUTO = 0</enum>
+    <platInit/>
+    <writeable/>
+    <odmVisable/>
+    <odmChangeable/>
+</attribute>
+
 <attribute>
     <id>ATTR_MSS_FREQ</id>
     <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>

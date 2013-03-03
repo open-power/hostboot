@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- IBM CONFIDENTIAL                                                       -->
 <!--                                                                        -->
-<!-- COPYRIGHT International Business Machines Corp. 2012                   -->
+<!-- COPYRIGHT International Business Machines Corp. 2012,2013              -->
 <!--                                                                        -->
 <!-- p1                                                                     -->
 <!--                                                                        -->
@@ -62,6 +62,21 @@
       firmware notes:
         Bit mask defining set of active/valid PHBs
         bit0=PHB0, bit1=PHB1, bit2=PHB2
+    </description>
+    <valueType>uint8</valueType>
+    <platInit/>
+    <persistRuntime/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PROC_PCIE_REFCLOCK_ENABLE</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>PCIE refclock enable valid mask
+      creator: platform
+      consumer: proc_pcie_scominit
+      firmware notes:
+        Bit mask defining state of refclock drive enables
+        bit0=PCI0, bit1=PCI1, bit2=PCI2
     </description>
     <valueType>uint8</valueType>
     <platInit/>

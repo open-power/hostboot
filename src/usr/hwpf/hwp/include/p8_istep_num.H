@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012                   */
+/* COPYRIGHT International Business Machines Corp. 2012,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -23,7 +23,7 @@
 #ifndef __P8_ISTEP_NUM_H
 #define __P8_ISTEP_NUM_H
 
-// $Id: p8_istep_num.H,v 1.19 2012/10/23 12:47:56 koenig Exp $
+// $Id: p8_istep_num.H,v 1.22 2013/02/06 04:15:38 jmcgill Exp $
 
 /// Istep number encoding for all SEEPROM and PNOR procedures.  Used to update
 /// the SBEVITAL register to record procedure progress and to create unique
@@ -68,10 +68,11 @@ CONST_UINT64_T(proc_sbe_ex_core_initf_istep_num,            ULL(0x040B));
 CONST_UINT64_T(proc_sbe_ex_do_manual_inits_istep_num,       ULL(0x040C));
 CONST_UINT64_T(proc_sbe_ex_startclocks_istep_num,           ULL(0x040D));
 CONST_UINT64_T(proc_sbe_ex_scominit_istep_num,              ULL(0x040E));
-CONST_UINT64_T(proc_sbe_ex_init_escape_istep_num,           ULL(0x040F));
-CONST_UINT64_T(proc_sbe_ex_sp_runtime_scom_istep_num,       ULL(0x0410));
-CONST_UINT64_T(proc_sbe_ex_occ_runtime_scom_istep_num,      ULL(0x0411));
-CONST_UINT64_T(proc_sbe_ex_host_runtime_scom_istep_num,     ULL(0x0412));
+CONST_UINT64_T(proc_sbe_ex_core_scominit_istep_num,         ULL(0x040F));
+CONST_UINT64_T(proc_sbe_ex_init_escape_istep_num,           ULL(0x0410));
+CONST_UINT64_T(proc_sbe_ex_sp_runtime_scom_istep_num,       ULL(0x0411));
+CONST_UINT64_T(proc_sbe_ex_occ_runtime_scom_istep_num,      ULL(0x0412));
+CONST_UINT64_T(proc_sbe_ex_host_runtime_scom_istep_num,     ULL(0x0413));
 
 CONST_UINT64_T(proc_sbe_enable_pnor_istep_num,              ULL(0x0500));
 CONST_UINT64_T(proc_sbe_lco_loader_istep_num,               ULL(0x0501));
@@ -82,5 +83,6 @@ CONST_UINT64_T(proc_sbe_trigger_winkle_istep_num,           ULL(0x0F01));
 #define PROC_SBE_TRIGGER_WINKLE_ISTEP_NUM proc_sbe_trigger_winkle_istep_num
 #define PROC_SBE_CHECK_MASTER_ISTEP_NUM proc_sbe_check_master_istep_num
 #define PROC_SBE_ENABLE_PNOR_ISTEP_NUM proc_sbe_enable_pnor_istep_num
+#define PROC_SBE_EX_HOST_RUNTIME_SCOM_ISTEP_NUM proc_sbe_ex_host_runtime_scom_istep_num
 
 #endif  // __P8_ISTEP_NUM_H

@@ -39,6 +39,7 @@
 #include    <trace/interface.H>
 #include    <initservice/taskargs.H>
 #include    <errl/errlentry.H>
+#include    <errl/errludtarget.H>
 
 #include    <initservice/isteps_trace.H>
 #include    <hwpisteperror.H>
@@ -55,6 +56,7 @@
 #include    <pbusLinkSvc.H>
 
 #include    "proc_build_smp/proc_build_smp.H"
+#include    <intr/interrupt.H>
 
 namespace   ACTIVATE_POWERBUS
 {
@@ -64,6 +66,7 @@ using   namespace   ISTEP;
 using   namespace   TARGETING;
 using   namespace   EDI_EI_INITIALIZATION;
 using   namespace   fapi;
+using   namespace   ERRORLOG;
 
 //******************************************************************************
 // wrapper function to call proc_build_smp
@@ -232,6 +235,52 @@ void*    call_proc_build_smp( void    *io_pArgs )
             TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
                       "SUCCESS : proc_build_smp" );
         }
+
+        // At the point where we can now change the proc chips to use
+        // XSCOM rather than FSISCOM which is the default.
+
+        TARGETING::TargetHandleList procChips;
+        getAllChips(procChips, TYPE_PROC);
+
+        TARGETING::TargetHandleList::iterator curproc = procChips.begin();
+
+        // Loop through all proc chips
+        while(curproc != procChips.end())
+        {
+            TARGETING::Target*  l_proc_target = *curproc;
+
+            // If the proc chip supports xscom..
+            if (l_proc_target->getAttr<ATTR_PRIMARY_CAPABILITIES>()
+                .supportsXscom)
+            {
+                ScomSwitches l_switches =
+                  l_proc_target->getAttr<ATTR_SCOM_SWITCHES>();
+
+                // If Xscom is not already enabled.
+                if ((l_switches.useXscom != 1) || (l_switches.useFsiScom != 0))
+                {
+                    l_switches.useFsiScom = 0;
+                    l_switches.useXscom = 1;
+
+                    // Turn off FSI scom and turn on Xscom.
+                    l_proc_target->setAttr<ATTR_SCOM_SWITCHES>(l_switches);
+                }
+            }
+
+            // Enable PSI interrupts even if can't Xscom as
+            // Pbus is up and interrupts can flow
+            l_errl = INTR::enablePsiIntr(l_proc_target); 
+            if(l_errl)
+            {
+                // capture the target data in the elog
+                ErrlUserDetailsTarget(l_proc_target).addToLog( l_errl );
+
+                break;
+            }
+
+            ++curproc;
+        }
+
 
     } while (0);
 

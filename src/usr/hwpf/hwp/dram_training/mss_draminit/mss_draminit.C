@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_draminit.C,v 1.44 2013/01/25 15:16:21 jdsloat Exp $
+// $Id: mss_draminit.C,v 1.46 2013/02/12 17:24:16 jdsloat Exp $
 //------------------------------------------------------------------------------
 // Don't forget to create CVS comments when you check in your changes!
 //------------------------------------------------------------------------------
@@ -28,6 +28,8 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
+//  1.46   | jdsloat  | 02/12/13| Fixed RTT_WR in MR2
+//  1.45   | jdsloat  | 01/28/13| is_sim check for address mirror mode
 //  1.44   | jdsloat  | 01/25/13| Address Mirror Mode added for dual drop CDIMMs
 //  1.43   | bellows  | 12/06/12| Fixed Review Comment
 //  1.42   | jdsloat  | 12/02/12| SHADOW REG PRINT OUT FIX
@@ -168,6 +170,7 @@ ReturnCode mss_draminit_cloned(Target& i_target)
     uint8_t secondary_ranks_array[4][2]; //secondary_ranks_array[group][port]
     uint8_t tertiary_ranks_array[4][2]; //tertiary_ranks_array[group][port]
     uint8_t quaternary_ranks_array[4][2]; //quaternary_ranks_array[group][port]
+    uint8_t is_sim = 0;
     
  
     //populate primary_ranks_arrays_array
@@ -212,11 +215,14 @@ ReturnCode mss_draminit_cloned(Target& i_target)
     if(rc) return rc;
     rc = FAPI_ATTR_GET(ATTR_EFF_DIMM_TYPE, &i_target, dimm_type);
     if(rc) return rc;
+    rc = FAPI_ATTR_GET(ATTR_IS_SIMULATION, NULL, is_sim);
+    if(rc) return rc;
 
     // Check to see if it's Dual drop and needs address mirror mode.  Set the approriate flag. 
     if (   (dimm_type == ENUM_ATTR_EFF_DIMM_TYPE_CDIMM)
 	&& (num_drops_per_port == ENUM_ATTR_EFF_NUM_DROPS_PER_PORT_DUAL)
-	&& (dram_gen == ENUM_ATTR_EFF_DRAM_GEN_DDR3) )
+	&& (dram_gen == ENUM_ATTR_EFF_DRAM_GEN_DDR3)
+	&& (is_sim == 0)   )
     {
 
 	FAPI_INF( "Setting Address Mirroring in the PHY");
@@ -1017,6 +1023,10 @@ ReturnCode mss_mrs_load(
     rc = FAPI_ATTR_GET(ATTR_EFF_DIMM_TYPE, &i_target, dimm_type);
     if(rc) return rc;
 
+    uint8_t is_sim = 0;
+    rc = FAPI_ATTR_GET(ATTR_IS_SIMULATION, NULL, is_sim);
+    if(rc) return rc;
+
 
     //Lines commented out in the following section are waiting for xml attribute adds
     //MRS0
@@ -1427,7 +1437,7 @@ ReturnCode mss_mrs_load(
                     rc_num = rc_num | mrs2.insert((uint8_t) sr_temp, 7, 1);
                     rc_num = rc_num | mrs2.insert((uint8_t) 0x00, 8, 1);
                     rc_num = rc_num | mrs2.insert((uint8_t) dram_rtt_wr[i_port_number][dimm_number][rank_number], 9, 2);
-                    rc_num = rc_num | mrs2.insert((uint8_t) 0x00, 10, 6);
+                    rc_num = rc_num | mrs2.insert((uint8_t) 0x00, 11, 5);
 
         	    rc_num = rc_num | mrs2.extractPreserve(&MRS2, 0, 16, 0);
      
@@ -1487,7 +1497,7 @@ ReturnCode mss_mrs_load(
                             rc_num = rc_num | bank_pre_AMM_3.insert((uint8_t) MRS0_BA, 2, 1, 5);
                         }
 
-			if ( (dimm_type == ENUM_ATTR_EFF_DIMM_TYPE_CDIMM) && (dimm_number == 1) )
+			if ( (dimm_type == ENUM_ATTR_EFF_DIMM_TYPE_CDIMM) && (dimm_number == 1) && (is_sim == 0))
 			{
 			    FAPI_INF( "ADDRESS MIRRORING ON PORT%d DIMM%d RANK%d", i_port_number, dimm_number, rank_number);
 

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012                   */
+/* COPYRIGHT International Business Machines Corp. 2012,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_eff_grouping.C,v 1.16 2012/12/14 08:41:20 gpaulraj Exp $
+// $Id: mss_eff_grouping.C,v 1.18 2013/02/01 23:38:22 asaetow Exp $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
 // *! All Rights Reserved -- Property of IBM
@@ -38,7 +38,10 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
-//  1.16   | gpaulraj | 12-14-12| Modified "unable to group dimm size" as Error message
+//  1.18   | asaetow  | 02-01-13| Removed FAPI_ERR("Mirror Base address overlaps with memory base address. "); temporarily.
+//         |          |         | NOTE: Need Giri to check mirroring enable before checking for overlaps. 
+//  1.17   | gpaulraj | 01-31-13| Error place holders added 
+//  1.16   | gpaulraj | 12-14-12| Modified "nnable to group dimm size" as Error message
 //  1.15   | bellows  | 12-11-12| Picked up latest updates from Girisankar
 //  1.14   | bellows  | 12-11-12| added ; to DBG line
 //  1.13   | bellows  | 12-07-12| fix for interleaving attr and array bounds
@@ -230,8 +233,45 @@ extern "C" {
 	rc = FAPI_ATTR_GET(ATTR_ALL_MCS_IN_INTERLEAVING_GROUP, NULL,check_board); // system level attribute
 	if (!rc.ok()) { FAPI_ERR("Error reading ATTR_ALL_MCS_IN_INTERLEAVING_GROUP"); return rc; }
 
+        if(check_board)
+        {
+          if((groups_allowed & 0x02) || (groups_allowed & 0x04)||(groups_allowed & 0x08))
+          {
+
+            FAPI_INF("FABRIC IS IN NON-CHECKER BOARD MODE.");
+            FAPI_INF("FABRIC SUPPORTS THE FOLLOWING ");
+//@thi - Already asked Anuwat to fix this
+            if( (groups_allowed & 0x02)&& check_board){FAPI_INF("2MCS/GROUP");}
+            if( (groups_allowed & 0x04)&& check_board){FAPI_INF("4MCS/GROUP");}
+            if( (groups_allowed & 0x08)&& check_board){FAPI_INF("8MCS/GROUP");}
+            FAPI_INF("FABRIC DOES NOT SUPPORT THE FOLLOWING ");
+            if(! ((groups_allowed & 0x01)&& !check_board)){FAPI_INF("1MCS/GROUP");}
+            if(!((groups_allowed & 0x02)&& check_board)){FAPI_INF("2MCS/GROUP");}
+            if(!((groups_allowed & 0x04)&& check_board)){FAPI_INF("4MCS/GROUP");}
+            if(!((groups_allowed & 0x08)&& check_board)){FAPI_INF("8MCS/GROUP");}
+           }
+           else
+           {
+              FAPI_ERR("UNABLE TO GROUP");
+              FAPI_ERR("FABRIC IS IN NON-CHECKER BOARD MODE.  SET ATTRIBUTE 'ATTR_MSS_INTERLEAVE_ENABLE' TO SUPPORT '2MCS/GROUP, 4MCS/GROUP  AND 8MCS/GROUP'. OR ENABLE CHECKER BOARD, TO SUPPORT '1MCS/GROUP'. ");
+              FAPI_SET_HWP_ERROR(rc, RC_MSS_PLACE_HOLDER_ERROR);
+              return rc;
+           }
+         }
+         else
+         {
+            if(groups_allowed & 0x01) {
+            FAPI_INF("FABRIC IS IN CHECKER BOARD MODE AND IT SUPPORTS 1MCS/GROUP"); }
+            else  {
+            FAPI_ERR("UNABLE TO GROUP");
+            FAPI_ERR("FABRIC IS IN CHECKER BOARD MODE BUT IT DOES NOT SUPPORT 1MCS/GROUP. SET ATTRIBUTE 'ATTR_MSS_INTERLEAVE_ENABLE' TO SUPPORT '1MCS/GROUP'. OR DISABLE CHECKER BOARD, TO SUPPORT '2MCS/GROUP, 4MCS/GROUP  AND 8MCS/GROUP'.");
+            FAPI_SET_HWP_ERROR(rc, RC_MSS_PLACE_HOLDER_ERROR);
+            return rc;
+
+            }
 
 
+         }
         for(uint8_t i=0;i<16;i++)
         {
              grouped[i]=0;
@@ -422,15 +462,21 @@ extern "C" {
                   gp++;
                  }
              }
+
            }
            if(!done)
-           {
+           {  uint8_t ungroup =0;
               for(uint8_t i=0;i<8;i++)
               {
           		   if(grouped[i] !=1 && eff_grouping_data.groupID[i][0] != 0 )
-          		   FAPI_ERR ("UNABLE TO GROUP MCS%d size is %d", i,eff_grouping_data.groupID[i][0]);
-              }
 
+          		   { FAPI_ERR ("UNABLE TO GROUP MCS%d size is %d", i,eff_grouping_data.groupID[i][0]); ungroup++;}
+              }
+            if (ungroup)
+             {
+               FAPI_SET_HWP_ERROR(rc, RC_MSS_PLACE_HOLDER_ERROR);
+              return rc;
+             }
              for(uint8_t i=0;i<gp;i++)
                for(uint8_t j=0;j<16;j++)
                  eff_grouping_data.groupID[i][j]=tempgpID.groupID[i][j];
@@ -464,6 +510,7 @@ extern "C" {
       uint8_t j=0;
       count=0;
 
+    uint64_t total_size_non_mirr =0;
     for(pos=0;pos<=gp_pos;pos++)
       {
         eff_grouping_data.groupID[pos][2] = eff_grouping_data.groupID[pos][0]*eff_grouping_data.groupID[pos][1];
@@ -484,6 +531,8 @@ extern "C" {
             //eff_grouping_data.groupID[pos+8][13] = eff_grouping_data.groupID[pos][13]/2;
              eff_grouping_data.groupID[pos][12] =1;
         }
+
+        total_size_non_mirr += eff_grouping_data.groupID[pos][2];
       }
       for(i=0;i<gp_pos;i++)
       {
@@ -527,6 +576,8 @@ extern "C" {
         }
       }
 
+
+
       rc = FAPI_ATTR_GET(ATTR_PROC_MEM_BASE,&i_target,mss_base_address);
       mss_base_address =   mss_base_address >> 30;
       if(!rc.ok()) return rc;
@@ -536,32 +587,58 @@ extern "C" {
 
       if(!rc.ok()) return rc;
 
-      for(pos=0;pos<gp_pos;pos++)
+      if( mss_base_address > (mirror_base + total_size_non_mirr/2)  || mirror_base > (mss_base_address + total_size_non_mirr))
       {
-        if(pos==0)
-        {
 
-          eff_grouping_data.groupID[pos][3] =mss_base_address;
-          eff_grouping_data.groupID[pos+8][3]=mirror_base;  //mirrored base address
-          if(eff_grouping_data.groupID[pos][12])
+          for(pos=0;pos<gp_pos;pos++)
           {
+             if(pos==0)
+              {
 
-            eff_grouping_data.groupID[pos][14] = eff_grouping_data.groupID[pos][3]+ eff_grouping_data.groupID[pos][2]/2;
-            eff_grouping_data.groupID[pos+8][14] = eff_grouping_data.groupID[pos+8][3]+ eff_grouping_data.groupID[pos+8][2]/2; //mirrored base address with alternate bars
-          }
-        }
-        else
-        {
-          eff_grouping_data.groupID[pos][3] = eff_grouping_data.groupID[pos-1][3]+eff_grouping_data.groupID[pos-1][2];
-          eff_grouping_data.groupID[pos+8][3]= eff_grouping_data.groupID[pos-1+8][3]+eff_grouping_data.groupID[pos-1+8][2];
+                 eff_grouping_data.groupID[pos][3] =mss_base_address;
 
-          if(eff_grouping_data.groupID[pos][12])
-          {
-            eff_grouping_data.groupID[pos][14] = eff_grouping_data.groupID[pos][3]+ eff_grouping_data.groupID[pos][2]/2;
-            eff_grouping_data.groupID[pos+8][14] = eff_grouping_data.groupID[pos+8][3]+ eff_grouping_data.groupID[pos+8][2]/2; //mirrored base address with alternate bars
+                 if(eff_grouping_data.groupID[pos][12])
+                  {
+
+                      eff_grouping_data.groupID[pos][14] = eff_grouping_data.groupID[pos][3]+ eff_grouping_data.groupID[pos][2]/2;
+
+                  }
+              }
+             else
+              {
+                 eff_grouping_data.groupID[pos][3] = eff_grouping_data.groupID[pos-1][3]+eff_grouping_data.groupID[pos-1][2];
+
+
+                 if(eff_grouping_data.groupID[pos][12])
+                 {
+                   eff_grouping_data.groupID[pos][14] = eff_grouping_data.groupID[pos][3]+ eff_grouping_data.groupID[pos][2]/2;
+
+                 }
+              }
+
+              if(eff_grouping_data.groupID[pos][1]>1 )
+              {
+                 eff_grouping_data.groupID[pos+8][3]=mirror_base;
+                 mirror_base= mirror_base + eff_grouping_data.groupID[pos+8][2];
+                 if(eff_grouping_data.groupID[pos][12])
+                  {
+                     eff_grouping_data.groupID[pos+8][14] = eff_grouping_data.groupID[pos+8][3]+ eff_grouping_data.groupID[pos+8][2]/2; //mirrored base address with alternate bars
+                  }
+
+               }
           }
-        }		
-      }		
+
+       }
+
+       // AST HERE: NOTE: Need Giri to check mirroring enable before checking for overlaps.
+       //else
+       //{
+       //   FAPI_ERR("Mirror Base address overlaps with memory base address. ");
+       //    FAPI_SET_HWP_ERROR(rc, RC_MSS_PLACE_HOLDER_ERROR);
+       //   return rc;
+       //}
+
+
       ecmdDataBufferBase MC_IN_GP(8);
       uint8_t mcs_in_group[8];
       for(uint8_t i=0;i<8;i++)
@@ -600,21 +677,21 @@ extern "C" {
       {
         if(eff_grouping_data.groupID[i][0]>0)
         {
-          FAPI_INF (" Group   %d MCS Size  %4d   ",i,eff_grouping_data.groupID[i][0]);
-          FAPI_INF (" No of MCS %4d ",eff_grouping_data.groupID[i][1]);
-          FAPI_INF (" Group Size %4d ",eff_grouping_data.groupID[i][2]);
-          FAPI_INF (" Base Add.  %4d ",eff_grouping_data.groupID[i][3]);
-          FAPI_INF (" Mirrored Group SIze %4d", eff_grouping_data.groupID[i+8][2]);
-          FAPI_INF (" Mirror Base Add %4d", eff_grouping_data.groupID[i+8][3]);
+          FAPI_INF (" Group   %d MCS Size  %4dGB",i,eff_grouping_data.groupID[i][0]);
+          FAPI_INF (" No of MCS %4d   ",eff_grouping_data.groupID[i][1]);
+          FAPI_INF (" Group Size %4dGB",eff_grouping_data.groupID[i][2]);
+          FAPI_INF (" Base Add.  %4dGB ",eff_grouping_data.groupID[i][3]);
+          FAPI_INF (" Mirrored Group SIze %4dGB", eff_grouping_data.groupID[i+8][2]);
+          FAPI_INF (" Mirror Base Add %4dGB" , eff_grouping_data.groupID[i+8][3]);
           for(uint8_t j=4;j<4+eff_grouping_data.groupID[i][1];j++)
           {
             FAPI_INF (" MCSID%d- Pos %4d",(j-4),eff_grouping_data.groupID[i][j]);
           }
           FAPI_INF (" Alter-bar  %4d",eff_grouping_data.groupID[i][12]);
-          FAPI_INF("Alter-bar base add = %4d",eff_grouping_data.groupID[i][14]);
-          FAPI_INF("Alter-bar size = %4d",eff_grouping_data.groupID[i][13]);
-          FAPI_INF("Alter-bar Mirrored Base add = %4d", eff_grouping_data.groupID[i+8][14]);
-          FAPI_INF("Alter-bar Mirrored size = %4d", eff_grouping_data.groupID[i+8][13]);
+          FAPI_INF("Alter-bar base add = %4dGB ",eff_grouping_data.groupID[i][14]);
+          FAPI_INF("Alter-bar size = %4dGB",eff_grouping_data.groupID[i][13]);
+          FAPI_INF("Alter-bar Mirrored Base add = %4dGB ", eff_grouping_data.groupID[i+8][14]);
+          FAPI_INF("Alter-bar Mirrored size = %4dGB", eff_grouping_data.groupID[i+8][13]);
         }
         else
         {
