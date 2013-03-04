@@ -22,6 +22,7 @@
 # IBM_PROLOG_END_TAG
 
 ROOTPATH = ../../../..
+GENDIR = ${ROOTPATH}/obj/genfiles
 
 SUBDIRS = framework.d test.d
 
@@ -43,6 +44,8 @@ VPATH =  \
     common/framework/service \
     common/framework/config \
     common/framework/rule \
+    common/mnfgtools \
+    mnfgtools \
     framework \
     framework/rule \
     framework/service \
@@ -71,6 +74,8 @@ EXTRAINCDIR += ${PRD_USR_PATH}/common/framework/config
 EXTRAINCDIR += ${PRD_USR_PATH}/common/framework/rule
 EXTRAINCDIR += ${PRD_USR_PATH}/common/plat
 EXTRAINCDIR += ${PRD_USR_PATH}/common/plat/pegasus
+EXTRAINCDIR += ${PRD_USR_PATH}/common/mnfgtools
+EXTRAINCDIR += ${PRD_USR_PATH}/mnfgtools
 EXTRAINCDIR += ${PRD_USR_PATH}/framework/service
 EXTRAINCDIR += ${PRD_USR_PATH}/plat/pegasus
 
@@ -96,5 +101,25 @@ OBJS = \
  ${prd_pegasus_specific_HB} \
  ${PRDF_RULE_PLUGINS_PEGASUS} \
  ${PRDF_RULE_PLUGINS_PEGASUS_WSIM} \
+
+#------------------------------------------------------------------------------
+# Generated Mfg Threshold Header file
+#------------------------------------------------------------------------------
+MFG_THRES	    = prdfMfgThresholds
+MFG_THRES_H	    = ${MFG_THRES}.H
+MFG_THRES_PL    = ${PRD_USR_PATH}/common/mnfgtools/${MFG_THRES}.pl
+MFG_THRES_LIST	= ${PRD_USR_PATH}/common/mnfgtools/${MFG_THRES}.lst
+RULEOBJDIR      = ${ROOTPATH}/obj/modules/prdf/rule
+MFG_THRES_PATH	= ${GENDIR}/${MFG_THRES_H}
+
+GENFILES       = ${MFG_THRES_H}
+
+${MFG_THRES_PATH} : ${MFG_THRES_LIST}
+	${MFG_THRES_PL} $^ > $@
+
+EXTRA_CLEAN    = ${MFG_THRES_PATH}
+
+
+
 
 include ${ROOTPATH}/config.mk

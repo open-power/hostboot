@@ -79,6 +79,9 @@ prd_register = \
  prdfCaptureData.o \
  prdfScanFacility.o
 
+prd_mnfgtools = \
+ prdfMfgThresholdMgr.o
+
 prd_object_files = \
  ${prd_framework} \
  ${prd_util} \
@@ -86,6 +89,7 @@ prd_object_files = \
  ${prd_service} \
  ${prd_resolution} \
  ${prd_register} \
+ ${prd_mnfgtools} \
 
 ################################################################################
 # PRD object files common to Hostboot and FSP, but not to PRD simulator.

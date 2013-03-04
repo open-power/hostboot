@@ -42,12 +42,12 @@
 #include <prdfRegisterCache.H>
 #include <prdfScanFacility.H>
 #include <prdfSystemSpecific.H>
+#include <prdfMfgThresholdMgr.H>
 
 // For some odd reason when compile in FSP, these includes have to be down here
 // or there will be some weird compiling error in iipResolutionFactory.h
 #ifndef __HOSTBOOT_MODULE
   #include <prdfChipPersist.H>          // for ChipPersist
-  #include <prdfMfgThresholdMgr.H>
   #include <prdfSdcFileControl.H>       // for RestoreAnalysis()
 #endif
 
@@ -79,10 +79,8 @@ void unInitialize()
     // what it needs to.
     ResolutionFactory::Access().Reset();
 
-#ifndef __HOSTBOOT_MODULE
     // clear the MfgThresholdMgr
     MfgThresholdMgr::getInstance()->reset();
-#endif
 
     PRDF_EXIT( "PRDF::unInitialize()" );
 }

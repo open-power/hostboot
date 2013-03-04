@@ -50,10 +50,7 @@
 #include <prdfPlatServices.H>
 #include <prdfGlobal.H>
 #include <prdfRuleMetaData.H>
-
-#ifndef __HOSTBOOT_MODULE
-  #include <prdfMfgThresholdMgr.H>
-#endif
+#include <prdfMfgThresholdMgr.H>
 
 namespace PRDF
 {
@@ -105,11 +102,8 @@ System::~System(void)
     // clear the Resolution factory
     ResolutionFactory::Access().Reset();
 
-#ifndef __HOSTBOOT_MODULE
-    // FIXME: need to implement MfgThresholdMgr in Hostboot
     // clear the MfgThresholdMgr
     MfgThresholdMgr::getInstance()->reset();
-#endif
 
     // clear the threshold policies
     ThresholdResolution::reset();

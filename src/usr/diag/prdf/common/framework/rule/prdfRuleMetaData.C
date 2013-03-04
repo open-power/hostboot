@@ -21,9 +21,10 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
+#include <prdfMfgThresholdMgr.H>
+
 #ifndef __HOSTBOOT_MODULE
   #include <utilreg.H> // for UtilReg
-  #include <prdfMfgThresholdMgr.H>
   #include <prdfSdcFileControl.H> //for SyncAnalysis
 #endif
 #include <prdfRuleMetaData.H>
@@ -747,12 +748,9 @@ Resolution * RuleMetaData::createResolution( Prdr::Expr * i_action,
                 }
                 else if(i_action->cv_value[4].i)
                 {
-                    // FIXME : need to uncomment MfgThresholdMgr after we figure it out
-                    #ifndef __HOSTBOOT_MODULE
                     l_rc = &i_data.cv_reslFactory.GetThresholdSigResolution(
                                 *(MfgThresholdMgr::getInstance()->
                                      getThresholdP(i_action->cv_value[3].i) ) );
-                    #endif
                 }
                 else
                 {
@@ -776,13 +774,10 @@ Resolution * RuleMetaData::createResolution( Prdr::Expr * i_action,
                     }
                     else if(i_action->cv_value[4].i)
                     {
-                        // FIXME : need to uncomment MfgThresholdMgr after we figure it out
-                        #ifndef __HOSTBOOT_MODULE
                         l_rc = &i_data.cv_reslFactory.
                                 GetThresholdResolution(i_action->cv_value[5].i,
                                     *(MfgThresholdMgr::getInstance()->
                                         getThresholdP(i_action->cv_value[3].i)));
-                        #endif
                     }
                     else
                     {

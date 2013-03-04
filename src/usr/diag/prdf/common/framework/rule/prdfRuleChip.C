@@ -21,9 +21,10 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
+#include <prdfMfgThresholdMgr.H>
+
 #ifndef __HOSTBOOT_MODULE
   #include <utilreg.H> // for UtilReg
-  #include <prdfMfgThresholdMgr.H>
   #include <prdfSdcFileControl.H> //for SyncAnalysis
 #endif
 
@@ -113,6 +114,7 @@ int32_t RuleChip::Analyze( STEP_CODE_DATA_STRUCT & i_serviceData,
 };
 
 //------------------------------------------------------------------------------
+
 ExtensibleChipFunction *
     RuleChip::getExtensibleFunction( const char * i_func, bool i_expectNull )
 {

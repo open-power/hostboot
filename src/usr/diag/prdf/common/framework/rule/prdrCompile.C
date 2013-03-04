@@ -543,13 +543,15 @@ uint32_t prdrActionArgMap(const std::string & i_arg)
         #define HDCT_COMMAND_T_END
         #include <hdctContent.H>
 
+#endif
+
         // Initialize MFG thresholds.
         #define PRDF_MFGTHRESHOLD_TABLE_BEGIN
         #define PRDF_MFGTHRESHOLD_TABLE_END
         #define PRDF_MFGTHRESHOLD_ENTRY(a,b,c) \
             g_ActionArgMap[#a] = b;
         #include <prdfMfgThresholds.H>
-#endif
+
 
         l_initialized = true;
 

@@ -52,7 +52,7 @@
 #   threshold( field( 5 / 2 min) );
 #   threshold( field(32 / 1 day), mfg(2 / hour) );
 #   threshold( field( 2 /   min), mfg(1       ) );
-#   threshold( field(32 /   day), mfg_file(P7CORE_L2_CACHE_CES) );
+#   threshold( field(32 /   day), mfg_file(P8CHIP_OFFNODE_BUS_CES) );
 
 /** Threshold of 1 */
 actionclass threshold1
@@ -70,6 +70,13 @@ actionclass SUEGenerationPoint
 {
     flag(UERE);
 };
+
+/** Threshold OnNode Bus CE */
+actionclass thresholdOnNode
+{
+    threshold( field(32 / day), mfg_file(P8CHIP_ONNODE_BUS_CES));
+};
+
 
 ################################################################################
 #                               Simple Callouts                                #
