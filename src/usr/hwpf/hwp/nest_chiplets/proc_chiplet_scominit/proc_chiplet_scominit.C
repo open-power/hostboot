@@ -20,8 +20,8 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_chiplet_scominit.C,v 1.9 2013/01/20 19:29:42 jmcgill Exp $
-// $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_chiplet_scominit.C,v $
+// $Id: proc_chiplet_scominit.C,v 1.10 2013/03/04 17:32:59 jmcgill Exp $
+// $Source: /afs/awd.austin.ibm.com/proj/p9/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_chiplet_scominit.C,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2012
 // *! All Rights Reserved -- Property of IBM
@@ -85,6 +85,22 @@ fapi::ReturnCode proc_chiplet_scominit(const fapi::Target & i_target)
                 break;
             }
 
+            // execute PSI SCOM initfile
+            FAPI_INF("proc_chiplet_scominit: Executing %s on %s",
+                     PROC_CHIPLET_SCOMINIT_PSI_IF, i_target.toEcmdString());
+            FAPI_EXEC_HWP(
+                rc,
+                fapiHwpExecInitFile,
+                initfile_targets,
+                PROC_CHIPLET_SCOMINIT_PSI_IF);
+            if (!rc.ok())
+            {
+                FAPI_ERR("proc_chiplet_scominit: Error from fapiHwpExecInitfile executing %s on %s",
+                         PROC_CHIPLET_SCOMINIT_PSI_IF,
+                         i_target.toEcmdString());
+                break;
+            }
+
             // query NX partial good attribute
             rc = FAPI_ATTR_GET(ATTR_PROC_NX_ENABLE,
                                &i_target,
@@ -99,8 +115,6 @@ fapi::ReturnCode proc_chiplet_scominit(const fapi::Target & i_target)
             if (nx_enabled == fapi::ENUM_ATTR_PROC_NX_ENABLE_ENABLE)
             {
                 // execute NX SCOM initfile
-                initfile_targets.clear();
-                initfile_targets.push_back(i_target);
                 FAPI_INF("proc_chiplet_scominit: Executing %s on %s",
                          PROC_CHIPLET_SCOMINIT_NX_IF, i_target.toEcmdString());
                 FAPI_EXEC_HWP(

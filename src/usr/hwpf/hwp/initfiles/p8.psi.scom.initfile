@@ -1,0 +1,30 @@
+#-- $Id: p8.psi.scom.initfile,v 1.2 2013/03/04 17:22:34 jmcgill Exp $
+#-------------------------------------------------------------------------------
+#--
+#-- (C) Copyright International Business Machines Corp. 2011
+#-- All Rights Reserved -- Property of IBM
+#-- *** IBM Confidential ***
+#--
+#-- TITLE       : p8.psi.scom.initfile
+#-- DESCRIPTION : Perform PSI configuration
+#--
+#-- OWNER NAME  : Joe McGill              Email: jmcgill@us.ibm.com
+#--
+#--------------------------------------------------------------------------------
+
+SyntaxVersion = 1
+
+#--------------------------------------------------------------------------------
+#-- Includes
+#--------------------------------------------------------------------------------
+
+
+#--------------------------------------------------------------------------------
+#-- SCOM initializations
+#--------------------------------------------------------------------------------
+
+# PSI Host Bridge FIR Mask Register
+scom 0x02010903 {
+    bits,    scom_data;
+    0:63,    0x9D03F9F800000000;
+}

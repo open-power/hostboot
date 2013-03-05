@@ -131,7 +131,8 @@ HWP_INITFILES = hwp/initfiles/sample.initfile \
                 hwp/initfiles/p8.dmi.custom.scom.initfile \
                 hwp/initfiles/cen.dmi.custom.scom.initfile \
                 hwp/initfiles/p8.abus.custom.scom.initfile \
-                hwp/initfiles/p8.xbus.custom.scom.initfile
+                hwp/initfiles/p8.xbus.custom.scom.initfile \
+                hwp/initfiles/p8.psi.scom.initfile
 
 HWP_IF_DEFINE_DIR = hwp/initfiles
 

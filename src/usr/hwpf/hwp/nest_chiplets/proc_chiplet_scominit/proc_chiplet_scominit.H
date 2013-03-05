@@ -20,8 +20,8 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_chiplet_scominit.H,v 1.8 2013/01/20 19:30:37 jmcgill Exp $
-// $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_chiplet_scominit.H,v $
+// $Id: proc_chiplet_scominit.H,v 1.9 2013/03/04 17:33:04 jmcgill Exp $
+// $Source: /afs/awd.austin.ibm.com/proj/p9/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_chiplet_scominit.H,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2012
 // *! All Rights Reserved -- Property of IBM
@@ -50,6 +50,7 @@
 //------------------------------------------------------------------------------
 
 const char * const PROC_CHIPLET_SCOMINIT_FBC_IF = "p8.fbc.scom.if";
+const char * const PROC_CHIPLET_SCOMINIT_PSI_IF = "p8.psi.scom.if";
 const char * const PROC_CHIPLET_SCOMINIT_NX_IF  = "p8.nx.scom.if";
 const char * const PROC_CHIPLET_SCOMINIT_AS_IF  = "p8.as.scom.if";
 const char * const PROC_CHIPLET_SCOMINIT_MCS_IF = "p8.mcs.scom.if";
@@ -77,6 +78,7 @@ extern "C" {
  * @param[in] i_target Reference to target
  *                     If TARGET_TYPE_PROC_CHIP, calls:
  *                     - p8.fbc.scom.initfile
+ *                     - p8.psi.scom.initfile
  *                     - p8.nx.scom.initfile
  *                     - p8.as.scom.initfile
  *                     - p8.mcs.scom.initfile for each functional MCS chiplet
