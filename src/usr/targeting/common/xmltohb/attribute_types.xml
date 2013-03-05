@@ -9762,7 +9762,7 @@ Measured in GB</description>
     </description>
     <simpleType>
         <uint32_t>
-            <default>0</default>
+            <default>0x00100008</default>
         </uint32_t>
     </simpleType>
     <persistency>volatile</persistency>

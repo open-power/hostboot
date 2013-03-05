@@ -74,7 +74,7 @@ VPATH += ${ROOTPATH}/src/usr/hwpf/hwp/build_winkle_images/p8_set_pore_bar
 ##  Point to the PORE image in PNOR
 ##  taken from ref image
 ##      /afs/awd.austin.ibm.com/projects/eclipz/lab/p8/gsiexe/compiled_pgm_sources/scratch_image/vpo/910520/s1.sbe_ref.bin
-BINARY_FILES = $(IMGDIR)/procpore.dat:15def9e08f862467f910f6fa43b782ceffdf50b9
+BINARY_FILES = $(IMGDIR)/procpore.dat:0b95ce885d0a97c887743ea6affdc169b147c1a0
 
 include ${ROOTPATH}/config.mk
 
