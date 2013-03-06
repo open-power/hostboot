@@ -43,7 +43,8 @@ gcov:
 	rm -rf obj/gcov/*
 	$(MAKE) gcov_pass
 	find obj/gcov/ -size 0c | xargs rm # Delete empty files.
-	genhtml obj/gcov/*.lcov -o obj/gcov/html
+	genhtml obj/gcov/*.lcov -o obj/gcov/html --prefix `pwd` \
+	    --title `git describe --dirty`
 	@echo "View GCOV results with: firefox obj/gcov/html/index.html"
 
 $(IMGDIR)/hbotStringFile : $(IMAGES)
