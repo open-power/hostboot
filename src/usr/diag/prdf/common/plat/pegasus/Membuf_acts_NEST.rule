@@ -56,14 +56,14 @@ group gNestChipletFir filter singlebit
     (NestChipletFir, bit(7)) ? analyze(gMbsFir);
 
     /** NEST_CHIPLET_FIR[8|9]
-     *  Attention from MBSECCFIRs
-     */
-    (NestChipletFir, bit(8|9)) ? analyze(gMbsEccFir);
-
-    /** NEST_CHIPLET_FIR[10|11]
      *  Attention from MCBISTFIRs
      */
-    (NestChipletFir, bit(10|11)) ? analyze(gMcbistFir);
+    (NestChipletFir, bit(8|9)) ? analyze(gMcbistFir);
+
+    /** NEST_CHIPLET_FIR[10|11]
+     *  Attention from MBSECCFIRs
+     */
+    (NestChipletFir, bit(10|11)) ? analyze(gMbsEccFir);
 
     /** NEST_CHIPLET_FIR[12]
      *  Attention from NESTFBISTFIR
