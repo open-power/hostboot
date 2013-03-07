@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2012              */
+/* COPYRIGHT International Business Machines Corp. 2011,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -228,14 +228,15 @@ errlHndl_t discoverTargets()
                         chipFunctional = false;
                     }
                     else
-                    if (pgData[VPD_CP00_PG_POWERBUS_INDEX] !=
-                                    VPD_CP00_PG_POWERBUS_GOOD)
+                    if ((pgData[VPD_CP00_PG_POWERBUS_INDEX] &
+                             VPD_CP00_PG_POWERBUS_BASE) !=
+                                    VPD_CP00_PG_POWERBUS_BASE)
                     {
                         HWAS_INF("pTarget %.8X - PowerBus "
                                     "pgPdata[%d]: expected 0x%04X - bad",
                             pTarget->getAttr<ATTR_HUID>(),
                             VPD_CP00_PG_POWERBUS_INDEX,
-                            VPD_CP00_PG_POWERBUS_GOOD);
+                            VPD_CP00_PG_POWERBUS_BASE);
                         chipFunctional = false;
                     }
                 } // TYPE_PROC
@@ -321,6 +322,36 @@ errlHndl_t discoverTargets()
                             pDesc->getAttr<ATTR_HUID>(), indexEX,
                             VPD_CP00_PG_EX0_INDEX + indexEX,
                             VPD_CP00_PG_EX0_GOOD);
+                        descFunctional = false;
+                      }
+                    }
+                    else
+                    if (pDesc->getAttr<ATTR_TYPE>() == TYPE_MCS)
+                    {
+                      ATTR_CHIP_UNIT_type indexMCS =
+                                pDesc->getAttr<ATTR_CHIP_UNIT>();
+                      // check: MCS 0..3 in MCL, MCS 4..7 in MCR
+                      if (((indexMCS >=0) && (indexMCS <=3)) &&
+                          ((pgData[VPD_CP00_PG_POWERBUS_INDEX] &
+                            VPD_CP00_PG_POWERBUS_MCL) == 0))
+                      {
+                        HWAS_INF("pDesc %.8X - MCS%d "
+                                    "pgPdata[%d]: MCL expected 0x%04X - bad",
+                            pDesc->getAttr<ATTR_HUID>(), indexMCS,
+                            VPD_CP00_PG_POWERBUS_INDEX,
+                            VPD_CP00_PG_POWERBUS_MCL);
+                        descFunctional = false;
+                      }
+                      else
+                      if (((indexMCS >=4) && (indexMCS <=7)) &&
+                          ((pgData[VPD_CP00_PG_POWERBUS_INDEX] &
+                            VPD_CP00_PG_POWERBUS_MCR) == 0))
+                      {
+                        HWAS_INF("pDesc %.8X - MCS%d "
+                                    "pgPdata[%d]: MCR expected 0x%04X - bad",
+                            pDesc->getAttr<ATTR_HUID>(), indexMCS,
+                            VPD_CP00_PG_POWERBUS_INDEX,
+                            VPD_CP00_PG_POWERBUS_MCR);
                         descFunctional = false;
                       }
                     }

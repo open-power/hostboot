@@ -149,22 +149,22 @@ errlHndl_t platReadPartialGood(const TargetHandle_t &i_target,
         {
             // skip past the header
             uint16_t *pgData = reinterpret_cast <uint16_t *>(&pgRaw[VPD_CP00_PG_HDR_LENGTH]);
-            if (i_target->getAttr<ATTR_HUID>() == 0x70000)
+            if (i_target->getAttr<ATTR_HUID>() == 0x50000)
             {   // 1st proc - let it go thru ok.
             }
             else
-            if (i_target->getAttr<ATTR_HUID>() == 0x70001)
+            if (i_target->getAttr<ATTR_HUID>() == 0x50001)
             {   // 2nd proc - mark Pervasive bad - entire chip
                 //  should be marked present and NOT functional
                 pgData[VPD_CP00_PG_PERVASIVE_INDEX] = 0;
             }
             else
-            if (i_target->getAttr<ATTR_HUID>() == 0x70002)
+            if (i_target->getAttr<ATTR_HUID>() == 0x50002)
             {   // 3rd proc - part of XBUS is bad
                 pgData[VPD_CP00_PG_XBUS_INDEX] = 0;
             }
             else
-            if (i_target->getAttr<ATTR_HUID>() == 0x70003)
+            if (i_target->getAttr<ATTR_HUID>() == 0x50003)
             {   // 4th proc -  EX13 and EX14 are bad
                 pgData[VPD_CP00_PG_EX0_INDEX+13] = 0;
                 pgData[VPD_CP00_PG_EX0_INDEX+14] = 0;

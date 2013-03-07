@@ -1,26 +1,25 @@
-/*  IBM_PROLOG_BEGIN_TAG
- *  This is an automatically generated prolog.
- *
- *  $Source: src/include/usr/hwas/common/hwasCommon.H $
- *
- *  IBM CONFIDENTIAL
- *
- *  COPYRIGHT International Business Machines Corp. 2012
- *
- *  p1
- *
- *  Object Code Only (OCO) source materials
- *  Licensed Internal Code Source Materials
- *  IBM HostBoot Licensed Internal Code
- *
- *  The source code for this program is not published or other-
- *  wise divested of its trade secrets, irrespective of what has
- *  been deposited with the U.S. Copyright Office.
- *
- *  Origin: 30
- *
- *  IBM_PROLOG_END_TAG
- */
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/include/usr/hwas/common/hwasCommon.H $                    */
+/*                                                                        */
+/* IBM CONFIDENTIAL                                                       */
+/*                                                                        */
+/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/*                                                                        */
+/* p1                                                                     */
+/*                                                                        */
+/* Object Code Only (OCO) source materials                                */
+/* Licensed Internal Code Source Materials                                */
+/* IBM HostBoot Licensed Internal Code                                    */
+/*                                                                        */
+/* The source code for this program is not published or otherwise         */
+/* divested of its trade secrets, irrespective of what has been           */
+/* deposited with the U.S. Copyright Office.                              */
+/*                                                                        */
+/* Origin: 30                                                             */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
 /**
  *  @file hwasCommon.H
  *
@@ -100,21 +99,32 @@ const uint32_t VPD_CP00_PG_PIB_INDEX        = 0;
 const uint32_t VPD_CP00_PG_PIB_GOOD         = 0x0000;
 
 const uint32_t VPD_CP00_PG_PERVASIVE_INDEX  = 1;
+// all good - 0:PRV, 1:NET, 2:PIB, 3:OCC, 7:PLL, 8:OSCSW - 0xF180
 const uint32_t VPD_CP00_PG_PERVASIVE_GOOD   = 0xF180;
 
 const uint32_t VPD_CP00_PG_POWERBUS_INDEX   = 2;
-const uint32_t VPD_CP00_PG_POWERBUS_GOOD    = 0xFC00;
+// all good - 0:PRV, 1:PB, 2:NX, 3:PCIS, 4:MCL, 5:MCR - 0xFC00
+//     base - 0:PRV, 1:PB, 2:NX, 3:PCIS               - 0xF000
+//     MCL - mcs-[0..3]                               - 0x0800
+//     MCR - mcs-[4..7]                               - 0x0400
+const uint32_t VPD_CP00_PG_POWERBUS_BASE    = 0xF000;
+const uint32_t VPD_CP00_PG_POWERBUS_MCL     = 0x0800;
+const uint32_t VPD_CP00_PG_POWERBUS_MCR     = 0x0400;
 
 const uint32_t VPD_CP00_PG_XBUS_INDEX       = 4;
+// all good - 0:PRV, 1:IOX, 2:IOPCI, 3:XH - 0xF000
 const uint32_t VPD_CP00_PG_XBUS_GOOD        = 0xF000;
 
 const uint32_t VPD_CP00_PG_ABUS_INDEX       = 8;
+// all good - 0:PRV, 1:AB, 2:IOA, 7:PLL - 0xE100
 const uint32_t VPD_CP00_PG_ABUS_GOOD        = 0xE100;
 
 const uint32_t VPD_CP00_PG_PCIE_INDEX       = 9;
+// all good - 0:PRV, 1:PCI0, 2:PCI1, 3:PCI2, 5:IOPCI, 6:PBF, 7:PLL - 0xF700
 const uint32_t VPD_CP00_PG_PCIE_GOOD        = 0xF700;
 
 const uint32_t VPD_CP00_PG_EX0_INDEX        = 16;
+// all good - 0:PRV, 1:rC, 2:L2, 3:L3NP, 6:REFR, 7:DPLL - 0xF300
 const uint32_t VPD_CP00_PG_EX0_GOOD         = 0xF300;
 
 /**
