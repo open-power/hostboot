@@ -52,6 +52,8 @@ errlHndl_t FakeIpoll::processPutReg(
         uint64_t i_new,
         uint64_t i_old)
 {
+    errlHndl_t err = NULL;
+
     // check for a gfir bit turning on, or
     // if ipoll is unmasked while gfir is high
     // then raise an interrupt
@@ -71,17 +73,38 @@ errlHndl_t FakeIpoll::processPutReg(
         ? ~ipollContent & i_old & iv_ipollbits
         : false;
 
-    bool set = i_address == IPOLL::address
-        ? false
-        : (content & iv_gfirbits) && !(i_old & iv_gfirbits);
+    bool set = false;
+
+    if(i_address == GP1::address)
+    {
+            set = i_new != i_old;
+    }
+    else if(i_address != IPOLL::address)
+    {
+        set = ((content & iv_gfirbits) && !(i_old & iv_gfirbits));
+    }
 
     if((set && !masked)
             || (unmasked && hi))
     {
+        err = i_sys.modifyReg(
+                i_target,
+                IPOLL_STATUS_REG,
+                iv_ipollbits,
+                SCOM_OR);
+
         interrupt(i_sys, i_target, ATTENTION);
     }
+    else
+    {
+        err = i_sys.modifyReg(
+                i_target,
+                IPOLL_STATUS_REG,
+                ~iv_ipollbits,
+                SCOM_AND);
+    }
 
-    return 0;
+    return err;
 }
 
 void FakeIpoll::processEoi(
@@ -98,7 +121,7 @@ void FakeIpoll::processEoi(
     bool masked = ipollContent & iv_ipollbits;
     bool high = content & iv_gfirbits;
 
-    if(high && !masked)
+    if(high && !masked && iv_address != GP1::address)
     {
         interrupt(i_sys, i_source, ATTENTION);
     }

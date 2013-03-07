@@ -30,7 +30,6 @@
 #include <errl/errlmanager.H>
 #include "attnsvc.H"
 #include "attntrace.H"
-#include "attnlistutil.H"
 #include "attnprd.H"
 #include "attnproc.H"
 #include "attnmem.H"
@@ -44,15 +43,61 @@ using namespace ERRORLOG;
 namespace ATTN
 {
 
-void getMask(uint64_t i_type, void * i_data)
+void getPbGp2Mask(uint64_t i_pos, void * i_data)
 {
     uint64_t & mask = *static_cast<uint64_t *>(i_data);
-    uint64_t tmp = 0;
 
-    IPOLL::getCheckbits(i_type, tmp);
+    uint64_t tmp = 0;
+    GP1::getCheckbits(i_pos, tmp);
 
     mask |= tmp;
 }
+
+/**
+ * @brief calculated mask cache for ipoll
+ */
+class HostMask
+{
+    uint64_t iv_hostMask;
+    uint64_t iv_nonHostMask;
+
+    HostMask() : iv_hostMask(0), iv_nonHostMask(0)
+    {
+        IPOLL::getCheckbits(HOST, iv_hostMask);
+        IPOLL::forEach(~0, &iv_nonHostMask, &getIpollMask);
+
+        iv_nonHostMask = iv_nonHostMask & ~iv_hostMask;
+    }
+
+    static void getIpollMask(uint64_t i_type, void * i_data)
+    {
+        uint64_t & mask = *static_cast<uint64_t *>(i_data);
+
+        uint64_t tmp = 0;
+        IPOLL::getCheckbits(i_type, tmp);
+
+        mask |= tmp;
+    }
+
+    static HostMask & get()
+    {
+        static HostMask hm;
+
+        return hm;
+    }
+
+    public:
+
+    static uint64_t host()
+    {
+        return get().iv_hostMask;
+    }
+
+    static uint64_t nonHost()
+    {
+        return get().iv_nonHostMask;
+    }
+};
 
 errlHndl_t Service::configureInterrupts(
         msg_q_t i_q,
@@ -61,7 +106,9 @@ errlHndl_t Service::configureInterrupts(
     errlHndl_t err = NULL;
 
     // First register for Q
-    // This will set up the lcl_err interrupt on all chips
+    // This will set up the psi host bridge logic for
+    // lcl_err interrupt on all chips
+
     if(i_mode == UP)
     {
         err = INTR::registerMsgQ(i_q,
@@ -69,7 +116,9 @@ errlHndl_t Service::configureInterrupts(
                                  INTR::ISN_LCL_ERR);
     }
 
-    //Issue scoms to allow attentions to flow via INTR
+    // setup the ITR macro for GPIO type host attentions,
+    // on all procs
+
     if(!err)
     {
         TargetHandleList procs;
@@ -80,11 +129,11 @@ errlHndl_t Service::configureInterrupts(
         {
             uint64_t mask = 0;
 
-            // clear status
+            // clear GPIO interrupt type status register
 
             if(i_mode == UP)
             {
-                err = putScom(*it, INTR_TYPE_LCL_ERR_STATUS_REG,
+                err = putScom(*it, INTR_TYPE_LCL_ERR_STATUS_AND_REG,
                               0);
             }
 
@@ -93,27 +142,28 @@ errlHndl_t Service::configureInterrupts(
                 break;
             }
 
-            // unmask lcl err intr
+            // unmask GPIO interrupt type
 
             mask = 0x8000000000000000ull;
 
-            err = modifyScom(
-                             *it,
-                             INTR_TYPE_MASK_REG,
-                             i_mode == UP ? ~mask : mask,
-                             i_mode == UP ? SCOM_AND : SCOM_OR);
+            err = putScom(
+                    *it,
+                    (i_mode == UP
+                     ? INTR_TYPE_MASK_AND_REG
+                     : INTR_TYPE_MASK_OR_REG),
+                    i_mode == UP ? ~mask : mask);
 
             if(err)
             {
                 break;
             }
 
-            // set lcl err intr conf - or
+            // set GPIO interrupt type mode - or
 
             if(i_mode == UP)
             {
-                err = modifyScom(*it, INTR_TYPE_CONFIG_REG,
-                                 ~mask, SCOM_AND);
+                err = putScom(*it, INTR_TYPE_CONFIG_AND_REG,
+                                 ~mask);
             }
 
             if(err)
@@ -121,9 +171,11 @@ errlHndl_t Service::configureInterrupts(
                 break;
             }
 
-            // enable powerbus gpin
+            // enable/disable MCSes
 
-            mask = 0x0018000000000000ull;
+            mask = 0;
+
+            GP1::forEach(~0, &mask, &getPbGp2Mask);
 
             err = modifyScom(
                              *it,
@@ -136,11 +188,12 @@ errlHndl_t Service::configureInterrupts(
                 break;
             }
 
-            // enable interrupts in ipoll mask
+            // enable attentions in ipoll mask
 
-            mask = 0;
+            mask = HostMask::nonHost();
+            mask |= HostMask::host();
 
-            IPOLL::forEach(~0, &mask, &getMask);
+            // this doesn't have an and/or reg for some reason...
 
             err = modifyScom(
                     *it,
@@ -225,14 +278,12 @@ bool Service::intrTaskWait(msg_t * & o_msg)
     return shutdown;
 }
 
-errlHndl_t Service::processIntrQMsgPreAck(const msg_t & i_msg,
-        AttentionList & o_attentions)
+
+void Service::processIntrQMsgPreAck(const msg_t & i_msg)
 {
     // this function should do as little as possible
     // since the hw can't generate additional interrupts
     // until the msg is acknowledged
-
-    errlHndl_t err = NULL;
 
     TargetHandle_t proc = NULL;
 
@@ -244,6 +295,8 @@ errlHndl_t Service::processIntrQMsgPreAck(const msg_t & i_msg,
     getTargetService().getAllChips(procs, TYPE_PROC);
 
     TargetHandleList::iterator it = procs.begin();
+
+    // resolve the xisr to a proc target
 
     while(it != procs.end())
     {
@@ -262,110 +315,91 @@ errlHndl_t Service::processIntrQMsgPreAck(const msg_t & i_msg,
         ++it;
     }
 
-    ATTN_DBG("preack: xisr: 0x%07x, tgt: %p", xisr.u32, proc);
+    uint64_t hostMask = HostMask::host();
+    uint64_t nonHostMask = HostMask::nonHost();
+    uint64_t data = 0;
 
-    do {
+    // do the minimum that is required
+    // for sending EOI without getting
+    // another interrupt.  for host attentions
+    // this is clearing the gpio interrupt
+    // type status register
+    // and for xstp,rec,spcl this is
+    // masking the appropriate bit in
+    // ipoll mask
 
-        // determine what has an attention
-        // determine what attentions are unmasked
-        // in the ipoll mask register and query the proc & mem
-        // resolvers for active attentions
+    // read the ipoll status register
+    // to determine the interrupt was
+    // caused by host attn or something
+    // else (xstp,rec,spcl)
 
-        ProcOps & procOps = getProcOps();
-        MemOps & memOps = getMemOps();
+    errlHndl_t err = getScom(proc, IPOLL_STATUS_REG, data);
 
-        uint64_t ipollMaskScomData = 0;
+    if(err)
+    {
+        errlCommit(err, ATTN_COMP_ID);
 
-        // get ipoll mask register content and decode
-        // unmasked attention types
+        // assume everything is on
 
-        err = getScom(proc, IPOLL::address, ipollMaskScomData);
+        data = hostMask | nonHostMask;
+    }
 
-        if(err)
-        {
-            break;
-        }
+    if(data & hostMask)
+    {
+        // if host attention, clear the ITR macro gpio interrupt
+        // type status register.
 
-        ATTN_DBG("resolving 0x%016x...", ipollMaskScomData);
-
-        // query the proc resolver for active attentions
-
-        err = procOps.resolve(proc, ipollMaskScomData, o_attentions);
-
-        if(err)
-        {
-            break;
-        }
-
-        // query the mem resolver for active attentions
-
-        err = memOps.resolve(proc, ipollMaskScomData, o_attentions);
+        err = putScom(proc, INTR_TYPE_LCL_ERR_STATUS_AND_REG, 0);
 
         if(err)
         {
-            break;
+            errlCommit(err, ATTN_COMP_ID);
         }
+    }
 
-        // mask them
+    if(data & nonHostMask)
+    {
+        // mask local proc xstp,rec and/or special attns if on.
 
-        err = o_attentions.forEach(MaskFunct()).err;
+        // the other thread might be trying to unmask
+        // on the same target.  The mutex ensures
+        // neither thread corrupts the register.
+
+        mutex_lock(&iv_mutex);
+
+        err = modifyScom(proc, IPOLL::address, data & nonHostMask, SCOM_OR);
+
+        mutex_unlock(&iv_mutex);
 
         if(err)
         {
-            break;
+            errlCommit(err, ATTN_COMP_ID);
         }
-
-        // clear anything in the status register
-
-        err = putScom(proc, INTR_TYPE_LCL_ERR_STATUS_REG, 0);
-
-        if(err)
-        {
-            break;
-        }
-
-        ATTN_DBG("...resolved %d", o_attentions.size());
-
-    } while(0);
-
-    return err;
+    }
 }
 
 void Service::processIntrQMsg(msg_t & i_msg)
 {
-    errlHndl_t err = NULL;
-
-    AttentionList newAttentions;
-
     // processIntrQMsgPreAck function should do as little as possible
     // since the hw can't generate additional interrupts until the
     // msg is acknowledged
 
-    err = processIntrQMsgPreAck(i_msg, newAttentions);
+    processIntrQMsgPreAck(i_msg);
 
     // respond to the interrupt service so hw
     // can generate additional interrupts
 
     msg_respond(iv_intrTaskQ, &i_msg);
 
-    if(err)
-    {
-        errlCommit(err, ATTN_COMP_ID);
-    }
-    else if(!newAttentions.empty())
-    {
-        // put the new attentions in the list
+    // wake up the prd task
 
-        mutex_lock(&iv_mutex);
+    mutex_lock(&iv_mutex);
 
-        iv_attentions.merge(newAttentions);
+    iv_interrupt = true;
 
-        mutex_unlock(&iv_mutex);
+    mutex_unlock(&iv_mutex);
 
-        // wake up the prd task
-
-        sync_cond_signal(&iv_cond);
-    }
+    sync_cond_signal(&iv_cond);
 }
 
 void* Service::prdTask(void * i_svc)
@@ -374,13 +408,15 @@ void* Service::prdTask(void * i_svc)
 
     Service & svc = *static_cast<Service *>(i_svc);
     bool shutdown = false;
-    AttentionList attentions;
+
+    TargetHandleList procs;
+    getTargetService().getAllChips(procs, TYPE_PROC);
 
     // wait for a wakeup
 
     while(true)
     {
-        shutdown = svc.prdTaskWait(attentions);
+        shutdown = svc.prdTaskWait();
 
         if(shutdown)
         {
@@ -392,12 +428,13 @@ void* Service::prdTask(void * i_svc)
 
         // new attentions for prd to handle
 
-        svc.processAttentions(attentions);
+        svc.processAttentions(procs);
     }
+
     return NULL;
 }
 
-bool Service::prdTaskWait(AttentionList & o_attentions)
+bool Service::prdTaskWait()
 {
     // wait for a wakeup
 
@@ -405,20 +442,21 @@ bool Service::prdTaskWait(AttentionList & o_attentions)
 
     mutex_lock(&iv_mutex);
 
-    while(iv_attentions.empty() && !iv_shutdownPrdTask)
+    while(!iv_interrupt && !iv_shutdownPrdTask)
     {
         sync_cond_wait(&iv_cond, &iv_mutex);
-
-        ATTN_FAST("...prd task woke up");
     }
 
-    o_attentions = iv_attentions;
-    iv_attentions.clear();
+    ATTN_FAST("...prd task woke up, shutdown: %d, pending: %d",
+            iv_shutdownPrdTask,
+            iv_interrupt);
 
-    if(o_attentions.empty() && iv_shutdownPrdTask)
+    if(iv_shutdownPrdTask)
     {
         swap(shutdown, iv_shutdownPrdTask);
     }
+
+    iv_interrupt = false;
 
     mutex_unlock(&iv_mutex);
 
@@ -430,53 +468,88 @@ bool Service::prdTaskWait(AttentionList & o_attentions)
     return shutdown;
 }
 
-void Service::processAttentions(const AttentionList & i_attentions)
+void Service::processAttentions(const TargetHandleList & i_procs)
 {
     errlHndl_t err = NULL;
+    AttentionList attentions;
 
-    err = getPrdWrapper().callPrd(i_attentions);
-
-    if(err)
-    {
-        errlCommit(err, ATTN_COMP_ID);
-    }
+    MemOps & memOps = getMemOps();
+    ProcOps & procOps = getProcOps();
 
     do {
 
-        // figure out which attentions PRD did not clear.
+        attentions.clear();
 
-        AttentionList cleared, uncleared;
+        // enumerate the highest priority pending attention
+        // on every chip and then give the entire set to PRD
 
-        err = i_attentions.split(cleared, uncleared, ClearedPredicate()).err;
+        TargetHandleList::const_iterator pit = i_procs.end();
+
+        while(pit-- != i_procs.begin())
+        {
+            // enumerate proc local attentions (xstp,spcl,rec).
+
+            err = procOps.resolveIpoll(*pit, attentions);
+
+            if(err)
+            {
+                errlCommit(err, ATTN_COMP_ID);
+            }
+
+            // enumerate host attentions and convert
+            // to centaur targets
+
+            err = memOps.resolve(*pit, attentions);
+
+            if(err)
+            {
+                errlCommit(err, ATTN_COMP_ID);
+            }
+        }
+
+        err = getPrdWrapper().callPrd(attentions);
 
         if(err)
         {
-            break;
+            errlCommit(err, ATTN_COMP_ID);
         }
 
-        mutex_lock(&iv_mutex);
+        // unmask proc local attentions
+        // (xstp,rec,special) in ipoll mask
 
-        // reinsert attentions PRD did not clear.
+        // any pending attentions will be found
+        // on the next pass
 
-        iv_attentions.merge(uncleared);
+        pit = i_procs.end();
 
-        mutex_unlock(&iv_mutex);
-
-        // unmask cleared attentions
-
-        err = cleared.forEach(UnmaskFunct()).err;
-
-        if(err)
+        while(pit-- != i_procs.begin())
         {
-            break;
+            mutex_lock(&iv_mutex);
+
+            // the other thread might be trying to mask
+            // on the same target.  The mutex ensures
+            // neither thread corrupts the register.
+
+            err = modifyScom(
+                    *pit,
+                    IPOLL::address,
+                    ~HostMask::nonHost(),
+                    SCOM_AND);
+
+            mutex_unlock(&iv_mutex);
+
+            if(err)
+            {
+                errlCommit(err, ATTN_COMP_ID);
+            }
         }
 
-    } while(0);
+        // if on a given Centaur with a pending attention
+        // on an MBA, an attention comes on in the other MBA
+        // we don't get an interrupt for that.  So make another
+        // pass and check for that.
 
-    if(err)
-    {
-        errlCommit(err, ATTN_COMP_ID);
-    }
+    } while(!attentions.empty());
 }
 
 errlHndl_t Service::stop()
@@ -611,6 +684,7 @@ errlHndl_t Service::start()
 }
 
 Service::Service() :
+    iv_interrupt(false),
     iv_intrTaskQ(0),
     iv_shutdownPrdTask(false),
     iv_prdTask(0),

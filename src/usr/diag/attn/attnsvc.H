@@ -1,26 +1,25 @@
-/*  IBM_PROLOG_BEGIN_TAG
- *  This is an automatically generated prolog.
- *
- *  $Source: src/usr/diag/attn/attnsvc.H $
- *
- *  IBM CONFIDENTIAL
- *
- *  COPYRIGHT International Business Machines Corp. 2012
- *
- *  p1
- *
- *  Object Code Only (OCO) source materials
- *  Licensed Internal Code Source Materials
- *  IBM HostBoot Licensed Internal Code
- *
- *  The source code for this program is not published or other-
- *  wise divested of its trade secrets, irrespective of what has
- *  been deposited with the U.S. Copyright Office.
- *
- *  Origin: 30
- *
- *  IBM_PROLOG_END_TAG
- */
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/usr/diag/attn/attnsvc.H $                                 */
+/*                                                                        */
+/* IBM CONFIDENTIAL                                                       */
+/*                                                                        */
+/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/*                                                                        */
+/* p1                                                                     */
+/*                                                                        */
+/* Object Code Only (OCO) source materials                                */
+/* Licensed Internal Code Source Materials                                */
+/* IBM HostBoot Licensed Internal Code                                    */
+/*                                                                        */
+/* The source code for this program is not published or otherwise         */
+/* divested of its trade secrets, irrespective of what has been           */
+/* deposited with the U.S. Copyright Office.                              */
+/*                                                                        */
+/* Origin: 30                                                             */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
 #ifndef __ATTN_ATTNSVC_H
 #define __ATTN_ATTNSVC_H
 
@@ -188,22 +187,14 @@ class Service
          * @brief processIntrQMsgPreAck pre EOI interrupt service message
          *        processing
          *
-         * perform the interrupt service message processing steps that must
-         * be done before EOI can be sent by the interrupt service.  Namely
-         * resolve and mask the interrupt causing attentions.
+         * Perform the interrupt service message processing steps that must
+         * be done before EOI can be sent by the interrupt service.
          *
          * @post interrupt service message ready to be acknowledged
          *
          * @param[in] i_msg interrupt svc intr message to be processed
-         * @param[out] o_attentions attentions associated with interrupt msg
-         *
-         * @return errlHndl_t Error log.
-         *
-         * @retval[0] no error
-         * @retval[!0] unexpected error
          */
-        errlHndl_t processIntrQMsgPreAck(const msg_t & i_msg,
-                AttentionList & o_attentions);
+        void processIntrQMsgPreAck(const msg_t & i_msg);
 
         /**
          * @brief startPrdTask start task helper function
@@ -231,23 +222,23 @@ class Service
          * @retval[true] shutdown requested
          * @retval[false] shutdown not requested
          */
-        bool prdTaskWait(AttentionList & o_attentions);
+        bool prdTaskWait();
 
         /**
          * @brief processAttentions process interrupt task wakeup
          *
          * call prd to analyze attentions
          *
-         * @post attentions analyzed by prd.  attentions cleard by prd unmasked
+         * @param[i_procs] procs to check for attentions behind
          *
-         * @param[in] i_attentions attentions to be processed by prd
+         * @post attentions analyzed by prd.  attentions cleared by prd unmasked
          */
-        void processAttentions(const AttentionList & i_attentions);
+        void processAttentions(const TARGETING::TargetHandleList & i_procs);
 
         /**
-         * @brief iv_attentions all active attentions in the node
+         * @brief iv_interrupt PRD thread wakeup indicator
          */
-        AttentionList iv_attentions;
+        bool iv_interrupt;
 
         /**
          * @brief iv_intrTaskQ intr task message q

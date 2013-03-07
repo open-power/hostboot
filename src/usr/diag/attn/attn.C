@@ -90,7 +90,7 @@ errlHndl_t checkForIplAttentions()
 
             // query the mem resolver for active attentions
 
-            err = memOps.resolve(*tit, 0, attentions);
+            err = memOps.resolve(*tit, attentions);
 
             if(err)
             {

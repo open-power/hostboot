@@ -40,118 +40,6 @@ using namespace ERRORLOG;
 namespace ATTN
 {
 
-errlHndl_t MemOps::mask(const AttnData & i_data)
-{
-    errlHndl_t err = 0;
-
-    do {
-
-        TargetHandle_t proc = getTargetService().getProc(i_data.targetHndl);
-
-        mutex_lock(&iv_mutex);
-
-        bool mask = iv_maskState[proc] == 0;
-
-        iv_maskState[proc]++;
-
-        mutex_unlock(&iv_mutex);
-
-        if(mask)
-        {
-            uint64_t ipollMaskWriteBits = 0;
-
-            IPOLL::getCheckbits(HOST, ipollMaskWriteBits);
-
-            err = modifyScom(proc, IPOLL::address,
-                    ipollMaskWriteBits, SCOM_OR);
-
-            if(err)
-            {
-                break;
-            }
-        }
-
-
-    } while(0);
-
-    return err;
-}
-
-errlHndl_t MemOps::unmask(const AttnData & i_data)
-{
-    errlHndl_t err = 0;
-
-    do {
-
-        TargetHandle_t proc = getTargetService().getProc(i_data.targetHndl);
-
-        mutex_lock(&iv_mutex);
-
-        iv_maskState[proc]--;
-
-        bool unmask = iv_maskState[proc] == 0;
-
-        if(unmask)
-        {
-            iv_maskState.erase(proc);
-        }
-
-        mutex_unlock(&iv_mutex);
-
-        if(unmask)
-        {
-            uint64_t ipollMaskWriteBits = 0;
-
-            IPOLL::getCheckbits(HOST, ipollMaskWriteBits);
-
-            err = modifyScom(proc, IPOLL::address,
-                    ~ipollMaskWriteBits, SCOM_AND);
-
-            if(err)
-            {
-                break;
-            }
-        }
-
-    } while(0);
-
-    return err;
-}
-
-errlHndl_t MemOps::query(const AttnData & i_attnToCheck, bool & o_active)
-{
-    errlHndl_t err = 0;
-
-    uint64_t checkbits = 0, scomData = 0;
-    TargetHandle_t mem = i_attnToCheck.targetHndl;
-
-    do
-    {
-        TargetHandle_t mcs = getTargetService().getMcs(mem);
-
-        MCI::getCheckbits(i_attnToCheck.attnType, checkbits);
-
-        err = getScom(mcs, MCI::address, scomData);
-
-        if(err)
-        {
-            break;
-        }
-
-        if(scomData & checkbits)
-        {
-            o_active = true;
-        }
-        else
-        {
-            o_active = false;
-        }
-
-    } while(0);
-
-    return err;
-}
-
 struct ResolveMcsArgs
 {
     TargetHandle_t proc;
@@ -218,26 +106,15 @@ void resolveMcs(uint64_t i_mcs, void * i_data)
 
 errlHndl_t MemOps::resolve(
         TargetHandle_t i_proc,
-        uint64_t i_typeMask,
         AttentionList & o_attentions)
 {
     errlHndl_t err = 0;
 
-    uint64_t gp1ScomData = 0, hostMask = 0;
-    vector<uint64_t> mcsPositions;
-
-    IPOLL::getCheckbits(HOST, hostMask);
+    uint64_t gp1ScomData = 0;
 
     do {
 
-        if(hostMask & i_typeMask)
-        {
-            // host attentions are masked....
-
-            break;
-        }
-
-        // get the nest_gp1 register content and decode
+        // get the nest gp1 register content and decode
         // (get a list of membufs reporting attentions)
 
         err = getScom(i_proc, GP1::address, gp1ScomData);
@@ -262,11 +139,11 @@ errlHndl_t MemOps::resolve(
 
 MemOps::MemOps()
 {
-    mutex_init(&iv_mutex);
+
 }
 
 MemOps::~MemOps()
 {
-    mutex_destroy(&iv_mutex);
+
 }
 }

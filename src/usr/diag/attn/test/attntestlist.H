@@ -1,26 +1,25 @@
-/*  IBM_PROLOG_BEGIN_TAG
- *  This is an automatically generated prolog.
- *
- *  $Source: src/usr/diag/attn/test/attntestlist.H $
- *
- *  IBM CONFIDENTIAL
- *
- *  COPYRIGHT International Business Machines Corp. 2012
- *
- *  p1
- *
- *  Object Code Only (OCO) source materials
- *  Licensed Internal Code Source Materials
- *  IBM HostBoot Licensed Internal Code
- *
- *  The source code for this program is not published or other-
- *  wise divested of its trade secrets, irrespective of what has
- *  been deposited with the U.S. Copyright Office.
- *
- *  Origin: 30
- *
- *  IBM_PROLOG_END_TAG
- */
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/usr/diag/attn/test/attntestlist.H $                       */
+/*                                                                        */
+/* IBM CONFIDENTIAL                                                       */
+/*                                                                        */
+/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/*                                                                        */
+/* p1                                                                     */
+/*                                                                        */
+/* Object Code Only (OCO) source materials                                */
+/* Licensed Internal Code Source Materials                                */
+/* IBM HostBoot Licensed Internal Code                                    */
+/*                                                                        */
+/* The source code for this program is not published or otherwise         */
+/* divested of its trade secrets, irrespective of what has been           */
+/* deposited with the U.S. Copyright Office.                              */
+/*                                                                        */
+/* Origin: 30                                                             */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
 #ifndef __TEST_ATTNTESTLIST_H
 #define __TEST_ATTNTESTLIST_H
 
@@ -258,144 +257,6 @@ class AttnListTest : public CxxTest::TestSuite
             }
 
             TS_TRACE(EXIT_MRK "testForEach");
-        }
-
-        /**
-         * @brief testSplit Unit test for the
-         *        split method.
-         */
-        void testSplit(void)
-        {
-            static AttentionOps * nullOps = 0;
-            static const TargetHandle_t nullTarget = 0;
-
-            static const AttnData tests[] =
-            {
-                {nullTarget, CHECK_STOP},
-                {nullTarget +2, CHECK_STOP},
-                {nullTarget, RECOVERABLE},
-                {nullTarget +1, RECOVERABLE},
-                {nullTarget +2, RECOVERABLE},
-                {nullTarget +1, CHECK_STOP},
-            };
-            static const AttnData * testsEnd = tests
-                + sizeof(tests)/sizeof(*tests);
-
-            TS_TRACE(ENTER_MRK "testSplit");
-
-            const AttnData * testIt = tests;
-
-            uint64_t xstpCount = 0;
-
-            AttentionList l;
-
-            while(testIt != testsEnd)
-            {
-                l.add(Attention(*testIt, nullOps));
-
-                if(testIt->attnType == CHECK_STOP)
-                {
-                    ++xstpCount;
-                }
-                ++testIt;
-            }
-
-            AttentionList t, f;
-            l.split(t, f, CheckstopPredicate());
-
-            if(t.size() != xstpCount
-                    || f.size() != static_cast<uint64_t>((
-                            testsEnd - tests)) - xstpCount)
-            {
-                TS_FAIL("Unexpected result calling split");
-            }
-
-            AttentionList::iterator tit = t.begin();
-            AttentionList::iterator fit = f.begin();
-
-            while(tit != t.end() && fit != f.end())
-            {
-                AttnData td, fd;
-                tit->getData(td);
-                fit->getData(fd);
-
-                if(td.attnType != CHECK_STOP
-                        || fd.attnType != RECOVERABLE)
-                {
-                    TS_FAIL("Unexpected result calling split");
-                    break;
-                }
-
-                ++tit;
-                ++fit;
-            }
-
-            TS_TRACE(EXIT_MRK "testSplit");
-        }
-
-        /**
-         * @brief testMerge Unit test for the
-         *        merge method.
-         */
-        void testMerge(void)
-        {
-            static AttentionOps * nullOps = 0;
-            static const TargetHandle_t nullTarget = 0;
-
-            static const struct Tests
-            {
-              AttnData a;
-              AttnData b;
-
-            } tests[] =
-            {
-                {{nullTarget +1, CHECK_STOP}, {nullTarget +2, RECOVERABLE}},
-                {{nullTarget +3, SPECIAL}, {nullTarget +4, RECOVERABLE}},
-                {{nullTarget +5, CHECK_STOP}, {nullTarget +6, RECOVERABLE}},
-                {{nullTarget +7, SPECIAL}, {nullTarget +8, RECOVERABLE}},
-                {{nullTarget +9, CHECK_STOP}, {nullTarget +10, SPECIAL}},
-            };
-            static const Tests * testsEnd = tests
-                + sizeof(tests)/sizeof(*tests);
-
-            TS_TRACE(EXIT_MRK "testMerge");
-
-            const Tests * testIt = tests;
-
-            AttentionList l1, l2;
-
-            while(testIt != testsEnd)
-            {
-                l1.add(Attention(testIt->a, nullOps));
-                l2.add(Attention(testIt->b, nullOps));
-
-                ++testIt;
-            }
-
-            l1.merge(l2);
-
-            if(l1.size() != static_cast<uint64_t>((testsEnd - tests) * 2))
-            {
-                TS_FAIL("Attention list not merged");
-            }
-
-            AttentionList::iterator it2 = l1.begin();
-            AttentionList::iterator it1 = it2;
-            it2++;
-
-            while(it2 != l1.end())
-            {
-                if((*it2) < (*it1))
-                {
-                    TS_FAIL("Attention list not sorted");
-                    break;
-                }
-
-                ++it1;
-                ++it2;
-            }
-
-            TS_TRACE(EXIT_MRK "testMerge");
         }
 };
 #endif

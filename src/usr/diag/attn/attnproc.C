@@ -39,33 +39,6 @@ using namespace ERRORLOG;
 namespace ATTN
 {
 
-errlHndl_t ProcOps::mask(const AttnData & i_data)
-{
-    errlHndl_t err = 0;
-
-    uint64_t ipollMaskWriteBits = 0;
-
-    IPOLL::getCheckbits(i_data.attnType, ipollMaskWriteBits);
-
-    err = modifyScom(i_data.targetHndl, IPOLL::address,
-            ipollMaskWriteBits, SCOM_OR);
-
-    return err;
-}
-
-errlHndl_t ProcOps::unmask(const AttnData & i_data)
-{
-    errlHndl_t err = 0;
-
-    uint64_t ipollMaskWriteBits = 0;
-
-    IPOLL::getCheckbits(i_data.attnType, ipollMaskWriteBits);
-
-    err = modifyScom(i_data.targetHndl, IPOLL::address,
-                ~ipollMaskWriteBits, SCOM_AND);
-    return err;
-}
-
 errlHndl_t ProcOps::query(const AttnData & i_attnToCheck, bool & o_active)
 {
     errlHndl_t err = 0;
@@ -88,6 +61,72 @@ errlHndl_t ProcOps::query(const AttnData & i_attnToCheck, bool & o_active)
         {
             o_active = false;
         }
+    }
+
+    return err;
+}
+
+errlHndl_t ProcOps::resolveIpoll(
+        TargetHandle_t i_proc,
+        AttentionList & o_attentions)
+{
+    errlHndl_t err = NULL;
+    uint64_t on = 0;
+    uint64_t observed = 0;
+    AttnData d;
+
+    // very unlikely, but look for any
+    // supported bits on in the
+    // status register, in case the other
+    // thread hasn't masked it yet
+
+    err = getScom(i_proc, IPOLL_STATUS_REG, on);
+
+    if(err)
+    {
+        errlCommit(err, ATTN_COMP_ID);
+    }
+
+    // also look for any supported bits on in the
+    // mask register, indicating that the other thread
+    // saw the error and masked it.
+
+    err = getScom(i_proc, IPOLL::address, observed);
+
+    if(err)
+    {
+        errlCommit(err, ATTN_COMP_ID);
+    }
+
+    for(uint64_t type = INVALID_ATTENTION_TYPE;
+            type != END_ATTENTION_TYPE;
+            ++type)
+    {
+        uint64_t supported = 0;
+
+        if(!IPOLL::getCheckbits(type, supported))
+        {
+            // this object doesn't support
+            // this attention type
+
+            continue;
+        }
+
+        // analysis should be done if the bit for this
+        // attention type is either on in the status reg
+        // or masked in the mask reg
+
+        if(!(supported & (on | observed)))
+        {
+            continue;
+        }
+
+        d.attnType = static_cast<ATTENTION_VALUE_TYPE>(type);
+        d.targetHndl = i_proc;
+
+        o_attentions.add(Attention(d, this));
+
+        break;
     }
 
     return err;
