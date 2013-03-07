@@ -134,4 +134,16 @@ enum BlockPriority
 #define DUMP_TEST_MEMORY_SIZE  (4*MEGABYTE)
 
 
+//TODO RTC: 35752 - Merge SLW and OCC into simgle HOMER Offset
+//Note: OCC base image must be at 4MB offset, COMMON data must be at 8MB offset.
+/** Physical Memory for OCC images - 1MB/chip * 4 chips */
+#define VMM_OCC_IMAGE_BASE_ADDR (72*MEGABYTE)
+#define VMM_OCC_IMAGE_BASE_SIZE (4*MEGABYTE)
+
+/** Physical Memory for OCC common space - 8MB total */
+#define VMM_OCC_COMMON_ADDR (80*MEGABYTE)
+#define VMM_OCC_COMMON_SIZE (8*MEGABYTE)
+
+
+
 #endif /* _VMMCONST_H */

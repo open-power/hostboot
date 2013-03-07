@@ -55,7 +55,7 @@ EXTENDED_MODULES = targeting ecmddatabuffer fapi hwp plat	\
                    mdia mbox prdf bus_training \
                    activate_powerbus build_winkle_images \
                    core_activate dram_initialization edi_ei_initialization \
-                   establish_system_smp \
+                   establish_system_smp occ\
                    nest_chiplets start_payload thread_activate slave_sbe \
                    attn runtime ibscom dump
 
@@ -83,8 +83,7 @@ include ${ROOTPATH}/src/usr/diag/prdf/common/prd_ruletable.mk
 hbicore_DATA_MODULES =  sample.if p8.dmi.scom.if cen.dmi.scom.if \
                         p8.fbc.scom.if mbs_def.if mba_def.if cen_ddrphy.if \
                         p8.pe.phase1.scom.if p8.pe.phase2.scom.if \
-                        dimmspd.dat centaur.sbe_pnor.bin procmvpd.dat \
-                        ${PRDR_RULE_TABLE_TARGETS} \
+                        centaur.sbe_pnor.bin ${PRDR_RULE_TABLE_TARGETS} \
                         p8.abus.scom.if p8.xbus.scom.if p8.mcs.scom.if \
                         p8.as.scom.if p8.nx.scom.if p8.dmi.custom.scom.if \
                         cen.dmi.custom.scom.if p8.abus.custom.scom.if \

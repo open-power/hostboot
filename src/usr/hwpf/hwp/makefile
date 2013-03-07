@@ -47,7 +47,7 @@ OBJS = fapiTestHwp.o \
 SUBDIRS	=   dmi_training.d  sbe_centaur_init.d mc_config.d \
             dram_training.d activate_powerbus.d build_winkle_images.d \
             core_activate.d dram_initialization.d edi_ei_initialization.d \
-            establish_system_smp.d bus_training.d \
+            establish_system_smp.d bus_training.d occ.d\
             nest_chiplets.d start_payload.d thread_activate.d slave_sbe.d
 
 include mvpd_accessors/mvpd.mk
