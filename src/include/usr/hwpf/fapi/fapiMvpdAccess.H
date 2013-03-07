@@ -77,9 +77,9 @@ namespace fapi
         MVPD_RECORD_LWP9 = 0x1b,
         MVPD_RECORD_LWPA = 0x1c,
         MVPD_RECORD_LWPB = 0x1d,
-        MPVD_RECORD_LWPC = 0x1e,
-        MPVD_RECORD_LWPD = 0x1f,
-        MPVD_RECORD_LWPE = 0x20,
+        MVPD_RECORD_LWPC = 0x1e,
+        MVPD_RECORD_LWPD = 0x1f,
+        MVPD_RECORD_LWPE = 0x20,
         MVPD_RECORD_VWML = 0x21,
         MVPD_RECORD_MER0 = 0x22,
     };
