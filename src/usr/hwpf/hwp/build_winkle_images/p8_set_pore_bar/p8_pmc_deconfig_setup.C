@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_pmc_deconfig_setup.C,v 1.7 2012/12/19 09:52:36 pchatnah Exp $
+// $Id: p8_pmc_deconfig_setup.C,v 1.9 2013/03/08 19:52:47 stillgs Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/p8_pmc_deconfig_setup.C,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
@@ -105,13 +105,13 @@ p8_pmc_deconfig_setup(const Target& i_target)
     FAPI_INF("Executing p8_pmc_deconfig_setup...");
 
     l_rc = fapiGetChildChiplets (i_target, TARGET_TYPE_EX_CHIPLET, l_exChiplets, TARGET_STATE_PRESENT);
-	if (l_rc)
-	{
-	    FAPI_ERR("Error from fapiGetChildChiplets!");
-	    return l_rc;
-	}
+    if (l_rc)
+    {
+        FAPI_ERR("Error from fapiGetChildChiplets!");
+        return l_rc;
+    }
 
-	FAPI_DBG("\tChiplet vector size  => %u ", l_exChiplets.size());
+    FAPI_DBG("\tChiplet vector size  => %u ", l_exChiplets.size());
 
     // Set the buffer to assume that all chiplets are deconfigured.  Validly configured
     // chiplets will then turn off this deconfiguration.
@@ -126,8 +126,8 @@ p8_pmc_deconfig_setup(const Target& i_target)
     }
 
     // Iterate through the returned chiplets
-	for (uint8_t j=0; j < l_exChiplets.size(); j++)
-	{
+    for (uint8_t j=0; j < l_exChiplets.size(); j++)
+    {
 
         // Determine if it's functional
         l_rc = FAPI_ATTR_GET(ATTR_FUNCTIONAL, &l_exChiplets[j], l_functional);
@@ -148,7 +148,7 @@ p8_pmc_deconfig_setup(const Target& i_target)
                     break;
                 }
 
-		FAPI_INF(" Working on ex chiplet number %d", l_ex_number);
+                FAPI_INF(" Working on ex chiplet number %d", l_ex_number);
 
                 l_rc=fapiGetScom(i_target, (EX_GP3_0x100F0012+(l_ex_number*0x01000000)), data);
                 if(l_rc)
@@ -183,12 +183,12 @@ p8_pmc_deconfig_setup(const Target& i_target)
                 // Do nothing
             }
         }
-	}
+    }
 
     // If no errors, write the deconfig register
     if (!l_rc)
     {
-	    if ( core_flag )
+        if ( core_flag )
         {
             l_rc=fapiPutScom(i_target, PMC_CORE_DECONFIG_REG_0x0006200D , config_data);
             if(l_rc)
@@ -201,10 +201,9 @@ p8_pmc_deconfig_setup(const Target& i_target)
             }
         }
         else
-	    {
-	        FAPI_ERR("No configured cores were detected!");
-	        FAPI_SET_HWP_ERROR(l_rc, RC_PROCPM_PMC_DECONFIG_NO_CORES);
-	    }
+        {
+            FAPI_INF("No configured cores were detected!");
+        }
     }
     return l_rc;
 }
