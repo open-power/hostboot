@@ -1,9 +1,14 @@
 
-#-- $Id: mba_def.initfile,v 1.26 2013/01/23 14:55:47 yctschan Exp $
+#-- $Id: mba_def.initfile,v 1.30 2013/03/05 17:01:22 yctschan Exp $
 #-- CHANGE HISTORY:
 #--------------------------------------------------------------------------------
 #-- Version:|Author: | Date:  | Comment:
 #-- --------|--------|--------|--------------------------------------------------
+#--     1.30|tschang | 3/05/13|Set def_margin2 to 0 to decrease timing parmeters for performance and added def_margin1 for RW parms
+#--     1.29|tschang | 2/27/13|Set def_margin to 1 to decrease timing parmeters for performance
+#--     1.28|tschang | 2/11/13|Set WR ODT start to 1 and end to 5 (HW239026)
+#--                            Updated cfg_nm_per_slot_enabled for CDIMM cfgs
+#--     1.27|tschang | 1/28/13|Set mba_cal3 register to max timeout values for periodic cal
 #--     1.26|tschang | 1/23/13|Write Latency equation changed for mba_tmr0 register - define def_WL = (ATTR_EFF_DRAM_CWL + ATTR_EFF_DRAM_CL - 1 - 7)
 #--     1.25|tschang | 1/17/13|added def_margin constant to increment mba tmr0 register by the value of def_margin - current setting of margin is 2
 #--     1.24|tschang | 1/04/13|added code to detect and overrun condition with periodic cal and choose a larger timebase when that happens
@@ -232,7 +237,8 @@ define def_equal_test     =  (SYS.ATTR_SCRATCH_UINT32_1 == SYS.ATTR_SCRATCH_UINT
 
 
 # mba tmr0 register timings are added to the value below
-define def_margin      = (2);
+define def_margin1     = (1);
+define def_margin2     = (0);
 
 
 define def_no_spare     =   (SYS.ATTR_IS_SIMULATION==1) ;
@@ -1673,10 +1679,14 @@ scom 0x03010416     {
     0:14    ,   ATTR_MSS_MEM_THROTTLE_NUMERATOR_PER_MBA   ,            1            ,     any;          # cfg_nm_n_per_mba	MSS_MEM_THROTTLE_NUMERATOR_PER_MBA
     15:30   ,   ATTR_MSS_MEM_THROTTLE_NUMERATOR_PER_CHIP  ,            1            ,     any;          # cfg_nm_n_per_chip	MSS_MEM_THROTTLE_NUMERATOR_PER_CHIP
     31:44   ,   ATTR_MSS_MEM_THROTTLE_DENOMINATOR         ,            1            ,     any;          # cfg_nm_m	MSS_MEM_THROTTLE_DENOMINATOR
-    51      ,   0b1                                       ,            1            ,     any;          # cfg_nm_per_slot_enabled	1
+#    51      ,   0b1                                       ,            1            ,     any;          # cfg_nm_per_slot_enabled	1
+    51      ,   0b0                                       ,            1            ,     (ATTR_EFF_DIMM_TYPE == 0);          # cfg_nm_per_slot_enabled	Set to 0 for CDIMM, Set to 1 for everything else
+    51      ,   0b1                                       ,            1            ,     ((ATTR_EFF_DIMM_TYPE == 1) || (ATTR_EFF_DIMM_TYPE == 2) || (ATTR_EFF_DIMM_TYPE == 3));          # cfg_nm_per_slot_enabled	Set to 0 for CDIMM, Set to 1 for everything else
     52      ,   0b0                                       ,            1            ,     (ATTR_EFF_DIMM_TYPE == 0);          # cfg_nm_count_other_mba_dis	Set to 0 for CDIMM, Set to 1 for everything else
     52      ,   0b1                                       ,            1            ,     ((ATTR_EFF_DIMM_TYPE == 1) || (ATTR_EFF_DIMM_TYPE == 2) || (ATTR_EFF_DIMM_TYPE == 3));          # cfg_nm_count_other_mba_dis	Set to 0 for CDIMM, Set to 1 for everything else
 }
+
+
 
 # ATTR_EFF_DIMM_TYPE
 # CDIMM = 0, RDIMM = 1, UDIMM = 2, LRDIMM = 3
@@ -1891,79 +1901,80 @@ scom 0x03010415     {
 #
 scom 0x0301040B     {
     bits    ,   scom_data   ,       ATTR_FUNCTIONAL,    expr;
-    0:3     ,   0b0100   + def_margin  ,             1            ,   any; # RRSMSR_dly is 4 for all cfgs     1                                                      D
-    4:7     ,   0b0100   + def_margin  ,             1            ,   any; # RRSMDR_dly is 4 for all cfgs     2                                                      D
-    8:11    ,   0b0111   + def_margin  ,             1            ,   (CENTAUR.ATTR_MSS_FREQ == 1066) || (CENTAUR.ATTR_MSS_FREQ == 1333) || (CENTAUR.ATTR_MSS_FREQ == 1600); # RRDM_dly     3    D
-    8:11    ,   0b1000   + def_margin  ,             1            ,   (CENTAUR.ATTR_MSS_FREQ == 1866) || (CENTAUR.ATTR_MSS_FREQ == 2133); # RRDM_dly     3                             D
-    8:11    ,   0b1001   + def_margin  ,             1            ,   (CENTAUR.ATTR_MSS_FREQ == 2400); # RRDM_dly     3                                                      D
-    12:15   ,   0b0001   + def_margin  ,             1            ,   (def_mba_tmr0q_RW_dlys7  == 1); # RWSMSR_dly   4
-    12:15   ,   0b1000   + def_margin  ,             1            ,   (def_mba_tmr0q_RW_dlys8  == 1); # RWSMSR_dly   4
-    12:15   ,   0b1001   + def_margin  ,             1            ,   (def_mba_tmr0q_RW_dlys9  == 1); # RWSMSR_dly   4
-    12:15   ,   0b1010   + def_margin  ,             1            ,   (def_mba_tmr0q_RW_dlys10 == 1); # RWSMSR_dly   4
-    12:15   ,   0b1011   + def_margin  ,             1            ,   (def_mba_tmr0q_RW_dlys11 == 1); # RWSMSR_dly   4
-    12:15   ,   0b1100   + def_margin  ,             1            ,   (def_mba_tmr0q_RW_dlys12 == 1); # RWSMSR_dly   4
-    12:15   ,   0b1101   + def_margin  ,             1            ,   (def_mba_tmr0q_RW_dlys13 == 1); # RWSMSR_dly   4
-    12:15   ,   0b1110   + def_margin  ,             1            ,   (def_mba_tmr0q_RW_dlys14 == 1); # RWSMSR_dly   4
-    12:15   ,   0b1111   + def_margin  ,             1            ,   (def_mba_tmr0q_RW_dlys15 == 1); # RWSMSR_dly   4
-    16:19   ,   0b0001   + def_margin  ,             1            ,   (def_mba_tmr0q_RW_dlys7  == 1); # RWSMDR_dly   5
-    16:19   ,   0b1000   + def_margin  ,             1            ,   (def_mba_tmr0q_RW_dlys8  == 1); # RWSMDR_dly   5
-    16:19   ,   0b1001   + def_margin  ,             1            ,   (def_mba_tmr0q_RW_dlys9  == 1); # RWSMDR_dly   5
-    16:19   ,   0b1010   + def_margin  ,             1            ,   (def_mba_tmr0q_RW_dlys10 == 1); # RWSMDR_dly   5
-    16:19   ,   0b1011   + def_margin  ,             1            ,   (def_mba_tmr0q_RW_dlys11 == 1); # RWSMDR_dly   5
-    16:19   ,   0b1100   + def_margin  ,             1            ,   (def_mba_tmr0q_RW_dlys12 == 1); # RWSMDR_dly   5
-    16:19   ,   0b1101   + def_margin  ,             1            ,   (def_mba_tmr0q_RW_dlys13 == 1); # RWSMDR_dly   5
-    16:19   ,   0b1110   + def_margin  ,             1            ,   (def_mba_tmr0q_RW_dlys14 == 1); # RWSMDR_dly   5
-    16:19   ,   0b1111   + def_margin  ,             1            ,   (def_mba_tmr0q_RW_dlys15 == 1); # RWSMDR_dly   5
-    20:23   ,   0b0001   + def_margin  ,             1            ,   (def_mba_tmr0q_RW_dlys7  == 1); # RWDM_dly	 6
-    20:23   ,   0b1000   + def_margin  ,             1            ,   (def_mba_tmr0q_RW_dlys8  == 1); # RWDM_dly	 6
-    20:23   ,   0b1001   + def_margin  ,             1            ,   (def_mba_tmr0q_RW_dlys9  == 1); # RWDM_dly	 6
-    20:23   ,   0b1010   + def_margin  ,             1            ,   (def_mba_tmr0q_RW_dlys10 == 1); # RWDM_dly	 6
-    20:23   ,   0b1011   + def_margin  ,             1            ,   (def_mba_tmr0q_RW_dlys11 == 1); # RWDM_dly	 6
-    20:23   ,   0b1100   + def_margin  ,             1            ,   (def_mba_tmr0q_RW_dlys12 == 1); # RWDM_dly	 6
-    20:23   ,   0b1101   + def_margin  ,             1            ,   (def_mba_tmr0q_RW_dlys13 == 1); # RWDM_dly	 6
-    20:23   ,   0b1110   + def_margin  ,             1            ,   (def_mba_tmr0q_RW_dlys14 == 1); # RWDM_dly	 6
-    20:23   ,   0b1111   + def_margin  ,             1            ,   (def_mba_tmr0q_RW_dlys15 == 1); # RWDM_dly	 6
-    24:29   ,   0b010011 + def_margin  ,             1            ,   (def_mba_tmr0q_WRSM_dlys19 == 1); # WRSMSR_dly   7
-    24:29   ,   0b010100 + def_margin  ,             1            ,   (def_mba_tmr0q_WRSM_dlys20 == 1); # WRSMSR_dly   7
-    24:29   ,   0b010101 + def_margin  ,             1            ,   (def_mba_tmr0q_WRSM_dlys21 == 1); # WRSMSR_dly   7
-    24:29   ,   0b010111 + def_margin  ,             1            ,   (def_mba_tmr0q_WRSM_dlys23 == 1); # WRSMSR_dly   7
-    24:29   ,   0b011000 + def_margin  ,             1            ,   (def_mba_tmr0q_WRSM_dlys24 == 1); # WRSMSR_dly   7
-    24:29   ,   0b011001 + def_margin  ,             1            ,   (def_mba_tmr0q_WRSM_dlys25 == 1); # WRSMSR_dly   7
-    24:29   ,   0b011010 + def_margin  ,             1            ,   (def_mba_tmr0q_WRSM_dlys26 == 1); # WRSMSR_dly   7
-    24:29   ,   0b011011 + def_margin  ,             1            ,   (def_mba_tmr0q_WRSM_dlys27 == 1); # WRSMSR_dly   7
-    24:29   ,   0b011100 + def_margin  ,             1            ,   (def_mba_tmr0q_WRSM_dlys28 == 1); # WRSMSR_dly   7
-    24:29   ,   0b011101 + def_margin  ,             1            ,   (def_mba_tmr0q_WRSM_dlys29 == 1); # WRSMSR_dly   7
-    24:29   ,   0b011110 + def_margin  ,             1            ,   (def_mba_tmr0q_WRSM_dlys30 == 1); # WRSMSR_dly   7
-    24:29   ,   0b011111 + def_margin  ,             1            ,   (def_mba_tmr0q_WRSM_dlys31 == 1); # WRSMSR_dly   7
-    24:29   ,   0b100000 + def_margin  ,             1            ,   (def_mba_tmr0q_WRSM_dlys32 == 1); # WRSMSR_dly   7
-    24:29   ,   0b100001 + def_margin  ,             1            ,   (def_mba_tmr0q_WRSM_dlys33 == 1); # WRSMSR_dly   7
-    30:35   ,   0b010111 + def_margin  ,             1            ,   (def_mba_tmr0q_WRSM_dlys23 == 1); # WRSMDR_dly   8
-    30:35   ,   0b011000 + def_margin  ,             1            ,   (def_mba_tmr0q_WRSM_dlys24 == 1); # WRSMDR_dly   8
-    30:35   ,   0b011001 + def_margin  ,             1            ,   (def_mba_tmr0q_WRSM_dlys25 == 1); # WRSMDR_dly   8
-    30:35   ,   0b011010 + def_margin  ,             1            ,   (def_mba_tmr0q_WRSM_dlys26 == 1); # WRSMDR_dly   8
-    30:35   ,   0b011011 + def_margin  ,             1            ,   (def_mba_tmr0q_WRSM_dlys27 == 1); # WRSMDR_dly   8
-    30:35   ,   0b011100 + def_margin  ,             1            ,   (def_mba_tmr0q_WRSM_dlys28 == 1); # WRSMDR_dly   8
-    30:35   ,   0b011101 + def_margin  ,             1            ,   (def_mba_tmr0q_WRSM_dlys29 == 1); # WRSMDR_dly   8
-    30:35   ,   0b011110 + def_margin  ,             1            ,   (def_mba_tmr0q_WRSM_dlys30 == 1); # WRSMDR_dly   8
-    30:35   ,   0b011111 + def_margin  ,             1            ,   (def_mba_tmr0q_WRSM_dlys31 == 1); # WRSMDR_dly   8
-    30:35   ,   0b100000 + def_margin  ,             1            ,   (def_mba_tmr0q_WRSM_dlys32 == 1); # WRSMDR_dly   8
-    30:35   ,   0b100001 + def_margin  ,             1            ,   (def_mba_tmr0q_WRSM_dlys33 == 1); # WRSMDR_dly   8
-    36:39   ,   0b0100   + def_margin  ,             1            ,   (def_mba_tmr0q_WRDM_dlys4 == 1); # WRDM_dly     9
-    36:39   ,   0b0101   + def_margin  ,             1            ,   (def_mba_tmr0q_WRDM_dlys5 == 1); # WRDM_dly     9
-    36:39   ,   0b0110   + def_margin  ,             1            ,   (def_mba_tmr0q_WRDM_dlys6 == 1); # WRDM_dly     9
-    36:39   ,   0b0111   + def_margin  ,             1            ,   (def_mba_tmr0q_WRDM_dlys7 == 1); # WRDM_dly     9
-    36:39   ,   0b1000   + def_margin  ,             1            ,   (def_mba_tmr0q_WRDM_dlys8 == 1); # WRDM_dly     9
-    40:43   ,   0b0100   + def_margin  ,             1            ,   any; # WWSMSR_dly is 4 for all cfgs     10                                      D
-    44:47   ,   0b0100   + def_margin  ,             1            ,   any; # WWSMDR_dly is 4 for all cfgs     11                                      D
-    48:51   ,   0b0111   + def_margin  ,             1            ,   (CENTAUR.ATTR_MSS_FREQ == 1066) || (CENTAUR.ATTR_MSS_FREQ == 1333) || (CENTAUR.ATTR_MSS_FREQ == 1600);  # WWDM_dly     12     D
-    48:51   ,   0b1000   + def_margin  ,             1            ,   (CENTAUR.ATTR_MSS_FREQ == 1866) || (CENTAUR.ATTR_MSS_FREQ == 2133);  # WWDM_dly     12                              D
-    48:51   ,   0b1001   + def_margin  ,             1            ,   (CENTAUR.ATTR_MSS_FREQ == 2400);                           # WWDM_dly     12                              D
-    52:55   ,   0b0100   + def_margin  ,             1            ,   any; # RROP_dly is 4 for all cfgs       13                                                        D
-    56:59   ,   0b0100   + def_margin  ,             1            ,   any; # WWOP_dly is 4 for all cfgs       14                                                        D
-    60:63   ,   0b0100   + def_margin  ,             1            ,   (def_MBA_TMR0Q_Trrd_dly4 == 1); # TMR0Q_Trrd     15
-    60:63   ,   0b0101   + def_margin  ,             1            ,   (def_MBA_TMR0Q_Trrd_dly5 == 1); # TMR0Q_Trrd     15
-    60:63   ,   0b0110   + def_margin  ,             1            ,   (def_MBA_TMR0Q_Trrd_dly6 == 1); # TMR0Q_Trrd     15
-    60:63   ,   0b0111   + def_margin  ,             1            ,   (def_MBA_TMR0Q_Trrd_dly7 == 1); # TMR0Q_Trrd     15
+    0:3     ,   0b0100   + def_margin2 ,             1            ,   any; # RRSMSR_dly is 4 for all cfgs     1                                                      D
+    4:7     ,   0b0100   + def_margin2 ,             1            ,   any; # RRSMDR_dly is 4 for all cfgs     2                                                      D
+    8:11    ,   0b0111   + def_margin2 ,             1            ,   (CENTAUR.ATTR_MSS_FREQ == 1066) || (CENTAUR.ATTR_MSS_FREQ == 1333) || (CENTAUR.ATTR_MSS_FREQ == 1600); # RRDM_dly     3    D
+    8:11    ,   0b1000   + def_margin2 ,             1            ,   (CENTAUR.ATTR_MSS_FREQ == 1866) || (CENTAUR.ATTR_MSS_FREQ == 2133); # RRDM_dly     3                             D
+    8:11    ,   0b1001   + def_margin2 ,             1            ,   (CENTAUR.ATTR_MSS_FREQ == 2400); # RRDM_dly     3                                                      D
+# fails will 0 margin 12:15
+    12:15   ,   0b0001   + def_margin1 ,             1            ,   (def_mba_tmr0q_RW_dlys7  == 1); # RWSMSR_dly   4
+    12:15   ,   0b1000   + def_margin1 ,             1            ,   (def_mba_tmr0q_RW_dlys8  == 1); # RWSMSR_dly   4
+    12:15   ,   0b1001   + def_margin1 ,             1            ,   (def_mba_tmr0q_RW_dlys9  == 1); # RWSMSR_dly   4
+    12:15   ,   0b1010   + def_margin1 ,             1            ,   (def_mba_tmr0q_RW_dlys10 == 1); # RWSMSR_dly   4
+    12:15   ,   0b1011   + def_margin1 ,             1            ,   (def_mba_tmr0q_RW_dlys11 == 1); # RWSMSR_dly   4
+    12:15   ,   0b1100   + def_margin1 ,             1            ,   (def_mba_tmr0q_RW_dlys12 == 1); # RWSMSR_dly   4
+    12:15   ,   0b1101   + def_margin1 ,             1            ,   (def_mba_tmr0q_RW_dlys13 == 1); # RWSMSR_dly   4
+    12:15   ,   0b1110   + def_margin1 ,             1            ,   (def_mba_tmr0q_RW_dlys14 == 1); # RWSMSR_dly   4
+    12:15   ,   0b1111   + def_margin1 ,             1            ,   (def_mba_tmr0q_RW_dlys15 == 1); # RWSMSR_dly   4
+    16:19   ,   0b0001   + def_margin1 ,             1            ,   (def_mba_tmr0q_RW_dlys7  == 1); # RWSMDR_dly   5
+    16:19   ,   0b1000   + def_margin1 ,             1            ,   (def_mba_tmr0q_RW_dlys8  == 1); # RWSMDR_dly   5
+    16:19   ,   0b1001   + def_margin1 ,             1            ,   (def_mba_tmr0q_RW_dlys9  == 1); # RWSMDR_dly   5
+    16:19   ,   0b1010   + def_margin1 ,             1            ,   (def_mba_tmr0q_RW_dlys10 == 1); # RWSMDR_dly   5
+    16:19   ,   0b1011   + def_margin1 ,             1            ,   (def_mba_tmr0q_RW_dlys11 == 1); # RWSMDR_dly   5
+    16:19   ,   0b1100   + def_margin1 ,             1            ,   (def_mba_tmr0q_RW_dlys12 == 1); # RWSMDR_dly   5
+    16:19   ,   0b1101   + def_margin1 ,             1            ,   (def_mba_tmr0q_RW_dlys13 == 1); # RWSMDR_dly   5
+    16:19   ,   0b1110   + def_margin1 ,             1            ,   (def_mba_tmr0q_RW_dlys14 == 1); # RWSMDR_dly   5
+    16:19   ,   0b1111   + def_margin1 ,             1            ,   (def_mba_tmr0q_RW_dlys15 == 1); # RWSMDR_dly   5
+    20:23   ,   0b0001   + def_margin2 ,             1            ,   (def_mba_tmr0q_RW_dlys7  == 1); # RWDM_dly	 6
+    20:23   ,   0b1000   + def_margin2 ,             1            ,   (def_mba_tmr0q_RW_dlys8  == 1); # RWDM_dly	 6
+    20:23   ,   0b1001   + def_margin2 ,             1            ,   (def_mba_tmr0q_RW_dlys9  == 1); # RWDM_dly	 6
+    20:23   ,   0b1010   + def_margin2 ,             1            ,   (def_mba_tmr0q_RW_dlys10 == 1); # RWDM_dly	 6
+    20:23   ,   0b1011   + def_margin2 ,             1            ,   (def_mba_tmr0q_RW_dlys11 == 1); # RWDM_dly	 6
+    20:23   ,   0b1100   + def_margin2 ,             1            ,   (def_mba_tmr0q_RW_dlys12 == 1); # RWDM_dly	 6
+    20:23   ,   0b1101   + def_margin2 ,             1            ,   (def_mba_tmr0q_RW_dlys13 == 1); # RWDM_dly	 6
+    20:23   ,   0b1110   + def_margin2 ,             1            ,   (def_mba_tmr0q_RW_dlys14 == 1); # RWDM_dly	 6
+    20:23   ,   0b1111   + def_margin2 ,             1            ,   (def_mba_tmr0q_RW_dlys15 == 1); # RWDM_dly	 6
+    24:29   ,   0b010011 + def_margin2 ,             1            ,   (def_mba_tmr0q_WRSM_dlys19 == 1); # WRSMSR_dly   7
+    24:29   ,   0b010100 + def_margin2 ,             1            ,   (def_mba_tmr0q_WRSM_dlys20 == 1); # WRSMSR_dly   7
+    24:29   ,   0b010101 + def_margin2 ,             1            ,   (def_mba_tmr0q_WRSM_dlys21 == 1); # WRSMSR_dly   7
+    24:29   ,   0b010111 + def_margin2 ,             1            ,   (def_mba_tmr0q_WRSM_dlys23 == 1); # WRSMSR_dly   7
+    24:29   ,   0b011000 + def_margin2 ,             1            ,   (def_mba_tmr0q_WRSM_dlys24 == 1); # WRSMSR_dly   7
+    24:29   ,   0b011001 + def_margin2 ,             1            ,   (def_mba_tmr0q_WRSM_dlys25 == 1); # WRSMSR_dly   7
+    24:29   ,   0b011010 + def_margin2 ,             1            ,   (def_mba_tmr0q_WRSM_dlys26 == 1); # WRSMSR_dly   7
+    24:29   ,   0b011011 + def_margin2 ,             1            ,   (def_mba_tmr0q_WRSM_dlys27 == 1); # WRSMSR_dly   7
+    24:29   ,   0b011100 + def_margin2 ,             1            ,   (def_mba_tmr0q_WRSM_dlys28 == 1); # WRSMSR_dly   7
+    24:29   ,   0b011101 + def_margin2 ,             1            ,   (def_mba_tmr0q_WRSM_dlys29 == 1); # WRSMSR_dly   7
+    24:29   ,   0b011110 + def_margin2 ,             1            ,   (def_mba_tmr0q_WRSM_dlys30 == 1); # WRSMSR_dly   7
+    24:29   ,   0b011111 + def_margin2 ,             1            ,   (def_mba_tmr0q_WRSM_dlys31 == 1); # WRSMSR_dly   7
+    24:29   ,   0b100000 + def_margin2 ,             1            ,   (def_mba_tmr0q_WRSM_dlys32 == 1); # WRSMSR_dly   7
+    24:29   ,   0b100001 + def_margin2 ,             1            ,   (def_mba_tmr0q_WRSM_dlys33 == 1); # WRSMSR_dly   7
+    30:35   ,   0b010111 + def_margin2 ,             1            ,   (def_mba_tmr0q_WRSM_dlys23 == 1); # WRSMDR_dly   8
+    30:35   ,   0b011000 + def_margin2 ,             1            ,   (def_mba_tmr0q_WRSM_dlys24 == 1); # WRSMDR_dly   8
+    30:35   ,   0b011001 + def_margin2 ,             1            ,   (def_mba_tmr0q_WRSM_dlys25 == 1); # WRSMDR_dly   8
+    30:35   ,   0b011010 + def_margin2 ,             1            ,   (def_mba_tmr0q_WRSM_dlys26 == 1); # WRSMDR_dly   8
+    30:35   ,   0b011011 + def_margin2 ,             1            ,   (def_mba_tmr0q_WRSM_dlys27 == 1); # WRSMDR_dly   8
+    30:35   ,   0b011100 + def_margin2 ,             1            ,   (def_mba_tmr0q_WRSM_dlys28 == 1); # WRSMDR_dly   8
+    30:35   ,   0b011101 + def_margin2 ,             1            ,   (def_mba_tmr0q_WRSM_dlys29 == 1); # WRSMDR_dly   8
+    30:35   ,   0b011110 + def_margin2 ,             1            ,   (def_mba_tmr0q_WRSM_dlys30 == 1); # WRSMDR_dly   8
+    30:35   ,   0b011111 + def_margin2 ,             1            ,   (def_mba_tmr0q_WRSM_dlys31 == 1); # WRSMDR_dly   8
+    30:35   ,   0b100000 + def_margin2 ,             1            ,   (def_mba_tmr0q_WRSM_dlys32 == 1); # WRSMDR_dly   8
+    30:35   ,   0b100001 + def_margin2 ,             1            ,   (def_mba_tmr0q_WRSM_dlys33 == 1); # WRSMDR_dly   8
+    36:39   ,   0b0100   + def_margin2 ,             1            ,   (def_mba_tmr0q_WRDM_dlys4 == 1); # WRDM_dly     9
+    36:39   ,   0b0101   + def_margin2 ,             1            ,   (def_mba_tmr0q_WRDM_dlys5 == 1); # WRDM_dly     9
+    36:39   ,   0b0110   + def_margin2 ,             1            ,   (def_mba_tmr0q_WRDM_dlys6 == 1); # WRDM_dly     9
+    36:39   ,   0b0111   + def_margin2 ,             1            ,   (def_mba_tmr0q_WRDM_dlys7 == 1); # WRDM_dly     9
+    36:39   ,   0b1000   + def_margin2 ,             1            ,   (def_mba_tmr0q_WRDM_dlys8 == 1); # WRDM_dly     9
+    40:43   ,   0b0100   + def_margin2 ,             1            ,   any; # WWSMSR_dly is 4 for all cfgs     10                                      D
+    44:47   ,   0b0100   + def_margin2 ,             1            ,   any; # WWSMDR_dly is 4 for all cfgs     11                                      D
+    48:51   ,   0b0111   + def_margin2 ,             1            ,   (CENTAUR.ATTR_MSS_FREQ == 1066) || (CENTAUR.ATTR_MSS_FREQ == 1333) || (CENTAUR.ATTR_MSS_FREQ == 1600);  # WWDM_dly     12     D
+    48:51   ,   0b1000   + def_margin2 ,             1            ,   (CENTAUR.ATTR_MSS_FREQ == 1866) || (CENTAUR.ATTR_MSS_FREQ == 2133);  # WWDM_dly     12                              D
+    48:51   ,   0b1001   + def_margin2 ,             1            ,   (CENTAUR.ATTR_MSS_FREQ == 2400);                           # WWDM_dly     12                              D
+    52:55   ,   0b0100   + def_margin2 ,             1            ,   any; # RROP_dly is 4 for all cfgs       13                                                        D
+    56:59   ,   0b0100   + def_margin2 ,             1            ,   any; # WWOP_dly is 4 for all cfgs       14                                                        D
+    60:63   ,   0b0100   + def_margin2 ,             1            ,   (def_MBA_TMR0Q_Trrd_dly4 == 1); # TMR0Q_Trrd     15
+    60:63   ,   0b0101   + def_margin2 ,             1            ,   (def_MBA_TMR0Q_Trrd_dly5 == 1); # TMR0Q_Trrd     15
+    60:63   ,   0b0110   + def_margin2 ,             1            ,   (def_MBA_TMR0Q_Trrd_dly6 == 1); # TMR0Q_Trrd     15
+    60:63   ,   0b0111   + def_margin2 ,             1            ,   (def_MBA_TMR0Q_Trrd_dly7 == 1); # TMR0Q_Trrd     15
 }
 
 # MBA_TMR1Q  mba01 timer settings
@@ -2038,6 +2049,9 @@ scom 0x0301040C     {
 #putscom cen.mba 301040a 30 6 001011 -ib -pall -call
 
 define def_WL = (ATTR_EFF_DRAM_CWL + ATTR_EFF_DRAM_CL - 1 - 7);
+define def_WL_AL0 = (ATTR_EFF_DRAM_CWL - 7);
+define def_WL_AL_MINUS1 = (ATTR_EFF_DRAM_CWL + ATTR_EFF_DRAM_CL - 1 - 7);
+define def_WL_AL_MINUS2 = (ATTR_EFF_DRAM_CWL + ATTR_EFF_DRAM_CL - 2 - 7);
 
 # MBA_DSM0Q  mba01 data state machine settings
 #< B0.C0.M00A.CENTAUR.MBU.MBA01.MBA_SRQ.MBA_DSM0Q(0:63) = 0x0870466094038800
@@ -2055,8 +2069,10 @@ scom 0x0301040A     {
     6:11    ,   0b000111    ,           1            ,    (def_mba_dsm0q_CFG_RODT_end_dly7 == 1); # CFG_RODT_end_dly     22
     6:11    ,   0b001000    ,           1            ,    (def_mba_dsm0q_CFG_RODT_end_dly8 == 1); # CFG_RODT_end_dly     22
     6:11    ,   0b001001    ,           1            ,    (def_mba_dsm0q_CFG_RODT_end_dly9 == 1); # CFG_RODT_end_dly     22
-    12:17   ,   0b000001    ,           1            ,    any; # CFG_WODT_start_dly is 1 for all cfgs   23                     D
-    18:23   ,   0b000110    ,           1            ,    any; # CFG_WODT_end_dly is 6 for all cfgs     24                     D
+#    12:17   ,   0b000001    ,           1            ,    any; # CFG_WODT_start_dly is 1 for all cfgs   23                     D
+    12:17   ,   0b000000    ,           1            ,    any; # CFG_WODT_start_dly is 1 for all cfgs   23                     D
+#    18:23   ,   0b000110    ,           1            ,    any; # CFG_WODT_end_dly is 6 for all cfgs     24                     D
+    18:23   ,   0b000101    ,           1            ,    any; # CFG_WODT_end_dly is 6 for all cfgs     24                     D
     24:29   ,   0b011000    ,           1            ,    any; # wrdone_dly is 24 for all cfgs 25                              D
     30:35   ,   def_WL + 1  ,           1            ,    (ATTR_EFF_DIMM_TYPE == 1); # wrdata_dly = CWL + AL[CL-1] + 1	
     30:35   ,   def_WL      ,           1            ,    (ATTR_EFF_DIMM_TYPE == 0) || (ATTR_EFF_DIMM_TYPE == 2); # wrdata_dly = CWL + AL[CL-1] 		
@@ -2491,6 +2507,25 @@ scom 0x03010410    {
     30:38   ,   0b000000000                    ,          1            ,    any;    #set timer to 0 for z sync
     39      ,   0b0                            ,          1            ,    any;    #use single rank mode
     40:63   ,   0b000000000000000000000000     ,          1            ,     any;    #reserved to 0
+}
+
+# MBA_CAL3Q (this timer to be used for mem cal)
+#
+scom 0x03010412    {
+
+    bits    ,   scom_data                      ,       ATTR_FUNCTIONAL,   expr;
+    0:1     ,   0b11                           ,          1            ,    any;    #cfg_internal_zq_tb RW Internal ZQ time base
+    2:9     ,   0b11111111                     ,          1            ,    any;    #cfg_internal_zq_length RW Number of internal ZQ time bases required to meet max internal zq length
+    10:11   ,   0b11                           ,          1            ,    any;    #cfg_external_zq_tb RW External ZQ time base
+    12:19   ,   0b11111111                     ,          1            ,    any;    #cfg_external_zq_length RW Number of external ZQ time bases required to meet max external zq length
+    20:21   ,   0b11                           ,          1            ,    any;    #cfg_rdclk_sysclk_tb RW Readclk/Sysclk time base
+    22:29   ,   0b11111111                     ,          1            ,    any;    #cfg_rdclk_sysclk_length RW Number of Readclk/sysclk time bases required to meet max rdclk length
+    30:31   ,   0b11                           ,          1            ,    any;    #cfg_dqs_alignment_tb RW Dqs alignment time base
+    32:39   ,   0b11111111                     ,          1            ,    any;    #cfg_dqs_alignment_length RW Number of Dqs alignment time bases required to meet max dqs alignment length
+    40:41   ,   0b11                           ,          1            ,    any;    #cfg_mpr_readeye_tb RW Readeye time base
+    42:49   ,   0b11111111                     ,          1            ,    any;    #cfg_mpr_readeye_length RW Number of readeye time bases required to meet max external zq length
+    50:51   ,   0b11                           ,          1            ,    any;    #cfg_all_periodic_tb RW All Periodics time base
+    52:59   ,   0b11111111                     ,          1            ,    any;    #cfg_all_periodic_length RW Number of all_periodic time bases required to meet max calibration length for all periodic calibration ( in parallel )
 }
 
 ###########################################################################################

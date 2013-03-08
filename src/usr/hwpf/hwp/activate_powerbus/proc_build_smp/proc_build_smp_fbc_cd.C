@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012                   */
+/* COPYRIGHT International Business Machines Corp. 2012,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_build_smp_fbc_cd.C,v 1.4 2012/09/24 05:01:19 jmcgill Exp $
+// $Id: proc_build_smp_fbc_cd.C,v 1.7 2013/03/04 14:53:51 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_build_smp_fbc_cd.C,v $
 //------------------------------------------------------------------------------
 // *|
@@ -503,6 +503,202 @@ fapi::ReturnCode proc_build_smp_set_sconfig_c8(
     return rc;
 }
 
+
+//------------------------------------------------------------------------------
+// function: program PB serial SCOM chain (center #9)
+// parameters: i_smp_chip => structure encapsulating SMP chip
+// returns: FAPI_RC_SUCCESS if register programming is successful,
+//          else error
+//------------------------------------------------------------------------------
+fapi::ReturnCode proc_build_smp_set_sconfig_c9(
+    const proc_build_smp_chip& i_smp_chip)
+{
+    fapi::ReturnCode rc;
+    uint32_t rc_ecmd = 0x0;
+    ecmdDataBufferBase data(64);
+
+    // mark function entry
+    FAPI_DBG("proc_build_smp_set_sconfig_c9: Start");
+
+    do
+    {
+        // build register content
+        // cp_starve_limit
+        rc_ecmd |= data.insertFromRight(
+            PB_SCONFIG_C9_CP_STARVE_LIMIT,
+            PB_SCONFIG_C9_CP_STARVE_LIMIT_START_BIT,
+            (PB_SCONFIG_C9_CP_STARVE_LIMIT_END_BIT-
+             PB_SCONFIG_C9_CP_STARVE_LIMIT_START_BIT+1));
+
+        // gp_starve_limit
+        rc_ecmd |= data.insertFromRight(
+            PB_SCONFIG_C9_GP_STARVE_LIMIT,
+            PB_SCONFIG_C9_GP_STARVE_LIMIT_START_BIT,
+            (PB_SCONFIG_C9_GP_STARVE_LIMIT_END_BIT-
+             PB_SCONFIG_C9_GP_STARVE_LIMIT_START_BIT+1));
+
+        // rgp_starve_limit
+        rc_ecmd |= data.insertFromRight(
+            PB_SCONFIG_C9_RGP_STARVE_LIMIT,
+            PB_SCONFIG_C9_RGP_STARVE_LIMIT_START_BIT,
+            (PB_SCONFIG_C9_RGP_STARVE_LIMIT_END_BIT-
+             PB_SCONFIG_C9_RGP_STARVE_LIMIT_START_BIT+1));
+
+        // sp_starve_limit
+        rc_ecmd |= data.insertFromRight(
+            PB_SCONFIG_C9_SP_STARVE_LIMIT,
+            PB_SCONFIG_C9_SP_STARVE_LIMIT_START_BIT,
+            (PB_SCONFIG_C9_SP_STARVE_LIMIT_END_BIT-
+             PB_SCONFIG_C9_SP_STARVE_LIMIT_START_BIT+1));
+
+        // fp_starve_limit
+        rc_ecmd |= data.insertFromRight(
+            PB_SCONFIG_C9_FP_STARVE_LIMIT,
+            PB_SCONFIG_C9_FP_STARVE_LIMIT_START_BIT,
+            (PB_SCONFIG_C9_FP_STARVE_LIMIT_END_BIT-
+             PB_SCONFIG_C9_FP_STARVE_LIMIT_START_BIT+1));
+
+        // ux_scope_arb_mode
+        rc_ecmd |= data.insertFromRight(
+            PB_SCONFIG_C9_UX_SCOPE_ARB_MODE,
+            PB_SCONFIG_C9_UX_SCOPE_ARB_MODE_START_BIT,
+            (PB_SCONFIG_C9_UX_SCOPE_ARB_MODE_END_BIT-
+             PB_SCONFIG_C9_UX_SCOPE_ARB_MODE_START_BIT+1));
+
+        // ux_local_arb_mode
+        rc_ecmd |= data.insertFromRight(
+            PB_SCONFIG_C9_UX_LOCAL_ARB_MODE,
+            PB_SCONFIG_C9_UX_LOCAL_ARB_MODE_START_BIT,
+            (PB_SCONFIG_C9_UX_LOCAL_ARB_MODE_END_BIT-
+             PB_SCONFIG_C9_UX_LOCAL_ARB_MODE_START_BIT+1));
+
+        if (rc_ecmd)
+        {
+            FAPI_ERR("proc_build_smp_set_sconfig_c9: Error 0x%x setting up PB Serial Configuration load register data buffer",
+                     rc_ecmd);
+            rc.setEcmdError(rc_ecmd);
+            break;
+        }
+
+        // call common routine to program chain
+        rc = proc_build_smp_set_sconfig(i_smp_chip, PB_SCONFIG_C9_DEF, data);
+        if (!rc.ok())
+        {
+            FAPI_ERR("proc_build_smp_set_sconfig_c9: Error from proc_build_smp_set_sconfig");
+            break;
+        }
+    } while(0);
+
+    // mark function exit
+    FAPI_DBG("proc_build_smp_set_sconfig_c9: End");
+    return rc;
+}
+
+
+//------------------------------------------------------------------------------
+// function: program PB serial SCOM chain (center #10)
+// parameters: i_smp_chip => structure encapsulating SMP chip
+// returns: FAPI_RC_SUCCESS if register programming is successful,
+//          else error
+//------------------------------------------------------------------------------
+fapi::ReturnCode proc_build_smp_set_sconfig_c10(
+    const proc_build_smp_chip& i_smp_chip)
+{
+    fapi::ReturnCode rc;
+    uint32_t rc_ecmd = 0x0;
+    ecmdDataBufferBase data(64);
+
+    // mark function entry
+    FAPI_DBG("proc_build_smp_set_sconfig_c10: Start");
+
+    do
+    {
+        // build register content
+        // program hang command rates
+        for (uint8_t l = 0; l < PB_SCONFIG_NUM_CPU_RATIOS; l++)
+        {
+            rc_ecmd |= data.insertFromRight(
+                PB_SCONFIG_C10_CMD_CPU_RATIO[l],
+                PB_SCONFIG_C10_CMD_CPU_RATIO_START_BIT[l],
+                (PB_SCONFIG_C10_CMD_CPU_RATIO_END_BIT[l]-
+                 PB_SCONFIG_C10_CMD_CPU_RATIO_START_BIT[l]+1));
+        }
+
+        if (rc_ecmd)
+        {
+            FAPI_ERR("proc_build_smp_set_sconfig_c10: Error 0x%x setting up PB Serial Configuration load register data buffer",
+                     rc_ecmd);
+            rc.setEcmdError(rc_ecmd);
+            break;
+        }
+
+        // call common routine to program chain
+        rc = proc_build_smp_set_sconfig(i_smp_chip, PB_SCONFIG_C10_DEF, data);
+        if (!rc.ok())
+        {
+            FAPI_ERR("proc_build_smp_set_sconfig_c10: Error from proc_build_smp_set_sconfig");
+            break;
+        }
+    } while(0);
+
+    // mark function exit
+    FAPI_DBG("proc_build_smp_set_sconfig_c10: End");
+    return rc;
+}
+
+
+//------------------------------------------------------------------------------
+// function: program PB serial SCOM chain (center #11)
+// parameters: i_smp_chip => structure encapsulating SMP chip
+// returns: FAPI_RC_SUCCESS if register programming is successful,
+//          else error
+//------------------------------------------------------------------------------
+fapi::ReturnCode proc_build_smp_set_sconfig_c11(
+    const proc_build_smp_chip& i_smp_chip)
+{
+    fapi::ReturnCode rc;
+    uint32_t rc_ecmd = 0x0;
+    ecmdDataBufferBase data(64);
+
+    // mark function entry
+    FAPI_DBG("proc_build_smp_set_sconfig_c11: Start");
+
+    do
+    {
+        // build register content
+        // program hang command rates
+        for (uint8_t l = 0; l < PB_SCONFIG_NUM_CPU_RATIOS; l++)
+        {
+            rc_ecmd |= data.insertFromRight(
+                PB_SCONFIG_C11_RSP_CPU_RATIO[l],
+                PB_SCONFIG_C11_RSP_CPU_RATIO_START_BIT[l],
+                (PB_SCONFIG_C11_RSP_CPU_RATIO_END_BIT[l]-
+                 PB_SCONFIG_C11_RSP_CPU_RATIO_START_BIT[l]+1));
+        }
+
+        if (rc_ecmd)
+        {
+            FAPI_ERR("proc_build_smp_set_sconfig_c11: Error 0x%x setting up PB Serial Configuration load register data buffer",
+                     rc_ecmd);
+            rc.setEcmdError(rc_ecmd);
+            break;
+        }
+
+        // call common routine to program chain
+        rc = proc_build_smp_set_sconfig(i_smp_chip, PB_SCONFIG_C11_DEF, data);
+        if (!rc.ok())
+        {
+            FAPI_ERR("proc_build_smp_set_sconfig_c11: Error from proc_build_smp_set_sconfig");
+            break;
+        }
+    } while(0);
+
+    // mark function exit
+    FAPI_DBG("proc_build_smp_set_sconfig_c11: End");
+    return rc;
+}
+
+
 //------------------------------------------------------------------------------
 // function: program PB serial SCOM chain (west/east #0)
 // parameters: i_smp_chip => structure encapsulating SMP chip
@@ -799,6 +995,7 @@ fapi::ReturnCode proc_build_smp_set_sconfig_we1(
     uint32_t rc_ecmd = 0x0;
     ecmdDataBufferBase data(64);
 
+
     // mark function entry
     FAPI_DBG("proc_build_smp_set_sconfig_we1: Start");
 
@@ -811,6 +1008,7 @@ fapi::ReturnCode proc_build_smp_set_sconfig_we1(
     uint8_t data_c2i_dval_launch = 0x0;              // wc_p1
     uint8_t rcmd_i2c_done_launch = 0x0;              // rc_p1
     uint8_t rcmd_i2c_pty_rd_capture = 0x0;           // rc
+    uint8_t attr_proc_pbiex_async_sel = fapi::ENUM_ATTR_PROC_PBIEX_ASYNC_SEL_SEL0;
 
     do
     {
@@ -833,16 +1031,19 @@ fapi::ReturnCode proc_build_smp_set_sconfig_we1(
                     cmd_c2i_dval_launch = 0x3;       // wc
                     data_i2c_dctr_launch = 0x1;      // rc_m2
                     data_c2i_dval_launch = 0x2;      // wc_m1
+                    attr_proc_pbiex_async_sel = fapi::ENUM_ATTR_PROC_PBIEX_ASYNC_SEL_SEL0;
                     break;
                 case PROC_BUILD_SMP_CORE_FLOOR_RATIO_4_8:
                     cmd_c2i_dval_launch = 0x3;       // wc
                     data_i2c_dctr_launch = 0x2;      // rc_m1
                     data_c2i_dval_launch = 0x3;      // wc
+                    attr_proc_pbiex_async_sel = fapi::ENUM_ATTR_PROC_PBIEX_ASYNC_SEL_SEL1;
                     break;
                 case PROC_BUILD_SMP_CORE_FLOOR_RATIO_2_8:
                     cmd_c2i_dval_launch = 0x0;       // wc_p1
                     data_i2c_dctr_launch = 0x3;      // rc
                     data_c2i_dval_launch = 0x0;      // wc_p1
+                    attr_proc_pbiex_async_sel = fapi::ENUM_ATTR_PROC_PBIEX_ASYNC_SEL_SEL2;
                     break;
                 default:
                     FAPI_ERR("proc_build_smp_set_sconfig_we1: Unsupported core floor frequency ratio enum (%d)",
@@ -855,6 +1056,16 @@ fapi::ReturnCode proc_build_smp_set_sconfig_we1(
         }
         if (rc)
         {
+            break;
+        }
+
+        // write async select attribute
+        rc = FAPI_ATTR_SET(ATTR_PROC_PBIEX_ASYNC_SEL,
+                           NULL,
+                           attr_proc_pbiex_async_sel);
+        if (rc)
+        {
+            FAPI_ERR("proc_build_smp_set_sconfig_we1: Error writing ATTR_PROC_PBIEX_ASYNC_SEL");
             break;
         }
 
@@ -1093,6 +1304,27 @@ fapi::ReturnCode proc_build_smp_set_fbc_cd(
             if (!rc.ok())
             {
                 FAPI_ERR("proc_build_smp_set_fbc_cd: Error from proc_build_smp_set_sconfig_c8");
+                break;
+            }
+
+            rc = proc_build_smp_set_sconfig_c9(p_iter->second);
+            if (!rc.ok())
+            {
+                FAPI_ERR("proc_build_smp_set_fbc_cd: Error from proc_build_smp_set_sconfig_c9");
+                break;
+            }
+
+            rc = proc_build_smp_set_sconfig_c10(p_iter->second);
+            if (!rc.ok())
+            {
+                FAPI_ERR("proc_build_smp_set_fbc_cd: Error from proc_build_smp_set_sconfig_c10");
+                break;
+            }
+
+            rc = proc_build_smp_set_sconfig_c11(p_iter->second);
+            if (!rc.ok())
+            {
+                FAPI_ERR("proc_build_smp_set_fbc_cd: Error from proc_build_smp_set_sconfig_c11");
                 break;
             }
 

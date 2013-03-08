@@ -1,0 +1,68 @@
+<!-- IBM_PROLOG_BEGIN_TAG                                                   -->
+<!-- This is an automatically generated prolog.                             -->
+<!--                                                                        -->
+<!-- $Source: src/usr/hwpf/hwp/proc_winkle_scan_override_attributes.xml $   -->
+<!--                                                                        -->
+<!-- IBM CONFIDENTIAL                                                       -->
+<!--                                                                        -->
+<!-- COPYRIGHT International Business Machines Corp. 2013                   -->
+<!--                                                                        -->
+<!-- p1                                                                     -->
+<!--                                                                        -->
+<!-- Object Code Only (OCO) source materials                                -->
+<!-- Licensed Internal Code Source Materials                                -->
+<!-- IBM HostBoot Licensed Internal Code                                    -->
+<!--                                                                        -->
+<!-- The source code for this program is not published or otherwise         -->
+<!-- divested of its trade secrets, irrespective of what has been           -->
+<!-- deposited with the U.S. Copyright Office.                              -->
+<!--                                                                        -->
+<!-- Origin: 30                                                             -->
+<!--                                                                        -->
+<!-- IBM_PROLOG_END_TAG                                                     -->
+<!-- proc_winkle_scan_override_attributes.xml -->
+<attributes>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PROC_EX_FUNC_L3_DELTA_DATA</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>Delta/flip data for ex_func_l3 ring containing winkle customization settings for PBIEX programming.
+                 Relies on PBIEX settings in reference image containing scan flush default values.
+                 High-order 16 bits provide byte address offset for ring modification.
+                 Low-order 8 bits provide override data for addressed byte.
+                 Entries will be processed from index 0 to 63 (byte address of 0xFFFFFF should be used to signify last entry to process).
+      creator: platform
+      firmware notes:
+    </description>
+    <valueType>uint32</valueType>
+    <array>64</array>
+    <platInit/>
+    <persistRuntime/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PROC_EX_FUNC_L3_LENGTH</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>Length of ex_func_l3 ring in bits
+      creator: platform
+      firmware notes:
+    </description>
+    <valueType>uint32</valueType>
+    <platInit/>
+    <persistRuntime/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PROC_PBIEX_ASYNC_SEL</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>Selector for ATTR_PROC_EX_FUNC_L3_DELTA_DATA value to be returned by platform.
+      creator: proc_build_smp
+      firmware notes:
+    </description>
+    <valueType>uint8</valueType>
+    <enum>SEL0 = 0x0, SEL1 = 0x1, SEL2 = 0x2</enum>
+    <persistRuntime/>
+    <writeable/>
+  </attribute>
+  <!-- ********************************************************************* -->
+</attributes>

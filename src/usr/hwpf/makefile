@@ -109,7 +109,8 @@ HWP_ATTR_XML_FILES = hwp/memory_attributes.xml \
                      hwp/build_winkle_images/p8_slw_build/proc_pll_ring_attributes.xml \
                      hwp/build_winkle_images/p8_slw_build/p8_xip_customize_attributes.xml \
                      hwp/poreve_memory_attributes.xml \
-                     hwp/mcbist_attributes.xml
+                     hwp/mcbist_attributes.xml \
+                     hwp/proc_winkle_scan_override_attributes.xml
 
 #------------------------------------------------------------------------------
 # Initfiles

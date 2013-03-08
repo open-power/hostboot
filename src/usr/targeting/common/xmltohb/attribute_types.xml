@@ -10583,4 +10583,76 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
     </hwpfToHbAttrMap>
 </attribute>
 
+<attribute>
+    <id>PROC_EX_FUNC_L3_DELTA_DATA</id>
+    <description>Delta/flip data for ex_func_l3 ring containing winkle customization settings for PBIEX programming.
+                 Relies on PBIEX settings in reference image containing scan flush default values.
+                 High-order 16 bits provide byte address offset for ring modification.
+                 Low-order 8 bits provide override data for addressed byte.
+                 Entries will be processed from index 0 to 63 (byte address of 0xFFFFFF should be used to signify last entry to process).
+      creator: platform
+      firmware notes:
+    </description>
+   <simpleType>
+      <uint32_t></uint32_t>
+      <array>64</array>
+  </simpleType>
+  <persistency>non-volatile</persistency>
+  <readable/>
+  <hwpfToHbAttrMap>
+      <id>ATTR_PROC_EX_FUNC_L3_DELTA_DATA</id>
+      <macro>DIRECT</macro>
+  </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>PROC_EX_FUNC_L3_LENGTH</id>
+    <description>Length of ex_func_l3 ring in bits
+      creator: platform
+      firmware notes:
+    </description>
+   <simpleType>
+      <uint32_t></uint32_t>
+   </simpleType>
+   <persistency>non-volatile</persistency>
+   <readable/>
+   <hwpfToHbAttrMap>
+      <id>ATTR_PROC_EX_FUNC_L3_LENGTH</id>
+      <macro>DIRECT</macro>
+   </hwpfToHbAttrMap>
+</attribute>
+
+<enumerationType>
+    <id>PROC_PBIEX_ASYNC_SEL</id>
+    <description>Enumeration indicating which _PBIEX_ASYNC_SEL should be use</description>
+    <enumerator>
+        <name>SEL0</name>
+        <value>0</value>
+    </enumerator>
+    <enumerator>
+        <name>SEL1</name>
+        <value>1</value>
+    </enumerator>
+    <enumerator>
+        <name>SEL2</name>
+        <value>2</value>
+    </enumerator>
+</enumerationType>
+
+<attribute>
+    <id>PROC_PBIEX_ASYNC_SEL</id>
+    <description>Selector for ATTR_PROC_EX_FUNC_L3_DELTA_DATA value to be returned by platform.
+      creator: proc_build_smp
+      firmware notes:
+    </description>
+    <simpleType><uint8_t></uint8_t></simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_PROC_PBIEX_ASYNC_SEL</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
 </attributes>

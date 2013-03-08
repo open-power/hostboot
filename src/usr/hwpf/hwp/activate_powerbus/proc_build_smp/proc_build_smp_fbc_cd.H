@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012                   */
+/* COPYRIGHT International Business Machines Corp. 2012,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_build_smp_fbc_cd.H,v 1.3 2012/09/05 03:12:50 jmcgill Exp $
+// $Id: proc_build_smp_fbc_cd.H,v 1.5 2013/03/04 14:53:56 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_build_smp_fbc_cd.H,v $
 //------------------------------------------------------------------------------
 // *|
@@ -67,6 +67,10 @@ struct proc_build_smp_sconfig_def
 
 // hang level constants
 const uint8_t PB_SCONFIG_NUM_HANG_LEVELS = 7;
+
+// CPU ratio constants
+const uint8_t PB_SCONFIG_NUM_CPU_RATIOS = 4;
+
 
 const uint32_t PB_SCONFIG_LOAD[PROC_BUILD_SMP_NUM_SHADOWS] =
 {
@@ -200,6 +204,60 @@ const uint32_t PB_SCONFIG_C8_CPO_RTY_LEVEL_END_BIT = 63;
 const uint8_t  PB_SCONFIG_C8_HANG_CMD_RATE[PB_SCONFIG_NUM_HANG_LEVELS] = { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
 const uint32_t PB_SCONFIG_C8_CPO_JUMP_LEVEL = 0x3;
 const uint32_t PB_SCONFIG_C8_CPO_RTY_LEVEL = 0xF;
+
+
+//
+// PBH_CMD_CENTRAL_ARB (center, chain #9) field/bit definitions
+//
+
+const proc_build_smp_sconfig_def PB_SCONFIG_C9_DEF = { 0x9, 44, false, { false, true, false } };
+
+const uint32_t PB_SCONFIG_C9_CP_STARVE_LIMIT_START_BIT = 20;
+const uint32_t PB_SCONFIG_C9_CP_STARVE_LIMIT_END_BIT = 27;
+const uint32_t PB_SCONFIG_C9_GP_STARVE_LIMIT_START_BIT = 28;
+const uint32_t PB_SCONFIG_C9_GP_STARVE_LIMIT_END_BIT = 35;
+const uint32_t PB_SCONFIG_C9_RGP_STARVE_LIMIT_START_BIT = 36;
+const uint32_t PB_SCONFIG_C9_RGP_STARVE_LIMIT_END_BIT = 43;
+const uint32_t PB_SCONFIG_C9_SP_STARVE_LIMIT_START_BIT = 44;
+const uint32_t PB_SCONFIG_C9_SP_STARVE_LIMIT_END_BIT = 51;
+const uint32_t PB_SCONFIG_C9_FP_STARVE_LIMIT_START_BIT = 52;
+const uint32_t PB_SCONFIG_C9_FP_STARVE_LIMIT_END_BIT = 59;
+const uint32_t PB_SCONFIG_C9_UX_SCOPE_ARB_MODE_START_BIT = 60;
+const uint32_t PB_SCONFIG_C9_UX_SCOPE_ARB_MODE_END_BIT = 61;
+const uint32_t PB_SCONFIG_C9_UX_LOCAL_ARB_MODE_START_BIT = 62;
+const uint32_t PB_SCONFIG_C9_UX_LOCAL_ARB_MODE_END_BIT = 63;
+
+const uint8_t PB_SCONFIG_C9_CP_STARVE_LIMIT  = 0x80;
+const uint8_t PB_SCONFIG_C9_GP_STARVE_LIMIT  = 0x80;
+const uint8_t PB_SCONFIG_C9_RGP_STARVE_LIMIT = 0x80;
+const uint8_t PB_SCONFIG_C9_SP_STARVE_LIMIT  = 0x80;
+const uint8_t PB_SCONFIG_C9_FP_STARVE_LIMIT  = 0x80;
+const uint8_t PB_SCONFIG_C9_UX_SCOPE_ARB_MODE = 0x1; // RR_ONLY
+const uint8_t PB_SCONFIG_C9_UX_LOCAL_ARB_MODE = 0x2; // LFSR_ON_STARVATION_ELSE_RR
+
+
+//
+// PBH_CMD_CENTRAL_ARB (center, chain #10) field/bit definitions
+//
+
+const proc_build_smp_sconfig_def PB_SCONFIG_C10_DEF = { 0xA, 20, false, { false, true, false } };
+
+const uint32_t PB_SCONFIG_C10_CMD_CPU_RATIO_START_BIT[PB_SCONFIG_NUM_CPU_RATIOS] = { 59, 54, 49, 44 };
+const uint32_t PB_SCONFIG_C10_CMD_CPU_RATIO_END_BIT[PB_SCONFIG_NUM_CPU_RATIOS]   = { 63, 58, 53, 48 };
+
+const uint8_t PB_SCONFIG_C10_CMD_CPU_RATIO[PB_SCONFIG_NUM_CPU_RATIOS] = { 3, 7, 11, 15 };
+
+
+//
+// PBH_RSP_CRESP_ARB (center, chain #11) field/bit definitions
+//
+
+const proc_build_smp_sconfig_def PB_SCONFIG_C11_DEF = { 0xB, 20, false, { false, true, false } };
+
+const uint32_t PB_SCONFIG_C11_RSP_CPU_RATIO_START_BIT[PB_SCONFIG_NUM_CPU_RATIOS] = { 59, 54, 49, 44 };
+const uint32_t PB_SCONFIG_C11_RSP_CPU_RATIO_END_BIT[PB_SCONFIG_NUM_CPU_RATIOS]   = { 63, 58, 53, 48 };
+
+const uint8_t PB_SCONFIG_C11_RSP_CPU_RATIO[PB_SCONFIG_NUM_CPU_RATIOS] = { 4, 8, 12, 16 };
 
 
 //

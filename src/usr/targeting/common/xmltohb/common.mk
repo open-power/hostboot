@@ -81,8 +81,8 @@ FAPI_ATTR_SOURCES =          \
     build_winkle_images/p8_slw_build/p8_xip_customize_attributes.xml \
     sync_attributes.xml   \
     poreve_memory_attributes.xml \
-    mcbist_attributes.xml
-
+    mcbist_attributes.xml \
+    proc_winkle_scan_override_attributes.xml
 
 XMLTOHB_GENERIC_XML     = generic.xml
 XMLTOHB_FAPI_XML        = fapiattrs.xml
