@@ -318,7 +318,7 @@ errlHndl_t RUNTIME::load_host_data( void )
 
         // if any AVP flags are set, override the payload kind
         if( (mnfg_flags & TARGETING::MNFG_FLAG_BIT_MNFG_AVP_ENABLE)
-            || (mnfg_flags & TARGETING::MNFG_FLAG_BIT_MNFG_AVP_ENABLE) )
+            || (mnfg_flags & TARGETING::MNFG_FLAG_BIT_MNFG_HDAT_AVP_ENABLE) )
         {
             if( payload_kind != TARGETING::PAYLOAD_KIND_AVP )
             {

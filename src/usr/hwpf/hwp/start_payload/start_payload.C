@@ -133,6 +133,28 @@ void*    call_host_runtime_setup( void    *io_pArgs )
             }
         }
 
+        // Map the Host Data into the VMM if applicable
+        //   Note: call will set ATTR_PAYLOAD_KIND appropriately
+        l_err = RUNTIME::load_host_data();
+        if( l_err )
+        {
+            break;
+        }
+
+        // Skip the rest in AVP mode
+        TARGETING::Target * sys = NULL;
+        TARGETING::targetService().getTopLevelTarget( sys );
+        assert(sys != NULL);
+
+        TARGETING::ATTR_PAYLOAD_KIND_type payload_kind
+          = sys->getAttr<TARGETING::ATTR_PAYLOAD_KIND>();
+        if( TARGETING::PAYLOAD_KIND_AVP == payload_kind )
+        {
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                       "Skipping host_runtime_setup in AVP mode" );
+            break;
+        }
+
         // Write the HostServices attributes into mainstore
         l_err = RUNTIME::populate_attributes();
         if ( l_err )

@@ -520,13 +520,7 @@ errlHndl_t populate_attributes( void )
     do {
         TRACFCOMP( g_trac_runtime, "Running populate_attributes" );
 
-        // Map the Host Data into the VMM
-        errhdl = RUNTIME::load_host_data();
-        if( errhdl )
-        {
-            break;
-        }
-
+        // Write the System-level Attributes
         errhdl = populate_system_attributes();
         if( errhdl )
         {

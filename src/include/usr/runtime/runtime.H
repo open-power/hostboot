@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012                   */
+/* COPYRIGHT International Business Machines Corp. 2012,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -40,6 +40,15 @@ errlHndl_t populate_attributes( void );
 
 /**
  * @brief  Add the host data mainstore location to VMM
+ *
+ * @description  If running with the standard PHYP payload this function
+ *    will map all supported HDAT sections into the VMM to allow access
+ *    from user space.  When running in standalone (no payload) mode,
+ *    some reserved memory will be mapped in for testcases.  If AVPs are
+ *    enabled, no memory will be mapped and the PAYLOAD_KIND attribute
+ *    will be set appropriately.
+ *
+ * @return errlHndl_t  NULL on success
  */
 errlHndl_t load_host_data( void );
 
