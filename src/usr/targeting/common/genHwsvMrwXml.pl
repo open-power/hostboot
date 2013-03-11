@@ -126,7 +126,12 @@ foreach my $i (@{$SystemAttrs->{'required-policy-settings'}})
     #TODO: SW187611 remove the hard core value for FREQ_CORE_FLOOR
 
     push @systemAttr, ["ALL_MCS_IN_INTERLEAVING_GROUP",
-                       $i->{all_mcs_in_interleaving_group},
+#@TODO RTC: 66365
+# As a temporary workaround, ignoring value of ALL_MCS_IN_INTERLEAVING_GROUP
+# and overwriting MRW supplied value with "0".  Replace "0" with following
+# line when it's time to remove the workaround    
+# $i->{all_mcs_in_interleaving_group},
+                       "0",
                        "FREQ_A",
                        $freqA,
                        "FREQ_CORE_FLOOR",
