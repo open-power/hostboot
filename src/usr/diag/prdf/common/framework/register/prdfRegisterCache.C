@@ -48,21 +48,19 @@ BIT_STRING_CLASS & RegDataCache::read(
                                 const SCAN_COMM_REGISTER_CLASS * i_pRegister,
                                 bool & o_readStat )
 {
-    BIT_STRING_CLASS * l_pBitString = NULL;
-    o_readStat = false;
     ScomRegisterAccess l_scomAccessKey ( *i_pRegister,i_pChip );
-    CacheDump::iterator itDump = iv_cachedRead.find( l_scomAccessKey );
-    if( iv_cachedRead.end() != itDump )
-    {
-        o_readStat = true;
-        l_pBitString = itDump->second ;
-    }
-    else
+    BIT_STRING_CLASS * l_pBitString = queryCache( l_scomAccessKey );
+    o_readStat = false;
+    if( NULL == l_pBitString )
     {
         // Creating new entry
         l_pBitString = new BitStringBuffer( i_pRegister->GetBitLength( ) );
         // Adding register in the cache
         iv_cachedRead[l_scomAccessKey] = l_pBitString;
+    }
+    else
+    {
+        o_readStat = true;
     }
     return *l_pBitString;
 }
@@ -101,4 +99,28 @@ void RegDataCache::flush( ExtensibleChip* i_pChip,
 
 //------------------------------------------------------------------------------
 
+BIT_STRING_CLASS * RegDataCache::queryCache(
+                            ExtensibleChip* i_pChip,
+                            const SCAN_COMM_REGISTER_CLASS * i_pRegister )const
+{
+    ScomRegisterAccess l_scomAccessKey ( *i_pRegister,i_pChip );
+    return queryCache( l_scomAccessKey );
+}
+
+//------------------------------------------------------------------------------
+
+BIT_STRING_CLASS * RegDataCache::queryCache(
+                        const ScomRegisterAccess & i_scomAccessKey ) const
+{
+    BIT_STRING_CLASS * l_pBitString = NULL;
+    CacheDump::const_iterator itDump = iv_cachedRead.find( i_scomAccessKey );
+    if( iv_cachedRead.end() != itDump )
+    {
+        l_pBitString = itDump->second ;
+    }
+
+    return l_pBitString;
+}
+
+//------------------------------------------------------------------------------
 }// end namespace  PRDF

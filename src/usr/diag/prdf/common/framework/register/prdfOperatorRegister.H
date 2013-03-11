@@ -401,7 +401,7 @@ class NullRegister : public SCAN_COMM_REGISTER_CLASS
         return *this;
     }
 
-    virtual uint32_t Read()  { return 0; }
+    virtual uint32_t Read() { return 0; }
     virtual uint32_t Write() { return 0; }
 
     const BIT_STRING_CLASS * GetBitString(
@@ -558,7 +558,7 @@ class ConstantRegister : public SCAN_COMM_REGISTER_CLASS
         return *this;
     }
 
-    virtual uint32_t Read()  { return SUCCESS; }
+    virtual uint32_t Read()   { return SUCCESS; }
     virtual uint32_t Write() { return SUCCESS; }
 
     const BIT_STRING_CLASS * GetBitString(

@@ -102,13 +102,13 @@ public:
      * @brief     Directly reads from hardware register
      * @return    SUCCESS|FAIL
      */
-    virtual uint32_t ForceRead();
+    virtual uint32_t ForceRead() const ;
     /**
      * @brief     Returns contents of register.If entry does not exist in cache
      *            a  fresh entry is created and hardware is read.
      * @return    SUCCESS|FAIL
     */
-    virtual uint32_t Read( );
+    virtual uint32_t Read( ) ;
     /**
      * @brief     Writes cache contents to register.
      * @return    SUCCESS|FAIL

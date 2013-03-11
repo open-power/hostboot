@@ -97,6 +97,22 @@ class RegDataCache
      */
     void flush( ExtensibleChip* i_pChip,
                 const SCAN_COMM_REGISTER_CLASS * i_pRegister );
+    /**
+     * @brief Queries if a specific entry exist in cache.
+     * @param i_pChip       The rulechip  associated with the register.
+     * @param i_pRegister   base part of register entry to be queried in cache.
+     * @return pointer to cache entry associated with a given register
+     */
+     BIT_STRING_CLASS * queryCache( ExtensibleChip* i_pChip,
+                            const SCAN_COMM_REGISTER_CLASS * i_pRegister )const;
+    /**
+     * @brief Queries if a specific entry exist in cache.
+     * @param i_scomAccessKey Reference to register to be queried.
+     * @return pointer to cache entry associated with a given register
+     */
+
+    BIT_STRING_CLASS * queryCache(
+                        const ScomRegisterAccess & i_scomAccessKey )const;
   private: // data
 
     typedef std::map<ScomRegisterAccess, BIT_STRING_CLASS *> CacheDump;

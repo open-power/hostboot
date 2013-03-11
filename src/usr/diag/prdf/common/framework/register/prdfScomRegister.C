@@ -84,13 +84,41 @@ void ScomRegister::SetBitString( const BIT_STRING_CLASS *bs )
 
 const BIT_STRING_CLASS *ScomRegister::GetBitString( ATTENTION_TYPE i_type )const
 {
+    BIT_STRING_CLASS * l_pString = NULL;
     bool l_readStat = false;
-    return &( readCache( l_readStat ) );
+    //Expectation is, caller shall first call Read( ) and then GetBitString.
+    //This leaves an opportunity of mistake. One may call GetBitString without
+    //calling Read() first. As a result, a stray entry in cache gets created
+    //which  shall never be in sync with hardware.
+
+    //As a solution, first cache is queried.If the given entry exist, bitString
+    //pointer is returned else a new entry is created. This new entry is
+    //synchronized with hardware and then pointer to bit string is returned to
+    //caller.
+    RegDataCache & regDump = RegDataCache::getCachedRegisters();
+    l_pString = regDump.queryCache( getChip( ), this );
+
+    if( NULL == l_pString )
+    {
+        ForceRead( );
+        //if ForceRead fails, a dummy entry is returned that way analysis shall
+        //fail gracefully else we return a new entry which is in sync with
+        //hardware
+        l_pString = &( readCache( l_readStat ) );
+
+    }
+    return l_pString;
 }
 // ---------------------------------------------------------------------
 BIT_STRING_CLASS & ScomRegister::AccessBitString( )
 {
     bool l_readStat = false;
+    //Expectation is, caller shall first call Read( ) and then AccessBitString.
+    //This leaves an opportunity of mistake. One may call AccessBitString
+    //without calling Read() first. As a result, a stray entry in cache gets
+    //created which shall never be in sync with hardware. Calling Read( ) before
+    //readCache( ) inside function eliminates this scenario.
+    Read( );
     return ( readCache( l_readStat ) );
 
 }
@@ -113,7 +141,7 @@ uint32_t ScomRegister::Read( )
 }
 
 // ----------------------------------------------------------------------------
-uint32_t ScomRegister::ForceRead()
+uint32_t ScomRegister::ForceRead() const
 {
     int32_t rc = SUCCESS;
     bool l_readStat = false;
