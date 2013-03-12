@@ -120,26 +120,10 @@ errlHndl_t discoverTargets()
 
         // find CLASS_ENC
         PredicateCTM predEnc(CLASS_ENC);
-        TargetHandleList pEncList;
-        targetService().getAssociated( pEncList, pSys,
-            TargetService::CHILD, TargetService::ALL, &predEnc );
-
-        for (TargetHandleList::iterator pEnc_it = pEncList.begin();
-                pEnc_it != pEncList.end();
-                pEnc_it++)
-        {
-            TargetHandle_t pEnc = *pEnc_it;
-
-            // mark it as present
-            enableHwasState(pEnc, true, true);
-            HWAS_DBG("pEnc %.8X - marked present",
-                pEnc->getAttr<ATTR_HUID>());
-        } // for pEnc_it
-
         PredicateCTM predChip(CLASS_CHIP);
         PredicateCTM predDimm(CLASS_LOGICAL_CARD, TYPE_DIMM);
         PredicatePostfixExpr checkExpr;
-        checkExpr.push(&predChip).push(&predDimm).Or();
+        checkExpr.push(&predChip).push(&predDimm).Or().push(&predEnc).Or();
 
         TargetHandleList pCheckPres;
         targetService().getAssociated( pCheckPres, pSys,
@@ -167,6 +151,17 @@ errlHndl_t discoverTargets()
             )
         {
             TargetHandle_t pTarget = *pTarget_it;
+
+            // if CLASS_ENC is still in this list, mark as present
+            if (pTarget->getAttr<ATTR_CLASS>() == CLASS_ENC)
+            {
+                enableHwasState(pTarget, true, true);
+                HWAS_DBG("pTarget %.8X - CLASS_ENC marked present",
+                    pTarget->getAttr<ATTR_HUID>());
+
+                // on to the next target
+                continue;
+            }
 
             bool chipFunctional = true;
             bool chipPresent = true;

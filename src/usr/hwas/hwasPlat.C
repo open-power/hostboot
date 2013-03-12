@@ -197,6 +197,19 @@ errlHndl_t platPresenceDetect(TargetHandleList &io_targets)
     {
         TargetHandle_t pTarget = *pTarget_it;
 
+        // if CLASS_ENC
+        // by definition, hostboot only has 1 node/enclosure, and we're
+        //  here, so it is functional
+        if (pTarget->getAttr<ATTR_CLASS>() == CLASS_ENC)
+        {
+            HWAS_DBG("pTarget %.8X - detected present",
+                pTarget->getAttr<ATTR_HUID>());
+
+            // on to the next target
+            pTarget_it++;
+            continue;
+        }
+
         // call deviceRead() to see if they are present
         bool present = false;
         size_t presentSize = sizeof(present);
