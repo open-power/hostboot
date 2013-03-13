@@ -25,6 +25,7 @@
 #include <iipMopRegisterAccess.h>
 #include <prdfTrace.H>
 #include <prdfPlatServices.H>
+#include "prdfsimServices.H"
 
 namespace PRDF
 {
@@ -54,7 +55,12 @@ namespace PRDF
                            uint64_t registerId,
                            SimOp i_op)
     {
-        //PRDF_DENTER( "ScrDB::processCmd()" );
+        // set target state to functional if not already functional
+        if(false == isFunctional(i_ptargetHandle))
+        {
+            getSimServices().setHwasState(i_ptargetHandle, true);
+        }
+
         switch (i_op)
         {
             case WRITE:
@@ -70,7 +76,7 @@ namespace PRDF
                 PRDF_ERR( "ScrDB::processCmd() unsupported operation: 0x%X", i_op );
                 break;
         }
-        //PRDF_DEXIT( "ScrDB::processCmd()" );
+
         return;
     }
 
