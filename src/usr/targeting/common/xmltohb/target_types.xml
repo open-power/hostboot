@@ -1042,6 +1042,19 @@
     <attribute><id>MSS_NWELL_MISPLACEMENT</id></attribute>
     <attribute><id>EI_BUS_TX_MSBSWAP</id></attribute>
     <attribute><id>MSS_FREQ_OVERRIDE</id></attribute>
+    <attribute><id>MEMB_TP_BNDY_PLL_DATA</id></attribute>
+    <attribute><id>MEMB_TP_BNDY_PLL_FLUSH</id></attribute>
+    <attribute><id>MEMB_TP_BNDY_PLL_FOR_DCCAL_DATA</id></attribute>
+    <attribute><id>MEMB_TP_BNDY_PLL_LENGTH</id></attribute>
+    <attribute><id>MEMB_TP_BNDY_PLL_SCAN_SELECT</id></attribute>
+    <attribute><id>MEMB_TP_BNDY_PLL_NEST4000_MEM1066_DATA</id></attribute>
+    <attribute><id>MEMB_TP_BNDY_PLL_NEST4000_MEM1333_DATA</id></attribute>
+    <attribute><id>MEMB_TP_BNDY_PLL_NEST4000_MEM1600_DATA</id></attribute>
+    <attribute><id>MEMB_TP_BNDY_PLL_NEST4000_MEM1866_DATA</id></attribute>
+    <attribute><id>MEMB_TP_BNDY_PLL_NEST4800_MEM1066_DATA</id></attribute>
+    <attribute><id>MEMB_TP_BNDY_PLL_NEST4800_MEM1333_DATA</id></attribute>
+    <attribute><id>MEMB_TP_BNDY_PLL_NEST4800_MEM1600_DATA</id></attribute>
+    <attribute><id>MEMB_TP_BNDY_PLL_NEST4800_MEM1866_DATA</id></attribute>
 </targetType>
 
 <!-- Centaur MBS -->

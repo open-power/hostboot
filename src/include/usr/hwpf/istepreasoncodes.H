@@ -115,6 +115,7 @@ enum istepModuleId
     ISTEP_PROC_XBUS_SCOMINIT                            = 0x43,
     ISTEP_PROC_ABUS_SCOMINIT                            = 0x44,
     ISTEP_PROC_DMI_SCOMINIT                             = 0x45,
+    ISTEP_MEM_PLL_INITF                                 = 0x46,
 };
 
 /**

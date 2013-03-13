@@ -164,12 +164,70 @@ void*    call_mem_pll_initf( void *io_pArgs )
 
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mem_pll_initf entry" );
 
-    // call cen_mem_pll_initf.C
+    // Get all Centaur targets
+    TARGETING::TargetHandleList l_membufTargetList;
+    getAllChips(l_membufTargetList, TYPE_MEMBUF);
+
+    for (TargetHandleList::const_iterator
+            l_membuf_iter = l_membufTargetList.begin();
+            l_membuf_iter != l_membufTargetList.end();
+            ++l_membuf_iter)
+    {
+        //  make a local copy of the target for ease of use
+        const TARGETING::Target* l_pCentaur = *l_membuf_iter;
+
+        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                "Running cen_mem_pll_initf HWP on "
+                "target HUID %.8X", TARGETING::get_huid(l_pCentaur));
+
+        // Cast to a FAPI type of target.
+        const fapi::Target l_fapi_centaur( TARGET_TYPE_MEMBUF_CHIP,
+                 (const_cast<TARGETING::Target*>(l_pCentaur)));
+
+        //  call cen_mem_pll_initf to do pll init
+        FAPI_INVOKE_HWP(l_err, cen_mem_pll_initf, l_fapi_centaur);
+
+        if (l_err)
+        {
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                      "ERROR 0x%.8X: cen_mem_pll_initf HWP returns error",
+                      l_err->reasonCode());
+
+            // capture the target data in the elog
+            ErrlUserDetailsTarget(l_pCentaur).addToLog(l_err );
+
+            break;
+        }
+        else
+        {
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                       "SUCCESS: cen_mem_pll_initf HWP( )" );
+        }
+    }
+
+    if( l_err )
+    {
+        /*@
+         * @errortype
+         * @reasoncode  ISTEP_DRAM_TRAINING_FAILED
+         * @severity    ERRORLOG::ERRL_SEV_UNRECOVERABLE
+         * @moduleid    ISTEP_MEM_PLL_INITF
+         * @userdata1   bytes 0-1: plid identifying first error
+         *              bytes 2-3: reason code of first error
+         * @userdata2   bytes 0-1: total number of elogs included
+         *              bytes 2-3: N/A
+         * @devdesc     call to cen_mem_pll_initf has failed
+         */
+        l_StepError.addErrorDetails(ISTEP_DRAM_TRAINING_FAILED,
+                                    ISTEP_MEM_PLL_INITF,
+                                    l_err);
+
+        errlCommit( l_err, HWPF_COMP_ID );
+    }
 
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mem_pll_initf exit" );
 
-    return  l_err;      // remove this when HWP is implemented
-    // return l_StepError.getErrorHandle();
+    return l_StepError.getErrorHandle();
 }
 
 
@@ -203,26 +261,6 @@ void*    call_mem_pll_setup( void *io_pArgs )
         // Cast to a FAPI type of target.
         const fapi::Target l_fapi_centaur( TARGET_TYPE_MEMBUF_CHIP,
                  (const_cast<TARGETING::Target*>(l_pCentaur)));
-
-        //  call cen_mem_pll_initf to do pll init
-        FAPI_INVOKE_HWP(l_err, cen_mem_pll_initf, l_fapi_centaur);
-
-        if (l_err)
-        {
-            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                      "ERROR 0x%.8X: mem_pll_initf HWP returns error",
-                      l_err->reasonCode());
-
-            // capture the target data in the elog
-            ErrlUserDetailsTarget(l_pCentaur).addToLog(l_err );
-
-            break;
-        }
-        else
-        {
-            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                       "SUCCESS: mem_pll_initf HWP( )" );
-        }
 
         //  call cen_mem_pll_setup to verify lock
         FAPI_INVOKE_HWP(l_err, cen_mem_pll_setup, l_fapi_centaur);
