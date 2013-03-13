@@ -97,7 +97,13 @@ hbicore_test_DATA_MODULES = ${hbicore_DATA_MODULES} testdata
 
 IMAGE_PASS_BODY += buildpnor
 
+IMAGE_PASS_BODY += $(IMGDIR)/hbotStringFile
+CLEAN_TARGETS += $(IMGDIR)/hbotStringFile
+
 include ${ROOTPATH}/config.mk
 
 buildpnor: ${IMAGES}
 	cd build/buildpnor/ && ${MAKE} buildpnor
+
+$(IMGDIR)/hbotStringFile : $(IMAGES)
+	$(ROOTPATH)/src/build/trace/tracehash_hb.pl -c -d $(ROOTPATH)/obj -s $@

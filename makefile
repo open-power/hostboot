@@ -23,8 +23,8 @@
 SUBDIRS = src.d
 ROOTPATH = .
 
-IMAGE_PASS_BODY += $(GENDIR)/hwp_id.html $(IMGDIR)/hbotStringFile
-CLEAN_TARGETS   += $(GENDIR)/hwp_id.html $(IMGDIR)/hbotStringFile
+IMAGE_PASS_BODY += $(GENDIR)/hwp_id.html
+CLEAN_TARGETS   += $(GENDIR)/hwp_id.html
 IMAGE_PASS_BODY += cscope ctags check_istep_modules
 
 include ./config.mk
@@ -46,9 +46,6 @@ gcov:
 	genhtml obj/gcov/*.lcov -o obj/gcov/html --prefix `pwd` \
 	    --title `git describe --dirty`
 	@echo "View GCOV results with: firefox obj/gcov/html/index.html"
-
-$(IMGDIR)/hbotStringFile : $(IMAGES)
-	$(ROOTPATH)/src/build/trace/tracehash_hb.pl -c -d $(ROOTPATH)/obj -s $@
 
 $(GENDIR)/hwp_id.html :
 	$(ROOTPATH)/src/build/tools/hwp_id.pl -i -l > $@

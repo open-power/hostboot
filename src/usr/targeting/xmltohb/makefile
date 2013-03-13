@@ -106,6 +106,9 @@ make_gendir_errl:
 	@mkdir -p $(GENDIR_ERRL)
 GEN_PASS_PRE += make_gendir_errl
 
+XMLTOHB_RAN_INDICATION = $(GENDIR)/.called_xmltohb_compiler
+CLEAN_TARGETS += $(XMLTOHB_RAN_INDICATION)
+
 include ${ROOTPATH}/config.mk
 
 # Delete any generated file on error 
@@ -131,9 +134,8 @@ ${GENDIR}/${XMLTOHB_FAPI_XML}: ${XMLTOHB_MERGE_SCRIPT} \
 	$< $^ > $@
 
 # create the header files, only needs generic xml
-$(call GENTARGET,$(XMLTOHB_TARGETS)) : call_xmltohb_compiler
-.PHONY: call_xmltohb_compiler
-call_xmltohb_compiler: ${XMLTOHB_COMPILER_SCRIPT} \
+$(call GENTARGET,$(XMLTOHB_TARGETS)) : $(XMLTOHB_RAN_INDICATION)
+$(XMLTOHB_RAN_INDICATION): ${XMLTOHB_COMPILER_SCRIPT} \
     ${GENDIR}/${XMLTOHB_GENERIC_XML} ${GENDIR}/${XMLTOHB_FAPI_XML}
 	$< $(addprefix --hb-xml-file=,${GENDIR}/${XMLTOHB_GENERIC_XML}) \
        $(addprefix --fapi-attributes-xml-file=,${GENDIR}/${XMLTOHB_FAPI_XML}) \
@@ -141,6 +143,7 @@ call_xmltohb_compiler: ${XMLTOHB_COMPILER_SCRIPT} \
          --img-output-file=none
 	cp ${GENDIR_ERRL}/errludattribute.H ${GENDIR_PLUGINS}
 	cp ${GENDIR_ERRL}/errludtarget.H ${GENDIR_PLUGINS}
+	touch $(XMLTOHB_RAN_INDICATION)
 
 # system-specific XML needs the generic plus the xxx.system.xml file + the
 # MRW file

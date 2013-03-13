@@ -59,6 +59,7 @@ endif
 
 CODE_PASS: ${IMGDIR}/errlparser
 
+.PHONY: mkdirs
 mkdirs:
 	mkdir -p ${OBJDIR}
 	mkdir -p ${GENDIR}/plugins
@@ -67,11 +68,11 @@ mkdirs:
 ${ERRLPARSE_TARGETS} : gen_errl_parsers
 
 .PHONY: gen_errl_parsers
-gen_errl_parsers:
+gen_errl_parsers: mkdirs
 	./genErrlParsers.pl -b ${ROOTPATH} -o ${GENDIR}/plugins
 
-${GENDIR}/comps.C: ${ROOTPATH}/src/include/usr/hbotcompid.H
-	grep "const compId_t [A-Z0-9]*_COMP_ID" $^ | \
+${GENDIR}/comps.C: ${ROOTPATH}/src/include/usr/hbotcompid.H mkdirs
+	grep "const compId_t [A-Z0-9]*_COMP_ID" $< | \
 	grep -v MY_COMP_ID | \
 	sed 's/const compId_t \([A-Z0-9]*\)_COMP_ID[ =\t]*\(0[xX][0-9a-fA-F]*\).*/{ "\1", \2 },/' \
 	> $@
