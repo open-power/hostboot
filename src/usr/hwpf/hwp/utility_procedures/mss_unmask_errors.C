@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_unmask_errors.C,v 1.2 2013/01/31 22:35:01 gollub Exp $
+// $Id: mss_unmask_errors.C,v 1.3 2013/03/08 22:03:00 gollub Exp $
 //------------------------------------------------------------------------------
 // Don't forget to create CVS comments when you check in your changes!
 //------------------------------------------------------------------------------
@@ -33,6 +33,7 @@
 //         |          |         | errors masked until mss_unmask_fetch_errors,
 //         |          |         | so they will be masked during memdiags, and
 //         |          |         | unmasked before scrub is started.
+//   1.3   | 03/08/13 | gollub  | Masking MBSPA[0] for DD1, and using MBSPA[8] instead.
 
 //------------------------------------------------------------------------------
 //  Includes
@@ -1700,14 +1701,11 @@ fapi::ReturnCode mss_unmask_maint_errors(const fapi::Target & i_target,
         //       to be valid errors for PRD to log.
 
 
-        // 0	Command_Complete                             unmasked 
-        // NOTE: This bit broken in DD1
+        // 0	Command_Complete                             mask (broken on DD1)
+        // NOTE: This bit broken in DD1.
         // It can be made to come on when cmd completes clean, or make to come
         // on when cmd stops on error, but can't be set to do both. 
-        // I am unmasking it since it should work for init commands which
-        // will always complete clean. This should at least allow FW to 
-        // get cmd complete attention for sf init cmd.
-        l_ecmd_rc |= l_mbaspa_mask.clearBit(0);            
+        l_ecmd_rc |= l_mbaspa_mask.setBit(0);            
 
         // 1	Hard_CE_ETE_Attn                             mask (until after memdiags)
         // NOTE: FW memdiags needs this masked because they want to wait till

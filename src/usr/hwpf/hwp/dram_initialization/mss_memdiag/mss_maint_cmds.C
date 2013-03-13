@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_maint_cmds.C,v 1.19 2013/01/31 22:27:22 gollub Exp $
+// $Id: mss_maint_cmds.C,v 1.20 2013/03/08 22:03:57 gollub Exp $
 //------------------------------------------------------------------------------
 // Don't forget to create CVS comments when you check in your changes!
 //------------------------------------------------------------------------------
@@ -63,6 +63,7 @@
 //         |          |         | Added mss_do_steering
 //         |          |         | Added mss_stopCmd
 //         |          |         | Removed cleanupCmd for cmds that didn't use it
+//   1.20  | 03/08/13 | gollub  | Mask MBSPA[0][8] during increment cmd
 
 //------------------------------------------------------------------------------
 //    Includes
@@ -2554,7 +2555,31 @@ fapi::ReturnCode mss_IncrementAddress::setupAndExecuteCmd()
 
 
     fapi::ReturnCode l_rc;
+    uint32_t l_ecmd_rc = 0;    
+    ecmdDataBufferBase l_mbspa_mask(64);
+    ecmdDataBufferBase l_mbspa_mask_original(64);
+    ecmdDataBufferBase l_mbspa_and(64);    
+    
+    // Read MBSPA MASK
+    l_rc = fapiGetScom(iv_target, MBA01_MBSPAMSKQ_0x03010614, l_mbspa_mask);
+    if(l_rc) return l_rc;
+    
+    // Save original mask value so we can restore it when done
+    l_ecmd_rc |= l_mbspa_mask_original.insert(l_mbspa_mask, 0, 64, 0);    
 
+    // Mask bits 0 and 8, to hide the special attentions when the cmd completes
+    l_ecmd_rc |= l_mbspa_mask.setBit(0);        
+    l_ecmd_rc |= l_mbspa_mask.setBit(8);
+    if(l_ecmd_rc)
+    {
+        l_rc.setEcmdError(l_ecmd_rc);
+        return l_rc;
+    }
+
+    // Write MBSPA MASK
+    l_rc = fapiPutScom(iv_target, MBA01_MBSPAMSKQ_0x03010614, l_mbspa_mask);
+    if(l_rc) return l_rc;
+    
     // Make sure maint logic in valid state to run new cmd
     l_rc = preConditionCheck(); if(l_rc) return l_rc;
 
@@ -2583,6 +2608,25 @@ fapi::ReturnCode mss_IncrementAddress::setupAndExecuteCmd()
 
     // Collect FFDC
     l_rc = collectFFDC(); if(l_rc) return l_rc;
+
+    // Clear bits 0 and 8 in MBSPA AND register
+    l_ecmd_rc |= l_mbspa_and.flushTo1();
+    l_ecmd_rc |= l_mbspa_and.clearBit(0);
+    l_ecmd_rc |= l_mbspa_and.clearBit(8);
+    if(l_ecmd_rc)
+    {
+        l_rc.setEcmdError(l_ecmd_rc);
+        return l_rc;
+    }
+
+    // Write MPSPA AND register
+    l_rc = fapiPutScom(iv_target, MBA01_MBSPAQ_AND_0x03010612, l_mbspa_and);
+    if(l_rc) return l_rc;
+    
+    // Restore MBSPA MASK 
+    l_rc = fapiPutScom(iv_target, MBA01_MBSPAMSKQ_0x03010614, l_mbspa_mask_original);
+    if(l_rc) return l_rc;
+    
 
     FAPI_INF("EXIT mss_IncrementAddress::setupAndExecuteCmd()");
 
