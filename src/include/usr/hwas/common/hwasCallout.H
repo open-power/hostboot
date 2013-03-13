@@ -132,14 +132,14 @@ enum callOutPriority
  *  @param[in]  i_pData  Pointer to the callout bundle
  *  @param[in]  i_Size  size of the data in the callout bundle
  *
- *  @return void
+ *  @return true if shutdown required, false otherwise
  */
-void processCallout(const uint32_t i_errlPlid,
+bool processCallout(const uint32_t i_errlPlid,
         uint8_t *i_pData,
         uint64_t i_Size);
 
 // typedef for function pointer that the errlog class will use.
-typedef void (*processCalloutFn)(const uint32_t, uint8_t *, uint64_t);
+typedef bool (*processCalloutFn)(const uint32_t, uint8_t *, uint64_t);
 #endif // not PARSER
 
 //

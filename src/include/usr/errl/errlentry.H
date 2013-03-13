@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2012              */
+/* COPYRIGHT International Business Machines Corp. 2011,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -481,6 +481,16 @@ private:
      *
      */
     void commit( compId_t i_commiterComp );
+
+
+    /**
+     * @brief The ErrlManager will call here to ask the
+     * ErrlEntry to handle deconfigure and GARD callouts
+     * The ErrlManager is the primary user of this call.
+     *
+     *  @return plid if we need to shutdown, zero if no action
+     */
+    uint32_t callout();
 
 
     /**

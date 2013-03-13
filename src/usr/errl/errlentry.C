@@ -268,13 +268,13 @@ void ErrlEntry::addHwCallout(const TARGETING::Target *i_target,
 
         ErrlUserDetailsCallout(&ep, sizeof(ep),
                 i_priority, i_deconfigState, i_gardErrorType).addToLog(this);
-    }
 
-    if (i_deconfigState == HWAS::DELAYED_DECONFIG)
-    {
-        // call HWAS function to register this action.
-        HWAS::theDeconfigGard().registerDelayedDeconfigure(
-                                *i_target, plid());
+        if (i_deconfigState == HWAS::DELAYED_DECONFIG)
+        {
+            // call HWAS function to register this action.
+            HWAS::theDeconfigGard().registerDelayedDeconfigure(
+                                    *i_target, plid());
+        }
     }
 
 } // addHwCallout
@@ -304,6 +304,23 @@ void ErrlEntry::commit( compId_t  i_committerComponent )
     // User header contains the component ID of the committer.
     iv_User.setComponentId( i_committerComponent );
 
+    // Add the captured backtrace to the error log
+    if (iv_pBackTrace)
+    {
+        iv_pBackTrace->addToLog(this);
+        delete iv_pBackTrace;
+        iv_pBackTrace = NULL;
+    }
+}
+
+
+///////////////////////////////////////////////////////////////////////////////
+// for use by ErrlManager
+uint32_t ErrlEntry::callout()
+{
+    uint32_t l_rc = 0;
+    TRACFCOMP(g_trac_errl, INFO_MRK"errlEntry::callout");
+
     // see if HWAS has been loaded and has set the processCallout function
     HWAS::processCalloutFn pFn;
     pFn = ERRORLOG::theErrlManager::instance().getHwasProcessCalloutFn();
@@ -316,11 +333,16 @@ void ErrlEntry::commit( compId_t  i_committerComponent )
         {
             // if this is a CALLOUT
             if ((ERRL_COMP_ID     == (*it)->iv_header.iv_compId) &&
-                (1                  == (*it)->iv_header.iv_ver) &&
+                (1                == (*it)->iv_header.iv_ver) &&
                 (ERRL_UDT_CALLOUT == (*it)->iv_header.iv_sst))
             {
                 // call HWAS to have this processed
-                (*pFn)(plid(),(*it)->iv_pData, (*it)->iv_Size);
+                if ((*pFn)(plid(),(*it)->iv_pData, (*it)->iv_Size))
+                {
+                    // if it returned true, we need to return the plid
+                    // to indicate that we need to shutdown
+                    l_rc = plid();
+                }
             }
         } // for each SectionVector
     } // if HWAS module loaded
@@ -329,13 +351,8 @@ void ErrlEntry::commit( compId_t  i_committerComponent )
         TRACFCOMP(g_trac_errl, INFO_MRK"hwas processCalloutFn not set!");
     }
 
-    // Add the captured backtrace to the error log
-    if (iv_pBackTrace)
-    {
-        iv_pBackTrace->addToLog(this);
-        delete iv_pBackTrace;
-        iv_pBackTrace = NULL;
-    }
+    TRACFCOMP(g_trac_errl, INFO_MRK"errlEntry::callout returning 0x%X", l_rc);
+    return l_rc;
 }
 
 

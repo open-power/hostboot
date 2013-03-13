@@ -208,13 +208,13 @@ void ErrlManager::errlogMsgHndlr ( void )
         switch( theMsg->type )
         {
             case ERRLOG_NEEDS_TO_BE_COMMITTED_TYPE:
+            {
 
                 //Extract error log handle from the message. We need the error
                 //log handle to pass along to saveErrlogEntry and sendMboxMsg
                 l_err = (errlHndl_t) theMsg->extra_data;
                 
                 //Ask the ErrlEntry to assign commit component, commit time
-                //and callout information
                 l_err->commit( (compId_t) theMsg->data[0] );
 
                 //Write the error log to L3 memory till PNOR is implemented 
@@ -227,16 +227,31 @@ void ErrlManager::errlogMsgHndlr ( void )
                 {
                     sendMboxMsg ( l_err );
                 }
- 
+
+                //Ask the ErrlEntry to process any callouts
+                uint32_t calloutPlid = l_err->callout();
+
                 //We are done with the error log handle so delete it.
                 delete l_err;
                 l_err = NULL;
 
-                //We are done with the msg so go back and wait for a next one 
+                //We are done with the msg
                 msg_free(theMsg);
- 
-                break;
 
+                // done cleaning up, see if we need to exit.
+                if (calloutPlid != 0)
+                {
+                    // non-zero means that we need to shutdown!
+                    TRACFCOMP( g_trac_errl, INFO_MRK
+                            "callout says Shutdown due to plid 0x%X",
+                            calloutPlid );
+                    errlogShutdown();
+                    INITSERVICE::doShutdown(calloutPlid);
+                }
+
+                // else go back and wait for a next msg 
+                break;
+                }
             case ERRLOG_COMMITTED_ACK_RESPONSE_TYPE:
                 //Hostboot must keep track and clean up hostboot error 
                 //logs in PNOR after it is committed by FSP. 
@@ -490,7 +505,8 @@ void ErrlManager::errlogShutdown(void)
     // Ensure that all the error logs are pushed out to PNOR
     // prior to the PNOR resource provider shutting down.
  
-    l_err = PNOR::getSectionInfo(PNOR::HB_ERRLOGS, PNOR::CURRENT_SIDE, l_section);
+    l_err = PNOR::getSectionInfo(PNOR::HB_ERRLOGS, PNOR::CURRENT_SIDE,
+                                    l_section);
  
     if(l_err)
     {
@@ -512,8 +528,14 @@ void ErrlManager::errlogShutdown(void)
         }
     }
 
+    // Un-register error log message queue from the shutdown 
+    INITSERVICE::unregisterShutdownEvent( iv_msgQ);
+
     // Un-register error log message queue from the mailbox service
     MBOX::msgq_unregister( MBOX::HB_ERROR_MSGQ );
+
+    // destroy the queue
+    msg_q_destroy(iv_msgQ);
 
     return;
 }

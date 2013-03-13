@@ -820,15 +820,12 @@ void DeconfigGard::_GardRecordIdSetup(uint32_t i_size)
 
 bool DeconfigGard::_processDelayedDeconfig()
 {
-    HWAS_INF("_processDelayedDeconfig entry. ");
-
     // we're going to return the current setting
     bool rc = iv_delayedDeconfig;
 
     // for now, clear the mark on the wall.
     iv_delayedDeconfig = false;
 
-    HWAS_INF("_processDelayedDeconfig exit rc %d", rc);
     return rc;
 } // _processDelayedDeconfig
 
