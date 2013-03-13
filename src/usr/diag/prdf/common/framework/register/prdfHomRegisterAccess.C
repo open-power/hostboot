@@ -38,7 +38,7 @@
   #include <targeting/common/targetservice.H>
 #else
   #include <ecmdDataBuffer.H>
-  #include <hwsvScanScom.H>
+  #include <hwcoScanScom.H>
   #include <chicservlib.H>
   #include <hwsvExecutionService.H>
 #endif
