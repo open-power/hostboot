@@ -171,6 +171,7 @@ enum istepReasonCode
     ISTEP_PROC_REC_ATTN_FAILED                  = ISTEP_COMP_ID | 0x2A,
     ISTEP_PROC_XBUS_SCOMINIT_FAILED             = ISTEP_COMP_ID | 0x2B,
     ISTEP_PROC_ABUS_SCOMINIT_FAILED             = ISTEP_COMP_ID | 0x2C,
+    ISTEP_PROC_SWITCH_CFSIM_FAILED              = ISTEP_COMP_ID | 0x2D,
 };  // end ISTEP
 
 }

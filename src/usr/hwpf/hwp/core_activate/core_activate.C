@@ -127,8 +127,8 @@ void*    call_host_activate_master( void    *io_pArgs )
         if ( l_errl )
         {
             TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-            "proc_prep_master_winkle ERROR : Returning errorlog, PLID=0x%x",
-                l_errl->plid() );
+            "proc_prep_master_winkle ERROR : Returning errorlog, reason=0x%x",
+                l_errl->reasonCode() );
 
             // capture the target data in the elog
             ErrlUserDetailsTarget(l_cpu_target).addToLog( l_errl );
@@ -187,8 +187,9 @@ void*    call_host_activate_master( void    *io_pArgs )
         if ( l_errl )
         {
             TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                       "proc_stop_deadman_timer ERROR : Returning errorlog, PLID=0x%x",
-                       l_errl->plid() );
+                       "proc_stop_deadman_timer ERROR : "
+                       "Returning errorlog, reason=0x%x",
+                       l_errl->reasonCode() );
 
             // capture the target data in the elog
             ErrlUserDetailsTarget(l_cpu_target).addToLog( l_errl );
@@ -280,7 +281,8 @@ void*    call_host_activate_slave_cores( void    *io_pArgs )
         if (pir != l_masterCoreID)
         {
             TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                       "call_host_activate_slave_cores: Waking %x", pir);
+                       "call_host_activate_slave_cores: Waking %x",
+                       pir );
 
             int rc = cpu_start_core(pir,en_threads);
 
@@ -291,9 +293,10 @@ void*    call_host_activate_slave_cores( void    *io_pArgs )
             if ((0 != rc) && (NULL == l_errl))
             {
                 TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                           "call_host_activate_slave_cores: Error from kernel"
-                           " %d on core %x",
-                           rc, pir);
+                           "call_host_activate_slave_cores: "
+                           "Error from kernel %d on core %x",
+                           rc,
+                           pir);
                 /*@
                  * @errortype
                  * @reasoncode  ISTEP_BAD_RC
@@ -325,7 +328,7 @@ void*    call_host_activate_slave_cores( void    *io_pArgs )
         TARGETING::TargetHandleList l_procTargetList;
         getAllChips(l_procTargetList, TYPE_PROC);
 
-        // loop thru all the cpus
+        // loop thru all the cpus and reset the pore bars.
         for (TargetHandleList::const_iterator
                 l_proc_iter = l_procTargetList.begin();
                 l_proc_iter != l_procTargetList.end();
@@ -418,14 +421,15 @@ void*    call_host_ipl_complete( void    *io_pArgs )
     {
         // We only need to run cfsim on the master Processor.
         TARGETING::Target * l_masterProc =   NULL;
-        (void)TARGETING::targetService().masterProcChipTargetHandle( l_masterProc );
+        (void)TARGETING::targetService().
+            masterProcChipTargetHandle( l_masterProc );
 
         const fapi::Target l_fapi_proc_target( TARGET_TYPE_PROC_CHIP,
                 ( const_cast<TARGETING::Target*>(l_masterProc) ) );
 
         TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                "Running proc_switch_cfsim HWP on "
-                "target HUID %.8X", TARGETING::get_huid(l_masterProc));
+                "Running proc_switch_cfsim HWP on target HUID %.8X",
+                TARGETING::get_huid(l_masterProc) );
 
 
         //  call proc_switch_cfsim
@@ -444,12 +448,32 @@ void*    call_host_ipl_complete( void    *io_pArgs )
         if (l_err)
         {
             TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                      "ERROR 0x%.8X: proc_switch_cfsim HWP returns error",
+                      "ERROR 0x%.8X: proc_switch_cfsim HWP returned error",
                       l_err->reasonCode());
 
             // capture the target data in the elog
             ErrlUserDetailsTarget(l_masterProc).addToLog( l_err );
 
+            /*@
+             * @errortype
+             * @reasoncode      ISTEP_PROC_SWITCH_CFSIM_FAILED
+             * @severity        ERRORLOG::ERRL_SEV_UNRECOVERABLE
+             * @moduleid        ISTEP_HOST_IPL_COMPLETE
+             * @userdata1       bytes 0-1: plid identifying first error
+             *                  bytes 2-3: reason code of first error
+             * @userdata2       bytes 0-1: total number of elogs included
+             *                  bytes 2-3: N/A
+             * @devdesc         call to proc_switch_cfsim failed.
+             *                  see error identified by the plid in user data
+             *                  field.
+             */
+            l_stepError.addErrorDetails( ISTEP_PROC_SWITCH_CFSIM_FAILED,
+                                         ISTEP_HOST_IPL_COMPLETE,
+                                         l_err );
+            // commit errorlog
+            errlCommit( l_err, HWPF_COMP_ID );
+
+            // break to end
             break;
         }
         else
@@ -472,11 +496,8 @@ void*    call_host_ipl_complete( void    *io_pArgs )
 
             //  dump physical path to target
             TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                       "Running cen_switch_rec_attn HWP on ...");
-            EntityPath l_path;
-            l_path  =   l_memChip->getAttr<ATTR_PHYS_PATH>();
-            l_path.dump();
-
+                       "Running cen_switch_rec_attn HWP on target HUID %.8X",
+                       TARGETING::get_huid(l_memChip) );
 
             // cast OUR type of target to a FAPI type of target.
             fapi::Target l_fapi_centaur_target( TARGET_TYPE_MEMBUF_CHIP,
@@ -525,6 +546,11 @@ void*    call_host_ipl_complete( void    *io_pArgs )
             }
         }   // endfor
 
+        // check if any errors were collected above.  If so, drop out here.
+        if ( !l_stepError.isNull() )
+        {
+            break;
+        }
 
         //  Loop through all the mcs in the system
         //  and run proc_switch_rec_attn
@@ -539,10 +565,8 @@ void*    call_host_ipl_complete( void    *io_pArgs )
 
             //  dump physical path to target
             TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                        "Running proc_switch_rec_attn HWP on ...");
-            EntityPath l_path;
-            l_path  =   l_mcsChiplet->getAttr<ATTR_PHYS_PATH>();
-            l_path.dump();
+                       "Running cen_switch_rec_attn HWP on target HUID %.8X",
+                       TARGETING::get_huid(l_mcsChiplet) );
 
             // cast OUR type of target to a FAPI type of target.
             fapi::Target l_fapi_mcs_target( TARGET_TYPE_MCS_CHIPLET,
