@@ -46,23 +46,6 @@ using namespace Util;
 namespace ATTN
 {
 
-/**
- * @brief DisableProcResolver
- *
- * FIXME:  Temp turn off the proc
- *  resolver until the proc global
- *  FIRs can be scomed in simics.
- *  RTC: 47750
- */
-static struct DisableProcResolver
-{
-    DisableProcResolver()
-    {
-        Singleton<ProcOps>::instance().disable();
-    }
-
-} disableProcResolver;
-
 errlHndl_t startService()
 {
     return Singleton<Service>::instance().start();
