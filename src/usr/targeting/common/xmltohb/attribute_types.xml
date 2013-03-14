@@ -10168,6 +10168,7 @@ Measured in GB</description>
     </simpleType>
     <persistency>volatile</persistency>
     <readable/>
+    <writeable/>
     <hwpfToHbAttrMap>
         <id>ATTR_EX_L2_SINGLE_MEMBER_ENABLE</id>
         <macro>DIRECT</macro>
