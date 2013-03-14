@@ -42,6 +42,7 @@
 #include <targeting/common/util.H>
 #include <targeting/common/trace.H>
 #include <targeting/common/predicates/predicateattrval.H>
+#include <targeting/common/utilFilter.H>
 
 namespace TARGETING
 {
@@ -71,13 +72,52 @@ bool Target::_tryGetAttr(
 {
     #define TARG_FN "_tryGetAttr()"
 
-    void* l_pAttrData = NULL;
-    (void) _getAttrPtr(i_attr, l_pAttrData);
-    if (l_pAttrData)
+    bool l_found = false;
+
+    // Very fast check if there are any overrides at all
+    if (unlikely(cv_overrideTank.attributesExist()))
     {
-        memcpy(io_pAttrData, l_pAttrData, i_size);
+        // Check if there are any overrides for this attr ID
+        if (cv_overrideTank.attributeExists(i_attr))
+        {
+            // The following attributes can be used to determine the position
+            // of a target (for a unit, the position is the parent's position)
+            // Do not check for overrides for these because an infinite loop
+            // will result from recursively checking for overrides
+            if ((i_attr != ATTR_PHYS_PATH) &&
+                (i_attr != ATTR_AFFINITY_PATH) &&
+                (i_attr != ATTR_POWER_PATH))
+            {
+                // Find if there is an attribute override
+                uint32_t l_type = getAttrTankTargetType();
+                uint16_t l_pos = getAttrTankTargetPos();
+                uint8_t l_unitPos = getAttrTankTargetUnitPos();
+
+                l_found = cv_overrideTank.getAttribute(i_attr, l_type,
+                    l_pos, l_unitPos, io_pAttrData);
+
+                if (l_found)
+                {
+                    TRACFCOMP(g_trac_targeting, "Returning Override for 0x%08x",
+                              i_attr);
+                }
+            }
+        }
     }
-    return (l_pAttrData != NULL);
+
+    if (!l_found)
+    {
+        // No attribute override, get the real attribute
+        void* l_pAttrData = NULL;
+        (void) _getAttrPtr(i_attr, l_pAttrData);
+        if (l_pAttrData)
+        {
+            memcpy(io_pAttrData, l_pAttrData, i_size);
+            l_found = true;
+        }
+    }
+
+    return l_found;
 
     #undef TARG_FN
 }
@@ -93,6 +133,47 @@ bool Target::_trySetAttr(
 {
     #define TARG_FN "_trySetAttr()"
 
+    // Figure out if effort should be expended figuring out the target's type/
+    // position in order to clear any non-const attribute overrides and/or to
+    // store the attribute for syncing to Cronus
+
+    bool l_clearAnyNonConstOverride = false;
+
+    // Very fast check if there are any overrides at all for this Attr ID
+    if (unlikely(cv_overrideTank.attributesExist()))
+    {
+        // Check if there are any overrides for this attr ID
+        if (cv_overrideTank.attributeExists(i_attr))
+        {
+            l_clearAnyNonConstOverride = true;
+        }
+    }
+
+    bool l_syncAttribute = AttributeTank::syncEnabled();
+
+    if (unlikely(l_clearAnyNonConstOverride || l_syncAttribute))
+    {
+        uint32_t l_type = getAttrTankTargetType();
+        uint16_t l_pos = getAttrTankTargetPos();
+        uint8_t l_unitPos = getAttrTankTargetUnitPos();
+
+        if (l_clearAnyNonConstOverride)
+        {
+            // Clear any non const override for this attribute because the
+            // attribute is being written
+            cv_overrideTank.clearNonConstAttribute(i_attr, l_type, l_pos,
+                l_unitPos);
+        }
+
+        if (l_syncAttribute)
+        {
+            // Write the attribute to the SyncAttributeTank to sync to Cronus
+            cv_syncTank.setAttribute(i_attr, l_type, l_pos, l_unitPos, 0,
+                i_size, i_pAttrData);
+        }
+    }
+
+    // Set the real attribute
     void* l_pAttrData = NULL;
     (void) _getAttrPtr(i_attr, l_pAttrData);
     if (l_pAttrData)
@@ -342,6 +423,98 @@ Target* Target::getTargetFromHuid(
     return l_pTarget;
     #undef TARG_FN
 }
+
+//******************************************************************************
+// Target::getAttrTankTargetType()
+//******************************************************************************
+uint32_t Target::getAttrTankTargetType() const
+{
+    // In a Targeting Attribute Tank, the Target Type is the TARGETING::TYPE
+    TARGETING::TYPE l_targetType = TYPE_NA;
+    void * l_pAttrData = NULL;
+    _getAttrPtr(ATTR_TYPE, l_pAttrData);
+    if (l_pAttrData)
+    {
+        l_targetType = *(reinterpret_cast<TARGETING::TYPE *>(l_pAttrData));
+    }
+
+    return l_targetType;
+}
+
+//******************************************************************************
+// Target::getAttrTankTargetPos()
+//******************************************************************************
+uint16_t Target::getAttrTankTargetPos() const
+{
+    // In a Targeting Attribute Tank, the Position for units is the
+    // ATTR_POSITION of the parent chip, else if the target has an ATTR_POSITION
+    // then it is that else it is ATTR_POS_NA
+    AttributeTraits<ATTR_POSITION>::Type l_targetPos =
+        AttributeTank::ATTR_POS_NA;
+
+    TARGETING::CLASS l_targetClass = CLASS_NA;
+    void * l_pAttrData = NULL;
+    _getAttrPtr(ATTR_CLASS, l_pAttrData);
+    if (l_pAttrData)
+    {
+        l_targetClass = *(reinterpret_cast<TARGETING::CLASS *>(l_pAttrData));
+    }
+
+    if (l_targetClass == CLASS_UNIT)
+    {
+        // The position is the parent chip's position
+        const Target * l_pParent = getParentChip(this);
+
+        if (l_pParent)
+        {
+            l_pParent->_getAttrPtr(ATTR_POSITION, l_pAttrData);
+            if (l_pAttrData)
+            {
+                l_targetPos = *(reinterpret_cast
+                    <AttributeTraits<ATTR_POSITION>::Type *>(l_pAttrData));
+            }
+        }
+    }
+    else
+    {
+        // The position is this object's position
+        _getAttrPtr(ATTR_POSITION, l_pAttrData);
+        if (l_pAttrData)
+        {
+            l_targetPos = *(reinterpret_cast
+                    <AttributeTraits<ATTR_POSITION>::Type *>(l_pAttrData));
+        }
+    }
+
+    return l_targetPos;
+}
+
+//******************************************************************************
+// Target::getAttrTankTargetUnitPos()
+//******************************************************************************
+uint8_t Target::getAttrTankTargetUnitPos() const
+{
+    // In a Targeting Attribute Tank, the Unit Position for units is
+    // ATTR_CHIP_UNIT, else it is ATTR_UNIT_POS_NA
+    AttributeTraits<ATTR_CHIP_UNIT>::Type l_targetUnitPos =
+        AttributeTank::ATTR_UNIT_POS_NA;
+
+    void * l_pAttrData = NULL;
+    _getAttrPtr(ATTR_CHIP_UNIT, l_pAttrData);
+    if (l_pAttrData)
+    {
+        l_targetUnitPos = *(reinterpret_cast
+            <AttributeTraits<ATTR_CHIP_UNIT>::Type *>(l_pAttrData));
+    }
+
+    return l_targetUnitPos;
+}
+
+//******************************************************************************
+// Attribute Tanks
+//******************************************************************************
+AttributeTank Target::cv_overrideTank;
+AttributeTank Target::cv_syncTank;
 
 #undef TARG_CLASS
 

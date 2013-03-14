@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/include/usr/hwpf/plat/fapiPlatHwpExecutor.H $             */
+/* $Source: src/include/usr/targeting/adapters/mutexadapter.H $           */
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2013              */
+/* COPYRIGHT International Business Machines Corp. 2013                   */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,35 +20,30 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-/**
- *  @file fapiPlatHwpExecutor.H
- *
- *  @brief Defines the FAPI PLAT HWP Executor Macro.
- *
- *  The PLAT HWP Executor macro is called by the FAPI HWP Executor macro when a
- *  PLAT invoker function or a HWP wants to execute a HWP. Each platform can
- *  modify the macro to do any platform specific work to execute the HWP (e.g.
- *  dlopening a shared library)
- */
-
-#ifndef FAPIPLATHWPEXECUTOR_H_
-#define FAPIPLATHWPEXECUTOR_H_
-
-#include <fapiTestHwp.H>
-#include <fapiTestHwpError.H>
-#include <fapiTestHwpFfdc.H>
-#include <fapiTestHwpConfig.H>
-#include <fapiTestHwpDq.H>
-#include <dimmBadDqBitmapAccessHwp.H>
-#include <erepairGetFailedLanesHwp.H>
-#include <erepairGetMnfgFailedLanesHwp.H>
+#ifndef __TARGETING_MUTEXADAPTER_H
+#define __TARGETING_MUTEXADAPTER_H
 
 /**
- * @brief HWP Executor macro
- *
- * Call the HWP directly.
- */
-#define FAPI_PLAT_EXEC_HWP(RC, FUNC, _args_...) \
-    RC = FUNC(_args_)
+* @file mutexAdapter.H
+*
+* @brief Provides Hostboot specific TARGETING Mutex
+*/
 
-#endif // FAPIPLATHWPEXECUTOR_H_
+#include <sys/sync.h>
+
+#define TARG_MUTEX_TYPE \
+ mutex_t
+
+#define TARG_MUTEX_INIT(_t) \
+ mutex_init(&(_t))
+
+#define TARG_MUTEX_DESTROY(_t) \
+ mutex_destroy(&(_t))
+
+#define TARG_MUTEX_LOCK(_t) \
+ mutex_lock(&(_t))
+
+#define TARG_MUTEX_UNLOCK(_t) \
+ mutex_unlock(&(_t))
+
+#endif

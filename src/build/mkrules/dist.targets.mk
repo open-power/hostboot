@@ -61,8 +61,9 @@ COPY_FILES = \
     img/dimmspd.dat:vpo \
     img/procmvpd.dat:vpo \
     img/cvpd.dat:vpo \
-    obj/genfiles/fapiAttributeIds.txt:vpo \
-    obj/genfiles/fapiAttributeEnums.txt:vpo \
+    obj/genfiles/fapiAttrInfo.csv:vpo \
+    obj/genfiles/fapiAttrEnumInfo.csv:vpo \
+    obj/genfiles/targAttrInfo.csv:vpo \
     src/build/hwpf/prcd_compile.tcl:tools \
     src/usr/hwpf/hwp/initfiles/sample.initfile:tools \
     $(foreach file, $(call ROOTPATH_WILDCARD,releaseNotes.html), $(file):fsp)\
@@ -153,8 +154,9 @@ simics.tar_CONTENTS = \
     img/dimmspd.dat \
     img/procmvpd.dat \
     img/cvpd.dat \
-    obj/genfiles/fapiAttributeIds.txt \
-    obj/genfiles/fapiAttributeEnums.txt \
+    obj/genfiles/fapiAttrInfo.csv \
+    obj/genfiles/fapiAttrEnumInfo.csv \
+    obj/genfiles/targAttrInfo.csv
 
 #
 # Contents for the fsp.tar.
@@ -168,8 +170,9 @@ fsp.tar_CONTENTS = \
     src/build/buildpnor/defaultPnorLayout.xml \
     img/simics_MURANO_targeting.bin \
     img/simics_VENICE_targeting.bin \
-    obj/genfiles/fapiAttributeIds.txt \
-    obj/genfiles/fapiAttributeEnums.txt \
+    obj/genfiles/fapiAttrInfo.csv \
+    obj/genfiles/fapiAttrEnumInfo.csv \
+    obj/genfiles/targAttrInfo.csv \
     $(addsuffix :targeting/,\
 	$(call ROOTPATH_WILDCARD_RECURSIVE,src/usr/targeting/common))\
     $(addsuffix :targeting/,\

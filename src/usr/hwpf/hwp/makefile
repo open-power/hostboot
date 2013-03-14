@@ -36,7 +36,6 @@ OBJS = fapiTestHwp.o \
        fapiTestHwpError.o \
        fapiTestHwpFfdc.o \
        fapiTestHwpConfig.o \
-       fapiTestHwpAttr.o \
        fapiTestHwpDq.o \
        fapiHwpExecInitFile.o \
        dimmBadDqBitmapFuncs.o \

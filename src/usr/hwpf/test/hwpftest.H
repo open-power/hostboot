@@ -251,69 +251,6 @@ public:
     }
 
     /**
-     * @brief Test HWPF Attributes: call a test procedure that exercises
-     *        FAPI attributes
-     */
-    void testHwpf4()
-    {
-        errlHndl_t l_err = NULL;
-
-        // Get the first MBA chiplet
-        fapi::Target l_mbaChiplet;
-        {
-        TARGETING::PredicateCTM l_pred(TARGETING::CLASS_UNIT, TARGETING::TYPE_MBA);
-        TARGETING::TargetRangeFilter l_filter(TARGETING::targetService().begin(),
-                                              TARGETING::targetService().end(),
-                                              &l_pred);
-        if (l_filter)
-        {
-            l_mbaChiplet.setType(fapi::TARGET_TYPE_MBA_CHIPLET);
-            l_mbaChiplet.set(*l_filter);
-        }
-        else
-        {
-            FAPI_ERR("testHwpf4: No MBAs found");
-            TS_FAIL("testHwpf4: No MBAs found");
-            return;
-        }
-        }
-
-        // Get the first proc chip
-        fapi::Target l_procChip;
-        {
-        TARGETING::PredicateCTM l_pred(TARGETING::CLASS_CHIP, TARGETING::TYPE_PROC);
-        TARGETING::TargetRangeFilter l_filter(TARGETING::targetService().begin(),
-                                              TARGETING::targetService().end(),
-                                              &l_pred);
-        if (l_filter)
-        {
-            l_procChip.setType(fapi::TARGET_TYPE_PROC_CHIP);
-            l_procChip.set(*l_filter);
-        }
-        else
-        {
-            FAPI_ERR("testHwpf4: No proc chips found");
-            TS_FAIL("testHwpf4: No proc chips found");
-            return;
-        }
-        }
-
-        FAPI_INVOKE_HWP(l_err, hwpTestAttributes, l_mbaChiplet, l_procChip);
-
-        if (l_err)
-        {
-            TS_FAIL("testHwpf4: Unit Test failed. "
-                    "hwpTestAttributes failed. Error logged");
-            errlCommit(l_err,HWPF_COMP_ID);
-        }
-        else
-        {
-            TS_TRACE("testHwpf4: Unit Test passed. "
-                     "hwpTestAttributes passed. Error logged");
-        }
-    }
-
-    /**
      * @brief Test HWPF InitFile: call the procedure that exercises a
      *        sample initfile
      */

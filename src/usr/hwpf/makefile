@@ -164,8 +164,8 @@ FAPI_ATTR_ID_TARGET = fapiAttributeIds.H
 
 # The FAPI files generated from Attribute XML files
 FAPI_ATTR_TARGETS = fapiChipEcFeature.C fapiAttributePlatCheck.H \
-                    fapiAttributesSupported.html fapiAttributeIds.txt \
-                    fapiAttributeEnums.txt
+                    fapiAttributesSupported.html fapiAttrInfo.csv \
+                    fapiAttrEnumInfo.csv
 
 # The binary, list and attr files generated from Initfiles
 # Generation depends on ifcompiler and fapiAttributeIds.H

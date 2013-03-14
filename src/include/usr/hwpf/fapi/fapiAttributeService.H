@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2012              */
+/* COPYRIGHT International Business Machines Corp. 2011,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -41,6 +41,7 @@
  *                                                  ptr
  *                          mjjones     04/10/2012  Support for privileged atts
  *                          mjjones     06/07/2012  Add attr override support
+ *                          mjjones     03/13/2013  Move attr override code to plat
  */
 
 #ifndef FAPIATTRIBUTESERVICE_H_
@@ -78,46 +79,23 @@
  * The PRIVILEGED macros call a template function (compiler will optimize out)
  * that will cause a compile failure if the ID is not valid or VAL is not the
  * correct type.
- *     The GET macro calls the FAPI_PLAT_GET_ATTR_OVERRIDE PLAT macro to find if
- *     there is an attribute override value to return (platforms can set this to
- *     false if they do not support attribute override or if they handle it in
- *     the standard <ID>_GETMACRO path), if this returns false then the
- *     <ID>_GETMACRO PLAT macro is called to get the attribute, platforms must
- *     define a _GETMACRO for each attribute.
- *
- *     The SET macro calls the FAPI_PLAT_ATTR_SET_ACTIONS PLAT macro to perform
- *     any necessary platform actions on an attribute set, this includes
- *     clearing any non-const attribute override and storing the attribute for
- *     synchronization (platforms can set this to NULL if they do not need to
- *     take any actions). It then calls the <ID>_SETMACRO PLAT macro to set the
- *     attribute, platforms must define a _SETMACRO for each attribute
- *
- * Note that a const attribute override is one that is always returned on a
- * FAPI_ATTR_GET even if a subsequent FAPI_ATTR_SET is done. A non-const
- * attribute override is one that is cleared when a FAPI_ATTR_SET is done
  */
 #define FAPI_ATTR_GET(ID, PTARGET, VAL) \
     (fapi::fapiFailIfPrivileged<fapi::ID##_Privileged>(), \
      fapi::fapiCheckIdType<fapi::ID##_Type>(fapi::ID, VAL), \
-     FAPI_PLAT_GET_ATTR_OVERRIDE(fapi::ID, PTARGET, VAL) ? \
-         fapi::FAPI_RC_SUCCESS \
-       : ID##_GETMACRO(ID, PTARGET, VAL))
+     ID##_GETMACRO(ID, PTARGET, VAL))
 
 #define FAPI_ATTR_SET(ID, PTARGET, VAL) \
     (fapi::fapiFailIfPrivileged<fapi::ID##_Privileged>(), \
      fapi::fapiCheckIdType<fapi::ID##_Type>(fapi::ID, VAL), \
-     FAPI_PLAT_ATTR_SET_ACTIONS(fapi::ID, PTARGET, VAL), \
      ID##_SETMACRO(ID, PTARGET, VAL))
 
 #define FAPI_ATTR_GET_PRIVILEGED(ID, PTARGET, VAL) \
     (fapi::fapiCheckIdType<fapi::ID##_Type>(fapi::ID, VAL), \
-     FAPI_PLAT_GET_ATTR_OVERRIDE(fapi::ID, PTARGET, VAL) ? \
-         fapi::FAPI_RC_SUCCESS \
-       : ID##_GETMACRO(ID, PTARGET, VAL))
+     ID##_GETMACRO(ID, PTARGET, VAL))
 
 #define FAPI_ATTR_SET_PRIVILEGED(ID, PTARGET, VAL) \
     (fapi::fapiCheckIdType<fapi::ID##_Type>(fapi::ID, VAL), \
-     FAPI_PLAT_ATTR_SET_ACTIONS(fapi::ID, PTARGET, VAL), \
      ID##_SETMACRO(ID, PTARGET, VAL))
 
 namespace fapi

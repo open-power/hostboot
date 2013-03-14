@@ -48,6 +48,7 @@
 
 // This component
 #include <targeting/common/attributes.H>
+#include <targeting/common/attributeTank.H>
 
 namespace TARGETING
 {
@@ -269,6 +270,26 @@ class Target
          */
         Target* getTargetFromHuid(const ATTR_HUID_type i_huid) const;
 
+        /**
+         *  @brief Return the Targeting Override Attribute Tank
+         *
+         *  @return Reference to the Attribute Tank
+         */
+        static AttributeTank & theTargOverrideAttrTank()
+        {
+            return cv_overrideTank;
+        }
+
+        /**
+         *  @brief Return the Targeting Sync Attribute Tank
+         *
+         *  @return Reference to the Attribute Tank
+         */
+        static AttributeTank & theTargSyncAttrTank()
+        {
+            return cv_syncTank;
+        }
+
     private: // Private helper interfaces
 
         /**
@@ -378,6 +399,39 @@ class Target
             const ATTRIBUTE_ID i_attribute,
                   mutex_t*&    o_pMutex) const;
 
+        /**
+         *  @brief Returns the target's type as used in an attribute tank.
+         *
+         *  This target type is associated with an attribute in an attribute
+         *  tank and helps identify which target(s) the attribute belongs to
+         *
+         *  @return uint32_t The target type
+         */
+        uint32_t getAttrTankTargetType() const;
+
+        /**
+         *  @brief Returns the target's position as used in an attribute tank.
+         *
+         *  This target position is associated with an attribute in an attribute
+         *  tank and helps identify which target(s) the attribute belongs to.
+         *  For a unit, this is the parent chip's position
+         *
+         *  @return uint16_t The target position
+         */
+        uint16_t getAttrTankTargetPos() const;
+
+        /**
+         *  @brief Returns the target's unit position as used in an attribute
+         *         tank.
+         *
+         *  This target unit position is associated with an attribute in an
+         *  attribute tank and helps identify which target(s) the attribute
+         *  belongs to. This is only a valid value for units
+         *
+         *  @return uint8_t The target unit position
+         */
+        uint8_t getAttrTankTargetUnitPos() const;
+
     private: // Private instance variables
 
         uint32_t       iv_attrs;          ///< Total attributes allowed for this
@@ -406,6 +460,12 @@ class Target
 
         Target& operator=(
             const Target& i_right);
+
+    private: // Private class variables
+
+        // Attribute Tanks
+        static AttributeTank cv_overrideTank;
+        static AttributeTank cv_syncTank;
 
       friend class PnorBuilderService;
 

@@ -814,7 +814,7 @@ void IStepDispatcher::handleMoreWorkNeededMsg ( bool i_first )
 
             // Send the potentially modified set of HWPF Attribute overrides and any
             // HWPF Attributes to sync to the FSP
-            fapi::attrOverrideSync::sendAttrOverridesAndSyncsToFsp();
+            fapi::theAttrOverrideSync().sendAttrOverridesAndSyncsToFsp();
 
             msg_respond( iv_msgQ,
                          iv_Msg );

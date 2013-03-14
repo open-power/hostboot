@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/include/usr/hwpf/hwp/fapiTestHwpAttr.H $                  */
+/* $Source: src/usr/hwpf/test/fapiattrtest.H $                            */
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2012              */
+/* COPYRIGHT International Business Machines Corp. 2013                   */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,41 +20,79 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+#ifndef FAPIATTRTEST_H
+#define FAPIATTRTEST_H
+
 /**
- *  @file fapiTestHwpAttr.H
+ *  @file fapiattrtanktest.H
  *
- *  @brief Defines a test Hardware Procedure that exercises the test attributes
- */
+ *  @brief Test case for FAPI AttributeTank
+*/
 
-/*
- * Change Log ******************************************************************
- * Flag     Defect/Feature  User        Date        Description
- * ------   --------------  ----------  ----------- ----------------------------
- *                          mjjones     06/30/2011  Created.
- *                          mjjones     10/07/2011  Removed target param
- *                          mjjones     10/17/2011  Added func pointer
- */
+#include <cxxtest/TestSuite.H>
+#include "fapiAttrTest.C"
 
-#ifndef FAPITESTHWPATTR_H_
-#define FAPITESTHWPATTR_H_
+using namespace fapi;
 
-#include <fapi.H>
-
-typedef fapi::ReturnCode (*hwpTestAttributes_FP_t)();
-
-extern "C"
+class FapiAttrTest: public CxxTest::TestSuite
 {
+public:
 
-/**
- * @brief HWP that exercises attributes
- *
- * @param[in] i_mbaTarget  Reference to MBA chiplet target
- * @param[in] i_procTarget Reference to processor chip target
- * @return ReturnCode
- */
-fapi::ReturnCode hwpTestAttributes(fapi::Target & i_mbaTarget,
-                                   fapi::Target & i_procTarget);
+    void test1(void)
+    {
+        if (attrTest1() != 0)
+        {
+            TS_FAIL("attrTest1. Fail");
+        }
+    }
 
-}
+    void test2(void)
+    {
+        if (attrTest2() != 0)
+        {
+            TS_FAIL("attrTest2. Fail");
+        }
+    }
+
+    void test3(void)
+    {
+        if (attrTest3() != 0)
+        {
+            TS_FAIL("attrTest3. Fail");
+        }
+    }
+
+    void test4(void)
+    {
+        if (attrTest4() != 0)
+        {
+            TS_FAIL("attrTest4. Fail");
+        }
+    }
+
+    void test5(void)
+    {
+        if (attrTest5() != 0)
+        {
+            TS_FAIL("attrTest5. Fail");
+        }
+    }
+
+    void test6(void)
+    {
+        if (attrTest6() != 0)
+        {
+            TS_FAIL("attrTest6. Fail");
+        }
+    }
+
+    void test7(void)
+    {
+        if (attrTest7() != 0)
+        {
+            TS_FAIL("attrTest7. Fail");
+        }
+    }
+};
 
 #endif
