@@ -34,22 +34,8 @@
 #ifdef CONTEXT_x86_nfp
 
 // FIXME: RTC: 51689 will address this issue.
-// Need support for attributeenums.H in x86.nfp. For now
-// stub out the TYPE enum values.
-
-namespace TARGETING
-{
-    enum TYPE
-    {
-        TYPE_NA     = 0x00000000,
-        TYPE_DIMM   = 0x00000003,
-        TYPE_MEMBUF = 0x00000004,
-        TYPE_PROC   = 0x00000005,
-        TYPE_EX     = 0x00000006,
-        TYPE_MCS    = 0x0000000B,
-        TYPE_MBA    = 0x0000000D,
-    };
-}
+// Need support for attributeenums.H in x86.nfp.
+#include <../../../export/ppc/fips/include/attributeenums.H>
 
 #else
 
