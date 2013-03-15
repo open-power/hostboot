@@ -77,7 +77,7 @@ namespace Prdr
             {
                 // NOTE: to patch PRF files require rebuilding
                 // entire Hostboot image and put in a special
-                // location on FSP /nfs mount.
+                // location on FSP /maint/ mount.
                 // FIXME: if we need to patch prf files directly
                 // on Hostboot, need to discuss with Patrick
                 // about a possibility of creating a new PNOR
@@ -119,22 +119,18 @@ namespace Prdr
 
                 if (NULL != l_errl) break;
 
-                // Read /nfs/data/... directory path
-                size_t l_nfsPathSize = 256;
-                char l_nfsPath[256] = { '\0' };
-                l_errl = UtilReg::read("fstp/NFS_Root",
-                                       (void *) l_nfsPath,
-                                       l_nfsPathSize);
-
-                strncat(l_nfsPath, "prdf/", 255);
-                strncat(l_nfsPath, i_file, 255);
-                strncat(l_nfsPath, ".prf", 255);
+                // Read /maint/data/... directory path
+                // for any prf file patch
+                char l_patchPath[256] = { '\0' };
+                strcpy(l_patchPath, "/maint/data/prdf/");
+                strncat(l_patchPath, i_file, 255);
+                strncat(l_patchPath, ".prf", 255);
 
                 if (NULL != l_errl) break;
 
                 // Open File to read chip.
-                UtilFile l_ruleFile(l_nfsPath);
-                if (!l_ruleFile.exists())        // check for NFS file.
+                UtilFile l_ruleFile(l_patchPath);
+                if (!l_ruleFile.exists())        // check for patch file.
                 {
                     l_ruleFile.Open(l_rootPath, "r");
                 }
