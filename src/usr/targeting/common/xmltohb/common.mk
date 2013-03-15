@@ -35,9 +35,7 @@ XMLTOHB_HEADER_TARGETS =        \
     attributetraits.H           \
     attributestructs.H          \
     pnortargeting.H             \
-    fapiplatattrmacros.H        \
-    plugins/errludattribute.H   \
-    plugins/errludtarget.H
+    fapiplatattrmacros.H
 
 XMLTOHB_SOURCE_TARGETS = \
     attributestrings.C   \

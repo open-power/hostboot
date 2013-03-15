@@ -101,11 +101,6 @@ CLEAN_TARGETS += $(addprefix $(GENDIR)/, ${XMLTOHB_SYSTEM_BINARIES}) \
 
 GENDIR_ERRL = $(ROOTPATH)/obj/genfiles/errl
 
-.PHONY: make_gendir_errl
-make_gendir_errl:
-	@mkdir -p $(GENDIR_ERRL)
-GEN_PASS_PRE += make_gendir_errl
-
 XMLTOHB_RAN_INDICATION = $(GENDIR)/.called_xmltohb_compiler
 CLEAN_TARGETS += $(XMLTOHB_RAN_INDICATION)
 

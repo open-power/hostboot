@@ -206,35 +206,36 @@ if( !($cfgSrcOutputDir =~ "none") )
     #fixme-Remove when RTC:38197 is done
     open(ATTR_DUMP_FILE,">$cfgSrcOutputDir"."attributedump.C")
       or fatal ("Attribute dump file: \"$cfgSrcOutputDir"
-		. "attributedump.C\" could not be opened.");
+        . "attributedump.C\" could not be opened.");
     my $dumpFile = *ATTR_DUMP_FILE;
     writeDumpFile($attributes,$dumpFile);
     close $dumpFile;
 
     open(ATTR_ATTRERRL_C_FILE,">$cfgSrcOutputDir"."errludattribute.C")
       or fatal ("Attribute errlog C file: \"$cfgSrcOutputDir"
-		. "errludattribute.C\" could not be opened.");
+        . "errludattribute.C\" could not be opened.");
     my $attrErrlCFile = *ATTR_ATTRERRL_C_FILE;
     writeAttrErrlCFile($attributes,$attrErrlCFile);
     close $attrErrlCFile;
 
+    mkdir("$cfgSrcOutputDir/errl");
     open(ATTR_ATTRERRL_H_FILE,">$cfgSrcOutputDir"."errl/errludattribute.H")
       or fatal ("Attribute errlog H file: \"$cfgSrcOutputDir"
-		. "errl/errludattribute.H\" could not be opened.");
+        . "errl/errludattribute.H\" could not be opened.");
     my $attrErrlHFile = *ATTR_ATTRERRL_H_FILE;
     writeAttrErrlHFile($attributes,$attrErrlHFile);
     close $attrErrlHFile;
 
     open(ATTR_TARGETERRL_C_FILE,">$cfgSrcOutputDir"."errludtarget.C")
       or fatal ("Target errlog C file: \"$cfgSrcOutputDir"
-		. "errludtarget.C\" could not be opened.");
+        . "errludtarget.C\" could not be opened.");
     my $targetErrlCFile = *ATTR_TARGETERRL_C_FILE;
     writeTargetErrlCFile($attributes,$targetErrlCFile);
     close $targetErrlCFile;
 
     open(ATTR_TARGETERRL_H_FILE,">$cfgSrcOutputDir"."errl/errludtarget.H")
       or fatal ("Target errlog H file: \"$cfgSrcOutputDir"
-		. "errl/errludtarget.H\" could not be opened.");
+        . "errl/errludtarget.H\" could not be opened.");
     my $targetErrlHFile = *ATTR_TARGETERRL_H_FILE;
     writeTargetErrlHFile($attributes,$targetErrlHFile);
     close $targetErrlHFile;
