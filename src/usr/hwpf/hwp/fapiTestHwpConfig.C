@@ -112,7 +112,7 @@ fapi::ReturnCode hwpTestConfig(const fapi::Target & i_chip)
            break;
        }
 
-       // Call  fapiGetOtherSideOfDmiBus to get mem buffer
+       // Call  fapiGetOtherSideOfMemChannel to get mem buffer
        fapi::Target l_mb;
        fapi::Target l_mcs2;
 
@@ -121,23 +121,23 @@ fapi::ReturnCode hwpTestConfig(const fapi::Target & i_chip)
        l_rc = fapiGetOtherSideOfMemChannel(l_mcs, l_mb);
        if (l_rc)
        {
-           FAPI_ERR("hwpTestConfig: Error from fapiGetOtherSideOfDmiBus");
+           FAPI_ERR("hwpTestConfig: Error from fapiGetOtherSideOfMemChannel");
            break;
        }
        FAPI_INF("hwpTestConfig: mem buf: %s", l_mb.toEcmdString());
 
-       // Call  fapiGetOtherSideOfDmiBus to get back to the same mcs
+       // Call  fapiGetOtherSideOfMemChannel to get back to the same mcs
        l_rc = fapiGetOtherSideOfMemChannel(l_mb, l_mcs2);
        if (l_rc)
        {
-           FAPI_ERR("hwpTestConfig: Error from fapiGetOtherSideOfDmiBus");
+           FAPI_ERR("hwpTestConfig: Error from fapiGetOtherSideOfMemChannel");
            break;
        }
        FAPI_INF("hwpTestConfig: mcs: %s", l_mcs2.toEcmdString());
 
        if (l_mcs != l_mcs2) 
        {
-           FAPI_ERR("hwpTestConfig: fapiGetOtherSideOfDmiBus wrong mcs");
+           FAPI_ERR("hwpTestConfig: fapiGetOtherSideOfMemChannel wrong mcs");
            FAPI_SET_HWP_ERROR(l_rc, RC_TEST_WRONG_MCS_RETURNED);
            break;
        }
