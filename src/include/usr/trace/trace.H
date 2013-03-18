@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2012              */
+/* COPYRIGHT International Business Machines Corp. 2011,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -41,6 +41,21 @@ const uint32_t TRAC_COMP_SIZE    = 16;      //< Max component name size
 const uint32_t TRAC_MAX_ARGS     = 9;       //< Max number of arguments in trace
 
 typedef uint32_t trace_hash_val;    //< Hash values are 32 bits.
+
+
+extern  "C" {
+
+/**
+ *  @brief  dummy function to satisfy BEAM.
+ *  C files are normally pre(pre)processed by the "tracepp" script,
+ *  which translates this function call to a call to a unique hash function.
+ *  When BEAM is run on the un-preprocessed files, it outputs lots
+ *  of parser errors because it cannot find this function.
+ *  This must be extern "C", otherwise BEAM cannot find it.
+ */
+trace_hash_val  trace_adal_hash( ... ) ;
+}   //  end extern "C"
+
 
 namespace TRACE
 {
@@ -150,6 +165,8 @@ namespace TRACE
      *  @brief  flush Continuous trace buffers
      */
     void flushBuffers();
+
+
 };
 
 typedef TRACE::ComponentDesc trace_desc_t;

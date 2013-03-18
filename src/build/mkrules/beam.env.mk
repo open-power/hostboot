@@ -25,15 +25,9 @@
 # Description:
 #     Configuration of the BEAM settings.
 
-BEAMVER = beam-3.5.2
+BEAMVER = beam-3.6.1
 BEAMPATH = /afs/rch/projects/esw/beam/$(BEAMVER)
 BEAMCMD = $(HOST_PREFIX)jail $(BEAMPATH)/bin/beam_compile
-BEAMFLAGS = \
-    --beam::source=$(BEAMPATH)/tcl/beam_default_parms.tcl \
-    --beam::source=$(ROOTPATH)/src/build/beam/compiler_c_config.tcl \
-    --beam::source=$(ROOTPATH)/src/build/beam/compiler_cpp_config.tcl \
-    --beam::exit0 \
-    -o /dev/null
 
 ifdef MODULE
 BEAMDIR = $(ROOTPATH)/obj/beam/$(MODULE)
@@ -41,3 +35,20 @@ else
 BEAMDIR = $(ROOTPATH)/obj/beam/core
 endif
 
+##	Set BEAM source files.
+##  see the beamgen:  target to generate these config files.
+BEAMFLAGS += --beam::parms=$(BEAMPATH)/tcl/beam_default_parms.tcl   \
+    $(ROOTPATH)/src/build/beam/beam_parms.tcl
+BEAMFLAGS += --beam::source=$(ROOTPATH)/src/build/beam/compiler_c_config.tcl
+BEAMFLAGS += --beam::source=$(ROOTPATH)/src/build/beam/compiler_cpp_config.tcl
+
+##  point to a directory that BEAM can use for its' working files.
+BEAMFLAGS += --beam::data=${BEAMDIR}
+
+## tell the "Edison" compiler to generate no warnings.
+BEAMFLAGS += --edg=--no_warnings
+
+# make beam continue doing analyses even after first error found
+BEAMFLAGS += --beam::exit0
+
+BEAMFLAGS += -o /dev/null

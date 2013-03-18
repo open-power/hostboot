@@ -38,7 +38,8 @@ $(OBJDIR)/%.dep : %.cc
 	@mkdir -p $(OBJDIR)
 	$(C2) "    DEP        $(notdir $<)"
 	$(C1)rm -f $@; \
-	$(CXX_RAW) -M $(CXXFLAGS) $< -o $@.$$$$ $(INCFLAGS) -iquote .; \
+	$(CXX_RAW) -M $(call FLAGS_FILTER, $(CXXFLAGS), $<) $< \
+	           -o $@.$$$$ $(INCFLAGS) -iquote .; \
 	sed 's,\($*\)\.o[ :]*,$(OBJDIR)/\1.o $@ : ,g' < $@.$$$$ > $@; \
 	rm -f $@.$$$$
 
@@ -55,7 +56,8 @@ $(OBJDIR)/%.dep : %.S
 	@mkdir -p $(OBJDIR)
 	$(C2) "    DEP        $(notdir $<)"
 	$(C1)rm -f $@; \
-	$(CC_RAW) -M $(ASMFLAGS) $< -o $@.$$$$ $(ASMINCFLAGS) $(INCFLAGS) -iquote .; \
+	$(CC_RAW) -M $(ASMFLAGS) $< -o $@.$$$$ $(ASMINCFLAGS) \
+	          $(INCFLAGS) -iquote .; \
 	sed 's,\($*\)\.o[ :]*,$(OBJDIR)/\1.o $@ : ,g' < $@.$$$$ > $@; \
 	rm -f $@.$$$$
 
