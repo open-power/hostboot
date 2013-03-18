@@ -208,34 +208,34 @@ struct PfaData
            Reserved_2     :8;
 
   // PRD Service Data Collector Flags
-  uint32_t MP_DUMP_REQ    :1,
-           MP_RESET_REQ   :1,
-           MP_FATAL       :1,
-           REBOOT_MSG     :1,
-           DUMP           :1,
-           UERE           :1,
-           SUE            :1,
-           CRUMB          :1,
-           AT_THRESHOLD   :1,
-           DEGRADED       :1,
-           SERVICE_CALL   :1,
-           TRACKIT        :1,
-           TERMINATE      :1,
-           LOGIT          :1,
-           MEMORY_STEERED :1,
-           FLOODING       :1,
-           THERMAL_EVENT  :1,
-           UNIT_CHECKSTOP :1,
-           USING_SAVED_SDC :1,
-           LAST_CORE_TERMINATE :1,
-           FORCE_LATENT_CS :1,
-           DEFER_DECONFIG_MASTER :1,
-           DEFER_DECONFIG  :1,
-           CM_MODE         :1,
-           TERMINATE_ON_CS :1,
-           HCDB_SUPPORT    :1,
-           SIGNATURE_SUPPORT :1,
-           Reserved        :5;
+  uint32_t MP_DUMP_REQ          :1,
+           MP_RESET_REQ         :1,
+           MP_FATAL             :1,
+           REBOOT_MSG           :1,
+           DUMP                 :1,
+           UERE                 :1,
+           SUE                  :1,
+           CRUMB                :1,
+           AT_THRESHOLD         :1,
+           DEGRADED             :1,
+           SERVICE_CALL         :1,
+           TRACKIT              :1,
+           TERMINATE            :1,
+           LOGIT                :1,
+           MEMORY_STEERED       :1,
+           FLOODING             :1,
+           THERMAL_EVENT        :1,
+           UNIT_CHECKSTOP       :1,
+           USING_SAVED_SDC      :1,
+           LAST_CORE_TERMINATE  :1,
+           FORCE_LATENT_CS      :1,
+           Reserved_0           :1,
+           DEFER_DECONFIG       :1,
+           CM_MODE              :1,
+           TERMINATE_ON_CS      :1,
+           HCDB_SUPPORT         :1,
+           SIGNATURE_SUPPORT    :1,
+           Reserved             :5;
   //                            1  TRUE
   //                            0  FALSE
   //
@@ -287,34 +287,34 @@ struct PfaData
                       (i_right.Reserved_2)
                     )
             <<
-                    ( (i_right.MP_DUMP_REQ << 31) |
-                      (i_right.MP_RESET_REQ << 30) |
-                      (i_right.MP_FATAL << 29) |
-                      (i_right.REBOOT_MSG << 28) |
-                      (i_right.DUMP << 27) |
-                      (i_right.UERE << 26) |
-                      (i_right.SUE << 25) |
-                      (i_right.CRUMB << 24) |
-                      (i_right.AT_THRESHOLD << 23) |
-                      (i_right.DEGRADED << 22) |
-                      (i_right.SERVICE_CALL << 21) |
-                      (i_right.TRACKIT << 20) |
-                      (i_right.TERMINATE << 19) |
-                      (i_right.LOGIT << 18) |
-                      (i_right.MEMORY_STEERED << 17) |
-                      (i_right.FLOODING << 16) |
-                      (i_right.THERMAL_EVENT << 15) |
-                      (i_right.UNIT_CHECKSTOP << 14) |                //MP09c
-                      (i_right.USING_SAVED_SDC << 13) |         //MP08
-                      (i_right.LAST_CORE_TERMINATE << 12) |     //MP10
-                      (i_right.FORCE_LATENT_CS << 11) |         //MP11
-                      (i_right.DEFER_DECONFIG_MASTER << 10) |   //MP12
-                      (i_right.DEFER_DECONFIG << 9) |           //MP12
-                      (i_right.CM_MODE << 8) |                  //MP12
-                      (i_right.TERMINATE_ON_CS << 7) |          //mp78
-                      (i_right.HCDB_SUPPORT << 6) |             //mp15
-                      (i_right.SIGNATURE_SUPPORT << 5) |
-                      (i_right.Reserved)
+                    ( (i_right.MP_DUMP_REQ          << 31) |
+                      (i_right.MP_RESET_REQ         << 30) |
+                      (i_right.MP_FATAL             << 29) |
+                      (i_right.REBOOT_MSG           << 28) |
+                      (i_right.DUMP                 << 27) |
+                      (i_right.UERE                 << 26) |
+                      (i_right.SUE                  << 25) |
+                      (i_right.CRUMB                << 24) |
+                      (i_right.AT_THRESHOLD         << 23) |
+                      (i_right.DEGRADED             << 22) |
+                      (i_right.SERVICE_CALL         << 21) |
+                      (i_right.TRACKIT              << 20) |
+                      (i_right.TERMINATE            << 19) |
+                      (i_right.LOGIT                << 18) |
+                      (i_right.MEMORY_STEERED       << 17) |
+                      (i_right.FLOODING             << 16) |
+                      (i_right.THERMAL_EVENT        << 15) |
+                      (i_right.UNIT_CHECKSTOP       << 14) |
+                      (i_right.USING_SAVED_SDC      << 13) |
+                      (i_right.LAST_CORE_TERMINATE  << 12) |
+                      (i_right.FORCE_LATENT_CS      << 11) |
+                      (i_right.Reserved_0           << 10) |
+                      (i_right.DEFER_DECONFIG       <<  9) |
+                      (i_right.CM_MODE              <<  8) |
+                      (i_right.TERMINATE_ON_CS      <<  7) |
+                      (i_right.HCDB_SUPPORT         <<  6) |
+                      (i_right.SIGNATURE_SUPPORT    <<  5) |
+                      (i_right.Reserved                  )
                     )
             //<< i_right.ComponentDataLabel[0] << i_right.ComponentDataLabel[1]
             <<
@@ -364,43 +364,43 @@ struct PfaData
              >> l_tmp[4]
              >> l_tmp[5];
 
-      i_right.PFA_errlActions = (l_tmp[1] >> 16) & 0xFFFF;
-      i_right.PFA_errlSeverity = (l_tmp[1] >> 8) & 0xFF;
-      i_right.MP_DUMP_REQ         = (l_tmp[2] >> 31) & 0x01;
-      i_right.MP_RESET_REQ         = (l_tmp[2] >> 30) & 0x01;
-      i_right.MP_FATAL                 = (l_tmp[2] >> 29) & 0x01;
-      i_right.REBOOT_MSG         = (l_tmp[2] >> 28) & 0x01;
-      i_right.DUMP                 = (l_tmp[2] >> 27) & 0x01;
-      i_right.UERE                 = (l_tmp[2] >> 26) & 0x01;
-      i_right.SUE                 = (l_tmp[2] >> 25) & 0x01;
-      i_right.CRUMB                 = (l_tmp[2] >> 24) & 0x01;
-      i_right.AT_THRESHOLD        = (l_tmp[2] >> 23) & 0x01;
-      i_right.DEGRADED                 = (l_tmp[2] >> 22) & 0x01;
-      i_right.SERVICE_CALL         = (l_tmp[2] >> 21) & 0x01;
-      i_right.TRACKIT                 = (l_tmp[2] >> 20) & 0x01;
-      i_right.TERMINATE         = (l_tmp[2] >> 19) & 0x01;
-      i_right.LOGIT                 = (l_tmp[2] >> 18) & 0x01;
-      i_right.MEMORY_STEERED         = (l_tmp[2] >> 17) & 0x01;
-      i_right.FLOODING                 = (l_tmp[2] >> 16) & 0x01;
-      i_right.THERMAL_EVENT        = (l_tmp[2] >> 15) & 0x01; //pw02
-      i_right.UNIT_CHECKSTOP        = (l_tmp[2] >> 14) & 0x01; //pw02   //MP09c
-      i_right.USING_SAVED_SDC        = (l_tmp[2] >> 13) & 0x01; //MP08
-      i_right.LAST_CORE_TERMINATE = (l_tmp[2] >> 12) & 0x01; //MP10
-      i_right.FORCE_LATENT_CS   = (l_tmp[2] >> 11) & 0x01; //MP11
-      i_right.DEFER_DECONFIG_MASTER  = (l_tmp[2] >> 10) & 0x01; //MP12
-      i_right.DEFER_DECONFIG    = (l_tmp[2] >>  9) & 0x01;      //MP12
-      i_right.CM_MODE           = (l_tmp[2] >>  8) & 0x01;      //MP12
-      i_right.TERMINATE_ON_CS   = (l_tmp[2] >>  7) & 0x01;      //mp78
-      i_right.HCDB_SUPPORT      = (l_tmp[2] >>  6) & 0x01;      //mp15
-      i_right.SIGNATURE_SUPPORT = (l_tmp[2] >>  5) & 0x01;
-      i_right.ErrorCount = (l_tmp[3] >> 16) & 0xFFFF;
-      i_right.Threshold = (l_tmp[3]) & 0xFFFF;
-      i_right.PRDServiceActionCounter = (l_tmp[4] >> 24) & 0xFF;
-      i_right.ErrorType = (l_tmp[4] >> 16) & 0xFF;
-      i_right.homGardState = (l_tmp[4] >> 8) & 0xFF;
-      i_right.PRD_AttnTypes = (l_tmp[5] >> 24) & 0xFF;
-      i_right.PRD_SecondAttnTypes = (l_tmp[5] >> 16) & 0xFF;
-      i_right.reasonCode = (l_tmp[5]) & 0xFFFF;  //MP06 a
+      i_right.PFA_errlActions           = (l_tmp[1] >> 16) & 0xFFFF;
+      i_right.PFA_errlSeverity          = (l_tmp[1] >>  8) & 0xFF;
+      i_right.MP_DUMP_REQ               = (l_tmp[2] >> 31) & 0x01;
+      i_right.MP_RESET_REQ              = (l_tmp[2] >> 30) & 0x01;
+      i_right.MP_FATAL                  = (l_tmp[2] >> 29) & 0x01;
+      i_right.REBOOT_MSG                = (l_tmp[2] >> 28) & 0x01;
+      i_right.DUMP                      = (l_tmp[2] >> 27) & 0x01;
+      i_right.UERE                      = (l_tmp[2] >> 26) & 0x01;
+      i_right.SUE                       = (l_tmp[2] >> 25) & 0x01;
+      i_right.CRUMB                     = (l_tmp[2] >> 24) & 0x01;
+      i_right.AT_THRESHOLD              = (l_tmp[2] >> 23) & 0x01;
+      i_right.DEGRADED                  = (l_tmp[2] >> 22) & 0x01;
+      i_right.SERVICE_CALL              = (l_tmp[2] >> 21) & 0x01;
+      i_right.TRACKIT                   = (l_tmp[2] >> 20) & 0x01;
+      i_right.TERMINATE                 = (l_tmp[2] >> 19) & 0x01;
+      i_right.LOGIT                     = (l_tmp[2] >> 18) & 0x01;
+      i_right.MEMORY_STEERED            = (l_tmp[2] >> 17) & 0x01;
+      i_right.FLOODING                  = (l_tmp[2] >> 16) & 0x01;
+      i_right.THERMAL_EVENT             = (l_tmp[2] >> 15) & 0x01;
+      i_right.UNIT_CHECKSTOP            = (l_tmp[2] >> 14) & 0x01;
+      i_right.USING_SAVED_SDC           = (l_tmp[2] >> 13) & 0x01;
+      i_right.LAST_CORE_TERMINATE       = (l_tmp[2] >> 12) & 0x01;
+      i_right.FORCE_LATENT_CS           = (l_tmp[2] >> 11) & 0x01;
+      i_right.Reserved_0                = (l_tmp[2] >> 10) & 0x01;
+      i_right.DEFER_DECONFIG            = (l_tmp[2] >>  9) & 0x01;
+      i_right.CM_MODE                   = (l_tmp[2] >>  8) & 0x01;
+      i_right.TERMINATE_ON_CS           = (l_tmp[2] >>  7) & 0x01;
+      i_right.HCDB_SUPPORT              = (l_tmp[2] >>  6) & 0x01;
+      i_right.SIGNATURE_SUPPORT         = (l_tmp[2] >>  5) & 0x01;
+      i_right.ErrorCount                = (l_tmp[3] >> 16) & 0xFFFF;
+      i_right.Threshold                 = (l_tmp[3]      ) & 0xFFFF;
+      i_right.PRDServiceActionCounter   = (l_tmp[4] >> 24) & 0xFF;
+      i_right.ErrorType                 = (l_tmp[4] >> 16) & 0xFF;
+      i_right.homGardState              = (l_tmp[4] >>  8) & 0xFF;
+      i_right.PRD_AttnTypes             = (l_tmp[5] >> 24) & 0xFF;
+      i_right.PRD_SecondAttnTypes       = (l_tmp[5] >> 16) & 0xFF;
+      i_right.reasonCode                = (l_tmp[5]      ) & 0xFFFF;
 
       i_left >>        i_right.PfaCalloutCount;                     //mp16 m
       for (uint32_t i = 0; i < i_right.PfaCalloutCount; i++)

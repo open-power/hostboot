@@ -546,16 +546,12 @@ errlHndl_t ErrDataService::GenerateSrcPfa(ATTENTION_TYPE attn_type,
     // Callout loop to set up Reason code and SRC word 9
     //**************************************************************
 
-    //FIXME  relevant PlatServices function defintions are not available yet
-    //bool myCM_FUNCTIONAL = true;
-
     // Must go thru callout list to look for RIOPORT procedure callouts,
     // since they require the port info to be in SRC Word 9
     bool HW = false;
     bool SW = false;
     bool SW_High = false;
     bool SecondLevel = false;
-    bool l_memBuffInCallouts = false;
     uint32_t SrcWord7 = 0;
     uint32_t SrcWord9 = 0;
     fspmrulist = sdc.GetMruList();
@@ -590,60 +586,10 @@ errlHndl_t ErrDataService::GenerateSrcPfa(ATTENTION_TYPE attn_type,
             calloutsPlusDimms = calloutsPlusDimms + partCount -1;
             HW = true; //hardware callout
 
-            // If we are in Concurrent Maintenance Mode, we will need to disable
-            // Deferred Deconfig, if the callouts are not HWSV_CM_FUNCTIONAL.
-
-            /* FIXME: RTC 50063 PlatServices::inCMMode() not available yet
-            if (PlatServices::inCMMode())
-            {
-                if (partCount < 1)
-                {
-                    // Something wrong with memmru
-                    myCM_FUNCTIONAL = false;
-                    PRDF_TRAC( "PRDTRACE: RasServices MemMru has no callouts" );
-                }
-                else
-                {
-                    for ( TargetHandleList::iterator it = partList.begin();
-                          it != partList.end(); it++ )
-                    {
-                        if ( !PlatServices::isCM_FUNCTIONAL(*it) )
-                        {
-                            myCM_FUNCTIONAL = false;
-                            PRDF_TRAC( PRDF_FUNC"isCM_FUNCTIONAL is false for ID: 0x%08x",
-                                       PlatServices::getHuid(*it) );
-                            break;
-                        }
-                    }
-                }
-            }
-            */
         }
         else // PRDcalloutData::TYPE_TARGET
         {
             HW = true; // Hardware callout
-
-            TargetHandle_t target = thiscallout.getTarget();
-            if (( TYPE_MEMBUF == PlatServices::getTargetType(target) ) ||
-                ( TYPE_MBA    == PlatServices::getTargetType(target) ))
-                l_memBuffInCallouts = true;
-
-            // If we are in Concurrent Maintenance Mode,
-            // we will need to disable the
-            // Deferred Deconfig, if the callouts are not HWSV_CM_FUNCTIONAL.
-            // FIXME PlatServices::inCMMode() not avaialble yet
-            #if 0
-            if (PlatServices::inCMMode())
-            {
-            // FIXME PlatServices::isCM_FUNCTIONAL  not avaialble yet
-                if ( !PlatServices::isCM_FUNCTIONAL(l_thisChipHandle) )
-                {
-                    myCM_FUNCTIONAL = false;
-                    PRDF_TRAC( "PRDTRACE: RasServices CM not functional for ID: %x",
-                               PlatServices::getHuid(l_thisChipHandle) );
-                }
-            }
-            #endif
         }
 
     }
@@ -684,26 +630,23 @@ errlHndl_t ErrDataService::GenerateSrcPfa(ATTENTION_TYPE attn_type,
     SrcWord7 = i_sdc.GetAttentionType() << 8;
     SrcWord7 |= i_sdc.GetCauseAttentionType();
 
-    //**************************************************************
+    //--------------------------------------------------------------------------
     // Check for IPL Diag Mode and set up for Deferred Deconfig
-    //**************************************************************
+    //--------------------------------------------------------------------------
 
- //TODO TargetHandle conversion -defferredDeconfigMasterNot avaialable yet
-#if 0
-    hutlIplStepManager* stepManager = PlatServices::getDeferredDeconfigMaster();
-    if ( NULL != stepManager )
+#ifdef __HOSTBOOT_MODULE
+
+    iplDiagMode = PlatServices::isInMdiaMode();
+
+    // Deferred Deconfig should be used throughout all of Hostboot (both
+    // checkForIplAttns() and MDIA).
+    if ( (HWSV::HWSV_NO_GARD != gardState ||
+          GardResolution::DeconfigNoGard == prdGardErrType ) )
     {
-        iplDiagMode = true;
-        if ( (MACHINE_CHECK != attn_type || !terminateOnCheckstop) &&
-              myCM_FUNCTIONAL             &&
-              (HWSV_NO_GARD != gardState ||
-               GardResolution::DeconfigNoGard == prdGardErrType )  ) //Allow Deferred Deconfig for IPL Diag when No Gard action is needed
-        {
-            deferDeconfig = true;
-            deconfigState = HWSV_DECONFIG;
-            deconfigSched = HWSV::HWSV_DECONFIG_DEFER;
-        }
-
+        deferDeconfig = true;
+        deconfigState = HWSV::HWSV_DECONFIG;
+        // NOTE: deconfigSched is not actually used in Hostboot. Will remove in
+        // the refactoring effort.
     }
 
 #endif
@@ -761,28 +704,17 @@ errlHndl_t ErrDataService::GenerateSrcPfa(ATTENTION_TYPE attn_type,
         thiscallout = (*i).callout;
         if ( PRDcalloutData::TYPE_TARGET == thiscallout.getType() )
         {
-            TargetHandle_t target = thiscallout.getTarget();
-            // Don't deconfig a Memory Controller for Bus Errors (Mc and SuperNova
-            // both in Callouts) for Mem Diag. Note still deconfg the SuperNova.
             HWSV::hwsvDeconfigEnum thisDeconfigState = deconfigState;
-            TYPE l_targetType = PlatServices::getTargetType(target);
-            if ( HWSV::HWSV_DECONFIG == deconfigState  &&
-                 l_memBuffInCallouts            &&
-                 (l_targetType  ==  TYPE_MCS))
-                 //In P8 only 1:1 connection between Mem Buf and Mem ctrl
-            {
-                thisDeconfigState = HWSV::HWSV_NO_DECONFIG;
-            }
 
             #ifdef __HOSTBOOT_MODULE
-            // FIXME: this will change once mdia mode support is in
-            if(true == iplDiagMode)
+            // Special case for Hostboot.
+            if ( deferDeconfig )
             {
-              thisDeconfigState = HWSV::HWSV_DEFER_DECONFIG;
+                thisDeconfigState = HWAS::DELAYED_DECONFIG;
             }
             #endif
 
-            PRDF_HW_ADD_CALLOUT(target,
+            PRDF_HW_ADD_CALLOUT(thiscallout.getTarget(),
                                 thispriority,
                                 thisDeconfigState,
                                 gardState,
@@ -935,23 +867,22 @@ errlHndl_t ErrDataService::GenerateSrcPfa(ATTENTION_TYPE attn_type,
     pfaData.MEMORY_STEERED = (sdc.IsMemorySteered()==true)? 1:0;
     pfaData.FLOODING = (sdc.IsFlooding()==true)? 1:0;
 
-    pfaData.ErrorCount = sdc.GetHits();
+    pfaData.ErrorCount              = sdc.GetHits();
     pfaData.PRDServiceActionCounter = serviceActionCounter;
-    pfaData.Threshold = sdc.GetThreshold();
-    pfaData.ErrorType = prdGardErrType;
-    pfaData.homGardState = gardState;
-    pfaData.PRD_AttnTypes = attn_type;
-    pfaData.PRD_SecondAttnTypes = i_sdc.GetCauseAttentionType();
-    pfaData.THERMAL_EVENT = (sdc.IsThermalEvent()==true)? 1:0;
-    pfaData.UNIT_CHECKSTOP = (sdc.IsUnitCS()==true)? 1:0;
-    pfaData.USING_SAVED_SDC = (sdc.IsUsingSavedSdc()==true)? 1:0;
-    pfaData.FORCE_LATENT_CS = (i_sdc.IsForceLatentCS()==true)? 1:0;
-    pfaData.DEFER_DECONFIG_MASTER = (iplDiagMode==true)? 1:0;
-    pfaData.DEFER_DECONFIG = (deferDeconfig==true)? 1:0;
-    pfaData.CM_MODE = 0; //FIXME  Need to change this initialization
-    pfaData.TERMINATE_ON_CS = (terminateOnCheckstop==true)? 1:0;
-    pfaData.reasonCode = sdc.GetReasonCode();
-    pfaData.PfaCalloutCount = calloutcount;
+    pfaData.Threshold               = sdc.GetThreshold();
+    pfaData.ErrorType               = prdGardErrType;
+    pfaData.homGardState            = gardState;
+    pfaData.PRD_AttnTypes           = attn_type;
+    pfaData.PRD_SecondAttnTypes     = i_sdc.GetCauseAttentionType();
+    pfaData.THERMAL_EVENT           = (sdc.IsThermalEvent()==true)? 1:0;
+    pfaData.UNIT_CHECKSTOP          = (sdc.IsUnitCS()==true)? 1:0;
+    pfaData.USING_SAVED_SDC         = (sdc.IsUsingSavedSdc()==true)? 1:0;
+    pfaData.FORCE_LATENT_CS         = (i_sdc.IsForceLatentCS()==true)? 1:0;
+    pfaData.DEFER_DECONFIG          = (deferDeconfig==true)? 1:0;
+    pfaData.CM_MODE                 = 0; //FIXME RTC 50063
+    pfaData.TERMINATE_ON_CS         = (terminateOnCheckstop==true)? 1:0;
+    pfaData.reasonCode              = sdc.GetReasonCode();
+    pfaData.PfaCalloutCount         = calloutcount;
 
     // First clear out the PFA Callout list from previous SRC
     for (uint32_t j = 0; j < MruListLIMIT; ++j)
