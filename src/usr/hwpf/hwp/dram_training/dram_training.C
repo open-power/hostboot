@@ -117,9 +117,10 @@ void*    call_host_disable_vddr( void *io_pArgs )
              *              bytes 2-3: reason code of first error
              * @userdata2   bytes 0-1: total number of elogs included
              *              bytes 2-3: N/A
-             * @devdesc     call to mss_scominit has failed
-             *              see error log in the user details section for
-             *              additional details.
+             * @devdesc     Failed trying to send the VDD disable message
+             *              to the FSP.
+             *              See error log in the user details section for
+             *              additional information.
              */
             l_StepError.addErrorDetails(ISTEP_DRAM_TRAINING_FAILED,
                                         ISTEP_VDDR_DISABLE,
@@ -416,9 +417,10 @@ void*    call_host_enable_vddr( void *io_pArgs )
              *              bytes 2-3: reason code of first error
              * @userdata2   bytes 0-1: total number of elogs included
              *              bytes 2-3: N/A
-             * @devdesc     call to mss_scominit has failed
-             *              see error log in the user details section for
-             *              additional details.
+             * @devdesc     Failed trying to send the VDD enable message
+             *              to the FSP.
+             *              See error log in the user details section for
+             *              additional information.
              */
             l_StepError.addErrorDetails(ISTEP_DRAM_TRAINING_FAILED,
                                         ISTEP_VDDR_ENABLE,
