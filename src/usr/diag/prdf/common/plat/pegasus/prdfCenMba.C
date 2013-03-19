@@ -28,13 +28,15 @@
 #include <iipServiceDataCollector.h>
 #include <prdfCalloutUtil.H>
 #include <prdfExtensibleChip.H>
-#include <prdfMemUtil.H>
 #include <prdfPlatServices.H>
 #include <prdfPluginMap.H>
 #include <prdfCenMbaDataBundle.H>
 
 namespace PRDF
 {
+
+using namespace PlatServices;
+
 namespace Mba
 {
 
@@ -74,11 +76,6 @@ int32_t PostAnalysis( ExtensibleChip * i_mbaChip,
 
     using namespace TARGETING;
 
-    // In hostboot, we need to clear associated bits in the MCIFIR bits.
-    int32_t l_rc = MemUtil::clearHostAttns( i_mbaChip, i_sc );
-    if ( SUCCESS != l_rc )
-        PRDF_ERR( "[Mba::PostAnalysis] MemUtil::clearHostAttns failed" );
-
     // Send command complete to MDIA.
     // This must be done in post analysis after attentions have been cleared.
 
@@ -89,8 +86,8 @@ int32_t PostAnalysis( ExtensibleChip * i_mbaChip,
     {
         mbadb->iv_sendCmdCompleteMsg = false;
 
-        l_rc = PlatServices::mdiaSendEventMsg( mbaTarget,
-                                               mbadb->iv_cmdCompleteMsgData );
+        int32_t l_rc = mdiaSendEventMsg( mbaTarget,
+                                         mbadb->iv_cmdCompleteMsgData );
 
         if ( l_rc )
         {

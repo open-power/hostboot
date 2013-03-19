@@ -105,6 +105,13 @@ void getCurrentTime( Timer & o_timer );
  */
 int32_t syncFile( const char * i_fileName );
 
+/**
+ * @brief Sleep for given time (seconds plus milliseconds).
+ * @param i_seconds      Sleep time in seconds.
+ * @param i_milliseconds Sleep time in milliseconds.
+ */
+void milliSleep( uint32_t i_seconds, uint32_t i_milliseconds );
+
 //##############################################################################
 //##                       Processor specific functions
 //##############################################################################

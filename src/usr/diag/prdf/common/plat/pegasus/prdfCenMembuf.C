@@ -28,57 +28,17 @@
 #include <iipServiceDataCollector.h>
 #include <prdfCalloutUtil.H>
 #include <prdfExtensibleChip.H>
-#include <prdfMemUtil.H>
 #include <prdfPlatServices.H>
 #include <prdfPluginMap.H>
 #include <prdfGlobal.H>
 #include <iipSystem.h>
 
+#include <prdfCenMembufDataBundle.H>
+
 namespace PRDF
 {
 namespace Membuf
 {
-
-/**
- * @brief Data container for the Centaur Membuf chip.
- */
-class CenMembufDataBundle : public DataBundle
-{
-  public:
-
-    /**
-     * @brief Constructor.
-     * @param i_membChip The membuf chip.
-     */
-    CenMembufDataBundle( ExtensibleChip * i_membChip ) :
-        iv_analyzeMba1Starvation(false) { };
-
-    /**
-     * @brief Destructor.
-     */
-    ~CenMembufDataBundle() { };
-
-  private: // functions
-
-    CenMembufDataBundle( const CenMembufDataBundle & );
-    const CenMembufDataBundle & operator=( const CenMembufDataBundle & );
-
-  public:
-
-    // Toggles to solve MBA1 starvation issue
-    bool iv_analyzeMba1Starvation;
-};
-
-/**
- * @brief  Wrapper function for the CenMembufDataBundle.
- * @param  i_membChip The centaur chip.
- * @return This centaur's data bundle.
- */
-CenMembufDataBundle * getCenMembufDataBundle( ExtensibleChip * i_membChip )
-{
-    return static_cast<CenMembufDataBundle *>(i_membChip->getDataBundle());
-}
-
 
 //##############################################################################
 //
@@ -254,21 +214,57 @@ PRDF_PLUGIN_DEFINE( Membuf, MBA1_Starvation );
 /**
  * @brief  Plugin function called after analysis is complete but before PRD
  *         exits.
- * @param  i_membufChip A Centaur Membuf chip.
- * @param  i_sc      The step code data struct.
+ * @param  i_mbChip A Centaur chip.
+ * @param  i_sc     The step code data struct.
  * @note   This is especially useful for any analysis that still needs to be
  *         done after the framework clears the FIR bits that were at attention.
  * @return SUCCESS.
  */
-int32_t PostAnalysis( ExtensibleChip * i_membufChip,
-                      STEP_CODE_DATA_STRUCT & i_sc )
+int32_t PostAnalysis( ExtensibleChip * i_mbChip, STEP_CODE_DATA_STRUCT & i_sc )
 {
-    //FIXME: need to implement
+    #define PRDF_FUNC "[Membuf::PostAnalysis] "
+
+    #ifdef __HOSTBOOT_MODULE
+
+    // In hostboot, we need to clear associated bits in the MCIFIR bits.
+    do
+    {
+        CenMembufDataBundle * mbdb = getCenMembufDataBundle(i_mbChip);
+        ExtensibleChip * mcsChip = mbdb->getMcsChip();
+        if ( NULL == mcsChip )
+        {
+            PRDF_ERR( PRDF_FUNC"CenMembufDataBundle::getMcsChip() failed" );
+            break;
+        }
+
+        // Clear the associated MCIFIR bits for all attention types.
+        // NOTE: If there are any active attentions left in the Centaur the
+        //       associated MCIFIR bit will be redriven with the next packet on
+        //       the bus.
+        SCAN_COMM_REGISTER_CLASS * firand = mcsChip->getRegister("MCIFIR_AND");
+
+        firand->setAllBits();
+        firand->ClearBit(12); // CS
+        firand->ClearBit(15); // RE
+        firand->ClearBit(16); // SPA
+        firand->ClearBit(17); // maintenance command complete
+
+        int32_t l_rc = firand->Write();
+        if ( SUCCESS != l_rc )
+        {
+            PRDF_ERR( PRDF_FUNC"MCIFIR_AND write failed" );
+            break;
+        }
+
+    } while (0);
+
+    #endif // __HOSTBOOT_MODULE
 
     return SUCCESS;
+
+    #undef PRDF_FUNC
 }
 PRDF_PLUGIN_DEFINE( Membuf, PostAnalysis );
-
 
 } // end namespace Membuf
 } // end namespace PRDF

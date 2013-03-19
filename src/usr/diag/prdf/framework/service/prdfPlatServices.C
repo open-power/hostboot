@@ -95,6 +95,13 @@ int32_t syncFile( const char * i_fileName )
     return SUCCESS;
 }
 
+//------------------------------------------------------------------------------
+
+void milliSleep( uint32_t i_seconds, uint32_t i_milliseconds )
+{
+    nanosleep( i_seconds, i_milliseconds * 1000000 );
+}
+
 //##############################################################################
 //##                       Processor specific functions
 //##############################################################################

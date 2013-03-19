@@ -301,14 +301,11 @@ errlHndl_t main( ATTENTION_VALUE_TYPE i_attentionType,
     g_prd_errlHndl = serviceGenerator.GenerateSrcPfa( i_attentionType,
                                                       serviceData );
 
-    //FIXME need delay to  let attention lines  settle
-
-    // mk461813 a Sleep for 20msec to let attention lines settle if we are at
-    // threshold
-    //if ((g_prd_errlHndl == NULL) && serviceData.IsAtThreshold())
-    //{
-        //may need to call some function to manage some delay
-    //}
+    // Sleep for 20msec to let attention lines settle if we are at threshold.
+    if ( (g_prd_errlHndl == NULL) && serviceData.IsAtThreshold() )
+    {
+        PlatServices::milliSleep( 0, 20 );
+    }
 
     RasServices::SetTerminateOnCheckstop(true);
 

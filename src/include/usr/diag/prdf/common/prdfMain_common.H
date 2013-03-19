@@ -94,9 +94,6 @@ enum prd_return_code_t
     //! DD11: SRC ACCESS FAILED
     SCR_ACCESS_FAILED = 0xDD11,
 
-    //! DD12: HOM ACCESS FAILED
-    HOM_ACCESS_FAILED = 0xDD12,
-
     //! DD20: System Analyze() is called with no domains in System (init failed?)
     NO_DOMAINS_IN_SYSTEM = 0xDD20,
 
@@ -126,12 +123,6 @@ enum prd_return_code_t
 
     //! DDFF: Special return code indicating Not to reset or mask FIR bits.
     PRD_NO_CLEAR_FIR_BITS = 0xDDFF,
-
-    //! 7FFD: word13 of src 7FFDxxxx - An assert failed in PRD
-    PRD_ASSERT_ERROR_SIGNATURE = 0x7FFD,
-
-    //! 7FFF: word13 of src 7FFFxxxx - xxxx will describe the error
-    PRD_EXECUTION_ERROR_SIGNATURE = 0x7FFF
 
 };
 

@@ -29,7 +29,6 @@ PRDF_RULE_PLUGINS_PEGASUS = \
     prdfP8Pll.o \
     prdfCenMba.o \
     prdfCenMembuf.o \
-    prdfCenMbaAddress.o \
     prdfCenPll.o
 
 # Object files for PRDF rule plugins, but include sim extensions.
@@ -39,8 +38,8 @@ PRDF_RULE_PLUGINS_PEGASUS_WSIM = \
 # PEGASUS specific objects, not rule related.
 prd_pegasus_specific = \
     prdfCalloutUtil.o \
+    prdfCenMbaAddress.o \
     prdfLineDelete.o \
-    prdfMemUtil.o \
     prdfPegasusConfigurator.o \
     prdfRegisterData.o
 

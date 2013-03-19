@@ -124,7 +124,7 @@ int32_t CheckCoreCheckstop( ExtensibleChip * i_chip,
             // Don't sleep on first time through.
             if (l_secondsToSleep != CORECS_SECONDS_TO_SLEEP)
             {
-                sleep(1);
+                PlatServices::milliSleep(1,0); // 1 second
             }
             l_secondsToSleep--;
 
