@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012                   */
+/* COPYRIGHT International Business Machines Corp. 2012,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,13 +20,16 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+#ifndef __RUNTIME_HDATSTRUCTS_H
+#define __RUNTIME_HDATSTRUCTS_H
+
 #include <stdint.h>
 #include <vmmconst.h>
 #include <string.h>
 
 // Copied from FipS:src/hdat/fsp/hdatnaca.H
 // offset in mainstore where NACA starts
-const uint64_t HDAT_NACA_OFFSET = 0x00004000;  
+const uint64_t HDAT_NACA_OFFSET = 0x00004000;
 
 
 /* NOTE: Most of these structures were copied and adapted from the HDAT
@@ -39,16 +42,16 @@ const uint64_t HDAT_NACA_OFFSET = 0x00004000;
  *  The NACA is a data structure used primarily by the host operating
  *  system.  The NACA is prebuilt as part of the primary host LID.  FipS
  *  uses several fields in the NACA to determine where the LID table
- *  and the Service Processor Interace Root Array reside.      
+ *  and the Service Processor Interace Root Array reside.
  *  Fields which are not used by FipS are just defined as reserved so
  *  that we don't have to chase uninteresting changes the host OS may
  *  make to things FipS does not care about.
  */
 struct hdatNaca_t
 {
-    uint8_t  reserved1[48];       // 0x0000 Reserved space    
-    uint64_t spira;               // 0x0030 SPIRA offset 
-    uint8_t  reserved2[104];      // 0x0038 Reserved space  
+    uint8_t  reserved1[48];       // 0x0000 Reserved space
+    uint64_t spira;               // 0x0030 SPIRA offset
+    uint8_t  reserved2[104];      // 0x0038 Reserved space
     uint32_t spiraSize;           // 0x00A0 Actual SPIRA size in bytes
     uint8_t  nacaReserved4[28];   // 0x00A4 reserved space
     uint64_t nacaHypLoadMap;      // 0x00C0 Hyp resident module load map
@@ -93,15 +96,15 @@ enum hdatSpiraDataAreas
     HDAT_MDT              = 14,   // memory description tree
     HDAT_IO_HUB           = 15,   // I/O hub FRU array
     HDAT_CPU_CTRL         = 16,   // CPU controls
-    HDAT_MS_DUMP_SRC_TBL  = 17,   // mainstore dump source table 
-    HDAT_MS_DUMP_DST_TBL  = 18,   // mainstore dump destination table 
+    HDAT_MS_DUMP_SRC_TBL  = 17,   // mainstore dump source table
+    HDAT_MS_DUMP_DST_TBL  = 18,   // mainstore dump destination table
     HDAT_MS_DUMP_RSLT_TBL = 19,   // mainstore dump results table
     HDAT_SPIRA_DA_GA1LAST = 20,   // End of list for 1st eclipz release
-    HDAT_HEAP             = 20,   // Phyp allocated storage location 
-    HDAT_PCIA             = 21,   // PCIA (Core information area) 
-    HDAT_PCRD             = 22,   // PCRD (Chip related data area) 
+    HDAT_HEAP             = 20,   // Phyp allocated storage location
+    HDAT_PCIA             = 21,   // PCIA (Core information area)
+    HDAT_PCRD             = 22,   // PCRD (Chip related data area)
     HSVC_DATA             = 23,   // Host Services Data
-    HDAT_SPIRA_DA_LAST    = 24           
+    HDAT_SPIRA_DA_LAST    = 24
 };
 
 
@@ -123,11 +126,11 @@ struct hdat5Tuple_t
 
 // Copied from FipS:src/hdat/fsp/hdat.H
 /** @brief Type definition for the common hypervisor Data Interface
- *         Format (HDIF) header.    
+ *         Format (HDIF) header.
  */
 struct hdatHDIF_t
 {
-  uint16_t hdatStructId;        // 0x0000 Structure format ID               
+  uint16_t hdatStructId;        // 0x0000 Structure format ID
   char     hdatStructName[6];   // 0x0002 Structure eye catcher
   uint16_t hdatInstance;        // 0x0008 Instance number
   uint16_t hdatVersion;         // 0x000A Structure version
@@ -145,32 +148,32 @@ struct hdatHDIF_t
  */
 struct hdatHDIFChildHdr_t
 {
-  uint32_t hdatOffset;          // 0x0000 Offset from top of structure 
+  uint32_t hdatOffset;          // 0x0000 Offset from top of structure
   uint32_t hdatSize;            // 0x0004 Child data structure size in bytes
   uint32_t hdatCnt;             // 0x0008 Count of child data structures
 } __attribute__ ((packed));
 
 
 // Copied from FipS:src/hdat/fsp/hdat.H
-/** @brief Type definition for the "pointer" header to the internal data.                            
+/** @brief Type definition for the "pointer" header to the internal data.
  */
 struct hdatHDIFDataHdr_t
 {
-  uint32_t hdatOffset;          // 0x0000 Offset from top of structure 
+  uint32_t hdatOffset;          // 0x0000 Offset from top of structure
   uint32_t hdatSize;            // 0x0004 Data structure size in bytes
 } __attribute__ ((packed));
 
 
 // Copied from FipS:src/hdat/fsp/hdat.H
-/** @brief Type definition for the data array header.  Used when internal 
- *         data is an array.                              
+/** @brief Type definition for the data array header.  Used when internal
+ *         data is an array.
  */
 struct hdatHDIFDataArray_t
 {
   uint32_t hdatOffset;     // 0x0000 Offset to array from this structure
   uint32_t hdatArrayCnt;   // 0x0004 Number of array entries
   uint32_t hdatAllocSize;  // 0x0008 Size of allocated space for array entry
-  uint32_t hdatActSize;    // 0x000C Actual size of an array entry 
+  uint32_t hdatActSize;    // 0x000C Actual size of an array entry
 } __attribute__ ((packed));
 
 
@@ -241,4 +244,4 @@ struct hdatHeaderExp_t
         return retval;
      };
 };
-
+#endif

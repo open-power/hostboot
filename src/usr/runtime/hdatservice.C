@@ -30,6 +30,7 @@
 #include <vmmconst.h>
 #include <util/align.H>
 #include "hdatstructs.H"
+#include "fakepayload.H"
 
 extern trace_desc_t* g_trac_runtime;
 
@@ -58,7 +59,7 @@ const hdatHeaderExp_t IPLPARMS_SYSTEM_HEADER = {
 };
 
 //big enough to hold all of PHYP
-const uint64_t HDAT_MEM_SIZE = 128*MEGABYTE; 
+const uint64_t HDAT_MEM_SIZE = 128*MEGABYTE;
 
 /********************
  Utility Functions
@@ -138,7 +139,7 @@ errlHndl_t check_header( uint64_t i_base,
 
         // Check the ID, Version and Name
         if( (i_header->hdatStructId != i_exp.id)
-            && (i_header->hdatVersion != i_exp.version) 
+            && (i_header->hdatVersion != i_exp.version)
             && !memcmp(i_header->hdatStructName,i_exp.name,6) )
         {
             TRACFCOMP( g_trac_runtime, ERR_MRK "RUNTIME::check_header> HDAT Header data not as expected (id:version:name). Act=%.4X:%.4X:%s, Exp=%.4X:%.4X :%s", i_header->hdatStructId, i_header->hdatVersion, i_header->hdatStructName, i_exp.id, i_exp.version, i_exp.name );
@@ -311,7 +312,7 @@ errlHndl_t RUNTIME::load_host_data( void )
         // get the current payload kind
         TARGETING::ATTR_PAYLOAD_KIND_type payload_kind
           = sys->getAttr<TARGETING::ATTR_PAYLOAD_KIND>();
-        
+
         // read the mfg flags
         TARGETING::ATTR_MNFG_FLAGS_type mnfg_flags
           = sys->getAttr<TARGETING::ATTR_MNFG_FLAGS>();
@@ -365,36 +366,12 @@ errlHndl_t RUNTIME::load_host_data( void )
                                    hdat_size );
                 errhdl->collectTrace("RUNTIME",1024);
                 break;
-            }        
+            }
         }
         else if( TARGETING::PAYLOAD_KIND_NONE == payload_kind )
         {
             // Standalone Test Image with no payload
-
-            // Ensure that there really is no payload being loaded
-            TARGETING::ATTR_PAYLOAD_BASE_type payload_base
-              = sys->getAttr<TARGETING::ATTR_PAYLOAD_BASE>();
-            if( payload_base != 0 )
-            {
-                TRACFCOMP( g_trac_runtime, "load_host_data> Non-zero PAYLOAD_BASE (0x%X) for PAYLOAD_KIND==NONE", payload_base );
-                /*@
-                 * @errortype
-                 * @moduleid     RUNTIME::MOD_HDATSERVICE_LOAD_HOST_DATA
-                 * @reasoncode   RUNTIME::RC_WRONG_PAYLOAD_ATTRS
-                 * @userdata1    PAYLOAD_BASE
-                 * @userdata2    PAYLOAD_KIND
-                 * @devdesc      Nonzero PAYLOAD_BASE for standalone
-                 *               PAYLOAD_KIND
-                 */
-                errhdl = new ERRORLOG::ErrlEntry(
-                                   ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                   RUNTIME::MOD_HDATSERVICE_LOAD_HOST_DATA,
-                                   RUNTIME::RC_WRONG_PAYLOAD_ATTRS,
-                                   payload_base,
-                                   payload_kind );
-                errhdl->collectTrace("RUNTIME",1024);
-                break;
-            }
+            FakePayload::load();
 
             // Map in some arbitrary memory for the HostServices code to use
             TRACFCOMP( g_trac_runtime, "load_host_data> STANDALONE: Mapping in 0x%X-0x%X (%d MB)", HSVC_TEST_MEMORY_ADDR, HSVC_TEST_MEMORY_ADDR+HSVC_TEST_MEMORY_SIZE, HSVC_TEST_MEMORY_SIZE );
@@ -450,8 +427,8 @@ errlHndl_t RUNTIME::load_host_data( void )
                                    DUMP_TEST_TABLE_SIZE);
                 errhdl->collectTrace("RUNTIME",1024);
                 break;
-            }        
-     
+            }
+
         }
         else
         {

@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/runtime/attribute_structs.H $                         */
+/* $Source: src/usr/runtime/common/hsvc_attribute_structs.H $             */
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012                   */
+/* COPYRIGHT International Business Machines Corp. 2012,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,12 +20,14 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+#ifndef __RUNTIME_HSVC_ATTRIBUTE_STRUCTS_H
+#define __RUNTIME_HSVC_ATTRIBUTE_STRUCTS_H
+
 /**
  *  @file attribute_structs.H
  *
  *  @brief Shared structures with the HostServices code
  */
-
 struct hsvc_proc_header_t {
     uint64_t procid; //=NNNCCC
     uint64_t offset; //offset to attribute header relative to start of node_data
@@ -76,3 +78,5 @@ struct hsvc_node_data_t
 static const uint64_t HSVC_HUID        = 0xFF000001FFFFFFFF;
 static const uint64_t HSVC_PHYS_PATH   = 0xFF000002FFFFFFFF;
 static const uint64_t HSVC_ECMD_STRING = 0xFF000003FFFFFFFF;
+
+#endif
