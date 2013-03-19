@@ -158,17 +158,20 @@ errlHndl_t initialize()
         {
             //there is some problem in building RuleMetaData object
             g_prd_errlHndl = l_errBuild;
+
+            //object model is either not build or at best incomplete.We must
+            // clean this up .The easiest way is to delete the system which in
+            //in turn shall clean up the constituents.
+            delete systemPtr;
+            systemPtr = NULL;
+            g_initialized = false;
+            PRDF_ERR("PRDF::initialize() failed to buid object model");
         }
         //systemPtr is populated in configurator
-        if(systemPtr != NULL)
+        else if( systemPtr != NULL )
         {
             systemPtr->Initialize(); // Hardware initialization
             g_initialized = true;
-        }
-        else // something bad happend.
-        {
-            PRDF_ERR("PRDF::initialize() failed to buid object model");
-            g_initialized = false;
         }
 
         // Flush rule table cache since objects are all built.

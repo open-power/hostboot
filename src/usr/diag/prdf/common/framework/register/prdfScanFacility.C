@@ -178,7 +178,6 @@ SCAN_COMM_REGISTER_CLASS &  ScanFacility::GetPluginRegister(
 //-----------------------------------------------------------------------------
 void ScanFacility::ResetPluginRegister()
 {
-  PRDF_INF( "ScanFacility.ResetPluginRegister()" );
   iv_pluginRegFw.clear();
 
 

@@ -112,13 +112,16 @@ errlHndl_t PegasusConfigurator::build()
     MbaDomain    * l_mbaDomain    = new MbaDomain(    MBA_DOMAIN    );
 
     uint32_t l_maxNodeCount = _getMaxNumNodes();
-
     // PLL domains
     PllDomainList l_fabricPllDomains(l_maxNodeCount, NULL);
     PllDomainList l_membPllDomains(  l_maxNodeCount, NULL);
 
     do
     {
+        // Idea of build is to add chips to domain and add domains to System
+        // Also, we should ensure that if build fails in mid way, deleting
+        // System should be enough to clean up th partial model.
+
         // Add chips to domains.
         errl = addDomainChips( TYPE_PROC, l_procDomain, &l_fabricPllDomains );
         if ( NULL != errl ) break;
@@ -135,16 +138,25 @@ errlHndl_t PegasusConfigurator::build()
         errl = addDomainChips( TYPE_MBA, l_mbaDomain );
         if ( NULL != errl ) break;
 
-        // Add Pll domains to domain list.
-        addPllDomainsToSystem( l_fabricPllDomains, l_membPllDomains );
+    } while (0);
+
+        //Note: we are adding these domains to system regardles of error log
+        //handle status. We are doing it simply because in case error handle is
+        //not NULL, we want to clean up the partial object model by simply
+        //deleting the system. If we add domain to system with or without chips
+        //( error scenario ), we can do the clean up quite easily.
 
         // Add domains to domain list. NOTE: Order is important because this is
         // the order the domains will be analyzed.
+
+        addPllDomainsToSystem( l_fabricPllDomains, l_membPllDomains );
+
+        //Proc domain added after PLL domain
         sysDmnLst.push_back( l_procDomain   );
-        sysDmnLst.push_back( l_exDomain     );
-        sysDmnLst.push_back( l_mcsDomain    );
+        sysDmnLst.push_back( l_exDomain );
+        sysDmnLst.push_back( l_mcsDomain );
         sysDmnLst.push_back( l_membufDomain );
-        sysDmnLst.push_back( l_mbaDomain    );
+        sysDmnLst.push_back( l_mbaDomain );
 
         // Add chips to the system.
         Configurator::chipList & chips = getChipList();
@@ -173,7 +185,6 @@ errlHndl_t PegasusConfigurator::build()
         chips.clear();
         domains.clear();
 
-    } while (0);
 
     if ( NULL != errl )
     {
@@ -236,7 +247,9 @@ errlHndl_t PegasusConfigurator::addDomainChips( TARGETING::TYPE  i_type,
                                             scanFac, resFac,l_errl );
             if( NULL != l_errl )
             {
+                delete chip;
                 break;
+
             }
             sysChipLst.push_back( chip );
             io_domain->AddChip(   chip );
