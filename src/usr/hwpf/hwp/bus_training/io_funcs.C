@@ -384,6 +384,9 @@ ReturnCode  edi_training::training_function_status(const Target&  master_chip_ta
                      break;
                     }
                     
+                    //@thi - Display loop count
+                    FAPI_INF("io_run_training: curr_cyc = %lld\n", curr_cyc);
+                    
                     if ( curr_cyc >= end_cycle )
                     {
                             dump_ffdc_wiretest(master_chip_target, master_chip_interface ,master_group,  slave_chip_target ,  slave_chip_interface,slave_group);

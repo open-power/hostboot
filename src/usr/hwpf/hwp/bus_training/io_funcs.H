@@ -75,8 +75,11 @@ public:
 	bus_status    eye_opt_status;
 	bus_status    repair_status;
 	bus_status    functional_status;
-        //Updating max cycles to suit 100ms theoretical max timeout as per Mike Spear
-	static const uint32_t      max_poll_cycles=100;
+       //@thi - Pete & Varkey will release a new version that has max_poll_cycles = 300.
+       //       Because we need this in a build quickly, I go ahead and temporarily
+       //       change it here in this version.
+        //Updating max cycles to suit 300ms theoretical max timeout as per Mike Spear
+	static const uint32_t      max_poll_cycles=300;
 	static const uint32_t      increment_poll_cycles=1;
 	uint32_t endpoints_set; // How many end points have we accessed so far
 
