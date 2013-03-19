@@ -80,14 +80,28 @@ public:
                                        BACKTRACE_ENTRY_SYMBOL_SIZE);
 
         // Initialize l_the symbol table.
-        const char * l_pSymFile = "hbicore.syms";
+        const char * const l_pNfsSymFile = "/nfs/data/hbicore.syms";
         hbSymbolTable symTab;
-        int readRC = symTab.readSymbols( l_pSymFile );
+        int readRC = symTab.readSymbols( l_pNfsSymFile );
         if( readRC )
         {
-            i_parser.PrintString( "Symbols not found", l_pSymFile );
-            // symTab.nearestSymbol() will return NULL because of this.
-            // Carry on.
+            // Not found in NFS, look in maint for symbol file
+            const char * const l_pMaintSymFile = "/maint/data/hbicore.syms";
+            readRC = symTab.readSymbols( l_pMaintSymFile );
+
+            if( readRC )
+            {
+                // Not found in maint, look in pwd
+                const char * const l_pPwdSymFile = "hbicore.syms";
+                readRC = symTab.readSymbols( l_pPwdSymFile );
+
+                if( readRC )
+                {
+                    i_parser.PrintString( "Symbols not found", l_pPwdSymFile );
+                    // symTab.nearestSymbol() will return NULL because of this.
+                    // Carry on.
+                }
+            }
         }
 
         const char * l_pErrlEntry = "ErrlEntry::ErrlEntry";
