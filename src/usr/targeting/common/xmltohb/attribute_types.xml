@@ -2590,7 +2590,7 @@
         <!-- DMI deploy lane spares -->
         <name>MNFG_DMI_DEPLOY_LANE_SPARES</name>
         <value>0x00004000</value>
-    </enumerator>    
+    </enumerator>
 </enumerationType>
 
 <!-- Support for pm_hwp_attributes.xml -->
@@ -8272,8 +8272,11 @@ bits6:7  will be consumed together to form COARSE_LVL. </description>
 
 <attribute>
     <id>ECID</id>
-    <description>Bits 0 to 63 of the ECID in array entry 0 and bits 64 to 127 in ECID array entry 1
-Created from running the mss_get_cen_ecid.C</description>
+    <description>
+    Bits 0 to 63 of the ECID in array entry 0 and bits 64 to 127 in ECID array entry 1
+    Created from running proc_getecid.C for processors
+    Created from running mss_get_cen_ecid.C for centaurs
+    </description>
     <simpleType>
         <uint64_t>
             <default>0</default>
@@ -9226,11 +9229,11 @@ Measured in GB</description>
 		0x00, 0x20, 0x00, 0x20, 0x00, 0x70, 0x00, 0x80,
 		0x52, 0xC5, 0x90, 0x00, 0x00, 0x00, 0x00, 0x00,
 		0x00, 0x00, 0x00, 0x80, 0x00, 0x80, 0x01, 0xC0,
-		0x02, 0x01, 0x4B, 0x17, 0x40, 0x00, 0x00, 0x00, 
-		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
-		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
-		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
-		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 
+		0x02, 0x01, 0x4B, 0x17, 0x40, 0x00, 0x00, 0x00,
+		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
             </default>
         </uint8_t>
         <array>128</array>
@@ -9905,7 +9908,7 @@ Measured in GB</description>
 <attribute>
     <id>ENABLED_THREADS</id>
     <description>
-       Bitmask of threads to enable for each processor, 
+       Bitmask of threads to enable for each processor,
        Zero means enable all architected threads
     </description>
     <simpleType>
@@ -10066,7 +10069,7 @@ Measured in GB</description>
 		called MSB Swap where lane 0 of the TX chip wires to lane n-1 on the RX chip where 'n' is the width of the bus. A basic description
 		of this capability is that the board designer can save layers on the board wiring by crossing the wiring between the two chips in
 		a prescribed manner. In a non-MSB Swapped bus Lane 0 on the TX chip wires to lane 0 on the RX chip, lane 1 to lane 1 and so on.
-		If a bus is MSB Swapped then lane 0 of the TX chip wires to lane 'n-1' of the RX chip, lane 1 to lane 'n-2', etc. Random or 
+		If a bus is MSB Swapped then lane 0 of the TX chip wires to lane 'n-1' of the RX chip, lane 1 to lane 'n-2', etc. Random or
 		arbitrary wiring of TX to RX lanes on different chips is NOT ALLOWED.
 
         The Master Chip of two connected chips is defined as the chip with the smaller value of (100*Node + Pos).
@@ -10076,12 +10079,12 @@ Measured in GB</description>
 
 		The Downstream TX_MSBSWAP from the MRW is a uint8 value. 0x01 means the Downstream bus is wired msb to lsb etc. and
 		0x00 means the bus is wired normally, msb to msb, lsb to lsb (lane0 to lane0).
-		
+
 		The Upstream TX_MSBSWAP from the MRW is a uint8 value. 0x01 means the Upstream bus is wired msb to lsb etc. and
 		0x00 means the bus is wired normally, msb to msb, lsb to lsb (lane0 to lane0).
-		
+
 		It is up to the platform code to set up each ATTR_EI_BUS_TX_MSBSWAP value for the correct target endpoints.
-		 
+
     </description>
     <simpleType>
       <uint8_t>
@@ -10733,7 +10736,7 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
         <macro>DIRECT</macro>
     </hwpfToHbAttrMap>
 </attribute>
- 
+
 <attribute>
     <id>MEMB_TP_BNDY_PLL_FOR_DCCAL_DATA</id>
     <description>Ring image for Centaur tp_bndy_pll ring

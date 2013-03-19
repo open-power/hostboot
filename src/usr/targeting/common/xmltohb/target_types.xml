@@ -360,7 +360,7 @@
      <attribute><id>SBE_SEEPROM_I2C_PORT</id></attribute>
      <attribute><id>PNOR_I2C_ADDRESS_BYTES</id></attribute>
      <!-- End Supporting poreve_memory_attributes.xml -->
-     
+
 </targetType>
 
 <targetType>
@@ -438,6 +438,7 @@
     <attribute><id>PROC_PCIE_REFCLOCK_ENABLE</id></attribute>
     <attribute><id>PROC_EX_FUNC_L3_DELTA_DATA</id></attribute>
     <attribute><id>PROC_EX_FUNC_L3_LENGTH</id></attribute>
+    <attribute><id>ECID</id></attribute>
 </targetType>
 
 <targetType>

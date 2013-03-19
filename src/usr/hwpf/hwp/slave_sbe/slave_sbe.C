@@ -55,6 +55,7 @@
 #include "slave_sbe.H"
 #include "proc_revert_sbe_mcs_setup/proc_revert_sbe_mcs_setup.H"
 #include "proc_check_slave_sbe_seeprom_complete.H"
+#include "proc_getecid.H"
 
 using namespace ISTEP;
 using namespace ISTEP_ERROR;
@@ -208,7 +209,8 @@ void* call_proc_check_slave_sbe_seeprom_complete( void *io_pArgs )
         TARGETING::Target* l_pProcTarget = *l_proc_iter;
 
         TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                "target HUID %.8X", TARGETING::get_huid(l_pProcTarget));
+                "target HUID %.8X",
+                TARGETING::get_huid(l_pProcTarget));
 
         if ( l_pProcTarget  ==  l_pMasterProcTarget )
         {
@@ -258,6 +260,69 @@ void* call_proc_check_slave_sbe_seeprom_complete( void *io_pArgs )
             TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
                       "SUCCESS : proc_check_slave_sbe_seeprom_complete",
                       "completed ok");
+
+        }
+    }   // endfor
+
+
+    //  Once the sbe's are up correctly, fetch all the proc ECIDs and
+    //  store them in an attribute.
+    for (TargetHandleList::const_iterator
+            l_proc_iter = l_procTargetList.begin();
+            l_proc_iter != l_procTargetList.end();
+            ++l_proc_iter)
+    {
+        //  make a local copy of the Processor target
+        TARGETING::Target* l_pProcTarget = *l_proc_iter;
+
+        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                "target HUID %.8X",
+                TARGETING::get_huid(l_pProcTarget));
+
+        fapi::Target l_fapiProcTarget( fapi::TARGET_TYPE_PROC_CHIP,
+                                       l_pProcTarget    );
+
+        //  proc_getecid should set the fuse string to 112 bits long.
+        ecmdDataBufferBase  l_fuseString;
+
+        // Invoke the HWP
+        FAPI_INVOKE_HWP(l_errl,
+                        proc_getecid,
+                        l_fapiProcTarget,
+                        l_fuseString  );
+
+        if (l_errl)
+        {
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                      "ERROR : proc_getecid",
+                      " failed, returning errorlog" );
+
+            // capture the target data in the elog
+            ErrlUserDetailsTarget(l_pProcTarget).addToLog( l_errl );
+
+            /*@
+             * @errortype
+             * @reasoncode  ISTEP_PROC_GETECID_FAILED
+             * @severity    ERRORLOG::ERRL_SEV_UNRECOVERABLE
+             * @moduleid    ISTEP_PROC_GETECID
+             * @userdata1   bytes 0-1: plid identifying first error
+             *              bytes 2-3: reason code of first error
+             * @userdata2   bytes 0-1: total number of elogs included
+             *              bytes 2-3: N/A
+             * @devdesc     call to proc_get_ecid failed.
+             *
+             */
+             l_stepError.addErrorDetails( ISTEP_PROC_GETECID_FAILED,
+                                          ISTEP_PROC_GETECID,
+                                          l_errl );
+
+             errlCommit( l_errl, HWPF_COMP_ID );
+        }
+        else
+        {
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                      "SUCCESS : proc_getecid",
+                      " completed ok");
 
         }
     }   // endfor

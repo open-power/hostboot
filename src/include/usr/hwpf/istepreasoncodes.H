@@ -116,6 +116,7 @@ enum istepModuleId
     ISTEP_PROC_ABUS_SCOMINIT                            = 0x44,
     ISTEP_PROC_DMI_SCOMINIT                             = 0x45,
     ISTEP_MEM_PLL_INITF                                 = 0x46,
+    ISTEP_PROC_GETECID                                  = 0x47,
 };
 
 /**
@@ -173,6 +174,7 @@ enum istepReasonCode
     ISTEP_PROC_ABUS_SCOMINIT_FAILED             = ISTEP_COMP_ID | 0x2C,
     ISTEP_PROC_SWITCH_CFSIM_FAILED              = ISTEP_COMP_ID | 0x2D,
     ISTEP_LOAD_SLW_FROM_PNOR_FAILED             = ISTEP_COMP_ID | 0x2E,
+    ISTEP_PROC_GETECID_FAILED                   = ISTEP_COMP_ID | 0x2F,
 };  // end ISTEP
 
 }
