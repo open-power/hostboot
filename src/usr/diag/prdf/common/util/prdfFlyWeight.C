@@ -36,6 +36,7 @@
 #include <tracinterface.H>
 #include <prdfHeapBucketSize.H>
 #include <prdfTrace.H>
+#include <prdfAssert.h>
 
 #undef prdfFlyWeight_C
 //----------------------------------------------------------------------
@@ -114,7 +115,8 @@ T & FlyWeight<T,S>::get(const T & key)
       current_array = new T[RoundBucketSize<T,S>::value];
       if(current_array == NULL)   // dg00a
       {                           // dg00a
-        PRDF_TRAC("PRDF Could not get requested memory");  // dg00a
+        PRDF_ERR("PRDF Could not get requested memory");
+        PRDF_ASSERT( NULL != current_array );
       }                           // dg00a
       // if the heap of array ptrs is full(or non-existant) then increase capacity by S dg00a
       if(iv_heap.size() == iv_heap.capacity())     // dg00a

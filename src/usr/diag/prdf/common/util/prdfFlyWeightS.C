@@ -24,6 +24,8 @@
 #include <prdfFlyWeightS.H>
 #include <algorithm>
 #include <prdfHeapBucketSize.H>
+#include <prdfTrace.H>
+#include <prdfAssert.h>
 
 namespace PRDF
 {
@@ -201,7 +203,13 @@ T * FlyWeightS<T,S>::getHeap()
 
     if (NULL == iv_nextPos)
     {
-        iv_heaps.push_back(iv_nextPos = new T[RoundBucketSize<T,S>::value]);
+        iv_nextPos = new T[RoundBucketSize<T,S>::value];
+        if( NULL == iv_nextPos )
+        {
+            PRDF_ERR("Can not allocate memory on heap");
+            PRDF_ASSERT( NULL != iv_nextPos );
+        }
+        iv_heaps.push_back(iv_nextPos);
     }
 
     T * l_rc = iv_nextPos;
@@ -209,7 +217,13 @@ T * FlyWeightS<T,S>::getHeap()
     iv_nextPos++;
     if ((static_cast<T*>(*(iv_heaps.end()-1)) + RoundBucketSize<T,S>::value) == iv_nextPos)
     {
-        iv_heaps.push_back(iv_nextPos = new T[RoundBucketSize<T,S>::value]);
+        iv_nextPos = new T[RoundBucketSize<T,S>::value];
+        if( NULL == iv_nextPos )
+        {
+            PRDF_ERR("Can not allocate memory on heap");
+            PRDF_ASSERT( NULL != iv_nextPos );
+        }
+        iv_heaps.push_back(iv_nextPos);
     }
 
     return l_rc;
