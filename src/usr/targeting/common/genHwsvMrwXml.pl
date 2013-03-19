@@ -271,6 +271,8 @@ use constant PBUS_FIRST_END_POINT_INDEX => 0;
 use constant PBUS_SECOND_END_POINT_INDEX => 1;
 use constant PBUS_DOWNSTREAM_INDEX => 2;
 use constant PBUS_UPSTREAM_INDEX => 3;
+use constant PBUS_TX_MSB_LSB_SWAP => 4;
+use constant PBUS_RX_MSB_LSB_SWAP => 5;
 foreach my $i (@{$powerbus->{'power-bus'}})
 {
     # Pull out the connection information from the description
@@ -282,9 +284,22 @@ foreach my $i (@{$powerbus->{'power-bus'}})
     # Grab the lane swap information
     my $dwnstrm_swap = $i->{'downstream-n-p-lane-swap-mask'};
     my $upstrm_swap =  $i->{'upstream-n-p-lane-swap-mask'};
+    my $bustype = $endp1;
+    $bustype =~ s/.*:p.*:(.).*/$1/;
+    my $tx_swap = 0;
+    my $rx_swap = 0;
+    if (lc($bustype) eq "a")
+    {
+        $tx_swap =  $i->{'tx-msb-lsb-swap'};
+        $rx_swap =  $i->{'rx-msb-lsb-swap'};
+        $tx_swap = ($tx_swap eq "false") ? 0 : 1;
+        $rx_swap = ($rx_swap eq "false") ? 0 : 1;
+    }
     #print STDOUT "powerbus: $endp1, $endp2, $dwnstrm_swap, $upstrm_swap\n";
-    push @pbus, [ lc($endp1), lc($endp2), $dwnstrm_swap, $upstrm_swap ];
-    push @pbus, [ lc($endp2), lc($endp1), $dwnstrm_swap, $upstrm_swap ];
+    push @pbus, [ lc($endp1), lc($endp2), $dwnstrm_swap,
+                  $upstrm_swap, $tx_swap, $rx_swap ];
+    push @pbus, [ lc($endp2), lc($endp1), $dwnstrm_swap,
+                  $upstrm_swap, $tx_swap, $rx_swap ];
 }
 
 open (FH, "<$mrwdir/${sysname}-dmi-busses.xml") ||
@@ -297,11 +312,15 @@ use constant DBUS_MCS_NODE_INDEX => 0;
 use constant DBUS_MCS_PROC_INDEX => 1;
 use constant DBUS_MCS_UNIT_INDEX => 2;
 use constant DBUS_MCS_DOWNSTREAM_INDEX => 3;
+use constant DBUS_MCS_TX_SWAP_INDEX => 4;
+use constant DBUS_MCS_RX_SWAP_INDEX => 5;
 
 my @dbus_centaur;
 use constant DBUS_CENTAUR_NODE_INDEX => 0;
 use constant DBUS_CENTAUR_MEMBUF_INDEX => 1;
 use constant DBUS_CENTAUR_UPSTREAM_INDEX => 2;
+use constant DBUS_CENTAUR_TX_SWAP_INDEX => 3;
+use constant DBUS_CENTAUR_RX_SWAP_INDEX => 4;
 foreach my $dmi (@{$dmibus->{'dmi-bus'}})
 {
     # First grab the MCS information
@@ -310,16 +329,24 @@ foreach my $dmi (@{$dmibus->{'dmi-bus'}})
     my $proc = $dmi->{'mcs'}->{'target'}->{'position'};
     my $mcs = $dmi->{'mcs'}->{'target'}->{'chipUnit'};
     my $swap = $dmi->{'downstream-n-p-lane-swap-mask'};
+    my $tx_swap = $dmi->{'tx-msb-lsb-swap'};
+    my $rx_swap = $dmi->{'rx-msb-lsb-swap'};
+    $tx_swap = ($tx_swap eq "false") ? 0 : 1;
+    $rx_swap = ($rx_swap eq "false") ? 0 : 1;
     #print STDOUT "dbus_mcs: n$node:p$proc:mcs:$mcs swap:$swap\n";
-    push @dbus_mcs, [ $node, $proc, $mcs, $swap ];
+    push @dbus_mcs, [ $node, $proc, $mcs, $swap, $tx_swap, $rx_swap ];
 
     # Now grab the centuar chip information
     # Centaur is always slave so it gets upstream
     my $node = $dmi->{'centaur'}->{'target'}->{'node'};
     my $membuf = $dmi->{'centaur'}->{'target'}->{'position'};
     my $swap = $dmi->{'upstream-n-p-lane-swap-mask'};
+    my $tx_swap = $dmi->{'rx-msb-lsb-swap'};
+    my $rx_swap = $dmi->{'tx-msb-lsb-swap'};
+    $tx_swap = ($tx_swap eq "false") ? 0 : 1;
+    $rx_swap = ($rx_swap eq "false") ? 0 : 1;
     #print STDOUT "dbus_centaur: n$node:cen$membuf swap:$swap\n";
-    push @dbus_centaur, [ $node, $membuf, $swap ];
+    push @dbus_centaur, [ $node, $membuf, $swap, $tx_swap, $rx_swap ];
 }
 
 open (FH, "<$mrwdir/${sysname}-cent-vrds.xml") ||
@@ -1827,6 +1854,7 @@ sub generate_mcs
                    0x10000000000*$logid + 0x2000000000*$mcs);
 
     my $lane_swap = 0;
+    my $msb_swap = 0;
     foreach my $dmi ( @dbus_mcs )
     {
         if (($dmi->[DBUS_MCS_NODE_INDEX],
@@ -1834,6 +1862,7 @@ sub generate_mcs
              $dmi->[DBUS_MCS_UNIT_INDEX]) eq (${node},$proc,$mcs))
         {
             $lane_swap = $dmi->[DBUS_MCS_DOWNSTREAM_INDEX];
+            $msb_swap = $dmi->[DBUS_MCS_TX_SWAP_INDEX];
             last;
         }
     }
@@ -1862,17 +1891,10 @@ sub generate_mcs
     <attribute><id>DMI_REFCLOCK_SWIZZLE</id>
         <default>$DmiRefClockSwizzle[$mcs]</default>
     </attribute>
-    <!-- TODO When MRW provides the information, these two attributes
-         should be included. values of X come from MRW.
     <attribute>
-        <id>EI_BUS_RX_MSB_LSB_SWAP</id>
-        <default>X</default>
+        <id>EI_BUS_TX_MSBSWAP</id>
+        <default>$msb_swap</default>
     </attribute>
-    <attribute>
-        <id>EI_BUS_TX_MSB_LSB_SWAP</id>
-        <default>X</default>
-    </attribute>
-    -->
     <attribute>
         <id>EI_BUS_TX_LANE_INVERT</id>
         <default>$lane_swap</default>
@@ -1951,6 +1973,7 @@ sub generate_ax_buses
         my $p_proc = 0;
         my $p_port = 0;
         my $lane_swap = 0;
+        my $msb_swap = 0;
         foreach my $pbus ( @pbus )
         {
             if ($pbus->[PBUS_FIRST_END_POINT_INDEX] eq "n${node}:p${proc}:${type}${i}")
@@ -1968,12 +1991,14 @@ sub generate_ax_buses
                     # This chip is lower so it's master so it gets
                     # the downstream data.
                     $lane_swap = $pbus->[PBUS_DOWNSTREAM_INDEX];
+                    $msb_swap = $pbus->[PBUS_TX_MSB_LSB_SWAP];
                 }
                 else
                 {
                     # This chip is higher so it's the slave chip
                     # and gets the upstream
                     $lane_swap = $pbus->[PBUS_UPSTREAM_INDEX];
+                    $msb_swap = $pbus->[PBUS_RX_MSB_LSB_SWAP];
                 }
                 last;
             }
@@ -2014,6 +2039,10 @@ sub generate_ax_buses
     <attribute>
         <id>EI_BUS_TX_LANE_INVERT</id>
         <default>$lane_swap</default>
+    </attribute>
+    <attribute>
+        <id>EI_BUS_TX_MSBSWAP</id>
+        <default>$msb_swap</default>
     </attribute>";
         }
 
@@ -2036,12 +2065,14 @@ sub generate_centaur
     my $uidstr = sprintf("0x%02X04%04X",${node},$mcs+$proc*8+${node}*8*8);
 
     my $lane_swap = 0;
+    my $msb_swap = 0;
     foreach my $dmi ( @dbus_centaur )
     {
         if (($dmi->[DBUS_CENTAUR_NODE_INDEX],
              $dmi->[DBUS_CENTAUR_MEMBUF_INDEX]) eq (${node},$ctaur))
         {
             $lane_swap = $dmi->[DBUS_CENTAUR_UPSTREAM_INDEX];
+            $msb_swap = $dmi->[DBUS_CENTAUR_RX_SWAP_INDEX];
             last;
         }
     }
@@ -2067,17 +2098,10 @@ sub generate_centaur
         <id>VMEM_ID</id>
         <default>$vmemId</default>
     </attribute>
-    <!-- TODO When MRW provides the information, these two attributes
-         should be included. values of X come from MRW.
     <attribute>
-        <id>EI_BUS_RX_MSB_LSB_SWAP</id>
-        <default>X</default>
+        <id>EI_BUS_TX_MSBSWAP</id>
+        <default>$msb_swap</default>
     </attribute>
-    <attribute>
-        <id>EI_BUS_TX_MSB_LSB_SWAP</id>
-        <default>X</default>
-    </attribute>
-    -->
 
     <!-- FSI is connected via proc$proc:cMFSI-$cfsi -->
     <attribute>
