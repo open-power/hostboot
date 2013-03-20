@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- IBM CONFIDENTIAL                                                       -->
 <!--                                                                        -->
-<!-- COPYRIGHT International Business Machines Corp. 2012                   -->
+<!-- COPYRIGHT International Business Machines Corp. 2012,2013              -->
 <!--                                                                        -->
 <!-- p1                                                                     -->
 <!--                                                                        -->
@@ -31,6 +31,28 @@
 </hwpError>
   <!-- *********************************************************************** -->
   <hwpError>
+    <rc>RC_PROC_SLWB_BUF_PTR_ERROR</rc>
+    <description>Supplied buffer(s) is invalid.</description>
+    <ffdc>DATA_BUF1_PTR</ffdc>
+    <ffdc>DATA_BUF2_PTR</ffdc>
+  </hwpError>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_PROC_SLWB_BUF_SIZE_NOT_FIXED</rc>
+    <description>Supplied buffer size(s) differs from agreed upon fixed ring buffer size.</description>
+    <ffdc>DATA_BUF1_SIZE</ffdc>
+    <ffdc>DATA_BUF2_SIZE</ffdc>
+    <ffdc>DATA_BUF_SIZE_FIXED</ffdc>
+  </hwpError>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_PROC_SLWB_IMAGE_SIZE_NOT_FIXED</rc>
+    <description>Supplied max output image size differs from agreed upon fixed SLW image size.</description>
+    <ffdc>DATA_IMG_SIZE_MAX</ffdc>
+    <ffdc>DATA_IMG_SIZE_FIXED</ffdc>
+  </hwpError>
+  <!-- *********************************************************************** -->
+  <hwpError>
     <rc>RC_PROC_SLWB_IMAGE_SIZE_MISMATCH</rc>
     <description>Supplied image size differs from size in image header.</description>
     <ffdc>DATA_IMG_SIZE_INP</ffdc>
@@ -45,12 +67,32 @@
   </hwpError>
   <!-- *********************************************************************** -->
   <hwpError>
+    <rc>RC_PROC_SLWB_RING_BLOCK_TOO_LARGE</rc>
+    <description>Ring block is too large.</description>
+    <ffdc>DATA_RING_BLOCK_SIZEOFTHIS</ffdc>
+    <ffdc>DATA_SIZE_OF_BUF1</ffdc>
+  </hwpError>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_PROC_SLWB_RING_BLOCK_ALIGN_ERROR</rc>
+    <description>Problem with WF ring block alignment.</description>
+    <ffdc>DATA_RING_BLOCK_ENTRYOFFSET</ffdc>
+    <ffdc>DATA_RING_BLOCK_SIZEOFTHIS</ffdc>
+  </hwpError>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_PROC_SLWB_IMGBUILD_ERROR</rc>
+    <description>Local IMGBUILD_xyz error from non-FAPI routine. Check rc code in p8_delta_scan_rw.h.</description>
+    <ffdc>RC_LOCAL</ffdc>
+  </hwpError>
+  <!-- *********************************************************************** -->
+  <hwpError>
     <rc>RC_PROC_SLWB_MAX_IMAGE_SIZE_EXCEEDED</rc>
     <description>Estimated image size exceeds max allowed size.</description>
     <ffdc>DATA_IMG_SIZE_OLD</ffdc>
     <ffdc>DATA_IMG_SIZE_EST</ffdc>
     <ffdc>DATA_IMG_SIZE_MAX</ffdc>
-</hwpError>
+  </hwpError>
   <!-- *********************************************************************** -->
   <hwpError>
     <rc>RC_PROC_SLWB_INTERNAL_IMAGE_ERR</rc>
@@ -83,6 +125,14 @@
   </hwpError>
   <!-- *********************************************************************** -->
   <hwpError>
+    <rc>RC_PROC_SLWB_L3_FUNC_OVERLAY_ERROR</rc>
+    <description>Existing ring has 1-bits in overlay locations.</description>
+    <ffdc>DATA_FAIL_BYTE_NO</ffdc>
+    <ffdc>DATA_EXISTING_RING_BYTE</ffdc>
+    <ffdc>DATA_OVERLAY_RING_BYTE</ffdc>
+</hwpError>
+  <!-- *********************************************************************** -->
+  <hwpError>
     <rc>RC_PROC_SLWB_WF_CREATION_ERROR</rc>
     <description>Wiggle-flip programming failed.</description>
     <ffdc>RC_LOCAL</ffdc>
@@ -97,6 +147,12 @@
   <hwpError>
     <rc>RC_PROC_SLWB_APPEND_SLW_SECTION_ERROR</rc>
     <description>Error associated with adding empty SLW section for ramming table.</description>
+    <ffdc>RC_LOCAL</ffdc>
+  </hwpError>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_PROC_SLWB_CREATE_FIXED_IMAGE_ERROR</rc>
+    <description>Error associated with creating and initializing fixed image and fixed .slw and .ffdc sections.</description>
     <ffdc>RC_LOCAL</ffdc>
   </hwpError>
   <!-- *********************************************************************** -->
@@ -116,6 +172,11 @@
     <rc>RC_PROC_SLWB_UNKNOWN_ERROR</rc>
     <description>Unknown error. (Shouldn't be in this code section.)</description>
     <ffdc>RC_LOCAL</ffdc>
+  </hwpError>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_PROC_SLWB_BAD_CODE_OR_PARM</rc>
+    <description>Shouldn't be in this code section or invalid parm.</description>
   </hwpError>
   <!-- *********************************************************************** -->
   <hwpError>

@@ -21,34 +21,9 @@
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
 <attributes>
+  <!-- ********************************************************************* -->
   <attribute>
     <id>ATTR_MEMB_TP_BNDY_PLL_DATA</id>
-    <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
-    <description>Ring image for Centaur tp_bndy_pll ring
-      creator: platform
-      firmware notes:
-    </description>
-    <valueType>uint8</valueType>
-    <array>80</array>
-    <platInit/>
-    <persistRuntime/>
-  </attribute>
-  <!-- ********************************************************************* -->
-  <attribute>
-    <id>ATTR_MEMB_TP_BNDY_PLL_FLUSH</id>
-    <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
-    <description>Ring flush image for Centaur tp_bndy_pll ring
-      creator: platform
-      firmware notes:
-    </description>
-    <valueType>uint8</valueType>
-    <array>80</array>
-    <platInit/>
-    <persistRuntime/>
-  </attribute>
-  <!-- ********************************************************************* -->
-  <attribute>
-    <id>ATTR_MEMB_TP_BNDY_PLL_FOR_DCCAL_DATA</id>
     <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
     <description>Ring image for Centaur tp_bndy_pll ring
       creator: platform
@@ -73,9 +48,47 @@
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>
+    <id>ATTR_MEMB_TP_BNDY_PLL_FLUSH</id>
+    <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
+    <description>Ring flush image for Centaur tp_bndy_pll ring
+      creator: platform
+      firmware notes:
+    </description>
+    <valueType>uint8</valueType>
+    <array>80</array>
+    <platInit/>
+    <persistRuntime/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
     <id>ATTR_MEMB_TP_BNDY_PLL_SCAN_SELECT</id>
     <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
     <description>Scan select for ring image for Centaur tp_bndy_pll ring
+      creator: platform
+      firmware notes:
+    </description>
+    <valueType>uint32</valueType>
+    <platInit/>
+    <persistRuntime/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_MEMB_TP_BNDY_PLL_FOR_DCCAL_DATA</id>
+    <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
+    <description>Ring image for Centaur tp_bndy_pll ring
+      creator: platform
+      firmware notes:
+    </description>
+    <valueType>uint8</valueType>
+    <array>80</array>
+    <platInit/>
+    <persistRuntime/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_MEMB_TP_BNDY_PLL_FOR_DCCAL_LENGTH</id>
+    <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
+    <description>Length of data in ring image for Centaur tp_bndy_pll ring
       creator: platform
       firmware notes:
     </description>
@@ -98,6 +111,18 @@
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>
+    <id>ATTR_MEMB_TP_BNDY_PLL_NEST4000_MEM1066_LENGTH</id>
+    <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
+    <description>Length of data in ring image for Centaur tp_bndy_pll ring
+      creator: platform
+      firmware notes:
+    </description>
+    <valueType>uint32</valueType>
+    <platInit/>
+    <persistRuntime/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
     <id>ATTR_MEMB_TP_BNDY_PLL_NEST4000_MEM1333_DATA</id>
     <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
     <description>Ring image for Centaur tp_bndy_pll ring for nest=4000 mem=1333
@@ -106,6 +131,18 @@
     </description>
     <valueType>uint8</valueType>
     <array>80</array>
+    <platInit/>
+    <persistRuntime/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_MEMB_TP_BNDY_PLL_NEST4000_MEM1333_LENGTH</id>
+    <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
+    <description>Length of data in ring image for Centaur tp_bndy_pll ring
+      creator: platform
+      firmware notes:
+    </description>
+    <valueType>uint32</valueType>
     <platInit/>
     <persistRuntime/>
   </attribute>
@@ -124,6 +161,18 @@
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>
+    <id>ATTR_MEMB_TP_BNDY_PLL_NEST4000_MEM1600_LENGTH</id>
+    <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
+    <description>Length of data in ring image for Centaur tp_bndy_pll ring
+      creator: platform
+      firmware notes:
+    </description>
+    <valueType>uint32</valueType>
+    <platInit/>
+    <persistRuntime/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
     <id>ATTR_MEMB_TP_BNDY_PLL_NEST4000_MEM1866_DATA</id>
     <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
     <description>Ring image for Centaur tp_bndy_pll ring for nest=4000 mem=1866
@@ -132,6 +181,18 @@
     </description>
     <valueType>uint8</valueType>
     <array>80</array>
+    <platInit/>
+    <persistRuntime/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_MEMB_TP_BNDY_PLL_NEST4000_MEM1866_LENGTH</id>
+    <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
+    <description>Length of data in ring image for Centaur tp_bndy_pll ring
+      creator: platform
+      firmware notes:
+    </description>
+    <valueType>uint32</valueType>
     <platInit/>
     <persistRuntime/>
   </attribute>
@@ -150,6 +211,18 @@
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>
+    <id>ATTR_MEMB_TP_BNDY_PLL_NEST4800_MEM1066_LENGTH</id>
+    <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
+    <description>Length of data in ring image for Centaur tp_bndy_pll ring
+      creator: platform
+      firmware notes:
+    </description>
+    <valueType>uint32</valueType>
+    <platInit/>
+    <persistRuntime/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
     <id>ATTR_MEMB_TP_BNDY_PLL_NEST4800_MEM1333_DATA</id>
     <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
     <description>Ring image for Centaur tp_bndy_pll ring for nest=4800 mem=1333
@@ -158,6 +231,18 @@
     </description>
     <valueType>uint8</valueType>
     <array>80</array>
+    <platInit/>
+    <persistRuntime/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_MEMB_TP_BNDY_PLL_NEST4800_MEM1333_LENGTH</id>
+    <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
+    <description>Length of data in ring image for Centaur tp_bndy_pll ring
+      creator: platform
+      firmware notes:
+    </description>
+    <valueType>uint32</valueType>
     <platInit/>
     <persistRuntime/>
   </attribute>
@@ -176,6 +261,18 @@
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>
+    <id>ATTR_MEMB_TP_BNDY_PLL_NEST4800_MEM1600_LENGTH</id>
+    <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
+    <description>Length of data in ring image for Centaur tp_bndy_pll ring
+      creator: platform
+      firmware notes:
+    </description>
+    <valueType>uint32</valueType>
+    <platInit/>
+    <persistRuntime/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
     <id>ATTR_MEMB_TP_BNDY_PLL_NEST4800_MEM1866_DATA</id>
     <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
     <description>Ring image for Centaur tp_bndy_pll ring for nest=4800 mem=1866
@@ -188,6 +285,17 @@
     <persistRuntime/>
   </attribute>
   <!-- ********************************************************************* -->
-
+  <attribute>
+    <id>ATTR_MEMB_TP_BNDY_PLL_NEST4800_MEM1866_LENGTH</id>
+    <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
+    <description>Length of data in ring image for Centaur tp_bndy_pll ring
+      creator: platform
+      firmware notes:
+    </description>
+    <valueType>uint32</valueType>
+    <platInit/>
+    <persistRuntime/>
+  </attribute>
+  <!-- ********************************************************************* -->
 </attributes>
 

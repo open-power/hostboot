@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_scom_addresses.H,v 1.135 2013/03/01 03:05:38 pchatnah Exp $
+// $Id: p8_scom_addresses.H,v 1.139 2013/03/17 22:07:53 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/p8_scom_addresses.H,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
@@ -404,6 +404,8 @@ CONST_UINT64_T( PMC_DEEPEXIT_MASK_WAND_0x000620A0     , ULL(0x000620A0) );
 CONST_UINT64_T( PMC_DEEPEXIT_MASK_WOR_0x000620A1      , ULL(0x000620A1) );
 CONST_UINT64_T( PMC_INTCHP_COMMAND_REG_0x00062014        , ULL(0x00062014) );
 CONST_UINT64_T( PMC_INTCHP_STATUS_REG_0x00062013                    , ULL(0x00062013) );
+CONST_UINT64_T( PMC_INTCHP_CTRL_REG1_0x00062010                    , ULL(0x00062010) );
+CONST_UINT64_T( PMC_INTCHP_CTRL_REG4_0x00062012                    , ULL(0x00062012) );
 CONST_UINT64_T( PMC_PORE_REQ_REG0_0x0006208E                   , ULL(0x0006208E) );
 CONST_UINT64_T( PMC_PARAMETER_REG0_0x00062005         , ULL(0x00062005) );
 CONST_UINT64_T( PMC_O2P_CTRL_STATUS_REG_0x00062061  , ULL (0x00062061));
@@ -847,14 +849,14 @@ CONST_UINT64_T( PB_FIR_MASK_OR_EAST_0x02010C85        , ULL(0x02010C85) );
 CONST_UINT64_T( PB_FIR_ACTION0_EAST_0x02010C86        , ULL(0x02010C86) );
 CONST_UINT64_T( PB_FIR_ACTION1_EAST_0x02010C87        , ULL(0x02010C87) );
 // RAS FIR
-CONST_UINT64_T( PB_RAS_FIR_0x02010C6C                 , ULL(0x02010C6C) );
-CONST_UINT64_T( PB_RAS_FIR_AND_0x02010C6D             , ULL(0x02010C6D) );
-CONST_UINT64_T( PB_RAS_FIR_OR_0x02010C6E              , ULL(0x02010C6E) );
-CONST_UINT64_T( PB_RAS_FIR_MASK_0x02010C6F            , ULL(0x02010C6F) );
-CONST_UINT64_T( PB_RAS_FIR_MASK_AND_0x02010C70        , ULL(0x02010C70) );
-CONST_UINT64_T( PB_RAS_FIR_MASK_OR_0x02010C71         , ULL(0x02010C71) );
-CONST_UINT64_T( PB_RAS_FIR_ACTION0_0x02010C72         , ULL(0x02010C72) );
-CONST_UINT64_T( PB_RAS_FIR_ACTION1_0x02010C73         , ULL(0x02010C73) );
+CONST_UINT64_T( PB_RAS_FIR_0x02010C6E                 , ULL(0x02010C6E) );
+CONST_UINT64_T( PB_RAS_FIR_AND_0x02010C6F             , ULL(0x02010C6F) );
+CONST_UINT64_T( PB_RAS_FIR_OR_0x02010C70              , ULL(0x02010C70) );
+CONST_UINT64_T( PB_RAS_FIR_MASK_0x02010C71            , ULL(0x02010C71) );
+CONST_UINT64_T( PB_RAS_FIR_MASK_AND_0x02010C72        , ULL(0x02010C72) );
+CONST_UINT64_T( PB_RAS_FIR_MASK_OR_0x02010C73         , ULL(0x02010C73) );
+CONST_UINT64_T( PB_RAS_FIR_ACTION0_0x02010C74         , ULL(0x02010C74) );
+CONST_UINT64_T( PB_RAS_FIR_ACTION1_0x02010C75         , ULL(0x02010C75) );
 //------------------------------------------------------------------------------
 //      PLL LOCK
 //------------------------------------------------------------------------------
@@ -912,6 +914,8 @@ CONST_UINT64_T( ADU_PMISC_MODE_0x0202000B             , ULL(0x0202000B) );
 CONST_UINT64_T( ADU_UNTRUSTED_BAR_0x02020015          , ULL(0x02020015) );
 CONST_UINT64_T( ADU_UNTRUSTED_BAR_MASK_0x02020016     , ULL(0x02020016) );
 CONST_UINT64_T( ADU_TBROM_BAR_0x02020017              , ULL(0x02020017) );
+CONST_UINT64_T( ADU_HANG_DIV_0x02020018               , ULL(0x02020018) );
+CONST_UINT64_T( ADU_IOS_LINK_EN_0x02020019            , ULL(0x02020019) );
 
 //------------------------------------------------------------------------------
 //      PCIe
@@ -1421,6 +1425,9 @@ CONST_UINT64_T( EX_L3_FIR_MASK_REG_0x10010803         , ULL(0x10010803) );
 CONST_UINT64_T( EX_L3_FIR_ACTION0_REG_0x10010806      , ULL(0x10010806) );
 CONST_UINT64_T( EX_L3_FIR_ACTION1_REG_0x10010807      , ULL(0x10010807) );
 CONST_UINT64_T( EX_L3_MODE_REG1_0x1001080A            , ULL(0x1001080A) );
+CONST_UINT64_T( EX_L3_BAR1_REG_0x1001080B             , ULL(0x1001080B) );
+CONST_UINT64_T( EX_L3_BAR2_REG_0x10010813             , ULL(0x10010813) );
+CONST_UINT64_T( EX_L3_BAR_GROUP_MASK_REG_0x10010816   , ULL(0x10010816) );
 CONST_UINT64_T( EX_L3_CERRS_RD_EPS_REG_0x10010829     , ULL(0x10010829) );
 CONST_UINT64_T( EX_L3_CERRS_WR_EPS_REG_0x1001082A     , ULL(0x1001082A) );
 CONST_UINT64_T( EX_L3_MODE_REG0_0x1001082B            , ULL(0x1001082B) );
@@ -1817,6 +1824,18 @@ This section is automatically updated by CVS when you check in this file.
 Be sure to create CVS comments when you commit so that they can be included here.
 
 $Log: p8_scom_addresses.H,v $
+Revision 1.139  2013/03/17 22:07:53  jmcgill
+add L3 BAR registers
+
+Revision 1.138  2013/03/07 17:21:18  jmcgill
+add ADU hang divider register
+
+Revision 1.137  2013/03/07 06:29:23  pchatnah
+adding intchip address
+
+Revision 1.136  2013/03/04 02:51:38  jmcgill
+fix PB RAS/EXTFIR addresses, add ADU secure iovalid register
+
 Revision 1.135  2013/03/01 03:05:38  pchatnah
 adding device_id register
 

@@ -64,6 +64,21 @@
 </hwpError>
 <!-- *********************************************************************** -->
 <hwpError>
+  <rc>RC_PROC_XIPC_BUF_PTR_ERROR</rc>
+  <description>Supplied buffer(s) is invalid.</description>
+  <ffdc>DATA_BUF1_PTR</ffdc>
+  <ffdc>DATA_BUF2_PTR</ffdc>
+</hwpError>
+<!-- *********************************************************************** -->
+<hwpError>
+  <rc>RC_PROC_XIPC_BUF_SIZE_NOT_FIXED</rc>
+  <description>Supplied buffer size(s) differs from agreed upon fixed ring buffer size.</description>
+  <ffdc>DATA_BUF1_SIZE</ffdc>
+  <ffdc>DATA_BUF2_SIZE</ffdc>
+  <ffdc>DATA_BUF_SIZE_FIXED</ffdc>
+</hwpError>
+<!-- *********************************************************************** -->
+<hwpError>
   <rc>RC_PROC_XIPC_IMAGE_UPDATE_ERROR</rc>
   <description>Error associated with updating mainstore image.</description>
   <ffdc>RC_LOCAL</ffdc>

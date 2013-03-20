@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_slw_build.C,v 1.10 2013/02/08 02:48:58 cmolsen Exp $
+// $Id: p8_slw_build.C,v 1.21 2013/03/14 03:07:11 cmolsen Exp $
 /*------------------------------------------------------------------------------*/
 /* *! TITLE : p8_slw_build                                                      */
 /* *! DESCRIPTION : Extracts and decompresses delta ring states from EPROM      */
@@ -91,17 +91,15 @@ ReturnCode p8_slw_build( const fapi::Target    &i_target,
                          uint32_t         *io_sizeImageOut)
 {
   ReturnCode rc;
-  uint8_t  l_uint8 = 0;
-  uint32_t ddLevel=0;
-  uint8_t  sysPhase=1; // Build an SLW image.
-    
+  uint8_t   l_uint8 = 0;
+  uint32_t  ddLevel=0;
+  uint8_t   sysPhase=1;
   uint32_t  rcLoc=0, rcSearch=0, i, countWF=0;
   uint32_t  sizeImage=0, sizeImageOutMax, sizeImageTmp, sizeImageOld;
-  //uint8_t   *deltaRingDxed=NULL;
   CompressedScanData *deltaRingRS4=NULL;
   DeltaRingLayout rs4RingLayout;
-  void *nextRing=NULL;
-  uint32_t  ringBitLen=0; //ringByteLen=0, ringTrailBits=0;
+  void  		*nextRing=NULL;
+  uint32_t  ringBitLen=0;
   uint32_t  *wfInline=NULL;
   uint32_t  wfInlineLenInWords;
 	uint64_t  scanMaxRotate=SCAN_ROTATE_DEFAULT;
@@ -232,10 +230,9 @@ ReturnCode p8_slw_build( const fapi::Target    &i_target,
   }
 	FAPI_DBG("Image size (after .pibmem0 delete): %i",sizeImage);
 
-  // ==========================================================================
-  // Get DD level from FAPI attributes.
-  // ==========================================================================
-//  rc = FAPI_ATTR_GET(ATTR_EC, &i_target, l_uint8);
+	//
+	// DD level.
+	//
   rc = FAPI_ATTR_GET_PRIVILEGED(ATTR_EC, &i_target, l_uint8);
   ddLevel = (uint32_t)l_uint8;
   if (rc)  {
@@ -243,8 +240,73 @@ ReturnCode p8_slw_build( const fapi::Target    &i_target,
     return rc;
   }
 
+
+#ifndef IMGBUILD_PPD_IGNORE_XIPC
+  // ==========================================================================
+  // Get various FAPI attributes and variables needed for ring unraveling.
+  // ==========================================================================
+	uint8_t    attrAsyncSafeMode=0, bAsyncSafeMode;
+	uint32_t   attrFuncL3RingList[MAX_FUNC_L3_RING_LIST_ENTRIES]={0};
+	uint8_t    attrFuncL3RingData[MAX_FUNC_L3_RING_SIZE]={0};
+	uint32_t   attrFuncL3RingLength=0;
+	SbeXipItem xipTocItem;
+	uint64_t   xipFuncL3RingVector=0;
+	uint32_t   iEntry;
+
+	// Safe mode status.
+	//
+  rc = FAPI_ATTR_GET(ATTR_PROC_FABRIC_ASYNC_SAFE_MODE, NULL, attrAsyncSafeMode);
+  FAPI_DBG("--> attrAsyncSafeMode = 0x%x ",attrAsyncSafeMode);
+  if (rc)  {
+    FAPI_ERR("FAPI_ATTR_GET(ATTR_PROC_FABRIC_ASYNC_SAFE_MODE) returned error.");
+    return rc;
+  }
+	bAsyncSafeMode = attrAsyncSafeMode;
+  FAPI_DBG("--> bAsyncSafeMode = 0x%x ",bAsyncSafeMode);
+	
+	// Obtain ex_func_l3_ring overlay data and length from attributes.
+	// Obtain ring name and ring's vector location from image.
+	//
+  FAPI_DBG("--> (1) Check if we should modify the ex_func_l3_ring with attribute data.");
+	if (!bAsyncSafeMode)  {
+    FAPI_DBG("--> (1) Yes, we should modify the ex_func_l3_ring with attribute data.");
+		// Get overlay ring from attributes.
+	  rc = FAPI_ATTR_GET(ATTR_PROC_EX_FUNC_L3_DELTA_DATA, &i_target, attrFuncL3RingList);
+	  if (rc)  {
+	    FAPI_ERR("FAPI_ATTR_GET(ATTR_PROC_EX_FUNC_L3_DELTA_DATA) returned error.");
+	    return rc;
+	  }
+	  rc = FAPI_ATTR_GET(ATTR_PROC_EX_FUNC_L3_LENGTH, &i_target, attrFuncL3RingLength);
+	  if (rc)  {
+	    FAPI_ERR("FAPI_ATTR_GET(ATTR_PROC_EX_FUNC_L3_LENGTH) returned error.");
+	    return rc;
+	  }
+		//attrFuncL3RingLength = 0xBEBA;
+		for (iEntry=0; iEntry<MAX_FUNC_L3_RING_LIST_ENTRIES; iEntry++)  {
+			if (attrFuncL3RingList[iEntry]!=0xffff0000)  {
+				attrFuncL3RingData[attrFuncL3RingList[iEntry]>>16] = (uint8_t)((attrFuncL3RingList[iEntry]<<24)>>24);
+			}
+			else
+				break;
+        }
+		FAPI_DBG("Overlay [raw] ring created. ");
+		// Get ring name from xip image.
+		rcLoc = sbe_xip_find((void*)i_imageIn, FUNC_L3_RING_TOC_NAME, &xipTocItem);
+		if (rcLoc)  {
+	    FAPI_ERR("sbe_xip_find() failed w/rc=%i", rcLoc);
+	    FAPI_ERR("Probable cause:");
+	    FAPI_ERR("\tThe keyword (=%s) was not found.", FUNC_L3_RING_TOC_NAME);
+	    uint32_t & RC_LOCAL = rcLoc;
+	    FAPI_SET_HWP_ERROR(rc, RC_PROC_SLWB_KEYWORD_NOT_FOUND_ERROR);
+	    return rc;
+	  }
+		xipFuncL3RingVector = xipTocItem.iv_address;
+	}
+#endif
+
+
   /***************************************************************************
-   *                            SEARCH LOOP - Begin                            *
+   *                          SEARCH LOOP - Begin                            *
    ***************************************************************************/
   do  {
 
@@ -298,6 +360,7 @@ ReturnCode p8_slw_build( const fapi::Target    &i_target,
 											NULL,         // No need to pass a separate out image
 											sizeImageTmp,
 											sysPhase,
+											2, // We're only interested in SRAM mode for non-fixed img.
 											buf1,
 											sizeBuf1,
 											buf2,
@@ -310,9 +373,9 @@ ReturnCode p8_slw_build( const fapi::Target    &i_target,
 			return rc;
 		}
     FAPI_INF("Xip customization done.");
-#endif
-		sizeImageTmp = sizeImageOutMax;
+#else
     // Initialize .slw section with PORE table.
+		sizeImageTmp = sizeImageOutMax;
     rcLoc = initialize_slw_section( i_imageOut,
                                     &sizeImageTmp);
     if (rcLoc)  {
@@ -329,6 +392,8 @@ ReturnCode p8_slw_build( const fapi::Target    &i_target,
 			return rc;
     }
     FAPI_INF("SLW section allocated for Ramming and Scomming tables.");
+#endif
+
     // Update host_runtime_scom pointer to point to sub_slw_runtime_scom
 		rcLoc = update_runtime_scom_pointer( i_imageOut);
 		if (rcLoc==IMGBUILD_ERR_KEYWORD_NOT_FOUND)  {
@@ -373,18 +438,11 @@ ReturnCode p8_slw_build( const fapi::Target    &i_target,
   // Decompress RS4 delta state.
   // ==========================================================================
   FAPI_DBG("--> Decompressing RS4 delta ring.");
-  // Note:  deltaRingDxed is left-aligned. If converting to uint32_t, do BE->LE flip.
-  //deltaRingDxed = NULL;
-  //rcLoc = rs4_decompress( &deltaRingDxed,
-  //                        &ringBitLen,
-  //                        deltaRingRS4);
   rcLoc = _rs4_decompress((uint8_t*)buf2,
                           sizeBuf2,
 													&ringBitLen,
                           deltaRingRS4);
   if (rcLoc)  {
-    //FAPI_ERR("\trs4_decompress() failed: rc=%i",rcLoc);
-    //if (deltaRingDxed)  free(deltaRingDxed);
     FAPI_ERR("\t_rs4_decompress() failed: rc=%i",rcLoc);
     if (buf2)  free(buf2);
 		uint32_t & RC_LOCAL=rcLoc;
@@ -393,6 +451,79 @@ ReturnCode p8_slw_build( const fapi::Target    &i_target,
   }
   FAPI_DBG("\tDecompression successful.\n");
   
+
+#ifndef IMGBUILD_PPD_IGNORE_XIPC
+  // ==========================================================================
+  // CUSTOMIZE item:    Overlay ex_func_l3_ring.
+	// Retrieval method:  Attribute.
+	// Note: Check if ex_func_l3_ring's vector address matches current backPtr.
+	//       If so, perform OR operation with new attribute data for this ring.
+	// Assumptions:
+	// - Base ring only.
+	// - Correct DD level rings only.
+  // ==========================================================================
+	uint8_t   byteExisting=0, byteOverlay=0, bGoodByte=1;
+	uint32_t  iByte, sizeRingInBytes;
+  FAPI_DBG("--> (2) Check if we should modify the ex_func_l3_ring with attribute data.");
+	if (!bAsyncSafeMode)  {
+    FAPI_DBG("--> (2) Yes, we should modify the ex_func_l3_ring with attribute data.");
+		// Find ring match by comparing backItemPtr and ring lengths. Note that
+		//   we can't use fwdPtr for finding a match since we don't know which DD 
+		//   level ring it ended up pointing at.
+		if (xipFuncL3RingVector==myRev64(rs4RingLayout.backItemPtr) &&
+				attrFuncL3RingLength==myRev32(deltaRingRS4->iv_length))  {
+			// Perform OR between the existing ring and attribute ring.
+			sizeRingInBytes = (attrFuncL3RingLength-1)/8 + 1;
+			bGoodByte = 1;
+////			FAPI_DBG("Byte[  # ]: ER  OR  FR ");
+			FAPI_DBG("Byte[  # ]: ER  OR =ER? ");
+			FAPI_DBG("-----------------------");
+			for (iByte=0; (iByte<sizeRingInBytes && bGoodByte); iByte++)  {
+////				FAPI_DBG("Byte[%4i]: %02x ",
+////								iByte,
+////									*((uint8_t*)buf2+iByte));
+				if (*(attrFuncL3RingData+iByte))  {
+					// Check there are 0-bits in the existing byte where there are
+					//   1-bits in the overlay byte.
+					byteExisting = *((uint8_t*)buf2+iByte);
+					byteOverlay  = *(&attrFuncL3RingData[0]+iByte);
+					if (byteExisting!=(byteExisting & ~byteOverlay))  {
+						FAPI_ERR("Byte[%4i]: %02x  %02x  %02x <-violation",iByte,byteExisting,byteOverlay,byteExisting&~byteOverlay);
+						bGoodByte = 0;
+						break;
+					}
+					else  {
+						FAPI_DBG("Byte[%4i]: %02x  %02x  %02x ",iByte,byteExisting,byteOverlay,byteExisting&~byteOverlay);
+					}
+					// Only update existing ring when there's content in overlay data.
+////					FAPI_DBG("Byte[%4i]: %02x  %02x  %02x ",
+////										iByte,
+////										*((uint8_t*)buf2+iByte),
+////										*(&attrFuncL3RingData[0]+iByte),
+////										*((uint8_t*)buf2+iByte) | *(&attrFuncL3RingData[0]+iByte));
+					*((uint8_t*)buf2+iByte) = byteExisting | byteOverlay;
+////					FAPI_DBG("Byte[%4i]:         %02x ",
+////										iByte,
+////										*((uint8_t*)buf2+iByte));
+				}
+////				FAPI_DBG("Byte[%4i]:         %02x ",
+////									iByte,
+////									*((uint8_t*)buf2+iByte));
+			}
+			FAPI_DBG("-----------------------");
+			if (!bGoodByte)  {
+ 			  FAPI_ERR("The existing ex_l3_func_ring has 1-bits in overlay locations. ");
+ 			  if (buf2)  free(buf2);
+				uint32_t & DATA_FAIL_BYTE_NO = iByte;
+				uint8_t & DATA_EXISTING_RING_BYTE = byteExisting;
+				uint8_t & DATA_OVERLAY_RING_BYTE = byteOverlay; 
+ 			  FAPI_SET_HWP_ERROR(rc, RC_PROC_SLWB_L3_FUNC_OVERLAY_ERROR);
+ 			  return rc;
+			}
+		}
+	}
+#endif
+
 
   // ==========================================================================
   // Create Wiggle-Flip Programs (but first resolve max rotate status.)
@@ -423,11 +554,8 @@ ReturnCode p8_slw_build( const fapi::Target    &i_target,
 		FAPI_INF("Continuing...\n");
 	}
 
-#ifdef IMGBUILD_PPD_ENFORCE_SCAN_DELAY
+  // Support for enforcing delay after WF scan write scoms.
   uint64_t waitsScanDelay=10;
-  // Temporary support for enforcing delay after scan WF scoms.
-  // Also remove all references and usages of waitsScanDelay in this file and in
-  //   p8_image_help.C.
   rcLoc = sbe_xip_get_scalar( (void*)i_imageIn, "waits_delay_for_scan", &waitsScanDelay);
   if (rcLoc)  {
 		FAPI_ERR("Error obtaining waits_delay_for_scan keyword.\n");
@@ -436,7 +564,6 @@ ReturnCode p8_slw_build( const fapi::Target    &i_target,
 	  FAPI_SET_HWP_ERROR(rc, RC_PROC_SLWB_UNKNOWN_XIP_ERROR);
 	  return rc;
   }
-#endif
 
 	wfInline = (uint32_t*)buf1;
 	wfInlineLenInWords = sizeBuf1/4;
@@ -444,14 +571,11 @@ ReturnCode p8_slw_build( const fapi::Target    &i_target,
                                   ringBitLen,
                                   myRev32(deltaRingRS4->iv_scanSelect),
                                   (uint32_t)deltaRingRS4->iv_chipletId,
-                                  &wfInline, 
+                                  &wfInline,
                                   &wfInlineLenInWords,
-#ifdef IMGBUILD_PPD_ENFORCE_SCAN_DELAY
+                                  deltaRingRS4->iv_flushOptimization,
 																	(uint32_t)scanMaxRotate,
                                   (uint32_t)waitsScanDelay);
-#else
-																	(uint32_t)scanMaxRotate);
-#endif
 	if (rcLoc)  {
     FAPI_ERR("create_wiggle_flip_prg() failed w/rcLoc=%i",rcLoc);
     //if (deltaRingDxed)  free(deltaRingDxed);
@@ -497,15 +621,6 @@ ReturnCode p8_slw_build( const fapi::Target    &i_target,
   sizeImageOld = sizeImageTmp;
   countWF++;
 
-
-  // ==========================================================================
-  // Clean up
-  // ==========================================================================
-  //if (deltaRingDxed)  free(deltaRingDxed);
-  // 2012-11-14: CMO- Do NOT free buf1 or buf2 here! They are used in xip_customize().
-	//             And once these buffers are actually passed as parms to slw_build,
-	//             stop freeing them inside slw_build!!!!!!!!
-  
   // ==========================================================================
   // Are we done?
   // ==========================================================================
@@ -530,6 +645,7 @@ ReturnCode p8_slw_build( const fapi::Target    &i_target,
 											NULL,         // No need to pass a separate out image
 											sizeImageTmp,
 											sysPhase,
+											2, // We're only interested in SRAM mode for non-fixed img.
 											buf1,
 											sizeBuf1,
 											buf2,
@@ -542,9 +658,9 @@ ReturnCode p8_slw_build( const fapi::Target    &i_target,
 			return rc;
 		}
     FAPI_INF("Xip customization done.");
-#endif
+#else
+		// Initialize .slw section with PORE table.
     sizeImageTmp = sizeImageOutMax;
-    // Initialize .slw section with PORE table.
 		rcLoc = initialize_slw_section( i_imageOut,
                                     &sizeImageTmp);
     if (rcLoc)  {
@@ -561,13 +677,16 @@ ReturnCode p8_slw_build( const fapi::Target    &i_target,
 			return rc;
     }
     FAPI_INF("SLW section initialized for Ramming and Scomming tables.");
-    // Update host_runtime_scom pointer to point to sub_slw_runtime_scom
+#endif
+    
+		// Update host_runtime_scom pointer to point to sub_slw_runtime_scom
 		rcLoc = update_runtime_scom_pointer(i_imageOut);
 		if (rcLoc==IMGBUILD_ERR_KEYWORD_NOT_FOUND)  {
 			uint32_t &RC_LOCAL=rcLoc;
 			FAPI_SET_HWP_ERROR(rc, RC_PROC_SLWB_KEYWORD_NOT_FOUND_ERROR);
 			return rc;
 		}
+		
 		// Report final size.
 		sbe_xip_image_size( i_imageOut, io_sizeImageOut);
     FAPI_INF("Final SLW image size: %i", *io_sizeImageOut);

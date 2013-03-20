@@ -10803,21 +10803,22 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
     <simpleType>
         <uint8_t>
             <default>
-                 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-                 0x00, 0x00, 0xFD, 0x10, 0x44, 0x00, 0x00, 0x00, 0x00, 0x00,
-                 0x00, 0x00, 0x00, 0x00, 0x20, 0x00, 0x20, 0x00, 0x70, 0x00,
-                 0x00, 0x52, 0xC0, 0x30, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-                 0x00, 0x00, 0x80, 0x00, 0x00, 0x19, 0x04, 0x03, 0x00, 0xA0,
-                 0x00, 0x00, 0x02, 0x90, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-                 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-                 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                0x00, 0x00, 0x00, 0x00, 0x04, 0x00, 0x00, 0x00, 0x00, 0x00,
+                0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x20, 0x00, 0x70, 0x00,
+                0x80, 0x51, 0xA7, 0x90, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                0x00, 0x00, 0x80, 0x00, 0x00, 0x1D, 0x96, 0x0C, 0x00, 0xA0,
+                0x00, 0x00, 0x02, 0x90, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+
             </default>
         </uint8_t>
         <array>80</array>
     </simpleType>
-    <persistency>volatile</persistency>
     <readable/>
     <writeable/>
+    <persistency>volatile</persistency>
     <hwpfToHbAttrMap>
         <id>ATTR_MEMB_TP_BNDY_PLL_DATA</id>
         <macro>DIRECT</macro>
@@ -10832,18 +10833,27 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
     </description>
     <simpleType>
         <uint8_t>
-            <default>0</default>
+            <default>
+                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+            </default>
         </uint8_t>
         <array>80</array>
     </simpleType>
-    <persistency>non-volatile</persistency>
     <readable/>
+    <persistency>non-volatile</persistency>
     <hwpfToHbAttrMap>
         <id>ATTR_MEMB_TP_BNDY_PLL_FLUSH</id>
         <macro>DIRECT</macro>
     </hwpfToHbAttrMap>
 </attribute>
-
+ 
 <attribute>
     <id>MEMB_TP_BNDY_PLL_FOR_DCCAL_DATA</id>
     <description>Ring image for Centaur tp_bndy_pll ring
@@ -10852,15 +10862,255 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
     </description>
     <simpleType>
         <uint8_t>
-            <default>0</default>
+            <default>
+                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                0x00, 0x08, 0x00, 0x00, 0x04, 0x00, 0x00, 0x00, 0x00, 0x00,
+                0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x20, 0x00, 0x70, 0x00,
+                0x80, 0x51, 0xA7, 0x90, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                0x00, 0x00, 0x80, 0x00, 0x00, 0x1D, 0x96, 0x0C, 0x00, 0xA0,
+                0x00, 0x00, 0x02, 0x90, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+            </default>
         </uint8_t>
         <array>80</array>
     </simpleType>
-    <persistency>volatile</persistency>
     <readable/>
-    <writeable/>
+    <persistency>non-volatile</persistency>
     <hwpfToHbAttrMap>
         <id>ATTR_MEMB_TP_BNDY_PLL_FOR_DCCAL_DATA</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>MEMB_TP_BNDY_PLL_NEST4000_MEM1066_DATA</id>
+    <description>Ring image for Centaur tp_bndy_pll ring
+      creator: platform
+      firmware notes:
+    </description>
+    <simpleType>
+        <uint8_t>
+            <default>
+                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                0x00, 0x00, 0xFD, 0x10, 0x44, 0x00, 0x00, 0x00, 0x00, 0x00,
+                0x00, 0x00, 0x00, 0x00, 0x20, 0x00, 0x20, 0x00, 0x70, 0x00,
+                0x00, 0x52, 0xC0, 0x30, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                0x00, 0x00, 0x80, 0x00, 0x00, 0x19, 0x04, 0x02, 0x80, 0xA0,
+                0x00, 0x00, 0x02, 0x90, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+            </default>
+        </uint8_t>
+        <array>80</array>
+    </simpleType>
+    <readable/>
+    <persistency>non-volatile</persistency>
+    <hwpfToHbAttrMap>
+        <id>ATTR_MEMB_TP_BNDY_PLL_NEST4000_MEM1066_DATA</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>MEMB_TP_BNDY_PLL_NEST4000_MEM1333_DATA</id>
+    <description>Ring image for Centaur tp_bndy_pll ring
+      creator: platform
+      firmware notes:
+    </description>
+    <simpleType>
+        <uint8_t>
+            <default>
+                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                0x00, 0x00, 0xFD, 0x10, 0x44, 0x00, 0x00, 0x00, 0x00, 0x00,
+                0x00, 0x00, 0x00, 0x00, 0x20, 0x00, 0x20, 0x00, 0x70, 0x00,
+                0x00, 0x52, 0xC0, 0x30, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                0x00, 0x00, 0x80, 0x00, 0x00, 0x19, 0x04, 0x02, 0x80, 0xA0,
+                0x00, 0x00, 0x02, 0x90, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+            </default>
+        </uint8_t>
+        <array>80</array>
+    </simpleType>
+    <readable/>
+    <persistency>non-volatile</persistency>
+    <hwpfToHbAttrMap>
+        <id>ATTR_MEMB_TP_BNDY_PLL_NEST4000_MEM1333_DATA</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>MEMB_TP_BNDY_PLL_NEST4000_MEM1600_DATA</id>
+    <description>Ring image for Centaur tp_bndy_pll ring
+      creator: platform
+      firmware notes:
+    </description>
+    <simpleType>
+        <uint8_t>
+            <default>
+                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                0x00, 0x00, 0xFD, 0x10, 0x44, 0x00, 0x00, 0x00, 0x00, 0x00,
+                0x00, 0x00, 0x00, 0x00, 0x20, 0x00, 0x20, 0x00, 0x70, 0x00,
+                0x00, 0x52, 0xC0, 0x30, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                0x00, 0x00, 0x80, 0x00, 0x00, 0x19, 0x04, 0x03, 0x00, 0xA0,
+                0x00, 0x00, 0x02, 0x90, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+            </default>
+        </uint8_t>
+        <array>80</array>
+    </simpleType>
+    <readable/>
+    <persistency>non-volatile</persistency>
+    <hwpfToHbAttrMap>
+        <id>ATTR_MEMB_TP_BNDY_PLL_NEST4000_MEM1600_DATA</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>MEMB_TP_BNDY_PLL_NEST4000_MEM1866_DATA</id>
+    <description>Ring image for Centaur tp_bndy_pll ring
+      creator: platform
+      firmware notes:
+    </description>
+    <simpleType>
+        <uint8_t>
+            <default>
+                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                0x00, 0x00, 0xFD, 0x10, 0x44, 0x00, 0x00, 0x00, 0x00, 0x00,
+                0x00, 0x00, 0x00, 0x00, 0x20, 0x00, 0x20, 0x00, 0x70, 0x00,
+                0x00, 0x52, 0xC0, 0x30, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                0x00, 0x00, 0x80, 0x00, 0x00, 0x1B, 0x44, 0x03, 0x80, 0xA0,
+                0x00, 0x00, 0x02, 0x90, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+            </default>
+        </uint8_t>
+        <array>80</array>
+    </simpleType>
+    <readable/>
+    <persistency>non-volatile</persistency>
+    <hwpfToHbAttrMap>
+        <id>ATTR_MEMB_TP_BNDY_PLL_NEST4000_MEM1866_DATA</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>MEMB_TP_BNDY_PLL_NEST4800_MEM1066_DATA</id>
+    <description>Ring image for Centaur tp_bndy_pll ring
+      creator: platform
+      firmware notes:
+    </description>
+    <simpleType>
+        <uint8_t>
+            <default>
+                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                0x00, 0x00, 0xFD, 0x10, 0x44, 0x00, 0x00, 0x00, 0x00, 0x00,
+                0x00, 0x00, 0x00, 0x00, 0x20, 0x00, 0x20, 0x00, 0x60, 0x00,
+                0x80, 0x51, 0xA4, 0x30, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                0x00, 0x00, 0x80, 0x00, 0x00, 0x19, 0x04, 0x02, 0x80, 0xA0,
+                0x00, 0x00, 0x02, 0x90, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+            </default>
+        </uint8_t>
+        <array>80</array>
+    </simpleType>
+    <readable/>
+    <persistency>non-volatile</persistency>
+    <hwpfToHbAttrMap>
+        <id>ATTR_MEMB_TP_BNDY_PLL_NEST4800_MEM1066_DATA</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>MEMB_TP_BNDY_PLL_NEST4800_MEM1333_DATA</id>
+    <description>Ring image for Centaur tp_bndy_pll ring
+      creator: platform
+      firmware notes:
+    </description>
+    <simpleType>
+        <uint8_t>
+            <default>
+                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                0x00, 0x00, 0xFD, 0x10, 0x44, 0x00, 0x00, 0x00, 0x00, 0x00,
+                0x00, 0x00, 0x00, 0x00, 0x20, 0x00, 0x20, 0x00, 0x60, 0x00,
+                0x80, 0x51, 0xA4, 0x30, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                0x00, 0x00, 0x80, 0x00, 0x00, 0x19, 0x04, 0x02, 0x80, 0xA0,
+                0x00, 0x00, 0x02, 0x90, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+            </default>
+        </uint8_t>
+        <array>80</array>
+    </simpleType>
+    <readable/>
+    <persistency>non-volatile</persistency>
+    <hwpfToHbAttrMap>
+        <id>ATTR_MEMB_TP_BNDY_PLL_NEST4800_MEM1333_DATA</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>MEMB_TP_BNDY_PLL_NEST4800_MEM1600_DATA</id>
+    <description>Ring image for Centaur tp_bndy_pll ring
+      creator: platform
+      firmware notes:
+    </description>
+    <simpleType>
+        <uint8_t>
+            <default>
+                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                0x00, 0x00, 0xFD, 0x10, 0x44, 0x00, 0x00, 0x00, 0x00, 0x00,
+                0x00, 0x00, 0x00, 0x00, 0x20, 0x00, 0x20, 0x00, 0x60, 0x00,
+                0x80, 0x51, 0xA4, 0x30, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                0x00, 0x00, 0x80, 0x00, 0x00, 0x19, 0x04, 0x03, 0x00, 0xA0,
+                0x00, 0x00, 0x02, 0x90, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+            </default>
+        </uint8_t>
+        <array>80</array>
+    </simpleType>
+    <readable/>
+    <persistency>non-volatile</persistency>
+    <hwpfToHbAttrMap>
+        <id>ATTR_MEMB_TP_BNDY_PLL_NEST4800_MEM1600_DATA</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>MEMB_TP_BNDY_PLL_NEST4800_MEM1866_DATA</id>
+    <description>Ring image for Centaur tp_bndy_pll ring
+      creator: platform
+      firmware notes:
+    </description>
+    <simpleType>
+        <uint8_t>
+            <default>
+                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                0x00, 0x00, 0xFD, 0x10, 0x44, 0x00, 0x00, 0x00, 0x00, 0x00,
+                0x00, 0x00, 0x00, 0x00, 0x20, 0x00, 0x20, 0x00, 0x60, 0x00,
+                0x80, 0x51, 0xA4, 0x30, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                0x00, 0x00, 0x80, 0x00, 0x00, 0x1B, 0x44, 0x03, 0x80, 0xA0,
+                0x00, 0x00, 0x02, 0x90, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+            </default>
+        </uint8_t>
+        <array>80</array>
+    </simpleType>
+    <readable/>
+    <persistency>non-volatile</persistency>
+    <hwpfToHbAttrMap>
+        <id>ATTR_MEMB_TP_BNDY_PLL_NEST4800_MEM1866_DATA</id>
         <macro>DIRECT</macro>
     </hwpfToHbAttrMap>
 </attribute>
@@ -10872,14 +11122,185 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
       firmware notes:
     </description>
     <simpleType>
-      <uint32_t>
-            <default>0x000001ba</default>
-      </uint32_t>
+        <uint32_t>
+            <default>0x1BA</default>
+        </uint32_t>
     </simpleType>
-    <persistency>non-volatile</persistency>
     <readable/>
+    <persistency>non-volatile</persistency>
     <hwpfToHbAttrMap>
         <id>ATTR_MEMB_TP_BNDY_PLL_LENGTH</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>MEMB_TP_BNDY_PLL_FOR_DCCAL_LENGTH</id>
+    <description>Length of data in ring image for Centaur tp_bndy_pll ring
+      creator: platform
+      firmware notes:
+    </description>
+    <simpleType>
+        <uint32_t>
+            <default>0x1BA</default>
+        </uint32_t>
+    </simpleType>
+    <readable/>
+    <persistency>non-volatile</persistency>
+    <hwpfToHbAttrMap>
+        <id>ATTR_MEMB_TP_BNDY_PLL_FOR_DCCAL_LENGTH</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>MEMB_TP_BNDY_PLL_NEST4000_MEM1066_LENGTH</id>
+    <description>Length of data in ring image for Centaur tp_bndy_pll ring
+      creator: platform
+      firmware notes:
+    </description>
+    <simpleType>
+        <uint32_t>
+            <default>0x1BA</default>
+        </uint32_t>
+    </simpleType>
+    <readable/>
+    <persistency>non-volatile</persistency>
+    <hwpfToHbAttrMap>
+        <id>ATTR_MEMB_TP_BNDY_PLL_NEST4000_MEM1066_LENGTH</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>MEMB_TP_BNDY_PLL_NEST4000_MEM1333_LENGTH</id>
+    <description>Length of data in ring image for Centaur tp_bndy_pll ring
+      creator: platform
+      firmware notes:
+    </description>
+    <simpleType>
+        <uint32_t>
+            <default>0x1BA</default>
+        </uint32_t>
+    </simpleType>
+    <readable/>
+    <persistency>non-volatile</persistency>
+    <hwpfToHbAttrMap>
+        <id>ATTR_MEMB_TP_BNDY_PLL_NEST4000_MEM1333_LENGTH</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>MEMB_TP_BNDY_PLL_NEST4000_MEM1600_LENGTH</id>
+    <description>Length of data in ring image for Centaur tp_bndy_pll ring
+      creator: platform
+      firmware notes:
+    </description>
+    <simpleType>
+        <uint32_t>
+            <default>0x1BA</default>
+        </uint32_t>
+    </simpleType>
+    <readable/>
+    <persistency>non-volatile</persistency>
+    <hwpfToHbAttrMap>
+        <id>ATTR_MEMB_TP_BNDY_PLL_NEST4000_MEM1600_LENGTH</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>MEMB_TP_BNDY_PLL_NEST4000_MEM1866_LENGTH</id>
+    <description>Length of data in ring image for Centaur tp_bndy_pll ring
+      creator: platform
+      firmware notes:
+    </description>
+    <simpleType>
+        <uint32_t>
+            <default>0x1BA</default>
+        </uint32_t>
+    </simpleType>
+    <readable/>
+    <persistency>non-volatile</persistency>
+    <hwpfToHbAttrMap>
+        <id>ATTR_MEMB_TP_BNDY_PLL_NEST4000_MEM1866_LENGTH</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>MEMB_TP_BNDY_PLL_NEST4800_MEM1066_LENGTH</id>
+    <description>Length of data in ring image for Centaur tp_bndy_pll ring
+      creator: platform
+      firmware notes:
+    </description>
+    <simpleType>
+        <uint32_t>
+            <default>0x1BA</default>
+        </uint32_t>
+    </simpleType>
+    <readable/>
+    <persistency>non-volatile</persistency>
+    <hwpfToHbAttrMap>
+        <id>ATTR_MEMB_TP_BNDY_PLL_NEST4800_MEM1066_LENGTH</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>MEMB_TP_BNDY_PLL_NEST4800_MEM1333_LENGTH</id>
+    <description>Length of data in ring image for Centaur tp_bndy_pll ring
+      creator: platform
+      firmware notes:
+    </description>
+    <simpleType>
+        <uint32_t>
+            <default>0x1BA</default>
+        </uint32_t>
+    </simpleType>
+    <readable/>
+    <persistency>non-volatile</persistency>
+    <hwpfToHbAttrMap>
+        <id>ATTR_MEMB_TP_BNDY_PLL_NEST4800_MEM1333_LENGTH</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>MEMB_TP_BNDY_PLL_NEST4800_MEM1600_LENGTH</id>
+    <description>Length of data in ring image for Centaur tp_bndy_pll ring
+      creator: platform
+      firmware notes:
+    </description>
+    <simpleType>
+        <uint32_t>
+            <default>0x1BA</default>
+        </uint32_t>
+    </simpleType>
+    <readable/>
+    <persistency>non-volatile</persistency>
+    <hwpfToHbAttrMap>
+        <id>ATTR_MEMB_TP_BNDY_PLL_NEST4800_MEM1600_LENGTH</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>MEMB_TP_BNDY_PLL_NEST4800_MEM1866_LENGTH</id>
+    <description>Length of data in ring image for Centaur tp_bndy_pll ring
+      creator: platform
+      firmware notes:
+    </description>
+    <simpleType>
+        <uint32_t>
+            <default>0x1BA</default>
+        </uint32_t>
+    </simpleType>
+    <readable/>
+    <persistency>non-volatile</persistency>
+    <hwpfToHbAttrMap>
+        <id>ATTR_MEMB_TP_BNDY_PLL_NEST4800_MEM1866_LENGTH</id>
         <macro>DIRECT</macro>
     </hwpfToHbAttrMap>
 </attribute>
@@ -10891,180 +11312,14 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
       firmware notes:
     </description>
     <simpleType>
-        <uint32_t></uint32_t>
+        <uint32_t>
+            <default>0x00100008</default>
+        </uint32_t>
     </simpleType>
-    <persistency>non-volatile</persistency>
     <readable/>
+    <persistency>non-volatile</persistency>
     <hwpfToHbAttrMap>
         <id>ATTR_MEMB_TP_BNDY_PLL_SCAN_SELECT</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
-    <id>MEMB_TP_BNDY_PLL_NEST4000_MEM1066_DATA</id>
-    <description>Ring image for Centaur tp_bndy_pll ring for nest=4000 mem=1066
-      creator: platform
-      firmware notes:
-    </description>
-    <simpleType>
-        <uint8_t>
-            <default>0</default>
-        </uint8_t>
-        <array>80</array>
-    </simpleType>
-    <persistency>volatile</persistency>
-    <readable/>
-    <writeable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_MEMB_TP_BNDY_PLL_NEST4000_MEM1066_DATA</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
-    <id>MEMB_TP_BNDY_PLL_NEST4000_MEM1333_DATA</id>
-    <description>Ring image for Centaur tp_bndy_pll ring for nest=4000 mem=1333
-      creator: platform
-      firmware notes:
-    </description>
-    <simpleType>
-        <uint8_t>
-            <default>0</default>
-        </uint8_t>
-        <array>80</array>
-    </simpleType>
-    <persistency>volatile</persistency>
-    <readable/>
-    <writeable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_MEMB_TP_BNDY_PLL_NEST4000_MEM1333_DATA</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
-    <id>MEMB_TP_BNDY_PLL_NEST4000_MEM1600_DATA</id>
-    <description>Ring image for Centaur tp_bndy_pll ring for nest=4000 mem=1600
-      creator: platform
-      firmware notes:
-    </description>
-    <simpleType>
-        <uint8_t>
-            <default>0</default>
-        </uint8_t>
-        <array>80</array>
-    </simpleType>
-    <persistency>volatile</persistency>
-    <readable/>
-    <writeable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_MEMB_TP_BNDY_PLL_NEST4000_MEM1600_DATA</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
-    <id>MEMB_TP_BNDY_PLL_NEST4000_MEM1866_DATA</id>
-    <description>Ring image for Centaur tp_bndy_pll ring for nest=4000 mem=1866
-      creator: platform
-      firmware notes:
-    </description>
-    <simpleType>
-        <uint8_t>
-            <default>0</default>
-        </uint8_t>
-        <array>80</array>
-    </simpleType>
-    <persistency>volatile</persistency>
-    <readable/>
-    <writeable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_MEMB_TP_BNDY_PLL_NEST4000_MEM1866_DATA</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
-    <id>MEMB_TP_BNDY_PLL_NEST4800_MEM1066_DATA</id>
-    <description>Ring image for Centaur tp_bndy_pll ring for nest=4800 mem=1066
-      creator: platform
-      firmware notes:
-    </description>
-    <simpleType>
-        <uint8_t>
-            <default>0</default>
-        </uint8_t>
-        <array>80</array>
-    </simpleType>
-    <persistency>volatile</persistency>
-    <readable/>
-    <writeable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_MEMB_TP_BNDY_PLL_NEST4800_MEM1066_DATA</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
-    <id>MEMB_TP_BNDY_PLL_NEST4800_MEM1333_DATA</id>
-    <description>Ring image for Centaur tp_bndy_pll ring for nest=4800 mem=1333
-      creator: platform
-      firmware notes:
-    </description>
-    <simpleType>
-        <uint8_t>
-            <default>0</default>
-        </uint8_t>
-        <array>80</array>
-    </simpleType>
-    <persistency>volatile</persistency>
-    <readable/>
-    <writeable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_MEMB_TP_BNDY_PLL_NEST4800_MEM1333_DATA</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
-    <id>MEMB_TP_BNDY_PLL_NEST4800_MEM1600_DATA</id>
-    <description>Ring image for Centaur tp_bndy_pll ring for nest=4800 mem=1600
-      creator: platform
-      firmware notes:
-    </description>
-    <simpleType>
-        <uint8_t>
-            <default>0</default>
-        </uint8_t>
-        <array>80</array>
-    </simpleType>
-    <persistency>volatile</persistency>
-    <readable/>
-    <writeable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_MEMB_TP_BNDY_PLL_NEST4800_MEM1600_DATA</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
-    <id>MEMB_TP_BNDY_PLL_NEST4800_MEM1866_DATA</id>
-    <description>Ring image for Centaur tp_bndy_pll ring for nest=4800 mem=1866
-      creator: platform
-      firmware notes:
-    </description>
-    <simpleType>
-        <uint8_t>
-            <default>0</default>
-        </uint8_t>
-        <array>80</array>
-    </simpleType>
-    <persistency>volatile</persistency>
-    <readable/>
-    <writeable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_MEMB_TP_BNDY_PLL_NEST4800_MEM1866_DATA</id>
         <macro>DIRECT</macro>
     </hwpfToHbAttrMap>
 </attribute>

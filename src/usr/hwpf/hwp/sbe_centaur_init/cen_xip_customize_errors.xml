@@ -1,0 +1,67 @@
+<!-- IBM_PROLOG_BEGIN_TAG                                                   -->
+<!-- This is an automatically generated prolog.                             -->
+<!--                                                                        -->
+<!-- $Source: src/usr/hwpf/hwp/sbe_centaur_init/cen_xip_customize_errors.xml $ -->
+<!--                                                                        -->
+<!-- IBM CONFIDENTIAL                                                       -->
+<!--                                                                        -->
+<!-- COPYRIGHT International Business Machines Corp. 2013                   -->
+<!--                                                                        -->
+<!-- p1                                                                     -->
+<!--                                                                        -->
+<!-- Object Code Only (OCO) source materials                                -->
+<!-- Licensed Internal Code Source Materials                                -->
+<!-- IBM HostBoot Licensed Internal Code                                    -->
+<!--                                                                        -->
+<!-- The source code for this program is not published or otherwise         -->
+<!-- divested of its trade secrets, irrespective of what has been           -->
+<!-- deposited with the U.S. Copyright Office.                              -->
+<!--                                                                        -->
+<!-- Origin: 30                                                             -->
+<!--                                                                        -->
+<!-- IBM_PROLOG_END_TAG                                                     -->
+<!-- Error definitions for proc_slw_build procedure -->
+<hwpErrors>
+<!-- *********************************************************************** -->
+<hwpError>
+  <rc>RC_CEN_XIPC_UNSPECIFIED_IMAGE_ERR</rc>
+  <description>Unspecified image error. Check sbe_xip_image.h for meaning of local rcLoc.</description>
+  <ffdc>RC_LOCAL</ffdc>
+</hwpError>
+<!-- *********************************************************************** -->
+<hwpError>
+  <rc>RC_CEN_XIPC_IMAGE_SIZE_MISMATCH</rc>
+  <description>Supplied image size differs from size in image header in MS.</description>
+  <ffdc>DATA_IMG_SIZE_INP</ffdc>
+  <ffdc>DATA_IMG_SIZE</ffdc>
+</hwpError>
+<!-- *********************************************************************** -->
+<hwpError>
+  <rc>RC_CEN_XIPC_PLL_RING_SIZE_TOO_LARGE</rc>
+  <description>PLL ring size returned from attribute is too large.</description>
+  <ffdc>DATA_ATTRIBUTE_RING_SIZE</ffdc>
+  <ffdc>DATA_MAX_PLL_RING_SIZE</ffdc>
+	<ffdc>DATA_SIZE_OF_BUF1</ffdc>
+</hwpError>
+<!-- *********************************************************************** -->
+<hwpError>
+  <rc>RC_CEN_XIPC_IMGBUILD_ERROR</rc>
+  <description>Local IMGBUILD_xyz error from non-FAPI image build routine. Check rcLoc code in p8_delta_scan_rw.h.</description>
+  <ffdc>RC_LOCAL</ffdc>
+</hwpError>
+<!-- *********************************************************************** -->
+<hwpError>
+  <rc>RC_CEN_XIPC_PLL_RING_BLOCK_TOO_LARGE</rc>
+  <description>PLL ring block is too large.</description>
+  <ffdc>DATA_RING_BLOCK_SIZEOFTHIS</ffdc>
+	<ffdc>DATA_SIZE_OF_BUF1</ffdc>
+</hwpError>
+<!-- *********************************************************************** -->
+<hwpError>
+  <rc>RC_CEN_XIPC_RING_BLOCK_ALIGN_ERROR</rc>
+  <description>Problem with WF PLL ring block alignment.</description>
+  <ffdc>DATA_RING_BLOCK_ENTRYOFFSET</ffdc>
+  <ffdc>DATA_RING_BLOCK_SIZEOFTHIS</ffdc>
+</hwpError>
+<!-- *********************************************************************** -->
+</hwpErrors>

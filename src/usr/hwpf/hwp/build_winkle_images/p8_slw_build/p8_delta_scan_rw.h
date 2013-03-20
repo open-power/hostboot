@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_delta_scan_rw.h,v 1.35 2013/02/13 00:24:08 cmolsen Exp $
+// $Id: p8_delta_scan_rw.h,v 1.38 2013/03/06 18:21:46 cmolsen Exp $
 #define OVERRIDE_OFFSET 8            // Byte offset of forward pointer's addr relative 
                                      //   to base forward pointer's addr.
 #define SIZE_IMAGE_BUF_MAX      5000000 // Max ~50MB image buffer size.
@@ -36,10 +36,13 @@
 #define L2_SINGLE_MEMBER_ENABLE_TOC_NAME  "l2_single_member_enable_mask"
 #define PROC_PIB_REPR_VECTOR_TOC_NAME     "proc_sbe_pibmem_repair_vector"
 #define NEST_SKEWADJUST_VECTOR_TOC_NAME   "proc_sbe_nest_skewadjust_vector"
-#define MAX_PLL_RING_SIZE                 128 // Bytes
+#define MAX_PLL_RING_SIZE                  128 // Bytes
 #define PERV_BNDY_PLL_RING_TOC_NAME       "perv_bndy_pll_ring"
 #define PERV_BNDY_PLL_RING_ALT_TOC_NAME   "perv_bndy_pll_ring_alt"
-#define MAX_CEN_PLL_RING_SIZE             80 // Bytes
+#define MAX_FUNC_L3_RING_LIST_ENTRIES     64  
+#define MAX_FUNC_L3_RING_SIZE             7000 // Bytes
+#define FUNC_L3_RING_TOC_NAME             "ex_func_l3_ring"
+#define MAX_CEN_PLL_RING_SIZE               80 // Bytes
 #define TP_PLL_BNDY_RING_ALT_TOC_NAME     "tp_pll_bndy_ring_alt"
 
 /*****  Scan setting  *****/
@@ -233,12 +236,9 @@ int  create_wiggle_flip_prg(
               uint32_t   i_chipletID,
               uint32_t   **o_wfInline,
               uint32_t   *o_wfInlineLenInWords,
-#ifdef IMGBUILD_PPD_ENFORCE_SCAN_DELAY
+              uint8_t    i_flushOptimization,
 							uint32_t   i_scanMaxRotate,
               uint32_t   i_waitsScanDelay);
-#else
-							uint32_t   i_scanMaxRotate);
-#endif
 
 uint64_t calc_ring_layout_entry_offset(
 							uint8_t  i_typeRingLayout,

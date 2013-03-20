@@ -56,6 +56,7 @@ OBJS =  build_winkle_images.o   \
         sbe_xip_image.o         \
         p8_pore_table_static_data.o   \
         p8_pore_table_gen_api.o \
+        p8_pore_table_gen_api_fixed.o \
         p8_pmc_deconfig_setup.o \
         p8_poreslw_init.o       \
         p8_set_pore_bar.o       \

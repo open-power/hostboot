@@ -237,6 +237,7 @@ const DepModInfo  g_istep10Dependancies = {
         DEP_LIB(libsbe_centaur_init.so),
         DEP_LIB(libfapiporeve.so),
         DEP_LIB(libporeve.so),
+        DEP_LIB(libbuild_winkle_images.so),
         { 0 },
     }
 };

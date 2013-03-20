@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_image_help.C,v 1.48 2013/02/13 00:22:12 cmolsen Exp $
+// $Id: p8_image_help.C,v 1.52 2013/03/01 22:24:11 cmolsen Exp $
 //
 /*------------------------------------------------------------------------------*/
 /* *! TITLE : p8_image_help.C                                                   */
@@ -123,12 +123,9 @@ int create_wiggle_flip_prg( uint32_t *i_deltaRing,          // scan ring delta s
                             uint32_t i_chipletID,           // Chiplet ID
                             uint32_t **o_wfInline,          // location of the PORE instructions data stream
                             uint32_t *o_wfInlineLenInWords, // final length of data stream
-#ifdef IMGBUILD_PPD_ENFORCE_SCAN_DELAY
+                            uint8_t  i_flushOptimization,   // flush optimize or not
 														uint32_t i_scanMaxRotate,       // Max rotate bit len on 38xxx, or polling threshold on 39xxx.
                             uint32_t i_waitsScanDelay)      // Temporary debug support.
-#else
-														uint32_t i_scanMaxRotate)       // Max rotate bit len on 38xxx, or polling threshold on 39xxx.
-#endif
 {
   uint32_t rc=0;
   uint32_t i=0;
@@ -227,27 +224,15 @@ int create_wiggle_flip_prg( uint32_t *i_deltaRing,          // scan ring delta s
     return ctx.error;
   }
 
-#ifdef IMGBUILD_PPD_WF_WORST_CASE_PIB
-  uint32_t poreCTR=0;
-	// Save CTR value and restore it when done.
-/*
-  pore_MV(&ctx, A1, CTR);
-  if (ctx.error > 0)  {
-    MY_ERR("***WORST CASE PIB(1) rc = %d", ctx.error);
-    return ctx.error;
-  }
-*/
-#endif
-
 	// Preload the scan data/shift reg with the scan header check word.
   //
   pore_imm64b = ((uint64_t)scanRingCheckWord) << 32;
 //  pore_LI(&ctx, D0, pore_imm64b );
 //  pore_STD(&ctx, D0, scanRing_baseAddr, P0);
 	pore_STI(&ctx, scanRing_baseAddr, P0, pore_imm64b);
-#ifdef IMGBUILD_PPD_ENFORCE_SCAN_DELAY
-  pore_WAITS(&ctx, i_waitsScanDelay);
-#endif
+  if (i_waitsScanDelay)  {
+    pore_WAITS(&ctx, i_waitsScanDelay);
+  }
   if (ctx.error > 0)  {
     MY_ERR("***STI(1) rc = %d", ctx.error);
     return ctx.error;
@@ -314,35 +299,13 @@ int create_wiggle_flip_prg( uint32_t *i_deltaRing,          // scan ring delta s
           return ctx.error;
         }
 #else
-#ifdef IMGBUILD_PPD_WF_WORST_CASE_PIB
-				PoreInlineLocation  srcwc1=0,tgtwc1=0;
-				poreCTR = rotateLen/i_scanMaxRotate-1;
-				if (poreCTR>=0)  {
-					scanRing_poreAddr = scanRing_baseAddr | i_scanMaxRotate;
-					pore_LS(&ctx, CTR, poreCTR);
-					PORE_LOCATION(&ctx, tgtwc1);
-        	pore_LD(&ctx, D0, scanRing_poreAddr, P1);
-					PORE_LOCATION(&ctx, srcwc1);
-					pore_LOOP(&ctx, tgtwc1);
-					pore_inline_branch_fixup(&ctx, srcwc1, tgtwc1);
-				}
-				scanRing_poreAddr = scanRing_baseAddr | (rotateLen-i_scanMaxRotate*(poreCTR+1));
-        pore_LD(&ctx, D0, scanRing_poreAddr, P1);
-        if (ctx.error > 0)  {
-          MY_ERR("***WORST CASE PIB(1) rc = %d", ctx.error);
-          return ctx.error;
-        }  
-#else
         scanRing_poreAddr = scanRing_baseAddr | rotateLen;
         pore_LD(&ctx, D0, scanRing_poreAddr, P1);
-#ifdef IMGBUILD_PPD_ENFORCE_SCAN_DELAY
 //        pore_WAITS(&ctx, i_waitsScanDelay);
-#endif
         if (ctx.error > 0)  {
           MY_ERR("***LD D0 rc = %d", ctx.error);
           return ctx.error;
         }  
-#endif
 #endif
 
       } // End of if (rotateLen>0)
@@ -362,38 +325,55 @@ int create_wiggle_flip_prg( uint32_t *i_deltaRing,          // scan ring delta s
         //   current shift register content when loaded.
         // --------------------------------------------------------------------
         // Take snapshot of present content of shift reg and put in D1.
-        pore_LD(&ctx, D1, scanRing_baseAddr, P1);
-#ifdef IMGBUILD_PPD_ENFORCE_SCAN_DELAY
-//        pore_WAITS(&ctx, i_waitsScanDelay);
-#endif
-        // Calculate shift reg cleanup mask and put in D0. The intent is to
-        //   clear bit in the ring data positions while keeping any header
-        //   check word content untouched.
-        clean_up_shift_reg_mask = 0xffffffff>>bitShift;
-        pore_imm64b = ((uint64_t)clean_up_shift_reg_mask) << 32;
-        pore_LI(&ctx, D0, pore_imm64b );
-        // Cleanup shift register snapshot and put in D1.
-        pore_AND(&ctx, D1, D0, D1);
-        // Put ring data in D0. Note, any dirty content was removed earlier.
-        pore_imm64b = ((uint64_t)myRev32(i_deltaRing[i])) << 32;
-        pore_LI(&ctx, D0, pore_imm64b );
-        // Finally, combine the ring data and the shift reg content and put in D0.
-        pore_OR(&ctx, D0, D0, D1);
-				pore_STD(&ctx, D0, scanRing_poreAddr, P0);
+        if (i_flushOptimization)  {
+          pore_LD(&ctx, D1, scanRing_baseAddr, P1);
+//          pore_WAITS(&ctx, i_waitsScanDelay);
+          // Calculate shift reg cleanup mask and put in D0. The intent is to
+          //   clear bit in the ring data positions while keeping any header
+          //   check word content untouched.
+          clean_up_shift_reg_mask = 0xffffffff>>bitShift;
+          pore_imm64b = ((uint64_t)clean_up_shift_reg_mask) << 32;
+          pore_LI(&ctx, D0, pore_imm64b );
+          // Cleanup shift register snapshot and put in D1.
+          pore_AND(&ctx, D1, D0, D1);
+          // Put ring data in D0. 
+          // Note, any dirty content was removed earlier.
+          pore_imm64b = ((uint64_t)myRev32(i_deltaRing[i])) << 32;
+          pore_LI(&ctx, D0, pore_imm64b );
+          // Finally, combine the ring data and the shift reg content and put in D0.
+          pore_OR(&ctx, D0, D0, D1);
+				  pore_STD(&ctx, D0, scanRing_poreAddr, P0);
+        }
+        else  {
+          pore_LD(&ctx, D1, scanRing_baseAddr, P1);
+          // Bring ring data in as an immediate. 
+          // Note, any dirty content was removed earlier.
+          pore_imm64b = ((uint64_t)myRev32(i_deltaRing[i])) << 32;
+          pore_XORI(&ctx, D0, D1, pore_imm64b);
+          pore_STD(&ctx, D0, scanRing_poreAddr, P0);
+        }
       }
       else  {
         // --------------------------------------------------------------------
         // Not the last word OR the last word has exactly 32-bit of ring data.
         // --------------------------------------------------------------------
-        pore_imm64b = ((uint64_t)myRev32(i_deltaRing[i])) << 32;
-//        pore_LI(&ctx, D0, pore_imm64b );
-				pore_STI(&ctx, scanRing_poreAddr, P0, pore_imm64b);
+        if (i_flushOptimization)  {
+          pore_imm64b = ((uint64_t)myRev32(i_deltaRing[i])) << 32;
+        // Shift it in by bitShift bits.
+//          pore_LI(&ctx, D0, pore_imm64b );
+//          pore_STD(&ctx, D0, scanRing_poreAddr, P0);
+		  		pore_STI(&ctx, scanRing_poreAddr, P0, pore_imm64b);
+        }
+        else  {
+          pore_LD(&ctx, D1, scanRing_baseAddr, P1);
+          pore_imm64b = ((uint64_t)myRev32(i_deltaRing[i])) << 32;
+          pore_XORI(&ctx, D0, D1, pore_imm64b);
+          pore_STD(&ctx, D0, scanRing_poreAddr, P0);
+        }
       }
-      // Shift it in by bitShift bits.
-//      pore_STD(&ctx, D0, scanRing_poreAddr, P0);
-#ifdef IMGBUILD_PPD_ENFORCE_SCAN_DELAY
-      pore_WAITS(&ctx, i_waitsScanDelay);
-#endif
+      if (i_waitsScanDelay)  {
+        pore_WAITS(&ctx, i_waitsScanDelay);
+      }
       if (ctx.error > 0)  {
         MY_ERR("***STI(2) (or STD) rc = %d", ctx.error);
         return ctx.error;
@@ -436,17 +416,11 @@ int create_wiggle_flip_prg( uint32_t *i_deltaRing,          // scan ring delta s
         rotateLen = rotateLen - SCAN_MAX_ROTATE_LONG;
 	  	}
 #else
-#ifdef IMGBUILD_PPD_WF_WORST_CASE_PIB
-      // There is no max rotateLen issue in this case since we rotate 32 bits
-			// at a time.
-#else
       if (rotateLen>i_scanMaxRotate)  {
         //scanRing_poreAddr = scanRing_baseAddr | rotateLen;
         scanRing_poreAddr = scanRing_baseAddr | i_scanMaxRotate;
         pore_LD(&ctx, D0, scanRing_poreAddr, P1);
-#ifdef IMGBUILD_PPD_ENFORCE_SCAN_DELAY
 //        pore_WAITS(&ctx, i_waitsScanDelay);
-#endif
         if (ctx.error > 0)  {
           MY_ERR("***LD D0 rc = %d", ctx.error);
           return ctx.error;
@@ -454,7 +428,6 @@ int create_wiggle_flip_prg( uint32_t *i_deltaRing,          // scan ring delta s
         //rotateLen = 0;
         rotateLen = rotateLen - i_scanMaxRotate;
       }
-#endif
 #endif
 
     } //end of else (i_deltaRing==0)
@@ -492,50 +465,16 @@ int create_wiggle_flip_prg( uint32_t *i_deltaRing,          // scan ring delta s
     }
 		rotateLen=0;
 #else
-#ifdef IMGBUILD_PPD_WF_WORST_CASE_PIB
-		PoreInlineLocation  srcwc2=0,tgtwc2=0;
-		poreCTR = rotateLen/i_scanMaxRotate-1;
-		if (poreCTR>=0)  {
-			scanRing_poreAddr = scanRing_baseAddr | i_scanMaxRotate;
-			pore_LS(&ctx, CTR, poreCTR);
-			PORE_LOCATION(&ctx, tgtwc2);
-    	pore_LD(&ctx, D0, scanRing_poreAddr, P1);
-			PORE_LOCATION(&ctx, srcwc2);
-			pore_LOOP(&ctx, tgtwc2);
-			pore_inline_branch_fixup(&ctx, srcwc2, tgtwc2);
-		}
-		scanRing_poreAddr = scanRing_baseAddr | (rotateLen-i_scanMaxRotate*(poreCTR+1));
-    pore_LD(&ctx, D0, scanRing_poreAddr, P1);
-    if (ctx.error > 0)  {
-      MY_ERR("***WORST CASE PIB(2) rc = %d", ctx.error);
-      return ctx.error;
-    }
-		rotateLen=0;
-#else
     scanRing_poreAddr=scanRing_baseAddr | rotateLen;
     pore_LD(&ctx, D0, scanRing_poreAddr, P1);
-#ifdef IMGBUILD_PPD_ENFORCE_SCAN_DELAY
 //    pore_WAITS(&ctx, i_waitsScanDelay);
-#endif
     if (ctx.error > 0)  {
       MY_ERR("***LD D0 rc = %d", ctx.error);
       return ctx.error;
     }
     rotateLen=0;
 #endif
-#endif
   }
-
-/*
-#ifdef IMGBUILD_PPD_WF_WORST_CASE_PIB
-  // Restore CTR value.
-	pore_MV(&ctx, CTR, A1);
-  if (ctx.error > 0)  {
-    MY_ERR("***WORST CASE PIB(5) rc = %d", ctx.error);
-    return ctx.error;
-  }
-#endif
-*/
 
   // Finally, check that our header check word went through in one piece.
   // Note, we first do the MC-READ-AND check, then the MC-READ-OR check
@@ -567,9 +506,7 @@ int create_wiggle_flip_prg( uint32_t *i_deltaRing,          // scan ring delta s
   }
   // ...Load the output check word...
   pore_LD(&ctx, D0, scanRing_baseAddr, P1);
-#ifdef IMGBUILD_PPD_ENFORCE_SCAN_DELAY
 //  pore_WAITS(&ctx, i_waitsScanDelay);
-#endif
   // Compare against the reference header check word...
   pore_XORI( &ctx, D0, D0, ((uint64_t)scanRingCheckWord) << 32);
   PORE_LOCATION( &ctx, src5);
@@ -611,8 +548,10 @@ int create_wiggle_flip_prg( uint32_t *i_deltaRing,          // scan ring delta s
   pore_HALT( &ctx);
   PORE_LOCATION( &ctx, tgt8);
 //  pore_LI( &ctx, D0, 0x0);  // Do shadowing by setpulse.
+//  pore_MR( &ctx, D0, D1);
 //	pore_STD( &ctx, D0, GENERIC_CLK_SCAN_UPDATEDR_0x0003A000, P0);
 	pore_STI(&ctx, GENERIC_CLK_SCAN_UPDATEDR_0x0003A000, P0, 0x0);
+//  pore_WAITS(&ctx, i_waitsScanDelay);
 	pore_RET( &ctx);
   if (ctx.error > 0)  {
     MY_ERR("***LD, XORI, BRANZ, RET or HALT went wrong  rc = %d", ctx.error);
@@ -1502,7 +1441,7 @@ int write_vpd_ring_to_ipl_image(void			*io_image,
 	uint32_t rc=0, bufLC;
 	uint8_t  chipletId, idxVector=0;
 	uint32_t sizeRs4Launch, sizeRs4Ring;
-	uint32_t sizeImageIn;
+	uint32_t sizeImageIn,sizeImage;
 	PoreInlineContext ctx;
 	uint32_t asmInitLC=0;
 	uint32_t asmBuffer[ASM_RS4_LAUNCH_BUF_SIZE/4];
@@ -1629,6 +1568,7 @@ int write_vpd_ring_to_ipl_image(void			*io_image,
   	idxVector = 0;
 
   // Write ring block to image.
+  sbe_xip_image_size( io_image, &sizeImage);
 	rc = write_ring_block_to_image(io_image,
 	                               i_ringName,
 	                               bufRs4RingBlock,
@@ -1637,8 +1577,12 @@ int write_vpd_ring_to_ipl_image(void			*io_image,
 	                               0,
 	                               io_sizeImageOut);
   if (rc)  {
-  	MY_ERR("write_ring_block_to_image() failed w/rc=%i",rc);
-    MY_ERR("Check p8_delta_scan_rw.h for meaning of IMGBUILD_xyz rc code.");
+  	MY_ERR("write_ring_block_to_image() failed w/rc=%i \n",rc);
+    MY_ERR("Check p8_delta_scan_rw.h for meaning of IMGBUILD_xyz rc code. \n");
+    MY_ERR("Ring name: %s\n ", i_ringName);
+    MY_ERR("Size of image before wrbti() call: %i\n ", sizeImage);
+    MY_ERR("Size of ring block being added: %i\n ", sizeRs4RingBlock);
+    MY_ERR("Max size of image allowed: %i\n ", io_sizeImageOut);
     return IMGBUILD_ERR_RING_WRITE_TO_IMAGE;
   }
 
@@ -1670,10 +1614,13 @@ int write_vpd_ring_to_slw_image(void			*io_image,
 	uint32_t rc=0, bufLC;
 	uint8_t  chipletId, idxVector=0;
 	uint32_t sizeRingRaw=0, sizeRingRawChk;
-	uint32_t sizeImageIn;
+	uint32_t sizeImageIn,sizeImage;
 	uint32_t *wfInline=NULL;
 	uint32_t wfInlineLenInWords;
 	uint64_t scanMaxRotate=SCAN_ROTATE_DEFAULT;
+  uint64_t waitsScanDelay=0;
+	uint64_t twinHaltOpCodes;
+	uint32_t iFill;
 	
 	MY_INF("i_ringName=%s; \n",	i_ringName);
 
@@ -1723,8 +1670,6 @@ int write_vpd_ring_to_slw_image(void			*io_image,
 		MY_INF("Continuing...; ");
 	}
 
-#ifdef IMGBUILD_PPD_ENFORCE_SCAN_DELAY
-  uint64_t waitsScanDelay=10;
   // Temporary support for enforcing delay after scan WF scoms.
   // Also remove all references and usages of waitsScanDelay in this file.
   rc = sbe_xip_get_scalar( io_image, "waits_delay_for_scan", &waitsScanDelay);
@@ -1732,7 +1677,6 @@ int write_vpd_ring_to_slw_image(void			*io_image,
     MY_ERR("Error obtaining waits_delay_for_scan keyword.\n");
 	  return IMGBUILD_ERR_XIP_MISC;
   }
-#endif
 
 	wfInline = (uint32_t*)i_bufRs4Ring;  // Reuse this buffer (HB buf1) for wiggle-flip prg.
 	wfInlineLenInWords = i_sizeBufTmp/4; // Assuming same size of both HB buf1 and buf2.
@@ -1742,12 +1686,9 @@ int write_vpd_ring_to_slw_image(void			*io_image,
 	                            (uint32_t)i_bufRs4Ring->iv_chipletId,
 	                            &wfInline,
 	                            &wfInlineLenInWords, // Is 8-byte aligned on return.
-#ifdef IMGBUILD_PPD_ENFORCE_SCAN_DELAY
+                              i_bufRs4Ring->iv_flushOptimization,
 	                            (uint32_t)scanMaxRotate,
                               (uint32_t)waitsScanDelay);
-#else
-	                            (uint32_t)scanMaxRotate);
-#endif
 	if (rc)  {
 	  MY_ERR("create_wiggle_flip_prg() failed w/rc=%i; ",rc);
 	  return IMGBUILD_ERR_WF_CREATE;
@@ -1778,9 +1719,11 @@ int write_vpd_ring_to_slw_image(void			*io_image,
 		sizeWfRingBlock = ((sizeRingRaw-1)/32 + 1) * 4 * WF_WORST_CASE_SIZE_FAC + 
 											WF_ENCAP_SIZE;
 		sizeWfRingBlock = (uint32_t)myByteAlign(8, sizeWfRingBlock);
-    memset((void*)((uint64_t)bufWfRingBlock+entryOffsetWfRingBlock), 
-            0, 
-            sizeWfRingBlock-entryOffsetWfRingBlock);
+		// Fill void with "halt" instructions, 0x02000000 (LE). Note, void is whole multiple of 8x.
+    twinHaltOpCodes = myRev64((uint64_t)0x02000000<<32 | (uint64_t)0x02000000);
+		for (iFill=0; iFill<(sizeWfRingBlock-entryOffsetWfRingBlock); iFill=iFill+8)  {
+			*(uint64_t*)((uint64_t)bufWfRingBlock+entryOffsetWfRingBlock+iFill) = twinHaltOpCodes;
+		}
 	}
 	// Quick check to see if final ring block size will fit in HB buffer.
 	if (sizeWfRingBlock>sizeWfRingBlockMax)  {
@@ -1811,6 +1754,7 @@ int write_vpd_ring_to_slw_image(void			*io_image,
   	idxVector = 0;
 
   // Write ring block to image.
+  sbe_xip_image_size( io_image, &sizeImage);
 	rc = write_ring_block_to_image(io_image,
 	                               i_ringName,
 	                               bufWfRingBlock,
@@ -1821,6 +1765,10 @@ int write_vpd_ring_to_slw_image(void			*io_image,
   if (rc)  {
   	MY_ERR("write_ring_block_to_image() failed w/rc=%i; \n",rc);
     MY_ERR("Check p8_delta_scan_rw.h for meaning of IMGBUILD_xyz rc code; \n");
+    MY_ERR("Ring name: %s\n ", i_ringName);
+    MY_ERR("Size of image before wrbti() call: %i\n ", sizeImage);
+    MY_ERR("Size of ring block being added: %i\n ", sizeWfRingBlock);
+    MY_ERR("Max size of image allowed: %i\n ", io_sizeImageOut);
     return IMGBUILD_ERR_RING_WRITE_TO_IMAGE;
   }
 
