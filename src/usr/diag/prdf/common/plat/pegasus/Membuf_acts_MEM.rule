@@ -41,22 +41,22 @@ group gMemChipletFir filter singlebit
     (MemChipletFir, bit(3)) ? analyze(gMemLFir);
 
     /** MEM_CHIPLET_FIR[5]
-     *  Attention from MBAFIR (MBA 01)
+     *  Attention from MBACALFIR (MBA 01)
      */
     (MemChipletFir, bit(5)) ? analyzeMba0;
 
     /** MEM_CHIPLET_FIR[6]
-     *  Attention from MBAFIR (MBA 23)
+     *  Attention from MBAFIR (MBA 01)
      */
-    (MemChipletFir, bit(6)) ? analyzeMba1;
+    (MemChipletFir, bit(6)) ? analyzeMba0;
 
     /** MEM_CHIPLET_FIR[7]
-     *  Attention from MBACALFIR (MBA 01)
+     *  Attention from MBACALFIR (MBA 23)
      */
-    (MemChipletFir, bit(7)) ? analyzeMba0;
+    (MemChipletFir, bit(7)) ? analyzeMba1;
 
     /** MEM_CHIPLET_FIR[8]
-     *  Attention from MBACALFIR (MBA 23)
+     *  Attention from MBAFIR (MBA 23)
      */
     (MemChipletFir, bit(8)) ? analyzeMba1;
 
