@@ -1672,18 +1672,18 @@ sub generate_proc
     # Starts at 1024TB - 2GB, 1MB per proc
     printf( "    <attribute><id>INTP_BASE_ADDR</id>\n" );
     printf( "        <default>0x%016X</default>\n",
-       0x0003FFFF80000000 + 0x400000*$node + 0x100000*$proc );
+       0x0003FFFF80000000 + 0x400000*$lognode + 0x100000*$logid );
     printf( "    </attribute>\n" );
 
     # Starts at 1024TB - 7GB, 1MB per PHB (=4MB per proc)
     printf( "    <attribute><id>PHB_BASE_ADDRS</id>\n" );
     printf( "        <default>\n" );
     printf( "            0x%016X,0x%016X,\n",
-       0x0003FFFE40000000 + 0x1000000*$node + 0x400000*$proc + 0x100000*0,
-         0x0003FFFE40000000 + 0x1000000*$node + 0x400000*$proc + 0x100000*1 );
+       0x0003FFFE40000000 + 0x1000000*$lognode + 0x400000*$logid + 0x100000*0,
+         0x0003FFFE40000000 + 0x1000000*$lognode + 0x400000*$logid + 0x100000*1 );
     printf( "            0x%016X,0x%016X\n",
-       0x0003FFFE40000000 + 0x1000000*$node + 0x400000*$proc + 0x100000*2,
-         0x0003FFFE40000000 + 0x1000000*$node + 0x400000*$proc + 0x100000*3 );
+       0x0003FFFE40000000 + 0x1000000*$lognode + 0x400000*$logid + 0x100000*2,
+         0x0003FFFE40000000 + 0x1000000*$lognode + 0x400000*$logid + 0x100000*3 );
     printf( "        </default>\n" );
     printf( "    </attribute>\n" );
 

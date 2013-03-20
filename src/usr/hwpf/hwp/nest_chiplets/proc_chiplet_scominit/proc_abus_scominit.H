@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_abus_scominit.H,v 1.1 2012/08/11 18:24:25 jmcgill Exp $
+// $Id: proc_abus_scominit.H,v 1.2 2013/02/11 04:27:41 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_abus_scominit.H,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2012
@@ -48,7 +48,8 @@
 //------------------------------------------------------------------------------
 // Constant definitions
 //------------------------------------------------------------------------------
-const char * const ABUS_IF = "p8.abus.scom.if";
+const char * const ABUS_BASE_IF = "p8.abus.scom.if";
+const char * const ABUS_CUSTOM_IF = "p8.abus.custom.scom.if";
 
 //------------------------------------------------------------------------------
 // Structure definitions

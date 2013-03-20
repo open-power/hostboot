@@ -1,9 +1,9 @@
-#-- $Id: p8.abus.scom.initfile,v 1.7 2013/02/11 04:26:41 jmcgill Exp $ 
+#-- $Id: p8.abus.scom.initfile,v 1.9 2013/03/15 21:16:40 thomsen Exp $ 
 
 
 ####################################################################
 ##  
-##  Auto-genrated by fig2scominit.pl
+##  ********** Auto-genrated by fig2scominit.pl  *********** HAND EDITED BY PETE THOMSEN on 3/7/13 to add the GCR Buffer Parity Mask workaround until the auto-gen'd/custom Abus initfile/procedure changes can be released
 ##      Based on SETUP_ID_MODE A_BUS_TR_HW
 ##      from ../../logic/mesa_sim/fusion/run/IODUV_ABUS_WRAP.IODUV_ABUS_WRAP.figdb
 ##
@@ -14,6 +14,8 @@
  ## --------------------------------------------------------------------------------
  ## -- VersionID: |Author:  | Date:  | Comment:
  ## -- -----------|---------|--------|-------------------------------------------------
+#--     1.9 |jgrell  |03/14/13|Added temporary masking of the GCR Buffer Parity Checkers in the GCR Master until the source of the error can be found. This ungates the lab.
+#--     1.8 |thomsen |03/07/13|Temporarily mask the GCR Buffer Parity Checker until the source of the error can be found. This ungates the lab.
  ## -- mbs13011802| mbs     |01-18-13| Added rx_fence to run_mode dial (HW236326)
  ## -- mbs12121100| mbs     |12-11-12| Added rx_prot_speed_slct and rx_c4_sel
  ## -- smr12112700| SMR     |11-27-12| Added rx_dyn_recal_overall_timeout_sel init to 0b001
@@ -598,6 +600,39 @@ scom 0x8004340F08010C3F {
 	tx_prbs_tap_id, 0b111;
 }
 
+#--**************************************************************************************************************
+#----------------------------------------------------------------------------------------------------------------
+#    ________________     ____        ________             ____             _ __           __  ___           __  
+#   / ____/ ____/ __ \   / __ )__  __/ __/ __/__  _____   / __ \____ ______(_) /___  __   /  |/  /___ ______/ /__
+#  / / __/ /   / /_/ /  / __  / / / / /_/ /_/ _ \/ ___/  / /_/ / __ `/ ___/ / __/ / / /  / /|_/ / __ `/ ___/ //_/
+# / /_/ / /___/ _, _/  / /_/ / /_/ / __/ __/  __/ /     / ____/ /_/ / /  / / /_/ /_/ /  / /  / / /_/ (__  ) ,<   
+# \____/\____/_/ |_|  /_____/\__,_/_/ /_/  \___/_/     /_/    \__,_/_/  /_/\__/\__, /  /_/  /_/\__,_/____/_/|_|  
+#                                                                             /____/                             
+#----------------------------------------------------------------------------------------------------------------
+#--**************************************************************************************************************
+# HW242564: Temporarily mask the GCR Buffer Parity Checker until the source of the error can be found. This ungates the lab.
+# 0x800???0002011E3F
+# This is applied to all configured clkgrp's via chiplet targetting
+scom 0x800.0b(rx_fir1_mask_pg)(rx_grp0)(lane_na).0x(abus_gcr_addr) {
+bits,                             scom_data;
+rx_pg_fir_err_mask_gcr_buff,      0b1;
+}
+scom 0x800.0b(tx_fir_mask_pg)(tx_grp0)(lane_na).0x(abus_gcr_addr) {
+bits,                             scom_data;
+tx_pg_fir_err_mask_gcr_buff,      0b1;
+}
+scom 0x800.0b(rx_fir_mask_pb)(rx_grp0)(lane_na).0x(abus_gcr_addr) {
+bits,                             scom_data;
+rx_pb_fir_err_mask_gcr_buff0,    0b1;
+rx_pb_fir_err_mask_gcr_buff1,    0b1;
+rx_pb_fir_err_mask_gcr_buff2,    0b1;
+}
+
+# Mask off all rx and tx parity errors in the fir register
+scom 0x08010C03 {
+scom_data;
+0xC000000000000000;
+}
 
 ######################################
 ##      END OF FILE

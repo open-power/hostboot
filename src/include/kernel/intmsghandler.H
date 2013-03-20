@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2012              */
+/* COPYRIGHT International Business Machines Corp. 2011,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -63,7 +63,7 @@ class InterruptMsgHdlr : public MessageHandler
             P8_IP_THREADID_LSL = (12-0),
             P8_IP_COREID_LSL   = (15-3),    
             P8_IP_CHIPID_LSL   = (20-7),
-            P8_IP_NODEID_LSL   = (23-10),
+            P8_IP_NODEID_LSL   = (22-10),
             XIRR_ADDR_OFFSET   = 4,
         };
 
@@ -102,11 +102,13 @@ class InterruptMsgHdlr : public MessageHandler
         {
             uint64_t offset = 0;
 
-            // The node and chip id fields are adjacent in both the PIR and
-            // the mmio offset - so they can be done in one shift operation
+            // The PIR chip id field has 1 extra bit (8 chips), so we need
+            // to shift the node and chip separately
             offset  |= 
-                (i_pir & (P8_PIR_NODEID_MSK | P8_PIR_CHIPID_MSK))
-                << P8_IP_CHIPID_LSL;
+                (i_pir & P8_PIR_NODEID_MSK) << P8_IP_NODEID_LSL;
+
+            offset  |= 
+                (i_pir & P8_PIR_CHIPID_MSK) << P8_IP_CHIPID_LSL;
 
             // The core and thread id field are adjacent in both the PIR and
             // the mmio offset, so they can be done in one shift operation.

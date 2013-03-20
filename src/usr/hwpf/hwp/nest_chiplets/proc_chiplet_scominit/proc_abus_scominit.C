@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_abus_scominit.C,v 1.2 2013/01/20 19:23:46 jmcgill Exp $
+// $Id: proc_abus_scominit.C,v 1.3 2013/02/11 04:27:40 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_abus_scominit.C,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2012
@@ -92,12 +92,22 @@ fapi::ReturnCode proc_abus_scominit(
             (i_other_pu_target.getType() == fapi::TARGET_TYPE_PROC_CHIP))
         {
             FAPI_INF("proc_abus_scominit: Executing %s on %s",
-                     ABUS_IF, i_abus_target.toEcmdString());
-            FAPI_EXEC_HWP(rc, fapiHwpExecInitFile, targets, ABUS_IF);
+                     ABUS_BASE_IF, i_abus_target.toEcmdString());
+            FAPI_EXEC_HWP(rc, fapiHwpExecInitFile, targets, ABUS_BASE_IF);
             if (!rc.ok())
             {
                 FAPI_ERR("proc_abus_scominit: Error from fapiHwpExecInitfile executing %s on %s",
-                         ABUS_IF, i_abus_target.toEcmdString());
+                         ABUS_BASE_IF, i_abus_target.toEcmdString());
+                break;
+            }
+
+            FAPI_INF("proc_abus_scominit: Executing %s on %s",
+                     ABUS_CUSTOM_IF, i_abus_target.toEcmdString());
+            FAPI_EXEC_HWP(rc, fapiHwpExecInitFile, targets, ABUS_CUSTOM_IF);
+            if (!rc.ok())
+            {
+                FAPI_ERR("proc_abus_scominit: Error from fapiHwpExecInitfile executing %s on %s",
+                         ABUS_CUSTOM_IF, i_abus_target.toEcmdString());
                 break;
             }
         }

@@ -48,7 +48,6 @@ extern "C"
 
 
 // Declare Global Variables
-
         int fl_fail   = 0;
         int fl_pass   = 0;
         int frtl_fail = 0;
@@ -1756,6 +1755,13 @@ fapi::ReturnCode proc_cen_framelock(const fapi::Target& i_pu_target,
 
     fapi::ReturnCode l_rc;
     uint32_t l_ecmdRc = 0;
+
+    fl_fail   = 0;
+    fl_pass   = 0;
+    frtl_fail = 0;
+    frtl_pass = 0;
+    num_try   = 0;
+
 
     // mark HWP entry
     FAPI_IMP("proc_cen_framelock: Entering ...");
