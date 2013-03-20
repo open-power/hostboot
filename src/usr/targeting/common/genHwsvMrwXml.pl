@@ -107,8 +107,8 @@ if ($SYSNAME eq "TULETA")
 {
     $DmiRefClockSwizzle[4] = 7;
     $DmiRefClockSwizzle[5] = 6;
-    $DmiRefClockSwizzle[6] = 5;
-    $DmiRefClockSwizzle[7] = 4;
+    $DmiRefClockSwizzle[6] = 4;
+    $DmiRefClockSwizzle[7] = 5;
 }
 
 open (FH, "<$mrwdir/${sysname}-system-policy.xml") ||
