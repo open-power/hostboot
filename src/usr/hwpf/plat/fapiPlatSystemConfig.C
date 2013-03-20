@@ -313,10 +313,13 @@ fapi::ReturnCode fapiGetChildChiplets(
                                             false);
 
                 // Return fapi::Targets to the caller
-                for (uint32_t i = 0; i < l_chipletList.size(); i++)
+                for (TARGETING::TargetHandleList::const_iterator
+                        chipletIter = l_chipletList.begin();
+                        chipletIter != l_chipletList.end();
+                        ++chipletIter)
                 {
                     TARGETING::HwasState l_state =
-                        l_chipletList[i]->getAttr<TARGETING::ATTR_HWAS_STATE>();
+                        (*chipletIter)->getAttr<TARGETING::ATTR_HWAS_STATE>();
 
                     if ((fapi::TARGET_STATE_PRESENT == i_state) &&
                         !l_state.present)
@@ -330,7 +333,7 @@ fapi::ReturnCode fapiGetChildChiplets(
                     }
 
                     fapi::Target l_chiplet(i_chipletType,
-                        reinterpret_cast<void *>(l_chipletList[i]));
+                        reinterpret_cast<void *>(*chipletIter));
                     o_chiplets.push_back(l_chiplet);
                 }
             }
@@ -388,10 +391,13 @@ fapi::ReturnCode fapiGetAssociatedDimms(
                       TARGETING::TargetService::ALL, &l_predicate);
 
         // Return fapi::Targets to the caller
-        for (uint32_t i = 0; i < l_dimmList.size(); i++)
+        for (TARGETING::TargetHandleList::const_iterator
+                dimmIter = l_dimmList.begin();
+                dimmIter != l_dimmList.end();
+                ++dimmIter)
         {
             TARGETING::HwasState l_state =
-                l_dimmList[i]->getAttr<TARGETING::ATTR_HWAS_STATE>();
+                (*dimmIter)->getAttr<TARGETING::ATTR_HWAS_STATE>();
 
             if ((fapi::TARGET_STATE_PRESENT == i_state) && !l_state.present)
             {
@@ -404,7 +410,7 @@ fapi::ReturnCode fapiGetAssociatedDimms(
             }
 
             fapi::Target l_dimm(fapi::TARGET_TYPE_DIMM,
-                                reinterpret_cast<void *>(l_dimmList[i]));
+                                reinterpret_cast<void *>(*dimmIter));
             o_dimms.push_back(l_dimm);
         }
     }

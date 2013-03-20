@@ -418,34 +418,36 @@ void TargetService::getAssociated(
     o_list.clear();
 
     // Figure out which attribute to look up
-    for (uint32_t i = 0; i < iv_associationMappings.size(); ++i)
+    for (AssociationMappings_t::const_iterator
+            assocIter = iv_associationMappings.begin();
+            assocIter != iv_associationMappings.end();
+            ++assocIter)
     {
-        if (i_type == iv_associationMappings[i].associationType)
+        if (i_type == (*assocIter).associationType)
         {
             EntityPath l_entityPath;
 
-            bool l_exist = tryGetPath(iv_associationMappings[i].attr,
+            bool l_exist = tryGetPath((*assocIter).attr,
                 i_pTarget, l_entityPath);
 
             if (l_exist)
             {
-                if (iv_associationMappings[i].associationDir == INWARDS)
+                if ((*assocIter).associationDir == INWARDS)
                 {
-                    (void) _getInwards(iv_associationMappings[i].attr,
+                    (void) _getInwards((*assocIter).attr,
                         i_recursionLevel, l_entityPath, i_pPredicate, o_list);
                 }
-                else if (iv_associationMappings[i].associationDir
-                    == OUTWARDS)
+                else if ((*assocIter).associationDir == OUTWARDS)
                 {
-                    (void) _getOutwards(iv_associationMappings[i].attr,
+                    (void) _getOutwards((*assocIter).attr,
                         i_recursionLevel, l_entityPath, i_pPredicate, o_list);
                 }
                 else
                 {
                     TARG_ASSERT(0, TARG_LOC
-                           "iv_associationMappings[i].associationDir "
+                           "(*assocIter).associationDir "
                            "= 0x%X not supported",
-                           iv_associationMappings[i].associationDir);
+                           (*assocIter).associationDir);
                 }
             }
             break;

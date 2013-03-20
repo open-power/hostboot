@@ -1,25 +1,25 @@
-//  IBM_PROLOG_BEGIN_TAG
-//  This is an automatically generated prolog.
-//
-//  $Source: src/usr/targeting/predicates/predicatepostfixexpr.C $
-//
-//  IBM CONFIDENTIAL
-//
-//  COPYRIGHT International Business Machines Corp. 2011
-//
-//  p1
-//
-//  Object Code Only (OCO) source materials
-//  Licensed Internal Code Source Materials
-//  IBM HostBoot Licensed Internal Code
-//
-//  The source code for this program is not published or other-
-//  wise divested of its trade secrets, irrespective of what has
-//  been deposited with the U.S. Copyright Office.
-//
-//  Origin: 30
-//
-//  IBM_PROLOG_END
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/usr/targeting/common/predicates/predicatepostfixexpr.C $  */
+/*                                                                        */
+/* IBM CONFIDENTIAL                                                       */
+/*                                                                        */
+/* COPYRIGHT International Business Machines Corp. 2011,2013              */
+/*                                                                        */
+/* p1                                                                     */
+/*                                                                        */
+/* Object Code Only (OCO) source materials                                */
+/* Licensed Internal Code Source Materials                                */
+/* IBM HostBoot Licensed Internal Code                                    */
+/*                                                                        */
+/* The source code for this program is not published or otherwise         */
+/* divested of its trade secrets, irrespective of what has been           */
+/* deposited with the U.S. Copyright Office.                              */
+/*                                                                        */
+/* Origin: 30                                                             */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
 
 /**
  *  @file targeting/common/predicates/predicatepostfixexpr.C
@@ -154,12 +154,15 @@ bool PredicatePostfixExpr::operator()(
     std::vector<bool> l_stack;
     bool l_result = false;
 
-    for(uint32_t i=0; i<iv_ops.size(); ++i)
+    for (std::vector<Operation>::const_iterator
+            opsIter = iv_ops.begin();
+            opsIter != iv_ops.end();
+            ++opsIter)
     {
-        switch(iv_ops[i].logicalOp)
+        switch((*opsIter).logicalOp)
         {
             case EVAL:
-                l_stack.push_back((*iv_ops[i].pPredicate)(i_pTarget));
+                l_stack.push_back((*(*opsIter).pPredicate)(i_pTarget));
                 break;
             case AND:
                 TARG_ASSERT(l_stack.size() >= 2,
@@ -187,7 +190,7 @@ bool PredicatePostfixExpr::operator()(
                 TARG_ASSERT(0,
                        TARG_LOC "Attempted to evaluate unsupported "
                        "logical operation %d",
-                       iv_ops[i].logicalOp);
+                       (*opsIter).logicalOp);
                 break;
         }
     }

@@ -154,7 +154,7 @@ namespace TARGETING
 
             // Locate corresponding attribute section for message.
             ssize_t section = -1;
-            for (size_t i = 0; i < iv_sectionCount; i++)
+            for (size_t i = 0; i < iv_sectionCount; ++i)
             {
                 if ((vAddr >= iv_sections[i].vmmAddress) &&
                     (vAddr < iv_sections[i].vmmAddress + iv_sections[i].size))
@@ -338,7 +338,7 @@ namespace TARGETING
                     );
 
             // Parse each section.
-            for (size_t i = 0; i < iv_sectionCount; i++, l_section++)
+            for (size_t i = 0; i < iv_sectionCount; i++, ++l_section)
             {
                 iv_sections[i].type = l_section->sectionType;
 
@@ -379,7 +379,7 @@ namespace TARGETING
             iv_msgQ = msg_q_create();
 
             // Create VMM block for each section, assign permissions.
-            for (size_t i = 0; i < iv_sectionCount; i++)
+            for (size_t i = 0; i < iv_sectionCount; ++i)
             {
                 uint64_t l_perm = 0;
                 switch(iv_sections[i].type)
@@ -515,12 +515,15 @@ namespace TARGETING
         bool      l_rc = true;      // true if write to section is successful
 
         // for each page
-        for ( size_t i = 0; (i < i_pages.size()) && (true == l_rc); i++ )
+        for (std::vector<TARGETING::sectionRefData>::const_iterator
+                pageIter = i_pages.begin();
+                (pageIter != i_pages.end()) && (true == l_rc);
+                ++pageIter)
         {
             // search for the section we need
-            for ( size_t j = 0; j < iv_sectionCount; j++ )
+            for ( size_t j = 0; j < iv_sectionCount; ++j )
             {
-                if ( iv_sections[j].type == i_pages[i].sectionId )
+                if ( iv_sections[j].type == (*pageIter).sectionId )
                 {
                     // found it..
                     TARG_DBG( "Writing Attribute Section: ID: %u, "
@@ -528,10 +531,10 @@ namespace TARGETING
                         iv_sections[j].type,
                         iv_sections[j].vmmAddress,
                         iv_sections[j].size,
-                        i_pages[i].pageNumber);
+                        (*pageIter).pageNumber);
 
                     // check that page number is within range
-                    uint64_t l_pageOffset = i_pages[i].pageNumber * PAGESIZE;
+                    uint64_t l_pageOffset = (*pageIter).pageNumber * PAGESIZE;
                     if ( iv_sections[j].size < (l_pageOffset + PAGESIZE) )
                     {
                         TARG_ERR("page offset 0x%lx is greater than "
@@ -549,7 +552,7 @@ namespace TARGETING
                         reinterpret_cast<uint8_t *>
                         (iv_sections[j].vmmAddress) + l_pageOffset;
 
-                    memcpy( l_dataPtr, i_pages[i].dataPtr, PAGESIZE );
+                    memcpy( l_dataPtr, (*pageIter).dataPtr, PAGESIZE );
                     break;
                 }
             }
@@ -573,7 +576,7 @@ namespace TARGETING
         uint16_t pages              =  0;
 
         // search for the section we need
-        for (size_t i = 0; i < iv_sectionCount; i++ )
+        for (size_t i = 0; i < iv_sectionCount; ++i )
         {
             if ( iv_sections[i].type == i_sectionId )
             {

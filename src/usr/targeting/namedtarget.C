@@ -1,26 +1,25 @@
-/*  IBM_PROLOG_BEGIN_TAG
- *  This is an automatically generated prolog.
- *
- *  $Source: src/usr/targeting/hbutil/namedtarget.C $
- *
- *  IBM CONFIDENTIAL
- *
- *  COPYRIGHT International Business Machines Corp. 2012
- *
- *  p1
- *
- *  Object Code Only (OCO) source materials
- *  Licensed Internal Code Source Materials
- *  IBM HostBoot Licensed Internal Code
- *
- *  The source code for this program is not published or other-
- *  wise divested of its trade secrets, irrespective of what has
- *  been deposited with the U.S. Copyright Office.
- *
- *  Origin: 30
- *
- *  IBM_PROLOG_END_TAG
- */
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/usr/targeting/namedtarget.C $                             */
+/*                                                                        */
+/* IBM CONFIDENTIAL                                                       */
+/*                                                                        */
+/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/*                                                                        */
+/* p1                                                                     */
+/*                                                                        */
+/* Object Code Only (OCO) source materials                                */
+/* Licensed Internal Code Source Materials                                */
+/* IBM HostBoot Licensed Internal Code                                    */
+/*                                                                        */
+/* The source code for this program is not published or otherwise         */
+/* divested of its trade secrets, irrespective of what has been           */
+/* deposited with the U.S. Copyright Office.                              */
+/*                                                                        */
+/* Origin: 30                                                             */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
 /**
  *  @file namedtarget.C
  *
@@ -74,9 +73,12 @@ const TARGETING::Target *   getMasterCore( )
                "getMasterCore: found %d cores on master proc",
                l_cores.size()   );
 
-    for ( uint8_t l_coreNum=0; l_coreNum < l_cores.size(); l_coreNum++ )
+    for (TARGETING::TargetHandleList::const_iterator
+            coreIter = l_cores.begin();
+            coreIter != l_cores.end();
+            ++coreIter)
     {
-        TARGETING::Target *    l_core  =   l_cores[ l_coreNum ] ;
+        TARGETING::Target * l_core = *coreIter;
 
         CHIP_UNIT_ATTR l_coreId =
                     l_core->getAttr<TARGETING::ATTR_CHIP_UNIT>();

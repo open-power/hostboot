@@ -106,9 +106,12 @@ void HBVddrMsg::createVddrData(
 
         hwsvPowrVmemRequest_t l_entry;
 
-        for ( size_t i = 0; i < l_membufTargetList.size(); i++ )
+        for (TARGETING::TargetHandleList::const_iterator
+                membufIter = l_membufTargetList.begin();
+                membufIter != l_membufTargetList.end();
+                ++membufIter)
         {
-            l_Target=l_membufTargetList[i];
+            l_Target = *membufIter;
 
             TARGETING::ATTR_VMEM_ID_type l_VmemId=
                             l_Target->getAttr<TARGETING::ATTR_VMEM_ID>();
@@ -123,8 +126,8 @@ void HBVddrMsg::createVddrData(
 
         if (l_membufTargetList.size() >1)
         {
-            //take out the duplicates Voltage IDs in io_request by first sorting and 
-            //then removing the duplicates
+            //take out the duplicates Voltage IDs in io_request by first sorting
+            //and then removing the duplicates
 
             std::sort(io_request.begin(), io_request.end(), compareVids);
 
@@ -206,7 +209,7 @@ errlHndl_t HBVddrMsg::sendMsg(uint32_t i_msgType) const
        
         hwsvPowrVmemRequest_t* l_ptr = reinterpret_cast<hwsvPowrVmemRequest_t*>(l_data);
         
-        for (size_t j =0; j<l_dataCount; j++)
+        for (size_t j =0; j<l_dataCount; ++j)
         {
             l_ptr->VmemId=l_request.at(j).VmemId;
             l_ptr->Voltage=l_request.at(j).Voltage;
@@ -299,7 +302,7 @@ errlHndl_t  HBVddrMsg::processVDDRmsg(msg_t* i_recvMsg) const
         const hwsvPowrVmemReply_t* l_ptr= 
                     reinterpret_cast<const hwsvPowrVmemReply_t*>(l_extraData);
 
-        for (size_t i=0; i<l_elementCount; i++)
+        for (size_t i=0; i<l_elementCount; ++i)
         {
             l_VmemId = l_ptr->VmemId;
             l_errPlid = l_ptr->plid;

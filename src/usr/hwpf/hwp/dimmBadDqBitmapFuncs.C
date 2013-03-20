@@ -1,25 +1,25 @@
-//  IBM_PROLOG_BEGIN_TAG
-//  This is an automatically generated prolog.
-//
-//  $Source: src/usr/hwpf/hwp/dimmBadDqBitmapFuncs.C $
-//
-//  IBM CONFIDENTIAL
-//
-//  COPYRIGHT International Business Machines Corp. 2012
-//
-//  p1
-//
-//  Object Code Only (OCO) source materials
-//  Licensed Internal Code Source Materials
-//  IBM HostBoot Licensed Internal Code
-//
-//  The source code for this program is not published or other-
-//  wise divested of its trade secrets, irrespective of what has
-//  been deposited with the U.S. Copyright Office.
-//
-//  Origin: 30
-//
-//  IBM_PROLOG_END
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/usr/hwpf/hwp/dimmBadDqBitmapFuncs.C $                     */
+/*                                                                        */
+/* IBM CONFIDENTIAL                                                       */
+/*                                                                        */
+/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/*                                                                        */
+/* p1                                                                     */
+/*                                                                        */
+/* Object Code Only (OCO) source materials                                */
+/* Licensed Internal Code Source Materials                                */
+/* IBM HostBoot Licensed Internal Code                                    */
+/*                                                                        */
+/* The source code for this program is not published or otherwise         */
+/* divested of its trade secrets, irrespective of what has been           */
+/* deposited with the U.S. Copyright Office.                              */
+/*                                                                        */
+/* Origin: 30                                                             */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
 /**
  *  @file dimmBadDqBitmapFuncs.C
  *
@@ -65,8 +65,8 @@ fapi::ReturnCode dimmBadDqCheckParamFindDimm(const fapi::Target & i_mba,
         (i_dimm >= DIMM_DQ_MAX_MBAPORT_DIMMS) ||
         (i_rank >= DIMM_DQ_MAX_DIMM_RANKS))
     {
-        FAPI_ERR("dimmBadDqCheckParams: Bad parameter. %d:%d:%d", i_port,
-                 i_dimm, i_rank);
+        FAPI_ERR("dimmBadDqCheckParamFindDimm: Bad parameter. %d:%d:%d",
+                i_port, i_dimm, i_rank);
         const uint8_t & FFDC_PORT = i_port;
         const uint8_t & FFDC_DIMM = i_dimm;
         const uint8_t & FFDC_RANK = i_rank;
@@ -81,36 +81,41 @@ fapi::ReturnCode dimmBadDqCheckParamFindDimm(const fapi::Target & i_mba,
 
         if (l_rc)
         {
-            FAPI_ERR("dimmBadDqFindDimm: Error from fapiGetAssociatedDimms");
+            FAPI_ERR("dimmBadDqCheckParamFindDimm: "
+                        "Error from fapiGetAssociatedDimms");
         }
         else
         {
             // Find the DIMM with the correct MBA port/dimm
-            uint8_t i = 0;
             uint8_t l_port = 0;
             uint8_t l_dimm = 0;
+            std::vector<fapi::Target>::const_iterator dimmIter;
 
-            for (; i < l_dimms.size(); i++)
+            for (dimmIter = l_dimms.begin();
+                    dimmIter != l_dimms.end();
+                    ++dimmIter)
             {
-                l_rc = FAPI_ATTR_GET(ATTR_MBA_PORT, &(l_dimms[i]), l_port);
+                l_rc = FAPI_ATTR_GET(ATTR_MBA_PORT, &(*dimmIter), l_port);
 
                 if (l_rc)
                 {
-                    FAPI_ERR("dimmBadDqFindDimm: Error getting ATTR_MBA_PORT for dimm");
+                    FAPI_ERR("dimmBadDqCheckParamFindDimm: "
+                                "Error getting ATTR_MBA_PORT for dimm");
                     break;
                 }
                 else if (l_port == i_port)
                 {
-                    l_rc = FAPI_ATTR_GET(ATTR_MBA_DIMM, &(l_dimms[i]), l_dimm);
+                    l_rc = FAPI_ATTR_GET(ATTR_MBA_DIMM, &(*dimmIter), l_dimm);
 
                     if (l_rc)
                     {
-                        FAPI_ERR("dimmBadDqFindDimm: Error getting ATTR_MBA_DIMM for dimm");
+                        FAPI_ERR("dimmBadDqCheckParamFindDimm: "
+                                    "Error getting ATTR_MBA_DIMM for dimm");
                         break;
                     }
                     else if (l_dimm == i_dimm)
                     {
-                        o_dimm = l_dimms[i];
+                        o_dimm = *dimmIter;
                         break;
                     }
                 }            
@@ -118,9 +123,10 @@ fapi::ReturnCode dimmBadDqCheckParamFindDimm(const fapi::Target & i_mba,
 
             if (!l_rc)
             {
-                if (i == l_dimms.size())
+                if (dimmIter == l_dimms.end())
                 {
-                    FAPI_ERR("dimmBadDqFindDimm: Did not find DIMM for %s:%d:%d",
+                    FAPI_ERR("dimmBadDqCheckParamFindDimm: "
+                             "Did not find DIMM for %s:%d:%d",
                              i_mba.toEcmdString(), i_port, i_dimm);
                     const fapi::Target & FFDC_MBA_TARGET = i_mba;
                     const uint8_t & FFDC_PORT = i_port;
