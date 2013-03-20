@@ -99,6 +99,11 @@
         capture     group default;
     };
 
+# FIXME: RTC 67200 We are currently unable to SCOM to the PCICLOCKFIRs during
+#        hostboot. Dean is working on a HW solution for the time being, PRD will
+#        not do analysis on these FIRs. This story will be used to re-enable
+#        analysis.
+
     ############################################################################
     # PCIE Chiplet PCICLOCKFIR_0
     ############################################################################
@@ -109,31 +114,31 @@
         scomaddr    0x09012000;
         reset       (&, 0x09012001);
         mask        (|, 0x09012005);
-        capture     group default;
+        #capture     group default; FIXME: RTC 67200
     };
 
     register PCICLOCKFIR_0_MASK
     {
         name        "ES.PE_WRAP_TOP.PE0.PH3_TOP.ETU.RSB.PR_REGS.LEM.FIR_MASK_REG";
         scomaddr    0x09012003;
-        capture     type secondary;
-        capture     group default;
+        #capture     type secondary; FIXME: RTC 67200
+        #capture     group default; FIXME: RTC 67200
     };
 
     register PCICLOCKFIR_0_ACT0
     {
         name        "ES.PE_WRAP_TOP.PE0.PH3_TOP.ETU.RSB.PR_REGS.LEM.FIR_ACTION0_REG";
         scomaddr    0x09012006;
-        capture     type secondary;
-        capture     group default;
+        #capture     type secondary; FIXME: RTC 67200
+        #capture     group default; FIXME: RTC 67200
     };
 
     register PCICLOCKFIR_0_ACT1
     {
         name        "ES.PE_WRAP_TOP.PE0.PH3_TOP.ETU.RSB.PR_REGS.LEM.FIR_ACTION1_REG";
         scomaddr    0x09012007;
-        capture     type secondary;
-        capture     group default;
+        #capture     type secondary; FIXME: RTC 67200
+        #capture     group default; FIXME: RTC 67200
     };
 
     ############################################################################
@@ -146,31 +151,31 @@
         scomaddr    0x09012400;
         reset       (&, 0x09012401);
         mask        (|, 0x09012405);
-        capture     group default;
+        #capture     group default; FIXME: RTC 67200
     };
 
     register PCICLOCKFIR_1_MASK
     {
         name        "ES.PE_WRAP_TOP.PE1.PH3_TOP.ETU.RSB.PR_REGS.LEM.FIR_MASK_REG";
         scomaddr    0x09012403;
-        capture     type secondary;
-        capture     group default;
+        #capture     type secondary; FIXME: RTC 67200
+        #capture     group default; FIXME: RTC 67200
     };
 
     register PCICLOCKFIR_1_ACT0
     {
         name        "ES.PE_WRAP_TOP.PE1.PH3_TOP.ETU.RSB.PR_REGS.LEM.FIR_ACTION0_REG";
         scomaddr    0x09012406;
-        capture     type secondary;
-        capture     group default;
+        #capture     type secondary; FIXME: RTC 67200
+        #capture     group default; FIXME: RTC 67200
     };
 
     register PCICLOCKFIR_1_ACT1
     {
         name        "ES.PE_WRAP_TOP.PE1.PH3_TOP.ETU.RSB.PR_REGS.LEM.FIR_ACTION1_REG";
         scomaddr    0x09012407;
-        capture     type secondary;
-        capture     group default;
+        #capture     type secondary; FIXME: RTC 67200
+        #capture     group default; FIXME: RTC 67200
     };
 
     ############################################################################
@@ -183,31 +188,31 @@
         scomaddr    0x09012800;
         reset       (&, 0x09012801);
         mask        (|, 0x09012805);
-        capture     group default;
+        #capture     group default; FIXME: RTC 67200
     };
 
     register PCICLOCKFIR_2_MASK
     {
         name        "ES.PE_WRAP_TOP.PE2.PH3_TOP.ETU.RSB.PR_REGS.LEM.FIR_MASK_REG";
         scomaddr    0x09012803;
-        capture     type secondary;
-        capture     group default;
+        #capture     type secondary; FIXME: RTC 67200
+        #capture     group default; FIXME: RTC 67200
     };
 
     register PCICLOCKFIR_2_ACT0
     {
         name        "ES.PE_WRAP_TOP.PE2.PH3_TOP.ETU.RSB.PR_REGS.LEM.FIR_ACTION0_REG";
         scomaddr    0x09012806;
-        capture     type secondary;
-        capture     group default;
+        #capture     type secondary; FIXME: RTC 67200
+        #capture     group default; FIXME: RTC 67200
     };
 
     register PCICLOCKFIR_2_ACT1
     {
         name        "ES.PE_WRAP_TOP.PE2.PH3_TOP.ETU.RSB.PR_REGS.LEM.FIR_ACTION1_REG";
         scomaddr    0x09012807;
-        capture     type secondary;
-        capture     group default;
+        #capture     type secondary; FIXME: RTC 67200
+        #capture     group default; FIXME: RTC 67200
     };
 
     ############################################################################
