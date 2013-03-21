@@ -94,7 +94,7 @@ my $CHIPNAME = "";
 my $MAXNODE = 0;
 if ($sysname eq "brazos")
 {
-    $MAXNODE = 3;
+    $MAXNODE = 4;
 }
 
 # Quick patch to support platform specific setting for DMI_REFCLOCK_SWIZZLE
@@ -135,13 +135,13 @@ foreach my $i (@{$SystemAttrs->{'required-policy-settings'}})
 #@TODO RTC: 66365
 # As a temporary workaround, ignoring value of ALL_MCS_IN_INTERLEAVING_GROUP
 # and overwriting MRW supplied value with "0".  Replace "0" with following
-# line when it's time to remove the workaround    
+# line when it's time to remove the workaround
 # $i->{all_mcs_in_interleaving_group},
                        "0",
                        "FREQ_A",
                        $freqA,
                        "FREQ_CORE_FLOOR",
-                       "0x2580",  
+                       "0x2580",
                        "FREQ_PB",
                        $freqPB,
                        "FREQ_PCIE",
@@ -583,19 +583,61 @@ use constant FSI_TARGET_FIELD => 2;
 use constant FSI_MASTER_FIELD => 3;
 use constant FSI_TARGET_TYPE  => 4;
 my @Fsis;
-my $fspnode;
+my @rawFSPTargets;
 foreach my $i (@{$fsiBus->{'fsi-bus'}})
 {
     if (lc($i->{master}->{type}) eq "fsp master")
     {
-        $fspnode = $i->{master}->{target}->{node};
-        $fspnode =~ s/n(.*):p.*/$1/;
+        # The condition to identify a FSP:
+        # On a non-brazos system : FSP and a processor are in the same node
+        # On highend system : one FSI link to something in its own node 
+        #
+        if (($i->{slave}->{target}->{node} eq $i->{master}->{target}->{node})
+            && (($i->{slave}->{target}->{name} eq "pu") ||
+                ($i->{slave}->{target}->{name} eq "cfam-s")))
+        {
+            my $fspnode = $i->{master}->{target}->{node};
+            $fspnode =~ s/n(.*):p.*/$1/;
+            push @rawFSPTargets, [ $fspnode, 0, 0,
+                                $i->{master}->{'instance-path'} ];
+        }
     }
 
     push @Fsis, [ $i->{master}->{type}, $i->{master}->{link},
-        "n$i->{slave}->{target}->{node}:p$i->{slave}->{target}->{position}", 
+        "n$i->{slave}->{target}->{node}:p$i->{slave}->{target}->{position}",
         "n$i->{master}->{target}->{node}:p$i->{master}->{target}->{position}",
                   $i->{slave}->{target}->{name} ];
+}
+
+# eliminate any duplicate FSP entries
+use constant FSP_NODE_FIELD => 0;
+use constant FSP_FLAG_FIELD => 1;
+use constant FSP_ORD_FIELD  => 2;
+use constant FSP_IPATH_FIELD  => 3;
+our @FSPTargets;
+my $fspcount = 0;
+for my $i (0 .. $#rawFSPTargets)
+{
+    my $duplicate = 0;
+    if ($i != 0)
+    {
+        my $ipath = $rawFSPTargets[$i][FSP_IPATH_FIELD];
+        for my $j (0 .. $#FSPTargets)
+        {
+            if ($ipath eq $FSPTargets[$j][FSP_IPATH_FIELD])
+            {
+                $duplicate = 1;
+                last;
+            }
+        }
+    }
+
+    if ($duplicate == 0)
+    {
+        push @FSPTargets, [ $rawFSPTargets[$i][FSP_NODE_FIELD],
+             0, $fspcount, $rawFSPTargets[$i][FSP_IPATH_FIELD] ];
+        $fspcount++;
+    }
 }
 
 open (FH, "<$mrwdir/${sysname}-psi-busses.xml") ||
@@ -647,7 +689,7 @@ foreach my $i (@{$memBus->{'memory-bus'}})
          $i->{dimm}->{'instance-path'}, $i->{'fsi-link'},
          $i->{mcs}->{target}->{node},
          $i->{mcs}->{target}->{position}, 0,
-         $i->{dimm}->{'instance-path'} ]; 
+         $i->{dimm}->{'instance-path'} ];
 }
 
 # Sort the memory busses, based on their Node, Pos & instance paths
@@ -769,25 +811,6 @@ for my $i ( 0 .. $#SortedTargets )
         }
     }
 }
-open (FH, "<$mrwdir/${sysname}-proc-spi-busses.xml") ||
-
-    die "ERROR: unable to open $mrwdir/${sysname}-proc-spi-busses.xml\n";
-close (FH);
-
-my $spiBus = XMLin("$mrwdir/${sysname}-proc-spi-busses.xml",
-                    forcearray=>['processor-spi-bus']);
-
-# Capture all SPI connections into the @SPIs array
-our @SPIs;
-foreach my $i (@{$spiBus->{'processor-spi-bus'}})
-{
-    push @SPIs, [
-                  $i->{processor}->{'instance-path'},
-                  $i->{processor}->{target}->{node},
-                  $i->{processor}->{target}->{position},
-                  $i->{endpoint}->{'instance-path'}
-                ];
-}
 
 # Finally, generate the xml file.
 print "<!-- Source path = $mrwdir -->\n";
@@ -802,21 +825,26 @@ my $node = 0;
 my $Mproc = 0;
 my $fru_id = 0;
 my @fru_paths;
+my $hasProc = 0;
 
-for (my $curnode = 0; $curnode <= $MAXNODE; $curnode++) 
+for (my $curnode = 0; $curnode <= $MAXNODE; $curnode++)
 {
 
 $node = $curnode;
+$hasProc = 0;
 
 # find master proc of this node
 for my $i ( 0 .. $#Fsis )
 {
+    my $nodeId = lc($Fsis[$i][FSI_TARGET_FIELD]);
+    $nodeId =~ s/.*n(.*):.*$/$1/;
     if ((lc($Fsis[$i][FSI_TYPE_FIELD]) eq "fsp master") &&
         (($Fsis[$i][FSI_TARGET_TYPE]) eq "pu") &&
-        (lc($Fsis[$i][FSI_TARGET_FIELD]) eq "n${curnode}+:p[0-9]+"))
+        ($nodeId eq $node))
     {
         $Mproc = $Fsis[$i][FSI_TARGET_FIELD];
         $Mproc =~ s/.*p(.*)/$1/;
+        $hasProc = 1;
     }
 }
 
@@ -825,9 +853,23 @@ for my $i ( 0 .. $#Fsis )
 generate_system_node();
 
 # Third generate the FSP chip
-if ($curnode == $fspnode)
+for my $fsp ( 0 .. $#FSPTargets )
 {
-    do_plugin('fsp_chip');
+    if (($FSPTargets[$fsp][FSP_NODE_FIELD] eq $node) &&
+        ($FSPTargets[$fsp][FSP_FLAG_FIELD] == 0))
+    {
+        my $instanceId = $FSPTargets[$fsp][FSP_IPATH_FIELD];
+        $instanceId = chop($instanceId);
+        do_plugin('fsp_chip', $node,
+                   $instanceId, $FSPTargets[$fsp][FSP_ORD_FIELD]);
+        # set flag to indicate the target already instatiated
+        $FSPTargets[$fsp][FSP_FLAG_FIELD] = 1;
+    }
+}
+
+if ($hasProc == 0)
+{
+    next;
 }
 
 # Fourth, generate the proc, occ, ex-chiplet, mcs-chiplet
@@ -919,7 +961,7 @@ for (my $do_core = 0, my $i = 0; $i <= $#STargets; $i++)
         }
 
         # call to do any fsp per-proc targets (ie, occ, psi)
-        do_plugin('fsp_proc_targets', $proc, $i, 
+        do_plugin('fsp_proc_targets', $proc, $i, $proc_ordinal_id,
                     $STargets[$i][NODE_FIELD], $STargets[$i][POS_FIELD]);
     }
     elsif ($STargets[$i][NAME_FIELD] eq "ex")
@@ -1091,9 +1133,9 @@ for my $i ( 0 .. $#SMembuses )
 # call to do pnor attributes
 do_plugin('all_pnors', $node);
 
-print "\n</attributes>\n";
-
 }
+
+print "\n</attributes>\n";
 
 # All done!
 #close ($outFH);
@@ -1439,7 +1481,7 @@ sub generate_sys
         <default>1</default>
     </attribute>";
     generate_max_config();
-    
+
     # call to do any fsp per-sys attributes
     do_plugin('fsp_sys', $sys, $sysname, 0);
 
@@ -1458,25 +1500,25 @@ sub generate_max_config
     my $maxDimm_Per_MbaPort =0;
     my $maxMbaPort_Per_Mba =0;
     my $maxMba_Per_MemBuf =0;
-    
+
     # MBA Ports Per MBA is 2 in P8 and is hard coded here
     use constant MBA_PORTS_PER_MBA => 2;
-    
+
     # MAX Chiplets Per Proc is 32 and is hard coded here
     use constant CHIPLETS_PER_PROC => 32;
-    
+
     # MAX Mba Per MemBuf is 2 and is hard coded here
     # PNEW_TODO to change if P9 different
     use constant MAX_MBA_PER_MEMBUF => 2;
-    
+
     # MAX Dimms Per MBA PORT is 2 and is hard coded here
     # PNEW_TODO to change if P9 different
     use constant MAX_DIMMS_PER_MBAPORT => 2;
-    
+
     for (my $i = 0; $i < $#STargets; $i++)
     {
         if ($STargets[$i][NAME_FIELD] eq "pu")
-        {   
+        {
             if ($node == 0)
             {
                 $maxProcChip_Per_Node += 1;
@@ -1495,19 +1537,19 @@ sub generate_max_config
             $maxMcs_Per_System += 1;
         }
     }
-    
+
     # loading the hard coded value
     $maxMbaPort_Per_Mba = MBA_PORTS_PER_MBA;
-    
+
     # loading the hard coded value
     $maxChiplets_Per_Proc = CHIPLETS_PER_PROC;
-    
+
     # loading the hard coded value
     $maxMba_Per_MemBuf = MAX_MBA_PER_MEMBUF;
-    
+
     # loading the hard coded value
     $maxDimm_Per_MbaPort = MAX_DIMMS_PER_MBAPORT;
-    
+
     print "
     <attribute>
         <id>MAX_PROC_CHIPS_PER_NODE</id>
@@ -1576,7 +1618,7 @@ sub generate_system_node
 ";
 
     # call to do any fsp per-system_node targets
-    do_plugin('fsp_system_node_targets');
+    do_plugin('fsp_system_node_targets', $node);
 }
 
 sub generate_proc
@@ -1597,7 +1639,7 @@ sub generate_proc
         $mboxpath = $devpath->{chip}->{$ipath}->{'mailbox-path'};
         $mboxsize = length($mboxpath) + 1;
     }
-  
+
     my $psilink = 0;
     for my $psi ( 0 .. $#hbPSIs )
     {
