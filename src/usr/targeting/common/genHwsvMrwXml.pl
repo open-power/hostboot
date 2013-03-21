@@ -1530,8 +1530,18 @@ sub generate_system_node
         <default>affinity:sys-$sys/node-$node</default>
     </attribute>";
 
+    # TODO: move RID calculation to genHwsvMrwXml_fsp.pm
     # call to do any fsp per-system_node attributes
-    my $rid = "0x800";
+    my $rid = sprintf("0x80%X",${node});
+
+    # TODO: replace Brazos system check with something less dependent on name
+    #brazos is different then tuleta and orlena
+    #for 1 node systems the RID is 0x800 but for brazos, 
+    #the 800 is for the maxdale, and 801-804 for the processor nodes.  
+    if ($sysname eq "brazos")
+    {
+        $rid = sprintf("0x80%X",${node}+1);
+    }
     do_plugin('fsp_system_node', $node, $rid );
 
     print "
@@ -1549,7 +1559,6 @@ sub generate_proc
     my $uidstr = sprintf("0x%02X05%04X",${node},${proc});
     my $vpdnum = sprintf("%d",${proc}+${node}*8);
     my $position = ${proc};
-    my $rid = sprintf("0x10%02X",$fruid);
     my $scompath = $devpath->{chip}->{$ipath}->{'scom-path'};
     my $scanpath = $devpath->{chip}->{$ipath}->{'scan-path'};
     my $scomsize = length($scompath) + 1;
