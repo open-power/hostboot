@@ -6,7 +6,7 @@
 #
 # IBM CONFIDENTIAL
 #
-# COPYRIGHT International Business Machines Corp. 2011,2012
+# COPYRIGHT International Business Machines Corp. 2011,2013
 #
 # p1
 #
@@ -64,6 +64,7 @@
 #                  mjjones   09/28/12  Minor change to add FFDC on error
 #                  mjjones   11/05/12  Generate fapiAttributeIds.txt
 #                                      Generate fapiAttributeEnums.txt
+#                  mjjones   03/21/13  Add fapi namespace to Chip EC Feature macro
 #
 # End Change Log ******************************************************
 
@@ -489,7 +490,7 @@ foreach my $argnum (1 .. $#ARGV)
             # compile failure if a set is attempted
             #------------------------------------------------------------------
             print AIFILE "#define $attr->{id}_GETMACRO(ID, PTARGET, VAL) ";
-            print AIFILE "fapi::fapiQueryChipEcFeature(ID, PTARGET, VAL)\n";
+            print AIFILE "fapi::fapiQueryChipEcFeature(fapi::ID, PTARGET, VAL)\n";
             print AIFILE "#define $attr->{id}_SETMACRO(ID, PTARGET, VAL) ";
             print AIFILE "CHIP_EC_FEATURE_ATTRIBUTE_NOT_WRITABLE\n";
         }
