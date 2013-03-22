@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/diag/prdf/common/plat/pegasus/prdfCenMbaConst.H $     */
+/* $Source: src/usr/diag/prdf/common/plat/pegasus/prdfCenConst.H $        */
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
@@ -25,8 +25,8 @@
 #define PRDF_CEN_MBA_CONST_H
 
 /**
- *   @file prdfCenMbaConst.H
- *   @brief Defines Centaur Mba related constants
+ *   @file prdfCenConst.H
+ *   @brief Defines Centaur related constants
  */
 //------------------------------------------------------------------------------
 //  Includes
@@ -41,7 +41,9 @@ enum
     MAX_DIMM_SLCT_PER_MBA = 2,
     MAX_RANKS_PER_DIMM_SLCT = 4,
     MAX_RANKS_PER_MBA = MAX_DIMM_SLCT_PER_MBA * MAX_RANKS_PER_DIMM_SLCT,
+
     SYMBOLS_PER_RANK = 72,
+    DQS_PER_DIMM     = 72,
 };
 
 } // end namespace PRDF
