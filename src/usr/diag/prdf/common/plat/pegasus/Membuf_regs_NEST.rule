@@ -456,3 +456,63 @@
         capture     group default;
     };
 
+    ############################################################################
+    # Memory ECC Error Address Registers
+    ############################################################################
+
+    register MBNCER_0
+    {
+        name        "MBS Memory NCE Error Address 0 Register";
+        scomaddr    0x02011660;
+        capture     group default;
+    };
+
+    register MBRCER_0
+    {
+        name        "MBS Memory RCE Error Address 0 Register";
+        scomaddr    0x02011661;
+        capture     group default;
+    };
+
+    register MBMPER_0
+    {
+        name        "MBS Memory MPE Error Address 0 Register";
+        scomaddr    0x02011662;
+        capture     group default;
+    };
+
+    register MBUER_0
+    {
+        name        "MBS Memory UE Error Address 0 Register";
+        scomaddr    0x02011663;
+        capture     group default;
+    };
+
+    register MBNCER_1
+    {
+        name        "MBS Memory NCE Error Address 1 Register";
+        scomaddr    0x02011760;
+        capture     group default;
+    };
+
+    register MBRCER_1
+    {
+        name        "MBS Memory RCE Error Address 1 Register";
+        scomaddr    0x02011761;
+        capture     group default;
+    };
+
+    register MBMPER_1
+    {
+        name        "MBS Memory MPE Error Address 1 Register";
+        scomaddr    0x02011762;
+        capture     group default;
+    };
+
+    register MBUER_1
+    {
+        name        "MBS Memory UE Error Address 1 Register";
+        scomaddr    0x02011763;
+        capture     group default;
+    };
+

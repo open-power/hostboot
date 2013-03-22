@@ -31,6 +31,7 @@
 #include <prdfPlatServices.H>
 #include <prdfPluginMap.H>
 
+#include <prdfCenAddress.H>
 #include <prdfCenMbaCaptureData.H>
 #include <prdfCenMbaDataBundle.H>
 
@@ -119,6 +120,8 @@ PRDF_PLUGIN_DEFINE( Mba, PostAnalysis );
 int32_t MaintCmdComplete( ExtensibleChip * i_mbaChip,
                           STEP_CODE_DATA_STRUCT & i_sc )
 {
+    #define PRDF_FUNC "[Mba::MaintCmdComplete] "
+
     using namespace TARGETING;
 
     int32_t l_rc = SUCCESS;
@@ -128,20 +131,16 @@ int32_t MaintCmdComplete( ExtensibleChip * i_mbaChip,
     {
         #ifdef __HOSTBOOT_MODULE
 
-        if ( PlatServices::isInMdiaMode() )
+        if ( isInMdiaMode() )
         {
             // Immediately inform mdia that the command
             // has finished.
 
-            l_rc = PlatServices::mdiaSendEventMsg( mbaTarget,
-                    MDIA::RESET_TIMER );
+            l_rc = mdiaSendEventMsg( mbaTarget, MDIA::RESET_TIMER );
 
             if(l_rc)
             {
-                PRDF_ERR( "[Mba::MaintCmdComplete] "
-                        "PlatServices::mdiaSendEventMsg"
-                        " failed" );
-
+                PRDF_ERR( PRDF_FUNC"PlatServices::mdiaSendEventMsg() failed" );
                 // keep going
             }
 
@@ -150,25 +149,20 @@ int32_t MaintCmdComplete( ExtensibleChip * i_mbaChip,
             // the command will need to be restarted.
             // Tuck this away until PostAnalysis.
 
+            CenAddr startAddr, endAddr;
+            l_rc  = cenGetMaintAddr( i_mbaChip, MAINT_START_ADDR, startAddr );
+            l_rc |= cenGetMaintAddr( i_mbaChip, MAINT_END_ADDR,   endAddr   );
+            if ( SUCCESS != l_rc )
+            {
+                PRDF_ERR( PRDF_FUNC"cenGetMbaAddr() failed" );
+                break;
+            }
+
             CenMbaDataBundle * mbadb = getMbaDataBundle( i_mbaChip );
-
-            SCAN_COMM_REGISTER_CLASS * MBMACA =
-                i_mbaChip->getRegister("MBMACA");
-            SCAN_COMM_REGISTER_CLASS * MBMEA = i_mbaChip->getRegister("MBMEA");
-
-            l_rc = MBMACA->Read();
-            if (l_rc != SUCCESS) break;
-
-            l_rc = MBMEA->Read();
-            if (l_rc != SUCCESS) break;
-
             mbadb->iv_sendCmdCompleteMsg = true;
             mbadb->iv_cmdCompleteMsgData =
-                (MBMACA->GetBitFieldJustified(0, 40)
-                 == MBMEA->GetBitFieldJustified(0, 40))
-                ? MDIA::COMMAND_COMPLETE
-                : MDIA::COMMAND_STOPPED;
-
+                        startAddr == endAddr ? MDIA::COMMAND_COMPLETE
+                                             : MDIA::COMMAND_STOPPED;
             // Do not commit error log for a successful command complete.
             if ( MDIA::COMMAND_COMPLETE == mbadb->iv_cmdCompleteMsgData )
 	            i_sc.service_data->DontCommitErrorLog();
@@ -183,12 +177,13 @@ int32_t MaintCmdComplete( ExtensibleChip * i_mbaChip,
 
     if ( SUCCESS != l_rc )
     {
-        PRDF_ERR( "[Mba::MaintCmdComplete] failed on MBA 0x%08x",
-                  PlatServices::getHuid(mbaTarget) );
+        PRDF_ERR( PRDF_FUNC"failed on MBA 0x%08x", getHuid(mbaTarget) );
         CalloutUtil::defaultError( i_sc );
     }
 
     return l_rc;
+
+    #undef PRDF_FUNC
 }
 PRDF_PLUGIN_DEFINE( Mba, MaintCmdComplete );
 

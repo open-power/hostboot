@@ -251,14 +251,14 @@ chip Mba
 
     register MBMACA
     {
-        name        "MBU.MBA01.MBA_MCBIST.SCOMFIR.MBMACAQ";
+        name        "MBA Maintenance Command Start Address Register";
         scomaddr    0x0301060D;
         capture     group default;
     };
 
     register MBMEA
     {
-        name        "MBU.MBA01.MBA_MCBIST.SCOMFIR.MBMEAQ";
+        name        "MBA Maintenance Command End Address Register";
         scomaddr    0x0301060E;
         capture     group default;
     };
