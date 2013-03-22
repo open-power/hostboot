@@ -51,6 +51,7 @@
 #                  mjjones   11/09/12  Generate fapiSetSbeError.H
 #                  mjjones   01/09/13  Fix CFAM register capture
 #                  mjjones   03/14/13  Allow 64bit literals for SCOM reg capture
+#                  mjjones   03/22/13  Support Procedure Callouts
 #
 # End Change Log ******************************************************
 
@@ -461,12 +462,12 @@ foreach my $argnum (1 .. $#ARGV)
             $eiEntryCount++;
         }
 
-        # Target callouts
+        # Procedure/Target callouts
         foreach my $callout (@{$err->{callout}})
         {
-            if (! exists $callout->{target})
+            if ((! exists $callout->{target}) && (! exists $callout->{procedure}))
             {
-                print ("fapiParseErrorInfo.pl ERROR. Callout target missing\n");
+                print ("fapiParseErrorInfo.pl ERROR. Callout procedure/target missing\n");
                 exit(1);
             }
 
@@ -476,18 +477,33 @@ foreach my $argnum (1 .. $#ARGV)
                 exit(1);
             }
 
-            # Check the type
-            print EIFILE "fapi::fapiCheckType<const fapi::Target *>(&$callout->{target}); ";
+            my $objNum = 0;
+            if (exists $callout->{target})
+            {
+                # Check the type
+                print EIFILE
+                    "fapi::fapiCheckType<const fapi::Target *>(&$callout->{target}); ";
 
-            # Add the Target to the objectlist if it doesn't already exist
-            my $objNum = addEntryToArray(\@eiObjects, $callout->{target});
+                # Add the Target to the objectlist if it doesn't already exist
+                $objNum = addEntryToArray(\@eiObjects, $callout->{target});
+            }
 
             # Add an EI entry to eiEntryStr
             if ($eiEntryCount > 0)
             {
                 $eiEntryStr .= ", ";
             }
-            $eiEntryStr .= "{fapi::ReturnCode::EI_TYPE_CALLOUT, $objNum, fapi::PRI_$callout->{priority}, 0}";
+
+            if (exists $callout->{target})
+            {
+                $eiEntryStr .=
+                    "{fapi::ReturnCode::EI_TYPE_CALLOUT, $objNum, fapi::CalloutPriorities::$callout->{priority}, 0}";
+            }
+            else
+            {
+                $eiEntryStr .=
+                    "{fapi::ReturnCode::EI_TYPE_PROCEDURE_CALLOUT, 0, fapi::CalloutPriorities::$callout->{priority}, fapi::ProcedureCallouts::$callout->{procedure}}";
+            }
             $eiEntryCount++;
         }
 

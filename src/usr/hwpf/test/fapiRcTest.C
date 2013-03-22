@@ -1,26 +1,25 @@
-/*  IBM_PROLOG_BEGIN_TAG
- *  This is an automatically generated prolog.
- *
- *  $Source: src/usr/hwpf/test/fapiRcTest.C $
- *
- *  IBM CONFIDENTIAL
- *
- *  COPYRIGHT International Business Machines Corp. 2011-2012
- *
- *  p1
- *
- *  Object Code Only (OCO) source materials
- *  Licensed Internal Code Source Materials
- *  IBM HostBoot Licensed Internal Code
- *
- *  The source code for this program is not published or other-
- *  wise divested of its trade secrets, irrespective of what has
- *  been deposited with the U.S. Copyright Office.
- *
- *  Origin: 30
- *
- *  IBM_PROLOG_END_TAG
- */
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/usr/hwpf/test/fapiRcTest.C $                              */
+/*                                                                        */
+/* IBM CONFIDENTIAL                                                       */
+/*                                                                        */
+/* COPYRIGHT International Business Machines Corp. 2011,2013              */
+/*                                                                        */
+/* p1                                                                     */
+/*                                                                        */
+/* Object Code Only (OCO) source materials                                */
+/* Licensed Internal Code Source Materials                                */
+/* IBM HostBoot Licensed Internal Code                                    */
+/*                                                                        */
+/* The source code for this program is not published or otherwise         */
+/* divested of its trade secrets, irrespective of what has been           */
+/* deposited with the U.S. Copyright Office.                              */
+/*                                                                        */
+/* Origin: 30                                                             */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
 /**
  *  @file fapiTargetTest.C
  *
@@ -36,6 +35,7 @@
  *                          mjjones     09/23/2011  Updated test for ErrorInfo
  *                          mjjones     01/13/2012  Use new ReturnCode interfaces
  *                          mjjones     08/14/2012  Use new ErrorInfo structures
+ *                          mjjones     03/28/2013  Added proc-callout tests
  */
 
 #include <fapi.H>
@@ -618,10 +618,13 @@ uint32_t rcTest12()
     fapi::ReturnCode::ErrorInfoEntry l_entries[] =
         {{fapi::ReturnCode::EI_TYPE_FFDC, 0,
           fapi::ReturnCodeFfdc::getErrorInfoFfdcSize(l_ffdc)},
-         {fapi::ReturnCode::EI_TYPE_CALLOUT, 1, fapi::PRI_MEDIUM},
+         {fapi::ReturnCode::EI_TYPE_PROCEDURE_CALLOUT, 0,
+          fapi::CalloutPriorities::HIGH, fapi::ProcedureCallouts::CODE},
+         {fapi::ReturnCode::EI_TYPE_CALLOUT, 1,
+          fapi::CalloutPriorities::MEDIUM},
          {fapi::ReturnCode::EI_TYPE_DECONF, 1},
          {fapi::ReturnCode::EI_TYPE_GARD, 1}};
-    l_rc.addErrorInfo(l_objects, l_entries, 4);
+    l_rc.addErrorInfo(l_objects, l_entries, 5);
 
     do
     {
@@ -686,9 +689,11 @@ uint32_t rcTest12()
             break;
         }
 
-        if (l_pErrInfo->iv_CDGs[0]->iv_calloutPriority != PRI_MEDIUM)
+        if (l_pErrInfo->iv_CDGs[0]->iv_calloutPriority !=
+            CalloutPriorities::MEDIUM)
         {
-            FAPI_ERR("rcTest12. callout priority mismatch");
+            FAPI_ERR("rcTest12. callout priority mismatch (%d)",
+                     l_pErrInfo->iv_CDGs[0]->iv_calloutPriority);
             l_result = 8;
             break;
         }
@@ -707,6 +712,31 @@ uint32_t rcTest12()
             break;
         }
 
+        if (l_pErrInfo->iv_procedureCallouts.size() != 1)
+        {
+            FAPI_ERR("rcTest12. %d proc-callouts",
+                     l_pErrInfo->iv_procedureCallouts.size());
+            l_result = 11;
+            break;
+        }
+
+        if (l_pErrInfo->iv_procedureCallouts[0]->iv_procedure !=
+            ProcedureCallouts::CODE)
+        {
+            FAPI_ERR("rcTest12. procedure callout mismatch (%d)",
+                     l_pErrInfo->iv_procedureCallouts[0]->iv_procedure);
+            l_result = 12;
+            break;
+        }
+
+        if (l_pErrInfo->iv_procedureCallouts[0]->iv_calloutPriority !=
+            CalloutPriorities::HIGH)
+        {
+            FAPI_ERR("rcTest12. procedure callout priority mismatch (%d)",
+                     l_pErrInfo->iv_procedureCallouts[0]->iv_calloutPriority);
+            l_result = 13;
+            break;
+        }
 
         FAPI_INF("rcTest12. Success!");
     }
@@ -955,12 +985,16 @@ uint32_t rcTest16()
           fapi::ReturnCodeFfdc::getErrorInfoFfdcSize(l_ffdc)},
          {fapi::ReturnCode::EI_TYPE_FFDC, 1,
           fapi::ReturnCodeFfdc::getErrorInfoFfdcSize(l_ffdc2)},
-         {fapi::ReturnCode::EI_TYPE_CALLOUT, 2, fapi::PRI_HIGH},
-         {fapi::ReturnCode::EI_TYPE_CALLOUT, 3, fapi::PRI_LOW},
+         {fapi::ReturnCode::EI_TYPE_CALLOUT, 2, fapi::CalloutPriorities::HIGH},
+         {fapi::ReturnCode::EI_TYPE_CALLOUT, 3, fapi::CalloutPriorities::LOW},
          {fapi::ReturnCode::EI_TYPE_DECONF, 2},
          {fapi::ReturnCode::EI_TYPE_DECONF, 3},
-         {fapi::ReturnCode::EI_TYPE_GARD, 2}};
-    l_rc.addErrorInfo(l_objects, l_entries, 7);
+         {fapi::ReturnCode::EI_TYPE_GARD, 2},
+         {fapi::ReturnCode::EI_TYPE_PROCEDURE_CALLOUT, 0,
+          fapi::CalloutPriorities::HIGH, fapi::ProcedureCallouts::CODE},
+         {fapi::ReturnCode::EI_TYPE_PROCEDURE_CALLOUT, 0,
+          fapi::CalloutPriorities::MEDIUM, fapi::ProcedureCallouts::LVL_SUPPORT}};
+    l_rc.addErrorInfo(l_objects, l_entries, 9);
 
     do
     {
@@ -1035,7 +1069,8 @@ uint32_t rcTest16()
             break;
         }
 
-        if (l_pErrInfo->iv_CDGs[0]->iv_calloutPriority != PRI_HIGH)
+        if (l_pErrInfo->iv_CDGs[0]->iv_calloutPriority !=
+                CalloutPriorities::HIGH)
         {
             FAPI_ERR("rcTest16. CDG[0] callout priority mismatch");
             l_result = 9;
@@ -1063,7 +1098,8 @@ uint32_t rcTest16()
             break;
         }
 
-        if (l_pErrInfo->iv_CDGs[1]->iv_calloutPriority != PRI_LOW)
+        if (l_pErrInfo->iv_CDGs[1]->iv_calloutPriority !=
+            CalloutPriorities::LOW)
         {
             FAPI_ERR("rcTest16. CDG[1] callout priority mismatch");
             l_result = 13;
@@ -1081,6 +1117,50 @@ uint32_t rcTest16()
         {
             FAPI_ERR("rcTest16. CDG[1] gard set");
             l_result = 15;
+            break;
+        }
+
+        if (l_pErrInfo->iv_procedureCallouts.size() != 2)
+        {
+            FAPI_ERR("rcTest16. %d proc-callouts",
+                     l_pErrInfo->iv_procedureCallouts.size());
+            l_result = 16;
+            break;
+        }
+
+        if (l_pErrInfo->iv_procedureCallouts[0]->iv_procedure !=
+            ProcedureCallouts::CODE)
+        {
+            FAPI_ERR("rcTest16. procedure[0] callout mismatch (%d)",
+                     l_pErrInfo->iv_procedureCallouts[0]->iv_procedure);
+            l_result = 17;
+            break;
+        }
+
+        if (l_pErrInfo->iv_procedureCallouts[0]->iv_calloutPriority !=
+            CalloutPriorities::HIGH)
+        {
+            FAPI_ERR("rcTest16. procedure[0] callout priority mismatch (%d)",
+                     l_pErrInfo->iv_procedureCallouts[0]->iv_calloutPriority);
+            l_result = 18;
+            break;
+        }
+
+        if (l_pErrInfo->iv_procedureCallouts[1]->iv_procedure !=
+            ProcedureCallouts::LVL_SUPPORT)
+        {
+            FAPI_ERR("rcTest16. procedure[1] callout mismatch (%d)",
+                     l_pErrInfo->iv_procedureCallouts[1]->iv_procedure);
+            l_result = 19;
+            break;
+        }
+
+        if (l_pErrInfo->iv_procedureCallouts[1]->iv_calloutPriority !=
+            CalloutPriorities::MEDIUM)
+        {
+            FAPI_ERR("rcTest16. procedure[1] callout priority mismatch (%d)",
+                     l_pErrInfo->iv_procedureCallouts[1]->iv_calloutPriority);
+            l_result = 20;
             break;
         }
 

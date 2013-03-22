@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2012              */
+/* COPYRIGHT International Business Machines Corp. 2011,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -38,6 +38,7 @@
  *                          mjjones     08/14/2012  Merge Callout/Deconfig/Gard
  *                                                  structures into one
  *                          mjjones     09/19/2012  Replace FFDC type with ID
+ *                          mjjones     03/22/2013  Support Procedure Callouts
  */
 
 #include <fapiErrorInfo.H>
@@ -77,11 +78,23 @@ const void * ErrorInfoFfdc::getData(uint32_t & o_size) const
 }
 
 //******************************************************************************
+// ErrorInfoProcedureCallout Constructor
+//******************************************************************************
+ErrorInfoProcedureCallout::ErrorInfoProcedureCallout(
+    const ProcedureCallouts::ProcedureCallout i_procedure,
+    const CalloutPriorities::CalloutPriority i_calloutPriority)
+: iv_procedure(i_procedure), iv_calloutPriority(i_calloutPriority)
+{
+
+}
+
+//******************************************************************************
 // ErrorInfoCDG Constructor
 //******************************************************************************
 ErrorInfoCDG::ErrorInfoCDG(const Target & i_target)
-: iv_target(i_target), iv_callout(false), iv_calloutPriority(PRI_LOW),
-  iv_deconfigure(false), iv_gard(false)
+: iv_target(i_target), iv_callout(false),
+  iv_calloutPriority(CalloutPriorities::LOW), iv_deconfigure(false),
+  iv_gard(false)
 {
 
 }
@@ -93,6 +106,14 @@ ErrorInfo::~ErrorInfo()
 {
     for (ErrorInfo::ErrorInfoFfdcItr_t l_itr = iv_ffdcs.begin();
          l_itr != iv_ffdcs.end(); ++l_itr)
+    {
+        delete (*l_itr);
+        (*l_itr) = NULL;
+    }
+
+    for (ErrorInfo::ErrorInfoProcedureCalloutItr_t l_itr =
+             iv_procedureCallouts.begin();
+         l_itr != iv_procedureCallouts.end(); ++l_itr)
     {
         delete (*l_itr);
         (*l_itr) = NULL;

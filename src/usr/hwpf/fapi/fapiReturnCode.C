@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2012              */
+/* COPYRIGHT International Business Machines Corp. 2011,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -48,6 +48,7 @@
  *                          brianh      07/31/2012  performance/size optimizations
  *                          mjjones     08/14/2012  Use new ErrorInfo structure
  *                          mjjones     09/19/2012  Add FFDC ID to error info
+ *                          mjjones     03/22/2013  Support Procedure Callouts
  */
 
 #include <fapiReturnCode.H>
@@ -230,7 +231,7 @@ void ReturnCode::addErrorInfo(const void * const * i_pObjects,
 {
     for (uint32_t i = 0; i < i_count; i++)
     {
-        // Figure out the object that this FFDC refers to
+        // Figure out the object that this ErrorInfo refers to
         const void * l_pObject = i_pObjects[i_pEntries[i].iv_object];
 
         if (i_pEntries[i].iv_type == EI_TYPE_FFDC)
@@ -277,15 +278,30 @@ void ReturnCode::addErrorInfo(const void * const * i_pObjects,
                  FAPI_ERR("addErrorInfo: Unrecognized FFDC data: %d", l_size);
             }
         }
+        else if (i_pEntries[i].iv_type == EI_TYPE_PROCEDURE_CALLOUT)
+        {
+            ProcedureCallouts::ProcedureCallout l_proc =
+                static_cast<ProcedureCallouts::ProcedureCallout>
+                    (i_pEntries[i].iv_data2);
+            CalloutPriorities::CalloutPriority l_pri =
+                static_cast<CalloutPriorities::CalloutPriority>
+                    (i_pEntries[i].iv_data1);
+
+            // Add the ErrorInfo
+            FAPI_ERR("addErrorInfo: Adding proc callout, proc: %d, pri: %d",
+                     l_proc, l_pri);
+            addEIProcedureCallout(l_proc, l_pri);
+        }
         else if (i_pEntries[i].iv_type == EI_TYPE_CALLOUT)
         {
             // Get a pointer to the Target to callout and the priority
             const Target * l_pTarget = static_cast<const Target *>(l_pObject);
-            CalloutPriority l_pri =
-                static_cast<CalloutPriority>(i_pEntries[i].iv_data1);
+            CalloutPriorities::CalloutPriority l_pri =
+                static_cast<CalloutPriorities::CalloutPriority>
+                    (i_pEntries[i].iv_data1);
 
             // Add the ErrorInfo
-            FAPI_ERR("addErrorInfo: Adding callout, pri: %d", l_pri);
+            FAPI_ERR("addErrorInfo: Adding target callout, pri: %d", l_pri);
             addEICallout(*l_pTarget, l_pri);
         }
         else if (i_pEntries[i].iv_type == EI_TYPE_DECONF)
@@ -394,10 +410,26 @@ void ReturnCode::forgetData()
 }
 
 //******************************************************************************
+// addEIProcedureCallout function
+//******************************************************************************
+void ReturnCode::addEIProcedureCallout(
+    const ProcedureCallouts::ProcedureCallout i_procedure,
+    const CalloutPriorities::CalloutPriority i_priority)
+{
+    // Create an ErrorInfoProcedureCallout object and add it to the Error
+    // Information
+    ErrorInfoProcedureCallout * l_pCallout = new ErrorInfoProcedureCallout(
+        i_procedure, i_priority);
+    getCreateReturnCodeDataRef().getCreateErrorInfo().
+        iv_procedureCallouts.push_back(l_pCallout);
+}
+
+//******************************************************************************
 // addEICallout function
 //******************************************************************************
-void ReturnCode::addEICallout(const Target & i_target,
-                              const CalloutPriority i_priority)
+void ReturnCode::addEICallout(
+    const Target & i_target,
+    const CalloutPriorities::CalloutPriority i_priority)
 {
     // Get/Create a ErrorInfoCDG object for the target and update the callout
     ErrorInfoCDG & l_errorInfoCdg = getCreateReturnCodeDataRef().

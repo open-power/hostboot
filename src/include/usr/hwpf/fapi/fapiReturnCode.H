@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2012              */
+/* COPYRIGHT International Business Machines Corp. 2011,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -45,6 +45,7 @@
  *                          brianh      07/31/2012  performance/size optimizations
  *                          mjjones     08/14/2012  Created getCreateReturnCodeDataRef
  *                          mjjones     09/19/2012  Add FFDC ID to error info
+ *                          mjjones     03/22/2013  Support Procedure Callouts
  */
 
 #ifndef FAPIRETURNCODE_H_
@@ -277,10 +278,11 @@ public:
      */
     enum ErrorInfoType
     {
-        EI_TYPE_FFDC    = 1,
-        EI_TYPE_CALLOUT = 2,
-        EI_TYPE_DECONF  = 3,
-        EI_TYPE_GARD    = 4,
+        EI_TYPE_FFDC              = 1,
+        EI_TYPE_PROCEDURE_CALLOUT = 2,
+        EI_TYPE_CALLOUT           = 3,
+        EI_TYPE_DECONF            = 4,
+        EI_TYPE_GARD              = 5,
     };
 
     /**
@@ -291,12 +293,13 @@ public:
      */
     struct ErrorInfoEntry
     {
-        uint8_t iv_type;   // The type of ErrorInfo (from ErrorInfoType enum)
-        uint8_t iv_object; // Which object in the i_pObjects array the
-                           // ErrorInfoEntry refers to
-        int16_t  iv_data1; // EI_TYPE_FFDC   : Size of FFDC
-                           // EI_TYPE_CALLOUT: CalloutPriority
-        uint32_t iv_data2; // EI_TYPE_FFDC   : FFDC Id
+        uint8_t  iv_type;   // The type of ErrorInfo (from ErrorInfoType enum)
+        uint8_t  iv_object; // Which object in the i_pObjects array the
+                            // ErrorInfoEntry refers to
+        int16_t  iv_data1;  // EI_TYPE_FFDC               : Size of FFDC
+                            // EI_TYPE_[PROCEDURE_]CALLOUT: CalloutPriority
+        uint32_t iv_data2;  // EI_TYPE_FFDC               : FFDC Id
+                            // EI_TYPE_PROCEDURE_CALLOUT  : ProcedureCallout
     };
 
     /**
@@ -377,6 +380,18 @@ private:
     void forgetData();
 
     /**
+     * @brief Add a procedure to callout to the ErrorInfo
+     *
+     * This is called by addErrorInfo
+     *
+     * @param[in] i_procedure The procedure to callout
+     * @param[in] i_priority  The priority of the callout
+     */
+     void addEIProcedureCallout(
+         const ProcedureCallouts::ProcedureCallout i_procedure,
+         const CalloutPriorities::CalloutPriority i_priority);
+
+    /**
      * @brief Add a target to callout to the ErrorInfo
      *
      * This is called by addErrorInfo
@@ -384,8 +399,9 @@ private:
      * @param[in] i_target   Reference to the target to callout.
      * @param[in] i_priority The priority of the callout
      */
-     void addEICallout(const Target & i_target,
-                       const CalloutPriority i_priority);
+     void addEICallout(
+         const Target & i_target,
+         const CalloutPriorities::CalloutPriority i_priority);
 
     /**
      * @brief Add a target to deconfigure to the ErrorInfo

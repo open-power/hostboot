@@ -47,6 +47,11 @@
     <ffdc>UNIT_TEST_FFDC_DATA_BUF</ffdc>
     <!-- Add a Target as FFDC -->
     <ffdc>UNIT_TEST_FFDC_MASTER_CHIP_TARGET</ffdc>
+    <!-- Callout next level of support -->
+    <callout>
+        <procedure>LVL_SUPPORT</procedure>
+        <priority>MEDIUM</priority>
+    </callout>
     <!-- Callout MASTER_CHIP HIGH -->
     <!-- Commented out to avoid actually calling out a chip in UT
         <callout>
