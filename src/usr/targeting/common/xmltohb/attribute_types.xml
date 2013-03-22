@@ -10166,7 +10166,7 @@ Measured in GB</description>
     <simpleType>
         <uint32_t></uint32_t>
     </simpleType>
-    <persistency>volatile</persistency>
+    <persistency>non-volatile</persistency>
     <readable/>
     <writeable/>
     <hwpfToHbAttrMap>
