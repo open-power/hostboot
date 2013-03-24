@@ -102,7 +102,7 @@ if ($sysname eq "brazos")
 # same swizzled wiring
 # TODO. This will be remove when MRW provide the settings in system specific
 # xml file. RTC 65460
-my @DmiRefClockSwizzle = [ 0, 1, 2, 3, 4, 5, 6, 7 ];
+my @DmiRefClockSwizzle = ( 0, 1, 2, 3, 4, 5, 6, 7 );
 if ($SYSNAME eq "TULETA")
 {
     $DmiRefClockSwizzle[4] = 7;
