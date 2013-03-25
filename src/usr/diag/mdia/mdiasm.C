@@ -149,6 +149,16 @@ void StateMachine::processCommandTimeout(const MonitorIDs & i_monitorIDs)
             errlCommit(err, MDIA_COMP_ID);
         }
 
+        fapirc = (*cit)->cleanupCmd();
+
+        err = fapiRcToErrl(fapirc);
+
+        if(err)
+        {
+            MDIA_ERR("sm: mss_MaintCmd::cleanupCmd failed");
+            errlCommit(err, MDIA_COMP_ID);
+        }
+
         delete (*cit);
     }
 }
@@ -526,6 +536,34 @@ errlHndl_t StateMachine::doMaintCommand(WorkFlowProperties & i_wfp)
             }
 
             startAddr.setDoubleWord(0, address);
+            startAddr.insert(static_cast<uint32_t>(0), 40, 24); // addr is 0:39
+
+            switch(workItem)
+            {
+                case START_RANDOM_PATTERN:
+                    static_cast<mss_SuperFastRandomInit *>(
+                            cmd)->setStartAddr(startAddr);
+                    break;
+                case START_SCRUB:
+                    static_cast<mss_SuperFastRead *>(
+                            cmd)->setStartAddr(startAddr);
+                    break;
+                case START_PATTERN_0:
+                case START_PATTERN_1:
+                case START_PATTERN_2:
+                case START_PATTERN_3:
+                case START_PATTERN_4:
+                case START_PATTERN_5:
+                case START_PATTERN_6:
+                case START_PATTERN_7:
+                    static_cast<mss_SuperFastInit *>(
+                            cmd)->setStartAddr(startAddr);
+                    break;
+                default:
+                    MDIA_ERR("sm: unrecognized maint command type %d:",
+                            workItem);
+                    break;
+            }
         }
 
         else
@@ -648,6 +686,8 @@ bool StateMachine::processMaintCommandEvent(const MaintCommandEvent & i_event)
     bool resume = true, dispatched = false;
 
     mss_MaintCmd * cmd = NULL;
+    ReturnCode fapirc;
+    errlHndl_t err = NULL;
 
     mutex_lock(&iv_mutex);
 
@@ -719,6 +759,17 @@ bool StateMachine::processMaintCommandEvent(const MaintCommandEvent & i_event)
                 cmd = static_cast<mss_MaintCmd *>(wfp.data);
                 wfp.data = NULL;
 
+                MDIA_FAST("sm: stopping command: %p", cmd);
+
+                fapirc = cmd->stopCmd();
+                err = fapiRcToErrl(fapirc);
+
+                if(err)
+                {
+                    MDIA_ERR("sm: mss_MaintCmd::stopCmd failed");
+                    errlCommit(err, MDIA_COMP_ID);
+                }
+
                 break;
 
             case RESET_TIMER:
@@ -728,6 +779,20 @@ bool StateMachine::processMaintCommandEvent(const MaintCommandEvent & i_event)
 
                 resume = false;
                 break;
+        }
+
+        if(cmd)
+        {
+            // restore any init settings that
+            // may have been changed by the command
+
+            fapirc = cmd->cleanupCmd();
+            err = fapiRcToErrl(fapirc);
+            if(err)
+            {
+                MDIA_ERR("sm: mss_MaintCmd::cleanupCmd failed");
+                errlCommit(err, MDIA_COMP_ID);
+            }
         }
 
         // schedule the next work item
