@@ -229,8 +229,25 @@ chip Mba
     };
 
     ############################################################################
-    # Maintenance command addresses
+    # Maintenance Command Registers
     ############################################################################
+
+    register MBMCT
+    {
+        name        "MBA Maintenance Command Type Register";
+        scomaddr    0x0301060A;
+        capture     group default;
+    };
+
+    # NOTE: PRD doesn't use MBMCC directly and the bits are cleared by HW so I
+    #       see no reason to add it here.
+
+    register MBMSR
+    {
+        name        "MBA Maintenance Command Status Register";
+        scomaddr    0x0301060C;
+        capture     group default;
+    };
 
     register MBMACA
     {
@@ -243,6 +260,20 @@ chip Mba
     {
         name        "MBU.MBA01.MBA_MCBIST.SCOMFIR.MBMEAQ";
         scomaddr    0x0301060E;
+        capture     group default;
+    };
+
+    register MBASCTL
+    {
+        name        "MBA Memory Scrub/Read Control Register";
+        scomaddr    0x0301060F;
+        capture     group default;
+    };
+
+    register MBAECTL
+    {
+        name        "MBA Error Control Register";
+        scomaddr    0x03010610;
         capture     group default;
     };
 

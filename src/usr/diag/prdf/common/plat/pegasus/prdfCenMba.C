@@ -166,6 +166,10 @@ int32_t MaintCmdComplete( ExtensibleChip * i_mbaChip,
                  == MBMEA->GetBitFieldJustified(0, 40))
                 ? MDIA::COMMAND_COMPLETE
                 : MDIA::COMMAND_STOPPED;
+
+            // Do not commit error log for a successful command complete.
+            if ( MDIA::COMMAND_COMPLETE == mbadb->iv_cmdCompleteMsgData )
+	            i_sc.service_data->DontCommitErrorLog();
         }
 
         #endif // __HOSTBOOT_MODULE
