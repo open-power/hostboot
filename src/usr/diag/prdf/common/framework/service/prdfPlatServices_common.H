@@ -112,6 +112,13 @@ int32_t syncFile( const char * i_fileName );
  */
 void milliSleep( uint32_t i_seconds, uint32_t i_milliseconds );
 
+/**
+ * @brief   Convert a Targeting target to FAPI target
+ * @param   i_target  Any target
+ * @return  Returns the corresponding FAPI target for a given target
+ */
+fapi::Target getFapiTarget( TARGETING::TargetHandle_t i_target );
+
 //##############################################################################
 //##                       Processor specific functions
 //##############################################################################

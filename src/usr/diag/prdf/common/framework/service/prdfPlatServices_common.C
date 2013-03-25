@@ -74,13 +74,6 @@ fapi::TargetType getFapiType( TARGETING::TargetHandle_t i_target )
     return o_type;
 }
 
-//------------------------------------------------------------------------------
-
-fapi::Target getFapiTarget( TARGETING::TargetHandle_t i_target )
-{
-    return fapi::Target( getFapiType(i_target), i_target );
-}
-
 //##############################################################################
 //##                     System Level Utility Functions
 //##############################################################################
@@ -90,6 +83,14 @@ void getECIDString( TargetHandle_t i_target, const char * o_ecidStr )
     o_ecidStr ="";
     PRDF_ERR( "[PlatServices::getECIDString] Function not implemented yet" );
 }
+
+//------------------------------------------------------------------------------
+
+fapi::Target getFapiTarget( TARGETING::TargetHandle_t i_target )
+{
+    return fapi::Target( getFapiType(i_target), i_target );
+}
+
 
 //##############################################################################
 //##                       Processor specific functions

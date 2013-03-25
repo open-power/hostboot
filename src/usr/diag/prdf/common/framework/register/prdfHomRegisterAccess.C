@@ -32,14 +32,8 @@
 
 #ifdef __HOSTBOOT_MODULE
   #include <ecmdDataBufferBase.H>
-  #include <fapi.H>
-  #include <errlmanager.H>
-  #include <devicefw/userif.H>
-  #include <targeting/common/targetservice.H>
 #else
   #include <ecmdDataBuffer.H>
-  #include <hwcoScanScom.H>
-  #include <chicservlib.H>
   #include <hwsvExecutionService.H>
 #endif
 
@@ -51,6 +45,7 @@
 #include <prdfGlobal.H>
 #include <prdfErrlUtil.H>
 #include <prdfTrace.H>
+
 #undef prdfHomRegisterAccess_C
 
 
@@ -145,15 +140,12 @@ uint32_t ScomAccessor::Access(TARGETING::TargetHandle_t i_target,
     uint32_t rc = SUCCESS;
     errlHndl_t errH = NULL;
     uint32_t bsize = bs.GetLength();
-    uint32_t l_ecmdRc = ECMD_DBUF_SUCCESS;
 
     if(i_target != NULL)
     {
         #ifdef __HOSTBOOT_MODULE
 
         ecmdDataBufferBase buffer(bsize);
-        uint64_t l_data = 0;
-        size_t l_size = sizeof(uint64_t);
 
         #else
 
@@ -172,36 +164,22 @@ uint32_t ScomAccessor::Access(TARGETING::TargetHandle_t i_target,
                 // FIXME: If register is in a EX chiplet, need to also update
                 //        PORE image ????
 
-                #ifdef __HOSTBOOT_MODULE
-
-                l_data = buffer.getDoubleWord(0);
-                errH = deviceWrite( i_target,
-                                    &l_data,
-                                    l_size,
-                                    DEVICE_SCOM_ADDRESS(registerId));
-
-                #else
-
-                errH = HWSV::hwsvPutScom(i_target, registerId, buffer);
-
-                #endif
+                PRD_FAPI_TO_ERRL(errH,
+                                 fapiPutScom,
+                                 PlatServices::getFapiTarget(i_target),
+                                 registerId,
+                                 buffer);
 
                 break;
 
             case MopRegisterAccess::READ:
                 bs.Pattern(0x00000000); // clear all bits
 
-                #ifdef __HOSTBOOT_MODULE
-
-                errH = deviceRead( i_target, &l_data, l_size,
-                                   DEVICE_SCOM_ADDRESS(registerId) );
-                l_ecmdRc = buffer.setDoubleWord(0, l_data);
-
-                #else
-
-                errH = HWSV::hwsvGetScom(i_target, registerId, buffer);
-
-                #endif
+                PRD_FAPI_TO_ERRL(errH,
+                                 fapiGetScom,
+                                 PlatServices::getFapiTarget(i_target),
+                                 registerId,
+                                 buffer);
 
                 for(unsigned int i = 0; i < bsize; ++i)
                 {
@@ -263,42 +241,6 @@ uint32_t ScomAccessor::Access(TARGETING::TargetHandle_t i_target,
             delete errH;
             errH = NULL;
         }
-    }
-    if (l_ecmdRc != ECMD_DBUF_SUCCESS)
-    {
-        PRDF_ERR( "ScomAccessor::Access ecmdDataBuffer "
-                  "operation failed with ecmd_rc = 0x%.8X", l_ecmdRc );
-        /*@
-         * @errortype
-         * @subsys     EPUB_FIRMWARE_SP
-         * @reasoncode PRDF_ECMD_DATA_BUFFER_FAIL
-         * @moduleid   PRDF_HOM_SCOM
-         * @userdata1  ecmdDataBuffer return code
-         * @userdata2  Chip HUID
-         * @userdata3  unused
-         * @userdata4  unused
-         * @devdesc    Low-level data buffer support returned a failure. Probable firmware error.
-         * @procedure  EPUB_PRC_SP_CODE
-         */
-        errlHndl_t ecmd_rc_errl = NULL;
-        PRDF_CREATE_ERRL(ecmd_rc_errl,
-                         ERRL_SEV_PREDICTIVE,                // error on diagnosticERRL_ETYPE_NOT_APPLICABLE
-                         ERRL_ETYPE_NOT_APPLICABLE,
-                         SRCI_MACH_CHECK,                    // B1xx src
-                         SRCI_NO_ATTR,
-                         PRDF_HOM_SCOM,                      // module id
-                         FSP_DEFAULT_REFCODE,                // refcode
-                         PRDF_ECMD_DATA_BUFFER_FAIL,         // Reason code - see prdf_service_codes.H
-                         l_ecmdRc,                           // user data word 1
-                         PlatServices::getHuid(i_target),    // user data word 2
-                         0,                                  // user data word 3
-                         0                                   // user data word 4
-                         );
-
-        PRDF_ADD_PROCEDURE_CALLOUT(ecmd_rc_errl, SRCI_PRIORITY_MED, EPUB_PRC_SP_CODE);
-        PRDF_COMMIT_ERRL(ecmd_rc_errl, ERRL_ACTION_REPORT);
-
-        rc = FAIL;
     }
 
     PRDF_DEXIT("ScomAccessor::Access(): rc=%d", rc);
