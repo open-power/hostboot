@@ -135,7 +135,7 @@ bool getCacheDeconfig(uint64_t i_masterCoreId)
             theRecord = MVPD::LRPC;
             break;
         case 0xD:
-            theRecord = MVPD::LRPE;
+            theRecord = MVPD::LRPD;
             break;
         case 0xE:
             theRecord = MVPD::LRPE;
