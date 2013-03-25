@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_eff_grouping.C,v 1.18 2013/02/01 23:38:22 asaetow Exp $
+// $Id: mss_eff_grouping.C,v 1.23 2013/03/27 15:36:37 bellows Exp $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
 // *! All Rights Reserved -- Property of IBM
@@ -38,6 +38,11 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
+//  1.23   | bellows  | 03-26-13| Allow for checkboard mode with more than one mcs per group
+//  1.22   | bellows  | 03-21-13| Error Logging support
+//  1.21   | bellows  | 03-11-13| Fixed syntax error with respect to the fapi macro under cronus
+//  1.20   | bellows  | 03-08-13| Proper way to deconfigure mulitple/variable MCS
+//  1.19   | bellows  | 02-27-13| Added back in mirror overlap check.  Added in error rc for grouping
 //  1.18   | asaetow  | 02-01-13| Removed FAPI_ERR("Mirror Base address overlaps with memory base address. "); temporarily.
 //         |          |         | NOTE: Need Giri to check mirroring enable before checking for overlaps. 
 //  1.17   | gpaulraj | 01-31-13| Error place holders added 
@@ -62,6 +67,7 @@
 #include <mss_eff_grouping.H>
 #include <fapi.H>
 #include "cen_scom_addresses.H"
+//#include <mss_error_support.H>
 //#include <mss_funcs.H>
 
 //#ifdef FAPIECMD
@@ -233,14 +239,13 @@ extern "C" {
 	rc = FAPI_ATTR_GET(ATTR_ALL_MCS_IN_INTERLEAVING_GROUP, NULL,check_board); // system level attribute
 	if (!rc.ok()) { FAPI_ERR("Error reading ATTR_ALL_MCS_IN_INTERLEAVING_GROUP"); return rc; }
 
-        if(check_board)
+        if(check_board) // this is a 1 when interleaving is required to be on  Only acceptable > 1MCS per group
         {
           if((groups_allowed & 0x02) || (groups_allowed & 0x04)||(groups_allowed & 0x08))
           {
 
             FAPI_INF("FABRIC IS IN NON-CHECKER BOARD MODE.");
             FAPI_INF("FABRIC SUPPORTS THE FOLLOWING ");
-//@thi - Already asked Anuwat to fix this
             if( (groups_allowed & 0x02)&& check_board){FAPI_INF("2MCS/GROUP");}
             if( (groups_allowed & 0x04)&& check_board){FAPI_INF("4MCS/GROUP");}
             if( (groups_allowed & 0x08)&& check_board){FAPI_INF("8MCS/GROUP");}
@@ -254,19 +259,21 @@ extern "C" {
            {
               FAPI_ERR("UNABLE TO GROUP");
               FAPI_ERR("FABRIC IS IN NON-CHECKER BOARD MODE.  SET ATTRIBUTE 'ATTR_MSS_INTERLEAVE_ENABLE' TO SUPPORT '2MCS/GROUP, 4MCS/GROUP  AND 8MCS/GROUP'. OR ENABLE CHECKER BOARD, TO SUPPORT '1MCS/GROUP'. ");
-              FAPI_SET_HWP_ERROR(rc, RC_MSS_PLACE_HOLDER_ERROR);
+              FAPI_SET_HWP_ERROR(rc, RC_MSS_NON_CHECKER_BOARD_MODE_GROUPING_NOT_POSSIBLE);
               return rc;
            }
          }
-         else
+         else // Fabric is in checkerboard mode, allow all sizes.  Anything but 1 will have performance impacts
          {
             if(groups_allowed & 0x01) {
             FAPI_INF("FABRIC IS IN CHECKER BOARD MODE AND IT SUPPORTS 1MCS/GROUP"); }
             else  {
-            FAPI_ERR("UNABLE TO GROUP");
-            FAPI_ERR("FABRIC IS IN CHECKER BOARD MODE BUT IT DOES NOT SUPPORT 1MCS/GROUP. SET ATTRIBUTE 'ATTR_MSS_INTERLEAVE_ENABLE' TO SUPPORT '1MCS/GROUP'. OR DISABLE CHECKER BOARD, TO SUPPORT '2MCS/GROUP, 4MCS/GROUP  AND 8MCS/GROUP'.");
-            FAPI_SET_HWP_ERROR(rc, RC_MSS_PLACE_HOLDER_ERROR);
-            return rc;
+//             FAPI_ERR("UNABLE TO GROUP");
+//             FAPI_ERR("FABRIC IS IN CHECKER BOARD MODE BUT IT DOES NOT SUPPORT 1MCS/GROUP. SET ATTRIBUTE 'ATTR_MSS_INTERLEAVE_ENABLE' TO SUPPORT '1MCS/GROUP'. OR DISABLE CHECKER BOARD, TO SUPPORT '2MCS/GROUP, 4MCS/GROUP  AND 8MCS/GROUP'.");
+//             const fapi::Target & PROC_CHIP = i_target;
+//             FAPI_SET_HWP_ERROR(rc, RC_MSS_CHECKER_BOARD_MODE_GROUPING_NOT_POSSIBLE);
+//            return rc;
+            FAPI_INF("FABRIC IS IN CHECKER BOARD MODE BUT YOU ARE ASKING FOR MORE THAN 1MCS/GROUP. YOU ARE NOT GOING TO HAVE PERFOMRANCE YOU COULD GET IF YOU WERE IN CHECKERBOARD MODE");
 
             }
 
@@ -465,17 +472,27 @@ extern "C" {
 
            }
            if(!done)
-           {  uint8_t ungroup =0;
-              for(uint8_t i=0;i<8;i++)
-              {
-          		   if(grouped[i] !=1 && eff_grouping_data.groupID[i][0] != 0 )
+           {
+             uint8_t ungroup =0;
+             ReturnCode ungroup_rc;
 
-          		   { FAPI_ERR ("UNABLE TO GROUP MCS%d size is %d", i,eff_grouping_data.groupID[i][0]); ungroup++;}
-              }
+             for(uint8_t i=0;i<8;i++)
+             {
+               if(grouped[i] !=1 && eff_grouping_data.groupID[i][0] != 0 )
+               {
+                 FAPI_ERR ("UNABLE TO GROUP MCS%d size is %d", i,eff_grouping_data.groupID[i][0]);
+                 ungroup++;
+                 if(ungroup == 1) { // First time, call out the Main error
+                   FAPI_SET_HWP_ERROR(ungroup_rc, RC_MSS_UNABLE_TO_GROUP_SUMMARY);
+                 }     
+                 const fapi::Target & TARGET_MCS = l_proc_chiplets[i];
+                 FAPI_ADD_INFO_TO_HWP_ERROR(rc, RC_MSS_UNABLE_TO_GROUP_MCS);
+
+               }
+             }
             if (ungroup)
              {
-               FAPI_SET_HWP_ERROR(rc, RC_MSS_PLACE_HOLDER_ERROR);
-              return rc;
+	        return ungroup_rc;
              }
              for(uint8_t i=0;i<gp;i++)
                for(uint8_t j=0;j<16;j++)
@@ -630,13 +647,12 @@ extern "C" {
 
        }
 
-       // AST HERE: NOTE: Need Giri to check mirroring enable before checking for overlaps.
-       //else
-       //{
-       //   FAPI_ERR("Mirror Base address overlaps with memory base address. ");
-       //    FAPI_SET_HWP_ERROR(rc, RC_MSS_PLACE_HOLDER_ERROR);
-       //   return rc;
-       //}
+       else
+       {
+          FAPI_ERR("Mirror Base address overlaps with memory base address. ");
+          FAPI_SET_HWP_ERROR(rc, RC_MSS_BASE_ADDRESS_OVERLAPS_MIRROR_ADDRESS);
+          return rc;
+       }
 
 
       ecmdDataBufferBase MC_IN_GP(8);

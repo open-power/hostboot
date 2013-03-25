@@ -8143,7 +8143,7 @@ firmware notes: Used as override attribute for pstate procedure
     <description>Used in the setting of groups.  It is a bit vector.  If the value  BITWISE_AND  1 = 1 then groups of 1 are enabled with special checkerboard modes needed, if the value  BITWISE_AND  2 = 2, then groups of 2 are possible; if value  BITWISE_AND  4, the groups of 4 are possible; if value  BITWISE_AND  8, the groups of 8 are possible.  If no groups can formed according to this input, then an error will be thrown.</description>
     <simpleType>
         <uint8_t>
-            <default>0x01</default>
+            <default>0x07</default>
         </uint8_t>
     </simpleType>
     <persistency>non-volatile</persistency>
