@@ -32,6 +32,9 @@ namespace Util
     {
         UTIL_MOD_MEM_READ       = 0x01,       // UtilMem::Read
         UTIL_MOD_MEM_WRITE      = 0x02,       // UtilMem::Write
+        UTIL_LIDMGR_GETLID      = 0x03,       // UtilLidMgr::getLid
+        UTIL_LIDMGR_GETLIDSIZE  = 0x04,       // UtilLidMgr::getLidSize
+        UTIL_LIDMGR_GETLIDPNOR  = 0x06,       // UtilLidMgr::getLidPnor
     };
 
     enum ReasonCode
@@ -39,6 +42,10 @@ namespace Util
         UTIL_ERC_NONE           = UTIL_COMP_ID | 0x01,
         UTIL_ERC_BAD_PTR        = UTIL_COMP_ID | 0x02,
         UTIL_ERC_EOF            = UTIL_COMP_ID | 0x03,
+        UTIL_LIDMGR_RC_FAIL     = UTIL_COMP_ID | 0x04,
+        UTIL_LIDMGR_INVAL_DATA  = UTIL_COMP_ID | 0x05,
+        UTIL_LIDMGR_INVAL_SIZE  = UTIL_COMP_ID | 0x06,
+        UTIL_LIDMGR_UNSUP_MSG   = UTIL_COMP_ID | 0x07,
     };
 };
 

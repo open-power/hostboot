@@ -80,6 +80,7 @@ namespace fapi
         MOD_GET_CACHE_DECONFIG                     = 0x29,
         MOD_FAPI_GET_OTHER_SIDE_OF_MEM_CHANNEL     = 0x2A,
         MOD_MBVPD_ACCESS                           = 0x2B,
+        MOD_OCC_LOAD_OCC_IMAGE_TO_HOMER            = 0x2C,
     };
 
     /**
@@ -118,6 +119,9 @@ namespace fapi
         RC_NO_SINGLE_MCS              = HWPF_COMP_ID | 0x25,
         RC_NO_SINGLE_MEMBUFF          = HWPF_COMP_ID | 0x26,
         RC_STATE_MISMATCH             = HWPF_COMP_ID | 0x27,
+
+        // OCC Errors
+        RC_MMIO_UNMAP_ERR             = HWPF_COMP_ID | 0x28,
     };
 
     /**

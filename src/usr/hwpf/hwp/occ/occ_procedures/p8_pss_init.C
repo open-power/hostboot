@@ -175,7 +175,8 @@ pss_config_spi_settings(const Target& l_pTarget)
 
     
     rc = FAPI_ATTR_GET(ATTR_FREQ_PB, NULL , attr_proc_pss_init_nest_frequency); if (rc) return rc;
-    rc = FAPI_ATTR_GET(ATTR_PM_SPIPSS_FREQUENCY, &l_pTarget,attr_pm_pss_init_spipss_frequency); if (rc) return rc ;
+    //TODO RTC: 68461 - refresh procedures - hacked target in the line below to be NULL
+    rc = FAPI_ATTR_GET(ATTR_PM_SPIPSS_FREQUENCY, NULL,attr_pm_pss_init_spipss_frequency); if (rc) return rc ;
     
   
 

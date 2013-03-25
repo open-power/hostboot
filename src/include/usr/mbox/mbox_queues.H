@@ -47,7 +47,7 @@ namespace MBOX
         //                        5,  // Reserved for VID
         HB_HWPF_ATTR_MSGQ       = 6, // HWPF Attribute override/sync
         HB_TRACE_MSGQ           = 7,
-
+        HB_LID_MSGQ             = 8, //For transferring LIDs from FSP.
         HB_TEST_MSGQ            = 0x7FFFFFFF,
 
         // FSP mailboxes
@@ -63,6 +63,8 @@ namespace MBOX
         FSP_DUMP_MSGQ_ID        = 0x8000000A,
         FSP_HWPF_ATTR_MSGQ      = 0x8000000B, // HWPF Attribute override/sync
         FSP_VPD_MSGQ            = 0x8000000C,
+        FSP_LID_MSGQ            = FSP_ATTR_SYNC_MSGQ,
+
 
         FSP_ECHO_MSGQ = 0xFFFFFFFF,     // Fake FSP for test
     };

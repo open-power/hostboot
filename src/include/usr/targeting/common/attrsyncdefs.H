@@ -96,6 +96,8 @@ namespace   TARGETING
      */
     enum ATTR_SYNC_MSG_TYPE
     {
+        //NOTE: Types cannot overlap with types in utillidmgrdefs.H
+        //  due to common FSP message queue
         ATTR_SYNC_NO_MSG          = 0,
         ATTR_SYNC_SECTION_TO_FSP  = 0x000000A1,
         ATTR_SYNC_COMPLETE_TO_FSP = 0x000000A2,

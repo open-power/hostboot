@@ -28,7 +28,7 @@
 
 #include    <devicefw/userif.H>
 #include    <sys/misc.h>
-#include    <sys/mm.h>
+#include    <sys/mmio.h>
 #include    <vmmconst.h>
 
 //  targeting support
@@ -41,6 +41,9 @@
 #include    <hwpf/plat/fapiPlatTrace.H>
 #include    <hwpf/hwpf_reasoncodes.H>
 
+#include    <vfs/vfs.H> 
+#include    <util/utillidmgr.H>
+
 // Procedures
 #include <p8_pba_init.H>
 #include <p8_occ_control.H>
@@ -50,18 +53,80 @@
 
 extern trace_desc_t* g_fapiTd;
 
+const uint32_t g_OCCLIDID = 0x81e00430;
+
 namespace OCC
 {
 
     errlHndl_t loadOCCImageToHomer(uint64_t i_homer_addr )
     {
         errlHndl_t  l_errl  =   NULL;
+        void* mapped_homer = NULL;
 
+        size_t lidSize = 0;
         do {
-            //RTC: 51076 - Implement DMA message passing to
-            //  get OCC image from FSP.
+            UtilLidMgr lidMgr(g_OCCLIDID);
+
+            l_errl = lidMgr.getLidSize(lidSize);
+            if(l_errl)
+            {
+                TRACFCOMP( g_fapiImpTd,
+                           ERR_MRK"loadOCCImageToHomer: Error getting lid size.  lidId=0x%.8x",
+                           g_OCCLIDID);
+                break;
+            }
+
+            //Map homer into virtual memory
+            mapped_homer =
+              mmio_dev_map(reinterpret_cast<void*>(i_homer_addr), THIRTYTWO_MB);
+
+            l_errl = lidMgr.getLid(mapped_homer, lidSize);
+            if(l_errl)
+            {
+                TRACFCOMP( g_fapiImpTd,
+                           ERR_MRK"loadOCCImageToHomer: Error getting lid..  lidId=0x%.8x",
+                           g_OCCLIDID);
+                break;
+            }
 
         }while(0);
+
+        if(mapped_homer)
+        {
+            int rc = 0;
+            errlHndl_t  l_tmpErrl  =   NULL;
+            rc =  mmio_dev_unmap(mapped_homer);
+            if (rc != 0)
+            {
+                /*@
+                 * @errortype
+                 * @moduleid     fapi::MOD_OCC_LOAD_OCC_IMAGE_TO_HOMER
+                 * @reasoncode   fapi::RC_MMIO_UNMAP_ERR
+                 * @userdata1    Return Code
+                 * @userdata2    Unmap address
+                 * @devdesc      mmio_dev_unmap() returns error
+                 */
+                l_tmpErrl =
+                  new ERRORLOG::ErrlEntry(
+                                          ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                          fapi::MOD_OCC_LOAD_OCC_IMAGE_TO_HOMER,
+                                          fapi::RC_MMIO_UNMAP_ERR,
+                                          rc,
+                                          reinterpret_cast<uint64_t>
+                                          (mapped_homer));
+                if(l_tmpErrl)
+                {
+                    if(l_errl)
+                    {
+                        errlCommit( l_tmpErrl, HWPF_COMP_ID );
+                    }
+                    else
+                    {
+                        l_errl = l_tmpErrl;
+                    }
+                }
+            }
+        }
 
         return l_errl;
     }
@@ -79,8 +144,9 @@ namespace OCC
         do {
 
             // cast OUR type of target to a FAPI type of target.
-            const fapi::Target l_fapiTarg(fapi::TARGET_TYPE_PROC_CHIP,
-                                          (const_cast<TARGETING::Target*>(i_target)));
+            const fapi::Target
+              l_fapiTarg(fapi::TARGET_TYPE_PROC_CHIP,
+                         (const_cast<TARGETING::Target*>(i_target)));
 
 
             //==============================
@@ -129,7 +195,7 @@ namespace OCC
                 break;
             }
 
-            //TODO: This flow needs to be updated along with procedure refresh
+           //TODO: This flow needs to be updated along with procedure refresh
             //RTC: 68461
             // Config path
             // p8_pm_init.C enum: PM_CONFIG

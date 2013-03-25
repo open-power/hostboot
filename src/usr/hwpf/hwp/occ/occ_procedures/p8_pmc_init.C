@@ -139,10 +139,8 @@ pmc_config_spivid_settings(const Target& l_pTarget)
     FAPI_INF("entering the config function");
 
         rc = FAPI_ATTR_GET(ATTR_FREQ_PB, NULL, attr_proc_nest_frequency); if (rc) return rc;
-        //TODO RTC: 68461 - refresh procedures - hacked target in the line below.
-        rc = FAPI_ATTR_GET(ATTR_PM_SPIVID_FREQUENCY, &l_pTarget, attr_pm_spivid_frequency); if (rc) return rc;
-
-
+        rc = FAPI_ATTR_GET(ATTR_PM_SPIVID_FREQUENCY, NULL, attr_pm_spivid_frequency); if (rc) return rc; 
+    
 
 
     // calculation of clock divider

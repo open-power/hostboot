@@ -29,7 +29,6 @@ namespace OCC {
                        uint64_t i_common_addr,
                        TARGETING::Target* i_target);
 
-
 } //end OCC namespace
 
 #endif
