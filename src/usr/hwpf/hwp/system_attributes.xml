@@ -177,7 +177,27 @@
     <platInit/>
     <writeable/>
   </attribute>
-  <!-- ********************************************************************* -->
+  
+  <!--The following attribute was added in the sytem_attributes.xml in ekb
+      at this point of time HostBoot does not plan to support SBE hooks and
+      therefore does not support this attribute.This comment is for someone 
+      who tries to integrate the newer version of system_attributes.xml from
+      ekb and wonders what Hostboot should do with this
+  -->
+  <!--
+  <attribute>
+    <id>ATTR_DISABLE_I2C_ACCESS</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+      Set to skip physical access to i2c interface in SBE execution.
+      Consumed by SBE hooks to permit skipping of selected code when
+      running on a test platform (i.e., wafer) which does not have a physical
+      SEEPROM connected.
+    </description>
+    <valueType>uint8</valueType>
+    <platInit/>
+  </attribute>
+  -->
   <attribute>
     <id>ATTR_PIB_I2C_REFCLOCK</id>
     <targetType>TARGET_TYPE_SYSTEM</targetType>
