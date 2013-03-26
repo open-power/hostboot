@@ -116,6 +116,7 @@ if($cfgVerbose)
 
 use constant INVALID_HUID=>0xffffffff;
 my $xml = new XML::Simple (KeyAttr=>[]);
+use Digest::MD5 qw(md5_hex);
 
 # Until full machine parseable workbook parsing splits out all the input files,
 # use the intermediate representation containing the full host boot model.
@@ -1312,8 +1313,8 @@ VERBATIM
     my $attributeIdEnumeration = getAttributeIdEnumeration($attributes);
     foreach my $enumerator (@{$attributeIdEnumeration->{enumerator}})
     {
-        $hexVal = sprintf "0x%08X", $enumerator->{value};
         $attrId = $enumerator->{name};
+        $hexVal = $enumerator->{value};
         write;
     }
 
@@ -2604,6 +2605,7 @@ sub getAttributeIdEnumeration {
 
     my $attributeValue = 0;
     my $enumeration = { } ;
+    my %attrValHash;
 
     # add the N/A value
     $enumeration->{description} = "Internal enum for attribute IDs\n";
@@ -2614,10 +2616,17 @@ sub getAttributeIdEnumeration {
     foreach my $attribute (@{$attributes->{attribute}})
     {
         $attributeValue++;
+        my $attributeHexVal = md5_hex($attribute->{id});
+        my $attributeHexVal28bit =substr($attributeHexVal,0,7);
+        if(exists($attrValHash{$attributeHexVal28bit}))
+        {
+            fatal("Error:Duplicate AttributeId hashvalue for $attribute->{id}" );
+        }
+        $attrValHash{$attributeHexVal28bit}=1;
         $enumeration->{enumerator}->[$attributeValue]->{name}
             = $attribute->{id};
         $enumeration->{enumerator}->[$attributeValue]->{value}
-            = sprintf "%u",$attributeValue;
+            = sprintf "0x%s",$attributeHexVal28bit;
         $attribute->{value} = $attributeValue;
     }
 
