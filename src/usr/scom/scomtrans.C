@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2012              */
+/* COPYRIGHT International Business Machines Corp. 2011,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -212,21 +212,24 @@ errlHndl_t scomTranslate(DeviceFW::OperationType i_opType,
             // MCS Indirect mask = 0x80000060_FFFFFFFF
             //   0x80000060_02011A3F      MCS      0  # DMI0 Indirect SCOM RX3
             //   0x80000040_02011A3F      MCS      1  # DMI1 Indirect SCOM RX2
-            //   0x80000020_02011A3F      MCS      2  # DMI2 Indirect SCOM RX1
-            //   0x80000000_02011A3F      MCS      3  # DMI3 Indirect SCOM RX0 
+            //   0x80000000_02011A3F      MCS      2  # DMI3 Indirect SCOM RX0 
+            //   0x80000020_02011A3F      MCS      3  # DMI2 Indirect SCOM RX1
+            //
             //   0x80000060_02011E3F      MCS      4  # DMI4 Indirect SCOM RX3
             //   0x80000040_02011E3F      MCS      5  # DMI5 Indirect SCOM RX2
-            //   0x80000020_02011E3F      MCS      6  # DMI6 Indirect SCOM RX1
-            //   0x80000000_02011E3F      MCS      7  # DMI7 Indirect SCOM RX0
-
+            //   0x80000000_02011E3F      MCS      6  # DMI7 Indirect SCOM RX0
+            //   0x80000020_02011E3F      MCS      7  # DMI6 Indirect SCOM RX1
+            //
             //   0x80000460_02011A3F      MCS      0  # DMI0 Indirect SCOM TX3
             //   0x80000440_02011A3F      MCS      1  # DMI1 Indirect SCOM TX2
-            //   0x80000420_02011A3F      MCS      2  # DMI2 Indirect SCOM TX1
-            //   0x80000400_02011A3F      MCS      3  # DMI3 Indirect SCOM TX0
+            //   0x80000400_02011A3F      MCS      2  # DMI3 Indirect SCOM TX0
+            //   0x80000420_02011A3F      MCS      3  # DMI2 Indirect SCOM TX1
+            //
             //   0x80000460_02011E3F      MCS      4  # DMI4 Indirect SCOM TX3
             //   0x80000440_02011E3F      MCS      5  # DMI5 Indirect SCOM TX2
-            //   0x80000420_02011E3F      MCS      6  # DMI6 Indirect SCOM TX1
-            //   0x80000400_02011E3F      MCS      7  # DMI7 Indirect SCOM TX0
+            //   0x80000400_02011E3F      MCS      6  # DMI7 Indirect SCOM TX0
+            //   0x80000420_02011E3F      MCS      7  # DMI6 Indirect SCOM TX1
+            //
             //  SCOM_TRANS_IND_MCS_BASEADDR =     0x8000006002011A00,
 
 
@@ -258,12 +261,12 @@ errlHndl_t scomTranslate(DeviceFW::OperationType i_opType,
                         {
                             i_addr |= 0x4000000000;
                         }
-                        // instance 2 or 6
-                        else if (l_instance % 4 == 2)
+                        // instance 3 or 7
+                        else if (l_instance % 4 == 3)
                         {
                             i_addr |= 0x2000000000;
                         }
-                        // instance 3 or 7 is 0 so no bits to turn on.
+                        // instance 2 or 6 is 0 so no bits to turn on.
                     }
                 }
 
