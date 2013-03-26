@@ -38,6 +38,14 @@ namespace RUNTIME
         MOD_HDATSERVICE_GET_STANDALONE_SECTION  = 0x06, /**< hdatservice.C */
         MOD_HDATSERVICE_GET_HOST_DATA_SECTION  = 0x07, /**< hdatservice.C */
         MOD_HDATSERVICE_VERIFY_HDAT_ADDRESS  = 0x08, /**< hdatservice.C */
+        MOD_TCE_CREATE                  = 0x09,   /**< tce.C */
+        MOD_TCE_INIT_HDW                = 0x0A,   /**< tce.C */
+        MOD_TCE_ALLOCATE                = 0x0B,   /**< tce.C */
+        MOD_TCE_DEALLOCATE              = 0x0C,   /**< tce.C */
+        MOD_TCE_INIT                    = 0x0D,   /**< tce.C */
+        MOD_TCE_MAP                     = 0x0E,   /**< tce.C */
+
+
     };
 
     enum RuntimeReasonCode
@@ -55,7 +63,14 @@ namespace RUNTIME
         RC_INVALID_ADDRESS          = RUNTIME_COMP_ID | 0x0B,
         RC_INVALID_SECTION          = RUNTIME_COMP_ID | 0x0C,
         RC_CANNOT_MAP_MEMORY3       = RUNTIME_COMP_ID | 0x0D,
-
+        RC_TCE_INVALID_SIZE         = RUNTIME_COMP_ID | 0x0E,
+        RC_TCE_ADDR_NOT_ALIGNED     = RUNTIME_COMP_ID | 0x0F,
+        RC_TCE_INIT_NOT_RUN         = RUNTIME_COMP_ID | 0x10,
+        RC_TCE_DEV_MAP_FAIL         = RUNTIME_COMP_ID | 0x11,
+        RC_TCE_DEV_UNMAP_FAIL       = RUNTIME_COMP_ID | 0x12,
+        RC_TCE_NO_ACTIVE_PSI        = RUNTIME_COMP_ID | 0x13,
+        RC_TCE_NOT_ENOUGH_FREE_ENTRIES = RUNTIME_COMP_ID | 0x14,
+        RC_TCE_ENTRY_NOT_CONTIGUOUS   = RUNTIME_COMP_ID | 0x15,
     };
 };
 

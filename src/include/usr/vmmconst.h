@@ -149,4 +149,10 @@ enum BlockPriority
 #define DUMP_TEST_MEMORY_ADDR (HSVC_TEST_MEMORY_ADDR + HSVC_TEST_MEMORY_SIZE)
 #define DUMP_TEST_MEMORY_SIZE  (4*MEGABYTE)
 
+/** Location of the TCE Table */
+#define TCE_TABLE_ADDR  (90*MEGABYTE)
+
+// The size if 512K bytes of entries each uint64_t or 8 bytes in size.
+#define TCE_TABLE_SIZE  ((512*KILOBYTE)*sizeof(uint64_t))
+
 #endif /* _VMMCONST_H */
