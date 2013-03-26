@@ -14,5 +14,8 @@ New version of proc_a_x_pll HW procedure requires additional actions
   src/build/citest/etc/patches/s1.act_proc_a_x_pll_patch
 - CoReq: N/A
 
-
-
+Add action for L3 purge register.
+-RTC: 67762
+-CMVC: 876083
+-Files: p8_ex_l3purge.act
+-Coreq: None

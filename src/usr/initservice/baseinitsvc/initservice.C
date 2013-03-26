@@ -307,8 +307,12 @@ errlHndl_t InitService::executeFn(
 
     do  {
 
-        //
-        l_errl  =   checkNLoadModule( i_ptask );
+        // If the module is not in the base image, then we must ensure that
+        // the module has been loaded already.
+        if (BASE_IMAGE != i_ptask->taskflags.module_type)
+        {
+            l_errl = checkNLoadModule( i_ptask );
+        }
         if ( l_errl )
         {
             TRACFCOMP(g_trac_initsvc,

@@ -62,8 +62,6 @@ void BaseSegment::_init()
     iv_block = new Block(0x0, iv_physMemSize);
     iv_block->setParent(this);
 
-    // TODO iv_physMemSize needs to be recalculated when DIMM memory is avail.
-
     // Set default page permissions on block.
     for (uint64_t i = 0; i < VMM_BASE_BLOCK_SIZE; i += PAGESIZE)
     {
@@ -246,9 +244,9 @@ int BaseSegment::_mmExtend(void)
 
     // Call to allocate a block passing in the requested address of where the
     // SPTEs should be created
-    int rc =  _mmAllocBlock(NULL, reinterpret_cast<void *>(l_vaddr), l_size, false,
-                            /*(uint64_t *)*/reinterpret_cast<uint64_t *>(l_vaddr));
-   
+    int rc =  _mmAllocBlock(NULL, reinterpret_cast<void *>(l_vaddr), l_size,
+                            false, reinterpret_cast<uint64_t *>(l_vaddr));
+
     if (rc)
     {
         printk("Got an error in mmAllocBlock\n");
@@ -264,7 +262,8 @@ int BaseSegment::_mmExtend(void)
     // Now need to take the pages past the SPTE and add them to the heap.
 
     //get the number of pages needed to hold the SPTE entries.
-    uint64_t spte_pages = (ALIGN_PAGE(l_size)/PAGESIZE * sizeof(ShadowPTE))/PAGESIZE;
+    uint64_t spte_pages = (ALIGN_PAGE(l_size)/PAGESIZE *
+                           sizeof(ShadowPTE))/PAGESIZE;
 
     printkd("Number of SPTE pages %ld\n", spte_pages);
 
@@ -273,7 +272,8 @@ int BaseSegment::_mmExtend(void)
     // used for the SPTE.
 
     // Call Add Memory with the starting address , size.. it will put the pages
-    // on the heap call this with the address being the first page past the SPTE.
+    // on the heap call this with the address being the first page past the
+    // SPTE.
     PageManager::addMemory(l_vaddr + (spte_pages*PAGESIZE),
                            l_size/PAGESIZE - spte_pages);
 
@@ -291,7 +291,7 @@ int BaseSegment::_mmExtend(void)
 
 /**
  * Allocates a block of virtual memory of the given size
- * to at a specified physical address. 
+ * to at a specified physical address.
  */
 int BaseSegment::mmLinearMap(void *i_paddr, uint64_t i_size)
 {
@@ -300,7 +300,7 @@ int BaseSegment::mmLinearMap(void *i_paddr, uint64_t i_size)
 
 /**
  * Allocates a block of virtual memory of the given size
- * to at a specified physical address 
+ * to at a specified physical address
  */
 int BaseSegment::_mmLinearMap(void *i_paddr, uint64_t i_size)
 {

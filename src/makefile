@@ -46,7 +46,7 @@ DIRECT_BOOT_OBJECTS = start.o kernel.o taskmgr.o cpumgr.o syscall.o \
                       shutdown.o forceattn_p8.o terminate.o ipc.o machchk.o
 
 BASE_MODULES = trace errl devicefw scom xscom initservice \
-               pnor vfs 
+               secureboot_base pnor vfs
 
 EXTENDED_MODULES = targeting ecmddatabuffer fapi hwp plat	\
                    extinitsvc istepdisp hwas fsi fsiscom i2c intr scan \
@@ -57,7 +57,7 @@ EXTENDED_MODULES = targeting ecmddatabuffer fapi hwp plat	\
                    core_activate dram_initialization edi_ei_initialization \
                    establish_system_smp occ\
                    nest_chiplets start_payload thread_activate slave_sbe \
-                   attn runtime ibscom dump tod_init
+                   attn runtime ibscom dump tod_init secureboot_ext
 
 TESTCASE_MODULES = cxxtest testtrace testerrl testdevicefw testsyslib \
                    testscom testxscom testtargeting testinitservice testkernel \

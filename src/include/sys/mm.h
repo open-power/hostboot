@@ -99,6 +99,7 @@ int mm_set_permission(void* va, uint64_t size, uint64_t access_type);
 
 enum MM_EXTEND_SIZE
 {
+    MM_EXTEND_POST_SECUREBOOT, //< Extend memory to include bottom of cache.
     MM_EXTEND_FULL_CACHE,      //< Extend memory to include full cache (8mb).
     MM_EXTEND_REAL_MEMORY,     //< Extend memory into real mainstore.
 };

@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/include/util/align.H $                                    */
+/* $Source: src/usr/secureboot/base/service.C $                           */
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2013              */
+/* COPYRIGHT International Business Machines Corp. 2013                   */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,34 +20,49 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-#ifndef __UTIL_ALIGN_H
-#define __UTIL_ALIGN_H
+#include <secureboot/service.H>
+#include <stdint.h>
+#include <sys/mm.h>
+#include <util/singleton.H>
+#include <secureboot/secure_reasoncodes.H>
 
-#include <limits.h>
+#include "settings.H"
+#include "header.H"
+#include "purge.H"
 
-// Return a number >= input that is aligned up to the next 4-byte boundary
-#define ALIGN_4(u) (((u) + 0x3ull) & ~0x3ull)
+namespace SECUREBOOT
+{
+    void* initializeBase(void* unused)
+    {
+        errlHndl_t l_errl = NULL;
 
-// Return a number <= input that is rounded down to nearest 4-byte boundary
-#define ALIGN_DOWN_4(u) ((u) & ~3ull)
+        do
+        {
+            // Load original secureboot header.
+            if (enabled())
+            {
+                Singleton<Header>::instance().loadBaseHeader();
+            }
 
-// Return a number >= input that is aligned up to the next 8-byte bounday
-#define ALIGN_8(u) (((u) + 0x7ull) & ~0x7ull)
+            // Blind-purge lower portion of cache.
+            l_errl = issueBlindPurge();
+            if (l_errl)
+            {
+                break;
+            }
 
-// Return a number <= input that is rounded down to nearest 8-byte boundary
-#define ALIGN_DOWN_8(u) ((u) & ~7ull)
+            // Extend memory footprint into lower portion of cache.
+            //   This can only fail is someone has already called to extend
+            //   to post-secureboot state.  Major coding bug, so just assert.
+            assert(0 == mm_extend(MM_EXTEND_POST_SECUREBOOT));
 
-// Return a number >= input that is aligned up to the next page boundary
-#define ALIGN_PAGE(u) (((u) + (PAGESIZE-1)) & ~(PAGESIZE-1))
+        } while(0);
 
-// Return a number <= input that is aligned on a page boundary
-#define ALIGN_PAGE_DOWN(u) ((u) - (u)%PAGESIZE)
+        return l_errl;
+    }
 
-// Return a number >= input that is aligned up to the next MB boundary
-#define ALIGN_MEGABYTE(u) (((u) + (MEGABYTE-1)) & ~(MEGABYTE-1))
-
-// Return a number <= input that is aligned on a MB boundary
-#define ALIGN_MEGABYTE_DOWN(u) ((u) - (u)%MEGABYTE)
-
-
-#endif
+    bool enabled()
+    {
+        return Singleton<Settings>::instance().getEnabled();
+    }
+}

@@ -187,44 +187,98 @@ uint64_t PageManager::availPages()
 PageManager::PageManager()
     : iv_pagesAvail(0), iv_pagesTotal(0), iv_lock(0)
 {
-    // Determine first page of un-allocated memory
-    // and number of pages available.
-    uint64_t addr = firstPageAddr();
-    size_t length = (MEMLEN - addr) / PAGESIZE;
+    this->_initialize();
+}
 
+void PageManager::_initialize()
+{
+    typedef PageManagerCore::page_t page_t;
+    uint64_t totalPages = 0;
 
-    // Display.
-    printk("Initializing PageManager with %zd pages starting at %lx...",
-           length,
-           addr);
+    page_t* startAddr = reinterpret_cast<page_t*>(firstPageAddr());
+    page_t* endAddr = reinterpret_cast<page_t*>(VmmManager::INITIAL_MEM_SIZE);
+    printk("Initializing PageManager starting at %p...", startAddr);
 
-    // Populate L3 cache lines.
-    uint64_t* cache_line = reinterpret_cast<uint64_t*>(addr);
-    uint64_t* end_cache_line = (uint64_t*) VmmManager::INITIAL_MEM_SIZE;
-    KernelMisc::populate_cache_lines(cache_line, end_cache_line);
+    // Calculate chunks along the top half of the L3 and erase them.
+    uint64_t currentBlock = reinterpret_cast<uint64_t>(startAddr);
+    do
+    {
+        if (currentBlock % (1*MEGABYTE) >= (512*KILOBYTE))
+        {
+            currentBlock = ALIGN_MEGABYTE(currentBlock);
+            continue;
+        }
 
+        uint64_t endBlock = ALIGN_MEGABYTE_DOWN(currentBlock) + 512*KILOBYTE;
 
-    // Allocate pages
-    iv_heapKernel.addMemory( addr, RESERVED_PAGES );
-    addr += RESERVED_PAGES * PAGESIZE;
-    length -= RESERVED_PAGES;
+        // Populate L3 cache lines for this chunk.
+        KernelMisc::populate_cache_lines(
+            reinterpret_cast<uint64_t*>(currentBlock),
+            reinterpret_cast<uint64_t*>(endBlock));
 
-    iv_heap.addMemory( addr, length );
+        // Adjust address to compensate for reserved hole and add to
+        // heap...
 
-    KernelMemState::setMemScratchReg(KernelMemState::MEM_CONTAINED_L3,
-                                     KernelMemState::HALF_CACHE);
+        // Check if this block starts in the hole.
+        if ((currentBlock >= VmmManager::FIRST_RESERVED_PAGE) &&
+            (currentBlock < VmmManager::END_RESERVED_PAGE))
+        {
+            // End of the block is in the hole, skip.
+            if (endBlock < VmmManager::END_RESERVED_PAGE)
+            {
+                currentBlock = ALIGN_MEGABYTE(endBlock);
+                continue;
+            }
+
+            // Advance the current block past the hole.
+            currentBlock = VmmManager::END_RESERVED_PAGE;
+        }
+
+        // Check if the block is has the hole in it.
+        if ((endBlock >= VmmManager::FIRST_RESERVED_PAGE) &&
+            (currentBlock < VmmManager::FIRST_RESERVED_PAGE))
+        {
+            // Hole is at the end of the block, shrink it down.
+            if (endBlock < VmmManager::END_RESERVED_PAGE)
+            {
+                endBlock = VmmManager::FIRST_RESERVED_PAGE;
+            }
+            // Hole is in the middle... yuck.
+            else
+            {
+                uint64_t pages =
+                    (VmmManager::FIRST_RESERVED_PAGE - currentBlock) / PAGESIZE;
+
+                iv_heap.addMemory(currentBlock, pages);
+                totalPages += pages;
+
+                currentBlock = VmmManager::END_RESERVED_PAGE;
+            }
+        }
+
+        uint64_t pages = (endBlock - currentBlock) / PAGESIZE;
+
+        iv_heap.addMemory(currentBlock, pages);
+        totalPages += pages;
+
+        currentBlock = ALIGN_MEGABYTE(endBlock);
+
+    } while (reinterpret_cast<page_t*>(currentBlock) != endAddr);
+
+    printk("%ld pages.\n", totalPages);
+
+    // Reserve pages for the kernel.
+    iv_heapKernel.addMemory(reinterpret_cast<uint64_t>(
+                              iv_heap.allocatePage(KERNEL_HEAP_RESERVED_PAGES)),
+                            KERNEL_HEAP_RESERVED_PAGES);
 
     // Statistics
-    iv_pagesTotal = length;
-    iv_pagesAvail = length;
-    cv_low_page_count = length;
+    iv_pagesTotal = totalPages;
+    iv_pagesAvail = totalPages;
+    cv_low_page_count = totalPages;
 
-
-    // @TODO: Venice: Clear 3-8MB region and add to free memory pool.
-    //                Can't do this now due to fake-PNOR driver.
-    // iv_heap.addMemory(...);
-
-    printk("done\n");
+    KernelMemState::setMemScratchReg(KernelMemState::MEM_CONTAINED_L3,
+                                     KernelMemState::PRE_SECURE_BOOT);
 }
 
 void* PageManager::_allocatePage(size_t n, bool userspace)
@@ -271,11 +325,10 @@ void PageManager::_freePage(void* p, size_t n)
     __sync_add_and_fetch(&iv_pagesAvail, n);
 
     // Keep the reserved page count for the kernel full
-    // Should it be continuous RESERVED_PAGES??
     size_t ks = iv_heapKernel.getFreePageCount();
-    if(ks < RESERVED_PAGES)
+    if(ks < KERNEL_HEAP_RESERVED_PAGES)
     {
-        ks = RESERVED_PAGES - ks;
+        ks = KERNEL_HEAP_RESERVED_PAGES - ks;
         PageManagerCore::page_t * page = iv_heap.allocatePage(ks);
         if(page)
         {

@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/include/util/align.H $                                    */
+/* $Source: src/usr/secureboot/settings.H $                               */
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2013              */
+/* COPYRIGHT International Business Machines Corp. 2013                   */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,34 +20,37 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-#ifndef __UTIL_ALIGN_H
-#define __UTIL_ALIGN_H
+#ifndef __SECUREBOOT_SETTINGS_H
+#define __SECUREBOOT_SETTINGS_H
 
-#include <limits.h>
+#include <stdint.h>
 
-// Return a number >= input that is aligned up to the next 4-byte boundary
-#define ALIGN_4(u) (((u) + 0x3ull) & ~0x3ull)
+namespace SECUREBOOT
+{
+    /** @class Settings
+     *
+     *  @brief Caches and parses the hardware settings for Secureboot.
+     */
+    class Settings
+    {
+        public:
+            Settings() : iv_regValue(0) { _init(); };
+            ~Settings() {};
 
-// Return a number <= input that is rounded down to nearest 4-byte boundary
-#define ALIGN_DOWN_4(u) ((u) & ~3ull)
+            /** @brief Determine if Secureboot is enabled. */
+            bool getEnabled();
 
-// Return a number >= input that is aligned up to the next 8-byte bounday
-#define ALIGN_8(u) (((u) + 0x7ull) & ~0x7ull)
+        private:
+            void _init();
 
-// Return a number <= input that is rounded down to nearest 8-byte boundary
-#define ALIGN_DOWN_8(u) ((u) & ~7ull)
+                /** Cached register value. */
+            uint64_t iv_regValue;
 
-// Return a number >= input that is aligned up to the next page boundary
-#define ALIGN_PAGE(u) (((u) + (PAGESIZE-1)) & ~(PAGESIZE-1))
-
-// Return a number <= input that is aligned on a page boundary
-#define ALIGN_PAGE_DOWN(u) ((u) - (u)%PAGESIZE)
-
-// Return a number >= input that is aligned up to the next MB boundary
-#define ALIGN_MEGABYTE(u) (((u) + (MEGABYTE-1)) & ~(MEGABYTE-1))
-
-// Return a number <= input that is aligned on a MB boundary
-#define ALIGN_MEGABYTE_DOWN(u) ((u) - (u)%MEGABYTE)
-
+                /** SCOM address for security settings. */
+            static const uint64_t SECURITY_SWITCH_REGISTER;
+                /** Bitfield mask for Secureboot enable flag. */
+            static const uint64_t SECURITY_SWITCH_TRUSTED_BOOT;
+    };
+}
 
 #endif

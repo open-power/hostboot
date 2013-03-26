@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/include/util/align.H $                                    */
+/* $Source: src/usr/secureboot/base/settings.C $                          */
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2013              */
+/* COPYRIGHT International Business Machines Corp. 2013                   */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,34 +20,33 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-#ifndef __UTIL_ALIGN_H
-#define __UTIL_ALIGN_H
+#include <errl/errlentry.H>
+#include <devicefw/userif.H>
 
-#include <limits.h>
+#include "settings.H"
 
-// Return a number >= input that is aligned up to the next 4-byte boundary
-#define ALIGN_4(u) (((u) + 0x3ull) & ~0x3ull)
+namespace SECUREBOOT
+{
+    const uint64_t Settings::SECURITY_SWITCH_REGISTER = 0x00010005;
+    const uint64_t
+        Settings::SECURITY_SWITCH_TRUSTED_BOOT = 0x4000000000000000ull;
 
-// Return a number <= input that is rounded down to nearest 4-byte boundary
-#define ALIGN_DOWN_4(u) ((u) & ~3ull)
+    void Settings::_init()
+    {
+        errlHndl_t l_errl = NULL;
+        size_t size = sizeof(iv_regValue);
 
-// Return a number >= input that is aligned up to the next 8-byte bounday
-#define ALIGN_8(u) (((u) + 0x7ull) & ~0x7ull)
+        // Read / cache security switch setting from processor.
+        l_errl = deviceRead(TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL,
+                            &iv_regValue, size,
+                            DEVICE_SCOM_ADDRESS(SECURITY_SWITCH_REGISTER));
 
-// Return a number <= input that is rounded down to nearest 8-byte boundary
-#define ALIGN_DOWN_8(u) ((u) & ~7ull)
+        // If this errors, we're in bad shape and shouldn't trust anything.
+        assert(NULL == l_errl);
+    }
 
-// Return a number >= input that is aligned up to the next page boundary
-#define ALIGN_PAGE(u) (((u) + (PAGESIZE-1)) & ~(PAGESIZE-1))
-
-// Return a number <= input that is aligned on a page boundary
-#define ALIGN_PAGE_DOWN(u) ((u) - (u)%PAGESIZE)
-
-// Return a number >= input that is aligned up to the next MB boundary
-#define ALIGN_MEGABYTE(u) (((u) + (MEGABYTE-1)) & ~(MEGABYTE-1))
-
-// Return a number <= input that is aligned on a MB boundary
-#define ALIGN_MEGABYTE_DOWN(u) ((u) - (u)%MEGABYTE)
-
-
-#endif
+    bool Settings::getEnabled()
+    {
+        return 0 != (iv_regValue & SECURITY_SWITCH_TRUSTED_BOOT);
+    }
+}

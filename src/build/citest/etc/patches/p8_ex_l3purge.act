@@ -1,0 +1,9 @@
+
+# Indicate purge complete whenever a purge operation is requested.
+CAUSE_EFFECT CHIPLETS ex{
+    LABEL=[L3 PURGE REGISTER]
+    WATCH=[REG(MYCHIPLET,0x0001080e)]
+
+    CAUSE: TARGET=[REG(MYCHIPLET,0x0001080e)] OP=[BIT,ON] BIT=[0]
+    EFFECT: TARGET=[REG(MYCHIPLET,0x0001080e)] OP=[BIT,OFF] BIT=[0]
+}

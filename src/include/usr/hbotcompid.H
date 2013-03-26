@@ -275,6 +275,14 @@ const compId_t VPD_COMP_ID = 0x1D00;
 const char VPD_COMP_NAME[] = "vpd";
 //@}
 
+/** @name SECURE
+ *  Secureboot Support component
+ */
+//@{
+const compId_t SECURE_COMP_ID = 0x1E00;
+const char SECURE_COMP_NAME[] = "secure";
+//@}
+
 
 /** @name HSVC
  * Host Services component

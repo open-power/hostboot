@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2010,2012              */
+/* COPYRIGHT International Business Machines Corp. 2010,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -176,8 +176,7 @@ class PageManager
 
         enum
         {
-            MEMLEN = VmmManager::FIRST_RESERVED_PAGE,
-            RESERVED_PAGES = 4,
+            KERNEL_HEAP_RESERVED_PAGES = 4,
 
             LOWMEM_NORM_LIMIT = 16,
             LOWMEM_CRIT_LIMIT = 5,
@@ -192,6 +191,7 @@ class PageManager
         ~PageManager() {};
 
     private:
+        void _initialize();
 
         void* _allocatePage(size_t,bool);   //!< see allocatePage()
         void _freePage(void*, size_t);       //!< see freePage()

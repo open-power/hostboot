@@ -42,18 +42,22 @@ class VmmManager
         {
             INITIAL_MEM_SIZE = 4*MEGABYTE,
 
-            // put the Page Table at the end of our memory space
-            PTSIZE = (1 << 18),
-            HTABORG_OFFSET = (INITIAL_MEM_SIZE - PTSIZE),
+            // Place the page table at the top side of the cache, 256k in size.
+            INITIAL_PT_OFFSET = INITIAL_MEM_SIZE - 1*MEGABYTE,
+            PTSIZE = 256*KILOBYTE,
+            HTABORG_OFFSET = INITIAL_PT_OFFSET,
 
-            // Put the DMA Pages just under the Page Table
+            // Put the DMA Pages just after the Page Table
             MBOX_DMA_PAGES = 64,    // must be <= 64
             MBOX_DMA_PAGESIZE = (1 * KILOBYTE),
-            MBOX_DMA_ADDR = (HTABORG_OFFSET
-                             - (MBOX_DMA_PAGES * MBOX_DMA_PAGESIZE)),
+            MBOX_DMA_ADDR = INITIAL_PT_OFFSET + PTSIZE,
+            MBOX_DMA_SIZE = MBOX_DMA_PAGES * MBOX_DMA_PAGESIZE,
 
-            /** The base image and heap must be below this address. */
-            FIRST_RESERVED_PAGE = MBOX_DMA_ADDR,
+            /** We need to reserve a hole in heap memory for the page table,
+             *  etc.  Use these constants to define the hole. */
+            FIRST_RESERVED_PAGE = INITIAL_PT_OFFSET,
+            END_RESERVED_PAGE = INITIAL_PT_OFFSET +
+                                 PTSIZE + MBOX_DMA_SIZE,
 
             // Tells processor to ignore HRMOR
             FORCE_PHYS_ADDR = 0x8000000000000000,

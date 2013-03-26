@@ -32,3 +32,11 @@
 #cp $BACKING_BUILD/src/simu/data/cec-chip/base_cec_chip_file $sb/simu/data/cec-chip
 #patch -p0 $sb/simu/data/cec-chip/base_cec_chip_file $HOSTBOOTROOT/src/build/citest/etc/patches/my_patch_File
 
+echo "+++ Updating actions for Blind Purge (CMVC 876083)"
+mkdir -p $sb/simu/data/cec-chip
+cp $BACKING_BUILD/src/simu/data/cec-chip/p8_ex.act $sb/simu/data/cec-chip
+cp $BACKING_BUILD/src/simu/data/cec-chip/s1_ex.act $sb/simu/data/cec-chip
+cat $HOSTBOOTROOT/src/build/citest/etc/patches/p8_ex_l3purge.act >> \
+    $sb/simu/data/cec-chip/p8_ex.act
+cat $HOSTBOOTROOT/src/build/citest/etc/patches/p8_ex_l3purge.act >> \
+    $sb/simu/data/cec-chip/s1_ex.act

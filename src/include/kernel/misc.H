@@ -121,6 +121,15 @@ namespace KernelMisc
 
     };
 
+    /** @fn expand_half_cache
+     *
+     *  @brief Expands the image footprint from a quarter-cache (top 512k of
+     *         each cache column) to a half-cache (full 1mb of each column).
+     *
+     *  @return 0 or -errno
+     */
+    int expand_half_cache();
+
     /** @fn expand_full_cache
      *
      *  @brief Expands the image footprint from a half-cache to full-cache
@@ -155,7 +164,7 @@ namespace KernelMisc
      *     NOTE: This function is a wrapper function for writeScratchReg that
      *     takes care of modifying the scratch register address value depending
      *     on the getCPUType.   The writeScratchReg takes the scratch address
-     *     passed in and puts that date in that register using assembly code
+     *     passed in and puts that data in that register using assembly code
      *
      *  @param[in] uint64_t - scratch_addr
      *  @param[in] uint64_t - Data
