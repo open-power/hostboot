@@ -101,6 +101,8 @@ actionclass defaultMaskedError
 /** Default TBD action */
 actionclass TBDDefaultCallout
 {
-    defaultMaskedError;
+    dumpSH;
+    callout2ndLvlMed;
+    threshold( field(32 / day), mfg(32 / day) );
 };
 
