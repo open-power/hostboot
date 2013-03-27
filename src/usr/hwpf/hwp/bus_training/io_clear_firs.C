@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: io_clear_firs.C,v 1.5 2013/02/20 09:40:22 jaswamin Exp $
+// $Id: io_clear_firs.C,v 1.9 2013/03/26 14:45:18 jaswamin Exp $
 // *!***************************************************************************
 // *! (C) Copyright International Business Machines Corp. 2012, 2013
 // *!           All Rights Reserved -- Property of IBM
@@ -39,10 +39,15 @@
 //------------------------------------------------------------------------------
 // Version:|Author: | Date:  | Comment:
 // --------|--------|--------|--------------------------------------------------
-//   1.3   |varkeykv|02/18/13|  Missing function check in
-//   1.2   |jaswamin|02/14/13|  function for reading the fir scom register contents, enums and arrays for doing fir isolation
-//   1.1   |jaswamin|02/14/13|  Additions for reading the fir register.
-//   1.0   |jaswamin|01/30/13|  Initial check in .
+//   1.9   |jaswmain|03/26/13|  Removed DOS line endings
+//   1.8   |jaswamin|03/25/13|  Removed 64 bit fir clearing function.
+//   1.7   |varkeykv|03/20/13|  Additional moved FIR functions from clear firs to training files
+//   1.6   |jaswamin|03/05/13|  Modifications as per review comments
+//   1.5   |jaswamin|02/20/13|  Changes as per review comment
+//   1.4   |varkeykv|02/18/13|  Missing function check in
+//   1.3   |jaswamin|02/14/13|  function for reading the fir scom register contents, enums and arrays for doing fir isolation
+//   1.2   |jaswamin|02/14/13|  Additions for reading the fir register.
+//   1.1   |jaswamin|01/30/13|  Initial check in .
 //------------------------------------------------------------------------------
 
 #include <fapi.H>
@@ -55,27 +60,6 @@ extern "C" {
 
 using namespace fapi;
 
-// For clearing the FIR mask , used by io run training 
-ReturnCode clear_fir_mask_reg(const Target &i_target,fir_io_interface_t i_chip_interface){
-    
-    ReturnCode rc;
-//@thi - Fixed compiler error. Varkey will fix this in next version
-//    uint32_t rc_ecmd=0;
-    uint64_t  scom_address64=0;
-    ecmdDataBufferBase putscom_data64(64),temp(64);
-    //rc_ecmd |=getscom_data64.flushTo0();
-    //rc_ecmd |=putscom_data64.flushTo0();
-    FAPI_INF("io_run_training:In the Clear FIR MASK register function ");
-    //get the 64 bit data
-    temp.setDoubleWord(0,fir_clear_mask_reg_addr[i_chip_interface]);
-    scom_address64=temp.getDoubleWord(0);
-    
-    //do the putscom
-    rc=fapiPutScom( i_target, scom_address64, putscom_data64);
-    
-    return(rc);
-    
-}
 
 // for toggling the rx and tx fir reset.
 ReturnCode clear_fir_err_regs(const Target &i_target,io_interface_t i_chip_interface,uint32_t i_group){
@@ -87,9 +71,6 @@ ReturnCode clear_fir_err_regs(const Target &i_target,io_interface_t i_chip_inter
  
     ecmdDataBufferBase set_bits(16);
     ecmdDataBufferBase clear_bits(16);
-    
-    FAPI_DBG("In the Clear fir procedure");
-    //const Target *target_ptr=&target;
     
     //set the rx_fir_reset bit
     bits=rx_fir_reset;
@@ -144,26 +125,6 @@ ReturnCode clear_fir_err_regs(const Target &i_target,io_interface_t i_chip_inter
     
 }
 
-ReturnCode clear_fir_reg(const Target &i_target,fir_io_interface_t i_chip_interface){
-    
-    ReturnCode rc;
-//@thi - Fixed compiler error. Varkey will fix this in next version
-//    uint32_t rc_ecmd=0;
-    uint64_t  scom_address64=0;
-    ecmdDataBufferBase putscom_data64(64),temp(64);
-    //rc_ecmd |=getscom_data64.flushTo0();
-    //rc_ecmd |=putscom_data64.flushTo0();
-    
-    //get the 64 bit data
-    temp.setDoubleWord(0,fir_clear_reg_addr[i_chip_interface]);
-    scom_address64=temp.getDoubleWord(0);
-    
-    //do the putscom
-    rc=fapiPutScom( i_target, scom_address64, putscom_data64);
-    
-    return(rc);
-    
-}
 
 ReturnCode read_fir_reg(const Target &i_target,fir_io_interface_t i_chip_interface,ecmdDataBufferBase &o_databuf_64bit){
     
@@ -173,8 +134,6 @@ ReturnCode read_fir_reg(const Target &i_target,fir_io_interface_t i_chip_interfa
     ecmdDataBufferBase temp(64);
     rc_ecmd |=o_databuf_64bit.flushTo0();
     
-    //rc_ecmd |=putscom_data64.flushTo0();
-    
     //get the 64 bit scom address.
     temp.setDoubleWord(0,fir_rw_reg_addr[i_chip_interface]);
     scom_address64=temp.getDoubleWord(0);
@@ -183,8 +142,6 @@ ReturnCode read_fir_reg(const Target &i_target,fir_io_interface_t i_chip_interfa
     rc=fapiGetScom(i_target,scom_address64,o_databuf_64bit);
     
     return(rc);
-    
-    
 }
 
 ReturnCode io_clear_firs(const fapi::Target &i_target){
@@ -231,10 +188,7 @@ ReturnCode io_clear_firs(const fapi::Target &i_target){
      }
      
     rc=clear_fir_err_regs(i_target,gcr_interface,group);
-    if(rc){
-               return rc;
-    }
-    rc=clear_fir_reg(i_target,interface);
+    
     return(rc);
 }
 

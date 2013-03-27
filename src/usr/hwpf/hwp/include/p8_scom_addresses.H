@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_scom_addresses.H,v 1.139 2013/03/17 22:07:53 jmcgill Exp $
+// $Id: p8_scom_addresses.H,v 1.140 2013/03/21 13:50:57 pchatnah Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/p8_scom_addresses.H,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
@@ -862,7 +862,7 @@ CONST_UINT64_T( PB_RAS_FIR_ACTION1_0x02010C75         , ULL(0x02010C75) );
 //------------------------------------------------------------------------------
 // PLL lock information
 CONST_UINT64_T( PB_PLLLOCKREG_0x020F0019              , ULL(0x020F0019) );
-
+CONST_UINT64_T( PCBMS_INTERRUPT_TYPE_REG_0x000F001A ,   ULL(0x000F001A));
 //------------------------------------------------------------------------------
 //      CAPP
 //------------------------------------------------------------------------------
@@ -1824,6 +1824,9 @@ This section is automatically updated by CVS when you check in this file.
 Be sure to create CVS comments when you commit so that they can be included here.
 
 $Log: p8_scom_addresses.H,v $
+Revision 1.140  2013/03/21 13:50:57  pchatnah
+ading checkstop register
+
 Revision 1.139  2013/03/17 22:07:53  jmcgill
 add L3 BAR registers
 

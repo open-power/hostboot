@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012                   */
+/* COPYRIGHT International Business Machines Corp. 2012,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_build_smp_adu.C,v 1.3 2012/09/24 05:02:10 jmcgill Exp $
+// $Id: proc_build_smp_adu.C,v 1.4 2013/02/25 14:50:52 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_build_smp_adu.C,v $
 //------------------------------------------------------------------------------
 // *|
@@ -223,6 +223,7 @@ fapi::ReturnCode proc_build_smp_adu_check_status(
     fapi::ReturnCode rc;
     proc_adu_utils_adu_status status_exp, status_act;
     bool match = false;
+    uint8_t num_polls = 0;
 
     FAPI_DBG("proc_build_smp_adu_check_status: Start");
     do
@@ -242,13 +243,28 @@ fapi::ReturnCode proc_build_smp_adu_check_status(
         status_exp.pbinit_missing   = ADU_STATUS_BIT_DONT_CARE;
 
         // retreive actual status value
-        FAPI_DBG("proc_build_smp_adu_check_status: Calling library to read ADU status");
-        rc = proc_adu_utils_get_adu_status(i_target,
-                                           status_act);
-        if (!rc.ok())
+        while (num_polls < PROC_BUILD_SMP_MAX_STATUS_POLLS)
         {
-            FAPI_ERR("proc_build_smp_adu_check_status: Error from proc_adu_utils_get_adu_status");
-            break;
+            FAPI_DBG("proc_build_smp_adu_check_status: Calling library to read ADU status (poll %d)",
+                     num_polls+1);
+            rc = proc_adu_utils_get_adu_status(i_target,
+                                               status_act);
+            if (!rc.ok())
+            {
+                FAPI_ERR("proc_build_smp_adu_check_status: Error from proc_adu_utils_get_adu_status");
+                break;
+            }
+
+            // status reported as busy, poll again
+            if (status_act.busy)
+            {
+                num_polls++;
+            }
+            // not busy, check for expected status
+            else
+            {
+                break;
+            }
         }
 
         // check status bits versus expected pattern

@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: io_funcs.C,v 1.16 2013/02/07 10:07:28 varkeykv Exp $
+// $Id: io_funcs.C,v 1.17 2013/03/20 10:47:08 varkeykv Exp $
 // *!***************************************************************************
 // *! (C) Copyright International Business Machines Corp. 1997, 1998
 // *!           All Rights Reserved -- Property of IBM
@@ -45,14 +45,15 @@
 //------------------------------------------------------------------------------
 #include "io_funcs.H"
 
+
 extern "C"
 {
     using namespace fapi;
+    
 
 /****************************************************************************************/
 /* edi_training.C   - functions of edi_training class                                */
 /****************************************************************************************/
-
 
 //! Wrapper to Run W,D,E,R , F based on bus_status (selected on);
 ReturnCode  edi_training::run_training(const Target& master_target,  io_interface_t master_interface,uint32_t master_group, const Target&  slave_target,  io_interface_t  slave_interface,uint32_t slave_group) {
@@ -60,6 +61,7 @@ ReturnCode  edi_training::run_training(const Target& master_target,  io_interfac
     // bool master_chip_found=false; -- maybe for fabric ...need to test later
 	
 	FAPI_DBG("io_run_training: Starting training on SLAVE side");
+
 	// Set the slave rx_start_wderf
         rc=run_training_functions(slave_target,slave_interface,slave_group);
 	if (!rc.ok())  {
@@ -90,7 +92,6 @@ ReturnCode  edi_training::run_training(const Target& master_target,  io_interfac
 			}
 		    }
 		 }
-
         }
     return(rc);
 }
@@ -243,7 +244,6 @@ ReturnCode  edi_training::training_function_status(const Target&  master_chip_ta
                                     {
                                        FAPI_ERR("io_run_training: the wiretest training state reported a fail  \n");
 				       FAPI_SET_HWP_ERROR(rc, IO_RUN_TRAINING_FAIL_WIRETEST_RC);
-				       //fapiLogError(rc);
                                        wire_test_status =  FAILED ;
                                        rx_wderf_failed[WIRE_TEST]=true;
                                       // Run First FAILED Data Capture for Wire Test for FAILED bus
@@ -272,7 +272,6 @@ ReturnCode  edi_training::training_function_status(const Target&  master_chip_ta
                                             rx_wderf_failed[DESKEW]=true;
                                             FAPI_ERR("io_run_training : deskew training state reported a fail  \n");
                                             FAPI_SET_HWP_ERROR(rc, IO_RUN_TRAINING_FAIL_DESKEW_RC);
-					    //fapiLogError(rc);
                                             desckew_status =  FAILED ;
 					    break;
                                     }
@@ -296,7 +295,6 @@ ReturnCode  edi_training::training_function_status(const Target&  master_chip_ta
                                     {
                                              FAPI_ERR("io_run_training : eye_opt_ training state reported a fail\n");
                                              FAPI_SET_HWP_ERROR(rc, IO_RUN_TRAINING_FAIL_EYE_OPT_RC);
-					     //fapiLogError(rc);
                                              rx_wderf_failed[EYE_OPT]=true;
                                              eye_opt_status =  FAILED ;
 					     break;
@@ -321,8 +319,6 @@ ReturnCode  edi_training::training_function_status(const Target&  master_chip_ta
                                     {
                                              FAPI_DBG("io_run_training: static repair encountered an error    \n");
                                              rx_wderf_failed[REPAIR]=true;
-                                             FAPI_SET_HWP_ERROR(rc, IO_RUN_TRAINING_FAIL_REPAIR_RC);
-					     //fapiLogError(rc);
                                              repair_status =  FAILED ;
 					     break;
                                     }
@@ -349,7 +345,6 @@ ReturnCode  edi_training::training_function_status(const Target&  master_chip_ta
                                              FAPI_DBG("io_run_training:   rx_func_mode_failed    \n");
                                              rx_wderf_failed[FUNCTIONAL]=true;
                                              FAPI_SET_HWP_ERROR(rc, IO_RUN_TRAINING_FAIL_FUNC_MODE_RC);
-					     //fapiLogError(rc);
                                              functional_status =   FAILED ;
 					     break;
                                     }
@@ -370,7 +365,8 @@ ReturnCode  edi_training::training_function_status(const Target&  master_chip_ta
                         curr_cyc++;
                         FAPI_DBG("\n\t io_run_training: Cycles into polling = %lld\n", curr_cyc);
                         FAPI_DBG("\n\t io_run_training: Cycles remaining in polling = %lld\n", end_cycle - curr_cyc );
-			// Updated Loop count and per delay call count to acheive max of 100ms theoretical delay as per Mike Spear 
+			// Updated Loop count and per delay call count to acheive max of 100ms theoretical delay as per Mike Spear
+			// This is 1ms poll call..Loop counter =100 .. a total of ~100ms
                         rc=fapiDelay(1000000,increment_poll_cycles);
                         if(!rc.ok())
                         {
@@ -384,9 +380,6 @@ ReturnCode  edi_training::training_function_status(const Target&  master_chip_ta
                      break;
                     }
                     
-                    //@thi - Display loop count
-                    FAPI_INF("io_run_training: curr_cyc = %lld\n", curr_cyc);
-                    
                     if ( curr_cyc >= end_cycle )
                     {
                             dump_ffdc_wiretest(master_chip_target, master_chip_interface ,master_group,  slave_chip_target ,  slave_chip_interface,slave_group);
@@ -395,31 +388,26 @@ ReturnCode  edi_training::training_function_status(const Target&  master_chip_ta
 			    {
 			    FAPI_ERR("io_run_training: wiretest timeout");
 			    FAPI_SET_HWP_ERROR(rc, IO_RUN_TRAINING_WIRETEST_TIMEOUT_RC);
-			    //fapiLogError(rc);
 			    }
 			    else if (desckew_selected && desckew_status == RUNNING)
 			    {
 			    FAPI_ERR("io_run_training: deskew timeout");
 			    FAPI_SET_HWP_ERROR(rc, IO_RUN_TRAINING_DESKEW_TIMEOUT_RC);
-			   // fapiLogError(rc);
 			    }
 			    else if (repair_selected && repair_status == RUNNING)
 			    {
 			    FAPI_ERR("io_run_training: repair timeout");
 			    FAPI_SET_HWP_ERROR(rc, IO_RUN_TRAINING_REPAIR_TIMEOUT_RC);
-			   // fapiLogError(rc);
 			    }
 			    else if (eye_opt_selected && eye_opt_status == RUNNING)
 			    {
 			    FAPI_ERR("io_run_training: eyeopt timeout");
 			    FAPI_SET_HWP_ERROR(rc, IO_RUN_TRAINING_EYE_OPT_TIMEOUT_RC);
-			    //fapiLogError(rc);
 			    }
 			    else
 			    {
 			    FAPI_ERR("io_run_training: func timeout");
 			    FAPI_SET_HWP_ERROR(rc, IO_RUN_TRAINING_FUNC_MODE_TIMEOUT_RC);
-			    //fapiLogError(rc);
 			    }
 			    break;
                     }

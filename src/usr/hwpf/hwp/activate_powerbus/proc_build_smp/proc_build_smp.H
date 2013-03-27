@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_build_smp.H,v 1.8 2013/01/21 03:11:30 jmcgill Exp $
+// $Id: proc_build_smp.H,v 1.9 2013/02/14 00:51:31 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_build_smp.H,v $
 //------------------------------------------------------------------------------
 // *|
@@ -63,7 +63,6 @@
 // *!        (current: placeholder settings from Murano sim)
 // *! TODO:: phase 2 execution for Venice (FSP drawer integration)
 // *! TODO:: support for manufacturing AVP mode configurations
-// *! TODO:: attributes for PBIEX EX inits in winkle image (scan)
 //------------------------------------------------------------------------------
 
 #ifndef _PROC_BUILD_SMP_H_

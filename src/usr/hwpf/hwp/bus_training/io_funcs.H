@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: io_funcs.H,v 1.14 2013/02/12 06:25:32 varkeykv Exp $
+// $Id: io_funcs.H,v 1.15 2013/03/20 10:47:08 varkeykv Exp $
 // *!***************************************************************************
 // *! (C) Copyright International Business Machines Corp. 1997, 1998
 // *!           All Rights Reserved -- Property of IBM
@@ -49,6 +49,7 @@
 #define IO_funcs
 #include <fapi.H>
 #include "gcr_funcs.H"
+#include "io_clear_firs.H"
 
 using namespace fapi;
 	// Bus Status State
@@ -75,10 +76,7 @@ public:
 	bus_status    eye_opt_status;
 	bus_status    repair_status;
 	bus_status    functional_status;
-       //@thi - Pete & Varkey will release a new version that has max_poll_cycles = 300.
-       //       Because we need this in a build quickly, I go ahead and temporarily
-       //       change it here in this version.
-        //Updating max cycles to suit 300ms theoretical max timeout as per Mike Spear
+        //Updating max cycles to suit 280ms theoretical max timeout as per Mike Spear
 	static const uint32_t      max_poll_cycles=300;
 	static const uint32_t      increment_poll_cycles=1;
 	uint32_t endpoints_set; // How many end points have we accessed so far
@@ -147,6 +145,7 @@ public:
     ReturnCode isChipMaster(const Target& target, io_interface_t interface,uint32_t current_group,
                             bool& master_chip_found
                             );
+        
 };
 
 

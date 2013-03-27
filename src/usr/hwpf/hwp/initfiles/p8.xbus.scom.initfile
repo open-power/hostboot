@@ -1,19 +1,21 @@
-#-- $Id: p8.xbus.scom.initfile,v 1.6 2013/02/06 22:20:58 thomsen Exp $ 
+#-- $Id: p8.xbus.scom.initfile,v 1.8 2013/03/22 20:34:43 jgrell Exp $ 
 
 
 ####################################################################
 ##  
 ##  Auto-genrated by fig2scominit.pl
-##      Based on SETUP_ID_MODE X_BUS_8B_TR_HW RX_MASTER_MODE MASTER
+##      Based on SETUP_ID_MODE X_BUS_8B_TR_HW
 ##      from ../../logic/mesa_sim/fusion/run/IOEPC_XBUS_WRAP.IOEPC_XBUS_WRAP.figdb
 ##
-##   Created on Wed Feb  6 11:20:13 EST 2013, by derrin
+##   Created on Fri Mar 22 14:31:30 CDT 2013, by jgrell
 ####################################################################
 
 ## -- CHANGE HISTORY:
  ## --------------------------------------------------------------------------------
  ## -- Version:|Author:  | Date:  | Comment:
  ## -- --------|---------|--------|-------------------------------------------------
+ ## -- jgr13031300| jgr     |03-13-13| Added missing entries from rel 0128
+ ## -- 13030500| thomsen |03-05-13| Added DLL settings for HW241376
  ## -- 13011802| mbs     |01-18-13| Added rx_fence to run_mode dial (HW236326)
  ## -- 12112700| SMR     |11-27-12| HW20806: Added rx_sls_extend_sel default of 0b101 (slave side only!)
  ## -- 12111300| berger  |11-13-12| Updated with HW eyeopt and recal settings
@@ -56,8 +58,8 @@ SyntaxVersion = 1
 ####################################################################
 include ei4.io.define
 
-                    define HW_EXPRESS = SYS.ATTR_IS_SIMULATION == 0;
-                    define VBU_EXPRESS = SYS.ATTR_IS_SIMULATION == 1;
+                    define def_IS_HW  = SYS.ATTR_IS_SIMULATION == 0;
+                    define def_IS_VBU = SYS.ATTR_IS_SIMULATION == 1;
                 
 
 define def_bus_id0 = (ATTR_CHIP_UNIT_POS == 0);
@@ -65,11 +67,25 @@ define def_bus_id1 = (ATTR_CHIP_UNIT_POS == 1);
 define def_bus_id2 = (ATTR_CHIP_UNIT_POS == 2);
 define def_bus_id3 = (ATTR_CHIP_UNIT_POS == 3);
 
-define def_is_master = (TGT1.ATTR_FABRIC_CHIP_ID < TGT3.ATTR_FABRIC_CHIP_ID);
-define def_is_slave  = (TGT1.ATTR_FABRIC_CHIP_ID > TGT3.ATTR_FABRIC_CHIP_ID);
+define prim_id = (TGT1.ATTR_FABRIC_NODE_ID*100) + TGT1.ATTR_POS;
+define conn_id = (TGT3.ATTR_FABRIC_NODE_ID*100) + TGT3.ATTR_POS;
+
+define def_is_master = (prim_id < conn_id);
+define def_is_slave  = (prim_id > conn_id);
 
 define xbus_base_addr = xbus0_gcr_addr;
 
+
+#RX01_GEN.RX01.RX0.RXCTL.RX_CTL_REGS.RX_DLL_ANALOG_TWEAKS_PG
+scom 0x800E7800(xbus_base_addr) { 
+	bits, scom_data, expr;
+     rx_dll1_vreg_drvcon,  0b001   , def_IS_HW;
+     rx_dll1_vreg_drvcon,  0b000  , def_IS_VBU;
+     rx_dll2_vreg_drvcon,  0b001   , def_IS_HW;
+     rx_dll2_vreg_drvcon,  0b000  , def_IS_VBU;
+     rx_dll_vreg_compcon,  0b101   , def_IS_HW;
+     rx_dll_vreg_compcon,  0b000  , def_IS_VBU;
+}
 
 #RX01_GEN.RX01.RX0.RXCTL.RX_CTL_REGS.RX_DYN_RPR_ERR_TALLYING1_PG
 scom 0x8009D800(xbus_base_addr) { 
@@ -89,80 +105,80 @@ scom 0x800AE000(xbus_base_addr) {
 #RX01_GEN.RX01.RX0.RXCTL.RX_CTL_REGS.RX_EI4_CAL_CNTL_PP
 scom 0x800B1800(xbus_base_addr) { 
 	bits, scom_data, expr;
-     rx_ddc_use_cyc_block_lock,  0b0   , HW_EXPRESS;
-     rx_ddc_use_cyc_block_lock,  0b1  , VBU_EXPRESS;
+     rx_ddc_use_cyc_block_lock,  0b0   , def_IS_HW;
+     rx_ddc_use_cyc_block_lock,  0b1  , def_IS_VBU;
 }
 
 #RX01_GEN.RX01.RX0.RXCTL.RX_CTL_REGS.RX_EI4_CAL_DEC_A_D_PP
 scom 0x800B3000(xbus_base_addr) { 
 	bits, scom_data, expr;
-     rx_cal_dec_val_a,  0b1111   , HW_EXPRESS;
-     rx_cal_dec_val_a,  0b1000  , VBU_EXPRESS;
-     rx_cal_dec_val_b,  0b0001   , HW_EXPRESS;
-     rx_cal_dec_val_b,  0b0000  , VBU_EXPRESS;
-     rx_cal_dec_val_c,  0b1111   , HW_EXPRESS;
-     rx_cal_dec_val_c,  0b0000  , VBU_EXPRESS;
-     rx_cal_dec_val_d,  0b1111   , HW_EXPRESS;
-     rx_cal_dec_val_d,  0b1110  , VBU_EXPRESS;
+     rx_cal_dec_val_a,  0b0111   , def_IS_HW;
+     rx_cal_dec_val_a,  0b1000  , def_IS_VBU;
+     rx_cal_dec_val_b,  0b0001   , def_IS_HW;
+     rx_cal_dec_val_b,  0b0000  , def_IS_VBU;
+     rx_cal_dec_val_c,  0b0111   , def_IS_HW;
+     rx_cal_dec_val_c,  0b0000  , def_IS_VBU;
+     rx_cal_dec_val_d,  0b0111   , def_IS_HW;
+     rx_cal_dec_val_d,  0b0110  , def_IS_VBU;
 }
 
 #RX01_GEN.RX01.RX0.RXCTL.RX_CTL_REGS.RX_EI4_CAL_DEC_E_H_PP
 scom 0x800B3800(xbus_base_addr) { 
 	bits, scom_data, expr;
-     rx_cal_dec_val_e,  0b1111   , HW_EXPRESS;
-     rx_cal_dec_val_e,  0b1110  , VBU_EXPRESS;
-     rx_cal_dec_val_f,  0b1111   , HW_EXPRESS;
-     rx_cal_dec_val_f,  0b0000  , VBU_EXPRESS;
-     rx_cal_dec_val_g,  0b1111   , HW_EXPRESS;
-     rx_cal_dec_val_g,  0b0000  , VBU_EXPRESS;
-     rx_cal_dec_val_h,  0b1111   , HW_EXPRESS;
-     rx_cal_dec_val_h,  0b0000  , VBU_EXPRESS;
+     rx_cal_dec_val_e,  0b0111   , def_IS_HW;
+     rx_cal_dec_val_e,  0b0110  , def_IS_VBU;
+     rx_cal_dec_val_f,  0b0111   , def_IS_HW;
+     rx_cal_dec_val_f,  0b0000  , def_IS_VBU;
+     rx_cal_dec_val_g,  0b0111   , def_IS_HW;
+     rx_cal_dec_val_g,  0b0000  , def_IS_VBU;
+     rx_cal_dec_val_h,  0b0111   , def_IS_HW;
+     rx_cal_dec_val_h,  0b0000  , def_IS_VBU;
 }
 
 #RX01_GEN.RX01.RX0.RXCTL.RX_CTL_REGS.RX_EI4_CAL_INC_A_D_PP
 scom 0x800B2000(xbus_base_addr) { 
 	bits, scom_data, expr;
-     rx_cal_inc_val_a,  0b1111   , HW_EXPRESS;
-     rx_cal_inc_val_a,  0b1000  , VBU_EXPRESS;
-     rx_cal_inc_val_b,  0b0001   , HW_EXPRESS;
-     rx_cal_inc_val_b,  0b0000  , VBU_EXPRESS;
-     rx_cal_inc_val_c,  0b1111   , HW_EXPRESS;
-     rx_cal_inc_val_c,  0b0000  , VBU_EXPRESS;
-     rx_cal_inc_val_d,  0b1111   , HW_EXPRESS;
-     rx_cal_inc_val_d,  0b1110  , VBU_EXPRESS;
+     rx_cal_inc_val_a,  0b0111   , def_IS_HW;
+     rx_cal_inc_val_a,  0b1000  , def_IS_VBU;
+     rx_cal_inc_val_b,  0b0001   , def_IS_HW;
+     rx_cal_inc_val_b,  0b0000  , def_IS_VBU;
+     rx_cal_inc_val_c,  0b0111   , def_IS_HW;
+     rx_cal_inc_val_c,  0b0000  , def_IS_VBU;
+     rx_cal_inc_val_d,  0b0111   , def_IS_HW;
+     rx_cal_inc_val_d,  0b0110  , def_IS_VBU;
 }
 
 #RX01_GEN.RX01.RX0.RXCTL.RX_CTL_REGS.RX_EI4_CAL_INC_E_H_PP
 scom 0x800B2800(xbus_base_addr) { 
 	bits, scom_data, expr;
-     rx_cal_inc_val_e,  0b1111   , HW_EXPRESS;
-     rx_cal_inc_val_e,  0b1110  , VBU_EXPRESS;
-     rx_cal_inc_val_f,  0b1111   , HW_EXPRESS;
-     rx_cal_inc_val_f,  0b0000  , VBU_EXPRESS;
-     rx_cal_inc_val_g,  0b1111   , HW_EXPRESS;
-     rx_cal_inc_val_g,  0b0000  , VBU_EXPRESS;
-     rx_cal_inc_val_h,  0b1111   , HW_EXPRESS;
-     rx_cal_inc_val_h,  0b0000  , VBU_EXPRESS;
+     rx_cal_inc_val_e,  0b0111   , def_IS_HW;
+     rx_cal_inc_val_e,  0b0110  , def_IS_VBU;
+     rx_cal_inc_val_f,  0b0111   , def_IS_HW;
+     rx_cal_inc_val_f,  0b0000  , def_IS_VBU;
+     rx_cal_inc_val_g,  0b0111   , def_IS_HW;
+     rx_cal_inc_val_g,  0b0000  , def_IS_VBU;
+     rx_cal_inc_val_h,  0b0111   , def_IS_HW;
+     rx_cal_inc_val_h,  0b0000  , def_IS_VBU;
 }
 
 #RX01_GEN.RX01.RX0.RXCTL.RX_CTL_REGS.RX_EO_STEP_CNTL_PG
 scom 0x800A3800(xbus_base_addr) { 
 	bits, scom_data, expr;
-     rx_eo_enable_ber_test,  0b1   , HW_EXPRESS;
-     rx_eo_enable_ber_test,  0b0  , VBU_EXPRESS;
-     rx_eo_enable_ctle_cal,  0b1   , HW_EXPRESS;
-     rx_eo_enable_ctle_cal,  0b0  , VBU_EXPRESS;
-     rx_eo_enable_dcd_cal,  0b1   , HW_EXPRESS;
-     rx_eo_enable_dcd_cal,  0b0  , VBU_EXPRESS;
+     rx_eo_enable_ber_test,  0b1   , def_IS_HW;
+     rx_eo_enable_ber_test,  0b0  , def_IS_VBU;
+     rx_eo_enable_ctle_cal,  0b1   , def_IS_HW;
+     rx_eo_enable_ctle_cal,  0b0  , def_IS_VBU;
+     rx_eo_enable_dcd_cal,  0b1   , def_IS_HW;
+     rx_eo_enable_dcd_cal,  0b0  , def_IS_VBU;
 	rx_eo_enable_final_l2u_adj, 0b1, any;
-     rx_eo_enable_latch_offset_cal,  0b1   , HW_EXPRESS;
-     rx_eo_enable_latch_offset_cal,  0b0  , VBU_EXPRESS;
-     rx_eo_enable_measure_eye_width,  0b1   , HW_EXPRESS;
-     rx_eo_enable_measure_eye_width,  0b0  , VBU_EXPRESS;
-     rx_eo_enable_result_check,  0b1   , HW_EXPRESS;
-     rx_eo_enable_result_check,  0b0  , VBU_EXPRESS;
-     rx_eo_enable_vref_cal,  0b1   , HW_EXPRESS;
-     rx_eo_enable_vref_cal,  0b0  , VBU_EXPRESS;
+     rx_eo_enable_latch_offset_cal,  0b1   , def_IS_HW;
+     rx_eo_enable_latch_offset_cal,  0b0  , def_IS_VBU;
+     rx_eo_enable_measure_eye_width,  0b1   , def_IS_HW;
+     rx_eo_enable_measure_eye_width,  0b0  , def_IS_VBU;
+     rx_eo_enable_result_check,  0b1   , def_IS_HW;
+     rx_eo_enable_result_check,  0b0  , def_IS_VBU;
+     rx_eo_enable_vref_cal,  0b1   , def_IS_HW;
+     rx_eo_enable_vref_cal,  0b0  , def_IS_VBU;
 }
 
 #RX01_GEN.RX01.RX0.RXCTL.RX_CTL_REGS.RX_FENCE_PG
@@ -203,6 +219,13 @@ scom 0x80093000(xbus_base_addr) {
 	rx_lane_disabled_vec_16_31, 0b0000111111111111, any;
 }
 
+#RX01_GEN.RX01.RX0.RXCTL.RX_CTL_REGS.RX_MODE1_PP
+scom 0x800B0800(xbus_base_addr) { 
+	bits, scom_data, expr;
+     rx_bit_lock_timeout_sel,  0b110   , def_IS_HW;
+     rx_bit_lock_timeout_sel,  0b101  , def_IS_VBU;
+}
+
 #RX01_GEN.RX01.RX0.RXCTL.RX_CTL_REGS.RX_MODE_PG
 scom 0x80081800(xbus_base_addr) { 
 	bits, scom_data, expr;
@@ -212,34 +235,36 @@ scom 0x80081800(xbus_base_addr) {
 #RX01_GEN.RX01.RX0.RXCTL.RX_CTL_REGS.RX_RC_STEP_CNTL_PG
 scom 0x800AB800(xbus_base_addr) { 
 	bits, scom_data, expr;
-     rx_rc_enable_dll_update,  0b1   , HW_EXPRESS;
-     rx_rc_enable_dll_update,  0b0  , VBU_EXPRESS;
-     rx_rc_enable_edge_track,  0b1   , HW_EXPRESS;
-     rx_rc_enable_edge_track,  0b0  , VBU_EXPRESS;
-     rx_rc_enable_measure_eye_width,  0b1   , HW_EXPRESS;
-     rx_rc_enable_measure_eye_width,  0b0  , VBU_EXPRESS;
-     rx_rc_enable_result_check,  0b1   , HW_EXPRESS;
-     rx_rc_enable_result_check,  0b0  , VBU_EXPRESS;
+     rx_rc_enable_dll_update,  0b1   , def_IS_HW;
+     rx_rc_enable_dll_update,  0b0  , def_IS_VBU;
+     rx_rc_enable_edge_track,  0b1   , def_IS_HW;
+     rx_rc_enable_edge_track,  0b0  , def_IS_VBU;
+     rx_rc_enable_measure_eye_width,  0b1   , def_IS_HW;
+     rx_rc_enable_measure_eye_width,  0b0  , def_IS_VBU;
+     rx_rc_enable_result_check,  0b1   , def_IS_HW;
+     rx_rc_enable_result_check,  0b0  , def_IS_VBU;
 }
 
 #RX01_GEN.RX01.RX0.RXCTL.RX_CTL_REGS.RX_SERVO_TO1_PP
 scom 0x800B6000(xbus_base_addr) { 
 	bits, scom_data, expr;
-     rx_servo_timeout_sel_a,  0b0101   , HW_EXPRESS;
-     rx_servo_timeout_sel_a,  0b1000  , VBU_EXPRESS;
-     rx_servo_timeout_sel_b,  0b1010   , HW_EXPRESS;
-     rx_servo_timeout_sel_b,  0b1000  , VBU_EXPRESS;
-     rx_servo_timeout_sel_c,  0b0101   , HW_EXPRESS;
-     rx_servo_timeout_sel_c,  0b1000  , VBU_EXPRESS;
+     rx_servo_timeout_sel_a,  0b0101   , def_IS_HW;
+     rx_servo_timeout_sel_a,  0b1000  , def_IS_VBU;
+     rx_servo_timeout_sel_b,  0b1010   , def_IS_HW;
+     rx_servo_timeout_sel_b,  0b1000  , def_IS_VBU;
+     rx_servo_timeout_sel_c,  0b0101   , def_IS_HW;
+     rx_servo_timeout_sel_c,  0b1000  , def_IS_VBU;
+     rx_servo_timeout_sel_d,  0b1001   , def_IS_HW;
+     rx_servo_timeout_sel_d,  0b0101  , def_IS_VBU;
 }
 
 #RX01_GEN.RX01.RX0.RXCTL.RX_CTL_REGS.RX_SERVO_TO2_PP
 scom 0x800B6800(xbus_base_addr) { 
 	bits, scom_data, expr;
-     rx_servo_timeout_sel_f,  0b1000   , HW_EXPRESS;
-     rx_servo_timeout_sel_f,  0b0110  , VBU_EXPRESS;
-     rx_servo_timeout_sel_h,  0b0110   , HW_EXPRESS;
-     rx_servo_timeout_sel_h,  0b1000  , VBU_EXPRESS;
+     rx_servo_timeout_sel_f,  0b1000   , def_IS_HW;
+     rx_servo_timeout_sel_f,  0b0110  , def_IS_VBU;
+     rx_servo_timeout_sel_h,  0b1110   , def_IS_HW;
+     rx_servo_timeout_sel_h,  0b1000  , def_IS_VBU;
 }
 
 #RX01_GEN.RX01.RX0.RXCTL.RX_CTL_REGS.RX_SPARE_MODE_PG
@@ -248,10 +273,27 @@ scom 0x80080800(xbus_base_addr) {
 	rx_sls_extend_sel, 0b101, def_is_slave;
 }
 
+#RX01_GEN.RX01.RX0.RXCTL.RX_CTL_REGS.RX_TIMEOUT_SEL1_PG
+scom 0x80091000(xbus_base_addr) { 
+	bits, scom_data, expr;
+     rx_eo_ctle_timeout_sel,  0b111   , def_IS_HW;
+     rx_eo_ctle_timeout_sel,  0b110  , def_IS_VBU;
+     rx_eo_offset_timeout_sel,  0b111   , def_IS_HW;
+     rx_eo_offset_timeout_sel,  0b110  , def_IS_VBU;
+     rx_eo_vref_timeout_sel,  0b111   , def_IS_HW;
+     rx_eo_vref_timeout_sel,  0b110  , def_IS_VBU;
+}
+
 #RX01_GEN.RX01.RX0.RXCTL.RX_CTL_REGS.RX_TIMEOUT_SEL_PG
 scom 0x80089800(xbus_base_addr) { 
 	bits, scom_data, expr;
+     rx_ds_bl_timeout_sel,  0b101   , def_IS_HW;
+     rx_ds_bl_timeout_sel,  0b001  , def_IS_VBU;
+     rx_ds_timeout_sel,  0b110   , def_IS_HW;
+     rx_ds_timeout_sel,  0b010  , def_IS_VBU;
 	rx_sls_timeout_sel, 0b001, any;
+     rx_wt_timeout_sel,  0b111   , def_IS_HW;
+     rx_wt_timeout_sel,  0b011  , def_IS_VBU;
 }
 
 #RX01_GEN.RX01.RX0.RXCTL.RX_CTL_REGS.RX_TX_BUS_INFO_PG
@@ -387,6 +429,17 @@ scom 0x8000B013(xbus_base_addr) {
 	rx_prbs_tap_id, 0b000, any;
 }
 
+#RX01_GEN.RX01.RX1.RXCTL.RX_CTL_REGS.RX_DLL_ANALOG_TWEAKS_PG
+scom 0x800E7820(xbus_base_addr) { 
+	bits, scom_data, expr;
+     rx_dll1_vreg_drvcon,  0b001   , def_IS_HW;
+     rx_dll1_vreg_drvcon,  0b000  , def_IS_VBU;
+     rx_dll2_vreg_drvcon,  0b001   , def_IS_HW;
+     rx_dll2_vreg_drvcon,  0b000  , def_IS_VBU;
+     rx_dll_vreg_compcon,  0b101   , def_IS_HW;
+     rx_dll_vreg_compcon,  0b000  , def_IS_VBU;
+}
+
 #RX01_GEN.RX01.RX1.RXCTL.RX_CTL_REGS.RX_DYN_RPR_ERR_TALLYING1_PG
 scom 0x8009D820(xbus_base_addr) { 
 	bits, scom_data, expr;
@@ -405,80 +458,80 @@ scom 0x800AE020(xbus_base_addr) {
 #RX01_GEN.RX01.RX1.RXCTL.RX_CTL_REGS.RX_EI4_CAL_CNTL_PP
 scom 0x800B1820(xbus_base_addr) { 
 	bits, scom_data, expr;
-     rx_ddc_use_cyc_block_lock,  0b0   , HW_EXPRESS;
-     rx_ddc_use_cyc_block_lock,  0b1  , VBU_EXPRESS;
+     rx_ddc_use_cyc_block_lock,  0b0   , def_IS_HW;
+     rx_ddc_use_cyc_block_lock,  0b1  , def_IS_VBU;
 }
 
 #RX01_GEN.RX01.RX1.RXCTL.RX_CTL_REGS.RX_EI4_CAL_DEC_A_D_PP
 scom 0x800B3020(xbus_base_addr) { 
 	bits, scom_data, expr;
-     rx_cal_dec_val_a,  0b1111   , HW_EXPRESS;
-     rx_cal_dec_val_a,  0b1000  , VBU_EXPRESS;
-     rx_cal_dec_val_b,  0b0001   , HW_EXPRESS;
-     rx_cal_dec_val_b,  0b0000  , VBU_EXPRESS;
-     rx_cal_dec_val_c,  0b1111   , HW_EXPRESS;
-     rx_cal_dec_val_c,  0b0000  , VBU_EXPRESS;
-     rx_cal_dec_val_d,  0b1111   , HW_EXPRESS;
-     rx_cal_dec_val_d,  0b1110  , VBU_EXPRESS;
+     rx_cal_dec_val_a,  0b0111   , def_IS_HW;
+     rx_cal_dec_val_a,  0b1000  , def_IS_VBU;
+     rx_cal_dec_val_b,  0b0001   , def_IS_HW;
+     rx_cal_dec_val_b,  0b0000  , def_IS_VBU;
+     rx_cal_dec_val_c,  0b0111   , def_IS_HW;
+     rx_cal_dec_val_c,  0b0000  , def_IS_VBU;
+     rx_cal_dec_val_d,  0b0111   , def_IS_HW;
+     rx_cal_dec_val_d,  0b0110  , def_IS_VBU;
 }
 
 #RX01_GEN.RX01.RX1.RXCTL.RX_CTL_REGS.RX_EI4_CAL_DEC_E_H_PP
 scom 0x800B3820(xbus_base_addr) { 
 	bits, scom_data, expr;
-     rx_cal_dec_val_e,  0b1111   , HW_EXPRESS;
-     rx_cal_dec_val_e,  0b1110  , VBU_EXPRESS;
-     rx_cal_dec_val_f,  0b1111   , HW_EXPRESS;
-     rx_cal_dec_val_f,  0b0000  , VBU_EXPRESS;
-     rx_cal_dec_val_g,  0b1111   , HW_EXPRESS;
-     rx_cal_dec_val_g,  0b0000  , VBU_EXPRESS;
-     rx_cal_dec_val_h,  0b1111   , HW_EXPRESS;
-     rx_cal_dec_val_h,  0b0000  , VBU_EXPRESS;
+     rx_cal_dec_val_e,  0b0111   , def_IS_HW;
+     rx_cal_dec_val_e,  0b0110  , def_IS_VBU;
+     rx_cal_dec_val_f,  0b0111   , def_IS_HW;
+     rx_cal_dec_val_f,  0b0000  , def_IS_VBU;
+     rx_cal_dec_val_g,  0b0111   , def_IS_HW;
+     rx_cal_dec_val_g,  0b0000  , def_IS_VBU;
+     rx_cal_dec_val_h,  0b0111   , def_IS_HW;
+     rx_cal_dec_val_h,  0b0000  , def_IS_VBU;
 }
 
 #RX01_GEN.RX01.RX1.RXCTL.RX_CTL_REGS.RX_EI4_CAL_INC_A_D_PP
 scom 0x800B2020(xbus_base_addr) { 
 	bits, scom_data, expr;
-     rx_cal_inc_val_a,  0b1111   , HW_EXPRESS;
-     rx_cal_inc_val_a,  0b1000  , VBU_EXPRESS;
-     rx_cal_inc_val_b,  0b0001   , HW_EXPRESS;
-     rx_cal_inc_val_b,  0b0000  , VBU_EXPRESS;
-     rx_cal_inc_val_c,  0b1111   , HW_EXPRESS;
-     rx_cal_inc_val_c,  0b0000  , VBU_EXPRESS;
-     rx_cal_inc_val_d,  0b1111   , HW_EXPRESS;
-     rx_cal_inc_val_d,  0b1110  , VBU_EXPRESS;
+     rx_cal_inc_val_a,  0b0111   , def_IS_HW;
+     rx_cal_inc_val_a,  0b1000  , def_IS_VBU;
+     rx_cal_inc_val_b,  0b0001   , def_IS_HW;
+     rx_cal_inc_val_b,  0b0000  , def_IS_VBU;
+     rx_cal_inc_val_c,  0b0111   , def_IS_HW;
+     rx_cal_inc_val_c,  0b0000  , def_IS_VBU;
+     rx_cal_inc_val_d,  0b0111   , def_IS_HW;
+     rx_cal_inc_val_d,  0b0110  , def_IS_VBU;
 }
 
 #RX01_GEN.RX01.RX1.RXCTL.RX_CTL_REGS.RX_EI4_CAL_INC_E_H_PP
 scom 0x800B2820(xbus_base_addr) { 
 	bits, scom_data, expr;
-     rx_cal_inc_val_e,  0b1111   , HW_EXPRESS;
-     rx_cal_inc_val_e,  0b1110  , VBU_EXPRESS;
-     rx_cal_inc_val_f,  0b1111   , HW_EXPRESS;
-     rx_cal_inc_val_f,  0b0000  , VBU_EXPRESS;
-     rx_cal_inc_val_g,  0b1111   , HW_EXPRESS;
-     rx_cal_inc_val_g,  0b0000  , VBU_EXPRESS;
-     rx_cal_inc_val_h,  0b1111   , HW_EXPRESS;
-     rx_cal_inc_val_h,  0b0000  , VBU_EXPRESS;
+     rx_cal_inc_val_e,  0b0111   , def_IS_HW;
+     rx_cal_inc_val_e,  0b0110  , def_IS_VBU;
+     rx_cal_inc_val_f,  0b0111   , def_IS_HW;
+     rx_cal_inc_val_f,  0b0000  , def_IS_VBU;
+     rx_cal_inc_val_g,  0b0111   , def_IS_HW;
+     rx_cal_inc_val_g,  0b0000  , def_IS_VBU;
+     rx_cal_inc_val_h,  0b0111   , def_IS_HW;
+     rx_cal_inc_val_h,  0b0000  , def_IS_VBU;
 }
 
 #RX01_GEN.RX01.RX1.RXCTL.RX_CTL_REGS.RX_EO_STEP_CNTL_PG
 scom 0x800A3820(xbus_base_addr) { 
 	bits, scom_data, expr;
-     rx_eo_enable_ber_test,  0b1   , HW_EXPRESS;
-     rx_eo_enable_ber_test,  0b0  , VBU_EXPRESS;
-     rx_eo_enable_ctle_cal,  0b1   , HW_EXPRESS;
-     rx_eo_enable_ctle_cal,  0b0  , VBU_EXPRESS;
-     rx_eo_enable_dcd_cal,  0b1   , HW_EXPRESS;
-     rx_eo_enable_dcd_cal,  0b0  , VBU_EXPRESS;
+     rx_eo_enable_ber_test,  0b1   , def_IS_HW;
+     rx_eo_enable_ber_test,  0b0  , def_IS_VBU;
+     rx_eo_enable_ctle_cal,  0b1   , def_IS_HW;
+     rx_eo_enable_ctle_cal,  0b0  , def_IS_VBU;
+     rx_eo_enable_dcd_cal,  0b1   , def_IS_HW;
+     rx_eo_enable_dcd_cal,  0b0  , def_IS_VBU;
 	rx_eo_enable_final_l2u_adj, 0b1, any;
-     rx_eo_enable_latch_offset_cal,  0b1   , HW_EXPRESS;
-     rx_eo_enable_latch_offset_cal,  0b0  , VBU_EXPRESS;
-     rx_eo_enable_measure_eye_width,  0b1   , HW_EXPRESS;
-     rx_eo_enable_measure_eye_width,  0b0  , VBU_EXPRESS;
-     rx_eo_enable_result_check,  0b1   , HW_EXPRESS;
-     rx_eo_enable_result_check,  0b0  , VBU_EXPRESS;
-     rx_eo_enable_vref_cal,  0b1   , HW_EXPRESS;
-     rx_eo_enable_vref_cal,  0b0  , VBU_EXPRESS;
+     rx_eo_enable_latch_offset_cal,  0b1   , def_IS_HW;
+     rx_eo_enable_latch_offset_cal,  0b0  , def_IS_VBU;
+     rx_eo_enable_measure_eye_width,  0b1   , def_IS_HW;
+     rx_eo_enable_measure_eye_width,  0b0  , def_IS_VBU;
+     rx_eo_enable_result_check,  0b1   , def_IS_HW;
+     rx_eo_enable_result_check,  0b0  , def_IS_VBU;
+     rx_eo_enable_vref_cal,  0b1   , def_IS_HW;
+     rx_eo_enable_vref_cal,  0b0  , def_IS_VBU;
 }
 
 #RX01_GEN.RX01.RX1.RXCTL.RX_CTL_REGS.RX_FENCE_PG
@@ -519,6 +572,13 @@ scom 0x80093020(xbus_base_addr) {
 	rx_lane_disabled_vec_16_31, 0b0000111111111111, any;
 }
 
+#RX01_GEN.RX01.RX1.RXCTL.RX_CTL_REGS.RX_MODE1_PP
+scom 0x800B0820(xbus_base_addr) { 
+	bits, scom_data, expr;
+     rx_bit_lock_timeout_sel,  0b110   , def_IS_HW;
+     rx_bit_lock_timeout_sel,  0b101  , def_IS_VBU;
+}
+
 #RX01_GEN.RX01.RX1.RXCTL.RX_CTL_REGS.RX_MODE_PG
 scom 0x80081820(xbus_base_addr) { 
 	bits, scom_data, expr;
@@ -528,34 +588,36 @@ scom 0x80081820(xbus_base_addr) {
 #RX01_GEN.RX01.RX1.RXCTL.RX_CTL_REGS.RX_RC_STEP_CNTL_PG
 scom 0x800AB820(xbus_base_addr) { 
 	bits, scom_data, expr;
-     rx_rc_enable_dll_update,  0b1   , HW_EXPRESS;
-     rx_rc_enable_dll_update,  0b0  , VBU_EXPRESS;
-     rx_rc_enable_edge_track,  0b1   , HW_EXPRESS;
-     rx_rc_enable_edge_track,  0b0  , VBU_EXPRESS;
-     rx_rc_enable_measure_eye_width,  0b1   , HW_EXPRESS;
-     rx_rc_enable_measure_eye_width,  0b0  , VBU_EXPRESS;
-     rx_rc_enable_result_check,  0b1   , HW_EXPRESS;
-     rx_rc_enable_result_check,  0b0  , VBU_EXPRESS;
+     rx_rc_enable_dll_update,  0b1   , def_IS_HW;
+     rx_rc_enable_dll_update,  0b0  , def_IS_VBU;
+     rx_rc_enable_edge_track,  0b1   , def_IS_HW;
+     rx_rc_enable_edge_track,  0b0  , def_IS_VBU;
+     rx_rc_enable_measure_eye_width,  0b1   , def_IS_HW;
+     rx_rc_enable_measure_eye_width,  0b0  , def_IS_VBU;
+     rx_rc_enable_result_check,  0b1   , def_IS_HW;
+     rx_rc_enable_result_check,  0b0  , def_IS_VBU;
 }
 
 #RX01_GEN.RX01.RX1.RXCTL.RX_CTL_REGS.RX_SERVO_TO1_PP
 scom 0x800B6020(xbus_base_addr) { 
 	bits, scom_data, expr;
-     rx_servo_timeout_sel_a,  0b0101   , HW_EXPRESS;
-     rx_servo_timeout_sel_a,  0b1000  , VBU_EXPRESS;
-     rx_servo_timeout_sel_b,  0b1010   , HW_EXPRESS;
-     rx_servo_timeout_sel_b,  0b1000  , VBU_EXPRESS;
-     rx_servo_timeout_sel_c,  0b0101   , HW_EXPRESS;
-     rx_servo_timeout_sel_c,  0b1000  , VBU_EXPRESS;
+     rx_servo_timeout_sel_a,  0b0101   , def_IS_HW;
+     rx_servo_timeout_sel_a,  0b1000  , def_IS_VBU;
+     rx_servo_timeout_sel_b,  0b1010   , def_IS_HW;
+     rx_servo_timeout_sel_b,  0b1000  , def_IS_VBU;
+     rx_servo_timeout_sel_c,  0b0101   , def_IS_HW;
+     rx_servo_timeout_sel_c,  0b1000  , def_IS_VBU;
+     rx_servo_timeout_sel_d,  0b1001   , def_IS_HW;
+     rx_servo_timeout_sel_d,  0b0101  , def_IS_VBU;
 }
 
 #RX01_GEN.RX01.RX1.RXCTL.RX_CTL_REGS.RX_SERVO_TO2_PP
 scom 0x800B6820(xbus_base_addr) { 
 	bits, scom_data, expr;
-     rx_servo_timeout_sel_f,  0b1000   , HW_EXPRESS;
-     rx_servo_timeout_sel_f,  0b0110  , VBU_EXPRESS;
-     rx_servo_timeout_sel_h,  0b0110   , HW_EXPRESS;
-     rx_servo_timeout_sel_h,  0b1000  , VBU_EXPRESS;
+     rx_servo_timeout_sel_f,  0b1000   , def_IS_HW;
+     rx_servo_timeout_sel_f,  0b0110  , def_IS_VBU;
+     rx_servo_timeout_sel_h,  0b1110   , def_IS_HW;
+     rx_servo_timeout_sel_h,  0b1000  , def_IS_VBU;
 }
 
 #RX01_GEN.RX01.RX1.RXCTL.RX_CTL_REGS.RX_SPARE_MODE_PG
@@ -564,10 +626,27 @@ scom 0x80080820(xbus_base_addr) {
 	rx_sls_extend_sel, 0b101, def_is_slave;
 }
 
+#RX01_GEN.RX01.RX1.RXCTL.RX_CTL_REGS.RX_TIMEOUT_SEL1_PG
+scom 0x80091020(xbus_base_addr) { 
+	bits, scom_data, expr;
+     rx_eo_ctle_timeout_sel,  0b111   , def_IS_HW;
+     rx_eo_ctle_timeout_sel,  0b110  , def_IS_VBU;
+     rx_eo_offset_timeout_sel,  0b111   , def_IS_HW;
+     rx_eo_offset_timeout_sel,  0b110  , def_IS_VBU;
+     rx_eo_vref_timeout_sel,  0b111   , def_IS_HW;
+     rx_eo_vref_timeout_sel,  0b110  , def_IS_VBU;
+}
+
 #RX01_GEN.RX01.RX1.RXCTL.RX_CTL_REGS.RX_TIMEOUT_SEL_PG
 scom 0x80089820(xbus_base_addr) { 
 	bits, scom_data, expr;
+     rx_ds_bl_timeout_sel,  0b101   , def_IS_HW;
+     rx_ds_bl_timeout_sel,  0b001  , def_IS_VBU;
+     rx_ds_timeout_sel,  0b110   , def_IS_HW;
+     rx_ds_timeout_sel,  0b010  , def_IS_VBU;
 	rx_sls_timeout_sel, 0b001, any;
+     rx_wt_timeout_sel,  0b111   , def_IS_HW;
+     rx_wt_timeout_sel,  0b011  , def_IS_VBU;
 }
 
 #RX01_GEN.RX01.RX1.RXCTL.RX_CTL_REGS.RX_TX_BUS_INFO_PG
@@ -703,6 +782,17 @@ scom 0x8000B033(xbus_base_addr) {
 	rx_prbs_tap_id, 0b000, any;
 }
 
+#RX23_GEN.RX23.RX0.RXCTL.RX_CTL_REGS.RX_DLL_ANALOG_TWEAKS_PG
+scom 0x800E7840(xbus_base_addr) { 
+	bits, scom_data, expr;
+     rx_dll1_vreg_drvcon,  0b001   , def_IS_HW;
+     rx_dll1_vreg_drvcon,  0b000  , def_IS_VBU;
+     rx_dll2_vreg_drvcon,  0b001   , def_IS_HW;
+     rx_dll2_vreg_drvcon,  0b000  , def_IS_VBU;
+     rx_dll_vreg_compcon,  0b101   , def_IS_HW;
+     rx_dll_vreg_compcon,  0b000  , def_IS_VBU;
+}
+
 #RX23_GEN.RX23.RX0.RXCTL.RX_CTL_REGS.RX_DYN_RPR_ERR_TALLYING1_PG
 scom 0x8009D840(xbus_base_addr) { 
 	bits, scom_data, expr;
@@ -721,80 +811,80 @@ scom 0x800AE040(xbus_base_addr) {
 #RX23_GEN.RX23.RX0.RXCTL.RX_CTL_REGS.RX_EI4_CAL_CNTL_PP
 scom 0x800B1840(xbus_base_addr) { 
 	bits, scom_data, expr;
-     rx_ddc_use_cyc_block_lock,  0b0   , HW_EXPRESS;
-     rx_ddc_use_cyc_block_lock,  0b1  , VBU_EXPRESS;
+     rx_ddc_use_cyc_block_lock,  0b0   , def_IS_HW;
+     rx_ddc_use_cyc_block_lock,  0b1  , def_IS_VBU;
 }
 
 #RX23_GEN.RX23.RX0.RXCTL.RX_CTL_REGS.RX_EI4_CAL_DEC_A_D_PP
 scom 0x800B3040(xbus_base_addr) { 
 	bits, scom_data, expr;
-     rx_cal_dec_val_a,  0b1111   , HW_EXPRESS;
-     rx_cal_dec_val_a,  0b1000  , VBU_EXPRESS;
-     rx_cal_dec_val_b,  0b0001   , HW_EXPRESS;
-     rx_cal_dec_val_b,  0b0000  , VBU_EXPRESS;
-     rx_cal_dec_val_c,  0b1111   , HW_EXPRESS;
-     rx_cal_dec_val_c,  0b0000  , VBU_EXPRESS;
-     rx_cal_dec_val_d,  0b1111   , HW_EXPRESS;
-     rx_cal_dec_val_d,  0b1110  , VBU_EXPRESS;
+     rx_cal_dec_val_a,  0b0111   , def_IS_HW;
+     rx_cal_dec_val_a,  0b1000  , def_IS_VBU;
+     rx_cal_dec_val_b,  0b0001   , def_IS_HW;
+     rx_cal_dec_val_b,  0b0000  , def_IS_VBU;
+     rx_cal_dec_val_c,  0b0111   , def_IS_HW;
+     rx_cal_dec_val_c,  0b0000  , def_IS_VBU;
+     rx_cal_dec_val_d,  0b0111   , def_IS_HW;
+     rx_cal_dec_val_d,  0b0110  , def_IS_VBU;
 }
 
 #RX23_GEN.RX23.RX0.RXCTL.RX_CTL_REGS.RX_EI4_CAL_DEC_E_H_PP
 scom 0x800B3840(xbus_base_addr) { 
 	bits, scom_data, expr;
-     rx_cal_dec_val_e,  0b1111   , HW_EXPRESS;
-     rx_cal_dec_val_e,  0b1110  , VBU_EXPRESS;
-     rx_cal_dec_val_f,  0b1111   , HW_EXPRESS;
-     rx_cal_dec_val_f,  0b0000  , VBU_EXPRESS;
-     rx_cal_dec_val_g,  0b1111   , HW_EXPRESS;
-     rx_cal_dec_val_g,  0b0000  , VBU_EXPRESS;
-     rx_cal_dec_val_h,  0b1111   , HW_EXPRESS;
-     rx_cal_dec_val_h,  0b0000  , VBU_EXPRESS;
+     rx_cal_dec_val_e,  0b0111   , def_IS_HW;
+     rx_cal_dec_val_e,  0b0110  , def_IS_VBU;
+     rx_cal_dec_val_f,  0b0111   , def_IS_HW;
+     rx_cal_dec_val_f,  0b0000  , def_IS_VBU;
+     rx_cal_dec_val_g,  0b0111   , def_IS_HW;
+     rx_cal_dec_val_g,  0b0000  , def_IS_VBU;
+     rx_cal_dec_val_h,  0b0111   , def_IS_HW;
+     rx_cal_dec_val_h,  0b0000  , def_IS_VBU;
 }
 
 #RX23_GEN.RX23.RX0.RXCTL.RX_CTL_REGS.RX_EI4_CAL_INC_A_D_PP
 scom 0x800B2040(xbus_base_addr) { 
 	bits, scom_data, expr;
-     rx_cal_inc_val_a,  0b1111   , HW_EXPRESS;
-     rx_cal_inc_val_a,  0b1000  , VBU_EXPRESS;
-     rx_cal_inc_val_b,  0b0001   , HW_EXPRESS;
-     rx_cal_inc_val_b,  0b0000  , VBU_EXPRESS;
-     rx_cal_inc_val_c,  0b1111   , HW_EXPRESS;
-     rx_cal_inc_val_c,  0b0000  , VBU_EXPRESS;
-     rx_cal_inc_val_d,  0b1111   , HW_EXPRESS;
-     rx_cal_inc_val_d,  0b1110  , VBU_EXPRESS;
+     rx_cal_inc_val_a,  0b0111   , def_IS_HW;
+     rx_cal_inc_val_a,  0b1000  , def_IS_VBU;
+     rx_cal_inc_val_b,  0b0001   , def_IS_HW;
+     rx_cal_inc_val_b,  0b0000  , def_IS_VBU;
+     rx_cal_inc_val_c,  0b0111   , def_IS_HW;
+     rx_cal_inc_val_c,  0b0000  , def_IS_VBU;
+     rx_cal_inc_val_d,  0b0111   , def_IS_HW;
+     rx_cal_inc_val_d,  0b0110  , def_IS_VBU;
 }
 
 #RX23_GEN.RX23.RX0.RXCTL.RX_CTL_REGS.RX_EI4_CAL_INC_E_H_PP
 scom 0x800B2840(xbus_base_addr) { 
 	bits, scom_data, expr;
-     rx_cal_inc_val_e,  0b1111   , HW_EXPRESS;
-     rx_cal_inc_val_e,  0b1110  , VBU_EXPRESS;
-     rx_cal_inc_val_f,  0b1111   , HW_EXPRESS;
-     rx_cal_inc_val_f,  0b0000  , VBU_EXPRESS;
-     rx_cal_inc_val_g,  0b1111   , HW_EXPRESS;
-     rx_cal_inc_val_g,  0b0000  , VBU_EXPRESS;
-     rx_cal_inc_val_h,  0b1111   , HW_EXPRESS;
-     rx_cal_inc_val_h,  0b0000  , VBU_EXPRESS;
+     rx_cal_inc_val_e,  0b0111   , def_IS_HW;
+     rx_cal_inc_val_e,  0b0110  , def_IS_VBU;
+     rx_cal_inc_val_f,  0b0111   , def_IS_HW;
+     rx_cal_inc_val_f,  0b0000  , def_IS_VBU;
+     rx_cal_inc_val_g,  0b0111   , def_IS_HW;
+     rx_cal_inc_val_g,  0b0000  , def_IS_VBU;
+     rx_cal_inc_val_h,  0b0111   , def_IS_HW;
+     rx_cal_inc_val_h,  0b0000  , def_IS_VBU;
 }
 
 #RX23_GEN.RX23.RX0.RXCTL.RX_CTL_REGS.RX_EO_STEP_CNTL_PG
 scom 0x800A3840(xbus_base_addr) { 
 	bits, scom_data, expr;
-     rx_eo_enable_ber_test,  0b1   , HW_EXPRESS;
-     rx_eo_enable_ber_test,  0b0  , VBU_EXPRESS;
-     rx_eo_enable_ctle_cal,  0b1   , HW_EXPRESS;
-     rx_eo_enable_ctle_cal,  0b0  , VBU_EXPRESS;
-     rx_eo_enable_dcd_cal,  0b1   , HW_EXPRESS;
-     rx_eo_enable_dcd_cal,  0b0  , VBU_EXPRESS;
+     rx_eo_enable_ber_test,  0b1   , def_IS_HW;
+     rx_eo_enable_ber_test,  0b0  , def_IS_VBU;
+     rx_eo_enable_ctle_cal,  0b1   , def_IS_HW;
+     rx_eo_enable_ctle_cal,  0b0  , def_IS_VBU;
+     rx_eo_enable_dcd_cal,  0b1   , def_IS_HW;
+     rx_eo_enable_dcd_cal,  0b0  , def_IS_VBU;
 	rx_eo_enable_final_l2u_adj, 0b1, any;
-     rx_eo_enable_latch_offset_cal,  0b1   , HW_EXPRESS;
-     rx_eo_enable_latch_offset_cal,  0b0  , VBU_EXPRESS;
-     rx_eo_enable_measure_eye_width,  0b1   , HW_EXPRESS;
-     rx_eo_enable_measure_eye_width,  0b0  , VBU_EXPRESS;
-     rx_eo_enable_result_check,  0b1   , HW_EXPRESS;
-     rx_eo_enable_result_check,  0b0  , VBU_EXPRESS;
-     rx_eo_enable_vref_cal,  0b1   , HW_EXPRESS;
-     rx_eo_enable_vref_cal,  0b0  , VBU_EXPRESS;
+     rx_eo_enable_latch_offset_cal,  0b1   , def_IS_HW;
+     rx_eo_enable_latch_offset_cal,  0b0  , def_IS_VBU;
+     rx_eo_enable_measure_eye_width,  0b1   , def_IS_HW;
+     rx_eo_enable_measure_eye_width,  0b0  , def_IS_VBU;
+     rx_eo_enable_result_check,  0b1   , def_IS_HW;
+     rx_eo_enable_result_check,  0b0  , def_IS_VBU;
+     rx_eo_enable_vref_cal,  0b1   , def_IS_HW;
+     rx_eo_enable_vref_cal,  0b0  , def_IS_VBU;
 }
 
 #RX23_GEN.RX23.RX0.RXCTL.RX_CTL_REGS.RX_FENCE_PG
@@ -835,6 +925,13 @@ scom 0x80093040(xbus_base_addr) {
 	rx_lane_disabled_vec_16_31, 0b0000111111111111, any;
 }
 
+#RX23_GEN.RX23.RX0.RXCTL.RX_CTL_REGS.RX_MODE1_PP
+scom 0x800B0840(xbus_base_addr) { 
+	bits, scom_data, expr;
+     rx_bit_lock_timeout_sel,  0b110   , def_IS_HW;
+     rx_bit_lock_timeout_sel,  0b101  , def_IS_VBU;
+}
+
 #RX23_GEN.RX23.RX0.RXCTL.RX_CTL_REGS.RX_MODE_PG
 scom 0x80081840(xbus_base_addr) { 
 	bits, scom_data, expr;
@@ -844,34 +941,36 @@ scom 0x80081840(xbus_base_addr) {
 #RX23_GEN.RX23.RX0.RXCTL.RX_CTL_REGS.RX_RC_STEP_CNTL_PG
 scom 0x800AB840(xbus_base_addr) { 
 	bits, scom_data, expr;
-     rx_rc_enable_dll_update,  0b1   , HW_EXPRESS;
-     rx_rc_enable_dll_update,  0b0  , VBU_EXPRESS;
-     rx_rc_enable_edge_track,  0b1   , HW_EXPRESS;
-     rx_rc_enable_edge_track,  0b0  , VBU_EXPRESS;
-     rx_rc_enable_measure_eye_width,  0b1   , HW_EXPRESS;
-     rx_rc_enable_measure_eye_width,  0b0  , VBU_EXPRESS;
-     rx_rc_enable_result_check,  0b1   , HW_EXPRESS;
-     rx_rc_enable_result_check,  0b0  , VBU_EXPRESS;
+     rx_rc_enable_dll_update,  0b1   , def_IS_HW;
+     rx_rc_enable_dll_update,  0b0  , def_IS_VBU;
+     rx_rc_enable_edge_track,  0b1   , def_IS_HW;
+     rx_rc_enable_edge_track,  0b0  , def_IS_VBU;
+     rx_rc_enable_measure_eye_width,  0b1   , def_IS_HW;
+     rx_rc_enable_measure_eye_width,  0b0  , def_IS_VBU;
+     rx_rc_enable_result_check,  0b1   , def_IS_HW;
+     rx_rc_enable_result_check,  0b0  , def_IS_VBU;
 }
 
 #RX23_GEN.RX23.RX0.RXCTL.RX_CTL_REGS.RX_SERVO_TO1_PP
 scom 0x800B6040(xbus_base_addr) { 
 	bits, scom_data, expr;
-     rx_servo_timeout_sel_a,  0b0101   , HW_EXPRESS;
-     rx_servo_timeout_sel_a,  0b1000  , VBU_EXPRESS;
-     rx_servo_timeout_sel_b,  0b1010   , HW_EXPRESS;
-     rx_servo_timeout_sel_b,  0b1000  , VBU_EXPRESS;
-     rx_servo_timeout_sel_c,  0b0101   , HW_EXPRESS;
-     rx_servo_timeout_sel_c,  0b1000  , VBU_EXPRESS;
+     rx_servo_timeout_sel_a,  0b0101   , def_IS_HW;
+     rx_servo_timeout_sel_a,  0b1000  , def_IS_VBU;
+     rx_servo_timeout_sel_b,  0b1010   , def_IS_HW;
+     rx_servo_timeout_sel_b,  0b1000  , def_IS_VBU;
+     rx_servo_timeout_sel_c,  0b0101   , def_IS_HW;
+     rx_servo_timeout_sel_c,  0b1000  , def_IS_VBU;
+     rx_servo_timeout_sel_d,  0b1001   , def_IS_HW;
+     rx_servo_timeout_sel_d,  0b0101  , def_IS_VBU;
 }
 
 #RX23_GEN.RX23.RX0.RXCTL.RX_CTL_REGS.RX_SERVO_TO2_PP
 scom 0x800B6840(xbus_base_addr) { 
 	bits, scom_data, expr;
-     rx_servo_timeout_sel_f,  0b1000   , HW_EXPRESS;
-     rx_servo_timeout_sel_f,  0b0110  , VBU_EXPRESS;
-     rx_servo_timeout_sel_h,  0b0110   , HW_EXPRESS;
-     rx_servo_timeout_sel_h,  0b1000  , VBU_EXPRESS;
+     rx_servo_timeout_sel_f,  0b1000   , def_IS_HW;
+     rx_servo_timeout_sel_f,  0b0110  , def_IS_VBU;
+     rx_servo_timeout_sel_h,  0b1110   , def_IS_HW;
+     rx_servo_timeout_sel_h,  0b1000  , def_IS_VBU;
 }
 
 #RX23_GEN.RX23.RX0.RXCTL.RX_CTL_REGS.RX_SPARE_MODE_PG
@@ -880,10 +979,27 @@ scom 0x80080840(xbus_base_addr) {
 	rx_sls_extend_sel, 0b101, def_is_slave;
 }
 
+#RX23_GEN.RX23.RX0.RXCTL.RX_CTL_REGS.RX_TIMEOUT_SEL1_PG
+scom 0x80091040(xbus_base_addr) { 
+	bits, scom_data, expr;
+     rx_eo_ctle_timeout_sel,  0b111   , def_IS_HW;
+     rx_eo_ctle_timeout_sel,  0b110  , def_IS_VBU;
+     rx_eo_offset_timeout_sel,  0b111   , def_IS_HW;
+     rx_eo_offset_timeout_sel,  0b110  , def_IS_VBU;
+     rx_eo_vref_timeout_sel,  0b111   , def_IS_HW;
+     rx_eo_vref_timeout_sel,  0b110  , def_IS_VBU;
+}
+
 #RX23_GEN.RX23.RX0.RXCTL.RX_CTL_REGS.RX_TIMEOUT_SEL_PG
 scom 0x80089840(xbus_base_addr) { 
 	bits, scom_data, expr;
+     rx_ds_bl_timeout_sel,  0b101   , def_IS_HW;
+     rx_ds_bl_timeout_sel,  0b001  , def_IS_VBU;
+     rx_ds_timeout_sel,  0b110   , def_IS_HW;
+     rx_ds_timeout_sel,  0b010  , def_IS_VBU;
 	rx_sls_timeout_sel, 0b001, any;
+     rx_wt_timeout_sel,  0b111   , def_IS_HW;
+     rx_wt_timeout_sel,  0b011  , def_IS_VBU;
 }
 
 #RX23_GEN.RX23.RX0.RXCTL.RX_CTL_REGS.RX_TX_BUS_INFO_PG
@@ -1019,6 +1135,17 @@ scom 0x8000B053(xbus_base_addr) {
 	rx_prbs_tap_id, 0b000, any;
 }
 
+#RX23_GEN.RX23.RX1.RXCTL.RX_CTL_REGS.RX_DLL_ANALOG_TWEAKS_PG
+scom 0x800E7860(xbus_base_addr) { 
+	bits, scom_data, expr;
+     rx_dll1_vreg_drvcon,  0b001   , def_IS_HW;
+     rx_dll1_vreg_drvcon,  0b000  , def_IS_VBU;
+     rx_dll2_vreg_drvcon,  0b001   , def_IS_HW;
+     rx_dll2_vreg_drvcon,  0b000  , def_IS_VBU;
+     rx_dll_vreg_compcon,  0b101   , def_IS_HW;
+     rx_dll_vreg_compcon,  0b000  , def_IS_VBU;
+}
+
 #RX23_GEN.RX23.RX1.RXCTL.RX_CTL_REGS.RX_DYN_RPR_ERR_TALLYING1_PG
 scom 0x8009D860(xbus_base_addr) { 
 	bits, scom_data, expr;
@@ -1037,80 +1164,80 @@ scom 0x800AE060(xbus_base_addr) {
 #RX23_GEN.RX23.RX1.RXCTL.RX_CTL_REGS.RX_EI4_CAL_CNTL_PP
 scom 0x800B1860(xbus_base_addr) { 
 	bits, scom_data, expr;
-     rx_ddc_use_cyc_block_lock,  0b0   , HW_EXPRESS;
-     rx_ddc_use_cyc_block_lock,  0b1  , VBU_EXPRESS;
+     rx_ddc_use_cyc_block_lock,  0b0   , def_IS_HW;
+     rx_ddc_use_cyc_block_lock,  0b1  , def_IS_VBU;
 }
 
 #RX23_GEN.RX23.RX1.RXCTL.RX_CTL_REGS.RX_EI4_CAL_DEC_A_D_PP
 scom 0x800B3060(xbus_base_addr) { 
 	bits, scom_data, expr;
-     rx_cal_dec_val_a,  0b1111   , HW_EXPRESS;
-     rx_cal_dec_val_a,  0b1000  , VBU_EXPRESS;
-     rx_cal_dec_val_b,  0b0001   , HW_EXPRESS;
-     rx_cal_dec_val_b,  0b0000  , VBU_EXPRESS;
-     rx_cal_dec_val_c,  0b1111   , HW_EXPRESS;
-     rx_cal_dec_val_c,  0b0000  , VBU_EXPRESS;
-     rx_cal_dec_val_d,  0b1111   , HW_EXPRESS;
-     rx_cal_dec_val_d,  0b1110  , VBU_EXPRESS;
+     rx_cal_dec_val_a,  0b0111   , def_IS_HW;
+     rx_cal_dec_val_a,  0b1000  , def_IS_VBU;
+     rx_cal_dec_val_b,  0b0001   , def_IS_HW;
+     rx_cal_dec_val_b,  0b0000  , def_IS_VBU;
+     rx_cal_dec_val_c,  0b0111   , def_IS_HW;
+     rx_cal_dec_val_c,  0b0000  , def_IS_VBU;
+     rx_cal_dec_val_d,  0b0111   , def_IS_HW;
+     rx_cal_dec_val_d,  0b0110  , def_IS_VBU;
 }
 
 #RX23_GEN.RX23.RX1.RXCTL.RX_CTL_REGS.RX_EI4_CAL_DEC_E_H_PP
 scom 0x800B3860(xbus_base_addr) { 
 	bits, scom_data, expr;
-     rx_cal_dec_val_e,  0b1111   , HW_EXPRESS;
-     rx_cal_dec_val_e,  0b1110  , VBU_EXPRESS;
-     rx_cal_dec_val_f,  0b1111   , HW_EXPRESS;
-     rx_cal_dec_val_f,  0b0000  , VBU_EXPRESS;
-     rx_cal_dec_val_g,  0b1111   , HW_EXPRESS;
-     rx_cal_dec_val_g,  0b0000  , VBU_EXPRESS;
-     rx_cal_dec_val_h,  0b1111   , HW_EXPRESS;
-     rx_cal_dec_val_h,  0b0000  , VBU_EXPRESS;
+     rx_cal_dec_val_e,  0b0111   , def_IS_HW;
+     rx_cal_dec_val_e,  0b0110  , def_IS_VBU;
+     rx_cal_dec_val_f,  0b0111   , def_IS_HW;
+     rx_cal_dec_val_f,  0b0000  , def_IS_VBU;
+     rx_cal_dec_val_g,  0b0111   , def_IS_HW;
+     rx_cal_dec_val_g,  0b0000  , def_IS_VBU;
+     rx_cal_dec_val_h,  0b0111   , def_IS_HW;
+     rx_cal_dec_val_h,  0b0000  , def_IS_VBU;
 }
 
 #RX23_GEN.RX23.RX1.RXCTL.RX_CTL_REGS.RX_EI4_CAL_INC_A_D_PP
 scom 0x800B2060(xbus_base_addr) { 
 	bits, scom_data, expr;
-     rx_cal_inc_val_a,  0b1111   , HW_EXPRESS;
-     rx_cal_inc_val_a,  0b1000  , VBU_EXPRESS;
-     rx_cal_inc_val_b,  0b0001   , HW_EXPRESS;
-     rx_cal_inc_val_b,  0b0000  , VBU_EXPRESS;
-     rx_cal_inc_val_c,  0b1111   , HW_EXPRESS;
-     rx_cal_inc_val_c,  0b0000  , VBU_EXPRESS;
-     rx_cal_inc_val_d,  0b1111   , HW_EXPRESS;
-     rx_cal_inc_val_d,  0b1110  , VBU_EXPRESS;
+     rx_cal_inc_val_a,  0b0111   , def_IS_HW;
+     rx_cal_inc_val_a,  0b1000  , def_IS_VBU;
+     rx_cal_inc_val_b,  0b0001   , def_IS_HW;
+     rx_cal_inc_val_b,  0b0000  , def_IS_VBU;
+     rx_cal_inc_val_c,  0b0111   , def_IS_HW;
+     rx_cal_inc_val_c,  0b0000  , def_IS_VBU;
+     rx_cal_inc_val_d,  0b0111   , def_IS_HW;
+     rx_cal_inc_val_d,  0b0110  , def_IS_VBU;
 }
 
 #RX23_GEN.RX23.RX1.RXCTL.RX_CTL_REGS.RX_EI4_CAL_INC_E_H_PP
 scom 0x800B2860(xbus_base_addr) { 
 	bits, scom_data, expr;
-     rx_cal_inc_val_e,  0b1111   , HW_EXPRESS;
-     rx_cal_inc_val_e,  0b1110  , VBU_EXPRESS;
-     rx_cal_inc_val_f,  0b1111   , HW_EXPRESS;
-     rx_cal_inc_val_f,  0b0000  , VBU_EXPRESS;
-     rx_cal_inc_val_g,  0b1111   , HW_EXPRESS;
-     rx_cal_inc_val_g,  0b0000  , VBU_EXPRESS;
-     rx_cal_inc_val_h,  0b1111   , HW_EXPRESS;
-     rx_cal_inc_val_h,  0b0000  , VBU_EXPRESS;
+     rx_cal_inc_val_e,  0b0111   , def_IS_HW;
+     rx_cal_inc_val_e,  0b0110  , def_IS_VBU;
+     rx_cal_inc_val_f,  0b0111   , def_IS_HW;
+     rx_cal_inc_val_f,  0b0000  , def_IS_VBU;
+     rx_cal_inc_val_g,  0b0111   , def_IS_HW;
+     rx_cal_inc_val_g,  0b0000  , def_IS_VBU;
+     rx_cal_inc_val_h,  0b0111   , def_IS_HW;
+     rx_cal_inc_val_h,  0b0000  , def_IS_VBU;
 }
 
 #RX23_GEN.RX23.RX1.RXCTL.RX_CTL_REGS.RX_EO_STEP_CNTL_PG
 scom 0x800A3860(xbus_base_addr) { 
 	bits, scom_data, expr;
-     rx_eo_enable_ber_test,  0b1   , HW_EXPRESS;
-     rx_eo_enable_ber_test,  0b0  , VBU_EXPRESS;
-     rx_eo_enable_ctle_cal,  0b1   , HW_EXPRESS;
-     rx_eo_enable_ctle_cal,  0b0  , VBU_EXPRESS;
-     rx_eo_enable_dcd_cal,  0b1   , HW_EXPRESS;
-     rx_eo_enable_dcd_cal,  0b0  , VBU_EXPRESS;
+     rx_eo_enable_ber_test,  0b1   , def_IS_HW;
+     rx_eo_enable_ber_test,  0b0  , def_IS_VBU;
+     rx_eo_enable_ctle_cal,  0b1   , def_IS_HW;
+     rx_eo_enable_ctle_cal,  0b0  , def_IS_VBU;
+     rx_eo_enable_dcd_cal,  0b1   , def_IS_HW;
+     rx_eo_enable_dcd_cal,  0b0  , def_IS_VBU;
 	rx_eo_enable_final_l2u_adj, 0b1, any;
-     rx_eo_enable_latch_offset_cal,  0b1   , HW_EXPRESS;
-     rx_eo_enable_latch_offset_cal,  0b0  , VBU_EXPRESS;
-     rx_eo_enable_measure_eye_width,  0b1   , HW_EXPRESS;
-     rx_eo_enable_measure_eye_width,  0b0  , VBU_EXPRESS;
-     rx_eo_enable_result_check,  0b1   , HW_EXPRESS;
-     rx_eo_enable_result_check,  0b0  , VBU_EXPRESS;
-     rx_eo_enable_vref_cal,  0b1   , HW_EXPRESS;
-     rx_eo_enable_vref_cal,  0b0  , VBU_EXPRESS;
+     rx_eo_enable_latch_offset_cal,  0b1   , def_IS_HW;
+     rx_eo_enable_latch_offset_cal,  0b0  , def_IS_VBU;
+     rx_eo_enable_measure_eye_width,  0b1   , def_IS_HW;
+     rx_eo_enable_measure_eye_width,  0b0  , def_IS_VBU;
+     rx_eo_enable_result_check,  0b1   , def_IS_HW;
+     rx_eo_enable_result_check,  0b0  , def_IS_VBU;
+     rx_eo_enable_vref_cal,  0b1   , def_IS_HW;
+     rx_eo_enable_vref_cal,  0b0  , def_IS_VBU;
 }
 
 #RX23_GEN.RX23.RX1.RXCTL.RX_CTL_REGS.RX_FENCE_PG
@@ -1151,6 +1278,13 @@ scom 0x80093060(xbus_base_addr) {
 	rx_lane_disabled_vec_16_31, 0b0000111111111111, any;
 }
 
+#RX23_GEN.RX23.RX1.RXCTL.RX_CTL_REGS.RX_MODE1_PP
+scom 0x800B0860(xbus_base_addr) { 
+	bits, scom_data, expr;
+     rx_bit_lock_timeout_sel,  0b110   , def_IS_HW;
+     rx_bit_lock_timeout_sel,  0b101  , def_IS_VBU;
+}
+
 #RX23_GEN.RX23.RX1.RXCTL.RX_CTL_REGS.RX_MODE_PG
 scom 0x80081860(xbus_base_addr) { 
 	bits, scom_data, expr;
@@ -1160,34 +1294,36 @@ scom 0x80081860(xbus_base_addr) {
 #RX23_GEN.RX23.RX1.RXCTL.RX_CTL_REGS.RX_RC_STEP_CNTL_PG
 scom 0x800AB860(xbus_base_addr) { 
 	bits, scom_data, expr;
-     rx_rc_enable_dll_update,  0b1   , HW_EXPRESS;
-     rx_rc_enable_dll_update,  0b0  , VBU_EXPRESS;
-     rx_rc_enable_edge_track,  0b1   , HW_EXPRESS;
-     rx_rc_enable_edge_track,  0b0  , VBU_EXPRESS;
-     rx_rc_enable_measure_eye_width,  0b1   , HW_EXPRESS;
-     rx_rc_enable_measure_eye_width,  0b0  , VBU_EXPRESS;
-     rx_rc_enable_result_check,  0b1   , HW_EXPRESS;
-     rx_rc_enable_result_check,  0b0  , VBU_EXPRESS;
+     rx_rc_enable_dll_update,  0b1   , def_IS_HW;
+     rx_rc_enable_dll_update,  0b0  , def_IS_VBU;
+     rx_rc_enable_edge_track,  0b1   , def_IS_HW;
+     rx_rc_enable_edge_track,  0b0  , def_IS_VBU;
+     rx_rc_enable_measure_eye_width,  0b1   , def_IS_HW;
+     rx_rc_enable_measure_eye_width,  0b0  , def_IS_VBU;
+     rx_rc_enable_result_check,  0b1   , def_IS_HW;
+     rx_rc_enable_result_check,  0b0  , def_IS_VBU;
 }
 
 #RX23_GEN.RX23.RX1.RXCTL.RX_CTL_REGS.RX_SERVO_TO1_PP
 scom 0x800B6060(xbus_base_addr) { 
 	bits, scom_data, expr;
-     rx_servo_timeout_sel_a,  0b0101   , HW_EXPRESS;
-     rx_servo_timeout_sel_a,  0b1000  , VBU_EXPRESS;
-     rx_servo_timeout_sel_b,  0b1010   , HW_EXPRESS;
-     rx_servo_timeout_sel_b,  0b1000  , VBU_EXPRESS;
-     rx_servo_timeout_sel_c,  0b0101   , HW_EXPRESS;
-     rx_servo_timeout_sel_c,  0b1000  , VBU_EXPRESS;
+     rx_servo_timeout_sel_a,  0b0101   , def_IS_HW;
+     rx_servo_timeout_sel_a,  0b1000  , def_IS_VBU;
+     rx_servo_timeout_sel_b,  0b1010   , def_IS_HW;
+     rx_servo_timeout_sel_b,  0b1000  , def_IS_VBU;
+     rx_servo_timeout_sel_c,  0b0101   , def_IS_HW;
+     rx_servo_timeout_sel_c,  0b1000  , def_IS_VBU;
+     rx_servo_timeout_sel_d,  0b1001   , def_IS_HW;
+     rx_servo_timeout_sel_d,  0b0101  , def_IS_VBU;
 }
 
 #RX23_GEN.RX23.RX1.RXCTL.RX_CTL_REGS.RX_SERVO_TO2_PP
 scom 0x800B6860(xbus_base_addr) { 
 	bits, scom_data, expr;
-     rx_servo_timeout_sel_f,  0b1000   , HW_EXPRESS;
-     rx_servo_timeout_sel_f,  0b0110  , VBU_EXPRESS;
-     rx_servo_timeout_sel_h,  0b0110   , HW_EXPRESS;
-     rx_servo_timeout_sel_h,  0b1000  , VBU_EXPRESS;
+     rx_servo_timeout_sel_f,  0b1000   , def_IS_HW;
+     rx_servo_timeout_sel_f,  0b0110  , def_IS_VBU;
+     rx_servo_timeout_sel_h,  0b1110   , def_IS_HW;
+     rx_servo_timeout_sel_h,  0b1000  , def_IS_VBU;
 }
 
 #RX23_GEN.RX23.RX1.RXCTL.RX_CTL_REGS.RX_SPARE_MODE_PG
@@ -1196,10 +1332,27 @@ scom 0x80080860(xbus_base_addr) {
 	rx_sls_extend_sel, 0b101, def_is_slave;
 }
 
+#RX23_GEN.RX23.RX1.RXCTL.RX_CTL_REGS.RX_TIMEOUT_SEL1_PG
+scom 0x80091060(xbus_base_addr) { 
+	bits, scom_data, expr;
+     rx_eo_ctle_timeout_sel,  0b111   , def_IS_HW;
+     rx_eo_ctle_timeout_sel,  0b110  , def_IS_VBU;
+     rx_eo_offset_timeout_sel,  0b111   , def_IS_HW;
+     rx_eo_offset_timeout_sel,  0b110  , def_IS_VBU;
+     rx_eo_vref_timeout_sel,  0b111   , def_IS_HW;
+     rx_eo_vref_timeout_sel,  0b110  , def_IS_VBU;
+}
+
 #RX23_GEN.RX23.RX1.RXCTL.RX_CTL_REGS.RX_TIMEOUT_SEL_PG
 scom 0x80089860(xbus_base_addr) { 
 	bits, scom_data, expr;
+     rx_ds_bl_timeout_sel,  0b101   , def_IS_HW;
+     rx_ds_bl_timeout_sel,  0b001  , def_IS_VBU;
+     rx_ds_timeout_sel,  0b110   , def_IS_HW;
+     rx_ds_timeout_sel,  0b010  , def_IS_VBU;
 	rx_sls_timeout_sel, 0b001, any;
+     rx_wt_timeout_sel,  0b111   , def_IS_HW;
+     rx_wt_timeout_sel,  0b011  , def_IS_VBU;
 }
 
 #RX23_GEN.RX23.RX1.RXCTL.RX_CTL_REGS.RX_TX_BUS_INFO_PG

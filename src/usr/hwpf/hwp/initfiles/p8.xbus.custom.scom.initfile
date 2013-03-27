@@ -1,13 +1,21 @@
-#-- $Id: p8.xbus.custom.scom.initfile,v 1.1 2013/02/04 19:52:00 thomsen Exp $
+#-- $Id: p8.xbus.custom.scom.initfile,v 1.3 2013/03/15 21:18:37 thomsen Exp $
 #-- CHANGE HISTORY:
 #--------------------------------------------------------------------------------
 #-- Version:|Author: | Date:  | Comment:
 #-- --------|--------|--------|--------------------------------------------------
+#--     1.3 |jgrell  |03/14/13|Added temporary masking of the GCR Buffer Parity Checkers in the GCR Master until the source of the error can be found. This ungates the lab.
+#--     1.2 |thomsen |02/13/13|Cleaned up and Added Commented-out Lane Power Ups
+#--         |        |        |Temporarily mask the GCR Buffer Parity Checker until the source of the error can be found. This ungates the lab.
 #--     1.1 |thomsen |01/29/13|Created initial version
 #-- --------|--------|--------|--------------------------------------------------
 #--------------------------------------------------------------------------------
 # End of revision history
 #--------------------------------------------------------------------------------
+#-- TARGETS:
+#-- SYS. Chiplet target
+#-- TGT1. Proc target
+#-- TGT2. Connected Chiplet target
+#-- TGT3. Connected Proc target
 
 #--Master list of variables that can be used in this file is at:
 #--<Attribute Definition Location>
@@ -34,109 +42,73 @@ include ei4.io.define
 #-- -----------------------------------------------------------------------------
 #--******************************************************************************
 #-- -----------------------------------------------------------------------------
+define def_IS_HW  = (SYS.ATTR_IS_SIMULATION == 0);
+define def_IS_VBU = (SYS.ATTR_IS_SIMULATION == 1);
 
-## ./iotk put rx_fence=1
-## 0x
-#scom 0x800.0b(rx_fence_pg)(rx_grp0,rx_grp1,rx_grp2,rx_grp3)(lane_na).0x(xbus0_gcr_addr,xbus1_gcr_addr,xbus2_gcr_addr,xbus3_gcr_addr) {
-#bits,                     scom_data;
-#rx_fence,                 0b1;
+define def_all_lanes=11111;
+
+#--***********************************************************************************
+#-------------------------------------------------------------------------------------
+#-- Overrides
+#-------------------------------------------------------------------------------------
+#--***********************************************************************************
+
+#--***********************************************************************************
+#-------------------------------------------------------------------------------------
+#     __                        ____                             __  __
+#    / /   ____ _____  ___     / __ \____ _      _____  _____   / / / /___
+#   / /   / __ `/ __ \/ _ \   / /_/ / __ \ | /| / / _ \/ ___/  / / / / __ \
+#  / /___/ /_/ / / / /  __/  / ____/ /_/ / |/ |/ /  __/ /     / /_/ / /_/ /
+# /_____/\__,_/_/ /_/\___/  /_/    \____/|__/|__/\___/_/      \____/ .___/
+#                                                                 /_/
+#-------------------------------------------------------------------------------------
+#--***********************************************************************************
+
+## rx_lane_pdwn
+#scom 0x800.0b(rx_mode_pl)(rx_grp0)(def_all_lanes).0x(xbus0_gcr_addr){
+#    bits,            scom_data;
+#    rx_lane_pdwn,    0b0;
 #}
 #
-## ./iotk put rx_c4_sel=00
-## ./iotk put rx_prot_speed_slct=1
-## 0x8009C00002011E3F 
-#scom 0x800.0b(rx_misc_analog_pg)(rx_grp0,rx_grp1,rx_grp2,rx_grp3)(lane_na).0x(xbus0_gcr_addr,xbus1_gcr_addr,xbus2_gcr_addr,xbus3_gcr_addr) {
-#bits,                     scom_data;
-#rx_c4_sel,                0b00;
-#rx_prot_speed_slct,       0b1;
+## tx_lane_pdwn
+#scom 0x800.0b(tx_mode_pl)(tx_grp0)(def_all_lanes).0x(xbus0_gcr_addr){
+#    bits,            scom_data;
+#    tx_lane_pdwn,    0b0;
 #}
-## ./iotk put rx_servo_timeout_sel_D=1001
-## 0x800B600002011E3F 
-#scom 0x800.0b(rx_servo_to1_pp)(rx_grp0,rx_grp1,rx_grp2,rx_grp3)(lane_na).0x(xbus0_gcr_addr,xbus1_gcr_addr,xbus2_gcr_addr,xbus3_gcr_addr) {
-#bits,                     scom_data;
-#rx_servo_timeout_sel_d,   0b1001;
-#}
-## ./iotk put rx_servo_timeout_sel_H=1110
-## 0x800B680002011E3F 
-#scom 0x800.0b(rx_servo_to2_pp)(rx_grp0,rx_grp1,rx_grp2,rx_grp3)(lane_na).0x(xbus0_gcr_addr,xbus1_gcr_addr,xbus2_gcr_addr,xbus3_gcr_addr) {
-#bits,                     scom_data;
-#rx_servo_timeout_sel_h,   0b1110;
-#}
-## ./iotk put rx_servo_timeout_sel_I=1011
-## ./iotk put rx_servo_timeout_sel_J=1100
-## 0x800B700002011E3F 
-#scom 0x800.0b(rx_servo_to3_pp)(rx_grp0,rx_grp1,rx_grp2,rx_grp3)(lane_na).0x(xbus0_gcr_addr,xbus1_gcr_addr,xbus2_gcr_addr,xbus3_gcr_addr) {
-#bits,                     scom_data;
-#rx_servo_timeout_sel_i,   0b1011;
-#rx_servo_timeout_sel_j,   0b1100;
-#rx_servo_timeout_sel_k,   0b1101;
-#}
-## ./iotk put rx_wt_timeout_sel=111
-## ./iotk put rx_ds_bl_timeout_sel=101
-## ./iotk put rx_ds_timeout_sel=110
-##./iotk put rx_sls_timeout_sel=111
-## 0x8008980002011E3F 
-#scom 0x800.0b(rx_timeout_sel_pg)(rx_grp0,rx_grp1,rx_grp2,rx_grp3)(lane_na).0x(xbus0_gcr_addr,xbus1_gcr_addr,xbus2_gcr_addr,xbus3_gcr_addr) {
-#bits,                     scom_data;
-#rx_wt_timeout_sel,        0b111;
-#rx_ds_bl_timeout_sel,     0b101;
-#rx_ds_timeout_sel,        0b110;
-#rx_sls_timeout_sel,       0b001;
-#}
-#
-## ./iotk put rx_bit_lock_timeout_sel=110
-## 0x800B080002011E3F 
-#scom 0x800.0b(rx_mode1_pp)(rx_grp0,rx_grp1,rx_grp2,rx_grp3)(lane_na).0x(xbus0_gcr_addr,xbus1_gcr_addr,xbus2_gcr_addr,xbus3_gcr_addr) {
-#bits,                     scom_data;
-#rx_bit_lock_timeout_sel,  0b110;
-#}
-## ./iotk put rx_eo_offset_timeout_sel=111
-## ./iotk put rx_eo_amp_timeout_sel=111
-## ./iotk put rx_eo_ctle_timeout_sel=111
-## ./iotk put rx_eo_h1ap_timeout_sel=111
-## ./iotk put rx_eo_ddc_timeout_sel=111
-## 0x8009100002011E3F 
-#scom 0x800.0b(rx_timeout_sel1_pg)(rx_grp0,rx_grp1,rx_grp2,rx_grp3)(lane_na).0x(xbus0_gcr_addr,xbus1_gcr_addr,xbus2_gcr_addr,xbus3_gcr_addr) {
-#bits,                     scom_data;
-#rx_eo_offset_timeout_sel, 0b111;
-#rx_eo_amp_timeout_sel,    0b111;
-#rx_eo_ctle_timeout_sel,   0b111;
-#rx_eo_h1ap_timeout_sel,   0b111;
-#rx_eo_ddc_timeout_sel,    0b111;
-#}
-#
-#
-## 800A380002011E3F
-#scom 0x800.0b(rx_eo_step_cntl_pg)(rx_grp0,rx_grp1,rx_grp2,rx_grp3)(lane_na).0x(xbus0_gcr_addr,xbus1_gcr_addr,xbus2_gcr_addr,xbus3_gcr_addr) {
-#bits,                               scom_data;
-#rx_eo_enable_latch_offset_cal,      0b1;
-#rx_eo_enable_ctle_cal,              0b1;
-#rx_eo_enable_vga_cal,               0b1;
-#rx_eo_enable_dfe_h1_cal,            0b1;
-#rx_eo_enable_h1ap_tweak,            0b1;
-#rx_eo_enable_ddc,                   0b1;
-#rx_eo_enable_final_l2u_adj,         0b1;
-#rx_eo_enable_ber_test,              0b1;
-#rx_eo_enable_result_check,          0b1;
-#}
-#
-#scom 0x800.0b(rx_eo_convergence_pg)(rx_grp0,rx_grp1,rx_grp2,rx_grp3)(lane_na).0x(xbus0_gcr_addr,xbus1_gcr_addr,xbus2_gcr_addr,xbus3_gcr_addr) {
-#bits,                               scom_data;
-#rx_eo_converged_end_count,          0b111;
-#}
-#
-## 0x800AB80002011E3F
-#scom 0x800.0b(rx_rc_step_cntl_pg)(rx_grp0,rx_grp1,rx_grp2,rx_grp3)(lane_na).0x(xbus0_gcr_addr,xbus1_gcr_addr,xbus2_gcr_addr,xbus3_gcr_addr) {
-#bits,                               scom_data;
-#rx_rc_enable_latch_offset_cal,      0b1;
-#rx_rc_enable_ctle_cal,              0b1;
-#rx_rc_enable_vga_cal,               0b1;
-#rx_rc_enable_h1ap_tweak,            0b1;
-#rx_rc_enable_ddc,                   0b1;
-#rx_rc_enable_ber_test,              0b1;
-#rx_rc_enable_result_check,          0b1;
-##rx_rc_enable_dfe_h1_cal,           0b0; # Leave DFE off during recal for now
-#}
+
+#--**************************************************************************************************************
+#----------------------------------------------------------------------------------------------------------------
+#    ________________     ____        ________             ____             _ __           __  ___           __  
+#   / ____/ ____/ __ \   / __ )__  __/ __/ __/__  _____   / __ \____ ______(_) /___  __   /  |/  /___ ______/ /__
+#  / / __/ /   / /_/ /  / __  / / / / /_/ /_/ _ \/ ___/  / /_/ / __ `/ ___/ / __/ / / /  / /|_/ / __ `/ ___/ //_/
+# / /_/ / /___/ _, _/  / /_/ / /_/ / __/ __/  __/ /     / ____/ /_/ / /  / / /_/ /_/ /  / /  / / /_/ (__  ) ,<   
+# \____/\____/_/ |_|  /_____/\__,_/_/ /_/  \___/_/     /_/    \__,_/_/  /_/\__/\__, /  /_/  /_/\__,_/____/_/|_|  
+#                                                                             /____/                             
+#----------------------------------------------------------------------------------------------------------------
+#--**************************************************************************************************************
+# HW242564: Temporarily mask the GCR Buffer Parity Checker until the source of the error can be found. This ungates the lab.
+# 0x800???0002011E3F
+# This is applied to all configured clkgrp's via chiplet targetting
+scom 0x800.0b(rx_fir1_mask_pg)(rx_grp0,rx_grp1,rx_grp2,rx_grp3)(lane_na).0x(xbus0_gcr_addr) {
+bits,                             scom_data;
+rx_pg_fir_err_mask_gcr_buff,      0b1;
+}
+scom 0x800.0b(tx_fir_mask_pg)(tx_grp0,tx_grp1,tx_grp2,tx_grp3)(lane_na).0x(xbus0_gcr_addr) {
+bits,                             scom_data;
+tx_pg_fir_err_mask_gcr_buff,      0b1;
+}
+scom 0x800.0b(rx_fir_mask_pb)(rx_grp0,rx_grp1,rx_grp2,rx_grp3)(lane_na).0x(xbus0_gcr_addr) {
+bits,                             scom_data;
+rx_pb_fir_err_mask_gcr_buff0,    0b1;
+rx_pb_fir_err_mask_gcr_buff1,    0b1;
+rx_pb_fir_err_mask_gcr_buff2,    0b1;
+}
+
+# Mask off all rx and tx parity errors in the fir register
+scom 0x04011003 {
+scom_data;
+0xC000000000000000;
+}
 
 
 ############################################################################################

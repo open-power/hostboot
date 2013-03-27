@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012                   */
+/* COPYRIGHT International Business Machines Corp. 2012,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_build_smp_epsilon.H,v 1.2 2012/09/05 03:11:55 jmcgill Exp $
+// $Id: proc_build_smp_epsilon.H,v 1.4 2013/03/17 21:43:43 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_build_smp_epsilon.H,v $
 //------------------------------------------------------------------------------
 // *|
@@ -55,13 +55,14 @@
 const uint32_t PROC_BUILD_SMP_EPSILON_MIN_VALUE = 0x1;
 const uint32_t PROC_BUILD_SMP_EPSILON_MAX_VALUE = 0xFFFFFFFF;
 
-const uint32_t PROC_BUILD_SMP_EPSILON_R_T0_HE[] = {    6,    6,    7,    8,    9,   17 };
-const uint32_t PROC_BUILD_SMP_EPSILON_R_T1_HE[] = {   42,   44,   46,   49,   53,   75 };
-const uint32_t PROC_BUILD_SMP_EPSILON_R_T2_HE[] = {   85,   87,   89,   92,   96,  118 };
-const uint32_t PROC_BUILD_SMP_EPSILON_R_F_HE[]  = {   57,   59,   61,   64,   68,   90 };
-const uint32_t PROC_BUILD_SMP_EPSILON_W_HE[]    = {   30,   31,   31,   32,   34,   41 };
-const uint32_t PROC_BUILD_SMP_EPSILON_W_F_HE[]  = {   13,   13,   14,   15,   16,   23 };
-const uint32_t PROC_BUILD_SMP_EPSILON_P_HE[]    = {  925, 1605, 1605, 1605, 1605, 1605 };
+// MR epsilon (Murano)
+const uint32_t PROC_BUILD_SMP_EPSILON_R_T0_HE[] = {    5,    5,    6,    7,    8,   15 };
+const uint32_t PROC_BUILD_SMP_EPSILON_R_T1_HE[] = {   35,   37,   39,   41,   45,   63 };
+const uint32_t PROC_BUILD_SMP_EPSILON_R_T2_HE[] = {   71,   73,   75,   77,   80,   99 };
+const uint32_t PROC_BUILD_SMP_EPSILON_R_F_HE[]  = {   55,   56,   58,   60,   65,   82 };
+const uint32_t PROC_BUILD_SMP_EPSILON_W_HE[]    = {   26,   27,   28,   29,   30,   35 };
+const uint32_t PROC_BUILD_SMP_EPSILON_W_F_HE[]  = {   26,   27,   28,   29,   30,   35 };
+const uint32_t PROC_BUILD_SMP_EPSILON_P_HE[]    = {  771, 1338, 1338, 1338, 1338, 1338 };
 
 const uint32_t PROC_BUILD_SMP_EPSILON_R_T0_LE[] = {    6,    6,    7,    8,    9,   17 };
 const uint32_t PROC_BUILD_SMP_EPSILON_R_T1_LE[] = {    6,    6,    7,    8,    9,   17 };
@@ -82,15 +83,11 @@ const uint32_t PROC_BUILD_SMP_EPSILON_L2_MAX_VALUE_R_T1 = 512;
 const uint32_t PROC_BUILD_SMP_EPSILON_L2_MAX_VALUE_R_T2 = 2048;
 const uint32_t PROC_BUILD_SMP_EPSILON_L2_MAX_VALUE_W_T2 = 128;
 
-const uint8_t  PROC_BUILD_SMP_EPSILON_L2_FORCE_T2 = 0x1;
-
 // L3
 const uint32_t PROC_BUILD_SMP_EPSILON_L3_MAX_VALUE_R_T0 = 512;
 const uint32_t PROC_BUILD_SMP_EPSILON_L3_MAX_VALUE_R_T1 = 512;
 const uint32_t PROC_BUILD_SMP_EPSILON_L3_MAX_VALUE_R_T2 = 2048;
 const uint32_t PROC_BUILD_SMP_EPSILON_L3_MAX_VALUE_W_T2 = 128;
-
-const uint8_t  PROC_BUILD_SMP_EPSILON_L3_FORCE_T2 = 0x1;
 
 // MCS
 const uint32_t PROC_BUILD_SMP_EPSILON_MCS_MAX_VALUE_R_T0 = 1016;

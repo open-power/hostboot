@@ -1,4 +1,4 @@
-#-- $Id: p8.mcs.scom.initfile,v 1.1 2012/10/08 03:24:14 jmcgill Exp $
+#-- $Id: p8.mcs.scom.initfile,v 1.2 2013/03/25 03:08:07 jmcgill Exp $
 #-- CHANGE HISTORY:
 #--------------------------------------------------------------------------------
 #-- Version:|Author: | Date:  | Comment:
@@ -16,7 +16,7 @@ SyntaxVersion = 1
 
 
 #--******************************************************************************
-#-- MC Mode0 Register Ship Mode
+#-- MCS Mode0 Register
 #--******************************************************************************
  scom 0x0000000002011807              {
      bits ,                    scom_data        ;
@@ -52,7 +52,7 @@ SyntaxVersion = 1
 
 
 #--******************************************************************************
-#-- MC Mode2 Register Ship Mode
+#-- MCS Mode2 Register
 #--******************************************************************************
  scom 0x0000000002011809              {
      bits ,                    scom_data        ;
@@ -72,14 +72,14 @@ SyntaxVersion = 1
      36:38,                    0b010            ;              # MCMODE2Q_CHANNEL_ARB_WRITE_HP_THRESHOLD
      39   ,                    0b0              ;              # MCMODE2Q_DISABLE_BAD_CRESP_TO_CENTAUR
      40   ,                    0b1              ;              # MCMODE2Q_ENABLE_CRC_BYPASS_ALWAYS
-     41:43,                    0b111            ;              # MCMODE2Q_CHANNEL_HANG_VALUE
+     41:43,                    0b011            ;              # MCMODE2Q_CHANNEL_HANG_VALUE
      44   ,                    0b1              ;              # MCMODE2Q_ENABLE_RD_HANG
      45   ,                    0b1              ;              # MCMODE2Q_ENABLE_WR_HANG
      46   ,                    0b1              ;              # MCMODE2Q_ENABLE_MIRROR_RD_HANG
      47   ,                    0b1              ;              # MCMODE2Q_ENABLE_MIRROR_WR_HANG
      48   ,                    0b1              ;              # MCMODE2Q_ENABLE_AO_HANG
      49   ,                    0b1              ;              # MCMODE2Q_ENABLE_INBAND_HANG
-     50:52,                    0b111            ;              # MCMODE2Q_NONMIRROR_HANG_VALUE
+     50:52,                    0b110            ;              # MCMODE2Q_NONMIRROR_HANG_VALUE
      53:55,                    0b111            ;              # MCMODE2Q_MIRROR_HANG_VALUE
      56   ,                    0b1              ;              # MCMODE2Q_ENABLE_EMER_THROTTLE
      57   ,                    0b0              ;              # MCMODE2Q_DRIVE_SHARED_PRESP_WITH_LOST_CLAIM
@@ -94,7 +94,26 @@ SyntaxVersion = 1
 
 
 #--******************************************************************************
-#-- MC Busy Control Register Ship Mode
+#-- MCS Mode3 Register
+#--******************************************************************************
+ scom 0x000000000201180A              {
+     bits ,                    scom_data        ;
+     24   ,                    0b1              ;              # MCMODE3Q_ENABLE_LOCAL_TIMEOUT_TIMEBASE
+     25:30,                    0b000001         ;              # MCMODE3Q_LOCAL_TIMEOUT_TIMEBASE_THRESHOLD
+}
+
+
+#--******************************************************************************
+#-- MCS Mode4 Register
+#--******************************************************************************
+ scom 0x000000000201181A              {
+     bits ,                    scom_data        ;
+     17:18,                    0b01             ;              # MCMODE4Q_SELECT_RPTHANG_DECODE
+     19   ,                    0b1              ;              # MCMODE4Q_LOCAL_TIMEBASE_SELECT
+}
+
+#--******************************************************************************
+#-- MC Busy Control Register
 #--******************************************************************************
  scom 0x0000000002011818              {
      bits ,                    scom_data        ;

@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_setup_bars.H,v 1.4 2012/12/11 23:59:31 jmcgill Exp $
+// $Id: proc_setup_bars.H,v 1.5 2013/03/17 22:56:07 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_setup_bars.H,v $
 //------------------------------------------------------------------------------
 // *|
@@ -905,7 +905,6 @@ const proc_setup_bars_bar_reg_def mcd_f1_bar_reg_def =
 };
 
 // PCIe BAR constants
-// TODO: investigate development of PCIe chip unit support
 const uint32_t PROC_SETUP_BARS_PCIE_CHIP_NON_MIRRORED_BAR[PROC_SETUP_BARS_PCIE_NUM_UNITS] =
 {
     PCIE0_NODAL_BAR0_0x02012010,

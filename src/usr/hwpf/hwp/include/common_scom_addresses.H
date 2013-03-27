@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: common_scom_addresses.H,v 1.40 2013/01/08 18:24:16 koenig Exp $
+// $Id: common_scom_addresses.H,v 1.44 2013/03/18 19:43:27 jeshua Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/common_scom_addresses.H,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
@@ -133,6 +133,7 @@ CONST_UINT64_T( GENERIC_CLK_SYNC_CONFIG_0x00030000    , ULL(0x00030000) );
 CONST_UINT64_T( GENERIC_CLK_REGION_0x00030006         , ULL(0x00030006) );
 CONST_UINT64_T( GENERIC_CLK_SCANSEL_0x00030007        , ULL(0x00030007) );
 CONST_UINT64_T( GENERIC_CLK_STATUS_0x00030008         , ULL(0x00030008) );
+CONST_UINT64_T( GENERIC_CLK_ERROR_0x00030009          , ULL(0x00030009) );
 CONST_UINT64_T( GENERIC_CLK_SCANDATA0_0x00038000      , ULL(0x00038000) );
 CONST_UINT64_T( GENERIC_CLK_SCAN_UPDATEDR_0x0003A000  , ULL(0x0003A000) );
 CONST_UINT64_T( GENERIC_CLK_SCAN_CAPTUREDR_0x0003C000 , ULL(0x0003C000) );
@@ -224,8 +225,6 @@ CONST_UINT32_T( CFAM_FSI_SBE_VITAL_0x0000281C         , ULL(0x0000281C) );
 //      OTPROM
 //------------------------------------------------------------------------------
 CONST_UINT64_T( OTPROM_0x00010000                     , ULL(0x00010000) );
-
-CONST_UINT64_T( OTPROM_SECURE_SWITCHES_0x00010005     , ULL(0x00010005) );
 
 //------------------------------------------------------------------------------
 //      PIBMEM
@@ -596,7 +595,6 @@ CONST_UINT64_T( SCAN_ALLSCANEXVITAL,                ULL(0x0FF00DCE00000000) );  
 CONST_UINT64_T( SCAN_ALLSCANEXPRV,                  ULL(0x0FF00DCE00000000) );  // Looking to be deprecated
 CONST_UINT64_T( SCAN_ALL_BUT_GPTRTIMEREP,           ULL(0x0FF00DCE00000000) );
 CONST_UINT64_T( SCAN_ALL_BUT_VITALDPLLGPTRTIME,     ULL(0x0FE00DCE00000000) );
-CONST_UINT64_T( SCAN_ALL_BUT_VITALPLLGPTRTIME,      ULL(0x0FE00DCE00000000) );
 CONST_UINT64_T( SCAN_GPTR_TIME_REP,                 ULL(0x0FF0023000000000) );
 CONST_UINT64_T( SCAN_PLL_GPTR,                      ULL(0x0010020000000000) );
 CONST_UINT64_T( SCAN_PLL_BNDY_FUNC,                 ULL(0x0010080800000000) );
@@ -636,6 +634,18 @@ This section is automatically updated by CVS when you check in this file.
 Be sure to create CVS comments when you commit so that they can be included here.
 
 $Log: common_scom_addresses.H,v $
+Revision 1.44  2013/03/18 19:43:27  jeshua
+Removed OTPROM_SECURE_SWITCHES_0x00010005 because it's not common between P8 and Centaur. P8 code should use OTPC_M_SECURITY_SWITCH_0x00010005
+
+Revision 1.43  2013/03/07 17:02:58  gweber
+moved centaur-only SCAN_ constants to cen_scom_addresses.H
+
+Revision 1.42  2013/03/06 12:43:59  gweber
+Set CLOCK_REGION_PERV for scan0 perv
+
+Revision 1.41  2013/02/20 17:44:46  cmolsen
+Added CC error reg 30009.
+
 Revision 1.40  2013/01/08 18:24:16  koenig
 Updates - AK
 

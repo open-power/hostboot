@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012                   */
+/* COPYRIGHT International Business Machines Corp. 2012,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_thread_control.C,v 1.18 2012/09/26 15:14:36 karm Exp $
+// $Id: proc_thread_control.C,v 1.20 2013/03/15 15:03:58 jklazyns Exp $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2012
 // *! All Rights Reserved -- Property of IBM
@@ -346,7 +346,7 @@ extern "C"
 
         do
         {
-            FAPI_DBG("proc_thread_control_stop : Initiating stop command to core PC logic for thread %d", i_thread);
+            FAPI_INF("proc_thread_control_stop : Initiating stop command to core PC logic for thread %d", i_thread);
 
             rc_ecmd |= scomData.flushTo0();
             rc_ecmd |= scomData.setBit(PTC_DIR_CTL_SP_STOP);
@@ -662,7 +662,10 @@ extern "C"
 
         do
         {
+            FAPI_INF("proc_thread_control_query: Start");
+
             o_state = 0;
+
             rc = fapiGetScom(i_target, rasStatAddr, scomData);
             if (!rc.ok())
             {
@@ -691,7 +694,10 @@ extern "C"
             {
                 o_state |= THREAD_STATE_ENABLED;
             }
-            if (o_ras_status.isBitSet(PTC_RAS_STAT_RUN_BIT))
+            // Threads that are not in maintenance and not checkstopped are also considered 'running'
+            if (o_ras_status.isBitSet(PTC_RAS_STAT_RUN_BIT)  ||
+               ((!o_ras_status.isBitSet(PTC_RAS_STAT_MAINT)) &&
+                (!o_ras_status.isBitSet(PTC_RAS_STAT_CHKSTOP))))
             {
                 o_state |= THREAD_STATE_RUNNING;
             }
@@ -721,6 +727,7 @@ extern "C"
                 o_state |= THREAD_STATE_RAM_ACTIVE;
             }
 
+            FAPI_INF("proc_thread_control_query: thread state=%016llX (ras_status=%016llX)", o_state, o_ras_status.getDoubleWord(0));
         }
         while (0);
         return rc;

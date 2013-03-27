@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012                   */
+/* COPYRIGHT International Business Machines Corp. 2012,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_build_smp_epsilon.C,v 1.4 2012/09/24 05:02:40 jmcgill Exp $
+// $Id: proc_build_smp_epsilon.C,v 1.6 2013/02/22 17:55:10 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_build_smp_epsilon.C,v $
 //------------------------------------------------------------------------------
 // *|
@@ -181,7 +181,11 @@ fapi::ReturnCode proc_build_smp_set_epsilons_l2(
     bool r_t1_fits = false;
     bool r_t2_fits = false;
     bool w_t2_fits = false;
-    uint32_t attr_value;
+    uint8_t l2_force_t2_attr_value;
+    uint32_t l2_r_t0_attr_value;
+    uint32_t l2_r_t1_attr_value;
+    uint32_t l2_r_t2_attr_value;
+    uint32_t l2_w_attr_value;
 
     // mark function entry
     FAPI_DBG("proc_build_smp_set_epsilons_l2: Start");
@@ -245,12 +249,12 @@ fapi::ReturnCode proc_build_smp_set_epsilons_l2(
 
         // set attributes based on unit implementation
         FAPI_DBG("proc_build_smp_set_epsilons_l2: Writing ATTR_L2_R_T2_EPS");
-        attr_value = ((i_eps_cfg.r_t2 == PROC_BUILD_SMP_EPSILON_L2_MAX_VALUE_R_T2)?
-                      (0):(i_eps_cfg.r_t2+1));
+        l2_r_t2_attr_value = ((i_eps_cfg.r_t2 == PROC_BUILD_SMP_EPSILON_L2_MAX_VALUE_R_T2)?
+                              (0):(i_eps_cfg.r_t2+1));
         rc = FAPI_ATTR_SET(
             ATTR_L2_R_T2_EPS,
             NULL,
-            attr_value);
+            l2_r_t2_attr_value);
 
         if (!rc.ok())
         {
@@ -259,12 +263,12 @@ fapi::ReturnCode proc_build_smp_set_epsilons_l2(
         }
 
         FAPI_DBG("proc_build_smp_set_epsilons_l2: Writing ATTR_L2_W_EPS");
-        attr_value = ((i_eps_cfg.w_t2 == PROC_BUILD_SMP_EPSILON_L2_MAX_VALUE_W_T2)?
-                      (0):(i_eps_cfg.w_t2+1));
+        l2_w_attr_value = ((i_eps_cfg.w_t2 == PROC_BUILD_SMP_EPSILON_L2_MAX_VALUE_W_T2)?
+                           (0):(i_eps_cfg.w_t2+1));
         rc = FAPI_ATTR_SET(
             ATTR_L2_W_EPS,
             NULL,
-            attr_value);
+            l2_w_attr_value);
 
         if (!rc.ok())
         {
@@ -275,49 +279,54 @@ fapi::ReturnCode proc_build_smp_set_epsilons_l2(
         // force tier2 if necessary
         if (!r_t0_fits || !r_t1_fits)
         {
-            FAPI_DBG("proc_build_smp_set_epsilons_l2: Writing ATTR_L2_FORCE_R_T2_EPS");
-            uint8_t attr_value = PROC_BUILD_SMP_EPSILON_L2_FORCE_T2;
-            rc = FAPI_ATTR_SET(
-                ATTR_L2_FORCE_R_T2_EPS,
-                NULL,
-                attr_value);
-
-            if (!rc.ok())
-            {
-                FAPI_ERR("proc_build_smp_set_epsilons_l2: Error from FAPI_ATTR_SET (ATTR_L2_FORCE_R_T2_EPS)");
-                break;
-            }
+            l2_force_t2_attr_value = fapi::ENUM_ATTR_L2_FORCE_R_T2_EPS_ON;
+            l2_r_t0_attr_value = 0;
+            l2_r_t1_attr_value = 0;
         }
         // otherwise, write explicit read tier0, read tier1 attribute values
         else
         {
-            FAPI_DBG("proc_build_smp_set_epsilons_l2: Writing ATTR_L2_R_T0_EPS");
-            attr_value = ((i_eps_cfg.r_t0 == PROC_BUILD_SMP_EPSILON_L2_MAX_VALUE_R_T0)?
-                          (0):(i_eps_cfg.r_t0+1));
-            rc = FAPI_ATTR_SET(
-                ATTR_L2_R_T0_EPS,
-                NULL,
-                attr_value);
+            l2_force_t2_attr_value = fapi::ENUM_ATTR_L2_FORCE_R_T2_EPS_OFF;
+            l2_r_t0_attr_value = ((i_eps_cfg.r_t0 == PROC_BUILD_SMP_EPSILON_L2_MAX_VALUE_R_T0)?
+                                  (0):(i_eps_cfg.r_t0+1));
+            l2_r_t1_attr_value = ((i_eps_cfg.r_t1 == PROC_BUILD_SMP_EPSILON_L2_MAX_VALUE_R_T1)?
+                                  (0):(i_eps_cfg.r_t1+1));
+        }
 
-            if (!rc.ok())
-            {
-                FAPI_ERR("proc_build_smp_set_epsilons_l2: Error from FAPI_ATTR_SET (ATTR_L2_R_T0_EPS)");
-                break;
-            }
+        FAPI_DBG("proc_build_smp_set_epsilons_l2: Writing ATTR_L2_FORCE_R_T2_EPS");
+        rc = FAPI_ATTR_SET(
+            ATTR_L2_FORCE_R_T2_EPS,
+            NULL,
+            l2_force_t2_attr_value);
 
-            FAPI_DBG("proc_build_smp_set_epsilons_l2: Writing ATTR_L2_R_T1_EPS");
-            attr_value = ((i_eps_cfg.r_t1 == PROC_BUILD_SMP_EPSILON_L2_MAX_VALUE_R_T1)?
-                          (0):(i_eps_cfg.r_t1+1));
-            rc = FAPI_ATTR_SET(
-                ATTR_L2_R_T1_EPS,
-                NULL,
-                attr_value);
+        if (!rc.ok())
+        {
+            FAPI_ERR("proc_build_smp_set_epsilons_l2: Error from FAPI_ATTR_SET (ATTR_L2_FORCE_R_T2_EPS)");
+            break;
+        }
 
-            if (!rc.ok())
-            {
-                FAPI_ERR("proc_build_smp_set_epsilons_l2: Error from FAPI_ATTR_SET (ATTR_L2_R_T1_EPS)");
-                break;
-            }
+        FAPI_DBG("proc_build_smp_set_epsilons_l2: Writing ATTR_L2_R_T0_EPS");
+        rc = FAPI_ATTR_SET(
+            ATTR_L2_R_T0_EPS,
+            NULL,
+            l2_r_t0_attr_value);
+
+        if (!rc.ok())
+        {
+            FAPI_ERR("proc_build_smp_set_epsilons_l2: Error from FAPI_ATTR_SET (ATTR_L2_R_T0_EPS)");
+            break;
+        }
+
+        FAPI_DBG("proc_build_smp_set_epsilons_l2: Writing ATTR_L2_R_T1_EPS");
+        rc = FAPI_ATTR_SET(
+            ATTR_L2_R_T1_EPS,
+            NULL,
+            l2_r_t1_attr_value);
+
+        if (!rc.ok())
+        {
+            FAPI_ERR("proc_build_smp_set_epsilons_l2: Error from FAPI_ATTR_SET (ATTR_L2_R_T1_EPS)");
+            break;
         }
     } while(0);
 
@@ -343,7 +352,12 @@ fapi::ReturnCode proc_build_smp_set_epsilons_l3(
     bool r_t1_fits = false;
     bool r_t2_fits = false;
     bool w_t2_fits = false;
-    uint32_t attr_value;
+
+    uint8_t l3_force_t2_attr_value;
+    uint32_t l3_r_t0_attr_value;
+    uint32_t l3_r_t1_attr_value;
+    uint32_t l3_r_t2_attr_value;
+    uint32_t l3_w_attr_value;
 
     // mark function entry
     FAPI_DBG("proc_build_smp_set_epsilons_l3: Start");
@@ -409,12 +423,12 @@ fapi::ReturnCode proc_build_smp_set_epsilons_l3(
 
         // set attributes based on unit implementation
         FAPI_DBG("proc_build_smp_set_epsilons_l3: Writing ATTR_L3_R_T2_EPS");
-        attr_value = ((i_eps_cfg.r_t2 == PROC_BUILD_SMP_EPSILON_L3_MAX_VALUE_R_T2)?
-                      (0):(i_eps_cfg.r_t2+1));
+        l3_r_t2_attr_value = ((i_eps_cfg.r_t2 == PROC_BUILD_SMP_EPSILON_L3_MAX_VALUE_R_T2)?
+                              (0):(i_eps_cfg.r_t2+1));
         rc = FAPI_ATTR_SET(
             ATTR_L3_R_T2_EPS,
             NULL,
-            attr_value);
+            l3_r_t2_attr_value);
 
         if (!rc.ok())
         {
@@ -423,12 +437,12 @@ fapi::ReturnCode proc_build_smp_set_epsilons_l3(
         }
 
         FAPI_DBG("proc_build_smp_set_epsilons_l3: Writing ATTR_L3_W_EPS");
-        attr_value = ((i_eps_cfg.w_t2 == PROC_BUILD_SMP_EPSILON_L3_MAX_VALUE_W_T2)?
-                      (0):(i_eps_cfg.w_t2+1));
+        l3_w_attr_value = ((i_eps_cfg.w_t2 == PROC_BUILD_SMP_EPSILON_L3_MAX_VALUE_W_T2)?
+                           (0):(i_eps_cfg.w_t2+1));
         rc = FAPI_ATTR_SET(
             ATTR_L3_W_EPS,
             NULL,
-            attr_value);
+            l3_w_attr_value);
 
         if (!rc.ok())
         {
@@ -439,49 +453,54 @@ fapi::ReturnCode proc_build_smp_set_epsilons_l3(
         // force tier2 if necessary
         if (!r_t0_fits || !r_t1_fits)
         {
-            FAPI_DBG("proc_build_smp_set_epsilons_l3: Writing ATTR_L3_FORCE_R_T2_EPS");
-            uint8_t attr_value = PROC_BUILD_SMP_EPSILON_L3_FORCE_T2;
-            rc = FAPI_ATTR_SET(
-                ATTR_L3_FORCE_R_T2_EPS,
-                NULL,
-                attr_value);
-
-            if (!rc.ok())
-            {
-                FAPI_ERR("proc_build_smp_set_epsilons_l3: Error from FAPI_ATTR_SET (ATTR_L3_FORCE_R_T2_EPS)");
-                break;
-            }
+            l3_force_t2_attr_value = fapi::ENUM_ATTR_L3_FORCE_R_T2_EPS_ON;
+            l3_r_t0_attr_value = 0;
+            l3_r_t1_attr_value = 0;
         }
         // otherwise, write explicit read tier0, read tier1 attribute values
         else
         {
-            FAPI_DBG("proc_build_smp_set_epsilons_l3: Writing ATTR_L3_R_T0_EPS");
-            attr_value = ((i_eps_cfg.r_t0 == PROC_BUILD_SMP_EPSILON_L3_MAX_VALUE_R_T0)?
-                          (0):(i_eps_cfg.r_t0+1));
-            rc = FAPI_ATTR_SET(
-                ATTR_L3_R_T0_EPS,
-                NULL,
-                attr_value);
+            l3_force_t2_attr_value = fapi::ENUM_ATTR_L2_FORCE_R_T2_EPS_OFF;
+            l3_r_t0_attr_value = ((i_eps_cfg.r_t0 == PROC_BUILD_SMP_EPSILON_L3_MAX_VALUE_R_T0)?
+                                  (0):(i_eps_cfg.r_t0+1));
+            l3_r_t1_attr_value = ((i_eps_cfg.r_t1 == PROC_BUILD_SMP_EPSILON_L3_MAX_VALUE_R_T1)?
+                                  (0):(i_eps_cfg.r_t1+1));
+        }
 
-            if (!rc.ok())
-            {
-                FAPI_ERR("proc_build_smp_set_epsilons_l3: Error from FAPI_ATTR_SET (ATTR_L3_R_T0_EPS)");
-                break;
-            }
+        FAPI_DBG("proc_build_smp_set_epsilons_l3: Writing ATTR_L3_FORCE_R_T2_EPS");
+        rc = FAPI_ATTR_SET(
+            ATTR_L3_FORCE_R_T2_EPS,
+            NULL,
+            l3_force_t2_attr_value);
 
-            FAPI_DBG("proc_build_smp_set_epsilons_l3: Writing ATTR_L3_R_T1_EPS");
-            attr_value = ((i_eps_cfg.r_t1 == PROC_BUILD_SMP_EPSILON_L3_MAX_VALUE_R_T1)?
-                          (0):(i_eps_cfg.r_t1+1));
-            rc = FAPI_ATTR_SET(
-                ATTR_L3_R_T1_EPS,
-                NULL,
-                attr_value);
+        if (!rc.ok())
+        {
+            FAPI_ERR("proc_build_smp_set_epsilons_l3: Error from FAPI_ATTR_SET (ATTR_L3_FORCE_R_T2_EPS)");
+            break;
+        }
 
-            if (!rc.ok())
-            {
-                FAPI_ERR("proc_build_smp_set_epsilons_l3: Error from FAPI_ATTR_SET (ATTR_L3_R_T1_EPS)");
-                break;
-            }
+        FAPI_DBG("proc_build_smp_set_epsilons_l3: Writing ATTR_L3_R_T0_EPS");
+        rc = FAPI_ATTR_SET(
+            ATTR_L3_R_T0_EPS,
+            NULL,
+            l3_r_t0_attr_value);
+
+        if (!rc.ok())
+        {
+            FAPI_ERR("proc_build_smp_set_epsilons_l3: Error from FAPI_ATTR_SET (ATTR_L3_R_T0_EPS)");
+            break;
+        }
+
+        FAPI_DBG("proc_build_smp_set_epsilons_l3: Writing ATTR_L3_R_T1_EPS");
+        rc = FAPI_ATTR_SET(
+            ATTR_L3_R_T1_EPS,
+            NULL,
+            l3_r_t1_attr_value);
+
+        if (!rc.ok())
+        {
+            FAPI_ERR("proc_build_smp_set_epsilons_l3: Error from FAPI_ATTR_SET (ATTR_L3_R_T1_EPS)");
+            break;
         }
     } while(0);
 
@@ -1292,14 +1311,6 @@ fapi::ReturnCode proc_build_smp_set_epsilons(
                     break;
                 }
 
-                // NX
-                rc = proc_build_smp_set_epsilons_nx(target, i_smp.eps_cfg);
-                if (!rc.ok())
-                {
-                    FAPI_ERR("proc_build_smp_set_epsilons: Error from proc_build_smp_set_epsilons_nx");
-                    break;
-                }
-
                 // HCA
                 rc = proc_build_smp_set_epsilons_hca(target, i_smp.eps_cfg);
                 if (!rc.ok())
@@ -1308,12 +1319,24 @@ fapi::ReturnCode proc_build_smp_set_epsilons(
                     break;
                 }
 
-                // CAPP
-                rc = proc_build_smp_set_epsilons_capp(target, i_smp.eps_cfg);
-                if (!rc.ok())
+                // set epsilons for NX regions only if partial good attribute is set
+                if (p_iter->second.nx_enabled)
                 {
-                    FAPI_ERR("proc_build_smp_set_epsilons: Error from proc_build_smp_set_epsilons_capp");
-                    break;
+                    // NX
+                    rc = proc_build_smp_set_epsilons_nx(target, i_smp.eps_cfg);
+                    if (!rc.ok())
+                    {
+                        FAPI_ERR("proc_build_smp_set_epsilons: Error from proc_build_smp_set_epsilons_nx");
+                        break;
+                    }
+
+                    // CAPP
+                    rc = proc_build_smp_set_epsilons_capp(target, i_smp.eps_cfg);
+                    if (!rc.ok())
+                    {
+                        FAPI_ERR("proc_build_smp_set_epsilons: Error from proc_build_smp_set_epsilons_capp");
+                        break;
+                    }
                 }
 
                 // MCD

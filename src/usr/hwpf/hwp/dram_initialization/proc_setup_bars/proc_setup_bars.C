@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_setup_bars.C,v 1.8 2012/12/11 23:59:28 jmcgill Exp $
+// $Id: proc_setup_bars.C,v 1.9 2013/03/17 22:56:03 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_setup_bars.C,v $
 //------------------------------------------------------------------------------
 // *|
@@ -2421,7 +2421,6 @@ proc_setup_bars_write_local_chip_region_bars(
         }
 
         // MCD (non-mirrored)
-        // TODO: potential optimization if DSMP links are known to be disabled?
         if (i_smp_chip.non_mirrored_range.enabled)
         {
             FAPI_DBG("proc_setup_bars_write_local_chip_region_bars: Writing MCD Configuration 0 (Non-Mirrored) register");
@@ -2438,7 +2437,6 @@ proc_setup_bars_write_local_chip_region_bars(
         }
 
         // MCD (mirrored)
-        // TODO: potential optimization if DSMP links are known to be disabled?
         if (i_smp_chip.mirrored_range.enabled)
         {
             FAPI_DBG("proc_setup_bars_write_local_chip_region_bars: Writing MCD Configuration 1 (Mirrored) register");

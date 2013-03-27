@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012                   */
+/* COPYRIGHT International Business Machines Corp. 2012,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_build_smp_adu.H,v 1.2 2012/09/05 03:11:26 jmcgill Exp $
+// $Id: proc_build_smp_adu.H,v 1.3 2013/02/25 14:50:53 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_build_smp_adu.H,v $
 //------------------------------------------------------------------------------
 // *|
@@ -48,6 +48,8 @@
 //------------------------------------------------------------------------------
 // Constants
 //------------------------------------------------------------------------------
+
+const uint32_t PROC_BUILD_SMP_MAX_STATUS_POLLS = 5;
 
 const uint32_t PROC_BUILD_SMP_PHASE1_ADU_LOCK_ATTEMPTS = 1;
 const bool PROC_BUILD_SMP_PHASE1_ADU_PICK_LOCK = false;

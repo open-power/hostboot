@@ -1,4 +1,4 @@
-#-- $Id: p8.nx.scom.initfile,v 1.3 2013/01/25 16:23:46 johnre Exp $
+#-- $Id: p8.nx.scom.initfile,v 1.5 2013/03/25 21:38:50 jmcgill Exp $
 #-------------------------------------------------------------------------------
 #--
 #-- (C) Copyright International Business Machines Corp. 2011
@@ -138,7 +138,6 @@ scom 0x0201308F {
 #-- PowerBus Epsilon Config Register (0x0201309D)
 scom 0x0201309D {
     bits  ,  scom_data      ;
-     0:5  ,  0b000101       ;  #-- epsilon count value.  number * 7 clock cycles.
      6    ,  0b0            ;  #-- disable epsilon counter
 }
 
@@ -334,4 +333,20 @@ scom 0x02013107 {
 
 
 
+#-- APC Master Config Register
+scom 0x02013019 {
+    bits  , scom_data       ;
+    4:7   , 0b0000          ;   #-- HANG_POLL_SCALE
+}
 
+#-- CAPP Snoop Control Register
+scom 0x0201301B {
+    bits  ,  scom_data      ;
+    48:51 ,  0b0010         ;   #-- CXA_SNP_DATA_HANG_POLL_SCALE
+}
+
+#-- CAPP Transport Control Register
+scom 0x0201301C {
+    bits  ,  scom_data      ;
+    15:18 ,  0b1000         ;   #-- TLBI_DATA_POLL_PULSE_DIV
+}

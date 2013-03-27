@@ -20,8 +20,8 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_chiplet_scominit.C,v 1.10 2013/03/04 17:32:59 jmcgill Exp $
-// $Source: /afs/awd.austin.ibm.com/proj/p9/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_chiplet_scominit.C,v $
+// $Id: proc_chiplet_scominit.C,v 1.11 2013/03/25 02:39:41 jmcgill Exp $
+// $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_chiplet_scominit.C,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2012
 // *! All Rights Reserved -- Property of IBM
@@ -97,6 +97,22 @@ fapi::ReturnCode proc_chiplet_scominit(const fapi::Target & i_target)
             {
                 FAPI_ERR("proc_chiplet_scominit: Error from fapiHwpExecInitfile executing %s on %s",
                          PROC_CHIPLET_SCOMINIT_PSI_IF,
+                         i_target.toEcmdString());
+                break;
+            }
+
+            // execute TP bridge SCOM initfile
+            FAPI_INF("proc_chiplet_scominit: Executing %s on %s",
+                     PROC_CHIPLET_SCOMINIT_TPBRIDGE_IF, i_target.toEcmdString());
+            FAPI_EXEC_HWP(
+                rc,
+                fapiHwpExecInitFile,
+                initfile_targets,
+                PROC_CHIPLET_SCOMINIT_TPBRIDGE_IF);
+            if (!rc.ok())
+            {
+                FAPI_ERR("proc_chiplet_scominit: Error from fapiHwpExecInitfile executing %s on %s",
+                         PROC_CHIPLET_SCOMINIT_TPBRIDGE_IF,
                          i_target.toEcmdString());
                 break;
             }

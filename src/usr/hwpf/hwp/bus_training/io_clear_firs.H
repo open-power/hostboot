@@ -20,7 +20,33 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: io_clear_firs.H,v 1.4 2013/02/20 09:40:22 jaswamin Exp $
+// $Id: io_clear_firs.H,v 1.7 2013/03/26 14:45:18 jaswamin Exp $
+// *!***************************************************************************
+// *! (C) Copyright International Business Machines Corp. 2012, 2013
+// *!           All Rights Reserved -- Property of IBM
+// *!                   *** IBM Confidential ***
+// *!***************************************************************************
+// *! FILENAME             : io_clear_firs.H
+// *! TITLE                : 
+// *! DESCRIPTION          : To clear summary fir registers
+// *! CONTEXT              : 
+// *!
+// *! OWNER  NAME          : Swaminathan, Janani         Email: jaswamin@in.ibm.com
+// *! BACKUP NAME          : Varghese, Varkey            Email: varkey.kv@in.ibm.com
+// *!
+// *!***************************************************************************
+// CHANGE HISTORY:
+//------------------------------------------------------------------------------
+// Version:|Author: | Date:  | Comment:
+// --------|--------|--------|--------------------------------------------------
+//   1.7   |jaswmain|03/26/13|  Removed DOS line endings
+//   1.6   |jaswamin|03/25/13|  Removed 64 bit fir clearing function.
+//   1.5   |varkeykv|03/20/13|  Additional moved FIR functions from clear firs to training files
+//   1.4   |jaswamin|02/20/13|  Changes as per review comment
+//   1.3   |varkeykv|02/18/13|  Added func decl for clear mask fir function
+//   1.2   |jaswamin|02/14/13|  function for reading the fir scom register contents,enums and arrays for doing fir isolation
+//   1.1   |jaswamin|01/30/13|  Initial check in .
+//------------------------------------------------------------------------------
 #ifndef IO_CLEAR_FIRS_H
 #define IO_CLEAR_FIRS_H
 
@@ -84,6 +110,8 @@ const uint32_t fir_clear_mask_reg_addr[FIR_INTERFACES]={0x04011004,
                                                   0x02011a04, 
                                                   0x02011e04, 
                                                   0x02010404  };
+                                                  
+
 enum fir_error_type{
     RX_PARITY,
     TX_PARITY,
@@ -160,10 +188,6 @@ extern "C"
 fapi::ReturnCode io_clear_firs(const fapi::Target &target);
 
 fapi::ReturnCode clear_fir_err_regs(const Target &target,io_interface_t chip_interface,uint32_t group);
-
-fapi::ReturnCode clear_fir_reg(const Target &target,fir_io_interface_t chip_interface);
-
-fapi::ReturnCode clear_fir_mask_reg(const Target &target,fir_io_interface_t chip_interface);
 
 fapi::ReturnCode read_fir_reg(const Target &target,fir_io_interface_t chip_interface,ecmdDataBufferBase &databuf_64bit);
 
