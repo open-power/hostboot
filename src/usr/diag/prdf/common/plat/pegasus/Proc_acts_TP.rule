@@ -48,22 +48,22 @@ group gTpChipletFir filter singlebit
     /** TP_CHIPLET_FIR[5]
      *  Attention from MCIFIR (MCS 00 Venice only)
      */
-    (TpChipletFir, bit(5)) ? defaultMaskedError;
+    (TpChipletFir, bit(5)) ? analyzeMcs00;
 
     /** TP_CHIPLET_FIR[6]
      *  Attention from MCIFIR (MCS 01 Venice only)
      */
-    (TpChipletFir, bit(6)) ? defaultMaskedError;
+    (TpChipletFir, bit(6)) ? analyzeMcs01;
 
     /** TP_CHIPLET_FIR[7]
      *  Attention from MCIFIR (MCS 10 Venice only)
      */
-    (TpChipletFir, bit(7)) ? defaultMaskedError;
+    (TpChipletFir, bit(7)) ? analyzeMcs10;
 
     /** TP_CHIPLET_FIR[8]
      *  Attention from MCIFIR (MCS 11 Venice only)
      */
-    (TpChipletFir, bit(8)) ? defaultMaskedError;
+    (TpChipletFir, bit(8)) ? analyzeMcs11;
 
     /** TP_CHIPLET_FIR[9]
      *  Attention from MCIFIR (MCS 20)
@@ -126,22 +126,22 @@ group gTpChipletSpa filter singlebit
     /** TP_CHIPLET_SPA[1]
      *  Attention from MCIFIR_00 (Venice only)
      */
-    (TpChipletSpa, bit(1)) ? defaultMaskedError;
+    (TpChipletSpa, bit(1)) ? analyzeMcs00;
 
     /** TP_CHIPLET_SPA[2]
      *  Attention from MCIFIR_01 (Venice only)
      */
-    (TpChipletSpa, bit(2)) ? defaultMaskedError;
+    (TpChipletSpa, bit(2)) ? analyzeMcs01;
 
     /** TP_CHIPLET_SPA[3]
      *  Attention from MCIFIR_10 (Venice only)
      */
-    (TpChipletSpa, bit(3)) ? defaultMaskedError;
+    (TpChipletSpa, bit(3)) ? analyzeMcs10;
 
     /** TP_CHIPLET_SPA[4]
-     *  Attention from MCIFIR_10 (Venice only)
+     *  Attention from MCIFIR_11 (Venice only)
      */
-    (TpChipletSpa, bit(4)) ? defaultMaskedError;
+    (TpChipletSpa, bit(4)) ? analyzeMcs11;
 
     /** TP_CHIPLET_SPA[5]
      *  Attention from MCIFIR_20
@@ -774,6 +774,34 @@ group gPmcFir filter singlebit
 ################################################################################
 # Actions specific to TP chiplet
 ################################################################################
+
+/** Analyze connected MCS 00 */
+actionclass analyzeMcs00
+{
+    analyze(connected(TYPE_MCS, 0));
+    funccall("MaskMCS00IfCentaurCheckstop");
+};
+
+/** Analyze connected MCS 01 */
+actionclass analyzeMcs01
+{
+    analyze(connected(TYPE_MCS, 1));
+    funccall("MaskMCS01IfCentaurCheckstop");
+};
+
+/** Analyze connected MCS 10 */
+actionclass analyzeMcs10
+{
+    analyze(connected(TYPE_MCS, 2));
+    funccall("MaskMCS10IfCentaurCheckstop");
+};
+
+/** Analyze connected MCS 11 */
+actionclass analyzeMcs11
+{
+    analyze(connected(TYPE_MCS, 3));
+    funccall("MaskMCS11IfCentaurCheckstop");
+};
 
 /** Analyze connected MCS 20 */
 actionclass analyzeMcs20

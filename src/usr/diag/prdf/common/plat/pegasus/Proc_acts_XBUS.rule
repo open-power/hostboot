@@ -28,9 +28,9 @@
 rule XbusChipletFir
 {
   CHECK_STOP:
-     (XBUS_CHIPLET_CS_FIR       & `1F80000000000000`) & ~XBUS_CHIPLET_FIR_MASK;
+     (XBUS_CHIPLET_CS_FIR       & `1FC0000000000000`) & ~XBUS_CHIPLET_FIR_MASK;
   RECOVERABLE:
-    ((XBUS_CHIPLET_RE_FIR >> 2) & `1F80000000000000`) & ~XBUS_CHIPLET_FIR_MASK;
+    ((XBUS_CHIPLET_RE_FIR >> 2) & `1FC0000000000000`) & ~XBUS_CHIPLET_FIR_MASK;
 };
 
 group gXbusChipletFir filter singlebit
@@ -48,7 +48,7 @@ group gXbusChipletFir filter singlebit
     /** XbusChipletFir[5]
      *  Attention from IOXFIR_0 (Venice only)
      */
-    (XbusChipletFir, bit(5)) ? defaultMaskedError;
+    (XbusChipletFir, bit(5)) ? analyze(gIoxFir_0);
 
     /** XbusChipletFir[6]
      *  Attention from IOXFIR_1
@@ -58,12 +58,17 @@ group gXbusChipletFir filter singlebit
     /** XbusChipletFir[7]
      *  Attention from IOXFIR_2 (Venice only)
      */
-    (XbusChipletFir, bit(7)) ? defaultMaskedError;
+    (XbusChipletFir, bit(7)) ? analyze(gIoxFir_2);
 
     /** XbusChipletFir[8]
      *  Attention from IOXFIR_3 (Venice only)
      */
-    (XbusChipletFir, bit(8)) ? defaultMaskedError;
+    (XbusChipletFir, bit(8)) ? analyze(gIoxFir_3);
+
+    /** XbusChipletFir[9]
+     *  Attention from PSIFIR (Venice only)
+     */
+    (XbusChipletFir, bit(9)) ? analyze(gXbusPsiFir);
 };
 
 ################################################################################
@@ -250,6 +255,169 @@ group gPbenFir filter singlebit
      *  FIR_SCOM_ERR: pben iox fir_scom_err
      */
     (PbenFir, bit(36)) ? TBDDefaultCallout;
+};
+
+################################################################################
+# XBUS Chiplet IOXFIR_0
+################################################################################
+
+rule IoxFir_0
+{
+    CHECK_STOP:  IOXFIR_0 & ~IOXFIR_0_MASK & ~IOXFIR_0_ACT0 & ~IOXFIR_0_ACT1;
+    RECOVERABLE: IOXFIR_0 & ~IOXFIR_0_MASK & ~IOXFIR_0_ACT0 &  IOXFIR_0_ACT1;
+};
+
+group gIoxFir_0 filter singlebit
+{
+    /** IOXFIR_0[0]
+     * FIR_RX_INVALID_STATE_OR_PARITY_ERROR
+     */
+    (IoxFir_0, bit(0)) ? defaultMaskedError;
+
+    /** IOXFIR_0[1]
+     * FIR_TX_INVALID_STATE_OR_PARITY_ERROR
+     */
+    (IoxFir_0, bit(1)) ? defaultMaskedError;
+
+    /** IOXFIR_0[2]
+     *  FIR_GCR_HANG_ERROR
+     */
+    (IoxFir_0, bit(2)) ? defaultMaskedError;
+
+    /** IOXFIR_0[8]
+     * FIR_RX_BUS0_TRAINING_ERROR
+     */
+    (IoxFir_0, bit(8)) ? defaultMaskedError;
+
+    /** IOXFIR_0[9]
+     *  FIR_RX_BUS0_SPARE_DEPLOYED
+     */
+    (IoxFir_0, bit(9)) ? defaultMaskedError;
+
+    /** IOXFIR_0[10]
+     * FIR_RX_BUS0_MAX_SPARES_EXCEEDED
+     */
+    (IoxFir_0, bit(10)) ? defaultMaskedError;
+
+    /** IOXFIR_0[11]
+     * FIR_RX_BUS0_RECAL_OR_DYN_REPAIR_ERROR
+     */
+    (IoxFir_0, bit(11)) ? defaultMaskedError;
+
+    /** IOXFIR_0[12]
+     *  FIR_RX_BUS0_TOO_MANY_BUS_ERRORS
+     */
+    (IoxFir_0, bit(12)) ? defaultMaskedError;
+
+    /** IOXFIR_0[16]
+     *  FIR_RX_BUS1_TRAINING_ERROR
+     */
+    (IoxFir_0, bit(16)) ? defaultMaskedError;
+
+    /** IOXFIR_0[17]
+     *  FIR_RX_BUS1_SPARE_DEPLOYED
+     */
+    (IoxFir_0, bit(17)) ? defaultMaskedError;
+
+    /** IOXFIR_0[18]
+     *  FIR_RX_BUS1_MAX_SPARES_EXCEEDED
+     */
+    (IoxFir_0, bit(18)) ? defaultMaskedError;
+
+    /** IOXFIR_0[19]
+     *  FIR_RX_BUS1_RECAL_OR_DYN_REPAIR_ERROR
+     */
+    (IoxFir_0, bit(19)) ? defaultMaskedError;
+
+    /** IOXFIR_0[20]
+     *  FIR_RX_BUS1_TOO_MANY_BUS_ERRORS
+     */
+    (IoxFir_0, bit(20)) ? defaultMaskedError;
+
+    /** IOXFIR_0[24]
+     *  FIR_RX_BUS2_TRAINING_ERROR
+     */
+    (IoxFir_0, bit(24)) ? defaultMaskedError;
+
+    /** IOXFIR_0[25]
+     *  FIR_RX_BUS2_SPARE_DEPLOYED
+     */
+    (IoxFir_0, bit(25)) ? defaultMaskedError;
+
+    /** IOXFIR_0[26]
+     *  FIR_RX_BUS2_MAX_SPARES_EXCEEDED
+     */
+    (IoxFir_0, bit(26)) ? defaultMaskedError;
+
+    /** IOXFIR_0[27]
+     *  FIR_RX_BUS2_RECAL_OR_DYN_REPAIR_ERROR
+     */
+    (IoxFir_0, bit(27)) ? defaultMaskedError;
+
+    /** IOXFIR_0[28]
+     *  FIR_RX_BUS2_TOO_MANY_BUS_ERRORS
+     */
+    (IoxFir_0, bit(28)) ? defaultMaskedError;
+
+    /** IOXFIR_0[32]
+     *  FIR_RX_BUS3_TRAINING_ERROR
+     */
+    (IoxFir_0, bit(32)) ? defaultMaskedError;
+
+    /** IOXFIR_0[33]
+     *  FIR_RX_BUS3_SPARE_DEPLOYED
+     */
+    (IoxFir_0, bit(33)) ? defaultMaskedError;
+
+    /** IOXFIR_0[34]
+     *  FIR_RX_BUS3_MAX_SPARES_EXCEEDED
+     */
+    (IoxFir_0, bit(34)) ? defaultMaskedError;
+
+    /** IOXFIR_0[35]
+     *  FIR_RX_BUS3_RECAL_OR_DYN_REPAIR_ERROR
+     */
+    (IoxFir_0, bit(35)) ? defaultMaskedError;
+
+    /** IOXFIR_0[36]
+     *  FIR_RX_BUS3_TOO_MANY_BUS_ERRORS
+     */
+    (IoxFir_0, bit(36)) ? defaultMaskedError;
+
+    /** IOXFIR_0[40]
+     *  FIR_RX_BUS4_TRAINING_ERROR
+     */
+    (IoxFir_0, bit(40)) ? defaultMaskedError;
+
+    /** IOXFIR_0[41]
+     *  FIR_RX_BUS4_SPARE_DEPLOYED
+     */
+    (IoxFir_0, bit(41)) ? defaultMaskedError;
+
+    /** IOXFIR_0[42]
+     *  FIR_RX_BUS4_MAX_SPARES_EXCEEDED
+     */
+    (IoxFir_0, bit(42)) ? defaultMaskedError;
+
+    /** IOXFIR_0[43]
+     *  FIR_RX_BUS4_RECAL_OR_DYN_REPAIR_ERROR
+     */
+    (IoxFir_0, bit(43)) ? defaultMaskedError;
+
+    /** IOXFIR_0[44]
+     *  FIR_RX_BUS4_TOO_MANY_BUS_ERRORS
+     */
+    (IoxFir_0, bit(44)) ? defaultMaskedError;
+
+    /** IOXFIR_0[48]
+     *  FIR_SCOMFIR_ERROR
+     */
+    (IoxFir_0, bit(48)) ? defaultMaskedError;
+
+    /** IOXFIR_0[49]
+     *  FIR_SCOMFIR_ERROR_CLONE
+     */
+    (IoxFir_0, bit(49)) ? defaultMaskedError;
 };
 
 ################################################################################
@@ -443,6 +611,357 @@ group gIoxFir_1 filter singlebit
      *  FIR_SCOMFIR_ERROR_CLONE
      */
     (IoxFir_1, bit(49)) ? TBDDefaultCallout;
+};
+
+################################################################################
+# XBUS Chiplet IOXFIR_2
+################################################################################
+
+rule IoxFir_2
+{
+    CHECK_STOP:  IOXFIR_2 & ~IOXFIR_2_MASK & ~IOXFIR_2_ACT0 & ~IOXFIR_2_ACT1;
+    RECOVERABLE: IOXFIR_2 & ~IOXFIR_2_MASK & ~IOXFIR_2_ACT0 &  IOXFIR_2_ACT1;
+};
+
+group gIoxFir_2 filter singlebit
+{
+    /** IOXFIR_2[0]
+     * FIR_RX_INVALID_STATE_OR_PARITY_ERROR
+     */
+    (IoxFir_2, bit(0)) ? defaultMaskedError;
+
+    /** IOXFIR_2[1]
+     * FIR_TX_INVALID_STATE_OR_PARITY_ERROR
+     */
+    (IoxFir_2, bit(1)) ? defaultMaskedError;
+
+    /** IOXFIR_2[2]
+     *  FIR_GCR_HANG_ERROR
+     */
+    (IoxFir_2, bit(2)) ? defaultMaskedError;
+
+    /** IOXFIR_2[8]
+     * FIR_RX_BUS0_TRAINING_ERROR
+     */
+    (IoxFir_2, bit(8)) ? defaultMaskedError;
+
+    /** IOXFIR_2[9]
+     *  FIR_RX_BUS0_SPARE_DEPLOYED
+     */
+    (IoxFir_2, bit(9)) ? defaultMaskedError;
+
+    /** IOXFIR_2[10]
+     * FIR_RX_BUS0_MAX_SPARES_EXCEEDED
+     */
+    (IoxFir_2, bit(10)) ? defaultMaskedError;
+
+    /** IOXFIR_2[11]
+     * FIR_RX_BUS0_RECAL_OR_DYN_REPAIR_ERROR
+     */
+    (IoxFir_2, bit(11)) ? defaultMaskedError;
+
+    /** IOXFIR_2[12]
+     *  FIR_RX_BUS0_TOO_MANY_BUS_ERRORS
+     */
+    (IoxFir_2, bit(12)) ? defaultMaskedError;
+
+    /** IOXFIR_2[16]
+     *  FIR_RX_BUS1_TRAINING_ERROR
+     */
+    (IoxFir_2, bit(16)) ? defaultMaskedError;
+
+    /** IOXFIR_2[17]
+     *  FIR_RX_BUS1_SPARE_DEPLOYED
+     */
+    (IoxFir_2, bit(17)) ? defaultMaskedError;
+
+    /** IOXFIR_2[18]
+     *  FIR_RX_BUS1_MAX_SPARES_EXCEEDED
+     */
+    (IoxFir_2, bit(18)) ? defaultMaskedError;
+
+    /** IOXFIR_2[19]
+     *  FIR_RX_BUS1_RECAL_OR_DYN_REPAIR_ERROR
+     */
+    (IoxFir_2, bit(19)) ? defaultMaskedError;
+
+    /** IOXFIR_2[20]
+     *  FIR_RX_BUS1_TOO_MANY_BUS_ERRORS
+     */
+    (IoxFir_2, bit(20)) ? defaultMaskedError;
+
+    /** IOXFIR_2[24]
+     *  FIR_RX_BUS2_TRAINING_ERROR
+     */
+    (IoxFir_2, bit(24)) ? defaultMaskedError;
+
+    /** IOXFIR_2[25]
+     *  FIR_RX_BUS2_SPARE_DEPLOYED
+     */
+    (IoxFir_2, bit(25)) ? defaultMaskedError;
+
+    /** IOXFIR_2[26]
+     *  FIR_RX_BUS2_MAX_SPARES_EXCEEDED
+     */
+    (IoxFir_2, bit(26)) ? defaultMaskedError;
+
+    /** IOXFIR_2[27]
+     *  FIR_RX_BUS2_RECAL_OR_DYN_REPAIR_ERROR
+     */
+    (IoxFir_2, bit(27)) ? defaultMaskedError;
+
+    /** IOXFIR_2[28]
+     *  FIR_RX_BUS2_TOO_MANY_BUS_ERRORS
+     */
+    (IoxFir_2, bit(28)) ? defaultMaskedError;
+
+    /** IOXFIR_2[32]
+     *  FIR_RX_BUS3_TRAINING_ERROR
+     */
+    (IoxFir_2, bit(32)) ? defaultMaskedError;
+
+    /** IOXFIR_2[33]
+     *  FIR_RX_BUS3_SPARE_DEPLOYED
+     */
+    (IoxFir_2, bit(33)) ? defaultMaskedError;
+
+    /** IOXFIR_2[34]
+     *  FIR_RX_BUS3_MAX_SPARES_EXCEEDED
+     */
+    (IoxFir_2, bit(34)) ? defaultMaskedError;
+
+    /** IOXFIR_2[35]
+     *  FIR_RX_BUS3_RECAL_OR_DYN_REPAIR_ERROR
+     */
+    (IoxFir_2, bit(35)) ? defaultMaskedError;
+
+    /** IOXFIR_2[36]
+     *  FIR_RX_BUS3_TOO_MANY_BUS_ERRORS
+     */
+    (IoxFir_2, bit(36)) ? defaultMaskedError;
+
+    /** IOXFIR_2[40]
+     *  FIR_RX_BUS4_TRAINING_ERROR
+     */
+    (IoxFir_2, bit(40)) ? defaultMaskedError;
+
+    /** IOXFIR_2[41]
+     *  FIR_RX_BUS4_SPARE_DEPLOYED
+     */
+    (IoxFir_2, bit(41)) ? defaultMaskedError;
+
+    /** IOXFIR_2[42]
+     *  FIR_RX_BUS4_MAX_SPARES_EXCEEDED
+     */
+    (IoxFir_2, bit(42)) ? defaultMaskedError;
+
+    /** IOXFIR_2[43]
+     *  FIR_RX_BUS4_RECAL_OR_DYN_REPAIR_ERROR
+     */
+    (IoxFir_2, bit(43)) ? defaultMaskedError;
+
+    /** IOXFIR_2[44]
+     *  FIR_RX_BUS4_TOO_MANY_BUS_ERRORS
+     */
+    (IoxFir_2, bit(44)) ? defaultMaskedError;
+
+    /** IOXFIR_2[48]
+     *  FIR_SCOMFIR_ERROR
+     */
+    (IoxFir_2, bit(48)) ? defaultMaskedError;
+
+    /** IOXFIR_2[49]
+     *  FIR_SCOMFIR_ERROR_CLONE
+     */
+    (IoxFir_2, bit(49)) ? defaultMaskedError;
+};
+
+################################################################################
+# XBUS Chiplet IOXFIR_3
+################################################################################
+
+rule IoxFir_3
+{
+    CHECK_STOP:  IOXFIR_3 & ~IOXFIR_3_MASK & ~IOXFIR_3_ACT0 & ~IOXFIR_3_ACT1;
+    RECOVERABLE: IOXFIR_3 & ~IOXFIR_3_MASK & ~IOXFIR_3_ACT0 &  IOXFIR_3_ACT1;
+};
+
+group gIoxFir_3 filter singlebit
+{
+    /** IOXFIR_3[0]
+     * FIR_RX_INVALID_STATE_OR_PARITY_ERROR
+     */
+    (IoxFir_3, bit(0)) ? defaultMaskedError;
+
+    /** IOXFIR_3[1]
+     * FIR_TX_INVALID_STATE_OR_PARITY_ERROR
+     */
+    (IoxFir_3, bit(1)) ? defaultMaskedError;
+
+    /** IOXFIR_3[2]
+     *  FIR_GCR_HANG_ERROR
+     */
+    (IoxFir_3, bit(2)) ? defaultMaskedError;
+
+    /** IOXFIR_3[8]
+     * FIR_RX_BUS0_TRAINING_ERROR
+     */
+    (IoxFir_3, bit(8)) ? defaultMaskedError;
+
+    /** IOXFIR_3[9]
+     *  FIR_RX_BUS0_SPARE_DEPLOYED
+     */
+    (IoxFir_3, bit(9)) ? defaultMaskedError;
+
+    /** IOXFIR_3[10]
+     * FIR_RX_BUS0_MAX_SPARES_EXCEEDED
+     */
+    (IoxFir_3, bit(10)) ? defaultMaskedError;
+
+    /** IOXFIR_3[11]
+     * FIR_RX_BUS0_RECAL_OR_DYN_REPAIR_ERROR
+     */
+    (IoxFir_3, bit(11)) ? defaultMaskedError;
+
+    /** IOXFIR_3[12]
+     *  FIR_RX_BUS0_TOO_MANY_BUS_ERRORS
+     */
+    (IoxFir_3, bit(12)) ? defaultMaskedError;
+
+    /** IOXFIR_3[16]
+     *  FIR_RX_BUS1_TRAINING_ERROR
+     */
+    (IoxFir_3, bit(16)) ? defaultMaskedError;
+
+    /** IOXFIR_3[17]
+     *  FIR_RX_BUS1_SPARE_DEPLOYED
+     */
+    (IoxFir_3, bit(17)) ? defaultMaskedError;
+
+    /** IOXFIR_3[18]
+     *  FIR_RX_BUS1_MAX_SPARES_EXCEEDED
+     */
+    (IoxFir_3, bit(18)) ? defaultMaskedError;
+
+    /** IOXFIR_3[19]
+     *  FIR_RX_BUS1_RECAL_OR_DYN_REPAIR_ERROR
+     */
+    (IoxFir_3, bit(19)) ? defaultMaskedError;
+
+    /** IOXFIR_3[20]
+     *  FIR_RX_BUS1_TOO_MANY_BUS_ERRORS
+     */
+    (IoxFir_3, bit(20)) ? defaultMaskedError;
+
+    /** IOXFIR_3[24]
+     *  FIR_RX_BUS2_TRAINING_ERROR
+     */
+    (IoxFir_3, bit(24)) ? defaultMaskedError;
+
+    /** IOXFIR_3[25]
+     *  FIR_RX_BUS2_SPARE_DEPLOYED
+     */
+    (IoxFir_3, bit(25)) ? defaultMaskedError;
+
+    /** IOXFIR_3[26]
+     *  FIR_RX_BUS2_MAX_SPARES_EXCEEDED
+     */
+    (IoxFir_3, bit(26)) ? defaultMaskedError;
+
+    /** IOXFIR_3[27]
+     *  FIR_RX_BUS2_RECAL_OR_DYN_REPAIR_ERROR
+     */
+    (IoxFir_3, bit(27)) ? defaultMaskedError;
+
+    /** IOXFIR_3[28]
+     *  FIR_RX_BUS2_TOO_MANY_BUS_ERRORS
+     */
+    (IoxFir_3, bit(28)) ? defaultMaskedError;
+
+    /** IOXFIR_3[32]
+     *  FIR_RX_BUS3_TRAINING_ERROR
+     */
+    (IoxFir_3, bit(32)) ? defaultMaskedError;
+
+    /** IOXFIR_3[33]
+     *  FIR_RX_BUS3_SPARE_DEPLOYED
+     */
+    (IoxFir_3, bit(33)) ? defaultMaskedError;
+
+    /** IOXFIR_3[34]
+     *  FIR_RX_BUS3_MAX_SPARES_EXCEEDED
+     */
+    (IoxFir_3, bit(34)) ? defaultMaskedError;
+
+    /** IOXFIR_3[35]
+     *  FIR_RX_BUS3_RECAL_OR_DYN_REPAIR_ERROR
+     */
+    (IoxFir_3, bit(35)) ? defaultMaskedError;
+
+    /** IOXFIR_3[36]
+     *  FIR_RX_BUS3_TOO_MANY_BUS_ERRORS
+     */
+    (IoxFir_3, bit(36)) ? defaultMaskedError;
+
+    /** IOXFIR_3[40]
+     *  FIR_RX_BUS4_TRAINING_ERROR
+     */
+    (IoxFir_3, bit(40)) ? defaultMaskedError;
+
+    /** IOXFIR_3[41]
+     *  FIR_RX_BUS4_SPARE_DEPLOYED
+     */
+    (IoxFir_3, bit(41)) ? defaultMaskedError;
+
+    /** IOXFIR_3[42]
+     *  FIR_RX_BUS4_MAX_SPARES_EXCEEDED
+     */
+    (IoxFir_3, bit(42)) ? defaultMaskedError;
+
+    /** IOXFIR_3[43]
+     *  FIR_RX_BUS4_RECAL_OR_DYN_REPAIR_ERROR
+     */
+    (IoxFir_3, bit(43)) ? defaultMaskedError;
+
+    /** IOXFIR_3[44]
+     *  FIR_RX_BUS4_TOO_MANY_BUS_ERRORS
+     */
+    (IoxFir_3, bit(44)) ? defaultMaskedError;
+
+    /** IOXFIR_3[48]
+     *  FIR_SCOMFIR_ERROR
+     */
+    (IoxFir_3, bit(48)) ? defaultMaskedError;
+
+    /** IOXFIR_3[49]
+     *  FIR_SCOMFIR_ERROR_CLONE
+     */
+    (IoxFir_3, bit(49)) ? defaultMaskedError;
+};
+
+################################################################################
+# XBUS Chiplet PSIFIR
+################################################################################
+
+rule XbusPsiFir
+{
+  CHECK_STOP:
+     XBUS_PSIFIR & ~XBUS_PSIFIR_MASK & ~XBUS_PSIFIR_ACT0 & ~XBUS_PSIFIR_ACT1;
+  RECOVERABLE:
+     XBUS_PSIFIR & ~XBUS_PSIFIR_MASK & ~XBUS_PSIFIR_ACT0 &  XBUS_PSIFIR_ACT1;
+};
+
+group gXbusPsiFir filter singlebit
+{
+    /** XBUS_PSIFIR[5]
+     *  INTERNAL_SCOM_ERROR
+     */
+    (XbusPsiFir, bit(5)) ? defaultMaskedError;
+
+    /** XBUS_PSIFIR[6]
+     *  INTERNAL_SCOM_ERROR_CLONE
+     */
+    (XbusPsiFir, bit(6)) ? defaultMaskedError;
 };
 
 ################################################################################

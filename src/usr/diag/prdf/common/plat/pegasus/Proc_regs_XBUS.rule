@@ -122,10 +122,41 @@
     };
 
     ############################################################################
-    # XBUS Chiplet IOXFIR_0
+    # XBUS Chiplet IOXFIR_0 (Venice only)
     ############################################################################
 
-    # Venice only scomaddr = TBD
+   register IOXFIR_0
+   {
+        name        "XBUS01.X0.BUSCTL.SCOM.FIR_REG";
+        scomaddr    0x04011000;
+        reset       (&, 0x04011001);
+        mask        (|, 0x04011005);
+        capture     group never; #FIXME: RTC 67200
+    };
+
+    register IOXFIR_0_MASK
+    {
+        name        "XBUS01.X0.BUSCTL.SCOM.FIR_MASK_REG";
+        scomaddr    0x04011003;
+        capture     type secondary;
+        capture     group never; #FIXME: RTC 67200
+    };
+
+    register IOXFIR_0_ACT0
+    {
+        name        "XBUS01.X0.BUSCTL.SCOM.FIR_ACTION0_REG";
+        scomaddr    0x04011006;
+        capture     type secondary;
+        capture     group never; #FIXME: RTC 67200
+    };
+
+    register IOXFIR_0_ACT1
+    {
+        name        "XBUS01.X0.BUSCTL.SCOM.FIR_ACTION1_REG";
+        scomaddr    0x04011007;
+        capture     type secondary;
+        capture     group never; #FIXME: RTC 67200
+    };
 
     ############################################################################
     # XBUS Chiplet IOXFIR_1
@@ -133,7 +164,7 @@
 
     register IOXFIR_1
     {
-        name        "XBUS1.BUSCTL.SCOM.FIR_REG";
+        name        "XBUS01.X1.BUSCTL.SCOM.FIR_REG";
         scomaddr    0x04011400;
         reset       (&, 0x04011401);
         mask        (|, 0x04011405);
@@ -142,7 +173,7 @@
 
     register IOXFIR_1_MASK
     {
-        name        "XBUS1.BUSCTL.SCOM.FIR_MASK_REG";
+        name        "XBUS01.X1.BUSCTL.SCOM.FIR_MASK_REG";
         scomaddr    0x04011403;
         capture     type secondary;
         capture     group default;
@@ -150,7 +181,7 @@
 
     register IOXFIR_1_ACT0
     {
-        name        "XBUS1.BUSCTL.SCOM.FIR_ACTION0_REG";
+        name        "XBUS01.X1.BUSCTL.SCOM.FIR_ACTION0_REG";
         scomaddr    0x04011406;
         capture     type secondary;
         capture     group default;
@@ -158,21 +189,120 @@
 
     register IOXFIR_1_ACT1
     {
-        name        "XBUS1.BUSCTL.SCOM.FIR_ACTION0_REG";
+        name        "XBUS01.X1.BUSCTL.SCOM.FIR_ACTION1_REG";
         scomaddr    0x04011407;
         capture     type secondary;
         capture     group default;
     };
 
     ############################################################################
-    # XBUS Chiplet IOXFIR_2
+    # XBUS Chiplet IOXFIR_2 (Venice only)
     ############################################################################
 
-    # Venice only scomaddr = TBD
+    register IOXFIR_2
+    {
+        name        "XBUS23.X0.BUSCTL.SCOM.FIR_REG";
+        scomaddr    0x04011800;
+        reset       (&, 0x04011801);
+        mask        (|, 0x04011805);
+        capture     group never; #FIXME: RTC 67200
+    };
+
+    register IOXFIR_2_MASK
+    {
+        name        "XBUS23.X0.BUSCTL.SCOM.FIR_MASK_REG";
+        scomaddr    0x04011803;
+        capture     type secondary;
+        capture     group never; #FIXME: RTC 67200
+    };
+
+    register IOXFIR_2_ACT0
+    {
+        name        "XBUS23.X0.BUSCTL.SCOM.FIR_ACTION0_REG";
+        scomaddr    0x04011806;
+        capture     type secondary;
+        capture     group never; #FIXME: RTC 67200
+    };
+
+    register IOXFIR_2_ACT1
+    {
+        name        "XBUS23.X0.BUSCTL.SCOM.FIR_ACTION1_REG";
+        scomaddr    0x04011807;
+        capture     type secondary;
+        capture     group never; #FIXME: RTC 67200
+    };
 
     ############################################################################
-    # XBUS Chiplet IOXFIR_3
+    # XBUS Chiplet IOXFIR_3 (Venice only)
     ############################################################################
 
-    # Venice only scomaddr = TBD
+    register IOXFIR_3
+    {
+        name        "XBUS23.X1.BUSCTL.SCOM.FIR_REG";
+        scomaddr    0x04011c00;
+        reset       (&, 0x04011c01);
+        mask        (|, 0x04011c05);
+        capture     group never; #FIXME: RTC 67200
+    };
+
+    register IOXFIR_3_MASK
+    {
+        name        "XBUS23.X1.XBUS1.BUSCTL.SCOM.FIR_MASK_REG";
+        scomaddr    0x04011c03;
+        capture     type secondary;
+        capture     group never; #FIXME: RTC 67200
+    };
+
+    register IOXFIR_3_ACT0
+    {
+        name        "XBUS23.X1.XBUS1.BUSCTL.SCOM.FIR_ACTION0_REG";
+        scomaddr    0x04011c06;
+        capture     type secondary;
+        capture     group never; #FIXME: RTC 67200
+    };
+
+    register IOXFIR_3_ACT1
+    {
+        name        "XBUS23.X1.XBUS1.BUSCTL.SCOM.FIR_ACTION1_REG";
+        scomaddr    0x04011c07;
+        capture     type secondary;
+        capture     group never; #FIXME: RTC 67200
+    };
+
+    ############################################################################
+    # XBUS Chiplet XBUS_PSIFIR (Venice only)
+    ############################################################################
+
+    register XBUS_PSIFIR
+    {
+        name        "PSI.PSI_MAC.PSI_SCOM.FIR_REG";
+        scomaddr    0x04012400;
+        reset       (&, 0x04012401);
+        mask        (|, 0x04012405);
+        capture     group never; #FIXME: RTC 67200
+    };
+
+    register XBUS_PSIFIR_MASK
+    {
+        name        "PSI.PSI_MAC.PSI_SCOM.FIR_MASK_REG";
+        scomaddr    0x04012403;
+        capture     type secondary;
+        capture     group never; #FIXME: RTC 67200
+    };
+
+    register XBUS_PSIFIR_ACT0
+    {
+        name        "PSI.PSI_MAC.PSI_SCOM.FIR_ACTION0_REG";
+        scomaddr    0x04012406;
+        capture     type secondary;
+        capture     group never; #FIXME: RTC 67200
+    };
+
+    register XBUS_PSIFIR_ACT1
+    {
+        name        "PSI.PSI_MAC.PSI_SCOM.FIR_ACTION1_REG";
+        scomaddr    0x04012407;
+        capture     type secondary;
+        capture     group never; #FIXME: RTC 67200
+    };
 

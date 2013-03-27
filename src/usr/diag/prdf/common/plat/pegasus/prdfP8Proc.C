@@ -672,6 +672,42 @@ int32_t MaskIfCentaurCheckstop( ExtensibleChip * i_chip,
  * @param  i_sc   The step code data struct
  * @returns Failure or Success
  */
+int32_t MaskMCS00IfCentaurCheckstop( ExtensibleChip * i_chip,
+                                     STEP_CODE_DATA_STRUCT & i_sc )
+{
+    int32_t l_rc = SUCCESS;
+    l_rc = MaskIfCentaurCheckstop(i_chip, i_sc, 5);
+    return l_rc;
+}
+PRDF_PLUGIN_DEFINE( Proc, MaskMCS00IfCentaurCheckstop );
+
+int32_t MaskMCS01IfCentaurCheckstop( ExtensibleChip * i_chip,
+                                     STEP_CODE_DATA_STRUCT & i_sc )
+{
+    int32_t l_rc = SUCCESS;
+    l_rc = MaskIfCentaurCheckstop(i_chip, i_sc, 6);
+    return l_rc;
+}
+PRDF_PLUGIN_DEFINE( Proc, MaskMCS01IfCentaurCheckstop );
+
+int32_t MaskMCS10IfCentaurCheckstop( ExtensibleChip * i_chip,
+                                     STEP_CODE_DATA_STRUCT & i_sc )
+{
+    int32_t l_rc = SUCCESS;
+    l_rc = MaskIfCentaurCheckstop(i_chip, i_sc, 7);
+    return l_rc;
+}
+PRDF_PLUGIN_DEFINE( Proc, MaskMCS10IfCentaurCheckstop );
+
+int32_t MaskMCS11IfCentaurCheckstop( ExtensibleChip * i_chip,
+                                     STEP_CODE_DATA_STRUCT & i_sc )
+{
+    int32_t l_rc = SUCCESS;
+    l_rc = MaskIfCentaurCheckstop(i_chip, i_sc, 8);
+    return l_rc;
+}
+PRDF_PLUGIN_DEFINE( Proc, MaskMCS11IfCentaurCheckstop );
+
 int32_t MaskMCS20IfCentaurCheckstop( ExtensibleChip * i_chip,
                                      STEP_CODE_DATA_STRUCT & i_sc )
 {
