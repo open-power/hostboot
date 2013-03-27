@@ -212,14 +212,6 @@ if( !($cfgSrcOutputDir =~ "none") )
     writeFapiPlatAttrMacrosHeaderFileFooter ($fapiPlatAttrMacrosHeaderFile);
     close $fapiPlatAttrMacrosHeaderFile;
 
-    #fixme-Remove when RTC:38197 is done
-    open(ATTR_DUMP_FILE,">$cfgSrcOutputDir"."attributedump.C")
-      or fatal ("Attribute dump file: \"$cfgSrcOutputDir"
-        . "attributedump.C\" could not be opened.");
-    my $dumpFile = *ATTR_DUMP_FILE;
-    writeDumpFile($attributes,$dumpFile);
-    close $dumpFile;
-
     open(ATTR_ATTRERRL_C_FILE,">$cfgSrcOutputDir"."errludattribute.C")
       or fatal ("Attribute errlog C file: \"$cfgSrcOutputDir"
         . "errludattribute.C\" could not be opened.");
@@ -827,16 +819,16 @@ namespace TARGETING
 
         // Initialized to zero on Fsp Reset / Obliterate on Fsp Reset or R/R
         SECTION_TYPE_FSP_P0_ZERO_INIT = 0x4,
-        
+
         // Initialized from Flash / Obliterate on Fsp Reset or R/R
         SECTION_TYPE_FSP_P0_FLASH_INIT = 0x5,
-        
+
         // This section remains across fsp power cycle, fixed, never updates
         SECTION_TYPE_FSP_P3_RO = 0x6,
 
         // This section persist changes across Fsp Power cycle
         SECTION_TYPE_FSP_P3_RW = 0x7,
-         
+
         // Initialized to zero on hard reset, else existing P1 memory
         // copied on R/R
         SECTION_TYPE_FSP_P1_ZERO_INIT = 0x8,
@@ -1993,7 +1985,7 @@ sub writeAttrErrlHFile {
             {
                 print $outFile "              uint32_t offset = 0;\n";
             }
-            if (exists $attribute->{simpleType}->{uint8_t}) 
+            if (exists $attribute->{simpleType}->{uint8_t})
             {
                 print $outFile "              l_traceEntry.resize(10+offset + $total_count * 5);\n";
                 print $outFile "              for (uint32_t i = 0;i<$total_count;i++) {\n";
@@ -2509,175 +2501,6 @@ sub writeTargetErrlHFile {
     print $outFile "#endif\n";
 } # sub writeTargetErrlHFile
 
-
-
-#fixme-Remove when RTC:38197 is done
-######
-#Create a .C file to dump all possible attributes
-#####
-sub writeDumpFile {
-    my($attributes,$outFile) = @_;
-
-    #First setup the includes and function definition
-    print $outFile "#include <targeting/common/targetservice.H>\n";
-    print $outFile "#include <targeting/common/trace.H>\n";
-    print $outFile "#include <stdio.h>\n";
-    print $outFile "\n";
-    print $outFile "namespace TARGETING\n";
-    print $outFile "{\n";
-    print $outFile "    void dumpAllAttributes( TARG_TD_t i_trac, uint32_t i_huid )\n";
-    print $outFile "    {\n";
-    print $outFile "        using namespace TARGETING;\n";
-    print $outFile "\n";
-    print $outFile "        bool foundit = false;\n";
-    print $outFile "        TargetService& l_targetService = targetService();\n";
-    print $outFile "\n";
-    print $outFile "        // Loop through every Target\n";
-    print $outFile "        for( TargetIterator l_targ = l_targetService.begin();\n";
-    print $outFile "             l_targ != l_targetService.end();\n";
-    print $outFile "             ++l_targ )\n";
-    print $outFile "        {\n";
-
-    # add a HUID check first so we can act on a single target
-    print $outFile "            { //HUID Check\n";
-    print $outFile "                AttributeTraits<ATTR_HUID>::Type huid;\n";
-    print $outFile "                if( (*l_targ)->tryGetAttr<ATTR_HUID>(huid) ) {\n";
-    print $outFile "                    if( (i_huid != huid) && (i_huid != 0) )\n";
-    print $outFile "                    {\n";
-    print $outFile "                        //skip this target\n";
-    print $outFile "                        continue;\n";
-    print $outFile "                    }\n";
-    print $outFile "                    else\n";
-    print $outFile "                    {\n";
-    print $outFile "                        foundit = true;\n";
-    print $outFile "                    }\n";
-    print $outFile "                }\n";
-    print $outFile "            }\n";
-
-    # add the physical path first so we know where we are
-    print $outFile "            { //Physical Path\n";
-    print $outFile "                AttributeTraits<ATTR_PHYS_PATH>::Type tmp;\n";
-    print $outFile "                if( (*l_targ)->tryGetAttr<ATTR_PHYS_PATH>(tmp) ) {\n";
-    print $outFile "                    char* tmpstring = tmp.toString();\n";
-    print $outFile "                    TRACFCOMP( i_trac, \"DUMP: --ATTR_PHYS_PATH=%s--\", tmpstring );\n";
-    print $outFile "                    free(tmpstring);\n";
-    print $outFile "                }\n";
-    print $outFile "            }\n";
-
-    # loop through every attribute
-    foreach my $attribute (@{$attributes->{attribute}})
-    {
-	# skip write-only attributes
-	if(!(exists $attribute->{readable})) {
-	    next;
-	}
-
-	# skip the PHYS_PATH that we already added
-	if( $attribute->{id} =~ /PHYS_PATH/ ) {
-	    next;
-	}
-
-	# Enums have strings defined already, use them
-	if(exists $attribute->{simpleType} && (exists $attribute->{simpleType}->{enumeration}) ) {
-	    print $outFile "            { //simpleType:enum\n";
-	    print $outFile "                AttributeTraits<ATTR_",$attribute->{id},">::Type tmp;\n";
-	    print $outFile "                if( (*l_targ)->tryGetAttr<ATTR_",$attribute->{id},">(tmp) ) {\n";
-	    print $outFile "                    const char* tmpstr = (*l_targ)->getAttrAsString<ATTR_",$attribute->{id},">();\n";
-	    print $outFile "                    TRACFCOMP( i_trac, \"DUMP: ",$attribute->{id},"=%s\", tmpstr );\n";
-	    print $outFile "                }\n";
-	    print $outFile "            }\n";
-	}
-	# signed ints dump as decimals
-	elsif(exists $attribute->{simpleType}
-	      && ( (exists $attribute->{simpleType}->{int8_t}) ||
-		  (exists $attribute->{simpleType}->{int16_t}) ||
-		  (exists $attribute->{simpleType}->{int32_t}) ||
-		  (exists $attribute->{simpleType}->{int64_t})
-		  )
-		)
-	{
-	    print $outFile "            { //simpleType:int\n";
-	    print $outFile "                AttributeTraits<ATTR_",$attribute->{id},">::Type tmp;\n";
-	    print $outFile "                if( (*l_targ)->tryGetAttr<ATTR_",$attribute->{id},">(tmp) ) {\n";
-	    print $outFile "                    TRACFCOMP( i_trac, \"DUMP: ",$attribute->{id},"=%d\", tmp );\n";
-	    print $outFile "                }\n";
-	    print $outFile "            }\n";
-	}
-	# unsigned ints dump as hex
-	elsif(exists $attribute->{simpleType}
-	      && ( (exists $attribute->{simpleType}->{uint8_t}) ||
-		  (exists $attribute->{simpleType}->{uint16_t}) ||
-		  (exists $attribute->{simpleType}->{uint32_t}) ||
-		  (exists $attribute->{simpleType}->{uint64_t})
-		  )
-		)
-	{
-	    print $outFile "            { //simpleType:uint\n";
-	    print $outFile "                AttributeTraits<ATTR_",$attribute->{id},">::Type tmp;\n";
-	    print $outFile "                if( (*l_targ)->tryGetAttr<ATTR_",$attribute->{id},">(tmp) ) {\n";
-	    print $outFile "                    TRACFCOMP( i_trac, \"DUMP: ",$attribute->{id},"=0x%X\", tmp );\n";
-	    print $outFile "                }\n";
-	    print $outFile "            }\n";
-	}
-	# makes no sense to dump mutex attributes, so skipping
-	elsif(exists $attribute->{simpleType} && (exists $attribute->{simpleType}->{hbmutex}) ) {
-	    print $outFile "            //Skipping Mutex ",$attribute->{id},"\n";
-	}
-	# use the built-in stringifier for EntityPaths
-	elsif(exists $attribute->{nativeType} && ($attribute->{nativeType}->{name} eq "EntityPath")) {
-	    print $outFile "            { //nativeType:EntityPath\n";
-	    print $outFile "                AttributeTraits<ATTR_",$attribute->{id},">::Type tmp;\n";
-	    print $outFile "                if( (*l_targ)->tryGetAttr<ATTR_",$attribute->{id},">(tmp) ) {\n";
-	    print $outFile "                    char* tmpstring = tmp.toString();\n";
-	    print $outFile "                    TRACFCOMP( i_trac, \"DUMP: ",$attribute->{id},"=%s\", tmpstring );\n";
-	    print $outFile "                    free(tmpstring);\n";
-	    print $outFile "                }\n";
-	    print $outFile "            }\n";
-	}
-	# any other nativeTypes are just decimals...  (I never saw one)
-	elsif(exists $attribute->{nativeType}) {
-	    print $outFile "            { //nativeType\n";
-	    print $outFile "                AttributeTraits<ATTR_",$attribute->{id},">::Type tmp;\n";
-	    print $outFile "                if( (*l_targ)->tryGetAttr<ATTR_",$attribute->{id},">(tmp) ) {\n";
-	    print $outFile "                    TRACFCOMP( i_trac, \"DUMP: ",$attribute->{id},"=%d\", tmp );\n";
-	    print $outFile "                }\n";
-	    print $outFile "            }\n";
-	}
-	# any complicated types just get dumped as raw hex binary
-	elsif(exists $attribute->{complexType}) {
-	    print $outFile "            { //complexType\n";
-	    print $outFile "                AttributeTraits<ATTR_",$attribute->{id},">::Type tmp;\n";
-	    print $outFile "                if( (*l_targ)->tryGetAttr<ATTR_",$attribute->{id},">(tmp) ) {\n";
-	    print $outFile "                    TRACFBIN( i_trac, \"DUMP: ",$attribute->{id},"=\", &tmp, sizeof(tmp) );\n";
-	    print $outFile "                }\n";
-	    print $outFile "            }\n";
-	}
-	# just in case, add a comment about missing types
-	else
-	{
-	    print $outFile "            //Skipping ",$attribute->{id},"\n";
-	}
-    }
-
-    print $outFile "        }\n";
-    print $outFile "\n";
-    print $outFile "        if( !foundit )\n";
-    print $outFile "        {\n";
-    print $outFile "            TRACFCOMP( i_trac, \"DUMP: No Target found matching HUID=%.8X\", i_huid );\n";
-    print $outFile "        }\n";
-    print $outFile "    }\n";
-    print $outFile "\n";
-
-    # add another prototype that is easier to call from debug framework
-    print $outFile "    void dumpAllAttributes2( trace_desc_t** i_trac, uint32_t i_huid )\n";
-    print $outFile "    {\n";
-    print $outFile "        dumpAllAttributes( *i_trac, i_huid );\n";
-    print $outFile "    }\n";
-    print $outFile "\n";
-
-    print $outFile "}\n";
-    print $outFile "\n";
-}
 
 sub UTILITY_FUNCTIONS { }
 
@@ -3362,11 +3185,11 @@ sub isFspTargetInstance {
     else
     {
         %g_fspTargetTypesCache =
-            map { $_->{id} => exists $_->{fspOnly} ? 1:0 } 
+            map { $_->{id} => exists $_->{fspOnly} ? 1:0 }
                 @{$attributes->{targetType}};
         $fspTargetInstance = %g_fspTargetTypesCache->{$targetInstance->{type}};
     }
-    
+
     return $fspTargetInstance;
 }
 
@@ -4067,11 +3890,11 @@ sub generateTargetingImage {
             }
         }
 
-        # Flag if target is FSP specific; in that case store all of its 
-        # attributes in the FSP section, regardless of whether they are 
+        # Flag if target is FSP specific; in that case store all of its
+        # attributes in the FSP section, regardless of whether they are
         # themselves FSP specific.  Only need to do this 1x per target instance
         my $fspTarget = isFspTargetInstance($attributes,$targetInstance);
- 
+
         my %attributeDefCache =
             map { $_->{id} => $_} @{$attributes->{attribute}};
 
@@ -4102,7 +3925,7 @@ sub generateTargetingImage {
                     $section = "fspP3Ro";
                 }
                 elsif( exists $attributeDef->{writeable}
-                       && $attributeDef->{persistency} eq "non-volatile" ) 
+                       && $attributeDef->{persistency} eq "non-volatile" )
                 {
                     $section = "fspP3Rw";
                 }
@@ -4110,7 +3933,7 @@ sub generateTargetingImage {
                 {
                     $section = "fspP1DefaultedFromZero";
                 }
-                elsif( $attributeDef->{persistency} eq "semi-non-volatile" ) 
+                elsif( $attributeDef->{persistency} eq "semi-non-volatile" )
                 {
                     $section = "fspP1DefaultedFromP3";
                 }
@@ -4424,7 +4247,7 @@ sub generateTargetingImage {
     $sectionHoH{ heapZeroInit }{ type   } = 3;
     $sectionHoH{ heapZeroInit }{ size   } =
         sizeBlockAligned($heapZeroInitOffset,$blockSize,1);
-  
+
     # zeroInitSection occupies no space in the binary, so set the
     # Hostboot section address to that of the zeroInitSection
     $sectionHoH{ hbHeapZeroInit }{ offset } =
@@ -4659,7 +4482,7 @@ bytes by default
 =item B<--include-fsp-attributes>
 
 Emits FSP specific attributes and targets into the generated binaries and
-generated code.  
+generated code.
 
 =item B<--noinclude-fsp-attributes>
 
