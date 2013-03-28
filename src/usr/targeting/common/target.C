@@ -135,30 +135,36 @@ void Target::_getAttrPtr(
             TARG_GET_SINGLETON(TARGETING::theAttrRP).translateAddr(ppAttrAddr));
     }
 
-    // Iterate through all the target's attribute IDs
-    for (uint32_t i = 0; i < iv_attrs; ++i)
-    {
-        // Point to the ith attribute ID.  If it matches the requested attribute
-        // ID,
-        // look up the attribute's address
-        if (*(pAttrId+i) == i_attr)
+    if ((pAttrId != NULL) && (ppAttrAddr != NULL))
+    {   // only check for the attribute if we got a valid address from
+        // the translateAddr function
+
+        // Iterate through all the target's attribute IDs
+        for (uint32_t i = 0; i < iv_attrs; ++i)
         {
-            // Locate the corresponding attribute address
-            l_pAttr = TARG_TO_PLAT_PTR(*(ppAttrAddr+i));
-
-            // Only translate addresses on platforms where addresses are 4 bytes
-            // wide (FSP).  The compiler should perform dead code elimination of
-            // this path on platforms with 8 byte wide addresses (Hostboot),
-            // since the "if" check can be statically computed at compile time.
-            if(TARG_ADDR_TRANSLATION_REQUIRED)
+            // Point to the ith attribute ID.  If it matches the requested
+            // attribute ID,
+            // look up the attribute's address
+            if (*(pAttrId+i) == i_attr)
             {
-                l_pAttr =
-                    TARG_GET_SINGLETON(TARGETING::theAttrRP).translateAddr(
-                        l_pAttr);
-            }
+                // Locate the corresponding attribute address
+                l_pAttr = TARG_TO_PLAT_PTR(*(ppAttrAddr+i));
 
-            break;
-        }
+                // Only translate addresses on platforms where addresses are
+                // 4 byte wide (FSP).  The compiler should perform dead code
+                // elimination this path on platforms with 8 byte wide
+                // addresses (Hostboot), since the "if" check can be statically
+                // computed at compile time.
+                if(TARG_ADDR_TRANSLATION_REQUIRED)
+                {
+                    l_pAttr =
+                        TARG_GET_SINGLETON(TARGETING::theAttrRP).translateAddr(
+                            l_pAttr);
+                }
+
+                break;
+            }
+        } // for
     }
     o_pAttr = l_pAttr;
 
@@ -230,12 +236,12 @@ uint8_t * Target::targetFFDC( uint32_t & o_size ) const
     AttributeTraits<ATTR_CLASS>::Type attrClass = getAttr<ATTR_CLASS>();
     AttributeTraits<ATTR_TYPE>::Type  attrType  = getAttr<ATTR_TYPE>();
     AttributeTraits<ATTR_MODEL>::Type attrModel = getAttr<ATTR_MODEL>();
-    uint32_t headerSize = sizeof(attrHuid) + 
-                            sizeof(attrClass) + sizeof(attrType) + 
+    uint32_t headerSize = sizeof(attrHuid) +
+                            sizeof(attrClass) + sizeof(attrType) +
                             sizeof(attrModel);
 
     uint32_t attrEnum = ATTR_NA;
-    
+
     uint8_t pathPhysSize = 0;
     AttributeTraits<ATTR_PHYS_PATH>::Type pathPhys;
     if( tryGetAttr<ATTR_PHYS_PATH>(pathPhys) ) {
@@ -257,7 +263,7 @@ uint8_t * Target::targetFFDC( uint32_t & o_size ) const
     // to compensate for the size of that attribute type, when applicable
     pFFDC = static_cast<uint8_t*>(
         malloc(  headerSize
-               + pathPhysSize 
+               + pathPhysSize
                + sizeof(attrEnum)
                + pathAffSize
                + sizeof(attrEnum)));

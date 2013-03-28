@@ -658,6 +658,10 @@ uint32_t TargetService::_maxTargets()
                         pNumTargets));
     }
 
+    TARG_ASSERT(pNumTargets, TARG_ERR_LOC
+                "FATAL: Could not determine location of targets after "
+                "address translation");
+
     iv_maxTargets = *pNumTargets;
 
     TARG_INF("Max targets = %d",iv_maxTargets);
