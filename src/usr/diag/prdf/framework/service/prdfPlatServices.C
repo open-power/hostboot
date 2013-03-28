@@ -67,9 +67,15 @@ bool isMasterFSP()
 
 bool isMemoryPreservingIpl()
 {
-    bool l_isMemPreservingIpl = false;
+    using namespace TARGETING;
 
-    // TODO (RTC 23138): Add support for Hostboot.
+    bool l_isMemPreservingIpl = false;
+    TargetHandle_t l_pTarget = getSystemTarget();
+
+    if(l_pTarget && l_pTarget->getAttr<ATTR_IS_MPIPL_HB>())
+    {
+        l_isMemPreservingIpl = true;
+    }
 
     return l_isMemPreservingIpl;
 }
