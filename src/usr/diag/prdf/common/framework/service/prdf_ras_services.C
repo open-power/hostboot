@@ -48,9 +48,6 @@
 #include <algorithm>
 #include <iipSystem.h>         //For RemoveStoppedChips
 
-// FIXME: RTC: 62866 will investigate the removal of CPTR
-#define CPTR_Identifier 0x43505452
-
 #ifdef __HOSTBOOT_MODULE
   #define htonl(foo) (foo) // no-op for HB
   #include <stdio.h>
@@ -1546,45 +1543,50 @@ void RasServices::MnfgTrace(ErrorSignature * l_esig )
 
 void ErrDataService::AddCapData(ServiceDataCollector & i_sdc, errlHndl_t i_errHdl)
 {
-    // NOTE: Labels on this structure are not being verified in the
-    //       plugins.  If that behavior changes, we must use htonl()
-    //       to fix the endianness on them.
-
-    CaptureDataClass * l_CapDataBuf = new CaptureDataClass;
+    // As CaptureDataClass has large array inside, allocate it on heap
+    CaptureDataClass  *l_CapDataBuf = new CaptureDataClass() ;
 
     for(uint32_t ii = 0; ii < CaptureDataSize; ++ii)
     {
         l_CapDataBuf->CaptureData[ii] = 0xFF;
     }
 
-    l_CapDataBuf->CaptureData_Label = CPTR_Identifier;        //Start of Capture Data 'CPTR'
-    l_CapDataBuf->EndLabel[0]           = 0x454E4420;        // End of Capture data
-    l_CapDataBuf->EndLabel[1]           = 0x44415441;        // 'END DATA'
+    uint32_t thisCapDataSize =  i_sdc.GetCaptureData().Copy(
+                                                     l_CapDataBuf->CaptureData,
+                                                     CaptureDataSize );
 
-    uint32_t thisCapDataSize =  i_sdc.GetCaptureData().Copy(l_CapDataBuf->CaptureData,CaptureDataSize);
+    do
+    {
+        if( 0 == thisCapDataSize )
+        {
+            // Nothing to add
+            break;
+        }
 
-    thisCapDataSize = thisCapDataSize + 32; // include the eye catcher labels
+        l_CapDataBuf->PfaCaptureDataSize = htonl( thisCapDataSize );
 
-    l_CapDataBuf->PfaCaptureDataSize = thisCapDataSize;
-    l_CapDataBuf->PfaCaptureDataSize = htonl(l_CapDataBuf->PfaCaptureDataSize);
+        thisCapDataSize = thisCapDataSize +
+                          sizeof(l_CapDataBuf->PfaCaptureDataSize);
 
-    //Compress the Capture data
-    size_t l_compressBufSize =
-                PrdfCompressBuffer::compressedBufferMax(thisCapDataSize);
-    const size_t sz_compressCapBuf = l_compressBufSize + 4;
-    uint8_t * l_compressCapBuf = new uint8_t[sz_compressCapBuf];
+        //Compress the Capture data
+        size_t l_compressBufSize =
+                PrdfCompressBuffer::compressedBufferMax( thisCapDataSize );
 
-    memcpy(l_compressCapBuf, l_CapDataBuf, 4); // grab CPTR string
-    PrdfCompressBuffer::compressBuffer( &((uint8_t *) l_CapDataBuf)[4],
-                                        (size_t) thisCapDataSize - 4,
-                                        &l_compressCapBuf[4],
-                                        l_compressBufSize);
+        uint8_t * l_compressCapBuf = new uint8_t[l_compressBufSize];
 
-    //Add the Compressed Capture data to Error Log User Data
-    PRDF_ADD_FFDC( i_errHdl, (const char*)l_compressCapBuf,
-                   sz_compressCapBuf, ErrlVer2, ErrlCapData_1 );
-    delete [] l_compressCapBuf;
-    delete l_CapDataBuf;
+        PrdfCompressBuffer::compressBuffer( ( ( uint8_t * ) l_CapDataBuf ),
+                                            (size_t) thisCapDataSize ,
+                                            l_compressCapBuf,
+                                            l_compressBufSize);
+
+        //Actual size of compressed data is returned in l_compressBufSize
+        //Add the Compressed Capture data to Error Log User Data
+        PRDF_ADD_FFDC( i_errHdl, (const char*)l_compressCapBuf,
+                       (size_t) l_compressBufSize, ErrlVer2, ErrlCapData_1 );
+
+        delete [] l_compressCapBuf;
+        delete l_CapDataBuf;
+    }while (0);
 }
 
 // ----------------------------------------------------------------------------

@@ -427,10 +427,8 @@ struct PfaData
 
 struct CaptureDataClass
 {
-  uint32_t CaptureData_Label; // Label to show start of Capture data.
   uint32_t PfaCaptureDataSize;
   uint8_t CaptureData[CaptureDataSize]; // MAKMAK Can this be variable size?
-  uint32_t EndLabel[2];// Label to show End of Capture Data
 };
 
 } // end namespace PRDF
