@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012                   */
+/* COPYRIGHT International Business Machines Corp. 2012,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_ddr_phy_reset.C,v 1.17 2012/12/03 15:49:27 mfred Exp $
+// $Id: mss_ddr_phy_reset.C,v 1.18 2013/03/18 19:38:48 mfred Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/centaur/working/procedures/ipl/fapi/mss_ddr_phy_reset.C,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
@@ -31,6 +31,7 @@
 // *! DESCRIPTION : see additional comments below
 // *! OWNER NAME  : Mark Fredrickson  Email: mfred@us.ibm.com
 // *! BACKUP NAME : Mark Bellows      Email: bellows@us.ibm.com
+// *! SCREEN      : memory_screen
 // #! ADDITIONAL COMMENTS :
 //
 // The purpose of this procedure is to do a soft reset of the DDR PHY logic
@@ -138,6 +139,8 @@ fapi::ReturnCode mss_ddr_phy_reset_cloned(const fapi::Target & i_target)
     uint8_t P1_DP2_reg_error = 0;
     uint8_t P1_DP3_reg_error = 0;
     uint8_t P1_DP4_reg_error = 0;
+    fapi::Target l_centaurTarget;
+    uint8_t      continue_on_dp18_pll_lock_failure = 0;
 
 
     FAPI_INF("********* mss_ddr_phy_reset start *********");
@@ -163,13 +166,13 @@ fapi::ReturnCode mss_ddr_phy_reset_cloned(const fapi::Target & i_target)
         // Deassert Force_mclk_low signal
         // see CQ 216395 (HW217109)
         rc = mss_deassert_force_mclk_low(i_target);
-        if(rc)
+        if (rc)
         {
             FAPI_ERR(" deassert_force_mclk_low Failed rc = 0x%08X (creator = %d)", uint32_t(rc), rc.getCreator());
             break;
         }
 
-  
+
         //
         // 1. Drive all control signals to the PHY to their inactive state, idle state, or inactive value.
         //    (Note: The chip should already be in this state.)
@@ -349,7 +352,7 @@ fapi::ReturnCode mss_ddr_phy_reset_cloned(const fapi::Target & i_target)
         //    PC DP18 PLL Lock Status should be 0xF800:  (SCOM Addr: 0x8000C0000301143F, 0x8001C0000301143F, 0x8000C0000301183F, 0x8001C0000301183F)
         //    PC AD32S PLL Lock Status should be 0xC000: (SCOM Addr: 0x8000C0010301143F, 0x8001C0010301143F, 0x8000C0010301183F, 0x8001C0010301183F)
         //------------------------
-        // 7a - Poll for lock bits
+        // 8a - Poll for lock bits
         FAPI_DBG("Step 8: Poll until DP18 and AD32S PLLs have locked....\n");
         do
         {
@@ -392,10 +395,33 @@ fapi::ReturnCode mss_ddr_phy_reset_cloned(const fapi::Target & i_target)
         } while ((done_polling == 0) && (poll_count < MAX_POLL_LOOPS)); // Poll until PLLs are locked.
         if (rc) break;    // Go to end of proc if error found inside polling loop.
   
+
         if (poll_count == MAX_POLL_LOOPS)
         {
+
             //-------------------------------
-            // 7b - Check Port 0 DP lock bits
+            // Check to see if we should continue even if the DP18 PLL lock fails
+            rc = fapiGetParentChip(i_target, l_centaurTarget);
+            if (rc)
+            {
+                FAPI_ERR("Error getting Centaur parent target from the input MBA");
+                break;
+            }
+            else
+            {
+                rc = FAPI_ATTR_GET( ATTR_CENTAUR_EC_MSS_CONTINUE_ON_DP18_PLL_LOCK_FAIL, &l_centaurTarget, continue_on_dp18_pll_lock_failure);
+                if (rc)
+                {
+                    FAPI_ERR("Failed to get attribute: ATTR_CENTAUR_EC_MSS_CONTINUE_ON_DP18_PLL_LOCK_FAIL.");
+                    break;
+                }
+                else
+                {
+                    FAPI_DBG("Got attribute ATTR_CENTAUR_EC_MSS_CONTINUE_ON_DP18_PLL_LOCK_FAIL:  value=%X.\n", continue_on_dp18_pll_lock_failure);
+                }
+            }
+            //-------------------------------
+            // 8b - Check Port 0 DP lock bits
             if ( dp_p0_lock_data.getHalfWord(3) != DP18_PLL_EXP_LOCK_STATUS )
             {
                 FAPI_ERR("One or more DP18 port 0 (0x0C000) PLL failed to lock!   Lock Status = %04X",dp_p0_lock_data.getHalfWord(3));
@@ -405,10 +431,15 @@ fapi::ReturnCode mss_ddr_phy_reset_cloned(const fapi::Target & i_target)
                 if ( dp_p0_lock_data.isBitClear(50) ) { FAPI_ERR("Port 0 DP 2 PLL failed to lock!");}
                 if ( dp_p0_lock_data.isBitClear(51) ) { FAPI_ERR("Port 0 DP 3 PLL failed to lock!");}
                 if ( dp_p0_lock_data.isBitClear(52) ) { FAPI_ERR("Port 0 DP 4 PLL failed to lock!");}
-                // break;  // Don't break.  Keep going to initialize any other channels that might be good.
+                if (!continue_on_dp18_pll_lock_failure)
+                {
+                    FAPI_ERR("DP18 PLL lock failed and this chip does not have the known DP18 lock bug.");
+                    break;
+                }
+                // for DD1 parts that have the DP18 lock bug - keep going to initialize any other channels that might be good.
             }
             //-------------------------------
-            // 7c - Check Port 1 DP lock bits
+            // 8c - Check Port 1 DP lock bits
             if ( dp_p1_lock_data.getHalfWord(3) != DP18_PLL_EXP_LOCK_STATUS )
             {
                 FAPI_ERR("One or more DP18 port 1 (0x1C000) PLL failed to lock!   Lock Status = %04X",dp_p1_lock_data.getHalfWord(3));
@@ -418,10 +449,15 @@ fapi::ReturnCode mss_ddr_phy_reset_cloned(const fapi::Target & i_target)
                 if ( dp_p1_lock_data.isBitClear(50) ) { FAPI_ERR("Port 1 DP 2 PLL failed to lock!");}
                 if ( dp_p1_lock_data.isBitClear(51) ) { FAPI_ERR("Port 1 DP 3 PLL failed to lock!");}
                 if ( dp_p1_lock_data.isBitClear(52) ) { FAPI_ERR("Port 1 DP 4 PLL failed to lock!");}
-                // break;  // Don't break.  Keep going to initialize any channels that might be good.
+                if (!continue_on_dp18_pll_lock_failure)
+                {
+                    FAPI_ERR("DP18 PLL lock failed and this chip does not have the known DP18 lock bug.");
+                    break;
+                }
+                // for DD1 parts that have the DP18 lock bug - keep going to initialize any other channels that might be good.
             }
             //-------------------------------
-            // 7d - Check Port 0 AD lock bits
+            // 8d - Check Port 0 AD lock bits
             if ( ad_p0_lock_data.getHalfWord(3) != AD32S_PLL_EXP_LOCK_STATUS )
             {
                 FAPI_ERR("One or more AD32S port 0 (0x0C001) PLL failed to lock!   Lock Status = %04X",ad_p0_lock_data.getHalfWord(3));
@@ -429,7 +465,7 @@ fapi::ReturnCode mss_ddr_phy_reset_cloned(const fapi::Target & i_target)
                 break;
             }
             //-------------------------------
-            // 7e - Check Port 1 AD lock bits
+            // 8e - Check Port 1 AD lock bits
             if ( ad_p1_lock_data.getHalfWord(3) != AD32S_PLL_EXP_LOCK_STATUS )
             {
                 FAPI_ERR("One or more AD32S port 1 (0x1C001) PLL failed to lock!   Lock Status = %04X",ad_p1_lock_data.getHalfWord(3));
@@ -1079,6 +1115,9 @@ This section is automatically updated by CVS when you check in this file.
 Be sure to create CVS comments when you commit so that they can be included here.
 
 $Log: mss_ddr_phy_reset.C,v $
+Revision 1.18  2013/03/18 19:38:48  mfred
+Update to not continue if DP18 PLL fails to lock and EC is DD2.
+
 Revision 1.17  2012/12/03 15:49:27  mfred
 Fixed bug to allow exit from loops in case of error.
 

@@ -23,7 +23,7 @@
 #ifndef __P8_ISTEP_NUM_H
 #define __P8_ISTEP_NUM_H
 
-// $Id: p8_istep_num.H,v 1.22 2013/02/06 04:15:38 jmcgill Exp $
+// $Id: p8_istep_num.H,v 1.24 2013/02/25 14:59:03 jeshua Exp $
 
 /// Istep number encoding for all SEEPROM and PNOR procedures.  Used to update
 /// the SBEVITAL register to record procedure progress and to create unique
@@ -80,9 +80,22 @@ CONST_UINT64_T(proc_sbe_instruct_start_istep_num,           ULL(0x0502));
 
 CONST_UINT64_T(proc_sbe_trigger_winkle_istep_num,           ULL(0x0F01));
 
+// The following record progress through the SLW process and only are 
+// logged in the virtual SBEVITAL in the OCC SRAM;  these are not recorded
+// in the real SBEVITAL as they are not executed during the master core IPL.
+CONST_UINT64_T(slw_fast_sleep_enter_istep_num,              ULL(0x0F80));
+CONST_UINT64_T(slw_fast_sleep_exit_istep_num,               ULL(0x0F81));
+CONST_UINT64_T(slw_fast_winkle_enter_istep_num,             ULL(0x0F82));
+CONST_UINT64_T(slw_fast_winkle_exit_istep_num,              ULL(0x0F83));
+CONST_UINT64_T(slw_deep_sleep_enter_istep_num,              ULL(0x0F84));
+CONST_UINT64_T(slw_deep_sleep_exit_istep_num,               ULL(0x0F85));
+CONST_UINT64_T(slw_deep_winkle_enter_istep_num,             ULL(0x0F86));
+CONST_UINT64_T(slw_deep_winkle_exit_istep_num,              ULL(0x0F87));
+
 #define PROC_SBE_TRIGGER_WINKLE_ISTEP_NUM proc_sbe_trigger_winkle_istep_num
 #define PROC_SBE_CHECK_MASTER_ISTEP_NUM proc_sbe_check_master_istep_num
 #define PROC_SBE_ENABLE_PNOR_ISTEP_NUM proc_sbe_enable_pnor_istep_num
 #define PROC_SBE_EX_HOST_RUNTIME_SCOM_ISTEP_NUM proc_sbe_ex_host_runtime_scom_istep_num
+#define PROC_SBE_TP_LD_IMAGE_ISTEP_NUM proc_sbe_tp_ld_image_istep_num
 
 #endif  // __P8_ISTEP_NUM_H

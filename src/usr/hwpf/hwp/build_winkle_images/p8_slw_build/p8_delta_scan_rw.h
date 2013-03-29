@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_delta_scan_rw.h,v 1.38 2013/03/06 18:21:46 cmolsen Exp $
+// $Id: p8_delta_scan_rw.h,v 1.40 2013/03/22 04:12:02 cmolsen Exp $
 #define OVERRIDE_OFFSET 8            // Byte offset of forward pointer's addr relative 
                                      //   to base forward pointer's addr.
 #define SIZE_IMAGE_BUF_MAX      5000000 // Max ~50MB image buffer size.
@@ -89,6 +89,7 @@
 #define IMGBUILD_INVALID_IMAGE               10  // Invalid image.
 #define IMGBUILD_IMAGE_SIZE_MISMATCH         11  // Mismatch between image sizes.
 #define IMGBUILD_IMAGE_SIZE_MESS             12  // Messed up image or section sizes.
+#define IMGBUILD_ERR_DECOMPRESSION           13  // Error assoc with decompressing RS4.
 #define IMGBUILD_ERR_PORE_INLINE             20  // Pore inline error.
 #define IMGBUILD_ERR_PORE_INLINE_ASM         21  // Err assoc w/inline assembler.
 #define IMGBUILD_ERR_WF_CREATE               45  // Err assoc w/create_wiggle_flip_prg.

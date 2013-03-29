@@ -23,7 +23,7 @@
 #ifndef __SBE_XIP_IMAGE_H
 #define __SBE_XIP_IMAGE_H
 
-// $Id: sbe_xip_image.h,v 1.20 2013/02/06 04:48:45 bcbrock Exp $
+// $Id: sbe_xip_image.h,v 1.23 2013/03/20 21:41:53 cmolsen Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/sbe/sbe_xip_image.h,v $
 //-----------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
@@ -87,7 +87,7 @@
 #define SBE_XIP_SECTION_STRINGS     8
 #define SBE_XIP_SECTION_HALT        9
 #define SBE_XIP_SECTION_PIBMEM0    10
-#define SBE_XIP_SECTION_PIBMEM1    11
+#define SBE_XIP_SECTION_DCRINGS    11
 #define SBE_XIP_SECTION_RINGS      12
 #define SBE_XIP_SECTION_SLW        13
 #define SBE_XIP_SECTION_FIT        14
@@ -96,6 +96,23 @@
 #define SBE_XIP_SECTIONS 16
 
 /// @}
+
+
+/// \defgroup sbe_xip_validate() ignore masks.
+///
+/// These defines, when matched in sbe_xip_validate(), cause the validation
+/// to skip the check of the corresponding property. The purpose is to more
+/// effectively debug images that may be damaged and which have excess info
+/// before or after the image. The latter will be the case when dumping the
+/// image as a memory block without knowing where the image starts and ends.
+///
+/// @{
+
+#define SBE_XIP_IGNORE_FILE_SIZE (uint32_t)0x00000001
+#define SBE_XIP_IGNORE_ALL       (uint32_t)0x80000000
+
+/// @}
+
 
 #ifndef __ASSEMBLER__
 
@@ -113,7 +130,7 @@
         ".strings",                             \
         ".halt",                                \
         ".pibmem0",                             \
-        ".pibmem1",                             \
+        ".dcrings",                             \
         ".rings",                               \
         ".slw",                                 \
         ".fit",                                 \
@@ -599,6 +616,9 @@ typedef struct {
 /// 
 /// \param[in] i_size The putative size of the image
 ///
+/// \param[in] i_maskIgnores Array of ignore bits representing which properties
+/// should not be checked for in sbe_xip_validate2().
+///
 /// This API should be called first by all applications that manipulate
 /// SBE-XIP images in host memory.  The magic number is validated, and 
 /// the image is checked for consistency of the section table and table of
@@ -610,6 +630,9 @@ typedef struct {
 /// \retval non-0 See \ref sbe_xip_image_errors
 int
 sbe_xip_validate(void* i_image, const uint32_t i_size);
+
+int
+sbe_xip_validate2(void* i_image, const uint32_t i_size, const uint32_t i_maskIgnores);
 
 
 /// Normalize the SBE-XIP image

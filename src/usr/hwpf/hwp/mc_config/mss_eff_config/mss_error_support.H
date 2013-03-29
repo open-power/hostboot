@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/hwpf/hwp/mc_config/mss_eff_config/opt_memmap.H $      */
+/* $Source: src/usr/hwpf/hwp/mc_config/mss_eff_config/mss_error_support.H $ */
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/* COPYRIGHT International Business Machines Corp. 2013                   */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,20 +20,20 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: opt_memmap.H,v 1.3 2013/02/20 23:13:30 vanlee Exp $
+// $Id: mss_error_support.H,v 1.1 2013/03/21 19:04:22 bellows Exp $
+
 //------------------------------------------------------------------------------
-// *! (C) Copyright International Business Machines Corp. 2012
+// *! (C) Copyright International Business Machines Corp. 2013
 // *! All Rights Reserved -- Property of IBM
 // *! *** IBM Confidential ***
 //------------------------------------------------------------------------------
-// *! TITLE       : opt_memmap.H
-// *! DESCRIPTION : see additional comments below
-// *! OWNER NAME  : Girisankar Paulraj     Email: gpaulraj@in.ibm.com
-// *! BACKUP NAME : Mark Bellows      Email: bellows@us.ibm.com
-// *! ADDITIONAL COMMENTS :
+// *! TITLE : mss_error_support.H
+// *! DESCRIPTION : Tools
+// *! OWNER NAME : bellows@us.ibm.com
+// *! BACKUP NAME :
+// #! ADDITIONAL COMMENTS :
 //
-// Header file for opt_memmap
-//
+
 //------------------------------------------------------------------------------
 // Don't forget to create CVS comments when you check in your changes!
 //------------------------------------------------------------------------------
@@ -41,25 +41,25 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
-//  1.1    | vanlee   | 12/01/12| Initial version
-//  1.2    | vanlee   | 01/04/13| Added version string
-//  1.3    | vanlee   | 02/20/13| Added i_init parameter
+//  1.0    | 03/08/13 | bellows | First version
 
-#ifndef MSS_OPT_MEMMAP_H_
-#define MSS_OPT_MEMMAP_H_
+#ifndef _MSS_ERROR_SUPPORT_H
+#define _MSS_ERROR_SUPPORT_H
 
 #include <fapi.H>
 
-typedef fapi::ReturnCode (*opt_memmap_FP_t)(std::vector<fapi::Target> & i_procs,
-                          bool i_init);
+typedef fapi::ReturnCode (*hwpCollectMemGrouping_FP_t)(const fapi::Target&,  fapi::ReturnCode &);
 
 extern "C"
 {
 
-// i_init = true  : initialize all ATTR_PROC_MEM_BASE attributes to 0
-//        = false : perform memory map optimization
-fapi::ReturnCode opt_memmap(std::vector<fapi::Target> & i_procs, bool i_init);
+
+fapi::ReturnCode hwpCollectMemGrouping(const fapi::Target & i_target,fapi::ReturnCode & o_rc);
+fapi::ReturnCode hwpCollectMemFIRs(const fapi::Target & i_target,fapi::ReturnCode & o_rc);
+
+
 
 } // extern "C"
 
-#endif // MSS_OPT_MEMMAP_H_
+#endif /* _MSS_ERROR_SUPPORT_H */
+

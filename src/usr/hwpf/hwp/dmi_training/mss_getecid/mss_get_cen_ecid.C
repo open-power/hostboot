@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_get_cen_ecid.C,v 1.13 2013/01/24 18:29:59 bellows Exp $
+// $Id: mss_get_cen_ecid.C,v 1.18 2013/03/27 13:20:55 bellows Exp $
 //------------------------------------------------------------------------------
 // *|
 // *! (C) Copyright International Business Machines Corp. 2012
@@ -31,7 +31,7 @@
 // *! DESCRIPTION : Get ECID string from target using SCOM's
 // *!
 // *! OWNER NAME  : Mark Bellows Email: bellows@us.ibm.com
-// *! Copied From : Joe McGill's proc_cleanup code 
+// *! Copied From : Joe McGill's proc_cleanup code
 // *!
 //------------------------------------------------------------------------------
 //------------------------------------------------------------------------------
@@ -39,6 +39,11 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
+//   1.18  | bellows  |27-MAR-13| Fixes to rc handling from reviewer comments
+//   1.17  | bellows  |26-MAR-13| Additional reviewer comments
+//   1.16  | bellows  |26-MAR-13| Cleanup because of Firmware Gerrit Review Comments
+//   1.15  | bellows  |22-MAR-13| Changed name of ECID Attribute per Firmware request
+//   1.14  | bellows  |29-JAN-13| Getting sub version, setting NWELL Attribute
 //   1.13  | bellows  |24-JAN-13| Cache Disable Valid bit is ecid_128, made bit
 //         |          |         | number consistent
 //   1.12  | bellows  |23-JAN-13| PSRO attriubute is available in cronus dev
@@ -66,9 +71,9 @@ extern "C" {
 // HWP entry point
 fapi::ReturnCode mss_get_cen_ecid(
     const fapi::Target& i_target,
-    uint8_t & ddr_port_status,
-    uint8_t & cache_enable_o,
-    uint8_t & centaur_sub_revision_o
+    uint8_t & o_ddr_port_status,
+    uint8_t & o_cache_enable,
+    uint8_t & o_centaur_sub_revision
     )
 {
     // return code
@@ -86,7 +91,7 @@ fapi::ReturnCode mss_get_cen_ecid(
         return rc;
     }
     scom.reverse();
-    data[0] = scom.getDoubleWord(0);    
+    data[0] = scom.getDoubleWord(0);
     //gets the second part of the ecid and sets the attribute
     rc = fapiGetScom( i_target, ECID_PART_1_0x00010001, scom );
     if (rc)
@@ -96,10 +101,10 @@ fapi::ReturnCode mss_get_cen_ecid(
     }
     scom.reverse();
     data[1] = scom.getDoubleWord(0);
-    rc = FAPI_ATTR_SET(ATTR_MSS_ECID, &i_target, data);
+    rc = FAPI_ATTR_SET(ATTR_ECID, &i_target, data);
     if (rc)
     {
-        FAPI_ERR("mss_get_cen_ecid: set ATTR_MSS_ECID" );
+        FAPI_ERR("mss_get_cen_ecid: set ATTR_ECID" );
         return rc;
     }
 
@@ -130,29 +135,22 @@ fapi::ReturnCode mss_get_cen_ecid(
       else if(bit113_114 == 1) t = fapi::ENUM_ATTR_MSS_CACHE_ENABLE_HALF_A;
       else if(bit113_114 == 2) t = fapi::ENUM_ATTR_MSS_CACHE_ENABLE_HALF_B;
       else t = fapi::ENUM_ATTR_MSS_CACHE_ENABLE_OFF;
-      cache_enable_o = t;
+      o_cache_enable = t;
     }
     else {
       FAPI_INF("Cache Dissbled because eDRAM data bits are assumed to be bad");
-      cache_enable_o = fapi::ENUM_ATTR_MSS_CACHE_ENABLE_OFF;
+      o_cache_enable = fapi::ENUM_ATTR_MSS_CACHE_ENABLE_OFF;
     }
 
-//    //sets the cache attribute and error checks
-//    rc = FAPI_ATTR_SET(ATTR_MSS_CACHE_ENABLE, &i_target, t);
-//    if (!rc.ok()) {
-//       FAPI_ERR("mss_get_cen_ecid: could not set ATTR_MSS_CACHE_ENABLE" );
-//       return rc;
-//    }
-    
     //reads in the ECID info for whether a DDR port side is good or bad
-    rc_ecmd = scom.extract(&ddr_port_status,50,2);
-    ddr_port_status = ddr_port_status >> 6;
+    rc_ecmd = scom.extract(&o_ddr_port_status,50,2);
+    o_ddr_port_status = o_ddr_port_status >> 6;
     if(rc_ecmd) {
        FAPI_ERR("mss_get_cen_ecid: could not extract DDR status data" );
        rc.setEcmdError(rc_ecmd);
        return rc;
     }
-    
+
      //116..123         average PSRO from 85C wafer test
     uint8_t bit117_124=0;
     rc_ecmd = scom.extract(&bit117_124,52,8);
@@ -177,7 +175,28 @@ fapi::ReturnCode mss_get_cen_ecid(
        rc.setEcmdError(rc_ecmd);
        return rc;
     }
-    centaur_sub_revision_o=bit125;
+    o_centaur_sub_revision=bit125;
+    // The ecid contains the chip's subrevision, changes in the subrevision should not
+    // change firmware behavior but for the exceptions, update attributes to indicate
+    // those behaviors
+    uint8_t ec;
+    uint8_t l_nwell_misplacement = 0;
+    rc = FAPI_ATTR_GET_PRIVILEGED(ATTR_EC, &i_target, ec);
+    if (!rc.ok()) {
+       FAPI_ERR("mss_get_cen_ecid: could not GET PRIVILEGED ATTR_EC" );
+       return rc;
+    }
+    if ((ec == 0x10) && (o_centaur_sub_revision < 1))
+    {
+  // For DD1.00, the transistor misplaced in the nwell needs some setting adjustments to get it to function
+  // after DD1.00, we no longer need to make that adjustment
+       l_nwell_misplacement = 1;
+    }
+    rc = FAPI_ATTR_SET(ATTR_MSS_NWELL_MISPLACEMENT, &i_target, l_nwell_misplacement);
+    if (!rc.ok()) {
+       FAPI_ERR("mss_get_cen_ecid: could not set ATTR_MSS_NWELL_MISPLACEMENT" );
+       return rc;
+    }
 
    // mark HWP exit
     FAPI_IMP("Exiting mss_get_cen_ecid....");

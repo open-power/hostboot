@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012                   */
+/* COPYRIGHT International Business Machines Corp. 2012,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,8 +20,9 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+// $Id: opt_memmap.C,v 1.6 2013/02/22 22:27:34 vanlee Exp $
 //------------------------------------------------------------------------------
-// *! (C) Copyright International Business Machines Corp. 2012
+// *! (C) Copyright International Business Machines Corp. 2012, 2013
 // *! All Rights Reserved -- Property of IBM
 // *! *** IBM Confidential ***
 //------------------------------------------------------------------------------
@@ -38,18 +39,21 @@
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
 //  1.1    | vanlee   | 12/01/12| First drop
+//  1.4    | vanlee   | 01/04/13| Added version string
+//  1.5    | vanlee   | 02/20/13| Add init paramter
+//  1.6    | vanlee   | 02/22/13| Update sort logic of ProcBase class
 //------------------------------------------------------------------------------
 // Design flow
 //
-// opt_memmap() is run in between two mss_eff_grouping() calls.
+// opt_memmap() is run alternatively between two mss_eff_grouping() calls.
 //
-// 1) Before First mss_eff_grouping() call
+// 1) Call opt_memmap() with i_init = true
 //    - Each proc's ATTR_PROC_MEM_BASE attribute is set to 0
 //    - Each proc's ATTR_PROC_MIRROR_BASE attribute is set to 512TB
 // 2) First mss_eff_grouping() call
 //    - The HWP updates each proc's ATTR_PROC_MEM_BASES and ATTR_PROC_MEM_SIZES
 //      attributes based on installed memory behind each proc
-// 3) Call opt_memmap()
+// 3) Call opt_memmap() with i_init = false
 //    - Get "effective stackable" size (EffSize) of each proc. Due to (1), 
 //        (a) EffSize = highest ATTR_PROC_MEM_BASES +
 //                      its corresponding ATTR_PROC_MEM_SIZES
@@ -89,7 +93,7 @@ extern "C" {
     public:
         uint64_t iv_base;
         uint64_t iv_size;
-        bool operator<(MemRegion rhs)
+        bool operator<(MemRegion rhs) const
         { 
             bool l_lt = true;
             if (iv_base > rhs.iv_base || 
@@ -107,23 +111,41 @@ extern "C" {
     public:
         fapi::Target *iv_tgt;
         uint64_t iv_size;
-        bool operator<(ProcBase rhs) { return iv_size < rhs.iv_size; }
-        ProcBase(fapi::Target* t, uint64_t s) : iv_tgt(t), iv_size(s) {}
+        uint32_t iv_pos;
+        // sorting in increasing size, and decreasing proc position
+        // e.g. proc0 and proc2 have same size, then the order will be
+        // proc2 then proc0
+        bool operator<(ProcBase rhs) const
+        {
+            bool l_lt = true;
+            if (iv_size > rhs.iv_size ||
+                (iv_size == rhs.iv_size && iv_pos < rhs.iv_pos))
+            {
+                l_lt = false;
+            }
+            return l_lt;
+        }
+        ProcBase(fapi::Target* t, uint64_t s, uint32_t p) :
+                                   iv_tgt(t), iv_size(s), iv_pos(p) {}
     };
 
     inline uint64_t PowerOf2Roundedup( uint64_t i_number )
     {
         if (i_number)
         {
-            uint64_t leading0s = 0;
-            asm volatile("cntlzd %0, %1" : "=r"(leading0s) : "r"(i_number));
-            uint64_t mask = ( 1ULL << (63 - leading0s) );
-            i_number = mask << ((mask ^ i_number) ? 1 : 0);
+            --i_number;
+            i_number |= i_number >> 1;
+            i_number |= i_number >> 2;
+            i_number |= i_number >> 4;
+            i_number |= i_number >> 8;
+            i_number |= i_number >> 16;
+            i_number |= i_number >> 32;
+            ++i_number;
         }
         return i_number;
     }
-        
-    ReturnCode opt_memmap(std::vector<fapi::Target> & i_procs)
+
+    ReturnCode opt_memmap(std::vector<fapi::Target> & i_procs, bool i_init)
     {
         ReturnCode rc;
         std::vector<ProcBase> l_procBases;
@@ -135,6 +157,18 @@ extern "C" {
         for (std::vector<fapi::Target>::iterator l_iter = i_procs.begin();
              l_iter != i_procs.end(); ++l_iter)
         {
+            // If request to initialize MEM_BASE, just do it for each proc
+            if (i_init)
+            {
+                uint64_t l_base = 0;
+                rc = FAPI_ATTR_SET(ATTR_PROC_MEM_BASE, &(*l_iter), l_base);
+                if (rc)
+                {
+                    break;
+                }
+                continue;
+            }
+
             rc = FAPI_ATTR_GET(ATTR_POS, &(*l_iter), l_pos);
             if (rc)
             {
@@ -157,7 +191,7 @@ extern "C" {
             {
                 for(size_t i = 0; i < l_MCS_per_proc; i++)
                 {
-                    FAPI_INF("  l_bases[%d] = %016X", i, l_bases[i]);
+                    FAPI_INF("  l_bases[%d] = %016llX", i, l_bases[i]);
                 }
             }
 
@@ -171,7 +205,7 @@ extern "C" {
             {
                 for(size_t i = 0; i < l_MCS_per_proc; i++)
                 {
-                    FAPI_INF("  l_sizes[%d] = %016X", i, l_sizes[i]);
+                    FAPI_INF("  l_sizes[%d] = %016llX", i, l_sizes[i]);
                 }
             }
 
@@ -189,31 +223,27 @@ extern "C" {
             round_size += l_regions[l_regions.size()-1].iv_size;
             round_size = PowerOf2Roundedup( round_size );
 
-            FAPI_INF("  round_size = %016X", round_size);
+            FAPI_INF("  round_size = %016llX", round_size);
 
             // save the proc's target and effective size
-            ProcBase l_procBase(&(*l_iter), round_size);
+            ProcBase l_procBase(&(*l_iter), round_size, l_pos);
             l_procBases.push_back(l_procBase);
         }
 
-        while (rc.ok())
+        while (rc.ok() && !i_init)
         {
             std::sort(l_procBases.begin(), l_procBases.end());
             uint64_t cur_mem_base = 0;
-            uint64_t cur_mir_base = 0x0002000000000000;  // 512TB
+            uint64_t cur_mir_base = 0x0002000000000000LL;  // 512TB
 
             for (size_t i = l_procBases.size(); i != 0; --i)
             {
                 fapi::Target * l_tgt = l_procBases[i-1].iv_tgt;
                 uint64_t size = l_procBases[i-1].iv_size;
+                l_pos = l_procBases[i-1].iv_pos;
 
-                uint32_t l_pos = 0;
-                rc = FAPI_ATTR_GET(ATTR_POS, l_tgt, l_pos);
-                if (rc.ok())
-                {
-                    FAPI_INF("proc%d MEM_BASE = %016X", l_pos, cur_mem_base);
-                    FAPI_INF("proc%d MIRROR_BASE = %016X", l_pos, cur_mir_base);
-                }
+                FAPI_INF("proc%d MEM_BASE = %016llX", l_pos, cur_mem_base);
+                FAPI_INF("proc%d MIRROR_BASE = %016llX", l_pos, cur_mir_base);
 
                 rc = FAPI_ATTR_SET(ATTR_PROC_MEM_BASE, l_tgt, cur_mem_base);
                 if (rc)

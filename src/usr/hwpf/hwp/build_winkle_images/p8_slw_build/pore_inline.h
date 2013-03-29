@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012                   */
+/* COPYRIGHT International Business Machines Corp. 2012,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -23,7 +23,7 @@
 #ifndef __PORE_INLINE_H__
 #define __PORE_INLINE_H__
 
-// $Id: pore_inline.h,v 1.16 2012/11/12 19:54:15 bcbrock Exp $
+// $Id: pore_inline.h,v 1.18 2013/02/06 01:10:35 bcbrock Exp $
 
 // ** WARNING : This file is maintained as part of the OCC firmware.  Do **
 // ** not edit this file in the PMX area or the hardware procedure area  **
@@ -52,6 +52,19 @@ extern "C" {
 
 
 #ifndef __ASSEMBLER__
+
+// PHYP tools do not support 'static' functions and variables as it interferes
+// with their concurrent patch methodology.  So when compiling for PHYP the
+// PORE instruction "macros" are simply declared "inline".  This also extends
+// into the implementation C files - so under PHYP all previosuly local static
+// functions will now be global functions. We retain 'static' to reduce code
+// size and improve abstraction for OCC applications.
+
+#ifdef PPC_HYP
+#define PORE_STATIC
+#else
+#define PORE_STATIC static
+#endif
 
 /// Error code strings from the PORE inline assembler/disassembler
 ///
@@ -543,25 +556,25 @@ pore_inline_disassemble(PoreInlineContext *ctx, PoreInlineDisassembly *dis);
 
 
 // Native PORE instruction assembly, using PGAS opcode names and operand
-// ordering rules.
+// ordering rules. 
 
 // NOP, TRAP, RET
 
-static inline int
+PORE_STATIC inline int
 pore_NOP(PoreInlineContext *ctx) 
 {
     return pore_inline_instruction1(ctx, PGAS_OPCODE_NOP, 0);
 }
 
 
-static inline int
+PORE_STATIC inline int
 pore_TRAP(PoreInlineContext *ctx) 
 {
     return pore_inline_instruction1(ctx, PGAS_OPCODE_TRAP, 0);
 }
 
 
-static inline int
+PORE_STATIC inline int
 pore_RET(PoreInlineContext *ctx) 
 {
     return pore_inline_instruction1(ctx, PGAS_OPCODE_RET, 0);
@@ -573,7 +586,7 @@ pore_RET(PoreInlineContext *ctx)
 int
 pore_WAITS(PoreInlineContext *ctx, uint32_t cycles);
 
-static inline int
+PORE_STATIC inline int
 pore_HALT(PoreInlineContext *ctx)
 {
     return pore_inline_instruction1(ctx, PGAS_OPCODE_WAITS, 0);
@@ -585,19 +598,19 @@ pore_HOOKI(PoreInlineContext *ctx, uint32_t index, uint64_t imm);
 
 // BRA, BSR, LOOP
 
-static inline int
+PORE_STATIC inline int
 pore_BRA(PoreInlineContext *ctx, PoreInlineLocation target)
 {
     return pore_inline_bra(ctx, PGAS_OPCODE_BRA, target);
 }
 
-static inline int
+PORE_STATIC inline int
 pore_BSR(PoreInlineContext *ctx, PoreInlineLocation target)
 {
     return pore_inline_bra(ctx, PGAS_OPCODE_BSR, target);
 }
 
-static inline int
+PORE_STATIC inline int
 pore_LOOP(PoreInlineContext *ctx, PoreInlineLocation target)
 {
     return pore_inline_bra(ctx, PGAS_OPCODE_LOOP, target);
@@ -606,14 +619,14 @@ pore_LOOP(PoreInlineContext *ctx, PoreInlineLocation target)
 
 // BRAZ, BRANZ
 
-static inline int
+PORE_STATIC inline int
 pore_BRAZ(PoreInlineContext *ctx, int reg, PoreInlineLocation target)
 {
     return pore_inline_brac(ctx, PGAS_OPCODE_BRAZ, reg, target);
 }
 
 
-static inline int
+PORE_STATIC inline int
 pore_BRANZ(PoreInlineContext *ctx, int reg, PoreInlineLocation target)
 {
     return pore_inline_brac(ctx, PGAS_OPCODE_BRANZ, reg, target);
@@ -622,7 +635,7 @@ pore_BRANZ(PoreInlineContext *ctx, int reg, PoreInlineLocation target)
 
 // CMPIBRAEQ, CMPIBRANE, CMPIBSREQ
 
-static inline int
+PORE_STATIC inline int
 pore_CMPIBRAEQ(PoreInlineContext *ctx, 
                int reg, PoreInlineLocation target, uint64_t imm)
 {
@@ -630,7 +643,7 @@ pore_CMPIBRAEQ(PoreInlineContext *ctx,
 }
 
 
-static inline int
+PORE_STATIC inline int
 pore_CMPIBRANE(PoreInlineContext *ctx, 
                int reg, PoreInlineLocation target, uint64_t imm)
 {
@@ -638,7 +651,7 @@ pore_CMPIBRANE(PoreInlineContext *ctx,
 }
 
 
-static inline int
+PORE_STATIC inline int
 pore_CMPIBSREQ(PoreInlineContext *ctx, 
                int reg, PoreInlineLocation target, uint64_t imm)
 {
@@ -648,12 +661,12 @@ pore_CMPIBSREQ(PoreInlineContext *ctx,
 
 // BRAD, BSRD
 
-static inline int
+PORE_STATIC inline int
 pore_BRAD(PoreInlineContext *ctx, int reg) {
     return pore_inline_brad(ctx, PGAS_OPCODE_BRAD, reg);
 }
 
-static inline int
+PORE_STATIC inline int
 pore_BSRD(PoreInlineContext *ctx, int reg) {
     return pore_inline_brad(ctx, PGAS_OPCODE_BSRD, reg);
 }
@@ -661,19 +674,19 @@ pore_BSRD(PoreInlineContext *ctx, int reg) {
 
 // ANDI, ORI, XORI
 
-static inline int
+PORE_STATIC inline int
 pore_ANDI(PoreInlineContext *ctx, int dest, int src, uint64_t imm)
 {
     return pore_inline_ilogic(ctx, PGAS_OPCODE_ANDI, dest, src, imm);
 }
 
-static inline int
+PORE_STATIC inline int
 pore_ORI(PoreInlineContext *ctx, int dest, int src, uint64_t imm)
 {
     return pore_inline_ilogic(ctx, PGAS_OPCODE_ORI, dest, src, imm);
 }
 
-static inline int
+PORE_STATIC inline int
 pore_XORI(PoreInlineContext *ctx, int dest, int src, uint64_t imm)
 {
     return pore_inline_ilogic(ctx, PGAS_OPCODE_XORI, dest, src, imm);
@@ -682,31 +695,31 @@ pore_XORI(PoreInlineContext *ctx, int dest, int src, uint64_t imm)
 
 // AND, OR, XOR, ADD, SUB
 
-static inline int
+PORE_STATIC inline int
 pore_AND(PoreInlineContext *ctx, int dest, int src1, int src2)
 {
     return pore_inline_alurr(ctx, PGAS_OPCODE_AND, dest, src1, src2);
 }
 
-static inline int
+PORE_STATIC inline int
 pore_OR(PoreInlineContext *ctx, int dest, int src1, int src2)
 {
     return pore_inline_alurr(ctx, PGAS_OPCODE_OR, dest, src1, src2);
 }
 
-static inline int
+PORE_STATIC inline int
 pore_XOR(PoreInlineContext *ctx, int dest, int src1, int src2)
 {
     return pore_inline_alurr(ctx, PGAS_OPCODE_XOR, dest, src1, src2);
 }
 
-static inline int
+PORE_STATIC inline int
 pore_ADD(PoreInlineContext *ctx, int dest, int src1, int src2)
 {
     return pore_inline_alurr(ctx, PGAS_OPCODE_ADD, dest, src1, src2);
 }
 
-static inline int
+PORE_STATIC inline int
 pore_SUB(PoreInlineContext *ctx, int dest, int src1, int src2)
 {
     return pore_inline_alurr(ctx, PGAS_OPCODE_SUB, dest, src1, src2);
@@ -715,13 +728,13 @@ pore_SUB(PoreInlineContext *ctx, int dest, int src1, int src2)
 
 // ADDS, SUBS
 
-static inline int
+PORE_STATIC inline int
 pore_ADDS(PoreInlineContext *ctx, int dest, int src, int imm)
 {
     return pore_inline_adds(ctx, PGAS_OPCODE_ADDS, dest, src, imm);
 }
 
-static inline int
+PORE_STATIC inline int
 pore_SUBS(PoreInlineContext *ctx, int dest, int src, int imm)
 {
     return pore_inline_adds(ctx, PGAS_OPCODE_SUBS, dest, src, imm);
@@ -748,7 +761,7 @@ pore_LI(PoreInlineContext *ctx, int dest, uint64_t imm);
 
 // LD, LDANDI, STD, STI, BSI, BCI
 
-static inline int
+PORE_STATIC inline int
 pore_LD(PoreInlineContext *ctx, int dest, int32_t offset, int base) 
 {
     return 
@@ -756,7 +769,7 @@ pore_LD(PoreInlineContext *ctx, int dest, int32_t offset, int base)
 			       PORE_INLINE_PSEUDO_LD, dest, offset, base, 0);
 }
 
-static inline int
+PORE_STATIC inline int
 pore_LDANDI(PoreInlineContext *ctx, 
             int dest, int32_t offset, int base, uint64_t imm)
 {
@@ -766,7 +779,7 @@ pore_LDANDI(PoreInlineContext *ctx,
                                dest, offset, base, imm);
 }
 
-static inline int
+PORE_STATIC inline int
 pore_STD(PoreInlineContext *ctx, int src, int32_t offset, int base) 
 {
     return 
@@ -774,7 +787,7 @@ pore_STD(PoreInlineContext *ctx, int src, int32_t offset, int base)
 			       PORE_INLINE_PSEUDO_STD, src, offset, base, 0);
 }
 
-static inline int
+PORE_STATIC inline int
 pore_STI(PoreInlineContext *ctx, int32_t offset, int base, uint64_t imm)
 {
     return 
@@ -782,7 +795,7 @@ pore_STI(PoreInlineContext *ctx, int32_t offset, int base, uint64_t imm)
 			       PGAS_OPCODE_STI, 0, offset, base, imm);
 }
 
-static inline int
+PORE_STATIC inline int
 pore_BSI(PoreInlineContext *ctx, 
          int src, int32_t offset, int base, uint64_t imm) 
 {
@@ -791,7 +804,7 @@ pore_BSI(PoreInlineContext *ctx,
 			       PGAS_OPCODE_BSI, src, offset, base, imm);
 }
 
-static inline int
+PORE_STATIC inline int
 pore_BCI(PoreInlineContext *ctx, 
          int src, int32_t offset, int base, uint64_t imm) 
 {

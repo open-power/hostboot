@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_eff_config.C,v 1.20 2013/02/28 21:36:08 asaetow Exp $
+// $Id: mss_eff_config.C,v 1.21 2013/03/22 21:57:25 asaetow Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/
 //          centaur/working/procedures/ipl/fapi/mss_eff_config.C,v $
 //------------------------------------------------------------------------------
@@ -44,7 +44,9 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
-//   1.21  |          |         | 
+//   1.22  |          |         | 
+//   1.21  | asaetow  |22-Mar-13| Changed ATTR_EFF_ZQCAL_INTERVAL and ATTR_EFF_MEMCAL_INTERVAL back to enable.
+//         |          |         | NOTE: Need mba_def.initfile v1.27 or newer
 //   1.20  | asaetow  |28-Feb-13| Changed temporary ATTR_EFF_ZQCAL_INTERVAL and ATTR_EFF_MEMCAL_INTERVAL to disable.
 //         |          |         | NOTE: Temporary until we get timeout error fixed.
 //   1.19  | sauchadh |26-Feb-13| Added MCBIST related attributes
@@ -1526,15 +1528,15 @@ fapi::ReturnCode mss_eff_config_setup_eff_atts(
     //  ------------------------------ = 13.333ms 
     //  (1.5 * 10) + (0.15 * 150)
 
-    p_o_atts->eff_zqcal_interval = 0;
-    //p_o_atts->eff_zqcal_interval = ( 13333 *
-    //        p_i_mss_eff_config_data->mss_freq) / 2;
+    //p_o_atts->eff_zqcal_interval = 0;
+    p_o_atts->eff_zqcal_interval = ( 13333 *
+            p_i_mss_eff_config_data->mss_freq) / 2;
 //------------------------------------------------------------------------------
     // Calculate MEMCAL Interval based on 1sec interval across all bits per DP18
 
-    p_o_atts->eff_memcal_interval = 0;
-    //p_o_atts->eff_memcal_interval = (62500 *
-    //        p_i_mss_eff_config_data->mss_freq) / 2;
+    //p_o_atts->eff_memcal_interval = 0;
+    p_o_atts->eff_memcal_interval = (62500 *
+            p_i_mss_eff_config_data->mss_freq) / 2;
 //------------------------------------------------------------------------------
     // Calculate tRFI
     p_o_atts->eff_dram_trfi = (3900 *

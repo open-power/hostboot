@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012                   */
+/* COPYRIGHT International Business Machines Corp. 2012,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: cen_mem_pll_setup.C,v 1.23 2012/08/13 17:16:16 mfred Exp $
+// $Id: cen_mem_pll_setup.C,v 1.24 2013/03/04 17:56:26 mfred Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/centaur/working/procedures/ipl/fapi/cen_mem_pll_setup.C,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2012
@@ -31,6 +31,7 @@
 // *! DESCRIPTION : see additional comments below
 // *! OWNER NAME  : Mark Fredrickson  Email: mfred@us.ibm.com
 // *! BACKUP NAME : Mark Bellows      Email: bellows@us.ibm.com
+// *! SCREEN      : pervasive_screen
 // #! ADDITIONAL COMMENTS :
 //
 // The purpose of this procedure is to make sure the Centaur MEM PLL locks.
@@ -133,6 +134,9 @@ fapi::ReturnCode cen_mem_pll_setup(const fapi::Target & i_target)
 This section is automatically updated by CVS when you check in this file.
 Be sure to create CVS comments when you commit so that they can be included here.
 $Log: cen_mem_pll_setup.C,v $
+Revision 1.24  2013/03/04 17:56:26  mfred
+Add some header comments for BACKUP and SCREEN.
+
 Revision 1.23  2012/08/13 17:16:16  mfred
 Adding new hwp cen_mem_pll_initf.
 

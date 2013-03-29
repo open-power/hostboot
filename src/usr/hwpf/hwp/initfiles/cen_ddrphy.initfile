@@ -1,9 +1,10 @@
-#-- $Id: cen_ddrphy.initfile,v 1.20 2013/01/16 21:07:47 mwuu Exp $
+#-- $Id: cen_ddrphy.initfile,v 1.21 2013/02/08 00:32:24 mwuu Exp $
 #-- CHANGE HISTORY:
 #--------------------------------------------------------------------------------
 #-- Version:|Author: | Date:  | Comment:
 #-- --------|--------|--------|--------------------------------------------------
-#--     1.20|mwuu    |01/16/12|Updated TWTR & TRTP define for FW_WR_RD field in
+#--     1.21|mwuu    |02/07/13|Updated PC_CSID register to default CS to high
+#--     1.20|mwuu    |01/16/13|Updated TWTR & TRTP define for FW_WR_RD field in
 #           |        |        |WC_CONFIG0 and FW_RD_WR in WC_CONFIG2 in 0W spec.
 #           |        |        |Thin Oxide hibernation disabled in ATEST & BIT_DIR1
 #           |		 |		  |registers.
@@ -812,7 +813,7 @@ scom 0x80013C7B0301143f {				# PFET_TERM_P1_[0:4]	broadcast
 # ---------------------------------------------------------------------------------------
 # Output(DQ/DQS) driver impedance settings
 #
-#  ATTR_EFF_CEN_DRV_IMP_DQ_DQS	24, 30, 34, 40
+#  ATTR_EFF_CEN_DRV_IMP_DQ_DQS	24, 30, 34, 40 + FFE differences...
 #
 #  [01:23]				 [N:P]	[0:1][0:4]
 # DPHY01_DDRPHY_DP18_IO_TX_NFET_SLICE_P0_0	0x078	0x800000780301143f
@@ -2586,10 +2587,6 @@ scom 0x8001c0150301143f {
 # ---------------------------------------------------------------------------------------
 # SEQ Read/Write Data {0-1} Register	default=0x5555		!! 	need to set to custom mode
 #																for DDR3
-#	!! Anuwat says for WLC pattern get from SN, doesn't look like its only for WLC
-#
-# For DDRPHY_DP18_RX_PEAK_AMP:Read_Centering_Mode
-#
 # Attributes
 # Read/Write via programming interface. Two registers. These two registers are used to
 # create eight beats of data by repeating every fourth bit of data within a beat.
@@ -2840,6 +2837,12 @@ scom 0x8001C40D0301143F {
 #
 # DPHY01_DDRPHY_PC_CSID_CFG_P0		0x033	0x8000c0330301143f
 # PHYW.PHYX.SYNTHX.D3SIDEA.PCX.REG51_L2
+scom 0x800(0,1)c0330301143f {
+	bits	,	scom_data			;
+#	0:47	,	0x000000000000		;	# reserved
+	48:55	,	0xFF				;	# CS[0:7] level
+	56:63	,	0x00				;	# reserved
+}
 
 # ---------------------------------------------------------------------------------------
 # DP18 DQSCLK offset		default=0x0200			needed for SIM
@@ -3388,10 +3391,9 @@ scom 0x8000c0090301143f {
 # asking Ken...
 
 # ---------------------------------------------------------------------------------------
-# PC Rank Group Register		no need to set since using RDIMMs
+# PC Rank Group Register		set in the mss_draminit procedure
 #
-# This register provides control of mirrored address bits. Mainly? used for
-# UDIMMs?
+# This register provides control of mirrored address bits.
 #
 # DPHY01_DDRPHY_PC_RANK_GROUP_P0		0x11	0x8000c0110301143f
 # PHYW.PHYX.SYNTHX.D3SIDEA.PCX.REG17_L2
@@ -3406,7 +3408,7 @@ scom 0x8000c0090301143f {
 #	53		,	0b0			,	any			;	# ADDR_MIRROR_RP2_SEC
 #	54		,	0b0			,	any			;	# ADDR_MIRROR_RP3_PRI
 #	55		,	0b0			,	any			;	# ADDR_MIRROR_RP3_SEC
-#	56:57	,	0b0			,	any			;	# RANK_GROUPING
+#	56:57	,	0b0			,	any			;	# RANK_GROUPING		# reserved
 #	58		,	0b0			,	any			;	# ADDR_MIRROR_A3_A4
 #	59		,	0b0			,	any			;	# ADDR_MIRROR_A5_A6
 #	60		,	0b0			,	any			;	# ADDR_MIRROR_A7_A8
@@ -3762,7 +3764,7 @@ scom 0x800(0,1)C8070301143F {	# _P[0:1]
 #
 
 # ---------------------------------------------------------------------------------------
-# SEQ Configuration 0 Register		default=0		!! need to review settings
+# SEQ Configuration 0 Register		default=0
 #
 # DPHY01.DDRPHY_SEQ_CONFIG0_P0
 # DPHY01.DDRPHY_SEQ_CONFIG0_P1
@@ -3773,7 +3775,7 @@ scom 0x800(0,1)C4020301143F {	# _P[0:1]
 	bits	,	scom_data		;
 #	0:47	,	0x000000000000	;	# reserved
 	48		,	0b0				;	# MPR_PATTERN_BIT
-	49		,	0b0				;	# TWO_CYCLE_ADDR_EN (must be set to 0), need 1 in sim ?  2N
+	49		,	0b0				;	# TWO_CYCLE_ADDR_EN (must be set to 0?)
 	50:53	,	0b0000			;	# MR_MASK_EN (mode register[0:3] mask during calibration)
 	54		,	0b0				;	# DELAYED_PARITY (only for DDR4, DDR3 don't care)
 	55		,	0b0				;	# LRDIMM_CONTEXT
@@ -4004,23 +4006,26 @@ scom 0x800(0,1)CC000301143F {	# _P[0:1]
 #	0:47	,	0x000000000000		,	any										;	# reserved
 # !! need to review
 	# = 12 + max(tWLDQSEN-tMOD,tWLO+tWLOE) + (longest DQS wire delay in CKs) + (longest DQ wire delay in CKs)
-	48:55	,	0x10				,	any										;	# TWLO_TWLOE = 16	(same as DD0)
-	# @ 1600, = 12 + max(13,3) + ldqs + ldq = 25 + ldqs + ldq
-	#48:55	,	0x1B				,	any										;	# TWLO_TWLOE = 27
+	48:55	,	0x10				,	(def_is_sim)							;	# TWLO_TWLOE = 16	(same as DD0)
+	# @ 1600, = 12 + max(13,8) + ldqs + ldq = 25 + ldqs + ldq
+	# @ 1866, = 12 + max(13,9) + ldqs + ldq = 25 + ldqs + ldq
+	48:55	,	0x1B				,	any										;	# TWLO_TWLOE = 27
 	#48:55	,	(25+ldqs+ldq)		,	(CEN.ATTR_MSS_FREQ > 1460)				;	# TWLO_TWLOE	(> 1333)
-	56		,	0b1					,	any										;	# WL_ONE_DQS_PULSE = enable
 
-	# FW_WR_RD = max(tWTR+11,AL+tRTP+3), ATTR_EFF_DRAM_AL(0,1,2)
-	57:62	,	0b000000			,	(def_is_sim)							;
-	57:62	,	0b010001			,	any										;	# same as dd0
+	56		,	0b1					,	any										;	# WL_ONE_DQS_PULSE = enable (one pulse)
+#	56		,	0b0					,	any										;	# WL_ONE_DQS_PULSE = disable (many pulses)
+
+	# FW_WR_RD [same formula as RD_WR? max(tWTR+11,AL+tRTP+3), ATTR_EFF_DRAM_AL(0,1,2)]
+	57:62	,	0b000000			,	(def_is_sim)							;   # is this max?
+	57:62	,	0b010001			,	any										;	# same as dd0, 17 clocks
 	
 	# AL={1,2};	max (TWTR + 11, TRTP + AL + 3)
-	57:62	,	(def_TWTR_PLUS_OFF)	,	(def_AL_ena && (def_TWTR_PLUS_OFF >= def_TRTP_PLUS_AL) )	;	# TWTR + 11
-	57:62	,	(def_TRTP_PLUS_AL)	,	(def_AL_ena && (def_TWTR_PLUS_OFF < def_TRTP_PLUS_AL) )		;	# TRTP + AL + 3
+#	57:62	,	(def_TWTR_PLUS_OFF)	,	(def_AL_ena && (def_TWTR_PLUS_OFF >= def_TRTP_PLUS_AL) )	;	# TWTR + 11
+#	57:62	,	(def_TRTP_PLUS_AL)	,	(def_AL_ena && (def_TWTR_PLUS_OFF < def_TRTP_PLUS_AL) )		;	# TRTP + AL + 3
 
 	# AL=0, 	max (TWTR + 11, TRTP + 3)
-	57:62	,	(def_TWTR_PLUS_OFF)	,	(def_AL_dis && (def_TWTR_PLUS_OFF >= def_TRTP_PLUS_NOAL) )	;	# TWTR + 11
-	57:62	,	(def_TRTP_PLUS_NOAL),	(def_AL_dis && (def_TWTR_PLUS_OFF < def_TRTP_PLUS_NOAL)	)	;	# TRTP + 3
+#	57:62	,	(def_TWTR_PLUS_OFF)	,	(def_AL_dis && (def_TWTR_PLUS_OFF >= def_TRTP_PLUS_NOAL) )	;	# TWTR + 11
+#	57:62	,	(def_TRTP_PLUS_NOAL),	(def_AL_dis && (def_TWTR_PLUS_OFF < def_TRTP_PLUS_NOAL)	)	;	# TRTP + 3
 
 	63		,	0b0					,	any										;	# CUSTOM_INIT_WRITE
 }
@@ -4254,6 +4259,7 @@ scom 0x800108000301143f {
 #
 # Procedure function to set this register, pulling data from the SPD.
 # 1 = disable dq bit
+# !! Note only affects calibrations.
 #
 # DPHY01_DDRPHY_DP18_DATA_BIT_DISABLE0_RP0_P0_0		0x07C	0x8000007c0301143f
 # PHYW.PHYX.GEN_DP#0.DPX.HC.HC.D3PHY_WRDP18WRAP.D3PHY_WRDP18CNTL_MAC.DDRPHY_DP18_DATA_BIT_DISABLE0_RP0_L2

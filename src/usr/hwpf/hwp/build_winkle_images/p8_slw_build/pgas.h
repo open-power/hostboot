@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012                   */
+/* COPYRIGHT International Business Machines Corp. 2012,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -25,7 +25,7 @@
 
 #define __PGAS__
 
-// $Id: pgas.h,v 1.17 2012/08/15 19:24:49 bcbrock Exp $
+// $Id: pgas.h,v 1.19 2013/01/09 23:01:38 bcbrock Exp $
 
 // ** WARNING : This file is maintained as part of the OCC firmware.  Do **
 // ** not edit this file in the PMX area, the hardware procedure area,   **
@@ -335,6 +335,14 @@
 	.macro	..dxdy, reg1, reg2, err="Expecting D0, D1 in either order"
 	.if	!((((\reg1) == D0) && ((\reg2) == D1)) || \
 		  (((\reg1) == D1) && ((\reg2) == D0)))
+	.error "\err"
+	.endif
+	.endm
+
+	// A register pair required to be A0, A1 in any order
+	.macro	..axay, reg1, reg2, err="Expecting A0, A1 in either order"
+	.if	!((((\reg1) == A0) && ((\reg2) == A1)) || \
+		  (((\reg1) == A1) && ((\reg2) == A0)))
 	.error "\err"
 	.endif
 	.endm
@@ -750,6 +758,60 @@
 	.endm	
 
 
+        //////////////////////////////////////////////////////////////////////
+        // EXTRPRC   - Extract and right-justify the PIB/PCB return code
+        // TPRCB[N]Z - Test PIB return code and branch if [not] zero
+        // TPRCBGT   - Test PIB return code and branch if greater-than
+        // TPRCBLE   - Test PIB return code and branch if less-then or equal
+        //////////////////////////////////////////////////////////////////////
+        //
+        // To support cases where PORE code expects or must explicitly handle
+        // non-0 PIB return codes, the PIB return code and parity indication
+        // are stored in bits 32 (parity) and 33-35 (return code) of the IFR.
+        // These macros extract the four PIB/PCB status bits from the IFR and
+        // right-justifies them into the data register provided. For EXTRPRC
+        // that is the total function of the macro. The TPRCB[N]Z macros
+        // provide a simple non-destructive test and branch for zero (success)
+        // and non-zero (potential problem) codes after the extraction.
+        //
+        // In complex error handling scenarios one would typically compare the
+        // PIB return code against an upper-bound, e.g., the offline response
+        // (0x2), and then take further action. If the parity error bit is set
+        // then this would produce an aggregate "return code" higher than any
+        // that one would typically want to ignore. The TPRCBGT/TPRCBLE macros
+        // provide this function; however the test destroys the extracted
+        // return code so that if further analysis is required the code will
+        // need to be a extracted again.
+        //////////////////////////////////////////////////////////////////////
+
+        .macro  extrprc, dest:req
+        ..data  (\dest)
+        mr      (\dest), IFR
+        extrdi  (\dest), (\dest), 4, 32             
+        .endm
+
+        .macro  tprcbz, dest:req, target:req
+        extrprc (\dest)
+        braz    (\dest), (\target)
+        .endm
+        
+        .macro  tprcbnz, dest:req, target:req
+        extrprc (\dest)
+        branz   (\dest), (\target)
+        .endm
+        
+        .macro  tprcbgt, dest:req, target:req, bound:req
+        extrprc (\dest)
+        subs    (\dest), (\dest), (\bound)
+        tfbugt  (\dest), (\target)
+        .endm
+        
+        .macro  tprcble, dest:req, target:req, bound:req
+        extrprc (\dest)
+        subs    (\dest), (\dest), (\bound)
+        tfbule  (\dest), (\target)
+        .endm
+        
 	//////////////////////////////////////////////////////////////////////
 	// LPCS - Load Pervasive Chiplet from Scom address
 	//////////////////////////////////////////////////////////////////////

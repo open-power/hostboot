@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_pm.H,v 1.2 2012/12/07 20:20:10 stillgs Exp $
+// $Id: p8_pm.H,v 1.3 2013/03/05 23:01:11 stillgs Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/p8_pm.H,v $
 //------------------------------------------------------------------------------
 // *|
@@ -68,6 +68,39 @@ enum p8_PM_FLOW_MODE {
         };
 #endif  // _P8_PM_FLOW_MODE
 
+
+// Macros to enhance readability yet provide for error handling
+// Assume the error path is to break out of the current loop.  If nested loops
+// are employed, the error_flag can be used to break out of the necessary
+// levels.
+#define PUTSCOM(_mi_target, _mi_address, _mi_buffer){		            \
+    l_rc = fapiPutScom(_mi_target, _mi_address, _mi_buffer);            \
+    if(!l_rc.ok())                                                      \
+    {                                                                   \
+        FAPI_ERR("PutScom error to address 0x%08llx", _mi_address);     \
+        error_flag=true;                                                \
+        break;                                                          \
+    }                                                                   \
+}
+
+#define GETSCOM(_mi_target, _mi_address, _mi_buffer){		            \
+    l_rc = fapiGetScom(_mi_target, _mi_address, _mi_buffer);            \
+    if(!l_rc.ok())                                                      \
+    {                                                                   \
+        FAPI_ERR("GetScom error to address 0x%08llx", _mi_address);     \
+        error_flag=true;                                                \
+        break;                                                          \
+    }                                                                   \
+}
+
+#define E_RC_CHECK(_mi_e_rc, _mi_l_rc){                                 \
+    if (e_rc)                                                           \
+    {                                                                   \
+        FAPI_ERR("Error (0x%x) accessing ecmdDataBufferBase", _mi_e_rc);\
+        _mi_l_rc.setEcmdError(_mi_e_rc);                                \
+        break;                                                          \
+    }                                                                   \
+}
 
 } // extern "C"
 

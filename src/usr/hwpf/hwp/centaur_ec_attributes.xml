@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- IBM CONFIDENTIAL                                                       -->
 <!--                                                                        -->
-<!-- COPYRIGHT International Business Machines Corp. 2012                   -->
+<!-- COPYRIGHT International Business Machines Corp. 2012,2013              -->
 <!--                                                                        -->
 <!-- p1                                                                     -->
 <!--                                                                        -->
@@ -39,4 +39,37 @@
       </chip>
     </chipEcFeature>
   </attribute>
+
+ <attribute>
+    <id>ATTR_CENTAUR_EC_MSS_CONTINUE_ON_DP18_PLL_LOCK_FAIL</id>
+    <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
+    <description>
+Controls the ddr_phy_reset procedure.  When set to TRUE, the procedure will continue with processing other DP18 blocks, if one fails.  In DD2, this attribute must be set to false so that the failing hardware (centaur) is marked as bad and not the DIMM.  Set by firwmare using the EC level or by a MRW
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_CENTAUR</name>
+        <ec>
+          <value>0x10</value>
+          <test>EQUAL</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
+
+<attribute>
+    <id>ATTR_CENTAUR_EC_MSS_READ_PHASE_SELECT_RESET</id>
+    <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
+    <description>Set by the platform depending on DD1 vs DD2.  If true, then training and periodic training needs to make adjustments to the read phase select.  In DD2, we expect this to be fixed.</description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_CENTAUR</name>
+        <ec>
+          <value>0x10</value>
+          <test>EQUAL</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+</attribute>
+
 </attributes>

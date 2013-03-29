@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012                   */
+/* COPYRIGHT International Business Machines Corp. 2012,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: pore_inline_assembler.c,v 1.15 2012/11/12 19:54:15 bcbrock Exp $
+// $Id: pore_inline_assembler.c,v 1.18 2013/02/06 17:41:51 bcbrock Exp $
 
 // ** WARNING : This file is maintained as part of the OCC firmware.  Do **
 // ** not edit this file in the PMX area or the hardware procedure area  **
@@ -368,6 +368,9 @@
 /// section will be disassembled as data.  For complete information see the
 /// documentation for pore_inline_disassemble().
 
+#ifdef PPC_HYP
+#include <HvPlicModule.H>
+#endif
 
 #define __PORE_INLINE_ASSEMBLER_C__
 #include "pore_inline.h"
@@ -376,7 +379,7 @@
 // Definitions of PORE register classes.  These are predicates that return
 // 1 if the register is a member of the class, else 0.
 
-static int
+PORE_STATIC int
 pore_data(int reg)
 {
     return 
@@ -385,7 +388,7 @@ pore_data(int reg)
 }
 
 
-static int
+PORE_STATIC int
 pore_address(int reg)
 {
     return
@@ -394,7 +397,7 @@ pore_address(int reg)
 }
 
 
-static int
+PORE_STATIC int
 pore_pervasive_chiplet_id(int reg)
 {
     return
@@ -403,7 +406,7 @@ pore_pervasive_chiplet_id(int reg)
 }
 
 
-static int
+PORE_STATIC int
 pore_branch_compare_data(int reg)
 {
     return 
@@ -413,7 +416,7 @@ pore_branch_compare_data(int reg)
 }
 
 
-static int
+PORE_STATIC int
 pore_ls_destination(int reg)
 {
     return
@@ -427,7 +430,7 @@ pore_ls_destination(int reg)
 }
 
 
-static int
+PORE_STATIC int
 pore_li_destination(int reg)
 {
     return 
@@ -441,7 +444,7 @@ pore_li_destination(int reg)
 }
 
 
-static int
+PORE_STATIC int
 pore_mr_source(int reg)
 {
     return
@@ -459,7 +462,7 @@ pore_mr_source(int reg)
         (reg == EMR);
 }
 
-static int
+PORE_STATIC int
 pore_mr_destination(int reg)
 {
     return
@@ -564,12 +567,11 @@ pore_inline_host64(unsigned long p)
 
 // 32-bit population count
 //
-// This is a well-known divide-and-conquer algorithm, e.g. look on Wikipedia
-// under "Hamming Weight". The idea is to compute sums of adjacent bit
-// segments in parallel, in place.
+// This is a well-known divide-and-conquer algorithm.  The idea is to compute
+// sums of adjacent bit segments in parallel, in place.
 
-static int
-popcount32(uint32_t x)
+PORE_STATIC int
+pore_popcount32(uint32_t x)
 {
     uint32_t m1 = 0x55555555;
     uint32_t m2 = 0x33333333;
@@ -584,10 +586,10 @@ popcount32(uint32_t x)
 
 // 64-bit population count
 
-static int
-popcount64(uint64_t x)
+PORE_STATIC int
+pore_popcount64(uint64_t x)
 {
-    return popcount32(x & 0xffffffff) + popcount32(x >> 32);
+    return pore_popcount32(x & 0xffffffff) + pore_popcount32(x >> 32);
 }
 
 
@@ -596,7 +598,7 @@ popcount64(uint64_t x)
 int
 pore_inline_parity(uint32_t instruction, uint64_t imd64)
 {
-    return (popcount32(instruction) + popcount64(imd64)) % 2;
+    return (pore_popcount32(instruction) + pore_popcount64(imd64)) % 2;
 }
 	
 	
@@ -799,7 +801,7 @@ pore_inline_context_bump(PoreInlineContext *ctx, size_t bytes)
 // Allocation failure sets the context error code to either
 // PORE_INLINE_NO_MEMORY or PORE_INLINE_ALIGNMENT_ERROR.
 
-static unsigned long
+PORE_STATIC unsigned long
 pore_inline_allocate(PoreInlineContext *ctx, size_t bytes)
 {
     unsigned long p = 0;
@@ -1229,7 +1231,7 @@ pore_LI(PoreInlineContext *ctx, int dest, uint64_t imm)
 
 // LD, LDANDI, STD, STI, BSI, BCI
 
-static void
+PORE_STATIC void
 pervasive_ima24(PoreInlineContext *ctx, 
                 int opcode, uint32_t offset, int base, uint64_t imm)
 {
@@ -1254,7 +1256,7 @@ pervasive_ima24(PoreInlineContext *ctx,
 }            
         
 
-static void
+PORE_STATIC void
 memory_ima24(PoreInlineContext *ctx, 
              int opcode, uint32_t offset, int base, uint64_t imm)
 {
@@ -1281,7 +1283,7 @@ memory_ima24(PoreInlineContext *ctx,
 }
 
 
-static void
+PORE_STATIC void
 ima24(PoreInlineContext *ctx, 
       int opcode, uint32_t offset, int base, uint64_t imm)
 {
@@ -1294,7 +1296,6 @@ ima24(PoreInlineContext *ctx,
     }
 }
 
-#include <stdio.h>
 
 int
 pore_inline_load_store(PoreInlineContext *ctx, 

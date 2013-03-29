@@ -1,9 +1,12 @@
 
-#-- $Id: mba_def.initfile,v 1.30 2013/03/05 17:01:22 yctschan Exp $
+#-- $Id: mba_def.initfile,v 1.33 2013/03/18 21:22:56 yctschan Exp $
 #-- CHANGE HISTORY:
 #--------------------------------------------------------------------------------
 #-- Version:|Author: | Date:  | Comment:
 #-- --------|--------|--------|--------------------------------------------------
+#--     1.33|tschang | 3/12/13|RWDM_dly margin increased by 1 to match other RW dlys - HW243893
+#--     1.32|tschang | 3/12/13|Def_margin_rdtag set it to 4 - increased by 2
+#--     1.31|tschang | 3/11/13|Defined new def_margin_rdtag and set it to 2 to increase it from figtree values
 #--     1.30|tschang | 3/05/13|Set def_margin2 to 0 to decrease timing parmeters for performance and added def_margin1 for RW parms
 #--     1.29|tschang | 2/27/13|Set def_margin to 1 to decrease timing parmeters for performance
 #--     1.28|tschang | 2/11/13|Set WR ODT start to 1 and end to 5 (HW239026)
@@ -237,8 +240,9 @@ define def_equal_test     =  (SYS.ATTR_SCRATCH_UINT32_1 == SYS.ATTR_SCRATCH_UINT
 
 
 # mba tmr0 register timings are added to the value below
-define def_margin1     = (1);
-define def_margin2     = (0);
+define def_margin1      = (1);
+define def_margin2      = (0);
+define def_margin_rdtag = (4);
 
 
 define def_no_spare     =   (SYS.ATTR_IS_SIMULATION==1) ;
@@ -1925,15 +1929,15 @@ scom 0x0301040B     {
     16:19   ,   0b1101   + def_margin1 ,             1            ,   (def_mba_tmr0q_RW_dlys13 == 1); # RWSMDR_dly   5
     16:19   ,   0b1110   + def_margin1 ,             1            ,   (def_mba_tmr0q_RW_dlys14 == 1); # RWSMDR_dly   5
     16:19   ,   0b1111   + def_margin1 ,             1            ,   (def_mba_tmr0q_RW_dlys15 == 1); # RWSMDR_dly   5
-    20:23   ,   0b0001   + def_margin2 ,             1            ,   (def_mba_tmr0q_RW_dlys7  == 1); # RWDM_dly	 6
-    20:23   ,   0b1000   + def_margin2 ,             1            ,   (def_mba_tmr0q_RW_dlys8  == 1); # RWDM_dly	 6
-    20:23   ,   0b1001   + def_margin2 ,             1            ,   (def_mba_tmr0q_RW_dlys9  == 1); # RWDM_dly	 6
-    20:23   ,   0b1010   + def_margin2 ,             1            ,   (def_mba_tmr0q_RW_dlys10 == 1); # RWDM_dly	 6
-    20:23   ,   0b1011   + def_margin2 ,             1            ,   (def_mba_tmr0q_RW_dlys11 == 1); # RWDM_dly	 6
-    20:23   ,   0b1100   + def_margin2 ,             1            ,   (def_mba_tmr0q_RW_dlys12 == 1); # RWDM_dly	 6
-    20:23   ,   0b1101   + def_margin2 ,             1            ,   (def_mba_tmr0q_RW_dlys13 == 1); # RWDM_dly	 6
-    20:23   ,   0b1110   + def_margin2 ,             1            ,   (def_mba_tmr0q_RW_dlys14 == 1); # RWDM_dly	 6
-    20:23   ,   0b1111   + def_margin2 ,             1            ,   (def_mba_tmr0q_RW_dlys15 == 1); # RWDM_dly	 6
+    20:23   ,   0b0001   + def_margin1 ,             1            ,   (def_mba_tmr0q_RW_dlys7  == 1); # RWDM_dly	 6
+    20:23   ,   0b1000   + def_margin1 ,             1            ,   (def_mba_tmr0q_RW_dlys8  == 1); # RWDM_dly	 6
+    20:23   ,   0b1001   + def_margin1 ,             1            ,   (def_mba_tmr0q_RW_dlys9  == 1); # RWDM_dly	 6
+    20:23   ,   0b1010   + def_margin1 ,             1            ,   (def_mba_tmr0q_RW_dlys10 == 1); # RWDM_dly	 6
+    20:23   ,   0b1011   + def_margin1 ,             1            ,   (def_mba_tmr0q_RW_dlys11 == 1); # RWDM_dly	 6
+    20:23   ,   0b1100   + def_margin1 ,             1            ,   (def_mba_tmr0q_RW_dlys12 == 1); # RWDM_dly	 6
+    20:23   ,   0b1101   + def_margin1 ,             1            ,   (def_mba_tmr0q_RW_dlys13 == 1); # RWDM_dly	 6
+    20:23   ,   0b1110   + def_margin1 ,             1            ,   (def_mba_tmr0q_RW_dlys14 == 1); # RWDM_dly	 6
+    20:23   ,   0b1111   + def_margin1 ,             1            ,   (def_mba_tmr0q_RW_dlys15 == 1); # RWDM_dly	 6
     24:29   ,   0b010011 + def_margin2 ,             1            ,   (def_mba_tmr0q_WRSM_dlys19 == 1); # WRSMSR_dly   7
     24:29   ,   0b010100 + def_margin2 ,             1            ,   (def_mba_tmr0q_WRSM_dlys20 == 1); # WRSMSR_dly   7
     24:29   ,   0b010101 + def_margin2 ,             1            ,   (def_mba_tmr0q_WRSM_dlys21 == 1); # WRSMSR_dly   7
@@ -2093,26 +2097,31 @@ scom 0x0301040A     {
 #    30:35   ,   0b010001    ,           1            ,    (def_mba_dsm0q_cfg_wrdata_dly17 == 1); # wrdata_dly		26
 #    30:35   ,   0b010010    ,           1            ,    (def_mba_dsm0q_cfg_wrdata_dly18 == 1); # wrdata_dly		26
 #    30:35   ,   0b010011    ,           1            ,    (def_mba_dsm0q_cfg_wrdata_dly19 == 1); # wrdata_dly		26
-#    36:41   ,   0b001100    ,           1            ,    (def_mba_dsm0q_cfg_rdtag_dly12 == 1); # rdtag_dly		27
-#    36:41   ,   0b001101    ,           1            ,    (def_mba_dsm0q_cfg_rdtag_dly13 == 1); # rdtag_dly		27
-#    36:41   ,   0b001110    ,           1            ,    (def_mba_dsm0q_cfg_rdtag_dly14 == 1); # rdtag_dly		27
-#    36:41   ,   0b001111    ,           1            ,    (def_mba_dsm0q_cfg_rdtag_dly15 == 1); # rdtag_dly		27
-#    36:41   ,   0b010000    ,           1            ,    (def_mba_dsm0q_cfg_rdtag_dly16 == 1); # rdtag_dly		27
-#    36:41   ,   0b010001    ,           1            ,    (def_mba_dsm0q_cfg_rdtag_dly17 == 1); # rdtag_dly		27
-#    36:41   ,   0b010010    ,           1            ,    (def_mba_dsm0q_cfg_rdtag_dly18 == 1); # rdtag_dly		27
-#    36:41   ,   0b010011    ,           1            ,    (def_mba_dsm0q_cfg_rdtag_dly19 == 1); # rdtag_dly		27
-#    36:41   ,   0b010100    ,           1            ,    (def_mba_dsm0q_cfg_rdtag_dly20 == 1); # rdtag_dly		27
-#    36:41   ,   0b010101    ,           1            ,    (def_mba_dsm0q_cfg_rdtag_dly21 == 1); # rdtag_dly		27
-#    36:41   ,   0b010110    ,           1            ,    (def_mba_dsm0q_cfg_rdtag_dly22 == 1); # rdtag_dly		27
-#    36:41   ,   0b010111    ,           1            ,    (def_mba_dsm0q_cfg_rdtag_dly23 == 1); # rdtag_dly		27
-#    36:41   ,   0b011000    ,           1            ,    (def_mba_dsm0q_cfg_rdtag_dly24 == 1); # rdtag_dly		27
-#    36:41   ,   0b011001    ,           1            ,    (def_mba_dsm0q_cfg_rdtag_dly25 == 1); # rdtag_dly		27
-#    36:41   ,   0b011010    ,           1            ,    (def_mba_dsm0q_cfg_rdtag_dly26 == 1); # rdtag_dly		27
-#    36:41   ,   0b011011    ,           1            ,    (def_mba_dsm0q_cfg_rdtag_dly27 == 1); # rdtag_dly		27
-#    36:41   ,   0b011100    ,           1            ,    (def_mba_dsm0q_cfg_rdtag_dly28 == 1); # rdtag_dly		27
-#    36:41   ,   0b011101    ,           1            ,    (def_mba_dsm0q_cfg_rdtag_dly29 == 1); # rdtag_dly		27
+    36:41   ,   0b001100 + def_margin_rdtag   ,           1            ,    (def_mba_dsm0q_cfg_rdtag_dly12 == 1); # rdtag_dly		27
+    36:41   ,   0b001101 + def_margin_rdtag   ,           1            ,    (def_mba_dsm0q_cfg_rdtag_dly13 == 1); # rdtag_dly		27
+    36:41   ,   0b001110 + def_margin_rdtag   ,           1            ,    (def_mba_dsm0q_cfg_rdtag_dly14 == 1); # rdtag_dly		27
+    36:41   ,   0b001111 + def_margin_rdtag   ,           1            ,    (def_mba_dsm0q_cfg_rdtag_dly15 == 1); # rdtag_dly		27
+    36:41   ,   0b010000 + def_margin_rdtag   ,           1            ,    (def_mba_dsm0q_cfg_rdtag_dly16 == 1); # rdtag_dly		27
+    36:41   ,   0b010001 + def_margin_rdtag   ,           1            ,    (def_mba_dsm0q_cfg_rdtag_dly17 == 1); # rdtag_dly		27
+    36:41   ,   0b010010 + def_margin_rdtag   ,           1            ,    (def_mba_dsm0q_cfg_rdtag_dly18 == 1); # rdtag_dly		27
+    36:41   ,   0b010011 + def_margin_rdtag   ,           1            ,    (def_mba_dsm0q_cfg_rdtag_dly19 == 1); # rdtag_dly		27
+    36:41   ,   0b010100 + def_margin_rdtag   ,           1            ,    (def_mba_dsm0q_cfg_rdtag_dly20 == 1); # rdtag_dly		27
+    36:41   ,   0b010101 + def_margin_rdtag   ,           1            ,    (def_mba_dsm0q_cfg_rdtag_dly21 == 1); # rdtag_dly		27
+    36:41   ,   0b010110 + def_margin_rdtag   ,           1            ,    (def_mba_dsm0q_cfg_rdtag_dly22 == 1); # rdtag_dly		27
+    36:41   ,   0b010111 + def_margin_rdtag   ,           1            ,    (def_mba_dsm0q_cfg_rdtag_dly23 == 1); # rdtag_dly		27
+    36:41   ,   0b011000 + def_margin_rdtag   ,           1            ,    (def_mba_dsm0q_cfg_rdtag_dly24 == 1); # rdtag_dly		27
+    36:41   ,   0b011001 + def_margin_rdtag   ,           1            ,    (def_mba_dsm0q_cfg_rdtag_dly25 == 1); # rdtag_dly		27
+    36:41   ,   0b011010 + def_margin_rdtag   ,           1            ,    (def_mba_dsm0q_cfg_rdtag_dly26 == 1); # rdtag_dly		27
+    36:41   ,   0b011011 + def_margin_rdtag   ,           1            ,    (def_mba_dsm0q_cfg_rdtag_dly27 == 1); # rdtag_dly		27
+    36:41   ,   0b011100 + def_margin_rdtag   ,           1            ,    (def_mba_dsm0q_cfg_rdtag_dly28 == 1); # rdtag_dly		27
+    36:41   ,   0b011101 + def_margin_rdtag   ,           1            ,    (def_mba_dsm0q_cfg_rdtag_dly29 == 1); # rdtag_dly		27
 #    36:41   ,   0b100100    ,           1            ,    any                                 ; # rdtag_dly		36  temporary fix for testfloor
-    36:41   ,   0b011000    ,           1            ,    any                                 ; # rdtag_dly		24  temporary fix for testfloor
+#    36:41   ,   0b011000    ,           1            ,    any                                 ; # rdtag_dly		24  temporary fix for testfloor
+#    36:41   ,   0b010111    ,           1            ,    any                                 ; # rdtag_dly		23  temporary fix for testfloor
+# setting 22 works for 1600 11-11-11
+#    36:41   ,   0b010110    ,           1            ,    any                                 ; # rdtag_dly		22  temporary fix for testfloor
+# setting 21 failed
+#    36:41   ,   0b010101    ,           1            ,    any                                 ; # rdtag_dly		21  temporary fix for testfloor
     43:48   ,   0b000101    ,           1            ,    (def_mba_dsm0q_CFG_RODT_BC4_END_DLY5 == 1); # CFG_RODT_BC4_END_DLY 28
     43:48   ,   0b000110    ,           1            ,    (def_mba_dsm0q_CFG_RODT_BC4_END_DLY6 == 1); # CFG_RODT_BC4_END_DLY 28
     43:48   ,   0b000111    ,           1            ,    (def_mba_dsm0q_CFG_RODT_BC4_END_DLY7 == 1); # CFG_RODT_BC4_END_DLY 28

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012                   */
+/* COPYRIGHT International Business Machines Corp. 2012,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -21,7 +21,7 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 // -*- mode: C++; c-file-style: "linux";  -*-
-// $Id: proc_check_slave_sbe_seeprom_complete.C,v 1.5 2012/11/13 21:00:34 jeshua Exp $
+// $Id: proc_check_slave_sbe_seeprom_complete.C,v 1.6 2013/02/06 04:14:57 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_check_slave_sbe_seeprom_complete.C,v $
 //------------------------------------------------------------------------------
 // *|
@@ -309,7 +309,8 @@ extern "C"
 
             //Did it stop in the correct istep?
             if(( istep_num != PROC_SBE_CHECK_MASTER_ISTEP_NUM ) &&
-               ( istep_num != PROC_SBE_ENABLE_PNOR_ISTEP_NUM ))
+               ( istep_num != PROC_SBE_ENABLE_PNOR_ISTEP_NUM ) &&
+               ( istep_num != PROC_SBE_EX_HOST_RUNTIME_SCOM_ISTEP_NUM ))
             {
                 FAPI_ERR(
                     "SBE halted in wrong istep (istep 0x%X, substep %i)", 

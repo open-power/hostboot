@@ -8410,7 +8410,7 @@ bits6:7  will be consumed together to form COARSE_LVL. </description>
 </attribute>
 
 <attribute>
-    <id>MSS_ECID</id>
+    <id>ECID</id>
     <description>Bits 0 to 63 of the ECID in array entry 0 and bits 64 to 127 in ECID array entry 1
 Created from running the mss_get_cen_ecid.C</description>
     <simpleType>
@@ -8423,7 +8423,7 @@ Created from running the mss_get_cen_ecid.C</description>
     <readable/>
     <writeable/>
     <hwpfToHbAttrMap>
-        <id>ATTR_MSS_ECID</id>
+        <id>ATTR_ECID</id>
         <macro>DIRECT</macro>
     </hwpfToHbAttrMap>
 </attribute>
@@ -11320,6 +11320,653 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
     <persistency>non-volatile</persistency>
     <hwpfToHbAttrMap>
         <id>ATTR_MEMB_TP_BNDY_PLL_SCAN_SELECT</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>MRW_SAFEMODE_MEM_THROTTLE_NUMERATOR_PER_MBA</id>
+    <description>Machine Readable Workbook safe mode throttle value for numerator cfg_nm_n_per_mba</description>
+    <simpleType>
+        <uint32_t></uint32_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_MRW_SAFEMODE_MEM_THROTTLE_NUMERATOR_PER_MBA</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>MRW_SAFEMODE_MEM_THROTTLE_DENOMINATOR</id>
+    <description>Machine Readable Workbook safe mode throttle value for denominator cfg_nm_m</description>
+    <simpleType>
+        <uint32_t></uint32_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_MRW_SAFEMODE_MEM_THROTTLE_DENOMINATOR</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>MRW_SAFEMODE_MEM_THROTTLE_NUMERATOR_PER_CHIP</id>
+    <description>Machine Readable Workbook safe mode throttle value for numerator cfg_nm_n_per_chip</description>
+    <simpleType>
+        <uint32_t></uint32_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_MRW_SAFEMODE_MEM_THROTTLE_NUMERATOR_PER_CHIP</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>MRW_THERMAL_MEMORY_POWER_LIMIT</id>
+    <description>Machine Readable Workbook Thermal Memory Power Limit</description>
+    <simpleType>
+        <uint32_t></uint32_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_MRW_THERMAL_MEMORY_POWER_LIMIT</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_DRAM_LPASR</id>
+    <description> Low Power Auto Self-Refresh. This is for DDR4 MRS2.  Computed in mss_eff_cnfg. Each memory channel will have a value.
+      creator: mss_eff_cnfg
+      consumer: various
+      firmware notes: none</description>
+    <simpleType>
+        <uint8_t></uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_DRAM_LPASR</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_MPR_PAGE</id>
+    <description>MPR Page Selection This is for DDR4 MRS3.  Computed in mss_eff_cnfg. Each memory channel will have a value.
+      creator: mss_eff_cnfg
+      consumer: various
+      firmware notes: none</description>
+    <simpleType>
+        <uint8_t></uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_MPR_PAGE</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_GEARDOWN_MODE</id>
+    <description>Gear Down Mode. This is for DDR4 MRS3.  Computed in mss_eff_cnfg. Each memory channel will have a value.
+      creator: mss_eff_cnfg
+      consumer: various
+      firmware notes: none</description>
+    <simpleType>
+        <uint8_t></uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_GEARDOWN_MODE</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_PER_DRAM_ACCESS</id>
+    <description>Per DRAM accessibility.  This is for DDR4 MRS3.  Computed in mss_eff_cnfg. Each memory channel will have a value.
+      creator: mss_eff_cnfg
+      consumer: various
+      firmware notes: none</description>
+    <simpleType>
+        <uint8_t></uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_PER_DRAM_ACCESS</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_TEMP_READOUT</id>
+    <description>Temperature sensor readout. This is for DDR4 MRS3.  Computed in mss_eff_cnfg. Each memory channel will have a value.
+      creator: mss_eff_cnfg
+      consumer: various
+      firmware notes: none</description>
+    <simpleType>
+        <uint8_t></uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_TEMP_READOUT</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_FINE_REFRESH_MODE</id>
+    <description>Fine refresh mode. This is for DDR4 MRS3.  Computed in mss_eff_cnfg. Each memory channel will have a value.
+      creator: mss_eff_cnfg
+      consumer: various
+      firmware notes: none</description>
+    <simpleType>
+        <uint8_t></uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_FINE_REFRESH_MODE</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_CRC_WR_LATENCY</id>
+    <description>write latency for CRC and DM. This is for DDR4 MRS3.  Computed in mss_eff_cnfg. Each memory channel will have a value.
+      creator: mss_eff_cnfg
+      consumer: various
+      firmware notes: none</description>
+    <simpleType>
+        <uint8_t></uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_CRC_WR_LATENCY</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_MPR_RD_FORMAT</id>
+    <description>MPR READ FORMAT. This is for DDR4 MRS3.  Computed in mss_eff_cnfg. Each memory channel will have a value.
+      creator: mss_eff_cnfg
+      consumer: various
+      firmware notes: none</description>
+    <simpleType>
+        <uint8_t></uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_MPR_RD_FORMAT</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_MAX_POWERDOWN_MODE</id>
+    <description>Max Power down mode. This is for DDR4 MRS4.  Computed in mss_eff_cnfg. Each memory channel will have a value.
+      creator: mss_eff_cnfg
+      consumer: various
+      firmware notes: none</description>
+    <simpleType>
+        <uint8_t></uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_MAX_POWERDOWN_MODE</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_TEMP_REF_RANGE</id>
+    <description>Temp ref range. This is for DDR4 MRS4.  Computed in mss_eff_cnfg. Each memory channel will have a value.
+      creator: mss_eff_cnfg
+      consumer: various
+      firmware notes: none</description>
+    <simpleType>
+        <uint8_t></uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_TEMP_REF_RANGE</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_TEMP_REF_MODE</id>
+    <description>Temp controlled ref mode. This is for DDR4 MRS4.  Computed in mss_eff_cnfg. Each memory channel will have a value.
+      creator: mss_eff_cnfg
+      consumer: various
+      firmware notes: none</description>
+    <simpleType>
+        <uint8_t></uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_TEMP_REF_MODE</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_INT_VREF_MON</id>
+    <description>Internal Vref Monitor.. This is for DDR4 MRS4.  Computed in mss_eff_cnfg. Each memory channel will have a value.
+      creator: mss_eff_cnfg
+      consumer: various
+      firmware notes: none</description>
+    <simpleType>
+        <uint8_t></uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_INT_VREF_MON</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_CS_CMD_LATENCY</id>
+    <description>CS to CMD/ADDR Latency. This is for DDR4 MRS4.  Computed in mss_eff_cnfg. Each memory channel will have a value.
+      creator: mss_eff_cnfg
+      consumer: various
+      firmware notes: none</description>
+    <simpleType>
+        <uint8_t></uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_CS_CMD_LATENCY</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_SELF_REF_ABORT</id>
+    <description>Self Refresh Abort. This is for DDR4 MRS4.  Computed in mss_eff_cnfg. Each memory channel will have a value.
+      creator: mss_eff_cnfg
+      consumer: various
+      firmware notes: none</description>
+    <simpleType>
+        <uint8_t></uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_SELF_REF_ABORT</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_RD_PREAMBLE_TRAIN</id>
+    <description>Read Pre amble Training Mode. This is for DDR4 MRS4.  Computed in mss_eff_cnfg. Each memory channel will have a value.
+      creator: mss_eff_cnfg
+      consumer: various
+      firmware notes: none</description>
+    <simpleType>
+        <uint8_t></uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_RD_PREAMBLE_TRAIN</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_RD_PREAMBLE</id>
+    <description>Read Pre amble. This is for DDR4 MRS4.  Computed in mss_eff_cnfg. Each memory channel will have a value.
+      creator: mss_eff_cnfg
+      consumer: various
+      firmware notes: none</description>
+    <simpleType>
+        <uint8_t></uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_RD_PREAMBLE</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_WR_PREAMBLE</id>
+    <description>Write Pre amble. This is for DDR4 MRS4.  Computed in mss_eff_cnfg. Each memory channel will have a value.
+      creator: mss_eff_cnfg
+      consumer: various
+      firmware notes: none</description>
+    <simpleType>
+        <uint8_t></uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_WR_PREAMBLE</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_CA_PARITY_LATENCY</id>
+    <description>C/A Parity Latency Mode. This is for DDR4 MRS5.  Computed in mss_eff_cnfg. Each memory channel will have a value.
+      creator: mss_eff_cnfg
+      consumer: various
+      firmware notes: none</description>
+    <simpleType>
+        <uint8_t></uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_CA_PARITY_LATENCY</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_CRC_ERROR_CLEAR</id>
+    <description>CRC Error Clear. This is for DDR4 MRS5.  Computed in mss_eff_cnfg. Each memory channel will have a value.
+      creator: mss_eff_cnfg
+      consumer: various
+      firmware notes: none</description>
+    <simpleType>
+        <uint8_t></uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_CRC_ERROR_CLEAR</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_CA_PARITY_ERROR_STATUS</id>
+    <description>C/A Parity Error Status. This is for DDR4 MRS5.  Computed in mss_eff_cnfg. Each memory channel will have a value.
+      creator: mss_eff_cnfg
+      consumer: various
+      firmware notes: none</description>
+    <simpleType>
+        <uint8_t></uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_CA_PARITY_ERROR_STATUS</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_ODT_INPUT_BUFF</id>
+    <description>ODT Input Buffer during power down. This is for DDR4 MRS5.  Computed in mss_eff_cnfg. Each memory channel will have a value.
+      creator: mss_eff_cnfg
+      consumer: various
+      firmware notes: none</description>
+    <simpleType>
+        <uint8_t></uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_ODT_INPUT_BUFF</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_RTT_PARK</id>
+    <description>RTT_Park value. This is for DDR4 MRS5.  Computed in mss_eff_cnfg. Each memory channel will have a value.
+      creator: mss_eff_cnfg
+      consumer: various
+      firmware notes: none</description>
+    <simpleType>
+        <uint8_t></uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_RTT_PARK</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_CA_PARITY</id>
+    <description>CA Parity Persistance Error. This is for DDR4 MRS5.  Computed in mss_eff_cnfg. Each memory channel will have a value.
+      creator: mss_eff_cnfg
+      consumer: various
+      firmware notes: none</description>
+    <simpleType>
+        <uint8_t></uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_CA_PARITY</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_DATA_MASK</id>
+    <description>Data Mask. This is for DDR4 MRS5.  Computed in mss_eff_cnfg. Each memory channel will have a value.
+      creator: mss_eff_cnfg
+      consumer: various
+      firmware notes: none</description>
+    <simpleType>
+        <uint8_t></uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_DATA_MASK</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_WRITE_DBI</id>
+    <description>Write DBI. This is for DDR4 MRS5.  Computed in mss_eff_cnfg. Each memory channel will have a value.
+      creator: mss_eff_cnfg
+      consumer: various
+      firmware notes: none</description>
+    <simpleType>
+        <uint8_t></uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_WRITE_DBI</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_READ_DBI</id>
+    <description>Read DBI. This is for DDR4 MRS5.  Computed in mss_eff_cnfg. Each memory channel will have a value.
+      creator: mss_eff_cnfg
+      consumer: various
+      firmware notes: none</description>
+    <simpleType>
+        <uint8_t></uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_READ_DBI</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>VREF_DQ_TRAIN_VALUE</id>
+    <description>vrefdq_train value. This is for DDR4 MRS6.  Computed in mss_eff_cnfg. Each memory channel will have a value.
+      creator: mss_eff_cnfg
+      consumer: various
+      firmware notes: none</description>
+    <simpleType>
+        <uint8_t></uint8_t>
+        <array>2,2,4</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_VREF_DQ_TRAIN_VALUE</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>VREF_DQ_TRAIN_RANGE</id>
+    <description>vrefdq_train range. This is for DDR4 MRS6.  Computed in mss_eff_cnfg. Each memory channel will have a value.
+      creator: mss_eff_cnfg
+      consumer: various
+      firmware notes: none</description>
+    <simpleType>
+        <uint8_t></uint8_t>
+        <array>2,2,4</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_VREF_DQ_TRAIN_RANGE</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>VREF_DQ_TRAIN_ENABLE</id>
+    <description>vrefdq_train enable. This is for DDR4 MRS6.  Computed in mss_eff_cnfg. Each memory channel will have a value.
+      creator: mss_eff_cnfg
+      consumer: various
+      firmware notes: none</description>
+    <simpleType>
+        <uint8_t></uint8_t>
+        <array>2,2,4</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_VREF_DQ_TRAIN_ENABLE</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>TCCD_L</id>
+    <description>tccd_l. This is for DDR4 MRS6.  Computed in mss_eff_cnfg. Each memory channel will have a value.
+      creator: mss_eff_cnfg
+      consumer: various
+      firmware notes: none</description>
+    <simpleType>
+        <uint8_t></uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_TCCD_L</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_WRITE_CRC</id>
+    <description>Write CRC control for DDR4.  Set in mss_eff_cnfg.  Each memory channel will have a value.
+      creator: mss_eff_cnfg
+      consumer: various
+      firmware notes: none</description>
+    <simpleType>
+        <uint8_t></uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_WRITE_CRC</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_DRAM_2N_MODE_ENABLED</id>
+    <description>Describes if this MBA is in 2N address mode.  The DIMM attributes associated with this MBA describes if this mode is needed for SI.  The MR Keyword of the VPD gives and indication of the value needed. Set by eff_config and consumed in the mba_def.initfile.</description>
+    <simpleType>
+        <uint8_t></uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_DRAM_2N_MODE_ENABLED</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>MSS_DIMM_POWER_TEST_REV</id>
+    <description>The power test revision number that is saved when data is saved on an ISDIMM.  If the power test changes, then a difference indicates that the power test needs to be rerun.  This attribute needs to stick around between IPLs</description>
+    <simpleType>
+        <uint8_t></uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_MSS_DIMM_POWER_TEST_REV</id>
         <macro>DIRECT</macro>
     </hwpfToHbAttrMap>
 </attribute>

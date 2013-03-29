@@ -1,8 +1,9 @@
-#-- $Id: mbs_def.initfile,v 1.25 2013/01/17 15:41:30 yctschan Exp $
+#-- $Id: mbs_def.initfile,v 1.28 2013/03/15 16:59:48 jmcgill Exp $
 #-- CHANGE HISTORY:
 #--------------------------------------------------------------------------------
 #-- Version:|Author: | Date:  | Comment:
 #-- --------|--------|--------|--------------------------------------------------
+#--   1.26  |tschang |03/13/13| changed cache interleave mode to have ATTR_MSS_CACHE_ENABLE as a condition
 #--   1.25  |tschang |01/17/13| cache enabled when (ATTR_MSS_CACHE_ENABLE != 0) - enabled cache when 1/2 cache mode is choosen
 #--   1.21  |tschang |10/23/12| disable interleaving when one or both MBA are disabled (partial good tests)
 #--   1.20  |tschang |09/27/12| added partial good support for the SCOM write using ATTR_FUNCTIONAL
@@ -442,8 +443,8 @@ scom 0x0201140F   {
     0   ,       0b1     , (ATTR_MSS_CACHE_ENABLE != 0);   # MBCCFGQ_cache_enable
 #    1   ,       0b0     , any                       ;        # -MW match dials
     1   ,       0b0     , any                       ;         # MBCCFGQ_cfg_dyn_whap_en
-    2   ,       0b0     , (SYS.ATTR_MSS_CLEANER_ENABLE == 0); # MBCCFGQ_cleaner_enable
-    2   ,       0b1     , (SYS.ATTR_MSS_CLEANER_ENABLE == 1); # MBCCFGQ_cleaner_enable
+    2   ,       0b0     , ((SYS.ATTR_MSS_CLEANER_ENABLE == 0) || (ATTR_MSS_CACHE_ENABLE != 1)); # MBCCFGQ_cleaner_enable
+    2   ,       0b1     , ((SYS.ATTR_MSS_CLEANER_ENABLE == 1) && (ATTR_MSS_CACHE_ENABLE == 1)); # MBCCFGQ_cleaner_enable
     3   ,       0b0     , any                       ;         # MBCCFGQ_cache_only_enable
     4   ,       0b0     , any                       ;         # MBCCFGQ_lru_dmap_en
     5   ,       0b0     , any                       ;         # MBCCFGQ_lru_random_en
@@ -456,15 +457,12 @@ scom 0x0201140F   {
     11  ,       0b1     , (SYS.ATTR_MSS_PREFETCH_ENABLE == 0);         # MBCCFGQ_srw_prefetch_dis
     12  ,       0b0     , (SYS.ATTR_MSS_PREFETCH_ENABLE == 1);         # MBCCFGQ_prq_prefetch_dis
     12  ,       0b1     , (SYS.ATTR_MSS_PREFETCH_ENABLE == 0);         # MBCCFGQ_prq_prefetch_dis
-#   12	,		0b0		,	any						;		# -MW match dials
-#    12  ,       0b0     , (SYS.ATTR_MSS_PREFETCH_ENABLE == 1) && (SYS.ATTR_MSS_CACHE_ENABLE == 1);
-#    12  ,       0b1     , (SYS.ATTR_MSS_PREFETCH_ENABLE == 0);
-#13:16  ,       0xF     , any                       ;         # MBCCFGQ_cln_page_mode_bundle_max_cnt_0_3
-#17:22  ,       0x10    , any                       ;         # MBCCFGQ_cln_wrq_tgt_alloc_0_5
-#23:28  ,       0x7     , any                       ;         # MBCCFGQ_cln_wr_priority_wrq_hwmark_0_5
-#29:34  ,       0x6     , any                       ;         # MBCCFGQ_cln_wr_priority_wrq_lwmark_0_5
-#35:48  ,       0x400   , any                       ;         # MBCCFGQ_cln_wr_priority_dv_hwmark_0_13
-#49:62  ,       0x300   , any                       ;         # MBCCFGQ_cln_wr_priority_dv_lwmark_0_13
+ 13:16  ,       0xE     , any                       ;         # MBCCFGQ_cln_page_mode_bundle_max_cnt_0_3
+ 17:22  ,       0x1F    , any                       ;         # MBCCFGQ_cln_wrq_tgt_alloc_0_5
+ 23:28  ,       0x7     , any                       ;         # MBCCFGQ_cln_wr_priority_wrq_hwmark_0_5
+ 29:34  ,       0x6     , any                       ;         # MBCCFGQ_cln_wr_priority_wrq_lwmark_0_5
+ 35:48  ,       0x1000  , any                       ;         # MBCCFGQ_cln_wr_priority_dv_hwmark_0_13
+ 49:62  ,       0x0FC0  , any                       ;         # MBCCFGQ_cln_wr_priority_dv_lwmark_0_13
 }
 
 
@@ -555,8 +553,10 @@ scom 0x0201140B     {
     10:11   ,   0b01        ,         1           , (SYS.ATTR_MSS_MCA_HASH_MODE == 1);  # MBAXCR01Q_MBA01_Hash_Mode
     10:11   ,   0b10        ,         1           , (SYS.ATTR_MSS_MCA_HASH_MODE == 2);  # MBAXCR01Q_MBA01_Hash_Mode
 #    12      ,   0b0         ,         1           , any;							# -MW match dials  # MBAXCR01Q_MBA01_Interleave_Mode
-    12      ,   0b0         ,         1           , (SYS.ATTR_MSS_MBA_CACHELINE_INTERLEAVE_MODE == 0);  # MBAXCR01Q_MBA01_Interleave_Mode
-    12      ,   0b1         ,         1           , (SYS.ATTR_MSS_MBA_CACHELINE_INTERLEAVE_MODE == 1);  # MBAXCR01Q_MBA01_Interleave_Mode
+#    12      ,   0b0         ,         1           , (SYS.ATTR_MSS_MBA_CACHELINE_INTERLEAVE_MODE == 0);  # MBAXCR01Q_MBA01_Interleave_Mode
+#    12      ,   0b1         ,         1           , (SYS.ATTR_MSS_MBA_CACHELINE_INTERLEAVE_MODE == 1);  # MBAXCR01Q_MBA01_Interleave_Mode
+    12      , 0b0           ,         1           , ((SYS.ATTR_MSS_MBA_CACHELINE_INTERLEAVE_MODE == 0) || (ATTR_MSS_CACHE_ENABLE != 1)); # MBAXCR01Q_MBA01_Interleave_Mode
+    12      , 0b1           ,         1           , ((SYS.ATTR_MSS_MBA_CACHELINE_INTERLEAVE_MODE == 1) && (ATTR_MSS_CACHE_ENABLE == 1)); # MBAXCR01Q_MBA01_Interleave_Mod
 }
 
 

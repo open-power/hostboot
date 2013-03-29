@@ -1,27 +1,26 @@
-/*  IBM_PROLOG_BEGIN_TAG
- *  This is an automatically generated prolog.
- *
- *  $Source: src/usr/hwpf/hwp/dram_training/mem_startclocks/cen_mem_startclocks.C $
- *
- *  IBM CONFIDENTIAL
- *
- *  COPYRIGHT International Business Machines Corp. 2012
- *
- *  p1
- *
- *  Object Code Only (OCO) source materials
- *  Licensed Internal Code Source Materials
- *  IBM HostBoot Licensed Internal Code
- *
- *  The source code for this program is not published or other-
- *  wise divested of its trade secrets, irrespective of what has
- *  been deposited with the U.S. Copyright Office.
- *
- *  Origin: 30
- *
- *  IBM_PROLOG_END_TAG
- */
-// $Id: cen_mem_startclocks.C,v 1.9 2012/06/07 13:52:27 jmcgill Exp $
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/usr/hwpf/hwp/dram_training/mem_startclocks/cen_mem_startclocks.C $ */
+/*                                                                        */
+/* IBM CONFIDENTIAL                                                       */
+/*                                                                        */
+/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/*                                                                        */
+/* p1                                                                     */
+/*                                                                        */
+/* Object Code Only (OCO) source materials                                */
+/* Licensed Internal Code Source Materials                                */
+/* IBM HostBoot Licensed Internal Code                                    */
+/*                                                                        */
+/* The source code for this program is not published or otherwise         */
+/* divested of its trade secrets, irrespective of what has been           */
+/* deposited with the U.S. Copyright Office.                              */
+/*                                                                        */
+/* Origin: 30                                                             */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
+// $Id: cen_mem_startclocks.C,v 1.10 2013/03/04 17:56:29 mfred Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/centaur/working/procedures/ipl/fapi/cen_mem_startclocks.C,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2012
@@ -32,6 +31,7 @@
 // *! DESCRIPTION : see additional comments below
 // *! OWNER NAME  : Mark Fredrickson  Email: mfred@us.ibm.com
 // *! BACKUP NAME : Mark Bellows      Email: bellows@us.ibm.com
+// *! SCREEN      : pervasive_screen
 // #! ADDITIONAL COMMENTS : See below
 //
 // The purpose of this procedure is to drop the fences and release the tholds associated with the Centaur chip MEM PLL.
@@ -393,6 +393,9 @@ fapi::ReturnCode cen_mem_startclocks(const fapi::Target & i_target)
 This section is automatically updated by CVS when you check in this file.
 Be sure to create CVS comments when you commit so that they can be included here.
 $Log: cen_mem_startclocks.C,v $
+Revision 1.10  2013/03/04 17:56:29  mfred
+Add some header comments for BACKUP and SCREEN.
+
 Revision 1.9  2012/06/07 13:52:27  jmcgill
 use independent data buffers for cfam/scom accesses
 

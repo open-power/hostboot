@@ -1,30 +1,29 @@
-/*  IBM_PROLOG_BEGIN_TAG
- *  This is an automatically generated prolog.
- *
- *  $Source: src/usr/hwpf/hwp/build_winkle_images/proc_set_pore_bar/pgp_pba.h $
- *
- *  IBM CONFIDENTIAL
- *
- *  COPYRIGHT International Business Machines Corp. 2012
- *
- *  p1
- *
- *  Object Code Only (OCO) source materials
- *  Licensed Internal Code Source Materials
- *  IBM HostBoot Licensed Internal Code
- *
- *  The source code for this program is not published or other-
- *  wise divested of its trade secrets, irrespective of what has
- *  been deposited with the U.S. Copyright Office.
- *
- *  Origin: 30
- *
- *  IBM_PROLOG_END_TAG
- */
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/usr/hwpf/hwp/build_winkle_images/p8_set_pore_bar/pgp_pba.h $ */
+/*                                                                        */
+/* IBM CONFIDENTIAL                                                       */
+/*                                                                        */
+/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/*                                                                        */
+/* p1                                                                     */
+/*                                                                        */
+/* Object Code Only (OCO) source materials                                */
+/* Licensed Internal Code Source Materials                                */
+/* IBM HostBoot Licensed Internal Code                                    */
+/*                                                                        */
+/* The source code for this program is not published or otherwise         */
+/* divested of its trade secrets, irrespective of what has been           */
+/* deposited with the U.S. Copyright Office.                              */
+/*                                                                        */
+/* Origin: 30                                                             */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
 #ifndef __PGP_PBA_H__
 #define __PGP_PBA_H__
 
-// $Id: pgp_pba.h,v 1.1 2012/08/13 13:04:35 stillgs Exp $
+// $Id: pgp_pba.h,v 1.2 2012/10/05 18:42:15 pchatnah Exp $
 
 /// \file pgp_pba.h
 /// \brief PBA unit header.  Local and mechanically generated macros.
@@ -32,7 +31,7 @@
 /// \todo Add Doxygen grouping to constant groups
 
 //#include "pba_register_addresses.h"
-#include "pba_firmware_registers.h"
+#include "pba_firmware_register.H"
 
 #define POWERBUS_CACHE_LINE_SIZE 128
 #define LOG_POWERBUS_CACHE_LINE_SIZE 7

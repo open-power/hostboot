@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012                   */
+/* COPYRIGHT International Business Machines Corp. 2012,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_shmoo_common.H,v 1.10 2012/12/06 11:46:58 sasethur Exp $
+// $Id: mss_shmoo_common.H,v 1.12 2013/03/20 17:18:38 sasethur Exp $
 // *!***************************************************************************
 // *! (C) Copyright International Business Machines Corp. 1997, 1998
 // *!           All Rights Reserved -- Property of IBM 
@@ -58,6 +58,7 @@ const uint8_t MAX_NIBBLES=2;
 const uint8_t MAX_BITS=4;
 const uint8_t MAX_DQ=80;
 const uint8_t MAX_DQS=20;
+const uint8_t SCHMOO_NIBBLES=20;
 const uint16_t read_counter_threshold=1000;
 const uint16_t error_threshold_count=400;
 const uint8_t MAX_PORT = 2;

@@ -164,9 +164,11 @@
     <attribute><id>MAX_CHIPLETS_PER_PROC</id></attribute>
     <attribute><id>MAX_MCS_PER_SYSTEM</id></attribute>
     <!-- End max/min config attributes -->
-
     <attribute><id>PROC_PBIEX_ASYNC_SEL</id></attribute>
-
+    <attribute><id>MRW_SAFEMODE_MEM_THROTTLE_NUMERATOR_PER_MBA</id></attribute>
+    <attribute><id>MRW_SAFEMODE_MEM_THROTTLE_DENOMINATOR</id></attribute>
+    <attribute><id>MRW_SAFEMODE_MEM_THROTTLE_NUMERATOR_PER_CHIP</id></attribute>
+    <attribute><id>MRW_THERMAL_MEMORY_POWER_LIMIT</id></attribute>
 </targetType>
 
 <targetType>
@@ -904,6 +906,37 @@
     <attribute><id>MCBIST_ADDR_SLAVE_RANK_ON</id></attribute>
     <attribute><id>MCBIST_ADDR_STR_MAP</id></attribute>
     <attribute><id>MCBIST_ADDR_RAND</id></attribute>
+    <attribute><id>EFF_DRAM_LPASR</id></attribute>
+    <attribute><id>EFF_MPR_PAGE</id></attribute>
+    <attribute><id>EFF_GEARDOWN_MODE</id></attribute>
+    <attribute><id>EFF_PER_DRAM_ACCESS</id></attribute>
+    <attribute><id>EFF_TEMP_READOUT</id></attribute>
+    <attribute><id>EFF_FINE_REFRESH_MODE</id></attribute>
+    <attribute><id>EFF_MPR_RD_FORMAT</id></attribute>
+    <attribute><id>EFF_MAX_POWERDOWN_MODE</id></attribute>
+    <attribute><id>EFF_TEMP_REF_RANGE</id></attribute>
+    <attribute><id>EFF_TEMP_REF_MODE</id></attribute>
+    <attribute><id>EFF_INT_VREF_MON</id></attribute>
+    <attribute><id>EFF_CS_CMD_LATENCY</id></attribute>
+    <attribute><id>EFF_SELF_REF_ABORT</id></attribute>
+    <attribute><id>EFF_RD_PREAMBLE_TRAIN</id></attribute>
+    <attribute><id>EFF_RD_PREAMBLE</id></attribute>
+    <attribute><id>EFF_WR_PREAMBLE</id></attribute>
+    <attribute><id>EFF_CA_PARITY_LATENCY</id></attribute>
+    <attribute><id>EFF_CRC_ERROR_CLEAR</id></attribute>
+    <attribute><id>EFF_CA_PARITY_ERROR_STATUS</id></attribute>
+    <attribute><id>EFF_ODT_INPUT_BUFF</id></attribute>
+    <attribute><id>EFF_RTT_PARK</id></attribute>
+    <attribute><id>EFF_CA_PARITY</id></attribute>
+    <attribute><id>EFF_DATA_MASK</id></attribute>
+    <attribute><id>EFF_WRITE_DBI</id></attribute>
+    <attribute><id>EFF_READ_DBI</id></attribute>
+    <attribute><id>VREF_DQ_TRAIN_VALUE</id></attribute>
+    <attribute><id>VREF_DQ_TRAIN_RANGE</id></attribute>
+    <attribute><id>VREF_DQ_TRAIN_ENABLE</id></attribute>
+    <attribute><id>TCCD_L</id></attribute>
+    <attribute><id>EFF_WRITE_CRC</id></attribute>
+    <attribute><id>EFF_DRAM_2N_MODE_ENABLED</id></attribute>
 </targetType>
 
 <targetType>
@@ -1015,7 +1048,7 @@
     <attribute><id>MSS_VOLT</id></attribute>
     <attribute><id>MSS_FREQ</id></attribute>
     <attribute><id>MSS_LAB_OVERRIDE_FOR_MEM_PLL</id></attribute>
-    <attribute><id>MSS_ECID</id></attribute>
+    <attribute><id>ECID</id></attribute>
     <attribute><id>EI_BUS_RX_MSB_LSB_SWAP</id></attribute>
     <attribute><id>EI_BUS_TX_MSB_LSB_SWAP</id></attribute>
     <attribute>

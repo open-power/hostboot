@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012                   */
+/* COPYRIGHT International Business Machines Corp. 2012,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -30,20 +30,21 @@
 // *! OWNER NAME: Klaus P. Gungl         Email: kgungl@de.ibm.com
 // *!
 // *! General Description:
-// *!        
+// *!
 // *!  include file for pba_init with constants, definitions, prototypes
 // *!
 //------------------------------------------------------------------------------
-//  
+//
 
-#ifndef _PROC_PBAINIT_H_
-#define _PROC_PBAINIT_H_
+#ifndef _P8_PBAINIT_H_
+#define _P8_PBAINIT_H_
 
 #include "p8_scom_addresses.H"
 
 typedef fapi::ReturnCode (*p8_pba_init_FP_t) (const fapi::Target& , uint64_t );
 
-// constant definitions for valid command scope. LIMIT is used by setup routine for plausibility checking.
+// constant definitions for valid command scope. LIMIT is used by setup routine
+// for plausibility checking.
 
 #define PBA_CMD_SCOPE_NODAL    0x00
 #define PBA_CMD_SCOPE_GROUP    0x01
@@ -53,50 +54,64 @@ typedef fapi::ReturnCode (*p8_pba_init_FP_t) (const fapi::Target& , uint64_t );
 #define PBA_CMD_SCOPE_FOREIGN1 0x05
 #define PBA_CMD_SCOPE_LIMIT    0x06
 
-enum cmd_scope_t 
+enum cmd_scope_t
 {
-    CMD_SCOPE_NODAL, 
-    CMD_SCOPE_GROUP, 
-    CMD_SCOPE_SYSTEM, 
-    CMD_SCOPE_RGP, 
-    CMD_SCOPE_FOREIGN0,  
-    CMD_SCOPE_FOREIGN1 
+    CMD_SCOPE_NODAL,
+    CMD_SCOPE_GROUP,
+    CMD_SCOPE_SYSTEM,
+    CMD_SCOPE_RGP,
+    CMD_SCOPE_FOREIGN0,
+    CMD_SCOPE_FOREIGN1
 };
 // enum cmd_scope_type {NODAL, GROUP, SYSTEM, RGP, FOREIGN0, FOREIGN1 };
 
 
-// addresses of PBA and PBABAR, actually a duplicate of definitions in "p8_scom_addresses.H" but here an array to be indexed.
-const uint64_t PBA_BARs[4] = 
+// addresses of PBA and PBABAR, actually a duplicate of definitions in
+// "p8_scom_addresses.H" but here an array to be indexed.
+const uint64_t PBA_BARs[4] =
 {
-    PBA_BAR0_0x02013F00, 
-    PBA_BAR1_0x02013F01, 
-    PBA_BAR2_0x02013F02, 
+    PBA_BAR0_0x02013F00,
+    PBA_BAR1_0x02013F01,
+    PBA_BAR2_0x02013F02,
     PBA_BAR3_0x02013F03
 };
 
-const uint64_t PBA_BARMSKs[4] = 
+const uint64_t PBA_BARMSKs[4] =
 {
-    PBA_BARMSK0_0x02013F04, 
-    PBA_BARMSK1_0x02013F05, 
-    PBA_BARMSK2_0x02013F06, 
+    PBA_BARMSK0_0x02013F04,
+    PBA_BARMSK1_0x02013F05,
+    PBA_BARMSK2_0x02013F06,
     PBA_BARMSK3_0x02013F07
 };
 
-const uint64_t PBA_SLVCTLs[4] = 
+const uint64_t PBA_SLVCTLs[4] =
 {
-    PBA_SLVCTL0_0x00064004, 
-    PBA_SLVCTL1_0x00064005, 
-    PBA_SLVCTL2_0x00064006, 
-    PBA_SLVCTL3_0x00064007};
+    PBA_SLVCTL0_0x00064004,
+    PBA_SLVCTL1_0x00064005,
+    PBA_SLVCTL2_0x00064006,
+    PBA_SLVCTL3_0x00064007
+};
+
+const uint64_t PBA_SLVRESETs[4] =
+{
+    0x8000000000000000ull,
+    0xA000000000000000ull,
+    0xC000000000000000ull,
+    0xE000000000000000ull
+};
+
+// Maximum number of Polls for PBA slave reset
+#define MAX_PBA_RESET_POLLS     16
+#define PBA_RESET_POLL_DELAY    1       // in microseconds
 
 // bar mask is valid for bits 23 to 43, in a 64bit value this is
-//           1         2         3         4         5         6 
+//           1         2         3         4         5         6
 // 0123456789012345678901234567890123456789012345678901234567890123
 // 0000000000000000000000011111111111111111111100000000000000000000
 //    0   0   0   0   0   1   F   F   F   F   F   0   0   0   0   0
 // 0000000000000011111111111111111111111111111100000000000000000000
 //    0   0   0   3   F   F   F   F   F   F   F   0   0   0   0   0
-//                       0123456701234567 
+//                       0123456701234567
 #define BAR_MASK_LIMIT 0x000001FFFFF00000ull
 #define BAR_ADDR_LIMIT 0x0003FFFFFFF00000ull
 
@@ -140,7 +155,7 @@ typedef union {
 
 typedef struct {
   bar_reg_type     bar_reg;
-  barmsk_reg_type  barmsk_reg; 
+  barmsk_reg_type  barmsk_reg;
 } struct_pba_bar_init_type;
 
 
@@ -151,7 +166,7 @@ typedef struct {
     unsigned short reserved_2:10;
     unsigned long addr:30;
     unsigned long reserved_3:20;
-  }; 
+  };
   struct struct_pba_barmsk{
     unsigned long reserved_1:23;
     unsigned long mask:21;
@@ -182,7 +197,7 @@ typedef union pbaxcfg_typ{
      unsigned long  reserved_2 :23 ;
    } fields;
 } pbaxcfg_t;
-   
+
 
 
 
@@ -190,11 +205,11 @@ typedef union pbaxcfg_typ{
 // Function prototypes
 // ----------------------------------------------------------------------
 
-extern "C" 
+extern "C"
 {
 
-fapi::ReturnCode 
-p8_pba_init (const fapi::Target& i_target, 
+fapi::ReturnCode
+p8_pba_init (const fapi::Target& i_target,
                      uint64_t mode
               );
 
@@ -203,6 +218,6 @@ p8_pba_init (const fapi::Target& i_target,
 
 
 
-#endif // _PROC_PBAINITQ_H_
+#endif // _P8_PBAINITQ_H_
 
 

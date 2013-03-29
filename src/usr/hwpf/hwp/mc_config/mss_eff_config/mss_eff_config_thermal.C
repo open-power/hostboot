@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_eff_config_thermal.C,v 1.14 2012/12/12 20:10:33 pardeik Exp $
+// $Id: mss_eff_config_thermal.C,v 1.15 2013/02/11 18:42:45 pardeik Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/
 //          centaur/working/procedures/ipl/fapi/mss_eff_config_thermal.C,v $
 //------------------------------------------------------------------------------
@@ -53,6 +53,8 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
+//   1.15  | pardeik  |11-FEB-13| set safemode throttles to unthrottled value
+//         |          |         | for lab until fw sets runtime throttles
 //   1.14  | pardeik  |03-DEC-12| update lines to have a max width of 80 chars
 //         |          |         | added FAPI_ERR before return code lines
 //         |          |         | made trace statements for procedures FAPI_IMP
@@ -449,8 +451,24 @@ extern "C" {
 	}
 */
 // TODO:  Get Safemode throttles from MRW (platinit), hardcode until available
-	safemode_throttle_n_per_mba = 96;
-	safemode_throttle_n_per_chip = 32;
+// Do not use safe mode throttles until firmware programs runtime throttles (ie.  don't impact lab with throttles)
+	if (dimm_type == CDIMM)
+	{
+	    safemode_throttle_n_per_mba = 96;
+	}
+	else
+	{
+	    safemode_throttle_n_per_mba = 96;
+	}
+//	safemode_throttle_n_per_chip = 32;
+	if (dimm_type == CDIMM)
+	{
+	    safemode_throttle_n_per_chip = 192;
+	}
+	else
+	{
+	    safemode_throttle_n_per_chip = 96;
+	}
 	safemode_throttle_d = 512;
 /*
 	rc = FAPI_ATTR_GET(ATTR_MRW_SAFEMODE_MEM_THROTTLE_NUMERATOR_PER_MBA,

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012                   */
+/* COPYRIGHT International Business Machines Corp. 2012,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: sbe_xip_image.c,v 1.21 2012/09/18 20:16:49 bcbrock Exp $
+// $Id: sbe_xip_image.c,v 1.26 2013/03/13 23:28:17 cmolsen Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/sbe/sbe_xip_image.c,v $
 //-----------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
@@ -44,6 +44,10 @@
 /// ensure that no memory outside of the putative bounds of the image is ever
 /// referenced during validation.
 
+#ifdef PPC_HYP
+#include <HvPlicModule.H>
+#endif
+
 #include <stddef.h>
 #include <stdint.h>
 #include <stdlib.h>
@@ -54,6 +58,29 @@
 ////////////////////////////////////////////////////////////////////////////
 // Local Functions
 ////////////////////////////////////////////////////////////////////////////
+
+// PHYP has their own way of implementing the <string.h> functions. PHYP also
+// does not allow static functions or data, so all of the XIP_STATIC functions
+// defined here are global to PHYP.
+
+#ifdef PPC_HYP
+
+#ifndef  _HVTYPES_H
+#include <HvTypes.H>
+#endif
+
+#define strcpy(dest, src) hvstrcpy(dest, src)
+#define strlen(s) hvstrlen(s)
+#define strcmp(s1, s2) hvstrcmp(s1, s2)
+
+#define XIP_STATIC
+        
+#else // PPC_HYP
+
+#define XIP_STATIC static
+
+#endif // PPC_HYP
+
 
 #ifdef DEBUG_SBE_XIP_IMAGE
 
@@ -83,7 +110,7 @@
 #define F0x016llx "0x%016" PRIx64
 #define F0x012llx "0x%012" PRIx64
 
-static SBE_XIP_ERROR_STRINGS(sbe_xip_error_strings);
+XIP_STATIC SBE_XIP_ERROR_STRINGS(sbe_xip_error_strings);
 
 #define TRACE_ERROR(x)                                                  \
     ({                                                                  \
@@ -106,11 +133,11 @@ static SBE_XIP_ERROR_STRINGS(sbe_xip_error_strings);
 
 #if 0
 
-static uint32_t revle32(const uint32_t i_x);
+XIP_STATIC uint32_t xipRevLe32(const uint32_t i_x);
 
-static SBE_XIP_TYPE_STRINGS(type_strings);
+XIP_STATIC SBE_XIP_TYPE_STRINGS(type_strings);
 
-static void
+XIP_STATIC void
 dumpToc(int index, SbeXipToc* toc)
 {
     printf("TOC entry %d @ %p\n" 
@@ -120,8 +147,8 @@ dumpToc(int index, SbeXipToc* toc)
            "    iv_section  = 0x%02x\n"
            "    iv_elements = %d\n",
            index, toc, 
-           revle32(toc->iv_id), 
-           revle32(toc->iv_data), 
+           xipRevLe32(toc->iv_id), 
+           xipRevLe32(toc->iv_data), 
            SBE_XIP_TYPE_STRING(type_strings, toc->iv_type), 
            toc->iv_section, 
            toc->iv_elements);
@@ -131,7 +158,7 @@ dumpToc(int index, SbeXipToc* toc)
 
 #if 0
 
-static void
+XIP_STATIC void
 dumpItem(SbeXipItem* item)
 {
     printf("SbeXipItem @ %p\n"
@@ -153,7 +180,7 @@ dumpItem(SbeXipItem* item)
 
 #endif  /* 0 */
 
-static void
+XIP_STATIC void
 dumpSectionTable(const void* i_image)
 {
     int i, rc;
@@ -193,8 +220,8 @@ dumpSectionTable(const void* i_image)
 
 /// Byte-reverse a 16-bit integer if on a little-endian machine
 
-static uint16_t
-revle16(const uint16_t i_x)
+XIP_STATIC uint16_t
+xipRevLe16(const uint16_t i_x)
 {
     uint16_t rx;
 
@@ -214,8 +241,8 @@ revle16(const uint16_t i_x)
 
 /// Byte-reverse a 32-bit integer if on a little-endian machine
 
-static uint32_t
-revle32(const uint32_t i_x)
+XIP_STATIC uint32_t
+xipRevLe32(const uint32_t i_x)
 {
     uint32_t rx;
 
@@ -237,8 +264,8 @@ revle32(const uint32_t i_x)
 
 /// Byte-reverse a 64-bit integer if on a little-endian machine
 
-static uint64_t
-revle64(const uint64_t i_x)
+XIP_STATIC uint64_t
+xipRevLe64(const uint64_t i_x)
 {
     uint64_t rx;
 
@@ -264,52 +291,52 @@ revle64(const uint64_t i_x)
 
 /// What is the image link address?
 
-static uint64_t
-linkAddress(const void* i_image)
+XIP_STATIC uint64_t
+xipLinkAddress(const void* i_image)
 {
-    return revle64(((SbeXipHeader*)i_image)->iv_linkAddress);
+    return xipRevLe64(((SbeXipHeader*)i_image)->iv_linkAddress);
 }
 
 
 /// What is the image size?
 
-static uint32_t
-imageSize(const void* i_image)
+XIP_STATIC uint32_t
+xipImageSize(const void* i_image)
 {
-    return revle32(((SbeXipHeader*)i_image)->iv_imageSize);
+    return xipRevLe32(((SbeXipHeader*)i_image)->iv_imageSize);
 }
 
 
 /// Set the image size
 
-static void
-setImageSize(void* io_image, const size_t i_size)
+XIP_STATIC void
+xipSetImageSize(void* io_image, const size_t i_size)
 {
-    ((SbeXipHeader*)io_image)->iv_imageSize = revle32(i_size);
+    ((SbeXipHeader*)io_image)->iv_imageSize = xipRevLe32(i_size);
 }
 
 
 /// Re-establish the required final alignment
 
-static void
-finalAlignment(void* io_image)
+XIP_STATIC void
+xipFinalAlignment(void* io_image)
 {
     uint32_t size;
 
-    size = imageSize(io_image);
+    size = xipImageSize(io_image);
 
     if ((size % SBE_XIP_FINAL_ALIGNMENT) != 0) {
-        setImageSize(io_image, 
-                     size + (SBE_XIP_FINAL_ALIGNMENT -
-                             (size % SBE_XIP_FINAL_ALIGNMENT)));
+        xipSetImageSize(io_image, 
+                        size + (SBE_XIP_FINAL_ALIGNMENT -
+                                (size % SBE_XIP_FINAL_ALIGNMENT)));
     }
 }
 
 
 /// Compute a host address from an image address and offset
 
-static void*
-hostAddressFromOffset(const void* i_image, const uint32_t offset)
+XIP_STATIC void*
+xipHostAddressFromOffset(const void* i_image, const uint32_t offset)
 {
     return (void*)((unsigned long)i_image + offset);
 }
@@ -317,29 +344,34 @@ hostAddressFromOffset(const void* i_image, const uint32_t offset)
 
 /// Convert a PORE address to a host address
 
-static void*
-pore2Host(const void* i_image, const uint64_t i_poreAddress)
+XIP_STATIC void*
+xipPore2Host(const void* i_image, const uint64_t i_poreAddress)
 {
-    return hostAddressFromOffset(i_image, 
-                                 i_poreAddress - linkAddress(i_image));
+    return xipHostAddressFromOffset(i_image, 
+                                    i_poreAddress - xipLinkAddress(i_image));
 }
 
 
-static int
-validatePoreAddress(const void* i_image, 
-                    const uint64_t i_poreAddress, 
-                    const uint32_t size)
+XIP_STATIC int
+xipValidatePoreAddress(const void* i_image, 
+                       const uint64_t i_poreAddress, 
+                       const uint32_t size)
 {
     int rc;
 
-    if ((i_poreAddress < linkAddress(i_image)) ||
-        (i_poreAddress > (linkAddress(i_image) + imageSize(i_image) - size))) {
+    if ((i_poreAddress < xipLinkAddress(i_image)) ||
+        (i_poreAddress > (xipLinkAddress(i_image) + 
+                          xipImageSize(i_image) - 
+                          size))) {
         rc = TRACE_ERRORX(SBE_XIP_INVALID_ARGUMENT,
-                          "The PORE address " F0x012llx " is outside the bounds "
-                          "of the image (" F0x012llx ":" F0x012llx ") for %u-byte access.\n",
+                          "The PORE address " F0x012llx 
+                          " is outside the bounds "
+                          "of the image (" 
+                          F0x012llx ":" F0x012llx 
+                          ") for %u-byte access.\n",
                           i_poreAddress,
-                          linkAddress(i_image),
-                          linkAddress(i_image) + imageSize(i_image) - 1,
+                          xipLinkAddress(i_image),
+                          xipLinkAddress(i_image) + xipImageSize(i_image) - 1,
                           size);
     } else {
         rc = 0;
@@ -350,17 +382,17 @@ validatePoreAddress(const void* i_image,
 
 /// Get the magic number from the image
 
-static uint64_t
-magic(const void* i_image)
+XIP_STATIC uint64_t
+xipMagic(const void* i_image)
 {
-    return revle64(((SbeXipHeader*)i_image)->iv_magic);
+    return xipRevLe64(((SbeXipHeader*)i_image)->iv_magic);
 }
 
 
 /// Get the header version from the image
 
-static uint8_t
-headerVersion(const void* i_image)
+XIP_STATIC uint8_t
+xipHeaderVersion(const void* i_image)
 {
     return ((SbeXipHeader*)i_image)->iv_headerVersion;
 }
@@ -368,8 +400,8 @@ headerVersion(const void* i_image)
 
 /// Has the image been normalized?
 
-static uint8_t
-normalized(const void* i_image)
+XIP_STATIC uint8_t
+xipNormalized(const void* i_image)
 {
     return ((SbeXipHeader*)i_image)->iv_normalized;
 }
@@ -377,8 +409,8 @@ normalized(const void* i_image)
 
 /// Has the image TOC been sorted?
 
-static uint8_t
-sorted(const void* i_image)
+XIP_STATIC uint8_t
+xipSorted(const void* i_image)
 {
     return ((SbeXipHeader*)i_image)->iv_tocSorted;
 }
@@ -387,8 +419,8 @@ sorted(const void* i_image)
 /// A quick check that the image exists, has the correct magic and header
 /// version, and optionally is normalized.
 
-static int 
-quickCheck(const void* i_image, const int i_normalizationRequired)
+XIP_STATIC int 
+xipQuickCheck(const void* i_image, const int i_normalizationRequired)
 {
     int rc;
 
@@ -400,21 +432,22 @@ quickCheck(const void* i_image, const int i_normalizationRequired)
                               "Image pointer is NULL (0)\n");
             break;
         }
-        if ((magic(i_image) >> 32) != SBE_XIP_MAGIC) {
+        if ((xipMagic(i_image) >> 32) != SBE_XIP_MAGIC) {
             rc = TRACE_ERRORX(SBE_XIP_IMAGE_ERROR,
                               "Magic number mismatch; Found "
                               "" F0x016llx ", expected 0x%08x........\n",
-                              magic(i_image), SBE_XIP_MAGIC);
+                              xipMagic(i_image), SBE_XIP_MAGIC);
             break;
         }
-        if ((headerVersion(i_image)) != SBE_XIP_HEADER_VERSION) {
+        if ((xipHeaderVersion(i_image)) != SBE_XIP_HEADER_VERSION) {
             rc = TRACE_ERRORX(SBE_XIP_IMAGE_ERROR,
                               "Header version mismatch; Expecting %d, "
                               "found %d\n",
-                              SBE_XIP_HEADER_VERSION, headerVersion(i_image));
+                              SBE_XIP_HEADER_VERSION, 
+                              xipHeaderVersion(i_image));
             break;
         }
-        if (i_normalizationRequired && !normalized(i_image)) {
+        if (i_normalizationRequired && !xipNormalized(i_image)) {
             rc = TRACE_ERRORX(SBE_XIP_NOT_NORMALIZED,
                               "Image not normalized\n");
             break;
@@ -427,17 +460,17 @@ quickCheck(const void* i_image, const int i_normalizationRequired)
 
 /// Convert a 32-bit relocatable offset to a full PORE 48-bit address
 
-static uint64_t 
-fullAddress(const void* i_image, uint32_t offset)
+XIP_STATIC uint64_t 
+xipFullAddress(const void* i_image, uint32_t offset)
 {
-    return (linkAddress(i_image) & 0x0000ffff00000000ull) + offset;
+    return (xipLinkAddress(i_image) & 0x0000ffff00000000ull) + offset;
 }
 
 
 /// Translate a section table entry
  
-static void
-translateSection(SbeXipSection* o_dest, const SbeXipSection* i_src)
+XIP_STATIC void
+xipTranslateSection(SbeXipSection* o_dest, const SbeXipSection* i_src)
 {
 #ifndef _BIG_ENDIAN
 
@@ -445,8 +478,8 @@ translateSection(SbeXipSection* o_dest, const SbeXipSection* i_src)
 #error This code assumes the SBE-XIP header version 8 layout
 #endif
 
-    o_dest->iv_offset = revle32(i_src->iv_offset);
-    o_dest->iv_size = revle32(i_src->iv_size);
+    o_dest->iv_offset = xipRevLe32(i_src->iv_offset);
+    o_dest->iv_size = xipRevLe32(i_src->iv_size);
     o_dest->iv_alignment = i_src->iv_alignment;
     o_dest->iv_reserved8[0] = 0;
     o_dest->iv_reserved8[1] = 0;
@@ -461,8 +494,8 @@ translateSection(SbeXipSection* o_dest, const SbeXipSection* i_src)
 
 /// Translate a TOC entry
 
-static void
-translateToc(SbeXipToc* o_dest, SbeXipToc* i_src)
+XIP_STATIC void
+xipTranslateToc(SbeXipToc* o_dest, SbeXipToc* i_src)
 {
 #ifndef _BIG_ENDIAN
 
@@ -470,8 +503,8 @@ translateToc(SbeXipToc* o_dest, SbeXipToc* i_src)
 #error This code assumes the SBE-XIP header version 8 layout
 #endif
 
-    o_dest->iv_id = revle32(i_src->iv_id);
-    o_dest->iv_data = revle32(i_src->iv_data);
+    o_dest->iv_id = xipRevLe32(i_src->iv_id);
+    o_dest->iv_data = xipRevLe32(i_src->iv_data);
     o_dest->iv_type = i_src->iv_type;
     o_dest->iv_section = i_src->iv_section;
     o_dest->iv_elements = i_src->iv_elements;
@@ -486,8 +519,8 @@ translateToc(SbeXipToc* o_dest, SbeXipToc* i_src)
 
 /// Find the final (highest-address) section of the image
 
-static int
-finalSection(const void* i_image, int* o_sectionId)
+XIP_STATIC int
+xipFinalSection(const void* i_image, int* o_sectionId)
 {
     int i, rc;
     uint32_t offset;
@@ -514,10 +547,10 @@ finalSection(const void* i_image, int* o_sectionId)
 
 /// Return a pointer to an image-format section table entry
 
-static int
-getSectionPointer(const void* i_image,
-                  const int i_sectionId,
-                  SbeXipSection** o_imageSection)
+XIP_STATIC int
+xipGetSectionPointer(const void* i_image,
+                     const int i_sectionId,
+                     SbeXipSection** o_imageSection)
 {
     int rc;
 
@@ -534,18 +567,18 @@ getSectionPointer(const void* i_image,
 
 /// Restore a section table entry from host format to image format.
 
-static int
-putSection(const void* i_image,
-           const int i_sectionId,
-           SbeXipSection* i_hostSection)
+XIP_STATIC int
+xipPutSection(const void* i_image,
+              const int i_sectionId,
+              SbeXipSection* i_hostSection)
 {
     int rc;
     SbeXipSection *imageSection;
 
-    rc = getSectionPointer(i_image, i_sectionId, &imageSection);
+    rc = xipGetSectionPointer(i_image, i_sectionId, &imageSection);
 
     if (!rc) {
-        translateSection(imageSection, i_hostSection);
+        xipTranslateSection(imageSection, i_hostSection);
     }
 
     return rc;
@@ -554,15 +587,16 @@ putSection(const void* i_image,
 
 /// Set the offset of a section
 
-static int
-setSectionOffset(void* io_image, const int i_section, const uint32_t i_offset)
+XIP_STATIC int
+xipSetSectionOffset(void* io_image, const int i_section, 
+                    const uint32_t i_offset)
 {
     SbeXipSection* section;
     int rc;
 
-    rc = getSectionPointer(io_image, i_section, &section);
+    rc = xipGetSectionPointer(io_image, i_section, &section);
     if (!rc) {
-        section->iv_offset = revle32(i_offset);
+        section->iv_offset = xipRevLe32(i_offset);
     }
     return rc;
 }
@@ -570,15 +604,15 @@ setSectionOffset(void* io_image, const int i_section, const uint32_t i_offset)
 
 /// Set the size of a section
 
-static int
-setSectionSize(void* io_image, const int i_section, const uint32_t i_size)
+XIP_STATIC int
+xipSetSectionSize(void* io_image, const int i_section, const uint32_t i_size)
 {
     SbeXipSection* section;
     int rc;
 
-    rc = getSectionPointer(io_image, i_section, &section);
+    rc = xipGetSectionPointer(io_image, i_section, &section);
     if (!rc) {
-        section->iv_size = revle32(i_size);
+        section->iv_size = xipRevLe32(i_size);
     }
     return rc;
 }
@@ -591,11 +625,11 @@ setSectionSize(void* io_image, const int i_section, const uint32_t i_size)
 // section contains the address - if none then the image is corrupted. We can
 // (must) use the 32-bit offset form of the address here.
 
-static int
-pore2Section(const void* i_image, 
-             const uint64_t i_poreAddress,
-             int* o_section,
-             uint32_t* o_offset)
+XIP_STATIC int
+xipPore2Section(const void* i_image, 
+                const uint64_t i_poreAddress,
+                int* o_section,
+                uint32_t* o_offset)
 {
     int rc, sectionId;
     SbeXipSection section;
@@ -604,19 +638,20 @@ pore2Section(const void* i_image,
     do {
         rc = 0;
 
-        if ((i_poreAddress < linkAddress(i_image)) ||
-            (i_poreAddress > (linkAddress(i_image) + imageSize(i_image)))) {
+        if ((i_poreAddress < xipLinkAddress(i_image)) ||
+            (i_poreAddress > 
+             (xipLinkAddress(i_image) + xipImageSize(i_image)))) {
             rc = TRACE_ERRORX(SBE_XIP_INVALID_ARGUMENT,
                               "pore2section: The i_poreAddress argument "
                               "(" F0x016llx ")\nis outside the bounds of the "
                               "image (" F0x016llx ":" F0x016llx ")\n",
                               i_poreAddress,
-                              linkAddress(i_image),
-                              linkAddress(i_image) + imageSize(i_image));
+                              xipLinkAddress(i_image),
+                              xipLinkAddress(i_image) + xipImageSize(i_image));
             break;
         }
 
-        addressOffset = (i_poreAddress - linkAddress(i_image)) & 0xffffffff;
+        addressOffset = (i_poreAddress - xipLinkAddress(i_image)) & 0xffffffff;
 
         for (sectionId = 0; sectionId < SBE_XIP_SECTIONS; sectionId++) {
             rc = sbe_xip_get_section(i_image, sectionId, &section);
@@ -655,12 +690,12 @@ pore2Section(const void* i_image,
 ///
 /// All return values are optional.
 
-static int
-getToc(void* i_image,
-       SbeXipToc** o_toc,
-       size_t* o_entries,
-       int* o_sorted,
-       char** o_strings)
+XIP_STATIC int
+xipGetToc(void* i_image,
+          SbeXipToc** o_toc,
+          size_t* o_entries,
+          int* o_sorted,
+          char** o_strings)
 {
     int rc;
     SbeXipSection tocSection, stringsSection;
@@ -670,7 +705,7 @@ getToc(void* i_image,
         if (rc) break;
 
         rc = sbe_xip_get_section(i_image, SBE_XIP_SECTION_STRINGS,
-                        &stringsSection);
+                                 &stringsSection);
         if (rc) break;
 
         if (o_toc) {
@@ -680,7 +715,7 @@ getToc(void* i_image,
             *o_entries = tocSection.iv_size / sizeof(SbeXipToc);
         }
         if (o_sorted) {
-            *o_sorted = sorted(i_image);
+            *o_sorted = xipSorted(i_image);
         }
         if (o_strings) {
             *o_strings = (char*)i_image + stringsSection.iv_offset;
@@ -692,12 +727,12 @@ getToc(void* i_image,
 
 /// Compare two normalized TOC entries for sorting.
 
-static int
-compareToc(const SbeXipToc* i_a, const SbeXipToc* i_b, 
-           const char* i_strings)
+XIP_STATIC int
+xipCompareToc(const SbeXipToc* i_a, const SbeXipToc* i_b, 
+              const char* i_strings)
 {
-    return strcmp(i_strings + revle32(i_a->iv_id),
-                  i_strings + revle32(i_b->iv_id));
+    return strcmp(i_strings + xipRevLe32(i_a->iv_id),
+                  i_strings + xipRevLe32(i_b->iv_id));
 }
 
 
@@ -705,9 +740,9 @@ compareToc(const SbeXipToc* i_a, const SbeXipToc* i_b,
 
 // Note: The stack requirement is limited to 256 bytes + minor local storage.
 
-static void
-quickSort(SbeXipToc* io_toc, int i_left, int i_right,
-          const char* i_strings)
+XIP_STATIC void
+xipQuickSort(SbeXipToc* io_toc, int i_left, int i_right,
+             const char* i_strings)
 {
     int i, j, left, right, sp;
     SbeXipToc pivot, temp;
@@ -728,10 +763,10 @@ quickSort(SbeXipToc* io_toc, int i_left, int i_right,
         pivot = io_toc[(i + j) / 2];
 
         while (i <= j) {
-            while (compareToc(&(io_toc[i]), &pivot, i_strings) < 0) {
+            while (xipCompareToc(&(io_toc[i]), &pivot, i_strings) < 0) {
                 i++;
             }
-            while (compareToc(&(io_toc[j]), &pivot, i_strings) > 0) {
+            while (xipCompareToc(&(io_toc[j]), &pivot, i_strings) > 0) {
                 j--;
             }
             if (i <= j) {
@@ -756,8 +791,8 @@ quickSort(SbeXipToc* io_toc, int i_left, int i_right,
 
 /// TOC linear search
 
-static int
-linearSearch(void* i_image, const char* i_id, SbeXipToc** o_entry)
+XIP_STATIC int
+xipLinearSearch(void* i_image, const char* i_id, SbeXipToc** o_entry)
 {
     int rc;
     SbeXipToc *imageToc, hostToc;
@@ -765,10 +800,10 @@ linearSearch(void* i_image, const char* i_id, SbeXipToc** o_entry)
     char* strings;
 
     *o_entry = 0;
-    rc = getToc(i_image, &imageToc, &entries, 0, &strings);
+    rc = xipGetToc(i_image, &imageToc, &entries, 0, &strings);
     if (!rc) {
         for (; entries; entries--, imageToc++) {
-            translateToc(&hostToc, imageToc);
+            xipTranslateToc(&hostToc, imageToc);
             if (strcmp(i_id, strings + hostToc.iv_id) == 0) {
                 break;
             }
@@ -787,8 +822,8 @@ linearSearch(void* i_image, const char* i_id, SbeXipToc** o_entry)
 
 /// A classic binary search of a (presumed) sorted array
 
-static int
-binarySearch(void* i_image, const char* i_id, SbeXipToc** o_entry)
+XIP_STATIC int
+xipBinarySearch(void* i_image, const char* i_id, SbeXipToc** o_entry)
 {
     int rc;
     SbeXipToc *imageToc;
@@ -799,7 +834,7 @@ binarySearch(void* i_image, const char* i_id, SbeXipToc** o_entry)
     do {
         *o_entry = 0;
 
-        rc = getToc(i_image, &imageToc, &entries, &sorted, &strings);
+        rc = xipGetToc(i_image, &imageToc, &entries, &sorted, &strings);
         if (rc) break;
 
         if (!sorted) {
@@ -811,7 +846,7 @@ binarySearch(void* i_image, const char* i_id, SbeXipToc** o_entry)
         right = entries - 1;
         while (left <= right) {
             next = (left + right) / 2;
-            sort = strcmp(i_id, strings + revle32(imageToc[next].iv_id));
+            sort = strcmp(i_id, strings + xipRevLe32(imageToc[next].iv_id));
             if (sort == 0) {
                 *o_entry = &(imageToc[next]);
                 break;
@@ -835,8 +870,8 @@ binarySearch(void* i_image, const char* i_id, SbeXipToc** o_entry)
 /// The TOC is validated by searching for the entry, which will uncover
 /// duplicate entries or problems with sorting/searching.
 
-static int
-validateTocEntry(void* io_image, const SbeXipItem* i_item, void* io_arg)
+XIP_STATIC int
+xipValidateTocEntry(void* io_image, const SbeXipItem* i_item, void* io_arg)
 {
     int rc;
     SbeXipItem found;
@@ -872,7 +907,7 @@ validateTocEntry(void* io_image, const SbeXipItem* i_item, void* io_arg)
 #define FNV_PRIME32 16777619u
 
 uint32_t
-hash32(const char* s) 
+xipHash32(const char* s) 
 {
     uint32_t hash;
 
@@ -892,10 +927,10 @@ hash32(const char* s)
 // addresses in the TOC are actually 32-bit offsets in the address space named
 // in bits 16:31 of the link address of the image.
 
-static int
-normalizeToc(void* io_image, SbeXipToc *io_imageToc,
-             SbeXipHashedToc** io_fixedTocEntry,
-             size_t* io_fixedEntriesRemaining)
+XIP_STATIC int
+xipNormalizeToc(void* io_image, SbeXipToc *io_imageToc,
+                SbeXipHashedToc** io_fixedTocEntry,
+                size_t* io_fixedEntriesRemaining)
 {
     SbeXipToc hostToc;
     int idSection, dataSection;
@@ -909,15 +944,16 @@ normalizeToc(void* io_image, SbeXipToc *io_imageToc,
         // sections/offsets of the Id string (which must be in .strings) and
         // the data.
 
-        translateToc(&hostToc, io_imageToc);
+        xipTranslateToc(&hostToc, io_imageToc);
 
         hostString = 
-            (char*)pore2Host(io_image, fullAddress(io_image, hostToc.iv_id));
+            (char*)xipPore2Host(io_image, 
+                                xipFullAddress(io_image, hostToc.iv_id));
 
-        rc = pore2Section(io_image,
-                          fullAddress(io_image, hostToc.iv_id),
-                          &idSection,
-                          &idOffset);
+        rc = xipPore2Section(io_image,
+                             xipFullAddress(io_image, hostToc.iv_id),
+                             &idSection,
+                             &idOffset);
         if (rc) break;
 
         if (idSection != SBE_XIP_SECTION_STRINGS) {
@@ -925,10 +961,10 @@ normalizeToc(void* io_image, SbeXipToc *io_imageToc,
             break;
         }
 
-        rc = pore2Section(io_image,
-                          fullAddress(io_image, hostToc.iv_data),
-                          &dataSection,
-                          &dataOffset);
+        rc = xipPore2Section(io_image,
+                             xipFullAddress(io_image, hostToc.iv_data),
+                             &dataSection,
+                             &dataOffset);
         if (rc) break;
 
         // Now replace the Id and data pointers with their offsets, and update
@@ -953,8 +989,8 @@ normalizeToc(void* io_image, SbeXipToc *io_imageToc,
                 break;
             }
 
-            (*io_fixedTocEntry)->iv_hash = revle32(hash32(hostString));
-            (*io_fixedTocEntry)->iv_offset = revle16(hostToc.iv_data);
+            (*io_fixedTocEntry)->iv_hash = xipRevLe32(xipHash32(hostString));
+            (*io_fixedTocEntry)->iv_offset = xipRevLe16(hostToc.iv_data);
             (*io_fixedTocEntry)->iv_type = hostToc.iv_type;
             (*io_fixedTocEntry)->iv_elements = hostToc.iv_elements;
             
@@ -964,7 +1000,7 @@ normalizeToc(void* io_image, SbeXipToc *io_imageToc,
 
         // Finally update the TOC entry
 
-        translateToc(io_imageToc, &hostToc);
+        xipTranslateToc(io_imageToc, &hostToc);
 
     } while (0);
 
@@ -975,8 +1011,8 @@ normalizeToc(void* io_image, SbeXipToc *io_imageToc,
 // Check for hash collisions in the .fixed mini-TOC.  Note that endianness is
 // not an issue here, as we're comparing for equality.
 
-static int
-hashCollision(SbeXipHashedToc* i_fixedToc, size_t i_entries)
+XIP_STATIC int
+xipHashCollision(SbeXipHashedToc* i_fixedToc, size_t i_entries)
 {
     int rc;
     size_t i, j;
@@ -1002,17 +1038,17 @@ hashCollision(SbeXipHashedToc* i_fixedToc, size_t i_entries)
 /// Decode a normalized image-format TOC entry into a host-format SbeXipItem
 /// structure
 
-static int
-decodeToc(void* i_image, 
-          SbeXipToc* i_imageToc, 
-          SbeXipItem* o_item)
+XIP_STATIC int
+xipDecodeToc(void* i_image, 
+             SbeXipToc* i_imageToc, 
+             SbeXipItem* o_item)
 {
     int rc;
     SbeXipToc hostToc;
     SbeXipSection dataSection, stringsSection;
 
     do {
-        if (!normalized(i_image)) {
+        if (!xipNormalized(i_image)) {
             rc = TRACE_ERROR(SBE_XIP_NOT_NORMALIZED);
             break;
         }
@@ -1022,7 +1058,7 @@ decodeToc(void* i_image,
         // number of elements in the outgoing structure. The Id string is
         // always located in the TOC_STRINGS section.
 
-        translateToc(&hostToc, i_imageToc);
+        xipTranslateToc(&hostToc, i_imageToc);
 
         o_item->iv_toc = i_imageToc;
         o_item->iv_type = hostToc.iv_type;
@@ -1051,7 +1087,7 @@ decodeToc(void* i_image,
                     dataSection.iv_offset + hostToc.iv_data);
 
         o_item->iv_address = 
-            linkAddress(i_image) + dataSection.iv_offset + hostToc.iv_data;
+            xipLinkAddress(i_image) + dataSection.iv_offset + hostToc.iv_data;
 
         o_item->iv_partial = 0;
             
@@ -1062,8 +1098,8 @@ decodeToc(void* i_image,
 
 /// Sort the TOC
 
-static int
-sortToc(void* io_image)
+XIP_STATIC int
+xipSortToc(void* io_image)
 {
     int rc;
     SbeXipToc *hostToc;
@@ -1071,15 +1107,15 @@ sortToc(void* io_image)
     char* strings;
 
     do {
-        rc = quickCheck(io_image, 1);
+        rc = xipQuickCheck(io_image, 1);
         if (rc) break;
 
-        if (sorted(io_image)) break;
+        if (xipSorted(io_image)) break;
 
-        rc = getToc(io_image, &hostToc, &entries, 0, &strings);
+        rc = xipGetToc(io_image, &hostToc, &entries, 0, &strings);
         if (rc) break;
 
-        quickSort(hostToc, 0, entries - 1, strings);
+        xipQuickSort(hostToc, 0, entries - 1, strings);
 
         ((SbeXipHeader*)io_image)->iv_tocSorted = 1;
         
@@ -1093,9 +1129,9 @@ sortToc(void* io_image)
 // modified to reflect the pad, but the caller must modify the section size to
 // reflect the pad.
 
-static int
-padImage(void* io_image, uint32_t i_allocation, 
-         uint32_t i_align, uint32_t* pad)
+XIP_STATIC int
+xipPadImage(void* io_image, uint32_t i_allocation, 
+            uint32_t i_align, uint32_t* pad)
 {
     int rc;
 
@@ -1110,18 +1146,18 @@ padImage(void* io_image, uint32_t i_allocation,
             break;
         }
 
-        *pad = imageSize(io_image) % i_align;
+        *pad = xipImageSize(io_image) % i_align;
         if (*pad != 0) {
             *pad = i_align - *pad;
 
-            if ((imageSize(io_image) + *pad) > i_allocation) {
+            if ((xipImageSize(io_image) + *pad) > i_allocation) {
                 rc = TRACE_ERROR(SBE_XIP_WOULD_OVERFLOW);
                 break;
             }
 
-            memset((void*)((unsigned long)io_image + imageSize(io_image)), 
+            memset((void*)((unsigned long)io_image + xipImageSize(io_image)), 
                    0, *pad);
-            setImageSize(io_image, imageSize(io_image) + *pad);
+            xipSetImageSize(io_image, xipImageSize(io_image) + *pad);
         }
     } while (0);
 
@@ -1131,10 +1167,10 @@ padImage(void* io_image, uint32_t i_allocation,
 
 //  Get the .fixed_toc section
 
-static int
-getFixedToc(void* io_image, 
-            SbeXipHashedToc** o_imageToc, 
-            size_t* o_entries)
+XIP_STATIC int
+xipGetFixedToc(void* io_image, 
+               SbeXipHashedToc** o_imageToc, 
+               size_t* o_entries)
 {
     int rc;
     SbeXipSection section;
@@ -1157,8 +1193,8 @@ getFixedToc(void* io_image,
 // adequate. The TOC structures are also small so all byte-reversal is done
 // 'by hand' rather than with a translate-type API.
 
-static int
-fixedFind(void* i_image, const char* i_id, SbeXipItem* o_item)
+XIP_STATIC int
+xipFixedFind(void* i_image, const char* i_id, SbeXipItem* o_item)
 {
     int rc;
     SbeXipHashedToc* toc;
@@ -1168,10 +1204,10 @@ fixedFind(void* i_image, const char* i_id, SbeXipItem* o_item)
     uint32_t offset;
 
     do {
-        rc = getFixedToc(i_image, &toc, &entries);
+        rc = xipGetFixedToc(i_image, &toc, &entries);
         if (rc) break;
 
-        for (hash = revle32(hash32(i_id)); entries != 0; entries--, toc++) {
+        for (hash = xipRevLe32(xipHash32(i_id)); entries != 0; entries--, toc++) {
             if (toc->iv_hash == hash) break;
         }
 
@@ -1184,7 +1220,7 @@ fixedFind(void* i_image, const char* i_id, SbeXipItem* o_item)
 
         // The caller may have requested a lookup only (o_item == 0), in which
         // case we're done.  Otherwise we create a partial SbeXipItem and
-        // populate the non-0 fields analogously to the decodeToc()
+        // populate the non-0 fields analogously to the xipDecodeToc()
         // routine. The data resides in the .fixed section in this case.
 
         if (o_item == 0) break;
@@ -1204,10 +1240,104 @@ fixedFind(void* i_image, const char* i_id, SbeXipItem* o_item)
             break;
         }
 
-        offset = fixedSection.iv_offset + revle16(toc->iv_offset);
+        offset = fixedSection.iv_offset + xipRevLe16(toc->iv_offset);
 
         o_item->iv_imageData = (void*)((uint8_t*)i_image + offset);
-        o_item->iv_address = linkAddress(i_image) + offset;
+        o_item->iv_address = xipLinkAddress(i_image) + offset;
+
+    } while (0);
+
+    return rc;
+}
+
+
+// Search for an item in the special built-in TOC of header fields, and
+// populate a partial TOC entry if requested. 
+//
+// This facility was added to allow header data to be searched by name even
+// when the TOC has been stripped. This API will only be used in the case of a
+// stripped TOC since the header fields are also indexed in the main TOC.
+//
+// The table is allocated on the stack in order to make this code concurrently
+// patchable in PHYP (although PHYP applications will never use this code).
+// The table is small and unsorted so a linear search is adequate, and the
+// stack requirememts are small.
+
+XIP_STATIC int
+xipHeaderFind(void* i_image, const char* i_id, SbeXipItem* o_item)
+{
+    int rc;
+    unsigned i;
+    uint32_t offset;
+    SbeXipSection headerSection;
+
+#define HEADER_TOC(id, field, type)             \
+    {#id, offsetof(SbeXipHeader, field), type}
+
+    struct HeaderToc {
+
+        const char* iv_id;
+        uint16_t iv_offset;
+        uint8_t iv_type;
+
+    } toc[] = {
+
+        HEADER_TOC(magic,        iv_magic,       SBE_XIP_UINT64),
+        HEADER_TOC(entry_offset, iv_entryOffset, SBE_XIP_UINT64),
+        HEADER_TOC(link_address, iv_linkAddress, SBE_XIP_UINT64),
+
+        HEADER_TOC(image_size, iv_imageSize, SBE_XIP_UINT32),
+        HEADER_TOC(build_date, iv_buildDate, SBE_XIP_UINT32),
+        HEADER_TOC(build_time, iv_buildTime, SBE_XIP_UINT32),
+
+        HEADER_TOC(header_version, iv_headerVersion, SBE_XIP_UINT8),
+        HEADER_TOC(toc_normalized, iv_normalized,    SBE_XIP_UINT8),
+        HEADER_TOC(toc_sorted,     iv_tocSorted,     SBE_XIP_UINT8),
+
+        HEADER_TOC(build_user, iv_buildUser, SBE_XIP_STRING),
+        HEADER_TOC(build_host, iv_buildHost, SBE_XIP_STRING),
+
+    };
+
+    do {
+
+        rc = SBE_XIP_ITEM_NOT_FOUND;
+        for (i = 0; i < (sizeof(toc) / sizeof(struct HeaderToc)); i++) {
+            if (strcmp(i_id, toc[i].iv_id) == 0) {
+                rc = 0;
+                break;
+            }
+        }
+
+        if (rc) break;
+
+        // The caller may have requested a lookup only (o_item == 0), in which
+        // case we're done.  Otherwise we create a partial SbeXipItem and
+        // populate the non-0 fields analogously to the xipDecodeToc()
+        // routine. The data resides in the .fixed section in this case.
+
+        if (o_item == 0) break;
+
+        o_item->iv_partial = 1;
+        o_item->iv_toc = 0;
+        o_item->iv_id = 0;
+
+        o_item->iv_type = toc[i].iv_type;
+        o_item->iv_elements = 1; /* True for now... */
+
+        rc = sbe_xip_get_section(i_image, SBE_XIP_SECTION_HEADER, 
+                                 &headerSection);
+        if (rc) break;
+
+        if (headerSection.iv_size == 0) {
+            rc = TRACE_ERROR(SBE_XIP_DATA_NOT_PRESENT);
+            break;
+        }
+
+        offset = headerSection.iv_offset + toc[i].iv_offset;
+
+        o_item->iv_imageData = (void*)((uint8_t*)i_image + offset);
+        o_item->iv_address = xipLinkAddress(i_image) + offset;
 
     } while (0);
 
@@ -1253,13 +1383,14 @@ sbe_xip_validate(void* i_image, const uint32_t i_size)
             rc = TRACE_ERRORX(SBE_XIP_BUG,
                               "C/Assembler size mismatch(%d/%d) "
                               "for SbeXipHashedToc\n",
-                              sizeof(SbeXipHashedToc), SIZE_OF_SBE_XIP_HASHED_TOC);
+                              sizeof(SbeXipHashedToc), 
+                              SIZE_OF_SBE_XIP_HASHED_TOC);
             break;
         }
 
         // Validate the image pointer and magic number
 
-        rc = quickCheck(i_image, 0);
+        rc = xipQuickCheck(i_image, 0);
         if (rc) break;
 
         // Validate the image size
@@ -1335,8 +1466,135 @@ sbe_xip_validate(void* i_image, const uint32_t i_size)
 
         size = hostHeader.iv_section[SBE_XIP_SECTION_TOC].iv_size; 
         if (size != 0) {
-            if (normalized(i_image)) {
-                rc = sbe_xip_map_toc(i_image, validateTocEntry, 0);
+            if (xipNormalized(i_image)) {
+                rc = sbe_xip_map_toc(i_image, xipValidateTocEntry, 0);
+                if (rc) break;
+            }
+        }
+    } while (0);
+    return rc;
+}
+
+
+int
+sbe_xip_validate2(void* i_image, const uint32_t i_size, const uint32_t i_maskIgnores)
+{          
+    SbeXipHeader hostHeader;
+    int rc = 0, i;
+    uint32_t linkAddress, imageSize, extent, offset, size;
+    uint8_t alignment;
+
+    sbe_xip_translate_header(&hostHeader, (SbeXipHeader*)i_image);
+
+    do {
+        
+        // Validate C/Assembler constraints.
+
+        if (sizeof(SbeXipSection) != SIZE_OF_SBE_XIP_SECTION) {
+            rc = TRACE_ERRORX(SBE_XIP_BUG,
+                              "C/Assembler size mismatch(%d/%d) "
+                              "for SbeXipSection\n",
+                              sizeof(SbeXipSection), SIZE_OF_SBE_XIP_SECTION);
+            break;
+        }
+                              
+        if (sizeof(SbeXipToc) != SIZE_OF_SBE_XIP_TOC) {
+            rc = TRACE_ERRORX(SBE_XIP_BUG,
+                              "C/Assembler size mismatch(%d/%d) "
+                              "for SbeXipToc\n",
+                              sizeof(SbeXipToc), SIZE_OF_SBE_XIP_TOC);
+            break;
+        }
+
+        if (sizeof(SbeXipHashedToc) != SIZE_OF_SBE_XIP_HASHED_TOC) {
+            rc = TRACE_ERRORX(SBE_XIP_BUG,
+                              "C/Assembler size mismatch(%d/%d) "
+                              "for SbeXipHashedToc\n",
+                              sizeof(SbeXipHashedToc), 
+                              SIZE_OF_SBE_XIP_HASHED_TOC);
+            break;
+        }
+
+        // Validate the image pointer and magic number
+
+        rc = xipQuickCheck(i_image, 0);
+        if (rc) break;
+
+        // Validate the image size
+
+        linkAddress = hostHeader.iv_linkAddress;
+        imageSize = hostHeader.iv_imageSize;
+        extent = linkAddress + imageSize;
+
+        if (imageSize < sizeof(SbeXipHeader)) {
+            rc = TRACE_ERRORX(SBE_XIP_IMAGE_ERROR,
+                              "sbe_xip_validate2(%p, %u) : "
+                              "The image size recorded in the image "
+                              "(%u) is smaller than the header size.\n",
+                              i_image, i_size, imageSize);
+            break;
+        }
+        if (imageSize != i_size && !(i_maskIgnores & SBE_XIP_IGNORE_FILE_SIZE)) {
+            rc = TRACE_ERRORX(SBE_XIP_IMAGE_ERROR,
+                              "sbe_xip_validate2(%p, %u) : "
+                              "The image size recorded in the image "
+                              "(%u) does not match the i_size parameter.\n",
+                              i_image, i_size, imageSize);
+            break;
+        }
+        if (extent <= linkAddress) {
+            rc = TRACE_ERRORX(SBE_XIP_IMAGE_ERROR,
+                              "sbe_xip_validate2(%p, %u) : "
+                              "Given the link address (%u) and the "
+                              "image size, the image wraps the address space\n",
+                              i_image, i_size, linkAddress);
+            break;
+        }
+        if ((imageSize % SBE_XIP_FINAL_ALIGNMENT) != 0) {
+            rc = TRACE_ERRORX(SBE_XIP_ALIGNMENT_ERROR,
+                              "sbe_xip_validate2(%p, %u) : "
+                              "The image size (%u) is not a multiple of %u\n",
+                              i_image, i_size, imageSize, 
+                              SBE_XIP_FINAL_ALIGNMENT);
+            break;
+        }
+
+        // Validate that all sections appear to be within the image
+        // bounds, and are aligned correctly.
+
+        for (i = 0; i < SBE_XIP_SECTIONS; i++) {
+
+            offset = hostHeader.iv_section[i].iv_offset;
+            size = hostHeader.iv_section[i].iv_size;
+            alignment = hostHeader.iv_section[i].iv_alignment;
+
+            if ((offset > imageSize) || 
+                ((offset + size) > imageSize) ||
+                ((offset + size) < offset)) {
+                rc = TRACE_ERRORX(SBE_XIP_IMAGE_ERROR,
+                                  "Section %d does not appear to be within "
+                                  "the bounds of the image\n"
+                                  "offset = %u, size = %u, image size = %u\n",
+                                  i, offset, size, imageSize);
+                break;
+            }
+            if ((offset % alignment) != 0) {
+                rc = TRACE_ERRORX(SBE_XIP_ALIGNMENT_ERROR,
+                                  "Section %d requires %d-byte initial "
+                                  "alignment but the section offset is %u\n",
+                                  i, alignment, offset);
+                break;
+            }
+        }
+        if (rc) break;
+
+        // If the TOC exists and the image is normalized, validate each TOC
+        // entry. 
+
+        size = hostHeader.iv_section[SBE_XIP_SECTION_TOC].iv_size; 
+        if (size != 0) {
+            if (xipNormalized(i_image)) {
+                rc = sbe_xip_map_toc(i_image, xipValidateTocEntry, 0);
                 if (rc) break;
             }
         }
@@ -1368,23 +1626,23 @@ sbe_xip_normalize(void* io_image)
     size_t tocEntries, fixedTocEntries, fixedEntriesRemaining;
        
     do {
-        rc = quickCheck(io_image, 0);
+        rc = xipQuickCheck(io_image, 0);
         if (rc) break;
 
-        if (!normalized(io_image)) {
+        if (!xipNormalized(io_image)) {
 
-            rc = getToc(io_image, &imageToc, &tocEntries, 0, 0);
+            rc = xipGetToc(io_image, &imageToc, &tocEntries, 0, 0);
             if (rc) break;
 
-            rc = getFixedToc(io_image, &fixedImageToc, &fixedTocEntries);
+            rc = xipGetFixedToc(io_image, &fixedImageToc, &fixedTocEntries);
             if (rc) break;
 
             fixedTocEntry = fixedImageToc;
             fixedEntriesRemaining = fixedTocEntries;
 
             for (; tocEntries--; imageToc++) {
-                rc = normalizeToc(io_image, imageToc, 
-                                  &fixedTocEntry, &fixedEntriesRemaining);
+                rc = xipNormalizeToc(io_image, imageToc, 
+                                     &fixedTocEntry, &fixedEntriesRemaining);
                 if (rc) break;
                                   
             }
@@ -1396,20 +1654,20 @@ sbe_xip_normalize(void* io_image)
                 break;
             }
 
-            rc = hashCollision(fixedImageToc, fixedTocEntries);
+            rc = xipHashCollision(fixedImageToc, fixedTocEntries);
             if (rc) break;
 
             ((SbeXipHeader*)io_image)->iv_normalized = 1;
         }
 
-        rc = sortToc(io_image);
+        rc = xipSortToc(io_image);
         if (rc) break;
 
         for (i = 0; i < SBE_XIP_SECTIONS; i++) {
             rc = sbe_xip_get_section(io_image, i, &section);
             if (rc) break;
             if (section.iv_size == 0) {
-                setSectionOffset(io_image, i, 0);
+                xipSetSectionOffset(io_image, i, 0);
             }
         }
         if (rc) break;
@@ -1427,9 +1685,9 @@ sbe_xip_image_size(void* io_image, uint32_t* o_size)
 {
     int rc;
 
-    rc = quickCheck(io_image, 0);
+    rc = xipQuickCheck(io_image, 0);
     if (!rc) {
-        *o_size = imageSize(io_image);
+        *o_size = xipImageSize(io_image);
     }
     return rc;
 }
@@ -1443,18 +1701,18 @@ sbe_xip_get_section(const void* i_image,
     int rc;
     SbeXipSection *imageSection;
 
-    rc = getSectionPointer(i_image, i_sectionId, &imageSection);
+    rc = xipGetSectionPointer(i_image, i_sectionId, &imageSection);
 
     if (!rc) {
-        translateSection(o_hostSection, imageSection);
+        xipTranslateSection(o_hostSection, imageSection);
     }
 
     return rc;
 }
 
 
-// If the 'big' TOC is not present, search the mini-TOC that only indexes the
-// fixed section.
+// If the 'big' TOC is not present, search the mini-TOCs that only index the
+// .fixed and .header sections.
 
 int
 sbe_xip_find(void* i_image, 
@@ -1467,21 +1725,24 @@ sbe_xip_find(void* i_image,
     SbeXipSection* tocSection;
 
     do {
-        rc = quickCheck(i_image, 1);
+        rc = xipQuickCheck(i_image, 1);
         if (rc) break;
 
-        rc = getSectionPointer(i_image, SBE_XIP_SECTION_TOC, &tocSection);
+        rc = xipGetSectionPointer(i_image, SBE_XIP_SECTION_TOC, &tocSection);
         if (rc) break;
 
         if (tocSection->iv_size == 0) {
-            rc = fixedFind(i_image, i_id, o_item);
+            rc = xipFixedFind(i_image, i_id, o_item);
+            if (rc) {
+                rc = xipHeaderFind(i_image, i_id, o_item);
+            }
             break;
         }
 
-        if (sorted(i_image)) {
-            rc = binarySearch(i_image, i_id, &toc);
+        if (xipSorted(i_image)) {
+            rc = xipBinarySearch(i_image, i_id, &toc);
         } else {
-            rc = linearSearch(i_image, i_id, &toc);
+            rc = xipLinearSearch(i_image, i_id, &toc);
         }
         if (rc) break;
 
@@ -1490,7 +1751,7 @@ sbe_xip_find(void* i_image,
         } else {
             pitem = &item;
         }
-        rc = decodeToc(i_image, toc, pitem);
+        rc = xipDecodeToc(i_image, toc, pitem);
         if (rc) break;
 
     } while (0);
@@ -1514,7 +1775,7 @@ sbe_xip_map_halt(void* io_image,
     uint32_t actualSize;
 
     do {
-        rc = quickCheck(io_image, 0);
+        rc = xipQuickCheck(io_image, 0);
         if (rc) break;
 
         rc = sbe_xip_get_section(io_image, SBE_XIP_SECTION_HALT, &haltSection);
@@ -1526,7 +1787,7 @@ sbe_xip_map_halt(void* io_image,
         while (size) {
 
             rc = i_fn(io_image, 
-                      revle64(halt->iv_address),
+                      xipRevLe64(halt->iv_address),
                       halt->iv_string,
                       io_arg);
             if (rc) break;
@@ -1561,11 +1822,11 @@ typedef struct {
 } GetHaltStruct;
 
 
-static int
-getHaltMap(void* io_image, 
-           const uint64_t i_poreAddress,
-           const char* i_rcString,
-           void* io_arg)
+XIP_STATIC int
+xipGetHaltMap(void* io_image, 
+              const uint64_t i_poreAddress,
+              const char* i_rcString,
+              void* io_arg)
 {
     int rc;
 
@@ -1592,10 +1853,10 @@ sbe_xip_get_halt(void* io_image,
 
     s.iv_address = i_poreAddress;
     do {
-        rc = quickCheck(io_image, 0);
+        rc = xipQuickCheck(io_image, 0);
         if (rc) break;
 
-        rc = sbe_xip_map_halt(io_image, getHaltMap, &s);
+        rc = sbe_xip_map_halt(io_image, xipGetHaltMap, &s);
         if (rc == 0) {
             rc = TRACE_ERRORX(SBE_XIP_ITEM_NOT_FOUND,
                               "sbe_xip_get_halt: No HALT code is associated "
@@ -1623,10 +1884,10 @@ sbe_xip_get_scalar(void *i_image, const char* i_id, uint64_t* o_data)
             *o_data = *((uint8_t*)(item.iv_imageData));
             break;
         case SBE_XIP_UINT32:
-            *o_data = revle32(*((uint32_t*)(item.iv_imageData)));
+            *o_data = xipRevLe32(*((uint32_t*)(item.iv_imageData)));
             break;
         case SBE_XIP_UINT64:
-            *o_data = revle64(*((uint64_t*)(item.iv_imageData)));
+            *o_data = xipRevLe64(*((uint64_t*)(item.iv_imageData)));
             break;
         case SBE_XIP_ADDRESS:
             *o_data = item.iv_address;
@@ -1663,10 +1924,10 @@ sbe_xip_get_element(void *i_image,
             *o_data = ((uint8_t*)(item.iv_imageData))[i_index];
             break;
         case SBE_XIP_UINT32:
-            *o_data = revle32(((uint32_t*)(item.iv_imageData))[i_index]);
+            *o_data = xipRevLe32(((uint32_t*)(item.iv_imageData))[i_index]);
             break;
         case SBE_XIP_UINT64:
-            *o_data = revle64(((uint64_t*)(item.iv_imageData))[i_index]);
+            *o_data = xipRevLe64(((uint64_t*)(item.iv_imageData))[i_index]);
             break;
         default:
             rc = TRACE_ERROR(SBE_XIP_TYPE_ERROR);
@@ -1708,10 +1969,10 @@ sbe_xip_read_uint64(const void *i_image,
     int rc;
 
     do {
-        rc = quickCheck(i_image, 0);
+        rc = xipQuickCheck(i_image, 0);
         if (rc) break;
 
-        rc = validatePoreAddress(i_image, i_poreAddress, 8);
+        rc = xipValidatePoreAddress(i_image, i_poreAddress, 8);
         if (rc) break;
 
         if (i_poreAddress % 8) {
@@ -1720,7 +1981,7 @@ sbe_xip_read_uint64(const void *i_image,
         }
 
         *o_data = 
-            revle64(*((uint64_t*)pore2Host(i_image, i_poreAddress)));
+            xipRevLe64(*((uint64_t*)xipPore2Host(i_image, i_poreAddress)));
 
     } while(0);
 
@@ -1741,10 +2002,10 @@ sbe_xip_set_scalar(void* io_image, const char* i_id, const uint64_t i_data)
             *((uint8_t*)(item.iv_imageData)) = (uint8_t)i_data;
             break;
         case SBE_XIP_UINT32:
-            *((uint32_t*)(item.iv_imageData)) = revle32((uint32_t)i_data);
+            *((uint32_t*)(item.iv_imageData)) = xipRevLe32((uint32_t)i_data);
             break;
         case SBE_XIP_UINT64:
-            *((uint64_t*)(item.iv_imageData)) = revle64((uint64_t)i_data);
+            *((uint64_t*)(item.iv_imageData)) = xipRevLe64((uint64_t)i_data);
             break;
         default:
             rc = TRACE_ERROR(SBE_XIP_TYPE_ERROR);
@@ -1779,11 +2040,11 @@ sbe_xip_set_element(void *i_image,
             break;
         case SBE_XIP_UINT32:
             ((uint32_t*)(item.iv_imageData))[i_index] = 
-                revle32((uint32_t)i_data);
+                xipRevLe32((uint32_t)i_data);
             break;
         case SBE_XIP_UINT64:
             ((uint64_t*)(item.iv_imageData))[i_index] = 
-                revle64((uint64_t)i_data);
+                xipRevLe64((uint64_t)i_data);
             break;
         default:
             rc = TRACE_ERROR(SBE_XIP_TYPE_ERROR);
@@ -1832,10 +2093,10 @@ sbe_xip_write_uint64(void *io_image,
     int rc;
 
     do {
-        rc = quickCheck(io_image, 0);
+        rc = xipQuickCheck(io_image, 0);
         if (rc) break;
 
-        rc = validatePoreAddress(io_image, i_poreAddress, 8);
+        rc = xipValidatePoreAddress(io_image, i_poreAddress, 8);
         if (rc) break;
 
         if (i_poreAddress % 8) {
@@ -1843,7 +2104,8 @@ sbe_xip_write_uint64(void *io_image,
             break;
         }
 
-        *((uint64_t*)pore2Host(io_image, i_poreAddress)) = revle64(i_data);
+        *((uint64_t*)xipPore2Host(io_image, i_poreAddress)) = 
+            xipRevLe64(i_data);
 
     } while(0);
 
@@ -1858,7 +2120,7 @@ sbe_xip_delete_section(void* io_image, const int i_sectionId)
     SbeXipSection section;
 
     do {
-        rc = quickCheck(io_image, 1);
+        rc = xipQuickCheck(io_image, 1);
         if (rc) break;
 
         rc = sbe_xip_get_section(io_image, i_sectionId, &section);
@@ -1871,7 +2133,7 @@ sbe_xip_delete_section(void* io_image, const int i_sectionId)
 
         if (section.iv_size == 0) break;
 
-        rc = finalSection(io_image, &final);
+        rc = xipFinalSection(io_image, &final);
         if (rc) break;
 
         if (final != i_sectionId) {
@@ -1881,17 +2143,22 @@ sbe_xip_delete_section(void* io_image, const int i_sectionId)
             break;
         }
 
-        setImageSize(io_image, section.iv_offset);
-        setSectionOffset(io_image, i_sectionId, 0);
-        setSectionSize(io_image, i_sectionId, 0);
+        xipSetImageSize(io_image, section.iv_offset);
+        xipSetSectionOffset(io_image, i_sectionId, 0);
+        xipSetSectionSize(io_image, i_sectionId, 0);
 
-        finalAlignment(io_image);
+        xipFinalAlignment(io_image);
 
     } while (0);
 
     return rc;
 }
 
+
+#ifndef PPC_HYP
+
+// This API is not needed by PHYP procedures, and is elided since PHYP does
+// not support malloc().
 
 int
 sbe_xip_duplicate_section(const void* i_image, 
@@ -1905,7 +2172,7 @@ sbe_xip_duplicate_section(const void* i_image,
     *o_duplicate = 0;
 
     do {
-        rc = quickCheck(i_image, 0);
+        rc = xipQuickCheck(i_image, 0);
         if (rc) break;
 
         rc = sbe_xip_get_section(i_image, i_sectionId, &section);
@@ -1927,7 +2194,7 @@ sbe_xip_duplicate_section(const void* i_image,
         }
 
         memcpy(*o_duplicate, 
-               hostAddressFromOffset(i_image, section.iv_offset),
+               xipHostAddressFromOffset(i_image, section.iv_offset),
                section.iv_size);
         
         
@@ -1941,6 +2208,8 @@ sbe_xip_duplicate_section(const void* i_image,
 
     return rc;
 }
+
+#endif // PPC_HYP
 
 
 int
@@ -1957,7 +2226,7 @@ sbe_xip_append(void* io_image,
     uint32_t pad;
 
     do {
-        rc = quickCheck(io_image, 1);
+        rc = xipQuickCheck(io_image, 1);
         if (rc) break;
 
         rc = sbe_xip_get_section(io_image, i_sectionId, &section);
@@ -1971,16 +2240,17 @@ sbe_xip_append(void* io_image,
             // the image to the specified section alignment.  Note that the
             // size of the previously final section does not change.
 
-            rc = padImage(io_image, i_allocation, section.iv_alignment, &pad);
+            rc = xipPadImage(io_image, i_allocation, section.iv_alignment, 
+                             &pad);
             if (rc) break;
-            section.iv_offset = imageSize(io_image);
+            section.iv_offset = xipImageSize(io_image);
 
         } else {
 
             // Otherwise, the section must be the final section in order to
             // continue. Remove any padding from the image.
 
-            rc = finalSection(io_image, &final);
+            rc = xipFinalSection(io_image, &final);
             if (rc) break;
 
             if (final != i_sectionId) {
@@ -1989,7 +2259,7 @@ sbe_xip_append(void* io_image,
                                   "%d\n", i_sectionId);
                 break;
             }
-            setImageSize(io_image, section.iv_offset + section.iv_size);
+            xipSetImageSize(io_image, section.iv_offset + section.iv_size);
         }
 
 
@@ -1997,7 +2267,7 @@ sbe_xip_append(void* io_image,
         // parameter o_sectionOffset and copy the new data into the image (or
         // simply clear the space).
 
-        if ((imageSize(io_image) + i_size) > i_allocation) {
+        if ((xipImageSize(io_image) + i_size) > i_allocation) {
             rc = TRACE_ERROR(SBE_XIP_WOULD_OVERFLOW);
             break;
         }            
@@ -2005,7 +2275,8 @@ sbe_xip_append(void* io_image,
             *o_sectionOffset = section.iv_size;
         }
 
-        hostAddress = hostAddressFromOffset(io_image, imageSize(io_image));
+        hostAddress = 
+            xipHostAddressFromOffset(io_image, xipImageSize(io_image));
         if (i_data == 0) {
             memset(hostAddress, 0, i_size);
         } else {
@@ -2015,11 +2286,11 @@ sbe_xip_append(void* io_image,
 
         // Update the image size and section table. 
 
-        setImageSize(io_image, imageSize(io_image) + i_size);
-        finalAlignment(io_image);
+        xipSetImageSize(io_image, xipImageSize(io_image) + i_size);
+        xipFinalAlignment(io_image);
 
         section.iv_size += i_size;
-        rc = putSection(io_image, i_sectionId, &section);
+        rc = xipPutSection(io_image, i_sectionId, &section);
         if (rc) break;
         
 
@@ -2045,7 +2316,7 @@ sbe_xip_section2pore(const void* i_image,
     SbeXipSection section;
 
     do {
-        rc = quickCheck(i_image, 0);
+        rc = xipQuickCheck(i_image, 0);
         if (rc) break;
 
         rc = sbe_xip_get_section(i_image, i_sectionId, &section);
@@ -2061,7 +2332,7 @@ sbe_xip_section2pore(const void* i_image,
             break;
         }
 
-        *o_poreAddress = linkAddress(i_image) + section.iv_offset + i_offset;
+        *o_poreAddress = xipLinkAddress(i_image) + section.iv_offset + i_offset;
 
         if (*o_poreAddress % 4) {
             rc = TRACE_ERROR(SBE_XIP_ALIGNMENT_ERROR);
@@ -2083,10 +2354,10 @@ sbe_xip_pore2section(const void* i_image,
     int rc;
 
     do {
-        rc = quickCheck(i_image, 0);
+        rc = xipQuickCheck(i_image, 0);
         if (rc) break;
 
-        rc = pore2Section(i_image, i_poreAddress, i_section, i_offset);
+        rc = xipPore2Section(i_image, i_poreAddress, i_section, i_offset);
 
     } while(0);
 
@@ -2102,18 +2373,19 @@ sbe_xip_pore2host(const void* i_image,
     int rc;
 
     do {
-        rc = quickCheck(i_image, 0);
+        rc = xipQuickCheck(i_image, 0);
         if (rc) break;
 
-        if ((i_poreAddress < linkAddress(i_image)) ||
-            (i_poreAddress > (linkAddress(i_image) + imageSize(i_image)))) {
+        if ((i_poreAddress < xipLinkAddress(i_image)) ||
+            (i_poreAddress > 
+             (xipLinkAddress(i_image) + xipImageSize(i_image)))) {
             rc = TRACE_ERROR(SBE_XIP_INVALID_ARGUMENT);
             break;
         }
 
         *o_hostAddress = 
-            hostAddressFromOffset(i_image, 
-                                  i_poreAddress - linkAddress(i_image));
+            xipHostAddressFromOffset(i_image, 
+                                     i_poreAddress - xipLinkAddress(i_image));
     } while(0);
 
     return rc;
@@ -2128,16 +2400,17 @@ sbe_xip_host2pore(const void* i_image,
     int rc;
 
     do {
-        rc = quickCheck(i_image, 0);
+        rc = xipQuickCheck(i_image, 0);
         if (rc) break;
 
         if ((i_hostAddress < i_image) ||
-            (i_hostAddress > hostAddressFromOffset(i_image, imageSize(i_image)))) {
+            (i_hostAddress > 
+             xipHostAddressFromOffset(i_image, xipImageSize(i_image)))) {
             rc = TRACE_ERROR(SBE_XIP_INVALID_ARGUMENT);
             break;
         }
 
-        *o_poreAddress = linkAddress(i_image) + 
+        *o_poreAddress = xipLinkAddress(i_image) + 
             ((unsigned long)i_hostAddress - (unsigned long)i_image);
         if (*o_poreAddress % 4) {
             rc = TRACE_ERROR(SBE_XIP_ALIGNMENT_ERROR);
@@ -2161,9 +2434,9 @@ sbe_xip_translate_header(SbeXipHeader* o_dest, const SbeXipHeader* i_src)
 #error This code assumes the SBE-XIP header version 8 layout
 #endif
 
-    o_dest->iv_magic = revle64(i_src->iv_magic);
-    o_dest->iv_entryOffset = revle64(i_src->iv_entryOffset);
-    o_dest->iv_linkAddress = revle64(i_src->iv_linkAddress);
+    o_dest->iv_magic = xipRevLe64(i_src->iv_magic);
+    o_dest->iv_entryOffset = xipRevLe64(i_src->iv_entryOffset);
+    o_dest->iv_linkAddress = xipRevLe64(i_src->iv_linkAddress);
 
     for (i = 0; i < 5; i++) {
         o_dest->iv_reserved64[i] = 0;
@@ -2173,12 +2446,12 @@ sbe_xip_translate_header(SbeXipHeader* o_dest, const SbeXipHeader* i_src)
              srcSection = i_src->iv_section;
          i < SBE_XIP_SECTIONS; 
          i++, destSection++, srcSection++) {
-        translateSection(destSection, srcSection);
+        xipTranslateSection(destSection, srcSection);
     }
 
-    o_dest->iv_imageSize = revle32(i_src->iv_imageSize);
-    o_dest->iv_buildDate = revle32(i_src->iv_buildDate);
-    o_dest->iv_buildTime = revle32(i_src->iv_buildTime);
+    o_dest->iv_imageSize = xipRevLe32(i_src->iv_imageSize);
+    o_dest->iv_buildDate = xipRevLe32(i_src->iv_buildDate);
+    o_dest->iv_buildTime = xipRevLe32(i_src->iv_buildTime);
 
     for (i = 0; i < 5; i++) {
         o_dest->iv_reserved32[i] = 0;
@@ -2220,14 +2493,14 @@ sbe_xip_map_toc(void* io_image,
     size_t entries;
 
     do {
-        rc = quickCheck(io_image, 0);
+        rc = xipQuickCheck(io_image, 0);
         if (rc) break;
 
-        rc = getToc(io_image, &imageToc, &entries, 0, 0);
+        rc = xipGetToc(io_image, &imageToc, &entries, 0, 0);
         if (rc) break;
 
         for (; entries--; imageToc++) {
-            rc = decodeToc(io_image, imageToc, &item);
+            rc = xipDecodeToc(io_image, imageToc, &item);
             if (rc) break;
             rc = i_fn(io_image, &item, io_arg);
             if (rc) break;
@@ -2236,10 +2509,3 @@ sbe_xip_map_toc(void* io_image,
 
     return rc;
 }
-
-
-
-    
-
-        
-                                 

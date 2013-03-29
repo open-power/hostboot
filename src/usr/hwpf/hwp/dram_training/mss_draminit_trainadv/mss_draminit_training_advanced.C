@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_draminit_training_advanced.C,v 1.25 2013/01/31 15:54:58 sasethur Exp $
+// $Id: mss_draminit_training_advanced.C,v 1.26 2013/03/06 11:22:31 sasethur Exp $
 /* File is created by SARAVANAN SETHURAMAN on Thur 29 Sept 2011. */
 
 //------------------------------------------------------------------------------
@@ -65,6 +65,7 @@
 //  1.23   | sasethur |14-Dec-12| Updated for FW review comments 
 //  1.24   | sasethur |17-Jan-13| Updated for mss_mcbist_common.C include file 
 //  1.25   | abhijsau |31-Jan-13| removed  mss_mcbist_common.C include file , needs to be included while compiling 
+//  1.26   | abhijsau |06-Mar-13| fixed fw comment 
 
 
 // This procedure Schmoo's DRV_IMP, SLEW, VREF (DDR, CEN), RCV_IMP based on attribute from effective config procedure
@@ -321,7 +322,7 @@ fapi::ReturnCode mss_draminit_training_advanced_cloned(const fapi::Target & i_ta
     			    return rc;
     			}
     		    }
-    		    if (((l_shmoo_param_valid & DELAY_REG) != 0) || (l_shmoo_type_valid != 0))
+    		    if (((l_shmoo_param_valid & DELAY_REG) != 0) || (l_shmoo_type_valid != TEST_NONE))
     		    {
     			rc = delay_shmoo(i_target_mba, l_port, l_shmoo_type_valid, &l_left_margin, &l_right_margin,i_pattern,i_test_type); 
     			if (rc)

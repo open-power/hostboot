@@ -378,7 +378,8 @@ errlHndl_t call_opt_memmap()
         l_fapi_procs.push_back(l_fapi_target);
     }
 
-    FAPI_INVOKE_HWP(l_err, opt_memmap, l_fapi_procs);
+    bool l_initProcMemBaseAttr = false;
+    FAPI_INVOKE_HWP(l_err, opt_memmap, l_fapi_procs, l_initProcMemBaseAttr);
 
     if ( l_err )
     {

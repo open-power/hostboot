@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012                   */
+/* COPYRIGHT International Business Machines Corp. 2012,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -22,7 +22,7 @@
 /* IBM_PROLOG_END_TAG                                                     */
 
 // -*- mode: C++; c-file-style: "linux";  -*-
-// $Id: proc_read_seeprom.C,v 1.8 2012/10/22 15:28:41 szhong Exp $
+// $Id: proc_read_seeprom.C,v 1.9 2012/11/16 23:44:55 szhong Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/utils/proc_read_seeprom.C,v $
 //------------------------------------------------------------------------------
 // *|
@@ -48,6 +48,17 @@
 //------------------------------------------------------------------------------
 #include "proc_read_seeprom.H"
 #include <fapi.H>
+
+//*******************************************************
+//Experiments on s1_e8052 wafer model shows first read takes 29*200000 cycles
+//other normal reads takes 19*200000 cycles.
+//*******************************************************
+
+#define TIMEOUT_LIMIT 40         //total time_out: TIMEOUT_LIMIT*LOOP_DELAY_CYCLE or TIMEOUT_LIMIT*LOOP_DELAY_TIME
+#define LOOP_DELAY_CYCLE 200000
+#define LOOP_DELAY_TIME  200000  //!!!this number should be rechecked!!!
+
+
 //------------------------------------------------------------------------------
 // Function definitions
 //------------------------------------------------------------------------------
@@ -270,8 +281,14 @@ extern "C"
 	//ECC Buffer
 	ecmdDataBufferBase ecc_buff = ecmdDataBufferBase (64);
 	ecmdDataBufferBase   vital_reg_buff=ecmdDataBufferBase(64);
+
+
+
+
+
 	
 	uint64_t ecc_value; 
+	//uint64_t fix_offset=0;//read from logic address of 2000
 	uint32_t rc_ecmd=0;
 	do 
 	{
@@ -438,8 +455,11 @@ extern "C"
 			}			    
 		    //Wait until the value is ready to be collected 
 		    bool is_not_complete = true; 
+		    uint16_t counter=0;
 		    while(is_not_complete)
 			{
+			    counter++;
+			    //printf( "counter: %d\n",counter);
 			    rc = fapiGetScom(i_target, PORE_ECCB_STATUS_REGISTER_READ_0x000C0002, is_ready);
 			    if(rc)
 				{
@@ -457,6 +477,15 @@ extern "C"
 					    FAPI_SET_HWP_ERROR(rc,RC_PROC_READ_SEEPROM_I2C_COMMAND_COMPLETE_NOT_SET);
 					    break;  
 					}
+				}
+			    rc=fapiDelay(LOOP_DELAY_TIME,LOOP_DELAY_CYCLE);
+			    if (rc) break;
+
+			    if(counter>TIMEOUT_LIMIT)
+				{
+				    FAPI_SET_HWP_ERROR(rc,RC_PROC_READ_SEEPROM_I2C_COMMAND_COMPLETE_TIME_OUT);
+				    FAPI_ERR("ERROR: I2C_COMMAND_COMPLETE not set, TIME OUT");
+				    break;
 				}
 			}
 		    if(rc)

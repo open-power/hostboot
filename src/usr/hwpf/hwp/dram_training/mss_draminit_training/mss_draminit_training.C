@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_draminit_training.C,v 1.55 2013/02/25 19:05:31 jdsloat Exp $
+// $Id: mss_draminit_training.C,v 1.56 2013/03/09 00:05:43 jdsloat Exp $
 //------------------------------------------------------------------------------
 // Don't forget to create CVS comments when you check in your changes!
 //------------------------------------------------------------------------------
@@ -28,6 +28,11 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|------------------------------------------------
+//  1.56   | jdsloat  |27-FEB-13| Fixed rtt_nom and rtt_wr swap bug during condition of rtt_nom = diabled and rtt_wr = non-disabled
+//         |          |         | Added workaround on a per quad resolution
+//	   |          |         | Added workaround as a seperate sub
+//	   |          |         | Added framework of binning workaround based on timing reference
+//	   |          |         | Added putscom to enable spare cke mirroring
 //  1.55   | jdsloat  |25-FEB-13| Added MBA/Port info to debug messages.
 //  1.54   | jdsloat  |22-FEB-13| Edited WRITE_READ workaround to also edit DQSCLK PHASE
 //  1.53   | jdsloat  |14-FEB-13| Fixed WRITE_READ workaround so it will execute in a partial substep case
@@ -158,6 +163,7 @@ ReturnCode mss_draminit_training_cloned(Target& i_target);
 ReturnCode mss_check_cal_status(Target& i_target, uint8_t i_port, uint8_t i_group,  mss_draminit_training_result& io_status);
 ReturnCode mss_check_error_status(Target& i_target, uint8_t i_port, uint8_t i_group,  mss_draminit_training_result& io_status);
 ReturnCode mss_rtt_nom_rtt_wr_swap( Target& i_target, uint32_t i_port_number, uint8_t i_rank, uint32_t i_rank_pair_group, uint32_t& io_ccs_inst_cnt, uint8_t& io_dram_rtt_nom_original);
+ReturnCode mss_read_center_workaround(Target& i_target, uint8_t i_mbaPosition, uint32_t i_port, uint32_t i_rank_group);
 
 ReturnCode getC4dq2reg(const Target &i_mba, const uint8_t i_port, const uint8_t i_dimm, const uint8_t i_rank, ecmdDataBufferBase &o_reg);
 ReturnCode setC4dq2reg(const Target &i_mba, const uint8_t i_port, const uint8_t i_dimm, const uint8_t i_rank, ecmdDataBufferBase &o_reg);
@@ -198,7 +204,7 @@ ReturnCode mss_draminit_training_cloned(Target& i_target)
        INVALID = 255
     };
 
-    const uint32_t NUM_POLL = 100;
+    const uint32_t NUM_POLL = 10000;
 
     ReturnCode rc;
     uint32_t rc_num = 0;
@@ -260,13 +266,7 @@ ReturnCode mss_draminit_training_cloned(Target& i_target)
     uint8_t cal_steps = 0;
     uint8_t cur_cal_step = 0;
     ecmdDataBufferBase cal_steps_8(8);
-    uint64_t DQSCLK_RD_PHASE_ADDR_0 = 0;
-    uint64_t DQSCLK_RD_PHASE_ADDR_1 = 0;
-    uint64_t DQSCLK_RD_PHASE_ADDR_2 = 0;
-    uint64_t DQSCLK_RD_PHASE_ADDR_3 = 0;
-    uint64_t DQSCLK_RD_PHASE_ADDR_4 = 0;
-    uint8_t l_value_u8 = 0;
-    uint8_t l_new_value_u8 = 0;
+
     uint8_t l_nwell_misplacement = 0;
 
     uint8_t dram_rtt_nom_original = 0;
@@ -302,11 +302,20 @@ ReturnCode mss_draminit_training_cloned(Target& i_target)
         return rc;
     }
 
+
+
     //Get which training steps we are to run
     rc = FAPI_ATTR_GET(ATTR_MSS_CAL_STEP_ENABLE, &i_target, cal_steps);
     if(rc) return rc;
-
     rc_num = rc_num | cal_steps_8.insert(cal_steps, 0, 8, 0);
+
+
+    //Setup SPARE CKE enable bit
+    rc = fapiGetScom(i_target, MBA01_MBARPC0Q_0x03010434, data_buffer_64);
+    if(rc) return rc;
+    rc_num = rc_num | data_buffer_64.setBit(42);
+    rc = fapiPutScom(i_target, MBA01_MBARPC0Q_0x03010434, data_buffer_64);
+    if(rc) return rc;
 
     //Set up CCS Mode Reg for Init cal
     rc = fapiGetScom(i_target, MEM_MBA01_CCS_MODEQ_0x030106A7, data_buffer_64);
@@ -552,7 +561,7 @@ ReturnCode mss_draminit_training_cloned(Target& i_target)
 		        // Before WR_LVL --- Change the RTT_NOM to RTT_WR pre-WR_LVL
 			if (cur_cal_step == 1)
 			{
-			    dram_rtt_nom_original = 0;
+			    dram_rtt_nom_original = 0xFF;
 			    rc = mss_rtt_nom_rtt_wr_swap(i_target,
 							 port,
 							 primary_ranks_array[group][port],
@@ -650,172 +659,7 @@ ReturnCode mss_draminit_training_cloned(Target& i_target)
 			    ( ( l_nwell_misplacement == fapi::ENUM_ATTR_MSS_NWELL_MISPLACEMENT_TRUE  )
 			    ||( l_nwell_misplacement == fapi::ENUM_ATTR_MSS_NWELL_MISPLACEMENT_FALSE ) ) )
 			{
-			    FAPI_INF( "+++ Read Centering Workaround on rank group: %d +++", group);
-			    FAPI_INF( "+++ Clearing values from RD PHASE SELECT regs. +++");
-			    FAPI_INF( "+++ Incrementing by 2 values from DQS CLK PHASE SELECT regs. +++");
-
-			    if ( port == 0 )
-			    {
-				if ( group == 0 )
-				{
-				    DQSCLK_RD_PHASE_ADDR_0 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR0_P0_0_0x800000090301143F;
-				    DQSCLK_RD_PHASE_ADDR_1 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR0_P0_1_0x800004090301143F;
-				    DQSCLK_RD_PHASE_ADDR_2 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR0_P0_2_0x800008090301143F;
-				    DQSCLK_RD_PHASE_ADDR_3 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR0_P0_3_0x80000C090301143F;
-				    DQSCLK_RD_PHASE_ADDR_4 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR0_P0_4_0x800010090301143F;
-
-				}
-				else if ( group == 1 )
-				{
-				    DQSCLK_RD_PHASE_ADDR_0 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR1_P0_0_0x800001090301143F;
-				    DQSCLK_RD_PHASE_ADDR_1 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR1_P0_1_0x800005090301143F;
-				    DQSCLK_RD_PHASE_ADDR_2 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR1_P0_2_0x800009090301143F;
-				    DQSCLK_RD_PHASE_ADDR_3 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR1_P0_3_0x80000D090301143F;
-				    DQSCLK_RD_PHASE_ADDR_4 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR1_P0_4_0x800011090301143F;
-
-				}
-				else if ( group == 2 )
-				{
-				    DQSCLK_RD_PHASE_ADDR_0 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR2_P0_0_0x800002090301143F;
-				    DQSCLK_RD_PHASE_ADDR_1 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR2_P0_1_0x800006090301143F;
-				    DQSCLK_RD_PHASE_ADDR_2 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR2_P0_2_0x80000A090301143F;
-				    DQSCLK_RD_PHASE_ADDR_3 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR2_P0_3_0x80000E090301143F;
-				    DQSCLK_RD_PHASE_ADDR_4 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR2_P0_4_0x800012090301143F;
-
-				}
-				else if ( group == 3 )
-				{
-				    DQSCLK_RD_PHASE_ADDR_0 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR3_P0_0_0x800003090301143F;
-				    DQSCLK_RD_PHASE_ADDR_1 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR3_P0_1_0x800007090301143F;
-				    DQSCLK_RD_PHASE_ADDR_2 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR3_P0_2_0x80000B090301143F;
-				    DQSCLK_RD_PHASE_ADDR_3 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR3_P0_3_0x80000F090301143F;
-				    DQSCLK_RD_PHASE_ADDR_4 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR3_P0_4_0x800013090301143F;
-
-				}
-			    }
-			    else if (port == 1 )
-			    {
-				if ( group == 0 )
-				{
-				    DQSCLK_RD_PHASE_ADDR_0 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR0_P1_0_0x800100090301143F;
-				    DQSCLK_RD_PHASE_ADDR_1 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR0_P1_1_0x800104090301143F;
-				    DQSCLK_RD_PHASE_ADDR_2 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR0_P1_2_0x800108090301143F;
-				    DQSCLK_RD_PHASE_ADDR_3 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR0_P1_3_0x80010C090301143F;
-				    DQSCLK_RD_PHASE_ADDR_4 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR0_P1_4_0x800110090301143F;
-
-				}
-				else if ( group == 1 )
-				{
-				    DQSCLK_RD_PHASE_ADDR_0 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR1_P1_0_0x800101090301143F;
-				    DQSCLK_RD_PHASE_ADDR_1 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR1_P1_1_0x800105090301143F;
-				    DQSCLK_RD_PHASE_ADDR_2 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR1_P1_2_0x800109090301143F;
-				    DQSCLK_RD_PHASE_ADDR_3 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR1_P1_3_0x80010D090301143F;
-				    DQSCLK_RD_PHASE_ADDR_4 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR1_P1_4_0x800111090301143F;
-
-	
-				}
-				else if ( group == 2 )
-				{
-				    DQSCLK_RD_PHASE_ADDR_0 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR2_P1_0_0x800102090301143F;
-				    DQSCLK_RD_PHASE_ADDR_1 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR2_P1_1_0x800106090301143F;
-				    DQSCLK_RD_PHASE_ADDR_2 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR2_P1_2_0x80010A090301143F;
-				    DQSCLK_RD_PHASE_ADDR_3 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR2_P1_3_0x80010E090301143F;
-				    DQSCLK_RD_PHASE_ADDR_4 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR2_P1_4_0x800112090301143F;
-
-				}
-				else if ( group == 3 )
-				{
-				    DQSCLK_RD_PHASE_ADDR_0 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR3_P1_0_0x800103090301143F;
-				    DQSCLK_RD_PHASE_ADDR_1 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR3_P1_1_0x800107090301143F;
-				    DQSCLK_RD_PHASE_ADDR_2 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR3_P1_2_0x80010B090301143F;
-				    DQSCLK_RD_PHASE_ADDR_3 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR3_P1_3_0x80010F090301143F;
-				    DQSCLK_RD_PHASE_ADDR_4 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR3_P1_4_0x800113090301143F;
-
-				}
-			    }
-
-			    // Set Read Phase to 0.
-                            //Increment dqs clk 2. 4 is the limit, wrap around (IE 5 = 1, 6 = 2)
-			    rc = fapiGetScom(i_target, DQSCLK_RD_PHASE_ADDR_0, data_buffer_64);
-			    if (rc) return rc;
-			    rc_num = rc_num | data_buffer_64.clearBit(50, 2);
-			    rc_num = rc_num | data_buffer_64.clearBit(54, 2);
-			    rc_num = rc_num | data_buffer_64.clearBit(58, 2);
-			    rc_num = rc_num | data_buffer_64.clearBit(62, 2);
-
-			    for ( uint8_t l_element_u8 = 0; l_element_u8 < 4; l_element_u8 += 1 ) {
-				l_value_u8 = 0;
-				data_buffer_64.extractToRight(&l_value_u8, (48 + (l_element_u8 * 4)), 2);
-				l_new_value_u8 = (l_value_u8 + 2) % 4;
-				data_buffer_64.insertFromRight(&l_new_value_u8, (48 + (l_element_u8 * 4)), 2);
-			    }
-			    rc = fapiPutScom(i_target, DQSCLK_RD_PHASE_ADDR_0, data_buffer_64);
-			    if (rc) return rc;
-
-			    rc = fapiGetScom(i_target, DQSCLK_RD_PHASE_ADDR_1, data_buffer_64);
-			    if (rc) return rc;
-			    rc_num = rc_num | data_buffer_64.clearBit(50, 2);
-			    rc_num = rc_num | data_buffer_64.clearBit(54, 2);
-			    rc_num = rc_num | data_buffer_64.clearBit(58, 2);
-			    rc_num = rc_num | data_buffer_64.clearBit(62, 2);
-
-			    for ( uint8_t l_element_u8 = 0; l_element_u8 < 4; l_element_u8 += 1 ) {
-				l_value_u8 = 0;
-				data_buffer_64.extractToRight(&l_value_u8, (48 + (l_element_u8 * 4)), 2);
-				l_new_value_u8 = (l_value_u8 + 2) % 4;
-				data_buffer_64.insertFromRight(&l_new_value_u8, (48 + (l_element_u8 * 4)), 2);
-			    }
-			    rc = fapiPutScom(i_target, DQSCLK_RD_PHASE_ADDR_1, data_buffer_64);
-			    if (rc) return rc;
-
-			    rc = fapiGetScom(i_target, DQSCLK_RD_PHASE_ADDR_2, data_buffer_64);
-			    if (rc) return rc;
-			    rc_num = rc_num | data_buffer_64.clearBit(50, 2);
-			    rc_num = rc_num | data_buffer_64.clearBit(54, 2);
-			    rc_num = rc_num | data_buffer_64.clearBit(58, 2);
-			    rc_num = rc_num | data_buffer_64.clearBit(62, 2);
-
-			    for ( uint8_t l_element_u8 = 0; l_element_u8 < 4; l_element_u8 += 1 ) {
-				l_value_u8 = 0;
-				data_buffer_64.extractToRight(&l_value_u8, (48 + (l_element_u8 * 4)), 2);
-				l_new_value_u8 = (l_value_u8 + 2) % 4;
-				data_buffer_64.insertFromRight(&l_new_value_u8, (48 + (l_element_u8 * 4)), 2);
-			    }
-			    rc = fapiPutScom(i_target, DQSCLK_RD_PHASE_ADDR_2, data_buffer_64);
-			    if (rc) return rc;
-
-			    rc = fapiGetScom(i_target, DQSCLK_RD_PHASE_ADDR_3, data_buffer_64);
-			    if (rc) return rc;
-			    rc_num = rc_num | data_buffer_64.clearBit(50, 2);
-			    rc_num = rc_num | data_buffer_64.clearBit(54, 2);
-			    rc_num = rc_num | data_buffer_64.clearBit(58, 2);
-			    rc_num = rc_num | data_buffer_64.clearBit(62, 2);
-
-			    for ( uint8_t l_element_u8 = 0; l_element_u8 < 4; l_element_u8 += 1 ) {
-				l_value_u8 = 0;
-				data_buffer_64.extractToRight(&l_value_u8, (48 + (l_element_u8 * 4)), 2);
-				l_new_value_u8 = (l_value_u8 + 2) % 4;
-				data_buffer_64.insertFromRight(&l_new_value_u8, (48 + (l_element_u8 * 4)), 2);
-			    }
-			    rc = fapiPutScom(i_target, DQSCLK_RD_PHASE_ADDR_3, data_buffer_64);
-			    if (rc) return rc;
-
-			    rc = fapiGetScom(i_target, DQSCLK_RD_PHASE_ADDR_4, data_buffer_64);
-			    if (rc) return rc;
-			    rc_num = rc_num | data_buffer_64.clearBit(50, 2);
-			    rc_num = rc_num | data_buffer_64.clearBit(54, 2);
-			    rc_num = rc_num | data_buffer_64.clearBit(58, 2);
-			    rc_num = rc_num | data_buffer_64.clearBit(62, 2);
-
-			    for ( uint8_t l_element_u8 = 0; l_element_u8 < 4; l_element_u8 += 1 ) {
-				l_value_u8 = 0;
-				data_buffer_64.extractToRight(&l_value_u8, (48 + (l_element_u8 * 4)), 2);
-				l_new_value_u8 = (l_value_u8 + 2) % 4;
-				data_buffer_64.insertFromRight(&l_new_value_u8, (48 + (l_element_u8 * 4)), 2);
-			    }
-			    rc = fapiPutScom(i_target, DQSCLK_RD_PHASE_ADDR_4, data_buffer_64);
-			    if (rc) return rc;
-
+			    mss_read_center_workaround(i_target, mbaPosition, port, group);
 			}
 
 		    }
@@ -980,6 +824,723 @@ ReturnCode mss_check_error_status( Target& i_target,
     return rc;
 }
 
+ReturnCode mss_read_center_workaround(
+            Target& i_target,
+            uint8_t i_mbaPosition,
+            uint32_t i_port,
+	    uint32_t i_rank_group
+            )
+{
+
+    ReturnCode rc;
+    uint32_t rc_num = 0;
+    ecmdDataBufferBase data_buffer_64(64);
+
+
+    uint64_t DQSCLK_RD_PHASE_ADDR_0 = 0;
+    uint64_t DQSCLK_RD_PHASE_ADDR_1 = 0;
+    uint64_t DQSCLK_RD_PHASE_ADDR_2 = 0;
+    uint64_t DQSCLK_RD_PHASE_ADDR_3 = 0;
+    uint64_t DQSCLK_RD_PHASE_ADDR_4 = 0;
+    uint64_t RD_TIMING_REF0_ADDR_0 = 0;
+    uint64_t RD_TIMING_REF0_ADDR_1 = 0;
+    uint64_t RD_TIMING_REF0_ADDR_2 = 0;
+    uint64_t RD_TIMING_REF0_ADDR_3 = 0;
+    uint64_t RD_TIMING_REF0_ADDR_4 = 0;
+    uint64_t RD_TIMING_REF1_ADDR_0 = 0;
+    uint64_t RD_TIMING_REF1_ADDR_1 = 0;
+    uint64_t RD_TIMING_REF1_ADDR_2 = 0;
+    uint64_t RD_TIMING_REF1_ADDR_3 = 0;
+    uint64_t RD_TIMING_REF1_ADDR_4 = 0;
+    uint8_t l_value_u8 = 0;
+    uint8_t l_new_value_u8 = 0;
+    uint8_t quad0_workaround_type = 2;
+    uint8_t quad1_workaround_type = 2;
+    uint8_t quad2_workaround_type = 2;
+    uint8_t quad3_workaround_type = 2;
+    uint8_t dqs_clk_increment_wa0 = 0;
+    uint8_t dqs_clk_increment_wa1 = 3;
+    uint8_t dqs_clk_increment_wa2 = 2;
+    uint8_t read_phase_value_wa0 = 0;
+    uint8_t read_phase_value_wa1 = 0;
+    uint8_t read_phase_value_wa2 = 0;
+    uint8_t dqs_clk_increment_quad0 = 2;
+    uint8_t dqs_clk_increment_quad1 = 2;
+    uint8_t dqs_clk_increment_quad2 = 2;
+    uint8_t dqs_clk_increment_quad3 = 2;
+    uint8_t read_phase_value_quad0 = 0;
+    uint8_t read_phase_value_quad1 = 0;
+    uint8_t read_phase_value_quad2 = 0;
+    uint8_t read_phase_value_quad3 = 0;
+    uint8_t l_timing_ref_quad0 = 0;
+    uint8_t l_timing_ref_quad1 = 0;
+    uint8_t l_timing_ref_quad2 = 0;
+    uint8_t l_timing_ref_quad3 = 0;
+
+    FAPI_INF( "+++ Read Centering Workaround on MBA: %d Port: %d rank group: %d +++", i_mbaPosition, i_port, i_rank_group);
+    FAPI_INF( "+++ Choosing New RD PHASE SELECT values based on timing values. +++");
+    FAPI_INF( "+++ Incrementing DQS CLK PHASE SELECT regs based on timing values. +++");
+
+    if ( i_port == 0 )
+    {
+
+	RD_TIMING_REF0_ADDR_0 = DPHY01_DDRPHY_DP18_READ_TIMING_REFERENCE0_P0_0_0x800000700301143F;
+	RD_TIMING_REF0_ADDR_1 = DPHY01_DDRPHY_DP18_READ_TIMING_REFERENCE0_P0_1_0x800004700301143F;
+	RD_TIMING_REF0_ADDR_2 = DPHY01_DDRPHY_DP18_READ_TIMING_REFERENCE0_P0_2_0x800008700301143F;
+	RD_TIMING_REF0_ADDR_3 = DPHY01_DDRPHY_DP18_READ_TIMING_REFERENCE0_P0_3_0x80000C700301143F;
+	RD_TIMING_REF0_ADDR_4 = DPHY01_DDRPHY_DP18_READ_TIMING_REFERENCE0_P0_4_0x800010700301143F;
+	RD_TIMING_REF1_ADDR_0 = DPHY01_DDRPHY_DP18_READ_TIMING_REFERENCE1_P0_0_0x800000710301143F;
+	RD_TIMING_REF1_ADDR_1 = DPHY01_DDRPHY_DP18_READ_TIMING_REFERENCE1_P0_1_0x800004710301143F;
+	RD_TIMING_REF1_ADDR_2 = DPHY01_DDRPHY_DP18_READ_TIMING_REFERENCE1_P0_2_0x800008710301143F;
+	RD_TIMING_REF1_ADDR_3 = DPHY01_DDRPHY_DP18_READ_TIMING_REFERENCE1_P0_3_0x80000C710301143F;
+	RD_TIMING_REF1_ADDR_4 = DPHY01_DDRPHY_DP18_READ_TIMING_REFERENCE1_P0_4_0x800010710301143F;
+
+	if ( i_rank_group == 0 )
+	{
+	    DQSCLK_RD_PHASE_ADDR_0 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR0_P0_0_0x800000090301143F;
+	    DQSCLK_RD_PHASE_ADDR_1 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR0_P0_1_0x800004090301143F;
+	    DQSCLK_RD_PHASE_ADDR_2 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR0_P0_2_0x800008090301143F;
+	    DQSCLK_RD_PHASE_ADDR_3 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR0_P0_3_0x80000C090301143F;
+	    DQSCLK_RD_PHASE_ADDR_4 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR0_P0_4_0x800010090301143F;
+
+	}
+	else if ( i_rank_group == 1 )
+	{
+	    DQSCLK_RD_PHASE_ADDR_0 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR1_P0_0_0x800001090301143F;
+	    DQSCLK_RD_PHASE_ADDR_1 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR1_P0_1_0x800005090301143F;
+	    DQSCLK_RD_PHASE_ADDR_2 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR1_P0_2_0x800009090301143F;
+	    DQSCLK_RD_PHASE_ADDR_3 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR1_P0_3_0x80000D090301143F;
+	    DQSCLK_RD_PHASE_ADDR_4 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR1_P0_4_0x800011090301143F;
+
+	}
+	else if ( i_rank_group == 2 )
+	{
+	    DQSCLK_RD_PHASE_ADDR_0 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR2_P0_0_0x800002090301143F;
+	    DQSCLK_RD_PHASE_ADDR_1 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR2_P0_1_0x800006090301143F;
+	    DQSCLK_RD_PHASE_ADDR_2 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR2_P0_2_0x80000A090301143F;
+	    DQSCLK_RD_PHASE_ADDR_3 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR2_P0_3_0x80000E090301143F;
+	    DQSCLK_RD_PHASE_ADDR_4 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR2_P0_4_0x800012090301143F;
+
+	}
+	else if ( i_rank_group == 3 )
+	{
+	    DQSCLK_RD_PHASE_ADDR_0 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR3_P0_0_0x800003090301143F;
+	    DQSCLK_RD_PHASE_ADDR_1 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR3_P0_1_0x800007090301143F;
+	    DQSCLK_RD_PHASE_ADDR_2 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR3_P0_2_0x80000B090301143F;
+	    DQSCLK_RD_PHASE_ADDR_3 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR3_P0_3_0x80000F090301143F;
+	    DQSCLK_RD_PHASE_ADDR_4 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR3_P0_4_0x800013090301143F;
+
+	}
+    }
+    else if (i_port == 1 )
+    {
+
+	RD_TIMING_REF0_ADDR_0 = DPHY01_DDRPHY_DP18_READ_TIMING_REFERENCE0_P1_0_0x800100700301143F;
+	RD_TIMING_REF0_ADDR_1 = DPHY01_DDRPHY_DP18_READ_TIMING_REFERENCE0_P1_1_0x800104700301143F;
+	RD_TIMING_REF0_ADDR_2 = DPHY01_DDRPHY_DP18_READ_TIMING_REFERENCE0_P1_2_0x800108700301143F;
+	RD_TIMING_REF0_ADDR_3 = DPHY01_DDRPHY_DP18_READ_TIMING_REFERENCE0_P1_3_0x80010C700301143F;
+	RD_TIMING_REF0_ADDR_4 = DPHY01_DDRPHY_DP18_READ_TIMING_REFERENCE0_P1_4_0x800110700301143F;
+	RD_TIMING_REF1_ADDR_0 = DPHY01_DDRPHY_DP18_READ_TIMING_REFERENCE1_P1_0_0x800100710301143F;
+	RD_TIMING_REF1_ADDR_1 = DPHY01_DDRPHY_DP18_READ_TIMING_REFERENCE1_P1_1_0x800104710301143F;
+	RD_TIMING_REF1_ADDR_2 = DPHY01_DDRPHY_DP18_READ_TIMING_REFERENCE1_P1_2_0x800108710301143F;
+	RD_TIMING_REF1_ADDR_3 = DPHY01_DDRPHY_DP18_READ_TIMING_REFERENCE1_P1_3_0x80010C710301143F;
+	RD_TIMING_REF1_ADDR_4 = DPHY01_DDRPHY_DP18_READ_TIMING_REFERENCE1_P1_4_0x800110710301143F;
+
+	if ( i_rank_group == 0 )
+	{
+	    DQSCLK_RD_PHASE_ADDR_0 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR0_P1_0_0x800100090301143F;
+	    DQSCLK_RD_PHASE_ADDR_1 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR0_P1_1_0x800104090301143F;
+	    DQSCLK_RD_PHASE_ADDR_2 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR0_P1_2_0x800108090301143F;
+	    DQSCLK_RD_PHASE_ADDR_3 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR0_P1_3_0x80010C090301143F;
+	    DQSCLK_RD_PHASE_ADDR_4 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR0_P1_4_0x800110090301143F;
+
+	}
+	else if ( i_rank_group == 1 )
+	{
+	    DQSCLK_RD_PHASE_ADDR_0 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR1_P1_0_0x800101090301143F;
+	    DQSCLK_RD_PHASE_ADDR_1 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR1_P1_1_0x800105090301143F;
+	    DQSCLK_RD_PHASE_ADDR_2 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR1_P1_2_0x800109090301143F;
+	    DQSCLK_RD_PHASE_ADDR_3 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR1_P1_3_0x80010D090301143F;
+	    DQSCLK_RD_PHASE_ADDR_4 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR1_P1_4_0x800111090301143F;
+
+
+	}
+	else if ( i_rank_group == 2 )
+	{
+	    DQSCLK_RD_PHASE_ADDR_0 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR2_P1_0_0x800102090301143F;
+	    DQSCLK_RD_PHASE_ADDR_1 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR2_P1_1_0x800106090301143F;
+	    DQSCLK_RD_PHASE_ADDR_2 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR2_P1_2_0x80010A090301143F;
+	    DQSCLK_RD_PHASE_ADDR_3 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR2_P1_3_0x80010E090301143F;
+	    DQSCLK_RD_PHASE_ADDR_4 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR2_P1_4_0x800112090301143F;
+
+	}
+	else if ( i_rank_group == 3 )
+	{
+	    DQSCLK_RD_PHASE_ADDR_0 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR3_P1_0_0x800103090301143F;
+	    DQSCLK_RD_PHASE_ADDR_1 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR3_P1_1_0x800107090301143F;
+	    DQSCLK_RD_PHASE_ADDR_2 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR3_P1_2_0x80010B090301143F;
+	    DQSCLK_RD_PHASE_ADDR_3 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR3_P1_3_0x80010F090301143F;
+	    DQSCLK_RD_PHASE_ADDR_4 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR3_P1_4_0x800113090301143F;
+
+	}
+    }
+
+    //Block 0
+    rc = fapiGetScom(i_target, RD_TIMING_REF0_ADDR_0, data_buffer_64);
+    if (rc) return rc;
+    rc_num = rc_num | data_buffer_64.extractToRight(&l_timing_ref_quad0, 49, 7);
+    rc_num = rc_num | data_buffer_64.extractToRight(&l_timing_ref_quad1, 57, 7);
+    rc = fapiGetScom(i_target, RD_TIMING_REF1_ADDR_0, data_buffer_64);
+    if (rc) return rc;
+    rc_num = rc_num | data_buffer_64.extractToRight(&l_timing_ref_quad2, 49, 7);
+    rc_num = rc_num | data_buffer_64.extractToRight(&l_timing_ref_quad3, 57, 7);
+
+    if ( quad0_workaround_type == 0 )
+    {
+	dqs_clk_increment_quad0 = dqs_clk_increment_wa0;
+	read_phase_value_quad0 = read_phase_value_wa0;
+    }
+    else if ( quad0_workaround_type == 1 )
+    {
+	dqs_clk_increment_quad0 = dqs_clk_increment_wa1;
+	read_phase_value_quad0 = read_phase_value_wa1;
+    }
+    else if ( quad0_workaround_type == 2 )
+    {
+	dqs_clk_increment_quad0 = dqs_clk_increment_wa2;
+	read_phase_value_quad0 = read_phase_value_wa2;
+    }
+    FAPI_INF( "+++ Block 0 Quad 0 using workaround %d dqs_clk_increment: %d read_phase_value: %d +++", quad0_workaround_type, dqs_clk_increment_quad0, read_phase_value_quad0);
+
+    if ( quad1_workaround_type == 0 )
+    {
+	dqs_clk_increment_quad1 = dqs_clk_increment_wa0;
+	read_phase_value_quad1 = read_phase_value_wa0;
+    }
+    else if ( quad1_workaround_type == 1 )
+    {
+	dqs_clk_increment_quad1 = dqs_clk_increment_wa1;
+	read_phase_value_quad1 = read_phase_value_wa1;
+    }
+    else if ( quad1_workaround_type == 2 )
+    {
+	dqs_clk_increment_quad1 = dqs_clk_increment_wa2;
+	read_phase_value_quad1 = read_phase_value_wa2;
+    }
+    FAPI_INF( "+++ Block 0 Quad 1 using workaround %d dqs_clk_increment: %d read_phase_value: %d +++", quad0_workaround_type, dqs_clk_increment_quad1, read_phase_value_quad1);
+
+    if ( quad2_workaround_type == 0 )
+    {
+	dqs_clk_increment_quad2 = dqs_clk_increment_wa0;
+	read_phase_value_quad2 = read_phase_value_wa0;
+    }
+    else if ( quad2_workaround_type == 1 )
+    {
+	dqs_clk_increment_quad2 = dqs_clk_increment_wa1;
+	read_phase_value_quad2 = read_phase_value_wa1;
+    }
+    else if ( quad2_workaround_type == 2 )
+    {
+	dqs_clk_increment_quad2 = dqs_clk_increment_wa2;
+	read_phase_value_quad2 = read_phase_value_wa2;
+    }
+    FAPI_INF( "+++ Block 0 Quad 2 using workaround %d dqs_clk_increment: %d read_phase_value: %d +++", quad0_workaround_type, dqs_clk_increment_quad2, read_phase_value_quad2);
+
+    if ( quad3_workaround_type == 0 )
+    {
+	dqs_clk_increment_quad3 = dqs_clk_increment_wa0;
+	read_phase_value_quad3 = read_phase_value_wa0;
+    }
+    else if ( quad3_workaround_type == 1 )
+    {
+	dqs_clk_increment_quad3 = dqs_clk_increment_wa1;
+	read_phase_value_quad3 = read_phase_value_wa1;
+    }
+    else if ( quad3_workaround_type == 2 )
+    {
+	dqs_clk_increment_quad3 = dqs_clk_increment_wa2;
+	read_phase_value_quad3 = read_phase_value_wa2;
+    }
+    FAPI_INF( "+++ Block 0 Quad 3 using workaround %d dqs_clk_increment: %d read_phase_value: %d +++", quad0_workaround_type, dqs_clk_increment_quad3, read_phase_value_quad3);
+
+    rc = fapiGetScom(i_target, DQSCLK_RD_PHASE_ADDR_0, data_buffer_64);
+    if (rc) return rc;
+
+    // Set Read Phase.
+    rc_num = rc_num | data_buffer_64.insertFromRight(read_phase_value_quad0, 50, 2);
+    rc_num = rc_num | data_buffer_64.insertFromRight(read_phase_value_quad1, 54, 2);
+    rc_num = rc_num | data_buffer_64.insertFromRight(read_phase_value_quad2, 58, 2);
+    rc_num = rc_num | data_buffer_64.insertFromRight(read_phase_value_quad3, 62, 2);
+
+    //Increment dqs clk. 4 is the limit, wrap around (IE 5 = 1, 6 = 2)
+    l_value_u8 = 0;
+    rc_num = rc_num | data_buffer_64.extractToRight(&l_value_u8, 48, 2);
+    l_new_value_u8 = (l_value_u8 + dqs_clk_increment_quad0) % 4;
+    rc_num = rc_num | data_buffer_64.insertFromRight(&l_new_value_u8, 48, 2);
+    l_value_u8 = 0;
+    rc_num = rc_num | data_buffer_64.extractToRight(&l_value_u8, 52, 2);
+    l_new_value_u8 = (l_value_u8 + dqs_clk_increment_quad1) % 4;
+    rc_num = rc_num | data_buffer_64.insertFromRight(&l_new_value_u8, 52, 2);
+    l_value_u8 = 0;
+    rc_num = rc_num | data_buffer_64.extractToRight(&l_value_u8, 56, 2);
+    l_new_value_u8 = (l_value_u8 + dqs_clk_increment_quad2) % 4;
+    rc_num = rc_num | data_buffer_64.insertFromRight(&l_new_value_u8, 56, 2);    
+    l_value_u8 = 0;
+    rc_num = rc_num | data_buffer_64.extractToRight(&l_value_u8, 60, 2);
+    l_new_value_u8 = (l_value_u8 + dqs_clk_increment_quad3) % 4;
+    rc_num = rc_num | data_buffer_64.insertFromRight(&l_new_value_u8, 60, 2);
+
+    rc = fapiPutScom(i_target, DQSCLK_RD_PHASE_ADDR_0, data_buffer_64);
+    if (rc) return rc;
+
+    //Block 1
+    rc = fapiGetScom(i_target, RD_TIMING_REF0_ADDR_1, data_buffer_64);
+    if (rc) return rc;
+    rc_num = rc_num | data_buffer_64.extractToRight(&l_timing_ref_quad0, 49, 7);
+    rc_num = rc_num | data_buffer_64.extractToRight(&l_timing_ref_quad1, 57, 7);
+    rc = fapiGetScom(i_target, RD_TIMING_REF1_ADDR_1, data_buffer_64);
+    if (rc) return rc;
+    rc_num = rc_num | data_buffer_64.extractToRight(&l_timing_ref_quad2, 49, 7);
+    rc_num = rc_num | data_buffer_64.extractToRight(&l_timing_ref_quad3, 57, 7);
+
+
+    if ( quad0_workaround_type == 0 )
+    {
+	dqs_clk_increment_quad0 = dqs_clk_increment_wa0;
+	read_phase_value_quad0 = read_phase_value_wa0;
+    }
+    else if ( quad0_workaround_type == 1 )
+    {
+	dqs_clk_increment_quad0 = dqs_clk_increment_wa1;
+	read_phase_value_quad0 = read_phase_value_wa1;
+    }
+    else if ( quad0_workaround_type == 2 )
+    {
+	dqs_clk_increment_quad0 = dqs_clk_increment_wa2;
+	read_phase_value_quad0 = read_phase_value_wa2;
+    }
+    FAPI_INF( "+++ Block 1 Quad 0 using workaround %d dqs_clk_increment: %d read_phase_value: %d +++", quad0_workaround_type, dqs_clk_increment_quad0, read_phase_value_quad0);
+
+    if ( quad1_workaround_type == 0 )
+    {
+	dqs_clk_increment_quad1 = dqs_clk_increment_wa0;
+	read_phase_value_quad1 = read_phase_value_wa0;
+    }
+    else if ( quad1_workaround_type == 1 )
+    {
+	dqs_clk_increment_quad1 = dqs_clk_increment_wa1;
+	read_phase_value_quad1 = read_phase_value_wa1;
+    }
+    else if ( quad1_workaround_type == 2 )
+    {
+	dqs_clk_increment_quad1 = dqs_clk_increment_wa2;
+	read_phase_value_quad1 = read_phase_value_wa2;
+    }
+    FAPI_INF( "+++ Block 1 Quad 1 using workaround %d dqs_clk_increment: %d read_phase_value: %d +++", quad0_workaround_type, dqs_clk_increment_quad1, read_phase_value_quad1);
+
+    if ( quad2_workaround_type == 0 )
+    {
+	dqs_clk_increment_quad2 = dqs_clk_increment_wa0;
+	read_phase_value_quad2 = read_phase_value_wa0;
+    }
+    else if ( quad2_workaround_type == 1 )
+    {
+	dqs_clk_increment_quad2 = dqs_clk_increment_wa1;
+	read_phase_value_quad2 = read_phase_value_wa1;
+    }
+    else if ( quad2_workaround_type == 2 )
+    {
+	dqs_clk_increment_quad2 = dqs_clk_increment_wa2;
+	read_phase_value_quad2 = read_phase_value_wa2;
+    }
+    FAPI_INF( "+++ Block 1 Quad 2 using workaround %d dqs_clk_increment: %d read_phase_value: %d +++", quad0_workaround_type, dqs_clk_increment_quad2, read_phase_value_quad2);
+
+    if ( quad3_workaround_type == 0 )
+    {
+	dqs_clk_increment_quad3 = dqs_clk_increment_wa0;
+	read_phase_value_quad3 = read_phase_value_wa0;
+    }
+    else if ( quad3_workaround_type == 1 )
+    {
+	dqs_clk_increment_quad3 = dqs_clk_increment_wa1;
+	read_phase_value_quad3 = read_phase_value_wa1;
+    }
+    else if ( quad3_workaround_type == 2 )
+    {
+	dqs_clk_increment_quad3 = dqs_clk_increment_wa2;
+	read_phase_value_quad3 = read_phase_value_wa2;
+    }
+    FAPI_INF( "+++ Block 1 Quad 3 using workaround %d dqs_clk_increment: %d read_phase_value: %d +++", quad0_workaround_type, dqs_clk_increment_quad3, read_phase_value_quad3);
+
+
+    rc = fapiGetScom(i_target, DQSCLK_RD_PHASE_ADDR_1, data_buffer_64);
+    if (rc) return rc;
+
+    // Set Read Phase.
+    rc_num = rc_num | data_buffer_64.insertFromRight(read_phase_value_quad0, 50, 2);
+    rc_num = rc_num | data_buffer_64.insertFromRight(read_phase_value_quad1, 54, 2);
+    rc_num = rc_num | data_buffer_64.insertFromRight(read_phase_value_quad2, 58, 2);
+    rc_num = rc_num | data_buffer_64.insertFromRight(read_phase_value_quad3, 62, 2);
+
+    //Increment dqs clk. 4 is the limit, wrap around (IE 5 = 1, 6 = 2)
+    l_value_u8 = 0;
+    rc_num = rc_num | data_buffer_64.extractToRight(&l_value_u8, 48, 2);
+    l_new_value_u8 = (l_value_u8 + dqs_clk_increment_quad0) % 4;
+    rc_num = rc_num | data_buffer_64.insertFromRight(&l_new_value_u8, 48, 2);
+    l_value_u8 = 0;
+    rc_num = rc_num | data_buffer_64.extractToRight(&l_value_u8, 52, 2);
+    l_new_value_u8 = (l_value_u8 + dqs_clk_increment_quad1) % 4;
+    rc_num = rc_num | data_buffer_64.insertFromRight(&l_new_value_u8, 52, 2);
+    l_value_u8 = 0;
+    rc_num = rc_num | data_buffer_64.extractToRight(&l_value_u8, 56, 2);
+    l_new_value_u8 = (l_value_u8 + dqs_clk_increment_quad2) % 4;
+    rc_num = rc_num | data_buffer_64.insertFromRight(&l_new_value_u8, 56, 2);    
+    l_value_u8 = 0;
+    rc_num = rc_num | data_buffer_64.extractToRight(&l_value_u8, 60, 2);
+    l_new_value_u8 = (l_value_u8 + dqs_clk_increment_quad3) % 4;
+    rc_num = rc_num | data_buffer_64.insertFromRight(&l_new_value_u8, 60, 2);
+
+    rc = fapiPutScom(i_target, DQSCLK_RD_PHASE_ADDR_1, data_buffer_64);
+    if (rc) return rc;
+
+    //Block 2
+    rc = fapiGetScom(i_target, RD_TIMING_REF0_ADDR_2, data_buffer_64);
+    if (rc) return rc;
+    rc_num = rc_num | data_buffer_64.extractToRight(&l_timing_ref_quad0, 49, 7);
+    rc_num = rc_num | data_buffer_64.extractToRight(&l_timing_ref_quad1, 57, 7);
+    rc = fapiGetScom(i_target, RD_TIMING_REF1_ADDR_2, data_buffer_64);
+    if (rc) return rc;
+    rc_num = rc_num | data_buffer_64.extractToRight(&l_timing_ref_quad2, 49, 7);
+    rc_num = rc_num | data_buffer_64.extractToRight(&l_timing_ref_quad3, 57, 7);
+
+
+    if ( quad0_workaround_type == 0 )
+    {
+	dqs_clk_increment_quad0 = dqs_clk_increment_wa0;
+	read_phase_value_quad0 = read_phase_value_wa0;
+    }
+    else if ( quad0_workaround_type == 1 )
+    {
+	dqs_clk_increment_quad0 = dqs_clk_increment_wa1;
+	read_phase_value_quad0 = read_phase_value_wa1;
+    }
+    else if ( quad0_workaround_type == 2 )
+    {
+	dqs_clk_increment_quad0 = dqs_clk_increment_wa2;
+	read_phase_value_quad0 = read_phase_value_wa2;
+    }
+    FAPI_INF( "+++ Block 2 Quad 0 using workaround %d dqs_clk_increment: %d read_phase_value: %d +++", quad0_workaround_type, dqs_clk_increment_quad0, read_phase_value_quad0);
+
+    if ( quad1_workaround_type == 0 )
+    {
+	dqs_clk_increment_quad1 = dqs_clk_increment_wa0;
+	read_phase_value_quad1 = read_phase_value_wa0;
+    }
+    else if ( quad1_workaround_type == 1 )
+    {
+	dqs_clk_increment_quad1 = dqs_clk_increment_wa1;
+	read_phase_value_quad1 = read_phase_value_wa1;
+    }
+    else if ( quad1_workaround_type == 2 )
+    {
+	dqs_clk_increment_quad1 = dqs_clk_increment_wa2;
+	read_phase_value_quad1 = read_phase_value_wa2;
+    }
+    FAPI_INF( "+++ Block 2 Quad 1 using workaround %d dqs_clk_increment: %d read_phase_value: %d +++", quad0_workaround_type, dqs_clk_increment_quad1, read_phase_value_quad1);
+
+    if ( quad2_workaround_type == 0 )
+    {
+	dqs_clk_increment_quad2 = dqs_clk_increment_wa0;
+	read_phase_value_quad2 = read_phase_value_wa0;
+    }
+    else if ( quad2_workaround_type == 1 )
+    {
+	dqs_clk_increment_quad2 = dqs_clk_increment_wa1;
+	read_phase_value_quad2 = read_phase_value_wa1;
+    }
+    else if ( quad2_workaround_type == 2 )
+    {
+	dqs_clk_increment_quad2 = dqs_clk_increment_wa2;
+	read_phase_value_quad2 = read_phase_value_wa2;
+    }
+    FAPI_INF( "+++ Block 2 Quad 2 using workaround %d dqs_clk_increment: %d read_phase_value: %d +++", quad0_workaround_type, dqs_clk_increment_quad2, read_phase_value_quad2);
+
+    if ( quad3_workaround_type == 0 )
+    {
+	dqs_clk_increment_quad3 = dqs_clk_increment_wa0;
+	read_phase_value_quad3 = read_phase_value_wa0;
+    }
+    else if ( quad3_workaround_type == 1 )
+    {
+	dqs_clk_increment_quad3 = dqs_clk_increment_wa1;
+	read_phase_value_quad3 = read_phase_value_wa1;
+    }
+    else if ( quad3_workaround_type == 2 )
+    {
+	dqs_clk_increment_quad3 = dqs_clk_increment_wa2;
+	read_phase_value_quad3 = read_phase_value_wa2;
+    }
+    FAPI_INF( "+++ Block 2 Quad 3 using workaround %d dqs_clk_increment: %d read_phase_value: %d +++", quad0_workaround_type, dqs_clk_increment_quad3, read_phase_value_quad3);
+
+
+    rc = fapiGetScom(i_target, DQSCLK_RD_PHASE_ADDR_2, data_buffer_64);
+    if (rc) return rc;
+
+    // Set Read Phase.
+    rc_num = rc_num | data_buffer_64.insertFromRight(read_phase_value_quad0, 50, 2);
+    rc_num = rc_num | data_buffer_64.insertFromRight(read_phase_value_quad1, 54, 2);
+    rc_num = rc_num | data_buffer_64.insertFromRight(read_phase_value_quad2, 58, 2);
+    rc_num = rc_num | data_buffer_64.insertFromRight(read_phase_value_quad3, 62, 2);
+
+    //Increment dqs clk. 4 is the limit, wrap around (IE 5 = 1, 6 = 2)
+    l_value_u8 = 0;
+    rc_num = rc_num | data_buffer_64.extractToRight(&l_value_u8, 48, 2);
+    l_new_value_u8 = (l_value_u8 + dqs_clk_increment_quad0) % 4;
+    rc_num = rc_num | data_buffer_64.insertFromRight(&l_new_value_u8, 48, 2);
+    l_value_u8 = 0;
+    rc_num = rc_num | data_buffer_64.extractToRight(&l_value_u8, 52, 2);
+    l_new_value_u8 = (l_value_u8 + dqs_clk_increment_quad1) % 4;
+    rc_num = rc_num | data_buffer_64.insertFromRight(&l_new_value_u8, 52, 2);
+    l_value_u8 = 0;
+    rc_num = rc_num | data_buffer_64.extractToRight(&l_value_u8, 56, 2);
+    l_new_value_u8 = (l_value_u8 + dqs_clk_increment_quad2) % 4;
+    rc_num = rc_num | data_buffer_64.insertFromRight(&l_new_value_u8, 56, 2);    
+    l_value_u8 = 0;
+    rc_num = rc_num | data_buffer_64.extractToRight(&l_value_u8, 60, 2);
+    l_new_value_u8 = (l_value_u8 + dqs_clk_increment_quad3) % 4;
+    rc_num = rc_num | data_buffer_64.insertFromRight(&l_new_value_u8, 60, 2);
+
+    rc = fapiPutScom(i_target, DQSCLK_RD_PHASE_ADDR_2, data_buffer_64);
+    if (rc) return rc;
+
+    //Block 3
+    rc = fapiGetScom(i_target, RD_TIMING_REF0_ADDR_3, data_buffer_64);
+    if (rc) return rc;
+    rc_num = rc_num | data_buffer_64.extractToRight(&l_timing_ref_quad0, 49, 7);
+    rc_num = rc_num | data_buffer_64.extractToRight(&l_timing_ref_quad1, 57, 7);
+    rc = fapiGetScom(i_target, RD_TIMING_REF1_ADDR_3, data_buffer_64);
+    if (rc) return rc;
+    rc_num = rc_num | data_buffer_64.extractToRight(&l_timing_ref_quad2, 49, 7);
+    rc_num = rc_num | data_buffer_64.extractToRight(&l_timing_ref_quad3, 57, 7);
+
+    if ( quad0_workaround_type == 0 )
+    {
+	dqs_clk_increment_quad0 = dqs_clk_increment_wa0;
+	read_phase_value_quad0 = read_phase_value_wa0;
+    }
+    else if ( quad0_workaround_type == 1 )
+    {
+	dqs_clk_increment_quad0 = dqs_clk_increment_wa1;
+	read_phase_value_quad0 = read_phase_value_wa1;
+    }
+    else if ( quad0_workaround_type == 2 )
+    {
+	dqs_clk_increment_quad0 = dqs_clk_increment_wa2;
+	read_phase_value_quad0 = read_phase_value_wa2;
+    }
+    FAPI_INF( "+++ Block 3 Quad 0 using workaround %d dqs_clk_increment: %d read_phase_value: %d +++", quad0_workaround_type, dqs_clk_increment_quad0, read_phase_value_quad0);
+
+    if ( quad1_workaround_type == 0 )
+    {
+	dqs_clk_increment_quad1 = dqs_clk_increment_wa0;
+	read_phase_value_quad1 = read_phase_value_wa0;
+    }
+    else if ( quad1_workaround_type == 1 )
+    {
+	dqs_clk_increment_quad1 = dqs_clk_increment_wa1;
+	read_phase_value_quad1 = read_phase_value_wa1;
+    }
+    else if ( quad1_workaround_type == 2 )
+    {
+	dqs_clk_increment_quad1 = dqs_clk_increment_wa2;
+	read_phase_value_quad1 = read_phase_value_wa2;
+    }
+    FAPI_INF( "+++ Block 3 Quad 1 using workaround %d dqs_clk_increment: %d read_phase_value: %d +++", quad0_workaround_type, dqs_clk_increment_quad1, read_phase_value_quad1);
+
+    if ( quad2_workaround_type == 0 )
+    {
+	dqs_clk_increment_quad2 = dqs_clk_increment_wa0;
+	read_phase_value_quad2 = read_phase_value_wa0;
+    }
+    else if ( quad2_workaround_type == 1 )
+    {
+	dqs_clk_increment_quad2 = dqs_clk_increment_wa1;
+	read_phase_value_quad2 = read_phase_value_wa1;
+    }
+    else if ( quad2_workaround_type == 2 )
+    {
+	dqs_clk_increment_quad2 = dqs_clk_increment_wa2;
+	read_phase_value_quad2 = read_phase_value_wa2;
+    }
+    FAPI_INF( "+++ Block 3 Quad 2 using workaround %d dqs_clk_increment: %d read_phase_value: %d +++", quad0_workaround_type, dqs_clk_increment_quad2, read_phase_value_quad2);
+
+    if ( quad3_workaround_type == 0 )
+    {
+	dqs_clk_increment_quad3 = dqs_clk_increment_wa0;
+	read_phase_value_quad3 = read_phase_value_wa0;
+    }
+    else if ( quad3_workaround_type == 1 )
+    {
+	dqs_clk_increment_quad3 = dqs_clk_increment_wa1;
+	read_phase_value_quad3 = read_phase_value_wa1;
+    }
+    else if ( quad3_workaround_type == 2 )
+    {
+	dqs_clk_increment_quad3 = dqs_clk_increment_wa2;
+	read_phase_value_quad3 = read_phase_value_wa2;
+    }
+    FAPI_INF( "+++ Block 3 Quad 3 using workaround %d dqs_clk_increment: %d read_phase_value: %d +++", quad0_workaround_type, dqs_clk_increment_quad3, read_phase_value_quad3);
+
+
+    rc = fapiGetScom(i_target, DQSCLK_RD_PHASE_ADDR_3, data_buffer_64);
+    if (rc) return rc;
+
+    // Set Read Phase.
+    rc_num = rc_num | data_buffer_64.insertFromRight(read_phase_value_quad0, 50, 2);
+    rc_num = rc_num | data_buffer_64.insertFromRight(read_phase_value_quad1, 54, 2);
+    rc_num = rc_num | data_buffer_64.insertFromRight(read_phase_value_quad2, 58, 2);
+    rc_num = rc_num | data_buffer_64.insertFromRight(read_phase_value_quad3, 62, 2);
+
+    //Increment dqs clk. 4 is the limit, wrap around (IE 5 = 1, 6 = 2)
+    l_value_u8 = 0;
+    rc_num = rc_num | data_buffer_64.extractToRight(&l_value_u8, 48, 2);
+    l_new_value_u8 = (l_value_u8 + dqs_clk_increment_quad0) % 4;
+    rc_num = rc_num | data_buffer_64.insertFromRight(&l_new_value_u8, 48, 2);
+    l_value_u8 = 0;
+    rc_num = rc_num | data_buffer_64.extractToRight(&l_value_u8, 52, 2);
+    l_new_value_u8 = (l_value_u8 + dqs_clk_increment_quad1) % 4;
+    rc_num = rc_num | data_buffer_64.insertFromRight(&l_new_value_u8, 52, 2);
+    l_value_u8 = 0;
+    rc_num = rc_num | data_buffer_64.extractToRight(&l_value_u8, 56, 2);
+    l_new_value_u8 = (l_value_u8 + dqs_clk_increment_quad2) % 4;
+    rc_num = rc_num | data_buffer_64.insertFromRight(&l_new_value_u8, 56, 2);    
+    l_value_u8 = 0;
+    rc_num = rc_num | data_buffer_64.extractToRight(&l_value_u8, 60, 2);
+    l_new_value_u8 = (l_value_u8 + dqs_clk_increment_quad3) % 4;
+    rc_num = rc_num | data_buffer_64.insertFromRight(&l_new_value_u8, 60, 2);
+
+    rc = fapiPutScom(i_target, DQSCLK_RD_PHASE_ADDR_3, data_buffer_64);
+    if (rc) return rc;
+
+    //Block 4
+    rc = fapiGetScom(i_target, RD_TIMING_REF0_ADDR_4, data_buffer_64);
+    if (rc) return rc;
+    rc_num = rc_num | data_buffer_64.extractToRight(&l_timing_ref_quad0, 49, 7);
+    rc_num = rc_num | data_buffer_64.extractToRight(&l_timing_ref_quad1, 57, 7);
+    rc = fapiGetScom(i_target, RD_TIMING_REF1_ADDR_4, data_buffer_64);
+    if (rc) return rc;
+    rc_num = rc_num | data_buffer_64.extractToRight(&l_timing_ref_quad2, 49, 7);
+    rc_num = rc_num | data_buffer_64.extractToRight(&l_timing_ref_quad3, 57, 7);
+
+
+    if ( quad0_workaround_type == 0 )
+    {
+	dqs_clk_increment_quad0 = dqs_clk_increment_wa0;
+	read_phase_value_quad0 = read_phase_value_wa0;
+    }
+    else if ( quad0_workaround_type == 1 )
+    {
+	dqs_clk_increment_quad0 = dqs_clk_increment_wa1;
+	read_phase_value_quad0 = read_phase_value_wa1;
+    }
+    else if ( quad0_workaround_type == 2 )
+    {
+	dqs_clk_increment_quad0 = dqs_clk_increment_wa2;
+	read_phase_value_quad0 = read_phase_value_wa2;
+    }
+    FAPI_INF( "+++ Block 4 Quad 0 using workaround %d dqs_clk_increment: %d read_phase_value: %d +++", quad0_workaround_type, dqs_clk_increment_quad0, read_phase_value_quad0);
+
+    if ( quad1_workaround_type == 0 )
+    {
+	dqs_clk_increment_quad1 = dqs_clk_increment_wa0;
+	read_phase_value_quad1 = read_phase_value_wa0;
+    }
+    else if ( quad1_workaround_type == 1 )
+    {
+	dqs_clk_increment_quad1 = dqs_clk_increment_wa1;
+	read_phase_value_quad1 = read_phase_value_wa1;
+    }
+    else if ( quad1_workaround_type == 2 )
+    {
+	dqs_clk_increment_quad1 = dqs_clk_increment_wa2;
+	read_phase_value_quad1 = read_phase_value_wa2;
+    }
+    FAPI_INF( "+++ Block 4 Quad 1 using workaround %d dqs_clk_increment: %d read_phase_value: %d +++", quad0_workaround_type, dqs_clk_increment_quad1, read_phase_value_quad1);
+
+    if ( quad2_workaround_type == 0 )
+    {
+	dqs_clk_increment_quad2 = dqs_clk_increment_wa0;
+	read_phase_value_quad2 = read_phase_value_wa0;
+    }
+    else if ( quad2_workaround_type == 1 )
+    {
+	dqs_clk_increment_quad2 = dqs_clk_increment_wa1;
+	read_phase_value_quad2 = read_phase_value_wa1;
+    }
+    else if ( quad2_workaround_type == 2 )
+    {
+	dqs_clk_increment_quad2 = dqs_clk_increment_wa2;
+	read_phase_value_quad2 = read_phase_value_wa2;
+    }
+    FAPI_INF( "+++ Block 4 Quad 2 using workaround %d dqs_clk_increment: %d read_phase_value: %d +++", quad0_workaround_type, dqs_clk_increment_quad2, read_phase_value_quad2);
+
+    if ( quad3_workaround_type == 0 )
+    {
+	dqs_clk_increment_quad3 = dqs_clk_increment_wa0;
+	read_phase_value_quad3 = read_phase_value_wa0;
+    }
+    else if ( quad3_workaround_type == 1 )
+    {
+	dqs_clk_increment_quad3 = dqs_clk_increment_wa1;
+	read_phase_value_quad3 = read_phase_value_wa1;
+    }
+    else if ( quad3_workaround_type == 2 )
+    {
+	dqs_clk_increment_quad3 = dqs_clk_increment_wa2;
+	read_phase_value_quad3 = read_phase_value_wa2;
+    }
+    FAPI_INF( "+++ Block 4 Quad 3 using workaround %d dqs_clk_increment: %d read_phase_value: %d +++", quad0_workaround_type, dqs_clk_increment_quad3, read_phase_value_quad3);
+
+
+    rc = fapiGetScom(i_target, DQSCLK_RD_PHASE_ADDR_4, data_buffer_64);
+    if (rc) return rc;
+
+    // Set Read Phase.
+    rc_num = rc_num | data_buffer_64.insertFromRight(read_phase_value_quad0, 50, 2);
+    rc_num = rc_num | data_buffer_64.insertFromRight(read_phase_value_quad1, 54, 2);
+    rc_num = rc_num | data_buffer_64.insertFromRight(read_phase_value_quad2, 58, 2);
+    rc_num = rc_num | data_buffer_64.insertFromRight(read_phase_value_quad3, 62, 2);
+
+    //Increment dqs clk. 4 is the limit, wrap around (IE 5 = 1, 6 = 2)
+    l_value_u8 = 0;
+    rc_num = rc_num | data_buffer_64.extractToRight(&l_value_u8, 48, 2);
+    l_new_value_u8 = (l_value_u8 + dqs_clk_increment_quad0) % 4;
+    rc_num = rc_num | data_buffer_64.insertFromRight(&l_new_value_u8, 48, 2);
+    l_value_u8 = 0;
+    rc_num = rc_num | data_buffer_64.extractToRight(&l_value_u8, 52, 2);
+    l_new_value_u8 = (l_value_u8 + dqs_clk_increment_quad1) % 4;
+    rc_num = rc_num | data_buffer_64.insertFromRight(&l_new_value_u8, 52, 2);
+    l_value_u8 = 0;
+    rc_num = rc_num | data_buffer_64.extractToRight(&l_value_u8, 56, 2);
+    l_new_value_u8 = (l_value_u8 + dqs_clk_increment_quad2) % 4;
+    rc_num = rc_num | data_buffer_64.insertFromRight(&l_new_value_u8, 56, 2);    
+    l_value_u8 = 0;
+    rc_num = rc_num | data_buffer_64.extractToRight(&l_value_u8, 60, 2);
+    l_new_value_u8 = (l_value_u8 + dqs_clk_increment_quad3) % 4;
+    rc_num = rc_num | data_buffer_64.insertFromRight(&l_new_value_u8, 60, 2);
+
+    rc = fapiPutScom(i_target, DQSCLK_RD_PHASE_ADDR_4, data_buffer_64);
+    if (rc) return rc;
+
+    if(rc_num)
+    {
+        rc.setEcmdError(rc_num);
+        return rc;
+    }
+
+    return rc;
+}
+
 ReturnCode mss_rtt_nom_rtt_wr_swap(
             Target& i_target,
             uint32_t i_port_number,
@@ -992,9 +1553,9 @@ ReturnCode mss_rtt_nom_rtt_wr_swap(
     // Target MBA level
     // This is a function written specifically for mss_draminit_training
     // Meant for placing RTT_WR into RTT_NOM within MR1 before wr_lvl
-    // If the function argument dram_rtt_nom_original is 0 it will put the original rtt_nom there
+    // If the function argument dram_rtt_nom_original has a value of 0xFF it will put the original rtt_nom there
     // and write rtt_wr to the rtt_nom value
-    // If the function argument dram_rtt_nom_original has a value it will write that value to rtt_nom.
+    // If the function argument dram_rtt_nom_original has any value besides 0xFF it will try to write that value to rtt_nom.
 
 
     ReturnCode rc;  
@@ -1045,6 +1606,7 @@ ReturnCode mss_rtt_nom_rtt_wr_swap(
     uint8_t is_sim = 0;
     rc = FAPI_ATTR_GET(ATTR_IS_SIMULATION, NULL, is_sim);
     if(rc) return rc;
+
 
     // Raise CKE high with NOPS, waiting min Reset CKE exit time (tXPR) - 400 cycles
     rc_num = rc_num | csn_8.setBit(0,8);
@@ -1324,7 +1886,7 @@ ReturnCode mss_rtt_nom_rtt_wr_swap(
     if ( (mrs2_16.isBitClear(9)) && (mrs2_16.isBitClear(10)) )
     {
 	//RTT WR DISABLE
-	FAPI_INF( "DRAM_RTT_WR currently set to disable.");
+	FAPI_INF( "DRAM_RTT_WR currently set to Disable.");
 	dram_rtt_wr = 0x00;
 
 	//RTT NOM CODE FOR THIS VALUE IS 
@@ -1355,14 +1917,14 @@ ReturnCode mss_rtt_nom_rtt_wr_swap(
 
     // If you have a 0 value in dram_rtt_nom_orignal
     // you will use dram_rtt_nom_original to save the original value
-    if (io_dram_rtt_nom_original  == 0)
+    if (io_dram_rtt_nom_original  == 0xFF)
     {
 	io_dram_rtt_nom_original = dram_rtt_nom;
 	dram_rtt_nom = dram_rtt_wr;
 
 	if (dram_rtt_wr == 0x00)
 	{
-	    FAPI_INF( "DRAM_RTT_NOM to be set to DRAM_RTT_WR which is disable.");
+	    FAPI_INF( "DRAM_RTT_NOM to be set to DRAM_RTT_WR which is Disable.");
 	}
 	else if (dram_rtt_wr == 0x80)
 	{
@@ -1373,7 +1935,7 @@ ReturnCode mss_rtt_nom_rtt_wr_swap(
 	    FAPI_INF( "DRAM_RTT_NOM to be set to DRAM_RTT_WR which is 120 Ohm.");
 	}
     }
-    else if (io_dram_rtt_nom_original != 0)
+    else if (io_dram_rtt_nom_original != 0xFF)
     {
 	dram_rtt_nom = io_dram_rtt_nom_original;
 
@@ -1407,6 +1969,11 @@ ReturnCode mss_rtt_nom_rtt_wr_swap(
 	{
 	    // RTT_NOM set to 120
 	    FAPI_INF( "DRAM_RTT_NOM being set back to 120 Ohm.");
+	}
+	else
+	{
+	    FAPI_INF( "Proposed DRAM_RTT_NOM value is a non-supported.  Using Disabled.");
+	    dram_rtt_nom = 0x00;
 	}
     }
 

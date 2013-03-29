@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_draminit_mc.C,v 1.33 2013/02/04 20:04:51 lapietra Exp $
+// $Id: mss_draminit_mc.C,v 1.34 2013/03/12 21:33:56 lapietra Exp $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
 // *! All Rights Reserved -- Property of IBM
@@ -44,6 +44,7 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
+//  1.34   | dcadiga  |12-MAR-13| Added spare cke disable as step 0
 //  1.33   | dcadiga  |04-FEB-13| For some reason the main procedure call was commented out in the last commit... commenting it back in
 //  1.32   | gollub   |31-JAN-13| Uncommenting mss_unmask_maint_errors and mss_unmask_inband_errors
 //  1.31   | dcadiga  |21-JAN-13| Fixed variable name for memcal_interval (coded as memcal_iterval...)
@@ -119,6 +120,7 @@ ReturnCode mss_set_iml_complete(Target& i_target);
 ReturnCode mss_enable_power_management(Target& i_target);
 ReturnCode mss_enable_control_bit_ecc(Target& i_target);
 ReturnCode mss_ccs_mode_reset(Target& i_target);
+ReturnCode mss_spare_cke_disable(Target& i_target);
 
 
 ReturnCode mss_draminit_mc(Target& i_target)
@@ -158,6 +160,22 @@ ReturnCode mss_draminit_mc_cloned(Target& i_target)
     rc=fapiGetChildChiplets(i_target, fapi::TARGET_TYPE_MBA_CHIPLET, l_mbaChiplets);
     if (rc) return rc;
 
+    // Step Zero: Turn Off Spare CKE - This needs to be off before IML complete
+    FAPI_INF("+++ Disabling Spare CKE FIX +++");
+    for (uint32_t i=0; i < l_mbaChiplets.size(); i++)
+    {
+       rc = mss_spare_cke_disable(l_mbaChiplets[i]);
+       if(rc)
+       {
+          FAPI_ERR("---Error During Spare CKE Disable rc = 0x%08X (creator = %d)---", uint32_t(rc), rc.getCreator());
+          return rc;
+       }
+       
+
+
+    }
+
+
     // Step One: Set IML COMPLETE
     FAPI_INF( "+++ Setting IML Complete +++");
     rc = mss_set_iml_complete(i_target);
@@ -170,6 +188,7 @@ ReturnCode mss_draminit_mc_cloned(Target& i_target)
     // Loop through the 2 MBA's
     for (uint32_t i=0; i < l_mbaChiplets.size(); i++)
     {
+        
 
         // Step Two: Disable CCS address lines
         FAPI_INF( "+++ Disabling CCS Address Lines +++");
@@ -450,6 +469,31 @@ ReturnCode mss_ccs_mode_reset (Target& i_target)
     FAPI_INF("+++ mss_ccs_mode_reset complete +++");
     return rc;
 }
+
+ReturnCode mss_spare_cke_disable (Target& i_target)
+{
+
+    //Target MBA
+    //Selects address data from the mainline
+    //Variables
+    ReturnCode rc;
+    ReturnCode rc_buff;
+    uint32_t rc_num  = 0;
+    ecmdDataBufferBase spare_cke_data_buffer_64(64);
+
+    //Setup SPARE CKE enable bit
+    rc = fapiGetScom(i_target, MBA01_MBARPC0Q_0x03010434, spare_cke_data_buffer_64);
+    if(rc) return rc;
+    rc_num = rc_num | spare_cke_data_buffer_64.clearBit(42);
+    rc = fapiPutScom(i_target, MBA01_MBARPC0Q_0x03010434, spare_cke_data_buffer_64);
+    if(rc) return rc;
+
+
+    FAPI_INF("+++ disable_spare_cke complete +++");
+    return rc;
+}
+
+
 
 } //end extern C
 

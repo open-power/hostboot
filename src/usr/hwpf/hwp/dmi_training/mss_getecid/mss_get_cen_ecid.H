@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_get_cen_ecid.H,v 1.6 2013/01/21 17:11:37 bellows Exp $
+// $Id: mss_get_cen_ecid.H,v 1.8 2013/03/26 15:53:59 bellows Exp $
 //------------------------------------------------------------------------------
 // *|
 // *! (C) Copyright International Business Machines Corp. 2012
@@ -41,6 +41,8 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
+//   1.8   | bellows  |26-MAR-13| Reviewer found updates
+//   1.7   | bellows  |22-MAR-13| Changed commented name of ECID Attribute per Firmware request
 //   1.6   | bellows  |21-JAN-13| added in sub revision reader
 //   1.5   | bellows  |15-JAN-13| moved Cache Enable Information to the caller
 // 1.1-1.4 | various  |07-DEC-12| Original Program
@@ -70,7 +72,7 @@ enum mss_get_cen_ecid_ddr_status
 
 // function pointer typedef definition for HWP call support
 typedef fapi::ReturnCode
-(*mss_get_cen_ecid_FP_t)(const fapi::Target& i_target, uint8_t & ddr_port_status, uint8_t & cache_enable_o,      uint8_t & centaur_sub_revision_o
+(*mss_get_cen_ecid_FP_t)(const fapi::Target& i_target, uint8_t & o_ddr_port_status, uint8_t & o_cache_enable,      uint8_t & o_centaur_sub_revision
 );
 
 
@@ -83,17 +85,19 @@ extern "C"
 
 // function: FAPI mss_get_cen_ecid HWP entry point
 // parameters: i_target => cen chip target
-//             &ddr_port_status => indicates if the MBA's are bad, with MBA 1 being the rightmost bit and MBA 0 being the next to right most bit
-//             &cache_enable_o => what it would have set the cache enable attribute to if it sets attributes
+//             &o_ddr_port_status => indicates if the MBA's are bad, with MBA 1 being the rightmost bit and MBA 0 being the next to right most bit
+//             &o_cache_enable => what it would have set the cache enable attribute to if it sets attributes
+//             &o_centaur_sub_revision => the sub revision indicator between DD1.0 and DD1.01
 // returns: FAPI_RC_SUCCESS if FBC stop is deasserted at end of execution
-//          else FAPI getscom/putscom return code for failing operation
-// Updates attributes: ATTR_MSS_ECID[2] -> bits 1-64 and 65-128 of the ECID
-//                     ATTR_MSS_CACHE_ENABLE -> Stores which parts of the eDRAM are enabled
+//          else FAPI return code for failing operation
+// Updates attributes: ATTR_ECID[2] -> bits 1-64 and 65-128 of the ECID
+//                     ATTR_MSS_PSRO -> average PSRO from 85C wafer test
+//                     ATTR_MSS_NWELL_MISPLACEMENT -> indicates if nwell defect in hardware
 fapi::ReturnCode mss_get_cen_ecid(
     const fapi::Target& i_target,
-    uint8_t & ddr_port_status,
-    uint8_t & cache_enable_o,
-    uint8_t & centaur_sub_revision_o
+    uint8_t & o_ddr_port_status,
+    uint8_t & o_cache_enable,
+    uint8_t & o_centaur_sub_revision
 
     );
 

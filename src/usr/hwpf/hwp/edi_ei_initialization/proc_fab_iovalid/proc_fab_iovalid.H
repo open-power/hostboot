@@ -1,27 +1,26 @@
-/*  IBM_PROLOG_BEGIN_TAG
- *  This is an automatically generated prolog.
- *
- *  $Source: src/usr/hwpf/hwp/edi_ei_initialization/proc_fab_iovalid/proc_fab_iovalid.H $
- *
- *  IBM CONFIDENTIAL
- *
- *  COPYRIGHT International Business Machines Corp. 2012
- *
- *  p1
- *
- *  Object Code Only (OCO) source materials
- *  Licensed Internal Code Source Materials
- *  IBM HostBoot Licensed Internal Code
- *
- *  The source code for this program is not published or other-
- *  wise divested of its trade secrets, irrespective of what has
- *  been deposited with the U.S. Copyright Office.
- *
- *  Origin: 30
- *
- *  IBM_PROLOG_END_TAG
- */
-// $Id: proc_fab_iovalid.H,v 1.8 2012/07/23 14:15:54 jmcgill Exp $
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/usr/hwpf/hwp/edi_ei_initialization/proc_fab_iovalid/proc_fab_iovalid.H $ */
+/*                                                                        */
+/* IBM CONFIDENTIAL                                                       */
+/*                                                                        */
+/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/*                                                                        */
+/* p1                                                                     */
+/*                                                                        */
+/* Object Code Only (OCO) source materials                                */
+/* Licensed Internal Code Source Materials                                */
+/* IBM HostBoot Licensed Internal Code                                    */
+/*                                                                        */
+/* The source code for this program is not published or otherwise         */
+/* divested of its trade secrets, irrespective of what has been           */
+/* deposited with the U.S. Copyright Office.                              */
+/*                                                                        */
+/* Origin: 30                                                             */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
+// $Id: proc_fab_iovalid.H,v 1.9 2013/03/05 02:53:21 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_fab_iovalid.H,v $
 //------------------------------------------------------------------------------
 // *|
@@ -99,6 +98,20 @@ const uint8_t X_GP0_X3_IOVALID_BIT = 51;
 const uint8_t A_GP0_A0_IOVALID_BIT = 48;
 const uint8_t A_GP0_A1_IOVALID_BIT = 49;
 const uint8_t A_GP0_A2_IOVALID_BIT = 50;
+
+// ADU Secure Iovalid register bit/field definitions
+const uint8_t ADU_IOS_LINK_EN_A0_IOVALID_BIT = 0;
+const uint8_t ADU_IOS_LINK_EN_A1_IOVALID_BIT = 1;
+const uint8_t ADU_IOS_LINK_EN_A2_IOVALID_BIT = 2;
+
+// PB RAS FIR register bit/field definitions
+const uint8_t PB_RAS_FIR_X0_BIT = 0;
+const uint8_t PB_RAS_FIR_X1_BIT = 1;
+const uint8_t PB_RAS_FIR_X2_BIT = 2;
+const uint8_t PB_RAS_FIR_X3_BIT = 3;
+const uint8_t PB_RAS_FIR_A0_BIT = 4;
+const uint8_t PB_RAS_FIR_A1_BIT = 5;
+const uint8_t PB_RAS_FIR_A2_BIT = 6;
 
 
 extern "C"

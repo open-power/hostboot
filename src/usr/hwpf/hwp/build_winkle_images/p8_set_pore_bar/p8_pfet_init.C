@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_pfet_init.C,v 1.2 2013/01/29 19:39:45 jmcgill Exp $
+// $Id: p8_pfet_init.C,v 1.3 2013/03/18 17:58:33 pchatnah Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/p8_pfet_init.C,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
@@ -266,7 +266,7 @@ pfet_init(const Target& i_target)
         if (l_rc)
         {
             FAPI_ERR("fapiGetAttribute ATTR_FREQ_PROC_REFCLOCK");
-            FAPI_SET_HWP_ERROR(l_rc, RC_PROCPM_PFET_GET_ATTR);
+	    //            FAPI_SET_HWP_ERROR(l_rc, RC_PROCPM_PFET_GET_ATTR);
             break;
         }
         
@@ -277,7 +277,7 @@ pfet_init(const Target& i_target)
         if (l_rc)
         {
             FAPI_ERR("fapiGetAttribute ATTR_PM_PFET_POWERUP_CORE_DELAY0");
-            FAPI_SET_HWP_ERROR(l_rc, RC_PROCPM_PFET_GET_ATTR);
+	    //            FAPI_SET_HWP_ERROR(l_rc, RC_PROCPM_PFET_GET_ATTR);
             break;
         }
 
@@ -288,7 +288,7 @@ pfet_init(const Target& i_target)
         if (l_rc)
         {
             FAPI_ERR("fapiGetAttribute ATTR_PM_PFET_POWERUP_CORE_DELAY1");
-            FAPI_SET_HWP_ERROR(l_rc, RC_PROCPM_PFET_GET_ATTR);
+	    //            FAPI_SET_HWP_ERROR(l_rc, RC_PROCPM_PFET_GET_ATTR);
             break;
         }
 
@@ -299,7 +299,7 @@ pfet_init(const Target& i_target)
         if (l_rc)
         {
             FAPI_ERR("fapiGetAttribute ATTR_PM_PFET_POWERDOWN_CORE_DELAY0");
-            FAPI_SET_HWP_ERROR(l_rc, RC_PROCPM_PFET_GET_ATTR);
+	    //            FAPI_SET_HWP_ERROR(l_rc, RC_PROCPM_PFET_GET_ATTR);
             break;
         }
 
@@ -310,7 +310,7 @@ pfet_init(const Target& i_target)
         if (l_rc)
         {
             FAPI_ERR("fapiGetAttribute ATTR_PM_PFET_POWERDOWN_CORE_DELAY1");
-            FAPI_SET_HWP_ERROR(l_rc, RC_PROCPM_PFET_GET_ATTR);
+	    //            FAPI_SET_HWP_ERROR(l_rc, RC_PROCPM_PFET_GET_ATTR);
             break;
         }
 
@@ -321,7 +321,7 @@ pfet_init(const Target& i_target)
         if (l_rc)
         {
             FAPI_ERR("fapiGetAttribute ATTR_PM_PFET_POWERUP_ECO_DELAY0");
-            FAPI_SET_HWP_ERROR(l_rc, RC_PROCPM_PFET_GET_ATTR);
+	    //            FAPI_SET_HWP_ERROR(l_rc, RC_PROCPM_PFET_GET_ATTR);
             break;
         }
 
@@ -333,7 +333,7 @@ pfet_init(const Target& i_target)
         if (l_rc)
         {
             FAPI_ERR("fapiGetAttribute ATTR_PM_PFET_POWERUP_ECO_DELAY1");
-            FAPI_SET_HWP_ERROR(l_rc, RC_PROCPM_PFET_GET_ATTR);
+	    //            FAPI_SET_HWP_ERROR(l_rc, RC_PROCPM_PFET_GET_ATTR);
             break;
         }
 
@@ -343,7 +343,7 @@ pfet_init(const Target& i_target)
         if (l_rc)
         {
             FAPI_ERR("fapiGetAttribute ATTR_PM_PFET_POWERDOWN_ECO_DELAY0");
-            FAPI_SET_HWP_ERROR(l_rc, RC_PROCPM_PFET_GET_ATTR);
+	    //            FAPI_SET_HWP_ERROR(l_rc, RC_PROCPM_PFET_GET_ATTR);
             break;
         }
 
@@ -354,7 +354,7 @@ pfet_init(const Target& i_target)
         if (l_rc)
         {
             FAPI_ERR("fapiGetAttribute ATTR_PM_PFET_POWERDOWN_ECO_DELAY1");
-            FAPI_SET_HWP_ERROR(l_rc, RC_PROCPM_PFET_GET_ATTR);
+	    //            FAPI_SET_HWP_ERROR(l_rc, RC_PROCPM_PFET_GET_ATTR);
             break;
         }
 

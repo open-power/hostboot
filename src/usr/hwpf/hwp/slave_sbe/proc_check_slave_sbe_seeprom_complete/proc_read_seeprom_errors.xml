@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- IBM CONFIDENTIAL                                                       -->
 <!--                                                                        -->
-<!-- COPYRIGHT International Business Machines Corp. 2012                   -->
+<!-- COPYRIGHT International Business Machines Corp. 2012,2013              -->
 <!--                                                                        -->
 <!-- p1                                                                     -->
 <!--                                                                        -->
@@ -87,6 +87,11 @@
     <rc>RC_PROC_READ_SEEPROM_I2C_COMMAND_COMPLETE_NOT_SET</rc>
     <description>Bit 52 of status register not set after bit 44 is cleared</description>
  </hwpError> 
+<!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_PROC_READ_SEEPROM_I2C_COMMAND_COMPLETE_TIME_OUT</rc>
+    <description>Bit 52 of status register not set and time out after certain time</description>
+ </hwpError>
 <!-- *********************************************************************** -->
   <hwpError>
     <rc>RC_PROC_READ_SEEPROM_I2C_STOP_ERR_BIT_SET</rc>

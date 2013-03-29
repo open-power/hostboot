@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012                   */
+/* COPYRIGHT International Business Machines Corp. 2012,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -21,7 +21,7 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 // -*- mode: C++; c-file-style: "linux";  -*-
-// $Id: proc_extract_sbe_rc.C,v 1.3 2012/10/29 22:06:08 jeshua Exp $
+// $Id: proc_extract_sbe_rc.C,v 1.4 2012/11/13 21:00:34 jeshua Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_extract_sbe_rc.C,v $
 //------------------------------------------------------------------------------
 // *|
@@ -149,7 +149,7 @@ extern "C"
                     i_use_secondary = true;
                 }
 
-                FAPI_PLAT_EXEC_HWP(rc, proc_read_seeprom, i_target,
+                FAPI_EXEC_HWP(rc, proc_read_seeprom, i_target,
                                    i_start_addr, i_length,
                                    i_ecc_disable, &error_code_64,
                                    i_use_secondary);
@@ -175,7 +175,7 @@ extern "C"
 //                 uint32_t i_length = 8;
 //                 //JDS TODO - figure out how to get ECC status
 //                 bool i_ecc_disable = false;
-//                 FAPI_PLAT_EXEC_HWP(rc, proc_read_pibmem, i_target,
+//                 FAPI_EXEC_HWP(rc, proc_read_pibmem, i_target,
 //                                    i_start_addr, i_length,
 //                                    i_ecc_disable, &error_code_64);
 //                 if(rc)
@@ -198,7 +198,7 @@ extern "C"
 //                 uint32_t i_length = 8;
 //                 //JDS TODO - figure out how to get ECC status
 //                 bool i_ecc_disable = false;
-//                 FAPI_PLAT_EXEC_HWP(rc, proc_read_otprom, i_target,
+//                 FAPI_EXEC_HWP(rc, proc_read_otprom, i_target,
 //                                    i_start_addr, i_length,
 //                                    i_ecc_disable, &error_code_64);
 //                 if(rc)
@@ -228,7 +228,7 @@ extern "C"
             // JDS TODO - replace this with the official FAPI call
             //            once it exists
             //////////////////////////////////////////
-            FAPI_PLAT_EXEC_HWP(rc, proc_sbe_error, i_target, error_code);
+            FAPI_EXEC_HWP(rc, proc_sbe_error, i_target, error_code);
         } while(0);
 
         //Make sure the code doesn't return SUCCESS
