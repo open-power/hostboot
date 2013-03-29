@@ -100,6 +100,7 @@ OBJS = \
  ${prd_pegasus_specific} \
  ${prd_pegasus_specific_HB} \
  ${PRDF_RULE_PLUGINS_PEGASUS} \
+ ${PRDF_RULE_PLUGINS_PEGASUS_HB} \
  ${PRDF_RULE_PLUGINS_PEGASUS_WSIM} \
 
 #------------------------------------------------------------------------------
@@ -119,7 +120,6 @@ ${MFG_THRES_PATH} : ${MFG_THRES_LIST}
 
 EXTRA_CLEAN    = ${MFG_THRES_PATH}
 
-
-
+#------------------------------------------------------------------------------
 
 include ${ROOTPATH}/config.mk

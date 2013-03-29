@@ -61,50 +61,6 @@ int32_t Initialize( ExtensibleChip * i_mbaChip )
 }
 PRDF_PLUGIN_DEFINE( Mba, Initialize );
 
-//------------------------------------------------------------------------------
-
-/**
- * @brief  Plugin function called after analysis is complete but before PRD
- *         exits.
- * @param  i_mbaChip A Centaur MBA chip.
- * @param  i_sc      The step code data struct.
- * @note   This is especially useful for any analysis that still needs to be
- *         done after the framework clears the FIR bits that were at attention.
- * @return SUCCESS.
- */
-int32_t PostAnalysis( ExtensibleChip * i_mbaChip,
-                      STEP_CODE_DATA_STRUCT & i_sc )
-{
-    #ifdef __HOSTBOOT_MODULE
-
-    using namespace TARGETING;
-
-    // Send command complete to MDIA.
-    // This must be done in post analysis after attentions have been cleared.
-
-    TargetHandle_t mbaTarget = i_mbaChip->GetChipHandle();
-    CenMbaDataBundle * mbadb = getMbaDataBundle( i_mbaChip );
-
-    if ( mbadb->iv_sendCmdCompleteMsg )
-    {
-        mbadb->iv_sendCmdCompleteMsg = false;
-
-        int32_t l_rc = mdiaSendEventMsg( mbaTarget,
-                                         mbadb->iv_cmdCompleteMsgData );
-
-        if ( l_rc )
-        {
-            PRDF_ERR( "[Mba::PostAnalysis] PlatServices::mdiaSendEventMsg"
-                      " failed" );
-        }
-    }
-
-    #endif // __HOSTBOOT_MODULE
-
-    return SUCCESS;
-}
-PRDF_PLUGIN_DEFINE( Mba, PostAnalysis );
-
 //##############################################################################
 //
 //                                   MBASPA
@@ -186,29 +142,6 @@ int32_t MaintCmdComplete( ExtensibleChip * i_mbaChip,
     #undef PRDF_FUNC
 }
 PRDF_PLUGIN_DEFINE( Mba, MaintCmdComplete );
-
-/**
- * @brief  Plugin to send a Skip MBA message for Memory Diagnositics.
- * @note   Does nothing in non-MDIA mode.
- * @note   Will stop any maintenance commands in progress.
- * @param  i_chip   mba target
- * @param  i_sc     The step code data struct.
- * @return SUCCESS
- */
-// FIXME: Story 51702 will implement this
-int32_t SkipMbaMsg( ExtensibleChip * i_chip,
-                           STEP_CODE_DATA_STRUCT & i_sc )
-{
-    using namespace TARGETING;
-    int32_t o_rc = SUCCESS;
-    TargetHandle_t mbaTarget = i_chip->GetChipHandle();
-
-    PRDF_ERR("[SkipMbaMsg] MBA 0x%08x : this function is not yet implemented!",
-                 PlatServices::getHuid(mbaTarget));
-
-    return o_rc;
-}
-PRDF_PLUGIN_DEFINE( Mba, SkipMbaMsg );
 
 } // end namespace Mba
 } // end namespace PRDF

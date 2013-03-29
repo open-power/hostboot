@@ -129,16 +129,19 @@ bool isInMdiaMode()
 int32_t mdiaSendEventMsg( TargetHandle_t i_mbaTarget,
                           MDIA::MaintCommandEventType i_eventType )
 {
+    #define PRDF_FUNC "[PlatServices::mdiaSendCmdComplete] "
+
     int32_t o_rc = SUCCESS;
 
     do
     {
+        if ( !isInMdiaMode() ) break; // no-op
+
         // Verify type.
         TYPE l_type = getTargetType(i_mbaTarget);
         if ( TYPE_MBA != l_type )
         {
-            PRDF_ERR( "[PlatServices::mdiaSendCmdComplete] unsupported target "
-                      "type %d", l_type );
+            PRDF_ERR( PRDF_FUNC"unsupported target type %d", l_type );
             o_rc = FAIL;
             break;
         }
@@ -152,8 +155,7 @@ int32_t mdiaSendEventMsg( TargetHandle_t i_mbaTarget,
         errlHndl_t errl = MDIA::processEvent( l_mdiaEvent );
         if ( NULL != errl )
         {
-            PRDF_ERR( "[PlatServices::mdiaSendCmdComplete] MDIA::processEvent "
-                      "failed" );
+            PRDF_ERR( PRDF_FUNC"MDIA::processEvent() failed" );
             PRDF_COMMIT_ERRL( errl, ERRL_ACTION_REPORT );
             o_rc = FAIL;
             break;
@@ -163,11 +165,13 @@ int32_t mdiaSendEventMsg( TargetHandle_t i_mbaTarget,
 
     if ( SUCCESS != o_rc )
     {
-        PRDF_ERR( "[PlatServices::mdiaSendCmdComplete] Failed: i_target=0x%08x",
-                  getHuid(i_mbaTarget) );
+        PRDF_ERR( PRDF_FUNC"Failed: i_target=0x%08x i_eventType=%d",
+                  getHuid(i_mbaTarget), i_eventType );
     }
 
     return o_rc;
+
+    #undef PRDF_FUNC
 }
 
 //------------------------------------------------------------------------------

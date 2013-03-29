@@ -21,26 +21,19 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-/**
- * @file prdfCenPLL.C
- * @brief chip Plug-in code for centaur pll support
+/** @file  prdfCenPLL.C
+ *  @brief Contains all common plugin code for the Centaur PLL logic.
  */
 
 #include <iipServiceDataCollector.h>
 #include <prdfExtensibleChip.H>
 #include <prdfPluginMap.H>
-#include <prdfBitString.H>
-#include <iipscr.h>
-#include <prdfPlatServices.H>
-#include <prdfGlobal.H>
-#include <iipSystem.h>
 
 namespace PRDF
 {
 
 namespace Membuf
 {
-
 
 enum
 {
@@ -83,7 +76,6 @@ int32_t QueryPll( ExtensibleChip * i_chip,
     } while(0);
 
     return rc;
-
 }
 PRDF_PLUGIN_DEFINE( Membuf, QueryPll );
 
@@ -109,7 +101,6 @@ int32_t ClearPll( ExtensibleChip * i_chip,
     }
 
     return rc;
-
 }
 PRDF_PLUGIN_DEFINE( Membuf, ClearPll );
 
@@ -156,65 +147,6 @@ int32_t CalloutPll( ExtensibleChip * i_chip,
     return SUCCESS;
 }
 PRDF_PLUGIN_DEFINE( Membuf, CalloutPll );
-
-/**
-  Send a PLL error message on Centaur  Plugin.
-  @param i_chip the chip that this is for.
-  @param i_sc service data.
-  @returns Failure Or Success of message call.
-  @note
-   */
-int32_t PllPostAnalysis( ExtensibleChip * i_chip,
-                    STEP_CODE_DATA_STRUCT & i_sc )
-{
-    using namespace TARGETING;
-    int32_t l_rc = SUCCESS;
-
-// Need to send MBA Skip Message to MDIA in Hostboot only
-#ifdef __HOSTBOOT_MODULE
-
-    TargetHandle_t l_cenHandle = i_chip->GetChipHandle();
-
-    do
-    {
-        TargetHandleList list = PlatServices::getConnected(l_cenHandle , TYPE_MBA);
-        if ( 0 == list.size() )
-        {
-            PRDF_ERR("[PllPostAnalysis] failed to get MBAs connected to this "
-                     "Membuf: 0x%08x", PlatServices::getHuid(l_cenHandle) );
-            l_rc = FAIL;
-            break;
-        }
-
-        for (TargetHandleList::iterator mbaIt = list.begin(); mbaIt != list.end(); ++mbaIt)
-        {
-            // Get the extensible chip for this mba
-            ExtensibleChip *l_mbaChip = (ExtensibleChip *)systemPtr->GetChip(*mbaIt);
-
-            //Check to make sure we are at threshold and have something garded.
-            if( (NULL != l_mbaChip) &&
-                (i_sc.service_data->IsAtThreshold()) &&
-                (i_sc.service_data->QueryGard() != GardResolution::NoGard) )
-            {
-                //Call the Skip Maintanence Command on this mba
-                ExtensibleChipFunction * l_skipMbaMsg =
-                    l_mbaChip->getExtensibleFunction("SkipMbaMsg", true);
-
-                // This call will return an error if it doesn't complete.
-                // Don't fail on error.  keep going.
-                l_rc |= (*l_skipMbaMsg)(l_mbaChip,
-                        PluginDef::bindParm<STEP_CODE_DATA_STRUCT &>(i_sc));
-            }
-        }
-
-    } while(0);
-
-#endif // ifdef __HOSTBOOT_MODULE
-
-    return l_rc;
-}
-PRDF_PLUGIN_DEFINE( Membuf, PllPostAnalysis );
-
 
 } // end namespace Membuf
 

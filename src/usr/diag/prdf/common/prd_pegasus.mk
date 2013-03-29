@@ -28,6 +28,7 @@ PRDF_RULE_PLUGINS_PEGASUS = \
     prdfP8Mcs.o \
     prdfP8Pll.o \
     prdfCenMba.o \
+    prdfPlatCenMba.o \
     prdfCenMembuf.o \
     prdfCenPll.o
 
