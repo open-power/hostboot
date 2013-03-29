@@ -30,6 +30,7 @@
 #include <targeting/common/iterators/rangefilter.H>
 #include <targeting/common/predicates/predicateisfunctional.H>
 #include <targeting/common/predicates/predicatepostfixexpr.H>
+#include <targeting/common/predicates/predicateattrval.H>
 
 /**
  * Miscellaneous Filter Utility Functions
@@ -179,24 +180,30 @@ void getAffinityTargets ( TARGETING::TargetHandleList& o_vector,
 
 }
 
-void getChildAffinityTargets ( TARGETING::TargetHandleList& o_vector,
-		 const Target * i_target, CLASS i_class, TYPE i_type, 
-		 bool i_functional )
+void getChildAffinityTargets(
+          TARGETING::TargetHandleList& o_vector,
+    const Target*                      i_target, 
+          CLASS                        i_class, 
+          TYPE                         i_type, 
+          bool                         i_functional)
 {
     getAffinityTargets (o_vector, i_target, i_class, i_type,
-			TARGETING::TargetService::CHILD_BY_AFFINITY, 
-			i_functional); 
+        TARGETING::TargetService::CHILD_BY_AFFINITY, 
+        i_functional); 
 }
 
 
-void getParentAffinityTargets ( TARGETING::TargetHandleList& o_vector,
-		 const Target * i_target, CLASS i_class, TYPE i_type,
-		 bool i_functional )
+void getParentAffinityTargets(
+          TARGETING::TargetHandleList& o_vector,
+    const Target*                      i_target, 
+          CLASS                        i_class, 
+          TYPE                         i_type,
+          bool                         i_functional )
 {
 
     getAffinityTargets (o_vector, i_target, i_class, i_type,
-			TARGETING::TargetService::PARENT_BY_AFFINITY,
-			i_functional); 
+        TARGETING::TargetService::PARENT_BY_AFFINITY,
+        i_functional); 
 }
 
 const Target * getParentChip( const Target * i_pChiplet )
@@ -227,5 +234,125 @@ const Target * getParentChip( const Target * i_pChiplet )
     return l_pChip;
 }
 
+void getPeerTargets(
+          TARGETING::TargetHandleList& o_peerTargetList,
+    const Target*                      i_pSrcTarget,
+    const PredicateBase*               i_pPeerFilter,
+    const PredicateBase*               i_pResultFilter)
+{
+    #define TARG_FN "getPeerTargets"
+    TARG_ENTER();
+    Target* l_pPeerTarget = NULL;
+    
+    if(i_pSrcTarget == NULL)
+    {
+        TARG_ASSERT("User tried to call getPeerTargets using NULL Target"
+                " Handle");
+    }
+    
+    // Clear the list
+    o_peerTargetList.clear();
+    do
+    {
+        // List to maintain all child targets which are found by get associated
+        // from the Src target with i_pPeerFilter predicate 
+        TARGETING::TargetHandleList l_pSrcTarget_list;
+
+        // Create input master predicate here by taking in the i_pPeerFilter
+        TARGETING::PredicatePostfixExpr l_superPredicate;
+        TARGETING::PredicateAttrVal<TARGETING::ATTR_PEER_TARGET>
+            l_notNullPeerExist(NULL, true);
+        l_superPredicate.push(&l_notNullPeerExist);
+        if(i_pPeerFilter)
+        {
+            l_superPredicate.push(i_pPeerFilter).And();
+        }
+
+        // Check if the i_srcTarget is the leaf node
+        if(i_pSrcTarget->tryGetAttr<TARGETING::ATTR_PEER_TARGET>(l_pPeerTarget))
+        {
+            if(l_superPredicate(i_pSrcTarget))
+            {
+                // Exactly one Peer Target to Cross
+                // Put this to input target list
+                l_pSrcTarget_list.push_back(
+                        const_cast<TARGETING::Target*>(i_pSrcTarget));
+            }
+            else
+            {
+                TARG_INF("Input Target provided doesn't have a valid Peer "
+                    "Target Attribute, Returning Empty List");
+                break;
+            }
+        }
+        // Not a leaf node, find out all leaf node with valid PEER Target
+        else
+        {
+            (void) TARGETING::targetService().getAssociated(
+                    l_pSrcTarget_list,
+                    i_pSrcTarget,
+                    TARGETING::TargetService::CHILD,
+                    TARGETING::TargetService::ALL,
+                    &l_superPredicate);
+        }
+
+        // Now we have a list of input targets on which we have to find the peer
+        // Check if we have a result predicate filter to apply
+        if(i_pResultFilter == NULL)
+        {
+            // Simply get the Peer Target for all Src target in the list and
+            // return
+            for(TARGETING::TargetHandleList::const_iterator pTargetIt 
+                    = l_pSrcTarget_list.begin(); 
+                pTargetIt != l_pSrcTarget_list.end();
+                ++pTargetIt)
+            {
+                TARGETING::Target* l_pPeerTgt = 
+                    (*pTargetIt)->getAttr<TARGETING::ATTR_PEER_TARGET>();
+                o_peerTargetList.push_back(l_pPeerTgt);
+            }
+            break;
+        }
+        // Result predicate filter is not NULL, we need to apply this predicate
+        // on each of the PEER Target found on the input target list
+        else
+        {
+            for(TARGETING::TargetHandleList::const_iterator pTargetIt 
+                    = l_pSrcTarget_list.begin(); 
+                pTargetIt != l_pSrcTarget_list.end();
+                ++pTargetIt)
+            {
+                TARGETING::TargetHandleList l_peerTarget_list;
+                TARGETING::Target* l_pPeerTgt = 
+                    (*pTargetIt)->getAttr<TARGETING::ATTR_PEER_TARGET>();
+
+                // Check whether this target matches the filter criteria
+                // or we have to look for ALL Parents matching the criteria.
+                if((*i_pResultFilter)(l_pPeerTgt))
+                {
+                    o_peerTargetList.push_back(l_pPeerTgt);
+                }
+                else
+                {
+                    (void) TARGETING::targetService().getAssociated(
+                            l_peerTarget_list,
+                            l_pPeerTgt,
+                            TARGETING::TargetService::PARENT,
+                            TARGETING::TargetService::ALL,
+                            i_pResultFilter);
+                    if(!l_peerTarget_list.empty())
+                    {
+                        // Insert the first one only.
+                        o_peerTargetList.push_back(
+                                l_peerTarget_list.front());
+                    }
+                }
+            }
+        }
+    } while(0);
+
+    TARG_EXIT();
+    #undef TARG_FN
+}
 
 };  // end namespace

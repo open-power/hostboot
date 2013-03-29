@@ -1,25 +1,25 @@
-//  IBM_PROLOG_BEGIN_TAG
-//  This is an automatically generated prolog.
-//
-//  $Source: src/include/usr/targeting/target.H $
-//
-//  IBM CONFIDENTIAL
-//
-//  COPYRIGHT International Business Machines Corp. 2011
-//
-//  p1
-//
-//  Object Code Only (OCO) source materials
-//  Licensed Internal Code Source Materials
-//  IBM HostBoot Licensed Internal Code
-//
-//  The source code for this program is not published or other-
-//  wise divested of its trade secrets, irrespective of what has
-//  been deposited with the U.S. Copyright Office.
-//
-//  Origin: 30
-//
-//  IBM_PROLOG_END
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/include/usr/targeting/common/target.H $                   */
+/*                                                                        */
+/* IBM CONFIDENTIAL                                                       */
+/*                                                                        */
+/* COPYRIGHT International Business Machines Corp. 2011,2013              */
+/*                                                                        */
+/* p1                                                                     */
+/*                                                                        */
+/* Object Code Only (OCO) source materials                                */
+/* Licensed Internal Code Source Materials                                */
+/* IBM HostBoot Licensed Internal Code                                    */
+/*                                                                        */
+/* The source code for this program is not published or otherwise         */
+/* divested of its trade secrets, irrespective of what has been           */
+/* deposited with the U.S. Copyright Office.                              */
+/*                                                                        */
+/* Origin: 30                                                             */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
 
 #ifndef __TARGETING_COMMON_TARGET_H
 #define __TARGETING_COMMON_TARGET_H
@@ -251,6 +251,24 @@ class Target
          */
         uint8_t * targetFFDC( uint32_t & o_size ) const;
 
+        /**
+         *  @brief Returns the target handle referencing a target whose HUID 
+         *      matches the caller supplied value
+         *
+         *  @param[in] i_huid HUID of target to find
+         *
+         *  @pre Target service must be initialized
+         *
+         *  @return Target handle referencing a target whose HUID matches the
+         *      caller supplied value
+         *
+         *  @retval !NULL Target handle referencing a target whose HUID matches
+         *      the caller supplied value.
+         *  @retval NULL No target found whose HUID matches the caller supplied
+         *      value. 
+         */
+        Target* getTargetFromHuid(const ATTR_HUID_type i_huid) const;
+
     private: // Private helper interfaces
 
         /**
@@ -439,6 +457,10 @@ const char* Target::getAttrAsString() const
            "returned false",A);
     return attrToString<A>(l_attrValue);
 }
+
+// WARNING: The following #include imports any platform specific template
+// specializations for getAttr and tryGetAttr
+#include <targeting/adapters/targetadapter.H>
 
 } // End namespace TARGETING
 

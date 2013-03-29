@@ -148,6 +148,58 @@ void getAllLogicalCards( TARGETING::TargetHandleList & o_vector,
                          TYPE i_cardType,
                          bool i_functional = true );
 
+/**
+ * @brief Returns the list of targets which is an immediate peer of the source
+ * target provided by the user. 
+ *
+ * @par Detailed Description:
+ *
+ * Two types of filter provided here as argument -
+ * a.   i_pPeerFilter, constrain the search only to follow PEER_TARGET links for
+ *      leaf targets (of the source target, inclusive) that meet the filter
+ *      criteria. Omitting the filter crosses all leaf targets of the source
+ *      (inclusive) that have PEER_TARGET attributes
+ * b.   i_pResultFilter, constrains the result targets returned, such that after
+ *      crossing a peer link, only the first target ['if any'] matching the
+ *      filter criteria [(searching upwards in the chain of physical parent
+ *      targets)] is returned. Omitting the filter has the side effect of
+ *      returning the target immediately on the other end of a peer link
+ *
+ * Filter usage guidelines -
+ * 1.   If source target given by the user suports PEER TARGET Attribute &
+ *      i_pPeerFilter is also provided then a Target list will be prepared by
+ *      going inwards from the source target including the source target.
+ *      If the source target doesn't support PEER Target Attribute & filter is
+ *      provided then list will be prepared by going inwards from the source
+ *      target excluding the source target.
+ * 2.   If i_pResultFilter is NULL, then a Peer Target list which includes all
+ *      Peer Targets of the source target list mentioned above in step 1, will
+ *      be prepared and returned to the user. If i_pResultFilter is not NULL,
+ *      then the filter will applied on the parent chain of all peer target
+ *      found from the step 1 list above (inclusive), that matches the criteria
+ *
+ * @param[out] o_peerTargets List of target handles that match the specified
+ *             criteria. This will be cleared in case not already done.
+ * @param[in] i_pSrcTarget Target from which to search for other targets
+ * @param[in] i_pPeerFilter to be applied on the target & target leafs that
+ *            has PEER Target Attribute, as provided by user.
+ *            i_pPeerFilter Pointer to a predicate to be evaluated against each
+ *            candidate target (as determined by the source target, type, and
+ *            recursion level parameters). 
+ * @param[in] i_pResultFilter to be applied on self and the Parent chain of
+ *            Peer Targets of the source target & target leaf provided by user
+ *            or evaluated on the basis of the i_pPeerFilter given by user.
+ *            i_pResultFilter Pointer to a predicate to be evaluated against
+ *            each candidate target (as determined by the source target, type,
+ *            and recursion level parameters).
+ *
+ * @return N/A
+ */
+void getPeerTargets(
+          TARGETING::TargetHandleList& o_peerTargets,
+    const Target*                      i_pSrcTarget,
+    const PredicateBase*               i_pPeerFilter = NULL,
+    const PredicateBase*               i_pResultFilter = NULL);
 
 }
 

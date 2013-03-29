@@ -41,6 +41,7 @@
 #include <targeting/attrrp.H>
 #include <targeting/common/util.H>
 #include <targeting/common/trace.H>
+#include <targeting/common/predicates/predicateattrval.H>
 
 namespace TARGETING
 {
@@ -307,6 +308,32 @@ uint8_t * Target::targetFFDC( uint32_t & o_size ) const
     o_size = bSize;
     return pFFDC;
 
+    #undef TARG_FN
+}
+
+//******************************************************************************
+// Target::getTargetFromHuid()
+//******************************************************************************
+
+Target* Target::getTargetFromHuid(
+    const ATTR_HUID_type i_huid) const
+{
+    #define TARG_FN "getTargetFromHuid"
+    Target* l_pTarget = NULL;
+    
+    TARGETING::PredicateAttrVal<TARGETING::ATTR_HUID> huidMatches(i_huid);
+
+    TARGETING::TargetRangeFilter targetsWithMatchingHuid(
+        TARGETING::targetService().begin(),
+        TARGETING::targetService().end(),
+        &huidMatches);
+    if(targetsWithMatchingHuid)
+    {
+        // Exactly one target will match the HUID, if any
+        l_pTarget = *targetsWithMatchingHuid;
+    }
+
+    return l_pTarget;
     #undef TARG_FN
 }
 

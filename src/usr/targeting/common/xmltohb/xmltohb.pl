@@ -114,6 +114,7 @@ if($cfgVerbose)
 # Initialize some globals
 ################################################################################
 
+use constant INVALID_HUID=>0xffffffff;
 my $xml = new XML::Simple (KeyAttr=>[]);
 
 # Until full machine parseable workbook parsing splits out all the input files,
@@ -135,7 +136,14 @@ validateAttributes($attributes);
 validateTargetInstances($attributes);
 validateTargetTypes($attributes);
 validateTargetTypesExtension($attributes);
-handleTgtPtrAttributes(\$attributes, \%Target_t);
+if($cfgIncludeFspAttributes)
+{
+    handleTgtPtrAttributesFsp(\$attributes, \%Target_t);
+}
+else
+{
+    handleTgtPtrAttributesHb(\$attributes, \%Target_t);
+}
 
 # Open the output files and write them
 if( !($cfgSrcOutputDir =~ "none") )
@@ -427,10 +435,42 @@ sub validateTargetInstances{
 }
 
 ################################################################################
+# Convert Target_t PHYS_PATH into Peer target's HUID - FSP Specific
+################################################################################
+
+sub handleTgtPtrAttributesFsp
+{
+    my($attributes) = @_;
+    
+    # replace PEER_TARGET attribute<PHYS_PATH> value with PEER's HUID
+    foreach my $targetInstance (@{${$attributes}->{targetInstance}})
+    {
+        foreach my $attr (@{$targetInstance->{attribute}})
+        {
+            if (exists $attr->{default})
+            {
+                if(   ($attr->{default} ne "NULL") 
+                   && ($attr->{id} eq "PEER_TARGET"))
+                {
+                    my $peerHUID = getPeerHuid(${$attributes}, 
+                                       $attr->{default});
+                    if($peerHUID == INVALID_HUID)
+                    {
+                        fatal("HUID for Peer Target not found");
+                    }
+                    $attr->{default} = (hex($peerHUID) << 32);
+                    $attr->{default} = sprintf("0x%X",$attr->{default}); 
+                }
+            }
+        }
+    }
+}
+
+################################################################################
 # Convert PHYS_PATH into index for Target_t attribute's value
 ################################################################################
 
-sub handleTgtPtrAttributes{
+sub handleTgtPtrAttributesHb{
     my($attributes, $Target_t) = @_;
 
     my $aId = 0;
@@ -480,6 +520,47 @@ sub handleTgtPtrAttributes{
             }
         }
     }
+}
+
+sub getPeerHuid 
+{
+    my($attributes, $peerPhysPath) = @_;
+
+    my $peerHUID = INVALID_HUID;
+    my $found = 0;
+    foreach my $targetInstance (@{$attributes->{targetInstance}})
+    {
+        foreach my $attr (@{$targetInstance->{attribute}})
+        {
+            if ($attr->{id} eq "PHYS_PATH")
+            {
+                if ($attr->{default} eq $peerPhysPath)
+                {
+                    # $attr->{id} for HUID might have been lost in the iteration
+                    # Need to repeat iteration
+                    foreach my $attr1 (@{$targetInstance->{attribute}})
+                    {
+                        if ($attr1->{id} eq "HUID")
+                        {
+                            $peerHUID = $attr1->{default};
+                            $found = 1;
+                            last;
+                        }
+                    }
+                    if($found)
+                    {
+                        last;
+                    }
+                }
+            }
+        }
+        if($found)
+        {
+            last;
+        }
+    }
+
+    return $peerHUID;    
 }
 
 sub SOURCE_FILE_GENERATION_FUNCTIONS { }

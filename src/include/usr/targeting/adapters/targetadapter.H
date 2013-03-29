@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/include/usr/targeting/common/predicates/predicates.H $    */
+/* $Source: src/include/usr/targeting/adapters/targetadapter.H $          */
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/* COPYRIGHT International Business Machines Corp. 2013                   */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,23 +20,17 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-#ifndef __TARGETING_COMMON_PREDICATES_H
-#define __TARGETING_COMMON_PREDICATES_H
 
 /**
- *  @file targeting/common/predicates/predicates.H
+ *  @file targeting/adapters/targetadapter.H
  *
- *  @brief Shortcut file to pull in all the predicate include files.
+ *  @brief Provides platform specific attribute accessor template
+ *      specializations.  
  *
+ *   @warning Must only be included by target.H
+ *
+ *   @note The contents of this file are inserted inline into middle of
+ *       target.H and purposefully omit include guards.  Only change this 
+ *       file unless you know what you are doing!
  */
-#include <targeting/common/predicates/predicatebase.H>
-#include <targeting/common/predicates/predicatectm.H>
-#include <targeting/common/predicates/predicateisfunctional.H>
-#include <targeting/common/predicates/predicatehwas.H>
-#include <targeting/common/predicates/predicatepostfixexpr.H>
-#include <targeting/common/predicates/predicateattrval.H>
-
-// please keep up to date...
-
-#endif // __TARGETING_COMMON_PREDICATES_H
 
