@@ -66,6 +66,11 @@ actionclass threshold32pday
     threshold( field(32 / day) );
 };
 
+actionclass SUEGenerationPoint
+{
+    flag(UERE);
+};
+
 ################################################################################
 #                               Simple Callouts                                #
 ################################################################################
@@ -74,6 +79,42 @@ actionclass threshold32pday
 actionclass callout2ndLvlMed
 {
     callout(procedure(NextLevelSupport_ENUM), MRU_MED);
+};
+
+actionclass calloutSelfMed
+{
+    callout(MRU_MED);
+};
+
+actionclass calloutSelfLow
+{
+    callout(MRU_LOW);
+};
+
+actionclass SelfMedThr1
+{
+    calloutSelfMed;
+    threshold1;
+};
+
+actionclass SelfMedThr1UE
+{
+    calloutSelfMed;
+    threshold1;
+    SUEGenerationPoint;
+};
+
+actionclass SelfLowLevel2MedThr1
+{
+    calloutSelfLow;
+    callout2ndLvlMed;
+    threshold1;
+};
+
+actionclass SelfMedThr32PerDay
+{
+    calloutSelfMed;
+    threshold32pday;
 };
 
 ################################################################################

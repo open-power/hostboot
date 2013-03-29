@@ -1014,189 +1014,199 @@ rule L3Fir
 group gL3Fir filter singlebit
 {
     /** L3FIR[0]
-     *  Reserved field (Access type is pb_cmd_err)
+     *  PowerBus Command Error - Overrun condition.
      */
-    (L3Fir, bit(0)) ? TBDDefaultCallout;
+    (L3Fir, bit(0)) ? SelfLowLevel2MedThr1;
 
     /** L3FIR[1]
-     *  Reserved field (Access type is pb_data_err)
+     *  PowerBus Data Error - Overrun condition.
      */
-    (L3Fir, bit(1)) ? TBDDefaultCallout;
+    (L3Fir, bit(1)) ? SelfLowLevel2MedThr1;
 
     /** L3FIR[2]
-     *  Reserved field (Access type is l3_spare_error1)
+     *  Spare
      */
-    (L3Fir, bit(2)) ? TBDDefaultCallout;
+    (L3Fir, bit(2)) ? defaultMaskedError;
 
     /** L3FIR[3]
-     * Reserved field (Access type is l3_spare_error1)
+     * Spare
      */
-    (L3Fir, bit(3)) ? TBDDefaultCallout;
+    (L3Fir, bit(3)) ? defaultMaskedError;
 
     /** L3FIR[4]
-     *  Reserved field (Access type is l3_cac_rd_ce_det_not_lindel_req)
+     *  L3 Cache CE, no line delete requested.
      */
-    (L3Fir, bit(4)) ? TBDDefaultCallout;
+    (L3Fir, bit(4)) ? L3CE;
 
     /** L3FIR[5]
-     *  Reserved field (Access type is l3_cac_rd_ue_det)
+     *  L3 Cache UE.
      */
-    (L3Fir, bit(5)) ? TBDDefaultCallout;
+    (L3Fir, bit(5)) ? L3UE;
+
+    /** L3FIR[4,5]
+     *  L3 Cache UE with CE.
+     */
+    (L3Fir, bit(4,5)) ? L3UE;
 
     /** L3FIR[6]
-     *  Reserved field (Access type is l3_cac_rd_sue_det)
+     *  L3 Cache SUE.
      */
-    (L3Fir, bit(6)) ? TBDDefaultCallout;
+    (L3Fir, bit(6)) ? defaultMaskedError;
 
     /** L3FIR[7]
-     *  Reserved field (Access type is l3_cac_wr_data_ce_from_pb)
+     *  L3 Cache Write CE from PowerBus
      */
-    (L3Fir, bit(7)) ? TBDDefaultCallout;
+    (L3Fir, bit(7)) ? SelfMedThr32PerDay;
 
     /** L3FIR[8]
-     *  Reserved field (Access type is l3_cac_wr_data_ue_from_pb)
+     *  L3 Cache Write UE from PowerBus
      */
-    (L3Fir, bit(8)) ? TBDDefaultCallout;
+    (L3Fir, bit(8)) ? SelfMedThr1UE;
 
     /** L3FIR[9]
-     *  Reserved field (Access type is l3_cac_wr_data_sue_from_pb)
+     *  L3 Cache Write SUE from PowerBus
      */
-    (L3Fir, bit(9)) ? TBDDefaultCallout;
+    (L3Fir, bit(9)) ? defaultMaskedError;
 
     /** L3FIR[10]
-     *  Reserved field (Access type is l3_cac_wr_data_ce_from_l2)
+     *  L3 Cache Write CE from L2
      */
-    (L3Fir, bit(10)) ? TBDDefaultCallout;
+    (L3Fir, bit(10)) ? SelfMedThr32PerDay;
 
     /** L3FIR[11]
-     *  Reserved field (Access type is l3_cac_wr_data_ue_from_l2)
+     *  L3 Cache Write UE from L2
      */
-    (L3Fir, bit(11)) ? TBDDefaultCallout;
+    (L3Fir, bit(11)) ? SelfMedThr1UE;
 
     /** L3FIR[12]
-     *  Reserved field (Access type is l3_cac_wr_data_sue_from_l2)
+     *  L3 Cache Write SUE from L2
      */
-    (L3Fir, bit(12)) ? TBDDefaultCallout;
+    (L3Fir, bit(12)) ? defaultMaskedError;
 
     /** L3FIR[13]
-     *  Reserved field (Access type is l3_dir_rd_ce_det)
+     *  L3 Dir Read CE
      */
-    (L3Fir, bit(13)) ? TBDDefaultCallout;
+    (L3Fir, bit(13)) ? L3DirCE;
 
     /** L3FIR[14]
-     *  Reserved field (Access type is l3_dir_rd_ue_det)
+     *  L3 Dir Read UE
      */
-    (L3Fir, bit(14)) ? TBDDefaultCallout;
+    (L3Fir, bit(14)) ? SelfMedThr1UE;
 
     /** L3FIR[15]
-     *  Reserved field (Access type is l3_dir_rd_phantom_error)
+     *  L3 Dir Read \"Phantom Error\"
      */
-    (L3Fir, bit(15)) ? TBDDefaultCallout;
+    (L3Fir, bit(15)) ? defaultMaskedError;
 
     /** L3FIR[16]
-     *  Reserved field (Access type is l3_co_sn_cresp_addr_err)
+     *  L3 Store Address Error
      */
-    (L3Fir, bit(16)) ? TBDDefaultCallout;
+    (L3Fir, bit(16)) ? SelfLowLevel2MedThr1;
 
     /** L3FIR[17]
-     *  Reserved field (Access type is l3_pf_cresp_addr_err)
+     *  L3 Load Address Error (from Prefetch Machine)
      */
-    (L3Fir, bit(17)) ? TBDDefaultCallout;
+    (L3Fir, bit(17)) ? SelfMedThr1;
 
     /** L3FIR[18]
-     *  Reserved field (Access type is l3_addr_hang_detected)
+     *  L3 Address Hang
      */
-    (L3Fir, bit(18)) ? TBDDefaultCallout;
+    (L3Fir, bit(18)) ? defaultMaskedError;
 
     /** L3FIR[19]
      *  Reserved field (Access type is l3_flink_0_load_ack_dead)
      */
-    (L3Fir, bit(19)) ? TBDDefaultCallout;
+    (L3Fir, bit(19)) ? callout2ndLvlMed;
 
     /** L3FIR[20]
      *  Reserved field (Access type is l3_flink_0_store_ack_dead)
      */
-    (L3Fir, bit(20)) ? TBDDefaultCallout;
+    (L3Fir, bit(20)) ? callout2ndLvlMed;
 
     /** L3FIR[21]
      *  Reserved field (Access type is l3_flink_1_load_ack_dead)
      */
-    (L3Fir, bit(21)) ? TBDDefaultCallout;
+    (L3Fir, bit(21)) ? callout2ndLvlMed;
 
     /** L3FIR[22]
      *  Reserved field (Access type is l3_flink_1_store_ack_dead)
      */
-    (L3Fir, bit(22)) ? TBDDefaultCallout;
+    (L3Fir, bit(22)) ? callout2ndLvlMed;
 
     /** L3FIR[23]
-     *  Reserved field (Access type is l3_mach_hang_detected)
+     *  L3 Machine Hang
      */
-    (L3Fir, bit(23)) ? TBDDefaultCallout;
+    (L3Fir, bit(23)) ? SelfLowLevel2MedThr1;
 
     /** L3FIR[24]
-     *  Reserved field (Access type is l3_hw_control_err)
+     *  L3 Hw Control Error
      */
-    (L3Fir, bit(24)) ? TBDDefaultCallout;
+    (L3Fir, bit(24)) ? SelfMedThr1;
 
     /** L3FIR[25]
-     *  Reserved field (Access type is l3_snoop_sw_err_detected)
+     *  L3 Snoop Sw error detected
      */
-    (L3Fir, bit(25)) ? TBDDefaultCallout;
+    (L3Fir, bit(25)) ? SelfLowLevel2MedThr1;
 
     /** L3FIR[26]
-     *  Reserved field (Access type is l3_line_del_ce_done)
+     *  L3 Line Delete CE done
      */
-    (L3Fir, bit(26)) ? TBDDefaultCallout;
+    (L3Fir, bit(26)) ? defaultMaskedError;
 
     /** L3FIR[27]
-     *  Reserved field (Access type is l3_dram_error)
+     *  L3 DRAM Logic Error
      */
-    (L3Fir, bit(27)) ? TBDDefaultCallout;
+    (L3Fir, bit(27)) ? SelfMedThr1;
 
     /** L3FIR[28]
-     *  Reserved field (Access type is l3_lru_error)
+     *  L3 LRU SRAM Logic Recoverable Error
      */
-    (L3Fir, bit(28)) ? TBDDefaultCallout;
+    (L3Fir, bit(28)) ? SelfMedThr32PerDay;
 
     /** L3FIR[29]
-     *  Reserved field (Access type is l3_all_members_deleted_error)
+     *  L3 Cache Congruence Class Deleted
      */
-    (L3Fir, bit(29)) ? TBDDefaultCallout;
+    (L3Fir, bit(29)) ? SelfMedThr1;
 
     /** L3FIR[30]
-     *  Reserved field (Access type is l3_refresh_timer_error)
+     *  L3 Cache Timer Refresh Error
      */
-    (L3Fir, bit(30)) ? TBDDefaultCallout;
+    (L3Fir, bit(30)) ? SelfMedThr1;
 
     /** L3FIR[31]
-     *  Reserved field (Access type is l3_ha_consumer_sw_access_err)
+     *  L3 HA Consumer SW Access Error
      */
-    (L3Fir, bit(31)) ? TBDDefaultCallout;
+    (L3Fir, bit(31)) ? defaultMaskedError;
 
     /** L3FIR[32]
-     *  Reserved field (Access type is l3_ha_producer_sw_access_err)
+     *  L3 HA Producer SW Access Error
      */
-    (L3Fir, bit(32)) ? TBDDefaultCallout;
+    (L3Fir, bit(32)) ? defaultMaskedError;
 
     /** L3FIR[33]
-     *  Reserved field (Access type is l3_ha_line_in_consumer_cac_err)
+     *  L3 HA Line In Consumer Cache Error
      */
-    (L3Fir, bit(33)) ? TBDDefaultCallout;
+    (L3Fir, bit(33)) ? defaultMaskedError;
 
     /** L3FIR[34]
-     *  Reserved field (Access type is l3_ha_table_in_producer_cac_err)
+     *  L3 HA Table In Producer Cache Error
      */
-    (L3Fir, bit(34)) ? TBDDefaultCallout;
+    (L3Fir, bit(34)) ? defaultMaskedError;
 
     /** L3FIR[35]
-     *  Reserved field (Access type is l3_ha_log_overflow_err)
+     *  L3 HA Log Overflow
      */
-    (L3Fir, bit(35)) ? TBDDefaultCallout;
+    (L3Fir, bit(35)) ? callout2ndLvlMed;
 
     /** L3FIR[36]
-     *  Reserved field (Access type is scom_err)
+     *  SCOM_ERR: scom error
      */
-    (L3Fir, bit(36)) ? TBDDefaultCallout;
+    (L3Fir, bit(36)) ? defaultMaskedError;
+
+    /** L3FIR[37]
+     *  SCOM_ERR: scom error
+     */
+    (L3Fir, bit(37)) ? defaultMaskedError;
 };
 
 ################################################################################
@@ -1347,4 +1357,23 @@ actionclass analyzeCoreUnitCheckstop
     funccall("SetCoreCheckstopCause");
     analyze(gCoreFir);
     funccall("MaskIfCoreCheckstop");
+};
+
+actionclass L3DirCE
+{
+    calloutSelfMed;
+    threshold32pday; #FIXME RTC:65507 add MFG threshold
+};
+
+actionclass L3UE
+{
+    SelfMedThr1UE;
+    #funccall("L3UE"); #FIXME RTC:22859 support for L3 repairs and trace arrays
+};
+
+actionclass L3CE
+{
+    calloutSelfMed;
+    threshold32pday; #FIXME RTC:65507 add MFG threshold
+    #funccall("L3CE"); #FIXME RTC:22859 support for L3 repairs and trace arrays
 };

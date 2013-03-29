@@ -496,7 +496,6 @@ uint32_t prdrActionArgMap(const std::string & i_arg)
             g_ActionArgMap[i->str] = i->val;
         }
 
-#if 0
         // Initialize SDC Flags.
         // FIXME: Not quite happy with the way this is implemented. Would like
         //        to move the macros to another file like we did with
@@ -508,7 +507,6 @@ uint32_t prdrActionArgMap(const std::string & i_arg)
         #define PRDF_SDC_FLAGS_MAP_END
         #undef iipServiceDataCollector_h
         #include <iipServiceDataCollector.h>
-#endif
 
         // Initialize Gard values.
         // TODO: Map these from xspprdGardResolution.h
