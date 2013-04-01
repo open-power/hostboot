@@ -85,7 +85,23 @@ int cpu_master_winkle()
     task_affinity_pin();
     task_affinity_migrate_to_master();
 
-    int rc = reinterpret_cast<int64_t>(_syscall0(MISC_CPUWINKLE));
+    int rc = reinterpret_cast<int64_t>(
+                _syscall1(MISC_CPUWINKLE,
+                          reinterpret_cast<void*>(WINKLE_SCOPE_MASTER)));
+
+    task_affinity_unpin();
+
+    return rc;
+}
+
+int cpu_all_winkle()
+{
+    task_affinity_pin();
+    task_affinity_migrate_to_master();
+
+    int rc = reinterpret_cast<int64_t>(
+                _syscall1(MISC_CPUWINKLE,
+                          reinterpret_cast<void*>(WINKLE_SCOPE_ALL)));
 
     task_affinity_unpin();
 

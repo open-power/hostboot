@@ -90,6 +90,37 @@ namespace KernelMisc
             uint64_t iv_timebase;
     };
 
+    /** @class WinkleAll
+     *
+     * @brief DeferredWork class for implementing cpu_all_winkle.
+     */
+    class WinkleAll : public ::DeferredWork
+    {
+        public:
+            /** ctor
+             *
+             *  @param i_caller - Task calling cpu_all_winkle to be restored
+             *                    after winkle is complete.
+             *
+             */
+            WinkleAll(task_t* i_caller) :
+                iv_caller(i_caller), iv_timebase(0), iv_firstThread(0) {};
+
+            void masterPreWork();
+            void activeMainWork();
+            void masterPostWork();
+            void nonactiveMainWork();
+
+        private:
+                /** Caller of cpu_all_winkle() */
+            task_t* iv_caller;
+                /** Current time-base value for restore after winkle. */
+            uint64_t iv_timebase;
+                /** Sync value for first thread to wake up. */
+            uint64_t iv_firstThread;
+
+    };
+
     /** @fn expand_full_cache
      *
      *  @brief Expands the image footprint from a half-cache to full-cache
@@ -123,14 +154,13 @@ namespace KernelMisc
      *
      *     NOTE: This function is a wrapper function for writeScratchReg that
      *     takes care of modifying the scratch register address value depending
-     *     on the getCPUType.   The writeScratchReg takes the scratch address 
+     *     on the getCPUType.   The writeScratchReg takes the scratch address
      *     passed in and puts that date in that register using assembly code
      *
      *  @param[in] uint64_t - scratch_addr
-     *  @param[in] uint64_t - Data 
+     *  @param[in] uint64_t - Data
      */
     void updateScratchReg(MMIO_Scratch_Register scratch_addr, uint64_t data);
-
 
 };
 #endif

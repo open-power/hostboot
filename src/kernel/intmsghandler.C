@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2012              */
+/* COPYRIGHT International Business Machines Corp. 2011,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -76,7 +76,7 @@ void InterruptMsgHdlr::handleInterrupt()
 
     if( cv_ipc_base_address != 0 )
     {
-        uint64_t xirrAddress = cv_ipc_base_address; 
+        uint64_t xirrAddress = cv_ipc_base_address;
 
         xirrAddress += mmio_offset(pir); // Add offset for this cpu
         xirrAddress += XIRR_ADDR_OFFSET; // Add offset for XIRR register
@@ -142,6 +142,19 @@ void InterruptMsgHdlr::addCpuCore(uint64_t i_pir)
         cv_instance->sendMessage(MSG_INTR_ADD_CPU,
                                  (void*)pir_key,(void *)i_pir,t);
     }
+}
+
+void InterruptMsgHdlr::sendIPI(uint64_t i_pir)
+{
+    uint64_t mfrrAddress = cv_ipc_base_address;
+    mfrrAddress += mmio_offset(i_pir);
+    mfrrAddress += MFRR_ADDR_OFFSET;
+
+    register uint8_t data = 0;
+
+    eieio(); sync();
+    MAGIC_INSTRUCTION(MAGIC_SIMICS_CORESTATESAVE);
+    asm volatile("stbcix %0,0,%1" :: "r" (data) , "r" (mfrrAddress));
 }
 
 MessageHandler::HandleResult InterruptMsgHdlr::handleResponse

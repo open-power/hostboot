@@ -61,10 +61,11 @@ class InterruptMsgHdlr : public MessageHandler
             // Logical Shift Left fields for mmio Base address from PIR.
             // (IP addr bit pos - PIR bit pos)
             P8_IP_THREADID_LSL = (12-0),
-            P8_IP_COREID_LSL   = (15-3),    
+            P8_IP_COREID_LSL   = (15-3),
             P8_IP_CHIPID_LSL   = (20-7),
             P8_IP_NODEID_LSL   = (22-10),
             XIRR_ADDR_OFFSET   = 4,
+            MFRR_ADDR_OFFSET   = 12,
         };
 
         // Notes:
@@ -77,7 +78,7 @@ class InterruptMsgHdlr : public MessageHandler
         InterruptMsgHdlr(MessageQueue * i_msgQ)
             : MessageHandler(NULL,i_msgQ) {}
 
-        /** 
+        /**
          * Destructor.
          */
         virtual ~InterruptMsgHdlr() {};
@@ -104,10 +105,10 @@ class InterruptMsgHdlr : public MessageHandler
 
             // The PIR chip id field has 1 extra bit (8 chips), so we need
             // to shift the node and chip separately
-            offset  |= 
+            offset  |=
                 (i_pir & P8_PIR_NODEID_MSK) << P8_IP_NODEID_LSL;
 
-            offset  |= 
+            offset  |=
                 (i_pir & P8_PIR_CHIPID_MSK) << P8_IP_CHIPID_LSL;
 
             // The core and thread id field are adjacent in both the PIR and
@@ -118,7 +119,7 @@ class InterruptMsgHdlr : public MessageHandler
 
             return offset;
         }
-            
+
         /**
          * Create the InterruptMsgHdlr to handle external interrupts
          * @param[in] i_msgQ The message queue
@@ -137,6 +138,13 @@ class InterruptMsgHdlr : public MessageHandler
          * @note should be called when ever a new core becomes active
          */
         static void addCpuCore(uint64_t i_pir);
+
+        /**
+         * Issue an IPI to the core.
+         *
+         * @param[in] i_pir - The PIR of the CPU to send IPI at.
+         */
+        static void sendIPI(uint64_t i_pir);
 
     private:
 

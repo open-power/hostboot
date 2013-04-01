@@ -58,6 +58,17 @@ enum ShutdownStatus
     SHUTDOWN_STATUS_INITSVC_FAILED      = 0x01230004,
 };
 
+/**
+ * @enum WinkleScopes
+ *
+ * Scope of the winkle operation.
+ */
+enum WinkleScope
+{
+    WINKLE_SCOPE_MASTER = 0x0,
+    WINKLE_SCOPE_ALL = 0x1,
+};
+
 #ifdef __cplusplus
 extern "C"
 {
@@ -160,6 +171,19 @@ uint64_t cpu_spr_value(CpuSprNames spr);
  *        process will unset any task affinity.  See task_affinity_unpin().
  */
 int cpu_master_winkle();
+
+/** @fn cpu_all_winkle
+ *  @brief Winkle all the threads.
+ *
+ *  This is used in multi-node systems to quiesce all the cores in a drawer
+ *  prior to the fabric being stitched together.
+ *
+ *  @retval 0 - Success
+ *
+ *  @note This function will migrate the task to the master thread and in the
+ *        process will unset any task affinity.  See task_affinity_unpin().
+ */
+int cpu_all_winkle();
 
 /** @fn cpu_crit_assert
  *  @brief Forces a Terminate Immediate after a crit-assert is issued

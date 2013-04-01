@@ -34,6 +34,7 @@
 #include <kernel/pagemgr.H>
 #include <kernel/vmmmgr.H>              // INITIAL_MEM_SIZE
 #include <kernel/memstate.H>
+#include <kernel/intmsghandler.H>
 
 extern "C"
     void kernel_shutdown(size_t, uint64_t, uint64_t, uint64_t) NO_RETURN;
@@ -66,7 +67,7 @@ namespace KernelMisc
                        status);
             }
 
-            // Call to set the Core Scratch Reg 0 with the status 
+            // Call to set the Core Scratch Reg 0 with the status
             updateScratchReg(MMIO_SCRATCH_PROGRESS_CODE, status);
 
         }
@@ -219,6 +220,98 @@ namespace KernelMisc
         // Race condition that should not occur...
         //
         // Attempted to winkle the master and another thread came online in
+        // the process.
+        kassert(false);
+    }
+
+    void WinkleAll::masterPreWork()
+    {
+        printk("Winkle all - ");
+
+        // Save away the current timebase.  All threads are in this object
+        // now so they're not going to be using the time for anything else.
+        iv_timebase = getTB();
+    }
+
+    void WinkleAll::activeMainWork()
+    {
+        cpu_t* cpu = CpuManager::getCurrentCPU();
+
+        // Return current task to run-queue so it isn't lost.
+        cpu->scheduler->returnRunnable();
+        TaskManager::setCurrentTask(cpu->idle_task);
+
+        // Clear LPCR values that wakes up from winkle.  LPCR[49, 50, 51]
+        // Otherwise, there may be an interrupt pending or something that
+        // prevents us from fully entering winkle.
+        setLPCR(getLPCR() & (~0x0000000000007000));
+
+        // Deactivate CPU from kernel.
+        cpu->winkled = true;
+        CpuManager::deactivateCPU(cpu);
+
+        // Create kernel save area and store ptr in bottom of kernel stack.
+        task_t* saveArea = new task_t;
+        memset(saveArea, '\0', sizeof(task_t));
+        saveArea->context.msr_mask = 0xD030; // EE, ME, PR, IR, DR.
+        *(reinterpret_cast<task_t**>(cpu->kernel_stack_bottom)) = saveArea;
+
+        // Execute winkle.
+        kernel_execute_winkle(saveArea);
+
+        // Re-activate CPU in kernel and re-init VMM SPRs.
+        delete saveArea;
+        cpu->winkled = false;
+        CpuManager::activateCPU(cpu);
+        VmmManager::init_slb();
+
+        // Wake up all the other threads.
+        if(__sync_bool_compare_and_swap(&iv_firstThread, 0, 1))
+        {
+            for(uint64_t i = 0; i < KERNEL_MAX_SUPPORTED_CPUS_PER_NODE *
+                                    KERNEL_MAX_SUPPORTED_NODES; i++)
+            {
+                cpu_t* slave = CpuManager::getCpu(i);
+
+                if ((NULL != slave) && (slave != cpu))
+                {
+                    if (slave->winkled)
+                    {
+                        InterruptMsgHdlr::sendIPI(i);
+                    }
+                }
+            }
+        };
+
+        // Sync timebase.
+        if (getTB() < iv_timebase)
+        {
+            setTB(iv_timebase);
+        }
+
+        // Select a new task if not the master CPU.  Master CPU will resume
+        // the code that called cpu_master_winkle().
+        if (!cpu->master)
+        {
+            cpu->scheduler->setNextRunnable();
+        }
+
+    }
+
+    void WinkleAll::masterPostWork()
+    {
+        printk("Awake!\n");
+
+        // Restore caller of cpu_all_winkle().
+        iv_caller->state = TASK_STATE_RUNNING;
+        TaskManager::setCurrentTask(iv_caller);
+    }
+
+    void WinkleAll::nonactiveMainWork()
+    {
+        // Race condition that should not occur...
+        //
+        // Attempted to winkle the threads and another thread came online in
         // the process.
         kassert(false);
     }

@@ -700,12 +700,13 @@ namespace Systemcalls
         }
     };
 
-    /** Winkle all the threads so that the runtime SLW image can be loaded. */
+    /** Winkle all the threads. */
     void CpuWinkle(task_t *t)
     {
         cpu_t* cpu = CpuManager::getCurrentCPU();
 
-        if ((CpuManager::getCpuCount() > CpuManager::getThreadCount()) ||
+        if ((WINKLE_SCOPE_MASTER == TASK_GETARG0(t) &&
+                (CpuManager::getCpuCount() > CpuManager::getThreadCount())) ||
             (!cpu->master))
         {
             TASK_SETRTN(t, -EDEADLK);
@@ -713,7 +714,15 @@ namespace Systemcalls
         else
         {
             TASK_SETRTN(t, 0);
-            KernelMisc::WinkleCore* deferred = new KernelMisc::WinkleCore(t);
+            DeferredWork* deferred = NULL;
+            if (WINKLE_SCOPE_MASTER == TASK_GETARG0(t))
+            {
+                deferred = new KernelMisc::WinkleCore(t);
+            }
+            else
+            {
+                deferred = new KernelMisc::WinkleAll(t);
+            }
             t->state = TASK_STATE_BLOCK_USRSPACE;
             t->state_info = deferred;
             DeferredQueue::insert(deferred);
