@@ -197,14 +197,20 @@ int32_t CheckForRecovered(ExtensibleChip * i_chip,
 int32_t CheckForRecoveredSev(ExtensibleChip * i_chip,
                              uint32_t & o_sev)
 {
+    int32_t o_rc = SUCCESS;
+
     SCAN_COMM_REGISTER_CLASS * l_rer = NULL;
     SCAN_COMM_REGISTER_CLASS * l_TPrer = NULL;
-    SCAN_COMM_REGISTER_CLASS * l_unitxstp = NULL;
 
-    int32_t o_rc = SUCCESS;
+    // FIXME 68302 - This needs a better check for FSP environment
+    // we could get a xstp during hostboot at a stage when GLOBALUNITXSTPFIR
+    // can't be accessed
+#ifndef __HOSTBOOT_MODULE
+    SCAN_COMM_REGISTER_CLASS * l_unitxstp = NULL;
 
     l_unitxstp = i_chip->getRegister("GLOBALUNITXSTPFIR");
     o_rc |= l_unitxstp->Read();
+#endif
     l_rer = i_chip->getRegister("GLOBAL_RE_FIR");
     o_rc |= l_rer->Read();
     l_TPrer = i_chip->getRegister("TP_CHIPLET_RE_FIR");
@@ -232,12 +238,17 @@ int32_t CheckForRecoveredSev(ExtensibleChip * i_chip,
         // error from TP (other than MCS chiplets)
         o_sev = 3;
     }
-    else if((l_rer->GetBitFieldJustified(11,14) &
-             l_unitxstp->GetBitFieldJustified(11,14)) == 0)
+    // FIXME 68302 - This needs a better check for FSP environment
+    // we could get a xstp during hostboot at a stage when GLOBALUNITXSTPFIR
+    // can't be accessed
+#ifndef __HOSTBOOT_MODULE
+    else if((l_rer->GetBitFieldJustified(16,16) &
+             l_unitxstp->GetBitFieldJustified(16,16)) == 0 )
     {
         // core recoverable
         o_sev = 2;
     }
+#endif
     else
     {
         // core checkstop
@@ -343,10 +354,14 @@ int32_t GetCheckstopInfo( ExtensibleChip * i_chip,
 
 } PRDF_PLUGIN_DEFINE( Proc, GetCheckstopInfo );
 
-int32_t CoreConfigured(ExtensibleChip * i_chip,
-                       bool & o_isCoreConfigured)
+int32_t CoreConfiguredAndNotHostboot(ExtensibleChip * i_chip,
+                                     bool & o_isCoreConfigured)
 {
     o_isCoreConfigured = false;
+#ifdef __HOSTBOOT_MODULE
+    // if in hostboot just return false to prevent the default reg capture
+    return SUCCESS;
+#endif
 
     TargetHandleList l_coreList =
       PlatServices::getConnected(i_chip->GetChipHandle(), TYPE_EX);
@@ -355,7 +370,7 @@ int32_t CoreConfigured(ExtensibleChip * i_chip,
         o_isCoreConfigured = true;
 
     return SUCCESS;
-} PRDF_PLUGIN_DEFINE(Proc, CoreConfigured);
+} PRDF_PLUGIN_DEFINE(Proc, CoreConfiguredAndNotHostboot);
 
 /**
   * @brief Call  HWP and set the right dump type

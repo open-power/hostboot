@@ -90,7 +90,7 @@ chip Proc
         name        "Virtual Global Unit Checkstop FIR";
         scomaddr    0x51040001;
         capture     group default;
-        capture     req funccall("CoreConfigured");
+        capture     req funccall("CoreConfiguredAndNotHostboot");
     };
 
 # Import all of the chiplet registers
