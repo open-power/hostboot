@@ -44,6 +44,9 @@ INCLUDES = hbdescriptor.H \
 
 .elseif(${CONTEXT} == "x86.nfp")
 
+# this file is in src/hbfw/fsp in cmvc
+.include "makefile.nfp"
+
 EXPINC_SUBDIRS   += plugins
 OBJECTS_SUBDIRS  += plugins
 EXPLIB_SUBDIRS   += plugins
