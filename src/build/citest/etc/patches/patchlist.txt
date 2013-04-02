@@ -4,9 +4,3 @@ Brief description of the problem or reason for patch
 -CMVC: Defect/Req for checking the changes into fips810		
 -Files: list of files		
 -Coreq: list of associated changes, e.g. workarounds.presimsetup
-
-Fix broken ITR Macro actions.  Improve maint cmd actions.
--RTC: 66137
--CMVC: 871945
--Files: mdia-actions.patch
--Coreq: None

@@ -353,7 +353,7 @@ def hexDumpToNumber(hexlist):
 
 # Fetch the current HRMOR value.
 def getHRMOR():
-    runStr  =  "(system_cmp0.cpu0_0_05_0).read-reg HRMOR"
+    runStr  =  "(system_cmp0.cpu0_0_04_0).read-reg HRMOR"
     ( result, out )  =   quiet_run_command( runStr, output_modes.regular )
     return result
 

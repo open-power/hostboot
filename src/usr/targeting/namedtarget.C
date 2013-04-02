@@ -70,8 +70,8 @@ const TARGETING::Target *   getMasterCore( )
                       true );
 
     TRACDCOMP( g_trac_targeting,
-               "getMasterCore: found %d cores on master proc",
-               l_cores.size()   );
+               "getMasterCore: found %d cores on master proc, l_mastreCoreID:0x%X",
+               l_cores.size(),l_masterCoreID   );
 
     for (TARGETING::TargetHandleList::const_iterator
             coreIter = l_cores.begin();
@@ -88,7 +88,7 @@ const TARGETING::Target *   getMasterCore( )
         pir |= l_logicalNodeId << 10;
 
         if (pir == l_masterCoreID){
-            TRACDCOMP( g_trac_targeting,
+            TRACFCOMP( g_trac_targeting,
                        "found master core: 0x%x, PIR=0x%x :",
                        l_coreId,
                        pir  );

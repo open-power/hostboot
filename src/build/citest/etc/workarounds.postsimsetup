@@ -25,12 +25,3 @@
 ## Workarounds that are run after start_simics is executed for the first time
 ##    to setup the sandbox
 ##
-mkdir -p $sb/simu/data/cec-chip
-echo "+++ Updating actions for mdia"
-cp $BACKING_BUILD/src/simu/data/cec-chip/p8_mba.act $sb/simu/data/cec-chip
-cp $BACKING_BUILD/src/simu/data/cec-chip/s1_mba.act $sb/simu/data/cec-chip
-cp $BACKING_BUILD/src/simu/data/cec-chip/p8.chip $sb/simu/data/cec-chip
-cp $BACKING_BUILD/src/simu/data/cec-chip/p8_common.chip $sb/simu/data/cec-chip
-cp $BACKING_BUILD/src/simu/data/cec-chip/centaur.act $sb/simu/data/cec-chip
-cp $BACKING_BUILD/src/simu/data/cec-chip/centaur.chip $sb/simu/data/cec-chip
-patch -p1 -d $sb < $HOSTBOOTROOT/src/build/citest/etc/patches/mdia-actions.patch

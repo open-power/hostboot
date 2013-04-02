@@ -74,7 +74,6 @@ mvpdTestData mvpdData[] =
     { MVPD::CP00, MVPD::pdR },
     { MVPD::CP00, MVPD::pdG },
     { MVPD::CP00, MVPD::pdV },
-    { MVPD::CP00, MVPD::pdH },
     //    { MVPD::CP00, pdP }, // no #P in test data
     { MVPD::CP00, MVPD::SB },
     { MVPD::CP00, MVPD::MK },
@@ -89,13 +88,14 @@ mvpdTestData mvpdData[] =
     { MVPD::LRP5, MVPD::pdP },
     { MVPD::LRP5, MVPD::pdM },
     { MVPD::LRP5, MVPD::CH },
-    { MVPD::LRP6, MVPD::VD },
-    { MVPD::LRP6, MVPD::pdV },
-    { MVPD::LRP6, MVPD::pdP },
-    { MVPD::LRP6, MVPD::pdM },
-    { MVPD::LRP6, MVPD::CH },
-    /*         // no LRP7,LRP8,LRP9,LRPA,LRPB,LWPO,LWP1,LWP2,LWP3
+/*
+             // no LRP6, LRP7,LRP8,LRP9,LRPA,LRPB,LWPO,LWP1,LWP2,LWP3
                       in test data
+     { MVPD::LRP6, MVPD::VD },
+     { MVPD::LRP6, MVPD::pdV },
+     { MVPD::LRP6, MVPD::pdP },
+     { MVPD::LRP6, MVPD::pdM },
+     { MVPD::LRP6, MVPD::CH },
      { MVPD::LRP7, VD },
      { MVPD::LRP7, MVPD::pdV },
      { MVPD::LRP7, MVPD::pdP },
@@ -161,11 +161,11 @@ mvpdTestData mvpdData[] =
     { MVPD::LWP5, MVPD::pd2 },
     { MVPD::LWP5, MVPD::pd3 },
     { MVPD::LWP5, MVPD::IN },
-    { MVPD::LWP6, MVPD::VD },
-    { MVPD::LWP6, MVPD::pd2 },
-    { MVPD::LWP6, MVPD::pd3 },
-    { MVPD::LWP6, MVPD::IN },
-    /*                 // no LWP7,LWP8,LWP9,LWPA,LWPB in test data
+    /*                 // no LWP6, LWP7,LWP8,LWP9,LWPA,LWPB in test data
+     { MVPD::LWP6, MVPD::VD },
+     { MVPD::LWP6, MVPD::pd2 },
+     { MVPD::LWP6, MVPD::pd3 },
+     { MVPD::LWP6, MVPD::IN },
      { MVPD::LWP7, MVPD::VD },
      { MVPD::LWP7, MVPD::pd2 },
      { MVPD::LWP7, MVPD::pd3 },
