@@ -1673,7 +1673,7 @@ sub generate_proc
     my ($proc, $ipath, $lognode, $logid, $ordinalId, $master, $slave, $fsi,
         $fruid,$hwTopology) = @_;
     my $uidstr = sprintf("0x%02X05%04X",${node},${proc});
-    my $vpdnum = sprintf("%d",${proc}+${node}*8);
+    my $vpdnum = ${proc};
     my $position = ${proc};
     my $scompath = $devpath->{chip}->{$ipath}->{'scom-path'};
     my $scanpath = $devpath->{chip}->{$ipath}->{'scan-path'};
