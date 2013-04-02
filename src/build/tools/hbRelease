@@ -844,11 +844,7 @@ sub git_order_commits
     {
         # Add dependencies for each patch to the hash.
         my $deps = git_commit_deps($level_info->{base}, $patch);
-
-        if (defined @{$deps})
-        {
-            push @{${$patch_hash{$patch}}->{deps}}, @{$deps};
-        }
+        push @{${$patch_hash{$patch}}->{deps}}, @{$deps};
 
         # Determine the distance from previous release for each patch.
         ${$patch_hash{$patch}}->{distance} = 
