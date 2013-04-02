@@ -203,6 +203,7 @@ void*   call_mss_memdiag( void    *io_pArgs )
                "call_mss_memdiag entry" );
 
     TargetHandleList l_mbaList;
+    TargetHandleList::iterator it;
     getAllChiplets(l_mbaList, TYPE_MBA);
 
     do {
@@ -214,11 +215,17 @@ void*   call_mss_memdiag( void    *io_pArgs )
             break;
         }
 
-        l_errl = runStep(l_mbaList);
-        if(NULL != l_errl)
+        // FIXME remove this workaround RTC: 68282
+        for(it = l_mbaList.begin();
+                it != l_mbaList.end();
+                ++it)
         {
-            TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "MDIA subStep failed");
-            break;
+            l_errl = runStep(TargetHandleList(1, *it));
+            if(NULL != l_errl)
+            {
+                TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "MDIA subStep failed");
+                break;
+            }
         }
 
         l_errl = ATTN::stopService();
