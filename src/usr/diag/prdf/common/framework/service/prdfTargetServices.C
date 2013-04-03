@@ -328,15 +328,44 @@ struct conn_t
     TYPE to : 8;
     TargetService::ASSOCIATION_TYPE type : 8;
 
-    bool operator<( const conn_t & r )
+    static uint32_t getSortOrder( TYPE type )
     {
-        if ( this->from == r.from )
-            return ( this->to < r.to );
-        else
-            return ( this->from < r.from );
+        // Can't trust that the order of the TYPE enum does not change so create
+        // our own sorting order.
+
+        uint32_t order = 0;
+
+        switch ( type )
+        {
+            case TYPE_NODE:   order =  0; break;
+            case TYPE_PROC:   order =  1; break;
+            case TYPE_EX:     order =  2; break;
+            case TYPE_XBUS:   order =  3; break;
+            case TYPE_ABUS:   order =  4; break;
+            case TYPE_PCI:    order =  5; break;
+            case TYPE_MCS:    order =  6; break;
+            case TYPE_MEMBUF: order =  7; break;
+            case TYPE_L4:     order =  8; break;
+            case TYPE_MBA:    order =  9; break;
+            case TYPE_DIMM:   order = 10; break;
+            default: ;
+        }
+
+        return order;
     }
 
-} PACKED;
+    bool operator<( const conn_t & r )
+    {
+        uint32_t thisOrder = getSortOrder(this->from);
+        uint32_t thatOrder = getSortOrder(r.from);
+
+        if ( thisOrder == thatOrder )
+            return ( getSortOrder(this->to) < getSortOrder(r.to) );
+        else
+            return ( thisOrder < thatOrder );
+    }
+
+};
 
 int32_t getAssociationType( TARGETING::TargetHandle_t i_target,
                             TARGETING::TYPE i_connType,
@@ -347,102 +376,70 @@ int32_t getAssociationType( TARGETING::TargetHandle_t i_target,
     static conn_t lookups[] =
     {
         // This table must be sorted based on the < operator of struct conn_t.
-        // FIXME: Create a Cxx test case that will catch if the values of the
-        //        TYPE enum changes.
-        { TYPE_NODE, TYPE_DIMM,   TargetService::CHILD_BY_AFFINITY },
-        { TYPE_NODE, TYPE_MEMBUF, TargetService::CHILD_BY_AFFINITY },
-        { TYPE_NODE, TYPE_PROC,   TargetService::CHILD_BY_AFFINITY },
-        { TYPE_NODE, TYPE_EX,     TargetService::CHILD_BY_AFFINITY },
-        { TYPE_NODE, TYPE_CORE,   TargetService::CHILD_BY_AFFINITY },
-        { TYPE_NODE, TYPE_L2,     TargetService::CHILD_BY_AFFINITY },
-        { TYPE_NODE, TYPE_L3,     TargetService::CHILD_BY_AFFINITY },
-        { TYPE_NODE, TYPE_L4,     TargetService::CHILD_BY_AFFINITY },
-        { TYPE_NODE, TYPE_MCS,    TargetService::CHILD_BY_AFFINITY },
-        { TYPE_NODE, TYPE_MBS,    TargetService::CHILD_BY_AFFINITY },
-        { TYPE_NODE, TYPE_MBA,    TargetService::CHILD_BY_AFFINITY },
-        { TYPE_NODE, TYPE_XBUS,   TargetService::CHILD_BY_AFFINITY },
-        { TYPE_NODE, TYPE_ABUS,   TargetService::CHILD_BY_AFFINITY },
-        { TYPE_NODE, TYPE_PCI,    TargetService::CHILD_BY_AFFINITY },
+        { TYPE_NODE,   TYPE_PROC,   TargetService::CHILD_BY_AFFINITY },
+        { TYPE_NODE,   TYPE_EX,     TargetService::CHILD_BY_AFFINITY },
+        { TYPE_NODE,   TYPE_XBUS,   TargetService::CHILD_BY_AFFINITY },
+        { TYPE_NODE,   TYPE_ABUS,   TargetService::CHILD_BY_AFFINITY },
+        { TYPE_NODE,   TYPE_PCI,    TargetService::CHILD_BY_AFFINITY },
+        { TYPE_NODE,   TYPE_MCS,    TargetService::CHILD_BY_AFFINITY },
+        { TYPE_NODE,   TYPE_MEMBUF, TargetService::CHILD_BY_AFFINITY },
+        { TYPE_NODE,   TYPE_L4,     TargetService::CHILD_BY_AFFINITY },
+        { TYPE_NODE,   TYPE_MBA,    TargetService::CHILD_BY_AFFINITY },
+        { TYPE_NODE,   TYPE_DIMM,   TargetService::CHILD_BY_AFFINITY },
 
-        { TYPE_DIMM, TYPE_NODE,   TargetService::PARENT_BY_AFFINITY },
-        { TYPE_DIMM, TYPE_MEMBUF, TargetService::PARENT_BY_AFFINITY },
-        { TYPE_DIMM, TYPE_PROC,   TargetService::PARENT_BY_AFFINITY },
-        { TYPE_DIMM, TYPE_MCS,    TargetService::PARENT_BY_AFFINITY },
-        { TYPE_DIMM, TYPE_MBA,    TargetService::PARENT_BY_AFFINITY },
+        { TYPE_PROC,   TYPE_NODE,   TargetService::PARENT_BY_AFFINITY },
+        { TYPE_PROC,   TYPE_EX,     TargetService::CHILD_BY_AFFINITY  },
+        { TYPE_PROC,   TYPE_XBUS,   TargetService::CHILD_BY_AFFINITY  },
+        { TYPE_PROC,   TYPE_ABUS,   TargetService::CHILD_BY_AFFINITY  },
+        { TYPE_PROC,   TYPE_PCI,    TargetService::CHILD_BY_AFFINITY  },
+        { TYPE_PROC,   TYPE_MCS,    TargetService::CHILD_BY_AFFINITY  },
+        { TYPE_PROC,   TYPE_MEMBUF, TargetService::CHILD_BY_AFFINITY  },
+        { TYPE_PROC,   TYPE_L4,     TargetService::CHILD_BY_AFFINITY  },
+        { TYPE_PROC,   TYPE_MBA,    TargetService::CHILD_BY_AFFINITY  },
+        { TYPE_PROC,   TYPE_DIMM,   TargetService::CHILD_BY_AFFINITY  },
+
+        { TYPE_EX,     TYPE_NODE,   TargetService::PARENT_BY_AFFINITY },
+        { TYPE_EX,     TYPE_PROC,   TargetService::PARENT_BY_AFFINITY },
+
+        { TYPE_XBUS,   TYPE_NODE,   TargetService::PARENT_BY_AFFINITY },
+        { TYPE_XBUS,   TYPE_PROC,   TargetService::PARENT_BY_AFFINITY },
+
+        { TYPE_ABUS,   TYPE_NODE,   TargetService::PARENT_BY_AFFINITY },
+        { TYPE_ABUS,   TYPE_PROC,   TargetService::PARENT_BY_AFFINITY },
+
+        { TYPE_PCI,    TYPE_NODE,   TargetService::PARENT_BY_AFFINITY },
+        { TYPE_PCI,    TYPE_PROC,   TargetService::PARENT_BY_AFFINITY },
+
+        { TYPE_MCS,    TYPE_NODE,   TargetService::PARENT_BY_AFFINITY },
+        { TYPE_MCS,    TYPE_PROC,   TargetService::PARENT_BY_AFFINITY },
+        { TYPE_MCS,    TYPE_MEMBUF, TargetService::CHILD_BY_AFFINITY  },
+        { TYPE_MCS,    TYPE_L4,     TargetService::CHILD_BY_AFFINITY  },
+        { TYPE_MCS,    TYPE_MBA,    TargetService::CHILD_BY_AFFINITY  },
+        { TYPE_MCS,    TYPE_DIMM,   TargetService::CHILD_BY_AFFINITY  },
 
         { TYPE_MEMBUF, TYPE_NODE,   TargetService::PARENT_BY_AFFINITY },
-        { TYPE_MEMBUF, TYPE_DIMM,   TargetService::CHILD_BY_AFFINITY  },
         { TYPE_MEMBUF, TYPE_PROC,   TargetService::PARENT_BY_AFFINITY },
-        { TYPE_MEMBUF, TYPE_L4,     TargetService::CHILD_BY_AFFINITY  },
         { TYPE_MEMBUF, TYPE_MCS,    TargetService::PARENT_BY_AFFINITY },
-        { TYPE_MEMBUF, TYPE_MBS,    TargetService::CHILD_BY_AFFINITY  },
+        { TYPE_MEMBUF, TYPE_L4,     TargetService::CHILD_BY_AFFINITY  },
         { TYPE_MEMBUF, TYPE_MBA,    TargetService::CHILD_BY_AFFINITY  },
+        { TYPE_MEMBUF, TYPE_DIMM,   TargetService::CHILD_BY_AFFINITY  },
 
-        { TYPE_PROC, TYPE_NODE,   TargetService::PARENT_BY_AFFINITY },
-        { TYPE_PROC, TYPE_DIMM,   TargetService::CHILD_BY_AFFINITY  },
-        { TYPE_PROC, TYPE_MEMBUF, TargetService::CHILD_BY_AFFINITY  },
-        { TYPE_PROC, TYPE_EX,     TargetService::CHILD_BY_AFFINITY  },
-        { TYPE_PROC, TYPE_CORE,   TargetService::CHILD_BY_AFFINITY  },
-        { TYPE_PROC, TYPE_L2,     TargetService::CHILD_BY_AFFINITY  },
-        { TYPE_PROC, TYPE_L3,     TargetService::CHILD_BY_AFFINITY  },
-        { TYPE_PROC, TYPE_L4,     TargetService::CHILD_BY_AFFINITY  },
-        { TYPE_PROC, TYPE_MCS,    TargetService::CHILD_BY_AFFINITY  },
-        { TYPE_PROC, TYPE_MBS,    TargetService::CHILD_BY_AFFINITY  },
-        { TYPE_PROC, TYPE_MBA,    TargetService::CHILD_BY_AFFINITY  },
-        { TYPE_PROC, TYPE_XBUS,   TargetService::CHILD_BY_AFFINITY  },
-        { TYPE_PROC, TYPE_ABUS,   TargetService::CHILD_BY_AFFINITY  },
-        { TYPE_PROC, TYPE_PCI,    TargetService::CHILD_BY_AFFINITY  },
+        { TYPE_L4,     TYPE_NODE,   TargetService::PARENT_BY_AFFINITY },
+        { TYPE_L4,     TYPE_PROC,   TargetService::PARENT_BY_AFFINITY },
+        { TYPE_L4,     TYPE_MCS,    TargetService::PARENT_BY_AFFINITY },
+        { TYPE_L4,     TYPE_MEMBUF, TargetService::PARENT_BY_AFFINITY },
 
-        { TYPE_EX, TYPE_NODE,   TargetService::PARENT_BY_AFFINITY },
-        { TYPE_EX, TYPE_PROC,   TargetService::PARENT_BY_AFFINITY },
-        { TYPE_EX, TYPE_CORE,   TargetService::CHILD_BY_AFFINITY  },
-        { TYPE_EX, TYPE_L2,     TargetService::CHILD_BY_AFFINITY  },
-        { TYPE_EX, TYPE_L3,     TargetService::CHILD_BY_AFFINITY  },
+        { TYPE_MBA,    TYPE_NODE,   TargetService::PARENT_BY_AFFINITY },
+        { TYPE_MBA,    TYPE_PROC,   TargetService::PARENT_BY_AFFINITY },
+        { TYPE_MBA,    TYPE_MCS,    TargetService::PARENT_BY_AFFINITY },
+        { TYPE_MBA,    TYPE_MEMBUF, TargetService::PARENT_BY_AFFINITY },
+        { TYPE_MBA,    TYPE_DIMM,   TargetService::CHILD_BY_AFFINITY  },
 
-        { TYPE_CORE, TYPE_NODE,   TargetService::PARENT_BY_AFFINITY },
-        { TYPE_CORE, TYPE_PROC,   TargetService::PARENT_BY_AFFINITY },
-        { TYPE_CORE, TYPE_EX,     TargetService::PARENT_BY_AFFINITY },
-
-        { TYPE_L2, TYPE_NODE,   TargetService::PARENT_BY_AFFINITY },
-        { TYPE_L2, TYPE_PROC,   TargetService::PARENT_BY_AFFINITY },
-        { TYPE_L2, TYPE_EX,     TargetService::PARENT_BY_AFFINITY },
-
-        { TYPE_L3, TYPE_NODE,   TargetService::PARENT_BY_AFFINITY },
-        { TYPE_L3, TYPE_PROC,   TargetService::PARENT_BY_AFFINITY },
-        { TYPE_L3, TYPE_EX,     TargetService::PARENT_BY_AFFINITY },
-
-        { TYPE_MBS, TYPE_NODE,   TargetService::PARENT_BY_AFFINITY },
-        { TYPE_MBS, TYPE_MEMBUF, TargetService::PARENT_BY_AFFINITY },
-        { TYPE_MBS, TYPE_PROC,   TargetService::PARENT_BY_AFFINITY },
-        { TYPE_MBS, TYPE_MCS,    TargetService::PARENT_BY_AFFINITY },
-
-        { TYPE_MCS, TYPE_NODE,   TargetService::PARENT_BY_AFFINITY },
-        { TYPE_MCS, TYPE_DIMM,   TargetService::CHILD_BY_AFFINITY  },
-        { TYPE_MCS, TYPE_MEMBUF, TargetService::CHILD_BY_AFFINITY  },
-        { TYPE_MCS, TYPE_PROC,   TargetService::PARENT_BY_AFFINITY },
-        { TYPE_MCS, TYPE_L4,     TargetService::CHILD_BY_AFFINITY  },
-        { TYPE_MCS, TYPE_MBS,    TargetService::CHILD_BY_AFFINITY  },
-        { TYPE_MCS, TYPE_MBA,    TargetService::CHILD_BY_AFFINITY  },
-
-        { TYPE_MBS, TYPE_NODE,   TargetService::PARENT_BY_AFFINITY },
-        { TYPE_MBS, TYPE_MEMBUF, TargetService::PARENT_BY_AFFINITY },
-        { TYPE_MBS, TYPE_PROC,   TargetService::PARENT_BY_AFFINITY },
-        { TYPE_MBS, TYPE_MCS,    TargetService::PARENT_BY_AFFINITY },
-
-        { TYPE_MBA, TYPE_NODE,   TargetService::PARENT_BY_AFFINITY },
-        { TYPE_MBA, TYPE_DIMM,   TargetService::CHILD_BY_AFFINITY  },
-        { TYPE_MBA, TYPE_MEMBUF, TargetService::PARENT_BY_AFFINITY },
-        { TYPE_MBA, TYPE_PROC,   TargetService::PARENT_BY_AFFINITY },
-        { TYPE_MBA, TYPE_MCS,    TargetService::PARENT_BY_AFFINITY },
-
-        { TYPE_XBUS, TYPE_NODE,   TargetService::PARENT_BY_AFFINITY },
-        { TYPE_XBUS, TYPE_PROC,   TargetService::PARENT_BY_AFFINITY },
-
-        { TYPE_ABUS, TYPE_NODE,   TargetService::PARENT_BY_AFFINITY },
-        { TYPE_ABUS, TYPE_PROC,   TargetService::PARENT_BY_AFFINITY },
-
-        { TYPE_PCI, TYPE_NODE,   TargetService::PARENT_BY_AFFINITY },
-        { TYPE_PCI, TYPE_PROC,   TargetService::PARENT_BY_AFFINITY },
+        { TYPE_DIMM,   TYPE_NODE,   TargetService::PARENT_BY_AFFINITY },
+        { TYPE_DIMM,   TYPE_PROC,   TargetService::PARENT_BY_AFFINITY },
+        { TYPE_DIMM,   TYPE_MCS,    TargetService::PARENT_BY_AFFINITY },
+        { TYPE_DIMM,   TYPE_MEMBUF, TargetService::PARENT_BY_AFFINITY },
+        { TYPE_DIMM,   TYPE_MBA,    TargetService::PARENT_BY_AFFINITY },
     };
 
     const size_t sz_lookups = sizeof(lookups) / sizeof(conn_t);
