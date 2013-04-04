@@ -39,7 +39,10 @@
 extern "C"
 {
 
-/******************************************************************************
+// TODO: RTC Task: 69592. Refactor eRepair code to remove this file and change
+// the erepairGetFailedLanesHwp.C file to read Manufacturing VPD
+
+/*****************************************************************************e
  * Forward Declarations
  *****************************************************************************/
 
@@ -52,10 +55,6 @@ extern "C"
  *        parsing.
  *
  * @param[in] i_tgtHandle   Reference to X-Bus or A-Bus or MCS target
- * @param[in] i_procTgt     Reference to the Processor target associated with
- *                          passed i_tgtHandle
- * @param[in] i_recordType  This is the VPD record type that is used to query
- *                          the VPD data
  * @param[o]  o_txFailLanes Reference to a vector that will hold eRepair fail
  *                          lane numbers of the Tx sub-interface.
  * @param[o]  o_rxFailLanes Reference to a vector that will hold eRepair fail
@@ -64,8 +63,6 @@ extern "C"
  * @return ReturnCode
  */
 fapi::ReturnCode retrieveMnfgRepairData(const fapi::Target   &i_tgtHandle,
-                                        const fapi::Target   &i_procTgt,
-                                        fapi::MvpdRecord     i_recordType,
                                         std::vector<uint8_t> &o_txFailLanes,
                                         std::vector<uint8_t> &o_rxFailLanes);
 
@@ -103,7 +100,6 @@ fapi::ReturnCode erepairGetMnfgFailedLanesHwp(const fapi::Target   &i_tgtHandle,
                                               std::vector<uint8_t> &o_rxFailLanes)
 {
     fapi::ReturnCode l_rc;
-    fapi::Target     l_processorTgt;
     fapi::TargetType l_tgtType = fapi::TARGET_TYPE_NONE;
     std::vector<fapi::Target> l_mcsChiplets;
 
@@ -119,10 +115,8 @@ fapi::ReturnCode erepairGetMnfgFailedLanesHwp(const fapi::Target   &i_tgtHandle,
         l_tgtType = i_tgtHandle.getType();
 
         // Verify if the correct target type is passed
-        // TODO: l_tgtType of fapi::TARGET_TYPE_MEMBUF_CHIP will be supported
-        //       when HWSV will provide the device driver to read the
-        //       Centaur FRU VPD. RTC Task 51234, Depends on Story 44009
         if((l_tgtType != fapi::TARGET_TYPE_MCS_CHIPLET)    &&
+           (l_tgtType != fapi::TARGET_TYPE_MEMBUF_CHIP)    &&
            (l_tgtType != fapi::TARGET_TYPE_XBUS_ENDPOINT)  &&
            (l_tgtType != fapi::TARGET_TYPE_ABUS_ENDPOINT))
         {
@@ -132,34 +126,17 @@ fapi::ReturnCode erepairGetMnfgFailedLanesHwp(const fapi::Target   &i_tgtHandle,
             break;
         }
 
-        // Determine the Processor target
-        l_rc = fapiGetParentChip(i_tgtHandle, l_processorTgt);
-        if(l_rc)
-        {
-            FAPI_ERR("Error (0x%x) from fapiGetParentChip",
-                    static_cast<uint32_t>(l_rc));
-            break;
-        }
-
         // Retrieve the Manufacturing eRepair lane numbers from the VPD
-        // TODO: Uncomment this block when the support for Mnfg VPD is
-        // available by HWSV in PNOR
-        /*
-        fapi::MvpdRecord l_mfgRecord;
-        l_mfgRecord = fapi::MVPD_RECORD_MER0;
         l_rc = retrieveMnfgRepairData(i_tgtHandle,
-                                  l_processorTgt,
-                                  l_mfgRecord,
-                                  o_txFailLanes,
-                                  o_rxFailLanes);
+                                      o_txFailLanes,
+                                      o_rxFailLanes);
 
         if(l_rc)
         {
             FAPI_ERR("Error (0x%x) during retrieval of Mfg records",
-                     static_cast<uint32_t>(l_rc));
+                    static_cast<uint32_t>(l_rc));
             break;
         }
-        */
     }while(0);
 
     FAPI_INF("<< erepairGetMnfgFailedLanesHwp");
@@ -169,36 +146,41 @@ fapi::ReturnCode erepairGetMnfgFailedLanesHwp(const fapi::Target   &i_tgtHandle,
 
 
 fapi::ReturnCode retrieveMnfgRepairData(const fapi::Target   &i_tgtHandle,
-                                        const fapi::Target   &i_procTgt,
-                                        fapi::MvpdRecord     i_recordType,
                                         std::vector<uint8_t> &o_txFailLanes,
                                         std::vector<uint8_t> &o_rxFailLanes)
 {
-    uint8_t  *l_retBuf = NULL;
-    uint32_t l_bufSize = 0;
     fapi::ReturnCode l_rc;
+    uint8_t          *l_retBuf = NULL;
+    uint32_t         l_bufSize = 0;
+    fapi::Target     l_procTarget;
 
-    FAPI_INF(">> retrieveMnfgRepairData: i_procTgt: %s",
-             i_procTgt.toEcmdString());
+    FAPI_INF(">> retrieveMnfgRepairData");
 
     do
     {
-        // Determine the size of the eRepair data in the VPD
-        l_rc = fapiGetMvpdField(i_recordType,
-                                fapi::MVPD_KEYWORD_PDI,
-                                i_procTgt,
-                                NULL,
-                                l_bufSize);
-
-        if(l_rc)
+        if(i_tgtHandle.getType() == fapi::TARGET_TYPE_MEMBUF_CHIP)
         {
-            FAPI_ERR("Error (0x%x) from fapiGetMvpdField",
-                     static_cast<uint32_t> (l_rc));
-            break;
-        }
+            // Determine the size of the eRepair data in the VPD
+            l_rc = fapiGetMBvpdField(fapi::MBVPD_RECORD_MER0,
+                                     fapi::MBVPD_KEYWORD_PDI,
+                                     i_tgtHandle,
+                                     NULL,
+                                     l_bufSize);
 
-        if(l_bufSize != 0)
-        {
+            if(l_rc)
+            {
+                FAPI_ERR("Error (0x%x) from fapiGetMBvpdField",
+                        static_cast<uint32_t> (l_rc));
+                break;
+            }
+
+            if((l_bufSize == 0) ||
+               (l_bufSize > EREPAIR::EREPAIR_MEM_MNFG_VPD_SIZE_PER_CENTAUR))
+            {
+                FAPI_SET_HWP_ERROR(l_rc, RC_ACCESSOR_HWP_INVALID_MEM_VPD_SIZE);
+                break;
+            }
+
             // Allocate memory for buffer
             l_retBuf = new uint8_t[l_bufSize];
             if(l_retBuf == NULL)
@@ -209,10 +191,35 @@ fapi::ReturnCode retrieveMnfgRepairData(const fapi::Target   &i_tgtHandle,
             }
 
             // Retrieve the Field eRepair data from the PNOR
-            l_rc = fapiGetMvpdField(i_recordType,
+            l_rc = fapiGetMBvpdField(fapi::MBVPD_RECORD_MER0,
+                                     fapi::MBVPD_KEYWORD_PDI,
+                                     i_tgtHandle,
+                                     l_retBuf,
+                                     l_bufSize);
+
+            if(l_rc)
+            {
+                FAPI_ERR("Error (0x%x) from fapiGetMBvpdField",
+                        static_cast<uint32_t> (l_rc));
+                break;
+            }
+        }
+        else
+        {
+            // Determine the Processor target
+            l_rc = fapiGetParentChip(i_tgtHandle, l_procTarget);
+            if(l_rc)
+            {
+                FAPI_ERR("Error (0x%x) from fapiGetParentChip",
+                         static_cast<uint32_t>(l_rc));
+                break;
+            }
+
+            // Determine the size of the eRepair data in the VPD
+            l_rc = fapiGetMvpdField(fapi::MVPD_RECORD_MER0,
                                     fapi::MVPD_KEYWORD_PDI,
-                                    i_procTgt,
-                                    l_retBuf,
+                                    l_procTarget,
+                                    NULL,
                                     l_bufSize);
 
             if(l_rc)
@@ -222,18 +229,49 @@ fapi::ReturnCode retrieveMnfgRepairData(const fapi::Target   &i_tgtHandle,
                 break;
             }
 
-            // Parse the buffer to determine eRepair lanes and copy the
-            // fail lane numbers to the return vector
-            l_rc = determineMnfgRepairLanes(i_tgtHandle,
-                                            l_retBuf,
-                                            l_bufSize,
-                                            o_txFailLanes,
-                                            o_rxFailLanes);
-            if(l_rc)
+            if((l_bufSize == 0) ||
+               (l_bufSize > EREPAIR::EREPAIR_P8_MODULE_VPD_MNFG_SIZE))
             {
-                FAPI_ERR("determineRepairLanes failed");
+                FAPI_SET_HWP_ERROR(l_rc,
+                                   RC_ACCESSOR_HWP_INVALID_FABRIC_VPD_SIZE);
                 break;
             }
+
+            // Allocate memory for buffer
+            l_retBuf = new uint8_t[l_bufSize];
+            if(l_retBuf == NULL)
+            {
+                FAPI_ERR("Failed to allocate memory size of %d", l_bufSize);
+                FAPI_SET_HWP_ERROR(l_rc, RC_ACCESSOR_HWP_MEMORY_ALLOC_FAIL);
+                break;
+            }
+
+            // Retrieve the Field eRepair data from the PNOR
+            l_rc = fapiGetMvpdField(fapi::MVPD_RECORD_MER0,
+                                    fapi::MVPD_KEYWORD_PDI,
+                                    l_procTarget,
+                                    l_retBuf,
+                                    l_bufSize);
+
+            if(l_rc)
+            {
+                FAPI_ERR("Error (0x%x) from fapiGetMvpdField",
+                        static_cast<uint32_t> (l_rc));
+                break;
+            }
+        }
+
+        // Parse the buffer to determine eRepair lanes and copy the
+        // fail lane numbers to the return vector
+        l_rc = determineMnfgRepairLanes(i_tgtHandle,
+                                        l_retBuf,
+                                        l_bufSize,
+                                        o_txFailLanes,
+                                        o_rxFailLanes);
+        if(l_rc)
+        {
+            FAPI_ERR("determineRepairLanes failed");
+            break;
         }
     }while(0);
 
@@ -259,6 +297,8 @@ fapi::ReturnCode determineMnfgRepairLanes(const fapi::Target   &i_tgtHandle,
     const uint32_t   l_memRepairDataSz    = sizeof(eRepairMemBus);
     const uint32_t   l_fabricRepairDataSz = sizeof(eRepairPowerBus);
     fapi::TargetType l_tgtType            = fapi::TARGET_TYPE_NONE;
+    fapi::Target     l_mcsTarget;
+    fapi::Target     l_tgtHandle;
     fapi::ReturnCode l_rc;
     fapi::ATTR_CHIP_UNIT_POS_Type l_busNum;
 
@@ -296,6 +336,9 @@ fapi::ReturnCode determineMnfgRepairLanes(const fapi::Target   &i_tgtHandle,
                     break;
                 }
 
+                // TODO: RTC task 71260
+                // Investigate if there is an Endianess issue with
+                // the memcpy and fix it.
                 memcpy(&l_fabricBus, l_vpdPtr, l_fabricRepairDataSz);
 
                 // Check if we have the correct Processor ID
@@ -341,10 +384,29 @@ fapi::ReturnCode determineMnfgRepairLanes(const fapi::Target   &i_tgtHandle,
                 }
             } // end of for loop
         } // end of if(l_tgtType is XBus or ABus)
-        else if(l_tgtType == fapi::TARGET_TYPE_MCS_CHIPLET)
+        else if((l_tgtType == fapi::TARGET_TYPE_MCS_CHIPLET) ||
+                 (l_tgtType == fapi::TARGET_TYPE_MEMBUF_CHIP))
         {
             // Parse for Memory bus data
             eRepairMemBus l_memBus;
+            l_tgtHandle = i_tgtHandle;
+
+            if(l_tgtType == fapi::TARGET_TYPE_MEMBUF_CHIP)
+            {
+                l_rc = fapiGetOtherSideOfMemChannel(
+                                                i_tgtHandle,
+                                                l_mcsTarget,
+                                                fapi::TARGET_STATE_FUNCTIONAL);
+
+                if(l_rc)
+                {
+                    FAPI_ERR("determineMnfgRepairLanes: Unable to get the"
+                             " connected MCS target");
+                    break;
+                }
+
+                l_tgtHandle = l_mcsTarget;
+            }
 
             // Read Power bus eRepair data and get the failed lane numbers
             for(l_loop = 0;
@@ -358,6 +420,9 @@ fapi::ReturnCode determineMnfgRepairLanes(const fapi::Target   &i_tgtHandle,
                     break;
                 }
 
+                // TODO: RTC task 71260
+                // Investigate if there is an Endianess issue with
+                // the memcpy and fix it.
                 memcpy(&l_memBus, l_vpdPtr, l_memRepairDataSz);
 
                 // Check if we have the correct Processor ID
@@ -372,7 +437,7 @@ fapi::ReturnCode determineMnfgRepairLanes(const fapi::Target   &i_tgtHandle,
                 }
 
                 // Check if we have the matching memory bus interface
-                l_rc = FAPI_ATTR_GET(ATTR_CHIP_UNIT_POS,&i_tgtHandle,l_busNum);
+                l_rc = FAPI_ATTR_GET(ATTR_CHIP_UNIT_POS,&l_tgtHandle,l_busNum);
                 if(l_rc)
                 {
                     FAPI_ERR("Error (0x%x), from ATTR_CHIP_UNIT_POS",
@@ -392,13 +457,27 @@ fapi::ReturnCode determineMnfgRepairLanes(const fapi::Target   &i_tgtHandle,
                 }
 
                 // Copy the fail lane numbers in the vectors
-                if(l_memBus.interface == EREPAIR::DMI_MCS_DRIVE)
+                if(l_tgtType == fapi::TARGET_TYPE_MCS_CHIPLET)
                 {
-                    o_txFailLanes.push_back(l_memBus.failBit);
+                    if(l_memBus.interface == EREPAIR::DMI_MCS_DRIVE)
+                    {
+                        o_txFailLanes.push_back(l_memBus.failBit);
+                    }
+                    else if(l_memBus.interface == EREPAIR::DMI_MCS_RECEIVE)
+                    {
+                        o_rxFailLanes.push_back(l_memBus.failBit);
+                    }
                 }
-                else if(l_memBus.interface == EREPAIR::DMI_MCS_RECEIVE)
+                if(l_tgtType == fapi::TARGET_TYPE_MEMBUF_CHIP)
                 {
-                    o_rxFailLanes.push_back(l_memBus.failBit);
+                    if(l_memBus.interface == EREPAIR::DMI_MEMBUF_DRIVE)
+                    {
+                        o_txFailLanes.push_back(l_memBus.failBit);
+                    }
+                    else if(l_memBus.interface == EREPAIR::DMI_MEMBUF_RECEIVE)
+                    {
+                        o_rxFailLanes.push_back(l_memBus.failBit);
+                    }
                 }
             } // end of for loop
         } // end of if(l_tgtType is MCS)

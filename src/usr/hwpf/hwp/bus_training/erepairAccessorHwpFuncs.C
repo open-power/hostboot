@@ -289,25 +289,19 @@ fapi::ReturnCode erepairGetRestoreLanes(const fapi::Target &i_endp1_target,
 
         // Check if MNFG_DISABLE_FABRIC_EREPAIR is enabled
         l_disableFabricERepair = false;
-        // TODO: This Mnfg flag is not defined yet. RTC: 59532
-        /*
         if(l_allMnfgFlags &
-           fapi::ENUM_ATTR_MNFG_FLAGS_MNFG_DISABLE_FABRIC_EREPAIR)
+           fapi::ENUM_ATTR_MNFG_FLAGS_MNFG_DISABLE_FABRIC_eREPAIR)
         {
             l_disableFabricERepair = true;
         }
-        */
 
         // Check if MNFG_DISABLE_MEMORY_EREPAIR is enabled
         l_disableMemoryERepair = false;
-        // TODO: This Mnfg flag is not defined yet. RTC: 59532
-        /*
         if(l_allMnfgFlags &
-           fapi::ENUM_ATTR_MNFG_FLAGS_MNFG_DISABLE_MEMORY_EREPAIR)
+           fapi::ENUM_ATTR_MNFG_FLAGS_MNFG_DISABLE_MEMORY_eREPAIR)
         {
             l_disableMemoryERepair = true;
         }
-        */
 
         // Check if this is Manufacturing mode IPL.
         l_mnfgModeIPL = false;
@@ -333,7 +327,7 @@ fapi::ReturnCode erepairGetRestoreLanes(const fapi::Target &i_endp1_target,
                 break;
             }
 
-            if(l_disableFabricERepair)
+            if(l_mnfgModeIPL && l_disableFabricERepair)
             {
                 // Fabric eRepair has been disabled using the
                 // Manufacturing policy flags
@@ -352,39 +346,12 @@ fapi::ReturnCode erepairGetRestoreLanes(const fapi::Target &i_endp1_target,
             FAPI_SET_HWP_ERROR(l_rc, RC_EREPAIR_RESTORE_INVALID_TARGET_PAIR);
             break;
         }
-        else if(l_disableMemoryERepair)
+        else if(l_mnfgModeIPL && l_disableMemoryERepair)
         {
             // Memory eRepair has been disabled using the
             // Manufacturing policy flags
             FAPI_INF("erepairGetRestoreLanes: Memory eRepair is disabled");
             break;
-        }
-
-        // TODO: Target Type of fapi::TARGET_TYPE_MEMBUF_CHIP will be supported
-        //       when HWSV will provide the device driver to read the
-        //       Centaur FRU VPD. RTC Task 51234, Depends on Story 44009
-        // This is a temporary workaround for December PON. Delete this block.
-        fapi::Target l_endp1_target, l_endp2_target;
-        if(l_endp1_tgtType == fapi::TARGET_TYPE_MEMBUF_CHIP)
-        {
-            l_endp1_target = l_endp2_target = i_endp2_target;
-
-            FAPI_INF(">>erepairGetRestoreLanes: PON Workaround: endp1 = %s,"
-                     " endp2 = %s", l_endp1_target.toEcmdString(),
-                     l_endp2_target.toEcmdString());
-        }
-        else if(l_endp2_tgtType == fapi::TARGET_TYPE_MEMBUF_CHIP)
-        {
-            l_endp1_target = l_endp2_target = i_endp1_target;
-
-            FAPI_INF(">>erepairGetRestoreLanes: PON Workaround: endp1 = %s,"
-                     " endp2 = %s", l_endp1_target.toEcmdString(),
-                     l_endp2_target.toEcmdString());
-        }
-        else
-        {
-            l_endp1_target = i_endp1_target;
-            l_endp2_target = i_endp2_target;
         }
 
 #ifndef __HOSTBOOT_MODULE
@@ -406,8 +373,8 @@ fapi::ReturnCode erepairGetRestoreLanes(const fapi::Target &i_endp1_target,
             /***** Check Field VPD *****/
 
             // Do not allow eRepair data in Field VPD during Mfg Mode IPL
-            l_rc = mnfgCheckFieldVPD(l_endp1_target,
-                                     l_endp2_target);
+            l_rc = mnfgCheckFieldVPD(i_endp1_target,
+                                     i_endp2_target);
             if(l_rc)
             {
                 FAPI_ERR("erepairGetRestoreLanes:Error from mnfgCheckFieldVPD");
@@ -415,15 +382,10 @@ fapi::ReturnCode erepairGetRestoreLanes(const fapi::Target &i_endp1_target,
             }
 
             /***** Read Manufacturing VPD *****/
-            // TODO: This is a temporary workaround until HWSV gets
-            //       the MER0 records into PNOR. As per Dean, the
-            //       Manufacturing support is needed by Feb-2013
-            //       RTC Task: 60517
-            /*   // Uncomment this block when MER0 is available
-            l_rc = getVerifiedRepairLanes(l_endp1_target,
+            l_rc = getVerifiedRepairLanes(i_endp1_target,
                                           o_endp1_txFaillanes,
                                           o_endp1_rxFaillanes,
-                                          l_endp2_target,
+                                          i_endp2_target,
                                           o_endp2_txFaillanes,
                                           o_endp2_rxFaillanes,
                                           l_charmModeIPL,
@@ -434,7 +396,6 @@ fapi::ReturnCode erepairGetRestoreLanes(const fapi::Target &i_endp1_target,
                          " getVerifiedRepairLanes(Mnfg)");
                 break;
             }
-            */
         }
         else
         {   /***** Normal Mode IPL *****/
@@ -444,14 +405,10 @@ fapi::ReturnCode erepairGetRestoreLanes(const fapi::Target &i_endp1_target,
 
             /***** Read Manufacturing VPD *****/
 
-            // TODO: This is a temporary workaround until HWSV gets
-            //       the MER0 records into PNOR
-            //       RTC Task: 60517
-            /*   // Uncomment this block when MER0 is available
-            l_rc = getVerifiedRepairLanes(l_endp1_target,
+            l_rc = getVerifiedRepairLanes(i_endp1_target,
                                           l_endp1_txMnfgFaillanes,
                                           l_endp1_rxMnfgFaillanes,
-                                          l_endp2_target,
+                                          i_endp2_target,
                                           l_endp2_txMnfgFaillanes,
                                           l_endp2_rxMnfgFaillanes,
                                           l_charmModeIPL,
@@ -462,14 +419,13 @@ fapi::ReturnCode erepairGetRestoreLanes(const fapi::Target &i_endp1_target,
                          " getVerifiedRepairLanes(Mnfg)");
                 break;
             }
-            */
 
             /***** Read Field VPD *****/
 
-            l_rc = getVerifiedRepairLanes(l_endp1_target,
+            l_rc = getVerifiedRepairLanes(i_endp1_target,
                                           l_endp1_txFieldFaillanes,
                                           l_endp1_rxFieldFaillanes,
-                                          l_endp2_target,
+                                          i_endp2_target,
                                           l_endp2_txFieldFaillanes,
                                           l_endp2_rxFieldFaillanes,
                                           l_charmModeIPL,
@@ -540,13 +496,16 @@ fapi::ReturnCode erepairGetRestoreLanes(const fapi::Target &i_endp1_target,
 
         // Get the eRepair threshold limit
         l_threshold = 0;
-        l_rc = geteRepairThreshold(l_endp1_target, l_mnfgModeIPL, l_threshold);
+        l_rc = geteRepairThreshold(i_endp1_target, l_mnfgModeIPL, l_threshold);
 
         if(l_rc)
         {
             FAPI_ERR("erepairGetRestoreLanes: Error from geteRepairThreshold");
             break;
         }
+
+        /*** We want to create eRepair threshold exceed error logs for   ***/
+        /*** each of the Tx and Rx sub-interfaces of both the end-points ***/
 
         // Check if the eRepair threshold has exceeded for Tx side of endp1
         if(o_endp1_txFaillanes.size() > l_threshold)
@@ -556,10 +515,14 @@ fapi::ReturnCode erepairGetRestoreLanes(const fapi::Target &i_endp1_target,
             FAPI_ERR("erepairGetRestoreLanes: eRepair threshold exceed error"
                      " seen in Tx of endp1 target. No.of lanes: %d",
                      o_endp1_txFaillanes.size());
-            // TODO: RTC 60623
-            // Need to provide FFDC data that has -
-            // End point targets, Sub-interface type and fail lanes causing
-            // threshold exceed
+
+            fapi::ReturnCode    l_rcLog;
+            const fapi::Target  &FFDC_ENDP_TARGET = i_endp1_target;
+            const interfaceType &FFDC_SUB_IFACE   = DRIVE;
+            const uint32_t      &FFDC_LANES       = o_endp1_txFaillanes.size();
+            FAPI_SET_HWP_ERROR(l_rcLog, RC_EREPAIR_RESTORE_THRESHOLD_EXCEED);
+
+            fapiLogError(l_rcLog);
         }
 
         // Check if the eRepair threshold has exceeded for Rx side of endp1
@@ -570,10 +533,14 @@ fapi::ReturnCode erepairGetRestoreLanes(const fapi::Target &i_endp1_target,
             FAPI_ERR("erepairGetRestoreLanes: eRepair threshold exceed error"
                      " seen in Rx of endp1 target. No.of lanes: %d",
                      o_endp1_rxFaillanes.size());
-            // TODO: RTC 60623
-            // Need to provide FFDC data that has -
-            // End point targets, Sub-interface type and fail lanes causing
-            // threshold exceed
+
+            fapi::ReturnCode    l_rcLog;
+            const fapi::Target  &FFDC_ENDP_TARGET = i_endp1_target;
+            const interfaceType &FFDC_SUB_IFACE   = RECEIVE;
+            const uint32_t      &FFDC_LANES       = o_endp1_rxFaillanes.size();
+            FAPI_SET_HWP_ERROR(l_rcLog, RC_EREPAIR_RESTORE_THRESHOLD_EXCEED);
+
+            fapiLogError(l_rcLog);
         }
 
         // Check if the eRepair threshold has exceeded for Tx side of endp2
@@ -584,10 +551,14 @@ fapi::ReturnCode erepairGetRestoreLanes(const fapi::Target &i_endp1_target,
             FAPI_ERR("erepairGetRestoreLanes: eRepair threshold exceed error"
                      " seen in Tx of endp2 target. No.of lanes: %d",
                      o_endp2_txFaillanes.size());
-            // TODO: RTC 60623
-            // Need to provide FFDC data that has -
-            // End point targets, Sub-interface type and fail lanes causing
-            // threshold exceed
+
+            fapi::ReturnCode    l_rcLog;
+            const fapi::Target  &FFDC_ENDP_TARGET = i_endp2_target;
+            const interfaceType &FFDC_SUB_IFACE   = DRIVE;
+            const uint32_t      &FFDC_LANES       = o_endp2_txFaillanes.size();
+            FAPI_SET_HWP_ERROR(l_rcLog, RC_EREPAIR_RESTORE_THRESHOLD_EXCEED);
+
+            fapiLogError(l_rcLog);
         }
 
         // Check if the eRepair threshold has exceeded for Rx side of endp2
@@ -598,17 +569,21 @@ fapi::ReturnCode erepairGetRestoreLanes(const fapi::Target &i_endp1_target,
             FAPI_ERR("erepairGetRestoreLanes: eRepair threshold exceed error"
                      " seen in Rx of endp2 target. No.of lanes: %d",
                      o_endp2_rxFaillanes.size());
-            // TODO: RTC 60623
-            // Need to provide FFDC data that has -
-            // End point targets, Sub-interface type and fail lanes causing
-            // threshold exceed
+
+            fapi::ReturnCode    l_rcLog;
+            const fapi::Target  &FFDC_ENDP_TARGET = i_endp2_target;
+            const interfaceType &FFDC_SUB_IFACE   = RECEIVE;
+            const uint32_t      &FFDC_LANES       = o_endp2_rxFaillanes.size();
+            FAPI_SET_HWP_ERROR(l_rcLog, RC_EREPAIR_RESTORE_THRESHOLD_EXCEED);
+
+            fapiLogError(l_rcLog);
         }
 
         if(l_thresholdExceed)
         {
             FAPI_ERR("erepairGetRestoreLanes: Threshold has Exceeded");
 
-            FAPI_SET_HWP_ERROR(l_rc, RC_EREPAIR_RESTORE_THRESHOLD_EXCEED);
+            FAPI_SET_HWP_ERROR(l_rc, RC_EREPAIR_THRESHOLD_EXCEED);
             break;
         }
 
@@ -642,7 +617,7 @@ fapi::ReturnCode erepairGetRestoreLanes(const fapi::Target &i_endp1_target,
         if(o_endp1_txFaillanes.size() || o_endp1_rxFaillanes.size())
         {
             l_sparesFound = false;
-            l_rc = removeSpareLanes(l_endp1_target,
+            l_rc = removeSpareLanes(i_endp1_target,
                                     o_endp1_txFaillanes,
                                     o_endp1_rxFaillanes,
                                     l_sparesFound);
@@ -661,39 +636,11 @@ fapi::ReturnCode erepairGetRestoreLanes(const fapi::Target &i_endp1_target,
             }
         }
 
-        // TODO: Delete the below block after uncommenting the next block
-        // Check if the fail lanes of endp2 are spare lanes. RTC: 51234
+        // Check if the fail lanes of endp2 are spare lanes
         if(o_endp2_rxFaillanes.size() || o_endp2_txFaillanes.size())
         {
             l_sparesFound = false;
-            l_rc = removeSpareLanes(l_endp2_target,
-                                    o_endp2_rxFaillanes,
-                                    o_endp2_txFaillanes,
-                                    l_sparesFound);
-
-            if(l_rc)
-            {
-                FAPI_ERR("erepairGetRestoreLanes: Error from"
-                         " removeSpareLanes(endp2)");
-                break;
-            }
-
-            if(l_sparesFound)
-            {
-                FAPI_SET_HWP_ERROR(l_rc, RC_EREPAIR_RESTORE_SPARE_LANES_IN_VPD);
-                fapiLogError(l_rc);
-            }
-        }
-
-        // TODO: This is a workaround for Jan-2013 PON.
-        // Need to uncomment the below block when there is
-        // support for MemBuf chips. RTC: 51234
-        // Check if the fail lanes of endp2 are spare lanes
-        /*
-        if(o_endp2_txFaillanes.size() || o_endp2_rxFaillanes.size())
-        {
-            l_sparesFound = false;
-            l_rc = removeSpareLanes(l_endp2_target,
+            l_rc = removeSpareLanes(i_endp2_target,
                                     o_endp2_txFaillanes,
                                     o_endp2_rxFaillanes,
                                     l_sparesFound);
@@ -711,31 +658,24 @@ fapi::ReturnCode erepairGetRestoreLanes(const fapi::Target &i_endp1_target,
                 fapiLogError(l_rc);
             }
         }
-        */
 
         if(l_mnfgModeIPL)
         {
-            // Check if MNFG_DMI_DEPLOY_SPARE_LANES is enabled
+            // Check if MNFG_DMI_DEPLOY_LANE_SPARES is enabled
             l_enableDmiSpares = false;
-            // TODO: This Mnfg flag is not defined yet. RTC: 59532
-            /*
             if(l_allMnfgFlags &
-               fapi::ENUM_ATTR_MNFG_FLAGS_MNFG_DMI_DEPLOY_SPARE_LANES)
+               fapi::ENUM_ATTR_MNFG_FLAGS_MNFG_DMI_DEPLOY_LANE_SPARES)
             {
                 l_enableDmiSpares = true;
             }
-            */
 
             // Check if MNFG_FABRIC_DEPLOY_LANE_SPARES is enabled
             l_enableFabricSpares = false;
-            // TODO: This Mnfg flag is not defined yet. RTC: 59532
-            /*
             if(l_allMnfgFlags &
-               fapi::ENUM_ATTR_MNFG_FLAGS_MNFG_FABRIC_DEPLOY_SPARE_LANES)
+               fapi::ENUM_ATTR_MNFG_FLAGS_MNFG_FABRIC_DEPLOY_LANE_SPARES)
             {
                 l_enableFabricSpares = true;
             }
-            */
 
             if(l_enableDmiSpares || l_enableFabricSpares)
             {
@@ -1004,6 +944,7 @@ fapi::ReturnCode geteRepairThreshold(const fapi::Target &i_endp_target,
 
     do
     {
+        o_threshold = 0;
         l_tgtType = i_endp_target.getType();
 
         if(i_mfgModeIPL)
@@ -1011,32 +952,28 @@ fapi::ReturnCode geteRepairThreshold(const fapi::Target &i_endp_target,
             switch(l_tgtType)
             {
                 case fapi::TARGET_TYPE_XBUS_ENDPOINT:
-                    o_threshold = 1; // This is a temp value used during PON
-                    // TODO: RTC: 50284
-                    // l_rc=FAPI_ATTR_GET(<ATTR_x-erepair-threshold-mnfg>,
-                    //                     &<systemTarget>,
-                    //                     o_threshold)
+                     l_rc = FAPI_ATTR_GET(ATTR_X_EREPAIR_THRESHOLD_MNFG,
+                                          NULL,
+                                          o_threshold);
                     break;
 
                 case fapi::TARGET_TYPE_ABUS_ENDPOINT:
-                    o_threshold = 0; // This is a temp value used during PON
-                    // l_rc=FAPI_ATTR_GET(<ATTR_a-erepair-threshold-mnfg>,
-                    //                     &<systemTarget>,
-                    //                     o_threshold)
+                     l_rc = FAPI_ATTR_GET(ATTR_A_EREPAIR_THRESHOLD_MNFG,
+                                          NULL,
+                                          o_threshold);
                     break;
 
                 case fapi::TARGET_TYPE_MCS_CHIPLET:
-                    o_threshold = 1; // This is a temp value used during PON
-                    // l_rc=FAPI_ATTR_GET(<ATTR_dmi-erepair-threshold-mnfg>,
-                    //                     &<systemTarget>,
-                    //                     o_threshold)
-                    FAPI_INF("geteRepairThreshold: Mnfg VPD, PON Workaround:"
-                             " o_threshold = %d", o_threshold);
+                case fapi::TARGET_TYPE_MEMBUF_CHIP:
+                     l_rc = FAPI_ATTR_GET(ATTR_DMI_EREPAIR_THRESHOLD_MNFG,
+                                          NULL,
+                                          o_threshold);
                     break;
 
                 default:
                     FAPI_ERR("geteRepairThreshold: Invalid target type %d",
                              l_tgtType);
+                    FAPI_SET_HWP_ERROR(l_rc, RC_EREPAIR_RESTORE_INVALID_TARGET);
                     break;
             };
         }
@@ -1045,31 +982,28 @@ fapi::ReturnCode geteRepairThreshold(const fapi::Target &i_endp_target,
             switch(l_tgtType)
             {
                 case fapi::TARGET_TYPE_XBUS_ENDPOINT:
-                    o_threshold = 1; // This is a temp value used during PON
-                    // l_rc=FAPI_ATTR_GET(<ATTR_x-erepair-threshold-field>,
-                    //                     &<systemTarget>,
-                    //                     o_threshold)
+                     l_rc = FAPI_ATTR_GET(ATTR_X_EREPAIR_THRESHOLD_FIELD,
+                                          NULL,
+                                          o_threshold);
                     break;
 
                 case fapi::TARGET_TYPE_ABUS_ENDPOINT:
-                    o_threshold = 1; // This is a temp value used during PON 
-                    // l_rc=FAPI_ATTR_GET(<ATTR_a-erepair-threshold-field>,
-                    //                     &<systemTarget>,
-                    //                     o_threshold)
+                     l_rc = FAPI_ATTR_GET(ATTR_A_EREPAIR_THRESHOLD_FIELD,
+                                          NULL,
+                                          o_threshold);
                     break;
 
                 case fapi::TARGET_TYPE_MCS_CHIPLET:
-                    o_threshold = 1; // This is a temp value used during PON
-                    // l_rc=FAPI_ATTR_GET(<ATTR_dmi-erepair-threshold-field>>,
-                    //                     &<systemTarget>,
-                    //                     o_threshold)
-                    FAPI_INF("geteRepairThreshold: Field VPD, PON Workaround:"
-                             " o_threshold = %d", o_threshold);
+                case fapi::TARGET_TYPE_MEMBUF_CHIP:
+                     l_rc = FAPI_ATTR_GET(ATTR_DMI_EREPAIR_THRESHOLD_FIELD,
+                                          NULL,
+                                          o_threshold);
                     break;
 
                 default:
                     FAPI_ERR("geteRepairThreshold: Invalid target type %d",
                              l_tgtType);
+                    FAPI_SET_HWP_ERROR(l_rc, RC_EREPAIR_RESTORE_INVALID_TARGET);
                     break;
             };
         }
@@ -1117,7 +1051,7 @@ fapi::ReturnCode mnfgCheckFieldVPD(const fapi::Target &i_endp1_target,
             l_fieldVPDClear = false;
 
             FAPI_ERR("mnfgCheckFieldVPD: eRepair records found in"
-                     " Field VPD of %s during Manufacturing mode IPL",
+                     " Field VPD, in Tx of %s during Manufacturing mode IPL",
                      i_endp1_target.toEcmdString());
         }
 
@@ -1141,7 +1075,7 @@ fapi::ReturnCode mnfgCheckFieldVPD(const fapi::Target &i_endp1_target,
             l_fieldVPDClear = false;
 
             FAPI_ERR("mnfgCheckFieldVPD: eRepair records found in"
-                     " Field VPD of %s during Manufacturing mode IPL",
+                     " Field VPD, in Rx of %s during Manufacturing mode IPL",
                      i_endp2_target.toEcmdString());
         }
 
@@ -1169,17 +1103,15 @@ fapi::ReturnCode getVerifiedRepairLanes(
 {
     fapi::ReturnCode l_rc;
 
-    bool l_invalidFails_inTx_Ofendp1 = false;
-    bool l_invalidFails_inRx_Ofendp1 = false;
-    bool l_invalidFails_inTx_Ofendp2 = false;
-    bool l_invalidFails_inRx_Ofendp2 = false;
-    std::vector<uint8_t> l_emptyVector;
-
     getLanes_t l_getLanes = NULL;
     setLanes_t l_setLanes = NULL;
 
     fapi::Target l_target[2] = {i_endp1_target, i_endp2_target};
-    uint8_t l_tgtIndx = 0;
+    bool         l_invalidFails_inTx_OfTgt[2] = {false, false};
+    bool         l_invalidFails_inRx_OfTgt[2] = {false, false};
+    uint8_t      l_tgtIndx = 0;
+
+    std::vector<uint8_t> l_emptyVector;
     std::vector<uint8_t> l_txFaillanes;
     std::vector<uint8_t> l_rxFaillanes;
 
@@ -1215,6 +1147,7 @@ fapi::ReturnCode getVerifiedRepairLanes(
                          l_target[l_tgtIndx].toEcmdString());
                 break;
             }
+
             if(l_tgtIndx == 0)
             {
                 o_endp1_txFaillanes = l_txFaillanes;
@@ -1228,7 +1161,7 @@ fapi::ReturnCode getVerifiedRepairLanes(
 
             l_txFaillanes.clear();
             l_rxFaillanes.clear();
-        }
+        } // end of for(l_tgtIndx)
 
         if(l_rc)
         {
@@ -1247,25 +1180,20 @@ fapi::ReturnCode getVerifiedRepairLanes(
 
         // Check if matching fail lanes exists on the sub-interfaces
         // connecting the two end points
-        l_invalidFails_inTx_Ofendp1 = false;
-        l_invalidFails_inRx_Ofendp2 = false;
-        l_invalidFails_inRx_Ofendp1 = false;
-        l_invalidFails_inTx_Ofendp2 = false;
-
         if(o_endp1_txFaillanes.size() || o_endp2_rxFaillanes.size())
         {
             invalidateNonMatchingFailLanes(o_endp1_txFaillanes,
                                            o_endp2_rxFaillanes,
-                                           l_invalidFails_inTx_Ofendp1,
-                                           l_invalidFails_inRx_Ofendp2);
+                                           l_invalidFails_inTx_OfTgt[0],
+                                           l_invalidFails_inRx_OfTgt[1]);
         }
 
         if(o_endp2_txFaillanes.size() || o_endp1_rxFaillanes.size())
         {
             invalidateNonMatchingFailLanes(o_endp2_txFaillanes,
                                            o_endp1_rxFaillanes,
-                                           l_invalidFails_inTx_Ofendp2,
-                                           l_invalidFails_inRx_Ofendp1);
+                                           l_invalidFails_inTx_OfTgt[1],
+                                           l_invalidFails_inRx_OfTgt[0]);
         }
 
         /***** Correct eRepair data of endp1 in VPD *****/
@@ -1285,7 +1213,8 @@ fapi::ReturnCode getVerifiedRepairLanes(
 
             // Update endp1 and endp2 VPD to invalidate fail lanes that do
             // not have matching fail lanes on the other end
-            if(l_invalidFails_inTx_Ofendp1 && l_invalidFails_inRx_Ofendp1)
+            if(l_invalidFails_inTx_OfTgt[l_tgtIndx] &&
+               l_invalidFails_inRx_OfTgt[l_tgtIndx])
             {
                 l_rc = l_setLanes(l_target[l_tgtIndx],
                                   l_txFaillanes,
@@ -1298,7 +1227,7 @@ fapi::ReturnCode getVerifiedRepairLanes(
                     break;
                 }
             }
-            else if(l_invalidFails_inTx_Ofendp1)
+            else if(l_invalidFails_inTx_OfTgt[l_tgtIndx])
             {
                 l_rc = l_setLanes(l_target[l_tgtIndx],
                                   l_txFaillanes,
@@ -1311,7 +1240,7 @@ fapi::ReturnCode getVerifiedRepairLanes(
                     break;
                 }
             }
-            else if(l_invalidFails_inRx_Ofendp1)
+            else if(l_invalidFails_inRx_OfTgt[l_tgtIndx])
             {
                 l_rc = l_setLanes(l_target[l_tgtIndx],
                                   l_emptyVector,
@@ -1417,6 +1346,7 @@ fapi::ReturnCode erepairGetFailedLanes(const fapi::Target &i_endp_target,
 
     do
     {
+        // Get the erepair lanes from Field VPD
         l_rc = erepairGetFieldFailedLanes(i_endp_target,
                                           l_txFailLanes,
                                           l_rxFailLanes);
@@ -1430,6 +1360,7 @@ fapi::ReturnCode erepairGetFailedLanes(const fapi::Target &i_endp_target,
         o_txFailLanes = l_txFailLanes;
         o_rxFailLanes = l_rxFailLanes;
 
+        // Get the erepair lanes from Manufacturing VPD
         l_txFailLanes.clear();
         l_rxFailLanes.clear();
         l_rc = erepairGetMnfgFailedLanes(i_endp_target,
@@ -1442,7 +1373,7 @@ fapi::ReturnCode erepairGetFailedLanes(const fapi::Target &i_endp_target,
             break;
         }
 
-        // Merge the Mnfg lanes with the Field lanes read previously
+        // Merge the Mnfg lanes with the Field lanes
         l_it = o_txFailLanes.end();
         o_txFailLanes.insert(l_it, l_txFailLanes.begin(), l_txFailLanes.end());
 
@@ -1505,7 +1436,6 @@ fapi::ReturnCode erepairGetMnfgFailedLanes(const fapi::Target &i_endp_target,
 
     FAPI_INF(">> erepairGetMnfgFailedLanes for %s",
              i_endp_target.toEcmdString());
-
     do
     {
         // Execute the Accessor HWP to retrieve the failed lanes from the VPD
@@ -1540,42 +1470,208 @@ fapi::ReturnCode erepairGetMnfgFailedLanes(const fapi::Target &i_endp_target,
     return l_rc;
 }
 
-// TODO: RTC: 59554
-// This functionality will be completed when the Accessor HWP will have
-// write capability
 fapi::ReturnCode erepairSetFailedLanes(
-                                     const fapi::Target   &i_endp_target,
-                                     const std::vector<uint8_t> &i_txFailLanes,
-                                     const std::vector<uint8_t> &i_rxFailLanes)
+                                  const fapi::Target         &i_txEndp_target,
+                                  const fapi::Target         &i_rxEndp_target,
+                                  const std::vector<uint8_t> &i_rxFailLanes,
+                                  bool                       &o_thresholdExceed)
 {
     fapi::ReturnCode l_rc;
+    uint64_t         l_allMnfgFlags    = 0;
+    bool             l_mnfgModeIPL     = false;
+    uint8_t          l_threshold       = 0;
+    setLanes_t       l_setLanes        = NULL;
+    getLanes_t       l_getLanes        = NULL;
+    std::vector<uint8_t> l_txFaillanes;
+    std::vector<uint8_t> l_rxFaillanes;
+    std::vector<uint8_t> l_emptyVector;
+    std::vector<uint8_t> l_throwAway;
+
+    FAPI_INF(">> erepairSetFailedLanes: %s-%s",
+              i_rxEndp_target.toEcmdString(), i_txEndp_target.toEcmdString());
+
+    do
+    {
+        o_thresholdExceed = false;
+
+        // Get the Manufacturing Policy flags
+        l_rc = FAPI_ATTR_GET(ATTR_MNFG_FLAGS, NULL, l_allMnfgFlags);
+
+        if(l_rc)
+        {
+            FAPI_ERR("erepairSetFailedLanes: Unable to read attribute"
+                     "ATTR_MNFG_FLAGS");
+            break;
+        }
+
+        // Check if this is a Mnfg mode IPL
+        if(l_allMnfgFlags & fapi::ENUM_ATTR_MNFG_FLAGS_MNFG_THRESHOLDS)
+        {
+            l_mnfgModeIPL = true;
+        }
+
+        if(l_mnfgModeIPL)
+        {
+            l_setLanes = &erepairSetMnfgFailedLanes;
+            l_getLanes = &erepairGetMnfgFailedLanes;
+        }
+        else
+        {
+            l_setLanes = &erepairSetFieldFailedLanes;
+            l_getLanes = &erepairGetFieldFailedLanes;
+        }
+
+        /*** Check if we have crossed the repair threshold ***/
+        // Get the eRepair threshold limit
+        l_threshold = 0;
+        l_rc = geteRepairThreshold(i_rxEndp_target, l_mnfgModeIPL, l_threshold);
+
+        if(l_rc)
+        {
+            FAPI_ERR("erepairSetFailedLanes: Error (0x%x) from"
+                     " geteRepairThreshold", static_cast<uint32_t> (l_rc));
+            break;
+        }
+
+        // Check if the new fails have crossed the threshold
+        if(i_rxFailLanes.size() > l_threshold)
+        {
+            o_thresholdExceed = true;
+            break;
+        }
+
+        // Get existing fail lanes that are in the VPD of rx endpoint
+        l_rc = l_getLanes(i_rxEndp_target, l_throwAway, l_rxFaillanes);
+
+        if(l_rc)
+        {
+            FAPI_ERR("erepairSetFailedLanes: Error (0x%x) from"
+                     " l_getLanes for %s", static_cast<uint32_t> (l_rc),
+                     i_rxEndp_target.toEcmdString());
+            break;
+        }
+
+        // Get existing fail lanes that are in the VPD of tx endpoint
+        l_rc = l_getLanes(i_txEndp_target, l_txFaillanes, l_throwAway);
+
+        if(l_rc)
+        {
+            FAPI_ERR("erepairSetFailedLanes: Error (0x%x) from"
+                     " l_getLanes for %s", static_cast<uint32_t> (l_rc),
+                     i_txEndp_target.toEcmdString());
+            break;
+        }
+
+        // Lets combine the new and old fail lanes of Rx side
+        l_rxFaillanes.insert(l_rxFaillanes.end(),
+                             i_rxFailLanes.begin(),
+                             i_rxFailLanes.end());
+        // Remove duplicate lanes if any on the Rx side
+        std::sort(l_rxFaillanes.begin(), l_rxFaillanes.end());
+
+        l_rxFaillanes.erase(std::unique(l_rxFaillanes.begin(),
+                                        l_rxFaillanes.end()),
+                            l_rxFaillanes.end());
+
+        // Lets combine the new and old fail lanes of Tx side
+        l_txFaillanes.insert(l_txFaillanes.end(),
+                             i_rxFailLanes.begin(),
+                             i_rxFailLanes.end());
+        // Remove duplicate lanes if any on the Tx side
+        std::sort(l_txFaillanes.begin(), l_txFaillanes.end());
+
+        l_txFaillanes.erase(std::unique(l_txFaillanes.begin(),
+                                        l_txFaillanes.end()),
+                            l_txFaillanes.end());
+
+        // Check if the sum of old and new fail lanes have crossed the threshold
+        if((l_txFaillanes.size() > l_threshold) ||
+           (l_rxFaillanes.size() > l_threshold))
+        {
+            o_thresholdExceed = true;
+            break;
+        }
+
+        /*** Update the VPD ***/
+
+        // Lets write the VPD of endpoint1 with faillanes on Rx side
+        l_rc = l_setLanes(i_rxEndp_target, l_emptyVector, l_rxFaillanes);
+        if(l_rc)
+        {
+            FAPI_ERR("Error from l_setLanes for %s",
+                    i_rxEndp_target.toEcmdString());
+            break;
+        }
+
+        // Lets write the VPD of endpoint2 with faillanes on Tx side
+        l_rc = l_setLanes(i_txEndp_target, l_txFaillanes, l_emptyVector);
+        if(l_rc)
+        {
+            FAPI_ERR("Error from l_setLanes for %s",
+                      i_txEndp_target.toEcmdString());
+            break;
+        }
+    }while(0);
+
+    FAPI_INF("<< erepairSetFailedLanes");
     return l_rc;
 }
 
-// TODO: RTC: 59554
-// This functionality will be completed when the Accessor HWP will have
-// write capability
 fapi::ReturnCode erepairSetFieldFailedLanes(
-                                      const fapi::Target   &i_endp_target,
+                                      const fapi::Target         &i_endp_target,
                                       const std::vector<uint8_t> &i_txFailLanes,
                                       const std::vector<uint8_t> &i_rxFailLanes)
 {
-    fapi::ReturnCode l_rc;
+    fapi::ReturnCode     l_rc;
+    std::vector<uint8_t> l_txFailedLanes;
+    std::vector<uint8_t> l_rxFailedLanes;
+
+    do
+    {
+        // Execute the Accessor HWP to write the fail lanes to Field VPD
+        FAPI_EXEC_HWP(l_rc,
+                      erepairSetFailedLanesHwp,
+                      i_endp_target,
+                      i_txFailLanes,
+                      i_rxFailLanes);
+
+        if(l_rc)
+        {
+            FAPI_ERR("erepairSetFieldFailedLanes: Error from Accessor HWP:"
+                     "erepairSetFailedLanesHwp");
+            break;
+        }
+    }while(0);
+
     return l_rc;
 }
 
-// TODO: RTC: 59554
-// This functionality will be completed when the Accessor HWP will have
-// write capability
 fapi::ReturnCode erepairSetMnfgFailedLanes(
                                      const fapi::Target   &i_endp_target,
                                      const std::vector<uint8_t> &i_txFailLanes,
                                      const std::vector<uint8_t> &i_rxFailLanes)
 {
     fapi::ReturnCode l_rc;
+
+    do
+    {
+        // Execute the Accessor HWP to write the fail lanes to Mnfg VPD
+        FAPI_EXEC_HWP(l_rc,
+                      erepairSetMnfgFailedLanesHwp,
+                      i_endp_target,
+                      i_txFailLanes,
+                      i_rxFailLanes);
+
+        if(l_rc)
+        {
+            FAPI_ERR("erepairSetMnfgFailedLanes: Error from Accessor HWP:"
+                     "erepairSetMnfgFailedLanesHwp");
+            break;
+        }
+    }while(0);
+
     return l_rc;
 }
-
 
 #ifndef __HOSTBOOT_MODULE
 bool charmModeThresholdExceed(std::vector<uint8_t> &i_endp1_txFaillanes,

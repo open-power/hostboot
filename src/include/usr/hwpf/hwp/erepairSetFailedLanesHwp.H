@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/include/usr/hwpf/hwp/erepairGetFailedLanesHwp.H $         */
+/* $Source: src/include/usr/hwpf/hwp/erepairSetFailedLanesHwp.H $         */
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/* COPYRIGHT International Business Machines Corp. 2013                   */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -21,7 +21,7 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 /**
- *  @file erepairGetFailedLanesHwp.H
+ *  @file erepairSetFailedLanesHwp.H
  *
  *  @brief FW Team HWP that accesses the fail lanes of Fabric and Memory buses.
  */
@@ -30,43 +30,44 @@
  * Change Log ******************************************************************
  * Flag     Defect/Feature  User        Date        Description
  * ------   --------------  ----------  ----------- ----------------------------
- *                          bilicon     09/14/2012  Created.
+ *                          bilicon     10-Jan-2013 Created.
  */
 
-#ifndef EREPAIRGETFAILEDLANESHWP_H_
-#define EREPAIRGETFAILEDLANESHWP_H_
+#ifndef EREPAIRSETFAILEDLANESHWP_H_
+#define EREPAIRSETFAILEDLANESHWP_H_
 
 #include <fapi.H>
 #include <erepairConsts.H>
 
 
-typedef fapi::ReturnCode (*erepairGetFailedLanesHwp_FP_t)(
+typedef fapi::ReturnCode (*erepairSetFailedLanesHwp_FP_t)(
                           const fapi::Target   &i_tgtHandle,
-                          std::vector<uint8_t> &o_txFailLanes,
-                          std::vector<uint8_t> &o_rxFailLanes);
+                          std::vector<uint8_t> &i_txFailLanes,
+                          std::vector<uint8_t> &i_rxFailLanes);
 
 extern "C"
 {
 
 /**
- * @brief FW Team HWP that retrieves the eRepair fail lanes from Field VPD.
- *        It retrieves the eRepair data from the P8 MVPD or the Centaur FRU
- *        VPD sections depending on the passed target type. It then parses the
- *        eRepair data to determine the fail lane numbers on the sub-interfaces
- *        (Tx and Rx) of the passed bus target.
+ * @brief FW Team HWP that writes the Field eRepair fail lanes to the VPD.
+ *        The fail lanes will be written to either the P8 MVPD or the
+ *        Centaur FRU VPD depending on the passed target type.
  *
  * @param[in] i_tgtHandle   Reference to X-Bus or A-Bus or MCS or memBuf Target
- * @param[o]  o_txFailLanes Reference to a vector that will hold eRepair fail
- *                          lane numbers of the Tx sub-interface.
- * @param[o]  o_rxFailLanes Reference to a vector that will hold eRepair fail
- *                          lane numbers of the Rx sub-interface.
+ * @param[in] i_txFailLanes Reference to a vector that has the Tx side
+ *                          (of i_tgtHandle) fail lane numbers that need
+ *                          to be written to the VPD
+ * @param[in] i_rxFailLanes Reference to a vector that has the Rx side
+ *                          (of i_tgtHandle) fail lane numbers that need
+ *                          to be written to the VPD
  *
  * @return ReturnCode
  *
  */
-fapi::ReturnCode erepairGetFailedLanesHwp(const fapi::Target   &i_tgtHandle,
-                                          std::vector<uint8_t> &o_txFailLanes,
-                                          std::vector<uint8_t> &o_rxFailLanes);
+fapi::ReturnCode erepairSetFailedLanesHwp(
+                                     const fapi::Target         &i_tgtHandle,
+                                     const std::vector<uint8_t> &i_txFailLanes,
+                                     const std::vector<uint8_t> &i_rxFailLanes);
 
 }// end of extern C
 

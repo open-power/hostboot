@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012                   */
+/* COPYRIGHT International Business Machines Corp. 2012,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -100,6 +100,11 @@ const uint8_t DMIBUS_SPARE_DEPLOY_LANE_1          = 0;
 const uint8_t DMIBUS_SPARE_DEPLOY_LANE_2          = 1;
 const uint8_t DMIBUS_MAXSPARES_IN_HW              = 2;
 
+const uint32_t EREPAIR_P8_MODULE_VPD_FIELD_SIZE       = 0x154; // 340 bytes
+const uint32_t EREPAIR_P8_MODULE_VPD_MNFG_SIZE        = 0xC4;  // 196 bytes
+const uint32_t EREPAIR_MEM_FIELD_VPD_SIZE_PER_CENTAUR = 0x1C;  // 28 bytes
+const uint32_t EREPAIR_MEM_MNFG_VPD_SIZE_PER_CENTAUR  = 0x14;  // 20 bytes
+
 enum busType
 {
     UNKNOWN_BUS_TYPE = 0,
@@ -116,7 +121,9 @@ enum interfaceType
     DMI_MCS_RECEIVE          = 3,  // MCS receive
     DMI_MCS_DRIVE            = 4,  // MCS transmit
     DMI_MEMBUF_RECEIVE       = 5,  // Centaur receive
-    DMI_MEMBUF_DRIVE         = 6   // Centaur transmit
+    DMI_MEMBUF_DRIVE         = 6,  // Centaur transmit
+    DRIVE                    = 7,  // Tx
+    RECEIVE                  = 8   // Rx
 };
 
 }// end of EREPAIR namespace

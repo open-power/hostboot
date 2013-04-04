@@ -424,6 +424,8 @@ void* call_dmi_erepair( void *io_pArgs )
     std::vector<uint8_t> l_endp1_rxFaillanes;
     std::vector<uint8_t> l_endp2_txFaillanes;
     std::vector<uint8_t> l_endp2_rxFaillanes;
+    uint32_t             l_count   = 0;
+    fapi::TargetType     l_tgtType = fapi::TARGET_TYPE_NONE;
 
     TargetHandleList           l_mcsTargetList;
     TargetHandleList           l_memTargetList;
@@ -554,7 +556,28 @@ void* call_dmi_erepair( void *io_pArgs )
                 errlCommit(l_errPtr, HWPF_COMP_ID);
                 break;
             }
-        }
+
+            l_tgtType = l_fapi_endp1_target.getType();
+            for(l_count = 0; l_count < l_endp1_txFaillanes.size(); l_count++)
+            {
+                TRACDCOMP(ISTEPS_TRACE::g_trac_isteps_trace,"Successfully"
+                          " restored Tx lane %d, of %s, of endpoint %s",
+                          l_endp1_txFaillanes[l_count],
+                          l_tgtType == TARGET_TYPE_XBUS_ENDPOINT ? "X-Bus" :
+                          l_tgtType == TARGET_TYPE_ABUS_ENDPOINT ? "A-Bus" :
+                          "DMI-Bus", l_fapi_endp1_target.toEcmdString());
+            }
+
+            for(l_count = 0; l_count < l_endp1_rxFaillanes.size(); l_count++)
+            {
+                TRACDCOMP(ISTEPS_TRACE::g_trac_isteps_trace,"Successfully"
+                          " restored Rx lane %d, of %s, of endpoint %s",
+                          l_endp1_txFaillanes[l_count],
+                          l_tgtType == TARGET_TYPE_XBUS_ENDPOINT ? "X-Bus" :
+                          l_tgtType == TARGET_TYPE_ABUS_ENDPOINT ? "A-Bus" :
+                          "DMI-Bus", l_fapi_endp1_target.toEcmdString());
+            }
+        } // end of if(l_endp1_txFaillanes.size() || l_endp1_rxFaillanes.size())
 
         if(l_endp2_txFaillanes.size() || l_endp2_rxFaillanes.size())
         {
@@ -567,7 +590,6 @@ void* call_dmi_erepair( void *io_pArgs )
                                    l_fapi_endp2_target.toEcmdString(),
                                    l_mcsNum,
                                    l_memNum );
-
             FAPI_INVOKE_HWP(l_errPtr,
                             io_restore_erepair,
                             l_fapi_endp2_target,
@@ -603,7 +625,28 @@ void* call_dmi_erepair( void *io_pArgs )
                 errlCommit(l_errPtr, HWPF_COMP_ID);
                 break;
             }
-        }
+
+            l_tgtType = l_fapi_endp2_target.getType();
+            for(l_count = 0; l_count < l_endp2_txFaillanes.size(); l_count++)
+            {
+                TRACDCOMP(ISTEPS_TRACE::g_trac_isteps_trace,"Successfully"
+                          " restored Tx lane %d, of %s, of endpoint %s",
+                          l_endp2_txFaillanes[l_count],
+                          l_tgtType == TARGET_TYPE_XBUS_ENDPOINT ? "X-Bus" :
+                          l_tgtType == TARGET_TYPE_ABUS_ENDPOINT ? "A-Bus" :
+                          "DMI-Bus", l_fapi_endp2_target.toEcmdString());
+            }
+
+            for(l_count = 0; l_count < l_endp2_rxFaillanes.size(); l_count++)
+            {
+                TRACDCOMP(ISTEPS_TRACE::g_trac_isteps_trace,"Successfully"
+                          " restored Rx lane %d, of %s, of endpoint %s",
+                          l_endp2_txFaillanes[l_count],
+                          l_tgtType == TARGET_TYPE_XBUS_ENDPOINT ? "X-Bus" :
+                          l_tgtType == TARGET_TYPE_ABUS_ENDPOINT ? "A-Bus" :
+                          "DMI-Bus", l_fapi_endp2_target.toEcmdString());
+            }
+        } // end of if(l_endp2_txFaillanes.size() || l_endp2_rxFaillanes.size())
     } // end for l_mcs_target
 
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_dmi_erepair exit" );

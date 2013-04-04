@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012                   */
+/* COPYRIGHT International Business Machines Corp. 2012,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -61,16 +61,16 @@ typedef fapi::ReturnCode (*setLanes_t)(
 
 /**
  * @brief FW Team Utility function that gets eRepair data from the VPD
+ *        This function gets the eRepair data from both the Field VPD
+ *        and the Manufacturing VPD.
  *
- * @param[in]   i_endp_target Reference to X-Bus or A-Bus or MCS Target
- * @param[out]  o_txFailLanes Reference to a Vector that will contain the fail
- *                            lanes read from the VPD for Drive side
- * @param[out]  o_rxFailLanes Reference to a Vector that will contain the fail
- *                            lanes read from the VPD for Receive side
+ * @param[in]  i_endp_target Reference to X-Bus or A-Bus or MCS or memBuf Target
+ * @param[out] o_txFailLanes Reference to a Vector that will contain the fail
+ *                           lanes read from the VPD for Drive side
+ * @param[out] o_rxFailLanes Reference to a Vector that will contain the fail
+ *                           lanes read from the VPD for Receive side
  * @return ReturnCode
  *
- * TODO: i_endp_target        There will be future support for Centaur Target.
- *                            RTC Task 51234. Depends on RTC Story 44009
  */
 fapi::ReturnCode erepairGetFailedLanes(const fapi::Target &i_endp_target,
                                        std::vector<uint8_t> &o_txFailLanes,
@@ -82,15 +82,13 @@ fapi::ReturnCode erepairGetFailedLanes(const fapi::Target &i_endp_target,
  * This is a wrapper function for the Accessor HWP which reads failed lane
  * numbers from the Field VPD
  *
- * @param[in]   i_endp_target Reference to X-Bus or A-Bus or MCS Target
- * @param[out]  o_txFailLanes Reference to a Vector that will contain the fail
- *                            lanes read from the Field VPD for Drive side
- * @param[out]  o_rxFailLanes Reference to a Vector that will contain the fail
- *                            lanes read from the Field VPD for Receive side
+ * @param[in]  i_endp_target Reference to X-Bus or A-Bus or MCS or memBuf Target
+ * @param[out] o_txFailLanes Reference to a Vector that will contain the fail
+ *                           lanes read from the Field VPD for Drive side
+ * @param[out] o_rxFailLanes Reference to a Vector that will contain the fail
+ *                           lanes read from the Field VPD for Receive side
  * @return ReturnCode
  *
- * TODO: i_endp_target        There will be future support for Centaur Target.
- *                            RTC Task 51234. Depends on RTC Story 44009
  */
 fapi::ReturnCode erepairGetFieldFailedLanes(const fapi::Target &i_endp_target,
                                             std::vector<uint8_t> &o_txFailLanes,
@@ -102,47 +100,56 @@ fapi::ReturnCode erepairGetFieldFailedLanes(const fapi::Target &i_endp_target,
  * This is a wrapper function for the Accessor HWP which reads failed lane
  * numbers from the Manufacturing VPD
  *
- * @param[in]   i_endp_target Reference to X-Bus or A-Bus or MCS Target
- * @param[out]  o_txFailLanes Reference to a Vector that will contain the fail
- *                            lanes read from the Mnfg VPD for Drive side
- * @param[out]  o_rxFailLanes Reference to a Vector that will contain the fail
- *                            lanes read from the Mnfg VPD for Receive side
+ * @param[in]  i_endp_target Reference to X-Bus or A-Bus or MCS or memBuf Target
+ * @param[out] o_txFailLanes Reference to a Vector that will contain the fail
+ *                           lanes read from the Mnfg VPD for Drive side
+ * @param[out] o_rxFailLanes Reference to a Vector that will contain the fail
+ *                           lanes read from the Mnfg VPD for Receive side
  * @return ReturnCode
  *
- * TODO: i_endp_target        There will be future support for Centaur Target.
- *                            RTC Task 51234. Depends on RTC Story 44009
  */
 fapi::ReturnCode erepairGetMnfgFailedLanes(const fapi::Target &i_endp_target,
                                            std::vector<uint8_t> &o_txFailLanes,
                                            std::vector<uint8_t> &o_rxFailLanes);
 
 /**
- * @brief FW Team Utility function that sets eRepair data in the VPD
+ * @brief FW Team Utility function that sets eRepair data in the VPD.
+ *        This functions sets the eRepair data to either the Field VPD
+ *        or the Manufacturing VPD depending on whether the IPL was done
+ *        in normal mode or Manufacturing mode.
+ *        It writes eRepair data to the VPD of both the endpoint targets
+ *        passed as arguments.
  *
- * @param[in]   i_endp_target Reference to X-Bus or A-Bus or MCS Target
- * @param[in]   i_txFailLanes Vector that will contain the fail lane
- *                            to be written to VPD for Drive side
- * @param[in]   i_rxFailLanes Vector that will contain the fail lanes
- *                            to be written to VPD for Receive side
+ * @param[in]  i_txEndp_target   Reference to X-Bus or A-Bus or MCS or memBuf
+ *                               Target. This is the peer target of
+ *                               i_rxEndp_target
+ * @param[in]  i_rxEndp_target   Reference to X-Bus or A-Bus or MCS or memBuf
+ *                               Target. This is the target on which the
+ *                               badlanes were found
+ * @param[in]  i_rxFailLanes     Vector that will contain the fail lanes
+ *                               to be written to VPD for Receive side
+ * @param[out] o_thresholdExceed If TRUE, indicates that the eRepair threshold
+ *                               has exceeded, FALSE otherwise.
  *
  * @return ReturnCode
  */
 fapi::ReturnCode erepairSetFailedLanes(
-                                     const fapi::Target &i_endp_target,
-                                     const std::vector<uint8_t> &i_txFailLanes,
-                                     const std::vector<uint8_t> &i_rxFailLanes);
+                                 const fapi::Target         &i_txEndp_target,
+                                 const fapi::Target         &i_rxEndp_target,
+                                 const std::vector<uint8_t> &i_rxFailLanes,
+                                 bool                       &o_thresholdExceed);
 
 /**
  * @brief FW Team Utility function that sets eRepair data in Field VPD
  *
- * This is a wrapper function for the Accessor HWP which write failed lane
- * numbers in the Field VPD
+ * This is a wrapper function for the Accessor HWP which writes failed lane
+ * numbers to the Field VPD
  *
- * @param[in]   i_endp_target Reference to X-Bus or A-Bus or MCS Target
- * @param[in]   i_txFailLanes Vector that will contain the fail lane
- *                            to be written to Field VPD for Drive side
- * @param[in]   i_rxFailLanes Vector that will contain the fail lanes
- *                            to be written to Field VPD for Receive side
+ * @param[in]  i_endp_target Reference to X-Bus or A-Bus or MCS or memBuf Target
+ * @param[in]  i_txFailLanes Vector that will contain the fail lane
+ *                           to be written to Field VPD for Drive side
+ * @param[in]  i_rxFailLanes Vector that will contain the fail lanes
+ *                           to be written to Field VPD for Receive side
  *
  * @return ReturnCode
  */
@@ -154,14 +161,14 @@ fapi::ReturnCode erepairSetFieldFailedLanes(
 /**
  * @brief FW Team Utility function that sets eRepair data in Manufacturing VPD
  *
- * This is a wrapper function for the Accessor HWP which write failed lane
- * numbers in the Manufacturing VPD
+ * This is a wrapper function for the Accessor HWP which writes failed lane
+ * numbers to the Manufacturing VPD
  *
- * @param[in]   i_endp_target Reference to X-Bus or A-Bus or MCS Target
- * @param[in]   i_txFailLanes Vector that will contain the fail lane
- *                            to be written to Mnfg VPD for Drive side
- * @param[in]   i_rxFailLanes Vector that will contain the fail lanes
- *                            to be written to Mnfg VPD for Receive side
+ * @param[in]  i_endp_target Reference to X-Bus or A-Bus or MCS or memBuf Target
+ * @param[in]  i_txFailLanes Vector that will contain the fail lane
+ *                           to be written to Mnfg VPD for Drive side
+ * @param[in]  i_rxFailLanes Vector that will contain the fail lanes
+ *                           to be written to Mnfg VPD for Receive side
  *
  * @return ReturnCode
  */
@@ -176,8 +183,8 @@ fapi::ReturnCode erepairSetMnfgFailedLanes(
  *
  * This function is called by the iStep dispatcher during the Restore Repair
  * iStep for Fabric buses and DMI buses. The caller need to make sure that the
- * first two arguments of this function need to be end point targets of a
- * Fabric bus or DMI bus.
+ * first and fourth arguments are the endpoint targets of a Fabric bus or
+ * DMI bus.
  * It calls the wrapper functions of Accessor HWP to read the fail lane data
  * recorded in the VPD on both the ends and verifies that there are matching
  * records on both the ends. If matching fail lanes are not found, the

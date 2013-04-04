@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012                   */
+/* COPYRIGHT International Business Machines Corp. 2012,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -49,22 +49,20 @@ extern "C"
 {
 
 /**
- * @brief FW Team HWP that retrieves the eRepair fail lanes.
- *        It retrieves the eRepair data from the P8 MVPD and the Centaur FRU
- *        VPD sections that is reserved for Mnfg usage. It then parses the
+ * @brief FW Team HWP that retrieves the eRepair fail lanes from Mnfg VPD.
+ *        It retrieves the eRepair data from the P8 MVPD or the Centaur FRU
+ *        VPD sections depending on the passed target type. It then parses the
  *        eRepair data to determine the fail lane numbers on the sub-interfaces
  *        (Tx and Rx) of the passed bus target.
  *
- * @param[in] i_tgtHandle   Reference to X-Bus or A-Bus or MCS or Target
+ * @param[in] i_tgtHandle   Reference to X-Bus or A-Bus or MCS or memBuf Target
  * @param[o]  o_txFailLanes Reference to a vector that will hold eRepair fail
- *                          lane numbers of the Tx sub-interface.
+ *                          lane numbers of the Tx sub-interface of i_tgtHandle
  * @param[o]  o_rxFailLanes Reference to a vector that will hold eRepair fail
- *                          lane numbers of the Rx sub-interface.
+ *                          lane numbers of the Rx sub-interface of i_tgtHandle
  *
  * @return ReturnCode
  *
- * TODO: i_tgtHandle        There will be future support for Centaur Target.
- *                          RTC Task 51234. Depends on RTC Story 44009
  */
 fapi::ReturnCode erepairGetMnfgFailedLanesHwp(const fapi::Target   &i_tgtHandle,
                                               std::vector<uint8_t> &o_txFailLanes,
