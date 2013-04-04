@@ -51,6 +51,7 @@
 
 #include    <hwpisteperror.H>
 #include    <errl/errludtarget.H>
+#include    <hwas/common/deconfigGard.H>
 
 //  targeting support.
 #include    <targeting/common/commontargeting.H>
@@ -99,7 +100,6 @@ void*    call_mss_getecid( void *io_pArgs )
     uint8_t    l_ddr_port_status = 0;
     uint8_t    l_cache_enable = 0;
     uint8_t    l_centaur_sub_revision = 0;
-    
 
     mss_get_cen_ecid_ddr_status l_mbaBadMask[2] =
        { MSS_GET_CEN_ECID_DDR_STATUS_MBA0_BAD,
@@ -196,35 +196,54 @@ void*    call_mss_getecid( void *io_pArgs )
                 // set to nonfunctional.
                 if ( l_ddr_port_status & l_mbaBadMask[l_pos] )
                 {
-                    //  Get the mba's state
-                    TARGETING::HwasState l_hwasState =
-                        l_pMBA->getAttr<ATTR_HWAS_STATE>();
-
-                    // Set to nonfunctional
-                    l_hwasState.functional = false;
-                    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                               "Setting MBA%c to nonfunctional", l_pos );
-
-                    l_pMBA->setAttr<ATTR_HWAS_STATE>(l_hwasState);
-
+                    // call HWAS to deconfigure this target
+                    l_err = HWAS::theDeconfigGard().deconfigureTarget(
+                                                        *l_pMBA, 0);
                     l_num_func_mbas--;
+
+                    if (l_err)
+                    {
+                        // shouldn't happen, but if it does, stop trying to
+                        //  deconfigure targets..
+                        break;
+                    }
                 }
+            } // for
+
+            // If there are no functional MBAs for this Centaur, deconfigure
+            // the Centaur as well
+            // TODO: RTC: 63225
+            //  this will go away when deconfigureByAssocation() handles this.
+            if (!l_err && (0 == l_num_func_mbas))
+            {
+                // call HWAS to deconfigure this target
+                l_err = HWAS::theDeconfigGard().deconfigureTarget(
+                                                    *l_pCentaur, 0);
             }
 
-            // If there are no functional MBAs for this Centaur, set the
-            // Centaur to nonfunctional as well
-            if (0 == l_num_func_mbas)
+            if (l_err)
             {
-                //  Get the Centaur's state
-                TARGETING::HwasState l_hwasState =
-                    l_pCentaur->getAttr<ATTR_HWAS_STATE>();
+                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                          "ERROR: error deconfiguring MBA or Centaur");
 
-                // Set to nonfunctional
-                l_hwasState.functional = false;
-                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                           "Setting Centaur to nonfunctional" );
+                /*@
+                 * @errortype
+                 * @reasoncode  ISTEP_DECONFIGURE_MBA_FAILED
+                 * @severity    ERRORLOG::ERRL_SEV_UNRECOVERABLE
+                 * @moduleid    ISTEP_MSS_GETECID
+                 * @userdata1   bytes 0-1: plid identifying first error
+                 *              bytes 2-3: reason code of first error
+                 * @userdata2   bytes 0-1: total number of elogs included
+                 *              bytes 2-3: N/A
+                 * @devdesc     call to deconfigure MBA or Centaur failed
+                 *              see error log in the user details section for
+                 *              additional details.
+                 */
+                l_StepError.addErrorDetails(ISTEP_DECONFIGURE_MBA_FAILED,
+                                            ISTEP_MSS_GETECID,
+                                            l_err );
 
-                l_pCentaur->setAttr<ATTR_HWAS_STATE>(l_hwasState);
+                errlCommit( l_err, HWPF_COMP_ID );
             }
         }
 
@@ -423,7 +442,7 @@ void* call_dmi_erepair( void *io_pArgs )
         ATTR_CHIP_UNIT_type l_mcsNum = l_mcs_target->getAttr<ATTR_CHIP_UNIT>();
 
         // find all the Centaurs that are associated with this MCS
-        getChildAffinityTargets(l_memTargetList, l_mcs_target, 
+        getChildAffinityTargets(l_memTargetList, l_mcs_target,
                        CLASS_CHIP, TYPE_MEMBUF);
 
         if(l_memTargetList.size() != EREPAIR_MAX_CENTAUR_PER_MCS)
@@ -846,7 +865,7 @@ void*    call_proc_cen_framelock( void *io_pArgs )
 
         //  find all the Centaurs that are associated with this MCS
         TARGETING::TargetHandleList l_memTargetList;
-        getChildAffinityTargets(l_memTargetList, l_mcs_target, 
+        getChildAffinityTargets(l_memTargetList, l_mcs_target,
                  CLASS_CHIP, TYPE_MEMBUF);
 
         for (TargetHandleList::const_iterator

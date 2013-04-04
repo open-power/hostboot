@@ -629,7 +629,8 @@ class CommonTargetingTestSuite: public CxxTest::TestSuite
         hwasPredicate.reset().poweredOn(true).present(true).functional(false);
         hwasPredicate.changedSinceLastIpl(true).dumpFunctional(false);
 
-        ATTR_HWAS_STATE_type allFiveHwasState = {true,true,false,true,false};
+        ATTR_HWAS_STATE_type allFiveHwasState =
+                { 0x0,true,true,false,true,false};
         l_pTopLevel->setAttr<ATTR_HWAS_STATE>(allFiveHwasState);
         if(!hwasPredicate(l_pTopLevel))
         {

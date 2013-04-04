@@ -133,7 +133,6 @@ errlHndl_t DeconfigGard::deconfigureTargetsFromGardRecordsForIpl(
         const TARGETING::PredicateBase *i_pPredicate)
 {
     HWAS_INF("Usr Request: Deconfigure Targets from GARD Records for IPL");
-    HWAS_MUTEX_LOCK(iv_mutex);
     errlHndl_t l_pErr = NULL;
     GardRecords_t l_gardRecords;
 
@@ -142,15 +141,16 @@ errlHndl_t DeconfigGard::deconfigureTargetsFromGardRecordsForIpl(
     //      subset of Targets to deconfigure to give the best chance of IPL
     //      This is known as Resource Recovery
 
-    // Get all GARD Records
-    l_pErr = _getGardRecords(GET_ALL_GARD_RECORDS, l_gardRecords);
-
-    if (l_pErr)
+    HWAS_MUTEX_LOCK(iv_mutex);
+    do
     {
-        HWAS_ERR("Error from _getGardRecords");
-    }
-    else
-    {
+        // Get all GARD Records
+        l_pErr = _getGardRecords(GET_ALL_GARD_RECORDS, l_gardRecords);
+        if (l_pErr)
+        {
+            HWAS_ERR("Error from _getGardRecords");
+            break;
+        }
         HWAS_INF("%d GARD Records found", l_gardRecords.size());
 
         // For each GARD Record
@@ -181,15 +181,31 @@ errlHndl_t DeconfigGard::deconfigureTargetsFromGardRecordsForIpl(
                     }
                 }
 
+                // skip if not present
+                if (!l_pTarget->getAttr<TARGETING::ATTR_HWAS_STATE>().present)
+                {
+                    HWAS_INF("skipping %.8X - target not present",
+                            TARGETING::get_huid(l_pTarget));
+                    continue;
+                }
+
                 // Deconfigure the Target
+                // don't need to check ATTR_DECONFIG_GARDABLE -- if we get
+                //  here, it's because of a gard record on this target
                 _deconfigureTarget(*l_pTarget, (*l_itr).iv_errlogPlid,
                                    DECONFIG_CAUSE_GARD_RECORD);
 
                 // Deconfigure other Targets by association
                 _deconfigureByAssoc(*l_pTarget, (*l_itr).iv_errlogPlid);
             }
+        } // for
+        if (l_pErr)
+        {   // if we broke out of the for loop, now break out of the do/while
+            break;
         }
+
     }
+    while (0);
 
     HWAS_MUTEX_UNLOCK(iv_mutex);
     return l_pErr;
@@ -200,16 +216,58 @@ errlHndl_t DeconfigGard::deconfigureTarget(TARGETING::Target & i_target,
                                            const uint32_t i_errlPlid)
 {
     HWAS_INF("Usr Request: Deconfigure Target");
-    HWAS_MUTEX_LOCK(iv_mutex);
+    errlHndl_t l_pErr = NULL;
 
-    // Deconfigure the Target
-    _deconfigureTarget(i_target, i_errlPlid, DECONFIG_CAUSE_FIRMWARE_REQ);
+    do
+    {
+        const uint8_t lDeconfigGardable =
+                i_target.getAttr<TARGETING::ATTR_DECONFIG_GARDABLE>();
+        const uint8_t lPresent =
+                i_target.getAttr<TARGETING::ATTR_HWAS_STATE>().present;
+        if (!lDeconfigGardable || !lPresent)
+        {
+            // Target is not Deconfigurable. Create an error
+            HWAS_ERR("Target %.8X not Deconfigurable",
+                TARGETING::get_huid(&i_target));
 
-    // Deconfigure other Targets by association
-    _deconfigureByAssoc(i_target, i_errlPlid);
+            /*@
+             * @errortype
+             * @moduleid     HWAS::MOD_DECONFIG_GARD
+             * @reasoncode   HWAS::RC_TARGET_NOT_DECONFIGURABLE
+             * @devdesc      Attempt to deconfigure a target that is not
+             *               deconfigurable
+             *               (not DECONFIG_GARDABLE or not present)
+             * @userdata1    HUID of input target // GARD errlog PLID
+             * @userdata2    ATTR_DECONFIG_GARDABLE // ATTR_HWAS_STATE.present
+             */
+            const uint64_t userdata1 =
+                (static_cast<uint64_t>(TARGETING::get_huid(&i_target)) << 32) |
+                i_errlPlid;
+            const uint64_t userdata2 =
+                (static_cast<uint64_t>(lDeconfigGardable) << 32) | lPresent;
+            l_pErr = hwasError(
+                ERRL_SEV_INFORMATIONAL,
+                HWAS::MOD_DECONFIG_GARD,
+                HWAS::RC_TARGET_NOT_DECONFIGURABLE,
+                userdata1,
+                userdata2);
+            break;
+        }
 
-    HWAS_MUTEX_UNLOCK(iv_mutex);
-    return NULL;
+        // all ok - do the work
+        HWAS_MUTEX_LOCK(iv_mutex);
+
+        // Deconfigure the Target
+        _deconfigureTarget(i_target, i_errlPlid, DECONFIG_CAUSE_FIRMWARE_REQ);
+
+        // Deconfigure other Targets by association
+        _deconfigureByAssoc(i_target, i_errlPlid);
+
+        HWAS_MUTEX_UNLOCK(iv_mutex);
+    }
+
+    while (0);
+    return l_pErr;
 }
 
 //******************************************************************************
@@ -297,10 +355,48 @@ errlHndl_t DeconfigGard::getGardRecords(
 void DeconfigGard::_deconfigureByAssoc(TARGETING::Target & i_target,
                                        const uint32_t i_errlPlid)
 {
-    HWAS_INF("****TBD****: Deconfiguring by Association for: %.8X",
+    HWAS_INF("Deconfiguring by Association for: %.8X",
                    TARGETING::get_huid(&i_target));
 
-    // TODO
+    TARGETING::TargetHandleList pChildList;
+    TARGETING::PredicateHwas hwasPredicate;
+    hwasPredicate.reset().poweredOn(true).present(true).functional(true);
+
+    // find all CHILD and CHILD_BY_AFFINITY matches for this target
+    // and deconfigure them
+    TARGETING::targetService().getAssociated( pChildList, &i_target,
+        TARGETING::TargetService::CHILD,
+        TARGETING::TargetService::ALL,
+        &hwasPredicate);
+    for (TARGETING::TargetHandleList::iterator pChild_it = pChildList.begin();
+            pChild_it != pChildList.end();
+            ++pChild_it)
+    {
+        TARGETING::TargetHandle_t pChild = *pChild_it;
+
+        if (pChild->getAttr<TARGETING::ATTR_DECONFIG_GARDABLE>())
+        {   // only deconfigure targets that are able to be deconfigured
+            _deconfigureTarget(*pChild, i_errlPlid,
+                DECONFIG_CAUSE_DECONFIG_BY_ASSOC);
+        }
+    } // for CHILD
+
+    TARGETING::targetService().getAssociated( pChildList, &i_target,
+        TARGETING::TargetService::CHILD_BY_AFFINITY,
+        TARGETING::TargetService::ALL,
+        &hwasPredicate);
+    for (TARGETING::TargetHandleList::iterator pChild_it = pChildList.begin();
+            pChild_it != pChildList.end();
+            ++pChild_it)
+    {
+        TARGETING::TargetHandle_t pChild = *pChild_it;
+
+        if (pChild->getAttr<TARGETING::ATTR_DECONFIG_GARDABLE>())
+        {   // only deconfigure targets that are able to be deconfigured
+            _deconfigureTarget(*pChild, i_errlPlid,
+                DECONFIG_CAUSE_DECONFIG_BY_ASSOC);
+        }
+    } // for CHILD_BY_AFFINITY
 }
 
 //******************************************************************************
@@ -308,58 +404,36 @@ void DeconfigGard::_deconfigureTarget(TARGETING::Target & i_target,
                                       const uint32_t i_errlPlid,
                                       const DeconfigCause i_cause)
 {
-    HWAS_INF("Deconfiguring Target %.8X",
-            TARGETING::get_huid(&i_target));
+    HWAS_INF("Deconfiguring Target %.8X, errlPlid %X cause %d",
+            TARGETING::get_huid(&i_target), i_errlPlid, i_cause);
 
-    if (!i_target.getAttr<TARGETING::ATTR_DECONFIG_GARDABLE>())
+    // Set the Target state to non-functional. The assumption is that it is
+    // not possible for another thread (other than deconfigGard) to be
+    // updating HWAS_STATE concurrently.
+    TARGETING::HwasState l_state =
+        i_target.getAttr<TARGETING::ATTR_HWAS_STATE>();
+
+    if (!l_state.functional)
     {
-        // Target is not Deconfigurable. Commit an error
-        HWAS_ERR("Target %.8X not Deconfigurable",
-            TARGETING::get_huid(&i_target));
-
-        /*@
-         * @errortype
-         * @moduleid     HWAS::MOD_DECONFIG_GARD
-         * @reasoncode   HWAS::RC_TARGET_NOT_DECONFIGURABLE
-         * @devdesc      Attempt to deconfigure a target that is not
-         *               deconfigurable
-         * @userdata1    HUID of input target / deconfigure errlog PLID
-         */
-        const uint64_t userdata1 =
-            (static_cast<uint64_t> (TARGETING::get_huid(&i_target)) << 32) |
-            i_errlPlid;
-        errlHndl_t l_pErr = hwasError(
-            ERRL_SEV_INFORMATIONAL,
-            HWAS::MOD_DECONFIG_GARD,
-            HWAS::RC_TARGET_NOT_DECONFIGURABLE,
-            userdata1);
-        errlCommit(l_pErr,HWAS_COMP_ID);
+        HWAS_DBG(
+        "Target HWAS_STATE already has functional=0; deconfiguredByPlid=0x%x",
+                l_state.deconfiguredByPlid);
     }
     else
     {
-        // Set the Target state to non-functional. The assumption is that it is
-        // not possible for another thread (other than deconfigGard) to be
-        // updating HWAS_STATE concurrently.
-        TARGETING::HwasState l_state =
-            i_target.getAttr<TARGETING::ATTR_HWAS_STATE>();
-
-        if (!l_state.functional)
-        {
-            HWAS_DBG("Target HWAS_STATE already non-functional");
-        }
-        else
-        {
-            HWAS_INF("Setting Target HWAS_STATE to non-functional");
-            l_state.functional = 0;
-            i_target.setAttr<TARGETING::ATTR_HWAS_STATE>(l_state);
-        }
-
-        // Do any necessary Deconfigure Actions
-        _doDeconfigureActions(i_target);
-
-        // Create a Deconfigure Record
-        _createDeconfigureRecord(i_target, i_errlPlid, i_cause);
+        HWAS_INF(
+        "Setting Target HWAS_STATE: functional=0, deconfiguredByPlid=0x%x",
+            i_errlPlid);
+        l_state.functional = 0;
+        l_state.deconfiguredByPlid = i_errlPlid;
+        i_target.setAttr<TARGETING::ATTR_HWAS_STATE>(l_state);
     }
+
+    // Do any necessary Deconfigure Actions
+    _doDeconfigureActions(i_target);
+
+    // Create a Deconfigure Record
+    _createDeconfigureRecord(i_target, i_errlPlid, i_cause);
 }
 
 //******************************************************************************
@@ -502,7 +576,11 @@ errlHndl_t DeconfigGard::_createGardRecord(const TARGETING::Target & i_target,
     do
     {
 
-        if (!i_target.getAttr<TARGETING::ATTR_DECONFIG_GARDABLE>())
+        const uint8_t lDeconfigGardable =
+                i_target.getAttr<TARGETING::ATTR_DECONFIG_GARDABLE>();
+        const uint8_t lPresent =
+                i_target.getAttr<TARGETING::ATTR_HWAS_STATE>().present;
+        if (!lDeconfigGardable || !lPresent)
         {
             // Target is not GARDable. Commit an error
             HWAS_ERR("Target not GARDable");
@@ -513,17 +591,21 @@ errlHndl_t DeconfigGard::_createGardRecord(const TARGETING::Target & i_target,
              * @reasoncode   HWAS::RC_TARGET_NOT_GARDABLE
              * @devdesc      Attempt to create a GARD Record for a target that
              *               is not GARDable
-             * @userdata1    HUID of input target / GARD errlog PLID
+             *               (not DECONFIG_GARDABLE or not present)
+             * @userdata1    HUID of input target // GARD errlog PLID
+             * @userdata2    ATTR_DECONFIG_GARDABLE // ATTR_HWAS_STATE.present
              */
             const uint64_t userdata1 =
                 (static_cast<uint64_t>(TARGETING::get_huid(&i_target)) << 32) |
                 i_errlPlid;
+            const uint64_t userdata2 =
+                (static_cast<uint64_t>(lDeconfigGardable) << 32) | lPresent;
             l_pErr = hwasError(
                 ERRL_SEV_UNRECOVERABLE,
                 HWAS::MOD_DECONFIG_GARD,
                 HWAS::RC_TARGET_NOT_GARDABLE,
-                userdata1);
-            errlCommit(l_pErr,HWAS_COMP_ID);
+                userdata1,
+                userdata2);
             break;
         }
 
@@ -536,9 +618,8 @@ errlHndl_t DeconfigGard::_createGardRecord(const TARGETING::Target & i_target,
             break;
         }
 
-        GardRecord * l_pRecord = NULL;
-
         // Find an empty GARD Record slot
+        GardRecord * l_pRecord = NULL;
         for (uint32_t i = 0; i < iv_maxGardRecords; i++)
         {
             if (iv_pGardRecords[i].iv_recordId == EMPTY_GARD_RECORDID)
@@ -558,7 +639,7 @@ errlHndl_t DeconfigGard::_createGardRecord(const TARGETING::Target & i_target,
              * @reasoncode   HWAS::RC_GARD_REPOSITORY_FULL
              * @devdesc      Attempt to create a GARD Record and the GARD
              *               Repository is full
-             * @userdata1    HUID of input target / GARD errlog PLID
+             * @userdata1    HUID of input target // GARD errlog PLID
              */
             const uint64_t userdata1 =
                 (static_cast<uint64_t> (TARGETING::get_huid(&i_target)) << 32) |

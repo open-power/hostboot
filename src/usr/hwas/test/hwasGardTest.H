@@ -281,7 +281,7 @@ public:
                 l_pTarget->getAttr<TARGETING::ATTR_HWAS_STATE>();
  
             // Deconfigure the chip. Production code will pass a valid PLID
-            l_pErr = HWAS::theDeconfigGard().deconfigureTarget(*l_pTarget, 0);
+            l_pErr = HWAS::theDeconfigGard().deconfigureTarget(*l_pTarget, 0xA);
         
             if (l_pErr)
             {
@@ -290,7 +290,7 @@ public:
             }
             
             // Deconfigure the chip again
-            l_pErr = HWAS::theDeconfigGard().deconfigureTarget(*l_pTarget, 0);
+            l_pErr = HWAS::theDeconfigGard().deconfigureTarget(*l_pTarget, 0xB);
         
             if (l_pErr)
             {

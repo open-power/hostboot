@@ -62,16 +62,26 @@ TRAC_INIT(&g_trac_imp_hwas, "HWAS_I",   1024 );
  * @brief       simple helper fn to get and set hwas state to poweredOn,
  *                  present, functional
  *
- * @param[in]   i_target    pointer to target that we're looking at
- * @param[in]   i_present   boolean indicating present or not
- * @param[in]   i_functional boolean indicating functional or not
+ * @param[in]   i_target        pointer to target that we're looking at
+ * @param[in]   i_present       boolean indicating present or not
+ * @param[in]   i_functional    boolean indicating functional or not
+ * @param[in]   i_errlPlid      errplid that caused change to non-funcational;
+ *                              0 if not associated with an error or if
+ *                              functional is true
  *
  * @return      none
  *
  */
-void enableHwasState(Target *i_target, bool i_present, bool i_functional)
+void enableHwasState(Target *i_target,
+        bool i_present, bool i_functional,
+        uint32_t i_errlPlid)
 {
-    HwasState hwasState     = i_target->getAttr<ATTR_HWAS_STATE>();
+    HwasState hwasState = i_target->getAttr<ATTR_HWAS_STATE>();
+
+    if (i_functional == false)
+    {   // record the PLID as a reason that we're marking non-functional
+        hwasState.deconfiguredByPlid = i_errlPlid;
+    }
     hwasState.poweredOn     = true;
     hwasState.present       = i_present;
     hwasState.functional    = i_functional;
@@ -90,6 +100,7 @@ errlHndl_t discoverTargets()
             ++target)
     {
         HwasState hwasState             = target->getAttr<ATTR_HWAS_STATE>();
+        hwasState.deconfiguredByPlid    = 0;
         hwasState.poweredOn             = false;
         hwasState.present               = false;
         hwasState.functional            = false;
@@ -99,11 +110,12 @@ errlHndl_t discoverTargets()
 
     // ASSUMPTIONS:
     // CLASS_SYS (exactly 1) - mark as present
-    // CLASS_ENC (>=1) - mark as present
-    // TYPE_PROC TYPE_MEMBUF TYPE_DIMM (ALL require hardware query)
-    //                                  - call platPresenceDetect
+    // CLASS_ENC and
+    // CLASS_CHIP - (TYPE_PROC TYPE_MEMBUF)
+    // CLASS_LOGICAL_CARD - TYPE_DIMM
+    //      (ALL require hardware query)
+    //      - call platPresenceDetect
     //  \->children: CLASS_* (NONE require hardware query) - mark as present
-
     do
     {
         // find CLASS_SYS (the top level target)
@@ -114,7 +126,7 @@ errlHndl_t discoverTargets()
                 "HWAS discoverTargets: no CLASS_SYS TopLevelTarget found");
 
         // mark this as present
-        enableHwasState(pSys, true, true);
+        enableHwasState(pSys, true, true, 0);
         HWAS_DBG("pSys %.8X - marked present",
             pSys->getAttr<ATTR_HUID>());
 
@@ -155,7 +167,7 @@ errlHndl_t discoverTargets()
             // if CLASS_ENC is still in this list, mark as present
             if (pTarget->getAttr<ATTR_CLASS>() == CLASS_ENC)
             {
-                enableHwasState(pTarget, true, true);
+                enableHwasState(pTarget, true, true, 0);
                 HWAS_DBG("pTarget %.8X - CLASS_ENC marked present",
                     pTarget->getAttr<ATTR_HUID>());
 
@@ -163,8 +175,9 @@ errlHndl_t discoverTargets()
                 continue;
             }
 
-            bool chipFunctional = true;
             bool chipPresent = true;
+            bool chipFunctional = true;
+            uint32_t errlPlid = 0;
             uint16_t pgData[VPD_CP00_PG_DATA_LENGTH / sizeof(uint16_t)];
             bzero(pgData, sizeof(pgData));
             if (pTarget->getAttr<ATTR_CLASS>() == CLASS_CHIP)
@@ -174,9 +187,10 @@ errlHndl_t discoverTargets()
 
                 if (errl)
                 {   // read of ID/EC failed even tho we were present..
-                    HWAS_INF("pTarget %.8X - read IDEC failed - bad",
-                        pTarget->getAttr<ATTR_HUID>());
+                    HWAS_INF("pTarget %.8X - read IDEC failed (plid 0x%X) - bad",
+                        errl->plid(), pTarget->getAttr<ATTR_HUID>());
                     chipFunctional = false;
+                    errlPlid = errl->plid();
 
                     // commit the error but keep going
                     errlCommit(errl, HWAS_COMP_ID);
@@ -190,9 +204,10 @@ errlHndl_t discoverTargets()
 
                     if (errl)
                     {   // read of PG failed even tho we were present..
-                        HWAS_INF("pTarget %.8X - read PG failed - bad",
-                            pTarget->getAttr<ATTR_HUID>());
+                        HWAS_INF("pTarget %.8X - read PG failed (plid 0x%X)- bad",
+                            errl->plid(), pTarget->getAttr<ATTR_HUID>());
                         chipFunctional = false;
+                        errlPlid = errl->plid();
 
                         // commit the error but keep going
                         errlCommit(errl, HWAS_COMP_ID);
@@ -353,7 +368,8 @@ errlHndl_t discoverTargets()
                 } // chipFunctional
 
                 // for sub-parts, if it's not functional, it's not present.
-                enableHwasState(pDesc, descFunctional, descFunctional);
+                enableHwasState(pDesc, descFunctional, descFunctional,
+                                errlPlid);
                 HWAS_DBG("pDesc %.8X - marked %spresent, %sfunctional",
                     pDesc->getAttr<ATTR_HUID>(),
                     descFunctional ? "" : "NOT ",
@@ -361,20 +377,13 @@ errlHndl_t discoverTargets()
             }
 
             // set HWAS state to show CHIP is present, functional per above
-            enableHwasState(pTarget, chipPresent, chipFunctional);
+            enableHwasState(pTarget, chipPresent, chipFunctional, errlPlid);
 
         } // for pTarget_it
 
     } while (0);
 
-    if (errl == NULL)
-    {
-        HWAS_INF("discoverTargets exit with no error");
-    }
-    else
-    {
-        HWAS_ERR("discoverTargets returning errl %p", errl);
-    }
+    HWAS_INF("discoverTargets returning errl %p", errl);
     return errl;
 } // discoverTargets
 

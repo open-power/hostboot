@@ -177,6 +177,7 @@ enum istepReasonCode
     ISTEP_LOAD_SLW_FROM_PNOR_FAILED             = ISTEP_COMP_ID | 0x2E,
     ISTEP_PROC_GETECID_FAILED                   = ISTEP_COMP_ID | 0x2F,
     ISTEP_TOP_LEVEL_TARGET_NULL                 = ISTEP_COMP_ID | 0x30,
+    ISTEP_DECONFIGURE_MBA_FAILED                = ISTEP_COMP_ID | 0x31,
 };  // end ISTEP
 
 }
