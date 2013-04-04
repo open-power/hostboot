@@ -1746,6 +1746,10 @@ sub generate_proc
         <id>FABRIC_CHIP_ID</id>
         <default>$logid</default>
     </attribute>
+    <attribute>
+        <id>FRU_ID</id>
+        <default>$fruid</default>
+    </attribute>
     <attribute><id>VPD_REC_NUM</id><default>$vpdnum</default></attribute>
 
     <!-- workaround for SW196865 - see  RTC:69918 for additional details -->

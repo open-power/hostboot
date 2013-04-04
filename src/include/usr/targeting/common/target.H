@@ -253,8 +253,7 @@ class Target
             bool l_wrote = trySetAttr<A>(i_attrValue);
             
             //@TODO: Remove assert once release has stabilized
-            TARG_ASSERT(l_wrote,"TARGETING::Target::setAttr<%d>: trySetAttr "
-                   "returned false",A);
+            TARG_ASSERT(l_wrote,"TARGETING::Target::setAttr<0x%7x>: trySetAttr returned false",A);
         }
 
         /**
@@ -504,8 +503,7 @@ typename AttributeTraits<A>::Type Target::getAttr() const
     bool l_read = tryGetAttr<A>(l_attrValue);
     
     //@TODO Remove assert once release has stablized 
-    TARG_ASSERT(l_read,"TARGETING::Target::getAttr<%d>: tryGetAttr "
-           "returned false",A);
+    TARG_ASSERT(l_read,"TARGETING::Target::getAttr<0x%7x>: tryGetAttr returned false",A);
     return l_attrValue;
 }
 
@@ -539,8 +537,7 @@ const char* Target::getAttrAsString() const
     bool l_read = tryGetAttr<A>(l_attrValue);
 
     //@TODO Remove assert once release has stabilized
-    TARG_ASSERT(l_read,"TARGETING::Target::getAttrAsString<%d>: tryGetAttr "
-           "returned false",A);
+    TARG_ASSERT(l_read,"TARGETING::Target::getAttrAsString<0x%7x>: tryGetAttr returned false",A);
     return attrToString<A>(l_attrValue);
 }
 

@@ -219,6 +219,9 @@
     <attribute>
         <id>CHIP_ID</id>
     </attribute>
+    <attribute>
+        <id>FRU_ID</id>
+    </attribute>
 </targetType>
 
 <targetType>

@@ -11862,6 +11862,14 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
 </attribute>
 
 <attribute>
+    <id>FRU_ID</id>
+    <description>FRU ID attribute for chip class</description>
+    <simpleType><uint32_t><default>0</default></uint32_t></simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+</attribute>
+
+<attribute>
     <id>PLCK_IPL_ATTR_OVERRIDES_EXIST</id>
     <description>
       Set to 1 by HWSV to indicate that attribute overrides exist in a PLCK IPL

@@ -87,7 +87,7 @@ errlHndl_t platReadIDEC(const TARGETING::TargetHandle_t &i_target);
  *  target. The platform specific code is responsible for returning the
  *  vector. The caller is reponsible for allocating and de-allocating the space.
  *
- * @param[in]  i_target    target to check for chip ID/EC
+ * @param[in]  i_target    target to read the Partial Good keyword from
  * @param[out] o_pgData    pointer to area that will hold the partialGood vector
  *                          read from VPD; must be malloc'ed by the caller,
  *                          and must be VPD_CP00_PG_DATA_LENGTH in size.
@@ -134,6 +134,42 @@ const uint32_t VPD_CP00_PG_PCIE_GOOD        = 0xF700;
 const uint32_t VPD_CP00_PG_EX0_INDEX        = 16;
 // all good - 0:PRV, 1:rC, 2:L2, 3:L3NP, 6:REFR, 7:DPLL - 0xF300
 const uint32_t VPD_CP00_PG_EX0_GOOD         = 0xF300;
+
+/**
+ * @brief platform specific code to determine the PR vector of the input
+ *  target. The platform specific code is responsible for returning the
+ *  vector. The caller is reponsible for allocating and de-allocating the space.
+ *
+ * @param[in]  i_target    target to read the PR keyword from
+ * @param[out] o_prData    pointer to area that will hold the PR keyword
+ *                          read from VPD; must be malloc'ed by the caller,
+ *                          and must be VPD_CP00_PR_DATA_LENGTH in size.
+ *
+ * @return errlHndl_t       valid errlHndl_t handle if there was an error
+ *                          NULL if no errors;
+ */
+errlHndl_t platReadPR(const TARGETING::TargetHandle_t &i_target,
+                                void *o_prData);
+
+// constants the platReadPR will use for looking at the VPD data
+const uint32_t VPD_VINI_PR_DATA_LENGTH      = 8;
+
+// Byte 2 Number of processors per module chip
+const uint32_t VPD_VINI_PR_B2_MASK          = 0xF0; // bits 0-3
+const uint32_t VPD_VINI_PR_B2_SHIFT         = 4;
+// Byte 7 Max VPD copies (aka replication factor)
+// Bits 2:7
+//   Number of chips using this VPD minus 1, i.e., Used to
+//   calculate the maximum number of duplicate copies of the B9
+//   keyword allowed. Multiply PR byte 2 (number of processor
+//   per module) times this value [(PR byte 7) + 1] to get the max
+//   number of copies of any given B9 keyword data in the SPIRA
+//   PACA structure.
+//   If the number of functional processors is different on chips
+//   within the same module. It will be firmwares responsibility
+//   average them out as specified in byte 2 above.
+const uint32_t VPD_VINI_PR_B7_MASK          = 0x3F; // bits 2-7
+
 
 /**
  * @brief platform specific code to get the address in PNOR to read

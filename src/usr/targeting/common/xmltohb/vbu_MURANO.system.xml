@@ -198,6 +198,10 @@
         <default>affinity:sys-0/node-0/proc-0</default>
     </attribute>
     <attribute>
+        <id>FRU_ID</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
         <id>FABRIC_NODE_ID</id>
         <default>0</default>
     </attribute>
@@ -710,6 +714,10 @@
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-1</default>
     </attribute>
+    <attribute>
+        <id>FRU_ID</id>
+        <default>0</default>
+    </attribute>
     <!-- FSI is connected via proc0:MFSI-0 -->
     <attribute>
         <id>FSI_MASTER_CHIP</id>
@@ -1132,6 +1140,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-2</default>
+    </attribute>
+    <attribute>
+        <id>FRU_ID</id>
+        <default>1</default>
     </attribute>
     <!-- FSI is connected via proc0:MFSI-2 -->
     <attribute>
@@ -1556,6 +1568,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-3</default>
+    </attribute>
+    <attribute>
+        <id>FRU_ID</id>
+        <default>1</default>
     </attribute>
     <!-- FSI is connected via proc0:MFSI-3 -->
     <attribute>

@@ -33,6 +33,7 @@
 // Includes
 /******************************************************************************/
 #include <stdint.h>
+#include <algorithm>
 
 #include <targeting/common/commontargeting.H>
 
@@ -57,6 +58,24 @@ TRAC_INIT(&g_trac_imp_hwas, "HWAS_I",   KILOBYTE );
 TRAC_INIT(&g_trac_dbg_hwas, "HWAS",     1024 );
 TRAC_INIT(&g_trac_imp_hwas, "HWAS_I",   1024 );
 #endif
+
+// structure used to store proc information for PR keyword processing
+typedef struct {
+    TargetHandle_t target;
+    ATTR_FRU_ID_type fruid;
+    uint8_t avgNum;
+    uint8_t vpdCopies;
+} procPR_t;
+
+// SORT functions that we'll use for PR keyword processing
+bool compareTargetHUID(TargetHandle_t t1, TargetHandle_t t2)
+{
+    return (t1->getAttr<ATTR_HUID>() < t2->getAttr<ATTR_HUID>());
+}
+bool compareProcFRUID(procPR_t t1, procPR_t t2)
+{
+    return (t1.fruid < t2.fruid);
+}
 
 /**
  * @brief       simple helper fn to get and set hwas state to poweredOn,
@@ -108,13 +127,10 @@ errlHndl_t discoverTargets()
         target->setAttr<ATTR_HWAS_STATE>(hwasState);
     }
 
-    // ASSUMPTIONS:
+    // Assumptions and actions:
     // CLASS_SYS (exactly 1) - mark as present
-    // CLASS_ENC and
-    // CLASS_CHIP - (TYPE_PROC TYPE_MEMBUF)
-    // CLASS_LOGICAL_CARD - TYPE_DIMM
-    //      (ALL require hardware query)
-    //      - call platPresenceDetect
+    // CLASS_ENC, TYPE_PROC, TYPE_MEMBUF, TYPE_DIMM
+    //     (ALL require hardware query) - call platPresenceDetect
     //  \->children: CLASS_* (NONE require hardware query) - mark as present
     do
     {
@@ -130,7 +146,7 @@ errlHndl_t discoverTargets()
         HWAS_DBG("pSys %.8X - marked present",
             pSys->getAttr<ATTR_HUID>());
 
-        // find CLASS_ENC
+        // find list of all we need to call platPresenceDetect against
         PredicateCTM predEnc(CLASS_ENC);
         PredicateCTM predChip(CLASS_CHIP);
         PredicateCTM predDimm(CLASS_LOGICAL_CARD, TYPE_DIMM);
@@ -152,14 +168,18 @@ errlHndl_t discoverTargets()
             break; // break out of the do/while so that we can return
         }
 
-        // no errors - keep going
         // for each, read their ID/EC level. if that works,
         //  mark them and their descendants as present
         //  read the partialGood vector to determine if any are not functional
+        //  and read and store values from the PR keyword
+
+        // list of procs and data that we'll need to look at the PR keyword
+        procPR_t l_procEntry;
+        std::vector <procPR_t> l_procPRList;
 
         for (TargetHandleList::iterator pTarget_it = pCheckPres.begin();
                 pTarget_it != pCheckPres.end();
-                pTarget_it++
+                ++pTarget_it
             )
         {
             TargetHandle_t pTarget = *pTarget_it;
@@ -180,6 +200,7 @@ errlHndl_t discoverTargets()
             uint32_t errlPlid = 0;
             uint16_t pgData[VPD_CP00_PG_DATA_LENGTH / sizeof(uint16_t)];
             bzero(pgData, sizeof(pgData));
+
             if (pTarget->getAttr<ATTR_CLASS>() == CLASS_CHIP)
             {
                 // read Chip ID/EC data from these physical chips
@@ -196,7 +217,6 @@ errlHndl_t discoverTargets()
                     errlCommit(errl, HWAS_COMP_ID);
                     // errl is now NULL
                 }
-
                 if (pTarget->getAttr<ATTR_TYPE>() == TYPE_PROC)
                 {
                     // read partialGood vector from these as well.
@@ -219,8 +239,7 @@ errlHndl_t discoverTargets()
                     if (pgData[VPD_CP00_PG_PIB_INDEX] !=
                                     VPD_CP00_PG_PIB_GOOD)
                     {
-                        HWAS_INF("pTarget %.8X - PIB "
-                                    "pgPdata[%d]: expected 0x%04X - bad",
+                        HWAS_INF("pTarget %.8X - PIB pgPdata[%d]: expected 0x%04X - bad",
                             pTarget->getAttr<ATTR_HUID>(),
                             VPD_CP00_PG_PIB_INDEX,
                             VPD_CP00_PG_PIB_GOOD);
@@ -230,8 +249,7 @@ errlHndl_t discoverTargets()
                     if (pgData[VPD_CP00_PG_PERVASIVE_INDEX] !=
                                     VPD_CP00_PG_PERVASIVE_GOOD)
                     {
-                        HWAS_INF("pTarget %.8X - Pervasive "
-                                    "pgPdata[%d]: expected 0x%04X - bad",
+                        HWAS_INF("pTarget %.8X - Pervasive pgPdata[%d]: expected 0x%04X - bad",
                             pTarget->getAttr<ATTR_HUID>(),
                             VPD_CP00_PG_PERVASIVE_INDEX,
                             VPD_CP00_PG_PERVASIVE_GOOD);
@@ -242,24 +260,49 @@ errlHndl_t discoverTargets()
                              VPD_CP00_PG_POWERBUS_BASE) !=
                                     VPD_CP00_PG_POWERBUS_BASE)
                     {
-                        HWAS_INF("pTarget %.8X - PowerBus "
-                                    "pgPdata[%d]: expected 0x%04X - bad",
+                        HWAS_INF("pTarget %.8X - PowerBus pgPdata[%d]: expected 0x%04X - bad",
                             pTarget->getAttr<ATTR_HUID>(),
                             VPD_CP00_PG_POWERBUS_INDEX,
                             VPD_CP00_PG_POWERBUS_BASE);
                         chipFunctional = false;
                     }
+                    else
+                    {
+                        // read the PR keywords that we need, so that if
+                        //  we have errors, we can handle them as approprite.
+                        uint8_t prData[VPD_VINI_PR_DATA_LENGTH/sizeof(uint8_t)];
+                        bzero(prData, sizeof(prData));
+                        errl = platReadPR(pTarget, prData);
+                        if (errl != NULL)
+                        {   // read of PR keyword failed
+                            HWAS_INF("pTarget %.8X - read PR failed - bad",
+                                pTarget->getAttr<ATTR_HUID>());
+                            chipFunctional = false;
+                            errlPlid = errl->plid();
+
+                            // commit the error but keep going
+                            errlCommit(errl, HWAS_COMP_ID);
+                            // errl is now NULL
+                        }
+                        else
+                        {
+                            // save info so that we can
+                            //  process the PR keyword after this loop
+                            HWAS_INF("pTarget %.8X - pushing to procPRlist; FRU_ID %d",
+                                pTarget->getAttr<ATTR_HUID>(),
+                                pTarget->getAttr<ATTR_FRU_ID>());
+                            l_procEntry.target = pTarget;
+                            l_procEntry.fruid = pTarget->getAttr<ATTR_FRU_ID>();
+                            l_procEntry.avgNum =
+                                        (prData[2] & VPD_VINI_PR_B2_MASK)
+                                            >> VPD_VINI_PR_B2_SHIFT;
+                            l_procEntry.vpdCopies =
+                                        (prData[7] & VPD_VINI_PR_B7_MASK) + 1;
+                            l_procPRList.push_back(l_procEntry);
+                        }
+                    }
                 } // TYPE_PROC
             } // CLASS_CHIP
-
-            // TODO: Story 35077 - add PR processing. roughly:
-            //  totalcores = readPR();
-            //  for each child ex in chip c
-            //      if goodcores < totalcores
-            //          if ex->functional==true
-            //              goodcores++
-            //      else
-            //          ex->functional = false
 
             HWAS_DBG("pTarget %.8X - detected present, %sfunctional",
                 pTarget->getAttr<ATTR_HUID>(),
@@ -272,7 +315,7 @@ errlHndl_t discoverTargets()
                 TargetService::CHILD, TargetService::ALL);
             for (TargetHandleList::iterator pDesc_it = pDescList.begin();
                     pDesc_it != pDescList.end();
-                    pDesc_it++)
+                    ++pDesc_it)
             {
                 TargetHandle_t pDesc = *pDesc_it;
                 // by default, the descendant's functionality is 'inherited'
@@ -286,8 +329,7 @@ errlHndl_t discoverTargets()
                         (pgData[VPD_CP00_PG_XBUS_INDEX] !=
                             VPD_CP00_PG_XBUS_GOOD))
                     {
-                        HWAS_INF("pDesc %.8X - XBUS  "
-                                    "pgPdata[%d]: expected 0x%04X - bad",
+                        HWAS_INF("pDesc %.8X - XBUS  pgPdata[%d]: expected 0x%04X - bad",
                             pDesc->getAttr<ATTR_HUID>(),
                             VPD_CP00_PG_XBUS_INDEX,
                             VPD_CP00_PG_XBUS_GOOD);
@@ -298,8 +340,7 @@ errlHndl_t discoverTargets()
                         (pgData[VPD_CP00_PG_ABUS_INDEX] !=
                             VPD_CP00_PG_ABUS_GOOD))
                     {
-                        HWAS_INF("pDesc %.8X - ABUS "
-                                    "pgPdata[%d]: expected 0x%04X - bad",
+                        HWAS_INF("pDesc %.8X - ABUS pgPdata[%d]: expected 0x%04X - bad",
                             pDesc->getAttr<ATTR_HUID>(),
                             VPD_CP00_PG_ABUS_INDEX,
                             VPD_CP00_PG_ABUS_GOOD);
@@ -310,8 +351,7 @@ errlHndl_t discoverTargets()
                         (pgData[VPD_CP00_PG_PCIE_INDEX] !=
                             VPD_CP00_PG_PCIE_GOOD))
                     {
-                        HWAS_INF("pDesc %.8X - PCIe "
-                                    "pgPdata[%d]: expected 0x%04X - bad",
+                        HWAS_INF("pDesc %.8X - PCIe pgPdata[%d]: expected 0x%04X - bad",
                             pDesc->getAttr<ATTR_HUID>(),
                             VPD_CP00_PG_PCIE_INDEX,
                             VPD_CP00_PG_PCIE_GOOD);
@@ -327,8 +367,7 @@ errlHndl_t discoverTargets()
                       if (pgData[VPD_CP00_PG_EX0_INDEX + indexEX] !=
                             VPD_CP00_PG_EX0_GOOD)
                       {
-                        HWAS_INF("pDesc %.8X - CORE/EX%d "
-                                    "pgPdata[%d]: expected 0x%04X - bad",
+                        HWAS_INF("pDesc %.8X - CORE/EX%d pgPdata[%d]: expected 0x%04X - bad",
                             pDesc->getAttr<ATTR_HUID>(), indexEX,
                             VPD_CP00_PG_EX0_INDEX + indexEX,
                             VPD_CP00_PG_EX0_GOOD);
@@ -345,8 +384,7 @@ errlHndl_t discoverTargets()
                           ((pgData[VPD_CP00_PG_POWERBUS_INDEX] &
                             VPD_CP00_PG_POWERBUS_MCL) == 0))
                       {
-                        HWAS_INF("pDesc %.8X - MCS%d "
-                                    "pgPdata[%d]: MCL expected 0x%04X - bad",
+                        HWAS_INF("pDesc %.8X - MCS%d pgPdata[%d]: MCL expected 0x%04X - bad",
                             pDesc->getAttr<ATTR_HUID>(), indexMCS,
                             VPD_CP00_PG_POWERBUS_INDEX,
                             VPD_CP00_PG_POWERBUS_MCL);
@@ -357,8 +395,7 @@ errlHndl_t discoverTargets()
                           ((pgData[VPD_CP00_PG_POWERBUS_INDEX] &
                             VPD_CP00_PG_POWERBUS_MCR) == 0))
                       {
-                        HWAS_INF("pDesc %.8X - MCS%d "
-                                    "pgPdata[%d]: MCR expected 0x%04X - bad",
+                        HWAS_INF("pDesc %.8X - MCS%d pgPdata[%d]: MCR expected 0x%04X - bad",
                             pDesc->getAttr<ATTR_HUID>(), indexMCS,
                             VPD_CP00_PG_POWERBUS_INDEX,
                             VPD_CP00_PG_POWERBUS_MCR);
@@ -380,6 +417,139 @@ errlHndl_t discoverTargets()
             enableHwasState(pTarget, chipPresent, chipFunctional, errlPlid);
 
         } // for pTarget_it
+
+        // PR keyword processing - potentially reduce the number of ex/core
+        //  units that are functional based on what's in the PR keyword.
+
+        // predicate to find present EX units
+        PredicateCTM predEX(CLASS_UNIT, TYPE_EX);
+        PredicateHwas predPresent;
+        predPresent.present(true);
+        PredicatePostfixExpr exCheckExpr;
+        exCheckExpr.push(&predEX).push(&predPresent).And();
+
+        // predicate to find CORE units
+        PredicateCTM predCore(CLASS_UNIT, TYPE_CORE);
+        PredicatePostfixExpr coreCheckExpr;
+        coreCheckExpr.push(&predCore);
+
+        // sort by ATTR_FRU_ID so PROC# are in the right groupings.
+        std::sort(l_procPRList.begin(), l_procPRList.end(),
+                    compareProcFRUID);
+
+        // AFTER all targets have been tested, loop thru procs to handle PR
+        const uint32_t l_PRProcCount = l_procPRList.size();
+        for (uint32_t procIdx = 0;
+                procIdx < l_PRProcCount;
+                // the increment will happen in the loop to handle
+                //  PR records covering more than 1 proc target
+            )
+        {
+            // determine the number of procs we should enable
+            uint8_t avgNum = l_procPRList[procIdx].avgNum;
+            uint8_t vpdCopies = l_procPRList[procIdx].vpdCopies;
+
+            // this procs FRU_ID, used to determine groupings
+            ATTR_FRU_ID_type thisFruId = l_procPRList[procIdx].fruid;
+
+            HWAS_INF("procPRList[%d] - PR avg units %d, VPDs %d, FRU_ID %d",
+                    procIdx, avgNum, vpdCopies, thisFruId);
+
+            // exs and iters for each proc in this vpd set
+            TargetHandleList pEXList[vpdCopies];
+            TargetHandleList::iterator pEX_it[vpdCopies];
+
+            // find the proc's that we think are in this group
+            for (uint32_t i = 0; i < vpdCopies; i++)
+            {
+                TargetHandle_t pProc = l_procPRList[procIdx].target;
+
+                // if this proc is past the last of the proc count
+                //  OR is NOT in the same FRU_ID
+                if ((procIdx >= l_PRProcCount) ||
+                    (thisFruId != pProc->getAttr<ATTR_FRU_ID>()))
+                {
+                    HWAS_DBG("procPRList[%d] - not in FRU_ID %d group",
+                            i, thisFruId);
+
+                    // change this to be how many we actually have here
+                    vpdCopies = i;
+
+                    // we're done - break so that we use procIdx as the
+                    //  start index next time
+                    break;
+                }
+
+                // get this proc's (CHILD) present EX units
+                targetService().getAssociated( pEXList[i], pProc,
+                        TargetService::CHILD, TargetService::ALL, &exCheckExpr);
+
+                // sort the list by ATTR_HUID to ensure that we
+                //  start at the same place each time
+                std::sort(pEXList[i].begin(), pEXList[i].end(),
+                            compareTargetHUID);
+
+                // keep a pointer into that list
+                pEX_it[i] = pEXList[i].begin();
+
+                // advance the outer loop as well since we're doing these
+                //  procs together
+                ++procIdx;
+            } // for
+            HWAS_DBG("procIdx %d, vpdCopies %d", procIdx, vpdCopies);
+
+            // now need to find EX units that stay function, going
+            //  across the list of units for each proc we have, until
+            //  we get to the max or run out of EXs.
+            uint8_t procs_remaining = vpdCopies;
+            uint32_t maxEXs = avgNum * vpdCopies;
+            uint32_t goodEXs = 0;
+            do
+            {
+                // now cycle thru the procs
+                for (uint32_t i = 0;i < vpdCopies;i++)
+                {
+                    // if we are done with this list of ex/core units
+                    //  from this processor
+                    if (pEX_it[i] == pEXList[i].end())
+                    {
+                        procs_remaining--;
+                        continue;
+                    }
+
+                    // got a present EX
+                    HWAS_DBG("pEX   %.8X - is good!",
+                            (*(pEX_it[i]))->getAttr<ATTR_HUID>());
+                    (pEX_it[i])++; // next ex/core in this proc's list
+                    goodEXs++;
+                } // for
+            }
+            while ((goodEXs < maxEXs) && (procs_remaining != 0));
+
+            // now mark the rest of the EXs as non-present/non-functional
+            for (uint32_t i = 0;i < vpdCopies;i++)
+            {
+                // walk thru the rest of the EX list
+                while (pEX_it[i] != pEXList[i].end())
+                {
+                    TargetHandle_t l_pEX = *(pEX_it[i]);
+                    enableHwasState(l_pEX, false, false, 0);
+                    HWAS_INF("pEX   %.8X - marked NOT present, NOT functional (PR)",
+                            l_pEX->getAttr<ATTR_HUID>());
+
+                    // now need to mark the child CORE
+                    TargetHandleList pCoreList;
+                    targetService().getAssociated(
+                        pCoreList, l_pEX,
+                        TargetService::CHILD, TargetService::ALL,
+                        &coreCheckExpr );
+                    enableHwasState(pCoreList[0], false, false, 0);
+                    HWAS_INF("pCore %.8X - marked NOT present, NOT functional (PR)",
+                            pCoreList[0]->getAttr<ATTR_HUID>());
+                    (pEX_it[i])++; // next ex/core in this proc's list
+                }
+            } // for making remaining non-present/non-functional
+        } // for procIdx < l_PRProcCount
 
     } while (0);
 

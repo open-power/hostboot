@@ -48,7 +48,7 @@ class RegisterHWASFunctions
     RegisterHWASFunctions()
     {
         // HWAS is awake
-        
+
         // register processCallout function for ErrlEntry::commit
         HWAS_DBG("module load: calling errlog::setHwasProcessCalloutFn");
         ERRORLOG::ErrlManager::setHwasProcessCalloutFn(
@@ -135,7 +135,6 @@ bool platSystemIsAtRuntime()
 errlHndl_t platReadPartialGood(const TargetHandle_t &i_target,
         void *o_pgData)
 {
-    errlHndl_t errl = NULL;
     HWAS_DBG( "i_target %.8X",
             i_target->getAttr<ATTR_HUID>());
 
@@ -143,7 +142,7 @@ errlHndl_t platReadPartialGood(const TargetHandle_t &i_target,
     uint8_t pgRaw[VPD_CP00_PG_HDR_LENGTH + VPD_CP00_PG_DATA_LENGTH];
     size_t pgSize = sizeof(pgRaw);
 
-    errl = deviceRead(i_target, pgRaw, pgSize,
+    errlHndl_t errl = deviceRead(i_target, pgRaw, pgSize,
             DEVICE_MVPD_ADDRESS(MVPD::CP00, MVPD::PG));
 
     if (unlikely(errl != NULL))
@@ -165,20 +164,30 @@ errlHndl_t platReadPartialGood(const TargetHandle_t &i_target,
             }
             else
             if (i_target->getAttr<ATTR_HUID>() == 0x50001)
-            {   // 2nd proc - mark Pervasive bad - entire chip
-                //  should be marked present and NOT functional
-                pgData[VPD_CP00_PG_PERVASIVE_INDEX] = 0;
+            {
+                pgData[VPD_CP00_PG_EX0_INDEX+6] = 0xF300;
+                pgData[VPD_CP00_PG_EX0_INDEX+12] = 0xF300;
+                pgData[VPD_CP00_PG_EX0_INDEX+13] = 0xF300;
+                pgData[VPD_CP00_PG_EX0_INDEX+14] = 0xF300;
             }
             else
             if (i_target->getAttr<ATTR_HUID>() == 0x50002)
-            {   // 3rd proc - part of XBUS is bad
-                pgData[VPD_CP00_PG_XBUS_INDEX] = 0;
+            {   // 3rd proc
+                //// mark Pervasive bad - entire chip
+                ////  should be marked present and NOT functional
+                ////pgData[VPD_CP00_PG_PERVASIVE_INDEX] = 0;
+
+                //pgData[VPD_CP00_PG_EX0_INDEX+12] = 0xF300;
+                pgData[VPD_CP00_PG_EX0_INDEX+13] = 0xF300;
+                pgData[VPD_CP00_PG_EX0_INDEX+14] = 0xF300;
             }
             else
             if (i_target->getAttr<ATTR_HUID>() == 0x50003)
-            {   // 4th proc -  EX13 and EX14 are bad
-                pgData[VPD_CP00_PG_EX0_INDEX+13] = 0;
-                pgData[VPD_CP00_PG_EX0_INDEX+14] = 0;
+            {   // 4th proc -  EX13 and EX14 are good
+                pgData[VPD_CP00_PG_EX0_INDEX+6] = 0xF300;
+                pgData[VPD_CP00_PG_EX0_INDEX+12] = 0xF300;
+                pgData[VPD_CP00_PG_EX0_INDEX+13] = 0xF300;
+                pgData[VPD_CP00_PG_EX0_INDEX+14] = 0xF300;
             }
         }
 #endif
@@ -192,6 +201,76 @@ errlHndl_t platReadPartialGood(const TargetHandle_t &i_target,
 
     return errl;
 } // platReadPartialGood
+
+//******************************************************************************
+// platReadPR function
+//******************************************************************************
+errlHndl_t platReadPR(const TargetHandle_t &i_target,
+        void *o_prData)
+{
+    HWAS_DBG( "i_target %.8X",
+            i_target->getAttr<ATTR_HUID>());
+
+    // call deviceRead() to find the PR record
+    uint8_t prData[VPD_VINI_PR_DATA_LENGTH];
+    size_t prSize = sizeof(prData);
+
+    errlHndl_t errl = deviceRead(i_target, prData, prSize,
+            DEVICE_MVPD_ADDRESS(MVPD::VINI, MVPD::PR));
+
+    if (unlikely(errl != NULL))
+    {   // errl was set - this is an error condition.
+        HWAS_ERR( "i_target %.8X - failed PR read",
+            i_target->getAttr<ATTR_HUID>());
+    }
+    else
+    {
+#if 0
+// Unit test. set P8_MURANO.config to have 4 procs, and this code will
+//  alter the VPD so that some of the procs and chiplets should get marked
+//  as NOT functional.
+        {
+            if (i_target->getAttr<ATTR_HUID>() == 0x50000)
+            {   // 1st proc - let it go thru ok.
+                prData[2] = 3 << VPD_VINI_PR_B2_SHIFT; // 3*2 = 6 cores
+                prData[7] = 0; // 2 procs
+                //prData[2] = 1 << VPD_VINI_PR_B2_SHIFT; // 1*4 = 4 cores
+                //prData[7] = 3; // 4 cores
+            }
+            else
+            if (i_target->getAttr<ATTR_HUID>() == 0x50001)
+            {   // 2nd proc -
+                prData[2] = 3 << VPD_VINI_PR_B2_SHIFT; // 3*2 = 6 cores
+                prData[7] = 1; // 2 procs
+                //prData[2] = 1 << VPD_VINI_PR_B2_SHIFT; // 1*4 = 4 cores
+                //prData[7] = 3; // 4 cores
+            }
+            else
+            if (i_target->getAttr<ATTR_HUID>() == 0x50002)
+            {   // 3rd proc -
+                prData[2] = 3 << VPD_VINI_PR_B2_SHIFT; // 3*2 = 6 cores
+                prData[7] = 0; // 2 procs
+                //prData[2] = 1 << VPD_VINI_PR_B2_SHIFT; // 1*4 = 4 cores
+                //prData[7] = 3; // 4 cores
+            }
+            else
+            if (i_target->getAttr<ATTR_HUID>() == 0x50003)
+            {   // 4th proc -
+                prData[2] = 3 << VPD_VINI_PR_B2_SHIFT; // 3*2 = 6 cores
+                prData[7] = 0; // 2 procs
+                //prData[2] = 1 << VPD_VINI_PR_B2_SHIFT; // 1*4 = 4 cores
+                //prData[7] = 3; // 4 cores
+            }
+        }
+#endif
+
+        HWAS_DBG_BIN("PR record", prData, VPD_VINI_PR_DATA_LENGTH);
+        // copy the data back into the caller's buffer
+        memcpy(o_prData, prData, VPD_VINI_PR_DATA_LENGTH);
+    }
+
+    return errl;
+} // platReadPR
 
 //******************************************************************************
 // platPresenceDetect function
@@ -278,7 +357,7 @@ GardAddress::GardAddress(bool &o_gardEnabled)
         if (errl)
         {
             HWAS_ERR("PNOR::getSectionInfo failed!!!");
-            // no support for GARD in this configuration.  
+            // no support for GARD in this configuration.
             // Commit the log as unrecoverable and keep going.
             errlCommit(errl, HWAS_COMP_ID);
             // errl is now NULL
@@ -311,14 +390,14 @@ GardAddress::~GardAddress()
     {
         for (std::vector<void *>::iterator iter = iv_addr.begin();
                 iter != iv_addr.end();
-                iter++)
+                ++iter)
         {
             HWAS_DBG("flushing GARD in PNOR: addr=%p", *iter);
             int l_rc = mm_remove_pages(FLUSH, (void *) *iter,
                         sizeof(DeconfigGard::GardRecord));
             if (l_rc)
             {
-                HWAS_ERR("mm_remove_pages(FLUSH,%p,%d) returned %d", 
+                HWAS_ERR("mm_remove_pages(FLUSH,%p,%d) returned %d",
                         *iter, sizeof(DeconfigGard::GardRecord),l_rc);
             }
         }
