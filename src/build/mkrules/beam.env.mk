@@ -27,7 +27,7 @@
 
 BEAMVER = beam-3.5.2
 BEAMPATH = /afs/rch/projects/esw/beam/$(BEAMVER)
-BEAMCMD = i686-mcp6-jail $(BEAMPATH)/bin/beam_compile
+BEAMCMD = $(HOST_PREFIX)jail $(BEAMPATH)/bin/beam_compile
 BEAMFLAGS = \
     --beam::source=$(BEAMPATH)/tcl/beam_default_parms.tcl \
     --beam::source=$(ROOTPATH)/src/build/beam/compiler_c_config.tcl \

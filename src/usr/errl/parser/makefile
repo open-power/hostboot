@@ -43,7 +43,7 @@ ERRLPARSE_TARGETS = \
 	${GENDIR}/plugins/hbfwUdIds.H \
     ${GENDIR}/plugins/makefile
 
-CC=i686-mcp6-g++ -m32
+CC=$(HOST_PREFIX)g++ -m32 -static
 CFLAGS:=-g -O0   -I $(ROOTPATH)/src/include/usr -I ${GENDIR}
 
 all: GEN_PASS CODE_PASS

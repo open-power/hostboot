@@ -98,20 +98,20 @@ ${PRDR_CMP_FLEX_C_PATH}: ${PRDR_CMP_FLEX}
 USERDEFINES = -D__HOSTBOOT_MODULE -O3 -pipe
 
 ${PRDR_CMP_YACC_o_PATH}: ${PRDR_CMP_YACC_C_PATH} ${PRDR_CMP_YACC_H_PATH}
-	i686-$(MCP_VER)-g++ -c $(USERDEFINES) $< \
+	$(HOST_PREFIX)g++ -c $(USERDEFINES) $< \
 		-I ${PRD_USR_PATH}/common/framework/rule \
 		-I ${PRD_USR_PATH}/common/util -I ${RULEOBJDIR} \
 		-o $@
 
 ${PRDR_CMP_FLEX_o_PATH}: ${PRDR_CMP_FLEX_C_PATH} ${PRDR_CMP_YACC_H_PATH}
-	i686-$(MCP_VER)-g++ -c $(USERDEFINES) $< \
+	$(HOST_PREFIX)g++ -c $(USERDEFINES) $< \
 		-I ${PRD_USR_PATH}/common/framework/rule \
 		-I ${PRD_USR_PATH}/common/util -I ${RULEOBJDIR} \
 		-o $@
 
 ${PRDR_CMP_o_PATH}: ${PRDR_CMP_C}
 	mkdir -p ${RULEOBJDIR}
-	i686-$(MCP_VER)-g++ -c $(USERDEFINES) $< \
+	$(HOST_PREFIX)g++ -c $(USERDEFINES) $< \
 		-I ${PRD_USR_PATH}/common/framework/rule \
 		-I ${PRD_USR_PATH}/common \
 		-I ${PRD_USR_PATH}/common/util \
@@ -122,7 +122,7 @@ ${PRDR_CMP_o_PATH}: ${PRDR_CMP_C}
 
 ${PRDR_CMP_PATH}: ${PRDR_CMP_YACC_o_PATH} ${PRDR_CMP_FLEX_o_PATH} \
 				  ${PRDR_CMP_o_PATH}
-	i686-$(MCP_VER)-g++ $(USERDEFINES) \
+	$(HOST_PREFIX)g++ $(USERDEFINES) \
 		${PRDR_CMP_YACC_o_PATH} ${PRDR_CMP_FLEX_o_PATH} ${PRDR_CMP_o_PATH} \
         -o $@
 
@@ -136,7 +136,7 @@ PRDRPP_SEARCHDIRS = -I../../common/plat/pegasus
 # Build .prf files from .rule files and store them in ${RULEOBJDIR}
 ${RULEOBJDIR}/%.prf : %.rule ${PRDR_CMP_PATH}
 	cat $< | ${PRD_USR_PATH}/common/framework/rule/prdrpp ${PRDRPP_SEARCHDIRS} \
-		   | i686-$(MCP_VER)-jail ${PRDR_CMP_PATH} $@
+		   | $(HOST_PREFIX)jail ${PRDR_CMP_PATH} $@
 
 # Copy all .prf files from ${RULEOBJDIR} to ${IMGDIR}
 ${EXTRA_PARTS}: ${IMGDIR}/% : ${RULEOBJDIR}/%

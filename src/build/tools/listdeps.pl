@@ -121,7 +121,8 @@ my @module_names = < *.so >;
 # shared library where it is defined.
 foreach $module_name  (@module_names )
 {
-    my @output = `ppc64-mcp6-nm -AD  --defined-only $module_name`;
+    my $PREFIX = $ENV{'CROSS_PREFIX'};
+    my @output = `${PREFIX}nm -AD  --defined-only $module_name`;
 
     chomp @output;
 
@@ -141,7 +142,7 @@ foreach $module_name  (@module_names )
 
 # if there was a library name passed in use that
 # otherwise if they asked to list all dependencies
-# then use the list we already created above, 
+# then use the list we already created above,
 # default is to the list required libs of istep modules
 my @istep_modules = ();
 
@@ -349,11 +350,11 @@ sub validate
     foreach my $match ( @Dependencies )
     {
         # check if the there exists a match
-        if ( !(defined $ListedDeps{$match}) && ($match) && 
+        if ( !(defined $ListedDeps{$match}) && ($match) &&
              !(defined $resident_modules{ $match } ) )
         {
           print "$module is MISSING DEPENDENCY $match\n";
-          print "\nplease add \"DEP_LIB($match),\""; 
+          print "\nplease add \"DEP_LIB($match),\"";
           print "  to src/include/usr/isteps/$istepFile\n\n";
           $rc = -1;
         }
@@ -382,7 +383,7 @@ sub usage
     print "-p will print dependency requirements\n";
     print "-All will print all dependency requirements (not just istep modules)\n";
     print "requires the -p option.\n\n";
- 
+
     exit 0;
 }
 

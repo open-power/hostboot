@@ -20,18 +20,13 @@
 # Origin: 30
 #
 # IBM_PROLOG_END_TAG
+ROOTPATH = ../../..
+
+CODE_PASS_BODY += linker
+CLEAN_TARGETS += linker
+
+include $(ROOTPATH)/config.mk
+
 linker: linker.C
-	i686-mcp6-g++ -O3 -g linker.C -o linker -lbfd -liberty -lz
+	$(HOST_PREFIX)g++ -O3 -g linker.C -o linker -lbfd -liberty -lz
 
-all: CODE_PASS
-
-CODE_PASS: linker
-
-GEN_PASS:
-
-clean:
-	(rm -f linker)
-
-BEAM_PASS:
-IMAGE_PASS:
-CLEAN_PASS: clean

@@ -25,17 +25,18 @@
 # Description:
 #     Configuration of the compiler settings.
 
-MCP_VER = mcp6
+CROSS_PREFIX ?= powerpc64-unknown-linux-gnu-
+HOST_PREFIX ?= x86_64-pc-linux-gnu-
 
-CC_RAW = ppc64-$(MCP_VER)-gcc -std=c99
-CXX_RAW = ppc64-$(MCP_VER)-g++
+CC_RAW = $(CROSS_PREFIX)gcc -std=c99
+CXX_RAW = $(CROSS_PREFIX)g++
 CC = $(TRACEPP) $(CC_RAW)
 CXX = $(TRACEPP) $(CXX_RAW)
 
-LD = ppc64-$(MCP_VER)-ld
-OBJDUMP = ppc64-$(MCP_VER)-objdump
-GCOV = ppc64-$(MCP_VER)-gcov
+LD = $(CROSS_PREFIX)ld
+OBJDUMP = $(CROSS_PREFIX)objdump
+GCOV = $(CROSS_PREFIX)gcov
 
 CUSTOM_LINKER_EXE = $(ROOTPATH)/src/build/linker/linker
-CUSTOM_LINKER = i686-$(MCP_VER)-jail $(CUSTOM_LINKER_EXE)
+CUSTOM_LINKER = $(HOST_PREFIX)jail $(CUSTOM_LINKER_EXE)
 
