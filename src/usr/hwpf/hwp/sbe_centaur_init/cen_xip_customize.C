@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: cen_xip_customize.C,v 1.8 2013/03/14 03:33:21 cmolsen Exp $
+// $Id: cen_xip_customize.C,v 1.10 2013/03/28 00:21:54 cmolsen Exp $
 /*------------------------------------------------------------------------------*/
 /* *! TITLE : cen_xip_customize.C                                               */
 /* *! DESCRIPTION : Customizes Centaur images from a Centaur reference image.   */
@@ -286,7 +286,10 @@ ReturnCode cen_xip_customize(const fapi::Target &i_target,
                                      0,
                                      0,
                                      0,
-                                     sizeImageOutMax );
+                                     sizeImageOutMax,
+                                     SBE_XIP_SECTION_RINGS,
+                                     i_buf2,      // Use buf2 as temp buf.
+                                     i_sizeBuf2 );
   if (rcLoc)  {
     FAPI_ERR("write_ring_block_to_image() failed w/rc=%i",rcLoc);
     FAPI_ERR("Check p8_delta_scan_rw.h for meaning of IMGBUILD_xyz rc code.");

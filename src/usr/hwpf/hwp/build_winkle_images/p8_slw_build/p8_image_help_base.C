@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_image_help_base.C,v 1.9 2013/03/01 22:23:03 cmolsen Exp $
+// $Id: p8_image_help_base.C,v 1.11 2013/03/28 16:03:16 cmolsen Exp $
 /*------------------------------------------------------------------------------*/
 /* *! TITLE : p8_image_help_base.c                                              */
 /* *! DESCRIPTION : Basic helper functions for building and extracting          */
@@ -58,14 +58,15 @@ int get_ring_layout_from_image2(  const void      *i_imageIn,
                                   uint32_t        i_ddLevel,
                                   uint8_t         i_sysPhase,
                                   DeltaRingLayout **o_rs4RingLayout,
-                                  void            **nextRing)
+                                  void            **nextRing,
+																	uint8_t 				i_xipSectionId)
 {
-  uint32_t rc=0, rcLoc=0;
-  uint8_t bRingFound=0, bRingEOS=0;
-  DeltaRingLayout *thisRingLayout, *nextRingLayout; //Pointers into memory mapped image. DO NOT CHANGE MEMBERS!
-  uint32_t sizeRings;
-  SbeXipSection hostSection;
-  void     *ringsHostAddress0;
+  uint32_t  rc=0, rcLoc=0;
+  uint8_t   bRingFound=0, bRingEOS=0;
+  DeltaRingLayout *thisRingLayout=NULL, *nextRingLayout=NULL; //Pointers into memory mapped image. DO NOT CHANGE MEMBERS!
+  uint32_t  sizeRings;
+  SbeXipSection xipSection;
+  void      *hostSection;
   
   SBE_XIP_ERROR_STRINGS(g_errorStrings);
 
@@ -73,31 +74,33 @@ int get_ring_layout_from_image2(  const void      *i_imageIn,
   // - .rings host address offset and
   // - .rings size
   //
-  rc = sbe_xip_get_section( i_imageIn, SBE_XIP_SECTION_RINGS, &hostSection);
+  rc = sbe_xip_get_section( i_imageIn, i_xipSectionId, &xipSection);
   if (rc)   {
-      MY_INF("ERROR : sbe_xip_get_section() failed: %s", SBE_XIP_ERROR_STRING(g_errorStrings, rc));
-      MY_INF("Probable cause:");
-      MY_INF("\tThe section (=SBE_XIP_SECTION_RINGS=%i) was not found.",SBE_XIP_SECTION_RINGS);
-      return IMGBUILD_ERR_KEYWORD_NOT_FOUND;
+    MY_INF("ERROR : sbe_xip_get_section() failed: %s", SBE_XIP_ERROR_STRING(g_errorStrings, rc));
+    MY_INF("Probable cause:");
+    MY_INF("\tThe section (=SBE_XIP_SECTION_<xyz>=%i) was not found.",i_xipSectionId);
+    return IMGBUILD_ERR_KEYWORD_NOT_FOUND;
   }
-  if (hostSection.iv_offset==0)  {
-    MY_INF("INFO : No ring data exists for the section ID = SBE_XIP_SECTION_RINGS (ID=%i).",SBE_XIP_SECTION_RINGS);
-    return DSLWB_RING_SEARCH_NO_MATCH; // Implies exhaust search as well.
+  if (xipSection.iv_offset==0)  {
+    MY_INF("INFO : No ring data exists for the section ID = SBE_XIP_SECTION_<xyz> =%i\n",i_xipSectionId);
+    return IMGBUILD_RING_SEARCH_NO_MATCH; // Implies exhaust search as well.
   }
-  ringsHostAddress0 = (void*)((uintptr_t)i_imageIn + hostSection.iv_offset); 
-  sizeRings = hostSection.iv_size;
+  hostSection = (void*)((uintptr_t)i_imageIn + xipSection.iv_offset); 
+  sizeRings = xipSection.iv_size;
 
   // On first call, get the base offset to the .rings section.
   // On subsequent calls, we're into the search for ddLevel and sysPhase, so use nextRing instead.
   //
   if (*nextRing==NULL)
-    nextRingLayout = (DeltaRingLayout*)ringsHostAddress0;
+    nextRingLayout = (DeltaRingLayout*)hostSection;
   else
     nextRingLayout = (DeltaRingLayout*)*nextRing;
 
-  MY_DBG("ringsHostAddress0 = 0x%016llx",(uint64_t)ringsHostAddress0);
+  MY_DBG("hostSection = 0x%016llx",(uint64_t)hostSection);
   MY_DBG("sizeRings = %i", sizeRings);
   MY_DBG("nextRingLayout = 0x%016llx",(uint64_t)nextRingLayout);
+  MY_DBG("i_ddLevel = 0x%02x",i_ddLevel);
+  MY_DBG("i_sysPhase = %i",i_sysPhase);
   
   // Populate the output RS4 ring BE layout structure as well as local structure in host LE format where needed.
   // Note! Entire memory content is in BE format. So we do LE conversions where needed.
@@ -123,32 +126,32 @@ int get_ring_layout_from_image2(  const void      *i_imageIn,
           (thisRingLayout->sysPhase==1 && i_sysPhase==1) ||
           (thisRingLayout->sysPhase==2 && (i_sysPhase==0 || i_sysPhase==1)))  {
         bRingFound = 1;
-        MY_DBG("\tRing match found!");
+        MY_DBG("Ring match found! \n");
       }
     }
     nextRingLayout = (DeltaRingLayout*)((uintptr_t)thisRingLayout + myRev32(thisRingLayout->sizeOfThis));
     *nextRing = (void*)nextRingLayout;
-    if (nextRingLayout>=(DeltaRingLayout*)((uintptr_t)ringsHostAddress0+sizeRings))  {
+    if (nextRingLayout>=(DeltaRingLayout*)((uintptr_t)hostSection+sizeRings))  {
       bRingEOS = 1;
       *nextRing = NULL;
-      MY_DBG("\tRing search exhausted!");
+      MY_DBG("Ring search exhausted! \n");
     }
     
   }  // End of SEARCH.
 
   if (bRingFound)  {
     if (bRingEOS)
-      rcLoc = DSLWB_RING_SEARCH_EXHAUST_MATCH;
+      rcLoc = IMGBUILD_RING_SEARCH_EXHAUST_MATCH;
     else
-      rcLoc = DSLWB_RING_SEARCH_MATCH;
+      rcLoc = IMGBUILD_RING_SEARCH_MATCH;
   }    
   else  {
     *nextRing = NULL;
     if (bRingEOS)
-      return DSLWB_RING_SEARCH_NO_MATCH; // Implies exhaust search as well.
+      return IMGBUILD_RING_SEARCH_NO_MATCH; // Implies exhaust search as well.
     else  {
       MY_INF("Messed up ring search. Check code and .rings content. Returning nothing.");
-      return DSLWB_RING_SEARCH_MESS;
+      return IMGBUILD_RING_SEARCH_MESS;
     }
   }
 
@@ -173,9 +176,9 @@ int get_ring_layout_from_image2(  const void      *i_imageIn,
     return IMGBUILD_ERR_MISALIGNED_RING_LAYOUT;
   }
 
-  if (*nextRing > (void*)((uintptr_t)ringsHostAddress0 + sizeRings))  {
+  if (*nextRing > (void*)((uintptr_t)hostSection + sizeRings))  {
     MY_INF("Book keeping got messed up during .rings search. .rings section does not appear aligned.");
-    MY_INF("ringsHostAddress0+sizeRings = 0x%016llx",(uint64_t)ringsHostAddress0+sizeRings);
+    MY_INF("hostSection+sizeRings = 0x%016llx",(uint64_t)hostSection+sizeRings);
     MY_INF("nextRing = 0x%016llx",*(uint64_t*)nextRing);
     MY_INF("Continuing...");
   }
@@ -207,7 +210,10 @@ int write_ring_block_to_image(  void             *io_image,
                                 const uint8_t    i_idxVector,
                                 const uint8_t    i_override,
                                 const uint8_t    i_overridable,
-                                const uint32_t   i_sizeImageMax)
+                                const uint32_t   i_sizeImageMax,
+                                const uint8_t    i_xipSectionId,
+                                void             *i_bufTmp,
+                                const uint32_t   i_sizeBufTmp)
 {
   uint32_t   rc=0;
   SbeXipItem tocItem;
@@ -232,26 +238,73 @@ int write_ring_block_to_image(  void             *io_image,
       MY_ERR("Probable cause: Ring name (=%s) not found in image.", i_ringName);
       return IMGBUILD_ERR_KEYWORD_NOT_FOUND;
     } 
-    i_ringBlock->backItemPtr = myRev64(  tocItem.iv_address + 
+    i_ringBlock->backItemPtr = myRev64( tocItem.iv_address +
                                         i_idxVector*8*(1+i_overridable) +
                                         8*i_override*i_overridable );
   }
 
-  // Append ring block to .rings section.
   //
+  // Insert ring block to .rings or .dcrings section.
+  // ------
+  
+  // Temporarily copy .dcrings section if inserting into .rings section.
+  SbeXipSection xipSectionDcrings;
+  void          *hostSectionDcrings=NULL;
+  
+  if (i_xipSectionId==SBE_XIP_SECTION_RINGS) {
+    rc = sbe_xip_get_section(io_image, SBE_XIP_SECTION_DCRINGS, &xipSectionDcrings);
+    if (rc)  {
+      MY_ERR("_get_section(.dcrings...) failed with rc=%i  ",rc);
+      return IMGBUILD_ERR_GET_SECTION;
+    }
+    if (!(xipSectionDcrings.iv_size==0 && xipSectionDcrings.iv_offset==0))  {
+      hostSectionDcrings = (void*)((uint64_t)io_image + (uint64_t)xipSectionDcrings.iv_offset);
+      if (xipSectionDcrings.iv_size<=i_sizeBufTmp)  {
+        memcpy(i_bufTmp, hostSectionDcrings, (size_t)xipSectionDcrings.iv_size);
+      }
+      else  {
+        MY_ERR("Size of .dcrings section (=%i) exceeds buffer size (=%i).  ",
+                xipSectionDcrings.iv_size, i_sizeBufTmp);
+        return IMGBUILD_BUFFER_TOO_SMALL;
+      }
+      rc = sbe_xip_delete_section(io_image, SBE_XIP_SECTION_DCRINGS);
+      if (rc)  {
+        MY_ERR("_delete_section(.dcrings...) failed w/rc=%i  ",rc);
+        return IMGBUILD_ERR_SECTION_DELETE;
+      }
+    }
+  }
+  
   rc = sbe_xip_append(io_image, 
-                      SBE_XIP_SECTION_RINGS, 
+                      i_xipSectionId, 
                       (void*)i_ringBlock,
                       myRev32(i_ringBlock->sizeOfThis),
                       i_sizeImageMax,
                       &offsetRingBlock);
   if (rc)   {
-    MY_ERR("sbe_xip_append() failed: %s", SBE_XIP_ERROR_STRING(g_errorStrings, rc));
+    MY_ERR("sbe_xip_append() failed: %s  ", SBE_XIP_ERROR_STRING(g_errorStrings, rc));
     sbe_xip_image_size(io_image,&sizeImage);
-    MY_ERR("Input image size: %i\n", sizeImage);
-    MY_ERR("Max image size allowed: %i\n", i_sizeImageMax);
+    MY_ERR("Input image size: %i  ", sizeImage);
+    MY_ERR("Max image size allowed: %i  ", i_sizeImageMax);
     return IMGBUILD_ERR_APPEND;
   }
+  
+  // Re-append .dcrings section if inserting into .rings section.
+  if (i_xipSectionId==SBE_XIP_SECTION_RINGS) {
+    if (!(xipSectionDcrings.iv_size==0 && xipSectionDcrings.iv_offset==0))  {
+      rc = sbe_xip_append(io_image,
+                          SBE_XIP_SECTION_DCRINGS,
+                          i_bufTmp,
+                          xipSectionDcrings.iv_size,
+                          i_sizeImageMax,
+                          NULL);
+      if (rc)  {
+        MY_ERR("_append(.dcrings...) failed: w/rc=%i  ", rc);
+        return IMGBUILD_ERR_APPEND;
+      }
+    }
+  }
+
   // ...get new image size and test if successful update.
   rc = sbe_xip_image_size( io_image, &sizeImage);
   MY_DBG("Updated image size (after append): %i",sizeImage);
@@ -266,16 +319,23 @@ int write_ring_block_to_image(  void             *io_image,
   }
   
   // Update forward pointer associated with the ring/var name + any override offset.
+	// (Note, we ONLY do this for .rings as we can't have forward ptrs to [non-scannable]
+	//    rings in the .dcrings section.)
   //
-  // Convert the ring offset (wrt .rings address) to an PORE address
-  rc = sbe_xip_section2pore(io_image, SBE_XIP_SECTION_RINGS, offsetRingBlock, &ringPoreAddress);
-  MY_DBG("fwdPtr=0x%016llx", ringPoreAddress);
-  if (rc)   {
-    MY_ERR("sbe_xip_section2pore() failed: %s", SBE_XIP_ERROR_STRING(g_errorStrings, rc));
-    return IMGBUILD_ERR_XIP_MISC;
-  }
+  // Convert the ring offset to an PORE address
+	if (i_xipSectionId==SBE_XIP_SECTION_RINGS)  {
+	  rc = sbe_xip_section2pore(io_image, i_xipSectionId, offsetRingBlock, &ringPoreAddress);
+	  MY_DBG("fwdPtr=0x%016llx", ringPoreAddress);
+	  if (rc)   {
+	    MY_ERR("sbe_xip_section2pore() failed: %s", SBE_XIP_ERROR_STRING(g_errorStrings, rc));
+	    return IMGBUILD_ERR_XIP_MISC;
+	  }
+	}
+	else
+		// We can not have forward ptr to [non-scannanble] rings in the .dcrings section.
+		ringPoreAddress = 0;
   
-  // Now, update the forward pointer.
+  // Now, update the forward pointer, making sure that it's zero for .dcrings section.
   //
   // First, retrieve the ring block's backPtr which tells us where the fwd ptr
   // is located.
@@ -285,7 +345,7 @@ int write_ring_block_to_image(  void             *io_image,
   // backItemPtr in the input ring block already has this from the ref image, 
   // and it shouldn't have changed after having been ported over to an 
   // IPL/Seeprom image.
-   backPtr = myRev64(i_ringBlock->backItemPtr);
+  backPtr = myRev64(i_ringBlock->backItemPtr);
   MY_DBG("backPtr = 0x%016llx",  backPtr);
   // Second, put the ring's Pore addr into the location pointed to by the back ptr.
   rc = sbe_xip_write_uint64(  io_image, 

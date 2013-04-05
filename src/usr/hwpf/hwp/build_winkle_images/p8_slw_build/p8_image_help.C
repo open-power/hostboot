@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_image_help.C,v 1.52 2013/03/01 22:24:11 cmolsen Exp $
+// $Id: p8_image_help.C,v 1.55 2013/04/01 21:32:16 cmolsen Exp $
 //
 /*------------------------------------------------------------------------------*/
 /* *! TITLE : p8_image_help.C                                                   */
@@ -1431,12 +1431,13 @@ int update_runtime_scom_pointer( void *io_image)
 //   Consider merging the two codes.
 int write_vpd_ring_to_ipl_image(void			*io_image,
                                 uint32_t  &io_sizeImageOut,
-														  	CompressedScanData *i_bufRs4Ring, // HB buf1
+														  	CompressedScanData *i_bufRs4Ring, // HB buf1. BE format.
 															  uint32_t  i_ddLevel,
 															  uint8_t   i_sysPhase,
 															  char 			*i_ringName,
 															  void      *i_bufTmp,              // HB buf2
-															  uint32_t  i_sizeBufTmp)
+															  uint32_t  i_sizeBufTmp,
+                                uint8_t   i_xipSectionId)         // Used by delta_scan()
 {
 	uint32_t rc=0, bufLC;
 	uint8_t  chipletId, idxVector=0;
@@ -1575,7 +1576,10 @@ int write_vpd_ring_to_ipl_image(void			*io_image,
 	                               idxVector,
 	                               0,
 	                               0,
-	                               io_sizeImageOut);
+	                               io_sizeImageOut,
+                                 i_xipSectionId,
+																 (void*)i_bufRs4Ring, // Reuse buffer as temp work buf.
+																 i_sizeBufTmp);
   if (rc)  {
   	MY_ERR("write_ring_block_to_image() failed w/rc=%i \n",rc);
     MY_ERR("Check p8_delta_scan_rw.h for meaning of IMGBUILD_xyz rc code. \n");
@@ -1603,7 +1607,7 @@ int write_vpd_ring_to_ipl_image(void			*io_image,
 // Notes:
 int write_vpd_ring_to_slw_image(void			*io_image,
                                 uint32_t  &io_sizeImageOut,
-														  	CompressedScanData *i_bufRs4Ring, // HB buf1
+														  	CompressedScanData *i_bufRs4Ring, // HB buf1. BE format.
 															  uint32_t  i_ddLevel,
 															  uint8_t   i_sysPhase,
 															  char 			*i_ringName,
@@ -1761,7 +1765,10 @@ int write_vpd_ring_to_slw_image(void			*io_image,
 	                               idxVector,
 	                               0,
 	                               0,
-	                               io_sizeImageOut);
+	                               io_sizeImageOut,
+                                 SBE_XIP_SECTION_RINGS,
+																 (void*)i_bufRs4Ring, // Reuse buffer as temp work buf.
+																 i_sizeBufTmp);
   if (rc)  {
   	MY_ERR("write_ring_block_to_image() failed w/rc=%i; \n",rc);
     MY_ERR("Check p8_delta_scan_rw.h for meaning of IMGBUILD_xyz rc code; \n");
@@ -1774,6 +1781,177 @@ int write_vpd_ring_to_slw_image(void			*io_image,
 
 	MY_INF("Successful SLW image update; \n");
 
+	return rc;
+}
+
+
+// check_and_perform_ring_datacare()
+//
+// Checks if the Mvpd ring passed has a datacare ring in the .dcrings image section. If it does,
+// the Mvpd's ring bits corresponding to the care bits in the 1st half of the dc cring will be 
+// overwritten by the data bits in the 2nd half of the dc ring.
+int check_and_perform_ring_datacare(	void     *i_imageRef,
+																			void  	 *io_buf1, // Mvpd ring in/out. BE format.
+																			uint8_t  i_ddLevel,
+																			uint8_t  i_sysPhase,
+																			char     *i_ringName,
+																			void     *io_buf2, // Work buffer.
+																			uint32_t i_sizeBuf2)
+{
+	int         rc=0, rcLoc=0;
+	uint32_t    bitLength, ringBitLen, ringBitLenDc;
+	uint32_t    scanSelect;
+	uint8_t     ringId, chipletId, flushOpt;
+	DeltaRingLayout  *rs4Datacare=NULL;
+	void        *nextRing=NULL;
+	SbeXipItem  xipTocItem;
+	uint8_t     bMatch=0;
+	uint32_t		sizeRs4Container;
+	
+	
+	bitLength  = myRev32(((CompressedScanData*)io_buf1)->iv_length);
+	scanSelect = myRev32(((CompressedScanData*)io_buf1)->iv_scanSelect);
+	ringId     = ((CompressedScanData*)io_buf1)->iv_ringId;
+	chipletId  = ((CompressedScanData*)io_buf1)->iv_chipletId;
+	flushOpt   = ((CompressedScanData*)io_buf1)->iv_flushOptimization;
+	
+	MY_INF("In check_and_perform_ring_datacare()...\n");
+
+	MY_DBG("Mvpd ring characteristics:\n");
+	MY_DBG("Ring name:   %s\n",i_ringName);
+	MY_DBG("Ring ID:     0x%02x\n",ringId);
+	MY_DBG("Chiplet ID:  0x%02x\n",chipletId);
+	MY_DBG("Flush Opt:   %i\n",flushOpt);
+	MY_DBG("Scan select: 0x%08x\n",scanSelect);
+	
+	rc = sbe_xip_find( i_imageRef, i_ringName, &xipTocItem);
+	if (rc)  {
+		MY_ERR("_find() failed w/rc=%i\n",rc);
+		return IMGBUILD_ERR_KEYWORD_NOT_FOUND;
+	}
+	MY_DBG("xipTocItem.iv_address=0x%016llx\n",xipTocItem.iv_address);
+	
+	// Now look for datacare match in .dcrings section.
+	nextRing = NULL;
+	rs4Datacare = NULL;
+	bMatch = 0;
+	do  {
+		// Retrieve ptr to next ring in .dcrings
+		rcLoc = get_ring_layout_from_image2(i_imageRef,
+																				i_ddLevel,
+																				i_sysPhase,
+																				&rs4Datacare, // Will pt to gptr overlay ring.
+																				&nextRing,
+																				SBE_XIP_SECTION_DCRINGS);
+		if (rcLoc==IMGBUILD_RING_SEARCH_MATCH ||
+				rcLoc==IMGBUILD_RING_SEARCH_EXHAUST_MATCH ||
+				rcLoc==IMGBUILD_RING_SEARCH_NO_MATCH)  {
+			MY_DBG("get_ring_layout_from_image2() returned rc=%i \n",rc);
+			rc = 0;
+		}
+		else {
+			MY_ERR("get_ring_layout_from_image2() failed w/rc=%i\n",rcLoc);
+			return IMGBUILD_ERR_RING_SEARCH;
+		}
+		// Does the rings backPtr match the Vpd ring's vector addr?
+		if (rs4Datacare)  {
+			MY_DBG("rs4Datacare->backItemPtr=0x%016llx\n",myRev64(rs4Datacare->backItemPtr));
+			if (myRev64(rs4Datacare->backItemPtr)==xipTocItem.iv_address)  {
+				MY_DBG("Found a match in .dcrings. \n");
+				bMatch = 1;
+				// TBD
+			}
+		}
+		else
+			MY_DBG("rs4Datacare=NULL (no ring matched search criteria, or empty ring section.)\n");
+	}  while (nextRing!=NULL && !bMatch);
+	
+	if (bMatch)  {
+
+		// Decompress Mvpd ring.
+		MY_DBG("Decompressing Mvpd ring.\n");
+	 	rc = _rs4_decompress( (uint8_t*)io_buf2,
+	   	                    i_sizeBuf2,
+													&ringBitLen,
+	    	                  (CompressedScanData*)io_buf1);
+	 	if (rc)  {
+	 	  MY_ERR("_rs4_decompress(mvpdring...) failed: rc=%i\n",rc);
+	 	  return IMGBUILD_ERR_RS4_DECOMPRESS;
+	 	}
+
+		// Decompress datacare overlay ring.
+		MY_DBG("Decompressing datacare ring.\n");
+  	rc = _rs4_decompress( (uint8_t*)io_buf1,
+    	                    i_sizeBuf2, // Assumption is that sizeBuf2=sizeBuf1
+													&ringBitLenDc,
+        	                (CompressedScanData*)( (uintptr_t)rs4Datacare + 
+																								 myRev64(rs4Datacare->entryOffset) +
+																								 ASM_RS4_LAUNCH_BUF_SIZE) );
+  	if (rc)  {
+  	  MY_ERR("_rs4_decompress(datacare...) failed: rc=%i\n",rc);
+  	  return IMGBUILD_ERR_RS4_DECOMPRESS;
+  	}
+		
+		MY_DBG("bitLength=%i\n",bitLength);
+		MY_DBG("ringBitLen=%i\n",ringBitLen);
+		MY_DBG("ringBitLenDc=%i\n",ringBitLenDc);
+		if ( bitLength!=ringBitLen || (2*ringBitLen)!=ringBitLenDc )  {
+			MY_ERR("Mvpd ring length (=%i) is not exactly half of datacare ring length (=%i)\n",
+							ringBitLen, ringBitLenDc);
+			return IMGBUILD_ERR_DATACARE_RING_MESS;
+		}
+		
+		// Overlay io_buf2 bits according to care and data bits in io_buf1
+		uint32_t iWord, remBits32;
+		uint32_t dataVpd, dataDc, careDc, careDc1, careDc2;
+		
+		// Split apart the raw datacare ring into data (1st part) and care (2nd part).
+		// Note that the order is already in BE for both Datacare and Mvpd rings.
+		// Further note that the care part is fractured into two words that need to
+		//   be combined into a single word. (That's the black magic part below).
+		remBits32 = ringBitLen - (ringBitLen/32)*32;
+		for (iWord=0; iWord<(ringBitLen+31)/32; iWord++)  {
+			dataDc  = *((uint32_t*)io_buf1 + iWord); 										// Data part
+			// Split off the care part, do BE->LE, shift the two parts propoerly, and finally do
+			//   LE->BE again. It's f*kin' black magic...
+			careDc1 = myRev32(*((uint32_t*)io_buf1 + ringBitLen/32 + iWord)); 		// Care part a
+			careDc2 = myRev32(*((uint32_t*)io_buf1 + ringBitLen/32 + 1 + iWord)); // Care part b
+			careDc  = myRev32(careDc1<<remBits32 | careDc2>>(32-remBits32));
+			dataVpd = *((uint32_t*)io_buf2 + iWord);
+			MY_DBG("data: %08x  iWord=%i\n",dataDc,iWord);
+			MY_DBG("care: %08x\n",careDc);
+			MY_DBG("orig: %08x\n",dataVpd);
+			dataVpd = ( dataVpd & ~careDc ) | dataDc;
+			MY_DBG("new:  %08x\n",dataVpd);
+			*((uint32_t*)io_buf2 + iWord) = dataVpd;
+			// Check for data+care construction. I.e., a 1-bit in data is illegal if corresponding
+			//   care bit is a 0-bit.
+			if ((dataDc & ~careDc)!=0)  {
+				MY_ERR("DataCare ring construction error:\n");
+				MY_ERR("A data bit (in word i=%i) is set but the care bit is not set.\n",iWord);
+				return IMGBUILD_ERR_DATACARE_RING_MESS;
+			}
+		}
+		
+		// Compress overlayed Mvpd ring.
+		rc = _rs4_compress(	(CompressedScanData*)io_buf1,
+												i_sizeBuf2,
+												&sizeRs4Container,
+												(uint8_t*)io_buf2,
+												bitLength,
+												(uint64_t)scanSelect<<32,
+												ringId,
+												chipletId,
+												flushOpt);
+ 		if (rc)  {
+ 		  MY_ERR("\t_rs4_compress() failed: rc=%i ",rc);
+ 		  return IMGBUILD_ERR_RS4_DECOMPRESS;
+ 		}	
+	
+	}
+	
+	MY_INF("Leaving check_and_perform_ring_datacare()...\n");
+	
 	return rc;
 }
 

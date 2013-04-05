@@ -202,8 +202,20 @@
 </hwpError>
 <!-- *********************************************************************** -->
 <hwpError>
+  <rc>RC_PROC_XIPC_PERFORM_RING_DATACARE_ERROR</rc>
+  <description>Error occured during check_and_perform_ring_datacare()</description>
+  <ffdc>RC_LOCAL</ffdc>
+</hwpError>
+<!-- *********************************************************************** -->
+<hwpError>
   <rc>RC_PROC_XIPC_WRITE_VPD_RING_TO_IMAGE_ERROR</rc>
   <description>Error occured during write_vpd_ring_to_{ipl,slw}_image()</description>
+  <ffdc>RC_LOCAL</ffdc>
+</hwpError>
+<!-- *********************************************************************** -->
+<hwpError>
+  <rc>RC_PROC_XIPC_XIP_DELETE_SECTION_ERROR</rc>
+  <description>sbe_xip_delete_section() failed w/local rc.</description>
   <ffdc>RC_LOCAL</ffdc>
 </hwpError>
 <!-- *********************************************************************** -->

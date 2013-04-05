@@ -84,7 +84,7 @@ hbicore_DATA_MODULES =  sample.if p8.dmi.scom.if cen.dmi.scom.if \
                         p8.fbc.scom.if mbs_def.if mba_def.if cen_ddrphy.if \
                         p8.pe.phase1.scom.if p8.pe.phase2.scom.if \
                         dimmspd.dat centaur.sbe_pnor.bin procmvpd.dat \
-                        procpore.dat ${PRDR_RULE_TABLE_TARGETS} \
+                        ${PRDR_RULE_TABLE_TARGETS} \
                         p8.abus.scom.if p8.xbus.scom.if p8.mcs.scom.if \
                         p8.as.scom.if p8.nx.scom.if p8.dmi.custom.scom.if \
                         cen.dmi.custom.scom.if p8.abus.custom.scom.if \

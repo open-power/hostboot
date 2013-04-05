@@ -20,10 +20,10 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_delta_scan_rw.h,v 1.40 2013/03/22 04:12:02 cmolsen Exp $
+// $Id: p8_delta_scan_rw.h,v 1.42 2013/04/01 17:31:22 cmolsen Exp $
 #define OVERRIDE_OFFSET 8            // Byte offset of forward pointer's addr relative 
                                      //   to base forward pointer's addr.
-#define SIZE_IMAGE_BUF_MAX      5000000 // Max ~50MB image buffer size.
+#define SIZE_IMAGE_BUF_MAX      5000000 // Max ~5MB image buffer size.
 #define SIZE_IMAGE_CENTAUR_MAX  5000000 // Max ~5MB image buffer size.
 #define SIZE_REPR_RING_MAX        50000 // Max ~50kB repr ring buffer size.
 #define SCOM_REG_MASK   0x00ffffff   // Scom register mask (within a chiplet)
@@ -36,6 +36,7 @@
 #define L2_SINGLE_MEMBER_ENABLE_TOC_NAME  "l2_single_member_enable_mask"
 #define PROC_PIB_REPR_VECTOR_TOC_NAME     "proc_sbe_pibmem_repair_vector"
 #define NEST_SKEWADJUST_VECTOR_TOC_NAME   "proc_sbe_nest_skewadjust_vector"
+#define SECURITY_SETUP_VECTOR_TOC_NAME    "proc_sbe_security_setup_vector"
 #define MAX_PLL_RING_SIZE                  128 // Bytes
 #define PERV_BNDY_PLL_RING_TOC_NAME       "perv_bndy_pll_ring"
 #define PERV_BNDY_PLL_RING_ALT_TOC_NAME   "perv_bndy_pll_ring_alt"
@@ -89,9 +90,16 @@
 #define IMGBUILD_INVALID_IMAGE               10  // Invalid image.
 #define IMGBUILD_IMAGE_SIZE_MISMATCH         11  // Mismatch between image sizes.
 #define IMGBUILD_IMAGE_SIZE_MESS             12  // Messed up image or section sizes.
-#define IMGBUILD_ERR_DECOMPRESSION           13  // Error assoc with decompressing RS4.
+#define IMGBUILD_RINGTYPE_NOT_ALLOWED        13  // Ringtype not allowed.
+#define IMGBUILD_BUFFER_TOO_SMALL            14  // Buffer too small.
 #define IMGBUILD_ERR_PORE_INLINE             20  // Pore inline error.
 #define IMGBUILD_ERR_PORE_INLINE_ASM         21  // Err assoc w/inline assembler.
+#define IMGBUILD_RING_SEARCH_MATCH            0
+#define IMGBUILD_RING_SEARCH_EXHAUST_MATCH   30
+#define IMGBUILD_RING_SEARCH_NO_MATCH        31
+#define IMGBUILD_RING_SEARCH_MESS            32
+#define IMGBUILD_ERR_RING_SEARCH             33  // Err assoc w/ring retrieval.
+#define IMGBUILD_ERR_DATACARE_RING_MESS      34  // Err assoc w/datacare & vpd ring sizes.
 #define IMGBUILD_ERR_WF_CREATE               45  // Err assoc w/create_wiggle_flip_prg.
 #define IMGBUILD_ERR_RING_WRITE_TO_IMAGE     46  // Err assoc w/wr_ring_block_to_img.
 #define IMGBUILD_ERR_SECTION_SIZING          48  // Err assoc w/section sizing.
@@ -106,6 +114,7 @@
 #define IMGBUILD_ERR_XIP_MISC                57  // Miscellaneous XIP image error.
 #define IMGBUILD_ERR_XIP_UNKNOWN             58  // Unknown XIP image error.
 #define IMGBUILD_ERR_RS4_DECOMPRESS          59  // Error during RS4 decompression.
+#define IMGBUILD_ERR_RS4_COMPRESS            60  // Error during RS4 compression.
 #define IMGBUILD_ERR_RAM_HDRS_NOT_SYNCED     61  // Ram headers not synchronized.
 #define IMGBUILD_ERR_RAM_TABLE_FULL          63  // Ram table is full.       
 #define IMGBUILD_ERR_RAM_CODE                64  // Code error in Ram API code.
@@ -179,8 +188,6 @@
 #include <p8_scan_compression.H>
 #endif
 
-#include <sbe_xip_image.h>
-
 #undef __PORE_INLINE_ASSEMBLER_C__
 #include <pore_inline.h>
 
@@ -252,7 +259,10 @@ int write_ring_block_to_image(
 							const uint8_t    i_idxVector,   // [0-15] - Ignored if ringName==NULL
 							const uint8_t    i_override,    // [0,1]  - Ignored if ringName==NULL
 							const uint8_t    i_overridable, // [0,1]  - Ignored if ringName==NULL
-              const uint32_t   i_sizeImageMax);
+              const uint32_t   i_sizeImageMax,
+              const uint8_t    i_xipSectionId,
+              void             *i_bufTmp,
+              const uint32_t   i_sizeBufTmp);
 
 #if !(defined __CEN_XIP_CUSTOMIZE_C)
 
@@ -273,7 +283,8 @@ int get_ring_layout_from_image2(
               uint32_t    i_ddLevel,
               uint8_t      i_sysPhase,
               DeltaRingLayout  **o_rs4RingLayout,
-              void        **nextRing);
+              void        **nextRing,
+              uint8_t     i_xipSectionId);
 
 int gen_ring_delta_state(  
               uint32_t   bitLen, 
@@ -303,7 +314,8 @@ int write_vpd_ring_to_ipl_image(
 							uint8_t    i_sysPhase,
               char       *i_ringName,
 							void       *i_bufTmp,
-							uint32_t   i_sizeBufTmp);
+							uint32_t   i_sizeBufTmp,
+              uint8_t    i_xipSection);
 
 int write_vpd_ring_to_slw_image(
               void       *io_image,
@@ -316,6 +328,15 @@ int write_vpd_ring_to_slw_image(
 							uint32_t   i_sizeBufTmp,
               uint8_t    i_bWcSpace);
 
+int check_and_perform_ring_datacare( 
+						  void      *i_imageRef,
+							void      *io_buf1,
+							uint8_t   i_ddLevel,
+						  uint8_t   i_sysPhase,
+							char      *i_ringName,
+							void      *i_buf2,
+							uint32_t  i_sizeBuf2);
+							
 int get_delta_ring_from_image(
               char       *i_fnImage,
               char       *i_varName,

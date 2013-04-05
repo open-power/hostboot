@@ -5660,6 +5660,26 @@ firmware notes: Used as override attribute for pstate procedure
     </hwpfToHbAttrMap>
 </attribute>
 
+<attribute>
+    <id>PROC_SECURITY_SETUP_VECTOR</id>
+    <description>
+      Secureboot 64-bit proc_sbe_security_setup_vector used 
+      by proc_sbe_security_setup.S.  0s are an unsecure SBE image
+      creator: platform
+      firmware notes:
+        64-bit proc_sbe_security_setup_vector
+    </description>
+    <simpleType>
+        <uint64_t></uint64_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_PROC_SECURITY_SETUP_VECTOR</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
 <!-- ===== Attributes supporting memory_attributes.xml HWPF Attributes ===== -->
 
 <attribute>

@@ -54,6 +54,8 @@
 #include    <targeting/common/utilFilter.H>
 #include    <targeting/namedtarget.H>
 
+#include <pnor/pnorif.H>
+
 //  fapi support
 #include    <fapi.H>
 #include    <fapiPlatHwpInvoker.H>
@@ -71,6 +73,8 @@
 #include    "p8_set_pore_bar/p8_set_pore_bar.H"
 #include    "p8_pm.H"                               //  PM_INIT
 #include    "p8_set_pore_bar/p8_poreslw_init.H"
+#include    "p8_slw_build/sbe_xip_image.h"
+
 
 namespace   BUILD_WINKLE_IMAGES
 {
@@ -88,65 +92,60 @@ using   namespace   DeviceFW;
 /**
  *  @brief Load PORE image and return a pointer to it, or NULL
  *
- *  @param[in]  -   target pointer - pointer to the processor target,
- *                  eventually we will need to know which processor to know
- *                  which image to load.
  *  @param[out] -   address of the PORE image
  *  @param[out] -   size of the PORE image
  *
  *  @return      NULL if success, errorlog if failure
  *
  */
-errlHndl_t  loadPoreImage( const TARGETING::Target  *i_CpuTarget,
-                           const char               *& o_rporeAddr,
-                            size_t                  & o_rporeSize )
+errlHndl_t  loadPoreImage(  const char              *& o_rporeAddr,
+                            uint32_t                 & o_rporeSize )
 {
-    errlHndl_t  l_errl      =   NULL;
-    const char * fileName   =   "procpore.dat";
-
-    /**
-     *  @todo add code here later to look up the IDEC of the processor and
-     *  load the appropriate PORE image.  Currently we just have the single
-     *  image.
-    */
+    errlHndl_t l_errl = NULL;
+    PNOR::SectionInfo_t l_info;
+    int64_t rc = 0;
+    o_rporeSize = 0;
 
     do
     {
-        // Load the file
-        TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                   "Load PORE file %s",
-                   fileName  );
-        l_errl = VFS::module_load( fileName );
-
-        if ( l_errl )
+        // Get WINK PNOR section info from PNOR RP
+        l_errl = PNOR::getSectionInfo( PNOR::WINK,PNOR::CURRENT_SIDE, l_info );
+        if( l_errl )
         {
-            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                       "ERROR: opening binary PORE file: %s",
-                       fileName );
-
-            //  quit and return errorlog
             break;
         }
 
-        // Get the starting address of the file/module
-        TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                   "Get starting address/size" );
-
-        l_errl = VFS::module_address( fileName,
-                                      o_rporeAddr,
-                                      o_rporeSize );
-        if ( l_errl )
+        rc = sbe_xip_image_size(reinterpret_cast<void*>(l_info.vaddr),
+                                &o_rporeSize);
+        if((rc !=0) || (o_rporeSize == 0) || o_rporeSize > l_info.size)
         {
             TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                       "ERROR: getting address of binary PORE file : %s",
-                       fileName );
-
-            // quit and return errorlog
+                       "ERROR: invalid WINK image rc[%d] slwSize[%d] part size[%d]",
+                       rc, o_rporeSize, l_info.size);
+            /*@
+             * @errortype
+             * @reasoncode  ISTEP_LOAD_SLW_FROM_PNOR_FAILED
+             * @severity    ERRORLOG::ERRL_SEV_UNRECOVERABLE
+             * @moduleid    ISTEP_BUILD_WINKLE_IMAGES
+             * @userdata1   Hi 32 bits: return code from sbe_xip_image_size
+             *              Lo 32 bits: Size of memory requested
+             * @userdata2   Size of WINK PNOR partition
+             * @devdesc     Image from PNOR WINK partion invalid, too small,
+             *              or too big
+             */
+            l_errl =
+              new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                       ISTEP::ISTEP_BUILD_WINKLE_IMAGES,
+                                       ISTEP::ISTEP_LOAD_SLW_FROM_PNOR_FAILED,
+                                       (rc<<32)|o_rporeSize,
+                                       l_info.size );
             break;
         }
 
-        TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                   "PORE addr = 0x%p, size=0x%x",
+        o_rporeAddr = reinterpret_cast<const char*>(l_info.vaddr);
+
+        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                   "WINK addr = 0x%p, size=0x%x",
                    o_rporeAddr,
                    o_rporeSize  );
 
@@ -318,7 +317,7 @@ void*    call_host_build_winkle( void    *io_pArgs )
     errlHndl_t  l_errl  =   NULL;
 
     const char  *l_pPoreImage   =   NULL;
-    size_t      l_poreSize      =   0;
+    uint32_t    l_poreSize      =   0;
     void        *l_pRealMemBase =
                         reinterpret_cast<void * const>( OUTPUT_PORE_IMG_ADDR ) ;
     ISTEP_ERROR::IStepError     l_StepError;
@@ -399,6 +398,20 @@ void*    call_host_build_winkle( void    *io_pArgs )
                    MAX_POSSIBLE_PROCS_IN_P8_SYSTEM,
                    l_pRealMemBase  );
 
+        //Load the reference image from PNOR
+        l_errl  =   loadPoreImage(  l_pPoreImage,
+                                    l_poreSize );
+        if ( l_errl )
+        {
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                      "host_build_winkle ERROR : errorlog PLID=0x%x",
+                      l_errl->plid() );
+
+            // drop out of do block with errorlog.
+            break;
+        }
+
+
         //  Loop through all functional Procs and generate images for them.
         TARGETING::TargetHandleList l_procChips;
         getAllChips( l_procChips,
@@ -422,18 +435,6 @@ void*    call_host_build_winkle( void    *io_pArgs )
                         "Build SLW image for proc "
                         "target HUID %.8X", TARGETING::get_huid(l_procChip));
 
-                l_errl  =   loadPoreImage(  l_procChip,
-                                            l_pPoreImage,
-                                            l_poreSize );
-                if ( l_errl )
-                {
-                    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                              "host_build_winkle ERROR : errorlog PLID=0x%x",
-                              l_errl->plid() );
-
-                    // drop out of do block with errorlog.
-                    break;
-                }
 
                 //  calculate size and location of the SLW output buffer
                 uint32_t    l_procNum =
@@ -467,7 +468,7 @@ void*    call_host_build_winkle( void    *io_pArgs )
                                  p8_slw_build,
                                  l_fapi_cpu_target,
                                  reinterpret_cast<const void*>(l_pPoreImage),
-                                 static_cast<uint32_t>(l_poreSize),
+                                 l_poreSize,
                                  l_pImageOut,
                                  &l_sizeImageOut
                                );

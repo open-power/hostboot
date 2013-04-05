@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_slw_build.C,v 1.21 2013/03/14 03:07:11 cmolsen Exp $
+// $Id: p8_slw_build.C,v 1.22 2013/03/27 20:05:52 cmolsen Exp $
 /*------------------------------------------------------------------------------*/
 /* *! TITLE : p8_slw_build                                                      */
 /* *! DESCRIPTION : Extracts and decompresses delta ring states from EPROM      */
@@ -194,8 +194,25 @@ ReturnCode p8_slw_build( const fapi::Target    &i_target,
     return rc;
   }
 
-  // Third, delete .rings and .pibmem0 sections (but keep .halt)
+  // Third, delete .dcrings, .rings and .pibmem0 sections (but keep .halt)
   //
+  rcLoc = sbe_xip_delete_section( i_imageOut, SBE_XIP_SECTION_DCRINGS);
+  if (rcLoc)  {
+    FAPI_ERR("xip_delete_section(.dcrings) failed w/rcLoc=%i",rcLoc);
+	  uint32_t & RC_LOCAL=rcLoc;
+    FAPI_SET_HWP_ERROR(rc, RC_PROC_SLWB_DELETE_IMAGE_SECTION_ERROR);
+    return rc;
+  }
+  sbe_xip_image_size(i_imageOut, &sizeImage);
+  rcLoc =  sbe_xip_validate(i_imageOut, sizeImage);
+  if (rcLoc)  {
+	  FAPI_ERR("xip_validate() failed w/rcLoc=%i",rcLoc);
+	  uint32_t & RC_LOCAL=rcLoc;
+    FAPI_SET_HWP_ERROR(rc, RC_PROC_SLWB_MS_INTERNAL_IMAGE_ERR);
+    return rc;
+  }
+  FAPI_DBG("Image size (after .dcrings delete): %i",sizeImage);
+
   rcLoc = sbe_xip_delete_section( i_imageOut, SBE_XIP_SECTION_RINGS);
   if (rcLoc)  {
     FAPI_ERR("xip_delete_section(.rings) failed w/rcLoc=%i",rcLoc);
@@ -356,8 +373,8 @@ ReturnCode p8_slw_build( const fapi::Target    &i_target,
 		FAPI_INF("Calling xip_customize().\n");
 		FAPI_EXEC_HWP(rc, p8_xip_customize,	
 		                  i_target,
-											i_imageOut,   // This is both in and out image for xip_customize.
-											NULL,         // No need to pass a separate out image
+											(void*)i_imageIn,
+											i_imageOut,
 											sizeImageTmp,
 											sysPhase,
 											2, // We're only interested in SRAM mode for non-fixed img.
@@ -641,8 +658,8 @@ ReturnCode p8_slw_build( const fapi::Target    &i_target,
 		FAPI_INF("Calling xip_customize().\n");
 		FAPI_EXEC_HWP(rc, p8_xip_customize,	
 		                  i_target,
-											i_imageOut,   // This is both in and out image for xip_customize.
-											NULL,         // No need to pass a separate out image
+											(void*)i_imageIn,
+											i_imageOut,
 											sizeImageTmp,
 											sysPhase,
 											2, // We're only interested in SRAM mode for non-fixed img.

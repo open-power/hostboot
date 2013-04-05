@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_xip_customize.C,v 1.37 2013/03/18 16:08:32 cmolsen Exp $
+// $Id: p8_xip_customize.C,v 1.41 2013/04/01 17:30:50 cmolsen Exp $
 /*------------------------------------------------------------------------------*/
 /* *! TITLE : p8_xip_customize                                                  */
 /* *! DESCRIPTION : Obtains repair rings from VPD and adds them to either       */
@@ -37,6 +37,7 @@
 //                          using "IMGBUILD_PPD_IGNORE_VPD" will ignore adding MVPD rings.
 //                          using "IMGBUILD_PPD_IGNORE_VPD_FIELD" will ignore using fapiGetMvpdField.
 //                          using "IMGBUILD_PPD_IGNORE_PLL_UPDATE" will ignore PLL attribute ring.
+//													using "IMGBUILD_PPD_IGNORE_L3_BAR" will ignore updating L3 Bar Scoms.
 //
 /* *! ASSUMPTIONS :                                                             */
 //
@@ -59,8 +60,8 @@ using namespace fapi;
 
 //  Parameter list:
 //  const fapi::Target &i_target:  Processor chip target.
-//  void      *i_imageIn:      Ptr to input IPL or input/output SLW image.
-//  void      *i_imageOut:     Ptr to output IPL img. (Ignored for SLW/RAM imgs.)
+//  void      *i_imageIn:      Ptr to input img. The IPL img for IPL and the ref img for SLW.
+//  void      *o_imageOut:     Ptr to output img.
 //  uint32_t  io_sizeImageOut: In: Max size of IPL/SRAM workspace/img. Out: Final size.
 //                             MUST equal FIXED_SEEPROM_WORK_SPACE for IPL Seeprom build.
 //  uint8_t   i_sysPhase:      0: IPL  1: SLW
@@ -76,7 +77,7 @@ using namespace fapi;
 //
 ReturnCode p8_xip_customize( const fapi::Target &i_target,
                              void            *i_imageIn,
-                             void            *i_imageOut,
+                             void            *o_imageOut,
                              uint32_t        &io_sizeImageOut,
                              const uint8_t   i_sysPhase,
                              const uint8_t   i_modeBuild,
@@ -87,13 +88,11 @@ ReturnCode p8_xip_customize( const fapi::Target &i_target,
 {
   fapi::ReturnCode rcFapi, rc=FAPI_RC_SUCCESS;
   uint32_t   rcLoc=0;
-  void       *imageOut;
   uint32_t   sizeImage, sizeImageIn, sizeImageOutMax, sizeImageMax;
   uint32_t   iVec=0;
+  uint8_t    attrDdLevel=0;
   uint64_t   attrCombGoodVec[MAX_CHIPLETS]={ (uint64_t(0xfedcba98)<<32)+0x76543210 };
   void       *hostCombGoodVec;
-  uint32_t   attrL2SingleMember=0;
-  void       *hostL2SingleMember;
   SbeXipItem xipTocItem;
   uint32_t   attrL2RT0Eps, attrL2RT1Eps, attrL2RT2Eps, attrL2WEps;
   uint8_t    attrL2ForceRT2Eps;
@@ -110,6 +109,13 @@ ReturnCode p8_xip_customize( const fapi::Target &i_target,
 
   sizeImageOutMax = io_sizeImageOut;
   
+	// First, get the system DD level. We'll need it several places.
+  rc = FAPI_ATTR_GET_PRIVILEGED(ATTR_EC, &i_target, attrDdLevel);
+  if (rc)  {
+    FAPI_ERR("FAPI_ATTR_GET_PRIVILEGED() failed w/rc=%i and ddLevel=0x%02x",(uint32_t)rc,attrDdLevel);
+    return rc;
+  }
+
   // ==========================================================================
   // Check and copy (if IPL phase) image to mainstore and clean it up.
   // ==========================================================================
@@ -126,14 +132,14 @@ ReturnCode p8_xip_customize( const fapi::Target &i_target,
   }
   FAPI_INF("Input image:\n  location=0x%016llx\n  size=%i\n",
      (uint64_t)i_imageIn, sizeImageIn);
-  
+
   // Second, if IPL phase, check image and buffer sizes and copy input image to 
   //   output mainstore [work] location.
+	// Note, we don't do this for SLW since it was already done in slw_build().
   //    
   if (i_sysPhase==0)  {
-    imageOut = i_imageOut;
     FAPI_INF("Output image:\n  location=0x%016llx\n  size (max)=%i\n",
-      (uint64_t)imageOut, sizeImageOutMax);
+      (uint64_t)o_imageOut, sizeImageOutMax);
     //
     // First, we'll check image size.
     //
@@ -154,9 +160,9 @@ ReturnCode p8_xip_customize( const fapi::Target &i_target,
       FAPI_SET_HWP_ERROR(rc, RC_PROC_XIPC_IMAGE_SIZE_MESS);
       return rc;
     }
-    memcpy( imageOut, i_imageIn, sizeImageIn);
-    sbe_xip_image_size(imageOut, &sizeImage);
-    rcLoc = sbe_xip_validate(imageOut, sizeImage);
+    memcpy( o_imageOut, i_imageIn, sizeImageIn);
+    sbe_xip_image_size(o_imageOut, &sizeImage);
+    rcLoc = sbe_xip_validate(o_imageOut, sizeImage);
     if (rcLoc)  {
       FAPI_ERR("xip_validate() failed w/rcLoc=%i",rcLoc);
       uint32_t & RC_LOCAL=rcLoc;
@@ -198,10 +204,6 @@ ReturnCode p8_xip_customize( const fapi::Target &i_target,
       return rc;
     }
   }
-  else  {  
-    // Output image is same as input image in SLW case (even for an SRAM build).
-    imageOut = i_imageIn;
-  }
 
 
   // ==========================================================================
@@ -228,7 +230,7 @@ ReturnCode p8_xip_customize( const fapi::Target &i_target,
     FAPI_ERR("FAPI_ATTR_GET(ATTR_CHIP_REGIONS_TO_ENABLE) returned error.\n");
     return rc;
   }
-  rcLoc = sbe_xip_find( imageOut, COMBINED_GOOD_VECTORS_TOC_NAME, &xipTocItem);
+  rcLoc = sbe_xip_find( o_imageOut, COMBINED_GOOD_VECTORS_TOC_NAME, &xipTocItem);
   if (rcLoc)  {
     FAPI_ERR("sbe_xip_find() failed w/rc=%i and %s", rcLoc, SBE_XIP_ERROR_STRING(errorStrings, rcLoc));
     FAPI_ERR("Probable cause:");
@@ -237,7 +239,7 @@ ReturnCode p8_xip_customize( const fapi::Target &i_target,
     FAPI_SET_HWP_ERROR(rc, RC_PROC_XIPC_KEYWORD_NOT_FOUND_ERROR);
     return rc;
   }
-  sbe_xip_pore2host( imageOut, xipTocItem.iv_address, &hostCombGoodVec);
+  sbe_xip_pore2host( o_imageOut, xipTocItem.iv_address, &hostCombGoodVec);
   FAPI_DBG("Dumping [initial] global variable content of combined_good_vectors, then the updated value:\n");
   for (iVec=0; iVec<MAX_CHIPLETS; iVec++)  {
     FAPI_DBG("combined_good_vectors[%2i]: Before=0x%016llX\n",iVec,*((uint64_t*)hostCombGoodVec+iVec));
@@ -253,12 +255,14 @@ ReturnCode p8_xip_customize( const fapi::Target &i_target,
   // Note: Governs if which cores' L2  may be flipped into single member mode.
   // ==========================================================================
   
+  uint32_t   attrL2SingleMember=0;
+  void       *hostL2SingleMember;
   rc = FAPI_ATTR_GET(ATTR_EX_L2_SINGLE_MEMBER_ENABLE, &i_target, attrL2SingleMember);
   if (rc)  {
     FAPI_ERR("FAPI_ATTR_GET(ATTR_EX_L2_SINGLE_MEMBER_ENABLE) returned error.\n");
     return rc;
   }
-  rcLoc = sbe_xip_find( imageOut, L2_SINGLE_MEMBER_ENABLE_TOC_NAME, &xipTocItem);
+  rcLoc = sbe_xip_find( o_imageOut, L2_SINGLE_MEMBER_ENABLE_TOC_NAME, &xipTocItem);
   if (rcLoc)  {
     FAPI_ERR("sbe_xip_find() failed w/rc=%i and %s", rcLoc, SBE_XIP_ERROR_STRING(errorStrings, rcLoc));
     FAPI_ERR("Probable cause:");
@@ -267,18 +271,50 @@ ReturnCode p8_xip_customize( const fapi::Target &i_target,
     FAPI_SET_HWP_ERROR(rc, RC_PROC_XIPC_KEYWORD_NOT_FOUND_ERROR);
     return rc;
   }
-  sbe_xip_pore2host( imageOut, xipTocItem.iv_address, &hostL2SingleMember);
-  FAPI_DBG("Dumping [initial] global variable content of l2_single_member_enable_mask, and then the updated value:\n");
-  FAPI_DBG("l2_single_member_enable_mask: Before=0x%016llX\n",*(uint64_t*)hostL2SingleMember);
+  sbe_xip_pore2host( o_imageOut, xipTocItem.iv_address, &hostL2SingleMember);
+  FAPI_DBG("Dumping [initial] global variable content of %s, and then the updated value:\n",
+						L2_SINGLE_MEMBER_ENABLE_TOC_NAME);
+  FAPI_DBG(" Before=0x%016llX\n",*(uint64_t*)hostL2SingleMember);
   *(uint64_t*)hostL2SingleMember = myRev64((uint64_t)attrL2SingleMember<<32);
-  FAPI_DBG("                              After =0x%016llX\n",*(uint64_t*)hostL2SingleMember);
-
+  FAPI_DBG(" After =0x%016llX\n",*(uint64_t*)hostL2SingleMember);
+  
+  
+  // ==========================================================================
+  // CUSTOMIZE item:    Security setup.
+  // Retrieval method:  Attribute.
+  // System phase:      IPL sysPhase.
+  // Note: TBD
+  // ==========================================================================
+	if (i_sysPhase==0)  {
+	  uint64_t   attrSecuritySetupVec=0;
+		void       *hostSecuritySetupVec;
+	  rc = FAPI_ATTR_GET(ATTR_PROC_SECURITY_SETUP_VECTOR, &i_target, attrSecuritySetupVec);
+	  if (rc)  {
+	    FAPI_ERR("FAPI_ATTR_GET(ATTR_PROC_SECURITY_SETUP_VECTOR) returned error.\n");
+	    return rc;
+	  }
+	  rcLoc = sbe_xip_find( o_imageOut, SECURITY_SETUP_VECTOR_TOC_NAME, &xipTocItem);
+	  if (rcLoc)  {
+	    FAPI_ERR("sbe_xip_find() failed w/rc=%i and %s", rcLoc, SBE_XIP_ERROR_STRING(errorStrings, rcLoc));
+	    FAPI_ERR("Probable cause:");
+	    FAPI_ERR("\tThe keyword (=%s) was not found.",SECURITY_SETUP_VECTOR_TOC_NAME);
+	    uint32_t & RC_LOCAL = rcLoc;
+	    FAPI_SET_HWP_ERROR(rc, RC_PROC_XIPC_KEYWORD_NOT_FOUND_ERROR);
+	    return rc;
+	  }
+	  sbe_xip_pore2host( o_imageOut, xipTocItem.iv_address, &hostSecuritySetupVec);
+	  FAPI_DBG("Dumping [initial] global variable content of %s, and then the updated value:\n",
+							SECURITY_SETUP_VECTOR_TOC_NAME);
+	  FAPI_DBG(" Before=0x%016llX\n",*(uint64_t*)hostSecuritySetupVec);
+	  *(uint64_t*)hostSecuritySetupVec = myRev64(attrSecuritySetupVec);
+	  FAPI_DBG(" After =0x%016llX\n",*(uint64_t*)hostSecuritySetupVec);
+	}
 
 #ifndef IMGBUILD_PPD_IGNORE_VPD_FIELD
   void     *hostPibmemRepairVec, *hostNestSkewAdjVec;
   uint8_t  *bufVpdField;
   uint32_t sizeVpdField=0;
-  uint8_t *byteField, *byteVector;
+  uint8_t  *byteField, *byteVector;
   // ==========================================================================
   // CUSTOMIZE item:    Update 20 swizzled bits for PIB repair vector.
   // Retrieval method:  MVPD field.
@@ -298,7 +334,7 @@ ReturnCode p8_xip_customize( const fapi::Target &i_target,
       FAPI_ERR("fapiGetMvpdField() w/keyword=PB returned error.");
       return rcFapi;
     }
-    rcLoc = sbe_xip_find( imageOut, PROC_PIB_REPR_VECTOR_TOC_NAME, &xipTocItem);
+    rcLoc = sbe_xip_find( o_imageOut, PROC_PIB_REPR_VECTOR_TOC_NAME, &xipTocItem);
     if (rcLoc)  {
       FAPI_ERR("sbe_xip_find() failed w/rc=%i and %s", rcLoc, SBE_XIP_ERROR_STRING(errorStrings, rcLoc));
       FAPI_ERR("Probable cause:");
@@ -314,7 +350,7 @@ ReturnCode p8_xip_customize( const fapi::Target &i_target,
       return rc;
     }
     FAPI_DBG("Dumping global variable content of pibmem_repair_vector:\n");
-    sbe_xip_pore2host( imageOut, xipTocItem.iv_address, &hostPibmemRepairVec);
+    sbe_xip_pore2host( o_imageOut, xipTocItem.iv_address, &hostPibmemRepairVec);
     FAPI_INF("pibmem_repair_vector:Before (in BE)=0x%016llX\n",*(uint64_t*)hostPibmemRepairVec);
     byteField  = (uint8_t*)bufVpdField;
     byteVector = (uint8_t*)hostPibmemRepairVec;
@@ -346,7 +382,7 @@ ReturnCode p8_xip_customize( const fapi::Target &i_target,
       FAPI_ERR("fapiGetMvpdField() w/keyword=MK returned error.");
       return rcFapi;
     }
-    rcLoc = sbe_xip_find( imageOut, NEST_SKEWADJUST_VECTOR_TOC_NAME, &xipTocItem);
+    rcLoc = sbe_xip_find( o_imageOut, NEST_SKEWADJUST_VECTOR_TOC_NAME, &xipTocItem);
     if (rcLoc)  {
       FAPI_ERR("sbe_xip_find() failed w/rc=%i and %s", rcLoc, SBE_XIP_ERROR_STRING(errorStrings, rcLoc));
       FAPI_ERR("Probable cause:");
@@ -362,7 +398,7 @@ ReturnCode p8_xip_customize( const fapi::Target &i_target,
       return rc;
     }
     FAPI_DBG("Dumping global variable content of nest_skewadjust_vector:\n");
-    sbe_xip_pore2host( imageOut, xipTocItem.iv_address, &hostNestSkewAdjVec);
+    sbe_xip_pore2host( o_imageOut, xipTocItem.iv_address, &hostNestSkewAdjVec);
     FAPI_INF("nest_skewadjust_vector: Before (in BE)=0x%016llX\n",*((uint64_t*)hostNestSkewAdjVec));
     byteField  = (uint8_t*)bufVpdField;
     byteVector = (uint8_t*)hostNestSkewAdjVec;
@@ -399,7 +435,6 @@ ReturnCode p8_xip_customize( const fapi::Target &i_target,
     uint8_t   attrRingData[MAX_PLL_RING_SIZE]={0};
     uint8_t   attrChipletId=0;
     uint32_t  attrScanSelect=0;
-    uint8_t   attrDdLevel=0;
     uint32_t  attrRingDataSize=0; // Ring bit size
     uint32_t  sizeDeltaPllRingAlt=0;
     uint32_t  sizeRs4Launch=0;
@@ -524,7 +559,7 @@ ReturnCode p8_xip_customize( const fapi::Target &i_target,
     
     // Construct RS4 launcher:
     // ...get the RS4 decompress address.
-    rcLoc = sbe_xip_get_scalar( imageOut, "proc_sbe_decompress_scan_chiplet_address", &scanChipletAddress);
+    rcLoc = sbe_xip_get_scalar( o_imageOut, "proc_sbe_decompress_scan_chiplet_address", &scanChipletAddress);
     if (rcLoc)  {
       FAPI_ERR("sbe_xip_get_scalar() failed w/rc=%i", rcLoc);
       FAPI_ERR("Probable cause: Key word =proc_sbe_decompress_scan_chiplet_address not found in image.");
@@ -582,11 +617,6 @@ ReturnCode p8_xip_customize( const fapi::Target &i_target,
       return rc;
     }
     bufPllRingAltBlock->sizeOfMeta  =  0;
-    rc = FAPI_ATTR_GET_PRIVILEGED(ATTR_EC, &i_target, attrDdLevel);
-    if (rc)  {
-      FAPI_ERR("FAPI_ATTR_GET_PRIVILEGED() failed w/rc=%i and ddLevel=0x%02x",(uint32_t)rc,attrDdLevel);
-      return rc;
-    }
     bufPllRingAltBlock->ddLevel      = myRev32((uint32_t)attrDdLevel);
     bufPllRingAltBlock->sysPhase     = i_sysPhase;
     bufPllRingAltBlock->override     = 0;
@@ -622,14 +652,16 @@ ReturnCode p8_xip_customize( const fapi::Target &i_target,
     // Append PLL _alt ring to image.
     //
     FAPI_INF("XIPC: PLL update: Appending RS4 PLL ring block to .rings section.");
-    rcLoc = write_ring_block_to_image( imageOut,
+    rcLoc = write_ring_block_to_image( o_imageOut,
                                        PERV_BNDY_PLL_RING_ALT_TOC_NAME,
                                        bufPllRingAltBlock,
                                        0,
                                        0,
                                        0,
-                                       MAX_SEEPROM_IMAGE_SIZE); // OK, since sysPhase=0.
-//                                       SBE_XIP_SECTION_RINGS);
+                                       MAX_SEEPROM_IMAGE_SIZE, // OK, since sysPhase=0.
+                                       SBE_XIP_SECTION_RINGS,
+																			 i_buf2,
+																			 i_sizeBuf2);
     if (rcLoc)  {
       FAPI_ERR("write_ring_block_to_image() failed w/rc=%i",rcLoc);
       FAPI_ERR("Check p8_delta_scan_rw.h for meaning of IMGBUILD_xyz rc code.");
@@ -677,7 +709,21 @@ ReturnCode p8_xip_customize( const fapi::Target &i_target,
   uint8_t    bValidChipletId=0,bRingAlreadyAdded=0;
   uint8_t    chipletIdVpd;
   uint32_t   sizeImageOut;
+	SbeXipSection xipSectionDcrings;
   
+	// First, is there an .dcrings section yet in the input image?  We need this to know 
+	//   if we should do datacare on #G rings a little later.
+	// (Note, it makes no sense checking in output image since SLW has been wiped clean, and 
+	//    the same may be the case with IPL image in the future.)
+  rcLoc = sbe_xip_get_section(i_imageIn, SBE_XIP_SECTION_DCRINGS, &xipSectionDcrings);
+  if (rcLoc)  {
+    FAPI_ERR("_get_section(.dcrings...) failed with rc=%i  ",rcLoc);
+		uint32_t &RC_LOCAL=rcLoc;
+    FAPI_SET_HWP_ERROR(rc, RC_PROC_XIPC_IMGBUILD_ERROR);
+    return rc;
+  }
+	
+	// Now wade through all conceivable Mvpd rings and add any that's there to the image.
   for (iVpdType=0; iVpdType<NUM_OF_VPD_TYPES; iVpdType++)  {
     if (iVpdType==0)  {
       ring_id_list = (RingIdList*)RING_ID_LIST_PG;
@@ -746,7 +792,6 @@ ReturnCode p8_xip_customize( const fapi::Target &i_target,
                                 bufVpdRing,
                                 sizeVpdRing);
           FAPI_DBG("XIPC: Mvpd rings: rcFapi=0x%08x",(uint32_t)rcFapi);
-          //FAPI_DBG("XIPC: Mvpd rings: RC_REPAIR_RING_NOT_FOUND=0x%08x",(uint32_t)RC_REPAIR_RING_NOT_FOUND);
           if (rcFapi==RC_REPAIR_RING_NOT_FOUND)  {
             // No match, do nothing. Next (chipletId,ringId)-pair.
             FAPI_INF("XIPC: Mvpd rings: (iRing,ringId,chipletId)=(%i,0x%02X,0x%02X) not found.",iRing,ringId,chipletId);
@@ -792,6 +837,26 @@ ReturnCode p8_xip_customize( const fapi::Target &i_target,
               return rc;
             }
             else  {
+							// Enforce flush optimization for Mvpd rings.
+							((CompressedScanData*)bufVpdRing)->iv_flushOptimization = 1;
+							// Do datacare, if needed.
+    					if ( xipSectionDcrings.iv_offset!=0 )  {
+								FAPI_INF("Calling check_and_perform_ring_datacare()\n");
+                rcLoc = check_and_perform_ring_datacare( 
+																					i_imageIn,
+																					(void*)bufVpdRing,  //HB buf1
+																					attrDdLevel,        //Playing it safe.
+																					i_sysPhase,
+																					(char*)(ring_id_list+iRing)->ringNameImg,
+																					(void*)i_buf2,			//HB buf2
+																					i_sizeBuf2);
+								if (rcLoc)  {
+								  FAPI_ERR("check_and_perform_ring_datacare() failed w/rc=%i  ",rcLoc);
+									uint32_t & RC_LOCAL = rcLoc;
+                  FAPI_SET_HWP_ERROR(rc, RC_PROC_XIPC_PERFORM_RING_DATACARE_ERROR);
+                  return rc;
+								}
+							}
               // Add VPD ring to image.
               if (!bRingAlreadyAdded)  {
                 rcLoc = 0;
@@ -799,21 +864,21 @@ ReturnCode p8_xip_customize( const fapi::Target &i_target,
                   sizeImageOut = MAX_SEEPROM_IMAGE_SIZE;
                   // Add VPD ring to --->>> IPL <<<--- image
                   rcLoc = write_vpd_ring_to_ipl_image(
-                                          imageOut,
+                                          o_imageOut,
                                           sizeImageOut,
                                           (CompressedScanData*)bufVpdRing, //HB buf1
                                           ddLevel,
                                           i_sysPhase,
                                           (char*)(ring_id_list+iRing)->ringNameImg,
                                           (void*)i_buf2,                   //HB buf2
-                                          i_sizeBuf2);
-//                                          SBE_XIP_SECTION_RINGS);
+                                          i_sizeBuf2,
+                                          SBE_XIP_SECTION_RINGS);
                 }
                 else  {
                   sizeImageOut = sizeImageOutMax;
                   // Add VPD ring to --->>> SLW <<<--- image
                   rcLoc = write_vpd_ring_to_slw_image(
-                                          imageOut,
+                                          o_imageOut,
                                           sizeImageOut,
                                           (CompressedScanData*)bufVpdRing, //HB buf1
                                           ddLevel,
@@ -843,6 +908,19 @@ ReturnCode p8_xip_customize( const fapi::Target &i_target,
       }
     }
   }
+	
+	// Now, we can safely remove the .dcrings section from the output image. Though, no
+	//   need to do it for SLW which was wiped clean in slw_build().
+	//
+	if (i_sysPhase==0)  {
+	  rcLoc = sbe_xip_delete_section(o_imageOut, SBE_XIP_SECTION_DCRINGS);
+	  if (rcLoc)  {
+	    MY_ERR("_delete_section(.dcrings...) failed w/rc=%i  ",rcLoc);
+			uint32_t & RC_LOCAL = rcLoc;
+	    FAPI_SET_HWP_ERROR(rc, RC_PROC_XIPC_XIP_DELETE_SECTION_ERROR);
+	    return rc;
+	  }
+	}
 #endif
 
 
@@ -865,12 +943,13 @@ ReturnCode p8_xip_customize( const fapi::Target &i_target,
   // ==========================================================================
 
   switch (i_modeBuild)  {
+	
   // --------------------------------------------------------------------
   // case 0:  IPL mode.
   // - This is first time SLW image is built. Go all out.
   // --------------------------------------------------------------------
   case P8_SLW_MODEBUILD_IPL:  // IPL mode.
-    rcLoc = create_and_initialize_fixed_image(imageOut);
+    rcLoc = create_and_initialize_fixed_image(o_imageOut);
     if (rcLoc)  {
       uint32_t & RC_LOCAL=rcLoc;
       FAPI_SET_HWP_ERROR(rc, RC_PROC_XIPC_CREATE_FIXED_IMAGE_ERROR);
@@ -884,7 +963,7 @@ ReturnCode p8_xip_customize( const fapi::Target &i_target,
   // - Fixed positioning of .slw and .ffdc already done during IPL mode. 
   // --------------------------------------------------------------------
   case P8_SLW_MODEBUILD_REBUILD:  // Rebuild mode. (Need to update Ram/Scom vectors.)
-    rcLoc = create_and_initialize_fixed_image(imageOut);
+    rcLoc = create_and_initialize_fixed_image(o_imageOut);
     if (rcLoc)  {
       uint32_t & RC_LOCAL=rcLoc;
       FAPI_SET_HWP_ERROR(rc, RC_PROC_XIPC_CREATE_FIXED_IMAGE_ERROR);
@@ -902,7 +981,7 @@ ReturnCode p8_xip_customize( const fapi::Target &i_target,
   // --------------------------------------------------------------------
   case P8_SLW_MODEBUILD_SRAM:  // SRAM mode.
     sizeImageTmp = sizeImageOutMax;
-    rcLoc = initialize_slw_section(imageOut,
+    rcLoc = initialize_slw_section(o_imageOut,
                                    &sizeImageTmp);
     if (rcLoc)  {
       if (rcLoc==IMGBUILD_ERR_IMAGE_TOO_LARGE)  {
@@ -923,7 +1002,8 @@ ReturnCode p8_xip_customize( const fapi::Target &i_target,
     FAPI_ERR("Bad code, or bad modeBuild (=%i) parm.",i_modeBuild);
     FAPI_SET_HWP_ERROR(rc, RC_PROC_XIPC_BAD_CODE_OR_PARM);
     return rc;
-  }
+  
+	}  // End of switch (i_modeBuild)
 
 
   // ==========================================================================
@@ -969,7 +1049,7 @@ ReturnCode p8_xip_customize( const fapi::Target &i_target,
   for (coreId=0; coreId<=15; coreId++)  {
     if (attrCombGoodVec[P8_CID_EX_LOW+coreId])  {
       rcLoc = p8_pore_gen_scom_fixed( 
-                      imageOut, 
+                      o_imageOut, 
                       2,        // modeBuild=2 (SRAM) for now. Change when switch to fixed img.
                       (uint32_t)EX_L2_CERRS_RD_EPS_REG_0x10012814, // Scom addr.
                       coreId,   // The core ID.
@@ -1028,7 +1108,7 @@ ReturnCode p8_xip_customize( const fapi::Target &i_target,
   for (coreId=0; coreId<=15; coreId++)  {
     if (attrCombGoodVec[P8_CID_EX_LOW+coreId])  {
       rcLoc = p8_pore_gen_scom_fixed( 
-                      imageOut, 
+                      o_imageOut, 
                       2,        // modeBuild=2 (SRAM) for now. Change when switch to fixed img.
                       (uint32_t)EX_L3_CERRS_RD_EPS_REG_0x10010829, // Scom addr.
                       coreId,   // The core ID.
@@ -1057,7 +1137,7 @@ ReturnCode p8_xip_customize( const fapi::Target &i_target,
   for (coreId=0; coreId<=15; coreId++)  {
     if (attrCombGoodVec[P8_CID_EX_LOW+coreId])  {
       rcLoc = p8_pore_gen_scom_fixed( 
-                      imageOut, 
+                      o_imageOut, 
                       2,        // modeBuild=2 (SRAM) for now. Change when switch to fixed img.
                       (uint32_t)EX_L3_CERRS_WR_EPS_REG_0x1001082A, // Scom addr.
                       coreId,   // The core ID.
@@ -1080,12 +1160,13 @@ ReturnCode p8_xip_customize( const fapi::Target &i_target,
     FAPI_INF("No active cores found. Did not update SCOM NC table w/L3 Epsilon data (2).\n");
   }
 
+
   // ==========================================================================
-  // CUSTOMIZE item:    L3 BAR config register SCOM table updates.
+  // CUSTOMIZE item:    L3 BAR config register SCOM table updates. (By JoeM)
   // Retrieval method:  Attribute.
   // System phase:      IPL and SLW sysPhase.
   // ==========================================================================
-
+#ifndef IMGBUILD_PPD_IGNORE_L3_BAR
   rc = FAPI_ATTR_GET(ATTR_PROC_L3_BAR1_REG, &i_target, attrL3BAR1);
   if (rc)  {
     FAPI_ERR("FAPI_ATTR_GET(ATTR_PROC_L3_BAR1_REG) returned error.\n");
@@ -1110,7 +1191,7 @@ ReturnCode p8_xip_customize( const fapi::Target &i_target,
   for (coreId=0; coreId<=15; coreId++)  {
     if (attrCombGoodVec[P8_CID_EX_LOW+coreId])  {
       rcLoc = p8_pore_gen_scom_fixed( 
-                      imageOut, 
+                      o_imageOut, 
                       2,        // modeBuild=2 (SRAM) for now. Change when switch to fixed img.
                       (uint32_t)EX_L3_BAR1_REG_0x1001080B, // Scom addr.
                       coreId,   // The core ID.
@@ -1139,7 +1220,7 @@ ReturnCode p8_xip_customize( const fapi::Target &i_target,
   for (coreId=0; coreId<=15; coreId++)  {
     if (attrCombGoodVec[P8_CID_EX_LOW+coreId])  {
       rcLoc = p8_pore_gen_scom_fixed( 
-                      imageOut, 
+                      o_imageOut, 
                       2,        // modeBuild=2 (SRAM) for now. Change when switch to fixed img.
                       (uint32_t)EX_L3_BAR2_REG_0x10010813, // Scom addr.
                       coreId,   // The core ID.
@@ -1168,7 +1249,7 @@ ReturnCode p8_xip_customize( const fapi::Target &i_target,
   for (coreId=0; coreId<=15; coreId++)  {
     if (attrCombGoodVec[P8_CID_EX_LOW+coreId])  {
       rcLoc = p8_pore_gen_scom_fixed( 
-                      imageOut, 
+                      o_imageOut, 
                       2,        // modeBuild=2 (SRAM) for now. Change when switch to fixed img.
                       (uint32_t)EX_L3_BAR_GROUP_MASK_REG_0x10010816, // Scom addr.
                       coreId,   // The core ID.
@@ -1190,6 +1271,7 @@ ReturnCode p8_xip_customize( const fapi::Target &i_target,
   else  {
     FAPI_INF("No active cores found. Did not update SCOM NC table w/L3 BAR data (3).\n");
   }
+#endif
 
   }  // End of if (i_sysPhase==1)
 
@@ -1198,8 +1280,7 @@ ReturnCode p8_xip_customize( const fapi::Target &i_target,
   // Done customizing, yeah!!
   //  
 
-  i_imageOut = imageOut;  // Note, imageOut=i_imageIn for SLW but =i_imageOut for IPL.
-  sbe_xip_image_size( i_imageOut, &io_sizeImageOut);
+  sbe_xip_image_size( o_imageOut, &io_sizeImageOut);
   
   if (i_sysPhase==0)
     sizeImageMax = MAX_SEEPROM_IMAGE_SIZE;
@@ -1208,7 +1289,7 @@ ReturnCode p8_xip_customize( const fapi::Target &i_target,
   
   FAPI_INF("XIPC:  Final output image:\n ");
   FAPI_INF("  location=0x%016llx\n  size (actual)=%i\n  size (max allowed)=%i\n ", 
-    (uint64_t)i_imageOut, io_sizeImageOut, sizeImageMax);
+    (uint64_t)o_imageOut, io_sizeImageOut, sizeImageMax);
   FAPI_INF("XIPC:  Input image (just for reference):\n ");
   FAPI_INF("  location=0x%016llx\n  size=%i\n ", 
     (uint64_t)i_imageIn, sizeImageIn);

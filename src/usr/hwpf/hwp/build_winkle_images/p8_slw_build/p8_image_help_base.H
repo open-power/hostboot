@@ -20,12 +20,14 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_image_help_base.H,v 1.15 2013/03/01 21:55:24 cmolsen Exp $
+// $Id: p8_image_help_base.H,v 1.16 2013/03/27 18:31:57 cmolsen Exp $
 //------------------------------------------------------------------------------
 //  Title:  p8_image_help_base.H
 //  Description:  Contains the most basic structures and defines needed for 
 //                image building and interpretation.
 //------------------------------------------------------------------------------
+
+#include <sbe_xip_image.h>
 
 //
 // Various image/ring buffer sizes. Must be used by all users (VBU, FSP, HB, HBI, Cronus)
@@ -50,6 +52,11 @@ const uint32_t  WF_WORST_CASE_SIZE_FAC  =   4; // WC WF size = 3x ring length.
 const uint32_t  LISTING_STRING_SIZE     = 256;
 const uint64_t  MAX_UINT64_T            = (uint64_t)0xFFFFFFFF<<32 | (uint64_t)0xFFFFFFFF;
 
+const uint8_t RING_SECTION_ID[] = {
+  SBE_XIP_SECTION_RINGS,
+  SBE_XIP_SECTION_DCRINGS,
+};
+const uint8_t RING_SECTION_ID_SIZE = sizeof(RING_SECTION_ID) / sizeof(RING_SECTION_ID[0]);
 
 #ifdef __cplusplus
 extern "C" {

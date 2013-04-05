@@ -270,4 +270,17 @@
     <persistRuntime/>
   </attribute>
   <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PROC_SECURITY_SETUP_VECTOR</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>64-bit proc_sbe_security_setup_vector used by proc_sbe_security_setup.S
+      creator: platform
+      firmware notes:
+        64-bit proc_sbe_security_setup_vector
+    </description>
+    <valueType>uint64</valueType>
+    <platInit/>
+    <persistRuntime/>
+  </attribute>
+  <!-- ********************************************************************* -->
 </attributes>
