@@ -1,25 +1,25 @@
-//  IBM_PROLOG_BEGIN_TAG
-//  This is an automatically generated prolog.
-//
-//  $Source: src/usr/hwpf/plat/fapiPlatTarget.C $
-//
-//  IBM CONFIDENTIAL
-//
-//  COPYRIGHT International Business Machines Corp. 2011
-//
-//  p1
-//
-//  Object Code Only (OCO) source materials
-//  Licensed Internal Code Source Materials
-//  IBM HostBoot Licensed Internal Code
-//
-//  The source code for this program is not published or other-
-//  wise divested of its trade secrets, irrespective of what has
-//  been deposited with the U.S. Copyright Office.
-//
-//  Origin: 30
-//
-//  IBM_PROLOG_END
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/usr/hwpf/plat/fapiPlatTarget.C $                          */
+/*                                                                        */
+/* IBM CONFIDENTIAL                                                       */
+/*                                                                        */
+/* COPYRIGHT International Business Machines Corp. 2011,2013              */
+/*                                                                        */
+/* p1                                                                     */
+/*                                                                        */
+/* Object Code Only (OCO) source materials                                */
+/* Licensed Internal Code Source Materials                                */
+/* IBM HostBoot Licensed Internal Code                                    */
+/*                                                                        */
+/* The source code for this program is not published or otherwise         */
+/* divested of its trade secrets, irrespective of what has been           */
+/* deposited with the U.S. Copyright Office.                              */
+/*                                                                        */
+/* Origin: 30                                                             */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
 /**
  *  @file platTarget.C
  *
@@ -88,7 +88,7 @@ void Target::toString(char (&o_ecmdString)[MAX_ECMD_STRING_LEN]) const
     }
     else
     {
-        // TODO
+        // TODO. RTC 47493
         // This is a temporary function that constructs the ECMD String from the
         // target's physical path attribute, eventually, the ECMD String will be
         // its own attribute (sourced from the MRW) and this function will be
@@ -110,7 +110,7 @@ void Target::toString(char (&o_ecmdString)[MAX_ECMD_STRING_LEN]) const
             // and a single space is added
             //
             // <chip> = chip type ("p8" = processor, "centaur" = memory buffer)
-            // <unit> = unit type ("ex", "mcs", "mbs", "mba")
+            // <unit> = unit type ("ex", "mcs", "mba", "abus", "xbus")
             // kX     = cage number. Always zero
             // nX     = node number. Always zero in HostBoot (right now)
             // sX     = slot number. Always zero
@@ -126,10 +126,11 @@ void Target::toString(char (&o_ecmdString)[MAX_ECMD_STRING_LEN]) const
             const char * const ECMD_CHIP_PROC_SPC = " ";
             const char * const ECMD_CHIP_MEMBUF = "centaur";
             const char * const ECMD_CHIP_MEMBUF_SPC = "    ";
-            const char * const ECMD_CHIPLET_EX =  "ex      ";
-            const char * const ECMD_CHIPLET_MCS = "mcs     ";
-            const char * const ECMD_CHIPLET_MBS = "mbs     ";
-            const char * const ECMD_CHIPLET_MBA = "mba     ";
+            const char * const ECMD_CHIPLET_EX   = "ex      ";
+            const char * const ECMD_CHIPLET_MCS  = "mcs     ";
+            const char * const ECMD_CHIPLET_MBA  = "mba     ";
+            const char * const ECMD_CHIPLET_XBUS = "xbus    ";
+            const char * const ECMD_CHIPLET_ABUS = "abus    ";
 
             // Look for a chip in the path
             const char * l_pChipType = NULL;
@@ -179,14 +180,19 @@ void Target::toString(char (&o_ecmdString)[MAX_ECMD_STRING_LEN]) const
                         l_pChipletType = ECMD_CHIPLET_MCS;
                         l_chipletPos = l_path[i].instance;
                     }
-                    else if (l_path[i].type == TARGETING::TYPE_MBS)
-                    {
-                        l_pChipletType = ECMD_CHIPLET_MBS;
-                        l_chipletPos = l_path[i].instance;
-                    }
                     else if (l_path[i].type == TARGETING::TYPE_MBA)
                     {
                         l_pChipletType = ECMD_CHIPLET_MBA;
+                        l_chipletPos = l_path[i].instance;
+                    }
+                    else if (l_path[i].type == TARGETING::TYPE_XBUS)
+                    {
+                        l_pChipletType = ECMD_CHIPLET_XBUS;
+                        l_chipletPos = l_path[i].instance;
+                    }
+                    else if (l_path[i].type == TARGETING::TYPE_ABUS)
+                    {
+                        l_pChipletType = ECMD_CHIPLET_ABUS;
                         l_chipletPos = l_path[i].instance;
                     }
                 }
