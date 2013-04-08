@@ -54,7 +54,8 @@ sub verifyPatchSet
     #   * Show only the lines changed, with no context (U0).
     # Grep only the lines marked with "+" (instead of "-") to find just the
     # actions done by this patchset and not the content removed.
-    open PATCH_CONTENTS, "git diff HEAD~1 --diff-filter=AM -U0 | grep \"^+\" |";
+    open PATCH_CONTENTS, "git diff HEAD~1 --diff-filter=AM -U0 | ".
+                         "grep -e \"^+\" -e \"^@@.*+[0-9]\\+\" |";
 
     my %fileContents = ();
 
@@ -76,6 +77,12 @@ sub verifyPatchSet
                 $lineCount = 0;
             }
             $lastFile = $1;
+        }
+        # Lines starting with "@@" indicates a seek in the file, so update
+        # line numbers.
+        elsif ($line =~ m/^@@.*\+([0-9]+)/)
+        {
+            $lineCount = $1 - 1;
         }
         else
         {
@@ -244,7 +251,7 @@ sub verifyCommitMsg
 
         # Identify if this is a tagged line or a non-tagged line and store
         # away.
-        if ($line =~ m/^\s*[A-Za-z0-9\-_]+:/)
+        if ($line =~ m/^\s*[A-Za-z0-9\-_]+:[^:]/)
         {
             # We allow lines that look like tags in the topic like...
             # "FOO: Adding support for BAR."
