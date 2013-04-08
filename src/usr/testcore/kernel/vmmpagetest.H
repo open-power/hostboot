@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2012              */
+/* COPYRIGHT International Business Machines Corp. 2011,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -214,14 +214,12 @@ class vmmpagetest: public CxxTest::TestSuite
         static void* testDaemon(void* unused)
         {
             msg_t* message = NULL;
-            uint64_t ea = 0;
             while (1)
             {
                 message = msg_wait(iv_mq);
                 if (message)
                 {
-                    ea = message->data[0];
-                    printkd("Effective Addr: 0x%lX, %s\n",ea,
+                    printkd("Effective Addr: 0x%lX, %s\n",message->data[0],
                             message->type==MSG_MM_RP_READ?"READ":"WRITE");
                     message->data[1] = 0;
                     rc = msg_respond(iv_mq, message);

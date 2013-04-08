@@ -1,25 +1,25 @@
-//  IBM_PROLOG_BEGIN_TAG
-//  This is an automatically generated prolog.
-//
-//  $Source: src/include/util/functor.H $
-//
-//  IBM CONFIDENTIAL
-//
-//  COPYRIGHT International Business Machines Corp. 2011
-//
-//  p1
-//
-//  Object Code Only (OCO) source materials
-//  Licensed Internal Code Source Materials
-//  IBM HostBoot Licensed Internal Code
-//
-//  The source code for this program is not published or other-
-//  wise divested of its trade secrets, irrespective of what has
-//  been deposited with the U.S. Copyright Office.
-//
-//  Origin: 30
-//
-//  IBM_PROLOG_END
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/include/util/functor.H $                                  */
+/*                                                                        */
+/* IBM CONFIDENTIAL                                                       */
+/*                                                                        */
+/* COPYRIGHT International Business Machines Corp. 2011,2013              */
+/*                                                                        */
+/* p1                                                                     */
+/*                                                                        */
+/* Object Code Only (OCO) source materials                                */
+/* Licensed Internal Code Source Materials                                */
+/* IBM HostBoot Licensed Internal Code                                    */
+/*                                                                        */
+/* The source code for this program is not published or otherwise         */
+/* divested of its trade secrets, irrespective of what has been           */
+/* deposited with the U.S. Copyright Office.                              */
+/*                                                                        */
+/* Origin: 30                                                             */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
 #ifndef __UTIL_FUNCTOR_H
 #define __UTIL_FUNCTOR_H
 
@@ -75,7 +75,7 @@ namespace Util
     };
 
     template <typename _ARG, typename _RESULT>
-    ALWAYS_INLINE    
+    ALWAYS_INLINE inline
     ptr_to_unary_function<_ARG, _RESULT> ptr_fun(_RESULT (*f)(_ARG))
     {
 	return ptr_to_unary_function<_ARG,_RESULT>(f);
@@ -97,7 +97,7 @@ namespace Util
 	    function_type function;
 
 	public:
-	    mem_ptr_to_unary_function(member_type& o, function_type f) 
+	    mem_ptr_to_unary_function(member_type& o, function_type f)
 		: object(o), function(f) {};
 
 	    _RESULT operator()(_ARG t)
@@ -107,8 +107,8 @@ namespace Util
     };
 
     template <typename _ARG, typename _RESULT, typename _CLASS>
-    ALWAYS_INLINE
-    mem_ptr_to_unary_function<_ARG, _RESULT, _CLASS> 
+    ALWAYS_INLINE inline
+    mem_ptr_to_unary_function<_ARG, _RESULT, _CLASS>
     mem_ptr_fun(_CLASS& o, _RESULT (_CLASS::*f)(_ARG))
     {
 	return mem_ptr_to_unary_function<_ARG,_RESULT,_CLASS>(o, f);

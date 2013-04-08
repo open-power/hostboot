@@ -126,19 +126,19 @@ class DumpTest: public CxxTest::TestSuite
                                 DUMP_TEST_DST_DATA_AREA + 192, 64};
 
 
-        // Point to the location of the src Data pointer. 
-        uint64_t *srcTablePtr = reinterpret_cast<uint64_t *>(srcTableAddr); 
+        // Point to the location of the src Data pointer.
+        uint64_t *srcTablePtr = reinterpret_cast<uint64_t *>(srcTableAddr);
 
-       // Point to the location of the dest Data pointer. 
-        uint64_t *dstTablePtr = reinterpret_cast<uint64_t *>(dstTableAddr); 
+       // Point to the location of the dest Data pointer.
+        uint64_t *dstTablePtr = reinterpret_cast<uint64_t *>(dstTableAddr);
 
         uint64_t *resultTablePtr = reinterpret_cast<uint64_t *>(resultsTableAddr);
 
-        // Put the src addresses defined above into the MDST 
-        memcpy(srcTablePtr, src_data, sizeof(src_data)); 
+        // Put the src addresses defined above into the MDST
+        memcpy(srcTablePtr, src_data, sizeof(src_data));
 
-       // Put the src addresses defined above into the MDDT 
-        memcpy(dstTablePtr, dst_data, sizeof(dst_data)); 
+       // Put the src addresses defined above into the MDDT
+        memcpy(dstTablePtr, dst_data, sizeof(dst_data));
 
         // Need to memory map
         uint64_t src_Inputdata[4][8] = {
@@ -179,19 +179,19 @@ class DumpTest: public CxxTest::TestSuite
 
         for (int i = 0; i<4; i++)
         {
-            
+
             // Get the Va for the page aligned Physical address
             va_mapsrcTableAddr =
               static_cast<uint64_t*>(mmio_dev_map(reinterpret_cast<void*>(ALIGN_PAGE_DOWN(src_data[index])),
                                                   THIRTYTWO_GB));
 
-            // copy the mapped VA to a VA pointer we will 
+            // copy the mapped VA to a VA pointer we will
             va_srcTableAddr = va_mapsrcTableAddr;
 
             // calculate offset based on page alignment.
             offset = src_data[index] - ALIGN_PAGE_DOWN(src_data[index]);
 
-            // increment the offset to correct VA offset. 
+            // increment the offset to correct VA offset.
             va_srcTableAddr += (offset/(sizeof (uint64_t)));
 
             memcpy(va_srcTableAddr, src_Inputdata[i], sizeof(src_Inputdata[i]));
@@ -240,13 +240,13 @@ class DumpTest: public CxxTest::TestSuite
               static_cast<uint64_t*>(mmio_dev_map(reinterpret_cast<void*>(ALIGN_PAGE_DOWN(dst_data[index])),
                                                   THIRTYTWO_GB));
 
-            // copy the mapped VA to a VA pointer we will 
+            // copy the mapped VA to a VA pointer we will
             va_destTableAddr = va_mapdestTableAddr;
 
             // calculate offset based on page alignment.
             offset = dst_data[index] - ALIGN_PAGE_DOWN(dst_data[index]);
 
-            // increment the offset to correct VA offset. 
+            // increment the offset to correct VA offset.
             va_destTableAddr += (offset/(sizeof (uint64_t)));
 
             uint64_t paddr = mm_virt_to_phys(va_destTableAddr);
@@ -259,7 +259,7 @@ class DumpTest: public CxxTest::TestSuite
             }
 
 
-            // Check the destination table. 
+            // Check the destination table.
             int src_rc = memcmp(va_destTableAddr,src_Inputdata[i],sizeof(src_Inputdata[i]));
 
             if (src_rc!=0)
@@ -284,7 +284,7 @@ class DumpTest: public CxxTest::TestSuite
         }
 
 
-        // Check the results table. 
+        // Check the results table.
         int result_rc = memcmp(resultTablePtr,result_data,sizeof (result_data));
 
         if (result_rc!=0)
@@ -299,7 +299,7 @@ class DumpTest: public CxxTest::TestSuite
 
     /**
      * @brief Basic dump test that has sequential src addresses to
-     *   imbalanced destination locations and sizes. 
+     *   imbalanced destination locations and sizes.
      *
      */
     void test_DumpCollectUnevenDest(void)
@@ -337,12 +337,12 @@ class DumpTest: public CxxTest::TestSuite
                                 DUMP_TEST_DST_DATA_AREA+1024 + 96, 32, // 4600480
                                 DUMP_TEST_DST_DATA_AREA+1024+ 128, 128}; // 46004C0
 
-        uint64_t *srcTablePtr = reinterpret_cast<uint64_t *>(srcTableAddr); 
-        uint64_t *dstTablePtr = reinterpret_cast<uint64_t *>(dstTableAddr); 
+        uint64_t *srcTablePtr = reinterpret_cast<uint64_t *>(srcTableAddr);
+        uint64_t *dstTablePtr = reinterpret_cast<uint64_t *>(dstTableAddr);
         uint64_t *resultTablePtr = reinterpret_cast<uint64_t *>(resultsTableAddr);
 
-        memcpy(srcTablePtr, src_data, sizeof(src_data)); 
-        memcpy(dstTablePtr, dst_data, sizeof(dst_data)); 
+        memcpy(srcTablePtr, src_data, sizeof(src_data));
+        memcpy(dstTablePtr, dst_data, sizeof(dst_data));
 
 
         // Need to memory map
@@ -365,7 +365,7 @@ class DumpTest: public CxxTest::TestSuite
                                         {0xdddddddddddddddd, 0xdddddddddddddddd,
                                          0xdddddddddddddddd, 0xdddddddddddddddd,
                                          0xdddddddddddddddd, 0xdddddddddddddddd,
-                                         0xdddddddddddddddd, 0xdddddddddddddddd},                            
+                                         0xdddddddddddddddd, 0xdddddddddddddddd},
         };
 
         // results output data expected
@@ -383,19 +383,19 @@ class DumpTest: public CxxTest::TestSuite
         int index = 0;
 
         for (int i = 0; i<4; i++)
-        {    
+        {
             // Get the Va for the page aligned Physical address
             va_mapsrcTableAddr =
               static_cast<uint64_t*>(mmio_dev_map(reinterpret_cast<void*>(ALIGN_PAGE_DOWN(src_data[index])),
                                                   THIRTYTWO_GB));
 
-            // copy the mapped VA to a VA pointer 
+            // copy the mapped VA to a VA pointer
             va_srcTableAddr = va_mapsrcTableAddr;
 
             // calculate offset based on page alignment.
             offset = src_data[index] - ALIGN_PAGE_DOWN(src_data[index]);
 
-            // increment the offset to correct VA offset. 
+            // increment the offset to correct VA offset.
             va_srcTableAddr += (offset/(sizeof (uint64_t)));
 
             memcpy(va_srcTableAddr, src_Inputdata[i], sizeof(src_Inputdata[i]));
@@ -432,7 +432,7 @@ class DumpTest: public CxxTest::TestSuite
         }
 
         //----------------------------------------------------------------
-        // !!!!! VERIFYING RESULTS  
+        // !!!!! VERIFYING RESULTS
         // Verify that the data and the VA mapping is correct.
         //--------------------------------------------------------------
         do
@@ -453,13 +453,13 @@ class DumpTest: public CxxTest::TestSuite
                 // Get the Va for the page aligned Physical address
                 va_mapdestTableAddr = static_cast<uint64_t*>(mmio_dev_map(reinterpret_cast<void*>(ALIGN_PAGE_DOWN(dst_data[index])),THIRTYTWO_GB));
 
-                // copy the mapped VA to a VA pointer we will 
+                // copy the mapped VA to a VA pointer we will
                 va_destTableAddr = va_mapdestTableAddr;
 
                 // calculate offset based on page alignment.
                 offset = dst_data[index] - ALIGN_PAGE_DOWN(dst_data[index]);
 
-                // increment the offset to correct VA offset. 
+                // increment the offset to correct VA offset.
                 va_destTableAddr += (offset/(sizeof (uint64_t)));
 
                 paddr = mm_virt_to_phys(va_destTableAddr);
@@ -479,7 +479,7 @@ class DumpTest: public CxxTest::TestSuite
                 }
                 else
                 {
-                    // Check the destination table. 
+                    // Check the destination table.
                     src_rc = memcmp(va_destTableAddr,src_Inputdata[i],dst_data[index+1]);
                 }
 
@@ -511,13 +511,13 @@ class DumpTest: public CxxTest::TestSuite
             // Get the Va for the page aligned Physical address
             va_mapdestTableAddr = static_cast<uint64_t*>(mmio_dev_map(reinterpret_cast<void*>(ALIGN_PAGE_DOWN(dst_data[index])),THIRTYTWO_GB));
 
-            // copy the mapped VA to a VA pointer we will 
+            // copy the mapped VA to a VA pointer we will
             va_destTableAddr = va_mapdestTableAddr;
 
             // calculate offset based on page alignment.
             offset = dst_data[index] - ALIGN_PAGE_DOWN(dst_data[index]);
 
-            // increment the offset to correct VA offset. 
+            // increment the offset to correct VA offset.
             va_destTableAddr += (offset/(sizeof (uint64_t)));
 
             paddr = mm_virt_to_phys(va_destTableAddr);
@@ -532,12 +532,12 @@ class DumpTest: public CxxTest::TestSuite
 
             int dataentries = (dst_data[index+1]/16);
 
-            // start with 3rd src index.. 
+            // start with 3rd src index..
             int i = 2;
             // Src Data input.
             int dataIndex = 0;
 
-            // Now loop through the data at this memory address and compare it to the data 
+            // Now loop through the data at this memory address and compare it to the data
             for (int j = 0; j<dataentries; j++)
             {
                 if (va_destTableAddr[j] != src_Inputdata[i][dataIndex])
@@ -576,7 +576,7 @@ class DumpTest: public CxxTest::TestSuite
 
         }while(0);
 
-        // Check the results table. 
+        // Check the results table.
         int result_rc = memcmp(resultTablePtr,result_data,sizeof (result_data));
 
         if (result_rc!=0)
@@ -585,7 +585,7 @@ class DumpTest: public CxxTest::TestSuite
             TS_FAIL( "DumpTest::DumpCollectUnevenDest ERROR : Unexpected error data mismatch in results table" );
         }
 
-   
+
      TRACFCOMP( g_trac_dump, "dumpTest::test_dumpCollectUnevenDest COMPLETE" );
     }
 
@@ -638,12 +638,12 @@ class DumpTest: public CxxTest::TestSuite
                                 DUMP_TEST_DST_DATA_AREA+3072+64,  128}; // 4600C40
 
 
-        uint64_t *srcTablePtr = reinterpret_cast<uint64_t *>(srcTableAddr); 
-        uint64_t *dstTablePtr = reinterpret_cast<uint64_t *>(dstTableAddr); 
+        uint64_t *srcTablePtr = reinterpret_cast<uint64_t *>(srcTableAddr);
+        uint64_t *dstTablePtr = reinterpret_cast<uint64_t *>(dstTableAddr);
         uint64_t *resultTablePtr = reinterpret_cast<uint64_t *>(resultsTableAddr);
 
-        memcpy(srcTablePtr, src_data, sizeof(src_data)); 
-        memcpy(dstTablePtr, dst_data, sizeof(dst_data)); 
+        memcpy(srcTablePtr, src_data, sizeof(src_data));
+        memcpy(dstTablePtr, dst_data, sizeof(dst_data));
 
 
         // Need to memory map
@@ -687,7 +687,7 @@ class DumpTest: public CxxTest::TestSuite
 
             offset = src_data[0] - ALIGN_PAGE_DOWN(src_data[0]);
 
-            // increment the offset to correct VA offset. 
+            // increment the offset to correct VA offset.
             va_srcTableAddr += (offset/(sizeof (uint64_t)));
 
             memcpy(va_srcTableAddr, src_data0, sizeof(src_data0));
@@ -713,7 +713,7 @@ class DumpTest: public CxxTest::TestSuite
             // calculate offset based on page alignment.
             offset = src_data[2] - ALIGN_PAGE_DOWN(src_data[2]);
 
-            // increment the offset to correct VA offset. 
+            // increment the offset to correct VA offset.
             va_srcTableAddr += (offset/(sizeof (uint64_t)));
 
             memcpy(va_srcTableAddr, src_data1, sizeof(src_data1));
@@ -739,7 +739,7 @@ class DumpTest: public CxxTest::TestSuite
             // calculate offset based on page alignment.
             offset = src_data[4] - ALIGN_PAGE_DOWN(src_data[4]);
 
-            // increment the offset to correct VA offset. 
+            // increment the offset to correct VA offset.
             va_srcTableAddr += (offset/(sizeof (uint64_t)));
 
             memcpy(va_srcTableAddr, src_data2, sizeof(src_data2));
@@ -765,7 +765,7 @@ class DumpTest: public CxxTest::TestSuite
             // calculate offset based on page alignment.
             offset = src_data[6] - ALIGN_PAGE_DOWN(src_data[6]);
 
-            // increment the offset to correct VA offset. 
+            // increment the offset to correct VA offset.
             va_srcTableAddr += (offset/(sizeof (uint64_t)));
 
             memcpy(va_srcTableAddr, src_data3, sizeof(src_data3));
@@ -804,7 +804,7 @@ class DumpTest: public CxxTest::TestSuite
 
 
         //----------------------------------------------------------------
-        // !!!!! VERIFYING RESULTS  
+        // !!!!! VERIFYING RESULTS
         // Verify that the data and the VA mapping is correct.
         //----------------------------------------------------------------
 
@@ -815,7 +815,6 @@ class DumpTest: public CxxTest::TestSuite
             uint64_t *va_destTableAddr = 0;
             offset = 0;
             int index = 0;
-            int i = 0;
 
 
             // FIRST Destination ENTRY source entires 0 and 1   !!!!
@@ -824,13 +823,13 @@ class DumpTest: public CxxTest::TestSuite
               static_cast<uint64_t*>(mmio_dev_map(reinterpret_cast<void*>(ALIGN_PAGE_DOWN(dst_data[index])),
                                                   THIRTYTWO_GB));
 
-            // copy the mapped VA to a VA pointer we will 
+            // copy the mapped VA to a VA pointer we will
             va_destTableAddr = va_mapdestTableAddr;
 
             // calculate offset based on page alignment.
             offset = dst_data[index] - ALIGN_PAGE_DOWN(dst_data[index]);
 
-            // increment the offset to correct VA offset. 
+            // increment the offset to correct VA offset.
             va_destTableAddr += (offset/(sizeof (uint64_t)));
 
             uint64_t paddr = mm_virt_to_phys(va_destTableAddr);
@@ -847,7 +846,7 @@ class DumpTest: public CxxTest::TestSuite
 
            int curSrcEntry = 0;
 
-            // Now loop through the data at this memory address and compare it to the data 
+            // Now loop through the data at this memory address and compare it to the data
             for (int j = 0; j<2; j++)
             {
                 if (va_destTableAddr[j] != src_data0[j])
@@ -864,7 +863,7 @@ class DumpTest: public CxxTest::TestSuite
             }
 
 
-            // Now loop through the remainder of this destination to a new src data entry 
+            // Now loop through the remainder of this destination to a new src data entry
             for (int j = 0; j<dataentries; j++)
             {
                 if (va_destTableAddr[curSrcEntry] != src_data1[j])
@@ -900,13 +899,13 @@ class DumpTest: public CxxTest::TestSuite
               static_cast<uint64_t*>(mmio_dev_map(reinterpret_cast<void*>(ALIGN_PAGE_DOWN(dst_data[index])),
                                                   THIRTYTWO_GB));
 
-            // copy the mapped VA to a VA pointer we will 
+            // copy the mapped VA to a VA pointer we will
             va_destTableAddr = va_mapdestTableAddr;
 
             // calculate offset based on page alignment.
             offset = dst_data[index] - ALIGN_PAGE_DOWN(dst_data[index]);
 
-            // increment the offset to correct VA offset. 
+            // increment the offset to correct VA offset.
             va_destTableAddr += (offset/(sizeof (uint64_t)));
 
             paddr = mm_virt_to_phys(va_destTableAddr);
@@ -918,9 +917,8 @@ class DumpTest: public CxxTest::TestSuite
             }
 
             dataentries = (dst_data[index+1]/16);
-            i = 0;
 
-            // Now loop through the data at this memory address and compare it to the data 
+            // Now loop through the data at this memory address and compare it to the data
             for (int j = 0; j<dataentries; j++)
             {
                 if (va_destTableAddr[j] != src_data2[j])
@@ -951,13 +949,13 @@ class DumpTest: public CxxTest::TestSuite
             // Get the Va for the page aligned Physical address
             va_mapdestTableAddr = static_cast<uint64_t*>(mmio_dev_map(reinterpret_cast<void*>(ALIGN_PAGE_DOWN(dst_data[index])),THIRTYTWO_GB));
 
-            // copy the mapped VA to a VA pointer we will 
+            // copy the mapped VA to a VA pointer we will
             va_destTableAddr = va_mapdestTableAddr;
 
             // calculate offset based on page alignment.
             offset = dst_data[index] - ALIGN_PAGE_DOWN(dst_data[index]);
 
-            // increment the offset to correct VA offset. 
+            // increment the offset to correct VA offset.
             va_destTableAddr += (offset/(sizeof (uint64_t)));
 
             paddr = mm_virt_to_phys(va_destTableAddr);
@@ -969,11 +967,11 @@ class DumpTest: public CxxTest::TestSuite
             }
 
             dataentries = (dst_data[index+1]/16);
-   
+
             curSrcEntry = 0;
 
 
-            // Now loop through the data at this memory address and compare it to the data 
+            // Now loop through the data at this memory address and compare it to the data
             for (int j = 0; j<dataentries; j++)
             {
                 if (va_destTableAddr[j] != src_data3[j])
@@ -1008,13 +1006,13 @@ class DumpTest: public CxxTest::TestSuite
               static_cast<uint64_t*>(mmio_dev_map(reinterpret_cast<void*>(ALIGN_PAGE_DOWN(dst_data[index])),
                                                   THIRTYTWO_GB));
 
-            // copy the mapped VA to a VA pointer we will 
+            // copy the mapped VA to a VA pointer we will
             va_destTableAddr = va_mapdestTableAddr;
 
             // calculate offset based on page alignment.
             offset = dst_data[index] - ALIGN_PAGE_DOWN(dst_data[index]);
 
-            // increment the offset to correct VA offset. 
+            // increment the offset to correct VA offset.
             va_destTableAddr += (offset/(sizeof (uint64_t)));
 
             paddr = mm_virt_to_phys(va_destTableAddr);
@@ -1029,7 +1027,7 @@ class DumpTest: public CxxTest::TestSuite
 
             dataentries = (dst_data[index+1]/16);
 
-            // Now loop through the data at this memory address and compare it to the data 
+            // Now loop through the data at this memory address and compare it to the data
             for (int j = 0; j<dataentries; j++)
             {
                 if (va_destTableAddr[j] != src_data3[curSrcEntry])
@@ -1061,7 +1059,7 @@ class DumpTest: public CxxTest::TestSuite
         }while(0);
 
 
-        // Check the results table. 
+        // Check the results table.
         int result_rc = memcmp(resultTablePtr,result_data,sizeof (result_data));
 
         if (result_rc!=0)
@@ -1120,20 +1118,20 @@ class DumpTest: public CxxTest::TestSuite
         uint64_t dst_data[8] = {DUMP_TEST_DST_DATA_AREA+4096, 64,   // 4601000
                                 DUMP_TEST_DST_DATA_AREA + 4096 + 64, 64,
                                 DUMP_TEST_DST_DATA_AREA + 4096 + 128, 64,
-                                DUMP_TEST_DST_DATA_AREA + 4096 + 192, 32};  // NOTE>> TOO SMALL of a space.. 
+                                DUMP_TEST_DST_DATA_AREA + 4096 + 192, 32};  // NOTE>> TOO SMALL of a space..
 
 
-        // Point to the location of the src Data pointer. 
-        uint64_t *srcTablePtr = reinterpret_cast<uint64_t *>(srcTableAddr); 
+        // Point to the location of the src Data pointer.
+        uint64_t *srcTablePtr = reinterpret_cast<uint64_t *>(srcTableAddr);
 
-        // Point to the location of the dest Data pointer. 
-        uint64_t *dstTablePtr = reinterpret_cast<uint64_t *>(dstTableAddr); 
+        // Point to the location of the dest Data pointer.
+        uint64_t *dstTablePtr = reinterpret_cast<uint64_t *>(dstTableAddr);
 
-        // Put the src addresses defined above into the MDST 
-        memcpy(srcTablePtr, src_data, sizeof(src_data)); 
+        // Put the src addresses defined above into the MDST
+        memcpy(srcTablePtr, src_data, sizeof(src_data));
 
-        // Put the src addresses defined above into the MDDT 
-        memcpy(dstTablePtr, dst_data, sizeof(dst_data)); 
+        // Put the src addresses defined above into the MDDT
+        memcpy(dstTablePtr, dst_data, sizeof(dst_data));
 
 
         // Need to memory map
@@ -1170,13 +1168,13 @@ class DumpTest: public CxxTest::TestSuite
             // Get the Va for the page aligned Physical address
             va_mapsrcTableAddr = static_cast<uint64_t*>(mmio_dev_map(reinterpret_cast<void*>(ALIGN_PAGE_DOWN(src_data[index])),THIRTYTWO_GB));
 
-            // copy the mapped VA to a VA pointer we will 
+            // copy the mapped VA to a VA pointer we will
             va_srcTableAddr = va_mapsrcTableAddr;
 
             // calculate offset based on page alignment.
             offset = src_data[index] - ALIGN_PAGE_DOWN(src_data[index]);
 
-            // increment the offset to correct VA offset. 
+            // increment the offset to correct VA offset.
             va_srcTableAddr += (offset/(sizeof (uint64_t)));
 
             memcpy(va_srcTableAddr, src_Inputdata[i], sizeof(src_Inputdata[i]));

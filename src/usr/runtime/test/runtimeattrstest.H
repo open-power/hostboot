@@ -142,7 +142,7 @@ class RuntimeAttrsTest: public CxxTest::TestSuite
                 }
             }
             attr++;
-        }        
+        }
 
         if( attr != sysdata->numAttr )
         {
@@ -423,6 +423,7 @@ class RuntimeAttrsTest: public CxxTest::TestSuite
                                                 0,
                                                 sys_data_addr,
                                                 sys_data_size );
+        if (errhdl) delete errhdl;
         return( (hsvc_system_data_t*)(sys_data_addr) );
     };
     hsvc_node_data_t* getNodePtr(void)
@@ -434,6 +435,7 @@ class RuntimeAttrsTest: public CxxTest::TestSuite
                                                 0,
                                                 node_data_addr,
                                                 node_data_size );
+        if (errhdl) delete errhdl;
         return( (hsvc_node_data_t*)(node_data_addr) );
     };
 

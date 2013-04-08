@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2012              */
+/* COPYRIGHT International Business Machines Corp. 2011,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -536,7 +536,6 @@ errlHndl_t i2cSetup ( TARGETING::Target * i_target,
                ENTER_MRK"i2cSetup()" );
 
     // Define the registers that we'll use
-    statusreg status;
     modereg mode;
     cmdreg cmd;
 
@@ -545,7 +544,6 @@ errlHndl_t i2cSetup ( TARGETING::Target * i_target,
         // TODO - Validate some of the arg values passed in
 
         // Wait for Command complete before we start
-        status.value = 0x0ull;
         err = i2cWaitForCmdComp( i_target,
                                  i_args );
 

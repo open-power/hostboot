@@ -25,21 +25,21 @@
 /**
  *  @file errlparser.C
  *
- *  @brief This program spawns the FipS x86 errl tool to display  
- *  a Hostboot error log in full detail.  This program can also show a 
- *  brief list of error logs without the detail.  When the user 
+ *  @brief This program spawns the FipS x86 errl tool to display
+ *  a Hostboot error log in full detail.  This program can also show a
+ *  brief list of error logs without the detail.  When the user
  *  wants the full detail, this program extracts the error log from
  *  the Hostboot image (or dump) and puts it into a temporary file. When
  *  saved to file, then this program execs "errl -d..."  to display
- *  the error log PEL data. 
- * 
+ *  the error log PEL data.
+ *
  *  There are other options, such as "-p" which writes all the PEL files
- *  and does not exec errl. This is useful for debugging. 
- * 
+ *  and does not exec errl. This is useful for debugging.
+ *
  *  Enter errlparser ? (or -? or -h or --help)   to print help.
  *  This program can be run standalone using a Simics
  *  L3 memory image and the HB syms file, however it is more likely
- *  spawned via "simics> hb-errl" 
+ *  spawned via "simics> hb-errl"
  */
 
 
@@ -47,6 +47,7 @@
 #include <stdlib.h>
 #include <netinet/in.h>
 #include <fcntl.h>
+#include <sys/stat.h>
 #include <unistd.h>
 #include <string.h>
 #include <errno.h>

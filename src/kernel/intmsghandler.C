@@ -100,8 +100,9 @@ void InterruptMsgHdlr::handleInterrupt()
         if(cv_instance)
         {
             cv_instance->sendMessage(MSG_INTR_EXTERN,
-                                     (void *)pir,
-                                     (void *)xirr,
+                                     reinterpret_cast<void*>(pir),
+                                     reinterpret_cast<void*>(
+                                        static_cast<uint64_t>(xirr)),
                                      NULL);
         }
     }

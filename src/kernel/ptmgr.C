@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2012              */
+/* COPYRIGHT International Business Machines Corp. 2011,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -44,7 +44,7 @@
  * @param[in] i_lastbit  Bit to stop extraction on, inclusive
  * @return uint64_t  Right-justified data
  */
-ALWAYS_INLINE static
+ALWAYS_INLINE static inline
 uint64_t EXTRACT_RJ( uint64_t i_var64,
                      uint64_t i_startbit,
                      uint64_t i_lastbit )
@@ -63,7 +63,7 @@ uint64_t EXTRACT_RJ( uint64_t i_var64,
  * @return uint64_t  Left-justified data
  */
 /*
-ALWAYS_INLINE static
+ALWAYS_INLINE static inline
 uint64_t EXTRACT_LJ( uint64_t var64,
                      uint64_t i_startbit,
                      uint64_t i_lastbit )
@@ -91,7 +91,7 @@ uint64_t EXTRACT_LJ( uint64_t var64,
  *                        original bit length
  * @return uint64_t  Left-justified data
  */
-ALWAYS_INLINE static
+ALWAYS_INLINE static inline
 uint64_t EXTRACT_RJ_LEN( uint64_t i_lastword,
                          uint64_t i_bitlen,
                          uint64_t i_startbit,
@@ -159,7 +159,7 @@ uint64_t EXTRACT_RJ_LEN( uint64_t i_lastword,
  * @return uint64_t  Left-justified data
  */
 /*
-ALWAYS_INLINE static
+ALWAYS_INLINE static inline
 uint64_t EXTRACT_LJ_LEN( uint64_t i_lastword,
                          uint64_t i_bitlen,
                          uint64_t i_startbit,
@@ -973,7 +973,7 @@ uint64_t PageTableManager::getAccessType( const PageTableEntry* i_pte )
 /**
  * @brief  Fill in default values for the PTE
  */
-ALWAYS_INLINE
+ALWAYS_INLINE inline
 void PageTableManager::setupDefaultPTE( PageTableEntry* o_pte )
 {
     o_pte->B = 0b01;   //Segment Size  (01=1TB)

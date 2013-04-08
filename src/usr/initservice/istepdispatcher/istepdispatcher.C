@@ -111,7 +111,7 @@ IStepDispatcher::IStepDispatcher ()
     iv_curIStep = 0x0;
     iv_curSubStep = 0x0;
     iv_sync = false;
-   
+
     // Save flag indicating whether we're in MPIPL mode
     iv_mpipl_mode = checkMpiplMode();
     TRACFCOMP( g_trac_initsvc, "MPIPL mode = %u",
@@ -887,6 +887,7 @@ void IStepDispatcher::handleBreakpoint ( uint32_t i_info )
         // breakpoint
         msg_t * rspMsg;
         rspMsg = msg_wait( iv_msgQ );
+        msg_free(rspMsg);
     }
 
     msg_free( myMsg );

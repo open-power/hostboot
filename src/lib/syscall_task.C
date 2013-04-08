@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2010,2012              */
+/* COPYRIGHT International Business Machines Corp. 2010,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -159,7 +159,10 @@ tid_t task_wait_tid(tid_t tid, int* status, void** retval)
 {
     return static_cast<tid_t>(
                reinterpret_cast<uint64_t>(
-                   _syscall3(TASK_WAIT,(void*)tid,status,retval)));
+                   _syscall3(TASK_WAIT,
+                        reinterpret_cast<void*>(static_cast<uint64_t>(tid)),
+                        status,
+                        retval)));
 }
 
 tid_t task_wait(int* status, void** retval)

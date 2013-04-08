@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2012              */
+/* COPYRIGHT International Business Machines Corp. 2011,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -165,12 +165,12 @@ class CommonTargetingTestSuite: public CxxTest::TestSuite
         {
             TARG_TS_FAIL("Expected to get the original target");
         }
-    
-        // Post init 
+
+        // Post init
         // Tested API: Target* toTarget(
         //     const EntityPath& i_entityPath) const;
-        // Behavior: Given an arbitrary target, I should be able to take its 
-        //     affinity path and convert it to the original target 
+        // Behavior: Given an arbitrary target, I should be able to take its
+        //     affinity path and convert it to the original target
         PredicateCTM mbaPredicate(CLASS_UNIT,TYPE_MBA);
         TargetRangeFilter mbaFilter(
             targetService().begin(),
@@ -558,7 +558,7 @@ class CommonTargetingTestSuite: public CxxTest::TestSuite
         }
 
         PredicateHwas hwasPredicate;
- 
+
         ATTR_HWAS_STATE_type savedHwasState
             = l_pTopLevel->getAttr<ATTR_HWAS_STATE>();
 
@@ -566,10 +566,14 @@ class CommonTargetingTestSuite: public CxxTest::TestSuite
         //     should return a match
         for(size_t i=0; i<32; ++i)
         {
-            ATTR_HWAS_STATE_type sweepHwasState 
-                = { i&16, i&8, i&4, i&2, i&1 };
+            ATTR_HWAS_STATE_type sweepHwasState
+                = { static_cast<uint8_t>(i&16),
+                    static_cast<uint8_t>(i&8),
+                    static_cast<uint8_t>(i&4),
+                    static_cast<uint8_t>(i&2),
+                    static_cast<uint8_t>(i&1) };
             l_pTopLevel->setAttr<ATTR_HWAS_STATE>(sweepHwasState);
-        
+
             if(!hwasPredicate(l_pTopLevel))
             {
                 TARG_TS_FAIL("Expected default HWAS predicate to match the "
@@ -618,7 +622,7 @@ class CommonTargetingTestSuite: public CxxTest::TestSuite
             TARG_TS_FAIL("Expected HWAS non-functional predicate to match the "
                 "target's non-functional HWAS state");
         }
-         
+
         // Test: Given a predicate looking for target whose HWAS state
         //     exactly matches all 5 configurable HWAS states, filter should
         //     return true
@@ -634,7 +638,7 @@ class CommonTargetingTestSuite: public CxxTest::TestSuite
         }
 
         // Test: Given a predicate looking for target whose HWAS state
-        //     exactly matches all 4 of 5 configurable HWAS states, filter 
+        //     exactly matches all 4 of 5 configurable HWAS states, filter
         //     should return false
         allFiveHwasState.dumpfunctional = true;
         l_pTopLevel->setAttr<ATTR_HWAS_STATE>(allFiveHwasState);
@@ -643,6 +647,9 @@ class CommonTargetingTestSuite: public CxxTest::TestSuite
             TARG_TS_FAIL("Expected HWAS predicate not to match the target's "
                 "4/5 matching HWAS state configuration");
         }
+
+        // Restore state.
+        l_pTopLevel->setAttr<ATTR_HWAS_STATE>(savedHwasState);
 
         } while(0);
 

@@ -137,12 +137,9 @@ errlHndl_t RuleMetaData::loadRuleFile( ScanFacility & i_scanFactory ,
     RegMap_t l_regMap;
     Reset_t l_resetMap;
     ResetAndMaskPair l_currentResets;
-    uint32_t l_regMax = 0;
     uint32_t l_vregMax = 0;
-    uint32_t l_groupMax = 0;
     ActionMap_t l_actionMap;
     GroupMap_t l_groupMap;
-    uint32_t l_actionMax = 0;
     uint32_t l_id = 1;
     errlHndl_t l_errl = NULL ;
     SharedThreshold_t l_sharedThresholds;
@@ -255,7 +252,7 @@ errlHndl_t RuleMetaData::loadRuleFile( ScanFacility & i_scanFactory ,
                 cv_hwCaptureGroups[1].push_back(l_regMap[l_id]);
             }
 
-            l_regMax = l_id++;
+            l_id++;
 
         }
 
@@ -286,21 +283,21 @@ errlHndl_t RuleMetaData::loadRuleFile( ScanFacility & i_scanFactory ,
         {
             iv_groupList.push_back( new Group( l_defaultResolution ) );
             l_groupMap[l_id] = iv_groupList.back();
-            l_groupMax = l_id++;
+            l_id++;
         };
 
         for (int i = 0; i < l_chip->cv_actionCount; i++)
         {
             if (l_actionMap[i])
             {
-                l_actionMax = l_id++;
+                l_id++;
                 continue;
             }
 
             // createActionClass will add to the actionMap.
             this->createActionClass(i, l_localData);
             //l_actionMap[l_id] = l_tmp;
-            l_actionMax = l_id++;
+            l_id++;
         }
 
         for (int i = 0; i < l_chip->cv_groupCount; i++)

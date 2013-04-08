@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2010,2012              */
+/* COPYRIGHT International Business Machines Corp. 2010,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -33,6 +33,7 @@ SECTIONS
         *(.text.kernelasm)
 	*(.text)
 	*(.text._*)
+        *(.text.*)
 	*(.rodata)
 	*(.rodata.*)
 	. = ALIGN(0x8);

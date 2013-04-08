@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2010,2012              */
+/* COPYRIGHT International Business Machines Corp. 2010,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -77,7 +77,7 @@ enum VfsMessages
 
 struct VfsSystemModule
 {
-    const char module[VFS_MODULE_NAME_MAX];     //!< Module name
+    char module[VFS_MODULE_NAME_MAX];           //!< Module name
     void  (*init)(void*);                       //!< ptr to init()
     void  (*start)(void*);                      //!< ptr to start()
     void  (*fini)(void*);                       //!< ptr to fini()
