@@ -38,7 +38,6 @@
 
 #include <diag/mdia/mdia.H>
 #include <diag/mdia/mdiamevent.H>
-#include <dram_initialization/mss_memdiag/mss_maint_cmds.H>
 #include <errno.h>
 #include <sys/time.h>
 #include <time.h>

@@ -5,7 +5,7 @@
 #
 # IBM CONFIDENTIAL
 #
-# COPYRIGHT International Business Machines Corp. 2012
+# COPYRIGHT International Business Machines Corp. 2012,2013
 #
 # p1
 #
@@ -21,8 +21,11 @@
 #
 # IBM_PROLOG_END_TAG
 EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/utility_procedures
+EXTRAINCDIR += ${ROOTPATH}/src/include/usr/hwpf/hwp
+EXTRAINCDIR += ${ROOTPATH}/src/include/usr/hwpf/hwp/utility_procedures
+EXTRAINCDIR += ${ROOTPATH}/usr/hwpf/hwp/include
 
 VPATH += utility_procedures
 
-OBJS += mss_unmask_errors.o
+OBJS += mss_unmask_errors.o mss_maint_cmds.o
 

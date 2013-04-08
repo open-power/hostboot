@@ -33,6 +33,7 @@
  */
 
 #include <diag/mdia/mdia.H>
+#include <utility_procedures/mss_maint_cmds.H>
 
 // This must be included after all other includes. This will take care of cases
 // where a file must be included in the common code, but the include paths are

@@ -38,7 +38,6 @@
 #include <prdfErrlUtil.H>
 
 #include <dimmBadDqBitmapFuncs.H> // for dimm[S|G]etBadDqBitmap()
-#include <dram_initialization/mss_memdiag/mss_maint_cmds.H>
 
 using namespace TARGETING;
 
