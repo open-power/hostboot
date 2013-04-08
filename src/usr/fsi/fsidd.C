@@ -410,24 +410,13 @@ errlHndl_t FsiDD::initializeHardware()
         } target_chipInfo_t ;
 
         // list of ports off of local MFSI
-        target_chipInfo_t local_mfsi[MAX_SLAVE_PORTS];
-        for( uint8_t mfsi=0; mfsi<MAX_SLAVE_PORTS; mfsi++ ) {
-            local_mfsi[mfsi].targ = NULL;
-        }
+        target_chipInfo_t local_mfsi[MAX_SLAVE_PORTS] = {};
 
         // list of possible ports off of local cMFSI
-        target_chipInfo_t local_cmfsi[MAX_SLAVE_PORTS];
-        for( uint8_t cmfsi=0; cmfsi<MAX_SLAVE_PORTS; cmfsi++ ) {
-            local_cmfsi[cmfsi].targ = NULL;
-        }
+        target_chipInfo_t local_cmfsi[MAX_SLAVE_PORTS] = {};
 
         // array of possible ports to initialize : [mfsi port][cmfsi port]
-        target_chipInfo_t remote_cmfsi[MAX_SLAVE_PORTS][MAX_SLAVE_PORTS];
-        for( uint8_t mfsi=0; mfsi<MAX_SLAVE_PORTS; mfsi++ ) {
-            for( uint8_t cmfsi=0; cmfsi<MAX_SLAVE_PORTS; cmfsi++ ) {
-                remote_cmfsi[mfsi][cmfsi].targ = NULL;
-            }
-        }
+        target_chipInfo_t remote_cmfsi[MAX_SLAVE_PORTS][MAX_SLAVE_PORTS] = {};
 
         FsiChipInfo_t info;
 
@@ -481,7 +470,6 @@ errlHndl_t FsiDD::initializeHardware()
             // initialize all of the local MFSI ports
             for( uint8_t mfsi=0; mfsi<MAX_SLAVE_PORTS; mfsi++ )
             {
-
                 bool slave_present = false;
                 l_err = initPort( local_mfsi[mfsi].info,
                                   slave_present );
@@ -491,7 +479,7 @@ errlHndl_t FsiDD::initializeHardware()
                     ERRORLOG::ErrlUserDetailsTarget(
                             local_mfsi[mfsi].targ
                         ).addToLog(l_err);
-                 
+
                     // commit the log here so that we can move on to next port
                     errlCommit(l_err,FSI_COMP_ID);
 
@@ -853,7 +841,7 @@ errlHndl_t FsiDD::handleOpbErrors(FsiAddrInfo_t& i_addrInfo,
 
             // Add data to main error log 'l_err' where possible
             size_t l_data_size = sizeof(data);
-            ERRORLOG::ErrlUserDetailsLogRegister 
+            ERRORLOG::ErrlUserDetailsLogRegister
                     l_eud_fsiT(i_addrInfo.fsiTarg);
 
             l_err2 = read( 0x31D0, &data );
