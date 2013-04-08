@@ -206,7 +206,8 @@
   io_errl->addHwCallout(i_target,                                    \
                         (const HWAS::callOutPriority)i_priority,     \
                         (const HWAS::DeconfigEnum)i_deconfigState,   \
-                        (const HWAS::GARD_ErrorType)i_gardErrType)
+                        (const HWAS::GARD_ErrorType)i_gardErrType);  \
+  (void)(i_hcdb_update)
 
 /**
  * @brief Process's pending deconfig and GARD service actions
