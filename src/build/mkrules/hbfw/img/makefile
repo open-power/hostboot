@@ -37,7 +37,8 @@ VPATH += ../fsp
 DEFAULT_PATH = ${.PATH}
 SRCPATH = ${DEFAULT_PATH:M*src*}
 
-OTHERS = cp_hbfiles build_pnor_images 
+build_all: cp_hbfiles 
+install_all: build_pnor_images
 
 #################################################
 # Copy Hostboot binary images to obj dir to be grabbed
@@ -100,6 +101,7 @@ PNOR_IMG_INFO = \
    murano.pnor:defaultPnorLayout.xml:${MURANO_SECT},${HOSTBOOT_DEFAULT_SECTIONS} \
    venice.pnor:defaultPnorLayout.xml:${VENICE_SECT},${HOSTBOOT_DEFAULT_SECTIONS} \
    ${FIPS_PNOR_INFO}
+
 
 __IMAGE_BUILD/% : .SPECTARG .PMAKE cp_hbfiles
 	@${MAKE:T:R} BUILD_SPECIFIC_IMAGE \
