@@ -511,7 +511,7 @@ def magic_instruction_callback(user_arg, cpu, arg):
         # tracMERG.  Once we extract the trace buffer, we need to reset
         # mailbox scratch 1 (to 0) so that the trace daemon knows it can
         # continue.
-        saveCommand = "(system_cmp0.phys_mem)->map[0][1]->image.save tracBINARY 0x%x %d ; (shell \"(fsp-trace ./ -s %s/hbotStringFile >> tracMERG 2>/dev/null) || true\"); p8Proc0.proc_fsi2host_mbox->regs[95][1] = 0"%(hb_tracBinaryBuffer,hb_tracBinaryBufferSz,os.environ['HB_TOOLPATH'])
+        saveCommand = "(system_cmp0.phys_mem)->map[0][1]->image.save tracBINARY 0x%x %d ; (shell \"(fsp-trace ./ -s %s/hbotStringFile >> tracMERG 2>/dev/null) || true\"); ($hb_masterproc).proc_fsi2host_mbox->regs[95][1] = 0"%(hb_tracBinaryBuffer,hb_tracBinaryBufferSz,os.environ['HB_TOOLPATH'])
         SIM_run_alone(run_command, saveCommand )
 
 # Continuous trace: Clear these files.

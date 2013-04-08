@@ -7,6 +7,29 @@ $hb_machine = (shell "env | grep 'GFW_P8_.*_PROC_CCIN' | sed 's/GFW_P8_\\(.*\\)_
 $hb_machine = (python "\""+$hb_machine+"\".lower()")
 python "os.environ['HB_MACHINE'] = \""+$hb_machine+"\""
 
+
+# Setup some common vars to use across machine types
+$hb_masterproc = ""
+try {
+    # Attempt to use the Brazos name
+    @SIM_get_object("cecdrawer0_p8Proc0")
+    $hb_masterproc = "cecdrawer0_p8Proc0"
+} except {
+    # Default to Tuleta/Orlena name
+    $hb_masterproc = "p8Proc0"
+}
+
+$hb_pnor = ""
+try {
+    # Attempt to use the Brazos name
+    @SIM_get_object("cecdrawer0_fpga0")
+    $hb_pnor = "cecdrawer0_fpga0"
+} except {
+    # Default to Tuleta/Orlena name
+    $hb_pnor = "fpga0"
+}
+
+
 # Load HB debug tools.
 try {
     run-python-file (lookup-file hbfw/simics-debug-framework.py)
