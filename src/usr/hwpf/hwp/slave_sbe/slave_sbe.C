@@ -133,7 +133,6 @@ void* call_proc_revert_sbe_mcs_setup(void *io_pArgs)
 //******************************************************************************
 void* call_host_slave_sbe_config(void *io_pArgs)
 {
-    errlHndl_t l_errl = NULL;
     IStepError  l_stepError;
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
@@ -141,8 +140,6 @@ void* call_host_slave_sbe_config(void *io_pArgs)
 
     // execute proc_read_nest_freq.C
     // execute proc_setup_sbe_config.C
-
-    l_errl  =   NULL;       // assignment to make the compiler happy
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                "call_host_slave_sbe_config exit" );
@@ -157,13 +154,11 @@ void* call_host_slave_sbe_config(void *io_pArgs)
 //******************************************************************************
 void* call_host_sbe_start( void *io_pArgs )
 {
-    errlHndl_t  l_errl = NULL;
     IStepError  l_stepError;
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_host_sbe_start entry" );
 
     // call proc_sbe_start.C
-    l_errl  =   NULL;       // assignment to make the compiler happy
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_host_sbe_start exit" );
 
@@ -339,14 +334,12 @@ void* call_proc_check_slave_sbe_seeprom_complete( void *io_pArgs )
 //******************************************************************************
 void* call_proc_xmit_sbe(void *io_pArgs )
 {
-    errlHndl_t  l_errl = NULL;
     IStepError  l_stepError;
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                "call_proc_xmit_sbe entry" );
 
     // call proc_xmit_sbe.C
-    l_errl  =   NULL;       // assignment to make the compiler happy
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                "call_proc_xmit_sbe exit" );

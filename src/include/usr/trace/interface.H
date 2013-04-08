@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2012              */
+/* COPYRIGHT International Business Machines Corp. 2011,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -41,6 +41,7 @@
 /******************************************************************************/
 // Includes
 /******************************************************************************/
+#include <builtins.h>
 #include <stdint.h>
 #include <trace/trace.H>      // Internal function and struct definitions
 
@@ -95,7 +96,8 @@ const uint32_t TRACE_FIELD   = 0;       //Indicates trace is field
 #else
 #ifndef HOSTBOOT_DEBUG
 
-#define TRACDCOMP(des,printf_string,args...) do {} while(0)
+#define TRACDCOMP(des,printf_string,args...) \
+    SUPPRESS_UNUSED_VARIABLE(NULL, ##args)
 #define TRACDBIN(des,descString,address,length) do {} while(0)
 
 #else

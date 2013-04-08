@@ -394,8 +394,8 @@ void*    call_host_build_winkle( void    *io_pArgs )
         //  Continue, build SLW images
 
         TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                   "Got real mem  buffer for 0x%08x cpu's = 0x%p",
-                   MAX_POSSIBLE_PROCS_IN_P8_SYSTEM,
+                   "Got real mem  buffer for %d cpus = 0x%p",
+                   P8_MAX_PROCS,
                    l_pRealMemBase  );
 
         //Load the reference image from PNOR

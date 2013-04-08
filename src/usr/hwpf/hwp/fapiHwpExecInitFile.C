@@ -77,6 +77,10 @@
 extern "C"
 {
 
+#ifndef SUPPRESS_UNUSED_VARIABLE
+#define SUPPRESS_UNUSED_VARIABLE(...)
+#endif
+
 //  --------------------------------------------------------------------
 //  enable minimal debug.  This will trace:
 //      Attr table, literal table, scoms, rows, and expressions being processed.
@@ -86,7 +90,7 @@ extern "C"
 #ifdef  HWPEXECINITFILE_DEBUG
 #define IF_DBG(_fmt_, _args_...) FAPI_IMP(_fmt_, ##_args_)
 #else
-#define IF_DBG(_fmt_, _args_...)
+#define IF_DBG(_fmt_, _args_...) SUPPRESS_UNUSED_VARIABLE(NULL, ##_args_)
 #endif
 
 //  --------------------------------------------------------------------
@@ -98,7 +102,7 @@ extern "C"
 #ifdef  HWPEXECINITFILE_MALLOC_DEBUG
 #define IF_MDBG(_fmt_, _args_...) FAPI_IMP(_fmt_, ##_args_)
 #else
-#define IF_MDBG(_fmt_, _args_...)
+#define IF_MDBG(_fmt_, _args_...) SUPPRESS_UNUSED_VARIABLE(NULL, ##_args_)
 #endif
 
 //  --------------------------------------------------------------------
@@ -109,7 +113,7 @@ extern "C"
 #ifdef  HWPEXECINITFILE_ATTR_DEBUG
 #define IF_ADBG(_fmt_, _args_...) FAPI_IMP(_fmt_, ##_args_)
 #else
-#define IF_ADBG(_fmt_, _args_...)
+#define IF_ADBG(_fmt_, _args_...) SUPPRESS_UNUSED_VARIABLE(NULL, ##_args_)
 #endif
 
 //  --------------------------------------------------------------------
@@ -120,7 +124,7 @@ extern "C"
 #ifdef HWPEXECINITFILE_DEBUG2
 #define IF_DBG2(_fmt_, _args_...) FAPI_INF(_fmt_, ##_args_)
 #else
-#define IF_DBG2(_fmt_, _args_...)
+#define IF_DBG2(_fmt_, _args_...) SUPPRESS_UNUSED_VARIABLE(NULL, ##_args_)
 #endif
 
 //******************************************************************************
