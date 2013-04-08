@@ -1,7 +1,3 @@
-# Note : Assumes these vars were setup in startup.simics
-# $hb_masterproc : name of master proc chip object
-# $hb_pnor : name of pnor object associated with master proc
-
 #If running in Hostboot Developer Environment, copies patched base 
 #and extended hostboot images onto the FSP so HWSV will load 
 #pached versions to PNOR instead of the default images 
@@ -24,17 +20,3 @@ try {
         }            
     }
 } except { echo "ERROR: Failed to load tools in combined.simics." }
-
-# 4-byte PNOR addressing workaround for Defect SW170513.
-# Only needed in combined configs to enable FSP communication.  Hostboot
-# PNOR DD covers hostboot access.  Remove with RTC: 51500
-try {
-    ($hb_pnor).sfc_master->state_three_bytes=0
-} except { echo "ERROR: Failed to run 4-byte PNOR address workaround in combined.simics." }
-
-# Manually set HB location till HWSV RTC 48188 is done
-try {
-    ($hb_masterproc).proc_lbus_map.write 0x28e8 0xFFEF0000
-} except { echo "ERROR: Failed to set HB MMIO location workaround in combined.simics." }
-
-
