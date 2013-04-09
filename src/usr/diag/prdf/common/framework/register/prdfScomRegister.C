@@ -230,7 +230,7 @@ bool ScomRegister::operator < ( const ScomRegister & i_rightRegister  ) const
 {
     if( iv_scomAddress == i_rightRegister.GetAddress() )
     {
-        return ( iv_chipType == i_rightRegister.getChipType() );
+        return ( iv_chipType < i_rightRegister.getChipType() );
     }
     else
     {
