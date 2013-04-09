@@ -87,10 +87,10 @@ void StateMachine::processCommandTimeout(const MonitorIDs & i_monitorIDs)
 
                 TargetHandle_t target = getTarget(**wit);
 
-                MDIA_ERR("sm: command %p: %d timed out on: %p",
+                MDIA_ERR("sm: command %p: %d timed out on: %x",
                         stopCmds.back(),
                         *((*wit)->workItem),
-                        target);
+                        get_huid(target));
 
                 /*@
                  * @errortype
@@ -332,8 +332,12 @@ bool StateMachine::scheduleWorkItem(WorkFlowProperties & i_wfp)
             iv_tp->start();
         }
 
+        TargetHandle_t target = getTarget(i_wfp);
+
         MDIA_FAST("sm: dispatching work item %d for: %p, priority: %d, "
-                "unit: %d", *i_wfp.workItem, getTarget(i_wfp), priority,
+                "unit: %d", *i_wfp.workItem,
+                get_huid(target),
+                priority,
                 i_wfp.chipUnit);
 
         iv_tp->insert(new WorkItem(*this, &i_wfp, priority, i_wfp.chipUnit));
@@ -384,8 +388,8 @@ bool StateMachine::executeWorkItem(WorkFlowProperties * i_wfp)
 
         uint64_t workItem = *i_wfp->workItem;
 
-        MDIA_FAST("sm: executing work item %d for: %p",
-                workItem, getTarget(*i_wfp));
+        MDIA_FAST("sm: executing work item %d for: %x",
+                workItem, get_huid(getTarget(*i_wfp)));
 
         mutex_unlock(&iv_mutex);
 
@@ -506,7 +510,8 @@ errlHndl_t StateMachine::doMaintCommand(WorkFlowProperties & i_wfp)
 
             mss_IncrementAddress incrementCmd(fapiMba);
 
-            MDIA_FAST("sm: increment address on: %p", targetMba);
+            MDIA_FAST("sm: increment address on: %x",
+                    get_huid(targetMba));
 
             fapirc = incrementCmd.setupAndExecuteCmd();
 
@@ -583,7 +588,8 @@ errlHndl_t StateMachine::doMaintCommand(WorkFlowProperties & i_wfp)
                             stopCondition,
                             false);
 
-                    MDIA_FAST("sm: random init %p on: %p", cmd, targetMba);
+                    MDIA_FAST("sm: random init %p on: %x", cmd,
+                            get_huid(targetMba));
                     break;
 
                 case START_SCRUB:
@@ -594,7 +600,8 @@ errlHndl_t StateMachine::doMaintCommand(WorkFlowProperties & i_wfp)
                             stopCondition,
                             false);
 
-                    MDIA_FAST("sm: scrub %p on: %p", cmd, targetMba);
+                    MDIA_FAST("sm: scrub %p on: %x", cmd,
+                            get_huid(targetMba));
                     break;
 
                 case START_PATTERN_0:
@@ -614,7 +621,8 @@ errlHndl_t StateMachine::doMaintCommand(WorkFlowProperties & i_wfp)
                             stopCondition,
                             false);
 
-                    MDIA_FAST("sm: init %p on: %p", cmd, targetMba);
+                    MDIA_FAST("sm: init %p on: %x", cmd,
+                            get_huid(targetMba));
                     break;
 
                 default:
@@ -623,8 +631,9 @@ errlHndl_t StateMachine::doMaintCommand(WorkFlowProperties & i_wfp)
 
             if(!cmd)
             {
-                MDIA_ERR("unrecognized maint command type %d on: %p",
-                        workItem, targetMba);
+                MDIA_ERR("unrecognized maint command type %d on: %x",
+                        workItem,
+                        get_huid(targetMba));
                 break;
             }
         }
@@ -705,7 +714,8 @@ bool StateMachine::processMaintCommandEvent(const MaintCommandEvent & i_event)
 
     if(wit == iv_workFlowProperties.end())
     {
-        MDIA_ERR("sm: did not find target");
+        MDIA_ERR("sm: did not find target: %x",
+                get_huid(i_event.target));
     }
 
     // if a command finishes (just) after the
@@ -721,7 +731,8 @@ bool StateMachine::processMaintCommandEvent(const MaintCommandEvent & i_event)
 
         getMonitor().removeMonitor(wfp.timer);
 
-        MDIA_FAST("sm: processing %p event for: %p", wfp.data, getTarget(wfp));
+        MDIA_FAST("sm: processing event for: %x: cmd: %p",
+                get_huid(getTarget(wfp)));
 
         switch(i_event.type)
         {
