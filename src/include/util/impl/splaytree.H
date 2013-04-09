@@ -1,26 +1,25 @@
-/*  IBM_PROLOG_BEGIN_TAG
- *  This is an automatically generated prolog.
- *
- *  $Source: src/include/util/impl/splaytree.H $
- *
- *  IBM CONFIDENTIAL
- *
- *  COPYRIGHT International Business Machines Corp. 2012
- *
- *  p1
- *
- *  Object Code Only (OCO) source materials
- *  Licensed Internal Code Source Materials
- *  IBM HostBoot Licensed Internal Code
- *
- *  The source code for this program is not published or other-
- *  wise divested of its trade secrets, irrespective of what has
- *  been deposited with the U.S. Copyright Office.
- *
- *  Origin: 30
- *
- *  IBM_PROLOG_END_TAG
- */
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/include/util/impl/splaytree.H $                           */
+/*                                                                        */
+/* IBM CONFIDENTIAL                                                       */
+/*                                                                        */
+/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/*                                                                        */
+/* p1                                                                     */
+/*                                                                        */
+/* Object Code Only (OCO) source materials                                */
+/* Licensed Internal Code Source Materials                                */
+/* IBM HostBoot Licensed Internal Code                                    */
+/*                                                                        */
+/* The source code for this program is not published or otherwise         */
+/* divested of its trade secrets, irrespective of what has been           */
+/* deposited with the U.S. Copyright Office.                              */
+/*                                                                        */
+/* Origin: 30                                                             */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
 #ifndef __UTIL_IMPL_SPLAYTREE_H
 #define __UTIL_IMPL_SPLAYTREE_H
 
@@ -101,7 +100,7 @@ namespace Util
             {
                 parent = child[LEFT] = child[RIGHT] = NULL;
 
-                new (&data_T()) T();
+                new (&data) T();
             };
 
             /** Default destructor.
@@ -110,7 +109,6 @@ namespace Util
              */
             ~Node()
             {
-                data_T().~T();
             }
 
             /** Copy constructor from a Node.
@@ -124,7 +122,7 @@ namespace Util
                 // they're from a different tree.
                 parent = child[LEFT] = child[RIGHT] = NULL;
 
-                new (&data_T()) T(r.data_T());
+                new (&data) T(r.data);
             };
 
             /** Copy constructor from a T.
@@ -136,19 +134,18 @@ namespace Util
             {
                 parent = child[LEFT] = child[RIGHT] = NULL;
 
-                new (&data_T()) T(v);
+                new (&data) T(v);
             };
-
 
             /** Access the data storage area as a T&. */
             T& data_T()
             {
-                return *(reinterpret_cast<T*>(data));
+                return data;
             };
             /** Access the data storage area as a const T&. */
             const T& data_T() const
             {
-                return *(reinterpret_cast<const T*>(data));
+                return data;
             }
 
             // Allow the SplayTree to use our internals.
@@ -193,7 +190,7 @@ namespace Util
                     child[LEFT] = r.child[LEFT];
                     child[RIGHT] = r.child[RIGHT];
 
-                    new (&data_T()) T(r.data_T());
+                    new (&data) T(r.data);
 
                     return *this;
                 }
@@ -211,14 +208,8 @@ namespace Util
                     /** Node-link to children nodes. */
                 mutable Node<T>* child[2];
 
-                    /** Data storage area.
-                     *
-                     *  Uses a compile-time calculation (static_max) to
-                     *  ensure this will be at least the size of a pointer.
-                     */
-                char data[Util::Algorithm::static_max<size_t,
-                                                      sizeof(void*),
-                                                      sizeof(T)>::value];
+                    /** Data storage area. */
+                T data;
         };
 
             // Forward declaration of iterator types.
@@ -392,10 +383,10 @@ namespace Util
 
                     /** Determine if the tree is empty. */
                 bool empty() const
-                    { return (header_n()->data_T() == 0); };
+                    { return (header_n()->data == 0); };
                     /** Determine the size (in nodes) of the tree. */
                 size_t size() const
-                    { return (header_n()->data_T()); };
+                    { return (header_n()->data); };
 
                     /** Get a pointer to the first node (smallest by value). */
                 node* front()

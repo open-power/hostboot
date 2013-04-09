@@ -324,10 +324,12 @@ namespace TRACEDAEMON
                 iv_curOffset[whichBuffer] = 0;
             }
 
+            trace_bin_entry_t* contEntry =
+                reinterpret_cast<trace_bin_entry_t*>(&whichEntry->data[0]);
+
             // Calculate the sizes of the entry.
-            size_t contEntryDataLength =
-                reinterpret_cast<trace_bin_entry_t*>(&whichEntry->data[0])
-                    ->head.length + sizeof(trace_bin_entry_t);
+            size_t contEntryDataLength = contEntry->head.length +
+                                         sizeof(trace_bin_entry_t);
 
             size_t contEntrySize = whichEntry->comp->iv_compNameLen +
                                    contEntryDataLength;
@@ -705,10 +707,11 @@ namespace TRACEDAEMON
 
                 if (NULL != entry->comp)
                 {
+                    trace_bin_entry_t* entryBin =
+                        reinterpret_cast<trace_bin_entry_t*>(&entry->data[0]);
                     // Calculate entry size.
-                    size_t entryDataLength =
-                        reinterpret_cast<trace_bin_entry_t*>(&entry->data[0])
-                            ->head.length + sizeof(trace_bin_entry_t);
+                    size_t entryDataLength = entryBin->head.length +
+                                             sizeof(trace_bin_entry_t);
 
                     size_t entrySize = entry->comp->iv_compNameLen +
                                        entryDataLength;

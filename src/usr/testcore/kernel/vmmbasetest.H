@@ -150,7 +150,16 @@ class VmmBaseTest : public CxxTest::TestSuite
 
         static void* writeToKernelCode(void* unused)
         {
-            (*(*(uint64_t**)&printk)) = 0x12345678;
+            uint64_t value = 0x12345678;
+
+            union fn_ptr
+            {
+                void (*opd)(const char*, ...);
+                uint64_t** data;
+            };
+            fn_ptr function = { printk };
+
+            memcpy(*function.data, &value, sizeof(value));
             return NULL;
         }
 

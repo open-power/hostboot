@@ -70,7 +70,13 @@ void FakePayload::load()
 
     // Copy over the fake payload code.
     uint8_t* dest = reinterpret_cast<uint8_t*>(memArea) + entry;
-    memcpy(dest, *(reinterpret_cast<void**>(&payload)), size);
+    union fn_ptr
+    {
+        void (*opd)();
+        uint64_t** data;
+    };
+    fn_ptr payload_code = { payload };
+    memcpy(dest, *payload_code.data, size);
 
     // Invalidate the icache since this is instructions.
     mm_icache_invalidate(memArea, ALIGN_8(safeClearArea) / sizeof(uint64_t));

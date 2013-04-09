@@ -61,7 +61,7 @@ namespace INTR
                 uint32_t        threadId:3;     //!< Thread number (0-7)
             } PACKED;
         };
-        PIR_t(uint32_t i_word) : word(i_word) {}
+        PIR_t(uint32_t i_word = 0) : word(i_word) {}
 
         PIR_t operator= (uint32_t i_word)
         {
@@ -173,7 +173,7 @@ namespace INTR
                 PE_IRSN_TX = 4,         // downstream enable
             };
 
-            enum INTR_ROUTING_t 
+            enum INTR_ROUTING_t
             {
                 INTR_UPSTREAM,
                 INTR_DOWNSTREAM,
