@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012                   */
+/* COPYRIGHT International Business Machines Corp. 2012,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -563,13 +563,13 @@ uint32_t p8_pore_gen_scom(  void       *io_image,
   // - For an append operation, if a NOP is found (before a RET obviously), the 
 	//   SCOM is replacing that NNNN sequence.
   hostScomEntryNext = hostScomTableThis;
-  while (*(uint32_t*)hostScomEntryNext!=*(uint32_t*)bufRET)  {
+  while (memcmp(hostScomEntryNext, bufRET, sizeof(uint32_t))) {
 	  entriesCount++;
 		if (*((uint32_t*)bufIIS+1)==*((uint32_t*)hostScomEntryNext+1) && entriesMatch==0)  {// +1 skips 1st word in Scom entry (which loads the PC in an LS operation.)
       hostScomEntryMatch = hostScomEntryNext;
       entriesMatch++;
     }
-    if (*(uint32_t*)hostScomEntryNext==*(uint32_t*)bufNOP && entriesNOP==0)  {
+    if ((0 == memcmp(hostScomEntryNext, bufNOP, sizeof(uint32_t))) && entriesNOP==0)  {
       hostScomEntryNOP = hostScomEntryNext;
 			entriesNOP++;
 		}
