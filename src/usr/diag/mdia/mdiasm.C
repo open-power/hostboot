@@ -95,13 +95,13 @@ void StateMachine::processCommandTimeout(const MonitorIDs & i_monitorIDs)
                 /*@
                  * @errortype
                  * @reasoncode       MDIA::MAINT_COMMAND_TIMED_OUT
-                 * @severity         ERRORLOG::ERRL_SEV_INFORMATIONAL
+                 * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE
                  * @moduleid         MDIA::PROCESS_COMMAND_TIMEOUT
                  * @userData1        Associated memory diag work item
                  * @devdesc          A maint command timed out
                  */
                 err = new ErrlEntry(
-                        ERRL_SEV_INFORMATIONAL,
+                        ERRL_SEV_UNRECOVERABLE,
                         PROCESS_COMMAND_TIMEOUT,
                         MAINT_COMMAND_TIMED_OUT,
                         *((*wit)->workItem), 0);
