@@ -32,6 +32,7 @@
 //******************************************************************************
 
 #include <hwpf/fapi/fapiTarget.H>
+#include <hwpf/fapi/fapiHwpExecutor.H>
 #include <targeting/common/targetservice.H>
 #include <targeting/common/utilFilter.H>
 #include <errl/errlentry.H>
@@ -39,6 +40,7 @@
 #include <hwpf/hwpf_reasoncodes.H>
 #include <vpd/spdenums.H>
 #include <devicefw/driverif.H>
+#include <hwpf/hwp/mvpd_accessors/getMvpdExL2SingleMemberEnable.H>
 
 // The following file checks at compile time that all HWPF attributes are
 // handled by Hostboot. This is done to ensure that the HTML file listing
@@ -1420,6 +1422,16 @@ fapi::ReturnCode fapiPlatGetProcPcieBarSize (
 
 
     return  l_fapirc;
+}
+
+fapi::ReturnCode fapiPlatGetSingleMemberEnableAttr(
+    const fapi::Target * i_pTarget,
+    uint32_t & o_val)
+{
+    // Call a VPD Accessor HWP to get the data
+    fapi::ReturnCode l_rc;
+    FAPI_EXEC_HWP(l_rc, getMvpdExL2SingleMemberEnable, *i_pTarget, o_val);
+    return l_rc;
 }
 
 fapi::ReturnCode fapiPlatGetEnableAttr ( fapi::AttributeId i_id,

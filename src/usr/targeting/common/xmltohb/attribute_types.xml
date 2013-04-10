@@ -10025,27 +10025,6 @@ Measured in GB</description>
     <readable/>
 </attribute>
 
-<!-- TODO: RTC story 64824: Need to review this attribute.  Per John F, it calls VPD func to provide the value -->
-<attribute>
-    <id>EX_L2_SINGLE_MEMBER_ENABLE</id>
-    <description>
-      Vector to communicate to SBE which EX chiplets must be configured with L2 in single member mode.
-      One bit per EX chiplet, bit location aligned to chiplet ID
-      (bit 16: EX00, bit 17: EX01, bit 18: EX02 ... bit 31: EX15)
-      EX chiplets whose L2 must run in single member mode are marked by a '1'.
-    </description>
-    <simpleType>
-        <uint32_t></uint32_t>
-    </simpleType>
-    <persistency>non-volatile</persistency>
-    <readable/>
-    <writeable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_EX_L2_SINGLE_MEMBER_ENABLE</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
 <!-- Note: This attribute is only used by FSP -->
 <attribute>
     <id>DMI_REFCLOCK_SWIZZLE</id>
@@ -10065,7 +10044,6 @@ Measured in GB</description>
     </hwpfToHbAttrMap>
 </attribute>
 
-<!-- TODO: RTC story 64824: Need to review this attribute and handle MRW data properly -->
 <attribute>
     <id>EI_BUS_TX_MSBSWAP</id>
     <description>

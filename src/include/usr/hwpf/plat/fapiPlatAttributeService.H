@@ -412,6 +412,18 @@ fapi::ReturnCode fapiPlatGetProcPcieBarSize (
                                     const fapi::Target * i_pTarget,
                                     uint64_t    (&o_pcieBarSize) [3][3] );
 
+/**
+ * @brief This function is called by the FAPI_ATTR_GET macro when getting
+ * ATTR_EX_L2_SINGLE_MEMBER_ENABLE. It should not be called directly.
+ *
+ *  @param[in]  i_pTarget Target pointer
+ *  @param[out] o_val     ATTR_EX_L2_SINGLE_MEMBER_ENABLE value
+ *  @return     ReturnCode. Zero on success, else platform specified error
+ */
+fapi::ReturnCode fapiPlatGetSingleMemberEnableAttr(
+    const fapi::Target * i_pTarget,
+    uint32_t & o_val);
+
 } // namespace platAttrSvc
 
 } // namespace fapi
@@ -705,5 +717,11 @@ fapi::ReturnCode fapiPlatGetProcPcieBarSize (
 #define ATTR_PROC_X_ENABLE_GETMACRO( ID, PTARGET, VAL )   \
     fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ? fapi::FAPI_RC_SUCCESS : \
     fapi::platAttrSvc::fapiPlatGetEnableAttr ( fapi::ID, PTARGET, VAL )
+
+//------------------------------------------------------------------------------
+//  MACROS to support MVPD attributes
+//------------------------------------------------------------------------------
+#define ATTR_EX_L2_SINGLE_MEMBER_ENABLE_GETMACRO( ID, PTARGET, VAL )   \
+    fapi::platAttrSvc::fapiPlatGetSingleMemberEnableAttr ( PTARGET, VAL )
 
 #endif // FAPIPLATATTRIBUTESERVICE_H_

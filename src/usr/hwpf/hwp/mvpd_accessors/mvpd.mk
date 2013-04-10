@@ -5,7 +5,7 @@
 #
 # IBM CONFIDENTIAL
 #
-# COPYRIGHT International Business Machines Corp. 2012
+# COPYRIGHT International Business Machines Corp. 2012,2013
 #
 # p1
 #
@@ -21,10 +21,12 @@
 #
 # IBM_PROLOG_END_TAG
 EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/mvpd_accessors
+EXTRAINCDIR += ${ROOTPATH}/src/include/usr/hwpf/hwp/mvpd_accessors
 
 VPATH += mvpd_accessors
 
 OBJS += getMvpdRing.o \
         setMvpdRing.o \
-        mvpdRingFuncs.o
+        mvpdRingFuncs.o \
+        getMvpdExL2SingleMemberEnable.o
 
