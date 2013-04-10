@@ -94,7 +94,7 @@ hbicore_test_MODULES = ${hbicore_MODULES}
 hbicore_test_EXTENDED_MODULES = ${hbicore_EXTENDED_MODULES} ${TESTCASE_MODULES}
 hbicore_test_DATA_MODULES = ${hbicore_DATA_MODULES} testdata
 
-IMAGE_PASS_BODY += buildpnor
+IMAGE_PASS_BODY += buildpnor imgsizecheck
 
 IMAGE_PASS_BODY += $(IMGDIR)/hbotStringFile
 CLEAN_TARGETS += $(IMGDIR)/hbotStringFile
@@ -106,3 +106,11 @@ buildpnor: ${IMAGES}
 
 $(IMGDIR)/hbotStringFile : $(IMAGES)
 	$(ROOTPATH)/src/build/trace/tracehash_hb.pl -c -d $(ROOTPATH)/obj -s $@
+
+.PHONY: imgsizecheck
+#make sure base image isn't over 508k  (512K - 4K for secure header)
+#PROCESS: get size of hbicore.bin, sort with respect to 508k (520192), then see if
+#last word is 508k.  If not, the base image is too big.
+MAX_BASE_SIZE = 520192
+imgsizecheck: ${IMGDIR}/hbicore.bin
+	$(if $(findstring $(shell (stat -c%s ${IMGDIR}/hbicore.bin; echo $(MAX_BASE_SIZE)) | sort -n | tail -n1), $(MAX_BASE_SIZE)),true, @echo ERROR: ${IMGDIR}/hbicore.bin too large.  Max allowed size is $(MAX_BASE_SIZE); false)
