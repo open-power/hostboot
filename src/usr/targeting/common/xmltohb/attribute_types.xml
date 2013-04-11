@@ -145,6 +145,12 @@
         <name>PNOR</name>
     </enumerator>
     <enumerator>
+        <name>OSC</name>
+    </enumerator>
+    <enumerator>
+        <name>TODCLK</name>
+    </enumerator>
+    <enumerator>
         <name>LAST_IN_RANGE</name>
     </enumerator>
     <default>NA</default>
@@ -5420,7 +5426,7 @@ firmware notes: Used as override attribute for pstate procedure
     </description>
     <simpleType>
         <uint32_t>
-            <default>1500</default>
+            <default>2400</default>
         </uint32_t>
     </simpleType>
     <persistency>volatile</persistency>
