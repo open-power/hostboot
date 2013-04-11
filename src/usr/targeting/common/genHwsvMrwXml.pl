@@ -97,20 +97,6 @@ if ($sysname eq "brazos")
     $MAXNODE = 4;
 }
 
-# Quick patch to support platform specific setting for DMI_REFCLOCK_SWIZZLE
-# attributes for MCS target. This quick patch assumes all procs have the
-# same swizzled wiring
-# TODO. This will be remove when MRW provide the settings in system specific
-# xml file. RTC 65460
-my @DmiRefClockSwizzle = ( 0, 1, 2, 3, 4, 5, 6, 7 );
-if ($SYSNAME eq "TULETA")
-{
-    $DmiRefClockSwizzle[4] = 7;
-    $DmiRefClockSwizzle[5] = 6;
-    $DmiRefClockSwizzle[6] = 4;
-    $DmiRefClockSwizzle[7] = 5;
-}
-
 open (FH, "<$mrwdir/${sysname}-system-policy.xml") ||
     die "ERROR: unable to open $mrwdir/${sysname}-system-policy.xml\n";
 close (FH);
@@ -323,6 +309,7 @@ use constant DBUS_MCS_UNIT_INDEX => 2;
 use constant DBUS_MCS_DOWNSTREAM_INDEX => 3;
 use constant DBUS_MCS_TX_SWAP_INDEX => 4;
 use constant DBUS_MCS_RX_SWAP_INDEX => 5;
+use constant DBUS_MCS_SWIZZLE_INDEX => 6;
 
 my @dbus_centaur;
 use constant DBUS_CENTAUR_NODE_INDEX => 0;
@@ -342,8 +329,9 @@ foreach my $dmi (@{$dmibus->{'dmi-bus'}})
     my $rx_swap = $dmi->{'rx-msb-lsb-swap'};
     $tx_swap = ($tx_swap eq "false") ? 0 : 1;
     $rx_swap = ($rx_swap eq "false") ? 0 : 1;
+    my $swizzle = $dmi->{'mcs-refclock-enable-mapping'};
     #print STDOUT "dbus_mcs: n$node:p$proc:mcs:$mcs swap:$swap\n";
-    push @dbus_mcs, [ $node, $proc, $mcs, $swap, $tx_swap, $rx_swap ];
+    push @dbus_mcs, [ $node, $proc, $mcs, $swap, $tx_swap, $rx_swap, $swizzle ];
 
     # Now grab the centuar chip information
     # Centaur is always slave so it gets upstream
@@ -2000,6 +1988,7 @@ sub generate_mcs
 
     my $lane_swap = 0;
     my $msb_swap = 0;
+    my $swizzle = 0;
     foreach my $dmi ( @dbus_mcs )
     {
         if (($dmi->[DBUS_MCS_NODE_INDEX],
@@ -2008,6 +1997,7 @@ sub generate_mcs
         {
             $lane_swap = $dmi->[DBUS_MCS_DOWNSTREAM_INDEX];
             $msb_swap = $dmi->[DBUS_MCS_TX_SWAP_INDEX];
+            $swizzle = $dmi->[DBUS_MCS_SWIZZLE_INDEX];
             last;
         }
     }
@@ -2034,7 +2024,7 @@ sub generate_mcs
         <default>$mscStr</default>
     </attribute>
     <attribute><id>DMI_REFCLOCK_SWIZZLE</id>
-        <default>$DmiRefClockSwizzle[$mcs]</default>
+        <default>$swizzle</default>
     </attribute>
     <attribute>
         <id>EI_BUS_TX_MSBSWAP</id>
