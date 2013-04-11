@@ -178,6 +178,7 @@
     <attribute><id>MRW_SAFEMODE_MEM_THROTTLE_DENOMINATOR</id></attribute>
     <attribute><id>MRW_SAFEMODE_MEM_THROTTLE_NUMERATOR_PER_CHIP</id></attribute>
     <attribute><id>MRW_THERMAL_MEMORY_POWER_LIMIT</id></attribute>
+    <attribute><id>PLCK_IPL_ATTR_OVERRIDES_EXIST</id></attribute>
 </targetType>
 
 <targetType>
