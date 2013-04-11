@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_pcie_scominit.H,v 1.2 2013/02/04 23:58:46 jmcgill Exp $
+// $Id: proc_pcie_scominit.H,v 1.3 2013/04/08 14:57:41 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_pcie_scominit.H,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2012
@@ -28,7 +28,8 @@
 // *! *** IBM Confidential ***
 //------------------------------------------------------------------------------
 // *! TITLE       : proc_pcie_scominit.H
-// *! DESCRIPTION : Perform PCIe Physical IO Inits (Phase 1, Steps 1-9) (FAPI)
+// *! DESCRIPTION : Perform PCIe Physical IO Inits (Phase 1, Steps 1-9 &
+// *!               Phase 2, Step 33) (FAPI)
 // *!
 // *! OWNER NAME  : Joe McGill        Email: jmcgill@us.ibm.com
 // *!
@@ -38,6 +39,7 @@
 // *!   Remove active IOPs from reset
 // *!   Perform IOP overrides/customization
 // *!   Mark IOP programming complete
+// *!   Remove ETU reset
 // *!
 //------------------------------------------------------------------------------
 
@@ -95,6 +97,15 @@ const uint32_t PCIE_GP4_IOP_SWAP_END_BIT[PROC_PCIE_SCOMINIT_NUM_IOP] =
     55
 };
 
+// ETU Reset register field/bit definitions
+const uint32_t PROC_PCIE_SCOMINIT_ETU_RESET[PROC_PCIE_SCOMINIT_NUM_PHB] =
+{
+    PCIE0_ETU_RESET_0x0901200A,
+    PCIE1_ETU_RESET_0x0901240A,
+    PCIE2_ETU_RESET_0x0901280A
+};
+const uint32_t ETU_RESET_GLOBAL_RESET_BIT = 0;
+
 // Murano/Venice support lane configurations bewtween 0x0 & 0xC,
 // swap values between 0x0 & 0x7
 const uint8_t PCIE_GP4_IOP_LANE_CFG_MAX = 0xC;
@@ -105,7 +116,7 @@ const uint8_t PCIE_GP4_IOP_SWAP_MAX = 0x7;
 const uint64_t PROC_PCIE_SCOMINIT_PLL_GLOBAL_CONTROL2[PROC_PCIE_SCOMINIT_NUM_IOP] =
 {
     PCIE_IOP0_PLL_GLOBAL_CONTROL2_0x8000080A0901143F,
-    PCIE_IOP1_PLL_GLOBAL_CONTROL2_0x8000080A0901187F,
+    PCIE_IOP1_PLL_GLOBAL_CONTROL2_0x8000080A0901187F
 };
 const uint32_t PLL_GLOBAL_CONTROL2_PROG_COMPLETE_BIT = 50;
 

@@ -1,27 +1,26 @@
-/*  IBM_PROLOG_BEGIN_TAG
- *  This is an automatically generated prolog.
- *
- *  $Source: src/usr/hwpf/hwp/dram_initialization/proc_setup_bars/proc_fab_smp.C $
- *
- *  IBM CONFIDENTIAL
- *
- *  COPYRIGHT International Business Machines Corp. 2012
- *
- *  p1
- *
- *  Object Code Only (OCO) source materials
- *  Licensed Internal Code Source Materials
- *  IBM HostBoot Licensed Internal Code
- *
- *  The source code for this program is not published or other-
- *  wise divested of its trade secrets, irrespective of what has
- *  been deposited with the U.S. Copyright Office.
- *
- *  Origin: 30
- *
- *  IBM_PROLOG_END_TAG
- */
-// $Id: proc_fab_smp.C,v 1.4 2012/05/18 18:07:44 jmcgill Exp $
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/usr/hwpf/hwp/dram_initialization/proc_setup_bars/proc_fab_smp.C $ */
+/*                                                                        */
+/* IBM CONFIDENTIAL                                                       */
+/*                                                                        */
+/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/*                                                                        */
+/* p1                                                                     */
+/*                                                                        */
+/* Object Code Only (OCO) source materials                                */
+/* Licensed Internal Code Source Materials                                */
+/* IBM HostBoot Licensed Internal Code                                    */
+/*                                                                        */
+/* The source code for this program is not published or otherwise         */
+/* divested of its trade secrets, irrespective of what has been           */
+/* deposited with the U.S. Copyright Office.                              */
+/*                                                                        */
+/* Origin: 30                                                             */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
+// $Id: proc_fab_smp.C,v 1.7 2012/09/24 05:00:12 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_fab_smp.C,v $
 //------------------------------------------------------------------------------
 // *|
@@ -44,7 +43,7 @@
 
 extern "C" {
 
-using   namespace   fapi;
+
 //------------------------------------------------------------------------------
 // Function definitions
 //------------------------------------------------------------------------------
@@ -87,7 +86,7 @@ fapi::ReturnCode proc_fab_smp_get_node_id_attr(
         FAPI_DBG("proc_fab_smp_get_node_id_attr: ATTR_FABRIC_NODE_ID = 0x%X",
                  node_id_attr);
 
-        // translate to enum
+        // translate to output value
         switch (node_id_attr)
         {
             case 0:
@@ -167,7 +166,7 @@ fapi::ReturnCode proc_fab_smp_get_chip_id_attr(
         FAPI_DBG("proc_fab_smp_get_chip_id_attr: ATTR_FABRIC_CHIP_ID = 0x%X",
                  chip_id_attr);
 
-        // translate to enum
+        // translate to output value
         switch (chip_id_attr)
         {
             case 0:
@@ -283,6 +282,7 @@ fapi::ReturnCode proc_fab_smp_get_pcie_dsmp_mux_attrs(
     FAPI_DBG("proc_fab_smp_get_pcie_dsmp_mux_attrs: End");
     return rc;
 }
+
 
 
 } // extern "C"

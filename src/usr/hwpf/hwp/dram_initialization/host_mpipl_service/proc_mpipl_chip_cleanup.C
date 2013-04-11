@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012                   */
+/* COPYRIGHT International Business Machines Corp. 2012,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_mpipl_chip_cleanup.C,v 1.3 2012/11/27 21:43:30 belldi Exp $
+// $Id: proc_mpipl_chip_cleanup.C,v 1.4 2013/02/02 20:58:09 belldi Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_mpipl_chip_cleanup.C,v $
 //------------------------------------------------------------------------------
 // *|
@@ -113,18 +113,18 @@ extern "C"
     //Verify MCD recovery was previously disabled for even and odd slices
     //If not, this is an error condition
     for (int counter = 0; counter < MAX_MCD_DIRS; counter++) {
-      FAPI_DBG("Verifying MCD %s Recovery is disabled\n", ARY_MCD_DIR_STRS[counter]);
+      FAPI_DBG("Verifying MCD %s Recovery is disabled", ARY_MCD_DIR_STRS[counter]);
       
       //Get data from MCD Even or Odd Recovery Ctrl reg
       rc = fapiGetScom(i_target, ARY_MCD_RECOVERY_CTRL_REGS_ADDRS[counter], fsi_data);
       if (rc) {
-        FAPI_ERR("%s: fapiGetScom error (addr: 0x%08llX)\n", procedureName, ARY_MCD_RECOVERY_CTRL_REGS_ADDRS[counter]);
+        FAPI_ERR("%s: fapiGetScom error (addr: 0x%08llX)", procedureName, ARY_MCD_RECOVERY_CTRL_REGS_ADDRS[counter]);
         return rc;
       }
 
       //Check whether bit 0 is 0, meaning MCD recovery is disabled as expected
       if( fsi_data.getBit(MCD_RECOVERY_CTRL_REG_BIT_POS0) ) {
-        FAPI_ERR("%s: MCD %s Recovery not disabled as expected\n", procedureName, ARY_MCD_DIR_STRS[counter]);
+        FAPI_ERR("%s: MCD %s Recovery not disabled as expected", procedureName, ARY_MCD_DIR_STRS[counter]);
         FAPI_SET_HWP_ERROR(rc, RC_MCD_RECOVERY_NOT_DISABLED_RC);
         return rc;
       }
@@ -132,19 +132,19 @@ extern "C"
 
     //Assert bit 0 of MCD Recovery Ctrl regs to enable MCD recovery
     for (int counter = 0; counter < MAX_MCD_DIRS; counter++) {
-      FAPI_DBG("Enabling MCD %s Recovery\n", ARY_MCD_DIR_STRS[counter]);
+      FAPI_DBG("Enabling MCD %s Recovery", ARY_MCD_DIR_STRS[counter]);
       
       //Get data from MCD Even or Odd Recovery Control reg
       rc = fapiGetScom(i_target, ARY_MCD_RECOVERY_CTRL_REGS_ADDRS[counter], fsi_data);
       if (rc) {
-        FAPI_ERR("%s: fapiGetScom error (addr: 0x%08llX)\n", procedureName, ARY_MCD_RECOVERY_CTRL_REGS_ADDRS[counter]);
+        FAPI_ERR("%s: fapiGetScom error (addr: 0x%08llX)", procedureName, ARY_MCD_RECOVERY_CTRL_REGS_ADDRS[counter]);
         return rc;
       }
       
       //Assert bit 0 of MCD Even or Odd Recovery Control reg to enable recovery
       rc_ecmd = fsi_data.setBit(MCD_RECOVERY_CTRL_REG_BIT_POS0 );
       if(rc_ecmd) {
-        FAPI_ERR("%s: Error (%u) asserting bit pos %u in ecmdDataBufferBase that stores value of MCD %s Recovery Control reg (addr: 0x%08llX)\n", procedureName, rc_ecmd, MCD_RECOVERY_CTRL_REG_BIT_POS0, ARY_MCD_DIR_STRS[counter], ARY_MCD_RECOVERY_CTRL_REGS_ADDRS[counter]);
+        FAPI_ERR("%s: Error (%u) asserting bit pos %u in ecmdDataBufferBase that stores value of MCD %s Recovery Control reg (addr: 0x%08llX)", procedureName, rc_ecmd, MCD_RECOVERY_CTRL_REG_BIT_POS0, ARY_MCD_DIR_STRS[counter], ARY_MCD_RECOVERY_CTRL_REGS_ADDRS[counter]);
         rc.setEcmdError(rc_ecmd);
         return rc;
       }
@@ -152,7 +152,7 @@ extern "C"
       //Write data to MCD Even or Odd Recovery Control reg
       rc = fapiPutScom(i_target, ARY_MCD_RECOVERY_CTRL_REGS_ADDRS[counter], fsi_data);
       if (rc) {
-        FAPI_ERR("%s: fapiPutScom error (addr: 0x%08llX)\n", procedureName, ARY_MCD_RECOVERY_CTRL_REGS_ADDRS[counter]);
+        FAPI_ERR("%s: fapiPutScom error (addr: 0x%08llX)", procedureName, ARY_MCD_RECOVERY_CTRL_REGS_ADDRS[counter]);
         return rc;
       }
     }

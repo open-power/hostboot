@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012                   */
+/* COPYRIGHT International Business Machines Corp. 2012,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_mpipl_ex_cleanup.C,v 1.3 2012/11/27 23:11:57 belldi Exp $
+// $Id: proc_mpipl_ex_cleanup.C,v 1.4 2013/02/02 21:02:23 belldi Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_mpipl_ex_cleanup.C,v $
 //------------------------------------------------------------------------------
 // *|
@@ -189,25 +189,25 @@ extern "C"
       // Get EX chiplet number
       rc = FAPI_ATTR_GET(ATTR_CHIP_UNIT_POS, &(*entry_pos), attr_chip_unit_pos); 
       if (rc) { 
-        FAPI_ERR("%s: fapiGetAttribute error (ATTR_CHIP_UNIT_POS)\n", procedureName);  
+        FAPI_ERR("%s: fapiGetAttribute error (ATTR_CHIP_UNIT_POS)", procedureName);  
         return rc;
       }
-      FAPI_DBG("EX chiplet pos = 0x%02X\n", attr_chip_unit_pos);
+      FAPI_DBG("EX chiplet pos = 0x%02X", attr_chip_unit_pos);
       
       EX_GP3_REG_0x1X0F0014 = EX_GP3_REG_PCB2_ADDR + (EX_OFFSET_MULT * attr_chip_unit_pos); //Addr of GP3 reg (PCB2) for respective EX chiplet
-      FAPI_DBG("GP3 reg (PCB2), addr=0x%08llX\n", EX_GP3_REG_0x1X0F0014);
+      FAPI_DBG("GP3 reg (PCB2), addr=0x%08llX", EX_GP3_REG_0x1X0F0014);
       
       EX_PMGP0_REG_0x1X0F0102 = EX_PMGP0_REG_PCB2_ADDR + (EX_OFFSET_MULT * attr_chip_unit_pos); //Addr of PM GP0 reg (PCB2) for respective EX chiplet
-      FAPI_DBG("PM GP0 reg (PCB2), addr=0x%08llX\n", EX_PMGP0_REG_0x1X0F0102 );
+      FAPI_DBG("PM GP0 reg (PCB2), addr=0x%08llX", EX_PMGP0_REG_0x1X0F0102 );
       
       EX_PMGP1_REG_0x1X0F0103 = EX_PMGP1_REG_PCB_ADDR + (EX_OFFSET_MULT * attr_chip_unit_pos); //Addr of PM GP1 reg (PCB) for respective EX chiplet
-      FAPI_DBG("PM GP1 reg (PCB), addr=0x%08llX\n", EX_PMGP1_REG_0x1X0F0103);
+      FAPI_DBG("PM GP1 reg (PCB), addr=0x%08llX", EX_PMGP1_REG_0x1X0F0103);
       
       EX_PMGP1_REG_0x1X0F0104 = EX_PMGP1_REG_PCB1_ADDR + (EX_OFFSET_MULT * attr_chip_unit_pos); //Addr of PM GP1 reg (PCB1) for respective EX chiplet
-      FAPI_DBG("PM GP1 reg (PCB1), addr=0x%08llX\n", EX_PMGP1_REG_0x1X0F0104);
+      FAPI_DBG("PM GP1 reg (PCB1), addr=0x%08llX", EX_PMGP1_REG_0x1X0F0104);
       
       EX_PMGP1_REG_0x1X0F0105 = EX_PMGP1_REG_PCB2_ADDR + (EX_OFFSET_MULT * attr_chip_unit_pos); //Addr of PM GP1 reg (PCB2) for respective EX chiplet
-      FAPI_DBG("PM GP1 reg (PCB2), addr=0x%08llX\n", EX_PMGP1_REG_0x1X0F0105);
+      FAPI_DBG("PM GP1 reg (PCB2), addr=0x%08llX", EX_PMGP1_REG_0x1X0F0105);
       
 
       //Undo step that prepared fast-winkled cores for scanning
@@ -215,69 +215,69 @@ extern "C"
       //1) Drop PB Electrical Fence (EX_GP3_OR_0x100F0014(27)=1)
       rc_ecmd = fsi_data.flushTo0();
       if(rc_ecmd) {
-        FAPI_ERR("%s: Error (%u): Could not flush ecmdDataBufferBase to 0's\n", procedureName, rc_ecmd);
+        FAPI_ERR("%s: Error (%u): Could not flush ecmdDataBufferBase to 0's", procedureName, rc_ecmd);
         rc.setEcmdError(rc_ecmd);
         return rc;
       }
 
-      FAPI_DBG("Asserting bit 27 of ecmdDataBufferBase that stores value of GP3 reg (addr: 0x%08llX)\n", EX_GP3_REG_0x1X0F0014);
+      FAPI_DBG("Asserting bit 27 of ecmdDataBufferBase that stores value of GP3 reg (addr: 0x%08llX)", EX_GP3_REG_0x1X0F0014);
       rc_ecmd = fsi_data.setBit(EX_GP3_REG_PCB2_BIT_POS27);
       if(rc_ecmd) {
-        FAPI_ERR("%s: Error (%u): Could not assert bit 27 of ecmdDataBufferBase that stores value of GP3 reg (addr: 0x%08llX)\n", procedureName, rc_ecmd, EX_GP3_REG_0x1X0F0014);
+        FAPI_ERR("%s: Error (%u): Could not assert bit 27 of ecmdDataBufferBase that stores value of GP3 reg (addr: 0x%08llX)", procedureName, rc_ecmd, EX_GP3_REG_0x1X0F0014);
         rc.setEcmdError(rc_ecmd);
         return rc;
       }
       
-      FAPI_DBG("ecmdDataBufferBase storing value of GP3 reg (addr: 0x%08llX), val=0x%016llX\n", EX_GP3_REG_0x1X0F0014, fsi_data.getDoubleWord((uint32_t) 0));
+      FAPI_DBG("ecmdDataBufferBase storing value of GP3 reg (addr: 0x%08llX), val=0x%016llX", EX_GP3_REG_0x1X0F0014, fsi_data.getDoubleWord((uint32_t) 0));
       rc = fapiPutScom( i_target, EX_GP3_REG_0x1X0F0014, fsi_data );
       if (rc) {
-        FAPI_ERR("%s: fapiPutScom error (addr: 0x%08llX)\n", procedureName, EX_GP3_REG_0x1X0F0014);
+        FAPI_ERR("%s: fapiPutScom error (addr: 0x%08llX)", procedureName, EX_GP3_REG_0x1X0F0014);
         return rc;
       }
       
       //2) Drop logical Pervasive/PCBS-PM fence (EX_PMGP0_OR_0x100F0102(39)=1)  
       rc_ecmd = fsi_data.flushTo0();
       if(rc_ecmd) {
-        FAPI_ERR("%s: Error (%u): Could not flush ecmdDataBufferBase to 0's\n", procedureName, rc_ecmd);
+        FAPI_ERR("%s: Error (%u): Could not flush ecmdDataBufferBase to 0's", procedureName, rc_ecmd);
         rc.setEcmdError(rc_ecmd);
         return rc;
       }
 
-      FAPI_DBG("Asserting bit 39 of ecmdDataBufferBase that stores value of PM GP0 reg (addr: 0x%08llX)\n", EX_PMGP0_REG_0x1X0F0102 );
+      FAPI_DBG("Asserting bit 39 of ecmdDataBufferBase that stores value of PM GP0 reg (addr: 0x%08llX)", EX_PMGP0_REG_0x1X0F0102 );
       rc_ecmd = fsi_data.setBit(EX_PMGP0_REG_PCB2_BIT_POS39);
       if(rc_ecmd) {
-        FAPI_ERR("%s: Error (%u): Could not assert bit 39 of ecmdDataBufferBase that stores value of PM GP0 reg (addr: 0x%08llX)\n", procedureName, rc_ecmd, EX_PMGP0_REG_0x1X0F0102);
+        FAPI_ERR("%s: Error (%u): Could not assert bit 39 of ecmdDataBufferBase that stores value of PM GP0 reg (addr: 0x%08llX)", procedureName, rc_ecmd, EX_PMGP0_REG_0x1X0F0102);
         rc.setEcmdError(rc_ecmd);
         return rc;
       }
       
-      FAPI_DBG("ecmdDataBufferBase storing value of PM GP0 reg (addr: 0x%08llX), val=0x%016llX\n", EX_PMGP0_REG_0x1X0F0102, fsi_data.getDoubleWord((uint32_t) 0));
+      FAPI_DBG("ecmdDataBufferBase storing value of PM GP0 reg (addr: 0x%08llX), val=0x%016llX", EX_PMGP0_REG_0x1X0F0102, fsi_data.getDoubleWord((uint32_t) 0));
       rc = fapiPutScom( i_target, EX_PMGP0_REG_0x1X0F0102, fsi_data );
       if (rc) {
-        FAPI_ERR("%s: fapiPutScom error (addr: 0x%08llX)\n", procedureName, EX_PMGP0_REG_0x1X0F0102);
+        FAPI_ERR("%s: fapiPutScom error (addr: 0x%08llX)", procedureName, EX_PMGP0_REG_0x1X0F0102);
         return rc;
       }
       
       //3) Drop Pervasive Extended Cache Option (ECO) fence (EX_PMGP0_OR_0x100F0102(22)=1)
       rc_ecmd = fsi_data.flushTo0();
       if(rc_ecmd) {
-        FAPI_ERR("%s: Error (%u): Could not flush ecmdDataBufferBase to 0's\n", procedureName, rc_ecmd);
+        FAPI_ERR("%s: Error (%u): Could not flush ecmdDataBufferBase to 0's", procedureName, rc_ecmd);
         rc.setEcmdError(rc_ecmd);
         return rc;
       }
       
-      FAPI_DBG("Asserting bit 22 of ecmdDataBufferBase that stores value of PM GP0 reg (addr: 0x%08llX)\n", EX_PMGP0_REG_0x1X0F0102 );
+      FAPI_DBG("Asserting bit 22 of ecmdDataBufferBase that stores value of PM GP0 reg (addr: 0x%08llX)", EX_PMGP0_REG_0x1X0F0102 );
       rc_ecmd = fsi_data.setBit(EX_PMGP0_REG_PCB2_BIT_POS22);
       if(rc_ecmd) {
-        FAPI_ERR("%s: Error (%u): Could not assert bit 22 of ecmdDataBufferBase that stores value of PM GP0 reg (addr: 0x%08llX)\n", procedureName, rc_ecmd, EX_PMGP0_REG_0x1X0F0102);
+        FAPI_ERR("%s: Error (%u): Could not assert bit 22 of ecmdDataBufferBase that stores value of PM GP0 reg (addr: 0x%08llX)", procedureName, rc_ecmd, EX_PMGP0_REG_0x1X0F0102);
         rc.setEcmdError(rc_ecmd);
         return rc;
       }
       
-      FAPI_DBG("ecmdDataBufferBase storing value of PM GP0 reg (addr: 0x%08llX), val=0x%016llX\n", EX_PMGP0_REG_0x1X0F0102, fsi_data.getDoubleWord((uint32_t) 0));
+      FAPI_DBG("ecmdDataBufferBase storing value of PM GP0 reg (addr: 0x%08llX), val=0x%016llX", EX_PMGP0_REG_0x1X0F0102, fsi_data.getDoubleWord((uint32_t) 0));
       rc = fapiPutScom( i_target, EX_PMGP0_REG_0x1X0F0102, fsi_data );
       if (rc) {
-        FAPI_ERR("%s: fapiPutScom error (addr: 0x%08llX)\n", procedureName, EX_PMGP0_REG_0x1X0F0102);
+        FAPI_ERR("%s: fapiPutScom error (addr: 0x%08llX)", procedureName, EX_PMGP0_REG_0x1X0F0102);
         return rc;
       }
       
@@ -285,29 +285,29 @@ extern "C"
 
       // Check bit 15 (PMICR_LATENCY_EN) of PM GP1 reg is 0, so bit 5 (WINKLE_POWER_OFF_SEL) of PM GP1 reg is controlled via SCOM write
       //
-      FAPI_DBG("Checking bit 15 (PMICR_LATENCY_EN) of PM GP1 reg (addr: 0x%08llX) is 0\n", EX_PMGP1_REG_0x1X0F0103);
+      FAPI_DBG("Checking bit 15 (PMICR_LATENCY_EN) of PM GP1 reg (addr: 0x%08llX) is 0", EX_PMGP1_REG_0x1X0F0103);
       rc = fapiGetScom(i_target, EX_PMGP1_REG_0x1X0F0103, fsi_data);
       if (rc) {
-        FAPI_ERR("%s: fapiGetScom error (addr: 0x%08llX)\n", procedureName, EX_PMGP1_REG_0x1X0F0103);
+        FAPI_ERR("%s: fapiGetScom error (addr: 0x%08llX)", procedureName, EX_PMGP1_REG_0x1X0F0103);
         return rc;
       }
-      FAPI_DBG("PM GP1 reg (addr: 0x%08llX), val=0x%016llX\n", EX_PMGP1_REG_0x1X0F0103, fsi_data.getDoubleWord((uint32_t) 0));
+      FAPI_DBG("PM GP1 reg (addr: 0x%08llX), val=0x%016llX", EX_PMGP1_REG_0x1X0F0103, fsi_data.getDoubleWord((uint32_t) 0));
       
       //Check whether bit 15 (PMICR_LATENCY_EN) of PowerManagement GP1 reg is 1
       if( fsi_data.getBit(EX_PMGP1_REG_PCB2_BIT_POS15) ) {
-        FAPI_DBG("Bit pos %u (PMICR_LATENCY_EN) of PM GP1 reg (addr: 0x%08llX) is 1\n", EX_PMGP1_REG_PCB2_BIT_POS15, EX_PMGP1_REG_0x1X0F0103);
-        FAPI_DBG("Clearing bit pos %u (PMICR_LATENCY_EN) of PM GP1 reg (addr: 0x%08llX)\n", EX_PMGP1_REG_PCB2_BIT_POS15, EX_PMGP1_REG_0x1X0F0103);
+        FAPI_DBG("Bit pos %u (PMICR_LATENCY_EN) of PM GP1 reg (addr: 0x%08llX) is 1", EX_PMGP1_REG_PCB2_BIT_POS15, EX_PMGP1_REG_0x1X0F0103);
+        FAPI_DBG("Clearing bit pos %u (PMICR_LATENCY_EN) of PM GP1 reg (addr: 0x%08llX)", EX_PMGP1_REG_PCB2_BIT_POS15, EX_PMGP1_REG_0x1X0F0103);
       
         //Clear bit 15 (PMICR_LATENCY_EN) of PM GP1 reg
         rc_ecmd = fsi_data.flushTo1();
         if(rc_ecmd) {
-          FAPI_ERR("%s: Error (%u): Could not flush ecmdDataBufferBase to 1's\n", procedureName, rc_ecmd);
+          FAPI_ERR("%s: Error (%u): Could not flush ecmdDataBufferBase to 1's", procedureName, rc_ecmd);
           rc.setEcmdError(rc_ecmd);
           return rc;
         }
         rc_ecmd = fsi_data.clearBit(EX_PMGP1_REG_PCB2_BIT_POS15);
         if(rc_ecmd) {
-	  FAPI_ERR("%s: Could not clear bit pos %u of PM GP1 reg (addr: 0x%08llX)\n", procedureName, EX_PMGP1_REG_PCB2_BIT_POS15, EX_PMGP1_REG_0x1X0F0104);
+	  FAPI_ERR("%s: Could not clear bit pos %u of PM GP1 reg (addr: 0x%08llX)", procedureName, EX_PMGP1_REG_PCB2_BIT_POS15, EX_PMGP1_REG_0x1X0F0104);
           rc.setEcmdError(rc_ecmd);
           return rc;
         }
@@ -315,7 +315,7 @@ extern "C"
         //Write data to PM GP1 reg
         rc = fapiPutScom(i_target, EX_PMGP1_REG_0x1X0F0104, fsi_data);
         if (rc) {
-          FAPI_ERR("%s: fapiPutScom error (addr: 0x%08llX)\n", procedureName, EX_PMGP1_REG_0x1X0F0104);
+          FAPI_ERR("%s: fapiPutScom error (addr: 0x%08llX)", procedureName, EX_PMGP1_REG_0x1X0F0104);
           return rc;
         }
       }
@@ -323,19 +323,19 @@ extern "C"
       // Assert bit 5 (WINKLE_POWER_OFF_SEL) of PM GP1 reg 
       rc_ecmd = fsi_data.flushTo0();
       if(rc_ecmd) {
-        FAPI_ERR("%s: Error (%u): Could not flush ecmdDataBufferBase to 0's\n", procedureName, rc_ecmd);
+        FAPI_ERR("%s: Error (%u): Could not flush ecmdDataBufferBase to 0's", procedureName, rc_ecmd);
         rc.setEcmdError(rc_ecmd);
         return rc;
       }
       rc_ecmd = fsi_data.setBit(EX_PMGP1_REG_PCB2_BIT_POS5);
       if(rc_ecmd) {
-        FAPI_ERR("%s: Could not assert bit pos %u of PM GP1 reg (addr: 0x%08llX)\n", procedureName, EX_PMGP1_REG_PCB2_BIT_POS5, EX_PMGP1_REG_0x1X0F0105);
+        FAPI_ERR("%s: Could not assert bit pos %u of PM GP1 reg (addr: 0x%08llX)", procedureName, EX_PMGP1_REG_PCB2_BIT_POS5, EX_PMGP1_REG_0x1X0F0105);
         rc.setEcmdError(rc_ecmd);
         return rc;
       }
       rc = fapiPutScom(i_target, EX_PMGP1_REG_0x1X0F0105, fsi_data);
       if (rc) {
-        FAPI_ERR("%s: fapiPutScom error (addr: 0x%08llX)\n", procedureName, EX_PMGP1_REG_0x1X0F0105);
+        FAPI_ERR("%s: fapiPutScom error (addr: 0x%08llX)", procedureName, EX_PMGP1_REG_0x1X0F0105);
         return rc;
       }
     
@@ -343,7 +343,7 @@ extern "C"
     }
 
     //Exiting fapi function
-    FAPI_DBG("Exiting fapi function: %s\n", procedureName);
+    FAPI_DBG("Exiting fapi function: %s", procedureName);
     
     return rc;
   }

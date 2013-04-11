@@ -1,27 +1,26 @@
-/*  IBM_PROLOG_BEGIN_TAG
- *  This is an automatically generated prolog.
- *
- *  $Source: src/usr/hwpf/hwp/dram_initialization/proc_setup_bars/proc_fab_smp.H $
- *
- *  IBM CONFIDENTIAL
- *
- *  COPYRIGHT International Business Machines Corp. 2012
- *
- *  p1
- *
- *  Object Code Only (OCO) source materials
- *  Licensed Internal Code Source Materials
- *  IBM HostBoot Licensed Internal Code
- *
- *  The source code for this program is not published or other-
- *  wise divested of its trade secrets, irrespective of what has
- *  been deposited with the U.S. Copyright Office.
- *
- *  Origin: 30
- *
- *  IBM_PROLOG_END_TAG
- */
-// $Id: proc_fab_smp.H,v 1.3 2012/05/18 18:07:49 jmcgill Exp $
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/usr/hwpf/hwp/dram_initialization/proc_setup_bars/proc_fab_smp.H $ */
+/*                                                                        */
+/* IBM CONFIDENTIAL                                                       */
+/*                                                                        */
+/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/*                                                                        */
+/* p1                                                                     */
+/*                                                                        */
+/* Object Code Only (OCO) source materials                                */
+/* Licensed Internal Code Source Materials                                */
+/* IBM HostBoot Licensed Internal Code                                    */
+/*                                                                        */
+/* The source code for this program is not published or otherwise         */
+/* divested of its trade secrets, irrespective of what has been           */
+/* deposited with the U.S. Copyright Office.                              */
+/*                                                                        */
+/* Origin: 30                                                             */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
+// $Id: proc_fab_smp.H,v 1.6 2012/09/24 05:00:15 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_fab_smp.H,v $
 //------------------------------------------------------------------------------
 // *|
@@ -42,7 +41,6 @@
 //------------------------------------------------------------------------------
 // Includes
 //------------------------------------------------------------------------------
-
 #include <fapi.H>
 
 
@@ -76,6 +74,20 @@ enum proc_fab_smp_chip_id
     FBC_CHIP_ID_7 = 7
 };
 
+// define set of supported epsilon table types
+enum proc_fab_smp_eps_table_type
+{
+    PROC_FAB_SMP_EPSILON_TABLE_TYPE_LE = 0,
+    PROC_FAB_SMP_EPSILON_TABLE_TYPE_HE = 1
+};
+
+// define set of supported broadcast/pump modes
+enum proc_fab_smp_pump_mode
+{
+    PROC_FAB_SMP_PUMP_MODE1 = 1,
+    PROC_FAB_SMP_PUMP_MODE2 = 2
+};
+
 
 //------------------------------------------------------------------------------
 // Constant definitions
@@ -84,9 +96,14 @@ enum proc_fab_smp_chip_id
 // largest representable fabric real address given HW implementation
 const uint64_t PROC_FAB_SMP_MAX_ADDRESS = ((1ULL << 50)-1ULL);
 
-// number of F links supported per chip
+// number of links supported per chip
+const uint8_t PROC_FAB_SMP_NUM_A_LINKS = 3;
+const uint8_t PROC_FAB_SMP_NUM_X_LINKS = 4;
 const uint8_t PROC_FAB_SMP_NUM_F_LINKS = 2;
 
+// range of fabric node/chip ID fields
+const uint8_t PROC_FAB_SMP_NUM_CHIP_IDS = 8;
+const uint8_t PROC_FAB_SMP_NUM_NODE_IDS = 8;
 
 extern "C"
 {

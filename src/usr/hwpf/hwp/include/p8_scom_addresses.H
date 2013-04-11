@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_scom_addresses.H,v 1.140 2013/03/21 13:50:57 pchatnah Exp $
+// $Id: p8_scom_addresses.H,v 1.143 2013/04/08 14:56:05 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/p8_scom_addresses.H,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
@@ -143,6 +143,17 @@ CONST_UINT64_T( DEVICE_ID_REG_0x000F000F            , ULL(0x000F000F) );
 /******************************************************************************/
 /********************************  TP CHIPLET  ********************************/
 /******************************************************************************/
+
+
+ //------------------------------------------------------------------------------
+ //      MULTICAST REGISTER DEFINITION
+ //------------------------------------------------------------------------------
+ CONST_UINT64_T( WRITE_ALL_EX_PMGP1_REG_0_RWx690F0103                             , ULL(0x690F0103) );       
+ CONST_UINT64_T( WRITE_ALL_EX_PMGP1_REG_0_WANDx690F0104                           , ULL(0x690F0104) );       
+ CONST_UINT64_T( WRITE_ALL_EX_PMGP1_REG_0_WORx690F0105                            , ULL(0x690F0105) );       
+ CONST_UINT64_T( WRITE_ALL_PCBSPM_MODE_REG_0x690F0156                             , ULL(0x690F0156) );       
+ CONST_UINT64_T( WRITE_ALL_PCBS_Power_Management_Bounds_Reg_0x690F015D            , ULL(0x690F015D) );       
+
 
 //------------------------------------------------------------------------------
 //      FSI MBOX (CFAM)
@@ -447,7 +458,9 @@ CONST_UINT64_T( PMC_LFIR_ACT1_0x01010847              , ULL(0x01010847) );
 // OCI Space Addresses
 
 CONST_UINT32_T( OCI_PMC_PORE_REQ_STAT_REG_0x40010480  , ULL(0x40010480) );
-
+CONST_UINT32_T( OCI_PMC_PORE_SCRATCH0_REG_0x400104E8  , ULL(0x400104E8) );
+CONST_UINT32_T( OCI_PMC_PORE_SCRATCH1_REG_0x400104F0  , ULL(0x400104F0) );
+CONST_UINT32_T( OCI_OCB_OTR0_REG_0x40050800           , ULL(0x40050800) );
 
 //------------------------------------------------------------------------------
 //      SPIADC
@@ -1282,10 +1295,15 @@ CONST_UINT64_T( PCIE_TRACE_DATA_HI_0x09010400         , ULL(0x09010400) );
 CONST_UINT64_T( PCIE_TRACE_DATA_LO_0x09010401         , ULL(0x09010401) );
 
 //------------------------------------------------------------------------------
-//      PCIE-BUS BARS
+//      PCIE-BUS PHB
 //------------------------------------------------------------------------------
+CONST_UINT64_T( PCIE0_ETU_RESET_0x0901200A            , ULL(0x0901200A) );
 CONST_UINT64_T( PCIE0_ASB_BAR_0x0901200B              , ULL(0x0901200B) );
+
+CONST_UINT64_T( PCIE1_ETU_RESET_0x0901240A            , ULL(0x0901240A) );
 CONST_UINT64_T( PCIE1_ASB_BAR_0x0901240B              , ULL(0x0901240B) );
+
+CONST_UINT64_T( PCIE2_ETU_RESET_0x0901280A            , ULL(0x0901280A) );
 CONST_UINT64_T( PCIE2_ASB_BAR_0x0901280B              , ULL(0x0901280B) );
 
 //------------------------------------------------------------------------------
@@ -1432,6 +1450,8 @@ CONST_UINT64_T( EX_L3_CERRS_RD_EPS_REG_0x10010829     , ULL(0x10010829) );
 CONST_UINT64_T( EX_L3_CERRS_WR_EPS_REG_0x1001082A     , ULL(0x1001082A) );
 CONST_UINT64_T( EX_L3_MODE_REG0_0x1001082B            , ULL(0x1001082B) );
 CONST_UINT64_T( EX_L3_PRD_PURGE_REG_0x1001080E        , ULL(0x1001080E) );
+CONST_UINT64_T( EX_L3_RD_EPSILON_CFG_REG_0x10010829   , ULL(0x10010829) );
+CONST_UINT64_T( EX_L3_WR_EPSILON_CFG_REG_0x1001082A   , ULL(0x1001082A) );
 CONST_UINT64_T( EX_L3_HA_DIRTY_ADDR_WR_PTR_0x10010832 , ULL(0x10010832) );
 
 //NCU
@@ -1455,6 +1475,7 @@ CONST_UINT64_T( EX_L2_CERRS_REG1_0x10012816           , ULL(0x10012816) );
 CONST_UINT64_T( EX_L2_MODE_REG0_0x1001280A            , ULL(0x1001280A) );
 CONST_UINT64_T( EX_L2_PURGE_CMD_PRD_0x1001280E        , ULL(0x1001280E) );
 CONST_UINT64_T( EX_L2_PURGE_CMD_PHYP_0x1001280F       , ULL(0x1001280F) );
+
 
 //------------------------------------------------------------------------------
 //      EX/CORE TRACE
@@ -1548,6 +1569,10 @@ CONST_UINT64_T( EX_PERV_SPRD_L1_100132A4              , ULL(0x100132A4) );
 CONST_UINT64_T( EX_PERV_SPRD_L2_100132A5              , ULL(0x100132A5) );
 CONST_UINT64_T( EX_PERV_SPRD_L3_100132A6              , ULL(0x100132A6) );
 
+// Performance Throttle Mode
+CONST_UINT64_T( EX_PERV_PFTH_THROT_0x100132AD         , ULL(0x100132AD) );
+
+
 //------------------------------------------------------------------------------
 //      EX OHA
 //------------------------------------------------------------------------------
@@ -1609,6 +1634,13 @@ CONST_UINT64_T( EX_PERV_LFIR_ACT1_0x10040011          , ULL(0x10040011) );
 //      EX THERMAL
 //------------------------------------------------------------------------------
 CONST_UINT64_T( EX_THERM_0x10050000                   , ULL(0x10050000) );
+CONST_UINT64_T( EX_THERM_DTS_RESULT0_0x10050000       , ULL(0x10050000) ); 
+CONST_UINT64_T( EX_THERM_DTS_RESULT1_0x10050001       , ULL(0x10050001) ); 
+CONST_UINT64_T( EX_THERM_MODE_REG_0x1005000F          , ULL(0x1005000F) ); 
+CONST_UINT64_T( EX_THERM_CONTROL_REG_0x10050012       , ULL(0x10050012) ); 
+CONST_UINT64_T( EX_THERM_ERR_STATUS_REG_0x10050013    , ULL(0x10050013) ); 
+CONST_UINT64_T( EX_CPM_CONFIG_WRITE_REG0_0x10050000   , ULL(0x10050000) );
+CONST_UINT64_T( EX_CPM_CONFIG_WRITE_REG1_0x10050001   , ULL(0x10050001) );
 
 //------------------------------------------------------------------------------
 //      EX Security
@@ -1824,6 +1856,16 @@ This section is automatically updated by CVS when you check in this file.
 Be sure to create CVS comments when you commit so that they can be included here.
 
 $Log: p8_scom_addresses.H,v $
+Revision 1.143  2013/04/08 14:56:05  jmcgill
+add PCIE ETU reset registers
+
+Revision 1.142  2013/03/26 12:17:16  stillgs
+
+Added EX DTS/Therm registers
+
+Revision 1.141  2013/03/26 11:45:14  pchatnah
+adding some more registers from prep_for_reset
+
 Revision 1.140  2013/03/21 13:50:57  pchatnah
 ading checkstop register
 
