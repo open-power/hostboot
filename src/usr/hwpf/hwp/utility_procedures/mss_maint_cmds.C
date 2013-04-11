@@ -44,7 +44,7 @@
 //         |          |         | Added stop condition enums
 //         |          |         | STOP_IMMEDIATE
 //         |          |         | ENABLE_CMD_COMPLETE_ATTENTION_ON_CLEAN_AND_ERROR
-//         |          |         | Now require cleanupCmd() for super fast read 
+//         |          |         | Now require cleanupCmd() for super fast read
 //         |          |         | to disable rrq fifo mode when done.
 //   1.11  | 09/07/12 | gollub  | Updates from review.
 //         |          |         | Support for more patterns.
@@ -55,9 +55,9 @@
 //         |          |         | Updates to traces.
 //   1.16  | 11/21/12 | gollub  | Updates from review.
 //   1.17  | 12/19/12 | gollub  | Added UE isolation
-//   1.18  | 01/15/13 | gollub  | Added check for valid dimm before calling 
+//   1.18  | 01/15/13 | gollub  | Added check for valid dimm before calling
 //         |          |         | dimmGetBadDqBitmap
-//   1.19  | 01/31/13 | gollub  | Updated MDI bits for random pattern so 
+//   1.19  | 01/31/13 | gollub  | Updated MDI bits for random pattern so
 //         |          |         | don't get SUEs
 //         |          |         | Added mss_check_steering
 //         |          |         | Added mss_do_steering
@@ -82,40 +82,40 @@ using namespace fapi;
 
 /**
  * @brief Max 8 master ranks per MB
- */ 
+ */
 const uint8_t MSS_MAX_RANKS =                         8;
 
 /**
  * @brief The number of symbols per rank
- */ 
+ */
 const uint8_t MSS_SYMBOLS_PER_RANK =                  72;
 
 /**
  * @brief 9 x8 DRAMs we can steer, plus one for no steer option
- */ 
+ */
 const uint8_t MSS_X8_STEER_OPTIONS_PER_PORT =         10;
 
 /**
  * @brief 18 x4 DRAMs we can steer on port0, plus one for no steer option
- */ 
+ */
 const uint8_t MSS_X4_STEER_OPTIONS_PER_PORT0 =        19;
 
 /**
  * @brief 17 x4 DRAMs we can steer on port1, plus one no steer option
- *        NOTE: Only 17 DRAMs we can steer since one DRAM is used for the 
+ *        NOTE: Only 17 DRAMs we can steer since one DRAM is used for the
  *        ECC spare.
- */ 
+ */
 const uint8_t MSS_X4_STEER_OPTIONS_PER_PORT1 =        18;
 
 /**
  * @brief 18 on port0, 17 on port1, plus one no steer option
  *        NOTE: Can's use ECC spare to fix bad spare DRAMs
- */ 
+ */
 const uint8_t MSS_X4_ECC_STEER_OPTIONS =              36;
 
 /**
  * @brief Max 8 patterns
- */ 
+ */
 const uint8_t MSS_MAX_PATTERNS =                      9;
 
 
@@ -123,14 +123,14 @@ namespace mss_MemConfig
 {
 /**
  * @brief DRAM size in gigabits, used to determine address range for maint cmds
- */ 
+ */
     enum DramSize
     {
         GBIT_2 = 0,
         GBIT_4 = 1,
         GBIT_8 = 2,
     };
-    
+
 /**
  * @brief DRAM width, used to determine address range for maint cmds
  */
@@ -153,7 +153,7 @@ namespace mss_MemConfig
         COL_12 = 0x00000FF8,    // c2, c1, c0 always 0
         BANK_3 = 0x00000007,
     };
-   
+
 /**
  * @brief Spare DRAM config, used to identify what spares exist
  */
@@ -164,7 +164,7 @@ namespace mss_MemConfig
         HIGH_NIBBLE = 2, // x4 spare (high nibble: no plan to use)
         FULL_BYTE   = 3  // x8 dpare
     };
-    
+
 };
 
 
@@ -200,7 +200,7 @@ static const uint32_t mss_mbstr[2]={
 static const uint32_t mss_mbmmr[2]={
     // port0/1                   port2/3
     MBS_ECC0_MBMMRQ_0x0201145B,  MBS_ECC1_MBMMRQ_0x0201149B};
-    
+
 static const uint32_t mss_readMuxRegs[8][2]={
     // port0/1                     port2/3
     {MBS_ECC0_MBSBS0_0x0201145E,   MBS_ECC1_MBSBS0_0x0201149E},
@@ -211,7 +211,7 @@ static const uint32_t mss_readMuxRegs[8][2]={
     {MBS_ECC0_MBSBS5_0x02011463,   MBS_ECC1_MBSBS5_0x020114A3},
     {MBS_ECC0_MBSBS6_0x02011464,   MBS_ECC1_MBSBS6_0x020114A4},
     {MBS_ECC0_MBSBS7_0x02011465,   MBS_ECC1_MBSBS7_0x020114A5}};
-        
+
 static const uint32_t mss_writeMuxRegs[8]={
 
     MBA01_MBABS0_0x03010440,
@@ -226,7 +226,7 @@ static const uint32_t mss_writeMuxRegs[8]={
 //------------------------------------------------------------------------------
 // Conversion from symbol index to galois field stored in markstore
 //------------------------------------------------------------------------------
-static const uint8_t mss_symbol2Galois[MSS_SYMBOLS_PER_RANK] = 
+static const uint8_t mss_symbol2Galois[MSS_SYMBOLS_PER_RANK] =
     {
     0x80, 0xa0, 0x90, 0xf0, 0x08, 0x0a, 0x09, 0x0f, // symbols  0- 7
     0x98, 0xda, 0xb9, 0x7f, 0x91, 0xd7, 0xb2, 0x78, // symbols  8-15
@@ -239,7 +239,7 @@ static const uint8_t mss_symbol2Galois[MSS_SYMBOLS_PER_RANK] =
     0xfe, 0x61, 0x75, 0x5d, 0x51, 0x27, 0xa2, 0x38, // symbols 64-71
     };
 
- 
+
 
 static const uint8_t mss_x8dramSparePort0Index_to_symbol[MSS_X8_STEER_OPTIONS_PER_PORT]={
     // symbol
@@ -646,19 +646,19 @@ static const uint32_t mss_ECC[MSS_MAX_PATTERNS][4]={
     0x04F3D0DA,   // 1st 64B of cachline
     0x019764DA,   // 2nd 64B of cachline
     0x0DC751A1},  // 2nd 64B of cachline
-    
+
 // PATTERN_6 - verified
    {0x0CF6B55C,   // 1st 64B of cachline
     0x08CCE671,   // 1st 64B of cachline
     0x02D94BBB,   // 2nd 64B of cachline
     0x030C31B6},  // 2nd 64B of cachline
-    
+
 // PATTERN_7 - verified
    {0x09150CD1,   // 1st 64B of cachline
     0x0F9D48C9,   // 1st 64B of cachline
     0x073AF236,   // 2nd 64B of cachline
     0x045D9F0E},  // 2nd 64B of cachline
-    
+
 // PATTERN_8: random
    {0x00000000,   // 1st 64B of cachline
     0x00000000,   // 1st 64B of cachline
@@ -696,17 +696,17 @@ mss_MaintCmd::mss_MaintCmd(const fapi::Target & i_target,
 fapi::ReturnCode mss_MaintCmd::stopCmd()
 {
     fapi::ReturnCode l_rc;
-    uint32_t l_ecmd_rc = 0;    
+    uint32_t l_ecmd_rc = 0;
     ecmdDataBufferBase l_mbmsrq(64);
     ecmdDataBufferBase l_mbmccq(64);
-    ecmdDataBufferBase l_mbmacaq(64);    
-        
+    ecmdDataBufferBase l_mbmacaq(64);
+
     FAPI_INF("ENTER mss_MaintCmd::stopCmd()");
-    
+
     // Read MBMSRQ
     l_rc = fapiGetScom(iv_target, MBA01_MBMSRQ_0x0301060C, l_mbmsrq);
     if(l_rc) return l_rc;
-    
+
     // If MBMSRQ[0], maint_cmd_in_progress, stop the cmd
     if (l_mbmsrq.isBitSet(0))
     {
@@ -725,16 +725,16 @@ fapi::ReturnCode mss_MaintCmd::stopCmd()
         // Write MBMCCQ
         l_rc = fapiPutScom(iv_target, MBA01_MBMCCQ_0x0301060B, l_mbmccq);
         if(l_rc) return l_rc;
-        
+
         // Read MBMSRQ
         l_rc = fapiGetScom(iv_target, MBA01_MBMSRQ_0x0301060C, l_mbmsrq);
         if(l_rc) return l_rc;
-        
+
         // If cmd didn't stop as expected
         if (l_mbmsrq.isBitSet(0))
         {
             FAPI_ERR("MBMSRQ[0] = 1, unsuccessful forced maint cmd stop.");
-             
+
             // Calling out MBA target high, deconfig, gard
             const fapi::Target & MBA = iv_target;
             // FFDC: Capture register we used to stop cmd
@@ -743,13 +743,13 @@ fapi::ReturnCode mss_MaintCmd::stopCmd()
             ecmdDataBufferBase & MBMSR = l_mbmsrq;
             // FFDC: Capture command type we are trying to run
             const mss_MaintCmd::CmdType & CMD_TYPE = iv_cmdType;
-            
+
             // Create new log
             FAPI_SET_HWP_ERROR(l_rc, RC_MSS_MAINT_UNSUCCESSFUL_FORCED_MAINT_CMD_STOP);
-            return l_rc;                        
-        }        
+            return l_rc;
+        }
     }
-    
+
     // Store the address we stopped at in iv_startAddr
     l_rc = fapiGetScom(iv_target, MBA01_MBMACAQ_0x0301060D, iv_startAddr);
     if(l_rc) return l_rc;
@@ -761,8 +761,8 @@ fapi::ReturnCode mss_MaintCmd::stopCmd()
         l_rc.setEcmdError(l_ecmd_rc);
         return l_rc;
     }
-    
-    
+
+
     FAPI_INF("EXIT mss_MaintCmd::stopCmd()");
     return l_rc;
 }
@@ -775,9 +775,9 @@ fapi::ReturnCode mss_MaintCmd::cleanupCmd()
 {
     fapi::ReturnCode l_rc;
     FAPI_INF("ENTER mss_MaintCmd::cleanupCmd()");
-    
 
-    
+
+
     FAPI_INF("EXIT mss_MaintCmd::cleanupCmd()");
     return l_rc;
 }
@@ -833,18 +833,18 @@ fapi::ReturnCode mss_MaintCmd::preConditionCheck()
     // Read MBSECC
     l_rc = fapiGetScom(iv_targetCentaur, mss_mbsecc[iv_mbaPosition], l_mbsecc);
     if(l_rc) return l_rc;
-    
+
     // Read MBMCT[0:4], cmd type, for FFDC
     l_rc = fapiGetScom(iv_target, MBA01_MBMCTQ_0x0301060A, l_mbmct);
     if(l_rc) return l_rc;
-    
+
 
     // Check for MBMCCQ[0], maint_cmd_start, to be reset by hw.
     if (l_mbmccq.isBitSet(0))
     {
 
         FAPI_ERR("MBMCCQ[0]: maint_cmd_start not reset by hw.");
-         
+
         // Calling out MBA target high, deconfig, gard
         const fapi::Target & MBA = iv_target;
         // FFDC: Capture register we are checking
@@ -852,8 +852,8 @@ fapi::ReturnCode mss_MaintCmd::preConditionCheck()
         // FFDC: Capture command type we are trying to run
         const mss_MaintCmd::CmdType & CMD_TYPE = iv_cmdType;
         // FFDC: MBMCT[0:4] contains the cmd type previously run
-        ecmdDataBufferBase & MBMCT = l_mbmct;  
-        
+        ecmdDataBufferBase & MBMCT = l_mbmct;
+
         // Create new log
         FAPI_SET_HWP_ERROR(l_rc, RC_MSS_MAINT_START_NOT_RESET);
     }
@@ -865,7 +865,7 @@ fapi::ReturnCode mss_MaintCmd::preConditionCheck()
         if (l_rc) fapiLogError(l_rc);
 
         FAPI_ERR("MBMCCQ[1]: maint_cmd_stop not reset by hw.");
-        
+
         // Calling out MBA target high, deconfig, gard
         const fapi::Target & MBA = iv_target;
         // FFDC: Capture register we are checking
@@ -873,8 +873,8 @@ fapi::ReturnCode mss_MaintCmd::preConditionCheck()
         // FFDC: Capture command type we are trying to run
         const mss_MaintCmd::CmdType & CMD_TYPE = iv_cmdType;
         // FFDC: MBMCT[0:4] contains the cmd type previously run
-        ecmdDataBufferBase & MBMCT = l_mbmct;  
-        
+        ecmdDataBufferBase & MBMCT = l_mbmct;
+
         // Create new log
         FAPI_SET_HWP_ERROR(l_rc, RC_MSS_MAINT_STOP_NOT_RESET);
     }
@@ -895,7 +895,7 @@ fapi::ReturnCode mss_MaintCmd::preConditionCheck()
         // FFDC: Capture command type we are trying to run
         const mss_MaintCmd::CmdType & CMD_TYPE = iv_cmdType;
         // FFDC: MBMCT[0:4] contains the cmd type previously run
-        ecmdDataBufferBase & MBMCT = l_mbmct;  
+        ecmdDataBufferBase & MBMCT = l_mbmct;
 
         // Create new log
         FAPI_SET_HWP_ERROR(l_rc, RC_MSS_MAINT_CMD_IN_PROGRESS);
@@ -1040,7 +1040,7 @@ fapi::ReturnCode mss_MaintCmd::loadEndAddress()
     ecmdDataBufferBase l_data(64);
 
     FAPI_INF("ENTER mss_MaintCmd::loadEndAddress()");
-    
+
     l_rc = fapiGetScom(iv_target, MBA01_MBMEAQ_0x0301060E, l_data);
     if(l_rc) return l_rc;
 
@@ -1049,7 +1049,7 @@ fapi::ReturnCode mss_MaintCmd::loadEndAddress()
     {
         l_rc.setEcmdError(l_ecmd_rc);
         return l_rc;
-    }    
+    }
     l_rc = fapiPutScom(iv_target, MBA01_MBMEAQ_0x0301060E, l_data);
     if(l_rc) return l_rc;
 
@@ -1081,7 +1081,7 @@ fapi::ReturnCode mss_MaintCmd::loadStopCondMask()
     if ( 0 != (iv_stopCondition & STOP_IMMEDIATE) )
         l_ecmd_rc |= l_mbasctlq.setBit(0);
 
-    // Enable stop end of rank    
+    // Enable stop end of rank
     if ( 0 != (iv_stopCondition & STOP_END_OF_RANK) )
         l_ecmd_rc |= l_mbasctlq.setBit(1);
 
@@ -1111,7 +1111,7 @@ fapi::ReturnCode mss_MaintCmd::loadStopCondMask()
 
     // Stop on MPE
     if ( 0 != (iv_stopCondition & STOP_ON_MPE) )
-        l_ecmd_rc |= l_mbasctlq.setBit(8);    
+        l_ecmd_rc |= l_mbasctlq.setBit(8);
 
     // Stop on UE
     if ( 0 != (iv_stopCondition & STOP_ON_UE) )
@@ -1126,9 +1126,9 @@ fapi::ReturnCode mss_MaintCmd::loadStopCondMask()
         l_ecmd_rc |= l_mbasctlq.setBit(11);
 
     // Stop on SUE
-    if ( 0 != (iv_stopCondition & STOP_ON_SUE) ) 
+    if ( 0 != (iv_stopCondition & STOP_ON_SUE) )
         l_ecmd_rc |= l_mbasctlq.setBit(12);
-    
+
     // Enable command complete attention on clean and error
     if ( 0 != (iv_stopCondition & ENABLE_CMD_COMPLETE_ATTENTION_ON_CLEAN_AND_ERROR) )
         l_ecmd_rc |= l_mbasctlq.setBit(16);
@@ -1144,7 +1144,7 @@ fapi::ReturnCode mss_MaintCmd::loadStopCondMask()
     if(l_rc) return l_rc;
 
     FAPI_INF("EXIT mss_MaintCmd::loadStopCondMask()");
-    
+
     return l_rc;
 }
 
@@ -1168,7 +1168,7 @@ fapi::ReturnCode mss_MaintCmd::startMaintCmd()
     {
         l_rc.setEcmdError(l_ecmd_rc);
         return l_rc;
-    }    
+    }
     l_rc = fapiPutScom(iv_target, MBA01_MBMCCQ_0x0301060B, l_data);
     if(l_rc) return l_rc;
 
@@ -1185,7 +1185,7 @@ fapi::ReturnCode mss_MaintCmd::postConditionCheck()
     ecmdDataBufferBase l_mbmccq(64);
     ecmdDataBufferBase l_mbafirq(64);
     ecmdDataBufferBase l_mbmct(64);
-    
+
     FAPI_INF("ENTER mss_MaintCmd::postConditionCheck()");
 
     // Read MBMCCQ
@@ -1195,16 +1195,16 @@ fapi::ReturnCode mss_MaintCmd::postConditionCheck()
     // Read MBAFIRQ
     l_rc = fapiGetScom(iv_target, MBA01_MBAFIRQ_0x03010600, l_mbafirq);
     if(l_rc) return l_rc;
-    
+
     // Read MBMCT[0:4], cmd type, for FFDC
     l_rc = fapiGetScom(iv_target, MBA01_MBMCTQ_0x0301060A, l_mbmct);
-    if(l_rc) return l_rc;    
-    
+    if(l_rc) return l_rc;
+
     // Check for MBMCCQ[0], maint_cmd_start, to be reset by hw.
     if (l_mbmccq.isBitSet(0))
     {
         FAPI_ERR("MBMCCQ[0]: maint_cmd_start not reset by hw.");
-        
+
         // Calling out MBA target high, deconfig, gard
         const fapi::Target & MBA = iv_target;
         // FFDC: Capture register we are checking
@@ -1212,8 +1212,8 @@ fapi::ReturnCode mss_MaintCmd::postConditionCheck()
         // FFDC: Capture command type we are trying to run
         const mss_MaintCmd::CmdType & CMD_TYPE = iv_cmdType;
         // FFDC: MBMCT[0:4] contains the cmd type set in hw
-        ecmdDataBufferBase & MBMCT = l_mbmct;  
-        
+        ecmdDataBufferBase & MBMCT = l_mbmct;
+
         // Create new log
         FAPI_SET_HWP_ERROR(l_rc, RC_MSS_MAINT_START_NOT_RESET);
     }
@@ -1225,7 +1225,7 @@ fapi::ReturnCode mss_MaintCmd::postConditionCheck()
         if (l_rc) fapiLogError(l_rc);
 
         FAPI_ERR("MBAFIRQ[0], invalid_maint_cmd.");
-        
+
         // TODO: Calling out FW high
         // FFDC: MBA target
         const fapi::Target & MBA = iv_target;
@@ -1234,9 +1234,9 @@ fapi::ReturnCode mss_MaintCmd::postConditionCheck()
         // FFDC: Capture command type we are trying to run
         const mss_MaintCmd::CmdType & CMD_TYPE = iv_cmdType;
         // FFDC: MBMCT[0:4] contains the cmd type set in hw
-        ecmdDataBufferBase & MBMCT = l_mbmct;  
-        
-        // Create new log        
+        ecmdDataBufferBase & MBMCT = l_mbmct;
+
+        // Create new log
         FAPI_SET_HWP_ERROR(l_rc, RC_MSS_MAINT_INVALID_CMD);
     }
 
@@ -1257,8 +1257,8 @@ fapi::ReturnCode mss_MaintCmd::postConditionCheck()
         const mss_MaintCmd::CmdType & CMD_TYPE = iv_cmdType;
         // FFDC: MBMCT[0:4] contains the cmd type set in hw
         ecmdDataBufferBase & MBMCT = l_mbmct;
-        // NOTE: List of additional FFDC regs specified in memory_errors.xml        
-        
+        // NOTE: List of additional FFDC regs specified in memory_errors.xml
+
         // Create new log
         FAPI_SET_HWP_ERROR(l_rc, RC_MSS_MAINT_INVALID_ADDR);
     }
@@ -1298,12 +1298,12 @@ fapi::ReturnCode mss_MaintCmd::pollForMaintCmdComplete()
         FAPI_DBG("MBSPAQ = 0x%.8X 0x%.8X",l_data.getWord(0), l_data.getWord(1));
 
         // Read MBMACAQ just to see if it's incrementing
-        l_rc = fapiGetScom(iv_target, MBA01_MBMACAQ_0x0301060D, l_data); 
+        l_rc = fapiGetScom(iv_target, MBA01_MBMACAQ_0x0301060D, l_data);
         if(l_rc) return l_rc;
         FAPI_DBG("MBMACAQ = 0x%.8X 0x%.8X",l_data.getWord(0), l_data.getWord(1));
 
         // Waiting for MBMSRQ[0] maint cmd in progress bit to turn off
-        l_rc = fapiGetScom(iv_target, MBA01_MBMSRQ_0x0301060C, l_data); 
+        l_rc = fapiGetScom(iv_target, MBA01_MBMSRQ_0x0301060C, l_data);
         if(l_rc) return l_rc;
         FAPI_DBG("MBMSRQ = 0x%.8X 0x%.8X",l_data.getWord(0), l_data.getWord(1));
 
@@ -1316,7 +1316,7 @@ fapi::ReturnCode mss_MaintCmd::pollForMaintCmdComplete()
     if (count == loop_limit)
     {
         FAPI_ERR("Maint cmd timeout.");
-        
+
         // TODO: Calling out FW high
         // Calling out MBA target low, deconfig, gard
         const fapi::Target & MBA = iv_target;
@@ -1324,10 +1324,10 @@ fapi::ReturnCode mss_MaintCmd::pollForMaintCmdComplete()
         const mss_MaintCmd::CmdType & CMD_TYPE = iv_cmdType;
         // Specify CENTAUR target so we can read some FFDC regs from MBS
         const fapi::Target & CENTAUR = iv_targetCentaur;
-        // NOTE: List of additional FFDC regs specified in memory_errors.xml        
+        // NOTE: List of additional FFDC regs specified in memory_errors.xml
 
         // Create new log
-        FAPI_SET_HWP_ERROR(l_rc, RC_MSS_MAINT_CMD_TIMEOUT);        
+        FAPI_SET_HWP_ERROR(l_rc, RC_MSS_MAINT_CMD_TIMEOUT);
     }
     else
     {
@@ -1349,7 +1349,7 @@ fapi::ReturnCode mss_MaintCmd::collectFFDC()
     uint8_t l_dramSparePort1Symbol = MSS_INVALID_SYMBOL;
     uint8_t l_eccSpareSymbol = MSS_INVALID_SYMBOL;
     uint8_t l_symbol_mark = MSS_INVALID_SYMBOL;
-    uint8_t l_chip_mark = MSS_INVALID_SYMBOL;    
+    uint8_t l_chip_mark = MSS_INVALID_SYMBOL;
 
     FAPI_INF("ENTER mss_MaintCmd::collectFFDC()");
 
@@ -1378,19 +1378,19 @@ fapi::ReturnCode mss_MaintCmd::collectFFDC()
     if(l_rc) return l_rc;
     FAPI_DBG("MBASCTLQ = 0x%.8X 0x%.8X", l_data.getWord(0), l_data.getWord(1));
 
-    l_rc = fapiGetScom(iv_target, MBA01_MBMCCQ_0x0301060B, l_data); 
+    l_rc = fapiGetScom(iv_target, MBA01_MBMCCQ_0x0301060B, l_data);
     if(l_rc) return l_rc;
     FAPI_DBG("MBMCCQ = 0x%.8X 0x%.8X", l_data.getWord(0), l_data.getWord(1));
 
-    l_rc = fapiGetScom(iv_target, MBA01_MBMSRQ_0x0301060C, l_data); 
+    l_rc = fapiGetScom(iv_target, MBA01_MBMSRQ_0x0301060C, l_data);
     if(l_rc) return l_rc;
     FAPI_DBG("MBMSRQ = 0x%.8X 0x%.8X", l_data.getWord(0), l_data.getWord(1));
 
-    l_rc = fapiGetScom(iv_target, MBA01_MBAFIRQ_0x03010600, l_data); 
+    l_rc = fapiGetScom(iv_target, MBA01_MBAFIRQ_0x03010600, l_data);
     if(l_rc) return l_rc;
     FAPI_DBG("MBAFIRQ = 0x%.8X 0x%.8X", l_data.getWord(0), l_data.getWord(1));
 
-    l_rc = fapiGetScom(iv_target, MBA01_MBSPAQ_0x03010611, l_data); 
+    l_rc = fapiGetScom(iv_target, MBA01_MBSPAQ_0x03010611, l_data);
     if(l_rc) return l_rc;
     FAPI_DBG("MBSPAQ = 0x%.8X 0x%.8X", l_data.getWord(0), l_data.getWord(1));
 
@@ -1446,7 +1446,7 @@ fapi::ReturnCode mss_MaintCmd::collectFFDC()
                                  l_eccSpareSymbol);
         if(l_rc) return l_rc;
     }
-        
+
     FAPI_INF("EXIT mss_MaintCmd::collectFFDC()");
     return l_rc;
 }
@@ -1540,7 +1540,7 @@ fapi::ReturnCode mss_MaintCmd::loadPattern(PatternIndex i_initPattern)
 
     for(loop=0; loop<16; loop++ )
     {
-        // A write to MAINT_BUFFx_DATAy will not update until the corresponding 
+        // A write to MAINT_BUFFx_DATAy will not update until the corresponding
         // MAINT_BUFFx_DATA_ECCy is written to.
         l_ecmd_rc |= l_data.insert(mss_maintBufferData[i_initPattern][loop][0], 0, 32, 0);
         l_ecmd_rc |= l_data.insert(mss_maintBufferData[i_initPattern][loop][1], 32, 32, 0);
@@ -1550,7 +1550,7 @@ fapi::ReturnCode mss_MaintCmd::loadPattern(PatternIndex i_initPattern)
             return l_rc;
         }
         l_rc = fapiPutScom(iv_targetCentaur, maintBufferDataRegs[iv_mbaPosition][loop][0], l_data);
-        if(l_rc) return l_rc;   
+        if(l_rc) return l_rc;
 
         l_rc = fapiPutScom(iv_targetCentaur, maintBufferDataRegs[iv_mbaPosition][loop][1], l_ecc);
         if(l_rc) return l_rc;
@@ -1583,11 +1583,11 @@ fapi::ReturnCode mss_MaintCmd::loadPattern(PatternIndex i_initPattern)
 
         l_rc = fapiPutScom(iv_targetCentaur, maintBuffer65thRegs[loop][iv_mbaPosition], l_65th);
         if(l_rc) return l_rc;
-    }  
+    }
 
     //----------------------------------------------------
     // Save i_initPattern in unused maint mark reg
-    // so we know what pattern was used when we do 
+    // so we know what pattern was used when we do
     // UE isolation
     //----------------------------------------------------
 
@@ -1695,8 +1695,8 @@ fapi::ReturnCode mss_MaintCmd::loadSpeed(TimeBaseSpeed i_speed)
     {
         // Get l_ddr_freq from ATTR_MSS_FREQ
         // Possible frequencies are 800, 1066, 1333, 1600, 1866, and 2133 MHz
-        // NOTE: Max 32 address bits using 800 and 1066 result in scrub 
-        // taking longer than 12h, but these is no plan to actually use 
+        // NOTE: Max 32 address bits using 800 and 1066 result in scrub
+        // taking longer than 12h, but these is no plan to actually use
         // those frequencies.
         l_rc = FAPI_ATTR_GET( ATTR_MSS_FREQ, &iv_targetCentaur, l_ddr_freq);
         if (l_rc)
@@ -1709,7 +1709,7 @@ fapi::ReturnCode mss_MaintCmd::loadSpeed(TimeBaseSpeed i_speed)
         if (l_ddr_freq == 0)
         {
             FAPI_ERR("ATTR_MSS_FREQ set to zero so can't calculate scrub rate.");
-                        
+
             // TODO: Calling out FW high
             // FFDC: MBA target
             const fapi::Target & MBA = iv_target;
@@ -1718,11 +1718,11 @@ fapi::ReturnCode mss_MaintCmd::loadSpeed(TimeBaseSpeed i_speed)
             // FFDC: Capture command type we are trying to run
             const mss_MaintCmd::CmdType & CMD_TYPE = iv_cmdType;
 
-            // Create new log            
+            // Create new log
             FAPI_SET_HWP_ERROR(l_rc, RC_MSS_MAINT_ZERO_DDR_FREQ);
             return l_rc;
         }
-        
+
         // l_timebase_sel
         // MBMCTQ[9:10]: 00 = 1 * Maint Clk
         //               01 = 8192 * Maint Clk
@@ -1756,7 +1756,7 @@ fapi::ReturnCode mss_MaintCmd::loadSpeed(TimeBaseSpeed i_speed)
         }
 
         // NOTE: Assumption is max 32 address bits, which can be done
-        // in 12h (+/- 2h). More than 32 address bits would 
+        // in 12h (+/- 2h). More than 32 address bits would
         // double scrub time for every extra address bit.
         if (l_num_address_bits > 32)
         {
@@ -1800,7 +1800,7 @@ fapi::ReturnCode mss_MaintCmd::loadSpeed(TimeBaseSpeed i_speed)
         l_timebase_burst_sel = 0;   // Disable burst mode
         l_burst_window_sel = 0;     // Don't care since burst mode disabled
         l_burst_window = 0;         // Don't care since burst mode disabled
-        l_burst_interval = 0;       // Don't care since burst mode disabled 
+        l_burst_interval = 0;       // Don't care since burst mode disabled
 
         return l_rc;
 
@@ -1878,7 +1878,7 @@ mss_SuperFastInit::mss_SuperFastInit( const fapi::Target & i_target,
                   i_stopCondition,
                   i_poll,
                   cv_cmdType),
-    iv_initPattern( i_initPattern ) // NOTE: iv_initPattern is instance 
+    iv_initPattern( i_initPattern ) // NOTE: iv_initPattern is instance
                                     // variable of SuperFastInit, since not
                                     // needed in parent class
     {}
@@ -1899,7 +1899,7 @@ fapi::ReturnCode mss_SuperFastInit::setupAndExecuteCmd()
 
     fapi::ReturnCode l_rc;
     ecmdDataBufferBase l_data(64);
-    
+
     // Gather data that needs to be stored. For testing purposes we will just
     // set an abitrary number.
     //l_rc = setSavedData( 0xdeadbeef ); if(l_rc) return l_rc;
@@ -1908,7 +1908,7 @@ fapi::ReturnCode mss_SuperFastInit::setupAndExecuteCmd()
 
     // Make sure maint logic in valid state to run new cmd
     l_rc = preConditionCheck(); if(l_rc) return l_rc;
-   
+
     // Load pattern
     l_rc = loadPattern(iv_initPattern); if(l_rc) return l_rc;
 
@@ -1993,7 +1993,7 @@ fapi::ReturnCode mss_SuperFastRandomInit::setupAndExecuteCmd()
 
     fapi::ReturnCode l_rc;
     uint32_t l_ecmd_rc = 0;
-    
+
     // Gather data that needs to be stored. For testing purposes we will just
     // set an abitrary number.
     //l_rc = setSavedData( 0xdeadbeef ); if(l_rc) return l_rc;
@@ -2008,7 +2008,7 @@ fapi::ReturnCode mss_SuperFastRandomInit::setupAndExecuteCmd()
 
     // Load cmd type: MBMCTQ
     l_rc = loadCmdType(); if(l_rc) return l_rc;
-    
+
     // Load start address: MBMACAQ
     l_rc = loadStartAddress(); if(l_rc) return l_rc;
 
@@ -2055,7 +2055,7 @@ fapi::ReturnCode mss_SuperFastRandomInit::setupAndExecuteCmd()
     l_rc = collectFFDC(); if(l_rc) return l_rc;
 
     FAPI_INF("EXIT mss_SuperFastRandomInit::setupAndExecuteCmd()");
-        
+
     return l_rc;
 }
 
@@ -2175,7 +2175,7 @@ fapi::ReturnCode mss_SuperFastRead::setupAndExecuteCmd()
 
     // Start the command: MBMCCQ
     l_rc = startMaintCmd(); if(l_rc) return l_rc;
-        
+
     // Check for early problems with maint cmd instead of waiting for
     // cmd timeout
     l_rc = postConditionCheck(); if(l_rc) return l_rc;
@@ -2287,7 +2287,7 @@ fapi::ReturnCode mss_SuperFastRead::cleanupCmd()
 
 
     FAPI_INF("EXIT mss_SuperFastRead::cleanupCmd()");
-    
+
     return l_rc;
 }
 
@@ -2328,7 +2328,7 @@ fapi::ReturnCode mss_AtomicInject::setupAndExecuteCmd()
     FAPI_INF("ENTER mss_AtomicInject::setupAndExecuteCmd()");
 
     fapi::ReturnCode l_rc;
-    uint32_t l_ecmd_rc = 0;    
+    uint32_t l_ecmd_rc = 0;
 
     // Gather data that needs to be stored. For testing purposes we will just
     // set an abitrary number.
@@ -2555,20 +2555,20 @@ fapi::ReturnCode mss_IncrementAddress::setupAndExecuteCmd()
 
 
     fapi::ReturnCode l_rc;
-    uint32_t l_ecmd_rc = 0;    
+    uint32_t l_ecmd_rc = 0;
     ecmdDataBufferBase l_mbspa_mask(64);
     ecmdDataBufferBase l_mbspa_mask_original(64);
-    ecmdDataBufferBase l_mbspa_and(64);    
-    
+    ecmdDataBufferBase l_mbspa_and(64);
+
     // Read MBSPA MASK
     l_rc = fapiGetScom(iv_target, MBA01_MBSPAMSKQ_0x03010614, l_mbspa_mask);
     if(l_rc) return l_rc;
-    
+
     // Save original mask value so we can restore it when done
-    l_ecmd_rc |= l_mbspa_mask_original.insert(l_mbspa_mask, 0, 64, 0);    
+    l_ecmd_rc |= l_mbspa_mask_original.insert(l_mbspa_mask, 0, 64, 0);
 
     // Mask bits 0 and 8, to hide the special attentions when the cmd completes
-    l_ecmd_rc |= l_mbspa_mask.setBit(0);        
+    l_ecmd_rc |= l_mbspa_mask.setBit(0);
     l_ecmd_rc |= l_mbspa_mask.setBit(8);
     if(l_ecmd_rc)
     {
@@ -2579,7 +2579,7 @@ fapi::ReturnCode mss_IncrementAddress::setupAndExecuteCmd()
     // Write MBSPA MASK
     l_rc = fapiPutScom(iv_target, MBA01_MBSPAMSKQ_0x03010614, l_mbspa_mask);
     if(l_rc) return l_rc;
-    
+
     // Make sure maint logic in valid state to run new cmd
     l_rc = preConditionCheck(); if(l_rc) return l_rc;
 
@@ -2622,11 +2622,11 @@ fapi::ReturnCode mss_IncrementAddress::setupAndExecuteCmd()
     // Write MPSPA AND register
     l_rc = fapiPutScom(iv_target, MBA01_MBSPAQ_AND_0x03010612, l_mbspa_and);
     if(l_rc) return l_rc;
-    
-    // Restore MBSPA MASK 
+
+    // Restore MBSPA MASK
     l_rc = fapiPutScom(iv_target, MBA01_MBSPAMSKQ_0x03010614, l_mbspa_mask_original);
     if(l_rc) return l_rc;
-    
+
 
     FAPI_INF("EXIT mss_IncrementAddress::setupAndExecuteCmd()");
 
@@ -2702,12 +2702,12 @@ fapi::ReturnCode mss_TimeBaseScrub::setupAndExecuteCmd()
     FAPI_INF("\nDEBUG. Set hard CE threshold to 1: MBSTRQ");
     ecmdDataBufferBase l_data(64);
     uint32_t l_hardCEThreshold = 1;
-    l_rc = fapiGetScom(iv_target, MBS01_MBSTRQ_0x02011655, l_data); 
+    l_rc = fapiGetScom(iv_target, MBS01_MBSTRQ_0x02011655, l_data);
     if(l_rc) return l_rc;
     l_data.insert( l_hardCEThreshold, 28, 12, 32-12 ); // 28:39 hard ce threshold
     l_data.setBit(2);   // Enable hard ce ETE special attention
     l_data.setBit(57);  // Enable per-symbol counters to count hard ces
-    l_rc = fapiPutScom(iv_target, MBS01_MBSTRQ_0x02011655, l_data); 
+    l_rc = fapiPutScom(iv_target, MBS01_MBSTRQ_0x02011655, l_data);
     if(l_rc) return l_rc;
     */
 
@@ -2726,7 +2726,7 @@ fapi::ReturnCode mss_TimeBaseScrub::setupAndExecuteCmd()
 
     // Poll for command complete: MBMSRQ
     l_rc = pollForMaintCmdComplete(); if(l_rc) return l_rc;
-    
+
     // Collect FFDC
     l_rc = collectFFDC(); if(l_rc) return l_rc;
 
@@ -2776,7 +2776,7 @@ fapi::ReturnCode mss_TimeBaseSteerCleanup::setupAndExecuteCmd()
     FAPI_INF("ENTER mss_TimeBaseSteerCleanup::setupAndExecuteCmd()");
 
     fapi::ReturnCode l_rc;
-    
+
     // Gather data that needs to be stored. For testing purposes we will just
     // set an abitrary number.
     //l_rc = setSavedData( 0xdeadbeef ); if(l_rc) return l_rc;
@@ -2849,7 +2849,7 @@ fapi::ReturnCode mss_get_address_range( const fapi::Target & i_target,
     static const uint8_t memConfigType[9][4][2]={
 
     // Refer to Centaur Workbook: 5.2 Master and Slave Rank Usage
-    //    
+    //
     //       SUBTYPE_A                    SUBTYPE_B                    SUBTYPE_C                    SUBTYPE_D
     //
     //SLOT_0_ONLY   SLOT_0_AND_1   SLOT_0_ONLY   SLOT_0_AND_1   SLOT_0_ONLY   SLOT_0_AND_1   SLOT_0_ONLY   SLOT_0_AND_1
@@ -3004,8 +3004,8 @@ fapi::ReturnCode mss_get_address_range( const fapi::Target & i_target,
         const fapi::Target & MBA = i_target;
         // FFDC: Capture register we are checking
         ecmdDataBufferBase & MBAXCR = l_data;
-        
-        // Create new log.        
+
+        // Create new log.
         FAPI_SET_HWP_ERROR(l_rc, RC_MSS_MAINT_INVALID_DRAM_SIZE_WIDTH);
         return l_rc;
     }
@@ -3021,7 +3021,7 @@ fapi::ReturnCode mss_get_address_range( const fapi::Target & i_target,
     // (4:5) Configuration subtype (A, B, C, D)
     l_ecmd_rc |= l_data.extractPreserve(&l_configSubType, 4, 2, 8-2);
 
-    // (8)   Slot Configuration 
+    // (8)   Slot Configuration
     // 0 = Centaur DIMM or IS DIMM, slot0 only, 1 = IS DIMM slots 0 and 1
     l_ecmd_rc |= l_data.extractPreserve(&l_slotConfig, 8, 1, 8-1);
     if(l_ecmd_rc)
@@ -3085,12 +3085,12 @@ fapi::ReturnCode mss_get_address_range( const fapi::Target & i_target,
             l_ecmd_rc |= o_endAddr.insert( l_end_slave_rank, 4, 3, 8-3 );
 
             // BANK = 7:10
-            l_ecmd_rc |= o_endAddr.insert( (uint32_t)l_bank, 7, 4, 32-4 ); 
+            l_ecmd_rc |= o_endAddr.insert( (uint32_t)l_bank, 7, 4, 32-4 );
 
             // ROW = 11:27
             l_ecmd_rc |= o_endAddr.insert( (uint32_t)l_row_zero, 11, 17, 32-17 );
 
-            // COL = 28:39, note: c2, c1, c0 always 0   
+            // COL = 28:39, note: c2, c1, c0 always 0
             l_ecmd_rc |= o_endAddr.insert( (uint32_t)l_col, 28, 12, 32-12 );
 
 
@@ -3134,9 +3134,9 @@ fapi::ReturnCode mss_get_address_range( const fapi::Target & i_target,
             // FFDC: Capture i_rank;
             uint8_t RANK = i_rank;
 
-            // Create new log. 
+            // Create new log.
             FAPI_SET_HWP_ERROR(l_rc, RC_MSS_MAINT_GET_ADDRESS_RANGE_BAD_INPUT);
-            return l_rc;        
+            return l_rc;
         }
 
         // NOTE: If this rank is not valid, we should see MBAFIR[1]: invalid
@@ -3289,9 +3289,9 @@ fapi::ReturnCode mss_get_mark_store( const fapi::Target & i_target,
         // FFDC: Capture i_rank;
         uint8_t RANK = i_rank;
 
-        // Create new log. 
+        // Create new log.
         FAPI_SET_HWP_ERROR(l_rc, RC_MSS_MAINT_GET_MARK_STORE_BAD_INPUT);
-        return l_rc;        
+        return l_rc;
     }
 
     // Read markstore register for the given rank
@@ -3318,7 +3318,7 @@ fapi::ReturnCode mss_get_mark_store( const fapi::Target & i_target,
 
     if (l_symbolMarkGalois == 0x00) // No symbol mark
     {
-        o_symbolMark = MSS_INVALID_SYMBOL; 
+        o_symbolMark = MSS_INVALID_SYMBOL;
     }
     else if (l_dramWidth == mss_MemConfig::X4)
     {
@@ -3364,7 +3364,7 @@ fapi::ReturnCode mss_get_mark_store( const fapi::Target & i_target,
             // FFDC: Capture markstore
             ecmdDataBufferBase & MARKSTORE = l_markstore;
 
-            // Create new log. 
+            // Create new log.
             FAPI_SET_HWP_ERROR(l_rc, RC_MSS_MAINT_INVALID_MARKSTORE);
             return l_rc;
         }
@@ -3381,7 +3381,7 @@ fapi::ReturnCode mss_get_mark_store( const fapi::Target & i_target,
 
     if (l_chipMarkGalois == 0x00) // No chip mark
     {
-        o_chipMark = MSS_INVALID_SYMBOL; 
+        o_chipMark = MSS_INVALID_SYMBOL;
     }
     else // Converted from galois field to chip index
     {
@@ -3419,7 +3419,7 @@ fapi::ReturnCode mss_get_mark_store( const fapi::Target & i_target,
             // FFDC: Capture markstore
             ecmdDataBufferBase & MARKSTORE = l_markstore;
 
-            // Create new log. 
+            // Create new log.
             FAPI_SET_HWP_ERROR(l_rc, RC_MSS_MAINT_INVALID_MARKSTORE);
             return l_rc;
         }
@@ -3427,7 +3427,7 @@ fapi::ReturnCode mss_get_mark_store( const fapi::Target & i_target,
 
     FAPI_INF("mss_get_mark_store(): rank%d, chip mark = %d, symbol mark = %d",
     i_rank, o_chipMark, o_symbolMark );
-    
+
     return l_rc;
 }
 
@@ -3481,7 +3481,7 @@ fapi::ReturnCode mss_put_mark_store( const fapi::Target & i_target,
         FAPI_ERR("Error getting DRAM width");
         return l_rc;
     }
-    
+
     // Check for i_rank out of range
     if (i_rank>=8)
     {
@@ -3492,10 +3492,10 @@ fapi::ReturnCode mss_put_mark_store( const fapi::Target & i_target,
         // FFDC: Capture i_rank;
         uint8_t RANK = i_rank;
 
-        // Create new log. 
+        // Create new log.
         FAPI_SET_HWP_ERROR(l_rc, RC_MSS_MAINT_PUT_MARK_STORE_BAD_INPUT);
-        return l_rc;        
-    }    
+        return l_rc;
+    }
 
     // Get l_symbolMarkGalois
     if (i_symbolMark == MSS_INVALID_SYMBOL) // No symbol mark
@@ -3570,7 +3570,7 @@ fapi::ReturnCode mss_put_mark_store( const fapi::Target & i_target,
         // FFDC: Capure i_chipMark;
         uint8_t CHIP_MARK = i_chipMark;
 
-        // Create new log. 
+        // Create new log.
         FAPI_SET_HWP_ERROR(l_rc, RC_MSS_MAINT_INVALID_SYMBOL_INDEX);
         return l_rc;
     }
@@ -3639,7 +3639,7 @@ fapi::ReturnCode mss_put_mark_store( const fapi::Target & i_target,
     {
         // TODO: Can FW distingish this rc from all the others
         // so they know they just need to retry after clearing MPR FIR?
-        
+
         FAPI_ERR("Markstore write may have been blocked due to MPE FIR set.");
 
         // FFDC: MBA target
@@ -3654,7 +3654,7 @@ fapi::ReturnCode mss_put_mark_store( const fapi::Target & i_target,
         uint8_t CHIP_MARK = i_chipMark;
         // FFDC: Capture MBECCFIR
         ecmdDataBufferBase & MBECCFIR = l_mbeccfir;
-        
+
         // Create new log.
         FAPI_SET_HWP_ERROR(l_rc, RC_MSS_MAINT_MARKSTORE_WRITE_BLOCKED);
         return l_rc;
@@ -3692,7 +3692,7 @@ fapi::ReturnCode mss_get_steer_mux( const fapi::Target & i_target,
 
     o_dramSparePort0Symbol = MSS_INVALID_SYMBOL;
     o_dramSparePort1Symbol = MSS_INVALID_SYMBOL;
-    o_eccSpareSymbol = MSS_INVALID_SYMBOL; 
+    o_eccSpareSymbol = MSS_INVALID_SYMBOL;
 
     // Get Centaur target for the given MBA
     l_rc = fapiGetParentChip(i_target, l_targetCentaur);
@@ -3721,21 +3721,21 @@ fapi::ReturnCode mss_get_steer_mux( const fapi::Target & i_target,
 
 
     // Check for i_rank or i_muxType out of range
-    if ((i_rank>=8) || 
+    if ((i_rank>=8) ||
        !((i_muxType==mss_SteerMux::READ_MUX) || (i_muxType==mss_SteerMux::WRITE_MUX)))
     {
-        FAPI_ERR("i_rank or i_muxType input to mss_get_steer_mux out of range");       
+        FAPI_ERR("i_rank or i_muxType input to mss_get_steer_mux out of range");
         // TODO: Calling out FW high
         // FFDC: MBA target
         const fapi::Target & MBA = i_target;
         // FFDC: Capture i_rank;
         uint8_t RANK = i_rank;
         // FFDC: Capure i_muxType
-        uint8_t MUX_TYPE = i_muxType;       
+        uint8_t MUX_TYPE = i_muxType;
 
-        // Create new log. 
+        // Create new log.
         FAPI_SET_HWP_ERROR(l_rc, RC_MSS_MAINT_GET_STEER_MUX_BAD_INPUT);
-        return l_rc;        
+        return l_rc;
     }
 
 
@@ -3774,7 +3774,7 @@ fapi::ReturnCode mss_get_steer_mux( const fapi::Target & i_target,
     else
     {
         FAPI_ERR("Steer mux l_dramSparePort0Index out of range.");
-        
+
         // TODO: Calling out FW high
         // FFDC: MBA target
         const fapi::Target & MBA = i_target;
@@ -3783,13 +3783,13 @@ fapi::ReturnCode mss_get_steer_mux( const fapi::Target & i_target,
         // FFDC: Capure i_rank;
         uint8_t RANK = i_rank;
         // FFDC: Capure i_muxType
-        uint8_t MUX_TYPE = i_muxType;       
+        uint8_t MUX_TYPE = i_muxType;
         // FFDC: Capture steer mux
         ecmdDataBufferBase & STEER_MUX = l_steerMux;
 
-        // Create new log. 
+        // Create new log.
         FAPI_SET_HWP_ERROR(l_rc, RC_MSS_MAINT_INVALID_STEER_MUX);
-        return l_rc;        
+        return l_rc;
     }
 
 
@@ -3814,7 +3814,7 @@ fapi::ReturnCode mss_get_steer_mux( const fapi::Target & i_target,
     else
     {
         FAPI_ERR("Steer mux l_dramSparePort1Index out of range.");
-        
+
         // TODO: Calling out FW high
         // FFDC: MBA target
         const fapi::Target & MBA = i_target;
@@ -3823,13 +3823,13 @@ fapi::ReturnCode mss_get_steer_mux( const fapi::Target & i_target,
         // FFDC: Capure i_rank;
         uint8_t RANK = i_rank;
         // FFDC: Capure i_muxType
-        uint8_t MUX_TYPE = i_muxType;       
+        uint8_t MUX_TYPE = i_muxType;
         // FFDC: Capture steer mux
         ecmdDataBufferBase & STEER_MUX = l_steerMux;
 
-        // Create new log. 
+        // Create new log.
         FAPI_SET_HWP_ERROR(l_rc, RC_MSS_MAINT_INVALID_STEER_MUX);
-        return l_rc;        
+        return l_rc;
     }
 
 
@@ -3850,7 +3850,7 @@ fapi::ReturnCode mss_get_steer_mux( const fapi::Target & i_target,
     else
     {
         FAPI_ERR("o_eccSpareSymbol out of range.");
-        
+
         // TODO: Calling out FW high
         // FFDC: MBA target
         const fapi::Target & MBA = i_target;
@@ -3859,13 +3859,13 @@ fapi::ReturnCode mss_get_steer_mux( const fapi::Target & i_target,
         // FFDC: Capure i_rank;
         uint8_t RANK = i_rank;
         // FFDC: Capure i_muxType
-        uint8_t MUX_TYPE = i_muxType;       
+        uint8_t MUX_TYPE = i_muxType;
         // FFDC: Capture steer mux
         ecmdDataBufferBase & STEER_MUX = l_steerMux;
 
-        // Create new log. 
+        // Create new log.
         FAPI_SET_HWP_ERROR(l_rc, RC_MSS_MAINT_INVALID_STEER_MUX);
-        return l_rc;        
+        return l_rc;
     }
 
     FAPI_INF("mss_get_steer_mux(): rank%d, port0 steer = %d, port1 steer = %d, ecc steer = %d",
@@ -3934,27 +3934,27 @@ fapi::ReturnCode mss_put_steer_mux( const fapi::Target & i_target,
 
 
     // Check for i_rank or i_muxType or i_steerType or i_symbol out of range
-    if ((i_rank>=8) || 
+    if ((i_rank>=8) ||
        !((i_muxType==mss_SteerMux::READ_MUX) || (i_muxType==mss_SteerMux::WRITE_MUX)) ||
        !((i_steerType == mss_SteerMux::DRAM_SPARE_PORT0) || (i_steerType == mss_SteerMux::DRAM_SPARE_PORT1) || (i_steerType == mss_SteerMux::ECC_SPARE)) ||
         (i_symbol >= 72))
     {
-        FAPI_ERR("i_rank or i_muxType or i_steerType or i_symbol input to mss_get_steer_mux out of range");       
+        FAPI_ERR("i_rank or i_muxType or i_steerType or i_symbol input to mss_get_steer_mux out of range");
         // TODO: Calling out FW high
         // FFDC: MBA target
         const fapi::Target & MBA = i_target;
         // FFDC: Capture i_rank;
         uint8_t RANK = i_rank;
         // FFDC: Capure i_muxType
-        uint8_t MUX_TYPE = i_muxType;       
+        uint8_t MUX_TYPE = i_muxType;
         // FFDC: Capure i_steerType
-        uint8_t STEER_TYPE = i_steerType;       
+        uint8_t STEER_TYPE = i_steerType;
         // FFDC: Capure i_symbol
-        uint8_t SYMBOL = i_symbol;       
+        uint8_t SYMBOL = i_symbol;
 
-        // Create new log. 
+        // Create new log.
         FAPI_SET_HWP_ERROR(l_rc, RC_MSS_MAINT_PUT_STEER_MUX_BAD_INPUT);
-        return l_rc;        
+        return l_rc;
     }
 
 
@@ -3991,7 +3991,7 @@ fapi::ReturnCode mss_put_steer_mux( const fapi::Target & i_target,
             if ( MSS_X8_STEER_OPTIONS_PER_PORT <= l_dramSparePort0Index )
             {
                 FAPI_ERR("No match for i_symbol = %d in mss_x8dramSparePort0Index_to_symbol[].", i_symbol);
-                
+
                 // TODO: Calling out FW high
                 // FFDC: MBA target
                 const fapi::Target & MBA = i_target;
@@ -4000,13 +4000,13 @@ fapi::ReturnCode mss_put_steer_mux( const fapi::Target & i_target,
                 // FFDC: Capure i_rank;
                 uint8_t RANK = i_rank;
                 // FFDC: Capure i_muxType
-                uint8_t MUX_TYPE = i_muxType;       
+                uint8_t MUX_TYPE = i_muxType;
                 // FFDC: Capure i_steerType
-                uint8_t STEER_TYPE = i_steerType;       
+                uint8_t STEER_TYPE = i_steerType;
                 // FFDC: Capure i_symbol
-                uint8_t SYMBOL = i_symbol;       
+                uint8_t SYMBOL = i_symbol;
 
-                // Create new log.                 
+                // Create new log.
                 FAPI_SET_HWP_ERROR(l_rc, RC_MSS_MAINT_INVALID_SYMBOL_TO_STEER);
                 return l_rc;
             }
@@ -4036,13 +4036,13 @@ fapi::ReturnCode mss_put_steer_mux( const fapi::Target & i_target,
                 // FFDC: Capure i_rank;
                 uint8_t RANK = i_rank;
                 // FFDC: Capure i_muxType
-                uint8_t MUX_TYPE = i_muxType;       
+                uint8_t MUX_TYPE = i_muxType;
                 // FFDC: Capure i_steerType
-                uint8_t STEER_TYPE = i_steerType;       
+                uint8_t STEER_TYPE = i_steerType;
                 // FFDC: Capure i_symbol
-                uint8_t SYMBOL = i_symbol;       
+                uint8_t SYMBOL = i_symbol;
 
-                // Create new log. 
+                // Create new log.
                 FAPI_SET_HWP_ERROR(l_rc, RC_MSS_MAINT_INVALID_SYMBOL_TO_STEER);
                 return l_rc;
             }
@@ -4079,13 +4079,13 @@ fapi::ReturnCode mss_put_steer_mux( const fapi::Target & i_target,
                 // FFDC: Capure i_rank;
                 uint8_t RANK = i_rank;
                 // FFDC: Capure i_muxType
-                uint8_t MUX_TYPE = i_muxType;       
+                uint8_t MUX_TYPE = i_muxType;
                 // FFDC: Capure i_steerType
-                uint8_t STEER_TYPE = i_steerType;       
+                uint8_t STEER_TYPE = i_steerType;
                 // FFDC: Capure i_symbol
-                uint8_t SYMBOL = i_symbol;       
+                uint8_t SYMBOL = i_symbol;
 
-                // Create new log. 
+                // Create new log.
                 FAPI_SET_HWP_ERROR(l_rc, RC_MSS_MAINT_INVALID_SYMBOL_TO_STEER);
                 return l_rc;
             }
@@ -4115,13 +4115,13 @@ fapi::ReturnCode mss_put_steer_mux( const fapi::Target & i_target,
                 // FFDC: Capure i_rank;
                 uint8_t RANK = i_rank;
                 // FFDC: Capure i_muxType
-                uint8_t MUX_TYPE = i_muxType;       
+                uint8_t MUX_TYPE = i_muxType;
                 // FFDC: Capure i_steerType
-                uint8_t STEER_TYPE = i_steerType;       
+                uint8_t STEER_TYPE = i_steerType;
                 // FFDC: Capure i_symbol
-                uint8_t SYMBOL = i_symbol;       
+                uint8_t SYMBOL = i_symbol;
 
-                // Create new log. 
+                // Create new log.
                 FAPI_SET_HWP_ERROR(l_rc, RC_MSS_MAINT_INVALID_SYMBOL_TO_STEER);
                 return l_rc;
             }
@@ -4159,13 +4159,13 @@ fapi::ReturnCode mss_put_steer_mux( const fapi::Target & i_target,
                 // FFDC: Capure i_rank;
                 uint8_t RANK = i_rank;
                 // FFDC: Capure i_muxType
-                uint8_t MUX_TYPE = i_muxType;       
+                uint8_t MUX_TYPE = i_muxType;
                 // FFDC: Capure i_steerType
-                uint8_t STEER_TYPE = i_steerType;       
+                uint8_t STEER_TYPE = i_steerType;
                 // FFDC: Capure i_symbol
-                uint8_t SYMBOL = i_symbol;       
+                uint8_t SYMBOL = i_symbol;
 
-                // Create new log. 
+                // Create new log.
                 FAPI_SET_HWP_ERROR(l_rc, RC_MSS_MAINT_INVALID_SYMBOL_TO_STEER);
                 return l_rc;
             }
@@ -4182,13 +4182,13 @@ fapi::ReturnCode mss_put_steer_mux( const fapi::Target & i_target,
             // FFDC: Capure i_rank;
             uint8_t RANK = i_rank;
             // FFDC: Capure i_muxType
-            uint8_t MUX_TYPE = i_muxType;       
+            uint8_t MUX_TYPE = i_muxType;
             // FFDC: Capure i_steerType
-            uint8_t STEER_TYPE = i_steerType;       
+            uint8_t STEER_TYPE = i_steerType;
             // FFDC: Capure i_symbol
-            uint8_t SYMBOL = i_symbol;       
+            uint8_t SYMBOL = i_symbol;
 
-            // Create new log. 
+            // Create new log.
             FAPI_SET_HWP_ERROR(l_rc, RC_MSS_MAINT_NO_X8_ECC_SPARE);
             return l_rc;
         }
@@ -4263,7 +4263,7 @@ fapi::ReturnCode mss_do_steering(const fapi::Target & i_target,
     uint8_t l_steerType = 0; // 0 = DRAM_SPARE_PORT0, Spare DRAM on port0
                              // 1 = DRAM_SPARE_PORT1, Spare DRAM on port1
                              // 2 = ECC_SPARE, ECC spare (used in x4 mode only)
-    
+
 
     // Check for i_rank or i_symbol out of range
     if ((i_rank>=8) || (i_symbol>=72))
@@ -4277,45 +4277,45 @@ fapi::ReturnCode mss_do_steering(const fapi::Target & i_target,
         // FFDC: Capture i_symbol;
         uint8_t SYMBOL = i_symbol;
         // FFDC: Capture i_x4EccSpare
-        uint8_t X4ECCSPARE = i_x4EccSpare;       
+        uint8_t X4ECCSPARE = i_x4EccSpare;
 
-        // Create new log. 
+        // Create new log.
         FAPI_SET_HWP_ERROR(l_rc, RC_MSS_MAINT_DO_STEER_INPUT_OUT_OF_RANGE);
-        return l_rc;        
+        return l_rc;
     }
 
     //------------------------------------------------------
     // Determine l_steerType
-    //------------------------------------------------------    
+    //------------------------------------------------------
     if (i_x4EccSpare)
     {
         l_steerType = mss_SteerMux::ECC_SPARE;
     }
     else
     {
-        // Symbols 71-40, 7-4 come from port0   
+        // Symbols 71-40, 7-4 come from port0
         if (((i_symbol<=71)&&(i_symbol>=40)) || ((i_symbol<=7)&&(i_symbol>=4)))
         {
             l_steerType = mss_SteerMux::DRAM_SPARE_PORT0;
         }
-        // Symbols 39-8, 3-0 come from port1   
+        // Symbols 39-8, 3-0 come from port1
         else
         {
-            l_steerType = mss_SteerMux::DRAM_SPARE_PORT1;        
-        }        
+            l_steerType = mss_SteerMux::DRAM_SPARE_PORT1;
+        }
     }
 
     //------------------------------------------------------
     // Update write mux
     //------------------------------------------------------
     l_rc = mss_put_steer_mux(
-    
+
         i_target,               // MBA
         i_rank,                 // Master rank: 0-7
         mss_SteerMux::WRITE_MUX,// write mux
         l_steerType,            // DRAM_SPARE_PORT0/DRAM_SPARE_PORT1/ECC_SPARE
         i_symbol);              // First symbol index of DRAM to steer around
-    
+
     if (l_rc)
     {
         FAPI_ERR("Error updating write mux");
@@ -4324,31 +4324,31 @@ fapi::ReturnCode mss_do_steering(const fapi::Target & i_target,
 
     //------------------------------------------------------
     // Wait for a periodic cal.
-    //------------------------------------------------------    
+    //------------------------------------------------------
 
     // 250 ms delay for HW mode
     const uint64_t  HW_MODE_DELAY = 250000000;
-    
-    // 200000 sim cycle delay for SIM mode  
-    const uint64_t  SIM_MODE_DELAY = 200000; 
-    
+
+    // 200000 sim cycle delay for SIM mode
+    const uint64_t  SIM_MODE_DELAY = 200000;
+
     fapiDelay(HW_MODE_DELAY, SIM_MODE_DELAY);
-    
+
     // TODO: Could be precise and find cal interval from:
     // ATTR_EFF_ZQCAL_INTERVAL (in clocks... so still have to know freq)
-    // ATTR_EFF_MEMCAL_INTERVAL (in clocks... so still have to know freq)                
+    // ATTR_EFF_MEMCAL_INTERVAL (in clocks... so still have to know freq)
 
     //------------------------------------------------------
     // Update read mux
-    //------------------------------------------------------    
+    //------------------------------------------------------
     l_rc = mss_put_steer_mux(
-    
+
         i_target,               // MBA
         i_rank,                 // Master rank: 0-7
         mss_SteerMux::READ_MUX, // read mux
         l_steerType,            // DRAM_SPARE_PORT0/DRAM_SPARE_PORT1/ECC_SPARE
         i_symbol);              // First symbol index of DRAM to steer around
-    
+
     if (l_rc)
     {
         FAPI_ERR("Error updating read mux");
@@ -4386,7 +4386,7 @@ fapi::ReturnCode mss_restore_DRAM_repairs( const fapi::Target & i_target,
     uint8_t l_dq_pair_index = 0;
     uint8_t l_bad_dq_pair_index = 0;
     uint8_t l_bad_dq_pair_count=0;
-    uint8_t l_bad_dq_pair = 0xff;
+    uint8_t __attribute__((unused)) l_bad_dq_pair = 0xff; // HACK.
     uint8_t l_dq_pair_mask = 0xC0;
     uint8_t l_byte_being_steered = 0xff;
     uint8_t l_bad_symbol = MSS_INVALID_SYMBOL;
@@ -4478,7 +4478,7 @@ fapi::ReturnCode mss_restore_DRAM_repairs( const fapi::Target & i_target,
     {
         // For each DIMM select on the given port:0,1
         for(l_dimm=0; l_dimm<DIMM_DQ_MAX_MBAPORT_DIMMS; l_dimm++ )
-        {         
+        {
             if (l_valid_dimm[l_port][l_dimm])
             {
                 // For each rank select on the given DIMM select:0,1,2,3
@@ -4573,7 +4573,7 @@ fapi::ReturnCode mss_restore_DRAM_repairs( const fapi::Target & i_target,
                                 l_dq_pair_mask = l_dq_pair_mask >> 2;
                             }
 
-                            // If spare is bad but not used, not valid to try repair 
+                            // If spare is bad but not used, not valid to try repair
                             if ( l_spare_exists && (l_byte==9) && (l_bad_dq_pair_count > 0) && !l_spare_used)
                             {
                                 FAPI_ERR("WARNING: port=%d, dimm=%d, rank=%d, l_dqBitmap[%d] = %02x, Bad unused spare - no valid repair",
@@ -4627,7 +4627,7 @@ fapi::ReturnCode mss_restore_DRAM_repairs( const fapi::Target & i_target,
 
                                     // Remember which byte is being steered
                                     // so we know where to apply chip or symbol mark
-                                    // if spare turns out to be bad 
+                                    // if spare turns out to be bad
                                     l_byte_being_steered = l_byte;
 
                                     // Update which rank 0-7 has had repairs applied
@@ -4715,13 +4715,13 @@ fapi::ReturnCode mss_restore_DRAM_repairs( const fapi::Target & i_target,
                                     l_port, l_dimm, l_rank, l_byte, l_dqBitmap[l_byte], 8*l_byte, 8*l_byte+7,l_chip_mark, l_chip_mark+3 );
 
                                 }
-     
+
                                 // Else, more bad bits than we can repair so update o_repairs_exceeded
                                 else
                                 {
-                                    o_repairs_exceeded |= l_repairs_exceeded_translation[l_port][l_dimm]; 
+                                    o_repairs_exceeded |= l_repairs_exceeded_translation[l_port][l_dimm];
 
-                                    l_repair_status[l_port][l_dimm][l_rank]=MSS_REPAIRS_EXCEEDED; 
+                                    l_repair_status[l_port][l_dimm][l_rank]=MSS_REPAIRS_EXCEEDED;
 
                                     // If port1 repairs exceeded and port0 had a repair, say port0 repairs exceeded too
                                     if ((l_repair_status[1][l_dimm][l_rank] == MSS_REPAIRS_EXCEEDED) && (l_repair_status[0][l_dimm][l_rank] == MSS_REPAIRS_APPLIED))
@@ -4736,7 +4736,7 @@ fapi::ReturnCode mss_restore_DRAM_repairs( const fapi::Target & i_target,
                                     // Break out of loop on bytes
                                     break;
                                 }
-                            } // End If bad symbol count > 1 
+                            } // End If bad symbol count > 1
 
 
                             //Else if bad symbol count = 1
@@ -4746,7 +4746,7 @@ fapi::ReturnCode mss_restore_DRAM_repairs( const fapi::Target & i_target,
                                 if (!l_symbol_mark_used)
                                 {
 
-                                    // NOTE: Have to do a read/modify/write so we 
+                                    // NOTE: Have to do a read/modify/write so we
                                     // only update symbol mark, and don't overwrite
                                     // chip mark.
 
@@ -4808,7 +4808,7 @@ fapi::ReturnCode mss_restore_DRAM_repairs( const fapi::Target & i_target,
                                     }
 
                                     FAPI_ERR("WARNING: port=%d, dimm=%d, rank=%d, l_dqBitmap[%d] = %02x, dq %d-%d, symbol %d, FIXED SYMBOL WITH X2 SYMBOL MARK",
-                                    l_port, l_dimm, l_rank, l_byte, l_dqBitmap[l_byte], 
+                                    l_port, l_dimm, l_rank, l_byte, l_dqBitmap[l_byte],
                                     8*l_byte + 2*l_bad_dq_pair_index, 8*l_byte + 2*l_bad_dq_pair_index + 1,
                                     l_symbol_mark );
 
@@ -4857,7 +4857,7 @@ fapi::ReturnCode mss_restore_DRAM_repairs( const fapi::Target & i_target,
 
                                     // Remember which byte is being steered
                                     // so we where to apply chip or symbol mark
-                                    // if spare turns out to be bad 
+                                    // if spare turns out to be bad
                                     l_byte_being_steered = l_byte;
 
                                     // Update which rank 0-7 has had repairs applied
@@ -4872,7 +4872,7 @@ fapi::ReturnCode mss_restore_DRAM_repairs( const fapi::Target & i_target,
                                     }
 
                                     FAPI_ERR("WARNING: port=%d, dimm=%d, rank=%d, l_dqBitmap[%d] = %02x, dq %d-%d, symbols %d-%d, FIXED SYMBOL WITH X8 STEER",
-                                    l_port, l_dimm, l_rank, l_byte, l_dqBitmap[l_byte], 
+                                    l_port, l_dimm, l_rank, l_byte, l_dqBitmap[l_byte],
                                     8*l_byte + 2*l_bad_dq_pair_index, 8*l_byte + 2*l_bad_dq_pair_index + 1,
                                     l_bad_symbol,
                                     l_bad_symbol + 3);
@@ -4883,7 +4883,7 @@ fapi::ReturnCode mss_restore_DRAM_repairs( const fapi::Target & i_target,
                                 else if (!l_chip_mark_used)
                                 {
 
-                                    // NOTE: Have to do a read/modify/write so we 
+                                    // NOTE: Have to do a read/modify/write so we
                                     // only update chip mark, and don't overwrite
                                     // symbol mark.
 
@@ -4945,7 +4945,7 @@ fapi::ReturnCode mss_restore_DRAM_repairs( const fapi::Target & i_target,
                                     }
 
                                     FAPI_ERR("WARNING: port=%d, dimm=%d, rank=%d, l_dqBitmap[%d] = %02x, dq %d-%d, symbols %d-%d, FIXED SYMBOL WITH X8 CHIP MARK",
-                                    l_port, l_dimm, l_rank, l_byte, l_dqBitmap[l_byte], 
+                                    l_port, l_dimm, l_rank, l_byte, l_dqBitmap[l_byte],
                                     8*l_byte + 2*l_bad_dq_pair_index, 8*l_byte + 2*l_bad_dq_pair_index + 1,
                                     l_chip_mark,
                                     l_chip_mark + 3);
@@ -5066,7 +5066,7 @@ fapi::ReturnCode mss_IPL_UE_isolation( const fapi::Target & i_target,
       MAINT0_MBA_MAINT_BUFF3_DATA2_0x03010687, // 5     DW11
       MAINT0_MBA_MAINT_BUFF1_DATA3_0x03010668, // 6     DW13
       MAINT0_MBA_MAINT_BUFF3_DATA3_0x03010688}},//7     DW15
-      
+
     // UE trap 1:
       // Port0
     {{MAINT0_MBA_MAINT_BUFF0_DATA4_0x03010659, // 0     DW0
@@ -5106,13 +5106,13 @@ fapi::ReturnCode mss_IPL_UE_isolation( const fapi::Target & i_target,
     uint8_t l_port = 0;    // 0,1
     uint8_t l_beat = 0;    // 0-7
     uint8_t l_byte = 0;    // 0-9
-    uint8_t l_loop = 0;        
+    uint8_t l_loop = 0;
     ecmdDataBufferBase l_data(64);
     ecmdDataBufferBase l_UE_trap0_signature(64);
     ecmdDataBufferBase l_UE_trap1_signature(64);
     ecmdDataBufferBase l_mbmmr(64);
     ecmdDataBufferBase l_mbmct(64);
-    ecmdDataBufferBase l_mbstr(64);    
+    ecmdDataBufferBase l_mbstr(64);
     uint8_t l_initPattern = 0;
     uint8_t l_cmd_type = 0;
     fapi::Target l_targetCentaur;
@@ -5130,7 +5130,7 @@ fapi::ReturnCode mss_IPL_UE_isolation( const fapi::Target & i_target,
     uint8_t l_ECC_c3_c2_c1_c0_23 = 0;
     uint8_t l_dramSparePort0Symbol = MSS_INVALID_SYMBOL;
     uint8_t l_dramSparePort1Symbol = MSS_INVALID_SYMBOL;
-    uint8_t l_eccSpareSymbol = MSS_INVALID_SYMBOL;  
+    uint8_t l_eccSpareSymbol = MSS_INVALID_SYMBOL;
 
     //----------------------------------------------------
     // Initialize o_bad_bits
@@ -5167,7 +5167,7 @@ fapi::ReturnCode mss_IPL_UE_isolation( const fapi::Target & i_target,
 
     // MBMMR[4:7] contains the pattern index
     l_rc = fapiGetScom(l_targetCentaur, mss_mbmmr[l_mbaPosition], l_mbmmr);
-    if(l_rc) return l_rc;   
+    if(l_rc) return l_rc;
     l_ecmd_rc |= l_mbmmr.extractPreserve(&l_initPattern, 4, 4, 8-4);
     if(l_ecmd_rc)
     {
@@ -5212,7 +5212,7 @@ fapi::ReturnCode mss_IPL_UE_isolation( const fapi::Target & i_target,
     //----------------------------------------------------
     l_rc = fapiGetScom(i_target, MAINT0_MBA_MAINT_BUFF0_DATA0_0x03010655, l_UE_trap0_signature);
     if(l_rc) return l_rc;
-    
+
     l_rc = fapiGetScom(i_target, MAINT0_MBA_MAINT_BUFF0_DATA4_0x03010659, l_UE_trap1_signature);
     if(l_rc) return l_rc;
 
@@ -5233,27 +5233,27 @@ fapi::ReturnCode mss_IPL_UE_isolation( const fapi::Target & i_target,
     else
     {
         FAPI_ERR("IPL UE trapping didn't work.");
-        
+
         // Read for FFDC: MBSTR[59]: UE trap enable bit
         l_rc = fapiGetScom(l_targetCentaur, mss_mbstr[l_mbaPosition], l_mbstr);
         if(l_rc) return l_rc;
-                
+
 
         // Calling out MBA target high, deconfig, gard
         const fapi::Target & MBA = i_target;
         // FFDC: Capture UE trap contents
         ecmdDataBufferBase & UE_TRAP0 = l_UE_trap0_signature;
-        ecmdDataBufferBase & UE_TRAP1 = l_UE_trap1_signature;        
+        ecmdDataBufferBase & UE_TRAP1 = l_UE_trap1_signature;
         // FFDC: MBMCT[0:4] contains the cmd type
-        ecmdDataBufferBase & MBMCT = l_mbmct;  
+        ecmdDataBufferBase & MBMCT = l_mbmct;
         // FFDC: MBMMR[4:7] contains the pattern index
-        ecmdDataBufferBase & MBMMR = l_mbmmr;  
+        ecmdDataBufferBase & MBMMR = l_mbmmr;
         // FFDC: MBSTR[59]: UE trap enable bit
-        ecmdDataBufferBase & MBSTR = l_mbstr;  
-        
+        ecmdDataBufferBase & MBSTR = l_mbstr;
+
         // Create new log
         FAPI_SET_HWP_ERROR(l_rc, RC_MSS_MAINT_NO_UE_TRAP);
-   
+
         return l_rc;
     }
 
@@ -5267,7 +5267,7 @@ fapi::ReturnCode mss_IPL_UE_isolation( const fapi::Target & i_target,
     {
         l_tmp_data_diff[0] = 0;
         l_tmp_data_diff[1] = 0;
-        
+
         FAPI_INF("port%d", l_port);
         for(l_beat=0; l_beat<8; l_beat++ )
         {
@@ -5287,7 +5287,7 @@ fapi::ReturnCode mss_IPL_UE_isolation( const fapi::Target & i_target,
             FAPI_INF("***************************************** l_tmp_diff: 0x%.8X 0x%.8X", l_tmp_data_diff[0], l_tmp_data_diff[1]);
         }
 
-        // Put l_tmp_diff into a ecmdDataBufferBase to make it easier 
+        // Put l_tmp_diff into a ecmdDataBufferBase to make it easier
         // to get into o_bad_bits
         l_ecmd_rc |= l_diff.insert(l_tmp_data_diff[0], 0, 32, 0);
         l_ecmd_rc |= l_diff.insert(l_tmp_data_diff[1], 32, 32, 0);
@@ -5316,7 +5316,7 @@ fapi::ReturnCode mss_IPL_UE_isolation( const fapi::Target & i_target,
     //----------------------------------------------------
 
     for(l_loop=0; l_loop<4; l_loop++ )
-    {   
+    {
         l_tag_MDI = 0;
         l_tmp_65th_byte_diff = 0;
 
@@ -5348,7 +5348,7 @@ fapi::ReturnCode mss_IPL_UE_isolation( const fapi::Target & i_target,
         {
             // Checkbit0_1 maps to port0 bit 64, which is on byte8
             o_bad_bits[0][8] |= 0x80;
-        }        
+        }
 
         // Check for mismatch in bit 1: Tag0_2
         if (l_tmp_65th_byte_diff & 0x40)
@@ -5378,7 +5378,7 @@ fapi::ReturnCode mss_IPL_UE_isolation( const fapi::Target & i_target,
     //----------------------------------------------------
 
     for(l_loop=0; l_loop<4; l_loop++ )
-    {   
+    {
         l_ECC = 0;
 
         l_rc = fapiGetScom(i_target, maintBufferRead65thByteRegs[l_UE_trap][l_loop], l_data);
@@ -5424,7 +5424,7 @@ fapi::ReturnCode mss_IPL_UE_isolation( const fapi::Target & i_target,
     o_bad_bits[0][8] |= l_ECC_c6_c5_c4_01 | l_ECC_c6_c5_c4_23;
     // The 8 bits of ECC_c3_c2_c1_c0 maps to byte8 byte on port1
     o_bad_bits[1][8] |= l_ECC_c3_c2_c1_c0_01 | l_ECC_c3_c2_c1_c0_23;
-    
+
 
     //----------------------------------------------------
     // Spare: Mark byte9 bad if bad bits found in position being steered
@@ -5471,7 +5471,7 @@ fapi::ReturnCode mss_IPL_UE_isolation( const fapi::Target & i_target,
     }
 
     //----------------------------------------------------
-    // Show results 
+    // Show results
     //----------------------------------------------------
 
     FAPI_ERR("WARNING: IPL UE isolation results for rank = %d.", i_rank);

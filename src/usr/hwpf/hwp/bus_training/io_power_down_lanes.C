@@ -27,19 +27,19 @@
 // *!                   *** IBM Confidential ***
 // *!***************************************************************************
 // *! FILENAME             : io_read_erepair.C
-// *! TITLE                : 
+// *! TITLE                :
 // *! DESCRIPTION          : Power down bad lanes
-// *! CONTEXT              : 
+// *! CONTEXT              :
 // *!
 // *! OWNER  NAME          : Varghese, Varkey         Email: varkey.kv@in.ibm.com
-// *! BACKUP NAME          : Swaminathan, Janani      Email: jaswamin@in.ibm.com      
+// *! BACKUP NAME          : Swaminathan, Janani      Email: jaswamin@in.ibm.com
 // *!
 // *!***************************************************************************
 // CHANGE HISTORY:
 //------------------------------------------------------------------------------
 // Version:|Author: | Date:  | Comment:
 // --------|--------|--------|--------------------------------------------------
-//   1.0   |varkeykv||Initial check in 
+//   1.0   |varkeykv||Initial check in
 //------------------------------------------------------------------------------
 
 #include <fapi.H>
@@ -55,7 +55,7 @@ using namespace fapi;
 /*
  This function will perform power down of lanes on any IO target MEMBUF,MCS , XBUS or ABUS
  * Bad lanes are powered down , but caller is expected to logically disable lanes by calling restore_repair prior
- * to calling this HWP 
+ * to calling this HWP
 */
 
 ReturnCode io_power_down_lanes(const Target& target,const std::vector<uint8_t> &tx_lanes,const std::vector<uint8_t> &rx_lanes)
@@ -69,28 +69,28 @@ ReturnCode io_power_down_lanes(const Target& target,const std::vector<uint8_t> &
   io_interface_t interface=CP_IOMC0_P0; // Since G
   uint32_t rc_ecmd=0;
   uint8_t clock_group=0;
-  uint8_t start_group=0;
-  uint8_t end_group=0;
-  
+  uint8_t __attribute__((unused)) start_group=0; // HACK
+  uint8_t __attribute__((unused)) end_group=0; // HACK
+
     rc_ecmd=mask.flushTo1();
     if(rc_ecmd)
     {
         rc.setEcmdError(rc_ecmd);
         return(rc);
     }
-    // Both TX and RX power down bits are on bit 0 
+    // Both TX and RX power down bits are on bit 0
     rc_ecmd=mask.clearBit(0);
     if(rc_ecmd)
     {
         rc.setEcmdError(rc_ecmd);
         return(rc);
     }
-  
-  // Check which type of bus this is and do setup needed 
+
+  // Check which type of bus this is and do setup needed
   if(target.getType() == fapi::TARGET_TYPE_ABUS_ENDPOINT) {
     start_group=0;
     end_group=0;
-    interface=CP_FABRIC_A0; // base scom for A bus , assume translation to A1 by PLAT 
+    interface=CP_FABRIC_A0; // base scom for A bus , assume translation to A1 by PLAT
   }
   else if(target.getType() == fapi::TARGET_TYPE_XBUS_ENDPOINT ) {
     start_group=0;
@@ -112,7 +112,7 @@ ReturnCode io_power_down_lanes(const Target& target,const std::vector<uint8_t> &
       FAPI_SET_HWP_ERROR(rc, IO_RUN_TRAINING_INVALID_INVOCATION_RC);
       return(rc);
   }
-  
+
    FAPI_INF("Power down IO lanes\n");
 
       rc_ecmd|=data.flushTo0();
@@ -123,26 +123,26 @@ ReturnCode io_power_down_lanes(const Target& target,const std::vector<uint8_t> &
           rc.setEcmdError(rc_ecmd);
           return(rc);
       }
-      
-    //TX Lanes power down 
+
+    //TX Lanes power down
       for(uint8_t i=0;i<tx_lanes.size();++i){
         clock_group=0;
         lane=tx_lanes[i];
-        //For Xbus figure out the clock group number 
+        //For Xbus figure out the clock group number
         if(interface==CP_FABRIC_X0){
           while(lane>(xbus_lanes_per_group-1)){
             lane=lane-xbus_lanes_per_group;
             clock_group++;
           }
         }
-        //Power down this lane 
+        //Power down this lane
         rc = GCR_write( target, interface, tx_mode_pl, clock_group,  lane,  data,mask );
         if(rc){return rc;}
 
       }
 
 
-      // Process RX lane powerdown 
+      // Process RX lane powerdown
       for(uint8_t i=0;i<rx_lanes.size();++i){
         clock_group=0;
         lane=rx_lanes[i];
@@ -153,7 +153,7 @@ ReturnCode io_power_down_lanes(const Target& target,const std::vector<uint8_t> &
             clock_group++;
           }
         }
-        //Power down this lane 
+        //Power down this lane
         rc = GCR_write( target, interface, rx_mode_pl, clock_group,  lane,  data,mask );
         if(rc){return rc;}
       }

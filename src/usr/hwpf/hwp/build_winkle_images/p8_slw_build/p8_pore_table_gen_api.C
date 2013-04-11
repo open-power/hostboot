@@ -61,8 +61,8 @@
 */
 uint32_t p8_pore_gen_cpureg(  void      *io_image,
                               uint32_t  i_sizeImage,
-                              uint32_t  i_regName, 
-                              uint64_t  i_regData, 
+                              uint32_t  i_regName,
+                              uint64_t  i_regData,
                               uint32_t  i_coreId,   // [0:15]
                               uint32_t  i_threadId)
 {
@@ -83,12 +83,12 @@ uint32_t p8_pore_gen_cpureg(  void      *io_image,
   uint32_t  sprSwiz=0;
 #ifdef DYNAMIC_RAM_TABLE
   uint32_t  iCore=0, sizeTableThis=0, sizeTableAll=0;
-  void      *hostRamEntryFirstAll; // First entry of all Ram tables. 
-  void      *hostRamEntryLastAll;  // Last entry of all Ram tables. 
+  void      *hostRamEntryFirstAll; // First entry of all Ram tables.
+  void      *hostRamEntryLastAll;  // Last entry of all Ram tables.
   uint64_t  xipRamTableNext;
 	void      *hostRamTableNext;
 #endif
-  
+
 	// -------------------------------------------------------------------------
   // Validate Ramming parameters.
   //
@@ -121,7 +121,7 @@ uint32_t p8_pore_gen_cpureg(  void      *io_image,
   if (rcLoc)
     return IMGBUILD_ERR_RAM_INVALID_PARM;
   rcLoc = 0;
-  
+
   // -------------------------------------------------------------------------
   // Validate image and get pointer to SLW section.
   //
@@ -146,7 +146,7 @@ uint32_t p8_pore_gen_cpureg(  void      *io_image,
   }
   hostSlwRamSection = (void*)((uint8_t*)io_image + xipSection.iv_offset);
   sbe_xip_host2pore( io_image, hostSlwRamSection, &xipSlwRamSection);
-      
+
   // -------------------------------------------------------------------------
   // Cross check SPR register and table defines
   //
@@ -155,7 +155,7 @@ uint32_t p8_pore_gen_cpureg(  void      *io_image,
     return IMGBUILD_ERR_RAM_HDRS_NOT_SYNCED;
   }
   if (xipSection.iv_size!=SLW_RAM_TABLE_SIZE+SLW_SCOM_TABLE_SIZE_ALL)  {
-    MY_ERR("SLW table size in *.H header file differs from SLW section size in image.\n"); 
+    MY_ERR("SLW table size in *.H header file differs from SLW section size in image.\n");
     MY_ERR("Check code or image version.\n");
     return IMGBUILD_ERR_RAM_HDRS_NOT_SYNCED;
   }
@@ -169,7 +169,7 @@ uint32_t p8_pore_gen_cpureg(  void      *io_image,
   MY_INF("Image validation and size checks - OK\n");
   MY_INF("\tImage size      = %i\n",i_sizeImage);
   MY_INF("\tSLW section size=  %i\n",xipSection.iv_size);
-  
+
   // -------------------------------------------------------------------------
   // Locate RAM vector and locate RAM table associated with "This" core ID.
   //
@@ -188,13 +188,13 @@ uint32_t p8_pore_gen_cpureg(  void      *io_image,
     hostRamTableThis = NULL;
     bNewTable = 1;
   }
-  
+
 #ifdef DYNAMIC_RAM_TABLE
   hostRamEntryFirstAll = hostSlwRamSection;
   hostRamEntryLastAll  = hostRamEntryFirstAll;
 
   // -------------------------------------------------------------------------
-  // Walk the RAM vector and RAM tables to 
+  // Walk the RAM vector and RAM tables to
   // - determine size of present tables, sizeTableAll - we'll need it when/if shifting entries forward
   // - check for RAM table overflow.
   //
@@ -237,14 +237,14 @@ uint32_t p8_pore_gen_cpureg(  void      *io_image,
   }
 #else
   // -------------------------------------------------------------------------
-  // We don't need to walk the "this" RAM table to check for RAM table 
+  // We don't need to walk the "this" RAM table to check for RAM table
 	//   as this is done further down during insertion of the entry.
   //
 #endif
-  
-  
+
+
   // -------------------------------------------------------------------------
-  // Walk the "This" core ID's RAM table to 
+  // Walk the "This" core ID's RAM table to
   // - determine insertion point, hostRamEntryThis, of new RAM entry
   //
   if (bNewTable)  {
@@ -258,11 +258,11 @@ uint32_t p8_pore_gen_cpureg(  void      *io_image,
     bEntryEnd = 1;
 #else
     // Append to beginning of agreed upon static position for this coreId.
-    hostRamTableThis = (void*)((uint8_t*)hostSlwRamSection + 
+    hostRamTableThis = (void*)((uint8_t*)hostSlwRamSection +
 		                                                  (uint32_t)(SLW_RAM_TABLE_SIZE/SLW_MAX_CORES)*i_coreId );
     hostRamEntryThis = hostRamTableThis;
     // ...update RAM vector (since it is currently NULL)
-    *((uint64_t*)hostRamVector + i_coreId) = myRev64( xipSlwRamSection + 
+    *((uint64_t*)hostRamVector + i_coreId) = myRev64( xipSlwRamSection +
 		                                                  (uint32_t)(SLW_RAM_TABLE_SIZE/SLW_MAX_CORES)*i_coreId );
     bEntryEnd = 1;
 #endif
@@ -308,8 +308,8 @@ uint32_t p8_pore_gen_cpureg(  void      *io_image,
   // (Need to do this before inserting new RAM entry at hostRamEntryThis.)
   //
   if (!bNewTable)
-    for ( ramEntryNext=(RamTableEntry*)hostRamEntryLastAll; 
-          ramEntryNext>=(RamTableEntry*)hostRamEntryThis; 
+    for ( ramEntryNext=(RamTableEntry*)hostRamEntryLastAll;
+          ramEntryNext>=(RamTableEntry*)hostRamEntryThis;
           ramEntryNext--  )  {
       *(ramEntryNext+1) = *ramEntryNext;
       if ((ramEntryNext+1)->instr!=ramEntryNext->instr)  {
@@ -337,7 +337,7 @@ uint32_t p8_pore_gen_cpureg(  void      *io_image,
   	                      ( ((uint32_t)headerType) << RAM_HEADER_TYPE_START_C   & RAM_HEADER_TYPE_MASK_C )   |
   	                      (            i_regName   << RAM_HEADER_SPRN_START_C   & RAM_HEADER_SPRN_MASK_C )   |
   	                      (            i_threadId  << RAM_HEADER_THREAD_START_C & RAM_HEADER_THREAD_MASK_C );
-  	// ...do the SPR instr 
+  	// ...do the SPR instr
   	sprSwiz = i_regName>>5 | (i_regName & 0x0000001f)<<5;
   	if (sprSwiz!=SLW_SPR_REGS[iReg].swizzled)  {
   	  MY_ERR("Inconsistent swizzle rules implemented. Check code. Dumping data.\n");
@@ -389,7 +389,7 @@ uint32_t p8_pore_gen_cpureg(  void      *io_image,
 uint32_t p8_pore_gen_scom(  void       *io_image,
                             uint32_t   i_sizeImage,
                             uint32_t   i_scomAddr,
-                            uint32_t   i_coreId,     // [0:15] 
+                            uint32_t   i_coreId,     // [0:15]
                             uint64_t   i_scomData,
                             uint32_t   i_operation,  // [0:5]
 														uint32_t   i_section)      // [0,2,3]
@@ -399,7 +399,7 @@ uint32_t p8_pore_gen_scom(  void       *io_image,
   uint32_t  operation=0;
   uint32_t  entriesCount=0, entriesMatch=0, entriesNOP=0;
   uint32_t  sizeImageIn=0;
-  void      *hostSlwSection;
+  void      __attribute__((unused)) *hostSlwSection; // HACK
   uint64_t  xipScomTableThis;
   void      *hostScomVector, *hostScomTableThis;
   void      *hostScomEntryNext;       // running entry pointer
@@ -410,7 +410,7 @@ uint32_t p8_pore_gen_scom(  void       *io_image,
   SbeXipSection xipSection;
   SbeXipItem    xipTocItem;
   PoreInlineContext ctx;
-  
+
   // -------------------------------------------------------------------------
   // Validate Scom parameters.
   //
@@ -433,7 +433,7 @@ uint32_t p8_pore_gen_scom(  void       *io_image,
   if (rcLoc)
     return IMGBUILD_ERR_SCOM_INVALID_PARM;
   rcLoc = 0;
-  
+
   // -------------------------------------------------------------------------
   // Validate image and get pointer to SLW section.
   //
@@ -459,7 +459,7 @@ uint32_t p8_pore_gen_scom(  void       *io_image,
   hostSlwSection = (void*)((uint8_t*)io_image + xipSection.iv_offset);
   // ...check .slw section size
   if (xipSection.iv_size!=SLW_RAM_TABLE_SIZE+SLW_SCOM_TABLE_SIZE_ALL)  {
-    MY_ERR("SLW table size in *.H header file differs from SLW section size in image.\n"); 
+    MY_ERR("SLW table size in *.H header file differs from SLW section size in image.\n");
     MY_ERR("Check code or image version.\n");
     return IMGBUILD_ERR_SCOM_HDRS_NOT_SYNCD;
   }
@@ -475,9 +475,9 @@ uint32_t p8_pore_gen_scom(  void       *io_image,
   MY_INF("Image validation and size checks - OK\n");
   MY_INF("\tImage size      = %i\n",i_sizeImage);
   MY_INF("\tSLW section size=  %i\n",xipSection.iv_size);
-  
+
   // -------------------------------------------------------------------------
-  // Locate Scom vector according to i_section and then locate Scom table 
+  // Locate Scom vector according to i_section and then locate Scom table
 	//   associated with "This" core ID.
   //
 	switch (i_section)  {
@@ -528,7 +528,7 @@ uint32_t p8_pore_gen_scom(  void       *io_image,
   //   doesn't include NOP entries.)
   // - If no NOP found, insert at first RET.
   //
-  
+
   // First, create search strings for addr, nop and ret.
   // Note, the following IIS will also be used in case of
 	// - i_operation==append
@@ -552,7 +552,7 @@ uint32_t p8_pore_gen_scom(  void       *io_image,
     MY_ERR("pore_NOP generated rc = %d", ctx.error);
     return IMGBUILD_ERR_PORE_INLINE_ASM;
   }
-  
+
   // Second, search for addr and nop in relevant coreId table until first RET.
   // Note:
   // - We go through ALL entries until first RET instr. We MUST find a RET instr,
@@ -560,7 +560,7 @@ uint32_t p8_pore_gen_scom(  void       *io_image,
 	// - Count number of entries and check for overrun, though we'll continue
 	//   searching until we find an RET. (Should be improved.)
   // - The STI(+SCOM_addr) opcode is in the 2nd word of the Scom entry.
-  // - For an append operation, if a NOP is found (before a RET obviously), the 
+  // - For an append operation, if a NOP is found (before a RET obviously), the
 	//   SCOM is replacing that NNNN sequence.
   hostScomEntryNext = hostScomTableThis;
   while (memcmp(hostScomEntryNext, bufRET, sizeof(uint32_t))) {
@@ -576,7 +576,7 @@ uint32_t p8_pore_gen_scom(  void       *io_image,
     hostScomEntryNext = (void*)((uintptr_t)hostScomEntryNext + XIPSIZE_SCOM_ENTRY);
   }
   hostScomEntryRET = hostScomEntryNext; // The last EntryNext will always be the first RET.
-  
+
 	switch (i_section)  {
 	case 0:
 	  if (entriesCount>=SLW_MAX_SCOMS_NC)  {
@@ -651,7 +651,7 @@ uint32_t p8_pore_gen_scom(  void       *io_image,
       i_operation, P8_PORE_SCOM_FIRST_OP, P8_PORE_SCOM_LAST_OP);
     return IMGBUILD_ERR_SCOM_INVALID_PARM;
   }
-  
+
   // -------------------------------------------------------------------------
   // Assuming pre-allocated Scom table (after pre-allocated Ram table):
   // - Table is pre-filled with RNNN ISS.
@@ -660,7 +660,7 @@ uint32_t p8_pore_gen_scom(  void       *io_image,
   // - Remember to check for more than SLW_MAX_SCOMS_NC entries!
   switch (operation)  {
 
-  case P8_PORE_SCOM_APPEND:  // Append a Scom at first occurring NNNN or RNNN,  
+  case P8_PORE_SCOM_APPEND:  // Append a Scom at first occurring NNNN or RNNN,
     if (hostScomEntryNOP)  {
       // ... replace the NNNN
 			MY_INF("Append at NOP\n");
@@ -695,7 +695,7 @@ uint32_t p8_pore_gen_scom(  void       *io_image,
 			MY_INF("Replace existing Scom w/NOPs\n");
       memcpy(hostScomEntryMatch,(void*)bufIIS,XIPSIZE_SCOM_ENTRY);
 		}
-    else  { 
+    else  {
       // do nothing, and assume everything is fine, since we did no damage.
     }
     break;
@@ -703,10 +703,10 @@ uint32_t p8_pore_gen_scom(  void       *io_image,
     if (hostScomEntryMatch)  {
       // ... do an OR on the data (which is the 2nd DWord in the entry)
 			MY_INF("Overlay existing Scom - OR case\n");
-      *((uint64_t*)hostScomEntryMatch+1) = 
+      *((uint64_t*)hostScomEntryMatch+1) =
         *((uint64_t*)hostScomEntryMatch+1) | myRev64(i_scomData);
 		}
-    else  { 
+    else  {
       MY_ERR("No Scom entry found to do OR operation with.\n");
       return IMGBUILD_ERR_SCOM_ENTRY_NOT_FOUND;
     }
@@ -715,10 +715,10 @@ uint32_t p8_pore_gen_scom(  void       *io_image,
     if (hostScomEntryMatch)  {
       // ... do an AND on the data (which is the 2nd DWord in the entry)
 			MY_INF("Overlay existing Scom - AND case\n");
-      *((uint64_t*)hostScomEntryMatch+1) = 
+      *((uint64_t*)hostScomEntryMatch+1) =
         *((uint64_t*)hostScomEntryMatch+1) & myRev64(i_scomData);
 		}
-    else  { 
+    else  {
       MY_ERR("No Scom entry found to do AND operation with.\n");
       return IMGBUILD_ERR_SCOM_ENTRY_NOT_FOUND;
     }
@@ -734,7 +734,7 @@ uint32_t p8_pore_gen_scom(  void       *io_image,
   default:
     MY_ERR("Impossible value of operation (=%i). Check code.\n",operation);
     return IMGBUILD_ERR_CHECK_CODE;
-  
+
   }  // End of switch(operation)
 
   return rc;

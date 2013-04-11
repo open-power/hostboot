@@ -30,7 +30,7 @@
 // *! OWNER NAME: Greg Still         Email: stillgs@us.ibm.com
 // *!
 /// \file p8_pfet_init.C
-/// \brief Configure and initialize the EX PFET controllers based on 
+/// \brief Configure and initialize the EX PFET controllers based on
 ///     attribute information and removes the override function.
 ///
 /// High-level procedure flow:
@@ -39,9 +39,9 @@
 ///     Check for valid parameters
 ///     if PM_CONFIG {
 ///         Nop (all the work is done in PM_INIT as this procedure is not run
-///         for the PM Reset path (eg, only done at IPL) 
+///         for the PM Reset path (eg, only done at IPL)
 ///     else if PM_INIT {
-///         Get the delay setting held in platform attributes 
+///         Get the delay setting held in platform attributes
 ///         Convert these to hardware values
 ///         for each EX chiplet {
 ///             Store the Core VDD delay and VRET/VOFF values
@@ -149,7 +149,7 @@ p8_pfet_init(const Target& i_target, uint32_t mode)
 
     /// -------------------------------
     /// Unsupported Mode
-    else 
+    else
     {
 
         FAPI_ERR("Unknown mode passed to p8_pfet_init. Mode %x ....", mode);
@@ -173,10 +173,10 @@ pfet_init(const Target& i_target)
     std::vector<fapi::Target>   l_exChiplets;
     uint8_t                     l_functional = 0;
     uint8_t                     l_ex_number = 0;
-    bool                        error_flag = false;
-    
+    bool __attribute__((unused)) error_flag = false; // HACK
+
     uint64_t                    address;
-    
+
     uint8_t                     core_vret_voff_value;
     uint8_t                     eco_vret_voff_value;
 
@@ -214,7 +214,7 @@ pfet_init(const Target& i_target)
     ///            ATTR_PM_PFET_POWERUP_ECO_DELAY0
     ///            ATTR_PM_PFET_POWERUP_ECO_DELAY1
     ///            ATTR_PM_PFET_POWERDOWN_CORE_DELAY0
-    ///            ATTR_PM_PFET_POWERDOWN_CORE_DELAY1 
+    ///            ATTR_PM_PFET_POWERDOWN_CORE_DELAY1
     ///            ATTR_PM_PFET_POWERDOWN_ECO_DELAY0
     ///            ATTR_PM_PFET_POWERDOWN_ECO_DELAY1
     ///       Output feature attributes
@@ -235,11 +235,11 @@ pfet_init(const Target& i_target)
     {
 
         FAPI_INF("Executing pfet_config...");
-        
+
         // Harcoded defaults that don't come via attribute
         // Vret (not supported) = "off" (stage 0 = 0xB) for bits 0:3
         // Voff                 = "off" (stage 01 = 0xB) for bits 4:7
-        // \todo  The scan0 values are zeros which indicate that the 
+        // \todo  The scan0 values are zeros which indicate that the
         // power won't go off.  Double check the setting below!!!
         core_vret_voff_value = 0xBB;
         eco_vret_voff_value = 0xBB;
@@ -269,7 +269,7 @@ pfet_init(const Target& i_target)
 	    //            FAPI_SET_HWP_ERROR(l_rc, RC_PROCPM_PFET_GET_ATTR);
             break;
         }
-        
+
         /// ----------------------------------------------------------
         l_rc = FAPI_ATTR_GET(   ATTR_PM_PFET_POWERUP_CORE_DELAY0,
                                 &i_target,
@@ -422,9 +422,9 @@ pfet_init(const Target& i_target)
         attr_pm_pfet_powerdown_eco_delay1_value         =
                 convert_delay_to_value( attr_pm_pfet_powerdown_eco_delay1 ,
                                         attr_proc_refclk_frequency);
-        
+
         // Choosing always delay0
-        attr_pm_pfet_powerup_core_sequence_delay_select         = 0;  
+        attr_pm_pfet_powerup_core_sequence_delay_select         = 0;
         attr_pm_pfet_powerdown_core_sequence_delay_select       = 0;
         attr_pm_pfet_powerup_eco_sequence_delay_select          = 0;
         attr_pm_pfet_powerdown_eco_sequence_delay_select        = 0;
@@ -449,8 +449,8 @@ pfet_init(const Target& i_target)
         //      Loop through all the functional chiplets
         //  ******************************************************************
 
-        l_rc = fapiGetChildChiplets(i_target, 
-                                    TARGET_TYPE_EX_CHIPLET, 
+        l_rc = fapiGetChildChiplets(i_target,
+                                    TARGET_TYPE_EX_CHIPLET,
                                     l_exChiplets,
                                     TARGET_STATE_PRESENT);
 	    if (l_rc)
@@ -575,7 +575,7 @@ pfet_init(const Target& i_target)
                 // -------------------------------------------------------------
                 FAPI_DBG("\tSetting ECO Voff Settings");
                 e_rc |= data.setBitLength(64);
-	            e_rc |= data.insertFromRight(eco_vret_voff_value, 0, 8);  
+	            e_rc |= data.insertFromRight(eco_vret_voff_value, 0, 8);
                 if (e_rc)
                 {
                     FAPI_ERR("Error (0x%x) setting up  ecmdDataBufferBase", e_rc);
@@ -650,12 +650,12 @@ pfet_set_delay( const fapi::Target& i_target,
 // convert_delay_to_value
 //  Helper function to convert time values (binary in ns)to hardware delays
 //------------------------------------------------------------------------------
-uint8_t 
-convert_delay_to_value (uint32_t i_delay, 
+uint8_t
+convert_delay_to_value (uint32_t i_delay,
                         uint32_t i_attr_proc_nest_frequency)
 {
     uint8_t   pfet_delay_value;
-    float     dly; 
+    float     dly;
     //  attr_proc_nest_frequency [MHz]
     //  delay [ns]
     //  pfet_delay_value = 15 - log2( i_delay * i_attr_proc_nest_frequency/1000);

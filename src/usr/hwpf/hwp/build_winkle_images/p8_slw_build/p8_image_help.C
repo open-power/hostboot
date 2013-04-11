@@ -54,8 +54,8 @@ extern "C"  {
 // i_alter - altered (desired) ring state
 // o_delta - ring delta state, caller allocates buffer
 // i_ringLen - length of ring in bits
-int calc_ring_delta_state( const uint32_t  *i_init, 
-													 const uint32_t  *i_alter, 
+int calc_ring_delta_state( const uint32_t  *i_init,
+													 const uint32_t  *i_alter,
 													 uint32_t        *o_delta,
 													 const uint32_t  i_ringLen )
 {
@@ -102,7 +102,7 @@ int calc_ring_delta_state( const uint32_t  *i_init,
 	    alter = alter & mask;
 	    remainingBits = 0;
 	  }
-	  
+
     // Do the XORing.
 		o_delta[i]  = init ^ alter;
 	}
@@ -130,7 +130,7 @@ int create_wiggle_flip_prg( uint32_t *i_deltaRing,          // scan ring delta s
   uint32_t rc=0;
   uint32_t i=0;
   uint32_t scanSelectAddr=0;
-  uint32_t scanRing_baseAddr=0, scanRing_baseAddr_long=0;
+  uint32_t scanRing_baseAddr=0, __attribute__((unused)) scanRing_baseAddr_long=0; // HACK
   uint32_t scanRing_poreAddr=0;
   uint32_t scanRingCheckWord=0;
   uint32_t bitShift=0;
@@ -143,28 +143,28 @@ int create_wiggle_flip_prg( uint32_t *i_deltaRing,          // scan ring delta s
   PoreInlineContext ctx;
 
 	maxWfInlineLenInWords = *o_wfInlineLenInWords;
-	
+
   pore_inline_context_create(&ctx, *o_wfInline, maxWfInlineLenInWords * 4, 0, 0);
-  
+
   //
   // Set Default scanselq addr and scanring addr vars
   //
 
   // 0x00030007: port 3 - clock cotrol endpt, x07- scanselq (regin & types)
-  scanSelectAddr = P8_PORE_CLOCK_CONTROLLER_REG;  
-  
+  scanSelectAddr = P8_PORE_CLOCK_CONTROLLER_REG;
+
   // Addr of clock control SCOM register(s) for short and long rotates.
   //
   // Short: 0x00038000: port 3, addr bit 16 must be set to 1 and bit 19 to 0.
-  scanRing_baseAddr = P8_PORE_SHIFT_REG; 
+  scanRing_baseAddr = P8_PORE_SHIFT_REG;
   scanRing_poreAddr = scanRing_baseAddr;
   // Long (poll): 0x00039000: port 3, addr bit 16 must be set to 1 and bit 19 to 1.
   scanRing_baseAddr_long = P8_PORE_SHIFT_REG | 0x00001000;
-  
+
   // Header check word for checking ring write was successful
   scanRingCheckWord = P8_SCAN_CHECK_WORD;
-  
-  // This fix is a direct copy of the setp1_mcreadand macro in ./ipl/sbe/p8_slw.H 
+
+  // This fix is a direct copy of the setp1_mcreadand macro in ./ipl/sbe/p8_slw.H
   uint64_t CLEAR_MC_TYPE_MASK=0x47;
   PoreInlineLocation src1=0, src2=0, tgt1=0, tgt2=0;
   pore_MR( &ctx, D1, P0);
@@ -194,7 +194,7 @@ int create_wiggle_flip_prg( uint32_t *i_deltaRing,          // scan ring delta s
     MY_ERR("***inline_branch_fixup error (2) rc = %d", ctx.error);
     return ctx.error;
   }
-  
+
 	// We can assume that atomic lock is already in effect prior to WF calls.
 	// It can probably also be assumed that functional clocks are stopped, but
 	//   let's do it and check for it anyway.
@@ -237,7 +237,7 @@ int create_wiggle_flip_prg( uint32_t *i_deltaRing,          // scan ring delta s
     MY_ERR("***STI(1) rc = %d", ctx.error);
     return ctx.error;
   }
-  
+
   // Check how many 32-bit shift ops are needed and if we need final shift of remaining bit.
   count = i_ringBitLen/32;
   remainder = i_ringBitLen%32;
@@ -250,13 +250,13 @@ int create_wiggle_flip_prg( uint32_t *i_deltaRing,          // scan ring delta s
   // CMO: I changed the following to not skip the first 32-bit.
   //remainingBits = i_ringBitLen-32;  //Yong impl.
   remainingBits = i_ringBitLen;   //Mike impl.
-  
+
   MY_DBG("count=%i  rem=%i  remBits=%i",count,remainder,remainingBits);
 
-  // Read and compare init and flush values 32 bits at a time.  Store delta in 
+  // Read and compare init and flush values 32 bits at a time.  Store delta in
   // o_delta buffer.
   for (i=0; i<count; i++)  {
-    
+
     if (i==(count-1))  {
       // Cleanup any leftover bits in dirty buffer. (Only applies to last word.)
       MY_DBG("Clearing any dirty bits in last WF word:\n");
@@ -270,7 +270,7 @@ int create_wiggle_flip_prg( uint32_t *i_deltaRing,          // scan ring delta s
 
     //====================================================================================
     // If flush & init values are identical, increase the read count, no code needed.
-    // When the discrepancy is found, read (rotate the ring) up to current address 
+    // When the discrepancy is found, read (rotate the ring) up to current address
     // then scan/write in the last 32 bits
     //====================================================================================
     if (i_deltaRing[i] > 0)  {
@@ -280,12 +280,12 @@ int create_wiggle_flip_prg( uint32_t *i_deltaRing,          // scan ring delta s
 #ifdef IMGBUILD_PPD_WF_POLLING_PROT
 				uint32_t  nwait1=0;
 				PoreInlineLocation  srcp1=0,tgtp1=0;
-        
+
         pore_imm64b = uint64_t(rotateLen)<<32;
 //        pore_LI(&ctx, D0, pore_imm64b);
 //        pore_STD(&ctx, D0, scanRing_baseAddr_long, P0);
 				pore_STI(&ctx, scanRing_baseAddr_long, P0, pore_imm64b);
-        
+
         nwait1 = rotateLen / 20 + 1; // 20x over sampling.
 				PORE_LOCATION(&ctx, tgtp1);
 				pore_WAITS(&ctx, nwait1);
@@ -305,7 +305,7 @@ int create_wiggle_flip_prg( uint32_t *i_deltaRing,          // scan ring delta s
         if (ctx.error > 0)  {
           MY_ERR("***LD D0 rc = %d", ctx.error);
           return ctx.error;
-        }  
+        }
 #endif
 
       } // End of if (rotateLen>0)
@@ -336,7 +336,7 @@ int create_wiggle_flip_prg( uint32_t *i_deltaRing,          // scan ring delta s
           pore_LI(&ctx, D0, pore_imm64b );
           // Cleanup shift register snapshot and put in D1.
           pore_AND(&ctx, D1, D0, D1);
-          // Put ring data in D0. 
+          // Put ring data in D0.
           // Note, any dirty content was removed earlier.
           pore_imm64b = ((uint64_t)myRev32(i_deltaRing[i])) << 32;
           pore_LI(&ctx, D0, pore_imm64b );
@@ -346,7 +346,7 @@ int create_wiggle_flip_prg( uint32_t *i_deltaRing,          // scan ring delta s
         }
         else  {
           pore_LD(&ctx, D1, scanRing_baseAddr, P1);
-          // Bring ring data in as an immediate. 
+          // Bring ring data in as an immediate.
           // Note, any dirty content was removed earlier.
           pore_imm64b = ((uint64_t)myRev32(i_deltaRing[i])) << 32;
           pore_XORI(&ctx, D0, D1, pore_imm64b);
@@ -387,12 +387,12 @@ int create_wiggle_flip_prg( uint32_t *i_deltaRing,          // scan ring delta s
         rotateLen = rotateLen + 32;
       else
         rotateLen = rotateLen + remainingBits;
-      
+
 #ifdef IMGBUILD_PPD_WF_POLLING_PROT
 			uint32_t nwait2=0;
 			PoreInlineLocation  srcp2=0,tgtp2=0;
-      
-      // Max rotate length is 2^20-1, i.e., data BITS(12-31)=>0x000FFFFF 
+
+      // Max rotate length is 2^20-1, i.e., data BITS(12-31)=>0x000FFFFF
 			if (rotateLen>=SCAN_MAX_ROTATE_LONG)  {
 			  MY_INF("Scanning should never be here since max possible ring length is\n");
         MY_INF("480,000 bits but MAX_LONG_ROTATE=0x%0x and rotateLen=0x%0x\n",
@@ -438,19 +438,19 @@ int create_wiggle_flip_prg( uint32_t *i_deltaRing,          // scan ring delta s
       remainingBits = 0;
 
   } // End of for loop
-       
+
   // If the scan ring has not been rotated to the original position
   // shift the ring by remaining shift bit length.
   if (rotateLen>0)  {
 #ifdef IMGBUILD_PPD_WF_POLLING_PROT
 		uint32_t nwait3=0;
 		PoreInlineLocation  srcp3=0,tgtp3=0;
-    
+
     pore_imm64b = uint64_t(rotateLen)<<32;
 //    pore_LI(&ctx, D0, pore_imm64b);
 //    pore_STD(&ctx, D0, scanRing_baseAddr_long, P0);
 		pore_STI(&ctx, scanRing_baseAddr_long, P0, pore_imm64b);
-    
+
     nwait3 = rotateLen / 20 + 1; // 20x over sampling.
     PORE_LOCATION(&ctx, tgtp3);
 	  pore_WAITS(&ctx, nwait3);
@@ -494,8 +494,8 @@ int create_wiggle_flip_prg( uint32_t *i_deltaRing,          // scan ring delta s
   pore_MR( &ctx, D1, P0);
   pore_ANDI( &ctx, D1, D1, CLEAR_MC_TYPE_MASK);
   pore_ORI( &ctx, D1, D1, BIT(60));
-  pore_MR( &ctx, P1, D1); 
-  if (ctx.error > 0)  { 
+  pore_MR( &ctx, P1, D1);
+  if (ctx.error > 0)  {
     MY_ERR("***setp1_mcreadand rc = %d", ctx.error);
     return ctx.error;
   }
@@ -596,7 +596,7 @@ int get_ring_layout_from_image( const void  *i_imageIn,
   uint32_t sizeInitf;
   SbeXipSection hostSection;
   void     *initfHostAddress0;
-  
+
   SBE_XIP_ERROR_STRINGS(errorStrings);
 
   // Always first get the .initf stats from the TOC:
@@ -614,7 +614,7 @@ int get_ring_layout_from_image( const void  *i_imageIn,
     MY_INF("INFO : No ring data exists for the section ID = SBE_XIP_SECTION_RINGS (ID=%i).",SBE_XIP_SECTION_RINGS);
     return DSLWB_RING_SEARCH_NO_MATCH; // Implies exhaust search as well.
   }
-  initfHostAddress0 = (void*)((uintptr_t)i_imageIn + hostSection.iv_offset); 
+  initfHostAddress0 = (void*)((uintptr_t)i_imageIn + hostSection.iv_offset);
   sizeInitf = hostSection.iv_size;
 
   // On first call, get the base offset to the .initf section.
@@ -625,16 +625,16 @@ int get_ring_layout_from_image( const void  *i_imageIn,
   else
     nextRingLayout = (DeltaRingLayout*)*nextRing;
 
-  MY_DBG("initfHostAddress0 = 0x%016llx",(uint64_t)initfHostAddress0); 
+  MY_DBG("initfHostAddress0 = 0x%016llx",(uint64_t)initfHostAddress0);
   MY_DBG("sizeInitf = %i", sizeInitf);
   MY_DBG("nextRingLayout = 0x%016llx",(uint64_t)nextRingLayout);
-  
+
   // Populate the output RS4 ring BE layout structure as well as local structure in host LE format where needed.
   // Note! Entire memory content is in BE format. So we do LE conversions where needed.
   //
   bRingFound = 0;
   bRingEOS = 0;
-  
+
   // SEARCH loop:  Parse ring blocks successively until we find a ring that matches:
   //     ddLevel == i_ddLevel
   //     sysPhase == i_sysPhase
@@ -647,7 +647,7 @@ int get_ring_layout_from_image( const void  *i_imageIn,
     MY_DBG("Next override = %i",thisRingLayout->override);
     MY_DBG("Next reserved1 = %i",thisRingLayout->reserved1);
     MY_DBG("Next reserved2 = %i",thisRingLayout->reserved2);
-    
+
     if (myRev32(thisRingLayout->ddLevel)==i_ddLevel)  { // Is there a non-specific DD level, like for sys phase?
       if ((thisRingLayout->sysPhase==0 && i_sysPhase==0) ||
           (thisRingLayout->sysPhase==1 && i_sysPhase==1) ||
@@ -663,7 +663,7 @@ int get_ring_layout_from_image( const void  *i_imageIn,
       *nextRing = NULL;
       MY_DBG("\tRing search exhausted!");
     }
-    
+
   }  // End of SEARCH.
 
   if (bRingFound)  {
@@ -671,7 +671,7 @@ int get_ring_layout_from_image( const void  *i_imageIn,
       rcLoc = DSLWB_RING_SEARCH_EXHAUST_MATCH;
     else
       rcLoc = DSLWB_RING_SEARCH_MATCH;
-  }    
+  }
   else  {
     *nextRing = NULL;
     if (bRingEOS)
@@ -691,29 +691,29 @@ int get_ring_layout_from_image( const void  *i_imageIn,
   o_rs4RingLayout->override    = thisRingLayout->override;
   o_rs4RingLayout->reserved1   = thisRingLayout->reserved1;
   o_rs4RingLayout->reserved2   = thisRingLayout->reserved2;
-  o_rs4RingLayout->metaData      =  (char*)(&thisRingLayout->reserved2 + 
+  o_rs4RingLayout->metaData      =  (char*)(&thisRingLayout->reserved2 +
                                             sizeof(thisRingLayout->reserved2));
-  o_rs4RingLayout->rs4Launch    = (uint32_t*)((uintptr_t)thisRingLayout + 
+  o_rs4RingLayout->rs4Launch    = (uint32_t*)((uintptr_t)thisRingLayout +
                                                 myRev64(thisRingLayout->entryOffset));
   // entryOffset, rs4Launch and ASM_RS4_LAUNCH_BUF_SIZE should already be 8-byte aligned.
-  o_rs4RingLayout->rs4Delta      = (uint32_t*)( (uintptr_t)thisRingLayout + 
+  o_rs4RingLayout->rs4Delta      = (uint32_t*)( (uintptr_t)thisRingLayout +
                                                 myRev64(thisRingLayout->entryOffset) +
                                                 ASM_RS4_LAUNCH_BUF_SIZE );
 
-  // Check that the ring layout structure in the memory is 8-byte aligned. This must 
+  // Check that the ring layout structure in the memory is 8-byte aligned. This must
 	// be so because:
-  // - The entryOffset address must be on an 8-byte boundary because the start of the 
-	//   .rings section must be 8-byte aligned AND because the rs4Delta member is the 
+  // - The entryOffset address must be on an 8-byte boundary because the start of the
+	//   .rings section must be 8-byte aligned AND because the rs4Delta member is the
 	//   last member and which must itself be 8-byte aligned.
-  // - These two things together means that both the beginning and end of the delta 
-	//   ring layout must be 8-byte aligned, and thus the whole block, i.e. sizeOfThis, 
+  // - These two things together means that both the beginning and end of the delta
+	//   ring layout must be 8-byte aligned, and thus the whole block, i.e. sizeOfThis,
 	//   must therefore automatically be 8-byte aligned.
   // Also check that the RS4 delta ring is 8-byte aligned.
   // Also check that the RS4 launcher is 8-byte aligned.
   //
-  if (((uintptr_t)thisRingLayout-(uintptr_t)i_imageIn)%8 || 
-      myRev32(o_rs4RingLayout->sizeOfThis)%8 || 
-      myRev64(o_rs4RingLayout->entryOffset)%8 || 
+  if (((uintptr_t)thisRingLayout-(uintptr_t)i_imageIn)%8 ||
+      myRev32(o_rs4RingLayout->sizeOfThis)%8 ||
+      myRev64(o_rs4RingLayout->entryOffset)%8 ||
       ASM_RS4_LAUNCH_BUF_SIZE%8)  {
     MY_ERR("Ring block or layout structure is not 8-byte aligned:");
     MY_ERR("  thisRingLayout-imageIn = %i",(uintptr_t)thisRingLayout-(uintptr_t)i_imageIn);
@@ -749,37 +749,37 @@ int write_wiggle_flip_to_image( void *io_imageOut,
   void *ringsBuffer=NULL;
   uint32_t ringRingsOffset=0;
   uint64_t ringPoreAddress=0,backPtr=0,fwdPtr=0,fwdPtrCheck;
-  
+
 	SBE_XIP_ERROR_STRINGS(errorStrings);
 
-  MY_DBG("wfInlineLenInWords=%i", i_wfInlineLenInWords);  
-  
+  MY_DBG("wfInlineLenInWords=%i", i_wfInlineLenInWords);
+
   // Modify the input ring layout content
-  // - Remove the qualifier section: ddLevel, sysPhase, override and reserved1+2.  
+  // - Remove the qualifier section: ddLevel, sysPhase, override and reserved1+2.
   //   This means reducing the entryOffset by the size of these qualifiers.
-  // - The new WF ring block and start of WF code must both be 8-byte aligned. 
+  // - The new WF ring block and start of WF code must both be 8-byte aligned.
   //   - RS4 entryOffset is already 8-byte aligned.
   //   - The WF code section, i.e. wfInlineLenInWords, is already 8-byte aligned.
   //
-  i_ringLayout->entryOffset  =  
+  i_ringLayout->entryOffset  =
     myRev64(  myByteAlign(8, myRev64(i_ringLayout->entryOffset) -
                              sizeof(i_ringLayout->ddLevel) -
                              sizeof(i_ringLayout->sysPhase) -
                              sizeof(i_ringLayout->override) -
                              sizeof(i_ringLayout->reserved1) -
                              sizeof(i_ringLayout->reserved2) ) );
-  i_ringLayout->sizeOfThis   =  
+  i_ringLayout->sizeOfThis   =
     myRev32( myRev64(i_ringLayout->entryOffset) + i_wfInlineLenInWords*4 );
-  
+
   // Not really any need for this. Just being consistent. Once we have transitioned completely to new
-  //  headers, then ditch i_wfInline from parm list and assign wfInline to layout in main program. 
+  //  headers, then ditch i_wfInline from parm list and assign wfInline to layout in main program.
   i_ringLayout->wfInline    = i_wfInline;
-  
+
   if (myRev64(i_ringLayout->entryOffset)%8 || myRev32(i_ringLayout->sizeOfThis)%8)  {
     MY_ERR("Ring block or WF code origin not 8-byte aligned.");
     return IMGBUILD_ERR_MISALIGNED_RING_LAYOUT;
   }
-      
+
   // Calc the size of the data section we're adding and the resulting output image.
   //
   rc = sbe_xip_image_size( io_imageOut, &sizeImageIn);
@@ -789,7 +789,7 @@ int write_wiggle_flip_to_image( void *io_imageOut,
   }
   sizeNewDataBlock = myRev32(i_ringLayout->sizeOfThis);
   // ...estimate max size of new image
-  sizeImageOutThisEst = sizeImageIn + sizeNewDataBlock + SBE_XIP_MAX_SECTION_ALIGNMENT; // 
+  sizeImageOutThisEst = sizeImageIn + sizeNewDataBlock + SBE_XIP_MAX_SECTION_ALIGNMENT; //
 
   if (sizeImageOutThisEst>*i_sizeImageMaxNew)  {
     MY_ERR("Estimated new image size (=%i) would exceed max allowed size (=%i).",
@@ -797,7 +797,7 @@ int write_wiggle_flip_to_image( void *io_imageOut,
     *i_sizeImageMaxNew = sizeImageOutThisEst;
     return IMGBUILD_ERR_IMAGE_TOO_LARGE;
   }
-  
+
   MY_DBG("Input image size\t\t= %6i\n\tNew rings data block size\t= %6i\n\tOutput image size (max)\t\t<=%6i",
     sizeImageIn, sizeNewDataBlock, sizeImageOutThisEst);
   MY_DBG("entryOffset = %i\n\tsizeOfThis = %i\n\tMeta data size = %i",
@@ -841,12 +841,12 @@ int write_wiggle_flip_to_image( void *io_imageOut,
   }
   deltaLC = i_wfInlineLenInWords*4;
   memcpy( (uint8_t*)ringsBuffer+bufLC, i_wfInline, deltaLC);
-  
+
   // Append WF ring layout to .rings section of in-memory input image.
   //   Note! All layout members should already be 8-byte aligned.
   //
-  rc = sbe_xip_append( io_imageOut, 
-                       SBE_XIP_SECTION_RINGS, 
+  rc = sbe_xip_append( io_imageOut,
+                       SBE_XIP_SECTION_RINGS,
                        (void*)ringsBuffer,
                        sizeNewDataBlock,
                        sizeImageOutThisEst,
@@ -868,7 +868,7 @@ int write_wiggle_flip_to_image( void *io_imageOut,
     return IMGBUILD_ERR_XIP_MISC;
   }
   MY_DBG("Successful append of RS4 ring to .rings. Next, update forward ptr...");
-  
+
   // Update forward pointer associated with the ring/var name + any override offset.
   //
   // Convert the ring offset (wrt .rings address) to an PORE address
@@ -881,12 +881,12 @@ int write_wiggle_flip_to_image( void *io_imageOut,
     return IMGBUILD_ERR_XIP_MISC;
   }
   // ...then update the forward pointer, i.e. the old "variable/ring name's" pointer.
-  //    DO NOT add any 8-byte offset if override ring. The backItemPtr already has this 
+  //    DO NOT add any 8-byte offset if override ring. The backItemPtr already has this
   //    from p8_delta_scan.
   //
   backPtr = myRev64(i_ringLayout->backItemPtr);
   MY_DBG("backPtr = 0x%016llx",  backPtr);
-  rc = sbe_xip_write_uint64(  io_imageOut, 
+  rc = sbe_xip_write_uint64(  io_imageOut,
                               backPtr,
                               fwdPtr);
   rc = rc+sbe_xip_read_uint64(io_imageOut,
@@ -898,7 +898,7 @@ int write_wiggle_flip_to_image( void *io_imageOut,
     return IMGBUILD_ERR_XIP_MISC;
   }
   if (fwdPtrCheck!=ringPoreAddress || backPtr!=myRev64(i_ringLayout->backItemPtr))  {
-    MY_ERR("Forward or backward pointer mess. Check code."); 
+    MY_ERR("Forward or backward pointer mess. Check code.");
     MY_ERR("fwdPtr       =0x%016llx",fwdPtr);
     MY_ERR("fwdPtrCheck  =0x%016llx",fwdPtrCheck);
     MY_ERR("layout bckPtr=0x%016llx",myRev64(i_ringLayout->backItemPtr));
@@ -916,9 +916,9 @@ int write_wiggle_flip_to_image( void *io_imageOut,
     if (ringsBuffer)  free(ringsBuffer);
     return IMGBUILD_ERR_XIP_MISC;
   }
-  
+
   if (ringsBuffer)  free(ringsBuffer);
-    
+
   return rc;
 }
 
@@ -940,12 +940,12 @@ int append_empty_section( void      *io_image,
   SBE_XIP_ERROR_STRINGS(errorStrings);
 
   rc = 0;
-  
+
   if (*i_sizeSection==0)  {
     MY_INF("INFO : Requested append size = 0. Nothing to do.");
     return rc;
   }
-  
+
   // Check if there is enough room in the new image to add section.
   //
   sbe_xip_image_size( io_image, &sizeImageIn);
@@ -960,11 +960,11 @@ int append_empty_section( void      *io_image,
     *i_sizeImageMaxNew = sizeImageOutThisEst;
     return IMGBUILD_ERR_IMAGE_TOO_LARGE;
   }
-  
+
   // Add the NULL buffer as a section append. sbe_xip_append() initializes with 0s.
   //
-  rc = sbe_xip_append( io_image, 
-                       i_sectionId, 
+  rc = sbe_xip_append( io_image,
+                       i_sectionId,
                        NULL,
                        *i_sizeSection,
                        sizeImageOutThisEst,
@@ -984,7 +984,7 @@ int append_empty_section( void      *io_image,
     MY_ERR("xip_validate() of output image failed: %s", SBE_XIP_ERROR_STRING(errorStrings, rc));
     return IMGBUILD_ERR_XIP_MISC;
   }
- 	
+
 	// Return final section size.
 	//
   rc = sbe_xip_get_section( io_image, i_sectionId, &xipSection);
@@ -1047,7 +1047,7 @@ int initialize_slw_section( void      *io_image,
     MY_ERR("***_RET or _NOP generated rc = %d", ctx.error);
     return IMGBUILD_ERR_PORE_INLINE_ASM;
   }
-  
+
   // ... get host and pore location of Scom table in .slw section.
 	// Note that we will assume, further down, that the NC section goes first,
 	//   then the L2 section and then the L3 section.
@@ -1068,7 +1068,7 @@ int initialize_slw_section( void      *io_image,
 
 	hostScomTableL2 = (void*)((uintptr_t)hostScomTableNC + SLW_SCOM_TABLE_SIZE_NC);
 	hostScomTableL3 = (void*)((uintptr_t)hostScomTableL2 + SLW_SCOM_TABLE_SIZE_L2);
-  
+
 	// ... get location of  ----> Scom NC <----  vector from TOC.
   rc = sbe_xip_find( io_image, SLW_HOST_SCOM_NC_VECTOR_TOC_NAME, &xipTocItem);
   if (rc)  {
@@ -1161,8 +1161,8 @@ int create_and_initialize_fixed_image( void      *io_image)
 	// Ensure, to play it safe, that last two sections (.slw & .ffdc) are both on
 	// 128-byte boundaries. The max [fixed] image size must itself already be
 	// 128-byte aligned.
-  sizeSectionFit  = (int) ( FIXED_SLW_IMAGE_SIZE - 
-                    				sizeImageIn - 
+  sizeSectionFit  = (int) ( FIXED_SLW_IMAGE_SIZE -
+                    				sizeImageIn -
                     				FIXED_SLW_SECTION_SIZE -
                     				FIXED_FFDC_SECTION_SIZE );
   if (sizeSectionFit<0)  {
@@ -1173,7 +1173,7 @@ int create_and_initialize_fixed_image( void      *io_image)
     MY_ERR("Size of .ffdc section = %i\n",FIXED_FFDC_SECTION_SIZE);
     return IMGBUILD_ERR_SECTION_SIZING;
   }
-  
+
   // Append .fit
   //
   sizeImageChk = FIXED_SLW_IMAGE_SIZE;
@@ -1192,7 +1192,7 @@ int create_and_initialize_fixed_image( void      *io_image)
 		  sizeSectionChk, sizeSectionReq);
 		return IMGBUILD_ERR_SECTION_SIZING;
 	}
-  
+
   // Append .slw
   //
   sizeImageChk = FIXED_SLW_IMAGE_SIZE;
@@ -1211,10 +1211,10 @@ int create_and_initialize_fixed_image( void      *io_image)
 		  sizeSectionChk, sizeSectionReq);
 		return IMGBUILD_ERR_SECTION_SIZING;
 	}
-		
+
 
   // Append .ffdc
-  // 
+  //
   sizeImageChk = FIXED_SLW_IMAGE_SIZE;
 	sizeSectionReq = FIXED_FFDC_SECTION_SIZE;
 	sizeSectionChk = sizeSectionReq;
@@ -1245,7 +1245,7 @@ int create_and_initialize_fixed_image( void      *io_image)
     return IMGBUILD_ERR_KEYWORD_NOT_FOUND;
   }
   hostRamTable = (void*)((uintptr_t)io_image + xipSection.iv_offset);
-	
+
 	// ... get location of Ram vector.
   rc = sbe_xip_find( io_image, SLW_HOST_REG_VECTOR_TOC_NAME, &xipTocItem);
   if (rc)  {
@@ -1278,7 +1278,7 @@ int create_and_initialize_fixed_image( void      *io_image)
     MY_ERR("***_RET or _NOP generated rc = %d", ctx.error);
     return IMGBUILD_ERR_PORE_INLINE_ASM;
   }
- 	
+
 	// ... calc host ptr to Scom NC subsection.
 	// Note that we will assume, further down, that the NC section goes first,
 	//   then the L2 section and then the L3 section.
@@ -1299,7 +1299,7 @@ int create_and_initialize_fixed_image( void      *io_image)
 
 	hostScomTableL2 = (void*)((uintptr_t)hostScomTableNC + SLW_SCOM_TABLE_SIZE_NC);
 	hostScomTableL3 = (void*)((uintptr_t)hostScomTableL2 + SLW_SCOM_TABLE_SIZE_L2);
-  
+
 	// ... get location of  ----> Scom NC <----  vector from TOC.
   rc = sbe_xip_find( io_image, SLW_HOST_SCOM_NC_VECTOR_TOC_NAME, &xipTocItem);
   if (rc)  {
@@ -1379,7 +1379,7 @@ int update_runtime_scom_pointer( void *io_image)
     MY_ERR("\tThe keyword (=%s) was not found.",SLW_RUNTIME_SCOM_TOC_NAME);
 		return IMGBUILD_ERR_KEYWORD_NOT_FOUND;
   }
-  
+
 	// Update host_runtime_scom with sub_slw_runtime_scom's address.
 	//
   rc = sbe_xip_set_scalar( io_image, HOST_RUNTIME_SCOM_TOC_NAME, xipSlwRuntimeAddr);
@@ -1447,7 +1447,7 @@ int write_vpd_ring_to_ipl_image(void			*io_image,
 	uint32_t asmInitLC=0;
 	uint32_t asmBuffer[ASM_RS4_LAUNCH_BUF_SIZE/4];
 	uint64_t scanChipletAddress=0;
-	
+
   SBE_XIP_ERROR_STRINGS(errorStrings);
 
 	MY_INF("i_ringName=%s; \n",	i_ringName);
@@ -1458,7 +1458,7 @@ int write_vpd_ring_to_ipl_image(void			*io_image,
   }
 
   sbe_xip_image_size( io_image, &sizeImageIn);
-  
+
   chipletId = i_bufRs4Ring->iv_chipletId;
 
 	// Create RS4 launcher and store in asmBuffer.
@@ -1470,13 +1470,13 @@ int write_vpd_ring_to_ipl_image(void			*io_image,
 				MY_ERR("\tProbable cause:\n");
 				MY_ERR("\t\tThe key word (=proc_sbe_decompress_scan_chiplet_address) does not exist in the image. (No TOC record.)\n");
 				return IMGBUILD_ERR_KEYWORD_NOT_FOUND;
-			} 
+			}
 			else
       if (rc==SBE_XIP_BUG)  {
 				MY_ERR("\tProbable cause:\n");
 				MY_ERR("\t\tIllegal keyword, maybe?\n");
 				return IMGBUILD_ERR_XIP_MISC;
-			} 
+			}
 			else  {
 				MY_ERR("\tUnknown cause.\n");
   	    return IMGBUILD_ERR_XIP_UNKNOWN;
@@ -1521,7 +1521,7 @@ int write_vpd_ring_to_ipl_image(void			*io_image,
 	DeltaRingLayout *bufRs4RingBlock;
 	uint64_t entryOffsetRs4RingBlock;
 	uint32_t sizeRs4RingBlock, sizeRs4RingBlockMax;
-	
+
 	bufRs4RingBlock = (DeltaRingLayout*)i_bufTmp; //HB buf2.
   sizeRs4RingBlockMax = i_sizeBufTmp;
   entryOffsetRs4RingBlock      = calc_ring_layout_entry_offset( 0, 0);
@@ -1554,7 +1554,7 @@ int write_vpd_ring_to_ipl_image(void			*io_image,
 	memcpy( (uint8_t*)bufRs4RingBlock+bufLC, (uint8_t*)i_bufRs4Ring, (size_t)sizeRs4Ring);
 
   // Now, some post-sanity checks on alignments.
-	if ( entryOffsetRs4RingBlock%8 || 
+	if ( entryOffsetRs4RingBlock%8 ||
 	     sizeRs4RingBlock%8)  {
 		MY_ERR("Member(s) of RS4 ring block are not 8-byte aligned; \n");
     MY_ERR("  Entry offset            = %i; \n", (uint32_t)entryOffsetRs4RingBlock);
@@ -1625,7 +1625,7 @@ int write_vpd_ring_to_slw_image(void			*io_image,
   uint64_t waitsScanDelay=0;
 	uint64_t twinHaltOpCodes;
 	uint32_t iFill;
-	
+
 	MY_INF("i_ringName=%s; \n",	i_ringName);
 
   if (i_bufTmp == NULL)  {
@@ -1634,9 +1634,9 @@ int write_vpd_ring_to_slw_image(void			*io_image,
   }
 
   sbe_xip_image_size( io_image, &sizeImageIn);
-  
+
   chipletId = i_bufRs4Ring->iv_chipletId;
-  
+
   // Decompress RS4 VPD ring.
   //
   sizeRingRaw = myRev32(i_bufRs4Ring->iv_length);
@@ -1698,7 +1698,7 @@ int write_vpd_ring_to_slw_image(void			*io_image,
 	  return IMGBUILD_ERR_WF_CREATE;
 	}
 
-  // Populate ring header and put ring header and Wf ring into 
+  // Populate ring header and put ring header and Wf ring into
   // proper spots in pre-allocated bufWfRingBlock buffer (HB buf2).
   //
   DeltaRingLayout *bufWfRingBlock;
@@ -1710,17 +1710,17 @@ int write_vpd_ring_to_slw_image(void			*io_image,
   entryOffsetWfRingBlock      = calc_ring_layout_entry_offset( 1, 0);
   bufWfRingBlock->entryOffset = myRev64(entryOffsetWfRingBlock);
   bufWfRingBlock->backItemPtr	= 0; // Will be updated below, as we don't know yet.
-	
-	// Allocate either fitted or worst-case space for the ring.  For example, the 
+
+	// Allocate either fitted or worst-case space for the ring.  For example, the
 	// rings, ex_repr_core/eco, need worst-case space allocation.
 	if (i_bWcSpace==0)  {
 		// Fitted space sizing.
 		sizeWfRingBlock =	entryOffsetWfRingBlock +  // Must be 8-byte aligned.
   									  wfInlineLenInWords*4;     // Must be 8-byte aligned.
 	}
-	else  {  
+	else  {
 		// Worst-case space sizing.
-		sizeWfRingBlock = ((sizeRingRaw-1)/32 + 1) * 4 * WF_WORST_CASE_SIZE_FAC + 
+		sizeWfRingBlock = ((sizeRingRaw-1)/32 + 1) * 4 * WF_WORST_CASE_SIZE_FAC +
 											WF_ENCAP_SIZE;
 		sizeWfRingBlock = (uint32_t)myByteAlign(8, sizeWfRingBlock);
 		// Fill void with "halt" instructions, 0x02000000 (LE). Note, void is whole multiple of 8x.
@@ -1743,7 +1743,7 @@ int write_vpd_ring_to_slw_image(void			*io_image,
 	memcpy( (uint8_t*)bufWfRingBlock+bufLC, wfInline, (size_t)wfInlineLenInWords*4);
 
   // Now, some post-sanity checks on alignments.
-	if ( entryOffsetWfRingBlock%8 || 
+	if ( entryOffsetWfRingBlock%8 ||
 	     sizeWfRingBlock%8)  {
 		MY_ERR("Member(s) of WF ring block are not 8-byte aligned:");
     MY_ERR("  Entry offset            = %i", (uint32_t)entryOffsetWfRingBlock);
@@ -1788,7 +1788,7 @@ int write_vpd_ring_to_slw_image(void			*io_image,
 // check_and_perform_ring_datacare()
 //
 // Checks if the Mvpd ring passed has a datacare ring in the .dcrings image section. If it does,
-// the Mvpd's ring bits corresponding to the care bits in the 1st half of the dc cring will be 
+// the Mvpd's ring bits corresponding to the care bits in the 1st half of the dc cring will be
 // overwritten by the data bits in the 2nd half of the dc ring.
 int check_and_perform_ring_datacare(	void     *i_imageRef,
 																			void  	 *io_buf1, // Mvpd ring in/out. BE format.
@@ -1807,14 +1807,14 @@ int check_and_perform_ring_datacare(	void     *i_imageRef,
 	SbeXipItem  xipTocItem;
 	uint8_t     bMatch=0;
 	uint32_t		sizeRs4Container;
-	
-	
+
+
 	bitLength  = myRev32(((CompressedScanData*)io_buf1)->iv_length);
 	scanSelect = myRev32(((CompressedScanData*)io_buf1)->iv_scanSelect);
 	ringId     = ((CompressedScanData*)io_buf1)->iv_ringId;
 	chipletId  = ((CompressedScanData*)io_buf1)->iv_chipletId;
 	flushOpt   = ((CompressedScanData*)io_buf1)->iv_flushOptimization;
-	
+
 	MY_INF("In check_and_perform_ring_datacare()...\n");
 
 	MY_DBG("Mvpd ring characteristics:\n");
@@ -1823,14 +1823,14 @@ int check_and_perform_ring_datacare(	void     *i_imageRef,
 	MY_DBG("Chiplet ID:  0x%02x\n",chipletId);
 	MY_DBG("Flush Opt:   %i\n",flushOpt);
 	MY_DBG("Scan select: 0x%08x\n",scanSelect);
-	
+
 	rc = sbe_xip_find( i_imageRef, i_ringName, &xipTocItem);
 	if (rc)  {
 		MY_ERR("_find() failed w/rc=%i\n",rc);
 		return IMGBUILD_ERR_KEYWORD_NOT_FOUND;
 	}
 	MY_DBG("xipTocItem.iv_address=0x%016llx\n",xipTocItem.iv_address);
-	
+
 	// Now look for datacare match in .dcrings section.
 	nextRing = NULL;
 	rs4Datacare = NULL;
@@ -1865,7 +1865,7 @@ int check_and_perform_ring_datacare(	void     *i_imageRef,
 		else
 			MY_DBG("rs4Datacare=NULL (no ring matched search criteria, or empty ring section.)\n");
 	}  while (nextRing!=NULL && !bMatch);
-	
+
 	if (bMatch)  {
 
 		// Decompress Mvpd ring.
@@ -1884,14 +1884,14 @@ int check_and_perform_ring_datacare(	void     *i_imageRef,
   	rc = _rs4_decompress( (uint8_t*)io_buf1,
     	                    i_sizeBuf2, // Assumption is that sizeBuf2=sizeBuf1
 													&ringBitLenDc,
-        	                (CompressedScanData*)( (uintptr_t)rs4Datacare + 
+        	                (CompressedScanData*)( (uintptr_t)rs4Datacare +
 																								 myRev64(rs4Datacare->entryOffset) +
 																								 ASM_RS4_LAUNCH_BUF_SIZE) );
   	if (rc)  {
   	  MY_ERR("_rs4_decompress(datacare...) failed: rc=%i\n",rc);
   	  return IMGBUILD_ERR_RS4_DECOMPRESS;
   	}
-		
+
 		MY_DBG("bitLength=%i\n",bitLength);
 		MY_DBG("ringBitLen=%i\n",ringBitLen);
 		MY_DBG("ringBitLenDc=%i\n",ringBitLenDc);
@@ -1900,11 +1900,11 @@ int check_and_perform_ring_datacare(	void     *i_imageRef,
 							ringBitLen, ringBitLenDc);
 			return IMGBUILD_ERR_DATACARE_RING_MESS;
 		}
-		
+
 		// Overlay io_buf2 bits according to care and data bits in io_buf1
 		uint32_t iWord, remBits32;
 		uint32_t dataVpd, dataDc, careDc, careDc1, careDc2;
-		
+
 		// Split apart the raw datacare ring into data (1st part) and care (2nd part).
 		// Note that the order is already in BE for both Datacare and Mvpd rings.
 		// Further note that the care part is fractured into two words that need to
@@ -1932,7 +1932,7 @@ int check_and_perform_ring_datacare(	void     *i_imageRef,
 				return IMGBUILD_ERR_DATACARE_RING_MESS;
 			}
 		}
-		
+
 		// Compress overlayed Mvpd ring.
 		rc = _rs4_compress(	(CompressedScanData*)io_buf1,
 												i_sizeBuf2,
@@ -1946,12 +1946,12 @@ int check_and_perform_ring_datacare(	void     *i_imageRef,
  		if (rc)  {
  		  MY_ERR("\t_rs4_compress() failed: rc=%i ",rc);
  		  return IMGBUILD_ERR_RS4_DECOMPRESS;
- 		}	
-	
+ 		}
+
 	}
-	
+
 	MY_INF("Leaving check_and_perform_ring_datacare()...\n");
-	
+
 	return rc;
 }
 
@@ -1967,8 +1967,8 @@ int check_and_perform_ring_datacare(	void     *i_imageRef,
 // - p8_delta_scan_w
 // - p8_delta_scan_r
 // - ???
-void cleanup( void *buf1, 
-              void *buf2, 
+void cleanup( void *buf1,
+              void *buf2,
               void *buf3,
               void *buf4,
               void *buf5)

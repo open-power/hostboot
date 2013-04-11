@@ -190,7 +190,7 @@ poreslw_init(const Target& i_target)
             FAPI_ERR("Scom error writing PMC_MODE");
             break;
         }
-             
+
         FAPI_DBG("Activate the PMC Idle seequencer by making sure the Halt bit is clear");
 
         // Setup up each of the EX chiplets
@@ -330,8 +330,8 @@ poreslw_ex_setup(const Target& i_target)
     uint8_t                         l_functional = 0;
     uint8_t                         l_ex_number = 0;
     uint64_t                        address;
-    bool                            core_flag = false;
-    bool                            error_flag = false;
+    bool    __attribute__((unused)) core_flag = false; // HACK
+    bool    __attribute__((unused)) error_flag = false; // HACK
     //@thi - fixed compiler error - Greg will fix this in next version
     //uint32_t                        fsierror = 0;
 
@@ -349,7 +349,7 @@ poreslw_ex_setup(const Target& i_target)
     const uint32_t                  PM_SLEEP_POWER_OFF_SEL_BIT  = 2;
     const uint32_t                  PM_WINKLE_POWER_DOWN_EN_BIT = 3;
     const uint32_t                  PM_WINKLE_POWER_UP_EN_BIT   = 4;
-    const uint32_t                  PM_WINKLE_POWER_OFF_SEL_BIT = 5;    
+    const uint32_t                  PM_WINKLE_POWER_OFF_SEL_BIT = 5;
 
     //@thi - fixed compiler error - Greg will fix this in next version
     //const uint32_t                  IDLE_STATE_OVERRIDE_EN = 6;
@@ -517,7 +517,7 @@ poreslw_ex_setup(const Target& i_target)
                     // If   sleep entry = 1 (hardware), sleep power down enable = 1
                     // else sleep entry = 0 (assisted), sleep power down enable = 0
                     if (pm_sleep_entry)
-                    {                        
+                    {
                         e_rc |= set_data.setBit(PM_SLEEP_POWER_DOWN_EN_BIT);
                     }
                     else
@@ -552,7 +552,7 @@ poreslw_ex_setup(const Target& i_target)
                     // else winkle entry = 0 (assisted), winkle power down enable = 0
                     if (pm_winkle_entry)
                     {
-                        e_rc |= set_data.setBit(PM_WINKLE_POWER_DOWN_EN_BIT);                        
+                        e_rc |= set_data.setBit(PM_WINKLE_POWER_DOWN_EN_BIT);
                     }
                     else
                     {
@@ -563,7 +563,7 @@ poreslw_ex_setup(const Target& i_target)
                     // else winkle exit  = 0 (assisted), winkle power up enable = 0
                     if (pm_winkle_exit)
                     {
-                        e_rc |= set_data.setBit(PM_WINKLE_POWER_UP_EN_BIT);                        
+                        e_rc |= set_data.setBit(PM_WINKLE_POWER_UP_EN_BIT);
                     }
                     else
                     {
@@ -637,16 +637,16 @@ poreslw_ex_setup(const Target& i_target)
                     // --------------------------------------
                     // Check if SBE code has already cleared the OHA override.
                     // As chiplets may be enabled but offline (eg in Winkle)
-                    // treat SCOM errors as off-line (eg skip it).  If online 
-                    // and set, clear the override. 
-                    
+                    // treat SCOM errors as off-line (eg skip it).  If online
+                    // and set, clear the override.
+
                     /* GSS:  removed as Cronus always puts a message out of (PCB_OFFLINE)
                         even though this code is meant to handle it. As this messge
                         can cause confusion in the lab, the check is being removed.
-                    bool oha_accessible = true;                  
+                    bool oha_accessible = true;
                     l_rc = fapiGetScom(l_exChiplets[j], EX_OHA_MODE_REG_RWx1002000D, data);
                     if(!l_rc.ok())
-                    {                                      
+                    {
                         l_rc = fapiGetCfamRegister( i_target, CFAM_FSI_STATUS_0x00001007, data );
                         if(!l_rc.ok())
                         {
@@ -655,14 +655,14 @@ poreslw_ex_setup(const Target& i_target)
                         }
                         FAPI_INF( "CFAM_FSI_STATUS_0x00001007: 0x%X", data.getWord(0));
                         e_rc |= data.extractToRight( &fsierror, 17, 3 );
-                        if ( e_rc ) 
-                        { 
-                            l_rc.setEcmdError(e_rc); 
+                        if ( e_rc )
+                        {
+                            l_rc.setEcmdError(e_rc);
                             break;
                         }
-                        if (fsierror == PIB_OFFLINE_ERROR) 
+                        if (fsierror == PIB_OFFLINE_ERROR)
                         {
-                            FAPI_INF( "Chiplet offline error detected. Skipping OHA Override clearing"); 
+                            FAPI_INF( "Chiplet offline error detected. Skipping OHA Override clearing");
                             oha_accessible = false;
                         }
                         else
@@ -695,8 +695,8 @@ poreslw_ex_setup(const Target& i_target)
                         }
                     }
                     End of check removal
-                    */  
-                    
+                    */
+
                     // --------------------------------------
                     // Check that PM function is enabled (eg not disabled).
                     // If not, remove the disable
@@ -708,10 +708,10 @@ poreslw_ex_setup(const Target& i_target)
                         FAPI_ERR("Scom error reading PMGP0");
                         break;
                     }
-                    
+
                     if (data.isBitSet(PM_DISABLE))
                     {
-                    
+
                         // Activate the PCBS-PM macro by clearing the PM_DISABLE bit
                         FAPI_INF("\tActivate the PCBS-PM for EX %x", l_ex_number);
 
@@ -742,7 +742,7 @@ poreslw_ex_setup(const Target& i_target)
                         FAPI_ERR("Scom error clearing EX_OCC_SPWKUP");
                         break;
                     }
-                    
+
                     if (data.isBitSet(0))
                     {
                         FAPI_INF("\tClear OCC Special Wake-up for EX %x", l_ex_number);
