@@ -38,6 +38,10 @@
 
 namespace TARGETING
 {
+ 
+#define TARG_NAMESPACE "TARGETING::"
+
+#define TARG_CLASS ""
 
 /**
  * @brief Populate the o_vector with target object pointers based on the
@@ -354,5 +358,9 @@ void getPeerTargets(
     TARG_EXIT();
     #undef TARG_FN
 }
+
+#undef TARG_CLASS
+
+#undef TARG_NAMESPACE
 
 };  // end namespace
