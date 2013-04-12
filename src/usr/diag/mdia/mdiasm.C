@@ -38,6 +38,8 @@
 #include <fapiPlatHwpInvoker.H>
 #include <diag/prdf/prdfMain.H>
 #include <devicefw/userif.H>
+#include <targeting/common/utilFilter.H>
+#include <errl/errludlogregister.H>
 
 using namespace TARGETING;
 using namespace ERRORLOG;
@@ -55,6 +57,100 @@ void StateMachine::running(bool & o_running)
     o_running = !(iv_done || iv_shutdown);
 
     mutex_unlock(&iv_mutex);
+}
+
+void addTimeoutFFDC(TargetHandle_t i_mba, errlHndl_t & io_log)
+{
+    const uint64_t mbaRegs[] = {
+        MBA01_SPA,
+        MBA01_SPA_MASK,
+        MBA01_CMD_TYPE,
+        MBA01_CMD_CONTROL,
+        MBA01_CMD_STATUS,
+        MBA01_MBMACAQ,
+        MBA01_MBMEA,
+    };
+
+    const uint64_t membufRegs[] = {
+        MEM_SPA_FIR,
+        MEM_SPA_FIR_MASK,
+    };
+
+    const uint64_t mcsRegs[] = {
+        MCI_FIR,
+        MCI_FIR_MASK,
+        MCI_FIR_ACT0,
+        MCI_FIR_ACT1,
+        MCS_MODE4,
+    };
+
+    const uint64_t procRegs[] = {
+        HOST_ATTN_PRES,
+        HOST_ATTN_MASK,
+        HOST_ATTN_CFG,
+        IPOLL_MASK,
+        IPOLL_STATUS,
+        PBUS_GP1,
+        PBUS_GP2,
+    };
+
+    // get the parent membuf
+    ConstTargetHandle_t membuf = getParentChip(i_mba);
+
+    // get the parent mcs
+    TargetHandleList targetList;
+    TargetHandle_t mcs = NULL;
+    if(membuf)
+    {
+        getParentAffinityTargets(
+                targetList,
+                membuf,
+                CLASS_UNIT,
+                TYPE_MCS);
+    }
+    if(targetList.size() == 1)
+    {
+        mcs = targetList[0];
+    }
+
+    // get the parent proc
+    ConstTargetHandle_t proc = NULL;
+    if(mcs)
+    {
+        proc = getParentChip(mcs);
+    }
+
+    const struct Entry
+    {
+        TARGETING::ConstTargetHandle_t target;
+        const uint64_t * begin;
+        const uint64_t * end;
+    } tables[] = {
+        {i_mba, mbaRegs, mbaRegs + sizeof(mbaRegs)/sizeof(*mbaRegs)},
+        {membuf,
+            membufRegs, membufRegs + sizeof(membufRegs)/sizeof(*membufRegs)},
+        {mcs, mcsRegs, mcsRegs + sizeof(mcsRegs)/sizeof(*mcsRegs)},
+        {proc, procRegs, procRegs + sizeof(procRegs)/sizeof(*procRegs)},
+    };
+
+    for(const Entry * tableIt = tables;
+            tableIt != tables + sizeof(tables)/sizeof(*tables);
+            ++tableIt)
+    {
+        if(!tableIt->target)
+        {
+            continue;
+        }
+        for(const uint64_t * regIt = tableIt->begin;
+                regIt != tableIt->end;
+                ++regIt)
+        {
+            ErrlUserDetailsLogRegister udLogRegister(
+                    tableIt->target,
+                    DEVICE_SCOM_ADDRESS(*regIt));
+            udLogRegister.addToLog(io_log);
+        }
+    }
 }
 
 void StateMachine::processCommandTimeout(const MonitorIDs & i_monitorIDs)
@@ -105,6 +201,10 @@ void StateMachine::processCommandTimeout(const MonitorIDs & i_monitorIDs)
                         PROCESS_COMMAND_TIMEOUT,
                         MAINT_COMMAND_TIMED_OUT,
                         *((*wit)->workItem), 0);
+
+                // collect ffdc
+
+                addTimeoutFFDC(target, err);
 
                 err->addHwCallout(target,
                         HWAS::SRCI_PRIORITY_HIGH,

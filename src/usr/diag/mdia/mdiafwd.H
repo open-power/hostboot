@@ -73,10 +73,34 @@ enum DiagMode
  */
 enum
 {
-    /**
-     * @brief maint command address register
-     */
-    MBA01_MBMACAQ = 0x0301060D,
+    // mem chiplet regs
+    MEM_SPA_FIR = 0x03040004,
+    MEM_SPA_FIR_MASK = 0x03040007,
+
+    // mba unit regs
+    MBA01_SPA = 0X03010611,
+    MBA01_SPA_MASK = 0X03010614,
+    MBA01_CMD_TYPE = 0X0301060A,
+    MBA01_CMD_CONTROL = 0X0301060B,
+    MBA01_CMD_STATUS = 0X0301060C,
+    MBA01_MBMACAQ = 0X0301060D,
+    MBA01_MBMEA = 0X0301060E,
+
+    // mcs unit regs
+    MCI_FIR = 0x02011840,
+    MCI_FIR_MASK = 0x02011843,
+    MCI_FIR_ACT0 = 0x02011846,
+    MCI_FIR_ACT1 = 0x02011847,
+    MCS_MODE4 = 0x0201181A,
+
+    // proc regs
+    HOST_ATTN_PRES = 0x01020000,
+    HOST_ATTN_MASK = 0x0102000C,
+    HOST_ATTN_CFG = 0x0102000F,
+    IPOLL_MASK = 0x01020013,
+    IPOLL_STATUS = 0x01020014,
+    PBUS_GP1 = 0x02000001,
+    PBUS_GP2 = 0x02000002,
 };
 
 /**
