@@ -40,8 +40,12 @@
 // will trace only the first 16 bytes (which in most cases is enough) to avoid a
 // multi-line binary trace. This all seems a little convoluted. Is there a
 // better way to trace a Target
-#define DG_TRAC_TARGET(string, pPath) \
+#define DG_DBG_TARGET(string, pPath) \
     HWAS_DBG_BIN(string, pPath, sizeof(TARGETING::EntityPath) - 1)
+#define DG_INF_TARGET(string, pPath) \
+    HWAS_INF_BIN(string, pPath, sizeof(TARGETING::EntityPath) - 1)
+#define DG_ERR_TARGET(string, pPath) \
+    HWAS_ERR_BIN(string, pPath, sizeof(TARGETING::EntityPath) - 1)
 
 // TODO There are a number of error logs created in this file. Most of them
 // should include the target identifier (PHYS_PATH). There is a plan in RTC
@@ -159,20 +163,10 @@ errlHndl_t DeconfigGard::deconfigureTargetsFromGardRecordsForIpl(
 
             if (l_pTarget == NULL)
             {
-                DG_TRAC_TARGET(ERR_MRK "Could not find Target for",
+                // could be a platform specific target for the other
+                // ie, we are hostboot and this is an FSP target, or vice-versa
+                DG_INF_TARGET("Could not find Target for",
                                &((*l_itr).iv_targetId));
-
-                /*@
-                 * @errortype
-                 * @moduleid     HWAS::MOD_DECONFIG_GARD
-                 * @reasoncode   HWAS::RC_TARGET_NOT_FOUND_FOR_GARD_RECORD
-                 * @devdesc      GARD Record could not be mapped to a Target
-                 */
-                l_pErr = hwasError(
-                    ERRL_SEV_INFORMATIONAL,
-                    HWAS::MOD_DECONFIG_GARD,
-                    HWAS::RC_TARGET_NOT_FOUND_FOR_GARD_RECORD);
-                errlCommit(l_pErr, HWAS_COMP_ID);
             }
             else
             {
@@ -329,10 +323,11 @@ void DeconfigGard::_deconfigureTarget(TARGETING::Target & i_target,
          * @reasoncode   HWAS::RC_TARGET_NOT_DECONFIGURABLE
          * @devdesc      Attempt to deconfigure a target that is not
          *               deconfigurable
-         * @userdata1    HUID of input target
+         * @userdata1    HUID of input target / deconfigure errlog PLID
          */
-        const uint64_t userdata1 = static_cast<uint64_t>
-                (TARGETING::get_huid(&i_target)) << 32;
+        const uint64_t userdata1 =
+            (static_cast<uint64_t> (TARGETING::get_huid(&i_target)) << 32) |
+            i_errlPlid;
         errlHndl_t l_pErr = hwasError(
             ERRL_SEV_INFORMATIONAL,
             HWAS::MOD_DECONFIG_GARD,
@@ -436,7 +431,7 @@ void DeconfigGard::_clearDeconfigureRecords(
         {
             if ((*l_itr).iv_targetId == *i_pTargetId)
             {
-                DG_TRAC_TARGET(INFO_MRK "Clearing Deconfigure Record for: ",
+                DG_INF_TARGET("Clearing Deconfigure Record for: ",
                                 i_pTargetId);
                 iv_deconfigureRecords.erase(l_itr);
                 l_foundRecord = true;
@@ -446,7 +441,7 @@ void DeconfigGard::_clearDeconfigureRecords(
 
         if (!l_foundRecord)
         {
-            DG_TRAC_TARGET(INFO_MRK "Did not find a Deconfigure Record to clear for: ",
+            DG_INF_TARGET("Did not find a Deconfigure Record to clear for: ",
                            i_pTargetId);
         }
     }
@@ -478,7 +473,7 @@ void DeconfigGard::_getDeconfigureRecords(
         {
             if ((*l_itr).iv_targetId == *i_pTargetId)
             {
-                DG_TRAC_TARGET(INFO_MRK "Getting Deconfigure Record for: ",
+                DG_INF_TARGET("Getting Deconfigure Record for: ",
                                i_pTargetId);
                 o_records.push_back(*l_itr);
                 break;
@@ -487,7 +482,7 @@ void DeconfigGard::_getDeconfigureRecords(
 
         if (l_itr == iv_deconfigureRecords.end())
         {
-            DG_TRAC_TARGET(INFO_MRK "Did not find a Deconfigure Record to get for: ",
+            DG_INF_TARGET("Did not find a Deconfigure Record to get for: ",
                            i_pTargetId);
         }
     }
@@ -516,12 +511,13 @@ errlHndl_t DeconfigGard::_createGardRecord(const TARGETING::Target & i_target,
              * @errortype
              * @moduleid     HWAS::MOD_DECONFIG_GARD
              * @reasoncode   HWAS::RC_TARGET_NOT_GARDABLE
-             * @devdesc      Attempt to create a GARD Record for a target that is
-             *               not GARDable
-             * @userdata1    HUID of input target
+             * @devdesc      Attempt to create a GARD Record for a target that
+             *               is not GARDable
+             * @userdata1    HUID of input target / GARD errlog PLID
              */
             const uint64_t userdata1 =
-                (uint64_t)(TARGETING::get_huid(&i_target)) << 32;
+                (static_cast<uint64_t>(TARGETING::get_huid(&i_target)) << 32) |
+                i_errlPlid;
             l_pErr = hwasError(
                 ERRL_SEV_UNRECOVERABLE,
                 HWAS::MOD_DECONFIG_GARD,
@@ -562,10 +558,11 @@ errlHndl_t DeconfigGard::_createGardRecord(const TARGETING::Target & i_target,
              * @reasoncode   HWAS::RC_GARD_REPOSITORY_FULL
              * @devdesc      Attempt to create a GARD Record and the GARD
              *               Repository is full
-             * @userdata1    HUID of input target
+             * @userdata1    HUID of input target / GARD errlog PLID
              */
             const uint64_t userdata1 =
-                (uint64_t)(TARGETING::get_huid(&i_target)) << 32;
+                (static_cast<uint64_t> (TARGETING::get_huid(&i_target)) << 32) |
+                i_errlPlid;
             l_pErr = hwasError(
                 ERRL_SEV_UNRECOVERABLE,
                 HWAS::MOD_DECONFIG_GARD,
@@ -665,7 +662,7 @@ errlHndl_t DeconfigGard::_clearGardRecords(
                 (iv_pGardRecords[i].iv_targetId == i_targetId)
                )
             {
-                DG_TRAC_TARGET(INFO_MRK "Clearing GARD Record for: ",
+                DG_INF_TARGET("Clearing GARD Record for: ",
                                &i_targetId);
                 // clear iv_recordId
                 iv_pGardRecords[i].iv_recordId = EMPTY_GARD_RECORDID;
@@ -676,7 +673,7 @@ errlHndl_t DeconfigGard::_clearGardRecords(
 
         if (!l_gardRecordsCleared)
         {
-            DG_TRAC_TARGET(INFO_MRK "No GARD Records to clear for: ",
+            DG_INF_TARGET("No GARD Records to clear for: ",
                            &i_targetId);
         }
     }
@@ -761,7 +758,7 @@ errlHndl_t DeconfigGard::_getGardRecords(
                 (iv_pGardRecords[i].iv_targetId == i_targetId)
                )
             {
-                DG_TRAC_TARGET(INFO_MRK "Getting GARD Record for: ",
+                DG_INF_TARGET("Getting GARD Record for: ",
                                &i_targetId);
                 o_records.push_back(iv_pGardRecords[i]);
                 l_gardRecordsGot = true;
@@ -770,7 +767,7 @@ errlHndl_t DeconfigGard::_getGardRecords(
 
         if (!l_gardRecordsGot)
         {
-            DG_TRAC_TARGET(INFO_MRK "No GARD Records to get for: ",
+            DG_INF_TARGET("No GARD Records to get for: ",
                            &i_targetId);
         }
     }

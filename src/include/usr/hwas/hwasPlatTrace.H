@@ -1,26 +1,25 @@
-/*  IBM_PROLOG_BEGIN_TAG
- *  This is an automatically generated prolog.
- *
- *  $Source: src/include/usr/hwas/hwasPlatTrace.H $
- *
- *  IBM CONFIDENTIAL
- *
- *  COPYRIGHT International Business Machines Corp. 2012
- *
- *  p1
- *
- *  Object Code Only (OCO) source materials
- *  Licensed Internal Code Source Materials
- *  IBM HostBoot Licensed Internal Code
- *
- *  The source code for this program is not published or other-
- *  wise divested of its trade secrets, irrespective of what has
- *  been deposited with the U.S. Copyright Office.
- *
- *  Origin: 30
- *
- *  IBM_PROLOG_END_TAG
- */
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/include/usr/hwas/hwasPlatTrace.H $                        */
+/*                                                                        */
+/* IBM CONFIDENTIAL                                                       */
+/*                                                                        */
+/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/*                                                                        */
+/* p1                                                                     */
+/*                                                                        */
+/* Object Code Only (OCO) source materials                                */
+/* Licensed Internal Code Source Materials                                */
+/* IBM HostBoot Licensed Internal Code                                    */
+/*                                                                        */
+/* The source code for this program is not published or otherwise         */
+/* divested of its trade secrets, irrespective of what has been           */
+/* deposited with the U.S. Copyright Office.                              */
+/*                                                                        */
+/* Origin: 30                                                             */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
 /**
  *  @file hwas/hwasPlatTrace.H
  *
@@ -53,10 +52,16 @@ namespace HWAS
 
 // Information traces (go into slow trace buffer that should not wrap often)
 #define HWAS_INF(_fmt_, _args_...) \
-    TRACFCOMP(g_trac_imp_hwas, TRACE_FILENAME _fmt_, ##_args_)
+    TRACFCOMP(g_trac_imp_hwas, INFO_MRK TRACE_FILENAME _fmt_, ##_args_)
+
+#define HWAS_INF_BIN(_str_, _addr_, _len_) \
+    TRACFBIN(g_trac_imp_hwas, INFO_MRK TRACE_FILENAME _str_, _addr_, _len_)
 
 // Error traces (go into slow trace buffer that should not wrap often)
 #define HWAS_ERR(_fmt_, _args_...) \
-    TRACFCOMP(g_trac_imp_hwas, TRACE_FILENAME _fmt_, ##_args_)
+    TRACFCOMP(g_trac_imp_hwas, ERR_MRK TRACE_FILENAME _fmt_, ##_args_)
+
+#define HWAS_ERR_BIN(_str_, _addr_, _len_) \
+    TRACFBIN(g_trac_imp_hwas, ERR_MRK TRACE_FILENAME _str_, _addr_, _len_)
 
 #endif // HWASPLATTRACE_H_
