@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012                   */
+/* COPYRIGHT International Business Machines Corp. 2012,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -33,6 +33,7 @@
 #include "../mdiasm.H"
 #include "../mdiasmimpl.H"
 #include <diag/mdia/mdiamevent.H>
+#include <targeting/common/utilFilter.H>
 #include "../mdiatrace.H"
 #include "../mdiamonitor.H"
 #include "../mdiafwd.H"
@@ -48,11 +49,14 @@ class MdiaSmTest : public CxxTest::TestSuite
 
         void getTargets(uint64_t i_count, TARGETING::TargetHandleList & o_list)
         {
-            TARGETING::TargetHandle_t first = 0;
+            TargetHandleList tmp;
+            TARGETING::getAllChiplets(tmp, TYPE_MBA);
 
-            while(i_count-- != 0)
+            TargetHandleList::iterator it = tmp.end();
+
+            while(i_count-- != 0 && it-- != tmp.begin())
             {
-                o_list.push_back(first + i_count);
+                o_list.push_back(*it);
             }
         }
 

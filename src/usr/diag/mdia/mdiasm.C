@@ -224,6 +224,7 @@ void StateMachine::setup(const WorkFlowAssocMap & i_list)
         p->restartCommand = false;
         p->memSize = 0; // TODO
         p->data = NULL;
+        p->chipUnit = it->first->getAttr<ATTR_CHIP_UNIT>();
 
         iv_workFlowProperties.push_back(p);
     }
@@ -331,10 +332,11 @@ bool StateMachine::scheduleWorkItem(WorkFlowProperties & i_wfp)
             iv_tp->start();
         }
 
-        MDIA_FAST("sm: dispatching work item %d for: %p, priority: %d",
-                *i_wfp.workItem, getTarget(i_wfp), priority);
+        MDIA_FAST("sm: dispatching work item %d for: %p, priority: %d, "
+                "unit: %d", *i_wfp.workItem, getTarget(i_wfp), priority,
+                i_wfp.chipUnit);
 
-        iv_tp->insert(new WorkItem(*this, &i_wfp, priority));
+        iv_tp->insert(new WorkItem(*this, &i_wfp, priority, i_wfp.chipUnit));
 
         return true;
     }

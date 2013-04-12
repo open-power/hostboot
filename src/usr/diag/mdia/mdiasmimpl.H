@@ -81,6 +81,11 @@ struct WorkFlowProperties
      * @brief pointer to single work item scoped data
      */
     void * data;
+
+    /**
+     * @brief mba position on membuf (0/1)
+     */
+    uint8_t chipUnit;
 };
 
 /**
