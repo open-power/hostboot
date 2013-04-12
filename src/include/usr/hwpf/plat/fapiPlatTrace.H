@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2012              */
+/* COPYRIGHT International Business Machines Corp. 2011,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -52,7 +52,7 @@ extern trace_desc_t* g_fapiImpTd;
 extern trace_desc_t* g_fapiScanTd;
 
 // Information traces (go into fast trace buffer that can wrap often)
-#define FAPI_INF(_fmt_, _args_...) TRACSCOMP(g_fapiTd, TRACE_FILENAME _fmt_, ##_args_ )
+#define FAPI_INF(_fmt_, _args_...) TRACFCOMP(g_fapiTd, TRACE_FILENAME _fmt_, ##_args_ )
 
 // Important traces (go into slow trace buffer that should not wrap often)
 #define FAPI_IMP(_fmt_, _args_...) TRACFCOMP(g_fapiImpTd, TRACE_FILENAME _fmt_, ##_args_ )
