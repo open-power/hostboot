@@ -1,4 +1,4 @@
-#-- $Id: p8.xbus.scom.initfile,v 1.8 2013/03/22 20:34:43 jgrell Exp $ 
+#-- $Id: p8.xbus.scom.initfile,v 1.9 2013/04/13 18:19:22 jgrell Exp $ 
 
 
 ####################################################################
@@ -7,13 +7,14 @@
 ##      Based on SETUP_ID_MODE X_BUS_8B_TR_HW
 ##      from ../../logic/mesa_sim/fusion/run/IOEPC_XBUS_WRAP.IOEPC_XBUS_WRAP.figdb
 ##
-##   Created on Fri Mar 22 14:31:30 CDT 2013, by jgrell
+##   Created on Sat Apr 13 12:40:27 CDT 2013, by jgrell
 ####################################################################
 
 ## -- CHANGE HISTORY:
  ## --------------------------------------------------------------------------------
  ## -- Version:|Author:  | Date:  | Comment:
  ## -- --------|---------|--------|-------------------------------------------------
+ ## -- 13031300| jgr     |04-13-13| Made rx dll1/dll2 vreg drv changes
  ## -- jgr13031300| jgr     |03-13-13| Added missing entries from rel 0128
  ## -- 13030500| thomsen |03-05-13| Added DLL settings for HW241376
  ## -- 13011802| mbs     |01-18-13| Added rx_fence to run_mode dial (HW236326)
@@ -79,9 +80,9 @@ define xbus_base_addr = xbus0_gcr_addr;
 #RX01_GEN.RX01.RX0.RXCTL.RX_CTL_REGS.RX_DLL_ANALOG_TWEAKS_PG
 scom 0x800E7800(xbus_base_addr) { 
 	bits, scom_data, expr;
-     rx_dll1_vreg_drvcon,  0b001   , def_IS_HW;
+     rx_dll1_vreg_drvcon,  0b110   , def_IS_HW;
      rx_dll1_vreg_drvcon,  0b000  , def_IS_VBU;
-     rx_dll2_vreg_drvcon,  0b001   , def_IS_HW;
+     rx_dll2_vreg_drvcon,  0b110   , def_IS_HW;
      rx_dll2_vreg_drvcon,  0b000  , def_IS_VBU;
      rx_dll_vreg_compcon,  0b101   , def_IS_HW;
      rx_dll_vreg_compcon,  0b000  , def_IS_VBU;
@@ -432,9 +433,9 @@ scom 0x8000B013(xbus_base_addr) {
 #RX01_GEN.RX01.RX1.RXCTL.RX_CTL_REGS.RX_DLL_ANALOG_TWEAKS_PG
 scom 0x800E7820(xbus_base_addr) { 
 	bits, scom_data, expr;
-     rx_dll1_vreg_drvcon,  0b001   , def_IS_HW;
+     rx_dll1_vreg_drvcon,  0b110   , def_IS_HW;
      rx_dll1_vreg_drvcon,  0b000  , def_IS_VBU;
-     rx_dll2_vreg_drvcon,  0b001   , def_IS_HW;
+     rx_dll2_vreg_drvcon,  0b110   , def_IS_HW;
      rx_dll2_vreg_drvcon,  0b000  , def_IS_VBU;
      rx_dll_vreg_compcon,  0b101   , def_IS_HW;
      rx_dll_vreg_compcon,  0b000  , def_IS_VBU;
@@ -785,9 +786,9 @@ scom 0x8000B033(xbus_base_addr) {
 #RX23_GEN.RX23.RX0.RXCTL.RX_CTL_REGS.RX_DLL_ANALOG_TWEAKS_PG
 scom 0x800E7840(xbus_base_addr) { 
 	bits, scom_data, expr;
-     rx_dll1_vreg_drvcon,  0b001   , def_IS_HW;
+     rx_dll1_vreg_drvcon,  0b110   , def_IS_HW;
      rx_dll1_vreg_drvcon,  0b000  , def_IS_VBU;
-     rx_dll2_vreg_drvcon,  0b001   , def_IS_HW;
+     rx_dll2_vreg_drvcon,  0b110   , def_IS_HW;
      rx_dll2_vreg_drvcon,  0b000  , def_IS_VBU;
      rx_dll_vreg_compcon,  0b101   , def_IS_HW;
      rx_dll_vreg_compcon,  0b000  , def_IS_VBU;
@@ -1138,9 +1139,9 @@ scom 0x8000B053(xbus_base_addr) {
 #RX23_GEN.RX23.RX1.RXCTL.RX_CTL_REGS.RX_DLL_ANALOG_TWEAKS_PG
 scom 0x800E7860(xbus_base_addr) { 
 	bits, scom_data, expr;
-     rx_dll1_vreg_drvcon,  0b001   , def_IS_HW;
+     rx_dll1_vreg_drvcon,  0b110   , def_IS_HW;
      rx_dll1_vreg_drvcon,  0b000  , def_IS_VBU;
-     rx_dll2_vreg_drvcon,  0b001   , def_IS_HW;
+     rx_dll2_vreg_drvcon,  0b110   , def_IS_HW;
      rx_dll2_vreg_drvcon,  0b000  , def_IS_VBU;
      rx_dll_vreg_compcon,  0b101   , def_IS_HW;
      rx_dll_vreg_compcon,  0b000  , def_IS_VBU;
