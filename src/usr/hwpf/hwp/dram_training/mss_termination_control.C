@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_termination_control.C,v 1.18 2013/03/05 15:40:38 mwuu Exp $
+// $Id: mss_termination_control.C,v 1.20 2013/04/09 11:04:34 lapietra Exp $
 /* File is created by SARAVANAN SETHURAMAN on Thur 29 Sept 2011. */
 
 //------------------------------------------------------------------------------
@@ -43,14 +43,16 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
-//  1.18   | mwuu	  |25-Feb-13| Added return code per port for config slew FN
-//  1.17   | mwuu	  |07-Feb-13| Improved the debug and trace messages.
-//  1.16   | mwuu	  |24-Jan-13| Fixed cal_slew extraction of bits.
-//  1.15   | mwuu	  |14-Jan-13| Altered error message for unsupported slew rate
-//  1.14   | mwuu	  |14-Jan-13| Removed error messages from slew cal fail when
+//  1.20   | sasethur |09-Apr-13| Changed wr_vref register settings as per ddr3spec
+//  1.19   | sasethur |05-Apr-13| Updated for port in parallel 
+//  1.18   | mwuu     |25-Feb-13| Added return code per port for config slew FN
+//  1.17   | mwuu     |07-Feb-13| Improved the debug and trace messages.
+//  1.16   | mwuu     |24-Jan-13| Fixed cal_slew extraction of bits.
+//  1.15   | mwuu     |14-Jan-13| Altered error message for unsupported slew rate
+//  1.14   | mwuu     |14-Jan-13| Removed error messages from slew cal fail when
 //         |          |         | in SIM and using unsupported slew rates.
-//  1.13   | mwuu	  |18-Dec-12| Took out initialization of array_rcs in declaration.
-//  1.12   | mwuu	  |14-Dec-12| Updated additional fw review comments
+//  1.13   | mwuu     |18-Dec-12| Took out initialization of array_rcs in declaration.
+//  1.12   | mwuu     |14-Dec-12| Updated additional fw review comments
 //  1.11   | sasethur |07-Dec-12| Updated for fw review comments
 //  1.10   | mwuu     |28-Nov-12| Added changes suggested from FW team.
 //  1.9    | mwuu     |20-Nov-12| Changed warning status to not cause error.
@@ -62,7 +64,7 @@
 //  1.4    | mwuu     |26-Oct-12| Added mss_slew_cal FN, not 100% complete
 //  1.3    | sasethur |26-Oct-12| Updated FW review comments - fapi::, const fapi:: Target
 //  1.2    | mwuu     |17-Oct-12| Updated return codes to use common error, also
-//                                updates to the slew function
+//         |          |         | updates to the slew function
 //  1.1    | sasethur |15-Oct-12| Functions defined & moved from training adv,
 //  							  Menlo upated slew function
 
@@ -136,8 +138,6 @@ fapi::ReturnCode config_drv_imp(const fapi::Target & i_target_mba, uint8_t i_por
 	}
     }
 
-    if (i_port == 0)
-    {
         rc = fapiGetScom(i_target_mba,
 		    DPHY01_DDRPHY_DP18_IO_TX_NFET_SLICE_P0_0_0x800000780301143F,
 		    data_buffer); if(rc) return rc;
@@ -179,10 +179,8 @@ fapi::ReturnCode config_drv_imp(const fapi::Target & i_target_mba, uint8_t i_por
 	rc = fapiPutScom(i_target_mba,
 		    DPHY01_DDRPHY_DP18_IO_TX_PFET_SLICE_P0_4_0x800010790301143F,
 		    data_buffer); if(rc) return rc;
-    }
-    else    // port = 1
-    {
-        rc = fapiGetScom(i_target_mba,
+        
+ 	rc = fapiGetScom(i_target_mba,
 		    DPHY01_DDRPHY_DP18_IO_TX_NFET_SLICE_P1_0_0x800100780301143F,
 		    data_buffer); if(rc) return rc;
 	rc_num = data_buffer.insertFromRight(enslice_drv,48,8);
@@ -223,7 +221,6 @@ fapi::ReturnCode config_drv_imp(const fapi::Target & i_target_mba, uint8_t i_por
 	rc = fapiPutScom(i_target_mba,
 		    DPHY01_DDRPHY_DP18_IO_TX_PFET_SLICE_P1_4_0x800110790301143F,
 		    data_buffer); if(rc) return rc;
-    }
     return rc;
 }
 
@@ -303,8 +300,6 @@ fapi::ReturnCode config_rcv_imp(const fapi::Target & i_target_mba, uint8_t i_por
     }
 
 
-    if (i_port == 0)
-    {
         rc = fapiGetScom(i_target_mba,
 		    DPHY01_DDRPHY_DP18_IO_TX_NFET_TERM_P0_0_0x8000007A0301143F,
 		    data_buffer); if(rc) return rc;
@@ -346,10 +341,8 @@ fapi::ReturnCode config_rcv_imp(const fapi::Target & i_target_mba, uint8_t i_por
 	rc = fapiPutScom(i_target_mba,
 		    DPHY01_DDRPHY_DP18_IO_TX_PFET_TERM_P0_4_0x8000107B0301143F,
 		    data_buffer); if(rc) return rc;
-    }
-    else
-    {
-        rc = fapiGetScom(i_target_mba,
+        
+	rc = fapiGetScom(i_target_mba,
 		    DPHY01_DDRPHY_DP18_IO_TX_NFET_TERM_P1_0_0x8001007A0301143F,
 		    data_buffer); if(rc) return rc;
 	rc_num = data_buffer.insertFromRight(enslicepterm,48,8);
@@ -390,7 +383,6 @@ fapi::ReturnCode config_rcv_imp(const fapi::Target & i_target_mba, uint8_t i_por
 	rc = fapiPutScom(i_target_mba,
 		    DPHY01_DDRPHY_DP18_IO_TX_PFET_TERM_P1_4_0x8001107B0301143F,
 		    data_buffer); if(rc) return rc;
-    }
     return rc;
 }
 
@@ -504,8 +496,6 @@ fapi::ReturnCode config_slew_rate(const fapi::Target & i_target_mba,
 		FAPI_DBG("port%u type=%u imp_idx=%u slew_idx=%u cal_slew=%u",
 			i_port, i_slew_type, imp_idx, slew_idx, slew_cal_value);
 
-		if (i_port == 0)	// port dq/dqs slew
-		{
 			rc = fapiGetScom(i_target_mba,
 				DPHY01_DDRPHY_DP18_IO_TX_CONFIG0_P0_0_0x800000750301143F,
 				data_buffer); if(rc) return rc;
@@ -533,9 +523,6 @@ fapi::ReturnCode config_slew_rate(const fapi::Target & i_target_mba,
 			rc = fapiPutScom(i_target_mba,
 				DPHY01_DDRPHY_DP18_IO_TX_CONFIG0_P0_4_0x800010750301143F,
 				data_buffer); if(rc) return rc;
-		}
-		else	// port 1 dq/dqs slew
-		{
 			rc = fapiGetScom(i_target_mba,
 				DPHY01_DDRPHY_DP18_IO_TX_CONFIG0_P1_0_0x800100750301143F,
 				data_buffer); if(rc) return rc;
@@ -563,7 +550,6 @@ fapi::ReturnCode config_slew_rate(const fapi::Target & i_target_mba,
 			rc = fapiPutScom(i_target_mba,
 				DPHY01_DDRPHY_DP18_IO_TX_CONFIG0_P1_4_0x800110750301143F,
 				data_buffer); if(rc) return rc;
-		} // end port 1 DATA
 	} // end DATA
     else	// Slew type = ADR
     {
@@ -640,8 +626,6 @@ fapi::ReturnCode config_slew_rate(const fapi::Target & i_target_mba,
 		FAPI_DBG("port%u type=%u slew_idx=%u imp_idx=%u cal_slew=%u",
 			i_port, i_slew_type, slew_idx, imp_idx, slew_cal_value);
 
-		if (i_port == 0)
-		{
 			rc = fapiGetScom(i_target_mba,
 				DPHY01_DDRPHY_ADR_IO_SLEW_CTL_VALUE_P0_ADR0_0x8000401A0301143F,
 				data_buffer); if(rc) return rc;
@@ -666,9 +650,6 @@ fapi::ReturnCode config_slew_rate(const fapi::Target & i_target_mba,
 			rc = fapiPutScom(i_target_mba,
 			DPHY01_DDRPHY_ADR_IO_SLEW_CTL_VALUE_P0_ADR3_0x80004C1A0301143F,
 			data_buffer); if(rc) return rc;
-		}
-		else	// port 1 ADR slew
-		{
 			rc = fapiGetScom(i_target_mba,
 			DPHY01_DDRPHY_ADR_IO_SLEW_CTL_VALUE_P1_ADR0_0x8001401A0301143F,
 			data_buffer); if(rc) return rc;
@@ -693,7 +674,6 @@ fapi::ReturnCode config_slew_rate(const fapi::Target & i_target_mba,
 			rc = fapiPutScom(i_target_mba,
 			DPHY01_DDRPHY_ADR_IO_SLEW_CTL_VALUE_P1_ADR3_0x80014C1A0301143F,
 			data_buffer); if(rc) return rc;
-		} // end port 1 ADR
     } // end ADR
     return rc;
 }
@@ -718,7 +698,7 @@ fapi::ReturnCode config_wr_dram_vref(const fapi::Target & i_target_mba, uint8_t 
     fapi::ReturnCode rc;
     uint32_t rc_num = 0;
     uint32_t pcvref = 0;
-    uint32_t i = 0;
+    uint32_t sign = 0;
 
     // For DDR3 vary from VDD*0.42 to VDD*575
     // For DDR4 internal voltage is there this function is not required
@@ -728,20 +708,85 @@ fapi::ReturnCode config_wr_dram_vref(const fapi::Target & i_target_mba, uint8_t 
 	FAPI_SET_HWP_ERROR(rc, RC_MSS_INVALID_FN_INPUT_ERROR);
 	return rc;
     }
-    for(i=0; i< MAX_WR_VREF; i++)
+	
+    if(i_wr_dram_vref < 500)
     {
-	if (wr_vref_array[i] == i_wr_dram_vref)
-	{
-            pcvref = i;
-	    break;
-	}
+        sign = 1;
+    }
+    else
+    {
+        sign = 0;
+    } 
+    if((i_wr_dram_vref == 420) || (i_wr_dram_vref == 575)) 
+    {
+        pcvref = 0xF;
+    }
+    else if((i_wr_dram_vref == 425) || (i_wr_dram_vref == 570)) 
+    {
+        pcvref = 0x7;
+    }
+    else if((i_wr_dram_vref == 430) || (i_wr_dram_vref == 565)) 
+    {
+        pcvref = 0xB;
+    }
+    else if((i_wr_dram_vref == 435) || (i_wr_dram_vref == 560)) 
+    {
+        pcvref = 0x3;
+    }
+    else if((i_wr_dram_vref == 440) || (i_wr_dram_vref == 555)) 
+    {
+        pcvref = 0xD;
+    }
+    else if((i_wr_dram_vref == 445) || (i_wr_dram_vref == 550)) 
+    {
+        pcvref = 0x5;
+    }
+    else if((i_wr_dram_vref == 450) || (i_wr_dram_vref == 545)) 
+    {
+        pcvref = 0x9;
+    }
+    else if((i_wr_dram_vref == 455) || (i_wr_dram_vref == 540)) 
+    {
+        pcvref = 0x1;
+    }
+    else if((i_wr_dram_vref == 460) || (i_wr_dram_vref == 535)) 
+    {
+        pcvref = 0xE;
+    }
+    else if((i_wr_dram_vref == 465) || (i_wr_dram_vref == 530)) 
+    {
+        pcvref = 0x6;
+    }
+    else if((i_wr_dram_vref == 470) || (i_wr_dram_vref == 525)) 
+    {
+        pcvref = 0xA;
+    }
+    else if((i_wr_dram_vref == 475) || (i_wr_dram_vref == 520)) 
+    {
+        pcvref = 0x2;
+    }
+    else if((i_wr_dram_vref == 480) || (i_wr_dram_vref == 515)) 
+    {
+        pcvref = 0xC;
+    }
+    else if((i_wr_dram_vref == 485) || (i_wr_dram_vref == 510)) 
+    {
+        pcvref = 0x4;
+    }
+    else if((i_wr_dram_vref == 490) || (i_wr_dram_vref == 505)) 
+    {
+        pcvref = 0x8;
+    }
+    else if((i_wr_dram_vref == 495) || (i_wr_dram_vref == 500)) 
+    {
+        pcvref = 0x0;
     }
 
-    if (i_port == 0)
-    {
 	rc = fapiGetScom(i_target_mba, DPHY01_DDRPHY_PC_VREF_DRV_CONTROL_P0_0x8000C0150301143F, data_buffer); if(rc) return rc;
-        rc_num = rc_num | data_buffer.insertFromRight(pcvref,48,5);
-        rc_num = rc_num | data_buffer.insertFromRight(pcvref,53,5);
+        rc_num = rc_num | data_buffer.insertFromRight(sign,48,1);
+        rc_num = rc_num | data_buffer.insertFromRight(sign,53,1);
+        rc_num = rc_num | data_buffer.insertFromRight(pcvref,49,4);
+        rc_num = rc_num | data_buffer.insertFromRight(pcvref,54,4);
         if (rc_num)
         {
             FAPI_ERR( "config_wr_vref: Error in setting up buffer ");
@@ -749,12 +794,10 @@ fapi::ReturnCode config_wr_dram_vref(const fapi::Target & i_target_mba, uint8_t 
             return rc;
         }
 	rc = fapiPutScom(i_target_mba, DPHY01_DDRPHY_PC_VREF_DRV_CONTROL_P0_0x8000C0150301143F, data_buffer); if(rc) return rc;
-    }
-    else
-    {
-	rc = fapiGetScom(i_target_mba, DPHY01_DDRPHY_PC_VREF_DRV_CONTROL_P1_0x8001C0150301143F, data_buffer); if(rc) return rc;
-        rc_num = rc_num | data_buffer.insertFromRight(pcvref,48,5);
-        rc_num = rc_num | data_buffer.insertFromRight(pcvref,53,5);
+        rc_num = rc_num | data_buffer.insertFromRight(sign,48,1);
+        rc_num = rc_num | data_buffer.insertFromRight(sign,53,1);
+        rc_num = rc_num | data_buffer.insertFromRight(pcvref,49,4);
+        rc_num = rc_num | data_buffer.insertFromRight(pcvref,54,4);
         if (rc_num)
         {
             FAPI_ERR( "config_wr_vref: Error in setting up buffer ");
@@ -762,7 +805,6 @@ fapi::ReturnCode config_wr_dram_vref(const fapi::Target & i_target_mba, uint8_t 
             return rc;
         }
 	rc = fapiPutScom(i_target_mba, DPHY01_DDRPHY_PC_VREF_DRV_CONTROL_P1_0x8001C0150301143F, data_buffer); if(rc) return rc;
-    }
     return rc;
 }
 /*------------------------------------------------------------------------------
@@ -803,8 +845,6 @@ fapi::ReturnCode config_rd_cen_vref (const fapi::Target & i_target_mba, uint8_t 
 	}
     }
 
-    if (i_port == 0)
-    {
 	rc = fapiGetScom(i_target_mba,
 		    DPHY01_DDRPHY_DP18_RX_PEAK_AMP_P0_0_0x800000060301143F,
 		    data_buffer); if(rc) return rc;
@@ -830,9 +870,6 @@ fapi::ReturnCode config_rd_cen_vref (const fapi::Target & i_target_mba, uint8_t 
 	rc = fapiPutScom(i_target_mba,
 		    DPHY01_DDRPHY_DP18_RX_PEAK_AMP_P0_4_0x800010060301143F,
 		    data_buffer); if(rc) return rc;
-    }
-    else
-    {
 	rc = fapiGetScom(i_target_mba,
 		    DPHY01_DDRPHY_DP18_RX_PEAK_AMP_P1_0_0x800100060301143F,
 		    data_buffer); if(rc) return rc;
@@ -858,7 +895,6 @@ fapi::ReturnCode config_rd_cen_vref (const fapi::Target & i_target_mba, uint8_t 
 	rc = fapiPutScom(i_target_mba,
 		    DPHY01_DDRPHY_DP18_RX_PEAK_AMP_P1_4_0x800110060301143F,
 		    data_buffer); if(rc) return rc;
-    }
     return rc;
 }
 /*------------------------------------------------------------------------------

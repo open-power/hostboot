@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_draminit_mc.C,v 1.34 2013/03/12 21:33:56 lapietra Exp $
+// $Id: mss_draminit_mc.C,v 1.35 2013/04/01 20:24:02 lapietra Exp $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
 // *! All Rights Reserved -- Property of IBM
@@ -44,6 +44,7 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
+//  1.35   | dcadiga  |01-APR-13| Temp Fix For Parity Error on 32GB
 //  1.34   | dcadiga  |12-MAR-13| Added spare cke disable as step 0
 //  1.33   | dcadiga  |04-FEB-13| For some reason the main procedure call was commented out in the last commit... commenting it back in
 //  1.32   | gollub   |31-JAN-13| Uncommenting mss_unmask_maint_errors and mss_unmask_inband_errors
@@ -130,7 +131,7 @@ ReturnCode mss_draminit_mc(Target& i_target)
     fapi::ReturnCode l_rc;
    //Commented back in by dcadiga 
     l_rc = mss_draminit_mc_cloned(i_target);
-    
+    //FAPI_INF("DID NOT RUN DRAMINIT MC\n");
 	// If mss_unmask_maint_errors gets it's own bad rc,
 	// it will commit the passed in rc (if non-zero), and return it's own bad rc.
 	// Else if mss_unmask_maint_errors runs clean, 
@@ -184,6 +185,18 @@ ReturnCode mss_draminit_mc_cloned(Target& i_target)
        FAPI_ERR("---Error During IML Complete Enable rc = 0x%08X (creator = %d)---", uint32_t(rc), rc.getCreator());
        return rc;
     }
+    //Temp Fix For Scom Parity
+    ecmdDataBufferBase parity_tmp_data_buffer_64(64); 
+    rc = fapiGetScom(i_target, MBS_FIR_REG_0x02011400, parity_tmp_data_buffer_64);
+    rc_num = rc_num | parity_tmp_data_buffer_64.clearBit(8);
+    rc = fapiPutScom(i_target, MBS_FIR_REG_0x02011400, parity_tmp_data_buffer_64);
+    if(rc)
+    {
+       FAPI_ERR("---Error During Clear Parity Bit", uint32_t(rc), rc.getCreator());
+       return rc;
+    }
+    
+
 
     // Loop through the 2 MBA's
     for (uint32_t i=0; i < l_mbaChiplets.size(); i++)

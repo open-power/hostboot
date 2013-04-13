@@ -1,8 +1,9 @@
-#-- $Id: mbs_def.initfile,v 1.28 2013/03/15 16:59:48 jmcgill Exp $
+#-- $Id: mbs_def.initfile,v 1.29 2013/04/08 15:52:55 yctschan Exp $
 #-- CHANGE HISTORY:
 #--------------------------------------------------------------------------------
 #-- Version:|Author: | Date:  | Comment:
 #-- --------|--------|--------|--------------------------------------------------
+#--   1.29  |tschang |04/08/13| added MBI cfg register initialization for Irving
 #--   1.26  |tschang |03/13/13| changed cache interleave mode to have ATTR_MSS_CACHE_ENABLE as a condition
 #--   1.25  |tschang |01/17/13| cache enabled when (ATTR_MSS_CACHE_ENABLE != 0) - enabled cache when 1/2 cache mode is choosen
 #--   1.21  |tschang |10/23/12| disable interleaving when one or both MBA are disabled (partial good tests)
@@ -394,6 +395,38 @@ define def_mba23_Planar_DIMM_with_both_DIMM_slots_0_and_1_populated    = (def_mb
 #define  def_23ATTR_MSS_MBA_INTERLEAVE_MODE = 0;
 #define  def_01ATTR_EFF_MBA_POS = 0;	# -MW not needed?
 #define  def_23ATTR_EFF_MBA_POS = 1;	# -MW not needed?
+
+# YCT added for Irving
+#--******************************************************************************
+#-- MBI Configuration Register
+#--******************************************************************************
+ scom 0x000000000201080A              {
+     bits ,                    scom_data        ;
+     0    ,                    0b0              ;              # MBICFGQ_FORCE_CHANNEL_FAIL
+     1    ,                    0b0              ;              # MBICFGQ_REPLAY_CRC_DISABLE
+     2    ,                    0b0              ;              # MBICFGQ_REPLAY_NOACK_DISABLE
+     3    ,                    0b0              ;              # MBICFGQ_REPLAY_OUTOFORDER_DISABLE
+     4    ,                    0b0              ;              # MBICFGQ_FORCE_LFSR_REPLAY
+     5    ,                    0b0              ;              # MBICFGQ_CRC_CHECK_DISABLE
+     6    ,                    0b0              ;              # MBICFGQ_ECC_CHECK_DISABLE
+     7    ,                    0b0              ;              # MBICFGQ_START_FRAME_LOCK
+     8    ,                    0b0              ;              # MBICFGQ_FORCE_FRTL
+     9    ,                    0b0              ;              # MBICFGQ_AUTO_FRTL_DISABLE
+     10:16,                    0b0000000        ;              # MBICFGQ_MANUAL_FRTL_VALUE
+     17   ,                    0x0              ;              # MBICFGQ_MANUAL_FRTL_DONE
+     18   ,                    0b0              ;              # MBICFGQ_ECC_CORRECT_DISABLE
+     19   ,                    0b0              ;              # MBICFGQ_SPARE1
+     20   ,                    0b0              ;              # MBICFGQ_LANE_VOTING_BYPASS
+     21:25,                    0b00000          ;              # MBICFGQ_BAD_LANE_VALUE
+     26   ,                    0b0              ;              # MBICFGQ_BAD_LANE_VOTING_DISABLE
+     27:32,                    0b010010         ;              # MBICFGQ_NO_FORWARD_PROGRESS_TIMEOUT_VALUE (0x12 = 18 => 2ms)
+     33:34,                    0b00             ;              # MBICFGQ_PERFORMANCE_DEGRADATION_PERCENT_SELECT
+     35:36,                    0b00             ;              # MBICFGQ_CHANNEL_INITIALIZATION_STATE_MACHINE_TIMEOUT_VALUE
+     37   ,                    0b0              ;              # MBICFGQ_RESET_KEEPER
+     38   ,                    0b0              ;              # MBICFGQ_FAULT_LINE_ERROR_ENABLE
+     39:43,                    0b00000          ;              # MBICFGQ_RESERVED
+
+ }
 
 ######################
 # temp VBU settings  #

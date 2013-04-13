@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012                   */
+/* COPYRIGHT International Business Machines Corp. 2012,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_funcs.H,v 1.13 2012/11/19 21:18:41 jsabrow Exp $
+// $Id: mss_funcs.H,v 1.14 2013/04/09 23:34:27 jdsloat Exp $
 /* File mss_funcs.H created by SLOAT JACOB D. (JAKE),2D3970 on Fri Apr 22 2011. */
 
 //------------------------------------------------------------------------------
@@ -43,6 +43,7 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
+//  1.14   | jdsloat  | 04/09/13| Moved Address mirror mode sub function in  from mss_draminit
 //  1.13   | jsabrow  | 11/19/12| added CCS data loader: mss_ccs_load_data_pattern
 //  1.12   | 07/16/12 | bellows | added in Id tag
 //  1.11   | 3/21/12  | divyakum| Added mss_execute_zq_cal function 
@@ -243,6 +244,18 @@ uint8_t mss_reverse_8bits(uint8_t i_number);
 //-----------------------------------------
 fapi::ReturnCode mss_execute_zq_cal(fapi::Target& i_target, 
                                     uint8_t i_port);
+
+//-----------------------------------------
+// mss_address_mirror_swizzle
+// swizzle the address bus and bank address bus for address mirror mode
+// Target = centaur.mba
+//-----------------------------------------
+fapi::ReturnCode mss_address_mirror_swizzle(fapi::Target& i_target,
+            				    uint32_t i_port,
+	    				    uint32_t i_dimm,
+	    				    uint32_t i_rank,
+            				    ecmdDataBufferBase& io_address,
+            				    ecmdDataBufferBase& io_bank);
 
 #endif /* _MSS_FUNCS_H */
 

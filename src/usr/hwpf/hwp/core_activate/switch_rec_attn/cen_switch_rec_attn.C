@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: cen_switch_rec_attn.C,v 1.3 2013/01/18 17:18:31 mfred Exp $
+// $Id: cen_switch_rec_attn.C,v 1.4 2013/03/04 17:56:36 mfred Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/centaur/working/procedures/ipl/fapi/cen_switch_rec_attn.C,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2012
@@ -30,6 +30,8 @@
 // *! TITLE       : cen_switch_rec_attn
 // *! DESCRIPTION : The purpose of this procedure is to route Centaur recoverable attns and special attns to the FSP.
 // *! OWNER NAME  : Mark Fredrickson  Email: mfred@us.ibm.com
+// *! BACKUP NAME : Mark Bellows      Email: bellows@us.ibm.com
+// *! SCREEN      : pervasive_screen
 // #! ADDITIONAL COMMENTS : See inline comments below.
 //
 //------------------------------------------------------------------------------
@@ -106,6 +108,9 @@ fapi::ReturnCode cen_switch_rec_attn(const fapi::Target & i_target)
 This section is automatically updated by CVS when you check in this file.
 Be sure to create CVS comments when you commit so that they can be included here.
 $Log: cen_switch_rec_attn.C,v $
+Revision 1.4  2013/03/04 17:56:36  mfred
+Add some header comments for BACKUP and SCREEN.
+
 Revision 1.3  2013/01/18 17:18:31  mfred
 Clear mask to allow special attentions to go to FSP, along with recoverables.
 

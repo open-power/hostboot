@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012                   */
+/* COPYRIGHT International Business Machines Corp. 2012,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_funcs.C,v 1.29 2012/11/19 21:18:40 jsabrow Exp $
+// $Id: mss_funcs.C,v 1.30 2013/04/09 23:33:09 jdsloat Exp $
 /* File mss_funcs.C created by SLOAT JACOB D. (JAKE),2D3970 on Fri Apr 22 2011. */
 
 //------------------------------------------------------------------------------
@@ -43,6 +43,7 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
+//  1.30   | jdsloat  | 04/09/13| Moved Address mirror mode sub function in  from mss_draminit
 //  1.29   | jsabrow  | 11/19/12| added CCS data loader: mss_ccs_load_data_pattern
 //  1.28   | bellows  | 07/16/12|added in Id tag
 //  1.27   | divyakum | 3/22/12 | Fixed warnings from mss_execute_zq_cal function
@@ -110,6 +111,69 @@ ReturnCode mss_ccs_set_end_bit(
     if(rc) return rc;
     rc = fapiPutScom(i_target, reg_address, data_buffer);
     if(rc) return rc;
+
+    return rc;
+}
+
+ReturnCode mss_address_mirror_swizzle(
+            Target& i_target,
+            uint32_t i_port,
+	    uint32_t i_dimm,
+	    uint32_t i_rank,
+            ecmdDataBufferBase& io_address,
+            ecmdDataBufferBase& io_bank
+              )
+{
+    ReturnCode rc;
+    ReturnCode rc_buff;
+    uint32_t rc_num = 0;
+    ecmdDataBufferBase address_post_swizzle_16(16);
+    ecmdDataBufferBase bank_post_swizzle_3(3);
+    uint16_t mirror_mode_ba = 0;
+    uint16_t mirror_mode_ad  = 0;
+
+	FAPI_INF( "ADDRESS MIRRORING ON %s PORT%d DIMM%d RANK%d", i_target.toEcmdString(), i_port, i_dimm, i_rank);
+
+	rc_num = rc_num | io_address.extractPreserve(&mirror_mode_ad, 0, 16, 0);
+	FAPI_INF( "PRE - MIRROR MODE ADDRESS: 0x%04X", mirror_mode_ad);
+	rc_num = rc_num | io_bank.extractPreserve(&mirror_mode_ba, 0, 3, 0);
+	FAPI_INF( "PRE - MIRROR MODE BANK ADDRESS: 0x%04X", mirror_mode_ba);
+
+	//Initialize address and bank address as the same pre mirror mode swizzle
+	rc_num = rc_num | address_post_swizzle_16.insert(io_address, 0, 16, 0);
+	rc_num = rc_num | bank_post_swizzle_3.insert(io_bank, 0, 3, 0);
+
+	//Swap A3 and A4
+	rc_num = rc_num | address_post_swizzle_16.insert(io_address, 4, 1, 3);
+	rc_num = rc_num | address_post_swizzle_16.insert(io_address, 3, 1, 4);
+
+	//Swap A5 and A6
+	rc_num = rc_num | address_post_swizzle_16.insert(io_address, 6, 1, 5);
+	rc_num = rc_num | address_post_swizzle_16.insert(io_address, 5, 1, 6);
+
+	//Swap A7 and A8
+	rc_num = rc_num | address_post_swizzle_16.insert(io_address, 8, 1, 7);
+	rc_num = rc_num | address_post_swizzle_16.insert(io_address, 7, 1, 8);
+
+	//Swap BA0 and BA1
+	rc_num = rc_num | bank_post_swizzle_3.insert(io_bank, 1, 1, 0);
+	rc_num = rc_num | bank_post_swizzle_3.insert(io_bank, 0, 1, 1);
+
+	rc_num = rc_num | address_post_swizzle_16.extractPreserve(&mirror_mode_ad, 0, 16, 0);
+	FAPI_INF( "POST - MIRROR MODE ADDRESS: 0x%04X", mirror_mode_ad);
+	rc_num = rc_num | bank_post_swizzle_3.extractPreserve(&mirror_mode_ba, 0, 3, 0);
+	FAPI_INF( "POST - MIRROR MODE BANK ADDRESS: 0x%04X", mirror_mode_ba);
+
+	//copy address and bank address back to the IO variables
+	rc_num = rc_num | io_address.insert(address_post_swizzle_16, 0, 16, 0);
+	rc_num = rc_num | io_bank.insert(bank_post_swizzle_3, 0, 3, 0);
+
+    if (rc_num)
+    {
+        FAPI_ERR( "Error setting up buffers");
+        rc_buff.setEcmdError(rc_num);
+        return rc_buff;
+    }
 
     return rc;
 }

@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_generic_shmoo.H,v 1.11 2013/01/21 12:36:52 sasethur Exp $
+// $Id: mss_generic_shmoo.H,v 1.13 2013/04/09 12:18:47 lapietra Exp $
 // *!***************************************************************************
 // *! (C) Copyright International Business Machines Corp. 1997, 1998
 // *!           All Rights Reserved -- Property of IBM
@@ -84,15 +84,17 @@ class generic_shmoo
         shmoo_algorithm_t algorithm;
         shmoo_mode mcbist_mode;
         uint8_t mcbist_error_map[MAX_PORT][MAX_RANK][MAX_BYTE][MAX_NIBBLES];
+		uint8_t schmoo_error_map[MAX_PORT][MAX_RANK][20];
 		shmoo_type_t shmoo_mask;
-	uint8_t iv_port;
-	uint8_t iv_MAX_RANKS;
+	uint8_t iv_addr;
+	uint8_t iv_MAX_RANKS[MAX_PORT];
 	uint8_t iv_MAX_BYTES;
 	uint8_t iv_pattern;
 	uint8_t iv_test_type;
 	uint8_t iv_dmm_type;
 	uint8_t iv_DQS_ON;
 	uint8_t iv_shmoo_type;
+	uint32_t iv_shmoo_param;
 	uint8_t valid_rank[MAX_RANK];
 
         
@@ -103,22 +105,23 @@ class generic_shmoo
 	
         enum bound_t { LEFT , RIGHT};    
      
-        generic_shmoo(uint8_t iv_port,shmoo_type_t shmoo_mask,shmoo_algorithm_t shmoo_algorithm);// Constructor
+        generic_shmoo(uint8_t iv_addr,shmoo_type_t shmoo_mask,shmoo_algorithm_t shmoo_algorithm);// Constructor
         generic_shmoo(){};
         ~generic_shmoo(){};  // Destructor
         void  init_multi_array(uint32_t (&array)[MAX_DQ][MAX_RPS],uint32_t init_val); //initialize multi dim arrays to known value
 	fapi::ReturnCode init_multi_array_dqs(uint32_t (&array)[MAX_DQ][MAX_RPS],uint32_t init_val);
         fapi::ReturnCode get_all_noms(const fapi::Target & i_target); //! Read in all the Nominal values of the relevant knobs
         fapi::ReturnCode find_bound(const fapi::Target & i_target,bound_t); // generic Right bound
-        fapi::ReturnCode knob_update(const fapi::Target & i_target,bound_t bound,uint8_t scenario,uint8_t rank,uint8_t byte,uint8_t nibble,uint8_t bit,uint8_t pass,bool &flag); // Increment or decrement the knob
+        fapi::ReturnCode knob_update(const fapi::Target & i_target,bound_t bound,uint8_t scenario,uint8_t bit,uint8_t pass,bool &flag); // Increment or decrement the knob
 	fapi::ReturnCode knob_update_dqs(const fapi::Target & i_target,bound_t bound,uint8_t scenario,uint8_t rank,uint8_t byte,uint8_t nibble,uint8_t bit,uint8_t pass);
         fapi::ReturnCode print_report(const fapi::Target & i_target); // Print Shmoo report to file or STDOUT
         fapi::ReturnCode print_shmoo_parms();
 	fapi::ReturnCode get_margin(const fapi::Target & i_target);
 	fapi::ReturnCode get_min_margin(const fapi::Target & i_target,uint32_t *o_right_min_margin,uint32_t *o_left_min_margin);
-        fapi::ReturnCode do_mcbist_test(const fapi::Target & i_target,uint8_t rank,uint8_t byte,uint8_t nibble,uint8_t &pass);
-        void  check_error_map(uint8_t i_rank,uint8_t i_byte,uint8_t i_nibble,uint8_t &pass);
+        fapi::ReturnCode do_mcbist_test(const fapi::Target & i_target);
+        fapi::ReturnCode  check_error_map(const fapi::Target & i_target,uint8_t port,uint8_t &pass);
         fapi::ReturnCode sanity_check(const fapi::Target & i_target);
-        fapi::ReturnCode run(const fapi::Target & i_target,uint32_t *right_min_margin,uint32_t *left_min_margin,uint8_t i_pattern,uint8_t i_test_type);
+		fapi::ReturnCode schmoo_setup_mcb( const fapi::Target & i_target);
+        fapi::ReturnCode run(const fapi::Target & i_target,uint32_t *right_min_margin,uint32_t *left_min_margin,uint8_t i_pattern,uint8_t i_test_type,uint32_t i_shmoo_param);
 };
 #endif

@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_mcbist.H,v 1.23 2013/01/16 15:16:29 sasethur Exp $
+// $Id: mss_mcbist.H,v 1.28 2013/02/14 12:04:04 billyz Exp $
 // *!***************************************************************************
 // *! (C) Copyright International Business Machines Corp. 1997, 1998
 // *!           All Rights Reserved -- Property of IBM
@@ -38,7 +38,10 @@
 //-------------------------------------------------------------------------------
 // Version:|Author: | Date:   | Comment:
 // --------|--------|---------|--------------------------------------------------
-//   1.23  |aditya  |01/11/16 |added a parameter to setup_mcbist function 
+//   1.27  |aditya  |02/13/13 |updated testtypes
+//   1.25  |aditya  |02/12/13 |updated testtypes
+//   1.24  |aditya  |01/30/13 |Updated fw comments
+//   1.23  |aditya  |01/16/13 |added a parameter to setup_mcbist function 
 //   1.22  |aditya  |01/11/13 |added a parameter to setup_mcbist function   
 //   1.21  |aditya  |01/07/13 | Updated FW Review Comments 
 //   1.20  |aditya  |01/03/13 | Updated FW Comments 
@@ -76,7 +79,7 @@ using namespace fapi;
 /*const uint8_t MAX_PORT = 2;
 const uint8_t MAX_BYTE = 10;
 const uint8_t MAX_RANK = 8;
-const uint8_t MAX_NIBBLE = 1;*/
+const uint8_t MAX_NIBBLE = 1;;;*/
 
 enum mcbist_test_mem
 {
@@ -109,7 +112,14 @@ enum mcbist_test_mem
     R_ONLY,
     W_ONLY_RAND,
     R_ONLY_RAND,
-    R_ONLY_MULTI
+    R_ONLY_MULTI,
+    SHORT,
+    SIMPLE_RAND_BARI,
+    W_R_INFINITE,
+    W_R_RAND_INFINITE,
+    R_INFINITE1,
+    R_INFINITE_RF,
+    MARCH
 };
 
 enum mcbist_data_gen
@@ -183,8 +193,8 @@ enum mcbist_data_mode
     RECCB,
     DEA,
     DRL,
-    DRR,
-    RAND	      	
+    DRR
+    	      	
 };
 
 enum mcbist_addr_mode
@@ -261,7 +271,7 @@ fapi::ReturnCode mcb_reset_trap(const fapi::Target & i_target_mba);
 fapi::ReturnCode cfg_mcb_dgen(const fapi::Target & i_target_mba,mcbist_data_gen i_datamode,uint8_t i_mcbrotate);
 fapi::ReturnCode cfg_byte_mask(const fapi::Target & i_target_mba,uint8_t i_rank,uint8_t i_port);
 fapi::ReturnCode start_mcb(const fapi::Target & i_target_mba);
-fapi::ReturnCode setup_mcbist(const fapi::Target & i_target_mba, uint8_t i_port,mcbist_data_gen i_mcbpatt,mcbist_test_mem i_mcbtest,mcbist_byte_mask i_mcbbytemask,uint8_t i_mcbrotate,uint8_t i_pattern,uint8_t i_test_type,uint8_t i_rank,uint8_t i_bit32,uint64_t i_start,uint64_t i_end);
+fapi::ReturnCode setup_mcbist(const fapi::Target & i_target_mba, uint8_t i_port,mcbist_data_gen i_mcbpatt,mcbist_test_mem i_mcbtest,mcbist_byte_mask i_mcbbytemask,uint8_t i_mcbrotate,uint8_t i_pattern,uint8_t i_test_type,uint8_t i_rank,uint8_t i_bit32,uint64_t i_start,uint64_t i_end,uint8_t new_address_map);
 fapi::ReturnCode cfg_mcb_addr(const fapi::Target & i_target_mba,uint8_t i_rank,uint8_t i_port,uint64_t i_start,uint64_t i_end);
 fapi::ReturnCode  mcb_error_map_print(const fapi::Target & i_target_mba,uint8_t i_port,uint8_t i_rank,ecmdDataBufferBase & i_mcb_fail_320);
 }

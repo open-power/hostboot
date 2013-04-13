@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012                   */
+/* COPYRIGHT International Business Machines Corp. 2012,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_eff_config_rank_group.C,v 1.8 2012/08/30 03:07:27 asaetow Exp $
+// $Id: mss_eff_config_rank_group.C,v 1.9 2013/04/01 20:08:03 asaetow Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/centaur/working/procedures/ipl/fapi/mss_eff_config_rank_group.C,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
@@ -46,7 +46,9 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
-//   1.9   |          |         |
+//   1.10  |          |         |
+//   1.9   | asaetow  |01-APR-13| Added 32G CDIMM 1R dualdrop workaround.
+//         |          |         | NOTE: Normally primary_rank_group0=0, primary_rank_group1=4.
 //   1.8   | asaetow  |29-AUG-12| Fixed variable init for rank_group to INVALID for PORT1. 
 //   1.7   | asaetow  |24-AUG-12| Fixed variable init for rank_group to INVALID. 
 //   1.6   | asaetow  |30-APR-12| Fixed "fapi::" for hostboot, added "const", renamed "i_target_mba", and changed comments.
@@ -134,7 +136,25 @@ fapi::ReturnCode mss_eff_config_rank_group(const fapi::Target i_target_mba) {
    uint8_t quanternary_rank_group3_u8array[PORT_SIZE];
 
    for (uint8_t cur_port = 0; cur_port < PORT_SIZE; cur_port += 1) {
-      if (dimm_type_u8 == LRDIMM) {
+      if ((dimm_type_u8 == CDIMM) && (num_ranks_per_dimm_u8array[cur_port][0] == 1) && (num_ranks_per_dimm_u8array[cur_port][1] == 1)) {
+         // NOTE: 32G CDIMM 1R dualdrop workaround, normally primary_rank_group0=0, primary_rank_group1=4.
+         primary_rank_group0_u8array[cur_port] = 0;
+         primary_rank_group1_u8array[cur_port] = INVALID;
+         primary_rank_group2_u8array[cur_port] = INVALID;
+         primary_rank_group3_u8array[cur_port] = INVALID;
+         secondary_rank_group0_u8array[cur_port] = 4;
+         secondary_rank_group1_u8array[cur_port] = INVALID;
+         secondary_rank_group2_u8array[cur_port] = INVALID;
+         secondary_rank_group3_u8array[cur_port] = INVALID;
+         tertiary_rank_group0_u8array[cur_port] = INVALID;
+         tertiary_rank_group1_u8array[cur_port] = INVALID;
+         tertiary_rank_group2_u8array[cur_port] = INVALID;
+         tertiary_rank_group3_u8array[cur_port] = INVALID;
+         quanternary_rank_group0_u8array[cur_port] = INVALID;
+         quanternary_rank_group1_u8array[cur_port] = INVALID;
+         quanternary_rank_group2_u8array[cur_port] = INVALID;
+         quanternary_rank_group3_u8array[cur_port] = INVALID;
+      } else if (dimm_type_u8 == LRDIMM) {
          // HERE: NOT correct, need to account for ATTR_EFF_DIMM_RANKS_CONFIGED for LRDIMMs /w multi master ranks
          primary_rank_group0_u8array[cur_port] = 0;
          primary_rank_group1_u8array[cur_port] = 4;

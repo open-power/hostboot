@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_draminit.C,v 1.46 2013/02/12 17:24:16 jdsloat Exp $
+// $Id: mss_draminit.C,v 1.47 2013/04/09 23:31:21 jdsloat Exp $
 //------------------------------------------------------------------------------
 // Don't forget to create CVS comments when you check in your changes!
 //------------------------------------------------------------------------------
@@ -28,6 +28,10 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
+//  1.47   | jdsloat  | 04/09/13| Added position info to debug messages
+//         |          |         | Added setup cycle for 2N mode
+//         |          |         | Added CKE high for RCD
+//         |          |         | Moved address mirror mode into its own function in mss_funcs
 //  1.46   | jdsloat  | 02/12/13| Fixed RTT_WR in MR2
 //  1.45   | jdsloat  | 01/28/13| is_sim check for address mirror mode
 //  1.44   | jdsloat  | 01/25/13| Address Mirror Mode added for dual drop CDIMMs
@@ -225,7 +229,7 @@ ReturnCode mss_draminit_cloned(Target& i_target)
 	&& (is_sim == 0)   )
     {
 
-	FAPI_INF( "Setting Address Mirroring in the PHY");
+	FAPI_INF( "Setting Address Mirroring in the PHY on %s ", i_target.toEcmdString());
 
 	//Set the Address and BA bits affected by mirroring
 	rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_RANK_GROUP_P0_0x8000C0110301143F, data_buffer_64);
@@ -258,7 +262,7 @@ ReturnCode mss_draminit_cloned(Target& i_target)
 			 ( primary_ranks_array[rank_pair_group][port_number] == 0x06) ||
 			 ( primary_ranks_array[rank_pair_group][port_number] == 0x07) )
 		    {
-			FAPI_INF( "Address Mirroring on PORT%d RANKPAIR%d RANK%d", port_number, rank_pair_group, primary_ranks_array[rank_pair_group][port_number]);
+			FAPI_INF( "Address Mirroring on %s PORT%d RANKPAIR%d RANK%d", i_target.toEcmdString(), port_number, rank_pair_group, primary_ranks_array[rank_pair_group][port_number]);
 			bit_position = 2 * rank_pair_group + 48;
 			FAPI_INF( "Setting bit %d", bit_position);
 			rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_RANK_GROUP_P0_0x8000C0110301143F, data_buffer_64);
@@ -272,7 +276,7 @@ ReturnCode mss_draminit_cloned(Target& i_target)
 			 ( secondary_ranks_array[rank_pair_group][port_number] == 0x06) ||
 			 ( secondary_ranks_array[rank_pair_group][port_number] == 0x07) )
 		    {
-			FAPI_INF( "Address Mirroring on PORT%d RANKPAIR%d RANK%d", port_number, rank_pair_group, primary_ranks_array[rank_pair_group][port_number]);
+			FAPI_INF( "Address Mirroring on %s PORT%d RANKPAIR%d RANK%d", i_target.toEcmdString(), port_number, rank_pair_group, primary_ranks_array[rank_pair_group][port_number]);
 			bit_position = 2 * rank_pair_group + 49;
 			FAPI_INF( "Setting bit %d", bit_position);
 			rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_RANK_GROUP_P0_0x8000C0110301143F, data_buffer_64);
@@ -286,7 +290,7 @@ ReturnCode mss_draminit_cloned(Target& i_target)
 			 ( tertiary_ranks_array[rank_pair_group][port_number] == 0x06) ||
 			 ( tertiary_ranks_array[rank_pair_group][port_number] == 0x07) )
 		    {
-			FAPI_INF( "Address Mirroring on PORT%d RANKPAIR%d RANK%d", port_number, rank_pair_group, primary_ranks_array[rank_pair_group][port_number]);
+			FAPI_INF( "Address Mirroring on %s PORT%d RANKPAIR%d RANK%d", i_target.toEcmdString(), port_number, rank_pair_group, primary_ranks_array[rank_pair_group][port_number]);
 			bit_position = 2 * rank_pair_group + 48;
 			FAPI_INF( "Setting bit %d", bit_position);
 			rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_RANK_GROUP_EXT_P0_0x8000C0350301143F, data_buffer_64);
@@ -300,7 +304,7 @@ ReturnCode mss_draminit_cloned(Target& i_target)
 			 ( quaternary_ranks_array[rank_pair_group][port_number] == 0x06) ||
 			 ( quaternary_ranks_array[rank_pair_group][port_number] == 0x07) )
 		    {
-			FAPI_INF( "Address Mirroring on PORT%d RANKPAIR%d RANK%d", port_number, rank_pair_group, primary_ranks_array[rank_pair_group][port_number]);
+			FAPI_INF( "Address Mirroring on %s PORT%d RANKPAIR%d RANK%d", i_target.toEcmdString(), port_number, rank_pair_group, primary_ranks_array[rank_pair_group][port_number]);
 			bit_position = 2 * rank_pair_group + 49;
 			FAPI_INF( "Setting bit %d", bit_position);
 			rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_RANK_GROUP_EXT_P0_0x8000C0350301143F, data_buffer_64);
@@ -317,7 +321,7 @@ ReturnCode mss_draminit_cloned(Target& i_target)
 			 ( primary_ranks_array[rank_pair_group][port_number] == 0x06) ||
 			 ( primary_ranks_array[rank_pair_group][port_number] == 0x07) )
 		    {
-			FAPI_INF( "Address Mirroring on PORT%d RANKPAIR%d RANK%d", port_number, rank_pair_group, primary_ranks_array[rank_pair_group][port_number]);
+			FAPI_INF( "Address Mirroring on %s PORT%d RANKPAIR%d RANK%d", i_target.toEcmdString(), port_number, rank_pair_group, primary_ranks_array[rank_pair_group][port_number]);
 			bit_position = 2 * rank_pair_group + 48;
 			FAPI_INF( "Setting bit %d", bit_position);
 			rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_RANK_GROUP_P1_0x8001C0110301143F, data_buffer_64);
@@ -331,7 +335,7 @@ ReturnCode mss_draminit_cloned(Target& i_target)
 			 ( secondary_ranks_array[rank_pair_group][port_number] == 0x06) ||
 			 ( secondary_ranks_array[rank_pair_group][port_number] == 0x07) )
 		    {
-			FAPI_INF( "Address Mirroring on PORT%d RANKPAIR%d RANK%d", port_number, rank_pair_group, primary_ranks_array[rank_pair_group][port_number]);
+			FAPI_INF( "Address Mirroring on %s PORT%d RANKPAIR%d RANK%d", i_target.toEcmdString(), port_number, rank_pair_group, primary_ranks_array[rank_pair_group][port_number]);
 			bit_position = 2 * rank_pair_group + 49;
 			FAPI_INF( "Setting bit %d", bit_position);
 			rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_RANK_GROUP_P1_0x8001C0110301143F, data_buffer_64);
@@ -345,7 +349,7 @@ ReturnCode mss_draminit_cloned(Target& i_target)
 			 ( tertiary_ranks_array[rank_pair_group][port_number] == 0x06) ||
 			 ( tertiary_ranks_array[rank_pair_group][port_number] == 0x07) )
 		    {
-			FAPI_INF( "Address Mirroring on PORT%d RANKPAIR%d RANK%d", port_number, rank_pair_group, primary_ranks_array[rank_pair_group][port_number]);
+			FAPI_INF( "Address Mirroring on %s PORT%d RANKPAIR%d RANK%d", i_target.toEcmdString(), port_number, rank_pair_group, primary_ranks_array[rank_pair_group][port_number]);
 			bit_position = 2 * rank_pair_group + 48;
 			FAPI_INF( "Setting bit %d", bit_position);
 			rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_RANK_GROUP_EXT_P1_0x8001C0350301143F, data_buffer_64);
@@ -480,25 +484,25 @@ ReturnCode mss_draminit_cloned(Target& i_target)
 		    		rc_num = rc_num | data_buffer_64.reverse();
 		    		rc_num = rc_num | mrs0.insert(data_buffer_64, 0, 16);
 		    		rc_num = rc_num | mrs0.extractPreserve(&MRS0, 0, 16, 0);
-		    		FAPI_INF( "PORT %d SHADOW REGISTER MRS 0 RP %d VALUE: 0x%04X",  port_number, rank_pair_group, MRS0 );
+		    		FAPI_INF( "%s PORT %d SHADOW REGISTER MRS 0 RP %d VALUE: 0x%04X", i_target.toEcmdString(), port_number, rank_pair_group, MRS0 );
 
 		    		rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_MR1_PRI_RP0_P0_0x8000C01D0301143F, data_buffer_64);
 		    		rc_num = rc_num | data_buffer_64.reverse();
 		    		rc_num = rc_num | mrs1.insert(data_buffer_64, 0, 16);
 		    		rc_num = rc_num | mrs1.extractPreserve(&MRS1, 0, 16, 0);
-		    		FAPI_INF( "PORT %d SHADOW REGISTER MRS 1 RP %d VALUE: 0x%04X",  port_number, rank_pair_group, MRS1);
+		    		FAPI_INF( "%s PORT %d SHADOW REGISTER MRS 1 RP %d VALUE: 0x%04X",  i_target.toEcmdString(), port_number, rank_pair_group, MRS1);
 
 		    		rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_MR2_PRI_RP0_P0_0x8000C01E0301143F, data_buffer_64);
 		    		rc_num = rc_num | data_buffer_64.reverse();
 		    		rc_num = rc_num | mrs2.insert(data_buffer_64, 0, 16);
 		    		rc_num = rc_num | mrs2.extractPreserve(&MRS2, 0, 16, 0);
-		    		FAPI_INF( "PORT %d SHADOW REGISTER MRS 2 RP %d VALUE: 0x%04X",  port_number, rank_pair_group, MRS2);
+		    		FAPI_INF( "%s PORT %d SHADOW REGISTER MRS 2 RP %d VALUE: 0x%04X",  i_target.toEcmdString(), port_number, rank_pair_group, MRS2);
 
 		    		rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_MR3_PRI_RP0_P0_0x8000C01F0301143F, data_buffer_64);
 		    		rc_num = rc_num | data_buffer_64.reverse();
 		    		rc_num = rc_num | mrs3.insert(data_buffer_64, 0, 16);
 		    		rc_num = rc_num | mrs3.extractPreserve(&MRS3, 0, 16, 0);
-		    		FAPI_INF( "PORT %d SHADOW REGISTER MRS 3 RP %d VALUE: 0x%04X",  port_number, rank_pair_group, MRS3);
+		    		FAPI_INF( "%s PORT %d SHADOW REGISTER MRS 3 RP %d VALUE: 0x%04X",  i_target.toEcmdString(), port_number, rank_pair_group, MRS3);
 
 			}
 			else if (rank_pair_group == 1)
@@ -507,25 +511,25 @@ ReturnCode mss_draminit_cloned(Target& i_target)
 		    		rc_num = rc_num | data_buffer_64.reverse();
 		    		rc_num = rc_num | mrs0.insert(data_buffer_64, 0, 16);
 		    		rc_num = rc_num | mrs0.extractPreserve(&MRS0, 0, 16, 0);
-		    		FAPI_INF( "PORT %d SHADOW REGISTER MRS 0 RP %d VALUE: 0x%04X",  port_number, rank_pair_group, MRS0);
+		    		FAPI_INF( "%s PORT %d SHADOW REGISTER MRS 0 RP %d VALUE: 0x%04X",  i_target.toEcmdString(), port_number, rank_pair_group, MRS0);
 
 		    		rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_MR1_PRI_RP1_P0_0x8000C11D0301143F, data_buffer_64);
 		    		rc_num = rc_num | data_buffer_64.reverse();
 		    		rc_num = rc_num | mrs1.insert(data_buffer_64, 0, 16);
 		    		rc_num = rc_num | mrs1.extractPreserve(&MRS1, 0, 16, 0);
-		    		FAPI_INF( "PORT %d SHADOW REGISTER MRS 1 RP %d VALUE: 0x%04X",  port_number, rank_pair_group, MRS1);
+		    		FAPI_INF( "%s PORT %d SHADOW REGISTER MRS 1 RP %d VALUE: 0x%04X",  i_target.toEcmdString(), port_number, rank_pair_group, MRS1);
 
 		    		rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_MR2_PRI_RP1_P0_0x8000C11E0301143F, data_buffer_64);
 		    		rc_num = rc_num | data_buffer_64.reverse();
 		    		rc_num = rc_num | mrs2.insert(data_buffer_64, 0, 16);
 		    		rc_num = rc_num | mrs2.extractPreserve(&MRS2, 0, 16, 0);
-		    		FAPI_INF( "PORT %d SHADOW REGISTER MRS 2 RP %d VALUE: 0x%04X",  port_number, rank_pair_group, MRS2);
+		    		FAPI_INF( "%s PORT %d SHADOW REGISTER MRS 2 RP %d VALUE: 0x%04X",  i_target.toEcmdString(), port_number, rank_pair_group, MRS2);
 
 		    		rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_MR3_PRI_RP1_P0_0x8000C11F0301143F, data_buffer_64);
 		    		rc_num = rc_num | data_buffer_64.reverse();
 		    		rc_num = rc_num | mrs3.insert(data_buffer_64, 0, 16);
 		    		rc_num = rc_num | mrs3.extractPreserve(&MRS3, 0, 16, 0);
-		    		FAPI_INF( "PORT %d SHADOW REGISTER MRS 3 RP %d VALUE: 0x%04X",  port_number, rank_pair_group, MRS3);
+		    		FAPI_INF( "%s PORT %d SHADOW REGISTER MRS 3 RP %d VALUE: 0x%04X",  i_target.toEcmdString(), port_number, rank_pair_group, MRS3);
 
 			}
 			else if (rank_pair_group == 2)
@@ -534,25 +538,25 @@ ReturnCode mss_draminit_cloned(Target& i_target)
 		   	       rc_num = rc_num | data_buffer_64.reverse();
 		   	       rc_num = rc_num | mrs0.insert(data_buffer_64, 0, 16);
 		   	       rc_num = rc_num | mrs0.extractPreserve(&MRS0, 0, 16, 0);
-		   	       FAPI_INF( "PORT %d SHADOW REGISTER MRS 0 RP %d VALUE: 0x%04X",  port_number, rank_pair_group, MRS0);
+		   	       FAPI_INF( "%s PORT %d SHADOW REGISTER MRS 0 RP %d VALUE: 0x%04X",  i_target.toEcmdString(), port_number, rank_pair_group, MRS0);
 
 		   	       rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_MR1_PRI_RP2_P0_0x8000C21D0301143F, data_buffer_64);
 		   	       rc_num = rc_num | data_buffer_64.reverse();
 		   	       rc_num = rc_num | mrs1.insert(data_buffer_64, 0, 16);
 		   	       rc_num = rc_num | mrs1.extractPreserve(&MRS1, 0, 16, 0);
-		   	       FAPI_INF( "PORT %d SHADOW REGISTER MRS 1 RP %d VALUE: 0x%04X",  port_number, rank_pair_group, MRS1);
+		   	       FAPI_INF( "%s PORT %d SHADOW REGISTER MRS 1 RP %d VALUE: 0x%04X",  i_target.toEcmdString(), port_number, rank_pair_group, MRS1);
 
 		   	       rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_MR2_PRI_RP2_P0_0x8000C21E0301143F, data_buffer_64);
 		   	       rc_num = rc_num | data_buffer_64.reverse();
 		   	       rc_num = rc_num | mrs2.insert(data_buffer_64, 0, 16);
 		   	       rc_num = rc_num | mrs2.extractPreserve(&MRS2, 0, 16, 0);
-		   	       FAPI_INF( "PORT %d SHADOW REGISTER MRS 2 RP %d VALUE: 0x%04X",  port_number, rank_pair_group, MRS2);
+		   	       FAPI_INF( "%s PORT %d SHADOW REGISTER MRS 2 RP %d VALUE: 0x%04X",  i_target.toEcmdString(), port_number, rank_pair_group, MRS2);
 
 		   	       rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_MR3_PRI_RP2_P0_0x8000C21F0301143F, data_buffer_64);
 		   	       rc_num = rc_num | data_buffer_64.reverse();
 		   	       rc_num = rc_num | mrs3.insert(data_buffer_64, 0, 16);
 		   	       rc_num = rc_num | mrs3.extractPreserve(&MRS3, 0, 16, 0);
-		   	       FAPI_INF( "PORT %d SHADOW REGISTER MRS 3 RP %d VALUE: 0x%04X",  port_number, rank_pair_group, MRS3);
+		   	       FAPI_INF( "%s PORT %d SHADOW REGISTER MRS 3 RP %d VALUE: 0x%04X",  i_target.toEcmdString(), port_number, rank_pair_group, MRS3);
 			}
 			else if (rank_pair_group == 3)
 			{
@@ -560,25 +564,25 @@ ReturnCode mss_draminit_cloned(Target& i_target)
 		   	       rc_num = rc_num | data_buffer_64.reverse();
 		   	       rc_num = rc_num | mrs0.insert(data_buffer_64, 0, 16);
 		   	       rc_num = rc_num | mrs0.extractPreserve(&MRS0, 0, 16, 0);
-		   	       FAPI_INF( "PORT %d SHADOW REGISTER MRS 0 RP %d VALUE: 0x%04X",  port_number, rank_pair_group, MRS0);
+		   	       FAPI_INF( "%s PORT %d SHADOW REGISTER MRS 0 RP %d VALUE: 0x%04X", i_target.toEcmdString(),  port_number, rank_pair_group, MRS0);
 
 		   	       rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_MR1_PRI_RP3_P0_0x8000C31D0301143F, data_buffer_64);
 		   	       rc_num = rc_num | data_buffer_64.reverse();
 		   	       rc_num = rc_num | mrs1.insert(data_buffer_64, 0, 16);
 		   	       rc_num = rc_num | mrs1.extractPreserve(&MRS1, 0, 16, 0);
-		   	       FAPI_INF( "PORT %d SHADOW REGISTER MRS 1 RP %d VALUE: 0x%04X",  port_number, rank_pair_group, MRS1);
+		   	       FAPI_INF( "%s PORT %d SHADOW REGISTER MRS 1 RP %d VALUE: 0x%04X",  i_target.toEcmdString(), port_number, rank_pair_group, MRS1);
 
 		   	       rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_MR2_PRI_RP3_P0_0x8000C31E0301143F, data_buffer_64);
 		   	       rc_num = rc_num | data_buffer_64.reverse();
 		   	       rc_num = rc_num | mrs2.insert(data_buffer_64, 0, 16);
 		   	       rc_num = rc_num | mrs2.extractPreserve(&MRS2, 0, 16, 0);
-		   	       FAPI_INF( "PORT %d SHADOW REGISTER MRS 2 RP %d VALUE: 0x%04X",  port_number, rank_pair_group, MRS2);
+		   	       FAPI_INF( "%s PORT %d SHADOW REGISTER MRS 2 RP %d VALUE: 0x%04X",  i_target.toEcmdString(), port_number, rank_pair_group, MRS2);
 
 		   	       rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_MR3_PRI_RP3_P0_0x8000C31F0301143F, data_buffer_64);
 		   	       rc_num = rc_num | data_buffer_64.reverse();
 		   	       rc_num = rc_num | mrs3.insert(data_buffer_64, 0, 16);
 		   	       rc_num = rc_num | mrs3.extractPreserve(&MRS3, 0, 16, 0);
-		   	       FAPI_INF( "PORT %d SHADOW REGISTER MRS 3 RP %d VALUE: 0x%04X", port_number, rank_pair_group, MRS3);
+		   	       FAPI_INF( "%s PORT %d SHADOW REGISTER MRS 3 RP %d VALUE: 0x%04X", i_target.toEcmdString(), port_number, rank_pair_group, MRS3);
 			}
 		}
 		else if (port_number == 1)
@@ -589,25 +593,25 @@ ReturnCode mss_draminit_cloned(Target& i_target)
 		    		rc_num = rc_num | data_buffer_64.reverse();
 		    		rc_num = rc_num | mrs0.insert(data_buffer_64, 0, 16);
 		    		rc_num = rc_num | mrs0.extractPreserve(&MRS0, 0, 16, 0);
-		    		FAPI_INF( "PORT %d SHADOW REGISTER MRS 0 RP %d VALUE: 0x%04X",  port_number, rank_pair_group, MRS0 );
+		    		FAPI_INF( "%s PORT %d SHADOW REGISTER MRS 0 RP %d VALUE: 0x%04X",  i_target.toEcmdString(), port_number, rank_pair_group, MRS0 );
 
 		    		rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_MR1_PRI_RP0_P1_0x8001C01D0301143F, data_buffer_64);
 		    		rc_num = rc_num | data_buffer_64.reverse();
 		    		rc_num = rc_num | mrs1.insert(data_buffer_64, 0, 16);
 		    		rc_num = rc_num | mrs1.extractPreserve(&MRS1, 0, 16, 0);
-		    		FAPI_INF( "PORT %d SHADOW REGISTER MRS 1 RP %d VALUE: 0x%04X",  port_number, rank_pair_group, MRS1);
+		    		FAPI_INF( "%s PORT %d SHADOW REGISTER MRS 1 RP %d VALUE: 0x%04X",  i_target.toEcmdString(), port_number, rank_pair_group, MRS1);
 
 		    		rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_MR2_PRI_RP0_P1_0x8001C01E0301143F, data_buffer_64);
 		    		rc_num = rc_num | data_buffer_64.reverse();
 		    		rc_num = rc_num | mrs2.insert(data_buffer_64, 0, 16);
 		    		rc_num = rc_num | mrs2.extractPreserve(&MRS2, 0, 16, 0);
-		    		FAPI_INF( "PORT %d SHADOW REGISTER MRS 2 RP %d VALUE: 0x%04X",  port_number, rank_pair_group, MRS2);
+		    		FAPI_INF( "%s PORT %d SHADOW REGISTER MRS 2 RP %d VALUE: 0x%04X",  i_target.toEcmdString(), port_number, rank_pair_group, MRS2);
 
 		    		rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_MR3_PRI_RP0_P1_0x8001C01F0301143F, data_buffer_64);
 		    		rc_num = rc_num | data_buffer_64.reverse();
 		    		rc_num = rc_num | mrs3.insert(data_buffer_64, 0, 16);
 		    		rc_num = rc_num | mrs3.extractPreserve(&MRS3, 0, 16, 0);
-		    		FAPI_INF( "PORT %d SHADOW REGISTER MRS 3 RP %d VALUE: 0x%04X",  port_number, rank_pair_group, MRS3);
+		    		FAPI_INF( "%s PORT %d SHADOW REGISTER MRS 3 RP %d VALUE: 0x%04X",  i_target.toEcmdString(), port_number, rank_pair_group, MRS3);
 
 			}
 			else if (rank_pair_group == 1)
@@ -616,25 +620,25 @@ ReturnCode mss_draminit_cloned(Target& i_target)
 		    		rc_num = rc_num | data_buffer_64.reverse();
 		    		rc_num = rc_num | mrs0.insert(data_buffer_64, 0, 16);
 		    		rc_num = rc_num | mrs0.extractPreserve(&MRS0, 0, 16, 0);
-		    		FAPI_INF( "PORT %d SHADOW REGISTER MRS 0 RP %d VALUE: 0x%04X",  port_number, rank_pair_group, MRS0);
+		    		FAPI_INF( "%s PORT %d SHADOW REGISTER MRS 0 RP %d VALUE: 0x%04X",  i_target.toEcmdString(), port_number, rank_pair_group, MRS0);
 
 		    		rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_MR1_PRI_RP1_P1_0x8001C11D0301143F, data_buffer_64);
 		    		rc_num = rc_num | data_buffer_64.reverse();
 		    		rc_num = rc_num | mrs1.insert(data_buffer_64, 0, 16);
 		    		rc_num = rc_num | mrs1.extractPreserve(&MRS1, 0, 16, 0);
-		    		FAPI_INF( "PORT %d SHADOW REGISTER MRS 1 RP %d VALUE: 0x%04X",  port_number, rank_pair_group, MRS1);
+		    		FAPI_INF( "%s PORT %d SHADOW REGISTER MRS 1 RP %d VALUE: 0x%04X",  i_target.toEcmdString(), port_number, rank_pair_group, MRS1);
 
 		    		rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_MR2_PRI_RP1_P1_0x8001C11E0301143F, data_buffer_64);
 		    		rc_num = rc_num | data_buffer_64.reverse();
 		    		rc_num = rc_num | mrs2.insert(data_buffer_64, 0, 16);
 		    		rc_num = rc_num | mrs2.extractPreserve(&MRS2, 0, 16, 0);
-		    		FAPI_INF( "PORT %d SHADOW REGISTER MRS 2 RP %d VALUE: 0x%04X",  port_number, rank_pair_group, MRS2);
+		    		FAPI_INF( "%s PORT %d SHADOW REGISTER MRS 2 RP %d VALUE: 0x%04X",  i_target.toEcmdString(), port_number, rank_pair_group, MRS2);
 
 		    		rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_MR3_PRI_RP1_P1_0x8001C11F0301143F, data_buffer_64);
 		    		rc_num = rc_num | data_buffer_64.reverse();
 		    		rc_num = rc_num | mrs3.insert(data_buffer_64, 0, 16);
 		    		rc_num = rc_num | mrs3.extractPreserve(&MRS3, 0, 16, 0);
-		    		FAPI_INF( "PORT %d SHADOW REGISTER MRS 3 RP %d VALUE: 0x%04X",  port_number, rank_pair_group, MRS3);
+		    		FAPI_INF( "%s PORT %d SHADOW REGISTER MRS 3 RP %d VALUE: 0x%04X",  i_target.toEcmdString(), port_number, rank_pair_group, MRS3);
 
 			}
 			else if (rank_pair_group == 2)
@@ -643,25 +647,25 @@ ReturnCode mss_draminit_cloned(Target& i_target)
 		   	       rc_num = rc_num | data_buffer_64.reverse();
 		   	       rc_num = rc_num | mrs0.insert(data_buffer_64, 0, 16);
 		   	       rc_num = rc_num | mrs0.extractPreserve(&MRS0, 0, 16, 0);
-		   	       FAPI_INF( "PORT %d SHADOW REGISTER MRS 0 RP %d VALUE: 0x%04X",  port_number, rank_pair_group, MRS0);
+		   	       FAPI_INF( "%s PORT %d SHADOW REGISTER MRS 0 RP %d VALUE: 0x%04X", i_target.toEcmdString(), port_number, rank_pair_group, MRS0);
 
 		   	       rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_MR1_PRI_RP2_P1_0x8001C21D0301143F, data_buffer_64);
 		   	       rc_num = rc_num | data_buffer_64.reverse();
 		   	       rc_num = rc_num | mrs1.insert(data_buffer_64, 0, 16);
 		   	       rc_num = rc_num | mrs1.extractPreserve(&MRS1, 0, 16, 0);
-		   	       FAPI_INF( "PORT %d SHADOW REGISTER MRS 1 RP %d VALUE: 0x%04X",  port_number, rank_pair_group, MRS1);
+		   	       FAPI_INF( "%s PORT %d SHADOW REGISTER MRS 1 RP %d VALUE: 0x%04X", i_target.toEcmdString(), port_number, rank_pair_group, MRS1);
 
 		   	       rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_MR2_PRI_RP2_P1_0x8001C21E0301143F, data_buffer_64);
 		   	       rc_num = rc_num | data_buffer_64.reverse();
 		   	       rc_num = rc_num | mrs2.insert(data_buffer_64, 0, 16);
 		   	       rc_num = rc_num | mrs2.extractPreserve(&MRS2, 0, 16, 0);
-		   	       FAPI_INF( "PORT %d SHADOW REGISTER MRS 2 RP %d VALUE: 0x%04X",  port_number, rank_pair_group, MRS2);
+		   	       FAPI_INF( "%s PORT %d SHADOW REGISTER MRS 2 RP %d VALUE: 0x%04X", i_target.toEcmdString(), port_number, rank_pair_group, MRS2);
 
 		   	       rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_MR3_PRI_RP2_P1_0x8001C21F0301143F, data_buffer_64);
 		   	       rc_num = rc_num | data_buffer_64.reverse();
 		   	       rc_num = rc_num | mrs3.insert(data_buffer_64, 0, 16);
 		   	       rc_num = rc_num | mrs3.extractPreserve(&MRS3, 0, 16, 0);
-		   	       FAPI_INF( "PORT %d SHADOW REGISTER MRS 3 RP %d VALUE: 0x%04X",  port_number, rank_pair_group, MRS3);
+		   	       FAPI_INF( "%s PORT %d SHADOW REGISTER MRS 3 RP %d VALUE: 0x%04X", i_target.toEcmdString(), port_number, rank_pair_group, MRS3);
 			}
 			else if (rank_pair_group == 3)
 			{
@@ -669,25 +673,25 @@ ReturnCode mss_draminit_cloned(Target& i_target)
 		   	       rc_num = rc_num | data_buffer_64.reverse();
 		   	       rc_num = rc_num | mrs0.insert(data_buffer_64, 0, 16);
 		   	       rc_num = rc_num | mrs0.extractPreserve(&MRS0, 0, 16, 0);
-		   	       FAPI_INF( "PORT %d SHADOW REGISTER MRS 0 RP %d VALUE: 0x%04X",  port_number, rank_pair_group, MRS0);
+		   	       FAPI_INF( "%s PORT %d SHADOW REGISTER MRS 0 RP %d VALUE: 0x%04X", i_target.toEcmdString(), port_number, rank_pair_group, MRS0);
 
 		   	       rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_MR1_PRI_RP3_P1_0x8001C31D0301143F, data_buffer_64);
 		   	       rc_num = rc_num | data_buffer_64.reverse();
 		   	       rc_num = rc_num | mrs1.insert(data_buffer_64, 0, 16);
 		   	       rc_num = rc_num | mrs1.extractPreserve(&MRS1, 0, 16, 0);
-		   	       FAPI_INF( "PORT %d SHADOW REGISTER MRS 1 RP %d VALUE: 0x%04X",  port_number, rank_pair_group, MRS1);
+		   	       FAPI_INF( "%s PORT %d SHADOW REGISTER MRS 1 RP %d VALUE: 0x%04X", i_target.toEcmdString(), port_number, rank_pair_group, MRS1);
 
 		   	       rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_MR2_PRI_RP3_P1_0x8001C31E0301143F, data_buffer_64);
 		   	       rc_num = rc_num | data_buffer_64.reverse();
 		   	       rc_num = rc_num | mrs2.insert(data_buffer_64, 0, 16);
 		   	       rc_num = rc_num | mrs2.extractPreserve(&MRS2, 0, 16, 0);
-		   	       FAPI_INF( "PORT %d SHADOW REGISTER MRS 2 RP %d VALUE: 0x%04X",  port_number, rank_pair_group, MRS2);
+		   	       FAPI_INF( "%s PORT %d SHADOW REGISTER MRS 2 RP %d VALUE: 0x%04X", i_target.toEcmdString(), port_number, rank_pair_group, MRS2);
 
 		   	       rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_MR3_PRI_RP3_P1_0x8001C31F0301143F, data_buffer_64);
 		   	       rc_num = rc_num | data_buffer_64.reverse();
 		   	       rc_num = rc_num | mrs3.insert(data_buffer_64, 0, 16);
 		   	       rc_num = rc_num | mrs3.extractPreserve(&MRS3, 0, 16, 0);
-		   	       FAPI_INF( "PORT %d SHADOW REGISTER MRS 3 RP %d VALUE: 0x%04X", port_number, rank_pair_group, MRS3);
+		   	       FAPI_INF( "%s PORT %d SHADOW REGISTER MRS 3 RP %d VALUE: 0x%04X", i_target.toEcmdString(), port_number, rank_pair_group, MRS3);
 			}
 
 		}
@@ -802,7 +806,7 @@ ReturnCode mss_rcd_load(
     ecmdDataBufferBase wen_1(1);
     rc_num = rc_num | wen_1.setBit(0);
     ecmdDataBufferBase cke_4(4);
-    rc_num = rc_num | cke_4.clearBit(0,4);
+    rc_num = rc_num | cke_4.setBit(0,4);
     ecmdDataBufferBase csn_8(8);
     rc_num = rc_num | csn_8.setBit(0,8);
     ecmdDataBufferBase odt_4(4);
@@ -854,7 +858,7 @@ ReturnCode mss_rcd_load(
     if(rc) return rc;
     io_ccs_inst_cnt ++;
 
-    FAPI_INF( "+++++++++++++++++++++ LOADING RCD CONTROL WORDS FOR PORT %d +++++++++++++++++++++", i_port_number);
+    FAPI_INF( "+++++++++++++++++++++ LOADING RCD CONTROL WORDS FOR %s PORT %d +++++++++++++++++++++", i_target.toEcmdString(), i_port_number);
 
     for ( dimm_number = 0; dimm_number < MAX_NUM_DIMMS; dimm_number++)
     {
@@ -866,7 +870,7 @@ ReturnCode mss_rcd_load(
         }
         else
         {
-            FAPI_INF( "RCD SETTINGS FOR PORT%d DIMM%d ", i_port_number, dimm_number);
+            FAPI_INF( "RCD SETTINGS FOR %s PORT%d DIMM%d ", i_target.toEcmdString(), i_port_number, dimm_number);
 	    FAPI_INF( "RCD Control Word: 0x%016llX", rcd_array[i_port_number][dimm_number]);
 
             if (rc_num)
@@ -971,8 +975,6 @@ ReturnCode mss_mrs_load(
     uint32_t rc_num = 0;
 
     ecmdDataBufferBase data_buffer_64(64);
-    ecmdDataBufferBase address_pre_AMM_16(16);
-    ecmdDataBufferBase bank_pre_AMM_3(3);
     ecmdDataBufferBase address_16(16);
     ecmdDataBufferBase bank_3(3);
     ecmdDataBufferBase activate_1(1);
@@ -990,7 +992,13 @@ ReturnCode mss_mrs_load(
     rc_num = rc_num | odt_4.setBit(0,4);
     ecmdDataBufferBase ddr_cal_type_4(4);
 
+    ecmdDataBufferBase csn_setup_8(8);
+    rc_num = rc_num | csn_setup_8.setBit(0,8);
+
     ecmdDataBufferBase num_idles_16(16);
+    ecmdDataBufferBase num_idles_setup_16(16);
+    rc_num = rc_num | num_idles_setup_16.insertFromRight((uint32_t) 400, 0, 16);
+
     ecmdDataBufferBase num_repeat_16(16);
     ecmdDataBufferBase data_20(20);
     ecmdDataBufferBase read_compare_1(1);
@@ -1007,13 +1015,9 @@ ReturnCode mss_mrs_load(
     uint16_t MRS2 = 0;
     uint16_t MRS3 = 0;
 
-    uint16_t mirror_mode_ba = 0;
-    uint16_t mirror_mode_ad  = 0;
-
-
     uint16_t num_ranks = 0;
 
-    FAPI_INF( "+++++++++++++++++++++ LOADING MRS SETTINGS FOR PORT %d +++++++++++++++++++++", i_port_number);
+    FAPI_INF( "+++++++++++++++++++++ LOADING MRS SETTINGS FOR %s PORT %d +++++++++++++++++++++", i_target.toEcmdString(), i_port_number);
 
     uint8_t num_ranks_array[2][2]; //[port][dimm]
     rc = FAPI_ATTR_GET(ATTR_EFF_NUM_RANKS_PER_DIMM, &i_target, num_ranks_array);
@@ -1027,6 +1031,9 @@ ReturnCode mss_mrs_load(
     rc = FAPI_ATTR_GET(ATTR_IS_SIMULATION, NULL, is_sim);
     if(rc) return rc;
 
+    uint8_t dram_2n_mode = 0;
+    rc = FAPI_ATTR_GET(ATTR_EFF_DRAM_2N_MODE_ENABLED, &i_target, dram_2n_mode);
+    if(rc) return rc;
 
     //Lines commented out in the following section are waiting for xml attribute adds
     //MRS0
@@ -1343,14 +1350,14 @@ ReturnCode mss_mrs_load(
 
         if (num_ranks == 0)
         {
-            FAPI_INF( "PORT%d DIMM%d not configured. Num_ranks: %d ", i_port_number, dimm_number, num_ranks);
+            FAPI_INF( " %s PORT%d DIMM%d not configured. Num_ranks: %d ", i_target.toEcmdString(), i_port_number, dimm_number, num_ranks);
         }
         else
         {
             // Rank 0-3
             for ( rank_number = 0; rank_number < num_ranks; rank_number++)
             {
-                    FAPI_INF( "MRS SETTINGS FOR PORT%d DIMM%d RANK%d", i_port_number, dimm_number, rank_number);
+                    FAPI_INF( "MRS SETTINGS FOR %s PORT%d DIMM%d RANK%d", i_target.toEcmdString(), i_port_number, dimm_number, rank_number);
 
                     rc_num = rc_num | csn_8.setBit(0,8);
                     rc_num = rc_num | address_16.clearBit(0, 16);
@@ -1470,74 +1477,32 @@ ReturnCode mss_mrs_load(
                         // Setting the bank address
                         if (mrs_number == 0)
                         {
-                            rc_num = rc_num | address_pre_AMM_16.insert(mrs2, 0, 16, 0);
-			    rc_num = rc_num | bank_pre_AMM_3.insert((uint8_t) MRS2_BA, 0, 1, 7);
-                            rc_num = rc_num | bank_pre_AMM_3.insert((uint8_t) MRS2_BA, 1, 1, 6);
-                            rc_num = rc_num | bank_pre_AMM_3.insert((uint8_t) MRS2_BA, 2, 1, 5);
+                            rc_num = rc_num | address_16.insert(mrs2, 0, 16, 0);
+			    rc_num = rc_num | bank_3.insert((uint8_t) MRS2_BA, 0, 1, 7);
+                            rc_num = rc_num | bank_3.insert((uint8_t) MRS2_BA, 1, 1, 6);
+                            rc_num = rc_num | bank_3.insert((uint8_t) MRS2_BA, 2, 1, 5);
                         }
                         else if ( mrs_number == 1)
                         {
-                            rc_num = rc_num | address_pre_AMM_16.insert(mrs3, 0, 16, 0);
-			    rc_num = rc_num | bank_pre_AMM_3.insert((uint8_t) MRS3_BA, 0, 1, 7);
-                            rc_num = rc_num | bank_pre_AMM_3.insert((uint8_t) MRS3_BA, 1, 1, 6);
-                            rc_num = rc_num | bank_pre_AMM_3.insert((uint8_t) MRS3_BA, 2, 1, 5);
+                            rc_num = rc_num | address_16.insert(mrs3, 0, 16, 0);
+			    rc_num = rc_num | bank_3.insert((uint8_t) MRS3_BA, 0, 1, 7);
+                            rc_num = rc_num | bank_3.insert((uint8_t) MRS3_BA, 1, 1, 6);
+                            rc_num = rc_num | bank_3.insert((uint8_t) MRS3_BA, 2, 1, 5);
                         }
                         else if ( mrs_number == 2)
                         {
-                            rc_num = rc_num | address_pre_AMM_16.insert(mrs1, 0, 16, 0);
-			    rc_num = rc_num | bank_pre_AMM_3.insert((uint8_t) MRS1_BA, 0, 1, 7);
-                            rc_num = rc_num | bank_pre_AMM_3.insert((uint8_t) MRS1_BA, 1, 1, 6);
-                            rc_num = rc_num | bank_pre_AMM_3.insert((uint8_t) MRS1_BA, 2, 1, 5);
+                            rc_num = rc_num | address_16.insert(mrs1, 0, 16, 0);
+			    rc_num = rc_num | bank_3.insert((uint8_t) MRS1_BA, 0, 1, 7);
+                            rc_num = rc_num | bank_3.insert((uint8_t) MRS1_BA, 1, 1, 6);
+                            rc_num = rc_num | bank_3.insert((uint8_t) MRS1_BA, 2, 1, 5);
                         }
                         else if ( mrs_number == 3)
                         {
-                            rc_num = rc_num | address_pre_AMM_16.insert(mrs0, 0, 16, 0);
-			    rc_num = rc_num | bank_pre_AMM_3.insert((uint8_t) MRS0_BA, 0, 1, 7);
-                            rc_num = rc_num | bank_pre_AMM_3.insert((uint8_t) MRS0_BA, 1, 1, 6);
-                            rc_num = rc_num | bank_pre_AMM_3.insert((uint8_t) MRS0_BA, 2, 1, 5);
+                            rc_num = rc_num | address_16.insert(mrs0, 0, 16, 0);
+			    rc_num = rc_num | bank_3.insert((uint8_t) MRS0_BA, 0, 1, 7);
+                            rc_num = rc_num | bank_3.insert((uint8_t) MRS0_BA, 1, 1, 6);
+                            rc_num = rc_num | bank_3.insert((uint8_t) MRS0_BA, 2, 1, 5);
                         }
-
-			if ( (dimm_type == ENUM_ATTR_EFF_DIMM_TYPE_CDIMM) && (dimm_number == 1) && (is_sim == 0))
-			{
-			    FAPI_INF( "ADDRESS MIRRORING ON PORT%d DIMM%d RANK%d", i_port_number, dimm_number, rank_number);
-
-			    rc_num = rc_num | address_pre_AMM_16.extractPreserve(&mirror_mode_ad, 0, 16, 0);
-			    FAPI_INF( "PRE - MIRROR MODE ADDRESS: 0x%04X", mirror_mode_ad);
-			    rc_num = rc_num | bank_pre_AMM_3.extractPreserve(&mirror_mode_ba, 0, 3, 0);
-			    FAPI_INF( "PRE - MIRROR MODE BANK ADDRESS: 0x%04X", mirror_mode_ba);
-
-			    //Initialize address and bank address as the same pre mirror mode swizzle
-			    rc_num = rc_num | address_16.insert(address_pre_AMM_16, 0, 16, 0);
-			    rc_num = rc_num | bank_3.insert(bank_pre_AMM_3, 0, 3, 0);
-
-			    //Swap A3 and A4
-			    rc_num = rc_num | address_16.insert(address_pre_AMM_16, 4, 1, 3);
-			    rc_num = rc_num | address_16.insert(address_pre_AMM_16, 3, 1, 4);
-
-			    //Swap A5 and A6
-			    rc_num = rc_num | address_16.insert(address_pre_AMM_16, 6, 1, 5);
-			    rc_num = rc_num | address_16.insert(address_pre_AMM_16, 5, 1, 6);
-
-			    //Swap A7 and A8
-			    rc_num = rc_num | address_16.insert(address_pre_AMM_16, 8, 1, 7);
-			    rc_num = rc_num | address_16.insert(address_pre_AMM_16, 7, 1, 8);
-
-			    //Swap BA0 and BA1
-			    rc_num = rc_num | bank_3.insert(bank_pre_AMM_3, 1, 1, 0);
-			    rc_num = rc_num | bank_3.insert(bank_pre_AMM_3, 0, 1, 1);
-
-			    rc_num = rc_num | address_16.extractPreserve(&mirror_mode_ad, 0, 16, 0);
-			    FAPI_INF( "POST - MIRROR MODE ADDRESS: 0x%04X", mirror_mode_ad);
-			    rc_num = rc_num | bank_3.extractPreserve(&mirror_mode_ba, 0, 3, 0);
-			    FAPI_INF( "POST - MIRROR MODE BANK ADDRESS: 0x%04X", mirror_mode_ba);
-
-			}
-			else
-			{
-			    // No need to worry about swizzle
-			    rc_num = rc_num | address_16.insert(address_pre_AMM_16, 0, 16, 0);
-			    rc_num = rc_num | bank_3.insert(bank_pre_AMM_3, 0, 3, 0);
-			}
 
                         if (rc_num)
                         {
@@ -1545,7 +1510,46 @@ ReturnCode mss_mrs_load(
                             rc_buff.setEcmdError(rc_num);
                             return rc_buff;
                         }
+
+			if ( (dimm_type == ENUM_ATTR_EFF_DIMM_TYPE_CDIMM) && (dimm_number == 1) && (is_sim == 0))
+			{
+		            rc = mss_address_mirror_swizzle(i_target, i_port_number, dimm_number, rank_number, address_16, bank_3);
+			}
+
                 
+			if (dram_2n_mode  == ENUM_ATTR_EFF_DRAM_2N_MODE_ENABLED_TRUE)
+			{
+
+                        // Send out to the CCS array a "setup" cycle 
+                        rc = mss_ccs_inst_arry_0( i_target,
+                                          io_ccs_inst_cnt,
+                                          address_16,
+                                          bank_3,
+                                          activate_1,
+                                          rasn_1,
+                                          casn_1,
+                                          wen_1,
+                                          cke_4,
+                                          csn_setup_8,
+                                          odt_4,
+                                          ddr_cal_type_4,
+                                          i_port_number);
+                        if(rc) return rc;
+                        rc = mss_ccs_inst_arry_1( i_target,
+                                          io_ccs_inst_cnt,
+                                          num_idles_setup_16,
+                                          num_repeat_16,
+                                          data_20,
+                                          read_compare_1,
+                                          rank_cal_4,
+                                          ddr_cal_enable_1,
+                                          ccs_end_1);
+                        if(rc) return rc;
+
+                        io_ccs_inst_cnt ++;
+
+			}
+
                         // Send out to the CCS array 
                         rc = mss_ccs_inst_arry_0( i_target,
                                           io_ccs_inst_cnt,

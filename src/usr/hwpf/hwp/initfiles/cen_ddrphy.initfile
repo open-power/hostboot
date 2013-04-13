@@ -1,8 +1,15 @@
-#-- $Id: cen_ddrphy.initfile,v 1.21 2013/02/08 00:32:24 mwuu Exp $
+#-- $Id: cen_ddrphy.initfile,v 1.23 2013/04/10 01:59:41 mwuu Exp $
+#-- $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/
+#--          centaur/working/procedures/ec_ind/scoms/cen_ddrphy.initfile,v $
+#
 #-- CHANGE HISTORY:
 #--------------------------------------------------------------------------------
 #-- Version:|Author: | Date:  | Comment:
 #-- --------|--------|--------|--------------------------------------------------
+#--     1.23|mwuu    |04/09/13|Fixed typo ENUM for 2N mode.
+#--     1.22|mwuu    |04/04/13|Updated tODTL definition when AL=0, added 2N support
+#		  					  |changed for LRDIMM: RLO=6, WLO=-1; DDR4 UDIMM mem type
+#		  					  |changed WC_CONFIG3 bit 48 drive dq on MRS
 #--     1.21|mwuu    |02/07/13|Updated PC_CSID register to default CS to high
 #--     1.20|mwuu    |01/16/13|Updated TWTR & TRTP define for FW_WR_RD field in
 #           |        |        |WC_CONFIG0 and FW_RD_WR in WC_CONFIG2 in 0W spec.
@@ -85,8 +92,8 @@ define def_is_sim		=	(SYS.ATTR_IS_SIMULATION == 1)	;
 define def_FAST_SIM_PC	=	1	;
 
 # for real HW uncomment,  !!FIX once ATTR_EFF_DIMM_SPARE available [2][4][4] port, dimm, rank
-define def_has_spare	=	(ATTR_EFF_DIMM_TYPE == 0)	;	# CDIMM
-define def_no_spare		=	(ATTR_EFF_DIMM_TYPE != 0)	;	# others, ISDIMMs, LRDIMM, etc.
+define def_has_spare	=	(ATTR_EFF_DIMM_TYPE == ENUM_ATTR_EFF_DIMM_TYPE_CDIMM)	;	# CDIMM
+define def_no_spare		=	(ATTR_EFF_DIMM_TYPE != ENUM_ATTR_EFF_DIMM_TYPE_CDIMM)	;	# others, ISDIMMs, LRDIMM, etc.
 
 # ports 0,1 must have functional dimms to be valid
 define def_valid_p0		=	(ATTR_MSS_EFF_DIMM_FUNCTIONAL_VECTOR >> 4);
@@ -264,6 +271,12 @@ define def_cdi_spcke_ohm20_p1	=	(ATTR_EFF_CEN_DRV_IMP_SPCKE[1] == ENUM_ATTR_EFF_
 define def_cdi_spcke_ohm30_p1	=	(ATTR_EFF_CEN_DRV_IMP_SPCKE[1] == ENUM_ATTR_EFF_CEN_DRV_IMP_SPCKE_OHM30)	;	# OHM30 = 0x1E (30)
 define def_cdi_spcke_ohm40_p1	=	(ATTR_EFF_CEN_DRV_IMP_SPCKE[1] == ENUM_ATTR_EFF_CEN_DRV_IMP_SPCKE_OHM40)	;	# OHM40 = 0x28 (40)
 
+# define for glacier1(1), glacier2=normal(0)
+define def_is_type1	=	((ATTR_MSS_DQS_SWIZZLE_TYPE == 1) && (ATTR_EFF_DIMM_TYPE != ENUM_ATTR_EFF_DIMM_TYPE_CDIMM))	;
+
+# define for 2 cycle addressing mode (2N)
+define def_2N_mode	= (ATTR_EFF_DRAM_2N_MODE_ENABLED == ENUM_ATTR_EFF_DRAM_2N_MODE_ENABLED_TRUE) ;
+
 
 # SIMPLIFY
 # ================================================================================
@@ -276,23 +289,22 @@ define def_TWTR_PLUS_OFF = (ATTR_EFF_DRAM_TWTR + 11)	;	# change from +8 on reg s
 define def_TRTP_PLUS_AL	= (ATTR_EFF_DRAM_TRTP + ATTR_EFF_DRAM_CL - ATTR_EFF_DRAM_AL + 3)	;
 define def_TRTP_PLUS_NOAL = (ATTR_EFF_DRAM_TRTP + 3)	;
 
-# for ODT on/off time calculation
+# for ODT on/off time calculation during write calibration
 # 2tCK = DDR4 feature for extended write preamble, should be defined by attribute if used.
 # tODTLON/OFF	DDR3=CWL+AL-2, DDR4=CWL+AL-3 if using 2tCK, otherwise same as DDR3 formula
 #define def_AL		= ((def_AL_ena)*(ATTR_EFF_DRAM_CL - ATTR_EFF_DRAM_AL));
 #define def_tODTL_DDR3		= (ATTR_EFF_DRAM_CWL + def_AL - 2)	;	# DDR3
 # should not try to do the defines above...
 define def_tODTL_DDR3		= (ATTR_EFF_DRAM_CWL + ATTR_EFF_DRAM_CL - ATTR_EFF_DRAM_AL - 2)	;	# DDR3
+define def_tODTL_DDR3_NOAL	= (ATTR_EFF_DRAM_CWL - 2)	;	# DDR3, no AL
 define def_tODTL_DDR4		= (ATTR_EFF_DRAM_CWL + ATTR_EFF_DRAM_CL - ATTR_EFF_DRAM_AL - 3)	;	# DDR4 & 2tCK
+define def_tODTL_DDR4_NOAL	= (ATTR_EFF_DRAM_CWL - 3)	;	# DDR4 & 2tCK, no AL
 
 # def_1PR 			= 1000*1000 / (FREQ / 2)
 # def_dqs_offset 	= (10 + ((def_p2p_jitter / 2) / def_1PR) + 1)	# +1 for ceiling FN
 #define def_p2p_jitter		=	240										;	# DQS peak to peak jitter in ps
 define def_p2p_jitter		=	2600										;	# DQS peak to peak jitter in ps
 define def_dqs_offset		=	(11 + ((def_p2p_jitter * CEN.ATTR_MSS_FREQ) / 4000000))	;
-
-# define for glacier1(1), glacier2=normal(0)
-define def_is_type1	=	((ATTR_MSS_DQS_SWIZZLE_TYPE == 1) && (ATTR_EFF_DIMM_TYPE != ENUM_ATTR_EFF_DIMM_TYPE_CDIMM))	;
 
 #---------------------------------------------------------------------------------
 
@@ -394,21 +406,30 @@ scom 0x800(0,1)C00D0301143F {
 # 	# WLO is normally 0 except for RDIMM (RCD) configurations in which case it's set to 1
 # DD0 = PORT_BUFFER_LATENCY
  	48:51	,	0x1			,	(def_is_rdimm)						;	# RDIMM
+ 	48:51	,	0xF			,	(def_is_lrdimm)						;	# LRDIMM  set WLO=-1
  	48:51	,	0x0			,	any									;	# WLO=WRITE_LATENCY_OFFSET (2's complement -8 to 7)
 # 	# 9.4.12.2	RLO = READ_LATENCY_OFFSET (2's complement -8 to 7) {0=CDIMM, 1=RDIMM, 2=LRDIMM}
  	52:55	,	0x0			,	(def_is_cdimm)						;	# CDIMM
  	52:55	,	0x1			,	(def_is_rdimm)						;	# RDIMM
- 	52:55	,	0x2			,	(def_is_lrdimm)						;	# LRDIMM
+ 	52:55	,	0x6			,	(def_is_lrdimm)						;	# LRDIMM
  	56		,	0b0			,	any									;	# MEMCTL_CIC_FAST
  	57		,	0b0			,	any									;	# MEMCTL_CTRN_IGNORE
  	58		,	0b0			,	any									;	# DISABLE_MEMCTL_CAL
 # 	Memory Type
 # 	# 59:61 , 000=DDR3/DDR4 CDIMM, DDR3 (001=RDIMM, 011=LRDIMM), DDR4 (101=RDIMM, 111=LRDIMM)
- 	59:61	,	0b000		,	(def_is_cdimm)						;	# CDIMM
- 	59:61	,	0b001		,	((def_is_rdimm) && (def_is_ddr3))	;	# DDR3 RDIMM
- 	59:61	,	0b011		,	((def_is_lrdimm) && (def_is_ddr3))	;	# DDR3 LRDIMM
- 	59:61	,	0b101		,	((def_is_rdimm) && (def_is_ddr4))	;	# DDR4 RDIMM
- 	59:61	,	0b111		,	((def_is_lrdimm) && (def_is_ddr4))	;	# DDR4 LRDIMM
+	59		,	0b1			,	(def_is_ddr4)						;	# DDR4
+	59		,	0b0			,	any									;	# DDR3
+
+	60		,	0b1			,	(def_is_lrdimm)						;	# LRDIMM
+	60		,	0b0			,	any									;	# not LRDIMM
+
+	61		,	0b1			,	((def_is_lrdimm) || (def_is_rdimm))	;	# registered C/A
+	61		,	0b0			,	any									;	# unbuffered C/A
+# 	59:61	,	0b000		,	(def_is_cdimm)						;	# CDIMM
+#	59:61	,	0b001		,	((def_is_rdimm) && (def_is_ddr3))	;	# DDR3 RDIMM
+# 	59:61	,	0b011		,	((def_is_lrdimm) && (def_is_ddr3))	;	# DDR3 LRDIMM
+# 	59:61	,	0b101		,	((def_is_rdimm) && (def_is_ddr4))	;	# DDR4 RDIMM
+# 	59:61	,	0b111		,	((def_is_lrdimm) && (def_is_ddr4))	;	# DDR4 LRDIMM
 #	62		,	0b1			,	any									;	# DDR4 Latency Chicken SW
 #	63		,	0b0			,	any									;	# Retain_Percal_SW
 }
@@ -3683,6 +3704,7 @@ scom 0x800(0,1)C8000301143F {	# _P[0:1]
 	#
 	# min GPO = 5 + max(rndUp(System_delay)) - RLO + ADVANCE_RD_VALID + SPAM_EN
 	# max GPO = 11 if in 2:1, 13 if in 4:1
+	48:51	,	0b0111		,	(def_is_lrdimm)	;	# GLOBAL_PHY_OFFSET LRDIMM set to 7
 	48:51	,	0b0101		,	any				;	# GLOBAL_PHY_OFFSET (GPO), ideally 2:1 max=11, 4:1 max=13
 	52		,	0b0			,	any				;	# ADVANCE_RD_VALID	ask Yuen
 	53		,	0b0			,	any				;	# PER_DUTY_CYCLE_SW, 0=rd cmds 50% duty cycle during per.cal, 1=continuously 
@@ -3772,17 +3794,20 @@ scom 0x800(0,1)C8070301143F {	# _P[0:1]
 # DPHY01_DDRPHY_SEQ_CONFIG0_P0		CTL 0x002	0x8000c4020301143f
 # PHYW.PHYX.SYNTHX.D3SIDEA.SEQX.U_SEQ_APB.MPR_PATTERN_DATA_L2
 scom 0x800(0,1)C4020301143F {	# _P[0:1]
-	bits	,	scom_data		;
-#	0:47	,	0x000000000000	;	# reserved
-	48		,	0b0				;	# MPR_PATTERN_BIT
-	49		,	0b0				;	# TWO_CYCLE_ADDR_EN (must be set to 0?)
-	50:53	,	0b0000			;	# MR_MASK_EN (mode register[0:3] mask during calibration)
-	54		,	0b0				;	# DELAYED_PARITY (only for DDR4, DDR3 don't care)
-	55		,	0b0				;	# LRDIMM_CONTEXT
-	56		,	0b0				;	# FORCE_RESERVED	# for DDR4
-	57		,	0b0				;	# HALT_ROTATION, for DDR4 staggered pattern
-	58		,	0b0				;	# FORCE_MPR
-#	59:63	,	0b00000			;	# reserved
+	bits	,	scom_data		,	expr	;
+#	0:47	,	0x000000000000	,	any		;	# reserved
+	48		,	0b0				,	any		;	# MPR_PATTERN_BIT
+#												# TWO_CYCLE_ADDR_EN
+	49		,	0b1				,	(def_2N_mode)	;	# enable 2 cycle addr mode
+	49		,	0b0				,	any				;	# disable 2 cycle addr mode
+
+	50:53	,	0b0000			,	any		;	# MR_MASK_EN (mode register[0:3] mask during calibration)
+	54		,	0b0				,	any		;	# DELAYED_PARITY (only for DDR4, DDR3 don't care)
+	55		,	0b0				,	any		;	# LRDIMM_CONTEXT
+	56		,	0b0				,	any		;	# FORCE_RESERVED	# for DDR4
+	57		,	0b0				,	any		;	# HALT_ROTATION, for DDR4 staggered pattern
+	58		,	0b0				,	any		;	# FORCE_MPR
+#	59:63	,	0b00000			,	any		;	# reserved
 }
 
 # ---------------------------------------------------------------------------------------
@@ -3905,54 +3930,31 @@ scom 0x800(0,1)C4130301143F {	# _P[0:1]
 # PHYW.PHYX.SYNTHX.D3SIDEA.SEQX.U_SEQ_APB.MEM_TIMING_PARAM2_L2
 #
 # TODTLON_OFF_CYCLES	DDR3=CWL+AL-2	DDR4 if 2tCK, CWL+AL-3
-# define def_tODTL_DDR3_AL0	=	def_tODTL_DDR3 - ATTR_EFF_DRAM_CL	;
-# scom 0x800(0,1)C4140301143F {	# _P[0:1]
-# 	bits	,	scom_data	,	ATTR_EFF_DRAM_GEN	,	ATTR_EFF_DRAM_AL	,	expr						;
-#	0:47	,	0x000000000000,	any					,	any					,	any							;	# reserved
-# 	#--------------- DDR3 -------------------------------------------------------------------------
-# 	48:51	,	0x3			,	1	,	0	,	(def_tODTL_DDR3_AL0 <= 8)									;	#  8 clks
-# 	48:51	,	0x4			,	1	,	0	,	((def_tODTL_DDR3_AL0 <= 16) && (def_tODTL_DDR3_AL0 > 8))	;	# 16 clks
-# 	48:51	,	0x5			,	1	,	0	,	((def_tODTL_DDR3_AL0 <= 32) && (def_tODTL_DDR3_AL0 > 16))	;	# 32 clks
-# 	48:51	,	0x6			,	1	,	0	,	((def_tODTL_DDR3_AL0 <= 64) && (def_tODTL_DDR3_AL0 > 32))	;	# 64 clks
-#  	48:51	,	0x3			,	1	,	any	,	(def_tODTL_DDR3 <= 8)										;	#  8 clks
-#  	48:51	,	0x4			,	1	,	any	,	((def_tODTL_DDR3 <= 16) && (def_tODTL_DDR3 > 8))			;	# 16 clks
-#  	48:51	,	0x5			,	1	,	any	,	((def_tODTL_DDR3 <= 32) && (def_tODTL_DDR3 > 16))			;	# 32 clks
-#  	48:51	,	0x6			,	1	,	any	,	((def_tODTL_DDR3 <= 64) && (def_tODTL_DDR3 > 32))			;	# 64 clks
-# 	#--------------- DDR4 -------------------------------------------------------------------------
-# 	48:51	,	0x3			,	2	,	0	,	(def_tODTL_DDR4_AL0 <= 8)									;	#  8 clks
-# 	48:51	,	0x4			,	2	,	0	,	((def_tODTL_DDR4_AL0 <= 16) && (def_tODTL_DDR4_AL0 > 8))	;	# 16 clks
-# 	48:51	,	0x5			,	2	,	0	,	((def_tODTL_DDR4_AL0 <= 32) && (def_tODTL_DDR4_AL0 > 16))	;	# 32 clks
-# 	48:51	,	0x6			,	2	,	0	,	((def_tODTL_DDR4_AL0 <= 64) && (def_tODTL_DDR4_AL0 > 32))	;	# 64 clks
-#  	48:51	,	0x3			,	2	,	any	,	(def_tODTL_DDR4 <= 8)										;	#  8 clks
-#  	48:51	,	0x4			,	2	,	any	,	((def_tODTL_DDR4 <= 16) && (def_tODTL_DDR4 > 8))			;	# 16 clks
-#  	48:51	,	0x5			,	2	,	any	,	((def_tODTL_DDR4 <= 32) && (def_tODTL_DDR4 > 16))			;	# 32 clks
-#  	48:51	,	0x6			,	2	,	any	,	((def_tODTL_DDR4 <= 64) && (def_tODTL_DDR4 > 32))			;	# 64 clks
-# 	48:51	,	0x0			,	any	,	any	,	any															;	#  0 clks
-# 	# TRC_CYCLES
-# 	52:55	,	0x7			,	((ATTR_EFF_DRAM_TRC > 64) && (ATTR_EFF_DRAM_TRC <= 128))			;	# 2^7 = 128 clks
-# 	52:55	,	0x6			,	((ATTR_EFF_DRAM_TRC > 32) && (ATTR_EFF_DRAM_TRC <= 64))				;	# 2^6 = 64 clks
-# 	52:55	,	0x5			,	((ATTR_EFF_DRAM_TRC > 16) && (ATTR_EFF_DRAM_TRC <= 32))				;	# 2^5 = 32 clks
-# 	52:55	,	0x4			,	((ATTR_EFF_DRAM_TRC > 8) && (ATTR_EFF_DRAM_TRC <= 16))				;	# 2^4 = 16 clks
-# 	52:55	,	0x3			,	(ATTR_EFF_DRAM_TRC <= 8)											;	# 2^3 = 8 clks
-# 	# TMRSC_CYCLES	for RLDRAMs, set to 0 for everything else
-# 	56:59	,	0x0			,	any																	;
-# #	60:63	,	0x0			,	any																	;	# reserved
-# }
-
+#
 scom 0x800(0,1)C4140301143F {	# _P[0:1]
 	bits	,	scom_data	,	expr																;
 #	0:47	,	0x000000000000,	any																	;	# reserved
 	# TODTLON_OFF_CYCLES	DDR3=CWL+AL-2	DDR4 if 2tCK, CWL+AL-3
 	#--------------- DDR3 -------------------------------------------------------------------------
-	48:51	,	0x3			,	((def_is_ddr3) && (def_tODTL_DDR3 <= 8))							;	#  8 clks
-	48:51	,	0x4			,	((def_is_ddr3) && (def_tODTL_DDR3 <= 16) && (def_tODTL_DDR3 > 8))	;	# 16 clks
-	48:51	,	0x5			,	((def_is_ddr3) && (def_tODTL_DDR3 <= 32) && (def_tODTL_DDR3 > 16))	;	# 32 clks
-	48:51	,	0x6			,	((def_is_ddr3) && (def_tODTL_DDR3 <= 64) && (def_tODTL_DDR3 > 32))	;	# 64 clks
+	48:51	,	0x3			,	((def_is_ddr3) && (def_AL_ena) && (def_tODTL_DDR3 <= 8))							;	#  8 clks
+	48:51	,	0x4			,	((def_is_ddr3) && (def_AL_ena) && (def_tODTL_DDR3 <= 16) && (def_tODTL_DDR3 > 8))	;	# 16 clks
+	48:51	,	0x5			,	((def_is_ddr3) && (def_AL_ena) && (def_tODTL_DDR3 <= 32) && (def_tODTL_DDR3 > 16))	;	# 32 clks
+	48:51	,	0x6			,	((def_is_ddr3) && (def_AL_ena) && (def_tODTL_DDR3 <= 64) && (def_tODTL_DDR3 > 32))	;	# 64 clks
+	#--------------- DDR3 and no AL ---------------------------------------------------------------
+	48:51	,	0x3			,	((def_is_ddr3) && (def_AL_dis) && (def_tODTL_DDR3_NOAL <= 8))									;	#  8 clks
+	48:51	,	0x4			,	((def_is_ddr3) && (def_AL_dis) && (def_tODTL_DDR3_NOAL <= 16) && (def_tODTL_DDR3_NOAL > 8))		;	# 16 clks
+	48:51	,	0x5			,	((def_is_ddr3) && (def_AL_dis) && (def_tODTL_DDR3_NOAL <= 32) && (def_tODTL_DDR3_NOAL > 16))	;	# 32 clks
+	48:51	,	0x6			,	((def_is_ddr3) && (def_AL_dis) && (def_tODTL_DDR3_NOAL <= 64) && (def_tODTL_DDR3_NOAL > 32))	;	# 64 clks
 	#--------------- DDR4 -------------------------------------------------------------------------
-	48:51	,	0x3			,	((def_is_ddr4) && (def_tODTL_DDR4 <= 8))							;	#  8 clks
-	48:51	,	0x4			,	((def_is_ddr4) && (def_tODTL_DDR4 <= 16) && (def_tODTL_DDR4 > 8))	;	# 16 clks
-	48:51	,	0x5			,	((def_is_ddr4) && (def_tODTL_DDR4 <= 32) && (def_tODTL_DDR4 > 16))	;	# 32 clks
-	48:51	,	0x6			,	((def_is_ddr4) && (def_tODTL_DDR4 <= 64) && (def_tODTL_DDR4 > 32))	;	# 64 clks
+	48:51	,	0x3			,	((def_is_ddr4) && (def_AL_ena) && (def_tODTL_DDR4 <= 8))							;	#  8 clks
+	48:51	,	0x4			,	((def_is_ddr4) && (def_AL_ena) && (def_tODTL_DDR4 <= 16) && (def_tODTL_DDR4 > 8))	;	# 16 clks
+	48:51	,	0x5			,	((def_is_ddr4) && (def_AL_ena) && (def_tODTL_DDR4 <= 32) && (def_tODTL_DDR4 > 16))	;	# 32 clks
+	48:51	,	0x6			,	((def_is_ddr4) && (def_AL_ena) && (def_tODTL_DDR4 <= 64) && (def_tODTL_DDR4 > 32))	;	# 64 clks
+	#--------------- DDR4 and no AL ---------------------------------------------------------------
+	48:51	,	0x3			,	((def_is_ddr4) && (def_AL_dis) && (def_tODTL_DDR4_NOAL <= 8))									;	#  8 clks
+	48:51	,	0x4			,	((def_is_ddr4) && (def_AL_dis) && (def_tODTL_DDR4_NOAL <= 16) && (def_tODTL_DDR4_NOAL > 8))		;	# 16 clks
+	48:51	,	0x5			,	((def_is_ddr4) && (def_AL_dis) && (def_tODTL_DDR4_NOAL <= 32) && (def_tODTL_DDR4_NOAL > 16))	;	# 32 clks
+	48:51	,	0x6			,	((def_is_ddr4) && (def_AL_dis) && (def_tODTL_DDR4_NOAL <= 64) && (def_tODTL_DDR4_NOAL > 32))	;	# 64 clks
 	48:51	,	0x0			,	any																	;	#  0 clks
 	# TRC_CYCLES
 #	52:55	,	0x7			,	(def_is_sim)														;	# match dials
@@ -4080,8 +4082,7 @@ scom 0x800(0,1)CC020301143F {	# _P[0:1]
 scom 0x800(0,1)CC050301143F {	# _P[0:1]
 	bits	,	scom_data	,	expr				;
 #	0:47	,	0x000000000000,	any					;	# reserved
-	48		,	0b1			,	(def_is_ddr4)		;	# if DDR4, drive DQ pins in DATA_BIT_ENABLE1
-	48		,	0b0			,	(def_not_ddr4)		;	# if not DDR4, set to 0
+	48		,	0b0			,	any					;   # DDR4 ballot, drive DQ pins on MRS
 # !! need to review
 	# MRS_CMD_DQ_ON determines the WL_per_DRAM_addr time.
 	# WL_per_DRAM_addr = 10 + MRS_CMD_DQ_ON 	in 2:1 mode

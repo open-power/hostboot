@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_mcbist.C,v 1.29 2013/01/16 15:38:02 sasethur Exp $
+// $Id: mss_mcbist.C,v 1.37 2013/02/19 12:14:03 sasethur Exp $
 // *!***************************************************************************
 // *! (C) Copyright International Business Machines Corp. 1997, 1998
 // *!           All Rights Reserved -- Property of IBM
@@ -38,8 +38,14 @@
 //------------------------------------------------------------------------------
 // Version:|Author: | Date:  | Comment:
 // --------|--------|--------|--------------------------------------------------
-//   1.29  |aditya  |01/11/16|Updated  cfg_mcb_dgen function
-//   1.28  |aditya  |01/11/16|Updated  cfg_mcb_dgen function
+//   1.37  |aditya  |02/19/13|updated testtypes
+//   1.34  |aditya  |02/13/13|updated testtypes
+//   1.33  |aditya  |02/12/13|updated testtypes
+//   1.32  |aditya  |02/11/13|updated testtypes  
+//   1.31  |aditya  |02/06/13|Updated SIMPLE_RAND test_type
+//   1.30  |aditya  |01/30/13|Updated fw comments
+//   1.29  |aditya  |01/11/13|Updated  cfg_mcb_dgen function
+//   1.28  |aditya  |01/11/13|Updated  cfg_mcb_dgen function
 //   1.27  |aditya  |01/11/13|Updated  cfg_mcb_dgen function
 //   1.26  |aditya  |01/07/13|Updated Review Comments
 //   1.25  |aditya  |01/03/13| Updated FW Comments 
@@ -111,43 +117,43 @@ fapi::ReturnCode  cfg_mcb_test_mem(const fapi::Target & i_target_mba,mcbist_test
         rc = mcb_write_test_mem(i_target_mba,MBA01_MCBIST_MCBMR0Q_0x030106a8,R,   0,SF,FIX, 1,DEFAULT,FIX_ADDR,2);  if(rc) return rc;
         rc = mcb_write_test_mem(i_target_mba,MBA01_MCBIST_MCBMR0Q_0x030106a8,OPER_RAND,0,RF,FIX, 1,DEFAULT,FIX_ADDR,3);  if(rc) return rc;
         
-        rc = mcb_write_test_mem(i_target_mba,MBA01_MCBIST_MCBMR1Q_0x030106a9,RW,  0,RF,RAND,0,DEFAULT,FIX_ADDR,0);   if(rc) return rc;
+        rc = mcb_write_test_mem(i_target_mba,MBA01_MCBIST_MCBMR1Q_0x030106a9,RW,  0,RF,DATA_RF,0,DEFAULT,FIX_ADDR,0);   if(rc) return rc;
     }
     else if (i_test_type == SIMPLE_RAND)
     {
-        rc = mcb_write_test_mem(i_target_mba,MBA01_MCBIST_MCBMR0Q_0x030106a8,W,   0,SF,RAND,0,DEFAULT,FIX_ADDR,0);  if(rc) return rc;
-        rc = mcb_write_test_mem(i_target_mba,MBA01_MCBIST_MCBMR0Q_0x030106a8,R,   0,SF,RAND,1,DEFAULT,FIX_ADDR,1);  if(rc) return rc;
-        rc = mcb_write_test_mem(i_target_mba,MBA01_MCBIST_MCBMR0Q_0x030106a8,W,   0,RF,RAND,1,DEFAULT,FIX_ADDR,2);  if(rc) return rc;
-        rc = mcb_write_test_mem(i_target_mba,MBA01_MCBIST_MCBMR0Q_0x030106a8,R,   0,RF,RAND,1,DEFAULT,FIX_ADDR,3);  if(rc) return rc;
+        rc = mcb_write_test_mem(i_target_mba,MBA01_MCBIST_MCBMR0Q_0x030106a8,W,   0,SF,DATA_RF,0,DEFAULT,FIX_ADDR,0);  if(rc) return rc;
+        rc = mcb_write_test_mem(i_target_mba,MBA01_MCBIST_MCBMR0Q_0x030106a8,R,   0,SF,DATA_RF,0,DEFAULT,FIX_ADDR,1);  if(rc) return rc;
+        rc = mcb_write_test_mem(i_target_mba,MBA01_MCBIST_MCBMR0Q_0x030106a8,W,   0,RF,DATA_RF,0,DEFAULT,FIX_ADDR,2);  if(rc) return rc;
+        rc = mcb_write_test_mem(i_target_mba,MBA01_MCBIST_MCBMR0Q_0x030106a8,R,   0,RF,DATA_RF,1,DEFAULT,FIX_ADDR,3);  if(rc) return rc;
         
-        rc = mcb_write_test_mem(i_target_mba,MBA01_MCBIST_MCBMR1Q_0x030106a9,RW,  4,RF,RAND,0,DEFAULT,FIX_ADDR,0);   if(rc) return rc;      
+        rc = mcb_write_test_mem(i_target_mba,MBA01_MCBIST_MCBMR1Q_0x030106a9,RW,  4,RF,DATA_RF,0,DEFAULT,FIX_ADDR,0);   if(rc) return rc;      
     }
     
     else if (i_test_type == WR_ONLY)
     {
-        rc = mcb_write_test_mem(i_target_mba,MBA01_MCBIST_MCBMR0Q_0x030106a8,W,   0,SF,RAND,0,DEFAULT,FIX_ADDR,0);  if(rc) return rc;
-        rc = mcb_write_test_mem(i_target_mba,MBA01_MCBIST_MCBMR0Q_0x030106a8,R,   0,SF,RAND,1,DEFAULT,FIX_ADDR,1);  if(rc) return rc;
+        rc = mcb_write_test_mem(i_target_mba,MBA01_MCBIST_MCBMR0Q_0x030106a8,W,   0,SF,DATA_RF,0,DEFAULT,FIX_ADDR,0);  if(rc) return rc;
+        rc = mcb_write_test_mem(i_target_mba,MBA01_MCBIST_MCBMR0Q_0x030106a8,R,   0,SF,DATA_RF,1,DEFAULT,FIX_ADDR,1);  if(rc) return rc;
         rc = mcb_write_test_mem(i_target_mba,MBA01_MCBIST_MCBMR0Q_0x030106a8,W,   0,RF,FIX,0,DEFAULT,FIX_ADDR,2);  if(rc) return rc; 
         rc = mcb_write_test_mem(i_target_mba,MBA01_MCBIST_MCBMR0Q_0x030106a8,OPER_RAND,0,RF,FIX,1,DEFAULT,FIX_ADDR,3);  if(rc) return rc;
         
-        rc = mcb_write_test_mem(i_target_mba,MBA01_MCBIST_MCBMR1Q_0x030106a9,RW,  4,RF,RAND,0,DEFAULT,FIX_ADDR,0);   if(rc) return rc;       
+        rc = mcb_write_test_mem(i_target_mba,MBA01_MCBIST_MCBMR1Q_0x030106a9,RW,  4,RF,DATA_RF,0,DEFAULT,FIX_ADDR,0);   if(rc) return rc;       
     } 
     else if (i_test_type == W_ONLY)
     {
-        rc = mcb_write_test_mem(i_target_mba,MBA01_MCBIST_MCBMR0Q_0x030106a8,W,   0,SF,RAND,1,DEFAULT,FIX_ADDR,0);  if(rc) return rc;
+        rc = mcb_write_test_mem(i_target_mba,MBA01_MCBIST_MCBMR0Q_0x030106a8,W,   0,SF,DATA_RF,1,DEFAULT,FIX_ADDR,0);  if(rc) return rc;
         rc = mcb_write_test_mem(i_target_mba,MBA01_MCBIST_MCBMR0Q_0x030106a8,R,   0,SF,FIX, 1,DEFAULT,FIX_ADDR,1);  if(rc) return rc;
         rc = mcb_write_test_mem(i_target_mba,MBA01_MCBIST_MCBMR0Q_0x030106a8,W,   0,RF,FIX, 0,DEFAULT,FIX_ADDR,2);  if(rc) return rc; 
         rc = mcb_write_test_mem(i_target_mba,MBA01_MCBIST_MCBMR0Q_0x030106a8,OPER_RAND,0,RF,FIX, 1,DEFAULT,FIX_ADDR,3);  if(rc) return rc;
         
-        rc = mcb_write_test_mem(i_target_mba,MBA01_MCBIST_MCBMR1Q_0x030106a9,RW,  4,RF,RAND,0,DEFAULT,FIX_ADDR,0);   if(rc) return rc;    
+        rc = mcb_write_test_mem(i_target_mba,MBA01_MCBIST_MCBMR1Q_0x030106a9,RW,  4,RF,DATA_RF,0,DEFAULT,FIX_ADDR,0);   if(rc) return rc;    
     }
     else if (i_test_type == R_ONLY)
     {
-        rc = mcb_write_test_mem(i_target_mba,MBA01_MCBIST_MCBMR0Q_0x030106a8,R,   0,SF,RAND,1,DEFAULT,FIX_ADDR,0);  if(rc) return rc;
+        rc = mcb_write_test_mem(i_target_mba,MBA01_MCBIST_MCBMR0Q_0x030106a8,R,   0,SF,DATA_RF,1,DEFAULT,FIX_ADDR,0);  if(rc) return rc;
         rc = mcb_write_test_mem(i_target_mba,MBA01_MCBIST_MCBMR0Q_0x030106a8,W,   0,RF,FIX, 0,DEFAULT,FIX_ADDR,2);  if(rc) return rc;
         rc = mcb_write_test_mem(i_target_mba,MBA01_MCBIST_MCBMR0Q_0x030106a8,OPER_RAND,0,RF,FIX, 1,DEFAULT,FIX_ADDR,3);  if(rc) return rc;
         
-        rc = mcb_write_test_mem(i_target_mba,MBA01_MCBIST_MCBMR1Q_0x030106a9,RW,  4,RF,RAND,0,DEFAULT,FIX_ADDR,0);  if(rc) return rc;  
+        rc = mcb_write_test_mem(i_target_mba,MBA01_MCBIST_MCBMR1Q_0x030106a9,RW,  4,RF,DATA_RF,0,DEFAULT,FIX_ADDR,0);  if(rc) return rc;  
     }
     
     else
@@ -188,8 +194,8 @@ fapi::ReturnCode  cfg_mcb_dgen(const fapi::Target & i_target_mba,mcbist_data_gen
     uint64_t l_spare = 0x0000000000000000ull;
 	//uint64_t l_data = 0x0000000000000000ull;
     uint8_t l_rotnum = 0;
-    uint32_t l_mba01_mcb_pseudo_random[NINE] = { MBA01_MCBIST_MCBFD0Q_0x030106be,MBA01_MCBIST_MCBFD1Q_0x030106bf,MBA01_MCBIST_MCBFD2Q_0x030106c0,MBA01_MCBIST_MCBFD3Q_0x030106c1,MBA01_MCBIST_MCBFD4Q_0x030106c2, MBA01_MCBIST_MCBFD5Q_0x030106c3,MBA01_MCBIST_MCBFD6Q_0x030106c4,MBA01_MCBIST_MCBFD7Q_0x030106c5,MBA01_MCBIST_MCBFDQ_0x030106c6};
-    uint32_t l_mba01_mcb_random[MAX_BYTE] = {MBA01_MCBIST_MCBRDS0Q_0x030106b2,MBA01_MCBIST_MCBRDS1Q_0x030106b3,MBA01_MCBIST_MCBRDS2Q_0x030106b4,MBA01_MCBIST_MCBRDS3Q_0x030106b5,MBA01_MCBIST_MCBRDS4Q_0x030106b6,MBA01_MCBIST_MCBRDS5Q_0x030106b7,MBA01_MCBIST_MCBRDS6Q_0x030106b8,MBA01_MCBIST_MCBRDS7Q_0x030106b9,MBA01_MCBIST_MCBRDS8Q_0x030106ba,MBA01_MCBIST_MCBDRSRQ_0x030106bc};
+    uint32_t l_mba01_mcb_pseudo_random[MAX_BYTE] = { MBA01_MCBIST_MCBFD0Q_0x030106be,MBA01_MCBIST_MCBFD1Q_0x030106bf,MBA01_MCBIST_MCBFD2Q_0x030106c0,MBA01_MCBIST_MCBFD3Q_0x030106c1,MBA01_MCBIST_MCBFD4Q_0x030106c2, MBA01_MCBIST_MCBFD5Q_0x030106c3,MBA01_MCBIST_MCBFD6Q_0x030106c4,MBA01_MCBIST_MCBFD7Q_0x030106c5,MBA01_MCBIST_MCBFDQ_0x030106c6,MBA01_MCBIST_MCBFDSPQ_0x030106c7};
+    uint32_t l_mba01_mcb_random[MAX_BYTE] = {MBA01_MCBIST_MCBRDS0Q_0x030106b2,MBA01_MCBIST_MCBRDS1Q_0x030106b3,MBA01_MCBIST_MCBRDS2Q_0x030106b4,MBA01_MCBIST_MCBRDS3Q_0x030106b5,MBA01_MCBIST_MCBRDS4Q_0x030106b6,MBA01_MCBIST_MCBRDS5Q_0x030106b7,MBA01_MCBIST_MCBRDS6Q_0x030106b8,MBA01_MCBIST_MCBRDS7Q_0x030106b9,MBA01_MCBIST_MCBRDS8Q_0x030106ba,0x030106bb};
     uint8_t l_index,l_index1 = 0;
     uint32_t l_rand_32 = 0;
 	
@@ -272,8 +278,10 @@ rc_num = l_var_data_buffer_64.setDoubleWord(0,l_var);  if (rc_num){ FAPI_ERR( "c
     else if(i_datamode == ABLE_FIVE)
     {
          
-        l_var = 0xA5A5A5A5A5A5A5A5ull;                                                                                                                                      
-        l_var1 =0x5A5A5A5A5A5A5A5Aull;                                                                                                                                  
+		// l_var = 0x4B4B4B4B4B4B4B4Bull;                                                                                                                                      
+        //l_var1 = 0x9696969696969696ull;     
+         l_var = 0xA5A5A5A5A5A5A5A5ull;                                                                                                                                      
+         l_var1 =0x5A5A5A5A5A5A5A5Aull;                                                                                                                                  
         l_spare = 0xA55AA55AA55AA55Aull; 
         
 		rc_num = l_spare_data_buffer_64.setDoubleWord(0,l_spare);  if (rc_num){ FAPI_ERR( "cfg_mcb_dgen:");rc.setEcmdError(rc_num);return rc;}
@@ -321,7 +329,7 @@ rc_num = l_var_data_buffer_64.setDoubleWord(0,l_var);  if (rc_num){ FAPI_ERR( "c
     {
        // srand(2);
         FAPI_INF("Need to check the value of RAND_MAX for this compiler -- assuming 32bit of data is returned");
-        for (l_index = 0; l_index< (MAX_BYTE-1) ; l_index++)
+        for (l_index = 0; l_index< (MAX_BYTE) ; l_index++)
         {
             //l_rand_32 = rand();
 			l_rand_32 = 0xFFFFFFFF;//Hard Coded Temporary Fix till random function is fixed
@@ -528,16 +536,16 @@ rc_num = l_var_data_buffer_64.setDoubleWord(0,l_var);  if (rc_num){ FAPI_ERR( "c
 	    	//Writing MBS 23 pattern registers for comparison mod
    
 	
-        rc = fapiPutScom(i_target_centaur, MBS_MCBIST01_MBS_MCBFD0Q_0x02011681, l_var_data_buffer_64); if(rc) return rc;
-        rc = fapiPutScom(i_target_centaur, MBS_MCBIST01_MBS_MCBFD1Q_0x02011682, l_var1_data_buffer_64); if(rc) return rc;
-        rc = fapiPutScom(i_target_centaur, MBS_MCBIST01_MBS_MCBFD2Q_0x02011683, l_var_data_buffer_64); if(rc) return rc;
-    	rc = fapiPutScom(i_target_centaur, MBS_MCBIST01_MBS_MCBFD3Q_0x02011684, l_var1_data_buffer_64); if(rc) return rc; 
-	    rc = fapiPutScom(i_target_centaur, MBS_MCBIST01_MBS_MCBFD4Q_0x02011685, l_var_data_buffer_64); if(rc) return rc; 
-	    rc = fapiPutScom(i_target_centaur, MBS_MCBIST01_MBS_MCBFD5Q_0x02011686, l_var1_data_buffer_64); if(rc) return rc; 
-	    rc = fapiPutScom(i_target_centaur, MBS_MCBIST01_MBS_MCBFD6Q_0x02011687, l_var_data_buffer_64); if(rc) return rc;	
-	    rc = fapiPutScom(i_target_centaur, MBS_MCBIST01_MBS_MCBFD7Q_0x02011688, l_var1_data_buffer_64); if(rc) return rc; 
-	    rc = fapiPutScom(i_target_centaur, MBS_MCBIST01_MBS_MCBFDQ_0x02011689,  l_spare_data_buffer_64); if(rc) return rc; 
-	    rc = fapiPutScom(i_target_centaur, MBS_MCBIST01_MBS_MCBFDSPQ_0x0201168A,l_spare_data_buffer_64); if(rc) return rc; 	                                                                                                                                                                    	         
+        rc = fapiPutScom(i_target_centaur, MBS_MCBIST23_MBS_MCBFD0Q_0x02011781, l_var_data_buffer_64); if(rc) return rc;
+        rc = fapiPutScom(i_target_centaur, MBS_MCBIST23_MBS_MCBFD1Q_0x02011782, l_var1_data_buffer_64); if(rc) return rc;
+        rc = fapiPutScom(i_target_centaur, MBS_MCBIST23_MBS_MCBFD2Q_0x02011783, l_var_data_buffer_64); if(rc) return rc;
+    	rc = fapiPutScom(i_target_centaur, MBS_MCBIST23_MBS_MCBFD3Q_0x02011784, l_var1_data_buffer_64); if(rc) return rc; 
+	    rc = fapiPutScom(i_target_centaur, MBS_MCBIST23_MBS_MCBFD4Q_0x02011785, l_var_data_buffer_64); if(rc) return rc; 
+	    rc = fapiPutScom(i_target_centaur, MBS_MCBIST23_MBS_MCBFD5Q_0x02011786, l_var1_data_buffer_64); if(rc) return rc; 
+	    rc = fapiPutScom(i_target_centaur, MBS_MCBIST23_MBS_MCBFD6Q_0x02011787, l_var_data_buffer_64); if(rc) return rc;	
+	    rc = fapiPutScom(i_target_centaur, MBS_MCBIST23_MBS_MCBFD7Q_0x02011788, l_var1_data_buffer_64); if(rc) return rc; 
+	    rc = fapiPutScom(i_target_centaur, MBS_MCBIST23_MBS_MCBFDQ_0x02011789,  l_spare_data_buffer_64); if(rc) return rc; 
+	    rc = fapiPutScom(i_target_centaur, MBS_MCBIST23_MBS_MCBFDSPQ_0x0201178A,l_spare_data_buffer_64); if(rc) return rc; 	                                                                                                                                                                    	         
 	                                                                                                                               	     
 		
     	}
