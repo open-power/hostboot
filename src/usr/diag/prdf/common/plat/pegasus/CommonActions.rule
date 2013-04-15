@@ -117,6 +117,25 @@ actionclass SelfMedThr32PerDay
     threshold32pday;
 };
 
+actionclass calloutSelfMedThr1
+{
+    calloutSelfMed;
+    threshold1;
+};
+
+actionclass CalloutLevel2Thr1
+{
+    callout2ndLvlMed;
+    threshold1;
+};
+
+actionclass calloutSelfAndLevel2MedThr1
+{
+    calloutSelfMed;
+    callout2ndLvlMed;
+    threshold1;
+};
+
 ################################################################################
 #                               Dump Types                                     #
 ################################################################################
@@ -146,4 +165,6 @@ actionclass TBDDefaultCallout
     callout2ndLvlMed;
     threshold( field(32 / day), mfg(32 / day) );
 };
+
+
 

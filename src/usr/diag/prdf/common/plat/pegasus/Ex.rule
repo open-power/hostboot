@@ -813,192 +813,192 @@ group gL2Fir filter singlebit
     /** L2FIR[0]
      *  CACHE_RD_CE
      */
-    (L2Fir, bit(0)) ? TBDDefaultCallout;
+    (L2Fir, bit(0)) ? L2CE;
 
     /** L2FIR[1]
      *  CACHE_RD_UE
      */
-    (L2Fir, bit(1)) ? TBDDefaultCallout;
+    (L2Fir, bit(1)) ? L2UE;
 
     /** L2FIR[2]
      *  CACHE_RD_SUE
      */
-    (L2Fir, bit(2)) ? TBDDefaultCallout;
+    (L2Fir, bit(2)) ? defaultMaskedError;
 
     /** L2FIR[3]
      *  HW_DIR_INTIATED_LINE_DELETE_OCCURRED
      */
-    (L2Fir, bit(3)) ? TBDDefaultCallout;
+    (L2Fir, bit(3)) ? defaultMaskedError;
 
     /** L2FIR[4]
      *  CACHE_UE_SUE_DETECTED_ON_MODIFIED_LINE_BY_CO
      */
-    (L2Fir, bit(4)) ? TBDDefaultCallout;
+    (L2Fir, bit(4)) ? defaultMaskedError;
 
     /** L2FIR[5]
      *  CACHE_UE_SUE_DETECTED_ON_NON_MODIFIED_LINE_BY_CO
      */
-    (L2Fir, bit(5)) ? TBDDefaultCallout;
+    (L2Fir, bit(5)) ? defaultMaskedError;
 
     /** L2FIR[6]
      *  DIR_CE_DETECTED
      */
-    (L2Fir, bit(6)) ? TBDDefaultCallout;
+    (L2Fir, bit(6)) ? SelfMedThr32PerDay;
 
     /** L2FIR[7]
      *  DIR_UE_DETECTED
      */
-    (L2Fir, bit(7)) ? TBDDefaultCallout;
+    (L2Fir, bit(7)) ? SelfMedThr1;
 
     /** L2FIR[8]
      *  DIR_STUCK_BIT_CE
      */
-    (L2Fir, bit(8)) ? TBDDefaultCallout;
+    (L2Fir, bit(8)) ? calloutSelfMedThr1;
 
     /** L2FIR[9]
      *  DIR_SBCE_REPAIR_FAILED
      */
-    (L2Fir, bit(9)) ? TBDDefaultCallout;
+    (L2Fir, bit(9)) ? SelfMedThr1;
 
     /** L2FIR[10]
      *  MULTIPLE_DIR_ERRORS_DETECTED
      */
-    (L2Fir, bit(10)) ? TBDDefaultCallout;
+    (L2Fir, bit(10)) ? defaultMaskedError;
 
     /** L2FIR[11]
      *  LRU_READ_ERROR_DETECTED
      */
-    (L2Fir, bit(11)) ? TBDDefaultCallout;
+    (L2Fir, bit(11)) ? SelfMedThr32PerDay;
 
     /** L2FIR[12]
      *  RC_POWERBUS_DATA_TIMEOUT
      */
-    (L2Fir, bit(12)) ? TBDDefaultCallout;
+    (L2Fir, bit(12)) ? CalloutLevel2Thr1;
 
     /** L2FIR[13]
      *  NCU_POWERBUS_DATA_TIMEOUT
      */
-    (L2Fir, bit(13)) ? TBDDefaultCallout;
+    (L2Fir, bit(13)) ? CalloutLevel2Thr1;
 
     /** L2FIR[14]
      *  HW_CONTROL_ERROR
      */
-    (L2Fir, bit(14)) ? TBDDefaultCallout;
+    (L2Fir, bit(14)) ? L2ChipLevel2;
 
     /** L2FIR[15]
      *  LRU_ALL_MEMBERS_IN_CGC_ARE_LINE_DELETED
      */
-    (L2Fir, bit(15)) ? TBDDefaultCallout;
+    (L2Fir, bit(15)) ? SelfMedThr1;
 
     /** L2FIR[16]
      *  CACHE_INHIBITED_HIT_CACHEABLE_ERROR
      */
-    (L2Fir, bit(16)) ? TBDDefaultCallout;
+    (L2Fir, bit(16)) ? SelfMedThr1;
 
     /** L2FIR[17]
      *  RC_LOAD_RECIVED_PB_CRESP_ADR_ERR
      */
-    (L2Fir, bit(17)) ? TBDDefaultCallout;
+    (L2Fir, bit(17)) ? SelfMedThr1UE;
 
     /** L2FIR[18]
      *  RC_STORE_RECIVED_PB_CRESP_ADR_ERR
      */
-    (L2Fir, bit(18)) ? TBDDefaultCallout;
+    (L2Fir, bit(18)) ?  SelfMedThr1;
 
     /** L2FIR[19]
      *  RC_POWBUS_DATA_CE_ERR_FROM_F2CHK
      */
-    (L2Fir, bit(19)) ? TBDDefaultCallout;
+    (L2Fir, bit(19)) ? L2PowerBusCE;
 
     /** L2FIR[20]
      *  RC_POWBUS_DATA_UE_ERR_FROM_F2CHK
      */
-    (L2Fir, bit(20)) ? TBDDefaultCallout;
+    (L2Fir, bit(20)) ? SelfMedThr1UE;
 
     /** L2FIR[21]
      *  RC_POWBUS_DATA_SUE_ERR_FROM_F2CHK
      */
-    (L2Fir, bit(21)) ? TBDDefaultCallout;
+    (L2Fir, bit(21)) ? defaultMaskedError;
 
     /** L2FIR[22]
      *  CO_ICSW_UE_SUE_DATA_ERR_FROM_F2CHK
      */
-    (L2Fir, bit(22)) ? TBDDefaultCallout;
+    (L2Fir, bit(22)) ? SelfMedThr1;
 
     /** L2FIR[23]
      *  RC_LOAD_RECIVED_PB_CRESP_ADR_ERR_FOR_HYP
      */
-    (L2Fir, bit(23)) ? TBDDefaultCallout;
+    (L2Fir, bit(23)) ? defaultMaskedError;
 
     /** L2FIR[24]
      *  RCDAT_RD_PARITY_ERR
      */
-    (L2Fir, bit(24)) ? TBDDefaultCallout;
+    (L2Fir, bit(24)) ? SelfMedThr1UE;
 
     /** L2FIR[25]
      *  CO_ICSW_RTY_BUSY_ABT_ERR
      */
-    (L2Fir, bit(25)) ? TBDDefaultCallout;
+    (L2Fir, bit(25)) ? defaultMaskedError;
 
     /** L2FIR[26]
      *  HA_LOG_STOP_SW_ERR
      */
-    (L2Fir, bit(26)) ? TBDDefaultCallout;
+    (L2Fir, bit(26)) ? calloutSelfAndLevel2MedThr1;
 
     /** L2FIR[27]
      *  RC_LOAD_RECEIVED_PB_ACK_DEAD_FROM_FOREIGN0
      */
-    (L2Fir, bit(27)) ? TBDDefaultCallout;
+    (L2Fir, bit(27)) ? callout2ndLvlMed;
 
     /** L2FIR[28]
      *  RC_LOAD_RECEIVED_PB_ACK_DEAD_FROM_FOREIGN1
      */
-    (L2Fir, bit(28)) ? TBDDefaultCallout;
+    (L2Fir, bit(28)) ? callout2ndLvlMed;
 
     /** L2FIR[29]
      *  RC_STORE_RECEIVED_PB_ACK_DEAD_FROM_FOREIGN0
      */
-    (L2Fir, bit(29)) ? TBDDefaultCallout;
+    (L2Fir, bit(29)) ? callout2ndLvlMed;
 
     /** L2FIR[30]
      *  RC_STORE_RECEIVED_PB_ACK_DEAD_FROM_FOREIGN1
      */
-    (L2Fir, bit(30)) ? TBDDefaultCallout;
+    (L2Fir, bit(30)) ? callout2ndLvlMed;
 
     /** L2FIR[31]
      *  ILLEGAL_MPALOG_TPID_SW_ERR
      */
-    (L2Fir, bit(31)) ? TBDDefaultCallout;
+    (L2Fir, bit(31)) ? defaultMaskedError;
 
     /** L2FIR[32]
      *  UNEXP_HA_ST_ERR
      */
-    (L2Fir, bit(32)) ? TBDDefaultCallout;
+    (L2Fir, bit(32)) ? defaultMaskedError;
 
     /** L2FIR[33]
      *  HA_LINE_IN_CONS_CACHE_ERR
      */
-    (L2Fir, bit(33)) ? TBDDefaultCallout;
+    (L2Fir, bit(33)) ? defaultMaskedError;
 
     /** L2FIR[34]
      *  HA_TABLE_IN_PROD_CACHE_ERR
      */
-    (L2Fir, bit(34)) ? TBDDefaultCallout;
+    (L2Fir, bit(34)) ? defaultMaskedError;
 
     /** L2FIR[35]
      *  ILLEGAL_LOG_STOP_SW_ERR
      */
-    (L2Fir, bit(35)) ? TBDDefaultCallout;
+    (L2Fir, bit(35)) ? defaultMaskedError;
 
     /** L2FIR[48]
      *  SCOM_ERR1: scom error
      */
-    (L2Fir, bit(48)) ? TBDDefaultCallout;
+    (L2Fir, bit(48)) ? defaultMaskedError;
 
     /** L2FIR[49]
      *  SCOM_ERR2: scom error
      */
-    (L2Fir, bit(49)) ? TBDDefaultCallout;
+    (L2Fir, bit(49)) ? defaultMaskedError;
 };
 
 ################################################################################
@@ -1376,4 +1376,44 @@ actionclass L3CE
     calloutSelfMed;
     threshold32pday; #FIXME RTC:65507 add MFG threshold
     #funccall("L3CE"); #FIXME RTC:22859 support for L3 repairs and trace arrays
+};
+
+
+actionclass L2CE
+{
+    calloutSelfMed;
+    threshold32pday; #FIXME RTC:65507 add MFG threshold
+    #funcall("L2CE");#FIXME RTC 22859 Support for L2 Line Delete
+
+};
+
+actionclass L2UE
+{
+    SelfMedThr1UE;
+    #funcall("L2UE");#FIXME RTC 22859 Support for L2 Line Delete
+};
+
+actionclass L2DirCE
+{
+    calloutSelfMed;
+    threshold32pday; #FIXME RTC:65507 add MFG threshold
+};
+
+actionclass L2ChipLevel2
+{
+    calloutProcLow;
+    callout2ndLvlMed;
+    threshold1;
+};
+
+actionclass calloutProcLow
+{
+    callout(connected(TYPE_PROC,0),MRU_LOW);
+};
+
+actionclass L2PowerBusCE
+{
+    #cannot callout L2 so calling out the chiplet
+    calloutSelfMed;
+    threshold1;
 };
