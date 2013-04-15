@@ -64,6 +64,8 @@
  *                                                  of the data when the data length is greater
  *                                                  then number of bits specified.
  *          SW187788        mww         02/27/2013  Add minimal succinct trace
+ *          SW195717        mww         04/22/2013  Add function to dump ffdc
+ *                                                  and trace.
  */
 
 #include <fapiHwpExecInitFile.H>
@@ -73,6 +75,8 @@
 #include <vector>
 #include <endian.h>
 #include <stdlib.h>
+
+#include <string.h>
 
 extern "C"
 {
@@ -204,7 +208,7 @@ typedef struct scomData
     uint16_t   numRows;
     char **    data;    //scom data to write
     bool       hasExpr; //has "expr" column
-    char *     colId;   //an attribute plus it's target#
+    char *     colId;   //an attribute plus its target#
     char **    rowData;
 }scomData_t;
 
@@ -231,6 +235,229 @@ typedef struct scomToWrite
 //A list of the scoms to write
 typedef std::vector<scomToWrite_t> scomList_t;
 
+
+//  ------------------------------------------------------------------------
+//  @class  InitFileStats
+//  collect statistics to dump if we hit an error.
+//  ------------------------------------------------------------------------
+class   InitFileStats
+{
+
+public:
+    /**
+     * @brief Constructor
+     *
+     *  @param  pointer to init file name
+     *  @param  init file version
+     *  @param  pointer to initfile image
+     *  @param  initfile image size
+     *
+     */
+    InitFileStats(  const char  *i_initfile,
+                    uint32_t    i_version,
+                    const char  *i_addr,
+                    size_t      i_size )
+        :   iv_ok(true),
+            iv_pAttrSymbolTableAddr( NULL ),
+            iv_attrSymbolTableSize( 0 ),
+
+            iv_pLitSymbolTableAddr( NULL ),
+            iv_litSymbolTableSize( NULL ),
+
+            iv_pScomSectionAddr( NULL ),
+            iv_scomSectionSize( 0 ),
+
+            iv_column( 0 ),
+            iv_row( 0 ),
+            iv_pStack( NULL )
+    {
+        iv_pInitFileName    =   i_initfile;
+        iv_initFileVersion  =   i_version;
+
+        iv_pInitFileAddr    =   i_addr;
+        iv_initFileSize     =   i_size;
+    }
+
+    /**
+     * @brief Destructor
+     */
+    ~InitFileStats()
+    {
+    }
+
+    /**
+     *  @brief  save address and size of attr table for dumping if necessary
+     *
+     *  @param  i_addr  address of attr table
+     *  @param  i_size  number of attributes in table
+     *
+     *  @return none.
+    */
+    void attrSymbolTable(   attrTableEntry  *i_addr,
+                            const uint16_t  i_size )
+    {
+        iv_pAttrSymbolTableAddr =   i_addr;
+        iv_attrSymbolTableSize  =   i_size;
+    }
+
+    /**
+     *  @brief  save address and size of lit table for dumping if necessary
+     *
+     *  @param  i_addr  address of lit table
+     *  @param  i_size  number of literals in table
+     *
+     *  @return none.
+    */
+    void litSymbolTable(    uint64_t         *i_addr,
+                            const int16_t    i_size )
+    {
+        iv_pLitSymbolTableAddr  =   i_addr;
+        iv_litSymbolTableSize   =   i_size;
+    }
+
+    /**
+     *  @brief  save address and size of scom section for dumping if necessary
+     *
+     *  @param  i_addr  address of scom section
+     *  @param  i_size  number of scoms in table
+     *
+     *  @return none.
+    */
+    void scomSection(   scomData_t  **i_addr,
+                        uint32_t    i_size )
+    {
+        iv_pScomSectionAddr =   i_addr;
+        iv_scomSectionSize  =   i_size;
+    }
+
+    /**
+     *  @brief save current Targets for dumping if necessary
+     *
+     *  @param  i_pTargets    pointer to target list.
+     *
+     *  @return none.
+     */
+    void    saveTargets(const std::vector<fapi::Target> * i_pTargets   )
+    {
+
+        iv_pTargets   =   i_pTargets;
+    }
+
+
+    /**
+     *  @brief save current Stack for dumping if necessary
+     *
+    *  @param  i_pStack    pointer to rpnStack.
+     *
+     *  @return none.
+    */
+    void    saveStack(  rpnStack_t      *i_pStack   )
+    {
+
+        iv_pStack   =   i_pStack;
+    }
+
+    /**
+     *  @brief save current column for dumping if necessary
+     *
+    *  @param  i_col    column we're working on
+     *
+     *  @return none.
+    */
+    void    saveCol(    uint32_t        i_col   )
+    {
+
+        iv_column   =   i_col;
+    }
+
+    /**
+     *  @brief save current row for dumping if necessary
+     *
+    *  @param  i_row       row we're working on
+     *
+     *  @return none.
+    */
+    void    saveRow(    uint32_t        i_row  )
+    {
+        iv_row  =   i_row;
+    }
+
+    /**
+     *  @brief  save current scom data for dumping if necessary
+     *
+     *  @param  i_scomData  scomData we are working on
+     *
+     *  @return none.
+    */
+    void    saveScom(   const scomData_t  *i_scomData )
+    {
+
+        iv_scomData         =   *i_scomData;
+    }
+
+    /**
+     *  @brief  dump saved values, and records that an error has ocurred.
+     *
+     *  @return none
+     *          sets iv_ok to false.
+     */
+    void    dump( );
+
+    /**
+     *  @brief  return ffdc information
+     *          Fills in FFDC values for a fapi Returncode.
+     *
+     *  @param  ref to fapi rc to fill in
+     *
+     *  @return none
+     *          filled in fapi RC
+     */
+    void    generateError( fapi::ReturnCode &o_fapiRc );
+
+
+    /**
+     *  Return whether dump() was called somewhere so we can log the error.
+     *
+     *  @return true or false, depending on whether dump() was called.
+    */
+    bool    ok()
+    {
+        return  iv_ok;
+    }
+
+private:
+    /**
+     *  Disable copy constructor and assignment operator
+     */
+    InitFileStats(const InitFileStats& i_right);
+    InitFileStats& operator=(const InitFileStats& i_right);
+
+    bool            iv_ok;
+    const char      *iv_pInitFileName;
+    uint32_t        iv_initFileVersion;
+    const char      *iv_pInitFileAddr;
+    size_t          iv_initFileSize;
+
+    attrTableEntry  *iv_pAttrSymbolTableAddr;
+    uint16_t        iv_attrSymbolTableSize;
+
+    uint64_t        *iv_pLitSymbolTableAddr;
+    uint16_t        iv_litSymbolTableSize;
+
+    scomData_t      **iv_pScomSectionAddr;
+    uint32_t        iv_scomSectionSize;
+
+    const std::vector<fapi::Target> * iv_pTargets;
+
+    uint32_t        iv_column;
+    uint32_t        iv_row;
+    scomData_t      iv_scomData;
+    rpnStack_t      *iv_pStack;
+
+};  // end class    InitFileStats
+
+
+
 //******************************************************************************
 // Forward Declarations
 //******************************************************************************
@@ -239,8 +466,7 @@ void ifSeek(ifInfo_t & io_ifInfo, size_t i_offset);
 void ifRead(ifInfo_t & io_ifInfo, void * o_data, uint32_t i_size,
             bool i_swap = true);
 
-void loadAttrSymbolTable(ifInfo_t & io_ifInfo,
-                         ifData_t & io_ifData);
+void loadAttrSymbolTable(ifInfo_t & io_ifInfo,ifData_t & io_ifData );
 
 void  unloadAttrSymbolTable(ifData_t & io_ifData);
 
@@ -248,50 +474,143 @@ fapi::ReturnCode getAttr(const ifData_t & i_ifData,
                  const uint16_t i_id,
                  uint64_t & o_val,
                  const uint32_t i_targetNum,
-                 const uint16_t i_arrayIndex[MAX_ATTRIBUTE_ARRAY_DIMENSION]);
+                 const uint16_t i_arrayIndex[MAX_ATTRIBUTE_ARRAY_DIMENSION],
+                 InitFileStats  &i_stats );
 
-void loadLitSymbolTable(ifInfo_t & io_ifInfo,
-                        ifData_t & io_ifData);
+void loadLitSymbolTable(ifInfo_t & io_ifInfo, ifData_t & io_ifData );
 
 void unloadLitSymbolTable(ifData_t & io_ifData);
 
 fapi::ReturnCode getLit(const ifData_t & i_ifData,
                         const uint16_t i_id,
-                        uint64_t & o_val);
+                        uint64_t & o_val,
+                        InitFileStats   &i_stats );
 
-void loadScomSection(ifInfo_t & io_ifInfo,
-                     ifData_t & io_ifData);
+void loadScomSection(ifInfo_t & io_ifInfo, ifData_t & io_ifData );
 
 void unloadScomSection(ifData_t & io_ifData);
 
-fapi::ReturnCode executeScoms(ifData_t & io_ifData);
+fapi::ReturnCode executeScoms(ifData_t & io_ifData,
+                              InitFileStats &i_stats );
 
-fapi::ReturnCode writeScom(ifData_t & i_ifData, const scomList_t & i_scomList);
+fapi::ReturnCode writeScom(ifData_t & i_ifData,
+                           const scomList_t & i_scomList,
+                           InitFileStats    &i_stats );
 
 fapi::ReturnCode getAttrArrayDimension(const ifData_t & i_ifData,
                                        const uint16_t i_id,
                                        uint8_t & o_attrDimension);
 
-void rpnPush(rpnStack_t * io_rpnStack, uint64_t i_val);
+void rpnPush(rpnStack_t * io_rpnStack,
+             uint64_t i_val );
 
-uint64_t rpnPop(rpnStack_t * io_rpnStack);
+uint64_t rpnPop(rpnStack_t * io_rpnStack,
+                InitFileStats   &i_stats   );
 
 void rpnDumpStack(rpnStack_t * i_rpnStack);
 
-uint64_t rpnUnaryOp(IfRpnOp i_op, uint64_t i_val, uint32_t i_any);
+uint64_t rpnUnaryOp(IfRpnOp i_op,
+                    uint64_t i_val,
+                    uint32_t i_any,
+                    InitFileStats   &i_stats   );
 
-uint64_t rpnBinaryOp(IfRpnOp i_op, uint64_t i_val1, uint64_t i_val2,
-                     uint32_t i_any);
+uint64_t rpnBinaryOp(IfRpnOp i_op,
+                     uint64_t i_val1,
+                     uint64_t i_val2,
+                     uint32_t i_any,
+                     InitFileStats  &i_stats   );
 
-fapi::ReturnCode rpnDoPush(ifData_t & io_ifData, const uint16_t i_id,
-                   uint32_t & io_any, const uint32_t i_targetNum,
-                   const uint16_t i_arrayIndex[MAX_ATTRIBUTE_ARRAY_DIMENSION]);
+fapi::ReturnCode rpnDoPush(ifData_t & io_ifData,
+                const uint16_t i_id,
+                uint32_t & io_any,
+                const uint32_t i_targetNum,
+                const uint16_t i_arrayIndex[MAX_ATTRIBUTE_ARRAY_DIMENSION],
+                           InitFileStats    &i_stats   );
 
-fapi::ReturnCode rpnDoOp(rpnStack_t * io_rpnStack, IfRpnOp i_op,
-                         uint32_t i_any);
+fapi::ReturnCode rpnDoOp(rpnStack_t * io_rpnStack,
+                         IfRpnOp i_op,
+                         uint32_t i_any,
+                         InitFileStats  &i_stats   );
 
-fapi::ReturnCode evalRpn(ifData_t & i_ifData, char * i_expr, uint32_t i_len,
-                         bool i_isColExpr = false, bool i_hasExpr = false);
+fapi::ReturnCode evalRpn(ifData_t & i_ifData,
+                         char * i_expr,
+                         uint32_t i_len,
+                         bool i_isColExpr,
+                         bool i_hasExpr,
+                         InitFileStats  &i_stats   );
+
+//
+void    InitFileStats::dump()
+{
+        iv_ok   =   false;
+
+        FAPI_IMP( "dump stats: initfile %s version %u, addr=%p, size = %u",
+                  iv_pInitFileName,
+                  iv_initFileVersion,
+                  iv_pInitFileAddr,
+                  iv_initFileSize );
+        FAPI_IMP( "dump stats: attribute symbol table addr=%p, num attrs= %u",
+                  iv_pAttrSymbolTableAddr,
+                  iv_attrSymbolTableSize );
+        for ( int i=0; i<iv_attrSymbolTableSize; i++ )
+        {
+            FAPI_IMP( "    %.4d    0x%x    0x%08x",
+                i,
+                iv_pAttrSymbolTableAddr[i].type,
+                iv_pAttrSymbolTableAddr[i].attrId );
+        }
+        FAPI_IMP( "dump stats: literal symbol table addr=%p, num lits = %u",
+                  iv_pLitSymbolTableAddr,
+                  iv_litSymbolTableSize );
+        for ( int i=0; i<iv_litSymbolTableSize; i++ )
+        {
+            FAPI_IMP( "    0xX%03x    0x%08x",
+                i+1,
+                iv_pLitSymbolTableAddr[i] );
+        }
+        FAPI_IMP( "dump stats: scomSection addr=%p, num scoms = %u",
+                  iv_pScomSectionAddr,
+                  iv_scomSectionSize );
+        FAPI_IMP( "dump stats: current column is 0x%x", iv_column );
+        FAPI_IMP( "dump stats: current row is 0x%x", iv_row );
+
+        FAPI_IMP( "dump stats: iv_scomData.len      is 0x%x",
+                  iv_scomData.len    );
+        FAPI_IMP( "dump stats: iv_scomData.offset   is 0x%x",
+                  iv_scomData.offset );
+        FAPI_IMP( "dump stats: iv_scomData.addrId   is 0x%x",
+                  iv_scomData.addrId );
+        FAPI_IMP( "dump stats: iv_scomData.numCols  is 0x%x",
+                  iv_scomData.numCols);
+        FAPI_IMP( "dump stats: iv_scomData.numRows  is 0x%x",
+                  iv_scomData.numRows);
+        FAPI_IMP( "dump stats: iv_scomData.data     addr is %p",
+                  iv_scomData.data   );
+        FAPI_IMP( "dump stats: iv_scomData.hasExpr  is 0x%x",
+                  iv_scomData.hasExpr);
+        FAPI_IMP( "dump stats: iv_scomData.colId    addr is %p",
+                  iv_scomData.colId  );
+        FAPI_IMP( "dump stats: iv_scomData.rowData  addr is %p",
+                  iv_scomData.rowData);
+
+        rpnDumpStack( iv_pStack );
+}
+
+
+//
+void    InitFileStats::generateError( fapi::ReturnCode &o_fapiRc )
+{
+    //  fill in ffdc info
+    uint16_t    &FFDC_SCOM_ADDRID   =   iv_scomData.addrId;
+    uint16_t    &FFDC_SCOM_OFFSET   =   iv_scomData.offset;
+    uint16_t    &FFDC_SCOM_LEN      =   iv_scomData.len;
+    uint32_t    &FFDC_COLUMN        =   iv_column;
+    uint32_t    &FFDC_ROW           =   iv_row;
+
+    FAPI_SET_HWP_ERROR( o_fapiRc, RC_INITFILE_EXECUTION_ERROR );
+
+}
+
 
 //******************************************************************************
 // fapiHwpExecInitFile function
@@ -312,11 +631,11 @@ fapi::ReturnCode fapiHwpExecInitFile(const std::vector<fapi::Target> & i_target,
     FAPI_INF(">> fapiHwpExecInitFile: Performing HWP for %s", i_file);
 
     // Print the ecmd string of the targets
-    FAPI_INF( "fapiHwpExecInitFile: SCOM target: %s",
+    FAPI_IMP( "fapiHwpExecInitFile: SCOM target: %s",
               i_target.front().toEcmdString());
     for (size_t i = 1; i < i_target.size(); i++)
     {
-        FAPI_INF( "fapiHwpExecInitFile: Associated target: %s",
+        FAPI_IMP( "fapiHwpExecInitFile: Associated target: %s",
                   i_target.at(i).toEcmdString());
     }
 
@@ -325,14 +644,15 @@ fapi::ReturnCode fapiHwpExecInitFile(const std::vector<fapi::Target> & i_target,
     size_t l_ifSize = 0;
     const char * l_ifAddr = NULL;
 
+
     // Load the binary initfile
     l_rc = fapiLoadInitFile(i_target.front(), i_file, l_ifAddr, l_ifSize);
 
     if (l_rc.ok())
     {
-        IF_DBG( "fapiHwpExecInitFile: data module addr = %p, size = %u",
-                l_ifAddr,
-                l_ifSize );
+        FAPI_IMP( "fapiHwpExecInitFile: initfile addr = %p, size = %u",
+                  l_ifAddr,
+                  l_ifSize );
 
         //Save the data
         ifInfo_t l_ifInfo;
@@ -389,42 +709,56 @@ fapi::ReturnCode fapiHwpExecInitFile(const std::vector<fapi::Target> & i_target,
                      l_version,
                      l_cvsVersion );
 
+            //  create a stats object to collect initfile statistics -
+            //  this will be used if things break.
+            InitFileStats   l_stats( i_file, l_version, l_ifAddr, l_ifSize );
+
             ifData_t l_ifData;
             memset(&l_ifData, 0, sizeof(ifData_t));
 
             //--------------------------------
             // Load the Attribute Symbol Table
             //--------------------------------
-            loadAttrSymbolTable(l_ifInfo, l_ifData);
-            IF_DBG( "fapiHwpExecInitFile: Addr of attribute symbol table %p, "
+            loadAttrSymbolTable(l_ifInfo, l_ifData  );
+            FAPI_IMP( "fapiHwpExecInitFile: Addr of attribute symbol table %p, "
                     "num attrs %u",
                     l_ifData.attrs,
                     l_ifData.numAttrs );
+            l_stats.attrSymbolTable(
+                l_ifData.attrs,
+                l_ifData.numAttrs );
 
             //--------------------------------
             // Load the Literal Symbol Table
             //--------------------------------
-            loadLitSymbolTable(l_ifInfo, l_ifData);
-            IF_DBG( "fapiHwpExecInitFile: Addr of literal symbol table %p, "
+            loadLitSymbolTable(l_ifInfo, l_ifData );
+            FAPI_IMP( "fapiHwpExecInitFile: Addr of literal symbol table %p, "
                     "num lits %u",
                     l_ifData.numericLits,
                     l_ifData.numLits );
+            l_stats.litSymbolTable(
+                l_ifData.numericLits,
+                l_ifData.numLits );
 
             //--------------------------------
             // Load the SCOM Section
             //--------------------------------
-            loadScomSection(l_ifInfo, l_ifData);
-            IF_DBG( "fapiHwpExecInitFile: Addr of scom section %p, "
+            loadScomSection(l_ifInfo, l_ifData );
+            FAPI_IMP( "fapiHwpExecInitFile: Addr of scom section %p, "
                     "num scoms %u",
                     l_ifData.scoms,
                     l_ifData.numScoms );
+            l_stats.scomSection(
+                l_ifData.scoms,
+                l_ifData.numScoms );
 
             //--------------------------------
             // Execute SCOMs
             //--------------------------------
             l_ifData.pTarget = &i_target;
 
-            l_rc = executeScoms(l_ifData);
+            l_rc = executeScoms(l_ifData, l_stats );
+
 
             //--------------------------------
             // Unload
@@ -478,7 +812,6 @@ void ifSeek(ifInfo_t & io_ifInfo, size_t i_offset)
     {
         FAPI_ERR("fapiHwpExecInitFile: ifSeek: offset out of range 0x%X",
                  i_offset );
-
         fapiAssert(false);
     }
 
@@ -512,7 +845,6 @@ void ifRead(ifInfo_t & io_ifInfo, void * o_data, uint32_t i_size, bool i_swap)
                   "out of range",
                   io_ifInfo.offset,
                   i_size );
-
         fapiAssert(false);
     }
 
@@ -555,7 +887,7 @@ void ifRead(ifInfo_t & io_ifInfo, void * o_data, uint32_t i_size, bool i_swap)
  * @param[in,out] io_ifData   Reference to ifData_t which contains initfile data
  */
 void loadAttrSymbolTable(ifInfo_t & io_ifInfo,
-                         ifData_t & io_ifData)
+                         ifData_t & io_ifData  )
 {
     IF_DBG( ">> fapiHwpExecInitFile: loadAttrSymbolTable" );
 
@@ -642,7 +974,8 @@ fapi::ReturnCode getAttr(const ifData_t & i_ifData,
                  const uint16_t i_id,
                  uint64_t & o_val,
                  const uint32_t i_targetNum,
-                 const uint16_t i_arrayIndex[MAX_ATTRIBUTE_ARRAY_DIMENSION])
+                 const uint16_t i_arrayIndex[MAX_ATTRIBUTE_ARRAY_DIMENSION],
+                 InitFileStats  &i_stats )
 {
     IF_DBG2( ">> fapiHwpExecInitFile: getAttr: id 0x%x target# %u",
              i_id, i_targetNum);
@@ -670,7 +1003,10 @@ fapi::ReturnCode getAttr(const ifData_t & i_ifData,
                     //Expect nonzero targetNum
                     FAPI_ERR( "fapiHwpExecInitFile: "
                               "getAttr: Expect nonzero targetNum" );
-                    fapiAssert(false);
+                    // dump trace and return error
+                    i_stats.dump( );
+                    i_stats.generateError( l_rc );
+                    break;
                 }
                 else if (i_ifData.pTarget->size() <= i_targetNum)
                 {
@@ -684,7 +1020,9 @@ fapi::ReturnCode getAttr(const ifData_t & i_ifData,
                     size_t l_ffdc = i_ifData.pTarget->size();
                     size_t & FFDC_IF_NUM_TGTS_PASSED_IN = l_ffdc;
                     FAPI_SET_HWP_ERROR(l_rc, RC_INITFILE_TGT_NUM_OUT_OF_RANGE);
+                    i_stats.dump();
                     break;
+
                 }
 
                 l_pTarget = &(i_ifData.pTarget->at(i_targetNum));
@@ -704,6 +1042,7 @@ fapi::ReturnCode getAttr(const ifData_t & i_ifData,
                 FAPI_ERR("fapiHwpExecInitFile: "
                          "getAttr: GetInitFileAttr failed rc 0x%x",
                          static_cast<uint32_t>(l_rc) );
+                i_stats.dump();
                 break;
             }
             if ( l_pTarget )
@@ -730,6 +1069,7 @@ fapi::ReturnCode getAttr(const ifData_t & i_ifData,
             //  GENERIC IDENTIFIER
             const uint16_t & FFDC_IF_ATTR_ID_OUT_OF_RANGE = i_id;
             FAPI_SET_HWP_ERROR(l_rc, RC_INITFILE_ATTR_ID_OUT_OF_RANGE);
+            i_stats.dump();
             break;
         }
     }
@@ -753,7 +1093,7 @@ fapi::ReturnCode getAttr(const ifData_t & i_ifData,
  * @param[in,out] io_ifData   Reference to ifData_t which contains initfile data
  */
 void loadLitSymbolTable(ifInfo_t & io_ifInfo,
-                        ifData_t & io_ifData)
+                        ifData_t & io_ifData )
 {
     IF_DBG2( ">> fapiHwpExecInitFile: loadLitSymbolTable" );
 
@@ -857,7 +1197,8 @@ void unloadLitSymbolTable(ifData_t & io_ifData)
 //******************************************************************************
 fapi::ReturnCode getLit(const ifData_t & i_ifData,
                         const uint16_t i_id,
-                        uint64_t & o_val)
+                        uint64_t & o_val,
+                        InitFileStats   &i_stats    )
 {
     IF_DBG2( ">> fapiHwpExecInitFile: getLit: id 0x%X",
              i_id );
@@ -881,6 +1222,9 @@ fapi::ReturnCode getLit(const ifData_t & i_ifData,
         //  GENERIC IDENTIFIER
         const uint16_t & FFDC_IF_LIT_ID_OUT_OF_RANGE = i_id;
         FAPI_SET_HWP_ERROR(l_rc, RC_INITFILE_LIT_ID_OUT_OF_RANGE);
+        //  dump trace
+        i_stats.dump();
+
     }
 
     return l_rc;
@@ -900,7 +1244,7 @@ fapi::ReturnCode getLit(const ifData_t & i_ifData,
  * @param[in,out] io_ifData   Reference to ifData_t which contains initfile data
  */
 void loadScomSection(ifInfo_t & io_ifInfo,
-                     ifData_t & io_ifData)
+                     ifData_t & io_ifData )
 {
     IF_DBG2( ">> fapiHwpExecInitFile: loadScomSection" );
 
@@ -1058,7 +1402,7 @@ void loadScomSection(ifInfo_t & io_ifInfo,
             //-----------------------------------
             if (0 < l_scoms[i]->numCols)
             {
-                //Allocate memory to hold the column data plus it's target id
+                //Allocate memory to hold the column data plus its target id
                 l_scoms[i]->colId =
                     reinterpret_cast<char *>
                         (malloc(l_scoms[i]->numCols * 2 * sizeof(uint16_t)));
@@ -1322,7 +1666,7 @@ void unloadScomSection(ifData_t & io_ifData)
  *
  * @return ReturnCode. Zero if success.
  */
-fapi::ReturnCode executeScoms(ifData_t & i_ifData)
+fapi::ReturnCode executeScoms(ifData_t & i_ifData, InitFileStats &i_stats )
 {
     FAPI_INF(">> fapiHwpExecInitFile: executeScoms");
 
@@ -1343,8 +1687,14 @@ fapi::ReturnCode executeScoms(ifData_t & i_ifData)
 
     i_ifData.rpnStack = &l_rpnStack;
 
+    i_stats.saveTargets( i_ifData.pTarget );
+    i_stats.saveStack(  &l_rpnStack );
+
     for (uint32_t i = 0; i < i_ifData.numScoms; i++)
     {
+        //  save values for debug
+        i_stats.saveScom( i_ifData.scoms[i] );
+
         //Get the number of simple columns
         l_numSimpleCols = i_ifData.scoms[i]->numCols;
         if (i_ifData.scoms[i]->hasExpr)
@@ -1361,6 +1711,8 @@ fapi::ReturnCode executeScoms(ifData_t & i_ifData)
             IF_DBG( ">> fapiHwpExecInitFile: executeScoms: scom %u row %u",
                     i,
                     l_row );
+            //  save values for debug
+            i_stats.saveRow(l_row);
 
             //Nothing to check if there are no columns
             //We found a row match
@@ -1383,8 +1735,11 @@ fapi::ReturnCode executeScoms(ifData_t & i_ifData)
             //Evaluate the simple columns (not the 'expr' column)
             for (uint16_t col= 0; col < l_numSimpleCols; col++)
             {
+                //  save values for debug
+                i_stats.saveCol( col );
+
                 //Evaluate the col id & target number
-                l_rc = evalRpn(i_ifData, l_colExpr, 4, true);
+                l_rc = evalRpn(i_ifData, l_colExpr, 4, true, false, i_stats );
 
                 if (l_rc)
                 {
@@ -1409,7 +1764,12 @@ fapi::ReturnCode executeScoms(ifData_t & i_ifData)
                     }
 
                     // PUSH  (SYMBOL)
-                    l_rc = evalRpn(i_ifData, l_rowExpr, l_byteCount);
+                    l_rc = evalRpn(i_ifData,
+                                   l_rowExpr,
+                                   l_byteCount,
+                                   false,
+                                   false,
+                                   i_stats );
                     l_rowExpr += l_byteCount; //advance past the calculation
 
                     if (l_rc)
@@ -1432,12 +1792,18 @@ fapi::ReturnCode executeScoms(ifData_t & i_ifData)
                 if((*l_rowExpr == FALSE_OP) || (*l_rowExpr == TRUE_OP))
                 {
                     //Unconditional OP; throw pushed COL symbol away
-                    rpnPop(i_ifData.rpnStack);
+                    rpnPop(i_ifData.rpnStack, i_stats );
+                    if ( !i_stats.ok() )
+                    {
+                        FAPI_ERR( "rpnPop failure" );
+                        i_stats.generateError( l_rc );
+                        break;
+                    }
                     IF_DBG2( "fapiHwpExecInitFile: executeScoms: "
                              "True or False op" );
                 }
 
-                l_rc = evalRpn(i_ifData, l_rowExpr, 1);
+                l_rc = evalRpn(i_ifData, l_rowExpr, 1, false, false, i_stats );
                 l_rowExpr++;
 
                 if (l_rc)
@@ -1448,10 +1814,17 @@ fapi::ReturnCode executeScoms(ifData_t & i_ifData)
                     break;
                 }
 
-                result = rpnPop(i_ifData.rpnStack);
+                result = rpnPop(i_ifData.rpnStack,i_stats );
+                if ( !i_stats.ok() )
+                {
+                    FAPI_ERR( "rpnPop failure" );
+                    i_stats.generateError( l_rc );
+                    break;
+                }
                 IF_DBG2( "fapiHwpExecInitFile: executeScoms: Simple Col: "
                          "result 0x%llX",
                          result );
+
 
                 //If zero, continue on to the next row.
                 if (0 == result)
@@ -1488,7 +1861,12 @@ fapi::ReturnCode executeScoms(ifData_t & i_ifData)
                 l_len = (l_len << 8) + *((uint8_t*)l_rowExpr);
                 l_rowExpr++;
 
-                l_rc = evalRpn(i_ifData, l_rowExpr, l_len, false, true);
+                l_rc = evalRpn(i_ifData,
+                               l_rowExpr,
+                               l_len,
+                               false,
+                               true,
+                               i_stats );
 
                 if (l_rc)
                 {
@@ -1498,7 +1876,13 @@ fapi::ReturnCode executeScoms(ifData_t & i_ifData)
                     break;
                 }
 
-                result = rpnPop(i_ifData.rpnStack);
+                result = rpnPop(i_ifData.rpnStack, i_stats );
+                if ( !i_stats.ok() )
+                {
+                    FAPI_ERR( "rpnPop failure" );
+                    i_stats.generateError( l_rc );
+                    break;
+                }
                 IF_DBG2( "fapiHwpExecInitFile: executeScoms: Expr: "
                          "result 0x%llX",
                          result );
@@ -1576,7 +1960,7 @@ fapi::ReturnCode executeScoms(ifData_t & i_ifData)
                 }
                 #endif
 
-                l_rc = writeScom(i_ifData, l_scomList);
+                l_rc = writeScom(i_ifData, l_scomList, i_stats );
 
                 // Clear the scom list
                 l_scomList.clear();
@@ -1600,8 +1984,12 @@ fapi::ReturnCode executeScoms(ifData_t & i_ifData)
         l_scomList.clear();
     }
 
-    //Clear the stack
+    //  Clear the stack, clear the external pointer to it
     l_rpnStack.clear();
+    i_ifData.rpnStack = NULL;
+
+    // clear it in stats as well.
+    i_stats.saveStack( NULL );
 
     FAPI_INF("<< fapiHwpExecInitFile: executeScoms");
     return l_rc;
@@ -1615,7 +2003,8 @@ fapi::ReturnCode executeScoms(ifData_t & i_ifData)
  * @return ReturnCode. Zero if success.
  */
 fapi::ReturnCode writeScom(ifData_t & i_ifData,
-                           const scomList_t & i_scomList)
+                           const scomList_t & i_scomList,
+                           InitFileStats  &i_stats )
 {
     FAPI_DBG(">> fapiHwpExecInitFile: writeScom");
 
@@ -1647,7 +2036,7 @@ fapi::ReturnCode writeScom(ifData_t & i_ifData,
             {
                 //Get the the scom address
                 l_addrId = i_ifData.scoms[l_scomNum]->addrId;
-                l_rc = getLit(i_ifData, l_addrId, l_addr);
+                l_rc = getLit(i_ifData, l_addrId, l_addr, i_stats );
                 if (l_rc)
                 {
                     break;
@@ -1658,7 +2047,10 @@ fapi::ReturnCode writeScom(ifData_t & i_ifData,
                 //Address should be the same for all scoms in the list
                 FAPI_ERR( "fapiHwpExecInitFile: writeScom: have scomList "
                           "of different Scom addresses!" );
-                fapiAssert(false);
+                // dump trace & ffdc
+                i_stats.dump( );
+                i_stats.generateError( l_rc );
+                break;
             }
 
             //Get the scom data
@@ -1668,7 +2060,12 @@ fapi::ReturnCode writeScom(ifData_t & i_ifData,
             l_rowSize = *((uint8_t*)l_rowExpr); //size of the scom data
             l_rowExpr++;
 
-            l_rc = evalRpn(i_ifData, l_rowExpr, l_rowSize, false, false);
+            l_rc = evalRpn(i_ifData,
+                           l_rowExpr,
+                           l_rowSize,
+                           false,
+                           false,
+                           i_stats);
 
             if (l_rc)
             {
@@ -1678,7 +2075,13 @@ fapi::ReturnCode writeScom(ifData_t & i_ifData,
                 break;
             }
 
-            l_tmpData = rpnPop(i_ifData.rpnStack);
+            l_tmpData = rpnPop(i_ifData.rpnStack, i_stats );
+            if ( !i_stats.ok() )
+            {
+                FAPI_ERR( "rpnPop failure" );
+                i_stats.generateError( l_rc );
+                break;
+            }
             IF_DBG2( "fapiHwpExecInitFile: writeScom: Scom data 0x%llX",
                      l_tmpData );
 
@@ -1720,7 +2123,10 @@ fapi::ReturnCode writeScom(ifData_t & i_ifData,
                     //a bit op
                     FAPI_ERR("fapiHwpExecInitFile: writeScom: "
                              "scomList size > 1 for PutScom op!" );
-                    fapiAssert(false);
+                    // dump trace & ffdc
+                    i_stats.dump( );
+                    i_stats.generateError( l_rc );
+                    break;
                 }
 
                 l_data = l_tmpData;
@@ -1872,7 +2278,8 @@ fapi::ReturnCode getAttrArrayDimension(const ifData_t & i_ifData,
  * @param[in,out] io_rpnStack  Ptr to RPN stack
  * @param[in]     i_val        Value to push
  */
-void rpnPush(rpnStack_t * io_rpnStack, uint64_t i_val)
+void rpnPush(rpnStack_t * io_rpnStack,
+             uint64_t i_val )
 {
     IF_DBG2( "fapiHwpExecInitFile: rpnPush 0x%llX",
              i_val );
@@ -1885,21 +2292,26 @@ void rpnPush(rpnStack_t * io_rpnStack, uint64_t i_val)
  * @param[in,out] io_rpnStack  Ptr to RPN stack
  * @return uint64_t            Value from top of stack
  */
-uint64_t rpnPop(rpnStack_t * io_rpnStack)
+uint64_t rpnPop(rpnStack_t * io_rpnStack, InitFileStats &i_stats )
 {
     IF_DBG2( "fapiHwpExecInitFile: rpnPop" );
+    uint64_t l_val = 0;
 
     if (0 == io_rpnStack->size())
     {
         FAPI_ERR( "fapiHwpExecInitFile: rpnPop: rpn stack is empty. " );
-        fapiAssert(false);
+
+        // dump trace here, register an error to be handled by caller.
+        i_stats.dump( );
     }
+    else
+    {
+        l_val = io_rpnStack->back();
+        io_rpnStack->pop_back();
 
-    uint64_t l_val = io_rpnStack->back();
-    io_rpnStack->pop_back();
-
-    IF_DBG2( "fapiHwpExecInitFile: rpnPop 0x%llX",
-             l_val );
+        IF_DBG2( "fapiHwpExecInitFile: rpnPop 0x%llX",
+                 l_val );
+    }
     return l_val;
 }
 
@@ -1909,23 +2321,25 @@ uint64_t rpnPop(rpnStack_t * io_rpnStack)
  */
 void rpnDumpStack(rpnStack_t * i_rpnStack)
 {
-    #ifdef HWPEXECINITFILE_DEBUG2
 
-    IF_DBG2( ">> fapiHwpExecInitFile: rpnDumpStack: stack size = %d",
-             i_rpnStack->size() );
-
-    uint64_t l_val = 0;
-
-    for (ssize_t i = i_rpnStack->size() - 1; i >= 0; i--)
+    if ( i_rpnStack != NULL )
     {
-        l_val = i_rpnStack->at(i);
-        IF_DBG2( "Stack: Value = 0x%llX",
-                 l_val );
+        FAPI_IMP( ">> fapiHwpExecInitFile: rpnDumpStack: %p, stack size = %d",
+                  i_rpnStack,
+                  i_rpnStack->size() );
+
+        uint64_t l_val = 0;
+
+        for (ssize_t i = i_rpnStack->size() - 1; i >= 0; i--)
+        {
+            l_val = i_rpnStack->at(i);
+            FAPI_IMP( "Stack: Value = 0x%llX",
+                      l_val );
+        }
+
+        FAPI_IMP( "<< fapiHwpExecInitFile: rpnDumpStack" );
     }
 
-    IF_DBG2( "<< fapiHwpExecInitFile: rpnDumpStack" );
-
-   #endif
 }
 
 /** @brief Executes the unary operations - the ones with 1 operand.
@@ -1935,7 +2349,11 @@ void rpnDumpStack(rpnStack_t * i_rpnStack)
  * @param[in] i_any  Flag indicating if this is an ANY op
  * @return uint64_t  The result
  */
-uint64_t rpnUnaryOp(IfRpnOp i_op, uint64_t i_val, uint32_t i_any)
+uint64_t rpnUnaryOp(    IfRpnOp i_op,
+                        uint64_t i_val,
+                        uint32_t i_any,
+                        InitFileStats   &i_stats
+                        )
 {
     IF_DBG2( "fapiHwpExecInitFile: rpnUnaryOp" );
     uint64_t result = 0;
@@ -1955,7 +2373,8 @@ uint64_t rpnUnaryOp(IfRpnOp i_op, uint64_t i_val, uint32_t i_any)
     {
         FAPI_ERR( "fapiHwpExecInitFile: rpnUnaryOp: Invalid Op %u",
                   i_op );
-        fapiAssert(false);
+        // dump trace and register an error to be handled by caller.
+        i_stats.dump( );
     }
 
     return result;
@@ -1968,8 +2387,12 @@ uint64_t rpnUnaryOp(IfRpnOp i_op, uint64_t i_val, uint32_t i_any)
  * @param[in] uint64_t i_val2  The second operand
  * @return uint64_t            The result
  */
-uint64_t rpnBinaryOp(IfRpnOp i_op, uint64_t i_val1, uint64_t i_val2,
-                     uint32_t i_any)
+uint64_t rpnBinaryOp(   IfRpnOp i_op,
+                        uint64_t i_val1,
+                        uint64_t i_val2,
+                        uint32_t i_any,
+                        InitFileStats   &i_stats
+                        )
 {
     IF_DBG2( ">> fapiHwpExecInitFile: rpnBinaryOp 0x%X",
              i_op );
@@ -2036,10 +2459,14 @@ uint64_t rpnBinaryOp(IfRpnOp i_op, uint64_t i_val1, uint64_t i_val2,
                     FAPI_ERR( "fapiHwpExecInitFile: rpnBinaryOp: "
                               "Division by zero, i_val1 = 0x%llx",
                               i_val1 );
-                    fapiAssert(false);
+                    //  dump stats and flag an error to be handled by caller
+                    i_stats.dump();
+                    result  =   0;
                 }
-
-                result = i_val1 / i_val2;
+                else
+                {
+                    result = i_val1 / i_val2;
+                }
                 break;
 
             case (MOD):
@@ -2048,10 +2475,14 @@ uint64_t rpnBinaryOp(IfRpnOp i_op, uint64_t i_val1, uint64_t i_val2,
                     FAPI_ERR( "fapiHwpExecInitFile: rpnBinaryOp: "
                               "Mod by zero, i_val1 = 0x%llx",
                               i_val1 );
-                    fapiAssert(false);
+                    //  dump stats and register an error to be handled by caller
+                    i_stats.dump();
+                    result  =   0;
                 }
-
-                result = i_val1 % i_val2;
+                else
+                {
+                    result = i_val1 % i_val2;
+                }
                 break;
 
             case (SHIFTLEFT):
@@ -2073,7 +2504,9 @@ uint64_t rpnBinaryOp(IfRpnOp i_op, uint64_t i_val1, uint64_t i_val2,
             default:
               FAPI_ERR("fapiHwpExecInitFile: rpnBinaryOp, invalid operator %d",
                        i_op);
-              fapiAssert(false);
+              // dump trace and register an error to be handled by caller
+              i_stats.dump();
+              result    =   0;
               break;
         }
     }
@@ -2097,7 +2530,9 @@ uint64_t rpnBinaryOp(IfRpnOp i_op, uint64_t i_val1, uint64_t i_val2,
  */
 fapi::ReturnCode rpnDoPush(ifData_t & io_ifData, const uint16_t i_id,
                    uint32_t & io_any, const uint32_t i_targetNum,
-                   const uint16_t i_arrayIndex[MAX_ATTRIBUTE_ARRAY_DIMENSION])
+                   const uint16_t i_arrayIndex[MAX_ATTRIBUTE_ARRAY_DIMENSION],
+                           InitFileStats    &i_stats
+                   )
 {
     IF_DBG2( ">> fapiHwpExecInitFile: rpnDoPush: id 0x%X",
              i_id );
@@ -2110,7 +2545,13 @@ fapi::ReturnCode rpnDoPush(ifData_t & io_ifData, const uint16_t i_id,
 
         if (i_id & IF_ATTR_TYPE) //It's an attribute
         {
-            l_rc = getAttr(io_ifData, i_id, l_val, i_targetNum, i_arrayIndex);
+            l_rc = getAttr(io_ifData,
+                           i_id,
+                           l_val,
+                           i_targetNum,
+                           i_arrayIndex,
+                           i_stats
+                           );
             if (l_rc)
             {
               break;
@@ -2129,7 +2570,7 @@ fapi::ReturnCode rpnDoPush(ifData_t & io_ifData, const uint16_t i_id,
             //If it's not 'ANY'
             if (i_id != IF_VAL_ANY)
             {
-                l_rc = getLit(io_ifData, i_id, l_val);
+                l_rc = getLit(io_ifData, i_id, l_val, i_stats );
                 if (l_rc)
                 {
                   FAPI_ERR( "fapiHwpExecInitFile: rpnDoPush: "
@@ -2182,12 +2623,17 @@ fapi::ReturnCode rpnDoPush(ifData_t & io_ifData, const uint16_t i_id,
  * @param[in]     i_any        Set if ANY op
  * @return fapi::ReturnCode    Zero on success
  */
-fapi::ReturnCode rpnDoOp(rpnStack_t * io_rpnStack, IfRpnOp i_op, uint32_t i_any)
+fapi::ReturnCode rpnDoOp(rpnStack_t * io_rpnStack,
+                         IfRpnOp i_op,
+                         uint32_t i_any,
+                         InitFileStats  &i_stats   )
 {
     IF_DBG2( ">> fapiHwpExecInitFile: rpnDoOp 0x%X",
              i_op );
 
+#ifdef HWPEXECINITFILE_DEBUG2
     rpnDumpStack(io_rpnStack);
+#endif
 
     fapi::ReturnCode l_rc = fapi::FAPI_RC_SUCCESS;
     uint64_t val1   = 0;
@@ -2216,48 +2662,80 @@ fapi::ReturnCode rpnDoOp(rpnStack_t * io_rpnStack, IfRpnOp i_op, uint32_t i_any)
         case (BITWISEOR):
 
             //pop the first value
-            val2 = rpnPop(io_rpnStack);
+            val2 = rpnPop(io_rpnStack, i_stats );
+            if ( !i_stats.ok() )
+            {
+                FAPI_ERR( "rpnPop failure" );
+                i_stats.generateError( l_rc );
+                break;
+            }
 
             //pop the second value
-            val1 = rpnPop(io_rpnStack);
+            val1 = rpnPop(io_rpnStack, i_stats );
+            if ( !i_stats.ok() )
+            {
+                FAPI_ERR( "rpnPop failure" );
+                i_stats.generateError( l_rc );
+                break;
+            }
 
             //Calculate the result
-            result = rpnBinaryOp(i_op, val1, val2, i_any);
+            result = rpnBinaryOp(i_op, val1, val2, i_any, i_stats );
+            if ( !i_stats.ok() )
+            {
+                FAPI_ERR( "rpnPop failure" );
+                i_stats.generateError( l_rc );
+                break;
+            }
 
             //Push the result onto the stack
-            rpnPush(io_rpnStack, result);
+            rpnPush(io_rpnStack, result );
 
             break;
 
         case (NOT):
 
             //Pop the value
-            val1 = rpnPop(io_rpnStack);
+            val1 = rpnPop(io_rpnStack, i_stats );
+            if ( !i_stats.ok() )
+            {
+                FAPI_ERR( "rpnPop failure" );
+                i_stats.generateError( l_rc );
+                break;
+            }
 
             //Calculate the result
-            result = rpnUnaryOp(i_op, val1, i_any);
+            result = rpnUnaryOp(i_op, val1, i_any, i_stats );
+            if ( !i_stats.ok() )
+            {
+                FAPI_ERR( "rpnPop failure" );
+                i_stats.generateError( l_rc );
+                break;
+            }
 
             //Push the result onto the stack
-            rpnPush(io_rpnStack, result);
+            rpnPush(io_rpnStack, result );
 
             break;
 
         case (FALSE_OP):
 
             result = 0;
-            rpnPush(io_rpnStack, result);
+            rpnPush(io_rpnStack, result );
             break;
 
         case (TRUE_OP):
 
            result = 1;
-           rpnPush(io_rpnStack, result);
+           rpnPush(io_rpnStack, result );
            break;
 
         default:
            FAPI_ERR( "fapiHwpExecInitFile: rpnDoOp: invalid op 0x%X",
                      i_op );
-           fapiAssert(false);
+           // dump trace & ffdc
+           i_stats.dump();
+           i_stats.generateError( l_rc );
            break;
     }
 
@@ -2274,6 +2752,7 @@ fapi::ReturnCode rpnDoOp(rpnStack_t * io_rpnStack, IfRpnOp i_op, uint32_t i_any)
  * @param[in]     i_expr      Expression to evaluate
  * @param[in]     i_len       Length of expression
  * @param[in]     i_hasExpr   True if EXPR column
+ * @param[in]     i_stats    ref to InitFileStatus object
  *
  * @return fapi::ReturnCode   Zero on success
  */
@@ -2281,7 +2760,8 @@ fapi::ReturnCode evalRpn( ifData_t & io_ifData,
                           char *i_expr,
                           uint32_t i_len,
                           const bool i_isColExpr,
-                          const bool i_hasExpr )
+                          const bool i_hasExpr,
+                          InitFileStats    &i_stats )
 {
     IF_DBG2( ">> fapiHwpExecInitFile: evalRpn" );
 
@@ -2333,8 +2813,12 @@ fapi::ReturnCode evalRpn( ifData_t & io_ifData,
 
                     if (l_targetId)
                     {
-                        // Retrieve the actual value for the target number (using it's id)
-                        l_rc = getLit(io_ifData,l_targetId,l_targetNum);
+                        // Retrieve the actual value for the target
+                        //  number (using it's id)
+                        l_rc = getLit(io_ifData,
+                                      l_targetId,
+                                      l_targetNum,
+                                      i_stats);
                         if (l_rc)
                         {
                             break;
@@ -2362,7 +2846,7 @@ fapi::ReturnCode evalRpn( ifData_t & io_ifData,
                     uint64_t l_tmpIdx = 0;
 
                     // Retrieve the actual value for the array index (using it's id)
-                    l_rc = getLit(io_ifData,l_arrayIdxId,l_tmpIdx);
+                    l_rc = getLit(io_ifData,l_arrayIdxId,l_tmpIdx, i_stats );
                     if (l_rc)
                     {
                         break;
@@ -2382,11 +2866,15 @@ fapi::ReturnCode evalRpn( ifData_t & io_ifData,
                               l_id,
                               l_any,
                               l_targetNum,
-                              l_arrayIndexs);
+                              l_arrayIndexs,
+                              i_stats );
         }
         else
         {
-            l_rc = rpnDoOp(io_ifData.rpnStack, l_op, l_any);
+            l_rc = rpnDoOp(io_ifData.rpnStack,
+                           l_op,
+                           l_any,
+                           i_stats );
         }
 
         if (l_rc)

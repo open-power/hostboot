@@ -156,5 +156,20 @@
     <rc>RC_TEST_WRONG_MCS_RETURNED</rc>
     <description>HWP Config Unit Test returned wrong MCS for memory buffer</description>
   </hwpError>
-  <!-- *********************************************************************** -->
+  <!-- ************************************************************ -->
+  <hwpError>
+    <rc>RC_INITFILE_EXECUTION_ERROR</rc>
+    <description>
+        The initFile has encountered an unusual error and dumped
+        error information.
+        See the FFDC and trace for diagnostic information.
+     </description>
+    <!-- Collect local FFDC -->
+    <ffdc>FFDC_SCOM_ADDRID</ffdc>
+    <ffdc>FFDC_SCOM_OFFSET</ffdc>
+    <ffdc>FFDC_SCOM_LEN</ffdc>
+    <ffdc>FFDC_COLUMN</ffdc>
+    <ffdc>FFDC_ROW</ffdc>
+  </hwpError>
+  <!-- ************************************************************ -->
 </hwpErrors>
