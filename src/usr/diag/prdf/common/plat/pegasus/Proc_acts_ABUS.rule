@@ -331,11 +331,185 @@ rule IoaFir
 
 group gIoaFir filter singlebit
 {
-#FIXME:A temp fix to generate error signature by setting bit 0
     /** IOAFIR[0]
-     *  ERROR
+     *  FIR_RX_INVALID_STATE_OR_PARITY_ERROR
      */
     (IoaFir, bit(0)) ? TBDDefaultCallout;
+
+    /** IOAFIR[1]
+     *  FIR_TX_INVALID_STATE_OR_PARITY_ERROR
+     */
+    (IoaFir, bit(1)) ? TBDDefaultCallout;
+
+    /** IOAFIR[2]
+     *  FIR_GCR_HANG_ERROR
+     */
+    (IoaFir, bit(2)) ? TBDDefaultCallout;
+
+    /** IOAFIR[3|4|5|6|7]
+     *  Reserved
+     */
+    (IoaFir, bit(3|4|5|6|7)) ? defaultMaskedError;
+
+    /** IOAFIR[8]
+     *  FIR_RX_BUS0_TRAINING_ERROR
+     */
+    (IoaFir, bit(8)) ? TBDDefaultCallout;
+
+    /** IOAFIR[9]
+     *  FIR_RX_BUS0_SPARE_DEPLOYED
+     */
+    (IoaFir, bit(9)) ? TBDDefaultCallout;
+
+    /** IOAFIR[10]
+     *  FIR_RX_BUS0_MAX_SPARES_EXCEEDED
+     */
+    (IoaFir, bit(10)) ? TBDDefaultCallout;
+
+    /** IOAFIR[11]
+     *  FIR_RX_BUS0_RECAL_OR_DYN_REPAIR_ERROR
+     */
+    (IoaFir, bit(11)) ? TBDDefaultCallout;
+
+    /** IOAFIR[12]
+     *  FIR_RX_BUS0_TOO_MANY_BUS_ERRORS
+     */
+    (IoaFir, bit(12)) ? TBDDefaultCallout;
+
+    /** IOAFIR[13|14|15]
+     *  Reserved
+     */
+    (IoaFir, bit(13|14|15)) ? defaultMaskedError;
+
+    /** IOAFIR[16]
+     *  FIR_RX_BUS1_TRAINING_ERROR
+     */
+    (IoaFir, bit(16)) ? TBDDefaultCallout;
+
+    /** IOAFIR[17]
+     *  FIR_RX_BUS1_SPARE_DEPLOYED
+     */
+    (IoaFir, bit(17)) ? TBDDefaultCallout;
+
+    /** IOAFIR[18]
+     *  FIR_RX_BUS1_MAX_SPARES_EXCEEDED
+     */
+    (IoaFir, bit(18)) ? TBDDefaultCallout;
+
+    /** IOAFIR[19]
+     *  FIR_RX_BUS1_RECAL_OR_DYN_REPAIR_ERROR
+     */
+    (IoaFir, bit(19)) ? TBDDefaultCallout;
+
+    /** IOAFIR[20]
+     *  FIR_RX_BUS1_TOO_MANY_BUS_ERRORS
+     */
+    (IoaFir, bit(20)) ? TBDDefaultCallout;
+
+    /** IOAFIR[21|22|23]
+     *  Reserved
+     */
+    (IoaFir, bit(21|22|23)) ? defaultMaskedError;
+
+    /** IOAFIR[24]
+     *  FIR_RX_BUS2_TRAINING_ERROR
+     */
+    (IoaFir, bit(24)) ? TBDDefaultCallout;
+
+    /** IOAFIR[25]
+     *  FIR_RX_BUS2_SPARE_DEPLOYED
+     */
+    (IoaFir, bit(25)) ? TBDDefaultCallout;
+
+    /** IOAFIR[26]
+     *  FIR_RX_BUS2_MAX_SPARES_EXCEEDED
+     */
+    (IoaFir, bit(26)) ? TBDDefaultCallout;
+
+    /** IOAFIR[27]
+     *  FIR_RX_BUS2_RECAL_OR_DYN_REPAIR_ERROR
+     */
+    (IoaFir, bit(27)) ? TBDDefaultCallout;
+
+    /** IOAFIR[28]
+     *  FIR_RX_BUS2_TOO_MANY_BUS_ERRORS
+     */
+    (IoaFir, bit(28)) ? TBDDefaultCallout;
+
+    /** IOAFIR[29|30|31]
+     *  Reserved
+     */
+    (IoaFir, bit(29|30|31)) ? defaultMaskedError;
+
+    /** IOAFIR[32]
+     *  FIR_RX_BUS3_TRAINING_ERROR
+     */
+    (IoaFir, bit(32)) ? TBDDefaultCallout;
+
+    /** IOAFIR[33]
+     *  FIR_RX_BUS3_SPARE_DEPLOYED
+     */
+    (IoaFir, bit(33)) ? TBDDefaultCallout;
+
+    /** IOAFIR[34]
+     *  FIR_RX_BUS3_MAX_SPARES_EXCEEDED
+     */
+    (IoaFir, bit(34)) ? TBDDefaultCallout;
+
+    /** IOAFIR[35]
+     *  FIR_RX_BUS3_RECAL_OR_DYN_REPAIR_ERROR
+     */
+    (IoaFir, bit(35)) ? TBDDefaultCallout;
+
+    /** IOAFIR[36]
+     *  FIR_RX_BUS3_TOO_MANY_BUS_ERRORS
+     */
+    (IoaFir, bit(36)) ? TBDDefaultCallout;
+
+    /** IOAFIR[37|38|39]
+     *  Reserved
+     */
+    (IoaFir, bit(37|38|39)) ? defaultMaskedError;
+
+    /** IOAFIR[40]
+     *  FIR_RX_BUS4_TRAINING_ERROR
+     */
+    (IoaFir, bit(40)) ? TBDDefaultCallout;
+
+    /** IOAFIR[41]
+     *  FIR_RX_BUS4_SPARE_DEPLOYED
+     */
+    (IoaFir, bit(41)) ? TBDDefaultCallout;
+
+    /** IOAFIR[42]
+     *  FIR_RX_BUS4_MAX_SPARES_EXCEEDED
+     */
+    (IoaFir, bit(42)) ? TBDDefaultCallout;
+
+    /** IOAFIR[43]
+     *  FIR_RX_BUS4_RECAL_OR_DYN_REPAIR_ERROR
+     */
+    (IoaFir, bit(43)) ? TBDDefaultCallout;
+
+    /** IOAFIR[44]
+     *  FIR_RX_BUS4_TOO_MANY_BUS_ERRORS
+     */
+    (IoaFir, bit(44)) ? TBDDefaultCallout;
+
+    /** IOAFIR[45|46|47]
+     *  Reserved
+     */
+    (IoaFir, bit(45|46|47)) ? TBDDefaultCallout;
+
+    /** IOAFIR[48]
+     *  FIR_SCOMFIR_ERROR
+     */
+    (IoaFir, bit(48)) ? TBDDefaultCallout;
+
+    /** IOAFIR[49]
+     *  FIR_SCOMFIR_ERROR_CLONE
+     */
+    (IoaFir, bit(49)) ? TBDDefaultCallout;
 };
 
 ################################################################################

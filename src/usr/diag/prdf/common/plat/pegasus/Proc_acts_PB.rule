@@ -197,11 +197,200 @@ rule NxDmaEngFir
 group gNxDmaEngFir filter singlebit
 {
 # FIXME - Get confirmation from HW team to see how this FIR is wired.
-#         Also, a temp fix to generate error signature by setting bit 0
     /** NXDMAENGFIR[0]
-     *  ERROR
+     *  Reserved
      */
-    (NxDmaEngFir, bit(0)) ? TBDDefaultCallout;
+    (NxDmaEngFir, bit(0)) ? defaultMaskedError;
+
+    /** NXDMAENGFIR[1]
+     *  ICS invalid state error FIR bit
+     */
+    (NxDmaEngFir, bit(1)) ? TBDDefaultCallout;
+
+    /** NXDMAENGFIR[2|3]
+     *  Reserved
+     */
+    (NxDmaEngFir, bit(2|3)) ? defaultMaskedError;
+
+    /** NXDMAENGFIR[4]
+     *  Channel 0 842 array corrected ECC error
+     */
+    (NxDmaEngFir, bit(4)) ? TBDDefaultCallout;
+
+    /** NXDMAENGFIR[5]
+     *  Channel 0 842 array uncorrectable ECC error
+     */
+    (NxDmaEngFir, bit(5)) ? TBDDefaultCallout;
+
+    /** NXDMAENGFIR[6]
+     *  Channel 1 842 array corrected ECC error
+     */
+    (NxDmaEngFir, bit(6)) ? TBDDefaultCallout;
+
+    /** NXDMAENGFIR[7]
+     *  Channel 1 842 array uncorrectable ECC error
+     */
+    (NxDmaEngFir, bit(7)) ? TBDDefaultCallout;
+
+    /** NXDMAENGFIR[8]
+     *  DMA non-zero CSB CC detected
+     */
+    (NxDmaEngFir, bit(8)) ? TBDDefaultCallout;
+
+    /** NXDMAENGFIR[9]
+     *  DMA array correctable ECC error
+     */
+    (NxDmaEngFir, bit(9)) ? TBDDefaultCallout;
+
+    /** NXDMAENGFIR[10]
+     *  DMA outbound write/inbound read correctable ECC error
+     */
+    (NxDmaEngFir, bit(10)) ? TBDDefaultCallout;
+
+    /** NXDMAENGFIR[11]
+     *  Channel 5 AMF array corrected ECC error
+     */
+    (NxDmaEngFir, bit(11)) ? TBDDefaultCallout;
+
+    /** NXDMAENGFIR[12]
+     *  Channel 6 AMF array corrected ECC error
+     */
+    (NxDmaEngFir, bit(12)) ? TBDDefaultCallout;
+
+    /** NXDMAENGFIR[13]
+     *  Channel 7 AMF array corrected ECC error
+     */
+    (NxDmaEngFir, bit(13)) ? TBDDefaultCallout;
+
+    /** NXDMAENGFIR[14]
+     *  Error from other SCOM satellites
+     */
+    (NxDmaEngFir, bit(14)) ? TBDDefaultCallout;
+
+    /** NXDMAENGFIR[15]
+     *  DMA invalid state error
+     */
+    (NxDmaEngFir, bit(15)) ? TBDDefaultCallout;
+
+    /** NXDMAENGFIR[16]
+     *  DMA invalid state error
+     */
+    (NxDmaEngFir, bit(16)) ? TBDDefaultCallout;
+
+    /** NXDMAENGFIR[17]
+     *  DMA array uncorrectable ECC error
+     */
+    (NxDmaEngFir, bit(17)) ? TBDDefaultCallout;
+
+    /** NXDMAENGFIR[18]
+     *  DMA outbound write/inbound read uncorrectable ECC error
+     */
+    (NxDmaEngFir, bit(18)) ? TBDDefaultCallout;
+
+    /** NXDMAENGFIR[19]
+     *  DMA inbound read error
+     */
+    (NxDmaEngFir, bit(19)) ? TBDDefaultCallout;
+
+    /** NXDMAENGFIR[20]
+     *  Channel 0 invalid state error
+     */
+    (NxDmaEngFir, bit(20)) ? TBDDefaultCallout;
+
+    /** NXDMAENGFIR[21]
+     *  Channel 1 invalid state error
+     */
+    (NxDmaEngFir, bit(21)) ? TBDDefaultCallout;
+
+    /** NXDMAENGFIR[22]
+     *  Channel 2 invalid state error
+     */
+    (NxDmaEngFir, bit(22)) ? TBDDefaultCallout;
+
+    /** NXDMAENGFIR[23]
+     *  Channel 3 invalid state error
+     */
+    (NxDmaEngFir, bit(23)) ? TBDDefaultCallout;
+
+    /** NXDMAENGFIR[24]
+     *  Channel 4 invalid state error
+     */
+    (NxDmaEngFir, bit(24)) ? TBDDefaultCallout;
+
+    /** NXDMAENGFIR[25]
+     *  Channel 5 invalid state error
+     */
+    (NxDmaEngFir, bit(25)) ? TBDDefaultCallout;
+
+    /** NXDMAENGFIR[26]
+     *  Channel 6 invalid state error
+     */
+    (NxDmaEngFir, bit(26)) ? TBDDefaultCallout;
+
+    /** NXDMAENGFIR[27]
+     *  Channel 7 invalid state error
+     */
+    (NxDmaEngFir, bit(27)) ? TBDDefaultCallout;
+
+    /** NXDMAENGFIR[28]
+     *  Channel 5 AMF array uncorrectable ECC error
+     */
+    (NxDmaEngFir, bit(28)) ? TBDDefaultCallout;
+
+    /** NXDMAENGFIR[29]
+     *  Channel 6 AMF array uncorrectable ECC error
+     */
+    (NxDmaEngFir, bit(29)) ? TBDDefaultCallout;
+
+    /** NXDMAENGFIR[30]
+     *  Channel 7 AMF array uncorrectable ECC error
+     */
+    (NxDmaEngFir, bit(30)) ? TBDDefaultCallout;
+
+    /** NXDMAENGFIR[31]
+     *  UE error on CRB(CSB address, CCB)
+     */
+    (NxDmaEngFir, bit(31)) ? TBDDefaultCallout;
+
+    /** NXDMAENGFIR[32]
+     *  SUE error on CRB(CSB address, CCB)
+     */
+    (NxDmaEngFir, bit(32)) ? TBDDefaultCallout;
+
+    /** NXDMAENGFIR[33]
+     *  SUE error on something other than CRB(CSB address, CCB)
+     */
+    (NxDmaEngFir, bit(33)) ? TBDDefaultCallout;
+
+    /** NXDMAENGFIR[34|35]
+     *  Reserved
+     */
+    (NxDmaEngFir, bit(34|35)) ? defaultMaskedError;
+
+    /** NXDMAENGFIR[36]
+     *  Channel 4 AMF array corrected ECC error
+     */
+    (NxDmaEngFir, bit(36)) ? TBDDefaultCallout;
+
+    /** NXDMAENGFIR[37]
+     *  Channel 4 AMF array uncorrectable ECC error
+     */
+    (NxDmaEngFir, bit(37)) ? TBDDefaultCallout;
+
+    /** NXDMAENGFIR[38|39|40|41|42|43|44|45|46|47]
+     *  Reserved
+     */
+    (NxDmaEngFir, bit(38|39|40|41|42|43|44|45|46|47)) ? defaultMaskedError;
+
+    /** NXDMAENGFIR[48]
+     *  FIR/SCOM satellite parity error
+     */
+    (NxDmaEngFir, bit(48)) ? TBDDefaultCallout;
+
+    /** NXDMAENGFIR[49]
+     *  FIR/SCOM satellite parity error FIR bit duplicate
+     */
+    (NxDmaEngFir, bit(49)) ? TBDDefaultCallout;
 };
 
 ################################################################################
@@ -217,11 +406,105 @@ rule NxCqFir
 group gNxCqFir filter singlebit
 {
 # FIXME - Get confirmation from HW team to see how this FIR is wired.
-#         Also, a temp fix to generate error signature by setting bit 0
     /** NXCQFIR[0]
-     *  ERROR
+     *  PBI internal parity error
      */
     (NxCqFir, bit(0)) ? TBDDefaultCallout;
+
+    /** NXCQFIR[1]
+     *  PowerBus CE error
+     */
+    (NxCqFir, bit(1)) ? TBDDefaultCallout;
+
+    /** NXCQFIR[2]
+     *  PowerBus UE error
+     */
+    (NxCqFir, bit(2)) ? TBDDefaultCallout;
+
+    /** NXCQFIR[3]
+     *  PowerBus SUE error
+     */
+    (NxCqFir, bit(3)) ? TBDDefaultCallout;
+
+    /** NXCQFIR[4]
+     *  Inbound array CE error
+     */
+    (NxCqFir, bit(4)) ? TBDDefaultCallout;
+
+    /** NXCQFIR[5]
+     *  Inbound array UE error
+     */
+    (NxCqFir, bit(5)) ? TBDDefaultCallout;
+
+    /** NXCQFIR[6]
+     *  PowerBus data hang error
+     */
+    (NxCqFir, bit(6)) ? TBDDefaultCallout;
+
+    /** NXCQFIR[7]
+     *  PowerBus command hang error
+     */
+    (NxCqFir, bit(7)) ? TBDDefaultCallout;
+
+    /** NXCQFIR[8]
+     *  PowerBus read address error
+     */
+    (NxCqFir, bit(8)) ? TBDDefaultCallout;
+
+    /** NXCQFIR[9]
+     *  PowerBus write address error
+     */
+    (NxCqFir, bit(9)) ? TBDDefaultCallout;
+
+    /** NXCQFIR[10]
+     *  PowerBus miscellaneous error
+     */
+    (NxCqFir, bit(10)) ? TBDDefaultCallout;
+
+    /** NXCQFIR[11]
+     *  MMIO BAR parity error
+     */
+    (NxCqFir, bit(11)) ? TBDDefaultCallout;
+
+    /** NXCQFIR[12]
+     *  CRB kill ISN received while holding ISN with UE error
+     */
+    (NxCqFir, bit(12)) ? TBDDefaultCallout;
+
+    /** NXCQFIR[13]
+     *  ACK_DEAD cresp received by read command
+     */
+    (NxCqFir, bit(13)) ? TBDDefaultCallout;
+
+    /** NXCQFIR[14]
+     *  ACK_DEAD cresp received by write command
+     */
+    (NxCqFir, bit(14)) ? TBDDefaultCallout;
+
+    /** NXCQFIR[15]
+     *  Link check aborted while waiting on data
+     */
+    (NxCqFir, bit(15)) ? TBDDefaultCallout;
+
+    /** NXCQFIR[16]
+     *  Hang poll time expired on internal transfer
+     */
+    (NxCqFir, bit(16)) ? TBDDefaultCallout;
+
+    /** NXCQFIR[17]
+     *  A write occurred to a secure register when it wasn't enabled
+     */
+    (NxCqFir, bit(17)) ? TBDDefaultCallout;
+
+    /** NXCQFIR[18]
+     *  FIR/SCOM satellite parity error
+     */
+    (NxCqFir, bit(18)) ? TBDDefaultCallout;
+
+    /** NXCQFIR[19]
+     *  FIR/SCOM satellite parity error duplicate
+     */
+    (NxCqFir, bit(19)) ? TBDDefaultCallout;
 };
 
 ################################################################################
@@ -2440,11 +2723,184 @@ rule IomcFir_1
 
 group gIomcFir_1 filter singlebit
 {
-# FIXME:A temp fix to generate error signature by setting bit 0
     /** IOMCFIR_1[0]
-     *  ERROR
+     *  FIR_RX_INVALID_STATE_OR_PARITY_ERROR
      */
     (IomcFir_1, bit(0)) ? TBDDefaultCallout;
+
+    /** IOMCFIR_1[1]
+     *  FIR_TX_INVALID_STATE_OR_PARITY_ERROR
+     */
+    (IomcFir_1, bit(1)) ? TBDDefaultCallout;
+
+    /** IOMCFIR_1[2]
+     *  FIR_GCR_HANG_ERROR
+     */
+    (IomcFir_1, bit(2)) ? TBDDefaultCallout;
+
+    /** IOMCFIR_1[3|4|5|6|7]
+     *  Reserved
+     */
+    (IomcFir_1, bit(3|4|5|6|7)) ? defaultMaskedError;
+
+    /** IOMCFIR_1[8]
+     *  FIR_RX_BUS0_TRAINING_ERROR
+     */
+    (IomcFir_1, bit(8)) ? TBDDefaultCallout;
+
+    /** IOMCFIR_1[9]
+     *  FIR_RX_BUS0_SPARE_DEPLOYED
+     */
+    (IomcFir_1, bit(9)) ? TBDDefaultCallout;
+
+    /** IOMCFIR_1[10]
+     *  FIR_RX_BUS0_MAX_SPARES_EXCEEDED
+     */
+    (IomcFir_1, bit(10)) ? TBDDefaultCallout;
+
+    /** IOMCFIR_1[11]
+     *  FIR_RX_BUS0_RECAL_OR_DYN_REPAIR_ERROR
+     */
+    (IomcFir_1, bit(11)) ? TBDDefaultCallout;
+
+    /** IOMCFIR_1[12]
+     *  FIR_RX_BUS0_TOO_MANY_BUS_ERRORS
+     */
+    (IomcFir_1, bit(12)) ? TBDDefaultCallout;
+
+    /** IOMCFIR_1[13|14|15]
+     *  Reserved
+     */
+    (IomcFir_1, bit(13|14|15)) ? defaultMaskedError;
+
+    /** IOMCFIR_1[16]
+     *  FIR_RX_BUS1_TRAINING_ERROR
+     */
+    (IomcFir_1, bit(16)) ? TBDDefaultCallout;
+
+    /** IOMCFIR_1[17]
+     *  FIR_RX_BUS1_SPARE_DEPLOYED
+     */
+    (IomcFir_1, bit(17)) ? TBDDefaultCallout;
+
+    /** IOMCFIR_1[18]
+     *  FIR_RX_BUS1_MAX_SPARES_EXCEEDED
+     */
+    (IomcFir_1, bit(18)) ? TBDDefaultCallout;
+
+    /** IOMCFIR_1[19]
+     *  FIR_RX_BUS1_RECAL_OR_DYN_REPAIR_ERROR
+     */
+    (IomcFir_1, bit(19)) ? TBDDefaultCallout;
+
+    /** IOMCFIR_1[20]
+     *  FIR_RX_BUS1_TOO_MANY_BUS_ERRORS
+     */
+    (IomcFir_1, bit(20)) ? TBDDefaultCallout;
+
+    /** IOMCFIR_1[21|22|23]
+     *  Reserved
+     */
+    (IomcFir_1, bit(21|22|23)) ? defaultMaskedError;
+
+    /** IOMCFIR_1[24]
+     *  FIR_RX_BUS2_TRAINING_ERROR
+     */
+    (IomcFir_1, bit(24)) ? TBDDefaultCallout;
+
+    /** IOMCFIR_1[25]
+     *  FIR_RX_BUS2_SPARE_DEPLOYED
+     */
+    (IomcFir_1, bit(25)) ? TBDDefaultCallout;
+
+    /** IOMCFIR_1[26]
+     *  FIR_RX_BUS2_MAX_SPARES_EXCEEDED
+     */
+    (IomcFir_1, bit(26)) ? TBDDefaultCallout;
+
+    /** IOMCFIR_1[27]
+     *  FIR_RX_BUS2_RECAL_OR_DYN_REPAIR_ERROR
+     */
+    (IomcFir_1, bit(27)) ? TBDDefaultCallout;
+
+    /** IOMCFIR_1[28]
+     *  FIR_RX_BUS2_TOO_MANY_BUS_ERRORS
+     */
+    (IomcFir_1, bit(28)) ? TBDDefaultCallout;
+
+    /** IOMCFIR_1[29|30|31]
+     *  Reserved
+     */
+    (IomcFir_1, bit(29|30|31)) ? defaultMaskedError;
+
+    /** IOMCFIR_1[32]
+     *  FIR_RX_BUS3_TRAINING_ERROR
+     */
+    (IomcFir_1, bit(32)) ? TBDDefaultCallout;
+
+    /** IOMCFIR_1[33]
+     *  FIR_RX_BUS3_SPARE_DEPLOYED
+     */
+    (IomcFir_1, bit(33)) ? TBDDefaultCallout;
+
+    /** IOMCFIR_1[34]
+     *  FIR_RX_BUS3_MAX_SPARES_EXCEEDED
+     */
+    (IomcFir_1, bit(34)) ? TBDDefaultCallout;
+
+    /** IOMCFIR_1[35]
+     *  FIR_RX_BUS3_RECAL_OR_DYN_REPAIR_ERROR
+     */
+    (IomcFir_1, bit(35)) ? TBDDefaultCallout;
+
+    /** IOMCFIR_1[36]
+     *  FIR_RX_BUS3_TOO_MANY_BUS_ERRORS
+     */
+    (IomcFir_1, bit(36)) ? TBDDefaultCallout;
+
+    /** IOMCFIR_1[37|38|39]
+     *  Reserved
+     */
+    (IomcFir_1, bit(37|38|39)) ? defaultMaskedError;
+
+    /** IOMCFIR_1[40]
+     *  FIR_RX_BUS4_TRAINING_ERROR
+     */
+    (IomcFir_1, bit(40)) ? TBDDefaultCallout;
+
+    /** IOMCFIR_1[41]
+     *  FIR_RX_BUS4_SPARE_DEPLOYED
+     */
+    (IomcFir_1, bit(41)) ? TBDDefaultCallout;
+
+    /** IOMCFIR_1[42]
+     *  FIR_RX_BUS4_MAX_SPARES_EXCEEDED
+     */
+    (IomcFir_1, bit(42)) ? TBDDefaultCallout;
+
+    /** IOMCFIR_1[43]
+     *  FIR_RX_BUS4_RECAL_OR_DYN_REPAIR_ERROR
+     */
+    (IomcFir_1, bit(43)) ? TBDDefaultCallout;
+
+    /** IOMCFIR_1[44]
+     *  FIR_RX_BUS4_TOO_MANY_BUS_ERRORS
+     */
+    (IomcFir_1, bit(44)) ? TBDDefaultCallout;
+
+    /** IOMCFIR_1[45|46|47]
+     *  Reserved
+     */
+    (IomcFir_1, bit(45|46|47)) ? defaultMaskedError;
+    /** IOMCFIR_1[48]
+     *  FIR_SCOMFIR_ERROR
+     */
+    (IomcFir_1, bit(48)) ? TBDDefaultCallout;
+
+    /** IOMCFIR_1[49]
+     *  FIR_SCOMFIR_ERROR_CLONE
+     */
+    (IomcFir_1, bit(49)) ? TBDDefaultCallout;
 };
 
 ################################################################################

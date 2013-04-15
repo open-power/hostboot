@@ -265,9 +265,184 @@ rule IoxFir_1
 group gIoxFir_1 filter singlebit
 {
     /** IOXFIR_1[0]
-     *  TBD
+     *  FIR_RX_INVALID_STATE_OR_PARITY_ERROR
      */
     (IoxFir_1, bit(0)) ? TBDDefaultCallout;
+
+    /** IOXFIR_1[1]
+     *  FIR_TX_INVALID_STATE_OR_PARITY_ERROR
+     */
+    (IoxFir_1, bit(1)) ? TBDDefaultCallout;
+
+    /** IOXFIR_1[2]
+     *  FIR_GCR_HANG_ERROR
+     */
+    (IoxFir_1, bit(2)) ? TBDDefaultCallout;
+
+    /** IOXFIR_1[3|4|5|6|7]
+     *  Reserved
+     */
+    (IoxFir_1, bit(3|4|5|6|7)) ? defaultMaskedError;
+
+    /** IOXFIR_1[8]
+     *  FIR_RX_BUS0_TRAINING_ERROR
+     */
+    (IoxFir_1, bit(8)) ? TBDDefaultCallout;
+
+    /** IOXFIR_1[9]
+     *  FIR_RX_BUS0_SPARE_DEPLOYED
+     */
+    (IoxFir_1, bit(9)) ? TBDDefaultCallout;
+
+    /** IOXFIR_1[10]
+     *  FIR_RX_BUS0_MAX_SPARES_EXCEEDED
+     */
+    (IoxFir_1, bit(10)) ? TBDDefaultCallout;
+
+    /** IOXFIR_1[11]
+     *  FIR_RX_BUS0_RECAL_OR_DYN_REPAIR_ERROR
+     */
+    (IoxFir_1, bit(11)) ? TBDDefaultCallout;
+
+    /** IOXFIR_1[12]
+     *  FIR_RX_BUS0_TOO_MANY_BUS_ERRORS
+     */
+    (IoxFir_1, bit(12)) ? TBDDefaultCallout;
+
+    /** IOXFIR_1[13|14|15]
+     *  Reserved
+     */
+    (IoxFir_1, bit(13|14|15)) ? defaultMaskedError;
+
+    /** IOXFIR_1[16]
+     *  FIR_RX_BUS1_TRAINING_ERROR
+     */
+    (IoxFir_1, bit(16)) ? TBDDefaultCallout;
+
+    /** IOXFIR_1[17]
+     *  FIR_RX_BUS1_SPARE_DEPLOYED
+     */
+    (IoxFir_1, bit(17)) ? TBDDefaultCallout;
+
+    /** IOXFIR_1[18]
+     *  FIR_RX_BUS1_MAX_SPARES_EXCEEDED
+     */
+    (IoxFir_1, bit(18)) ? TBDDefaultCallout;
+
+    /** IOXFIR_1[19]
+     *  FIR_RX_BUS1_RECAL_OR_DYN_REPAIR_ERROR
+     */
+    (IoxFir_1, bit(19)) ? TBDDefaultCallout;
+
+    /** IOXFIR_1[20]
+     *  FIR_RX_BUS1_TOO_MANY_BUS_ERRORS
+     */
+    (IoxFir_1, bit(20)) ? TBDDefaultCallout;
+
+    /** IOXFIR_1[21|22|23]
+     *  Reserved
+     */
+    (IoxFir_1, bit(21|22|23)) ? defaultMaskedError;
+
+    /** IOXFIR_1[24]
+     *  FIR_RX_BUS2_TRAINING_ERROR
+     */
+    (IoxFir_1, bit(24)) ? TBDDefaultCallout;
+
+    /** IOXFIR_1[25]
+     *  FIR_RX_BUS2_SPARE_DEPLOYED
+     */
+    (IoxFir_1, bit(25)) ? TBDDefaultCallout;
+
+    /** IOXFIR_1[26]
+     *  FIR_RX_BUS2_MAX_SPARES_EXCEEDED
+     */
+    (IoxFir_1, bit(26)) ? TBDDefaultCallout;
+
+    /** IOXFIR_1[27]
+     *  FIR_RX_BUS2_RECAL_OR_DYN_REPAIR_ERROR
+     */
+    (IoxFir_1, bit(27)) ? TBDDefaultCallout;
+
+    /** IOXFIR_1[28]
+     *  FIR_RX_BUS2_TOO_MANY_BUS_ERRORS
+     */
+    (IoxFir_1, bit(28)) ? TBDDefaultCallout;
+
+    /** IOXFIR_1[29|30|31]
+     *  Reserved
+     */
+    (IoxFir_1, bit(29|30|31)) ? defaultMaskedError;
+
+    /** IOXFIR_1[32]
+     *  FIR_RX_BUS3_TRAINING_ERROR
+     */
+    (IoxFir_1, bit(32)) ? TBDDefaultCallout;
+
+    /** IOXFIR_1[33]
+     *  FIR_RX_BUS3_SPARE_DEPLOYED
+     */
+    (IoxFir_1, bit(33)) ? TBDDefaultCallout;
+
+    /** IOXFIR_1[34]
+     *  FIR_RX_BUS3_MAX_SPARES_EXCEEDED
+     */
+    (IoxFir_1, bit(34)) ? TBDDefaultCallout;
+
+    /** IOXFIR_1[35]
+     *  FIR_RX_BUS3_RECAL_OR_DYN_REPAIR_ERROR
+     */
+    (IoxFir_1, bit(35)) ? TBDDefaultCallout;
+
+    /** IOXFIR_1[36]
+     *  FIR_RX_BUS3_TOO_MANY_BUS_ERRORS
+     */
+    (IoxFir_1, bit(36)) ? TBDDefaultCallout;
+
+    /** IOXFIR_1[37|38|39]
+     *  Reserved
+     */
+    (IoxFir_1, bit(37|38|39)) ? defaultMaskedError;
+
+    /** IOXFIR_1[40]
+     *  FIR_RX_BUS4_TRAINING_ERROR
+     */
+    (IoxFir_1, bit(40)) ? TBDDefaultCallout;
+
+    /** IOXFIR_1[41]
+     *  FIR_RX_BUS4_SPARE_DEPLOYED
+     */
+    (IoxFir_1, bit(41)) ? TBDDefaultCallout;
+
+    /** IOXFIR_1[42]
+     *  FIR_RX_BUS4_MAX_SPARES_EXCEEDED
+     */
+    (IoxFir_1, bit(42)) ? TBDDefaultCallout;
+
+    /** IOXFIR_1[43]
+     *  FIR_RX_BUS4_RECAL_OR_DYN_REPAIR_ERROR
+     */
+    (IoxFir_1, bit(43)) ? TBDDefaultCallout;
+
+    /** IOXFIR_1[44]
+     *  FIR_RX_BUS4_TOO_MANY_BUS_ERRORS
+     */
+    (IoxFir_1, bit(44)) ? TBDDefaultCallout;
+
+    /** IOXFIR_1[45|46|47]
+     *  Reserved
+     */
+    (IoxFir_1, bit(45|46|47)) ? defaultMaskedError;
+
+    /** IOXFIR_1[48]
+     *  FIR_SCOMFIR_ERROR
+     */
+    (IoxFir_1, bit(48)) ? TBDDefaultCallout;
+
+    /** IOXFIR_1[49]
+     *  FIR_SCOMFIR_ERROR_CLONE
+     */
+    (IoxFir_1, bit(49)) ? TBDDefaultCallout;
 };
 
 ################################################################################
