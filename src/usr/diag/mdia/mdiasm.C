@@ -188,7 +188,6 @@ errlHndl_t StateMachine::run(const WorkFlowAssocMap & i_list)
         if((*wit)->log)
         {
             errlCommit((*wit)->log, MDIA_COMP_ID);
-            // TODO (component, actions, etc)
         }
     }
 
@@ -202,6 +201,8 @@ void StateMachine::setup(const WorkFlowAssocMap & i_list)
     // clear out any properties from a previous run
 
     reset();
+
+    AttributeTraits<TARGETING::ATTR_EFF_DIMM_SIZE>::Type effDimmSizeAttr;
 
     mutex_lock(&iv_mutex);
 
@@ -222,7 +223,27 @@ void StateMachine::setup(const WorkFlowAssocMap & i_list)
         p->log = 0;
         p->timer = 0;
         p->restartCommand = false;
-        p->memSize = 0; // TODO
+        p->memSize = 0;
+
+        // get the memsize attached to this mba
+
+        if(it->first->tryGetAttr<TARGETING::ATTR_EFF_DIMM_SIZE>(
+                    effDimmSizeAttr))
+        {
+            for(uint64_t port = 0;
+                    port < sizeof(effDimmSizeAttr)/sizeof(*effDimmSizeAttr);
+                    ++port)
+            {
+                for(uint64_t dimm = 0;
+                        dimm <
+                        sizeof(effDimmSizeAttr[0])/sizeof(*effDimmSizeAttr[0]);
+                        ++dimm)
+                {
+                    p->memSize += effDimmSizeAttr[port][dimm];
+                }
+            }
+        }
+
         p->data = NULL;
         p->chipUnit = it->first->getAttr<ATTR_CHIP_UNIT>();
 
@@ -322,8 +343,11 @@ bool StateMachine::scheduleWorkItem(WorkFlowProperties & i_wfp)
         // the priority is the number of iterations
         // through the memory multiplied by the memory size
 
-        // TODO - multiply by memory size
-        uint64_t priority = getRemainingWorkItems(i_wfp);
+        // multiply by memory size
+        // assume 1 GB DIMMS if figuring out the memory
+        // size failed
+        uint64_t priority = getRemainingWorkItems(i_wfp)
+            * (i_wfp.memSize ? i_wfp.memSize : 1);
 
         if(!iv_tp)
         {
