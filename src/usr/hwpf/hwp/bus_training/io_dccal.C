@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: io_dccal.C,v 1.18 2013/01/26 17:35:09 jaswamin Exp $
+// $Id: io_dccal.C,v 1.19 2013/04/12 20:39:08 thomsen Exp $
 // *!***************************************************************************
 // *! (C) Copyright International Business Machines Corp. 1997, 1998
 // *!           All Rights Reserved -- Property of IBM
@@ -39,6 +39,7 @@
 //------------------------------------------------------------------------------
 // Version:|Author: | Date:  | Comment:
 // --------|--------|--------|--------------------------------------------------
+//   1.19  |thomsen |04/12/11| Added delay after starting zcal and offset cancellation to work around a GCR parity error bug (HW242564)
 //   1.18  |jaswamin|01/26/11| Commented out offset cal for X and A bus
 //   1.0   |varkeykv|09/27/11|Initial check in . Have to modify targets once bus target is defined and available.Not tested in any way other than in unit SIM IOTK
 //   1.1   |varkeykv |17/11/11|Code cleanup . Fixed header files. Changed fAPI API
@@ -156,6 +157,7 @@ ReturnCode run_offset_cal(const Target &target,io_interface_t master_interface,u
             return(rc);
         }
         rc=GCR_write(*target_ptr,chip_interface,rx_training_start_pg,group,0,set_bits ,clear_bits);if (rc) {return(rc);}
+	    fapiDelay(100000000,10000000); //Wait 100ms for zcal to complete before polling the status register
       
         // Poll for the done bit
         rc=GCR_read(*target_ptr,master_interface,rx_training_status_pg ,group,0,data_buffer);if (rc) {return(rc);} // have to add support for field parsing
@@ -317,7 +319,7 @@ ReturnCode run_zcal(const Target& target,io_interface_t master_interface,uint32_
                                 FAPI_DBG("IO_DCCAL : Starting Impedance Calibration ");
                                 //Get initial settings for debug purpose
                                 run_zcal_debug(*target_ptr,chip_interface,group);
-                                // Need to first set start bit to 0 to enable rise to 1 transition , also skip readback since this is WO field
+                                // Clear zcal_start. Need to first set start bit to 0 to enable rise to 1 transition.
                                 rc=GCR_write(*target_ptr,chip_interface,tx_impcal_pb,group,0,set_bits,clear_bits,true);if (rc) {return(rc);}
                                 bits=tx_zcal_req;
                                 rc_ecmd|=set_bits.insert(bits,0,16);
@@ -330,6 +332,7 @@ ReturnCode run_zcal(const Target& target,io_interface_t master_interface,uint32_
                                 }
                                 // Skip a readback and verify 
                                 rc=GCR_write(*target_ptr,chip_interface,tx_impcal_pb,group,0,set_bits,clear_bits,true);if (rc) {return(rc);}
+                                fapiDelay(20000000,10000000); //Wait 20ms for zcal to complete before polling the status register
                                 // Poll for the done bit
                                 rc=GCR_read(*target_ptr,chip_interface,tx_impcal_pb,group,0,data_buffer);if (rc) {return(rc);} // have to add support for field parsing
                                 int done_bit=tx_zcal_done;
