@@ -321,11 +321,9 @@ fapi::ReturnCode fapiGetChildChiplets(
                     TARGETING::HwasState l_state =
                         (*chipletIter)->getAttr<TARGETING::ATTR_HWAS_STATE>();
 
-                    if ((fapi::TARGET_STATE_PRESENT == i_state) &&
-                        !l_state.present)
-                    {
-                        continue;
-                    }
+                    // HWPs/FAPI considers partial good chiplets as present, but
+                    // firmware considers them not-present. Return all chiplets
+                    // in the model when caller requests PRESENT
                     if ((fapi::TARGET_STATE_FUNCTIONAL == i_state) &&
                         !l_state.functional)
                     {
