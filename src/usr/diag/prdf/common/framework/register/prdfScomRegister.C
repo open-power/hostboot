@@ -113,12 +113,9 @@ const BIT_STRING_CLASS *ScomRegister::GetBitString( ATTENTION_TYPE i_type )const
 BIT_STRING_CLASS & ScomRegister::AccessBitString( )
 {
     bool l_readStat = false;
-    //Expectation is, caller shall first call Read( ) and then AccessBitString.
-    //This leaves an opportunity of mistake. One may call AccessBitString
-    //without calling Read() first. As a result, a stray entry in cache gets
-    //created which shall never be in sync with hardware. Calling Read( ) before
-    //readCache( ) inside function eliminates this scenario.
-    Read( );
+    //FIXME RTC 51455 We need to find a way to make AccessBitString independent
+    //of Read. Calling Read inside this function shall make it read even
+    //write only registers. This operation shall fail on actual hardware.
     return ( readCache( l_readStat ) );
 
 }
