@@ -102,7 +102,6 @@ TASK_ENTRY_MACRO( IStepDispatcher::getTheInstance().init );
 IStepDispatcher::IStepDispatcher ()
     : iv_workerMsg( NULL )
 {
-    SPLESS::initIStepMode();
     mutex_init( &iv_bkPtMutex );
     mutex_init( &iv_syncMutex );
     mutex_init( &iv_stepMutex );
@@ -157,7 +156,7 @@ void IStepDispatcher::init ( errlHndl_t &io_rtaskRetErrl )
 
     do
     {
-        if( !(SPLESS::SPLessAttached()) )
+        if( !spLess() )
         {
             //  register message Q with FSP Mailbox - only if Fsp attached.
             err = MBOX::msgq_register( MBOX::HB_ISTEP_MSGQ,
@@ -174,8 +173,8 @@ void IStepDispatcher::init ( errlHndl_t &io_rtaskRetErrl )
                                          iv_msgQ );
         assert( l_workerTid > 0 );
 
-        // Check for SPLess operation
-        if( SPLESS::SPLessAttached() )
+        // Check for SPLess operation in istep mode
+        if( spLess() && getIStepMode())
         {
             // SPless user console is attached,
             //  launch SPTask.
@@ -213,26 +212,29 @@ void IStepDispatcher::init ( errlHndl_t &io_rtaskRetErrl )
             TRACFCOMP( g_trac_initsvc,
                        "IStep run all" );
 
-            // Read the attribute indicating if the FSP has attribute overrides
-            // and get the overrides if it does
-            uint8_t l_attrOverridesExist = 0;
-            TARGETING::Target* l_pTopLevelTarget = NULL;
-            TARGETING::targetService().getTopLevelTarget(l_pTopLevelTarget);
+            if(!spLess())
+            {
+                // Read the attribute indicating if the FSP has overrides
+                // and get the overrides if it does
+                uint8_t l_attrOverridesExist = 0;
+                TARGETING::Target* l_pTopLevelTarget = NULL;
+                TARGETING::targetService().getTopLevelTarget(l_pTopLevelTarget);
 
-            if (l_pTopLevelTarget == NULL)
-            {
-                TRACFCOMP(g_trac_initsvc,
-                          "init: ERROR: Top level target not found");
-            }
-            else
-            {
-                l_attrOverridesExist = l_pTopLevelTarget->
-                    getAttr<TARGETING::ATTR_PLCK_IPL_ATTR_OVERRIDES_EXIST>();
-            }
+                if (l_pTopLevelTarget == NULL)
+                {
+                    TRACFCOMP(g_trac_initsvc,
+                              "init: ERROR: Top level target not found");
+                }
+                else
+                {
+                    l_attrOverridesExist = l_pTopLevelTarget->
+                      getAttr<TARGETING::ATTR_PLCK_IPL_ATTR_OVERRIDES_EXIST>();
+                }
 
-            if (l_attrOverridesExist)
-            {
-                fapi::theAttrOverrideSync().getAttrOverridesFromFsp();
+                if (l_attrOverridesExist)
+                {
+                    fapi::theAttrOverrideSync().getAttrOverridesFromFsp();
+                }
             }
 
             // Execute all Isteps sequentially in 'normal' mode
@@ -889,7 +891,7 @@ void IStepDispatcher::handleBreakpoint ( uint32_t i_info )
     myMsg->data[1] = 0x0;
     myMsg->extra_data = NULL;
 
-    if( !(SPLESS::SPLessAttached()) )
+    if( !spLess() )
     {
         // FSP Attached
         // Wait for Fsp to respond.

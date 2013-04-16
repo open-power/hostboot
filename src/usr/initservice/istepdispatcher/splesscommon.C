@@ -1,26 +1,25 @@
-/*  IBM_PROLOG_BEGIN_TAG
- *  This is an automatically generated prolog.
- *
- *  $Source: src/usr/initservice/istepdispatcher/splesscommon.C $
- *
- *  IBM CONFIDENTIAL
- *
- *  COPYRIGHT International Business Machines Corp. 2012
- *
- *  p1
- *
- *  Object Code Only (OCO) source materials
- *  Licensed Internal Code Source Materials
- *  IBM HostBoot Licensed Internal Code
- *
- *  The source code for this program is not published or other-
- *  wise divested of its trade secrets, irrespective of what has
- *  been deposited with the U.S. Copyright Office.
- *
- *  Origin: 30
- *
- *  IBM_PROLOG_END_TAG
- */
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/usr/initservice/istepdispatcher/splesscommon.C $          */
+/*                                                                        */
+/* IBM CONFIDENTIAL                                                       */
+/*                                                                        */
+/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/*                                                                        */
+/* p1                                                                     */
+/*                                                                        */
+/* Object Code Only (OCO) source materials                                */
+/* Licensed Internal Code Source Materials                                */
+/* IBM HostBoot Licensed Internal Code                                    */
+/*                                                                        */
+/* The source code for this program is not published or otherwise         */
+/* divested of its trade secrets, irrespective of what has been           */
+/* deposited with the U.S. Copyright Office.                              */
+/*                                                                        */
+/* Origin: 30                                                             */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
 /**
  *  @file splesscommon.C
  *
@@ -72,7 +71,6 @@ using namespace   TARGETING;
 extern  uint64_t    g_SPLess_Command_Reg;
 extern  uint64_t    g_SPLess_Status_Reg;
 
-extern  uint64_t    g_SPLess_IStepMode_Reg;
 
 /**
  * @def g_SPLess_pMasterProcChip
@@ -85,74 +83,6 @@ TARGETING::Target* g_SPLess_pMasterProcChip =   NULL;
 /******************************************************************************/
 //  SPLESS support functions
 /******************************************************************************/
-
-bool    SPLessAttached( )
-{
-    bool    l_rc  =   false;
-
-    // check for IStep Mode signature(s)
-    if (    g_SPLess_IStepMode_Reg == ISTEP_MODE_SPLESS_SIGNATURE )
-    {
-        l_rc    =   true;
-    }
-
-    return l_rc;
-}
-
-
-void initIStepMode( )
-{
-    using namespace TARGETING;
-    uint64_t    l_readData      =   0;
-    Target      *l_pTopLevel    =   NULL;
-    TargetService& l_targetService = targetService();
-
-    (void) l_targetService.getTopLevelTarget(l_pTopLevel);
-    if (l_pTopLevel == NULL)
-    {
-        TRACFCOMP( INITSERVICE::g_trac_initsvc, "Top level handle was NULL" );
-        // drop through, default of attribute is is false
-    }
-    else
-    {
-        TRACDCOMP( INITSERVICE::g_trac_initsvc,
-                "initIStepMode entry: ISTEP_MODE attribute = %x",
-                l_pTopLevel->getAttr<ATTR_ISTEP_MODE>( ) );
-        // got a pointer to Targeting, complete setting the flag
-        l_readData  =   g_SPLess_IStepMode_Reg;
-
-        // Get the Thread 5 scratch reg
-        uint64_t t5ScratchVal = mmio_scratch_read( MMIO_SCRATCH_ISTEP_MODE );
-        TRACDCOMP( INITSERVICE::g_trac_initsvc,
-                   INFO_MRK"Thread 5 scratch reg val: 0x%08x",
-                   t5ScratchVal );
-        // Only need 1 bit.
-        t5ScratchVal = t5ScratchVal & 0x1;
-
-#ifdef  SPLESS_DEBUG
-        printk( "IStepMode Reg  = 0x%p, 0x%lx\n",
-                &g_SPLess_IStepMode_Reg,
-                l_readData );
-        printk( "Status Reg     = 0x%p\n",          &g_SPLess_Status_Reg );
-        printk( "Command Reg    = 0x%p\n",          &g_SPLess_Command_Reg );
-#endif
-        TRACDCOMP( INITSERVICE::g_trac_initsvc,
-                "IStepMode Reg = 0x%llx",
-                l_readData );
-
-        // check for IStep Mode signature(s)
-        if (    ( l_readData == ISTEP_MODE_SPLESS_SIGNATURE )
-             || ( 0x1 == t5ScratchVal ) )
-        {
-            l_pTopLevel->setAttr<ATTR_ISTEP_MODE> (true );
-
-            TRACDCOMP( INITSERVICE::g_trac_initsvc,
-                    "Signature or scratch reg set, ISTEP_MODE attr set = TRUE.",
-                    l_readData );
-        }
-    }
-
-}
 
 /******************************************************************************/
 //  SPLESS Command functions

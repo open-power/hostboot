@@ -238,7 +238,7 @@ sub readScom
     close OUTPUT;
 
     $result =~ s/.*0x//;
-    $result = pack "H*", $result;
+    $result = hex $result;
 
     return $result;
 }
@@ -257,9 +257,7 @@ sub writeScom
     my $size = shift;
     my $data = shift;
 
-    $data = unpack "H*", $result;
-
-    my $command = sprintf("putscom pu %x %s -quiet > /dev/null",
+    my $command = sprintf("putscom pu %x %x -quiet > /dev/null",
                           $addr, $data);
 
     system($command);
@@ -277,7 +275,7 @@ sub executeInstrCycles
 {
     my $cycles = shift;
 
-    system(sprintf "ecmddelay %dcycles", $cycles);
+    #No op on real HW
 }
 
 # @sub readyForInstructions

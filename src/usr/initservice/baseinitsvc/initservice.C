@@ -57,7 +57,6 @@ namespace   SPLESS
     //  allocate space for SPLess Command regs in the base image.
     uint64_t    g_SPLess_Command_Reg    =   0;
     uint64_t    g_SPLess_Status_Reg     =   0;
-    uint64_t    g_SPLess_IStepMode_Reg  =   0x123456789abcdef0;
 
 }
 //  -----   end namespace   SPLESS  ---------------------------------------

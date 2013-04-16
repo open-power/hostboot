@@ -6,7 +6,7 @@
 #
 # IBM CONFIDENTIAL
 #
-# COPYRIGHT International Business Machines Corp. 2011,2012
+# COPYRIGHT International Business Machines Corp. 2011,2013
 #
 # p1
 #
@@ -314,7 +314,6 @@ chomp $command;
 ##  Fetch the symbols we need from syms file
 ##  ---------------------------------------------------------------------------
 
-my  $IstepModeReg   =   getSymbol(  "SPLESS::g_SPLess_IStepMode_Reg" );
 my  $CommandReg     =   getSymbol(  "SPLESS::g_SPLess_Command_Reg" );
 my  $StatusReg      =   getSymbol(  "SPLESS::g_SPLess_Status_Reg" );
 
@@ -343,7 +342,6 @@ if  ( $opt_debug )
     print   STDERR  "hbCommand          =   $hbCommand\n";
 
     print   STDERR  "hbSymsFile         =   $hbSymsFile   \n" ;
-    print   STDERR  "IstepModeReg       =   $IstepModeReg \n" ;
     print   STDERR  "CommandReg         =   $CommandReg   \n" ;
     print   STDERR  "StatusReg          =   $StatusReg    \n" ;
     print   STDERR  "ShutDownFlag       =   $ShutDownFlag \n" ;
@@ -1008,7 +1006,6 @@ sub setMode( $ )
     my  $expected   =   0;
     my  $readybit   =   0;
     my  $result     =   0;
-    my  $hexstr     =   sprintf( "%x",$IstepModeReg );
     my  $resultRaw  =  0;
     my  $clearcmd   =  0;
 
@@ -1036,20 +1033,13 @@ sub setMode( $ )
        ( system( $clearcmd ) == 0 )
            or die "$clearcmd failed, $? : $! \n";
 
-        VBU_Cacheline::CLwrite( $hexstr, SPLESS_MODE_SIGNATURE );
+        print "Use attributes to control SPLess mode"
         $expected    =   1;
     }
     else
     {
         print "invalid setMode command: %s\n", $cmd ;
         return  -1;
-    }
-
-    if ( $opt_debug )
-    {
-        ##  readback and display
-        $result = VBU_Cacheline::CLread( $hexstr );
-        printf STDERR "===  istepmodereg readback:  0x%lx\n", $result ;
     }
 
     # Start instruction only for master thread 0

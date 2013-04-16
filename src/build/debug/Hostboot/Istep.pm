@@ -127,7 +127,6 @@ if ( !defined( $hbCount ) || ( $hbCount eq "" ) )
 }
 
 ## init global variables
-my  $IstepModeReg   =   "";
 my  $ShutDownFlag   =   "";
 my  $ShutDownSts    =   "";
 
@@ -169,7 +168,6 @@ sub main
     ##  Fetch the symbols we need from syms file
     ##  ---------------------------------------------------------------------------
 
-    $IstepModeReg   =   getSymbol(  "SPLESS::g_SPLess_IStepMode_Reg" );
     $CommandReg     =   getSymbol(  "SPLESS::g_SPLess_Command_Reg" );
     $StatusReg      =   getSymbol(  "SPLESS::g_SPLess_Status_Reg" );
 
@@ -277,7 +275,6 @@ sub main
         ::userDisplay   "command        =   \"$command\"\n";
 
         ::userDisplay   "g_SeqNum       =   ", sprintf("0x%x",$g_SeqNum),     "\n";
-        ::userDisplay   "IstepModeReg   =   ", sprintf("0x%x",$IstepModeReg), "\n";
         ::userDisplay   "CommandReg     =   ", sprintf("0x%x",$CommandReg),   "\n";
         ::userDisplay   "StatusReg      =   ", sprintf("0x%x",$StatusReg),    "\n";
         ::userDisplay   "ShutDownFlag   =   ", sprintf("0x%x",$ShutDownFlag), "\n";
@@ -583,40 +580,6 @@ sub isShutDown()
     return 0;
 }
 
-##
-##  Write to the IstepMode reg in memory.  This will not be changed to scom
-##
-##  @param[in]  -   64-bit value to write to the IstepModeReg
-##
-sub writeIstepModeReg( $ )
-{
-    my  $data   =   shift;
-
-    if ( $opt_debug )
-        {   ::userDisplay "=== writeIstepmodeReg ", sprintf("0x%x",$data), "\n"; }
-
-    ::write64( $IstepModeReg, $data );
-
-}
-
-
-##
-##  Read IStepModeReg   from memory.  This will not be changed to scom.
-##
-##  @return 64-bit value read from IStepModeReg
-##
-sub readIstepModeReg( )
-{
-    my  $data   =   0;
-
-    $data   =   ::read64( $IstepModeReg );
-
-    if ( $opt_debug )
-        {   ::userDisplay "=== readIstepmodeReg ", sprintf("0x%x",$data), "\n"; }
-
-    return  $data;
-}
-
 ##  --------------------------------------------------------------------
 ##  Write command reg
 ##
@@ -780,15 +743,20 @@ sub runIStep( $$ )
         if ( $taskStatus != 0 )
         {
             ::userDisplay   "Istep $stsIStep.$stsSubstep FAILED to launch, task status is $taskStatus\n" ;
+            exit;
         }
         else
         {
             ::userDisplay   "Istep $stsIStep.$stsSubstep $inList[$istep][$substep] returned Status: ",
-                            sprintf("%d",$istepStatus),
+                            sprintf("%x",$istepStatus),
                             "\n" ;
             if ( $istepStatus == 0xa )
             {
                 ::userDisplay   ":     not implemented yet.\n";
+            }
+            elsif ( $istepStatus != 0 )
+            {
+                exit;
             }
         }
         ::userDisplay   "------------------------------------------------------- SeqNum: $g_SeqNum\n";
@@ -911,7 +879,11 @@ sub setMode( $ )
 
     if ( $cmd eq "spless" )
     {
-        writeIstepModeReg( SPLESS_MODE_SIGNATURE );
+        ::userDisplay  "This command doesn't force HB into SPLESS mode anymore\n";
+        ::userDisplay  "It only establish SPLESS communication (clocks model in sim)\n";
+        ::userDisplay  "Use attributes to enter SPLESS mode\n";
+        ::userDisplay  "\tSP_FUNCTIONS:mailboxEnabled = 0b0\n";
+        ::userDisplay  "\tISTEP_MODE = 0x1\n";
         $expected    =   1;
     }
     else
@@ -919,21 +891,6 @@ sub setMode( $ )
         ::userDisplay   "invalid setMode command: $cmd\n" ;
         return  -1;
     }
-
-    if ( $opt_debug )
-    {
-        ##  readback and display
-        $result = readIstepModeReg( );
-        ::userDisplay   "=== IstepModeReg readback: ", sprintf("0x%x", $result), "\n" ;
-    }
-
-    ##  Clear status reg(s) before we start.  If the status reg is initialized
-    ##      to garbage, there is a chance that it will mistaken for the readybit
-    ::writeScom( MBOX_SCRATCH2, 8, 0 );             ## clear hi
-    ::writeScom( MBOX_SCRATCH1, 8, 0 );             ## clear lo
-
-    ##  Clear command reg as well.
-    ::writeScom( MBOX_SCRATCH3, 8, 0 );             ## clear cmd.
 
     ##  Loop, advancing clock, and wait for readybit
     $count  =   $hbCount ;

@@ -105,6 +105,10 @@
         <default>0</default>
     </attribute>
     <attribute>
+        <id>ISTEP_MODE</id>
+        <default>0x1</default>
+    </attribute>
+    <attribute>
         <id>SP_FUNCTIONS</id>
         <default>
             <field><id>fsiSlaveInit</id><value>1</value></field>
