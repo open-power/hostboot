@@ -87,6 +87,14 @@ TARGETING::TargetHandleList getConnectedDimms( TARGETING::TargetHandle_t i_mba,
                                                const CenRank & i_rank,
                                                uint8_t i_port );
 
+/**
+ * @param  i_mba  The target MBA.
+ * @param  i_port MBA port.
+ * @return A list of DIMMs connected to the MBA on given port.
+ */
+TARGETING::TargetHandleList getConnectedDimms( TARGETING::TargetHandle_t i_mba,
+                                               uint8_t i_port );
+
 } // end namespace CalloutUtil
 
 } // end namespace PRDF

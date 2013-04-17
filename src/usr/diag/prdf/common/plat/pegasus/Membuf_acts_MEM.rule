@@ -109,6 +109,7 @@ group gMemChipletSpa filter singlebit
 ################################################################################
 # MEM Chiplet LFIR
 ################################################################################
+# RAS spreadsheet: p8dd1_mss_FFDC_37_ reviewd.xls
 
 rule MemLFir
 {
@@ -122,52 +123,64 @@ group gMemLFir filter singlebit
     /** MEM_LFIR[0]
      *  CFIR internal parity error
      */
+    #TODO via RTC 23125
+    # bit is not defined in RAS spreadsheet
     (MemLFir, bit(0)) ? TBDDefaultCallout;
 
     /** MEM_LFIR[1]
      *  Local errors from GPIO (PCB error)
      */
-    (MemLFir, bit(1)) ? TBDDefaultCallout;
+    (MemLFir, bit(1)) ? defaultMaskedError;
 
     /** MEM_LFIR[2]
      *  Local errors from CC (PCB error)
      */
-    (MemLFir, bit(2)) ? TBDDefaultCallout;
+    (MemLFir, bit(2)) ? defaultMaskedError;
 
     /** MEM_LFIR[3]
      *  Local errors from CC (OPCG, parity, scan collision, ...)
      */
-    (MemLFir, bit(3)) ? TBDDefaultCallout;
+    (MemLFir, bit(3)) ? SelfMedThr1;
 
     /** MEM_LFIR[4]
      *  Local errors from PSC (PCB error)
      */
-    (MemLFir, bit(4)) ? TBDDefaultCallout;
+    (MemLFir, bit(4)) ? defaultMaskedError;
 
     /** MEM_LFIR[5]
      *  Local errors from PSC (parity error)
      */
-    (MemLFir, bit(5)) ? TBDDefaultCallout;
+    (MemLFir, bit(5)) ? defaultMaskedError;
 
     /** MEM_LFIR[6]
      *  Local errors from Thermal (parity error)
      */
-    (MemLFir, bit(6)) ? TBDDefaultCallout;
+    (MemLFir, bit(6)) ? defaultMaskedError;
 
     /** MEM_LFIR[7]
      *  Local errors from Thermal (PCB error)
      */
-    (MemLFir, bit(7)) ? TBDDefaultCallout;
+    (MemLFir, bit(7)) ? defaultMaskedError;
 
-    /** MEM_LFIR[8|9]
+    /** MEM_LFIR[8:10]
      *  Local errors from Thermal (Trip error)
      */
-    (MemLFir, bit(8|9)) ? TBDDefaultCallout;
+    (MemLFir, bit(8|9|10)) ? defaultMaskedError;
 
-    /** MEM_LFIR[10|11]
-     *  Local errors from Trace Array ( error)
+    /** MEM_LFIR[11:12]
+     *  Local errors from MBA01 Trace Array ( error)
      */
-    (MemLFir, bit(10|11)) ? TBDDefaultCallout;
+    (MemLFir, bit(11|12)) ? defaultMaskedError;
+
+    /** MEM_LFIR[13:14]
+     *  Local errors from MBA23 Trace Array ( error)
+     */
+    (MemLFir, bit(13|14)) ? defaultMaskedError;
+
+    /** MEM_LFIR[40]
+     *  Malfunction alert
+     */
+    (MemLFir, bit(40)) ? defaultMaskedError;
 };
 
 ################################################################################

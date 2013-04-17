@@ -44,6 +44,7 @@ group gTpChipletFir filter singlebit
 ################################################################################
 # TP Chiplet LFIR
 ################################################################################
+# RAS spreadsheet: p8dd1_mss_FFDC_37_ reviewd.xls
 
 rule TpLFir
 {
@@ -57,52 +58,64 @@ group gTpLFir filter singlebit
     /** TP_LFIR[0]
      *  CFIR internal parity error
      */
+    #TODO via RTC 23125
+    # bit is not defined in RAS spreadsheet
     (TpLFir, bit(0)) ? TBDDefaultCallout;
 
     /** TP_LFIR[1]
      *  Local errors from GPIO (PCB error)
      */
-    (TpLFir, bit(1)) ? TBDDefaultCallout;
+    (TpLFir, bit(1)) ? defaultMaskedError;
 
     /** TP_LFIR[2]
      *  Local errors from CC (PCB error)
      */
-    (TpLFir, bit(2)) ? TBDDefaultCallout;
+    (TpLFir, bit(2)) ? defaultMaskedError;
 
     /** TP_LFIR[3]
      *  Local errors from CC (OPCG, parity, scan collision, ...)
      */
-    (TpLFir, bit(3)) ? TBDDefaultCallout;
+    (TpLFir, bit(3)) ? SelfMedThr1;
 
     /** TP_LFIR[4]
      *  Local errors from PSC (PCB error)
      */
-    (TpLFir, bit(4)) ? TBDDefaultCallout;
+    (TpLFir, bit(4)) ? defaultMaskedError;
 
     /** TP_LFIR[5]
      *  Local errors from PSC (parity error)
      */
-    (TpLFir, bit(5)) ? TBDDefaultCallout;
+    (TpLFir, bit(5)) ? defaultMaskedError;
 
     /** TP_LFIR[6]
      *  Local errors from Thermal (parity error)
      */
-    (TpLFir, bit(6)) ? TBDDefaultCallout;
+    (TpLFir, bit(6)) ? defaultMaskedError;
 
     /** TP_LFIR[7]
      *  Local errors from Thermal (PCB error)
      */
-    (TpLFir, bit(7)) ? TBDDefaultCallout;
+    (TpLFir, bit(7)) ? defaultMaskedError;
 
-    /** TP_LFIR[8|9]
+    /** TP_LFIR[8:10]
      *  Local errors from Thermal (Trip error)
      */
-    (TpLFir, bit(8|9)) ? TBDDefaultCallout;
+    (TpLFir, bit(8|9|10)) ? defaultMaskedError;
 
-    /** TP_LFIR[10|11]
+    /** TP_LFIR[11:12]
      *  Local errors from Trace Array ( error)
      */
-    (TpLFir, bit(10|11)) ? TBDDefaultCallout;
+    (TpLFir, bit(11|12)) ? defaultMaskedError;
+
+    /** TP_LFIR[13:15]
+     *  Local errors from ITR
+     */
+    (TpLFir, bit(13|14|15)) ? defaultMaskedError;
+
+    /** TP_LFIR[16:18]
+     *  Local errors from PIB
+     */
+    (TpLFir, bit(16|17|18)) ? defaultMaskedError;
 
     /** TP_LFIR[19]
      *  local errors from nest PLL

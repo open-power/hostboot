@@ -45,6 +45,10 @@ using namespace PlatServices;
 
 namespace Mba
 {
+// Forward Declarations
+
+int32_t CalloutMbaAndDimm( ExtensibleChip * i_chip,
+                           STEP_CODE_DATA_STRUCT & i_sc, uint32_t i_port );
 
 //##############################################################################
 //
@@ -106,6 +110,58 @@ int32_t MaintCmdComplete( ExtensibleChip * i_mbaChip,
     #undef PRDF_FUNC
 }
 PRDF_PLUGIN_DEFINE( Mba, MaintCmdComplete );
+
+/**
+ * @brief  Plugin to add MBA and Dimms behind port 0 to callout list.
+ * @param  i_chip   mba chip
+ * @param  i_sc     The step code data struct.
+ * @return SUCCESS
+ */
+int32_t CalloutMbaAndDimmOnPort0( ExtensibleChip * i_chip,
+                           STEP_CODE_DATA_STRUCT & i_sc )
+{
+    return CalloutMbaAndDimm( i_chip, i_sc, 0);
+}
+PRDF_PLUGIN_DEFINE( Mba, CalloutMbaAndDimmOnPort0 );
+
+/**
+ * @brief  Plugin to add MBA and Dimms behind port 1 to callout list.
+ * @param  i_chip   mba chip
+ * @param  i_sc     The step code data struct.
+ * @return SUCCESS
+ */
+int32_t CalloutMbaAndDimmOnPort1( ExtensibleChip * i_chip,
+                           STEP_CODE_DATA_STRUCT & i_sc )
+{
+    return CalloutMbaAndDimm( i_chip, i_sc, 1);
+}
+PRDF_PLUGIN_DEFINE( Mba, CalloutMbaAndDimmOnPort1 );
+
+/**
+ * @brief  Plugin to add MBA and Dimms behind given port to callout list.
+ * @param  i_chip   mba chip
+ * @param  i_sc     The step code data struct.
+ * @param  i_port   Port Number.
+ * @return SUCCESS
+ */
+int32_t CalloutMbaAndDimm( ExtensibleChip * i_chip,
+                           STEP_CODE_DATA_STRUCT & i_sc, uint32_t i_port )
+{
+    using namespace TARGETING;
+    using namespace CalloutUtil;
+    int32_t o_rc = SUCCESS;
+    TargetHandle_t mbaTarget = i_chip->GetChipHandle();
+
+    TargetHandleList calloutList = getConnectedDimms( mbaTarget, i_port );
+    i_sc.service_data->SetCallout( mbaTarget, MRU_LOW );
+
+    for ( TargetHandleList::iterator it = calloutList.begin();
+          it != calloutList.end(); it++)
+    {
+       i_sc.service_data->SetCallout( *it,MRU_HIGH );
+    }
+    return o_rc;
+}
 
 } // end namespace Mba
 

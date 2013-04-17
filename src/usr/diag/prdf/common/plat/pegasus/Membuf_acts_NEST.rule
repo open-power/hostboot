@@ -86,6 +86,7 @@ group gNestChipletFir filter singlebit
 ################################################################################
 # NEST Chiplet LFIR
 ################################################################################
+# RAS spreadsheet: p8dd1_mss_FFDC_37_ reviewd.xls
 
 rule NestLFir
 {
@@ -99,52 +100,63 @@ group gNestLFir filter singlebit
     /** NEST_LFIR[0]
      *  CFIR internal parity error
      */
+    #TODO via RTC 23125
+    # bit is not defined in RAS spreadsheet
     (NestLFir, bit(0)) ? TBDDefaultCallout;
 
     /** NEST_LFIR[1]
      *  Local errors from GPIO (PCB error)
      */
-    (NestLFir, bit(1)) ? TBDDefaultCallout;
+    (NestLFir, bit(1)) ? defaultMaskedError;
 
     /** NEST_LFIR[2]
      *  Local errors from CC (PCB error)
      */
-    (NestLFir, bit(2)) ? TBDDefaultCallout;
+    (NestLFir, bit(2)) ? defaultMaskedError;
 
     /** NEST_LFIR[3]
      *  Local errors from CC (OPCG, parity, scan collision, ...)
      */
-    (NestLFir, bit(3)) ? TBDDefaultCallout;
+    (NestLFir, bit(3)) ? SelfMedThr1;
 
     /** NEST_LFIR[4]
      *  Local errors from PSC (PCB error)
      */
-    (NestLFir, bit(4)) ? TBDDefaultCallout;
+    (NestLFir, bit(4)) ? defaultMaskedError;
 
     /** NEST_LFIR[5]
      *  Local errors from PSC (parity error)
      */
-    (NestLFir, bit(5)) ? TBDDefaultCallout;
+    (NestLFir, bit(5)) ? defaultMaskedError;
 
+    #TODO via RTC 23125
+    # bit is defined in RAS spreadsheet but some question are present there.
     /** NEST_LFIR[6]
      *  Local errors from Thermal (parity error)
      */
-    (NestLFir, bit(6)) ? TBDDefaultCallout;
+    (NestLFir, bit(6)) ? SelfMedThr1;
 
+    #TODO via RTC 23125
+    # bit is defined in RAS spreadsheet but some question are present there.
     /** NEST_LFIR[7]
      *  Local errors from Thermal (PCB error)
      */
-    (NestLFir, bit(7)) ? TBDDefaultCallout;
+    (NestLFir, bit(7)) ? SelfMedThr1;
 
-    /** NEST_LFIR[8|9]
+    /** NEST_LFIR[8:10]
      *  Local errors from Thermal (Trip error)
      */
-    (NestLFir, bit(8|9)) ? TBDDefaultCallout;
+    (NestLFir, bit(8|9|10)) ? defaultMaskedError;
 
-    /** NEST_LFIR[10|11]
+    /** NEST_LFIR[11:12]
      *  Local errors from Trace Array ( error)
      */
-    (NestLFir, bit(10|11)) ? TBDDefaultCallout;
+    (NestLFir, bit(11|12)) ? defaultMaskedError;
+
+    /** NEST_LFIR[40]
+     *  Malfunction alert
+     */
+    (NestLFir, bit(40)) ? defaultMaskedError;
 };
 
 ################################################################################
@@ -468,6 +480,7 @@ group gScacFir filter singlebit
 ################################################################################
 #  NEST Chiplet MBIFIR
 ################################################################################
+# RAS spreadsheet: p8dd1_mss_FFDC_37_ reviewd.xls
 
 rule MbiFir
 {
@@ -478,126 +491,132 @@ rule MbiFir
 
 group gMbiFir filter singlebit
 {
-    /** MbiFir[0]
+    /** MBIFIR[0]
      *  MBIFIRQ_REPLAY_TIMEOUT
      */
-    (MbiFir, bit(0)) ? TBDDefaultCallout;
+    (MbiFir, bit(0)) ? calloutDmiBusTh1;
 
-    /** MbiFir[1]
+    /** MBIFIR[1]
      *  MBIFIRQ_CHANNEL_FAIL
      */
-    (MbiFir, bit(1)) ? TBDDefaultCallout;
+    (MbiFir, bit(1)) ? defaultMaskedError;
 
-    /** MbiFir[2]
+    /** MBIFIR[2]
      *  MBIFIRQ_CRC_ERROR
      */
-    (MbiFir, bit(2)) ? TBDDefaultCallout;
+    (MbiFir, bit(2)) ? defaultMaskedError;
 
-    /** MbiFir[3]
+    /** MBIFIR[3]
      *  MBIFIRQ_FRAME_NOACK
      */
-    (MbiFir, bit(3)) ? TBDDefaultCallout;
+    (MbiFir, bit(3)) ? defaultMaskedError;
 
-    /** MbiFir[4]
+    /** MBIFIR[4]
      *  MBIFIRQ_SEQID_OUT_OF_ORDER
      */
-    (MbiFir, bit(4)) ? TBDDefaultCallout;
+    (MbiFir, bit(4)) ? calloutDmiBusLvl2Th1;
 
-    /** MbiFir[5]
+    /** MBIFIR[5]
      *  MBIFIRQ_REPLAY_BUFFER_ECC_CE
      */
-    (MbiFir, bit(5)) ? TBDDefaultCallout;
+    (MbiFir, bit(5)) ? SelfMedThr5PerHour;
 
-    /** MbiFir[6]
+    /** MBIFIR[6]
      *  MBIFIRQ_REPLAY_BUFFER_ECC_UE
      */
-    (MbiFir, bit(6)) ? TBDDefaultCallout;
+    (MbiFir, bit(6)) ? SelfMedThr1;
 
-    /** MbiFir[7]
+    /** MBIFIR[7]
      *  MBIFIRQ_MBI_STATE_MACHINE_TIMEOUT
      */
-    (MbiFir, bit(7)) ? TBDDefaultCallout;
+    (MbiFir, bit(7)) ? defaultMaskedError;
 
-    /** MbiFir[8]
+    /** MBIFIR[8]
      *  MBIFIRQ_MBI_INTERNAL_CONTROL_PARITY_ERROR
      */
-    (MbiFir, bit(8)) ? TBDDefaultCallout;
+    (MbiFir, bit(8)) ? SelfMedThr1;
 
-    /** MbiFir[9]
+    /** MBIFIR[9]
      *  MBIFIRQ_MBI_DATA_FLOW_PARITY_ERROR
      */
-    (MbiFir, bit(9)) ? TBDDefaultCallout;
+    (MbiFir, bit(9)) ? SelfMedThr1;
 
-    /** MbiFir[10]
+    /** MBIFIR[10]
      *  MBIFIRQ_CRC_PERFORMANCE_DEGRADATION
      */
-    (MbiFir, bit(10)) ? TBDDefaultCallout;
+    # TODO RTC 23125. In RAS spreadsheet, threshold value is not clear
+    (MbiFir, bit(10)) ? calloutDmiBus;
 
-    /** MbiFir[11]
+    /** MBIFIR[11]
      *  MBIFIRQ_HOST_MC_GLOBAL_CHECKSTOP
      */
-    (MbiFir, bit(11)) ? TBDDefaultCallout;
+    (MbiFir, bit(11)) ? defaultMaskedError;
 
-    /** MbiFir[12]
+    /** MBIFIR[12]
      *  MBIFIRQ_HOST_MC_TRACESTOP
      */
-    (MbiFir, bit(12)) ? TBDDefaultCallout;
+    (MbiFir, bit(12)) ? defaultMaskedError;
 
-    /** MbiFir[13]
+    /** MBIFIR[13]
      *  MBIFIRQ_CHANNEL_INTERLOCK_FAIL
      */
-    (MbiFir, bit(13)) ? TBDDefaultCallout;
+    (MbiFir, bit(13)) ? defaultMaskedError;
 
-    /** MbiFir[14]
+    /** MBIFIR[14]
      *  MBIFIRQ_HOST_MC_LOCAL_CHECKSTOP
      */
-    (MbiFir, bit(14)) ? TBDDefaultCallout;
+    (MbiFir, bit(14)) ? defaultMaskedError;
 
-    /** MbiFir[15]
+    /** MBIFIR[15]
      *  MBIFIRQ_FRTL_CONTER_OVERFLOW
      */
-    (MbiFir, bit(15)) ? TBDDefaultCallout;
+    (MbiFir, bit(15)) ? defaultMaskedError;
 
-    /** MbiFir[16]
+    /** MBIFIR[16]
      *  MBIFIRQ_SCOM_REGISTER_PARITY_ERROR
      */
-    (MbiFir, bit(16)) ? TBDDefaultCallout;
+    (MbiFir, bit(16)) ? SelfMedThr1;
 
-    /** MbiFir[17]
+    /** MBIFIR[17]
      *  MBIFIRQ_IO_FAULT: IO to MBI
      */
-    (MbiFir, bit(17)) ? TBDDefaultCallout;
+    (MbiFir, bit(17)) ? defaultMaskedError;
 
-    /** MbiFir[18]
+    /** MBIFIR[18]
      *  MBIFIRQ_MULTIPLE_REPLAY
      */
-    (MbiFir, bit(18)) ? TBDDefaultCallout;
+    (MbiFir, bit(18)) ? defaultMaskedError;
 
-    /** MbiFir[19]
+    /** MBIFIR[19]
      *  MBIFIRQ_MBICFG_PARITY_SCOM_ERROR
      */
-    (MbiFir, bit(19)) ? TBDDefaultCallout;
+    (MbiFir, bit(19)) ? SelfMedThr1;
 
-    /** MbiFir[20]
+    /** MBIFIR[20]
      *  MBIFIRQ_BUFFER_OVERRUN_ERROR
      */
-    (MbiFir, bit(20)) ? TBDDefaultCallout;
+    (MbiFir, bit(20)) ? calloutDmiBusTh1;
 
-    /** MbiFir[25]
+    /** MBIFIR[21:24]
+     *  Reserved
+     */
+    (MbiFir, bit(21|22|23|24)) ? defaultMaskedError;
+
+    /** MBIFIR[25]
      *  MBIFIRQ_INTERNAL_SCOM_ERROR_CLONE
      */
-    (MbiFir, bit(25)) ? TBDDefaultCallout;
+    (MbiFir, bit(25)) ? defaultMaskedError;
 
-    /** MbiFir[26]
+    /** MBIFIR[26]
      *  MBIFIRQ_INTERNAL_SCOM_ERROR_CLONE_COPY
      */
-    (MbiFir, bit(26)) ? TBDDefaultCallout;
+    (MbiFir, bit(26)) ? defaultMaskedError;
 };
 
 ################################################################################
 #  NEST Chiplet MBSFIR
 ################################################################################
-
+# RAS spreadsheet: p8dd1_mss_FFDC_37_ reviewd.xls
 rule MbsFir
 {
     CHECK_STOP:  MBSFIR & ~MBSFIR_MASK & ~MBSFIR_ACT0 & ~MBSFIR_ACT1;
@@ -610,162 +629,165 @@ group gMbsFir filter singlebit
     /** MBSFIR[0]
      *  MBS_FIR_REG_HOST_PROTOCOL_ERROR
      */
-    (MbsFir, bit(0)) ? TBDDefaultCallout;
+    (MbsFir, bit(0)) ? calloutDmiBusTh1;
 
     /** MBSFIR[1]
      *  MBS_FIR_REG_INT_PROTOCOL_ERROR
      */
-    (MbsFir, bit(1)) ? TBDDefaultCallout;
+    (MbsFir, bit(1)) ? SelfMedThr1;
 
     /** MBSFIR[2]
      *  MBS_FIR_REG_INVALID_ADDRESS_ERROR
      */
-    (MbsFir, bit(2)) ? TBDDefaultCallout;
+    (MbsFir, bit(2)) ? callout2ndLvlMed;
 
     /** MBSFIR[3]
      *  MBS_FIR_REG_EXTERNAL_TIMEOUT
      */
-    (MbsFir, bit(3)) ? TBDDefaultCallout;
+    (MbsFir, bit(3)) ? CalloutMcsHighAndThr1;
 
     /** MBSFIR[4]
      *  MBS_FIR_REG_INTERNAL_TIMEOUT
      */
-    (MbsFir, bit(4)) ? TBDDefaultCallout;
+    (MbsFir, bit(4)) ? SelfMedThr1;
 
     /** MBSFIR[5]
      *  MBS_FIR_REG_INT_BUFFER_CE
      */
-    (MbsFir, bit(5)) ? TBDDefaultCallout;
+    (MbsFir, bit(5)) ? SelfMedThr32PerDay;
 
     /** MBSFIR[6]
      *  MBS_FIR_REG_INT_BUFFER_UE
      */
-    (MbsFir, bit(6)) ? TBDDefaultCallout;
+    (MbsFir, bit(6)) ? SelfMedThr1;
 
     /** MBSFIR[7]
      *  MBS_FIR_REG_INT_BUFFER_SUE
      */
-    (MbsFir, bit(7)) ? TBDDefaultCallout;
+    (MbsFir, bit(7)) ? defaultMaskedError;
 
     /** MBSFIR[8]
      *  MBS_FIR_REG_INT_PARITY_ERROR
      */
-    (MbsFir, bit(8)) ? TBDDefaultCallout;
+    (MbsFir, bit(8)) ? SelfMedThr1;
 
     /** MBSFIR[9]
      *  MBS_FIR_REG_CACHE_SRW_CE
      */
+    #TODO via RTC 22872 ( L4 Line Delete )
     (MbsFir, bit(9)) ? TBDDefaultCallout;
 
     /** MBSFIR[10]
      *  MBS_FIR_REG_CACHE_SRW_UE
      */
-    (MbsFir, bit(10)) ? TBDDefaultCallout;
+    (MbsFir, bit(10)) ? SelfMedThr1;
 
     /** MBSFIR[11]
      *  MBS_FIR_REG_CACHE_SRW_SUE
      */
-    (MbsFir, bit(11)) ? TBDDefaultCallout;
+    (MbsFir, bit(11)) ? defaultMaskedError;
 
     /** MBSFIR[12]
      *  MBS_FIR_REG_CACHE_CO_CE
      */
+    #TODO via RTC 22872 ( L4 Line Delete )
     (MbsFir, bit(12)) ? TBDDefaultCallout;
 
     /** MBSFIR[13]
      *  MBS_FIR_REG_CACHE_CO_UE
      */
-    (MbsFir, bit(13)) ? TBDDefaultCallout;
+    (MbsFir, bit(13)) ? SelfMedThr1;
 
     /** MBSFIR[14]
      *  MBS_FIR_REG_CACHE_CO_SUE
      */
-    (MbsFir, bit(14)) ? TBDDefaultCallout;
+    (MbsFir, bit(14)) ? defaultMaskedError;
 
     /** MBSFIR[15]
      *  MBS_FIR_REG_DIR_CE
      */
-    (MbsFir, bit(15)) ? TBDDefaultCallout;
+    (MbsFir, bit(15)) ? SelfMedThr32PerDay;
 
     /** MBSFIR[16]
      *  MBS_FIR_REG_DIR_UE
      */
-    (MbsFir, bit(16)) ? TBDDefaultCallout;
+    (MbsFir, bit(16)) ? SelfMedThr1;
 
     /** MBSFIR[17]
      *  MBS_FIR_REG_DIR_MEMBER_DELETED
      */
-    (MbsFir, bit(17)) ? TBDDefaultCallout;
+    (MbsFir, bit(17)) ? defaultMaskedError;
 
     /** MBSFIR[18]
      *  MBS_FIR_REG_DIR_ALL_MEMBERS_DELETED
      */
-    (MbsFir, bit(18)) ? TBDDefaultCallout;
+    (MbsFir, bit(18)) ? SelfMedThr1;
 
     /** MBSFIR[19]
      *  MBS_FIR_REG_LRU_ERROR
      */
-    (MbsFir, bit(19)) ? TBDDefaultCallout;
+    (MbsFir, bit(19)) ? SelfMedThr32PerDay;
 
     /** MBSFIR[20]
      *  MBS_FIR_REG_EDRAM_ERROR
      */
-    (MbsFir, bit(20)) ? TBDDefaultCallout;
+    (MbsFir, bit(20)) ? SelfMedThr1;
 
     /** MBSFIR[21]
      *  MBS_FIR_REG_EMERGENCY_THROTTLE_SET
      */
-    (MbsFir, bit(21)) ? TBDDefaultCallout;
+    (MbsFir, bit(21)) ? defaultMaskedError;
 
     /** MBSFIR[22]
      *  MBS_FIR_REG_HOST_INBAND_READ_ERROR
      */
-    (MbsFir, bit(22)) ? TBDDefaultCallout;
+    (MbsFir, bit(22)) ? defaultMaskedError;
 
     /** MBSFIR[23]
      *  MBS_FIR_REG_HOST_INBAND_WRITE_ERROR
      */
-    (MbsFir, bit(23)) ? TBDDefaultCallout;
+    (MbsFir, bit(23)) ? defaultMaskedError;
 
     /** MBSFIR[24]
      *  MBS_FIR_REG_OCC_INBAND_READ_ERROR
      */
-    (MbsFir, bit(24)) ? TBDDefaultCallout;
+    (MbsFir, bit(24)) ? defaultMaskedError;
 
     /** MBSFIR[25]
      *  MBS_FIR_REG_OCC_INBAND_WRITE_ERROR
      */
-    (MbsFir, bit(25)) ? TBDDefaultCallout;
+    (MbsFir, bit(25)) ? defaultMaskedError;
 
     /** MBSFIR[26]
      *  MBS_FIR_REG_SRB_BUFFER_CE
      */
-    (MbsFir, bit(26)) ? TBDDefaultCallout;
+    (MbsFir, bit(26)) ? SelfMedThr32PerDay;
 
     /** MBSFIR[27]
      *  MBS_FIR_REG_SRB_BUFFER_UE
      */
-    (MbsFir, bit(27)) ? TBDDefaultCallout;
+    (MbsFir, bit(27)) ? SelfMedThr1;
 
     /** MBSFIR[28]
      *  MBS_FIR_REG_SRB_BUFFER_SUE
      */
-    (MbsFir, bit(28)) ? TBDDefaultCallout;
+    (MbsFir, bit(28)) ? defaultMaskedError;
 
     /** MBSFIR[29]
      *  MBS_FIR_REG_INTERNAL_SCOM_ERROR
      */
-    (MbsFir, bit(29)) ? TBDDefaultCallout;
+    (MbsFir, bit(29)) ? defaultMaskedError;
 
     /** MBSFIR[30]
      *  MBS_FIR_REG_INTERNAL_SCOM_ERROR_COPY
      */
-    (MbsFir, bit(30)) ? TBDDefaultCallout;
+    (MbsFir, bit(30)) ? defaultMaskedError;
 };
 
 ################################################################################
 #  NEST Chiplet MBSECC01FIR and MBSECC23FIR
 ################################################################################
+# RAS spreadsheet: p8dd1_mss_FFDC_37_ reviewd.xls
 
 rule MbsEcc01Fir
 {
@@ -792,26 +814,43 @@ group gMbsEccFir filter singlebit
     /** MBSECCFIR01[0:7]
      *  MBECCFIR_MEMORY_MPE_RANK_0_7
      */
+    #TODO via RTC 22866 ( Chip Mark Verification )
     (MbsEcc01Fir, bit(0|1|2|3|4|5|6|7)) ? TBDDefaultCallout;
 
     /** MBSECCFIR23[0:7]
      *  MBECCFIR_MEMORY_MPE_RANK_0_7
      */
+    #TODO via RTC 22866 ( Chip Mark Verification )
     (MbsEcc23Fir, bit(0|1|2|3|4|5|6|7)) ? TBDDefaultCallout;
+
+    /** MBSECCFIR01[8:15]
+     *  Reserved
+     */
+    (MbsEcc01Fir, bit(8|9|10|11|12|13|14|15)) ? defaultMaskedError;
+
+    /** MBSECCFIR23[8:15]
+     *  Reserved
+     */
+    (MbsEcc23Fir, bit(8|9|10|11|12|13|14|15)) ? defaultMaskedError;
 
     /** MBSECCFIR01[16]
      *  MBECCFIR_MEMORY_NCE
      */
+    #TODO via RTC 47289 ( CE/UE isolation )
     (MbsEcc01Fir, bit(16)) ? TBDDefaultCallout;
 
     /** MBSECCFIR23[16]
      *  MBECCFIR_MEMORY_NCE
      */
+    #TODO via RTC 47289 ( CE/UE isolation )
     (MbsEcc23Fir, bit(16)) ? TBDDefaultCallout;
 
     /** MBSECCFIR01[17]
      *  MBECCFIR_MEMORY_RCE
      */
+    # TODO via RTC 23125. How to do this. In RAS spreadsheet action is RCE
+    # In description, Threshold per rank 8/24 make a callout of DIMM pair
+    # Needs discussion
     (MbsEcc01Fir, bit(17)) ? TBDDefaultCallout;
 
     /** MBSECCFIR23[17]
@@ -822,197 +861,216 @@ group gMbsEccFir filter singlebit
     /** MBSECCFIR01[18]
      *  MBECCFIR_MEMORY_SUE
      */
-    (MbsEcc01Fir, bit(18)) ? TBDDefaultCallout;
+    (MbsEcc01Fir, bit(18)) ? defaultMaskedError;
 
     /** MBSECCFIR23[18]
      *  MBECCFIR_MEMORY_SUE
      */
-    (MbsEcc23Fir, bit(18)) ? TBDDefaultCallout;
+    (MbsEcc23Fir, bit(18)) ? defaultMaskedError;
 
     /** MBSECCFIR01[19]
      *  MBECCFIR_MEMORY_UE
      */
+    #TODO via RTC 47289 ( CE/UE isolation )
     (MbsEcc01Fir, bit(19)) ? TBDDefaultCallout;
 
     /** MBSECCFIR23[19]
      *  MBECCFIR_MEMORY_UE
      */
+    #TODO via RTC 47289 ( CE/UE isolation )
     (MbsEcc23Fir, bit(19)) ? TBDDefaultCallout;
 
     /** MBSECCFIR01[20:27]
      *  MBECCFIR_MAINT_MPE_RANK_0_7
      */
+    #TODO via RTC 22866 ( Chip Mark Verification )
     (MbsEcc01Fir, bit(20|21|22|23|24|25|26|27)) ? TBDDefaultCallout;
 
     /** MBSECCFIR23[20:27]
      *  MBECCFIR_MAINT_MPE_RANK_0_7
      */
+    #TODO via RTC 22866 ( Chip Mark Verification )
     (MbsEcc23Fir, bit(20|21|22|23|24|25|26|27)) ? TBDDefaultCallout;
+
+    /** MBSECCFIR01[28:35]
+     *  Reserved
+     */
+    (MbsEcc01Fir, bit(28|29|30|31|32|33|34|35)) ? TBDDefaultCallout;
+
+    /** MBSECCFIR23[28:35]
+     *  Reserved
+     */
+    (MbsEcc23Fir, bit(28|29|30|31|32|33|34|35)) ? TBDDefaultCallout;
 
     /** MBSECCFIR01[36]
      *  MBECCFIR_MAINTENANCE_NCE
      */
-    (MbsEcc01Fir, bit(36)) ? TBDDefaultCallout;
+    (MbsEcc01Fir, bit(36)) ? defaultMaskedError;
 
     /** MBSECCFIR23[36]
      *  MBECCFIR_MAINTENANCE_NCE
      */
-    (MbsEcc23Fir, bit(36)) ? TBDDefaultCallout;
+    (MbsEcc23Fir, bit(36)) ? defaultMaskedError;
 
     /** MBSECCFIR01[37]
      *  MBECCFIR_MAINTENANCE_SCE
      */
-    (MbsEcc01Fir, bit(37)) ? TBDDefaultCallout;
+    (MbsEcc01Fir, bit(37)) ? defaultMaskedError;
 
     /** MBSECCFIR23[37]
      *  MBECCFIR_MAINTENANCE_SCE
      */
-    (MbsEcc23Fir, bit(37)) ? TBDDefaultCallout;
+    (MbsEcc23Fir, bit(37)) ? defaultMaskedError;
 
     /** MBSECCFIR01[38]
      *  MBECCFIR_MAINTENANCE_MCE
      */
-    (MbsEcc01Fir, bit(38)) ? TBDDefaultCallout;
+    (MbsEcc01Fir, bit(38)) ? defaultMaskedError;
 
     /** MBSECCFIR23[38]
      *  MBECCFIR_MAINTENANCE_MCE
      */
-    (MbsEcc23Fir, bit(38)) ? TBDDefaultCallout;
+    (MbsEcc23Fir, bit(38)) ? defaultMaskedError;
 
     /** MBSECCFIR01[39]
      *  MBECCFIR_MAINTENANCE_RCE
      */
-    (MbsEcc01Fir, bit(39)) ? TBDDefaultCallout;
+    (MbsEcc01Fir, bit(39)) ? defaultMaskedError;
 
     /** MBSECCFIR23[39]
      *  MBECCFIR_MAINTENANCE_RCE
      */
-    (MbsEcc23Fir, bit(39)) ? TBDDefaultCallout;
+    (MbsEcc23Fir, bit(39)) ? defaultMaskedError;
 
     /** MBSECCFIR01[40]
      *  MBECCFIR_MAINTENANCE_SUE
      */
-    (MbsEcc01Fir, bit(40)) ? TBDDefaultCallout;
+    (MbsEcc01Fir, bit(40)) ? defaultMaskedError;
 
     /** MBSECCFIR23[40]
      *  MBECCFIR_MAINTENANCE_SUE
      */
-    (MbsEcc23Fir, bit(40)) ? TBDDefaultCallout;
+    (MbsEcc23Fir, bit(40)) ? defaultMaskedError;
 
     /** MBSECCFIR01[41]
      *  MBECCFIR_MAINTENANCE_UE
      */
+    #TODO via RTC 47289 ( CE/UE isolation )
     (MbsEcc01Fir, bit(41)) ? TBDDefaultCallout;
 
     /** MBSECCFIR23[41]
      *  MBECCFIR_MAINTENANCE_UE
      */
+    #TODO via RTC 47289 ( CE/UE isolation )
     (MbsEcc23Fir, bit(41)) ? TBDDefaultCallout;
 
     /** MBSECCFIR01[42]
      *  MBECCFIR_MPE_DURING_USE_MAINTENANCE_MARK_MODE
      */
-    (MbsEcc01Fir, bit(42)) ? TBDDefaultCallout;
+    (MbsEcc01Fir, bit(42)) ? defaultMaskedError;
 
     /** MBSECCFIR23[42]
      *  MBECCFIR_MPE_DURING_USE_MAINTENANCE_MARK_MODE
      */
-    (MbsEcc23Fir, bit(42)) ? TBDDefaultCallout;
+    (MbsEcc23Fir, bit(42)) ? defaultMaskedError;
 
     /** MBSECCFIR01[43]
      *  MBECCFIR_PREFETCH_MEMORY_UE
      */
+    #TODO via RTC 47289 ( CE/UE isolation )
     (MbsEcc01Fir, bit(43)) ? TBDDefaultCallout;
 
     /** MBSECCFIR23[43]
      *  MBECCFIR_PREFETCH_MEMORY_UE
      */
+    #TODO via RTC 47289 ( CE/UE isolation )
     (MbsEcc23Fir, bit(43)) ? TBDDefaultCallout;
 
     /** MBSECCFIR01[44]
      *  MBECCFIR_MEMORY_RCD_PARITY_ERROR
      */
-    (MbsEcc01Fir, bit(44)) ? TBDDefaultCallout;
+    (MbsEcc01Fir, bit(44)) ? defaultMaskedError;
 
     /** MBSECCFIR23[44]
      *  MBECCFIR_MEMORY_RCD_PARITY_ERROR
      */
-    (MbsEcc23Fir, bit(44)) ? TBDDefaultCallout;
+    (MbsEcc23Fir, bit(44)) ? defaultMaskedError;
 
     /** MBSECCFIR01[45]
      *  MBECCFIR_MAINTENANCE_RCD_PARITY_ERROR
      */
-    (MbsEcc01Fir, bit(45)) ? TBDDefaultCallout;
+    (MbsEcc01Fir, bit(45)) ? defaultMaskedError;
 
     /** MBSECCFIR23[45]
      *  MBECCFIR_MAINTENANCE_RCD_PARITY_ERROR
      */
-    (MbsEcc23Fir, bit(45)) ? TBDDefaultCallout;
+    (MbsEcc23Fir, bit(45)) ? defaultMaskedError;
 
     /** MBSECCFIR01[46]
      *  MBECCFIR_RECOVERABLE_CONFIGURATION_REGISTER_PARITY_ERROR
      */
-    (MbsEcc01Fir, bit(46)) ? TBDDefaultCallout;
+    (MbsEcc01Fir, bit(46)) ? SelfMedThr1;
 
     /** MBSECCFIR23[46]
      *  MBECCFIR_RECOVERABLE_CONFIGURATION_REGISTER_PARITY_ERROR
      */
-    (MbsEcc23Fir, bit(46)) ? TBDDefaultCallout;
+    (MbsEcc23Fir, bit(46)) ? SelfMedThr1;
 
     /** MBSECCFIR01[47]
      *  MBECCFIR_UNRECOVERABLE_CONFIGURATION_REGISTER_PARITY_ERROR
      */
-    (MbsEcc01Fir, bit(47)) ? TBDDefaultCallout;
+    (MbsEcc01Fir, bit(47)) ? SelfMedThr1;
 
     /** MBSECCFIR23[47]
      *  MBECCFIR_UNRECOVERABLE_CONFIGURATION_REGISTER_PARITY_ERROR
      */
-    (MbsEcc23Fir, bit(47)) ? TBDDefaultCallout;
+    (MbsEcc23Fir, bit(47)) ? SelfMedThr1;
 
     /** MBSECCFIR01[48]
      *  MBECCFIR_MASKABLE_CONFIGURATION_REGISTER_PARITY_ERROR
      */
-    (MbsEcc01Fir, bit(48)) ? TBDDefaultCallout;
+    (MbsEcc01Fir, bit(48)) ? defaultMaskedError;
 
     /** MBSECCFIR23[48]
      *  MBECCFIR_MASKABLE_CONFIGURATION_REGISTER_PARITY_ERROR
      */
-    (MbsEcc23Fir, bit(48)) ? TBDDefaultCallout;
+    (MbsEcc23Fir, bit(48)) ? defaultMaskedError;
 
     /** MBSECCFIR01[49]
      *  MBECCFIR_ECC_DATAPATH_PARITY_ERROR
      */
-    (MbsEcc01Fir, bit(49)) ? TBDDefaultCallout;
+    (MbsEcc01Fir, bit(49)) ? SelfMedThr1;
 
     /** MBSECCFIR23[49]
      *  MBECCFIR_ECC_DATAPATH_PARITY_ERROR
      */
-    (MbsEcc23Fir, bit(49)) ? TBDDefaultCallout;
+    (MbsEcc23Fir, bit(49)) ? SelfMedThr1;
 
     /** MBSECCFIR01[50]
      *  MBECCFIR_INTERNAL_SCOM_ERROR
      */
-    (MbsEcc01Fir, bit(50)) ? TBDDefaultCallout;
+    (MbsEcc01Fir, bit(50)) ? defaultMaskedError;
 
     /** MBSECCFIR23[50]
      *  MBECCFIR_INTERNAL_SCOM_ERROR
      */
-    (MbsEcc23Fir, bit(50)) ? TBDDefaultCallout;
+    (MbsEcc23Fir, bit(50)) ? defaultMaskedError;
 
     /** MBSECCFIR01[51]
      *  MBECCFIR_INTERNAL_SCOM_ERROR_COPY
      */
-    (MbsEcc01Fir, bit(51)) ? TBDDefaultCallout;
+    (MbsEcc01Fir, bit(51)) ? defaultMaskedError;
 
     /** MBSECCFIR23[51]
      *  MBECCFIR_INTERNAL_SCOM_ERROR_COPY
      */
-    (MbsEcc23Fir, bit(51)) ? TBDDefaultCallout;
+    (MbsEcc23Fir, bit(51)) ? defaultMaskedError;
 };
 
 ################################################################################
 #  NEST Chiplet MCBIST01FIR and MCBIST23FIR
 ################################################################################
+# RAS spreadsheet: p8dd1_mss_FFDC_37_ reviewd.xls
 
 rule Mcbist01Fir
 {
@@ -1039,42 +1097,52 @@ group gMcbistFir filter singlebit
     /** MCBISTFIR01[0]
      *  MBSFIRQ_SCOM_PAR_ERRORS
      */
-    (Mcbist01Fir, bit(0)) ? TBDDefaultCallout;
+    (Mcbist01Fir, bit(0)) ? SelfMedThr1;
 
     /** MCBISTFIR23[0]
      *  MBSFIRQ_SCOM_PAR_ERRORS
      */
-    (Mcbist23Fir, bit(0)) ? TBDDefaultCallout;
+    (Mcbist23Fir, bit(0)) ? SelfMedThr1;
 
     /** MCBISTFIR01[1]
      *  MBSFIRQ_MBX_PAR_ERRORS
      */
-    (Mcbist01Fir, bit(1)) ? TBDDefaultCallout;
+    (Mcbist01Fir, bit(1)) ? calloutSelfMed;
 
     /** MCBISTFIR23[1]
      *  MBSFIRQ_MBX_PAR_ERRORS
      */
-    (Mcbist23Fir, bit(1)) ? TBDDefaultCallout;
+    (Mcbist23Fir, bit(1)) ? calloutSelfMed;
+
+    /** MCBISTFIR01[2:14]
+     *  Reserved
+     */
+    (Mcbist01Fir, bit(2|3|4|5|6|7|8|9|10|11|12|13|14)) ? defaultMaskedError;
+
+    /** MCBISTFIR23[2:14]
+     *  Reserved
+     */
+    (Mcbist23Fir, bit(2|3|4|5|6|7|8|9|10|11|12|13|14)) ? defaultMaskedError;
 
     /** MCBISTFIR01[15]
      *  MBSFIRQ_INTERNAL_SCOM_ERROR
      */
-    (Mcbist01Fir, bit(15)) ? TBDDefaultCallout;
+    (Mcbist01Fir, bit(15)) ? defaultMaskedError;
 
     /** MCBISTFIR23[15]
      *  MBSFIRQ_INTERNAL_SCOM_ERROR
      */
-    (Mcbist23Fir, bit(15)) ? TBDDefaultCallout;
+    (Mcbist23Fir, bit(15)) ? defaultMaskedError;
 
     /** MCBISTFIR01[16]
      *  MBSFIRQ_INTERNAL_SCOM_ERROR_CLONE
      */
-    (Mcbist01Fir, bit(16)) ? TBDDefaultCallout;
+    (Mcbist01Fir, bit(16)) ? defaultMaskedError;
 
     /** MCBISTFIR23[16]
      *  MBSFIRQ_INTERNAL_SCOM_ERROR_CLONE
      */
-    (Mcbist23Fir, bit(16)) ? TBDDefaultCallout;
+    (Mcbist23Fir, bit(16)) ? defaultMaskedError;
 };
 
 ################################################################################
@@ -1137,5 +1205,33 @@ actionclass bus0TooManyBusErrors
 {
     callout(procedure(MEMBUS_ERROR_ENUM), MRU_LOW);
     funccall("dmiBus0TooManyErrors");
+    threshold1;
+};
+
+/** Callout the DMI bus */
+actionclass calloutDmiBus
+{
+    calloutSelfMedA;
+    callout(connected(TYPE_MCS),MRU_MEDA);
+    callout(procedure(MEMBUS_ERROR_ENUM), MRU_LOW);
+};
+
+/** Callout the DMI bus, threhold 1 */
+actionclass calloutDmiBusTh1
+{
+    calloutDmiBus;
+    threshold1;
+};
+
+/** Callout the DMI bus and 2nd Level (LOW), threhold 1 */
+actionclass calloutDmiBusLvl2Th1
+{
+    calloutDmiBusTh1;
+    callout2ndLvlLow;
+};
+
+actionclass CalloutMcsHighAndThr1
+{
+    callout(connected(TYPE_MCS),MRU_HIGH);
     threshold1;
 };

@@ -159,6 +159,40 @@ TargetHandleList getConnectedDimms( TargetHandle_t i_mba,
     #undef PRDF_FUNC
 }
 
+//------------------------------------------------------------------------------
+
+TargetHandleList getConnectedDimms( TargetHandle_t i_mba,
+                                    uint8_t i_port )
+{
+    #define PRDF_FUNC "[CalloutUtil::getConnectedDimms] "
+
+    TargetHandleList o_list;
+
+    TargetHandleList dimmList = getConnectedDimms( i_mba );
+
+    for ( TargetHandleList::iterator dimmIt = dimmList.begin();
+          dimmIt != dimmList.end(); dimmIt++)
+    {
+        uint8_t portSlct;
+        int32_t l_rc = getMbaPort( *dimmIt, portSlct );
+        if ( SUCCESS != l_rc )
+        {
+            PRDF_ERR( PRDF_FUNC"getMbaPort(0x%08x) failed",
+                      getHuid(*dimmIt) );
+            continue;
+        }
+
+        if ( portSlct == i_port )
+        {
+            o_list.push_back( *dimmIt );
+        }
+    }
+
+    return o_list;
+
+    #undef PRDF_FUNC
+}
+
 } // end namespace CalloutUtil
 
 } // end namespace PRDF

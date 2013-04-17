@@ -419,6 +419,10 @@ group gMBA attntype CHECK_STOP, RECOVERABLE, UNIT_CS filter singlebit
 # MEM Chiplet MBAFIR
 ################################################################################
 
+# RAS spreadsheet: p8dd1_mss_FFDC_37_ reviewd.xls
+# TODO via RTC 23125. In some Fir bits, we may have to callout Centaur
+# rather than MBA. Marc will change callout rules as per latest design.
+# This is applicable for all FIRs in this file
 rule MbaFir
 {
     CHECK_STOP:  MBAFIR & ~MBAFIR_MASK & ~MBAFIR_ACT0 & ~MBAFIR_ACT1;
@@ -431,52 +435,57 @@ group gMbaFir filter singlebit
     /** MBAFIR[0]
      *  MBAFIRQ_INVALID_MAINT_CMD
      */
-    (MbaFir, bit(0)) ? TBDDefaultCallout;
+    (MbaFir, bit(0)) ? defaultMaskedError;
 
     /** MBAFIR[1]
      *  MBAFIRQ_INVALID_MAINT_ADDRESS
      */
-    (MbaFir, bit(1)) ? TBDDefaultCallout;
+    (MbaFir, bit(1)) ? defaultMaskedError;
 
     /** MBAFIR[2]
-     *  MBAFIRQ_MULTI_ADDRESS_MAINT_TIMEOU
+     *  MBAFIRQ_MULTI_ADDRESS_MAINT_TIMEOUT
      */
-    (MbaFir, bit(2)) ? TBDDefaultCallout;
+    (MbaFir, bit(2)) ? SelfMedThr1;
 
     /** MBAFIR[3]
      *  MBAFIRQ_INTERNAL_FSM_ERROR
      */
-    (MbaFir, bit(3)) ? TBDDefaultCallout;
+    (MbaFir, bit(3)) ? SelfMedThr1;
 
     /** MBAFIR[4]
      *  MBAFIRQ_MCBIST_ERROR
      */
-    (MbaFir, bit(4)) ? TBDDefaultCallout;
+    (MbaFir, bit(4)) ? defaultMaskedError;
 
     /** MBAFIR[5]
      *  MBAFIRQ_SCOM_CMD_REG_PE
      */
-    (MbaFir, bit(5)) ? TBDDefaultCallout;
+    (MbaFir, bit(5)) ? SelfMedThr1;
 
     /** MBAFIR[6]
      *  MBAFIRQ_CHANNEL_CHKSTP_ERR
      */
-    (MbaFir, bit(6)) ? TBDDefaultCallout;
+    (MbaFir, bit(6)) ? SelfMedThr1;
 
     /** MBAFIR[7]
      *  MBAFIRQ_WRD_CAW2_DATA_CE_UE_ERR
      */
-    (MbaFir, bit(7)) ? TBDDefaultCallout;
+    (MbaFir, bit(7)) ? SelfMedThr1;
+
+    /** MBAFIR[8:14]
+     *  Reserved
+     */
+    (MbaFir, bit(8|9|10|11|12|13|14)) ? defaultMaskedError;
 
     /** MBAFIR[15]
      *  MBAFIRQ_INTERNAL_SCOM_ERROR
      */
-    (MbaFir, bit(15)) ? TBDDefaultCallout;
+    (MbaFir, bit(15)) ? defaultMaskedError;
 
     /** MBAFIR[16]
      *  MBAFIRQ_INTERNAL_SCOM_ERROR_CLONE
      */
-    (MbaFir, bit(16)) ? TBDDefaultCallout;
+    (MbaFir, bit(16)) ? defaultMaskedError;
 };
 
 ################################################################################
@@ -526,7 +535,7 @@ group gMbaSecureFir filter singlebit
 ################################################################################
 # MEM Chiplet DDRPHYFIR
 ################################################################################
-
+# RAS spreadsheet: p8dd1_mss_FFDC_37_ reviewd.xls
 rule MbaDdrPhyFir
 {
   CHECK_STOP:
@@ -542,63 +551,69 @@ group gMbaDdrPhyFir filter singlebit
     /** MBADDRPHYFIR[48]
      *  PHY01_DDRPHY_FIR_REG_DDR0_FSM_CKSTP
      */
-    (MbaDdrPhyFir, bit(48)) ? TBDDefaultCallout;
+    (MbaDdrPhyFir, bit(48)) ? SelfMedThr1;
 
     /** MBADDRPHYFIR[49]
      *  PHY01_DDRPHY_FIR_REG_DDR0_PARITY_CKSTP
      */
-    (MbaDdrPhyFir, bit(49)) ? TBDDefaultCallout;
+    (MbaDdrPhyFir, bit(49)) ? SelfMedThr1;
 
     /** MBADDRPHYFIR[50]
      *  PHY01_DDRPHY_FIR_REG_DDR0_CALIBRATION_ERROR
      */
-    (MbaDdrPhyFir, bit(50)) ? TBDDefaultCallout;
+    (MbaDdrPhyFir, bit(50)) ? defaultMaskedError;
 
     /** MBADDRPHYFIR[51]
      *  PHY01_DDRPHY_FIR_REG_DDR0_FSM_ERR
      */
-    (MbaDdrPhyFir, bit(51)) ? TBDDefaultCallout;
+    (MbaDdrPhyFir, bit(51)) ? SelfMedThr32PerDay;
 
     /** MBADDRPHYFIR[52]
      *  PHY01_DDRPHY_FIR_REG_DDR0_PARITY_ERR
      */
-    (MbaDdrPhyFir, bit(52)) ? TBDDefaultCallout;
+    (MbaDdrPhyFir, bit(52)) ? SelfMedThr32PerDay;
 
     /** MBADDRPHYFIR[53]
      *  PHY01_DDRPHY_FIR_REG_DDR01_FIR_PARITY_ERR
      */
-    (MbaDdrPhyFir, bit(53)) ? TBDDefaultCallout;
+    (MbaDdrPhyFir, bit(53)) ? defaultMaskedError;
+
+    /** MBADDRPHYFIR[54:55]
+     *  Reserved
+     */
+    (MbaDdrPhyFir, bit(54|55)) ? defaultMaskedError;
 
     /** MBADDRPHYFIR[56]
      *  PHY01_DDRPHY_FIR_REG_DDR1_FSM_CKSTP
      */
-    (MbaDdrPhyFir, bit(56)) ? TBDDefaultCallout;
+    (MbaDdrPhyFir, bit(56)) ? SelfMedThr1;
 
     /** MBADDRPHYFIR[57]
      *  PHY01_DDRPHY_FIR_REG_DDR1_PARITY_CKSTP
      */
-    (MbaDdrPhyFir, bit(57)) ? TBDDefaultCallout;
+    (MbaDdrPhyFir, bit(57)) ? SelfMedThr1;
 
     /** MBADDRPHYFIR[58]
      *  PHY01_DDRPHY_FIR_REG_DDR1_CALIBRATION_ERROR
      */
-    (MbaDdrPhyFir, bit(58)) ? TBDDefaultCallout;
+    (MbaDdrPhyFir, bit(58)) ? defaultMaskedError;
 
     /** MBADDRPHYFIR[59]
      *  PHY01_DDRPHY_FIR_REG_DDR1_FSM_ERR
      */
-    (MbaDdrPhyFir, bit(59)) ? TBDDefaultCallout;
+    (MbaDdrPhyFir, bit(59)) ? SelfMedThr32PerDay;
 
     /** MBADDRPHYFIR[60]
      *  PHY01_DDRPHY_FIR_REG_DDR1_PARITY_ERR
      */
-    (MbaDdrPhyFir, bit(60)) ? TBDDefaultCallout;
+    (MbaDdrPhyFir, bit(60)) ? SelfMedThr32PerDay;
 };
 
 ################################################################################
 # MEM Chiplet MBACALFIR
 ################################################################################
 
+# RAS spreadsheet: p8dd1_mss_FFDC_37_ reviewd.xls
 rule MbaCalFir
 {
   CHECK_STOP:  MBACALFIR & ~MBACALFIR_MASK & ~MBACALFIR_ACT0 & ~MBACALFIR_ACT1;
@@ -611,112 +626,112 @@ group gMbaCalFir filter singlebit
     /** MBACALFIR[0]
      *  MBACALFIRQ_MBA_RECOVERABLE_ERROR
      */
-    (MbaCalFir, bit(0)) ? TBDDefaultCallout;
+    (MbaCalFir, bit(0)) ? SelfMedThr1;
 
     /** MBACALFIR[1]
      *  MBACALFIRQ_MBA_NONRECOVERABLE_ERROR
      */
-    (MbaCalFir, bit(1)) ? TBDDefaultCallout;
+    (MbaCalFir, bit(1)) ? SelfMedThr1;
 
     /** MBACALFIR[2]
      *  MBACALFIRQ_REFRESH_OVERRUN
      */
-    (MbaCalFir, bit(2)) ? TBDDefaultCallout;
+    (MbaCalFir, bit(2)) ? SelfMedThr32PerDay;
 
     /** MBACALFIR[3]
      *  MBACALFIRQ_WAT_ERROR
      */
-    (MbaCalFir, bit(3)) ? TBDDefaultCallout;
+    (MbaCalFir, bit(3)) ? defaultMaskedError;
 
     /** MBACALFIR[4]
      *  MBACALFIRQ_RCD_PARITY_ERROR_0
      */
-    (MbaCalFir, bit(4)) ? TBDDefaultCallout;
+    (MbaCalFir, bit(4)) ? CalloutMbaAndDimmOnPort0;
 
     /** MBACALFIR[5]
      *  MBACALFIRQ_DDR0_CAL_TIMEOUT_ERR
      */
-    (MbaCalFir, bit(5)) ? TBDDefaultCallout;
+    (MbaCalFir, bit(5)) ? SelfMedThr1;
 
     /** MBACALFIR[6]
      *  MBACALFIRQ_DDR1_CAL_TIMEOUT_ERR
      */
-    (MbaCalFir, bit(6)) ? TBDDefaultCallout;
+    (MbaCalFir, bit(6)) ? SelfMedThr1;
 
     /** MBACALFIR[7]
      *  MBACALFIRQ_RCD_PARITY_ERROR_1
      */
-    (MbaCalFir, bit(7)) ? TBDDefaultCallout;
+    (MbaCalFir, bit(7)) ? CalloutMbaAndDimmOnPort1;
 
     /** MBACALFIR[8]
      *  MBACALFIRQ_MBX_TO_MBA_PAR_ERROR
      */
-    (MbaCalFir, bit(8)) ? TBDDefaultCallout;
+    (MbaCalFir, bit(8)) ? SelfMedThr1;
 
     /** MBACALFIR[9]
      *  MBACALFIRQ_MBA_WRD_UE
      */
-    (MbaCalFir, bit(9)) ? TBDDefaultCallout;
+    (MbaCalFir, bit(9)) ? SelfMedThr1;
 
     /** MBACALFIR[10]
      *  MBACALFIRQ_MBA_WRD_CE
      */
-    (MbaCalFir, bit(10)) ? TBDDefaultCallout;
+    (MbaCalFir, bit(10)) ? SelfMedThr1;
 
     /** MBACALFIR[11]
      *  MBACALFIRQ_MBA_MAINT_UE
      */
-    (MbaCalFir, bit(11)) ? TBDDefaultCallout;
+    (MbaCalFir, bit(11)) ? SelfMedThr1;
 
     /** MBACALFIR[12]
      *  MBACALFIRQ_MBA_MAINT_CE
      */
-    (MbaCalFir, bit(12)) ? TBDDefaultCallout;
+    (MbaCalFir, bit(12)) ? SelfMedThr32PerDay;
 
     /** MBACALFIR[13]
      *  MBACALFIRQ_DDR_CAL_RESET_TIMEOUT
      */
-    (MbaCalFir, bit(13)) ? TBDDefaultCallout;
+    (MbaCalFir, bit(13)) ? SelfMedThr1;
 
     /** MBACALFIR[14]
      *  MBACALFIRQ_WRQ_DATA_CE
      */
-    (MbaCalFir, bit(14)) ? TBDDefaultCallout;
+    (MbaCalFir, bit(14)) ? SelfMedThr32PerDay;
 
     /** MBACALFIR[15]
      *  MBACALFIRQ_WRQ_DATA_UE
      */
-    (MbaCalFir, bit(15)) ? TBDDefaultCallout;
+    (MbaCalFir, bit(15)) ? SelfMedThr1;
 
     /** MBACALFIR[16]
      *  MBACALFIRQ_WRQ_DATA_SUE
      */
-    (MbaCalFir, bit(16)) ? TBDDefaultCallout;
+    (MbaCalFir, bit(16)) ? defaultMaskedError;
 
     /** MBACALFIR[17]
      *  MBACALFIRQ_WRQ_RRQ_HANG_ERR
      */
-    (MbaCalFir, bit(17)) ? TBDDefaultCallout;
+    (MbaCalFir, bit(17)) ? SelfMedThr1;
 
     /** MBACALFIR[18]
      *  MBACALFIRQ_SM_1HOT_ERR
      */
-    (MbaCalFir, bit(18)) ? TBDDefaultCallout;
+    (MbaCalFir, bit(18)) ? SelfMedThr1;
 
     /** MBACALFIR[19]
      *  MBACALFIRQ_WRD_SCOM_ERROR
      */
-    (MbaCalFir, bit(19)) ? TBDDefaultCallout;
+    (MbaCalFir, bit(19)) ? defaultMaskedError;
 
     /** MBACALFIR[20]
      *  MBACALFIRQ_INTERNAL_SCOM_ERROR
      */
-    (MbaCalFir, bit(20)) ? TBDDefaultCallout;
+    (MbaCalFir, bit(20)) ? defaultMaskedError;
 
     /** MBACALFIR[21]
      *  MBACALFIRQ_INTERNAL_SCOM_ERROR_COPY
      */
-    (MbaCalFir, bit(21)) ? TBDDefaultCallout;
+    (MbaCalFir, bit(21)) ? defaultMaskedError;
 };
 
 ###############################################################################
@@ -816,3 +831,16 @@ actionclass analyzeMaintCmdComplete
                                    # passed on to rule code.
 };
 
+/** Callout MBA and DIMMs on Port 0 */
+actionclass CalloutMbaAndDimmOnPort0
+{
+    funccall("CalloutMbaAndDimmOnPort0");
+    threshold1;
+};
+
+/** Callout MBA and DIMMs on Port 1 */
+actionclass CalloutMbaAndDimmOnPort1
+{
+    funccall("CalloutMbaAndDimmOnPort1");
+    threshold1;
+};
