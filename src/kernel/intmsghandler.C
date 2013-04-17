@@ -99,11 +99,13 @@ void InterruptMsgHdlr::handleInterrupt()
 
         if(cv_instance)
         {
+            cv_instance->iv_lock.lock();
             cv_instance->sendMessage(MSG_INTR_EXTERN,
                                      reinterpret_cast<void*>(pir),
                                      reinterpret_cast<void*>(
                                         static_cast<uint64_t>(xirr)),
                                      NULL);
+            cv_instance->iv_lock.unlock();
         }
     }
 
@@ -140,8 +142,10 @@ void InterruptMsgHdlr::addCpuCore(uint64_t i_pir)
         // for the message to be an invalid PIR.
         uint64_t pir_key = i_pir | 0x8000000000000000ul;
 
+        cv_instance->iv_lock.lock();
         cv_instance->sendMessage(MSG_INTR_ADD_CPU,
                                  (void*)pir_key,(void *)i_pir,t);
+        cv_instance->iv_lock.unlock();
     }
 }
 

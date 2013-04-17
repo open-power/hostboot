@@ -68,15 +68,11 @@ class InterruptMsgHdlr : public MessageHandler
             MFRR_ADDR_OFFSET   = 12,
         };
 
-        // Notes:
-        //   All external interrupts are routed to one cpu core
-        //   External Interrupts are only processed one at a time
-        //   So we don't need a spinlock
         /**
          * Constructor
          */
         InterruptMsgHdlr(MessageQueue * i_msgQ)
-            : MessageHandler(NULL,i_msgQ) {}
+            : MessageHandler(&iv_lock,i_msgQ), iv_lock() {}
 
         /**
          * Destructor.
@@ -150,6 +146,8 @@ class InterruptMsgHdlr : public MessageHandler
 
         static InterruptMsgHdlr * cv_instance;
         static uint64_t cv_ipc_base_address;
+
+        Spinlock iv_lock;
 };
 
 
