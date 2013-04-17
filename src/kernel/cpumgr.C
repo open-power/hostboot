@@ -91,7 +91,7 @@ void CpuManager::init()
 
     // Set up CPU structure.
     cv_cpus[getPIR() / KERNEL_MAX_SUPPORTED_CPUS_PER_NODE] =
-        new cpu_t*[KERNEL_MAX_SUPPORTED_CPUS_PER_NODE];
+        new cpu_t*[KERNEL_MAX_SUPPORTED_CPUS_PER_NODE]();
 
     // Create CPU objects starting at the thread-0 for this core.
     size_t baseCpu = getCpuId() & ~(threads-1);
@@ -184,15 +184,14 @@ void CpuManager::startCPU(ssize_t i)
     // Initialize node structure.
     if (NULL == cv_cpus[nodeId])
     {
-        cv_cpus[nodeId] = new cpu_t*[KERNEL_MAX_SUPPORTED_CPUS_PER_NODE];
+        cv_cpus[nodeId] = new cpu_t*[KERNEL_MAX_SUPPORTED_CPUS_PER_NODE]();
     }
 
     // Initialize CPU structure.
     if (NULL == cv_cpus[nodeId][cpuId])
     {
         printk("Starting CPU %ld...", i);
-        cpu_t* cpu = cv_cpus[nodeId][cpuId] = new cpu_t;
-        memset(cpu, 0x0, sizeof(cpu_t));
+        cpu_t* cpu = cv_cpus[nodeId][cpuId] = new cpu_t();
 
         // Initialize CPU.
         cpu->cpu = i;
