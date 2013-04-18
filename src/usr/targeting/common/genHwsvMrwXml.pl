@@ -175,7 +175,16 @@ foreach my $i (@{$SystemAttrs->{'required-policy-settings'}})
                        "A_EREPAIR_THRESHOLD_MNFG",
                        $i->{"a-erepair-threshold-mnfg"},
                        "DMI_EREPAIR_THRESHOLD_MNFG",
-                       $i->{"dmi-erepair-threshold-mnfg"},];
+                       $i->{"dmi-erepair-threshold-mnfg"},
+                       "MRW_SAFEMODE_W_SAFEMODE_MEM_THROTTLE_NUMERATOR_PER_MBA",
+                       $i->{"safemode_mem_throttle_numerator_per_mba"},
+                       "MRW_SAFEMODE_MEM_THROTTLE_DENOMINATOR",
+                       $i->{"safemode_mem_throttle_denominator"},
+                       "MRW_SAFEMODE_MEM_THROTTLE_NUMERATOR_PER_CHIP",
+                       $i->{"safemode_mem_throttle_numerator_per_chip"},
+                       "MRW_THERMAL_MEMORY_POWER_LIMIT",
+                       $i->{"thermal_memory_power_limit"},
+                       ];
 }
 
 my $ProcPcie;
