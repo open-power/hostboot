@@ -1212,7 +1212,8 @@ group gL3Fir filter singlebit
 ################################################################################
 # EX Chiplet NCUFIR
 ################################################################################
-
+# Based on p8dd1_mss_FFDC_37_reviewed
+###############################################################################
 rule NcuFir
 {
     CHECK_STOP:  NCUFIR & ~NCUFIR_MASK & ~NCUFIR_ACT0 & ~NCUFIR_ACT1;
@@ -1224,107 +1225,114 @@ group gNcuFir filter singlebit
     /** NCUFIR[0]
      *  CONTROL_ERR: H/W control error.
      */
-    (NcuFir, bit(0)) ? TBDDefaultCallout;
+    (NcuFir, bit(0)) ? SelfMedThr1;
 
     /** NCUFIR[1]
      *  TLBIE_SW_ERR: TLBIE received illegal AP/LP field from core.
      */
-    (NcuFir, bit(1)) ? TBDDefaultCallout;
+    (NcuFir, bit(1)) ? SelfLowLevel2MedThr1;
 
     /** NCUFIR[2]
-     *  ST_ADDR_ERR: Store address machine or TLBIE/sync machine received addr_err cresp.
+     *  ST_ADDR_ERR: Store address machine or TLBIE/sync machine received 
+     *  addr_err cresp.
      */
-    (NcuFir, bit(2)) ? TBDDefaultCallout;
+    (NcuFir, bit(2)) ? SelfLowLevel2MedThr1;
 
     /** NCUFIR[3]
      *  LD_ADDR_ERR: Load address machine received addr_err cresp.
      */
-    (NcuFir, bit(3)) ? TBDDefaultCallout;
+    (NcuFir, bit(3)) ? SelfLowLevel2MedThr1;
 
     /** NCUFIR[4]
      *  ST_FOREIGN0_ACK_DEAD: Store received ack_dead on foreign link0.
      */
-    (NcuFir, bit(4)) ? TBDDefaultCallout;
+    (NcuFir, bit(4)) ? SelfMedThr32PerDay;
 
     /** NCUFIR[5]
      *  ST_FOREIGN1_ACK_DEAD: Store received ack_dead on foreign link1.
      */
-    (NcuFir, bit(5)) ? TBDDefaultCallout;
+    (NcuFir, bit(5)) ? SelfMedThr32PerDay;
 
     /** NCUFIR[6]
      *  LD_FOREIGN0_ACK_DEAD: Load received ack_dead on foreign link0.
      */
-    (NcuFir, bit(6)) ? TBDDefaultCallout;
+    (NcuFir, bit(6)) ? SelfMedThr32PerDay;
 
     /** NCUFIR[7]
      *  LD_FOREIGN1_ACK_DEAD: Load received ack_dead on foreign link1.
      */
-    (NcuFir, bit(7)) ? TBDDefaultCallout;
+    (NcuFir, bit(7)) ? SelfMedThr32PerDay;
 
     /** NCUFIR[8]
      *  STQ_DATA_PARITY_ERR: Store data parity error from regfile detected.
      */
-    (NcuFir, bit(8)) ? TBDDefaultCallout;
+    (NcuFir, bit(8)) ? SelfMedThr1UE;
 
     /** NCUFIR[9]
      *  STORE_TIMEOUT: Store timed out on PB.
      */
-    (NcuFir, bit(9)) ? TBDDefaultCallout;
+    (NcuFir, bit(9)) ? SelfLowLevel2MedThr1;
 
     /** NCUFIR[10]
      *  TLBIE_MASTER_TIMEOUT: TLBIE master timed out on PB.
      */
-    (NcuFir, bit(10)) ? TBDDefaultCallout;
+    (NcuFir, bit(10)) ? SelfLowLevel2MedThr1;
 
     /** NCUFIR[11]
      *  TLBIE_SNOOP_TIMEOUT: TLBIE snooper timed out waiting for core.
      */
-    (NcuFir, bit(11)) ? TBDDefaultCallout;
+    (NcuFir, bit(11)) ? SelfMedThr1;
 
     /** NCUFIR[12]
      *  HTM_IMA_TIMEOUT: HTM/IMA address machine timed out on PB.
      */
-    (NcuFir, bit(12)) ? TBDDefaultCallout;
+    (NcuFir, bit(12)) ? SelfLowLevel2MedThr1;
 
     /** NCUFIR[13]
      *  IMA_CRESP_ADDR_ERR: IMA received addr_err cresp.
      */
-    (NcuFir, bit(13)) ? TBDDefaultCallout;
+    (NcuFir, bit(13)) ? SelfLowLevel2MedThr1;
 
     /** NCUFIR[14]
      *  IMA_FOREIGN0_ACK_DEAD: IMA received ack_dead on foreign link0.
      */
-    (NcuFir, bit(14)) ? TBDDefaultCallout;
+    (NcuFir, bit(14)) ? SelfLowLevel2MedThr1;
 
     /** NCUFIR[15]
      *  IMA_FOREIGN1_ACK_DEAD: IMA received ack_dead on foreign link1.
      */
-    (NcuFir, bit(15)) ? TBDDefaultCallout;
+    (NcuFir, bit(15)) ? SelfLowLevel2MedThr1;
 
     /** NCUFIR[16]
      *  HTM_GOT_ACK_DEAD: HTM received ack_dead on any foreign link.
      */
-    (NcuFir, bit(16)) ? TBDDefaultCallout;
+    (NcuFir, bit(16)) ? defaultMaskedError;
 
     /** NCUFIR[17]
      *  PMISC_CRESP_ADDR_ERR: PMISC received address error cresp.
      */
-    (NcuFir, bit(17)) ? TBDDefaultCallout;
+
+    (NcuFir, bit(17)) ? calloutProcMed;
 
     /** NCUFIR[18]
      *  TLBIE_CONTROL_ERR: TLBIE control error.
      */
-    (NcuFir, bit(28)) ? TBDDefaultCallout;
+    (NcuFir, bit(18)) ? SelfLowLevel2MedThr1;
+
+    /** NCUFIR[19|20|21|22|23]
+     *  SPARE
+     */
+    (NcuFir, bit(19|20|21|22|23)) ? defaultMaskedError;
 
     /** NCUFIR[24]
-     *  SCOM_ERR1: scom erro
+     *  SCOM_ERR1: scom error
      */
-    (NcuFir, bit(24)) ? TBDDefaultCallout;
+    (NcuFir, bit(24)) ? defaultMaskedError;
 
     /** NCUFIR[25]
      *  SCOM_ERR2: scom error
      */
-    (NcuFir, bit(25)) ? TBDDefaultCallout;
+    (NcuFir, bit(25)) ? defaultMaskedError;
 };
 
  ##############################################################################
@@ -1440,4 +1448,10 @@ actionclass L2PowerBusCE
     #cannot callout L2 so calling out the chiplet
     calloutSelfMed;
     threshold1;
+};
+
+
+actionclass calloutProcMed
+{
+    callout(connected(TYPE_PROC),MRU_MED);
 };
