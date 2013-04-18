@@ -30,6 +30,20 @@
 #include <usr/devicefw/driverif.H>
 #include <attributestructs.H>
 #include <sys/task.h>
+#include <usr/fsi/fsiif.H>
+
+
+
+/* Defines for FsiDD::getFsiFFDC() */
+enum ErrlVersion
+{
+    FsiFFDC_Ver1    = 1,
+};
+
+enum ErrlSubsect
+{
+    FsiFFDC_CapData_1    = 1,
+};
 
 
 /** @file fsidd.H
@@ -99,6 +113,19 @@ class FsiDD
      * @return bool  true if port sensed as active during FSI initialization
      */
     bool isSlavePresent( TARGETING::Target* i_target );
+
+    /**
+     * @brief Add FFDC for the target to an error log
+     *
+     * @param[in] i_ffdc_type   Type of FFDC to add
+     * @param[in,out] io_log   Error Log to add FFDC to
+     * @param[in] i_target      FSI Target
+     *
+     * @return void
+     */
+    void getFsiFFDC( FSI::fsiFFDCType_t  i_ffdc_type,
+                     errlHndl_t          &io_log ,
+                     TARGETING::Target*  i_target);
 
   protected:
     /**

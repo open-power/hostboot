@@ -61,6 +61,30 @@ bool isSlavePresent( TARGETING::Target* i_fsiMaster,
  */
 bool isSlavePresent( TARGETING::Target* i_target );
 
+
+/**
+ *  Enum defining type of FFDC to collect
+ */
+enum fsiFFDCType_t
+{
+    FSI_FFDC_PRESENCE_FAIL  = 0,
+    FSI_FFDC_READWRITE_FAIL,
+};
+
+/**
+ * @brief Add FFDC for the target to an error log
+ *
+ * @param[in] i_ffdc_type   Type of FFDC to add
+ * @param[in/out] i_log     Error Log to add FFDC to
+ * @param[in] i_target      FSI Target
+ *
+ * @return void
+ */
+void getFsiFFDC( fsiFFDCType_t       i_ffdc_type,
+                 errlHndl_t          &io_log,
+                 TARGETING::Target*  i_target);
+
+
 /**
  * FSI Slave Registers for P8
  *   These registers are repeated for every master+port+cascade combo 

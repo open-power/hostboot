@@ -270,6 +270,26 @@ bool isSlavePresent( TARGETING::Target* i_target )
     }
 }
 
+
+/**
+ * @brief Add FFDC for the target to an error log
+ */
+void getFsiFFDC(FSI::fsiFFDCType_t i_ffdc_type, errlHndl_t &i_log,
+                TARGETING::Target*  i_target)
+{
+    if ( (i_target == NULL) || (i_log == NULL) )
+    {
+        // NULL target or error log - can't collect data
+        return;
+    }
+    else
+    {
+        Singleton<FsiDD>::instance().getFsiFFDC(i_ffdc_type,
+                                                i_log, i_target);
+    }
+}
+
+
 }; //end FSI namespace
 
 
@@ -581,6 +601,148 @@ errlHndl_t FsiDD::initializeHardware()
     return l_err;
 }
 
+/**
+ * @brief Add FFDC for the target to an error log
+ */
+void FsiDD::getFsiFFDC(FSI::fsiFFDCType_t i_ffdc_type, errlHndl_t &io_log,
+                       TARGETING::Target*  i_target)
+{
+    TRACDCOMP( g_trac_fsi, "FSI::getFFDC>" );
+
+    // Local Variables
+    uint8_t * i_data_ptr = NULL;
+    uint32_t i_ffdc_byte_len = 0;
+    bool i_merge = false;
+    uint64_t l_slaveEnableIndex=0;
+    uint64_t l_byte_index = 0;
+
+    // Check Type -- Not doing anything unique right now
+    if ( ! (i_ffdc_type == FSI::FSI_FFDC_PRESENCE_FAIL ) ||
+           (i_ffdc_type == FSI::FSI_FFDC_READWRITE_FAIL) )
+    {
+        // Unsupported FSI FFDC type, so don't add FFDC section
+        TRACFCOMP( g_trac_fsi, "FSI::getFFDC> Incorect i_ffdc_type (%d) "
+                               "Not Adding FFDC section!",
+                               i_ffdc_type);
+
+        return;
+    }
+
+    // Add target to error log
+    if (i_target != NULL)
+    {
+        ERRORLOG::ErrlUserDetailsTarget(i_target).addToLog(io_log);
+    }
+
+    // Add Master Target to Log
+    if (iv_master != NULL)
+    {
+        ERRORLOG::ErrlUserDetailsTarget(iv_master).addToLog(io_log);
+    }
+
+    //  Information to capture
+    //  1) FsiChipInfo_t associated with this target
+    //  2) Size of iv_slaves[]
+    //  3) iv_slaves[]
+    //  4) uint64_t -- slave enable Index
+    i_ffdc_byte_len = sizeof(FsiChipInfo_t) +
+                      sizeof(uint32_t)      +
+                      sizeof(iv_slaves)     +
+                      sizeof(uint64_t);
+
+    i_data_ptr = static_cast<uint8_t*>(malloc(i_ffdc_byte_len));
+
+
+    // Collect the data
+    FsiChipInfo_t l_fsi_chip_info = getFsiInfo(i_target);
+
+    l_slaveEnableIndex = getSlaveEnableIndex (l_fsi_chip_info.master,
+                                              l_fsi_chip_info.type);
+
+
+    TRACFCOMP( g_trac_fsi,
+               "FSI::getFFDC> i_ffdc_byte_len =%d, i_data_ptr=%p,"
+               " sizeof: FsiChipInfo_t=%d, iv_slaves=%d, u32=%d "
+               "u64=%d, l_slaveEnableIndex=0x%x", i_ffdc_byte_len,
+               i_data_ptr, sizeof(FsiChipInfo_t), sizeof(iv_slaves),
+               sizeof(uint32_t), sizeof(uint64_t), l_slaveEnableIndex);
+
+
+    // Copy Data into memory bloack
+    l_byte_index = 0;
+
+    // FsiChipInfo_t
+    memcpy(reinterpret_cast<void*>(i_data_ptr + l_byte_index),
+           &l_fsi_chip_info, sizeof(FsiChipInfo_t));
+
+    l_byte_index += sizeof(FsiChipInfo_t);
+
+
+    // Size of iv_slaves[]
+    const uint32_t l_so_iv_slaves   = sizeof(iv_slaves);
+    memcpy(reinterpret_cast<void*>(i_data_ptr + l_byte_index),
+           &l_so_iv_slaves, sizeof(uint32_t));
+
+    l_byte_index += sizeof(uint32_t);
+
+
+    // iv_slaves[]
+    memcpy(reinterpret_cast<void*>(i_data_ptr + l_byte_index),
+           &iv_slaves, sizeof(iv_slaves));
+
+    l_byte_index += sizeof(iv_slaves);
+
+
+    // getSlaveEnable Index
+    memcpy(reinterpret_cast<void*>(i_data_ptr + l_byte_index),
+           &l_slaveEnableIndex, sizeof(uint64_t));
+
+    l_byte_index += sizeof(uint64_t);
+
+
+    // Check we didn't go too far or too short
+    if (l_byte_index !=  i_ffdc_byte_len)
+    {
+        TRACFCOMP( g_trac_fsi, "FSI::getFFDC> Byte Length Mismatch: "
+                               "Not Adding FFDC section!"
+                               "l_byte_index=%d, i_ffdc_byte_len=%d",
+                               l_byte_index, i_ffdc_byte_len);
+
+        // Free malloc'ed memory
+        if (i_data_ptr != NULL)
+        {
+            free(i_data_ptr);
+        }
+
+        return;
+    }
+
+    // Actual call to log the data
+    ERRORLOG::ErrlUD * l_pUD = (io_log)->addFFDC(FSI_COMP_ID,
+                                              i_data_ptr,
+                                              i_ffdc_byte_len,
+                                              FsiFFDC_Ver1,
+                                              FsiFFDC_CapData_1,
+                                              i_merge);
+
+    // Check for success
+    if (l_pUD == NULL)
+    {
+        // Failure to add FFDC section
+        TRACFCOMP( g_trac_fsi, "FSI::getFFDC> FAILURE TO ADD FFDC" );
+
+        // Add errl trace
+        (io_log)->collectTrace("ERR");
+    }
+    else
+    {
+        TRACFCOMP( g_trac_fsi, "FSI::getFFDC> FFDC Successfully added "
+                               "(%d bytes)", i_ffdc_byte_len );
+    }
+
+    return;
+
+}
 
 /********************
  Internal Methods

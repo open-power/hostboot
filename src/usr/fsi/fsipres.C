@@ -30,7 +30,9 @@
 #include <hwas/common/hwasCallout.H>
 #include <targeting/common/predicates/predicatectm.H>
 
+
 extern trace_desc_t* g_trac_fsi;
+
 
 namespace FSI
 {
@@ -160,6 +162,7 @@ errlHndl_t procPresenceDetect(DeviceFW::OperationType i_opType,
         }
     }
 
+
     // Finally compare the 2 methods
     if( fsi_present != mvpd_present )
     {
@@ -195,6 +198,14 @@ errlHndl_t procPresenceDetect(DeviceFW::OperationType i_opType,
         {
             l_errl->plid(l_saved_plid);
         }
+
+        // Add FFDC for the target to an error log
+        getFsiFFDC( FSI_FFDC_PRESENCE_FAIL, l_errl, i_target);
+
+
+        // Add FSI and VPD trace
+        l_errl->collectTrace("FSI");
+        l_errl->collectTrace("VPD");
 
         // commit this log and move on
         errlCommit( l_errl,
@@ -322,6 +333,7 @@ errlHndl_t membPresenceDetect(DeviceFW::OperationType i_opType,
         }
     }
 
+
     // Finally compare the 2 methods
     if( fsi_present != cvpd_present )
     {
@@ -332,16 +344,16 @@ errlHndl_t membPresenceDetect(DeviceFW::OperationType i_opType,
         /*@
          * @errortype
          * @moduleid     FSI::MOD_FSIPRES_MEMBPRESENCEDETECT
-         * @reasoncode   FSI::RC_FSI_MVPD_MISMATCH
-         * @userdata1    HUID of processor
+         * @reasoncode   FSI::RC_FSI_CVPD_MISMATCH
+         * @userdata1    HUID of membuffer
          * @userdata2[0:31]    FSI Presence
          * @userdata2[32:63]   VPD Presence
-         * @devdesc      presenceDetect> FSI and MVPD do not agree
+         * @devdesc      presenceDetect> FSI and CVPD do not agree
          */
         l_errl =
                 new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                         FSI::MOD_FSIPRES_MEMBPRESENCEDETECT,
-                                        FSI::RC_FSI_MVPD_MISMATCH,
+                                        FSI::RC_FSI_CVPD_MISMATCH,
                                         TARGETING::get_huid(i_target),
                                         TWO_UINT32_TO_UINT64(
                                             fsi_present,
@@ -358,6 +370,13 @@ errlHndl_t membPresenceDetect(DeviceFW::OperationType i_opType,
         {
             l_errl->plid(l_saved_plid);
         }
+
+        // Add FFDC for the target to an error log
+        getFsiFFDC( FSI_FFDC_PRESENCE_FAIL, l_errl, i_target);
+
+        // Add FSI and VPD trace
+        l_errl->collectTrace("FSI");
+        l_errl->collectTrace("VPD");
 
         // commit this log and move on
         errlCommit( l_errl,
