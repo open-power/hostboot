@@ -40,6 +40,12 @@ execute_in_sandbox()
 
     ${WORKON_CMD} -c ./sandbox_execute_cmd
 
+    if [ $? -ne 0 ]; then
+        echo "Sandbox cmd failed"
+        rm ${SANDBOXBASE}/src/sandbox_execute_cmd
+        exit -1
+    fi
+
     rm ${SANDBOXBASE}/src/sandbox_execute_cmd
 }
 
