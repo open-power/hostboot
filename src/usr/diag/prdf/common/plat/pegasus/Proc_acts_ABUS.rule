@@ -117,7 +117,8 @@ group gAbusLFir filter singlebit
 ################################################################################
 # ABUS Chiplet PBESFIR
 ################################################################################
-
+# based on p8dd1_mss_FFDC_37_ reviewd.xls
+################################################################################
 rule PbesFir
 {
     CHECK_STOP:
@@ -131,192 +132,192 @@ group gPbesFir filter singlebit
     /** PBESFIR[0]
      *  A0LINK_FMR_ERROR: a0link_fmr_error
      */
-    (PbesFir, bit(0)) ? TBDDefaultCallout;
+    (PbesFir, bit(0)) ? SelfHighThr1;
 
     /** PBESFIR[1]
      *  A1LINK_FMR_ERROR: a1link_fmr_error
      */
-    (PbesFir, bit(1)) ? TBDDefaultCallout;
+    (PbesFir, bit(1)) ? SelfHighThr1;
 
     /** PBESFIR[2]
      *  A2LINK_FMR_ERROR: a2link_fmr_error
      */
-    (PbesFir, bit(2)) ? TBDDefaultCallout;
+    (PbesFir, bit(2)) ? SelfHighThr1;
 
     /** PBESFIR[3]
      *  A0LINK_PSR_ERR: a0link_psr_err
      */
-    (PbesFir, bit(3)) ? TBDDefaultCallout;
+    (PbesFir, bit(3)) ? SelfHighThr1;
 
     /** PBESFIR[4]
      *  A1LINK_PSR_ERR: a1link_psr_err
      */
-    (PbesFir, bit(4)) ? TBDDefaultCallout;
+    (PbesFir, bit(4)) ? SelfHighThr1;
 
     /** PBESFIR[5]
      *  A2LINK_PSR_ERR: a2link_psr_err
      */
-    (PbesFir, bit(5)) ? TBDDefaultCallout;
+    (PbesFir, bit(5)) ? SelfHighThr1;
 
     /** PBESFIR[6]
      *  A0LINK_PSR_COR_ERR
      */
-    (PbesFir, bit(6)) ? TBDDefaultCallout;
+    (PbesFir, bit(6)) ? calloutAbus0AndProcThr5;
 
     /** PBESFIR[7]
      *  A0LINK_PSR_DERR_ERR
      */
-    (PbesFir, bit(7)) ? TBDDefaultCallout;
+    (PbesFir, bit(7)) ? defaultMaskedError;
 
     /** PBESFIR[8]
      *  A0LINK_PSR_UNC_ERR
      */
-    (PbesFir, bit(8)) ? TBDDefaultCallout;
+    (PbesFir, bit(8)) ? calloutAbus0AndProcThr1;
 
     /** PBESFIR[9]
      *  A1LINK_PSR_COR_ERR
      */
-    (PbesFir, bit(9)) ? TBDDefaultCallout;
+    (PbesFir, bit(9)) ? calloutAbus1AndProcThr5;
 
     /** PBESFIR[10]
      *  A1LINK_PSR_DERR_ERR
      */
-    (PbesFir, bit(10)) ? TBDDefaultCallout;
+    (PbesFir, bit(10)) ? defaultMaskedError;
 
     /** PBESFIR[11]
      *  A1LINK_PSR_UNC_ERR
      */
-    (PbesFir, bit(11)) ? TBDDefaultCallout;
+    (PbesFir, bit(11)) ? calloutAbus1AndProcThr1;
 
     /** PBESFIR[12]
      *  A2LINK_PSR_COR_ERR
      */
-    (PbesFir, bit(12)) ? TBDDefaultCallout;
+    (PbesFir, bit(12)) ? calloutAbus2AndProcThr5;
 
     /** PBESFIR[13]
      *  A2LINK_PSR_DERR_ERR
      */
-    (PbesFir, bit(13)) ? TBDDefaultCallout;
+    (PbesFir, bit(13)) ? defaultMaskedError;
 
     /** PBESFIR[14]
      *  NK_PSR_UNC_ERR
      */
-    (PbesFir, bit(14)) ? TBDDefaultCallout;
+    (PbesFir, bit(14)) ? calloutAbus2AndProcThr1;
 
     /** PBESFIR[15]
      *  A0LINK_FMR_COR_ERR_HI
      */
-    (PbesFir, bit(15)) ? TBDDefaultCallout;
+    (PbesFir, bit(15)) ? SelfHighThr32PerDay;
 
     /** PBESFIR[16]
      *  A0LINK_FMR_COR_ERR_LO
      */
-    (PbesFir, bit(16)) ? TBDDefaultCallout;
+    (PbesFir, bit(16)) ? SelfHighThr32PerDay;
 
     /** PBESFIR[17]
      *  A0LINK_FMR_SUE_ERR_HI
      */
-    (PbesFir, bit(17)) ? TBDDefaultCallout;
+    (PbesFir, bit(17)) ? defaultMaskedError;
 
     /** PBESFIR[18]
      *  A0LINK_FMR_SUE_ERR_LO
      */
-    (PbesFir, bit(18)) ? TBDDefaultCallout;
+    (PbesFir, bit(18)) ? defaultMaskedError;
 
     /** PBESFIR[19]
      *  A0LINK_FMR_UNC_ERR_HI
      */
-    (PbesFir, bit(19)) ? TBDDefaultCallout;
+    (PbesFir, bit(19)) ? calloutProcHighThr1SUE;
 
     /** PBESFIR[20]
      *  A0LINK_FMR_UNC_ERR_LO
      */
-    (PbesFir, bit(20)) ? TBDDefaultCallout;
+    (PbesFir, bit(20)) ? calloutProcHighThr1SUE;
 
     /** PBESFIR[21]
      *  A1LINK_FMR_COR_ERR_HI
      */
-    (PbesFir, bit(21)) ? TBDDefaultCallout;
+    (PbesFir, bit(21)) ? SelfHighThr32PerDay;
 
     /** PBESFIR[22]
      *  A1LINK_FMR_COR_ERR_LO
      */
-    (PbesFir, bit(22)) ? TBDDefaultCallout;
+    (PbesFir, bit(22)) ? SelfHighThr32PerDay;
 
     /** PBESFIR[23]
      *  A1LINK_FMR_SUE_ERR_HI
      */
-    (PbesFir, bit(23)) ? TBDDefaultCallout;
+    (PbesFir, bit(23)) ? defaultMaskedError;
 
     /** PBESFIR[24]
      *  A1LINK_FMR_SUE_ERR_LO
      */
-    (PbesFir, bit(24)) ? TBDDefaultCallout;
+    (PbesFir, bit(24)) ? defaultMaskedError;
 
     /** PBESFIR[25]
      *  A1LINK_FMR_UNC_ERR_HI
      */
-    (PbesFir, bit(25)) ? TBDDefaultCallout;
+    (PbesFir, bit(25)) ? calloutProcHighThr1SUE;
 
     /** PBESFIR[26]
      *  A1LINK_FMR_UNC_ERR_LO
      */
-    (PbesFir, bit(26)) ? TBDDefaultCallout;
+    (PbesFir, bit(26)) ? calloutProcHighThr1SUE;
 
     /** PBESFIR[27]
      *  A2LINK_FMR_COR_ERR_HI
      */
-    (PbesFir, bit(27)) ? TBDDefaultCallout;
+    (PbesFir, bit(27)) ? SelfHighThr32PerDay;
 
     /** PBESFIR[28]
      *  A2LINK_FMR_COR_ERR_LO
      */
-    (PbesFir, bit(28)) ? TBDDefaultCallout;
+    (PbesFir, bit(28)) ? SelfHighThr32PerDay;
 
     /** PBESFIR[29]
      *  A2LINK_FMR_SUE_ERR_HI
      */
-    (PbesFir, bit(29)) ? TBDDefaultCallout;
+    (PbesFir, bit(29)) ? defaultMaskedError;
 
     /** PBESFIR[30]
      *  A2LINK_FMR_SUE_ERR_LO
      */
-    (PbesFir, bit(30)) ? TBDDefaultCallout;
+    (PbesFir, bit(30)) ? defaultMaskedError;
 
     /** PBESFIR[31]
      *  A2LINK_FMR_UNC_ERR_HI
      */
-    (PbesFir, bit(31)) ? TBDDefaultCallout;
+    (PbesFir, bit(31)) ? calloutProcHighThr1SUE;
 
     /** PBESFIR[32]
      *  A2LINK_FMR_UNC_ERR_LO
      */
-    (PbesFir, bit(32)) ? TBDDefaultCallout;
+    (PbesFir, bit(32)) ? calloutProcHighThr1SUE;
 
     /** PBESFIR[33]
      *  A0_OBS_CR_OVERFLOW_FIR_ERR
      */
-    (PbesFir, bit(33)) ? TBDDefaultCallout;
+    (PbesFir, bit(33)) ? SelfHighThr1;
 
     /** PBESFIR[34]
      *  A1_OBS_CR_OVERFLOW_FIR_ERR
      */
-    (PbesFir, bit(34)) ? TBDDefaultCallout;
+    (PbesFir, bit(34)) ? SelfHighThr1;
 
     /** PBESFIR[35]
      *  A2_OBS_CR_OVERFLOW_FIR_ERR
      */
-    (PbesFir, bit(35)) ? TBDDefaultCallout;
+    (PbesFir, bit(35)) ? SelfHighThr1;
 
     /** PBESFIR[36]
      *  FIR_SCOM_ERR_DUP
      */
-    (PbesFir, bit(36)) ? TBDDefaultCallout;
+    (PbesFir, bit(36)) ? defaultMaskedError;
 
     /** PBESFIR[37]
      *  FIR_SCOM_ERR
      */
-    (PbesFir, bit(37)) ? TBDDefaultCallout;
+    (PbesFir, bit(37)) ? defaultMaskedError;
 };
 
 ################################################################################
@@ -576,5 +577,49 @@ actionclass abus2TooManyBusErrors
 {
     callout(procedure(PassiveFabric_OffNode_ENUM), MRU_LOW);
     funccall("abus2TooManyErrors");
+    threshold1;
+};
+
+actionclass calloutAbus0AndProcThr5
+{
+    callout(procedure(PassiveFabric_OffNode_ENUM), MRU_MED);
+    funccall("calloutProcsConnectedToAbus0");
+    threshold5pday;
+};
+
+
+actionclass calloutAbus1AndProcThr5
+{
+    callout(procedure(PassiveFabric_OffNode_ENUM), MRU_MED);
+    funccall("calloutProcsConnectedToAbus1");
+    threshold5pday;
+};
+
+actionclass calloutAbus2AndProcThr5
+{
+    callout(procedure(PassiveFabric_OffNode_ENUM), MRU_MED);
+    funccall("calloutProcsConnectedToAbus2");
+    threshold5pday;
+};
+
+actionclass calloutAbus0AndProcThr1
+{
+    callout(procedure(PassiveFabric_OffNode_ENUM), MRU_MED);
+    funccall("calloutProcsConnectedToAbus0");
+    threshold1;
+};
+
+
+actionclass calloutAbus1AndProcThr1
+{
+    callout(procedure(PassiveFabric_OffNode_ENUM), MRU_MED);
+    funccall("calloutProcsConnectedToAbus1");
+    threshold1;
+};
+
+actionclass calloutAbus2AndProcThr1
+{
+    callout(procedure(PassiveFabric_OffNode_ENUM), MRU_MED);
+    funccall("calloutProcsConnectedToAbus2");
     threshold1;
 };

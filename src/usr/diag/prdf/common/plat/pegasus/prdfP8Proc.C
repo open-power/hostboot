@@ -744,5 +744,82 @@ int32_t MaskMCS31IfCentaurCheckstop( ExtensibleChip * i_chip,
 }
 PRDF_PLUGIN_DEFINE( Proc, MaskMCS31IfCentaurCheckstop );
 
+/**
+ * @brief Calls out chip connected on both ends of the a given bus
+ * @param i_chip P8 chip
+ * @param i_sc   The step code data struct
+ * @param i_type type of bus in question
+ * @param i_pos  position asociated with bus target
+ * @returns Success
+ */
+
+int32_t calloutChip( ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & i_sc,
+                    TYPE i_type, uint32_t i_pos )
+{
+    //FIXME RTC 72645 Once connection type is supported in getconnected, we
+    //shall no longer need these plugins using this function.Callout connected
+    //resolution shall be enough for us to callout connected peer proc.
+
+    TargetHandle_t l_srcProcTgt = i_chip->GetChipHandle( );
+    TargetHandle_t l_desPeerProc = PlatServices::getConnectedPeerProc(
+                                                    l_srcProcTgt,i_type,i_pos );
+    PRDpriority l_priority = MRU_MEDA;
+    if( NULL == l_desPeerProc )
+    {
+        PRDF_ERR("proc::calloutChip failed to get peer proc ");
+    }
+    else
+    {
+        //FIXME RTC 23127 If Ras Team agrees,we shall just callout A-Bus here
+        //and not entire Proc chips on both ends of A-Bus.
+        i_sc.service_data->SetCallout( l_desPeerProc,l_priority );
+    }
+    i_sc.service_data->SetCallout( l_srcProcTgt,l_priority );
+    return SUCCESS;
+}
+
+/**
+ * @brief Called when there is an error on ABus0 connecting two PB chiplet
+ * @param i_chip P8 chip
+ * @param i_sc   The step code data struct
+ * @returns Success
+ */
+
+int32_t calloutProcsConnectedToAbus0(  ExtensibleChip * i_chip,
+                                        STEP_CODE_DATA_STRUCT & i_sc )
+{
+    return calloutChip( i_chip,i_sc,TYPE_ABUS,0 );
+}
+PRDF_PLUGIN_DEFINE( Proc,calloutProcsConnectedToAbus0 );
+
+
+/**
+ * @brief Called when there is an error on ABus1 connecting two PB chiplet
+ * @param i_chip P8 chip
+ * @param i_sc   The step code data struct
+ * @returns Success
+ */
+
+int32_t calloutProcsConnectedToAbus1(  ExtensibleChip * i_chip,
+                                        STEP_CODE_DATA_STRUCT & i_sc )
+{
+    return calloutChip( i_chip,i_sc,TYPE_ABUS,1 );
+}
+PRDF_PLUGIN_DEFINE( Proc,calloutProcsConnectedToAbus1 );
+
+/**
+ * @brief Called when there is an error on ABus2 connecting two PB chiplet
+ * @param i_chip P8 chip
+ * @param i_sc   The step code data struct
+ * @returns Success
+ */
+
+int32_t calloutProcsConnectedToAbus2(  ExtensibleChip * i_chip,
+                                        STEP_CODE_DATA_STRUCT & i_sc )
+{
+    return calloutChip( i_chip,i_sc,TYPE_ABUS,2 );
+}
+PRDF_PLUGIN_DEFINE( Proc,calloutProcsConnectedToAbus2 );
+
 } // end namespace Proc
 } // end namespace PRDF

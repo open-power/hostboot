@@ -147,7 +147,8 @@ chip Mcs
 ################################################################################
 # PB Chiplet MCIFIR
 ################################################################################
-
+# MCIFIR updated based on p8dd1_mss_FFDC_37_ reviewd.xls
+###############################################################################
 rule MciFir
 {
     CHECK_STOP:  MCIFIR & ~MCIFIR_MASK & ~MCIFIR_ACT0 & ~MCIFIR_ACT1;
@@ -164,62 +165,63 @@ group gMciFir attntype CHECK_STOP, RECOVERABLE, SPECIAL, UNIT_CS
     /** MCIFIR[0]
      *  MCIFIRQ_REPLAY_TIMEOUT
      */
-    (MciFir, bit(0)) ? TBDDefaultCallout;
+    (MciFir, bit(0)) ? calloutDmiBusTh1;
 
     /** MCIFIR[1]
      *  MCIFIRQ_CHANNEL_FAIL
      */
-    (MciFir, bit(1)) ? TBDDefaultCallout;
+    (MciFir, bit(1)) ? defaultMaskedError;
 
     /** MCIFIR[2]
      *  MCIFIRQ_CRC_ERROR
      */
-    (MciFir, bit(2)) ? TBDDefaultCallout;
+    (MciFir, bit(2)) ? defaultMaskedError;
 
     /** MCIFIR[3]
      *  MCIFIRQ_FRAME_NOACK
      */
-    (MciFir, bit(3)) ? TBDDefaultCallout;
+    (MciFir, bit(3)) ? defaultMaskedError;
 
     /** MCIFIR[4]
      *  MCIFIRQ_SEQID_OUT_OF_ORDER
      */
-    (MciFir, bit(4)) ? TBDDefaultCallout;
+    (MciFir, bit(4)) ? calloutDmiBusAndLvl2Th1;
 
     /** MCIFIR[5]
      *  MCIFIRQ_REPLAY_BUFFER_ECC_CE
      */
-    (MciFir, bit(5)) ? TBDDefaultCallout;
+    (MciFir, bit(5)) ? SelfHighThr5PerHour;
 
     /** MCIFIR[6]
      *  MCIFIRQ_REPLAY_BUFFER_ECC_UE
      */
-    (MciFir, bit(6)) ? TBDDefaultCallout;
+    (MciFir, bit(6)) ? SelfHighThr1 ;
 
     /** MCIFIR[7]
      *  MCIFIRQ_MCI_CHINIT_STATE_MACHINE_TIMEOUT
      */
-    (MciFir, bit(7)) ? TBDDefaultCallout;
+    (MciFir, bit(7)) ? defaultMaskedError;
 
     /** MCIFIR[8]
      *  MCIFIRQ_MCI_INTERNAL_CONTROL_PARITY_ERROR
      */
-    (MciFir, bit(8)) ? TBDDefaultCallout;
+    (MciFir, bit(8)) ? SelfHighThr1;
 
     /** MCIFIR[9]
      *  MCIFIRQ_MCI_DATA_FLOW_PARITY_ERROR
      */
-    (MciFir, bit(9)) ? TBDDefaultCallout;
+    (MciFir, bit(9)) ? SelfHighThr1;
 
     /** MCIFIR[10]
      *  MCIFIRQ_CRC_PERFORMANCE_DEGRADATION
      */
-    (MciFir, bit(10)) ? TBDDefaultCallout;
+    # FIXME RTC 23127 To be updated in a separate activity along with MBIFIR[10]
+    (MciFir, bit(10)) ? defaultMaskedError;
 
     /** MCIFIR[11]
      *  MCIFIRQ_CHANNEL_INTERLOCK_FAIL
      */
-    (MciFir, bit(11)) ? TBDDefaultCallout;
+    (MciFir, bit(11)) ? defaultMaskedError;
 
     /** MCIFIR[12]
      *  MCIFIRQ_CENTAUR_CHECKSTOP
@@ -235,12 +237,12 @@ group gMciFir attntype CHECK_STOP, RECOVERABLE, SPECIAL, UNIT_CS
     /** MCIFIR[13]
      *  MCIFIRQ_CENTAUR_TRACESTOP
      */
-    (MciFir, bit(13)) ? TBDDefaultCallout;
+    (MciFir, bit(13)) ? defaultMaskedError;
 
     /** MCIFIR[14]
      *  MCIFIRQ_FPGA_INTERRUPT
      */
-    (MciFir, bit(14)) ? TBDDefaultCallout;
+    (MciFir, bit(14)) ? defaultMaskedError;
 
     /** MCIFIR[15]
      *  MCIFIRQ_CENTAUR_RECOVERABLE_ERROR
@@ -266,42 +268,67 @@ group gMciFir attntype CHECK_STOP, RECOVERABLE, SPECIAL, UNIT_CS
     /** MCIFIR[18]
      *  MCIFIRQ_CENTAUR_INBAND_PIB_ERROR
      */
-    (MciFir, bit(18)) ? TBDDefaultCallout;
+    (MciFir, bit(18)) ? defaultMaskedError;
+
+    /** MCIFIR[19]
+     *  FRTL Conter Overflow
+     */
+    (MciFir, bit(19)) ? defaultMaskedError;
+
+    /** MCIFIR[20]
+     *  SCOM Register parity Error
+     */
+    (MciFir, bit(20)) ? SelfHighThr1;
+
+    /** MCIFIR[21]
+     *  SCOM Register parity Error
+     */
+    (MciFir, bit(21)) ? defaultMaskedError;
+
+    /** MCIFIR[22]
+     *  SCOM Register parity Error
+     */
+    (MciFir, bit(22)) ? calloutConnCenTh1;
+
+    /** MCIFIR[23]
+     *  SCOM Register parity Error
+     */
+    (MciFir, bit(23)) ? calloutDmiBusTh1;
 
     /** MCIFIR[24]
      *  MCIFIRQ_MCS_RECOVERABLE_ERROR
      */
-    (MciFir, bit(24)) ? TBDDefaultCallout;
+    (MciFir, bit(24)) ? SelfHighThr1;
 
     /** MCIFIR[25]
      *  MCIFIRQ_MCS_INTERNAL_NONRECOVERABLE_ERROR
      */
-    (MciFir, bit(25)) ? TBDDefaultCallout;
+    (MciFir, bit(25)) ? SelfHighThr1;
 
     /** MCIFIR[26]
      *  MCIFIRQ_POWERBUS_PROTOCOL_ERROR
      */
-    (MciFir, bit(26)) ? TBDDefaultCallout;
+    (MciFir, bit(26)) ? callout2ndLvlMed;
 
     /** MCIFIR[27]
      *  MCIFIRQ_MCS_COMMAND_LIST_TIMEOUT_DUE_TO_POWERBUS
      */
-    (MciFir, bit(27)) ? TBDDefaultCallout;
+    (MciFir, bit(27)) ? callout2ndLvlMed;
 
     /** MCIFIR[28]
      *  MCIFIRQ_MCS_COMMAND_LIST_TIMEOUT_DUE_TO_EDI_CHANNEL
      */
-    (MciFir, bit(28)) ? TBDDefaultCallout;
+    (MciFir, bit(28)) ? SelfLowLevel2MedThr1;
 
     /** MCIFIR[29]
      *  MCIFIRQ_INBAND_BAR_HIT_WITH_INCORRECT_TTYPE
      */
-    (MciFir, bit(29)) ? TBDDefaultCallout;
+    (MciFir, bit(29)) ? SelfLowLevel2MedThr1;
 
     /** MCIFIR[30]
      *  MCIFIRQ_MULTIPLE_BAR_HIT
      */
-    (MciFir, bit(30)) ? TBDDefaultCallout;
+    (MciFir, bit(30)) ? SelfLowLevel2MedThr1;
 
     /** MCIFIR[31]
      *  MCIFIRQ_CHANNEL_FAIL_SIGNAL_ACTIVE
@@ -314,47 +341,84 @@ group gMciFir attntype CHECK_STOP, RECOVERABLE, SPECIAL, UNIT_CS
     /** MCIFIR[32]
      *  MCIFIRQ_MIRROR_ACTION_OCCURRED
      */
-    (MciFir, bit(32)) ? TBDDefaultCallout;
+    # FIXME RTC 23127 TBD if this is needed as part of mirror error handling
+    (MciFir, bit(32)) ? defaultMaskedError;
 
     /** MCIFIR[33]
      *  MCIFIRQ_NONFOREIGN_ACCESS_TO_FOREIGN_BAR
      */
-    (MciFir, bit(33)) ? TBDDefaultCallout;
+    (MciFir, bit(33)) ? callout2ndLvlMed;
 
     /** MCIFIR[34]
      *  MCIFIRQ_CENTAUR_SYNC_COMMAND_DETECTED
      */
-    (MciFir, bit(34)) ? TBDDefaultCallout;
+    (MciFir, bit(34)) ? defaultMaskedError;
 
     /** MCIFIR[35]
      *  MCIFIRQ_POWERBUS_WRITE_DATA_BUFFER_CE
      */
-    (MciFir, bit(35)) ? TBDDefaultCallout;
+    (MciFir, bit(35)) ? calloutProcHighThr5PerHr;
 
     /** MCIFIR[36]
      *  MCIFIRQ_POWERBUS_WRITE_DATA_BUFFER_UE
      */
-    (MciFir, bit(36)) ? TBDDefaultCallout;
+    (MciFir, bit(36)) ? calloutParentProcHighThr1;
 
     /** MCIFIR[37]
      *  MCIFIRQ_POWERBUS_WRITE_DATA_BUFFER_SUE
      */
-    (MciFir, bit(37)) ? TBDDefaultCallout;
+    (MciFir, bit(37)) ? defaultMaskedError;
 
     /** MCIFIR[38]
      *  MCIFIRQ_HA_ILLEGAL_CONSUMER_ACCESS_ERROR
      */
-    (MciFir, bit(38)) ? TBDDefaultCallout;
+    (MciFir, bit(38)) ? callout2ndLvlMed;
+
+    /** MCIFIR[39]
+     *  MCIFIRQ_HA_ILLEGAL_CONSUMER_ACCESS_ERROR
+     */
+    (MciFir, bit(39)) ? callout2ndLvlMed;
+
+    /** MCIFIR[40]
+     *  CHANNEL TIMEOUT ERROR
+     */
+    # FIXME RTC 23127 No decision on MRU  as yet
+    (MciFir, bit(40)) ? defaultMaskedError;
+
+    /** MCIFIR[41]
+     *  CENTAUR FAULT LINE
+     */
+    (MciFir, bit(41)) ? defaultMaskedError;
+
+    /** MCIFIR[42]
+     *  MCS WAT
+     */
+    (MciFir, bit(42)) ? defaultMaskedError;
+
+    /** MCIFIR[43]
+     *  INVALID ADDRESS
+     */
+    (MciFir, bit(43)) ? defaultMaskedError;
+
+    /** MCIFIR[44|45|46]
+     *  Reserved
+     */
+    (MciFir, bit(44|45|46)) ? defaultMaskedError;
+
+    /** MCIFIR[47]
+     *  MCS WRITE DATAFLOW SUE
+     */
+    (MciFir, bit(47)) ? defaultMaskedError;
 
     /** MCIFIR[48]
      *  MCIFIRQ_INTERNAL_SCOM_ERROR
      */
-    (MciFir, bit(48)) ? TBDDefaultCallout;
+    (MciFir, bit(48)) ? defaultMaskedError;
 
     /** MCIFIR[49]
      *  MCIFIRQ_INTERNAL_SCOM_ERROR_CLONE
      */
-    (MciFir, bit(49)) ? TBDDefaultCallout;
+    (MciFir, bit(49)) ? defaultMaskedError;
 };
 
  ##############################################################################
@@ -374,3 +438,31 @@ group gMciFir attntype CHECK_STOP, RECOVERABLE, SPECIAL, UNIT_CS
 /** Analyze the connected Centaur */
 actionclass analyzeConnectedCentaur { analyze(connected(TYPE_MEMBUF)); };
 
+actionclass calloutProcHighThr5PerHr
+{
+    callout(connected(TYPE_PROC),MRU_HIGH);
+    threshold5phour;
+};
+
+/** Callout the connected Centaur, threshold 1 */
+actionclass calloutConnCenTh1
+{
+    callout(connected(TYPE_MEMBUF), MRU_MED);
+    threshold1;
+};
+
+/** Callout the DMI bus (MEDA), threshold 1 */
+actionclass calloutDmiBusTh1
+{
+    calloutSelfMedA;
+    callout(connected(TYPE_MEMBUF), MRU_MEDA);
+    callout(procedure(MEMBUS_ERROR_ENUM), MRU_LOW);
+    threshold1;
+};
+
+/** Callout the DMI bus (MEDA) and 2nd Level Support (LOW), threshold 1 */
+actionclass calloutDmiBusAndLvl2Th1
+{
+   calloutDmiBusTh1;
+   callout2ndLvlLow;
+};

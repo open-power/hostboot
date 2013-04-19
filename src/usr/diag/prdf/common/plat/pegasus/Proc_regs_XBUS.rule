@@ -280,8 +280,6 @@
     {
         name        "PSI.PSI_MAC.PSI_SCOM.FIR_REG";
         scomaddr    0x04012400;
-        reset       (&, 0x04012401);
-        mask        (|, 0x04012405);
         capture     group default;
     };
 

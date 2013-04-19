@@ -1030,6 +1030,10 @@ group gMcdFir filter singlebit
 #        rule code parser does not have the support for something like this.
 #        Maybe we can add this as a later feature.
 
+################################################################################
+# based on p8dd1_mss_FFDC_37_ reviewd.xls
+################################################################################
+
 rule PbEastFir
 {
   CHECK_STOP:  PBEASTFIR & ~PBEASTFIR_MASK & ~PBEASTFIR_ACT0 & ~PBEASTFIR_ACT1;
@@ -1047,302 +1051,322 @@ group gPbWestEastFir filter singlebit
     /** PBWESTFIR[0]
      *  PB_WEST_PBIEX01_PBH_HW_ERROR
      */
-    (PbWestFir, bit(0)) ? TBDDefaultCallout;
+    (PbWestFir, bit(0)) ? SelfHighThr1;
 
     /** PBEASTFIR[0]
      *  PB_EAST_PBIEX04_PBH_HW_ERROR
      */
-    (PbEastFir, bit(0)) ? TBDDefaultCallout;
+    (PbEastFir, bit(0)) ? SelfHighThr1;
 
     /** PBWESTFIR[1]
      *  PB_WEST_PBIEX01_PBH_RECOV_ERROR
      */
-    (PbWestFir, bit(1)) ? TBDDefaultCallout;
+    (PbWestFir, bit(1)) ? SelfHighThr1;
 
     /** PBEASTFIR[1]
      *  PB_EAST_PBIEX04_PBH_RECOV_ERROR
      */
-    (PbEastFir, bit(1)) ? TBDDefaultCallout;
+    (PbEastFir, bit(1)) ? SelfHighThr1;
 
     /** PBWESTFIR[2]
      *  PB_WEST_PBIEX01_PBH_PROTOCOL_ERROR
      */
-    (PbWestFir, bit(2)) ? TBDDefaultCallout;
+    (PbWestFir, bit(2)) ? calloutProcLevel2MedThr1;
 
     /** PBEASTFIR[2]
      *  PB_EAST_PBIEX04_PBH_PROTOCOL_ERROR
      */
-    (PbEastFir, bit(2)) ? TBDDefaultCallout;
+    (PbEastFir, bit(2)) ? calloutProcLevel2MedThr1;
 
     /** PBWESTFIR[3]
      *  PB_WEST_PBIEX01_PBH_OVERFLOW_ERROR
      */
-    (PbWestFir, bit(3)) ? TBDDefaultCallout;
+    (PbWestFir, bit(3)) ? calloutProcLevel2MedThr1;
 
     /** PBEASTFIR[3]
      *  PB_EAST_PBIEX04_PBH_OVERFLOW_ERROR
      */
-    (PbEastFir, bit(3)) ? TBDDefaultCallout;
+    (PbEastFir, bit(3)) ? calloutProcLevel2MedThr1;
 
     /** PBWESTFIR[4]
      *  PB_WEST_PBIEX02_PBH_HW_ERROR
      */
-    (PbWestFir, bit(4)) ? TBDDefaultCallout;
+    (PbWestFir, bit(4)) ? SelfHighThr1;
 
     /** PBEASTFIR[4]
      *  PB_EAST_PBIEX05_PBH_HW_ERROR
      */
-    (PbEastFir, bit(4)) ? TBDDefaultCallout;
+    (PbEastFir, bit(4)) ? SelfHighThr1;
 
     /** PBWESTFIR[5]
      *  PB_WEST_PBIEX02_PBH_RECOV_ERROR
      */
-    (PbWestFir, bit(5)) ? TBDDefaultCallout;
+    (PbWestFir, bit(5)) ? SelfHighThr1;
 
     /** PBEASTFIR[5]
      *  PB_EAST_PBIEX05_PBH_RECOV_ERROR
      */
-    (PbEastFir, bit(5)) ? TBDDefaultCallout;
+    (PbEastFir, bit(5)) ? SelfHighThr1;
 
     /** PBWESTFIR[6]
      *  PB_WEST_PBIEX02_PBH_PROTOCOL_ERROR
      */
-    (PbWestFir, bit(6)) ? TBDDefaultCallout;
+    (PbWestFir, bit(6)) ? calloutProcLevel2MedThr1;
 
     /** PBEASTFIR[6]
      *  PB_EAST_PBIEX05_PBH_PROTOCOL_ERROR
      */
-    (PbEastFir, bit(6)) ? TBDDefaultCallout;
+    (PbEastFir, bit(6)) ? calloutProcLevel2MedThr1;
 
     /** PBWESTFIR[7]
      *  PB_WEST_PBIEX02_PBH_OVERFLOW_ERROR
      */
-    (PbWestFir, bit(7)) ? TBDDefaultCallout;
+    (PbWestFir, bit(7)) ? calloutProcLevel2MedThr1;
 
     /** PBEASTFIR[7]
      *  PB_EAST_PBIEX05_PBH_OVERFLOW_ERROR
      */
-    (PbEastFir, bit(7)) ? TBDDefaultCallout;
+    (PbEastFir, bit(7)) ? calloutProcLevel2MedThr1;
 
     /** PBWESTFIR[8]
      *  PB_WEST_PBIEX03_PBH_HW_ERROR
      */
-    (PbWestFir, bit(8)) ? TBDDefaultCallout;
+    (PbWestFir, bit(8)) ? SelfHighThr1;
 
     /** PBEASTFIR[8]
      *  PB_EAST_PBIEX06_PBH_HW_ERROR
      */
-    (PbEastFir, bit(8)) ? TBDDefaultCallout;
+    (PbEastFir, bit(8)) ? SelfHighThr1;
 
     /** PBWESTFIR[9]
      *  PB_WEST_PBIEX03_PBH_RECOV_ERROR
      */
-    (PbWestFir, bit(9)) ? TBDDefaultCallout;
+    (PbWestFir, bit(9)) ? SelfHighThr1;
 
     /** PBEASTFIR[9]
      *  PB_EAST_PBIEX06_PBH_RECOV_ERROR
      */
-    (PbEastFir, bit(9)) ? TBDDefaultCallout;
+    (PbEastFir, bit(9)) ? SelfHighThr1;
 
     /** PBWESTFIR[10]
      *  PB_WEST_PBIEX03_PBH_PROTOCOL_ERROR
      */
-    (PbWestFir, bit(10)) ? TBDDefaultCallout;
+    (PbWestFir, bit(10)) ? calloutProcLevel2MedThr1;
 
     /** PBEASTFIR[10]
      *  PB_EAST_PBIEX06_PBH_PROTOCOL_ERROR
      */
-    (PbEastFir, bit(10)) ? TBDDefaultCallout;
+    (PbEastFir, bit(10)) ? calloutProcLevel2MedThr1;
 
     /** PBWESTFIR[11]
      *  PB_WEST_PBIEX03_PBH_OVERFLOW_ERROR
      */
-    (PbWestFir, bit(11)) ? TBDDefaultCallout;
+    (PbWestFir, bit(11)) ? calloutProcLevel2MedThr1;
 
     /** PBEASTFIR[11]
      *  PB_EAST_PBIEX06_PBH_OVERFLOW_ERROR
      */
-    (PbEastFir, bit(11)) ? TBDDefaultCallout;
+    (PbEastFir, bit(11)) ? calloutProcLevel2MedThr1;
 
     /** PBWESTFIR[12]
      *  PB_WEST_PBIEX09_PBH_HW_ERROR
      */
-    (PbWestFir, bit(12)) ? TBDDefaultCallout;
+    (PbWestFir, bit(12)) ? SelfHighThr1;
 
     /** PBEASTFIR[12]
      *  PB_EAST_PBIEX12_PBH_HW_ERROR
      */
-    (PbEastFir, bit(12)) ? TBDDefaultCallout;
+    (PbEastFir, bit(12)) ? SelfHighThr1;
 
     /** PBWESTFIR[13]
      *  PB_WEST_PBIEX09_PBH_RECOV_ERROR
      */
-    (PbWestFir, bit(13)) ? TBDDefaultCallout;
+    (PbWestFir, bit(13)) ? SelfHighThr1;
 
     /** PBEASTFIR[13]
      *  PB_EAST_PBIEX12_PBH_RECOV_ERROR
      */
-    (PbEastFir, bit(13)) ? TBDDefaultCallout;
+    (PbEastFir, bit(13)) ? SelfHighThr1;
 
     /** PBWESTFIR[14]
      *  PB_WEST_PBIEX09_PBH_PROTOCOL_ERROR
      */
-    (PbWestFir, bit(14)) ? TBDDefaultCallout;
+    (PbWestFir, bit(14)) ? calloutProcLevel2MedThr1;
 
     /** PBEASTFIR[14]
      *  PB_EAST_PBIEX12_PBH_PROTOCOL_ERROR
      */
-    (PbEastFir, bit(14)) ? TBDDefaultCallout;
+    (PbEastFir, bit(14)) ? calloutProcLevel2MedThr1;
 
     /** PBWESTFIR[15]
      *  PB_WEST_PBIEX09_PBH_OVERFLOW_ERROR
      */
-    (PbWestFir, bit(15)) ? TBDDefaultCallout;
+    (PbWestFir, bit(15)) ? calloutProcLevel2MedThr1;
 
     /** PBEASTFIR[15]
      *  PB_EAST_PBIEX12_PBH_OVERFLOW_ERROR
      */
-    (PbEastFir, bit(15)) ? TBDDefaultCallout;
+    (PbEastFir, bit(15)) ? calloutProcLevel2MedThr1;
 
     /** PBWESTFIR[16]
      *  PB_WEST_PBIEX10_PBH_HW_ERROR
      */
-    (PbWestFir, bit(16)) ? TBDDefaultCallout;
+    (PbWestFir, bit(16)) ? SelfHighThr1;
 
     /** PBEASTFIR[16]
      *  PB_EAST_PBIEX13_PBH_HW_ERROR
      */
-    (PbEastFir, bit(16)) ? TBDDefaultCallout;
+    (PbEastFir, bit(16)) ? SelfHighThr1;
 
     /** PBWESTFIR[17]
      *  PB_WEST_PBIEX10_PBH_RECOV_ERROR
      */
-    (PbWestFir, bit(17)) ? TBDDefaultCallout;
+    (PbWestFir, bit(17)) ? SelfHighThr1;
 
     /** PBEASTFIR[17]
      *  PB_EAST_PBIEX13_PBH_RECOV_ERROR
      */
-    (PbEastFir, bit(17)) ? TBDDefaultCallout;
+    (PbEastFir, bit(17)) ? SelfHighThr1;
 
     /** PBWESTFIR[18]
      *  PB_WEST_PBIEX10_PBH_PROTOCOL_ERROR
      */
-    (PbWestFir, bit(18)) ? TBDDefaultCallout;
+    (PbWestFir, bit(18)) ? calloutProcLevel2MedThr1;
 
     /** PBEASTFIR[18]
      *  PB_EAST_PBIEX13_PBH_PROTOCOL_ERROR
      */
-    (PbEastFir, bit(18)) ? TBDDefaultCallout;
+    (PbEastFir, bit(18)) ? calloutProcLevel2MedThr1;
 
     /** PBWESTFIR[19]
      *  PB_WEST_PBIEX10_PBH_OVERFLOW_ERROR
      */
-    (PbWestFir, bit(19)) ? TBDDefaultCallout;
+    (PbWestFir, bit(19)) ? calloutProcLevel2MedThr1;
 
     /** PBEASTFIR[19]
      *  PB_EAST_PBIEX13_PBH_OVERFLOW_ERROR
      */
-    (PbEastFir, bit(19)) ? TBDDefaultCallout;
+    (PbEastFir, bit(19)) ? calloutProcLevel2MedThr1;
 
     /** PBWESTFIR[20]
      *  PB_WEST_PBIEX11_PBH_HW_ERROR
      */
-    (PbWestFir, bit(20)) ? TBDDefaultCallout;
+    (PbWestFir, bit(20)) ? SelfHighThr1;
 
     /** PBEASTFIR[20]
      *  PB_EAST_PBIEX14_PBH_HW_ERROR
      */
-    (PbEastFir, bit(20)) ? TBDDefaultCallout;
+    (PbEastFir, bit(20)) ? SelfHighThr1;
 
     /** PBWESTFIR[21]
      *  PB_WEST_PBIEX11_PBH_RECOV_ERROR
      */
-    (PbWestFir, bit(21)) ? TBDDefaultCallout;
+    (PbWestFir, bit(21)) ? SelfHighThr1;
 
     /** PBEASTFIR[21]
      *  PB_EAST_PBIEX14_PBH_RECOV_ERROR
      */
-    (PbEastFir, bit(21)) ? TBDDefaultCallout;
+    (PbEastFir, bit(21)) ? SelfHighThr1;
 
     /** PBWESTFIR[22]
      *  PB_WEST_PBIEX11_PBH_PROTOCOL_ERROR
      */
-    (PbWestFir, bit(22)) ? TBDDefaultCallout;
+    (PbWestFir, bit(22)) ? calloutProcLevel2MedThr1;
 
     /** PBEASTFIR[22]
      *  PB_EAST_PBIEX14_PBH_PROTOCOL_ERROR
      */
-    (PbEastFir, bit(22)) ? TBDDefaultCallout;
+    (PbEastFir, bit(22)) ? calloutProcLevel2MedThr1;
 
     /** PBWESTFIR[23]
      *  PB_WEST_PBIEX11_PBH_OVERFLOW_ERROR
      */
-    (PbWestFir, bit(23)) ? TBDDefaultCallout;
+    (PbWestFir, bit(23)) ? calloutProcLevel2MedThr1;
 
     /** PBEASTFIR[23]
      *  PB_EAST_PBIEX14_PBH_OVERFLOW_ERROR
      */
-    (PbEastFir, bit(23)) ? TBDDefaultCallout;
+    (PbEastFir, bit(23)) ? calloutProcLevel2MedThr1;
 
     /** PBWESTFIR[24]
      *  PB_WEST_DATA_OVERFLOW_ERROR
      */
-    (PbWestFir, bit(24)) ? TBDDefaultCallout;
+    (PbWestFir, bit(24)) ? calloutProcLevel2MedThr1;
 
     /** PBEASTFIR[24]
      *  PB_EAST_DATA_OVERFLOW_ERROR
      */
-    (PbEastFir, bit(24)) ? TBDDefaultCallout;
+    (PbEastFir, bit(24)) ? calloutProcLevel2MedThr1;
 
     /** PBWESTFIR[25]
      *  PB_WEST_DATA_PROTOCOL_ERROR
      */
-    (PbWestFir, bit(25)) ? TBDDefaultCallout;
+    (PbWestFir, bit(25)) ? calloutProcLevel2MedThr1;
 
     /** PBEASTFIR[25]
      *  PB_EAST_DATA_PROTOCOL_ERROR
      */
-    (PbEastFir, bit(25)) ? TBDDefaultCallout;
+    (PbEastFir, bit(25)) ? calloutProcLevel2MedThr1;
 
     /** PBWESTFIR[26]
      *  PB_WEST_DATA_ROUTE_ERROR
      */
-    (PbWestFir, bit(26)) ? TBDDefaultCallout;
+    (PbWestFir, bit(26)) ? calloutProcLevel2MedThr1;
 
     /** PBEASTFIR[26]
      *  PB_EAST_DATA_ROUTE_ERROR
      */
-    (PbEastFir, bit(26)) ? TBDDefaultCallout;
+    (PbEastFir, bit(26)) ? calloutProcLevel2MedThr1;
 
     /** PBWESTFIR[27]
      *  PB_WEST_CMD_OVERFLOW_ERROR
      */
-    (PbWestFir, bit(27)) ? TBDDefaultCallout;
+    (PbWestFir, bit(27)) ? calloutProcLevel2MedThr1;
 
     /** PBEASTFIR[27]
      *  PB_EAST_CMD_OVERFLOW_ERROR
      */
-    (PbEastFir, bit(27)) ? TBDDefaultCallout;
+    (PbEastFir, bit(27)) ? calloutProcLevel2MedThr1;
+
+    /** PBWESTFIR[28]
+     *  PB_WEST_CMD_OVERFLOW_ERROR
+     */
+    (PbWestFir, bit(28)) ? calloutProcLevel2MedThr1;
+
+    /** PBEASTFIR[28]
+     *  PB_EAST_CMD_OVERFLOW_ERROR
+     */
+    (PbEastFir, bit(28)) ? calloutProcLevel2MedThr1;
+
+    /** PBWESTFIR[29|30|31]
+     *  PB_WEST_FIR_SPARE_0,1 and 2
+     */
+    (PbWestFir, bit(29|30|31)) ? defaultMaskedError;
+
+    /** PBEASTFIR[29|30|31]
+     *  PB_EAST_FIR_SPARE_0,1 and 2
+     */
+    (PbEastFir, bit(29|30|31)) ? defaultMaskedError;
 
     /** PBWESTFIR[32]
      *  FIR_SCOM_WEST_ERR
      */
-    (PbWestFir, bit(32)) ? TBDDefaultCallout;
+    (PbWestFir, bit(32)) ? defaultMaskedError;
 
     /** PBEASTFIR[32]
      *  FIR_SCOM_EAST_ERR
      */
-    (PbEastFir, bit(32)) ? TBDDefaultCallout;
+    (PbEastFir, bit(32)) ? defaultMaskedError;
 
     /** PBWESTFIR[33]
      *  FIR_SCOM_WEST_ERR_DUP
      */
-    (PbWestFir, bit(33)) ? TBDDefaultCallout;
+    (PbWestFir, bit(33)) ? defaultMaskedError;
 
     /** PBEASTFIR[33]
      *  FIR_SCOM_EAST_ERR_DUP
      */
-    (PbEastFir, bit(33)) ? TBDDefaultCallout;
+    (PbEastFir, bit(33)) ? defaultMaskedError;
 };
 
 ################################################################################
@@ -1361,27 +1385,27 @@ group gPbCentFir filter singlebit
     /** PBCENTFIR[0]
      *  PB_CENT_PROTOCOL_ERROR
      */
-    (PbCentFir, bit(0)) ? TBDDefaultCallout;
+    (PbCentFir, bit(0)) ? calloutProcLevel2MedThr1;
 
     /** PBCENTFIR[1]
      *  PB_CENT_OVERFLOW_ERROR
      */
-    (PbCentFir, bit(1)) ? TBDDefaultCallout;
+    (PbCentFir, bit(1)) ? calloutProcLevel2MedThr1;
 
     /** PBCENTFIR[2]
      *  PB_CENT_HW_PARITY_ERROR
      */
-    (PbCentFir, bit(2)) ? TBDDefaultCallout;
+    (PbCentFir, bit(2)) ? calloutProcLevel2MedThr1;
 
     /** PBCENTFIR[3]
      *  PB_CENT_TLBIE_TM_TIMEOUT_ERROR
      */
-    (PbCentFir, bit(3)) ? TBDDefaultCallout;
+    (PbCentFir, bit(3)) ? defaultMaskedError;
 
     /** PBCENTFIR[4]
      *  PB_CENT_COHERENCY_ERROR
      */
-    (PbCentFir, bit(4)) ? TBDDefaultCallout;
+    (PbCentFir, bit(4)) ? calloutProcLevel2MedThr1;
 
     /** PBCENTFIR[5]
      *  PB_CENT_CRESP_ADDR_ERROR
@@ -1391,22 +1415,22 @@ group gPbCentFir filter singlebit
     /** PBCENTFIR[6]
      *  PB_CENT_CRESP_ERROR
      */
-    (PbCentFir, bit(6)) ? TBDDefaultCallout;
+    (PbCentFir, bit(6)) ? calloutProcLevel2MedThr1;
 
     /** PBCENTFIR[7]
      *  PB_CENT_HANG_RECOVERY_LIMIT_ERROR
      */
-    (PbCentFir, bit(7)) ? TBDDefaultCallout;
+    (PbCentFir, bit(7)) ? defaultMaskedError;
 
     /** PBCENTFIR[8]
      *  PB_CENT_DATA_ROUTE_ERROR
      */
-    (PbCentFir, bit(8)) ? TBDDefaultCallout;
+    (PbCentFir, bit(8)) ? calloutProcLevel2MedThr1;
 
     /** PBCENTFIR[9]
      *  PB_CENT_HANG_RECOVERY_GTE_LEVEL1
      */
-    (PbCentFir, bit(9)) ? TBDDefaultCallout;
+    (PbCentFir, bit(9)) ? defaultMaskedError;
 
     /** PBCENTFIR[10]
      *  PB_CENT_FORCE_MP_IPL
@@ -1416,37 +1440,37 @@ group gPbCentFir filter singlebit
     /** PBCENTFIR[11]
      *  PB_CENT_FIR_SPARE_0
      */
-    (PbCentFir, bit(11)) ? TBDDefaultCallout;
+    (PbCentFir, bit(11)) ? calloutProcLevel2MedThr1;
 
     /** PBCENTFIR[12]
      *  PB_CENT_F0LINK_ERROR
      */
-    (PbCentFir, bit(12)) ? TBDDefaultCallout;
+    (PbCentFir, bit(12)) ? calloutProcLevel2MedThr1;
 
     /** PBCENTFIR[13]
      *  PB_CENT_F1LINK_ERROR
      */
-    (PbCentFir, bit(13)) ? TBDDefaultCallout;
+    (PbCentFir, bit(13)) ? calloutProcLevel2MedThr1;
 
     /** PBCENTFIR[14]
      *  PB_CENT_F0_OVERFLOW
      */
-    (PbCentFir, bit(14)) ? TBDDefaultCallout;
+    (PbCentFir, bit(14)) ? calloutProcLevel2MedThr1;
 
     /** PBCENTFIR[15]
      *  PB_CENT_F1_OVERFLOW
      */
-    (PbCentFir, bit(15)) ? TBDDefaultCallout;
+    (PbCentFir, bit(15)) ? calloutProcLevel2MedThr1;
 
     /** PBCENTFIR[16]
      *  FIR_SCOM_CENT_ERR
      */
-    (PbCentFir, bit(16)) ? TBDDefaultCallout;
+    (PbCentFir, bit(16)) ? defaultMaskedError;
 
     /** PBCENTFIR[17]
      *  FIR_SCOM_CENT_ERR_DUP
      */
-    (PbCentFir, bit(17)) ? TBDDefaultCallout;
+    (PbCentFir, bit(17)) ? defaultMaskedError;
 };
 
 ################################################################################
@@ -2248,6 +2272,9 @@ group gEnHcaFir filter singlebit
 #        rule code parser does not have the support for something like this.
 #        Maybe we can add this as a later feature.
 
+################################################################################
+# FIR last updated based on p8dd1_mss_FFDC_37_ reviewd.xls
+################################################################################
 rule PciNestFir_0
 {
   CHECK_STOP:
@@ -2277,21 +2304,22 @@ group gPciNestFir filter singlebit
     /** PCINESTFIR_0[0]
      *  BAR_PE
      */
-    (PciNestFir_0, bit(0)) ? TBDDefaultCallout;
+    (PciNestFir_0, bit(0)) ? calloutConnPci0Th1;
 
     /** PCINESTFIR_1[0]
      *  BAR_PE
      */
-    (PciNestFir_1, bit(0)) ? TBDDefaultCallout;
+    (PciNestFir_1, bit(0)) ? calloutConnPci1Th1;
 
     /** PCINESTFIR_2[0]
      *  BAR_PE
      */
-    (PciNestFir_2, bit(0)) ? TBDDefaultCallout;
+    (PciNestFir_2, bit(0)) ? calloutConnPci2Th1;
 
     /** PCINESTFIR_0[1]
      *  NONBAR_PE
      */
+    # FIXME RTC 23127 Should Phyp Threshold
     (PciNestFir_0, bit(1)) ? TBDDefaultCallout;
 
     /** PCINESTFIR_1[1]
@@ -2307,6 +2335,7 @@ group gPciNestFir filter singlebit
     /** PCINESTFIR_0[2]
      *  PB_TO_PEC_CE
      */
+    # FIXME RTC 23127 PB_TO_PEC under discussion
     (PciNestFir_0, bit(2)) ? TBDDefaultCallout;
 
     /** PCINESTFIR_1[2]
@@ -2322,6 +2351,7 @@ group gPciNestFir filter singlebit
     /** PCINESTFIR_0[3]
      *  PB_TO_PEC_UE
      */
+    # FIXME RTC 23127 PB_TO_PEC under discussion
     (PciNestFir_0, bit(3)) ? TBDDefaultCallout;
 
     /** PCINESTFIR_1[3]
@@ -2337,81 +2367,82 @@ group gPciNestFir filter singlebit
     /** PCINESTFIR_0[4]
      *  PB_TO_PEC_SUE
      */
-    (PciNestFir_0, bit(4)) ? TBDDefaultCallout;
+    (PciNestFir_0, bit(4)) ? defaultMaskedError;
 
     /** PCINESTFIR_1[4]
      *  PB_TO_PEC_SUE
      */
-    (PciNestFir_1, bit(4)) ? TBDDefaultCallout;
+    (PciNestFir_1, bit(4)) ? defaultMaskedError;
 
     /** PCINESTFIR_2[4]
      *  PB_TO_PEC_SUE
      */
-    (PciNestFir_2, bit(4)) ? TBDDefaultCallout;
+    (PciNestFir_2, bit(4)) ? defaultMaskedError;
 
     /** PCINESTFIR_0[5]
      *  ARY_ECC_CE
      */
-    (PciNestFir_0, bit(5)) ? TBDDefaultCallout;
+    (PciNestFir_0, bit(5)) ? calloutConnPci0Th32;
 
     /** PCINESTFIR_1[5]
      *  ARY_ECC_CE
      */
-    (PciNestFir_1, bit(5)) ? TBDDefaultCallout;
+    (PciNestFir_1, bit(5)) ? calloutConnPci1Th32;
 
     /** PCINESTFIR_2[5]
      *  ARY_ECC_CE
      */
-    (PciNestFir_2, bit(5)) ? TBDDefaultCallout;
+    (PciNestFir_2, bit(5)) ? calloutConnPci2Th32;
 
     /** PCINESTFIR_0[6]
      *  ARY_ECC_UE
      */
-    (PciNestFir_0, bit(6)) ? TBDDefaultCallout;
+    (PciNestFir_0, bit(6)) ? calloutConnPci0Th1;
 
     /** PCINESTFIR_1[6]
      *  ARY_ECC_UE
      */
-    (PciNestFir_1, bit(6)) ? TBDDefaultCallout;
+    (PciNestFir_1, bit(6)) ? calloutConnPci1Th1;
 
     /** PCINESTFIR_2[6]
      *  ARY_ECC_UE
      */
-    (PciNestFir_2, bit(6)) ? TBDDefaultCallout;
+    (PciNestFir_2, bit(6)) ? calloutConnPci2Th1;
 
     /** PCINESTFIR_0[7]
      *  ARY_ECC_SUE
      */
-    (PciNestFir_0, bit(7)) ? TBDDefaultCallout;
+    (PciNestFir_0, bit(7)) ? defaultMaskedError;
 
     /** PCINESTFIR_1[7]
      *  ARY_ECC_SUE
      */
-    (PciNestFir_1, bit(7)) ? TBDDefaultCallout;
+    (PciNestFir_1, bit(7)) ? defaultMaskedError;
 
     /** PCINESTFIR_2[7]
      *  ARY_ECC_SUE
      */
-    (PciNestFir_2, bit(7)) ? TBDDefaultCallout;
+    (PciNestFir_2, bit(7)) ? defaultMaskedError;
 
     /** PCINESTFIR_0[8]
      *  REGISTER_ARRAY_PE
      */
-    (PciNestFir_0, bit(8)) ? TBDDefaultCallout;
+    (PciNestFir_0, bit(8)) ? calloutConnPci0Th1;
 
     /** PCINESTFIR_1[8]
      *  REGISTER_ARRAY_PE
      */
-    (PciNestFir_1, bit(8)) ? TBDDefaultCallout;
+    (PciNestFir_1, bit(8)) ? calloutConnPci1Th1;
 
     /** PCINESTFIR_2[8]
      *  REGISTER_ARRAY_PE
      */
-    (PciNestFir_2, bit(8)) ? TBDDefaultCallout;
+    (PciNestFir_2, bit(8)) ? calloutConnPci2Th1;
 
     /** PCINESTFIR_0[9]
      *  PB_INTERFACE_PE
      */
+    # FIXME RTC 23127 MRU PB to PEC under discussion
     (PciNestFir_0, bit(9)) ? TBDDefaultCallout;
 
     /** PCINESTFIR_1[9]
@@ -2427,81 +2458,83 @@ group gPciNestFir filter singlebit
     /** PCINESTFIR_0[10]
      *  PB_DATA_HANG_ERRORS
      */
-    (PciNestFir_0, bit(10)) ? TBDDefaultCallout;
+    (PciNestFir_0, bit(10)) ? defaultMaskedError;
 
     /** PCINESTFIR_1[10]
      *  PB_DATA_HANG_ERRORS
      */
-    (PciNestFir_1, bit(10)) ? TBDDefaultCallout;
+    (PciNestFir_1, bit(10)) ? defaultMaskedError;
 
     /** PCINESTFIR_2[10]
      *  PB_DATA_HANG_ERRORS
      */
-    (PciNestFir_2, bit(10)) ? TBDDefaultCallout;
+    (PciNestFir_2, bit(10)) ? defaultMaskedError;
 
     /** PCINESTFIR_0[11]
      *  PB_HANG_ERRORS
      */
-    (PciNestFir_0, bit(11)) ? TBDDefaultCallout;
+    (PciNestFir_0, bit(11)) ? defaultMaskedError;
 
     /** PCINESTFIR_1[11]
      *  PB_HANG_ERRORS
      */
-    (PciNestFir_1, bit(11)) ? TBDDefaultCallout;
+    (PciNestFir_1, bit(11)) ? defaultMaskedError;
 
     /** PCINESTFIR_2[11]
      *  PB_HANG_ERRORS
      */
-    (PciNestFir_2, bit(11)) ? TBDDefaultCallout;
+    (PciNestFir_2, bit(11)) ? defaultMaskedError;
 
     /** PCINESTFIR_0[12]
      *  RD_ARE_ERRORS
      */
-    (PciNestFir_0, bit(12)) ? TBDDefaultCallout;
+    (PciNestFir_0, bit(12)) ? calloutProcLevel2MedThr1;
 
     /** PCINESTFIR_1[12]
      *  RD_ARE_ERRORS
      */
-    (PciNestFir_1, bit(12)) ? TBDDefaultCallout;
+    (PciNestFir_1, bit(12)) ? calloutProcLevel2MedThr1;
 
     /** PCINESTFIR_2[12]
      *  RD_ARE_ERRORS
      */
-    (PciNestFir_2, bit(12)) ? TBDDefaultCallout;
+    (PciNestFir_2, bit(12)) ? calloutProcLevel2MedThr1;
 
     /** PCINESTFIR_0[13]
      *  NONRD_ARE_ERRORS
      */
-    (PciNestFir_0, bit(13)) ? TBDDefaultCallout;
+    (PciNestFir_0, bit(13)) ? calloutProcLevel2MedThr1;
 
     /** PCINESTFIR_1[13]
      *  NONRD_ARE_ERRORS
      */
-    (PciNestFir_1, bit(13)) ? TBDDefaultCallout;
+    (PciNestFir_1, bit(13)) ? calloutProcLevel2MedThr1;
 
     /** PCINESTFIR_2[13]
      *  NONRD_ARE_ERRORS
      */
-    (PciNestFir_2, bit(13)) ? TBDDefaultCallout;
+    (PciNestFir_2, bit(13)) ? calloutProcLevel2MedThr1;
 
     /** PCINESTFIR_0[14]
      *  PCI_HANG_ERROR
      */
-    (PciNestFir_0, bit(14)) ? TBDDefaultCallout;
+    # FIXME RTC 23127 PCI All under discussion
+    (PciNestFir_0, bit(14)) ? calloutConnPci0AndIsolatePathTh1;
 
     /** PCINESTFIR_1[14]
      *  PCI_HANG_ERROR
      */
-    (PciNestFir_1, bit(14)) ? TBDDefaultCallout;
+    (PciNestFir_1, bit(14)) ? calloutConnPci1AndIsolatePathTh1;
 
     /** PCINESTFIR_2[14]
      *  PCI_HANG_ERROR
      */
-    (PciNestFir_2, bit(14)) ? TBDDefaultCallout;
+    (PciNestFir_2, bit(14)) ? calloutConnPci2AndIsolatePathTh1;
 
     /** PCINESTFIR_0[15]
      *  PCI_CLOCK_ERROR
      */
+    # FIXME RTC 23127 Clock Isolate is under discussion
     (PciNestFir_0, bit(15)) ? TBDDefaultCallout;
 
     /** PCINESTFIR_1[15]
@@ -2517,111 +2550,112 @@ group gPciNestFir filter singlebit
     /** PCINESTFIR_0[16]
      *  AIB_FENCE
      */
-    (PciNestFir_0, bit(16)) ? TBDDefaultCallout;
+    (PciNestFir_0, bit(16)) ? calloutConnPci0Th1;
 
     /** PCINESTFIR_1[16]
      *  AIB_FENCE
      */
-    (PciNestFir_1, bit(16)) ? TBDDefaultCallout;
+    (PciNestFir_1, bit(16)) ? calloutConnPci1Th1;
 
     /** PCINESTFIR_2[16]
      *  AIB_FENCE
      */
-    (PciNestFir_2, bit(16)) ? TBDDefaultCallout;
+    (PciNestFir_2, bit(16)) ? calloutConnPci2Th1;
 
     /** PCINESTFIR_0[17]
      *  HW_ERRORS
      */
-    (PciNestFir_0, bit(17)) ? TBDDefaultCallout;
+    (PciNestFir_0, bit(17)) ? calloutConnPci0Th1;
 
     /** PCINESTFIR_1[17]
      *  HW_ERRORS
      */
-    (PciNestFir_1, bit(17)) ? TBDDefaultCallout;
+    (PciNestFir_1, bit(17)) ? calloutConnPci1Th1;
 
     /** PCINESTFIR_2[17]
      *  HW_ERRORS
      */
-    (PciNestFir_2, bit(17)) ? TBDDefaultCallout;
+    (PciNestFir_2, bit(17)) ? calloutConnPci2Th1;
 
     /** PCINESTFIR_0[18]
      *  UNSOLICITIEDPBDATA
      */
-    (PciNestFir_0, bit(18)) ? TBDDefaultCallout;
+    (PciNestFir_0, bit(18)) ? callout2ndLvlMed;
 
     /** PCINESTFIR_1[18]
      *  UNSOLICITIEDPBDATA
      */
-    (PciNestFir_1, bit(18)) ? TBDDefaultCallout;
+    (PciNestFir_1, bit(18)) ? callout2ndLvlMed;
 
     /** PCINESTFIR_2[18]
      *  UNSOLICITIEDPBDATA
      */
-    (PciNestFir_2, bit(18)) ? TBDDefaultCallout;
+    (PciNestFir_2, bit(18)) ? callout2ndLvlMed;
 
     /** PCINESTFIR_0[19]
      *  UNEXPECTEDCRESP
      */
-    (PciNestFir_0, bit(19)) ? TBDDefaultCallout;
+    (PciNestFir_0, bit(19)) ? callout2ndLvlMed;
 
     /** PCINESTFIR_1[19]
      *  UNEXPECTEDCRESP
      */
-    (PciNestFir_1, bit(19)) ? TBDDefaultCallout;
+    (PciNestFir_1, bit(19)) ? callout2ndLvlMed;
 
     /** PCINESTFIR_2[19]
      *  UNEXPECTEDCRESP
      */
-    (PciNestFir_2, bit(19)) ? TBDDefaultCallout;
+    (PciNestFir_2, bit(19)) ? callout2ndLvlMed;
 
     /** PCINESTFIR_0[20]
      *  INVALIDCRESP
      */
-    (PciNestFir_0, bit(20)) ? TBDDefaultCallout;
+    (PciNestFir_0, bit(20)) ? calloutProcLevel2MedThr1;
 
     /** PCINESTFIR_1[20]
      *  INVALIDCRESP
      */
-    (PciNestFir_1, bit(20)) ? TBDDefaultCallout;
+    (PciNestFir_1, bit(20)) ? calloutProcLevel2MedThr1;
 
     /** PCINESTFIR_2[20]
      *  INVALIDCRESP
      */
-    (PciNestFir_2, bit(20)) ? TBDDefaultCallout;
+    (PciNestFir_2, bit(20)) ? calloutProcLevel2MedThr1;
 
     /** PCINESTFIR_0[21]
      *  PBUNSUPPORTEDSIZE
      */
-    (PciNestFir_0, bit(21)) ? TBDDefaultCallout;
+    (PciNestFir_0, bit(21)) ? calloutProcLevel2MedThr1;
 
     /** PCINESTFIR_1[21]
      *  PBUNSUPPORTEDSIZE
      */
-    (PciNestFir_1, bit(21)) ? TBDDefaultCallout;
+    (PciNestFir_1, bit(21)) ? calloutProcLevel2MedThr1;
 
     /** PCINESTFIR_2[21]
      *  PBUNSUPPORTEDSIZE
      */
-    (PciNestFir_2, bit(21)) ? TBDDefaultCallout;
+    (PciNestFir_2, bit(21)) ? calloutProcLevel2MedThr1;
 
     /** PCINESTFIR_0[22]
      *  PBUNSUPPORTEDCMD
      */
-    (PciNestFir_0, bit(22)) ? TBDDefaultCallout;
+    (PciNestFir_0, bit(22)) ? calloutProcLevel2MedThr1;
 
     /** PCINESTFIR_1[22]
      *  PBUNSUPPORTEDCMD
      */
-    (PciNestFir_1, bit(22)) ? TBDDefaultCallout;
+    (PciNestFir_1, bit(22)) ? calloutProcLevel2MedThr1;
 
     /** PCINESTFIR_2[22]
      *  PBUNSUPPORTEDCMD
      */
-    (PciNestFir_2, bit(22)) ? TBDDefaultCallout;
+    (PciNestFir_2, bit(22)) ? calloutProcLevel2MedThr1;
 
     /** PCINESTFIR_0[23]
      *  AIB_PE
      */
+    # FIXME RTC 23127 Should Phyp Threshold ?
     (PciNestFir_0, bit(23)) ? TBDDefaultCallout;
 
     /** PCINESTFIR_1[23]
@@ -2637,21 +2671,22 @@ group gPciNestFir filter singlebit
     /** PCINESTFIR_0[24]
      *  ASB_ERROR
      */
-    (PciNestFir_0, bit(24)) ? TBDDefaultCallout;
+    (PciNestFir_0, bit(24)) ? calloutConnPci0Th1;
 
     /** PCINESTFIR_1[24]
      *  ASB_ERROR
      */
-    (PciNestFir_1, bit(24)) ? TBDDefaultCallout;
+    (PciNestFir_1, bit(24)) ? calloutConnPci1Th1;
 
     /** PCINESTFIR_2[24]
      *  ASB_ERROR
      */
-    (PciNestFir_2, bit(24)) ? TBDDefaultCallout;
+    (PciNestFir_2, bit(24)) ? calloutConnPci2Th1;
 
     /** PCINESTFIR_0[25]
      *  FOREIGN_LINK_FAIL
      */
+     # FIXME RTC 23127 Action TBD
     (PciNestFir_0, bit(25)) ? TBDDefaultCallout;
 
     /** PCINESTFIR_1[25]
@@ -2667,6 +2702,7 @@ group gPciNestFir filter singlebit
     /** PCINESTFIR_0[26]
      *  FOREIGN_PB_HANG
      */
+    # FIXME RTC 23127 Action TBD
     (PciNestFir_0, bit(26)) ? TBDDefaultCallout;
 
     /** PCINESTFIR_1[26]
@@ -2682,6 +2718,7 @@ group gPciNestFir filter singlebit
     /** PCINESTFIR_0[27]
      *  CAPP_ERROR
      */
+    # FIXME RTC 23127 Action TBD
     (PciNestFir_0, bit(27)) ? TBDDefaultCallout;
 
     /** PCINESTFIR_1[27]
@@ -2697,17 +2734,48 @@ group gPciNestFir filter singlebit
     /** PCINESTFIR_0[28]
      *  SYNC_SCOM_ERR
      */
-    (PciNestFir_0, bit(28)) ? TBDDefaultCallout;
+    (PciNestFir_0, bit(28)) ? defaultMaskedError;
 
     /** PCINESTFIR_1[28]
      *  SYNC_SCOM_ERR
      */
-    (PciNestFir_1, bit(28)) ? TBDDefaultCallout;
+    (PciNestFir_1, bit(28)) ? defaultMaskedError;
 
     /** PCINESTFIR_2[28]
      *  SYNC_SCOM_ERR
      */
-    (PciNestFir_2, bit(28)) ? TBDDefaultCallout;
+    (PciNestFir_2, bit(28)) ? defaultMaskedError;
+
+    /** PCINESTFIR_0[29]
+     *  SCOM Engine ERROR 0
+     */
+    (PciNestFir_0, bit(29)) ? defaultMaskedError;
+
+    /** PCINESTFIR_1[29]
+     *  SCOM Engine ERROR 0
+     */
+    (PciNestFir_1, bit(29)) ? defaultMaskedError;
+
+    /** PCINESTFIR_2[29]
+     *  SCOM Engine ERROR 0
+     */
+    (PciNestFir_2, bit(29)) ? defaultMaskedError;
+
+    /** PCINESTFIR_0[30]
+     *  SCOM Engine ERROR 0
+     */
+    (PciNestFir_0, bit(30)) ? defaultMaskedError;
+
+    /** PCINESTFIR_1[30]
+     *  SCOM Engine ERROR 1
+     */
+    (PciNestFir_1, bit(30)) ? defaultMaskedError;
+
+    /** PCINESTFIR_2[30]
+     *  SCOM Engine ERROR 1
+     */
+    (PciNestFir_2, bit(30)) ? defaultMaskedError;
+
 };
 
 ################################################################################
@@ -2922,7 +2990,6 @@ actionclass analyzeMpIPL
     funccall("analyzeMpIPL");
 };
 
-
 # DMI Bus 0-3 Spare Deployed
 actionclass dmiBus0SpareDeployed
 {
@@ -3005,3 +3072,52 @@ actionclass dmiBus3TooManyBusErrors
     funccall("dmiBus3TooManyErrors");
     threshold1;
 };
+
+/** Callout the connected PCI 0 controller. */
+actionclass calloutConnPci0 { callout(connected(TYPE_PCI,0), MRU_MED); };
+
+/** Callout the connected PCI 1 controller. */
+actionclass calloutConnPci1 { callout(connected(TYPE_PCI,1), MRU_MED); };
+
+/** Callout the connected PCI 2 controller. */
+actionclass calloutConnPci2 { callout(connected(TYPE_PCI,2), MRU_MED); };
+
+/** Callout the connected PCI 0 controller, threshold 1 */
+actionclass calloutConnPci0Th1 { calloutConnPci0; threshold1; };
+
+/** Callout the connected PCI 1 controller, threshold 1 */
+actionclass calloutConnPci1Th1 { calloutConnPci1; threshold1; };
+
+/** Callout the connected PCI 2 controller, threshold 1 */
+actionclass calloutConnPci2Th1 { calloutConnPci2; threshold1; };
+
+/** Callout the connected PCI 0 controller, threshold 32 per day */
+actionclass calloutConnPci0Th32 { calloutConnPci0; threshold32pday; };
+
+/** Callout the connected PCI 1 controller, threshold 32 per day */
+actionclass calloutConnPci1Th32 { calloutConnPci1; threshold32pday; };
+
+/** Callout the connected PCI 2 controller, threshold 32 per day */
+actionclass calloutConnPci2Th32 { calloutConnPci2; threshold32pday; };
+
+/** Callout the connected PCI 0 controller and path to adapter, threshold 1 */
+actionclass calloutConnPci0AndIsolatePathTh1
+{
+    #FIXME RTC 23127 Need to find right Procedure for PCI path isolation
+    calloutConnPci0Th1;
+};
+
+/** Callout the connected PCI 1 controller and path to adapter, threshold 1 */
+actionclass calloutConnPci1AndIsolatePathTh1
+{
+    #FIXME RTC 23127 Need to find right Procedure for PCI path isolation
+    calloutConnPci1Th1;
+};
+
+/** Callout the connected PCI 2 controller and path to adapter, threshold 1 */
+actionclass calloutConnPci2AndIsolatePathTh1
+{
+    #FIXME RTC 23127 Need to find right Procedure for PCI path isolation
+    calloutConnPci2Th1;
+};
+

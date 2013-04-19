@@ -95,7 +95,7 @@ TARGETING::TargetHandle_t getTarget( const TARGETING::EntityPath & i_path )
     TargetHandle_t o_target = targetService().toTarget( i_path );
     if ( NULL == o_target )
     {
-        PRDF_ERR( "[getTarget] Failed: i_path=" ); i_path.dump();
+        PRDF_ERR( "[getTarget] Failed: i_path = " ); i_path.dump();
     }
 
     return o_target;

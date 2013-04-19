@@ -843,22 +843,22 @@ group gL2Fir filter singlebit
     /** L2FIR[6]
      *  DIR_CE_DETECTED
      */
-    (L2Fir, bit(6)) ? SelfMedThr32PerDay;
+    (L2Fir, bit(6)) ? L2DirCE;
 
     /** L2FIR[7]
      *  DIR_UE_DETECTED
      */
-    (L2Fir, bit(7)) ? SelfMedThr1;
+    (L2Fir, bit(7)) ? SelfHighThr1;
 
     /** L2FIR[8]
      *  DIR_STUCK_BIT_CE
      */
-    (L2Fir, bit(8)) ? calloutSelfMedThr1;
+    (L2Fir, bit(8)) ? SelfHighThr1;
 
     /** L2FIR[9]
      *  DIR_SBCE_REPAIR_FAILED
      */
-    (L2Fir, bit(9)) ? SelfMedThr1;
+    (L2Fir, bit(9)) ? SelfHighThr1;
 
     /** L2FIR[10]
      *  MULTIPLE_DIR_ERRORS_DETECTED
@@ -868,17 +868,17 @@ group gL2Fir filter singlebit
     /** L2FIR[11]
      *  LRU_READ_ERROR_DETECTED
      */
-    (L2Fir, bit(11)) ? SelfMedThr32PerDay;
+    (L2Fir, bit(11)) ? SelfHighThr32PerDay;
 
     /** L2FIR[12]
      *  RC_POWERBUS_DATA_TIMEOUT
      */
-    (L2Fir, bit(12)) ? CalloutLevel2Thr1;
+    (L2Fir, bit(12)) ? callout2ndLvlMed;
 
     /** L2FIR[13]
      *  NCU_POWERBUS_DATA_TIMEOUT
      */
-    (L2Fir, bit(13)) ? CalloutLevel2Thr1;
+    (L2Fir, bit(13)) ? callout2ndLvlMed;
 
     /** L2FIR[14]
      *  HW_CONTROL_ERROR
@@ -888,22 +888,22 @@ group gL2Fir filter singlebit
     /** L2FIR[15]
      *  LRU_ALL_MEMBERS_IN_CGC_ARE_LINE_DELETED
      */
-    (L2Fir, bit(15)) ? SelfMedThr1;
+    (L2Fir, bit(15)) ? SelfHighThr1;
 
     /** L2FIR[16]
      *  CACHE_INHIBITED_HIT_CACHEABLE_ERROR
      */
-    (L2Fir, bit(16)) ? SelfMedThr1;
+    (L2Fir, bit(16)) ? SelfHighThr1;
 
     /** L2FIR[17]
      *  RC_LOAD_RECIVED_PB_CRESP_ADR_ERR
      */
-    (L2Fir, bit(17)) ? SelfMedThr1UE;
+    (L2Fir, bit(17)) ? SelfHighThr1UE;
 
     /** L2FIR[18]
      *  RC_STORE_RECIVED_PB_CRESP_ADR_ERR
      */
-    (L2Fir, bit(18)) ?  SelfMedThr1;
+    (L2Fir, bit(18)) ?  SelfHighThr1;
 
     /** L2FIR[19]
      *  RC_POWBUS_DATA_CE_ERR_FROM_F2CHK
@@ -913,7 +913,7 @@ group gL2Fir filter singlebit
     /** L2FIR[20]
      *  RC_POWBUS_DATA_UE_ERR_FROM_F2CHK
      */
-    (L2Fir, bit(20)) ? SelfMedThr1UE;
+    (L2Fir, bit(20)) ? SelfHighThr1UE;
 
     /** L2FIR[21]
      *  RC_POWBUS_DATA_SUE_ERR_FROM_F2CHK
@@ -923,7 +923,7 @@ group gL2Fir filter singlebit
     /** L2FIR[22]
      *  CO_ICSW_UE_SUE_DATA_ERR_FROM_F2CHK
      */
-    (L2Fir, bit(22)) ? SelfMedThr1;
+    (L2Fir, bit(22)) ? SelfHighThr1;
 
     /** L2FIR[23]
      *  RC_LOAD_RECIVED_PB_CRESP_ADR_ERR_FOR_HYP
@@ -933,7 +933,7 @@ group gL2Fir filter singlebit
     /** L2FIR[24]
      *  RCDAT_RD_PARITY_ERR
      */
-    (L2Fir, bit(24)) ? SelfMedThr1UE;
+    (L2Fir, bit(24)) ? SelfHighThr1UE;
 
     /** L2FIR[25]
      *  CO_ICSW_RTY_BUSY_ABT_ERR
@@ -1061,7 +1061,7 @@ group gL3Fir filter singlebit
     /** L3FIR[8]
      *  L3 Cache Write UE from PowerBus
      */
-    (L3Fir, bit(8)) ? SelfMedThr1UE;
+    (L3Fir, bit(8)) ? SelfHighThr1UE;
 
     /** L3FIR[9]
      *  L3 Cache Write SUE from PowerBus
@@ -1071,12 +1071,12 @@ group gL3Fir filter singlebit
     /** L3FIR[10]
      *  L3 Cache Write CE from L2
      */
-    (L3Fir, bit(10)) ? SelfMedThr32PerDay;
+    (L3Fir, bit(10)) ? SelfHighThr32PerDay;
 
     /** L3FIR[11]
      *  L3 Cache Write UE from L2
      */
-    (L3Fir, bit(11)) ? SelfMedThr1UE;
+    (L3Fir, bit(11)) ? L3UE;
 
     /** L3FIR[12]
      *  L3 Cache Write SUE from L2
@@ -1091,7 +1091,7 @@ group gL3Fir filter singlebit
     /** L3FIR[14]
      *  L3 Dir Read UE
      */
-    (L3Fir, bit(14)) ? SelfMedThr1UE;
+    (L3Fir, bit(14)) ? SelfHighThr1UE;
 
     /** L3FIR[15]
      *  L3 Dir Read \"Phantom Error\"
@@ -1106,7 +1106,7 @@ group gL3Fir filter singlebit
     /** L3FIR[17]
      *  L3 Load Address Error (from Prefetch Machine)
      */
-    (L3Fir, bit(17)) ? SelfMedThr1;
+    (L3Fir, bit(17)) ? SelfHighThr1;
 
     /** L3FIR[18]
      *  L3 Address Hang
@@ -1141,7 +1141,7 @@ group gL3Fir filter singlebit
     /** L3FIR[24]
      *  L3 Hw Control Error
      */
-    (L3Fir, bit(24)) ? SelfMedThr1;
+    (L3Fir, bit(24)) ? SelfHighThr1;
 
     /** L3FIR[25]
      *  L3 Snoop Sw error detected
@@ -1156,22 +1156,22 @@ group gL3Fir filter singlebit
     /** L3FIR[27]
      *  L3 DRAM Logic Error
      */
-    (L3Fir, bit(27)) ? SelfMedThr1;
+    (L3Fir, bit(27)) ? SelfHighThr1;
 
     /** L3FIR[28]
      *  L3 LRU SRAM Logic Recoverable Error
      */
-    (L3Fir, bit(28)) ? SelfMedThr32PerDay;
+    (L3Fir, bit(28)) ? SelfHighThr32PerDay;
 
     /** L3FIR[29]
      *  L3 Cache Congruence Class Deleted
      */
-    (L3Fir, bit(29)) ? SelfMedThr1;
+    (L3Fir, bit(29)) ? SelfHighThr1;
 
     /** L3FIR[30]
      *  L3 Cache Timer Refresh Error
      */
-    (L3Fir, bit(30)) ? SelfMedThr1;
+    (L3Fir, bit(30)) ? SelfHighThr1;
 
     /** L3FIR[31]
      *  L3 HA Consumer SW Access Error
@@ -1225,7 +1225,7 @@ group gNcuFir filter singlebit
     /** NCUFIR[0]
      *  CONTROL_ERR: H/W control error.
      */
-    (NcuFir, bit(0)) ? SelfMedThr1;
+    (NcuFir, bit(0)) ? SelfHighThr1;
 
     /** NCUFIR[1]
      *  TLBIE_SW_ERR: TLBIE received illegal AP/LP field from core.
@@ -1246,27 +1246,27 @@ group gNcuFir filter singlebit
     /** NCUFIR[4]
      *  ST_FOREIGN0_ACK_DEAD: Store received ack_dead on foreign link0.
      */
-    (NcuFir, bit(4)) ? SelfMedThr32PerDay;
+    (NcuFir, bit(4)) ? SelfHighThr32PerDay;
 
     /** NCUFIR[5]
      *  ST_FOREIGN1_ACK_DEAD: Store received ack_dead on foreign link1.
      */
-    (NcuFir, bit(5)) ? SelfMedThr32PerDay;
+    (NcuFir, bit(5)) ? SelfHighThr32PerDay;
 
     /** NCUFIR[6]
      *  LD_FOREIGN0_ACK_DEAD: Load received ack_dead on foreign link0.
      */
-    (NcuFir, bit(6)) ? SelfMedThr32PerDay;
+    (NcuFir, bit(6)) ? SelfHighThr32PerDay;
 
     /** NCUFIR[7]
      *  LD_FOREIGN1_ACK_DEAD: Load received ack_dead on foreign link1.
      */
-    (NcuFir, bit(7)) ? SelfMedThr32PerDay;
+    (NcuFir, bit(7)) ? SelfHighThr32PerDay;
 
     /** NCUFIR[8]
      *  STQ_DATA_PARITY_ERR: Store data parity error from regfile detected.
      */
-    (NcuFir, bit(8)) ? SelfMedThr1UE;
+    (NcuFir, bit(8)) ? SelfHighThr1UE;
 
     /** NCUFIR[9]
      *  STORE_TIMEOUT: Store timed out on PB.
@@ -1281,7 +1281,7 @@ group gNcuFir filter singlebit
     /** NCUFIR[11]
      *  TLBIE_SNOOP_TIMEOUT: TLBIE snooper timed out waiting for core.
      */
-    (NcuFir, bit(11)) ? SelfMedThr1;
+    (NcuFir, bit(11)) ? SelfHighThr1;
 
     /** NCUFIR[12]
      *  HTM_IMA_TIMEOUT: HTM/IMA address machine timed out on PB.
@@ -1312,7 +1312,7 @@ group gNcuFir filter singlebit
      *  PMISC_CRESP_ADDR_ERR: PMISC received address error cresp.
      */
 
-    (NcuFir, bit(17)) ? calloutProcMed;
+    (NcuFir, bit(17)) ? calloutParentProcHighThr1;
 
     /** NCUFIR[18]
      *  TLBIE_CONTROL_ERR: TLBIE control error.
@@ -1394,19 +1394,19 @@ actionclass analyzeNcuFir
 
 actionclass L3DirCE
 {
-    calloutSelfMed;
+    calloutSelfHigh;
     threshold( field(32 / day), mfg_file(P8EX_L3_DIR_CES) );
 };
 
 actionclass L3UE
 {
-    SelfMedThr1UE;
+    SelfHighThr1UE;
     funccall("L3UE");
 };
 
 actionclass L3CE
 {
-    calloutSelfMed;
+    calloutSelfHigh;
     threshold( field(32 / day), mfg_file(P8EX_L3_CACHE_CES) );
     funccall("L3CE");
 };
@@ -1414,33 +1414,28 @@ actionclass L3CE
 
 actionclass L2CE
 {
-    calloutSelfMed;
+    calloutSelfHigh;
     threshold( field(32 / day), mfg_file(P8EX_L2_CACHE_CES) );
     funccall("L2CE");
 };
 
 actionclass L2UE
 {
-    SelfMedThr1UE;
+    SelfHighThr1UE;
     funccall("L2UE");
 };
 
 actionclass L2DirCE
 {
-    calloutSelfMed;
+    calloutSelfHigh;
     threshold( field(32 / day), mfg_file(P8EX_L2_DIR_CES) );
 };
 
 actionclass L2ChipLevel2
 {
-    calloutProcLow;
+    calloutParentProcLow;
     callout2ndLvlMed;
     threshold1;
-};
-
-actionclass calloutProcLow
-{
-    callout(connected(TYPE_PROC),MRU_LOW);
 };
 
 actionclass L2PowerBusCE
@@ -1450,8 +1445,7 @@ actionclass L2PowerBusCE
     threshold1;
 };
 
-
-actionclass calloutProcMed
+actionclass calloutParentProcLow
 {
-    callout(connected(TYPE_PROC),MRU_MED);
+    callout(connected(TYPE_PROC),MRU_LOW);
 };
