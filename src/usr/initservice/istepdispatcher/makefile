@@ -5,7 +5,7 @@
 #
 # IBM CONFIDENTIAL
 #
-# COPYRIGHT International Business Machines Corp. 2011,2012
+# COPYRIGHT International Business Machines Corp. 2011,2013
 #
 # p1
 #
@@ -23,6 +23,7 @@
 ROOTPATH = ../../../..
 MODULE = istepdisp
 
+EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/establish_system_smp
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/ecmddatabuffer
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/hwpf/fapi
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/hwpf/plat

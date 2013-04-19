@@ -1,31 +1,32 @@
-#  IBM_PROLOG_BEGIN_TAG
-#  This is an automatically generated prolog.
+# IBM_PROLOG_BEGIN_TAG
+# This is an automatically generated prolog.
 #
-#  $Source: src/usr/hwpf/hwp/establish_system_smp/makefile $
+# $Source: src/usr/hwpf/hwp/establish_system_smp/makefile $
 #
-#  IBM CONFIDENTIAL
+# IBM CONFIDENTIAL
 #
-#  COPYRIGHT International Business Machines Corp. 2012
+# COPYRIGHT International Business Machines Corp. 2012,2013
 #
-#  p1
+# p1
 #
-#  Object Code Only (OCO) source materials
-#  Licensed Internal Code Source Materials
-#  IBM HostBoot Licensed Internal Code
+# Object Code Only (OCO) source materials
+# Licensed Internal Code Source Materials
+# IBM HostBoot Licensed Internal Code
 #
-#  The source code for this program is not published or other-
-#  wise divested of its trade secrets, irrespective of what has
-#  been deposited with the U.S. Copyright Office.
+# The source code for this program is not published or otherwise
+# divested of its trade secrets, irrespective of what has been
+# deposited with the U.S. Copyright Office.
 #
-#  Origin: 30
+# Origin: 30
 #
-#  IBM_PROLOG_END
+# IBM_PROLOG_END_TAG
 
 ROOTPATH = ../../../../..
 
 MODULE = establish_system_smp
 
 ##      support for Targeting and fapi
+EXTRAINCDIR += ${ROOTPATH}/src/usr/initservice/istepdispatcher
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/ecmddatabuffer
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/hwpf/fapi
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/hwpf/plat
@@ -34,7 +35,7 @@ EXTRAINCDIR += ${ROOTPATH}/src/include/usr/hwpf/hwp
 ## pointer to common HWP files
 EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/include
 
-##  NOTE: add the base istep dir here. 
+##  NOTE: add the base istep dir here.
 EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/establish_system_smp
 
 ##  Include sub dirs
@@ -46,7 +47,7 @@ EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/establish_system_smp
 ##  NOTE: add new object files when you add a new HWP
 OBJS =  establish_system_smp.o
 
-        
+
 ##  NOTE: add a new directory onto the vpaths when you add a new HWP
 ##  EXAMPLE:
 #   VPATH += ${ROOTPATH}/src/usr/hwpf/hwp/establish_system_smp/<HWP_dir>

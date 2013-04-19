@@ -282,6 +282,22 @@ void*    call_mss_getecid( void *io_pArgs )
     return l_StepError.getErrorHandle();
 }
 
+//
+// Wrapper function to call dmi_attr_update
+//
+void * call_dmi_attr_update( void * io_pArgs )
+{
+    IStepError l_StepError;
+
+    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+            "call_dmi_attr_update entry" );
+
+    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+            "call_dmi_attr_update exit" );
+
+    return l_StepError.getErrorHandle();
+
+}
 
 //
 //  Wrapper function to call proc_dmi_scominit

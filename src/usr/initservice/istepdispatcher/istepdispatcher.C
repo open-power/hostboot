@@ -39,6 +39,9 @@
 
 #include    <kernel/console.H>              // printk status
 
+// for VFS::module_load
+#include <vfs/vfs.H>
+
 #include    <sys/task.h>                    //  tid_t, task_create, etc
 
 #include    <errl/errlentry.H>              //  errlHndl_t
@@ -53,6 +56,9 @@
 #include    <targeting/common/targetservice.H>
 #include    <targeting/attrsync.H>
 
+
+#include    <establish_system_smp.H>
+
 #include    <hwpf/plat/fapiPlatAttributeService.H>
 
 #include    <mbox/mbox_queues.H>            // HB_ISTEP_MSGQ
@@ -63,6 +69,7 @@
 
 #include    "istepdispatcher.H"
 #include    "istepWorker.H"
+#include    "istep_mbox_msgs.H"
 
 #include    "splesscommon.H"
 
@@ -484,6 +491,22 @@ errlHndl_t IStepDispatcher::msgHndlr ( void )
                 // is received.
                 handleMoreWorkNeededMsg( (theMsg->data[0] == 1) );
                 break;
+
+            case PROCESS_IOVALID_REQUEST:
+                TRACFCOMP( g_trac_initsvc,
+                           "msgHndlr : PROCESS_IOVALID_REQUEST" );
+
+                // make sure the library is loaded
+                err = VFS::module_load("libestablish_system_smp.so");
+
+                // if the module loaded ok, do the processing
+                if( err == NULL )
+                {
+                    iv_Msg = theMsg;
+                    handleProcFabIovalidMsg();
+                }
+                break;
+
 
             default:
                 // Default Message
@@ -1036,6 +1059,32 @@ bool IStepDispatcher::checkMpiplMode( ) const
 
     return  l_isMpiplMode;
 }
+
+void IStepDispatcher::handleProcFabIovalidMsg(   )
+{
+    TRACDCOMP( g_trac_initsvc,
+               ENTER_MRK"IStepDispatcher::handleProcFabIovalidMsg()" );
+
+    // do hostboot processing for istep
+    // sys_proc_fab_ipvalid
+    ESTABLISH_SYSTEM_SMP::host_sys_fab_iovalid_processing( iv_Msg );
+
+    // Send the message back as a response
+    msg_respond(iv_msgQ, iv_Msg);
+
+    // if there was an error don't winkle ?
+    if( iv_Msg->data[0] == HWSVR_MSG_SUCCESS )
+    {
+        TRACFCOMP( g_trac_initsvc,
+                   "$TODO RTC:71447 - winkle all cores");
+    }
+
+    TRACDCOMP( g_trac_initsvc,
+               EXIT_MRK"IStepDispatcher::handleProcFabIovalidMsg()" );
+
+    iv_Msg = NULL;
+}
+
 
 } // namespace
 

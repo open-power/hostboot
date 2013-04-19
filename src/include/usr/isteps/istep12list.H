@@ -27,18 +27,20 @@
  * @file    istep12list.H
  *
  *  IStep 12    Step 12 MC Config
- *  IPL FLow Doc        v1.28 (12/03/12)
+ *  IPL FLow Doc        v1.35 (04/11/13)
  *
- *  12.1	  host_collect_dimm_spd
+ *  12.1      host_collect_dimm_spd
  *  	: Collect Master dimm SPD
-  *  12.2	  mss_volt
+  *  12.2     mss_volt
  *  	: Calc dimm voltage
- *  12.3	  mss_freq
+ *  12.3      mss_freq
  *  	: Calc dimm frequency
- *  12.4	  mss_eff_config
+ *  12.4      mss_eff_config
  *  	: Determine effective config
- *
- *  *****************************************************************
+ *  12.5      mss_attr_update
+ *      : MSS ATTR update
+*
+*  *****************************************************************
  *  THIS FILE WAS GENERATED ON 2012-03-01:1032
  *  *****************************************************************
  *
@@ -58,13 +60,13 @@ namespace   INITSERVICE
 
 const   TaskInfo    g_istep12[]  =   {
         {
-                "",         // dummy, index 0
+                "",                   // dummy, index 0
                 NULL,
                 {
                         NONE,
                         EXT_IMAGE,
                         IPL_NOOP,
-                        false,                      // true = check for attentions
+                        false,        // true = check for attentions
                 }
         },
 
@@ -108,6 +110,17 @@ const   TaskInfo    g_istep12[]  =   {
                         true,
                 }
         },
+        {
+                ISTEPNAME(12,05,"mss_attr_update"),
+                MC_CONFIG::call_mss_attr_update,
+                {
+                        START_FN,
+                        EXT_IMAGE,
+                        NORMAL_IPL_OP,
+                        true,
+                }
+        },
+
 
         //  END OF LIST!
 };

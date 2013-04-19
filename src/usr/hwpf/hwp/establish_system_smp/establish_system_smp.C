@@ -47,6 +47,8 @@
 
 #include    <hwpisteperror.H>
 
+#include    <istep_mbox_msgs.H>
+
 //  targeting support
 #include    <targeting/common/commontargeting.H>
 
@@ -66,7 +68,6 @@ using   namespace   ISTEP;
 using   namespace   ISTEP_ERROR;
 using   namespace   TARGETING;
 using   namespace   fapi;
-
 
 
 //
@@ -116,6 +117,88 @@ void*    call_host_coalesce_host( void    *io_pArgs )
     return l_errl;
 }
 
+//******************************************************************************
+// host_sys_fab_iovalid_processing function
+//******************************************************************************
+void host_sys_fab_iovalid_processing( msg_t* io_pMsg )
+{
+    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+            "host_sys_fab_iovalid_processing entry" );
 
+    iovalid_msg * drawerData = NULL;
+
+    uint16_t count = 0;
+
+    std::vector<TARGETING::EntityPath> present_drawers;
+
+    errlHndl_t l_errl = NULL;
+
+    // if there is extra data, start processing it
+    // else send back a msg to indicate invalid msg
+    if(io_pMsg->extra_data)
+    {
+        drawerData = (iovalid_msg *)io_pMsg->extra_data;
+
+        // setup a pointer to the first drawer entry in our data
+        TARGETING::EntityPath * ptr = drawerData->drawers;
+
+
+        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,"Master node %s "
+                                                      "List size = %d bytes "
+                                                      "Drawer count = %d",
+                ptr->toString(), drawerData->size, drawerData->count);
+
+        count = drawerData->count;
+
+        // create a vector with the present drawers
+        for(uint8_t i = 0; i < count; i++)
+        {
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                    "list entry[%d] - %s", i, ptr->toString());
+
+            present_drawers.push_back(*ptr);
+            ptr++;
+        }
+
+        // $TODO RTC:63128 - exchange between present drawers to agree
+        // on valid endpoints
+        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                  "$TODO RTC:63128 - hb instances exchange and agree on cfg");
+
+        // $TODO RTC:63132 after agreement, open abuses as required
+        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                  "$TODO RTC:63132 - open the required A-busses "
+                  " after agreement is reached");
+
+        // release the storage from the message
+        free(io_pMsg->extra_data);
+        io_pMsg->extra_data = NULL;
+
+        io_pMsg->data[0] = INITSERVICE::HWSVR_MSG_SUCCESS;
+    }
+    else
+    {
+        // message needs to have at least one entry
+        // in the drawer list, else we will say invalid msg
+        io_pMsg->data[0] = INITSERVICE::HWSVR_INVALID_MESSAGE;
+    }
+
+    io_pMsg->data[1] = 0;
+
+    // if there is an error log add the ID to
+    // data 0
+    if(l_errl)
+    {
+        io_pMsg->data[0] = l_errl->eid();
+        errlCommit(l_errl, HWPF_COMP_ID);
+    }
+
+    // response will be sent by calling routine
+    // IStepDispatcher::handleMoreWorkNeededMsg()
+    // which will also execute the procedure to winkle all cores
+
+    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+            "host_sys_fab_iovalid_processing exit" );
+}
 
 };   // end namespace

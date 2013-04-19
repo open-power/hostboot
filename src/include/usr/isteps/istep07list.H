@@ -27,23 +27,25 @@
  * @file    istep07list.H
  *
  *  IStep 07    Nest Chiplets
- *  IPL FLow Doc        v1.28 (12/03/12)
+ *  IPL FLow Doc        v1.35 (04/11/13)
  *
- *    07.1    proc_a_x_pci_dmi_pll_initf
+ *    07.1    proc_attr_update
+ *          : Proc attr update
+ *    07.2    proc_a_x_pci_dmi_pll_initf
  *          : PLL Initfile for A, X, PCIe, DMI
- *    07.2    proc_a_x_pci_dmi_pll_setup
+ *    07.3    proc_a_x_pci_dmi_pll_setup
  *          : Setup PLL for A, X, PCIe, DMI
- *    07.3    proc_startclock_chiplets
+ *    07.4    proc_startclock_chiplets
  *          : Start clocks on A, X, PCIe chiplets
- *    07.4    proc_chiplet_scominit
+ *    07.5    proc_chiplet_scominit
  *          : Apply scom inits to chiplets
- *    07.5    proc_xbus_scominit
- *          : Apply scom inits to Xbus 
- *    07.6    proc_abus_scominit
- *          : Apply scom inits to Abus 
- *    07.7    proc_pcie_scominit
+ *    07.6    proc_xbus_scominit
+ *          : Apply scom inits to Xbus
+ *    07.7    proc_abus_scominit
+ *          : Apply scom inits to Abus
+ *    07.8    proc_pcie_scominit
  *          : Apply scom inits to PCIE  chiplets
- *    07.8    proc_scomoverride_chiplets
+ *    07.9    proc_scomoverride_chiplets
  *          : Apply sequenced scom inits
  *
  *  Please see the note in initsvcstructs.H for description of
@@ -73,7 +75,17 @@ namespace   INITSERVICE
                 }
         },
         {
-                ISTEPNAME(07,01,"proc_a_x_pci_dmi_pll_initf"),
+                ISTEPNAME(07,01,"proc_attr_update"),
+                NEST_CHIPLETS::call_proc_attr_update,
+                {
+                        START_FN,
+                        EXT_IMAGE,
+                        NORMAL_IPL_OP,
+                        false,
+                }
+        },
+        {
+                ISTEPNAME(07,02,"proc_a_x_pci_dmi_pll_initf"),
                 NEST_CHIPLETS::call_proc_a_x_pci_dmi_pll_initf,
                 {
                         START_FN,
@@ -84,7 +96,7 @@ namespace   INITSERVICE
         },
 
         {
-                ISTEPNAME(07,02,"proc_a_x_pci_dmi_pll_setup"),
+                ISTEPNAME(07,03,"proc_a_x_pci_dmi_pll_setup"),
                 NEST_CHIPLETS::call_proc_a_x_pci_dmi_pll_setup,
                 {
                         START_FN,
@@ -96,7 +108,7 @@ namespace   INITSERVICE
 
 
         {
-                ISTEPNAME(07,03,"proc_startclock_chiplets"),
+                ISTEPNAME(07,04,"proc_startclock_chiplets"),
                 NEST_CHIPLETS::call_proc_startclock_chiplets,
                 {
                         START_FN,
@@ -108,7 +120,7 @@ namespace   INITSERVICE
 
 
         {
-                ISTEPNAME(07,04,"proc_chiplet_scominit"),
+                ISTEPNAME(07,05,"proc_chiplet_scominit"),
                 NEST_CHIPLETS::call_proc_chiplet_scominit,
                 {
                         START_FN,
@@ -118,7 +130,7 @@ namespace   INITSERVICE
                 }
         },
         {
-                ISTEPNAME(07,05,"proc_xbus_scominit"),
+                ISTEPNAME(07,06,"proc_xbus_scominit"),
                 NEST_CHIPLETS::call_proc_xbus_scominit,
                 {
                         START_FN,
@@ -128,7 +140,7 @@ namespace   INITSERVICE
                 }
         },
         {
-                ISTEPNAME(07,06,"proc_abus_scominit"),
+                ISTEPNAME(07,07,"proc_abus_scominit"),
                 NEST_CHIPLETS::call_proc_abus_scominit,
                 {
                         START_FN,
@@ -138,7 +150,7 @@ namespace   INITSERVICE
                 }
         },
         {
-                ISTEPNAME(07,07,"proc_pcie_scominit"),
+                ISTEPNAME(07,08,"proc_pcie_scominit"),
                 NEST_CHIPLETS::call_proc_pcie_scominit,
                 {
                         START_FN,
@@ -148,7 +160,7 @@ namespace   INITSERVICE
                 }
         },
         {
-                ISTEPNAME(07,08,"proc_scomoverride_chiplets"),
+                ISTEPNAME(07,09,"proc_scomoverride_chiplets"),
                 NEST_CHIPLETS::call_proc_scomoverride_chiplets,
                 {
                         START_FN,

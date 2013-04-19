@@ -86,6 +86,22 @@ using   namespace   TARGETING;
 using   namespace   fapi;
 
 //*****************************************************************************
+// wrapper function to call proc_attr_update
+//*****************************************************************************
+void * call_proc_attr_update( void * io_pArgs )
+{
+    IStepError l_StepError;
+
+    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+            "call_proc_attr_update entry" );
+
+    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+            "call_proc_attr_update exit" );
+
+    return l_StepError.getErrorHandle();
+
+}
+//*****************************************************************************
 // wrapper function to call proc_a_x_pci_dmi_pll_initf
 //*****************************************************************************
 void*    call_proc_a_x_pci_dmi_pll_initf( void    *io_pArgs )
@@ -94,7 +110,7 @@ void*    call_proc_a_x_pci_dmi_pll_initf( void    *io_pArgs )
 
     IStepError l_StepError;
 
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, 
+    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
             "call_proc_a_x_pci_dmi_pll_initf entry" );
 
     TARGETING::TargetHandleList l_procTargetList;
@@ -171,7 +187,7 @@ void*    call_proc_a_x_pci_dmi_pll_setup( void    *io_pArgs )
 
     IStepError l_StepError;
 
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, 
+    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
             "call_proc_a_x_pci_dmi_pll_setup entry" );
 
     TARGETING::TargetHandleList l_procTargetList;
@@ -201,8 +217,8 @@ void*    call_proc_a_x_pci_dmi_pll_setup( void    *io_pArgs )
         if (l_err)
         {
             TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                      "ERROR 0x%.8X: proc_a_x_pci_dmi_pll_setup \
-                      HWP returns error",
+                      "ERROR 0x%.8X: proc_a_x_pci_dmi_pll_setup"
+                      " HWP returns error",
                       l_err->reasonCode());
 
             // capture the target data in the elog
@@ -234,7 +250,7 @@ void*    call_proc_a_x_pci_dmi_pll_setup( void    *io_pArgs )
         }
     }
 
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, 
+    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                "call_proc_a_x_pci_dmi_pll_setup exit" );
 
     // end task, returning any errorlogs to IStepDisp
@@ -252,7 +268,7 @@ errlHndl_t customizeChipRegions(TARGETING::Target* i_procTarget)
 
     do{
 
-        size_t l_pgSize = 0; 
+        size_t l_pgSize = 0;
 
         // First get the size
         l_err = deviceRead(i_procTarget,
@@ -293,24 +309,24 @@ errlHndl_t customizeChipRegions(TARGETING::Target* i_procTarget)
         static const size_t PG_START_POS = ( 64-16-4);
 
         //prepare the vector to be populated to ATTR_CHIP_REGIONS_TO_ENABLE
-        TARGETING::ATTR_CHIP_REGIONS_TO_ENABLE_type l_chipRegionData; 
+        TARGETING::ATTR_CHIP_REGIONS_TO_ENABLE_type l_chipRegionData;
         memset(l_chipRegionData,sizeof(ATTR_CHIP_REGIONS_TO_ENABLE_type),0);
 
         //Skip the header
         uint16_t *l_partialGoodUint16=reinterpret_cast<uint16_t*>(
                     &l_pgData[VPD_CP00_PG_HDR_LENGTH]);
 
-        //For customizing the image data, the 16 bit partial good value 
-        //retrieved for the chiplets ( 32 no. ) , should be set from bit 4..19 
+        //For customizing the image data, the 16 bit partial good value
+        //retrieved for the chiplets ( 32 no. ) , should be set from bit 4..19
         //of the attribute ATTR_CHIP_REGIONS_TO_ENABLE for the processor
 
-        for ( uint32_t l_chipRegionIndex = 0  ; 
+        for ( uint32_t l_chipRegionIndex = 0  ;
                 l_chipRegionIndex <  MAX_CHIPLETS_PER_PROC ;
                 ++l_chipRegionIndex)
         {
-            l_chipRegionData[l_chipRegionIndex] = 
+            l_chipRegionData[l_chipRegionIndex] =
                 l_partialGoodUint16[l_chipRegionIndex];
-            l_chipRegionData[l_chipRegionIndex] = 
+            l_chipRegionData[l_chipRegionIndex] =
                 l_chipRegionData[l_chipRegionIndex]<<PG_START_POS;
         }
 
@@ -326,7 +342,7 @@ errlHndl_t customizeChipRegions(TARGETING::Target* i_procTarget)
     free(l_pgData);
 
     return l_err;
-    
+
 }
 
 //*****************************************************************************
@@ -338,7 +354,7 @@ void*    call_proc_startclock_chiplets( void    *io_pArgs )
 
     IStepError l_StepError;
 
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, 
+    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                "call_proc_startclock_chiplets entry" );
 
     TARGETING::TargetHandleList l_procTargetList;
@@ -384,7 +400,7 @@ void*    call_proc_startclock_chiplets( void    *io_pArgs )
             break;
         }
 
-        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, 
+        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                 "Running proc_startclock_chiplets HWP on "
                 "target HUID %.8X", TARGETING::get_huid(l_proc_target));
 
@@ -425,15 +441,15 @@ void*    call_proc_startclock_chiplets( void    *io_pArgs )
         }
         else
         {
-            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, 
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                        "SUCCESS :  proc_startclock_chiplets HWP( )" );
         }
     }
 
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, 
+    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                "call_proc_startclock_chiplets exit" );
 
-    // end task, returning any errorlogs to IStepDisp 
+    // end task, returning any errorlogs to IStepDisp
     return l_StepError.getErrorHandle();
 }
 
@@ -832,7 +848,7 @@ void*    call_proc_scomoverride_chiplets( void    *io_pArgs )
 
     if (l_errl)
     {
-        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, 
+        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
                   "ERROR 0x%.8X : proc_scomoverride_chiplets "
                   "HWP returns error",
                   l_errl->reasonCode());
@@ -855,11 +871,11 @@ void*    call_proc_scomoverride_chiplets( void    *io_pArgs )
     }
     else
     {
-        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, 
+        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
                   "SUCCESS :  proc_scomoverride_chiplets HWP");
     }
 
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, 
+    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                "call_proc_scomoverride_chiplets exit" );
 
     // end task, returning any errorlogs to IStepDisp

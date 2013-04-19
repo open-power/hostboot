@@ -173,7 +173,7 @@ public:
                         uint8_t & o_subStep );
 
     /**
-     * @brief This function will return whether or not we are in MPIPL mode  
+     * @brief This function will return whether or not we are in MPIPL mode
      *
      *  @return bool - flag indicating whether we're in MPIPL mode
      *  @retval false if not in  MPIPL mode
@@ -192,6 +192,8 @@ public:
      *          true if IStep Mode is "ON"
      */
     bool getIStepMode( ) const;
+
+
 
 protected:
 
@@ -267,6 +269,15 @@ private:
     void handleMoreWorkNeededMsg ( bool i_first );
 
     /**
+     * @brief This function is used to handle the message from the FSP
+     *        telling hostboot to execute the processing required for
+     *        the sys_proc_fab_iovalid istep
+     *
+     * @return NONE.
+     */
+    void handleProcFabIovalidMsg( void );
+
+        /**
      * @brief This function is used to handle the single Istep requests from
      *      outside sources.
      *
@@ -288,9 +299,9 @@ private:
      * @return bool - whether we are SPLESS.
      */
     bool spLess ( void );
-     
+
     /**
-     * @brief This function will check whether or not we are in MPIPL mode  
+     * @brief This function will check whether or not we are in MPIPL mode
      *
      *  @return bool - flag indicating whether we're in MPIPL mode
      *  @retval false if not in  MPIPL mode

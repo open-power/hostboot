@@ -27,13 +27,13 @@
  * @file    istep18list.H
  *
  *  IStep 18    Establish System SMP
- *  IPL FLow Doc        v1.28 (12/03/12)
+ *  IPL FLow Doc        v1.35 (04/11/13)
  *
- *    18.10    host_coalesce_host
+ *    18.12    host_coalesce_host
  *          : Create single host image
- *    18.11    proc_tod_setup
+ *    18.13    proc_tod_setup
  *          : Create TOD topology
- *    18.12    proc_tod_init
+ *    18.14    proc_tod_init
  *          : Start TOD to running state
  *
  *  *****************************************************************
@@ -64,7 +64,7 @@ namespace   INITSERVICE
                         NONE,
                         EXT_IMAGE,
                         IPL_NOOP,
-                        false,                          // true = check for attentions
+                        false,        // true = check for attentions
                 }
         },
 
@@ -146,7 +146,6 @@ namespace   INITSERVICE
                 }
         },
         {
-
                 ISTEPNAME(18,08,""),
                 NULL,
                 {
@@ -157,7 +156,6 @@ namespace   INITSERVICE
                 }
         },
         {
-
                 ISTEPNAME(18,09,""),
                 NULL,
                 {
@@ -168,7 +166,28 @@ namespace   INITSERVICE
                 }
         },
         {
-                ISTEPNAME(18,10,"host_coalesce_host"),
+
+                ISTEPNAME(18,10,""),
+                NULL,
+                {
+                        NONE,
+                        EXT_IMAGE,
+                        IPL_NOOP,
+                        false,
+                }
+        },
+        {
+                ISTEPNAME(18,11,""),
+                NULL,
+                {
+                        NONE,
+                        EXT_IMAGE,
+                        IPL_NOOP,
+                        false,
+                }
+        },
+        {
+                ISTEPNAME(18,12,"host_coalesce_host"),
                 ESTABLISH_SYSTEM_SMP::call_host_coalesce_host,
                 {
                         START_FN,
@@ -178,7 +197,7 @@ namespace   INITSERVICE
                 }
         },
         {
-                ISTEPNAME(18,11,"proc_tod_setup"),
+                ISTEPNAME(18,13,"proc_tod_setup"),
                 TOD::call_tod_setup,
                 {
                         START_FN,
@@ -188,7 +207,7 @@ namespace   INITSERVICE
                 }
         },
         {
-                ISTEPNAME(18,12,"proc_tod_init"),
+                ISTEPNAME(18,14,"proc_tod_init"),
                 TOD::call_tod_init,
                 {
                         START_FN,
