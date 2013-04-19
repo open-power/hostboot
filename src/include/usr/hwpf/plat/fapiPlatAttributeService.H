@@ -453,6 +453,13 @@ fapi::ReturnCode fapiPlatGetSingleMemberEnableAttr(
             ? fapi::FAPI_RC_SUCCESS : fapi::platAttrSvc::createAttrAccessError( \
                 FAPI_PLAT_ATTR_SVC_MACRO_DIRECT_FAPI_##ID,fapi::ID,PTARGET)
 
+
+//------------------------------------------------------------------------------
+// MACRO to support the overriding of Chip EC Feature Attributes
+//------------------------------------------------------------------------------
+#define PLAT_GET_CHIP_EC_FEATURE_OVERRIDE(ID, PTARGET, VAL) \
+    fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL)
+
 //------------------------------------------------------------------------------
 // MACROs to route each ATTR_SPD access to the Hostboot SPD function
 //------------------------------------------------------------------------------

@@ -67,6 +67,7 @@
 #                  mjjones   03/21/13  Add fapi namespace to Chip EC Feature macro
 #                  mjjones   02/27/13  Generate fapiAttrInfo.csv
 #                                      Generate fapiAttrEnumInfo.csv
+#                  mjjones   04/11/13  Allow platform to override Chip EC Feature
 #
 # End Change Log ******************************************************
 
@@ -378,6 +379,7 @@ foreach my $argnum (1 .. $#ARGV)
         {
             # The value type of chip EC feature attributes is uint8_t
             print AIFILE "typedef uint8_t $attr->{id}_Type;\n";
+            print ITFILE "$attr->{id},$attr->{id},0x$attrIdHash{$attr->{id}},u8\n"
         }
         else
         {
@@ -516,8 +518,9 @@ foreach my $argnum (1 .. $#ARGV)
             # fapi function and define _SETMACRO to something that will cause a
             # compile failure if a set is attempted
             #------------------------------------------------------------------
-            print AIFILE "#define $attr->{id}_GETMACRO(ID, PTARGET, VAL) ";
-            print AIFILE "fapi::fapiQueryChipEcFeature(fapi::ID, PTARGET, VAL)\n";
+            print AIFILE "#define $attr->{id}_GETMACRO(ID, PTARGET, VAL) \\\n";
+            print AIFILE "    PLAT_GET_CHIP_EC_FEATURE_OVERRIDE(ID, PTARGET, VAL) ? fapi::FAPI_RC_SUCCESS : \\\n";
+            print AIFILE "    fapi::fapiQueryChipEcFeature(fapi::ID, PTARGET, VAL)\n";
             print AIFILE "#define $attr->{id}_SETMACRO(ID, PTARGET, VAL) ";
             print AIFILE "CHIP_EC_FEATURE_ATTRIBUTE_NOT_WRITABLE\n";
         }
