@@ -349,21 +349,19 @@ int32_t mssGetSteerMux( TargetHandle_t i_mbaTarget, uint8_t i_rank,
 {
     int32_t o_rc = SUCCESS;
 
-/* TODO: Marc is creating a new interface.
     errlHndl_t errl = NULL;
 
-    PRD_FAPI_TO_ERRL( errl, TODO, getFapiTarget(i_mbaTarget),
+    PRD_FAPI_TO_ERRL( errl, mss_check_steering, getFapiTarget(i_mbaTarget),
                       i_rank, o_port0Spare, o_port1Spare, o_eccSpare );
 
     if ( NULL != errl )
     {
-        PRDF_ERR( "[PlatServices::mssGetSteerMux] TODO() "
+        PRDF_ERR( "[PlatServices::mssGetSteerMux] mss_check_steering() "
                   "failed. HUID: 0x%08x rank: %d",
                   getHuid(i_mbaTarget), i_rank );
         PRDF_COMMIT_ERRL( errl, ERRL_ACTION_REPORT );
         o_rc = FAIL;
     }
-*/
 
     return o_rc;
 
@@ -376,22 +374,20 @@ int32_t mssSetSteerMux( TargetHandle_t i_mbaTarget, uint8_t i_rank,
 {
     int32_t o_rc = SUCCESS;
 
-/* TODO: Marc is creating a new interface.
     errlHndl_t errl = NULL;
 
-    PRD_FAPI_TO_ERRL( errl, TODO, getFapiTarget(i_mbaTarget),
+    PRD_FAPI_TO_ERRL( errl, mss_do_steering, getFapiTarget(i_mbaTarget),
                       i_rank, i_symbol, i_x4EccSpare );
 
     if ( NULL != errl )
     {
-        PRDF_ERR( "[PlatServices::mssSetSteerMux] TODO() "
+        PRDF_ERR( "[PlatServices::mssSetSteerMux] mss_do_steering "
                   "failed. HUID: 0x%08x rank: %d symbol: %d eccSpare: %c",
                   getHuid(i_mbaTarget), i_rank, i_symbol,
                   i_x4EccSpare ? 'T' : 'F' );
         PRDF_COMMIT_ERRL( errl, ERRL_ACTION_REPORT );
         o_rc = FAIL;
     }
-*/
 
     return o_rc;
 
