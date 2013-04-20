@@ -2465,19 +2465,37 @@ sub writeTargetErrlHFile {
     print $outFile "            // 2 Entity Paths next\n";
     print $outFile "            for (uint32_t k = 0;k < 2; k++)\n";
     print $outFile "            {\n";
+
+    my $attrPhysPath;
+    my $attrAffinityPath;
+
+    # need the attribute id's for ATTR_PHYS_PATH and ATTR_AFFINITY_PATH:
+    my $attributeIdEnumeration = getAttributeIdEnumeration($attributes);
+    foreach my $enumerator (@{$attributeIdEnumeration->{enumerator}})
+    {
+        if ($enumerator->{name} eq "PHYS_PATH")
+        {
+            $attrPhysPath = $enumerator->{value};
+        }
+        elsif ($enumerator->{name} eq "AFFINITY_PATH")
+        {
+            $attrAffinityPath = $enumerator->{value};
+        }
+    }
+
     print $outFile "                uint32_t l_pathType = ntohl(*l_ptr32);\n";
-    print $outFile "                if ((l_pathType == 0x15) || // ATTR_PHYS_PATH\n";
-    print $outFile "                    (l_pathType == 0x16))   // ATTR_AFFINITY_PATH\n";
+    print $outFile "                if ((l_pathType == $attrPhysPath) || // ATTR_PHYS_PATH\n";
+    print $outFile "                    (l_pathType == $attrAffinityPath))   // ATTR_AFFINITY_PATH\n";
     print $outFile "                {\n";
     print $outFile "                    l_ptr32++;\n";
     print $outFile "                    uint8_t *l_ptr = reinterpret_cast<uint8_t *>(l_ptr32);\n";
     print $outFile "                    char outString[128];\n";
     print $outFile "                    l_ptr = errlud_parse_entity_path(l_ptr,outString);\n";
-    print $outFile "                    if (l_pathType == 0x15)\n";
+    print $outFile "                    if (l_pathType == $attrPhysPath)\n";
     print $outFile "                    {\n";
     print $outFile "                      i_parser.PrintString(\"  ATTR_PHYS_PATH\", outString);\n";
     print $outFile "                    }\n";
-    print $outFile "                    if (l_pathType == 0x16)\n";
+    print $outFile "                    if (l_pathType == $attrAffinityPath)\n";
     print $outFile "                    {\n";
     print $outFile "                      i_parser.PrintString(\"  ATTR_AFFINITY_PATH\", outString);\n";
     print $outFile "                    } // else don't print anything\n";
