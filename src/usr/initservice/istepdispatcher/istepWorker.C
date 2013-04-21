@@ -40,6 +40,7 @@
 #include <errl/errlentry.H>
 
 #include <isteps/istepmasterlist.H>
+#include <hwpf/istepreasoncodes.H>
 
 #include    "../baseinitsvc/initservice.H"
 
@@ -465,23 +466,46 @@ const TaskInfo * findTaskInfo( const uint32_t i_IStep,
     return  l_pistep;
 }
 
-// $TODO - temporary implementation for bringup
 bool getSyncEnabledAttribute()
 {
+    using namespace TARGETING;
+
+    Target* l_pTopLevel = NULL;
+
     uint8_t l_syncEnabled = 0;
 
-    // $TODO RTC Issue 64008 - update to use targeting attribute accessors
-    fapi::ReturnCode l_rc;
-    l_rc = FAPI_ATTR_GET(ATTR_SYNC_BETWEEN_STEPS, NULL, l_syncEnabled);
+    TargetService& l_targetService = targetService();
 
-    if (l_rc)
+    l_targetService.getTopLevelTarget( l_pTopLevel );
+
+    if( l_pTopLevel == NULL )
     {
-       // trace for now, elog with new implementation
-       TRACFCOMP(g_trac_initsvc,"failed to read ATTR_SYNC_BETWEEN_STEPS, default"
-                                " to no sync");
+        TRACFCOMP( g_trac_initsvc,
+                "Top level handle was NULL, default sync not enabled" );
+        /*@
+         * @errortype
+         * @reasoncode       ISTEP::ISTEP_TOP_LEVEL_TARGET_NULL
+         * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE
+         * @moduleid         ISTEP_INITSVC_MOD_ID
+         * @userdata1        N/A
+         * @userdata2        N/A
+         * @devdesc          call to get top level targeting handle
+         *                   returned null.
+         */
 
+        errlHndl_t err = new ERRORLOG::ErrlEntry(
+                                ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                ISTEP::ISTEP_INITSVC_MOD_ID,
+                                ISTEP::ISTEP_TOP_LEVEL_TARGET_NULL );
+
+        errlCommit( err, ISTEP_COMP_ID );
+    }
+    else
+    {
+        l_syncEnabled = l_pTopLevel->getAttr<ATTR_SYNC_BETWEEN_STEPS> ();
     }
 
     return  ( (l_syncEnabled) ? true : false );
+
 }
 } // namespace

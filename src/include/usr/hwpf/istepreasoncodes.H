@@ -117,6 +117,7 @@ enum istepModuleId
     ISTEP_PROC_DMI_SCOMINIT                             = 0x45,
     ISTEP_MEM_PLL_INITF                                 = 0x46,
     ISTEP_PROC_GETECID                                  = 0x47,
+    ISTEP_INITSVC_MOD_ID                                = 0x48,
 };
 
 /**
@@ -175,6 +176,7 @@ enum istepReasonCode
     ISTEP_PROC_SWITCH_CFSIM_FAILED              = ISTEP_COMP_ID | 0x2D,
     ISTEP_LOAD_SLW_FROM_PNOR_FAILED             = ISTEP_COMP_ID | 0x2E,
     ISTEP_PROC_GETECID_FAILED                   = ISTEP_COMP_ID | 0x2F,
+    ISTEP_TOP_LEVEL_TARGET_NULL                 = ISTEP_COMP_ID | 0x30,
 };  // end ISTEP
 
 }
