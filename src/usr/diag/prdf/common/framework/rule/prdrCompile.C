@@ -164,7 +164,7 @@ int main(int argc, char ** argv)
 
     // output rules.
     l_size = htons((uint16_t)g_rules.size());
-    fwrite(&l_size, sizeof(l_size), 1, l_prfFile);
+    PRDR_FWRITE(&l_size, sizeof(l_size), 1, l_prfFile);
     for (std::map<std::string, Expr *>::iterator i = g_rules.begin();
          i != g_rules.end();
          i++)
@@ -182,16 +182,16 @@ int main(int argc, char ** argv)
     // output bit groups
     uint32_t l_pos = 0;
     l_size = htons((uint16_t)g_groups.size());
-    fwrite(&l_size, sizeof(l_size), 1, l_prfFile);
+    PRDR_FWRITE(&l_size, sizeof(l_size), 1, l_prfFile);
     l_size = htons((uint16_t)prdrGetRefId(&g_attentionStartGroup["CHECK_STOP"]));
-    fwrite(&l_size, sizeof(l_size), 1, l_prfFile);
+    PRDR_FWRITE(&l_size, sizeof(l_size), 1, l_prfFile);
     l_size = htons((uint16_t)prdrGetRefId(&g_attentionStartGroup["RECOVERABLE"]));
-    fwrite(&l_size, sizeof(l_size), 1, l_prfFile);
+    PRDR_FWRITE(&l_size, sizeof(l_size), 1, l_prfFile);
     l_size = htons((uint16_t)prdrGetRefId(&g_attentionStartGroup["SPECIAL"]));
-    fwrite(&l_size, sizeof(l_size), 1, l_prfFile);
+    PRDR_FWRITE(&l_size, sizeof(l_size), 1, l_prfFile);
     //@jl02 JL Adding this code to account for the new Attention entry type.
     l_size = htons((uint16_t)prdrGetRefId(&g_attentionStartGroup["UNIT_CS"]));  // @jl02
-    fwrite(&l_size, sizeof(l_size), 1, l_prfFile);                              // @jl02
+    PRDR_FWRITE(&l_size, sizeof(l_size), 1, l_prfFile);                              // @jl02
 
 #ifndef __HOSTBOOT_MODULE
 
@@ -212,7 +212,7 @@ int main(int argc, char ** argv)
 
     // output action classes.
     l_size = htons((uint16_t)g_actionclasses.size());
-    fwrite(&l_size, sizeof(l_size), 1, l_prfFile);
+    PRDR_FWRITE(&l_size, sizeof(l_size), 1, l_prfFile);
 
 #ifndef __HOSTBOOT_MODULE
 

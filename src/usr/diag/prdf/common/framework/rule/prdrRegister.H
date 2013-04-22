@@ -49,6 +49,12 @@
   #include <utilendian.H>
 #endif
 
+#define PRDR_FWRITE( memPtr, size, count, fileStream) \
+    if( count != fwrite(memPtr, size, count, fileStream)) \
+    { \
+        std::cout<<"Failed to write data to file"; \
+        exit(1); \
+    }
 namespace PRDR_COMPILER
 {
 
@@ -63,15 +69,15 @@ struct ResetOrMaskStruct
 
     void output(FILE * l_file)
     {
-        fwrite(&type, 1, 1, l_file);
+        PRDR_FWRITE(&type, 1, 1, l_file);
 
         uint64_t l_tmp64;
 
         l_tmp64 = htonll(addr_r);
-        fwrite(&l_tmp64, sizeof (l_tmp64), 1, l_file);
+        PRDR_FWRITE(&l_tmp64, sizeof (l_tmp64), 1, l_file);
 
         l_tmp64 = htonll(addr_w);
-        fwrite(&l_tmp64, sizeof (l_tmp64), 1, l_file);
+        PRDR_FWRITE(&l_tmp64, sizeof (l_tmp64), 1, l_file);
     }
 };
 
@@ -91,7 +97,7 @@ struct CaptureReqStruct
 
     void output(FILE * l_file)
     {
-        fwrite(&type, 1, 1, l_file);
+        PRDR_FWRITE(&type, 1, 1, l_file);
         uint32_t l_tmp32;
 
         int loopMax = 0;
@@ -115,13 +121,13 @@ struct CaptureReqStruct
         for (int i = 0; i < loopMax; i++)
         {
             l_tmp32 = htonl(data[i]);
-            fwrite(&l_tmp32, 4, 1, l_file);
+            PRDR_FWRITE(&l_tmp32, 4, 1, l_file);
         }
         if (type == PRDR_CAPTURE_FUNC)
         {
             if ('"' == (str)[0])
                 str = str.substr(1, str.size() - 2);
-            fwrite(str.c_str(), str.size() + 1, 1, l_file);
+            PRDR_FWRITE(str.c_str(), str.size() + 1, 1, l_file);
         }
     };
 };
@@ -232,24 +238,24 @@ class Register
         uint16_t l_temp16;
 
         l_temp16 = htons(PRDF::Util::hashString( cv_sname->c_str() ));
-        fwrite(&l_temp16, sizeof(l_temp16), 1, l_file);
+        PRDR_FWRITE(&l_temp16, sizeof(l_temp16), 1, l_file);
 
         l_temp = htonl(cv_flags);
-        fwrite(&l_temp, sizeof(l_temp), 1, l_file);
+        PRDR_FWRITE(&l_temp, sizeof(l_temp), 1, l_file);
 
         uint64_t l_temp64 = htonll(cv_scomaddr);
-        fwrite(&l_temp64, sizeof(l_temp64), 1, l_file);
+        PRDR_FWRITE(&l_temp64, sizeof(l_temp64), 1, l_file);
 
         if (cv_flags & Prdr::PRDR_REGISTER_SCOMLEN)
         {
             l_temp16 = htons(cv_scomlen);
-            fwrite(&l_temp16, sizeof(l_temp16), 1, l_file);
+            PRDR_FWRITE(&l_temp16, sizeof(l_temp16), 1, l_file);
         }
 
         if (cv_flags & Prdr::PRDR_REGISTER_RESETS)
         {
             l_temp16 = htons(cv_resets.size());
-            fwrite(&l_temp16, sizeof(l_temp16), 1, l_file);
+            PRDR_FWRITE(&l_temp16, sizeof(l_temp16), 1, l_file);
 
             std::for_each( cv_resets.begin(), cv_resets.end(),
                            std::bind2nd(
@@ -260,7 +266,7 @@ class Register
         if (cv_flags & Prdr::PRDR_REGISTER_MASKS)
         {
             l_temp16 = htons(cv_masks.size());
-            fwrite(&l_temp16, sizeof(l_temp16), 1, l_file);
+            PRDR_FWRITE(&l_temp16, sizeof(l_temp16), 1, l_file);
 
             std::for_each( cv_masks.begin(), cv_masks.end(),
                            std::bind2nd(
@@ -271,7 +277,7 @@ class Register
         if (cv_flags & Prdr::PRDR_REGISTER_CAPTURE)
         {
             l_temp16 = htons(cv_captures.size());
-            fwrite(&l_temp16, sizeof(l_temp16), 1, l_file);
+            PRDR_FWRITE(&l_temp16, sizeof(l_temp16), 1, l_file);
 
             std::for_each( cv_captures.begin(), cv_captures.end(),
                            std::bind2nd(

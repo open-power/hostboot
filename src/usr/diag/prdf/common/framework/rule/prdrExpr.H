@@ -98,8 +98,8 @@ class ExprRef : public Expr
                 char l_op = prdrGetRefType(cv_name);
                 uint16_t l_id = htons(prdrGetRefId(cv_name));
 
-                fwrite(&l_op, 1, 1, i_file);
-                fwrite(&l_id, sizeof(l_id), 1, i_file);
+                PRDR_FWRITE(&l_op, 1, 1, i_file);
+                PRDR_FWRITE(&l_id, sizeof(l_id), 1, i_file);
 
                 return 0;
             };
@@ -147,17 +147,17 @@ class ExprInt : public Expr
         int output(FILE * i_file)
             {
                 char tmp = cv_op;
-                fwrite(&tmp, 1, 1, i_file);
+                PRDR_FWRITE(&tmp, 1, 1, i_file);
 
                 if (Prdr::INTEGER != cv_op)
                 {
                     uint16_t temp = htons((uint16_t) cv_value);
-                    fwrite(&temp, sizeof(temp), 1, i_file);
+                    PRDR_FWRITE(&temp, sizeof(temp), 1, i_file);
                 }
                 else
                 {
                     uint32_t temp = htonl(cv_value);
-                    fwrite(&temp, sizeof(temp), 1, i_file);
+                    PRDR_FWRITE(&temp, sizeof(temp), 1, i_file);
                 }
 
                 return 0;
@@ -197,7 +197,7 @@ class ExprTime : public Expr
             seconds = iv_units * iv_base;
 
         seconds = htonl( seconds );
-        fwrite( &seconds, sizeof(seconds), 1, i_file );
+        PRDR_FWRITE( &seconds, sizeof(seconds), 1, i_file );
 
         return 0;
     }
@@ -231,11 +231,11 @@ class ExprBitString : public Expr
         int output(FILE * i_file)
             {
                 char tmp = cv_op;
-                fwrite(&tmp, 1, 1, i_file);
+                PRDR_FWRITE(&tmp, 1, 1, i_file);
 
                 // subtract 2 backticks.
                 uint8_t len = (cv_value.length() - 2) * 4;
-                fwrite(&len, sizeof(len), 1, i_file);
+                PRDR_FWRITE(&len, sizeof(len), 1, i_file);
 
                 uint8_t tmp8 = 0;
 
@@ -263,7 +263,7 @@ class ExprBitString : public Expr
                     }
                     if (i % 2 == 1)
                     {
-                        fwrite(&tmp8, sizeof(tmp8), 1, i_file);
+                        PRDR_FWRITE(&tmp8, sizeof(tmp8), 1, i_file);
                         tmp8 = 0;
                     }
 
@@ -296,7 +296,7 @@ class ExprOp1 : public Expr
 
         int output(FILE * i_file)
             {
-                fwrite(&cv_op, 1, 1, i_file);
+                PRDR_FWRITE(&cv_op, 1, 1, i_file);
                 cv_arg->output(i_file);
 
                 return 0;
@@ -335,7 +335,7 @@ class ExprOp2 : public Expr
 
         int output(FILE * i_file)
             {
-                fwrite(&cv_op, 1, 1, i_file);
+                PRDR_FWRITE(&cv_op, 1, 1, i_file);
                 cv_arg[0]->output(i_file);
                 cv_arg[1]->output(i_file);
 
@@ -408,19 +408,19 @@ class ExprAttnLink : public Expr
         int output(FILE * i_file)
         {
             char cv_op = Prdr::ATTNLINK;
-            fwrite(&cv_op, 1, 1, i_file);
+            PRDR_FWRITE(&cv_op, 1, 1, i_file);
 
             cv_op = 0;
             for (int i = 0; i < MAX_ATTNS; i++)
                 if (NULL != cv_arg[i])
                     cv_op++;
-            fwrite(&cv_op, 1, 1, i_file);
+            PRDR_FWRITE(&cv_op, 1, 1, i_file);
 
             for (int i = 0; i < MAX_ATTNS; i++)
                 if (NULL != cv_arg[i])
                 {
                     cv_op = i;
-                    fwrite(&cv_op, 1, 1, i_file);
+                    PRDR_FWRITE(&cv_op, 1, 1, i_file);
                     cv_arg[i]->output(i_file);
                 }
 
@@ -496,16 +496,16 @@ class ExprRule : public Expr
                 char l_op;
 
                 l_op = Prdr::REF_RULE;
-                fwrite(&l_op, 1, 1, i_file);
+                PRDR_FWRITE(&l_op, 1, 1, i_file);
                 l_ref = htons(prdrGetRefId(cv_rulename));
-                fwrite(&l_ref, sizeof(l_ref), 1, i_file);
+                PRDR_FWRITE(&l_ref, sizeof(l_ref), 1, i_file);
 
                 cv_bits->output(i_file);
 
                 l_op = prdrGetRefType(cv_actionname);
-                fwrite(&l_op, 1, 1, i_file);
+                PRDR_FWRITE(&l_op, 1, 1, i_file);
                 l_ref = htons(prdrGetRefId(cv_actionname));
-                fwrite(&l_ref, sizeof(l_ref), 1, i_file);
+                PRDR_FWRITE(&l_ref, sizeof(l_ref), 1, i_file);
 
                 return 0;
             };
@@ -618,7 +618,7 @@ class ExprAct_Try : public Expr
                 char l_op;
 
                 l_op = Prdr::ACT_TRY;
-                fwrite(&l_op, 1, 1, i_file);
+                PRDR_FWRITE(&l_op, 1, 1, i_file);
                 cv_left->output(i_file);
                 cv_right->output(i_file);
 
@@ -663,7 +663,7 @@ class ExprAct_Thresh : public Expr
             {
                 char l_op;
                 l_op = Prdr::ACT_THRES;
-                fwrite(&l_op, 1, 1, i_file);
+                PRDR_FWRITE(&l_op, 1, 1, i_file);
 
                 if (NULL == cv_thresholdTime[0])
                     l_op = 0;
@@ -681,29 +681,29 @@ class ExprAct_Thresh : public Expr
                 if (NULL != cv_mfg_file_thr)
                     l_op |= 0x20;
 
-                fwrite(&l_op, 1, 1, i_file);
+                PRDR_FWRITE(&l_op, 1, 1, i_file);
 
                 if (NULL != cv_thresholdTime[0])
                 {
-                    fwrite(&cv_field, sizeof(cv_field), 1, i_file);
+                    PRDR_FWRITE(&cv_field, sizeof(cv_field), 1, i_file);
                     cv_thresholdTime[0]->output(i_file);
                     if (NULL != cv_thresholdTime[1])
                     {
-                        fwrite(&cv_mfg, sizeof(cv_mfg), 1, i_file);
+                        PRDR_FWRITE(&cv_mfg, sizeof(cv_mfg), 1, i_file);
                         cv_thresholdTime[1]->output(i_file);
                     }
                     else if (NULL != cv_mfg_file_thr)
                     {
                         uint32_t l_tmp32 = prdrActionArgMap(*cv_mfg_file_thr);
                         l_tmp32 = htonl(l_tmp32);
-                        fwrite(&l_tmp32, sizeof(l_tmp32), 1, i_file);
+                        PRDR_FWRITE(&l_tmp32, sizeof(l_tmp32), 1, i_file);
                     }
                 }
 
                 if (0 != cv_3)
                 {
                     uint32_t l_tmp32 = htonl(cv_3);
-                    fwrite(&l_tmp32, 4, 1, i_file);
+                    PRDR_FWRITE(&l_tmp32, 4, 1, i_file);
                 }
 
                 return 0;
@@ -763,7 +763,7 @@ class ExprAct_Dump : public Expr  //@ecdf
                 char l_op;
 
                 l_op = Prdr::ACT_DUMP;
-                fwrite(&l_op, 1, 1, i_file);
+                PRDR_FWRITE(&l_op, 1, 1, i_file);
 
                 uint32_t l_dType;
 
@@ -772,7 +772,7 @@ class ExprAct_Dump : public Expr  //@ecdf
                 else
                     l_dType = prdrActionArgMap(*cv_1);
                 l_dType = htonl(l_dType);
-                fwrite(&l_dType, sizeof(l_dType), 1, i_file);
+                PRDR_FWRITE(&l_dType, sizeof(l_dType), 1, i_file);
 
                 return 0;
             };
@@ -798,10 +798,10 @@ class ExprAct_Gard : public Expr
                 char l_op;
 
                 l_op = Prdr::ACT_GARD;
-                fwrite(&l_op, 1, 1, i_file);
+                PRDR_FWRITE(&l_op, 1, 1, i_file);
 
                 uint32_t l_gType = htonl(prdrActionArgMap(*cv_1));
-                fwrite(&l_gType, sizeof(l_gType), 1, i_file);
+                PRDR_FWRITE(&l_gType, sizeof(l_gType), 1, i_file);
 
                 return 0;
             };
@@ -828,13 +828,13 @@ class ExprAct_Analyse : public Expr
         int output(FILE * i_file)
         {
             char l_op = Prdr::ACT_ANALY;
-            fwrite(&l_op, 1, 1, i_file);
+            PRDR_FWRITE(&l_op, 1, 1, i_file);
 
             uint32_t l_chipType = htonl(prdrActionArgMap(*cv_1));
-            fwrite(&l_chipType, sizeof(l_chipType), 1, i_file);
+            PRDR_FWRITE(&l_chipType, sizeof(l_chipType), 1, i_file);
 
             uint32_t l_chipIndx = htonl(cv_2);
-            fwrite(&l_chipIndx, sizeof(l_chipIndx), 1, i_file);
+            PRDR_FWRITE(&l_chipIndx, sizeof(l_chipIndx), 1, i_file);
 
             return 0;
         };
@@ -882,24 +882,24 @@ class ExprAct_Callout : public Expr
             char l_op;
 
             l_op = Prdr::ACT_CALL;
-            fwrite(&l_op, 1, 1, i_file);
+            PRDR_FWRITE(&l_op, 1, 1, i_file);
 
             l_op = cv_type;
-            fwrite(&l_op, 1, 1, i_file);
+            PRDR_FWRITE(&l_op, 1, 1, i_file);
 
             uint32_t l_priority = htonl(prdrActionArgMap(*cv_1));
-            fwrite(&l_priority, sizeof(l_priority), 1, i_file);
+            PRDR_FWRITE(&l_priority, sizeof(l_priority), 1, i_file);
 
             if (CALLOUT_SELF != cv_type)
             {
                 uint32_t l_arg = htonl(prdrActionArgMap(*cv_2));
-                fwrite(&l_arg, sizeof(l_arg), 1, i_file);
+                PRDR_FWRITE(&l_arg, sizeof(l_arg), 1, i_file);
 
                 l_arg = htonl(cv_3);
-                fwrite(&l_arg, sizeof(l_arg), 1, i_file);
+                PRDR_FWRITE(&l_arg, sizeof(l_arg), 1, i_file);
                 // Write bool for ALT resolution.
                 l_op = (NULL == cv_alt ? 0 : 1);
-                fwrite(&l_op, 1, 1, i_file);
+                PRDR_FWRITE(&l_op, 1, 1, i_file);
 
                 // Write ALT resolution.
                 if (NULL != cv_alt)
@@ -946,18 +946,18 @@ class ExprAct_Funccall : public Expr
                 char l_op;
 
                 l_op = Prdr::ACT_FUNC;
-                fwrite(&l_op, 1, 1, i_file);
+                PRDR_FWRITE(&l_op, 1, 1, i_file);
 
                 if ('"' == (*cv_1)[0])
                     (*cv_1) = cv_1->substr(1, cv_1->size() - 2);
-                fwrite(cv_1->c_str(), cv_1->size() + 1, 1, i_file);
+                PRDR_FWRITE(cv_1->c_str(), cv_1->size() + 1, 1, i_file);
 
                 uint32_t l_chip;
                 if (NULL != cv_2)
                     l_chip = htonl(prdrActionArgMap(*cv_2));
                 else
                     l_chip = 0;
-                fwrite(&l_chip, sizeof(l_chip), 1, i_file);
+                PRDR_FWRITE(&l_chip, sizeof(l_chip), 1, i_file);
 
                 return 0;
             };
@@ -987,10 +987,10 @@ class ExprAct_Flag : public Expr
                 char l_op;
 
                 l_op = Prdr::ACT_FLAG;
-                fwrite(&l_op, 1, 1, i_file);
+                PRDR_FWRITE(&l_op, 1, 1, i_file);
 
                 uint32_t l_flag = htonl(prdrActionArgMap(*cv_1));
-                fwrite(&l_flag, sizeof(l_flag), 1, i_file);
+                PRDR_FWRITE(&l_flag, sizeof(l_flag), 1, i_file);
 
                 return 0;
             };
@@ -1017,10 +1017,10 @@ class ExprAct_Capture : public Expr
                 char l_op;
 
                 l_op = Prdr::ACT_CAPT;
-                fwrite(&l_op, 1, 1, i_file);
+                PRDR_FWRITE(&l_op, 1, 1, i_file);
 
                 uint32_t l_group = htonl(prdrCaptureGroupMap(*cv_1));
-                fwrite(&l_group, sizeof(l_group), 1, i_file);
+                PRDR_FWRITE(&l_group, sizeof(l_group), 1, i_file);
 
                 return 0;
             };

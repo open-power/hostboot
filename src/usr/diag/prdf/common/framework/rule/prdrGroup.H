@@ -171,15 +171,15 @@ class Group
 
         int output(FILE * i_file)
             {
-                fwrite(&cv_op, 1, 1, i_file);
+                PRDR_FWRITE(&cv_op, 1, 1, i_file);
 
                 uint16_t l_ruleCount = htons(cv_rules.size());
-                fwrite(&l_ruleCount, sizeof(l_ruleCount), 1, i_file);
+                PRDR_FWRITE(&l_ruleCount, sizeof(l_ruleCount), 1, i_file);
 
                 // Write flags for GROUP op.
                 if (Prdr::GROUP == cv_op)
                 {
-                    fwrite(&cv_flags, 1, 1, i_file);
+                    PRDR_FWRITE(&cv_flags, 1, 1, i_file);
                     if (Prdr::PRDR_GROUP_FILTER_PRIORITY & cv_flags)
                     {
                         cv_priorityList->output(i_file);

@@ -30,7 +30,10 @@
  */
 
 #include <stdlib.h>
-
+// Portable formatting of uint64_t.  The ISO C99 standard requires
+// __STDC_FORMAT_MACROS to be defined in order for PRIx64 etc. to be defined.
+#define __STDC_FORMAT_MACROS
+#include <inttypes.h>
 #include <prdrToken.H>            // Token structure definition.
 #include <prdrCompile.y.H>  // Token enums from yacc code.
 
@@ -69,8 +72,10 @@ id      [A-Za-z_][A-Za-z0-9_]*
 %%
 
  /* Parse numerical constants to "INTEGER" type. */
-{integer}   { sscanf(yytext, "%llu", &yylval.long_integer); return PRDR_INTEGER; }
-{hexint}    { sscanf(yytext, "%llx", &yylval.long_integer); return PRDR_INTEGER; }
+{integer}   { sscanf(yytext, "%" PRIu64, &yylval.long_integer);
+              return PRDR_INTEGER; }
+{hexint}    { sscanf(yytext, "%" PRIx64, &yylval.long_integer);
+              return PRDR_INTEGER; }
 
  /* Parse a bitstring to "BIT_STRING" type. */
 {bitstring} {

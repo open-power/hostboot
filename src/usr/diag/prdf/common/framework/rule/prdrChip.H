@@ -134,26 +134,26 @@ class Chip
             uint32_t l_temp;
             uint16_t l_temp16;
 
-            fwrite("PRDRCHIP", 8, 1, l_file);
+            PRDR_FWRITE("PRDRCHIP", 8, 1, l_file);
 
             l_temp = htonl(cv_chipid);
-            fwrite(&l_temp, sizeof(l_temp), 1, l_file);
+            PRDR_FWRITE(&l_temp, sizeof(l_temp), 1, l_file);
 
             l_temp = htonl(cv_targetType);
-            fwrite(&l_temp, sizeof(l_temp), 1, l_file);
+            PRDR_FWRITE(&l_temp, sizeof(l_temp), 1, l_file);
 
             l_temp = htonl(cv_signatureOffset);
-            fwrite(&l_temp, sizeof(l_temp), 1, l_file);
+            PRDR_FWRITE(&l_temp, sizeof(l_temp), 1, l_file);
 
             // Write dumptype to file.  //@ecdf
             l_temp = htonl(cv_dumptype);
-            fwrite(&l_temp, sizeof(l_temp), 1, l_file);
+            PRDR_FWRITE(&l_temp, sizeof(l_temp), 1, l_file);
 
             l_temp16 = htons(cv_scomlen);
-            fwrite(&l_temp16, sizeof(l_temp16), 1, l_file);
+            PRDR_FWRITE(&l_temp16, sizeof(l_temp16), 1, l_file);
 
             l_temp16 = htons(cv_reglist.size());
-            fwrite(&l_temp16, sizeof(l_temp16), 1, l_file);
+            PRDR_FWRITE(&l_temp16, sizeof(l_temp16), 1, l_file);
 
             for (RegisterList::iterator i = cv_reglist.begin();
                  i != cv_reglist.end();
