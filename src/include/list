@@ -1,25 +1,25 @@
-//  IBM_PROLOG_BEGIN_TAG
-//  This is an automatically generated prolog.
-//
-//  $Source: src/include/list $
-//
-//  IBM CONFIDENTIAL
-//
-//  COPYRIGHT International Business Machines Corp. 2011
-//
-//  p1
-//
-//  Object Code Only (OCO) source materials
-//  Licensed Internal Code Source Materials
-//  IBM HostBoot Licensed Internal Code
-//
-//  The source code for this program is not published or other-
-//  wise divested of its trade secrets, irrespective of what has
-//  been deposited with the U.S. Copyright Office.
-//
-//  Origin: 30
-//
-//  IBM_PROLOG_END
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/include/list $                                            */
+/*                                                                        */
+/* IBM CONFIDENTIAL                                                       */
+/*                                                                        */
+/* COPYRIGHT International Business Machines Corp. 2011,2013              */
+/*                                                                        */
+/* p1                                                                     */
+/*                                                                        */
+/* Object Code Only (OCO) source materials                                */
+/* Licensed Internal Code Source Materials                                */
+/* IBM HostBoot Licensed Internal Code                                    */
+/*                                                                        */
+/* The source code for this program is not published or otherwise         */
+/* divested of its trade secrets, irrespective of what has been           */
+/* deposited with the U.S. Copyright Office.                              */
+/*                                                                        */
+/* Origin: 30                                                             */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
 #ifndef stl_list
 #define stl_list
 
@@ -170,7 +170,7 @@ namespace std
             /**
              * Default constructior
              */
-            __attribute__ ((always_inline))
+            __attribute__ ((always_inline)) inline
             ListIterator_t() : iv_node()
             {}
 
@@ -179,7 +179,7 @@ namespace std
              * Construct from a node pointer
              * @pararm[in] i_ln ListNode_t to use
              */
-            __attribute__ ((always_inline))
+            __attribute__ ((always_inline)) inline
             explicit ListIterator_t(ListNode_t* i_ln) : iv_node(i_ln)
             {}
 
@@ -187,7 +187,7 @@ namespace std
              * Dereference
              * @return reference to node data
              */
-            __attribute__ ((always_inline))
+            __attribute__ ((always_inline)) inline
             reference operator* () const
             {
                 return  static_cast<_Node*>(iv_node)->iv_data;
@@ -197,7 +197,7 @@ namespace std
              * Dereference
              * @return pointer to node data
              */
-            __attribute__ ((always_inline))
+            __attribute__ ((always_inline)) inline
             pointer   operator->() const
             {
                 return &static_cast<_Node*>(iv_node)->iv_data;
@@ -207,7 +207,7 @@ namespace std
              * Pre Increment
              * @return reference to iterator
              */
-            __attribute__ ((always_inline))
+            __attribute__ ((always_inline)) inline
             _This& operator++()
             {
                 iv_node = iv_node->iv_next; return *this;
@@ -217,7 +217,7 @@ namespace std
              * Post Increment
              * @return reference to iterator
              */
-            __attribute__ ((always_inline))
+            __attribute__ ((always_inline)) inline
             _This  operator++(int) 
             {
                 _This tmp = *this; 
@@ -229,7 +229,7 @@ namespace std
              * Pre decrement
              * @return reference to iterator
              */
-            __attribute__ ((always_inline))
+            __attribute__ ((always_inline)) inline
             _This& operator--()
             {
                 iv_node = iv_node->iv_prev;
@@ -240,7 +240,7 @@ namespace std
              * Post decrement
              * @return reference to iterator
              */
-            __attribute__ ((always_inline))
+            __attribute__ ((always_inline)) inline
             _This  operator--(int)
             {
                 _This tmp = *this;
@@ -253,7 +253,7 @@ namespace std
              * @param[in] Itertor to compare
              * @return true if ==, else false
              */
-            __attribute__ ((always_inline))
+            __attribute__ ((always_inline)) inline
             bool operator==(const _This& i_ln) const
             {
                 return iv_node == i_ln.iv_node;
@@ -264,7 +264,7 @@ namespace std
              * @param[in] Iterator to compare
              * @return true if !=, else false;
              */
-            __attribute__ ((always_inline))
+            __attribute__ ((always_inline)) inline
             bool operator!=(const _This& i_ln) const
             {
                 return iv_node != i_ln.iv_node;
@@ -302,7 +302,7 @@ namespace std
             /**
              * Default constructior
              */
-            __attribute__ ((always_inline))
+            __attribute__ ((always_inline)) inline
             ListConstIterator_t() : iv_node()
             {} 
 
@@ -310,7 +310,7 @@ namespace std
              * Construct from a const node pointer
              * @pararm[i] ListNode_t to use
              */
-            __attribute__ ((always_inline))
+            __attribute__ ((always_inline)) inline
             explicit ListConstIterator_t(const ListNode_t* i_ln) : iv_node(i_ln)
             {} 
 
@@ -318,7 +318,7 @@ namespace std
              * Construct from another const_iterator
              * @param[i] const_iterator reference
              */
-            __attribute__ ((always_inline))
+            __attribute__ ((always_inline)) inline
             ListConstIterator_t(const_iterator& i_ln) : iv_node(i_ln.iv_node)
             {}
 
@@ -326,7 +326,7 @@ namespace std
              * Dereference
              * @return const_reference to node data
              */
-            __attribute__ ((always_inline))
+            __attribute__ ((always_inline)) inline
             const_reference operator* () const
             {
                 return  static_cast<_Node*>(iv_node)->iv_data;
@@ -336,7 +336,7 @@ namespace std
              * Dereference
              * @return const pointer to node data
              */
-            __attribute__ ((always_inline))
+            __attribute__ ((always_inline)) inline
             pointer   operator->() const
             { 
                 return &static_cast<_Node*>(iv_node)->iv_data;
@@ -346,7 +346,7 @@ namespace std
              * Pre Increment
              * @return reference to iterator
              */
-            __attribute__ ((always_inline))
+            __attribute__ ((always_inline)) inline
             _This& operator++()
             {
                 iv_node = iv_node->iv_next; return *this;
@@ -356,7 +356,7 @@ namespace std
              * Post Increment
              * @return reference to iterator
              */
-            __attribute__ ((always_inline))
+            __attribute__ ((always_inline)) inline
             _This  operator++(int) 
             {
                 _This tmp = *this; 
@@ -368,7 +368,7 @@ namespace std
              * Pre decrement
              * @return reference to iterator
              */
-            __attribute__ ((always_inline))
+            __attribute__ ((always_inline)) inline
             _This& operator--()
             {
                 iv_node = iv_node->iv_prev;
@@ -379,7 +379,7 @@ namespace std
              * Post decrement
              * @return reference to iterator
              */
-            __attribute__ ((always_inline))
+            __attribute__ ((always_inline)) inline
             _This  operator--(int)
             {
                 _This tmp = *this;
@@ -392,7 +392,7 @@ namespace std
              * @param[in] Iterator to compare
              * @return true if ==, else false
              */
-            __attribute__ ((always_inline))
+            __attribute__ ((always_inline)) inline
             bool operator==(const _This& i_ln) const
             {
                 return iv_node == i_ln.iv_node;
@@ -403,7 +403,7 @@ namespace std
              * @param[in] Itertor to compare
              * @return true if !=, else false;
              */
-            __attribute__ ((always_inline))
+            __attribute__ ((always_inline)) inline
             bool operator!=(const _This& i_ln) const
             {
                 return iv_node != i_ln.iv_node;
@@ -415,7 +415,7 @@ namespace std
         };
 
     // So const and non-const iterators can be compared
-    template<typename VAL> __attribute__((always_inline))
+    template<typename VAL> __attribute__((always_inline)) inline
     bool
     operator==( const ListIterator_t<VAL>& i_ln,
                 const ListConstIterator_t<VAL>& i_lm)
@@ -423,13 +423,13 @@ namespace std
         return i_ln.iv_node == i_lm.iv_node;
     }
 
-    template<typename VAL> __attribute__((always_inline))
+    template<typename VAL> __attribute__((always_inline)) inline
     bool
-    operator !=( const ListIterator_t<VAL>& i_ln,
-                 const ListConstIterator_t<VAL>& i_lm)
+    operator!=( const ListIterator_t<VAL>& i_ln,
+                const ListConstIterator_t<VAL>& i_lm)
     {
         return i_ln.iv_node != i_lm.iv_node;
-    } 
+    }
 
     /**
      * @class std::list
@@ -510,7 +510,7 @@ namespace std
                 /**
                  *  Default ctor
                  */
-                __attribute__ ((always_inline))
+                __attribute__ ((always_inline)) inline
                 explicit list()
                 {
                     iv_node.reset();
@@ -554,7 +554,7 @@ namespace std
                  * dtor
                  * @post Destructors called, storaged freed.
                  */
-                __attribute__ ((always_inline))
+                __attribute__ ((always_inline)) inline
                 ~list()
                 {
                     clear();
@@ -565,7 +565,7 @@ namespace std
                  * @param[in] x reference list to copy.
                  * @post any previously obtained iterators are invalid
                  */
-                __attribute__ ((always_inline))
+                __attribute__ ((always_inline)) inline
                 list<T>& operator= (const list<T>& x)
                 {
                     list<T> new_list(x);
@@ -578,25 +578,25 @@ namespace std
                 /**
                  * Get iterator to first element in the list
                  */
-                __attribute__ ((always_inline))
+                __attribute__ ((always_inline)) inline
                 iterator begin() { return iterator(iv_node.iv_next); }
 
                 /**
                  * Get const_iterator to the first element in the list
                  */
-                __attribute__ ((always_inline))
+                __attribute__ ((always_inline)) inline
                 const_iterator begin() const { return const_iterator(iv_node.iv_next); }
 
                 /**
                  * Get an iterator to the last element in the list + 1
                  */
-                __attribute__ ((always_inline))
+                __attribute__ ((always_inline)) inline
                 iterator end() { return iterator(&iv_node); }
 
                 /**
                  * Get a const_iterator to the last element in the list + 1
                  */
-                __attribute__ ((always_inline))
+                __attribute__ ((always_inline)) inline
                 const_iterator end() const { return const_iterator(&iv_node); }
 
                 //reverse_iterator rbegin();
@@ -613,7 +613,7 @@ namespace std
                  * @pre none
                  * @post none
                  */
-                __attribute__ ((always_inline))
+                __attribute__ ((always_inline)) inline
                 bool empty() const
                 {
                     return iv_node.empty();
@@ -634,7 +634,7 @@ namespace std
                  * Return the maximum potential size the container could reach.
                  * @return number of the maximum element count this container could reach
                  */
-                __attribute__ ((always_inline))
+                __attribute__ ((always_inline)) inline
                 size_type max_size() const  { return UINT64_MAX/sizeof(T); }
 
                 /**
@@ -664,7 +664,7 @@ namespace std
                 /**
                  * Get a reference to the first element in the list
                  */
-                __attribute__ ((always_inline))
+                __attribute__ ((always_inline)) inline
                 reference front()
                 {
                     return *begin();
@@ -673,7 +673,7 @@ namespace std
                 /**
                  * Get a const_reference to the first element in the list
                  */
-                __attribute__ ((always_inline))
+                __attribute__ ((always_inline)) inline
                 const_reference front() const
                 {
                     return *begin();
@@ -682,7 +682,7 @@ namespace std
                 /**
                  * Get a reference to the last element in the list
                  */
-                __attribute__ ((always_inline))
+                __attribute__ ((always_inline)) inline
                 reference back()
                 {
                     iterator i = end();
@@ -693,7 +693,7 @@ namespace std
                 /**
                  * Get a const_reference to the last element in the list
                  */
-                __attribute__ ((always_inline))
+                __attribute__ ((always_inline)) inline
                 const_reference back() const
                 {
                     const_iterator i = end();
@@ -710,7 +710,7 @@ namespace std
                  * @post any previously obtained iterators are invalid
                  */
                 template <class InputIterator>
-                __attribute__ ((always_inline))
+                __attribute__ ((always_inline)) inline
                 void assign( InputIterator first, InputIterator last)
                 {
                     list<T> new_list(first,last);
@@ -723,7 +723,7 @@ namespace std
                  * @param[in] x Reference to the element used to create elements.
                  * @post any previously obtained iterators are invalid
                  */
-                __attribute__ ((always_inline))
+                __attribute__ ((always_inline)) inline
                 void assign( size_type n, const T& x)
                 {
                     list<T> new_list(n,x);
@@ -734,7 +734,7 @@ namespace std
                  * Add an element to the front fo the list
                  * @pararm Element to add
                  */
-                __attribute__ ((always_inline))
+                __attribute__ ((always_inline)) inline
                 void push_front (const T& x)
                 {
                     insert(begin(),x);
@@ -743,7 +743,7 @@ namespace std
                 /**
                  * Remove the element at the front of the container
                  */
-                __attribute__ ((always_inline))
+                __attribute__ ((always_inline)) inline
                 void pop_front ()
                 {
                     erase(begin());
@@ -754,7 +754,7 @@ namespace std
                  * @param[in] x referece to element to add
                  * @post size()+= 1;
                  */
-                __attribute__ ((always_inline))
+                __attribute__ ((always_inline)) inline
                 void push_back (const T& x)
                 {
                     insert(end(),x);
@@ -763,7 +763,7 @@ namespace std
                 /**
                  * Remove the element at the back of the container
                  */
-                __attribute__ ((always_inline))
+                __attribute__ ((always_inline)) inline
                 void pop_back ()
                 {
                     iterator i = end();
