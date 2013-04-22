@@ -118,47 +118,47 @@ rule TpChipletSpa
 
 group gTpChipletSpa filter singlebit
 {
-    /** TP_CHIPLET_FIR[0]
+    /** TP_CHIPLET_SPA[0]
      *  Attention from OCCFIR
      */
     (TpChipletSpa, bit(0)) ? analyze(gOccFir);
 
-    /** TP_CHIPLET_FIR[1]
+    /** TP_CHIPLET_SPA[1]
      *  Attention from MCIFIR_00 (Venice only)
      */
     (TpChipletSpa, bit(1)) ? defaultMaskedError;
 
-    /** TP_CHIPLET_FIR[2]
+    /** TP_CHIPLET_SPA[2]
      *  Attention from MCIFIR_01 (Venice only)
      */
     (TpChipletSpa, bit(2)) ? defaultMaskedError;
 
-    /** TP_CHIPLET_FIR[3]
+    /** TP_CHIPLET_SPA[3]
      *  Attention from MCIFIR_10 (Venice only)
      */
     (TpChipletSpa, bit(3)) ? defaultMaskedError;
 
-    /** TP_CHIPLET_FIR[4]
+    /** TP_CHIPLET_SPA[4]
      *  Attention from MCIFIR_10 (Venice only)
      */
     (TpChipletSpa, bit(4)) ? defaultMaskedError;
 
-    /** TP_CHIPLET_FIR[5]
+    /** TP_CHIPLET_SPA[5]
      *  Attention from MCIFIR_20
      */
     (TpChipletSpa, bit(5)) ? analyzeMcs20;
 
-    /** TP_CHIPLET_FIR[6]
+    /** TP_CHIPLET_SPA[6]
      *  Attention from MCIFIR_21
      */
     (TpChipletSpa, bit(6)) ? analyzeMcs21;
 
-    /** TP_CHIPLET_FIR[7]
+    /** TP_CHIPLET_SPA[7]
      *  Attention from MCIFIR_30
      */
     (TpChipletSpa, bit(7)) ? analyzeMcs30;
 
-    /** TP_CHIPLET_FIR[8]
+    /** TP_CHIPLET_SPA[8]
      *  Attention from MCIFIR_31
      */
     (TpChipletSpa, bit(8)) ? analyzeMcs31;

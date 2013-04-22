@@ -356,15 +356,28 @@ class ExprOp2 : public Expr
 
         uint16_t getSignature()
         {
-            return SignatureOp::combineSig(
-                    (NULL == cv_arg[0] ?
-                        SignatureOp::DEFAULT_SIGNATURE
-                        : cv_arg[0]->getSignature()
-                    ),
-                    (NULL == cv_arg[1] ?
-                        SignatureOp::DEFAULT_SIGNATURE
-                        : cv_arg[1]->getSignature()
-                    ));
+            // To match the signature generation during IPL
+            // time in RightShiftRegister/LeftShiftRegister,
+            // We need to skip calling combineSig during
+            // rule compile time.
+            // The casting is needed since these are extend ascii codes
+            if ((char(Prdr::RSHIFT) == cv_op) ||
+                (char(Prdr::LSHIFT) == cv_op))
+            {
+                return cv_arg[0]->getSignature();
+            }
+            else
+            {
+                return SignatureOp::combineSig(
+                                    (NULL == cv_arg[0] ?
+                                      SignatureOp::DEFAULT_SIGNATURE
+                                      : cv_arg[0]->getSignature()
+                                    ),
+                                    (NULL == cv_arg[1] ?
+                                      SignatureOp::DEFAULT_SIGNATURE
+                                      : cv_arg[1]->getSignature()
+                                    ));
+            }
         };
 
 };
