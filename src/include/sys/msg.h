@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2010,2012              */
+/* COPYRIGHT International Business Machines Corp. 2010,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -71,6 +71,7 @@ enum msg_root_queue_types_t
 {
     MSGQ_ROOT_VFS,
     MSGQ_ROOT_INTR,
+    MSGQ_TYPE_IPC = 0x08,   //!< Value is OR'd with the physical node number
 };
 
 /** @var msg_sys_types_t::MSG_MM_RP_READ

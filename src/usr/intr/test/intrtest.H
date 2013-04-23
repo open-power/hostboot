@@ -133,56 +133,6 @@ class IntrTest: public CxxTest::TestSuite
             }
         }
 
-        /**
-         * @brief Register an interrupt message queue, force an interrupt,
-         *        then handle the interrupt.
-         */
-        void test_intr( void )
-        {
-
-            // DISABLE in VBU
-            if( TARGETING::is_vpo() )
-            {
-                return;
-            }
-
-            errlHndl_t err = NULL;
-
-            // Need to register a msgq
-            msg_q_t msgQ = msg_q_create();
-            err = INTR::registerMsgQ(msgQ,0,INTR::ISN_INTERPROC);
-            if(err)
-            {
-                TS_FAIL("Errl from INTR::registerMsgQ()");
-                delete err;
-                err = NULL;
-            }
-
-            // Force an interrupt by writing to the MFFR on master
-            volatile uint8_t * mfrr =
-                reinterpret_cast<uint8_t *>(iv_masterAddr+12);
-            *(mfrr) = 0x55;
-            
-            TRACFCOMP(g_trac_intr,"Waiting for IPI interrupt");
-            msg_t* msg = msg_wait(msgQ); // wait for interrupt msg
-            TRACFCOMP(g_trac_intr,"Interrupt handled! Type=%lx",msg->data[0]);
-            if(msg->data[0] != INTR::INTERPROC_XISR)
-            {
-                TS_FAIL("INTR::unexpected interrupt type %lx",msg->data[0]);
-            }
-            msg_respond(msgQ,msg);
-
-            msgQ = INTR::unRegisterMsgQ(INTR::ISN_INTERPROC);
-            if(msgQ)
-            {
-                msg_q_destroy(msgQ);
-            }
-            else
-            {
-                TS_FAIL("INTR::unRegisterMsgQ failed");
-            }
-        }
-
         // This checks the enablePsiIntr. Even though the master proc
         // is already configured it does not use this interface
         // and there are no other processor currently configured in simics

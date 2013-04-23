@@ -57,6 +57,7 @@ namespace MBOX
         MSG_UNREGISTER_MSGQ,
         MSG_INTR,
         MSG_MBOX_SHUTDOWN,
+        MSG_IPC,
     };
 
 
@@ -173,6 +174,11 @@ namespace MBOX
              * @param[in] i_msg, The message 
              */
             errlHndl_t handleInterrupt();
+
+            /**
+             * Handle potential IPC message
+             */
+            void handleIPC();
 
             /**
              * Trace the message to the "fast" trace buffer

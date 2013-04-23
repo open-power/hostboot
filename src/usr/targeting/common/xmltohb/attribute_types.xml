@@ -1868,6 +1868,22 @@
 </attribute>
 
 <attribute>
+    <id>HB_HRMOR_NODAL_BASE</id>
+    <description>Hostboot HRMOR = (HB_HRMOR_NODAL_BASE * node) + offset. </description>
+    <!-- This value is set by the FSP.
+         Hostboot uses it to find the HRMOR of Hostboot images running on other nodes.
+         The value of HB_HRMOR_NODAL_BASE does NOT include the offset -->
+    <simpleType>
+        <uint64_t>
+            <default>0x400000000000</default> <!-- 64TB -->
+        </uint64_t>
+    </simpleType>
+    <persistency>volatile</persistency>
+    <readable/>
+    <writeable/>
+</attribute>
+
+<attribute>
     <id>EI_BUS_RX_MSB_LSB_SWAP</id>
     <description>PRBS scramble pattern per lane on DMI bus for p8 and centaur.</description>
     <simpleType>
@@ -1898,6 +1914,7 @@
         <macro>DIRECT</macro>
     </hwpfToHbAttrMap>
 </attribute>
+
 
 <!--    TARGETING attributes to support mss_setup_bars and proc_setup_bars  -->
 

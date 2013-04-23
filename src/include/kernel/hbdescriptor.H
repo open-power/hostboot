@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012                   */
+/* COPYRIGHT International Business Machines Corp. 2012,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -30,9 +30,12 @@
 
 struct HB_TI_DataArea;
 
+namespace KernelIpc { struct ipc_data_area_t; };
+
 struct HB_Descriptor
 {
      HB_TI_DataArea *TI_DataAreaPtr;  // ptr to the TI data area structure
+     KernelIpc::ipc_data_area_t *IPC_DataAreaPtr; // ptr to the IPC data area
 };
 
 #endif /* __KERNEL_HBDESCRIPTOR_H */

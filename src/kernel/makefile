@@ -27,7 +27,7 @@ OBJS += syscall.o scheduler.o spinlock.o exception.o vmmmgr.o timemgr.o
 OBJS += futexmgr.o ptmgr.o segmentmgr.o devicesegment.o basesegment.o
 OBJS += block.o cpuid.o misc.o msghandler.o blockmsghdlr.o stacksegment.o
 OBJS += softpatch_p8.o barrier.o idebug.o intmsghandler.o deferred.o
-OBJS += shutdown.o forceattn_p8.o terminate.o 
+OBJS += shutdown.o forceattn_p8.o terminate.o ipc.o 
 
 include ${ROOTPATH}/config.mk
 

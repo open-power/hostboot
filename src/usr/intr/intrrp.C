@@ -35,6 +35,7 @@
 #include <sys/mmio.h>
 #include <sys/misc.h>
 #include <kernel/console.H>
+#include <kernel/ipc.H>
 #include <sys/task.h>
 #include <vmmconst.h>
 #include <targeting/common/targetservice.H>
@@ -180,6 +181,17 @@ errlHndl_t IntrRp::_init()
         (mmio_dev_map(reinterpret_cast<void*>(realAddr),THIRTYTWO_MB));
 
     TRACFCOMP(g_trac_intr,"INTR: vAddr = %lx",iv_baseAddr);
+
+    // Set up the IPC message Data area
+    TARGETING::Target * sys = NULL;
+    TARGETING::targetService().getTopLevelTarget( sys );
+    assert(sys != NULL);
+    uint64_t hrmor_base =
+        sys->getAttr<TARGETING::ATTR_HB_HRMOR_NODAL_BASE>();
+ 
+    KernelIpc::ipc_data_area.pir = iv_masterCpu.word;
+    KernelIpc::ipc_data_area.hrmor_base = hrmor_base;
+    KernelIpc::ipc_data_area.msg_queue_id = 0;
 
     // Set the BAR scom reg
     err = setBAR(procTarget,iv_masterCpu);

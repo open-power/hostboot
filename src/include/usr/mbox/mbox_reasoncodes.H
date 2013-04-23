@@ -39,7 +39,9 @@ namespace MBOX
         MOD_MBOXSRV_FSP_MSG     = 0x07, // MailboxSp::handle_hbmbox_msg
         MOD_MBOXSRV_SENDMSG     = 0x08, // MailboxSp::send_msg
         MOD_MBOXSRV_INIT        = 0x09, // MailboxSp::_init
-        MOD_MBOXSRC_UNCLAIMED   = 0x0A, // MailboxSp::invalidMsgResponder
+        MOD_MBOXSRC_UNCLAIMED   = 0x0A, // MailboxSp::handleUnclaimed
+        MOD_MBOX_SEND           = 0x0B, // MBOX::send
+        MOD_MBOXSRV_IPC_MSG     = 0x0C, // MailboxSp::handleIPC
     };
 
     enum MBOXReasonCode
@@ -60,6 +62,8 @@ namespace MBOX
         RC_INVALID_DMA_LENGTH        = MBOX_COMP_ID | 0x0E,
         RC_KERNEL_REG_FAILED         = MBOX_COMP_ID | 0x0F,
         RC_MAILBOX_DISABLED          = MBOX_COMP_ID | 0x10,
+        RC_IPC_INVALID_NODE          = MBOX_COMP_ID | 0x11,
+        RC_MSG_SEND_ERROR            = MBOX_COMP_ID | 0x12,
     };
 
 

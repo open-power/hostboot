@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/kernel/terminate.C $                                      */
+/* $Source: src/include/kernel/ipc.H $                                    */
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/* COPYRIGHT International Business Machines Corp. 2013                   */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,58 +20,22 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+#if !defined(__IPC_H)
+#define __IPC_H
 
-#include <kernel/hbdescriptor.H>
-#include <kernel/hbterminatetypes.H>
-#include <kernel/terminate.H>
-#include <stdint.h>
-#include <kernel/console.H>
-#include <kernel/ipc.H>
+#include <sys/msg.h>
 
-#include <builtins.h>
-#include <kernel/kernel_reasoncodes.H>
-
-extern "C" void p8_force_attn() NO_RETURN;
-
-
-/* Instance of the TI Data Area */
-HB_TI_DataArea kernel_TIDataArea;
-
-/* Instance of the HB desriptor struct */
-HB_Descriptor kernel_hbDescriptor =
+namespace KernelIpc
 {
-    &kernel_TIDataArea,
-    &KernelIpc::ipc_data_area
+struct ipc_data_area_t
+{
+    uint64_t msg_queue_id;
+    msg_t    msg_payload;
+    uint64_t hrmor_base;
+    uint32_t pir;
 };
 
+extern ipc_data_area_t ipc_data_area;
+};
 
-
-void terminateExecuteTI()
-{
-    // Call the function that actually executes the TI code.
-    p8_force_attn();
-}
-
-void termWritePlid(uint16_t i_source, uint64_t plid)
-{
-    kernel_TIDataArea.type = TI_WITH_PLID;
-    kernel_TIDataArea.source = i_source;
-    kernel_TIDataArea.plid = plid;
-}
-
-void termWriteSRC(uint16_t i_source, uint16_t i_reasoncode,uint64_t i_failAddr)
-{
-    // Update the TI structure with the type of TI and who called.
-    kernel_TIDataArea.type = TI_WITH_SRC;
-    kernel_TIDataArea.source = i_source;
-
-    // Update TID data area with the SRC info we have avail
-    kernel_TIDataArea.src.ID = 0xBC;
-    kernel_TIDataArea.src.subsystem = 0x11;
-    kernel_TIDataArea.src.reasoncode = i_reasoncode;
-    kernel_TIDataArea.src.moduleID = 0;
-    kernel_TIDataArea.src.iType = TI_WITH_SRC;
-
-    // Update User Data with address of fail location
-    kernel_TIDataArea.src.word6 = i_failAddr;
-}
+#endif

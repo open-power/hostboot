@@ -309,6 +309,64 @@ class MboxSPTest : public CxxTest::TestSuite
           msg_free(msg);
 #endif
       }
+
+      /**
+       * @brief IPC message test
+       * 
+       */
+      void testIPC(void)
+      {
+          errlHndl_t err = NULL;
+          msg_t * msg = msg_allocate();
+          msg_t * tmsg = msg_allocate();
+          msg_q_t msgQ = msg_q_create();
+
+          err = MBOX::msgq_register(MBOX::HB_TEST_MSGQ,msgQ);
+          if(err)
+          {
+              TS_FAIL("MBOX IPC: Could not register message queue");
+              errlCommit(err,MBOX_COMP_ID);
+          }
+
+          msg->type = 1;
+          msg->data[0] = 0x1111111111111111ull;
+          msg->data[1] = 0x4444444444444444ull;
+          msg->extra_data = (void *)0x3333333333333333ull;
+
+          *tmsg = *msg; // save for compare
+          uint64_t node = 0;
+
+          err = MBOX::send(MBOX::HB_TEST_MSGQ,msg,node);
+          if(err)
+          {
+              TS_FAIL("MBOX::send (IPC) returned and error log");
+              errlCommit(err,MBOX_COMP_ID);
+              msg_free(msg);
+              return;
+          }
+
+          msg_t * rmsg = msg_wait(msgQ);
+
+          if(rmsg->type != tmsg->type || 
+             rmsg->data[0] != tmsg->data[0] || 
+             rmsg->data[1] != tmsg->data[1] ||
+             rmsg->extra_data != tmsg->extra_data)
+          {
+              TS_FAIL("IPCTEST: Unexpected IPC message");
+
+              TRACFCOMP(g_trac_mbox,
+                        "IPCTEST IPC MSG: %d %lx %lx %p",
+                        rmsg->type,
+                        rmsg->data[0],
+                        rmsg->data[1],
+                        rmsg->extra_data);
+          }
+
+          msgQ = MBOX::msgq_unregister(MBOX::HB_TEST_MSGQ);
+          msg_q_destroy(msgQ);
+          msg_free(rmsg);
+          msg_free(tmsg);
+      }
 };
 
 #endif

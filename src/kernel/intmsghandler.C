@@ -119,15 +119,6 @@ void InterruptMsgHdlr::handleInterrupt()
             printk("InterrurptMsgHdlr got called before IPC was setup\n");
             hit = true;
         }
-
-
-        // else we got an external interrupt before we got things set up.
-        // TODO Is there anything that can be done other than
-        // leave the interrupt presenter locked.
-        // Does the code that sets up the IP registers need to check to see if
-        // there is an interrupt sitting there and send an EOI?
-        // Story 41868 -  Mask off all interrupts very early - might
-        // resolve this TODO.
     }
 
 }
@@ -154,6 +145,8 @@ void InterruptMsgHdlr::sendIPI(uint64_t i_pir)
     uint64_t mfrrAddress = cv_ipc_base_address;
     mfrrAddress += mmio_offset(i_pir);
     mfrrAddress += MFRR_ADDR_OFFSET;
+
+    mfrrAddress |= 0x8000000000000000ul;
 
     register uint8_t data = 0;
 

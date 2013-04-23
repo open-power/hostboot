@@ -42,6 +42,10 @@
 #include <kernel/intmsghandler.H>
 #include <sys/sync.h>
 
+namespace KernelIpc
+{
+    void send(uint64_t i_q, msg_t * i_msg);
+};
 
 extern "C"
 void kernel_execute_decrementer()
@@ -308,44 +312,55 @@ namespace Systemcalls
 
     void MsgSend(task_t* t)
     {
-        MessageQueue* mq = (MessageQueue*) TASK_GETARG0(t);
+        uint64_t q_handle = TASK_GETARG0(t);
         msg_t* m = (msg_t*) TASK_GETARG1(t);
 
-        if ((NULL == mq) || (NULL == m))
+        if(((q_handle >> 32) & MSGQ_TYPE_IPC) != 0)
         {
-            printkd("NULL pointer for message queue (%p) or message (%p).\n",
-                    mq, m);
-            TASK_SETRTN(t, -EINVAL);
-            return;
+            // IPC message
+            KernelIpc::send(q_handle, m);
         }
-
-        m->__reserved__async = 0; // set to async msg.
-
-        if (m->type >= MSG_FIRST_SYS_TYPE)
+        else
         {
-            printkd("Invalid type for msg_send, type=%d.\n", m->type);
-            TASK_SETRTN(t, -EINVAL);
-            return;
-        }
 
-        mq->lock.lock();
+            MessageQueue* mq = reinterpret_cast<MessageQueue*>(q_handle);
 
-        // Get waiting (server) task.
-        task_t* waiter = mq->waiting.remove();
-        if (NULL == waiter) // None found, add to 'messages' queue.
-        {
-            MessagePending* mp = new MessagePending();
-            mp->key = m;
-            mp->task = t;
-            mq->messages.insert(mp);
-        }
-        else // Add waiter back to its scheduler.
-        {
-            TASK_SETRTN(waiter, (uint64_t) m);
-            waiter->cpu->scheduler->addTask(waiter);
-        }
+            if ((NULL == mq) || (NULL == m))
+            {
+                printkd("NULL pointer for message queue (%p) or message (%p).\n",
+                        mq, m);
+                TASK_SETRTN(t, -EINVAL);
+                return;
+            }
 
-        mq->lock.unlock();
+            m->__reserved__async = 0; // set to async msg.
+
+            if (m->type >= MSG_FIRST_SYS_TYPE)
+            {
+                printkd("Invalid type for msg_send, type=%d.\n", m->type);
+                TASK_SETRTN(t, -EINVAL);
+                return;
+            }
+
+            mq->lock.lock();
+
+            // Get waiting (server) task.
+            task_t* waiter = mq->waiting.remove();
+            if (NULL == waiter) // None found, add to 'messages' queue.
+            {
+                MessagePending* mp = new MessagePending();
+                mp->key = m;
+                mp->task = t;
+                mq->messages.insert(mp);
+            }
+            else // Add waiter back to its scheduler.
+            {
+                TASK_SETRTN(waiter, (uint64_t) m);
+                waiter->cpu->scheduler->addTask(waiter);
+            }
+
+            mq->lock.unlock();
+        }
         TASK_SETRTN(t, 0);
     }
 

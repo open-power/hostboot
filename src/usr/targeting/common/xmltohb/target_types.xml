@@ -100,6 +100,7 @@
     <attribute><id>PAYLOAD_KIND</id></attribute>
     <attribute><id>PAYLOAD_BASE</id></attribute>
     <attribute><id>PAYLOAD_ENTRY</id></attribute>
+    <attribute><id>HB_HRMOR_NODAL_BASE</id></attribute>
     <attribute><id>MSS_MCA_HASH_MODE</id></attribute>
     <attribute><id>MSS_MBA_ADDR_INTERLEAVE_BIT</id></attribute>
     <attribute><id>MSS_MBA_CACHELINE_INTERLEAVE_MODE</id></attribute>

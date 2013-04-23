@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2012              */
+/* COPYRIGHT International Business Machines Corp. 2011,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -67,6 +67,7 @@ namespace INTR
         ISN_LCL_ERR     = 4,
         ISN_HOST        = 5,
         ISN_INTERPROC   = 0xF0, //"special" as it isn't part of PSIHB
+                                //Converts to INTERPROC_XISR when registered
     };
 
     /**
@@ -119,7 +120,9 @@ namespace INTR
      *
      * @note the interrupt type is currently the ISN value in the PSIHB
      *       XIVR register
-     *       @see  i_intr_type for enumerations.
+     *       @see  ISNvalue_t for enumerations.
+     *       The XISR value is calculated and registered for all chips
+     *       presently capable of generaing interrupts.
      *
      * @note when an interrupt of type i_msg_type occurrs, the
      * interrupt presenter sends a sync message with type i_msg_type to
