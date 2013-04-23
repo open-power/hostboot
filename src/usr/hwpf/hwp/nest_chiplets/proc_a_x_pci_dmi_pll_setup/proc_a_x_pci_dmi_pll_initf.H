@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012                   */
+/* COPYRIGHT International Business Machines Corp. 2012,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_a_x_pci_dmi_pll_initf.H,v 1.2 2012/08/14 18:32:44 mfred Exp $
+// $Id: proc_a_x_pci_dmi_pll_initf.H,v 1.3 2013/04/17 22:38:40 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_a_x_pci_dmi_pll_initf.H,v $
 //------------------------------------------------------------------------------
 // *|
@@ -29,7 +29,7 @@
 // *! *** IBM Confidential ***
 // *|
 // *! TITLE       : proc_a_x_pci_dmi_pll_initf.H
-// *! DESCRIPTION : Start the VAR OSCs / Config the TANK PLLs & lock
+// *! DESCRIPTION : Scan PLL settings for A/X/PCI/DMI PLLs
 // *!
 // *! OWNER NAME  : Ralph Koester            Email: rkoester@de.ibm.com
 // *!
@@ -43,6 +43,10 @@
 //------------------------------------------------------------------------------
 
 #include <fapi.H>
+
+//------------------------------------------------------------------------------
+// Constant definitions
+//------------------------------------------------------------------------------
 
 //------------------------------------------------------------------------------
 // Structure definitions
@@ -60,13 +64,13 @@ extern "C"
 {
 
 /**
- * @brief Start variable Oscillator
+ * @brief Scan PLL settings for A/X/PCI/DMI PLLs
  *
  * @param[in] i_target     Reference to target
- * @param[in] i_startX     True if x_bus PLL should be started, else false
- * @param[in] i_startA     True if A PLL should be started, else false
- * @param[in] i_startPCIE  True if PCIE PLL should be started, else false
- * @param[in] i_startDMI   True if DMI PLL should be started, else false
+ * @param[in] i_startX     True if x_bus PLL should be initalized, else false
+ * @param[in] i_startA     True if A PLL should be initalized, else false
+ * @param[in] i_startPCIE  True if PCIE PLL should be initalized, else false
+ * @param[in] i_startDMI   True if DMI PLL should be initalized, else false
  *
  * @return ReturnCode
  */

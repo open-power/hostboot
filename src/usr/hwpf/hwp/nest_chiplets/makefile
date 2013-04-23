@@ -51,7 +51,8 @@ OBJS =  nest_chiplets.o \
         proc_a_x_pci_dmi_pll_setup.o \
         proc_pcie_scominit.o \
         proc_abus_scominit.o \
-        proc_xbus_scominit.o
+        proc_xbus_scominit.o \
+        proc_a_x_pci_dmi_pll_utils.o
         
 ##  NOTE: add a new directory onto the vpaths when you add a new HWP
 VPATH += ${ROOTPATH}/src/usr/hwpf/hwp/nest_chiplets/proc_start_clocks_chiplets

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012                   */
+/* COPYRIGHT International Business Machines Corp. 2012,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_a_x_pci_dmi_pll_setup.H,v 1.4 2012/08/14 18:32:48 mfred Exp $
+// $Id: proc_a_x_pci_dmi_pll_setup.H,v 1.5 2013/04/17 22:38:44 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_a_x_pci_dmi_pll_setup.H,v $
 //------------------------------------------------------------------------------
 // *|
@@ -29,7 +29,7 @@
 // *! *** IBM Confidential ***
 // *|
 // *! TITLE       : proc_a_x_pci_dmi_pll_setup.H
-// *! DESCRIPTION : Start the VAR OSCs / Config the TANK PLLs & lock
+// *! DESCRIPTION : Initialize and lock A/X/PCI/DMI PLLs
 // *!
 // *! OWNER NAME  : Ralph Koester            Email: rkoester@de.ibm.com
 // *!
@@ -60,7 +60,7 @@ extern "C"
 {
 
 /**
- * @brief Start variable Oscillator
+ * @brief Initialize and lock A/X/PCI/DMI PLLs
  *
  * @param[in] i_target     Reference to target
  * @param[in] i_startX     True if x_bus PLL should be started, else false
