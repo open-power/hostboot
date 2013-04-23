@@ -213,6 +213,28 @@ void IStepDispatcher::init ( errlHndl_t &io_rtaskRetErrl )
             TRACFCOMP( g_trac_initsvc,
                        "IStep run all" );
 
+            // Read the attribute indicating if the FSP has attribute overrides
+            // and get the overrides if it does
+            uint8_t l_attrOverridesExist = 0;
+            TARGETING::Target* l_pTopLevelTarget = NULL;
+            TARGETING::targetService().getTopLevelTarget(l_pTopLevelTarget);
+
+            if (l_pTopLevelTarget == NULL)
+            {
+                TRACFCOMP(g_trac_initsvc,
+                          "init: ERROR: Top level target not found");
+            }
+            else
+            {
+                l_attrOverridesExist = l_pTopLevelTarget->
+                    getAttr<TARGETING::ATTR_PLCK_IPL_ATTR_OVERRIDES_EXIST>();
+            }
+
+            if (l_attrOverridesExist)
+            {
+                fapi::theAttrOverrideSync().getAttrOverridesFromFsp();
+            }
+
             // Execute all Isteps sequentially in 'normal' mode
             err = executeAllISteps();
 
@@ -233,6 +255,10 @@ void IStepDispatcher::init ( errlHndl_t &io_rtaskRetErrl )
 
                 break;
             }
+
+            // Send the potentially modified set of Attribute overrides and any
+            // Attributes to sync to the FSP
+            fapi::theAttrOverrideSync().sendAttrOverridesAndSyncsToFsp();
         }
     } while( 0 );
 
@@ -812,8 +838,8 @@ void IStepDispatcher::handleMoreWorkNeededMsg ( bool i_first )
                        iv_Msg->data[1],
                        iv_Msg->extra_data );
 
-            // Send the potentially modified set of HWPF Attribute overrides and any
-            // HWPF Attributes to sync to the FSP
+            // Send the potentially modified set of Attribute overrides and any
+            // Attributes to sync to the FSP
             fapi::theAttrOverrideSync().sendAttrOverridesAndSyncsToFsp();
 
             msg_respond( iv_msgQ,

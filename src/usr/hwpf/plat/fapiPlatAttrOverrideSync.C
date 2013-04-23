@@ -347,10 +347,7 @@ void AttrOverrideSync::sendAttrOverridesAndSyncsToFsp()
                     }
                 }
             }
-        }
 
-        if (!l_pErr)
-        {
             // Send Hostboot Attributes to Sync to the FSP
             for (uint32_t i = TARGETING::AttributeTank::TANK_LAYER_FAPI;
                  i <= TARGETING::AttributeTank::TANK_LAYER_TARG; i++)
@@ -403,6 +400,34 @@ void AttrOverrideSync::sendAttrOverridesAndSyncsToFsp()
             }
         }
     }
+}
+
+//******************************************************************************
+void AttrOverrideSync::getAttrOverridesFromFsp()
+{
+    FAPI_IMP("Requesting Attribute Overrides from the FSP");
+
+    errlHndl_t l_pErr = NULL;
+
+    msg_t * l_pMsg = msg_allocate();
+    l_pMsg->type = MSG_GET_OVERRIDES;
+    l_pMsg->data[0] = 0;
+    l_pMsg->data[1] = 0;
+    l_pMsg->extra_data = NULL;
+
+    // Send the message and wait for a response, the response message is not
+    // read, it just ensures that the code waits until the FSP is done sending
+    // attribute overrides
+    l_pErr = MBOX::sendrecv(MBOX::FSP_HWPF_ATTR_MSGQ, l_pMsg);
+
+    if (l_pErr)
+    {
+        FAPI_ERR("getAttrOverridesFromFsp: Error sending to FSP");
+        errlCommit(l_pErr, HWPF_COMP_ID);
+    }
+
+    msg_free(l_pMsg);
+    l_pMsg = NULL;
 }
 
 //******************************************************************************

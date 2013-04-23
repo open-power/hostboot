@@ -90,6 +90,7 @@ public:
         MSG_SET_OVERRIDES       = MBOX::FIRST_UNSECURE_MSG + 0x10, // FSP<->Hb
         MSG_CLEAR_ALL_OVERRIDES = MBOX::FIRST_UNSECURE_MSG + 0x11, // FSP<->Hb
         MSG_SET_SYNC_ATTS       = MBOX::FIRST_UNSECURE_MSG + 0x12, // FSP<--Hb
+        MSG_GET_OVERRIDES       = MBOX::FIRST_UNSECURE_MSG + 0x13, // FSP<--Hb
     };
 
     /**
@@ -118,6 +119,14 @@ public:
      * - Sends the Hostboot Attribute Syncs to the FSP
      */
     void sendAttrOverridesAndSyncsToFsp();
+
+    /**
+     * @brief Gets Attribute Overrides and Syncs from the FSP
+     *
+     * This is called at the start of a normal (non-istep) IPL if an attribute
+     * is set indicating that the FSP has attribute overrides in place
+     */
+    void getAttrOverridesFromFsp();
 
     /**
      * @brief This function gets any Attribute Override on an attribute get
