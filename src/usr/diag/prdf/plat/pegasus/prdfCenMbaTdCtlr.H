@@ -40,24 +40,8 @@ class CenMbaTdCtlr : public CenMbaTdCtlrCommon
 {
   private: // constants, enums
 
-    /**
-     * @brief Lists all possible states of TD controller
-     * @note  These enums are used as array indexes to cv_cmdCompleteFuncs and
-     *        the last entry will be used to get the size of the array.
-     */
-    enum TdState
-    {
-        NO_OP = 0,       ///< No TD procedures in place.
-        VCM_PHASE_1,     ///< Verify Chip Mark phase 1.
-        VCM_PHASE_2,     ///< Verify Chip Mark phase 2.
-        DSD_PHASE_1,     ///< DRAM Spare Deploy phase 1.
-        DSD_PHASE_2,     ///< DRAM Spare Deploy phase 2.
-        MAX_TD_STATE     ///< The maximum number of TD states.
-    };
-
     // Function pointers for maintenance command complete events.
-    typedef int32_t (CenMbaTdCtlr::*CMD_COMPLETE_FUNCS)
-                                            ( STEP_CODE_DATA_STRUCT & io_sc );
+    typedef int32_t (CenMbaTdCtlr::*FUNCS)( STEP_CODE_DATA_STRUCT & io_sc );
 
   public: // functions
 
@@ -72,7 +56,7 @@ class CenMbaTdCtlr : public CenMbaTdCtlrCommon
      * @param i_mbaChip An MBA chip.
      */
     explicit CenMbaTdCtlr( ExtensibleChip * i_mbaChip ) :
-        CenMbaTdCtlrCommon(i_mbaChip), iv_tdState(NO_OP)
+        CenMbaTdCtlrCommon(i_mbaChip)
     {}
 
   public: // Overloaded functions
@@ -88,13 +72,15 @@ class CenMbaTdCtlr : public CenMbaTdCtlrCommon
     int32_t analyzeVcmPhase2( STEP_CODE_DATA_STRUCT & io_sc );
     int32_t analyzeDsdPhase1( STEP_CODE_DATA_STRUCT & io_sc );
     int32_t analyzeDsdPhase2( STEP_CODE_DATA_STRUCT & io_sc );
+    int32_t analyzeTpsPhase1( STEP_CODE_DATA_STRUCT & io_sc );
+    int32_t analyzeTpsPhase2( STEP_CODE_DATA_STRUCT & io_sc );
 
     int32_t startVcmPhase1();
     int32_t startVcmPhase2();
     int32_t startDsdPhase1();
     int32_t startDsdPhase2();
-
-    bool isInTdMode();
+    int32_t startTpsPhase1();
+    int32_t startTpsPhase2();
 
   private: // functions
 
@@ -104,7 +90,7 @@ class CenMbaTdCtlr : public CenMbaTdCtlrCommon
      *         occurred.
      * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
      */
-    int32_t checkEccErrors( uint8_t & o_eccErrorMask );
+    int32_t checkEccErrors( uint16_t & o_eccErrorMask );
 
     /**
      * @brief  Handle UEs during TD analysis.
@@ -112,6 +98,14 @@ class CenMbaTdCtlr : public CenMbaTdCtlrCommon
      * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
      */
     int32_t handleUE( STEP_CODE_DATA_STRUCT & io_sc );
+
+    /**
+     * @brief  Handle MPE event
+     * @param  io_sc Service data collector.
+     * @note   This will start VCM phase 1.
+     * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
+     */
+    int32_t handleMPE( STEP_CODE_DATA_STRUCT & io_sc );
 
     /**
      * @brief  Handle MCE event during VCM Phase 2
@@ -155,16 +149,21 @@ class CenMbaTdCtlr : public CenMbaTdCtlrCommon
      */
     int32_t signalMdiaCmdComplete();
 
-  private: // instance variables
+    /**
+     * @brief  Does mnfg setup for CE threshold.
+     * @note   Before calling this function, set current state to new
+     *         value (TPS_PHASE_1/ TPS_PHASE_2).
+     * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
+     */
+    int32_t mnfgCeSetup();
 
-    /** The targeted diagnostics state variable (see enum TdState). */
-    TdState iv_tdState;
+  private: // instance variables
 
     /** Array of functions pointers for TD controller states. This is used to
      *  determine the next course of action after a maintenance command complete
      *  attention.
      */
-    static CMD_COMPLETE_FUNCS cv_cmdCompleteFuncs[MAX_TD_STATE];
+    static FUNCS cv_cmdCompleteFuncs[MAX_TD_STATE];
 
 }; // CenMbaTdCtlr
 

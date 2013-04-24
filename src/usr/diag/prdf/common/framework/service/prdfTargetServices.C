@@ -1099,6 +1099,44 @@ bool isDramWidthX4( TargetHandle_t i_mba )
              i_mba->getAttr<ATTR_EFF_DRAM_WIDTH>() );
 }
 
+//------------------------------------------------------------------------------
+
+uint8_t getRanksPerDimm( TargetHandle_t i_mba, uint8_t i_ds )
+{
+    #define PRDF_FUNC "[PlatServices::getRanksPerDimm] "
+
+    uint8_t rankCount = 0; // default if something fails
+
+    do
+    {
+        if ( MAX_DIMM_PER_PORT <= i_ds )
+        {
+            PRDF_ERR( PRDF_FUNC"Invalid parameters i_ds:%u", i_ds );
+            break;
+        }
+
+        // NOTE: Unable to use getAttr() because it is not able to return an
+        //       array. Otherwise, all of the following would be able to fit in
+        //       one line of code. The targeting may fix this later.
+
+        ATTR_EFF_NUM_RANKS_PER_DIMM_type attr;
+        if ( !i_mba->tryGetAttr<ATTR_EFF_NUM_RANKS_PER_DIMM>(attr) )
+        {
+            PRDF_ERR( PRDF_FUNC"failed to get ATTR_EFF_NUM_RANKS_PER_DIMM" );
+            break;
+        }
+
+        // Note that DIMMs are plugged in pairs so the rank numbers should be
+        // the same for each port.
+        rankCount = attr[0][i_ds];
+
+    } while(0);
+
+    return rankCount;
+
+    #undef PRDF_FUNC
+}
+
 //##############################################################################
 //##
 //##                        Clock specific functions
@@ -1239,6 +1277,9 @@ bool areDramRepairsDisabled()
 
 bool mnfgSpareDramDeploy()
 { return isMnfgFlagSet( MNFG_FLAG_BIT_MNFG_TEST_DRAM_REPAIRS ); }
+
+bool isMfgCeCheckingEnabled()
+{ return isMnfgFlagSet( MNFG_FLAG_BIT_MNFG_IPL_MEMORY_CE_CHECKINGE ); }
 
 } // end namespace PlatServices
 

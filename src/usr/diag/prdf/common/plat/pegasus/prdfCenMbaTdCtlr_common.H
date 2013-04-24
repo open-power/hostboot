@@ -49,6 +49,26 @@ class ExtensibleChip;
  */
 class CenMbaTdCtlrCommon
 {
+  protected: // constants, enums
+
+    /**
+     * @brief Lists all possible states of TD controller
+     * @note  These enums are used as array indexes to cv_cmdCompleteFuncs and
+     *        the last entry will be used to get the size of the array.
+     */
+    enum TdState
+    {
+        NO_OP = 0,       ///< No TD procedures in place.
+        VCM_PHASE_1,     ///< Verify Chip Mark phase 1.
+        VCM_PHASE_2,     ///< Verify Chip Mark phase 2.
+        DSD_PHASE_1,     ///< DRAM Spare Deploy phase 1.
+        DSD_PHASE_2,     ///< DRAM Spare Deploy phase 2.
+        TPS_PHASE_1,     ///< Two-Phase Scrub phase 1.
+        TPS_PHASE_2,     ///< Two-Phase Scrub phase 2.
+        RANK_SCRUB,      ///< Targetted fast scrub on a rank.
+        MAX_TD_STATE     ///< The maximum number of TD states.
+    };
+
   public: // functions
 
     /**
@@ -62,8 +82,8 @@ class CenMbaTdCtlrCommon
      * @param i_mbaChip An MBA chip.
      */
     explicit CenMbaTdCtlrCommon( ExtensibleChip * i_mbaChip ) :
-        iv_mbaChip(i_mbaChip), iv_initialized(false), iv_rank(), iv_mark(),
-        iv_mssCmd(NULL)
+        iv_mbaChip(i_mbaChip), iv_initialized(false), iv_tdState(NO_OP),
+        iv_rank(), iv_mark(), iv_mssCmd(NULL)
     {}
 
     /** @brief Destructor */
@@ -140,6 +160,20 @@ class CenMbaTdCtlrCommon
     virtual int32_t analyzeDsdPhase2( STEP_CODE_DATA_STRUCT & io_sc ) = 0;
 
     /**
+     * @brief  Analyzes Tps Phase 1 results and moves state machine.
+     * @param  io_sc The step code data struct.
+     * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
+     */
+    virtual int32_t analyzeTpsPhase1( STEP_CODE_DATA_STRUCT & io_sc ) = 0;
+
+    /**
+     * @brief  Analyzes Tps Phase 2 results and moves state machine.
+     * @param  io_sc The step code data struct.
+     * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
+     */
+    virtual int32_t analyzeTpsPhase2( STEP_CODE_DATA_STRUCT & io_sc ) = 0;
+
+    /**
      * @brief  Starts VCM Phase 1.
      * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
      */
@@ -164,10 +198,22 @@ class CenMbaTdCtlrCommon
     virtual int32_t startDsdPhase2() = 0;
 
     /**
+     * @brief  Starts Tps Phase 1.
+     * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
+     */
+    virtual int32_t startTpsPhase1() = 0;
+
+    /**
+     * @brief  Starts Tps Phase 2.
+     * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
+     */
+    virtual int32_t startTpsPhase2() = 0;
+
+    /**
      * @return TRUE if currently running a targeted diagnositics procedure,
      *         FALSE otherwise.
      */
-    virtual bool isInTdMode() = 0;
+    virtual bool isInTdMode();
 
     /**
      * @brief  Calls the cleanupCmd() function of the command that had just
@@ -194,6 +240,9 @@ class CenMbaTdCtlrCommon
 
     /** Indicates if TD controller is initialized. */
     bool iv_initialized;
+
+    /** The targeted diagnostics state variable (see enum TdState). */
+    TdState iv_tdState;
 
     /** The current rank that is being targeted for diagnostics. */
     CenRank iv_rank;

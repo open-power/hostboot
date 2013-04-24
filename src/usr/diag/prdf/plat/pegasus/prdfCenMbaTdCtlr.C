@@ -52,24 +52,30 @@ using namespace PlatServices;
 
 enum EccErrorMask
 {
-    NO_ERROR = 0,   ///< No ECC errors found
-    UE  = 0x80,     ///< UE
-    MPE = 0x40,     ///< Chip mark placed
-    RCE = 0x20,     ///< Retry CE
-    MCE = 0x10,     ///< CE on chip mark
+    NO_ERROR  = 0,        ///< No ECC errors found
+    UE        = 0x01,     ///< UE
+    MPE       = 0x02,     ///< Chip mark placed
+    MCE       = 0x04,     ///< CE on chip mark
+    HARD_CTE  = 0x08,     ///< Hard CE threshold exceeed
+    SOFT_CTE  = 0x10,     ///< Soft CE threshold exceeed
+    INTER_CTE = 0x20,     ///< Intermittent CE threshold exceeed
+    RETRY_CTE = 0x40,     ///< Retry CE threshold exceeed
 };
 
 //------------------------------------------------------------------------------
 //                            Class Variables
 //------------------------------------------------------------------------------
 
-CenMbaTdCtlr::CMD_COMPLETE_FUNCS CenMbaTdCtlr::cv_cmdCompleteFuncs[] =
+CenMbaTdCtlr::FUNCS CenMbaTdCtlr::cv_cmdCompleteFuncs[] =
 {
     &CenMbaTdCtlr::analyzeCmdComplete,      // NO_OP
     &CenMbaTdCtlr::analyzeVcmPhase1,        // VCM_PHASE_1
     &CenMbaTdCtlr::analyzeVcmPhase2,        // VCM_PHASE_2
     &CenMbaTdCtlr::analyzeDsdPhase1,        // DSD_PHASE_1
     &CenMbaTdCtlr::analyzeDsdPhase2,        // DSD_PHASE_2
+    &CenMbaTdCtlr::analyzeTpsPhase1,        // TPS_PHASE_1
+    &CenMbaTdCtlr::analyzeTpsPhase2,        // TPS_PHASE_2
+    NULL,                                   // RANK_SCRUB
 };
 
 //------------------------------------------------------------------------------
@@ -107,6 +113,13 @@ int32_t CenMbaTdCtlr::handleCmdCompleteEvent( STEP_CODE_DATA_STRUCT & io_sc )
         {
             PRDF_ERR( PRDF_FUNC"mdiaSendEventMsg(RESET_TIMER) failed" );
             break;
+        }
+
+        if ( NULL == cv_cmdCompleteFuncs[iv_tdState] )
+        {
+            PRDF_ERR( PRDF_FUNC"Function for state %d not supported",
+                      iv_tdState );
+            o_rc = FAIL; break;
         }
 
         o_rc = (this->*cv_cmdCompleteFuncs[iv_tdState])( io_sc );
@@ -206,8 +219,6 @@ int32_t CenMbaTdCtlr::analyzeCmdComplete( STEP_CODE_DATA_STRUCT & io_sc )
 
     int32_t o_rc = SUCCESS;
 
-    TargetHandle_t mba = iv_mbaChip->GetChipHandle();
-
     do
     {
         if ( NO_OP != iv_tdState )
@@ -227,7 +238,7 @@ int32_t CenMbaTdCtlr::analyzeCmdComplete( STEP_CODE_DATA_STRUCT & io_sc )
         iv_rank = CenRank( addr.getRank() );
 
         // Get error condition which caused command to stop
-        uint8_t eccErrorMask = NO_ERROR;
+        uint16_t eccErrorMask = NO_ERROR;
         o_rc = checkEccErrors( eccErrorMask );
         if ( SUCCESS != o_rc )
         {
@@ -247,30 +258,28 @@ int32_t CenMbaTdCtlr::analyzeCmdComplete( STEP_CODE_DATA_STRUCT & io_sc )
         }
         else if ( eccErrorMask & MPE )
         {
-            // Get the current marks in hardware.
-            o_rc = mssGetMarkStore( mba, iv_rank, iv_mark );
+            o_rc = handleMPE( io_sc );
             if ( SUCCESS != o_rc )
             {
-                PRDF_ERR( PRDF_FUNC"mssGetMarkStore() failed");
+                PRDF_ERR( PRDF_FUNC"handleMPE() failed");
                 break;
             }
-
-            if ( !iv_mark.getCM().isValid() )
+        }
+        else if ( isMfgCeCheckingEnabled() )
+        {
+            // During MNFG IPL CE, we will get this condition.
+            // During SF read, all CE are reported as Hard CE.
+            // So we will only check for Hard CE threshold.
+            if ( eccErrorMask & HARD_CTE )
             {
-                PRDF_ERR( PRDF_FUNC"No valid chip mark to verify");
-                o_rc = FAIL; break;
-            }
-
-            io_sc.service_data->SetErrorSig( PRDFSIG_StartVcmPhase1 );
-
-            CalloutUtil::calloutMark( mba, iv_rank, iv_mark, io_sc );
-
-            // Start VCM procedure
-            o_rc = startVcmPhase1();
-            if ( SUCCESS != o_rc )
-            {
-                PRDF_ERR( PRDF_FUNC"startVcmPhase1() failed" );
-                break;
+                io_sc.service_data->SetErrorSig( PRDFSIG_StartTpsPhase1 );
+                // Start TPS Phase 1
+                o_rc = startTpsPhase1();
+                if ( SUCCESS != o_rc )
+                {
+                    PRDF_ERR( PRDF_FUNC"startTpsPhase1() failed" );
+                    break;
+                }
             }
         }
         else
@@ -305,7 +314,7 @@ int32_t CenMbaTdCtlr::analyzeVcmPhase1( STEP_CODE_DATA_STRUCT & io_sc )
         }
 
         // Get error condition which caused command to stop
-        uint8_t eccErrorMask = NO_ERROR;
+        uint16_t eccErrorMask = NO_ERROR;
         o_rc = checkEccErrors( eccErrorMask );
         if ( SUCCESS != o_rc )
         {
@@ -313,7 +322,7 @@ int32_t CenMbaTdCtlr::analyzeVcmPhase1( STEP_CODE_DATA_STRUCT & io_sc )
             break;
         }
 
-        if ( (eccErrorMask & UE) || (eccErrorMask & RCE) )
+        if ( (eccErrorMask & UE) || (eccErrorMask & RETRY_CTE) )
         {
             // Handle UE. Highest priority
             o_rc = handleUE( io_sc );
@@ -364,7 +373,7 @@ int32_t CenMbaTdCtlr::analyzeVcmPhase2( STEP_CODE_DATA_STRUCT & io_sc )
         }
 
         // Get error condition which caused command to stop
-        uint8_t eccErrorMask = NO_ERROR;
+        uint16_t eccErrorMask = NO_ERROR;
         o_rc = checkEccErrors( eccErrorMask );
         if ( SUCCESS != o_rc )
         {
@@ -448,7 +457,7 @@ int32_t CenMbaTdCtlr::analyzeDsdPhase1( STEP_CODE_DATA_STRUCT & io_sc )
         }
 
         // Get error condition which caused command to stop
-        uint8_t eccErrorMask = NO_ERROR;
+        uint16_t eccErrorMask = NO_ERROR;
         o_rc = checkEccErrors( eccErrorMask );
         if ( SUCCESS != o_rc)
         {
@@ -456,7 +465,7 @@ int32_t CenMbaTdCtlr::analyzeDsdPhase1( STEP_CODE_DATA_STRUCT & io_sc )
             break;
         }
 
-        if ( ( eccErrorMask & UE) || ( eccErrorMask & RCE ) )
+        if ( ( eccErrorMask & UE) || ( eccErrorMask & RETRY_CTE ) )
         {
             // Handle UE. Highest priority
             o_rc = handleUE( io_sc );
@@ -473,7 +482,7 @@ int32_t CenMbaTdCtlr::analyzeDsdPhase1( STEP_CODE_DATA_STRUCT & io_sc )
             CalloutUtil::calloutMark( mba, iv_rank, iv_mark, io_sc );
 
             // Start DSD Phase 2
-            startDsdPhase2();
+            o_rc = startDsdPhase2();
             if ( SUCCESS != o_rc )
             {
                 PRDF_ERR( PRDF_FUNC"startDsdPhase2() failed" );
@@ -507,7 +516,7 @@ int32_t CenMbaTdCtlr::analyzeDsdPhase2( STEP_CODE_DATA_STRUCT & io_sc )
         }
 
         // Get error condition which caused command to stop
-        uint8_t eccErrorMask = NO_ERROR;
+        uint16_t eccErrorMask = NO_ERROR;
         o_rc = checkEccErrors( eccErrorMask );
         if ( SUCCESS != o_rc )
         {
@@ -567,6 +576,144 @@ int32_t CenMbaTdCtlr::analyzeDsdPhase2( STEP_CODE_DATA_STRUCT & io_sc )
 
 //------------------------------------------------------------------------------
 
+int32_t CenMbaTdCtlr::analyzeTpsPhase1( STEP_CODE_DATA_STRUCT & io_sc )
+{
+    #define PRDF_FUNC "[CenMbaTdCtlr::analyzeTpsPhase1] "
+
+    int32_t o_rc = SUCCESS;
+
+    do
+    {
+        if ( TPS_PHASE_1 != iv_tdState )
+        {
+            PRDF_ERR( PRDF_FUNC"Invalid state machine configuration" );
+            o_rc = FAIL; break;
+        }
+
+        CenMbaDataBundle * mbadb = getMbaDataBundle( iv_mbaChip );
+
+        o_rc = mbadb->getIplCeStats()->collectStats( iv_rank );
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC"collectStats() failed");
+            break;
+        }
+
+        // Get error condition which caused command to stop
+        uint16_t eccErrorMask = NO_ERROR;
+        o_rc = checkEccErrors( eccErrorMask );
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC"checkEccErrors() failed" );
+            break;
+        }
+
+        if ( ( eccErrorMask & UE ) || ( eccErrorMask & RETRY_CTE ))
+        {
+            // Handle UE. Highest priority
+            o_rc = handleUE( io_sc );
+            if ( SUCCESS != o_rc )
+            {
+                PRDF_ERR( PRDF_FUNC"handleUE() failed" );
+                break;
+            }
+        }
+        else if ( eccErrorMask & MPE )
+        {
+            o_rc = handleMPE( io_sc );
+            if ( SUCCESS != o_rc )
+            {
+                PRDF_ERR( PRDF_FUNC"handleMPE() failed");
+                break;
+            }
+        }
+        else
+        {
+            // Start TPS Phase 2
+            io_sc.service_data->SetErrorSig( PRDFSIG_StartTpsPhase2 );
+            o_rc = startTpsPhase2();
+            if ( SUCCESS != o_rc )
+            {
+                PRDF_ERR( PRDF_FUNC"startTpsPhase2() failed" );
+                break;
+            }
+        }
+
+    } while (0);
+
+    return o_rc;
+
+    #undef PRDF_FUNC
+}
+
+//------------------------------------------------------------------------------
+
+int32_t CenMbaTdCtlr::analyzeTpsPhase2( STEP_CODE_DATA_STRUCT & io_sc )
+{
+    #define PRDF_FUNC "[CenMbaTdCtlr::analyzeTpsPhase2] "
+
+    int32_t o_rc = SUCCESS;
+
+    do
+    {
+        if ( TPS_PHASE_2 != iv_tdState )
+        {
+            PRDF_ERR( PRDF_FUNC"Invalid state machine configuration" );
+            o_rc = FAIL; break;
+        }
+
+        CenMbaDataBundle * mbadb = getMbaDataBundle( iv_mbaChip );
+
+        o_rc = mbadb->getIplCeStats()->calloutHardCes( iv_rank );
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC"calloutHardCes() failed");
+            break;
+        }
+
+        // Get error condition which caused command to stop
+        uint16_t eccErrorMask = NO_ERROR;
+        o_rc = checkEccErrors( eccErrorMask );
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC"checkEccErrors() failed" );
+            break;
+        }
+
+        if ( ( eccErrorMask & UE ) || ( eccErrorMask & RETRY_CTE ))
+        {
+            // Handle UE. Highest priority
+            o_rc = handleUE( io_sc );
+            if ( SUCCESS != o_rc )
+            {
+                PRDF_ERR( PRDF_FUNC"handleUE() failed" );
+                break;
+            }
+        }
+        else if ( eccErrorMask & MPE )
+        {
+            o_rc = handleMPE( io_sc );
+            if ( SUCCESS != o_rc )
+            {
+                PRDF_ERR( PRDF_FUNC"handleMPE() failed");
+                break;
+            }
+        }
+        else
+        {
+            io_sc.service_data->SetErrorSig( PRDFSIG_EndTpsPhase2 );
+            iv_tdState = NO_OP;
+        }
+
+    } while (0);
+
+    return o_rc;
+
+    #undef PRDF_FUNC
+}
+
+//------------------------------------------------------------------------------
+
 int32_t CenMbaTdCtlr::startVcmPhase1()
 {
     #define PRDF_FUNC "[CenMbaTdCtlr::startVcmPhase1] "
@@ -587,8 +734,7 @@ int32_t CenMbaTdCtlr::startVcmPhase1()
         }
 
         // Start phase 1.
-        uint32_t stopCond = ( mss_MaintCmd::STOP_END_OF_RANK    |
-                              mss_MaintCmd::STOP_ON_END_ADDRESS |
+        uint32_t stopCond = ( mss_MaintCmd::STOP_ON_END_ADDRESS |
                               mss_MaintCmd::ENABLE_CMD_COMPLETE_ATTENTION );
 
         iv_mssCmd = createMssCmd( mss_MaintCmdWrapper::TIMEBASE_STEER_CLEANUP,
@@ -635,8 +781,7 @@ int32_t CenMbaTdCtlr::startVcmPhase2()
         }
 
         // Start phase 2.
-        uint32_t stopCond = ( mss_MaintCmd::STOP_END_OF_RANK    |
-                              mss_MaintCmd::STOP_ON_END_ADDRESS |
+        uint32_t stopCond = ( mss_MaintCmd::STOP_ON_END_ADDRESS |
                               mss_MaintCmd::ENABLE_CMD_COMPLETE_ATTENTION );
 
         iv_mssCmd = createMssCmd( mss_MaintCmdWrapper::SUPERFAST_READ,
@@ -691,8 +836,7 @@ int32_t CenMbaTdCtlr::startDsdPhase1()
         }
 
         // Start phase 1.
-        uint32_t stopCond = ( mss_MaintCmd::STOP_END_OF_RANK    |
-                              mss_MaintCmd::STOP_ON_END_ADDRESS |
+        uint32_t stopCond = ( mss_MaintCmd::STOP_ON_END_ADDRESS |
                               mss_MaintCmd::ENABLE_CMD_COMPLETE_ATTENTION );
 
         iv_mssCmd = createMssCmd( mss_MaintCmdWrapper::TIMEBASE_STEER_CLEANUP,
@@ -739,8 +883,7 @@ int32_t CenMbaTdCtlr::startDsdPhase2()
         }
 
         // Start phase 2.
-        uint32_t stopCond = ( mss_MaintCmd::STOP_END_OF_RANK    |
-                              mss_MaintCmd::STOP_ON_END_ADDRESS |
+        uint32_t stopCond = ( mss_MaintCmd::STOP_ON_END_ADDRESS |
                               mss_MaintCmd::ENABLE_CMD_COMPLETE_ATTENTION );
 
         iv_mssCmd = createMssCmd( mss_MaintCmdWrapper::SUPERFAST_READ,
@@ -767,14 +910,119 @@ int32_t CenMbaTdCtlr::startDsdPhase2()
 
 //------------------------------------------------------------------------------
 
-bool CenMbaTdCtlr::isInTdMode()
+int32_t CenMbaTdCtlr::startTpsPhase1()
 {
-    return ( (NO_OP != iv_tdState) && (MAX_TD_STATE > iv_tdState) );
+    #define PRDF_FUNC "[CenMbaTdCtlr::startTpsPhase1] "
+
+    int32_t o_rc = SUCCESS;
+
+    iv_tdState = TPS_PHASE_1;
+
+    TargetHandle_t mba = iv_mbaChip->GetChipHandle();
+
+    do
+    {
+        o_rc = prepareNextCmd();
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC"prepareNextCmd() failed" );
+            break;
+        }
+
+        // We are using current state as input parameter in mnfgCeSetup.
+        // So it is mandatory to set iv_tdState before calling this function.
+        o_rc = mnfgCeSetup();
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC"mnfgCeSetup() failed" );
+            break;
+        }
+
+        // Start phase 1.
+        uint32_t stopCond = ( mss_MaintCmd::STOP_ON_END_ADDRESS |
+                              mss_MaintCmd::ENABLE_CMD_COMPLETE_ATTENTION );
+
+        iv_mssCmd = createMssCmd( mss_MaintCmdWrapper::TIMEBASE_SCRUB,
+                                  mba, iv_rank, stopCond );
+        if ( NULL == iv_mssCmd )
+        {
+            PRDF_ERR( PRDF_FUNC"createMssCmd() failed");
+            o_rc = FAIL; break;
+        }
+
+        o_rc = iv_mssCmd->setupAndExecuteCmd();
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC"setupAndExecuteCmd() failed" );
+            break;
+        }
+
+    } while(0);
+
+    return o_rc;
+
+    #undef PRDF_FUNC
 }
 
 //------------------------------------------------------------------------------
 
-int32_t CenMbaTdCtlr::checkEccErrors( uint8_t & o_eccErrorMask )
+int32_t CenMbaTdCtlr::startTpsPhase2()
+{
+    #define PRDF_FUNC "[CenMbaTdCtlr::startTpsPhase2] "
+
+    int32_t o_rc = SUCCESS;
+
+    iv_tdState = TPS_PHASE_2;
+
+    TargetHandle_t mba = iv_mbaChip->GetChipHandle();
+
+    do
+    {
+        o_rc = prepareNextCmd();
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC"prepareNextCmd() failed" );
+            break;
+        }
+
+        // We are using current state as input parameter in mnfgCeSetup.
+        // So it is mandatory to set iv_tdState before calling this function.
+        o_rc = mnfgCeSetup();
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC"mnfgCeSetup() failed" );
+            break;
+        }
+
+        // Start phase 2.
+        uint32_t stopCond = ( mss_MaintCmd::STOP_ON_END_ADDRESS |
+                              mss_MaintCmd::ENABLE_CMD_COMPLETE_ATTENTION );
+
+        iv_mssCmd = createMssCmd( mss_MaintCmdWrapper::TIMEBASE_SCRUB,
+                                  mba, iv_rank, stopCond );
+        if ( NULL == iv_mssCmd )
+        {
+            PRDF_ERR( PRDF_FUNC"createMssCmd() failed");
+            o_rc = FAIL; break;
+        }
+
+        o_rc = iv_mssCmd->setupAndExecuteCmd();
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC"setupAndExecuteCmd() failed" );
+            break;
+        }
+
+    } while(0);
+
+    return o_rc;
+
+    #undef PRDF_FUNC
+}
+
+//------------------------------------------------------------------------------
+
+int32_t CenMbaTdCtlr::checkEccErrors( uint16_t & o_eccErrorMask )
 {
     #define PRDF_FUNC "[CenMbaTdCtlr::checkEccErrors] "
 
@@ -821,7 +1069,20 @@ int32_t CenMbaTdCtlr::checkEccErrors( uint8_t & o_eccErrorMask )
 
         if ( mbsEccFir->IsBitSet(38) ) o_eccErrorMask |= MCE;
         if ( mbsEccFir->IsBitSet(41) ) o_eccErrorMask |= UE;
-        if ( mbsEccFir->IsBitSet(42) ) o_eccErrorMask |= RCE;
+
+        SCAN_COMM_REGISTER_CLASS * mbaSpaFir =
+                            iv_mbaChip->getRegister("MBASPA");
+        o_rc = mbaSpaFir->Read();
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC"Failed to read MBASPA Regsiter");
+            break;
+        }
+
+        if ( mbaSpaFir->IsBitSet(1) ) o_eccErrorMask |= HARD_CTE;
+        if ( mbaSpaFir->IsBitSet(2) ) o_eccErrorMask |= SOFT_CTE;
+        if ( mbaSpaFir->IsBitSet(3) ) o_eccErrorMask |= INTER_CTE;
+        if ( mbaSpaFir->IsBitSet(4) ) o_eccErrorMask |= RETRY_CTE;
 
     } while(0);
 
@@ -846,6 +1107,7 @@ int32_t CenMbaTdCtlr::handleUE( STEP_CODE_DATA_STRUCT & io_sc )
     io_sc.service_data->SetServiceCall();
 
     TargetHandle_t mba = iv_mbaChip->GetChipHandle();
+    CenMbaDataBundle * mbadb = getMbaDataBundle( iv_mbaChip );
 
     do
     {
@@ -892,6 +1154,13 @@ int32_t CenMbaTdCtlr::handleUE( STEP_CODE_DATA_STRUCT & io_sc )
             }
 
             callouts.insert( callouts.end(), dimms.begin(), dimms.end() );
+
+            if ( isMfgCeCheckingEnabled() )
+            {
+                // As we are doing callout for UE, we dont need to do callout
+                // during CE for this rank on given port
+                mbadb->getIplCeStats()->banAnalysis( iv_rank, ps );
+            }
         }
         if ( SUCCESS != o_rc ) break;
 
@@ -909,6 +1178,13 @@ int32_t CenMbaTdCtlr::handleUE( STEP_CODE_DATA_STRUCT & io_sc )
                 PRDF_ERR( PRDF_FUNC"getConnectedDimms() failed" );
                 o_rc = FAIL; break;
             }
+
+            if ( isMfgCeCheckingEnabled() )
+            {
+                // As we are doing callout for UE, we dont need to do callout
+                // during CE for this rank on both port
+                mbadb->getIplCeStats()->banAnalysis( iv_rank);
+            }
         }
 
         // Callout all DIMMs in the list.
@@ -925,6 +1201,50 @@ int32_t CenMbaTdCtlr::handleUE( STEP_CODE_DATA_STRUCT & io_sc )
     #undef PRDF_FUNC
 }
 
+//------------------------------------------------------------------------------
+
+int32_t CenMbaTdCtlr::handleMPE( STEP_CODE_DATA_STRUCT & io_sc )
+{
+    #define PRDF_FUNC "[CenMbaTdCtlr::handleMPE] "
+
+    int32_t o_rc = SUCCESS;
+
+    TargetHandle_t mba = iv_mbaChip->GetChipHandle();
+
+    do
+    {
+        // Get the current marks in hardware.
+        o_rc = mssGetMarkStore( mba, iv_rank, iv_mark );
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC"mssGetMarkStore() failed");
+            break;
+        }
+
+        if ( !iv_mark.getCM().isValid() )
+        {
+            PRDF_ERR( PRDF_FUNC"No valid chip mark to verify");
+            o_rc = FAIL; break;
+        }
+
+        io_sc.service_data->SetErrorSig( PRDFSIG_StartVcmPhase1 );
+
+        CalloutUtil::calloutMark( mba, iv_rank, iv_mark, io_sc );
+
+        // Start VCM procedure
+        o_rc = startVcmPhase1();
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC"startVcmPhase1() failed" );
+            break;
+        }
+
+    } while(0);
+
+    return o_rc;
+
+    #undef PRDF_FUNC
+}
 //------------------------------------------------------------------------------
 
 int32_t CenMbaTdCtlr::handleMCE_VCM2( STEP_CODE_DATA_STRUCT & io_sc )
@@ -1285,6 +1605,20 @@ int32_t CenMbaTdCtlr::prepareNextCmd()
             break;
         }
 
+        SCAN_COMM_REGISTER_CLASS * spaAnd =
+                                iv_mbaChip->getRegister("MBASPA_AND");
+        spaAnd->setAllBits();
+
+        // clear threshold exceeded attentions
+        spaAnd->SetBitFieldJustified( 1, 4, 0 );
+
+        o_rc = spaAnd->Write();
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC"Write() failed on MBASPA_AND" );
+            o_rc = FAIL; break;
+        }
+
     } while (0);
 
     return o_rc;
@@ -1330,6 +1664,70 @@ int32_t CenMbaTdCtlr::signalMdiaCmdComplete()
         mbadb->iv_cmdCompleteMsgData =
                         (allEndAddr == curEndAddr) ? MDIA::COMMAND_COMPLETE
                                                    : MDIA::COMMAND_STOPPED;
+
+    } while(0);
+
+    return o_rc;
+
+    #undef PRDF_FUNC
+}
+
+// Do the setup for mnfg IPL CE
+int32_t CenMbaTdCtlr::mnfgCeSetup()
+{
+    #define PRDF_FUNC "[CenMbaTdCtlr::mnfgCeSetup] "
+
+    int32_t o_rc = SUCCESS;
+
+    do
+    {
+        CenMbaDataBundle * mbadb = getMbaDataBundle( iv_mbaChip );
+        ExtensibleChip * membChip = mbadb->getMembChip();
+        if ( NULL == membChip )
+        {
+            PRDF_ERR( PRDF_FUNC"getMembChip() failed" );
+            o_rc = FAIL; break;
+        }
+
+        uint32_t mbaPos = getTargetPosition( iv_mbaChip->GetChipHandle() );
+
+        const char * reg_str = ( 0 == mbaPos ) ? "MBA0_MBSTR" : "MBA1_MBSTR";
+        SCAN_COMM_REGISTER_CLASS * mbstr = membChip->getRegister( reg_str );
+        o_rc = mbstr->Read();
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC"Read() failed on %s", reg_str );
+            break;
+        }
+
+        if ( TPS_PHASE_1 == iv_tdState )
+        {
+            //  Enable per-symbol error counters to count soft CEs
+            mbstr->SetBit(55);
+            mbstr->SetBit(56);
+            // Disable per-symbol error counters to count hard CEs
+            mbstr->ClearBit(57);
+        }
+        else if ( TPS_PHASE_2 == iv_tdState )
+        {
+            //  Disable per-symbol error counters to count soft CEs
+            mbstr->ClearBit(55);
+            mbstr->ClearBit(56);
+            //  Enable per-symbol error counters to count hard CEs
+            mbstr->SetBit(57);
+        }
+        else
+        {
+            PRDF_ERR( PRDF_FUNC"Inavlid State:%u", iv_tdState );
+            o_rc = FAIL; break;
+        }
+
+        o_rc = mbstr->Write();
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC"Write() failed on %s", reg_str );
+            break;
+        }
 
     } while(0);
 

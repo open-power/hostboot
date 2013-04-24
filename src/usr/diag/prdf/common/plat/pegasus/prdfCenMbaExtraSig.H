@@ -33,6 +33,9 @@ PRDR_ERROR_SIGNATURE(StartVcmPhase1,  0xffff0000, "", "Starting VCM phase 1");
 PRDR_ERROR_SIGNATURE(StartVcmPhase2,  0xffff0001, "", "Starting VCM phase 2");
 PRDR_ERROR_SIGNATURE(StartDsdPhase1,  0xffff0002, "", "Starting DSD phase 1");
 PRDR_ERROR_SIGNATURE(StartDsdPhase2,  0xffff0003, "", "Starting DSD phase 2");
+PRDR_ERROR_SIGNATURE(StartTpsPhase1,  0xffff0004, "", "Starting TPS phase 1");
+PRDR_ERROR_SIGNATURE(StartTpsPhase2,  0xffff0005, "", "Starting TPS phase 2");
+PRDR_ERROR_SIGNATURE(EndTpsPhase2,    0xffff0006, "", "TPS Phase 2 completed");
 
 PRDR_ERROR_SIGNATURE(MaintUE,         0xffff0010, "", "Maintenance UE");
 
@@ -54,6 +57,11 @@ PRDR_ERROR_SIGNATURE(RdrRepairsUsed,   0xffff0043, "",
 PRDR_ERROR_SIGNATURE(RdrRepairUnavail, 0xffff0044, "",
                      "RDR: Repairs needed but unavailable");
 
-
+PRDR_ERROR_SIGNATURE(MnfgIplFail,    0xffff0050, "",
+                     "MNFG IPL Internal failure");
+PRDR_ERROR_SIGNATURE(MnfgIplHardCE,  0xffff0051, "", "MNFG IPL hard CE");
+PRDR_ERROR_SIGNATURE(MnfgIplDramCTE, 0xffff0052, "", "MNFG IPL DRAM CTE");
+PRDR_ERROR_SIGNATURE(MnfgIplRankCTE, 0xffff0053, "", "MNFG IPL half-rank CTE");
+PRDR_ERROR_SIGNATURE(MnfgIplDsCTE,   0xffff0054, "", "MNFG IPL DIMM CTE");
 
 #endif // __prdfCenMbaExtraSig_H

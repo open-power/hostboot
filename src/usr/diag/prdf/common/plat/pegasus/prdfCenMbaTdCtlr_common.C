@@ -100,5 +100,12 @@ int32_t CenMbaTdCtlrCommon::chipMarkCleanup()
     #undef PRDF_FUNC
 }
 
+//------------------------------------------------------------------------------
+
+bool CenMbaTdCtlrCommon::isInTdMode()
+{
+    return ( (NO_OP != iv_tdState) && (MAX_TD_STATE > iv_tdState) );
+}
+
 } // end namespace PRDF
 

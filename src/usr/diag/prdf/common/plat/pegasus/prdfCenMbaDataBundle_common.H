@@ -83,9 +83,11 @@ class CenMbaDataBundleCommon : public DataBundle
     CenMbaDataBundleCommon( const CenMbaDataBundleCommon & );
     const CenMbaDataBundleCommon & operator=( const CenMbaDataBundleCommon & );
 
-  private: // instance variables
+  protected: // instance variables
 
     ExtensibleChip * iv_mbaChip;  ///< This MBA chip
+
+  private: // instance variables
     ExtensibleChip * iv_membChip; ///< The connected MEMBUF chip
 
   public: // instance variables

@@ -50,4 +50,6 @@ prd_pegasus_specific = \
     prdfLineDelete.o \
     prdfMemoryMru.o \
     prdfPegasusConfigurator.o \
+    prdfCenMbaThresholds_common.o \
+    prdfCenMemUtils.o \
     prdfRegisterData.o

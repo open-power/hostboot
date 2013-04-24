@@ -31,6 +31,7 @@
 #include <prdfCenMbaDataBundle_common.H>
 
 #include <diag/mdia/mdia.H>
+#include <prdfCenMbaIplCeStats.H>
 
 //------------------------------------------------------------------------------
 
@@ -50,13 +51,27 @@ class CenMbaDataBundle : public CenMbaDataBundleCommon
      */
     explicit CenMbaDataBundle( ExtensibleChip * i_mbaChip ) :
         CenMbaDataBundleCommon(i_mbaChip), iv_sendCmdCompleteMsg(false),
-        iv_cmdCompleteMsgData()
+        iv_cmdCompleteMsgData(), iv_iplCeStats(NULL)
     {}
 
     /**
      * @brief Destructor.
      */
-    ~CenMbaDataBundle() {}
+    ~CenMbaDataBundle()
+    {
+        delete iv_iplCeStats; iv_iplCeStats = NULL;
+    }
+
+    /** @return The IPL CE statistics object. */
+    CenMbaIplCeStats * getIplCeStats()
+    {
+        if ( NULL == iv_iplCeStats )
+        {
+            iv_iplCeStats = new CenMbaIplCeStats( iv_mbaChip );
+        }
+
+        return iv_iplCeStats;
+    }
 
   private: // functions
 
@@ -73,6 +88,10 @@ class CenMbaDataBundle : public CenMbaDataBundleCommon
      * Maintenance command message to send.
      */
     MDIA::MaintCommandEventType iv_cmdCompleteMsgData;
+
+  private: // instance variables
+
+    CenMbaIplCeStats * iv_iplCeStats; ///< MNFG IPL CE statistics object
 
 };
 

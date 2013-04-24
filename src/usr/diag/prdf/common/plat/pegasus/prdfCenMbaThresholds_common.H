@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/include/usr/diag/prdf/prdfMain.H $                        */
+/* $Source: src/usr/diag/prdf/common/plat/pegasus/prdfCenMbaThresholds_common.H $ */
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/* COPYRIGHT International Business Machines Corp. 2013                   */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -21,45 +21,37 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-#ifndef __prdfMain_H
-#define __prdfMain_H
+#ifndef __PRDF_CEN_MBA_COMMON_THRESHOLDS_H
+#define __PRDF_CEN_MBA_COMMON_THRESHOLDS_H
 
-/**
- * @file  prdfMain.H
- * @brief PRD code used by external components.
- *
- * This file contains code that is strictly specific to Hostboot. All code that
- * is common between FSP and Hostboot should be in the respective common file.
+/** @file  prdfCenMbaThresholds_common.H
+ *  @brief Utility functions used to get specific Centaur thresholds.
  */
 
-#include <errl/errlmanager.H> // for errlHndl_t
-
-// This must be included after all other includes. This will take care of cases
-// where a file must be included in the common code, but the include paths are
-// different between FSP and Hostboot.
-#include <diag/prdf/common/prdfMain_common.H>
+#include <prdfThresholdResolutions.H>
+#include <prdfCenAddress.H>
 
 namespace PRDF
 {
 
-/**
- * @brief  Restores hardware DRAM repairs to reflect what is stored in VPD.
- * @param  i_mba An MBA target.
- * @return Non-SUCCESS if conditions are such that a callout had to be made,
- *         SUCCESS otherwise.
- */
-extern int32_t restoreDramRepairs( const TARGETING::TargetHandle_t i_mba );
+class ExtensibleChip;
 
 /**
- * @brief  Analyzes IPL CE statistics during MNFG IPL
- * @param  i_mba An MBA target.
- * @param  o_calloutMade True if callout has been made, false otherwise .
- * @return Non-SUCCESS if internal function fails, SUCCESS otherwise.
+ * @brief  Returns number of allowed CEs for MNFG IPLs.
+ * @pre    Must check if in manufacturing mode before calling this function.
+ * @post   Must callout if the count is greater than the returned values.
+ * @param  i_mbaChip       MBA chip.
+ * @param  i_rank          The rank for which the threshold is needed.
+ * @param  o_cePerDram     CEs allowed per DRAM.
+ * @param  o_cePerHalfRank CEs allowed per logical DIMM rank.
+ * @param  o_cePerDimm     CEs allowed per logical DIMM.
+ * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
  */
-extern int32_t analyzeIplCEStats( const TARGETING::TargetHandle_t i_mba,
-                                  bool &o_calloutMade );
+int32_t getMnfgMemCeTh( ExtensibleChip * i_mbaChip, const CenRank & i_rank,
+                        uint16_t & o_cePerDram, uint16_t & o_cePerHalfRank,
+                        uint16_t & o_cePerDimm );
 
 } // end namespace PRDF
 
-#endif // __prdfMain_H
+#endif /* __PRDF_CEN_MBA_COMMON_THRESHOLDS_H */
 

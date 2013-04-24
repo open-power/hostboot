@@ -331,6 +331,15 @@ int32_t getMbaDimm( TARGETING::TargetHandle_t i_dimmTarget, uint8_t & o_dimm );
  */
 bool isDramWidthX4(TARGETING::TargetHandle_t i_mbaTarget);
 
+/**
+ * @brief   Obtain ranks per DIMM select on an MBA.
+ * @param   i_mbaTarget MBA target.
+ * @param   i_ds        DIMM select for DIMM.
+ * @return  Number of ranks confgured per DIMM select. If internal function
+ *          fails it will return 0.
+ */
+uint8_t getRanksPerDimm( TARGETING::TargetHandle_t i_mbaTarget, uint8_t i_ds );
+
 //##############################################################################
 //##
 //##                        Clock specific functions
@@ -406,6 +415,11 @@ bool areDramRepairsDisabled();
  */
 bool mnfgSpareDramDeploy();
 
+/**
+ * @brief  Returns the state of the MNFG_IPL_MEMORY_CE_CHECKINGE policy flag.
+ * @return TRUE if MNFG_IPL_MEMORY_CE_CHECKINGE is set, FALSE otherwise.
+ */
+bool isMfgCeCheckingEnabled();
 
 } // end namespace PlatServices
 

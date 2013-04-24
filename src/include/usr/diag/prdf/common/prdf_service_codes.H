@@ -60,6 +60,7 @@ enum ModuleId
     PRDF_ASSERT                   = 0x0A,
     PRDF_RAS_SERVICES             = 0x0B,
     PRDF_RESTORE_DRAM_REPAIR      = 0x0C,
+    PRDF_MNFG_IPL_CE_ANALYSIS     = 0x0D,
 };
 
 /******************************************************************************/

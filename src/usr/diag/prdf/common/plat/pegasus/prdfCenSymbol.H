@@ -34,6 +34,7 @@
 
 #include <prdfCenAddress.H>
 #include <prdfCenConst.H>
+#include <prdfPlatServices.H>
 #include <prdfTargetFwdRef.H>
 
 //##############################################################################
@@ -152,6 +153,16 @@ class CenSymbol
     /** @return The DRAM index for this symbol. */
     uint8_t getDram() const { return symbol2Dram( iv_symbol, iv_x4Dram ); }
 
+    /** @return rank associated with this symbol. */
+    CenRank getRank() const { return iv_rank; };
+
+    /**
+     * @brief  Sets this symbol's pin to a new set of bad pins.
+     * @param  The new pins.
+     * @return Non-SUCCESS if an internal function failed, SUCCESS otherwise.
+     */
+    int32_t setPins( uint8_t i_pins );
+
     /** @return TRUE this symbol is on a x4 DRAM, FALSE otherwise. */
     bool isX4Dram() const { return iv_x4Dram; }
 
@@ -171,20 +182,27 @@ class CenSymbol
      * @brief   Overrides the '<' operator.
      * @param   i_symbol The symbol to compare with.
      * @return  TRUE if this symbol is less than i_symbol, FALSE otherwise.
+     * @note    Compares against iv_symbol and iv_rank. There is currently no
+     *          need to compare against iv_mbaTarget.
      */
     bool operator < ( const CenSymbol & i_symbol ) const
     {
-        return ( this->getSymbol() < i_symbol.getSymbol() );
+        return ( (iv_symbol < i_symbol.iv_symbol) ||
+                 ( (iv_symbol == i_symbol.iv_symbol) &&
+                   (iv_rank   <  i_symbol.iv_rank ) ) );
     }
 
     /**
      * @brief  Overrides the '==' operator.
      * @param  i_symbol The symbol to compare with.
      * @return TRUE if the two symbols are equivalent, FALSE otherwise.
+     * @note   Compares against iv_symbol and iv_rank. There is currently no
+     *         need to compare against iv_mbaTarget.
      */
     bool operator == ( const CenSymbol & i_symbol ) const
     {
-        return ( this->getSymbol() == i_symbol.getSymbol() );
+        return ( (iv_symbol == i_symbol.iv_symbol) &&
+                 (iv_rank   == i_symbol.iv_rank  ) );
     }
 
   private: // functions

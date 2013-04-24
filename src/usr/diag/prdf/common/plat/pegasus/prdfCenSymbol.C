@@ -245,4 +245,28 @@ int32_t CenSymbol::getSymbol( const CenRank & i_rank, WiringType i_wiringType,
     #undef PRDF_FUNC
 }
 
+//------------------------------------------------------------------------------
+
+int32_t CenSymbol::setPins( uint8_t i_pins )
+{
+    #define PRDF_FUNC "[CenSymbol::setPins] "
+    int32_t o_rc = SUCCESS;
+
+    do
+    {
+        if ( BOTH_SYMBOL_DQS < i_pins )
+        {
+            PRDF_ERR( PRDF_FUNC"i_pins %u is invalid", i_pins );
+            o_rc = FAIL;
+            break;
+        }
+
+        iv_pins = i_pins;
+
+    } while (0);
+
+    return o_rc;
+    #undef PRDF_FUNC
+}
+
 } // end namespace PRDF

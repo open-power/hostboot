@@ -821,3 +821,21 @@
         capture     group default;
     };
 
+    ############################################################################
+    #  MBA Address Translate Control Register
+    ############################################################################
+
+    register MBA0_MBAXCR
+    {
+        name        "MBU.MBS.ARB.RXLT.MBAXCR01Q";
+        scomaddr    0x0201140B;
+        capture     group never;
+    };
+
+    register MBA1_MBAXCR
+    {
+        name        "MBU.MBS.ARB.RXLT.MBAXCR23Q";
+        scomaddr    0x0201140C;
+        capture     group never;
+    };
+
