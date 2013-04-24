@@ -1,9 +1,11 @@
 
-#-- $Id: mba_def.initfile,v 1.37 2013/04/04 21:24:21 yctschan Exp $
+#-- $Id: mba_def.initfile,v 1.39 2013/04/17 16:55:32 yctschan Exp $
 #-- CHANGE HISTORY:
 #--------------------------------------------------------------------------------
 #-- Version:|Author: | Date:  | Comment:
 #-- --------|--------|--------|--------------------------------------------------
+#--     1.39|tschang | 4/17/13|commented out maxall_min0 power controls until decision has been made for default value
+#--     1.38|tschang | 4/08/13|set cfg_min_domain_reduction_enable to 1 and maxall_min0 power controls
 #--     1.37|tschang | 4/04/13|ACT signal in CCS idle pattern set to 1 for DDR4 and 0 for non DDR4
 #--     1.36|tschang | 4/04/13|MBA_FARB2Q fixed rank master typo for IS1A_IS1B_IS1D_C1A_C1B_C1C_C1D_C5C cfg
 #--     1.35|tschang | 3/27/13|set trfc and refresh interval according to refresh equation
@@ -2168,6 +2170,7 @@ scom 0x03010432    {
 #
 scom 0x03010434    {
     bits    ,   scom_data   ,       ATTR_FUNCTIONAL,   expr;
+#    3:5     ,   0b010       ,           1            ,   any; # cfg_min_max_domains       36
     6:10    ,   0b00100     ,           1            ,   (def_MBARPC0Q_cfg_pup_avail_dly4  == 1); # MBARPC0Q_cfg_pup_avail     36
     6:10    ,   0b00101     ,           1            ,   (def_MBARPC0Q_cfg_pup_avail_dly5  == 1); # MBARPC0Q_cfg_pup_avail     36
     6:10    ,   0b00110     ,           1            ,   (def_MBARPC0Q_cfg_pup_avail_dly6  == 1); # MBARPC0Q_cfg_pup_avail     36
@@ -2187,6 +2190,7 @@ scom 0x03010434    {
     16:20   ,   0b00100     ,           1            ,   (def_MBARPC0Q_cfg_pup_pdn_dly4 == 1); # MBARPC0Q_cfg_pup_pdn       38
     16:20   ,   0b00101     ,           1            ,   (def_MBARPC0Q_cfg_pup_pdn_dly5 == 1); # MBARPC0Q_cfg_pup_pdn       38
     16:20   ,   0b00110     ,           1            ,   (def_MBARPC0Q_cfg_pup_pdn_dly6 == 1); # MBARPC0Q_cfg_pup_pdn       38
+    22      ,   0b1         ,           1            ,   any; # cfg_min_domain_reduction_enable set to 1 to enable power controls
 }
 
 # MBAPC1Q    power control settings reg 1

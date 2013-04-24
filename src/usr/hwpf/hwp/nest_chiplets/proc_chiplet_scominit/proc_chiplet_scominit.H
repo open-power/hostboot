@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_chiplet_scominit.H,v 1.10 2013/03/25 02:39:43 jmcgill Exp $
+// $Id: proc_chiplet_scominit.H,v 1.11 2013/04/08 13:49:12 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_chiplet_scominit.H,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2012
@@ -54,6 +54,7 @@ const char * const PROC_CHIPLET_SCOMINIT_PSI_IF       = "p8.psi.scom.if";
 const char * const PROC_CHIPLET_SCOMINIT_TPBRIDGE_IF  = "p8.tpbridge.scom.if";
 const char * const PROC_CHIPLET_SCOMINIT_NX_IF        = "p8.nx.scom.if";
 const char * const PROC_CHIPLET_SCOMINIT_AS_IF        = "p8.as.scom.if";
+const char * const PROC_CHIPLET_SCOMINIT_CXA_IF       = "p8.cxa.scom.if";
 const char * const PROC_CHIPLET_SCOMINIT_MCS_IF       = "p8.mcs.scom.if";
 
 //------------------------------------------------------------------------------
@@ -82,6 +83,7 @@ extern "C" {
  *                     - p8.psi.scom.initfile
  *                     - p8.tpbridge.scom.initfile
  *                     - p8.nx.scom.initfile
+ *                     - p8.cxa.scom.initfile
  *                     - p8.as.scom.initfile
  *                     - p8.mcs.scom.initfile for each functional MCS chiplet
  *

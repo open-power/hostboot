@@ -1,7 +1,11 @@
-#-- $Id: p8.mcs.scom.initfile,v 1.2 2013/03/25 03:08:07 jmcgill Exp $
+#-- $Id: p8.mcs.scom.initfile,v 1.4 2013/04/08 20:22:28 jmcgill Exp $
 #-- CHANGE HISTORY:
 #--------------------------------------------------------------------------------
 #-- Version:|Author: | Date:  | Comment:
+#-- --------|--------|--------|--------------------------------------------------
+#--     1.30|baysah  |04/04/13|- Set MCI Replay timeout value to 2ms.
+#--         |        |        |- Disable MCS arbiter blocking after checkstop.
+#--         |        |        |
 #-- --------|--------|--------|--------------------------------------------------
 #--     1.00|baysah  |08/12/12|Created MCS init file
 #-- --------|--------|--------|--------------------------------------------------
@@ -79,7 +83,7 @@ SyntaxVersion = 1
      47   ,                    0b1              ;              # MCMODE2Q_ENABLE_MIRROR_WR_HANG
      48   ,                    0b1              ;              # MCMODE2Q_ENABLE_AO_HANG
      49   ,                    0b1              ;              # MCMODE2Q_ENABLE_INBAND_HANG
-     50:52,                    0b110            ;              # MCMODE2Q_NONMIRROR_HANG_VALUE
+     50:52,                    0b101            ;              # MCMODE2Q_NONMIRROR_HANG_VALUE
      53:55,                    0b111            ;              # MCMODE2Q_MIRROR_HANG_VALUE
      56   ,                    0b1              ;              # MCMODE2Q_ENABLE_EMER_THROTTLE
      57   ,                    0b0              ;              # MCMODE2Q_DRIVE_SHARED_PRESP_WITH_LOST_CLAIM
@@ -108,6 +112,7 @@ SyntaxVersion = 1
 #--******************************************************************************
  scom 0x000000000201181A              {
      bits ,                    scom_data        ;
+      1:3,                     0b111            ;              # DISABLE INTERFACE AND ARBITER BLOCKING DURING INTERNAL MCS CHECKSTOP
      17:18,                    0b01             ;              # MCMODE4Q_SELECT_RPTHANG_DECODE
      19   ,                    0b1              ;              # MCMODE4Q_LOCAL_TIMEBASE_SELECT
 }
@@ -124,3 +129,37 @@ SyntaxVersion = 1
      24:33,                    0b0000000000     ;              # MCBUSYQ_BUSY_COUNTER_THRESHOLD2
      34:43,                    0b0000000000     ;              # MCBUSYQ_BUSY_COUNTER_THRESHOLD3
 }
+
+
+#--******************************************************************************
+#-- MCI Configuration Register
+#--******************************************************************************
+ scom 0x000000000201184A              {
+     bits ,                    scom_data        ;
+     0    ,                    0b0              ;              # MCICFGQ_FORCE_CHANNEL_FAIL
+     1    ,                    0b0              ;              # MCICFGQ_REPLAY_CRC_DISABLE
+     2    ,                    0b0              ;              # MCICFGQ_REPLAY_NOACK_DISABLE
+     3    ,                    0b0              ;              # MCICFGQ_REPLAY_OUTOFORDER_DISABLE
+     4    ,                    0b0              ;              # MCICFGQ_FORCE_LFSR_REPLAY
+     5    ,                    0b0              ;              # MCICFGQ_CRC_CHECK_DISABLE
+     6    ,                    0b0              ;              # MCICFGQ_ECC_CHECK_DISABLE
+     7    ,                    0b0              ;              # MCICFGQ_START_FRAME_LOCK
+     8    ,                    0b0              ;              # MCICFGQ_START_FRTL
+     9    ,                    0b0              ;              # MCICFGQ_AUTO_FRTL_DISABLE
+     10:16,                    0b0000000        ;              # MCICFGQ_MANUAL_FRTL_VALUE
+     17   ,                    0x0              ;              # MCICFGQ_MANUAL_FRTL_DONE
+     18   ,                    0b0              ;              # MCICFGQ_ECC_CORRECT_DISABLE
+     19   ,                    0b0              ;              # MCICFGQ_SPARE1
+     20   ,                    0b0              ;              # MCICFGQ_LANE_VOTING_BYPASS
+     21:25,                    0b00000          ;              # MCICFGQ_BAD_LANE_VALUE
+     26   ,                    0b0              ;              # MCICFGQ_BAD_LANE_VOTING_DISABLE
+     27:32,                    0b001001         ;              # MCICFGQ_NO_FORWARD_PROGRESS_TIMEOUT_VALUE (0x09 = 9 => 1ms)
+     33:34,                    0b00             ;              # MCICFGQ_PERFORMANCE_DEGRADATION_PERCENT_SELECT
+     35:36,                    0b00             ;              # MCICFGQ_CHANNEL_INITIALIZATION_STATE_MACHINE_TIMEOUT_VALUE
+     37   ,                    0b0              ;              # MCICFGQ_RESET_KEEPER
+     38:41,                    0b0001           ;              # MCICFGQ_REPLAY_DELAY_VALUE (set to 1 for pSeries, which is default value)
+     42:43,                    0b00             ;              # MCICFGQ_RESERVED
+
+ }
+
+

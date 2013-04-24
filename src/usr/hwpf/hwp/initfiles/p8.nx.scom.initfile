@@ -1,4 +1,4 @@
-#-- $Id: p8.nx.scom.initfile,v 1.5 2013/03/25 21:38:50 jmcgill Exp $
+#-- $Id: p8.nx.scom.initfile,v 1.6 2013/04/08 13:48:09 jmcgill Exp $
 #-------------------------------------------------------------------------------
 #--
 #-- (C) Copyright International Business Machines Corp. 2011
@@ -329,24 +329,4 @@ scom 0x02013107 {
     38:47 ,  0b0000000000   ;   #-- 0b00 mask Reserved
     48    ,  0b0            ;   #-- 0b00 mask FIR/SCOM satellite parity error FIR bit" ;
     49    ,  0b0            ;   #-- 0b00 mask FIR/SCOM satellite parity error FIR bit duplicate"
-}
-
-
-
-#-- APC Master Config Register
-scom 0x02013019 {
-    bits  , scom_data       ;
-    4:7   , 0b0000          ;   #-- HANG_POLL_SCALE
-}
-
-#-- CAPP Snoop Control Register
-scom 0x0201301B {
-    bits  ,  scom_data      ;
-    48:51 ,  0b0010         ;   #-- CXA_SNP_DATA_HANG_POLL_SCALE
-}
-
-#-- CAPP Transport Control Register
-scom 0x0201301C {
-    bits  ,  scom_data      ;
-    15:18 ,  0b1000         ;   #-- TLBI_DATA_POLL_PULSE_DIV
 }

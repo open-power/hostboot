@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_build_smp_adu.C,v 1.4 2013/02/25 14:50:52 jmcgill Exp $
+// $Id: proc_build_smp_adu.C,v 1.6 2013/03/28 16:28:32 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_build_smp_adu.C,v $
 //------------------------------------------------------------------------------
 // *|
@@ -266,6 +266,10 @@ fapi::ReturnCode proc_build_smp_adu_check_status(
                 break;
             }
         }
+        if (!rc.ok())
+        {
+            break;
+        }
 
         // check status bits versus expected pattern
         match =
@@ -324,6 +328,7 @@ fapi::ReturnCode proc_build_smp_adu_check_status(
             FAPI_ERR("proc_adu_utils_check_adu_status:   FBC_ALTD_PBINIT_MISSING_ERROR = %d",
                      (status_act.pbinit_missing == ADU_STATUS_BIT_SET)?(1):(0));
             const proc_adu_utils_adu_status & STATUS_DATA = status_act;
+            const uint8_t & NUM_POLLS = num_polls;
             FAPI_SET_HWP_ERROR(rc, RC_PROC_BUILD_SMP_ADU_STATUS_MISMATCH);
             break;
         }

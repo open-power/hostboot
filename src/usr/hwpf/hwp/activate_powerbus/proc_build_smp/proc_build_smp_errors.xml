@@ -107,6 +107,7 @@
   <hwpError>
     <rc>RC_PROC_BUILD_SMP_ADU_STATUS_MISMATCH</rc>
     <description>Status mismatch detected on ADU operation executed for SMP configuration.</description>
+    <ffdc>NUM_POLLS</ffdc>
     <ffdc>STATUS_DATA</ffdc>
   </hwpError>
   <hwpError>

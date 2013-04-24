@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_draminit_training.C,v 1.56 2013/03/09 00:05:43 jdsloat Exp $
+// $Id: mss_draminit_training.C,v 1.57 2013/04/16 21:22:50 jdsloat Exp $
 //------------------------------------------------------------------------------
 // Don't forget to create CVS comments when you check in your changes!
 //------------------------------------------------------------------------------
@@ -28,6 +28,7 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|------------------------------------------------
+//  1.57   | jdsloat  |27-FEB-13| Added second workaround adjustment to waterfall problem in order to use 2 rank pairs.
 //  1.56   | jdsloat  |27-FEB-13| Fixed rtt_nom and rtt_wr swap bug during condition of rtt_nom = diabled and rtt_wr = non-disabled
 //         |          |         | Added workaround on a per quad resolution
 //	   |          |         | Added workaround as a seperate sub
@@ -160,10 +161,11 @@ using namespace fapi;
 
 ReturnCode mss_draminit_training(Target& i_target);
 ReturnCode mss_draminit_training_cloned(Target& i_target);
-ReturnCode mss_check_cal_status(Target& i_target, uint8_t i_port, uint8_t i_group,  mss_draminit_training_result& io_status);
-ReturnCode mss_check_error_status(Target& i_target, uint8_t i_port, uint8_t i_group,  mss_draminit_training_result& io_status);
-ReturnCode mss_rtt_nom_rtt_wr_swap( Target& i_target, uint32_t i_port_number, uint8_t i_rank, uint32_t i_rank_pair_group, uint32_t& io_ccs_inst_cnt, uint8_t& io_dram_rtt_nom_original);
+ReturnCode mss_check_cal_status(Target& i_target, uint8_t i_mbaPosition, uint8_t i_port, uint8_t i_group,  mss_draminit_training_result& io_status);
+ReturnCode mss_check_error_status(Target& i_target, uint8_t i_mbaPosition, uint8_t i_port, uint8_t i_group,  uint8_t cur_cal_step, mss_draminit_training_result& io_status);
+ReturnCode mss_rtt_nom_rtt_wr_swap( Target& i_target, uint8_t i_mbaPosition, uint32_t i_port_number, uint8_t i_rank, uint32_t i_rank_pair_group, uint32_t& io_ccs_inst_cnt, uint8_t& io_dram_rtt_nom_original);
 ReturnCode mss_read_center_workaround(Target& i_target, uint8_t i_mbaPosition, uint32_t i_port, uint32_t i_rank_group);
+ReturnCode mss_read_center_second_workaround(Target& i_target);
 
 ReturnCode getC4dq2reg(const Target &i_mba, const uint8_t i_port, const uint8_t i_dimm, const uint8_t i_rank, ecmdDataBufferBase &o_reg);
 ReturnCode setC4dq2reg(const Target &i_mba, const uint8_t i_port, const uint8_t i_dimm, const uint8_t i_rank, ecmdDataBufferBase &o_reg);
@@ -348,7 +350,7 @@ ReturnCode mss_draminit_training_cloned(Target& i_target)
 	   (cal_steps_8.isBitClear(4)) && (cal_steps_8.isBitClear(5)) &&
 	   (cal_steps_8.isBitClear(6)) && (cal_steps_8.isBitClear(7)) ))
     {
-	FAPI_INF( "Performing External ZQ Calibration on MBA %d.", mbaPosition);
+	FAPI_INF( "Performing External ZQ Calibration on %s.", i_target.toEcmdString());
 
         //Execute ZQ_CAL
 	for(port = 0; port < MAX_NUM_PORT; port++)
@@ -376,7 +378,7 @@ ReturnCode mss_draminit_training_cloned(Target& i_target)
 		rc_num = rc_num | rasn_buffer_1.flushTo1();
 		rc_num = rc_num | ddr_cal_enable_buffer_1.flushTo1(); //Init cal
 
-		FAPI_INF( "+++ Setting up Init Cal on MBA: %d Port: %d rank group: %d cal_steps: 0x%02X +++", mbaPosition, port, group, cal_steps);
+		FAPI_INF( "+++ Setting up Init Cal on %s Port: %d rank group: %d cal_steps: 0x%02X +++", i_target.toEcmdString(), port, group, cal_steps);
 
 		for(cur_cal_step = 1; cur_cal_step < MAX_CAL_STEPS; cur_cal_step++) //Cycle through all possible cal steps
 		{
@@ -498,7 +500,7 @@ ReturnCode mss_draminit_training_cloned(Target& i_target)
 			 (cal_steps_8.isBitClear(4)) && (cal_steps_8.isBitClear(5)) &&
 			 (cal_steps_8.isBitClear(6)) && (cal_steps_8.isBitClear(7)) )
 		    {
-			FAPI_INF( "+++ Executing ALL Cal Steps at the same time on MBA: %d Port: %d rank group: %d +++", mbaPosition, port, group);
+			FAPI_INF( "+++ Executing ALL Cal Steps at the same time on %s Port: %d rank group: %d +++", i_target.toEcmdString(), port, group);
 			rc_num = rc_num | data_buffer_64.setBit(48);
 			rc_num = rc_num | data_buffer_64.setBit(50);
 			rc_num = rc_num | data_buffer_64.setBit(51);
@@ -509,42 +511,42 @@ ReturnCode mss_draminit_training_cloned(Target& i_target)
 		    }
 		    else if ( (cur_cal_step == 1) && (cal_steps_8.isBitSet(1)) )
 		    {
-			FAPI_INF( "+++ Write Leveling (WR_LVL) on MBA: %d Port %d rank group: %d +++", mbaPosition, port, group);
+			FAPI_INF( "+++ Write Leveling (WR_LVL) on %s Port %d rank group: %d +++", i_target.toEcmdString(), port, group);
 			rc_num = rc_num | data_buffer_64.setBit(48);
 		    }
 		    else if ( (cur_cal_step == 2) && (cal_steps_8.isBitSet(2)) )
 		    {
-			FAPI_INF( "+++ DQS Align (DQS_ALIGN) on MBA: %d Port: %d rank group: %d +++", mbaPosition, port, group);
+			FAPI_INF( "+++ DQS Align (DQS_ALIGN) on %s Port: %d rank group: %d +++", i_target.toEcmdString(), port, group);
 			rc_num = rc_num | data_buffer_64.setBit(50);
 		    }
 		    else if ( (cur_cal_step == 3) && (cal_steps_8.isBitSet(3)) )
 		    {
-			FAPI_INF( "+++ RD CLK Align (RDCLK_ALIGN) on MBA: %d Port: %d rank group: %d +++", mbaPosition, port, group);
+			FAPI_INF( "+++ RD CLK Align (RDCLK_ALIGN) on %s Port: %d rank group: %d +++", i_target.toEcmdString(), port, group);
 			rc_num = rc_num | data_buffer_64.setBit(51);
 		    }
 		    else if ( (cur_cal_step == 4) && (cal_steps_8.isBitSet(4)) )
 		    {
-			FAPI_INF( "+++ Read Centering (READ_CTR) on MBA: %d Port: %d rank group: %d +++", mbaPosition, port, group);
+			FAPI_INF( "+++ Read Centering (READ_CTR) on %s Port: %d rank group: %d +++", i_target.toEcmdString(), port, group);
 			rc_num = rc_num | data_buffer_64.setBit(52);
 		    }
 		    else if ( (cur_cal_step == 5) && (cal_steps_8.isBitSet(5)) )
 		    {
-			FAPI_INF( "+++ Write Centering (WRITE_CTR) on MBA: %d Port: %d rank group: %d +++", mbaPosition, port, group);
+			FAPI_INF( "+++ Write Centering (WRITE_CTR) on %s Port: %d rank group: %d +++", i_target.toEcmdString(), port, group);
 			rc_num = rc_num | data_buffer_64.setBit(53);
 		    }
 		    else if ( (cur_cal_step == 6) && (cal_steps_8.isBitSet(6)) && (cal_steps_8.isBitClear(7)) )
 		    {
-			FAPI_INF( "+++ Initial Course Write (COURSE_WR) on MBA: %d Port: %d rank group: %d +++", mbaPosition, port, group);
+			FAPI_INF( "+++ Initial Course Write (COURSE_WR) on %s Port: %d rank group: %d +++", i_target.toEcmdString(), port, group);
 			rc_num = rc_num | data_buffer_64.setBit(54);
 		    }
 		    else if ( (cur_cal_step == 6) && (cal_steps_8.isBitClear(6)) && (cal_steps_8.isBitSet(7)) )
 		    {
-			FAPI_INF( "+++ Course Read (COURSE_RD) on MBA: %d Port: %d rank group: %d +++", mbaPosition, port, group);
+			FAPI_INF( "+++ Course Read (COURSE_RD) on %s Port: %d rank group: %d +++", i_target.toEcmdString(), port, group);
 			rc_num = rc_num | data_buffer_64.setBit(55);
 		    }
 		    else if ( (cur_cal_step == 6) && (cal_steps_8.isBitSet(6)) && (cal_steps_8.isBitSet(7)) )
 		    {
-			FAPI_INF( "+++ Initial Course Write (COURSE_WR) and Course Read (COURSE_RD) simultaneously on MBA: %d Port: %d rank group: %d +++", mbaPosition, port, group);
+			FAPI_INF( "+++ Initial Course Write (COURSE_WR) and Course Read (COURSE_RD) simultaneously on %s Port: %d rank group: %d +++", i_target.toEcmdString(), port, group);
 			rc_num = rc_num | data_buffer_64.setBit(54);
 			rc_num = rc_num | data_buffer_64.setBit(55);
 		    }
@@ -563,6 +565,7 @@ ReturnCode mss_draminit_training_cloned(Target& i_target)
 			{
 			    dram_rtt_nom_original = 0xFF;
 			    rc = mss_rtt_nom_rtt_wr_swap(i_target,
+							 mbaPosition,
 							 port,
 							 primary_ranks_array[group][port],
 							 group,
@@ -622,7 +625,7 @@ ReturnCode mss_draminit_training_cloned(Target& i_target)
 			if(rc) return rc; //Error handling for mss_ccs_inst built into mss_funcs
 
 			//Check to see if the training completes
-			rc = mss_check_cal_status(i_target, port, group, cur_complete_status);
+			rc = mss_check_cal_status(i_target, mbaPosition, port, group, cur_complete_status);
 			if(rc) return rc;
 
 			if (cur_complete_status == MSS_INIT_CAL_STALL)
@@ -631,7 +634,7 @@ ReturnCode mss_draminit_training_cloned(Target& i_target)
 			}
 
 			//Check to see if the training errored out
-			rc = mss_check_error_status(i_target, port, group, cur_error_status);
+			rc = mss_check_error_status(i_target, mbaPosition, port, group, cur_cal_step, cur_error_status);
 			if(rc) return rc;
 
 			if (cur_error_status == MSS_INIT_CAL_FAIL)
@@ -643,6 +646,7 @@ ReturnCode mss_draminit_training_cloned(Target& i_target)
 			if (cur_cal_step == 1)
 			{
 			    rc = mss_rtt_nom_rtt_wr_swap(i_target,
+							 mbaPosition,
 							 port,
 							 primary_ranks_array[group][port],
 							 group,
@@ -668,7 +672,10 @@ ReturnCode mss_draminit_training_cloned(Target& i_target)
 	}//end of group loop
     }//end of port loop
 
+    // Make sure the DQS_CLK values of each byte have matching nibble values, using the lowest
+    rc = mss_read_center_second_workaround(i_target);
     if(rc) return rc;
+
     //rc = mss_get_bbm_regs(i_target);
     //if(rc)
     //{
@@ -695,6 +702,7 @@ ReturnCode mss_draminit_training_cloned(Target& i_target)
 }
 
 ReturnCode mss_check_cal_status( Target& i_target, 
+				 uint8_t i_mbaPosition,
                                  uint8_t i_port,
                                  uint8_t i_group,
 				 mss_draminit_training_result& io_status
@@ -723,7 +731,7 @@ ReturnCode mss_check_cal_status( Target& i_target,
     while((!cal_status_buffer_64.isBitSet(cal_status_reg_offset)) &&
           (poll_count <= 20))
     {
-        FAPI_INF( "+++ Calibration on port: %d rank group: %d in progress. Poll count: %d +++", i_port, i_group, poll_count);
+        FAPI_INF( "+++ Calibration on %s port: %d rank group: %d in progress. Poll count: %d +++", i_target.toEcmdString(), i_port, i_group, poll_count);
 
         poll_count++;
         if(i_port == 0)
@@ -741,21 +749,23 @@ ReturnCode mss_check_cal_status( Target& i_target,
 
     if(cal_status_buffer_64.isBitSet(cal_status_reg_offset))
     {
-	FAPI_INF( "+++ Calibration on port: %d rank group: %d finished. +++", i_port, i_group);
+	FAPI_INF( "+++ Calibration on %s port: %d rank group: %d finished. +++", i_target.toEcmdString(), i_port, i_group);
 	io_status = MSS_INIT_CAL_COMPLETE;
     }
     else
     {
-	FAPI_ERR( "+++ Calibration on port: %d rank group: %d has stalled! +++", i_port, i_group);
+	FAPI_ERR( "+++ Calibration on %s port: %d rank group: %d has stalled! +++", i_target.toEcmdString(), i_port, i_group);
 	io_status = MSS_INIT_CAL_STALL;
     }
 
     return rc;
 }
 
-ReturnCode mss_check_error_status( Target& i_target, 
+ReturnCode mss_check_error_status( Target& i_target,
+				 uint8_t i_mbaPosition,
                                  uint8_t i_port,
                                  uint8_t i_group,
+				 uint8_t cur_cal_step,
 				  mss_draminit_training_result& io_status
                                )
 {
@@ -780,44 +790,68 @@ ReturnCode mss_check_error_status( Target& i_target,
 
         if(cal_error_buffer_64.isBitSet(48))
         {
-            FAPI_ERR( "+++ Write leveling error occured on port: %d rank group: %d! +++", i_port, i_group);
+            FAPI_ERR( "+++ Write leveling error occured on %s port: %d rank group: %d! +++", i_target.toEcmdString(), i_port, i_group);
         }
         if(cal_error_buffer_64.isBitSet(50))
         {
-            FAPI_ERR( "+++ DQS Alignment error occured on port: %d rank group: %d! +++", i_port, i_group);
+            FAPI_ERR( "+++ DQS Alignment error occured on %s port: %d rank group: %d! +++", i_target.toEcmdString(), i_port, i_group);
         }
         if(cal_error_buffer_64.isBitSet(51))
         {
-            FAPI_ERR( "+++ RDCLK to SysClk alignment error occured on port: %d rank group: %d! +++", i_port, i_group);
+            FAPI_ERR( "+++ RDCLK to SysClk alignment error occured on %s port: %d rank group: %d! +++", i_target.toEcmdString(), i_port, i_group);
         }
         if(cal_error_buffer_64.isBitSet(52))
         {
-            FAPI_ERR( "+++ Read centering error occured on port: %d rank group: %d! +++", i_port, i_group);
+            FAPI_ERR( "+++ Read centering error occured on %s port: %d rank group: %d! +++", i_target.toEcmdString(), i_port, i_group);
         }
         if(cal_error_buffer_64.isBitSet(53))
         {
-            FAPI_ERR( "+++ Write centering error occured on port: %d rank group: %d! +++", i_port, i_group);
+            FAPI_ERR( "+++ Write centering error occured on %s port: %d rank group: %d! +++", i_target.toEcmdString(), i_port, i_group);
         }
         if(cal_error_buffer_64.isBitSet(55))
         {
-            FAPI_ERR( "+++ Coarse read centering error occured on port: %d rank group: %d! +++", i_port, i_group);
+            FAPI_ERR( "+++ Coarse read centering error occured on %s port: %d rank group: %d! +++", i_target.toEcmdString(), i_port, i_group);
         }
         if(cal_error_buffer_64.isBitSet(56))
         {
-            FAPI_ERR( "+++ Custom pattern read centering error occured on port: %d rank group: %d! +++", i_port, i_group);
+            FAPI_ERR( "+++ Custom pattern read centering error occured on %s port: %d rank group: %d! +++", i_target.toEcmdString(), i_port, i_group);
         }
         if(cal_error_buffer_64.isBitSet(57))
         {
-            FAPI_ERR( "+++ Custom pattern write centering error occured on port: %d rank group: %d! +++", i_port, i_group);
+            FAPI_ERR( "+++ Custom pattern write centering error occured on %s port: %d rank group: %d! +++", i_target.toEcmdString(), i_port, i_group);
         }
         if(cal_error_buffer_64.isBitSet(58))
         {
-            FAPI_ERR( "+++ Digital eye error occured on port: %d rank group: %d! +++", i_port, i_group);
+            FAPI_ERR( "+++ Digital eye error occured on %s port: %d rank group: %d! +++", i_target.toEcmdString(), i_port, i_group);
         }
     }
     else
     {
-	FAPI_INF( "+++ Calibration on port: %d rank group: %d was successful. +++", i_port, i_group);
+  	if (cur_cal_step == 1)
+	{
+	    FAPI_INF( "+++ Write_leveling on %s port: %d rank group: %d was successful. +++", i_target.toEcmdString(), i_port, i_group);
+	}
+	else if (cur_cal_step == 2)
+	{
+	    FAPI_INF( "+++ DQS Alignment on %s port: %d rank group: %d was successful. +++", i_target.toEcmdString(), i_port, i_group);
+	}
+	else if (cur_cal_step == 3)
+	{
+	    FAPI_INF( "+++ RDCLK to SysClk alignment on %s port: %d rank group: %d was successful. +++", i_target.toEcmdString(), i_port, i_group);
+	}
+	else if (cur_cal_step == 4)
+	{
+	    FAPI_INF( "+++ Read Centering on %s port: %d rank group: %d was successful. +++", i_target.toEcmdString(), i_port, i_group);
+	}
+	else if (cur_cal_step == 5)
+	{
+	    FAPI_INF( "+++ Write Centering on %s port: %d rank group: %d was successful. +++", i_target.toEcmdString(), i_port, i_group);
+	}
+	else if (cur_cal_step == 6)
+	{
+	    FAPI_INF( "+++ Course Read and/or Course Write on %s port: %d rank group: %d was successful. +++", i_target.toEcmdString(), i_port, i_group);
+	}
+
 	io_status = MSS_INIT_CAL_PASS;
     }
 
@@ -877,7 +911,7 @@ ReturnCode mss_read_center_workaround(
     uint8_t l_timing_ref_quad2 = 0;
     uint8_t l_timing_ref_quad3 = 0;
 
-    FAPI_INF( "+++ Read Centering Workaround on MBA: %d Port: %d rank group: %d +++", i_mbaPosition, i_port, i_rank_group);
+    FAPI_INF( "+++ Read Centering Workaround on %s Port: %d rank group: %d +++", i_target.toEcmdString(), i_port, i_rank_group);
     FAPI_INF( "+++ Choosing New RD PHASE SELECT values based on timing values. +++");
     FAPI_INF( "+++ Incrementing DQS CLK PHASE SELECT regs based on timing values. +++");
 
@@ -1010,7 +1044,7 @@ ReturnCode mss_read_center_workaround(
 	dqs_clk_increment_quad0 = dqs_clk_increment_wa2;
 	read_phase_value_quad0 = read_phase_value_wa2;
     }
-    FAPI_INF( "+++ Block 0 Quad 0 using workaround %d dqs_clk_increment: %d read_phase_value: %d +++", quad0_workaround_type, dqs_clk_increment_quad0, read_phase_value_quad0);
+    FAPI_INF( "+++ ALL Blocks ALL Quads using workaround number %d with dqs_clk_increment: %d read_phase_value: %d +++", quad0_workaround_type, dqs_clk_increment_quad0, read_phase_value_quad0);
 
     if ( quad1_workaround_type == 0 )
     {
@@ -1027,7 +1061,6 @@ ReturnCode mss_read_center_workaround(
 	dqs_clk_increment_quad1 = dqs_clk_increment_wa2;
 	read_phase_value_quad1 = read_phase_value_wa2;
     }
-    FAPI_INF( "+++ Block 0 Quad 1 using workaround %d dqs_clk_increment: %d read_phase_value: %d +++", quad0_workaround_type, dqs_clk_increment_quad1, read_phase_value_quad1);
 
     if ( quad2_workaround_type == 0 )
     {
@@ -1044,7 +1077,6 @@ ReturnCode mss_read_center_workaround(
 	dqs_clk_increment_quad2 = dqs_clk_increment_wa2;
 	read_phase_value_quad2 = read_phase_value_wa2;
     }
-    FAPI_INF( "+++ Block 0 Quad 2 using workaround %d dqs_clk_increment: %d read_phase_value: %d +++", quad0_workaround_type, dqs_clk_increment_quad2, read_phase_value_quad2);
 
     if ( quad3_workaround_type == 0 )
     {
@@ -1061,7 +1093,6 @@ ReturnCode mss_read_center_workaround(
 	dqs_clk_increment_quad3 = dqs_clk_increment_wa2;
 	read_phase_value_quad3 = read_phase_value_wa2;
     }
-    FAPI_INF( "+++ Block 0 Quad 3 using workaround %d dqs_clk_increment: %d read_phase_value: %d +++", quad0_workaround_type, dqs_clk_increment_quad3, read_phase_value_quad3);
 
     rc = fapiGetScom(i_target, DQSCLK_RD_PHASE_ADDR_0, data_buffer_64);
     if (rc) return rc;
@@ -1119,7 +1150,6 @@ ReturnCode mss_read_center_workaround(
 	dqs_clk_increment_quad0 = dqs_clk_increment_wa2;
 	read_phase_value_quad0 = read_phase_value_wa2;
     }
-    FAPI_INF( "+++ Block 1 Quad 0 using workaround %d dqs_clk_increment: %d read_phase_value: %d +++", quad0_workaround_type, dqs_clk_increment_quad0, read_phase_value_quad0);
 
     if ( quad1_workaround_type == 0 )
     {
@@ -1136,7 +1166,6 @@ ReturnCode mss_read_center_workaround(
 	dqs_clk_increment_quad1 = dqs_clk_increment_wa2;
 	read_phase_value_quad1 = read_phase_value_wa2;
     }
-    FAPI_INF( "+++ Block 1 Quad 1 using workaround %d dqs_clk_increment: %d read_phase_value: %d +++", quad0_workaround_type, dqs_clk_increment_quad1, read_phase_value_quad1);
 
     if ( quad2_workaround_type == 0 )
     {
@@ -1153,7 +1182,6 @@ ReturnCode mss_read_center_workaround(
 	dqs_clk_increment_quad2 = dqs_clk_increment_wa2;
 	read_phase_value_quad2 = read_phase_value_wa2;
     }
-    FAPI_INF( "+++ Block 1 Quad 2 using workaround %d dqs_clk_increment: %d read_phase_value: %d +++", quad0_workaround_type, dqs_clk_increment_quad2, read_phase_value_quad2);
 
     if ( quad3_workaround_type == 0 )
     {
@@ -1170,7 +1198,6 @@ ReturnCode mss_read_center_workaround(
 	dqs_clk_increment_quad3 = dqs_clk_increment_wa2;
 	read_phase_value_quad3 = read_phase_value_wa2;
     }
-    FAPI_INF( "+++ Block 1 Quad 3 using workaround %d dqs_clk_increment: %d read_phase_value: %d +++", quad0_workaround_type, dqs_clk_increment_quad3, read_phase_value_quad3);
 
 
     rc = fapiGetScom(i_target, DQSCLK_RD_PHASE_ADDR_1, data_buffer_64);
@@ -1229,7 +1256,6 @@ ReturnCode mss_read_center_workaround(
 	dqs_clk_increment_quad0 = dqs_clk_increment_wa2;
 	read_phase_value_quad0 = read_phase_value_wa2;
     }
-    FAPI_INF( "+++ Block 2 Quad 0 using workaround %d dqs_clk_increment: %d read_phase_value: %d +++", quad0_workaround_type, dqs_clk_increment_quad0, read_phase_value_quad0);
 
     if ( quad1_workaround_type == 0 )
     {
@@ -1246,7 +1272,6 @@ ReturnCode mss_read_center_workaround(
 	dqs_clk_increment_quad1 = dqs_clk_increment_wa2;
 	read_phase_value_quad1 = read_phase_value_wa2;
     }
-    FAPI_INF( "+++ Block 2 Quad 1 using workaround %d dqs_clk_increment: %d read_phase_value: %d +++", quad0_workaround_type, dqs_clk_increment_quad1, read_phase_value_quad1);
 
     if ( quad2_workaround_type == 0 )
     {
@@ -1263,7 +1288,6 @@ ReturnCode mss_read_center_workaround(
 	dqs_clk_increment_quad2 = dqs_clk_increment_wa2;
 	read_phase_value_quad2 = read_phase_value_wa2;
     }
-    FAPI_INF( "+++ Block 2 Quad 2 using workaround %d dqs_clk_increment: %d read_phase_value: %d +++", quad0_workaround_type, dqs_clk_increment_quad2, read_phase_value_quad2);
 
     if ( quad3_workaround_type == 0 )
     {
@@ -1280,7 +1304,6 @@ ReturnCode mss_read_center_workaround(
 	dqs_clk_increment_quad3 = dqs_clk_increment_wa2;
 	read_phase_value_quad3 = read_phase_value_wa2;
     }
-    FAPI_INF( "+++ Block 2 Quad 3 using workaround %d dqs_clk_increment: %d read_phase_value: %d +++", quad0_workaround_type, dqs_clk_increment_quad3, read_phase_value_quad3);
 
 
     rc = fapiGetScom(i_target, DQSCLK_RD_PHASE_ADDR_2, data_buffer_64);
@@ -1338,7 +1361,6 @@ ReturnCode mss_read_center_workaround(
 	dqs_clk_increment_quad0 = dqs_clk_increment_wa2;
 	read_phase_value_quad0 = read_phase_value_wa2;
     }
-    FAPI_INF( "+++ Block 3 Quad 0 using workaround %d dqs_clk_increment: %d read_phase_value: %d +++", quad0_workaround_type, dqs_clk_increment_quad0, read_phase_value_quad0);
 
     if ( quad1_workaround_type == 0 )
     {
@@ -1355,7 +1377,6 @@ ReturnCode mss_read_center_workaround(
 	dqs_clk_increment_quad1 = dqs_clk_increment_wa2;
 	read_phase_value_quad1 = read_phase_value_wa2;
     }
-    FAPI_INF( "+++ Block 3 Quad 1 using workaround %d dqs_clk_increment: %d read_phase_value: %d +++", quad0_workaround_type, dqs_clk_increment_quad1, read_phase_value_quad1);
 
     if ( quad2_workaround_type == 0 )
     {
@@ -1372,7 +1393,6 @@ ReturnCode mss_read_center_workaround(
 	dqs_clk_increment_quad2 = dqs_clk_increment_wa2;
 	read_phase_value_quad2 = read_phase_value_wa2;
     }
-    FAPI_INF( "+++ Block 3 Quad 2 using workaround %d dqs_clk_increment: %d read_phase_value: %d +++", quad0_workaround_type, dqs_clk_increment_quad2, read_phase_value_quad2);
 
     if ( quad3_workaround_type == 0 )
     {
@@ -1389,7 +1409,6 @@ ReturnCode mss_read_center_workaround(
 	dqs_clk_increment_quad3 = dqs_clk_increment_wa2;
 	read_phase_value_quad3 = read_phase_value_wa2;
     }
-    FAPI_INF( "+++ Block 3 Quad 3 using workaround %d dqs_clk_increment: %d read_phase_value: %d +++", quad0_workaround_type, dqs_clk_increment_quad3, read_phase_value_quad3);
 
 
     rc = fapiGetScom(i_target, DQSCLK_RD_PHASE_ADDR_3, data_buffer_64);
@@ -1448,7 +1467,6 @@ ReturnCode mss_read_center_workaround(
 	dqs_clk_increment_quad0 = dqs_clk_increment_wa2;
 	read_phase_value_quad0 = read_phase_value_wa2;
     }
-    FAPI_INF( "+++ Block 4 Quad 0 using workaround %d dqs_clk_increment: %d read_phase_value: %d +++", quad0_workaround_type, dqs_clk_increment_quad0, read_phase_value_quad0);
 
     if ( quad1_workaround_type == 0 )
     {
@@ -1465,7 +1483,6 @@ ReturnCode mss_read_center_workaround(
 	dqs_clk_increment_quad1 = dqs_clk_increment_wa2;
 	read_phase_value_quad1 = read_phase_value_wa2;
     }
-    FAPI_INF( "+++ Block 4 Quad 1 using workaround %d dqs_clk_increment: %d read_phase_value: %d +++", quad0_workaround_type, dqs_clk_increment_quad1, read_phase_value_quad1);
 
     if ( quad2_workaround_type == 0 )
     {
@@ -1482,7 +1499,6 @@ ReturnCode mss_read_center_workaround(
 	dqs_clk_increment_quad2 = dqs_clk_increment_wa2;
 	read_phase_value_quad2 = read_phase_value_wa2;
     }
-    FAPI_INF( "+++ Block 4 Quad 2 using workaround %d dqs_clk_increment: %d read_phase_value: %d +++", quad0_workaround_type, dqs_clk_increment_quad2, read_phase_value_quad2);
 
     if ( quad3_workaround_type == 0 )
     {
@@ -1499,7 +1515,6 @@ ReturnCode mss_read_center_workaround(
 	dqs_clk_increment_quad3 = dqs_clk_increment_wa2;
 	read_phase_value_quad3 = read_phase_value_wa2;
     }
-    FAPI_INF( "+++ Block 4 Quad 3 using workaround %d dqs_clk_increment: %d read_phase_value: %d +++", quad0_workaround_type, dqs_clk_increment_quad3, read_phase_value_quad3);
 
 
     rc = fapiGetScom(i_target, DQSCLK_RD_PHASE_ADDR_4, data_buffer_64);
@@ -1541,8 +1556,660 @@ ReturnCode mss_read_center_workaround(
     return rc;
 }
 
+ReturnCode mss_read_center_second_workaround(
+            Target& i_target
+            )
+{
+    //MBA target level
+    //DQS_CLK for each nibble of a byte is being adjusted to the lowest value for the given byte
+    //Across all byte lanes
+
+    uint8_t primary_ranks_array[4][2]; //primary_ranks_array[group][port]
+    ecmdDataBufferBase data_buffer_64(64);
+    uint64_t DQSCLK_RD_PHASE_ADDR_0 = 0;
+    uint64_t DQSCLK_RD_PHASE_ADDR_1 = 0;
+    uint64_t DQSCLK_RD_PHASE_ADDR_2 = 0;
+    uint64_t DQSCLK_RD_PHASE_ADDR_3 = 0;
+    uint64_t DQSCLK_RD_PHASE_ADDR_4 = 0;
+    uint64_t GATE_DELAY_ADDR_0 = 0;
+    uint64_t GATE_DELAY_ADDR_1 = 0;
+    uint64_t GATE_DELAY_ADDR_2 = 0;
+    uint64_t GATE_DELAY_ADDR_3 = 0;
+    uint64_t GATE_DELAY_ADDR_4 = 0;
+    uint8_t port = 0;
+    uint8_t rank_group = 0;
+    uint8_t l_value_n0_u8 = 0;
+    uint8_t l_value_n1_u8 = 0;
+    //uint8_t l_lowest_value_u8 = 0;
+    ReturnCode rc; 
+    uint32_t rc_num = 0;
+
+    uint32_t block;
+    uint32_t maxblocks = 5;
+    uint32_t byte;
+    uint32_t maxbytes = 2;
+    uint32_t nibble;
+    uint32_t maxnibbles = 2;
+
+    uint8_t l_lowest_value_u8[4][5][2][2]; // l_lowest_value_u8[group][block][byte_of_reg][nibble_of_byte]
+    uint8_t l_gate_delay_value_u8[4][5][2][2]; // l_lowest_value_u8[group][block][byte_of_reg][nibble_of_byte]
+
+
+    //populate primary_ranks_arrays_array
+    rc = FAPI_ATTR_GET(ATTR_EFF_PRIMARY_RANK_GROUP0, &i_target, primary_ranks_array[0]);
+    if(rc) return rc;
+    rc = FAPI_ATTR_GET(ATTR_EFF_PRIMARY_RANK_GROUP1, &i_target, primary_ranks_array[1]);
+    if(rc) return rc;
+    rc = FAPI_ATTR_GET(ATTR_EFF_PRIMARY_RANK_GROUP2, &i_target, primary_ranks_array[2]);
+    if(rc) return rc;
+    rc = FAPI_ATTR_GET(ATTR_EFF_PRIMARY_RANK_GROUP3, &i_target, primary_ranks_array[3]);
+    if(rc) return rc;
+
+
+    for(port = 0; port < MAX_PORTS; port++)
+    {
+
+
+	//FAPI_INF( "DQS_CLK Byte matching Workaround being applied on  %s  PORT: %d RP: %d", i_target.toEcmdString(), port, rank_group);
+	
+	//Gather all the byte information
+        for(rank_group = 0; rank_group < MAX_PRI_RANKS; rank_group++)
+	{
+
+	     //Initialize values
+	     for(block = 0; block < maxblocks; block++)
+	     {
+		for (byte = 0; byte < maxbytes; byte++)
+		{
+			for (nibble = 0; nibble < maxnibbles; nibble++)
+			{
+				l_lowest_value_u8[rank_group][block][byte][nibble] = 255;
+				l_gate_delay_value_u8[rank_group][block][byte][nibble] = 255;
+			}
+		}
+	     }
+
+	    //Check if rank group exists
+	    if(primary_ranks_array[rank_group][port] != 255)
+	    {
+	        FAPI_INF( "DQS_CLK Byte matching Workaround being applied on  %s  PORT: %d RP: %d", i_target.toEcmdString(), port, rank_group);
+    		if ( port == 0 )
+    		{
+
+			if ( rank_group == 0 )
+			{
+			    DQSCLK_RD_PHASE_ADDR_0 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR0_P0_0_0x800000090301143F;
+			    DQSCLK_RD_PHASE_ADDR_1 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR0_P0_1_0x800004090301143F;
+			    DQSCLK_RD_PHASE_ADDR_2 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR0_P0_2_0x800008090301143F;
+			    DQSCLK_RD_PHASE_ADDR_3 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR0_P0_3_0x80000C090301143F;
+			    DQSCLK_RD_PHASE_ADDR_4 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR0_P0_4_0x800010090301143F;
+			    GATE_DELAY_ADDR_0 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP0_P0_0_0x800000130301143F;
+			    GATE_DELAY_ADDR_1 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP0_P0_1_0x800004130301143F;
+			    GATE_DELAY_ADDR_2 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP0_P0_2_0x800008130301143F;
+			    GATE_DELAY_ADDR_3 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP0_P0_3_0x80000C130301143F;
+			    GATE_DELAY_ADDR_4 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP0_P0_4_0x800010130301143F;
+
+			}
+			else if ( rank_group == 1 )
+			{
+			    DQSCLK_RD_PHASE_ADDR_0 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR1_P0_0_0x800001090301143F;
+			    DQSCLK_RD_PHASE_ADDR_1 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR1_P0_1_0x800005090301143F;
+			    DQSCLK_RD_PHASE_ADDR_2 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR1_P0_2_0x800009090301143F;
+			    DQSCLK_RD_PHASE_ADDR_3 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR1_P0_3_0x80000D090301143F;
+			    DQSCLK_RD_PHASE_ADDR_4 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR1_P0_4_0x800011090301143F;
+			    GATE_DELAY_ADDR_0 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP1_P0_0_0x800001130301143F;
+			    GATE_DELAY_ADDR_1 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP1_P0_1_0x800005130301143F;
+			    GATE_DELAY_ADDR_2 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP1_P0_2_0x800009130301143F;
+			    GATE_DELAY_ADDR_3 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP1_P0_3_0x80000D130301143F;
+			    GATE_DELAY_ADDR_4 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP1_P0_4_0x800011130301143F;
+
+			}
+			else if ( rank_group == 2 )
+			{
+			    DQSCLK_RD_PHASE_ADDR_0 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR2_P0_0_0x800002090301143F;
+			    DQSCLK_RD_PHASE_ADDR_1 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR2_P0_1_0x800006090301143F;
+			    DQSCLK_RD_PHASE_ADDR_2 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR2_P0_2_0x80000A090301143F;
+			    DQSCLK_RD_PHASE_ADDR_3 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR2_P0_3_0x80000E090301143F;
+			    DQSCLK_RD_PHASE_ADDR_4 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR2_P0_4_0x800012090301143F;
+			    GATE_DELAY_ADDR_0 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP2_P0_0_0x800002130301143F;
+			    GATE_DELAY_ADDR_1 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP2_P0_1_0x800006130301143F;
+			    GATE_DELAY_ADDR_2 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP2_P0_2_0x80000A130301143F;
+			    GATE_DELAY_ADDR_3 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP2_P0_3_0x80000E130301143F;
+			    GATE_DELAY_ADDR_4 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP2_P0_4_0x800012130301143F;
+
+			}
+			else if ( rank_group == 3 )
+			{
+			    DQSCLK_RD_PHASE_ADDR_0 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR3_P0_0_0x800003090301143F;
+			    DQSCLK_RD_PHASE_ADDR_1 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR3_P0_1_0x800007090301143F;
+			    DQSCLK_RD_PHASE_ADDR_2 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR3_P0_2_0x80000B090301143F;
+			    DQSCLK_RD_PHASE_ADDR_3 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR3_P0_3_0x80000F090301143F;
+			    DQSCLK_RD_PHASE_ADDR_4 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR3_P0_4_0x800013090301143F;
+			    GATE_DELAY_ADDR_0 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP3_P0_0_0x800003130301143F;
+			    GATE_DELAY_ADDR_1 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP3_P0_1_0x800007130301143F;
+			    GATE_DELAY_ADDR_2 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP3_P0_2_0x80000B130301143F;
+			    GATE_DELAY_ADDR_3 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP3_P0_3_0x80000F130301143F;
+			    GATE_DELAY_ADDR_4 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP3_P0_4_0x800013130301143F;
+
+			}
+		    }
+		    else if (port == 1 )
+		    {
+
+			if ( rank_group == 0 )
+			{
+			    DQSCLK_RD_PHASE_ADDR_0 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR0_P1_0_0x800100090301143F;
+			    DQSCLK_RD_PHASE_ADDR_1 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR0_P1_1_0x800104090301143F;
+			    DQSCLK_RD_PHASE_ADDR_2 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR0_P1_2_0x800108090301143F;
+			    DQSCLK_RD_PHASE_ADDR_3 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR0_P1_3_0x80010C090301143F;
+			    DQSCLK_RD_PHASE_ADDR_4 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR0_P1_4_0x800110090301143F;
+			    GATE_DELAY_ADDR_0 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP0_P1_0_0x800100130301143F;
+			    GATE_DELAY_ADDR_1 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP0_P1_1_0x800104130301143F;
+			    GATE_DELAY_ADDR_2 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP0_P1_2_0x800108130301143F;
+			    GATE_DELAY_ADDR_3 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP0_P1_3_0x80010C130301143F;
+			    GATE_DELAY_ADDR_4 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP0_P1_4_0x800110130301143F;
+
+			}
+			else if ( rank_group == 1 )
+			{
+			    DQSCLK_RD_PHASE_ADDR_0 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR1_P1_0_0x800101090301143F;
+			    DQSCLK_RD_PHASE_ADDR_1 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR1_P1_1_0x800105090301143F;
+			    DQSCLK_RD_PHASE_ADDR_2 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR1_P1_2_0x800109090301143F;
+			    DQSCLK_RD_PHASE_ADDR_3 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR1_P1_3_0x80010D090301143F;
+			    DQSCLK_RD_PHASE_ADDR_4 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR1_P1_4_0x800111090301143F;
+			    GATE_DELAY_ADDR_0 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP1_P1_0_0x800101130301143F;
+			    GATE_DELAY_ADDR_1 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP1_P1_1_0x800105130301143F;
+			    GATE_DELAY_ADDR_2 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP1_P1_2_0x800109130301143F;
+			    GATE_DELAY_ADDR_3 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP1_P1_3_0x80010D130301143F;
+			    GATE_DELAY_ADDR_4 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP1_P1_4_0x800111130301143F;
+
+			}
+			else if ( rank_group == 2 )
+			{
+			    DQSCLK_RD_PHASE_ADDR_0 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR2_P1_0_0x800102090301143F;
+			    DQSCLK_RD_PHASE_ADDR_1 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR2_P1_1_0x800106090301143F;
+			    DQSCLK_RD_PHASE_ADDR_2 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR2_P1_2_0x80010A090301143F;
+			    DQSCLK_RD_PHASE_ADDR_3 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR2_P1_3_0x80010E090301143F;
+			    DQSCLK_RD_PHASE_ADDR_4 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR2_P1_4_0x800112090301143F;
+			    GATE_DELAY_ADDR_0 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP2_P1_0_0x800102130301143F;
+			    GATE_DELAY_ADDR_1 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP2_P1_1_0x800106130301143F;
+			    GATE_DELAY_ADDR_2 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP2_P1_2_0x80010A130301143F;
+			    GATE_DELAY_ADDR_3 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP2_P1_3_0x80010E130301143F;
+			    GATE_DELAY_ADDR_4 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP2_P1_4_0x800112130301143F;
+
+			}
+			else if ( rank_group == 3 )
+			{
+			    DQSCLK_RD_PHASE_ADDR_0 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR3_P1_0_0x800103090301143F;
+			    DQSCLK_RD_PHASE_ADDR_1 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR3_P1_1_0x800107090301143F;
+			    DQSCLK_RD_PHASE_ADDR_2 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR3_P1_2_0x80010B090301143F;
+			    DQSCLK_RD_PHASE_ADDR_3 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR3_P1_3_0x80010F090301143F;
+			    DQSCLK_RD_PHASE_ADDR_4 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR3_P1_4_0x800113090301143F;
+			    GATE_DELAY_ADDR_0 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP3_P1_0_0x800103130301143F;
+			    GATE_DELAY_ADDR_1 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP3_P1_1_0x800107130301143F;
+			    GATE_DELAY_ADDR_2 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP3_P1_2_0x80010B130301143F;
+			    GATE_DELAY_ADDR_3 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP3_P1_3_0x80010F130301143F;
+			    GATE_DELAY_ADDR_4 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP3_P1_4_0x800113130301143F;
+
+			}
+		    }
+
+
+		    // PHY BLOCK 0
+		    rc = fapiGetScom(i_target, DQSCLK_RD_PHASE_ADDR_0, data_buffer_64);
+		    if (rc) return rc;
+		    // Grabbing 2 nibbles of the same byte and making them equal to the same lowest value
+		    rc_num = rc_num | data_buffer_64.extractToRight(&l_value_n0_u8, 48, 2);
+		    rc_num = rc_num | data_buffer_64.extractToRight(&l_value_n1_u8, 52, 2);
+		    l_lowest_value_u8[rank_group][0][0][0] = l_value_n0_u8;
+		    l_lowest_value_u8[rank_group][0][0][1] = l_value_n1_u8;
+		    rc_num = rc_num | data_buffer_64.extractToRight(&l_value_n0_u8, 56, 2);
+		    rc_num = rc_num | data_buffer_64.extractToRight(&l_value_n1_u8, 60, 2);
+		    l_lowest_value_u8[rank_group][0][1][0] = l_value_n0_u8;
+		    l_lowest_value_u8[rank_group][0][1][1] = l_value_n1_u8;
+
+		    rc = fapiGetScom(i_target, GATE_DELAY_ADDR_0, data_buffer_64);
+		    if (rc) return rc;
+		    // Grabbing 2 nibbles of the same byte and making them equal the same lowest value
+		    rc_num = rc_num | data_buffer_64.extractToRight(&l_value_n0_u8, 49, 3);
+		    rc_num = rc_num | data_buffer_64.extractToRight(&l_value_n1_u8, 53, 3);
+		    l_gate_delay_value_u8[rank_group][0][0][0] = l_value_n0_u8;
+		    l_gate_delay_value_u8[rank_group][0][0][1] = l_value_n1_u8;
+		    rc_num = rc_num | data_buffer_64.extractToRight(&l_value_n0_u8, 57, 3);
+		    rc_num = rc_num | data_buffer_64.extractToRight(&l_value_n1_u8, 61, 3);
+		    l_gate_delay_value_u8[rank_group][0][1][0] = l_value_n0_u8;
+		    l_gate_delay_value_u8[rank_group][0][1][1] = l_value_n1_u8;
+
+		    // PHY BLOCK 1
+		    rc = fapiGetScom(i_target, DQSCLK_RD_PHASE_ADDR_1, data_buffer_64);
+		    if (rc) return rc;
+		    // Grabbing 2 nibbles of the same byte and making them equal to the same lowest value
+		    rc_num = rc_num | data_buffer_64.extractToRight(&l_value_n0_u8, 48, 2);
+		    rc_num = rc_num | data_buffer_64.extractToRight(&l_value_n1_u8, 52, 2);
+		    l_lowest_value_u8[rank_group][1][0][0] = l_value_n0_u8;
+		    l_lowest_value_u8[rank_group][1][0][1] = l_value_n1_u8;
+		    rc_num = rc_num | data_buffer_64.extractToRight(&l_value_n0_u8, 56, 2);
+		    rc_num = rc_num | data_buffer_64.extractToRight(&l_value_n1_u8, 60, 2);
+		    l_lowest_value_u8[rank_group][1][1][0] = l_value_n0_u8;
+		    l_lowest_value_u8[rank_group][1][1][1] = l_value_n1_u8;
+
+		    rc = fapiGetScom(i_target, GATE_DELAY_ADDR_1, data_buffer_64);
+		    if (rc) return rc;
+		    // Grabbing 2 nibbles of the same byte and making them equal the same lowest value
+		    rc_num = rc_num | data_buffer_64.extractToRight(&l_value_n0_u8, 49, 3);
+		    rc_num = rc_num | data_buffer_64.extractToRight(&l_value_n1_u8, 53, 3);
+		    l_gate_delay_value_u8[rank_group][1][0][0] = l_value_n0_u8;
+		    l_gate_delay_value_u8[rank_group][1][0][1] = l_value_n1_u8;
+		    rc_num = rc_num | data_buffer_64.extractToRight(&l_value_n0_u8, 57, 3);
+		    rc_num = rc_num | data_buffer_64.extractToRight(&l_value_n1_u8, 61, 3);
+		    l_gate_delay_value_u8[rank_group][1][1][0] = l_value_n0_u8;
+		    l_gate_delay_value_u8[rank_group][1][1][1] = l_value_n1_u8;
+
+		    // PHY BLOCK 2
+		    rc = fapiGetScom(i_target, DQSCLK_RD_PHASE_ADDR_2, data_buffer_64);
+		    if (rc) return rc;
+		    // Grabbing 2 nibbles of the same byte and making them equal to the same lowest value
+		    rc_num = rc_num | data_buffer_64.extractToRight(&l_value_n0_u8, 48, 2);
+		    rc_num = rc_num | data_buffer_64.extractToRight(&l_value_n1_u8, 52, 2);
+		    l_lowest_value_u8[rank_group][2][0][0] = l_value_n0_u8;
+		    l_lowest_value_u8[rank_group][2][0][1] = l_value_n1_u8;
+		    rc_num = rc_num | data_buffer_64.extractToRight(&l_value_n0_u8, 56, 2);
+		    rc_num = rc_num | data_buffer_64.extractToRight(&l_value_n1_u8, 60, 2);
+		    l_lowest_value_u8[rank_group][2][1][0] = l_value_n0_u8;
+		    l_lowest_value_u8[rank_group][2][1][1] = l_value_n1_u8;
+
+		    rc = fapiGetScom(i_target, GATE_DELAY_ADDR_2, data_buffer_64);
+		    if (rc) return rc;
+		    // Grabbing 2 nibbles of the same byte and making them equal the same lowest value
+		    rc_num = rc_num | data_buffer_64.extractToRight(&l_value_n0_u8, 49, 3);
+		    rc_num = rc_num | data_buffer_64.extractToRight(&l_value_n1_u8, 53, 3);
+		    l_gate_delay_value_u8[rank_group][2][0][0] = l_value_n0_u8;
+		    l_gate_delay_value_u8[rank_group][2][0][1] = l_value_n1_u8;
+		    rc_num = rc_num | data_buffer_64.extractToRight(&l_value_n0_u8, 57, 3);
+		    rc_num = rc_num | data_buffer_64.extractToRight(&l_value_n1_u8, 61, 3);
+		    l_gate_delay_value_u8[rank_group][2][1][0] = l_value_n0_u8;
+		    l_gate_delay_value_u8[rank_group][2][1][1] = l_value_n1_u8;
+
+		    // PHY BLOCK 3
+		    rc = fapiGetScom(i_target, DQSCLK_RD_PHASE_ADDR_3, data_buffer_64);
+		    if (rc) return rc;
+		    // Grabbing 2 nibbles of the same byte and making them equal to the same lowest value
+		    rc_num = rc_num | data_buffer_64.extractToRight(&l_value_n0_u8, 48, 2);
+		    rc_num = rc_num | data_buffer_64.extractToRight(&l_value_n1_u8, 52, 2);
+		    l_lowest_value_u8[rank_group][3][0][0] = l_value_n0_u8;
+		    l_lowest_value_u8[rank_group][3][0][1] = l_value_n1_u8;
+		    rc_num = rc_num | data_buffer_64.extractToRight(&l_value_n0_u8, 56, 2);
+		    rc_num = rc_num | data_buffer_64.extractToRight(&l_value_n1_u8, 60, 2);
+		    l_lowest_value_u8[rank_group][3][1][0] = l_value_n0_u8;
+		    l_lowest_value_u8[rank_group][3][1][1] = l_value_n1_u8;
+
+		    rc = fapiGetScom(i_target, GATE_DELAY_ADDR_3, data_buffer_64);
+		    if (rc) return rc;
+		    // Grabbing 2 nibbles of the same byte and making them equal the same lowest value
+		    rc_num = rc_num | data_buffer_64.extractToRight(&l_value_n0_u8, 49, 3);
+		    rc_num = rc_num | data_buffer_64.extractToRight(&l_value_n1_u8, 53, 3);
+		    l_gate_delay_value_u8[rank_group][3][0][0] = l_value_n0_u8;
+		    l_gate_delay_value_u8[rank_group][3][0][1] = l_value_n1_u8;
+		    rc_num = rc_num | data_buffer_64.extractToRight(&l_value_n0_u8, 57, 3);
+		    rc_num = rc_num | data_buffer_64.extractToRight(&l_value_n1_u8, 61, 3);
+		    l_gate_delay_value_u8[rank_group][3][1][0] = l_value_n0_u8;
+		    l_gate_delay_value_u8[rank_group][3][1][1] = l_value_n1_u8;
+
+		    // PHY BLOCK 4
+		    rc = fapiGetScom(i_target, DQSCLK_RD_PHASE_ADDR_4, data_buffer_64);
+		    if (rc) return rc;
+		    // Grabbing 2 nibbles of the same byte and making them equal to the same lowest value
+		    rc_num = rc_num | data_buffer_64.extractToRight(&l_value_n0_u8, 48, 2);
+		    rc_num = rc_num | data_buffer_64.extractToRight(&l_value_n1_u8, 52, 2);
+		    l_lowest_value_u8[rank_group][4][0][0] = l_value_n0_u8;
+		    l_lowest_value_u8[rank_group][4][0][1] = l_value_n1_u8;
+		    rc_num = rc_num | data_buffer_64.extractToRight(&l_value_n0_u8, 56, 2);
+		    rc_num = rc_num | data_buffer_64.extractToRight(&l_value_n1_u8, 60, 2);
+		    l_lowest_value_u8[rank_group][4][1][0] = l_value_n0_u8;
+		    l_lowest_value_u8[rank_group][4][1][1] = l_value_n1_u8;
+
+		    rc = fapiGetScom(i_target, GATE_DELAY_ADDR_4, data_buffer_64);
+		    if (rc) return rc;
+		    // Grabbing 2 nibbles of the same byte and making them equal the same lowest value
+		    rc_num = rc_num | data_buffer_64.extractToRight(&l_value_n0_u8, 49, 3);
+		    rc_num = rc_num | data_buffer_64.extractToRight(&l_value_n1_u8, 53, 3);
+		    l_gate_delay_value_u8[rank_group][4][0][0] = l_value_n0_u8;
+		    l_gate_delay_value_u8[rank_group][4][0][1] = l_value_n1_u8;
+		    rc_num = rc_num | data_buffer_64.extractToRight(&l_value_n0_u8, 57, 3);
+		    rc_num = rc_num | data_buffer_64.extractToRight(&l_value_n1_u8, 61, 3);
+		    l_gate_delay_value_u8[rank_group][4][1][0] = l_value_n0_u8;
+		    l_gate_delay_value_u8[rank_group][4][1][1] = l_value_n1_u8;
+
+		}
+	}
+
+	//Finding the lowest Value
+        for(block = 0; block < maxblocks; block++)
+	{
+		for (byte = 0; byte < maxbytes; byte++)
+		{
+
+			for (nibble = 0; nibble < maxnibbles; nibble++)
+			{
+
+			    if ( (l_lowest_value_u8[0][block][byte][nibble] == 0) || 
+				 (l_lowest_value_u8[1][block][byte][nibble] == 0) || 
+				 (l_lowest_value_u8[2][block][byte][nibble] == 0) || 
+				 (l_lowest_value_u8[3][block][byte][nibble] == 0) )
+			    {
+				    if ( (l_lowest_value_u8[0][block][byte][nibble] == 3) || 
+					 (l_lowest_value_u8[1][block][byte][nibble] == 3) || 
+					 (l_lowest_value_u8[2][block][byte][nibble] == 3) || 
+					 (l_lowest_value_u8[3][block][byte][nibble] == 3) )
+				    {
+
+					//In this case alone we make all gate values equal the gate of the lowest DQSCLK
+					if (l_lowest_value_u8[0][block][byte][nibble] == 3)
+					{
+						l_gate_delay_value_u8[1][block][byte][nibble] = l_gate_delay_value_u8[0][block][byte][nibble];
+						l_gate_delay_value_u8[2][block][byte][nibble] = l_gate_delay_value_u8[0][block][byte][nibble];
+						l_gate_delay_value_u8[3][block][byte][nibble] = l_gate_delay_value_u8[0][block][byte][nibble];
+					}
+					else if (l_lowest_value_u8[1][block][byte][nibble] == 3)
+					{
+						l_gate_delay_value_u8[0][block][byte][nibble] = l_gate_delay_value_u8[1][block][byte][nibble];
+						l_gate_delay_value_u8[2][block][byte][nibble] = l_gate_delay_value_u8[1][block][byte][nibble];
+						l_gate_delay_value_u8[3][block][byte][nibble] = l_gate_delay_value_u8[1][block][byte][nibble];
+					}
+					else if (l_lowest_value_u8[2][block][byte][nibble] == 3)
+					{
+						l_gate_delay_value_u8[0][block][byte][nibble] = l_gate_delay_value_u8[2][block][byte][nibble];
+						l_gate_delay_value_u8[1][block][byte][nibble] = l_gate_delay_value_u8[2][block][byte][nibble];
+						l_gate_delay_value_u8[3][block][byte][nibble] = l_gate_delay_value_u8[2][block][byte][nibble];
+					}
+					else if (l_lowest_value_u8[3][block][byte][nibble] == 3)
+					{
+						l_gate_delay_value_u8[0][block][byte][nibble] = l_gate_delay_value_u8[3][block][byte][nibble];
+						l_gate_delay_value_u8[1][block][byte][nibble] = l_gate_delay_value_u8[3][block][byte][nibble];
+						l_gate_delay_value_u8[2][block][byte][nibble] = l_gate_delay_value_u8[3][block][byte][nibble];
+					}
+
+					l_lowest_value_u8[0][block][byte][nibble] = 3;
+					l_lowest_value_u8[1][block][byte][nibble] = 3;
+					l_lowest_value_u8[2][block][byte][nibble] = 3;
+					l_lowest_value_u8[3][block][byte][nibble] = 3;
+				    }
+				    else 
+				    {
+					l_lowest_value_u8[0][block][byte][nibble] = 0;
+					l_lowest_value_u8[1][block][byte][nibble] = 0;
+					l_lowest_value_u8[2][block][byte][nibble] = 0;
+					l_lowest_value_u8[3][block][byte][nibble] = 0;
+
+				    }			
+			    }
+			    else if ( (l_lowest_value_u8[0][block][byte][nibble] == 2) || 
+				    (l_lowest_value_u8[1][block][byte][nibble] == 2) || 
+				    (l_lowest_value_u8[2][block][byte][nibble] == 2) || 
+				    (l_lowest_value_u8[3][block][byte][nibble] == 2) )
+			    {
+				    if ( (l_lowest_value_u8[0][block][byte][nibble] == 1) || 
+					 (l_lowest_value_u8[1][block][byte][nibble] == 1) || 
+					 (l_lowest_value_u8[2][block][byte][nibble] == 1) || 
+					 (l_lowest_value_u8[3][block][byte][nibble] == 1) )
+				    {
+					l_lowest_value_u8[0][block][byte][nibble] = 1;
+					l_lowest_value_u8[1][block][byte][nibble] = 1;
+					l_lowest_value_u8[2][block][byte][nibble] = 1;
+					l_lowest_value_u8[3][block][byte][nibble] = 1;
+
+				    }
+				    else 
+				    {
+					l_lowest_value_u8[0][block][byte][nibble] = 2;
+					l_lowest_value_u8[1][block][byte][nibble] = 2;
+					l_lowest_value_u8[2][block][byte][nibble] = 2;
+					l_lowest_value_u8[3][block][byte][nibble] = 2;	
+
+				    }			
+			    }
+
+			}
+		}
+
+	}
+
+
+	//Scoming in the New Values	
+        for(rank_group = 0; rank_group < MAX_PRI_RANKS; rank_group++)
+	{
+
+	    //Check if rank group exists
+	    if(primary_ranks_array[rank_group][port] != 255)
+	    {
+
+    		if ( port == 0 )
+    		{
+
+			if ( rank_group == 0 )
+			{
+			    DQSCLK_RD_PHASE_ADDR_0 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR0_P0_0_0x800000090301143F;
+			    DQSCLK_RD_PHASE_ADDR_1 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR0_P0_1_0x800004090301143F;
+			    DQSCLK_RD_PHASE_ADDR_2 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR0_P0_2_0x800008090301143F;
+			    DQSCLK_RD_PHASE_ADDR_3 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR0_P0_3_0x80000C090301143F;
+			    DQSCLK_RD_PHASE_ADDR_4 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR0_P0_4_0x800010090301143F;
+			    GATE_DELAY_ADDR_0 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP0_P0_0_0x800000130301143F;
+			    GATE_DELAY_ADDR_1 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP0_P0_1_0x800004130301143F;
+			    GATE_DELAY_ADDR_2 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP0_P0_2_0x800008130301143F;
+			    GATE_DELAY_ADDR_3 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP0_P0_3_0x80000C130301143F;
+			    GATE_DELAY_ADDR_4 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP0_P0_4_0x800010130301143F;
+
+			}
+			else if ( rank_group == 1 )
+			{
+			    DQSCLK_RD_PHASE_ADDR_0 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR1_P0_0_0x800001090301143F;
+			    DQSCLK_RD_PHASE_ADDR_1 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR1_P0_1_0x800005090301143F;
+			    DQSCLK_RD_PHASE_ADDR_2 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR1_P0_2_0x800009090301143F;
+			    DQSCLK_RD_PHASE_ADDR_3 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR1_P0_3_0x80000D090301143F;
+			    DQSCLK_RD_PHASE_ADDR_4 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR1_P0_4_0x800011090301143F;
+			    GATE_DELAY_ADDR_0 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP1_P0_0_0x800001130301143F;
+			    GATE_DELAY_ADDR_1 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP1_P0_1_0x800005130301143F;
+			    GATE_DELAY_ADDR_2 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP1_P0_2_0x800009130301143F;
+			    GATE_DELAY_ADDR_3 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP1_P0_3_0x80000D130301143F;
+			    GATE_DELAY_ADDR_4 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP1_P0_4_0x800011130301143F;
+
+			}
+			else if ( rank_group == 2 )
+			{
+			    DQSCLK_RD_PHASE_ADDR_0 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR2_P0_0_0x800002090301143F;
+			    DQSCLK_RD_PHASE_ADDR_1 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR2_P0_1_0x800006090301143F;
+			    DQSCLK_RD_PHASE_ADDR_2 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR2_P0_2_0x80000A090301143F;
+			    DQSCLK_RD_PHASE_ADDR_3 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR2_P0_3_0x80000E090301143F;
+			    DQSCLK_RD_PHASE_ADDR_4 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR2_P0_4_0x800012090301143F;
+			    GATE_DELAY_ADDR_0 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP2_P0_0_0x800002130301143F;
+			    GATE_DELAY_ADDR_1 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP2_P0_1_0x800006130301143F;
+			    GATE_DELAY_ADDR_2 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP2_P0_2_0x80000A130301143F;
+			    GATE_DELAY_ADDR_3 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP2_P0_3_0x80000E130301143F;
+			    GATE_DELAY_ADDR_4 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP2_P0_4_0x800012130301143F;
+
+			}
+			else if ( rank_group == 3 )
+			{
+			    DQSCLK_RD_PHASE_ADDR_0 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR3_P0_0_0x800003090301143F;
+			    DQSCLK_RD_PHASE_ADDR_1 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR3_P0_1_0x800007090301143F;
+			    DQSCLK_RD_PHASE_ADDR_2 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR3_P0_2_0x80000B090301143F;
+			    DQSCLK_RD_PHASE_ADDR_3 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR3_P0_3_0x80000F090301143F;
+			    DQSCLK_RD_PHASE_ADDR_4 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR3_P0_4_0x800013090301143F;
+			    GATE_DELAY_ADDR_0 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP3_P0_0_0x800003130301143F;
+			    GATE_DELAY_ADDR_1 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP3_P0_1_0x800007130301143F;
+			    GATE_DELAY_ADDR_2 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP3_P0_2_0x80000B130301143F;
+			    GATE_DELAY_ADDR_3 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP3_P0_3_0x80000F130301143F;
+			    GATE_DELAY_ADDR_4 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP3_P0_4_0x800013130301143F;
+
+			}
+		    }
+		    else if (port == 1 )
+		    {
+
+			if ( rank_group == 0 )
+			{
+			    DQSCLK_RD_PHASE_ADDR_0 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR0_P1_0_0x800100090301143F;
+			    DQSCLK_RD_PHASE_ADDR_1 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR0_P1_1_0x800104090301143F;
+			    DQSCLK_RD_PHASE_ADDR_2 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR0_P1_2_0x800108090301143F;
+			    DQSCLK_RD_PHASE_ADDR_3 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR0_P1_3_0x80010C090301143F;
+			    DQSCLK_RD_PHASE_ADDR_4 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR0_P1_4_0x800110090301143F;
+			    GATE_DELAY_ADDR_0 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP0_P1_0_0x800100130301143F;
+			    GATE_DELAY_ADDR_1 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP0_P1_1_0x800104130301143F;
+			    GATE_DELAY_ADDR_2 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP0_P1_2_0x800108130301143F;
+			    GATE_DELAY_ADDR_3 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP0_P1_3_0x80010C130301143F;
+			    GATE_DELAY_ADDR_4 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP0_P1_4_0x800110130301143F;
+
+			}
+			else if ( rank_group == 1 )
+			{
+			    DQSCLK_RD_PHASE_ADDR_0 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR1_P1_0_0x800101090301143F;
+			    DQSCLK_RD_PHASE_ADDR_1 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR1_P1_1_0x800105090301143F;
+			    DQSCLK_RD_PHASE_ADDR_2 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR1_P1_2_0x800109090301143F;
+			    DQSCLK_RD_PHASE_ADDR_3 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR1_P1_3_0x80010D090301143F;
+			    DQSCLK_RD_PHASE_ADDR_4 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR1_P1_4_0x800111090301143F;
+			    GATE_DELAY_ADDR_0 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP1_P1_0_0x800101130301143F;
+			    GATE_DELAY_ADDR_1 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP1_P1_1_0x800105130301143F;
+			    GATE_DELAY_ADDR_2 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP1_P1_2_0x800109130301143F;
+			    GATE_DELAY_ADDR_3 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP1_P1_3_0x80010D130301143F;
+			    GATE_DELAY_ADDR_4 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP1_P1_4_0x800111130301143F;
+
+			}
+			else if ( rank_group == 2 )
+			{
+			    DQSCLK_RD_PHASE_ADDR_0 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR2_P1_0_0x800102090301143F;
+			    DQSCLK_RD_PHASE_ADDR_1 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR2_P1_1_0x800106090301143F;
+			    DQSCLK_RD_PHASE_ADDR_2 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR2_P1_2_0x80010A090301143F;
+			    DQSCLK_RD_PHASE_ADDR_3 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR2_P1_3_0x80010E090301143F;
+			    DQSCLK_RD_PHASE_ADDR_4 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR2_P1_4_0x800112090301143F;
+			    GATE_DELAY_ADDR_0 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP2_P1_0_0x800102130301143F;
+			    GATE_DELAY_ADDR_1 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP2_P1_1_0x800106130301143F;
+			    GATE_DELAY_ADDR_2 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP2_P1_2_0x80010A130301143F;
+			    GATE_DELAY_ADDR_3 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP2_P1_3_0x80010E130301143F;
+			    GATE_DELAY_ADDR_4 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP2_P1_4_0x800112130301143F;
+
+			}
+			else if ( rank_group == 3 )
+			{
+			    DQSCLK_RD_PHASE_ADDR_0 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR3_P1_0_0x800103090301143F;
+			    DQSCLK_RD_PHASE_ADDR_1 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR3_P1_1_0x800107090301143F;
+			    DQSCLK_RD_PHASE_ADDR_2 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR3_P1_2_0x80010B090301143F;
+			    DQSCLK_RD_PHASE_ADDR_3 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR3_P1_3_0x80010F090301143F;
+			    DQSCLK_RD_PHASE_ADDR_4 = DPHY01_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR3_P1_4_0x800113090301143F;
+			    GATE_DELAY_ADDR_0 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP3_P1_0_0x800103130301143F;
+			    GATE_DELAY_ADDR_1 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP3_P1_1_0x800107130301143F;
+			    GATE_DELAY_ADDR_2 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP3_P1_2_0x80010B130301143F;
+			    GATE_DELAY_ADDR_3 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP3_P1_3_0x80010F130301143F;
+			    GATE_DELAY_ADDR_4 = DPHY01_DDRPHY_DP18_GATE_DELAY_RP3_P1_4_0x800113130301143F;
+
+			}
+		    }
+		
+		    //BLOCK 0
+		    rc = fapiGetScom(i_target, DQSCLK_RD_PHASE_ADDR_0, data_buffer_64);
+		    if (rc) return rc;
+		    rc_num = rc_num | data_buffer_64.insertFromRight(&l_lowest_value_u8[rank_group][0][0][0], 48, 2);
+		    rc_num = rc_num | data_buffer_64.insertFromRight(&l_lowest_value_u8[rank_group][0][0][1], 52, 2);
+		    rc_num = rc_num | data_buffer_64.insertFromRight(&l_lowest_value_u8[rank_group][0][1][0], 56, 2);
+		    rc_num = rc_num | data_buffer_64.insertFromRight(&l_lowest_value_u8[rank_group][0][1][1], 60, 2);
+		    rc = fapiPutScom(i_target, DQSCLK_RD_PHASE_ADDR_0, data_buffer_64);
+		    if (rc) return rc;
+
+		    rc = fapiGetScom(i_target, GATE_DELAY_ADDR_0, data_buffer_64);
+		    if (rc) return rc;
+		    rc_num = rc_num | data_buffer_64.insertFromRight(&l_gate_delay_value_u8[rank_group][0][0][0], 49, 3);
+		    rc_num = rc_num | data_buffer_64.insertFromRight(&l_gate_delay_value_u8[rank_group][0][0][1], 53, 3);
+		    rc_num = rc_num | data_buffer_64.insertFromRight(&l_gate_delay_value_u8[rank_group][0][1][0], 57, 3);
+		    rc_num = rc_num | data_buffer_64.insertFromRight(&l_gate_delay_value_u8[rank_group][0][1][1], 61, 3);
+		    rc = fapiPutScom(i_target, GATE_DELAY_ADDR_0, data_buffer_64);
+		    if (rc) return rc;
+
+		    //BLOCK 1
+		    rc = fapiGetScom(i_target, DQSCLK_RD_PHASE_ADDR_1, data_buffer_64);
+		    if (rc) return rc;
+		    rc_num = rc_num | data_buffer_64.insertFromRight(&l_lowest_value_u8[rank_group][1][0][0], 48, 2);
+		    rc_num = rc_num | data_buffer_64.insertFromRight(&l_lowest_value_u8[rank_group][1][0][1], 52, 2);
+		    rc_num = rc_num | data_buffer_64.insertFromRight(&l_lowest_value_u8[rank_group][1][1][0], 56, 2);
+		    rc_num = rc_num | data_buffer_64.insertFromRight(&l_lowest_value_u8[rank_group][1][1][1], 60, 2);
+		    rc = fapiPutScom(i_target, DQSCLK_RD_PHASE_ADDR_1, data_buffer_64);
+		    if (rc) return rc;
+
+		    rc = fapiGetScom(i_target, GATE_DELAY_ADDR_1, data_buffer_64);
+		    if (rc) return rc;
+		    rc_num = rc_num | data_buffer_64.insertFromRight(&l_gate_delay_value_u8[rank_group][1][0][0], 49, 3);
+		    rc_num = rc_num | data_buffer_64.insertFromRight(&l_gate_delay_value_u8[rank_group][1][0][1], 53, 3);
+		    rc_num = rc_num | data_buffer_64.insertFromRight(&l_gate_delay_value_u8[rank_group][1][1][0], 57, 3);
+		    rc_num = rc_num | data_buffer_64.insertFromRight(&l_gate_delay_value_u8[rank_group][1][1][1], 61, 3);
+		    rc = fapiPutScom(i_target, GATE_DELAY_ADDR_1, data_buffer_64);
+		    if (rc) return rc;
+
+		    //BLOCK 2
+		    rc = fapiGetScom(i_target, DQSCLK_RD_PHASE_ADDR_2, data_buffer_64);
+		    if (rc) return rc;
+		    rc_num = rc_num | data_buffer_64.insertFromRight(&l_lowest_value_u8[rank_group][2][0][0], 48, 2);
+		    rc_num = rc_num | data_buffer_64.insertFromRight(&l_lowest_value_u8[rank_group][2][0][1], 52, 2);
+		    rc_num = rc_num | data_buffer_64.insertFromRight(&l_lowest_value_u8[rank_group][2][1][0], 56, 2);
+		    rc_num = rc_num | data_buffer_64.insertFromRight(&l_lowest_value_u8[rank_group][2][1][1], 60, 2);
+		    rc = fapiPutScom(i_target, DQSCLK_RD_PHASE_ADDR_2, data_buffer_64);
+		    if (rc) return rc;
+
+		    rc = fapiGetScom(i_target, GATE_DELAY_ADDR_2, data_buffer_64);
+		    if (rc) return rc;
+		    rc_num = rc_num | data_buffer_64.insertFromRight(&l_gate_delay_value_u8[rank_group][2][0][0], 49, 3);
+		    rc_num = rc_num | data_buffer_64.insertFromRight(&l_gate_delay_value_u8[rank_group][2][0][1], 53, 3);
+		    rc_num = rc_num | data_buffer_64.insertFromRight(&l_gate_delay_value_u8[rank_group][2][1][0], 57, 3);
+		    rc_num = rc_num | data_buffer_64.insertFromRight(&l_gate_delay_value_u8[rank_group][2][1][1], 61, 3);
+		    rc = fapiPutScom(i_target, GATE_DELAY_ADDR_2, data_buffer_64);
+		    if (rc) return rc;
+
+		    //BLOCK 3
+		    rc = fapiGetScom(i_target, DQSCLK_RD_PHASE_ADDR_3, data_buffer_64);
+		    if (rc) return rc;
+		    rc_num = rc_num | data_buffer_64.insertFromRight(&l_lowest_value_u8[rank_group][3][0][0], 48, 2);
+		    rc_num = rc_num | data_buffer_64.insertFromRight(&l_lowest_value_u8[rank_group][3][0][1], 52, 2);
+		    rc_num = rc_num | data_buffer_64.insertFromRight(&l_lowest_value_u8[rank_group][3][1][0], 56, 2);
+		    rc_num = rc_num | data_buffer_64.insertFromRight(&l_lowest_value_u8[rank_group][3][1][1], 60, 2);
+		    rc = fapiPutScom(i_target, DQSCLK_RD_PHASE_ADDR_3, data_buffer_64);
+		    if (rc) return rc;
+
+		    rc = fapiGetScom(i_target, GATE_DELAY_ADDR_3, data_buffer_64);
+		    if (rc) return rc;
+		    rc_num = rc_num | data_buffer_64.insertFromRight(&l_gate_delay_value_u8[rank_group][3][0][0], 49, 3);
+		    rc_num = rc_num | data_buffer_64.insertFromRight(&l_gate_delay_value_u8[rank_group][3][0][1], 53, 3);
+		    rc_num = rc_num | data_buffer_64.insertFromRight(&l_gate_delay_value_u8[rank_group][3][1][0], 57, 3);
+		    rc_num = rc_num | data_buffer_64.insertFromRight(&l_gate_delay_value_u8[rank_group][3][1][1], 61, 3);
+		    rc = fapiPutScom(i_target, GATE_DELAY_ADDR_3, data_buffer_64);
+		    if (rc) return rc;
+
+		    //Block 4
+		    rc = fapiGetScom(i_target, DQSCLK_RD_PHASE_ADDR_4, data_buffer_64);
+		    if (rc) return rc;
+		    rc_num = rc_num | data_buffer_64.insertFromRight(&l_lowest_value_u8[rank_group][4][0][0], 48, 2);
+		    rc_num = rc_num | data_buffer_64.insertFromRight(&l_lowest_value_u8[rank_group][4][0][1], 52, 2);
+		    rc_num = rc_num | data_buffer_64.insertFromRight(&l_lowest_value_u8[rank_group][4][1][0], 56, 2);
+		    rc_num = rc_num | data_buffer_64.insertFromRight(&l_lowest_value_u8[rank_group][4][1][1], 60, 2);
+		    rc = fapiPutScom(i_target, DQSCLK_RD_PHASE_ADDR_4, data_buffer_64);
+		    if (rc) return rc;
+
+		    rc = fapiGetScom(i_target, GATE_DELAY_ADDR_4, data_buffer_64);
+		    if (rc) return rc;
+		    rc_num = rc_num | data_buffer_64.insertFromRight(&l_gate_delay_value_u8[rank_group][4][0][0], 49, 3);
+		    rc_num = rc_num | data_buffer_64.insertFromRight(&l_gate_delay_value_u8[rank_group][4][0][1], 53, 3);
+		    rc_num = rc_num | data_buffer_64.insertFromRight(&l_gate_delay_value_u8[rank_group][4][1][0], 57, 3);
+		    rc_num = rc_num | data_buffer_64.insertFromRight(&l_gate_delay_value_u8[rank_group][4][1][1], 61, 3);
+		    rc = fapiPutScom(i_target, GATE_DELAY_ADDR_4, data_buffer_64);
+		    if (rc) return rc;
+
+		}
+	}
+    }
+
+    return rc;
+}
+
+
 ReturnCode mss_rtt_nom_rtt_wr_swap(
             Target& i_target,
+            uint8_t i_mbaPosition,
             uint32_t i_port_number,
             uint8_t i_rank,
 	    uint32_t i_rank_pair_group,
@@ -1675,7 +2342,7 @@ ReturnCode mss_rtt_nom_rtt_wr_swap(
     // MRS CMD to CMD spacing = 12 cycles
     rc_num = rc_num | num_idles_16.insertFromRight((uint32_t) 12, 0, 16);
 
-    FAPI_INF( "Editing RTT_NOM during wr_lvl for PORT%d RP%d", i_port_number, i_rank_pair_group);
+    FAPI_INF( "Editing RTT_NOM during wr_lvl for %s PORT: %d RP: %d", i_target.toEcmdString(), i_port_number, i_rank_pair_group);
 
     //MRS1
     // Get contents of MRS 1 Shadow Reg

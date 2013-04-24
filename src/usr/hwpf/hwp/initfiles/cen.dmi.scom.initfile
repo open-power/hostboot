@@ -1,4 +1,4 @@
-#-- $Id: cen.dmi.scom.initfile,v 1.11 2013/03/20 18:11:01 jgrell Exp $ 
+#-- $Id: cen.dmi.scom.initfile,v 1.12 2013/04/18 19:20:14 jgrell Exp $ 
 
 
 ####################################################################
@@ -7,13 +7,14 @@
 ##      Based on SETUP_ID_MODE DMI_BUS_TR_HW
 ##      from ../../logic/mesa_sim/fusion/run/IODNC_MB_TOP.IODNC_MB_TOP.figdb
 ##
-##   Created on Wed Mar 20 11:03:01 CDT 2013, by jgrell
+##   Created on Mon Apr 15 15:04:16 CDT 2013, by jgrell
 ####################################################################
 
 ## -- CHANGE HISTORY:
  ## --------------------------------------------------------------------------------
  ## -- VersionID: |Author:  | Date:  | Comment:
  ## -- -----------|---------|--------|-------------------------------------------------
+ ## -- jgr13041800| jgr     |04-18-13| Added rx_max_ber_check_count setting to 0x03
  ## -- jgr13031300| jgr     |03-13-13| Added missing entries from rel 0128
  ## -- mbs13011802| mbs     |01-18-13| Added rx_fence to run_mode dial (HW236326)
  ## -- mbs13011000| mbs     |01-10-13| Added rx_prot_speed_slct and rx_c4_sel
@@ -64,6 +65,13 @@ include edi.io.define
                     define def_IS_VBU = SYS.ATTR_IS_SIMULATION == 1;
                 
 
+
+#RX.RXCTL.RX_CTL_REGS.RX_BER_CHK_PG
+scom 0x800AF0000201043F { 
+	bits, scom_data, expr;
+     rx_max_ber_check_count,  0b00000011   , def_IS_HW;
+     rx_max_ber_check_count,  0b00000000  , def_IS_VBU;
+}
 
 #RX.RXCTL.RX_CTL_REGS.RX_DFE_CONFIG_PP
 scom 0x800B78000201043F { 

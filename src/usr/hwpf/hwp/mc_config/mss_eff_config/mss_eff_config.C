@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_eff_config.C,v 1.21 2013/03/22 21:57:25 asaetow Exp $
+// $Id: mss_eff_config.C,v 1.24 2013/04/22 14:17:45 asaetow Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/
 //          centaur/working/procedures/ipl/fapi/mss_eff_config.C,v $
 //------------------------------------------------------------------------------
@@ -44,12 +44,15 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
-//   1.22  |          |         | 
-//   1.21  | asaetow  |22-Mar-13| Changed ATTR_EFF_ZQCAL_INTERVAL and ATTR_EFF_MEMCAL_INTERVAL back to enable.
+//   1.25  |          |         | 
+//   1.24  | asaetow  |19-APR-13| Fixed X4 CDIMM spare for RCB to use LOW_NIBBLE only.
+//   1.23  | asaetow  |17-APR-13| Added 10% margin to TRFI per defect HW248225
+//   1.22  | asaetow  |11-APR-13| Changed eff_dram_tdqs from 0 back to 1 for X8 ISDIMMs. 
+//   1.21  | asaetow  |22-MAR-13| Changed ATTR_EFF_ZQCAL_INTERVAL and ATTR_EFF_MEMCAL_INTERVAL back to enable.
 //         |          |         | NOTE: Need mba_def.initfile v1.27 or newer
-//   1.20  | asaetow  |28-Feb-13| Changed temporary ATTR_EFF_ZQCAL_INTERVAL and ATTR_EFF_MEMCAL_INTERVAL to disable.
+//   1.20  | asaetow  |28-FEB-13| Changed temporary ATTR_EFF_ZQCAL_INTERVAL and ATTR_EFF_MEMCAL_INTERVAL to disable.
 //         |          |         | NOTE: Temporary until we get timeout error fixed.
-//   1.19  | sauchadh |26-Feb-13| Added MCBIST related attributes
+//   1.19  | sauchadh |26-FEB-13| Added MCBIST related attributes
 //   1.18  | asaetow  |12-FEB-13| Changed eff_dram_tdqs from 1 to 0.
 //   1.17  | asaetow  |30-JAN-13| Changed "ATTR_SPD_MODULE_TYPE_CDIMM is obsolete..." message from error to warning.
 //   1.16  | bellows  |24-JAN-13| Added in CUSTOM bit of SPD and CUSTOM Attr
@@ -1188,13 +1191,19 @@ fapi::ReturnCode mss_eff_config_setup_eff_atts(
             == fapi::ENUM_ATTR_SPD_DRAM_WIDTH_W4)
     {
         p_o_atts->eff_dram_width = fapi::ENUM_ATTR_EFF_DRAM_WIDTH_X4;
+        p_o_atts->eff_dram_tdqs = fapi::ENUM_ATTR_EFF_DRAM_TDQS_DISABLE;
     }
     else if (p_i_data->dram_width[0][0]
             == fapi::ENUM_ATTR_SPD_DRAM_WIDTH_W8)
     {
         p_o_atts->eff_dram_width = fapi::ENUM_ATTR_EFF_DRAM_WIDTH_X8;
         // NOTE: TDQS enable MR1(A11) is only avaliable for X8 in DDR3
-        p_o_atts->eff_dram_tdqs = 0;
+        // TDQS disabled for X8 DDR3 CDIMM, enable for ISDIMM
+        if ( p_o_atts->eff_custom_dimm == fapi::ENUM_ATTR_EFF_CUSTOM_DIMM_NO ) {
+           p_o_atts->eff_dram_tdqs = fapi::ENUM_ATTR_EFF_DRAM_TDQS_ENABLE;
+        } else {
+           p_o_atts->eff_dram_tdqs = fapi::ENUM_ATTR_EFF_DRAM_TDQS_DISABLE;
+        }
     }
     else if (p_i_data->dram_width[0][0]
             == fapi::ENUM_ATTR_SPD_DRAM_WIDTH_W16)
@@ -1541,6 +1550,8 @@ fapi::ReturnCode mss_eff_config_setup_eff_atts(
     // Calculate tRFI
     p_o_atts->eff_dram_trfi = (3900 *
             p_i_mss_eff_config_data->mss_freq) / 2000;
+    // Added 10% margin to TRFI per defect HW248225
+    p_o_atts->eff_dram_trfi = (p_o_atts->eff_dram_trfi * 9) / 10;
 
     // Assigning dependent values to attributes
     for (int l_cur_mba_port = 0; l_cur_mba_port <
@@ -1588,12 +1599,16 @@ fapi::ReturnCode mss_eff_config_setup_eff_atts(
                if (( p_o_atts->eff_dimm_type == fapi::ENUM_ATTR_EFF_DIMM_TYPE_CDIMM)
                     && ( l_cur_mba_rank < p_o_atts->eff_num_ranks_per_dimm[l_cur_mba_port][l_cur_mba_dimm] ))
                {
-                 p_o_atts->
-                  eff_dimm_spare[l_cur_mba_port][l_cur_mba_dimm][l_cur_mba_rank]
-                    = fapi::ENUM_ATTR_EFF_DIMM_SPARE_FULL_BYTE;
+                  // Added for CDIMM RC_B which uses x4 parts
+                  if ( p_o_atts->eff_dram_width == fapi::ENUM_ATTR_EFF_DRAM_WIDTH_X4 ) {
+                     p_o_atts->eff_dimm_spare[l_cur_mba_port][l_cur_mba_dimm][l_cur_mba_rank]
+                       = fapi::ENUM_ATTR_EFF_DIMM_SPARE_LOW_NIBBLE;
+                  } else {
+                     p_o_atts->eff_dimm_spare[l_cur_mba_port][l_cur_mba_dimm][l_cur_mba_rank]
+                       = fapi::ENUM_ATTR_EFF_DIMM_SPARE_FULL_BYTE;
+                  }
                } else {
-                 p_o_atts->
-                  eff_dimm_spare[l_cur_mba_port][l_cur_mba_dimm][l_cur_mba_rank] 
+                  p_o_atts->eff_dimm_spare[l_cur_mba_port][l_cur_mba_dimm][l_cur_mba_rank] 
                     = fapi::ENUM_ATTR_EFF_DIMM_SPARE_NO_SPARE;
                }  
             }

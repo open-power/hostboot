@@ -1,0 +1,46 @@
+#-- $Id: p8.cxa.scom.initfile,v 1.2 2013/04/08 13:50:19 jmcgill Exp $
+#-------------------------------------------------------------------------------
+#--
+#-- (C) Copyright International Business Machines Corp. 2011
+#-- All Rights Reserved -- Property of IBM
+#-- *** IBM Confidential ***
+#--
+#-- TITLE       : p8.cxa.scom.initfile
+#-- DESCRIPTION : Perform CAPP configuration
+#--
+#-- OWNER NAME  : Bill Daly             Email: billdaly@us.ibm.com
+#--
+#--------------------------------------------------------------------------------
+
+SyntaxVersion = 1
+
+#--------------------------------------------------------------------------------
+#-- Includes
+#--------------------------------------------------------------------------------
+
+#--------------------------------------------------------------------------------
+#-- Defines
+#--------------------------------------------------------------------------------
+
+#--------------------------------------------------------------------------------
+#-- SCOM initializations
+#--------------------------------------------------------------------------------
+
+
+#-- APC Master Config Register
+scom 0x02013019 {
+    bits  , scom_data,      expr;
+    4:7   , 0b0000,         (ATTR_CHIP_EC_FEATURE_CAPP_HANG_CONTROL_ON_SCOM != 0);   #-- HANG_POLL_SCALE
+}
+
+#-- CAPP Snoop Control Register
+scom 0x0201301B {
+    bits  ,  scom_data,    expr;
+    48:51 ,  0b0010,       (ATTR_CHIP_EC_FEATURE_CAPP_HANG_CONTROL_ON_SCOM != 0);    #-- CXA_SNP_DATA_HANG_POLL_SCALE
+}
+
+#-- CAPP Transport Control Register
+scom 0x0201301C {
+    bits  ,  scom_data;
+    15:18 ,  0b1000;   #-- TLBI_DATA_POLL_PULSE_DIV
+}

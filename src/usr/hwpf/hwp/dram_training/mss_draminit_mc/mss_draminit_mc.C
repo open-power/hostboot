@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_draminit_mc.C,v 1.35 2013/04/01 20:24:02 lapietra Exp $
+// $Id: mss_draminit_mc.C,v 1.36 2013/04/15 13:07:51 lapietra Exp $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
 // *! All Rights Reserved -- Property of IBM
@@ -44,6 +44,7 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
+//  1.36   | dcadiga  |03-APR-13| Fixed compile warning
 //  1.35   | dcadiga  |01-APR-13| Temp Fix For Parity Error on 32GB
 //  1.34   | dcadiga  |12-MAR-13| Added spare cke disable as step 0
 //  1.33   | dcadiga  |04-FEB-13| For some reason the main procedure call was commented out in the last commit... commenting it back in
@@ -192,7 +193,7 @@ ReturnCode mss_draminit_mc_cloned(Target& i_target)
     rc = fapiPutScom(i_target, MBS_FIR_REG_0x02011400, parity_tmp_data_buffer_64);
     if(rc)
     {
-       FAPI_ERR("---Error During Clear Parity Bit", uint32_t(rc), rc.getCreator());
+       FAPI_ERR("---Error During Clear Parity Bit rc = 0x%08X (creator = %d)---", uint32_t(rc), rc.getCreator());
        return rc;
     }
     

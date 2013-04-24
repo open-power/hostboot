@@ -87,7 +87,8 @@ hbicore_DATA_MODULES =  sample.if p8.dmi.scom.if cen.dmi.scom.if \
                         p8.abus.scom.if p8.xbus.scom.if p8.mcs.scom.if \
                         p8.as.scom.if p8.nx.scom.if p8.dmi.custom.scom.if \
                         cen.dmi.custom.scom.if p8.abus.custom.scom.if \
-                        p8.xbus.custom.scom.if p8.psi.scom.if p8.tpbridge.scom.if
+                        p8.xbus.custom.scom.if p8.psi.scom.if p8.tpbridge.scom.if \
+                        p8.cxa.scom.if
 
 hbicore_test_OBJECTS = ${hbicore_OBJECTS}
 hbicore_test_MODULES = ${hbicore_MODULES}

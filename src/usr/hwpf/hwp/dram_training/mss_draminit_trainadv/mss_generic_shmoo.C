@@ -21,7 +21,7 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-// $Id: mss_generic_shmoo.C,v 1.43 2013/04/11 15:06:18 bellows Exp $
+// $Id: mss_generic_shmoo.C,v 1.44 2013/04/22 17:03:34 sasethur Exp $
 // *!***************************************************************************
 // *! (C) Copyright International Business Machines Corp. 1997, 1998
 // *!           All Rights Reserved -- Property of IBM
@@ -40,6 +40,7 @@
 //------------------------------------------------------------------------------
 // Version:|Author: | Date:   | Comment:
 // --------|--------|---------|--------------------------------------------------
+//   1.44  |bellows |04/22/13 |  fixed fw comments  
 //   1.43  |bellows |04/11/13 |  quick fix for firmware delivery.  Uninitialized varialbles: i_mcbtest, i_mcbpatt 
 //   1.42  |abhijit |04/09/13 |  added shmoo param 
 //   1.40  |abhijit |03/22/13 |  Fixed boundary checks  
@@ -626,7 +627,7 @@ fapi::ReturnCode generic_shmoo::knob_update(const fapi::Target & i_target,bound_
 	
 	uint8_t l_p=0;
     uint16_t l_delay=0;
-    uint32_t __attribute__((unused)) l_max=0; //SW198827 
+    //uint32_t l_max=0;
 	uint16_t l_max_limit=500;
     uint8_t rank=0;
 	uint8_t l_rank=0;
@@ -744,7 +745,7 @@ fapi::ReturnCode generic_shmoo::knob_update(const fapi::Target & i_target,bound_
 		rc = mss_getrankpair(i_target,l_p,rank,&l_rp,valid_rank);if(rc) return rc;
 	 for (l_n=0; l_n<l_SCHMOO_NIBBLES;l_n++){
 	 
-	 l_max=SHMOO[scenario].MBA.P[l_p].S[rank].K.lb_regval[l_dq][l_rp];
+	 //l_max=SHMOO[scenario].MBA.P[l_p].S[rank].K.lb_regval[l_dq][l_rp];
 	 
 	 
 	 if(schmoo_error_map[l_p][rank][l_n]==0){
@@ -1150,12 +1151,12 @@ fapi::ReturnCode generic_shmoo::get_min_margin(const fapi::Target & i_target,uin
 {
 
 
-    uint8_t __attribute__((unused)) l_socket=0; //SW198827
-    
+	uint8_t __attribute__((unused)) l_socket=0; //SW198827
+
 	//uint32_t rc_num =0;
 	uint8_t l_pattern=0;
 	uint8_t l_testtype=0;
-	uint8_t l_rank=0;
+	//uint8_t l_rank=0;
     fapi::ReturnCode rc;
 	
 	uint64_t l_start =0x0000000000000000ull; 
@@ -1165,14 +1166,8 @@ fapi::ReturnCode generic_shmoo::get_min_margin(const fapi::Target & i_target,uin
 	mcbist_test_mem i_mcbtest = CENSHMOO; // bellows: initialize to this type
 	mcbist_data_gen i_mcbpatt = ABLE_FIVE; // bellows: initialize to this data type
     
-   if(l_rank<4)
-    {   
-	l_socket=0;
-    }
-    else
-    {
-	l_socket=1;
-    }	
+    
+	
     
      //send shmoo mode to vary the address range
    

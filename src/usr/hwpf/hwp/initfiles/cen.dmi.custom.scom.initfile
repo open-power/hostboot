@@ -1,8 +1,9 @@
-#-- $Id: cen.dmi.custom.scom.initfile,v 1.6 2013/03/15 21:21:27 thomsen Exp $
+#-- $Id: cen.dmi.custom.scom.initfile,v 1.7 2013/04/18 19:20:50 jgrell Exp $
 #-- CHANGE HISTORY:
 #--------------------------------------------------------------------------------
 #-- Version:|Author: | Date:  | Comment:
 #-- --------|--------|--------|--------------------------------------------------
+#--     1.7 |jgrell  |04/18/13|Added EC level control of the Recal DFE, DDC, and CTLE enable bits. ('0' when EC < 20)
 #--     1.6 |jgrell  |03/14/13|Added temporary masking of the GCR Buffer Parity Checkers in the GCR Master until the source of the error can be found. This ungates the lab.
 #--     1.5 |thomsen |03/07/13|Temporarily mask the GCR Buffer Parity Checker until the source of the error can be found. This ungates the lab.
 #--         |        |        |Fixed address typo on tx_clk_invert entry
@@ -372,6 +373,20 @@ rx_pb_fir_err_mask_gcr_buff2,    0b1;
 scom 0x02010403 {
 scom_data;
 0xC000000000000000;
+}
+
+#--**************************************************************************************************************
+#----------------------------------------------------------------------------------------------------------------
+# Recal 
+#----------------------------------------------------------------------------------------------------------------
+#--**************************************************************************************************************
+# HW235842
+
+scom 0x800.0b(rx_rc_step_cntl_pg)(rx_grp0)(lane_na).0x(cn_gcr_addr) {
+bits,                         	scom_data, 	expr;
+rx_rc_enable_dfe_h1_cal,      	0b0,       	ATTR_CHIP_EC_FEATURE_RECAL_DFE_ENABLE==0;
+rx_rc_enable_ddc,		0b0,		ATTR_CHIP_EC_FEATURE_RECAL_DDC_ENABLE==0;
+rx_rc_enable_ctle_cal,		0b0,		ATTR_CHIP_EC_FEATURE_RECAL_CTLE_ENABLE==0;
 }
 
 ############################################################################################
