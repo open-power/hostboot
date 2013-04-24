@@ -190,15 +190,16 @@ public:
      * Deconfigure actions and create a Deconfigure Record) and Deconfigure
      * Targets by association. Any errors deconfiguring targets are committed
      * and the function continues. The only errors returned are usage errors.
+     * By default, targets are NOT deconfigured if the system is at Runtime.
      *
      * @param[in] i_target   Reference to Target to deconfigure.
      * @param[in] i_errlPlid Error log PLID to store in Deconfigure Record.
-     *
+     * @param[in] i_evenAtRunTime Deconfigure even if at RunTime
      * @return errlHndl_t. Error log handle.
      */
     errlHndl_t deconfigureTarget(TARGETING::Target & i_target,
-                                 const uint32_t i_errlPlid);
-
+                                 const uint32_t i_errlPlid,
+                                 bool i_evenAtRunTime = false);
     /**
      * @brief Registers a Delayed Deconfigure
      *

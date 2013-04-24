@@ -274,13 +274,22 @@ errlHndl_t DeconfigGard::deconfigureTargetsFromGardRecordsForIpl(
 
 //******************************************************************************
 errlHndl_t DeconfigGard::deconfigureTarget(TARGETING::Target & i_target,
-                                           const uint32_t i_errlPlid)
+                                           const uint32_t i_errlPlid,
+                                           bool i_evenAtRunTime)
 {
     HWAS_INF("Usr Request: Deconfigure Target");
     errlHndl_t l_pErr = NULL;
 
     do
     {
+        // Do not deconfig Target if we're NOT being asked to force AND
+        //   the is System is at runtime
+        if (!i_evenAtRunTime && platSystemIsAtRuntime())
+        {
+            HWAS_INF("Skipping deconfigTarget - System at Runtime");
+            break;
+        }
+
         const uint8_t lDeconfigGardable =
                 i_target.getAttr<TARGETING::ATTR_DECONFIG_GARDABLE>();
         const uint8_t lPresent =

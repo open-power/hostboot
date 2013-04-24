@@ -119,6 +119,17 @@ errlHndl_t platReadIDEC(const TargetHandle_t &i_target)
 } // platReadIDEC
 
 //******************************************************************************
+// platSystemIsAtRuntime function
+// Description: This function will return false always because when Hostboot
+// is running then System cannot be at runtime
+//******************************************************************************
+bool platSystemIsAtRuntime()
+{
+    HWAS_INF("HostBoot is running so system is not at runtime.");
+    return false;
+}
+
+//******************************************************************************
 // platReadPartialGood function
 //******************************************************************************
 errlHndl_t platReadPartialGood(const TargetHandle_t &i_target,

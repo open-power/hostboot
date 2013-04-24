@@ -51,11 +51,19 @@ namespace HWAS
 {
 
 /**
- * @brief platform specific code to determine if the targets in the
+ * @brief platform specific code to determine whether the System is at runtime.
+ *
+ * @return bool  Return true if the System is at runtime; false if not.
+ */
+
+bool platSystemIsAtRuntime();
+
+/**
+ *@brief platform specific code to determine if the targets in the
  *  input list are present or not. If the target is NOT present,
  *  target should be erased from the list
  *
- * @param[in]  io_targets   TargetHandleList of targets to check for presence
+ *@param[in]  io_targets   TargetHandleList of targets to check for presence
  *
  * @return errlHndl_t       valid errlHndl_t handle if there was an error
  *                          NULL if no errors;
