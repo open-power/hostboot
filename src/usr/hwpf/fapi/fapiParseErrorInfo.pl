@@ -52,6 +52,8 @@
 #                  mjjones   01/09/13  Fix CFAM register capture
 #                  mjjones   03/14/13  Allow 64bit literals for SCOM reg capture
 #                  mjjones   03/22/13  Support Procedure Callouts
+#                  mjjones   04/25/13  Allow multiple register ffdc ids in a
+#                                      collectRegisterFfdc element
 #
 # End Change Log ******************************************************
 
@@ -338,7 +340,8 @@ foreach my $argnum (1 .. $#ARGV)
     #--------------------------------------------------------------------------
     my $errors = $xml->XMLin($infile, ForceArray =>
         ['hwpError', 'collectFfdc', 'ffdc', 'callout', 'deconfigure', 'gard',
-         'registerFfdc', 'collectRegisterFfdc', 'cfamRegister', 'scomRegister']);
+         'registerFfdc', 'collectRegisterFfdc', 'cfamRegister', 'scomRegister',
+         'id']);
 
     # Uncomment to get debug output of all errors
     #print "\nFile: ", $infile, "\n", Dumper($errors), "\n";
@@ -412,9 +415,9 @@ foreach my $argnum (1 .. $#ARGV)
             #------------------------------------------------------------------
             # Check that expected fields are present
             #------------------------------------------------------------------
-            if (! exists $collectRegisterFfdc->{id})
+            if (! exists $collectRegisterFfdc->{id}[0])
             {
-                print ("fapiParseErrorInfo.pl ERROR. id missing from collectRegisterFfdc\n");
+                print ("fapiParseErrorInfo.pl ERROR. id(s) missing from collectRegisterFfdc\n");
                 exit(1);
             }
 
@@ -424,8 +427,11 @@ foreach my $argnum (1 .. $#ARGV)
                 exit(1);
             }
 
-            print EIFILE "fapiCollectRegFfdc($collectRegisterFfdc->{target}, ";
-            print EIFILE "fapi::$collectRegisterFfdc->{id}, RC); ";
+            foreach my $id (@{$collectRegisterFfdc->{id}})
+            {
+                print EIFILE "fapiCollectRegFfdc($collectRegisterFfdc->{target}, ";
+                print EIFILE "fapi::$id, RC); ";
+            }
         }
 
         print EIFILE "\n";
@@ -589,21 +595,27 @@ foreach my $argnum (1 .. $#ARGV)
         #----------------------------------------------------------------------
         # Check that expected fields are present
         #----------------------------------------------------------------------
-        if (! exists $registerFfdc->{id})
+        if (! exists $registerFfdc->{id}[0])
         {
             print ("fapiParseErrorInfo.pl ERROR. id missing from registerFfdc\n");
+            exit(1);
+        }
+
+        if (scalar @{$registerFfdc->{id}} > 1)
+        {
+            print ("fapiParseErrorInfo.pl ERROR. multiple ids in registerFfdc\n");
             exit(1);
         }
 
         #----------------------------------------------------------------------
         # Set the FFDC enum value in a global hash
         #----------------------------------------------------------------------
-        setFfdcEnumValue($registerFfdc->{id});
+        setFfdcEnumValue($registerFfdc->{id}[0]);
 
         #----------------------------------------------------------------------
         # Generate code to capture the registers in fapiCollectRegFfdc.C
         #----------------------------------------------------------------------
-        print CRFILE "        case $registerFfdc->{id}:\n";
+        print CRFILE "        case $registerFfdc->{id}[0]:\n";
 
         # Look for CFAM Register addresses
         foreach my $cfamRegister (@{$registerFfdc->{cfamRegister}})
