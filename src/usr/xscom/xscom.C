@@ -42,6 +42,7 @@
 #include <xscom/xscomreasoncodes.H>
 #include "xscom.H"
 #include <assert.h>
+#include <errl/errludlogregister.H>
 
 //@fixme-RTC:67295 Only log the error once
 bool MULTICAST_ERROR_LOGGED_ONCE = false;
@@ -410,7 +411,6 @@ errlHndl_t getTargetVirtualAddress(TARGETING::Target* i_target,
                 // this case.
 
                 // Save the virtual address attribute.
-
                 i_target->setAttr<TARGETING::ATTR_XSCOM_VIRTUAL_ADDR>(reinterpret_cast<uint64_t>(o_virtAddr));
 
             }
@@ -419,6 +419,325 @@ errlHndl_t getTargetVirtualAddress(TARGETING::Target* i_target,
     } while (0);
 
     return l_err;
+}
+
+
+
+
+/**
+ * @brief Do the scom operation
+ *
+ * @param[in]   i_opType        Operation type, see DeviceFW::OperationType
+ *                              in driverif.H
+ * @param[in]   i_virtAddr      XSCOM area Virtual Address space
+ * @param[in]   i_xscomAddr    Xscom Address
+ * @param[in/out] io_buffer     Read: Pointer to output data storage
+ *                              Write: Pointer to input data storage
+ * @param[in/out] io_buflen     Input: size of io_buffer (in bytes)
+ *                              Output:
+ *                                  Read: Size of output data
+ *                                  Write: Size of data written
+ * @param[in/out]   io_hmer     Hmer Status - Need this returned to determine if
+ *                              a retry can occur based on the failure type.
+
+ * @return errlhndl_t
+ */
+errlHndl_t  xScomDoOp(DeviceFW::OperationType i_opType,
+                      uint64_t* i_virtAddr,
+                      uint64_t i_xscomAddr,
+                      void* io_buffer,
+                      size_t& io_buflen,
+                      HMER &io_hmer)
+{
+
+    // Build the XSCom address (relative to node 0, chip 0)
+    XSComP8Address l_mmioAddr(i_xscomAddr);
+
+    // Get the offset
+    uint64_t l_offset = l_mmioAddr.offset();
+
+    // Keep MMIO access until XSCOM successfully done or error
+    uint64_t l_data = 0;
+
+    errlHndl_t l_err = NULL;
+
+    do
+    {
+        // Reset status
+        resetHMERStatus();
+
+        // The dereferencing should handle Cache inhibited internally
+        // Use local variable and memcpy to avoid unaligned memory access
+        l_data = 0;
+
+        if (i_opType == DeviceFW::READ)
+        {
+            l_data = *(i_virtAddr + l_offset);
+            memcpy(io_buffer, &l_data, sizeof(l_data));
+        }
+        else
+        {
+            memcpy(&l_data, io_buffer, sizeof(l_data));
+            *(i_virtAddr + l_offset) = l_data;
+        }
+
+        // Check for error or done
+        io_hmer = waitForHMERStatus();
+
+    } while (io_hmer.mXSComStatus == HMER::XSCOM_BLOCKED);
+
+
+    TRACDCOMP(g_trac_xscom, "xscomPerformOp: OpType 0x%.16llX, Address 0x%llX, MMIO Address 0x%llX",
+              static_cast<uint64_t>(i_opType),
+              i_xscomAddr,
+              static_cast<uint64_t>(l_mmioAddr));
+    TRACDCOMP(g_trac_xscom, "xscomPerformOp: l_offset 0x%.16llX; VirtAddr %p; i_virtAddr+l_offset %p",
+              l_offset,
+              i_virtAddr,
+              i_virtAddr + l_offset);
+
+    if (i_opType == DeviceFW::READ)
+    {
+        TRACDCOMP(g_trac_xscom, "xscomPerformOp: Read data: %.16llx", l_data);
+    }
+    else
+    {
+        TRACDCOMP(g_trac_xscom, "xscomPerformOp: Write data: %.16llx", l_data);
+    }
+
+    do
+    {
+        // Handle error
+        if (io_hmer.mXSComStatus != HMER::XSCOM_GOOD)
+        {
+
+            //@fixme-RTC:67295 remove these hacks, make log UNRECOVERABLE again
+            if( ((i_xscomAddr & 0xFF000000) == 0x57000000)
+                && (io_hmer.mXSComStatus == HMER::XSCOM_BAD_ADDRESS) )
+            {
+                if( MULTICAST_ERROR_LOGGED_ONCE )
+                {
+                    // Ignore this due to a Simics issue - see SW193003
+                    TRACFCOMP(g_trac_xscom, ERR_MRK "Skipping XSCOM errorlog for multicast error for addr=%llx",i_xscomAddr );
+                    io_buflen = XSCOM_BUFFER_SIZE;
+                    // break out as if success and do not create an error
+                    break;
+                }
+                MULTICAST_ERROR_LOGGED_ONCE = true;
+            }
+
+            uint64_t l_hmerVal = io_hmer;
+            TRACFCOMP(g_trac_xscom,ERR_MRK "XSCOM status error HMER: %.16llx, XSComStatus %llx, Addr=%llx",l_hmerVal, io_hmer.mXSComStatus, i_xscomAddr );
+            /*@
+             * @errortype
+             * @moduleid     XSCOM_DO_OP
+             * @reasoncode   XSCOM_STATUS_ERR
+             * @userdata1    HMER value
+             * @userdata2    XSCom address
+             * @devdesc      XSCom access error
+             */
+            l_err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_INFORMATIONAL,
+                                            XSCOM_DO_OP,
+                                            XSCOM_STATUS_ERR,
+                                            io_hmer,
+                                            l_mmioAddr);
+
+        }
+    }
+    while (0);
+
+    return l_err;
+
+}
+
+/**
+ * @brief Get the Virtual Address of the XSCOM space for the processor
+ *  associated with this thread (the source chip)
+ *
+ * @return uint64_t* virtualAddress
+ */
+uint64_t* getCpuIdVirtualAddress()
+{
+    uint64_t* o_virtAddr = 0;
+
+    // Get the CPU core this thread is running on
+    uint32_t cpuid = task_getcpuid();
+
+    //NNNCCCPPPPTTT format fot the cpuid..
+    //  N = node, C = chip, P = proc, T = thread
+    uint32_t chipId = (cpuid & 0x0480)>>7;
+    uint32_t nodeId = (cpuid & 0x1C00)>>10;
+
+    XSComBase_t l_systemBaseAddr = MASTER_PROC_XSCOM_BASE_ADDR;
+
+    // Target's XSCOM Base address
+    XSComBase_t l_XSComBaseAddr = l_systemBaseAddr +
+      ( ( (g_xscomMaxChipsPerNode * nodeId) +
+          chipId ) * THIRTYTWO_GB);
+
+    // Target's virtual address
+    o_virtAddr = static_cast<uint64_t*>
+      (mmio_dev_map(reinterpret_cast<void*>(l_XSComBaseAddr),
+                    THIRTYTWO_GB));
+
+    TRACDCOMP(g_trac_xscom, "getCpuIdVirtualAddress: o_Virtual Address   =  0x%llX\n",
+              o_virtAddr);
+
+    return o_virtAddr;
+
+}
+
+/**
+ * @brief Reset the Scom engine regs
+ *
+ * @param[in]  i_target        Target of the CPU that the xscom is for
+ * @param[in]  i_virtAddr      virtual address of the CPU that the xscom is
+ *                             targeted for
+ *
+ * @return none
+ */
+void resetScomEngine(TARGETING::Target* i_target,
+                           uint64_t* i_virtAddr)
+{
+    errlHndl_t l_err = NULL;
+    HMER l_hmer;
+    uint64_t io_buffer = 0;
+    size_t io_buflen = XSCOM_BUFFER_SIZE;
+    uint64_t* l_virtAddr = 0;
+
+    // xscom registers that need to be set.
+    uint32_t XscomAddr[3] = {0x0202000F,
+                             0x02020007,
+                             0x02020009};
+
+    TRACFCOMP(g_trac_xscom,"XSCOM RESET INTIATED");
+
+    // Loop through the registers you want to write to 0
+    for (int i = 0; i<3; i++)
+    {
+        // First address we need to read is for the Cpu that this thread is
+        // running on.  Need to find the virtAddr for that CPU.
+        if (i==0)
+        {
+            l_virtAddr =  getCpuIdVirtualAddress();
+        }
+        // The rest are xscoms are to the target cpu.
+        else
+        {
+            l_virtAddr = i_virtAddr;
+        }
+
+        //*********************************************************
+        // Write SCOM ADDR To reset the XSCOM ENGINE
+        //*********************************************************
+        l_err = xScomDoOp(DeviceFW::WRITE,
+                          l_virtAddr,
+                          XscomAddr[i],
+                          &io_buffer,
+                          io_buflen,
+                          l_hmer);
+
+
+        // If not successful
+        if (l_err)
+        {
+            // Delete thie errorlog as this is in the errorpath already.
+            delete l_err;
+
+            TRACFCOMP(g_trac_xscom,ERR_MRK "XSCOM RESET FAILED: XscomAddr = %.16llx, VAddr=%llx",XscomAddr[i], l_virtAddr );
+        }
+
+        // unmap the device now that we are done with the scom to that area.
+        if (i==0)
+        {
+            mmio_dev_unmap(reinterpret_cast<void*>(l_virtAddr));
+        }
+    }
+
+    return;
+}
+
+/**
+ * @brief Collect XSCOM FFDC data and add to the originating xscom failing
+ *    errorlog.
+ *
+ * @param[in]  i_target        XSCom target
+ * @param[in]  i_virtAddr      Target's virtual address
+ * @param[in/out] io_errl      Originating errorlog that we will add FFDC data
+ *                             to
+ * @return none
+ */
+void collectXscomFFDC(TARGETING::Target* i_target,
+                            uint64_t* i_virtAddr,
+                            errlHndl_t& io_errl)
+{
+    errlHndl_t l_err = NULL;
+    HMER l_hmer;
+    uint64_t io_buffer = 0;
+    size_t io_buflen = XSCOM_BUFFER_SIZE;
+    uint64_t* l_virtAddr = 0;
+
+    uint32_t XscomAddr[4] = {0x0202000F,
+                             0x02020004,
+                             0x02020007,
+                             0x02020009};
+
+
+    TRACFCOMP(g_trac_xscom,"XSCOM COLLECT FFDC STARTED");
+
+    // Loop through the addresses you want to collect.
+    for (int i = 0; i<4; i++)
+    {
+
+        // If collecting first address, need to collect from Source Chip
+        if (i==0)
+        {
+            l_virtAddr =  getCpuIdVirtualAddress();
+        }
+        else
+        {
+            l_virtAddr = i_virtAddr;
+        }
+
+        //*********************************************************
+        // READ SCOM ADDR
+        //*********************************************************
+
+        l_err = xScomDoOp(DeviceFW::READ,
+                          l_virtAddr,
+                          XscomAddr[i],
+                          &io_buffer,
+                          io_buflen,
+                          l_hmer);
+
+        // Always want to collect the Register FFDC.  Will append to the
+        // errorlog passed in by the caller and if the call got an error will
+        // append to that as well.
+
+        // Collect the data from the read
+        ERRORLOG::ErrlUserDetailsLogRegister l_logReg(i_target);
+
+        l_logReg.addDataBuffer(&io_buffer, sizeof(io_buffer),
+                               DEVICE_XSCOM_ADDRESS(XscomAddr[i]));
+
+
+        // If not successful
+        if (l_err)
+        {
+            delete l_err;
+
+            TRACFCOMP(g_trac_xscom,ERR_MRK "XSCOM Collect FFDC FAILED: XscomAddr = %.16llx, VAddr=%llx",XscomAddr[i], l_virtAddr);
+        }
+        // only add the Register data to the originating errorlog if successfull
+        else
+        {
+            // Add the register FFDC to the errorlog passed in. DO we do this
+            // all the time?  And can we log to more than one errorlog?
+            l_logReg.addToLog(io_errl);
+        }
+    }
+
+    return;
 }
 
 
@@ -443,7 +762,7 @@ errlHndl_t xscomPerformOp(DeviceFW::OperationType i_opType,
     {
         // XSCOM operation sanity check
         l_err = xscomOpSanityCheck(i_opType, i_target, io_buffer,
-                io_buflen, i_args);
+                                   io_buflen, i_args);
         if (l_err)
         {
             break;
@@ -471,105 +790,29 @@ errlHndl_t xscomPerformOp(DeviceFW::OperationType i_opType,
         l_XSComMutex = mmio_xscom_mutex();
         mutex_lock(l_XSComMutex);
 
-        // Build the XSCom address (relative to node 0, chip 0)
-        XSComP8Address l_mmioAddr(l_addr);
+        // this function will return an errorlog if bad status is detected on
+        // the read or write.
+        l_err = xScomDoOp(i_opType,
+                          l_virtAddr,
+                          l_addr,
+                          io_buffer,
+                          io_buflen,
+                          l_hmer);
 
-        // Get the offset
-        uint64_t l_offset = l_mmioAddr.offset();
-
-        // Keep MMIO access until XSCOM successfully done or error
-        uint64_t l_data = 0;
-        do
+        // If we got a scom error.
+        if (l_err)
         {
-            // Reset status
-            resetHMERStatus();
+            // Call XscomCollectFFDC..
+            collectXscomFFDC(i_target,
+                             l_virtAddr,
+                             l_err);
 
-            // The dereferencing should handle Cache inhibited internally
-            // Use local variable and memcpy to avoid unaligned memory access
-            l_data = 0;
+            // reset the scomEngine.
+            resetScomEngine(i_target,
+                            l_virtAddr);
 
-            if (i_opType == DeviceFW::READ)
-            {
-
-                 l_data = *(l_virtAddr + l_offset);
-
-                 memcpy(io_buffer, &l_data, sizeof(l_data));
-            }
-            else
-            {
-
-                memcpy(&l_data, io_buffer, sizeof(l_data));
-                *(l_virtAddr + l_offset) = l_data;
-            }
-
-            // Check for error or done
-            l_hmer = waitForHMERStatus();
-
-        } while (l_hmer.mXSComStatus == HMER::XSCOM_BLOCKED);
-
-        // Unlock
-        mutex_unlock(l_XSComMutex);
-
-        // Done, un-pin
-        task_affinity_unpin();
-
-        TRACDCOMP(g_trac_xscom, "xscomPerformOp: OpType 0x%.16llX, Address 0x%llX, MMIO Address 0x%llX",
-                       static_cast<uint64_t>(i_opType),
-                       l_addr,
-                       static_cast<uint64_t>(l_mmioAddr));
-        TRACDCOMP(g_trac_xscom, "xscomPerformOp: l_offset 0x%.16llX; VirtAddr %p; l_virtAddr+l_offset %p",
-                       l_offset,
-                       l_virtAddr,
-                       l_virtAddr + l_offset);
-
-        if (i_opType == DeviceFW::READ)
-        {
-            TRACDCOMP(g_trac_xscom, "xscomPerformOp: Read data: %.16llx", l_data);
-        }
-        else
-        {
-            TRACDCOMP(g_trac_xscom, "xscomPerformOp: Write data: %.16llx", l_data);
-        }
-
-        // Handle error
-        if (l_hmer.mXSComStatus != HMER::XSCOM_GOOD)
-        {
-            //@fixme-RTC:67295 remove these hacks, make log UNRECOVERABLE again            
-            if( ((l_addr & 0xFF000000) == 0x57000000)
-                && (l_hmer.mXSComStatus == HMER::XSCOM_BAD_ADDRESS) )
-            {
-                if( MULTICAST_ERROR_LOGGED_ONCE )
-                {
-                    // Ignore this due to a Simics issue - see SW193003
-                    TRACFCOMP(g_trac_xscom,
-                              ERR_MRK "Skipping XSCOM errorlog for multicast error for addr=%llx",
-                              l_addr );
-                    io_buflen = XSCOM_BUFFER_SIZE;
-                    break;
-                }
-                MULTICAST_ERROR_LOGGED_ONCE = true;
-            }
-
-            uint64_t l_hmerVal = l_hmer;
-            TRACFCOMP(g_trac_xscom,
-                      ERR_MRK "XSCOM status error HMER: %.16llx, XSComStatus %llx, Addr=%llx",
-                      l_hmerVal, l_hmer.mXSComStatus, l_addr );
-            /*@
-             * @errortype
-             * @moduleid     XSCOM_PERFORM_OP
-             * @reasoncode   XSCOM_STATUS_ERR
-             * @userdata1    HMER value
-             * @userdata2    XSCom address
-             * @devdesc      XSCom access error
-             */
-            l_err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_INFORMATIONAL,
-                                            XSCOM_PERFORM_OP,
-                                            XSCOM_STATUS_ERR,
-                                            l_hmer,
-                                            l_mmioAddr);
-            
-
-            // @todo - Collect more FFDC: HMER value, target ID, other registers?
+            // Add traces to errorlog..
+            l_err->collectTrace("XSCOM",1024);
 
             // Retry
             if (l_retryCtr <= MAX_XSCOM_RETRY)
@@ -592,6 +835,12 @@ errlHndl_t xscomPerformOp(DeviceFW::OperationType i_opType,
             // with all other device drivers
             io_buflen = XSCOM_BUFFER_SIZE;
         }
+
+        // Unlock
+        mutex_unlock(l_XSComMutex);
+
+        // Done, un-pin
+        task_affinity_unpin();
 
     } while (l_retry == true); // End retry loop
 

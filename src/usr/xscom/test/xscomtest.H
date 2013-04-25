@@ -179,7 +179,7 @@ public:
             TS_TRACE("testXscom1 runs successfully!");
         }
         return;
-    }
+  }
 
 
     /**
@@ -305,6 +305,47 @@ public:
         {
             TS_TRACE("testXscom2 runs successfully!");
         }
+        return;
+    }
+
+
+    //TODO: RTC34591 - Add testcase that talks to the non master proc.
+
+    /**
+     * @brief XSCOM test #3
+     *        read to an invalid address to force error path
+     */
+    void testXscom3(void)
+    {
+
+        TARGETING::TargetService& l_targetService = TARGETING::targetService();
+        TARGETING::Target* l_testTarget = NULL;
+        l_targetService.masterProcChipTargetHandle( l_testTarget );
+        assert(l_testTarget != NULL);
+        errlHndl_t l_err = NULL;
+
+        size_t l_size = sizeof(uint64_t);
+
+
+        // Perform XSComOM read
+        uint64_t l_readData = 0;
+        l_err = deviceRead(l_testTarget,
+                           &l_readData,
+                           l_size,
+                           DEVICE_SCOM_ADDRESS(0x01001111));
+        if (l_err)
+        {
+
+            TS_TRACE("testXscom3: XSCom read fails as expected: invalid addr");
+            errlCommit(l_err,XSCOM_COMP_ID);
+            TS_TRACE("testXscom3 runs successfully!");
+        }
+        else
+        {
+            TS_FAIL("testXscom3: XSCom read did not fail with bad address");
+        }
+
+
         return;
     }
 };
