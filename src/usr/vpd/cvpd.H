@@ -64,6 +64,7 @@ namespace CVPD
         { VEIR, "VEIR" },
         { VER0, "VER0" },  //Not currently used, but keep support
         { MER0, "MER0" },
+        { VSPD, "VSPD" },
         // -------------------------------------------------------------------
         // DO NOT USE!!  This is for test purposes ONLY!
         { CVPD_TEST_RECORD, "TEST" },
@@ -84,6 +85,13 @@ namespace CVPD
         // -------------------------------------------------------------------
         { pdI, "#I" },
         { PF,  "PF" },
+        { MT,  "MT" },
+        { MR,  "MR" },
+        { pdA, "#A" },
+        { EL,  "EL" },
+        { LM,  "LM" },
+        { MW,  "MW" },
+        { MV,  "MV" },
         // -------------------------------------------------------------------
         // DO NOT USE!!  This is for test purposes ONLY!
         { CVPD_TEST_KEYWORD, "XX" },

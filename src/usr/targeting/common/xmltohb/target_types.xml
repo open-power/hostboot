@@ -838,6 +838,9 @@
     <attribute><id>MSS_SLEW_RATE_DATA</id></attribute>
     <attribute><id>MSS_SLEW_RATE_ADR</id></attribute>
     <attribute><id>MSS_ALLOW_SINGLE_PORT</id></attribute>
+<!-- TODO RTC 69935. These phase rotator attributes need to come from CDIMM VPD
+     For now, they are setup by the mss_eff_config_termination HWP.
+     Remove these when valid vpd is on the CDIMMs  -->
     <attribute><id>EFF_CEN_PHASE_ROT_M0_CLK_P0</id></attribute>
     <attribute><id>EFF_CEN_PHASE_ROT_M0_CLK_P1</id></attribute>
     <attribute><id>EFF_CEN_PHASE_ROT_M1_CLK_P0</id></attribute>

@@ -58,6 +58,7 @@ fapi::ReturnCode MBvpdRecordXlate(const fapi::MBvpdRecord i_fapiRecord,
         CVPD::VEIR,
         CVPD::VER0,
         CVPD::MER0,
+        CVPD::VSPD,
     };
     const uint8_t NUM_MBVPD_RECORDS =
         sizeof(mbvpdFapiRecordToHbRecord)/sizeof(mbvpdFapiRecordToHbRecord[0]);
@@ -108,6 +109,14 @@ fapi::ReturnCode MBvpdKeywordXlate(const fapi::MBvpdKeyword i_fapiKeyword,
         mbvpdFapiKeywordToHbKeyword[] =
     {
         CVPD::pdI,
+        CVPD::PF,
+        CVPD::MT,
+        CVPD::MR,
+        CVPD::pdA,
+        CVPD::EL,
+        CVPD::LM,
+        CVPD::MW,
+        CVPD::MV,
     };
     const uint8_t NUM_MBVPD_KEYWORDS =
      sizeof(mbvpdFapiKeywordToHbKeyword)/sizeof(mbvpdFapiKeywordToHbKeyword[0]);

@@ -64,6 +64,14 @@ cvpdTestData cvpdData[] =
 {
     { CVPD::VEIR, CVPD::pdI },
     { CVPD::MER0, CVPD::pdI },
+    { CVPD::VSPD, CVPD::pdI },
+    { CVPD::VSPD, CVPD::MT },
+    { CVPD::VSPD, CVPD::MR },
+    { CVPD::VSPD, CVPD::pdA },
+    { CVPD::VSPD, CVPD::EL },
+    { CVPD::VSPD, CVPD::LM },
+    { CVPD::VSPD, CVPD::MW },
+    { CVPD::VSPD, CVPD::MV },
 
 };
 

@@ -41,6 +41,7 @@
 #include <vpd/spdenums.H>
 #include <devicefw/driverif.H>
 #include <hwpf/hwp/mvpd_accessors/getMvpdExL2SingleMemberEnable.H>
+#include <hwpf/hwp/mvpd_accessors/getMBvpdPhaseRotatorData.H>
 
 // The following file checks at compile time that all HWPF attributes are
 // handled by Hostboot. This is done to ensure that the HTML file listing
@@ -1202,6 +1203,17 @@ fapi::ReturnCode fapiPlatGetSingleMemberEnableAttr(
     // Call a VPD Accessor HWP to get the data
     fapi::ReturnCode l_rc;
     FAPI_EXEC_HWP(l_rc, getMvpdExL2SingleMemberEnable, *i_pTarget, o_val);
+    return l_rc;
+}
+
+fapi::ReturnCode fapiPlatGetPhaseRotatorData (
+             const fapi::Target * i_pTarget,
+             const fapi::MBvpdPhaseRotatorData i_attr,
+             uint8_t    (&o_val) [2] )
+{
+    // Call a VPD Accessor HWP to get the data
+    fapi::ReturnCode l_rc;
+    FAPI_EXEC_HWP(l_rc, getMBvpdPhaseRotatorData, *i_pTarget, i_attr, o_val);
     return l_rc;
 }
 

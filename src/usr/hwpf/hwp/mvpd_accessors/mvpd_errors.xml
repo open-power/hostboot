@@ -20,23 +20,23 @@
 <!-- Origin: 30                                                             -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
-<!-- $Id: mvpd_errors.xml,v 1.3 2013/04/10 22:02:54 mjjones Exp $ -->
+<!-- $Id: mvpd_errors.xml,v 1.4 2013/04/29 16:06:37 whs Exp $ -->
 <hwpErrors>
-  <!-- *********************************************************************** -->
+  <!-- ********************************************************************* -->
   <hwpError>
     <rc>RC_REPAIR_RING_INVALID_RINGBUF_PTR</rc>
     <description>
         Invalid input parameter:  pointer to ringbuffer was NULL
     </description>
   </hwpError>
-  <!-- *********************************************************************** -->
+  <!-- ********************************************************************* -->
   <hwpError>
     <rc>RC_REPAIR_RING_ALLOC_FAIL</rc>
     <description>
         Failed to allocate buffer space for repair ring data
     </description>
   </hwpError>
-  <!-- *********************************************************************** -->
+  <!-- ********************************************************************* -->
   <hwpError>
     <rc>RC_REPAIR_RING_INVALID_MAGIC</rc>
     <description>
@@ -44,14 +44,14 @@
     </description>
     <ffdc>MAGIC</ffdc>
   </hwpError>
-  <!-- *********************************************************************** -->
+  <!-- ********************************************************************* -->
   <hwpError>
     <rc>RC_REPAIR_RING_INVALID_SIZE</rc>
     <description>
-        Invalid input parameter:  size of buffer was not big enough to copy repair ring data
+        Invalid input parameter: buffer too small to copy repair ring data
     </description>
   </hwpError>
-  <!-- *********************************************************************** -->
+  <!-- ********************************************************************* -->
   <hwpError>
     <rc>RC_REPAIR_RING_NOT_FOUND</rc>
     <description>
@@ -60,26 +60,33 @@
     <ffdc>RING_MODIFIER</ffdc>
     <ffdc>CHIPLET_ID</ffdc>
   </hwpError>
-  <!-- *********************************************************************** -->
+  <!-- ********************************************************************* -->
   <hwpError>
     <rc>RC_MVPD_RING_FUNC_INVALID_PARAMETER</rc>
     <description>
         An invalid parameter was passed to a mvpd ring function.
     </description>
   </hwpError>
-  <!-- *********************************************************************** -->
+  <!-- ********************************************************************* -->
   <hwpError>
     <rc>RC_MVPD_RING_FUNC_INSUFFICIENT_RECORD_SPACE</rc>
     <description>
         Insufficient room in the record to set the requested ring.
     </description>
   </hwpError>
-  <!-- *********************************************************************** -->
+  <!-- ********************************************************************* -->
   <hwpError>
     <rc>RC_MVPD_EX_L2_SINGLE_MEMBER_ENABLE_BAD_FIELD_SIZE</rc>
     <description>
         VPD Field size too small to contain the EX_L2_SINGLE_MEMBER_ENABLE data
     </description>
     <ffdc>FIELD_SIZE</ffdc>
+  </hwpError>
+  <!-- ********************************************************************* -->
+  <hwpError>
+    <rc>RC_MBVPD_INSUFFICIENT_MR_KEYWORD</rc>
+    <description>
+        MR keyword record returned is smaller than expected.
+    </description>
   </hwpError>
 </hwpErrors>

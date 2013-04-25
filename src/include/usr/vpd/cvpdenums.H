@@ -36,6 +36,7 @@ namespace CVPD
         VEIR        = CVPD_FIRST_RECORD,
         VER0        = 0x01,
         MER0        = 0x02,
+        VSPD        = 0x03,
         // Last Record
         CVPD_LAST_RECORD,
         CVPD_TEST_RECORD,   // Test purposes ONLY!
@@ -51,6 +52,13 @@ namespace CVPD
         CVPD_FIRST_KEYWORD      = 0x00,
         pdI          = CVPD_FIRST_KEYWORD,
         PF           = 0x01,
+        MT           = 0x02,
+        MR           = 0x03,
+        pdA          = 0x04,
+        EL           = 0x05,
+        LM           = 0x06,
+        MW           = 0x07,
+        MV           = 0x08,
         // Last Keyword
         CVPD_LAST_KEYWORD,
         CVPD_TEST_KEYWORD,  // Test purposes ONLY!

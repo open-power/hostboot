@@ -25,7 +25,11 @@
 #define __FAPIWINKLETEST_H
 
 // set to 1 for doing unit tests, set to 0 for production
-#define RTC51716 0
+#define UNITTESTfwt 0
+// TODO: RTC 69935 complete Phase Rotator Data
+// use the code in the 1 path until 69935 fully implements 59048.
+// Then the 1 path code can be removed and use the 0 path.
+#define RTC69935fwt 1
 /**
  *  @file fapiwinkletest.H
  *
@@ -42,6 +46,7 @@
 
 #include    <getMvpdRing.H>
 #include    <setMvpdRing.H>
+#include    <mvpd_accessors/getMBvpdPhaseRotatorData.H>
 
 #include <errl/errlmanager.H>
 #include <errl/errlentry.H>
@@ -102,7 +107,6 @@ public:
             // cast OUR type of target to a FAPI type of target.
             fapi::Target l_fapi_cpu_target(
                                           TARGET_TYPE_PROC_CHIP,
-                                          reinterpret_cast<void *>
                    (const_cast<TARGETING::Target*>(l_cpu_target)) );
 
             // loop through mvpd records of interest
@@ -176,6 +180,14 @@ public:
             { MBVPD_RECORD_VEIR, MBVPD_KEYWORD_PDI},
 //          { MBVPD_RECORD_VER0, MBVPD_KEYWORD_PDI},//in spec, not supported
             { MBVPD_RECORD_MER0, MBVPD_KEYWORD_PDI},
+            { MBVPD_RECORD_VSPD, MBVPD_KEYWORD_PDI},
+            { MBVPD_RECORD_VSPD, MBVPD_KEYWORD_MT},
+            { MBVPD_RECORD_VSPD, MBVPD_KEYWORD_MR},
+            { MBVPD_RECORD_VSPD, MBVPD_KEYWORD_PDA},
+            { MBVPD_RECORD_VSPD, MBVPD_KEYWORD_EL},
+            { MBVPD_RECORD_VSPD, MBVPD_KEYWORD_LM},
+            { MBVPD_RECORD_VSPD, MBVPD_KEYWORD_MW},
+            { MBVPD_RECORD_VSPD, MBVPD_KEYWORD_MV},
         };
 
         TS_TRACE( "testGetMBvpd entry" );
@@ -200,7 +212,6 @@ public:
             // cast OUR type of target to a FAPI type of target.
             fapi::Target l_fapi_mb_target(
                                           TARGET_TYPE_MEMBUF_CHIP,
-                                          reinterpret_cast<void *>
                    (const_cast<TARGETING::Target*>(l_mb_target)) );
 
             // loop through mvpd records of interest
@@ -247,7 +258,14 @@ public:
                     free( l_pRecord );
                     return;
                 }
-
+#if UNITTESTmft
+                TRACFCOMP(g_trac_test,"testMBvpd:Record=%d,Keyword=%d",
+                                        l_mbvpdRecords[i].record,
+                                        l_mbvpdRecords[i].keyword);
+                TRACFBIN(g_trac_test,"testMBvpd:DumpRecord:",
+                      l_pRecord,
+                      l_len );
+#endif
                 //  call fapiSetMvpdField
                 l_fapirc = fapiSetMBvpdField(l_mbvpdRecords[i].record,
                                         l_mbvpdRecords[i].keyword,
@@ -270,6 +288,950 @@ public:
         TS_TRACE( "testGetMBvpd exit" );
 
     }
+
+    /**
+     * @brief  call fapiGetMBvpdField to fetch memory buffer vpd records.
+     *
+     */
+    void    testGetPhaseRotatorData()
+    {
+        fapi::ReturnCode    l_fapirc( fapi::FAPI_RC_SUCCESS );
+        const uint8_t PORT_SIZE = 2;
+        uint8_t l_attr_eff_cen_phase_rot[PORT_SIZE];
+#if RTC69935fwt
+        getMBvpdPhaseRotatorData_FP_t (l_getMBvpdPhaseRotatorData)
+                              = &getMBvpdPhaseRotatorData;
+#endif
+
+        TS_TRACE( "testGetPhaseRotatorData entry" );
+
+        TARGETING::TargetHandleList l_memBufList;
+        getAllChips(l_memBufList, TYPE_MEMBUF);
+
+        TS_TRACE( "testGetPhaseRotatorData l_memBufList.size()=%d",
+                                      l_memBufList.size() );
+
+        // loop thru memory buffers
+#if UNITTESTfwt
+        uint8_t l_mbNum = 0;    // check them all in unit test
+#else
+        uint8_t l_mbNum = (l_memBufList.size() > 0) ? l_memBufList.size()-1 : 0;
+#endif
+        for (; l_mbNum < l_memBufList.size(); l_mbNum++ )
+        {
+            TARGETING::TargetHandleList l_mbaList;
+            getChildAffinityTargets(l_mbaList,l_memBufList[l_mbNum],
+                            CLASS_UNIT,TYPE_MBA,false);
+
+            TS_TRACE( "testGetPhaseRotatorData l_mbaBufList.size()=%d",
+                    l_mbaList.size());
+
+            // loop thru all the mbas (should be 2)
+#if UNITTESTfwt
+            uint8_t l_mbaNum = 0;  // check them all in unit test
+#else
+            uint8_t l_mbaNum = (l_mbaList.size() > 0) ? l_mbaList.size()-1:0 ;
+#endif
+            for (; l_mbaNum < l_mbaList.size(); l_mbaNum++ )
+            {
+                //  dump physical path to target
+                EntityPath l_path;
+                l_path  =   l_mbaList[l_mbaNum]->getAttr<ATTR_PHYS_PATH>();
+                l_path.dump();
+
+                // cast OUR type of target to a FAPI type of target.
+                fapi::Target l_fapi_mba_target(
+                                          TARGET_TYPE_MBA_CHIPLET,
+                   (const_cast<TARGETING::Target*>(l_mbaList[l_mbaNum])) );
+
+               // verify getting all attributes
+#if RTC69935fwt
+               // getting all the attributes is a bit of over kill.
+               // cen_ddrphy.initfile accesses all the values
+               // the exhaustive test is good for unit test
+                l_fapirc = (*l_getMBvpdPhaseRotatorData)(l_fapi_mba_target,
+                           fapi::PHASE_ROT_M0_CLK_P0,
+                           l_attr_eff_cen_phase_rot);
+                if (l_fapirc) break;
+                TS_TRACE( "testGetPhaseRotatorData accessor"
+                    " ATTR_EFF_CEN_PHASE_ROT_M0_CLK_P0=(0x%02x,0x%02x)",
+                     l_attr_eff_cen_phase_rot[0],
+                     l_attr_eff_cen_phase_rot[1]);
+#if UNITTESTfwt
+                l_fapirc = (*l_getMBvpdPhaseRotatorData)(l_fapi_mba_target,
+                           fapi::PHASE_ROT_M0_CLK_P1,
+                           l_attr_eff_cen_phase_rot);
+                if (l_fapirc) break;
+                TS_TRACE( "testGetPhaseRotatorData accessor"
+                    " ATTR_EFF_CEN_PHASE_ROT_M0_CLK_P1=(0x%02x,0x%02x)",
+                     l_attr_eff_cen_phase_rot[0],
+                     l_attr_eff_cen_phase_rot[1]);
+
+                l_fapirc = (*l_getMBvpdPhaseRotatorData)(l_fapi_mba_target,
+                           fapi::PHASE_ROT_M1_CLK_P0,
+                           l_attr_eff_cen_phase_rot);
+                if (l_fapirc) break;
+                TS_TRACE( "testGetPhaseRotatorData accessor"
+                    " ATTR_EFF_CEN_PHASE_ROT_M1_CLK_P0=(0x%02x,0x%02x)",
+                     l_attr_eff_cen_phase_rot[0],
+                     l_attr_eff_cen_phase_rot[1]);
+
+                l_fapirc = (*l_getMBvpdPhaseRotatorData)(l_fapi_mba_target,
+                           fapi::PHASE_ROT_M1_CLK_P1,
+                           l_attr_eff_cen_phase_rot);
+                if (l_fapirc) break;
+                TS_TRACE( "testGetPhaseRotatorData accessor"
+                    " ATTR_EFF_CEN_PHASE_ROT_M1_CLK_P1=(0x%02x,0x%02x)",
+                     l_attr_eff_cen_phase_rot[0],
+                     l_attr_eff_cen_phase_rot[1]);
+
+                l_fapirc = (*l_getMBvpdPhaseRotatorData)(l_fapi_mba_target,
+                           fapi::PHASE_ROT_M_CMD_A0,
+                           l_attr_eff_cen_phase_rot);
+                if (l_fapirc) break;
+                TS_TRACE( "testGetPhaseRotatorData accessor"
+                    " ATTR_EFF_CEN_PHASE_ROT_M_CMD_A0=(0x%02x,0x%02x)",
+                     l_attr_eff_cen_phase_rot[0],
+                     l_attr_eff_cen_phase_rot[1]);
+
+                l_fapirc = (*l_getMBvpdPhaseRotatorData)(l_fapi_mba_target,
+                           fapi::PHASE_ROT_M_CMD_A1,
+                           l_attr_eff_cen_phase_rot);
+                if (l_fapirc) break;
+                TS_TRACE( "testGetPhaseRotatorData accessor"
+                    " ATTR_EFF_CEN_PHASE_ROT_M_CMD_A1=(0x%02x,0x%02x)",
+                     l_attr_eff_cen_phase_rot[0],
+                     l_attr_eff_cen_phase_rot[1]);
+
+                l_fapirc = (*l_getMBvpdPhaseRotatorData)(l_fapi_mba_target,
+                           fapi::PHASE_ROT_M_CMD_A2,
+                           l_attr_eff_cen_phase_rot);
+                if (l_fapirc) break;
+                TS_TRACE( "testGetPhaseRotatorData accessor"
+                    " ATTR_EFF_CEN_PHASE_ROT_M_CMD_A2=(0x%02x,0x%02x)",
+                     l_attr_eff_cen_phase_rot[0],
+                     l_attr_eff_cen_phase_rot[1]);
+
+                l_fapirc = (*l_getMBvpdPhaseRotatorData)(l_fapi_mba_target,
+                           fapi::PHASE_ROT_M_CMD_A3,
+                           l_attr_eff_cen_phase_rot);
+                if (l_fapirc) break;
+                TS_TRACE( "testGetPhaseRotatorData accessor"
+                    " ATTR_EFF_CEN_PHASE_ROT_M_CMD_A3=(0x%02x,0x%02x)",
+                     l_attr_eff_cen_phase_rot[0],
+                     l_attr_eff_cen_phase_rot[1]);
+
+                l_fapirc = (*l_getMBvpdPhaseRotatorData)(l_fapi_mba_target,
+                           fapi::PHASE_ROT_M_CMD_A4,
+                           l_attr_eff_cen_phase_rot);
+                if (l_fapirc) break;
+                TS_TRACE( "testGetPhaseRotatorData accessor"
+                    " ATTR_EFF_CEN_PHASE_ROT_M_CMD_A4=(0x%02x,0x%02x)",
+                     l_attr_eff_cen_phase_rot[0],
+                     l_attr_eff_cen_phase_rot[1]);
+
+                l_fapirc = (*l_getMBvpdPhaseRotatorData)(l_fapi_mba_target,
+                           fapi::PHASE_ROT_M_CMD_A5,
+                           l_attr_eff_cen_phase_rot);
+                if (l_fapirc) break;
+                TS_TRACE( "testGetPhaseRotatorData accessor"
+                    " ATTR_EFF_CEN_PHASE_ROT_M_CMD_A5=(0x%02x,0x%02x)",
+                     l_attr_eff_cen_phase_rot[0],
+                     l_attr_eff_cen_phase_rot[1]);
+
+                l_fapirc = (*l_getMBvpdPhaseRotatorData)(l_fapi_mba_target,
+                           fapi::PHASE_ROT_M_CMD_A6,
+                           l_attr_eff_cen_phase_rot);
+                if (l_fapirc) break;
+                TS_TRACE( "testGetPhaseRotatorData accessor"
+                    " ATTR_EFF_CEN_PHASE_ROT_M_CMD_A6=(0x%02x,0x%02x)",
+                     l_attr_eff_cen_phase_rot[0],
+                     l_attr_eff_cen_phase_rot[1]);
+
+                l_fapirc = (*l_getMBvpdPhaseRotatorData)(l_fapi_mba_target,
+                           fapi::PHASE_ROT_M_CMD_A7,
+                           l_attr_eff_cen_phase_rot);
+                if (l_fapirc) break;
+                TS_TRACE( "testGetPhaseRotatorData accessor"
+                    " ATTR_EFF_CEN_PHASE_ROT_M_CMD_A7=(0x%02x,0x%02x)",
+                     l_attr_eff_cen_phase_rot[0],
+                     l_attr_eff_cen_phase_rot[1]);
+
+                l_fapirc = (*l_getMBvpdPhaseRotatorData)(l_fapi_mba_target,
+                           fapi::PHASE_ROT_M_CMD_A8,
+                           l_attr_eff_cen_phase_rot);
+                if (l_fapirc) break;
+                TS_TRACE( "testGetPhaseRotatorData accessor"
+                    " ATTR_EFF_CEN_PHASE_ROT_M_CMD_A8=(0x%02x,0x%02x)",
+                     l_attr_eff_cen_phase_rot[0],
+                     l_attr_eff_cen_phase_rot[1]);
+
+                l_fapirc = (*l_getMBvpdPhaseRotatorData)(l_fapi_mba_target,
+                           fapi::PHASE_ROT_M_CMD_A9,
+                           l_attr_eff_cen_phase_rot);
+                if (l_fapirc) break;
+                TS_TRACE( "testGetPhaseRotatorData accessor"
+                    " ATTR_EFF_CEN_PHASE_ROT_M_CMD_A9=(0x%02x,0x%02x)",
+                     l_attr_eff_cen_phase_rot[0],
+                     l_attr_eff_cen_phase_rot[1]);
+
+                l_fapirc = (*l_getMBvpdPhaseRotatorData)(l_fapi_mba_target,
+                           fapi::PHASE_ROT_M_CMD_A10,
+                           l_attr_eff_cen_phase_rot);
+                if (l_fapirc) break;
+                TS_TRACE( "testGetPhaseRotatorData accessor"
+                    " ATTR_EFF_CEN_PHASE_ROT_M_CMD_A10=(0x%02x,0x%02x)",
+                     l_attr_eff_cen_phase_rot[0],
+                     l_attr_eff_cen_phase_rot[1]);
+
+                l_fapirc = (*l_getMBvpdPhaseRotatorData)(l_fapi_mba_target,
+                           fapi::PHASE_ROT_M_CMD_A11,
+                           l_attr_eff_cen_phase_rot);
+                if (l_fapirc) break;
+                TS_TRACE( "testGetPhaseRotatorData accessor"
+                    " ATTR_EFF_CEN_PHASE_ROT_M_CMD_A11=(0x%02x,0x%02x)",
+                     l_attr_eff_cen_phase_rot[0],
+                     l_attr_eff_cen_phase_rot[1]);
+
+                l_fapirc = (*l_getMBvpdPhaseRotatorData)(l_fapi_mba_target,
+                           fapi::PHASE_ROT_M_CMD_A12,
+                           l_attr_eff_cen_phase_rot);
+                if (l_fapirc) break;
+                TS_TRACE( "testGetPhaseRotatorData accessor"
+                    " ATTR_EFF_CEN_PHASE_ROT_M_CMD_A12=(0x%02x,0x%02x)",
+                     l_attr_eff_cen_phase_rot[0],
+                     l_attr_eff_cen_phase_rot[1]);
+
+                l_fapirc = (*l_getMBvpdPhaseRotatorData)(l_fapi_mba_target,
+                           fapi::PHASE_ROT_M_CMD_A13,
+                           l_attr_eff_cen_phase_rot);
+                if (l_fapirc) break;
+                TS_TRACE( "testGetPhaseRotatorData accessor"
+                    " ATTR_EFF_CEN_PHASE_ROT_M_CMD_A13=(0x%02x,0x%02x)",
+                     l_attr_eff_cen_phase_rot[0],
+                     l_attr_eff_cen_phase_rot[1]);
+
+                l_fapirc = (*l_getMBvpdPhaseRotatorData)(l_fapi_mba_target,
+                           fapi::PHASE_ROT_M_CMD_A14,
+                           l_attr_eff_cen_phase_rot);
+                if (l_fapirc) break;
+                TS_TRACE( "testGetPhaseRotatorData accessor"
+                    " ATTR_EFF_CEN_PHASE_ROT_M_CMD_A14=(0x%02x,0x%02x)",
+                     l_attr_eff_cen_phase_rot[0],
+                     l_attr_eff_cen_phase_rot[1]);
+
+                l_fapirc = (*l_getMBvpdPhaseRotatorData)(l_fapi_mba_target,
+                           fapi::PHASE_ROT_M_CMD_A15,
+                           l_attr_eff_cen_phase_rot);
+                if (l_fapirc) break;
+                TS_TRACE( "testGetPhaseRotatorData accessor"
+                    " ATTR_EFF_CEN_PHASE_ROT_M_CMD_A15=(0x%02x,0x%02x)",
+                     l_attr_eff_cen_phase_rot[0],
+                     l_attr_eff_cen_phase_rot[1]);
+
+                l_fapirc = (*l_getMBvpdPhaseRotatorData)(l_fapi_mba_target,
+                           fapi::PHASE_ROT_M_CMD_BA0,
+                           l_attr_eff_cen_phase_rot);
+                if (l_fapirc) break;
+                TS_TRACE( "testGetPhaseRotatorData accessor"
+                    " ATTR_EFF_CEN_PHASE_ROT_M_CMD_BA0=(0x%02x,0x%02x)",
+                     l_attr_eff_cen_phase_rot[0],
+                     l_attr_eff_cen_phase_rot[1]);
+
+                l_fapirc = (*l_getMBvpdPhaseRotatorData)(l_fapi_mba_target,
+                           fapi::PHASE_ROT_M_CMD_BA1,
+                           l_attr_eff_cen_phase_rot);
+                if (l_fapirc) break;
+                TS_TRACE( "testGetPhaseRotatorData accessor"
+                    " ATTR_EFF_CEN_PHASE_ROT_M_CMD_BA1=(0x%02x,0x%02x)",
+                     l_attr_eff_cen_phase_rot[0],
+                     l_attr_eff_cen_phase_rot[1]);
+
+                l_fapirc = (*l_getMBvpdPhaseRotatorData)(l_fapi_mba_target,
+                           fapi::PHASE_ROT_M_CMD_BA2,
+                           l_attr_eff_cen_phase_rot);
+                if (l_fapirc) break;
+                TS_TRACE( "testGetPhaseRotatorData accessor"
+                    " ATTR_EFF_CEN_PHASE_ROT_M_CMD_BA2=(0x%02x,0x%02x)",
+                     l_attr_eff_cen_phase_rot[0],
+                     l_attr_eff_cen_phase_rot[1]);
+
+                l_fapirc = (*l_getMBvpdPhaseRotatorData)(l_fapi_mba_target,
+                           fapi::PHASE_ROT_M_CMD_CASN,
+                           l_attr_eff_cen_phase_rot);
+                if (l_fapirc) break;
+                TS_TRACE( "testGetPhaseRotatorData accessor"
+                    " ATTR_EFF_CEN_PHASE_ROT_M_CMD_CASN=(0x%02x,0x%02x)",
+                     l_attr_eff_cen_phase_rot[0],
+                     l_attr_eff_cen_phase_rot[1]);
+
+                l_fapirc = (*l_getMBvpdPhaseRotatorData)(l_fapi_mba_target,
+                           fapi::PHASE_ROT_M_CMD_RASN,
+                           l_attr_eff_cen_phase_rot);
+                if (l_fapirc) break;
+                TS_TRACE( "testGetPhaseRotatorData accessor"
+                    " ATTR_EFF_CEN_PHASE_ROT_M_CMD_RASN=(0x%02x,0x%02x)",
+                     l_attr_eff_cen_phase_rot[0],
+                     l_attr_eff_cen_phase_rot[1]);
+
+                l_fapirc = (*l_getMBvpdPhaseRotatorData)(l_fapi_mba_target,
+                           fapi::PHASE_ROT_M_CMD_WEN,
+                           l_attr_eff_cen_phase_rot);
+                if (l_fapirc) break;
+                TS_TRACE( "testGetPhaseRotatorData accessor"
+                    " ATTR_EFF_CEN_PHASE_ROT_M_CMD_WEN=(0x%02x,0x%02x)",
+                     l_attr_eff_cen_phase_rot[0],
+                     l_attr_eff_cen_phase_rot[1]);
+
+                l_fapirc = (*l_getMBvpdPhaseRotatorData)(l_fapi_mba_target,
+                           fapi::PHASE_ROT_M_PAR,
+                           l_attr_eff_cen_phase_rot);
+                if (l_fapirc) break;
+                TS_TRACE( "testGetPhaseRotatorData accessor"
+                    " ATTR_EFF_CEN_PHASE_ROT_M_PAR=(0x%02x,0x%02x)",
+                     l_attr_eff_cen_phase_rot[0],
+                     l_attr_eff_cen_phase_rot[1]);
+
+                l_fapirc = (*l_getMBvpdPhaseRotatorData)(l_fapi_mba_target,
+                           fapi::PHASE_ROT_M_ACTN,
+                           l_attr_eff_cen_phase_rot);
+                if (l_fapirc) break;
+                TS_TRACE( "testGetPhaseRotatorData accessor"
+                    " ATTR_EFF_CEN_PHASE_ROT_M_ACTN=(0x%02x,0x%02x)",
+                     l_attr_eff_cen_phase_rot[0],
+                     l_attr_eff_cen_phase_rot[1]);
+
+                l_fapirc = (*l_getMBvpdPhaseRotatorData)(l_fapi_mba_target,
+                           fapi::PHASE_ROT_M0_CNTL_CKE0,
+                           l_attr_eff_cen_phase_rot);
+                if (l_fapirc) break;
+                TS_TRACE( "testGetPhaseRotatorData accessor"
+                    " ATTR_EFF_CEN_PHASE_ROT_M0_CNTL_CKE0=(0x%02x,0x%02x)",
+                     l_attr_eff_cen_phase_rot[0],
+                     l_attr_eff_cen_phase_rot[1]);
+
+                l_fapirc = (*l_getMBvpdPhaseRotatorData)(l_fapi_mba_target,
+                           fapi::PHASE_ROT_M0_CNTL_CKE1,
+                           l_attr_eff_cen_phase_rot);
+                if (l_fapirc) break;
+                TS_TRACE( "testGetPhaseRotatorData accessor"
+                    " ATTR_EFF_CEN_PHASE_ROT_M0_CNTL_CKE1=(0x%02x,0x%02x)",
+                     l_attr_eff_cen_phase_rot[0],
+                     l_attr_eff_cen_phase_rot[1]);
+
+                l_fapirc = (*l_getMBvpdPhaseRotatorData)(l_fapi_mba_target,
+                           fapi::PHASE_ROT_M0_CNTL_CKE2,
+                           l_attr_eff_cen_phase_rot);
+                if (l_fapirc) break;
+                TS_TRACE( "testGetPhaseRotatorData accessor"
+                    " ATTR_EFF_CEN_PHASE_ROT_M0_CNTL_CKE2=(0x%02x,0x%02x)",
+                     l_attr_eff_cen_phase_rot[0],
+                     l_attr_eff_cen_phase_rot[1]);
+
+                l_fapirc = (*l_getMBvpdPhaseRotatorData)(l_fapi_mba_target,
+                           fapi::PHASE_ROT_M0_CNTL_CKE3,
+                           l_attr_eff_cen_phase_rot);
+                if (l_fapirc) break;
+                TS_TRACE( "testGetPhaseRotatorData accessor"
+                    " ATTR_EFF_CEN_PHASE_ROT_M0_CNTL_CKE3=(0x%02x,0x%02x)",
+                     l_attr_eff_cen_phase_rot[0],
+                     l_attr_eff_cen_phase_rot[1]);
+
+                l_fapirc = (*l_getMBvpdPhaseRotatorData)(l_fapi_mba_target,
+                           fapi::PHASE_ROT_M0_CNTL_CSN0,
+                           l_attr_eff_cen_phase_rot);
+                if (l_fapirc) break;
+                TS_TRACE( "testGetPhaseRotatorData accessor"
+                    " ATTR_EFF_CEN_PHASE_ROT_M0_CNTL_CSN0=(0x%02x,0x%02x)",
+                     l_attr_eff_cen_phase_rot[0],
+                     l_attr_eff_cen_phase_rot[1]);
+
+                l_fapirc = (*l_getMBvpdPhaseRotatorData)(l_fapi_mba_target,
+                           fapi::PHASE_ROT_M0_CNTL_CSN1,
+                           l_attr_eff_cen_phase_rot);
+                if (l_fapirc) break;
+                TS_TRACE( "testGetPhaseRotatorData accessor"
+                    " ATTR_EFF_CEN_PHASE_ROT_M0_CNTL_CSN1=(0x%02x,0x%02x)",
+                     l_attr_eff_cen_phase_rot[0],
+                     l_attr_eff_cen_phase_rot[1]);
+
+                l_fapirc = (*l_getMBvpdPhaseRotatorData)(l_fapi_mba_target,
+                           fapi::PHASE_ROT_M0_CNTL_CSN2,
+                           l_attr_eff_cen_phase_rot);
+                if (l_fapirc) break;
+                TS_TRACE( "testGetPhaseRotatorData accessor"
+                    " ATTR_EFF_CEN_PHASE_ROT_M0_CNTL_CSN2=(0x%02x,0x%02x)",
+                     l_attr_eff_cen_phase_rot[0],
+                     l_attr_eff_cen_phase_rot[1]);
+
+                l_fapirc = (*l_getMBvpdPhaseRotatorData)(l_fapi_mba_target,
+                           fapi::PHASE_ROT_M0_CNTL_CSN3,
+                           l_attr_eff_cen_phase_rot);
+                if (l_fapirc) break;
+                TS_TRACE( "testGetPhaseRotatorData accessor"
+                    " ATTR_EFF_CEN_PHASE_ROT_M0_CNTL_CSN3=(0x%02x,0x%02x)",
+                     l_attr_eff_cen_phase_rot[0],
+                     l_attr_eff_cen_phase_rot[1]);
+
+                l_fapirc = (*l_getMBvpdPhaseRotatorData)(l_fapi_mba_target,
+                           fapi::PHASE_ROT_M0_CNTL_ODT0,
+                           l_attr_eff_cen_phase_rot);
+                if (l_fapirc) break;
+                TS_TRACE( "testGetPhaseRotatorData accessor"
+                    " ATTR_EFF_CEN_PHASE_ROT_M0_CNTL_ODT0=(0x%02x,0x%02x)",
+                     l_attr_eff_cen_phase_rot[0],
+                     l_attr_eff_cen_phase_rot[1]);
+
+                l_fapirc = (*l_getMBvpdPhaseRotatorData)(l_fapi_mba_target,
+                           fapi::PHASE_ROT_M0_CNTL_ODT1,
+                           l_attr_eff_cen_phase_rot);
+                if (l_fapirc) break;
+                TS_TRACE( "testGetPhaseRotatorData accessor"
+                    " ATTR_EFF_CEN_PHASE_ROT_M0_CNTL_ODT1=(0x%02x,0x%02x)",
+                     l_attr_eff_cen_phase_rot[0],
+                     l_attr_eff_cen_phase_rot[1]);
+
+                l_fapirc = (*l_getMBvpdPhaseRotatorData)(l_fapi_mba_target,
+                           fapi::PHASE_ROT_M1_CNTL_CKE0,
+                           l_attr_eff_cen_phase_rot);
+                if (l_fapirc) break;
+                TS_TRACE( "testGetPhaseRotatorData accessor"
+                    " ATTR_EFF_CEN_PHASE_ROT_M1_CNTL_CKE0=(0x%02x,0x%02x)",
+                     l_attr_eff_cen_phase_rot[0],
+                     l_attr_eff_cen_phase_rot[1]);
+
+                l_fapirc = (*l_getMBvpdPhaseRotatorData)(l_fapi_mba_target,
+                           fapi::PHASE_ROT_M1_CNTL_CKE1,
+                           l_attr_eff_cen_phase_rot);
+                if (l_fapirc) break;
+                TS_TRACE( "testGetPhaseRotatorData accessor"
+                    " ATTR_EFF_CEN_PHASE_ROT_M1_CNTL_CKE1=(0x%02x,0x%02x)",
+                     l_attr_eff_cen_phase_rot[0],
+                     l_attr_eff_cen_phase_rot[1]);
+
+                l_fapirc = (*l_getMBvpdPhaseRotatorData)(l_fapi_mba_target,
+                           fapi::PHASE_ROT_M1_CNTL_CKE2,
+                           l_attr_eff_cen_phase_rot);
+                if (l_fapirc) break;
+                TS_TRACE( "testGetPhaseRotatorData accessor"
+                    " ATTR_EFF_CEN_PHASE_ROT_M1_CNTL_CKE2=(0x%02x,0x%02x)",
+                     l_attr_eff_cen_phase_rot[0],
+                     l_attr_eff_cen_phase_rot[1]);
+
+                l_fapirc = (*l_getMBvpdPhaseRotatorData)(l_fapi_mba_target,
+                           fapi::PHASE_ROT_M1_CNTL_CKE3,
+                           l_attr_eff_cen_phase_rot);
+                if (l_fapirc) break;
+                TS_TRACE( "testGetPhaseRotatorData accessor"
+                    " ATTR_EFF_CEN_PHASE_ROT_M1_CNTL_CKE3=(0x%02x,0x%02x)",
+                     l_attr_eff_cen_phase_rot[0],
+                     l_attr_eff_cen_phase_rot[1]);
+
+                l_fapirc = (*l_getMBvpdPhaseRotatorData)(l_fapi_mba_target,
+                           fapi::PHASE_ROT_M1_CNTL_CSN0,
+                           l_attr_eff_cen_phase_rot);
+                if (l_fapirc) break;
+                TS_TRACE( "testGetPhaseRotatorData accessor"
+                    " ATTR_EFF_CEN_PHASE_ROT_M1_CNTL_CSN0=(0x%02x,0x%02x)",
+                     l_attr_eff_cen_phase_rot[0],
+                     l_attr_eff_cen_phase_rot[1]);
+
+                l_fapirc = (*l_getMBvpdPhaseRotatorData)(l_fapi_mba_target,
+                           fapi::PHASE_ROT_M1_CNTL_CSN1,
+                           l_attr_eff_cen_phase_rot);
+                if (l_fapirc) break;
+                TS_TRACE( "testGetPhaseRotatorData accessor"
+                    " ATTR_EFF_CEN_PHASE_ROT_M1_CNTL_CSN1=(0x%02x,0x%02x)",
+                     l_attr_eff_cen_phase_rot[0],
+                     l_attr_eff_cen_phase_rot[1]);
+
+                l_fapirc = (*l_getMBvpdPhaseRotatorData)(l_fapi_mba_target,
+                           fapi::PHASE_ROT_M1_CNTL_CSN2,
+                           l_attr_eff_cen_phase_rot);
+                if (l_fapirc) break;
+                TS_TRACE( "testGetPhaseRotatorData accessor"
+                    " ATTR_EFF_CEN_PHASE_ROT_M1_CNTL_CSN2=(0x%02x,0x%02x)",
+                     l_attr_eff_cen_phase_rot[0],
+                     l_attr_eff_cen_phase_rot[1]);
+
+                l_fapirc = (*l_getMBvpdPhaseRotatorData)(l_fapi_mba_target,
+                           fapi::PHASE_ROT_M1_CNTL_CSN3,
+                           l_attr_eff_cen_phase_rot);
+                if (l_fapirc) break;
+                TS_TRACE( "testGetPhaseRotatorData accessor"
+                    " ATTR_EFF_CEN_PHASE_ROT_M1_CNTL_CSN3=(0x%02x,0x%02x)",
+                     l_attr_eff_cen_phase_rot[0],
+                     l_attr_eff_cen_phase_rot[1]);
+
+                l_fapirc = (*l_getMBvpdPhaseRotatorData)(l_fapi_mba_target,
+                           fapi::PHASE_ROT_M1_CNTL_ODT0,
+                           l_attr_eff_cen_phase_rot);
+                if (l_fapirc) break;
+                TS_TRACE( "testGetPhaseRotatorData accessor"
+                    " ATTR_EFF_CEN_PHASE_ROT_M1_CNTL_ODT0=(0x%02x,0x%02x)",
+                     l_attr_eff_cen_phase_rot[0],
+                     l_attr_eff_cen_phase_rot[1]);
+
+                l_fapirc = (*l_getMBvpdPhaseRotatorData)(l_fapi_mba_target,
+                           fapi::PHASE_ROT_M1_CNTL_ODT1,
+                           l_attr_eff_cen_phase_rot);
+                if (l_fapirc) break;
+                TS_TRACE( "testGetPhaseRotatorData accessor"
+                    " ATTR_EFF_CEN_PHASE_ROT_M1_CNTL_ODT1=(0x%02x,0x%02x)",
+                     l_attr_eff_cen_phase_rot[0],
+                     l_attr_eff_cen_phase_rot[1]);
+#endif
+#else
+               // getting all the attributes is a bit of over kill.
+               // cen_ddrphy.initfile accesses all the values
+               // the exhaustive test is good for unit test
+                l_fapirc = FAPI_ATTR_GET(ATTR_EFF_CEN_PHASE_ROT_M0_CLK_P0,
+                           &l_fapi_mba_target,
+                           l_attr_eff_cen_phase_rot);
+                if (l_fapirc) break;
+                TS_TRACE( "testGetPhaseRotatorData"
+                    " ATTR_EFF_CEN_PHASE_ROT_M0_CLK_P0=(0x%02x,0x%02x)",
+                     l_attr_eff_cen_phase_rot[0],
+                     l_attr_eff_cen_phase_rot[1]);
+#if UNITTESTfwt
+                l_fapirc = FAPI_ATTR_GET(ATTR_EFF_CEN_PHASE_ROT_M0_CLK_P1,
+                           &l_fapi_mba_target,
+                           l_attr_eff_cen_phase_rot);
+                if (l_fapirc) break;
+                TS_TRACE( "testGetPhaseRotatorData"
+                    " ATTR_EFF_CEN_PHASE_ROT_M0_CLK_P1=(0x%02x,0x%02x)",
+                     l_attr_eff_cen_phase_rot[0],
+                     l_attr_eff_cen_phase_rot[1]);
+
+                l_fapirc = FAPI_ATTR_GET(ATTR_EFF_CEN_PHASE_ROT_M1_CLK_P0,
+                           &l_fapi_mba_target,
+                           l_attr_eff_cen_phase_rot);
+                if (l_fapirc) break;
+                TS_TRACE( "testGetPhaseRotatorData"
+                    " ATTR_EFF_CEN_PHASE_ROT_M1_CLK_P0=(0x%02x,0x%02x)",
+                     l_attr_eff_cen_phase_rot[0],
+                     l_attr_eff_cen_phase_rot[1]);
+
+                l_fapirc = FAPI_ATTR_GET(ATTR_EFF_CEN_PHASE_ROT_M1_CLK_P1,
+                           &l_fapi_mba_target,
+                           l_attr_eff_cen_phase_rot);
+                if (l_fapirc) break;
+                TS_TRACE( "testGetPhaseRotatorData"
+                    " ATTR_EFF_CEN_PHASE_ROT_M1_CLK_P1=(0x%02x,0x%02x)",
+                     l_attr_eff_cen_phase_rot[0],
+                     l_attr_eff_cen_phase_rot[1]);
+
+                l_fapirc = FAPI_ATTR_GET(ATTR_EFF_CEN_PHASE_ROT_M_CMD_A0,
+                           &l_fapi_mba_target,
+                           l_attr_eff_cen_phase_rot);
+                if (l_fapirc) break;
+                TS_TRACE( "testGetPhaseRotatorData"
+                    " ATTR_EFF_CEN_PHASE_ROT_M_CMD_A0=(0x%02x,0x%02x)",
+                     l_attr_eff_cen_phase_rot[0],
+                     l_attr_eff_cen_phase_rot[1]);
+
+                l_fapirc = FAPI_ATTR_GET(ATTR_EFF_CEN_PHASE_ROT_M_CMD_A1,
+                           &l_fapi_mba_target,
+                           l_attr_eff_cen_phase_rot);
+                if (l_fapirc) break;
+                TS_TRACE( "testGetPhaseRotatorData"
+                    " ATTR_EFF_CEN_PHASE_ROT_M_CMD_A1=(0x%02x,0x%02x)",
+                     l_attr_eff_cen_phase_rot[0],
+                     l_attr_eff_cen_phase_rot[1]);
+
+                l_fapirc = FAPI_ATTR_GET(ATTR_EFF_CEN_PHASE_ROT_M_CMD_A2,
+                           &l_fapi_mba_target,
+                           l_attr_eff_cen_phase_rot);
+                if (l_fapirc) break;
+                TS_TRACE( "testGetPhaseRotatorData"
+                    " ATTR_EFF_CEN_PHASE_ROT_M_CMD_A2=(0x%02x,0x%02x)",
+                     l_attr_eff_cen_phase_rot[0],
+                     l_attr_eff_cen_phase_rot[1]);
+
+                l_fapirc = FAPI_ATTR_GET(ATTR_EFF_CEN_PHASE_ROT_M_CMD_A3,
+                           &l_fapi_mba_target,
+                           l_attr_eff_cen_phase_rot);
+                if (l_fapirc) break;
+                TS_TRACE( "testGetPhaseRotatorData"
+                    " ATTR_EFF_CEN_PHASE_ROT_M_CMD_A3=(0x%02x,0x%02x)",
+                     l_attr_eff_cen_phase_rot[0],
+                     l_attr_eff_cen_phase_rot[1]);
+
+                l_fapirc = FAPI_ATTR_GET(ATTR_EFF_CEN_PHASE_ROT_M_CMD_A4,
+                           &l_fapi_mba_target,
+                           l_attr_eff_cen_phase_rot);
+                if (l_fapirc) break;
+                TS_TRACE( "testGetPhaseRotatorData"
+                    " ATTR_EFF_CEN_PHASE_ROT_M_CMD_A4=(0x%02x,0x%02x)",
+                     l_attr_eff_cen_phase_rot[0],
+                     l_attr_eff_cen_phase_rot[1]);
+
+                l_fapirc = FAPI_ATTR_GET(ATTR_EFF_CEN_PHASE_ROT_M_CMD_A5,
+                           &l_fapi_mba_target,
+                           l_attr_eff_cen_phase_rot);
+                if (l_fapirc) break;
+                TS_TRACE( "testGetPhaseRotatorData"
+                    " ATTR_EFF_CEN_PHASE_ROT_M_CMD_A5=(0x%02x,0x%02x)",
+                     l_attr_eff_cen_phase_rot[0],
+                     l_attr_eff_cen_phase_rot[1]);
+
+                l_fapirc = FAPI_ATTR_GET(ATTR_EFF_CEN_PHASE_ROT_M_CMD_A6,
+                           &l_fapi_mba_target,
+                           l_attr_eff_cen_phase_rot);
+                if (l_fapirc) break;
+                TS_TRACE( "testGetPhaseRotatorData"
+                    " ATTR_EFF_CEN_PHASE_ROT_M_CMD_A6=(0x%02x,0x%02x)",
+                     l_attr_eff_cen_phase_rot[0],
+                     l_attr_eff_cen_phase_rot[1]);
+
+                l_fapirc = FAPI_ATTR_GET(ATTR_EFF_CEN_PHASE_ROT_M_CMD_A7,
+                           &l_fapi_mba_target,
+                           l_attr_eff_cen_phase_rot);
+                if (l_fapirc) break;
+                TS_TRACE( "testGetPhaseRotatorData"
+                    " ATTR_EFF_CEN_PHASE_ROT_M_CMD_A7=(0x%02x,0x%02x)",
+                     l_attr_eff_cen_phase_rot[0],
+                     l_attr_eff_cen_phase_rot[1]);
+
+                l_fapirc = FAPI_ATTR_GET(ATTR_EFF_CEN_PHASE_ROT_M_CMD_A8,
+                           &l_fapi_mba_target,
+                           l_attr_eff_cen_phase_rot);
+                if (l_fapirc) break;
+                TS_TRACE( "testGetPhaseRotatorData"
+                    " ATTR_EFF_CEN_PHASE_ROT_M_CMD_A8=(0x%02x,0x%02x)",
+                     l_attr_eff_cen_phase_rot[0],
+                     l_attr_eff_cen_phase_rot[1]);
+
+                l_fapirc = FAPI_ATTR_GET(ATTR_EFF_CEN_PHASE_ROT_M_CMD_A9,
+                           &l_fapi_mba_target,
+                           l_attr_eff_cen_phase_rot);
+                if (l_fapirc) break;
+                TS_TRACE( "testGetPhaseRotatorData"
+                    " ATTR_EFF_CEN_PHASE_ROT_M_CMD_A9=(0x%02x,0x%02x)",
+                     l_attr_eff_cen_phase_rot[0],
+                     l_attr_eff_cen_phase_rot[1]);
+
+                l_fapirc = FAPI_ATTR_GET(ATTR_EFF_CEN_PHASE_ROT_M_CMD_A10,
+                           &l_fapi_mba_target,
+                           l_attr_eff_cen_phase_rot);
+                if (l_fapirc) break;
+                TS_TRACE( "testGetPhaseRotatorData"
+                    " ATTR_EFF_CEN_PHASE_ROT_M_CMD_A10=(0x%02x,0x%02x)",
+                     l_attr_eff_cen_phase_rot[0],
+                     l_attr_eff_cen_phase_rot[1]);
+
+                l_fapirc = FAPI_ATTR_GET(ATTR_EFF_CEN_PHASE_ROT_M_CMD_A11,
+                           &l_fapi_mba_target,
+                           l_attr_eff_cen_phase_rot);
+                if (l_fapirc) break;
+                TS_TRACE( "testGetPhaseRotatorData"
+                    " ATTR_EFF_CEN_PHASE_ROT_M_CMD_A11=(0x%02x,0x%02x)",
+                     l_attr_eff_cen_phase_rot[0],
+                     l_attr_eff_cen_phase_rot[1]);
+
+                l_fapirc = FAPI_ATTR_GET(ATTR_EFF_CEN_PHASE_ROT_M_CMD_A12,
+                           &l_fapi_mba_target,
+                           l_attr_eff_cen_phase_rot);
+                if (l_fapirc) break;
+                TS_TRACE( "testGetPhaseRotatorData"
+                    " ATTR_EFF_CEN_PHASE_ROT_M_CMD_A12=(0x%02x,0x%02x)",
+                     l_attr_eff_cen_phase_rot[0],
+                     l_attr_eff_cen_phase_rot[1]);
+
+                l_fapirc = FAPI_ATTR_GET(ATTR_EFF_CEN_PHASE_ROT_M_CMD_A13,
+                           &l_fapi_mba_target,
+                           l_attr_eff_cen_phase_rot);
+                if (l_fapirc) break;
+                TS_TRACE( "testGetPhaseRotatorData"
+                    " ATTR_EFF_CEN_PHASE_ROT_M_CMD_A13=(0x%02x,0x%02x)",
+                     l_attr_eff_cen_phase_rot[0],
+                     l_attr_eff_cen_phase_rot[1]);
+
+                l_fapirc = FAPI_ATTR_GET(ATTR_EFF_CEN_PHASE_ROT_M_CMD_A14,
+                           &l_fapi_mba_target,
+                           l_attr_eff_cen_phase_rot);
+                if (l_fapirc) break;
+                TS_TRACE( "testGetPhaseRotatorData"
+                    " ATTR_EFF_CEN_PHASE_ROT_M_CMD_A14=(0x%02x,0x%02x)",
+                     l_attr_eff_cen_phase_rot[0],
+                     l_attr_eff_cen_phase_rot[1]);
+
+                l_fapirc = FAPI_ATTR_GET(ATTR_EFF_CEN_PHASE_ROT_M_CMD_A15,
+                           &l_fapi_mba_target,
+                           l_attr_eff_cen_phase_rot);
+                if (l_fapirc) break;
+                TS_TRACE( "testGetPhaseRotatorData"
+                    " ATTR_EFF_CEN_PHASE_ROT_M_CMD_A15=(0x%02x,0x%02x)",
+                     l_attr_eff_cen_phase_rot[0],
+                     l_attr_eff_cen_phase_rot[1]);
+
+                l_fapirc = FAPI_ATTR_GET(ATTR_EFF_CEN_PHASE_ROT_M_CMD_BA0,
+                           &l_fapi_mba_target,
+                           l_attr_eff_cen_phase_rot);
+                if (l_fapirc) break;
+                TS_TRACE( "testGetPhaseRotatorData"
+                    " ATTR_EFF_CEN_PHASE_ROT_M_CMD_BA0=(0x%02x,0x%02x)",
+                     l_attr_eff_cen_phase_rot[0],
+                     l_attr_eff_cen_phase_rot[1]);
+
+                l_fapirc = FAPI_ATTR_GET(ATTR_EFF_CEN_PHASE_ROT_M_CMD_BA1,
+                           &l_fapi_mba_target,
+                           l_attr_eff_cen_phase_rot);
+                if (l_fapirc) break;
+                TS_TRACE( "testGetPhaseRotatorData"
+                    " ATTR_EFF_CEN_PHASE_ROT_M_CMD_BA1=(0x%02x,0x%02x)",
+                     l_attr_eff_cen_phase_rot[0],
+                     l_attr_eff_cen_phase_rot[1]);
+
+                l_fapirc = FAPI_ATTR_GET(ATTR_EFF_CEN_PHASE_ROT_M_CMD_BA2,
+                           &l_fapi_mba_target,
+                           l_attr_eff_cen_phase_rot);
+                if (l_fapirc) break;
+                TS_TRACE( "testGetPhaseRotatorData"
+                    " ATTR_EFF_CEN_PHASE_ROT_M_CMD_BA2=(0x%02x,0x%02x)",
+                     l_attr_eff_cen_phase_rot[0],
+                     l_attr_eff_cen_phase_rot[1]);
+
+                l_fapirc = FAPI_ATTR_GET(ATTR_EFF_CEN_PHASE_ROT_M_CMD_CASN,
+                           &l_fapi_mba_target,
+                           l_attr_eff_cen_phase_rot);
+                if (l_fapirc) break;
+                TS_TRACE( "testGetPhaseRotatorData"
+                    " ATTR_EFF_CEN_PHASE_ROT_M_CMD_CASN=(0x%02x,0x%02x)",
+                     l_attr_eff_cen_phase_rot[0],
+                     l_attr_eff_cen_phase_rot[1]);
+
+                l_fapirc = FAPI_ATTR_GET(ATTR_EFF_CEN_PHASE_ROT_M_CMD_RASN,
+                           &l_fapi_mba_target,
+                           l_attr_eff_cen_phase_rot);
+                if (l_fapirc) break;
+                TS_TRACE( "testGetPhaseRotatorData"
+                    " ATTR_EFF_CEN_PHASE_ROT_M_CMD_RASN=(0x%02x,0x%02x)",
+                     l_attr_eff_cen_phase_rot[0],
+                     l_attr_eff_cen_phase_rot[1]);
+
+                l_fapirc = FAPI_ATTR_GET(ATTR_EFF_CEN_PHASE_ROT_M_CMD_WEN,
+                           &l_fapi_mba_target,
+                           l_attr_eff_cen_phase_rot);
+                if (l_fapirc) break;
+                TS_TRACE( "testGetPhaseRotatorData"
+                    " ATTR_EFF_CEN_PHASE_ROT_M_CMD_WEN=(0x%02x,0x%02x)",
+                     l_attr_eff_cen_phase_rot[0],
+                     l_attr_eff_cen_phase_rot[1]);
+
+                l_fapirc = FAPI_ATTR_GET(ATTR_EFF_CEN_PHASE_ROT_M_PAR,
+                           &l_fapi_mba_target,
+                           l_attr_eff_cen_phase_rot);
+                if (l_fapirc) break;
+                TS_TRACE( "testGetPhaseRotatorData"
+                    " ATTR_EFF_CEN_PHASE_ROT_M_PAR=(0x%02x,0x%02x)",
+                     l_attr_eff_cen_phase_rot[0],
+                     l_attr_eff_cen_phase_rot[1]);
+
+                l_fapirc = FAPI_ATTR_GET(ATTR_EFF_CEN_PHASE_ROT_M_ACTN,
+                           &l_fapi_mba_target,
+                           l_attr_eff_cen_phase_rot);
+                if (l_fapirc) break;
+                TS_TRACE( "testGetPhaseRotatorData"
+                    " ATTR_EFF_CEN_PHASE_ROT_M_ACTN=(0x%02x,0x%02x)",
+                     l_attr_eff_cen_phase_rot[0],
+                     l_attr_eff_cen_phase_rot[1]);
+
+                l_fapirc = FAPI_ATTR_GET(ATTR_EFF_CEN_PHASE_ROT_M0_CNTL_CKE0,
+                           &l_fapi_mba_target,
+                           l_attr_eff_cen_phase_rot);
+                if (l_fapirc) break;
+                TS_TRACE( "testGetPhaseRotatorData"
+                    " ATTR_EFF_CEN_PHASE_ROT_M0_CNTL_CKE0=(0x%02x,0x%02x)",
+                     l_attr_eff_cen_phase_rot[0],
+                     l_attr_eff_cen_phase_rot[1]);
+
+                l_fapirc = FAPI_ATTR_GET(ATTR_EFF_CEN_PHASE_ROT_M0_CNTL_CKE1,
+                           &l_fapi_mba_target,
+                           l_attr_eff_cen_phase_rot);
+                if (l_fapirc) break;
+                TS_TRACE( "testGetPhaseRotatorData"
+                    " ATTR_EFF_CEN_PHASE_ROT_M0_CNTL_CKE1=(0x%02x,0x%02x)",
+                     l_attr_eff_cen_phase_rot[0],
+                     l_attr_eff_cen_phase_rot[1]);
+
+                l_fapirc = FAPI_ATTR_GET(ATTR_EFF_CEN_PHASE_ROT_M0_CNTL_CKE2,
+                           &l_fapi_mba_target,
+                           l_attr_eff_cen_phase_rot);
+                if (l_fapirc) break;
+                TS_TRACE( "testGetPhaseRotatorData"
+                    " ATTR_EFF_CEN_PHASE_ROT_M0_CNTL_CKE2=(0x%02x,0x%02x)",
+                     l_attr_eff_cen_phase_rot[0],
+                     l_attr_eff_cen_phase_rot[1]);
+
+                l_fapirc = FAPI_ATTR_GET(ATTR_EFF_CEN_PHASE_ROT_M0_CNTL_CKE3,
+                           &l_fapi_mba_target,
+                           l_attr_eff_cen_phase_rot);
+                if (l_fapirc) break;
+                TS_TRACE( "testGetPhaseRotatorData"
+                    " ATTR_EFF_CEN_PHASE_ROT_M0_CNTL_CKE3=(0x%02x,0x%02x)",
+                     l_attr_eff_cen_phase_rot[0],
+                     l_attr_eff_cen_phase_rot[1]);
+
+                l_fapirc = FAPI_ATTR_GET(ATTR_EFF_CEN_PHASE_ROT_M0_CNTL_CSN0,
+                           &l_fapi_mba_target,
+                           l_attr_eff_cen_phase_rot);
+                if (l_fapirc) break;
+                TS_TRACE( "testGetPhaseRotatorData"
+                    " ATTR_EFF_CEN_PHASE_ROT_M0_CNTL_CSN0=(0x%02x,0x%02x)",
+                     l_attr_eff_cen_phase_rot[0],
+                     l_attr_eff_cen_phase_rot[1]);
+
+                l_fapirc = FAPI_ATTR_GET(ATTR_EFF_CEN_PHASE_ROT_M0_CNTL_CSN1,
+                           &l_fapi_mba_target,
+                           l_attr_eff_cen_phase_rot);
+                if (l_fapirc) break;
+                TS_TRACE( "testGetPhaseRotatorData"
+                    " ATTR_EFF_CEN_PHASE_ROT_M0_CNTL_CSN1=(0x%02x,0x%02x)",
+                     l_attr_eff_cen_phase_rot[0],
+                     l_attr_eff_cen_phase_rot[1]);
+
+                l_fapirc = FAPI_ATTR_GET(ATTR_EFF_CEN_PHASE_ROT_M0_CNTL_CSN2,
+                           &l_fapi_mba_target,
+                           l_attr_eff_cen_phase_rot);
+                if (l_fapirc) break;
+                TS_TRACE( "testGetPhaseRotatorData"
+                    " ATTR_EFF_CEN_PHASE_ROT_M0_CNTL_CSN2=(0x%02x,0x%02x)",
+                     l_attr_eff_cen_phase_rot[0],
+                     l_attr_eff_cen_phase_rot[1]);
+
+                l_fapirc = FAPI_ATTR_GET(ATTR_EFF_CEN_PHASE_ROT_M0_CNTL_CSN3,
+                           &l_fapi_mba_target,
+                           l_attr_eff_cen_phase_rot);
+                if (l_fapirc) break;
+                TS_TRACE( "testGetPhaseRotatorData"
+                    " ATTR_EFF_CEN_PHASE_ROT_M0_CNTL_CSN3=(0x%02x,0x%02x)",
+                     l_attr_eff_cen_phase_rot[0],
+                     l_attr_eff_cen_phase_rot[1]);
+
+                l_fapirc = FAPI_ATTR_GET(ATTR_EFF_CEN_PHASE_ROT_M0_CNTL_ODT0,
+                           &l_fapi_mba_target,
+                           l_attr_eff_cen_phase_rot);
+                if (l_fapirc) break;
+                TS_TRACE( "testGetPhaseRotatorData"
+                    " ATTR_EFF_CEN_PHASE_ROT_M0_CNTL_ODT0=(0x%02x,0x%02x)",
+                     l_attr_eff_cen_phase_rot[0],
+                     l_attr_eff_cen_phase_rot[1]);
+
+                l_fapirc = FAPI_ATTR_GET(ATTR_EFF_CEN_PHASE_ROT_M0_CNTL_ODT1,
+                           &l_fapi_mba_target,
+                           l_attr_eff_cen_phase_rot);
+                if (l_fapirc) break;
+                TS_TRACE( "testGetPhaseRotatorData"
+                    " ATTR_EFF_CEN_PHASE_ROT_M0_CNTL_ODT1=(0x%02x,0x%02x)",
+                     l_attr_eff_cen_phase_rot[0],
+                     l_attr_eff_cen_phase_rot[1]);
+
+                l_fapirc = FAPI_ATTR_GET(ATTR_EFF_CEN_PHASE_ROT_M1_CNTL_CKE0,
+                           &l_fapi_mba_target,
+                           l_attr_eff_cen_phase_rot);
+                if (l_fapirc) break;
+                TS_TRACE( "testGetPhaseRotatorData"
+                    " ATTR_EFF_CEN_PHASE_ROT_M1_CNTL_CKE0=(0x%02x,0x%02x)",
+                     l_attr_eff_cen_phase_rot[0],
+                     l_attr_eff_cen_phase_rot[1]);
+
+                l_fapirc = FAPI_ATTR_GET(ATTR_EFF_CEN_PHASE_ROT_M1_CNTL_CKE1,
+                           &l_fapi_mba_target,
+                           l_attr_eff_cen_phase_rot);
+                if (l_fapirc) break;
+                TS_TRACE( "testGetPhaseRotatorData"
+                    " ATTR_EFF_CEN_PHASE_ROT_M1_CNTL_CKE1=(0x%02x,0x%02x)",
+                     l_attr_eff_cen_phase_rot[0],
+                     l_attr_eff_cen_phase_rot[1]);
+
+                l_fapirc = FAPI_ATTR_GET(ATTR_EFF_CEN_PHASE_ROT_M1_CNTL_CKE2,
+                           &l_fapi_mba_target,
+                           l_attr_eff_cen_phase_rot);
+                if (l_fapirc) break;
+                TS_TRACE( "testGetPhaseRotatorData"
+                    " ATTR_EFF_CEN_PHASE_ROT_M1_CNTL_CKE2=(0x%02x,0x%02x)",
+                     l_attr_eff_cen_phase_rot[0],
+                     l_attr_eff_cen_phase_rot[1]);
+
+                l_fapirc = FAPI_ATTR_GET(ATTR_EFF_CEN_PHASE_ROT_M1_CNTL_CKE3,
+                           &l_fapi_mba_target,
+                           l_attr_eff_cen_phase_rot);
+                if (l_fapirc) break;
+                TS_TRACE( "testGetPhaseRotatorData"
+                    " ATTR_EFF_CEN_PHASE_ROT_M1_CNTL_CKE3=(0x%02x,0x%02x)",
+                     l_attr_eff_cen_phase_rot[0],
+                     l_attr_eff_cen_phase_rot[1]);
+
+                l_fapirc = FAPI_ATTR_GET(ATTR_EFF_CEN_PHASE_ROT_M1_CNTL_CSN0,
+                           &l_fapi_mba_target,
+                           l_attr_eff_cen_phase_rot);
+                if (l_fapirc) break;
+                TS_TRACE( "testGetPhaseRotatorData"
+                    " ATTR_EFF_CEN_PHASE_ROT_M1_CNTL_CSN0=(0x%02x,0x%02x)",
+                     l_attr_eff_cen_phase_rot[0],
+                     l_attr_eff_cen_phase_rot[1]);
+
+                l_fapirc = FAPI_ATTR_GET(ATTR_EFF_CEN_PHASE_ROT_M1_CNTL_CSN1,
+                           &l_fapi_mba_target,
+                           l_attr_eff_cen_phase_rot);
+                if (l_fapirc) break;
+                TS_TRACE( "testGetPhaseRotatorData"
+                    " ATTR_EFF_CEN_PHASE_ROT_M1_CNTL_CSN1=(0x%02x,0x%02x)",
+                     l_attr_eff_cen_phase_rot[0],
+                     l_attr_eff_cen_phase_rot[1]);
+
+                l_fapirc = FAPI_ATTR_GET(ATTR_EFF_CEN_PHASE_ROT_M1_CNTL_CSN2,
+                           &l_fapi_mba_target,
+                           l_attr_eff_cen_phase_rot);
+                if (l_fapirc) break;
+                TS_TRACE( "testGetPhaseRotatorData"
+                    " ATTR_EFF_CEN_PHASE_ROT_M1_CNTL_CSN2=(0x%02x,0x%02x)",
+                     l_attr_eff_cen_phase_rot[0],
+                     l_attr_eff_cen_phase_rot[1]);
+
+                l_fapirc = FAPI_ATTR_GET(ATTR_EFF_CEN_PHASE_ROT_M1_CNTL_CSN3,
+                           &l_fapi_mba_target,
+                           l_attr_eff_cen_phase_rot);
+                if (l_fapirc) break;
+                TS_TRACE( "testGetPhaseRotatorData"
+                    " ATTR_EFF_CEN_PHASE_ROT_M1_CNTL_CSN3=(0x%02x,0x%02x)",
+                     l_attr_eff_cen_phase_rot[0],
+                     l_attr_eff_cen_phase_rot[1]);
+
+                l_fapirc = FAPI_ATTR_GET(ATTR_EFF_CEN_PHASE_ROT_M1_CNTL_ODT0,
+                           &l_fapi_mba_target,
+                           l_attr_eff_cen_phase_rot);
+                if (l_fapirc) break;
+                TS_TRACE( "testGetPhaseRotatorData"
+                    " ATTR_EFF_CEN_PHASE_ROT_M1_CNTL_ODT0=(0x%02x,0x%02x)",
+                     l_attr_eff_cen_phase_rot[0],
+                     l_attr_eff_cen_phase_rot[1]);
+
+                l_fapirc = FAPI_ATTR_GET(ATTR_EFF_CEN_PHASE_ROT_M1_CNTL_ODT1,
+                           &l_fapi_mba_target,
+                           l_attr_eff_cen_phase_rot);
+                if (l_fapirc) break;
+                TS_TRACE( "testGetPhaseRotatorData"
+                    " ATTR_EFF_CEN_PHASE_ROT_M1_CNTL_ODT1=(0x%02x,0x%02x)",
+                     l_attr_eff_cen_phase_rot[0],
+                     l_attr_eff_cen_phase_rot[1]);
+#endif
+#endif
+            }
+            if (l_fapirc)
+            {
+               TS_FAIL( "fapiGetPhaseRotatorData: FAPI_ATTR_GET fail rc=0x%x",
+                         static_cast<uint32_t>(l_fapirc) );
+               fapiLogError(l_fapirc);
+            }
+        }
+
+
+        TS_TRACE( "testGetPhaseRotatorData exit" );
+
+    }
+
 
     // Structure used to save/restore the VPD
     typedef struct saveRestoreData_t {
@@ -403,13 +1365,9 @@ public:
             // add to the master list
             l_srData.push_back(tmpsave);
             
-            //--
-
-
             // cast OUR type of target to a FAPI type of target.
             fapi::Target l_fapi_cpu_target(
                               TARGET_TYPE_PROC_CHIP,
-                               reinterpret_cast<void *>
                               (const_cast<TARGETING::Target*>(l_cpu_target)) );
 
             //  allocate some space to put the record(s)

@@ -8346,8 +8346,9 @@ bits6:7  will be consumed together to form COARSE_LVL. </description>
     </hwpfToHbAttrMap>
 </attribute>
 
-<!-- TODO RTC 59048. These phase rotator attributes need to come from CDIMM VPD. For now
-     they are setup by the mss_eff_config_termination HWP -->
+<!-- TODO RTC 69935. These phase rotator attributes need to come from CDIMM VPD
+     For now, they are setup by the mss_eff_config_termination HWP.
+     Remove these when valid vpd is on the CDIMMs  -->
 
 <attribute>
     <id>EFF_CEN_PHASE_ROT_M0_CLK_P0</id>

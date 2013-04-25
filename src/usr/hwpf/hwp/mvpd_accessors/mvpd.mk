@@ -28,5 +28,6 @@ VPATH += mvpd_accessors
 OBJS += getMvpdRing.o \
         setMvpdRing.o \
         mvpdRingFuncs.o \
-        getMvpdExL2SingleMemberEnable.o
+        getMvpdExL2SingleMemberEnable.o \
+        getMBvpdPhaseRotatorData.o
 
