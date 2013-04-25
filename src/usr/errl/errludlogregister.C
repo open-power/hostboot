@@ -163,7 +163,8 @@ void ErrlUserDetailsLogRegister::readRegister(
 
         TRACDCOMP(g_trac_errl, "LogRegister: deviceOpValist()");
         errlHndl_t errl;
-        errl = DeviceFW::deviceOpValist(DeviceFW::READ, iv_pTarget,
+        errl = DeviceFW::deviceOpValist(DeviceFW::READ,
+                    const_cast<TARGETING::Target *>(iv_pTarget),
                     &reg_data, reg_size,
                     (DeviceFW::AccessType) i_accessType, i_args);
 
@@ -327,7 +328,7 @@ void ErrlUserDetailsLogRegister::__addDataBuffer(
 
 //------------------------------------------------------------------------------
 ErrlUserDetailsLogRegister::ErrlUserDetailsLogRegister(
-    TARGETING::Target * i_pTarget)
+    const TARGETING::Target * i_pTarget)
     : iv_pTarget(i_pTarget), iv_dataSize(0)
 {
     TRACDCOMP(g_trac_errl, "LogRegister: target %p",
@@ -340,7 +341,7 @@ ErrlUserDetailsLogRegister::ErrlUserDetailsLogRegister(
 
 //------------------------------------------------------------------------------
 ErrlUserDetailsLogRegister::ErrlUserDetailsLogRegister(
-    TARGETING::Target * i_pTarget,
+    const TARGETING::Target * i_pTarget,
     DeviceFW::AccessType i_accessType, ...)
     : iv_pTarget(i_pTarget), iv_dataSize(0)
 {
@@ -359,7 +360,7 @@ ErrlUserDetailsLogRegister::ErrlUserDetailsLogRegister(
 
 //------------------------------------------------------------------------------
 ErrlUserDetailsLogRegister::ErrlUserDetailsLogRegister(
-    TARGETING::Target * i_pTarget,
+    const TARGETING::Target * i_pTarget,
     void *i_dataBuf,
     size_t i_dataSize,
     DeviceFW::AccessType i_accessType, ...)

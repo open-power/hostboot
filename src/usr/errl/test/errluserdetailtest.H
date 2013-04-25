@@ -530,9 +530,8 @@ public:
                         HWAS::SRCI_PRIORITY_LOW,
                         HWAS::DECONFIG,
                         HWAS::GARD_PoreError).addToLog(errl);
-            // TODO: RTC 45780
-            // SENTINEL not logged properly // deconfigCount++;
-            // SENTINEL not logged properly // gardCount++;
+            deconfigCount++;
+            gardCount++;
 
             ErrlUserDetailsCallout(
                         &HWAS::TARGET_IS_SENTINEL,
@@ -540,8 +539,7 @@ public:
                         HWAS::SRCI_PRIORITY_MED,
                         HWAS::DECONFIG,
                         HWAS::GARD_NULL).addToLog(errl);
-            // TODO: RTC 45780
-            // SENTINEL not logged properly // deconfigCount++;
+            deconfigCount++;
 
             // find a proc target
             PredicateCTM procChipFilter(CLASS_CHIP,TYPE_PROC);

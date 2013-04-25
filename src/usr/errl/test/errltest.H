@@ -423,16 +423,14 @@ public:
                     HWAS::SRCI_PRIORITY_LOW,
                     HWAS::DECONFIG,
                     HWAS::GARD_PoreError);
-            // TODO: RTC 45780
-            // SENTINEL not logged properly // deconfigCount++;
-            // SENTINEL not logged properly // gardCount++;
+            deconfigCount++;
+            gardCount++;
 
             errl->addHwCallout(TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL,
                     HWAS::SRCI_PRIORITY_MED,
                     HWAS::DECONFIG,
                     HWAS::GARD_NULL);
-            // TODO: RTC 45780
-            // SENTINEL not logged properly // deconfigCount++;
+            deconfigCount++;
 
             errl->addProcedureCallout(
                     HWAS::EPUB_PRC_MEMORY_PLUGGING_ERROR,

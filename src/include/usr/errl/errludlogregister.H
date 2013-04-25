@@ -61,7 +61,7 @@ public:
      *   and addToLog() in order to push the data to the error log.
      *
      */
-    ErrlUserDetailsLogRegister(TARGETING::Target * i_pTarget);
+    ErrlUserDetailsLogRegister(const TARGETING::Target * i_pTarget);
 
     /**
      *  @brief Constructor - target and register type/address
@@ -79,7 +79,7 @@ public:
      *   interface (DeviceFW::AccessType) types.
      *
      */
-    ErrlUserDetailsLogRegister(TARGETING::Target * i_pTarget,
+    ErrlUserDetailsLogRegister(const TARGETING::Target * i_pTarget,
                                 DeviceFW::AccessType i_accessType, ...);
 
     /**
@@ -100,7 +100,7 @@ public:
      *  Note that this can only be used for devicefw/userif.H register
      *   interface (DeviceFW::AccessType) types.
      */
-    ErrlUserDetailsLogRegister(TARGETING::Target * i_pTarget,
+    ErrlUserDetailsLogRegister(const TARGETING::Target * i_pTarget,
                                 void *i_dataBuf,
                                 size_t i_dataSize,
                                 DeviceFW::AccessType i_accessType, ...);
@@ -257,7 +257,7 @@ private:
             uint8_t i_accessType, ...);
 
     // allow for multiple calls to addData by user
-    TARGETING::Target * iv_pTarget;
+    const TARGETING::Target * iv_pTarget;
     uint32_t iv_dataSize;
 };
 
