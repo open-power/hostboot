@@ -763,23 +763,32 @@ void MailboxSp::recv_msg(mbox_msg_t & i_mbox_msg)
                 msg_free(msg);
             }
         }
-        // Else unregisteredd msg_queue_id
+        // Else unregistered msg_queue_id
         //  For NOW, ignore FSP mailbox stuff bounced back by the echo server
         else if(i_mbox_msg.msg_queue_id != FSP_MAILBOX_MSGQ)
         {
-            // Queue message to wait until queue is registered.
-            // copy in non-dma instance of payload msg
+            // copy in non-dma instance of payload msg back to mbox msg
             i_mbox_msg.msg_payload = *msg;
 
-            iv_pendingq.push_back(i_mbox_msg);
+            // Is this msg_queue_id valid ?
+            if(i_mbox_msg.msg_queue_id < HB_LAST_VALID_MSGQ  &&
+               i_mbox_msg.msg_queue_id > HB_MAILBOX_MSGQ)
+            {
+                // Queue message to wait until queue is registered.
+                iv_pendingq.push_back(i_mbox_msg);
 
-            TRACFCOMP(g_trac_mbox,
-                      INFO_MRK
-                      "MailboxSp::recv_msg. Unregistered msg queue id 0x%x"
-                      " message queued.",
-                      i_mbox_msg.msg_queue_id);
-
-
+                TRACFCOMP(g_trac_mbox,
+                          INFO_MRK
+                          "MailboxSp::recv_msg. Unregistered msg queue id 0x%x"
+                          " message queued.",
+                          i_mbox_msg.msg_queue_id);
+            }
+            else // un defined HB message queue
+            {
+                // Tell the FSP mbox about it and log an error
+                invalidMsgResponder(i_mbox_msg);
+                free(msg->extra_data); // toss this if it exists
+            }
             msg_free(msg);
         }
         else // This is a bounce-back msg from the echo server - Ignore
@@ -1041,8 +1050,8 @@ errlHndl_t MailboxSp::msgq_register(queue_id_t i_queue_id, msg_q_t i_msgQ)
         TRACFCOMP(g_trac_mbox,INFO_MRK"MailboxSp::msgq_register queue id 0x%x",
                   i_queue_id);
 
-        // Look for pending messages and send them
-        // remove_if and remove_copy_if not available
+        // Look for pending messages and send them.
+        // Note: remove_if and remove_copy_if not implemented in HB code.
         size_t size = iv_pendingq.size();
         while(size--)
         {
@@ -1171,7 +1180,7 @@ errlHndl_t MailboxSp::handleInterrupt()
             else if((mbox_msg.msg_queue_id==FSP_MAILBOX_MSGQ)&&
                     (mbox_msg.msg_payload.type == MSG_REQUEST_DMA_BUFFERS))
             {
-                // This is a response from the FSP
+                // This is a response from the FSP mbox for more DMA buffers
                 handle_hbmbox_resp(mbox_msg);
             }
             else
@@ -1281,6 +1290,69 @@ errlHndl_t MailboxSp::handleInterrupt()
     return err;
 }
 
+// Send a message to the FSP mailbox that a message it sent
+// had an invalid or undeliverable message
+void MailboxSp::invalidMsgResponder(mbox_msg_t & i_mbox_msg)
+{
+    mbox_msg_t r_mbox_msg;
+    r_mbox_msg.msg_queue_id = FSP_MAILBOX_MSGQ;
+    r_mbox_msg.msg_payload.type = MSG_INVALID_MSG_QUEUE_ID;
+    r_mbox_msg.msg_id = i_mbox_msg.msg_id;
+
+    // data[0] = msg_id and msg_queue_id
+    r_mbox_msg.msg_payload.data[0] =
+        *(reinterpret_cast<uint64_t*>(&i_mbox_msg));
+    // data[1] = type & flags
+    r_mbox_msg.msg_payload.data[1] =
+        *(reinterpret_cast<uint64_t*>(&(i_mbox_msg.msg_payload)));
+
+    r_mbox_msg.msg_payload.extra_data = NULL;
+    r_mbox_msg.msg_payload.__reserved__async = 0; // async
+
+    send_msg(&r_mbox_msg);
+
+
+    TRACFCOMP(g_trac_mbox,
+              ERR_MRK
+              "MailboxSp::invalidMsgResponder> Unclaimed mbox message from"
+              " FSP. Queueid 0x%08x",
+              i_mbox_msg.msg_queue_id);
+
+    /*@ errorlog tag
+     * @errortype       ERRL_SEV_INFORMATIONAL
+     * @moduleid        MBOX::MOD_MBOXSRC_UNCLAIMED
+     * @reasoncode      MBOX::RC_INVALID_QUEUE
+     * @userdata1       msg queue
+     * @userdata2       msg type
+     * @devdesc         Message from FSP. Message not claimed
+     *                  by any Hostboot service.
+     */
+    errlHndl_t err = new ERRORLOG::ErrlEntry
+        (
+         ERRORLOG::ERRL_SEV_INFORMATIONAL,
+         MBOX::MOD_MBOXSRC_UNCLAIMED,
+         MBOX::RC_INVALID_QUEUE,            //  reason Code
+         i_mbox_msg.msg_queue_id,           //  message queue id
+         i_mbox_msg.msg_payload.type        //  message type
+        );
+
+    err->addProcedureCallout(HWAS::EPUB_PRC_SP_CODE,
+                             HWAS::SRCI_PRIORITY_HIGH);
+
+    err->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
+                             HWAS::SRCI_PRIORITY_HIGH);
+
+    UserDetailsMboxMsg
+        ffdc(reinterpret_cast<uint64_t*>(&i_mbox_msg),
+             sizeof(mbox_msg_t),
+             reinterpret_cast<uint64_t*>
+             (i_mbox_msg.msg_payload.extra_data),
+             i_mbox_msg.msg_payload.data[1]);
+
+    ffdc.addToLog(err);
+
+    errlCommit(err,MBOX_COMP_ID);
+}
 
 // Handle unclaimed messages in iv_pendingq
 void MailboxSp::handleUnclaimed()
@@ -1289,57 +1361,7 @@ void MailboxSp::handleUnclaimed()
         mbox_msg != iv_pendingq.end();
         ++mbox_msg)
     {
-        mbox_msg_t r_mbox_msg;
-        r_mbox_msg.msg_queue_id = FSP_MAILBOX_MSGQ;
-        r_mbox_msg.msg_payload.type = MSG_INVALID_MSG_QUEUE_ID;
-        r_mbox_msg.msg_id = mbox_msg->msg_id;
-
-        mbox_msg_t * msg = &(*mbox_msg);
-        // msg_id and msg_queue_id
-        r_mbox_msg.msg_payload.data[0] =
-            *(reinterpret_cast<uint64_t*>(msg));
-        // type & flags
-        r_mbox_msg.msg_payload.data[1] =
-            *(reinterpret_cast<uint64_t*>(&(msg->msg_payload)));
-
-        r_mbox_msg.msg_payload.extra_data = NULL;
-        r_mbox_msg.msg_payload.__reserved__async = 0; // async
-
-        send_msg(&r_mbox_msg);
-
-        TRACFCOMP(g_trac_mbox,
-                  ERR_MRK
-                  "MailboxSp::handleUnclaimed> Message never claimed. "
-                  "Queueid 0x%08x",
-                  mbox_msg->msg_queue_id);
-
-        /*@ errorlog tag
-         * @errortype       ERRL_SEV_INFORMATIONAL
-         * @moduleid        MBOX::MOD_MBOXSRC_UNCLAIMED
-         * @reasoncode      MBOX::RC_INVALID_QUEUE
-         * @userdata1       msg queue
-         * @userdata2       msg type
-         * @devdesc         Message from FSP. Message not claimed
-         *                  by any Hostboot service.
-         */
-        errlHndl_t err = new ERRORLOG::ErrlEntry
-            (
-             ERRORLOG::ERRL_SEV_INFORMATIONAL,
-             MBOX::MOD_MBOXSRC_UNCLAIMED,
-             MBOX::RC_INVALID_QUEUE,            //  reason Code
-             mbox_msg->msg_queue_id,            //  message queue id
-             mbox_msg->msg_payload.type         //  message type
-            );
-
-        UserDetailsMboxMsg
-            ffdc(reinterpret_cast<uint64_t*>(msg),
-                 sizeof(mbox_msg_t),
-                 reinterpret_cast<uint64_t*>(msg->msg_payload.extra_data),
-                 msg->msg_payload.data[1]);
-
-        ffdc.addToLog(err);
-
-        errlCommit(err,MBOX_COMP_ID);
+        invalidMsgResponder(*mbox_msg);
     }
     iv_pendingq.clear();
 }

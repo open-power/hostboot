@@ -39,7 +39,7 @@ namespace MBOX
         MOD_MBOXSRV_FSP_MSG     = 0x07, // MailboxSp::handle_hbmbox_msg
         MOD_MBOXSRV_SENDMSG     = 0x08, // MailboxSp::send_msg
         MOD_MBOXSRV_INIT        = 0x09, // MailboxSp::_init
-        MOD_MBOXSRC_UNCLAIMED   = 0x0A, // MailboxSp::handleUnclaimed
+        MOD_MBOXSRC_UNCLAIMED   = 0x0A, // MailboxSp::invalidMsgResponder
     };
 
     enum MBOXReasonCode

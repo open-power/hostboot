@@ -48,6 +48,10 @@ namespace MBOX
         HB_HWPF_ATTR_MSGQ       = 6, // HWPF Attribute override/sync
         HB_TRACE_MSGQ           = 7,
         HB_LID_MSGQ             = 8, //For transferring LIDs from FSP.
+
+        // Add HB mbox msg queue ids (services) before this line
+        HB_LAST_VALID_MSGQ,          // end of valid HB mbox msgQ ids
+
         HB_TEST_MSGQ            = 0x7FFFFFFF,
 
         // FSP mailboxes
