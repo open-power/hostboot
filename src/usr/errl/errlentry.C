@@ -337,9 +337,16 @@ uint32_t ErrlEntry::callout()
                 (ERRL_UDT_CALLOUT == (*it)->iv_header.iv_sst))
             {
                 // call HWAS to have this processed
-                if ((*pFn)(plid(),(*it)->iv_pData, (*it)->iv_Size))
+                (*pFn)(this,(*it)->iv_pData, (*it)->iv_Size);
+
+                // check to see if the master processor got deconfigured
+                TARGETING::Target *l_masterProc;
+                TARGETING::targetService().masterProcChipTargetHandle(
+                        l_masterProc);
+                if (!l_masterProc->getAttr<TARGETING::ATTR_HWAS_STATE>().
+                            functional)
                 {
-                    // if it returned true, we need to return the plid
+                    // if it got deconfigured, we need to return the plid
                     // to indicate that we need to shutdown
                     l_rc = plid();
                 }

@@ -128,18 +128,17 @@ enum callOutPriority
  *  @brief processCallout process the userdetail for a callout, calling
  *              the deconfigure and/or GARD funcationality as appropriate
  *
- *  @param[in]  i_errlPlid Error log PLID to store in GARD Record.
+ *  @param[in]  i_errl Error log handle
  *  @param[in]  i_pData  Pointer to the callout bundle
  *  @param[in]  i_Size  size of the data in the callout bundle
  *
- *  @return true if shutdown required, false otherwise
  */
-bool processCallout(const uint32_t i_errlPlid,
+void processCallout(errlHndl_t i_errl,
         uint8_t *i_pData,
         uint64_t i_Size);
 
 // typedef for function pointer that the errlog class will use.
-typedef bool (*processCalloutFn)(const uint32_t, uint8_t *, uint64_t);
+typedef bool (*processCalloutFn)(errlHndl_t, uint8_t *, uint64_t);
 #endif // not PARSER
 
 //
@@ -165,6 +164,41 @@ typedef struct callout_ud
     };
 } callout_ud_t;
 
+/**
+ * @brief platform specific code to handle a procedure callout that has been
+ *  found in an errlog
+ *
+ * @param[in]  i_errl       errlHndl for this errlog.
+ * @param[in]  i_procedure  Enum indicating which procedure to add to the
+ *                          error log
+ * @param[in]  i_priority   Enum indicating the priority of the callout
+ *
+ * @return errlHndl_t       valid errlHndl_t handle if there was an error,
+ *                          NULL if no errors;
+ */
+errlHndl_t platHandleProcedureCallout(errlHndl_t i_errl,
+        epubProcedureID i_procedure,
+        callOutPriority i_priority);
+
+/**
+ * @brief platform specific code to handle a hardware callout that has been
+ *  found in an errlog
+ *
+ * @param[in]  i_pTarget        target
+ * @param[in]  i_priority       Enum indicating the priority of the callout
+ * @param[in]  i_deconfigState  Enum indicating whether to deconfig or not
+ * @param[in]  i_errl           errlHnld for this errlog
+ * @param[in]  i_gardErrType    Enum indicating the type of failure
+ *
+ * @return errlHndl_t       valid errlHndl_t handle if there was an error,
+ *                          NULL if no errors;
+ */
+errlHndl_t platHandleHWCallout(
+        TARGETING::Target *i_pTarget,
+        callOutPriority i_priority,
+        DeconfigEnum    i_deconfigState,
+        errlHndl_t i_errl,
+        GARD_ErrorType  i_gardErrorType);
 
 };   // end namespace
 

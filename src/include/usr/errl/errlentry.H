@@ -55,6 +55,14 @@
 #include <errl/errlud.H>
 #include <hbotcompid.H>
 #include <targeting/common/target.H>
+
+
+namespace ERRORLOG
+{
+class ErrlEntry;
+}
+typedef ERRORLOG::ErrlEntry* errlHndl_t;
+
 #include <hwas/common/hwasCallout.H>
 
 namespace ERRORLOG
@@ -658,9 +666,6 @@ inline void ErrlEntry::setSrcType(const srcType_t i_srcType)
 }
 
 } // End namespace
-
-
-typedef ERRORLOG::ErrlEntry* errlHndl_t;
 
 
 #endif //ERRLENTRY_H

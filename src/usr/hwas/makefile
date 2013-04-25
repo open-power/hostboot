@@ -5,7 +5,7 @@
 #
 # IBM CONFIDENTIAL
 #
-# COPYRIGHT International Business Machines Corp. 2011,2012
+# COPYRIGHT International Business Machines Corp. 2011,2013
 #
 # p1
 #
@@ -34,7 +34,7 @@ MODULE = hwas
 OBJS =  hwas.o hwasCallout.o deconfigGard.o
 
 # files in this directory
-OBJS +=  hwasPlat.o hostbootIstep.o hwasPlatError.o
+OBJS +=  hwasPlat.o hostbootIstep.o hwasPlatError.o hwasPlatCallout.o
 
 SUBDIRS = test.d
 

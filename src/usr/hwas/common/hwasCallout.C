@@ -33,6 +33,7 @@
 /******************************************************************************/
 #include <stdint.h>
 
+#include <hwas/common/hwasError.H>
 #include <hwas/common/hwasCommon.H>
 #include <hwas/common/deconfigGard.H>
 #include <hwas/common/hwasCallout.H>
@@ -42,16 +43,17 @@
 namespace HWAS
 {
 
-bool processCallout(const uint32_t i_errlPlid,
+using namespace HWAS::COMMON;
+
+void processCallout(errlHndl_t i_errl,
         uint8_t *i_pData,
         uint64_t i_Size)
 {
-    HWAS_INF("processCallout entry. plid 0x%x data %p size %lld",
-            i_errlPlid, i_pData, i_Size);
+    HWAS_INF("processCallout entry. data %p size %lld",
+            i_pData, i_Size);
 
-    bool l_rc = false; // default is no shutdown required
     callout_ud_t *pCalloutUD = (callout_ud_t *)i_pData;
-    errlHndl_t errl = NULL;
+
     switch (pCalloutUD->type)
     {
         case (HW_CALLOUT):
@@ -71,18 +73,20 @@ bool processCallout(const uint32_t i_errlPlid,
                 if (unlikely(pTarget == NULL))
                 {   // only happen if we have a corrupt errlog or targeting.
                     HWAS_ERR("HW callout; pTarget was NULL!!!");
-            
+
                     /*@
                      * @errortype
                      * @moduleid     HWAS::MOD_PROCESS_CALLOUT
                      * @reasoncode   HWAS::RC_INVALID_TARGET
                      * @devdesc      Invalid Target encountered in
-                     *               processCallout
+                     *               processing of HW callout
+                     * @userdata1    callout errlog PLID
                      */
-                    errl = hwasError(
-                        ERRORLOG::ERRL_SEV_INFORMATIONAL,
+                    errlHndl_t errl = hwasError(
+                        ERRL_SEV_INFORMATIONAL,
                         HWAS::MOD_PROCESS_CALLOUT,
-                        HWAS::RC_INVALID_TARGET);
+                        HWAS::RC_INVALID_TARGET,
+                        i_errl->plid());
                     errlCommit(errl, HWAS_COMP_ID);
                     break;
                 }
@@ -92,100 +96,31 @@ bool processCallout(const uint32_t i_errlPlid,
                 TARGETING::targetService().masterProcChipTargetHandle(pTarget);
             }
 
-            const DeconfigEnum deconfigState = pCalloutUD->deconfigState;
-            const GARD_ErrorType gardErrorType = pCalloutUD->gardErrorType;
-            //const callOutPriority priority = pCalloutUD->priority;
-
-            HWAS_INF("HW callout; pTarget %p gardErrorType %x deconfigState %x",
-                    pTarget, gardErrorType, deconfigState);
-            switch (gardErrorType)
+            errlHndl_t errl = platHandleHWCallout(
+                            pTarget,
+                            pCalloutUD->priority,
+                            pCalloutUD->deconfigState,
+                            i_errl,
+                            pCalloutUD->gardErrorType);
+            if (errl)
             {
-                case (GARD_NULL):
-                {   // means no GARD operations
-                    break;
-                }
-                default:
-                {
-                    // move these to platform specific functions?
-                    // RTC: 45781
-                    // hostboot:
-                    // call HWAS common function
-                    errl = HWAS::theDeconfigGard().createGardRecord(*pTarget,
-                            i_errlPlid,
-                            GARD_Fatal);
-                    errlCommit(errl, HWAS_COMP_ID);
-                    // fsp:
-                    // RTC: 45781
-                    // nothing? gard record is already in PNOR
-                    break;
-                }
-            } // switch gardErrorType
-
-            switch (deconfigState)
-            {
-                case (NO_DECONFIG):
-                {
-                    break;
-                }
-                case (DECONFIG):
-                {
-                    // check to see if this target is the master processor
-                    TARGETING::Target *l_masterProc;
-                    TARGETING::targetService().masterProcChipTargetHandle(
-                                l_masterProc);
-                    if (pTarget == l_masterProc)
-                    {
-                        // if so, we can't run anymore, so we will
-                        // return TRUE so the caller calls doShutdown
-                        HWAS_ERR("callout - DECONFIG on MasterProc");
-                        l_rc = true;
-                        break;
-                    }
-
-                    // else, call HWAS common function
-                    errl = HWAS::theDeconfigGard().deconfigureTarget(*pTarget,
-                                i_errlPlid);
-                    errlCommit(errl, HWAS_COMP_ID);
-                    break;
-                }
-                case (DELAYED_DECONFIG):
-                {
-                    // check to see if this target is the master processor
-                    TARGETING::Target *l_masterProc;
-                    TARGETING::targetService().masterProcChipTargetHandle(
-                                l_masterProc);
-                    if (pTarget == l_masterProc)
-                    {
-                        // if so, we can't run anymore, so we will
-                        // return TRUE so the caller calls doShutdown
-                        l_rc = true;
-                        HWAS_ERR("callout - DELAYED_DECONFIG on MasterProc");
-                        break;
-                    }
-                    // else
-                    // do nothing -- the deconfig information was already
-                    // put on a queue and will be processed separately,
-                    // when the time is right.
-                    break;
-                }
-            } // switch deconfigState
+                HWAS_ERR("HW callout: error from platHandlHWCallout");
+                errlCommit(errl, HWAS_COMP_ID);
+            }
             break;
-        }
+        } // HW_CALLOUT
         case (PROCEDURE_CALLOUT):
         {
             HWAS_INF("Procedure callout; proc 0x%x priority 0x%x",
                 pCalloutUD->type, pCalloutUD->type);
-            //const HWAS::epubProcedureID procedure = pCalloutUD->procedure;
-            //const callOutPriority priority = pCalloutUD->priority;
 
-            // move these to platform specific functions?
-            // RTC: 45781
-            // hostboot:
-            // nothing
-
-            // fsp:
-            // RTC: 45781
-            // ? not sure what fsp does for procedure callouts?
+            errlHndl_t errl = platHandleProcedureCallout(i_errl,
+                            pCalloutUD->procedure, pCalloutUD->priority);
+            if (errl)
+            {
+                HWAS_ERR("HW callout: error from platHandlProcedureCallout");
+                errlCommit(errl, HWAS_COMP_ID);
+            }
             break;
         }
         default:
@@ -195,8 +130,7 @@ bool processCallout(const uint32_t i_errlPlid,
         }
     } // switch
 
-    HWAS_INF("processCallout exit l_rc %d", l_rc);
-    return l_rc;
+    HWAS_INF("processCallout exit");
 } // processCallout
 
 }; // end namespace
