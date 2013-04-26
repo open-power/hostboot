@@ -29,7 +29,8 @@ exec tclsh "$0" "$@"
 # Based on if_server.tcl by Doug Gilbert
 
 
-set version "1.4"
+set PNOR_version "1.4"
+set version "1.5"
 
 ############################################################################
 # Accept is called when a new client request comes in
@@ -39,6 +40,12 @@ set version "1.4"
 proc Accept { sock addr port} {
     global socklist
     global log
+    global keepsandbox
+    global fulldirectory
+
+    # reset some per-connection variables that don't always get sent
+    set keepsandbox 0
+    set fulldirectory 0
 
     puts "[clock format [clock seconds]]: Accept $sock from $addr port $port"
     puts $log "$port: [clock format [clock seconds]]: Accept $sock from $addr port $port"
@@ -530,14 +537,7 @@ proc SendSandbox { sock git_sh} {
         puts $git_sh "echo $fips_dir > src/build/citest/etc/bbuild;"
     }
 
-    puts $git_sh "source env.bash;\
-                  make -j4;"
-
-    # hack for now. need to point to 'current' version of hb, not built, since
-    # older versions doesn't support the new fipssetup command.
-    # when this is ready merge, i'll copy the corrected 'hb' into the hostboot
-    # projects directory.
-    puts $git_sh "rm -f hb;ln -s /gsa/ausgsa/home/h/o/hortonb/hb2/src/build/tools/hb;"
+    puts $git_sh "source env.bash; BUILD_MINIMAL=1 make -j4;"
 
     puts $git_sh "export SANDBOXROOT=`pwd`; export SANDBOXNAME=prcd_fsp;\
                   echo \"./hb fipssetup && ./hb prime\" > hbdo; chmod +x hbdo;\
@@ -601,7 +601,7 @@ proc SendSandboxNew { sock git_sh} {
     # Start Compile
     ##################################################################
     set newdir src/usr/hwpf/hwp/mss_new
-    puts $git_sh "source env.bash; make -j4; make -C $newdir"
+    puts $git_sh "source env.bash; BUILD_MINIMAL=1 make -j4; make -C $newdir"
 
     ##################################################################
     # tell the workon shell to terminate
@@ -652,7 +652,7 @@ proc SendSandboxNew { sock git_sh} {
 # client.  Note: Everything from stderr gets returned
 ##################################################################
 
-set explist [list  {^make.*Error.*} {ERROR:.*} {error:.*} {^IfScrub..E>.*} {^Parse Error.*} {^Error.*} ]
+set explist [list  {^make.*Error.*} {ERROR:.*} {error:.*} {^IfScrub..E>.*} {^Parse Error.*} {^Error.*} {^exception caught.*} ]
 
 ##################################################################
 ## This event catches the output of the sandbox when the pipe become readable
@@ -740,7 +740,7 @@ proc SendObjFiles { sock obj_dir } {
 ##################################################################
 proc SendPnorFiles { sock obj_dir } {
     global log
-    global version
+    global PNOR_version
     global client_version
 
     set pnor_files {}
@@ -750,7 +750,7 @@ proc SendPnorFiles { sock obj_dir } {
         puts $sock "ERROR: Needed image files not found in $obj_dir"
         puts $log "$sock: Needed image files not found in $obj_dir"
     } else {
-        if { $client_version < $version } {
+        if { $client_version < $PNOR_version } {
             # client can't handle PNOR_FILE type, so just send the files
             #  back and they'll get put into the <outputdir>
             SendFiles "OBJ_FILE" $sock $pnor_files

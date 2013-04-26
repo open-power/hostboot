@@ -261,9 +261,7 @@ proc start_patch_server_on_fsp { fspip fsppassword } {
 # MAIN
 # ------------------------
 set userid $::env(USER)
-set home $::env(HOME)
-set domain [exec hostname -d]
-set version "1.4"
+set version "1.5"
 
 set files [list]
 set directories [list]
@@ -289,7 +287,8 @@ foreach arg $argv {
                 -o    { set state outputflag }
                 -n    { set newfiles 1 }
                 -k    { set keepsandbox 1 }
-                -*h* { puts {prcd_compile.tcl [--help] [-f <fipslevel> | -d <drivername>] [-o <ouput dir> ] [-n] [ <filename> | -D <directory] }
+                -O    { set noretrieve 1 }
+                -*h* { puts {prcd_compile.tcl [--help] [-f <fipslevel> | -d <drivername>] [-o <ouput dir> | -O ] [-n] [ <filename> | -D <directory>] }
                        puts {}
                        puts {For existing files, this only supports *.{c,C,h,H,initfile,xml} files in the following hostboot directory trees: }
                        puts {    src/usr/hwpf/hwp }
@@ -297,16 +296,12 @@ foreach arg $argv {
                        puts {}
                        puts {The files can either be in the local current working directory, or in a local sub-directory mirroring the hostboot tree. }
                        puts {}
-                       puts {examples }
-                       puts {> prcd_compile.tcl -d hb0216a_1307.810 -o ./output fapiTestHwp.C fapiTestHwp.C sample.initfile}
-                       puts {> prcd_compile.tcl -d hb0216a_1307.810 -o ./output/ proc_cen_framelock.C }
-                       puts {> prcd_compile.tcl -f b0211a_1307.810 -o output dmi_training/proc_cen_framelock/proc_cen_framelock.H }
-                       puts {}
                        puts {Without the -n parameter, the file MUST be an existing files in the hostboot sandbox.}
                        puts {If they are not found in the sandbox, an error will be returned.}
                        puts {}
-                       puts {On success, files from the img/ directory (*.bin *.syms and hbotStringFile) }
-                       puts {will be placed in the output directory. }
+                       puts {if -O is not specified, on success, image and pnor files will be placed in the output directory. }
+                       puts {The -o parameter is optional. The default is the current working directory. }
+                       puts {If instead the -O parameter is specified, no image or pnor files are returned. }
                        puts {}
                        puts {With the -n parameter, the files are assumed to be for a NEW HWP and will be checked to see}
                        puts {if they compile - no binary image files will be returned.}
@@ -320,6 +315,11 @@ foreach arg $argv {
                        puts {}
                        puts {The -d and -o parameters are optional.  Default for -d is the master level of code }
                        puts {and default for -o is the current working directory }
+                       puts {}
+                       puts {examples }
+                       puts {> prcd_compile.tcl -d hb0216a_1307.810 -o ./output fapiTestHwp.C fapiTestHwp.C sample.initfile}
+                       puts {> prcd_compile.tcl -d hb0216a_1307.810 -o ./output/ proc_cen_framelock.C }
+                       puts {> prcd_compile.tcl -f b0211a_1307.810 -o output dmi_training/proc_cen_framelock/proc_cen_framelock.H }
                        puts {}
                        puts "Version: $version"
                        puts {}
@@ -475,7 +475,9 @@ if {[info exists newfiles]}  {
   # Generate compile, retrieve, and complete directives
   ##########################################################
   lappend cmds ":HWP_COMPILE"
-  lappend cmds ":HWP_RETRIEVE"
+  if { ![info exists noretrieve] } {
+    lappend cmds ":HWP_RETRIEVE"
+  }
   lappend cmds ":HWP_DONE"
 }
 
