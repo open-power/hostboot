@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_pm.H,v 1.3 2013/03/05 23:01:11 stillgs Exp $
+// $Id: p8_pm.H,v 1.4 2013/04/12 01:22:23 stillgs Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/p8_pm.H,v $
 //------------------------------------------------------------------------------
 // *|
@@ -100,6 +100,41 @@ enum p8_PM_FLOW_MODE {
         _mi_l_rc.setEcmdError(_mi_e_rc);                                \
         break;                                                          \
     }                                                                   \
+}
+
+#define GETATTR_DEFAULT(_mi_attr, _mi_attr_name, _mi_target, _mi_value, _mi_default){\
+        rc = FAPI_ATTR_GET(_mi_attr, _mi_target, _mi_value); \
+        if (rc) \
+        { \
+            FAPI_ERR("fapiGetAttribute of %s with rc = 0x%x", _mi_attr_name, (uint32_t)rc); \
+            break; \
+        } \
+        FAPI_INF (" value read from attribute %s = 0x%x",  _mi_attr_name,  _mi_value ); \
+        if (!_mi_value) \
+        { \
+            FAPI_DBG(" setting value of read attribute %s to default = 0x%x",  _mi_attr_name,  _mi_default ); \
+             _mi_value = _mi_default;\
+        } \
+}
+
+#define GETATTR(_mi_attr, _mi_attr_name, _mi_target, _mi_value){\
+        rc = FAPI_ATTR_GET(_mi_attr, _mi_target, _mi_value); \
+        if (rc) \
+        { \
+             FAPI_ERR("fapiGetAttribute of %s with rc = 0x%x",  _mi_attr_name, (uint32_t)rc); \
+            break; \
+        } \
+        FAPI_INF (" value read from attribute %s = 0x%x", _mi_attr_name, _mi_value ); \
+}
+
+#define SETATTR(_mi_attr, _mi_attr_name, _mi_target, _mi_value){\
+        rc = FAPI_ATTR_SET(_mi_attr, _mi_target, _mi_value); \
+        if (rc) \
+        { \
+            FAPI_ERR("fapiSetAttribute of %s with rc = 0x%x",  _mi_attr_name, (uint32_t)rc); \
+            break; \
+        } \
+        FAPI_INF (" value written to attribute %s = 0x%x",  _mi_attr_name,  _mi_value ); \
 }
 
 } // extern "C"

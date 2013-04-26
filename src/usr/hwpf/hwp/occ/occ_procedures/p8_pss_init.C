@@ -20,24 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-/* begin_generated_IBM_copyright_prolog                            */
-/*                                                                 */
-/* This is an automatically generated copyright prolog.            */
-/* After initializing,  DO NOT MODIFY OR MOVE                      */ 
-/* --------------------------------------------------------------- */
-/* IBM Confidential                                                */
-/*                                                                 */
-/* Licensed Internal Code Source Materials                         */
-/*                                                                 */
-/* (C)Copyright IBM Corp.  2014, 2014                              */
-/*                                                                 */
-/* The Source code for this program is not published  or otherwise */
-/* divested of its trade secrets,  irrespective of what has been   */
-/* deposited with the U.S. Copyright Office.                       */
-/*  -------------------------------------------------------------- */
-/*                                                                 */
-/* end_generated_IBM_copyright_prolog                              */
-// $Id: p8_pss_init.C,v 1.2 2012/08/24 10:18:50 pchatnah Exp $
+// $Id: p8_pss_init.C,v 1.4 2013/04/05 12:25:34 pchatnah Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/p8_pss_init.C,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
@@ -175,7 +158,7 @@ pss_config_spi_settings(const Target& l_pTarget)
 
     
     rc = FAPI_ATTR_GET(ATTR_FREQ_PB, NULL , attr_proc_pss_init_nest_frequency); if (rc) return rc;
-    //TODO RTC: 68461 - refresh procedures - hacked target in the line below to be NULL
+    ///TODO RTC: 71328 - hack to use system target
     rc = FAPI_ATTR_GET(ATTR_PM_SPIPSS_FREQUENCY, NULL,attr_pm_pss_init_spipss_frequency); if (rc) return rc ;
     
   
@@ -208,7 +191,7 @@ p8_pss_init(Target &i_target, uint32_t mode)
     uint8_t	 attr_pm_apss_chip_select=1 ;
     uint8_t	 attr_pm_spipss_frame_size ;
     // uint8_t  attr_pm_spipss_out_count ;
-    // uint8_t	 attr_pm_spipss_in_delay ;
+    uint8_t	 attr_pm_spipss_in_delay ;
     // uint8_t	 attr_pm_spipss_in_count ;
     uint8_t	 attr_pm_spipss_clock_polarity ;
     uint8_t	 attr_pm_spipss_clock_phase ;
@@ -260,10 +243,10 @@ p8_pss_init(Target &i_target, uint32_t mode)
      else { FAPI_INF (" value read from the attribute attr_pm_spipss_frame_size = 0x%x", attr_pm_spipss_frame_size );}
 
      	//---------------------------------------------------------- 
-//      rc = FAPI_ATTR_GET(ATTR_PM_SPIPSS_IN_DELAY, &i_target, attr_pm_spipss_in_delay); 
+      rc = FAPI_ATTR_GET(ATTR_PM_SPIPSS_IN_DELAY, &i_target, attr_pm_spipss_in_delay); 
 
-//      if (rc) { FAPI_ERR("fapiGetAttribute of ATTR_PM_SPIPSS_IN_DELAY with rc = 0x%x", (uint32_t)rc);  return rc; }
-//      else { FAPI_INF (" value read from the attribute attr_pm_spipss_in_delay_frame1 = 0x%x", attr_pm_spipss_in_delay);}
+      if (rc) { FAPI_ERR("fapiGetAttribute of ATTR_PM_SPIPSS_IN_DELAY with rc = 0x%x", (uint32_t)rc);  return rc; }
+      else { FAPI_INF (" value read from the attribute attr_pm_spipss_in_delay_frame1 = 0x%x", attr_pm_spipss_in_delay);}
 
      	//---------------------------------------------------------- 
      rc = FAPI_ATTR_GET(ATTR_PM_SPIPSS_CLOCK_POLARITY, &i_target, attr_pm_spipss_clock_polarity); 
@@ -304,7 +287,7 @@ p8_pss_init(Target &i_target, uint32_t mode)
       else { FAPI_INF (" value read from the attribute attr_pm_spipss_clock_divider = 0x%x", attr_pm_spipss_clock_divider);}
 
 
-
+      rc = FAPI_ATTR_GET(ATTR_FREQ_PB, NULL, attr_proc_pss_init_nest_frequency); if (rc) return rc;
 
 
 
@@ -348,16 +331,17 @@ p8_pss_init(Target &i_target, uint32_t mode)
 
    uint8_t  	 hwctrl_frame_size =         attr_pm_spipss_frame_size ;         
 //    uint8_t       hwctrl_out_count =          attr_pm_spipss_out_count ;        
-//    uint8_t       hwctrl_in_delay =           attr_pm_spipss_in_delay ;         
+    uint8_t       hwctrl_in_delay =           attr_pm_spipss_in_delay ;         
 //    uint8_t       hwctrl_in_count =           attr_pm_spipss_in_count ;         
    uint8_t 	 hwctrl_clk_pol =     attr_pm_spipss_clock_polarity ;   
    uint8_t       hwctrl_clk_pha =        attr_pm_spipss_clock_phase ;      
    uint32_t       hwctrl_clk_divider =      attr_pm_spipss_clock_divider ;    
    uint32_t       hwctrl_inter_frame_delay =  attr_pm_spipss_inter_frame_delay ;
    uint8_t 	 hwctrl_device = attr_pm_apss_chip_select;
-   uint8_t       nest_freq = attr_proc_pss_init_nest_frequency ;
-        uint32_t  spipss_100ns_div_value ;
-  spipss_100ns_div_value = 4 / ( attr_proc_pss_init_nest_frequency*1000000) * (100 /1000000000);
+   uint32_t       nest_freq = attr_proc_pss_init_nest_frequency ;
+   uint32_t  spipss_100ns_div_value ;
+	spipss_100ns_div_value = (( attr_proc_pss_init_nest_frequency ) /40);
+	//	spipss_100ns_div_value = (( attr_proc_pss_init_nest_frequency * 1000000 * 100) /4000000000);
 
 
 
@@ -382,6 +366,7 @@ p8_pss_init(Target &i_target, uint32_t mode)
         //   data.flushTo0();
         //   data.setWord(1, 0x41000100);
 	e_rc=data.insertFromRight(hwctrl_frame_size,0,6); if (e_rc) { rc.setEcmdError(e_rc);     return rc; }
+	e_rc=data.insertFromRight(hwctrl_in_delay,12,6); if (e_rc) { rc.setEcmdError(e_rc);     return rc; }
 
         // FAPI_INF("    -----------------------------------------------------");
         FAPI_INF("    SPIPSS ADC CTRL_REG_0 Configuration                  ");
@@ -417,7 +402,7 @@ p8_pss_init(Target &i_target, uint32_t mode)
 
         // modify_data here
 
-        uint8_t   hwctrl_fsm_enable = 0x0 ;  
+        uint8_t   hwctrl_fsm_enable = 0x1 ;  
         uint8_t   hwctrl_nr_of_frames = 0x10 ;   
 
 
@@ -542,7 +527,7 @@ p8_pss_init(Target &i_target, uint32_t mode)
         uint32_t   p2s_inter_frame_delay = 0x0;
 //         uint8_t   p2s_in_count1;
 //         uint8_t   p2s_out_count1;
-//         uint8_t   p2s_in_delay1;
+         uint8_t   p2s_in_delay;
 //         uint8_t   p2s_in_count2;
 //         uint8_t   p2s_out_count2;
 //         uint8_t   p2s_in_delay2;
@@ -580,7 +565,7 @@ p8_pss_init(Target &i_target, uint32_t mode)
 
 	 p2s_frame_size =         attr_pm_spipss_frame_size ;         
 	 //	 p2s_out_count =          attr_pm_spipss_out_count ;        
-	 //	 p2s_in_delay =           attr_pm_spipss_in_delay ;         
+	 	 p2s_in_delay =           attr_pm_spipss_in_delay ;         
 	 //	 p2s_in_count =           attr_pm_spipss_in_count ;         
 	 p2s_clk_pol =     attr_pm_spipss_clock_polarity ;   
 	 p2s_clk_pha =        attr_pm_spipss_clock_phase ;      
@@ -607,12 +592,13 @@ p8_pss_init(Target &i_target, uint32_t mode)
 	//         e_rc=data.flushTo0(); if (e_rc) { rc.setEcmdError(e_rc);     return rc; }
         //   e_rc=data.setWord(1, 0x41000100); if (e_rc) { rc.setEcmdError(e_rc);     return rc; }
         e_rc=data.insertFromRight(p2s_frame_size,0,6); if (e_rc) { rc.setEcmdError(e_rc);     return rc; }
+        e_rc=data.insertFromRight(p2s_in_delay,12,6); if (e_rc) { rc.setEcmdError(e_rc);     return rc; }
 
         // FAPI_INF("    -----------------------------------------------------");
         FAPI_INF("    SPIPSS P2S CTRL_REG_0 Configuration                  ");
         // FAPI_INF("    -----------------------------------------------------");  
         FAPI_INF("      frame size                 => %d ", p2s_frame_size);
-        FAPI_INF("                                       "                   );
+        FAPI_INF("      p2s_in_delay               => %d ", p2s_in_delay  );
         FAPI_INF("                                       "                   );
         // FAPI_INF("    -----------------------------------------------------");
 
@@ -642,7 +628,7 @@ p8_pss_init(Target &i_target, uint32_t mode)
 
         // modify_data here
 
-        uint8_t   p2s_fsm_enable = 0x0 ;  
+        uint8_t   p2s_fsm_enable = 0x1 ;  
         uint8_t   p2s_nr_of_frames = 0x10 ;   
 
 	//      e_rc=data.flushTo0(); if (e_rc) { rc.setEcmdError(e_rc);     return rc; }
@@ -757,8 +743,8 @@ p8_pss_init(Target &i_target, uint32_t mode)
          // FAPI_INF("    -----------------------------------------------------");
          FAPI_INF("    SPIPSS_100NS_REG is set the value                     ");
          // FAPI_INF("    -----------------------------------------------------");  
-         FAPI_INF("      spipss_100ns_div_value     => %d ", spipss_100ns_div_value       );
-         FAPI_INF("                                       "                     );
+         FAPI_INF("      spipss_100ns_div_value_hi     => %d ", spipss_100ns_div_value       );
+         FAPI_INF("        nest_freq                   => %d ", nest_freq                     );
          FAPI_INF("                                       "                     );
          // FAPI_INF("    -----------------------------------------------------");
 

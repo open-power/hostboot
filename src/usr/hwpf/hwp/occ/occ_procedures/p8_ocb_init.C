@@ -20,25 +20,8 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-/* begin_generated_IBM_copyright_prolog                            */
-/*                                                                 */
-/* This is an automatically generated copyright prolog.            */
-/* After initializing,  DO NOT MODIFY OR MOVE                      */ 
-/* --------------------------------------------------------------- */
-/* IBM Confidential                                                */
-/*                                                                 */
-/* Licensed Internal Code Source Materials                         */
-/*                                                                 */
-/* (C)Copyright IBM Corp.  2014, 2014                              */
-/*                                                                 */
-/* The Source code for this program is not published  or otherwise */
-/* divested of its trade secrets,  irrespective of what has been   */
-/* deposited with the U.S. Copyright Office.                       */
-/*  -------------------------------------------------------------- */
-/*                                                                 */
-/* end_generated_IBM_copyright_prolog                              */
-// $Id: p8_ocb_init.C,v 1.3 2012/10/11 13:49:00 jimyac Exp $
-// $Source: /afs/awd.austin.ibm.com/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/p8_ocb_init.C,v $
+// $Id: p8_ocb_init.C,v 1.5 2013/04/23 16:30:58 jimyac Exp $
+// $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/p8_ocb_init.C,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2012
 // *! All Rights Reserved -- Property of IBM
@@ -597,6 +580,149 @@ ReturnCode proc_ocb_reset(const Target& i_target) {
       return rc;
     }
   } // end for loop
+
+  // -----------------------------------------
+  // Set Interrupt Source Mask Registers 0 & 1 
+  // OIMR0/1 @ 0X0006A006 & 0X0006A016
+  // -----------------------------------------
+  l_ecmdRc = data.flushTo1();
+  if (l_ecmdRc) {
+    FAPI_ERR("Error (0x%x) setting up ecmdDataBufferBase", l_ecmdRc);
+    rc.setEcmdError(l_ecmdRc);
+    return rc;
+  }  
+  
+  rc = fapiPutScom(i_target, OCC_ITP_MASK0_MASK_OR_0x0006A006, data);
+  if (!rc.ok()) {
+    FAPI_ERR("**** ERROR : Unexpected error encountered in write to OCC Interrupt Source Mask Register0 (OIMR0)");
+    return rc;
+  }  
+
+  rc = fapiPutScom(i_target, OCC_ITP_MASK1_MASK_OR_0x0006A016, data);
+  if (!rc.ok()) {
+    FAPI_ERR("**** ERROR : Unexpected error encountered in write to OCC Interrupt Source Mask Register1 (OIMR1)");
+    return rc;
+  }  
+
+  // ---------------------------------------------------------------------------------
+  // Clear OCC Interrupt Controller Registers
+  //   - OITR0/1  Interrupt Type 0/1                         @ 0x0006A008 & 0x0006A018
+  //   - OIEPR0/1 Interrupt Edge Polarity 0/1                @ 0x0006A009 & 0x0006A019
+  //   - OISR0/1  Interrupt Source 0/1                       @ 0x0006A001 & 0x0006A011  
+  //   - OCIR0/1  Interrupt Critical Enable 0/1              @ 0x0006A00A & 0x0006A01A
+  //   - ODHER0/1 Interrupt Debug Halt Enable 0/1            @ 0x0006A00A & 0x0006A01A
+  //   - OUDER0/1 Interrupt Unconditional Debug Event Enable @ 0x0006A00C & 0x0006A01C
+  // ---------------------------------------------------------------------------------
+  l_ecmdRc = data.flushTo0();  
+  if (l_ecmdRc) {
+    FAPI_ERR("Error (0x%x) setting up ecmdDataBufferBase", l_ecmdRc);
+    rc.setEcmdError(l_ecmdRc);
+    return rc;
+  }  
+
+  rc = fapiPutScom(i_target, OCC_ITP_TYPE0_0x0006A008, data);
+  if (!rc.ok()) {
+    FAPI_ERR("**** ERROR : Unexpected error encountered in write to OCC Interrupt Type Register0 (OITR0)");
+    return rc;
+  }  
+  
+  rc = fapiPutScom(i_target, OCC_ITP_TYPE1_0x0006A018, data);
+  if (!rc.ok()) {
+    FAPI_ERR("**** ERROR : Unexpected error encountered in write to OCC Interrupt Type Register1 (OITR1)");
+    return rc;
+  }   
+
+
+  rc = fapiPutScom(i_target, OCC_ITP_EDGE_POLARITY0_0x0006A009, data);
+  if (!rc.ok()) {
+    FAPI_ERR("**** ERROR : Unexpected error encountered in write to OCC Interrupt Edge Polarity Register0 (OIEPR0)");
+    return rc;
+  }  
+
+  rc = fapiPutScom(i_target, OCC_ITP_EDGE_POLARITY1_0x0006A019, data);
+  if (!rc.ok()) {
+    FAPI_ERR("**** ERROR : Unexpected error encountered in write to OCC Interrupt Edge Polarity Register1 (OIEPR1)");
+    return rc;
+  }  
+
+
+ rc = fapiPutScom(i_target, OCC_ITP_SOURCE0_MASK_AND_0x0006A001, data);
+  if (!rc.ok()) {
+    FAPI_ERR("**** ERROR : Unexpected error encountered in write to OCC Interrupt Source Register0 (OISR0)");
+    return rc;
+  }  
+  
+  rc = fapiPutScom(i_target, OCC_ITP_SOURCE1_MASK_AND_0x0006A011, data);
+  if (!rc.ok()) {
+    FAPI_ERR("**** ERROR : Unexpected error encountered in write to OCC Interrupt Source Register1 (OISR1)");
+    return rc;
+  }  
+
+
+  rc = fapiPutScom(i_target, OCC_ITP_CRITICAL_EN0_0x0006A00A, data);
+  if (!rc.ok()) {
+    FAPI_ERR("**** ERROR : Unexpected error encountered in write to OCC Interrupt Critical Enable Register0 (OCIR0)");
+    return rc;
+  }  
+
+  rc = fapiPutScom(i_target, OCC_ITP_CRITICAL_EN1_0x0006A01A, data);
+  if (!rc.ok()) {
+    FAPI_ERR("**** ERROR : Unexpected error encountered in write to OCC Interrupt Critical Enable Register1 (OCIR1)");
+    return rc;
+  }  
+
+
+  rc = fapiPutScom(i_target, OCC_ITP_DEBUG_HALT_EN0_0x0006A00E, data);
+  if (!rc.ok()) {
+    FAPI_ERR("**** ERROR : Unexpected error encountered in write to OCC Interrupt Debug Halt Enable Register0 (ODHER0)");
+    return rc;
+  }  
+
+  rc = fapiPutScom(i_target, OCC_ITP_DEBUG_HALT_EN1_0x0006A01E, data);
+  if (!rc.ok()) {
+    FAPI_ERR("**** ERROR : Unexpected error encountered in write to OCC Interrupt Debug Halt Enable Register1 (ODHER1)");
+    return rc;
+  }  
+
+ 
+  rc = fapiPutScom(i_target, OCC_ITP_UNCOND_DEBUG_EN0_0x0006A00C, data);
+  if (!rc.ok()) {
+    FAPI_ERR("**** ERROR : Unexpected error encountered in write to OCC Unconditional Debug Event Enable Register0 (OUDER0)");
+    return rc;
+  }  
+  
+  rc = fapiPutScom(i_target, OCC_ITP_UNCOND_DEBUG_EN1_0x0006A01C, data);
+  if (!rc.ok()) {
+    FAPI_ERR("**** ERROR : Unexpected error encountered in write to OCC Unconditional Debug Event Enable Register1 (OUDER1)");
+    return rc;
+  }    
+    
+  // ----------------------------------------------------------
+  // Clear OCC Interrupt Timer Registers 0 & 1 
+  // OTR0/1 @ 0x0006A100 & 0x0006A101
+  // ----------------------------------------------------------  
+  // clear OTR0/1     0x0006A100 & 0x0006A101 need bits 0&1 set to clear register
+  l_ecmdRc = data.flushTo0(); 
+  l_ecmdRc |= data.setBit(0);
+  l_ecmdRc |= data.setBit(1);
+  
+  if (l_ecmdRc) {
+    FAPI_ERR("Error (0x%x) setting up ecmdDataBufferBase", l_ecmdRc);
+    rc.setEcmdError(l_ecmdRc);
+    return rc;
+  }  
+
+  rc = fapiPutScom(i_target, OCC_ITP_TIMER0_0x0006A100, data);
+  if (!rc.ok()) {
+    FAPI_ERR("**** ERROR : Unexpected error encountered in write to OCC Interrupt Timer0 Register (OTR0)");
+    return rc;
+  }  
+
+  rc = fapiPutScom(i_target, OCC_ITP_TIMER1_0x0006A101, data);
+  if (!rc.ok()) {
+    FAPI_ERR("**** ERROR : Unexpected error encountered in write to OCC Interrupt Timer1 Register (OTR1)");
+    return rc;
+  }  
 
   return rc;
 }

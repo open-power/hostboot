@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/hwpf/hwp/occ/occ_procedures/p8_pm_pmc_firinit.H $     */
+/* $Source: src/usr/hwpf/hwp/occ/occ_procedures/p8_cpu_special_wakeup.H $ */
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
@@ -20,15 +20,15 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_pm_pmc_firinit.H,v 1.5 2013/04/01 04:27:51 stillgs Exp $
-// $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/p8_pm_pmc_firinit.H,v $
+// $Id: p8_cpu_special_wakeup.H,v 1.5 2013/04/16 12:14:35 pchatnah Exp $
+// $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/p8_cpu_special_wakeup.H,v $
 //------------------------------------------------------------------------------
 // *|
 // *! (C) Copyright International Business Machines Corp. 2011
 // *! All Rights Reserved -- Property of IBM
 // *! *** IBM Confidential ***
 // *|
-// *! TITLE       : p8_pm_pmc_firinit.H
+// *! TITLE       : proc_cpu_special_wakeup.H
 // *! DESCRIPTION : Set the EX chiplet into Special Wake-up via one of the 
 // *!               entity bits provided
 // *!
@@ -37,30 +37,76 @@
 // *!
 //------------------------------------------------------------------------------
 
+#ifndef _PROC_CPUSPECWKUP_H_
+#define _PROC_CPUSPECWKUP_H_
+
+
+//------------------------------------------------------------------------------
+// Constant definitions
+//------------------------------------------------------------------------------
+
+#ifndef _PROC_SPCWKUP_ENTITY
+#define _PROC_SPCWKUP_ENTITY
+
+#define NUM_SPCWKUP_ENTITIES 4
+enum PROC_SPCWKUP_ENTITY 
+{
+    HOST,
+    FSP,
+    OCC,
+    PHYP = HOST,
+    SPW_ALL
+};
+
+
+
+#define NUM_SPCWKUP_OPS 3
+enum PROC_SPCWKUP_OPS 
+{
+    SPCWKUP_DISABLE,
+    SPCWKUP_ENABLE,
+    SPCWKUP_INIT
+};
+
+
+#endif  // _PROC_SPCWKUP_TGTS
+
+
+
 
 //------------------------------------------------------------------------------
 // Includes
 //------------------------------------------------------------------------------
-#include "p8_pm_firinit.H"
+
 
 // function pointer typedef definition for HWP call support
-typedef fapi::ReturnCode (*p8_pm_pmc_firinit_FP_t) (const fapi::Target& , uint32_t mode );
+typedef fapi::ReturnCode (*p8_cpu_special_wakeup_FP_t) (
+                            const fapi::Target&, 
+                            PROC_SPCWKUP_OPS, 
+                            PROC_SPCWKUP_ENTITY         );
 
 extern "C" {
 
 //------------------------------------------------------------------------------
-// function: FAPI p8_pm_pmc_firinit  HWP entry point
-//           operates on chips passed in i_target argument to perform
-//           desired settings of FIRS of PMC macro 
-// parameters: i_target        => chip target
-
-// returns: FAPI_RC_SUCCESS if all specified operations complete successfully,
-//          else return code for failing operation
+// Parameter structure definitions
 //------------------------------------------------------------------------------
+
+
+//------------------------------------------------------------------------------
+// Function prototype
+//------------------------------------------------------------------------------
+/// \param[in] i_target EX target
+/// \param[in] i_entity   Entity bit to use (OCC, PHYP, FSP)
+/// \param[in] i_operation   operation to use (SPCWKUP_ENABLE, SPCWKUP_DISABLE)
+
+
+/// \retval ECMD_SUCCESS if something good happens,
+/// \retval BAD_RETURN_CODE otherwise
 fapi::ReturnCode 
-p8_pm_pmc_firinit(const fapi::Target& i_target, uint32_t mode );
- 
+p8_cpu_special_wakeup(  const fapi::Target& i_target, 
+                        PROC_SPCWKUP_OPS i_operation , 
+                        PROC_SPCWKUP_ENTITY i_entity );
 
 } // extern "C"
 
-
+#endif // _PROC_CPUSPECWKUP_H_

@@ -20,25 +20,8 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-/* begin_generated_IBM_copyright_prolog                            */
-/*                                                                 */
-/* This is an automatically generated copyright prolog.            */
-/* After initializing,  DO NOT MODIFY OR MOVE                      */ 
-/* --------------------------------------------------------------- */
-/* IBM Confidential                                                */
-/*                                                                 */
-/* Licensed Internal Code Source Materials                         */
-/*                                                                 */
-/* (C)Copyright IBM Corp.  2014, 2014                              */
-/*                                                                 */
-/* The Source code for this program is not published  or otherwise */
-/* divested of its trade secrets,  irrespective of what has been   */
-/* deposited with the U.S. Copyright Office.                       */
-/*  -------------------------------------------------------------- */
-/*                                                                 */
-/* end_generated_IBM_copyright_prolog                              */
 // $Id: p8_occ_sram_init.H,v 1.1 2012/08/23 16:35:37 jimyac Exp $
-// $Source: /afs/awd.austin.ibm.com/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/p8_occ_sram_init.H,v $
+// $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/p8_occ_sram_init.H,v $
 //------------------------------------------------------------------------------
 // *|
 // *! (C) Copyright International Business Machines Corp. 2011

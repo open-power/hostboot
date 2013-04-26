@@ -51,6 +51,7 @@
 #include    <mbox/mbox_queues.H>
 #include    <mbox/mboxif.H>
 #include    <i2c/i2cif.H>
+#include    <hwpf/hwp/occ/occ.H>
 
 #include    <initservice/isteps_trace.H>
 #include    <hwpisteperror.H>
@@ -141,17 +142,61 @@ void*    call_host_runtime_setup( void    *io_pArgs )
             break;
         }
 
-        // Skip the rest in AVP mode
+        // Only run OCC in AVP mode.  Run the rest in !AVP mode
         TARGETING::Target * sys = NULL;
         TARGETING::targetService().getTopLevelTarget( sys );
         assert(sys != NULL);
 
         TARGETING::ATTR_PAYLOAD_KIND_type payload_kind
           = sys->getAttr<TARGETING::ATTR_PAYLOAD_KIND>();
+
         if( TARGETING::PAYLOAD_KIND_AVP == payload_kind )
         {
-            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                       "Skipping host_runtime_setup in AVP mode" );
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "Skipping host_runtime_setup in AVP mode.  Starting OCC" );
+            //Load modules needed by OCC
+            bool occ_loaded = false;
+
+            if (  !VFS::module_is_loaded( "libocc.so" ) )
+            {
+                l_err = VFS::module_load( "libocc.so" );
+
+                if ( l_err )
+                {
+                    //  load module returned with errl set
+                    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                               "Could not load occ module" );
+                    // break from do loop if error occured
+                    break;
+                }
+                occ_loaded = true;
+            }
+
+            l_err = HBOCC::loadnStartAllOccs();
+            if(l_err)
+            {
+                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                           ERR_MRK"loadnStartAllOccs failed" );
+            }
+
+            //make sure we always unload the module
+            if (occ_loaded)
+            {
+                errlHndl_t  l_tmpErrl  =   NULL;
+                l_tmpErrl = VFS::module_unload( "libocc.so" );
+                if ( l_tmpErrl )
+                {
+                    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                               ERR_MRK"Error unloading libocc module" );
+                    if(l_err)
+                    {
+                        errlCommit( l_tmpErrl, HWPF_COMP_ID );
+                    }
+                    else
+                    {
+                        l_err = l_tmpErrl;
+                    }
+                }
+            }
             break;
         }
 

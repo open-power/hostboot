@@ -37,7 +37,8 @@
 
 #include    <sys/misc.h>            //  cpu_thread_count(), P8_MAX_PROCS
 #include    <vfs/vfs.H>             // PORE image
-#include    <sys/mm.h>              //  mm_linear_map
+#include    <sys/mmio.h>            // mmio_dev_map
+#include    <sys/mm.h>              // mm_linear_map
 
 #include    <trace/interface.H>
 #include    <initservice/taskargs.H>
@@ -319,7 +320,12 @@ void*    call_host_build_winkle( void    *io_pArgs )
     const char  *l_pPoreImage   =   NULL;
     uint32_t    l_poreSize      =   0;
     void        *l_pRealMemBase =
-                        reinterpret_cast<void * const>( OUTPUT_PORE_IMG_ADDR ) ;
+                        reinterpret_cast
+                 <void * const>(VMM_HOMER_REGION_START_ADDR );
+#if 0
+    //TODO RTC 71081 - enabled when switching to dev_map
+    void* l_pVirtMemBase = NULL;
+#endif
     ISTEP_ERROR::IStepError     l_StepError;
 
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
@@ -330,73 +336,40 @@ void*    call_host_build_winkle( void    *io_pArgs )
     do  {
         //  Get a chunk of real memory big enough to store all the possible
         //  SLW images.
-        const uint64_t l_RealMemSize = ((MAX_OUTPUT_PORE_IMG_IN_MB*1*MEGABYTE) *
-                              P8_MAX_PROCS );
 
-        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                   "Got realmem to store all SLW images, size=0x%lx",
-                   l_RealMemSize    );
+        //Assert if anyone ever changes VMM_HOMER_REGION_SIZE to not
+        //equal 32MB because mmio_dev_map won't support it
+        assert(VMM_HOMER_REGION_SIZE == THIRTYTWO_MB,
+               "host_build_winkle: Unsupported HOMER Region size");
 
-        const int l_getAddrRc =   mm_linear_map(  l_pRealMemBase,
-                                        l_RealMemSize   );
-        if ( l_getAddrRc != 0 )
-        {
-            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                       "ERROR:  could not get real mem." );
-
-            //  build userdata2, truncated pointer in hi, size in low
-            uint64_t    l_userdata2 =   (
-                                        ( ( (reinterpret_cast<uint64_t>
-                                             (l_pRealMemBase) )
-                                            & 0x00000000ffffffff) << 32 )
-                                        |
-                                        l_RealMemSize );
-            /*@
-             * @errortype
-             * @reasoncode  ISTEP_GET_SLW_OUTPUT_BUFFER_FAILED
-             * @severity    ERRORLOG::ERRL_SEV_UNRECOVERABLE
-             * @moduleid    ISTEP_BUILD_WINKLE_IMAGES
-             * @userdata1   return code from mm_linear_map
-             * @userdata2   Hi 32 bits: Address of memory requested
-             *              Lo 32 bits: Size of memory requested
-             * @devdesc     Failed to map in a real memory area to store the
-             *              SLW images for all possible processors
-             *
-             */
-            l_errl =
-            new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                     ISTEP::ISTEP_BUILD_WINKLE_IMAGES,
-                                     ISTEP::ISTEP_GET_SLW_OUTPUT_BUFFER_FAILED,
-                                     l_getAddrRc,
-                                     l_userdata2 );
-            /*@
-             * @errortype
-             * @reasoncode  ISTEP_GET_SLW_REALMEM_FAILED
-             * @severity    ERRORLOG::ERRL_SEV_UNRECOVERABLE
-             * @moduleid    ISTEP_HOST_BUILD_WINKLE
-             * @userdata1       bytes 0-1: plid identifying first error
-             *                  bytes 2-3: reason code of first error
-             * @userdata2       bytes 0-1: total number of elogs included
-             *                  bytes 2-3: N/A
-             * @devdesc     call to host_build_winkle has failed
-             *
-             */
-            l_StepError.addErrorDetails(ISTEP::ISTEP_GET_SLW_REALMEM_FAILED,
-                                        ISTEP::ISTEP_HOST_BUILD_WINKLE,
-                                        l_errl);
-            errlCommit( l_errl, HWPF_COMP_ID );
-
-            // Drop to bottom and exit with IStepError filled in
-            break;
-        }
-
-
-        //  Continue, build SLW images
+#if 0
+        //TODO RTC: 71081 change to non-cache inhibited
+        //version of mmio_dev_map
+        l_pVirtMemBase =
+              mmio_dev_map(l_pRealMemBase, THIRTYTWO_MB);
 
         TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                   "Got real mem  buffer for %d cpus = 0x%p",
+                   "Got virtual mem  buffer for %d cpus = 0x%p",
+                   P8_MAX_PROCS,
+                   l_pVirtMemBase  );
+#else
+        const int l_getAddrRc = mm_linear_map (l_pRealMemBase,
+                                               THIRTYTWO_MB);
+        if(l_getAddrRc != 0)
+        {
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, ERR_MRK"host_build_winkle ERROR : could not get real mem");
+            assert(false);
+            // drop out of do block with errorlog.
+            break;
+        }
+        TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                   "Got virtual mem  buffer for %d cpus = 0x%p",
                    P8_MAX_PROCS,
                    l_pRealMemBase  );
+
+#endif
+        //  Continue, build SLW images
+
 
         //Load the reference image from PNOR
         l_errl  =   loadPoreImage(  l_pPoreImage,
@@ -438,14 +411,26 @@ void*    call_host_build_winkle( void    *io_pArgs )
 
                 //  calculate size and location of the SLW output buffer
                 uint32_t    l_procNum =
-                    l_procChip->getAttr<TARGETING::ATTR_POSITION>();
+                  l_procChip->getAttr<TARGETING::ATTR_POSITION>();
+                uint64_t    l_procOffsetAddr =
+                  ( l_procNum *VMM_HOMER_INSTANCE_SIZE ) + HOMER_SLW_IMG_OFFSET;
+
                 uint64_t    l_procRealMemAddr  =
-                    ( reinterpret_cast<uint64_t>(l_pRealMemBase) +
-                      ( l_procNum * (MAX_OUTPUT_PORE_IMG_IN_MB*1*MEGABYTE) )) ;
-                void        *l_pImageOut = reinterpret_cast<void * const>
-                                           ( l_procRealMemAddr );
+                  reinterpret_cast<uint64_t>(l_pRealMemBase)
+                  + l_procOffsetAddr;
+#if 0
+                //TODO RTC: 71081 - change to use virtual offset
+                //when switched to mmio_dev_map type interface.
+                void *l_pImageOut =
+                  reinterpret_cast<void * const>
+                  (reinterpret_cast<uint64_t>(l_pVirtMemBase)
+                   + l_procOffsetAddr) ;
+#else
+                 void *l_pImageOut =
+                   reinterpret_cast<void * const>(l_procRealMemAddr);
+#endif
                 uint32_t    l_sizeImageOut  =
-                                    (MAX_OUTPUT_PORE_IMG_IN_MB*1*MEGABYTE)  ;
+                  (HOMER_MAX_SLW_IMG_SIZE_IN_MB*MEGABYTE);
 
                 //  set default values, p8_slw_build will provide actual size
                 l_procChip->setAttr<TARGETING::ATTR_SLW_IMAGE_ADDR>
@@ -454,9 +439,10 @@ void*    call_host_build_winkle( void    *io_pArgs )
                                                         ( l_sizeImageOut ) ;
 
                 TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                           "Real mem  buffer for cpu 0x%08x = 0x%p",
+                           "Real mem  buffer for cpu 0x%08x = %p, virtAddr=%p",
                            l_procNum,
-                           l_procRealMemAddr );
+                           l_procRealMemAddr,
+                           l_pImageOut);
 
                 // cast OUR type of target to a FAPI type of target.
                 const fapi::Target l_fapi_cpu_target( TARGET_TYPE_PROC_CHIP,
@@ -545,6 +531,54 @@ void*    call_host_build_winkle( void    *io_pArgs )
     }  while (0);
     // @@@@@    END CUSTOM BLOCK:   @@@@@
 
+#if 0
+    //TODO RTC 71081 - enable when switching to dev_map
+    // interface
+    if(l_pVirtMemBase)
+    {
+        int rc = 0;
+        rc =  mmio_dev_unmap(l_pVirtMemBase);
+        if (rc != 0)
+        {
+            /*@
+             * @errortype
+             * @reasoncode   ISTEP::ISTEP_MMIO_UNMAP_ERR
+             * @moduleid     ISTEP::ISTEP_BUILD_WINKLE_IMAGES
+             * @severity     ERRORLOG::ERRL_SEV_UNRECOVERABLE
+             * @userdata1    Return Code
+             * @userdata2    Unmap address
+             * @devdesc      mmio_dev_unmap() returns error
+             */
+            l_errl =
+              new ERRORLOG::ErrlEntry(
+                                      ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                      ISTEP::ISTEP_BUILD_WINKLE_IMAGES,
+                                      ISTEP::ISTEP_MMIO_UNMAP_ERR,
+                                      rc,
+                                      reinterpret_cast<uint64_t>
+                                      (l_pVirtMemBase));
+
+            /*@
+             * @errortype
+             * @reasoncode  ISTEP_MMIO_UNMAP_ERR
+             * @severity    ERRORLOG::ERRL_SEV_UNRECOVERABLE
+             * @moduleid    ISTEP_HOST_BUILD_WINKLE
+             * @userdata1       bytes 0-1: plid identifying first error
+             *                  bytes 2-3: reason code of first error
+             * @userdata2       bytes 0-1: total number of elogs included
+             *                  bytes 2-3: N/A
+             * @devdesc     Call to host_build_winkle has failed due to
+             *              unmapping of memory.
+             *
+             */
+            l_StepError.addErrorDetails(
+                                        ISTEP::ISTEP_MMIO_UNMAP_ERR,
+                                        ISTEP::ISTEP_HOST_BUILD_WINKLE,
+                                        l_errl );
+            errlCommit( l_errl, HWPF_COMP_ID );
+        }
+    }
+#endif
 
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                "call_host_build_winkle exit" );
@@ -611,7 +645,7 @@ void*    call_proc_set_pore_bar( void    *io_pArgs )
         //  This is rounded up to the nearest power of 2 by the HWP.
         //  Easiest way to insure this works right is to set it to a power
         //  of 2;  see vmmconst.H
-        uint64_t l_mem_size =  MAX_OUTPUT_PORE_IMG_IN_MB ;
+        uint64_t l_mem_size =  HOMER_MAX_SLW_IMG_SIZE_IN_MB ;
 
         //  defined in p8_set_pore_bar.H
         uint32_t        l_mem_type  =   SLW_L3 ;

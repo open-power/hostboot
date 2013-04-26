@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- IBM CONFIDENTIAL                                                       -->
 <!--                                                                        -->
-<!-- COPYRIGHT International Business Machines Corp. 2012                   -->
+<!-- COPYRIGHT International Business Machines Corp. 2012,2013              -->
 <!--                                                                        -->
 <!-- p1                                                                     -->
 <!--                                                                        -->
@@ -32,6 +32,23 @@
   <hwpError>
     <rc>RC_PROCPM_PMCINIT_TIMEOUT</rc>
     <description>time out in polling some register condition.</description>
+  </hwpError>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_PROCPM_PMCRESET_TARGET_ERROR</rc>
+    <description>Either both targets are masters or slaves in reset mode.</description>
+  </hwpError>
+
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_PROCPM_FIR_ERROR</rc>
+    <description>Either both targets are masters or slaves in reset mode.</description>
+  </hwpError>
+
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_PROCPM_PMCRESET_DCM_INSTALL_ERROR</rc>
+    <description>Error found in DCM installment..</description>
   </hwpError>
   <!-- *********************************************************************** -->
 </hwpErrors>

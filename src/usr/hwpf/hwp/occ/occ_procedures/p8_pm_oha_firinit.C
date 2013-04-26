@@ -20,40 +20,27 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-/* begin_generated_IBM_copyright_prolog                            */
-/*                                                                 */
-/* This is an automatically generated copyright prolog.            */
-/* After initializing,  DO NOT MODIFY OR MOVE                      */ 
-/* --------------------------------------------------------------- */
-/* IBM Confidential                                                */
-/*                                                                 */
-/* Licensed Internal Code Source Materials                         */
-/*                                                                 */
-/* (C)Copyright IBM Corp.  2014, 2014                              */
-/*                                                                 */
-/* The Source code for this program is not published  or otherwise */
-/* divested of its trade secrets,  irrespective of what has been   */
-/* deposited with the U.S. Copyright Office.                       */
-/*  -------------------------------------------------------------- */
-/*                                                                 */
-/* end_generated_IBM_copyright_prolog                              */
-// $Id: p8_pm_oha_firinit.C,v 1.4 2012/09/16 05:10:14 pchatnah Exp $
-// $Source: /afs/awd.austin.ibm.com/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/p8_pm_oha_firinit.C,v $
+// $Id: p8_pm_oha_firinit.C,v 1.11 2013/04/01 04:25:38 stillgs Exp $
+// $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/p8_pm_oha_firinit.C,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
 // *! All Rights Reserved -- Property of IBM
 // *! *** IBM Confidential ***
 //------------------------------------------------------------------------------
-// *! OWNER NAME: Joe Procwriter         Email: asmartpersion@xx.ibm.com
+// *! OWNER NAME: Pradeep CN         Email: pradeepcn@in.ibm.com
 // *!
 // *! General Description: Configures the FIR errors
 // *!        
 // *!   The purpose of this procedure is to ......
 // *!   
 // *!   High-level procedure flow:
-// *!     o Do thing 1
-// *!     o Do thing 2
-// *!     o Do thing 3
+// *!     o Set the particluar bits of databuffers action0 , action 1 and mask for the correspoding actions via MACROS
+// *!     o Write the action1 , actionn0 and mask registers of FIRs
+// *!     o 
+// *!     o 
+// *!     o 
+// *!     o 
+// *!
 // *!     o Check if all went well
 // *!     o   If so celebrate 
 // *!     o   Else write logs, set bad return code
@@ -68,10 +55,10 @@
 // ----------------------------------------------------------------------
 // Includes
 // ----------------------------------------------------------------------
+
 #include <fapi.H>
 #include "p8_scom_addresses.H"
 #include "p8_pm_oha_firinit.H"
-#include "p8_pm_firinit.H"
 
 
 extern "C" {
@@ -93,96 +80,145 @@ using namespace fapi;
 // ----------------------------------------------------------------------
 
 
-
-
-
-// ----------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // Function prototypes
-// ----------------------------------------------------------------------
+//------------------------------------------------------------------------------
 
+//------------------------------------------------------------------------------
+// function: FAPI p8_pm_oha_firinit  HWP entry point
+//           operates on chips passed in i_target argument to perform
+//           desired settings of FIRS of OHA macro 
+// parameters: i_target        => chip target
 
-
-
-// ----------------------------------------------------------------------
-// Function definitions
-// ----------------------------------------------------------------------
-
-
-// function: xxx
-// parameters: none
-// returns: ECMD_SUCCESS if something good happens,
-//          BAD_RETURN_CODE otherwise
-ReturnCode
-p8_pm_oha_firinit(const fapi::Target &i_target  )
+// returns: FAPI_RC_SUCCESS if all specified operations complete successfully,
+//          else return code for failing operation
+//------------------------------------------------------------------------------
+fapi::ReturnCode
+p8_pm_oha_firinit(const fapi::Target &i_target , uint32_t mode )
 {
-    ReturnCode rc;
- //    ecmdDataBufferBase  action_0(64);
-//     ecmdDataBufferBase  action_1(64);
-    ecmdDataBufferBase  mask(64);
-    uint32_t            e_rc = 0;
+    fapi::ReturnCode                rc;
+    //TODO RTC: 71328 unused fapi::TargetState               l_state = TARGET_STATE_FUNCTIONAL; 
+    ecmdDataBufferBase              mask(64);
+    uint32_t                        e_rc = 0;
+        
+    std::vector<fapi::Target>       l_chiplets;
+    std::vector<Target>::iterator   itr;    
+
+
+    enum OHA_FIRS 
+    {    
+        OHA21_PPT_TIMEOUT_ERR       =0            ,
+        NOT_CPM_BIT_SYNCED          =1            ,
+        AISS_HANG_CONDITION         =2            ,
+        TC_TC_THERM_TRIP0           =3            ,
+        TC_TC_THERM_TRIP1           =4            ,
+        PCB_ERR_TO_FIR              =5            
     
-    std::vector<fapi::Target>      l_chiplets;
-    std::vector<Target>::iterator  itr;
+    };
+
+    FAPI_INF("Executing proc_pm_oha_firinit  ...");
     
+    do
+    {
+
+       //#--  OHA_ERROR_AND_ERROR_MASK_REG:     0..1     WREG=0x0E OHA error and error mask register 
+       //#--  tpc_oha1_mac_inst.error_mask      0..5     SCOM    
+       //#--  0..5    RW      oha_error_mask  Error mask for OHA/DPLL error reporting registers
+
+       if (mode == PM_RESET)
+       {                                
+            rc = fapiGetChildChiplets ( i_target, 
+                                        TARGET_TYPE_EX_CHIPLET, 
+                                        l_chiplets, 
+                                        TARGET_STATE_FUNCTIONAL); 
+            if (rc) 
+            {
+                FAPI_ERR("fapiGetChildChiplets failed."); 
+                break;
+            }
+            
+            FAPI_DBG("  chiplet vector size          => %u", l_chiplets.size());
+            
+            e_rc  = mask.flushTo0();
+            e_rc |= mask.setBit(0,OHA_FIR_REGISTER_LENGTH);
+            if (e_rc)
+            {
+                rc.setEcmdError(e_rc);
+                break;
+            }          
+
+            for (itr = l_chiplets.begin(); itr != l_chiplets.end(); itr++)
+            {
+                rc = fapiPutScom((*itr), EX_OHA_ERROR_ERROR_MASK_REG_RWx1002000E, mask );
+                if (rc) 
+                {
+                    FAPI_ERR("fapiPutScom(EX_OHA_ERROR_ERROR_MASK_REG_RWx1002000E) failed."); 
+                    break;
+                }
+            }
+            // Exit if error detected
+            if (!rc.ok())
+            {
+                break;
+            }
+       }
+       else 
+       {
+            e_rc = mask.flushTo0(); 
+
+            SET_FIR_MASKED(OHA21_PPT_TIMEOUT_ERR); //  OHA21_PPT_TIMEOUT_ERR            
+            SET_FIR_MASKED(NOT_CPM_BIT_SYNCED   ); //  NOT_CPM_BIT_SYNCED               
+            SET_FIR_MASKED(AISS_HANG_CONDITION  ); //  AISS_HANG_CONDITION              
+            SET_FIR_MASKED(TC_TC_THERM_TRIP0    ); //  TC_TC_THERM_TRIP0                
+            SET_FIR_MASKED(TC_TC_THERM_TRIP1    ); //  TC_TC_THERM_TRIP1                
+            SET_FIR_MASKED(PCB_ERR_TO_FIR       ); //  PCB_ERR_TO_FIR                   
     
-    //    FAPI_INF("");
-    FAPI_INF("Executing proc_pm_oha_firinit  ....\n");
+            if (e_rc)
+            {
+                rc.setEcmdError(e_rc);
+                break;
+            }
 
+            //    #--***********************************************************
+            //    #-- Mask  EX_OHA_ERROR_ERROR_MASK_REG_RWx1002000E
+            //    #--***********************************************************
+            
+            rc = fapiGetChildChiplets(   i_target,
+                                         fapi::TARGET_TYPE_EX_CHIPLET,
+                                         l_chiplets,
+                                         TARGET_STATE_FUNCTIONAL);
+            if (rc) 
+            {
+	            FAPI_ERR("fapiGetChildChiplets failed."); 
+                break;
+	        }
+           
+            FAPI_DBG("  chiplet vector size          => %u", l_chiplets.size());
 
+            for (itr = l_chiplets.begin(); itr != l_chiplets.end(); itr++)
+            {                
 
-//#--OHA_ERROR_AND_ERROR_MASK_REG:0..1               WREG=0x0E       OHA error and error mask register 
-//#--        tpc_oha1_mac_inst.error_mask    0..5    SCOM    
-//#--        0..5    RW      oha_error_mask  Error mask for OHA/DPLL error reporting registers
+                rc = fapiPutScom( (*itr), 
+                                  EX_OHA_ERROR_ERROR_MASK_REG_RWx1002000E, 
+                                  mask );
+                if (rc)
+                {
+                     FAPI_ERR("fapiPutScom(EX_OHA_ERROR_ERROR_MASK_REG_RWx1002000E) failed.");
+                     break;
+                }              
+            } // Chiplet loop
+            
+            // Exit if error detected
+            if (!rc.ok())
+            {
+                break;
+            }
+        } // Mode
+        
+    } while(0);
 
+    return rc;
 
-    
-
-
- 
-    e_rc |= mask.flushTo0(); 
-
-
-    SET_FIR_MASKED(0);    //        oha21_ppt_timeout_err            
-    SET_FIR_MASKED(1);	  //        NOT CPM_bit_synced               
-    SET_FIR_MASKED(2);	  //        aiss_hang_condition              
-    SET_FIR_MASKED(3);	  //        tc_tc_therm_trip0                
-    SET_FIR_MASKED(4);	  //        tc_tc_therm_trip1                
-    SET_FIR_MASKED(5);	  //        pcb_err_to_fir                   
- 
-    if (e_rc) { FAPI_ERR("Bit operation failed. With rc = 0x%x", (uint32_t)e_rc);  rc.setEcmdError(e_rc); return rc;    }
-    
-
-    
-//    #--******************************************************************************
-//    #-- Mask  EX_OHA_ERROR_ERROR_MASK_REG_RWx1002000E
-//    #--******************************************************************************
-
- rc = fapiGetChildChiplets (i_target, TARGET_TYPE_EX_CHIPLET, l_chiplets, TARGET_STATE_FUNCTIONAL); if (rc) return rc;
- FAPI_DBG("  chiplet vector size          => %u", l_chiplets.size());
-
-  for (itr = l_chiplets.begin(); itr != l_chiplets.end(); itr++){
-  
-
-
-    rc = fapiPutScom((*itr), EX_OHA_ERROR_ERROR_MASK_REG_RWx1002000E, mask );
-    if (rc) {
-      FAPI_ERR("fapiPutScom(EX_OHA_ERROR_ERROR_MASK_REG_RWx1002000E) failed."); return rc;
-    }
-    
-    FAPI_INF("Done in current chiplet  ....\n");
-    
-  }
-
-
-
-
-
-    return rc ;
-    
- 
 } // Procedure
 
-
 } //end extern C
- 
-

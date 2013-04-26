@@ -20,25 +20,8 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-/* begin_generated_IBM_copyright_prolog                            */
-/*                                                                 */
-/* This is an automatically generated copyright prolog.            */
-/* After initializing,  DO NOT MODIFY OR MOVE                      */
-/* --------------------------------------------------------------- */
-/* IBM Confidential                                                */
-/*                                                                 */
-/* Licensed Internal Code Source Materials                         */
-/*                                                                 */
-/* (C)Copyright IBM Corp.  2014, 2014                              */
-/*                                                                 */
-/* The Source code for this program is not published  or otherwise */
-/* divested of its trade secrets,  irrespective of what has been   */
-/* deposited with the U.S. Copyright Office.                       */
-/*  -------------------------------------------------------------- */
-/*                                                                 */
-/* end_generated_IBM_copyright_prolog                              */
-// $Id: p8_pmc_init.C,v 1.6 2012/10/04 10:24:27 pchatnah Exp $
-// $Source: /afs/awd.austin.ibm.com/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/p8_pmc_init.C,v $
+// $Id: p8_pmc_init.C,v 1.30 2013/04/30 11:20:22 pchatnah Exp $
+// $Source: /archive/shadow/ekb/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/p8_pmc_init.C,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
 // *! All Rights Reserved -- Property of IBM
@@ -67,1255 +50,2420 @@
 // ----------------------------------------------------------------------
 // Includes
 // ----------------------------------------------------------------------
-
 #include "p8_pm.H"
 #include "p8_pmc_init.H"
 
-//----------------------------------------------------------------------
-//  eCMD Includes
-//----------------------------------------------------------------------
-// #include <ecmdClientCapi.H>
-// #include <ecmdUtils.H>
-// #include <ecmdSharedUtils.H>
-// #include <iostream>
-// #include <fapiUtil.H>
-//#include <sim_utils.inc>
-//#include "myscoms.H"          // Remove eventually
+#define INTERCHIP_HALT_POLL_COUNT 256
+#define VOLTAGE_CHANGE_POLL_COUNT 100
+#define O2S_POLL_COUNT 256
+#define O2P_POLL_COUNT 8
+#define PSTATE_HALT_POLL_COUNT 256
+#define PORE_REQ_POLL_COUNT 256
 
-
-// ----------------------------------------------------------------------
-// Includes
-// ----------------------------------------------------------------------
-#include <fapi.H>
-#include <ecmdDataBufferBase.H>
-
-//#ifdef FAPIECMD
 extern "C" {
-  //  #endif
-
-
 
 using namespace fapi;
-
-//TODO RTC: 68461 - Refresh procedures to remove multiple definitions
-//RTC 68461 CONST_UINT64_T( OCB_OCI_OIMR1_0x0006a014                    , ULL(0x0006a014) );
-//RTC 68461 CONST_UINT64_T( OCB_OCI_OIMR0_0x0006a004                    , ULL(0x0006a004) );
-  //NST_UINT64_T(  PMC_MODE_REG_0x00062000                    , ULL(0x00062000) );
-//RTC 68461 CONST_UINT64_T( PMC_INTCHP_COMMAND_REG_0x00062014           , ULL(0x00062014) );
-//RTC 68461 CONST_UINT64_T( PMC_INTCHP_STATUS_REG_0x00062013                    , ULL(0x00062013) );
-  //CONST_UINT64_T( PMC_INTCHP_COMMAND_REG_0x00062014                   , ULL(0x00062014) );
-
 
 // ----------------------------------------------------------------------
 // Function prototypes
 // ----------------------------------------------------------------------
 
-
-// fapi::ReturnCode
-// pmc_create_spivid_settings(const Target& l_pTarget)
-// {
-//     fapi::ReturnCode rc;
-
-
-
-
-
-//       return rc ;
-// }
-
-//-------------------------------------------------------------------------
-    /// Locally computed variables to put into the feature attributes
-//-------------------------------------------------------------------------
-
+// ----------------------------------------------------------------------
+/**
+ * pmc_config_spivid_settings
+ *
+ * @param[in] i_target Chip target
+ *
+ * @retval ECMD_SUCCESS
+ * @retval ERROR defined in xml
+ */
 fapi::ReturnCode
 pmc_config_spivid_settings(const Target& l_pTarget)
 {
     fapi::ReturnCode rc;
 
+    // SPIVID Defaults
+
+    const uint32_t  default_spivid_frequency = 1;  // MHz
+    // Units: nanoseconds;  Value 10 microseconds
+    const uint32_t  default_spivid_interframe_delay_write_status = 10000;
+    // Units: nanoseconds;  Value 1 microsecond
+    const uint32_t  default_spivid_inter_retry_delay = 1000;
+
+
+    uint32_t attr_pm_spivid_frequency = 1;
+    uint32_t attr_proc_nest_frequency = 2000;
+
     uint32_t attr_pm_spivid_clock_divider;
-    uint32_t attr_pm_spivid_frequency = 10;
-    uint32_t attr_proc_nest_frequency = 2400;
-
-    FAPI_INF("entering the config function");
-
-        rc = FAPI_ATTR_GET(ATTR_FREQ_PB, NULL, attr_proc_nest_frequency); if (rc) return rc;
-        rc = FAPI_ATTR_GET(ATTR_PM_SPIVID_FREQUENCY, NULL, attr_pm_spivid_frequency); if (rc) return rc; 
-    
+    uint32_t attr_pm_spivid_interframe_delay_write_status;
+    uint32_t attr_pm_spivid_interframe_delay_write_status_value;
+    uint32_t attr_pm_spivid_inter_retry_delay_value;
+    uint32_t attr_pm_spivid_inter_retry_delay;
 
 
-    // calculation of clock divider
-       attr_pm_spivid_clock_divider =  (attr_proc_nest_frequency/(attr_pm_spivid_frequency*8)-1 );
+    do
+    {
+        FAPI_INF("Entering the config function");
+
+        //----------------------------------------------------------
+        GETATTR(            ATTR_FREQ_PB,
+                            "ATTR_FREQ_PB",
+                            NULL,
+                            attr_proc_nest_frequency);
+        
+        //----------------------------------------------------------
+        GETATTR_DEFAULT(    ATTR_PM_SPIVID_FREQUENCY,
+                            "ATTR_PM_SPIVID_FREQUENCY",
+                            NULL,
+                            attr_pm_spivid_frequency,
+                            default_spivid_frequency);
+
+        // calculation of clock divider
+        attr_pm_spivid_clock_divider =  (attr_proc_nest_frequency / 
+                                            (attr_pm_spivid_frequency*8)-1 );
 
 
-         rc = FAPI_ATTR_SET(ATTR_PM_SPIVID_CLOCK_DIVIDER, &l_pTarget, attr_pm_spivid_clock_divider); if (rc) return rc;
+        SETATTR(            ATTR_PM_SPIVID_CLOCK_DIVIDER,
+                            "ATTR_PM_SPIVID_CLOCK_DIVIDER",
+                            &l_pTarget,
+                            attr_pm_spivid_clock_divider);
+                            
+        //----------------------------------------------------------
+        // Delay between command and status frames of a SPIVID WRITE operation
+        // (binary in nanoseconds)
 
-        FAPI_INF("exiting the config function");
+        GETATTR_DEFAULT(    ATTR_PM_SPIVID_INTERFRAME_DELAY_WRITE_STATUS,
+                            "ATTR_PM_SPIVID_INTERFRAME_DELAY_WRITE_STATUS",
+                            &l_pTarget,
+                            attr_pm_spivid_interframe_delay_write_status,
+                            default_spivid_interframe_delay_write_status);
+	   
+        // Delay is computed as: (value * ~100ns_hang_pulse)
+        // +0/-~100ns_hang_pulse time
+        // Thus, value = delay / 100
+        attr_pm_spivid_interframe_delay_write_status_value =
+                attr_pm_spivid_interframe_delay_write_status / 100;
+
+        SETATTR(            ATTR_PM_SPIVID_INTERFRAME_DELAY_WRITE_STATUS_VALUE,
+                            "ATTR_PM_SPIVID_INTERFRAME_DELAY_WRITE_STATUS_VALUE",
+                            &l_pTarget,
+                            attr_pm_spivid_interframe_delay_write_status_value);
+        
+        //----------------------------------------------------------
+
+        // Delay between SPIVID reture attempts when WRITE command status
+        // indicates an error (binary in nanoseconds)
+
+        GETATTR_DEFAULT(    ATTR_PM_SPIVID_INTER_RETRY_DELAY,
+                            "ATTR_PM_SPIVID_INTER_RETRY_DELAY",
+                            &l_pTarget,
+                            attr_pm_spivid_inter_retry_delay,
+                            default_spivid_inter_retry_delay);
+        
+        FAPI_DBG (" attr_pm_spivid_inter_retry_delay value in config function = 0x%x", 
+                            attr_pm_spivid_inter_retry_delay );
+                            
+        // Delay is computed as: (value * ~100ns_hang_pulse)
+        // +0/-~100ns_hang_pulse time
+        // Thus, value = delay / 100
+        attr_pm_spivid_inter_retry_delay_value =
+                attr_pm_spivid_inter_retry_delay / 100;
+
+        SETATTR(            ATTR_PM_SPIVID_INTER_RETRY_DELAY_VALUE,
+                            "ATTR_PM_SPIVID_INTER_RETRY_DELAY_VALUE",
+                            &l_pTarget,
+                            attr_pm_spivid_inter_retry_delay_value);
+        
+        FAPI_INF("Exiting the config function");
+
+    } while(0);
+
     return rc ;
 }
 
 
-
+// ----------------------------------------------------------------------
+/**
+ * pmc_reset_function
+ *
+ * @param[in] i_target1 Primary Chip target:   Murano - chip0; Venice - chip
+ * @param[in] i_target2 Secondary Chip target: Murano - chip1; Venice - NULL
+ *
+ * @retval ECMD_SUCCESS
+ * @retval ERROR defined in xml
+ */
 fapi::ReturnCode
-pmc_reset_function(const Target& i_target)
+pmc_reset_function(const fapi::Target& i_target1 , const fapi::Target& i_target2 )
+{
+
+    fapi::ReturnCode rc;
+    ecmdDataBufferBase data(64);
+    //  ecmdDataBufferBase mask(64);
+    uint32_t e_rc = 0;
+    uint32_t count = 0 ;
+    bool is_stopped ;
+    bool is_spivid_stopped ;
+    bool is_not_ongoing ;
+
+    //  bool fw_pstate_mode ;
+    bool is_pstate_error_stopped ;
+    bool is_intchp_error_stopped;
+    bool master_enable_pstate_voltage_changes ;
+    bool master_is_MasterPMC;
+    bool master_enable_fw_pstate_mode;
+    bool master_is_enable_interchip_interface;
+
+
+    //TODO RTC: 71328 - explicit default - could be uninitialized on line 1084
+    bool slave_enable_pstate_voltage_changes = false;
+    bool slave_is_MasterPMC;
+    //TODO RTC: 71328 - explicit default - could be uninitialized on line 1075
+    bool slave_enable_fw_pstate_mode = false;
+    //TODO RTC: 71328 - explicit default - could be uninitialized on line 1374
+    bool slave_is_enable_interchip_interface = false;
+
+
+    fapi::Target master_target;
+    fapi::Target slave_target;
+    uint8_t attr_pm_spivid_port_enable1 = 0;
+//    uint8_t attr_pm_spivid_port_enable2 = 0;
+    uint8_t attr_dcm_installed_1 = 0;
+    uint8_t attr_dcm_installed_2 = 0;
+    uint64_t any_error = 0;
+
+    do
+    {
+        // Check for validity of passed parms
+        bool dcm = false;
+
+        FAPI_INF("Performing STEP 1");
+        rc = FAPI_ATTR_GET(ATTR_PROC_DCM_INSTALLED, &i_target1, attr_dcm_installed_1);
+        if (rc)
+        {
+            FAPI_ERR("fapiGetAttribute of ATTR_DCM_INSTALLED with rc = 0x%x", (uint32_t)rc);
+            break;
+        }
+
+        FAPI_INF (" ATTR_DCM_INSTALLED value in reset function = 0x%x", attr_dcm_installed_1 );
+
+        if (attr_dcm_installed_1 == 0)
+        {
+
+            //         target2 should be NULL
+            //         if not NULL, exit with config error
+            if (i_target2.getType() != TARGET_TYPE_NONE  )
+            {
+                FAPI_ERR ("config error : target2 is not null for target1 dcm not installed case");
+                FAPI_SET_HWP_ERROR(rc, RC_PROCPM_PMCRESET_DCM_INSTALL_ERROR);
+                break;
+            }
+        }
+        else
+        {
+            // GSS: test removed as this can be the case for a deconfigured DCM
+            //         if target2 is NULL, exit with config error
+            //         if target2 dcm attr not 1, exit with config error
+            //if (i_target2.getType() == TARGET_TYPE_NONE )
+            //{
+            //    FAPI_ERR ("config error : target2 is null for target1 dcm installed case");
+            //    FAPI_SET_HWP_ERROR(rc, RC_PROCPM_PMCRESET_DCM_INSTALL_ERROR);
+            //    break;
+            //}
+
+	  if (i_target2.getType() != TARGET_TYPE_NONE  )
+            {            rc = FAPI_ATTR_GET(ATTR_PROC_DCM_INSTALLED, &i_target2, attr_dcm_installed_2);
+	      if (rc)
+		{
+		  FAPI_ERR("fapiGetAttribute of ATTR_DCM_INSTALLED with rc = 0x%x", (uint32_t)rc);
+		  break;
+		}
+	      FAPI_INF (" ATTR_DCM_INSTALLED value in reset function = 0x%x", attr_dcm_installed_2 );
+	      
+	      if (attr_dcm_installed_2 != 1)
+		{
+		  FAPI_ERR ("config error:  DCM_INSTALLED target2 does not match target1");
+		  FAPI_SET_HWP_ERROR(rc, RC_PROCPM_PMCRESET_DCM_INSTALL_ERROR);
+		  break;
+		}
+	      
+	      dcm = true;
+	    }
+        }
+	
+        ////////////////////////////////////////////////////////////////////////////
+        // 1) Determine master chip and slave chip. By reading the SPIVID_EN attribute
+        //    If SPIVID_EN is != 0 then that target is master
+        //    If SPIVID_EN is == 0 then that target is slave
+        //    If both SPIVID_EN are != 0 then its an error
+        ////////////////////////////////////////////////////////////////////////////
+
+
+        FAPI_INF("Performing STEP 1");
+        rc = FAPI_ATTR_GET( ATTR_PM_SPIVID_PORT_ENABLE,
+                            &i_target1,
+                            attr_pm_spivid_port_enable1);
+        if (rc)
+        {
+            FAPI_ERR("fapiGetAttribute of ATTR_PM_SPIVID_PORT_ENABLE with rc = 0x%x", (uint32_t)rc);
+            break;
+        }
+        FAPI_INF (" value read from the attribute attr_pm_spivid_port_enable in reset function = 0x%x",
+                    attr_pm_spivid_port_enable1);
+
+        // \todo  Removing until as the secondary port enable attrributes are irrelevant
+        /*
+        if (dcm)
+        {
+            rc = FAPI_ATTR_GET( ATTR_PM_SPIVID_PORT_ENABLE,
+                                &i_target2,
+                                attr_pm_spivid_port_enable2);
+            if (rc)
+            {
+                FAPI_ERR("fapiGetAttribute of ATTR_PM_SPIVID_PORT_ENABLE with rc = 0x%x", (uint32_t)rc);
+                break;
+            }
+            FAPI_INF (" value read from the attribute attr_pm_spivid_port_enable in reset function = 0x%x",
+                        attr_pm_spivid_port_enable2);
+        }
+
+
+        if (attr_pm_spivid_port_enable2 != 0 &&   attr_pm_spivid_port_enable1 != 0 )
+        {
+            FAPI_ERR("Both targets have SPIVIDs enabled: check the configuration setup.");
+            FAPI_SET_HWP_ERROR(rc, RC_PROCPM_PMCRESET_TARGET_ERROR);
+            break;
+        }
+        else if (attr_pm_spivid_port_enable2 == 0 &&   attr_pm_spivid_port_enable1 == 0 )
+        {
+            FAPI_ERR("Neither target has SPIVID enabled: check the configuration setup.");
+            FAPI_SET_HWP_ERROR(rc, RC_PROCPM_PMCRESET_TARGET_ERROR);
+            break;
+        }
+        else
+        {
+
+            if (attr_pm_spivid_port_enable2 != 0 )
+            {
+                master_target = i_target2;
+                slave_target = i_target1;
+            }
+        */
+            if (attr_pm_spivid_port_enable1 != 0 )
+            {
+                master_target = i_target1;
+                slave_target = i_target2;
+            }
+            else
+            {
+                FAPI_ERR("Master target does not have SPIVID ports enabled: check the configuration setup.");
+                FAPI_SET_HWP_ERROR(rc, RC_PROCPM_PMCRESET_TARGET_ERROR);
+                break;
+            }
+        //}
+
+
+
+        ////////////////////////////////////////////////////////////////////////////
+        // 2.0 cRQ_TD_IntMaskRQ: Mask OCC interrupts in OIMR1
+        //     PMC_PSTATE_REQUEST, PMC_PROTOCOL_ONGOING, PMC_VOLTAGE_CHANGE_ONGOING,
+        //     PMC_INTERCHIP_MSG_SEND_ONGOING, PMC_IDLE_ENTER, PMC_IDLE_EXIT, PMC_SYNC
+        //       12
+        //       13
+        //       14
+        //       15
+        //       18
+        //       20
+        //       22  of OCB_OCI_OIMR1_0x0006a014
+        //
+        // 2.1 cRQ_TD_IntMaskER: Mask OCC interrupts in OIMR0
+        //     PMC_ERROR, PMC_MALF_ALERT, PMC_INTERCHIP_MSG_RECVD
+        //         9
+        //        13
+        //        21  of OCB_OCI_OIMR0_0x0006a004
+        ////////////////////////////////////////////////////////////////////////////
+
+        // ******************************************************
+        // Master
+        // ******************************************************
+
+        FAPI_INF("Performing STEP 2.00");
+
+        // CHECKING PMC_FIRS
+
+        e_rc = data.flushTo0();
+        if (e_rc)
+        {
+            rc.setEcmdError(e_rc);
+            break;
+        }
+        rc = fapiGetScom(master_target, PMC_LFIR_0x01010840 , data );
+        if (rc)
+        {
+           FAPI_ERR("fapiGetScom(PMC_LFIR_0x01010840) failed.");
+           break;
+        }
+
+        any_error = data.getDoubleWord(0);
+
+        if (any_error)
+        {
+           FAPI_DBG(" PMC_FIR has error(s) active.  Continuing though  0x%16llX ", data.getDoubleWord(0));
+           //FAPI_SET_HWP_ERROR(rc, RC_PROCPM_FIR_ERROR); break;
+           //return rc ;
+        }
+
+
+        e_rc = data.flushTo0();
+        if (e_rc)
+        {
+            rc.setEcmdError(e_rc);
+            break;
+        }
+
+        rc = fapiGetScom(master_target, OCB_OCI_OIMR1_0x0006a014 , data );
+        if (rc) {
+             FAPI_ERR("fapiGetScom(OCB_OCI_OIMR1_0x0006a014) failed."); break;
+        }
+
+
+        e_rc  = data.setBit(12);
+        e_rc |= data.setBit(13);
+        e_rc |= data.setBit(14);
+        e_rc |= data.setBit(15);
+        e_rc |= data.setBit(18);
+        e_rc |= data.setBit(20);
+        e_rc |= data.setBit(22);
+        if (e_rc)
+        {
+            FAPI_ERR("ecmdDataBufferBase error setting up OCB_OCI_OIMR1_0x0006a014 on Master");
+            rc.setEcmdError(e_rc);
+            break;
+        }
+
+        rc = fapiPutScom(master_target, OCB_OCI_OIMR1_0x0006a014 , data );
+        if (rc) {
+             FAPI_ERR("fapiPutScom(OCB_OCI_OIMR1_0x0006a014) failed."); break;
+        }
+
+        rc = fapiGetScom(master_target, OCB_OCI_OIMR0_0x0006a004 , data );
+        if (rc) {
+             FAPI_ERR("fapiGetScom(OCB_OCI_OIMR0_0x0006a004) failed."); break;
+        }
+
+
+        e_rc = data.setBit(9);
+        e_rc |= data.setBit(13);
+        e_rc |= data.setBit(21);
+        if (e_rc)
+        {
+            FAPI_ERR("ecmdDataBufferBase error setting up OCB_OCI_OIMR0_0x0006a004 on Master");
+            rc.setEcmdError(e_rc);
+            break;
+        }
+
+
+
+        rc = fapiPutScom(master_target, OCB_OCI_OIMR0_0x0006a004 , data );
+        if (rc)
+        {
+             FAPI_ERR("fapiPutScom(OCB_OCI_OIMR0_0x0006a004) failed.");
+             break;
+        }
+
+        // ******************************************************
+        // Slave
+        // ******************************************************
+
+        if (dcm)
+        {
+
+            FAPI_INF("Performing STEP 2.01");
+
+            // CHECKING PMC_FIRS
+
+            e_rc = data.flushTo0();
+            if (e_rc)
+            {
+                FAPI_ERR("ecmdDataBufferBase error flushing buffer");
+                rc.setEcmdError(e_rc);
+                break;
+            }
+
+            rc = fapiGetScom(slave_target, PMC_LFIR_0x01010840 , data );
+            if (rc) {
+              FAPI_ERR("fapiGetScom(PMC_LFIR_0x01010840) failed.");
+              break;
+            }
+
+            any_error = data.getDoubleWord(0);
+
+            if (any_error)
+            {
+               FAPI_ERR(" PMC_FIR has error(s) active.  0x%16llX ", data.getDoubleWord(0));
+               //FAPI_SET_HWP_ERROR(rc, RC_PROCPM_FIR_ERROR); break;
+               //return rc ;
+            }
+
+            e_rc = data.flushTo0();
+            if (e_rc)
+            {
+                FAPI_ERR("ecmdDataBufferBase error flushing buffer");
+                rc.setEcmdError(e_rc);
+                break;
+            }
+
+            rc = fapiGetScom(slave_target, OCB_OCI_OIMR1_0x0006a014 , data );
+            if (rc)
+            {
+                FAPI_ERR("fapiGetScom(OCB_OCI_OIMR1_0x0006a014) failed."); break;
+            }
+
+            e_rc  = data.setBit(12);
+            e_rc |= data.setBit(13);
+            e_rc |= data.setBit(14);
+            e_rc |= data.setBit(15);
+            e_rc |= data.setBit(18);
+            e_rc |= data.setBit(20);
+            e_rc |= data.setBit(22);
+            if (e_rc)
+            {
+                FAPI_ERR("ecmdDataBufferBase error setting up OIMR1");
+                rc.setEcmdError(e_rc);
+                break;
+            }
+
+            rc = fapiPutScom(slave_target, OCB_OCI_OIMR1_0x0006a014 , data );
+            if (rc)
+            {
+                FAPI_ERR("fapiPutScom(OCB_OCI_OIMR1_0x0006a014) failed.");
+                break;
+            }
+
+            rc = fapiGetScom(slave_target, OCB_OCI_OIMR0_0x0006a004 , data );
+            if (rc)
+            {
+                 FAPI_ERR("fapiGetScom(OCB_OCI_OIMR0_0x0006a004) failed.");
+                 break;
+            }
+
+            e_rc  = data.setBit(9);
+            e_rc |= data.setBit(13);
+            e_rc |= data.setBit(21);
+            if (e_rc)
+            {
+                FAPI_ERR("ecmdDataBufferBase error setting up OIMR0");
+                rc.setEcmdError(e_rc);
+                break;
+            }
+
+            rc = fapiPutScom(slave_target, OCB_OCI_OIMR0_0x0006a004 , data );
+            if (rc)
+            {
+                 FAPI_ERR("fapiPutScom(OCB_OCI_OIMR0_0x0006a004) failed."); break;
+            }
+        }
+
+
+        ////////////////////////////////////////////////////////////////////////////
+        // Issue halt to Pstate Master FSM on master_chiptarget
+        // Issue halt to Pstate Master FSM on slave_chiptarget
+        //
+        // 3. cRQ_TD_DisableMPS: Write PMC_MODE_REG to halt things
+        //    halt_pstate_master_fsm<-1          <-1 indicates to write the bit with the value 1
+        //    halt_idle_state_master_fsm<-1      <-1 indicates to write the bit with the value 1
+        //    Note: Other bits are left as setup so the configuration remains as things halt, and new
+        //          requests are queued (just now processed now).
+        ////////////////////////////////////////////////////////////////////////////
+
+
+        // ******************************************************
+        // Master
+        // ******************************************************
+        FAPI_INF("Performing STEP 3.00");
+
+        rc = fapiGetScom(master_target, PMC_MODE_REG_0x00062000 , data );
+        if (rc)
+        {
+             FAPI_ERR("fapiGetScom(PMC_MODE_REG_0x00062000) failed.");
+             break;
+        }
+
+        e_rc = data.setBit(05);
+        e_rc |= data.setBit(14);
+        if (e_rc)
+        {
+            FAPI_ERR("ecmdDataBufferBase error setting up PMC_MODE_REG_0x00062000 on Master during reset");
+            rc.setEcmdError(e_rc);
+            break;
+        }
+
+        rc = fapiPutScom(master_target, PMC_MODE_REG_0x00062000 , data );
+        if (rc)
+        {
+             FAPI_ERR("fapiPutScom(PMC_MODE_REG_0x00062000) failed.");
+             break;
+        }
+
+        master_is_MasterPMC = data.isBitSet(6) & data.isBitSet(7) ;
+        master_enable_pstate_voltage_changes = data.isBitSet(3) ;
+        master_enable_fw_pstate_mode = data.isBitSet(2) ;
+        master_is_enable_interchip_interface = data.isBitSet(6) ;
+
+
+        // ******************************************************
+        // Slave
+        // ******************************************************
+
+        if (dcm)
+        {
+            FAPI_INF("Performing STEP 3.01");
+            rc = fapiGetScom(slave_target, PMC_MODE_REG_0x00062000 , data );
+            if (rc)
+            {
+              FAPI_ERR("fapiGetScom(PMC_MODE_REG_0x00062000) failed.");
+              break;
+            }
+
+
+            e_rc = data.setBit(05);
+            e_rc |= data.setBit(14);
+            if (e_rc)
+            {
+                FAPI_ERR("ecmdDataBufferBase error setting up PMC_MODE_REG_0x00062000 on Slave during reset");
+                rc.setEcmdError(e_rc);
+                break;
+            }
+
+            rc = fapiPutScom(slave_target, PMC_MODE_REG_0x00062000 , data );
+            if (rc)
+            {
+                 FAPI_ERR("fapiPutScom(PMC_MODE_REG_0x00062000) failed.");
+                 break;
+            }
+
+            slave_is_MasterPMC = data.isBitSet(6) & data.isBitSet(7) ;
+            slave_enable_pstate_voltage_changes = data.isBitSet(3) ;
+            slave_enable_fw_pstate_mode = data.isBitSet(2) ;
+            slave_is_enable_interchip_interface = data.isBitSet(6) ;
+
+
+            // Check with Greg about return
+            // TODO : if ATTR_DCM_INSTALLED = 1 chip level attribute
+            if (master_is_MasterPMC == 0)
+            {
+              FAPI_ERR(" MasterPMC bit of Master PMC is not set");
+
+            }
+
+            if (slave_is_MasterPMC == 1)
+            {
+                FAPI_ERR(" MasterPMC bit of Slave PMC is set");
+            }
+
+
+            //TODO RTC: 71328 - make priorities explicit with paranthesis
+            if ((master_is_enable_interchip_interface ==1) & (slave_is_enable_interchip_interface == 0))
+            {
+              FAPI_ERR (" Configuration Error : Master is enabled with interchip interface but slave is not ");
+
+            }
+
+            //TODO RTC: 71328 - make priorities explicit with paranthesis
+            if ( (master_enable_fw_pstate_mode == 1)  & (slave_enable_fw_pstate_mode == 0))
+            {
+              FAPI_ERR (" Configuration Error : Master is enabled with FW pstate mode but slave is not ");
+
+            }
+        }
+
+
+
+        ////////////////////////////////////////////////////////////////////////////
+        // Issue halt to interchip FSM on master_chiptarget
+        // Poll for interchip interface to stop on master_chiptarget
+        // If poll not complete, flag "reset_suspicious" and save the poll point; continue
+
+        // Issue halt to interchip FSM on slave_chiptarget
+        // Poll for interchip interface to stop on slave_chiptarget
+        // If poll not complete, flag "reset_suspicious" and save the poll point; continue
+
+        // Poll for Pstate Master FSM being stopped on slave_chiptarget
+        // If poll not complete, flag "reset_suspicious" and save the poll point; continue
+        // Poll for Pstate Master FSM being stopped on slave_chiptarget
+        // If poll not complete, flag "reset_suspicious" and save the poll point; continue
+        //
+        // 4. if enable_interchip_interface==1
+        //       cRQ_TD_HaltInterchip_On: Write PMC_INTCHP_COMMAND_REG.interchip_halt_msg_fsm<-1 Should we write the command register here ? That's why I specified the command register, PMC_INTCHP_COMMAND_REG.
+        //    cRQ_TD_HaltInterchip_Wait1: Read PMC_STATUS_REG
+        //    cRQ_TD_HaltInterchip_Wait2: Read PMC_INTCHP_STATUS_REG
+        //       is_pstate_error_stopped = pstate_processing_is_suspended || gpsa_bdcst_error || gpsa_vchg_error || gpsa_timeout_error || pstate_interchip_error
+        //       is_intchp_error_stopped = interchip_ecc_ue_err || interchip_fsm_err || (is_MasterPMC && interchip_slave_error_code != 0) is_MasterPMC where is this bit ?
+        //       is_stopped = (interchip_ga_ongoing == 0) || is_pstate_error_stopped || is_intchp_error_stopped
+        //       If !is_stopped Then -->cRQ_TD_HaltInterchip_Wait1  (Wait limit is parm TD_Interchip_HaltWait_max=260)
+        //    cRQ_TD_HaltInterchipIf: PMC_MODE_REG.interchip_halt_if<-1 interchip_halt_if where is this bit ? PMC_MODE_REG bit 15 as documented.
+
+
+        ////////////////////////////////////////////////////////////////////////////
+
+        // ******************************************************
+        // Master
+        // ******************************************************
+        if (dcm)
+        {
+            FAPI_INF("Performing STEP 4.00");
+            if (master_is_enable_interchip_interface == 1)
+            {
+
+                rc = fapiGetScom(master_target, PMC_INTCHP_COMMAND_REG_0x00062014 , data );
+                if (rc)
+                {
+                    FAPI_ERR("fapiGetScom(PMC_INTCHP_COMMAND_REG_0x00062014) failed.");
+                    break;
+                }
+
+                e_rc = data.setBit(01);
+                if (e_rc)
+                {
+                    FAPI_ERR("ecmdDataBufferBase error setting up PMC_INTCHP_COMMAND_REG_0x00062014 on Master during reset");
+                    rc.setEcmdError(e_rc);
+                    break;
+                }
+
+
+                rc = fapiPutScom(master_target, PMC_INTCHP_COMMAND_REG_0x00062014 , data );
+                if (rc)
+                {
+                    FAPI_ERR("fapiPutScom(PMC_INTCHP_COMMAND_REG_0x00062014) failed.");
+                    break;
+                }
+
+                //  Poll for interchip interface to stop
+                for (count = 0 , is_stopped = 0 ; count <= INTERCHIP_HALT_POLL_COUNT && is_stopped == 0;  count++)
+                {
+                    //    Interchip_Wait1: Read PMC_STATUS_REG
+                    //       is_pstate_error_stopped =  pstate_processing_is_suspended ||
+                    //                                  gpsa_bdcst_error ||
+                    //                                  gpsa_vchg_error ||
+                    //                                  gpsa_timeout_error ||
+                    //                                  pstate_interchip_error
+
+                    rc = fapiGetScom(master_target, PMC_STATUS_REG_0x00062009 , data );
+                    if (rc)
+                    {
+                        FAPI_ERR("fapiGetScom(PMC_STATUS_REG_0x00062009) failed.");
+                        break;
+                    }
+
+                    is_pstate_error_stopped =   data.isBitSet(0) |
+                                                data.isBitSet(1) |
+                                                data.isBitSet(5) |
+                                                data.isBitSet(6) |
+                                                data.isBitSet(11);
+
+                    //    Interchip_Wait2: Read PMC_INTCHP_STATUS_REG
+                    //       is_intchp_error_stopped =  interchip_ecc_ue_err ||
+                    //                                  interchip_fsm_err ||
+                    //                                  (is_MasterPMC && interchip_slave_error_code != 0) is_MasterPMC
+                    rc = fapiGetScom(master_target, PMC_INTCHP_STATUS_REG_0x00062013 , data );
+                    if (rc)
+                    {
+                        FAPI_ERR("fapiGetScom(PMC_INTCHP_STATUS_REG_0x00062013) failed.");
+                        break;
+                    }
+                    is_intchp_error_stopped =   data.isBitSet(1) |
+                                                data.isBitSet(7) |
+                                                (~( data.isBitClear(16,4) &&  master_is_MasterPMC)) ;
+
+                    //    is_stopped = (interchip_ga_ongoing == 0) ||
+                    //                  is_pstate_error_stopped ||
+                    //                  is_intchp_error_stopped ;
+                    is_stopped = data.isBitClear(0)  || is_pstate_error_stopped || is_intchp_error_stopped;
+                    FAPI_DBG("polling interchip ongoing :  ... ");
+
+                    //       If !is_stopped Then -->Interchip_Wait1  (Wait limit is parm TD_Interchip_HaltWait_max=260)
+
+                } // end_for
+                // Error check
+                if (!rc.ok())
+                {
+                    break;
+                }
+
+                if (count > INTERCHIP_HALT_POLL_COUNT)
+                {
+                    FAPI_ERR("Timed out in polling interchip ongoing : Reset_suspicious    ... ");
+                    //       FAPI_SET_HWP_ERROR(rc, RC_PROCPM_PMCINIT_TIMEOUT);
+                    //       break;
+                }
+
+                //    InterchipIf: PMC_MODE_REG.interchip_halt_if<-1 interchip_halt_if
+
+                rc = fapiGetScom(master_target, PMC_MODE_REG_0x00062000 , data );
+                if (rc)
+                {
+                    FAPI_ERR("fapiGetScom(PMC_MODE_REG_0x00062000) failed.");
+                    break;
+                }
+
+                e_rc = data.setBit(15);
+                if (e_rc)
+                {
+                    FAPI_ERR("ecmdDataBufferBase error setting up PMC_MODE_REG_0x00062000 on Master during reset");
+                    rc.setEcmdError(e_rc);
+                    break;
+                }
+
+                rc = fapiPutScom(master_target, PMC_MODE_REG_0x00062000 , data );
+                if (rc) {
+                  FAPI_ERR("fapiPutScom(PMC_MODE_REG_0x00062000) failed."); break;
+                }
+
+            } // end if
+
+            // ******************************************************
+            // Slave
+            // ******************************************************
+
+
+            FAPI_INF("Performing STEP 4.01");
+
+            if (slave_is_enable_interchip_interface ==1)
+            {
+
+                rc = fapiGetScom(slave_target, PMC_INTCHP_COMMAND_REG_0x00062014 , data );
+                if (rc)
+                {
+                    FAPI_ERR("fapiGetScom(PMC_INTCHP_COMMAND_REG_0x00062014) failed.");
+                    break;
+                }
+
+                e_rc = data.setBit(01);
+                if (e_rc)
+                {
+                    FAPI_ERR("ecmdDataBufferBase error setting up PMC_INTCHP_COMMAND_REG_0x00062014 on Slave during reset");
+                    rc.setEcmdError(e_rc);
+                    break;
+                }
+
+                rc = fapiPutScom(slave_target, PMC_INTCHP_COMMAND_REG_0x00062014 , data );
+                if (rc)
+                {
+                    FAPI_ERR("fapiPutScom(PMC_INTCHP_COMMAND_REG_0x00062014) failed.");
+                    break;
+                }
+
+                 //  Poll for interchip interface to stop
+                for (count = 0 , is_stopped = 0 ; count <= INTERCHIP_HALT_POLL_COUNT && is_stopped == 0;  count++)
+                {
+                    //    Interchip_Wait1: Read PMC_STATUS_REG
+                    //       is_pstate_error_stopped =  pstate_processing_is_suspended ||
+                    //                                  gpsa_bdcst_error ||
+                    //                                  gpsa_vchg_error ||
+                    //                                  gpsa_timeout_error ||
+                    //                                  pstate_interchip_error
+
+                    rc = fapiGetScom(slave_target, PMC_STATUS_REG_0x00062009 , data );
+                    if (rc)
+                    {
+                        FAPI_ERR("fapiGetScom(PMC_STATUS_REG_0x00062009) failed.");
+                        break;
+                    }
+
+                    is_pstate_error_stopped =   data.isBitSet(0) |
+                                                data.isBitSet(1) |
+                                                data.isBitSet(5) |
+                                                data.isBitSet(6) |
+                                                data.isBitSet(11) ;
+
+
+                    //    Interchip_Wait2: Read PMC_INTCHP_STATUS_REG
+                    //       is_intchp_error_stopped =  interchip_ecc_ue_err ||
+                    //                                  interchip_fsm_err ||
+                    //                                  (is_MasterPMC && interchip_slave_error_code != 0) is_MasterPMC
+
+                    rc = fapiGetScom(slave_target, PMC_INTCHP_STATUS_REG_0x00062013 , data );
+                    if (rc)
+                    {
+                        FAPI_ERR("fapiGetScom(PMC_INTCHP_STATUS_REG_0x00062013) failed.");
+                        break;
+                    }
+                    is_intchp_error_stopped =   data.isBitSet(1) |
+                                                data.isBitSet(7) |
+                                                (~( data.isBitClear(16,4) &&  slave_is_MasterPMC));
+
+                    //    is_stopped = (interchip_ga_ongoing == 0) ||
+                    //                  is_pstate_error_stopped ||
+                    //                  is_intchp_error_stopped ;
+                    is_stopped =    data.isBitClear(0) ||
+                                    is_pstate_error_stopped ||
+                                    is_intchp_error_stopped;
+                    FAPI_DBG("polling interchip ongoing :     ... ");
+
+                } // end_for
+
+                // Error check
+                if (!rc.ok())
+                {
+                    break;
+                }
+
+                // Timeout check
+                if (count > INTERCHIP_HALT_POLL_COUNT)
+                {
+                    FAPI_ERR("Timed out in polling interchip ongoing : Reset_suspicious    ... ");
+                    //       FAPI_SET_HWP_ERROR(rc, RC_PROCPM_PMCINIT_TIMEOUT);
+                    //       break;
+                }
+
+
+                //    InterchipIf: PMC_MODE_REG.interchip_halt_if<-1 interchip_halt_if
+                rc = fapiGetScom(slave_target, PMC_MODE_REG_0x00062000 , data );
+                if (rc)
+                {
+                    FAPI_ERR("fapiGetScom(PMC_MODE_REG_0x00062000) failed.");
+                    break;
+                }
+
+                e_rc = data.setBit(15);
+                if (e_rc)
+                {
+                    FAPI_ERR("ecmdDataBufferBase error setting up PMC_MODE_REG_0x00062000 on Slave during reset");
+                    rc.setEcmdError(e_rc);
+                    break;
+                }
+
+                rc = fapiPutScom(slave_target, PMC_MODE_REG_0x00062000 , data );
+                if (rc)
+                {
+                    FAPI_ERR("fapiPutScom(PMC_MODE_REG_0x00062000) failed.");
+                    break;
+                }
+
+            } // end if
+        } // end dcm
+
+        ////////////////////////////////////////////////////////////////////////////
+        // If voltage changes are enable, issue halt to SPIVID controller on FSM on master_chiptarget
+        // Poll for SPIVID FSM to halt on master_chiptarget
+        // If poll not complete, flag "reset_suspicious" and save the poll point; continue
+        //
+        // 5. if enable_pstate_voltage_changes==1
+        //         HaltSpivid: PMC_SPIV_COMMAND_REG.spivid_halt_fsm<-1
+        //    Spivid_HaltWait: Read PMC_SPIV_STATUS_REG
+        //       is_spivid_error = spivid_retry_timeout || spivid_fsm_err
+        //       if spivid_ongoing && !is_spivid_error Then -->Spivid_HaltWait   (Wait limit is parm TD_Spivid_HaltWait_max=100)
+        //       else -->MPS_HaltWait
+        ////////////////////////////////////////////////////////////////////////////
+
+         FAPI_INF("Performing STEP 5.00");
+
+        if (master_enable_pstate_voltage_changes==1)
+        {
+            //  HaltSpivid: PMC_SPIV_COMMAND_REG.spivid_halt_fsm<-1
+            rc = fapiGetScom(master_target, PMC_SPIV_COMMAND_REG_0x00062047 , data );
+            if (rc)
+            {
+                FAPI_ERR("fapiGetScom(PMC_SPIV_COMMAND_REG_0x00062047) failed.");
+                break;
+            }
+
+            e_rc = data.setBit(0);
+            if (e_rc)
+            {
+                FAPI_ERR("ecmdDataBufferBase error setting up PMC_SPIV_COMMAND_REG_0x00062047 on Master during reset");
+                rc.setEcmdError(e_rc);
+                break;
+            }
+
+            rc = fapiPutScom(master_target, PMC_SPIV_COMMAND_REG_0x00062047 , data );
+            if (rc)
+            {
+                FAPI_ERR("fapiPutScom(PMC_SPIV_COMMAND_REG_0x00062047) failed.");
+                break;
+            }
+
+            //    Spivid_HaltWait: Read PMC_SPIV_STATUS_REG
+            for (count = 0 , is_spivid_stopped=0; count <= VOLTAGE_CHANGE_POLL_COUNT  && is_spivid_stopped==0  ; count++)
+            {
+                rc = fapiGetScom(master_target, PMC_SPIV_STATUS_REG_0x00062046 , data );
+                if (rc)
+                {
+                  FAPI_ERR("fapiGetScom(PMC_SPIV_STATUS_REG_0x00062046) failed.");
+                  break;
+                }
+                is_spivid_stopped =   data.isBitClear(0) |
+                                      data.isBitSet(1)   |
+                                      data.isBitSet(2)   |
+                                      data.isBitSet(3)   |
+                                      data.isBitSet(4) ;
+                FAPI_DBG("Polling spivid ongoing on Masster ... ");
+            } // end for
+
+            // Error check
+            if (!rc.ok())
+            {
+                break;
+            }
+
+            // Timeout check
+            if (count > VOLTAGE_CHANGE_POLL_COUNT)
+            {
+                FAPI_ERR("Timed out in polling spiv ongoing  : Reset_suspicious    ... ");
+                // \todo
+                //       FAPI_SET_HWP_ERROR(rc, RC_PROCPM_PMCINIT_TIMEOUT);
+                //       break;
+            }
+        } // end if
+
+
+        ////////////////////////////////////////////////////////////////////////////
+        // Poll for Pstate Master FSM being stopped on master_chiptarget
+        //   If poll not complete, flag "reset_suspicious" and save the poll point; continue
+        // Poll for Pstate Master FSM being stopped on slave_chiptarget
+        //   If poll not complete, flag "reset_suspicious" and save the poll point; continue
+        //
+        // 6. MPS_HaltWait: Read PMC_STATUS_REG
+        //
+        //       if (fw_pstate_mode)
+        //          is_not_ongoing = (enable_pstate_voltage_changes==0 || volt_chg_ongoing==0) && (brd_cst_ongoing == 0)
+        //       else
+        //          is_not_ongoing = (enable_pstate_voltage_changes==0 || gpsa_chg_ongoing==0)
+        //
+        //       is_pstate_error = (pstate_interchip_error || pstate_processing_is_suspended || gpsa_bdcst_error || gpsa_vchg_error || gpsa_timeout_error)
+        //            is_stopped = is_not_ongoing || is_pstate_error
+        //
+        //       if (!is_stopped) then -->MPS_HaltWait   (Wait limit)
+        ////////////////////////////////////////////////////////////////////////////
+
+         FAPI_INF("Performing STEP 6.00 ");
+
+
+        // ******************************************************
+        // Master
+        // ******************************************************
+        for (count = 0, is_stopped = 0; count <= PSTATE_HALT_POLL_COUNT && is_stopped == 0 ; count++)
+        {
+            rc = fapiGetScom(master_target, PMC_STATUS_REG_0x00062009 , data );
+            if (rc)
+            {
+              FAPI_ERR("fapiGetScom(PMC_STATUS_REG_0x00062009) failed.");
+              break;
+            }
+
+
+            if (master_enable_fw_pstate_mode)
+            {
+              is_not_ongoing = (master_enable_pstate_voltage_changes == 0 ||
+                                data.isBitClear(8)                          ) &&
+                                data.isBitClear(9);
+            }
+            else
+            {
+              is_not_ongoing = (master_enable_pstate_voltage_changes==0 ||
+                                data.isBitClear(7)                        );
+            }
+
+            is_stopped = (  data.isBitSet(11) |
+                            data.isBitSet(12) |
+                            data.isBitSet(1)  |
+                            data.isBitSet(5)  |
+                            data.isBitSet(6)) |
+                            is_not_ongoing ;
+            FAPI_DBG("Polling voltage change ongoing on Master ... ");
+        } // end for
+
+        if (count > PSTATE_HALT_POLL_COUNT )
+        {
+           FAPI_ERR("Timed out in polling voltage change ongoing : Reset_suspicious   ... ");
+           //    FAPI_SET_HWP_ERROR(rc, RC_PROCPM_PMCINIT_TIMEOUT);
+           //    break;
+        }
+
+        // ******************************************************
+        // Slave
+        // ******************************************************
+        if (dcm)
+        {
+            FAPI_INF("Performing STEP 6.01 ");
+
+            for (count = 0 , is_stopped = 0 ; count <= PSTATE_HALT_POLL_COUNT && is_stopped == 0 ; count++)
+            {
+
+                rc = fapiGetScom(slave_target, PMC_STATUS_REG_0x00062009 , data );
+                if (rc)
+                {
+                    FAPI_ERR("fapiGetScom(PMC_STATUS_REG_0x00062009) failed.");
+                    break;
+                }
+
+                if (slave_enable_fw_pstate_mode)
+                {
+                    is_not_ongoing = (  slave_enable_pstate_voltage_changes == 0 ||
+                                        data.isBitClear(8)                         ) &&
+                                        data.isBitClear(9);
+                }
+                else
+                {
+                    is_not_ongoing = (  slave_enable_pstate_voltage_changes == 0 ||
+                                        data.isBitClear(7)                         );
+                }
+
+                is_stopped = (  data.isBitSet(11) |
+                                data.isBitSet(12) |
+                                data.isBitSet(1)  |
+                                data.isBitSet(5)  |
+                                data.isBitSet(6)) |
+                                is_not_ongoing ;
+                FAPI_DBG("polling voltage change ongoing on Slave ...");
+            } // end for
+
+            // Error check
+            if (!rc.ok())
+            {
+                break;
+            }
+
+            // Timeout check
+            if (count > PSTATE_HALT_POLL_COUNT )
+            {
+                FAPI_ERR("Timed out in polling voltage change ongoing : Reset_suspicious   ... ");
+                //    FAPI_SET_HWP_ERROR(rc, RC_PROCPM_PMCINIT_TIMEOUT);
+                //    break;
+            }
+        } // dcm
+
+
+        ///////////////////////////////////////////////////////////////////////////////////////////////////////////
+        // Poll for O2P bridge being complete on master_chiptarget
+        // As the OCC (PPC405) has been halt prior to entry of this procedure,
+        //      this poll will be immediate if there are no PIB related errors present
+        // Poll for O2P bridge being complete on slave_chiptarget
+        // As the OCC (PPC405) has been halt prior to entry of this procedure,
+        //      this poll will be immediate if there are no PIB related errors present
+        //
+        // Poll for O2S bridge being complete on master_chiptarget
+        // As the OCC (PPC405) has been halt prior to entry of this procedure,
+        //      this poll will be immediate if there are no SPIVID related errors present
+        //
+        // 7. Wait
+        //      - If an O2P or O2S Op is pending and did not hit an error
+        //      - Queisce after traffic generation or last FW GA_Step
+        //    The O2P and O2S bridges are treated separately.  The firmware should handle these
+        //    recognizing they are still busy, hit an error, or hit a firmware timeout.  The
+        //    firmware can then choose a halt sequence for them.
+        //    O2S: Write PMC_O2S_COMMAND_REG.o2s_halt_retries<-1
+        //         Read PMC_O2S_STATUS_REG
+        //         Wait for o2s_ongoing==0 or error (o2s_retry_timeout | o2s_write_while_bridge_busy_err | o2s_fsm_err)
+        //    O2P: No halt command in PMC - wait for PIB timeout.
+        //         Read PMC_O2P_CTRL_STATUS_REG
+        //         Wait for o2p_ongoing==0 or error (o2p_write_while_bridge_busy_err | o2p_fsm_err | o2p_abort | o2p_parity_error)
+        ///////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        // ******************************************************
+        // Master
+        // ******************************************************
+
+        FAPI_INF("Performing STEP 7.00 ");
+        rc = fapiGetScom(master_target, PMC_O2S_COMMAND_REG_0x00062057 , data );
+        if (rc)
+        {
+            FAPI_ERR("fapiGetScom(PMC_O2S_COMMAND_REG__0x00062057) failed.");
+            break;
+        }
+
+        e_rc = data.setBit(00);  if(e_rc){rc.setEcmdError(e_rc); break; }
+
+        rc = fapiPutScom(master_target, PMC_O2S_COMMAND_REG_0x00062057 , data );
+        if (rc)
+        {
+            FAPI_ERR("fapiPutScom(PMC_O2S_COMMAND_REG__0x00062057) failed.");
+            break;
+        }
+
+        // Poll for O2S to be stopped
+        for (count = 0 , is_stopped = 0 ; count <= O2S_POLL_COUNT && is_stopped == 0 ; count++)
+        {
+            rc = fapiGetScom(master_target, PMC_O2S_STATUS_REG_0x00062056 , data );
+            if (rc)
+            {
+                FAPI_ERR("fapiGetScom(PMC_O2S_STATUS_REG__0x00062056) failed.");
+                break;
+            }
+
+            is_stopped = (  data.isBitClear(0) |
+                            data.isBitSet(4)   |
+                            data.isBitSet(5)   |
+                            data.isBitSet(7));
+            FAPI_DBG("Polling O2S ongoing . :   .. ");
+        }
+
+        // Error check
+        if (!rc.ok())
+        {
+            break;
+        }
+
+        // Timeout check
+        if (count > O2S_POLL_COUNT)
+        {
+            FAPI_ERR("Timed out in polling O2S ongoing . : Reset_suspicious  .. ");
+            //       FAPI_SET_HWP_ERROR(rc, RC_PROCPM_PMCINIT_TIMEOUT);
+            //       break;
+        }
+
+        // Poll for O2P to be stopped
+        for (count = 0 , is_stopped = 0 ; count <= O2P_POLL_COUNT && is_stopped == 0 ; count++)
+        {
+            rc = fapiGetScom(master_target, PMC_O2P_CTRL_STATUS_REG_0x00062061 , data );
+            if (rc)
+            {
+                FAPI_ERR("fapiGetScom(PMC_O2P_STATUS_REG__0x00062061) failed.");
+                break;
+            }
+
+            is_stopped = (  data.isBitClear(0) |
+                            data.isBitSet(4)   |
+                            data.isBitSet(5)   |
+                            data.isBitSet(6)   |
+                            data.isBitSet(7));
+            FAPI_DBG("Polling O2P ongoing . :   .. ");
+        }
+
+        // Error check
+        if (!rc.ok())
+        {
+            break;
+        }
+
+        // Timeout check
+        if (count > O2P_POLL_COUNT)
+        {
+            FAPI_ERR("Timed out in polling O2P ongoing . : Reset_suspicious .. ");
+            //       FAPI_SET_HWP_ERROR(rc, RC_PROCPM_PMCINIT_TIMEOUT);
+            //       break;
+        }
+
+        // ******************************************************
+        // Slave
+        // ******************************************************
+
+        if (dcm)
+        {
+            FAPI_INF("Performing STEP 7.01 ");
+
+            for (count = 0 , is_stopped = 0 ; count <= O2P_POLL_COUNT  && is_stopped == 0 ; count++)
+            {
+                rc = fapiGetScom(slave_target, PMC_O2P_CTRL_STATUS_REG_0x00062061 , data );
+                if (rc)
+                {
+                     FAPI_ERR("fapiGetScom(PMC_O2P_STATUS_REG__0x00062061) failed.");
+                     break;
+                }
+
+                is_stopped = (   data.isBitClear(0) |
+                                 data.isBitSet(4)   |
+                                 data.isBitSet(5)   |
+                                 data.isBitSet(6)   |
+                                 data.isBitSet(7));
+                FAPI_DBG("Polling O2P ongoing . :   .. ");
+            }
+
+            // Error check
+            if (!rc.ok())
+            {
+                break;
+            }
+
+            // Timeout check
+            if (count > O2P_POLL_COUNT)
+            {
+                FAPI_ERR("Timed out in polling O2P ongoing . : Reset_suspicious .. ");
+                //       FAPI_SET_HWP_ERROR(rc, RC_PROCPM_PMCINIT_TIMEOUT);
+                //       break;
+            }
+        } // dcm
+
+
+        ///////////////////////////////////////////////////////////////////////////////////////////////////////////
+        //GREG: Check with Greg whether this is needed for both master and slave?
+        // 8) Poll for Idle FSM being quiesced (timeout: 500ms to cover the case of having all 4 types of Deep Idle
+        // transitions in flight)
+        // Note: Previously issued special wake-ups could have triggered PORE activity through the Idle FSM (and
+        // the related pending queues). if poll timeout, mark the error point
+        //
+        // Note on Idle/PORE-SLW state (prior to reset)
+        // Given that special wake-up occurred before this point, any errors that resulted from that special wake-up
+        // (eg PORE-SLW fatal or timeout indicated in PMC LFIR) will have fired a malfunction alert to PHYP whereby
+        // the execution of p8_poreslw_recovery.C will have taken place.
+        ///////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        FAPI_INF("Performing STEP 8.00 ");
+        for (count = 0 , is_stopped = 0 ; count <= PORE_REQ_POLL_COUNT  && is_stopped == 0 ; count++)
+        {
+            rc = fapiGetScom(master_target, PMC_PORE_REQ_REG0_0x0006208E , data );
+            if (rc)
+            {
+                FAPI_ERR("fapiGetScom(PMC_O2P_STATUS_REG__0x00062061) failed.");
+                break;
+            }
+
+            is_stopped = (data.isBitClear(20)) ;
+            FAPI_DBG("Polling pore_busy bit ...");
+        }
+
+        // Error check
+        if (!rc.ok())
+        {
+            break;
+        }
+
+        //  Timeout check
+        if (count > PORE_REQ_POLL_COUNT)
+        {
+            FAPI_ERR("Timed out in polling pore_busy bit  . : Reset_suspicious .. ");
+            //       FAPI_SET_HWP_ERROR(rc, RC_PROCPM_PMCINIT_TIMEOUT);
+            //       break;
+        }
+
+        ///////////////////////////////////////////////////////////////////////////////
+        // GREG:
+        // Issue interchip interface reset (if enabled) on master_chiptarget
+        // PMC_INTCHP_COMMAND_REG.reset (0) = 1
+        // PMC_INTCHP_COMMAND_REG.reset (0) = 0
+        // Issue interchip interface reset (if enabled) on slave_chiptarget
+        // PMC_INTCHP_COMMAND_REG.reset (0) = 1
+        // PMC_INTCHP_COMMAND_REG.reset (0) = 0
+
+        // SCOTT:
+        // 9. if enable_interchip_interface==1 and parm InterchipResetIf_AfterHalt
+        //     InterchipResetIf_On: PMC_INTCHP_COMMAND_REG.interchip_reset_if<-1
+        //    InterchipResetIf_Off: PMC_INTCHP_COMMAND_REG.interchip_reset_if<-0
+        ///////////////////////////////////////////////////////////////////////////////
+
+        // ******************************************************
+        // Master
+        // ******************************************************
+
+
+        FAPI_INF("Performing STEP 9.00 ");
+
+        if ( master_is_enable_interchip_interface == 1)
+        {
+
+            rc = fapiGetScom(master_target, PMC_INTCHP_COMMAND_REG_0x00062014 , data );
+            if (rc)
+            {
+                FAPI_ERR("fapiGetScom(PMC_INTCHP_COMMAND_REG_0x00062014) failed.");
+                break;
+            }
+
+            e_rc = data.setBit(0);
+            if (e_rc)
+            {
+                FAPI_ERR("ecmdDataBufferBase error setting up PMC_INTCHP_COMMAND_REG_0x00062014 on Master reset");
+                rc.setEcmdError(e_rc);
+                break;
+            }
+
+            rc = fapiPutScom(master_target, PMC_INTCHP_COMMAND_REG_0x00062014 , data );
+            if (rc)
+            {
+                FAPI_ERR("fapiPutScom(PMC_INTCHP_COMMAND_REG_0x00062014) failed.");
+                break;
+            }
+
+            e_rc = data.clearBit(0);
+            if (e_rc)
+            {
+                FAPI_ERR("ecmdDataBufferBase error clearing up PMC_INTCHP_COMMAND_REG_0x00062014 on Master reset");
+                rc.setEcmdError(e_rc);
+                break;
+            }
+
+            rc = fapiPutScom(master_target, PMC_INTCHP_COMMAND_REG_0x00062014 , data );
+            if (rc)
+            {
+                FAPI_ERR("fapiPutScom(PMC_INTCHP_COMMAND_REG_0x00062014) failed.");
+                break;
+            }
+        }
+
+        // ******************************************************
+        // Slave
+        // ******************************************************
+
+         if (dcm)
+         {
+             FAPI_INF("Performing STEP 9.01 ");
+
+             if ( slave_is_enable_interchip_interface == 1)
+             {
+
+                rc = fapiGetScom(slave_target, PMC_INTCHP_COMMAND_REG_0x00062014 , data );
+                if (rc)
+                {
+                    FAPI_ERR("fapiGetScom(PMC_INTCHP_COMMAND_REG_0x00062014) failed.");
+                    break;
+                }
+
+                e_rc = data.setBit(0);
+                if (e_rc)
+                {
+                    FAPI_ERR("ecmdDataBufferBase error setting up PMC_INTCHP_COMMAND_REG_0x00062014 on Slave reset");
+                    rc.setEcmdError(e_rc);
+                    break;
+                }
+
+                rc = fapiPutScom(slave_target, PMC_INTCHP_COMMAND_REG_0x00062014 , data );
+                if (rc)
+                {
+                    FAPI_ERR("fapiPutScom(PMC_INTCHP_COMMAND_REG_0x00062014) failed.");
+                    break;
+                }
+
+                e_rc = data.clearBit(0);
+                if (e_rc)
+                {
+                    FAPI_ERR("ecmdDataBufferBase error clearing up PMC_INTCHP_COMMAND_REG_0x00062014 on Slave reset");
+                    rc.setEcmdError(e_rc);
+                    break;
+                }
+
+                rc = fapiPutScom(slave_target, PMC_INTCHP_COMMAND_REG_0x00062014 , data );
+                if (rc)
+                {
+                    FAPI_ERR("fapiPutScom(PMC_INTCHP_COMMAND_REG_0x00062014) failed.");
+                    break;
+                }
+            }
+        }
+
+        ///////////////////////////////////////////////////////////////////////////////////////////////////////////
+        // Issue reset to the PMC
+        // Note:  this action will wipe out the Idle Pending queue so that requests for idle transitions (entry and exit) will be lost which means that PHYP notification needs to happen.
+        // Write PMC_MODE_REG.pmc_reset_all_voltage_registers = 1.
+        // Clearing LFIRs will have  been done by PRD
+        // Note:  this will remove CONFIG settings
+        // This puts the PMC into firmware mode which halts any future Global Actual operations
+        ///////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        // ******************************************************
+        // Master
+        // ******************************************************
+        // RESET_ALL_PMC_REGISTERS
+        rc = fapiGetScom(master_target, PMC_MODE_REG_0x00062000 , data );
+        if (rc)
+        {
+            FAPI_ERR("fapiGetScom(PMC_MODE_REG_0x00062000) failed.");
+            break;
+        }
+
+        e_rc = data.setBit(12);
+            if (e_rc)
+            {
+                FAPI_ERR("ecmdDataBufferBase error setting up PMC_INTCHP_COMMAND_REG_0x00062014 on Master reset");
+                rc.setEcmdError(e_rc);
+                break;
+            }
+        if (rc)
+        {
+            FAPI_ERR("fapiPutScom(PMC_INTCHP_COMMAND_REG_0x00062014) failed.");
+            break;
+        }
+
+        rc = fapiPutScom(master_target, PMC_MODE_REG_0x00062000 , data );
+        if (rc)
+        {
+             FAPI_ERR("fapiPutScom(PMC_MODE_REG_0x00062000) failed.");
+             break;
+        }
+
+        // ******************************************************
+        // Slave
+        // ******************************************************
+        if (dcm)
+        {
+
+            rc = fapiGetScom(slave_target, PMC_MODE_REG_0x00062000 , data );
+            if (rc)
+            {
+                 FAPI_ERR("fapiGetScom(PMC_MODE_REG_0x00062000) failed.");
+                 break;
+            }
+
+            e_rc = data.setBit(12);
+            if (e_rc)
+            {
+                FAPI_ERR("ecmdDataBufferBase error setting up PMC_MODE_REG_0x00062000 on Slave reset");
+                rc.setEcmdError(e_rc);
+                break;
+            }
+
+            rc = fapiPutScom(slave_target, PMC_MODE_REG_0x00062000 , data );
+            if (rc)
+            {
+                FAPI_ERR("fapiPutScom(PMC_MODE_REG_0x00062000) failed.");
+                break;
+            }
+
+            // \todo remove in deference to init path
+            // Restored only for slave
+            // SAFE_MODE_WITHOUT_SPIVID
+            rc = fapiGetScom(slave_target, PMC_MODE_REG_0x00062000 , data );
+            if (rc)
+            {
+                FAPI_ERR("fapiGetScom(PMC_MODE_REG_0x00062000) failed.");
+                break;
+            }
+
+            e_rc = data.setBit(13);
+            if (e_rc)
+            {
+                FAPI_ERR("ecmdDataBufferBase error for PMC_MODE_REG_0x00062000 on Slave reset");
+                rc.setEcmdError(e_rc);
+                break;
+            }
+
+            rc = fapiPutScom(slave_target, PMC_MODE_REG_0x00062000 , data );
+            if (rc)
+            {
+                FAPI_ERR("fapiPutScom(PMC_MODE_REG_0x00062000) failed.");
+                break;
+            }
+        }
+    } while(0);
+
+    return rc;
+}
+
+// ----------------------------------------------------------------------
+/**
+ * pmc_init_function
+ *
+ * @param[in] i_target1 Primary Chip target:   Murano - chip0; Venice - chip
+
+ * @retval ECMD_SUCCESS
+ * @retval ERROR defined in xml
+ */
+fapi::ReturnCode pmc_init_function(const fapi::Target& i_target1 )
 {
     fapi::ReturnCode rc;
-  ecmdDataBufferBase data(64);
-  //  ecmdDataBufferBase mask(64);
-  uint32_t e_rc = 0;
-  uint32_t count = 0 ;
-  bool is_stopped ;
-  bool is_spivid_stopped ;
-  bool is_not_ongoing ;
-  bool enable_pstate_voltage_changes ;
-  bool fw_pstate_mode = false;  ////TODO RTC: 68461 - refresh procedures, and to init variable.
-  bool is_pstate_error_stopped ;
-  bool is_intchp_error_stopped;
-  bool is_MasterPMC;
-  bool __attribute__((unused)) enable_fw_pstate_mode; // HACK
+    uint32_t        e_rc;
+    ecmdDataBufferBase data(64);
+    uint8_t         attr_pm_spivid_frame_size;
+    uint8_t         attr_pm_spivid_in_delay_frame1;
+    uint8_t         attr_pm_spivid_in_delay_frame2;
+    uint8_t         attr_pm_spivid_clock_polarity;
+    uint8_t         attr_pm_spivid_clock_phase;
+    uint32_t        attr_pm_spivid_clock_divider;
+    uint8_t         attr_pm_spivid_port_enable = 7;
+    uint32_t        attr_pm_spivid_interframe_delay_write_status_value;
+    uint32_t        attr_pm_spivid_inter_retry_delay_value;
+    uint8_t         attr_pm_spivid_crc_gen_enable;
+    uint8_t         attr_pm_spivid_crc_check_enable;
+    uint8_t         attr_pm_spivid_majority_vote_enable;
+    uint8_t         attr_pm_spivid_max_retries;
+    uint8_t         attr_pm_spivid_crc_polynomial_enables;
+
+
+    const uint8_t   default_spivid_frame_size = 32;
+    const uint8_t   default_spivid_in_delay_frame1 = 0;
+    const uint8_t   default_spivid_in_delay_frame2 = 0;
+    const uint8_t   default_spivid_clock_polarity = 0;
+    const uint8_t   default_spivid_clock_phase = 0;
+    const uint32_t  default_spivid_port_enable = 0x0;
+    const uint8_t   default_spivid_crc_gen_enable = 1;
+    const uint8_t   default_spivid_crc_check_enable = 0;
+    const uint8_t   default_spivid_majority_vote_enable = 1;
+    const uint8_t   default_spivid_max_retries = 5;
+    const uint8_t   default_spivid_crc_polynomial_enables = 0xD5;
+
+    uint32_t        var_100ns_div_value = 0;
+    uint32_t        proc_nest_frequency = 2400;
+    uint32_t        attr_pm_interchip_frequency = 10;
+    uint32_t        interchip_clock_divider = 0 ;
+
+    do
+    {
+
+        rc = FAPI_ATTR_GET(ATTR_FREQ_PB, NULL, proc_nest_frequency);
+        if (rc)
+        {
+            FAPI_ERR("fapiGetAttribute of ATTR_FREQ_PB with rc = 0x%x", (uint32_t)rc);
+            break;
+        }
+
+        //    var_100ns_div_value = (( attr_proc_pss_init_nest_frequency * 1000000 * 100) /4000000000);
+        var_100ns_div_value =    (( proc_nest_frequency ) /40);
+        interchip_clock_divider = ( proc_nest_frequency /(attr_pm_interchip_frequency*8)-1 );
+
+            //----------------------------------------------------------
+        GETATTR_DEFAULT(    ATTR_PM_SPIVID_FRAME_SIZE,
+                    "ATTR_PM_SPIVID_FRAME_SIZE",
+                    &i_target1,
+                    attr_pm_spivid_frame_size,
+                    default_spivid_frame_size );
+
+            //----------------------------------------------------------
+        GETATTR_DEFAULT(    ATTR_PM_SPIVID_IN_DELAY_FRAME1,
+                    "ATTR_PM_SPIVID_IN_DELAY_FRAME1",
+                    &i_target1,
+                    attr_pm_spivid_in_delay_frame1,
+                    default_spivid_in_delay_frame1 );
+
+            //----------------------------------------------------------
+        GETATTR_DEFAULT(    ATTR_PM_SPIVID_IN_DELAY_FRAME1,
+                    "ATTR_PM_SPIVID_IN_DELAY_FRAME1",
+                    &i_target1,
+                    attr_pm_spivid_in_delay_frame2,
+                    default_spivid_in_delay_frame2 );
+
+            //----------------------------------------------------------
+        GETATTR_DEFAULT(    ATTR_PM_SPIVID_CLOCK_POLARITY,
+                    "ATTR_PM_SPIVID_CLOCK_POLARITY",
+                    &i_target1,
+                    attr_pm_spivid_clock_polarity,
+                    default_spivid_clock_polarity );
+
+            //----------------------------------------------------------
+        GETATTR_DEFAULT(    ATTR_PM_SPIVID_CLOCK_PHASE,
+                    "ATTR_PM_SPIVID_CLOCK_PHASE",
+                    &i_target1,
+                    attr_pm_spivid_clock_phase,
+                    default_spivid_clock_phase );
+
+            //----------------------------------------------------------
+        GETATTR_DEFAULT(    ATTR_PM_SPIVID_CRC_GEN_ENABLE,
+                    "ATTR_PM_SPIVID_CRC_GEN_ENABLE",
+                    &i_target1,
+                    attr_pm_spivid_crc_gen_enable,
+                    default_spivid_crc_gen_enable );
+
+            //----------------------------------------------------------
+        GETATTR_DEFAULT(    ATTR_PM_SPIVID_CRC_CHECK_ENABLE,
+                    "ATTR_PM_SPIVID_CRC_CHECK_ENABLE",
+                    &i_target1,
+                    attr_pm_spivid_crc_check_enable,
+                    default_spivid_crc_check_enable );
+
+            //----------------------------------------------------------
+        GETATTR_DEFAULT(    ATTR_PM_SPIVID_MAJORITY_VOTE_ENABLE,
+                    "ATTR_PM_SPIVID_CRC_CHECK_ENABLE",
+                    &i_target1,
+                    attr_pm_spivid_majority_vote_enable,
+                    default_spivid_majority_vote_enable );
+
+            //----------------------------------------------------------
+        GETATTR_DEFAULT(    ATTR_PM_SPIVID_MAX_RETRIES,
+                    "ATTR_PM_SPIVID_MAX_RETRIES",
+                    &i_target1,
+                    attr_pm_spivid_max_retries,
+                    default_spivid_max_retries );
+
+            //----------------------------------------------------------
+        GETATTR_DEFAULT(    ATTR_PM_SPIVID_CRC_POLYNOMIAL_ENABLES,
+                    "ATTR_PM_SPIVID_CRC_POLYNOMIAL_ENABLES",
+                    &i_target1,
+                    attr_pm_spivid_crc_polynomial_enables,
+                    default_spivid_crc_polynomial_enables );
+
+            //----------------------------------------------------------
+        GETATTR_DEFAULT(    ATTR_PM_SPIVID_PORT_ENABLE,
+                    "ATTR_PM_SPIVID_PORT_ENABLE",
+                    &i_target1,
+                    attr_pm_spivid_port_enable,
+                    default_spivid_port_enable );
+                    
+           //----------------------------------------------------------
+       GETATTR(     ATTR_PM_SPIVID_CLOCK_DIVIDER,
+                    "ATTR_PM_SPIVID_CLOCK_DIVIDER",
+                    &i_target1,
+                    attr_pm_spivid_clock_divider);
+
+            //----------------------------------------------------------
+       GETATTR(     ATTR_PM_SPIVID_INTERFRAME_DELAY_WRITE_STATUS_VALUE,
+                   "ATTR_PM_SPIVID_INTERFRAME_DELAY_WRITE_STATUS_VALUE",
+                    &i_target1,
+                    attr_pm_spivid_interframe_delay_write_status_value);
+        
+            //----------------------------------------------------------
+        GETATTR(    ATTR_PM_SPIVID_INTER_RETRY_DELAY_VALUE,
+                    "ATTR_PM_SPIVID_INTER_RETRY_DELAY_VALUE",
+                    &i_target1,
+                    attr_pm_spivid_inter_retry_delay_value);
+
+        FAPI_INF("PMC initialization...");
+
+        uint8_t o2s_frame_size = attr_pm_spivid_frame_size;
+        uint8_t o2s_in_delay1  = attr_pm_spivid_in_delay_frame1;
+        uint8_t o2s_in_delay2  = attr_pm_spivid_in_delay_frame2;
+        uint8_t o2s_clk_pol    = attr_pm_spivid_clock_polarity;
+        uint8_t o2s_clk_pha    = attr_pm_spivid_clock_phase;
+        uint8_t o2s_port_enable = attr_pm_spivid_port_enable;
+        uint32_t o2s_inter_frame_delay = attr_pm_spivid_interframe_delay_write_status_value;
+        uint8_t o2s_crc_gen_en = attr_pm_spivid_crc_gen_enable;
+        uint8_t o2s_crc_check_en = attr_pm_spivid_crc_check_enable;
+        uint8_t o2s_majority_vote_en = attr_pm_spivid_majority_vote_enable;
+        uint8_t o2s_max_retries = attr_pm_spivid_max_retries;
+        uint8_t o2s_crc_polynomial_enables = attr_pm_spivid_crc_polynomial_enables;
+        uint16_t o2s_clk_divider = attr_pm_spivid_clock_divider;
+        //spivid_freq =  attr_pm_spivid_frequency;
+        uint8_t   o2s_in_count2        = o2s_frame_size ;
+        uint8_t   o2s_out_count2          = o2s_frame_size ;
+        uint8_t   o2s_bridge_enable = 0x1 ;
+        uint8_t   o2s_nr_of_frames        = 2 ;
+        uint8_t   o2s_in_count1        = o2s_frame_size ;
+        uint8_t   o2s_out_count1        = o2s_frame_size ;
+        uint8_t   hangpulse_predivider = 1;
+        uint8_t   gpsa_timeout_value   = 100;
+        uint8_t   one=1;
+        uint8_t   zero=0;
+        uint8_t   dcm=0;
+        uint8_t   is_master=0;
+        uint8_t   is_slave=1;
+
+        uint8_t   is_simulation = 0;
+        uint8_t   attr_dcm_installed_1 = 0;
+        uint64_t any_error = 0;
+
+        rc = FAPI_ATTR_GET( ATTR_IS_SIMULATION, NULL, is_simulation);
+        if (rc)
+        {
+            FAPI_ERR("Failed to get attribute: ATTR_IS_SIMULATION.");
+            break ;
+        }
+
+        if (is_simulation)
+        {
+            // Simulation value
+            gpsa_timeout_value   = 100;
+        }
+        else
+        {
+            // Hardware
+            gpsa_timeout_value   = 255;
+        }
+
+        // Here to bypass feature attribute passing until these as moved into proc.pm.pmc.scom.initfile
+        o2s_bridge_enable = 0x1 ;
+
+        e_rc = data.flushTo0();
+        if (e_rc)
+        {
+            FAPI_ERR("ecmdDataBufferBase error flushing buffer");
+            rc.setEcmdError(e_rc);
+            break;
+        }
+
+        rc = fapiGetScom(i_target1, PMC_LFIR_0x01010840 , data );
+        if (rc)
+        {
+            FAPI_ERR("fapiGetScom(PMC_LFIR_0x01010840) failed.");
+            break;
+        }
+
+        any_error = data.getDoubleWord(0);
+    
+        if (any_error)
+        {
+           FAPI_ERR(" PMC_FIR has error(s) active.  0x%16llX ", data.getDoubleWord(0));
+           //FAPI_SET_HWP_ERROR(rc, RC_PROCPM_FIR_ERROR); break;
+           //return rc ;
+        }
+
+        //  ******************************************************************
+        //     - set PMC_o2s_CTRL_REG0A (24b)
+        //  ******************************************************************
+
+        rc = fapiGetScom(i_target1, PMC_O2S_CTRL_REG0A_0x00062050, data );
+        if (rc)
+        {
+             FAPI_ERR("fapiGetScom(PMC_O2S_CTRL_REG0A) failed.");
+             break;
+        }
+
+        e_rc  = data.insertFromRight(o2s_frame_size , 0,6);
+        e_rc |= data.insertFromRight(o2s_out_count1 , 6,6);
+        e_rc |= data.insertFromRight(o2s_in_delay1  ,12,6);
+        e_rc |= data.insertFromRight(o2s_in_count1  ,18,6);
+        if (e_rc)
+        {
+            FAPI_ERR("ecmdDataBufferBase error setting up PMC_O2S_CTRL_REG0A on Master init");
+            rc.setEcmdError(e_rc);
+            break;
+        }
+    
+        FAPI_INF("  PMC_O2S_CTRL_REG0A / PMC_SPIV_CTRL_REG0A  Configuration");
+        FAPI_INF("    frame size                 => %d ",  o2s_frame_size);
+        FAPI_INF("    o2s_out_count1             => %d ",  o2s_out_count1);
+        FAPI_INF("    o2s_in_delay1              => %d ",  o2s_in_delay1);
+        FAPI_INF("    o2s_in_count1              => %d ",  o2s_in_count1);
+
+        rc = fapiPutScom(i_target1, PMC_O2S_CTRL_REG0A_0x00062050, data );
+        if (rc)
+        {
+            FAPI_ERR("fapiPutScom(PMC_O2S_CTRL_REG0A_0x00062050) failed.");
+            break;
+        }
+
+        rc = fapiPutScom(i_target1, PMC_SPIV_CTRL_REG0A_0x00062040, data );
+        if (rc)
+        {
+            FAPI_ERR("fapiPutScom(PMC_SPIV_CTRL_REG0A_0x00062040) failed.");
+            break;
+        }
+
+        //  ******************************************************************
+        //     - set PMC_O2S_CTRL_REG0B (24b)
+        //  ******************************************************************
+
+        rc = fapiGetScom(i_target1, PMC_O2S_CTRL_REG0B_0x00062051, data );
+        if (rc)
+        {
+            FAPI_ERR("fapiGetScom(PMC_O2S_CTRL_REG0B) failed.");
+            break;
+        }
+    
+        e_rc  = data.insertFromRight(o2s_out_count2,00,6);
+        e_rc |= data.insertFromRight(o2s_in_delay2 ,06,6);
+        e_rc |= data.insertFromRight(o2s_in_count2 ,12,6);
+        if (e_rc)
+        {
+            FAPI_ERR("ecmdDataBufferBase error setting up PMC_O2S_CTRL_REG0B_0x00062051 on Master init");
+            rc.setEcmdError(e_rc);
+            break;
+        }
+
+        FAPI_INF("  PMC_O2S_CTRL_REG0B_ / PMC_SPIV_CTRL_REG0B Configuration");
+        FAPI_INF("    o2s_out_count2             => %d ",  o2s_out_count2);
+        FAPI_INF("    o2s_in_delay2              => %d ",  o2s_in_delay2 );
+        FAPI_INF("    o2s_in_count2              => %d ",  o2s_in_count2 );
+
+	rc = fapiPutScom(i_target1, PMC_O2S_CTRL_REG0B_0x00062051, data );
+        if (rc)
+        {
+            FAPI_ERR("fapiPutScom(PMC_O2S_CTRL_REG0B_0x00062051) failed.");
+            break;
+        }
+
+        rc = fapiPutScom(i_target1, PMC_SPIV_CTRL_REG0B_0x00062041, data );
+        if (rc)
+        {
+            FAPI_ERR("fapiPutScom(PMC_SPIV_CTRL_REG0B_0x00062041) failed.");
+            break;
+        }
+    
+        //  ******************************************************************
+        //     - set PMC_O2S_CTRL_REG1
+        //  ******************************************************************
+
+        rc = fapiGetScom(i_target1, PMC_O2S_CTRL_REG1_0x00062052, data );
+        if (rc)
+        {
+            FAPI_ERR("fapiGetScom(PMC_O2S_CTRL_REG1) failed.");
+            break;
+        }
+
+        o2s_nr_of_frames--;
+        e_rc = data.insertFromRight(o2s_bridge_enable   ,0 ,1);
+        e_rc |= data.insertFromRight(o2s_clk_pol         ,2 ,1);
+        e_rc |= data.insertFromRight(o2s_clk_pha         ,3 ,1);
+        e_rc |= data.insertFromRight(o2s_clk_divider     ,4 ,10);
+        e_rc |= data.insertFromRight(o2s_nr_of_frames    ,17,1);
+        e_rc |= data.insertFromRight(o2s_port_enable     ,18,3);
+        if (e_rc)
+        {
+            FAPI_ERR("ecmdDataBufferBase error setting up PMC_O2S_CTRL_REG1 on Master init");
+            rc.setEcmdError(e_rc);
+            break;
+        }
+    
+        o2s_nr_of_frames++ ;
+ 	FAPI_INF("  PMC_O2S_CTRL_REG1 / PMC_SPIV_CTRL_REG1 ");
+ 	FAPI_INF("    o2s_bridge_enable           => %d ",  o2s_bridge_enable );
+         FAPI_INF("    o2s_clk_pol                 => %d ",  o2s_clk_pol    );
+         FAPI_INF("    o2s_clk_pha                 => %d ",  o2s_clk_pha    );
+         FAPI_INF("    o2s_clk_divider             => 0x%x", o2s_clk_divider);
+         FAPI_INF("    o2s_nr_of_frames            => %d ",  o2s_nr_of_frames);
+         FAPI_INF("    o2s_port_enable             => %d ",  o2s_port_enable);
+
+                
+        rc = fapiPutScom(i_target1, PMC_O2S_CTRL_REG1_0x00062052, data );
+        if (rc)
+        {
+            FAPI_ERR("fapiPutScom(PMC_O2S_CTRL_REG1_0x00062052) failed.");
+             break;
+        }
+
+        rc = fapiPutScom(i_target1, PMC_SPIV_CTRL_REG1_0x00062042, data );
+        if (rc)
+        {
+            FAPI_ERR("fapiPutScom(PMC_SPIV_CTRL_REG1_0x00062042) failed.");
+            break;
+        }
+    
+        //  ******************************************************************
+        //     - set PMC_O2S_CTRL_REG2
+        //  ******************************************************************
+
+        rc = fapiGetScom(i_target1, PMC_O2S_CTRL_REG2_0x00062053, data );
+        if (rc)
+        {
+            FAPI_ERR("fapiGetScom(PMC_O2S_CTRL_REG2) failed.");
+            break;
+        }
+
+        e_rc = data.insertFromRight(  o2s_inter_frame_delay   ,0,17);
+        if (e_rc)
+        {
+            FAPI_ERR("ecmdDataBufferBase error setting up PMC_O2S_CTRL_REG2 on Master init");
+            rc.setEcmdError(e_rc);
+            break;
+        }
+    
+
+        FAPI_INF("  PMC_O2S_CTRL_REG2_ / PMC_SPIV_CTRL_REG2Configuration");
+        FAPI_INF("    o2s_inter_frame_delay       => %d ",  o2s_inter_frame_delay );
+
+        rc = fapiPutScom(i_target1, PMC_O2S_CTRL_REG2_0x00062053, data );
+        if (rc)
+        {
+            FAPI_ERR("fapiPutScom(PMC_O2S_CTRL_REG2_0x00062053) failed.");
+            break;
+        }
+
+        rc = fapiPutScom(i_target1, PMC_SPIV_CTRL_REG2_0x00062043, data );
+        if (rc)
+        {
+            FAPI_ERR("fapiPutScom(PMC_SPIV_CTRL_REG2_0x00062043) failed.");
+            break;
+        }
+
+        //  ******************************************************************
+        //     - set PMC_SPIV_CTRL_REG3
+        //  ******************************************************************
+
+        rc = fapiGetScom(i_target1, PMC_SPIV_CTRL_REG3_0x00062044, data );
+        if (rc)
+        {
+            FAPI_ERR("fapiGetScom(PMC_SPIV_CTRL_REG3) failed.");
+            break;
+        }
+
+        e_rc = data.insertFromRight(  attr_pm_spivid_inter_retry_delay_value   ,0,17);
+        e_rc |= data.insertFromRight(  var_100ns_div_value , 17 , 6);
+        if (e_rc)
+        {
+            FAPI_ERR("ecmdDataBufferBase error setting up PMC_SPIV_CTRL_REG3 on Master init");
+            rc.setEcmdError(e_rc);
+            break;
+        }
+
+        FAPI_INF("  PMC_SPIV_CTRL_REG3 Configuration                  ");
+        FAPI_INF("    spivid_inter_retry_delay_value => %d ",  attr_pm_spivid_inter_retry_delay_value );
+        FAPI_INF("    100ns_div_value                => %d ",  var_100ns_div_value);
+
+        rc = fapiPutScom(i_target1, PMC_SPIV_CTRL_REG3_0x00062044, data );
+        if (rc)
+        {
+            FAPI_ERR("fapiPutScom(PMC_SPIV_CTRL_REG3_0x00062044) failed.");
+            break;
+        }
+
+            //  ******************************************************************
+        //     - set PMC_O2S_CTRL_REG4
+        //  ******************************************************************
+
+        rc = fapiGetScom(i_target1, PMC_O2S_CTRL_REG4_0x00062055, data );
+        if (rc)
+        {
+            FAPI_ERR("fapiGetScom(PMC_O2S_CTRL_REG4) failed.");
+            break;
+        }
+
+        e_rc  = data.insertFromRight(  o2s_crc_gen_en         ,0,1);
+        e_rc |= data.insertFromRight(  o2s_crc_check_en       ,1,1);
+        e_rc |= data.insertFromRight(  o2s_majority_vote_en   ,2,1);
+        e_rc |= data.insertFromRight(  o2s_max_retries        ,3,5);
+        e_rc |= data.insertFromRight(  o2s_crc_polynomial_enables,8,8);
+        if (e_rc)
+        {
+            FAPI_ERR("ecmdDataBufferBase error setting up PMC_O2S_CTRL_REG on Master init");
+            rc.setEcmdError(e_rc);
+            break;
+        }
+
+        FAPI_INF("  PMC_O2S_CTRL_REG4 Configuration");
+        FAPI_INF("    o2s_crc_gen_en           => %d ",  o2s_crc_gen_en          );
+        FAPI_INF("    o2s_crc_check_en         => %d ",  o2s_crc_check_en        );
+        FAPI_INF("    o2s_majority_vote_en     => %d ",  o2s_majority_vote_en    );
+        FAPI_INF("    o2s_max_retries          => %d ",  o2s_max_retries         );
+        FAPI_INF("    o2s_crc_polynomial_enab  => 0x%x ",  o2s_crc_polynomial_enables );
+
+
+        rc = fapiPutScom(i_target1, PMC_O2S_CTRL_REG4_0x00062055, data );
+        if (rc)
+        {
+            FAPI_ERR("fapiPutScom(PMC_O2S_CTRL_REG4_0x00062055) failed.");
+            break;
+        }
+
+        //  ******************************************************************
+        //   Program crc polynomials
+        //  ******************************************************************
+
+        rc = fapiGetScom(i_target1, PMC_SPIV_CTRL_REG4_0x00062045, data );
+        if (rc)
+        {
+            FAPI_ERR("fapiGetScom(PMC_SPIV_CTRL_REG4) failed.");
+            break;
+        }
+
+        e_rc  = data.insertFromRight(  o2s_crc_gen_en         ,0,1);
+        e_rc |= data.insertFromRight(  o2s_crc_check_en       ,1,1);
+        e_rc |= data.insertFromRight(  o2s_majority_vote_en   ,2,1);
+        e_rc |= data.insertFromRight(  o2s_max_retries        ,3,5);
+        e_rc |= data.insertFromRight(  o2s_crc_polynomial_enables,8,8);
+        if (e_rc)
+        {
+            FAPI_ERR("ecmdDataBufferBase error setting up PMC_SPIV_CTRL_REG4 on Master init");
+            rc.setEcmdError(e_rc);
+            break;
+        }
+
+        FAPI_INF("  PMC_SPIV_CTRL_REG4 Configuration");
+        FAPI_INF("    spiv_crc_gen_en           => %d ",  o2s_crc_gen_en          );
+        FAPI_INF("    spiv_crc_check_en         => %d ",  o2s_crc_check_en        );
+        FAPI_INF("    spiv_majority_vote_en     => %d ",  o2s_majority_vote_en    );
+        FAPI_INF("    spiv_max_retries          => %d ",  o2s_max_retries         );
+        FAPI_INF("    spiv_crc_polynomial_enab  => 0x%x ",  o2s_crc_polynomial_enables );
+
+        rc = fapiPutScom(i_target1, PMC_SPIV_CTRL_REG4_0x00062045, data );
+        if (rc)
+        {
+            FAPI_ERR("fapiPutScom(PMC_SPIV_CTRL_REG4_0x00062045) failed.");
+            break;
+        }
+
+        //  ******************************************************************
+        //     - write PMC_PARAMETER_REG0
+        //  ******************************************************************
+        rc = fapiGetScom(i_target1, PMC_PARAMETER_REG0_0x00062005, data );
+        if (rc)
+        {
+            FAPI_ERR("fapiGetScom(PMC_PARAMETER_REG0_0x00062005) failed.");
+            break;
+        }
+
+        e_rc = data.insertFromRight(hangpulse_predivider ,15,6);
+        e_rc |= data.insertFromRight(gpsa_timeout_value   ,21,8);
+        if (e_rc)
+        {
+            FAPI_ERR("ecmdDataBufferBase error setting up PMC_PARAMETER_REG0_0x00062005 on Master init");
+            rc.setEcmdError(e_rc);
+            break;
+        }
+
+        FAPI_INF("  PMC_PARAMETER_REG0 Configuration");
+        FAPI_INF("    hangpulse_predivider       => 0x%x ",  hangpulse_predivider);
+        FAPI_INF("    gpsa_timeout_value         => 0x%x ",  gpsa_timeout_value  );
+
+        rc = fapiPutScom(i_target1, PMC_PARAMETER_REG0_0x00062005, data );
+        if (rc)
+        {
+            FAPI_ERR("fapiPutScom(PMC_PARAMETER_REG0_0x00062005) failed.");
+            break;
+        }
+
+        //  ******************************************************************
+        //     - write PMC_MODE_REG
+        //  ******************************************************************
+        rc = fapiGetScom(i_target1, PMC_MODE_REG_0x00062000, data );
+        if (rc)
+        {
+            FAPI_ERR("fapiGetScom(PMC_MODE_REG_0x00062000) failed.");
+            break;
+        }
+
+        e_rc  = data.insertFromRight(zero , 0  ,1); //HW_PSTATE_MODE
+        e_rc |= data.insertFromRight(zero , 1  ,1); //FW_PSTATE_AUCTION_MODE
+        e_rc |= data.insertFromRight(one  , 2  ,1); //FW_PSTATE_MODE
+        e_rc |= data.insertFromRight(zero , 13 ,1); //SAFE_MODE_WITHOUT_SPIVID
+        if (e_rc)
+        {
+            FAPI_ERR("ecmdDataBufferBase error setting up PMC_SPIV_CTRL_REG4 on Master init");
+            rc.setEcmdError(e_rc);
+            break;
+        }
+
+        FAPI_INF("  PMC_MODE_REG Configuration");
+        FAPI_INF("    SAFE_MODE_WITHOUT_SPIVID       => %d ",  zero);
+
+        rc = fapiPutScom(i_target1, PMC_MODE_REG_0x00062000, data );
+        if (rc)
+        {
+            FAPI_ERR("fapiPutScom(PMC_MODE_REG_0x00062000) failed.");
+            break;
+        }
+
+        // *************************************************************
+        // REGISTER WRITES FOR DCMS
+        // *************************************************************
+
+        rc = FAPI_ATTR_GET(ATTR_PROC_DCM_INSTALLED, &i_target1, attr_dcm_installed_1);
+        if (rc)
+        {
+            FAPI_ERR("fapiGetAttribute of ATTR_DCM_INSTALLED with rc = 0x%x", (uint32_t)rc);
+            break;
+        }
+        FAPI_INF (" value read from the attribute ATTR_DCM_INSTALLED in init function = 0x%x", attr_dcm_installed_1 );
+
+        if (attr_dcm_installed_1 == 1)
+        {
+            dcm = 1;
+
+            rc = fapiGetScom(i_target1, DEVICE_ID_REG_0x000F000F, data );
+            if (rc)
+            {
+                FAPI_ERR("fapiGetScom(DEVICE_ID_REG_0x000F000F) failed.");
+                break;
+            }
+
+            is_master = data.isBitClear(39) ;
+            is_slave = not is_master ;
+        }
+        else
+        {
+            dcm = 0 ;
+        }
+    
+        if (dcm == 1)
+        {
+            if (is_master)
+            {            
+                FAPI_INF ("**** Setting up DCM Master ****");
+            }
+            else 
+            {
+                FAPI_INF ("**** Setting up DCM Slave ****");
+            }
+            //  ****************************************************************
+            //     - write PMC_MODE_REG
+            //  ****************************************************************
+            rc = fapiGetScom(i_target1, PMC_MODE_REG_0x00062000, data );
+            if (rc)
+            {
+                FAPI_ERR("fapiGetScom(PMC_MODE_REG_0x00062000) failed.");
+                break;
+            }
+
+            e_rc  = data.insertFromRight( one      , 6 ,1); //ENABLE_INTERCHIP_INTERFACE
+            e_rc |= data.insertFromRight( is_master, 7 ,1); //INTERCHIP_MODE
+            e_rc |= data.insertFromRight( is_master, 8 ,1); //ENABLE_INTERCHIP_PSTATE_IN_HAPS
+            e_rc |= data.insertFromRight( is_slave ,13 ,1); //SAFEMODE_WITHOUT_SPIVID
+            if (e_rc)
+            {
+                FAPI_ERR("ecmdDataBufferBase error setting up PMC_MODE_REG_0x00062000 on Master DCM init");
+                rc.setEcmdError(e_rc);
+                break;
+            }
+
+            FAPI_INF("  PMC_MODE_REG Configuration");
+            FAPI_DBG("    ENABLE_INTERCHIP_INTERFACE             => %d ", one       );
+            FAPI_DBG("    INTERCHIP_MODE                         => %d ", is_master );
+            FAPI_DBG("    ENABLE_INTERCHIP_PSTATE_IN_HAPS        => %d ", is_master );
+            FAPI_DBG("    SAFE_MODE_WITHOUT_SPIVID               => %d ", is_slave  );
+
+            rc = fapiPutScom(i_target1, PMC_MODE_REG_0x00062000, data );
+            if (rc)
+            {
+                FAPI_ERR("fapiPutScom(PMC_MODE_REG_0x00062000) failed.");
+                break;
+            }
+            FAPI_DBG(" before exiting pmc_init PMC_MODE_REG_0x00062000  =>0x%16llx", data.getDoubleWord(0));
+
+            //  ******************************************************************
+            //     - set PMC_O2S_CTRL_REG1
+            //  ******************************************************************
+
+            rc = fapiGetScom(i_target1, PMC_O2S_CTRL_REG1_0x00062052, data );
+            if (rc)
+            {
+                FAPI_ERR("fapiGetScom(PMC_O2S_CTRL_REG1) failed.");
+                break;
+            }
+	
+            // Force the port enables on the slave or else the SPIVID on the slave
+            // chip will hang
+            if (is_slave)
+            {
+                 o2s_port_enable = 4 ;
+                 e_rc = data.insertFromRight(o2s_port_enable     ,18,3);
+                 if (e_rc)
+                 {
+                     FAPI_ERR("ecmdDataBufferBase error setting up forced slave port enable on Slave DCM init");
+                     rc.setEcmdError(e_rc);
+                     break;
+                 }
+                 FAPI_INF("Forcing port enable on slave to avoid SPIVID controller hang");
+                 FAPI_INF("  PMC O2S CTRL_REG_1 / PMC_SPIV_CTRL_REG1 Configuration");
+                 FAPI_INF("    spiv/o2s_port_enable       => %d ",  o2s_port_enable  );
+            }
+
+            // \todo this should be looked at for removal to avoid future problems
+            rc = fapiPutScom(i_target1, PMC_O2S_CTRL_REG1_0x00062052, data );
+            if (rc)
+            {
+                FAPI_ERR("fapiPutScom(PMC_O2S_CTRL_REG1_0x00062052) failed.");
+                break;
+            }
+
+            rc = fapiPutScom(i_target1, PMC_SPIV_CTRL_REG1_0x00062042, data );
+            if (rc)
+            {
+                FAPI_ERR("fapiPutScom(PMC_SPIV_CTRL_REG1_0x00062042) failed.");
+                break;
+            }
+	
+            //  ******************************************************************
+            //     - write PMC_INTCHP_CTRL_REG1
+            //  ******************************************************************
+            rc = fapiGetScom(i_target1, PMC_INTCHP_CTRL_REG1_0x00062010, data );
+            if (rc)
+            {
+                FAPI_ERR("fapiGetScom(PMC_INTCHP_CTRL_REG1_0x00062010) failed.");
+                break;
+            }
+
+            e_rc  = data.insertFromRight(one , 0 ,1);                      //INTERCHIP_GA_FSM_ENABLE
+            e_rc |= data.insertFromRight(zero, 7 ,1);                      //INTERCHIP_CPHA
+            e_rc |= data.insertFromRight( interchip_clock_divider, 4 ,10); //INTERCHIP_CLOCK_DIVIDER
+            if (e_rc)
+            {
+                FAPI_ERR("ecmdDataBufferBase error setting up PMC_INTCHP_CTRL_REG1_0x00062010 on Master DCM init");
+                rc.setEcmdError(e_rc);
+                break;
+            }
+
+            FAPI_INF("  PMC_INTCHP_CTRL_REG1 Configuration                  ");
+            FAPI_DBG("    INTERCHIP_GA_FSM_ENABLE        =>   %d ",  one          );
+            FAPI_DBG("    INTERCHIP_CPHA                 =>   %d ", zero     );
+            FAPI_DBG("    INTERCHIP_CLOCK_DIVIDER        => 0x%x ", interchip_clock_divider     );
+
+            rc = fapiPutScom(i_target1, PMC_INTCHP_CTRL_REG1_0x00062010, data );
+            if (rc)
+            {
+                FAPI_ERR("fapiPutScom(PMC_INTCHP_CTRL_REG1_0x00062010) failed.");
+                break;
+            }
+            FAPI_DBG(" before exiting pmc_init PMC_INTCHP_CTRL_REG1_0x00062010  =>0x%16llx", data.getDoubleWord(0));
+
+            //  ******************************************************************
+            //     - write PMC_INTCHP_CTRL_REG4
+            //  ******************************************************************
+            rc = fapiGetScom(i_target1, PMC_INTCHP_CTRL_REG4_0x00062012, data );
+            if (rc)
+            {
+                FAPI_ERR("fapiGetScom(PMC_INTCHP_CTRL_REG4_0x00062012) failed.");
+                break;
+            }
+            e_rc  = data.insertFromRight(one , 0 ,1); //INTERCHIP_ECC_GEN_EN
+            e_rc |= data.insertFromRight(one , 1 ,1); //INTERCHIP_ECC_CHECK_EN
+            e_rc |= data.insertFromRight(one , 2 ,1); //INTERCHIP_MSG_RCV_OVERFLOW_CHECK_EN
+            e_rc |= data.insertFromRight(one , 3 ,1); //INTERCHIP_ECC_UE_BLOCK_EN
+            if (e_rc)
+            {
+                FAPI_ERR("ecmdDataBufferBase error setting up PMC_INTCHP_CTRL_REG1_0x00062010 on Master DCM init");
+                rc.setEcmdError(e_rc);
+                break;
+            }
+
+            FAPI_INF("  PMC_INTCHP_CTRL_REG4 Configuration                  ");
+            FAPI_DBG("    INTERCHIP_ECC_GEN_EN                       =>   %d ",  one          );
+            FAPI_DBG("    INTERCHIP_ECC_CHECK_EN                     =>   %d ",  one          );
+            FAPI_DBG("    INTERCHIP_MSG_RCV_OVERFLOW_CHECK_EN        =>   %d ",  one          );
+            FAPI_DBG("    INTERCHIP_ECC_UE_BLOCK_EN                  =>   %d ",  one          );
+	
+            rc = fapiPutScom(i_target1, PMC_INTCHP_CTRL_REG4_0x00062012, data );
+            if (rc)
+            {
+                FAPI_ERR("fapiPutScom(PMC_INTCHP_CTRL_REG4_0x00062012) failed.");
+                break;
+	        }
+	FAPI_DBG(" before exiting pmc_init PMC_INTCHP_CTRL_REG4_0x00062012  =>0x%16llx", data.getDoubleWord(0));
+        } // dcm
+    
+    } while(0);
+
+
+
+    FAPI_INF ("Done with the init");
+    FAPI_INF ("Done with the init");
+    return rc; 
 
-
-////////////////////////////////////////////////////////////////////////////
-// 1. cRQ_TD_IntMaskRQ: Mask OCC interrupts in OIMR1
-//    PMC_PSTATE_REQUEST, PMC_PROTOCOL_ONGOING, PMC_VOLTAGE_CHANGE_ONGOING,
-//    PMC_INTERCHIP_MSG_SEND_ONGOING, PMC_IDLE_ENTER, PMC_IDLE_EXIT, PMC_SYNC
-////////////////////////////////////////////////////////////////////////////
-
-  FAPI_INF("Performing STEP 1");
-
-    e_rc = data.flushTo0(); if(e_rc){rc.setEcmdError(e_rc); return rc;}
-
-    rc = fapiGetScom(i_target, OCB_OCI_OIMR1_0x0006a014 , data );
-    if (rc) {
-         FAPI_ERR("fapiGetScom(OCB_OCI_OIMR1_0x0006a014) failed."); return rc;
-    }
-
-
-    e_rc = data.setBit(12);  if(e_rc){rc.setEcmdError(e_rc); return rc; }
-    e_rc = data.setBit(13);  if(e_rc){rc.setEcmdError(e_rc); return rc; }
-    e_rc = data.setBit(14);  if(e_rc){rc.setEcmdError(e_rc); return rc; }
-    e_rc = data.setBit(15);  if(e_rc){rc.setEcmdError(e_rc); return rc; }
-    e_rc = data.setBit(18);  if(e_rc){rc.setEcmdError(e_rc); return rc; }
-    e_rc = data.setBit(20);  if(e_rc){rc.setEcmdError(e_rc); return rc; }
-    e_rc = data.setBit(22);  if(e_rc){rc.setEcmdError(e_rc); return rc; }
-
-
-
-    rc = fapiPutScom(i_target, OCB_OCI_OIMR1_0x0006a014 , data );
-    if (rc) {
-         FAPI_ERR("fapiPutScom(OCB_OCI_OIMR1_0x0006a014) failed."); return rc;
-    }
-
-////////////////////////////////////////////////////////////////////////////
-// 2. cRQ_TD_IntMaskER: Mask OCC interrupts in OIMR0
-//    PMC_ERROR, PMC_MALF_ALERT, PMC_INTERCHIP_MSG_RECVD
-////////////////////////////////////////////////////////////////////////////
-
-
-
-  FAPI_INF("Performing STEP 2");
-    rc = fapiGetScom(i_target, OCB_OCI_OIMR0_0x0006a004 , data );
-    if (rc) {
-         FAPI_ERR("fapiGetScom(OCB_OCI_OIMR0_0x0006a004) failed."); return rc;
-    }
-
-
-    e_rc = data.setBit(9);  if(e_rc){rc.setEcmdError(e_rc); return rc; }
-    e_rc = data.setBit(13);  if(e_rc){rc.setEcmdError(e_rc); return rc; }
-    e_rc = data.setBit(21);  if(e_rc){rc.setEcmdError(e_rc); return rc; }
-
-
-
-    rc = fapiPutScom(i_target, OCB_OCI_OIMR0_0x0006a004 , data );
-    if (rc) {
-         FAPI_ERR("fapiPutScom(OCB_OCI_OIMR0_0x0006a004) failed."); return rc;
-    }
-
-
-////////////////////////////////////////////////////////////////////////////
-// 3. cRQ_TD_DisableMPS: Write PMC_MODE_REG to halt things  Which register bits should be written with what to make this below halts ?
-//    halt_pstate_master_fsm<-1          <-1 indicates to write the bit with the value 1
-//    halt_idle_state_master_fsm<-1      <-1 indicates to write the bit with the value 1
-//    Note: Other bits are left as setup so the configuration remains as things halt, and new
-//          requests are queued (just now processed now).
-////////////////////////////////////////////////////////////////////////////
-
-  FAPI_INF("Performing STEP 3");
-    rc = fapiGetScom(i_target, PMC_MODE_REG_0x00062000 , data );
-    if (rc) {
-         FAPI_ERR("fapiGetScom(PMC_MODE_REG_0x00062000) failed."); return rc;
-    }
-
-
-    e_rc = data.setBit(05);  if(e_rc){rc.setEcmdError(e_rc); return rc; }
-    e_rc = data.setBit(14);  if(e_rc){rc.setEcmdError(e_rc); return rc; }
-
-
-
-    rc = fapiPutScom(i_target, PMC_MODE_REG_0x00062000 , data );
-    if (rc) {
-         FAPI_ERR("fapiPutScom(PMC_MODE_REG_0x00062000) failed."); return rc;
-    }
-
-    is_MasterPMC = data.isBitSet(6) & data.isBitSet(7) ;
-    enable_pstate_voltage_changes = data.isBitSet(6) ;
-    enable_fw_pstate_mode = data.isBitSet(2) ;
-
-
-
-
-
-
-////////////////////////////////////////////////////////////////////////////
-// 4. if enable_interchip_interface==1
-//       cRQ_TD_HaltInterchip_On: Write PMC_INTCHP_COMMAND_REG.interchip_halt_msg_fsm<-1 Should we write the command register here ? That's why I specified the command register, PMC_INTCHP_COMMAND_REG.
-//    cRQ_TD_HaltInterchip_Wait1: Read PMC_STATUS_REG
-//    cRQ_TD_HaltInterchip_Wait2: Read PMC_INTCHP_STATUS_REG
-//       is_pstate_error_stopped = pstate_processing_is_suspended || gpsa_bdcst_error || gpsa_vchg_error || gpsa_timeout_error || pstate_interchip_error
-//       is_intchp_error_stopped = interchip_ecc_ue_err || interchip_fsm_err || (is_MasterPMC && interchip_slave_error_code != 0) is_MasterPMC where is this bit ?
-//       is_stopped = (interchip_ga_ongoing == 0) || is_pstate_error_stopped || is_intchp_error_stopped
-//       If !is_stopped Then -->cRQ_TD_HaltInterchip_Wait1  (Wait limit is parm TD_Interchip_HaltWait_max=260)
-//    cRQ_TD_HaltInterchipIf: PMC_MODE_REG.interchip_halt_if<-1 interchip_halt_if where is this bit ? PMC_MODE_REG bit 15 as documented.
-
-
-////////////////////////////////////////////////////////////////////////////
-
-
-  FAPI_INF("Performing STEP 4");
-    if (data.isBitSet(6))
-
-      {
-
-	rc = fapiGetScom(i_target, PMC_INTCHP_COMMAND_REG_0x00062014 , data );
-	if (rc) {
-	  FAPI_ERR("fapiGetScom(PMC_INTCHP_COMMAND_REG_0x00062014) failed."); return rc;
-	}
-
-	e_rc = data.setBit(01);  if(e_rc){rc.setEcmdError(e_rc); return rc; }
-
-
-	rc = fapiPutScom(i_target, PMC_INTCHP_COMMAND_REG_0x00062014 , data );
-	if (rc) {
-	  FAPI_ERR("fapiPutScom(PMC_INTCHP_COMMAND_REG_0x00062014) failed."); return rc;
-	}
-
-
-
-
-
-
-	for (count = 0 , is_stopped = 0 ; count <= 256 && is_stopped == 0;  count++)
-	  {
-//    cRQ_TD_HaltInterchip_Wait1: Read PMC_STATUS_REG
-//       is_pstate_error_stopped = pstate_processing_is_suspended || gpsa_bdcst_error || gpsa_vchg_error || gpsa_timeout_error || pstate_interchip_error
-
-	    rc = fapiGetScom(i_target, PMC_STATUS_REG_0x00062009 , data );
-	    if (rc) {
-	      FAPI_ERR("fapiGetScom(PMC_STATUS_REG_0x00062009) failed."); return rc;
-	    }
-
-
-	    is_pstate_error_stopped = data.isBitSet(0) | data.isBitSet(1) | data.isBitSet(5)| data.isBitSet(6) | data.isBitSet(11) ;
-
-
-//    cRQ_TD_HaltInterchip_Wait2: Read PMC_INTCHP_STATUS_REG
-//       is_intchp_error_stopped = interchip_ecc_ue_err || interchip_fsm_err || (is_MasterPMC && interchip_slave_error_code != 0) is_MasterPMC where is this bit ?
-
-	    rc = fapiGetScom(i_target, PMC_INTCHP_STATUS_REG_0x00062013 , data );
-	    if (rc) {
-	      FAPI_ERR("fapiGetScom(PMC_INTCHP_STATUS_REG_0x00062013) failed."); return rc;
-	    }
-	    is_intchp_error_stopped = data.isBitSet(1) | data.isBitSet(7) | (~( data.isBitClear(16,4) &&  is_MasterPMC))  ;
-
-//	is_stopped = (interchip_ga_ongoing == 0) || is_pstate_error_stopped || is_intchp_error_stopped ;
-	    is_stopped = data.isBitClear(0)  || is_pstate_error_stopped || is_intchp_error_stopped;
-
-
-//       If !is_stopped Then -->cRQ_TD_HaltInterchip_Wait1  (Wait limit is parm TD_Interchip_HaltWait_max=260)
-
-
-	  } // end_for
-	if (count > 256)
-	  {
-	   FAPI_ERR("Timed out in polling interchip ongoing    ... ");
-	   FAPI_SET_HWP_ERROR(rc, RC_PROCPM_PMCINIT_TIMEOUT);
-	   return rc;
-
-	  }
-
-
-//    cRQ_TD_HaltInterchipIf: PMC_MODE_REG.interchip_halt_if<-1 interchip_halt_if where is this bit ? PMC_MODE_REG bit 15 as documented.
-
-    rc = fapiGetScom(i_target, PMC_MODE_REG_0x00062000 , data );
-    if (rc) {
-         FAPI_ERR("fapiGetScom(PMC_MODE_REG_0x00062000) failed."); return rc;
-    }
-
-    e_rc = data.setBit(15);  if(e_rc){rc.setEcmdError(e_rc); return rc; }
-
-    rc = fapiPutScom(i_target, PMC_MODE_REG_0x00062000 , data );
-    if (rc) {
-         FAPI_ERR("fapiPutScom(PMC_MODE_REG_0x00062000) failed."); return rc;
-    }
-
-
-
-
-      } // end if
-
-
-
-
-////////////////////////////////////////////////////////////////////////////
-// 5. if enable_pstate_voltage_changes==1
-//         cRQ_TD_HaltSpivid: PMC_SPIV_COMMAND_REG.spivid_halt_fsm<-1
-//    cRQ_TD_Spivid_HaltWait: Read PMC_SPIV_STATUS_REG
-//       is_spivid_error = spivid_retry_timeout || spivid_fsm_err
-//       if spivid_ongoing && !is_spivid_error Then -->cRQ_TD_Spivid_HaltWait   (Wait limit is parm TD_Spivid_HaltWait_max=100)
-//       else -->cRQ_TD_MPS_HaltWait
-////////////////////////////////////////////////////////////////////////////
-
-  FAPI_INF("Performing STEP 5");
-
-    if (enable_pstate_voltage_changes==1)
-      {
-//         cRQ_TD_HaltSpivid: PMC_SPIV_COMMAND_REG.spivid_halt_fsm<-1
-	rc = fapiGetScom(i_target, PMC_SPIV_COMMAND_REG_0x00062047 , data );
-	if (rc) {
-	  FAPI_ERR("fapiGetScom(PMC_SPIV_COMMAND_REG_0x00062047) failed."); return rc;
-	}
-
-	e_rc = data.setBit(15);  if(e_rc){rc.setEcmdError(e_rc); return rc; }
-
-	rc = fapiPutScom(i_target, PMC_SPIV_COMMAND_REG_0x00062047 , data );
-	if (rc) {
-	  FAPI_ERR("fapiPutScom(PMC_SPIV_COMMAND_REG_0x00062047) failed."); return rc;
-	}
-
-
-
-//    cRQ_TD_Spivid_HaltWait: Read PMC_SPIV_STATUS_REG
-
-//       if spivid_ongoing && !is_spivid_error Then -->cRQ_TD_Spivid_HaltWait   (Wait limit is parm TD_Spivid_HaltWait_max=100)
-
-	for (count = 0 , is_spivid_stopped=0; count <= 100 && is_spivid_stopped==0  ; count++)
-	  {
-
-	    rc = fapiGetScom(i_target, PMC_SPIV_STATUS_REG_0x00062046 , data );
-	    if (rc) {
-	      FAPI_ERR("fapiGetScom(PMC_SPIV_STATUS_REG_0x00062046) failed."); return rc;
-	    }
-	    is_spivid_stopped = data.isBitClear(0) | data.isBitSet(1) | data.isBitSet(2) | data.isBitSet(3) | data.isBitSet(4) ;
-
-	  } // end for
-
-
-
-	if (count > 100)
-	  {
-	   FAPI_ERR("Timed out in polling spiv ongoing    ... ");
-	   FAPI_SET_HWP_ERROR(rc, RC_PROCPM_PMCINIT_TIMEOUT);
-	   return rc;
-
-	  }
-
-      } // end if
-
-
-////////////////////////////////////////////////////////////////////////////
-// 6. cRQ_TD_MPS_HaltWait: Read PMC_STATUS_REG
-//
-//       if (fw_pstate_mode)
-//          is_not_ongoing = (enable_pstate_voltage_changes==0 || volt_chg_ongoing==0) && (brd_cst_ongoing == 0)
-//       else
-//          is_not_ongoing = (enable_pstate_voltage_changes==0 || gpsa_chg_ongoing==0)
-
-//       is_pstate_error = (pstate_interchip_error || pstate_processing_is_suspended || gpsa_bdcst_error || gpsa_vchg_error || gpsa_timeout_error)
-//            is_stopped = is_not_ongoing || is_pstate_error
-
-//       if (!is_stopped) then -->cRQ_TD_MPS_HaltWait   (Wait limit)
-
-////////////////////////////////////////////////////////////////////////////
-
-  FAPI_INF("Performing STEP ");
-
-
-    for (count = 0 , is_stopped = 0 ; count <= 256 && is_stopped == 0 ; count++)
-      {
-
-	rc = fapiGetScom(i_target, PMC_STATUS_REG_0x00062009 , data );
-	if (rc) {
-	  FAPI_ERR("fapiGetScom(PMC_STATUS_REG_0x00062009) failed."); return rc;
-	}
-
-
-	if (fw_pstate_mode)
-	  {
-
-	    is_not_ongoing = (enable_pstate_voltage_changes==0 ||  data.isBitClear(8)) && data.isBitClear(9);
-
-	  }
-	else
-	  {
-	    is_not_ongoing = (enable_pstate_voltage_changes==0 ||  data.isBitClear(7));
-	  }
-
-	is_stopped = (data.isBitSet(11) | data.isBitSet(12) | data.isBitSet(1) | data.isBitSet(5) | data.isBitSet(6)) | is_not_ongoing ;
-
-      } // end for
-
-	if (count > 100)
-	  {
-	   FAPI_ERR("Timed out in polling voltage change ongoing    ... ");
-	   FAPI_SET_HWP_ERROR(rc, RC_PROCPM_PMCINIT_TIMEOUT);
-	   return rc;
-
-	  }
-	return rc;
 }
-// ----------------------------------------------------------------------
-// Function definitions
-// ----------------------------------------------------------------------
 
 
-// function: p8_pmc_init
-// parameters: target , mode = (PM_INIT , PM_CONFIG, PM_RESET)
-// returns: ECMD_SUCCESS if something good happens,
-//          BAD_RETURN_CODE otherwise
+// ----------------------------------------------------------------------
+/**
+ * p8_pmc_init
+ *
+ * @param[in] i_target1 Primary Chip target:   Murano - chip0; Venice - chip
+ * @param[in] i_target2 Secondary Chip target: Murano - chip1; Venice - NULL
+ * @param[in] mode (PM_INIT , PM_CONFIG, PM_RESET)
+ *
+ * @retval ECMD_SUCCESS
+ * @retval ERROR defined in xml
+ */
 fapi::ReturnCode
-p8_pmc_init(const Target& i_target, uint32_t mode)
+p8_pmc_init(const fapi::Target& i_target1, const fapi::Target& i_target2, uint32_t mode)
 {
-  fapi::ReturnCode rc;
-  ecmdDataBufferBase data(64);
-  ecmdDataBufferBase mask(64);
-  uint32_t            e_rc = 0;
-
-  FAPI_INF("");
-  FAPI_INF("Executing p8_pmc_init  ....");
-
-
-  // ------------------------------------------------
-  // CONFIG mode
-  // ------------------------------------------------
-  if (mode == PM_CONFIG)
-  {
-
-    FAPI_INF("PMC configuration...");    rc=pmc_config_spivid_settings(i_target);
-
-  }
-
-  // ------------------------------------------------
-  // INIT mode
-  // ------------------------------------------------
-
-  else if (mode == PM_INIT) {
-
-    uint8_t attr_pm_spivid_frame_size;
-    uint8_t attr_pm_spivid_in_delay_frame1;
-    uint8_t attr_pm_spivid_in_delay_frame2;
-    uint8_t attr_pm_spivid_clock_polarity;
-    uint8_t attr_pm_spivid_clock_phase;
-    uint32_t attr_pm_spivid_clock_divider;
-    uint8_t attr_pm_spivid_port_enable = 7;
-    // uint32_t attr_pm_spivid_interframe_delay_write_status;
-    uint32_t attr_pm_spivid_interframe_delay_write_status_value;
-//     uint32_t attr_pm_spivid_inter_retry_delay_value;
-//     uint32_t attr_pm_spivid_inter_retry_delay;
-    uint8_t attr_pm_spivid_crc_gen_enable;
-    uint8_t attr_pm_spivid_crc_check_enable;
-    uint8_t attr_pm_spivid_majority_vote_enable;
-    uint8_t attr_pm_spivid_max_retries;
-    uint8_t attr_pm_spivid_crc_polynomial_enables;
-
-
-
-     	//----------------------------------------------------------
-     rc = FAPI_ATTR_GET(ATTR_PM_SPIVID_FRAME_SIZE, &i_target, attr_pm_spivid_frame_size);
-     if (rc) { FAPI_ERR("fapiGetAttribute of ATTR_PM_SPIVID_FRAME_SIZE with rc = 0x%x", (uint32_t)rc);  return rc; }
-     else { FAPI_INF (" value read from the attribute attr_pm_spivid_frame_size = 0x%x", attr_pm_spivid_frame_size );}
-
-     	//----------------------------------------------------------
-     rc = FAPI_ATTR_GET(ATTR_PM_SPIVID_IN_DELAY_FRAME1, &i_target, attr_pm_spivid_in_delay_frame1);
-
-     if (rc) { FAPI_ERR("fapiGetAttribute of ATTR_PM_SPIVID_IN_DELAY_FRAME1 with rc = 0x%x", (uint32_t)rc);  return rc; }
-     else { FAPI_INF (" value read from the attribute attr_pm_spivid_in_delay_frame1 = 0x%x", attr_pm_spivid_in_delay_frame1);}
-
-     	//----------------------------------------------------------
-     rc = FAPI_ATTR_GET(ATTR_PM_SPIVID_IN_DELAY_FRAME2, &i_target, attr_pm_spivid_in_delay_frame2);
-
-     if (rc) { FAPI_ERR("fapiGetAttribute of ATTR_PM_SPIVID_IN_DELAY_FRAME2 with rc = 0x%x", (uint32_t)rc);  return rc; }
-     else { FAPI_INF (" value read from the attribute attr_pm_spivid_in_delay_frame2 = 0x%x", attr_pm_spivid_in_delay_frame2);}
-
-     	//----------------------------------------------------------
-     rc = FAPI_ATTR_GET(ATTR_PM_SPIVID_CLOCK_POLARITY, &i_target, attr_pm_spivid_clock_polarity);
-
-     if (rc) { FAPI_ERR("fapiGetAttribute of ATTR_PM_SPIVID_CLOCK_POLARITY with rc = 0x%x", (uint32_t)rc);  return rc; }
-     else { FAPI_INF (" value read from the attribute attr_pm_spivid_clock_polarity = 0x%x", attr_pm_spivid_clock_polarity);}
-
-     	//----------------------------------------------------------
-     rc = FAPI_ATTR_GET(ATTR_PM_SPIVID_CLOCK_PHASE, &i_target, attr_pm_spivid_clock_phase);
-
-     if (rc) { FAPI_ERR("fapiGetAttribute of ATTR_PM_SPIVID_CLOCK_PHASE with rc = 0x%x", (uint32_t)rc);  return rc; }
-     else { FAPI_INF (" value read from the attribute attr_pm_spivid_clock_phase = 0x%x", attr_pm_spivid_clock_phase);}
-
-     	//----------------------------------------------------------
-//      rc = FAPI_ATTR_GET(ATTR_PM_SPIVID_INTERFRAME_DELAY_WRITE_STATUS, &i_target, attr_pm_spivid_interframe_delay_write_status);
-
-//      if (rc) { FAPI_ERR("fapiGetAttribute of ATTR_PM_SPIVID_INTERFRAME_DELAY_WRITE_STATUS with rc = 0x%x", (uint32_t)rc);  return rc; }
-//      else { FAPI_INF (" value read from the attribute attr_pm_spivid_interframe_delay_write_status = 0x%x", attr_pm_spivid_interframe_delay_write_status);}
-
-     	//----------------------------------------------------------
-     rc = FAPI_ATTR_GET(ATTR_PM_SPIVID_INTERFRAME_DELAY_WRITE_STATUS_VALUE, &i_target, attr_pm_spivid_interframe_delay_write_status_value);
-
-     if (rc) { FAPI_ERR("fapiGetAttribute of ATTR_PM_SPIVID_INTERFRAME_DELAY_WRITE_STATUS_VALUE with rc = 0x%x", (uint32_t)rc);  return rc; }
-     else { FAPI_INF (" value read from the attribute attr_pm_spivid_interframe_delay_write_status_value = 0x%x", attr_pm_spivid_interframe_delay_write_status_value);}
-
-     	//----------------------------------------------------------
-//      rc = FAPI_ATTR_GET(ATTR_PM_SPIVID_INTER_RETRY_DELAY_VALUE, &i_target, attr_pm_spivid_inter_retry_delay_value);
-
-//      if (rc) { FAPI_ERR("fapiGetAttribute of ATTR_PM_SPIVID_INTER_RETRY_DELAY_VALUE with rc = 0x%x", (uint32_t)rc);  return rc; }
-//      else { FAPI_INF (" value read from the attribute attr_pm_spivid_inter_retry_delay_value = 0x%x", attr_pm_spivid_inter_retry_delay_value);}
-
-//      	//----------------------------------------------------------
-//      rc = FAPI_ATTR_GET(ATTR_PM_SPIVID_INTER_RETRY_DELAY, &i_target, attr_pm_spivid_inter_retry_delay);
-
-//      if (rc) { FAPI_ERR("fapiGetAttribute of ATTR_PM_SPIVID_INTER_RETRY_DELAY with rc = 0x%x", (uint32_t)rc);  return rc; }
-//      else { FAPI_INF (" value read from the attribute attr_pm_spivid_inter_retry_delay = 0x%x", attr_pm_spivid_inter_retry_delay);}
-
-     	//----------------------------------------------------------
-     rc = FAPI_ATTR_GET(ATTR_PM_SPIVID_CRC_GEN_ENABLE, &i_target, attr_pm_spivid_crc_gen_enable);
-
-     if (rc) { FAPI_ERR("fapiGetAttribute of ATTR_PM_SPIVID_CRC_GEN_ENABLE with rc = 0x%x", (uint32_t)rc);  return rc; }
-     else { FAPI_INF (" value read from the attribute attr_pm_spivid_crc_gen_enable = 0x%x", attr_pm_spivid_crc_gen_enable);}
-
-     	//----------------------------------------------------------
-     rc = FAPI_ATTR_GET(ATTR_PM_SPIVID_CRC_CHECK_ENABLE, &i_target, attr_pm_spivid_crc_check_enable);
-
-     if (rc) { FAPI_ERR("fapiGetAttribute of ATTR_PM_SPIVID_CRC_CHECK_ENABLE with rc = 0x%x", (uint32_t)rc);  return rc; }
-     else { FAPI_INF (" value read from the attribute attr_pm_spivid_crc_check_enable = 0x%x", attr_pm_spivid_crc_check_enable);}
-
-     	//----------------------------------------------------------
-     rc = FAPI_ATTR_GET(ATTR_PM_SPIVID_MAJORITY_VOTE_ENABLE, &i_target, attr_pm_spivid_majority_vote_enable);
-
-     if (rc) { FAPI_ERR("fapiGetAttribute of ATTR_PM_SPIVID_MAJORITY_VOTE_ENABLE with rc = 0x%x", (uint32_t)rc);  return rc; }
-     else { FAPI_INF (" value read from the attribute attr_pm_spivid_majority_vote_enable = 0x%x", attr_pm_spivid_majority_vote_enable);}
-
-     	//----------------------------------------------------------
-     rc = FAPI_ATTR_GET(ATTR_PM_SPIVID_MAX_RETRIES, &i_target, attr_pm_spivid_max_retries);
-
-     if (rc) { FAPI_ERR("fapiGetAttribute of ATTR_PM_SPIVID_MAX_RETRIES with rc = 0x%x", (uint32_t)rc);  return rc; }
-     else { FAPI_INF (" value read from the attribute attr_pm_spivid_max_retries = 0x%x", attr_pm_spivid_max_retries);}
-
-     	//----------------------------------------------------------
-     rc = FAPI_ATTR_GET(ATTR_PM_SPIVID_CRC_POLYNOMIAL_ENABLES, &i_target, attr_pm_spivid_crc_polynomial_enables);
-
-     if (rc) { FAPI_ERR("fapiGetAttribute of ATTR_PM_SPIVID_CRC_POLYNOMIAL_ENABLES with rc = 0x%x", (uint32_t)rc);  return rc; }
-     else { FAPI_INF (" value read from the attribute attr_pm_spivid_crc_polynomial_enables = 0x%x", attr_pm_spivid_crc_polynomial_enables);}
-
-
-     	//----------------------------------------------------------
-      rc = FAPI_ATTR_GET(ATTR_PM_SPIVID_CLOCK_DIVIDER, &i_target, attr_pm_spivid_clock_divider);
-
-      if (rc) { FAPI_ERR("fapiGetAttribute of ATTR_PM_SPIVID_CLOCK_DIVIDER with rc = 0x%x", (uint32_t)rc);  return rc; }
-      else { FAPI_INF (" value read from the attribute attr_pm_spivid_clock_divider = 0x%x", attr_pm_spivid_clock_divider);}
-
-
-     	//----------------------------------------------------------
-      rc = FAPI_ATTR_GET(ATTR_PM_SPIVID_PORT_ENABLE, &i_target, attr_pm_spivid_port_enable);
-
-      if (rc) { FAPI_ERR("fapiGetAttribute of ATTR_PM_SPIVID_PORT_ENABLE with rc = 0x%x", (uint32_t)rc);  return rc; }
-     else { FAPI_INF (" value read from the attribute attr_pm_spivid_port_enable = 0x%x", attr_pm_spivid_port_enable);}
-
-
-     	//----------------------------------------------------------
-
-
-
-
-
-
-
-
-
-
-
-      //      rc=pmc_create_spivid_settings(i_target);  above lines replaced this functions
-
-    FAPI_INF("PMC initialization...");
-
-     uint8_t o2s_frame_size = attr_pm_spivid_frame_size;
-     uint8_t o2s_in_delay1  = attr_pm_spivid_in_delay_frame1;
-     uint8_t o2s_in_delay2  = attr_pm_spivid_in_delay_frame2;
-     uint8_t o2s_clk_pol    = attr_pm_spivid_clock_polarity;
-     uint8_t o2s_clk_pha    = attr_pm_spivid_clock_phase;
-     uint8_t o2s_port_enable = attr_pm_spivid_port_enable;
-     uint32_t o2s_inter_frame_delay = attr_pm_spivid_interframe_delay_write_status_value;
-     uint8_t o2s_crc_gen_en = attr_pm_spivid_crc_gen_enable;
-     uint8_t o2s_crc_check_en = attr_pm_spivid_crc_check_enable;
-     uint8_t o2s_majority_vote_en = attr_pm_spivid_majority_vote_enable;
-     uint8_t o2s_max_retries = attr_pm_spivid_max_retries;
-     uint8_t o2s_crc_polynomial_enables = attr_pm_spivid_crc_polynomial_enables;
-     uint16_t o2s_clk_divider = attr_pm_spivid_clock_divider;
-     //spivid_freq =  attr_pm_spivid_frequency;
-     uint8_t   o2s_in_count2 	   = 0 ;
-     uint8_t   o2s_out_count2          = 0 ;
-     uint8_t   o2s_bridge_enable = 0x1 ;
-     uint8_t   o2s_nr_of_frames        = 1 ; //(uint8_t) args.front(); args.pop_front(); // for pmc o2s operations it is usually 1
-     uint8_t   o2s_in_count1 	   = 0 ;
-     uint8_t   o2s_out_count1 	   = 32 ;
-     uint32_t  dummy = 0 ;
-
-
-     uint8_t   one=1;
-
-
-
-
-
-    // Here to bypass feature attribute passing until these as moved into proc.pm.pmc.scom.initfile
-
-//     o2s_frame_size = 0x10 ;
-//     o2s_clk_pol    = 0;
-//     o2s_clk_pha    = 0;
-//     o2s_clk_divider= 0x1D;
-//     o2s_inter_frame_delay = 0x0;
-//     nest_freq = 600;
-//     spivid_freq = 10;
-//     o2s_in_count1=0;
-//     o2s_out_count1=0;
-//     o2s_in_delay1=0;
-//     o2s_in_count2=0;
-//     o2s_out_count2=0;
-//     o2s_in_delay2=0;
-//    o2s_wdata = 0x11223344;
-
-
-
-    //  ******************************************************************
-    // 	- set PMC_o2s_CTRL_REG0A (24b)
-    //  ******************************************************************
-
-    rc = fapiGetScom(i_target, PMC_O2S_CTRL_REG0A_0x00062050, data );
-    if (rc) {
-         FAPI_ERR("fapiGetScom(PMC_O2S_CTRL_REG0A) failed."); return rc;
-    }
-
-    e_rc = data.insertFromRight(   o2s_frame_size ,0,6); if(e_rc){rc.setEcmdError(e_rc); return rc;}
-    e_rc = data.insertFromRight(   o2s_in_count1  ,6,6); if(e_rc){rc.setEcmdError(e_rc); return rc;}
-    e_rc = data.insertFromRight(   o2s_out_count1 ,12,6); if(e_rc){rc.setEcmdError(e_rc); return rc;}
-    e_rc = data.insertFromRight(   o2s_in_delay1  ,18,6); if(e_rc){rc.setEcmdError(e_rc); return rc;}
-
-
-
-    // FAPI_INF("  -----------------------------------------------------");
-    FAPI_INF("  PMC O2S CTRL_REG_0A Configuration                  ");
-    // FAPI_INF("  -----------------------------------------------------");
-    e_rc = data.extractToRight(&dummy,0,6);
-    FAPI_INF("    frame size                 => %x ",  dummy);
-    e_rc |= data.extractToRight(&dummy,6,6);
-    FAPI_INF("    o2s_out_count1             => %x ",  dummy);
-    e_rc |= data.extractToRight(&dummy,12,6);
-    FAPI_INF("    o2s_in_delay1              => %x ",  dummy);
-    e_rc |= data.extractToRight(&dummy,18,6);
-    FAPI_INF("    o2s_in_count1              => %x ",  dummy);
-    FAPI_INF("                                     "                 );
-    FAPI_INF("                                     "                 );
-    // FAPI_INF("  -----------------------------------------------------");
-
-    if(e_rc){rc.setEcmdError(e_rc); return rc;}
-    rc = fapiPutScom(i_target, PMC_O2S_CTRL_REG0A_0x00062050, data );
-    if (rc) {
-      FAPI_ERR("fapiPutScom(PMC_O2S_CTRL_REG0A_0x00062050) failed."); return rc;
-    }
-
-
-    //  ******************************************************************
-    // 	- set PMC_O2S_CTRL_REG0B (24b)
-    //  ******************************************************************
-
-    rc = fapiGetScom(i_target, PMC_O2S_CTRL_REG0B_0x00062051, data );
-    if (rc) {
-      FAPI_ERR("fapiGetScom(PMC_O2S_CTRL_REG0B) failed."); return rc;
-    }
-
-    e_rc = data.insertFromRight(o2s_out_count2,00,6); if(e_rc){rc.setEcmdError(e_rc); return rc;}
-    e_rc = data.insertFromRight(o2s_in_delay2 ,06,6); if(e_rc){rc.setEcmdError(e_rc); return rc;}
-    e_rc = data.insertFromRight(o2s_in_count2 ,12,6); if(e_rc){rc.setEcmdError(e_rc); return rc;}
-
-    // FAPI_INF("  -----------------------------------------------------");
-    FAPI_INF("  PMC O2S CTRL_REG_0B Configuration                  ");
-    // FAPI_INF("  -----------------------------------------------------");
-    FAPI_INF("    o2s_out_count2             => %d ",  o2s_out_count2);
-    FAPI_INF("    o2s_in_delay2              => %d ",  o2s_in_delay2 );
-    FAPI_INF("    o2s_in_count2              => %d ",  o2s_in_count2 );
-    FAPI_INF("                                     "                 );
-    FAPI_INF("                                     "                 );
-    // FAPI_INF("  -----------------------------------------------------");
-
-    rc = fapiPutScom(i_target, PMC_O2S_CTRL_REG0B_0x00062051, data );
-    if (rc) {
-      FAPI_ERR("fapiPutScom(PMC_O2S_CTRL_REG0B_0x00062051) failed."); return rc;
-    }
-
-    //  ******************************************************************
-    // 	- set PMC_O2S_CTRL_REG1
-    //  ******************************************************************
-
-    rc = fapiGetScom(i_target, PMC_O2S_CTRL_REG1_0x00062052, data );
-    if (rc) {
-      FAPI_ERR("fapiGetScom(PMC_O2S_CTRL_REG1) failed."); return rc;
-    }
-
-    o2s_nr_of_frames--;
-    e_rc = data.insertFromRight(   o2s_bridge_enable ,0,1); if(e_rc){rc.setEcmdError(e_rc); return rc;}
-    e_rc = data.insertFromRight(   o2s_clk_pol    ,2,1); if(e_rc){rc.setEcmdError(e_rc); return rc;}
-    e_rc = data.insertFromRight(   o2s_clk_pha    ,3,1); if(e_rc){rc.setEcmdError(e_rc); return rc;}
-    e_rc = data.insertFromRight(   o2s_clk_divider,4,10); if(e_rc){rc.setEcmdError(e_rc); return rc;}
-    e_rc = data.insertFromRight(   o2s_nr_of_frames ,17,1); if(e_rc){rc.setEcmdError(e_rc); return rc;}
-    e_rc = data.insertFromRight(   o2s_port_enable    ,18,3); if(e_rc){rc.setEcmdError(e_rc); return rc;}
-    o2s_nr_of_frames++;
-
-
-    // FAPI_INF("  -----------------------------------------------------");
-    FAPI_INF("  PMC O2S CTRL_REG_1 Configuration                  ");
-    // FAPI_INF("  -----------------------------------------------------");
-    FAPI_INF("    o2s_bridge_enable           => %d ",  o2s_bridge_enable );
-    FAPI_INF("    o2s_clk_pol                 => %d ",  o2s_clk_pol    );
-    FAPI_INF("    o2s_clk_pha                 => %d ",  o2s_clk_pha    );
-    FAPI_INF("    o2s_clk_divider             => %d ",  o2s_clk_divider);
-    FAPI_INF("    o2s_nr_of_frames            => %d ",  o2s_nr_of_frames);
-    FAPI_INF("    o2s_port_enable             => %d ",  o2s_port_enable);
-    FAPI_INF("                                     "                 );
-    FAPI_INF("                                     "                 );
-    // FAPI_INF("  -----------------------------------------------------");
-
-    rc = fapiPutScom(i_target, PMC_O2S_CTRL_REG1_0x00062052, data );
-    if (rc) {
-      FAPI_ERR("fapiPutScom(PMC_O2S_CTRL_REG1_0x00062052) failed."); return rc;
-    }
-
-
-    //  ******************************************************************
-    // 	- set PMC_O2S_CTRL_REG2
-    //  ******************************************************************
-
-
-    rc = fapiGetScom(i_target, PMC_O2S_CTRL_REG2_0x00062053, data );
-    if (rc) {
-      FAPI_ERR("fapiGetScom(PMC_O2S_CTRL_REG2) failed."); return rc;
-    }
-
-    e_rc = data.insertFromRight(  o2s_inter_frame_delay   ,0,17); if(e_rc){rc.setEcmdError(e_rc); return rc;}
-
-    // FAPI_INF("  -----------------------------------------------------");
-    FAPI_INF("  PMC O2S CTRL_REG_2 Configuration                  ");
-    // FAPI_INF("  -----------------------------------------------------");
-    FAPI_INF("    o2s_inter_frame_delay       => %d ",  o2s_inter_frame_delay );
-    FAPI_INF("                                     "                 );
-    FAPI_INF("                                     "                 );
-    // FAPI_INF("  -----------------------------------------------------");
-
-
-
-    rc = fapiPutScom(i_target, PMC_O2S_CTRL_REG2_0x00062053, data );
-    if (rc) {
-      FAPI_ERR("fapiPutScom(PMC_O2S_CTRL_REG2_0x00062053) failed."); return rc;
-    }
-
-    //  ******************************************************************
-    // 	- set PMC_O2S_CTRL_REG4
-    //  ******************************************************************
-
-    rc = fapiGetScom(i_target, PMC_O2S_CTRL_REG4_0x00062055, data );
-    if (rc) {
-      FAPI_ERR("fapiGetScom(PMC_O2S_CTRL_REG4) failed."); return rc;
-    }
-
-    e_rc = data.insertFromRight(  o2s_crc_gen_en         ,0,1); if(e_rc){rc.setEcmdError(e_rc); return rc;}
-    e_rc = data.insertFromRight(  o2s_crc_check_en       ,1,1); if(e_rc){rc.setEcmdError(e_rc); return rc;}
-    e_rc = data.insertFromRight(  o2s_majority_vote_en   ,2,1); if(e_rc){rc.setEcmdError(e_rc); return rc;}
-    e_rc = data.insertFromRight(  o2s_max_retries        ,3,5); if(e_rc){rc.setEcmdError(e_rc); return rc;}
-    e_rc = data.insertFromRight(  o2s_crc_polynomial_enables,8,8); if(e_rc){rc.setEcmdError(e_rc); return rc;}
-
-    // FAPI_INF("  -----------------------------------------------------");
-    FAPI_INF("  PMC O2S CTRL_REG_4 Configuration                  ");
-    // FAPI_INF("  -----------------------------------------------------");
-    FAPI_INF("    o2s_crc_gen_en           => %d ",  o2s_crc_gen_en          );
-    FAPI_INF("    o2s_crc_check_en         => %d ",  o2s_crc_check_en        );
-    FAPI_INF("    o2s_majority_vote_en     => %d ",  o2s_majority_vote_en    );
-    FAPI_INF("    o2s_max_retries          => %d ",  o2s_max_retries         );
-    FAPI_INF("    o2s_crc_polynomial_enab  => %d ",  o2s_crc_polynomial_enables );
-    FAPI_INF("                                     "                 );
-    FAPI_INF("                                     "                 );
-    // FAPI_INF("  -----------------------------------------------------");
-
-
-    rc = fapiPutScom(i_target, PMC_O2S_CTRL_REG4_0x00062055, data );
-    if (rc) {
-      FAPI_ERR("fapiPutScom(PMC_O2S_CTRL_REG4_0x00062055) failed."); return rc;
-    }
-
-//  ******************************************************************
-//   Program crc polynomials
-//  ******************************************************************
-
-   rc = fapiGetScom(i_target, PMC_SPIV_CTRL_REG4_0x00062045, data );
-   if (rc) {
-     FAPI_ERR("fapiGetScom(PMC_SPIV_CTRL_REG4) failed."); return rc;
-   }
-
-
-   e_rc = data.insertFromRight(  o2s_crc_gen_en         ,0,1); if(e_rc){rc.setEcmdError(e_rc); return rc;}
-   e_rc = data.insertFromRight(  o2s_crc_check_en       ,1,1); if(e_rc){rc.setEcmdError(e_rc); return rc;}
-   e_rc = data.insertFromRight(  o2s_majority_vote_en   ,2,1); if(e_rc){rc.setEcmdError(e_rc); return rc;}
-   e_rc = data.insertFromRight(  o2s_max_retries        ,3,5); if(e_rc){rc.setEcmdError(e_rc); return rc;}
-   e_rc = data.insertFromRight(  o2s_crc_polynomial_enables,8,8); if(e_rc){rc.setEcmdError(e_rc); return rc;}
-
-      //   FAPI_INF("  -----------------------------------------------------");
-   FAPI_INF("  PMC O2S CTRL_REG_3Configuration                  ");
-   //   FAPI_INF("  -----------------------------------------------------");
-   FAPI_INF("    spiv_crc_gen_en           => %d ",  o2s_crc_gen_en          );
-   FAPI_INF("    spiv_crc_check_en         => %d ",  o2s_crc_check_en        );
-   FAPI_INF("    spiv_majority_vote_en     => %d ",  o2s_majority_vote_en    );
-   FAPI_INF("    spiv_max_retries          => %d ",  o2s_max_retries         );
-   FAPI_INF("    spiv_crc_polynomial_enab  => %d ",  o2s_crc_polynomial_enables );
-   FAPI_INF("                                     "                 );
-   FAPI_INF("                                     "                 );
-   //   FAPI_INF("  -----------------------------------------------------");
-
-
-   rc = fapiPutScom(i_target, PMC_SPIV_CTRL_REG4_0x00062045, data );
-   if (rc) {
-     FAPI_ERR("fapiPutScom(PMC_SPIV_CTRL_REG4_0x00062045) failed."); return rc;
-   }
-
-
-    //  ******************************************************************
-    // 	- write PMC_O2S_command_reg to clear any latent errors
-    //  ******************************************************************
-   e_rc = data.flushTo0(); if(e_rc){rc.setEcmdError(e_rc); return rc;}
-    e_rc = data.insertFromRight(one ,0,1); if(e_rc){rc.setEcmdError(e_rc); return rc;} // halt retries
-    e_rc = data.insertFromRight(one ,1,1); if(e_rc){rc.setEcmdError(e_rc); return rc;} // reset sticky errors
-    // FAPI_INF("  -----------------------------------------------------");
-    FAPI_INF("   clearing errors                                 ");
-    // FAPI_INF("  -----------------------------------------------------");
-
-    rc = fapiPutScom(i_target, PMC_O2S_COMMAND_REG_0x00062057, data );
-    if (rc) {
-      FAPI_ERR("fapiPutScom(PMC_O2S_COMMAND_REG_0x00062057) failed."); return rc;
-    }
-
-    e_rc = data.flushTo0(); if(e_rc){rc.setEcmdError(e_rc); return rc;}
-
-    rc = fapiPutScom(i_target, PMC_O2S_COMMAND_REG_0x00062057, data );
-    if (rc) {
-      FAPI_ERR("fapiPutScom(PMC_O2S_COMMAND_REG_0x00062057) failed."); return rc;
-    }
-    FAPI_INF ("I m done with the init " );
-
-  }
-
-  /// -------------------------------
-  /// Reset:  perform reset of PMC
-  else if (mode == PM_RESET)
-  {
-
-    FAPI_INF("PMC reset...");
-
-    //  Reset PMC.  However, the bit used means the entire PMC must be reconfigured!
-
-    e_rc = data.flushTo0(); if(e_rc){rc.setEcmdError(e_rc); return rc;}
-    e_rc = data.setBit(12);  if(e_rc){rc.setEcmdError(e_rc); return rc; } // RESET_ALL_PMC_REGISTERS
-
-    rc=fapiPutScom(i_target, PMC_MODE_REG_0x00062000 , data); if(rc) return rc;
-    // This function is not yet verified
-    rc=pmc_reset_function(i_target);
-
-
-  }
-
-
-  /// -------------------------------
-  /// Unsupported Mode
-
-  else {
-    FAPI_ERR("Unknown mode passed to p8_pmc_init. Mode %x ", mode);
-    uint32_t & MODE = mode;
-    FAPI_SET_HWP_ERROR(rc, RC_PROCPM_PMC_CODE_BAD_MODE);
-  }
-
-  return rc;
-
-}
-
-
-
-  //#ifdef FAPIECMD
-}   //end extern C
-// #endif
-
-
-
-
-
-
-
-
-
-
-
-// BackUPS
-
-// ----------------------------------------------------------------------
-// Constant definitions
-// ----------------------------------------------------------------------
-
-
-
-// PIB Space Addresses
-
+    fapi::ReturnCode    rc;
+
+    do
+    {
+
+        // ------------------------------------------------
+        // CONFIG mode
+        // ------------------------------------------------
+        if (mode == PM_CONFIG)
+        {
+            rc = pmc_config_spivid_settings(i_target1);
+            if (rc)
+            {
+                FAPI_ERR("Error from pmc_config_spivid_settings for target1");
+                break;
+            }
+
+	    if ( i_target2.getType() != TARGET_TYPE_NONE ) 
+	      {
+		rc = pmc_config_spivid_settings(i_target2);
+		if (rc)
+		  {
+		    FAPI_ERR("Error from pmc_config_spivid_settings for target2");
+		    break;
+		  }
+	      }
+        }
+
+        // ------------------------------------------------
+        // INIT mode
+        // ------------------------------------------------
+        else if (mode == PM_INIT)
+        {
+            FAPI_INF("Executing p8_pmc_init for Target %s ...", i_target1.toEcmdString());
+            rc = pmc_init_function(i_target1);
+	    //            FAPI_INF("Reacged here");
+            if (rc)
+            {
+                FAPI_ERR("Error from pmc_init_function for target1");
+                break;
+            }
+
+
+
+	    if ( i_target2.getType() != TARGET_TYPE_NONE ) 
+	      {
+		FAPI_INF("Executing p8_pmc_init for target %s ...", i_target2.toEcmdString());
+		rc = pmc_init_function(i_target2);
+		if (rc)
+		  {
+		    FAPI_ERR("Error from pmc_init_function for target2");
+		    break;
+		  }
+	      }
+
+
+        }
+
+        /// -------------------------------
+        /// Reset:  perform reset of PMC
+        /// -------------------------------
+        else if (mode == PM_RESET)
+        {
+            rc = pmc_reset_function(i_target1 , i_target2);
+            if (rc)
+            {
+                FAPI_ERR("Error from pmc_reset_function");
+                break;
+            }
+        }
+
+        /// -------------------------------
+        /// Unsupported Mode
+        /// -------------------------------
+        else
+        {
+            FAPI_ERR("Unknown mode passed to p8_pmc_init. Mode %x ", mode);
+            uint32_t & MODE = mode;
+            FAPI_SET_HWP_ERROR(rc, RC_PROCPM_PMC_CODE_BAD_MODE);
+        }
+
+    } while(0);
+    //    FAPI_INF("im here ");   
+    return rc;
+
+} // end p8_pmc_init
+
+} //end extern C
 
 /*
-    CONST_UINT64_T( PMC_SPIV_CTRL_REG0B_0x00072041        , ULL(0x00072041) );
-    CONST_UINT64_T( PMC_SPIV_CTRL_REG1_0x00072042        , ULL(0x00072042) );
-    CONST_UINT64_T( PMC_SPIV_CTRL_REG2_0x00072043        , ULL(0x00072043) );
-    CONST_UINT64_T( PMC_SPIV_CTRL_REG3_0x00072044        , ULL(0x00072044) );
-    CONST_UINT64_T( PMC_SPIV_CTRL_REG4_0x00072045        , ULL(0x00072045) );
-    CONST_UINT64_T( PMC_SPIV_STATUS_REG_0x00072046        , ULL(0x00072046) );
-    CONST_UINT64_T( PMC_SPIV_COMMAND_REG_0x00072047        , ULL(0x00072047) );
+*************** Do not edit this area ***************
+This section is automatically updated by CVS when you check in this file.
+Be sure to create CVS comments when you commit so that they can be included here.
 
+$Log: p8_pmc_init.C,v $
+Revision 1.30  2013/04/30 11:20:22  pchatnah
+fixing memory fault issue for scm
 
-    CONST_UINT64_T( PMC_O2S_CTRL_REG0A_0x00062050 , ULL(0x00062050) );
-    CONST_UINT64_T( PMC_O2S_CTRL_REG0B_0x00062051 ,ULL(0x00062051) );
-    CONST_UINT64_T( PMC_O2S_CTRL_REG1_0x00062052 ,ULL(0x00062052) );
-    CONST_UINT64_T( PMC_O2S_CTRL_REG2_0x00062053 ,ULL(0x00062053) );
-    CONST_UINT64_T( PMC_O2S_CTRL_REG4_0x00062055 ,ULL(0x00062055) );
-    CONST_UINT64_T( PMC_O2S_STATUS_REG_0x00062056 ,ULL(0x00062056) );
-    CONST_UINT64_T( PMC_O2S_COMMAND_REG_0x00062057 ,ULL(0x00062057) );
-    CONST_UINT64_T( PMC_O2S_WDATA_REG_0x00062058 ,ULL(0x00062058) );
-    CONST_UINT64_T( PMC_O2S_RDATA_REG_0x00062059 ,ULL(0x00062059) );
+Revision 1.29  2013/04/17 13:11:28  pchatnah
+fixing some more SCM issues
 
-// OCI Space Addresses
-CONST_UINT32_T( OCI_PMC_MODE_REG_0x40010000  , ULL(0x40010000) );
+Revision 1.28  2013/04/16 12:00:26  pchatnah
+fixing Daniels failures on hardware
+
+Revision 1.27  2013/04/12 01:25:02  stillgs
+
+Update for DCM initialization and reset function per hardware testing
+
+Revision 1.25  2013/04/06 02:14:03  pchatnah
+ restructuring
+
+Revision 1.24  2013/04/04 12:43:49  pchatnah
+fixing sm_without_spivid
+
+Revision 1.23  2013/04/02 14:17:55  pchatnah
+fixing spivid_enable for slave
+
+Revision 1.22  2013/04/01 04:11:54  stillgs
+
+Output formating changes only to remove extraneous log content
+
+Revision 1.21  2013/03/28 14:42:02  pchatnah
+adding FIR check
+
+Revision 1.20  2013/03/28 14:29:04  pchatnah
+adding FIR check
+
+Revision 1.19  2013/03/15 12:25:57  pchatnah
+fixing no_of_ports
+
+Revision 1.18  2013/03/04 16:15:35  pchatnah
+fising more issues for prep_for_reset
+
+Revision 1.17  2013/02/25 19:27:01  pchatnah
+fising compilation issues
+
+Revision 1.16  2013/02/21 08:58:37  pchatnah
+fixing 100ns calculation
+
+Revision 1.15  2013/02/11 15:44:16  pchatnah
+fixing pstate
+
+Revision 1.14  2013/02/07 18:44:49  pchatnah
+adding PM_LFIR reset also into it
+
+Revision 1.13  2013/01/24 11:58:12  pchatnah
+adding log inside the file
+
 */
-
-// ----------------------------------------------------------------------
-// Global variables
-// ----------------------------------------------------------------------
-
-// std::string PROCEDURE = "p8_pmc_init";        // procedure name
-  //std::string REVISION  = "$Revision: 1.6 $";        // procedure CVS revision
-
-//ReturnCode BAD_RETURN_CODE      = 0x12000001;      // procedure return code on fail, not used by ECMD
-//uint32_t   SIM_CYCLE_POLL_DELAY = 200000;          // simulation cycle delay between status register polls
-//bool       VERBOSE              = true;            // enable verbose mode debug comments
-//uint32_t   MAX_POLL_ATTEMPTS    = 5;               // maximum number of status poll attempts to make before giving up
-
-
-
-  // Global Variables
-    /// From generated pm_attributes_plat.H
-
-/*
-      uint8_t attr_pm_pstate_stepsize;
-      uint8_t attr_pm_external_vrm_stepdelay_range;
-      uint8_t attr_pm_external_vrm_stepdelay_value;
-      uint8_t attr_pm_pmc_hangpulse_divider;
-      uint8_t attr_pm_pvsafe_pstate;
-      uint8_t attr_pm_pstate_undervolting_minimum;
-      uint8_t attr_pm_pstate_undervolting_maximum;
-*/
-
-
-    /// From generated pm_attributes_plat.H
-
-
-
-
-
-
-
-
-
-/*
-    rc = FAPI_ATTR_GET(ATTR_PM_SPIVID_FRAME_SIZE, l_pTarget, attr_pm_spivid_frame_size); if (rc) return rc;
-    rc = FAPI_ATTR_GET(ATTR_PM_SPIVID_IN_DELAY_FRAME1, l_pTarget, attr_pm_spivid_in_delay_frame1); if (rc) return rc;
-    rc = FAPI_ATTR_GET(ATTR_PM_SPIVID_IN_DELAY_FRAME2, l_pTarget, attr_pm_spivid_in_delay_frame2); if (rc) return rc;
-    rc = FAPI_ATTR_GET(ATTR_PM_SPIVID_INTER_FRAME_DELAY, l_pTarget, attr_pm_spivid_inter_frame_delay); if (rc) return rc;
-    rc = FAPI_ATTR_GET(ATTR_PM_SPIVID_INTER_FRAME_DELAY_WRITE_STATUS, l_pTarget, attr_pm_spivid_inter_frame_delay_write_status); if (rc) return rc;
-    rc = FAPI_ATTR_GET(ATTR_PM_SPIVID_INTER_RETRY_DELAY, l_pTarget, attr_pm_spivid_inter_retry_delay); if (rc) return rc;
-*/
-
-
-    // Here to test feature attribute passing util these as moved into proc.pm.pmc.scom.initfile
-    /*
-    rc = FAPI_ATTR_GET(ATTR_SPIVID_CLOCK_POLARITY, NULL, o2s_clk_pol); if (rc) return rc;
-    rc = FAPI_ATTR_GET(ATTR_SPIVID_CLOCK_PHASE, NULL, o2s_clk_pha); if (rc) return rc;
-    rc = FAPI_ATTR_GET(ATTR_SPIVID_PORT_ENABLE, NULL, o2s_port_enable); if (rc) return rc;
-    rc = FAPI_ATTR_GET(SPIVID_INTER_FRAME_DELAY_WRITE_STATUS, NULL, o2s_inter_frame_delay); if (rc) return rc;
-
-
-    //   rc = FAPI_ATTR_GET(SPIVID_INTER_RETRY_DELAY, NULL, l_uint64_1); if (rc) return rc;
-
-    rc = FAPI_ATTR_GET(ATTR_SPIVID_CRC_GEN_ENABLE, NULL, o2s_crc_gen_en); if (rc) return rc;
-    rc = FAPI_ATTR_GET(ATTR_SPIVID_CRC_CHECK_ENABLE, NULL, o2s_crc_check_en); if (rc) return rc;
-    rc = FAPI_ATTR_GET(ATTR_SPIVID_MAJORITY_VOTE_ENABLE, NULL, o2s_majority_vote_en); if (rc) return rc;
-    rc = FAPI_ATTR_GET(ATTR_SPIVID_MAX_RETRIES, NULL, o2s_max_retries); if (rc) return rc;
-    rc = FAPI_ATTR_GET(ATTR_SPIVID_CRC_POLYNOMIAL_ENABLES, NULL, o2s_crc_polynomial_enables); if (rc) return rc;
-    rc = FAPI_ATTR_GET(ATTR_SPIVID_IN_DELAY_FRAME1, NULL, o2s_in_delay1); if (rc) return rc;
-    rc = FAPI_ATTR_GET(ATTR_SPIVID_IN_DELAY_FRAME2, NULL, o2s_in_delay2); if (rc) return rc;
-    */
-
-
-
-
-//     uint8_t attr_pm_spivid_frame_size_set = 32;
-//     uint8_t attr_pm_spivid_in_delay_frame1_set = 0;
-//     uint8_t attr_pm_spivid_in_delay_frame2_set = 0 ;
-//     uint8_t attr_pm_spivid_clock_polarity_set = 0;
-//     uint8_t attr_pm_spivid_clock_phase_set = 0 ;
-//     //    uint32_t attr_pm_spivid_clock_divider_set = 0x1D ;
-//     //    uint8_t attr_pm_spivid_port_enable_set = 3 ;
-//     uint32_t attr_pm_spivid_interframe_delay_write_status_set = 0 ;
-//     uint32_t attr_pm_spivid_interframe_delay_write_status_value_set = 12;
-//     uint32_t attr_pm_spivid_inter_retry_delay_value_set = 20 ;
-//     uint32_t attr_pm_spivid_inter_retry_delay_set = 1;
-//     uint8_t attr_pm_spivid_crc_gen_enable_set = 1 ;
-//     uint8_t attr_pm_spivid_crc_check_enable_set = 1 ;
-//     uint8_t attr_pm_spivid_majority_vote_enable_set = 1;
-//     uint8_t attr_pm_spivid_max_retries_set = 5 ;
-//     uint8_t attr_pm_spivid_crc_polynomial_enables_set = 0xD5;
-// //     uint32_t attr_pm_spivid_frequency_set = 20;
-// //     uint32_t attr_p8_nest_frequency_set = 3000;
-
-
-
-
-
-//     rc = FAPI_ATTR_SET(ATTR_PM_SPIVID_FRAME_SIZE, &l_pTarget, attr_pm_spivid_frame_size_set);
-//      if (rc) { FAPI_ERR("fapiGetAttribute of ATTR_PM_SPIVID_FRAME_SIZE with rc = 0x%x", (uint32_t)rc);  return rc; }
-
-
-//      	//----------------------------------------------------------
-//      rc = FAPI_ATTR_SET(ATTR_PM_SPIVID_IN_DELAY_FRAME1, &l_pTarget, attr_pm_spivid_in_delay_frame1_set);
-//      if (rc) { FAPI_ERR("fapiSetAttribute of ATTR_PM_SPIVID_IN_DELAY_FRAME1 with rc = 0x%x", (uint32_t)rc);  return rc; }
-
-//      	//----------------------------------------------------------
-//      rc = FAPI_ATTR_SET(ATTR_PM_SPIVID_IN_DELAY_FRAME2, &l_pTarget, attr_pm_spivid_in_delay_frame2_set);
-//      if (rc) { FAPI_ERR("fapiSetAttribute of ATTR_PM_SPIVID_IN_DELAY_FRAME2 with rc = 0x%x", (uint32_t)rc);  return rc; }
-
-//      	//----------------------------------------------------------
-//      rc = FAPI_ATTR_SET(ATTR_PM_SPIVID_CLOCK_POLARITY, &l_pTarget, attr_pm_spivid_clock_polarity_set);
-//      if (rc) { FAPI_ERR("fapiSetAttribute of ATTR_PM_SPIVID_CLOCK_POLARITY with rc = 0x%x", (uint32_t)rc);  return rc; }
-
-//      	//----------------------------------------------------------
-//      rc = FAPI_ATTR_SET(ATTR_PM_SPIVID_CLOCK_PHASE, &l_pTarget, attr_pm_spivid_clock_phase_set);
-//      if (rc) { FAPI_ERR("fapiSetAttribute of ATTR_PM_SPIVID_CLOCK_PHASE with rc = 0x%x", (uint32_t)rc);  return rc; }
-
-
-
-//      	//----------------------------------------------------------
-//      rc = FAPI_ATTR_SET(ATTR_PM_SPIVID_INTERFRAME_DELAY_WRITE_STATUS, &l_pTarget, attr_pm_spivid_interframe_delay_write_status_set);
-//      if (rc) { FAPI_ERR("fapiSetAttribute of ATTR_PM_SPIVID_INTERFRAME_DELAY_WRITE_STATUS with rc = 0x%x", (uint32_t)rc);  return rc; }
-
-//      	//----------------------------------------------------------
-//      rc = FAPI_ATTR_SET(ATTR_PM_SPIVID_INTERFRAME_DELAY_WRITE_STATUS_VALUE, &l_pTarget, attr_pm_spivid_interframe_delay_write_status_value_set);
-//      if (rc) { FAPI_ERR("fapiSetAttribute of ATTR_PM_SPIVID_INTERFRAME_DELAY_WRITE_STATUS_VALUE with rc = 0x%x", (uint32_t)rc);  return rc; }
-
-//      	//----------------------------------------------------------
-//      rc = FAPI_ATTR_SET(ATTR_PM_SPIVID_INTER_RETRY_DELAY_VALUE, &l_pTarget, attr_pm_spivid_inter_retry_delay_value_set);
-//      if (rc) { FAPI_ERR("fapiSetAttribute of ATTR_PM_SPIVID_INTER_RETRY_DELAY_VALUE with rc = 0x%x", (uint32_t)rc);  return rc; }
-
-//      	//----------------------------------------------------------
-//      rc = FAPI_ATTR_SET(ATTR_PM_SPIVID_INTER_RETRY_DELAY, &l_pTarget, attr_pm_spivid_inter_retry_delay_set);
-//      if (rc) { FAPI_ERR("fapiSetAttribute of ATTR_PM_SPIVID_INTER_RETRY_DELAY with rc = 0x%x", (uint32_t)rc);  return rc; }
-
-//      	//----------------------------------------------------------
-//      rc = FAPI_ATTR_SET(ATTR_PM_SPIVID_CRC_GEN_ENABLE, &l_pTarget, attr_pm_spivid_crc_gen_enable_set);
-//      if (rc) { FAPI_ERR("fapiSetAttribute of ATTR_PM_SPIVID_CRC_GEN_ENABLE with rc = 0x%x", (uint32_t)rc);  return rc; }
-
-//      	//----------------------------------------------------------
-//      rc = FAPI_ATTR_SET(ATTR_PM_SPIVID_CRC_CHECK_ENABLE, &l_pTarget, attr_pm_spivid_crc_check_enable_set);
-//      if (rc) { FAPI_ERR("fapiSetAttribute of ATTR_PM_SPIVID_CRC_CHECK_ENABLE with rc = 0x%x", (uint32_t)rc);  return rc; }
-
-//      	//----------------------------------------------------------
-//      rc = FAPI_ATTR_SET(ATTR_PM_SPIVID_MAJORITY_VOTE_ENABLE, &l_pTarget, attr_pm_spivid_majority_vote_enable_set);
-//      if (rc) { FAPI_ERR("fapiSetAttribute of ATTR_PM_SPIVID_MAJORITY_VOTE_ENABLE with rc = 0x%x", (uint32_t)rc);  return rc; }
-
-//      	//----------------------------------------------------------
-//      rc = FAPI_ATTR_SET(ATTR_PM_SPIVID_MAX_RETRIES, &l_pTarget, attr_pm_spivid_max_retries_set);
-//      if (rc) { FAPI_ERR("fapiSetAttribute of ATTR_PM_SPIVID_MAX_RETRIES with rc = 0x%x", (uint32_t)rc);  return rc; }
-
-//      	//----------------------------------------------------------
-//      rc = FAPI_ATTR_SET(ATTR_PM_SPIVID_CRC_POLYNOMIAL_ENABLES, &l_pTarget, attr_pm_spivid_crc_polynomial_enables_set);
-//      if (rc) { FAPI_ERR("fapiSetAttribute of ATTR_PM_SPIVID_CRC_POLYNOMIAL_ENABLES with rc = 0x%x", (uint32_t)rc);  return rc; }
-
-
-// //         rc = FAPI_ATTR_SET(ATTR_FREQ_PB, &l_pTarget, attr_p8_nest_frequency_set); if (rc) return rc;
-// //         rc = FAPI_ATTR_SET(ATTR_PM_SPIVID_FREQUENCY, &l_pTarget, attr_pm_spivid_frequency_set); if (rc) return rc;
-
-
-//      	//----------------------------------------------------------
-//  //     rc = FAPI_ATTR_SET(ATTR_PM_SPIVID_CLOCK_DIVIDER, &l_pTarget, attr_pm_spivid_clock_divider_set);
-// //      if (rc) { FAPI_ERR("fapiSetAttribute of ATTR_PM_SPIVID_CLOCK_DIVIDER with rc = 0x%x", (uint32_t)rc);  return rc; }
-
-
-//      	//----------------------------------------------------------
-// //      rc = FAPI_ATTR_SET(ATTR_PM_SPIVID_PORT_ENABLE, &l_pTarget, attr_pm_spivid_port_enable_set);
-// //      if (rc) { FAPI_ERR("fapiSetAttribute of ATTR_PM_SPIVID_PORT_ENABLE with rc = 0x%x", (uint32_t)rc);  return rc; }
-
-
-
-
-
-
-
-
-
-
-
-    /// 	//----------------------------------------------------------
-    /// rc = FAPI_ATTR_SET(ATTR_PM_PSTATE_STEPSIZE, &l_pTarget, attr_pm_pstate_stepsize_set);
-    /// if (rc) { FAPI_ERR("fapiSetAttribute of ATTR_PM_PSTATE_STEPSIZE with rc = 0x%x", (uint32_t)rc);  break; }
-
-    /// 	//----------------------------------------------------------
-    /// rc = FAPI_ATTR_SET(ATTR_PM_EXTERNAL_VRM_STEPDELAY_RANGE, &l_pTarget, attr_pm_external_vrm_stepdelay_range_set);
-    /// if (rc) { FAPI_ERR("fapiSetAttribute of ATTR_PM_EXTERNAL_VRM_STEPDELAY_RANGE with rc = 0x%x", (uint32_t)rc);  break; }
-
-    /// 	//----------------------------------------------------------
-    /// rc = FAPI_ATTR_SET(ATTR_PM_EXTERNAL_VRM_STEPDELAY_VALUE, &l_pTarget, attr_pm_external_vrm_stepdelay_value_set);
-    /// if (rc) { FAPI_ERR("fapiSetAttribute of ATTR_PM_EXTERNAL_VRM_STEPDELAY_VALUE with rc = 0x%x", (uint32_t)rc);  break; }
-
-    /// 	//----------------------------------------------------------
-    /// rc = FAPI_ATTR_SET(ATTR_PM_PMC_HANGPULSE_DIVIDER, &l_pTarget, attr_pm_pmc_hangpulse_divider_set);
-    /// if (rc) { FAPI_ERR("fapiSetAttribute of ATTR_PM_PMC_HANGPULSE_DIVIDER with rc = 0x%x", (uint32_t)rc);  break; }
-
-    /// 	//----------------------------------------------------------
-    /// rc = FAPI_ATTR_SET(ATTR_PM_PVSAFE_PSTATE, &l_pTarget, attr_pm_pvsafe_pstate_set);
-    /// if (rc) { FAPI_ERR("fapiSetAttribute of ATTR_PM_PVSAFE_PSTATE with rc = 0x%x", (uint32_t)rc);  break; }
-
-    /// 	//----------------------------------------------------------
-    /// rc = FAPI_ATTR_SET(ATTR_PM_PSTATE_UNDERVOLTING_MINIMUM, &l_pTarget, attr_pm_pstate_undervolting_minimum_set);
-    /// if (rc) { FAPI_ERR("fapiSetAttribute of ATTR_PM_PSTATE_UNDERVOLTING_MINIMUM with rc = 0x%x", (uint32_t)rc);  break; }
-
-    /// 	//----------------------------------------------------------
-    /// rc = FAPI_ATTR_SET(ATTR_PM_PSTATE_UNDERVOLTING_MAXIMUM, &l_pTarget, attr_pm_pstate_undervolting_maximum_set);
-    /// if (rc) { FAPI_ERR("fapiSetAttribute of ATTR_PM_PSTATE_UNDERVOLTING_MAXIMUM with rc = 0x%x", (uint32_t)rc);  break; }
-
-
-//      	//----------------------------------------------------------
-//      rc = FAPI_ATTR_SET(ATTR_PM_OCC_HEARTBEAT_TIME, &l_pTarget, attr_pm_occ_heartbeat_time_set);
-//      if (rc) { FAPI_ERR("fapiSetAttribute of ATTR_PM_OCC_HEARTBEAT_TIME with rc = 0x%x", (uint32_t)rc);  break; }
-
-// ------------------------------------------------------------------------------------------------------------------------------------------------
-
-// Enable the get functions
-
-
-//      	//----------------------------------------------------------
-//      rc = FAPI_ATTR_GET(ATTR_PM_SPIVID_FRAME_SIZE, &l_pTarget, attr_pm_spivid_frame_size);
-//      if (rc) { FAPI_ERR("fapiGetAttribute of ATTR_PM_SPIVID_FRAME_SIZE with rc = 0x%x", (uint32_t)rc);  return rc; }
-//      else { FAPI_INF (" value read from the attribute attr_pm_spivid_frame_size = 0x%x", attr_pm_spivid_frame_size );}
-
-//      	//----------------------------------------------------------
-//      rc = FAPI_ATTR_GET(ATTR_PM_SPIVID_IN_DELAY_FRAME1, &l_pTarget, attr_pm_spivid_in_delay_frame1);
-
-//      if (rc) { FAPI_ERR("fapiGetAttribute of ATTR_PM_SPIVID_IN_DELAY_FRAME1 with rc = 0x%x", (uint32_t)rc);  return rc; }
-//      else { FAPI_INF (" value read from the attribute attr_pm_spivid_in_delay_frame1 = 0x%x", attr_pm_spivid_in_delay_frame1);}
-
-//      	//----------------------------------------------------------
-//      rc = FAPI_ATTR_GET(ATTR_PM_SPIVID_IN_DELAY_FRAME2, &l_pTarget, attr_pm_spivid_in_delay_frame2);
-
-//      if (rc) { FAPI_ERR("fapiGetAttribute of ATTR_PM_SPIVID_IN_DELAY_FRAME2 with rc = 0x%x", (uint32_t)rc);  return rc; }
-//      else { FAPI_INF (" value read from the attribute attr_pm_spivid_in_delay_frame2 = 0x%x", attr_pm_spivid_in_delay_frame2);}
-
-//      	//----------------------------------------------------------
-//      rc = FAPI_ATTR_GET(ATTR_PM_SPIVID_CLOCK_POLARITY, &l_pTarget, attr_pm_spivid_clock_polarity);
-
-//      if (rc) { FAPI_ERR("fapiGetAttribute of ATTR_PM_SPIVID_CLOCK_POLARITY with rc = 0x%x", (uint32_t)rc);  return rc; }
-//      else { FAPI_INF (" value read from the attribute attr_pm_spivid_clock_polarity = 0x%x", attr_pm_spivid_clock_polarity);}
-
-//      	//----------------------------------------------------------
-//      rc = FAPI_ATTR_GET(ATTR_PM_SPIVID_CLOCK_PHASE, &l_pTarget, attr_pm_spivid_clock_phase);
-
-//      if (rc) { FAPI_ERR("fapiGetAttribute of ATTR_PM_SPIVID_CLOCK_PHASE with rc = 0x%x", (uint32_t)rc);  return rc; }
-//      else { FAPI_INF (" value read from the attribute attr_pm_spivid_clock_phase = 0x%x", attr_pm_spivid_clock_phase);}
-
-//      	//----------------------------------------------------------
-//      rc = FAPI_ATTR_GET(ATTR_PM_SPIVID_INTERFRAME_DELAY_WRITE_STATUS, &l_pTarget, attr_pm_spivid_interframe_delay_write_status);
-
-//      if (rc) { FAPI_ERR("fapiGetAttribute of ATTR_PM_SPIVID_INTERFRAME_DELAY_WRITE_STATUS with rc = 0x%x", (uint32_t)rc);  return rc; }
-//      else { FAPI_INF (" value read from the attribute attr_pm_spivid_interframe_delay_write_status = 0x%x", attr_pm_spivid_interframe_delay_write_status);}
-
-//      	//----------------------------------------------------------
-//      rc = FAPI_ATTR_GET(ATTR_PM_SPIVID_INTERFRAME_DELAY_WRITE_STATUS_VALUE, &l_pTarget, attr_pm_spivid_interframe_delay_write_status_value);
-
-//      if (rc) { FAPI_ERR("fapiGetAttribute of ATTR_PM_SPIVID_INTERFRAME_DELAY_WRITE_STATUS_VALUE with rc = 0x%x", (uint32_t)rc);  return rc; }
-//      else { FAPI_INF (" value read from the attribute attr_pm_spivid_interframe_delay_write_status_value = 0x%x", attr_pm_spivid_interframe_delay_write_status_value);}
-
-//      	//----------------------------------------------------------
-//      rc = FAPI_ATTR_GET(ATTR_PM_SPIVID_INTER_RETRY_DELAY_VALUE, &l_pTarget, attr_pm_spivid_inter_retry_delay_value);
-
-//      if (rc) { FAPI_ERR("fapiGetAttribute of ATTR_PM_SPIVID_INTER_RETRY_DELAY_VALUE with rc = 0x%x", (uint32_t)rc);  return rc; }
-//      else { FAPI_INF (" value read from the attribute attr_pm_spivid_inter_retry_delay_value = 0x%x", attr_pm_spivid_inter_retry_delay_value);}
-
-//      	//----------------------------------------------------------
-//      rc = FAPI_ATTR_GET(ATTR_PM_SPIVID_INTER_RETRY_DELAY, &l_pTarget, attr_pm_spivid_inter_retry_delay);
-
-//      if (rc) { FAPI_ERR("fapiGetAttribute of ATTR_PM_SPIVID_INTER_RETRY_DELAY with rc = 0x%x", (uint32_t)rc);  return rc; }
-//      else { FAPI_INF (" value read from the attribute attr_pm_spivid_inter_retry_delay = 0x%x", attr_pm_spivid_inter_retry_delay);}
-
-//      	//----------------------------------------------------------
-//      rc = FAPI_ATTR_GET(ATTR_PM_SPIVID_CRC_GEN_ENABLE, &l_pTarget, attr_pm_spivid_crc_gen_enable);
-
-//      if (rc) { FAPI_ERR("fapiGetAttribute of ATTR_PM_SPIVID_CRC_GEN_ENABLE with rc = 0x%x", (uint32_t)rc);  return rc; }
-//      else { FAPI_INF (" value read from the attribute attr_pm_spivid_crc_gen_enable = 0x%x", attr_pm_spivid_crc_gen_enable);}
-
-//      	//----------------------------------------------------------
-//      rc = FAPI_ATTR_GET(ATTR_PM_SPIVID_CRC_CHECK_ENABLE, &l_pTarget, attr_pm_spivid_crc_check_enable);
-
-//      if (rc) { FAPI_ERR("fapiGetAttribute of ATTR_PM_SPIVID_CRC_CHECK_ENABLE with rc = 0x%x", (uint32_t)rc);  return rc; }
-//      else { FAPI_INF (" value read from the attribute attr_pm_spivid_crc_check_enable = 0x%x", attr_pm_spivid_crc_check_enable);}
-
-//      	//----------------------------------------------------------
-//      rc = FAPI_ATTR_GET(ATTR_PM_SPIVID_MAJORITY_VOTE_ENABLE, &l_pTarget, attr_pm_spivid_majority_vote_enable);
-
-//      if (rc) { FAPI_ERR("fapiGetAttribute of ATTR_PM_SPIVID_MAJORITY_VOTE_ENABLE with rc = 0x%x", (uint32_t)rc);  return rc; }
-//      else { FAPI_INF (" value read from the attribute attr_pm_spivid_majority_vote_enable = 0x%x", attr_pm_spivid_majority_vote_enable);}
-
-//      	//----------------------------------------------------------
-//      rc = FAPI_ATTR_GET(ATTR_PM_SPIVID_MAX_RETRIES, &l_pTarget, attr_pm_spivid_max_retries);
-
-//      if (rc) { FAPI_ERR("fapiGetAttribute of ATTR_PM_SPIVID_MAX_RETRIES with rc = 0x%x", (uint32_t)rc);  return rc; }
-//      else { FAPI_INF (" value read from the attribute attr_pm_spivid_max_retries = 0x%x", attr_pm_spivid_max_retries);}
-
-//      	//----------------------------------------------------------
-//      rc = FAPI_ATTR_GET(ATTR_PM_SPIVID_CRC_POLYNOMIAL_ENABLES, &l_pTarget, attr_pm_spivid_crc_polynomial_enables);
-
-//      if (rc) { FAPI_ERR("fapiGetAttribute of ATTR_PM_SPIVID_CRC_POLYNOMIAL_ENABLES with rc = 0x%x", (uint32_t)rc);  return rc; }
-//      else { FAPI_INF (" value read from the attribute attr_pm_spivid_crc_polynomial_enables = 0x%x", attr_pm_spivid_crc_polynomial_enables);}
-
-
-//      	//----------------------------------------------------------
-//       rc = FAPI_ATTR_GET(ATTR_PM_SPIVID_CLOCK_DIVIDER, &l_pTarget, attr_pm_spivid_clock_divider);
-
-//       if (rc) { FAPI_ERR("fapiGetAttribute of ATTR_PM_SPIVID_CLOCK_DIVIDER with rc = 0x%x", (uint32_t)rc);  return rc; }
-//       else { FAPI_INF (" value read from the attribute attr_pm_spivid_clock_divider = 0x%x", attr_pm_spivid_clock_divider);}
-
-
-//      	//----------------------------------------------------------
-//       rc = FAPI_ATTR_GET(ATTR_PM_SPIVID_PORT_ENABLE, &l_pTarget, attr_pm_spivid_port_enable);
-
-//       if (rc) { FAPI_ERR("fapiGetAttribute of ATTR_PM_SPIVID_PORT_ENABLE with rc = 0x%x", (uint32_t)rc);  return rc; }
-//      else { FAPI_INF (" value read from the attribute attr_pm_spivid_port_enable = 0x%x", attr_pm_spivid_port_enable);}
-
-
-//      	//----------------------------------------------------------
-
-
-
-
-
-
-    //--------------------------------------------------------------------
-    //- >>> SCOM.INITFILE elements
-    //--------------------------------------------------------------------

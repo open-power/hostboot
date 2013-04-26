@@ -56,7 +56,7 @@ namespace fapi
         MOD_GET_CACHE_DECONFIG                     = 0x11,
         MOD_FAPI_GET_OTHER_SIDE_OF_MEM_CHANNEL     = 0x12,
         MOD_MBVPD_ACCESS                           = 0x13,
-        MOD_OCC_LOAD_OCC_IMAGE_TO_HOMER            = 0x14,
+        MOD_OCC_LOAD_START_ALL_OCCS                = 0x14,
     };
 
     /**

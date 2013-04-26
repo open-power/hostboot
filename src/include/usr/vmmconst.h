@@ -107,12 +107,28 @@ enum BlockPriority
 /** Page Size in bits per SLBE  */
 #define SLBE_b 12
 
-/** Hardwired pointer to output SLW image in real mem */
-/** 128M + 32M  */
-/** SLW image must be on 1M boundary */
-/** set_pore_bars expects a region size in MB.  It must be a power of 2 */
-#define OUTPUT_PORE_IMG_ADDR        128*MEGABYTE + 32*MEGABYTE
-#define MAX_OUTPUT_PORE_IMG_IN_MB   4
+/** Hardwired pointer to HOMER images in real mem */
+/** HOMER starts at 128MB + 32MB = 160MB */
+/** HOMER is 4 MB per proc, 8 procs = 32MB */
+/** Each HOMER must start on a 4MB offset to meet OCC requirements */
+#define VMM_HOMER_REGION_START_ADDR (128*MEGABYTE + 32*MEGABYTE)
+#define VMM_HOMER_INSTANCE_SIZE_IN_MB (4)
+#define VMM_HOMER_INSTANCE_SIZE \
+ (VMM_HOMER_INSTANCE_SIZE_IN_MB*MEGABYTE)
+#define VMM_HOMER_REGION_SIZE (VMM_HOMER_INSTANCE_SIZE*8)
+/** HOMER_REGION_END = 192MB */
+#define VMM_HOMER_REGION_END_ADDR \
+ (VMM_HOMER_REGION_START_ADDR + VMM_HOMER_REGION_SIZE)
+
+/** Physical Memory for OCC common space - 8MB total */
+/** OCC Common must be on an 8MB offset */
+/** Start = End of Homer, currently 192MB */
+#define VMM_OCC_COMMON_START_ADDR VMM_HOMER_REGION_END_ADDR
+#define VMM_OCC_COMMON_SIZE_IN_MB 8
+#define VMM_OCC_COMMON_SIZE \
+ (VMM_OCC_COMMON_SIZE_IN_MB*MEGABYTE)
+#define VMM_OCC_COMMON_END \
+ (VMM_OCC_COMMON_START_ADDR + VMM_OCC_COMMON_SIZE)
 
 
 /**
@@ -132,18 +148,5 @@ enum BlockPriority
 /* Chunk of physical memory used for Dump Source Table */
 #define DUMP_TEST_MEMORY_ADDR (HSVC_TEST_MEMORY_ADDR + HSVC_TEST_MEMORY_SIZE)
 #define DUMP_TEST_MEMORY_SIZE  (4*MEGABYTE)
-
-
-//TODO RTC: 35752 - Merge SLW and OCC into simgle HOMER Offset
-//Note: OCC base image must be at 4MB offset, COMMON data must be at 8MB offset.
-/** Physical Memory for OCC images - 1MB/chip * 4 chips */
-#define VMM_OCC_IMAGE_BASE_ADDR (72*MEGABYTE)
-#define VMM_OCC_IMAGE_BASE_SIZE (4*MEGABYTE)
-
-/** Physical Memory for OCC common space - 8MB total */
-#define VMM_OCC_COMMON_ADDR (80*MEGABYTE)
-#define VMM_OCC_COMMON_SIZE (8*MEGABYTE)
-
-
 
 #endif /* _VMMCONST_H */

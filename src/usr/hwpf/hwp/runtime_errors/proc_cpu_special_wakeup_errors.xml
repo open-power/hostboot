@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- IBM CONFIDENTIAL                                                       -->
 <!--                                                                        -->
-<!-- COPYRIGHT International Business Machines Corp. 2012                   -->
+<!-- COPYRIGHT International Business Machines Corp. 2012,2013              -->
 <!--                                                                        -->
 <!-- p1                                                                     -->
 <!--                                                                        -->
@@ -31,10 +31,18 @@
   <hwpError>
     <rc>RC_PROCPM_SPCWKUP_CODE_BAD_ENTITY</rc>
     <description>An invalid entity (eg besides FSP, OCC, or PHYP ENUM) was passed to proc_cpu_special_wakeup</description>
+     <ffdc>I_ENTITY</ffdc>
   </hwpError>
   <!-- *********************************************************************** -->
   <hwpError>
     <rc>RC_PROCPM_SPCWKUP_CODE_BAD_OP</rc>
     <description>An invalid operation (eg besides Set or Clear ENUM) was passed to proc_cpu_special_wakeup</description>
+   <ffdc>I_OPERATION</ffdc> 
   </hwpError>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_PROCPM_CHKSTOP</rc>
+    <description>system is checkstopped before proc_cpu_special_wakeup</description>
+  </hwpError>
+
 </hwpErrors>

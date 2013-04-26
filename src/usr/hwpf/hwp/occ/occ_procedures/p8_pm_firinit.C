@@ -20,24 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-/* begin_generated_IBM_copyright_prolog                            */
-/*                                                                 */
-/* This is an automatically generated copyright prolog.            */
-/* After initializing,  DO NOT MODIFY OR MOVE                      */ 
-/* --------------------------------------------------------------- */
-/* IBM Confidential                                                */
-/*                                                                 */
-/* Licensed Internal Code Source Materials                         */
-/*                                                                 */
-/* (C)Copyright IBM Corp.  2014, 2014                              */
-/*                                                                 */
-/* The Source code for this program is not published  or otherwise */
-/* divested of its trade secrets,  irrespective of what has been   */
-/* deposited with the U.S. Copyright Office.                       */
-/*  -------------------------------------------------------------- */
-/*                                                                 */
-/* end_generated_IBM_copyright_prolog                              */
-// $Id: p8_pm_firinit.C,v 1.3 2012/09/11 10:31:30 pchatnah Exp $
+// $Id: p8_pm_firinit.C,v 1.10 2013/04/02 12:48:19 pchatnah Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/p8_pm_firinit.C,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
@@ -89,13 +72,7 @@
 #include "p8_pm_oha_firinit.H"
 #include "p8_pm_occ_firinit.H"
 
-
-
-
-// #ifdef FAPIECMD
 extern "C" {
-  // #endif 
-
 
 using namespace fapi;
 
@@ -103,16 +80,13 @@ using namespace fapi;
 // Constant definitions
 // ----------------------------------------------------------------------
 
-
 // ---------------------------------------------------------------------- 
 // Global variables
 // ----------------------------------------------------------------------
 
-
 // ----------------------------------------------------------------------
 // Function prototypes
 // ----------------------------------------------------------------------
-
 
 // ----------------------------------------------------------------------
 // Function definitions
@@ -124,88 +98,137 @@ fapi::ReturnCode p8_pm_firinitlist(Target &i_target);
 // ----------------------------------------------------------------------
 
 fapi::ReturnCode
-p8_pm_firinit(const fapi::Target &i_target )
+p8_pm_firinit(const fapi::Target &i_target , uint32_t mode)
 {
-
-    fapi::ReturnCode l_rc;
+  fapi::ReturnCode rc;
+  ecmdDataBufferBase data(64);
+  //  ecmdDataBufferBase mask(64);
+  uint32_t e_rc = 0;
+  uint64_t any_error = 0;
  
-
-
-    //  ******************************************************************
-    //  PMC_FIRS 
-    //  ******************************************************************  
+    fapi::ReturnCode l_fapi_rc; 
+    
+    do
+    {
    
-    FAPI_DBG("");
-    FAPI_EXEC_HWP(l_rc, p8_pm_pmc_firinit , i_target );
-    if (l_rc) 
-    { 
-        FAPI_ERR("ERROR: p8_pm_pmc_firinit detected failed result"); 
-        return l_rc;
-    }    
+// *************************************************************
+  // CHECKING FOR FIRS BEFORE RESET and INIT
+// *************************************************************
+
+    FAPI_DBG("checking FIRs of PBA PMC OCC  ...");
+
+// PMC FIR
+     e_rc = data.flushTo0(); if(e_rc){rc.setEcmdError(e_rc); return rc;}
+     rc = fapiGetScom(i_target, PMC_LFIR_0x01010840 , data );
+     if (rc) {
+       FAPI_ERR("fapiGetScom(PMC_LFIR_0x01010840) failed."); return rc;
+     }
+
+     any_error = data.getDoubleWord(0);
+     
+     if (any_error)
+     {
+	    FAPI_ERR(" PMC_FIR has error(s) active.  0x%16llX ", data.getDoubleWord(0));
+	    //FAPI_SET_HWP_ERROR(rc, RC_PROCPM_FIR_ERROR); return rc;
+	    //return rc ;
+     }
+
+// PBA FIR
+     e_rc = data.flushTo0(); if(e_rc){rc.setEcmdError(e_rc); return rc;}
+     rc = fapiGetScom(i_target, PBA_FIR_0x02010840 , data );
+     if (rc) {
+       FAPI_ERR("fapiGetScom(PBA_FIR_0x02010840) failed."); return rc;
+     }
+
+     any_error = data.getDoubleWord(0);
+     
+     if (any_error)
+     {
+	    FAPI_ERR(" PBA_FIR_0x02010840  has error(s) active.  0x%16llX ", data.getDoubleWord(0));
+	    //FAPI_SET_HWP_ERROR(rc, RC_PROCPM_FIR_ERROR); return rc;
+	    //return rc ;
+     }
+
+
+// OCC FIR
+     e_rc = data.flushTo0(); if(e_rc){rc.setEcmdError(e_rc); return rc;}
+     rc = fapiGetScom(i_target, OCC_LFIR_0x01010800 , data );
+     if (rc) {
+       FAPI_ERR("fapiGetScom(OCC_LFIR_0x01010800) failed."); return rc;
+     }
+
+     any_error = data.getDoubleWord(0);
+     
+     if (any_error)
+     {
+	    FAPI_ERR(" OCC_LFIR_0x01010800  has error(s) active.  0x%16llX ", data.getDoubleWord(0));
+	    //FAPI_SET_HWP_ERROR(rc, RC_PROCPM_FIR_ERROR); return rc;
+	    //return rc ;
+     }
+
+
+
+
+ 
+        //  ******************************************************************
+        //  PMC_FIRS 
+        //  ******************************************************************  
+
+        FAPI_EXEC_HWP(l_fapi_rc, p8_pm_pmc_firinit , i_target , mode );
+        if (l_fapi_rc) 
+        { 
+            FAPI_ERR("ERROR: p8_pm_pmc_firinit detected failed result"); 
+            break;
+        }    
+
+        //  ******************************************************************
+        //  PBA 
+        //  ******************************************************************  
+    ;
+        FAPI_EXEC_HWP(l_fapi_rc, p8_pm_pba_firinit , i_target , mode );
+        if (l_fapi_rc) 
+        { 
+            FAPI_ERR("ERROR: p8_pm_pba_firinit detected failed result"); 
+            break;
+        }    
+
+        //  ******************************************************************
+        //  OHA 
+        //  ******************************************************************  
+
+        FAPI_EXEC_HWP(l_fapi_rc, p8_pm_oha_firinit , i_target , mode );
+        if (l_fapi_rc) 
+        { 
+            FAPI_ERR("ERROR: p8_pm_oha_firinit detected failed result"); 
+            break;
+        }    
+
+        //  ******************************************************************
+        //  PCBS
+        //  ******************************************************************  
+
+        FAPI_EXEC_HWP(l_fapi_rc, p8_pm_pcbs_firinit , i_target , mode );
+        if (l_fapi_rc) 
+        { 
+            FAPI_ERR("ERROR: p8_pm_pcbs_firinit detected failed result"); 
+            break;
+        }    
+
+        //  ******************************************************************
+        //  OCC
+        //  ******************************************************************  
+
+        FAPI_EXEC_HWP(l_fapi_rc,  p8_pm_occ_firinit , i_target , mode );
+        if (l_fapi_rc) 
+        { 
+            FAPI_ERR("ERROR: p8_pm_occ_firinit detected failed result"); 
+            break;
+        }    
+
+    } while(0);
   
-
-
-    //  ******************************************************************
-    //  PBA 
-    //  ******************************************************************  
-   
-   
-    FAPI_DBG("");
-    FAPI_EXEC_HWP(l_rc, p8_pm_pba_firinit , i_target );
-    if (l_rc) 
-    { 
-        FAPI_ERR("ERROR: p8_pm_pba_firinit detected failed result"); 
-        return l_rc;
-    }    
+    return l_fapi_rc;
   
+} // Procedure
 
-    //  ******************************************************************
-    //  OHA 
-    //  ******************************************************************  
-   
-   
-    FAPI_DBG("");
-    FAPI_EXEC_HWP(l_rc, p8_pm_oha_firinit , i_target );
-    if (l_rc) 
-    { 
-        FAPI_ERR("ERROR: p8_pm_oha_firinit detected failed result"); 
-        return l_rc;
-    }    
-  
-    //  ******************************************************************
-    //  PCBS
-    //  ******************************************************************  
-   
-   
-    FAPI_DBG("");
-    FAPI_EXEC_HWP(l_rc, p8_pm_pcbs_firinit , i_target );
-    if (l_rc) 
-    { 
-        FAPI_ERR("ERROR: p8_pm_pcbs_firinit detected failed result"); 
-        return l_rc;
-    }    
-
-
-    //  ******************************************************************
-    //  OCC
-    //  ******************************************************************  
-   
-   
-    FAPI_DBG("");
-    FAPI_EXEC_HWP(l_rc,  p8_pm_occ_firinit , i_target );
-    if (l_rc) 
-    { 
-        FAPI_ERR("ERROR: p8_pm_occ_firinit detected failed result"); 
-        return l_rc;
-    }    
-  
-
-  
-    return l_rc;
-  
-} 
-
-
-  //#ifdef FAPIECMD
 } //end extern C
-//#endif 

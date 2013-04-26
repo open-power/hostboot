@@ -63,7 +63,8 @@ OBJS =  occ.o \
         p8_pm_pcbs_firinit.o \
         p8_pm_occ_firinit.o \
         p8_pm_pba_firinit.o \
-        p8_pm_pmc_firinit.o
+        p8_pm_pmc_firinit.o \
+        p8_cpu_special_wakeup.o
 
 ##  NOTE: add a new directory onto the vpaths when you add a new HWP
 ##  EXAMPLE:

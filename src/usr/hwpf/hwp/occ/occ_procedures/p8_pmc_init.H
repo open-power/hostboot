@@ -20,23 +20,8 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-/* begin_generated_IBM_copyright_prolog                            */
-/*                                                                 */
-/* This is an automatically generated copyright prolog.            */
-/* After initializing,  DO NOT MODIFY OR MOVE                      */ 
-/* --------------------------------------------------------------- */
-/* IBM Confidential                                                */
-/*                                                                 */
-/* Licensed Internal Code Source Materials                         */
-/*                                                                 */
-/* (C)Copyright IBM Corp.  2014, 2014                              */
-/*                                                                 */
-/* The Source code for this program is not published  or otherwise */
-/* divested of its trade secrets,  irrespective of what has been   */
-/* deposited with the U.S. Copyright Office.                       */
-/*  -------------------------------------------------------------- */
-/*                                                                 */
-/* end_generated_IBM_copyright_prolog                              */
+// $Id: p8_pmc_init.H,v 1.7 2013/04/12 01:25:04 stillgs Exp $
+// $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/p8_pmc_init.H,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
 // *! All Rights Reserved -- Property of IBM
@@ -44,32 +29,30 @@
 //------------------------------------------------------------------------------
 // *! OWNER NAME: Greg Stilll         Email: stillgs@us.ibm.com
 // *!
+
 // *! General Description:
 // *!        This procedure is intializes / resets / configures the O2S access bridge
 // *!        Target : Processor chip
 //------------------------------------------------------------------------------
 //  
 
-/// \param[in] i_target Chip target
+/// \param[in] i_target1 Primary chip target of the module
+/// \param[in] i_target2 Secondary chip target (applicable to DCMs)
 /// \param[in] mode     
 
 
 // function pointer typedef definition for HWP call support
-typedef fapi::ReturnCode (*p8_pmc_init_FP_t) (const fapi::Target&, uint32_t mode);
+typedef fapi::ReturnCode (*p8_pmc_init_FP_t) (  const fapi::Target& ,
+                                                const fapi::Target&, 
+                                                uint32_t mode);
 
 extern "C" {
 
-// enum p8_PM_FLOW_MODE {
-//         PM_CONFIG     = 0x1,
-//         PM_RESET      = 0x2,
-//         PM_INIT       = 0x3,
-//         PM_SETUP      = 0x4,
-//         PM_SETUP_PIB  = 0x5,
-//         PM_SETUP_ALL  = 0x6
-//         };
 
-
-fapi::ReturnCode p8_pmc_init(const fapi::Target& i_target, uint32_t mode);
+fapi::ReturnCode 
+p8_pmc_init(const fapi::Target& i_target1, 
+            const fapi::Target& i_target2, 
+            uint32_t mode);
 
 }
 

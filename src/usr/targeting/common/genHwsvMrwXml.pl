@@ -1714,6 +1714,13 @@ sub generate_proc
         $pci_bndy_pll    = 565;
     }
 
+    #MURANO=DCM installed, VENICE=SCM
+    my $dcm_installed = 0;
+    if($CHIPNAME eq "murano")
+    {
+        $dcm_installed = 1;
+    }
+
     print "
     <!-- $SYSNAME n${node}p${proc} processor chip -->
 
@@ -1772,6 +1779,9 @@ sub generate_proc
     <attribute>
     <id>PROC_PCI_BNDY_PLL_LENGTH</id>
         <default>$pci_bndy_pll</default>
+    </attribute>
+    <attribute><id>PROC_DCM_INSTALLED</id>
+        <default>$dcm_installed</default>
     </attribute>";
 
     if ($slave)

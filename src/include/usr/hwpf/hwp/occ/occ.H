@@ -23,11 +23,16 @@
 #ifndef OCC_H_
 #define OCC_H_
 
-namespace OCC {
+namespace HBOCC {
 
-    errlHndl_t loadnStartOcc(uint64_t i_homer_addr,
-                       uint64_t i_common_addr,
-                       TARGETING::Target* i_target);
+    /**
+     * @brief Starts OCCs on all Processors in the node
+     *        This is intended to be used for AVP testing.
+     *
+     * @return errlHndl_t  Error log if OCC load failed
+     */
+    errlHndl_t loadnStartAllOccs();
+
 
 } //end OCC namespace
 

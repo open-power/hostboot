@@ -20,25 +20,8 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-/* begin_generated_IBM_copyright_prolog                            */
-/*                                                                 */
-/* This is an automatically generated copyright prolog.            */
-/* After initializing,  DO NOT MODIFY OR MOVE                      */ 
-/* --------------------------------------------------------------- */
-/* IBM Confidential                                                */
-/*                                                                 */
-/* Licensed Internal Code Source Materials                         */
-/*                                                                 */
-/* (C)Copyright IBM Corp.  2014, 2014                              */
-/*                                                                 */
-/* The Source code for this program is not published  or otherwise */
-/* divested of its trade secrets,  irrespective of what has been   */
-/* deposited with the U.S. Copyright Office.                       */
-/*  -------------------------------------------------------------- */
-/*                                                                 */
-/* end_generated_IBM_copyright_prolog                              */
-// $Id: p8_pba_init.C,v 1.7 2012/10/25 11:59:45 kgungl Exp $
-// $Source: /afs/awd.austin.ibm.com/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/p8_pba_init.C,v $
+// $Id: p8_pba_init.C,v 1.11 2013/04/01 04:11:57 stillgs Exp $
+// $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/p8_pba_init.C,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
 // *! All Rights Reserved -- Property of IBM
@@ -89,13 +72,11 @@
 #include <fapi.H>
 #include "p8_scom_addresses.H"
 #include "p8_pba_init.H"
-#include "pba_firmware_register.H" 
 #include "p8_pm.H"
-#include <ecmdDataBufferBase.H>
 
 // get the constants from here
-// #include "pgp_pba.h"
-// #include "pgp_common.h" 
+#include "pgp_pba.h"
+#include "pgp_common.h" 
   
 extern "C" {
  
@@ -104,89 +85,6 @@ using namespace fapi;
 // ----------------------------------------------------------------------
 // Constant definitions
 // ----------------------------------------------------------------------
-// constant definitions are currently in the *.h files, need to consolidate?
-
-// move the following to p8_scom_addresses.H 
-// CONST_UINT64_T( PBAXSNDTX_00064020    , ULL(0x00064020) );
-// CONST_UINT64_T( PBAXCFG_00064021      , ULL(0x00064021) );
-// CONST_UINT64_T( PBAXSHBR0_00064026    , ULL(0x00064026) );
-// CONST_UINT64_T( PBAXSHBR1_0006402A    , ULL(0x0006402A) );
-
-  // from  "pgp_pba.h" "pgp_common.h" 
-////////////////////////////////////
-// Macros for fields of PBA_SLVCTLn
-////////////////////////////////////
-
-// PBA write Ttypes
-
-#define PBA_WRITE_TTYPE_DMA_PR_WR    0x0 /// DMA Partial Write
-#define PBA_WRITE_TTYPE_LCO_M        0x1 /// L3 LCO, Tsize denotes chiplet
-#define PBA_WRITE_TTYPE_ATOMIC_RMW   0x2 /// Atomic operations
-#define PBA_WRITE_TTYPE_CACHE_INJECT 0x3 /// ?
-#define PBA_WRITE_TTYPE_CI_PR_W      0x4 /// Cache-inhibited partial write for Centaur putscom().
-
-#define PBA_WRITE_TTYPE_DC PBA_WRITE_TTYPE_DMA_PR_WR // Don't care
-
-#define PBA_OCI_REGION 0
-
-#define PBA_BCE_OCI_TRANSACTION_32_BYTES 0
-#define PBA_BCE_OCI_TRANSACTION_64_BYTES 1
-#define PBA_BCE_OCI_TRANSACTION_8_BYTES  2
-
-#define PBA_OCI_MARKER_BASE 0x40070000
-
-#define PBA_SLAVE_PORE_GPE 0    /* GPE0/1, but only 1 can access mainstore */
-#define PBA_SLAVE_OCC      1	/* 405 I- and D-cache */
-#define PBA_SLAVE_PORE_SLW 2	
-#define PBA_SLAVE_OCB      3
-
-#define OCI_MASTER_ID_PORE_GPE 0
-#define OCI_MASTER_ID_PMC      1
-#define OCI_MASTER_ID_PBA      2
-#define OCI_MASTER_ID_UNUSED   3
-#define OCI_MASTER_ID_PORE_SLW 4
-#define OCI_MASTER_ID_OCB      5
-#define OCI_MASTER_ID_OCC_ICU  6
-#define OCI_MASTER_ID_OCC_DCU  7
-
-// PBA write gather timeouts are defined in terms of the number of 'pulses'. A
-// pulse occurs every 64 OCI cycles. The timing of the last write of a
-// sequence is variable, so the timeout will occur somewhere between (N - 1) *
-// 64 and N * 64 OCI cycles.  If write gather timeouts are disabled, the PBA
-// holds the data until some condition occurs that causes it to disgorge the
-// data. Slaves using cache-inhibited partial write never gather write
-// data. Note from spec. : "Write gather timeouts must NOT be disabled if
-// multiple masters are enabled to write through the PBA".  The only case
-// where write gather timeouts will be disabled is for the IPL-time injection
-// of data into the L3 caches.
-
-#define PBA_WRITE_GATHER_TIMEOUT_DISABLE   0x0
-#define PBA_WRITE_GATHER_TIMEOUT_2_PULSES  0x4
-#define PBA_WRITE_GATHER_TIMEOUT_4_PULSES  0x5
-#define PBA_WRITE_GATHER_TIMEOUT_8_PULSES  0x6
-#define PBA_WRITE_GATHER_TIMEOUT_16_PULSES 0x7
-
-/// PBA write gather timeout don't care assignment
-#define PBA_WRITE_GATHER_TIMEOUT_DC PBA_WRITE_GATHER_TIMEOUT_2_PULSES
-
-
-// PBA read Ttype
-
-#define PBA_READ_TTYPE_CL_RD_NC      0x0 /// Cache line read
-#define PBA_READ_TTYPE_CI_PR_RD      0x1 /// Cache-inhibited partial read for Centaur getscom().
-
-/// PBA read TTYPE don't care assignment
-#define PBA_READ_TTYPE_DC PBA_READ_TTYPE_CL_RD_NC      
-  
-
-// PBA read prefetch options
-
-#define PBA_READ_PREFETCH_AUTO_EARLY  0x0 /// Aggressive prefetch
-#define PBA_READ_PREFETCH_NONE        0x1 /// No prefetch
-#define PBA_READ_PREFETCH_AUTO_LATE   0x2 /// Non-aggressive prefetch
-
-/// PBA read prefetch don't care assignment
-#define PBA_READ_PREFETCH_DC PBA_READ_PREFETCH_NONE  
 
 
 // ----------------------------------------------------------------------
@@ -197,15 +95,16 @@ using namespace fapi;
 // ----------------------------------------------------------------------
 // local Function definitions / prototypes
 // ----------------------------------------------------------
-ReturnCode p8_pba_init_PM_CONFIG ( const Target& i_target );
-ReturnCode p8_pba_init_PM_INIT ( const Target& i_target );
-ReturnCode p8_pba_init_PM_RESET ( const Target& i_target );
+fapi::ReturnCode p8_pba_init_PM_CONFIG ( const Target& i_target );
+fapi::ReturnCode p8_pba_init_PM_INIT ( const Target& i_target );
+fapi::ReturnCode p8_pba_init_PM_RESET ( const Target& i_target );
 
-ReturnCode pba_slave_setup_init ( const Target& i_target );
-ReturnCode pba_slave_setup_reset ( const Target& i_target );
+fapi::ReturnCode pba_slave_setup_init ( const Target& i_target );
+fapi::ReturnCode pba_slave_setup_reset ( const Target& i_target );
+fapi::ReturnCode pba_slave_reset(const Target& i_target);
 
-  // from pgp_pba.h
-int pba_slave_reset(int id);
+// from pgp_pba.h
+//int pba_slave_reset(int id);
 
 
 // **********************************************************************************************
@@ -213,412 +112,419 @@ int pba_slave_reset(int id);
 // function: 
 // set the pba registers depending on "mode", no default mode
 // returns: fapi return codes
-ReturnCode
+fapi::ReturnCode
 p8_pba_init(const Target& i_target, 
                 uint64_t mode
              )
 {
-ReturnCode rc;
-// calling the selected function from here
+    fapi::ReturnCode rc;
+    // calling the selected function from here
  
- if (mode == PM_CONFIG) { 
-    rc =  p8_pba_init_PM_CONFIG(i_target); 
- } else {
-    if (mode == PM_INIT) { 
+    if (mode == PM_CONFIG) 
+    { 
+       rc =  p8_pba_init_PM_CONFIG(i_target); 
+    } 
+    else if (mode == PM_INIT) 
+    { 
        rc =  p8_pba_init_PM_INIT(i_target); 
-    } else { 
-       if (mode == PM_RESET) { 
-          rc =  p8_pba_init_PM_RESET(i_target); 
-       } else {
-          FAPI_SET_HWP_ERROR(rc,RC_P8_PBA_INIT_INCORRECT_MODE);
-       } // endif
+    } 
+    else if (mode == PM_RESET) 
+    { 
+       rc =  p8_pba_init_PM_RESET(i_target); 
+    }
+    else 
+    {
+      FAPI_ERR("Unknown mode passed to p8_pba_init. Mode %08llx ", mode);      
+      FAPI_SET_HWP_ERROR(rc,RC_P8_PBA_INIT_INCORRECT_MODE);
     } // endif
- } // endif
 
- return rc;
+
+    return rc;
 }
 
 // **********************************************************************************************
  // ******************************************************** mode = PM_RESET ********************
 
-ReturnCode
-  p8_pba_init_PM_RESET(const Target& i_target)
-  {
+fapi::ReturnCode
+p8_pba_init_PM_RESET(const Target& i_target)
+{
 
- ReturnCode rc;
- ecmdDataBufferBase data(64);
- uint32_t l_rc;              // local returncode
+    fapi::ReturnCode rc;
+    ecmdDataBufferBase data(64);
+    uint32_t l_rc;              // local returncode
 
-            
- //  if (mode == PM_RESET) {
-   FAPI_INF("mode = PM_RESET..\n");
-   l_rc =  data.setDoubleWord(0, 0x0);
-   if (l_rc) 
-   { 
-      FAPI_ERR("data.setDoubleWord ( ) failed. With rc = 0x%x", (uint32_t)l_rc);  rc.setEcmdError(l_rc); return rc;    
-   } // end if
- 
-
-   // For reset phase, write these with 0x0
-   // No content for config or init phase as all initialization is done by OCC FW   
-   rc = fapiPutScom(i_target, PBA_BCDE_CTL_0x00064010 , data);
-   if (rc) 
-   {  
-      FAPI_ERR("fapiPutScom(PBA_BCDE_CTL_0x00064010  ) failed. With rc = 0x%x", (uint32_t)rc); return rc; 
-   }  else 
-   {
-      FAPI_INF("Done with PBA_BCDE_CTL_0x00064010  \n "); 
-   }  // end if-else
-
-   rc = fapiPutScom(i_target, PBA_BCDE_SET_0x00064011 , data);
-   if (rc) 
-   {  
-      FAPI_ERR("fapiPutScom( PBA_BCDE_SET_0x00064011 ) failed. With rc = 0x%x", (uint32_t)rc); return rc; 
-   } else 
-   {
-      FAPI_INF("Done with PBA_BCDE_SET_0x00064011  \n "); 
-   } // end if-else
-
-   rc = fapiPutScom(i_target, PBA_BCDE_STAT_0x00064012 , data);
-   if (rc) 
-   {  
-      FAPI_ERR("fapiPutScom( PBA_BCDE_STAT_0x00064012 ) failed. With rc = 0x%x", (uint32_t)rc); return rc; 
-   } else 
-   {
-      FAPI_INF("Done with PBA_BCDE_STAT_0x00064012  \n "); 
-   } // end if-else
-
-   rc = fapiPutScom(i_target, PBA_BCDE_PBADR_0x00064013 , data);
-   if (rc) 
-   {  
-      FAPI_ERR("fapiPutScom( PBA_BCDE_PBADR_0x00064013 ) failed. With rc = 0x%x", (uint32_t)rc); return rc; 
-   } else 
-   {
-      FAPI_INF("Done with PBA_BCDE_PBADR_0x00064013  \n "); 
-   }
-
-   rc = fapiPutScom(i_target, PBA_BCDE_OCIBAR_0x00064014 , data);
-   if (rc) 
-   {  
-      FAPI_ERR("fapiPutScom( PBA_BCDE_OCIBAR_0x00064014 ) failed. With rc = 0x%x", (uint32_t)rc); return rc; 
-   } else 
-   {
-      FAPI_INF("Done with PBA_BCDE_OCIBAR_0x00064014  \n "); 
-   }
-
-   rc = fapiPutScom(i_target, PBA_BCUE_CTL_0x00064015 , data);
-   if (rc) 
-   {  
-      FAPI_ERR("fapiPutScom( PBA_BCUE_CTL_0x0006401 ) failed. With rc = 0x%x", (uint32_t)rc); return rc; 
-   } else 
-   {
-      FAPI_INF("Done with PBA_BCUE_CTL_0x00064015  \n "); 
-   }
-
-   rc = fapiPutScom(i_target, PBA_BCUE_SET_0x00064016 , data);
-   if (rc) 
-   {  
-      FAPI_ERR("fapiPutScom( PBA_BCUE_SET_0x00064016 ) failed. With rc = 0x%x", (uint32_t)rc); return rc; 
-   } else 
-   {
-      FAPI_INF("Done with PBA_BCUE_SET_0x00064016  \n "); 
-   } // end if-else
-
-   rc = fapiPutScom(i_target, PBA_BCUE_STAT_0x00064017 , data);
-   if (rc) 
-   {  
-      FAPI_ERR("fapiPutScom(PBA_BCUE_STAT_0x00064017  ) failed. With rc = 0x%x", (uint32_t)rc); return rc; 
-   } else 
-   {
-      FAPI_INF("Done with PBA_BCUE_STAT_0x00064017  \n "); 
-   } // end if-else
-
-   rc = fapiPutScom(i_target, PBA_BCUE_PBADR_0x00064018 , data);
-   if (rc) 
-   {  
-      FAPI_ERR("fapiPutScom(PBA_BCUE_PBADR_0x00064018  ) failed. With rc = 0x%x", (uint32_t)rc); return rc; 
-   } else 
-   {
-      FAPI_INF("Done with PBA_BCUE_PBADR_0x00064018  \n "); 
-   } // end if-else
-
-   rc = fapiPutScom(i_target, PBA_BCUE_OCIBAR_0x00064019 , data);
-   if (rc) 
-   {  
-      FAPI_ERR("fapiPutScom( PBA_BCUE_OCIBAR_0x00064019  ) failed. With rc = 0x%x", (uint32_t)rc); return rc; 
-   } else 
-   {
-      FAPI_INF("Done with PBA_BCUE_OCIBAR_0x00064019  \n "); 
-   }  // end if-else 
- 
-   // For reset, written with 0x0s to restore to fresh value.
-   rc = fapiPutScom(i_target, PBA_SLVCTL0_0x00064004 , data);
-   if (rc) 
-   {  
-      FAPI_ERR("fapiPutScom( PBA_SLVCTL0_0x00064004 ) failed. With rc = 0x%x", (uint32_t)rc); return rc; 
-   } else 
-   {
-      FAPI_INF("Done with PBA_SLVCTL0_0x0006400  \n "); 
-   }   // end if-else
-
-   rc = fapiPutScom(i_target, PBA_SLVCTL1_0x00064005 , data);
-   if (rc) 
-   {  
-      FAPI_ERR("fapiPutScom( PBA_SLVCTL1_0x00064005 ) failed. With rc = 0x%x", (uint32_t)rc); return rc; 
-   } else 
-   {
-      FAPI_INF("Done with PBA_SLVCTL1_0x00064005  \n "); 
-   }  // end if-else
-
-   rc = fapiPutScom(i_target, PBA_SLVCTL2_0x00064006 , data);
-   if (rc) 
-   {  
-      FAPI_ERR("fapiPutScom(  PBA_SLVCTL2_0x00064006 ) failed. With rc = 0x%x", (uint32_t)rc); return rc; 
-   } else 
-   {
-      FAPI_INF("Done with PBA_SLVCTL2_0x00064006  \n "); 
-   } // end if-else
-
-   rc = fapiPutScom(i_target, PBA_SLVCTL3_0x00064007 , data);
-   if (rc) 
-   {  
-      FAPI_ERR("fapiPutScom( PBA_SLVCTL3_0x00064007 ) failed. With rc = 0x%x", (uint32_t)rc); return rc; 
-   } else 
-   {
-      FAPI_INF("Done with PBA_SLVCTL3_0x00064007  \n "); 
-   } // end if-else
-
-   // Clear the PBA FIR (Reset) only
-   l_rc = data.setDoubleWord(0, 0x0);
-   if (l_rc) 
-   { 
-      FAPI_ERR("data.setDoubleWord ( ) failed. With rc = 0x%x", (uint32_t)l_rc); rc.setEcmdError(l_rc); return rc;    
-   }   // end if
-   rc = fapiPutScom(i_target, PBA_FIR_0x02010840   , data);
-   if (rc) 
-   {  
-      FAPI_ERR("fapiPutScom( PBA_FIR_0x02010840 ) failed. With rc = 0x%x", (uint32_t)rc); return rc; 
-   } else 
-   {
-      FAPI_DBG("Done with PBA_FIR_0x02010840 \n "); 
-   } // end if-else
-
- // For reset, this register should be written with the value from figtree to restore the initial hardware state. 
- // Therefore fix this constant:
- // For init, needs detailing for performance and/or CHSW enable/disable
- // reset case
-   // data still 0
-   rc = fapiPutScom(i_target, PBA_CONFIG_0x0201084B  , data);
-   if (rc) 
-   {  
-      FAPI_ERR("fapiPutScom( PBA_CONFIG_0x0201084B  ) failed. With rc = 0x%x", (uint32_t)rc); return rc; 
-   } else 
-   {
-      FAPI_INF("Done with, PBA_CONFIG_0x0201084B   \n "); 
-   } // end if-else 
-
-   // pba slave register handling for PM_RESET
-   rc = pba_slave_setup_reset(i_target);
-   if (rc) 
-   {  
-      FAPI_ERR("pba_slave_setup_reset failed. With rc = 0x%x", (uint32_t)rc); return rc; 
-   } else 
-   {
-      FAPI_INF("Done with, pba_slave_setup_reset   \n "); 
-   }  // end if-else
-
-   // For reset, written with 0x0s to restore to fresh value.
-   rc = fapiPutScom(i_target, PBA_ERR_RPT0_0x0201084C  , data);
-   if (rc) 
-   {  
-      FAPI_ERR("fapiPutScom( PBA_ERR_RPT0_0x0201084C ) failed. With rc = 0x%x", (uint32_t)rc); return rc; 
-   } else 
-   {
-      FAPI_INF("Done with PBA_ERR_RPT0_0x0201084C  \n "); 
-   } // end if-else
-   // the following operations are not required, keep this in mind, don't erase them here
-   //    l_rc = fapiPutScom(i_target, PBA_ERR_RPT1_0x0201084D  , data);
-   //    if(l_rc) { FAPI_SET_HWP_ERROR(l_rc, RC_PROC_PBA_INIT_PUTSCOM_FAILED); return l_rc; }
-   //      else {FAPI_INF("Done with PBA_ERR_RPT1_0x0201084D  \n ") };
-
-   //    l_rc = fapiPutScom(i_target, PBA_ERR_RPT2_0x0201084E   , data);
-   //     if(l_rc) { FAPI_SET_HWP_ERROR(l_rc, RC_PROC_PBA_INIT_PUTSCOM_FAILED); return l_rc; }
-   //       else {FAPI_INF("Done with PBA_ERR_RPT2_0x0201084E  \n ") };
+    do
+    {
+        
+        // Reset each slave and wait for completion.
+        rc =  pba_slave_reset(i_target);
+        if (rc) 
+        {  
+             FAPI_ERR("pba_slave_reset failed."); 
+             break; 
+        }
+        
+           
+        FAPI_INF("mode = PM_RESET...");
+        l_rc =  data.setDoubleWord(0, 0x0);
+        if (l_rc) 
+        { 
+            FAPI_ERR("data.setDoubleWord ( ) failed. With rc = 0x%x", (uint32_t)l_rc);
+            rc.setEcmdError(l_rc); 
+            break;    
+        } // end if
 
 
-   // The following apply to Reset mode (
-   rc = fapiPutScom(i_target, PBA_SLVRST_0x00064001 , data);
-   if (rc) {  FAPI_ERR("fapiPutScom( PBA_SLVRST_0x00064001 ) failed. With rc = 0x%x", (uint32_t)rc); return rc; } 
-      else {FAPI_INF("Done with PBA_SLVRST_0x00064001  \n "); }
- 
-    // last step: pba slave setup for reset
-    rc = pba_slave_setup_reset (i_target);
-    if (rc) {  FAPI_ERR("fapi pba_slave_setup_reset failed. With rc = 0x%x", (uint32_t)rc); return rc; }
-      else {FAPI_INF("Done with fapi pba_slave_setup_reset \n "); }
+        // For reset phase, write these with 0x0
+        // No content for config or init phase as all initialization is done by OCC FW   
+        rc = fapiPutScom(i_target, PBA_BCDE_CTL_0x00064010 , data);
+        if (rc) 
+        {  
+            FAPI_ERR("fapiPutScom(PBA_BCDE_CTL_0x00064010  ) failed. With rc = 0x%x", (uint32_t)rc);
+            break; 
+        }
 
-   return rc;
+        rc = fapiPutScom(i_target, PBA_BCDE_SET_0x00064011 , data);
+        if (rc) 
+        {  
+            FAPI_ERR("fapiPutScom( PBA_BCDE_SET_0x00064011 ) failed. With rc = 0x%x", (uint32_t)rc); 
+            break; 
+        } 
+
+        rc = fapiPutScom(i_target, PBA_BCDE_STAT_0x00064012 , data);
+        if (rc) 
+        {  
+            FAPI_ERR("fapiPutScom( PBA_BCDE_STAT_0x00064012 ) failed. With rc = 0x%x", (uint32_t)rc); 
+            break; 
+        }
+
+        rc = fapiPutScom(i_target, PBA_BCDE_PBADR_0x00064013 , data);
+        if (rc) 
+        {  
+            FAPI_ERR("fapiPutScom( PBA_BCDE_PBADR_0x00064013 ) failed. With rc = 0x%x", (uint32_t)rc); 
+            break; 
+        }
+
+        rc = fapiPutScom(i_target, PBA_BCDE_OCIBAR_0x00064014 , data);
+        if (rc) 
+        {  
+            FAPI_ERR("fapiPutScom( PBA_BCDE_OCIBAR_0x00064014 ) failed. With rc = 0x%x", (uint32_t)rc); 
+            break; 
+        }
+
+        rc = fapiPutScom(i_target, PBA_BCUE_CTL_0x00064015 , data);
+        if (rc) 
+        {  
+            FAPI_ERR("fapiPutScom( PBA_BCUE_CTL_0x0006401 ) failed. With rc = 0x%x", (uint32_t)rc); 
+            break; 
+        }
+
+        rc = fapiPutScom(i_target, PBA_BCUE_SET_0x00064016 , data);
+        if (rc) 
+        {  
+            FAPI_ERR("fapiPutScom( PBA_BCUE_SET_0x00064016 ) failed. With rc = 0x%x", (uint32_t)rc); 
+            break; 
+        }
+
+        rc = fapiPutScom(i_target, PBA_BCUE_STAT_0x00064017 , data);
+        if (rc) 
+        {  
+            FAPI_ERR("fapiPutScom(PBA_BCUE_STAT_0x00064017  ) failed. With rc = 0x%x", (uint32_t)rc); 
+            break; 
+        }
+
+        rc = fapiPutScom(i_target, PBA_BCUE_PBADR_0x00064018 , data);
+        if (rc) 
+        {  
+            FAPI_ERR("fapiPutScom(PBA_BCUE_PBADR_0x00064018  ) failed. With rc = 0x%x", (uint32_t)rc); 
+            break; 
+        }
+
+        rc = fapiPutScom(i_target, PBA_BCUE_OCIBAR_0x00064019 , data);
+        if (rc) 
+        {  
+            FAPI_ERR("fapiPutScom( PBA_BCUE_OCIBAR_0x00064019  ) failed. With rc = 0x%x", (uint32_t)rc); 
+            break; 
+        }
+
+        // For reset, written with 0x0s to restore to fresh value.
+        rc = fapiPutScom(i_target, PBA_SLVCTL0_0x00064004 , data);
+        if (rc) 
+        {  
+            FAPI_ERR("fapiPutScom( PBA_SLVCTL0_0x00064004 ) failed. With rc = 0x%x", (uint32_t)rc); 
+            break; 
+        }
+
+        rc = fapiPutScom(i_target, PBA_SLVCTL1_0x00064005 , data);
+        if (rc) 
+        {  
+            FAPI_ERR("fapiPutScom( PBA_SLVCTL1_0x00064005 ) failed. With rc = 0x%x", (uint32_t)rc); 
+            break; 
+        }
+
+        rc = fapiPutScom(i_target, PBA_SLVCTL2_0x00064006 , data);
+        if (rc) 
+        {  
+            FAPI_ERR("fapiPutScom(  PBA_SLVCTL2_0x00064006 ) failed. With rc = 0x%x", (uint32_t)rc); 
+            break; 
+        } 
+
+        rc = fapiPutScom(i_target, PBA_SLVCTL3_0x00064007 , data);
+        if (rc) 
+        {  
+            FAPI_ERR("fapiPutScom( PBA_SLVCTL3_0x00064007 ) failed. With rc = 0x%x", (uint32_t)rc); 
+            break; 
+        } 
+
+        // Clear the PBA FIR (Reset) only
+        l_rc = data.setDoubleWord(0, 0x0);
+        if (l_rc) 
+        { 
+            FAPI_ERR("data.setDoubleWord ( ) failed. With rc = 0x%x", (uint32_t)l_rc); 
+            rc.setEcmdError(l_rc); 
+            break;    
+        }   // end if
+        
+        rc = fapiPutScom(i_target, PBA_FIR_0x02010840   , data);
+        if (rc) 
+        {  
+            FAPI_ERR("fapiPutScom( PBA_FIR_0x02010840 ) failed. With rc = 0x%x", (uint32_t)rc); 
+            break; 
+        }
+
+        // For reset, this register should be written with the value from figtree
+        // to restore the initial hardware state.  Therefore fix this constant.
+        // For init, needs detailing for performance and/or CHSW enable/disable
+        // reset case
+        // data still 0
+        rc = fapiPutScom(i_target, PBA_CONFIG_0x0201084B  , data);
+        if (rc) 
+        {  
+            FAPI_ERR("fapiPutScom( PBA_CONFIG_0x0201084B  ) failed. With rc = 0x%x", (uint32_t)rc); 
+            break; 
+        }
+
+        // pba slave register handling for PM_RESET
+        rc = pba_slave_setup_reset(i_target);
+        if (rc) 
+        {  
+            FAPI_ERR("pba_slave_setup_reset failed. With rc = 0x%x", (uint32_t)rc); 
+            break; 
+        }
+
+        // For reset, written with 0x0s to restore to fresh value.
+        rc = fapiPutScom(i_target, PBA_ERR_RPT0_0x0201084C  , data);
+        if (rc) 
+        {  
+            FAPI_ERR("fapiPutScom( PBA_ERR_RPT0_0x0201084C ) failed. With rc = 0x%x", (uint32_t)rc); 
+            break; 
+        }
+
+        // the following operations are not required, keep this in mind, don't erase them here
+        //    l_rc = fapiPutScom(i_target, PBA_ERR_RPT1_0x0201084D  , data);
+        //    if(l_rc) { FAPI_SET_HWP_ERROR(l_rc, RC_PROC_PBA_INIT_PUTSCOM_FAILED); return l_rc; }
+        //      else {FAPI_INF("Done with PBA_ERR_RPT1_0x0201084D  \n ") };
+
+        //    l_rc = fapiPutScom(i_target, PBA_ERR_RPT2_0x0201084E   , data);
+        //     if(l_rc) { FAPI_SET_HWP_ERROR(l_rc, RC_PROC_PBA_INIT_PUTSCOM_FAILED); return l_rc; }
+        //       else {FAPI_INF("Done with PBA_ERR_RPT2_0x0201084E  \n ") };
+
+
+        // The following apply to Reset mode
+        rc = fapiPutScom(i_target, PBA_SLVRST_0x00064001 , data);
+        if (rc) 
+        {  
+             FAPI_ERR("fapiPutScom( PBA_SLVRST_0x00064001 ) failed. With rc = 0x%x", (uint32_t)rc); 
+             break; 
+        } 
+
+        // last step: pba slave setup for reset
+        rc = pba_slave_setup_reset (i_target);
+        if (rc) 
+        {  
+             FAPI_ERR("fapi pba_slave_setup_reset failed. With rc = 0x%x", (uint32_t)rc); 
+             break; 
+        }
+    } while(0);
+     
+    return rc;
 
  } // endif (mode == PM_RESET)
   
 
   
- // ***********************************************************************************************
- // ************************************************************ mode = PM_INIT *******************
- // call pba_slave_setup
- ReturnCode
-  p8_pba_init_PM_INIT(const Target& i_target)
-  {
+// ***********************************************************************************************
+// ************************************************************ mode = PM_INIT *******************
+// call pba_slave_setup
+fapi::ReturnCode
+p8_pba_init_PM_INIT(const Target& i_target)
+{
 
- ReturnCode rc;
- ecmdDataBufferBase data(64);
- uint32_t l_rc;              // local returncode
+    fapi::ReturnCode rc;
+    ecmdDataBufferBase data(64);
+    uint32_t l_rc;              // local returncode
 
-  uint8_t ATTR_PM_PBAX_RCV_RESERV_TIMEOUT_value = 0 ;
-  uint8_t ATTR_PM_PBAX_SND_RETRY_COUNT_OVERCOMMIT_ENABLE_value = 0 ;
-  uint8_t ATTR_PM_PBAX_SND_RETRY_THRESHOLD_value = 0 ;
-  uint8_t ATTR_PM_PBAX_SND_RESERV_TIMEOUT_value = 0 ;
+    uint8_t ATTR_PM_PBAX_RCV_RESERV_TIMEOUT_value = 0 ;
+    uint8_t ATTR_PM_PBAX_SND_RETRY_COUNT_OVERCOMMIT_ENABLE_value = 0 ;
+    uint8_t ATTR_PM_PBAX_SND_RETRY_THRESHOLD_value = 0 ;
+    uint8_t ATTR_PM_PBAX_SND_RESERV_TIMEOUT_value = 0 ;
 
-  pbaxcfg_t pbaxcfg_setup ;
-
- // if (mode == PM_INIT) {
-   FAPI_INF("mode = PM_INIT..\n");
-   l_rc =  data.setDoubleWord(0, 0x0);
-   if (l_rc) 
-   { 
-      FAPI_ERR("data.setDoubleWord ( ) failed. With rc = 0x%x", (uint32_t)l_rc);  rc.setEcmdError(l_rc); return rc;    
-   } // end if  
-   // For reset, this register should be written with the value from figtree to restore the
-   // initial hardware state.
-   // For init, needs detailing for performance and/or CHSW enable/disable TODO
-   // init case
-   rc = fapiPutScom(i_target, PBA_CONFIG_0x0201084B  , data);
-   if (rc) 
-   {  
-      FAPI_ERR("fapiPutScom( PBA_CONFIG_0x0201084B ) failed. With rc = 0x%x", (uint32_t)rc); return rc; 
-   }  else 
-   {
-      FAPI_INF("Done with, PBA_CONFIG_0x0201084B   \n "); 
-   }  // end if-else
-
-   // Clear the PBA FIR (Reset) only
-   // data still 0
-   rc = fapiPutScom(i_target, PBA_FIR_0x02010840   , data);
-   if (rc) 
-   {  
-      FAPI_ERR("fapiPutScom( PBA_FIR_0x02010840 ) failed. With rc = 0x%x", (uint32_t)rc); return rc; 
-   } else 
-   {
-      FAPI_DBG("Done with PBA_FIR_0x02010840 \n "); 
-   } // end if-else
-
-   // The following registers are ROX, hence need not be touched:
-   // PBA_RBUFVAL0_0x02010850
-   // PBA_RBUFVAL1_0x02010851
-   // PBA_RBUFVAL2_0x02010852
-   // PBA_RBUFVAL3_0x02010853
-   // PBA_RBUFVAL4_0x02010854
-   // PBA_RBUFVAL5_0x02010855
-   // PBA_WBUFVAL0_0x02010858
-   // PBA_WBUFVAL1_0x02010859
-
-   // These PowerBus Overcommit regs are read-only, therefore no action required:
-   // PBA_PBOCR0_0x00064020
-   // PBA_PBOCR1_0x00064021
-   // PBA_PBOCR2_0x00064022
-   // PBA_PBOCR3_0x00064023
-   // PBA_PBOCR4_0x00064024
-   // PBA_PBOCR5_0x0006402
-
-   // The PBA BARs and their associated Masks are done outside of this FAPI set.  Thus, during
-   // a reset, the BARS/MASKS are retained. this applies to
-   // PBA_BAR0_0x02013F00
-   // PBA_BARMSK0_0x02013F04
-   // PBA_BARMSK1_0x02013F05
-   // PBA_BAR1_0x02013F01
-   // PBA_BAR2_0x02013F02
-   // PBA_BAR3_0x02013F03
-   // PBA_TRUSTMODE_0x02013F08   
-
-   // any checkreads => NO
-
-    rc = FAPI_ATTR_GET ( ATTR_PM_PBAX_RCV_RESERV_TIMEOUT   , &i_target, ATTR_PM_PBAX_RCV_RESERV_TIMEOUT_value  );
-    if (rc) 
-    {  
-       FAPI_ERR("fapi_attr_get( ATTR_PM_PBAX_RCV_RESERV_TIMEOUT ) failed. With rc = 0x%x", (uint32_t)rc); return rc; 
-    } // end if
-
-    rc = FAPI_ATTR_GET ( ATTR_PM_PBAX_SND_RETRY_COUNT_OVERCOMMIT_ENABLE   , &i_target, ATTR_PM_PBAX_SND_RETRY_COUNT_OVERCOMMIT_ENABLE_value );
-    if (rc) 
-    {  
-       FAPI_ERR("fapi_attr_get( ATTR_PM_PBAX_SND_RETRY_COUNT_OVERCOMMIT_ENABL ) failed. With rc = 0x%x", (uint32_t)rc); return rc; 
-    } // end if
-
-    rc = FAPI_ATTR_GET ( ATTR_PM_PBAX_SND_RETRY_THRESHOLD , &i_target, ATTR_PM_PBAX_SND_RETRY_THRESHOLD_value  ); 
-    if (rc) 
-    {  
-       FAPI_ERR("fapi_attr_get( ATTR_PM_PBAX_SND_RETRY_THRESHOLD ) failed. With rc = 0x%x", (uint32_t)rc); return rc; 
-    } // end if
-
-    rc = FAPI_ATTR_GET ( ATTR_PM_PBAX_SND_RESERV_TIMEOUT  , &i_target, ATTR_PM_PBAX_SND_RESERV_TIMEOUT_value ); 
-    if (rc) 
-    {  
-       FAPI_ERR("fapi_attr_get( ATTR_PM_PBAX_SND_RESERV_TIMEOU ) failed. With rc = 0x%x", (uint32_t)rc); return rc; 
-    } // end if
-  
-    // assemble the attributes
-    // 20:24, ATTR_PM_PBAX_RCV_RESERV_TIMEOUT_value
-    // 27; ATTR_PM_PBAX_SND_RETRY_COUNT_OVERCOMMIT_ENABLE_value
-    // 28:35; ATTR_PM_PBAX_SND_RETRY_THRESHOLD_value
-    // 36:40  ATTR_PM_PBAX_SND_RESERV_TIMEOUT_value
-    pbaxcfg_setup.fields.ATTR_PM_PBAX_RCV_RESERV_TIMEOUT = ATTR_PM_PBAX_RCV_RESERV_TIMEOUT_value;
-    pbaxcfg_setup.fields.ATTR_PM_PBAX_SND_RETRY_COUNT_OVERCOMMIT_ENABLE = ATTR_PM_PBAX_SND_RETRY_COUNT_OVERCOMMIT_ENABLE_value;
-    pbaxcfg_setup.fields.ATTR_PM_PBAX_SND_RETRY_THRESHOLD = ATTR_PM_PBAX_SND_RETRY_THRESHOLD_value;
-    pbaxcfg_setup.fields.ATTR_PM_PBAX_SND_RESERV_TIMEOUT = ATTR_PM_PBAX_SND_RESERV_TIMEOUT_value;
-
-    // put the attribute values into PBAXCFG
-    l_rc = data.setDoubleWord(0, pbaxcfg_setup.value); 
-    if (l_rc) 
-    { 
-       FAPI_ERR("data.setDoubleWord ( ) failed. With rc = 0x%x", (uint32_t)l_rc); rc.setEcmdError(l_rc); return rc;    
-    }  // end if
-    rc = fapiPutScom(i_target, PBAXCFG_00064021   , data);
-    if (rc) 
-    {  
-       FAPI_ERR("fapiPutScom(PBAXCFG_00064021) failed. With rc = 0x%x", (uint32_t)rc); return rc; 
-    }  else 
-    { 
-       FAPI_INF("Done with attr_pbaxsndtx_value ");  
-    } // end if-else
-  
-    // last step: pba slave setup for init
-    rc = pba_slave_setup_init (i_target);
-    if (rc) 
-    {  
-       FAPI_ERR("fapi pba_slave_setup_init failed. With rc = 0x%x", (uint32_t)rc); return rc; 
-    } else 
+    pbaxcfg_t pbaxcfg_setup ;
+    pbaxcfg_setup.value = 0;
+    do
     {
-       FAPI_INF("Done with api_pba_slave_init \n "); 
-    } // end if-else
+        // if (mode == PM_INIT) {
+        FAPI_INF("mode = PM_INIT...");
+        l_rc =  data.setDoubleWord(0, 0x0);
+        if (l_rc) 
+        { 
+            FAPI_ERR("data.setDoubleWord ( ) failed. With rc = 0x%x", (uint32_t)l_rc);  
+            rc.setEcmdError(l_rc); 
+            break;    
+        } // end if  
+
+        // For reset, this register should be written with the value from figtree to restore the
+        // initial hardware state.
+        // For init, needs detailing for performance and/or CHSW enable/disable TODO
+        // init case
+	        FAPI_INF("flusing PBA_CONFIG register ");
+
+        rc = fapiPutScom(i_target, PBA_CONFIG_0x0201084B  , data);
+        if (rc) 
+        {  
+            FAPI_ERR("fapiPutScom( PBA_CONFIG_0x0201084B ) failed. With rc = 0x%x", (uint32_t)rc); 
+            break; 
+        }
+
+        // Clear the PBA FIR (Reset) only
+        // data still 0
+	        FAPI_INF("flusing PBA_FIR register ");
+        rc = fapiPutScom(i_target, PBA_FIR_0x02010840   , data);
+        if (rc) 
+        {  
+            FAPI_ERR("fapiPutScom( PBA_FIR_0x02010840 ) failed. With rc = 0x%x", (uint32_t)rc); 
+            break; 
+        }
+
+        // The following registers are ROX, hence need not be touched:
+        // PBA_RBUFVAL0_0x02010850
+        // PBA_RBUFVAL1_0x02010851
+        // PBA_RBUFVAL2_0x02010852
+        // PBA_RBUFVAL3_0x02010853
+        // PBA_RBUFVAL4_0x02010854
+        // PBA_RBUFVAL5_0x02010855
+        // PBA_WBUFVAL0_0x02010858
+        // PBA_WBUFVAL1_0x02010859
+
+        // These PowerBus Overcommit regs are read-only, therefore no action required:
+        // PBA_PBOCR0_0x00064020
+        // PBA_PBOCR1_0x00064021
+        // PBA_PBOCR2_0x00064022
+        // PBA_PBOCR3_0x00064023
+        // PBA_PBOCR4_0x00064024
+        // PBA_PBOCR5_0x0006402
+
+        // The PBA BARs and their associated Masks are done outside of this FAPI set.  Thus, during
+        // a reset, the BARS/MASKS are retained. this applies to
+        // PBA_BAR0_0x02013F00
+        // PBA_BARMSK0_0x02013F04
+        // PBA_BARMSK1_0x02013F05
+        // PBA_BAR1_0x02013F01
+        // PBA_BAR2_0x02013F02
+        // PBA_BAR3_0x02013F03
+        // PBA_TRUSTMODE_0x02013F08   
+
+        // any checkreads => NO
+        
+        rc = FAPI_ATTR_GET ( ATTR_PM_PBAX_RCV_RESERV_TIMEOUT   , &i_target, ATTR_PM_PBAX_RCV_RESERV_TIMEOUT_value  );
+        if (rc) 
+        {  
+            FAPI_ERR("fapi_attr_get( ATTR_PM_PBAX_RCV_RESERV_TIMEOUT ) failed. With rc = 0x%x", (uint32_t)rc); 
+            break; 
+        } // end if
+
+        rc = FAPI_ATTR_GET ( ATTR_PM_PBAX_SND_RETRY_COUNT_OVERCOMMIT_ENABLE , &i_target, ATTR_PM_PBAX_SND_RETRY_COUNT_OVERCOMMIT_ENABLE_value );
+        if (rc) 
+        {  
+            FAPI_ERR("fapi_attr_get( ATTR_PM_PBAX_SND_RETRY_COUNT_OVERCOMMIT_ENABLE ) failed. With rc = 0x%x", (uint32_t)rc); 
+            break; 
+        } // end if
+
+        rc = FAPI_ATTR_GET ( ATTR_PM_PBAX_SND_RETRY_THRESHOLD , &i_target, ATTR_PM_PBAX_SND_RETRY_THRESHOLD_value  ); 
+        if (rc) 
+        {  
+            FAPI_ERR("fapi_attr_get( ATTR_PM_PBAX_SND_RETRY_THRESHOLD ) failed. With rc = 0x%x", (uint32_t)rc); 
+            break; 
+        } // end if
+
+        rc = FAPI_ATTR_GET ( ATTR_PM_PBAX_SND_RESERV_TIMEOUT  , &i_target, ATTR_PM_PBAX_SND_RESERV_TIMEOUT_value ); 
+        if (rc) 
+        {  
+            FAPI_ERR("fapi_attr_get( ATTR_PM_PBAX_SND_RESERV_TIMEOUT ) failed. With rc = 0x%x", (uint32_t)rc); 
+            break; 
+        } // end if
+        
+        
+        
+        // assemble the attributes
+        // 20:24, ATTR_PM_PBAX_RCV_RESERV_TIMEOUT_value
+        // 27; ATTR_PM_PBAX_SND_RETRY_COUNT_OVERCOMMIT_ENABLE_value
+        // 28:35; ATTR_PM_PBAX_SND_RETRY_THRESHOLD_value
+        // 36:40  ATTR_PM_PBAX_SND_RESERV_TIMEOUT_value
+        pbaxcfg_setup.fields.ATTR_PM_PBAX_RCV_RESERV_TIMEOUT = ATTR_PM_PBAX_RCV_RESERV_TIMEOUT_value;
+        pbaxcfg_setup.fields.ATTR_PM_PBAX_SND_RETRY_COUNT_OVERCOMMIT_ENABLE = ATTR_PM_PBAX_SND_RETRY_COUNT_OVERCOMMIT_ENABLE_value;
+        pbaxcfg_setup.fields.ATTR_PM_PBAX_SND_RETRY_THRESHOLD = ATTR_PM_PBAX_SND_RETRY_THRESHOLD_value;
+        pbaxcfg_setup.fields.ATTR_PM_PBAX_SND_RESERV_TIMEOUT = ATTR_PM_PBAX_SND_RESERV_TIMEOUT_value;
+
+        // put the attribute values into PBAXCFG
+        l_rc = data.setDoubleWord(0, pbaxcfg_setup.value); 
+        if (l_rc) 
+        { 
+            FAPI_ERR("data.setDoubleWord ( ) failed. With rc = 0x%x", (uint32_t)l_rc); 
+            rc.setEcmdError(l_rc); 
+            break;    
+        }  // end if
+
+        rc = fapiPutScom(i_target, PBAXCFG_00064021   , data);
+        if (rc) 
+        {  
+            FAPI_ERR("fapiPutScom(PBAXCFG_00064021) failed. With rc = 0x%x", (uint32_t)rc); 
+            break; 
+        }
+
+        // last step: pba slave setup for init
+        rc = pba_slave_setup_init (i_target);
+        if (rc) 
+        {  
+            FAPI_ERR("fapi pba_slave_setup_init failed. With rc = 0x%x", (uint32_t)rc); 
+            break; 
+        }
+    } while(0);
 
     return rc;
 
- } // end PM_INIT
+} // end PM_INIT
 
   
- // *************************************************************************************************
- // ************************************************************* mode = PM_CONFIG ******************
- //  
- /// Configuration:  perform translation of any Platform Attributes into
- /// Feature Attributes that are applied during Initalization of PBAX
- ReturnCode
-  p8_pba_init_PM_CONFIG(const Target& i_target)
-  {
-    ReturnCode rc;
+// *************************************************************************************************
+// ************************************************************* mode = PM_CONFIG ******************
+//  
+/// Configuration:  perform translation of any Platform Attributes into
+/// Feature Attributes that are applied during Initalization of PBAX
+fapi::ReturnCode
+p8_pba_init_PM_CONFIG(const Target& i_target)
+{
+    fapi::ReturnCode rc;
     ecmdDataBufferBase data(64);
     uint32_t l_rc;              // local returncode
-    FAPI_INF("mode = PM_CONFIG..\n");
+    FAPI_INF("mode = PM_CONFIG...");
     l_rc = data.setDoubleWord(0, 0x0);
-    if (l_rc) { FAPI_ERR("data.setDoubleWord ( ) failed. With rc = 0x%x", (uint32_t)l_rc); rc.setEcmdError(l_rc); return rc; }   
+    if (l_rc) 
+    { 
+        FAPI_ERR("data.setDoubleWord ( ) failed. With rc = 0x%x", (uint32_t)l_rc); 
+        rc.setEcmdError(l_rc); 
+        return rc; 
+    }   
 
     FAPI_INF("PBAX configuration...");
     FAPI_INF("Getting PBAX configuration values via attribute settings."); 
@@ -675,12 +581,12 @@ ReturnCode
 ///
 /// \bug The dis_slvmatch_order bit is going away
 
-ReturnCode
+fapi::ReturnCode
 pba_slave_setup_init(const Target& i_target)
 {
     pba_mode_t pm;
     pba_slvctln_t ps;
-    ReturnCode rc;
+    fapi::ReturnCode rc;
     uint32_t l_rc;              // local returncode
     ecmdDataBufferBase data(64);
 
@@ -705,19 +611,18 @@ pba_slave_setup_init(const Target& i_target)
     l_rc = data.setDoubleWord(0, pm.value);
     if (l_rc) 
     { 
-       FAPI_ERR("data.setDoubleWord ( ) failed. With rc = 0x%x", (uint32_t)l_rc);   rc.setEcmdError(l_rc); return rc;    
+       FAPI_ERR("data.setDoubleWord ( ) failed. With rc = 0x%x", (uint32_t)l_rc);   
+       rc.setEcmdError(l_rc); 
+       return rc;    
     }
 
     // write the prepared value
     rc = fapiPutScom(i_target, PBA_MODE_0x00064000 , data);
     if (rc) 
     {  
-       FAPI_ERR("fapiPutScom( PBA_MODE_0x00064000 ) failed. With rc = 0x%x", (uint32_t)rc); return rc; 
-    } else 
-    {
-       FAPI_INF("Done with PBA_MODE \n "); 
-    } // end if-else
-
+       FAPI_ERR("fapiPutScom( PBA_MODE_0x00064000 ) failed. With rc = 0x%x", (uint32_t)rc); 
+       return rc; 
+    } 
 
     // Slave 0 (PORE-GPE).  This is a read/write slave. We only do 'static'
     // setup here. Dynamic setup will be done by each GPE program that needs
@@ -736,16 +641,16 @@ pba_slave_setup_init(const Target& i_target)
     l_rc = data.setDoubleWord(0, ps.value);
     if (l_rc) 
     { 
-       FAPI_ERR("data.setDoubleWord ( ) failed. With rc = 0x%x", (uint32_t)l_rc);   rc.setEcmdError(l_rc); return rc;    
+       FAPI_ERR("data.setDoubleWord ( ) failed. With rc = 0x%x", (uint32_t)l_rc);   rc.setEcmdError(l_rc); 
+       return rc;    
     } // end if  
+    
     rc = fapiPutScom(i_target, PBA_SLVCTL0_0x00064004 , data);
     if (rc) 
     {  
-       FAPI_ERR("fapiPutScom( PBA_SLVCTL0_0x00064004 ) failed. With rc = 0x%x", (uint32_t)rc); return rc; 
-    } else 
-    { 
-       FAPI_INF("Done with PBA_MODE \n "); 
-    } // end if-else
+       FAPI_ERR("fapiPutScom( PBA_SLVCTL0_0x00064004 ) failed. With rc = 0x%x", (uint32_t)rc); 
+       return rc; 
+    } 
 
     // Slave 1 (405 ICU/DCU).  This is a read/write slave.  Write gethering is
     // allowed, but with the shortest possible timeout. This slave is
@@ -764,21 +669,22 @@ pba_slave_setup_init(const Target& i_target)
     ps.fields.buf_alloc_b = 1;
     ps.fields.buf_alloc_c = 1;
     ps.fields.buf_alloc_w = 1;
+    
     l_rc = data.setDoubleWord(0, ps.value);
     if (l_rc) 
     { 
-       FAPI_ERR("data.setDoubleWord ( ) failed. With rc = 0x%x", (uint32_t)l_rc);   rc.setEcmdError(l_rc); return rc;    
+       FAPI_ERR("data.setDoubleWord ( ) failed. With rc = 0x%x", (uint32_t)l_rc);   
+       rc.setEcmdError(l_rc); 
+       return rc;    
     } // end if 
+    
     rc = fapiPutScom(i_target, PBA_SLVCTL1_0x00064005 , data);
     if (rc) 
     {  
-       FAPI_ERR("fapiPutScom( PBA_SLVCTL1_0x00064005 ) failed. With rc = 0x%x", (uint32_t)rc); return rc; 
-    } else 
-    { 
-       FAPI_INF("Done with PBA_MODE \n "); 
-    } // end if-else
-
-
+       FAPI_ERR("fapiPutScom( PBA_SLVCTL1_0x00064005 ) failed. With rc = 0x%x", (uint32_t)rc); 
+       return rc; 
+    } 
+    
     // Slave 2 (PORE-SLW).  This is a read/write slave. Write gathering is
     // allowed, but with the shortest possible timeout.  The slave is set up
     // to allow normal reads and writes at initialization.  The 24x7 code may
@@ -801,17 +707,17 @@ pba_slave_setup_init(const Target& i_target)
     l_rc = data.setDoubleWord(0, ps.value);
     if (l_rc) 
     { 
-       FAPI_ERR("data.setDoubleWord ( ) failed. With rc = 0x%x", (uint32_t)l_rc);  rc.setEcmdError(l_rc); return rc;    
+       FAPI_ERR("data.setDoubleWord ( ) failed. With rc = 0x%x", (uint32_t)l_rc);  
+       rc.setEcmdError(l_rc); 
+       return rc;    
     } // end if 
+    
     rc = fapiPutScom(i_target, PBA_SLVCTL2_0x00064006 , data);
     if (rc) 
     {  
-       FAPI_ERR("fapiPutScom( PBA_SLVCTL2_0x00064006 ) failed. With rc = 0x%x", (uint32_t)rc); return rc; 
-    } else 
-    {
-       FAPI_INF("Done with PBA_MODE \n "); 
-    } // end if-else
-
+       FAPI_ERR("fapiPutScom( PBA_SLVCTL2_0x00064006 ) failed. With rc = 0x%x", (uint32_t)rc); 
+       return rc; 
+    }
 
     // Slave 3 (OCB).  This is a read/write slave. Write gathering is
     // allowed, but with the shortest possible timeout.
@@ -829,84 +735,164 @@ pba_slave_setup_init(const Target& i_target)
     ps.fields.buf_alloc_b = 1;
     ps.fields.buf_alloc_c = 1;
     ps.fields.buf_alloc_w = 1;
+    
     l_rc = data.setDoubleWord(0, ps.value);
     if (l_rc) 
     { 
        FAPI_ERR("data.setDoubleWord ( ) failed. With rc = 0x%x", (uint32_t)l_rc);   rc.setEcmdError(l_rc); return rc;    
     } // end if
+    
     rc = fapiPutScom(i_target, PBA_SLVCTL3_0x00064007 , data);
     if (rc) 
     {  
        FAPI_ERR("fapiPutScom( PBA_SLVCTL3_0x00064007 ) failed. With rc = 0x%x", (uint32_t)rc); return rc; 
-    } else 
-    {
-        
-       FAPI_INF("Done with PBA_MODE \n "); 
-    } // end if-else
+    }
 
     return rc;
 }  // end pba_slave_setup_init
 
 
+// ************************************************************************************************
+// **************************************************** pba_slave_setup_reset *********************
 // for reset, set all register contents to zero
-ReturnCode
+fapi::ReturnCode
 pba_slave_setup_reset(const Target& i_target)
 {
-    ReturnCode rc;
+    fapi::ReturnCode rc;
     uint32_t l_rc;              // local returncode
     ecmdDataBufferBase data(64);
 
-    l_rc= data.setDoubleWord(0, 0x00000000);
-    if (l_rc) 
-    { 
-       FAPI_ERR("data.setDoubleWord ( ) failed. With rc = 0x%x", (uint32_t)l_rc); rc.setEcmdError(l_rc); return rc;    
-    } // end if  
-
-    rc = fapiPutScom(i_target, PBA_MODE_0x00064000 , data);
-    if (rc) 
-    {  
-       FAPI_ERR("fapiPutScom( PBA_MODE_0x00064000 ) failed. With rc = 0x%x", (uint32_t)rc); return rc; 
-    } else 
+    do
     {
-       FAPI_INF("Done with PBA_MODE \n "); 
-    } // end if-else
+        l_rc= data.setDoubleWord(0, 0x00000000);
+        if (l_rc) 
+        { 
+           FAPI_ERR("data.setDoubleWord ( ) failed. With rc = 0x%x", (uint32_t)l_rc);
+           rc.setEcmdError(l_rc);  
+           break;    
+        } // end if  
 
-    rc = fapiPutScom(i_target, PBA_SLVCTL0_0x00064004 , data);
-    if (rc) 
-    {  
-       FAPI_ERR("fapiPutScom( PBA_SLVCTL0_0x00064004 ) failed. With rc = 0x%x", (uint32_t)rc); return rc; 
-    } else 
-    {
-       FAPI_INF("Done with PBA_MODE \n "); 
-    } // end if-else
+        rc = fapiPutScom(i_target, PBA_MODE_0x00064000 , data);
+        if (rc) 
+        {  
+           FAPI_ERR("fapiPutScom( PBA_MODE_0x00064000 ) failed. With rc = 0x%x", (uint32_t)rc); 
+           break; 
+        } 
 
-    rc = fapiPutScom(i_target, PBA_SLVCTL1_0x00064005 , data);
-    if (rc) 
-    {  
-       FAPI_ERR("fapiPutScom( PBA_SLVCTL1_0x00064005 ) failed. With rc = 0x%x", (uint32_t)rc); return rc; 
-    } else 
-    {
-       FAPI_INF("Done with PBA_MODE \n "); 
-    } // end if-else
+        rc = fapiPutScom(i_target, PBA_SLVCTL0_0x00064004 , data);
+        if (rc) 
+        {  
+           FAPI_ERR("fapiPutScom( PBA_SLVCTL0_0x00064004 ) failed. With rc = 0x%x", (uint32_t)rc); 
+           break; 
+        }
+        rc = fapiPutScom(i_target, PBA_SLVCTL1_0x00064005 , data);
+        if (rc) 
+        {  
+           FAPI_ERR("fapiPutScom( PBA_SLVCTL1_0x00064005 ) failed. With rc = 0x%x", (uint32_t)rc); 
+           break; 
+        }
 
-    rc = fapiPutScom(i_target, PBA_SLVCTL2_0x00064006 , data);
-    if (rc) 
-    {  
-       FAPI_ERR("fapiPutScom( PBA_SLVCTL2_0x00064006 ) failed. With rc = 0x%x", (uint32_t)rc); return rc; 
-    } else 
-    {
-       FAPI_INF("Done with PBA_MODE \n "); 
-    } // end if-else
+        rc = fapiPutScom(i_target, PBA_SLVCTL2_0x00064006 , data);
+        if (rc) 
+        {  
+           FAPI_ERR("fapiPutScom( PBA_SLVCTL2_0x00064006 ) failed. With rc = 0x%x", (uint32_t)rc); 
+           break; 
+        }
 
-    rc = fapiPutScom(i_target, PBA_SLVCTL3_0x00064007 , data);
-    if (rc) 
-    {  
-       FAPI_ERR("fapiPutScom( PBA_SLVCTL3_0x00064007 ) failed. With rc = 0x%x", (uint32_t)rc); return rc; 
-    } else 
-    {
-       FAPI_INF("Done with PBA_MODE \n "); 
-    } // end if-else
+        rc = fapiPutScom(i_target, PBA_SLVCTL3_0x00064007 , data);
+        if (rc) 
+        {  
+           FAPI_ERR("fapiPutScom( PBA_SLVCTL3_0x00064007 ) failed. With rc = 0x%x", (uint32_t)rc); 
+           break; 
+        }
+    } while(0);
+    
+    return rc;
 
+}  // end pba_slave_setup_reset
+
+
+
+
+// ************************************************************************************************
+// **************************************************** pba_slave_reset ***************************
+// Walk each slave to hit the respective reset and then poll for completion
+fapi::ReturnCode
+pba_slave_reset(const Target& i_target)
+{
+    fapi::ReturnCode    rc;
+    ecmdDataBufferBase  data(64);
+    bool                error_flag = false;
+    bool                poll_failure = false;
+
+   
+    do
+    {        
+        for (int s=0; s<= 3; s++)
+        {           
+            
+            FAPI_INF("Reseting PBA Slave %x", s);
+            poll_failure = true;
+	    //           for (int p=0; p<MAX_PBA_RESET_POLLS; p++)
+            for (int p=0; p<=16; p++)
+            {
+            
+                // Set the reset for the selected slave
+                data.setDoubleWord(0, PBA_SLVRESETs[s]);
+
+                rc = fapiPutScom(i_target, PBA_SLVRST_0x00064001 , data);
+                if (rc) 
+                {  
+                     FAPI_ERR("fapiPutScom( PBA_SLVRST_0x00064001 ) failed. With rc = 0x%x", (uint32_t)rc); 
+                     break ;
+                } 
+            
+                // Read the reset register to check for reset completion
+                rc = fapiGetScom(i_target, PBA_SLVRST_0x00064001 , data);               
+                if (rc) 
+                {  
+                     FAPI_ERR("fapiGetPutScom( PBA_SLVRST_0x00064001 ) failed. With rc = 0x%x", (uint32_t)rc); 
+                     error_flag = true;
+                     break; 
+                } 
+                FAPI_DBG("Slave %x reset poll data = 0x%16llu", s, data.getDoubleWord(0));
+                
+                // If slave reset in progress, wait and then poll
+                if (data.isBitClear(4+s))
+                {
+                    poll_failure = false; 
+                    break;               
+                }
+                else
+                {
+                    rc = fapiDelay(PBA_RESET_POLL_DELAY*1000, 200000);   // In microseconds
+                }
+    
+            }
+            if (error_flag)
+            {
+                 break; 
+            }
+            
+            if (poll_failure)
+            {
+                 FAPI_ERR("fapiGetPutScom( PBA_SLVRST_0x00064001 ) failed. With rc = 0x%x", (uint32_t)rc); 
+                 // NEED SET RC
+                 break; 
+            }
+            
+            // Check if the slave is still actually busy.  Consider whether this should be polled
+            if (data.isBitSet(8+s))
+            {
+                FAPI_ERR("Slave %x still busy after reset", s); 
+                 // NEED SET RC
+                break;           
+            }
+
+        }
+        
+    } while(0);
+    
     return rc;
 
 }  // end pba_slave_setup_reset

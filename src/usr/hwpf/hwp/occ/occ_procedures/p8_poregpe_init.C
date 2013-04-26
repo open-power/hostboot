@@ -20,25 +20,8 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-/* begin_generated_IBM_copyright_prolog                            */
-/*                                                                 */
-/* This is an automatically generated copyright prolog.            */
-/* After initializing,  DO NOT MODIFY OR MOVE                      */ 
-/* --------------------------------------------------------------- */
-/* IBM Confidential                                                */
-/*                                                                 */
-/* Licensed Internal Code Source Materials                         */
-/*                                                                 */
-/* (C)Copyright IBM Corp.  2014, 2014                              */
-/*                                                                 */
-/* The Source code for this program is not published  or otherwise */
-/* divested of its trade secrets,  irrespective of what has been   */
-/* deposited with the U.S. Copyright Office.                       */
-/*  -------------------------------------------------------------- */
-/*                                                                 */
-/* end_generated_IBM_copyright_prolog                              */
-// $Id: p8_poregpe_init.C,v 1.2 2012/10/10 20:23:05 stillgs Exp $
-// $Source: /afs/awd.austin.ibm.com/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/p8_poregpe_init.C,v $
+// $Id: p8_poregpe_init.C,v 1.3 2013/04/01 04:11:56 stillgs Exp $
+// $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/p8_poregpe_init.C,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
 // *! All Rights Reserved -- Property of IBM
@@ -118,13 +101,13 @@ p8_poregpe_init(const Target& i_target, uint32_t mode, uint32_t engine)
        
     do
     {
-        FAPI_INF("Executing p8_poregpe_init in mode %x for engine %x....\n",
+        FAPI_INF("Executing p8_poregpe_init in mode %x for engine %x....",
                   mode, engine);
 
         if (!(engine == GPE0 || engine == GPE1 || engine == GPEALL) ) 
         {
 
-          FAPI_ERR("Unknown engine passed to p8_poregpe_init. Engine %x ....\n",
+          FAPI_ERR("Unknown engine passed to p8_poregpe_init. Engine %x ....",
                   engine);
           FAPI_SET_HWP_ERROR(l_rc, RC_PROCPM_GPE_BAD_ENGINE);
           break;
@@ -135,8 +118,8 @@ p8_poregpe_init(const Target& i_target, uint32_t mode, uint32_t engine)
         /// Feature Attributes that are applied during Initalization
         if (mode == PM_CONFIG) 
         {
-          FAPI_INF("PORE-GPE configuration...\n");
-          FAPI_INF("---> None is defined...done by OCC firmware\n");  
+          FAPI_INF("PORE-GPE configuration...");
+          FAPI_INF("---> None is defined...done by OCC firmware");  
         } 
 
         /// -------------------------------
@@ -144,8 +127,8 @@ p8_poregpe_init(const Target& i_target, uint32_t mode, uint32_t engine)
         /// the GPEs using necessary Platform or Feature attributes. 
         else if (mode == PM_INIT) 
         {
-          FAPI_INF("PORE-GPE initialization...\n");
-          FAPI_INF("---> None is defined...done by OCC firmware\n");  
+          FAPI_INF("PORE-GPE initialization...");
+          FAPI_INF("---> None is defined...done by OCC firmware");  
         } 
 
         /// -------------------------------
@@ -171,7 +154,7 @@ p8_poregpe_init(const Target& i_target, uint32_t mode, uint32_t engine)
 
         else 
         {
-          FAPI_ERR("Unknown mode passed to p8_poregpe_init. Mode %x ....\n", mode);
+          FAPI_ERR("Unknown mode passed to p8_poregpe_init. Mode %x ....", mode);
           FAPI_SET_HWP_ERROR(l_rc, RC_PROCPM_GPE_CODE_BAD_MODE);
         }
     } while(0);
@@ -199,7 +182,7 @@ poregpe_reset(const Target& i_target, const uint32_t engine)
     
 
       
-    FAPI_INF("PORE-GPE reset...Engine: %x\n", engine);
+    FAPI_INF("PORE-GPE reset...Engine: %x", engine);
     
     do
     {
@@ -302,7 +285,7 @@ poregpe_reset(const Target& i_target, const uint32_t engine)
          
         if(!wait_state_detected)
         {
-          FAPI_ERR("GPE%x reset failed \n", engine);
+          FAPI_ERR("GPE%x reset failed ", engine);
           FAPI_SET_HWP_ERROR(l_rc, RC_PROCPM_GPE0_RESET_TIMEOUT);
         }
 

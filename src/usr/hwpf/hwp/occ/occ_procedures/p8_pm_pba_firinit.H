@@ -20,25 +20,8 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-/* begin_generated_IBM_copyright_prolog                            */
-/*                                                                 */
-/* This is an automatically generated copyright prolog.            */
-/* After initializing,  DO NOT MODIFY OR MOVE                      */ 
-/* --------------------------------------------------------------- */
-/* IBM Confidential                                                */
-/*                                                                 */
-/* Licensed Internal Code Source Materials                         */
-/*                                                                 */
-/* (C)Copyright IBM Corp.  2014, 2014                              */
-/*                                                                 */
-/* The Source code for this program is not published  or otherwise */
-/* divested of its trade secrets,  irrespective of what has been   */
-/* deposited with the U.S. Copyright Office.                       */
-/*  -------------------------------------------------------------- */
-/*                                                                 */
-/* end_generated_IBM_copyright_prolog                              */
-// $Id: p8_pm_pba_firinit.H,v 1.3 2012/09/24 08:44:38 pchatnah Exp $
-// $Source: /afs/awd.austin.ibm.com/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/p8_pm_pba_firinit.H,v $
+// $Id: p8_pm_pba_firinit.H,v 1.6 2013/04/01 04:27:50 stillgs Exp $
+// $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/p8_pm_pba_firinit.H,v $
 //------------------------------------------------------------------------------
 // *|
 // *! (C) Copyright International Business Machines Corp. 2011
@@ -53,14 +36,12 @@
 // *!
 //------------------------------------------------------------------------------
 
+#include "p8_pm_firinit.H"
+
 // function pointer typedef definition for HWP call support
-typedef fapi::ReturnCode (*p8_pm_pba_firinit_FP_t) (const fapi::Target&  );
+typedef fapi::ReturnCode (*p8_pm_pba_firinit_FP_t) (const fapi::Target&  , uint32_t mode);
 
 extern "C" {
-
-
-fapi::ReturnCode 
-p8_pm_pba_firinit(const fapi::Target& i_target );
 
 //------------------------------------------------------------------------------
 // Function prototypes
@@ -75,6 +56,9 @@ p8_pm_pba_firinit(const fapi::Target& i_target );
 // returns: FAPI_RC_SUCCESS if all specified operations complete successfully,
 //          else return code for failing operation
 //------------------------------------------------------------------------------
+fapi::ReturnCode 
+p8_pm_pba_firinit(const fapi::Target& i_target, uint32_t mode );
+
 
 } // extern "C"
 
