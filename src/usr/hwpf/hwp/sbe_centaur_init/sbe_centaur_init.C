@@ -221,19 +221,6 @@ void*    call_sbe_centaur_init( void *io_pArgs )
 
             FAPI_INVOKE_HWP(l_errl, fapiPoreVe, l_fapiTarget, myArgs);
 
-            //@TODO - This is a temp workaround while HW team (Martin)
-            //       investigating the scan failure in Centaur
-            // RTC task 66964 is to remove this.
-            if (l_errl )
-            {
-                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                  "Failed SBE Centaur init on 0x%.8X first time.  Retry....",
-                   TARGETING::get_huid(l_membuf_target));
-                delete l_errl;
-                l_errl = NULL;
-                FAPI_INVOKE_HWP(l_errl, fapiPoreVe, l_fapiTarget, myArgs);
-            }
-
             if (l_errl)
             {
                 TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
