@@ -70,8 +70,7 @@ errlHndl_t collectGard(const TARGETING::PredicateBase *i_pPredicate)
 
     if (errl)
     {
-        HWAS_ERR("ERROR: collectGard failed to clear GARD Records for "
-                    "replaced Targets");
+        HWAS_ERR("ERROR: collectGard failed to clear GARD Records for replaced Targets");
     }
     else
     {
@@ -80,8 +79,7 @@ errlHndl_t collectGard(const TARGETING::PredicateBase *i_pPredicate)
 
         if (errl)
         {
-            HWAS_ERR("ERROR: collectGard failed to deconfigure Targets "
-                        "from GARD Records for IPL");
+            HWAS_ERR("ERROR: collectGard failed to deconfigure Targets from GARD Records for IPL");
         }
         else
         {
@@ -118,11 +116,76 @@ DeconfigGard::~DeconfigGard()
 //******************************************************************************
 errlHndl_t DeconfigGard::clearGardRecordsForReplacedTargets()
 {
-    HWAS_INF("****TBD****Usr Request: Clear GARD Records for replaced Targets");
-    HWAS_MUTEX_LOCK(iv_mutex);
+    HWAS_INF("User Request: Clear GARD Records for replaced Targets");
     errlHndl_t l_pErr = NULL;
 
-    // TODO
+    // Create the predicate with changed HWAS state
+    TARGETING::PredicateHwas l_predicateHwas;
+    l_predicateHwas.changedSinceLastIpl(true);
+
+    HWAS_MUTEX_LOCK(iv_mutex);
+    do
+    {
+        // For each GARD Record
+        for (uint32_t i = 0; i < iv_maxGardRecords; i++)
+        {
+            if (iv_pGardRecords[i].iv_recordId == EMPTY_GARD_RECORDID)
+            {
+                // if this isn't a valid/filled GARD record, skip
+                continue;
+            }
+
+            // Find the associated Target
+            TARGETING::Target* l_pTarget = TARGETING::targetService().
+                            toTarget(iv_pGardRecords[i].iv_targetId);
+
+            if (l_pTarget == NULL)
+            {
+                // could be a platform specific target for the other
+                // ie, we are hostboot and this is an FSP target, or vice-versa
+                DG_INF_TARGET("Could not find Target for",
+                               &(iv_pGardRecords[i].iv_targetId));
+                continue;
+            }
+
+            // if this does NOT match, continue to next in loop
+            if (l_predicateHwas(l_pTarget) == false)
+            {
+                HWAS_INF("skipping %.8X - changedSinceLastIPL false",
+                        TARGETING::get_huid(l_pTarget));
+                continue;
+            }
+
+{
+    // TODO: RTC: 70468 add flush method to GardAddress; move this to outside
+    // for loop scope, and add flush after the writeRecord below.
+        bool l_gardEnabled = false;
+        GardAddress l_GardAddress(l_gardEnabled);
+
+        if (!l_gardEnabled)
+        {
+            // TODO: RTC: 70468 return errlHndl_t returned from GardAdress
+            HWAS_ERR("Error from l_GardAddress");
+            break;
+        }
+
+            // Clear the gard record
+            HWAS_INF("clearing GARD for %.8X, recordId %d",
+                        TARGETING::get_huid(l_pTarget),
+                        iv_pGardRecords[i].iv_recordId);
+            iv_pGardRecords[i].iv_recordId = EMPTY_GARD_RECORDID;
+            l_GardAddress.writeRecord(&iv_pGardRecords[i]);
+    // for now, this will force a flush to PNOR
+}
+
+            // now clear the 'changed' bit
+            TARGETING::HwasState hwasState =
+                l_pTarget->getAttr<TARGETING::ATTR_HWAS_STATE>();
+            hwasState.changedSinceLastIPL = false;
+            l_pTarget->setAttr<TARGETING::ATTR_HWAS_STATE>( hwasState );
+        } // for
+    }
+    while (0);
 
     HWAS_MUTEX_UNLOCK(iv_mutex);
     return l_pErr;
@@ -151,11 +214,18 @@ errlHndl_t DeconfigGard::deconfigureTargetsFromGardRecordsForIpl(
             HWAS_ERR("Error from _getGardRecords");
             break;
         }
+
         HWAS_INF("%d GARD Records found", l_gardRecords.size());
+
+        if (l_gardRecords.empty())
+        {
+            break;
+        }
 
         // For each GARD Record
         for (GardRecordsCItr_t l_itr = l_gardRecords.begin();
-             l_itr != l_gardRecords.end(); ++l_itr)
+             l_itr != l_gardRecords.end();
+             ++l_itr)
         {
             // Find the associated Target
             TARGETING::Target * l_pTarget =
@@ -167,43 +237,34 @@ errlHndl_t DeconfigGard::deconfigureTargetsFromGardRecordsForIpl(
                 // ie, we are hostboot and this is an FSP target, or vice-versa
                 DG_INF_TARGET("Could not find Target for",
                                &((*l_itr).iv_targetId));
+                continue;
             }
-            else
+
+            // if this does NOT match, continue to next in loop
+            if (i_pPredicate && ((*i_pPredicate)(l_pTarget) == false))
             {
-                if (i_pPredicate)
-                {
-                    // if this does NOT match, continue to next in loop
-                    if ((*i_pPredicate)(l_pTarget) == false)
-                    {
-                        HWAS_INF("skipping %.8X - predicate didn't match",
-                                TARGETING::get_huid(l_pTarget));
-                        continue;
-                    }
-                }
-
-                // skip if not present
-                if (!l_pTarget->getAttr<TARGETING::ATTR_HWAS_STATE>().present)
-                {
-                    HWAS_INF("skipping %.8X - target not present",
-                            TARGETING::get_huid(l_pTarget));
-                    continue;
-                }
-
-                // Deconfigure the Target
-                // don't need to check ATTR_DECONFIG_GARDABLE -- if we get
-                //  here, it's because of a gard record on this target
-                _deconfigureTarget(*l_pTarget, (*l_itr).iv_errlogPlid,
-                                   DECONFIG_CAUSE_GARD_RECORD);
-
-                // Deconfigure other Targets by association
-                _deconfigureByAssoc(*l_pTarget, (*l_itr).iv_errlogPlid);
+                HWAS_INF("skipping %.8X - predicate didn't match",
+                        TARGETING::get_huid(l_pTarget));
+                continue;
             }
-        } // for
-        if (l_pErr)
-        {   // if we broke out of the for loop, now break out of the do/while
-            break;
-        }
 
+            // skip if not present
+            if (!l_pTarget->getAttr<TARGETING::ATTR_HWAS_STATE>().present)
+            {
+                HWAS_INF("skipping %.8X - target not present",
+                        TARGETING::get_huid(l_pTarget));
+                continue;
+            }
+
+            // Deconfigure the Target
+            // don't need to check ATTR_DECONFIG_GARDABLE -- if we get
+            //  here, it's because of a gard record on this target
+            _deconfigureTarget(*l_pTarget, (*l_itr).iv_errlogPlid,
+                               DECONFIG_CAUSE_GARD_RECORD);
+
+            // Deconfigure other Targets by association
+            _deconfigureByAssoc(*l_pTarget, (*l_itr).iv_errlogPlid);
+        } // for
     }
     while (0);
 
@@ -567,15 +628,12 @@ errlHndl_t DeconfigGard::_createGardRecord(const TARGETING::Target & i_target,
                                            const uint32_t i_errlPlid,
                                            const GARD_ErrorType i_errorType)
 {
-    errlHndl_t l_pErr = NULL;
-
-    TARGETING::EntityPath l_id = i_target.getAttr<TARGETING::ATTR_PHYS_PATH>();
     HWAS_INF("Creating GARD Record for %.8X",
             TARGETING::get_huid(&i_target));
+    errlHndl_t l_pErr = NULL;
 
     do
     {
-
         const uint8_t lDeconfigGardable =
                 i_target.getAttr<TARGETING::ATTR_DECONFIG_GARDABLE>();
         const uint8_t lPresent =
@@ -609,11 +667,12 @@ errlHndl_t DeconfigGard::_createGardRecord(const TARGETING::Target & i_target,
             break;
         }
 
-        bool l_gardEnabled;
+        bool l_gardEnabled = false;
         GardAddress l_GardAddress(l_gardEnabled);
 
         if (!l_gardEnabled)
         {
+            // TODO: RTC: 70468 return errlHndl_t returned from GardAdress
             HWAS_ERR("Error from l_GardAddress");
             break;
         }
@@ -653,7 +712,7 @@ errlHndl_t DeconfigGard::_createGardRecord(const TARGETING::Target & i_target,
         }
 
         l_pRecord->iv_recordId = iv_nextGardRecordId++;
-        l_pRecord->iv_targetId = l_id;
+        l_pRecord->iv_targetId = i_target.getAttr<TARGETING::ATTR_PHYS_PATH>();
         // TODO Setup iv_cardMruSn or iv_chipMruEcid
         l_pRecord->iv_errlogPlid = i_errlPlid;
         l_pRecord->iv_errorType = i_errorType;
@@ -663,7 +722,6 @@ errlHndl_t DeconfigGard::_createGardRecord(const TARGETING::Target & i_target,
         l_pRecord->iv_gardTime = 0; // TODO Get epoch time
 
         l_GardAddress.writeRecord((void *)l_pRecord);
-
     }
     while (0);
 
@@ -675,7 +733,7 @@ errlHndl_t DeconfigGard::_clearGardRecords(const uint32_t i_recordId)
 {
     errlHndl_t l_pErr = NULL;
 
-    bool l_gardEnabled;
+    bool l_gardEnabled = false;
     GardAddress l_GardAddress(l_gardEnabled);
 
     if (l_gardEnabled)
@@ -718,6 +776,7 @@ errlHndl_t DeconfigGard::_clearGardRecords(const uint32_t i_recordId)
     }
     else
     {
+        // TODO: RTC: 70468 return errlHndl_t returned from GardAdress
         HWAS_ERR("Error from l_GardAddress");
     }
 
@@ -730,7 +789,7 @@ errlHndl_t DeconfigGard::_clearGardRecords(
 {
     errlHndl_t l_pErr = NULL;
 
-    bool l_gardEnabled;
+    bool l_gardEnabled = false;
     GardAddress l_GardAddress(l_gardEnabled);
 
     if (l_gardEnabled)
@@ -745,9 +804,9 @@ errlHndl_t DeconfigGard::_clearGardRecords(
             {
                 DG_INF_TARGET("Clearing GARD Record for: ",
                                &i_targetId);
+                l_gardRecordsCleared = true;
                 // clear iv_recordId
                 iv_pGardRecords[i].iv_recordId = EMPTY_GARD_RECORDID;
-                l_gardRecordsCleared = true;
                 l_GardAddress.writeRecord(&iv_pGardRecords[i]);
             }
         }
@@ -760,6 +819,7 @@ errlHndl_t DeconfigGard::_clearGardRecords(
     }
     else
     {
+        // TODO: RTC: 70468 return errlHndl_t returned from GardAdress
         HWAS_ERR("Error from l_GardAddress");
     }
 
@@ -773,7 +833,7 @@ errlHndl_t DeconfigGard::_getGardRecords(const uint32_t i_recordId,
     errlHndl_t l_pErr = NULL;
     o_records.clear();
 
-    bool l_gardEnabled;
+    bool l_gardEnabled = false;
     GardAddress l_GardAddress(l_gardEnabled);
 
     if (l_gardEnabled)
@@ -793,8 +853,7 @@ errlHndl_t DeconfigGard::_getGardRecords(const uint32_t i_recordId,
         }
         else
         {
-            uint32_t i = 0;
-            for (; i < iv_maxGardRecords; i++)
+            for (uint32_t i = 0; i < iv_maxGardRecords; i++)
             {
                 if (iv_pGardRecords[i].iv_recordId == i_recordId)
                 {
@@ -803,15 +862,12 @@ errlHndl_t DeconfigGard::_getGardRecords(const uint32_t i_recordId,
                     break;
                 }
             }
-
-            if (i == iv_maxGardRecords)
-            {
-                HWAS_DBG("No GARD Record ID 0x%x to get", i_recordId);
-            }
         }
+        HWAS_INF("%d GARD Records found", o_records.size());
     }
     else
     {
+        // TODO: RTC: 70468 return errlHndl_t returned from GardAdress
         HWAS_ERR("Error from l_GardAddress");
     }
 
@@ -826,13 +882,11 @@ errlHndl_t DeconfigGard::_getGardRecords(
     errlHndl_t l_pErr = NULL;
     o_records.clear();
 
-    bool l_gardEnabled;
+    bool l_gardEnabled = false;
     GardAddress l_GardAddress(l_gardEnabled);
 
     if (l_gardEnabled)
     {
-        bool l_gardRecordsGot = false;
-
         for (uint32_t i = 0; i < iv_maxGardRecords; i++)
         {
             if ((iv_pGardRecords[i].iv_recordId != EMPTY_GARD_RECORDID) &&
@@ -842,11 +896,10 @@ errlHndl_t DeconfigGard::_getGardRecords(
                 DG_INF_TARGET("Getting GARD Record for: ",
                                &i_targetId);
                 o_records.push_back(iv_pGardRecords[i]);
-                l_gardRecordsGot = true;
             }
         }
 
-        if (!l_gardRecordsGot)
+        if (o_records.empty())
         {
             DG_INF_TARGET("No GARD Records to get for: ",
                            &i_targetId);
@@ -854,6 +907,7 @@ errlHndl_t DeconfigGard::_getGardRecords(
     }
     else
     {
+        // TODO: RTC: 70468 return errlHndl_t returned from GardAdress
         HWAS_ERR("Error from l_GardAddress");
     }
 

@@ -436,7 +436,7 @@ private:
     /**
      * @brief Clears the specified GARD Records.
      *
-     * @param[in] i_recordId RecordId to clear. If zero (CLEAR_ALL_GARD_RECORDS)
+     * @param[in] i_recordId RecordId to clear. If CLEAR_ALL_GARD_RECORDS
      *                          then all GARD Records cleared.
      *
      * @return errlHndl_t. Error log handle.
