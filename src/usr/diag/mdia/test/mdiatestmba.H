@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012                   */
+/* COPYRIGHT International Business Machines Corp. 2012,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -47,7 +47,7 @@ class MdiaMbaTest : public CxxTest::TestSuite
             TS_TRACE(ENTER_MRK "testGetMbaDiagnosticMode");
 
             DiagMode mode;
-            Globals globals;
+            Globals globals = {};
             TargetHandle_t mba = 0;
 
             errlHndl_t err = getMbaDiagnosticMode(
@@ -73,7 +73,7 @@ class MdiaMbaTest : public CxxTest::TestSuite
 
             TS_TRACE(ENTER_MRK "testGetMbaWorkFlow");
 
-            Globals globals;
+            Globals globals = {};
             TargetHandle_t mba = 0;
             DiagMode mode;
 

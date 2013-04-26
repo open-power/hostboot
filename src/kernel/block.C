@@ -66,7 +66,7 @@ void Block::init(MessageQueue* i_msgQ, uint64_t *i_spteAddr)
     if (i_spteAddr == NULL)
     {
         // Create a shadow PTE for each page.
-        iv_ptes = new ShadowPTE[iv_size / PAGESIZE];
+        iv_ptes = new ShadowPTE[iv_size / PAGESIZE]();
     }
     else // set the page table to reside at the address requested
     {

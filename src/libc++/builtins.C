@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2010,2012              */
+/* COPYRIGHT International Business Machines Corp. 2010,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -149,7 +149,7 @@ extern "C" int __cxa_atexit(void (*i_dtor)(void*),
     // TODO - Only need dtors for extended image modules
     if(i_dso_handle != __dso_handle)
     {
-        DtorEntry_t * entry = new DtorEntry_t;
+        DtorEntry_t * entry = new DtorEntry_t();
         entry->key = i_dso_handle;
         entry->dtor = i_dtor;
         entry->arg = i_arg;

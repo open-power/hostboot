@@ -111,7 +111,7 @@ int32_t PllDomain::Analyze(STEP_CODE_DATA_STRUCT & serviceData,
                           ATTENTION_TYPE attentionType)
 {
     typedef ExtensibleChip * ChipPtr;
-    CcAutoDeletePointerVector<ChipPtr> chip(new ChipPtr[GetSize()]);
+    CcAutoDeletePointerVector<ChipPtr> chip(new ChipPtr[GetSize()]());
     int count = 0;
     int32_t rc = SUCCESS;
 

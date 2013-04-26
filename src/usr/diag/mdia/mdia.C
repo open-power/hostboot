@@ -48,7 +48,7 @@ errlHndl_t runStep(const TargetHandleList & i_targetList)
 
     errlHndl_t err = 0;
 
-    Globals globals;
+    Globals globals = {};
 
     TargetHandle_t top = 0;
     targetService().getTopLevelTarget(top);

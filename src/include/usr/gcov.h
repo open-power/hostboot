@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012                   */
+/* COPYRIGHT International Business Machines Corp. 2012,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -146,11 +146,11 @@ void __gcov_module_copychain(gcov_info* chain)
     while(chain != NULL)
     {
         // Copy old info.
-        gcov_info* new_info = new gcov_info;
+        gcov_info* new_info = new gcov_info();
         memcpy(new_info, chain, sizeof(gcov_info));
 
         // Copy old counters.
-        uint64_t* new_counters = new uint64_t[chain->n_counters];
+        uint64_t* new_counters = new uint64_t[chain->n_counters]();
         memcpy(new_counters, chain->counters,
                chain->n_counters*sizeof(uint64_t));
         new_info->counters = new_counters;

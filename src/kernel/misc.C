@@ -179,8 +179,7 @@ namespace KernelMisc
         CpuManager::deactivateCPU(cpu);
 
         // Create kernel save area and store ptr in bottom of kernel stack.
-        task_t* saveArea = new task_t;
-        memset(saveArea, '\0', sizeof(task_t));
+        task_t* saveArea = new task_t();
         saveArea->context.msr_mask = 0xD030; // EE, ME, PR, IR, DR.
         *(reinterpret_cast<task_t**>(cpu->kernel_stack_bottom)) = saveArea;
 
@@ -251,8 +250,7 @@ namespace KernelMisc
         CpuManager::deactivateCPU(cpu);
 
         // Create kernel save area and store ptr in bottom of kernel stack.
-        task_t* saveArea = new task_t;
-        memset(saveArea, '\0', sizeof(task_t));
+        task_t* saveArea = new task_t();
         saveArea->context.msr_mask = 0xD030; // EE, ME, PR, IR, DR.
         *(reinterpret_cast<task_t**>(cpu->kernel_stack_bottom)) = saveArea;
 

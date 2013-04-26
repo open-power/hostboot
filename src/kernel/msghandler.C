@@ -1,26 +1,25 @@
-/*  IBM_PROLOG_BEGIN_TAG
- *  This is an automatically generated prolog.
- *
- *  $Source: src/kernel/msghandler.C $
- *
- *  IBM CONFIDENTIAL
- *
- *  COPYRIGHT International Business Machines Corp. 2011-2012
- *
- *  p1
- *
- *  Object Code Only (OCO) source materials
- *  Licensed Internal Code Source Materials
- *  IBM HostBoot Licensed Internal Code
- *
- *  The source code for this program is not published or other-
- *  wise divested of its trade secrets, irrespective of what has
- *  been deposited with the U.S. Copyright Office.
- *
- *  Origin: 30
- *
- *  IBM_PROLOG_END_TAG
- */
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/kernel/msghandler.C $                                     */
+/*                                                                        */
+/* IBM CONFIDENTIAL                                                       */
+/*                                                                        */
+/* COPYRIGHT International Business Machines Corp. 2011,2013              */
+/*                                                                        */
+/* p1                                                                     */
+/*                                                                        */
+/* Object Code Only (OCO) source materials                                */
+/* Licensed Internal Code Source Materials                                */
+/* IBM HostBoot Licensed Internal Code                                    */
+/*                                                                        */
+/* The source code for this program is not published or otherwise         */
+/* divested of its trade secrets, irrespective of what has been           */
+/* deposited with the U.S. Copyright Office.                              */
+/*                                                                        */
+/* Origin: 30                                                             */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
 #include <assert.h>
 #include <errno.h>
 #include <util/locked/queue.H>
@@ -38,7 +37,7 @@ void MessageHandler::sendMessage(msg_sys_types_t i_type, void* i_key,
     task_t* ready_task = NULL;
 
     // Save pending info for when we get the response.
-    MessageHandler_Pending* mhp = new MessageHandler_Pending;
+    MessageHandler_Pending* mhp = new MessageHandler_Pending();
     mhp->key = i_key;
     mhp->task = i_task;
 
@@ -53,7 +52,7 @@ void MessageHandler::sendMessage(msg_sys_types_t i_type, void* i_key,
     if (!iv_pending.find(i_key))
     {
         // Create message.
-        msg_t* m = new msg_t;
+        msg_t* m = new msg_t();
         m->type = i_type;
         m->data[0] = reinterpret_cast<uint64_t>(i_key);
         m->data[1] = reinterpret_cast<uint64_t>(i_data);

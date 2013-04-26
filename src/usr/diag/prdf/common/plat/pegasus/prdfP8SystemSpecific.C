@@ -33,7 +33,7 @@ namespace SystemSpecific
 {
     PRDF::Configurator * getConfiguratorPtr()
     {
-        return new PRDF::PegasusConfigurator;
+        return new PRDF::PegasusConfigurator();
     }
 
     void postAnalysisWorkarounds(STEP_CODE_DATA_STRUCT & i_sdc)

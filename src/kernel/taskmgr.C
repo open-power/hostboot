@@ -1,25 +1,25 @@
-//  IBM_PROLOG_BEGIN_TAG
-//  This is an automatically generated prolog.
-//
-//  $Source: src/kernel/taskmgr.C $
-//
-//  IBM CONFIDENTIAL
-//
-//  COPYRIGHT International Business Machines Corp. 2010 - 2011
-//
-//  p1
-//
-//  Object Code Only (OCO) source materials
-//  Licensed Internal Code Source Materials
-//  IBM HostBoot Licensed Internal Code
-//
-//  The source code for this program is not published or other-
-//  wise divested of its trade secrets, irrespective of what has
-//  been deposited with the U.S. Copyright Office.
-//
-//  Origin: 30
-//
-//  IBM_PROLOG_END
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/kernel/taskmgr.C $                                        */
+/*                                                                        */
+/* IBM CONFIDENTIAL                                                       */
+/*                                                                        */
+/* COPYRIGHT International Business Machines Corp. 2010,2013              */
+/*                                                                        */
+/* p1                                                                     */
+/*                                                                        */
+/* Object Code Only (OCO) source materials                                */
+/* Licensed Internal Code Source Materials                                */
+/* IBM HostBoot Licensed Internal Code                                    */
+/*                                                                        */
+/* The source code for this program is not published or otherwise         */
+/* divested of its trade secrets, irrespective of what has been           */
+/* deposited with the U.S. Copyright Office.                              */
+/*                                                                        */
+/* Origin: 30                                                             */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
 #include <util/singleton.H>
 #include <kernel/taskmgr.H>
 #include <kernel/task.H>
@@ -86,8 +86,7 @@ task_t* TaskManager::_createIdleTask()
 task_t* TaskManager::_createTask(TaskManager::task_fn_t t,
 				 void* p, bool withStack, bool kernelParent)
 {
-    task_t* task = new task_t;
-    memset(task, '\0', sizeof(task_t));
+    task_t* task = new task_t();
 
     task->tid = this->getNextTid();
 
@@ -127,7 +126,7 @@ task_t* TaskManager::_createTask(TaskManager::task_fn_t t,
     task->state_info = NULL;
 
     // Create tracker instance for this task.
-    task_tracking_t* tracker = new task_tracking_t;
+    task_tracking_t* tracker = new task_tracking_t();
     tracker->key = task->tid;
     tracker->task = task;
     tracker->status = -1;
@@ -293,7 +292,7 @@ void TaskManager::_waitTask(task_t* t, int64_t tid, int* status, void** retval)
         }
         else // Otherwise, create wait-info to defer task.
         {
-            task_wait_t* tj = t->tracker->wait_info = new task_wait_t;
+            task_wait_t* tj = t->tracker->wait_info = new task_wait_t();
             tj->tid = tid;
             tj->status = status;
             tj->retval = retval;

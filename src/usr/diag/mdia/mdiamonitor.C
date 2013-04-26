@@ -180,7 +180,7 @@ void CommandMonitor::start(StateMachine & i_sm)
 
     if(!iv_tid)
     {
-        ThreadArgs * args = new ThreadArgs;
+        ThreadArgs * args = new ThreadArgs();
         if(NULL != args)
         {
             args->obj = this;

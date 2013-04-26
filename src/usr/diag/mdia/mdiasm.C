@@ -215,7 +215,7 @@ void StateMachine::setup(const WorkFlowAssocMap & i_list)
         // to indicate that no work has been done yet
         // for the target
 
-        p = new WorkFlowProperties;
+        p = new WorkFlowProperties();
 
         p->assoc = it;
         p->workItem = getWorkFlow(it).begin();
@@ -352,7 +352,7 @@ bool StateMachine::scheduleWorkItem(WorkFlowProperties & i_wfp)
         if(!iv_tp)
         {
             MDIA_FAST("Starting threadPool...");
-            iv_tp = new Util::ThreadPool<WorkItem>;
+            iv_tp = new Util::ThreadPool<WorkItem>();
             iv_tp->start();
         }
 

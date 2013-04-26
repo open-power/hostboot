@@ -199,8 +199,7 @@ void kernel_execute_fp_unavail()
     {
         // Enable FP by creating a FP context.
         // Context switch code will handle the rest.
-        t->fp_context = new context_fp_t;
-        memset(t->fp_context, '\0', sizeof(context_fp_t));
+        t->fp_context = new context_fp_t();
     }
 }
 

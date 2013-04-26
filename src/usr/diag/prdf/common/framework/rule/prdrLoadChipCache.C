@@ -71,7 +71,7 @@ namespace Prdr
         }
         else
         {
-            (*o_chip) = new Chip;
+            (*o_chip) = new Chip();
 
             do
             {
