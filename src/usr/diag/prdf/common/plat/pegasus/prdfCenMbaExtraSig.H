@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/diag/prdf/common/plat/pegasus/prdfCenConst.H $        */
+/* $Source: src/usr/diag/prdf/common/plat/pegasus/prdfCenMbaExtraSig.H $  */
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2004,2013              */
+/* COPYRIGHT International Business Machines Corp. 2013                   */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -21,42 +21,28 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-#ifndef PRDF_CEN_MBA_CONST_H
-#define PRDF_CEN_MBA_CONST_H
+#ifndef __prdfCenMbaExtraSig_H
+#define __prdfCenMbaExtraSig_H
 
-/**
- *   @file prdfCenConst.H
- *   @brief Defines Centaur related constants
- */
-//------------------------------------------------------------------------------
-//  Includes
-//------------------------------------------------------------------------------
+#include <prdrSignatures.H>
 
-namespace PRDF
-{
+PRDR_ERROR_SIGNATURE(MaintCmdComplete_ERROR, 0xeeee0000, "",
+                     "ERROR: maint cmd complete analysis failed" );
 
-enum
-{
-    PORT_SLCT_PER_MBA       = 2,
-    MAX_DIMM_SLCT_PER_MBA   = 2,
-    MAX_RANKS_PER_DIMM_SLCT = 4,
-    MAX_RANKS_PER_MBA       = MAX_DIMM_SLCT_PER_MBA * MAX_RANKS_PER_DIMM_SLCT,
+PRDR_ERROR_SIGNATURE(StartVcmPhase1,  0xffff0000, "", "Starting VCM phase 1");
+PRDR_ERROR_SIGNATURE(StartVcmPhase2,  0xffff0001, "", "Starting VCM phase 2");
+PRDR_ERROR_SIGNATURE(StartDsdPhase1,  0xffff0002, "", "Starting DSD phase 1");
+PRDR_ERROR_SIGNATURE(StartDsdPhase2,  0xffff0003, "", "Starting DSD phase 2");
 
-    SYMBOLS_PER_RANK = 72,
-    DQS_PER_DIMM     = 72,
+PRDR_ERROR_SIGNATURE(MaintUE,         0xffff0010, "", "Maintenance UE");
 
-    SYMBOLS_PER_BYTE = 4,
-    DQS_PER_SYMBOL   = 2,
-    DQS_PER_BYTE     = SYMBOLS_PER_BYTE * DQS_PER_SYMBOL,
+PRDR_ERROR_SIGNATURE(VcmVerified,     0xffff0020, "", "VCM: verified");
+PRDR_ERROR_SIGNATURE(VcmFalseAlarm,   0xffff0021, "", "VCM: false alarm");
+PRDR_ERROR_SIGNATURE(VcmBadSpare,     0xffff0022, "", "VCM: bad DRAM spare");
+PRDR_ERROR_SIGNATURE(VcmMarksUnavail, 0xffff0023, "",
+                     "VCM: No more marks available");
 
-    SYMBOLS_PER_X8DRAM = 4,
-    SYMBOLS_PER_X4DRAM = 2,
+PRDR_ERROR_SIGNATURE(DsdDramSpared,   0xffff0030, "", "DSD: DRAM spared");
+PRDR_ERROR_SIGNATURE(DsdBadSpare,     0xffff0031, "", "DSD: DRAM spare is bad");
 
-    X8DRAMS_PER_RANK = SYMBOLS_PER_RANK / SYMBOLS_PER_X8DRAM,
-    X4DRAMS_PER_RANK = SYMBOLS_PER_RANK / SYMBOLS_PER_X4DRAM,
-};
-
-} // end namespace PRDF
-
-#endif // PRDF_CEN_MBA_CAPTURE_DATA_H
-
+#endif // __prdfCenMbaExtraSig_H

@@ -55,6 +55,7 @@
 namespace PRDF
 {
 
+class CenAddr;
 class CenDqBitmap;
 class CenMark;
 class CenRank;
@@ -208,6 +209,7 @@ int32_t getBadDqBitmap( TARGETING::TargetHandle_t i_mba, const CenRank & i_rank,
  * @param  i_mbaTarget A MBA target.
  * @param  i_rank   Target rank.
  * @param  i_bitmap DQ bitmap container.
+ * @note   This is a no-op if DRAM Repairs are disabled in manufacturing.
  * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
  */
 int32_t setBadDqBitmap( TARGETING::TargetHandle_t i_mba, const CenRank & i_rank,
@@ -269,6 +271,28 @@ int32_t mssGetSteerMux( TARGETING::TargetHandle_t i_mba, const CenRank & i_rank,
  */
 int32_t mssSetSteerMux( TARGETING::TargetHandle_t i_mba, const CenRank & i_rank,
                         const CenSymbol & i_symbol, bool i_x4EccSpare );
+
+/**
+ * @brief  Returns the start and end maintenance address of the given MBA.
+ * @param  i_mba       Target MBA.
+ * @param  o_startAddr The return start address.
+ * @param  o_endAddr   The return end address.
+ * @return Non-SUCCESS in internal function fails, SUCCESS otherwise.
+ */
+int32_t getMemAddrRange( TARGETING::TargetHandle_t i_mba, CenAddr & o_startAddr,
+                         CenAddr & o_endAddr );
+
+/**
+ * @brief  Returns the start and end maintenance address of the given rank.
+ * @param  i_mba       Target MBA.
+ * @param  i_rank      Target rank.
+ * @param  o_startAddr The return start address.
+ * @param  o_endAddr   The return end address.
+ * @return Non-SUCCESS in internal function fails, SUCCESS otherwise.
+ */
+int32_t getMemAddrRange( TARGETING::TargetHandle_t i_mba,
+                         const CenRank & i_rank, CenAddr & o_startAddr,
+                         CenAddr & o_endAddr );
 
 /**
  * @brief   Returns the memory buffer raw card type (i.e. R/C A).
@@ -362,7 +386,7 @@ class mss_MaintCmdWrapper
  * @param  i_cmdType     Maintenance command type which we want to create.
  * @param  i_mba         An MBA target.
  * @param  i_stopCond    Bit mask for conditions in which to stop command.
- * @param  i_isFastSpeed false = slow (12 H), true = fast.
+ * @param  i_isFastSpeed false = slow (12 H), true = fast (default).
  * @return A mss_MaintCmdWrapper object, NULL if an internal function failed.
  * @note   This function allocates memory on heap for mss_MaintCmdWrapper
  *         object. It is the caller's responsibilty to delete this object.
@@ -370,16 +394,17 @@ class mss_MaintCmdWrapper
  */
 mss_MaintCmdWrapper * createMssCmd( mss_MaintCmdWrapper::CmdType i_cmdType,
                                     TARGETING::TargetHandle_t i_mba,
-                                    uint32_t i_stopCond, bool i_isFastSpeed );
+                                    uint32_t i_stopCond,
+                                    bool i_isFastSpeed = true );
 
 /**
  * @brief  Create a maintenance command object that will run on all memory
  *         behind the given rank.
  * @param  i_cmdType     Maintenance command type which we want to create.
+ * @param  i_rank        The target rank.
  * @param  i_mba         An MBA target.
  * @param  i_stopCond    Bit mask for conditions in which to stop command.
- * @param  i_isFastSpeed false = slow (12 H), true = fast.
- * @param  i_rank        The target rank.
+ * @param  i_isFastSpeed false = slow (12 H), true = fast (default).
  * @return A mss_MaintCmdWrapper object, NULL if an internal function failed.
  * @note   This function allocates memory on heap for mss_MaintCmdWrapper
  *         object. It is the caller's responsibilty to delete this object.
@@ -387,8 +412,8 @@ mss_MaintCmdWrapper * createMssCmd( mss_MaintCmdWrapper::CmdType i_cmdType,
  */
 mss_MaintCmdWrapper * createMssCmd( mss_MaintCmdWrapper::CmdType i_cmdType,
                                     TARGETING::TargetHandle_t i_mba,
-                                    uint32_t i_stopCond, bool i_isFastSpeed,
-                                    const CenRank & i_rank );
+                                    const CenRank & i_rank, uint32_t i_stopCond,
+                                    bool i_isFastSpeed = true );
 
 } // end namespace PlatServices
 

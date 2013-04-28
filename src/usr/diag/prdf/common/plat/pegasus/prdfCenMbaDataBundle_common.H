@@ -28,10 +28,14 @@
  *  @brief Contains the common data bundle for a Centaur MBA object.
  */
 
+// Framework includes
 #include <iipSystem.h>
 #include <prdfExtensibleChip.H>
 #include <prdfGlobal.H>
 #include <prdfPlatServices.H>
+
+// Pegasus includes
+#include <prdfCenMbaTdCtlr.H>
 
 namespace PRDF
 {
@@ -48,7 +52,7 @@ class CenMbaDataBundleCommon : public DataBundle
      * @param i_mbaChip The MBA chip.
      */
     explicit CenMbaDataBundleCommon( ExtensibleChip * i_mbaChip ) :
-        iv_mbaChip(i_mbaChip), iv_membChip(NULL)
+        iv_mbaChip(i_mbaChip), iv_membChip(NULL), iv_tdCtlr(i_mbaChip)
     {}
 
     /**
@@ -83,6 +87,11 @@ class CenMbaDataBundleCommon : public DataBundle
 
     ExtensibleChip * iv_mbaChip;  ///< This MBA chip
     ExtensibleChip * iv_membChip; ///< The connected MEMBUF chip
+
+  public: // instance variables
+
+    CenMbaTdCtlr iv_tdCtlr;       ///< Targeted Diagnostics Controller
+
 };
 
 } // end namespace PRDF

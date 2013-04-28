@@ -27,6 +27,7 @@
 
 #include <iipServiceDataCollector.h>
 #include <prdfCenAddress.H>
+#include <prdfCenMarkstore.H>
 #include <prdfPlatServices.H>
 #include <prdfTrace.H>
 
@@ -45,6 +46,25 @@ void defaultError( STEP_CODE_DATA_STRUCT & i_sc )
     i_sc.service_data->SetCallout( NextLevelSupport_ENUM );
     i_sc.service_data->SetCallout( SP_CODE );
     i_sc.service_data->SetServiceCall();
+}
+
+//------------------------------------------------------------------------------
+
+void calloutMark( TargetHandle_t i_mba, const CenRank & i_rank,
+                  const CenMark & i_mark, STEP_CODE_DATA_STRUCT & io_sc,
+                  PRDpriority i_priority )
+{
+    if ( i_mark.getCM().isValid() )
+    {
+        MemoryMru memmru ( i_mba, i_rank, i_mark.getCM() );
+        io_sc.service_data->SetCallout( memmru, i_priority );
+    }
+
+    if ( i_mark.getSM().isValid() )
+    {
+        MemoryMru memmru ( i_mba, i_rank, i_mark.getSM() );
+        io_sc.service_data->SetCallout( memmru, i_priority );
+    }
 }
 
 //------------------------------------------------------------------------------

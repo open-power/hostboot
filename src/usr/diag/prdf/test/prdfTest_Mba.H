@@ -62,9 +62,8 @@ class MBAFIR:public CxxTest::TestSuite
             }
         }
 
-        void TestCheckstop(void)
+        void DISABLED_TestCheckstop(void)
         {
-            /*
             PRDS_BEGIN("MBAFIR01 Checkstop attention");
             PRDS_ERROR_ENTRY("NODE{0}:MEMBUF{4}", PRDF::CHECK_STOP);
             PRDS_EXPECTED_SIGNATURE("NODE{0}:MEMBUF{4}:MBS{0}:MBA{0}", 0x43f10002);
@@ -82,26 +81,7 @@ class MBAFIR:public CxxTest::TestSuite
             {
                 TS_FAIL("Expected Signature Failed MBAFIR01 Checkstop attention");
             }
-            */
         }
 
-        void TestSpecialAttention(void)
-        {
-            PRDS_BEGIN("MBAFIR01 Special attention");
-            PRDS_ERROR_ENTRY("NODE{0}:MEMBUF{4}", PRDF::SPECIAL);
-            PRDS_EXPECTED_SIGNATURE("NODE{0}:MEMBUF{4}:MBS{0}:MBA{0}", 0x9e8b0000);
-            //        PRDS_EXPECTED_CALLOUT(NONE);
-            // GLOBAL_RE_FIR
-            PRDS_SCR_WRITE("NODE{0}:MEMBUF{4}", 0x570F001A, 0x1000000000000000);
-            // MEM_CHIPLET_CS_FIR[0] Attention from MBAFIR01
-            PRDS_SCR_WRITE("NODE{0}:MEMBUF{4}", 0x03040004, 0x8000000000000000);
-            // set MBAFIR01[0]
-            PRDS_SCR_WRITE("NODE{0}:MEMBUF{4}:MBS{0}:MBA{0}", 0x03010611, 0x8000000000000000);
-            PRDS_START_SIM();
-            if(!(PRDS_END()))
-            {
-                TS_FAIL("Expected Signature Failed MBAFIR01 Special attention");
-            }
-        }
 };
 #endif

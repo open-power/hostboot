@@ -585,8 +585,12 @@ errlHndl_t StateMachine::doMaintCommand(WorkFlowProperties & i_wfp)
     uint64_t timeout = 60000000000;
     errlHndl_t err = NULL;
 
-    uint64_t stopCondition = mss_MaintCmd::STOP_ON_END_ADDRESS
-        | mss_MaintCmd::ENABLE_CMD_COMPLETE_ATTENTION;
+    uint64_t stopCondition =
+                mss_MaintCmd::STOP_END_OF_RANK                  |
+                mss_MaintCmd::STOP_ON_MPE                       |
+                mss_MaintCmd::STOP_ON_UE                        |
+                mss_MaintCmd::STOP_ON_END_ADDRESS               |
+                mss_MaintCmd::ENABLE_CMD_COMPLETE_ATTENTION;
 
     uint64_t workItem;
     bool restart;

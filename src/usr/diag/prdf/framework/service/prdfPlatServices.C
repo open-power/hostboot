@@ -36,6 +36,9 @@
 #include <prdfTrace.H>
 #include <prdfAssert.h>
 
+#include <prdfCenAddress.H>
+#include <prdfCenDqBitmap.H>
+
 #include <diag/mdia/mdia.H>
 #include <diag/mdia/mdiamevent.H>
 #include <errno.h>
@@ -43,8 +46,6 @@
 #include <time.h>
 
 using namespace TARGETING;
-
-//------------------------------------------------------------------------------
 
 namespace PRDF
 {
@@ -198,6 +199,37 @@ int32_t mssRestoreDramRepairs( TargetHandle_t i_mbaTarget,
     }
 
     return o_rc;
+}
+
+//------------------------------------------------------------------------------
+
+int32_t mssIplUeIsolation( TargetHandle_t i_mba, const CenRank & i_rank,
+                           CenDqBitmap & o_bitmap )
+{
+    #define PRDF_FUNC "[PlatServices::mssIplUeIsolation] "
+
+    int32_t o_rc = SUCCESS;
+
+    uint8_t data[PORT_SLCT_PER_MBA][DIMM_DQ_RANK_BITMAP_SIZE];
+
+    errlHndl_t errl = NULL;
+    PRD_FAPI_TO_ERRL( errl, mss_IPL_UE_isolation, getFapiTarget(i_mba),
+                      i_rank.flatten(), data );
+    if ( NULL != errl )
+    {
+        PRDF_ERR( PRDF_FUNC"mss_IPL_UE_isolation() failed: MBA=0x%08x "
+                  "rank=%d", getHuid(i_mba), i_rank.flatten() );
+        PRDF_COMMIT_ERRL( errl, ERRL_ACTION_REPORT );
+        o_rc = FAIL;
+    }
+    else
+    {
+        o_bitmap = CenDqBitmap ( i_mba, i_rank, data );
+    }
+
+    return o_rc;
+
+    #undef PRDF_FUNC
 }
 
 } // end namespace PlatServices

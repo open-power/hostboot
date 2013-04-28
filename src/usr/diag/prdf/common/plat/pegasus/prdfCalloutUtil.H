@@ -24,15 +24,18 @@
 #ifndef prdfCalloutUtil_H
 #define prdfCalloutUtil_H
 
-#include <prdfPlatServices.H>
-
 /** @file  prdfCalloutUtil.H
  *  @brief Utility functions for common, non-trivial callouts.
  */
 
+#include <prdfPlatServices.H>
+
+#include <prdfCallouts.H>
+
 namespace PRDF
 {
 
+class CenMark;
 class CenRank;
 struct STEP_CODE_DATA_STRUCT;
 
@@ -46,6 +49,19 @@ namespace CalloutUtil
  * @param i_sc The step code data struct.
  */
 void defaultError( STEP_CODE_DATA_STRUCT & i_sc );
+
+/**
+ * @brief Will add a MemoryMru to the callout list for the chip mark and symbol
+ *        mark, if they exist.
+ * @param i_mba      Target MBA.
+ * @param i_rank     Target rank.
+ * @param i_mark     Target mark.
+ * @param io_sc      The step code data struct.
+ * @param i_priority Callout priority (default MRU_MED).
+ */
+void calloutMark( TARGETING::TargetHandle_t i_mba, const CenRank & i_rank,
+                  const CenMark & i_mark, STEP_CODE_DATA_STRUCT & io_sc,
+                  PRDpriority i_priority = MRU_MED );
 
 /**
  * @param  i_mba  The target MBA.

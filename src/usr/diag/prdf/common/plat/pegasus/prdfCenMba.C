@@ -22,18 +22,21 @@
 /* IBM_PROLOG_END_TAG                                                     */
 
 /** @file  prdfCenMba.C
- *  @brief Contains all the plugin code for the PRD Centaur MBA
+ *  @brief Contains all common plugin code for the Centaur MBA
  */
 
+// Framework includes
 #include <iipServiceDataCollector.h>
-#include <prdfCalloutUtil.H>
 #include <prdfExtensibleChip.H>
 #include <prdfPlatServices.H>
 #include <prdfPluginMap.H>
 
-#include <prdfCenAddress.H>
+// Pegasus includes
+#include <prdfCalloutUtil.H>
 #include <prdfCenMbaCaptureData.H>
 #include <prdfCenMbaDataBundle.H>
+
+using namespace TARGETING;
 
 namespace PRDF
 {
@@ -78,71 +81,32 @@ int32_t MaintCmdComplete( ExtensibleChip * i_mbaChip,
 {
     #define PRDF_FUNC "[Mba::MaintCmdComplete] "
 
-    using namespace TARGETING;
-
     int32_t l_rc = SUCCESS;
+
     TargetHandle_t mbaTarget = i_mbaChip->GetChipHandle();
+    CenMbaDataBundle * mbadb = getMbaDataBundle( i_mbaChip );
 
-    do
-    {
-        #ifdef __HOSTBOOT_MODULE
-
-        if ( isInMdiaMode() )
-        {
-            // Immediately inform mdia that the command
-            // has finished.
-
-            l_rc = mdiaSendEventMsg( mbaTarget, MDIA::RESET_TIMER );
-
-            if(l_rc)
-            {
-                PRDF_ERR( PRDF_FUNC"PlatServices::mdiaSendEventMsg() failed" );
-                // keep going
-            }
-
-            // Determine for mdia whether or not the command
-            // finished at the end of the last rank or if
-            // the command will need to be restarted.
-            // Tuck this away until PostAnalysis.
-
-            CenAddr startAddr, endAddr;
-            l_rc  = getCenMaintStartAddr( i_mbaChip, startAddr );
-            l_rc |= getCenMaintEndAddr(   i_mbaChip, endAddr   );
-            if ( SUCCESS != l_rc )
-            {
-                PRDF_ERR( PRDF_FUNC"cenGetMbaAddr() failed" );
-                break;
-            }
-
-            CenMbaDataBundle * mbadb = getMbaDataBundle( i_mbaChip );
-            mbadb->iv_sendCmdCompleteMsg = true;
-            mbadb->iv_cmdCompleteMsgData =
-                        startAddr == endAddr ? MDIA::COMMAND_COMPLETE
-                                             : MDIA::COMMAND_STOPPED;
-
-            // Do not commit error log for a successful command complete.
-            if ( MDIA::COMMAND_COMPLETE == mbadb->iv_cmdCompleteMsgData )
-                 i_sc.service_data->DontCommitErrorLog();
-        }
-
-        #endif // __HOSTBOOT_MODULE
-
-        // Get DRAM repairs capture data
-        CenMbaCaptureData::addDramRepairsData( mbaTarget, i_sc );
-
-    } while (0);
-
+    // Tell the TD controller that a maintenance command complete occurred.
+    l_rc = mbadb->iv_tdCtlr.handleCmdCompleteEvent( i_sc );
     if ( SUCCESS != l_rc )
     {
-        PRDF_ERR( PRDF_FUNC"failed on MBA 0x%08x", getHuid(mbaTarget) );
+        PRDF_ERR( PRDF_FUNC"Failed: i_mbaChip=0x%08x", getHuid(mbaTarget) );
         CalloutUtil::defaultError( i_sc );
     }
 
-    return l_rc;
+    // Gather capture data even if something failed above.
+    // NOTE: There is no need to capture if the maintenance command complete was
+    //       successful with no errors because the error log will not be
+    //       committed.
+    if ( !i_sc.service_data->IsDontCommitErrl() )
+        CenMbaCaptureData::addDramRepairsData( mbaTarget, i_sc );
+
+    return PRD_NO_CLEAR_FIR_BITS; // FIR bits are cleared by this plugin
 
     #undef PRDF_FUNC
 }
 PRDF_PLUGIN_DEFINE( Mba, MaintCmdComplete );
 
 } // end namespace Mba
+
 } // end namespace PRDF

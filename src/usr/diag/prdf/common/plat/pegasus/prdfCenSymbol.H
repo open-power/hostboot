@@ -81,9 +81,10 @@ class CenSymbol
      * @brief Constructor from components
      */
     CenSymbol( TARGETING::TargetHandle_t i_mba, CenRank i_rank,
-               WiringType i_wiringType, uint8_t i_symbol, uint8_t i_pins ) :
+               WiringType i_wiringType, uint8_t i_symbol, uint8_t i_pins,
+               bool i_x4Dram ) :
         iv_mbaTarget(i_mba), iv_rank(i_rank), iv_wiringType(i_wiringType),
-        iv_symbol(i_symbol), iv_pins(i_pins)
+        iv_symbol(i_symbol), iv_pins(i_pins), iv_x4Dram(i_x4Dram)
     {}
 
   public: // functions
@@ -148,6 +149,12 @@ class CenSymbol
     /** @return The port select for this symbol. */
     uint8_t getPortSlct() const { return symbol2PortSlct( iv_symbol ); }
 
+    /** @return The DRAM index for this symbol. */
+    uint8_t getDram() const { return symbol2Dram( iv_symbol, iv_x4Dram ); }
+
+    /** @return TRUE this symbol is on a x4 DRAM, FALSE otherwise. */
+    bool isX4Dram() const { return iv_x4Dram; }
+
     /** @return The symbol of the given Centaur DQ and port select. */
     static uint8_t cenDq2Symbol( uint8_t i_CenDq, uint8_t i_ps );
 
@@ -156,6 +163,9 @@ class CenSymbol
 
     /** @return The port select for given symbol. */
     static uint8_t symbol2PortSlct( uint8_t i_symbol );
+
+    /** @return The DRAM index for the given symbol. */
+    static uint8_t symbol2Dram( uint8_t i_symbol, bool isX4Dram );
 
     /**
      * @brief   Overrides the '<' operator.
@@ -199,6 +209,7 @@ class CenSymbol
     WiringType iv_wiringType;               ///< This symbol's wiring type.
     uint8_t iv_symbol;                      ///< This symbol's numerical value.
     uint8_t iv_pins;                        ///< See enum DqMask.
+    bool iv_x4Dram;                         ///< TRUE x4 DRAM, FALSE x8 DRAM.
 };
 
 } // end namespace PRDF

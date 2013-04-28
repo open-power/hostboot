@@ -71,6 +71,9 @@ class MemoryMru
     MemoryMru( TARGETING::TargetHandle_t i_mbaTarget, const CenRank & i_rank,
                MemoryMruData::Callout i_specialCallout );
 
+    /** @brief Indicates that the symbol actually resides on the DRAM spare. */
+    void setDramSpared() { iv_memMruMeld.s.dramSpared = 1; }
+
   public: // functions
 
     /** @return The 32-bit representation of this MemoryMru. */

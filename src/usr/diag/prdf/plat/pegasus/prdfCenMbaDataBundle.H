@@ -38,7 +38,7 @@ namespace PRDF
 {
 
 /**
- * @brief The P7 Centaur MBA data bundle.
+ * @brief Centaur MBA data bundle.
  */
 class CenMbaDataBundle : public CenMbaDataBundleCommon
 {
@@ -56,9 +56,7 @@ class CenMbaDataBundle : public CenMbaDataBundleCommon
     /**
      * @brief Destructor.
      */
-    ~CenMbaDataBundle()
-    {
-    }
+    ~CenMbaDataBundle() {}
 
   private: // functions
 

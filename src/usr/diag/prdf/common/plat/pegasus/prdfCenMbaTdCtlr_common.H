@@ -1,0 +1,212 @@
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/usr/diag/prdf/common/plat/pegasus/prdfCenMbaTdCtlr_common.H $ */
+/*                                                                        */
+/* IBM CONFIDENTIAL                                                       */
+/*                                                                        */
+/* COPYRIGHT International Business Machines Corp. 2013                   */
+/*                                                                        */
+/* p1                                                                     */
+/*                                                                        */
+/* Object Code Only (OCO) source materials                                */
+/* Licensed Internal Code Source Materials                                */
+/* IBM HostBoot Licensed Internal Code                                    */
+/*                                                                        */
+/* The source code for this program is not published or otherwise         */
+/* divested of its trade secrets, irrespective of what has been           */
+/* deposited with the U.S. Copyright Office.                              */
+/*                                                                        */
+/* Origin: 30                                                             */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
+
+/** @file  prdfCenMbaTdCtlr_common.H
+ *  @brief The common implementation of the MBA TD Controller.
+ */
+
+#ifndef __prdfCenMbaTdCtlr_common_H
+#define __prdfCenMbaTdCtlr_common_H
+
+// Framework includes
+#include <iipServiceDataCollector.h>
+#include <prdf_types.h>
+#include <prdfPlatServices.H>
+
+// Pegasus includes
+#include <prdfCenAddress.H>
+#include <prdfCenConst.H>
+#include <prdfCenMarkstore.H>
+#include <prdfCenMbaExtraSig.H>
+
+namespace PRDF
+{
+
+class ExtensibleChip;
+
+/**
+ * @brief A state machine for memory targeted diagnostics.
+ */
+class CenMbaTdCtlrCommon
+{
+  public: // functions
+
+    /**
+     * @brief Constructor
+     *
+     * This constructor will be called in the MBA data bundle code. Therefore,
+     * no register reads/writes can be done in this constructor. Anything needed
+     * to initialize the instance variables that requires register reads/writes
+     * or is non-trivial should be done in initialize().
+     *
+     * @param i_mbaChip An MBA chip.
+     */
+    explicit CenMbaTdCtlrCommon( ExtensibleChip * i_mbaChip ) :
+        iv_mbaChip(i_mbaChip), iv_initialized(false), iv_rank(), iv_mark(),
+        iv_mssCmd(NULL)
+    {}
+
+    /** @brief Destructor */
+    ~CenMbaTdCtlrCommon()
+    {
+        delete iv_mssCmd; iv_mssCmd = NULL;
+    }
+
+    /**
+     * @brief  Determines and executes the next course of action after a
+     *         maintenance command complete attention.
+     * @note   Initializes the TD controller, if needed.
+     * @param  io_sc The step code data struct.
+     * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
+     */
+    virtual int32_t handleCmdCompleteEvent( STEP_CODE_DATA_STRUCT & io_sc ) = 0;
+
+  protected: // functions
+
+    /**
+     * @brief  Initializes the TD controller and sets appropriate information
+     *         in the hardware, if needed.
+     *
+     * Since the TD controller constructor will only be called in the MBA data
+     * bundle, register reads/writes can NOT be done in the constructor.
+     * Instead, anything needed to initialize the instance variables that
+     * requires register reads/writes or is non-trivial should be done in
+     * this function.
+     *
+     * @note   Should be called at the beginning of every public function to
+     *         ensure the TD controller is initialized.
+     * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
+     */
+    virtual int32_t initialize() = 0;
+
+    /**
+     * @brief Analyzes a non-TD command complete event.
+     *
+     * A maintenance command has completed but no TD are in progress. This
+     * function will check for any ECC errors, unverified chip marks from a
+     * reset/reload, etc. and starts any TD procedures, if necessary.
+     *
+     * @param  io_sc The step code data struct.
+     * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
+     */
+    virtual int32_t analyzeCmdComplete( STEP_CODE_DATA_STRUCT & io_sc ) = 0;
+
+    /**
+     * @brief  Analyzes VCM Phase 1 results and moves state machine.
+     * @param  io_sc The step code data struct.
+     * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
+     */
+    virtual int32_t analyzeVcmPhase1( STEP_CODE_DATA_STRUCT & io_sc ) = 0;
+
+    /**
+     * @brief  Analyzes VCM Phase 2 results and moves state machine.
+     * @param  io_sc The step code data struct.
+     * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
+     */
+    virtual int32_t analyzeVcmPhase2( STEP_CODE_DATA_STRUCT & io_sc ) = 0;
+
+    /**
+     * @brief  Analyzes DSD Phase 1 results and moves state machine.
+     * @param  io_sc The step code data struct.
+     * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
+     */
+    virtual int32_t analyzeDsdPhase1( STEP_CODE_DATA_STRUCT & io_sc ) = 0;
+
+    /**
+     * @brief  Analyzes DSD Phase 2 results and moves state machine.
+     * @param  io_sc The step code data struct.
+     * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
+     */
+    virtual int32_t analyzeDsdPhase2( STEP_CODE_DATA_STRUCT & io_sc ) = 0;
+
+    /**
+     * @brief  Starts VCM Phase 1.
+     * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
+     */
+    virtual int32_t startVcmPhase1() = 0;
+
+    /**
+     * @brief  Starts VCM Phase 2.
+     * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
+     */
+    virtual int32_t startVcmPhase2() = 0;
+
+    /**
+     * @brief  Starts DSD Phase 1.
+     * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
+     */
+    virtual int32_t startDsdPhase1() = 0;
+
+    /**
+     * @brief  Starts DSD Phase 2.
+     * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
+     */
+    virtual int32_t startDsdPhase2() = 0;
+
+    /**
+     * @return TRUE if currently running a targeted diagnositics procedure,
+     *         FALSE otherwise.
+     */
+    virtual bool isInTdMode() = 0;
+
+    /**
+     * @brief  Calls the cleanupCmd() function of the command that had just
+     *         completed.
+     * @note   This function will clear the maintenance command complete
+     *         attention. So for FSP attentions, the SDC needs to be synched
+     *         before calling this function just in case there is a
+     *         reset/reload.
+     * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
+     */
+    virtual int32_t cleanupPrevCmd();
+
+    /**
+     * @brief  Clears FIR bits that may have been a side-effect of a chip mark
+     *         placed by hardware.
+     * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
+     */
+    virtual int32_t chipMarkCleanup();
+
+  protected: // instance variables
+
+    /** The memory controller chip that this TD controller acts on. */
+    ExtensibleChip * iv_mbaChip;
+
+    /** Indicates if TD controller is initialized. */
+    bool iv_initialized;
+
+    /** The current rank that is being targeted for diagnostics. */
+    CenRank iv_rank;
+
+    /** The current mark that is being targeted for diagnostics. */
+    CenMark iv_mark;
+
+    /** Current maintenance command */
+    PlatServices::mss_MaintCmdWrapper * iv_mssCmd;
+
+}; // CenMbaTdCtlrCommon
+
+} // end namespace PRDF
+
+#endif // __prdfCenMbaTdCtlr_common_H
+

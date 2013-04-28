@@ -228,6 +228,42 @@ int32_t CenDqBitmap::setEccSpare( uint8_t i_pins )
 
 //------------------------------------------------------------------------------
 
+int32_t CenDqBitmap::isDramSpareAvailable( uint8_t i_portSlct,
+                                           bool & o_available )
+{
+    #define PRDF_FUNC "[CenDqBitmap::isDramSpareAvailable] "
+
+    int32_t o_rc = SUCCESS;
+
+    o_available = false;
+
+    do
+    {
+        if ( PORT_SLCT_PER_MBA <= i_portSlct )
+        {
+            PRDF_ERR( PRDF_FUNC"Invalid parameter: i_portSlct=%d", i_portSlct );
+            o_rc = FAIL; break;
+        }
+
+        if ( isDramWidthX4(iv_mba) )
+        {
+            // TODO: RTC 68096 Need to add x4 ECC support.
+        }
+        else
+        {
+            o_available =
+                      ( 0 == iv_data[i_portSlct][DIMM_DQ_RANK_BITMAP_SIZE-1] );
+        }
+
+    } while (0);
+
+    return o_rc;
+
+    #undef PRDF_FUNC
+}
+
+//------------------------------------------------------------------------------
+
 void CenDqBitmap::getCaptureData( CaptureData & o_cd ) const
 {
     uint8_t rank   = iv_rank.flatten();

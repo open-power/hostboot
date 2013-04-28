@@ -41,10 +41,12 @@ prd_pegasus_specific = \
     prdfCalloutUtil.o \
     prdfCenAddress.o \
     prdfCenDqBitmap.o \
-    prdfCenSymbol.o \
-    prdfLineDelete.o \
-    prdfPegasusConfigurator.o \
     prdfCenMbaCaptureData.o \
+    prdfCenMbaTdCtlr.o \
+    prdfCenMbaTdCtlr_common.o \
+    prdfCenSymbol.o \
+    prdfLaneRepair.o \
+    prdfLineDelete.o \
     prdfMemoryMru.o \
-    prdfRegisterData.o \
-    prdfLaneRepair.o
+    prdfPegasusConfigurator.o \
+    prdfRegisterData.o

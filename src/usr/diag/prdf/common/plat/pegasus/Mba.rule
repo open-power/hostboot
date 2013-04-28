@@ -44,6 +44,8 @@ chip Mba
     dump        DUMP_CONTENT_HWSUPERNOVA;
     scomlen     64;
 
+.include "prdfCenMbaExtraSig.H";
+
  #############################################################################
  #                                                                           #
  #  ######                                                                   #
@@ -120,6 +122,13 @@ chip Mba
         capture     group FirRegs;
     };
 
+    register MBADDRPHYFIR_AND
+    {
+        name        "DPHY01.PHY01_DDRPHY_FIR_REG_AND";
+        scomaddr    0x800200910301143F;
+        capture     group never;
+    };
+
     register MBADDRPHYFIR_MASK
     {
         name        "DPHY01.PHY01_DDRPHY_FIR_MASK_REG";
@@ -190,9 +199,15 @@ chip Mba
         name        "MBU.MBA01.MBA_MCBIST.SCOMFIR.MBSPAQ";
         scomaddr    0x03010611;
         reset       (&, 0x03010612);
-        #FIXME : There is no OR register for mask. Is it right to use  mask register value
         mask        (|, 0x03010614);
         capture     group FirRegs;
+    };
+
+    register MBASPA_AND
+    {
+        name        "MBU.MBA01.MBA_MCBIST.SCOMFIR.MBSPAQ_AND";
+        scomaddr    0x03010612;
+        capture     group never;
     };
 
     register MBASPA_MASK
@@ -220,7 +235,6 @@ chip Mba
         scomaddr    0x030106E7;
         capture     group CerrRegs;
     };
-
 
     register DDRPHY_APB_FIR_ERR0_P0
     {
@@ -796,5 +810,9 @@ group gMbaSpa attntype SPECIAL filter singlebit
 ################################################################################
 
 /** Analyze maintenance command complete */
-actionclass analyzeMaintCmdComplete { funccall("MaintCmdComplete"); };
+actionclass analyzeMaintCmdComplete
+{
+    funccall("MaintCmdComplete");  # Must be called last so return code can be
+                                   # passed on to rule code.
+};
 

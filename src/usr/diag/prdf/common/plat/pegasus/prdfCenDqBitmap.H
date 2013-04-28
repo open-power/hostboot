@@ -114,6 +114,14 @@ class CenDqBitmap
     int32_t setEccSpare( uint8_t i_pins );
 
     /**
+     * @brief  Queries for DRAM spare status.
+     * @param  i_portSlct  The target port.
+     * @param  o_available TRUE if the spare is available, FALSE if it is used.
+     * @return Non-SUCCESS if an internal function failed, SUCCESS otherwise.
+     */
+    int32_t isDramSpareAvailable( uint8_t i_portSlct, bool & o_available );
+
+    /**
      * @brief Adds the bitmaps for both ports to the capture data.
      * @param o_cd Capture data struct.
      */

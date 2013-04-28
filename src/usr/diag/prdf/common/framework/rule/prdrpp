@@ -50,11 +50,15 @@ sub read_file
             open_file($include);
             print ".end_included\n";
         }
+        elsif ( $line =~ m{/\*[^\*].*\*/} )
+        {
+            # Skip C-style (/* */) comments. This is needed to avoid prologs
+            # added to the extra signature .H files.
+        }
         else
         {
             print $line;
         }
-
     }
 }
 

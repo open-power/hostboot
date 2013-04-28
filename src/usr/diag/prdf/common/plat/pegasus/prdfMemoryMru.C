@@ -203,8 +203,7 @@ MemoryMru::MemoryMru( TARGETING::TargetHandle_t i_mbaTarget,
         iv_memMruMeld.s.rank       = iv_rank.flatten();
         iv_memMruMeld.s.symbol     = iv_symbol.getSymbol();
         iv_memMruMeld.s.pins       = iv_symbol.getPins();
-        //TODO: RTC 68096 Add support for DRAM spare
-        iv_memMruMeld.s.dramSpared = 0;
+        iv_memMruMeld.s.dramSpared = 0; // manually set by setDramSpared()
         iv_memMruMeld.s.wiringType = iv_symbol.getWiringType();
 
         // If the code gets to this point the MemoryMru is valid.

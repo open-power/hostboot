@@ -60,28 +60,16 @@ CenSymbol CenSymbol::fromSymbol( TargetHandle_t i_mba, const CenRank & i_rank,
             break;
         }
 
-        if ( SYMBOLS_PER_RANK <= i_symbol )
-        {
-            PRDF_ERR( PRDF_FUNC"i_symbol is invalid" );
-            break;
-        }
-
         if ( BOTH_SYMBOL_DQS < i_pins )
         {
             PRDF_ERR( PRDF_FUNC"i_pins is invalid" );
             break;
         }
 
-        o_symbol = CenSymbol ( i_mba, i_rank, wiringType, i_symbol, i_pins );
+        o_symbol = CenSymbol ( i_mba, i_rank, wiringType, i_symbol, i_pins,
+                               isDramWidthX4(i_mba) );
 
     } while (0);
-
-    if ( !o_symbol.isValid() )
-    {
-        PRDF_ERR( PRDF_FUNC"Failed: i_mba=0x%08x i_rank=%d i_symbol=%d "
-                  "i_pins=%d", getHuid(i_mba), i_rank.flatten(), i_symbol,
-                  i_pins );
-    }
 
     return o_symbol;
 
@@ -124,16 +112,10 @@ CenSymbol CenSymbol::fromDimmDq( TargetHandle_t i_mba, const CenRank & i_rank,
         uint8_t pins = (0 == (i_dimmDq & ODD_SYMBOL_DQ)) ? EVEN_SYMBOL_DQ :
                                                            ODD_SYMBOL_DQ;
 
-        o_symbol = CenSymbol ( i_mba, i_rank, wiringType, symbol, pins );
+        o_symbol = CenSymbol ( i_mba, i_rank, wiringType, symbol, pins,
+                               isDramWidthX4(i_mba) );
 
     } while (0);
-
-    if ( !o_symbol.isValid() )
-    {
-        PRDF_ERR( PRDF_FUNC"Failed: i_mba=0x%08x i_rank=%d i_dimmDq=%d "
-                  "i_portSlct=%d", getHuid(i_mba), i_rank.flatten(), i_dimmDq,
-                  i_portSlct );
-    }
 
     return o_symbol;
 
@@ -201,6 +183,20 @@ uint8_t CenSymbol::symbol2PortSlct( uint8_t i_symbol )
     }
 
     return portSlct;
+}
+
+//------------------------------------------------------------------------------
+
+uint8_t CenSymbol::symbol2Dram( uint8_t i_symbol, bool isX4Dram )
+{
+    uint8_t dram = isX4Dram ? X4DRAMS_PER_RANK : X8DRAMS_PER_RANK;
+
+    if ( SYMBOLS_PER_RANK > i_symbol )
+    {
+        dram = i_symbol / (isX4Dram ? SYMBOLS_PER_X4DRAM : SYMBOLS_PER_X8DRAM);
+    }
+
+    return dram;
 }
 
 //------------------------------------------------------------------------------

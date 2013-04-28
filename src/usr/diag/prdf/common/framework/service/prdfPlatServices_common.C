@@ -60,6 +60,14 @@ namespace PlatServices
 {
 
 //##############################################################################
+//##                             Forward references
+//##############################################################################
+
+int32_t getMemAddrRange( TargetHandle_t i_mba, uint8_t i_rank,
+                         ecmdDataBufferBase & o_startAddr,
+                         ecmdDataBufferBase & o_endAddr );
+
+//##############################################################################
 //##                     Utility Functions (for this file only)
 //##############################################################################
 
@@ -289,22 +297,25 @@ int32_t setBadDqBitmap( TargetHandle_t i_mba, const CenRank & i_rank,
 
     int32_t o_rc = SUCCESS;
 
-    const uint8_t (&data)[PORT_SLCT_PER_MBA][DIMM_DQ_RANK_BITMAP_SIZE]
+    if ( !areDramRepairsDisabled() )
+    {
+        const uint8_t (&data)[PORT_SLCT_PER_MBA][DIMM_DQ_RANK_BITMAP_SIZE]
                                                         = i_bitmap.getData();
 
-    for ( int32_t ps = 0; ps < PORT_SLCT_PER_MBA; ps++ )
-    {
-        errlHndl_t errl = NULL;
-        PRD_FAPI_TO_ERRL( errl, dimmSetBadDqBitmap, getFapiTarget(i_mba),
-                          ps, i_rank.getDimmSlct(), i_rank.getRankSlct(),
-                          data[ps] );
-        if ( NULL != errl )
+        for ( int32_t ps = 0; ps < PORT_SLCT_PER_MBA; ps++ )
         {
-            PRDF_ERR( PRDF_FUNC"dimmSetBadDqBitmap() failed: MBA=0x%08x "
-                      "ps=%d ds=%d rs=%d", getHuid(i_mba), ps,
-                      i_rank.getDimmSlct(), i_rank.getRankSlct() );
-            PRDF_COMMIT_ERRL( errl, ERRL_ACTION_REPORT );
-            o_rc = FAIL;
+            errlHndl_t errl = NULL;
+            PRD_FAPI_TO_ERRL( errl, dimmSetBadDqBitmap, getFapiTarget(i_mba),
+                              ps, i_rank.getDimmSlct(), i_rank.getRankSlct(),
+                              data[ps] );
+            if ( NULL != errl )
+            {
+                PRDF_ERR( PRDF_FUNC"dimmSetBadDqBitmap() failed: MBA=0x%08x "
+                          "ps=%d ds=%d rs=%d", getHuid(i_mba), ps,
+                          i_rank.getDimmSlct(), i_rank.getRankSlct() );
+                PRDF_COMMIT_ERRL( errl, ERRL_ACTION_REPORT );
+                o_rc = FAIL;
+            }
         }
     }
 
@@ -438,6 +449,48 @@ int32_t mssSetSteerMux( TargetHandle_t i_mba, const CenRank & i_rank,
                   i_x4EccSpare ? 'T' : 'F' );
         PRDF_COMMIT_ERRL( errl, ERRL_ACTION_REPORT );
         o_rc = FAIL;
+    }
+
+    return o_rc;
+}
+
+//------------------------------------------------------------------------------
+
+int32_t getMemAddrRange( TargetHandle_t i_mba, CenAddr & o_startAddr,
+                         CenAddr & o_endAddr )
+{
+    ecmdDataBufferBase startAddr(64), endAddr(64);
+    int32_t o_rc = getMemAddrRange( i_mba, MSS_ALL_RANKS, startAddr, endAddr );
+    if ( SUCCESS != o_rc )
+    {
+        PRDF_ERR( "[PlatServices::getMemAddrRange] failed: i_mba=0x%08x",
+                  getHuid(i_mba) );
+    }
+    else
+    {
+        o_startAddr = CenAddr::fromMaintStartAddr( startAddr.getDoubleWord(0) );
+        o_endAddr   = CenAddr::fromMaintEndAddr(   endAddr.getDoubleWord(0)   );
+    }
+
+    return o_rc;
+}
+
+//------------------------------------------------------------------------------
+
+int32_t getMemAddrRange( TargetHandle_t i_mba, const CenRank & i_rank,
+                         CenAddr & o_startAddr, CenAddr & o_endAddr )
+{
+    ecmdDataBufferBase startAddr(64), endAddr(64);
+    int32_t o_rc = getMemAddrRange(i_mba, i_rank.flatten(), startAddr, endAddr);
+    if ( SUCCESS != o_rc )
+    {
+        PRDF_ERR( "[PlatServices::getMemAddrRange] failed: i_mba=0x%08x "
+                  "i_rank=%d", getHuid(i_mba), i_rank.flatten() );
+    }
+    else
+    {
+        o_startAddr = CenAddr::fromMaintStartAddr( startAddr.getDoubleWord(0) );
+        o_endAddr   = CenAddr::fromMaintEndAddr(   endAddr.getDoubleWord(0)   );
     }
 
     return o_rc;
@@ -673,8 +726,9 @@ mss_MaintCmdWrapper * createMssCmd( mss_MaintCmdWrapper::CmdType i_cmdType,
 //------------------------------------------------------------------------------
 
 mss_MaintCmdWrapper * createMssCmd( mss_MaintCmdWrapper::CmdType i_cmdType,
-                                    TargetHandle_t i_mba, uint32_t i_stopCond,
-                                    bool i_isFastSpeed, const CenRank & i_rank )
+                                    TargetHandle_t i_mba,
+                                    const CenRank & i_rank, uint32_t i_stopCond,
+                                    bool i_isFastSpeed )
 {
     mss_MaintCmdWrapper * o_cmd = NULL;
 
