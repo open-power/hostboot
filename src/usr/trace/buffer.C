@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012                   */
+/* COPYRIGHT International Business Machines Corp. 2012,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -464,7 +464,7 @@ namespace TRACE
 
         size_t l_totalSize = l_size;
         Entry* entry = i_comp->iv_first;
-        Entry* orig_entry = entry;
+        size_t l_entriesToExtract = 0;
 
         do
         {
@@ -482,6 +482,7 @@ namespace TRACE
                 if ((l_totalSize + entry->size + sizeof(uint32_t)) <= i_size)
                 {
                     l_totalSize += entry->size + sizeof(uint32_t);
+                    l_entriesToExtract++;
 
                     if ((entry->next) &&
                         (entry->next->comp))
@@ -507,7 +508,7 @@ namespace TRACE
             }
 
             // Now we can actually copy all the entries...
-            while(1)
+            while(entry != NULL)
             {
                 // Copy entry data.
                 memcpy(&l_data[l_size], &entry->data[0],entry->size);
@@ -520,7 +521,7 @@ namespace TRACE
 
                 l_entries++;
 
-                if (entry == orig_entry)
+                if (l_entries == l_entriesToExtract)
                 {
                     break;
                 }
