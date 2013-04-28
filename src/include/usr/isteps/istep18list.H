@@ -31,6 +31,10 @@
  *
  *    18.10    host_coalesce_host
  *          : Create single host image
+ *    18.11    proc_tod_setup
+ *          : Create TOD topology
+ *    18.12    proc_tod_init
+ *          : Start TOD to running state
  *
  *  *****************************************************************
  *  THIS FILE WAS PARTIALLY GENERATED ON 2012-04-11:1611
@@ -46,6 +50,7 @@
 
 //  include prototypes file
 #include    "../../../usr/hwpf/hwp/establish_system_smp/establish_system_smp.H"
+#include    "../../../usr/hwpf/hwp/tod_init/tod_init.H"
 
 namespace   INITSERVICE
 {
@@ -172,7 +177,26 @@ namespace   INITSERVICE
                         false,
                 }
         },
-
+        {
+                ISTEPNAME(18,11,"proc_tod_setup"),
+                TOD::call_tod_setup,
+                {
+                        START_FN,
+                        EXT_IMAGE,
+                        NORMAL_IPL_OP,
+                        false,
+                }
+        },
+        {
+                ISTEPNAME(18,12,"proc_tod_init"),
+                TOD::call_tod_init,
+                {
+                        START_FN,
+                        EXT_IMAGE,
+                        NORMAL_IPL_OP,
+                        false,
+                }
+        },
 
         //  END OF LIST!
 };
@@ -180,6 +204,7 @@ namespace   INITSERVICE
 const DepModInfo  g_istep18Dependancies = {
     {
         DEP_LIB(libestablish_system_smp.so),
+        DEP_LIB(libtod_init.so),
         { 0 },
     }
 };

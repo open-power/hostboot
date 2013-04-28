@@ -195,7 +195,7 @@ my %resident_modules = (
     "libprdf.so"           => '1',
     "libmdia.so"           => '1',
     "libattn.so"           => '1',
-    "libi2c.so"           => '1',
+    "libi2c.so"            => '1',
 
 );
 

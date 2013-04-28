@@ -170,7 +170,13 @@ const compId_t INTR_COMP_ID = 0x0F00;
 const char INTR_COMP_NAME[] = "intr";
 //@}
 
-// 0x1000 - open to reclaim
+/** @name TOD
+ *  TOD component
+ */
+//@{
+const compId_t TOD_COMP_ID = 0x1000;
+const char TOD_COMP_NAME[] = "tod";
+//@}
 
 /** @name MBOX
  *  MBOX component

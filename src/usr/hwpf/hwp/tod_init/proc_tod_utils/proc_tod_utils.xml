@@ -1,0 +1,54 @@
+<!-- IBM_PROLOG_BEGIN_TAG                                                   -->
+<!-- This is an automatically generated prolog.                             -->
+<!--                                                                        -->
+<!-- $Source: src/usr/hwpf/hwp/tod_init/proc_tod_utils/proc_tod_utils.xml $ -->
+<!--                                                                        -->
+<!-- IBM CONFIDENTIAL                                                       -->
+<!--                                                                        -->
+<!-- COPYRIGHT International Business Machines Corp. 2013                   -->
+<!--                                                                        -->
+<!-- p1                                                                     -->
+<!--                                                                        -->
+<!-- Object Code Only (OCO) source materials                                -->
+<!-- Licensed Internal Code Source Materials                                -->
+<!-- IBM HostBoot Licensed Internal Code                                    -->
+<!--                                                                        -->
+<!-- The source code for this program is not published or otherwise         -->
+<!-- divested of its trade secrets, irrespective of what has been           -->
+<!-- deposited with the U.S. Copyright Office.                              -->
+<!--                                                                        -->
+<!-- Origin: 30                                                             -->
+<!--                                                                        -->
+<!-- IBM_PROLOG_END_TAG                                                     -->
+<!-- Error codes for proc_tod_utils (used by setup, init, status) -->
+<hwpErrors>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_PROC_TOD_SETUP_INVALID_TOPOLOGY</rc>
+    <description>The TOD topology includes an invalid configuration</description>
+  </hwpError>
+  <hwpError>
+    <rc>RC_PROC_TOD_SETUP_INVALID_NODE_DELAY</rc>
+    <description>Node delay must be between 0 and 0xFF inclusive.</description>
+  </hwpError>
+  <hwpError>
+    <rc>RC_PROC_TOD_INIT_NOT_RUNNING</rc>
+    <description>TOD is expected to be running, but is not.</description>
+  </hwpError>
+  <hwpError>
+    <rc>RC_PROC_TOD_INIT_TIMEOUT</rc>
+    <description>TOD bit did not clear or assert in the allotted time.</description>
+  </hwpError>
+  <hwpError>
+    <rc>RC_PROC_TOD_INIT_INTERRUPT_PENDING</rc>
+    <description>TFMR indicating an interrupt is pending; step error detected or external OSC not operating properly</description>
+  </hwpError>
+  <hwpError>
+    <rc>RC_PROC_TOD_INIT_ERROR</rc>
+    <description>A FIR bit is active after starting the TOD topology</description>
+  </hwpError>
+  <hwpError>
+    <rc>RC_PROC_TOD_NULL_NODE</rc>
+    <description>An null node has been passed into the procedure</description>
+  </hwpError>
+</hwpErrors>
