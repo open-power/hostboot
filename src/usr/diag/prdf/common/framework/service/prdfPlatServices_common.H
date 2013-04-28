@@ -344,6 +344,25 @@ class mss_MaintCmdWrapper
         SUPERFAST_READ,
     };
 
+    /** Input flags to control how, and on what, the command runs. **/
+    enum CtrlFlags
+    {
+        /** Run all defaults. See each individual flag of default behavior */
+        NO_FLAGS        = 0x00,
+
+        /** When set, the command will run from the beginning of the given rank
+         *  to the end of memory. Default is to run to the end of the rank. */
+        END_OF_MEMORY   = 0x01,
+
+        /** When set, the command will run once every 12/24 hours. Default is to
+         *  run as fast as possible. */
+        BG_SCRUB        = 0x02,
+
+        /** When set, the command will run on the slave rank only. Default is to
+         *  run on the entire master rank. */
+        SLAVE_RANK_ONLY = 0x04,
+    };
+
   public: // functions
 
     /**
@@ -388,41 +407,21 @@ class mss_MaintCmdWrapper
 }; // class mss_MaintCmdWrapper
 
 /**
- * @brief  Create a maintenance command object that will run on all memory
- *         behind this MBA.
- * @param  i_cmdType     Maintenance command type which we want to create.
- * @param  i_mba         An MBA target.
- * @param  i_stopCond    Bit mask for conditions in which to stop command.
- * @param  i_isFastSpeed false = slow (12 H), true = fast (default).
+ * @brief  Create a maintenance command object.
+ * @param  i_cmdType  Maintenance command type which we want to create.
+ * @param  i_mba      An MBA target.
+ * @param  i_rank     The first rank to start with (see enum CtrlFlags for
+ *                    more details).
+ * @param  i_stopCond Bit mask for conditions in which to stop command.
+ * @param  i_flags    See enum CtrlFlags for details.
  * @return A mss_MaintCmdWrapper object, NULL if an internal function failed.
  * @note   This function allocates memory on heap for mss_MaintCmdWrapper
  *         object. It is the caller's responsibilty to delete this object.
- * @note   i_isFastSpeed will be ignored for super fast commands.
  */
 mss_MaintCmdWrapper * createMssCmd( mss_MaintCmdWrapper::CmdType i_cmdType,
-                                    TARGETING::TargetHandle_t i_mba,
-                                    uint32_t i_stopCond,
-                                    bool i_isFastSpeed = true );
-
-/**
- * @brief  Create a maintenance command object that will run on all memory
- *         behind the given rank.
- * @param  i_cmdType     Maintenance command type which we want to create.
- * @param  i_rank        The target rank.
- * @param  i_mba         An MBA target.
- * @param  i_stopCond    Bit mask for conditions in which to stop command.
- * @param  i_isFastSpeed false = slow (12 H), true = fast (default).
- * @param  i_slaveOnly   true = slave rank only, false = master rank (default).
- * @return A mss_MaintCmdWrapper object, NULL if an internal function failed.
- * @note   This function allocates memory on heap for mss_MaintCmdWrapper
- *         object. It is the caller's responsibilty to delete this object.
- * @note   i_isFastSpeed will be ignored for super fast commands.
- */
-mss_MaintCmdWrapper * createMssCmd( mss_MaintCmdWrapper::CmdType i_cmdType,
-                                    TARGETING::TargetHandle_t i_mba,
-                                    const CenRank & i_rank, uint32_t i_stopCond,
-                                    bool i_isFastSpeed = true,
-                                    bool i_slaveOnly = false );
+                            TARGETING::TargetHandle_t i_mba,
+                            const CenRank & i_rank, uint32_t i_stopCond,
+                            uint32_t i_flags = mss_MaintCmdWrapper::NO_FLAGS );
 
 } // end namespace PlatServices
 

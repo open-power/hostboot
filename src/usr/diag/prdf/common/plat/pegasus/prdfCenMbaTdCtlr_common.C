@@ -94,16 +94,6 @@ int32_t CenMbaTdCtlrCommon::prepareNextCmd()
 
     do
     {
-        CenMbaDataBundle * mbadb = getMbaDataBundle( iv_mbaChip );
-        ExtensibleChip * membChip = mbadb->getMembChip();
-        if ( NULL == membChip )
-        {
-            PRDF_ERR( PRDF_FUNC"getMembChip() failed" );
-            o_rc = FAIL; break;
-        }
-
-        uint32_t mbaPos = getTargetPosition( iv_mbaChip->GetChipHandle() );
-
         //----------------------------------------------------------------------
         // Clean up previous command
         //----------------------------------------------------------------------
@@ -119,8 +109,8 @@ int32_t CenMbaTdCtlrCommon::prepareNextCmd()
         // Clear ECC counters
         //----------------------------------------------------------------------
 
-        const char * reg_str = ( 0 == mbaPos ) ? "MBA0_MBSTR" : "MBA1_MBSTR";
-        SCAN_COMM_REGISTER_CLASS * mbstr = membChip->getRegister( reg_str );
+        const char * reg_str = (0 == iv_mbaPos) ? "MBA0_MBSTR" : "MBA1_MBSTR";
+        SCAN_COMM_REGISTER_CLASS * mbstr = iv_membChip->getRegister( reg_str );
         o_rc = mbstr->Read();
         if ( SUCCESS != o_rc )
         {
@@ -141,18 +131,24 @@ int32_t CenMbaTdCtlrCommon::prepareNextCmd()
         // the register cache to avoid clearing the counters again with a write
         // from the out-of-date cached copy.
         RegDataCache & cache = RegDataCache::getCachedRegisters();
-        cache.flush( membChip, mbstr );
+        cache.flush( iv_membChip, mbstr );
 
         //----------------------------------------------------------------------
         // Clear ECC FIRs
         //----------------------------------------------------------------------
 
-        reg_str = ( 0 == mbaPos ) ? "MBA0_MBSECCFIR_AND" : "MBA1_MBSECCFIR_AND";
-        SCAN_COMM_REGISTER_CLASS * firand = membChip->getRegister( reg_str );
+        reg_str = (0 == iv_mbaPos) ? "MBA0_MBSECCFIR_AND"
+                                   : "MBA1_MBSECCFIR_AND";
+        SCAN_COMM_REGISTER_CLASS * firand = iv_membChip->getRegister( reg_str );
         firand->setAllBits();
 
-        // Clear MPE bit for this rank.
-        firand->ClearBit( 20 + iv_rank.getMaster() );
+        // Clear all MPE bits.
+        // This will need to be done when starting a TD procedure or background
+        // scrubbing. iv_rank may not be set when starting background scrubbing
+        // and technically there should only be one of these MPE bits on at a
+        // time so we should not have to worry about losing an attention by
+        // clearing them all.
+        firand->SetBitFieldJustified( 20, 8, 0 );
 
         // Clear NCE, SCE, MCE, RCE, SUE, UE bits (36-41)
         firand->SetBitFieldJustified( 36, 6, 0 );
@@ -168,7 +164,7 @@ int32_t CenMbaTdCtlrCommon::prepareNextCmd()
                                 iv_mbaChip->getRegister("MBASPA_AND");
         spaAnd->setAllBits();
 
-        // clear threshold exceeded attentions
+        // Clear threshold exceeded attentions
         spaAnd->SetBitFieldJustified( 1, 4, 0 );
 
         o_rc = spaAnd->Write();
@@ -226,23 +222,12 @@ int32_t CenMbaTdCtlrCommon::checkEccErrors( uint16_t & o_eccErrorMask )
 
     o_eccErrorMask = NO_ERROR;
 
-    TargetHandle_t mba = iv_mbaChip->GetChipHandle();
-
     do
     {
-        CenMbaDataBundle * mbadb = getMbaDataBundle( iv_mbaChip );
-        ExtensibleChip * membChip = mbadb->getMembChip();
-        if ( NULL == membChip )
-        {
-            PRDF_ERR( PRDF_FUNC"getMembChip() failed: MBA=0x%08x",
-                      getHuid(mba) );
-            o_rc = FAIL; break;
-        }
-
-        const char * reg_str = ( 0 == getTargetPosition(mba) )
-                                    ? "MBA0_MBSECCFIR" : "MBA1_MBSECCFIR";
-        SCAN_COMM_REGISTER_CLASS * mbsEccFir = membChip->getRegister( reg_str );
-
+        const char * reg_str = (0 == iv_mbaPos) ? "MBA0_MBSECCFIR"
+                                                : "MBA1_MBSECCFIR";
+        SCAN_COMM_REGISTER_CLASS * mbsEccFir
+                                        = iv_membChip->getRegister( reg_str );
         o_rc = mbsEccFir->Read();
         if ( SUCCESS != o_rc )
         {
@@ -306,8 +291,6 @@ int32_t CenMbaTdCtlrCommon::handleMCE_VCM2( STEP_CODE_DATA_STRUCT & io_sc )
         }
 
         io_sc.service_data->SetErrorSig( PRDFSIG_VcmVerified );
-
-        CalloutUtil::calloutMark( mba, iv_rank, iv_mark, io_sc );
 
         if ( areDramRepairsDisabled() )
         {
@@ -524,6 +507,60 @@ int32_t CenMbaTdCtlrCommon::handleMCE_DSD2( STEP_CODE_DATA_STRUCT & io_sc )
 
 //------------------------------------------------------------------------------
 
+int32_t CenMbaTdCtlrCommon::setRtEteThresholds()
+{
+    #define PRDF_FUNC "[CenMbaTdCtlrCommon::setRtEteThresholds] "
+
+    int32_t o_rc = SUCCESS;
+
+    do
+    {
+        const char * reg_str = (0 == iv_mbaPos) ? "MBA0_MBSTR" : "MBA1_MBSTR";
+        SCAN_COMM_REGISTER_CLASS * mbstr = iv_membChip->getRegister( reg_str );
+        o_rc = mbstr->Read();
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC"Read() failed on %s", reg_str );
+            break;
+        }
+
+        // TODO: RTC 88720 The soft and intermittent CE thresholds will be
+        //       calculated based on the per DRAM threshold similar to the IPL
+        //       CE analysis.
+        uint32_t softIntCe = 1;
+
+        // Only care about retry CEs if there are a lot of them. So the
+        // threshold will be high in the field. However, in MNFG the retry CEs
+        // will be handled differently by putting every occurrence in the RCE
+        // table and doing targeted diagnostics when needed.
+        uint32_t retryCe = mfgMode() ? 1 : 2047;
+
+        uint32_t hardCe = 1; // Always stop on first occurrence.
+
+        mbstr->SetBitFieldJustified(  4, 12, softIntCe );
+        mbstr->SetBitFieldJustified( 16, 12, softIntCe );
+        mbstr->SetBitFieldJustified( 28, 12, hardCe    );
+        mbstr->SetBitFieldJustified( 40, 12, retryCe   );
+
+        // Set the per symbol counters to count soft, intermittent, and hard CEs
+        mbstr->SetBitFieldJustified( 55, 3, 0x7 );
+
+        o_rc = mbstr->Write();
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC"Write() failed on %s", reg_str );
+            break;
+        }
+
+    } while(0);
+
+    return o_rc;
+
+    #undef PRDF_FUNC
+}
+
+//------------------------------------------------------------------------------
+
 void CenMbaTdCtlrCommon::badPathErrorHandling( STEP_CODE_DATA_STRUCT & io_sc )
 {
     #define PRDF_FUNC "[CenMbaTdCtlrCommon::badPathErrorHandling] "
@@ -537,10 +574,6 @@ void CenMbaTdCtlrCommon::badPathErrorHandling( STEP_CODE_DATA_STRUCT & io_sc )
             iv_mark.getSM().getSymbol() );
 
     iv_tdState = NO_OP;
-
-    int32_t l_rc = cleanupPrevCmd(); // Just in case.
-    if ( SUCCESS != l_rc )
-        PRDF_ERR( PRDF_FUNC"cleanupPrevCmd() failed" );
 
     io_sc.service_data->SetErrorSig( PRDFSIG_MaintCmdComplete_ERROR );
     io_sc.service_data->SetServiceCall();

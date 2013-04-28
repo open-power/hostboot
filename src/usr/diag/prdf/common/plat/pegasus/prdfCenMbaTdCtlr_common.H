@@ -95,6 +95,24 @@ class CenMbaTdCtlrCommon
         RETRY_CTE = 0x40,     ///< Retry CE threshold exceeed
     };
 
+    // Common stop conditions
+    enum StopConditions
+    {
+        COND_TARGETED_CMD =
+            mss_MaintCmd::STOP_ON_END_ADDRESS |
+            mss_MaintCmd::ENABLE_CMD_COMPLETE_ATTENTION,
+
+        COND_BG_SCRUB =
+            mss_MaintCmd::STOP_ON_HARD_NCE_ETE |
+            mss_MaintCmd::STOP_ON_INT_NCE_ETE  |
+            mss_MaintCmd::STOP_ON_SOFT_NCE_ETE |
+            mss_MaintCmd::STOP_ON_RETRY_CE_ETE |
+            mss_MaintCmd::STOP_ON_MPE |
+            mss_MaintCmd::STOP_ON_UE |
+            mss_MaintCmd::STOP_IMMEDIATE |
+            mss_MaintCmd::ENABLE_CMD_COMPLETE_ATTENTION,
+     };
+
   public: // functions
 
     /**
@@ -283,6 +301,7 @@ class CenMbaTdCtlrCommon
     /**
      * @brief  Preforms cleanup tasks that need to be done before starting the
      *         next maintenance command (i.e. clear scrub counter).
+     * @note   Will call cleanupPrevCmd() as part of the preparations.
      * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
      */
     virtual int32_t prepareNextCmd();
@@ -320,6 +339,16 @@ class CenMbaTdCtlrCommon
     virtual int32_t handleMCE_DSD2( STEP_CODE_DATA_STRUCT & io_sc );
 
     /**
+     * @brief  Will set the threshold for all runtime ETE attentions in
+     *         hardware.
+     * @note   This only sets the runtime thresholds but is a common function
+     *         because these thresholds will need to be set before starting the
+     *         initial fast scrub at the end of Hostboot.
+     * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
+     */
+    virtual int32_t setRtEteThresholds();
+
+    /**
      * @brief This class is designed such that all functions will eventually
      *        return any bad error code to the top level public functions such
      *        as handleCmdCompleteEvent() and handleTdEvent(). This is a common
@@ -331,8 +360,14 @@ class CenMbaTdCtlrCommon
 
   protected: // instance variables
 
-    /** The memory controller chip that this TD controller acts on. */
+    /** The MBA chip that this TD controller acts on. */
     ExtensibleChip * iv_mbaChip;
+
+    /** The MEMBUF chip connected iv_mbaChip. */
+    ExtensibleChip * iv_membChip;
+
+    /** The position number (0-1) relative to the connected MEMBUF. */
+    uint32_t iv_mbaPos;
 
     /** Indicates if TD controller is initialized. */
     bool iv_initialized;

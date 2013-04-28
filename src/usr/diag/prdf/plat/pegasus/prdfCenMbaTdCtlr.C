@@ -119,12 +119,32 @@ int32_t CenMbaTdCtlr::handleCmdCompleteEvent( STEP_CODE_DATA_STRUCT & io_sc )
         // Do some cleanup if the TD procedure is complete.
         if ( !isInTdMode() )
         {
-            o_rc = exitTdSequence();
+            // Clean up the previous command
+            // PRD is not starting another command but MDIA might be so clear
+            // the counters and FIRs as well.
+            o_rc = prepareNextCmd();
             if ( SUCCESS != o_rc )
             {
-                PRDF_ERR( PRDF_FUNC"exitTdSequence() failed" );
+                PRDF_ERR( PRDF_FUNC"prepareNextCmd() failed" );
                 break;
             }
+
+            // Inform MDIA about command complete
+            // Note that we only want to send the command complete message if
+            // everything above is successful because a bad return code will
+            // result in a SKIP_MBA message sent. There is no need to send
+            // redundant messages.
+            o_rc = signalMdiaCmdComplete();
+            if ( SUCCESS != o_rc )
+            {
+                PRDF_ERR( PRDF_FUNC"signalMdiaCmdComplete() failed" );
+                break;
+            }
+
+            // Clear out the mark, just in case. This is so we don't
+            // accidentally callout this mark on another rank in an error path
+            // scenario.
+            iv_mark = CenMark();
         }
 
     } while(0);
@@ -134,8 +154,12 @@ int32_t CenMbaTdCtlr::handleCmdCompleteEvent( STEP_CODE_DATA_STRUCT & io_sc )
         PRDF_ERR( PRDF_FUNC"Failed." );
         badPathErrorHandling( io_sc );
 
+        int32_t l_rc = cleanupPrevCmd(); // Just in case.
+        if ( SUCCESS != l_rc )
+            PRDF_ERR( PRDF_FUNC"cleanupPrevCmd() failed" );
+
         // Tell MDIA to skip further analysis on this MBA.
-        int32_t l_rc = mdiaSendEventMsg( mba, MDIA::SKIP_MBA );
+        l_rc = mdiaSendEventMsg( mba, MDIA::SKIP_MBA );
         if ( SUCCESS != l_rc )
             PRDF_ERR( PRDF_FUNC"mdiaSendEventMsg(SKIP_MBA) failed" );
     }
@@ -167,6 +191,98 @@ int32_t CenMbaTdCtlr::handleTdEvent( STEP_CODE_DATA_STRUCT & io_sc,
 }
 
 //------------------------------------------------------------------------------
+
+int32_t CenMbaTdCtlr::startInitialBgScrub()
+{
+    #define PRDF_FUNC "[CenMbaTdCtlr::startInitialBgScrub] "
+
+    int32_t o_rc = SUCCESS;
+
+    iv_tdState = NO_OP;
+
+    // NOTE: It is possible for a chip mark to have been placed between MDIA
+    //       and the initial start scrub. Those unverified chip marks will be
+    //       found in the runtime TD controller's initialize() function. The
+    //       chip marks will then be verified after the initial fast scrub is
+    //       complete.
+
+    TargetHandle_t mba = iv_mbaChip->GetChipHandle();
+
+    do
+    {
+        // Should have been initialized during MDIA. If not, there is a serious
+        // logic issue.
+        if ( !iv_initialized )
+        {
+            PRDF_ERR( PRDF_FUNC"TD controller not initialized." );
+            break;
+        }
+
+        // Cleanup hardware before starting the maintenance command. This will
+        // clear the ECC counters, which must be done before setting the ETE
+        // thresholds.
+        o_rc = prepareNextCmd();
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC"prepareNextCmd() failed" );
+            break;
+        }
+
+        // Set the default thresholds for all ETE attentions.
+        o_rc = setRtEteThresholds();
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC"setRtEteThresholds() failed" );
+            break;
+        }
+
+        // Need the first rank in memory.
+        CenAddr startAddr, junk;
+        o_rc = getMemAddrRange( mba, startAddr, junk );
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC"getMemAddrRange() failed" );
+            break;
+        }
+
+        // Start the initial fast scrub.
+        iv_mssCmd = createMssCmd( mss_MaintCmdWrapper::TIMEBASE_SCRUB,
+                                  mba, startAddr.getRank(), COND_TARGETED_CMD,
+                                  mss_MaintCmdWrapper::END_OF_MEMORY );
+        if ( NULL == iv_mssCmd )
+        {
+            PRDF_ERR( PRDF_FUNC"createMssCmd() failed" );
+            o_rc = FAIL; break;
+        }
+
+        o_rc = iv_mssCmd->setupAndExecuteCmd();
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC"setupAndExecuteCmd() failed" );
+            break;
+        }
+
+    } while (0);
+
+    if ( SUCCESS != o_rc )
+    {
+        // Can't use badPathErrorHandling() because there is no SDC created when
+        // this function is called.
+
+        PRDF_ERR( PRDF_FUNC"iv_mbaChip:0x%08x iv_initialized:%c",
+                  iv_mbaChip->GetId(), iv_initialized ? 'T' : 'F' );
+
+        int32_t l_rc = cleanupPrevCmd(); // Just in case.
+        if ( SUCCESS != l_rc )
+            PRDF_ERR( PRDF_FUNC"cleanupPrevCmd() failed" );
+    }
+
+    return o_rc;
+
+    #undef PRDF_FUNC
+}
+
+//------------------------------------------------------------------------------
 //                            Private Functions
 //------------------------------------------------------------------------------
 
@@ -186,6 +302,23 @@ int32_t CenMbaTdCtlr::initialize()
         if ( TYPE_MBA != getTargetType(mba) )
         {
             PRDF_ERR( PRDF_FUNC"iv_mbaChip is not TYPE_MBA" );
+            o_rc = FAIL; break;
+        }
+
+        // Set iv_membChip.
+        CenMbaDataBundle * mbadb = getMbaDataBundle( iv_mbaChip );
+        iv_membChip = mbadb->getMembChip();
+        if ( NULL == iv_membChip )
+        {
+            PRDF_ERR( PRDF_FUNC"getMembChip() failed" );
+            o_rc = FAIL; break;
+        }
+
+        // Set iv_mbaPos.
+        iv_mbaPos = getTargetPosition( mba );
+        if ( MAX_MBA_PER_MEMBUF <= iv_mbaPos )
+        {
+            PRDF_ERR( PRDF_FUNC"iv_mbaPos=%d is invalid", iv_mbaPos );
             o_rc = FAIL; break;
         }
 
@@ -718,11 +851,8 @@ int32_t CenMbaTdCtlr::startVcmPhase1( STEP_CODE_DATA_STRUCT & io_sc )
         }
 
         // Start phase 1.
-        uint32_t stopCond = ( mss_MaintCmd::STOP_ON_END_ADDRESS |
-                              mss_MaintCmd::ENABLE_CMD_COMPLETE_ATTENTION );
-
         iv_mssCmd = createMssCmd( mss_MaintCmdWrapper::TIMEBASE_STEER_CLEANUP,
-                                  mba, iv_rank, stopCond );
+                                  mba, iv_rank, COND_TARGETED_CMD );
         if ( NULL == iv_mssCmd )
         {
             PRDF_ERR( PRDF_FUNC"createMssCmd() failed");
@@ -766,11 +896,8 @@ int32_t CenMbaTdCtlr::startVcmPhase2( STEP_CODE_DATA_STRUCT & io_sc )
         }
 
         // Start phase 2.
-        uint32_t stopCond = ( mss_MaintCmd::STOP_ON_END_ADDRESS |
-                              mss_MaintCmd::ENABLE_CMD_COMPLETE_ATTENTION );
-
         iv_mssCmd = createMssCmd( mss_MaintCmdWrapper::SUPERFAST_READ,
-                                  mba, iv_rank, stopCond );
+                                  mba, iv_rank, COND_TARGETED_CMD );
         if ( NULL == iv_mssCmd )
         {
             PRDF_ERR( PRDF_FUNC"createMssCmd() failed");
@@ -822,11 +949,8 @@ int32_t CenMbaTdCtlr::startDsdPhase1( STEP_CODE_DATA_STRUCT & io_sc )
         }
 
         // Start phase 1.
-        uint32_t stopCond = ( mss_MaintCmd::STOP_ON_END_ADDRESS |
-                              mss_MaintCmd::ENABLE_CMD_COMPLETE_ATTENTION );
-
         iv_mssCmd = createMssCmd( mss_MaintCmdWrapper::TIMEBASE_STEER_CLEANUP,
-                                  mba, iv_rank, stopCond );
+                                  mba, iv_rank, COND_TARGETED_CMD );
         if ( NULL == iv_mssCmd )
         {
             PRDF_ERR( PRDF_FUNC"createMssCmd() failed");
@@ -870,11 +994,8 @@ int32_t CenMbaTdCtlr::startDsdPhase2( STEP_CODE_DATA_STRUCT & io_sc )
         }
 
         // Start phase 2.
-        uint32_t stopCond = ( mss_MaintCmd::STOP_ON_END_ADDRESS |
-                              mss_MaintCmd::ENABLE_CMD_COMPLETE_ATTENTION );
-
         iv_mssCmd = createMssCmd( mss_MaintCmdWrapper::SUPERFAST_READ,
-                                  mba, iv_rank, stopCond );
+                                  mba, iv_rank, COND_TARGETED_CMD );
         if ( NULL == iv_mssCmd )
         {
             PRDF_ERR( PRDF_FUNC"createMssCmd() failed");
@@ -927,11 +1048,9 @@ int32_t CenMbaTdCtlr::startTpsPhase1( STEP_CODE_DATA_STRUCT & io_sc )
         }
 
         // Start phase 1.
-        uint32_t stopCond = ( mss_MaintCmd::STOP_ON_END_ADDRESS |
-                              mss_MaintCmd::ENABLE_CMD_COMPLETE_ATTENTION );
-
         iv_mssCmd = createMssCmd( mss_MaintCmdWrapper::TIMEBASE_SCRUB,
-                                  mba, iv_rank, stopCond, true, true );
+                                  mba, iv_rank, COND_TARGETED_CMD,
+                                  mss_MaintCmdWrapper::SLAVE_RANK_ONLY );
         if ( NULL == iv_mssCmd )
         {
             PRDF_ERR( PRDF_FUNC"createMssCmd() failed");
@@ -984,11 +1103,9 @@ int32_t CenMbaTdCtlr::startTpsPhase2( STEP_CODE_DATA_STRUCT & io_sc )
         }
 
         // Start phase 2.
-        uint32_t stopCond = ( mss_MaintCmd::STOP_ON_END_ADDRESS |
-                              mss_MaintCmd::ENABLE_CMD_COMPLETE_ATTENTION );
-
         iv_mssCmd = createMssCmd( mss_MaintCmdWrapper::TIMEBASE_SCRUB,
-                                  mba, iv_rank, stopCond, true, true );
+                                  mba, iv_rank, COND_TARGETED_CMD,
+                                  mss_MaintCmdWrapper::SLAVE_RANK_ONLY );
         if ( NULL == iv_mssCmd )
         {
             PRDF_ERR( PRDF_FUNC"createMssCmd() failed");
@@ -1161,48 +1278,6 @@ int32_t CenMbaTdCtlr::handleMPE( STEP_CODE_DATA_STRUCT & io_sc )
 
     #undef PRDF_FUNC
 }
-//------------------------------------------------------------------------------
-
-int32_t CenMbaTdCtlr::exitTdSequence()
-{
-    #define PRDF_FUNC "[CenMbaTdCtlr::exitTdSequence] "
-
-    int32_t o_rc = SUCCESS;
-
-    do
-    {
-        // Clean up the previous command
-        // PRD is not starting another command but MDIA might be so clear the
-        // counters and FIRs as well.
-        o_rc = prepareNextCmd();
-        if ( SUCCESS != o_rc )
-        {
-            PRDF_ERR( PRDF_FUNC"prepareNextCmd() failed" );
-            break;
-        }
-
-        // Inform MDIA about command complete
-        // Note that we only want to send the command complete message if
-        // everything above is successful because a bad return code will result
-        // in a SKIP_MBA message sent. There is no need to send redundant
-        // messages.
-        o_rc = signalMdiaCmdComplete();
-        if ( SUCCESS != o_rc )
-        {
-            PRDF_ERR( PRDF_FUNC"signalMdiaCmdComplete() failed" );
-            break;
-        }
-
-        // Clear out the mark, just in case. This is so we don't accidentally
-        // callout this mark on another rank in an error path scenario.
-        iv_mark = CenMark();
-
-    } while (0);
-
-    return o_rc;
-
-    #undef PRDF_FUNC
-}
 
 //------------------------------------------------------------------------------
 
@@ -1250,6 +1325,8 @@ int32_t CenMbaTdCtlr::signalMdiaCmdComplete()
     #undef PRDF_FUNC
 }
 
+//------------------------------------------------------------------------------
+
 // Do the setup for mnfg IPL CE
 int32_t CenMbaTdCtlr::mnfgCeSetup()
 {
@@ -1259,18 +1336,8 @@ int32_t CenMbaTdCtlr::mnfgCeSetup()
 
     do
     {
-        CenMbaDataBundle * mbadb = getMbaDataBundle( iv_mbaChip );
-        ExtensibleChip * membChip = mbadb->getMembChip();
-        if ( NULL == membChip )
-        {
-            PRDF_ERR( PRDF_FUNC"getMembChip() failed" );
-            o_rc = FAIL; break;
-        }
-
-        uint32_t mbaPos = getTargetPosition( iv_mbaChip->GetChipHandle() );
-
-        const char * reg_str = ( 0 == mbaPos ) ? "MBA0_MBSTR" : "MBA1_MBSTR";
-        SCAN_COMM_REGISTER_CLASS * mbstr = membChip->getRegister( reg_str );
+        const char * reg_str = (0 == iv_mbaPos) ? "MBA0_MBSTR" : "MBA1_MBSTR";
+        SCAN_COMM_REGISTER_CLASS * mbstr = iv_membChip->getRegister( reg_str );
         o_rc = mbstr->Read();
         if ( SUCCESS != o_rc )
         {

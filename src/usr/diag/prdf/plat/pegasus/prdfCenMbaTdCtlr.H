@@ -84,6 +84,15 @@ class CenMbaTdCtlr : public CenMbaTdCtlrCommon
     int32_t startTpsPhase1( STEP_CODE_DATA_STRUCT & io_sc );
     int32_t startTpsPhase2( STEP_CODE_DATA_STRUCT & io_sc );
 
+  public: // functions
+
+    /**
+     * @brief  Start the initial background scrub. This is done at the very end
+     *         of Hostboot after the last call to checkForIplAttns().
+     * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
+     */
+    int32_t startInitialBgScrub();
+
   private: // functions
 
     /**
@@ -100,13 +109,6 @@ class CenMbaTdCtlr : public CenMbaTdCtlrCommon
      * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
      */
     int32_t handleMPE( STEP_CODE_DATA_STRUCT & io_sc );
-
-    /**
-     * @brief  Handle cleanup when TD sequence is complete and TD state machine
-     *         will reset.
-     * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
-     */
-    int32_t exitTdSequence();
 
     /**
      * @brief  Sends a message to MDIA that a maintenance command has completed.

@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/diag/prdf/common/framework/config/prdfMbaDomain.H $   */
+/* $Source: src/usr/diag/prdf/framework/config/prdfMbaDomain.H $          */
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
@@ -21,40 +21,31 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-#ifndef __PRDFMBADOMAIN_H
-#define __PRDFMBADOMAIN_H
+#ifndef __prdfMbaDomain_H
+#define __prdfMbaDomain_H
 
-#include <prdfRuleChipDomain.H>
+#include <prdfMbaDomain_common.H>
 
 namespace PRDF
 {
 
-class MbaDomain : public RuleChipDomain
+class MbaDomain : public MbaDomainCommon
 {
   public:
 
-    /**
-     * @brief Constructor
-     * @param i_did  The domain ID
-     * @param i_size The projected size of the domain
-     */
     MbaDomain( DOMAIN_ID i_did, uint32_t i_size = MBA_DOMAIN_SIZE ) :
-        RuleChipDomain( i_did, i_size )
+        MbaDomainCommon( i_did, i_size )
     {}
 
     /**
-     * @brief  Query for an attention of a specific type in this domain
-     * @param  i_attnType [MACHINE_CHECK | RECOVERABLE | SPECIAL]
-     * @return false
-     * @note   This function will always return false. That way PRD will look
-     *         for the attention via the memory buffer chip.
+     * @brief Starts memory background scrubbing for each MBA in the node.
+     * @param Non-SUCCESS if an internal function failed, SUCCESS otherwise.
      */
-    virtual bool Query( ATTENTION_TYPE i_attnType )
-    {  return false;  }
+    int32_t startScrub();
 
 };
 
 } // end namespace PRDF
 
-#endif /* __PRDFMBADOMAIN_H */
+#endif /* __prdfMbaDomain_H */
 

@@ -59,6 +59,18 @@ extern int32_t restoreDramRepairs( const TARGETING::TargetHandle_t i_mba );
 extern int32_t analyzeIplCEStats( const TARGETING::TargetHandle_t i_mba,
                                   bool &o_calloutMade );
 
+/**
+ * @brief  Starts memory background scrubbing on all MBAs in the node.
+ *
+ * This will only start the initial fast scrub of all memory. PRD on the FSP or
+ * HostServices (SP-less machines) will need to resume normal background
+ * scrubbing once this initial fast scrub is complete.
+ *
+ * @return If an error log is returned, then some internal function failed. See
+ *         the FFDC in the error log for failure details.
+ */
+extern errlHndl_t startScrub();
+
 } // end namespace PRDF
 
 #endif // __prdfMain_H

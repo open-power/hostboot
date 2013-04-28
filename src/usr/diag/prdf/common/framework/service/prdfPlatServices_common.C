@@ -746,39 +746,40 @@ mss_MaintCmdWrapper * createMssCmd( mss_MaintCmdWrapper::CmdType i_cmdType,
 //------------------------------------------------------------------------------
 
 mss_MaintCmdWrapper * createMssCmd( mss_MaintCmdWrapper::CmdType i_cmdType,
-                                    TargetHandle_t i_mba, uint32_t i_stopCond,
-                                    bool i_isFastSpeed )
-{
-    mss_MaintCmdWrapper * o_cmd = NULL;
-
-    ecmdDataBufferBase sAddr(64), eAddr(64);
-    int32_t l_rc = getMemAddrRange( i_mba, MSS_ALL_RANKS, sAddr, eAddr );
-    if ( SUCCESS == l_rc )
-    {
-        o_cmd = createMssCmd( i_cmdType, i_mba, i_stopCond, i_isFastSpeed,
-                              sAddr, eAddr );
-    }
-
-    return o_cmd;
-}
-
-//------------------------------------------------------------------------------
-
-mss_MaintCmdWrapper * createMssCmd( mss_MaintCmdWrapper::CmdType i_cmdType,
                                     TargetHandle_t i_mba,
                                     const CenRank & i_rank, uint32_t i_stopCond,
-                                    bool i_isFastSpeed, bool i_slaveOnly )
+                                    uint32_t i_flags )
 {
     mss_MaintCmdWrapper * o_cmd = NULL;
 
-    ecmdDataBufferBase sAddr(64), eAddr(64);
-    int32_t l_rc = getMemAddrRange( i_mba, i_rank.getMaster(), sAddr, eAddr,
-                                    i_rank.getSlave(), i_slaveOnly );
-    if ( SUCCESS == l_rc )
+    bool slaveOnly = ( 0 != (i_flags & mss_MaintCmdWrapper::SLAVE_RANK_ONLY) );
+    bool allMemory = ( 0 != (i_flags & mss_MaintCmdWrapper::END_OF_MEMORY  ) );
+    bool fastScrub = ( 0 == (i_flags & mss_MaintCmdWrapper::BG_SCRUB       ) );
+
+    do
     {
-        o_cmd = createMssCmd( i_cmdType, i_mba, i_stopCond, i_isFastSpeed,
+
+        int32_t l_rc = SUCCESS;
+
+        // Get the address range of i_rank.
+        ecmdDataBufferBase sAddr(64), eAddr(64);
+        l_rc = getMemAddrRange( i_mba, i_rank.getMaster(), sAddr, eAddr,
+                                i_rank.getSlave(), slaveOnly );
+        if ( SUCCESS != l_rc ) break;
+
+        // Get the last address in memory, if needed.
+        if ( allMemory )
+        {
+            ecmdDataBufferBase junk(64);
+            l_rc = getMemAddrRange( i_mba, MSS_ALL_RANKS, junk, eAddr );
+            if ( SUCCESS != l_rc ) break;
+        }
+
+        // Create the command
+        o_cmd = createMssCmd( i_cmdType, i_mba, i_stopCond, fastScrub,
                               sAddr, eAddr );
-    }
+
+    } while (0);
 
     return o_cmd;
 }
