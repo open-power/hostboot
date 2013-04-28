@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2012              */
+/* COPYRIGHT International Business Machines Corp. 2011,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -29,6 +29,7 @@
 #include <assert.h>
 #include <sys/task.h>
 #include <arch/ppc.H>
+#include <kernel/misc.H>
 
 #include <kernel/hbterminatetypes.H>
 #include <kernel/terminate.H>
@@ -40,6 +41,11 @@ namespace TRACE { void (*traceCallback)(void*, size_t) = NULL; };
 
 extern "C" void __assert(AssertBehavior i_assertb, int i_line)
 {
+    if ((i_assertb == ASSERT_CRITICAL) && (KernelMisc::in_kernel_mode()))
+    {
+        i_assertb = ASSERT_KERNEL;
+    }
+
     switch (i_assertb)
     {
         case ASSERT_TRACE_DONE: // Custom trace was provided.

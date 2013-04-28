@@ -119,6 +119,7 @@ void* HeapManager::_allocate(size_t i_sz)
             g_smallheap_alloc_hw = g_smallheap_allocated;
         // test_pages();
 #endif
+        crit_assert(chunk->free);
         chunk->free = false;
         return &chunk->next;
     }
@@ -180,7 +181,7 @@ void* HeapManager::_reallocBig(void* i_ptr, size_t i_sz)
 
            break;
        }
-       bc = bc->next;
+       bc = (big_chunk_t*) (((uint64_t)bc->next) & 0x00000000FFFFFFFF);
    }
    return new_ptr;
 }
@@ -196,6 +197,7 @@ void HeapManager::_free(void * i_ptr)
         __sync_sub_and_fetch(&g_smallheap_count,1);
         __sync_sub_and_fetch(&g_smallheap_allocated,bucketByteSize(chunk->bucket));
 #endif
+        crit_assert(!chunk->free);
         push_bucket(chunk, chunk->bucket);
     }
 }
@@ -531,7 +533,7 @@ void* HeapManager::_allocateBig(size_t i_sz)
                 break;
             }
         }
-        bc = bc->next;
+        bc = (big_chunk_t*) (((uint64_t)bc->next) & 0x00000000FFFFFFFF);
     }
     if(!bc)
     {
@@ -570,7 +572,7 @@ bool HeapManager::_freeBig(void* i_ptr)
             result = true;
             break;
         }
-        bc = bc->next;
+        bc = (big_chunk_t*) (((uint64_t)bc->next) & 0x00000000FFFFFFFF);
     }
     return result;
 }
