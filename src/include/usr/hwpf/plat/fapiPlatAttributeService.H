@@ -69,51 +69,69 @@ namespace platAttrSvc
 {
 
 /**
- *  @brief Returns the system target
+ *  @brief Compile time check that a FAPI attribute is the same size as a
+ *         TARGETING attribute when they are direct mapped
  *
- *  @par Detailed Description:
- *      Returns the system target.  If the target service has not been
- *      initialized -or- there is any failure to acquire it, the function
- *      will assert
+ *  If the size is different then an undefined class is instantiated leading
+ *  to a compile time failure else an empty inline function is optimized out
+ *  by the compiler.
  *
- *  @return Target handle to the system target
+ *  @param[in] result of size comparison
  *
- *  @retval !NULL An actual target handle
- *  @retval NULL Not possible
+ *  @return Pointer to Targeting Target
  */
-TARGETING::Target* getSystemTarget();
+class ErrorFapiTargSizeMismatch;
+template<const bool SIZE_MISMATCH> void failIfFapiTargAttrSizeMismatch()
+{
+    ErrorFapiTargSizeMismatch();
+}
+template <> inline void failIfFapiTargAttrSizeMismatch<false>() {}
 
 /**
- *  @brief Returns a fapiReturn code containing information on an attribute
- *      access error
+ *  @brief Gets a Targeting attribute, this is called by the macro that maps a
+ *         FAPI Attribute get to a TARGETING attribute and should not be called
+ *         directly
  *
- *  @param[in] i_targAttrId Platform attribute ID
- *  @param[in] i_fapiAttrId FAPI attribute ID which maps to the platform
- *      attribute ID
- *  @param[in] i_pFapiTarget Pointer to the FAPI target holding the
- *      requested attribute
+ *  @param[in] i_pFapiTarget Pointer to FAPI Target
+ *  @param[in] i_targAttrId  TARGETING Attribute ID
+ *  @param[in] i_attrSize    Size of attribute in bytes
+ *  @param[in] o_pAttr       Pointer to attribute where value is copied to
  *
- *  @return fapiReturn code containing a platform generated error log
- *
- *  @retval FAPI_RC_PLAT_ERR_SEE_DATA (return code value) which informs
- *      caller there is a host boot error log attached
+ *  @return ReturnCode
  */
-fapi::ReturnCode createAttrAccessError(
-    const TARGETING::ATTRIBUTE_ID i_targAttrId,
-    const fapi::AttributeId       i_fapiAttrId,
-    const fapi::Target*           i_pFapiTarget);
+fapi::ReturnCode getTargetingAttr(const fapi::Target * i_pFapiTarget,
+                                  const TARGETING::ATTRIBUTE_ID i_targAttrId,
+                                  const uint32_t i_attrSize,
+                                  void * o_pAttr);
+
+/**
+ *  @brief Sets a Targeting attribute, this is called by the macro that maps a
+ *         FAPI Attribute set to a TARGETING attribute and should not be called
+ *         directly
+ *
+ *  @param[in] i_pFapiTarget Pointer to FAPI Target
+ *  @param[in] i_targAttrId  TARGETING Attribute ID
+ *  @param[in] i_attrSize    Size of attribute in bytes
+ *  @param[in] i_pAttr       Pointer to attribute where value is retrieved from
+ *
+ *  @return ReturnCode
+ */
+fapi::ReturnCode setTargetingAttr(const fapi::Target * i_pFapiTarget,
+                                  const TARGETING::ATTRIBUTE_ID i_targAttrId,
+                                  const uint32_t i_attrSize,
+                                  void * i_pAttr);
 
 /**
  * @brief This function is called by the FAPI_ATTR_GET macro when accessing
  * SPD ATTR. It should not be called directly
  *
- * @param[in]  i_target Target pointer to operate on
- * @param[in]  i_keyword SPD keyword
- * @param[out] o_data   Address of Storage for saving the attribute value
- * @param[in]  i_len    Size of storage
+ * @param[in]  i_pFapiTarget Target pointer to operate on
+ * @param[in]  i_keyword     SPD keyword
+ * @param[out] o_data        Address of Storage for saving the attribute value
+ * @param[in]  i_len         Size of storage
  * @return ReturnCode.  Zero on success, else platform specified error
  */
-fapi::ReturnCode fapiPlatGetSpdAttr(const fapi::Target * i_target,
+fapi::ReturnCode fapiPlatGetSpdAttr(const fapi::Target * i_pFapiTarget,
                                     const uint16_t i_keyword,
                                     void * o_data,
                                     size_t i_len );
@@ -122,13 +140,13 @@ fapi::ReturnCode fapiPlatGetSpdAttr(const fapi::Target * i_target,
  * @brief This function is called by the FAPI_ATTR_SET macro when accessing
  * SPD ATTR. It should not be called directly
  *
- * @param[in] i_target  Target pointer to operate on
- * @param[in] i_keyword SPD keyword
- * @param[in] i_data    Pointer to data
- * @param[in] i_len     Size of data
+ * @param[in] i_pFapiTarget Target pointer to operate on
+ * @param[in] i_keyword     SPD keyword
+ * @param[in] i_data        Pointer to data
+ * @param[in] i_len         Size of data
  * @return ReturnCode.  Zero on success, else platform specified error
  */
-fapi::ReturnCode fapiPlatSetSpdAttr(const fapi::Target * i_target,
+fapi::ReturnCode fapiPlatSetSpdAttr(const fapi::Target * i_pFapiTarget,
                                     const uint16_t i_keyword,
                                     void * i_data,
                                     size_t i_len );
@@ -159,33 +177,33 @@ fapi::ReturnCode fapiPlatGetMirrorBaseAddr(const fapi::Target * i_pMcsTarget,
  * @brief This function is called by the FAPI_ATTR_GET macro when getting
  * ATTR_CEN_DQ_TO_DIMM_CONN_DQ. It should not be called directly
  *
- * @param[in]  i_pDimmTarget DIMM target pointer
- * @param[out] o_data        Output data
+ * @param[in]  i_pDimmFapiTarget DIMM target pointer
+ * @param[out] o_data            Output data
  * @return ReturnCode.  Zero on success, else platform specified error
  */
-fapi::ReturnCode fapiPlatGetDqMapping(const fapi::Target * i_pDimmTarget,
+fapi::ReturnCode fapiPlatGetDqMapping(const fapi::Target * i_pDimmFapiTarget,
                                       uint8_t (&o_data)[DIMM_DQ_NUM_DQS]);
 
 /**
  * @brief This function is called by the FAPI_ATTR_GET macro when getting
  * ATTR_NAME. It should not be called directly
  *
- * @param[in]  i_pTarget Target pointer
- * @param[out] o_name    Output Name (from enum ATTR_NAME_Enum)
+ * @param[in]  i_pFapiTarget Target pointer
+ * @param[out] o_name        Output Name (from enum ATTR_NAME_Enum)
  * @return ReturnCode.   Zero on success, else platform specified error
  */
-fapi::ReturnCode fapiPlatGetTargetName(const fapi::Target * i_pTarget,
+fapi::ReturnCode fapiPlatGetTargetName(const fapi::Target * i_pFapiTarget,
                                        uint8_t & o_name);
 
 /**
  * @brief This function is called by the FAPI_ATTR_GET macro when getting
  * ATTR_FUNCTIONAL. It should not be called directly
  *
- * @param[in]  i_pTarget    Target pointer
- * @param[out] o_functional 1 = functional, else 0
+ * @param[in]  i_pFapiTarget    Target pointer
+ * @param[out] o_functional     1 = functional, else 0
  * @return ReturnCode.   Zero on success, else platform specified error
  */
-fapi::ReturnCode fapiPlatGetFunctional(const fapi::Target * i_pTarget,
+fapi::ReturnCode fapiPlatGetFunctional(const fapi::Target * i_pFapiTarget,
                                        uint8_t & o_functional);
 
 /**
@@ -429,30 +447,31 @@ fapi::ReturnCode fapiPlatGetSingleMemberEnableAttr(
 } // namespace fapi
 
 /**
- *  @brief Macro which directly maps a FAPI request to get a platform
- *      attribute to the equivalent host boot request
+ *  @brief Macro which directly maps a FAPI_ATTR_GET to a Targeting attr get
+ *
+ *  Firstly there is a compile time check that the FAPI Attribute has the same
+ *  size as the correpsonding TARGETING attribute, this is optimized out, then
+ *  there is a single function call
  */
 #define FAPI_PLAT_ATTR_SVC_GETMACRO_DIRECT(ID, PTARGET, VAL) \
-    ( ((PTARGET > 0) ? \
-        static_cast<TARGETING::Target*>( \
-            static_cast<const fapi::Target*>(PTARGET)->get()) \
-    : fapi::platAttrSvc::getSystemTarget())->tryGetAttr< \
-        FAPI_PLAT_ATTR_SVC_MACRO_DIRECT_FAPI_##ID>(VAL)) \
-            ? fapi::FAPI_RC_SUCCESS : fapi::platAttrSvc::createAttrAccessError( \
-                FAPI_PLAT_ATTR_SVC_MACRO_DIRECT_FAPI_##ID,fapi::ID,PTARGET)
+    (fapi::platAttrSvc::failIfFapiTargAttrSizeMismatch<sizeof(VAL) != \
+         sizeof(TARGETING::AttributeTraits \
+             <FAPI_PLAT_ATTR_SVC_MACRO_DIRECT_FAPI_##ID>::Type)>(), \
+     fapi::platAttrSvc::getTargetingAttr(PTARGET, \
+         FAPI_PLAT_ATTR_SVC_MACRO_DIRECT_FAPI_##ID, sizeof(VAL), &(VAL)))
 /**
- *  @brief Macro which directly maps a FAPI request to set a platform
- *      attribute to the equivalent host boot request
+ *  @brief Macro which directly maps a FAPI_ATTR_SET to a Targeting attr set
+ *
+ *  Firstly there is a compile time check that the FAPI Attribute has the same
+ *  size as the correpsonding TARGETING attribute, this is optimized out, then
+ *  there is a single function call
  */
 #define FAPI_PLAT_ATTR_SVC_SETMACRO_DIRECT(ID, PTARGET, VAL) \
-    ( ((PTARGET > 0) ? \
-        static_cast<TARGETING::Target*>( \
-            static_cast<const fapi::Target*>(PTARGET)->get()) \
-    : fapi::platAttrSvc::getSystemTarget())->trySetAttr< \
-         FAPI_PLAT_ATTR_SVC_MACRO_DIRECT_FAPI_##ID>(VAL)) \
-            ? fapi::FAPI_RC_SUCCESS : fapi::platAttrSvc::createAttrAccessError( \
-                FAPI_PLAT_ATTR_SVC_MACRO_DIRECT_FAPI_##ID,fapi::ID,PTARGET)
-
+    (fapi::platAttrSvc::failIfFapiTargAttrSizeMismatch<sizeof(VAL) != \
+         sizeof(TARGETING::AttributeTraits \
+             <FAPI_PLAT_ATTR_SVC_MACRO_DIRECT_FAPI_##ID>::Type)>(), \
+     fapi::platAttrSvc::setTargetingAttr(PTARGET, \
+         FAPI_PLAT_ATTR_SVC_MACRO_DIRECT_FAPI_##ID, sizeof(VAL), &(VAL)))
 
 //------------------------------------------------------------------------------
 // MACRO to support the overriding of Chip EC Feature Attributes

@@ -56,84 +56,67 @@ namespace fapi
 
 namespace platAttrSvc
 {
+
 //******************************************************************************
-// fapi::platAttrSvc::getHostbootTarget
+// fapi::platAttrSvc::getTargetingTarget
 //******************************************************************************
-fapi::ReturnCode getHostbootTarget(
+fapi::ReturnCode getTargetingTarget(
     const fapi::Target* i_pFapiTarget,
     TARGETING::Target* & o_pTarget,
     const TARGETING::TYPE i_expectedType = TARGETING::TYPE_NA)
 {
     fapi::ReturnCode l_rc;
 
-    // Check that the FAPI Target pointer is not NULL
     if (i_pFapiTarget == NULL)
     {
-        FAPI_ERR("getHostbootTarget. NULL FAPI Target passed");
-
-        /*@
-         *  @errortype
-         *  @moduleid   MOD_ATTR_GET_HB_TARGET
-         *  @reasoncode RC_NULL_FAPI_TARGET
-         *  @devdesc    NULL FAPI Target passed to attribute access macro
-         */
-        errlHndl_t l_pError = new ERRORLOG::ErrlEntry(
-            ERRORLOG::ERRL_SEV_INFORMATIONAL,
-            fapi::MOD_ATTR_GET_HB_TARGET,
-            fapi::RC_NULL_FAPI_TARGET);
-        l_rc.setPlatError(reinterpret_cast<void *> (l_pError));
+        TARGETING::targetService().getTopLevelTarget(o_pTarget);
     }
     else
     {
-        // Extract the Hostboot Target pointer
         o_pTarget = reinterpret_cast<TARGETING::Target*>(i_pFapiTarget->get());
+    }
 
-        // Check that the Hostboot Target pointer is not NULL
-        if (o_pTarget == NULL)
+    if (o_pTarget == NULL)
+    {
+        // FAPI Target contained a NULL Targ handle or no top level target!
+        FAPI_ERR("getTargetingTarget. NULL Targ Target");
+
+        /*@
+         *  @errortype
+         *  @moduleid   MOD_ATTR_GET_TARGETING_TARGET
+         *  @reasoncode RC_EMBEDDED_NULL_TARGET_PTR
+         *  @devdesc    NULL TARG Target passed to attribute access macro
+         */
+        errlHndl_t l_pError = new ERRORLOG::ErrlEntry(
+            ERRORLOG::ERRL_SEV_INFORMATIONAL,
+            MOD_ATTR_GET_TARGETING_TARGET,
+            RC_EMBEDDED_NULL_TARGET_PTR);
+        l_rc.setPlatError(reinterpret_cast<void *> (l_pError));
+    }
+    else if (i_expectedType != TARGETING::TYPE_NA)
+    {
+        TARGETING::TYPE l_type = o_pTarget->getAttr<TARGETING::ATTR_TYPE>();
+
+        if (l_type != i_expectedType)
         {
-            FAPI_ERR("getHostbootTarget. NULL Hostbot Target passed");
+            FAPI_ERR("getTargetingTarget. Type: %d, expected %d", l_type,
+                     i_expectedType);
 
             /*@
              *  @errortype
-             *  @moduleid   MOD_ATTR_GET_HB_TARGET
-             *  @reasoncode RC_EMBEDDED_NULL_TARGET_PTR
-             *  @devdesc    NULL HOSTBOOT Target passed to attribute access macro
+             *  @moduleid   MOD_ATTR_GET_TARGETING_TARGET
+             *  @reasoncode RC_UNEXPECTED_TARGET_TYPE
+             *  @userdata1  Target Type
+             *  @userdata2  Expected Target Type
+             *  @devdesc    Unexpected Target Type passed to attribute access
+             *              macro
              */
             errlHndl_t l_pError = new ERRORLOG::ErrlEntry(
                 ERRORLOG::ERRL_SEV_INFORMATIONAL,
-                fapi::MOD_ATTR_GET_HB_TARGET,
-                fapi::RC_EMBEDDED_NULL_TARGET_PTR);
+                MOD_ATTR_GET_TARGETING_TARGET,
+                RC_UNEXPECTED_TARGET_TYPE,
+                l_type, i_expectedType);
             l_rc.setPlatError(reinterpret_cast<void *> (l_pError));
-        }
-        else
-        {
-            // Check that the Target Type is as expected
-            if (i_expectedType != TARGETING::TYPE_NA)
-            {
-                TARGETING::TYPE l_type =
-                    o_pTarget->getAttr<TARGETING::ATTR_TYPE>();
-
-                if (l_type != i_expectedType)
-                {
-                    FAPI_ERR("getHostbootTarget. Type: %d, expected %d",
-                             l_type, i_expectedType);
-
-                    /*@
-                     *  @errortype
-                     *  @moduleid   MOD_ATTR_GET_HB_TARGET
-                     *  @reasoncode RC_UNEXPECTED_TARGET_TYPE
-                     *  @userdata1  Target Type
-                     *  @userdata2  Expected Target Type
-                     *  @devdesc    Unexpected Target Type passed to attribute access macro
-                     */
-                    errlHndl_t l_pError = new ERRORLOG::ErrlEntry(
-                        ERRORLOG::ERRL_SEV_INFORMATIONAL,
-                        fapi::MOD_ATTR_GET_HB_TARGET,
-                        fapi::RC_UNEXPECTED_TARGET_TYPE,
-                        l_type, i_expectedType);
-                    l_rc.setPlatError(reinterpret_cast<void *> (l_pError));
-                }
-            }
         }
     }
 
@@ -141,48 +124,110 @@ fapi::ReturnCode getHostbootTarget(
 }
 
 //******************************************************************************
-// fapi::platAttrSvc::getSystemTarget
+// fapi::platAttrSvc::getTargetingAttr
 //******************************************************************************
-
-TARGETING::Target* getSystemTarget()
+fapi::ReturnCode getTargetingAttr(const fapi::Target * i_pFapiTarget,
+                                  const TARGETING::ATTRIBUTE_ID i_targAttrId,
+                                  const uint32_t i_attrSize,
+                                  void * o_pAttr)
 {
-    TARGETING::Target* l_pTarget = NULL;
-    TARGETING::targetService().getTopLevelTarget(l_pTarget);
-    assert(l_pTarget);
-    return l_pTarget;
+    TARGETING::Target * l_pTargTarget = NULL;
+
+    fapi::ReturnCode l_rc = getTargetingTarget(i_pFapiTarget, l_pTargTarget);
+
+    if (l_rc)
+    {
+        FAPI_ERR("getTargetingAttr: Error from getTargetingTarget");
+    }
+    else
+    {
+        // Note directly calling Target's private _tryGetAttr function for code
+        // size optimization, the public function is a template function that
+        // cannot be called with a variable attribute ID, the template function
+        // checks at compile time that the Targeting attribute is readable, but
+        // that is already checked by the Targeting compiler
+        bool l_success = l_pTargTarget->_tryGetAttr(i_targAttrId, i_attrSize,
+                                                    o_pAttr);
+
+        if (!l_success)
+        {
+            FAPI_ERR("getTargetingAttr: Error from _tryGetAttr");
+            /*@
+             *  @errortype
+             *  @moduleid   MOD_PLAT_ATTR_SVC_GET_TARG_ATTR
+             *  @reasoncode RC_FAILED_TO_ACCESS_ATTRIBUTE
+             *  @userdata1  Platform attribute ID
+             *  @userdata2  FAPI target type, or NULL if system target
+             *  @devdesc    Failed to get requested attribute.
+             *      Possible causes: Invalid target, attribute not implemented,
+             *          attribute not present on given target, target service
+             *          not initialized
+             */
+            errlHndl_t l_pError = new ERRORLOG::ErrlEntry(
+                ERRORLOG::ERRL_SEV_INFORMATIONAL,
+                MOD_PLAT_ATTR_SVC_GET_TARG_ATTR,
+                RC_FAILED_TO_ACCESS_ATTRIBUTE,
+                i_targAttrId,
+                i_pFapiTarget ? i_pFapiTarget->getType(): NULL);
+
+            l_rc.setPlatError(reinterpret_cast<void *>(l_pError));
+        }
+    }
+
+    return l_rc;
 }
 
 //******************************************************************************
-// fapi::platAttrSvc::createAttrAccessError
+// fapi::platAttrSvc::setTargetingAttr
 //******************************************************************************
-
-fapi::ReturnCode createAttrAccessError(
-    const TARGETING::ATTRIBUTE_ID i_targAttrId,
-    const fapi::AttributeId       i_fapiAttrId,
-    const fapi::Target* const     i_pFapiTarget)
+fapi::ReturnCode setTargetingAttr(const fapi::Target * i_pFapiTarget,
+                                  const TARGETING::ATTRIBUTE_ID i_targAttrId,
+                                  const uint32_t i_attrSize,
+                                  void * i_pAttr)
 {
-    /*@
-     *  @errortype
-     *  @moduleid   MOD_PLAT_ATTR_SVC_CREATE_ATTR_ACCESS_ERROR
-     *  @reasoncode RC_FAILED_TO_ACCESS_ATTRIBUTE
-     *  @userdata1  Top 32 bits = platform attribute ID, lower 32 bits =
-     *                  FAPI attribute ID
-     *  @userdata2  FAPI target type, or NULL if system target
-     *  @devdesc    Failed to get requested attribute.
-     *      Possible causes: Invalid target, attribute not implemented,
-     *          attribute not present on given target, target service not
-     *          initialized
-     */
-    errlHndl_t l_pError = new ERRORLOG::ErrlEntry(
-        ERRORLOG::ERRL_SEV_INFORMATIONAL,
-        fapi::MOD_PLAT_ATTR_SVC_CREATE_ATTR_ACCESS_ERROR,
-        fapi::RC_FAILED_TO_ACCESS_ATTRIBUTE,
-          (static_cast<uint64_t>(i_targAttrId) << 32)
-        | (static_cast<uint64_t>(i_fapiAttrId)),
-        i_pFapiTarget ? i_pFapiTarget->getType(): NULL);
+    TARGETING::Target * l_pTargTarget = NULL;
 
-    fapi::ReturnCode l_rc;
-    l_rc.setPlatError(reinterpret_cast<void *> (l_pError));
+    fapi::ReturnCode l_rc = getTargetingTarget(i_pFapiTarget, l_pTargTarget);
+
+    if (l_rc)
+    {
+        FAPI_ERR("setTargetingAttr: Error from getTargetingTarget");
+    }
+    else
+    {
+        // Note directly calling Target's private _trySetAttr function for code
+        // size optimization, the public function is a template function that
+        // cannot be called with a variable attribute ID, the template function
+        // checks at compile time that the Targeting attribute is writeable, but
+        // that is already checked by the Targeting compiler
+        bool l_success = l_pTargTarget->_trySetAttr(i_targAttrId, i_attrSize,
+                                                    i_pAttr);
+
+        if (!l_success)
+        {
+            FAPI_ERR("setTargetingAttr: Error from _trySetAttr");
+            /*@
+             *  @errortype
+             *  @moduleid   MOD_PLAT_ATTR_SVC_SET_TARG_ATTR
+             *  @reasoncode RC_FAILED_TO_ACCESS_ATTRIBUTE
+             *  @userdata1  Platform attribute ID
+             *  @userdata2  FAPI target type, or NULL if system target
+             *  @devdesc    Failed to Set requested attribute.
+             *      Possible causes: Invalid target, attribute not implemented,
+             *          attribute not present on given target, target service
+             *          not initialized
+             */
+            errlHndl_t l_pError = new ERRORLOG::ErrlEntry(
+                ERRORLOG::ERRL_SEV_INFORMATIONAL,
+                MOD_PLAT_ATTR_SVC_SET_TARG_ATTR,
+                RC_FAILED_TO_ACCESS_ATTRIBUTE,
+                i_targAttrId,
+                i_pFapiTarget ? i_pFapiTarget->getType(): NULL);
+
+            l_rc.setPlatError(reinterpret_cast<void *>(l_pError));
+        }
+    }
+
     return l_rc;
 }
 
@@ -246,31 +291,38 @@ static void platUpdateAttrValue( const uint16_t i_keyword, void * o_data )
 // fapiPlatGetSpdAttr function.
 // Call SPD device driver to retrieve the SPD attribute
 //******************************************************************************
-fapi::ReturnCode fapiPlatGetSpdAttr(const fapi::Target * i_target,
+fapi::ReturnCode fapiPlatGetSpdAttr(const fapi::Target * i_pFapiTarget,
                                     const uint16_t i_keyword,
                                     void * o_data, const size_t i_len)
 {
     FAPI_DBG(ENTER_MRK "fapiPlatGetSpdAttr");
 
     fapi::ReturnCode l_rc;
+    TARGETING::Target* l_pTarget = NULL;
 
-    // Extract the component pointer
-    TARGETING::Target* l_target =
-                         reinterpret_cast<TARGETING::Target*>(i_target->get());
+    l_rc = getTargetingTarget(i_pFapiTarget, l_pTarget, TARGETING::TYPE_DIMM);
 
-    errlHndl_t l_err = NULL;
-    size_t l_len = i_len;
-    l_err = deviceRead(l_target, o_data, l_len, DEVICE_SPD_ADDRESS(i_keyword));
-
-    if (l_err)
+    if (l_rc)
     {
-        // Add the error log pointer as data to the ReturnCode
-        FAPI_ERR("platGetSpdAttr: deviceRead() returns error");
-        l_rc.setPlatError(reinterpret_cast<void *> (l_err));
+        FAPI_ERR("fapiPlatGetSpdAttr: Error from getTargetingTarget");
     }
     else
     {
-        platUpdateAttrValue(i_keyword, o_data);
+        errlHndl_t l_err = NULL;
+        size_t l_len = i_len;
+        l_err = deviceRead(l_pTarget, o_data, l_len,
+                           DEVICE_SPD_ADDRESS(i_keyword));
+
+        if (l_err)
+        {
+            // Add the error log pointer as data to the ReturnCode
+            FAPI_ERR("fapiPlatGetSpdAttr: deviceRead() returns error");
+            l_rc.setPlatError(reinterpret_cast<void *> (l_err));
+        }
+        else
+        {
+            platUpdateAttrValue(i_keyword, o_data);
+        }
     }
 
     FAPI_DBG(EXIT_MRK "fapiPlatGetSpdAttr");
@@ -281,27 +333,34 @@ fapi::ReturnCode fapiPlatGetSpdAttr(const fapi::Target * i_target,
 // fapiPlatSetSpdAttr function.
 // Call SPD device driver to set the SPD attribute
 //******************************************************************************
-fapi::ReturnCode fapiPlatSetSpdAttr(const fapi::Target * i_target,
+fapi::ReturnCode fapiPlatSetSpdAttr(const fapi::Target * i_pFapiTarget,
                                     const uint16_t i_keyword,
                                     void * i_data, const size_t i_len)
 {
     FAPI_DBG(ENTER_MRK "fapiPlatSetSpdAttr");
 
     fapi::ReturnCode l_rc;
+    TARGETING::Target* l_pTarget = NULL;
 
-    // Extract the component pointer
-    TARGETING::Target* l_target =
-                         reinterpret_cast<TARGETING::Target*>(i_target->get());
+    l_rc = getTargetingTarget(i_pFapiTarget, l_pTarget, TARGETING::TYPE_DIMM);
 
-    errlHndl_t l_err = NULL;
-    size_t l_len = i_len;
-    l_err = deviceWrite(l_target, i_data, l_len, DEVICE_SPD_ADDRESS(i_keyword));
-
-    if (l_err)
+    if (l_rc)
     {
-        // Add the error log pointer as data to the ReturnCode
-        FAPI_ERR("platSetSpdAttr: deviceWrite() returns error");
-        l_rc.setPlatError(reinterpret_cast<void *> (l_err));
+        FAPI_ERR("fapiPlatSetSpdAttr: Error from getTargetingTarget");
+    }
+    else
+    {
+        errlHndl_t l_err = NULL;
+        size_t l_len = i_len;
+        l_err = deviceWrite(l_pTarget, i_data, l_len,
+                            DEVICE_SPD_ADDRESS(i_keyword));
+
+        if (l_err)
+        {
+            // Add the error log pointer as data to the ReturnCode
+            FAPI_ERR("fapiPlatSetSpdAttr: deviceWrite() returns error");
+            l_rc.setPlatError(reinterpret_cast<void *> (l_err));
+        }
     }
 
     FAPI_DBG(EXIT_MRK "fapiPlatSetSpdAttr");
@@ -321,74 +380,45 @@ fapi::ReturnCode fapiPlatBaseAddrCheckMcsGetChip(
     TARGETING::Target* & o_pChipTarget)
 {
     fapi::ReturnCode l_rc;
-    bool l_error = false;
 
-    // Check that the FAPI Target pointer is not NULL
-    if (i_pMcsTarget == NULL)
+    l_rc = getTargetingTarget(i_pMcsTarget, o_pMcsTarget, TARGETING::TYPE_MCS);
+
+    if (l_rc)
     {
-        FAPI_ERR("fapiPlatBaseAddrCheckMcsGetChip. NULL FAPI Target passed");
-        l_error = true;
+        FAPI_ERR(
+            "fapiPlatBaseAddrCheckMcsGetChip: Error from getTargetingTarget");
     }
     else
     {
-        // Extract the MCS Hostboot Target pointer
-        o_pMcsTarget =
-            reinterpret_cast<TARGETING::Target*>(i_pMcsTarget->get());
+        // Get the parent chip
+        TARGETING::TargetHandleList l_parentList;
+        TARGETING::targetService().getAssociated(
+            l_parentList,
+            o_pMcsTarget,
+            TARGETING::TargetService::PARENT,
+            TARGETING::TargetService::IMMEDIATE);
 
-        // Check that the MCS Hostboot Target pointer is not NULL
-        if (o_pMcsTarget == NULL)
+        if (l_parentList.size() != 1)
         {
-            FAPI_ERR("fapiPlatBaseAddrCheckMcsGetChip. NULL HB Target passed");
-            l_error = true;
+            FAPI_ERR("fapiPlatBaseAddrCheckMcsGetChip. Did not find single parent chip (%d)",
+                l_parentList.size());
+            /*@
+             *  @errortype
+             *  @moduleid   MOD_ATTR_BASE_ADDR_GET
+             *  @reasoncode RC_ATTR_BAD_TARGET_PARAM
+             *  @devdesc    Failed to get MCS base address attribute due to
+             *              bad target parameter.
+             */
+            errlHndl_t l_pError = new ERRORLOG::ErrlEntry(
+                ERRORLOG::ERRL_SEV_INFORMATIONAL,
+                MOD_ATTR_BASE_ADDR_GET,
+                RC_ATTR_BAD_TARGET_PARAM);
+            l_rc.setPlatError(reinterpret_cast<void *> (l_pError));
         }
         else
         {
-            // Check that the Target is an MCS chiplet
-            if (o_pMcsTarget->getAttr<TARGETING::ATTR_TYPE>() !=
-                TARGETING::TYPE_MCS)
-            {
-                FAPI_ERR("fapiPlatBaseAddrCheckMcsGetChip. Not an MCS (0x%x)",
-                         o_pMcsTarget->getAttr<TARGETING::ATTR_TYPE>());
-                l_error = true;
-            }
-            else
-            {
-                // Get the parent chip
-                TARGETING::TargetHandleList l_parentList;
-                TARGETING::targetService().getAssociated(
-                    l_parentList,
-                    o_pMcsTarget,
-                    TARGETING::TargetService::PARENT,
-                    TARGETING::TargetService::IMMEDIATE);
-
-                if (l_parentList.size() != 1)
-                {
-                    FAPI_ERR("fapiPlatBaseAddrCheckMcsGetChip. Did not find single parent chip (%d)",
-                             l_parentList.size());
-                    l_error = true;
-                }
-                else
-                {
-                    o_pChipTarget = l_parentList[0];
-                }
-            }
+            o_pChipTarget = l_parentList[0];
         }
-    }
-
-    if (l_error)
-    {
-        /*@
-         *  @errortype
-         *  @moduleid   MOD_ATTR_BASE_ADDR_GET
-         *  @reasoncode RC_ATTR_BAD_TARGET_PARAM
-         *  @devdesc    Failed to get MCS base address attribute due to
-         *              bad target parameter.
-         */
-        errlHndl_t l_pError = new ERRORLOG::ErrlEntry(
-            ERRORLOG::ERRL_SEV_INFORMATIONAL,
-            fapi::MOD_ATTR_BASE_ADDR_GET,
-            fapi::RC_ATTR_BAD_TARGET_PARAM);
-        l_rc.setPlatError(reinterpret_cast<void *> (l_pError));
     }
 
     return l_rc;
@@ -470,80 +500,40 @@ fapi::ReturnCode fapiPlatGetMirrorBaseAddr(const fapi::Target * i_pMcsTarget,
 //******************************************************************************
 // fapiPlatGetDqMapping function.
 //******************************************************************************
-fapi::ReturnCode fapiPlatGetDqMapping(const fapi::Target * i_pDimmTarget,
+fapi::ReturnCode fapiPlatGetDqMapping(const fapi::Target * i_pDimmFapiTarget,
                                       uint8_t (&o_data)[DIMM_DQ_NUM_DQS])
 {
     fapi::ReturnCode l_rc;
-    bool l_error = false;
+    TARGETING::Target * l_pDimmTarget = NULL;
 
-    // Check that the FAPI Target pointer is not NULL
-    if (i_pDimmTarget == NULL)
+    l_rc = getTargetingTarget(i_pDimmFapiTarget, l_pDimmTarget,
+                              TARGETING::TYPE_DIMM);
+
+    if (l_rc)
     {
-        FAPI_ERR("fapiPlatGetDqMapping. NULL FAPI Target passed");
-        l_error = true;
+        FAPI_ERR("fapiPlatGetDqMapping: Error from getTargetingTarget");
     }
     else
     {
-        // Extract the DIMM Hostboot Target pointer
-        TARGETING::Target * l_pDimmTarget =
-            reinterpret_cast<TARGETING::Target*>(i_pDimmTarget->get());
-
-        // Check that the DIMM Hostboot Target pointer is not NULL
-        if (l_pDimmTarget == NULL)
+        if (l_pDimmTarget->getAttr<TARGETING::ATTR_MODEL>() ==
+            TARGETING::MODEL_CDIMM)
         {
-            FAPI_ERR("fapiPlatGetDqMapping. NULL HB Target passed");
-            l_error = true;
+            // C-DIMM. There is no DQ mapping from Centaur DQ to DIMM Connector
+            // DQ because there is no DIMM Connector. Return a direct 1:1 map
+            // (0->0, 1->1, etc)
+            for (uint8_t i = 0; i < DIMM_DQ_NUM_DQS; i++)
+            {
+                o_data[i] = i;
+            }
         }
         else
         {
-            // Check that the Target is a DIMM
-            if (l_pDimmTarget->getAttr<TARGETING::ATTR_TYPE>() !=
-                TARGETING::TYPE_DIMM)
-            {
-                FAPI_ERR("fapiPlatGetDqMapping. Not a DIMM (0x%x)",
-                         l_pDimmTarget->getAttr<TARGETING::ATTR_TYPE>());
-                l_error = true;
-            }
-            else
-            {
-                if (l_pDimmTarget->getAttr<TARGETING::ATTR_MODEL>() ==
-                    TARGETING::MODEL_CDIMM)
-                {
-                    // C-DIMM. There is no DQ mapping from Centaur DQ to DIMM
-                    // Connector DQ because there is no DIMM Connector. Return
-                    // a direct 1:1 map (0->0, 1->1, etc)
-                    for (uint8_t i = 0; i < DIMM_DQ_NUM_DQS; i++)
-                    {
-                        o_data[i] = i;
-                    }
-                }
-                else
-                {
-                    // IS-DIMM. Get the mapping using a Hostboot attribute
-                    // Note that getAttr() cannot be used to get an array
-                    // attribute so using tryGetAttr and ignoring result
-                    l_pDimmTarget->
-                        tryGetAttr<TARGETING::ATTR_CEN_DQ_TO_DIMM_CONN_DQ>
-                            (o_data);
-                }
-            }
+            // IS-DIMM. Get the mapping using a Hostboot attribute. Note that
+            // getAttr() cannot be used to get an array attribute so using
+            // tryGetAttr and ignoring result
+            l_pDimmTarget->
+                tryGetAttr<TARGETING::ATTR_CEN_DQ_TO_DIMM_CONN_DQ>(o_data);
         }
-    }
-
-    if (l_error)
-    {
-        /*@
-         *  @errortype
-         *  @moduleid   MOD_ATTR_DQ_MAP_GET
-         *  @reasoncode RC_ATTR_BAD_TARGET_PARAM
-         *  @devdesc    Failed to get DIMM DQ mapping attribute due to
-         *              bad target parameter.
-         */
-        errlHndl_t l_pError = new ERRORLOG::ErrlEntry(
-            ERRORLOG::ERRL_SEV_INFORMATIONAL,
-            fapi::MOD_ATTR_DQ_MAP_GET,
-            fapi::RC_ATTR_BAD_TARGET_PARAM);
-        l_rc.setPlatError(reinterpret_cast<void *> (l_pError));
     }
 
     return l_rc;
@@ -552,70 +542,53 @@ fapi::ReturnCode fapiPlatGetDqMapping(const fapi::Target * i_pDimmTarget,
 //******************************************************************************
 // fapiPlatGetTargetName function
 //******************************************************************************
-fapi::ReturnCode fapiPlatGetTargetName(const fapi::Target * i_pTarget,
+fapi::ReturnCode fapiPlatGetTargetName(const fapi::Target * i_pFapiTarget,
                                        uint8_t & o_name)
 {
     fapi::ReturnCode l_rc;
+    TARGETING::Target * l_pHbTarget = NULL;
     o_name = ENUM_ATTR_NAME_NONE;
-    bool l_error = false;
 
-    // Check that the FAPI Target pointer is not NULL
-    if (i_pTarget == NULL)
+    l_rc = getTargetingTarget(i_pFapiTarget, l_pHbTarget);
+
+    if (l_rc)
     {
-        FAPI_ERR("fapiPlatGetTargetName. NULL FAPI Target passed");
-        l_error = true;
+        FAPI_ERR("fapiPlatGetTargetName: Error from getTargetingTarget");
     }
     else
     {
-        // Extract the MCS Hostboot Target pointer
-        TARGETING::Target * l_pHbTarget = reinterpret_cast<TARGETING::Target*>(
-            i_pTarget->get());
+        TARGETING::MODEL l_model =
+            l_pHbTarget->getAttr<TARGETING::ATTR_MODEL>();
 
-        // Check that the MCS Hostboot Target pointer is not NULL
-        if (l_pHbTarget == NULL)
+        if (l_model == TARGETING::MODEL_VENICE)
         {
-            FAPI_ERR("fapiPlatGetTargetName. NULL HB Target passed");
-            l_error = true;
+            o_name = ENUM_ATTR_NAME_VENICE;
+        }
+        else if (l_model == TARGETING::MODEL_MURANO)
+        {
+            o_name = ENUM_ATTR_NAME_MURANO;
+        }
+        else if (l_model == TARGETING::MODEL_CENTAUR)
+        {
+            o_name = ENUM_ATTR_NAME_CENTAUR;
         }
         else
         {
-            TARGETING::MODEL l_model = l_pHbTarget->
-                getAttr<TARGETING::ATTR_MODEL>();
+            FAPI_ERR("fapiPlatGetTargetName. Unknown name 0x%x", l_model);
 
-            if (l_model == TARGETING::MODEL_VENICE)
-            {
-                o_name = ENUM_ATTR_NAME_VENICE;
-            }
-            else if (l_model == TARGETING::MODEL_MURANO)
-            {
-                o_name = ENUM_ATTR_NAME_MURANO;
-            }
-            else if (l_model == TARGETING::MODEL_CENTAUR)
-            {
-                o_name = ENUM_ATTR_NAME_CENTAUR;
-            }
-            else
-            {
-                FAPI_ERR("fapiPlatGetTargetName. Unknown name 0x%x", l_model);
-                l_error = true;
-            }
+            /*@
+             *  @errortype
+             *  @moduleid   MOD_ATTR_GET_TARGET_NAME
+             *  @reasoncode RC_ATTR_BAD_TARGET_PARAM
+             *  @devdesc    Failed to get the Target name due to bad target
+             *              parameter.
+             */
+            errlHndl_t l_pError = new ERRORLOG::ErrlEntry(
+                ERRORLOG::ERRL_SEV_INFORMATIONAL,
+                MOD_ATTR_GET_TARGET_NAME,
+                RC_ATTR_BAD_TARGET_PARAM);
+            l_rc.setPlatError(reinterpret_cast<void *> (l_pError));
         }
-    }
-
-    if (l_error)
-    {
-        /*@
-         *  @errortype
-         *  @moduleid   MOD_ATTR_GET_TARGET_NAME
-         *  @reasoncode RC_ATTR_BAD_TARGET_PARAM
-         *  @devdesc    Failed to get the Target name due to bad target
-         *              parameter.
-         */
-        errlHndl_t l_pError = new ERRORLOG::ErrlEntry(
-            ERRORLOG::ERRL_SEV_INFORMATIONAL,
-            fapi::MOD_ATTR_GET_TARGET_NAME,
-            fapi::RC_ATTR_BAD_TARGET_PARAM);
-        l_rc.setPlatError(reinterpret_cast<void *> (l_pError));
     }
 
     return l_rc;
@@ -624,59 +597,26 @@ fapi::ReturnCode fapiPlatGetTargetName(const fapi::Target * i_pTarget,
 //******************************************************************************
 // fapiPlatGetFunctional function
 //******************************************************************************
-fapi::ReturnCode fapiPlatGetFunctional(const fapi::Target * i_pTarget,
+fapi::ReturnCode fapiPlatGetFunctional(const fapi::Target * i_pFapiTarget,
                                        uint8_t & o_functional)
 {
     fapi::ReturnCode l_rc;
+    TARGETING::Target * l_pHbTarget = NULL;
     o_functional = 0;
-    bool l_error = false;
 
-    // TODO. Move the checking of the FAPI Target pointer and embedded Hostboot
-    // Target pointer to a common function. Not doing it here because there are
-    // currently other changes to this file going through review.
+    l_rc = getTargetingTarget(i_pFapiTarget, l_pHbTarget);
 
-    // Check that the FAPI Target pointer is not NULL
-    if (i_pTarget == NULL)
+    if (l_rc)
     {
-        FAPI_ERR("fapiPlatGetFunctional. NULL FAPI Target passed");
-        l_error = true;
+        FAPI_ERR("fapiPlatGetFunctional: Error from getTargetingTarget");
     }
     else
     {
-        // Extract the MCS Hostboot Target pointer
-        TARGETING::Target * l_pHbTarget = reinterpret_cast<TARGETING::Target*>(
-            i_pTarget->get());
-
-        // Check that the MCS Hostboot Target pointer is not NULL
-        if (l_pHbTarget == NULL)
+        TARGETING::PredicateIsFunctional l_functional;
+        if (l_functional(l_pHbTarget))
         {
-            FAPI_ERR("fapiPlatGetFunctional. NULL HB Target passed");
-            l_error = true;
+            o_functional = 1;
         }
-        else
-        {
-            TARGETING::PredicateIsFunctional l_functional;
-            if (l_functional(l_pHbTarget))
-            {
-                o_functional = 1;
-            }
-        }
-    }
-
-    if (l_error)
-    {
-        /*@
-         *  @errortype
-         *  @moduleid   MOD_ATTR_GET_FUNCTIONAL
-         *  @reasoncode RC_ATTR_BAD_TARGET_PARAM
-         *  @devdesc    Failed to get the functional state due to bad target
-         *              parameter.
-         */
-        errlHndl_t l_pError = new ERRORLOG::ErrlEntry(
-            ERRORLOG::ERRL_SEV_INFORMATIONAL,
-            fapi::MOD_ATTR_GET_FUNCTIONAL,
-            fapi::RC_ATTR_BAD_TARGET_PARAM);
-        l_rc.setPlatError(reinterpret_cast<void *> (l_pError));
     }
 
     return l_rc;
@@ -691,12 +631,12 @@ fapi::ReturnCode fapiPlatGetTargetPos(const fapi::Target * i_pFapiTarget,
     fapi::ReturnCode l_rc;
     TARGETING::Target * l_pTarget = NULL;
 
-    // Get the Hostboot Target
-    l_rc = getHostbootTarget(i_pFapiTarget, l_pTarget);
+    // Get the Targeting Target
+    l_rc = getTargetingTarget(i_pFapiTarget, l_pTarget);
 
     if (l_rc)
     {
-        FAPI_ERR("getTargetName: Error getting Hostboot Target");
+        FAPI_ERR("getTargetName: Error from getTargetingTarget");
     }
     else
     {
@@ -723,61 +663,45 @@ enum
  *          supporting proc/mss_setup_bars attributes
  *          Return useful parameters
  *
- *  @param[in]  -   i_pTarget   incoming target
- *  @param[in]  -   i_modid     mod id to report if error
- *  @param[out] -   o_procNum   found processor number of i_pTarget
- *  @apram[out] -   o_isEnabled ENABLE/DISABLE flag for BAR_ENABLE ATTRS
+ *  @param[in]  -   i_pFapiTarget incoming target
+ *  @param[out] -   o_procNum     found processor number of i_pTarget
+ *  @apram[out] -   o_isEnabled   ENABLE/DISABLE flag for BAR_ENABLE ATTRS
  *  @return     -   success or appropriate fapi returncode
 */
-fapi::ReturnCode barsPreCheck( const fapi::Target * i_pTarget,
-                               const uint8_t        i_modId,
+fapi::ReturnCode barsPreCheck( const fapi::Target * i_pFapiTarget,
                                uint64_t             &o_procNum,
                                uint8_t              &o_isEnabled
                               )
 {
-    fapi::ReturnCode l_fapirc( fapi::FAPI_RC_SUCCESS );
+    fapi::ReturnCode l_rc;
+    TARGETING::Target* l_pTarget = NULL;
 
-    do  {
-        if (i_pTarget == NULL)
-        {
-            FAPI_ERR("Error: NULL FAPI Target passed");
-            /*
-                Error tag block should be where this routine is called,
-                hopefully the script is smart enough to figure that out.
-            */
-            errlHndl_t l_pError = new ERRORLOG::ErrlEntry(
-                ERRORLOG::ERRL_SEV_INFORMATIONAL,
-                i_modId,
-                fapi::RC_ATTR_BAD_TARGET_PARAM );
-            l_fapirc.setPlatError(reinterpret_cast<void *> (l_pError));
-            break;
-        }
+    l_rc = getTargetingTarget(i_pFapiTarget, l_pTarget);
 
-        const TARGETING::Target* l_pProcTarget =
-            reinterpret_cast<const TARGETING::Target*>(i_pTarget->get());
-
+    if (l_rc)
+    {
+        FAPI_ERR("barsPreCheck: Error from getTargetingTarget");
+    }
+    else
+    {
         //  ATTR_POSITION should return the logical proc ID
         o_procNum  =
             static_cast<uint64_t>
-                (l_pProcTarget->getAttr<TARGETING::ATTR_POSITION>() );
-
-        TARGETING::HwasState hwasState =
-            l_pProcTarget->getAttr<TARGETING::ATTR_HWAS_STATE>();
-
+                (l_pTarget->getAttr<TARGETING::ATTR_POSITION>() );
 
         //  if proc is functional then set the BAR_ENABLE ATTR to ENABLE
-        if ( hwasState.functional )
+        TARGETING::PredicateIsFunctional l_functional;
+        if (l_functional(l_pTarget))
         {
-            o_isEnabled =   PROC_BARS_ENABLE;
+            o_isEnabled = PROC_BARS_ENABLE;
         }
         else
         {
-            o_isEnabled =   PROC_BARS_DISABLE;
+            o_isEnabled = PROC_BARS_DISABLE;
         }
+    }
 
-    }   while(0);
-
-    return  l_fapirc;
+    return  l_rc;
 }
 
 
@@ -790,71 +714,50 @@ fapi::ReturnCode fapiPlatGetProcMemBase(
                                        const fapi::Target * i_pTarget,
                                        uint64_t   &o_memBase )
 {
-    fapi::ReturnCode l_fapirc( fapi::FAPI_RC_SUCCESS );
+    fapi::ReturnCode l_rc;
     uint64_t    l_procNum       =   0;
     uint8_t     l_isEnabled     =   PROC_BARS_DISABLE;
 
     FAPI_DBG( "fapiPlatGetProcMemBase: entry" ) ;
 
-    do  {
-
+    do
+    {
         o_memBase   =   0;
-
-        /*@
-         *  @errortype
-         *  @moduleid   MOD_ATTR_PROC_MEMBASE_GET
-         *  @reasoncode RC_ATTR_BAD_TARGET_PARAM
-         *  @devdesc    Null or non functional FAPI Target passed to ATTR_GET
-         */
-        l_fapirc    =   barsPreCheck( i_pTarget,
-                                      fapi::MOD_ATTR_PROC_MEMBASE_GET,
-                                      l_procNum,
-                                      l_isEnabled );
-        if ( l_fapirc )
+        l_rc = barsPreCheck(i_pTarget, l_procNum, l_isEnabled);
+        if ( l_rc )
         {
-            FAPI_ERR("ERROR : NULL FAPI Target");
+            FAPI_ERR("fapiPlatGetProcMemBase: Error from barsPreCheck");
             break;
         }
 
         //  To match with fapiPlatGetMemoryBaseAddr
         //      0 for proc 0,  64TB for proc1, etc.
         o_memBase = ( l_procNum * 1024 * 1024 * 1024 * 1024 * 64 ) ;
-        FAPI_DBG( "fapiPlatGetProcMemBase: proc %d memBase=%p",
-                  l_procNum,
-                  o_memBase );
+        FAPI_DBG( "fapiPlatGetProcMemBase: proc %d memBase=0x%016llx",
+                  l_procNum, o_memBase );
 
     } while (0);
 
     FAPI_DBG( "fapiPlatGetProcMemBase: exit" ) ;
 
-    return  l_fapirc;
+    return  l_rc;
 }
 
 fapi::ReturnCode fapiPlatGetProcMirrorBase (
                                     const fapi::Target * i_pTarget,
                                     uint64_t    &o_mirrorMemBase )
 {
-    fapi::ReturnCode l_fapirc( fapi::FAPI_RC_SUCCESS );
+    fapi::ReturnCode l_rc;
     uint64_t    l_procNum       =   0;
     uint8_t     l_isEnabled     =   PROC_BARS_DISABLE;
 
-    do  {
-
+    do
+    {
         o_mirrorMemBase   =   0;
-
-        /*@
-         *  @errortype
-         *  @moduleid   MOD_ATTR_PROC_MIRRORBASE_GET
-         *  @reasoncode RC_ATTR_BAD_TARGET_PARAM
-         *  @devdesc    Null FAPI Target passed to ATTR_GET
-         */
-        l_fapirc    =   barsPreCheck( i_pTarget,
-                                      fapi::MOD_ATTR_PROC_MEMBASE_GET,
-                                      l_procNum,
-                                      l_isEnabled );
-        if ( l_fapirc )
+        l_rc = barsPreCheck(i_pTarget, l_procNum, l_isEnabled);
+        if (l_rc)
         {
-            FAPI_ERR("ERROR : NULL FAPI Target");
+            FAPI_ERR("fapiPlatGetProcMirrorBase: Error from barsPreCheck");
             break;
         }
 
@@ -863,13 +766,12 @@ fapi::ReturnCode fapiPlatGetProcMirrorBase (
         o_mirrorMemBase = ( 512 * 1024 * 1024 ) ;
         o_mirrorMemBase *= ( 1024 * 1024 );
         o_mirrorMemBase += ( (l_procNum) * 32 * 1024 * 1024 * 1024 * 1024 ) ;
-        FAPI_DBG( "fapiPlatGetMirrorMemBase: proc %d mirrorMemBase=%p",
-                  l_procNum,
-                  o_mirrorMemBase );
+        FAPI_DBG( "fapiPlatGetMirrorMemBase: proc %d mirrorMemBase=0x%016llx",
+                  l_procNum, o_mirrorMemBase );
 
     } while (0);
 
-    return  l_fapirc;
+    return  l_rc;
 }
 
 
@@ -877,24 +779,16 @@ fapi::ReturnCode fapiPlatGetProcForeignNearBase (
                                     const fapi::Target * i_pTarget,
                                     uint64_t (&o_foreignNearBase)[ 2 ] )
 {
-    fapi::ReturnCode    l_fapirc( fapi::FAPI_RC_SUCCESS );
+    fapi::ReturnCode    l_rc;
     uint64_t    l_procNum       =   0;
     uint8_t     l_isEnabled     =   PROC_BARS_DISABLE;
 
-    do  {
-        /*@
-         *  @errortype
-         *  @moduleid   MOD_ATTR_PROC_FOREIGN_NEAR_BASE_GET
-         *  @reasoncode RC_ATTR_BAD_TARGET_PARAM
-         *  @devdesc    Null FAPI Target passed to ATTR_GET
-         */
-        l_fapirc    =   barsPreCheck( i_pTarget,
-                                      fapi::MOD_ATTR_PROC_FOREIGN_NEAR_BASE_GET,
-                                      l_procNum,
-                                      l_isEnabled );
-        if ( l_fapirc )
+    do
+    {
+        l_rc = barsPreCheck(i_pTarget, l_procNum, l_isEnabled);
+        if ( l_rc )
         {
-            FAPI_ERR("ERROR : NULL FAPI Target");
+            FAPI_ERR("fapiPlatGetProcForeignNearBase: Error from barsPreCheck");
             break;
         }
 
@@ -904,31 +798,23 @@ fapi::ReturnCode fapiPlatGetProcForeignNearBase (
 
     }   while (0);
 
-    return  l_fapirc;
+    return  l_rc;
 }
 
 fapi::ReturnCode fapiPlatGetProcForeignNearSize (
                                     const fapi::Target * i_pTarget,
                                     uint64_t (&o_foreignNearSize)[ 2 ] )
 {
-    fapi::ReturnCode l_fapirc( fapi::FAPI_RC_SUCCESS );
+    fapi::ReturnCode l_rc;
     uint64_t    l_procNum       =   0;
     uint8_t     l_isEnabled     =   PROC_BARS_DISABLE;
 
-    do  {
-        /*@
-         *  @errortype
-         *  @moduleid   MOD_ATTR_PROC_FOREIGN_NEAR_SIZE_GET
-         *  @reasoncode RC_ATTR_BAD_TARGET_PARAM
-         *  @devdesc    Null FAPI Target passed to ATTR_GET
-         */
-        l_fapirc    =   barsPreCheck( i_pTarget,
-                                      fapi::MOD_ATTR_PROC_FOREIGN_NEAR_SIZE_GET,
-                                      l_procNum,
-                                      l_isEnabled );
-        if ( l_fapirc )
+    do
+    {
+        l_rc = barsPreCheck(i_pTarget, l_procNum, l_isEnabled);
+        if ( l_rc )
         {
-            FAPI_ERR("ERROR : NULL FAPI Target");
+            FAPI_ERR("fapiPlatGetProcForeignNearSize: Error from barsPreCheck");
             break;
         }
 
@@ -938,31 +824,23 @@ fapi::ReturnCode fapiPlatGetProcForeignNearSize (
 
     }   while(0);
 
-    return  l_fapirc;
+    return  l_rc;
 }
 
 fapi::ReturnCode fapiPlatGetProcForeignFarBase (
                                     const fapi::Target * i_pTarget,
                                     uint64_t (&o_foreignFarBase)[ 2 ] )
 {
-    fapi::ReturnCode l_fapirc( fapi::FAPI_RC_SUCCESS );
+    fapi::ReturnCode l_rc;
     uint64_t    l_procNum       =   0;
     uint8_t     l_isEnabled     =   PROC_BARS_DISABLE;
 
-    do  {
-        /*@
-         *  @errortype
-         *  @moduleid   MOD_ATTR_PROC_FOREIGN_FAR_BASE_GET
-         *  @reasoncode RC_ATTR_BAD_TARGET_PARAM
-         *  @devdesc    Null FAPI Target passed to ATTR_GET
-         */
-        l_fapirc    =   barsPreCheck( i_pTarget,
-                                      fapi::MOD_ATTR_PROC_FOREIGN_FAR_BASE_GET,
-                                      l_procNum,
-                                      l_isEnabled );
-        if ( l_fapirc )
+    do
+    {
+        l_rc = barsPreCheck(i_pTarget, l_procNum, l_isEnabled);
+        if ( l_rc )
         {
-            FAPI_ERR("ERROR : NULL FAPI Target");
+            FAPI_ERR("fapiPlatGetProcForeignFarBase: Error from barsPreCheck");
             break;
         }
 
@@ -972,31 +850,23 @@ fapi::ReturnCode fapiPlatGetProcForeignFarBase (
 
     }   while(0);
 
-    return  l_fapirc;
+    return  l_rc;
 }
 
 fapi::ReturnCode fapiPlatGetProcForeignFarSize (
                                     const fapi::Target * i_pTarget,
                                     uint64_t (&o_foreignFarSize)[ 2 ] )
 {
-    fapi::ReturnCode l_fapirc( fapi::FAPI_RC_SUCCESS );
+    fapi::ReturnCode l_rc;
     uint64_t    l_procNum       =   0;
     uint8_t     l_isEnabled     =   PROC_BARS_DISABLE;
 
-    do  {
-        /*@
-         *  @errortype
-         *  @moduleid   MOD_ATTR_PROC_FOREIGN_FAR_SIZE_GET
-         *  @reasoncode RC_ATTR_BAD_TARGET_PARAM
-         *  @devdesc    Null FAPI Target passed to ATTR_GET
-         */
-        l_fapirc    =   barsPreCheck( i_pTarget,
-                                      fapi::MOD_ATTR_PROC_FOREIGN_FAR_SIZE_GET,
-                                      l_procNum,
-                                      l_isEnabled );
-        if ( l_fapirc )
+    do
+    {
+        l_rc = barsPreCheck(i_pTarget, l_procNum, l_isEnabled);
+        if ( l_rc )
         {
-            FAPI_ERR("ERROR : NULL FAPI Target");
+            FAPI_ERR("fapiPlatGetProcForeignFarSize: Error from barsPreCheck");
             break;
         }
 
@@ -1006,31 +876,23 @@ fapi::ReturnCode fapiPlatGetProcForeignFarSize (
 
     }   while(0);
 
-    return  l_fapirc;
+    return  l_rc;
 }
 
 fapi::ReturnCode fapiPlatGetProcHaBase (
                                     const fapi::Target * i_pTarget,
                                     uint64_t (&o_haBase)[ 8 ] )
 {
-    fapi::ReturnCode l_fapirc( fapi::FAPI_RC_SUCCESS );
+    fapi::ReturnCode l_rc;
     uint64_t    l_procNum       =   0;
     uint8_t     l_isEnabled     =   PROC_BARS_DISABLE;
 
-    do  {
-        /*@
-         *  @errortype
-         *  @moduleid   MOD_ATTR_PROC_HA_BASE_GET
-         *  @reasoncode RC_ATTR_BAD_TARGET_PARAM
-         *  @devdesc    Null FAPI Target passed to ATTR_GET
-         */
-        l_fapirc    =   barsPreCheck( i_pTarget,
-                                      fapi::MOD_ATTR_PROC_HA_BASE_GET,
-                                      l_procNum,
-                                      l_isEnabled );
-        if ( l_fapirc )
+    do
+    {
+        l_rc = barsPreCheck(i_pTarget, l_procNum, l_isEnabled);
+        if ( l_rc )
         {
-            FAPI_ERR("ERROR : NULL FAPI Target");
+            FAPI_ERR("fapiPlatGetProcHaBase: Error from barsPreCheck");
             break;
         }
 
@@ -1046,31 +908,23 @@ fapi::ReturnCode fapiPlatGetProcHaBase (
 
     }   while(0);
 
-    return  l_fapirc;
+    return  l_rc;
 }
 
 fapi::ReturnCode fapiPlatGetProcHaSize (
                                     const fapi::Target * i_pTarget,
                                     uint64_t (&o_haSize)[ 8 ] )
 {
-    fapi::ReturnCode l_fapirc( fapi::FAPI_RC_SUCCESS );
+    fapi::ReturnCode l_rc;
     uint64_t    l_procNum       =   0;
     uint8_t     l_isEnabled     =   PROC_BARS_DISABLE;
 
-    do  {
-        /*@
-         *  @errortype
-         *  @moduleid   MOD_ATTR_PROC_HA_SIZE_GET
-         *  @reasoncode RC_ATTR_BAD_TARGET_PARAM
-         *  @devdesc    Null FAPI Target passed to ATTR_GET
-         */
-        l_fapirc    =   barsPreCheck( i_pTarget,
-                                      fapi::MOD_ATTR_PROC_HA_SIZE_GET,
-                                      l_procNum,
-                                      l_isEnabled );
-        if ( l_fapirc )
+    do
+    {
+        l_rc = barsPreCheck(i_pTarget, l_procNum, l_isEnabled);
+        if ( l_rc )
         {
-            FAPI_ERR("ERROR : NULL FAPI Target");
+            FAPI_ERR("fapiPlatGetProcHaSize: Error from barsPreCheck");
             break;
         }
 
@@ -1086,7 +940,7 @@ fapi::ReturnCode fapiPlatGetProcHaSize (
 
     } while(0);
 
-    return  l_fapirc;
+    return  l_rc;
 }
 
 
@@ -1099,30 +953,19 @@ fapi::ReturnCode fapiPlatGetProcPsiBridgeBarEnable (
                                     const fapi::Target * i_pTarget,
                                     uint8_t     &o_psiBridgeBarEnable )
 {
-    fapi::ReturnCode l_fapirc( fapi::FAPI_RC_SUCCESS );
+    fapi::ReturnCode l_rc;
     o_psiBridgeBarEnable =   PROC_BARS_DISABLE;
+    TARGETING::Target* l_pProcTarget = NULL;
 
-    do  {
-        if (i_pTarget == NULL)
-        {
-            FAPI_ERR("Error: NULL FAPI Target passed");
-            /*@
-             *  @errortype
-             *  @moduleid   MOD_ATTR_PROC_PSI_BRIDGE_BAR_ENABLE_GET
-             *  @reasoncode RC_ATTR_BAD_TARGET_PARAM
-             *  @devdesc    Null FAPI Target passed to ATTR_GET
-             */
-            errlHndl_t l_pError = new ERRORLOG::ErrlEntry(
-                ERRORLOG::ERRL_SEV_INFORMATIONAL,
-                fapi::MOD_ATTR_PROC_PSI_BRIDGE_BAR_ENABLE_GET,
-                fapi::RC_ATTR_BAD_TARGET_PARAM );
-            l_fapirc.setPlatError(reinterpret_cast<void *> (l_pError));
-            break;
-        }
+    l_rc = getTargetingTarget(i_pTarget, l_pProcTarget);
 
-        const TARGETING::Target* l_pProcTarget =
-            reinterpret_cast<const TARGETING::Target*>(i_pTarget->get());
-
+    if (l_rc)
+    {
+        FAPI_ERR(
+            "fapiPlatGetProcPsiBridgeBarEnable: Error from getTargetingTarget");
+    }
+    else
+    {
         uint64_t bar = l_pProcTarget->getAttr<TARGETING::ATTR_PSI_BRIDGE_BASE_ADDR>();
 
         //  if bar is not zero
@@ -1130,175 +973,118 @@ fapi::ReturnCode fapiPlatGetProcPsiBridgeBarEnable (
         {
             o_psiBridgeBarEnable =   PROC_BARS_ENABLE;
         }
-    }   while(0);
+    }
 
-    return  l_fapirc;
+    return  l_rc;
 }
 
 fapi::ReturnCode fapiPlatGetProcFspBarEnable (
                                     const fapi::Target * i_pTarget,
                                     uint8_t     &o_fspBarEnable )
 {
-    fapi::ReturnCode l_fapirc( fapi::FAPI_RC_SUCCESS );
+    fapi::ReturnCode l_rc;
     o_fspBarEnable =   PROC_BARS_DISABLE;
+    TARGETING::Target* l_pProcTarget = NULL;
 
-    do  {
-        if (i_pTarget == NULL)
-        {
-            FAPI_ERR("Error: NULL FAPI Target passed");
-            /*@
-             *  @errortype
-             *  @moduleid   MOD_ATTR_PROC_FSP_BAR_ENABLE_GET
-             *  @reasoncode RC_ATTR_BAD_TARGET_PARAM
-             *  @devdesc    Null FAPI Target passed to ATTR_GET
-             */
-            errlHndl_t l_pError = new ERRORLOG::ErrlEntry(
-                ERRORLOG::ERRL_SEV_INFORMATIONAL,
-                fapi::MOD_ATTR_PROC_FSP_BAR_ENABLE_GET,
-                fapi::RC_ATTR_BAD_TARGET_PARAM );
-            l_fapirc.setPlatError(reinterpret_cast<void *> (l_pError));
-            break;
-        }
+    l_rc = getTargetingTarget(i_pTarget, l_pProcTarget);
 
-        const TARGETING::Target* l_pProcTarget =
-            reinterpret_cast<const TARGETING::Target*>(i_pTarget->get());
-
+    if (l_rc)
+    {
+        FAPI_ERR(
+            "fapiPlatGetProcFspBarEnable: Error from getTargetingTarget");
+    }
+    else
+    {
         uint64_t bar = l_pProcTarget->getAttr<TARGETING::ATTR_FSP_BASE_ADDR>();
 
         //  if bar is not zero
         if ( bar )
         {
             o_fspBarEnable =   PROC_BARS_ENABLE;
-
         }
+    }
 
-    }   while(0);
-
-    return  l_fapirc;
+    return  l_rc;
 }
 
 fapi::ReturnCode fapiPlatGetProcIntpBarEnable (
                                     const fapi::Target * i_pTarget,
                                     uint8_t    &o_intpBarEnable )
 {
-    fapi::ReturnCode l_fapirc( fapi::FAPI_RC_SUCCESS );
+    fapi::ReturnCode l_rc;
     uint64_t    l_procNum       =   0;
     uint8_t     l_isEnabled     =   PROC_BARS_DISABLE;
 
-    do  {
-        /*@
-         *  @errortype
-         *  @moduleid   MOD_ATTR_PROC_INTP_BAR_ENABLE_GET
-         *  @reasoncode RC_ATTR_BAD_TARGET_PARAM
-         *  @devdesc    Null FAPI Target passed to ATTR_GET
-         */
-        l_fapirc    =   barsPreCheck( i_pTarget,
-                                      fapi::MOD_ATTR_PROC_INTP_BAR_ENABLE_GET,
-                                      l_procNum,
-                                      l_isEnabled );
-        if ( l_fapirc )
-        {
-            FAPI_ERR("ERROR : NULL FAPI Target");
-            break;
-        }
-
+    l_rc    =   barsPreCheck(i_pTarget, l_procNum, l_isEnabled);
+    if ( l_rc )
+    {
+        FAPI_ERR("fapiPlatGetProcIntpBarEnable: Error from barsPreCheck");
+    }
+    else
+    {
         o_intpBarEnable =   l_isEnabled;
+    }
 
-    }   while(0);
-
-    return  l_fapirc;
+    return  l_rc;
 }
 
 fapi::ReturnCode fapiPlatGetProcNxMmioBarEnable(
                                     const fapi::Target * i_pTarget,
                                     uint8_t     &o_nxMmioBarEnable )
 {
-    fapi::ReturnCode l_fapirc( fapi::FAPI_RC_SUCCESS );
+    fapi::ReturnCode l_rc;
     uint64_t    l_procNum       =   0;
     uint8_t     l_isEnabled     =   PROC_BARS_DISABLE;
 
-    do  {
-        /*@
-         *  @errortype
-         *  @moduleid   MOD_ATTR_PROC_NX_MMIO_BAR_ENABLE_GET
-         *  @reasoncode RC_ATTR_BAD_TARGET_PARAM
-         *  @devdesc    Null FAPI Target passed to ATTR_GET
-         */
-        l_fapirc    =   barsPreCheck( i_pTarget,
-                                      fapi::MOD_ATTR_PROC_NX_MMIO_BAR_ENABLE_GET,
-                                      l_procNum,
-                                      l_isEnabled );
-        if ( l_fapirc )
-        {
-            FAPI_ERR("ERROR : NULL FAPI Target");
-            break;
-        }
-
+    l_rc    =   barsPreCheck(i_pTarget, l_procNum, l_isEnabled);
+    if ( l_rc )
+    {
+        FAPI_ERR("fapiPlatGetProcNxMmioBarEnable: Error from barsPreCheck");
+    }
+    else
+    {
         o_nxMmioBarEnable   =   l_isEnabled;
+    }
 
-    }   while(0);
-
-    return  l_fapirc;
+    return  l_rc;
 }
 
 fapi::ReturnCode fapiPlatGetProcNxMmioBarSize (
                                     const fapi::Target * i_pTarget,
                                     uint64_t    &o_nxMmioBarSize )
 {
-    fapi::ReturnCode l_fapirc( fapi::FAPI_RC_SUCCESS );
+    fapi::ReturnCode l_rc;
     uint64_t    l_procNum       =   0;
     uint8_t     l_isEnabled     =   PROC_BARS_DISABLE;
 
-    do  {
-        /*@
-         *  @errortype
-         *  @moduleid   MOD_ATTR_PROC_NX_MMIO_BAR_SIZE_GET
-         *  @reasoncode RC_ATTR_BAD_TARGET_PARAM
-         *  @devdesc    Null FAPI Target passed to ATTR_GET
-         */
-        l_fapirc    =   barsPreCheck( i_pTarget,
-                                  fapi::MOD_ATTR_PROC_NX_MMIO_BAR_SIZE_GET,
-                                  l_procNum,
-                                  l_isEnabled );
-        if ( l_fapirc )
-        {
-            FAPI_ERR("ERROR : NULL FAPI Target");
-            break;
-        }
+    l_rc    =   barsPreCheck(i_pTarget, l_procNum, l_isEnabled);
+    if ( l_rc )
+    {
+        FAPI_ERR("fapiPlatGetProcNxMmioBarSize: Error from barsPreCheck");
+    }
+    else
+    {
+        o_nxMmioBarSize   =   PROC_RNG_SIZE ;
+    }
 
-          o_nxMmioBarSize   =   PROC_RNG_SIZE ;
-
-    }   while(0);
-
-    return  l_fapirc;
+    return  l_rc;
 }
 
 fapi::ReturnCode fapiPlatGetProcPcieBarEnable (
                                     const fapi::Target * i_pTarget,
                                     uint8_t     (&o_pcieBarEnable) [3][3] )
 {
-    fapi::ReturnCode l_fapirc( fapi::FAPI_RC_SUCCESS );
+    fapi::ReturnCode l_rc;
     uint64_t    l_procNum       =   0;
     uint8_t     l_isEnabled     =   PROC_BARS_DISABLE;
 
-    do  {
-        /*@
-         *  @errortype
-         *  @moduleid   MOD_ATTR_PROC_PCIE_BAR_ENABLE_GET
-         *  @reasoncode RC_ATTR_BAD_TARGET_PARAM
-         *  @devdesc    Null FAPI Target passed to ATTR_GET
-         */
-        l_fapirc    =   barsPreCheck( i_pTarget,
-                                      fapi::MOD_ATTR_PROC_PCIE_BAR_ENABLE_GET,
-                                      l_procNum,
-                                      l_isEnabled );
-        if ( l_fapirc )
-        {
-            FAPI_ERR("ERROR : NULL FAPI Target");
-            break;
-        }
-
-
+    l_rc    =   barsPreCheck(i_pTarget, l_procNum, l_isEnabled);
+    if ( l_rc )
+    {
+        FAPI_ERR("fapiPlatGetProcPcieBarEnable: Error from barsPreCheck");
+    }
+    else
+    {
         //  BAR # 0 are the PCIE unit #'s
         //  BAR # 1 is reserved, should be DISabled (per Joe McGill)
         //  BAR # 2 are the PHB REGS
@@ -1314,94 +1100,81 @@ fapi::ReturnCode fapiPlatGetProcPcieBarEnable (
                       o_pcieBarEnable[u][1],
                       o_pcieBarEnable[u][2]    );
         }
+    }
 
-    }   while(0);
-
-    return  l_fapirc;
+    return  l_rc;
 }
 
 fapi::ReturnCode fapiPlatGetProcPcieBarBaseAddr (
                                     const fapi::Target * i_pTarget,
                                     uint64_t    (&o_pcieBarBase) [3][3] )
 {
-    fapi::ReturnCode l_fapirc( fapi::FAPI_RC_SUCCESS );
+    fapi::ReturnCode l_rc;
     uint64_t    l_procNum       =   0;
     uint8_t     l_isEnabled     =   PROC_BARS_DISABLE;
 
-    do  {
-        /*@
-         *  @errortype
-         *  @moduleid   MOD_ATTR_PROC_PCIE_BAR_BASE_ADDR_GET
-         *  @reasoncode RC_ATTR_BAD_TARGET_PARAM
-         *  @devdesc    Null FAPI Target passed to ATTR_GET
-         */
-        l_fapirc    =   barsPreCheck( i_pTarget,
-                                      fapi::MOD_ATTR_PROC_PCIE_BAR_BASE_ADDR_GET,
-                                      l_procNum,
-                                      l_isEnabled );
-        if ( l_fapirc )
+    l_rc = barsPreCheck(i_pTarget, l_procNum, l_isEnabled);
+
+    if ( l_rc )
+    {
+        FAPI_ERR("fapiPlatGetProcPcieBarBaseAddr: Error from barsPreCheck");
+    }
+    else
+    {
+        TARGETING::Target* l_pProcTarget = NULL;
+
+        l_rc = getTargetingTarget(i_pTarget, l_pProcTarget);
+
+        if (l_rc)
         {
-            FAPI_ERR("ERROR : NULL FAPI Target");
-            break;
+            FAPI_ERR("fapiPlatGetProcPcieBarBaseAddr: Error from getTargetingTarget");
         }
-
-        // Extract the Proc Hostboot Target pointer
-        TARGETING::Target * l_hbProc =
-          reinterpret_cast<TARGETING::Target*>(i_pTarget->get());
-
-        // Pull the data out of the Hostboot attribute
-        uint64_t l_pciMem[4];
-        l_hbProc->tryGetAttr<TARGETING::ATTR_PCI_BASE_ADDRS>(l_pciMem);
-        uint64_t l_phbRegs[4];
-        l_hbProc->tryGetAttr<TARGETING::ATTR_PHB_BASE_ADDRS>(l_phbRegs);
-
-        //  BAR # 0 are the PCIE unit #'s
-        //  BAR # 1 is disabled, set to 0
-        //  BAR # 2 are the PHB REGS
-        for ( uint8_t u=0; u < 3; u++ )
+        else
         {
-           o_pcieBarBase[u][0]  =  l_pciMem[u];
-           o_pcieBarBase[u][1]  =  0;
-           o_pcieBarBase[u][2]  =  l_phbRegs[u];
+            // Pull the data out of the Hostboot attribute
+            uint64_t l_pciMem[4];
+            l_pProcTarget->tryGetAttr<TARGETING::ATTR_PCI_BASE_ADDRS>(
+                l_pciMem);
+            uint64_t l_phbRegs[4];
+            l_pProcTarget->tryGetAttr<TARGETING::ATTR_PHB_BASE_ADDRS>(
+                l_phbRegs);
 
-           FAPI_DBG( "fapiPlatGetProcPcieBarBaseAddr: Unit %d : %p %p %p",
-                     u,
-                     o_pcieBarBase[u][0],
-                     o_pcieBarBase[u][1],
-                     o_pcieBarBase[u][2]    );
+            //  BAR # 0 are the PCIE unit #'s
+            //  BAR # 1 is disabled, set to 0
+            //  BAR # 2 are the PHB REGS
+            for ( uint8_t u=0; u < 3; u++ )
+            {
+               o_pcieBarBase[u][0]  =  l_pciMem[u];
+               o_pcieBarBase[u][1]  =  0;
+               o_pcieBarBase[u][2]  =  l_phbRegs[u];
+
+               FAPI_DBG( "fapiPlatGetProcPcieBarBaseAddr: Unit %d : %p %p %p",
+                         u,
+                         o_pcieBarBase[u][0],
+                         o_pcieBarBase[u][1],
+                         o_pcieBarBase[u][2]    );
+            }
         }
+    }
 
-    }   while(0);
-
-
-    return  l_fapirc;
+    return  l_rc;
 }
 
 fapi::ReturnCode fapiPlatGetProcPcieBarSize (
                                     const fapi::Target * i_pTarget,
                                     uint64_t    (&o_pcieBarSize) [3][3] )
 {
-    fapi::ReturnCode l_fapirc( fapi::FAPI_RC_SUCCESS );
+    fapi::ReturnCode l_rc;
     uint64_t    l_procNum       =   0;
     uint8_t     l_isEnabled     =   PROC_BARS_DISABLE;
 
-    do  {
-        /*@
-         *  @errortype
-         *  @moduleid   MOD_ATTR_PROC_PCIE_BAR_SIZE_GET
-         *  @reasoncode RC_ATTR_BAD_TARGET_PARAM
-         *  @devdesc    Null FAPI Target passed to ATTR_GET
-         */
-        l_fapirc    =   barsPreCheck( i_pTarget,
-                                      fapi::MOD_ATTR_PROC_PCIE_BAR_SIZE_GET,
-                                      l_procNum,
-                                      l_isEnabled );
-        if ( l_fapirc )
-        {
-            FAPI_ERR("ERROR : NULL FAPI Target");
-            break;
-        }
-
+    l_rc    =   barsPreCheck(i_pTarget, l_procNum, l_isEnabled);
+    if ( l_rc )
+    {
+        FAPI_ERR("fapiPlatGetProcPcieBarSize: Error from barsPreCheck");
+    }
+    else
+    {
         //  NOTE: supported BAR0/1 sizes are from 64KB-1PB
         //  NOTE: BAR1 is disabled, set to 0
         //  NOTE: only supported BAR2 size is 4KB
@@ -1417,11 +1190,9 @@ fapi::ReturnCode fapiPlatGetProcPcieBarSize (
                      o_pcieBarSize[u][1],
                      o_pcieBarSize[u][2]    );
         }
+    }
 
-    }   while(0);
-
-
-    return  l_fapirc;
+    return  l_rc;
 }
 
 fapi::ReturnCode fapiPlatGetSingleMemberEnableAttr(
@@ -1435,15 +1206,19 @@ fapi::ReturnCode fapiPlatGetSingleMemberEnableAttr(
 }
 
 fapi::ReturnCode fapiPlatGetEnableAttr ( fapi::AttributeId i_id,
-     const fapi::Target * i_pTarget, uint8_t & o_enable )
+     const fapi::Target * i_pFapiTarget, uint8_t & o_enable )
 {
     fapi::ReturnCode l_rc;
     TARGETING::Target * l_pTarget = NULL;
 
-    // Get the Hostboot Target
-    l_rc = getHostbootTarget(i_pTarget, l_pTarget);
+    // Get the Targeting Target
+    l_rc = getTargetingTarget(i_pFapiTarget, l_pTarget);
 
-    if (l_rc.ok())
+    if (l_rc)
+    {
+        FAPI_ERR("fapiPlatGetEnableAttr: Error from getTargetingTarget");
+    }
+    else
     {
         TARGETING::TargetHandleList l_buses;
         switch (i_id)

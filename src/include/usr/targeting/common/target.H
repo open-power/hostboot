@@ -50,6 +50,23 @@
 #include <targeting/common/attributes.H>
 #include <targeting/common/attributeTank.H>
 
+//******************************************************************************
+// Forward declarations to allow friend functions to work
+//******************************************************************************
+namespace fapi
+{
+    class ReturnCode;
+    class Target;
+
+    namespace platAttrSvc
+    {
+        fapi::ReturnCode getTargetingAttr(const fapi::Target *,
+            const TARGETING::ATTRIBUTE_ID, const uint32_t, void *);
+        fapi::ReturnCode setTargetingAttr(const fapi::Target *,
+            const TARGETING::ATTRIBUTE_ID, const uint32_t, void *);
+    }
+}
+
 namespace TARGETING
 {
 
@@ -468,6 +485,15 @@ class Target
         static AttributeTank cv_syncTank;
 
       friend class PnorBuilderService;
+
+      // Friend functions to allow FAPI Attribute code to directly call
+      // _tryGetAttr and _trySetAttr for code size optimization
+      friend fapi::ReturnCode fapi::platAttrSvc::getTargetingAttr(
+          const fapi::Target *, TARGETING::ATTRIBUTE_ID, const uint32_t,
+          void *);
+      friend fapi::ReturnCode fapi::platAttrSvc::setTargetingAttr(
+          const fapi::Target *, TARGETING::ATTRIBUTE_ID, const uint32_t,
+          void *);
 
 } PACKED;
 
