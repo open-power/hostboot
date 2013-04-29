@@ -386,6 +386,7 @@
     <attribute><id>RNG_BAR_SIZE</id></attribute>
     <attribute><id>IMT_BASE_ADDR</id></attribute>
     <attribute><id>IMT_BAR_SIZE</id></attribute>
+    <attribute><id>IBSCOM_PROC_BASE_ADDR</id></attribute>
     <!-- end Memory Map -->
 
     <!-- PROC_PCIE  attributes -->

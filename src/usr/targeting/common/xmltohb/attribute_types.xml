@@ -2173,6 +2173,18 @@
 </attribute>
 
 <attribute>
+    <id>IBSCOM_PROC_BASE_ADDR</id>
+    <description>PROC Inband Scom base address</description>
+    <simpleType>
+        <uint64_t>
+            <default>0x0003E00000000000</default>
+        </uint64_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+</attribute>
+
+<attribute>
     <id>MIRROR_BASE_ADDRESS</id>
     <description>System Mirrorable base address</description>
     <simpleType>

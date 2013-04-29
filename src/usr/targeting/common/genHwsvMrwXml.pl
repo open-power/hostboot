@@ -1827,6 +1827,12 @@ sub generate_proc
        0x0003FFFF40000000 + 0x4000*$lognode + 0x1000*$logid );
     printf( "    </attribute>\n" );
 
+    # Starts at 992TB - 128GB per MCS/Centaur
+    printf( "    <attribute><id>IBSCOM_PROC_BASE_ADDR</id>\n" );
+    printf( "        <default>0x%016X</default>\n",
+       0x0003E00000000000 + 0x40000000000*$lognode + 0x10000000000*$logid );
+    printf( "    </attribute>\n" );
+
     print "    <!-- End PHYP Memory Map -->\n\n";
     # end PHYP Memory Map
 

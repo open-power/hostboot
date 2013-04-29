@@ -232,6 +232,9 @@
     <attribute><id>RNG_BASE_ADDR</id>
         <default>0x0003FFFF40000000</default>
     </attribute>
+    <attribute><id>IBSCOM_PROC_BASE_ADDR</id>
+        <default>0x0003E00000000000</default>
+    </attribute>
 
     <!-- PROC_PCIE_ attributes -->
     <attribute>

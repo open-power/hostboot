@@ -112,7 +112,7 @@ TRAC_INIT(&g_trac_runtime, "RUNTIME", KILOBYTE);
     (*_num_attr)++; }
 
 /**
- * @brief Read the PHYS_PATH attribute from targeting and stick it into mainstore
+ * @brief Read the ECMD_STRING attribute from targeting and stick it into mainstore
  */
 #define ADD_ECMD_STRING() \
    { const char* estring = _target->toEcmdString(); \
@@ -124,7 +124,22 @@ TRAC_INIT(&g_trac_runtime, "RUNTIME", KILOBYTE);
     _output_ptr +=  _cur_header->sizeBytes; \
     (*_num_attr)++; }
 
-//void Target::toString(char (&o_ecmdString)[MAX_ECMD_STRING_LEN]) const
+/**
+ * @brief Read the IBSCOM_BASE attribute from targeting
+ *        and stick it into mainstore
+ */
+#define ADD_IBSCOM_BASE(__targ) \
+   { TARGETING::AttributeTraits \
+       <TARGETING::ATTR_IBSCOM_PROC_BASE_ADDR>::Type ibscomBase; \
+    _rc = !(__targ->tryGetAttr \
+       <TARGETING::ATTR_IBSCOM_PROC_BASE_ADDR>(ibscomBase)); \
+    _cur_header = &(_all_headers[(*_num_attr)]); \
+    _cur_header->id = HSVC_IBSCOM_BASE; \
+    _cur_header->sizeBytes = sizeof(uint64_t); \
+    _cur_header->offset = (_output_ptr - _beginning); \
+    memcpy( _output_ptr, &ibscomBase,  _cur_header->sizeBytes ); \
+    _output_ptr +=  _cur_header->sizeBytes; \
+    (*_num_attr)++; }
 
 /**
  * @brief Insert a terminator into the attribute list
@@ -408,6 +423,7 @@ errlHndl_t populate_node_attributes( uint64_t i_nodeNum )
             ADD_HUID( (all_procs[p]) ); // for debug
             ADD_PHYS_PATH( (all_procs[p]) );
             ADD_ECMD_STRING();
+            ADD_IBSCOM_BASE( (all_procs[p]) );
 
             // Use a generated file for the list of attributes to load
             #include "common/hsvc_procdata.C"

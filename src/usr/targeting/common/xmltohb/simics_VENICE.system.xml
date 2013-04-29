@@ -258,6 +258,9 @@
     <attribute><id>RNG_BASE_ADDR</id>
         <default>0x0003FFFF40000000</default>
     </attribute>
+    <attribute><id>IBSCOM_PROC_BASE_ADDR</id>
+        <default>0x0003E00000000000</default>
+    </attribute>
     <attribute><id>PROC_DCM_INSTALLED</id>
         <default>0</default>
     </attribute>
@@ -1273,6 +1276,9 @@
     </attribute>
     <attribute><id>RNG_BASE_ADDR</id>
         <default>0x0003FFFF40001000</default>
+    </attribute>
+    <attribute><id>IBSCOM_PROC_BASE_ADDR</id>
+        <default>0x0003E10000000000</default>
     </attribute>
     <attribute><id>PROC_DCM_INSTALLED</id>
         <default>0</default>
@@ -2290,6 +2296,9 @@
     <attribute><id>RNG_BASE_ADDR</id>
         <default>0x0003FFFF40002000</default>
     </attribute>
+    <attribute><id>IBSCOM_PROC_BASE_ADDR</id>
+        <default>0x0003E20000000000</default>
+    </attribute>
     <attribute><id>PROC_DCM_INSTALLED</id>
         <default>0</default>
     </attribute>
@@ -3306,6 +3315,9 @@
     <attribute><id>RNG_BASE_ADDR</id>
         <default>0x0003FFFF40003000</default>
     </attribute>
+    <attribute><id>IBSCOM_PROC_BASE_ADDR</id>
+        <default>0x0003E30000000000</default>
+    </attribute>
     <attribute><id>PROC_DCM_INSTALLED</id>
         <default>0</default>
     </attribute>
@@ -4319,6 +4331,9 @@
     </attribute>
     <attribute><id>RNG_BASE_ADDR</id>
         <default>0x0003FFFF40004000</default>
+    </attribute>
+    <attribute><id>IBSCOM_PROC_BASE_ADDR</id>
+        <default>0x0003E40000000000</default>
     </attribute>
     <attribute><id>PROC_DCM_INSTALLED</id>
         <default>0</default>
@@ -5336,6 +5351,9 @@
     <attribute><id>RNG_BASE_ADDR</id>
         <default>0x0003FFFF40005000</default>
     </attribute>
+    <attribute><id>IBSCOM_PROC_BASE_ADDR</id>
+        <default>0x0003E50000000000</default>
+    </attribute>
     <attribute><id>PROC_DCM_INSTALLED</id>
         <default>0</default>
     </attribute>
@@ -6349,6 +6367,9 @@
     </attribute>
     <attribute><id>RNG_BASE_ADDR</id>
         <default>0x0003FFFF40006000</default>
+    </attribute>
+    <attribute><id>IBSCOM_PROC_BASE_ADDR</id>
+        <default>0x0003E60000000000</default>
     </attribute>
     <attribute><id>PROC_DCM_INSTALLED</id>
         <default>0</default>
@@ -7364,6 +7385,9 @@
     </attribute>
     <attribute><id>RNG_BASE_ADDR</id>
         <default>0x0003FFFF40007000</default>
+    </attribute>
+    <attribute><id>IBSCOM_PROC_BASE_ADDR</id>
+        <default>0x0003E70000000000</default>
     </attribute>
     <attribute><id>PROC_DCM_INSTALLED</id>
         <default>0</default>
@@ -14656,6 +14680,9 @@
     </attribute>
     <attribute><id>RNG_BASE_ADDR</id>
         <default>0x0003FFFF40000000</default>
+    </attribute>
+    <attribute><id>IBSCOM_PROC_BASE_ADDR</id>
+        <default>0x0003E00000000000</default>
     </attribute>
     <attribute><id>PROC_DCM_INSTALLED</id>
         <default>0</default>

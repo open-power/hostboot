@@ -78,5 +78,6 @@ struct hsvc_node_data_t
 static const uint64_t HSVC_HUID        = 0xFF000001FFFFFFFF;
 static const uint64_t HSVC_PHYS_PATH   = 0xFF000002FFFFFFFF;
 static const uint64_t HSVC_ECMD_STRING = 0xFF000003FFFFFFFF;
+static const uint64_t HSVC_IBSCOM_BASE = 0xFF000004FFFFFFFF;
 
 #endif
