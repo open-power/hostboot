@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-/// $Id: proc_cen_framelock.C,v 1.12 2013/03/14 04:10:28 jmcgill Exp $
+/// $Id: proc_cen_framelock.C,v 1.13 2013/04/28 05:48:24 baysah Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_cen_framelock.C,v $
 //------------------------------------------------------------------------------
 // *|
@@ -2016,7 +2016,7 @@ fapi::ReturnCode proc_cen_framelock(const fapi::Target& i_pu_target,
 
 
     // EXIT Procedure
-    // by setting the MCI and MBI fir mask and action registers according to PRD requirements.
+    // by setting the MCI and MBI fir action and mask registers according to PRD requirements.
 
 
       // (Action0, Action1, Mask)
@@ -2029,59 +2029,11 @@ fapi::ReturnCode proc_cen_framelock(const fapi::Target& i_pu_target,
       // (1,0,0) = Use this setting for non-implemented bits
 
 
-        // Set P8 MCI FIR Mask
-        l_ecmdRc |= mci_data.flushTo0();
-        l_ecmdRc |= mci_data.setBit(0);     //Replay Timeout
-        l_ecmdRc |= mci_data.setBit(4);     //Seqid OOO
-        l_ecmdRc |= mci_data.setBit(5);     //Replay Buffer CE
-        l_ecmdRc |= mci_data.setBit(6);     //Replay Buffer UE
-        l_ecmdRc |= mci_data.setBit(8);     //MCI Internal Control Parity Error
-        l_ecmdRc |= mci_data.setBit(9);     //MCI Data Flow Parity Error
-        l_ecmdRc |= mci_data.setBit(10);    //CRC Performance Degradation
-        l_ecmdRc |= mci_data.setBit(12);    //Centaur Checkstop
-        l_ecmdRc |= mci_data.setBit(15);    //Centaur Recoverable Attention
-        l_ecmdRc |= mci_data.setBit(16);    //Centaur Special Attention
-        l_ecmdRc |= mci_data.setBit(17);    //Centaur Maintenance Complete
-        l_ecmdRc |= mci_data.setBit(20);    //SCOM Register Parity Error
-        l_ecmdRc |= mci_data.setBit(22);    //MCICFGQ Parity Error
-        l_ecmdRc |= mci_data.setBit(23);    //Replay Buffer Overrun
-        l_ecmdRc |= mci_data.setBit(40);    //MCS Channel Timeout Error
-        l_ecmdRc |= mci_data.copy(mci_mask);
-        l_ecmdRc |= mci_data.clearBit(0);     //Replay Timeout
-        l_ecmdRc |= mci_data.clearBit(4);     //Seqid OOO
-        l_ecmdRc |= mci_data.clearBit(5);     //Replay Buffer CE
-        l_ecmdRc |= mci_data.clearBit(6);     //Replay Buffer UE
-        l_ecmdRc |= mci_data.clearBit(8);     //MCI Internal Control Parity Error
-        l_ecmdRc |= mci_data.clearBit(9);     //MCI Data Flow Parity Error
-        l_ecmdRc |= mci_data.clearBit(10);    //CRC Performance Degradation
-        l_ecmdRc |= mci_data.clearBit(12);    //Centaur Checkstop
-        l_ecmdRc |= mci_data.clearBit(15);    //Centaur Recoverable Attention
-        l_ecmdRc |= mci_data.clearBit(16);    //Centaur Special Attention
-        l_ecmdRc |= mci_data.clearBit(17);    //Centaur Maintenance Complete
-        l_ecmdRc |= mci_data.clearBit(20);    //SCOM Register Parity Error
-        l_ecmdRc |= mci_data.clearBit(22);    //MCICFGQ Parity Error
-        l_ecmdRc |= mci_data.clearBit(23);    //Replay Buffer Overrun
-        l_ecmdRc |= mci_data.clearBit(40);    //MCS Channel Timeout Error
-        if (l_ecmdRc)
-        {
-            FAPI_ERR("proc_cen_framelock: Error 0x%x setting up data buffers to mask MCI FIRs",
-                     l_ecmdRc);
-            l_rc.setEcmdError(l_ecmdRc);
-            // return l_rc;
-        }
-
-        l_rc = proc_cen_framelock_set_pu_mci_firmask_reg(i_pu_target, mci_data, mci_mask);
-        if (l_rc)
-        {
-            FAPI_ERR("proc_cen_framelock: Error writing P8 MCI Fir Mask Register");
-            //return l_rc;
-        }
-
-
         // Set P8 MCI FIR ACT0
         //     Set action regs to recoverable interrupt (action0=1, action1=0) for MCIFIR's 12,15,16 and 17
+        //     On 4/25/2013, PRD asked to change bit 12 action from recov intr to recover error
         l_ecmdRc |= mci_data.flushTo0();
-        l_ecmdRc |= mci_data.setBit(12);    //Centaur Checkstop
+       // l_ecmdRc |= mci_data.setBit(12);    //Centaur Checkstop
         l_ecmdRc |= mci_data.setBit(15);    //Centaur Recoverable Attention
         l_ecmdRc |= mci_data.setBit(16);    //Centaur Special Attention
         l_ecmdRc |= mci_data.setBit(17);    //Centaur Maintenance Complete
@@ -2113,9 +2065,13 @@ fapi::ReturnCode proc_cen_framelock(const fapi::Target& i_pu_target,
         l_ecmdRc |= mci_data.setBit(8);     //MCI Internal Control Parity Error
         l_ecmdRc |= mci_data.setBit(9);     //MCI Data Flow Parity Error
         l_ecmdRc |= mci_data.setBit(10);    //CRC Performance Degradation
+        l_ecmdRc |= mci_data.setBit(12);    //Centaur Checkstop
         l_ecmdRc |= mci_data.setBit(20);    //Scom Register parity error
         l_ecmdRc |= mci_data.setBit(22);    //mcicfgq parity error
         l_ecmdRc |= mci_data.setBit(23);    //Replay Buffer Overrun
+        l_ecmdRc |= mci_data.setBit(27);    //MCS Command List Timeout due to PowerBus
+        l_ecmdRc |= mci_data.setBit(35);    //PowerBus Write Data Buffer CE
+        l_ecmdRc |= mci_data.setBit(36);    //PowerBus Write Data Buffer UE
         l_ecmdRc |= mci_data.setBit(40);    //MCS Channel Timeout Error
         l_ecmdRc |= mci_data.copy(mci_mask);
         if (l_ecmdRc)
@@ -2162,6 +2118,109 @@ fapi::ReturnCode proc_cen_framelock(const fapi::Target& i_pu_target,
 
 
 
+        // Set P8 MCI FIR Mask
+        l_ecmdRc |= mci_data.flushTo0();
+        l_ecmdRc |= mci_data.setBit(0);     //Replay Timeout
+        l_ecmdRc |= mci_data.setBit(4);     //Seqid OOO
+        l_ecmdRc |= mci_data.setBit(5);     //Replay Buffer CE
+        l_ecmdRc |= mci_data.setBit(6);     //Replay Buffer UE
+        l_ecmdRc |= mci_data.setBit(8);     //MCI Internal Control Parity Error
+        l_ecmdRc |= mci_data.setBit(9);     //MCI Data Flow Parity Error
+        l_ecmdRc |= mci_data.setBit(10);    //CRC Performance Degradation
+        l_ecmdRc |= mci_data.setBit(12);    //Centaur Checkstop
+        l_ecmdRc |= mci_data.setBit(15);    //Centaur Recoverable Attention
+        l_ecmdRc |= mci_data.setBit(16);    //Centaur Special Attention
+        l_ecmdRc |= mci_data.setBit(17);    //Centaur Maintenance Complete
+        l_ecmdRc |= mci_data.setBit(20);    //SCOM Register Parity Error
+        l_ecmdRc |= mci_data.setBit(22);    //MCICFGQ Parity Error
+        l_ecmdRc |= mci_data.setBit(23);    //Replay Buffer Overrun
+        l_ecmdRc |= mci_data.setBit(24);    //Recoverable MC Internal Error
+        l_ecmdRc |= mci_data.setBit(25);    //Non-Recoverable MC Internal Error (xstop)
+        l_ecmdRc |= mci_data.setBit(26);    //PowerBus Protocol Error (xstop)
+        l_ecmdRc |= mci_data.setBit(27);    //MCS Command List Timeout due to PB
+        l_ecmdRc |= mci_data.setBit(28);    //Multiple RCMD or CRESP active
+        l_ecmdRc |= mci_data.setBit(29);    //Inband Bar Hit with Incorrect TTYPE (xstop)
+        l_ecmdRc |= mci_data.setBit(30);    //Multiple Bar Hit (xstop)
+        l_ecmdRc |= mci_data.setBit(33);    //Invalid Foreign Bar Access (xstop)
+        l_ecmdRc |= mci_data.setBit(35);    //PowerBus Write Data Buffer CE
+        l_ecmdRc |= mci_data.setBit(36);    //PowerBus Write Data Buffer UE
+        l_ecmdRc |= mci_data.setBit(38);    //HA Illegal Consumer Access Error (xstop)
+        l_ecmdRc |= mci_data.setBit(39);    //HA Illegal Producer Access Error (xstop)
+        l_ecmdRc |= mci_data.setBit(40);    //MCS Channel Timeout Error
+        l_ecmdRc |= mci_data.copy(mci_mask);
+        l_ecmdRc |= mci_data.clearBit(0);     //Replay Timeout
+        l_ecmdRc |= mci_data.clearBit(4);     //Seqid OOO
+        l_ecmdRc |= mci_data.clearBit(5);     //Replay Buffer CE
+        l_ecmdRc |= mci_data.clearBit(6);     //Replay Buffer UE
+        l_ecmdRc |= mci_data.clearBit(8);     //MCI Internal Control Parity Error
+        l_ecmdRc |= mci_data.clearBit(9);     //MCI Data Flow Parity Error
+        l_ecmdRc |= mci_data.clearBit(10);    //CRC Performance Degradation
+        l_ecmdRc |= mci_data.clearBit(12);    //Centaur Checkstop
+        l_ecmdRc |= mci_data.clearBit(15);    //Centaur Recoverable Attention
+        l_ecmdRc |= mci_data.clearBit(16);    //Centaur Special Attention
+        l_ecmdRc |= mci_data.clearBit(17);    //Centaur Maintenance Complete
+        l_ecmdRc |= mci_data.clearBit(20);    //SCOM Register Parity Error
+        l_ecmdRc |= mci_data.clearBit(22);    //MCICFGQ Parity Error
+        l_ecmdRc |= mci_data.clearBit(23);    //Replay Buffer Overrun
+        l_ecmdRc |= mci_data.clearBit(24);    //Recoverable MC Internal Error
+        l_ecmdRc |= mci_data.clearBit(25);    //Non-Recoverable MC Internal Error (xstop)
+        l_ecmdRc |= mci_data.clearBit(26);    //PowerBus Protocol Error (xstop)
+        l_ecmdRc |= mci_data.clearBit(27);    //MCS Command List Timeout due to PB
+        l_ecmdRc |= mci_data.clearBit(28);    //Multiple RCMD or CRESP active
+        l_ecmdRc |= mci_data.clearBit(29);    //Inband Bar Hit with Incorrect TTYPE (xstop)
+        l_ecmdRc |= mci_data.clearBit(30);    //Multiple Bar Hit (xstop)
+        l_ecmdRc |= mci_data.clearBit(33);    //Invalid Foreign Bar Access (xstop)
+        l_ecmdRc |= mci_data.clearBit(35);    //PowerBus Write Data Buffer CE
+        l_ecmdRc |= mci_data.clearBit(36);    //PowerBus Write Data Buffer UE
+        l_ecmdRc |= mci_data.clearBit(38);    //HA Illegal Consumer Access Error (xstop)
+        l_ecmdRc |= mci_data.clearBit(39);    //HA Illegal Producer Access Error (xstop)
+        l_ecmdRc |= mci_data.clearBit(40);    //MCS Channel Timeout Error
+        if (l_ecmdRc)
+        {
+            FAPI_ERR("proc_cen_framelock: Error 0x%x setting up data buffers to mask MCI FIRs",
+                     l_ecmdRc);
+            l_rc.setEcmdError(l_ecmdRc);
+            // return l_rc;
+        }
+
+        l_rc = proc_cen_framelock_set_pu_mci_firmask_reg(i_pu_target, mci_data, mci_mask);
+        if (l_rc)
+        {
+            FAPI_ERR("proc_cen_framelock: Error writing P8 MCI Fir Mask Register");
+            //return l_rc;
+        }
+
+
+
+     // ===================================================================
+
+
+
+        // No Bits are set in FIR ACT0
+
+        // Set CEN MBI FIR ACT1
+        l_ecmdRc |= mbi_data.flushTo0();
+        l_ecmdRc |= mbi_data.setBit(4);     //Seqid OOO
+        l_ecmdRc |= mbi_data.setBit(5);     //Replay Buffer CE
+        l_ecmdRc |= mbi_data.setBit(10);    //CRC Performance Degradation
+        l_ecmdRc |= mbi_data.setBit(16);    //Scom Register parity error
+        l_ecmdRc |= mbi_data.copy(mbi_mask);
+        if (l_ecmdRc)
+        {
+            FAPI_ERR("proc_cen_framelock: Error 0x%x setting up data buffers to set MBI FIR actions",
+                     l_ecmdRc);
+            l_rc.setEcmdError(l_ecmdRc);
+            //return l_rc;
+        }
+
+        l_rc = proc_cen_framelock_set_cen_mbi_firact1_reg(i_mem_target, mbi_data, mbi_mask);
+        if (l_rc)
+        {
+            FAPI_ERR("proc_cen_framelock: Error writing Centaur MBI Fir Action1 Register");
+            //return l_rc;
+        }
+
+
 
 
         // Set Centaur MBI FIR Mask
@@ -2203,29 +2262,6 @@ fapi::ReturnCode proc_cen_framelock(const fapi::Target& i_pu_target,
         }
 
 
-        // No Bits are set in FIR ACT0
-
-        // Set P8 MBI FIR ACT1
-        l_ecmdRc |= mbi_data.flushTo0();
-        l_ecmdRc |= mbi_data.setBit(4);     //Seqid OOO
-        l_ecmdRc |= mbi_data.setBit(5);     //Replay Buffer CE
-        l_ecmdRc |= mbi_data.setBit(10);    //CRC Performance Degradation
-        l_ecmdRc |= mbi_data.setBit(16);    //Scom Register parity error
-        l_ecmdRc |= mbi_data.copy(mbi_mask);
-        if (l_ecmdRc)
-        {
-            FAPI_ERR("proc_cen_framelock: Error 0x%x setting up data buffers to set MBI FIR actions",
-                     l_ecmdRc);
-            l_rc.setEcmdError(l_ecmdRc);
-            //return l_rc;
-        }
-
-        l_rc = proc_cen_framelock_set_cen_mbi_firact1_reg(i_mem_target, mbi_data, mbi_mask);
-        if (l_rc)
-        {
-            FAPI_ERR("proc_cen_framelock: Error writing Centaur MBI Fir Action1 Register");
-            //return l_rc;
-        }
 
 
 
