@@ -104,14 +104,6 @@ group gTpLFir filter singlebit
      */
     (TpLFir, bit(10|11)) ? TBDDefaultCallout;
 
-    /** TP_LFIR[18]
-     *  local errors from mem PLL
-     *
-     *  These should never trigger directly themselves.
-     *  Should be handled by global PRD PLL code.
-     */
-    (TpLFir, bit(18)) ? threshold32pday;
-
     /** TP_LFIR[19]
      *  local errors from nest PLL
      *
@@ -119,6 +111,14 @@ group gTpLFir filter singlebit
      *  Should be handled by global PRD PLL code.
      */
     (TpLFir, bit(19)) ? threshold32pday;
+
+    /** TP_LFIR[20]
+     *  local errors from mem PLL
+     *
+     *  These should never trigger directly themselves.
+     *  Should be handled by global PRD PLL code.
+     */
+    (TpLFir, bit(20)) ? threshold32pday;
 
 };
 

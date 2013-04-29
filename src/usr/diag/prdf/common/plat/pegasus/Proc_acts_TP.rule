@@ -226,13 +226,13 @@ group gTpLFir filter singlebit
      */
     (TpLFir, bit(10|11)) ? TBDDefaultCallout;
 
-    /** TP_LFIR[14]
-     *  local errors from PCB ( error)
+    /** TP_LFIR[19]
+     *  Processor PLL error
      *
      *  These should never trigger directly themselves.
      *  Should be handled by global PRD PLL code.
      */
-    (TpLFir, bit(14)) ? threshold32pday;
+    (TpLFir, bit(19)) ? threshold32pday;
 
 };
 

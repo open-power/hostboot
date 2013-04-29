@@ -44,8 +44,8 @@ namespace Membuf
 
 enum
 {
-    PLL_DETECT_CENT_MEM  = 18,  // mem PLL error bit
-    PLL_DETECT_CENT_NEST = 19   // nest PLL error bit
+    PLL_DETECT_CENT_NEST = 19,  // nest PLL error bit
+    PLL_DETECT_CENT_MEM  = 20   // mem PLL error bit
 };
 
 /**

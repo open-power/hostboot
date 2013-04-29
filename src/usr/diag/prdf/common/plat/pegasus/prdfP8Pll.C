@@ -42,7 +42,7 @@ namespace Proc
 
 enum
 {
-    PLL_DETECT_P8 = 14,  //Bit position of the error bit.
+    PLL_DETECT_P8 = 19,  //Bit position of the error bit.
 };
 
 /**
