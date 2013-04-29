@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_draminit_training_advanced.C,v 1.29 2013/04/23 14:26:07 sasethur Exp $
+// $Id: mss_draminit_training_advanced.C,v 1.30 2013/04/24 13:41:57 sasethur Exp $
 /* File is created by SARAVANAN SETHURAMAN on Thur 29 Sept 2011. */
 
 //------------------------------------------------------------------------------
@@ -69,6 +69,7 @@
 //  1.27   | sasethur |09-Apr-13| Updated for port in parallel and pass shmoo param
 //  1.28   | sasethur |22-Apr-13| Fixed fw comment 
 //  1.29   | sasethur |23-Apr-13| Fixed fw comment 
+//  1.30   | sasethur |24-Apr-13| Fixed fw comment 
 
 // This procedure Schmoo's DRV_IMP, SLEW, VREF (DDR, CEN), RCV_IMP based on attribute from effective config procedure
 // DQ & DQS Driver impedance, Slew rate, WR_Vref shmoo would call only write_eye shmoo for margin calculation
@@ -1013,9 +1014,9 @@ void find_best_margin(shmoo_param i_shmoo_param_valid,
     uint32_t right_margin = 0;
     uint32_t left_margin_nom = 0;
     uint32_t right_margin_nom = 0;
-    uint32_t __attribute__((unused)) diff_margin_nom = 0; // SW198827
+    uint32_t diff_margin_nom = 0;
     //uint32_t total_margin = 0;
-    uint32_t __attribute__((unused)) diff_margin = 0; // SW198827
+    uint32_t diff_margin = 0;
     uint8_t index = 0;
     uint8_t index2 = 0;
    
@@ -1087,8 +1088,7 @@ void find_best_margin(shmoo_param i_shmoo_param_valid,
 	diff_margin = (i_left[index2] >= i_right[index2]) ? (i_left[index2] - i_right[index2]) : (i_right[index2] - i_left[index2]);
 	if ((left_margin > 0 && right_margin > 0))
 	{
-	   // if((left_margin >= left_margin_nom) && (right_margin >= right_margin_nom) && (diff_margin <= diff_margin_nom))
-	    if((left_margin >= left_margin_nom) && (right_margin >= right_margin_nom))
+	    if((left_margin >= left_margin_nom) && (right_margin >= right_margin_nom) && (diff_margin <= diff_margin_nom))
 	    {
  	        o_index = index2;
 		//wont break this loop, since the purpose is to find the best parameter value & best timing margin The enum is constructed to do that

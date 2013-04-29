@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_abus_scominit.H,v 1.2 2013/02/11 04:27:41 jmcgill Exp $
+// $Id: proc_abus_scominit.H,v 1.3 2013/04/18 22:36:20 jgrell Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_abus_scominit.H,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2012
@@ -58,8 +58,7 @@ const char * const ABUS_CUSTOM_IF = "p8.abus.custom.scom.if";
 // function pointer typedef definition for HWP call support
 typedef fapi::ReturnCode
 (*proc_abus_scominit_FP_t)(const fapi::Target & i_abus_target,
-                           const fapi::Target & i_this_pu_target,
-                           const fapi::Target & i_other_pu_target);
+                           const fapi::Target & i_connected_abus_target);
 
 extern "C" {
 
@@ -85,8 +84,7 @@ extern "C" {
  */
 fapi::ReturnCode proc_abus_scominit(
     const fapi::Target & i_abus_target,
-    const fapi::Target & i_this_pu_target,
-    const fapi::Target & i_other_pu_target);
+    const fapi::Target & i_connected_abus_target);
 
 
 } // extern "C"

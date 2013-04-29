@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_abus_scominit.C,v 1.3 2013/02/11 04:27:40 jmcgill Exp $
+// $Id: proc_abus_scominit.C,v 1.4 2013/04/18 22:35:35 jgrell Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_abus_scominit.C,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2012
@@ -36,6 +36,14 @@
 // *! ADDITIONAL COMMENTS :
 // *!
 //------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+//  Version		Date		Owner		Description
+//------------------------------------------------------------------------------
+//    1.4	   	02/18/13	thomsen		Changed targeting to use Abus_chiplet, chip, connected_Abus_chiplet & connected_chip to match Xbus and DMI target list so they are common
+//    1.3	   	02/10/13	jmcgill     Leverage chiplet level targeting, invoke custom initfile
+//    1.2	   	01/20/13	jmcgill		Add consistency check for A chiplet partial good support
+//    1.1       8/11/12     jmcgill		Initial release
+//------------------------------------------------------------------------------
 
 //------------------------------------------------------------------------------
 //  Includes
@@ -50,13 +58,13 @@ extern "C" {
 //------------------------------------------------------------------------------
 
 // HWP entry point, comments in header
-fapi::ReturnCode proc_abus_scominit(
-    const fapi::Target & i_abus_target,
-    const fapi::Target & i_this_pu_target,
-    const fapi::Target & i_other_pu_target)
+fapi::ReturnCode proc_abus_scominit( const fapi::Target & i_abus_target,
+                                     const fapi::Target & i_connected_abus_target)
 {
     fapi::ReturnCode rc;
     std::vector<fapi::Target> targets;
+    fapi::Target i_this_pu_target;
+    fapi::Target i_connected_pu_target;
     uint8_t abus_enable_attr;
 
     // mark HWP entry
@@ -64,6 +72,17 @@ fapi::ReturnCode proc_abus_scominit(
 
     do
     {
+
+	    // Get parent chip targets
+        rc = fapiGetParentChip(i_abus_target, i_this_pu_target); if(rc) return rc;
+        rc = fapiGetParentChip(i_connected_abus_target, i_connected_pu_target); if(rc) return rc;
+
+		// populate targets vector
+        targets.push_back(i_abus_target);               // Chiplet target
+        targets.push_back(i_this_pu_target);            // Proc target
+        targets.push_back(i_connected_abus_target);     // Connected Chiplet target
+        targets.push_back(i_connected_pu_target);       // Connected Proc target
+
         // query ABUS partial good attribute
         rc = FAPI_ATTR_GET(ATTR_PROC_A_ENABLE,
                            &i_this_pu_target,
@@ -81,36 +100,39 @@ fapi::ReturnCode proc_abus_scominit(
             break;
         }
 
-        // obtain target type to determine which initfile(s) to execute
-        targets.push_back(i_abus_target);
-        targets.push_back(i_this_pu_target);
-        targets.push_back(i_other_pu_target);
-
-        // processor ABUS chiplet target
-        if ((i_abus_target.getType() == fapi::TARGET_TYPE_ABUS_ENDPOINT) &&
-            (i_this_pu_target.getType() == fapi::TARGET_TYPE_PROC_CHIP) &&
-            (i_other_pu_target.getType() == fapi::TARGET_TYPE_PROC_CHIP))
+        // processor target, processor MCS chiplet target
+        // test target types to confirm correct before calling initfile(s) to execute
+        if ((i_this_pu_target.getType()        == fapi::TARGET_TYPE_PROC_CHIP)     &&
+            (i_abus_target.getType()           == fapi::TARGET_TYPE_ABUS_ENDPOINT) &&
+            (i_connected_pu_target.getType()   == fapi::TARGET_TYPE_PROC_CHIP)     &&
+            (i_connected_abus_target.getType() == fapi::TARGET_TYPE_ABUS_ENDPOINT))
         {
-            FAPI_INF("proc_abus_scominit: Executing %s on %s",
-                     ABUS_BASE_IF, i_abus_target.toEcmdString());
+		    // Call BASE DMI SCOMINIT
+            FAPI_INF("proc_abus_scominit: fapiHwpExecInitfile executing %s on %s, %s, %s, %s",
+                     ABUS_BASE_IF, i_this_pu_target.toEcmdString(), i_abus_target.toEcmdString(),
+			    	                 i_connected_pu_target.toEcmdString(), i_connected_abus_target.toEcmdString());
             FAPI_EXEC_HWP(rc, fapiHwpExecInitFile, targets, ABUS_BASE_IF);
             if (!rc.ok())
             {
-                FAPI_ERR("proc_abus_scominit: Error from fapiHwpExecInitfile executing %s on %s",
-                         ABUS_BASE_IF, i_abus_target.toEcmdString());
+                FAPI_ERR("proc_abus_scominit: Error from fapiHwpExecInitfile executing %s on %s, %s, %s, %s",
+                     ABUS_BASE_IF, i_this_pu_target.toEcmdString(), i_abus_target.toEcmdString(),
+			   	                 i_connected_pu_target.toEcmdString(), i_connected_abus_target.toEcmdString());
                 break;
             }
 
-            FAPI_INF("proc_abus_scominit: Executing %s on %s",
-                     ABUS_CUSTOM_IF, i_abus_target.toEcmdString());
+		    // Call CUSTOMIZED DMI SCOMINIT (system specific)
+            FAPI_INF("proc_abus_scominit: fapiHwpExecInitfile executing %s on %s, %s, %s, %s",
+                     ABUS_CUSTOM_IF, i_this_pu_target.toEcmdString(), i_abus_target.toEcmdString(),
+			    	                 i_connected_pu_target.toEcmdString(), i_connected_abus_target.toEcmdString());
             FAPI_EXEC_HWP(rc, fapiHwpExecInitFile, targets, ABUS_CUSTOM_IF);
             if (!rc.ok())
             {
-                FAPI_ERR("proc_abus_scominit: Error from fapiHwpExecInitfile executing %s on %s",
-                         ABUS_CUSTOM_IF, i_abus_target.toEcmdString());
+                FAPI_ERR("proc_abus_scominit: Error from fapiHwpExecInitfile executing %s on %s, %s, %s, %s",
+                         ABUS_CUSTOM_IF, i_abus_target.toEcmdString(), i_abus_target.toEcmdString(),
+			   	                 i_connected_pu_target.toEcmdString(), i_connected_abus_target.toEcmdString());
                 break;
             }
-        }
+		}
         // unsupported target type
         else
         {

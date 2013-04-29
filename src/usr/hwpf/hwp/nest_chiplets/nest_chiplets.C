@@ -697,12 +697,6 @@ void* call_proc_abus_scominit( void    *io_pArgs )
                        (const_cast<TARGETING::Target*>(l_abusTarget)));
                 targets.push_back(l_fapi_abus_target);
 
-                const fapi::Target l_fapi_this_cpu_target(
-                       TARGET_TYPE_PROC_CHIP,
-                       (const_cast<TARGETING::Target*>(
-                               l_cpuTarget)));
-                targets.push_back(l_fapi_this_cpu_target);
-
                 const fapi::Target l_fapi_other_cpu_target(
                        TARGET_TYPE_PROC_CHIP,
                        (const_cast<TARGETING::Target*>(
@@ -719,7 +713,6 @@ void* call_proc_abus_scominit( void    *io_pArgs )
 
                 FAPI_INVOKE_HWP(l_err, proc_abus_scominit,
                                 l_fapi_abus_target,
-                                l_fapi_this_cpu_target,
                                 l_fapi_other_cpu_target);
                 if (l_err)
                 {

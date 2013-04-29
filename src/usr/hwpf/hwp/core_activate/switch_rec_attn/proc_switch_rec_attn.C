@@ -21,7 +21,7 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 // -*- mode: C++; c-file-style: "linux";  -*-
-// $Id: proc_switch_rec_attn.C,v 1.1 2012/12/10 20:38:04 mfred Exp $
+// $Id: proc_switch_rec_attn.C,v 1.2 2013/04/12 19:23:36 mfred Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_switch_rec_attn.C,v $
 //------------------------------------------------------------------------------
 // *|
@@ -94,7 +94,12 @@ extern "C"
             // The FIR bits are in the MCS MCIFIR register (02011840 is the first instance)
             // The FIR masks are in the MCS MCIFIRMASK reg (02011843 is the first instance)
             FAPI_INF("Mask OFF the MCI FIR bits 12,15,16,17 coming from Centaur.\n");
-            rc_ecmd |= scom_data.flushTo0();
+            rc = fapiGetScom(i_target, MCS_MCIFIRMASK_0x02011843, scom_data);
+            if (rc)
+            {
+                FAPI_ERR("fapiGetScom error (MCS_MCIFIRMASK_0x02011843)");
+                break;
+            }
             rc_ecmd |= scom_data.setBit(MCI_CENTAUR_CHECKSTOP_BIT);
             rc_ecmd |= scom_data.setBit(MCI_CENTAUR_RECOV_ERR_BIT);
             rc_ecmd |= scom_data.setBit(MCI_CENTAUR_SPEC_ATTN_BIT);
@@ -179,6 +184,9 @@ extern "C"
 This section is automatically updated by CVS when you check in this file.
 Be sure to create CVS comments when you commit so that they can be included here.
 $Log: proc_switch_rec_attn.C,v $
+Revision 1.2  2013/04/12 19:23:36  mfred
+Avoid clearing bit 18 of the MCIFIRMASK by reading the reg first. (Fix for SW197032).
+
 Revision 1.1  2012/12/10 20:38:04  mfred
 Committing new procedure proc_switch_rec_attn.
 

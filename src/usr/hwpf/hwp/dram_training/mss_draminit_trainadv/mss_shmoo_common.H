@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_shmoo_common.H,v 1.12 2013/03/20 17:18:38 sasethur Exp $
+// $Id: mss_shmoo_common.H,v 1.13 2013/04/25 08:23:54 sasethur Exp $
 // *!***************************************************************************
 // *! (C) Copyright International Business Machines Corp. 1997, 1998
 // *!           All Rights Reserved -- Property of IBM 
@@ -52,7 +52,7 @@ enum shmoo_type_t { TEST_NONE=0,MCBIST=1,WR_EYE=2, WRT_DQS=4,RD_EYE=8,RD_GATE=16
 enum shmoo_algorithm_t { SEQ_LIN}; // Parallel bytes/ranks here .. no parallel targets in HB
 const uint8_t NINE = 9;
 const uint8_t MAX_RPS=4;// 4 Rank pairs in this design
-const uint8_t MAX_SHMOO=4;
+const uint8_t MAX_SHMOO=16;
 const uint8_t MAX_RANK_DIMM=4;
 const uint8_t MAX_NIBBLES=2;
 const uint8_t MAX_BITS=4;
@@ -87,5 +87,7 @@ struct shmoo_knob_data_t{
     uint32_t nom_val[MAX_DQ][MAX_RPS]; // nominal value of this instance of the knob
     uint32_t right_margin_val[MAX_DQ][MAX_RPS];
     uint32_t left_margin_val[MAX_DQ][MAX_RPS];
+	uint32_t right_err_cnt[MAX_DQ][MAX_RPS];
+	uint32_t left_err_cnt[MAX_DQ][MAX_RPS];
 };
 #endif
