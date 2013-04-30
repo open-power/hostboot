@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/targeting/common/predicates/predicatehwas.C $         */
+/* $Source: src/usr/targeting/common/predicates/predicatehwaschanged.C $  */
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/* COPYRIGHT International Business Machines Corp. 2013                   */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,9 +20,8 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-
 /**
- *  @file targeting/common/predicates/predicatehwas.C
+ *  @file targeting/common/predicates/predicatehwaschanged.C
  *
  *  @brief Implementation for a predicate which fiters a target based on its
  *      HWAS state
@@ -59,23 +58,23 @@ namespace TARGETING
 {
 
 #define TARG_NAMESPACE "TARGETING::"
-#define TARG_CLASS "PredicateHwas::"
+#define TARG_CLASS "PredicateHwasChanged::"
 
 //******************************************************************************
-// PredicateHwas::~PredicateHwas()
+// PredicateHwasChanged::~PredicateHwasChanged()
 //******************************************************************************
 
-PredicateHwas::~PredicateHwas()
+PredicateHwasChanged::~PredicateHwasChanged()
 {
-    #define TARG_FUNC "~PredicateHwas()"
+    #define TARG_FUNC "~PredicateHwasChanged()"
     #undef TARG_FUNC
 }
 
 //******************************************************************************
-// PredicateHwas::reset
+// PredicateHwasChanged::reset
 //******************************************************************************
 
-PredicateHwas& PredicateHwas::reset()
+PredicateHwasChanged& PredicateHwasChanged::reset()
 {
     memset(&iv_valid,0x00,sizeof(iv_valid));
     memset(&iv_desired,0x00,sizeof(iv_desired));
@@ -83,20 +82,24 @@ PredicateHwas& PredicateHwas::reset()
 }
 
 //******************************************************************************
-// PredicateHwas::operator()
+// PredicateHwasChanged::operator()
 //******************************************************************************
 
-bool PredicateHwas::operator()(
+bool PredicateHwasChanged::operator()(
     const Target* const i_pTarget) const
 {
     #define TARG_FUNC "operator()(...)"
 
-    hwasState actual = { rawValue: 0};
-    CPPASSERT(sizeof(actual.attribute) <= sizeof(actual.rawValue));
-    actual.attribute = i_pTarget->getAttr<ATTR_HWAS_STATE>();
+    hwasStateChangedFlag actual = { rawValue: 0};
+    CPPASSERT(sizeof(actual.attribute) <=
+                sizeof(actual.rawValue));
+    actual.attribute =
+            i_pTarget->getAttr<ATTR_HWAS_STATE_CHANGED_FLAG>();
+    ATTR_HWAS_STATE_CHANGED_SUBSCRIPTION_MASK_type subscriptionMask =
+            i_pTarget->getAttr<ATTR_HWAS_STATE_CHANGED_SUBSCRIPTION_MASK>();
 
-    return ( (actual.rawValue & iv_valid.rawValue) ==
-             (iv_desired.rawValue & iv_valid.rawValue));
+    return ((actual.rawValue & (iv_valid.rawValue & subscriptionMask)) ==
+            (iv_desired.rawValue & (iv_valid.rawValue & subscriptionMask)));
 
     #undef TARG_FUNC
 }

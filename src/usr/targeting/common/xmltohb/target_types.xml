@@ -39,6 +39,8 @@
         <id>PRIMARY_CAPABILITIES</id>
     </attribute>
     <attribute><id>HWAS_STATE</id></attribute>
+    <attribute><id>HWAS_STATE_CHANGED_FLAG</id></attribute>
+    <attribute><id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id></attribute>
     <attribute>
         <id>DECONFIG_GARDABLE</id>
         <default>0</default>
@@ -214,6 +216,9 @@
         <id>DECONFIG_GARDABLE</id>
         <default>1</default>
     </attribute>
+    <attribute><id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
+        <default>0x00000001</default> <!--GARD -->
+    </attribute>
     <attribute>
         <id>EC</id>
     </attribute>
@@ -366,7 +371,9 @@
      <attribute><id>SBE_SEEPROM_I2C_PORT</id></attribute>
      <attribute><id>PNOR_I2C_ADDRESS_BYTES</id></attribute>
      <!-- End Supporting poreve_memory_attributes.xml -->
-
+    <attribute><id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
+        <default>0x00000005</default> <!-- GARD, PSIDIAG -->
+    </attribute>
 </targetType>
 
 <targetType>
@@ -488,6 +495,9 @@
     <attribute>
         <id>DECONFIG_GARDABLE</id>
         <default>1</default>
+    </attribute>
+    <attribute><id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
+        <default>0x00000001</default> <!-- GARD -->
     </attribute>
     <attribute>
         <id>CHIP_UNIT</id>

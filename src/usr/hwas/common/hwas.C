@@ -123,7 +123,6 @@ errlHndl_t discoverTargets()
         hwasState.poweredOn             = false;
         hwasState.present               = false;
         hwasState.functional            = false;
-        hwasState.changedSinceLastIPL   = false;
         target->setAttr<ATTR_HWAS_STATE>(hwasState);
     }
 

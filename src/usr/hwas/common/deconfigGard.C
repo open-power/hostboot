@@ -119,9 +119,9 @@ errlHndl_t DeconfigGard::clearGardRecordsForReplacedTargets()
     HWAS_INF("User Request: Clear GARD Records for replaced Targets");
     errlHndl_t l_pErr = NULL;
 
-    // Create the predicate with changed HWAS state
-    TARGETING::PredicateHwas l_predicateHwas;
-    l_predicateHwas.changedSinceLastIpl(true);
+    // Create the predicate with HWAS changed state and our GARD bit
+    TARGETING::PredicateHwasChanged l_predicateHwasChanged;
+    l_predicateHwasChanged.changedBit(TARGETING::HWAS_CHANGED_BIT_GARD, true);
 
     HWAS_MUTEX_LOCK(iv_mutex);
     do
@@ -149,9 +149,9 @@ errlHndl_t DeconfigGard::clearGardRecordsForReplacedTargets()
             }
 
             // if this does NOT match, continue to next in loop
-            if (l_predicateHwas(l_pTarget) == false)
+            if (l_predicateHwasChanged(l_pTarget) == false)
             {
-                HWAS_INF("skipping %.8X - changedSinceLastIPL false",
+                HWAS_INF("skipping %.8X - GARD changed bit false",
                         TARGETING::get_huid(l_pTarget));
                 continue;
             }
@@ -178,11 +178,10 @@ errlHndl_t DeconfigGard::clearGardRecordsForReplacedTargets()
     // for now, this will force a flush to PNOR
 }
 
-            // now clear the 'changed' bit
-            TARGETING::HwasState hwasState =
-                l_pTarget->getAttr<TARGETING::ATTR_HWAS_STATE>();
-            hwasState.changedSinceLastIPL = false;
-            l_pTarget->setAttr<TARGETING::ATTR_HWAS_STATE>( hwasState );
+            // now clear our 'changed' bit
+            TARGETING::clear_hwas_changed_bit(
+                    l_pTarget,TARGETING::HWAS_CHANGED_BIT_GARD);
+
         } // for
     }
     while (0);
@@ -430,7 +429,7 @@ void DeconfigGard::_deconfigureByAssoc(TARGETING::Target & i_target,
 
     TARGETING::TargetHandleList pChildList;
     TARGETING::PredicateHwas hwasPredicate;
-    hwasPredicate.reset().poweredOn(true).present(true).functional(true);
+    hwasPredicate.poweredOn(true).present(true).functional(true);
 
     // find all CHILD and CHILD_BY_AFFINITY matches for this target
     // and deconfigure them

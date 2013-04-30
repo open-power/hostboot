@@ -81,7 +81,6 @@ public:
             l_hwasState.poweredOn             =   true;
             l_hwasState.present               =   true;
             l_hwasState.functional            =   true;
-            l_hwasState.changedSinceLastIPL   =   true;
 
             //  Now write the modified value back to Targeting.
             l_pTarget->setAttr<ATTR_HWAS_STATE>( l_hwasState );
@@ -113,12 +112,6 @@ public:
                         l_pTarget->getAttr<ATTR_HWAS_STATE>().functional );
             }
 
-            if ( l_pTarget->getAttr<ATTR_HWAS_STATE>().changedSinceLastIPL != true )
-            {
-                TS_FAIL( " changedSinceLastIPL = 0x%x, should be true",
-                        l_pTarget->getAttr<ATTR_HWAS_STATE>().changedSinceLastIPL );
-            }
-
             //
             //  Now write the original value back.
             //
@@ -146,12 +139,6 @@ public:
                         l_pTarget->getAttr<ATTR_HWAS_STATE>().functional );
             }
 
-            if ( l_pTarget->getAttr<ATTR_HWAS_STATE>().changedSinceLastIPL
-                    != l_orgHwasState.changedSinceLastIPL )
-            {
-                TS_FAIL( " changedSinceLastIPL = 0x%x, not restored",
-                        l_pTarget->getAttr<ATTR_HWAS_STATE>().changedSinceLastIPL );
-            }
         }
 
         TS_TRACE( "testHWASReadWrite exit" );

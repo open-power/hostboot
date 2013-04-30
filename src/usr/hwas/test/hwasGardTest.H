@@ -50,13 +50,13 @@ public:
     void testDeconfigure1()
     {
         TS_TRACE(INFO_MRK "testDeconfigure1: Started");
-        
+
         errlHndl_t l_pErr = NULL;
         HWAS::DeconfigGard::DeconfigureRecords_t l_records;
 
         // Get all Deconfigure Records
         l_pErr = HWAS::theDeconfigGard().getDeconfigureRecords(NULL, l_records);
-        
+
         if (l_pErr)
         {
             errlCommit(l_pErr,HWAS_COMP_ID);
@@ -68,17 +68,17 @@ public:
                      l_records.size());
         }
     }
-    
+
     /**
      *  @brief Test getting a Deconfigure Record for a specific Target
      */
     void testDeconfigure2()
     {
         TS_TRACE(INFO_MRK "testDeconfigure2: Started");
-        
+
         errlHndl_t l_pErr = NULL;
         HWAS::DeconfigGard::DeconfigureRecords_t l_records;
-        
+
         // Get the master processor chip
         TARGETING::Target* l_pTarget = NULL;
         TARGETING::targetService().masterProcChipTargetHandle(l_pTarget);
@@ -88,7 +88,7 @@ public:
         // Get any Deconfigure Record for the chip
         l_pErr = HWAS::theDeconfigGard().getDeconfigureRecords(&l_id,
                                                                l_records);
-        
+
         if (l_pErr)
         {
             errlCommit(l_pErr,HWAS_COMP_ID);
@@ -127,10 +127,10 @@ public:
         //  could be side effects in other cxxtests.
         TS_TRACE( " - SKIPPING -- other tests could be adversly affected");
 #else
-        
+
         errlHndl_t l_pErr = NULL;
         HWAS::DeconfigGard::DeconfigureRecords_t l_records;
-        
+
         // Get the master processor chip
         TARGETING::Target* l_pTarget = NULL;
         TARGETING::targetService().masterProcChipTargetHandle(l_pTarget);
@@ -142,26 +142,26 @@ public:
             // Get any existing Deconfigure Record for the chip
             l_pErr = HWAS::theDeconfigGard().getDeconfigureRecords(&l_id,
                                                                    l_records);
-            
+
             if (l_pErr)
             {
                 TS_FAIL("testDeconfigure3: Error from getDeconfigureRecords");
                 break;
             }
-            
+
             if (l_records.size() != 0)
             {
                 TS_TRACE(INFO_MRK "testDeconfigure3: Chip has existing Deconfigure Record, skipping test");
                 break;
             }
-            
+
             // Get the original HWAS_STATE of the chip
             TARGETING::HwasState l_origState =
                 l_pTarget->getAttr<TARGETING::ATTR_HWAS_STATE>();
- 
+
             // Deconfigure the chip. Production code will pass a valid PLID
             l_pErr = HWAS::theDeconfigGard().deconfigureTarget(*l_pTarget, 0);
-        
+
             if (l_pErr)
             {
                 TS_FAIL("testDeconfigure3: Error from deconfigureTarget");
@@ -171,66 +171,66 @@ public:
             // Get the new HWAS_STATE of the chip
             TARGETING::HwasState l_state =
                 l_pTarget->getAttr<TARGETING::ATTR_HWAS_STATE>();
-                
+
             if (l_state.functional)
             {
                 TS_FAIL("testDeconfigure3: Chip functional after deconfigure");
                 // intentionally continue
             }
-            
+
             // Get the Deconfigure Record for the chip
             l_pErr = HWAS::theDeconfigGard().getDeconfigureRecords(&l_id,
                                                                    l_records);
-            
+
             if (l_pErr)
             {
                 TS_FAIL("testDeconfigure3: Error from getDeconfigureRecords (2)");
                 break;
             }
-            
+
             if (l_records.size() != 1)
             {
                 TS_FAIL("testDeconfigure3: %d records for chip, expected 1",
                         l_records.size());
                 break;
             }
-            
+
             // Reset the HWAS_STATE of the chip
             l_pTarget->setAttr<TARGETING::ATTR_HWAS_STATE>(l_origState);
-            
+
             // Clear the Deconfigure Record
             HWAS::theDeconfigGard()._clearDeconfigureRecords(&l_id);
-            
+
             // Get the Deconfigure Record for the chip
             l_records.clear();
-            
+
             l_pErr = HWAS::theDeconfigGard().getDeconfigureRecords(&l_id,
                                                                    l_records);
-            
+
             if (l_pErr)
             {
                 TS_FAIL("testDeconfigure3: Error from getDeconfigureRecords (3)");
                 break;
             }
-            
+
             if (l_records.size() != 0)
             {
                 TS_FAIL("testDeconfigure3: %d records for chip, expected 0",
                         l_records.size());
                 break;
             }
-            
+
             TS_TRACE(INFO_MRK "testDeconfigure3: Success");
         }
         while (0);
-        
+
         if (l_pErr)
         {
             errlCommit(l_pErr,HWAS_COMP_ID);
         }
 #endif
     }
-    
+
     /**
      *  @brief Test Deconfiguring a Target multiple times
      */
@@ -248,10 +248,10 @@ public:
         //  could be side effects in other cxxtests.
         TS_TRACE( " - SKIPPING -- other tests could be adversly affected");
 #else
-        
+
         errlHndl_t l_pErr = NULL;
         HWAS::DeconfigGard::DeconfigureRecords_t l_records;
-        
+
         // Get the master processor chip
         TARGETING::Target* l_pTarget = NULL;
         TARGETING::targetService().masterProcChipTargetHandle(l_pTarget);
@@ -263,61 +263,61 @@ public:
             // Get any existing Deconfigure Record for the chip
             l_pErr = HWAS::theDeconfigGard().getDeconfigureRecords(&l_id,
                                                                    l_records);
-            
+
             if (l_pErr)
             {
                 TS_FAIL("testDeconfigure4: Error from getDeconfigureRecords");
                 break;
             }
-            
+
             if (l_records.size() != 0)
             {
                 TS_TRACE(INFO_MRK "testDeconfigure4: Chip has existing Deconfigure Record, skipping test");
                 break;
             }
-            
+
             // Get the current HWAS_STATE of the chip
             TARGETING::HwasState l_origState =
                 l_pTarget->getAttr<TARGETING::ATTR_HWAS_STATE>();
- 
+
             // Deconfigure the chip. Production code will pass a valid PLID
             l_pErr = HWAS::theDeconfigGard().deconfigureTarget(*l_pTarget, 0xA);
-        
+
             if (l_pErr)
             {
                 TS_FAIL("testDeconfigure4: Error from deconfigureTarget");
                 break;
             }
-            
+
             // Deconfigure the chip again
             l_pErr = HWAS::theDeconfigGard().deconfigureTarget(*l_pTarget, 0xB);
-        
+
             if (l_pErr)
             {
                 TS_FAIL("testDeconfigure4: Error from deconfigureTarget (2)");
                 break;
             }
-            
+
             // Get the new HWAS_STATE of the chip
             TARGETING::HwasState l_state =
                 l_pTarget->getAttr<TARGETING::ATTR_HWAS_STATE>();
-                
+
             if (l_state.functional)
             {
                 TS_FAIL("testDeconfigure4: Chip functional after deconfigure");
                 // intentionally continue
             }
-            
+
             // Get the Deconfigure Record for the chip
             l_pErr = HWAS::theDeconfigGard().getDeconfigureRecords(&l_id,
                                                                    l_records);
-            
+
             if (l_pErr)
             {
                 TS_FAIL("testDeconfigure4: Error from getDeconfigureRecords (2)");
                 break;
             }
-            
+
             // The second Deconfigure should not have created a new record
             if (l_records.size() != 1)
             {
@@ -325,17 +325,17 @@ public:
                         l_records.size());
                 break;
             }
-            
+
             // Reset the HWAS_STATE of the chip
             l_pTarget->setAttr<TARGETING::ATTR_HWAS_STATE>(l_origState);
-            
+
             // Clear the Deconfigure Record
             HWAS::theDeconfigGard()._clearDeconfigureRecords(&l_id);
-            
+
             TS_TRACE(INFO_MRK "testDeconfigure4: Success");
         }
         while (0);
-        
+
         if (l_pErr)
         {
             errlCommit(l_pErr,HWAS_COMP_ID);
@@ -349,13 +349,13 @@ public:
     void testGard1()
     {
         TS_TRACE(INFO_MRK "testGard1: Started");
-        
+
         errlHndl_t l_pErr = NULL;
         HWAS::DeconfigGard::GardRecords_t l_records;
 
         l_pErr = HWAS::theDeconfigGard().getGardRecords(
                         HWAS::DeconfigGard::GET_ALL_GARD_RECORDS, l_records);
-        
+
         if (l_pErr)
         {
             errlCommit(l_pErr,HWAS_COMP_ID);
@@ -367,19 +367,19 @@ public:
                      l_records.size());
         }
     }
-    
+
     /**
      *  @brief Test getting GARD Records with a bad record ID).
      */
     void testGard2()
     {
         TS_TRACE(INFO_MRK "testGard2: Started");
-        
+
         errlHndl_t l_pErr = NULL;
         HWAS::DeconfigGard::GardRecords_t l_records;
 
         l_pErr = HWAS::theDeconfigGard().getGardRecords(0x12345678, l_records);
-        
+
         if (l_pErr)
         {
             errlCommit(l_pErr,HWAS_COMP_ID);
@@ -398,27 +398,27 @@ public:
             }
         }
     }
-    
+
     /**
      *  @brief Test getting GARD Records for a specific target
      */
     void testGard3()
     {
         TS_TRACE(INFO_MRK "testGard3: Started");
-        
+
         errlHndl_t l_pErr = NULL;
         HWAS::DeconfigGard::GardRecords_t l_records;
-        
+
         // Get the master processor chip
         TARGETING::Target* l_pTarget = NULL;
         TARGETING::targetService().masterProcChipTargetHandle(l_pTarget);
         TARGETING::EntityPath l_id =
             l_pTarget->getAttr<TARGETING::ATTR_PHYS_PATH>();
-        
+
 
         // Get all GARD Records for the Target
         l_pErr = HWAS::theDeconfigGard().getGardRecords(l_id, l_records);
-        
+
         if (l_pErr)
         {
             errlCommit(l_pErr,HWAS_COMP_ID);
@@ -449,10 +449,10 @@ public:
         //  could be side effects in other cxxtests.
         TS_TRACE( " - SKIPPING -- other tests could be adversly affected");
 #else
-        
+
         errlHndl_t l_pErr = NULL;
         HWAS::DeconfigGard::GardRecords_t l_records;
-        
+
         // Get the master processor chip
         TARGETING::Target* l_pTarget = NULL;
         TARGETING::targetService().masterProcChipTargetHandle(l_pTarget);
@@ -463,26 +463,26 @@ public:
         {
             // Get any existing GARD Records for the chip
             l_pErr = HWAS::theDeconfigGard().getGardRecords(l_id, l_records);
-            
+
             if (l_pErr)
             {
                 TS_FAIL("testGard4: Error from getGardRecords");
                 break;
             }
-            
+
             if (l_records.size() != 0)
             {
                 TS_TRACE(INFO_MRK "testGard4: Chip has %d existing Gard Records, skipping test",
                          l_records.size());
                 break;
             }
-            
+
             // Create a GARD Record for the chip. Production code will pass a
             // valid PLID
             l_pErr = HWAS::theDeconfigGard().
                 createGardRecord(*l_pTarget, 0,
                                  HWAS::GARD_Predictive);
-        
+
             if (l_pErr)
             {
                 TS_FAIL("testGard4: Error from createGardRecord");
@@ -491,20 +491,20 @@ public:
 
             // Get the GARD Records for the chip
             l_pErr = HWAS::theDeconfigGard().getGardRecords(l_id, l_records);
-            
+
             if (l_pErr)
             {
                 TS_FAIL("testGard4: Error from getGardRecords (2)");
                 break;
             }
-            
+
             if (l_records.size() != 1)
             {
                 TS_FAIL("testGard4: %d records for chip, expected 1",
                         l_records.size());
                 break;
             }
-            
+
             if (l_records[0].iv_errorType !=
                 HWAS::GARD_Predictive)
             {
@@ -512,45 +512,45 @@ public:
                         l_records[0].iv_errorType);
                 break;
             }
-            
+
             // Clear the GARD Records for the chip
             l_pErr = HWAS::theDeconfigGard().clearGardRecords(l_id);
-            
+
             if (l_pErr)
             {
                 TS_FAIL("testGard4: Error from clearGardRecords");
                 break;
             }
-            
+
             // Get the GARD Records for the chip
             l_records.clear();
-            
+
             l_pErr = HWAS::theDeconfigGard().getGardRecords(l_id, l_records);
-            
+
             if (l_pErr)
             {
                 TS_FAIL("testGard4: Error from getGardRecords (3)");
                 break;
             }
-            
+
             if (l_records.size() != 0)
             {
                 TS_FAIL("testGard4: %d records for chip, expected 0",
                         l_records.size());
                 break;
             }
-            
+
             TS_TRACE(INFO_MRK "testGard4: Success");
         }
         while (0);
-                
+
         if (l_pErr)
         {
             errlCommit(l_pErr,HWAS_COMP_ID);
         }
 #endif
     }
-    
+
     /**
      *  @brief Test creating a GARD Record for a Target multiple times
      */
@@ -568,10 +568,10 @@ public:
         //  could be side effects in other cxxtests.
         TS_TRACE( " - SKIPPING -- other tests could be adversly affected");
 #else
-        
+
         errlHndl_t l_pErr = NULL;
         HWAS::DeconfigGard::GardRecords_t l_records;
-        
+
         // Get the master processor chip
         TARGETING::Target* l_pTarget = NULL;
         TARGETING::targetService().masterProcChipTargetHandle(l_pTarget);
@@ -582,37 +582,37 @@ public:
         {
             // Get any existing GARD Records for the chip
             l_pErr = HWAS::theDeconfigGard().getGardRecords(l_id, l_records);
-            
+
             if (l_pErr)
             {
                 TS_FAIL("testGard5: Error from getGardRecords");
                 break;
             }
-            
+
             if (l_records.size() != 0)
             {
                 TS_TRACE(INFO_MRK "testGard5: Chip has %d existing Gard Records, skipping test",
                          l_records.size());
                 break;
             }
-            
+
             // Create a GARD Record for the chip. Production code will pass a
             // valid PLID
             l_pErr = HWAS::theDeconfigGard().
                 createGardRecord(*l_pTarget, 0,
                                  HWAS::GARD_Predictive);
-        
+
             if (l_pErr)
             {
                 TS_FAIL("testGard5: Error from createGardRecord");
                 break;
             }
-            
+
             // Create another GARD Record for the chip
             l_pErr = HWAS::theDeconfigGard().
                 createGardRecord(*l_pTarget, 0,
                                  HWAS::GARD_Fatal);
-        
+
             if (l_pErr)
             {
                 TS_FAIL("testGard5: Error from createGardRecord (2)");
@@ -621,58 +621,58 @@ public:
 
             // Get the GARD Records for the chip
             l_pErr = HWAS::theDeconfigGard().getGardRecords(l_id, l_records);
-            
+
             if (l_pErr)
             {
                 TS_FAIL("testGard5: Error from getGardRecords (2)");
                 break;
             }
-            
+
             if (l_records.size() != 2)
             {
                 TS_FAIL("testGard5: %d records for chip, expected 2",
                         l_records.size());
                 break;
             }
-            
+
             // Clear the GARD Records for the chip
             l_pErr = HWAS::theDeconfigGard().clearGardRecords(l_id);
-            
+
             if (l_pErr)
             {
                 TS_FAIL("testGard5: Error from clearGardRecords");
                 break;
             }
-            
+
             // Get the GARD Records for the chip
             l_records.clear();
-            
+
             l_pErr = HWAS::theDeconfigGard().getGardRecords(l_id, l_records);
-            
+
             if (l_pErr)
             {
                 TS_FAIL("testGard5: Error from getGardRecords (3)");
                 break;
             }
-            
+
             if (l_records.size() != 0)
             {
                 TS_FAIL("testGard5: %d records for chip, expected 0",
                         l_records.size());
                 break;
             }
-            
+
             TS_TRACE(INFO_MRK "testGard5: Success");
         }
         while (0);
-                
+
         if (l_pErr)
         {
             errlCommit(l_pErr,HWAS_COMP_ID);
         }
 #endif
     }
-    
+
     /**
      *  @brief Test getting and clearing GARD Records by recordID
      */
@@ -690,51 +690,51 @@ public:
         //  could be side effects in other cxxtests.
         TS_TRACE( " - SKIPPING -- other tests could be adversly affected");
 #else
-        
+
         errlHndl_t l_pErr = NULL;
         HWAS::DeconfigGard::GardRecords_t l_records;
-        
+
         // Get the master processor chip
         TARGETING::Target* l_pTarget = NULL;
         TARGETING::targetService().masterProcChipTargetHandle(l_pTarget);
         TARGETING::EntityPath l_id =
             l_pTarget->getAttr<TARGETING::ATTR_PHYS_PATH>();
-        
+
         do
         {
             // Get any existing GARD Records for the chip
             l_pErr = HWAS::theDeconfigGard().getGardRecords(l_id, l_records);
-            
+
             if (l_pErr)
             {
                 TS_FAIL("testGard6: Error from getGardRecords");
                 break;
             }
-            
+
             if (l_records.size() != 0)
             {
                 TS_TRACE(INFO_MRK "testGard6: Chip has %d existing Gard Records, skipping test",
                          l_records.size());
                 break;
             }
-            
+
             // Create a GARD Record for the chip. Production code will pass a
             // valid PLID
             l_pErr = HWAS::theDeconfigGard().
                 createGardRecord(*l_pTarget, 0,
                                  HWAS::GARD_Predictive);
-        
+
             if (l_pErr)
             {
                 TS_FAIL("testGard6: Error from createGardRecord");
                 break;
             }
-            
+
             // Create another GARD Record for the chip
             l_pErr = HWAS::theDeconfigGard().
                 createGardRecord(*l_pTarget, 0,
                                  HWAS::GARD_Fatal);
-        
+
             if (l_pErr)
             {
                 TS_FAIL("testGard6: Error from createGardRecord (2)");
@@ -743,87 +743,87 @@ public:
 
             // Get the GARD Records for the chip
             l_pErr = HWAS::theDeconfigGard().getGardRecords(l_id, l_records);
-            
+
             if (l_pErr)
             {
                 TS_FAIL("testGard6: Error from getGardRecords (2)");
                 break;
             }
-            
+
             if (l_records.size() != 2)
             {
                 TS_FAIL("testGard6: %d records for chip, expected 2",
                         l_records.size());
                 break;
             }
-            
+
             // Get the first GARD Record for the chip by Record ID
             uint32_t l_recordID = l_records[0].iv_recordId;
             l_records.clear();
-            
+
             l_pErr = HWAS::theDeconfigGard().getGardRecords(l_recordID,
                                                             l_records);
-            
+
             if (l_pErr)
             {
                 TS_FAIL("testGard6: Error from getGardRecords (3)");
                 break;
             }
-            
+
             if (l_records.size() != 1)
             {
                 TS_FAIL("testGard6: %d records for chip, expected 1",
                         l_records.size());
                 break;
             }
-            
+
             // Clear the first GARD Record for the chip by Record ID
             l_pErr = HWAS::theDeconfigGard().clearGardRecords(l_recordID);
-            
+
             if (l_pErr)
             {
                 TS_FAIL("testGard6: Error from clearGardRecords");
                 break;
             }
-            
+
             // Get the GARD Records for the chip
             l_records.clear();
-            
+
             l_pErr = HWAS::theDeconfigGard().getGardRecords(l_id, l_records);
-            
+
             if (l_pErr)
             {
                 TS_FAIL("testGard6: Error from getGardRecords (4)");
                 break;
             }
-            
+
             if (l_records.size() != 1)
             {
                 TS_FAIL("testGard6: %d records for chip, expected 1 (2)",
                         l_records.size());
                 break;
             }
-            
+
             // Clear the GARD Records for the chip
             l_pErr = HWAS::theDeconfigGard().clearGardRecords(l_id);
-            
+
             if (l_pErr)
             {
                 TS_FAIL("testGard6: Error from clearGardRecords");
                 break;
             }
-            
+
             TS_TRACE(INFO_MRK "testGard6: Success");
         }
         while (0);
-                
+
         if (l_pErr)
         {
             errlCommit(l_pErr,HWAS_COMP_ID);
         }
 #endif
     }
-    
+
     /**
      *  @brief Test getting and clearing all GARD Records
      */
@@ -841,10 +841,10 @@ public:
         //  could be side effects in other cxxtests.
         TS_TRACE( " - SKIPPING -- other tests could be adversly affected");
 #else
-        
+
         errlHndl_t l_pErr = NULL;
         HWAS::DeconfigGard::GardRecords_t l_records;
-        
+
         // Get the master processor chip
         TARGETING::Target* l_pTarget = NULL;
         TARGETING::targetService().masterProcChipTargetHandle(l_pTarget);
@@ -856,37 +856,37 @@ public:
             // Get all existing GARD Records
             l_pErr = HWAS::theDeconfigGard().getGardRecords(
                             HWAS::DeconfigGard::GET_ALL_GARD_RECORDS, l_records);
-            
+
             if (l_pErr)
             {
                 TS_FAIL("testGard7: Error from getGardRecords");
                 break;
             }
-            
+
             if (l_records.size() != 0)
             {
                 TS_TRACE(INFO_MRK "testGard7: %d existing Gard Records, skipping test",
                          l_records.size());
                 break;
             }
-            
+
             // Create a GARD Record for the chip. Production code will pass a
             // valid PLID
             l_pErr = HWAS::theDeconfigGard().
                 createGardRecord(*l_pTarget, 0,
                                  HWAS::GARD_Predictive);
-        
+
             if (l_pErr)
             {
                 TS_FAIL("testGard7: Error from createGardRecord");
                 break;
             }
-            
+
             // Create another GARD Record for the chip
             l_pErr = HWAS::theDeconfigGard().
                 createGardRecord(*l_pTarget, 0,
                                  HWAS::GARD_Fatal);
-        
+
             if (l_pErr)
             {
                 TS_FAIL("testGard7: Error from createGardRecord (2)");
@@ -896,36 +896,188 @@ public:
             // Clear all GARD Records
             l_pErr = HWAS::theDeconfigGard().clearGardRecords(
                             HWAS::DeconfigGard::CLEAR_ALL_GARD_RECORDS);
-            
+
             if (l_pErr)
             {
                 TS_FAIL("testGard7: Error from clearGardRecords");
                 break;
             }
-            
+
             // Get the GARD Records
             l_records.clear();
-            
+
             l_pErr = HWAS::theDeconfigGard().getGardRecords(
                             HWAS::DeconfigGard::GET_ALL_GARD_RECORDS, l_records);
-            
+
             if (l_pErr)
             {
                 TS_FAIL("testGard7: Error from getGardRecords (2)");
                 break;
             }
-            
+
             if (l_records.size() != 0)
             {
                 TS_FAIL("testGard7: %d records for chip, expected 0",
                         l_records.size());
                 break;
             }
-            
+
             TS_TRACE(INFO_MRK "testGard7: Success");
         }
         while (0);
-                
+
+        if (l_pErr)
+        {
+            errlCommit(l_pErr,HWAS_COMP_ID);
+        }
+#endif
+    }
+
+    /**
+     *  @brief Test create GARD record, call collect GARD to confirm targets
+     *      are deconfigured, set changed bit ala HCDB, reprocess GARD to
+     *      confirm GARD record is deleted.
+     */
+    void testGard8()
+    {
+        TS_TRACE(INFO_MRK "testGard8: Started");
+#if 1
+        // these tests deconfigure and gard targets. and even tho they
+        //  restore their state after the tests, since the cxxtests are
+        //  all run in parallel, during the time that a target is non-
+        //  functional due to this test, another test may be running that
+        //  might be adversly affected.
+        // tests are left in the code so that a developer can enable them
+        //  to test these specific functions - just keep in mind that there
+        //  could be side effects in other cxxtests.
+        TS_TRACE( " - SKIPPING -- other tests could be adversly affected");
+#else
+        errlHndl_t l_pErr = NULL;
+        HWAS::DeconfigGard::GardRecords_t l_records;
+
+        do
+        {
+            l_pErr = HWAS::theDeconfigGard().getGardRecords(
+                        HWAS::DeconfigGard::GET_ALL_GARD_RECORDS, l_records);
+            if (l_pErr)
+            {
+                errlCommit(l_pErr,HWAS_COMP_ID);
+                TS_FAIL("testGard8: Error from getGardRecords");
+                break;
+            }
+
+            if (l_records.size() > 0)
+            {
+                TS_FAIL("testGard8: already GARD records here. %d records",
+                        l_records.size());
+                break;
+            }
+
+            // find a core that we can play with
+            TARGETING::Target * pSys;
+            TARGETING::targetService().getTopLevelTarget(pSys);
+
+            TARGETING::PredicateCTM predCore(
+                    TARGETING::CLASS_UNIT, TARGETING::TYPE_CORE);
+            TARGETING::PredicateHwas predFunctional;
+            predFunctional.poweredOn(true).present(true).functional(true);
+            TARGETING::PredicatePostfixExpr checkExpr;
+            checkExpr.push(&predCore).push(&predFunctional).And();
+
+            TARGETING::TargetHandleList pCoreList;
+            TARGETING::targetService().getAssociated( pCoreList, pSys,
+                TARGETING::TargetService::CHILD, TARGETING::TargetService::ALL,
+                &checkExpr );
+
+            if (pCoreList.empty())
+            {
+                TS_FAIL("testGard8: empty pCoreList");
+                break;
+            }
+
+            TARGETING::TargetHandle_t l_target = *pCoreList.begin();
+
+            // create GARD record, call 'doGard' step and confirm target is
+            //  deconfigured
+            l_pErr = HWAS::theDeconfigGard().createGardRecord(
+                            *l_target, 0x12, HWAS::GARD_Fatal);
+            if (l_pErr)
+            {
+                TS_FAIL("testGard8: Error from createGardRecord");
+                break;
+            }
+
+            l_pErr = HWAS::theDeconfigGard().getGardRecords(
+                        HWAS::DeconfigGard::GET_ALL_GARD_RECORDS, l_records);
+            if (l_pErr)
+            {
+                errlCommit(l_pErr,HWAS_COMP_ID);
+                TS_FAIL("testGard8: Error from getGardRecords");
+                break;
+            }
+            if (l_records.size() != 1)
+            {
+                TS_FAIL("testGard8: should be 1 record; instead %d records",
+                        l_records.size());
+                break;
+            }
+
+            l_pErr = HWAS::collectGard();
+            if (l_pErr)
+            {
+                TS_FAIL("testGard8: Error from collectGard");
+                break;
+            }
+
+            TARGETING::HwasState l_state =
+                l_target->getAttr<TARGETING::ATTR_HWAS_STATE>();
+            if (l_state.functional)
+            {
+                TS_FAIL("testGard8: target still functional");
+                break;
+            }
+
+            // reset functional state
+            l_state.functional = true;
+            l_target->setAttr<TARGETING::ATTR_HWAS_STATE>(l_state);
+
+            // emulate HCDB - target changed, call collectGard and confirm
+            //  GARD record is gone and target is functional
+            update_hwas_changed_mask(l_target);
+            l_pErr = HWAS::collectGard();
+            if (l_pErr)
+            {
+                TS_FAIL("testGard8: Error from collectGard2");
+                break;
+            }
+
+            l_pErr = HWAS::theDeconfigGard().getGardRecords(
+                        HWAS::DeconfigGard::GET_ALL_GARD_RECORDS, l_records);
+            if (l_pErr)
+            {
+                errlCommit(l_pErr,HWAS_COMP_ID);
+                TS_FAIL("testGard8: Error from getGardRecords");
+                break;
+            }
+            if (l_records.size() != 0)
+            {
+                TS_FAIL("testGard8: should be 0 records; instead %d records",
+                        l_records.size());
+                break;
+            }
+
+            l_state = l_target->getAttr<TARGETING::ATTR_HWAS_STATE>();
+            if (!l_state.functional)
+            {
+                TS_FAIL("testGard8: target NOT functional");
+                break;
+            }
+
+
+            TS_TRACE(INFO_MRK "testGard8: Success");
+        }
+        while (0);
+
         if (l_pErr)
         {
             errlCommit(l_pErr,HWAS_COMP_ID);

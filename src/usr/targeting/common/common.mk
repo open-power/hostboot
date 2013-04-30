@@ -24,8 +24,8 @@
 #
 #  @file targeting/common/common.mk
 #
-#  @brief Common targeting makefile to be included in 
-#      targeting/makefile 
+#  @brief Common targeting makefile to be included in
+#      targeting/makefile
 #
 ################################################################################
 
@@ -36,8 +36,9 @@ PREDICATES_OBJS =           \
     predicatepostfixexpr.o  \
     predicatectm.o          \
     predicateisfunctional.o \
-    predicatehwas.o  
-    
+    predicatehwas.o         \
+    predicatehwaschanged.o
+
 ITERATORS_OBJS =        \
     targetiterator.o    \
     rangefilter.o
@@ -49,8 +50,8 @@ TARGET_OBJS =       \
 
 OTHER_OBJS = \
      util.o utilFilter.o attributeTank.o
-     
-# Common     
+
+# Common
 COMMON_TARGETING_OBJS = \
     ${TARGET_OBJS}      \
     ${PREDICATES_OBJS}  \

@@ -33,6 +33,7 @@
 #include <targeting/common/predicates/predicatectm.H>
 #include <targeting/common/predicates/predicateisfunctional.H>
 #include <targeting/common/predicates/predicatehwas.H>
+#include <targeting/common/predicates/predicatehwaschanged.H>
 #include <targeting/common/predicates/predicatepostfixexpr.H>
 #include <targeting/common/predicates/predicateattrval.H>
 

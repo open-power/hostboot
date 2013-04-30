@@ -759,10 +759,9 @@
 <attribute>
     <id>HWAS_STATE</id>
     <description>HardWare Availability Service State Attribute.
-        Keeps track of Target values poweredOn, present, functional,
-        and changedSinceLastIPL</description>
+        Keeps track of Target values poweredOn, present, functional</description>
     <complexType>
-        <description>struct - 5 booleans and a PLID</description>
+        <description>struct - 4 booleans and a PLID</description>
         <field>
             <name>deconfiguredByPlid</name>
             <description>if this target was deconfigured,
@@ -802,16 +801,6 @@
             <default>0</default>
         </field>
         <field>
-            <name>changedSinceLastIPL</name>
-            <description>
-             0b0: Target has not changed (replaced, re-seated) since last IPL;
-             0b1: Target has changed (replaced, re-seated) since last IPL;
-            </description>
-            <type>uint8_t</type>
-            <bits>1</bits>
-            <default>0</default>
-        </field>
-        <field>
             <name>dumpfunctional</name>
             <description>FSP Only, used by DUMP applet;
              0b0: target is dump capabile;
@@ -826,6 +815,62 @@
     <readable/>
     <writeable/>
 </attribute>
+
+<attribute>
+    <id>HWAS_STATE_CHANGED_FLAG</id>
+    <description>HardWare Availability Service State Changed Attribute.
+        Keeps track of changedSinceChecked state, indicates if the
+        target has changed since last checked by the appropriate service.
+        This is a bit field of flags (see HWAS_CHANGED_BIT enumeration
+        that follows).
+        </description>
+    <simpleType>
+        <uint64_t>
+            <default>0x0</default>
+        </uint64_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <writeable/>
+</attribute>
+
+<attribute>
+    <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
+    <description>HardWare Availability Service State Changed Mask.
+        Used when a target changes (ie, via HCDB change) to set the
+        HWAS_STATE_CHANGED_FLAG, so that the appropriate services will
+        all handle the change.
+        This is a bit field of flags (see HWAS_CHANGED_BIT enumeration
+        that follows).
+        </description>
+    <simpleType>
+        <uint64_t>
+            <default>0x0</default>
+        </uint64_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+</attribute>
+
+<enumerationType>
+    <id>HWAS_CHANGED_BIT</id>
+    <description>Enumeration indicating the services that are concerned
+        with target changes (ie, via HCDB change).
+        The values can be combined using a bitwise 'OR'.
+    </description>
+    <enumerator>
+        <name>GARD</name>
+        <value>0x00000001</value>
+    </enumerator>
+    <enumerator>
+        <name>MEMDIAG</name>
+        <value>0x00000002</value>
+    </enumerator>
+    <enumerator>
+        <name>PSIDIAG</name>
+        <value>0x00000004</value>
+    </enumerator>
+</enumerationType>
 
 <!-- For POD Testing -->
 <attribute>
@@ -3604,7 +3649,7 @@ Selects which voltage level to place the Core and ECO domain PFETs upon Winkle e
 
 Producer: proc_build_gpstate.C
 
-Consumers: proc_pcbs_init.C, proc_pcbs_lpst_init.C, 
+Consumers: proc_pcbs_init.C, proc_pcbs_lpst_init.C,
     </description>
     <simpleType>	
         <uint32_t></uint32_t>
@@ -5550,7 +5595,7 @@ firmware notes: Used as override attribute for pstate procedure
 <id>PIB_I2C_NEST_PLL</id>
 <description>
     i2c pll for the system
-    default is 0x96 (For PIB @500 MHz (2 GHz nest)) for 
+    default is 0x96 (For PIB @500 MHz (2 GHz nest)) for
     I2C speed = ~250 kHz per Andreas Koenig.
 </description>
     <simpleType>
@@ -5717,7 +5762,7 @@ firmware notes: Used as override attribute for pstate procedure
 <attribute>
     <id>PROC_SECURITY_SETUP_VECTOR</id>
     <description>
-      Secureboot 64-bit proc_sbe_security_setup_vector used 
+      Secureboot 64-bit proc_sbe_security_setup_vector used
       by proc_sbe_security_setup.S.  0s are an unsecure SBE image
       creator: platform
       firmware notes:

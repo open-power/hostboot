@@ -567,8 +567,7 @@ class CommonTargetingTestSuite: public CxxTest::TestSuite
         for(size_t i=0; i<32; ++i)
         {
             ATTR_HWAS_STATE_type sweepHwasState
-                = { static_cast<uint8_t>(i&16),
-                    static_cast<uint8_t>(i&8),
+                = { static_cast<uint8_t>(i&8),
                     static_cast<uint8_t>(i&4),
                     static_cast<uint8_t>(i&2),
                     static_cast<uint8_t>(i&1) };
@@ -624,29 +623,28 @@ class CommonTargetingTestSuite: public CxxTest::TestSuite
         }
 
         // Test: Given a predicate looking for target whose HWAS state
-        //     exactly matches all 5 configurable HWAS states, filter should
+        //     exactly matches all configurable HWAS states, filter should
         //     return true
         hwasPredicate.reset().poweredOn(true).present(true).functional(false);
-        hwasPredicate.changedSinceLastIpl(true).dumpFunctional(false);
+        hwasPredicate.dumpFunctional(false);
 
-        ATTR_HWAS_STATE_type allFiveHwasState =
-                { 0x0,true,true,false,true,false};
-        l_pTopLevel->setAttr<ATTR_HWAS_STATE>(allFiveHwasState);
+        ATTR_HWAS_STATE_type allHwasState = {0, true,true,false,false};
+        l_pTopLevel->setAttr<ATTR_HWAS_STATE>(allHwasState);
         if(!hwasPredicate(l_pTopLevel))
         {
-            TARG_TS_FAIL("Expected 5 setting HWAS predicate to match the "
+            TARG_TS_FAIL("Expected setting HWAS predicate to match the "
                 "target's similarly configured HWAS state");
         }
 
         // Test: Given a predicate looking for target whose HWAS state
-        //     exactly matches all 4 of 5 configurable HWAS states, filter
+        //     exactly matches all but 1 configurable HWAS states, filter
         //     should return false
-        allFiveHwasState.dumpfunctional = true;
-        l_pTopLevel->setAttr<ATTR_HWAS_STATE>(allFiveHwasState);
+        allHwasState.dumpfunctional = true;
+        l_pTopLevel->setAttr<ATTR_HWAS_STATE>(allHwasState);
         if(hwasPredicate(l_pTopLevel))
         {
             TARG_TS_FAIL("Expected HWAS predicate not to match the target's "
-                "4/5 matching HWAS state configuration");
+                "all-but-1 matching HWAS state configuration");
         }
 
         // Restore state.
@@ -655,6 +653,116 @@ class CommonTargetingTestSuite: public CxxTest::TestSuite
         } while(0);
 
         TARG_TS_TRACE(EXIT_MRK "testPredicateHwas" );
+    }
+
+    void testPredicateHwasChanged()
+    {
+        TARG_TS_TRACE(ENTER_MRK "testPredicateHwasChanged" );
+
+        do {
+
+        using namespace TARGETING;
+        TargetService& l_targetService = targetService();
+
+        // Get master proc chip to work with
+        Target* l_pTarget = NULL;
+        (void) l_targetService.masterProcChipTargetHandle(l_pTarget);
+        if (l_pTarget == NULL)
+        {
+            TARG_TS_FAIL("MasterProcChipTarget handle was NULL");
+            break;
+        }
+
+        PredicateHwasChanged hwasChangedPredicate;
+
+        ATTR_HWAS_STATE_CHANGED_FLAG_type savedHwasChangedState =
+            l_pTarget->getAttr<ATTR_HWAS_STATE_CHANGED_FLAG>();
+
+        // Test: Given a target with any HWAS state, default HWAS predicate
+        //     should return a match
+        for(size_t i=0; i<32; ++i)
+        {
+            ATTR_HWAS_STATE_CHANGED_FLAG_type sweepState
+                = { static_cast<uint8_t>(i&1) };
+            l_pTarget->setAttr<ATTR_HWAS_STATE_CHANGED_FLAG>(sweepState);
+
+            if(!hwasChangedPredicate(l_pTarget))
+            {
+                TARG_TS_FAIL("Expected default HWAS predicate to match the "
+                    "target's HWAS state, using i = %d",i);
+            }
+        }
+
+        // Test: Given a target with cleared HWAS GARD bit, predicate
+        //    looking for GARD bit should return false
+        hwasChangedPredicate.reset().changedBit(HWAS_CHANGED_BIT_GARD, true);
+        ATTR_HWAS_STATE_CHANGED_FLAG_type noGardHwasChangedBit = 0;
+        l_pTarget->setAttr<ATTR_HWAS_STATE_CHANGED_FLAG>(noGardHwasChangedBit);
+        if(hwasChangedPredicate(l_pTarget))
+        {
+            TARG_TS_FAIL("Expected HWAS predicate not to match the "
+                "target's cleared HWAS GARD bit");
+        }
+
+        // Test: Having previously not matched a target, resetting the HWAS
+        //     predicate should match the target again
+        hwasChangedPredicate.reset();
+        if(!hwasChangedPredicate(l_pTarget))
+        {
+            TARG_TS_FAIL("Expected HWAS reset predicate to match the "
+                "target's HWAS state");
+        }
+
+        // Test: Given a target with set HWAS GARD bit, predicate
+        //    looking for GARD bit should return true
+        hwasChangedPredicate.reset().changedBit(HWAS_CHANGED_BIT_GARD, true);
+        //ATTR_HWAS_STATE_CHANGED_FLAG_type functionalHwasChangedState =
+        //HWAS_CHANGED_BIT_GARD;
+        l_pTarget->setAttr<ATTR_HWAS_STATE_CHANGED_FLAG>(HWAS_CHANGED_BIT_GARD);
+        if(!hwasChangedPredicate(l_pTarget))
+        {
+            TARG_TS_FAIL("Expected HWAS GARD bit predicate to match the "
+                "target's GARD bit HWAS state");
+        }
+
+        // Test: Given a target with cleared HWAS GARD bit, predicate
+        //    looking for cleared GARD bit should return true
+        hwasChangedPredicate.reset().changedBit(HWAS_CHANGED_BIT_GARD, false);
+        l_pTarget->setAttr<ATTR_HWAS_STATE_CHANGED_FLAG>(0);
+        if(!hwasChangedPredicate(l_pTarget))
+        {
+            TARG_TS_FAIL("Expected HWAS cleared GARD bit predicate to match "
+                "the target's cleared GARD bit HWAS state");
+        }
+
+        // Test: Given a target with all cleared HWAS bits, predicate
+        //    looking for all false should return true
+        hwasChangedPredicate.reset().allChangesApplied(false);
+        l_pTarget->setAttr<ATTR_HWAS_STATE_CHANGED_FLAG>(0);
+        if(!hwasChangedPredicate(l_pTarget))
+        {
+            TARG_TS_FAIL("Expected HWAS all cleared predicate to match the "
+                "target's all cleared HWAS state");
+        }
+
+        // Test: Given a target with all set HWAS bits, predicate
+        //    looking for all set should return true
+        hwasChangedPredicate.reset().allChangesApplied(true);
+        l_pTarget->setAttr<ATTR_HWAS_STATE_CHANGED_FLAG>
+            (l_pTarget->getAttr<ATTR_HWAS_STATE_CHANGED_SUBSCRIPTION_MASK>());
+        if(!hwasChangedPredicate(l_pTarget))
+        {
+            TARG_TS_FAIL("Expected HWAS all set predicate to match the "
+                "target's all set HWAS state");
+        }
+
+        // Restore state.
+        l_pTarget->setAttr<ATTR_HWAS_STATE_CHANGED_FLAG>
+                (savedHwasChangedState);
+
+        } while(0);
+
+        TARG_TS_TRACE(EXIT_MRK "testPredicateHwasChanged" );
     }
 
     void testPredicateCtm()
