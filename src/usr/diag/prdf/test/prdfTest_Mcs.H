@@ -45,7 +45,7 @@ class MCIFIR:public CxxTest::TestSuite
         {
             PRDS_BEGIN("MCI20 Recoverable attention");
             PRDS_ERROR_ENTRY("NODE{0}:PROC{0}", PRDF::RECOVERABLE);
-            PRDS_EXPECTED_SIGNATURE("NODE{0}:PROC{0}:MCS{4}", 0xde310000);
+            PRDS_EXPECTED_SIGNATURE("NODE{0}:PROC{0}:MCS{4}", 0x2f270000);
             // GLOBAL_RE_FIR set bit 1
             PRDS_SCR_WRITE("NODE{0}:PROC{0}", 0x570F001B , 0x4000000000000000);
             // TP_CHIPLET_RE_FIR set bit 7
@@ -66,7 +66,7 @@ class MCIFIR:public CxxTest::TestSuite
             /*
             PRDS_BEGIN("MCI20 Checkstop attention");
             PRDS_ERROR_ENTRY("NODE{0}:PROC{0}", PRDF::CHECK_STOP);
-            PRDS_EXPECTED_SIGNATURE("NODE{0}:PROC{0}:MCS{4}", 0xde310003);
+            PRDS_EXPECTED_SIGNATURE("NODE{0}:PROC{0}:MCS{4}", 0x2f270003);
             // GLOBAL_RE_FIR set bit 1
             PRDS_SCR_WRITE("NODE{0}:PROC{0}", 0x570F001C , 0x4000000000000000);
             // TP_CHIPLET_RE_FIR set bit 9
@@ -87,7 +87,7 @@ class MCIFIR:public CxxTest::TestSuite
         {
             PRDS_BEGIN("MCI20 Special attention");
             PRDS_ERROR_ENTRY("NODE{0}:PROC{0}", PRDF::SPECIAL);
-            PRDS_EXPECTED_SIGNATURE("NODE{0}:PROC{0}:MCS{4}", 0xde310001);
+            PRDS_EXPECTED_SIGNATURE("NODE{0}:PROC{0}:MCS{4}", 0x2f270001);
             // GLOBAL_SPA_FIR set bit 1
             PRDS_SCR_WRITE("NODE{0}:PROC{0}", 0x570F001A , 0x4000000000000000);
             // TP_CHIPLET_RE_FIR set bit 5

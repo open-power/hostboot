@@ -211,6 +211,65 @@ int32_t MBA1_Starvation( ExtensibleChip * i_membChip,
 }
 PRDF_PLUGIN_DEFINE( Membuf, MBA1_Starvation );
 
+//------------------------------------------------------------------------------
+
+/**
+ * @brief Analysis code that is called before the main analyze() function.
+ * @param i_mbChip A MEMBUF chip.
+ * @param i_sc Step Code Data structure
+ * @param o_analyzed TRUE if analysis has been done on this chip
+ * @return failure or success
+ */
+int32_t PreAnalysis( ExtensibleChip * i_mbChip, STEP_CODE_DATA_STRUCT & i_sc,
+                     bool & o_analyzed )
+{
+    #define PRDF_FUNC "[Membuf::PreAnalysis] "
+
+    int32_t o_rc = SUCCESS;
+
+    o_analyzed = false;
+
+    // Check for a Centaur Checkstop
+    do
+    {
+        // Skip if we're already analyzing a unit checkstop
+        if ( i_sc.service_data->GetFlag(ServiceDataCollector::UNIT_CS) )
+            break;
+
+        CenMembufDataBundle * mbdb = getCenMembufDataBundle(i_mbChip);
+        ExtensibleChip * mcsChip = mbdb->getMcsChip();
+        if ( NULL == mcsChip )
+        {
+            PRDF_ERR( PRDF_FUNC"CenMembufDataBundle::getMcsChip() failed" );
+            o_rc = FAIL; break;
+        }
+
+        // Check MCIFIR[31] for presence of Centaur checkstop
+        SCAN_COMM_REGISTER_CLASS * fir = mcsChip->getRegister("MCIFIR");
+        o_rc = fir->Read();
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC"Failed to read MCIFIR on 0x%08x",
+                      mcsChip->GetId() );
+            break;
+        }
+
+        if ( !fir->IsBitSet(31) ) break; // No unit checkstop
+
+        // Set Unit checkstop flag
+        i_sc.service_data->SetFlag(ServiceDataCollector::UNIT_CS);
+        i_sc.service_data->SetThresholdMaskId(0);
+
+        // Set the cause attention type
+        i_sc.service_data->SetCauseAttentionType(UNIT_CS);
+
+    } while (0);
+
+    return o_rc;
+
+    #undef PRDF_FUNC
+}
+PRDF_PLUGIN_DEFINE( Membuf, PreAnalysis );
 
 //------------------------------------------------------------------------------
 

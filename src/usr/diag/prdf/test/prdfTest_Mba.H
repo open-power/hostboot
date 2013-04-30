@@ -45,7 +45,7 @@ class MBAFIR:public CxxTest::TestSuite
         {
             PRDS_BEGIN("MBAFIR01 recoverable attention");
             PRDS_ERROR_ENTRY("NODE{0}:MEMBUF{4}", PRDF::RECOVERABLE);
-            PRDS_EXPECTED_SIGNATURE("NODE{0}:MEMBUF{4}:MBS{0}:MBA{0}", 0xea280003);
+            PRDS_EXPECTED_SIGNATURE("NODE{0}:MEMBUF{4}:MBS{0}:MBA{0}", 0x43f10003);
             //        PRDS_EXPECTED_CALLOUT(NONE);
             // GLOBAL_RE_FIR
             PRDS_SCR_WRITE("NODE{0}:MEMBUF{4}", 0x570F001B, 0x1000000000000000);
@@ -67,7 +67,7 @@ class MBAFIR:public CxxTest::TestSuite
             /*
             PRDS_BEGIN("MBAFIR01 Checkstop attention");
             PRDS_ERROR_ENTRY("NODE{0}:MEMBUF{4}", PRDF::CHECK_STOP);
-            PRDS_EXPECTED_SIGNATURE("NODE{0}:MEMBUF{4}:MBS{0}:MBA{0}", 0xea280002);
+            PRDS_EXPECTED_SIGNATURE("NODE{0}:MEMBUF{4}:MBS{0}:MBA{0}", 0x43f10002);
             //        PRDS_EXPECTED_CALLOUT(NONE);
             // GLOBAL_RE_FIR
             PRDS_SCR_WRITE("NODE{0}:MEMBUF{4}", 0x570F001C, 0x1000000000000000);

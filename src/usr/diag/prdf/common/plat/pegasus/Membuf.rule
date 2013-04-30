@@ -88,11 +88,10 @@ chip Membuf
 .include "Membuf_regs_NEST.rule"
 .include "Membuf_regs_MEM.rule"
 
-    ########################################################################
-    #
+    ############################################################################
     #	Non-existant Registers for Capture
-    #
-    ########################################################################
+    ############################################################################
+
     register VPD_FAILED_LANES_0TO63
     {
         name        "Bit map 0-63 of failed lanes read from VPD";
@@ -146,9 +145,12 @@ rule GlobalFir
 {
     CHECK_STOP:  GLOBAL_CS_FIR;
     RECOVERABLE: GLOBAL_RE_FIR;
+
+    # All of the Centaur CS (channel fail) bits are set as checkstop.
+    UNIT_CS:     GLOBAL_CS_FIR;
 };
 
-group gGlobalFir attntype CHECK_STOP, RECOVERABLE filter singlebit
+group gGlobalFir attntype CHECK_STOP, RECOVERABLE, UNIT_CS filter singlebit
 {
     /** GLOBAL_FIR[1]
      *  Attention from TP chiplet

@@ -421,38 +421,13 @@
     # NEST Chiplet MBSSECUREFIR
     ############################################################################
 
+    # This register is hardwired to channel failure (checkstop) and we cannot
+    # mask or change the state of the action registers.
     register MBSSECUREFIR
     {
         name        "MBU.MBS.ARB.RXLT.MBSSIRQ";
         scomaddr    0x0201141e;
         reset       (&, 0x0201141f);
-        # This is a special register in which we are not able to mask. All bits
-        # in this register should be set to checkstop so we will not need to
-        # mask anyway.
-        capture     group default;
-    };
-
-    register MBSSECUREFIR_MASK
-    {
-        name        "MBU.MBS.ARB.RXLT.MBSSIRMASK";
-        scomaddr    0x02011421;
-        capture     type secondary;
-        capture     group default;
-    };
-
-    register MBSSECUREFIR_ACT0
-    {
-        name        "MBU.MBS.ARB.RXLT.MBSSIRACT0";
-        scomaddr    0x02011424;
-        capture     type secondary;
-        capture     group default;
-    };
-
-    register MBSSECUREFIR_ACT1
-    {
-        name        "MBU.MBS.ARB.RXLT.MBSSIRACT1";
-        scomaddr    0x02011425;
-        capture     type secondary;
         capture     group default;
     };
 

@@ -48,6 +48,7 @@ group gTpChipletFir filter singlebit
 rule TpLFir
 {
   CHECK_STOP:  TP_LFIR & ~TP_LFIR_MASK & ~TP_LFIR_ACT0 & ~TP_LFIR_ACT1;
+  UNIT_CS:     TP_LFIR & ~TP_LFIR_MASK & ~TP_LFIR_ACT0 & ~TP_LFIR_ACT1;
   RECOVERABLE: TP_LFIR & ~TP_LFIR_MASK & ~TP_LFIR_ACT0 &  TP_LFIR_ACT1;
 };
 

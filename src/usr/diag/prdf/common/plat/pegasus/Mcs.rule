@@ -128,9 +128,13 @@ rule MciFir
     CHECK_STOP:  MCIFIR & ~MCIFIR_MASK & ~MCIFIR_ACT0 & ~MCIFIR_ACT1;
     RECOVERABLE: MCIFIR & ~MCIFIR_MASK & ~MCIFIR_ACT0 &  MCIFIR_ACT1;
     SPECIAL:     MCIFIR & ~MCIFIR_MASK &  MCIFIR_ACT0 & ~MCIFIR_ACT1;
+
+    # All of the Centaur CS (channel fail) bits set as recoverable.
+    UNIT_CS:     MCIFIR & ~MCIFIR_MASK & ~MCIFIR_ACT0 &  MCIFIR_ACT1;
 };
 
-group gMciFir attntype CHECK_STOP, RECOVERABLE, SPECIAL filter singlebit
+group gMciFir attntype CHECK_STOP, RECOVERABLE, SPECIAL, UNIT_CS
+      filter priority( 0, 1, 6, 8, 9, 12, 22, 23, 40 ) # Centaur CS FIR bits
 {
     /** MCIFIR[0]
      *  MCIFIRQ_REPLAY_TIMEOUT

@@ -97,38 +97,13 @@ chip Mba
     # MEM Chiplet MBASECUREFIR
     ############################################################################
 
+    # This register is hardwired to channel failure (checkstop) and we cannot
+    # mask or change the state of the action registers.
     register MBASECUREFIR
     {
         name        "MBU.MBA01.MBA_SRQ.MBASIRQ";
         scomaddr    0x0301041b;
         reset       (&, 0x0301041c);
-        # This is a special register in which we are not able to mask. All bits
-        # in this register should be set to checkstop so we will not need to
-        # mask anyway.
-        capture     group default;
-    };
-
-    register MBASECUREFIR_MASK
-    {
-        name        "MBU.MBA01.MBA_SRQ.MBASIRMASK";
-        scomaddr    0x0301041e;
-        capture     type secondary;
-        capture     group default;
-    };
-
-    register MBASECUREFIR_ACT0
-    {
-        name        "MBU.MBA01.MBA_SRQ.MBASIRACT0";
-        scomaddr    0x03010421;
-        capture     type secondary;
-        capture     group default;
-    };
-
-    register MBASECUREFIR_ACT1
-    {
-        name        "MBU.MBA01.MBA_SRQ.MBASIRACT1";
-        scomaddr    0x03010422;
-        capture     type secondary;
         capture     group default;
     };
 
@@ -311,22 +286,23 @@ chip Mba
 rule tmpMbaFir
 {
   CHECK_STOP:  MBAFIR & ~MBAFIR_MASK & ~MBAFIR_ACT0 & ~MBAFIR_ACT1;
+  UNIT_CS:     MBAFIR & ~MBAFIR_MASK & ~MBAFIR_ACT0 & ~MBAFIR_ACT1;
   RECOVERABLE: MBAFIR & ~MBAFIR_MASK & ~MBAFIR_ACT0 &  MBAFIR_ACT1;
   SPECIAL:     MBAFIR; # See note above.
 };
 
 rule tmpMbaSecureFir
 {
-  CHECK_STOP:
-    MBASECUREFIR & ~MBASECUREFIR_MASK & ~MBASECUREFIR_ACT0 & ~MBASECUREFIR_ACT1;
   # NOTE: This secure FIR will only report checkstop attentions.
-  SPECIAL:
-    MBASECUREFIR; # See note above.
+  CHECK_STOP: MBASECUREFIR;
+  UNIT_CS:    MBASECUREFIR;
+  SPECIAL:    MBASECUREFIR; # See note above.
 };
 
 rule tmpMbaCalFir
 {
   CHECK_STOP:  MBACALFIR & ~MBACALFIR_MASK & ~MBACALFIR_ACT0 & ~MBACALFIR_ACT1;
+  UNIT_CS:     MBACALFIR & ~MBACALFIR_MASK & ~MBACALFIR_ACT0 & ~MBACALFIR_ACT1;
   RECOVERABLE: MBACALFIR & ~MBACALFIR_MASK & ~MBACALFIR_ACT0 &  MBACALFIR_ACT1;
   SPECIAL:     MBACALFIR; # See note above.
 };
@@ -335,13 +311,15 @@ rule tmpMbaDdrPhyFir
 {
   CHECK_STOP:
     MBADDRPHYFIR & ~MBADDRPHYFIR_MASK & ~MBADDRPHYFIR_ACT0 & ~MBADDRPHYFIR_ACT1;
+  UNIT_CS:
+    MBADDRPHYFIR & ~MBADDRPHYFIR_MASK & ~MBADDRPHYFIR_ACT0 & ~MBADDRPHYFIR_ACT1;
   RECOVERABLE:
     MBADDRPHYFIR & ~MBADDRPHYFIR_MASK & ~MBADDRPHYFIR_ACT0 &  MBADDRPHYFIR_ACT1;
   SPECIAL:
     MBADDRPHYFIR; # See note above.
 };
 
-group gMBA attntype CHECK_STOP, RECOVERABLE filter singlebit
+group gMBA attntype CHECK_STOP, RECOVERABLE, UNIT_CS filter singlebit
 {
     (tmpMbaFir,       bit( 0| 1| 2| 3| 4| 5| 6| 7| 8| 9|
                           10|11|12|13|14|15|16|17|18|19|
@@ -383,6 +361,7 @@ group gMBA attntype CHECK_STOP, RECOVERABLE filter singlebit
 rule MbaFir
 {
     CHECK_STOP:  MBAFIR & ~MBAFIR_MASK & ~MBAFIR_ACT0 & ~MBAFIR_ACT1;
+    UNIT_CS:     MBAFIR & ~MBAFIR_MASK & ~MBAFIR_ACT0 & ~MBAFIR_ACT1;
     RECOVERABLE: MBAFIR & ~MBAFIR_MASK & ~MBAFIR_ACT0 &  MBAFIR_ACT1;
 };
 
@@ -445,9 +424,9 @@ group gMbaFir filter singlebit
 
 rule MbaSecureFir
 {
-  CHECK_STOP:
-    MBASECUREFIR & ~MBASECUREFIR_MASK & ~MBASECUREFIR_ACT0 & ~MBASECUREFIR_ACT1;
   # NOTE: This secure FIR will only report checkstop attentions.
+  CHECK_STOP: MBASECUREFIR;
+  UNIT_CS:    MBASECUREFIR;
 };
 
 group gMbaSecureFir filter singlebit
@@ -490,6 +469,8 @@ group gMbaSecureFir filter singlebit
 rule MbaDdrPhyFir
 {
   CHECK_STOP:
+    MBADDRPHYFIR & ~MBADDRPHYFIR_MASK & ~MBADDRPHYFIR_ACT0 & ~MBADDRPHYFIR_ACT1;
+  UNIT_CS:
     MBADDRPHYFIR & ~MBADDRPHYFIR_MASK & ~MBADDRPHYFIR_ACT0 & ~MBADDRPHYFIR_ACT1;
   RECOVERABLE:
     MBADDRPHYFIR & ~MBADDRPHYFIR_MASK & ~MBADDRPHYFIR_ACT0 &  MBADDRPHYFIR_ACT1;
@@ -560,6 +541,7 @@ group gMbaDdrPhyFir filter singlebit
 rule MbaCalFir
 {
   CHECK_STOP:  MBACALFIR & ~MBACALFIR_MASK & ~MBACALFIR_ACT0 & ~MBACALFIR_ACT1;
+  UNIT_CS:     MBACALFIR & ~MBACALFIR_MASK & ~MBACALFIR_ACT0 & ~MBACALFIR_ACT1;
   RECOVERABLE: MBACALFIR & ~MBACALFIR_MASK & ~MBACALFIR_ACT0 &  MBACALFIR_ACT1;
 };
 

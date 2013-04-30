@@ -66,10 +66,11 @@ int32_t CheckCentaurCheckstop( ExtensibleChip * i_mcsChip,
 {
     int32_t l_rc = SUCCESS;
 
-    do {
+    do
+    {
         // Skip if we're already at Unit Checkstop in SDC
         if (i_sc.service_data->GetFlag(ServiceDataCollector::UNIT_CS))
-        { break; }
+            break;
 
         // Check MCIFIR[31] for presence of Centaur checkstop
         SCAN_COMM_REGISTER_CLASS * l_mcifir = i_mcsChip->getRegister("MCIFIR");
@@ -87,6 +88,9 @@ int32_t CheckCentaurCheckstop( ExtensibleChip * i_mcsChip,
         // Set Unit checkstop flag
         i_sc.service_data->SetFlag(ServiceDataCollector::UNIT_CS);
         i_sc.service_data->SetThresholdMaskId(0);
+
+        // Set the cause attention type
+        i_sc.service_data->SetCauseAttentionType(UNIT_CS);
 
         // Collect FFDC
         // FIXME: RTC: 63753 (CENT_XSTP_FFDC capture group still needs to be
