@@ -633,10 +633,12 @@ errlHndl_t ErrDataService::GenerateSrcPfa(ATTENTION_TYPE attn_type,
             HW = true; // Hardware callout
 
             TargetHandle_t target = thiscallout.getTarget();
-            if ( TYPE_MEMBUF == PlatServices::getTargetType(target) )
+            if (( TYPE_MEMBUF == PlatServices::getTargetType(target) ) ||
+                ( TYPE_MBA    == PlatServices::getTargetType(target) ))
                 l_memBuffInCallouts = true;
 
-            // If we are in Concurrent Maintenance Mode, we will need to disable the
+            // If we are in Concurrent Maintenance Mode,
+            // we will need to disable the
             // Deferred Deconfig, if the callouts are not HOM_CM_FUNCTIONAL.
             // FIXME PlatServices::inCMMode() not avaialble yet
             #if 0
@@ -1060,11 +1062,13 @@ errlHndl_t ErrDataService::GenerateSrcPfa(ATTENTION_TYPE attn_type,
             //Check if this is last functional core
             if ( PlatServices::checkLastFuncCore(l_dumpHandle) )
             {
-                PRDF_TRAC( PRDF_FUNC"Last Func Core from Gard was true." );
+                PRDF_TRAC( PRDF_FUNC"Last Func Core: %x was true.",
+                           PlatServices::getHuid(l_dumpHandle)  );
                 ForceTerminate = true;
                 pfaData.LAST_CORE_TERMINATE = true;
                 errLog->setSev(ERRL_SEV_UNRECOVERABLE);  //Update Errl Severity
-                pfaData.PFA_errlSeverity = ERRL_SEV_UNRECOVERABLE; //Update PFA data
+                //Update PFA data
+                pfaData.PFA_errlSeverity = ERRL_SEV_UNRECOVERABLE;
             }
         }
     }
@@ -1251,11 +1255,12 @@ will also be removed. Need to confirm if this code is required anymore.
                 }
             }
             else if (l_targetType == TYPE_MEMBUF ||
+                     l_targetType == TYPE_MBA    ||
                      l_targetType == TYPE_MCS)
             {
                 // Centaur Checkstop
                 TargetHandle_t centaurHandle = l_dumpHandle;
-                if (l_targetType == TYPE_MCS)
+                if (l_targetType != TYPE_MEMBUF)
                 {
                     centaurHandle = PlatServices::getConnected(l_dumpHandle,
                                                             TYPE_MEMBUF) [0];

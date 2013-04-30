@@ -70,6 +70,7 @@ TESTS = prdfTest_ABus.H \
         prdfTest_McsMciFir.H \
         prdfTest_ProcCentFir.H \
         prdfTest_ProcMbsFir.H \
-        prdfTest_ProcTpLFir.H
+        prdfTest_ProcTpLFir.H \
+		prdfTest_CentCs.H
 
 include ${ROOTPATH}/config.mk
