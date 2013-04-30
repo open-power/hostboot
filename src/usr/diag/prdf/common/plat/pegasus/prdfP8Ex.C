@@ -197,5 +197,94 @@ int32_t MaskIfCoreCheckstop( ExtensibleChip * i_chip,
     return l_rc;
 } PRDF_PLUGIN_DEFINE(Ex, MaskIfCoreCheckstop);
 
+/**
+ * @brief Restart Trace Arrays that have been stopped on error
+ * @param i_chip Ex chip.
+ * @param i_stepcode Step Code data struct
+ * @return PRD return code
+ */
+int32_t RestartTraceArray( ExtensibleChip * i_chip,
+                           STEP_CODE_DATA_STRUCT & i_stepcode )
+{
+    int32_t l_rc = SUCCESS;
+#ifndef __HOSTBOOT_MODULE
+    l_rc = PlatServices::RestartTraceArray(i_chip->GetChipHandle());
+#endif
+    return l_rc;
+} PRDF_PLUGIN_DEFINE(Ex, RestartTraceArray);
+
+/**
+ * @brief Handle an L3 UE
+ * @param i_chip Ex chip.
+ * @param i_stepcode Step Code data struct
+ * @return PRD return code
+ */
+int32_t L3UE( ExtensibleChip * i_chip,
+                           STEP_CODE_DATA_STRUCT & i_stepcode )
+{
+    //FIXME RTC:22859 support for L2/L3 repairs
+    int32_t l_rc = SUCCESS;
+#ifndef __HOSTBOOT_MODULE
+    l_rc = PlatServices::processL2L3TraceArray(i_chip->GetChipHandle(),
+                                               false);
+#endif
+    return l_rc;
+
+} PRDF_PLUGIN_DEFINE(Ex, L3UE);
+
+/**
+ * @brief Handle an L3 CE
+ * @param i_chip Ex chip.
+ * @param i_stepcode Step Code data struct
+ * @return PRD return code
+ */
+int32_t L3CE( ExtensibleChip * i_chip,
+                           STEP_CODE_DATA_STRUCT & i_stepcode )
+{
+    //FIXME RTC:22859 support for L2/L3 repairs
+    int32_t l_rc = SUCCESS;
+#ifndef __HOSTBOOT_MODULE
+    l_rc = PlatServices::processL2L3TraceArray(i_chip->GetChipHandle(),
+                                               false);
+#endif
+    return l_rc;
+} PRDF_PLUGIN_DEFINE(Ex, L3CE);
+
+/**
+ * @brief Handle an L2 UE
+ * @param i_chip Ex chip.
+ * @param i_stepcode Step Code data struct
+ * @return PRD return code
+ */
+int32_t L2UE( ExtensibleChip * i_chip,
+                           STEP_CODE_DATA_STRUCT & i_stepcode )
+{
+    //FIXME RTC:22859 support for L2/L3 repairs
+    int32_t l_rc = SUCCESS;
+#ifndef __HOSTBOOT_MODULE
+    l_rc = PlatServices::processL2L3TraceArray(i_chip->GetChipHandle(),
+                                               true);
+#endif
+    return l_rc;
+} PRDF_PLUGIN_DEFINE(Ex, L2UE);
+
+/**
+ * @brief Handle an L2 CE
+ * @param i_chip Ex chip.
+ * @param i_stepcode Step Code data struct
+ * @return PRD return code
+ */
+int32_t L2CE( ExtensibleChip * i_chip,
+                           STEP_CODE_DATA_STRUCT & i_stepcode )
+{
+    //FIXME RTC:22859 support for L2/L3 repairs
+    int32_t l_rc = SUCCESS;
+#ifndef __HOSTBOOT_MODULE
+    l_rc = PlatServices::processL2L3TraceArray(i_chip->GetChipHandle(),
+                                               true);
+#endif
+    return l_rc;
+} PRDF_PLUGIN_DEFINE(Ex, L2CE);
+
 } // end namespace Ex
 } // end namespace PRDF

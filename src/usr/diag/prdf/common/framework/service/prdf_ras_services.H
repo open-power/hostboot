@@ -175,6 +175,16 @@ class ErrDataService
       */
     bool SdcRetrieve(sdcSaveFlagsEnum i_saveFlag, void * o_buffer);
 
+    /**
+     @brief Add Trace Data to File for Manufacturing.
+     @param[in] ErrorSignature
+     @return None.
+     @pre None.
+     @post None.
+     @exception None.
+     */
+    void MnfgTrace(ErrorSignature * l_esig);
+
     #endif // end if not __HOSTBOOT_MODULE
 
   private:
@@ -262,18 +272,6 @@ public:
    */
   virtual errlHndl_t GenerateSrcPfa( ATTENTION_TYPE attn_type,
                                     ServiceDataCollector & sdc );
-
-#ifndef __HOSTBOOT_MODULE
-  /**
-   @brief Add Trace Data to File for Manufacturing.
-   @param[in] ErrorSignature
-   @return None.
-   @pre None.
-   @post None.
-   @exception None.
-   */
-  void MnfgTrace(ErrorSignature * l_esig);
-#endif
 
   static void SetTerminateOnCheckstop(bool setting)
   {

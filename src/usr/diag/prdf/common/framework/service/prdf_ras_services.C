@@ -1300,8 +1300,7 @@ will also be removed. Need to confirm if this code is required anymore.
         // to pass errLog to PRDF_HWUDUMP
         // for FSP specific SRC handling in the future
 #ifndef __HOSTBOOT_MODULE
-        /* FIXME: not sure if we still need this in fips810?
-        MnfgTrace(esig); */
+        MnfgTrace(esig);
 #endif
 
         PRDF_GET_PLID(errLog, dumpPlid);
@@ -1340,8 +1339,7 @@ will also be removed. Need to confirm if this code is required anymore.
     {
 
 #ifndef __HOSTBOOT_MODULE
-        /* FIXME: not sure if we still need this in fips810?
-        MnfgTrace(esig); */
+        MnfgTrace(esig);
 #endif
 
         PRDF_DTRAC( PRDF_FUNC"generating a terminating, or MP Fatal SRC" );
@@ -1461,44 +1459,10 @@ will also be removed. Need to confirm if this code is required anymore.
     #undef PRDF_FUNC
 }
 
-void prdfGetTargetString(TargetHandle_t  i_pTargetHandle,
-                         char * o_chipName, uint32_t i_sizeOfChipName )
-{
-    //FIXME  waiting on alternate implementation of toString function in targeting
-    //FIXME Commenting out current usage of getEntityPathString
-    //char * l_entityPathString =NULL;
-    //uint32_t l_tempSize  =0;
-    do
-    {
-        if(NULL==i_pTargetHandle )
-        {
-#ifdef  __HOSTBOOT_MODULE
-            sprintf( o_chipName, "????, " );
-#else
-            snprintf( o_chipName, i_sizeOfChipName, "????, " );
-#endif
-
-        }
-        else
-        {
-/*
-            l_entityPathString =PlatServices::getEntityPathString(i_pTargetHandle);
-            l_tempSize  = strlen(l_entityPathString );
-            if(l_tempSize < i_sizeOfChipName)
-                i_sizeOfChipName = l_tempSize;
-            memcpy(o_chipName ,l_entityPathString ,i_sizeOfChipName);
-            free(l_entityPathString);
-*/
-        }
-
-    } while (0);
-}
-
-
 // ----------------------------------------------------------------------------
 
 #ifndef __HOSTBOOT_MODULE
-void RasServices::MnfgTrace(ErrorSignature * l_esig )
+void ErrDataService::MnfgTrace(ErrorSignature * l_esig )
 {
     char  * MnfgFilename = NULL;
     uint32_t l_size = 0;
@@ -1506,43 +1470,49 @@ void RasServices::MnfgTrace(ErrorSignature * l_esig )
 
     if ( PlatServices::mfgMode() )
     {
-        errlHndl_t errorLog = UtilReg::path(MnfgKey,1,"prdfMfgErrors",MnfgFilename,l_size);
+        errlHndl_t errorLog = UtilReg::path(MnfgKey, 1, "prdfMfgErrors",
+                                            MnfgFilename, l_size);
         if (errorLog == NULL)
         {
             UtilFile l_mfgFile;
             l_mfgFile.Open(MnfgFilename,"a+");
 
-            char l_array[62];
-            char l_array2[42];
+            char l_string[100];
             uint32_t signature = l_esig->getSigId();
             HUID sigChip = l_esig->getChipId();
 
             // Get Entity Path String
             TargetHandle_t l_ptempHandle = PlatServices::getTarget(sigChip);
-            prdfGetTargetString(l_ptempHandle , l_array, 62);
-            l_mfgFile.write(l_array, strlen(l_array));
+            TARGETING::EntityPath path;
+            PlatServices::getEntityPath(l_ptempHandle, path,
+                                        EntityPath::PATH_PHYSICAL);
+            char *epStr = path.toString();
+            if (epStr)
+            {
+                snprintf(l_string, 100, "%s, ", path.toString());
+                free(epStr);
+            }
+
+            l_mfgFile.write(l_string, strlen(l_string));
 
             // Write Signature
-            snprintf(l_array, 62, "0x%08x,", signature);
-            l_mfgFile.write(l_array, 24);
+            snprintf(l_string, 100, "0x%08x, 0x%08x, ", sigChip, signature);
+            l_mfgFile.write(l_string, strlen(l_string));
 
             // Write chip ECID data
-            char ecidString[1024];
-            l_ptempHandle = PlatServices::getTarget(pfaData.PfaCalloutList[0].Callout);
-            //TODO TargetHandle conversion - not sure we need it now
-            PlatServices::getECIDString(l_ptempHandle , ecidString);
-            l_mfgFile.write(ecidString, strlen(ecidString));
+            PlatServices::getECIDString(l_ptempHandle, l_string);
+            l_mfgFile.write(l_string, strlen(l_string));
 
             // Write MRU list
             uint32_t n = 0;
             while ( (n < MruListLIMIT )  && (n < pfaData.PfaCalloutCount) )
             {
-                snprintf(l_array2, 16, ", %08x", pfaData.PfaCalloutList[n].Callout);
-                l_mfgFile.write(l_array2, 9);
+                snprintf(l_string, 100, " , %08x", pfaData.PfaCalloutList[n].Callout);
+                l_mfgFile.write(l_string, strlen(l_string));
                 ++n;
             }
-            snprintf(l_array2, 42, "\n");
-            l_mfgFile.write(l_array2, 1);
+            snprintf(l_string, 100, "\n");
+            l_mfgFile.write(l_string, 1);
 
             l_mfgFile.Close();
         }

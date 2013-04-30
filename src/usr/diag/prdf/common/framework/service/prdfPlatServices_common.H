@@ -90,7 +90,7 @@ bool isMemoryPreservingIpl();
  * @return  Returns ECID string for given target
  */
 void getECIDString( TARGETING::TargetHandle_t i_target,
-                    const char * o_ecidStr );
+                    char * o_ecidStr );
 
 /**
  * @brief Get a PRD timer value based on the current time.

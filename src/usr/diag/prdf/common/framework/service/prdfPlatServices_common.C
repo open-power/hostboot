@@ -85,9 +85,9 @@ fapi::TargetType getFapiType( TARGETING::TargetHandle_t i_target )
 //##                     System Level Utility Functions
 //##############################################################################
 
-void getECIDString( TargetHandle_t i_target, const char * o_ecidStr )
+void getECIDString( TargetHandle_t i_target, char * o_ecidStr )
 {
-    o_ecidStr ="";
+    sprintf(o_ecidStr, "%s", "N/A");
     PRDF_ERR( "[PlatServices::getECIDString] Function not implemented yet" );
 }
 

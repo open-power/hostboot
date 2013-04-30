@@ -398,7 +398,7 @@ group gExChipletFir attntype CHECK_STOP, RECOVERABLE filter priority(3,5,6,7,4,2
     /** EX_CHIPLET_FIR[3]
      *  Attention from LFIR
      */
-    (ExChipletFir, bit(3))? analyze(gExLFir);
+    (ExChipletFir, bit(3))? analyzeExLFir;
 
     /** EX_CHIPLET_FIR[4]
      *  Attention from COREFIR
@@ -408,17 +408,17 @@ group gExChipletFir attntype CHECK_STOP, RECOVERABLE filter priority(3,5,6,7,4,2
     /** EX_CHIPLET_FIR[5]
      *  Attention from L2FIR
      */
-    (ExChipletFir, bit(5)) ? analyze(gL2Fir);
+    (ExChipletFir, bit(5)) ? analyzeL2Fir;
 
     /** EX_CHIPLET_FIR[6]
      *  Attention from L3FIR
      */
-    (ExChipletFir, bit(6)) ? analyze(gL3Fir);
+    (ExChipletFir, bit(6)) ? analyzeL3Fir;
 
     /** EX_CHIPLET_FIR[7]
      *  Attention from NCUFIR
      */
-    (ExChipletFir, bit(7)) ? analyze(gNcuFir);
+    (ExChipletFir, bit(7)) ? analyzeNcuFir;
 };
 
 ################################################################################
@@ -1347,6 +1347,7 @@ actionclass analyzeCore
     funccall("CheckCoreCheckstop");
     analyze(gCoreFir);
     funccall("MaskIfCoreCheckstop");
+    funccall("RestartTraceArray");
 };
 
 # Chiplet recoverable FIR indicated Core checkstop, so take actions for
@@ -1359,44 +1360,67 @@ actionclass analyzeCoreUnitCheckstop
     funccall("MaskIfCoreCheckstop");
 };
 
+actionclass analyzeExLFir
+{
+    analyze(gExLFir);
+    funccall("RestartTraceArray");
+};
+
+actionclass analyzeL2Fir
+{
+    analyze(gL2Fir);
+    funccall("RestartTraceArray");
+};
+
+actionclass analyzeL3Fir
+{
+    analyze(gL3Fir);
+    funccall("RestartTraceArray");
+};
+
+actionclass analyzeNcuFir
+{
+    analyze(gNcuFir);
+    funccall("RestartTraceArray");
+};
+
 actionclass L3DirCE
 {
     calloutSelfMed;
-    threshold32pday; #FIXME RTC:65507 add MFG threshold
+    threshold( field(32 / day), mfg_file(P8EX_L3_DIR_CES) );
 };
 
 actionclass L3UE
 {
     SelfMedThr1UE;
-    #funccall("L3UE"); #FIXME RTC:22859 support for L3 repairs and trace arrays
+    funccall("L3UE");
 };
 
 actionclass L3CE
 {
     calloutSelfMed;
-    threshold32pday; #FIXME RTC:65507 add MFG threshold
-    #funccall("L3CE"); #FIXME RTC:22859 support for L3 repairs and trace arrays
+    threshold( field(32 / day), mfg_file(P8EX_L3_CACHE_CES) );
+    funccall("L3CE");
 };
 
 
 actionclass L2CE
 {
     calloutSelfMed;
-    threshold32pday; #FIXME RTC:65507 add MFG threshold
-    #funcall("L2CE");#FIXME RTC 22859 Support for L2 Line Delete
-
+    threshold( field(32 / day), mfg_file(P8EX_L2_CACHE_CES) );
+    funccall("L2CE");
 };
 
 actionclass L2UE
 {
     SelfMedThr1UE;
-    #funcall("L2UE");#FIXME RTC 22859 Support for L2 Line Delete
+    funccall("L2UE");
 };
 
 actionclass L2DirCE
 {
     calloutSelfMed;
-    threshold32pday; #FIXME RTC:65507 add MFG threshold
+    threshold( field(32 / day), mfg_file(P8EX_L2_DIR_CES) );
 };
 
 actionclass L2ChipLevel2
