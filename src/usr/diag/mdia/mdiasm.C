@@ -818,7 +818,16 @@ CommandMonitor & StateMachine::getMonitor()
 
 bool StateMachine::processMaintCommandEvent(const MaintCommandEvent & i_event)
 {
-    bool resume = true, dispatched = false;
+    enum
+    {
+        CLEANUP_CMD = 0x8,
+        DELETE_CMD = 0x4,
+        STOP_CMD = 0x2,
+        START_NEXT_CMD = 0x1,
+        DISPATCHED = 0x80,
+    };
+
+    uint64_t flags = 0;
 
     mss_MaintCmd * cmd = NULL;
     ReturnCode fapirc;
@@ -855,6 +864,8 @@ bool StateMachine::processMaintCommandEvent(const MaintCommandEvent & i_event)
 
         getMonitor().removeMonitor(wfp.timer);
 
+        cmd = static_cast<mss_MaintCmd *>(wfp.data);
+
         MDIA_FAST("sm: processing event for: %x: cmd: %p",
                 get_huid(getTarget(wfp)));
 
@@ -872,7 +883,7 @@ bool StateMachine::processMaintCommandEvent(const MaintCommandEvent & i_event)
 
                 // done with this maint command
 
-                cmd = static_cast<mss_MaintCmd *>(wfp.data);
+                flags = DELETE_CMD | START_NEXT_CMD;
                 wfp.data = NULL;
 
                 break;
@@ -881,6 +892,7 @@ bool StateMachine::processMaintCommandEvent(const MaintCommandEvent & i_event)
 
                 // command stopped at end of some other rank
 
+                flags = START_NEXT_CMD;
                 wfp.restartCommand = true;
 
                 break;
@@ -892,33 +904,39 @@ bool StateMachine::processMaintCommandEvent(const MaintCommandEvent & i_event)
                 wfp.status = COMPLETE;
 
                 // done with this maint command
-
-                cmd = static_cast<mss_MaintCmd *>(wfp.data);
+                flags = DELETE_CMD | STOP_CMD | START_NEXT_CMD;
                 wfp.data = NULL;
 
-                MDIA_FAST("sm: stopping command: %p", cmd);
-
-                fapirc = cmd->stopCmd();
-                err = fapiRcToErrl(fapirc);
-
-                if(err)
-                {
-                    MDIA_ERR("sm: mss_MaintCmd::stopCmd failed");
-                    errlCommit(err, MDIA_COMP_ID);
-                }
 
                 break;
 
             case RESET_TIMER:
+                flags = CLEANUP_CMD;
+                break;
 
-                // fall through
             default:
-
-                resume = false;
+                // this shouldn't happen, but if it does
+                // free up the memory
+                flags = DELETE_CMD;
+                wfp.data = NULL;
                 break;
         }
 
-        if(cmd)
+        if(flags & STOP_CMD)
+        {
+            MDIA_FAST("sm: stopping command: %p", cmd);
+
+            fapirc = cmd->stopCmd();
+            err = fapiRcToErrl(fapirc);
+
+            if(err)
+            {
+                MDIA_ERR("sm: mss_MaintCmd::stopCmd failed");
+                errlCommit(err, MDIA_COMP_ID);
+            }
+        }
+
+        if(flags & CLEANUP_CMD)
         {
             // restore any init settings that
             // may have been changed by the command
@@ -933,19 +951,23 @@ bool StateMachine::processMaintCommandEvent(const MaintCommandEvent & i_event)
         }
 
         // schedule the next work item
-
-        if(resume && !iv_shutdown)
-            dispatched = scheduleWorkItem(wfp);
+        if((flags & START_NEXT_CMD) && !iv_shutdown)
+        {
+            if(scheduleWorkItem(wfp))
+            {
+                flags |= DISPATCHED;
+            }
+        }
     }
 
     mutex_unlock(&iv_mutex);
 
-    if(cmd)
+    if(flags & DELETE_CMD)
     {
         delete cmd;
     }
 
-    return dispatched;
+    return (flags & DISPATCHED);
 }
 
 bool StateMachine::allWorkFlowsComplete()
