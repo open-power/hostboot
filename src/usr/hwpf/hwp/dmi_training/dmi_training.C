@@ -163,88 +163,113 @@ void*    call_mss_getecid( void *io_pArgs )
 
             errlCommit( l_err, HWPF_COMP_ID );
         }
-        else if (MSS_GET_CEN_ECID_DDR_STATUS_ALL_GOOD != l_ddr_port_status)
+        else
         {
-            // Check the DDR port status returned by mss_get_cen_ecid to
-            // see which MBA is bad.  If the MBA's state is
-            // functional and the DDR port status indicates that it's bad,
-            // then set the MBA to nonfunctional.  If the MBA's state is
-            // nonfunctional, then do nothing since we don't want to override
-            // previous settings.
-
-            // Find the functional MBAs associated with this Centaur
-            PredicateCTM l_mba_pred(CLASS_UNIT,TYPE_MBA);
-            TARGETING::TargetHandleList l_mbaTargetList;
-            getChildChiplets(l_mbaTargetList,
-                             l_pCentaur,
-                             TYPE_MBA);
-
-            uint8_t l_num_func_mbas = l_mbaTargetList.size();
-
-            for (TargetHandleList::const_iterator
-                    l_mba_iter = l_mbaTargetList.begin();
-                    l_mba_iter != l_mbaTargetList.end();
-                    ++l_mba_iter)
+            if (MSS_GET_CEN_ECID_DDR_STATUS_ALL_GOOD != l_ddr_port_status)
             {
-                //  Make a local copy of the target for ease of use
-                TARGETING::Target*  l_pMBA = *l_mba_iter;
+                // Check the DDR port status returned by mss_get_cen_ecid to
+                // see which MBA is bad.  If the MBA's state is
+                // functional and the DDR port status indicates that it's bad,
+                // then set the MBA to nonfunctional.  If the MBA's state is
+                // nonfunctional, then do nothing since we don't want to
+                // override previous settings.
 
-                // Get the MBA chip unit position
-                ATTR_CHIP_UNIT_type l_pos = l_pMBA->getAttr<ATTR_CHIP_UNIT>();
+                // Find the functional MBAs associated with this Centaur
+                PredicateCTM l_mba_pred(CLASS_UNIT,TYPE_MBA);
+                TARGETING::TargetHandleList l_mbaTargetList;
+                getChildChiplets(l_mbaTargetList,
+                                 l_pCentaur,
+                                 TYPE_MBA);
 
-                // Check the DDR port status to see if this MBA should be
-                // set to nonfunctional.
-                if ( l_ddr_port_status & l_mbaBadMask[l_pos] )
+                uint8_t l_num_func_mbas = l_mbaTargetList.size();
+
+                for (TargetHandleList::const_iterator
+                        l_mba_iter = l_mbaTargetList.begin();
+                        l_mba_iter != l_mbaTargetList.end();
+                        ++l_mba_iter)
+                {
+                    //  Make a local copy of the target for ease of use
+                    TARGETING::Target*  l_pMBA = *l_mba_iter;
+
+                    // Get the MBA chip unit position
+                    ATTR_CHIP_UNIT_type l_pos =
+                        l_pMBA->getAttr<ATTR_CHIP_UNIT>();
+
+                    // Check the DDR port status to see if this MBA should be
+                    // set to nonfunctional.
+                    if ( l_ddr_port_status & l_mbaBadMask[l_pos] )
+                    {
+                        // call HWAS to deconfigure this target
+                        l_err = HWAS::theDeconfigGard().deconfigureTarget(
+                                                            *l_pMBA, 0);
+                        l_num_func_mbas--;
+
+                        if (l_err)
+                        {
+                            // shouldn't happen, but if it does, stop trying to
+                            //  deconfigure targets..
+                            break;
+                        }
+                    }
+                } // for
+
+                // If there are no functional MBAs for this Centaur, deconfigure
+                // the Centaur as well
+                // TODO: RTC: 63225
+                //  this will go away when deconfigureByAssocation() handles this.
+                if (!l_err && (0 == l_num_func_mbas))
                 {
                     // call HWAS to deconfigure this target
                     l_err = HWAS::theDeconfigGard().deconfigureTarget(
-                                                        *l_pMBA, 0);
-                    l_num_func_mbas--;
-
-                    if (l_err)
-                    {
-                        // shouldn't happen, but if it does, stop trying to
-                        //  deconfigure targets..
-                        break;
-                    }
+                                                        *l_pCentaur, 0);
                 }
-            } // for
 
-            // If there are no functional MBAs for this Centaur, deconfigure
-            // the Centaur as well
-            // TODO: RTC: 63225
-            //  this will go away when deconfigureByAssocation() handles this.
-            if (!l_err && (0 == l_num_func_mbas))
-            {
-                // call HWAS to deconfigure this target
-                l_err = HWAS::theDeconfigGard().deconfigureTarget(
-                                                    *l_pCentaur, 0);
+                if (l_err)
+                {
+                    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                              "ERROR: error deconfiguring MBA or Centaur");
+
+                    /*@
+                     * @errortype
+                     * @reasoncode  ISTEP_DECONFIGURE_MBA_FAILED
+                     * @severity    ERRORLOG::ERRL_SEV_UNRECOVERABLE
+                     * @moduleid    ISTEP_MSS_GETECID
+                     * @userdata1   bytes 0-1: plid identifying first error
+                     *              bytes 2-3: reason code of first error
+                     * @userdata2   bytes 0-1: total number of elogs included
+                     *              bytes 2-3: N/A
+                     * @devdesc     call to deconfigure MBA or Centaur failed
+                     *              see error log in the user details section for
+                     *              additional details.
+                     */
+                    l_StepError.addErrorDetails(ISTEP_DECONFIGURE_MBA_FAILED,
+                                                ISTEP_MSS_GETECID,
+                                                l_err );
+
+                    errlCommit( l_err, HWPF_COMP_ID );
+                }
             }
 
-            if (l_err)
+            // mss_get_cen_ecid returns if the L4 cache is enabled. This can be
+            // - fapi::ENUM_ATTR_MSS_CACHE_ENABLE_OFF
+            // - fapi::ENUM_ATTR_MSS_CACHE_ENABLE_ON
+            // - fapi::ENUM_ATTR_MSS_CACHE_ENABLE_HALF_A
+            // - fapi::ENUM_ATTR_MSS_CACHE_ENABLE_HALF_B
+            // Firmware does not support HALF-enabled, it is treated like OFF.
+            // If the L4 cache is not ON then the L4 Target is deconfigured.
+            // The ATTR_MSS_CACHE_ENABLE attribute is set to either ON/OFF
+            if (l_cache_enable != fapi::ENUM_ATTR_MSS_CACHE_ENABLE_ON)
             {
                 TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                          "ERROR: error deconfiguring MBA or Centaur");
+                    "mss_get_cen_ecid returned L4 not-on (0x%02x)",
+                    l_cache_enable);
+                l_cache_enable = fapi::ENUM_ATTR_MSS_CACHE_ENABLE_OFF;
 
-                /*@
-                 * @errortype
-                 * @reasoncode  ISTEP_DECONFIGURE_MBA_FAILED
-                 * @severity    ERRORLOG::ERRL_SEV_UNRECOVERABLE
-                 * @moduleid    ISTEP_MSS_GETECID
-                 * @userdata1   bytes 0-1: plid identifying first error
-                 *              bytes 2-3: reason code of first error
-                 * @userdata2   bytes 0-1: total number of elogs included
-                 *              bytes 2-3: N/A
-                 * @devdesc     call to deconfigure MBA or Centaur failed
-                 *              see error log in the user details section for
-                 *              additional details.
-                 */
-                l_StepError.addErrorDetails(ISTEP_DECONFIGURE_MBA_FAILED,
-                                            ISTEP_MSS_GETECID,
-                                            l_err );
-
-                errlCommit( l_err, HWPF_COMP_ID );
+                // TODO RTC 68487. Get the child L4 Target and deconfigure it
             }
+
+            l_pCentaur->setAttr<TARGETING::ATTR_MSS_CACHE_ENABLE>(
+                l_cache_enable);
         }
 
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
