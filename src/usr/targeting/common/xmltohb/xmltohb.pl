@@ -1905,10 +1905,20 @@ sub writeAttrErrlHFile {
     print $outFile "\n";
     print $outFile "        switch (attrEnum) {\n";
 
+    my $attributeIdEnum = getAttributeIdEnumeration($attributes);
+
     # loop through every attribute to make the swith/case
     foreach my $attribute (@{$attributes->{attribute}})
     {
-        my $attrVal = sprintf "0x%08X", $attribute->{value};
+        my $attrVal;
+        foreach my $enum (@{$attributeIdEnum->{enumerator}})
+        {
+            if ($enum->{name} eq $attribute->{id})
+            {
+                $attrVal = $enum->{value};
+                last; # don't need to look at any others.
+            }
+        }
         print $outFile "          case ",$attrVal,": {\n";
 
         # things we'll skip:
