@@ -30,6 +30,7 @@
         name        "TCN.XFIR";
         scomaddr    0x02040000;
         capture     group default;
+        capture     group FirRegs;
     };
 
     register NEST_CHIPLET_RE_FIR
@@ -37,6 +38,7 @@
         name        "TCN.RFIR";
         scomaddr    0x02040001;
         capture     group default;
+        capture     group FirRegs;
     };
 
     register NEST_CHIPLET_FIR_MASK
@@ -45,6 +47,7 @@
         scomaddr    0x02040002;
         capture     type secondary;
         capture     group default;
+        capture     group FirRegs;
     };
 
     ############################################################################
@@ -58,6 +61,7 @@
         reset       (&, 0x0204000b);
         mask        (|, 0x0204000f);
         capture     group default;
+        capture     group FirRegs;
     };
 
     register NEST_LFIR_MASK
@@ -66,6 +70,7 @@
         scomaddr    0x0204000d;
         capture     type secondary;
         capture     group default;
+        capture     group FirRegs;
     };
 
     register NEST_LFIR_ACT0
@@ -74,6 +79,7 @@
         scomaddr    0x02040010;
         capture     type secondary;
         capture     group default;
+        capture     group FirRegs;
     };
 
     register NEST_LFIR_ACT1
@@ -82,6 +88,7 @@
         scomaddr    0x02040011;
         capture     type secondary;
         capture     group default;
+        capture     group FirRegs;
     };
 
     ############################################################################
@@ -95,6 +102,7 @@
         reset       (&, 0x02010401);
         mask        (|, 0x02010405);
         capture     group default;
+        capture     group FirRegs;
     };
 
     register DMIFIR_MASK
@@ -103,6 +111,7 @@
         scomaddr    0x02010403;
         capture     type secondary;
         capture     group default;
+        capture     group FirRegs;
     };
 
     register DMIFIR_ACT0
@@ -111,6 +120,7 @@
         scomaddr    0x02010406;
         capture     type secondary;
         capture     group default;
+        capture     group FirRegs;
     };
 
     register DMIFIR_ACT1
@@ -119,6 +129,7 @@
         scomaddr    0x02010407;
         capture     type secondary;
         capture     group default;
+        capture     group FirRegs;
     };
 
     ############################################################################
@@ -132,6 +143,7 @@
         reset       (&, 0x02010801);
         mask        (|, 0x02010805);
         capture     group default;
+        capture     group FirRegs;
     };
 
     register MBIFIR_MASK
@@ -140,6 +152,7 @@
         scomaddr    0x02010803;
         capture     type secondary;
         capture     group default;
+        capture     group FirRegs;
     };
 
     register MBIFIR_ACT0
@@ -148,6 +161,7 @@
         scomaddr    0x02010806;
         capture     type secondary;
         capture     group default;
+        capture     group FirRegs;
     };
 
     register MBIFIR_ACT1
@@ -156,6 +170,7 @@
         scomaddr    0x02010807;
         capture     type secondary;
         capture     group default;
+        capture     group FirRegs;
     };
 
     ############################################################################
@@ -169,6 +184,7 @@
         reset       (&, 0x02011401);
         mask        (|, 0x02011405);
         capture     group default;
+        capture     group FirRegs;
     };
 
     register MBSFIR_MASK
@@ -177,6 +193,7 @@
         scomaddr    0x02011403;
         capture     type secondary;
         capture     group default;
+        capture     group FirRegs;
     };
 
     register MBSFIR_ACT0
@@ -185,6 +202,7 @@
         scomaddr    0x02011406;
         capture     type secondary;
         capture     group default;
+        capture     group FirRegs;
     };
 
     register MBSFIR_ACT1
@@ -193,6 +211,7 @@
         scomaddr    0x02011407;
         capture     type secondary;
         capture     group default;
+        capture     group FirRegs;
     };
 
     ############################################################################
@@ -206,6 +225,7 @@
         reset       (&, 0x02011441);
         mask        (|, 0x02011445);
         capture     group default;
+        capture     group FirRegs;
     };
 
     register MBSECC01FIR_MASK
@@ -214,6 +234,7 @@
         scomaddr    0x02011443;
         capture     type secondary;
         capture     group default;
+        capture     group FirRegs;
     };
 
     register MBSECC01FIR_ACT0
@@ -222,6 +243,7 @@
         scomaddr    0x02011446;
         capture     type secondary;
         capture     group default;
+        capture     group FirRegs;
     };
 
     register MBSECC01FIR_ACT1
@@ -230,6 +252,7 @@
         scomaddr    0x02011447;
         capture     type secondary;
         capture     group default;
+        capture     group FirRegs;
     };
 
     ############################################################################
@@ -243,6 +266,7 @@
         reset       (&, 0x02011481);
         mask        (|, 0x02011485);
         capture     group default;
+        capture     group FirRegs;
     };
 
     register MBSECC23FIR_MASK
@@ -251,6 +275,7 @@
         scomaddr    0x02011483;
         capture     type secondary;
         capture     group default;
+        capture     group FirRegs;
     };
 
     register MBSECC23FIR_ACT0
@@ -259,6 +284,7 @@
         scomaddr    0x02011486;
         capture     type secondary;
         capture     group default;
+        capture     group FirRegs;
     };
 
     register MBSECC23FIR_ACT1
@@ -267,6 +293,7 @@
         scomaddr    0x02011487;
         capture     type secondary;
         capture     group default;
+        capture     group FirRegs;
     };
 
     ############################################################################
@@ -280,6 +307,7 @@
         reset       (&, 0x02011601);
         mask        (|, 0x02011605);
         capture     group default;
+        capture     group FirRegs;
     };
 
     register MCBIST01FIR_MASK
@@ -288,6 +316,7 @@
         scomaddr    0x02011603;
         capture     type secondary;
         capture     group default;
+        capture     group FirRegs;
     };
 
     register MCBIST01FIR_ACT0
@@ -296,6 +325,7 @@
         scomaddr    0x02011606;
         capture     type secondary;
         capture     group default;
+        capture     group FirRegs;
     };
 
     register MCBIST01FIR_ACT1
@@ -304,6 +334,7 @@
         scomaddr    0x02011607;
         capture     type secondary;
         capture     group default;
+        capture     group FirRegs;
     };
 
     ############################################################################
@@ -317,6 +348,7 @@
         reset       (&, 0x02011701);
         mask        (|, 0x02011705);
         capture     group default;
+        capture     group FirRegs;
     };
 
     register MCBIST23FIR_MASK
@@ -325,6 +357,7 @@
         scomaddr    0x02011703;
         capture     type secondary;
         capture     group default;
+        capture     group FirRegs;
     };
 
     register MCBIST23FIR_ACT0
@@ -333,6 +366,7 @@
         scomaddr    0x02011706;
         capture     type secondary;
         capture     group default;
+        capture     group FirRegs;
     };
 
     register MCBIST23FIR_ACT1
@@ -341,6 +375,7 @@
         scomaddr    0x02011707;
         capture     type secondary;
         capture     group default;
+        capture     group FirRegs;
     };
 
     ############################################################################
@@ -354,6 +389,7 @@
         reset       (&, 0x02010881);
         mask        (|, 0x02010885);
         capture     group default;
+        capture     group FirRegs;
     };
 
     register NESTFBISTFIR_MASK
@@ -362,6 +398,7 @@
         scomaddr    0x02010883;
         capture     type secondary;
         capture     group default;
+        capture     group FirRegs;
     };
 
     register NESTFBISTFIR_ACT0
@@ -370,6 +407,7 @@
         scomaddr    0x02010886;
         capture     type secondary;
         capture     group default;
+        capture     group FirRegs;
     };
 
     register NESTFBISTFIR_ACT1
@@ -378,6 +416,7 @@
         scomaddr    0x02010887;
         capture     type secondary;
         capture     group default;
+        capture     group FirRegs;
     };
 
     ############################################################################
@@ -391,6 +430,7 @@
         reset       (&, 0x020115c1);
         mask        (|, 0x020115c5);
         capture     group default;
+        capture     group FirRegs;
     };
 
     register SENSORCACHEFIR_MASK
@@ -399,6 +439,7 @@
         scomaddr    0x020115c3;
         capture     type secondary;
         capture     group default;
+        capture     group FirRegs;
     };
 
     register SENSORCACHEFIR_ACT0
@@ -407,6 +448,7 @@
         scomaddr    0x020115c6;
         capture     type secondary;
         capture     group default;
+        capture     group FirRegs;
     };
 
     register SENSORCACHEFIR_ACT1
@@ -415,6 +457,7 @@
         scomaddr    0x020115c7;
         capture     type secondary;
         capture     group default;
+        capture     group FirRegs;
     };
 
     ############################################################################
@@ -429,6 +472,98 @@
         scomaddr    0x0201141e;
         reset       (&, 0x0201141f);
         capture     group default;
+        capture     group FirRegs;
+    };
+
+    ############################################################################
+    # Error Report Registers
+    ############################################################################
+
+    register NEST_ERROR_STATUS
+    {
+        name        "TCN.ERROR_STATUS";
+        scomaddr    0x02030009;
+        capture     group default;
+        capture     group CerrRegs;
+    };
+
+    register MBIERPT
+    {
+        name        "MBU.MBI.MBI.MBIERPT0";
+        scomaddr    0x0201080F;
+        capture     group default;
+        capture     group CerrRegs;
+    };
+
+    register MBSCERR1
+    {
+        name        "MBU.MBS.MBSCERR1Q";
+        scomaddr    0x02011413;
+        capture     group default;
+        capture     group CerrRegs;
+    };
+
+    register MBSCERR2
+    {
+        name        "MBU.MBS.MBSCERR2Q";
+        scomaddr    0x0201142C;
+        capture     group default;
+        capture     group CerrRegs;
+    };
+
+    register MBSECC01ERRPT_0
+    {
+        name        "MBU.MBS.ECC01.MBSECCERR0";
+        scomaddr    0x02011466;
+        capture     group default;
+        capture     group CerrRegs;
+    };
+
+    register MBSECC01ERRPT_1
+    {
+        name        "MBU.MBS.ECC01.MBSECCERR1";
+        scomaddr    0x02011467;
+        capture     group default;
+        capture     group CerrRegs;
+    };
+    register MBSECC23ERRPT_0
+    {
+        name        "MBU.MBS.ECC23.MBSECCERR0";
+        scomaddr    0x020114A6;
+        capture     group default;
+        capture     group CerrRegs;
+    };
+
+    register MBSECC23ERRPT_1
+    {
+        name        "MBU.MBS.ECC23.MBSECCERR1";
+        scomaddr    0x020114A7;
+        capture     group default;
+        capture     group CerrRegs;
+    };
+
+    register MBXERRSTAT_0
+    {
+        name        "MBU.MBS.MCBISTS01.SCOMFIR.MBXERRSTATQ";
+        scomaddr    0x0201168f;
+        capture     group default;
+        capture     group CerrRegs;
+    };
+
+    register MBXERRSTAT_1
+    {
+        name        "MBU.MBS.MCBISTS23.SCOMFIR.MBXERRSTATQ";
+        scomaddr    0x0201178f;
+        capture     group default;
+        capture     group CerrRegs;
+    };
+
+    register SENSORCACHEERRPT
+    {
+        name        "SCAC.SCAC_ERRRPT";
+        scomaddr    0x020115D4;
+        capture     group default;
+        capture     group CerrRegs;
     };
 
     ############################################################################

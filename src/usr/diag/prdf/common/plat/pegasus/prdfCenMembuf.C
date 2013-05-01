@@ -33,6 +33,7 @@
 #include <prdfGlobal.H>
 #include <iipSystem.h>
 #include <prdfLaneRepair.H>
+#include <UtilHash.H>
 
 using namespace TARGETING;
 
@@ -40,6 +41,7 @@ using namespace TARGETING;
 
 namespace PRDF
 {
+
 namespace Membuf
 {
 
@@ -200,6 +202,26 @@ int32_t PreAnalysis( ExtensibleChip * i_mbChip, STEP_CODE_DATA_STRUCT & i_sc,
 
     o_analyzed = false;
 
+    // Get memory capture data.
+    CaptureData & cd = i_sc.service_data->GetCaptureData();
+    CenMembufDataBundle * mbdb = getMembufDataBundle( i_mbChip );
+    ExtensibleChip * mcsChip = mbdb->getMcsChip();
+    if ( NULL != mcsChip )
+    {
+        mcsChip->CaptureErrorData( cd, Util::hashString("FirRegs") );
+        mcsChip->CaptureErrorData( cd, Util::hashString("CerrRegs") );
+
+        for ( uint32_t i = 0; i < MAX_MBA_PER_MEMBUF; i++ )
+        {
+            ExtensibleChip * mbaChip = mbdb->getMbaChip(i);
+            if ( NULL != mbaChip )
+            {
+                mbaChip->CaptureErrorData( cd, Util::hashString("FirRegs") );
+                mbaChip->CaptureErrorData( cd, Util::hashString("CerrRegs") );
+            }
+        }
+    }
+
     // Check for a Centaur Checkstop
     do
     {
@@ -207,8 +229,6 @@ int32_t PreAnalysis( ExtensibleChip * i_mbChip, STEP_CODE_DATA_STRUCT & i_sc,
         if ( i_sc.service_data->GetFlag(ServiceDataCollector::UNIT_CS) )
             break;
 
-        CenMembufDataBundle * mbdb = getMembufDataBundle(i_mbChip);
-        ExtensibleChip * mcsChip = mbdb->getMcsChip();
         if ( NULL == mcsChip )
         {
             PRDF_ERR( PRDF_FUNC"CenMembufDataBundle::getMcsChip() failed" );

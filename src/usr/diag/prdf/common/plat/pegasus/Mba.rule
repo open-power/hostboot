@@ -66,7 +66,7 @@ chip Mba
         scomaddr    0x03010600;
         reset       (&, 0x03010601);
         mask        (|, 0x03010605);
-        capture     group default;
+        capture     group FirRegs;
     };
 
     register MBAFIR_MASK
@@ -74,7 +74,7 @@ chip Mba
         name        "MBU.MBA01.MBA_MCBIST.SCOMFIR.MBAFIRMASK";
         scomaddr    0x03010603;
         capture     type secondary;
-        capture     group default;
+        capture     group FirRegs;
     };
 
     register MBAFIR_ACT0
@@ -82,7 +82,7 @@ chip Mba
         name        "MBU.MBA01.MBA_MCBIST.SCOMFIR.MBAFIRACT0";
         scomaddr    0x03010606;
         capture     type secondary;
-        capture     group default;
+        capture     group FirRegs;
     };
 
     register MBAFIR_ACT1
@@ -90,7 +90,7 @@ chip Mba
         name        "MBU.MBA01.MBA_MCBIST.SCOMFIR.MBAFIRACT1";
         scomaddr    0x03010607;
         capture     type secondary;
-        capture     group default;
+        capture     group FirRegs;
     };
 
     ############################################################################
@@ -104,7 +104,7 @@ chip Mba
         name        "MBU.MBA01.MBA_SRQ.MBASIRQ";
         scomaddr    0x0301041b;
         reset       (&, 0x0301041c);
-        capture     group default;
+        capture     group FirRegs;
     };
 
     ############################################################################
@@ -117,7 +117,7 @@ chip Mba
         scomaddr    0x800200900301143F;
         reset       (&, 0x800200910301143F);
         mask        (|, 0x800200950301143F);
-        capture     group default;
+        capture     group FirRegs;
     };
 
     register MBADDRPHYFIR_MASK
@@ -125,7 +125,7 @@ chip Mba
         name        "DPHY01.PHY01_DDRPHY_FIR_MASK_REG";
         scomaddr    0x800200930301143F;
         capture     type secondary;
-        capture     group default;
+        capture     group FirRegs;
     };
 
     register MBADDRPHYFIR_ACT0
@@ -133,7 +133,7 @@ chip Mba
         name        "DPHY01.PHY01_DDRPHY_FIR_ACTION0_REG";
         scomaddr    0x800200960301143F;
         capture     type secondary;
-        capture     group default;
+        capture     group FirRegs;
     };
 
     register MBADDRPHYFIR_ACT1
@@ -141,7 +141,7 @@ chip Mba
         name        "DPHY01.PHY01_DDRPHY_FIR_ACTION1_REG";
         scomaddr    0x800200970301143F;
         capture     type secondary;
-        capture     group default;
+        capture     group FirRegs;
     };
 
     ############################################################################
@@ -154,7 +154,7 @@ chip Mba
         scomaddr    0x03010400;
         reset       (&, 0x03010401);
         mask        (|, 0x03010405);
-        capture     group default;
+        capture     group FirRegs;
     };
 
     register MBACALFIR_MASK
@@ -162,7 +162,7 @@ chip Mba
         name        "MBU.MBA01.MBA_SRQ.MBACALFIR_MASK";
         scomaddr    0x03010403;
         capture     type secondary;
-        capture     group default;
+        capture     group FirRegs;
     };
 
     register MBACALFIR_ACT0
@@ -170,7 +170,7 @@ chip Mba
         name        "MBU.MBA01.MBA_SRQ.MBACALFIR_ACTION0";
         scomaddr    0x03010406;
         capture     type secondary;
-        capture     group default;
+        capture     group FirRegs;
     };
 
     register MBACALFIR_ACT1
@@ -178,7 +178,7 @@ chip Mba
         name        "MBU.MBA01.MBA_SRQ.MBACALFIR_ACTION1";
         scomaddr    0x03010407;
         capture     type secondary;
-        capture     group default;
+        capture     group FirRegs;
     };
 
     ############################################################################
@@ -192,7 +192,7 @@ chip Mba
         reset       (&, 0x03010612);
         #FIXME : There is no OR register for mask. Is it right to use  mask register value
         mask        (|, 0x03010614);
-        capture     group default;
+        capture     group FirRegs;
     };
 
     register MBASPA_MASK
@@ -200,7 +200,54 @@ chip Mba
         name        "MBU.MBA01.MBA_MCBIST.SCOMFIR.MBSPAMSKQ";
         scomaddr    0x03010614;
         capture     type secondary;
-        capture     group default;
+        capture     group FirRegs;
+    };
+
+    ############################################################################
+    # Error Report Registers
+    ############################################################################
+
+    register MBA_ERR_REPORT
+    {
+        name        "MBU.MBA01.MBA_SRQ.MBA_ERR_REPORTQ";
+        scomaddr    0x0301041A;
+        capture     group CerrRegs;
+    };
+
+    register MBA_MCBERRPTQ
+    {
+        name        "MBU.MBA01.MBA_MCBIST.SCOMFIR.MBA_MCBERRPTQ";
+        scomaddr    0x030106E7;
+        capture     group CerrRegs;
+    };
+
+
+    register DDRPHY_APB_FIR_ERR0_P0
+    {
+        name        "DPHY01.DDRPHY_APB_FIR_ERR0_P0";
+        scomaddr    0x8000D0060301143F;
+        capture     group CerrRegs;
+    };
+
+    register DDRPHY_APB_FIR_ERR1_P0
+    {
+        name        "DPHY01.DDRPHY_APB_FIR_ERR1_P0";
+        scomaddr    0x8000D0070301143F;
+        capture     group CerrRegs;
+    };
+
+    register DDRPHY_APB_FIR_ERR0_P1
+    {
+        name        "DPHY01.DDRPHY_APB_FIR_ERR0_P1";
+        scomaddr    0x8001D0060301143F;
+        capture     group CerrRegs;
+    };
+
+    register DDRPHY_APB_FIR_ERR1_P1
+    {
+        name        "DPHY01.DDRPHY_APB_FIR_ERR1_P1";
+        scomaddr    0x8001D0070301143F;
+        capture     group CerrRegs;
     };
 
     ############################################################################

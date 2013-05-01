@@ -30,6 +30,7 @@
         name        "TCM.XFIR";
         scomaddr    0x03040000;
         capture     group default;
+        capture     group FirRegs;
     };
 
     register MEM_CHIPLET_RE_FIR
@@ -37,6 +38,7 @@
         name        "TCM.RFIR";
         scomaddr    0x03040001;
         capture     group default;
+        capture     group FirRegs;
     };
 
     register MEM_CHIPLET_FIR_MASK
@@ -45,6 +47,7 @@
         scomaddr    0x03040002;
         capture     type secondary;
         capture     group default;
+        capture     group FirRegs;
     };
 
     register MEM_CHIPLET_SPA
@@ -52,6 +55,7 @@
         name        "TCM.EPS.FIR.SPATTN";
         scomaddr    0x03040004;
         capture     group default;
+        capture     group FirRegs;
     };
 
     register MEM_CHIPLET_SPA_MASK
@@ -60,6 +64,7 @@
         scomaddr    0x03040007;
         capture     type secondary;
         capture     group default;
+        capture     group FirRegs;
     };
 
     ############################################################################
@@ -73,6 +78,7 @@
         reset       (&, 0x0304000b);
         mask        (|, 0x0304000f);
         capture     group default;
+        capture     group FirRegs;
     };
 
     register MEM_LFIR_MASK
@@ -81,6 +87,7 @@
         scomaddr    0x0304000d;
         capture     type secondary;
         capture     group default;
+        capture     group FirRegs;
     };
 
     register MEM_LFIR_ACT0
@@ -89,6 +96,7 @@
         scomaddr    0x03040010;
         capture     type secondary;
         capture     group default;
+        capture     group FirRegs;
     };
 
     register MEM_LFIR_ACT1
@@ -97,6 +105,7 @@
         scomaddr    0x03040011;
         capture     type secondary;
         capture     group default;
+        capture     group FirRegs;
     };
 
     ############################################################################
@@ -110,6 +119,7 @@
         reset       (&, 0x03010481);
         mask        (|, 0x03010485);
         capture     group default;
+        capture     group FirRegs;
     };
 
     register MEMFBISTFIR_MASK
@@ -118,6 +128,7 @@
         scomaddr    0x03010483;
         capture     type secondary;
         capture     group default;
+        capture     group FirRegs;
     };
 
     register MEMFBISTFIR_ACT0
@@ -126,6 +137,7 @@
         scomaddr    0x03010486;
         capture     type secondary;
         capture     group default;
+        capture     group FirRegs;
     };
 
     register MEMFBISTFIR_ACT1
@@ -134,5 +146,18 @@
         scomaddr    0x03010487;
         capture     type secondary;
         capture     group default;
+        capture     group FirRegs;
+    };
+
+    ############################################################################
+    # Error Report Registers
+    ############################################################################
+
+    register MEM_ERROR_STATUS
+    {
+        name        "TCM.ERROR_STATUS";
+        scomaddr    0x03030009;
+        capture     group default;
+        capture     group CerrRegs;
     };
 

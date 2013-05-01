@@ -74,6 +74,7 @@ chip Mcs
         reset       (&, 0x02011841);
         mask        (|, 0x02011845);
         capture     group default;
+        capture     group FirRegs;
     };
 
     register MCIFIR_AND
@@ -89,6 +90,7 @@ chip Mcs
         scomaddr    0x02011843;
         capture     type secondary;
         capture     group default;
+        capture     group FirRegs;
     };
 
     register MCIFIR_ACT0
@@ -97,6 +99,7 @@ chip Mcs
         scomaddr    0x02011846;
         capture     type secondary;
         capture     group default;
+        capture     group FirRegs;
     };
 
     register MCIFIR_ACT1
@@ -105,7 +108,29 @@ chip Mcs
         scomaddr    0x02011847;
         capture     type secondary;
         capture     group default;
+        capture     group FirRegs;
     };
+
+    ############################################################################
+    # Error Report Registers
+    ############################################################################
+
+    register MCERPT0
+    {
+        name        "MC0.MCS0.LEFT.LEFT.MCERPT0";
+        scomaddr    0x0201181E;
+        capture     group default;
+        capture     group CerrRegs;
+    };
+
+    register MCIERPT0
+    {
+        name        "MC0.MCS0.RIGHT.MCI.MCIERPT0";
+        scomaddr    0x0201184E;
+        capture     group default;
+        capture     group CerrRegs;
+    };
+
 };
 
  ##############################################################################

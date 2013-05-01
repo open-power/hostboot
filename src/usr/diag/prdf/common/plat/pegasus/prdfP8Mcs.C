@@ -32,6 +32,7 @@
 #include <prdfGlobal.H>
 #include <iipSystem.h>
 #include <prdfP8McsDataBundle.H>
+#include <prdfCenMembufDataBundle.H>
 
 //##############################################################################
 //
@@ -94,20 +95,6 @@ int32_t CheckCentaurCheckstop( ExtensibleChip * i_mcsChip,
         // Set the cause attention type
         i_sc.service_data->SetCauseAttentionType(UNIT_CS);
 
-        // Collect FFDC
-        // FIXME: RTC: 63753 (CENT_XSTP_FFDC capture group still needs to be
-        // populated with list of registers provided by Marc or Ken).
-        i_mcsChip->CaptureErrorData(i_sc.service_data->GetCaptureData(),
-                                    Util::hashString("CENT_XSTP_FFDC"));
-
-        P8McsDataBundle * mcsdb = getMcsDataBundle( i_mcsChip );
-        ExtensibleChip * membChip = mcsdb->getMembChip();
-        if ( NULL != membChip )
-        {
-            membChip->CaptureErrorData( i_sc.service_data->GetCaptureData(),
-                                        Util::hashString("CENT_XSTP_FFDC") );
-        }
-
     } while (0);
 
     return l_rc;
@@ -125,12 +112,35 @@ int32_t PreAnalysis ( ExtensibleChip * i_mcsChip, STEP_CODE_DATA_STRUCT & i_sc,
 {
     o_analyzed = false;
 
-    int32_t l_rc = SUCCESS;
+    // Get memory capture data.
+    CaptureData & cd = i_sc.service_data->GetCaptureData();
+    P8McsDataBundle * mcsdb = getMcsDataBundle( i_mcsChip );
+    ExtensibleChip * membChip = mcsdb->getMembChip();
+    if ( NULL != membChip )
+    {
+        membChip->CaptureErrorData( cd, Util::hashString("FirRegs") );
+        membChip->CaptureErrorData( cd, Util::hashString("CerrRegs") );
+
+        CenMembufDataBundle * mbdb = getMembufDataBundle( membChip );
+        for ( uint32_t i = 0; i < MAX_MBA_PER_MEMBUF; i++ )
+        {
+            ExtensibleChip * mbaChip = mbdb->getMbaChip(i);
+            if ( NULL != mbaChip )
+            {
+                mbaChip->CaptureErrorData( cd, Util::hashString("FirRegs") );
+                mbaChip->CaptureErrorData( cd, Util::hashString("CerrRegs") );
+            }
+        }
+    }
 
     // Check for a Centaur Checkstop
-    l_rc = CheckCentaurCheckstop(i_mcsChip, i_sc);
+    int32_t o_rc = CheckCentaurCheckstop( i_mcsChip, i_sc );
+    if ( SUCCESS != o_rc )
+    {
+        PRDF_ERR( "[Mcs::PreAnalysis] CheckCentaurCheckstop() failed" );
+    }
 
-    return l_rc;
+    return o_rc;
 }
 PRDF_PLUGIN_DEFINE( Mcs, PreAnalysis );
 

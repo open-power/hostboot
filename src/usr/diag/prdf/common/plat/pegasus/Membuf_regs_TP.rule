@@ -30,6 +30,7 @@
         name        "TPTOP.TPC.XFIR";
         scomaddr    0x01040000;
         capture     group default;
+        capture     group FirRegs;
     };
 
     register TP_CHIPLET_RE_FIR
@@ -37,6 +38,7 @@
         name        "TPTOP.TPC.RFIR";
         scomaddr    0x01040001;
         capture     group default;
+        capture     group FirRegs;
     };
 
     register TP_CHIPLET_FIR_MASK
@@ -45,6 +47,7 @@
         scomaddr    0x01040002;
         capture     type secondary;
         capture     group default;
+        capture     group FirRegs;
     };
 
     ############################################################################
@@ -58,6 +61,7 @@
         reset       (&, 0x0104000b);
         mask        (|, 0x0104000f);
         capture     group default;
+        capture     group FirRegs;
     };
 
     register TP_LFIR_AND
@@ -74,6 +78,7 @@
         scomaddr    0x0104000d;
         capture     type secondary;
         capture     group default;
+        capture     group FirRegs;
     };
 
     register TP_LFIR_MASK_AND
@@ -96,6 +101,7 @@
         scomaddr    0x01040010;
         capture     type secondary;
         capture     group default;
+        capture     group FirRegs;
     };
 
     register TP_LFIR_ACT1
@@ -104,5 +110,18 @@
         scomaddr    0x01040011;
         capture     type secondary;
         capture     group default;
+        capture     group FirRegs;
+    };
+
+    ############################################################################
+    # Error Report Registers
+    ############################################################################
+
+    register TP_ERROR_STATUS
+    {
+        name        "TPTOP.TPC.ERROR_STATUS";
+        scomaddr    0x01030009;
+        capture     group default;
+        capture     group CerrRegs;
     };
 
