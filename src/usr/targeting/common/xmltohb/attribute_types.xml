@@ -11872,11 +11872,11 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
     <id>PLCK_IPL_ATTR_OVERRIDES_EXIST</id>
     <description>
       Set to 1 by HWSV to indicate that attribute overrides exist in a PLCK IPL
-      (not an IPL by steps). This is read by Hostboot to deterine if it needs
+      (not an IPL by steps). This is read by Hostboot to determine if it needs
       to request the attribute overrides from HWSV before starting its IPL.
     </description>
     <simpleType><uint8_t><default>0x00</default></uint8_t></simpleType>
-    <persistency>volatile-zeroed</persistency>
+    <persistency>non-volatile</persistency>
     <readable/>
     <writeable/>
 </attribute>
