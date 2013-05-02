@@ -1695,8 +1695,24 @@ sub generate_proc
         }
     }
 
+    #default to murano (s1_) values and change later if for venice (p8_)
+    my $ab_bndy_pll     = 536;
+    my $pb_bndy_dmipll  = 1234;
+    my $ex_func_l3      = 48826;
+    my $perv_bndy_pll   = 861;
+    my $pci_bndy_pll    = 565;
+
+    if($CHIPNAME eq "venice")
+    {
+        $ab_bndy_pll     = 536;
+        $pb_bndy_dmipll  = 1848;
+        $ex_func_l3      = 49020;
+        $perv_bndy_pll   = 855;
+        $pci_bndy_pll    = 565;
+    }
+
     print "
-<!-- $SYSNAME n${node}p${proc} processor chip -->
+    <!-- $SYSNAME n${node}p${proc} processor chip -->
 
 <targetInstance>
     <id>sys${sys}node${node}proc${proc}</id>
@@ -1727,7 +1743,29 @@ sub generate_proc
         <id>FABRIC_CHIP_ID</id>
         <default>$logid</default>
     </attribute>
-    <attribute><id>VPD_REC_NUM</id><default>$vpdnum</default></attribute>";
+    <attribute><id>VPD_REC_NUM</id><default>$vpdnum</default></attribute>
+
+    <!-- workaround for SW196865 - see  RTC:69918 for additional details -->
+    <attribute>
+      <id>PROC_AB_BNDY_PLL_LENGTH</id>
+        <default>$ab_bndy_pll</default>
+    </attribute>
+    <attribute>
+    <id>PROC_PB_BNDY_DMIPLL_LENGTH</id>
+        <default>$pb_bndy_dmipll</default>
+    </attribute>
+    <attribute>
+    <id>PROC_EX_FUNC_L3_LENGTH</id>
+        <default>$ex_func_l3</default>
+    </attribute>
+    <attribute>
+    <id>PROC_PERV_BNDY_PLL_LENGTH</id>
+        <default>$perv_bndy_pll</default>
+    </attribute>
+    <attribute>
+    <id>PROC_PCI_BNDY_PLL_LENGTH</id>
+        <default>$pci_bndy_pll</default>
+    </attribute>";
 
     if ($slave)
     {

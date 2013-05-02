@@ -9441,9 +9441,7 @@ Measured in GB</description>
       firmware notes:
     </description>
     <simpleType>
-        <uint32_t>
-            <default>0x0000035d</default>
-        </uint32_t>
+        <uint32_t></uint32_t>
     </simpleType>
     <persistency>non-volatile</persistency>
     <readable/>
@@ -9460,9 +9458,7 @@ Measured in GB</description>
       firmware notes:
     </description>
     <simpleType>
-        <uint32_t>
-            <default>0x4d2</default>
-        </uint32_t>
+        <uint32_t></uint32_t>
     </simpleType>
     <persistency>non-volatile</persistency>
     <readable/>
@@ -9479,9 +9475,7 @@ Measured in GB</description>
       firmware notes:
     </description>
     <simpleType>
-        <uint32_t>
-            <default>0x00000218</default>
-        </uint32_t>
+        <uint32_t></uint32_t>
     </simpleType>
     <persistency>non-volatile</persistency>
     <readable/>
@@ -9498,9 +9492,7 @@ Measured in GB</description>
       firmware notes:
     </description>
     <simpleType>
-        <uint32_t>
-            <default>0x235</default>
-        </uint32_t>
+        <uint32_t></uint32_t>
     </simpleType>
     <persistency>non-volatile</persistency>
     <readable/>
