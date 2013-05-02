@@ -1,8 +1,9 @@
-#-- $Id: p8.abus.custom.scom.initfile,v 1.2 2013/04/18 22:30:04 jgrell Exp $
+#-- $Id: p8.abus.custom.scom.initfile,v 1.3 2013/05/01 20:36:16 jgrell Exp $
 #-- CHANGE HISTORY:
 #--------------------------------------------------------------------------------
 #-- Version:|Author: | Date:  | Comment:
 #-- --------|--------|--------|--------------------------------------------------
+#--     1.3 |thomsen |04/30/13|Added TGT1. to ATTR_CHIP_EC* attribute instances to reference a chip target rather than a chiplet target
 #--     1.2 |jgrell  |04/18/13|Added EC controled Recal enables
 #--     1.1 |thomsen |01/29/13|Created initial version
 #-- --------|--------|--------|--------------------------------------------------
@@ -298,9 +299,9 @@ scom 0x800.0b(tx_mode_pg)(tx_grp0)(lane_na).0x(abus_gcr_addr) {
 
 scom 0x800.0b(rx_rc_step_cntl_pg)(rx_grp0)(lane_na).0x(abus_gcr_addr) {
 bits,                         	scom_data, 	expr;
-#rx_rc_enable_dfe_h1_cal,      	0b0,       	ATTR_CHIP_EC_FEATURE_RECAL_DFE_ENABLE==0; # Set to 0b0 in figtree.
-rx_rc_enable_ddc,		0b0,		ATTR_CHIP_EC_FEATURE_RECAL_DDC_ENABLE==0;
-rx_rc_enable_ctle_cal,		0b0,		ATTR_CHIP_EC_FEATURE_RECAL_CTLE_ENABLE==0;
+#rx_rc_enable_dfe_h1_cal,      	0b0,       	TGT1.ATTR_CHIP_EC_FEATURE_RECAL_DFE_ENABLE==0; # Set to 0b0 in figtree.
+rx_rc_enable_ddc,		0b0,		TGT1.ATTR_CHIP_EC_FEATURE_RECAL_DDC_ENABLE==0;
+rx_rc_enable_ctle_cal,		0b0,		TGT1.ATTR_CHIP_EC_FEATURE_RECAL_CTLE_ENABLE==0;
 }
 
 ############################################################################################

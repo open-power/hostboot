@@ -520,6 +520,12 @@ void* call_proc_xbus_scominit( void    *io_pArgs )
     do
     {
         EDI_EI_INITIALIZATION::TargetPairs_t l_XbusConnections;
+        // Note:
+        // i_noDuplicate parameter must be set to false because
+        // two separate  calls would be needed:
+        //    X0 <--> X1
+        //    X1 <--> X0
+        // only the first target is used to issue SCOMs
         l_err =
         EDI_EI_INITIALIZATION::PbusLinkSvc::getTheInstance().getPbusConnections(
                                           l_XbusConnections, TYPE_XBUS, false);
@@ -629,7 +635,14 @@ void* call_proc_abus_scominit( void    *io_pArgs )
 
     do
     {
+
         EDI_EI_INITIALIZATION::TargetPairs_t l_AbusConnections;
+        // Note:
+        // i_noDuplicate parameter must be set to false because
+        // two separate  calls would be needed:
+        //    A0 <--> A1
+        //    A1 <--> A0
+        // only the first target is used to issue SCOMs
         l_err =
         EDI_EI_INITIALIZATION::PbusLinkSvc::getTheInstance().getPbusConnections(
                                           l_AbusConnections, TYPE_ABUS, false);
@@ -658,99 +671,73 @@ void* call_proc_abus_scominit( void    *io_pArgs )
             break;
         }
 
-        // Loop thru the proc
-        for (TargetHandleList::const_iterator
-                l_cpuIter = l_cpuTargetList.begin();
-                l_cpuIter != l_cpuTargetList.end();
-                ++l_cpuIter)
+        // For each ABUS pair
+        for (EDI_EI_INITIALIZATION::TargetPairs_t::iterator 
+                l_abusPairIter = l_AbusConnections.begin();
+                l_abusPairIter != l_AbusConnections.end();
+                ++l_abusPairIter)
         {
-            const TARGETING::Target* l_cpuTarget = *l_cpuIter;
+            // Make local copies of ABUS targets for ease of use
+            TARGETING::Target* l_thisAbusTarget =
+                 const_cast<TARGETING::Target*>(l_abusPairIter->first);
+            TARGETING::Target* l_connectedAbusTarget =
+                 const_cast<TARGETING::Target*>(l_abusPairIter->second);
 
-            // Get the ABUS under this proc
-            TARGETING::TargetHandleList l_abusList;
-            getChildChiplets( l_abusList, l_cpuTarget, TYPE_ABUS );
+            // Get this abus fapi taget
+            const fapi::Target l_fapi_this_abus_target(
+                   TARGET_TYPE_ABUS_ENDPOINT,
+                   const_cast<TARGETING::Target*>(l_thisAbusTarget));
 
-            // For each ABUS unit in this proc
-            for (TargetHandleList::const_iterator
-                    l_abus_iter = l_abusList.begin();
-                    l_abus_iter != l_abusList.end();
-                    ++l_abus_iter)
+            // Get connected abus fapi taget
+            const fapi::Target l_fapi_connected_abus_target(
+                   TARGET_TYPE_ABUS_ENDPOINT,
+                   const_cast<TARGETING::Target*>(l_connectedAbusTarget));
+
+            // Call HW procedure
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                "Running proc_abus_scominit HWP on "
+                "Abus target HUID %.8X Connected Abus target HUID %.8X",
+                TARGETING::get_huid(l_thisAbusTarget),
+                TARGETING::get_huid(l_connectedAbusTarget));
+
+            FAPI_INVOKE_HWP(l_err, proc_abus_scominit,
+                            l_fapi_this_abus_target,
+                            l_fapi_connected_abus_target);
+            if (l_err)
             {
-                //  make a local copy of the target for ease of use
-                TARGETING::Target* l_abusTarget = *l_abus_iter;
-                EDI_EI_INITIALIZATION::TargetPairs_t::iterator l_itr =
-                                l_AbusConnections.find(l_abusTarget);
-                if ( l_itr == l_AbusConnections.end() )
-                {
-                    continue;
-                }
+                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                    "ERROR %.8X : proc_abus_scominit HWP returns error. "
+                    "Abus target HUID %.8X,  Connected Abus target HUID %.8X",
+                    l_err->reasonCode(),
+                    TARGETING::get_huid(l_thisAbusTarget),
+                    TARGETING::get_huid(l_connectedAbusTarget));
 
-                const TARGETING::Target *l_pParent =
-                      getParentChip(
-                        (const_cast<TARGETING::Target*>(l_itr->second)));
+                // capture the target data in the elog
+                ErrlUserDetailsTarget(l_thisAbusTarget).addToLog( l_err );
+                ErrlUserDetailsTarget(l_connectedAbusTarget).addToLog( l_err );
 
-                // Targets to pass in HW procedure
-                std::vector<fapi::Target> targets;
+                /*@
+                 * @errortype
+                 * @reasoncode       ISTEP_PROC_ABUS_SCOMINIT_FAILED
+                 * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE
+                 * @moduleid         ISTEP_PROC_ABUS_SCOMINIT
+                 * @userdata1        bytes 0-1: plid identifying first error
+                 *                   bytes 2-3: reason code of first error
+                 * @userdata2        bytes 0-1: total number of elogs included
+                 *                   bytes 2-3: N/A
+                 * @devdesc          call to proc_abus_scominit has failed
+                 */
+                l_StepError.addErrorDetails(ISTEP_PROC_ABUS_SCOMINIT_FAILED,
+                                            ISTEP_PROC_ABUS_SCOMINIT,
+                                            l_err );
+                // We want to continue to the next target instead of exiting,
+                // Commit the error log and move on
+                // Note: Error log should already be deleted and set to NULL
+                // after committing
+                errlCommit(l_err, HWPF_COMP_ID);
+            }
+        } // End abus list loop
 
-                const fapi::Target l_fapi_abus_target(
-                       TARGET_TYPE_ABUS_ENDPOINT,
-                       (const_cast<TARGETING::Target*>(l_abusTarget)));
-                targets.push_back(l_fapi_abus_target);
-
-                const fapi::Target l_fapi_other_cpu_target(
-                       TARGET_TYPE_PROC_CHIP,
-                       (const_cast<TARGETING::Target*>(
-                               l_pParent)));
-                targets.push_back(l_fapi_other_cpu_target);
-
-                // Call HW procedure
-                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                    "Running proc_abus_scominit HWP on "
-                    "abus HUID %.8X this cpu HUID %.8X other cpu HUID %.8X",
-                    TARGETING::get_huid(l_abusTarget),
-                    TARGETING::get_huid(l_cpuTarget),
-                    TARGETING::get_huid(l_pParent));
-
-                FAPI_INVOKE_HWP(l_err, proc_abus_scominit,
-                                l_fapi_abus_target,
-                                l_fapi_other_cpu_target);
-                if (l_err)
-                {
-                    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                        "ERROR %.8X : proc_abus_scominit HWP returns error. "
-                        "abus HUID %.8X this cpu HUID %.8X other cpu HUID %.8X",
-                        l_err->reasonCode(),
-                        TARGETING::get_huid(l_abusTarget),
-                        TARGETING::get_huid(l_cpuTarget),
-                        TARGETING::get_huid(l_pParent));
-
-                    // capture the target data in the elog
-                    ErrlUserDetailsTarget(l_pParent).addToLog( l_err );
-                    ErrlUserDetailsTarget(l_cpuTarget).addToLog( l_err );
-                    ErrlUserDetailsTarget(l_abusTarget).addToLog( l_err );
-
-                    /*@
-                     * @errortype
-                     * @reasoncode       ISTEP_PROC_ABUS_SCOMINIT_FAILED
-                     * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE
-                     * @moduleid         ISTEP_PROC_ABUS_SCOMINIT
-                     * @userdata1        bytes 0-1: plid identifying first error
-                     *                   bytes 2-3: reason code of first error
-                     * @userdata2        bytes 0-1: total number of elogs included
-                     *                   bytes 2-3: N/A
-                     * @devdesc          call to proc_abus_scominit has failed
-                     */
-                    l_StepError.addErrorDetails(ISTEP_PROC_ABUS_SCOMINIT_FAILED,
-                                                ISTEP_PROC_ABUS_SCOMINIT,
-                                                l_err );
-                    // We want to continue to the next target instead of exiting,
-                    // Commit the error log and move on
-                    // Note: Error log should already be deleted and set to NULL
-                    // after committing
-                    errlCommit(l_err, HWPF_COMP_ID);
-                }
-            } // End abus list loop
-        } // End cpu loop
     } while (0);
 
     return l_StepError.getErrorHandle();
