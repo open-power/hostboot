@@ -809,41 +809,93 @@ public:
      */
     void testHwpf10()
     {
-        fapi::ReturnCode l_rc;
-        uint8_t l_chipHasFeature = 0xff;
-
-        // Get the master processor chip
-        TARGETING::Target* l_pTarget = NULL;
-        TARGETING::targetService().masterProcChipTargetHandle(l_pTarget);
-
-        // Create a FAPI Target
-        fapi::Target l_fapiTarget(TARGET_TYPE_PROC_CHIP,
-                                  reinterpret_cast<void *> (l_pTarget));
-
-        l_rc = FAPI_ATTR_GET(ATTR_CHIP_EC_FEATURE_TEST1, &l_fapiTarget,
-                             l_chipHasFeature);
-        if (l_rc)
+        do
         {
-            TS_FAIL("testHwpf10: ATTR_CHIP_EC_FEATURE_TEST1 get failed.");
-        }
-        else
-        {
-            FAPI_INF("testHwpf10: ATTR_CHIP_EC_FEATURE_TEST1: %d", l_chipHasFeature);
+            fapi::ReturnCode l_rc;
+            uint8_t l_chipHasFeature = 0xff;
 
-            l_chipHasFeature = 0xff;
-            l_rc = FAPI_ATTR_GET(ATTR_CHIP_EC_FEATURE_TEST2, &l_fapiTarget,
-                             l_chipHasFeature);
+            // Get the first procesor chip
+            TARGETING::TargetHandleList l_chipList;
+            TARGETING::getAllChips(l_chipList, TARGETING::TYPE_PROC, false);
+
+            if (l_chipList.size() == 0)
+            {
+                TS_FAIL("testHwpf10: Chip not found");
+                break;
+            }
+
+            // Create a FAPI Chip Target
+            fapi::Target l_fapiChipTarget(fapi::TARGET_TYPE_PROC_CHIP,
+                                          static_cast<void *>(l_chipList[0]));
+
+            // Get a test Chip EC Feature attribute
+            l_rc = FAPI_ATTR_GET(ATTR_CHIP_EC_FEATURE_TEST1, &l_fapiChipTarget,
+                                 l_chipHasFeature);
             if (l_rc)
             {
-                TS_FAIL("testHwpf10: ATTR_CHIP_EC_FEATURE_TEST2 get failed.");
+                TS_FAIL("testHwpf10: Chip ATTR_CHIP_EC_FEATURE_TEST1 get failed.");
+                break;
             }
-            else
-            {
-                FAPI_INF("testHwpf10: ATTR_CHIP_EC_FEATURE_TEST2: %d", l_chipHasFeature);
-            }
-        }
-    }
 
+            FAPI_INF("testHwpf10: Chip ATTR_CHIP_EC_FEATURE_TEST1: %d",
+                     l_chipHasFeature);
+
+            // Get another Chip EC Feature attribute
+            l_chipHasFeature = 0xff;
+            l_rc = FAPI_ATTR_GET(ATTR_CHIP_EC_FEATURE_TEST2, &l_fapiChipTarget,
+                                 l_chipHasFeature);
+            if (l_rc)
+            {
+                TS_FAIL("testHwpf10: Chip ATTR_CHIP_EC_FEATURE_TEST2 get failed.");
+                break;
+            }
+
+            FAPI_INF("testHwpf10: Chip ATTR_CHIP_EC_FEATURE_TEST2: %d",
+                     l_chipHasFeature);
+
+            // Get the first MCS child chiplet of the chip
+            TARGETING::TargetHandleList l_mcsList;
+            TARGETING::getChildChiplets(l_mcsList, l_chipList[0],
+                                        TARGETING::TYPE_MCS, false);
+
+            if (l_mcsList.size() == 0)
+            {
+                TS_FAIL("testHwpf10: MCS not found");
+                break;
+            }
+
+            // Create a FAPI MCS Chiplet Target
+            fapi::Target l_fapiMcsTarget(fapi::TARGET_TYPE_MCS_CHIPLET,
+                                         static_cast<void *>(l_mcsList[0]));
+
+            // Get a test Chip EC Feature attribute
+            l_chipHasFeature = 0xff;
+            l_rc = FAPI_ATTR_GET(ATTR_CHIP_EC_FEATURE_TEST1, &l_fapiMcsTarget,
+                                 l_chipHasFeature);
+            if (l_rc)
+            {
+                TS_FAIL("testHwpf10: MCS ATTR_CHIP_EC_FEATURE_TEST1 get failed.");
+                break;
+            }
+
+            FAPI_INF("testHwpf10: MCS ATTR_CHIP_EC_FEATURE_TEST1: %d",
+                     l_chipHasFeature);
+
+            // Get another Chip EC Feature attribute
+            l_chipHasFeature = 0xff;
+            l_rc = FAPI_ATTR_GET(ATTR_CHIP_EC_FEATURE_TEST2, &l_fapiMcsTarget,
+                                 l_chipHasFeature);
+            if (l_rc)
+            {
+                TS_FAIL("testHwpf10: MCS ATTR_CHIP_EC_FEATURE_TEST2 get failed.");
+                break;
+            }
+
+            FAPI_INF("testHwpf10: MCS ATTR_CHIP_EC_FEATURE_TEST2: %d",
+                     l_chipHasFeature);
+
+        } while(0);
+    }
 };
 
 #endif
