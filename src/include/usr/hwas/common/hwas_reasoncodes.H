@@ -30,6 +30,7 @@ namespace HWAS
         MOD_DECONFIG_GARD         = 0x01,
         MOD_PROCESS_CALLOUT       = 0x02,
         MOD_HOST_DISCOVER_TARGETS = 0x03,
+        MOD_HOST_GARD             = 0x04,
     };
 
     enum HwasReasonCode

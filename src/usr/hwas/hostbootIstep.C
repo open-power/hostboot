@@ -87,10 +87,7 @@ void* host_discover_targets( void *io_pArgs )
     // Check whether we're in MPIPL mode
     using namespace TARGETING;
     Target* l_pTopLevel = NULL;
-    uint8_t l_attrIsMpipl = 0;
-
-    TargetService& l_targetService = targetService();
-    l_targetService.getTopLevelTarget( l_pTopLevel );
+    targetService().getTopLevelTarget( l_pTopLevel );
 
     if( l_pTopLevel == NULL )
     {
@@ -111,20 +108,16 @@ void* host_discover_targets( void *io_pArgs )
     }
     else
     {
-        l_attrIsMpipl = l_pTopLevel->getAttr<ATTR_IS_MPIPL_HB> ();
-        
-        if (l_attrIsMpipl)
+        if (l_pTopLevel->getAttr<ATTR_IS_MPIPL_HB>())
         {
-            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                        "MPIPL mode" );
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, "MPIPL mode");
 
             // Sync attributes from Fsp
             errl = syncAllAttributesFromFsp();
         }
         else
         {
-            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                        "Normal IPL mode" );
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, "Normal IPL mode");
 
             errl = discoverTargets();
         }
@@ -143,8 +136,48 @@ void* host_gard( void *io_pArgs )
 {
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "host_gard entry" );
 
-    errlHndl_t errl = collectGard();
+    errlHndl_t errl;
 
+    // Check whether we're in MPIPL mode
+    using namespace TARGETING;
+    Target* l_pTopLevel = NULL;
+    targetService().getTopLevelTarget( l_pTopLevel );
+
+    if( l_pTopLevel == NULL )
+    {
+        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                   "Top level handle was NULL" );
+
+        /*@
+         * @errortype
+         * @severity     ERRORLOG::ERRL_SEV_UNRECOVERABLE
+         * @moduleid     HWAS::MOD_HOST_GARD
+         * @reasoncode   HWAS::RC_TOP_LEVEL_TARGET_NULL
+         * @devdesc      Call to get top level targeting handle
+         *               returned NULL
+         */
+        errl =  hwasError( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                           HWAS::MOD_HOST_GARD,
+                           HWAS::RC_TOP_LEVEL_TARGET_NULL );
+    }
+    else
+    {
+        if (l_pTopLevel->getAttr<ATTR_IS_MPIPL_HB>())
+        {
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, "MPIPL mode");
+
+            // we only want EX units to be processed
+            TARGETING::PredicateCTM l_exFilter(TARGETING::CLASS_UNIT,
+                                                TARGETING::TYPE_EX);
+            errl = collectGard(&l_exFilter);
+        }
+        else
+        {
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, "Normal IPL mode");
+
+            errl = collectGard();
+        }
+    }
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "host_gard exit" );
 
     return errl;
