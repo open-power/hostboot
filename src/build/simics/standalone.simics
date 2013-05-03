@@ -12,17 +12,25 @@ try {
     ($hb_pnor).sfc_master_mem.load-file ./syscvpd.dat 0x3E8A000
 } except { echo "ERROR: Failed to preload VPD into PNOR." }
 
-#Trigger a power on to cec-chip
-@mp="%s.proc_chip"%simenv.hb_masterproc
-@SIM_get_interface(SIM_get_object(mp),"signal").signal_raise(SIM_get_object(mp))
-
 #Write the PNOR MMIO addr into Scratch 2, 0x283A 
-#Then trigger the flush, load, and SBE start 
 ($hb_masterproc).proc_lbus_map.write 0x28e8 0xFFEF0000  #HB PNOR addr
-($hb_masterproc).proc_lbus_map.write 0x28e0 0x0000FBFF  #NonFunc EX (only 5 is good)
-($hb_masterproc).proc_lbus_map.write 0x2848 0x00000FFF  #GP3 0x2812 (flush) 
-($hb_masterproc).proc_lbus_map.write 0x2870 0x10000000  #SBE Vital 0x281C (load) 
-($hb_masterproc).proc_lbus_map.write 0x2870 0x90000000  #SBE Vital 0x281C (start)
+
+# Loop through every processor chip
+foreach $cc in (get-object-list p8_proc) {
+    echo $cc
+
+    #Trigger a power on to cec-chip
+    echo "-Trigger power on"
+    @mp="%s.proc_chip"%simenv.cc
+    @SIM_get_interface(SIM_get_object(mp),"signal").signal_raise(SIM_get_object(mp))
+
+    #Trigger the flush, load, and SBE start 
+    echo "-Trigger SBE"
+    ($cc).proc_lbus_map.write 0x28E0 0x0000F3FF  #NonFunc EX (only 4,5 is good)
+    ($cc).proc_lbus_map.write 0x2848 0x00000FFF  #GP3 0x2812 (flush) 
+    ($cc).proc_lbus_map.write 0x2870 0x10000000  #SBE Vital 0x281C (load) 
+    ($cc).proc_lbus_map.write 0x2870 0x90000000  #SBE Vital 0x281C (start)
+}
 
 ###################################
 #Configure SFC (mimmic FSP Setup)

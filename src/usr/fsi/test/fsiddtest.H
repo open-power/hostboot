@@ -186,32 +186,46 @@ class FsiDDTest : public CxxTest::TestSuite
         } test_data[] = {
             //** Master Control Space
             // version number
-            { PROC0, 0x003074, 0x92010800, false, true }, //CMFSI MVER
-            { PROC0, 0x003474, 0x92010800, false, true }, //MFSI MVER
+            //CMFSI MVER
+            { PROC0, 0x003074, 0x92010800, false, true },
+            //MFSI MVER
+            { PROC0, 0x003474, 0x92010800, false, true },
 
             //** Slave Regs (via absolute address)
-            { PROC0, 0x081000, 0x12345678, true, false }, //DATA_0 from FSI2PIB off MFSI-0 
-            { PROC0, 0x041028, 0x160E9049, false, false }, //CHIPID from SHIFT off cMFSI-0
-            { PROC0, 0x103074, 0x91010800, false, false }, //CMFSI MVER from Proc off MFSI-2
+            //DATA_0 from FSI2PIB off MFSI-0
+            { PROC0, 0x081000, 0x12345678, true, false }, 
+            //CHIPID from SHIFT off cMFSI-0
+            { PROC0, 0x041028, 0x160E9049, false, false },
+            //CMFSI MVER from Proc off MFSI-2
+            { PROC0, 0x103074, 0x92010800, false, false },
 
             //** Slave Regs
-            { PROCWRAP, 0x001000, 0x12345678, false, false }, //DATA_0 from FSI2PIB off MFSI-0 
-            { PROCWRAP, 0x001004, 0xA5A5A5A5, true, false }, //DATA_1 from FSI2PIB off MFSI-0
+            //DATA_0 from FSI2PIB off MFSI-0
+            { PROCWRAP, 0x001000, 0x12345678, false, false },
+            //DATA_1 from FSI2PIB off MFSI-0
+            { PROCWRAP, 0x001004, 0xA5A5A5A5, true, false },
 
             //** Slave Regs
-            { PROC1, 0x001000, 0x88776655, true, false }, //FEL from SHIFT off MFSI-1
+            //FEL from SHIFT off MFSI-1
+            { PROC1, 0x001000, 0x88776655, true, false },
 
             //** Slave Regs
-            { PROC2, 0x001000, 0x12345678, true, false }, //FEL from SHIFT off MFSI-2
+            //FEL from SHIFT off MFSI-2
+            { PROC2, 0x001000, 0x12345678, true, false }, 
 
             //** Slave Regs
-            { CENTAUR0, 0x000000, 0xC0010E95, false, false }, //Config Table entry for slave0 off cMFSI-0
-            { CENTAUR0, 0x001028, 0x160E9049, false, false }, //CHIPID from FSI2PIB off cMFSI-0
-            { CENTAUR0, 0x000C08, 0x12344321, true, false }, //FEL from SHIFT off cMFSI-0
+            //Config Table entry for slave0 off cMFSI-0
+            { CENTAUR0, 0x000000, 0xC0010E95, false, false },
+            //CHIPID from FSI2PIB off cMFSI-0
+            { CENTAUR0, 0x001028, 0x160E9049, false, false },
+            //FEL from SHIFT off cMFSI-0
+            { CENTAUR0, 0x000C08, 0x12344321, true, false },
 
             //** Slave Regs
-            { CENTAUR8, 0x001000, 0x33333333, true, false }, //FEL from SHIFT off cMFSI-0 of MFSI-1
-            { CENTAUR8, 0x001028, 0x160E9049, false, false }, //CHIPID from FSI2PIB off cMFSI-0 of MFSI-1
+            //FEL from SHIFT off cMFSI-0 of MFSI-1
+            { CENTAUR8, 0x001000, 0x33333333, true, false },
+            //CHIPID from FSI2PIB off cMFSI-0 of MFSI-1
+            { CENTAUR8, 0x001028, 0x160E9049, false, false },
         };
         const uint64_t NUM_ADDRS = sizeof(test_data)/sizeof(test_data[0]);
 
@@ -229,26 +243,30 @@ class FsiDDTest : public CxxTest::TestSuite
             {
                 if( ((0xFF0000 & test_data[x].addr) == 0x080000)
                     && (fsi_targets[PROCWRAP] != NULL)
-                    && (fsi_targets[PROCWRAP]->getAttr<TARGETING::ATTR_HWAS_STATE>().functional))
+                    && (fsi_targets[PROCWRAP]->
+                        getAttr<TARGETING::ATTR_HWAS_STATE>().functional))
                 {
                     test_data[x].present = true;
                 }
                 else if( ((0xFF0000 & test_data[x].addr) == 0x040000)
                          && (fsi_targets[CENTAUR0] != NULL)
-                         && (fsi_targets[CENTAUR0]->getAttr<TARGETING::ATTR_HWAS_STATE>().functional))
+                         && (fsi_targets[CENTAUR0]->
+                             getAttr<TARGETING::ATTR_HWAS_STATE>().functional))
                 {
                     test_data[x].present = true;
                 }
                 else if( ((0xFF0000 & test_data[x].addr) == 0x100000)
                          && (fsi_targets[PROC2] != NULL)
-                         && (fsi_targets[PROC2]->getAttr<TARGETING::ATTR_HWAS_STATE>().functional))
+                         && (fsi_targets[PROC2]->
+                             getAttr<TARGETING::ATTR_HWAS_STATE>().functional))
                 {
                     test_data[x].present = true;
                 }
             }
             // otherwise only talk to chips that we see
             else if (( fsi_targets[test_data[x].fsitarget] != NULL)   &&
-                     (fsi_targets[test_data[x].fsitarget]->getAttr<TARGETING::ATTR_HWAS_STATE>().functional))
+                     (fsi_targets[test_data[x].fsitarget]->
+                      getAttr<TARGETING::ATTR_HWAS_STATE>().functional))
             {
                 test_data[x].present = true;
             }
@@ -273,10 +291,11 @@ class FsiDDTest : public CxxTest::TestSuite
 
             total++;
             op_size = sizeof(uint32_t);
-            l_err = DeviceFW::deviceRead( fsi_targets[test_data[x].fsitarget], 
-                                          &(read_data[x]),
-                                          op_size,
-                                          DEVICE_FSI_ADDRESS(test_data[x].addr) );
+            l_err = DeviceFW::deviceRead(
+                              fsi_targets[test_data[x].fsitarget],
+                              &(read_data[x]),
+                              op_size,
+                              DEVICE_FSI_ADDRESS(test_data[x].addr) );
             if( l_err )
             {
                 TRACFCOMP(g_trac_fsi, "FsiDDTest::test_readWrite> Error from device : [%d] addr=0x%X, RC=%X", x, test_data[x].addr, l_err->reasonCode() );
@@ -300,10 +319,11 @@ class FsiDDTest : public CxxTest::TestSuite
             {
                 total++;
                 op_size = sizeof(uint32_t);
-                l_err = DeviceFW::deviceWrite( fsi_targets[test_data[x].fsitarget], 
-                                               &(test_data[x].data),
-                                               op_size,
-                                               DEVICE_FSI_ADDRESS(test_data[x].addr) );
+                l_err = DeviceFW::deviceWrite(
+                                  fsi_targets[test_data[x].fsitarget],
+                                  &(test_data[x].data),
+                                  op_size,
+                                  DEVICE_FSI_ADDRESS(test_data[x].addr) );
                 if( l_err )
                 {
                     TRACFCOMP(g_trac_fsi, "FsiDDTest::test_readWrite> Error from device : [%d] addr=0x%X, RC=%X", x, test_data[x].addr, l_err->reasonCode() );
@@ -324,10 +344,11 @@ class FsiDDTest : public CxxTest::TestSuite
 
             total++;
             op_size = sizeof(uint32_t);
-            l_err = DeviceFW::deviceRead( fsi_targets[test_data[x].fsitarget], 
-                                          &(read_data[x]),
-                                          op_size,
-                                          DEVICE_FSI_ADDRESS(test_data[x].addr) );
+            l_err = DeviceFW::deviceRead(
+                              fsi_targets[test_data[x].fsitarget],
+                              &(read_data[x]),
+                              op_size,
+                              DEVICE_FSI_ADDRESS(test_data[x].addr) );
             if( l_err )
             {
                 TRACFCOMP(g_trac_fsi, "FsiDDTest::test_readWrite> Error from device : [%d] addr=0x%X, RC=%X", x, test_data[x].addr, l_err->reasonCode() );
@@ -363,10 +384,11 @@ class FsiDDTest : public CxxTest::TestSuite
             if( test_data[x].writeable )
             {
                 total++;
-                l_err = DeviceFW::deviceWrite( fsi_targets[test_data[x].fsitarget], 
-                                               &(test_data[x].data),
-                                               op_size,
-                                               DEVICE_FSI_ADDRESS(test_data[x].addr) );
+                l_err = DeviceFW::deviceWrite(
+                                  fsi_targets[test_data[x].fsitarget],
+                                  &(test_data[x].data),
+                                  op_size,
+                                  DEVICE_FSI_ADDRESS(test_data[x].addr) );
                 if( l_err )
                 {
                     TRACFCOMP(g_trac_fsi, "FsiDDTest::test_readWrite> Error from device : addr=0x%X, RC=%X", test_data[x].addr, l_err->reasonCode() );
@@ -397,10 +419,11 @@ class FsiDDTest : public CxxTest::TestSuite
         // master sentinel should fail
         total++;
         size_t op_size = sizeof(uint32_t);       
-        l_err = DeviceFW::deviceRead( TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL, 
-                                      &regdata,
-                                      op_size,
-                                      DEVICE_FSI_ADDRESS(0x111111) );
+        l_err = DeviceFW::deviceRead(
+                          TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL,
+                          &regdata,
+                          op_size,
+                          DEVICE_FSI_ADDRESS(0x111111) );
         if( l_err && (l_err->reasonCode() == FSI::RC_MASTER_TARGET) )
         {
             delete l_err;
