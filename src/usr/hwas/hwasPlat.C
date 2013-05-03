@@ -30,6 +30,7 @@
 #include <hwas/common/hwasCommon.H>
 #include <hwas/common/hwasCallout.H>
 #include <hwas/common/deconfigGard.H>
+#include <hwas/hwasPlat.H>
 
 #include <devicefw/driverif.H>
 #include <initservice/taskargs.H>
@@ -339,6 +340,19 @@ errlHndl_t platPresenceDetect(TargetHandleList &io_targets)
 
     return errl;
 } // platPresenceDetect
+
+//******************************************************************************
+// hwasChangeDetection function
+//******************************************************************************
+errlHndl_t hwasChangeDetection()
+{
+    errlHndl_t errl = NULL;
+
+    // TODO: RTC: 70460
+    HWAS_INF("hwasChangeDetection");
+
+    return errl;
+} // hwasChangeDetection
 
 
 GardAddress::GardAddress(bool &o_gardEnabled)
