@@ -1,4 +1,4 @@
-#-- $Id: p8.xbus.scom.initfile,v 1.9 2013/04/13 18:19:22 jgrell Exp $ 
+#-- $Id: p8.xbus.scom.initfile,v 1.11 2013/05/02 21:30:11 jgrell Exp $ 
 
 
 ####################################################################
@@ -7,14 +7,17 @@
 ##      Based on SETUP_ID_MODE X_BUS_8B_TR_HW
 ##      from ../../logic/mesa_sim/fusion/run/IOEPC_XBUS_WRAP.IOEPC_XBUS_WRAP.figdb
 ##
-##   Created on Sat Apr 13 12:40:27 CDT 2013, by jgrell
+##   Created on Thu May  2 15:52:51 CDT 2013, by jgrell
 ####################################################################
 
 ## -- CHANGE HISTORY:
  ## --------------------------------------------------------------------------------
  ## -- Version:|Author:  | Date:  | Comment:
  ## -- --------|---------|--------|-------------------------------------------------
- ## -- 13031300| jgr     |04-13-13| Made rx dll1/dll2 vreg drv changes
+ ## -- 13050200| jgr     |05-02-13| Added rx_dll_vreg_dac_pullup=1 and changed rx_dll1/2_vreg_drvcon to 111
+ ## -- 13042400| jgr     |04-24-13| Added rx_max_ber_check_count=3 setting
+ ## -- 13041300| jgr     |04-13-13| Made rx dll1/dll2 vreg drv changes
+ ## -- smr13032500| SMR     |03-25-13| Changed rx_sls_timeout_sel init to 0b110
  ## -- jgr13031300| jgr     |03-13-13| Added missing entries from rel 0128
  ## -- 13030500| thomsen |03-05-13| Added DLL settings for HW241376
  ## -- 13011802| mbs     |01-18-13| Added rx_fence to run_mode dial (HW236326)
@@ -77,15 +80,24 @@ define def_is_slave  = (prim_id > conn_id);
 define xbus_base_addr = xbus0_gcr_addr;
 
 
+#RX01_GEN.RX01.RX0.RXCTL.RX_CTL_REGS.RX_BER_CHK_PG
+scom 0x800AF000(xbus_base_addr) { 
+	bits, scom_data, expr;
+     rx_max_ber_check_count,  0b00000011   , def_IS_HW;
+     rx_max_ber_check_count,  0b00000000  , def_IS_VBU;
+}
+
 #RX01_GEN.RX01.RX0.RXCTL.RX_CTL_REGS.RX_DLL_ANALOG_TWEAKS_PG
 scom 0x800E7800(xbus_base_addr) { 
 	bits, scom_data, expr;
-     rx_dll1_vreg_drvcon,  0b110   , def_IS_HW;
+     rx_dll1_vreg_drvcon,  0b111   , def_IS_HW;
      rx_dll1_vreg_drvcon,  0b000  , def_IS_VBU;
-     rx_dll2_vreg_drvcon,  0b110   , def_IS_HW;
+     rx_dll2_vreg_drvcon,  0b111   , def_IS_HW;
      rx_dll2_vreg_drvcon,  0b000  , def_IS_VBU;
      rx_dll_vreg_compcon,  0b101   , def_IS_HW;
      rx_dll_vreg_compcon,  0b000  , def_IS_VBU;
+     rx_dll_vreg_dac_pullup,  0b1   , def_IS_HW;
+     rx_dll_vreg_dac_pullup,  0b0  , def_IS_VBU;
 }
 
 #RX01_GEN.RX01.RX0.RXCTL.RX_CTL_REGS.RX_DYN_RPR_ERR_TALLYING1_PG
@@ -292,7 +304,7 @@ scom 0x80089800(xbus_base_addr) {
      rx_ds_bl_timeout_sel,  0b001  , def_IS_VBU;
      rx_ds_timeout_sel,  0b110   , def_IS_HW;
      rx_ds_timeout_sel,  0b010  , def_IS_VBU;
-	rx_sls_timeout_sel, 0b001, any;
+	rx_sls_timeout_sel, 0b110, any;
      rx_wt_timeout_sel,  0b111   , def_IS_HW;
      rx_wt_timeout_sel,  0b011  , def_IS_VBU;
 }
@@ -430,15 +442,24 @@ scom 0x8000B013(xbus_base_addr) {
 	rx_prbs_tap_id, 0b000, any;
 }
 
+#RX01_GEN.RX01.RX1.RXCTL.RX_CTL_REGS.RX_BER_CHK_PG
+scom 0x800AF020(xbus_base_addr) { 
+	bits, scom_data, expr;
+     rx_max_ber_check_count,  0b00000011   , def_IS_HW;
+     rx_max_ber_check_count,  0b00000000  , def_IS_VBU;
+}
+
 #RX01_GEN.RX01.RX1.RXCTL.RX_CTL_REGS.RX_DLL_ANALOG_TWEAKS_PG
 scom 0x800E7820(xbus_base_addr) { 
 	bits, scom_data, expr;
-     rx_dll1_vreg_drvcon,  0b110   , def_IS_HW;
+     rx_dll1_vreg_drvcon,  0b111   , def_IS_HW;
      rx_dll1_vreg_drvcon,  0b000  , def_IS_VBU;
-     rx_dll2_vreg_drvcon,  0b110   , def_IS_HW;
+     rx_dll2_vreg_drvcon,  0b111   , def_IS_HW;
      rx_dll2_vreg_drvcon,  0b000  , def_IS_VBU;
      rx_dll_vreg_compcon,  0b101   , def_IS_HW;
      rx_dll_vreg_compcon,  0b000  , def_IS_VBU;
+     rx_dll_vreg_dac_pullup,  0b1   , def_IS_HW;
+     rx_dll_vreg_dac_pullup,  0b0  , def_IS_VBU;
 }
 
 #RX01_GEN.RX01.RX1.RXCTL.RX_CTL_REGS.RX_DYN_RPR_ERR_TALLYING1_PG
@@ -645,7 +666,7 @@ scom 0x80089820(xbus_base_addr) {
      rx_ds_bl_timeout_sel,  0b001  , def_IS_VBU;
      rx_ds_timeout_sel,  0b110   , def_IS_HW;
      rx_ds_timeout_sel,  0b010  , def_IS_VBU;
-	rx_sls_timeout_sel, 0b001, any;
+	rx_sls_timeout_sel, 0b110, any;
      rx_wt_timeout_sel,  0b111   , def_IS_HW;
      rx_wt_timeout_sel,  0b011  , def_IS_VBU;
 }
@@ -783,15 +804,24 @@ scom 0x8000B033(xbus_base_addr) {
 	rx_prbs_tap_id, 0b000, any;
 }
 
+#RX23_GEN.RX23.RX0.RXCTL.RX_CTL_REGS.RX_BER_CHK_PG
+scom 0x800AF040(xbus_base_addr) { 
+	bits, scom_data, expr;
+     rx_max_ber_check_count,  0b00000011   , def_IS_HW;
+     rx_max_ber_check_count,  0b00000000  , def_IS_VBU;
+}
+
 #RX23_GEN.RX23.RX0.RXCTL.RX_CTL_REGS.RX_DLL_ANALOG_TWEAKS_PG
 scom 0x800E7840(xbus_base_addr) { 
 	bits, scom_data, expr;
-     rx_dll1_vreg_drvcon,  0b110   , def_IS_HW;
+     rx_dll1_vreg_drvcon,  0b111   , def_IS_HW;
      rx_dll1_vreg_drvcon,  0b000  , def_IS_VBU;
-     rx_dll2_vreg_drvcon,  0b110   , def_IS_HW;
+     rx_dll2_vreg_drvcon,  0b111   , def_IS_HW;
      rx_dll2_vreg_drvcon,  0b000  , def_IS_VBU;
      rx_dll_vreg_compcon,  0b101   , def_IS_HW;
      rx_dll_vreg_compcon,  0b000  , def_IS_VBU;
+     rx_dll_vreg_dac_pullup,  0b1   , def_IS_HW;
+     rx_dll_vreg_dac_pullup,  0b0  , def_IS_VBU;
 }
 
 #RX23_GEN.RX23.RX0.RXCTL.RX_CTL_REGS.RX_DYN_RPR_ERR_TALLYING1_PG
@@ -998,7 +1028,7 @@ scom 0x80089840(xbus_base_addr) {
      rx_ds_bl_timeout_sel,  0b001  , def_IS_VBU;
      rx_ds_timeout_sel,  0b110   , def_IS_HW;
      rx_ds_timeout_sel,  0b010  , def_IS_VBU;
-	rx_sls_timeout_sel, 0b001, any;
+	rx_sls_timeout_sel, 0b110, any;
      rx_wt_timeout_sel,  0b111   , def_IS_HW;
      rx_wt_timeout_sel,  0b011  , def_IS_VBU;
 }
@@ -1136,15 +1166,24 @@ scom 0x8000B053(xbus_base_addr) {
 	rx_prbs_tap_id, 0b000, any;
 }
 
+#RX23_GEN.RX23.RX1.RXCTL.RX_CTL_REGS.RX_BER_CHK_PG
+scom 0x800AF060(xbus_base_addr) { 
+	bits, scom_data, expr;
+     rx_max_ber_check_count,  0b00000011   , def_IS_HW;
+     rx_max_ber_check_count,  0b00000000  , def_IS_VBU;
+}
+
 #RX23_GEN.RX23.RX1.RXCTL.RX_CTL_REGS.RX_DLL_ANALOG_TWEAKS_PG
 scom 0x800E7860(xbus_base_addr) { 
 	bits, scom_data, expr;
-     rx_dll1_vreg_drvcon,  0b110   , def_IS_HW;
+     rx_dll1_vreg_drvcon,  0b111   , def_IS_HW;
      rx_dll1_vreg_drvcon,  0b000  , def_IS_VBU;
-     rx_dll2_vreg_drvcon,  0b110   , def_IS_HW;
+     rx_dll2_vreg_drvcon,  0b111   , def_IS_HW;
      rx_dll2_vreg_drvcon,  0b000  , def_IS_VBU;
      rx_dll_vreg_compcon,  0b101   , def_IS_HW;
      rx_dll_vreg_compcon,  0b000  , def_IS_VBU;
+     rx_dll_vreg_dac_pullup,  0b1   , def_IS_HW;
+     rx_dll_vreg_dac_pullup,  0b0  , def_IS_VBU;
 }
 
 #RX23_GEN.RX23.RX1.RXCTL.RX_CTL_REGS.RX_DYN_RPR_ERR_TALLYING1_PG
@@ -1351,7 +1390,7 @@ scom 0x80089860(xbus_base_addr) {
      rx_ds_bl_timeout_sel,  0b001  , def_IS_VBU;
      rx_ds_timeout_sel,  0b110   , def_IS_HW;
      rx_ds_timeout_sel,  0b010  , def_IS_VBU;
-	rx_sls_timeout_sel, 0b001, any;
+	rx_sls_timeout_sel, 0b110, any;
      rx_wt_timeout_sel,  0b111   , def_IS_HW;
      rx_wt_timeout_sel,  0b011  , def_IS_VBU;
 }
