@@ -1474,6 +1474,11 @@ group gPsiFir filter singlebit
     /** PSIFIR[2]
      *  PB_ECC_ERR_SUE
      */
+    (PsiFir, bit(2)) ? TBDDefaultCallout;
+
+    /** PSIFIR[3]
+     *  INTERRUPT_FROM_ERROR
+     */
     (PsiFir, bit(3)) ? TBDDefaultCallout;
 
     /** PSIFIR[4]
