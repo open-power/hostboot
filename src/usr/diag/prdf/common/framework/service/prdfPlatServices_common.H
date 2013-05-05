@@ -38,6 +38,7 @@
 
 #include <prdfTargetServices.H> // must include all common targeting code
 
+#include <prdfCenConst.H>
 #include <prdfTimer.H>
 
 #include <dimmConsts.H>         // for DIMM_DQ_RANK_BITMAP_SIZE
@@ -54,6 +55,7 @@
 namespace PRDF
 {
 
+class CenDqBitmap;
 class CenRank;
 
 namespace PlatServices
@@ -190,34 +192,24 @@ int32_t erepairFirIsolation(TARGETING::TargetHandle_t i_rxBusTgt);
 //##############################################################################
 
 /**
- * @brief  Reads the bad DQ bitmap attribute.
+ * @brief  Reads the bad DQ bitmap attribute for both ports of the target rank.
  * @param  i_mbaTarget A MBA target.
- * @param  i_portSlct  Port select (0-1).
- * @param  i_dimmSlct  DIMM select (0-1).
- * @param  i_rankSlct  Rank select (0-3).
- * @param  o_data      The return data array.
+ * @param  i_rank   Target rank.
+ * @param  o_bitmap DQ bitmap container.
  * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
  */
-int32_t getBadDqBitmap( TARGETING::TargetHandle_t i_mbaTarget,
-                        const uint8_t i_portSlct,
-                        const uint8_t i_dimmSlct,
-                        const uint8_t i_rankSlct,
-                        uint8_t (&o_data)[DIMM_DQ_RANK_BITMAP_SIZE] );
+int32_t getBadDqBitmap( TARGETING::TargetHandle_t i_mba, const CenRank & i_rank,
+                        CenDqBitmap & o_bitmap );
 
 /**
- * @brief  Writes the bad DQ bitmap attribute.
+ * @brief  Writes the bad DQ bitmap attribute for both ports of the target rank.
  * @param  i_mbaTarget A MBA target.
- * @param  i_portSlct  Port select (0-1).
- * @param  i_dimmSlct  DIMM select (0-1).
- * @param  i_rankSlct  Rank select (0-3).
- * @param  i_data      The input data array.
+ * @param  i_rank   Target rank.
+ * @param  i_bitmap DQ bitmap container.
  * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
  */
-int32_t setBadDqBitmap( TARGETING::TargetHandle_t i_mbaTarget,
-                        const uint8_t i_portSlct,
-                        const uint8_t i_dimmSlct,
-                        const uint8_t i_rankSlct,
-                        const uint8_t (&i_data)[DIMM_DQ_RANK_BITMAP_SIZE] );
+int32_t setBadDqBitmap( TARGETING::TargetHandle_t i_mba, const CenRank & i_rank,
+                        const CenDqBitmap & i_bitmap );
 
 /**
  * @brief  Invokes the get mark store hardware procedure.

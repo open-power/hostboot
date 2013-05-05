@@ -160,14 +160,6 @@ int32_t CenSymbol::getWiringType( TARGETING::TargetHandle_t i_mba,
 
 //------------------------------------------------------------------------------
 
-uint8_t CenSymbol::getPortSlct() const
-{
-    return ( ((iv_symbol <= 3) || ((8 <= iv_symbol) && (iv_symbol <= 39)))
-             ? 1 : 0 );
-}
-
-//------------------------------------------------------------------------------
-
 uint8_t CenSymbol::cenDq2Symbol( uint8_t i_cenDq, uint8_t i_ps )
 {
     uint8_t sym = SYMBOLS_PER_RANK;
@@ -198,6 +190,21 @@ uint8_t CenSymbol::symbol2CenDq( uint8_t i_symbol )
     }
 
     return cenDq;
+}
+
+//------------------------------------------------------------------------------
+
+uint8_t CenSymbol::symbol2PortSlct( uint8_t i_symbol )
+{
+    uint8_t portSlct = PORT_SLCT_PER_MBA;
+
+    if ( SYMBOLS_PER_RANK > i_symbol )
+    {
+        portSlct = ( ((i_symbol <= 3) || ((8 <= i_symbol) && (i_symbol <= 39)))
+                     ? 1 : 0 );
+    }
+
+    return portSlct;
 }
 
 //------------------------------------------------------------------------------

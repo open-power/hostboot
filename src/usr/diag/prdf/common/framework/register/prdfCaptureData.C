@@ -29,20 +29,6 @@
 //  Includes
 //----------------------------------------------------------------------
 
-#ifdef __HOSTBOOT_MODULE
-
-// For hostboot, these are no-ops
-#define htonl(foo) (foo)
-#define htons(foo) (foo)
-#define ntohl(foo) (foo)
-#define ntohs(foo) (foo)
-
-#else
-
-// for hton funcs.
-#include <netinet/in.h>
-
-#endif
 #include <iipbits.h>
 #include <prdfHomRegisterAccess.H>  // dg06a
 #include <prdfScomRegister.H>

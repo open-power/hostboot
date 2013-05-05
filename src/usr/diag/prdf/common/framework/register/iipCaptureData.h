@@ -82,6 +82,32 @@
 #include <prdfPlatServices.H>
 #include <functional>  // @jl04 a Needed for the unary function in new predicate.
 
+#ifdef __HOSTBOOT_MODULE
+
+  // FIXME: RTC 73204 was opened to add support for these in hostboot. They will
+  //        need to be removed once the issue has been resolved.
+  #ifndef htonl
+    #define htonl(foo) (foo)
+  #endif
+
+  #ifndef htons
+    #define htons(foo) (foo)
+  #endif
+
+  #ifndef ntohl
+    #define ntohl(foo) (foo)
+  #endif
+
+  #ifndef ntohs
+    #define ntohs(foo) (foo)
+  #endif
+
+#else
+
+  #include <netinet/in.h>
+
+#endif
+
 namespace PRDF
 {
 

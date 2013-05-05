@@ -30,17 +30,6 @@
 //------------------------------------------------------------------------------
 #include <string.h>                // for memcpy
 #define prdfServiceDataCollector_C
-
-#ifdef __HOSTBOOT_MODULE
-  // these are no-ops in HB
-  #define htonl(foo) (foo)
-  #define htons(foo) (foo)
-  #define ntohl(foo) (foo)
-  #define ntohs(foo) (foo)
-#else
-  #include <netinet/in.h>
-#endif
-
 #include <iipServiceDataCollector.h>
 #include <prdfPlatServices.H>
 #include <prdfTrace.H>

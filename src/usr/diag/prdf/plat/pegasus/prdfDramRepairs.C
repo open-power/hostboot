@@ -31,6 +31,8 @@
 #include <prdfErrlUtil.H>
 #include "common/prdfEnums.H"
 #include "common/plat/pegasus/prdfCenMbaCaptureData.H"
+#include "common/plat/pegasus/prdfCalloutUtil.H"
+#include "common/plat/pegasus/prdfCenDqBitmap.H"
 #include "common/plat/pegasus/prdfCenSymbol.H"
 #include "common/plat/pegasus/prdfMemoryMru.H"
 #include "framework/service/prdfPlatServices.H"
@@ -317,6 +319,9 @@ bool processBadDimms(TargetHandle_t i_mba, uint8_t i_badDimmMask)
 
 bool processDq(TargetHandle_t i_mba)
 {
+    using namespace TARGETING;
+    using namespace PlatServices;
+
     PRDF_DENTER("processDq: %p", i_mba);
 
     // callout any dimms on the argument MBA
@@ -324,64 +329,45 @@ bool processDq(TargetHandle_t i_mba)
 
     uint64_t calloutCount = 0;
 
-    // get all the dimms connected to this MBA
-
-    TARGETING::TargetHandleList dimms = PlatServices::getConnected(
-            i_mba, TARGETING::TYPE_DIMM);
-
-    TargetHandleList::iterator dit = dimms.end();
-
-    // call them out if they have any bad dq
-
-    while(dit-- != dimms.begin())
+    for ( uint32_t r = 0; r < MAX_RANKS_PER_MBA; r++ )
     {
-        uint8_t port = 0, dimm = 0;
+        CenRank rank ( r );
+        CenDqBitmap bitmap;
 
-        if(SUCCESS != PlatServices::getMbaPort(*dit, port))
+        if ( SUCCESS != getBadDqBitmap(i_mba, rank, bitmap) )
         {
-            // skip this dimm
-            continue;
+            continue; // skip this rank
         }
 
-        if(SUCCESS != PlatServices::getMbaDimm(*dit, dimm))
+        for ( uint32_t p = 0; p < PORT_SLCT_PER_MBA; p++ )
         {
-            // skip this dimm
-            continue;
-        }
-
-        bool badDq = false;
-        uint8_t bitmap[DIMM_DQ_RANK_BITMAP_SIZE];
-
-        uint64_t rankNumber = DIMM_DQ_MAX_DIMM_RANKS;
-
-        while(rankNumber-- && !badDq)
-        {
-            if(SUCCESS != PlatServices::getBadDqBitmap(
-                        i_mba,
-                        port,
-                        dimm,
-                        rankNumber,
-                        bitmap))
+            bool badDqs = false;
+            if ( SUCCESS != bitmap.badDqs(p, badDqs) )
             {
-                // skip this rank
+                continue; // skip this DIMM
+            }
+
+            if ( !badDqs )
+            {
+                continue; // skip this DIMM
+            }
+
+            TargetHandleList list = CalloutUtil::getConnectedDimms( i_mba,
+                                                                    rank, p );
+            if ( 0 == list.size() )
+            {
+                PRDF_ERR( "[processDq] bad bits present but no connected "
+                          "DIMM: MBA=0x%08x rank=%d port=%d", getHuid(i_mba),
+                          rank.flatten(), p );
                 continue;
             }
 
-            uint8_t * it = bitmap + DIMM_DQ_RANK_BITMAP_SIZE;
-
-            while(!badDq && it-- != bitmap)
+            for ( TargetHandleList::iterator i = list.begin();
+                  i < list.end(); i++ )
             {
-                if(*it)
-                {
-                    badDq = true;
-                }
+                ++calloutCount;
+                commitRestoreCallout( &addDimmCallout, *i, i_mba );
             }
-        }
-
-        if(badDq)
-        {
-            ++calloutCount;
-            commitRestoreCallout( &addDimmCallout, *dit, i_mba );
         }
     }
 

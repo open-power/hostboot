@@ -32,9 +32,6 @@
 #include <prdfDramRepairUsrData.H>
 #include <iipServiceDataCollector.h>
 #include <prdf_ras_services.H>
-#ifdef __HOSTBOOT_MODULE
-  #define htonl(foo) (foo) // no-op for HB
-#endif
 
 namespace PRDF
 {

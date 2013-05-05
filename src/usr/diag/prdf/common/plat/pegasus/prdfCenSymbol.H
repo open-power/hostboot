@@ -42,6 +42,7 @@
 
 namespace PRDF
 {
+
 /**
  * @brief Container for a memory symbol.
  */
@@ -137,17 +138,20 @@ class CenSymbol
     /** @return The bad pins associated with this symbol. */
     uint8_t getPins() const { return iv_pins; }
 
-    /**
-     * @brief  Returns this symbol's port select.
-     * @return Port select.
-     */
-    uint8_t getPortSlct() const;
+    /** @return The even Centaur DQ of this symbol. */
+    uint8_t getEvenDq() const { return symbol2CenDq( iv_symbol ); }
 
-    /** @return The symbol of this Cen DQ. */
+    /** @return The port select for this symbol. */
+    uint8_t getPortSlct() const { return symbol2PortSlct( iv_symbol ); }
+
+    /** @return The symbol of the given Centaur DQ and port select. */
     static uint8_t cenDq2Symbol( uint8_t i_CenDq, uint8_t i_ps );
 
-    /** @return The first Cen DQ in this symbol. */
+    /** @return The even Centaur DQ of the given symbol. */
     static uint8_t symbol2CenDq( uint8_t i_symbol );
+
+    /** @return The port select for given symbol. */
+    static uint8_t symbol2PortSlct( uint8_t i_symbol );
 
     /**
      * @brief   Overrides the '<' operator.

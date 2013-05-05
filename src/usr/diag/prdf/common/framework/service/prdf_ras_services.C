@@ -49,7 +49,6 @@
 #include <iipSystem.h>         //For RemoveStoppedChips
 
 #ifdef __HOSTBOOT_MODULE
-  #define htonl(foo) (foo) // no-op for HB
   #include <stdio.h>
 #else
   #include <srcisrc.H>

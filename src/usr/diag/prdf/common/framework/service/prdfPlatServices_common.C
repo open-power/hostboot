@@ -38,7 +38,7 @@
 #include <prdfErrlUtil.H>
 
 #include <prdfCenAddress.H>
-#include <prdfCenConst.H>
+#include <prdfCenDqBitmap.H>
 
 #include <dimmBadDqBitmapFuncs.H> // for dimm[S|G]etBadDqBitmap()
 
@@ -244,52 +244,72 @@ int32_t erepairFirIsolation(TargetHandle_t i_rxBusTgt)
 //##                        Memory specific functions
 //##############################################################################
 
-int32_t getBadDqBitmap( TargetHandle_t i_mbaTarget, const uint8_t i_portSlct,
-                        const uint8_t i_dimmSlct, const uint8_t i_rankSlct,
-                        uint8_t (&o_data)[DIMM_DQ_RANK_BITMAP_SIZE] )
+int32_t getBadDqBitmap( TargetHandle_t i_mba, const CenRank & i_rank,
+                        CenDqBitmap & o_bitmap )
 {
+    #define PRDF_FUNC "[PlatServices::getBadDqBitmap] "
+
     int32_t o_rc = SUCCESS;
 
-    errlHndl_t errl = NULL;
+    uint8_t data[PORT_SLCT_PER_MBA][DIMM_DQ_RANK_BITMAP_SIZE];
 
-    PRD_FAPI_TO_ERRL( errl, dimmGetBadDqBitmap, getFapiTarget(i_mbaTarget),
-                      i_portSlct, i_dimmSlct, i_rankSlct, o_data );
-
-    if ( NULL != errl )
+    for ( int32_t ps = 0; ps < PORT_SLCT_PER_MBA; ps++ )
     {
-        PRDF_ERR( "[PlatServices::getBadDqBitmap] dimmGetBadDqBitmap() failed. "
-                  "HUID: 0x%08x port: %d DIMM: %d rank: %d",
-                  getHuid(i_mbaTarget), i_portSlct, i_dimmSlct, i_rankSlct );
-        PRDF_COMMIT_ERRL( errl, ERRL_ACTION_REPORT );
-        o_rc = FAIL;
+        errlHndl_t errl = NULL;
+        PRD_FAPI_TO_ERRL( errl, dimmGetBadDqBitmap, getFapiTarget(i_mba),
+                          ps, i_rank.getDimmSlct(), i_rank.getRankSlct(),
+                          data[ps] );
+        if ( NULL != errl )
+        {
+            PRDF_ERR( PRDF_FUNC"dimmGetBadDqBitmap() failed: MBA=0x%08x "
+                      "ps=%d ds=%d rs=%d", getHuid(i_mba), ps,
+                      i_rank.getDimmSlct(), i_rank.getRankSlct() );
+            PRDF_COMMIT_ERRL( errl, ERRL_ACTION_REPORT );
+            o_rc = FAIL; break;
+        }
+    }
+
+    if ( SUCCESS == o_rc )
+    {
+        o_bitmap = CenDqBitmap ( i_mba, i_rank, data );
     }
 
     return o_rc;
+
+    #undef PRDF_FUNC
 }
 
 //------------------------------------------------------------------------------
 
-int32_t setBadDqBitmap( TargetHandle_t i_mbaTarget, const uint8_t i_portSlct,
-                        const uint8_t i_dimmSlct, const uint8_t i_rankSlct,
-                        const uint8_t (&i_data)[DIMM_DQ_RANK_BITMAP_SIZE] )
+int32_t setBadDqBitmap( TargetHandle_t i_mba, const CenRank & i_rank,
+                        const CenDqBitmap & i_bitmap )
 {
+    #define PRDF_FUNC "[PlatServices::setBadDqBitmap] "
+
     int32_t o_rc = SUCCESS;
 
-    errlHndl_t errl = NULL;
+    const uint8_t (&data)[PORT_SLCT_PER_MBA][DIMM_DQ_RANK_BITMAP_SIZE]
+                                                        = i_bitmap.getData();
 
-    PRD_FAPI_TO_ERRL( errl, dimmSetBadDqBitmap, getFapiTarget(i_mbaTarget),
-                      i_portSlct, i_dimmSlct, i_rankSlct, i_data );
-
-    if ( NULL != errl )
+    for ( int32_t ps = 0; ps < PORT_SLCT_PER_MBA; ps++ )
     {
-        PRDF_ERR( "[PlatServices::getBadDqBitmap] dimmSetBadDqBitmap() failed. "
-                  "HUID: 0x%08x ps: %d ds: %d rs: %d",
-                  getHuid(i_mbaTarget), i_portSlct, i_dimmSlct, i_rankSlct );
-        PRDF_COMMIT_ERRL( errl, ERRL_ACTION_REPORT );
-        o_rc = FAIL;
+        errlHndl_t errl = NULL;
+        PRD_FAPI_TO_ERRL( errl, dimmSetBadDqBitmap, getFapiTarget(i_mba),
+                          ps, i_rank.getDimmSlct(), i_rank.getRankSlct(),
+                          data[ps] );
+        if ( NULL != errl )
+        {
+            PRDF_ERR( PRDF_FUNC"dimmSetBadDqBitmap() failed: MBA=0x%08x "
+                      "ps=%d ds=%d rs=%d", getHuid(i_mba), ps,
+                      i_rank.getDimmSlct(), i_rank.getRankSlct() );
+            PRDF_COMMIT_ERRL( errl, ERRL_ACTION_REPORT );
+            o_rc = FAIL;
+        }
     }
 
     return o_rc;
+
+    #undef PRDF_FUNC
 }
 
 //------------------------------------------------------------------------------
@@ -367,7 +387,6 @@ int32_t mssGetSteerMux( TargetHandle_t i_mbaTarget, uint8_t i_rank,
     }
 
     return o_rc;
-
 }
 
 //------------------------------------------------------------------------------
@@ -393,7 +412,6 @@ int32_t mssSetSteerMux( TargetHandle_t i_mbaTarget, uint8_t i_rank,
     }
 
     return o_rc;
-
 }
 
 //------------------------------------------------------------------------------

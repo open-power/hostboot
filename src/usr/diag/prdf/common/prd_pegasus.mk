@@ -40,6 +40,7 @@ PRDF_RULE_PLUGINS_PEGASUS_WSIM = \
 prd_pegasus_specific = \
     prdfCalloutUtil.o \
     prdfCenAddress.o \
+    prdfCenDqBitmap.o \
     prdfCenSymbol.o \
     prdfLineDelete.o \
     prdfPegasusConfigurator.o \
