@@ -58,6 +58,8 @@
 namespace PRDF
 {
 
+using namespace PlatServices;
+
 //----------------------------------------------------------------------
 //  User Types
 //----------------------------------------------------------------------
@@ -226,47 +228,44 @@ int32_t CalloutConnected::Resolve( STEP_CODE_DATA_STRUCT & io_serviceData )
 {
     using namespace TARGETING;
 
-    TargetHandle_t l_pconnectedTarget = NULL;
-    TARGETING::TargetHandle_t l_psourceTarget =
-                            ServiceDataCollector::getTargetAnalyzed( ) ;
-    TargetHandleList l_connectedTargetList;
-    l_connectedTargetList = PlatServices::getConnected( l_psourceTarget,
-                                                        iv_targetType );
-    if( 0xffffffff == iv_idx )
+    TargetHandle_t sourceTrgt = ServiceDataCollector::getTargetAnalyzed();
+    TargetHandle_t connTrgt   = NULL;
+
+    TargetHandleList list = getConnected( sourceTrgt, iv_targetType );
+
+    if ( 0xffffffff == iv_idx )
     {
-        if( l_connectedTargetList.size()>0 )
-        {
-            l_pconnectedTarget = l_connectedTargetList[0];
-        }
+        if ( 0 < list.size() )
+            connTrgt = list[0];
     }
     else
     {
-        for( TargetHandleList::iterator itrTarget =
-            l_connectedTargetList.begin();
-            itrTarget!= l_connectedTargetList.end();itrTarget++ )
+        for (TargetHandleList::iterator i = list.begin(); i != list.end(); i++)
         {
-            if( iv_idx == PlatServices::getTargetPosition( *itrTarget ) )
+            if ( iv_idx == getTargetPosition(*i) )
             {
-                l_pconnectedTarget = *itrTarget ;
+                connTrgt = *i;
                 break;
             }
         }
     }
 
-    if ( l_pconnectedTarget != NULL )
+    if ( NULL != connTrgt )
     {
-        io_serviceData.service_data->SetCallout( l_pconnectedTarget,
-                                                 iv_priority );
+        io_serviceData.service_data->SetCallout( connTrgt, iv_priority );
     }
     else
     {
-        if(iv_altResolution != NULL)
+        if ( NULL != iv_altResolution )
         {
             iv_altResolution->Resolve( io_serviceData );
         }
         else
         {
-            io_serviceData.service_data->SetCallout( l_psourceTarget );
+            PRDF_ERR( "[CalloutConnected::Resolve] No connected chip found: "
+                      "sourceTrgt=0x%08x iv_targetType=0x%x",
+                      getHuid(sourceTrgt), iv_targetType );
+            io_serviceData.service_data->SetCallout( sourceTrgt );
         }
     }
 
@@ -280,49 +279,38 @@ int32_t AnalyzeConnected::Resolve( STEP_CODE_DATA_STRUCT & io_serviceData )
 {
     using namespace TARGETING;
 
-    CHIP_CLASS * l_connChipObj = NULL;
-    TARGETING::TargetHandle_t l_pconnChipTarget = NULL;
-    TARGETING::TargetHandle_t l_psourceHandle =
-                            ServiceDataCollector::getTargetAnalyzed( ) ;
-    // Get connected list.
-    TargetHandleList l_connectedTargetList = PlatServices::getConnected(
-                                                            l_psourceHandle,
-                                                            iv_targetType );
+    TargetHandle_t sourceTrgt = ServiceDataCollector::getTargetAnalyzed();
+    TargetHandle_t connTrgt   = NULL;
 
-    // If ID = 0xffffffff, find first valid.
+    TargetHandleList list = getConnected( sourceTrgt, iv_targetType );
+
     if ( 0xffffffff == iv_idx )
     {
-        if( l_connectedTargetList.size()>0 )
-        {
-            //First valid handle. we don't allow invalid things in list
-            l_pconnChipTarget = l_connectedTargetList[0] ;
-        }
+        if ( 0 < list.size() )
+            connTrgt = list[0];
     }
-    // Otherwise, grab from correct index.
     else
     {
-        for( TargetHandleList::iterator itrTarget =
-            l_connectedTargetList.begin();
-            itrTarget!= l_connectedTargetList.end();itrTarget++ )
+        for (TargetHandleList::iterator i = list.begin(); i != list.end(); i++)
         {
-            if( iv_idx == PlatServices::getTargetPosition( *itrTarget ) )
+            if ( iv_idx == getTargetPosition(*i) )
             {
-                l_pconnChipTarget = *itrTarget ;
+                connTrgt = *i;
                 break;
-
             }
         }
     }
 
     // If valid chip found, look up in global system container.
-    if ( NULL != l_pconnChipTarget )
+    CHIP_CLASS * connChip = NULL;
+    if ( NULL != connTrgt )
     {
-        l_connChipObj = systemPtr->GetChip( l_pconnChipTarget );
+        connChip = systemPtr->GetChip( connTrgt );
     }
 
     // Analyze chip.
-    if (NULL != l_connChipObj)
-        return l_connChipObj->Analyze( io_serviceData,
+    if ( NULL != connChip )
+        return connChip->Analyze( io_serviceData,
                         io_serviceData.service_data->GetCauseAttentionType() );
     else
         return PRD_UNRESOLVED_CHIP_CONNECTION;

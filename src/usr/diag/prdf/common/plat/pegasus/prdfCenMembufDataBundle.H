@@ -28,15 +28,13 @@
  *  @brief Contains the common data bundle for a PRD Centaur object.
  */
 
+#include <iipSystem.h>
 #include <prdfExtensibleChip.H>
+#include <prdfGlobal.H>
 #include <prdfPlatServices.H>
-
-using namespace TARGETING;
 
 namespace PRDF
 {
-
-using namespace PlatServices;
 
 /**
  * @brief Data container for the Centaur Membuf chip.
@@ -46,9 +44,13 @@ class CenMembufDataBundle : public DataBundle
   public:
 
     /** @brief Constructor */
-    CenMembufDataBundle( ExtensibleChip * i_mbChip ) :
-        iv_mbChip(i_mbChip), iv_mcsChip(NULL), iv_analyzeMba1Starvation(false)
-    {}
+    CenMembufDataBundle( ExtensibleChip * i_membChip ) :
+        iv_membChip(i_membChip), iv_mcsChip(NULL),
+        iv_analyzeMba1Starvation(false)
+    {
+        for ( uint32_t i = 0; i < MAX_MBA_PER_MEMBUF; i++ )
+            iv_mbaChips[i] = NULL;
+    }
 
     /** @brief Destructor */
     ~CenMembufDataBundle() {}
@@ -56,20 +58,52 @@ class CenMembufDataBundle : public DataBundle
     /** @return The connected MCS chip. */
     ExtensibleChip * getMcsChip()
     {
+        using namespace TARGETING;
+        using namespace PlatServices;
+
         if ( NULL == iv_mcsChip )
         {
-            TargetHandleList list = getConnected( iv_mbChip->GetChipHandle(),
-                                                  TYPE_MCS );
-            if ( 1 == list.size() )
-                iv_mcsChip = (ExtensibleChip *)systemPtr->GetChip( list[0] );
-            else
-            {
-                PRDF_ERR( "[CenMembufDataBundle::getMcsChip] "
-                          "getConnected() failed" );
-            }
+            TargetHandle_t memb = iv_membChip->GetChipHandle();
+
+            TargetHandle_t mcs = getConnectedParent( memb, TYPE_MCS );
+            if ( NULL != mcs )
+                iv_mcsChip = (ExtensibleChip *)systemPtr->GetChip( mcs );
         }
 
         return iv_mcsChip;
+    }
+
+    /** @return The connected MBA0 chip. */
+    ExtensibleChip * getMbaChip( uint32_t i_pos )
+    {
+        using namespace TARGETING;
+        using namespace PlatServices;
+
+        ExtensibleChip * mbaChip = NULL;
+
+        if ( MAX_MBA_PER_MEMBUF > i_pos )
+        {
+            if ( NULL == iv_mbaChips[i_pos] )
+            {
+                TargetHandle_t memb = iv_membChip->GetChipHandle();
+
+                TargetHandle_t mba = getConnectedChild( memb, TYPE_MBA, i_pos );
+                if ( NULL != mba )
+                {
+                    iv_mbaChips[i_pos]
+                                = (ExtensibleChip *)systemPtr->GetChip(mba);
+                }
+            }
+
+            mbaChip = iv_mbaChips[i_pos];
+        }
+        else
+        {
+            PRDF_ERR( "[CenMembufDataBundle::getMbaChip] Invalid parameter: "
+                      "i_pos=%d", i_pos );
+        }
+
+        return mbaChip;
     }
 
   private: // functions
@@ -79,8 +113,9 @@ class CenMembufDataBundle : public DataBundle
 
   private: // instance variables
 
-    ExtensibleChip * iv_mbChip;  ///< The Centaur chip
-    ExtensibleChip * iv_mcsChip; ///< The connected MCS chip
+    ExtensibleChip * iv_membChip; ///< This MEMBUF chip
+    ExtensibleChip * iv_mcsChip;  ///< The connected MCS chip
+    ExtensibleChip * iv_mbaChips[MAX_MBA_PER_MEMBUF]; ///< Connected MBA chips
 
   public: // instance variables
 
@@ -93,7 +128,7 @@ class CenMembufDataBundle : public DataBundle
  * @param  i_membChip The centaur chip.
  * @return This centaur's data bundle.
  */
-CenMembufDataBundle * getCenMembufDataBundle( ExtensibleChip * i_membChip )
+inline CenMembufDataBundle * getMembufDataBundle( ExtensibleChip * i_membChip )
 {
     return static_cast<CenMembufDataBundle *>(i_membChip->getDataBundle());
 }

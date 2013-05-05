@@ -21,7 +21,6 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-
 #ifndef __TEST_PRDFMCSMCIFIR_H
 #define __TEST_PRDFMCSMCIFIR_H
 

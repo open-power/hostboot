@@ -20,6 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+
 #ifndef prdfCenSymbol_H
 #define prdfCenSymbol_H
 

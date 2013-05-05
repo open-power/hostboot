@@ -67,6 +67,8 @@ using namespace TARGETING;
 namespace PRDF
 {
 
+using namespace PlatServices;
+
 // ----------------------------------------------------------------------------
 // Local macros and types
 // ----------------------------------------------------------------------------
@@ -1260,10 +1262,15 @@ will also be removed. Need to confirm if this code is required anymore.
             {
                 // Centaur Checkstop
                 TargetHandle_t centaurHandle = l_dumpHandle;
-                if (l_targetType != TYPE_MEMBUF)
+                if ( TYPE_MCS == l_targetType )
                 {
-                    centaurHandle = PlatServices::getConnected(l_dumpHandle,
-                                                            TYPE_MEMBUF) [0];
+                    centaurHandle = getConnectedChild( l_dumpHandle,
+                                                       TYPE_MEMBUF, 0 );
+                }
+                else if ( TYPE_MBA == l_targetType )
+                {
+                    centaurHandle = getConnectedParent( l_dumpHandle,
+                                                        TYPE_MEMBUF );
                 }
 
                 if (centaurHandle)

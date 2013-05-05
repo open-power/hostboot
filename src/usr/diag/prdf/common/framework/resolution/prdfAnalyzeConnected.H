@@ -78,7 +78,7 @@ public:
    *            analyze func.
    * @param[io] io_service_data Refernce to STEP_CODE_DATA_STRUCT
    * @return    SUCCESS | non-zero if chip not found.
-   * @note      if the call to getConnected yeilds NULL  than the
+   * @note      if the call to getConnected yields NULL  than the
    *            altResolution is called. If the altResolution is NULL than the
    *            source is added to the callout list.
    */

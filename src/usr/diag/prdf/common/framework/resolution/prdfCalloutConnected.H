@@ -94,7 +94,7 @@ public:
    * @param[io] io_service_data  Reference to STEP_CODE_DATA_STRUCT
    * @post      service_data is complete
    * @return    SUCCESS | non-zero
-   * @note      if the call to getConnected yeilds an invalid  target then
+   * @note      if the call to getConnected yields an invalid  target then
    *            altResolution is called. If the altResolution is NULL than the
    *            source is added to the callout list.
    */

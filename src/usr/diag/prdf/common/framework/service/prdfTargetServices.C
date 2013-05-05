@@ -371,6 +371,8 @@ int32_t getAssociationType( TARGETING::TargetHandle_t i_target,
                             TARGETING::TYPE i_connType,
                             TARGETING::TargetService::ASSOCIATION_TYPE & o_type)
 {
+    #define PRDF_FUNC "PlatServices::getAssociationType] "
+
     int32_t o_rc = SUCCESS;
 
     static conn_t lookups[] =
@@ -442,66 +444,54 @@ int32_t getAssociationType( TARGETING::TargetHandle_t i_target,
         { TYPE_DIMM,   TYPE_MBA,    TargetService::PARENT_BY_AFFINITY },
     };
 
-    const size_t sz_lookups = sizeof(lookups) / sizeof(conn_t);
-
-    conn_t match = { getTargetType(i_target), i_connType,
-                     TargetService::CHILD_BY_AFFINITY };
-
-    conn_t * it = std::lower_bound( lookups, lookups + sz_lookups, match );
-
-    if ( it != lookups + sz_lookups )
-        o_type = it->type;
-    else
+    do
     {
-        PRDF_ERR( "[getAssociationType] Failed: i_target=0x%08x i_connType=%d",
-                  getHuid(i_target), i_connType );
-        o_rc = FAIL;
-    }
+        if ( NULL == i_target )
+        {
+            PRDF_ERR( PRDF_FUNC"Given target is null" );
+            o_rc = FAIL; break;
+        }
+
+        const size_t sz_lookups = sizeof(lookups) / sizeof(conn_t);
+
+        TYPE type = getTargetType(i_target);
+
+        conn_t match = { type, i_connType, TargetService::CHILD_BY_AFFINITY };
+
+        conn_t * it = std::lower_bound( lookups, lookups + sz_lookups, match );
+
+        if ( (it == lookups + sz_lookups) || // off the end
+             (type != it->from) || (i_connType != it->to) ) // not equals
+        {
+            PRDF_ERR( PRDF_FUNC"Look-up failed: i_target=0x%08x i_connType=%d",
+                      getHuid(i_target), i_connType );
+            o_rc = FAIL; break;
+        }
+
+        o_type = it->type;
+
+    } while (0);
 
     return o_rc;
+
+    #undef PRDF_FUNC
 }
 
-//------------------------------------------------------------------------------
-
-// Helper function to return a parent or container target of a specified type.
-// For example, get EX target from CORE or PROC target from MEMBUF. Note, that
-// the input target could be the parent. Will return NULL if the parent is not
-// found. For example, a DIMM could not be a parent of a PROC.
-TARGETING::TargetHandle_t getParent( TARGETING::TargetHandle_t i_target,
-                                     TARGETING::TYPE i_connType )
+// Helper function for the various getConnected() functions.
+TargetHandleList getConnAssoc( TargetHandle_t i_target, TYPE i_connType,
+                               TargetService::ASSOCIATION_TYPE i_assocType )
 {
-    TARGETING::TargetHandle_t o_target = i_target; // Assume it is the parent.
+    #define PRDF_FUNC "[PlatServices::getConnAssoc] "
 
-    if ( i_connType != getTargetType(i_target) )
-    {
-        TargetHandleList list = getConnected( i_target, i_connType );
-        o_target = ( 1 == list.size() ) ? list[0] : NULL;
-    }
-
-    if ( NULL == o_target )
-    {
-        PRDF_ERR( "[getParent] Failed: i_target=0x%08x i_connType=%d",
-                  getHuid(i_target), i_connType );
-    }
-
-    return o_target;
-}
-
-//------------------------------------------------------------------------------
-
-TARGETING::TargetHandleList getConnected( TARGETING::TargetHandle_t i_target,
-                                          TARGETING::TYPE i_connType )
-{
     TargetHandleList o_list; // Default empty list
 
     do
     {
-        // Parameter checks. Error trace output is in NULL check below.
-        if ( NULL == i_target ) break;
-
-        TargetService::ASSOCIATION_TYPE l_assocType;
-        int32_t l_rc = getAssociationType( i_target, i_connType, l_assocType );
-        if ( SUCCESS != l_rc ) break;
+        if ( NULL == i_target )
+        {
+            PRDF_ERR( PRDF_FUNC"Given target is null" );
+            break;
+        }
 
         // Match any class, specified type, and functional.
         PredicateCTM predType( CLASS_NA, i_connType );
@@ -509,79 +499,184 @@ TARGETING::TargetHandleList getConnected( TARGETING::TargetHandle_t i_target,
         PredicatePostfixExpr predAnd;
         predAnd.push(&predType).push(&predFunc).And();
 
-        targetService().getAssociated( o_list, i_target, l_assocType,
+        targetService().getAssociated( o_list, i_target, i_assocType,
                                        TargetService::ALL, &predAnd );
 
     } while(0);
 
-    if ( 0 == o_list.size() )
+    return o_list;
+
+    #undef PRDF_FUNC
+}
+
+//------------------------------------------------------------------------------
+
+TargetHandleList getConnected( TargetHandle_t i_target, TYPE i_connType )
+{
+    TargetHandleList o_list; // Default empty list
+
+    do
     {
-        PRDF_ERR( "[getConnected] Failed: i_target=0x%08x i_connType=%d",
-                  getHuid(i_target), i_connType );
-    }
+        if ( i_connType == getTargetType(i_target) )
+        {
+            o_list.push_back( i_target );
+            break;
+        }
+
+        TargetService::ASSOCIATION_TYPE assocType;
+        int32_t l_rc = getAssociationType( i_target, i_connType, assocType );
+        if ( SUCCESS != l_rc ) break;
+
+        o_list = getConnAssoc( i_target, i_connType, assocType );
+
+    } while(0);
 
     return o_list;
 }
 
-TargetHandle_t getConnectedPos( TargetHandle_t i_target, TYPE i_type,
-                                uint32_t i_position )
-{
-    TargetHandle_t o_tgt = NULL;
-
-    TargetHandleList list = getConnected(i_target, i_type);
-
-    for (TargetHandleList::iterator i = list.begin();
-         i != list.end(); ++i)
-    {
-        if ( i_position == getTargetPosition(*i) )
-        {
-            o_tgt = *i;
-            break;
-        }
-    }
-    if ( NULL == o_tgt )
-    {
-        PRDF_ERR( "[getConnectedPos] "
-                  "Couldn't find connected target 0x%08x, type %d pos %d",
-                  getHuid(i_target), i_type, i_position);
-    }
-
-    return o_tgt;
-}
-
-// note - This function only works if ATTR_PEER_TARGET is defined.
-//        Currently only X and A bus targets.
-TargetHandle_t getConnectedPeerTarget(TargetHandle_t i_tgt)
-{
-    TargetHandle_t o_tgt = NULL;
-    if ( !i_tgt->tryGetAttr<ATTR_PEER_TARGET>(o_tgt) )
-    {
-        PRDF_ERR( "[getConnectedPeerTarget] "
-                  "Couldn't find connected peer target 0x%08x",
-                  getHuid(i_tgt));
-    }
-
-    return o_tgt;
-}
 //------------------------------------------------------------------------------
 
-TARGETING::TargetHandle_t getConnectedPeerProc(
-                                         TARGETING::TargetHandle_t i_procTarget,
-                                         TARGETING::TYPE i_busType,
-                                         uint32_t i_busPos )
+TargetHandle_t getConnectedParent( TargetHandle_t i_target, TYPE i_connType )
 {
-    #define FUNC "[getConnectedPeerProc] "
+    #define PRDF_FUNC "[PlatServices::getConnectedParent] "
+
+    TargetHandle_t o_parent = NULL;
+
+    do
+    {
+        if ( i_connType == getTargetType(i_target) )
+        {
+            o_parent = i_target;
+            break;
+        }
+
+        TargetService::ASSOCIATION_TYPE assocType;
+        int32_t l_rc = getAssociationType( i_target, i_connType, assocType );
+        if ( SUCCESS != l_rc ) break;
+
+        if ( TargetService::PARENT_BY_AFFINITY != assocType )
+        {
+            PRDF_ERR( PRDF_FUNC"Unsupported parent connection: i_target=0x%08x "
+                      "i_connType=%d", getHuid(i_target), i_connType );
+            break;
+        }
+
+        TargetHandleList list = getConnAssoc( i_target, i_connType, assocType );
+        if ( 1 != list.size() ) // Should be one and only one parent
+        {
+            PRDF_ERR( PRDF_FUNC"Could not find parent: i_target=0x%08x "
+                      "i_connType=%d", getHuid(i_target), i_connType );
+            break;
+        }
+
+        o_parent = list[0];
+
+    } while(0);
+
+    return o_parent;
+
+    #undef PRDF_FUNC
+}
+
+//------------------------------------------------------------------------------
+
+TargetHandle_t getConnectedChild( TargetHandle_t i_target, TYPE i_connType,
+                                  uint32_t i_position )
+{
+    #define PRDF_FUNC "[PlatServices::getConnectedChild] "
+
+    TargetHandle_t o_child = NULL;
+
+    do
+    {
+        TargetService::ASSOCIATION_TYPE assocType;
+        int32_t l_rc = getAssociationType( i_target, i_connType, assocType );
+        if ( SUCCESS != l_rc ) break;
+
+        if ( TargetService::CHILD_BY_AFFINITY != assocType )
+        {
+            PRDF_ERR( PRDF_FUNC"Unsupported child connection: i_target=0x%08x "
+                    "i_connType=%d", getHuid(i_target), i_connType );
+            break;
+        }
+
+        // SPECIAL CASE: The MEMBUF position number is relative to the PROC,
+        //      not the MCS. This means the MEMBUF position number is the same
+        //      as the position number of the attached MCS. In many cases, we
+        //      want to get the MEMBUF connected to the MCS, but don't have
+        //      knowledge of the MCS's position number (espeically in the rule
+        //      code. So the following will change the desired position number
+        //      to the MCS position number for MCS->MEMBUF connections only.
+        if ( TYPE_MCS == getTargetType(i_target) && TYPE_MEMBUF == i_connType )
+            i_position = getTargetPosition(i_target);
+
+        TargetHandleList list = getConnAssoc( i_target, i_connType, assocType );
+        for ( TargetHandleList::iterator i = list.begin();
+              i != list.end(); ++i )
+        {
+            if ( i_position == getTargetPosition(*i) )
+            {
+                o_child = *i;
+                break;
+            }
+        }
+
+    } while(0);
+
+    return o_child;
+
+    #undef PRDF_FUNC
+}
+
+//------------------------------------------------------------------------------
+
+TargetHandle_t getConnectedPeerTarget( TargetHandle_t i_target )
+{
+    #define PRDF_FUNC "[PlatServices::getConnectedPeerTarget] "
 
     TargetHandle_t o_target = NULL;
 
     do
     {
-        // Parameter checks. Error trace output is in NULL check below.
-        if ( NULL == i_procTarget ) break;
-
-        if ( TYPE_PROC != getTargetType(i_procTarget) )
+        if ( NULL == i_target )
         {
-            PRDF_ERR( FUNC"Given target is not of TYPE_PROC" ); break;
+            PRDF_ERR( PRDF_FUNC"Given target is NULL" );
+            break;
+        }
+
+        TYPE type = getTargetType( i_target );
+        if ( TYPE_XBUS != type && TYPE_ABUS != type )
+        {
+            PRDF_ERR( PRDF_FUNC"Target type not supported: i_target=0x%08x "
+                      "type=0x%x", getHuid(i_target), type );
+            break;
+        }
+
+        o_target = i_target->getAttr<ATTR_PEER_TARGET>();
+
+    } while(0);
+
+    return o_target;
+
+    #undef PRDF_FUNC
+}
+
+//------------------------------------------------------------------------------
+
+TargetHandle_t getConnectedPeerProc( TargetHandle_t i_procTarget,
+                                     TYPE i_busType, uint32_t i_busPos )
+{
+    #define PRDF_FUNC "[PlatServices::getConnectedPeerProc] "
+
+    TargetHandle_t o_target = NULL;
+
+    do
+    {
+        if ( NULL == i_procTarget || TYPE_PROC != getTargetType(i_procTarget) )
+        {
+            PRDF_ERR( PRDF_FUNC"Given target is not of TYPE_PROC: "
+                      "i_procTarget=0x%08x", getHuid(i_procTarget) );
+            break;
         }
 
         if ( !( ((TYPE_XBUS == i_busType) && (MAX_XBUS_PER_PROC > i_busPos)) ||
@@ -589,49 +684,22 @@ TARGETING::TargetHandle_t getConnectedPeerProc(
             break;
 
         // Starting PROC -> starting XBUS/ABUS.
-        TargetHandleList list = getConnected( i_procTarget, i_busType );
-        TargetHandle_t busTarget = NULL;
-        for (TargetHandleList::iterator i = list.begin(); i != list.end(); ++i)
-        {
-            if ( i_busPos == getTargetPosition(*i) )
-            {
-                busTarget = *i;
-                break; // for loop
-            }
-        }
-        if ( NULL == busTarget )
-        {
-            PRDF_ERR( FUNC"Couldn't find connected bus" ); break;
-        }
+        TargetHandle_t busTarget = getConnectedChild( i_procTarget, i_busType,
+                                                      i_busPos );
+        if ( NULL == busTarget ) break;
 
         // Starting XBUS/ABUS -> ATTR_PEER_TARGET -> destination XBUS/ABUS.
-        TargetHandle_t destTarget = NULL;
-// FIXME - ATTR_PEER_TARGET support has not been ported to FSP yet.
-//        if ( !busTarget->tryGetAttr<ATTR_PEER_TARGET>(destTarget) )
-        if ( true )
-        {
-            PRDF_ERR( FUNC"Couldn't find destination bus" ); break;
-        }
+        TargetHandle_t destTarget = getConnectedPeerTarget( busTarget );
+        if ( NULL == destTarget ) break;
 
-        // Destination XBUS/ABUS <-> destination PROC.
-        list = getConnected( destTarget, TYPE_PROC );
-        if ( 1 != list.size() )
-        {
-            PRDF_ERR( FUNC"Couldn't find destination PROC" ); break;
-        }
-        o_target = list[0];
+        // Destination XBUS/ABUS -> destination PROC.
+        o_target = getConnectedParent( destTarget, TYPE_PROC );
 
     } while(0);
 
-    if ( NULL == o_target )
-    {
-        PRDF_ERR( FUNC"Failed: i_procTarget=0x%08x i_busType=%d i_busPos=%d",
-                  getHuid(i_procTarget), i_busType, i_busPos );
-    }
-
-    #undef FUNC
-
     return o_target;
+
+    #undef PRDF_FUNC
 }
 
 //------------------------------------------------------------------------------
@@ -814,11 +882,8 @@ uint32_t getNodePosition( TARGETING::TargetHandle_t i_target )
     do
     {
         // Get the node handle.
-        TargetHandle_t l_node = NULL;
-        TargetHandleList l_list = getConnected( i_target, TYPE_NODE );
-        if ( 1 == l_list.size() )
-            l_node = l_list[0];
-        else
+        TargetHandle_t node = getConnectedParent( i_target, TYPE_NODE );
+        if ( NULL == node )
         {
             PRDF_ERR( "[getNodePosition] Failed to get node target" );
             break;
@@ -829,7 +894,7 @@ uint32_t getNodePosition( TARGETING::TargetHandle_t i_target )
         //        exist but it will, eventually. (RTC WI expected from Nick
         //        Bofferding)
         EntityPath l_path ( EntityPath::PATH_PHYSICAL );
-        int32_t l_rc = getEntityPath( l_node, l_path );
+        int32_t l_rc = getEntityPath( node, l_path );
         if ( SUCCESS != l_rc ) break;
 
         o_pos = l_path[l_path.size()-1].instance;
@@ -851,10 +916,12 @@ uint32_t getNodePosition( TARGETING::TargetHandle_t i_target )
 //##
 //##############################################################################
 
-int32_t getMasterRanks( TARGETING::TargetHandle_t i_memTarget,
+int32_t getMasterRanks( TargetHandle_t i_memTarget,
                         uint32_t i_portSlct, uint32_t i_dimmSlct,
                         std::vector<uint32_t> & o_ranks )
 {
+    #define PRDF_FUNC "PlatServices::getMasterRanks] "
+
     int32_t o_rc = FAIL;
 
     do
@@ -865,8 +932,12 @@ int32_t getMasterRanks( TARGETING::TargetHandle_t i_memTarget,
              (MAX_DIMM_PER_PORT <= i_dimmSlct) )
             break;
 
-        TARGETING::TargetHandle_t mbaTarget = getParent(i_memTarget, TYPE_MBA);
-        if ( NULL == mbaTarget ) break;
+        TargetHandle_t mbaTarget = getConnectedParent( i_memTarget, TYPE_MBA );
+        if ( NULL == mbaTarget )
+        {
+            PRDF_ERR( PRDF_FUNC"getConnectedParent() failed" );
+            break;
+        }
 
         uint8_t rankInfo[MAX_PORT_PER_MBA][MAX_DIMM_PER_PORT];
         if( !mbaTarget->tryGetAttr<ATTR_EFF_DIMM_RANKS_CONFIGED>(rankInfo) )
@@ -917,8 +988,12 @@ uint32_t getMemChnl( TARGETING::TargetHandle_t i_memTarget )
     {
         if ( NULL == i_memTarget ) break;
 
-        TARGETING::TargetHandle_t mcsTarget = getParent(i_memTarget, TYPE_MCS);
-        if ( NULL == mcsTarget ) break;
+        TargetHandle_t mcsTarget = getConnectedParent( i_memTarget, TYPE_MCS );
+        if ( NULL == mcsTarget )
+        {
+            PRDF_ERR( PRDF_FUNC"getConnectedParent() failed" );
+            break;
+        }
 
         o_chnl = getTargetPosition( mcsTarget );
 
@@ -944,24 +1019,16 @@ int32_t isMembufOnDimm( TARGETING::TargetHandle_t i_memTarget,
 
     do
     {
-        TargetHandle_t mbaTarget = NULL;
+        // The DIMMs in an node should either all be buffered or all not. So
+        // we can check the attribute from ANY MBA.
+        TargetHandleList list = getConnected( i_memTarget, TYPE_MBA );
+        if ( 0 == list.size() )
+        {
+            PRDF_ERR( "[isMembufOnDimm] Couldn't find an MBA target" );
+            break;
+        }
 
-        if ( TYPE_MBA == getTargetType(i_memTarget) )
-        {
-            mbaTarget = i_memTarget;
-        }
-        else
-        {
-            // The DIMMs in an node should either all be buffered or all not. So
-            // we can check the attribute from ANY MBA.
-            TargetHandleList list = getConnected( i_memTarget, TYPE_MBA );
-            if ( 0 == list.size() )
-            {
-                PRDF_ERR( "[isMembufOnDimm] Couldn't find an MBA target" );
-                break;
-            }
-            mbaTarget = list[0];
-        }
+        TargetHandle_t mbaTarget = list[0];
 
         o_isBuffered = mbaTarget->getAttr<ATTR_EFF_CUSTOM_DIMM>();
 

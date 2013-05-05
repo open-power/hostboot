@@ -150,15 +150,15 @@ MemoryMru::MemoryMru( TARGETING::TargetHandle_t i_mbaTarget,
 
     do
     {
-        TargetHandleList nodeList = getConnected( iv_mbaTarget, TYPE_NODE );
-        if ( 1 != nodeList.size() )
+        TargetHandle_t node = getConnectedParent( iv_mbaTarget, TYPE_NODE );
+        if ( NULL == node )
         {
             PRDF_ERR( PRDF_FUNC"Could not find node attached to MBA 0x%08x",
                       getHuid(iv_mbaTarget) );
             break;
         }
 
-        iv_memMruMeld.s.nodePos    = getTargetPosition( nodeList[0] );
+        iv_memMruMeld.s.nodePos    = getTargetPosition( node );
         iv_memMruMeld.s.mbaPos     = getTargetPosition( iv_mbaTarget );
         iv_memMruMeld.s.rank       = iv_rank.flatten();
         iv_memMruMeld.s.symbol     = iv_symbol.getSymbol();
@@ -188,15 +188,15 @@ MemoryMru::MemoryMru( TARGETING::TargetHandle_t i_mbaTarget,
 
     do
     {
-        TargetHandleList nodeList = getConnected( iv_mbaTarget, TYPE_NODE );
-        if ( 1 != nodeList.size() )
+        TargetHandle_t node = getConnectedParent( iv_mbaTarget, TYPE_NODE );
+        if ( NULL == node )
         {
             PRDF_ERR( PRDF_FUNC"Could not find node attached to MBA 0x%08x",
                       getHuid(iv_mbaTarget) );
             break;
         }
 
-        iv_memMruMeld.s.nodePos = getTargetPosition( nodeList[0] );
+        iv_memMruMeld.s.nodePos = getTargetPosition( node );
         iv_memMruMeld.s.mbaPos  = getTargetPosition( iv_mbaTarget );
         iv_memMruMeld.s.rank    = iv_rank.flatten();
         iv_memMruMeld.s.symbol  = iv_special;

@@ -169,22 +169,34 @@ uint8_t getChipLevel( TARGETING::TargetHandle_t i_target );
  * @param   i_target    The given target.
  * @param   i_connType  Type of target(s) return in list
  * @return  The connected list of targets. On error, the list will be empty.
+ * @note    If the given target is the same type as the given type, only the
+ *          given target is returned in the list.
  * @note    This function does not support peer-to-peer connections.
  */
 TARGETING::TargetHandleList getConnected( TARGETING::TargetHandle_t i_target,
                                           TARGETING::TYPE i_connType );
 
 /**
- * @brief   Returns a functional target of a given type and given target
- *          position that is associated with the given target.
+ * @brief   Returns a functional parent target of a given type.
+ * @param   i_target    The given target.
+ * @param   i_connType  Type of target(s) return in list
+ * @note    If the given target is the same type as the given type, the given
+ *          target is returned.
+ * @return  The requested parent target, NULL if something failed.
+ */
+TARGETING::TargetHandle_t getConnectedParent(TARGETING::TargetHandle_t i_target,
+                                             TARGETING::TYPE i_connType );
+
+/**
+ * @brief   Returns a functional child target of a given type and position.
  * @param   i_target    The given target.
  * @param   i_connType  Type of target(s) return in list
  * @param   i_position  Target position index
- * @return  The requested target handle, otherwise NULL
+ * @return  The requested child target, NULL if target not found.
  */
-TARGETING::TargetHandle_t getConnectedPos( TARGETING::TargetHandle_t i_target,
-                                           TARGETING::TYPE i_type,
-                                           uint32_t i_position );
+TARGETING::TargetHandle_t getConnectedChild( TARGETING::TargetHandle_t i_target,
+                                             TARGETING::TYPE i_connType,
+                                             uint32_t i_position );
 
 /**
  * @brief   Returns the target of a PROC that is connected via the given

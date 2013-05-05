@@ -31,6 +31,7 @@
 #include <UtilHash.H>
 #include <prdfGlobal.H>
 #include <iipSystem.h>
+#include <prdfP8McsDataBundle.H>
 
 //##############################################################################
 //
@@ -40,6 +41,7 @@
 
 namespace PRDF
 {
+
 namespace Mcs
 {
 
@@ -50,7 +52,7 @@ namespace Mcs
  */
 int32_t Initialize( ExtensibleChip * i_mcsChip )
 {
-    // FIXME: Add proper initialization as per requirement
+    i_mcsChip->getDataBundle() = new P8McsDataBundle( i_mcsChip );
     return SUCCESS;
 }
 PRDF_PLUGIN_DEFINE( Mcs, Initialize );
@@ -98,14 +100,12 @@ int32_t CheckCentaurCheckstop( ExtensibleChip * i_mcsChip,
         i_mcsChip->CaptureErrorData(i_sc.service_data->GetCaptureData(),
                                     Util::hashString("CENT_XSTP_FFDC"));
 
-        ExtensibleChip * l_cent = (ExtensibleChip *)
-          systemPtr->GetChip(PlatServices::getConnected(
-                                         i_mcsChip->GetChipHandle(),
-                                         TARGETING::TYPE_MEMBUF)[0] );
-        if (l_cent)
+        P8McsDataBundle * mcsdb = getMcsDataBundle( i_mcsChip );
+        ExtensibleChip * membChip = mcsdb->getMembChip();
+        if ( NULL != membChip )
         {
-            l_cent->CaptureErrorData(i_sc.service_data->GetCaptureData(),
-                                     Util::hashString("CENT_XSTP_FFDC"));
+            membChip->CaptureErrorData( i_sc.service_data->GetCaptureData(),
+                                        Util::hashString("CENT_XSTP_FFDC") );
         }
 
     } while (0);
@@ -148,31 +148,30 @@ int32_t PostAnalysis( ExtensibleChip * i_mcsChip,
 {
     int32_t l_rc = SUCCESS;
 
-    if (i_sc.service_data->GetFlag(ServiceDataCollector::UNIT_CS))
+    if ( i_sc.service_data->GetFlag(ServiceDataCollector::UNIT_CS) )
     {
-        ExtensibleChip * l_cent = (ExtensibleChip *)
-          systemPtr->GetChip(PlatServices::getConnected(
-                                           i_mcsChip->GetChipHandle(),
-                                           TARGETING::TYPE_MEMBUF)[0] );
-        if (l_cent)
+        P8McsDataBundle * mcsdb = getMcsDataBundle( i_mcsChip );
+        ExtensibleChip * membChip = mcsdb->getMembChip();
+        if ( NULL != membChip )
         {
             // Mask attentions from the Centaur
-            SCAN_COMM_REGISTER_CLASS * l_tpfirmask = NULL;
+            SCAN_COMM_REGISTER_CLASS * l_tpfirmask   = NULL;
             SCAN_COMM_REGISTER_CLASS * l_nestfirmask = NULL;
-            SCAN_COMM_REGISTER_CLASS * l_memfirmask = NULL;
-            SCAN_COMM_REGISTER_CLASS * l_memspamask = NULL;
+            SCAN_COMM_REGISTER_CLASS * l_memfirmask  = NULL;
+            SCAN_COMM_REGISTER_CLASS * l_memspamask  = NULL;
 
-            l_tpfirmask = l_cent->getRegister("TP_CHIPLET_FIR_MASK");
-            l_nestfirmask = l_cent->getRegister("NEST_CHIPLET_FIR_MASK");
-            l_memfirmask = l_cent->getRegister("MEM_CHIPLET_FIR_MASK");
-            l_memspamask = l_cent->getRegister("MEM_CHIPLET_SPA_MASK");
+            l_tpfirmask   = membChip->getRegister("TP_CHIPLET_FIR_MASK");
+            l_nestfirmask = membChip->getRegister("NEST_CHIPLET_FIR_MASK");
+            l_memfirmask  = membChip->getRegister("MEM_CHIPLET_FIR_MASK");
+            l_memspamask  = membChip->getRegister("MEM_CHIPLET_SPA_MASK");
 
-            l_tpfirmask->setAllBits(); l_rc |= l_tpfirmask->Write();
+            l_tpfirmask->setAllBits();   l_rc |= l_tpfirmask->Write();
             l_nestfirmask->setAllBits(); l_rc |= l_nestfirmask->Write();
-            l_memfirmask->setAllBits(); l_rc |= l_memfirmask->Write();
-            l_memspamask->setAllBits(); l_rc |= l_memspamask->Write();
+            l_memfirmask->setAllBits();  l_rc |= l_memfirmask->Write();
+            l_memspamask->setAllBits();  l_rc |= l_memspamask->Write();
         }
     }
+
     return SUCCESS;
 }
 PRDF_PLUGIN_DEFINE( Mcs, PostAnalysis );

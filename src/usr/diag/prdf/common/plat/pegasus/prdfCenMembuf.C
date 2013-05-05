@@ -111,30 +111,12 @@ int32_t MBA1_Starvation( ExtensibleChip * i_membChip,
                          STEP_CODE_DATA_STRUCT & i_sc )
 {
     using namespace TARGETING;
-    CenMembufDataBundle * l_membdb = getCenMembufDataBundle(i_membChip);
+    CenMembufDataBundle * l_membdb = getMembufDataBundle(i_membChip);
 
     do
     {
-        // Get MBA1 chip object
-        TargetHandle_t l_mba1Target = NULL;
-        TargetHandleList l_mbaList =
-            PlatServices::getConnected( i_membChip->GetChipHandle(),
-                                        TYPE_MBA );
-
-        TargetHandleList::iterator iter = l_mbaList.begin();
-        for( ; iter != l_mbaList.end(); ++iter)
-        {
-            if( 1 == PlatServices::getTargetPosition( *iter ) )
-            {
-                l_mba1Target = *iter;
-                break;
-            }
-        }
-
-        if( NULL == l_mba1Target )
-        {
-            break; // No MBA1 target, exit early
-        }
+        ExtensibleChip * mba1Chip = l_membdb->getMbaChip(1);
+        if ( NULL == mba1Chip ) break; // No MBA1 target, exit early
 
         if ( l_membdb->iv_analyzeMba1Starvation )
         {
@@ -184,25 +166,14 @@ int32_t MBA1_Starvation( ExtensibleChip * i_membChip,
             // MBA0 takes priority next
             l_membdb->iv_analyzeMba1Starvation = false;
 
-            ExtensibleChip * l_mbaChip =
-                (ExtensibleChip *)systemPtr->GetChip(l_mba1Target);
-
-            if( NULL == l_mbaChip )
-            {
-                break; // no MBA1 target, break out
-            }
-
             // Analyze MBA1
-            return l_mbaChip->Analyze(i_sc,
-                                      i_sc.service_data->GetCauseAttentionType());
+            return mba1Chip->Analyze( i_sc,
+                                i_sc.service_data->GetCauseAttentionType() );
         }
         else
         {
-            if( NULL != l_mba1Target )
-            {
-                // MBA1 takes priority next
-                l_membdb->iv_analyzeMba1Starvation = true;
-            }
+            // MBA1 takes priority next
+            l_membdb->iv_analyzeMba1Starvation = true;
         }
 
     } while (0);
@@ -236,7 +207,7 @@ int32_t PreAnalysis( ExtensibleChip * i_mbChip, STEP_CODE_DATA_STRUCT & i_sc,
         if ( i_sc.service_data->GetFlag(ServiceDataCollector::UNIT_CS) )
             break;
 
-        CenMembufDataBundle * mbdb = getCenMembufDataBundle(i_mbChip);
+        CenMembufDataBundle * mbdb = getMembufDataBundle(i_mbChip);
         ExtensibleChip * mcsChip = mbdb->getMcsChip();
         if ( NULL == mcsChip )
         {
@@ -291,7 +262,7 @@ int32_t PostAnalysis( ExtensibleChip * i_mbChip, STEP_CODE_DATA_STRUCT & i_sc )
     // In hostboot, we need to clear associated bits in the MCIFIR bits.
     do
     {
-        CenMembufDataBundle * mbdb = getCenMembufDataBundle(i_mbChip);
+        CenMembufDataBundle * mbdb = getMembufDataBundle(i_mbChip);
         ExtensibleChip * mcsChip = mbdb->getMcsChip();
         if ( NULL == mcsChip )
         {

@@ -69,9 +69,8 @@ int32_t handleLaneRepairEvent (ExtensibleChip * i_chip,
         else if (iChipType == TYPE_PROC)
         {
             // i_chip is a Proc, Get connected XBUS, ABUS, or MCS target
-            rxBusTgt = getConnectedPos(i_chip->GetChipHandle(),
-                                    i_busType,
-                                    i_busPos);
+            rxBusTgt = getConnectedChild( i_chip->GetChipHandle(),
+                                          i_busType, i_busPos );
             if ( NULL == rxBusTgt )
             {
                 PRDF_ERR( "[LaneRepair::handleLaneRepairEvent] HUID: 0x%08x "
@@ -98,11 +97,11 @@ int32_t handleLaneRepairEvent (ExtensibleChip * i_chip,
         }
         else if (i_busType == TYPE_MEMBUF)
         {
-            txBusTgt = getConnected(rxBusTgt, TYPE_MCS)[0];
+            txBusTgt = getConnectedParent(rxBusTgt, TYPE_MCS);
         }
         else if (i_busType == TYPE_MCS)
         {
-            txBusTgt = getConnected(rxBusTgt, TYPE_MEMBUF)[0];
+            txBusTgt = getConnectedChild(rxBusTgt, TYPE_MEMBUF, 0);
         }
 
         if ( NULL == txBusTgt )

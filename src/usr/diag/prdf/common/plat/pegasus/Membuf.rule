@@ -89,7 +89,7 @@ chip Membuf
 .include "Membuf_regs_MEM.rule"
 
     ############################################################################
-    #	Non-existant Registers for Capture
+    #   Non-existent Registers for Capture
     ############################################################################
 
     register VPD_FAILED_LANES_0TO63

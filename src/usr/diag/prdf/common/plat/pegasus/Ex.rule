@@ -1440,7 +1440,7 @@ actionclass L2ChipLevel2
 
 actionclass calloutProcLow
 {
-    callout(connected(TYPE_PROC,0),MRU_LOW);
+    callout(connected(TYPE_PROC),MRU_LOW);
 };
 
 actionclass L2PowerBusCE
