@@ -50,7 +50,7 @@ class MfgThresholdMgr
         static MfgThresholdMgr * getInstance();
 
         uint16_t getThreshold(uint32_t i_thrName);
-        const ThresholdResolution::ThresholdPolicy* getThresholdP(uint32_t i_thrName);
+        ThresholdResolution::ThresholdPolicy* getThresholdP(uint32_t i_thrName);
 
         void reset();
 
@@ -59,6 +59,8 @@ class MfgThresholdMgr
     private:
         uint16_t getThresholdDefault(uint32_t i_thrName);
         void setupFile();
+
+        FlyWeight<ThresholdResolution::ThresholdPolicy, 10> iv_thrs;
 
         PRDF_MFG_THRESHOLD_FILE_DECLARE(iv_file);
 };

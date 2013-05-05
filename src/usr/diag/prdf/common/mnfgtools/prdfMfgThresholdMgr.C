@@ -59,16 +59,19 @@ uint16_t MfgThresholdMgr::getThreshold(uint32_t i_thrName)
         return (uint16_t) l_thr; //FIXME In case of error (-1), is it right behavior
 }
 
-const ThresholdResolution::ThresholdPolicy*
+ThresholdResolution::ThresholdPolicy*
     MfgThresholdMgr::getThresholdP(uint32_t i_thrName)
 {
-    const static ThresholdResolution::ThresholdPolicy l_policy (getThreshold(i_thrName), 0xffffffff );
+    ThresholdResolution::ThresholdPolicy
+        l_policy(getThreshold(i_thrName), 0xffffffff );
 
-    return &(l_policy);
+    return &(iv_thrs.get(l_policy));
 }
 
 void MfgThresholdMgr::reset()
 {
+    iv_thrs.clear();
+
     PRDF_MFG_THRESHOLD_FILE_DELETE(iv_file);
 }
 
@@ -95,8 +98,8 @@ void MfgThresholdMgr::setupFile()
     PRDF_MFG_THRESHOLD_FILE_SETUP(iv_file);
 }
 
-bool operator==(const ThresholdResolution::ThresholdPolicy & l,
-                const ThresholdResolution::ThresholdPolicy & r)
+bool operator==(ThresholdResolution::ThresholdPolicy & l,
+                ThresholdResolution::ThresholdPolicy & r)
 {
     return (l.threshold == r.threshold) &&
            (l.interval == r.interval);
