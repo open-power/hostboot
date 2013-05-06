@@ -30,6 +30,7 @@
 #include <hwas/common/hwasCommon.H>
 #include <hwas/common/hwasCallout.H>
 #include <hwas/common/deconfigGard.H>
+#include <initservice/initserviceif.H>
 
 namespace HWAS
 {
@@ -92,27 +93,29 @@ errlHndl_t platHandleHWCallout(
         }
         case (DELAYED_DECONFIG):
         {
-            // check to see if this target is the master processor
-            TARGETING::Target *l_masterProc;
-            TARGETING::targetService().masterProcChipTargetHandle(
-                        l_masterProc);
-            if (i_pTarget == l_masterProc)
-            {
-                // if so, we can't run anymore, so we will
-                //  call HWAS to deconfigure, forcing the issue now.
-                // TODO: RTC: 45781
-                HWAS_ERR("callout - DELAYED_DECONFIG on MasterProc");
-                errl = HWAS::theDeconfigGard().deconfigureTarget(*i_pTarget,
-                        i_errl->plid());
-                break;
-            }
-            // else
             // do nothing -- the deconfig information was already
             // put on a queue and will be processed separately,
             // when the time is right.
             break;
         }
     } // switch i_deconfigState
+
+    // check to see if this target is the master processor
+    //  and if it's been deconfigured.
+    TARGETING::Target *l_masterProc;
+    TARGETING::targetService().masterProcChipTargetHandle(l_masterProc);
+    if (i_pTarget == l_masterProc)
+    {
+        const TARGETING::HwasState hwasState =
+                l_masterProc->getAttr<TARGETING::ATTR_HWAS_STATE>();
+        if (!hwasState.functional)
+        {
+            HWAS_ERR("master proc deconfigured - Shutdown due to plid 0x%X",
+                    i_errl->plid());
+            INITSERVICE::doShutdown(i_errl->plid());
+        }
+    }
+
     return errl;
 }
 

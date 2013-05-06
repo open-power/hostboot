@@ -41,15 +41,15 @@ namespace HWAS
 {
 
 /**
- *  @brief processDelayedDeconfig process any delayed deconfigure callouts
+ *  @brief processDeferredDeconfig process any deferred deconfigure callouts
  *              that might have been 'queued' up.
  *
  *  This is outside of the DeconfigGard class because it is called
  *
- *  @return bool true if there were delayed deconfigure callouts;
- *               false if there were NO delayed deconfigure callouts;
+ *  @return bool true if there were deferred deconfigure callouts;
+ *               false if there were NO deferred deconfigure callouts;
  */
-bool processDelayedDeconfig();
+bool processDeferredDeconfig();
 
 /**
  * @brief   collectGard   Common HWAS function to collect the GARD info
@@ -84,19 +84,7 @@ class DeconfigGard
 
 public:
 
-    /**
-     * @enum DeconfigCause
-     *
-     * Defines the possible causes for the creation of a Deconfigure Record
-     */
-    enum DeconfigCause
-    {
-        DECONFIG_CAUSE_GARD_RECORD       = 1,  // Existence of GARD Record
-        DECONFIG_CAUSE_FIRMWARE_REQ      = 2,  // Firmware Request
-        DECONFIG_CAUSE_DECONFIG_BY_ASSOC = 3,  // Deconfigure by Association
-    };
-
-    enum 
+    enum
     {
         CLEAR_ALL_GARD_RECORDS = EMPTY_GARD_RECORDID,
         GET_ALL_GARD_RECORDS = EMPTY_GARD_RECORDID,
@@ -106,7 +94,7 @@ public:
      * @struct GardRecord
      *
      * Defines a GARD Record.
-     * 
+     *
      * Multiple GARD Records can exist for a specific Target
      */
     struct GardRecord
@@ -132,16 +120,13 @@ public:
      * @struct DeconfigureRecord
      *
      * Defines a Deconfigure Record for deferred deconfigures
-     * 
+     *
      * Only one Deconfigure Record can exist for a specific Target
      */
     struct DeconfigureRecord
     {
-        TARGETING::EntityPath iv_targetId;
-        uint32_t              iv_errlogPlid;
-        uint8_t               iv_cause; // Value from DeconfigCause
-        uint8_t               iv_padding[3];
-        uint32_t              iv_deconfigureTime;
+        const TARGETING::Target * iv_target;
+        uint32_t            iv_errlogPlid;
     };
 
     typedef std::vector<DeconfigureRecord> DeconfigureRecords_t;
@@ -185,7 +170,7 @@ public:
      * Called from processCallout, which is called
      * by ErrlManager when committing an error log containing a
      * Deconfigure request.
-     * 
+     *
      * This will Deconfigure the Target (set state to non-functional, do any
      * Deconfigure actions and create a Deconfigure Record) and Deconfigure
      * Targets by association. Any errors deconfiguring targets are committed
@@ -201,13 +186,13 @@ public:
                                  const uint32_t i_errlPlid,
                                  bool i_evenAtRunTime = false);
     /**
-     * @brief Registers a Delayed Deconfigure
+     * @brief Registers a Deferred Deconfigure
      *
      * Called from errludcallout, which is called
-     * by hwasCallout when the user requests a 
-     * Delayed Deconfigure request.
-     * 
-     * For now, just put a mark on the wall indicating that we got a delayed
+     * by hwasCallout when the user requests a
+     * Deferred Deconfigure request.
+     *
+     * For now, just put a mark on the wall indicating that we got a deferred
      * deconfigure callout
      * TODO RTC: 45781
      *
@@ -215,7 +200,7 @@ public:
      * @param[in] i_errlPlid Error log PLID to store in Deconfigure Record.
      *
      */
-    void registerDelayedDeconfigure(const TARGETING::Target & i_target,
+    void registerDeferredDeconfigure(const TARGETING::Target & i_target,
                                  const uint32_t i_errlPlid);
 
     /**
@@ -223,9 +208,9 @@ public:
      *
      * Called by ErrlManager when committing an error log containing a
      * GARD Record request.
-     * 
+     *
      * Called by an administrator to manually create a GARD Record.
-     * 
+     *
      * Any error creating the GARD Record will be returned to the user.
      *
      * @param[in] i_target   Reference to Target to create GARD Record for.
@@ -239,31 +224,10 @@ public:
                                 const GARD_ErrorType i_errorType);
 
     /**
-     * @brief Gets the specified Deconfigure Records.
-     *
-     * Called by an administrator to view Deconfigure Records. There can only be
-     * one Deconfiguration Record per Target.
-     * 
-     * If the specified record does not exist then no error is returned. The
-     * only errors returned are usage errors and errors accessing the
-     * Deconfigure Records.
-     *
-     * @param[in]  i_pTargetId Pointer to the Target ID to get the Deconfigure
-     *                         Record for. If NULL then all Deconfigure Records
-     *                         are retrieved.
-     * @param[out] o_records   Reference to vector of DeconfigureRecords that is
-     *                         cleared then filled in with records.
-     *
-     * @return errlHndl_t. Error log handle.
-     */
-    errlHndl_t getDeconfigureRecords(const TARGETING::EntityPath * i_pTargetId,
-                                     DeconfigureRecords_t & o_records);
-    
-    /**
      * @brief Clears the specified GARD Records.
      *
      * Called by an administrator to clear GARD records manually.
-     * 
+     *
      * If the specified record does not exist then no error is returned. The
      * only errors returned are usage errors and errors accessing the GARD
      * Records.
@@ -279,7 +243,7 @@ public:
      * @brief Clears all GARD Records for the specified Target.
      *
      * Called by an administrator to clear GARD records manually.
-     * 
+     *
      * If no GARD Records exist for the Target then no error is returned. The
      * only errors returned are usage errors and errors accessing the GARD
      * Records.
@@ -294,7 +258,7 @@ public:
      * @brief Gets the specified GARD Records.
      *
      * Called by an administrator to view GARD Records.
-     * 
+     *
      * If the specified record does not exist then no error is returned. The
      * only errors returned are usage errors and errors accessing the GARD
      * Records.
@@ -313,7 +277,7 @@ public:
      * @brief Gets all GARD Records for the specified Target.
      *
      * Called by an administrator to view GARD Records.
-     * 
+     *
      * If no GARD Records exist for the Target then no error is returned. The
      * only errors returned are usage errors and errors accessing the GARD
      * Records.
@@ -326,12 +290,12 @@ public:
      */
     errlHndl_t getGardRecords(const TARGETING::EntityPath & i_targetId,
                               GardRecords_t & o_records);
-    
+
 protected:
 
     /**
      * @brief Default constructor
-     * 
+     *
      * Can only be called by Singleton
      */
     DeconfigGard();
@@ -350,7 +314,7 @@ private:
      */
     void _deconfigureByAssoc(TARGETING::Target & i_target,
                              const uint32_t i_errlPlid);
-    
+
     /**
      * @brief Deconfigures a Target.
      *
@@ -359,12 +323,10 @@ private:
      *
      * @param[in] i_target   Reference to Target to deconfigure.
      * @param[in] i_errlPlid Error log PLID to store in Deconfigure Record.
-     * @param[in] i_cause    Deconfigure cause.
      */
     void _deconfigureTarget(TARGETING::Target & i_target,
-                            const uint32_t i_errlPlid,
-                            const DeconfigCause i_cause);
-    
+                            const uint32_t i_errlPlid);
+
     /**
      * @brief Performs Deconfigure Actions.
      *
@@ -377,17 +339,39 @@ private:
      *
      * @param[in] i_target   Reference to Target to create record for.
      * @param[in] i_errlPlid Error log PLID to store in Deconfigure Record.
-     * @param[in] i_cause    Deconfigure cause.
      */
     void _createDeconfigureRecord(const TARGETING::Target & i_target,
-                                  const uint32_t i_errlPlid,
-                                  const DeconfigCause i_cause);
-    
+                                  const uint32_t i_errlPlid);
+
 public:
-    
+
+    /**
+     * @brief Gets the specified Deconfigure Records.
+     *
+     * Called by an administrator to view Deconfigure Records. There can only be
+     * one Deconfiguration Record per Target.
+     *
+     * If the specified record does not exist then no error is returned. The
+     * only errors returned are usage errors and errors accessing the
+     * Deconfigure Records.
+     *
+     * @note Provided for unit test only. Production code should not be
+     *       clearing Deconfigure Records.
+     *
+     * @param[in]  i_pTargetId Pointer to the Target ID to get the Deconfigure
+     *                         Record for. If NULL then all Deconfigure Records
+     *                         are retrieved.
+     * @param[out] o_records   Reference to vector of DeconfigureRecords that is
+     *                         cleared then filled in with records.
+     *
+     * @return errlHndl_t. Error log handle.
+     */
+    errlHndl_t _getDeconfigureRecords(const TARGETING::Target * i_pTarget,
+                                     DeconfigureRecords_t & o_records);
+
     /**
      * @brief Clears the specified Deconfigure Records.
-     * 
+     *
      * @note Provided for unit test only. Production code should not be
      *       clearing Deconfigure Records.
      *
@@ -395,35 +379,23 @@ public:
      *                        Records for. If NULL then all Deconfigure Records
      *                        are cleared.
      */
-    void _clearDeconfigureRecords(const TARGETING::EntityPath * i_pTargetId);
-    
+    void _clearDeconfigureRecords(const TARGETING::Target * i_pTarget);
+
 
     /**
-     *  @brief _processDelayedDeconfig process any delayed deconfigure callouts
-     *              that might have been 'queued' up.
+     *  @brief _processDeferredDeconfig process any deferred deconfigure
+     *              callouts that might have been 'queued' up.
      *
-     *
-     *  @return bool true if there were delayed deconfigure callouts;
-     *               false if there were NO delayed deconfigure callouts;
+     *  @return bool true if there were deferred deconfigure callouts;
+     *               false if there were NO deferred deconfigure callouts;
      */
-    bool _processDelayedDeconfig();
+    bool _processDeferredDeconfig();
 
 private:
-    /**
-     * @brief Gets the specified Deconfigure Records.
-     *
-     * @param[in]  i_pTargetId Pointer to the Target ID to get the Deconfigure
-     *                         Record for. If NULL then all Deconfigure Records
-     *                         are retrieved.
-     * @param[out] o_records   Reference to vector of DeconfigureRecords that is
-     *                         cleared then filled in with records.
-     */
-    void _getDeconfigureRecords(const TARGETING::EntityPath * i_pTargetId,
-                                DeconfigureRecords_t & o_records) const;
-    
+
     /**
      * @brief Creates a GARD Record for a Target.
-     * 
+     *
      * @param[in] i_target   Reference to Target to create GARD Record for.
      * @param[in] i_errlPlid Error log PLID to store in GARD Record.
      * @param[in] i_errorType Error Type of the GARD Record.
@@ -433,7 +405,7 @@ private:
     errlHndl_t _createGardRecord(const TARGETING::Target & i_target,
                                  const uint32_t i_errlPlid,
                                  const GARD_ErrorType i_errorType);
-    
+
     /**
      * @brief Clears the specified GARD Records.
      *
@@ -443,7 +415,7 @@ private:
      * @return errlHndl_t. Error log handle.
      */
     errlHndl_t _clearGardRecords(const uint32_t i_recordId);
-    
+
     /**
      * @brief Clears all GARD Records for the specified Target.
      *
@@ -465,7 +437,7 @@ private:
      */
     errlHndl_t _getGardRecords(const uint32_t i_recordId,
                                GardRecords_t & o_records);
-    
+
     /**
      * @brief Gets all GARD Records for the specified Target.
      *
@@ -478,10 +450,10 @@ private:
      */
     errlHndl_t _getGardRecords(const TARGETING::EntityPath & i_targetId,
                                GardRecords_t & o_records);
-    
+
     /**
      * @brief sets the maxGardRecords and nextGardRecordId variables
-     * 
+     *
      * @param[in]  i_size size of GARD area in PNOR/memory
      */
     void _GardRecordIdSetup(uint32_t i_size);
@@ -496,9 +468,6 @@ private:
 
     // The Deconfigure Records
     DeconfigureRecords_t iv_deconfigureRecords;
-
-    // are there any delayed deconfigure records
-    bool iv_delayedDeconfig;
 
 }; // DeconfigGard
 HWAS_DECLARE_SINGLETON(HWAS::DeconfigGard,theDeconfigGardSingleton);

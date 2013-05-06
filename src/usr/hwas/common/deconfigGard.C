@@ -57,10 +57,10 @@ namespace HWAS
 
 using namespace HWAS::COMMON;
 
-bool processDelayedDeconfig()
+bool processDeferredDeconfig()
 {
-    return HWAS::theDeconfigGard()._processDelayedDeconfig();
-} // processDelayedDeconfig
+    return HWAS::theDeconfigGard()._processDeferredDeconfig();
+}
 
 errlHndl_t collectGard(const TARGETING::PredicateBase *i_pPredicate)
 {
@@ -99,8 +99,7 @@ DeconfigGard & theDeconfigGard()
 DeconfigGard::DeconfigGard()
 : iv_nextGardRecordId(0),
   iv_maxGardRecords(0),
-  iv_pGardRecords(NULL),
-  iv_delayedDeconfig(false)
+  iv_pGardRecords(NULL)
 {
     HWAS_INF("DeconfigGard Constructor");
     HWAS_MUTEX_INIT(iv_mutex);
@@ -194,7 +193,7 @@ errlHndl_t DeconfigGard::clearGardRecordsForReplacedTargets()
 errlHndl_t DeconfigGard::deconfigureTargetsFromGardRecordsForIpl(
         const TARGETING::PredicateBase *i_pPredicate)
 {
-    HWAS_INF("Usr Request: Deconfigure Targets from GARD Records for IPL");
+    HWAS_INF("Deconfigure Targets from GARD Records for IPL");
     errlHndl_t l_pErr = NULL;
     GardRecords_t l_gardRecords;
 
@@ -258,8 +257,7 @@ errlHndl_t DeconfigGard::deconfigureTargetsFromGardRecordsForIpl(
             // Deconfigure the Target
             // don't need to check ATTR_DECONFIG_GARDABLE -- if we get
             //  here, it's because of a gard record on this target
-            _deconfigureTarget(*l_pTarget, (*l_itr).iv_errlogPlid,
-                               DECONFIG_CAUSE_GARD_RECORD);
+            _deconfigureTarget(*l_pTarget, (*l_itr).iv_errlogPlid);
 
             // Deconfigure other Targets by association
             _deconfigureByAssoc(*l_pTarget, (*l_itr).iv_errlogPlid);
@@ -276,7 +274,7 @@ errlHndl_t DeconfigGard::deconfigureTarget(TARGETING::Target & i_target,
                                            const uint32_t i_errlPlid,
                                            bool i_evenAtRunTime)
 {
-    HWAS_INF("Usr Request: Deconfigure Target");
+    HWAS_INF("Deconfigure Target");
     errlHndl_t l_pErr = NULL;
 
     do
@@ -327,7 +325,7 @@ errlHndl_t DeconfigGard::deconfigureTarget(TARGETING::Target & i_target,
         HWAS_MUTEX_LOCK(iv_mutex);
 
         // Deconfigure the Target
-        _deconfigureTarget(i_target, i_errlPlid, DECONFIG_CAUSE_FIRMWARE_REQ);
+        _deconfigureTarget(i_target, i_errlPlid);
 
         // Deconfigure other Targets by association
         _deconfigureByAssoc(i_target, i_errlPlid);
@@ -340,14 +338,17 @@ errlHndl_t DeconfigGard::deconfigureTarget(TARGETING::Target & i_target,
 }
 
 //******************************************************************************
-void DeconfigGard::registerDelayedDeconfigure(const TARGETING::Target & i_target,
-                                           const uint32_t i_errlPlid)
+void DeconfigGard::registerDeferredDeconfigure(
+        const TARGETING::Target & i_target,
+        const uint32_t i_errlPlid)
 {
-    HWAS_INF("Usr Request: registerDelayedDeconfigure Target");
+    HWAS_INF("registerDeferredDeconfigure Target %.8X, errlPlid %X",
+            TARGETING::get_huid(&i_target), i_errlPlid);
 
-    // for now, just put a mark on the wall.
-    // TODO: RTC 45781
-    iv_delayedDeconfig = true;
+    // Create a Deconfigure Record
+    HWAS_MUTEX_LOCK(iv_mutex);
+    _createDeconfigureRecord(i_target, i_errlPlid);
+    HWAS_MUTEX_UNLOCK(iv_mutex);
 }
 
 //******************************************************************************
@@ -355,7 +356,7 @@ errlHndl_t DeconfigGard::createGardRecord(const TARGETING::Target & i_target,
                                           const uint32_t i_errlPlid,
                                           const GARD_ErrorType i_errorType)
 {
-    HWAS_INF("Usr Request: Create GARD Record");
+    HWAS_INF("Create GARD Record");
     HWAS_MUTEX_LOCK(iv_mutex);
     errlHndl_t l_pErr = _createGardRecord(i_target, i_errlPlid, i_errorType);
     HWAS_MUTEX_UNLOCK(iv_mutex);
@@ -363,13 +364,48 @@ errlHndl_t DeconfigGard::createGardRecord(const TARGETING::Target & i_target,
 }
 
 //******************************************************************************
-errlHndl_t DeconfigGard::getDeconfigureRecords(
-    const TARGETING::EntityPath * i_pTargetId,
+errlHndl_t DeconfigGard::_getDeconfigureRecords(
+    const TARGETING::Target * i_pTarget,
     DeconfigureRecords_t & o_records)
 {
-    HWAS_INF("Usr Request: Get Deconfigure Record(s)");
+    HWAS_INF("Get Deconfigure Record(s)");
     HWAS_MUTEX_LOCK(iv_mutex);
-    _getDeconfigureRecords(i_pTargetId, o_records);
+
+    DeconfigureRecordsCItr_t l_itr = iv_deconfigureRecords.begin();
+    o_records.clear();
+
+    if (i_pTarget == NULL)
+    {
+        HWAS_INF("Getting all %d Deconfigure Records",
+                 iv_deconfigureRecords.size());
+
+        for (; l_itr != iv_deconfigureRecords.end(); ++l_itr)
+        {
+            o_records.push_back(*l_itr);
+        }
+    }
+    else
+    {
+        // Look for a Deconfigure Record for the specified Target (there can
+        // only be one record)
+        for (; l_itr != iv_deconfigureRecords.end(); ++l_itr)
+        {
+            if ((*l_itr).iv_target == i_pTarget)
+            {
+                HWAS_INF("Getting Deconfigure Record for %.8X",
+                               get_huid(i_pTarget));
+                o_records.push_back(*l_itr);
+                break;
+            }
+        }
+
+        if (l_itr == iv_deconfigureRecords.end())
+        {
+            HWAS_INF("Did not find a Deconfigure Record for %.8X",
+                           get_huid(i_pTarget));
+        }
+    }
+
     HWAS_MUTEX_UNLOCK(iv_mutex);
     return NULL;
 }
@@ -378,7 +414,7 @@ errlHndl_t DeconfigGard::getDeconfigureRecords(
 //******************************************************************************
 errlHndl_t DeconfigGard::clearGardRecords(const uint32_t i_recordId)
 {
-    HWAS_INF("Usr Request: Clear GARD Record(s) by Record ID");
+    HWAS_INF("Clear GARD Record(s) by Record ID");
     HWAS_MUTEX_LOCK(iv_mutex);
     errlHndl_t l_pErr = _clearGardRecords(i_recordId);
     HWAS_MUTEX_UNLOCK(iv_mutex);
@@ -389,7 +425,7 @@ errlHndl_t DeconfigGard::clearGardRecords(const uint32_t i_recordId)
 errlHndl_t DeconfigGard::clearGardRecords(
     const TARGETING::EntityPath & i_targetId)
 {
-    HWAS_INF("Usr Request: Clear GARD Record(s) by Target ID");
+    HWAS_INF("Clear GARD Record(s) by Target ID");
     HWAS_MUTEX_LOCK(iv_mutex);
     errlHndl_t l_pErr = _clearGardRecords(i_targetId);
     HWAS_MUTEX_UNLOCK(iv_mutex);
@@ -401,7 +437,7 @@ errlHndl_t DeconfigGard::getGardRecords(
     const uint32_t i_recordId,
     GardRecords_t & o_records)
 {
-    HWAS_INF("Usr Request: Get GARD Record(s) by Record ID");
+    HWAS_INF("Get GARD Record(s) by Record ID");
     HWAS_MUTEX_LOCK(iv_mutex);
     errlHndl_t l_pErr = _getGardRecords(i_recordId, o_records);
     HWAS_MUTEX_UNLOCK(iv_mutex);
@@ -413,7 +449,7 @@ errlHndl_t DeconfigGard::getGardRecords(
     const TARGETING::EntityPath & i_targetId,
     GardRecords_t & o_records)
 {
-    HWAS_INF("Usr Request: Get GARD Record(s) by Target ID");
+    HWAS_INF("Get GARD Record(s) by Target ID");
     HWAS_MUTEX_LOCK(iv_mutex);
     errlHndl_t l_pErr = _getGardRecords(i_targetId, o_records);
     HWAS_MUTEX_UNLOCK(iv_mutex);
@@ -445,8 +481,7 @@ void DeconfigGard::_deconfigureByAssoc(TARGETING::Target & i_target,
 
         if (pChild->getAttr<TARGETING::ATTR_DECONFIG_GARDABLE>())
         {   // only deconfigure targets that are able to be deconfigured
-            _deconfigureTarget(*pChild, i_errlPlid,
-                DECONFIG_CAUSE_DECONFIG_BY_ASSOC);
+            _deconfigureTarget(*pChild, i_errlPlid);
         }
     } // for CHILD
 
@@ -462,19 +497,17 @@ void DeconfigGard::_deconfigureByAssoc(TARGETING::Target & i_target,
 
         if (pChild->getAttr<TARGETING::ATTR_DECONFIG_GARDABLE>())
         {   // only deconfigure targets that are able to be deconfigured
-            _deconfigureTarget(*pChild, i_errlPlid,
-                DECONFIG_CAUSE_DECONFIG_BY_ASSOC);
+            _deconfigureTarget(*pChild, i_errlPlid);
         }
     } // for CHILD_BY_AFFINITY
 }
 
 //******************************************************************************
 void DeconfigGard::_deconfigureTarget(TARGETING::Target & i_target,
-                                      const uint32_t i_errlPlid,
-                                      const DeconfigCause i_cause)
+                                      const uint32_t i_errlPlid)
 {
-    HWAS_INF("Deconfiguring Target %.8X, errlPlid %X cause %d",
-            TARGETING::get_huid(&i_target), i_errlPlid, i_cause);
+    HWAS_INF("Deconfiguring Target %.8X, errlPlid %X",
+            TARGETING::get_huid(&i_target), i_errlPlid);
 
     // Set the Target state to non-functional. The assumption is that it is
     // not possible for another thread (other than deconfigGard) to be
@@ -500,9 +533,6 @@ void DeconfigGard::_deconfigureTarget(TARGETING::Target & i_target,
 
     // Do any necessary Deconfigure Actions
     _doDeconfigureActions(i_target);
-
-    // Create a Deconfigure Record
-    _createDeconfigureRecord(i_target, i_errlPlid, i_cause);
 }
 
 //******************************************************************************
@@ -514,40 +544,30 @@ void DeconfigGard::_doDeconfigureActions(TARGETING::Target & i_target)
 //******************************************************************************
 void DeconfigGard::_createDeconfigureRecord(
     const TARGETING::Target & i_target,
-    const uint32_t i_errlPlid,
-    const DeconfigCause i_cause)
+    const uint32_t i_errlPlid)
 {
-    // Get the Target's ID
-    TARGETING::EntityPath l_id = i_target.getAttr<TARGETING::ATTR_PHYS_PATH>();
-
     // Look for an existing Deconfigure Record for the Target
     DeconfigureRecordsCItr_t l_itr = iv_deconfigureRecords.begin();
 
     for (; l_itr != iv_deconfigureRecords.end(); ++l_itr)
     {
-        if ((*l_itr).iv_targetId == l_id)
+        if ((*l_itr).iv_target == &i_target)
         {
+            HWAS_DBG("Not creating Deconfigure Record, one exists errlPlid %X",
+                (*l_itr).iv_errlogPlid);
             break;
         }
     }
 
-    if (l_itr != iv_deconfigureRecords.end())
-    {
-        HWAS_DBG("Not creating a Deconfigure Record, one already exists");
-    }
-    else
+    // didn't find a match
+    if (l_itr == iv_deconfigureRecords.end())
     {
         // Create a DeconfigureRecord
         HWAS_INF("Creating a Deconfigure Record");
 
         DeconfigureRecord l_record;
-        l_record.iv_targetId = l_id;
+        l_record.iv_target = &i_target;
         l_record.iv_errlogPlid = i_errlPlid;
-        l_record.iv_cause = i_cause;
-        l_record.iv_padding[0] = 0;
-        l_record.iv_padding[1] = 0;
-        l_record.iv_padding[2] = 0;
-        l_record.iv_deconfigureTime = 0; // TODO Get epoch time
 
         iv_deconfigureRecords.push_back(l_record);
     }
@@ -555,9 +575,9 @@ void DeconfigGard::_createDeconfigureRecord(
 
 //******************************************************************************
 void DeconfigGard::_clearDeconfigureRecords(
-        const TARGETING::EntityPath * i_pTargetId)
+        const TARGETING::Target * i_pTarget)
 {
-    if (i_pTargetId == NULL)
+    if (i_pTarget == NULL)
     {
         HWAS_INF("Clearing all %d Deconfigure Records",
                  iv_deconfigureRecords.size());
@@ -572,10 +592,10 @@ void DeconfigGard::_clearDeconfigureRecords(
         for (DeconfigureRecordsItr_t l_itr = iv_deconfigureRecords.begin();
              l_itr != iv_deconfigureRecords.end(); ++l_itr)
         {
-            if ((*l_itr).iv_targetId == *i_pTargetId)
+            if ((*l_itr).iv_target == i_pTarget)
             {
-                DG_INF_TARGET("Clearing Deconfigure Record for: ",
-                                i_pTargetId);
+                HWAS_INF("Clearing Deconfigure Record for %.8X",
+                                get_huid(i_pTarget));
                 iv_deconfigureRecords.erase(l_itr);
                 l_foundRecord = true;
                 break;
@@ -584,52 +604,43 @@ void DeconfigGard::_clearDeconfigureRecords(
 
         if (!l_foundRecord)
         {
-            DG_INF_TARGET("Did not find a Deconfigure Record to clear for: ",
-                           i_pTargetId);
+            HWAS_INF("Did not find a Deconfigure Record to clear for %.8X",
+                           get_huid(i_pTarget));
         }
     }
 }
+
 
 //******************************************************************************
-void DeconfigGard::_getDeconfigureRecords(
-    const TARGETING::EntityPath * i_pTargetId,
-    DeconfigureRecords_t & o_records) const
+bool DeconfigGard::_processDeferredDeconfig()
 {
-    DeconfigureRecordsCItr_t l_itr = iv_deconfigureRecords.begin();
-    o_records.clear();
+    HWAS_DBG(">processDeferredDeconfig");
 
-    if (i_pTargetId == NULL)
+    // get all deconfigure records, process them, and delete them.
+    HWAS_MUTEX_LOCK(iv_mutex);
+
+    // we return true if there were targets to deconfigure.
+    bool rc = !iv_deconfigureRecords.empty();
+
+    for (DeconfigureRecordsItr_t l_itr = iv_deconfigureRecords.begin();
+            l_itr != iv_deconfigureRecords.end();
+            ++l_itr)
     {
-        HWAS_INF("Getting all %d Deconfigure Records",
-                 iv_deconfigureRecords.size());
+        // do the deconfigure
+        DeconfigureRecord l_record = *l_itr;
+        _deconfigureTarget(
+                const_cast<TARGETING::Target &> (*(l_record.iv_target)),
+                l_record.iv_errlogPlid);
+    } // for
 
-        for (; l_itr != iv_deconfigureRecords.end(); ++l_itr)
-        {
-            o_records.push_back(*l_itr);
-        }
-    }
-    else
-    {
-        // Look for a Deconfigure Record for the specified Target (there can
-        // only be one record)
-        for (; l_itr != iv_deconfigureRecords.end(); ++l_itr)
-        {
-            if ((*l_itr).iv_targetId == *i_pTargetId)
-            {
-                DG_INF_TARGET("Getting Deconfigure Record for: ",
-                               i_pTargetId);
-                o_records.push_back(*l_itr);
-                break;
-            }
-        }
+    // clear the list - handled them all
+    iv_deconfigureRecords.clear();
 
-        if (l_itr == iv_deconfigureRecords.end())
-        {
-            DG_INF_TARGET("Did not find a Deconfigure Record to get for: ",
-                           i_pTargetId);
-        }
-    }
-}
+    HWAS_MUTEX_UNLOCK(iv_mutex);
+
+    HWAS_DBG("<processDeferredDeconfig returning %d", rc);
+    return rc;
+} // _processDeferredDeconfig
 
 //******************************************************************************
 errlHndl_t DeconfigGard::_createGardRecord(const TARGETING::Target & i_target,
@@ -810,8 +821,7 @@ errlHndl_t DeconfigGard::_clearGardRecords(
                 (iv_pGardRecords[i].iv_targetId == i_targetId)
                )
             {
-                DG_INF_TARGET("Clearing GARD Record for: ",
-                               &i_targetId);
+                DG_INF_TARGET("Clearing GARD Record for: ", &i_targetId);
                 l_gardRecordsCleared = true;
                 // clear iv_recordId
                 iv_pGardRecords[i].iv_recordId = EMPTY_GARD_RECORDID;
@@ -821,8 +831,7 @@ errlHndl_t DeconfigGard::_clearGardRecords(
 
         if (!l_gardRecordsCleared)
         {
-            DG_INF_TARGET("No GARD Records to clear for: ",
-                           &i_targetId);
+            DG_INF_TARGET("No GARD Records to clear for: ", &i_targetId);
         }
     }
     else
@@ -901,16 +910,14 @@ errlHndl_t DeconfigGard::_getGardRecords(
                 (iv_pGardRecords[i].iv_targetId == i_targetId)
                )
             {
-                DG_INF_TARGET("Getting GARD Record for: ",
-                               &i_targetId);
+                DG_INF_TARGET("Getting GARD Record for: ", &i_targetId);
                 o_records.push_back(iv_pGardRecords[i]);
             }
         }
 
         if (o_records.empty())
         {
-            DG_INF_TARGET("No GARD Records to get for: ",
-                           &i_targetId);
+            DG_INF_TARGET("No GARD Records to get for: ", &i_targetId);
         }
     }
     else
@@ -957,17 +964,6 @@ void DeconfigGard::_GardRecordIdSetup(uint32_t i_size)
                  iv_maxGardRecords, iv_nextGardRecordId, l_numGardRecords);
     }
 }
-
-bool DeconfigGard::_processDelayedDeconfig()
-{
-    // we're going to return the current setting
-    bool rc = iv_delayedDeconfig;
-
-    // for now, clear the mark on the wall.
-    iv_delayedDeconfig = false;
-
-    return rc;
-} // _processDelayedDeconfig
 
 
 } // namespce HWAS

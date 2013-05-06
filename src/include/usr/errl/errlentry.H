@@ -536,9 +536,17 @@ private:
      * ErrlEntry to handle deconfigure and GARD callouts
      * The ErrlManager is the primary user of this call.
      *
-     *  @return plid if we need to shutdown, zero if no action
      */
-    uint32_t callout();
+    void processCallout();
+
+
+    /**
+     * @brief The ErrlManager will call here to ask the
+     * ErrlEntry to handle deferred deconfigure callouts
+     * The ErrlManager is the primary user of this call.
+     *
+     */
+    void deferredDeconfigure();
 
 
     /**

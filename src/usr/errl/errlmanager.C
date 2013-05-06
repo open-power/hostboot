@@ -229,7 +229,7 @@ void ErrlManager::errlogMsgHndlr ( void )
                 }
 
                 //Ask the ErrlEntry to process any callouts
-                uint32_t calloutPlid = l_err->callout();
+                l_err->processCallout();
 
                 //We are done with the error log handle so delete it.
                 delete l_err;
@@ -237,17 +237,6 @@ void ErrlManager::errlogMsgHndlr ( void )
 
                 //We are done with the msg
                 msg_free(theMsg);
-
-                // done cleaning up, see if we need to exit.
-                if (calloutPlid != 0)
-                {
-                    // non-zero means that we need to shutdown!
-                    TRACFCOMP( g_trac_errl, INFO_MRK
-                            "callout says Shutdown due to plid 0x%X",
-                            calloutPlid );
-                    errlogShutdown();
-                    INITSERVICE::doShutdown(calloutPlid);
-                }
 
                 // else go back and wait for a next msg 
                 break;
@@ -361,6 +350,9 @@ void ErrlManager::commitErrLog(errlHndl_t& io_err, compId_t i_committerComp )
         TRACFCOMP(g_trac_errl, "commitErrLog() called by %.4X for plid=0x%X,"
                                "Reasoncode=%.4X", i_committerComp,
                                io_err->plid(), io_err->reasonCode() );
+
+        //Ask ErrlEntry to check for any special deferred deconfigure callouts
+        io_err->deferredDeconfigure();
 
         //Offload the error log to the errlog message queue 
         sendErrlogToMessageQueue ( io_err, i_committerComp );

@@ -168,14 +168,16 @@ typedef struct callout_ud
  *  @param[in]  i_errl Error log handle
  *  @param[in]  i_pData  Pointer to the callout bundle
  *  @param[in]  i_Size  size of the data in the callout bundle
+ *  @param[in]  i_DeferredOnly  bool - true if ONLY check for defered deconfig
  *
  */
 void processCallout(errlHndl_t i_errl,
         uint8_t *i_pData,
-        uint64_t i_Size);
+        uint64_t i_Size,
+        bool i_DeferredOnly = false);
 
 // typedef for function pointer that the errlog class will use.
-typedef bool (*processCalloutFn)(errlHndl_t, uint8_t *, uint64_t);
+typedef bool (*processCalloutFn)(errlHndl_t, uint8_t *, uint64_t, bool);
 
 /**
  * @brief platform specific code to handle a procedure callout that has been

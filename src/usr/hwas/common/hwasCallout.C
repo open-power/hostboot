@@ -97,13 +97,33 @@ bool retrieveTarget(uint8_t * & io_uData,
 
 void processCallout(errlHndl_t i_errl,
         uint8_t *i_pData,
-        uint64_t i_Size)
+        uint64_t i_Size,
+        bool i_DeferredOnly)
 {
     HWAS_INF("processCallout entry. data %p size %lld",
             i_pData, i_Size);
 
     callout_ud_t *pCalloutUD = (callout_ud_t *)i_pData;
 
+    if (i_DeferredOnly)
+    {
+        if ((pCalloutUD->type == HW_CALLOUT) &&
+            (pCalloutUD->deconfigState == DELAYED_DECONFIG))
+        {
+            TARGETING::Target *pTarget = NULL;
+            uint8_t * l_uData = (uint8_t *)(pCalloutUD + 1);
+            bool l_err = retrieveTarget(l_uData, pTarget, i_errl);
+
+            if (!l_err)
+            {
+                HWAS::theDeconfigGard().registerDeferredDeconfigure(
+                            *pTarget,
+                            i_errl->plid());
+            }
+        }
+        // else, no deferred deconfigures - all good.
+    }
+    else
     switch (pCalloutUD->type)
     {
         case (HW_CALLOUT):

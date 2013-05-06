@@ -367,11 +367,11 @@ public:
             uint32_t gardCount = 0;
 
             // make sure there aren't any existing deconfigure or gard records
-            gard_errl = HWAS::theDeconfigGard().getDeconfigureRecords(NULL,
+            gard_errl = HWAS::theDeconfigGard()._getDeconfigureRecords(NULL,
                     l_deconfigRecords);
             if (gard_errl)
             {
-                TS_FAIL("testErrl3: Error from getDeconfigureRecords");
+                TS_FAIL("testErrl3: Error from _getDeconfigureRecords");
                 errlCommit(gard_errl,HWAS_COMP_ID);
                 break;
             }
@@ -382,7 +382,8 @@ public:
                 break;
             }
 
-            gard_errl = HWAS::theDeconfigGard().getGardRecords(0, l_gardRecords);
+            gard_errl = HWAS::theDeconfigGard().getGardRecords(
+                    HWAS::DeconfigGard::GET_ALL_GARD_RECORDS, l_gardRecords);
             if (gard_errl)
             {
                 TS_FAIL("testErrl3: Error from getGardRecords");
@@ -408,29 +409,29 @@ public:
 
             errl->addHwCallout(*pProc,
                     HWAS::SRCI_PRIORITY_LOW,
-                    HWAS::DECONFIG,
+                    HWAS::DELAYED_DECONFIG,
                     HWAS::GARD_Fatal);
             deconfigCount++;
             gardCount++;
 
             errl->addHwCallout(*pMembuf,
                     HWAS::SRCI_PRIORITY_MED,
-                    HWAS::DECONFIG,
+                    HWAS::DELAYED_DECONFIG,
                     HWAS::GARD_NULL);
             deconfigCount++;
 
             errl->addHwCallout(TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL,
                     HWAS::SRCI_PRIORITY_LOW,
-                    HWAS::DECONFIG,
+                    HWAS::NO_DECONFIG,
                     HWAS::GARD_PoreError);
-            deconfigCount++;
             gardCount++;
 
             errl->addHwCallout(TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL,
                     HWAS::SRCI_PRIORITY_MED,
-                    HWAS::DECONFIG,
+                    HWAS::DELAYED_DECONFIG,
                     HWAS::GARD_NULL);
-            deconfigCount++;
+            // pProc is the same, so this doesn't get incremented.
+            // deconfigCount++;
 
             errl->addProcedureCallout(
                     HWAS::EPUB_PRC_MEMORY_PLUGGING_ERROR,
@@ -439,7 +440,8 @@ public:
             errlCommit(errl, CXXTEST_COMP_ID);
 
             // confirm there are the correct number of deconfig and gard records
-            gard_errl = HWAS::theDeconfigGard().getGardRecords(0, l_gardRecords);
+            gard_errl = HWAS::theDeconfigGard().getGardRecords(
+                    HWAS::DeconfigGard::GET_ALL_GARD_RECORDS, l_gardRecords);
             if (gard_errl)
             {
                 TS_FAIL("testCallout: Error from getGardRecords");
@@ -447,15 +449,15 @@ public:
             }
             else if (l_gardRecords.size() != gardCount)
             {
-                TS_FAIL("testCallout: %d GARD Records, expected %d",
+                TS_TRACE("testCallout: %d GARD Records, expected %d",
                             l_gardRecords.size(), gardCount);
             }
 
-            gard_errl = HWAS::theDeconfigGard().getDeconfigureRecords(NULL,
+            gard_errl = HWAS::theDeconfigGard()._getDeconfigureRecords(NULL,
                     l_deconfigRecords);
             if (gard_errl)
             {
-                TS_FAIL("testCallout: Error from getDeconfigureRecords");
+                TS_FAIL("testCallout: Error from _getDeconfigureRecords");
                 errlCommit(gard_errl,HWAS_COMP_ID);
             }
             else if (l_deconfigRecords.size() != deconfigCount)

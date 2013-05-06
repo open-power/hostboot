@@ -375,15 +375,7 @@ void ErrlEntry::addHwCallout(const TARGETING::Target *i_target,
 
         ErrlUserDetailsCallout(&ep, sizeof(ep),
                 i_priority, i_deconfigState, i_gardErrorType).addToLog(this);
-
-        if (i_deconfigState == HWAS::DELAYED_DECONFIG)
-        {
-            // call HWAS function to register this action.
-            HWAS::theDeconfigGard().registerDelayedDeconfigure(
-                                    *i_target, plid());
-        }
     }
-
 } // addHwCallout
 
 
@@ -632,14 +624,13 @@ epubSubSystem_t ErrlEntry::getSubSystem( epubProcedureID i_procedure  )
 
 ///////////////////////////////////////////////////////////////////////////////
 // for use by ErrlManager
-uint32_t ErrlEntry::callout()
+void ErrlEntry::processCallout()
 {
-    uint32_t l_rc = 0;
-    TRACFCOMP(g_trac_errl, INFO_MRK"errlEntry::callout");
+    TRACFCOMP(g_trac_errl, INFO_MRK"errlEntry::processCallout");
 
     // see if HWAS has been loaded and has set the processCallout function
-    HWAS::processCalloutFn pFn;
-    pFn = ERRORLOG::theErrlManager::instance().getHwasProcessCalloutFn();
+    HWAS::processCalloutFn pFn =
+            ERRORLOG::theErrlManager::instance().getHwasProcessCalloutFn();
     if (pFn != NULL)
     {
         // look thru the errlog for any Callout UserDetail sections
@@ -653,21 +644,7 @@ uint32_t ErrlEntry::callout()
                 (ERRL_UDT_CALLOUT == (*it)->iv_header.iv_sst))
             {
                 // call HWAS to have this processed
-                (*pFn)(this,(*it)->iv_pData, (*it)->iv_Size);
-
-                // check to see if the master processor got deconfigured
-                TARGETING::Target *l_masterProc;
-                TARGETING::targetService().masterProcChipTargetHandle(
-                        l_masterProc);
-
-                const TARGETING::HwasState hwasState =
-                        l_masterProc->getAttr<TARGETING::ATTR_HWAS_STATE>();
-                if (hwasState.present && !hwasState.functional)
-                {
-                    // if it got deconfigured, we need to return the plid
-                    // to indicate that we need to shutdown
-                    l_rc = plid();
-                }
+                (*pFn)(this,(*it)->iv_pData, (*it)->iv_Size, false);
             }
         } // for each SectionVector
     } // if HWAS module loaded
@@ -676,8 +653,45 @@ uint32_t ErrlEntry::callout()
         TRACFCOMP(g_trac_errl, INFO_MRK"hwas processCalloutFn not set!");
     }
 
-    TRACFCOMP(g_trac_errl, INFO_MRK"errlEntry::callout returning 0x%X", l_rc);
-    return l_rc;
+    TRACFCOMP(g_trac_errl, INFO_MRK"errlEntry::processCallout returning");
+}
+
+
+///////////////////////////////////////////////////////////////////////////////
+// for use by ErrlManager
+void ErrlEntry::deferredDeconfigure()
+{
+    TRACFCOMP(g_trac_errl, INFO_MRK"errlEntry::deferredDeconfigure");
+
+    // see if HWAS has been loaded and has set the processCallout function
+    HWAS::processCalloutFn pFn =
+            ERRORLOG::theErrlManager::instance().getHwasProcessCalloutFn();
+    if (pFn != NULL)
+    {
+        //check for defered deconfigure callouts
+        // look thru the errlog for any Callout UserDetail sections
+        for(std::vector<ErrlUD*>::iterator it = iv_SectionVector.begin();
+                it != iv_SectionVector.end();
+                it++ )
+        {
+            // if this is a CALLOUT
+            if ((ERRL_COMP_ID     == (*it)->iv_header.iv_compId) &&
+                (1                == (*it)->iv_header.iv_ver) &&
+                (ERRL_UDT_CALLOUT == (*it)->iv_header.iv_sst))
+            {
+                // call HWAS function to register this action,
+                //  put it on a queue and will be processed separately,
+                //  when the time is right.
+                (*pFn)(this,(*it)->iv_pData, (*it)->iv_Size, true);
+            }
+        } // for each SectionVector
+    } // if HWAS module loaded
+    else
+    {
+        TRACFCOMP(g_trac_errl, INFO_MRK"hwas processCalloutFn not set!");
+    }
+
+    TRACFCOMP(g_trac_errl, INFO_MRK"errlEntry::deferredDeconfigure returning");
 }
 
 
