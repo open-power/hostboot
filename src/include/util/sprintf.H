@@ -1,25 +1,25 @@
-//  IBM_PROLOG_BEGIN_TAG
-//  This is an automatically generated prolog.
-//
-//  $Source: src/include/util/sprintf.H $
-//
-//  IBM CONFIDENTIAL
-//
-//  COPYRIGHT International Business Machines Corp. 2011
-//
-//  p1
-//
-//  Object Code Only (OCO) source materials
-//  Licensed Internal Code Source Materials
-//  IBM HostBoot Licensed Internal Code
-//
-//  The source code for this program is not published or other-
-//  wise divested of its trade secrets, irrespective of what has
-//  been deposited with the U.S. Copyright Office.
-//
-//  Origin: 30
-//
-//  IBM_PROLOG_END
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/include/util/sprintf.H $                                  */
+/*                                                                        */
+/* IBM CONFIDENTIAL                                                       */
+/*                                                                        */
+/* COPYRIGHT International Business Machines Corp. 2011,2013              */
+/*                                                                        */
+/* p1                                                                     */
+/*                                                                        */
+/* Object Code Only (OCO) source materials                                */
+/* Licensed Internal Code Source Materials                                */
+/* IBM HostBoot Licensed Internal Code                                    */
+/*                                                                        */
+/* The source code for this program is not published or otherwise         */
+/* divested of its trade secrets, irrespective of what has been           */
+/* deposited with the U.S. Copyright Office.                              */
+/*                                                                        */
+/* Origin: 30                                                             */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
 #ifndef __UTIL_SPRINTF_H
 #define __UTIL_SPRINTF_H
 
@@ -125,21 +125,33 @@ namespace Util
 		ALWAYS_INLINE				
 		static size_t display(_F& c, _T value)
 		{
-		    size_t length = sizeof(_T) * 2;
-		    subdisplay(c, value, length);
-		    return length;
+                    size_t count = 0;
+                    if (value == 0)
+                    {
+                        c('0'); count++;
+                    }
+                    else
+                    {
+                        count += subdisplay(c, value);
+                    }
+                    return count;
 		}
 		
 		template <typename _F>
-		static void subdisplay(_F& c, _T value, size_t length)
-		{
-		    if (length == 0) return;
-		    subdisplay(c, value / 16, length-1);
-		    char nibble = value % 16;
-		    if (nibble >= 0x0a)
-			c('A' + (nibble - 0x0a));
-		    else
-			c('0' + nibble);
+                static size_t subdisplay(_F& c, _T value)
+                {
+                    size_t count = 0;
+                    if (value != 0)
+                    {
+                        count += subdisplay(c, value / 16);
+                        char nibble = value % 16;
+                        if (nibble >= 0x0a)
+                            c('A' + (nibble - 0x0a));
+                        else
+                            c('0' + nibble);
+                        count++;
+                    }
+                    return count;
 		}
 	};
 

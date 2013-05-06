@@ -6,7 +6,7 @@
 #
 # IBM CONFIDENTIAL
 #
-# COPYRIGHT International Business Machines Corp. 2011,2012
+# COPYRIGHT International Business Machines Corp. 2011,2013
 #
 # p1
 #
@@ -464,7 +464,7 @@ cat $SBXHOME/traceHB.log
 
 initfail=0
 echo "Shutdown Code = $shutdown_code"
-if [ "${shutdown_code}" != "0000000001230000" ]
+if [ "${shutdown_code}" != "1230000" ]
 then
  echo "**ERROR : System did not initialize and/or shutdown properly**"
  initfail=1
