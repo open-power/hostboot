@@ -55,7 +55,10 @@ endif
 
 ## CODE_PASS
 ##    Compile the $(OBJS) and build the $(LIBS).
-CODE_PASS_BODY += $(OBJECTS) $(OBJECTS:.o=.list) $(LIBRARIES) $(EXTRA_PARTS)
+CODE_PASS_BODY += $(OBJECTS) $(LIBRARIES) $(EXTRA_PARTS)
+ifdef BUILD_OBJECT_LIST
+CODE_PASS_BODY += $(OBJECTS:.o=.list)
+endif
 CLEAN_TARGETS += $(OBJECTS) $(OBJECTS:.o=.o.hash) $(OBJECTS:.o=.dep) \
                  $(OBJECTS:.o=.list) $(LIBRARIES) $(EXTRA_PARTS)
 ifeq ($(MAKECMDGOALS),_BUILD/PASSES/CODE/BODY/ACT)

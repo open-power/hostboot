@@ -51,7 +51,7 @@ $(IMGDIR)/%.bin: $(IMGDIR)/%.elf \
                   --extended=0x40000 $(IMGDIR)/$*_extended.bin \
               $(addprefix $(IMGDIR)/lib, $(addsuffix .so, $($*_EXTENDED_MODULES))) \
               $(addprefix $(IMGDIR)/, $($*_DATA_MODULES)) \
-              > $(IMGDIR)/.$*.lnkout
+              | bzip2 -zc > $(IMGDIR)/.$*.lnkout
 	$(C1)$(ROOTPATH)/src/build/tools/addimgid $@ $<
 
 $(IMGDIR)/%.list $(IMGDIR)/%.syms: $(IMGDIR)/%.bin
@@ -59,6 +59,6 @@ $(IMGDIR)/%.list $(IMGDIR)/%.syms: $(IMGDIR)/%.bin
 	$(C1)(cd $(ROOTPATH); \
               src/build/tools/gensyms $*.bin $*_extended.bin 0x40000000 \
                   > ./img/$*.syms ; \
-              src/build/tools/genlist $*.bin > ./img/$*.list)
+              src/build/tools/genlist $*.bin | bzip2 -zc > ./img/$*.list)
 
 endif

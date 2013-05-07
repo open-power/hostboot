@@ -25,7 +25,10 @@ ROOTPATH = .
 
 IMAGE_PASS_BODY += $(GENDIR)/hwp_id.html
 CLEAN_TARGETS   += $(GENDIR)/hwp_id.html
-IMAGE_PASS_BODY += cscope ctags check_istep_modules
+ifndef BUILD_MINIMAL
+IMAGE_PASS_BODY += cscope ctags
+endif
+IMAGE_PASS_BODY += check_istep_modules
 
 include ./config.mk
 

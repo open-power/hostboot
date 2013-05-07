@@ -174,7 +174,7 @@ FAPI_ATTR_TARGETS = fapiChipEcFeature.C fapiAttributePlatCheck.H \
 HWP_IF_NAMES = $(notdir ${HWP_INITFILES})
 HWP_IF_BASENAMES = $(basename ${HWP_IF_NAMES})
 HWP_IF_BIN_TARGETS = $(addsuffix .if, ${HWP_IF_BASENAMES})
-HWP_IF_LST_TARGETS = $(addsuffix .if.list, ${HWP_IF_BASENAMES})
+HWP_IF_LST_TARGETS = $(addsuffix .if.list.bz2, ${HWP_IF_BASENAMES})
 HWP_IF_ATT_TARGETS = $(addsuffix .if.attr, ${HWP_IF_BASENAMES})
 HWP_IF_ALL_TARGETS = ${HWP_IF_BIN_TARGETS} ${HWP_IF_LST_TARGETS} \
                      ${HWP_IF_ATT_TARGETS}
@@ -256,15 +256,19 @@ $(call GENTARGET, ${FAPI_ATTR_ID_TARGET} ${FAPI_ATTR_TARGETS}) : \
 # The binary, list and attr files generated from Initfiles
 #------------------------------------------------------------------------------
 define HWP_IF_RECIPE
-$${GENDIR}/$(basename $(notdir $1)).if \
-$${GENDIR}/$(basename $(notdir $1)).if.list \
-$${GENDIR}/$(basename $(notdir $1)).if.attr : \
+$${GENDIR}/$(basename $(notdir $1)).if :\
 	$${GENDIR}/$${IF_CMP_COMPILER_TARGET} \
 	$${GENDIR}/$${FAPI_ATTR_ID_TARGET} \
 	$${HWP_IF_DEFINE_DIR} $1
 	    $$< -init $1 -outdir $$(dir $$@) \
             -attr $${GENDIR}/$${FAPI_ATTR_ID_TARGET} \
             -I $${HWP_IF_DEFINE_DIR}
+	@bzip2 $${GENDIR}/$(basename $(notdir $1)).if.list
+
+$${GENDIR}/$(basename $(notdir $1)).if.list.bz2: \
+    $${GENDIR}/$(basename $(notdir $1)).if
+$${GENDIR}/$(basename $(notdir $1)).if.attr: \
+    $${GENDIR}/$(basename $(notdir $1)).if
 endef
 $(foreach initfile,${HWP_INITFILES}, \
 	$(eval $(call HWP_IF_RECIPE,$(initfile))))
