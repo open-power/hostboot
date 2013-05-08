@@ -3069,19 +3069,19 @@
     <attribute><id>VPD_REC_NUM</id><default>4</default></attribute>
 </targetInstance>
 
-<!-- Centaur MBS affiliated with membuf4 -->
+<!-- Centaur L4 affiliated with membuf4 -->
 
 <targetInstance>
-    <id>sys0node0membuf4mbs0</id>
-    <type>unit-mbs-centaur</type>
+    <id>sys0node0membuf4l40</id>
+    <type>unit-l4-centaur</type>
     <attribute><id>HUID</id><default>0x000C0004</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/membuf-4/mbs-0</default>
+        <default>physical:sys-0/node-0/membuf-4/l4-0</default>
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-0/mcs-4/membuf-4/mbs-0</default>
+        <default>affinity:sys-0/node-0/proc-0/mcs-4/membuf-4/l4-0</default>
     </attribute>
 </targetInstance>
 
@@ -3167,19 +3167,19 @@
     <attribute><id>VPD_REC_NUM</id><default>5</default></attribute>
 </targetInstance>
 
-<!-- Centaur MBS affiliated with membuf5 -->
+<!-- Centaur L4 affiliated with membuf5 -->
 
 <targetInstance>
-    <id>sys0node0membuf5mbs0</id>
-    <type>unit-mbs-centaur</type>
+    <id>sys0node0membuf5l40</id>
+    <type>unit-l4-centaur</type>
     <attribute><id>HUID</id><default>0x000C0005</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/membuf-5/mbs-0</default>
+        <default>physical:sys-0/node-0/membuf-5/l4-0</default>
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-0/mcs-5/membuf-5/mbs-0</default>
+        <default>affinity:sys-0/node-0/proc-0/mcs-5/membuf-5/l4-0</default>
     </attribute>
 </targetInstance>
 
@@ -3265,19 +3265,19 @@
     <attribute><id>VPD_REC_NUM</id><default>6</default></attribute>
 </targetInstance>
 
-<!-- Centaur MBS affiliated with membuf6 -->
+<!-- Centaur L4 affiliated with membuf6 -->
 
 <targetInstance>
-    <id>sys0node0membuf6mbs0</id>
-    <type>unit-mbs-centaur</type>
+    <id>sys0node0membuf6l40</id>
+    <type>unit-l4-centaur</type>
     <attribute><id>HUID</id><default>0x000C0006</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/membuf-6/mbs-0</default>
+        <default>physical:sys-0/node-0/membuf-6/l4-0</default>
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-0/mcs-6/membuf-6/mbs-0</default>
+        <default>affinity:sys-0/node-0/proc-0/mcs-6/membuf-6/l4-0</default>
     </attribute>
 </targetInstance>
 
@@ -3363,19 +3363,19 @@
     <attribute><id>VPD_REC_NUM</id><default>7</default></attribute>
 </targetInstance>
 
-<!-- Centaur MBS affiliated with membuf7 -->
+<!-- Centaur L4 affiliated with membuf7 -->
 
 <targetInstance>
-    <id>sys0node0membuf7mbs0</id>
-    <type>unit-mbs-centaur</type>
+    <id>sys0node0membuf7l40</id>
+    <type>unit-l4-centaur</type>
     <attribute><id>HUID</id><default>0x000C0007</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/membuf-7/mbs-0</default>
+        <default>physical:sys-0/node-0/membuf-7/l4-0</default>
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-0/mcs-7/membuf-7/mbs-0</default>
+        <default>affinity:sys-0/node-0/proc-0/mcs-7/membuf-7/l4-0</default>
     </attribute>
 </targetInstance>
 
@@ -3460,19 +3460,19 @@
     <attribute><id>VPD_REC_NUM</id><default>12</default></attribute>
 </targetInstance>
 
-<!-- Centaur MBS affiliated with membuf12 -->
+<!-- Centaur L4 affiliated with membuf12 -->
 
 <targetInstance>
-    <id>sys0node0membuf12mbs0</id>
-    <type>unit-mbs-centaur</type>
+    <id>sys0node0membuf12l40</id>
+    <type>unit-l4-centaur</type>
     <attribute><id>HUID</id><default>0x000C000C</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/membuf-12/mbs-0</default>
+        <default>physical:sys-0/node-0/membuf-12/l4-0</default>
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-1/mcs-4/membuf-12/mbs-0</default>
+        <default>affinity:sys-0/node-0/proc-1/mcs-4/membuf-12/l4-0</default>
     </attribute>
 </targetInstance>
 
@@ -3558,19 +3558,19 @@
     <attribute><id>VPD_REC_NUM</id><default>13</default></attribute>
 </targetInstance>
 
-<!-- Centaur MBS affiliated with membuf13 -->
+<!-- Centaur L4 affiliated with membuf13 -->
 
 <targetInstance>
-    <id>sys0node0membuf13mbs0</id>
-    <type>unit-mbs-centaur</type>
+    <id>sys0node0membuf13l40</id>
+    <type>unit-l4-centaur</type>
     <attribute><id>HUID</id><default>0x000C000D</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/membuf-13/mbs-0</default>
+        <default>physical:sys-0/node-0/membuf-13/l4-0</default>
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-1/mcs-5/membuf-13/mbs-0</default>
+        <default>affinity:sys-0/node-0/proc-1/mcs-5/membuf-13/l4-0</default>
     </attribute>
 </targetInstance>
 
@@ -3656,19 +3656,19 @@
     <attribute><id>VPD_REC_NUM</id><default>14</default></attribute>
 </targetInstance>
 
-<!-- Centaur MBS affiliated with membuf14 -->
+<!-- Centaur L4 affiliated with membuf14 -->
 
 <targetInstance>
-    <id>sys0node0membuf14mbs0</id>
-    <type>unit-mbs-centaur</type>
+    <id>sys0node0membuf14l40</id>
+    <type>unit-l4-centaur</type>
     <attribute><id>HUID</id><default>0x000C000E</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/membuf-14/mbs-0</default>
+        <default>physical:sys-0/node-0/membuf-14/l4-0</default>
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-1/mcs-6/membuf-14/mbs-0</default>
+        <default>affinity:sys-0/node-0/proc-1/mcs-6/membuf-14/l4-0</default>
     </attribute>
 </targetInstance>
 
@@ -3754,19 +3754,19 @@
     <attribute><id>VPD_REC_NUM</id><default>15</default></attribute>
 </targetInstance>
 
-<!-- Centaur MBS affiliated with membuf15 -->
+<!-- Centaur L4 affiliated with membuf15 -->
 
 <targetInstance>
-    <id>sys0node0membuf15mbs0</id>
-    <type>unit-mbs-centaur</type>
+    <id>sys0node0membuf15l40</id>
+    <type>unit-l4-centaur</type>
     <attribute><id>HUID</id><default>0x000C000F</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/membuf-15/mbs-0</default>
+        <default>physical:sys-0/node-0/membuf-15/l4-0</default>
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-1/mcs-7/membuf-15/mbs-0</default>
+        <default>affinity:sys-0/node-0/proc-1/mcs-7/membuf-15/l4-0</default>
     </attribute>
 </targetInstance>
 
@@ -3851,19 +3851,19 @@
     <attribute><id>VPD_REC_NUM</id><default>20</default></attribute>
 </targetInstance>
 
-<!-- Centaur MBS affiliated with membuf20 -->
+<!-- Centaur L4 affiliated with membuf20 -->
 
 <targetInstance>
-    <id>sys0node0membuf20mbs0</id>
-    <type>unit-mbs-centaur</type>
+    <id>sys0node0membuf20l40</id>
+    <type>unit-l4-centaur</type>
     <attribute><id>HUID</id><default>0x000C0014</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/membuf-20/mbs-0</default>
+        <default>physical:sys-0/node-0/membuf-20/l4-0</default>
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-2/mcs-4/membuf-20/mbs-0</default>
+        <default>affinity:sys-0/node-0/proc-2/mcs-4/membuf-20/l4-0</default>
     </attribute>
 </targetInstance>
 
@@ -3949,19 +3949,19 @@
     <attribute><id>VPD_REC_NUM</id><default>21</default></attribute>
 </targetInstance>
 
-<!-- Centaur MBS affiliated with membuf21 -->
+<!-- Centaur L4 affiliated with membuf21 -->
 
 <targetInstance>
-    <id>sys0node0membuf21mbs0</id>
-    <type>unit-mbs-centaur</type>
+    <id>sys0node0membuf21l40</id>
+    <type>unit-l4-centaur</type>
     <attribute><id>HUID</id><default>0x000C0015</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/membuf-21/mbs-0</default>
+        <default>physical:sys-0/node-0/membuf-21/l4-0</default>
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-2/mcs-5/membuf-21/mbs-0</default>
+        <default>affinity:sys-0/node-0/proc-2/mcs-5/membuf-21/l4-0</default>
     </attribute>
 </targetInstance>
 
@@ -4047,19 +4047,19 @@
     <attribute><id>VPD_REC_NUM</id><default>22</default></attribute>
 </targetInstance>
 
-<!-- Centaur MBS affiliated with membuf22 -->
+<!-- Centaur L4 affiliated with membuf22 -->
 
 <targetInstance>
-    <id>sys0node0membuf22mbs0</id>
-    <type>unit-mbs-centaur</type>
+    <id>sys0node0membuf22l40</id>
+    <type>unit-l4-centaur</type>
     <attribute><id>HUID</id><default>0x000C0016</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/membuf-22/mbs-0</default>
+        <default>physical:sys-0/node-0/membuf-22/l4-0</default>
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-2/mcs-6/membuf-22/mbs-0</default>
+        <default>affinity:sys-0/node-0/proc-2/mcs-6/membuf-22/l4-0</default>
     </attribute>
 </targetInstance>
 
@@ -4145,19 +4145,19 @@
     <attribute><id>VPD_REC_NUM</id><default>23</default></attribute>
 </targetInstance>
 
-<!-- Centaur MBS affiliated with membuf23 -->
+<!-- Centaur L4 affiliated with membuf23 -->
 
 <targetInstance>
-    <id>sys0node0membuf23mbs0</id>
-    <type>unit-mbs-centaur</type>
+    <id>sys0node0membuf23l40</id>
+    <type>unit-l4-centaur</type>
     <attribute><id>HUID</id><default>0x000C0017</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/membuf-23/mbs-0</default>
+        <default>physical:sys-0/node-0/membuf-23/l4-0</default>
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-2/mcs-7/membuf-23/mbs-0</default>
+        <default>affinity:sys-0/node-0/proc-2/mcs-7/membuf-23/l4-0</default>
     </attribute>
 </targetInstance>
 
@@ -4242,19 +4242,19 @@
     <attribute><id>VPD_REC_NUM</id><default>28</default></attribute>
 </targetInstance>
 
-<!-- Centaur MBS affiliated with membuf28 -->
+<!-- Centaur L4 affiliated with membuf28 -->
 
 <targetInstance>
-    <id>sys0node0membuf28mbs0</id>
-    <type>unit-mbs-centaur</type>
+    <id>sys0node0membuf28l40</id>
+    <type>unit-l4-centaur</type>
     <attribute><id>HUID</id><default>0x000C001C</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/membuf-28/mbs-0</default>
+        <default>physical:sys-0/node-0/membuf-28/l4-0</default>
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-3/mcs-4/membuf-28/mbs-0</default>
+        <default>affinity:sys-0/node-0/proc-3/mcs-4/membuf-28/l4-0</default>
     </attribute>
 </targetInstance>
 
@@ -4340,19 +4340,19 @@
     <attribute><id>VPD_REC_NUM</id><default>29</default></attribute>
 </targetInstance>
 
-<!-- Centaur MBS affiliated with membuf29 -->
+<!-- Centaur L4 affiliated with membuf29 -->
 
 <targetInstance>
-    <id>sys0node0membuf29mbs0</id>
-    <type>unit-mbs-centaur</type>
+    <id>sys0node0membuf29l40</id>
+    <type>unit-l4-centaur</type>
     <attribute><id>HUID</id><default>0x000C001D</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/membuf-29/mbs-0</default>
+        <default>physical:sys-0/node-0/membuf-29/l4-0</default>
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-3/mcs-5/membuf-29/mbs-0</default>
+        <default>affinity:sys-0/node-0/proc-3/mcs-5/membuf-29/l4-0</default>
     </attribute>
 </targetInstance>
 
@@ -4438,19 +4438,19 @@
     <attribute><id>VPD_REC_NUM</id><default>30</default></attribute>
 </targetInstance>
 
-<!-- Centaur MBS affiliated with membuf30 -->
+<!-- Centaur L4 affiliated with membuf30 -->
 
 <targetInstance>
-    <id>sys0node0membuf30mbs0</id>
-    <type>unit-mbs-centaur</type>
+    <id>sys0node0membuf30l40</id>
+    <type>unit-l4-centaur</type>
     <attribute><id>HUID</id><default>0x000C001E</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/membuf-30/mbs-0</default>
+        <default>physical:sys-0/node-0/membuf-30/l4-0</default>
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-3/mcs-6/membuf-30/mbs-0</default>
+        <default>affinity:sys-0/node-0/proc-3/mcs-6/membuf-30/l4-0</default>
     </attribute>
 </targetInstance>
 
@@ -4536,19 +4536,19 @@
     <attribute><id>VPD_REC_NUM</id><default>31</default></attribute>
 </targetInstance>
 
-<!-- Centaur MBS affiliated with membuf31 -->
+<!-- Centaur L4 affiliated with membuf31 -->
 
 <targetInstance>
-    <id>sys0node0membuf31mbs0</id>
-    <type>unit-mbs-centaur</type>
+    <id>sys0node0membuf31l40</id>
+    <type>unit-l4-centaur</type>
     <attribute><id>HUID</id><default>0x000C001F</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/membuf-31/mbs-0</default>
+        <default>physical:sys-0/node-0/membuf-31/l4-0</default>
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-3/mcs-7/membuf-31/mbs-0</default>
+        <default>affinity:sys-0/node-0/proc-3/mcs-7/membuf-31/l4-0</default>
     </attribute>
 </targetInstance>
 

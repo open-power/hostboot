@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2012              */
+/* COPYRIGHT International Business Machines Corp. 2011,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -65,6 +65,7 @@ enum TargetType
     TARGET_TYPE_MCS_CHIPLET   = 0x00000040,
     TARGET_TYPE_XBUS_ENDPOINT = 0x00000080,
     TARGET_TYPE_ABUS_ENDPOINT = 0x00000100,
+    TARGET_TYPE_L4            = 0x00000200,
 };
 
 /**

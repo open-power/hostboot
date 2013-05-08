@@ -1,25 +1,25 @@
-//  IBM_PROLOG_BEGIN_TAG
-//  This is an automatically generated prolog.
-//
-//  $Source: src/usr/hwpf/test/fapiTargetTest.C $
-//
-//  IBM CONFIDENTIAL
-//
-//  COPYRIGHT International Business Machines Corp. 2011
-//
-//  p1
-//
-//  Object Code Only (OCO) source materials
-//  Licensed Internal Code Source Materials
-//  IBM HostBoot Licensed Internal Code
-//
-//  The source code for this program is not published or other-
-//  wise divested of its trade secrets, irrespective of what has
-//  been deposited with the U.S. Copyright Office.
-//
-//  Origin: 30
-//
-//  IBM_PROLOG_END
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/usr/hwpf/test/fapiTargetTest.C $                          */
+/*                                                                        */
+/* IBM CONFIDENTIAL                                                       */
+/*                                                                        */
+/* COPYRIGHT International Business Machines Corp. 2011,2013              */
+/*                                                                        */
+/* p1                                                                     */
+/*                                                                        */
+/* Object Code Only (OCO) source materials                                */
+/* Licensed Internal Code Source Materials                                */
+/* IBM HostBoot Licensed Internal Code                                    */
+/*                                                                        */
+/* The source code for this program is not published or otherwise         */
+/* divested of its trade secrets, irrespective of what has been           */
+/* deposited with the U.S. Copyright Office.                              */
+/*                                                                        */
+/* Origin: 30                                                             */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
 /**
  *  @file fapitargetTest.C
  *
@@ -338,5 +338,85 @@ uint32_t targetTest6()
 
     return l_result;
 }
+//******************************************************************************
+// targetTest7
+//******************************************************************************
+uint32_t targetTest7()
+{
+    uint32_t l_result = 0;
+    uint8_t l_handle = 7;
+    void * l_pHandle = reinterpret_cast<void *>(&l_handle);
+
+    // Create Target
+    Target l_target(TARGET_TYPE_L4, l_pHandle);
+
+    // Ensure that the handle pointer is as expected
+    void * l_pHandleCheck = l_target.get();
+
+    if (l_pHandleCheck != l_pHandle)
+    {
+        FAPI_ERR("targetTest7. Handle is not as expected");
+        l_result = 1;
+    }
+    else
+    {
+        // Ensure that the type is TARGET_TYPE_L4
+        TargetType l_type = l_target.getType();
+
+        if (l_type != TARGET_TYPE_L4)
+        {
+            FAPI_ERR("targetTest7. Type is 0x%x, expected L4", l_type);
+            l_result = 2;
+        }
+        else
+        {
+            FAPI_INF("targetTest7. Success!");
+        }
+    }
+
+    // Set the handle pointer to NULL to prevent any problem on destruction
+    l_target.set(NULL);
+
+    return l_result;
+}
+//******************************************************************************
+// targetTest8
+//******************************************************************************
+uint32_t targetTest8()
+{
+    uint32_t l_result = 0;
+    uint8_t l_handle = 7;
+    void * l_pHandle = reinterpret_cast<void *>(&l_handle);
+
+    // Create Target
+    Target l_target(TARGET_TYPE_L4, l_pHandle);
+
+    // an L4 Target is not a chip
+    if ( l_target.isChip() )
+    {
+        FAPI_ERR("targetTest8. L4 target incorrectly"
+                                " identified itself as a chip");
+        l_result = 1;
+    }
+    else
+    {
+
+        if ( !l_target.isChiplet() )
+        {
+            FAPI_ERR("targetTest8. L4 target failed to identify as a chiplett" );
+            l_result = 2;
+        }
+        else
+        {
+            FAPI_INF("targetTest8. Success!");
+        }
+    }
+
+    // Set the handle pointer to NULL to prevent any problem on destruction
+    l_target.set(NULL);
+
+    return l_result;
+}
+
 
 }

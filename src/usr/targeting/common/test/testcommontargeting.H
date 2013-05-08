@@ -433,6 +433,8 @@ class CommonTargetingTestSuite: public CxxTest::TestSuite
      */
     void testTargetClass(void)
     {
+
+
         TARG_TS_TRACE(ENTER_MRK "testTargetClass" );
 
         using namespace TARGETING;
@@ -540,6 +542,7 @@ class CommonTargetingTestSuite: public CxxTest::TestSuite
 
     void testPredicateHwas()
     {
+
         TARG_TS_TRACE(ENTER_MRK "testPredicateHwas" );
 
         do {
@@ -767,6 +770,7 @@ class CommonTargetingTestSuite: public CxxTest::TestSuite
 
     void testPredicateCtm()
     {
+
         TARG_TS_TRACE(ENTER_MRK "testPredicateCtm" );
 
         using namespace TARGETING;
@@ -862,6 +866,7 @@ class CommonTargetingTestSuite: public CxxTest::TestSuite
 
     void testPredicatePostfixExpr()
     {
+
         TARG_TS_TRACE(ENTER_MRK "testPredicatePostfixExpr" );
 
         using namespace TARGETING;
@@ -1100,6 +1105,7 @@ class CommonTargetingTestSuite: public CxxTest::TestSuite
 
     void testRangeFilter(void)
     {
+
         TARG_TS_TRACE(ENTER_MRK "testRangeFilters" );
 
         using namespace TARGETING;
@@ -1190,6 +1196,7 @@ class CommonTargetingTestSuite: public CxxTest::TestSuite
 
     void testComplexFilter(void)
     {
+
         TARG_TS_TRACE(ENTER_MRK "testComplexFilter" );
 
         using namespace TARGETING;
@@ -1271,6 +1278,7 @@ class CommonTargetingTestSuite: public CxxTest::TestSuite
 
     void testFapiToHbMacros ()
     {
+
         TARG_TS_TRACE(ENTER_MRK "testFapiToHbMacros" );
 
         TARG_TS_TRACE(INF_MRK "Now using direct access macros");
@@ -1397,6 +1405,7 @@ class CommonTargetingTestSuite: public CxxTest::TestSuite
 
     void testFapiAttributes ()
     {
+
         TARG_TS_TRACE(ENTER_MRK "testFapiAttributes" );
 
         using namespace TARGETING;
@@ -1545,6 +1554,7 @@ class CommonTargetingTestSuite: public CxxTest::TestSuite
 
     void testCentaurs()
     {
+
         TARG_TS_TRACE(ENTER_MRK "testCentaurs" );
 
         using namespace TARGETING;
@@ -1588,12 +1598,12 @@ class CommonTargetingTestSuite: public CxxTest::TestSuite
 
         TARG_TS_TRACE(EXIT_MRK "testCentaurs" );
     }
-
     /**
      *  @test Tests string attributes
      */
     void testStringAttributes(void)
     {
+
         TARG_TS_TRACE(ENTER_MRK "testStringAttributes" );
 
         using namespace TARGETING;
@@ -1831,6 +1841,179 @@ class CommonTargetingTestSuite: public CxxTest::TestSuite
 
         TARG_TS_TRACE(EXIT_MRK "testStringAttributes" );
     }
+
+    void testL4s()
+    {
+        TARG_TS_TRACE(ENTER_MRK "testL4s" );
+
+        using namespace TARGETING;
+
+        PredicateCTM l_procChip(CLASS_CHIP,TYPE_PROC,MODEL_MURANO);
+        TargetRangeFilter l_filter(
+            targetService().begin(),
+            targetService().end(),
+            &l_procChip);
+
+        PredicateCTM l_L4s(CLASS_UNIT,TYPE_L4);
+        uint32_t l_count = 0;
+        uint32_t l_procs = 0;
+
+        // There should be 16 L4s as children of the
+        // 16 processors
+        for(;l_filter;++l_filter)
+        {
+            l_procs++;
+
+            TargetHandleList l_list;
+            (void) targetService().getAssociated(
+                l_list,
+                *l_filter,
+                TARGETING::TargetService::CHILD_BY_AFFINITY,
+                TARGETING::TargetService::ALL,
+                &l_L4s);
+            l_count += l_list.size();
+        }
+
+        // 4 processors -- 4 L4 units per processor
+        uint32_t  total = 4 * l_procs;
+
+        if(l_procs)
+        {
+            if( l_count != total )
+            {
+                TARG_TS_FAIL("Did not find any L4 targets identified "
+                              "with child affinity to the processors");
+            }
+            else
+            {
+                TARG_TS_TRACE("Found %d L4 targets with child affinity to "
+                               "the processors", l_count);
+            }
+        }
+
+        l_count = 0;
+
+        PredicateCTM l_mcsChip(CLASS_UNIT,TYPE_MCS,MODEL_MURANO);
+        TargetRangeFilter l_filter2(
+            targetService().begin(),
+            targetService().end(),
+           &l_mcsChip);
+
+        uint32_t l_MCS = 0;
+
+        // L4 is also a child of the MCS
+        for(;l_filter2;++l_filter2)
+        {
+            l_MCS++;
+
+            TargetHandleList l_list;
+            (void) targetService().getAssociated(
+                l_list,
+                *l_filter2,
+                TARGETING::TargetService::CHILD_BY_AFFINITY,
+                TARGETING::TargetService::ALL,
+                &l_L4s);
+            l_count += l_list.size();
+        }
+
+        // 1  L4 uint per MCS uint
+        total = l_MCS;
+
+        if(l_MCS)
+        {
+            if(l_count != total )
+            {
+                TARG_TS_FAIL("Did not find any L4 targets connected to MCS");
+            }
+            else
+            {
+                TARG_TS_TRACE("Found %d L4 targets connected to MCS",l_count);
+            }
+        }
+
+        PredicateCTM l_nodes(CLASS_ENC,TYPE_NODE,MODEL_POWER8);
+        TargetRangeFilter l_filter3(
+            targetService().begin(),
+            targetService().end(),
+            &l_nodes);
+
+        uint32_t l_node = 0;
+        l_count = 0;
+        // L4 is also a child of the NODE
+        for(;l_filter3;++l_filter3)
+        {
+            l_node++;
+
+            TargetHandleList l_list;
+            (void) targetService().getAssociated(
+                l_list,
+                *l_filter3,
+                TARGETING::TargetService::CHILD_BY_AFFINITY,
+                TARGETING::TargetService::ALL,
+                &l_L4s);
+            l_count += l_list.size();
+        }
+
+        // 1 L4 per MCS * number of nodes
+        total = l_node * l_MCS;
+
+        if(l_node)
+        {
+            if(l_count != total )
+            {
+                TARG_TS_FAIL("Did not find any L4 targets "
+                             "with child affinity to the node");
+            }
+            else
+            {
+                TARG_TS_TRACE("Found %d L4 targets with child "
+                              "affinity to the node",l_count);
+            }
+        }
+
+        PredicateCTM l_membufs(CLASS_CHIP,TYPE_MEMBUF,MODEL_CENTAUR);
+        TargetRangeFilter l_filter4(
+            targetService().begin(),
+            targetService().end(),
+            &l_membufs);
+
+        int l_membuf = 0;
+        l_count = 0;
+        // L4 is also a child of the NODE
+        for(;l_filter4;++l_filter4)
+        {
+            l_membuf++;
+
+            TargetHandleList l_list;
+            (void) targetService().getAssociated(
+                l_list,
+                *l_filter4,
+                TARGETING::TargetService::CHILD_BY_AFFINITY,
+                TARGETING::TargetService::ALL,
+                &l_L4s);
+            l_count += l_list.size();
+        }
+
+        // 1 L4 per membuf
+        total = l_membuf;
+
+        if(l_membuf)
+        {
+            if(l_count != total )
+            {
+                TARG_TS_TRACE("\n\nDid not find any L4 targets "
+                             "with child affinity to the membuf target\n\n");
+            }
+            else
+            {
+                TARG_TS_TRACE("\n\nFound %d L4 targets with child "
+                              "affinity to the membuf\n\n",l_count);
+            }
+        }
+
+        TARG_TS_TRACE(EXIT_MRK "testL4s" );
+    }
+
 
 };
 

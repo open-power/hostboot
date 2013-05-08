@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012                   */
+/* COPYRIGHT International Business Machines Corp. 2012,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -54,6 +54,7 @@
 #include <targeting/common/entitypath.H>
 #include <targeting/common/target.H>
 #include <targeting/common/targetservice.H>
+#include <targeting/common/utilFilter.H>
 #include <targeting/common/iterators/rangefilter.H>
 #include <targeting/common/predicates/predicatectm.H>
 #include <targeting/common/predicates/predicatepostfixexpr.H>
@@ -232,13 +233,49 @@ class TargetingTestSuite : public CxxTest::TestSuite
                               TARG_RC_TEST_TARGET_FFDC,
                               0x0011223344556677,
                               0x8899aabbccddeeff);
-                               
+
         ErrlUserDetailsTarget(l_pTarget1).addToLog(l_err);
         ErrlUserDetailsTarget(l_pTarget2).addToLog(l_err);
 
         errlCommit(l_err, CXXTEST_COMP_ID);
 
         TS_TRACE(EXIT_MRK "testErrlTargetFFDC");
+    }
+
+    /**
+     *  @brief Test Hostboot specific L4 Target support
+     */
+    void testL4Target()
+    {
+        TS_TRACE(ENTER_MRK "testL4Target" );
+#if 0
+        // Disabling test until ecid reg setup in simics
+        // is resolved
+        using namespace ERRORLOG;
+        using namespace TARGETING;
+        using namespace fapi;
+
+        TargetHandleList l_targs;
+
+        getAllChiplets( l_targs, TYPE_L4);
+
+        TARGETING::EntityPath phys_path_ptr;
+
+        if( l_targs.size() )
+        {
+
+            phys_path_ptr =  l_targs[0]->getAttr<TARGETING::ATTR_PHYS_PATH>();
+
+            TS_TRACE("%s",  phys_path_ptr.toString());
+
+        }
+        else
+        {
+            TS_FAIL("no L4 targets found in system");
+        }
+
+#endif
+        TS_TRACE(EXIT_MRK "testL4Target" );
     }
 };
 

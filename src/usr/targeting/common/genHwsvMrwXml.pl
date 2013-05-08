@@ -1024,7 +1024,7 @@ for (my $do_core = 0, my $i = 0; $i <= $#STargets; $i++)
     }
 }
 
-# Fifth, generate the Centaur, MBS, and MBA
+# Fifth, generate the Centaur, L4, and MBA
 
 my $memb;
 my $membMcs;
@@ -2368,24 +2368,24 @@ sub generate_centaur
 
     $uidstr = sprintf("0x%02X0C%04X",${node},$mcs+$proc*8+${node}*8*8);
     print "
-<!-- $SYSNAME Centaur MBS affiliated with membuf$ctaur -->
+<!-- $SYSNAME Centaur L4 affiliated with membuf$ctaur -->
 
 <targetInstance>
-    <id>sys${sys}node${node}membuf${ctaur}mbs0</id>
-    <type>unit-mbs-centaur</type>
+    <id>sys${sys}node${node}membuf${ctaur}l40</id>
+    <type>unit-l4-centaur</type>
     <attribute><id>HUID</id><default>${uidstr}</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
-        <default>physical:sys-$sys/node-$node/membuf-$ctaur/mbs-0</default>
+        <default>physical:sys-$sys/node-$node/membuf-$ctaur/l4-0</default>
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-$sys/node-$node/proc-$proc/mcs-$mcs/"
-            . "membuf-$ctaur/mbs-0</default>
+            . "membuf-$ctaur/l4-0</default>
     </attribute>";
 
-    # call to do any fsp per-centaur_mbs attributes
-    do_plugin('fsp_centaur_mbs', $ctaur, $ordinalId );
+    # call to do any fsp per-centaur_l4 attributes
+    do_plugin('fsp_centaur_l4', $ctaur, $ordinalId );
 
     print "
 </targetInstance>

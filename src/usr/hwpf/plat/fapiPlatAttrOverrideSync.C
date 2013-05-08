@@ -109,6 +109,9 @@ void directOverride()
             case fapi::TARGET_TYPE_ABUS_ENDPOINT:
                 l_targetType = TARGETING::TYPE_ABUS;
                 break;
+            case fapi::TARGET_TYPE_L4:
+                l_targetType = TARGETING::TYPE_L4;
+                break;
         }
 
         FAPI_IMP(

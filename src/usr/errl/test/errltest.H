@@ -506,13 +506,13 @@ public:
                     TARGETING::targetService().end(),
                     &procChipFilter);
 
-            // find a membuf target
-            TARGETING::PredicateCTM membufChipFilter(
-                    TARGETING::CLASS_CHIP,TARGETING::TYPE_MEMBUF);
-            TARGETING::TargetRangeFilter pMembuf(
+            TARGETING::PredicateCTM l_L4s(TARGETING::CLASS_UNIT,
+                                          TARGETING::TYPE_L4);
+
+            TARGETING::TargetRangeFilter pL4(
                     TARGETING::targetService().begin(),
                     TARGETING::targetService().end(),
-                    &membufChipFilter);
+                    &l_L4s);
 
             // Create an error log
             errlHndl_t errl = new ERRORLOG::ErrlEntry(
@@ -520,22 +520,26 @@ public:
                                     ERRL_TEST_MOD_ID,
                                     ERRL_TEST_REASON_CODE);
 
+            printk("\n\nelog = 0x%X\n\n", errl->eid() );
+
             // test the different callout types
             TS_TRACE( "test callout pProc %p", *pProc);
             ERRORLOG::ErrlUserDetailsTarget(*pProc).addToLog(errl);
 
-            errl->addHwCallout(*pMembuf,
-                    HWAS::SRCI_PRIORITY_MED,
+            errl->addHwCallout(*pL4,
+                    HWAS::SRCI_PRIORITY_HIGH,
                     HWAS::DECONFIG,
                     HWAS::GARD_NULL);
 
-            errl->addHwCallout(TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL,
+            // make this one high too - should end up with B120 src
+            // as the first high priority callout is mem subsys
+            errl->addHwCallout( *pProc,
                     HWAS::SRCI_PRIORITY_HIGH,
                     HWAS::DECONFIG,
                     HWAS::GARD_NULL);
 
             errl->addProcedureCallout(
-                    HWAS::EPUB_PRC_MEMORY_PLUGGING_ERROR,
+                    HWAS::EPUB_PRC_HB_CODE,
                     HWAS::SRCI_PRIORITY_HIGH);
 
             errlCommit(errl, CXXTEST_COMP_ID);

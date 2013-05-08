@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2012              */
+/* COPYRIGHT International Business Machines Corp. 2011,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -148,7 +148,8 @@ bool Target::isChiplet() const
                         TARGET_TYPE_MBA_CHIPLET |
                         TARGET_TYPE_MCS_CHIPLET |
                         TARGET_TYPE_XBUS_ENDPOINT |
-                        TARGET_TYPE_ABUS_ENDPOINT)) != 0);
+                        TARGET_TYPE_ABUS_ENDPOINT |
+                        TARGET_TYPE_L4 )) != 0);
 }
 
 //******************************************************************************

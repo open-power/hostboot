@@ -717,11 +717,11 @@
 <!-- Hybrid targets -->
 
 <targetType>
-    <id>unit-mbs-power8</id>
+    <id>unit-l4-power8</id>
     <parent>unit</parent>
     <attribute>
         <id>TYPE</id>
-        <default>MBS</default>
+        <default>L4</default>
     </attribute>
 </targetType>
 
@@ -1035,23 +1035,6 @@
     </attribute>
 </targetType>
 
-<targetType>
-    <id>unit-mbs-venice</id>
-    <parent>unit-mbs-power8</parent>
-    <attribute>
-        <id>MODEL</id>
-        <default>VENICE</default>
-    </attribute>
-</targetType>
-
-<targetType>
-    <id>unit-mbs-murano</id>
-    <parent>unit-mbs-venice</parent>
-    <attribute>
-        <id>MODEL</id>
-        <default>MURANO</default>
-    </attribute>
-</targetType>
 
 <!-- Memory Buffer Target Types -->
 
@@ -1151,20 +1134,11 @@
     <attribute><id>MSS_BLUEWATERFALL_BROKEN</id></attribute>
 </targetType>
 
-<!-- Centaur MBS -->
+<!-- Centaur L4 -->
 
 <targetType>
-    <id>unit-mbs-centaur</id>
-    <parent>unit-mbs-power8</parent>
-    <attribute>
-        <id>PRIMARY_CAPABILITIES</id>
-        <default>
-            <field><id>supportsFsiScom</id><value>1</value></field>
-            <field><id>supportsXscom</id><value>0</value></field>
-            <field><id>supportsInbandScom</id><value>1</value></field>
-            <field><id>reserved</id><value>0</value></field>
-        </default>
-    </attribute>
+    <id>unit-l4-centaur</id>
+    <parent>unit-l4-power8</parent>
     <attribute>
         <id>MODEL</id>
         <default>CENTAUR</default>

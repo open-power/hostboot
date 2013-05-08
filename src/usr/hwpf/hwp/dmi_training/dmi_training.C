@@ -265,11 +265,31 @@ void*    call_mss_getecid( void *io_pArgs )
                     l_cache_enable);
                 l_cache_enable = fapi::ENUM_ATTR_MSS_CACHE_ENABLE_OFF;
 
-                // TODO RTC 68487. Get the child L4 Target and deconfigure it
+                TargetHandleList l_list;
+                getChildChiplets(l_list,
+                                 l_pCentaur,
+                                 TYPE_L4, false );
+
+                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                        "deconfigure %d -  L4s assocated with this centaur "
+                        "huid = 0x%.8X", l_list.size(), get_huid(l_pCentaur));
+
+                for (TargetHandleList::const_iterator
+                        l_l4_iter = l_list.begin();
+                        l_l4_iter != l_list.end();
+                        ++l_l4_iter)
+                {
+                        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                                "deconfigure L4 0x%.8X", get_huid( *l_l4_iter));
+
+                    // call HWAS to deconfigure
+                    l_err = HWAS::theDeconfigGard().
+                                        deconfigureTarget( **l_l4_iter , 0);
+                }
             }
 
             l_pCentaur->setAttr<TARGETING::ATTR_MSS_CACHE_ENABLE>(
-                l_cache_enable);
+                                                                l_cache_enable);
         }
 
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
