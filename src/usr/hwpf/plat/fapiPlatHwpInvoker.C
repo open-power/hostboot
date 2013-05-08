@@ -290,7 +290,14 @@ errlHndl_t fapiRcToErrl(ReturnCode & io_rc)
         // Set the ReturnCode to success, this will delete any ErrorInfo or PLAT
         // DATA associated with the ReturnCode
         io_rc = FAPI_RC_SUCCESS;
+
+        // add the fapi traces to the elog
+        l_pError->collectTrace(FAPI_TRACE_NAME, 256 );
+        l_pError->collectTrace(FAPI_IMP_TRACE_NAME, 256 );
+        l_pError->collectTrace(FAPI_SCAN_TRACE_NAME, 256 );
+
     }
+
 
     return l_pError;
 }
