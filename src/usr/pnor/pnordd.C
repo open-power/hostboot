@@ -773,7 +773,7 @@ errlHndl_t PnorDD::micronFlagStatus(uint64_t i_pollTime)
 
 
         //Check flag status bit.
-        uint32_t opStatus;
+        uint32_t opStatus = 0;
         uint64_t poll_time = 0;
         uint64_t loop = 0;
         while( poll_time < i_pollTime )
@@ -842,7 +842,7 @@ errlHndl_t PnorDD::micronFlagStatus(uint64_t i_pollTime)
             //Erase & Program error bits are sticky, so they need to be cleared.
 
             //Configure Get "Chip ID" command in SFC to clear special
-            //Micron 'flag status' register. remaining bits are all zero 
+            //Micron 'flag status' register. remaining bits are all zero
             //  since we just need to issue the SPI command.
             uint32_t confData = SPI_MICRON_CLRFLAG_STAT << 24;
             TRACDCOMP( g_trac_pnor, "PnorDD::micronFlagStatus> confData=0x%.8x",

@@ -259,7 +259,7 @@ errlHndl_t getTargetVirtualAddress(Target* i_target,
 
             // Map target's virtual address
             //NOTE: mmio_dev_map only supports 32 GB Allocation.  Technically,
-            //hostboot IBSCOM MMIO allocated 64GB, but the SCOM address space 
+            //hostboot IBSCOM MMIO allocated 64GB, but the SCOM address space
             //is small enough that 32 GB is sufficient.
             o_virtAddr = static_cast<uint64_t*>
               (mmio_dev_map(reinterpret_cast<void*>(l_IBScomBaseAddr),
@@ -503,7 +503,7 @@ errlHndl_t doIBScom(DeviceFW::OperationType i_opType,
                 }
 
 
-                uint64_t pib_code = (errData && PIB_ERROR_STATUS_MASK)
+                uint64_t pib_code = (errData & PIB_ERROR_STATUS_MASK)
                   >> PIB_ERROR_SHIFT;
                 if((errData & HOST_ERROR_VALID) &&//bit 32
                    // technically between 0x001 && 0x7, but only 3

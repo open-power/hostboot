@@ -1403,7 +1403,7 @@ errlHndl_t FsiDD::initMasterControl(TARGETING::Target* i_master,
         bool fsp_master_init = false;
         TARGETING::Target * sys = NULL;
         TARGETING::targetService().getTopLevelTarget( sys );
-        TARGETING::SpFunctions spfuncs;
+        TARGETING::SpFunctions spfuncs = TARGETING::SpFunctions();
         if( sys
             && sys->tryGetAttr<TARGETING::ATTR_SP_FUNCTIONS>(spfuncs)
             && spfuncs.fsiMasterInit )

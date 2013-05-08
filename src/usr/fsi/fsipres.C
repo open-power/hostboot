@@ -101,7 +101,7 @@ errlHndl_t procPresenceDetect(DeviceFW::OperationType i_opType,
         fsi_present = isSlavePresent(i_target);
     }
 
-    // Next look for valid Module VPD 
+    // Next look for valid Module VPD
     bool mvpd_present = false;
     size_t theSize = 0;
 
@@ -185,9 +185,9 @@ errlHndl_t procPresenceDetect(DeviceFW::OperationType i_opType,
                                             mvpd_present));
 
         // Callout the processor
-        l_errl->addHwCallout( i_target, 
-                              HWAS::SRCI_PRIORITY_LOW, 
-                              HWAS::NO_DECONFIG, 
+        l_errl->addHwCallout( i_target,
+                              HWAS::SRCI_PRIORITY_LOW,
+                              HWAS::NO_DECONFIG,
                               HWAS::GARD_NULL );
 
         // if there is a saved PLID, apply it to this error log
@@ -201,8 +201,8 @@ errlHndl_t procPresenceDetect(DeviceFW::OperationType i_opType,
                     FSI_COMP_ID );
     }
 
-    
-    bool present = fsi_present & mvpd_present;
+
+    bool present = fsi_present && mvpd_present;
     memcpy(io_buffer, &present, sizeof(present));
     io_buflen = sizeof(present);
 
@@ -273,11 +273,11 @@ errlHndl_t membPresenceDetect(DeviceFW::OperationType i_opType,
 
     if( l_errl )
     {
- 
+
         if( fsi_present )
         {
             // Save this plid to use later
-            l_saved_plid = l_errl->plid();    
+            l_saved_plid = l_errl->plid();
 
             // commit this log because we expected to have VPD
             errlCommit( l_errl,
@@ -321,7 +321,7 @@ errlHndl_t membPresenceDetect(DeviceFW::OperationType i_opType,
             cvpd_present = true;
         }
     }
- 
+
     // Finally compare the 2 methods
     if( fsi_present != cvpd_present )
     {
@@ -348,9 +348,9 @@ errlHndl_t membPresenceDetect(DeviceFW::OperationType i_opType,
                                             cvpd_present));
 
         // Callout the membuf
-        l_errl->addHwCallout( i_target, 
-                              HWAS::SRCI_PRIORITY_LOW, 
-                              HWAS::NO_DECONFIG, 
+        l_errl->addHwCallout( i_target,
+                              HWAS::SRCI_PRIORITY_LOW,
+                              HWAS::NO_DECONFIG,
                               HWAS::GARD_NULL );
 
         // if there is a saved PLID, apply it to this error log
@@ -363,8 +363,8 @@ errlHndl_t membPresenceDetect(DeviceFW::OperationType i_opType,
         errlCommit( l_errl,
                     FSI_COMP_ID );
     }
-    
-    bool present = fsi_present & cvpd_present;
+
+    bool present = fsi_present && cvpd_present;
     memcpy(io_buffer, &present, sizeof(present));
     io_buflen = sizeof(present);
 

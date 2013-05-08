@@ -314,15 +314,19 @@ errlHndl_t PnorRP::getSectionInfo( PNOR::SectionId i_section,
         }
     } while(0);
 
-    TRACDCOMP( g_trac_pnor, "PnorRP::getSectionInfo: i_section=%d, side=%d : id=%d", i_section, side, iv_TOC[side][i_section].id );
+    if (PNOR::INVALID_SECTION != id)
+    {
+        TRACDCOMP( g_trac_pnor, "PnorRP::getSectionInfo: i_section=%d, side=%d : id=%d", i_section, side, iv_TOC[side][i_section].id );
 
-    // copy my data into the external format
-    o_info.id = iv_TOC[side][id].id;
-    o_info.side = iv_TOC[side][id].side;
-    o_info.name = cv_EYECATCHER[id];
-    o_info.vaddr = iv_TOC[side][id].virtAddr;
-    o_info.size = iv_TOC[side][id].size;
-    o_info.eccProtected = (bool)(iv_TOC[side][id].miscFlags & FFS_MISC_ECC_PROTECT);
+        // copy my data into the external format
+        o_info.id = iv_TOC[side][id].id;
+        o_info.side = iv_TOC[side][id].side;
+        o_info.name = cv_EYECATCHER[id];
+        o_info.vaddr = iv_TOC[side][id].virtAddr;
+        o_info.size = iv_TOC[side][id].size;
+        o_info.eccProtected = (bool)(iv_TOC[side][id].miscFlags &
+                                     FFS_MISC_ECC_PROTECT);
+    }
 
     return l_errhdl;
 }

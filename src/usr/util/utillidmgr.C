@@ -83,7 +83,7 @@ errlHndl_t UtilLidMgr::getLidSize(size_t& o_lidSize)
             iv_lidSize = o_lidSize;
             break;
         }
-          
+
         //if we get here, it means we didn't find the LID in PNOR, so
         //ask the FSP for it.
 
@@ -394,7 +394,8 @@ errlHndl_t UtilLidMgr::getLid(void* i_dest, size_t i_destSize)
                                          Util::UTIL_LIDMGR_INVAL_DATA,
                                          TWO_UINT32_TO_UINT64(curLid,
                                                               iv_lidId),
-                                         TWO_UINT32_TO_UINT64(*(dataPtr),
+                                         TWO_UINT32_TO_UINT64(
+                                            NULL != dataPtr ? *(dataPtr) : 0,
                                                               0)
                                          );
 

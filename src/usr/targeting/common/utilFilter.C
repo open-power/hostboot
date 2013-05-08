@@ -38,7 +38,7 @@
 
 namespace TARGETING
 {
- 
+
 #define TARG_NAMESPACE "TARGETING::"
 
 #define TARG_CLASS ""
@@ -186,28 +186,28 @@ void getAffinityTargets ( TARGETING::TargetHandleList& o_vector,
 
 void getChildAffinityTargets(
           TARGETING::TargetHandleList& o_vector,
-    const Target*                      i_target, 
-          CLASS                        i_class, 
-          TYPE                         i_type, 
+    const Target*                      i_target,
+          CLASS                        i_class,
+          TYPE                         i_type,
           bool                         i_functional)
 {
     getAffinityTargets (o_vector, i_target, i_class, i_type,
-        TARGETING::TargetService::CHILD_BY_AFFINITY, 
-        i_functional); 
+        TARGETING::TargetService::CHILD_BY_AFFINITY,
+        i_functional);
 }
 
 
 void getParentAffinityTargets(
           TARGETING::TargetHandleList& o_vector,
-    const Target*                      i_target, 
-          CLASS                        i_class, 
+    const Target*                      i_target,
+          CLASS                        i_class,
           TYPE                         i_type,
           bool                         i_functional )
 {
 
     getAffinityTargets (o_vector, i_target, i_class, i_type,
         TARGETING::TargetService::PARENT_BY_AFFINITY,
-        i_functional); 
+        i_functional);
 }
 
 const Target * getParentChip( const Target * i_pChiplet )
@@ -247,19 +247,16 @@ void getPeerTargets(
     #define TARG_FN "getPeerTargets"
     TARG_ENTER();
     Target* l_pPeerTarget = NULL;
-    
-    if(i_pSrcTarget == NULL)
-    {
-        TARG_ASSERT("User tried to call getPeerTargets using NULL Target"
-                " Handle");
-    }
-    
+
+    TARG_ASSERT(NULL != i_pSrcTarget,
+                "User tried to call getPeerTargets using NULL Target Handle");
+
     // Clear the list
     o_peerTargetList.clear();
     do
     {
         // List to maintain all child targets which are found by get associated
-        // from the Src target with i_pPeerFilter predicate 
+        // from the Src target with i_pPeerFilter predicate
         TARGETING::TargetHandleList l_pSrcTarget_list;
 
         // Create input master predicate here by taking in the i_pPeerFilter
@@ -306,12 +303,12 @@ void getPeerTargets(
         {
             // Simply get the Peer Target for all Src target in the list and
             // return
-            for(TARGETING::TargetHandleList::const_iterator pTargetIt 
-                    = l_pSrcTarget_list.begin(); 
+            for(TARGETING::TargetHandleList::const_iterator pTargetIt
+                    = l_pSrcTarget_list.begin();
                 pTargetIt != l_pSrcTarget_list.end();
                 ++pTargetIt)
             {
-                TARGETING::Target* l_pPeerTgt = 
+                TARGETING::Target* l_pPeerTgt =
                     (*pTargetIt)->getAttr<TARGETING::ATTR_PEER_TARGET>();
                 o_peerTargetList.push_back(l_pPeerTgt);
             }
@@ -321,13 +318,13 @@ void getPeerTargets(
         // on each of the PEER Target found on the input target list
         else
         {
-            for(TARGETING::TargetHandleList::const_iterator pTargetIt 
-                    = l_pSrcTarget_list.begin(); 
+            for(TARGETING::TargetHandleList::const_iterator pTargetIt
+                    = l_pSrcTarget_list.begin();
                 pTargetIt != l_pSrcTarget_list.end();
                 ++pTargetIt)
             {
                 TARGETING::TargetHandleList l_peerTarget_list;
-                TARGETING::Target* l_pPeerTgt = 
+                TARGETING::Target* l_pPeerTgt =
                     (*pTargetIt)->getAttr<TARGETING::ATTR_PEER_TARGET>();
 
                 // Check whether this target matches the filter criteria
