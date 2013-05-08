@@ -42,6 +42,7 @@ namespace MBOX
         MOD_MBOXSRC_UNCLAIMED   = 0x0A, // MailboxSp::handleUnclaimed
         MOD_MBOX_SEND           = 0x0B, // MBOX::send
         MOD_MBOXSRV_IPC_MSG     = 0x0C, // MailboxSp::handleIPC
+        MOD_MBOX_MSGQ_FAIL      = 0x0D, // MBOX::makeErrlMsgQSendFail
     };
 
     enum MBOXReasonCode

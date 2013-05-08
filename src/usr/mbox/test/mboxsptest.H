@@ -242,6 +242,24 @@ class MboxSPTest : public CxxTest::TestSuite
           msg_free(msg);
       }
 
+      void testSuspendResume(void)
+      {
+
+          errlHndl_t err = MBOX::suspend();
+          if (err)
+          {
+              TS_FAIL("MBOX:suspend failed");
+              delete err;
+          }
+
+          err = MBOX::resume();
+          if (err)
+          {
+              TS_FAIL("MBOX::resume failed");
+              delete err;
+          }
+      }
+
       void testInvalidMsg(void)
       {
           msg_t * msg = msg_allocate();

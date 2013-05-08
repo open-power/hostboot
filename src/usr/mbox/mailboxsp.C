@@ -40,6 +40,12 @@
 
 #define MBOX_TRACE_NAME MBOX_COMP_NAME
 
+// Local functions
+namespace MBOX
+{
+    errlHndl_t makeErrlMsgQSendFail(uint64_t i_errno);
+};
+
 using namespace MBOX;
 
 // Defined in mboxdd.C
@@ -69,7 +75,8 @@ MailboxSp::MailboxSp()
         iv_shutdown_msg(NULL),
         iv_rts(true),
         iv_dma_pend(false),
-        iv_disabled(true)
+        iv_disabled(true),
+        iv_suspended(false)
 {
     // mailbox target
     TARGETING::targetService().masterProcChipTargetHandle(iv_trgt);
@@ -246,6 +253,11 @@ void MailboxSp::msgHandler()
                     {
                         handleShutdown();
                     }
+
+                    if(iv_suspended && quiesced())
+                    {
+                        suspend();
+                    }
                 }
 
                 break;
@@ -282,6 +294,11 @@ void MailboxSp::msgHandler()
                     iv_shutdown_msg = msg;      // Respond to this when done
                     iv_disabled = true;         // stop incomming new messages
 
+                    if(iv_suspended == true)
+                    {
+                        resume();
+                    }
+
                     handleUnclaimed();
                     if(quiesced())
                     {
@@ -289,6 +306,38 @@ void MailboxSp::msgHandler()
                     }
                     // else wait for things to quiesce
                 }
+                break;
+
+            case MSG_MBOX_SUSPEND:
+
+                if(!iv_disabled)
+                {
+                    TRACFCOMP(g_trac_mbox,
+                              INFO_MRK"MBOXSP Suspend event received");
+
+                    iv_suspend_msg = msg;   // Respond to this when done
+                    iv_suspended = true;    // Queue any new messages
+
+                    if(quiesced())
+                    {
+                        suspend();    // suspended
+                    }
+                }
+                else
+                {
+                    TRACFCOMP(g_trac_mbox,
+                              INFO_MRK"MBOXSP Ignored request to suspend a"
+                              " disabled mailbox");
+                    msg_respond(iv_msgQ,msg);
+                }
+                break;
+
+            case MSG_MBOX_RESUME:
+
+                resume();
+                msg_respond(iv_msgQ,msg);
+                TRACFCOMP(g_trac_mbox,INFO_MRK"Mailbox function resumed");
+
                 break;
 
             case MSG_IPC: // Interprocessor Messages
@@ -430,12 +479,13 @@ void MailboxSp::send_msg(mbox_msg_t * i_msg)
     // Can't send now if:
     //  - busy (waiting for ACK)
     //  - a DMA buffer request is pending
+    //  - The mailbox is suspended
     //  - there is nothing to send
     //
-    //  TODO future optimization: If both iv_rts and iv_dma_pend are true then
-    //  could look for a mesaage in the sendq that does not require a DMA
-    //  buffer and send it.
-    if(!iv_rts || iv_dma_pend || iv_sendq.size() == 0)
+    //  Future enhancement: If both iv_rts and iv_dma_pend are true then
+    //  could look for a mesaage from a different msgq in the sendq that does
+    //  not require a DMA buffer and send it.
+    if(!iv_rts || iv_dma_pend || iv_suspended || iv_sendq.size() == 0)
     {
         return;
     }
@@ -1523,7 +1573,8 @@ void MailboxSp::handleShutdown()
 
         errlCommit(err,MBOX_COMP_ID);
 
-        TRACFCOMP(g_trac_mbox, ERR_MRK"MBOXSP HALTED on critical error!");
+        TRACFCOMP(g_trac_mbox,
+                  ERR_MRK"MBOXSP Shutdown. HALTED on critical error!");
         crit_assert(0);
     }
 
@@ -1531,6 +1582,46 @@ void MailboxSp::handleShutdown()
     TRACFCOMP(g_trac_mbox,INFO_MRK"Mailbox is shutdown");
 }
 
+void MailboxSp::suspend()
+{
+    // Mask interrupts in the mbox hardware
+    errlHndl_t err = mboxddMaskInterrupts(iv_trgt);
+    if(err)  // SCOM failed.
+    {
+        // If this failed, the whole system is probably buggered up.
+
+        errlCommit(err,MBOX_COMP_ID);
+
+        TRACFCOMP(g_trac_mbox,
+                  ERR_MRK"MBOXSP Suspend. HALTED on critical error!");
+        crit_assert(0);
+    }
+
+    msg_respond(iv_msgQ,iv_suspend_msg);
+    TRACFCOMP(g_trac_mbox,INFO_MRK"Mailbox is suspended");
+}
+
+void MailboxSp::resume()
+{
+    iv_suspended = false;
+
+    if(!iv_disabled)
+    {
+        // Enable the mbox hardware
+        errlHndl_t err = mboxInit(iv_trgt);
+        if(err)  // SCOM failed.
+        {
+            // If this failed, the whole system is probably buggered up.
+
+            errlCommit(err,MBOX_COMP_ID);
+
+            TRACFCOMP(g_trac_mbox,
+                      ERR_MRK"MBOXSP Resume. HALTED on critical error!");
+            crit_assert(0);
+        }
+        send_msg();   // send next message on queue
+    }
+}
 
 // ----------------------------------------------------------------------------
 // External Interfaces @see mboxif.H
@@ -1726,4 +1817,89 @@ bool MBOX::mailbox_enabled()
     return enabled;
 }
 
+errlHndl_t MBOX::suspend()
+{
+    errlHndl_t err = NULL;
+    msg_q_t mboxQ = msg_q_resolve(VFS_ROOT_MSG_MBOX);
+    if(mboxQ)
+    {
+        msg_t * msg = msg_allocate();
+        msg->type = MSG_MBOX_SUSPEND;
 
+        int rc = msg_sendrecv(mboxQ, msg);
+
+        if (rc)
+        {
+            TRACFCOMP(g_trac_mbox, ERR_MRK
+                      "MBOX::suspend msg_sendrecv() failed. errno = %d",
+                      rc);
+
+            err = makeErrlMsgQSendFail(rc);
+        }
+
+        msg_free(msg);
+    }
+    else
+    {
+        TRACFCOMP(g_trac_mbox, ERR_MRK"Mailbox Service not available");
+    }
+
+    return err;
+}
+
+errlHndl_t MBOX::resume()
+{
+    errlHndl_t err = NULL;
+    msg_q_t mboxQ = msg_q_resolve(VFS_ROOT_MSG_MBOX);
+    if(mboxQ)
+    {
+        msg_t * msg = msg_allocate();
+        msg->type = MSG_MBOX_RESUME;
+
+        int rc = msg_sendrecv(mboxQ, msg);
+
+        if (rc)
+        {
+            TRACFCOMP(g_trac_mbox, ERR_MRK
+                      "MBOX::resume msg_sendrecv failed. errno = %d",
+                      rc);
+            err = makeErrlMsgQSendFail(rc);
+        }
+
+        msg_free(msg);
+    }
+    else
+    {
+        TRACFCOMP(g_trac_mbox, ERR_MRK"Mailbox Service not available");
+    }
+
+    return err;
+}
+
+errlHndl_t MBOX::makeErrlMsgQSendFail(uint64_t i_errno)
+{
+        TRACFCOMP(g_trac_mbox, ERR_MRK"Mailbox Service not available");
+
+        /*@ errorlog tag
+         * @errortype       ERRL_SEV_INFORMATIONAL
+         * @moduleid        MBOX::MOD_MBOX_MSGQ_FAIL
+         * @reasoncode      MBOX::RC_MSG_SEND_ERROR
+         * @userdata1       kernel errno
+         * @userdata2       <unused>
+         *
+         * @devdesc         Message send to mailbox sp failed
+         *
+         */
+        errlHndl_t err = new ERRORLOG::ErrlEntry
+            (
+             ERRORLOG::ERRL_SEV_INFORMATIONAL,    // severity
+             MBOX::MOD_MBOX_MSGQ_FAIL,            // moduleid
+             MBOX::RC_MSG_SEND_ERROR,             // reason code
+             i_errno,
+             0
+            );
+
+        err->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,                                                                                               HWAS::SRCI_PRIORITY_HIGH);
+        
+        return err;
+}

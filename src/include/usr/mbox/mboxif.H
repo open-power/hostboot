@@ -108,6 +108,26 @@ namespace MBOX
      */
     bool mailbox_enabled();
 
+    /**
+     * Suspend the mailbox. 
+     *
+     * @return error handle on error
+     *
+     * @note:
+     *     Any message sent to the FSP will be queued and send after the mailbox
+     *     is resumed. Interrupts from the FSP MBox will be masked.
+     */
+    errlHndl_t suspend();
+
+    /**
+     * Resume the mailbox
+     *
+     * @return error handle on error
+     *
+     * @note  FSP Mbox re-enabled, queued messages sent.
+     */
+    errlHndl_t resume();
+
 }; // end namespace MBOX
 
 #endif

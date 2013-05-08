@@ -57,6 +57,8 @@ namespace MBOX
         MSG_UNREGISTER_MSGQ,
         MSG_INTR,
         MSG_MBOX_SHUTDOWN,
+        MSG_MBOX_SUSPEND,
+        MSG_MBOX_RESUME,
         MSG_IPC,
     };
 
@@ -214,8 +216,20 @@ namespace MBOX
 
             /**
              * Handle shutdown
+             * @pre quiesced() == true
              */
             void handleShutdown();
+
+            /**
+             * Perform the final actions needed to suspend the mailbox sp
+             * @pre quiesced() == true
+             */
+            void suspend();
+
+            /**
+             * Resume the mailbox from the suspend state
+             */
+            void resume();
 
             /**
              * Send message to FSP indicating an invalid or undeliverable
@@ -282,9 +296,11 @@ namespace MBOX
 
             TARGETING::Target * iv_trgt;//!< mailbox device driver target
             msg_t *     iv_shutdown_msg;//!< Message to shutdown mbox
+            msg_t *     iv_suspend_msg; //!< Message to suspend mbox
             bool        iv_rts;         //!< ready to send flag
-            bool        iv_dma_pend;    //!< Request pending for more DMA buffers
-            bool        iv_disabled;    //!< Mailboxsp is shut off
+            bool        iv_dma_pend;    //!< Request pending for more DMA bufs
+            bool        iv_disabled;    //!< Mailboxsp shut off (rejects new)
+            bool        iv_suspended;   //!< Mailbox is suspended (queues new)
     };
 };
 
