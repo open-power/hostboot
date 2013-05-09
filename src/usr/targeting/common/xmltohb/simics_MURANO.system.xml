@@ -166,7 +166,7 @@
     </attribute>
     <attribute>
         <id>MAX_PROC_CHIPS_PER_NODE</id>
-        <default>2</default>
+        <default>4</default>
     </attribute>
     <!-- Start pm_plat_attributes.xml -->
     <attribute><id>PROC_R_LOADLINE</id>
