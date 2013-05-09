@@ -1869,9 +1869,8 @@ fapi::ReturnCode proc_cen_framelock(const fapi::Target& i_pu_target,
 
     // Set P8 MCI FIR ACT0
     //     Set action regs to recoverable interrupt (action0=1, action1=0) for MCIFIR's 12,15,16 and 17
-    //     On 4/25/2013, PRD asked to change bit 12 action from recov intr to recover error
     l_ecmdRc |= mci_data.flushTo0();
-    // l_ecmdRc |= mci_data.setBit(12);    //Centaur Checkstop
+    l_ecmdRc |= mci_data.setBit(12);    //Centaur Checkstop
     l_ecmdRc |= mci_data.setBit(15);    //Centaur Recoverable Attention
     l_ecmdRc |= mci_data.setBit(16);    //Centaur Special Attention
     l_ecmdRc |= mci_data.setBit(17);    //Centaur Maintenance Complete
@@ -1901,7 +1900,6 @@ fapi::ReturnCode proc_cen_framelock(const fapi::Target& i_pu_target,
     l_ecmdRc |= mci_data.setBit(8);     //MCI Internal Control Parity Error
     l_ecmdRc |= mci_data.setBit(9);     //MCI Data Flow Parity Error
     l_ecmdRc |= mci_data.setBit(10);    //CRC Performance Degradation
-    l_ecmdRc |= mci_data.setBit(12);    //Centaur Checkstop
     l_ecmdRc |= mci_data.setBit(20);    //Scom Register parity error
     l_ecmdRc |= mci_data.setBit(22);    //mcicfgq parity error
     l_ecmdRc |= mci_data.setBit(23);    //Replay Buffer Overrun

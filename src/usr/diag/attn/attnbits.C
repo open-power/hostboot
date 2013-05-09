@@ -183,8 +183,8 @@ void getCheckbitsAssociations(
 {
     static const RegAssoc first[] = {
 
-        {RECOVERABLE, 0x0001000000000000ull},
-        {SPECIAL, 0x0000C00000000000ull},
+        {RECOVERABLE, 0x0009000000000000ull},
+        {SPECIAL,     0x0000C00000000000ull},
     };
 
     static const RegAssoc * last = first +

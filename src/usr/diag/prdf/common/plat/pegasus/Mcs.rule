@@ -237,13 +237,9 @@ group gMciFir attntype CHECK_STOP, RECOVERABLE, SPECIAL, UNIT_CS
     /** MCIFIR[12]
      *  MCIFIRQ_CENTAUR_CHECKSTOP
      */
-    # NOTE: When set, this bit will trigger MCIFIR[31] (channel checkstop).
-    #       This bit will be set as a recoverable attention, so that PRD will
-    #       be called to analyze the recoverable attention in the P8 and
-    #       change then attention type to UNIT_CS because bit 31 is on. Then PRD
-    #       will analyze the Centaur for the root case of the unit checkstop.
-    # NOTE: This bit will be masked at runtime.
-    (MciFir, bit(12)) ? analyzeConnectedCentaur;
+    # NOTE: This bit will be set to host_attn and only monitored by HostATTN
+    #       during Hostboot.
+    (MciFir, bit(12)) ? defaultMaskedError;
 
     /** MCIFIR[13]
      *  MCIFIRQ_CENTAUR_TRACESTOP
@@ -258,22 +254,22 @@ group gMciFir attntype CHECK_STOP, RECOVERABLE, SPECIAL, UNIT_CS
     /** MCIFIR[15]
      *  MCIFIRQ_CENTAUR_RECOVERABLE_ERROR
      */
-    # NOTE: This bit will be set to host_attn during hostboot and masked at
-    #       runtime.
+    # NOTE: This bit will be set to host_attn and only monitored by HostATTN
+    #       during Hostboot.
     (MciFir, bit(15)) ? defaultMaskedError;
 
     /** MCIFIR[16]
      *  MCIFIRQ_CENTAUR_SPECIAL_ATTENTION
      */
-    # NOTE: This bit will be set to host_attn during hostboot and masked at
-    #       runtime.
+    # NOTE: This bit will be set to host_attn and only monitored by HostATTN
+    #       during Hostboot.
     (MciFir, bit(16)) ? defaultMaskedError;
 
     /** MCIFIR[17]
      *  MCIFIRQ_CENTAUR_MAINTENANCE_COMPLETE
      */
-    # NOTE: This bit will be set to host_attn during hostboot and masked at
-    #       runtime.
+    # NOTE: This bit will be set to host_attn and only monitored by HostATTN
+    #       during Hostboot.
     (MciFir, bit(17)) ? defaultMaskedError;
 
     /** MCIFIR[18]
@@ -446,9 +442,6 @@ group gMciFir attntype CHECK_STOP, RECOVERABLE, SPECIAL, UNIT_CS
 
 # Include the common action set.
 .include "CommonActions.rule"
-
-/** Analyze the connected Centaur */
-actionclass analyzeConnectedCentaur { analyze(connected(TYPE_MEMBUF)); };
 
 actionclass calloutProcHighThr5PerHr
 {

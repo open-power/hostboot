@@ -45,7 +45,7 @@ class CentaurCS:public CxxTest::TestSuite
         void TestCentaurCheckstop(void)
         {
             PRDS_BEGIN("Centaur CS");
-            PRDS_ERROR_ENTRY("NODE{0}:PROC{0}", PRDF::RECOVERABLE);
+            PRDS_ERROR_ENTRY("NODE{0}:MEMBUF{4}", PRDF::RECOVERABLE);
             PRDS_EXPECTED_SIGNATURE("NODE{0}:MEMBUF{4}:MBA{0}", 0x43F10003);
 
             // GLOBAL_RE_FIR set bit 1
