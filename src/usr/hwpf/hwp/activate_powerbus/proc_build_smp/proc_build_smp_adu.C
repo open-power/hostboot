@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_build_smp_adu.C,v 1.6 2013/03/28 16:28:32 jmcgill Exp $
+// $Id: proc_build_smp_adu.C,v 1.7 2013/05/09 03:52:14 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_build_smp_adu.C,v $
 //------------------------------------------------------------------------------
 // *|
@@ -361,7 +361,7 @@ fapi::ReturnCode proc_build_smp_quiesce_pb(
         adu_ctl.scope = ADU_FBC_OP_SCOPE_SYSTEM;
         adu_ctl.drop_priority = ADU_FBC_OP_DROP_PRIORITY_HIGH;
         adu_ctl.cmd_type = ADU_FBC_OP_CMD_ADDR_ONLY;
-        adu_ctl.init_policy = ADU_FBC_OP_FBC_INIT_NO_OVERRIDE;
+        adu_ctl.init_policy = ADU_FBC_OP_FBC_INIT_OVERRIDE;
         adu_ctl.use_autoinc = false;
 
         // acquire ADU lock
@@ -484,7 +484,7 @@ fapi::ReturnCode proc_build_smp_switch_cd(
         adu_ctl.scope = ADU_FBC_OP_SCOPE_SYSTEM;
         adu_ctl.drop_priority = ADU_FBC_OP_DROP_PRIORITY_HIGH;
         adu_ctl.cmd_type = ADU_FBC_OP_CMD_ADDR_ONLY;
-        adu_ctl.init_policy = ADU_FBC_OP_FBC_INIT_NO_OVERRIDE;
+        adu_ctl.init_policy = ADU_FBC_OP_FBC_INIT_OVERRIDE;
         adu_ctl.use_autoinc = false;
 
         adu_hp_ctl.do_tm_quiesce = false;
@@ -604,7 +604,7 @@ fapi::ReturnCode proc_build_smp_switch_ab(
         adu_ctl.scope = ADU_FBC_OP_SCOPE_SYSTEM;
         adu_ctl.drop_priority = ADU_FBC_OP_DROP_PRIORITY_HIGH;
         adu_ctl.cmd_type = ADU_FBC_OP_CMD_ADDR_ONLY;
-        adu_ctl.init_policy = ADU_FBC_OP_FBC_INIT_NO_OVERRIDE;
+        adu_ctl.init_policy = ADU_FBC_OP_FBC_INIT_OVERRIDE;
         adu_ctl.use_autoinc = false;
 
         adu_hp_ctl.do_tm_quiesce = false;
