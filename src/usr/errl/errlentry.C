@@ -251,11 +251,12 @@ void ErrlEntry::addHwCallout(const TARGETING::Target *i_target,
                         const HWAS::DeconfigEnum i_deconfigState,
                         const HWAS::GARD_ErrorType i_gardErrorType)
 {
-    TRACFCOMP(g_trac_errl, ENTER_MRK"addHwCallout(%p, 0x%x)",
-                i_target, i_priority);
 
     if (i_target == TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL)
     {
+        TRACFCOMP(g_trac_errl, ENTER_MRK
+                "addHwCallout(\"MASTER_PROC_SENTINEL\" 0x%x 0x%x 0x%x)",
+                i_target, i_priority, i_deconfigState, i_gardErrorType);
         ErrlUserDetailsCallout(
                 &HWAS::TARGET_IS_SENTINEL, sizeof(HWAS::TARGET_IS_SENTINEL),
                 i_priority, i_deconfigState, i_gardErrorType).addToLog(this);
@@ -263,6 +264,9 @@ void ErrlEntry::addHwCallout(const TARGETING::Target *i_target,
     else
     {   // we got a non MASTER_SENTINEL target, therefore the targeting
         // module is loaded, therefore we can make this call.
+        TRACFCOMP(g_trac_errl, ENTER_MRK"addHwCallout(0x%.8x 0x%x 0x%x 0x%x)",
+                get_huid(i_target), i_priority,
+                i_deconfigState, i_gardErrorType);
         TARGETING::EntityPath ep;
         ep = i_target->getAttr<TARGETING::ATTR_PHYS_PATH>();
 
@@ -343,8 +347,10 @@ uint32_t ErrlEntry::callout()
                 TARGETING::Target *l_masterProc;
                 TARGETING::targetService().masterProcChipTargetHandle(
                         l_masterProc);
-                if (!l_masterProc->getAttr<TARGETING::ATTR_HWAS_STATE>().
-                            functional)
+
+                const TARGETING::HwasState hwasState =
+                        l_masterProc->getAttr<TARGETING::ATTR_HWAS_STATE>();
+                if (hwasState.present && !hwasState.functional)
                 {
                     // if it got deconfigured, we need to return the plid
                     // to indicate that we need to shutdown
