@@ -37,6 +37,9 @@
 #include <prdfTrace.H>
 #include <prdfErrlUtil.H>
 
+#include <prdfCenAddress.H>
+#include <prdfCenConst.H>
+
 #include <dimmBadDqBitmapFuncs.H> // for dimm[S|G]etBadDqBitmap()
 
 //FIXME RTC:64173 - erepair code not in FSP yet
@@ -430,93 +433,213 @@ mss_MaintCmdWrapper::~mss_MaintCmdWrapper()
 
 //------------------------------------------------------------------------------
 
-int32_t mss_MaintCmdWrapper::stopCmd()
+int32_t mss_MaintCmdWrapper::setupAndExecuteCmd()
 {
-    PRDF_ASSERT( NULL != iv_cmd );
+    #define PRDF_FUNC "[mss_MaintCmdWrapper::setupAndExecuteCmd] "
+
     int32_t o_rc = SUCCESS;
-    fapi::ReturnCode l_rc = iv_cmd->stopCmd();
 
-    //  convert FAPI RC to error handle
-    errlHndl_t err = fapi::fapiRcToErrl(l_rc);
-
-    if (NULL != err)
+    fapi::ReturnCode l_rc = iv_cmd->setupAndExecuteCmd();
+    errlHndl_t errl = fapi::fapiRcToErrl( l_rc );
+    if ( NULL != errl )
     {
-        PRDF_GET_REASONCODE(err, o_rc);
-        PRDF_ERR( "mss_MaintCmdWrapper::stopCmd failed: [0x%X]", o_rc);
-        PRDF_COMMIT_ERRL( err, ERRL_ACTION_REPORT );
+        PRDF_GET_REASONCODE( errl, o_rc );
+        PRDF_ERR( PRDF_FUNC"setupAndExecuteCmd() failed: rc=0x%x", o_rc );
+        PRDF_COMMIT_ERRL( errl, ERRL_ACTION_REPORT );
         o_rc = FAIL;
     }
+
     return o_rc;
+
+    #undef PRDF_FUNC
 }
 
 //------------------------------------------------------------------------------
 
-int32_t mss_MaintCmdWrapper::setupAndExecuteCmd()
+int32_t mss_MaintCmdWrapper::stopCmd()
 {
-    PRDF_ASSERT( NULL != iv_cmd );
+    #define PRDF_FUNC "[mss_MaintCmdWrapper::stopCmd] "
+
     int32_t o_rc = SUCCESS;
-    fapi::ReturnCode l_rc = iv_cmd->setupAndExecuteCmd();
 
-    //  convert FAPI RC to error handle
-    errlHndl_t err = fapi::fapiRcToErrl(l_rc);
-
-    if (NULL != err)
+    fapi::ReturnCode l_rc = iv_cmd->stopCmd();
+    errlHndl_t errl = fapi::fapiRcToErrl( l_rc );
+    if ( NULL != errl )
     {
-        PRDF_GET_REASONCODE(err, o_rc);
-        PRDF_ERR( "mss_MaintCmdWrapper::setupAndExecuteCmd "
-                   "failed: [0x%X]", o_rc);
-        PRDF_COMMIT_ERRL( err, ERRL_ACTION_REPORT );
+        PRDF_GET_REASONCODE( errl, o_rc );
+        PRDF_ERR( PRDF_FUNC"stopCmd() failed: rc=0x%x", o_rc );
+        PRDF_COMMIT_ERRL( errl, ERRL_ACTION_REPORT );
         o_rc = FAIL;
     }
+
     return o_rc;
+
+    #undef PRDF_FUNC
 }
 
 //------------------------------------------------------------------------------
 
 int32_t mss_MaintCmdWrapper::cleanupCmd()
 {
-    PRDF_ASSERT( NULL != iv_cmd );
+    #define PRDF_FUNC "[mss_MaintCmdWrapper::cleanupCmd] "
+
     int32_t o_rc = SUCCESS;
+
     fapi::ReturnCode l_rc = iv_cmd->cleanupCmd();
-
-    //  convert FAPI RC to error handle
-    errlHndl_t err = fapi::fapiRcToErrl(l_rc);
-
-    if (NULL != err)
+    errlHndl_t errl = fapi::fapiRcToErrl( l_rc );
+    if ( NULL != errl )
     {
-        PRDF_GET_REASONCODE(err, o_rc);
-        PRDF_ERR( "mss_MaintCmdWrapper::cleanupCmd failed: [0x%X]", o_rc);
-        PRDF_COMMIT_ERRL( err, ERRL_ACTION_REPORT );
+        PRDF_GET_REASONCODE( errl, o_rc );
+        PRDF_ERR( PRDF_FUNC"cleanupCmd() failed: rc=0x%x", o_rc );
+        PRDF_COMMIT_ERRL( errl, ERRL_ACTION_REPORT );
         o_rc = FAIL;
     }
+
     return o_rc;
+
+    #undef PRDF_FUNC
 }
 
 //------------------------------------------------------------------------------
 
-mss_MaintCmdWrapper * createTimeBaseScrub(
-                        const TARGETING::TargetHandle_t i_mba,
-                        uint64_t i_startAddr, uint64_t i_endAddr,
-                        bool  i_isFastSpeed, uint32_t i_stopCondition )
+// Helper function for the createMssCmd() functions.
+int32_t getMemAddrRange( TargetHandle_t i_mba, uint8_t i_rank,
+                         ecmdDataBufferBase & o_startAddr,
+                         ecmdDataBufferBase & o_endAddr )
 {
-    ecmdDataBufferBase ecmdStartAddr(64);
-    ecmdDataBufferBase ecmdEndAddr(64);
+    #define PRDF_FUNC "[PlatServices::getMemAddrRange] "
 
-    ecmdStartAddr.setDoubleWord(0, i_startAddr);
-    ecmdEndAddr.setDoubleWord(0, i_endAddr);
+    int32_t o_rc = SUCCESS;
+
+    do
+    {
+        // Check parameters.
+        if ( TYPE_MBA != getTargetType(i_mba) )
+        {
+            PRDF_ERR( PRDF_FUNC"The given target is not TYPE_MBA" );
+            o_rc = FAIL; break;
+        }
+
+        if ( MSS_ALL_RANKS != i_rank && MAX_RANKS_PER_MBA <= i_rank )
+        {
+            PRDF_ERR( PRDF_FUNC"The given rank is not valid" );
+            o_rc = FAIL; break;
+        }
+
+        errlHndl_t errl = NULL;
+        PRD_FAPI_TO_ERRL( errl, mss_get_address_range, getFapiTarget(i_mba),
+                          i_rank, o_startAddr, o_endAddr );
+        if ( NULL != errl )
+        {
+            PRDF_ERR( PRDF_FUNC"mss_get_address_range() failed" );
+            PRDF_COMMIT_ERRL( errl, ERRL_ACTION_REPORT );
+            o_rc = FAIL; break;
+        }
+
+        // Verify addresses are of the valid register size.
+        if ( 64 != o_startAddr.getBitLength() ||
+             64 != o_endAddr.getBitLength() )
+        {
+            PRDF_ERR( PRDF_FUNC"Addresses returned from "
+                      "mss_get_address_range() are not 64-bit" );
+            o_rc = FAIL; break;
+        }
+
+    } while (0);
+
+    if ( SUCCESS != o_rc )
+    {
+        PRDF_ERR( PRDF_FUNC"Failed: 0x%08x 0x%02x", getHuid(i_mba), i_rank );
+    }
+
+    return o_rc;
+
+    #undef PRDF_FUNC
+}
+
+//------------------------------------------------------------------------------
+
+// Helper function for the other createMssCmd() functions.
+mss_MaintCmdWrapper * createMssCmd( mss_MaintCmdWrapper::CmdType i_cmdType,
+                                    TargetHandle_t i_mba, uint32_t i_stopCond,
+                                    bool i_isFastSpeed,
+                                    ecmdDataBufferBase i_startAddr,
+                                    ecmdDataBufferBase i_endAddr )
+{
+    #define PRDF_FUNC "[PlatServices::getMssCmd] "
+
+    mss_MaintCmdWrapper * o_cmd = NULL;
 
     mss_MaintCmd::TimeBaseSpeed cmdSpeed = mss_MaintCmd::SLOW_12H;
     if ( i_isFastSpeed )
         cmdSpeed = mss_MaintCmd::FAST_AS_POSSIBLE;
 
-    mss_MaintCmd * cmd = new mss_TimeBaseScrub( getFapiTarget(i_mba),
-                                                ecmdStartAddr, ecmdEndAddr,
-                                                cmdSpeed, i_stopCondition,
-                                                false );
+    mss_MaintCmd * cmd = NULL;
 
-    mss_MaintCmdWrapper * cmdWrapper = new mss_MaintCmdWrapper(cmd);
+    switch ( i_cmdType )
+    {
+        case mss_MaintCmdWrapper::TIMEBASE_SCRUB:
+            cmd = new mss_TimeBaseScrub( getFapiTarget(i_mba), i_startAddr,
+                                         i_endAddr, cmdSpeed, i_stopCond,
+                                         false );
+            break;
+        case mss_MaintCmdWrapper::TIMEBASE_STEER_CLEANUP:
+            cmd = new mss_TimeBaseSteerCleanup( getFapiTarget(i_mba),
+                                                i_startAddr, i_endAddr,
+                                                cmdSpeed, i_stopCond, false );
+            break;
+        case mss_MaintCmdWrapper::SUPERFAST_READ:
+            cmd = new mss_SuperFastRead( getFapiTarget(i_mba), i_startAddr,
+                                         i_endAddr, i_stopCond, false );
+            break;
+        default:
+            PRDF_ERR( PRDF_FUNC"Unsupported command type: 0x%x", i_cmdType );
+    }
 
-    return cmdWrapper;
+    if ( NULL != cmd )
+        o_cmd = new mss_MaintCmdWrapper(cmd);
+
+    return o_cmd;
+
+    #undef PRDF_FUNC
+}
+
+//------------------------------------------------------------------------------
+
+mss_MaintCmdWrapper * createMssCmd( mss_MaintCmdWrapper::CmdType i_cmdType,
+                                    TargetHandle_t i_mba, uint32_t i_stopCond,
+                                    bool i_isFastSpeed )
+{
+    mss_MaintCmdWrapper * o_cmd = NULL;
+
+    ecmdDataBufferBase sAddr(64), eAddr(64);
+    int32_t l_rc = getMemAddrRange( i_mba, MSS_ALL_RANKS, sAddr, eAddr );
+    if ( SUCCESS == l_rc )
+    {
+        o_cmd = createMssCmd( i_cmdType, i_mba, i_stopCond, i_isFastSpeed,
+                              sAddr, eAddr );
+    }
+
+    return o_cmd;
+}
+
+//------------------------------------------------------------------------------
+
+mss_MaintCmdWrapper * createMssCmd( mss_MaintCmdWrapper::CmdType i_cmdType,
+                                    TargetHandle_t i_mba, uint32_t i_stopCond,
+                                    bool i_isFastSpeed, const CenRank & i_rank )
+{
+    mss_MaintCmdWrapper * o_cmd = NULL;
+
+    ecmdDataBufferBase sAddr(64), eAddr(64);
+    int32_t l_rc = getMemAddrRange( i_mba, i_rank.flatten(), sAddr, eAddr );
+    if ( SUCCESS == l_rc )
+    {
+        o_cmd = createMssCmd( i_cmdType, i_mba, i_stopCond, i_isFastSpeed,
+                              sAddr, eAddr );
+    }
+
+    return o_cmd;
 }
 
 } // end namespace PlatServices

@@ -43,8 +43,6 @@
 #include <dimmConsts.H>         // for DIMM_DQ_RANK_BITMAP_SIZE
 #include <fapiPlatHwpInvoker.H> // for fapi::fapiRcToErrl()
 
-class mss_MaintCmd;
-
 #define PRD_FAPI_TO_ERRL(ERRHNDL, FUNC, _args_...) \
     { \
         fapi::ReturnCode l_rc = FUNC(_args_); \
@@ -55,6 +53,8 @@ class mss_MaintCmd;
 
 namespace PRDF
 {
+
+class CenRank;
 
 namespace PlatServices
 {
@@ -284,22 +284,31 @@ getDimmPlugCardType( TARGETING::TargetHandle_t i_dimmTarget );
 //##############################################################################
 
 /**
- * @brief This is a wrapper class for underlying maintainance class object
+ * @brief This is a wrapper class for underlying maintenance class object
  *
- * By this class, we will hide underlying maintainance class dependency
+ * By this class, we will hide underlying maintenance class dependency
  * from rest of code. All public function mss_MaintCmd used by prd should
  * be defined here also.
  */
 
 class mss_MaintCmdWrapper
 {
+  public: // data types
+
+    /** Represents underlying maintenance command object type **/
+    enum CmdType
+    {
+        TIMEBASE_SCRUB,
+        TIMEBASE_STEER_CLEANUP,
+        SUPERFAST_READ,
+    };
 
   public: // functions
 
     /**
      * @brief Constructor
      *
-     * @param i_maintCmd Underlying maintainance command object
+     * @param i_maintCmd Underlying maintenance command object
      */
     mss_MaintCmdWrapper( mss_MaintCmd * i_maintCmd );
 
@@ -332,31 +341,44 @@ class mss_MaintCmdWrapper
 
   private: // instance variables
 
-    // Underlying maintainance command object pointer
+    // Underlying maintenance command object pointer
     mss_MaintCmd * iv_cmd;
 
 }; // class mss_MaintCmdWrapper
 
 /**
- * @brief  Create Time base scrub object, wrap i around mss_MaintCmdWrapper
- *         object
- * @param  i_mba           An MBA target.
- * @param  i_startAddr     Start address for scrubbing.
- * @param  i_endAddr       End address for scrubbing.
- * @param  i_isFastSpeed   false = slow (12 H) , true = fast
- * @param  i_stopCondition Bit mask for conditions on which scrubbing should
- *                         stop.
- * @return mss_MaintCmdWrapper object
+ * @brief  Create a maintenance command object that will run on all memory
+ *         behind this MBA.
+ * @param  i_cmdType     Maintenance command type which we want to create.
+ * @param  i_mba         An MBA target.
+ * @param  i_stopCond    Bit mask for conditions in which to stop command.
+ * @param  i_isFastSpeed false = slow (12 H), true = fast.
+ * @return A mss_MaintCmdWrapper object, NULL if an internal function failed.
  * @note   This function allocates memory on heap for mss_MaintCmdWrapper
  *         object. It is the caller's responsibilty to delete this object.
+ * @note   i_isFastSpeed will be ignored for super fast commands.
  */
-mss_MaintCmdWrapper * createTimeBaseScrub(
-                       const TARGETING::TargetHandle_t i_mba,
-                       uint64_t i_startAddr,
-                       uint64_t i_endAddr,
-                       bool i_isFastSpeed,
-                       uint32_t i_stopCondition );
+mss_MaintCmdWrapper * createMssCmd( mss_MaintCmdWrapper::CmdType i_cmdType,
+                                    TARGETING::TargetHandle_t i_mba,
+                                    uint32_t i_stopCond, bool i_isFastSpeed );
 
+/**
+ * @brief  Create a maintenance command object that will run on all memory
+ *         behind the given rank.
+ * @param  i_cmdType     Maintenance command type which we want to create.
+ * @param  i_mba         An MBA target.
+ * @param  i_stopCond    Bit mask for conditions in which to stop command.
+ * @param  i_isFastSpeed false = slow (12 H), true = fast.
+ * @param  i_rank        The target rank.
+ * @return A mss_MaintCmdWrapper object, NULL if an internal function failed.
+ * @note   This function allocates memory on heap for mss_MaintCmdWrapper
+ *         object. It is the caller's responsibilty to delete this object.
+ * @note   i_isFastSpeed will be ignored for super fast commands.
+ */
+mss_MaintCmdWrapper * createMssCmd( mss_MaintCmdWrapper::CmdType i_cmdType,
+                                    TARGETING::TargetHandle_t i_mba,
+                                    uint32_t i_stopCond, bool i_isFastSpeed,
+                                    const CenRank & i_rank );
 
 } // end namespace PlatServices
 
