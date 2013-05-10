@@ -106,8 +106,8 @@ int32_t MaintCmdComplete( ExtensibleChip * i_mbaChip,
             // Tuck this away until PostAnalysis.
 
             CenAddr startAddr, endAddr;
-            l_rc  = cenGetMaintAddr( i_mbaChip, MAINT_START_ADDR, startAddr );
-            l_rc |= cenGetMaintAddr( i_mbaChip, MAINT_END_ADDR,   endAddr   );
+            l_rc  = getCenMaintStartAddr( i_mbaChip, startAddr );
+            l_rc |= getCenMaintEndAddr(   i_mbaChip, endAddr   );
             if ( SUCCESS != l_rc )
             {
                 PRDF_ERR( PRDF_FUNC"cenGetMbaAddr() failed" );
@@ -119,6 +119,7 @@ int32_t MaintCmdComplete( ExtensibleChip * i_mbaChip,
             mbadb->iv_cmdCompleteMsgData =
                         startAddr == endAddr ? MDIA::COMMAND_COMPLETE
                                              : MDIA::COMMAND_STOPPED;
+
             // Do not commit error log for a successful command complete.
             if ( MDIA::COMMAND_COMPLETE == mbadb->iv_cmdCompleteMsgData )
                  i_sc.service_data->DontCommitErrorLog();

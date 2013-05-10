@@ -155,12 +155,103 @@ class CenAddr
      *                enum ErrorType).
      */
     CenAddr( uint32_t i_rank, uint32_t i_bank, uint32_t i_row,
-                uint32_t i_col, uint32_t i_types = NONE ) :
+             uint32_t i_col, uint32_t i_types = NONE ) :
         iv_rank(i_rank), iv_types(i_types)
     {
         iv_bankRowCol.bank = i_bank;
         iv_bankRowCol.row  = i_row;
         iv_bankRowCol.col  = i_col;
+    }
+
+    /**
+     * @brief Creates a CenAddr from a mainline memory read address.
+     * @param i_addr 64-bit address.
+     * @param i_type The error type associated with this address.
+     */
+    static CenAddr fromReadAddr( uint64_t i_addr, uint32_t i_type )
+    {
+        return CenAddr(
+                  (i_addr >> 60) &     0x7,     // rank
+                  (i_addr >> 53) &     0xf,     // bank
+                 ((i_addr >>  5) & 0x20000) | ((i_addr >> 36) & 0x1ffff), // row
+                  (i_addr >> 24) &   0xfff,     // column
+                 i_type );                      // error type
+    }
+
+    /**
+     * @brief  Converts internal data structure to a mainline memory read
+     *         address.
+     * @return A uint64_t version of the address.
+     * @note   Does not include error type. This is because in most cases we
+     *         will use this function to write out to hardware and in doing so
+     *         we will want to clear the status bits anyway.
+     */
+    uint64_t toReadAddr() const
+    {
+        return ( ((uint64_t) iv_rank.flatten()             << 60) |
+                 ((uint64_t) iv_bankRowCol.bank            << 53) |
+                 ((uint64_t)(iv_bankRowCol.row & 0x1ffff)  << 36) |  // r16-r0
+                 ((uint64_t) iv_bankRowCol.col             << 24) |
+                 ((uint64_t)(iv_bankRowCol.row & 0x20000)  <<  5) ); // r17
+    }
+
+    /**
+     * @brief Creates a CenAddr from a maintenace start address.
+     * @param i_addr 64-bit address.
+     */
+    static CenAddr fromMaintStartAddr( uint64_t i_addr )
+    {
+        return CenAddr(
+                  (i_addr >> 60) &     0x7,     // rank
+                  (i_addr >> 53) &     0xf,     // bank
+                 ((i_addr << 13) & 0x20000) | ((i_addr >> 36) & 0x1ffff), // row
+                  (i_addr >> 24) &   0xfff,     // column
+                  (i_addr >> 17) &    0x7f );   // error type
+    }
+
+    /**
+     * @brief  Converts internal data structure to a maintenace start address.
+     * @return A uint64_t version of the address.
+     * @note   Does not include error type. This is because in most cases we
+     *         will use this function to write out to hardware and in doing so
+     *         we will want to clear the status bits anyway.
+     */
+    uint64_t toMaintStartAddr() const
+    {
+        return ( ((uint64_t) iv_rank.flatten()             << 60) |
+                 ((uint64_t) iv_bankRowCol.bank            << 53) |
+                 ((uint64_t)(iv_bankRowCol.row & 0x1ffff)  << 36) |  // r16-r0
+                 ((uint64_t) iv_bankRowCol.col             << 24) |
+                 ((uint64_t)(iv_bankRowCol.row & 0x20000)  >> 13) ); // r17
+    }
+
+    /**
+     * @brief Creates a CenAddr from a maintenace end address.
+     * @param i_addr 64-bit address.
+     */
+    static CenAddr fromMaintEndAddr( uint64_t i_addr )
+    {
+        return CenAddr(
+                  (i_addr >> 60) &     0x7,     // rank
+                  (i_addr >> 53) &     0xf,     // bank
+                 ((i_addr >>  6) & 0x20000) | ((i_addr >> 36) & 0x1ffff), // row
+                  (i_addr >> 24) &   0xfff );    // column
+    }
+
+    /**
+     * @brief  Converts internal data structure to a maintenace end address.
+     * @return A uint64_t version of the address.
+     * @note   Does not include error type. This is because in most cases we
+     *         will use this function to write out to hardware and in doing so
+     *         we will want to clear the status bits anyway.
+     */
+    uint64_t toMaintEndAddr() const
+    {
+        return ( ((uint64_t) iv_rank.flatten()             << 60) |
+                 ((uint64_t) iv_bankRowCol.bank            << 53) |
+                 ((uint64_t)(iv_bankRowCol.row & 0x1ffff)  << 36) |  // r16-r0
+                 ((uint64_t) iv_bankRowCol.col             << 24) |
+                 ((uint64_t)(iv_bankRowCol.row & 0x20000)  <<  6) ); // r17
     }
 
     /** @return This address's rank. */
@@ -194,7 +285,7 @@ class CenAddr
     {
         uint32_t bank :  4; ///< b2-b0
         uint32_t col  : 12; ///< c13,c11,c9-c3 (c2-c0 are tied to 0)
-        uint32_t row  : 17; ///< r16-r0
+        uint32_t row  : 18; ///< r17-r0
     } iv_bankRowCol;
 
     /** An OR of all error types assoiated with this address (see enum
@@ -207,66 +298,75 @@ class CenAddr
 //                       MBS Address Registers
 //------------------------------------------------------------------------------
 
-typedef const char * const ReadAddrReg;
+typedef const char * const CenReadAddrReg;
 
-extern ReadAddrReg READ_NCE_ADDR_0; ///< For the MBNCER_0 register
-extern ReadAddrReg READ_RCE_ADDR_0; ///< For the MBRCER_0 register
-extern ReadAddrReg READ_MPE_ADDR_0; ///< For the MBMPER_0 register
-extern ReadAddrReg READ_UE_ADDR_0;  ///< For the MBUER_0 register
+extern CenReadAddrReg READ_NCE_ADDR_0; ///< For the MBNCER_0 register
+extern CenReadAddrReg READ_RCE_ADDR_0; ///< For the MBRCER_0 register
+extern CenReadAddrReg READ_MPE_ADDR_0; ///< For the MBMPER_0 register
+extern CenReadAddrReg READ_UE_ADDR_0;  ///< For the MBUER_0 register
 
-extern ReadAddrReg READ_NCE_ADDR_1; ///< For the MBNCER_1 register
-extern ReadAddrReg READ_RCE_ADDR_1; ///< For the MBRCER_1 register
-extern ReadAddrReg READ_MPE_ADDR_1; ///< For the MBMPER_1 register
-extern ReadAddrReg READ_UE_ADDR_1;  ///< For the MBUER_1 register
+extern CenReadAddrReg READ_NCE_ADDR_1; ///< For the MBNCER_1 register
+extern CenReadAddrReg READ_RCE_ADDR_1; ///< For the MBRCER_1 register
+extern CenReadAddrReg READ_MPE_ADDR_1; ///< For the MBMPER_1 register
+extern CenReadAddrReg READ_UE_ADDR_1;  ///< For the MBUER_1 register
 
 /**
- * @brief  Returns the address from the specified register.
- * @param  i_mbChip  A Centaur chip.
- * @param  i_addrReg The target address register.
- * @param  o_addr    The returned address from hardware.
- * @return Non-SUCCESS if a register read fails, SUCCESS otherwise.
+ * @brief  Reads the specified mainline memory read address from hardware.
+ * @param  i_membChip A Centaur chip.
+ * @param  i_addrReg  The target address register.
+ * @param  o_addr     The returned address from hardware.
+ * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
  */
-int32_t cenGetReadAddr( ExtensibleChip * i_mbChip, ReadAddrReg i_addrReg,
+int32_t getCenReadAddr( ExtensibleChip * i_membChip, CenReadAddrReg i_addrReg,
                         CenAddr & o_addr );
 
 /**
- * @brief  Writes an address to the specified register.
- * @param  i_mbChip  A Centaur chip.
- * @param  i_addrReg The target address register.
- * @param  i_addr    The address to write to hardware.
- * @return Non-SUCCESS if a register read fails, SUCCESS otherwise.
+ * @brief  Writes the specified mainline memory read address to hardware.
+ * @param  i_membChip A Centaur chip.
+ * @param  i_addrReg  The target address register.
+ * @param  i_addr     The address to write to hardware.
+ * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
  */
-int32_t cenSetReadAddr( ExtensibleChip * i_mbChip, ReadAddrReg i_addrReg,
-                        CenAddr i_addr );
+int32_t setCenReadAddr( ExtensibleChip * i_membChip, CenReadAddrReg i_addrReg,
+                        const CenAddr & i_addr );
 
 //------------------------------------------------------------------------------
 //                       MBA Address Registers
 //------------------------------------------------------------------------------
 
-typedef const char * const MaintAddrReg;
-
-extern MaintAddrReg MAINT_START_ADDR; ///< For the MBMACA register
-extern MaintAddrReg MAINT_END_ADDR;   ///< For the MBMEA register
-
 /**
- * @brief  Returns the address from the specified register.
+ * @brief  Reads the maintenance start address from hardware.
  * @param  i_mbaChip An MBA chip.
- * @param  i_addrReg The target address register.
  * @param  o_addr    The returned address from hardware.
- * @return Non-SUCCESS if a register read fails, SUCCESS otherwise.
+ * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
  */
-int32_t cenGetMaintAddr( ExtensibleChip * i_mbaChip, MaintAddrReg i_addrReg,
-                         CenAddr & o_addr );
+int32_t getCenMaintStartAddr( ExtensibleChip * i_mbaChip, CenAddr & o_addr );
 
 /**
- * @brief  Writes an address to the specified register.
+ * @brief  Writes the maintenance start address to hardware.
  * @param  i_mbaChip An MBA chip.
- * @param  i_addrReg The target address register.
  * @param  i_addr    The address to write to hardware.
- * @return Non-SUCCESS if a register read fails, SUCCESS otherwise.
+ * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
  */
-int32_t cenSetMaintAddr( ExtensibleChip * i_mbChip, MaintAddrReg i_addrReg,
-                         CenAddr i_addr );
+int32_t setCenMaintStartAddr( ExtensibleChip * i_mbaChip,
+                              const CenAddr & i_addr );
+
+/**
+ * @brief  Reads the maintenance end address from hardware.
+ * @param  i_mbaChip An MBA chip.
+ * @param  o_addr    The returned address from hardware.
+ * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
+ */
+int32_t getCenMaintEndAddr( ExtensibleChip * i_mbaChip, CenAddr & o_addr );
+
+/**
+ * @brief  Writes the maintenance end address to hardware.
+ * @param  i_mbaChip An MBA chip.
+ * @param  i_addr    The address to write to hardware.
+ * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
+ */
+int32_t setCenMaintEndAddr( ExtensibleChip * i_mbaChip,
+                            const CenAddr & i_addr );
 
 } // end namespace PRDF
 

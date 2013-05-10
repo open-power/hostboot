@@ -43,71 +43,70 @@ using namespace PlatServices;
 //                       MBS Address Registers
 //------------------------------------------------------------------------------
 
-ReadAddrReg READ_NCE_ADDR_0 = "MBNCER_0";
-ReadAddrReg READ_RCE_ADDR_0 = "MBRCER_0";
-ReadAddrReg READ_MPE_ADDR_0 = "MBMPER_0";
-ReadAddrReg READ_UE_ADDR_0  = "MBUER_0";
+CenReadAddrReg READ_NCE_ADDR_0 = "MBNCER_0";
+CenReadAddrReg READ_RCE_ADDR_0 = "MBRCER_0";
+CenReadAddrReg READ_MPE_ADDR_0 = "MBMPER_0";
+CenReadAddrReg READ_UE_ADDR_0  = "MBUER_0";
 
-ReadAddrReg READ_NCE_ADDR_1 = "MBNCER_1";
-ReadAddrReg READ_RCE_ADDR_1 = "MBRCER_1";
-ReadAddrReg READ_MPE_ADDR_1 = "MBMPER_1";
-ReadAddrReg READ_UE_ADDR_1  = "MBUER_1";
+CenReadAddrReg READ_NCE_ADDR_1 = "MBNCER_1";
+CenReadAddrReg READ_RCE_ADDR_1 = "MBRCER_1";
+CenReadAddrReg READ_MPE_ADDR_1 = "MBMPER_1";
+CenReadAddrReg READ_UE_ADDR_1  = "MBUER_1";
 
 //------------------------------------------------------------------------------
 
-int32_t cenGetReadAddr( ExtensibleChip * i_mbChip, ReadAddrReg i_addrReg,
-                       CenAddr & o_addr )
+int32_t getCenReadAddr( ExtensibleChip * i_membChip, CenReadAddrReg i_addrReg,
+                        CenAddr & o_addr )
 {
-    #define PRDF_FUNC "[cenGetReadAddr] "
+    #define PRDF_FUNC "[getCenReadAddr] "
 
     int32_t o_rc = SUCCESS;
 
-    TargetHandle_t mbTarget = i_mbChip->GetChipHandle();
+    TargetHandle_t membTrgt = i_membChip->GetChipHandle();
 
     do
     {
-        if ( TYPE_MEMBUF != getTargetType(mbTarget) )
+        // Check parameters
+        if ( TYPE_MEMBUF != getTargetType(membTrgt) )
         {
             PRDF_ERR( PRDF_FUNC"Unsupported target type" );
             o_rc = FAIL; break;
         }
 
-        SCAN_COMM_REGISTER_CLASS * reg = i_mbChip->getRegister(i_addrReg);
+        // Read from hardware
+        SCAN_COMM_REGISTER_CLASS * reg = i_membChip->getRegister(i_addrReg);
         o_rc = reg->Read();
         if ( SUCCESS != o_rc )
         {
-            PRDF_ERR( PRDF_FUNC" %s Read() failed", i_addrReg );
+            PRDF_ERR( PRDF_FUNC"Read() failed on %s", i_addrReg );
             break;
         }
+        uint64_t addr = reg->GetBitFieldJustified( 0, 64 );
 
-        uint32_t rank = reg->GetBitFieldJustified( 1, 3);
-        uint32_t bank = reg->GetBitFieldJustified( 7, 4);
-        uint32_t row  = reg->GetBitFieldJustified(11,17);
-        uint32_t col  = reg->GetBitFieldJustified(28,12);
-
-        uint32_t types = CenAddr::NONE;
+        // Get the address type.
+        uint32_t type = CenAddr::NONE;
         if      ( READ_NCE_ADDR_0 == i_addrReg || READ_NCE_ADDR_1 == i_addrReg )
-            types = CenAddr::NCE;
+            type = CenAddr::NCE;
         else if ( READ_RCE_ADDR_0 == i_addrReg || READ_RCE_ADDR_1 == i_addrReg )
-            types = CenAddr::RCE;
+            type = CenAddr::RCE;
         else if ( READ_MPE_ADDR_0 == i_addrReg || READ_MPE_ADDR_1 == i_addrReg )
-            types = CenAddr::MPE;
+            type = CenAddr::MPE;
         else if ( READ_UE_ADDR_0  == i_addrReg || READ_UE_ADDR_1  == i_addrReg )
-            types = CenAddr::UE;
+            type = CenAddr::UE;
         else
         {
             PRDF_ERR( PRDF_FUNC"Unsupported register" );
             o_rc = FAIL; break;
         }
 
-        o_addr = CenAddr ( rank, bank, row, col, types );
+        o_addr = CenAddr::fromReadAddr( addr, type );
 
     } while (0);
 
     if ( SUCCESS != o_rc )
     {
         PRDF_ERR( PRDF_FUNC"Failed: HUID=0x%08x addrReg='%s'",
-                  getHuid(mbTarget), i_addrReg );
+                  getHuid(membTrgt), i_addrReg );
     }
 
     return o_rc;
@@ -117,35 +116,31 @@ int32_t cenGetReadAddr( ExtensibleChip * i_mbChip, ReadAddrReg i_addrReg,
 
 //------------------------------------------------------------------------------
 
-int32_t cenSetReadAddr( ExtensibleChip * i_mbChip, ReadAddrReg i_addrReg,
-                       CenAddr i_addr )
+int32_t setCenReadAddr( ExtensibleChip * i_membChip, CenReadAddrReg i_addrReg,
+                        const CenAddr & i_addr )
 {
-    #define PRDF_FUNC "[cenSetReadAddr] "
+    #define PRDF_FUNC "[setCenReadAddr] "
 
     int32_t o_rc = SUCCESS;
 
-    TargetHandle_t mbTarget = i_mbChip->GetChipHandle();
+    TargetHandle_t membTrgt = i_membChip->GetChipHandle();
 
     do
     {
-        if ( TYPE_MEMBUF != getTargetType(mbTarget) )
+        // Check parameters
+        if ( TYPE_MEMBUF != getTargetType(membTrgt) )
         {
             PRDF_ERR( PRDF_FUNC"Unsupported target type" );
             o_rc = FAIL; break;
         }
 
-        SCAN_COMM_REGISTER_CLASS * reg = i_mbChip->getRegister(i_addrReg);
-        reg->clearAllBits(); // clears out all status bits
-
-        reg->SetBitFieldJustified(  1,  3, i_addr.getRank().flatten() );
-        reg->SetBitFieldJustified(  7,  4, i_addr.getBank()           );
-        reg->SetBitFieldJustified( 11, 17, i_addr.getRow()            );
-        reg->SetBitFieldJustified( 28, 12, i_addr.getCol()            );
-
+        // Write to hardware
+        SCAN_COMM_REGISTER_CLASS * reg = i_membChip->getRegister(i_addrReg);
+        reg->SetBitFieldJustified( 0, 64, i_addr.toReadAddr() );
         o_rc = reg->Write();
         if ( SUCCESS != o_rc )
         {
-            PRDF_ERR( PRDF_FUNC" %s Write() failed", i_addrReg );
+            PRDF_ERR( PRDF_FUNC"Write() failed on %s", i_addrReg );
             break;
         }
 
@@ -154,7 +149,7 @@ int32_t cenSetReadAddr( ExtensibleChip * i_mbChip, ReadAddrReg i_addrReg,
     if ( SUCCESS != o_rc )
     {
         PRDF_ERR( PRDF_FUNC"Failed: HUID=0x%08x addrReg='%s'",
-                  getHuid(mbTarget), i_addrReg );
+                  getHuid(membTrgt), i_addrReg );
     }
 
     return o_rc;
@@ -166,60 +161,40 @@ int32_t cenSetReadAddr( ExtensibleChip * i_mbChip, ReadAddrReg i_addrReg,
 //                       MBA Address Registers
 //------------------------------------------------------------------------------
 
-MaintAddrReg MAINT_START_ADDR = "MBMACA";
-MaintAddrReg MAINT_END_ADDR   = "MBMEA";
-
-//------------------------------------------------------------------------------
-
-int32_t cenGetMaintAddr( ExtensibleChip * i_mbaChip, MaintAddrReg i_addrReg,
-                       CenAddr & o_addr )
+int32_t getCenMaintStartAddr( ExtensibleChip * i_mbaChip, CenAddr & o_addr )
 {
-    #define PRDF_FUNC "[cenGetMaintAddr] "
+    #define PRDF_FUNC "[getCenMaintStartAddr] "
 
     int32_t o_rc = SUCCESS;
 
-    TargetHandle_t mbaTarget = i_mbaChip->GetChipHandle();
+    TargetHandle_t mbaTrgt = i_mbaChip->GetChipHandle();
 
     do
     {
-        if ( TYPE_MBA != getTargetType(mbaTarget) )
+        // Check parameters
+        if ( TYPE_MBA != getTargetType(mbaTrgt) )
         {
             PRDF_ERR( PRDF_FUNC"Unsupported target type" );
             o_rc = FAIL; break;
         }
 
-        SCAN_COMM_REGISTER_CLASS * reg = i_mbaChip->getRegister(i_addrReg);
+        // Read from hardware
+        SCAN_COMM_REGISTER_CLASS * reg = i_mbaChip->getRegister("MBMACA");
         o_rc = reg->Read();
         if ( SUCCESS != o_rc )
         {
-            PRDF_ERR( PRDF_FUNC" %s Read() failed", i_addrReg );
+            PRDF_ERR( PRDF_FUNC"Read() failed on MBMACA" );
             break;
         }
+        uint64_t addr = reg->GetBitFieldJustified( 0, 64 );
 
-        uint32_t rank = reg->GetBitFieldJustified( 1, 3);
-        uint32_t bank = reg->GetBitFieldJustified( 7, 4);
-        uint32_t row  = reg->GetBitFieldJustified(11,17);
-        uint32_t col  = reg->GetBitFieldJustified(28,12);
-
-        uint32_t types = CenAddr::NONE;
-        if ( MAINT_START_ADDR == i_addrReg )
-            types = reg->GetBitFieldJustified(40,7);
-        else if ( MAINT_END_ADDR == i_addrReg )
-            types = CenAddr::NONE;
-        else
-        {
-            PRDF_ERR( PRDF_FUNC"Unsupported register" );
-            o_rc = FAIL; break;
-        }
-
-        o_addr = CenAddr ( rank, bank, row, col, types );
+        o_addr = CenAddr::fromMaintStartAddr( addr );
 
     } while (0);
 
     if ( SUCCESS != o_rc )
     {
-        PRDF_ERR( PRDF_FUNC"Failed: HUID=0x%08x addrReg='%s'",
-                  getHuid(mbaTarget), i_addrReg );
+        PRDF_ERR( PRDF_FUNC"Failed: HUID=0x%08x", getHuid(mbaTrgt) );
     }
 
     return o_rc;
@@ -229,35 +204,31 @@ int32_t cenGetMaintAddr( ExtensibleChip * i_mbaChip, MaintAddrReg i_addrReg,
 
 //------------------------------------------------------------------------------
 
-int32_t cenSetMaintAddr( ExtensibleChip * i_mbaChip, MaintAddrReg i_addrReg,
-                       CenAddr i_addr )
+int32_t setCenMaintStartAddr( ExtensibleChip * i_mbaChip,
+                              const CenAddr & i_addr )
 {
-    #define PRDF_FUNC "[cenSetMaintAddr] "
+    #define PRDF_FUNC "[setCenMaintStartAddr] "
 
     int32_t o_rc = SUCCESS;
 
-    TargetHandle_t mbaTarget = i_mbaChip->GetChipHandle();
+    TargetHandle_t mbaTrgt = i_mbaChip->GetChipHandle();
 
     do
     {
-        if ( TYPE_MBA != getTargetType(mbaTarget) )
+        // Check parameters
+        if ( TYPE_MBA != getTargetType(mbaTrgt) )
         {
             PRDF_ERR( PRDF_FUNC"Unsupported target type" );
             o_rc = FAIL; break;
         }
 
-        SCAN_COMM_REGISTER_CLASS * reg = i_mbaChip->getRegister(i_addrReg);
-        reg->clearAllBits(); // clears out all status bits
-
-        reg->SetBitFieldJustified(  1,  3, i_addr.getRank().flatten() );
-        reg->SetBitFieldJustified(  7,  4, i_addr.getBank()           );
-        reg->SetBitFieldJustified( 11, 17, i_addr.getRow()            );
-        reg->SetBitFieldJustified( 28, 12, i_addr.getCol()            );
-
+        // Write to hardware
+        SCAN_COMM_REGISTER_CLASS * reg = i_mbaChip->getRegister("MBMACA");
+        reg->SetBitFieldJustified( 0, 64, i_addr.toMaintStartAddr() );
         o_rc = reg->Write();
         if ( SUCCESS != o_rc )
         {
-            PRDF_ERR( PRDF_FUNC" %s Write() failed", i_addrReg );
+            PRDF_ERR( PRDF_FUNC"Write() failed on MBMACA" );
             break;
         }
 
@@ -265,8 +236,91 @@ int32_t cenSetMaintAddr( ExtensibleChip * i_mbaChip, MaintAddrReg i_addrReg,
 
     if ( SUCCESS != o_rc )
     {
-        PRDF_ERR( PRDF_FUNC"Failed: HUID=0x%08x addrReg='%s'",
-                  getHuid(mbaTarget), i_addrReg );
+        PRDF_ERR( PRDF_FUNC"Failed: HUID=0x%08x", getHuid(mbaTrgt) );
+    }
+
+    return o_rc;
+
+    #undef PRDF_FUNC
+}
+
+//------------------------------------------------------------------------------
+
+int32_t getCenMaintEndAddr( ExtensibleChip * i_mbaChip, CenAddr & o_addr )
+{
+    #define PRDF_FUNC "[getCenMaintEndAddr] "
+
+    int32_t o_rc = SUCCESS;
+
+    TargetHandle_t mbaTrgt = i_mbaChip->GetChipHandle();
+
+    do
+    {
+        // Check parameters
+        if ( TYPE_MBA != getTargetType(mbaTrgt) )
+        {
+            PRDF_ERR( PRDF_FUNC"Unsupported target type" );
+            o_rc = FAIL; break;
+        }
+
+        // Read from hardware
+        SCAN_COMM_REGISTER_CLASS * reg = i_mbaChip->getRegister("MBMEA");
+        o_rc = reg->Read();
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC"Read() failed on MBMEA" );
+            break;
+        }
+        uint64_t addr = reg->GetBitFieldJustified( 0, 64 );
+
+        o_addr = CenAddr::fromMaintEndAddr( addr );
+
+    } while (0);
+
+    if ( SUCCESS != o_rc )
+    {
+        PRDF_ERR( PRDF_FUNC"Failed: HUID=0x%08x", getHuid(mbaTrgt) );
+    }
+
+    return o_rc;
+
+    #undef PRDF_FUNC
+}
+
+//------------------------------------------------------------------------------
+
+int32_t setCenMaintEndAddr( ExtensibleChip * i_mbaChip, const CenAddr & i_addr )
+{
+    #define PRDF_FUNC "[setCenMaintEndAddr] "
+
+    int32_t o_rc = SUCCESS;
+
+    TargetHandle_t mbaTrgt = i_mbaChip->GetChipHandle();
+
+    do
+    {
+        // Check parameters
+        if ( TYPE_MBA != getTargetType(mbaTrgt) )
+        {
+            PRDF_ERR( PRDF_FUNC"Unsupported target type" );
+            o_rc = FAIL; break;
+        }
+
+        // Write to hardware
+        SCAN_COMM_REGISTER_CLASS * reg = i_mbaChip->getRegister("MBMEA");
+        reg->SetBitFieldJustified( 0, 64, i_addr.toMaintEndAddr() );
+        o_rc = reg->Write();
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC"Write() failed on MBMEA" );
+            break;
+        }
+
+    } while (0);
+
+    if ( SUCCESS != o_rc )
+    {
+        PRDF_ERR( PRDF_FUNC"Failed: HUID=0x%08x", getHuid(mbaTrgt) );
     }
 
     return o_rc;
