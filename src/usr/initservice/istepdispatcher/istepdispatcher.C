@@ -253,13 +253,13 @@ void IStepDispatcher::init ( errlHndl_t &io_rtaskRetErrl )
                 // normal IPL mode
                 TRACFCOMP( g_trac_initsvc, "sync attributes to FSP");
 
-                errlHndl_t l_errl = TARGETING::syncAllAttributesToFsp();
+                errlHndl_t l_syncAttrErrl = TARGETING::syncAllAttributesToFsp();
 
-                if(l_errl)
+                if(l_syncAttrErrl)
                 {
                     TRACFCOMP(g_trac_initsvc, "Attribute sync failed, see"
-                            "%x for details", l_errl->eid());
-                    errlCommit(l_errl, INITSVC_COMP_ID);
+                            "%x for details", l_syncAttrErrl->eid());
+                    errlCommit(l_syncAttrErrl, INITSVC_COMP_ID);
                 }
 
                 break;
@@ -299,28 +299,25 @@ errlHndl_t IStepDispatcher::executeAllISteps ( void )
              istep < MaxISteps;
              istep++ )
         {
-            // Run until num items +1, to be sure we know the last step
-            // finished
             for( size_t substep = 0;
-                 substep < (g_isteps[istep].numitems + 1);
+                 substep < g_isteps[istep].numitems ;
                  substep++ )
             {
-#if 1
-                //  $$  please save, need to fix for
-                //  $$      IPL service not returning error on invalid isteps
-#else
-                //  If the istep/substep doesn't exist, skip it.
-                if ( findTaskInfo( istep, substep ) ==  NULL )
+
+                //  Check to see if this is a valid istep, if not, don't
+                //  send it to istepWorker.  IstepWorker treats invalid
+                //  isteps as an error.
+                if ( NULL   ==  findTaskInfo( istep, substep ))
                 {
                     TRACFCOMP( g_trac_initsvc,
-                               INFO_MRK"Empty istep %d.%d, continuing...",
-                               istep,
-                               substep  );
+                               "executeAllSteps: "
+                               "skipping empty istep %d, substep: %d",
+                               istep, substep );
                     continue;
                 }
-#endif
-                // Before we can do anything, we need to be sure the worker thread is
-                // ready to start
+
+                // Before we can do anything, we need to be sure that
+                //  the worker thread is ready to start
                 theMsg = msg_wait( iv_msgQ );
 
                 // check for sync msgs
@@ -336,21 +333,14 @@ errlHndl_t IStepDispatcher::executeAllISteps ( void )
                     continue;
                 }
 
-                // If we just got the msg that the last step finished, break
-                // out
-                if( substep == (g_isteps[istep].numitems + 1) )
-                {
-                    TRACFCOMP( g_trac_initsvc,
-                               INFO_MRK"Last Step, exit" );
-                    break;
-                }
-
                 // Look for an errlog in extra_data
                 if( NULL != theMsg->extra_data )
                 {
                     TRACFCOMP( g_trac_initsvc,
-                               ERR_MRK"Error returned from istep(%d), substep(%d)",
-                               prevIstep, prevSubStep );
+                               ERR_MRK"executeAllISteps: "
+                               "Error returned from istep(%d), substep(%d)",
+                               prevIstep,
+                               prevSubStep );
 
                     err = ((errlHndl_t)theMsg->extra_data);
 
@@ -358,8 +348,11 @@ errlHndl_t IStepDispatcher::executeAllISteps ( void )
                 }
 
                 TRACFCOMP( g_trac_initsvc,
-                           INFO_MRK"executeAllSteps(0x%08x), istep: %d, substep: %d",
+                           INFO_MRK"executeAllSteps: "
+                           "type: 0x%08x, istep: %d, substep: %d",
                            theMsg->type, istep, substep );
+
+
 
                 // Set the Istep info
                 prevIstep = istep;
@@ -373,7 +366,7 @@ errlHndl_t IStepDispatcher::executeAllISteps ( void )
                              theMsg );
 
                 theMsg = NULL;
-            } // for substep < (g_isteps[istep].numitems + 1)
+            } // for substep
 
             // check to see if there were any delayed deconfigure callouts
             // call HWAS to have this processed
@@ -517,10 +510,11 @@ errlHndl_t IStepDispatcher::msgHndlr ( void )
                 if( iv_Msg )
                 {
                     TRACFCOMP( g_trac_initsvc,
-                               ERR_MRK"ERROR: IStep Dispatcher already has another "
-                               "Istep request for step: 0x%02x, substep: 0x%02x",
-                               ((iv_Msg->type & 0xFF00) >> 8),
-                               (iv_Msg->type & 0xFF) );
+                               ERR_MRK"msgHndlr: ERROR: "
+                               "IStep Dispatcher has another Istep request"
+                               "for step: %d, substep: %d",
+                               ((theMsg->type & 0xFF00) >> 8),
+                               (theMsg->type & 0xFF) );
 
                     /*@
                      * @errortype
@@ -533,11 +527,12 @@ errlHndl_t IStepDispatcher::msgHndlr ( void )
                      *                   and we are still working on a
                      *                   previous Istep.
                      */
-                    err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                                   ISTEP_INITSVC_MOD_ID,
-                                                   ISTEP_MULTIPLE_ISTEP_REQ,
-                                                   ((iv_Msg->type & 0xFF00) >> 8),
-                                                   (iv_Msg->type & 0xFF) );
+                    err = new ERRORLOG::ErrlEntry(
+                        ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                        ISTEP_INITSVC_MOD_ID,
+                        ISTEP_MULTIPLE_ISTEP_REQ,
+                        ((theMsg->type & 0xFF00) >> 8),
+                        (theMsg->type & 0xFF) );
 
                     break;
                 }
@@ -593,7 +588,8 @@ void IStepDispatcher::waitForSyncPoint ( void )
         spLess() )
     {
         TRACFCOMP( g_trac_initsvc,
-                   INFO_MRK"Istep mode or SPless, no wait for sync point allowed" );
+                   INFO_MRK"Istep mode or SPless, "
+                   "no wait for sync point allowed" );
         return;
     }
 
@@ -691,8 +687,8 @@ errlHndl_t IStepDispatcher::sendIstepCompleteMsg ( void )
         else
         {
             TRACFCOMP( g_trac_initsvc,
-                       ERR_MRK"Request to send Istep complete, but no outstanding "
-                       "message from Fsp found!!" );
+                       ERR_MRK"Request to send Istep complete, "
+                       "but no outstanding message from Fsp found!!" );
 
             /*@
              * @errortype
@@ -701,8 +697,8 @@ errlHndl_t IStepDispatcher::sendIstepCompleteMsg ( void )
              * @moduleid         ISTEP_INITSVC_MOD_ID
              * @userdata1        Current Istep
              * @userdata2        Current SubStep
-             * @devdesc          Request to send Istep Complete msg to Fsp, but no
-             *                   outstanding message from Fsp found.
+             * @devdesc          Request to send Istep Complete msg to Fsp, but
+             *                   no outstanding message from Fsp found.
              */
             err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                            ISTEP_INITSVC_MOD_ID,

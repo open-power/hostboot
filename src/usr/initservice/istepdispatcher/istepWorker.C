@@ -156,37 +156,37 @@ void iStepWorkerThread ( void * i_msgQ )
         substep = (theMsg->data[0] & 0xFF);
 
 
-        // Post the Progress Code
-        // TODO - Covered with RTC: 34046
-        InitService::getTheInstance().setProgressCode( progressCode );
-
         // Get the Task Info for this step
         const TaskInfo * theStep = findTaskInfo( istep,
                                                  substep );
 
-        if( prevStep != istep )
-        {
-            // unload the modules from the previous step
-            unLoadModules( prevStep );
-            // load modules for this step
-            loadModules( istep );
-            prevStep = istep;
-        }
-
-
         if( NULL != theStep )
         {
             TRACFCOMP( g_trac_initsvc,
-                    "IStepDispatcher (worker): Run Istep (%d), substep(%d), "
-                    "- %s",
+                    "IStepDispatcher (worker): "
+                    "Run Istep (%d), substep(%d), - %s",
                        istep, substep, theStep->taskname );
 
+            // Post the Progress Code
+            InitService::getTheInstance().setProgressCode( progressCode );
+
+            if( prevStep != istep )
+            {
+                // unload the modules from the previous step
+                unLoadModules( prevStep );
+                // load modules for this step
+                loadModules( istep );
+                prevStep = istep;
+            }
 
             err = InitService::getTheInstance().executeFn( theStep,
                                                            NULL );
 
+            //  flush contTrace immediately after each istep/substep  returns
+            TRAC_FLUSH_BUFFERS();
+
             // sync the attributes to fsp in single step mode but only
-            // after step 6 is complete to allow discoverTargets() to 
+            // after step 6 is complete to allow discoverTargets() to
             // run before the sync is done.
             if( step_mode && istep > 6 )
             {
@@ -199,8 +199,10 @@ void iStepWorkerThread ( void * i_msgQ )
 
                     if(l_errl)
                     {
-                        TRACFCOMP(g_trac_initsvc, "Attribute sync between steps failed, see"
-                                   "%x for details", l_errl->eid());
+                        TRACFCOMP(g_trac_initsvc,
+                        "Attribute sync between steps failed"
+                        "see %x for details",
+                        l_errl->eid());
 
                         errlCommit(l_errl, INITSVC_COMP_ID);
                     }
@@ -210,9 +212,10 @@ void iStepWorkerThread ( void * i_msgQ )
             if( err )
             {
                 TRACFCOMP( g_trac_initsvc,
-                           "IStepDipspatcher (worker): Istep %s returned "
-                           "errlog=%p",
-                           theStep->taskname, err );
+                           "IStepDipspatcher (worker): "
+                           "Istep %s return PLID=0x%x",
+                           theStep->taskname,
+                           err->plid() );
             }
             // Check for any attentions and invoke PRD for analysis
             else if ( true == theStep->taskflags.check_attn )
@@ -225,8 +228,8 @@ void iStepWorkerThread ( void * i_msgQ )
                 if ( err )
                 {
                     TRACFCOMP( g_trac_initsvc,
-                               "IStepDipspatcher (worker): Error returned "
-                               "from PRD analysis after Istep %s",
+                               "IStepDipspatcher (worker): "
+                               "ERROR return from PRD analysis after Istep %s",
                                theStep->taskname);
                 }
             }
@@ -234,13 +237,12 @@ void iStepWorkerThread ( void * i_msgQ )
         }
         else
         {
-#if 1
-            //  Nothing to do for this istep.
+            //  Invalid istep sent from FSP or spless, return error.
             TRACFCOMP( g_trac_initsvc,
-                       INFO_MRK"Empty Istep, Nothing to do!" );
-#else
-            //  $$  please save, need to fix for
-            //  $$      IPL service not returning error on invalid isteps
+                       "istepWorker: ERROR: "
+                       "Invalid Istep %d, substep %d ",
+                       istep,
+                       substep );
             //  This istep should have not been sent here to run, make up
             //  an errorlog and return it.
             /*@
@@ -259,26 +261,20 @@ void iStepWorkerThread ( void * i_msgQ )
                                            substep  );
 
             TRACFCOMP( g_trac_initsvc,
-                       ERR_MRK"Invalid Istep %d.%d, return errlog plid=0x%x",
+                       ERR_MRK"istepWorker ERROR:"
+                       "Invalid Istep %d.%d, returned errlog PLID=0x%x",
                        istep,
                        substep,
                        err->plid()  );
-#endif
         }
 
-
-
-        //  flush contTrace after each istep/substep  returns
-        TRAC_FLUSH_BUFFERS();
 
         msg_free( theMsg );
         theMsg = NULL;
     }   // end while(1)
 
     // Something bad happened...  this thread should never exit once started
-    assert( 0 );
-    TRACDCOMP( g_trac_initsvc,
-               ENTER_MRK"iStepWorkerThread()" );
+    assert( false, "istepWorker:  should never get here." );
 }
 
 
