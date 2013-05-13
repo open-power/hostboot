@@ -337,17 +337,18 @@ struct conn_t
 
         switch ( type )
         {
-            case TYPE_NODE:   order =  0; break;
-            case TYPE_PROC:   order =  1; break;
-            case TYPE_EX:     order =  2; break;
-            case TYPE_XBUS:   order =  3; break;
-            case TYPE_ABUS:   order =  4; break;
-            case TYPE_PCI:    order =  5; break;
-            case TYPE_MCS:    order =  6; break;
-            case TYPE_MEMBUF: order =  7; break;
-            case TYPE_L4:     order =  8; break;
-            case TYPE_MBA:    order =  9; break;
-            case TYPE_DIMM:   order = 10; break;
+            case TYPE_SYS:    order =  0; break;
+            case TYPE_NODE:   order =  1; break;
+            case TYPE_PROC:   order =  2; break;
+            case TYPE_EX:     order =  3; break;
+            case TYPE_XBUS:   order =  4; break;
+            case TYPE_ABUS:   order =  5; break;
+            case TYPE_PCI:    order =  6; break;
+            case TYPE_MCS:    order =  7; break;
+            case TYPE_MEMBUF: order =  8; break;
+            case TYPE_L4:     order =  9; break;
+            case TYPE_MBA:    order =  10; break;
+            case TYPE_DIMM:   order =  11; break;
             default: ;
         }
 
@@ -378,6 +379,8 @@ int32_t getAssociationType( TARGETING::TargetHandle_t i_target,
     static conn_t lookups[] =
     {
         // This table must be sorted based on the < operator of struct conn_t.
+        { TYPE_SYS,    TYPE_NODE,   TargetService::CHILD_BY_AFFINITY },
+        { TYPE_NODE,   TYPE_SYS,    TargetService::PARENT_BY_AFFINITY },
         { TYPE_NODE,   TYPE_PROC,   TargetService::CHILD_BY_AFFINITY },
         { TYPE_NODE,   TYPE_EX,     TargetService::CHILD_BY_AFFINITY },
         { TYPE_NODE,   TYPE_XBUS,   TargetService::CHILD_BY_AFFINITY },

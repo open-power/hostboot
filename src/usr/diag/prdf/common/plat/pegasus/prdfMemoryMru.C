@@ -55,33 +55,54 @@ MemoryMru::MemoryMru( uint32_t i_memMru ) :
 
     do
     {
-        // Get MBA target
-        TargetHandleList nodeList = getFunctionalTargetList( TYPE_NODE );
-        for ( TargetHandleList::iterator nodeIt = nodeList.begin();
-              nodeIt != nodeList.end(); nodeIt++ )
-        {
-            if ( iv_memMruMeld.s.nodePos != getTargetPosition(*nodeIt) )
-                continue;
+        // Get MBA target using node, proc, membuff and mba position
+        TargetHandle_t system = getSystemTarget();
 
-            TargetHandleList mbaList = getConnected( *nodeIt, TYPE_MBA );
-            for ( TargetHandleList::iterator mbaIt = mbaList.begin();
-                  mbaIt != mbaList.end(); mbaIt++ )
-            {
-                if ( iv_memMruMeld.s.mbaPos == getTargetPosition(*mbaIt) )
-                {
-                    iv_mbaTarget = *mbaIt;
-                    break;
-                }
-            }
-            if ( NULL != iv_mbaTarget ) break;
-        }
-        if ( NULL == iv_mbaTarget )
+        if ( NULL == system )
         {
-            PRDF_ERR( PRDF_FUNC"Could not find functional MBA target: "
-                      "nodePos=%d mbaPos=%d", iv_memMruMeld.s.nodePos,
-                      iv_memMruMeld.s.mbaPos );
+            PRDF_ERR( PRDF_FUNC"Could not find system target" );
             break;
         }
+
+        TargetHandle_t node = getConnectedChild( system, TYPE_NODE,
+                                                 iv_memMruMeld.s.nodePos );
+        if ( NULL == node )
+        {
+            PRDF_ERR( PRDF_FUNC"Could not find functional node attached to "
+                      "system at pos: %u", iv_memMruMeld.s.nodePos );
+            break;
+        }
+
+        TargetHandle_t proc = getConnectedChild( node, TYPE_PROC,
+                                                 iv_memMruMeld.s.procPos );
+        if ( NULL == proc )
+        {
+            PRDF_ERR( PRDF_FUNC"Could not find functional  proc attached to "
+                      "node 0x%08X at pos: %u", getHuid( node ),
+                       iv_memMruMeld.s.procPos );
+            break;
+        }
+
+        TargetHandle_t membuff = getConnectedChild( proc, TYPE_MEMBUF,
+                                                   iv_memMruMeld.s.cenPos );
+        if ( NULL == membuff )
+        {
+            PRDF_ERR( PRDF_FUNC"Could not find functional  membuff attached to "
+                      "proc 0x%08X at pos: %u", getHuid( proc ),
+                       iv_memMruMeld.s.cenPos );
+            break;
+        }
+
+        iv_mbaTarget = getConnectedChild( membuff, TYPE_MBA,
+                                          iv_memMruMeld.s.mbaPos );
+        if ( NULL == iv_mbaTarget )
+        {
+            PRDF_ERR( PRDF_FUNC"Could not find functional MBA attached to "
+                      "membuff 0x%08X at pos: %u", getHuid( membuff ),
+                       iv_memMruMeld.s.mbaPos );
+            break;
+        }
+
 
         // Get the rank
         iv_rank = CenRank( iv_memMruMeld.s.rank );
@@ -158,7 +179,27 @@ MemoryMru::MemoryMru( TARGETING::TargetHandle_t i_mbaTarget,
             break;
         }
 
+        TargetHandle_t proc = getConnectedParent( iv_mbaTarget, TYPE_PROC );
+        if ( NULL == proc )
+        {
+            PRDF_ERR( PRDF_FUNC"Could not find proc attached to MBA 0x%08x",
+                      getHuid(iv_mbaTarget) );
+            break;
+        }
+
+        TargetHandle_t memBuff = getConnectedParent( iv_mbaTarget,
+                                                     TYPE_MEMBUF );
+        if ( NULL == memBuff )
+        {
+            PRDF_ERR( PRDF_FUNC"Could not find memBuff attached to MBA 0x%08x",
+                      getHuid(iv_mbaTarget) );
+            break;
+        }
+
+
         iv_memMruMeld.s.nodePos    = getTargetPosition( node );
+        iv_memMruMeld.s.procPos    = getTargetPosition( proc );
+        iv_memMruMeld.s.cenPos     = getTargetPosition( memBuff );
         iv_memMruMeld.s.mbaPos     = getTargetPosition( iv_mbaTarget );
         iv_memMruMeld.s.rank       = iv_rank.flatten();
         iv_memMruMeld.s.symbol     = iv_symbol.getSymbol();
@@ -196,10 +237,30 @@ MemoryMru::MemoryMru( TARGETING::TargetHandle_t i_mbaTarget,
             break;
         }
 
-        iv_memMruMeld.s.nodePos = getTargetPosition( node );
-        iv_memMruMeld.s.mbaPos  = getTargetPosition( iv_mbaTarget );
-        iv_memMruMeld.s.rank    = iv_rank.flatten();
-        iv_memMruMeld.s.symbol  = iv_special;
+        TargetHandle_t proc = getConnectedParent( iv_mbaTarget, TYPE_PROC );
+        if ( NULL == proc )
+        {
+            PRDF_ERR( PRDF_FUNC"Could not find proc attached to MBA 0x%08x",
+                      getHuid(iv_mbaTarget) );
+            break;
+        }
+
+        TargetHandle_t memBuff = getConnectedParent( iv_mbaTarget,
+                                                     TYPE_MEMBUF );
+        if ( NULL == memBuff )
+        {
+            PRDF_ERR( PRDF_FUNC"Could not find memBuff attached to MBA 0x%08x",
+                      getHuid(iv_mbaTarget) );
+            break;
+        }
+
+
+        iv_memMruMeld.s.nodePos    = getTargetPosition( node );
+        iv_memMruMeld.s.procPos    = getTargetPosition( proc );
+        iv_memMruMeld.s.cenPos     = getTargetPosition( memBuff );
+        iv_memMruMeld.s.mbaPos     = getTargetPosition( iv_mbaTarget );
+        iv_memMruMeld.s.rank       = iv_rank.flatten();
+        iv_memMruMeld.s.symbol     = iv_special;
 
         // If the code gets to this point the MemoryMru is valid.
         iv_memMruMeld.s.valid = 1;

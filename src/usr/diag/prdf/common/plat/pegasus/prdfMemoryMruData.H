@@ -78,7 +78,9 @@ union MemMruMeld
 
         uint32_t valid      : 1; ///< Used to indicate nothing failed while
                                  ///< building the object (1=valid, 0=not valid)
-        uint32_t mbaPos     : 7; ///< MBA position within node (0-127)
+        uint32_t procPos    : 3; ///< Proc position within node (0-7)
+        uint32_t cenPos     : 3; ///< Centaur position within proc (0-7)
+        uint32_t mbaPos     : 1; ///< MBA position within centaur (0-1)
 
         uint32_t pins       : 2; ///< Even and/or Odd symbol pins
         uint32_t nodePos    : 3; ///< Node position (0-7)
