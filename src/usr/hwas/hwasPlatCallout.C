@@ -116,4 +116,20 @@ errlHndl_t platHandleHWCallout(
     return errl;
 }
 
+//******************************************************************************
+// platHandleBusCallout
+//******************************************************************************
+errlHndl_t platHandleBusCallout(
+        TARGETING::Target *i_pTarget1,
+        TARGETING::Target *i_pTarget2,
+        busTypeEnum i_busType,
+        callOutPriority i_priority,
+        errlHndl_t i_errl)
+{
+    errlHndl_t errl = NULL;
+
+    // hostboot does not handle or do any action for bus callouts
+    return errl;
+}
+
 } // namespace HWAS

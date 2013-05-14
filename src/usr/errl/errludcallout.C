@@ -38,6 +38,39 @@ namespace ERRORLOG
 extern TARGETING::TARG_TD_t g_trac_errl;
 
 //------------------------------------------------------------------------------
+// Bus callout
+ErrlUserDetailsCallout::ErrlUserDetailsCallout(
+        const void *i_pTarget1Data,
+        uint32_t i_target1DataLength,
+        const void *i_pTarget2Data,
+        uint32_t i_target2DataLength,
+        const HWAS::busTypeEnum i_busType,
+        const HWAS::callOutPriority i_priority)
+{
+    TRACDCOMP(g_trac_errl, "BusCallout entry");
+
+    // Set up ErrlUserDetails instance variables
+    iv_CompId = ERRL_COMP_ID;
+    iv_Version = 1;
+    iv_SubSection = ERRL_UDT_CALLOUT;
+
+    uint32_t pDataLength = sizeof(HWAS::callout_ud_t) +
+                           i_target1DataLength + i_target2DataLength;
+    HWAS::callout_ud_t *pData;
+    pData = reinterpret_cast<HWAS::callout_ud_t *>
+                (reallocUsrBuf(pDataLength));
+    pData->type = HWAS::BUS_CALLOUT;
+    pData->busType = i_busType;
+    pData->priority = i_priority;
+    char * l_ptr = (char *)(++pData);
+    memcpy(l_ptr, i_pTarget1Data, i_target1DataLength);
+    memcpy(l_ptr + i_target1DataLength, i_pTarget2Data, i_target2DataLength);
+
+    TRACDCOMP(g_trac_errl, "BusCallout exit; pDataLength %d", pDataLength);
+
+} // Bus callout
+
+//------------------------------------------------------------------------------
 // Hardware callout
 ErrlUserDetailsCallout::ErrlUserDetailsCallout(
         const void *i_pTargetData,

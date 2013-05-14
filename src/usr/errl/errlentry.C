@@ -299,6 +299,56 @@ void ErrlEntry::removeBackTrace()
 
 ////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////
+void ErrlEntry::addBusCallout(const TARGETING::Target *i_target_endp1,
+                        const TARGETING::Target *i_target_endp2,
+                        const HWAS::busTypeEnum i_busType,
+                        const HWAS::callOutPriority i_priority)
+{
+    TRACFCOMP(g_trac_errl, ENTER_MRK"addBusCallout(%p, %p, %d, 0x%x)",
+                i_target_endp1, i_target_endp2, i_busType, i_priority);
+
+    TARGETING::EntityPath ep1, ep2;
+    const void *pData1, *pData2;
+    uint32_t size1, size2;
+
+    if (i_target_endp1 == TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL)
+    {
+        size1 = sizeof(HWAS::TARGET_IS_SENTINEL);
+        pData1 = &HWAS::TARGET_IS_SENTINEL;
+    }
+    else
+    {   // we got a non MASTER_SENTINEL target, therefore the targeting
+        // module is loaded, therefore we can make this call.
+        ep1 = i_target_endp1->getAttr<TARGETING::ATTR_PHYS_PATH>();
+        size1 = TARGETING::EntityPath::MAX_PATH_ELEMENTS - ep1.size();
+        size1 *= sizeof(TARGETING::EntityPath::PathElement);
+        size1 = sizeof(ep1) - size1;
+        pData1 = &ep1;
+    }
+
+    if (i_target_endp2 == TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL)
+    {
+        size2 = sizeof(HWAS::TARGET_IS_SENTINEL);
+        pData2 = &HWAS::TARGET_IS_SENTINEL;
+    }
+    else
+    {   // we got a non MASTER_SENTINEL target, therefore the targeting
+        // module is loaded, therefore we can make this call.
+        ep2 = i_target_endp2->getAttr<TARGETING::ATTR_PHYS_PATH>();
+        size2 = TARGETING::EntityPath::MAX_PATH_ELEMENTS - ep2.size();
+        size2 *= sizeof(TARGETING::EntityPath::PathElement);
+        size2 = sizeof(ep2) - size2;
+        pData2 = &ep2;
+    }
+
+    ErrlUserDetailsCallout( pData1, size1, pData2, size2, i_busType,
+                            i_priority).addToLog(this);
+
+} // addBusCallout
+
+
+////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////
 void ErrlEntry::addHwCallout(const TARGETING::Target *i_target,
                         const HWAS::callOutPriority i_priority,
                         const HWAS::DeconfigEnum i_deconfigState,

@@ -52,6 +52,26 @@ class ErrlUserDetailsCallout : public ErrlUserDetails
 public:
 
     /**
+     *  @brief Construct a bus callout user detail
+     *
+     *  @param[in]  i_pTarget1Data   The hardware target1 data
+     *  @param[in]  i_target1DataLength    length of i_pTarget1Data
+     *  @param[in]  i_pTarget2Data   The hardware target2 data
+     *  @param[in]  i_target2DataLength    length of i_pTarget2Data
+     *  @param[in]  i_busType       bus type Enum
+     *  @param[in]  i_priority      Priority of the callout
+     *
+     *  @return void
+     */
+    ErrlUserDetailsCallout(
+                        const void *i_pTarget1Data,
+                        uint32_t i_target1DataLength,
+                        const void *i_pTarget2Data,
+                        uint32_t i_target2DataLength,
+                        const HWAS::busTypeEnum i_busType,
+                        const HWAS::callOutPriority i_priority);
+
+    /**
      *  @brief Construct a hardware callout user detail
      *
      *  @param[in]  i_pTargetData    The hardware target data

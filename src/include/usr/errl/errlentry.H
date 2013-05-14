@@ -423,6 +423,21 @@ public:
     void removeBackTrace();
 
     /**
+     *  @brief Add a bus callout
+     *
+     *  @param[in]  i_target1       The hardware bus endpoint target1
+     *  @param[in]  i_target2       The hardware bus endpoint target2
+     *  @param[in]  i_busType       The hardware bus type
+     *  @param[in]  i_priority      Priority of the callout
+     *
+     *  @return void
+     */
+    void addBusCallout(const TARGETING::Target *i_target1,
+                       const TARGETING::Target *i_target2,
+                       const HWAS::busTypeEnum i_busType,
+                       const HWAS::callOutPriority i_priority);
+
+    /**
      *  @brief Add a hardware callout
      *
      *  @param[in]  i_target        The hardware target

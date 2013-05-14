@@ -73,6 +73,37 @@ public:
 
         switch (pData->type)
         {
+            case HWAS::BUS_CALLOUT:
+            {
+                char * l_busType;
+                switch (ntohl(pData->busType))
+                {
+                    case HWAS::FSI_BUS_TYPE: l_busType = "FSI BUS";
+                                             break;
+                    case HWAS::DMI_BUS_TYPE: l_busType = "DMI BUS";
+                                             break;
+                    case HWAS::A_BUS_TYPE:   l_busType = "A BUS";
+                                             break;
+                    case HWAS::X_BUS_TYPE:   l_busType = "X BUS";
+                                             break;
+                    case HWAS::I2C_BUS_TYPE: l_busType = "I2C BUS";
+                                             break;
+                    case HWAS::PSI_BUS_TYPE: l_busType = "PSI BUS";
+                                             break;
+                    default:                 l_busType = "UNKNOWN BUS";
+                                             break;
+                }
+
+                i_parser.PrintString( "Callout Bus type", l_busType );
+
+                // what follows the pData structure is Two entity paths
+                // print them out
+                uint8_t *l_ptr = reinterpret_cast<uint8_t *>(pData+1);
+                printEntityPath(l_ptr, i_parser, "Target1");
+                printEntityPath(l_ptr, i_parser, "Target2");
+
+                break; // BUS_CALLOUT
+            }
             case HWAS::HW_CALLOUT:
             {
                 i_parser.PrintString( "Callout type", "Hardware Callout");
@@ -80,17 +111,7 @@ public:
                 // what follows the pData structure is an entity path
                 // print it first
                 uint8_t *l_ptr = reinterpret_cast<uint8_t *>(pData+1);
-                if (*l_ptr == 0xF0)
-                {
-                    i_parser.PrintString("Target",
-                                "MASTER_PROCESSOR_CHIP_TARGET_SENTINEL");
-                }
-                else
-                {
-                    char outString[128];
-                    l_ptr = errlud_parse_entity_path(l_ptr, outString);
-                    i_parser.PrintString("Target", outString);
-                }
+                printEntityPath(l_ptr, i_parser, "Target");
 
                 i_parser.PrintNumber( "CPU id", "0x%X", ntohl(pData->cpuid) );
 
@@ -209,6 +230,25 @@ private:
     ErrlUserDetailsParserCallout(const ErrlUserDetailsParserCallout &);
     ErrlUserDetailsParserCallout & operator=(
         const ErrlUserDetailsParserCallout &);
+
+    void printEntityPath(uint8_t * & io_ptr,
+                         ErrlUsrParser & i_parser,
+                         const char * i_label) const
+    {
+        if (*io_ptr == HWAS::TARGET_IS_SENTINEL)
+        {
+            i_parser.PrintString( i_label,
+                        "MASTER_PROCESSOR_CHIP_TARGET_SENTINEL");
+            ++io_ptr;
+        }
+        else
+        {
+            char outString[128];
+            io_ptr = errlud_parse_entity_path(io_ptr, outString);
+            i_parser.PrintString(i_label, outString);
+        }
+    }
+
 };
 
 }

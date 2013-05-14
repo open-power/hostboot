@@ -122,9 +122,20 @@ enum callOutPriority
     SRCI_PRIORITY_HIGH  = 6
 };
 
+enum busTypeEnum
+{
+    FSI_BUS_TYPE    = 1,
+    DMI_BUS_TYPE    = 2,
+    A_BUS_TYPE      = 3,
+    X_BUS_TYPE      = 4,
+    I2C_BUS_TYPE    = 5,
+    PSI_BUS_TYPE    = 6
+};
+
 //
 const uint8_t HW_CALLOUT        = 0x01;
 const uint8_t PROCEDURE_CALLOUT = 0x02;
+const uint8_t BUS_CALLOUT       = 0x03;
 
 const uint8_t TARGET_IS_SENTINEL = 0xF0;
 
@@ -141,6 +152,9 @@ typedef struct callout_ud
         };
         struct {    // callout
             epubProcedureID procedure;  // uint32_t
+        };
+        struct {
+            busTypeEnum     busType;
         };
     };
 } callout_ud_t;
@@ -198,6 +212,26 @@ errlHndl_t platHandleHWCallout(
         DeconfigEnum    i_deconfigState,
         errlHndl_t i_errl,
         GARD_ErrorType  i_gardErrorType);
+
+/**
+ * @brief platform specific code to handle a bus callout that has been
+ *  found in an errlog
+ *
+ * @param[in]  i_pTarget1       target endpoint1
+ * @param[in]  i_pTarget2       target endpoint2
+ * @param[in]  i_busType        bus type Enum
+ * @param[in]  i_priority       Enum indicating the priority of the callout
+ * @param[in]  i_errl           errlHnld for this errlog
+ *
+ * @return errlHndl_t       valid errlHndl_t handle if there was an error,
+ *                          NULL if no errors;
+ */
+errlHndl_t platHandleBusCallout(
+        TARGETING::Target *i_pTarget1,
+        TARGETING::Target *i_pTarget2,
+        busTypeEnum i_busType,
+        callOutPriority i_priority,
+        errlHndl_t i_errl);
 
 #endif // not PARSER
 
