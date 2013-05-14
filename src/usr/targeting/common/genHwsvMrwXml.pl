@@ -114,6 +114,7 @@ foreach my $i (@{$SystemAttrs->{'required-policy-settings'}})
     my $freqPB = sprintf("0x%04X",$i->{'proc_pb_frequency'}->{content});
     my $freqPCIE = sprintf("0x%04X",$i->{'proc_pcie_frequency'}->{content});
     my $freqX = sprintf("0x%04X",$i->{'proc_x_frequency'}->{content});
+    my $freqBoot = sprintf("0x%04X",$i->{'boot-frequency'}->{content});
 
     #TODO: SW187611 remove the hard core value for FREQ_CORE_FLOOR
 
@@ -124,6 +125,8 @@ foreach my $i (@{$SystemAttrs->{'required-policy-settings'}})
 # line when it's time to remove the workaround
 # $i->{all_mcs_in_interleaving_group},
                        "0",
+                       "BOOT_FREQ_MHZ",
+                       $freqBoot,
                        "FREQ_A",
                        $freqA,
                        "FREQ_CORE_FLOOR",
