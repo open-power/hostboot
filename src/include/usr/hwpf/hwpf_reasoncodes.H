@@ -57,6 +57,9 @@ namespace fapi
         MOD_FAPI_GET_OTHER_SIDE_OF_MEM_CHANNEL     = 0x12,
         MOD_MBVPD_ACCESS                           = 0x13,
         MOD_OCC_LOAD_START_ALL_OCCS                = 0x14,
+        MOD_VDDR_PROC_MSG                          = 0x15,
+        MOD_VDDR_PROC_VDDR_MSG                     = 0x16,
+        MOD_VDDR_SEND_MSG                          = 0x17,
     };
 
     /**
@@ -94,6 +97,12 @@ namespace fapi
 
         // OCC Errors
         RC_MMIO_UNMAP_ERR             = HWPF_COMP_ID | 0x24,
+
+        // VDDR Errors
+        RC_VDDR_EMPTY_MSG             = HWPF_COMP_ID | 0x25,
+        RC_VDDR_ERROR_MSG             = HWPF_COMP_ID | 0x26,
+        RC_VDDR_POWR_ERR              = HWPF_COMP_ID | 0x27,
+        RC_INCORRECT_MSG_TYPE         = HWPF_COMP_ID | 0x28,
     };
 
     /**

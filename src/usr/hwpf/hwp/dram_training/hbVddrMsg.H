@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012                   */
+/* COPYRIGHT International Business Machines Corp. 2012,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -44,7 +44,7 @@
 #include <mbox/mboxif.H>
 #include <targeting/common/targetservice.H>
 #include <targeting/common/utilFilter.H>
-
+#include <hwpf/hwpf_reasoncodes.H>
 
 /*****************************************************************************/
 // Forward class declarations
@@ -110,33 +110,6 @@ public:
     {
         HB_VDDR_ENABLE = 0x40000041,
         HB_VDDR_DISABLE = 0x40000042,
-    };
-
-    /**
-     * @enum VddrModuleId
-     *
-     * @brief  Module ID  enums for error handling
-     *
-     */
-    enum VddrModuleId
-    {
-        VDDR_PROC_MSG       = 0x01,
-        VDDR_PROC_VDDR_MSG  = 0x02,
-        VDDR_SEND_MSG       = 0x03,
-    };
-
-    /**
-     * @enum VddrReasonCode
-     *
-     * @brief  Reason code  enums for error handling
-     *
-     */
-    enum VddrReasonCode
-    {
-        VDDR_EMPTY_MSG      = 0x01,
-        VDDR_ERROR_MSG      = 0x02,
-        VDDR_POWR_ERR       = 0x03,
-        INCORRECT_MSG_TYPE  = 0x04,
     };
 
     /** 
@@ -241,7 +214,9 @@ protected:
      *
      * @return     None
      */
-    void createErrLog(errlHndl_t& io_err,VddrModuleId i_mod,VddrReasonCode i_rc,
+    void createErrLog(errlHndl_t& io_err,
+                      fapi::hwpfModuleId i_mod,
+                      fapi::hwpfReasonCode i_rc,
                       uint32_t i_userData1=0x0) const;
 
 };
