@@ -1,8 +1,10 @@
-#-- $Id: p8.mcs.scom.initfile,v 1.8 2013/05/02 16:32:15 jmcgill Exp $
+#-- $Id: p8.mcs.scom.initfile,v 1.9 2013/05/06 00:52:59 baysah Exp $
 #-- CHANGE HISTORY:
 #--------------------------------------------------------------------------------
 #-- Version:|Author: | Date:  | Comment:
 #-- --------|--------|--------|--------------------------------------------------
+#--     1.90|baysah  |05/05/13|- Disabled MCMODE1Q_DISABLE_FASTPATH_CRC_ECC_BYPASS and MCMODE0Q_CL_CHANNEL_TIMEOUT_FORCES_CHANNEL_FAIL.
+#--         |        |        |
 #--     1.70|baysah  |04/26/13|- Disabled MCMODE0Q_ENABLE_FAULT_LINE_FOR_GLOBAL_CHECKSTOP per firmware request for MPIPL.
 #--         |        |        |
 #--     1.60|baysah  |04/25/13|- Fix problem with incorrectly setting mcmode0 bit 1 which is marked as reserved, but its actually used to
@@ -30,34 +32,36 @@ SyntaxVersion = 1
 #-- MCS Mode0 Register
 #--******************************************************************************
  scom 0x0000000002011807              {
-     bits ,                    scom_data        ;
-     0    ,                    0b1              ;              # MCMODE0Q_ENABLE_CMD_BYP_STUTTER
-     1    ,                    0b0              ;              # MCMODE0Q_RESERVED Reserved
-     2    ,                    0b1              ;              # MCMODE0Q_ENABLE_NS_RD_AO_SFU_FOR_DCBZ
-     3    ,                    0b1              ;              # MCMODE0Q_ENABLE_CENTAUR_LOCAL_CHECKSTOP_COMMAND
-     4:7  ,                    0xF              ;              # MCMODE0Q_L3_PREFETCH_RETRY_THRESHOLD
-     8:11 ,                    0x0              ;              # MCMODE0Q_Number_of_CL_Entries_Reserved_for_Read
-     12:15,                    0x1              ;              # MCMODE0Q_NUMBER_OF_CL_ENTRIES_RESERVED_FOR_MIRRORED_OPS
-     16:19,                    0x0              ;              # MCMODE0Q_NUMBER_OF_CL_ENTRIES_RESERVED_FOR_WRITES
-     20:23,                    0x1              ;              # MCMODE0Q_NUMBER_OF_CL_ENTRIES_RESERVED_FOR_CP_WRITES
-     24:27,                    0x1              ;              # MCMODE0Q_NUMBER_OF_CL_ENTRIES_RESERVED_FOR_CP_IG
-     28:31,                    0x0              ;              # MCMODE0Q_NUMBER_OF_CL_ENTRIES_RESERVED_FOR_HTM_OPS
-     32:35,                    0x0              ;              # MCMODE0Q_NUMBER_OF_CL_ENTRIES_RESERVED_FOR_HA_ASSIST
-     36   ,                    0b1              ;              # MCMODE0Q_MCFGRP_19_IS_HO_BIT
-     37   ,                    0b1              ;              # MCMODE0Q_CL_CHANNEL_TIMEOUT_FORCES_CHANNEL_FAIL
-     38   ,                    0b0              ;              # MCMODE0Q_ENABLE_FAULT_LINE_FOR_GLOBAL_CHECKSTOP
-     39:43,                    0b00000          ;              # MCMODE0Q_RESERVED_39_43 Reserved
-     44:52,                    0b001100010      ;              # MCMODE0Q_ADDRESS_COLLISION_MODES
-     53   ,                    0b0              ;              # MCMODE0Q_INCLUDE_CP_IG_IN_CP_WRITE_FULLNESS_GROUP
-     54   ,                    0b1              ;              # MCMODE0Q_ENABLE_DMAWR_CMD_BIT
-     55   ,                    0b0              ;              # MCMODE0Q_ENABLE_READ_LFSR_DATA
-     56   ,                    0b0              ;              # MCMODE0Q_FORCE_CHANNEL_FAIL
-     57   ,                    0b0              ;              # MCMODE0Q_DISABLE_READ_CRC_ECC_BYPASS_TAKEN
-     58   ,                    0b0              ;              # MCMODE0Q_DISABLE_CL_AO_QUEUES
-     59:60,                    0b00             ;              # MCMODE0Q_ADDRESS_SELECT_LFSR_VALUE  (4k)
-     61   ,                    0b0              ;              # MCMODE0Q_ENABLE_CENTAUR_SYNC
-     62   ,                    0b0              ;              # MCMODE0Q_WRITE_DATA_BUFFER_ECC_CHECK_DISABLE
-     63   ,                    0b0              ;              # MCMODE0Q_WRITE_DATA_BUFFER_ECC_CORRECT_DISABLE
+     bits ,                    scom_data     ,     expr                ;
+     0    ,                    0b1           ,     any                 ;              # MCMODE0Q_ENABLE_CMD_BYP_STUTTER
+     1    ,                    0b0           ,     any                 ;              # MCMODE0Q_RESERVED Reserved
+     2    ,                    0b1           ,     any                 ;              # MCMODE0Q_ENABLE_NS_RD_AO_SFU_FOR_DCBZ
+     3    ,                    0b1           ,     any                 ;              # MCMODE0Q_ENABLE_CENTAUR_LOCAL_CHECKSTOP_COMMAND
+     4:7  ,                    0xF           ,     any                 ;              # MCMODE0Q_L3_PREFETCH_RETRY_THRESHOLD
+     8:11 ,                    0x0           ,     any                 ;              # MCMODE0Q_Number_of_CL_Entries_Reserved_for_Read
+     12:15,                    0x1           ,     any                 ;              # MCMODE0Q_NUMBER_OF_CL_ENTRIES_RESERVED_FOR_MIRRORED_OPS
+     16:19,                    0x0           ,     any                 ;              # MCMODE0Q_NUMBER_OF_CL_ENTRIES_RESERVED_FOR_WRITES
+     20:23,                    0x1           ,     any                 ;              # MCMODE0Q_NUMBER_OF_CL_ENTRIES_RESERVED_FOR_CP_WRITES
+     24:27,                    0x1           ,     any                 ;              # MCMODE0Q_NUMBER_OF_CL_ENTRIES_RESERVED_FOR_CP_IG
+     28:31,                    0x0           ,     any                 ;              # MCMODE0Q_NUMBER_OF_CL_ENTRIES_RESERVED_FOR_HTM_OPS
+     32:35,                    0x0           ,     any                 ;              # MCMODE0Q_NUMBER_OF_CL_ENTRIES_RESERVED_FOR_HA_ASSIST
+     36   ,                    0b1           ,     any                 ;              # MCMODE0Q_MCFGRP_19_IS_HO_BIT
+     37   ,                    0b0           ,     any                 ;              # MCMODE0Q_CL_CHANNEL_TIMEOUT_FORCES_CHANNEL_FAIL
+  #   37   ,                    0b1           ,  (TGT1.ATTR_CHIP_EC_FEATURE_MCS_ECC_BYPASS_DISABLE == 0x0) ;              # MCMODE0Q_CL_CHANNEL_TIMEOUT_FORCES_CHANNEL_FAIL
+  #   37   ,                    0b0           ,  (TGT1.ATTR_CHIP_EC_FEATURE_MCS_ECC_BYPASS_DISABLE != 0x0) ;              # MCMODE0Q_CL_CHANNEL_TIMEOUT_FORCES_CHANNEL_FAIL
+     38   ,                    0b0           ,     any                 ;              # MCMODE0Q_ENABLE_FAULT_LINE_FOR_GLOBAL_CHECKSTOP
+     39:43,                    0b00000       ,     any                 ;              # MCMODE0Q_RESERVED_39_43 Reserved
+     44:52,                    0b001100010   ,     any                 ;              # MCMODE0Q_ADDRESS_COLLISION_MODES
+     53   ,                    0b0           ,     any                 ;              # MCMODE0Q_INCLUDE_CP_IG_IN_CP_WRITE_FULLNESS_GROUP
+     54   ,                    0b1           ,     any                 ;              # MCMODE0Q_ENABLE_DMAWR_CMD_BIT
+     55   ,                    0b0           ,     any                 ;              # MCMODE0Q_ENABLE_READ_LFSR_DATA
+     56   ,                    0b0           ,     any                 ;              # MCMODE0Q_FORCE_CHANNEL_FAIL
+     57   ,                    0b0           ,     any                 ;              # MCMODE0Q_DISABLE_READ_CRC_ECC_BYPASS_TAKEN
+     58   ,                    0b0           ,     any                 ;              # MCMODE0Q_DISABLE_CL_AO_QUEUES
+     59:60,                    0b00          ,     any                 ;              # MCMODE0Q_ADDRESS_SELECT_LFSR_VALUE  (4k)
+     61   ,                    0b0           ,     any                 ;              # MCMODE0Q_ENABLE_CENTAUR_SYNC
+     62   ,                    0b0           ,     any                 ;              # MCMODE0Q_WRITE_DATA_BUFFER_ECC_CHECK_DISABLE
+     63   ,                    0b0           ,     any                 ;              # MCMODE0Q_WRITE_DATA_BUFFER_ECC_CORRECT_DISABLE
 
  }
 
@@ -86,7 +90,8 @@ SyntaxVersion = 1
      60   ,                    0b0                 ,     any              ;    # MCMODE1Q_ENABLE_DISABLE_SPEC_READ_FOR_NONDMA_GROUP_PUMP_LOCAL_READ
      61   ,                    0b0                 ,     any              ;    # MCMODE1Q_ENABLE_DISABLE_SPEC_READ_FOR_NONDMA_SYSTEM_PUMP_LOCAL_READ
      62   ,                    0b0                 ,     any              ;    # MCMODE1Q_DISABLE_FASTPATH_MCS_COMMAND_BYPASS
-     63   ,                    0b0                 ,     any              ;    # MCMODE1Q_DISABLE_FASTPATH_CRC_ECC_BYPASS
+     63   ,                    0b0                 , (TGT1.ATTR_CHIP_EC_FEATURE_MCS_ECC_BYPASS_DISABLE == 0x0)     ;    # MCMODE1Q_DISABLE_FASTPATH_CRC_ECC_BYPASS
+     63   ,                    0b1                 , (TGT1.ATTR_CHIP_EC_FEATURE_MCS_ECC_BYPASS_DISABLE != 0x0)     ;    # MCMODE1Q_DISABLE_FASTPATH_CRC_ECC_BYPASS
 
  }
 

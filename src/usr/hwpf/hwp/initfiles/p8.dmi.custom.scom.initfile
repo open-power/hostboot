@@ -1,8 +1,10 @@
-#-- $Id: p8.dmi.custom.scom.initfile,v 1.7 2013/03/15 21:19:29 thomsen Exp $
+#-- $Id: p8.dmi.custom.scom.initfile,v 1.9 2013/05/01 20:31:29 jgrell Exp $
 #-- CHANGE HISTORY:
 #--------------------------------------------------------------------------------
 #-- Version:|Author: | Date:  | Comment:
 #-- --------|--------|--------|--------------------------------------------------
+#--     1.9 |thomsen |04/30/13|Added TGT1. to ATTR_CHIP_EC* attribute instances to reference a chip target rather than a chiplet target
+#--     1.8 |jgrell  |04/18/13|Added EC level control of the Recal DFE, DDC, and CTLE enable bits. ('0' when EC < 20)
 #--     1.7 |jgrell  |03/14/13|Added temporary masking of the GCR Buffer Parity Checkers in the GCR Master until the source of the error can be found. This ungates the lab.
 #--     1.6 |thomsen |03/07/13|Temporarily mask the GCR Buffer Parity Checker until the source of the error can be found. This ungates the lab.
 #--     1.5 |thomsen |02/12/13|Added Lane Power Ups and Clock Invert
@@ -17,8 +19,6 @@
 #-- TARGETS:
 #-- SYS. Chiplet target
 #-- TGT1. Proc target
-#-- TGT2. Connected Chiplet target
-#-- TGT3. Connected Proc target
 
 #--  ATTR_CHIP_UNIT_POS is the MCS unit number (0-7 on Venice, 4-7 on Murano) and corresponds to the scom address translation done in
 #--  the p8.chipunit.scominfo file. It is used to be able to select a specific clock group number.
@@ -286,6 +286,21 @@ rx_pb_fir_err_mask_gcr_buff2,    0b1;
 scom 0x02011A03 {
 scom_data;
 0xC000000000000000;
+}
+
+
+#--**************************************************************************************************************
+#----------------------------------------------------------------------------------------------------------------
+# Recal 
+#----------------------------------------------------------------------------------------------------------------
+#--**************************************************************************************************************
+# HW235842
+
+scom 0x800.0b(rx_rc_step_cntl_pg)(rx_grp3)(lane_na).0x(dmi0_gcr_addr) {
+bits,                         	scom_data, 	expr;
+rx_rc_enable_dfe_h1_cal,      	0b0,       	TGT1.ATTR_CHIP_EC_FEATURE_RECAL_DFE_ENABLE==0;
+rx_rc_enable_ddc,		0b0,		TGT1.ATTR_CHIP_EC_FEATURE_RECAL_DDC_ENABLE==0;
+rx_rc_enable_ctle_cal,		0b0,		TGT1.ATTR_CHIP_EC_FEATURE_RECAL_CTLE_ENABLE==0;
 }
 
 ############################################################################################

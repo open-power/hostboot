@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_oha_init.C,v 1.8 2013/03/26 12:13:04 pchatnah Exp $
+// $Id: p8_oha_init.C,v 1.9 2013/04/30 18:17:25 mjjones Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/p8_oha_init.C,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
@@ -44,6 +44,8 @@
 ///
 ///
 /// \version
+/// \version --------------------------------------------------------------------------
+/// \version 1.9  mjjones 04/30/13 Removed unused variable
 /// \version --------------------------------------------------------------------------
 /// \version 1.3  rmaier 10/04/12 Replacing genHex*Str function
 /// \version --------------------------------------------------------------------------
@@ -217,17 +219,6 @@ p8_oha_init(const fapi::Target &i_target, uint32_t i_mode)
     {
      
          FAPI_INF("<p8_oha_init> : MODE: RESET Calling p8_oha_init_reset");
-
-         //Declare parms struct 
-         //TODO RTC: 71328 - hack to indicate unused
-         struct_i_oha_val_init_type  __attribute__((unused)) i_oha_val_init;
-
-         //Assign values to parms in struct
-         // should come from MRWB
-         i_oha_val_init.AISS_HANG_DETECT_TIMER_SEL = 9;  //  oha_mode_reg (11:14) - 0=1ms, 1=2ms, 3=4ms, ...9=512ms. others illegal
-         i_oha_val_init.PPT_TIMER_SELECT = 3;            //  activity_sample_mode_reg (36:37) 0=0.25us, 1=0.5us, 2=1us, and 3=2us
-         i_oha_val_init.LAD_ENTRY = 16;
-         i_oha_val_init.LAD_EXIT = 17;
 
          //  ******************************************************************
          /// \todo   should this values be attributes?? The get those attributes here
