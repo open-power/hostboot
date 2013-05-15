@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_setup_bars.H,v 1.5 2013/03/17 22:56:07 jmcgill Exp $
+// $Id: proc_setup_bars.H,v 1.6 2013/04/27 21:49:01 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_setup_bars.H,v $
 //------------------------------------------------------------------------------
 // *|
@@ -903,6 +903,15 @@ const proc_setup_bars_bar_reg_def mcd_f1_bar_reg_def =
     0x4000000000000014ULL,         // 1 config/group, foreign scope, f1 link
     0x780000000000001CULL
 };
+
+// MCD FIR Register constants
+const uint64_t MCD_FIR_MASK_RUNTIME_VAL = 0x2700000000000000ULL;
+
+// MCD Evn/Odd Recovery Control Register field/bit definitions
+const uint8_t PROC_SETUP_BARS_NUM_MCD_CFG = 4;
+
+const uint64_t MCD_RECOVERY_ENABLE_BIT = 0;
+const uint64_t MCD_RECOVERY_CFG_EN_BIT[PROC_SETUP_BARS_NUM_MCD_CFG] = {40,41,42,43};
 
 // PCIe BAR constants
 const uint32_t PROC_SETUP_BARS_PCIE_CHIP_NON_MIRRORED_BAR[PROC_SETUP_BARS_PCIE_NUM_UNITS] =

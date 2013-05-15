@@ -1,4 +1,4 @@
-#-- $Id: p8.fbc.define,v 1.5 2013/03/05 02:54:25 jmcgill Exp $
+#-- $Id: p8.fbc.define,v 1.7 2013/05/07 23:15:00 jmcgill Exp $
 #-------------------------------------------------------------------------------
 #--
 #-- (C) Copyright International Business Machines Corp. 2011
@@ -36,6 +36,15 @@ define dat_select = 13:18;
 define apm_en = 0;
 define pmucnt_en = 3;
 define pmucnt_sel = 4:5;
+
+#-- MCD Even/Odd Recovery Control Registers (MCD_REC_[EVEN_ODD] / 0x0201341[01])
+define mcd_recov_continuous = 2;
+define mcd_recov_pace_delay = 8:19;
+define mcd_recov_recov_all = 20;
+define mcd_recov_granule_count = 46:63;
+
+#-- MCD Recovery Pre Epsilon Configuration Register (MCD_PRE / 0x0201340B)
+define mcd_retry_count = 40:43;
 
 #-- MCD Debug Configuration Register (MCD_DBG / 0x02013416)
 define mcd_debug_enable = 3;

@@ -20,6 +20,8 @@
 <!-- Origin: 30                                                             -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
+<!-- $Id: proc_chip_ec_feature.xml,v 1.14 2013/05/01 22:08:25 jmcgill Exp $ -->
+<!-- Defines the attributes that are based on EC level -->
 <attributes>
   <attribute>
     <id>ATTR_CHIP_EC_FEATURE_HW_BUG_PIBSLVRESET</id>
@@ -154,11 +156,12 @@
   </attribute>
   <attribute>
     <id>ATTR_CHIP_EC_FEATURE_RECAL_DFE_ENABLE</id>
-    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <targetType>TARGET_TYPE_PROC_CHIP,TARGET_TYPE_MEMBUF_CHIP</targetType>
     <description>
       True if:
         Murano EC 0x20 or greater
         Venice EC 0x10 or greater
+        Centaur EC 0x20 or greater
     </description>
     <chipEcFeature>
       <chip>
@@ -172,6 +175,13 @@
         <name>ENUM_ATTR_NAME_VENICE</name>
         <ec>
           <value>0x10</value>
+          <test>GREATER_THAN_OR_EQUAL</test>
+        </ec>
+      </chip>
+      <chip>
+        <name>ENUM_ATTR_NAME_CENTAUR</name>
+        <ec>
+          <value>0x20</value>
           <test>GREATER_THAN_OR_EQUAL</test>
         </ec>
       </chip>
@@ -179,11 +189,12 @@
   </attribute>
   <attribute>
     <id>ATTR_CHIP_EC_FEATURE_RECAL_DDC_ENABLE</id>
-    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <targetType>TARGET_TYPE_PROC_CHIP,TARGET_TYPE_MEMBUF_CHIP</targetType>
     <description>
       True if:
         Murano EC 0x20 or greater
         Venice EC 0x10 or greater
+        Centaur EC 0x20 or greater 
     </description>
     <chipEcFeature>
       <chip>
@@ -197,6 +208,13 @@
         <name>ENUM_ATTR_NAME_VENICE</name>
         <ec>
           <value>0x10</value>
+          <test>GREATER_THAN_OR_EQUAL</test>
+        </ec>
+      </chip>
+      <chip>
+        <name>ENUM_ATTR_NAME_CENTAUR</name>
+        <ec>
+          <value>0x20</value>
           <test>GREATER_THAN_OR_EQUAL</test>
         </ec>
       </chip>
@@ -204,11 +222,12 @@
   </attribute>
   <attribute>
     <id>ATTR_CHIP_EC_FEATURE_RECAL_CTLE_ENABLE</id>
-    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <targetType>TARGET_TYPE_PROC_CHIP,TARGET_TYPE_MEMBUF_CHIP</targetType>
     <description>
       True if:
         Murano EC 0x20 or greater
         Venice EC 0x10 or greater
+        Centaur EC 0x20 or greater
     </description>
     <chipEcFeature>
       <chip>
@@ -222,6 +241,13 @@
         <name>ENUM_ATTR_NAME_VENICE</name>
         <ec>
           <value>0x10</value>
+          <test>GREATER_THAN_OR_EQUAL</test>
+        </ec>
+      </chip>
+      <chip>
+        <name>ENUM_ATTR_NAME_CENTAUR</name>
+        <ec>
+          <value>0x20</value>
           <test>GREATER_THAN_OR_EQUAL</test>
         </ec>
       </chip>
@@ -256,6 +282,56 @@
         <name>ENUM_ATTR_NAME_MURANO</name>
         <ec>
           <value>0x12</value>
+          <test>LESS_THAN</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
+  <attribute>
+    <id>ATTR_CHIP_EC_FEATURE_ADU_PBINIT_LAUNCH_BUG</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      True if: 
+        Murano EC less than 0x20
+        Venice EC less than 0x20
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_MURANO</name>
+        <ec>
+          <value>0x20</value>
+          <test>LESS_THAN</test>
+        </ec>
+      </chip>
+      <chip>
+        <name>ENUM_ATTR_NAME_VENICE</name>
+        <ec>
+          <value>0x20</value>
+          <test>LESS_THAN</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
+  <attribute>
+    <id>ATTR_CHIP_EC_FEATURE_MCS_ECC_BYPASS_DISABLE</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      True if:
+        Murano EC less than 0x20
+        Venice EC less than 0x20
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_MURANO</name>
+        <ec>
+          <value>0x20</value>
+          <test>LESS_THAN</test>
+        </ec>
+      </chip>
+      <chip>
+        <name>ENUM_ATTR_NAME_VENICE</name>
+        <ec>
+          <value>0x20</value>
           <test>LESS_THAN</test>
         </ec>
       </chip>

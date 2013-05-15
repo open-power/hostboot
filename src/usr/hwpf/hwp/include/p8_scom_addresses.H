@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_scom_addresses.H,v 1.143 2013/04/08 14:56:05 jmcgill Exp $
+// $Id: p8_scom_addresses.H,v 1.149 2013/05/09 04:05:36 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/p8_scom_addresses.H,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
@@ -158,6 +158,16 @@ CONST_UINT64_T( DEVICE_ID_REG_0x000F000F            , ULL(0x000F000F) );
 //------------------------------------------------------------------------------
 //      FSI MBOX (CFAM)
 //------------------------------------------------------------------------------
+CONST_UINT32_T( CFAM_FSI_GP3_0x00002812               , ULL(0x00002812) );
+CONST_UINT32_T( CFAM_FSI_GP4_0x00002813               , ULL(0x00002813) );
+CONST_UINT32_T( CFAM_FSI_GP5_0x00002814               , ULL(0x00002814) );
+CONST_UINT32_T( CFAM_FSI_GP6_0x00002815               , ULL(0x00002815) );
+CONST_UINT32_T( CFAM_FSI_GP7_0x00002816               , ULL(0x00002816) );
+CONST_UINT32_T( CFAM_FSI_GP8_0x00002817               , ULL(0x00002817) );
+CONST_UINT32_T( CFAM_FSI_WRITE_PROTECT_0x00002818     , ULL(0x00002818) );
+CONST_UINT32_T( CFAM_FSI_GP3_MIRROR_0x0000281B        , ULL(0x0000281B) );
+CONST_UINT32_T( CFAM_FSI_SBE_VITAL_0x0000281C         , ULL(0x0000281C) );
+
 CONST_UINT64_T( MBOX_SCRATCH_REG0_0x00002838          , ULL(0x00002838) );
 CONST_UINT64_T( MBOX_SCRATCH_REG1_0x00002839          , ULL(0x00002839) );
 CONST_UINT64_T( MBOX_SCRATCH_REG2_0x0000283A          , ULL(0x0000283A) );
@@ -394,6 +404,24 @@ CONST_UINT64_T( OCC_SRAM_BOOT_VEC1_0x00066005         , ULL(0x00066005) );
 CONST_UINT64_T( OCC_SRAM_BOOT_VEC2_0x00066006         , ULL(0x00066006) );
 CONST_UINT64_T( OCC_SRAM_BOOT_VEC3_0x00066007         , ULL(0x00066007) );
 
+// interrupt controller registers
+CONST_UINT64_T( OCC_ITP_SOURCE0_MASK_AND_0x0006A001   , ULL(0x0006A001) );
+CONST_UINT64_T( OCC_ITP_SOURCE1_MASK_AND_0x0006A011   , ULL(0x0006A011) );
+CONST_UINT64_T( OCC_ITP_MASK0_MASK_OR_0x0006A006      , ULL(0x0006A006) );
+CONST_UINT64_T( OCC_ITP_MASK1_MASK_OR_0x0006A016      , ULL(0x0006A016) );
+CONST_UINT64_T( OCC_ITP_TYPE0_0x0006A008              , ULL(0x0006A008) );
+CONST_UINT64_T( OCC_ITP_TYPE1_0x0006A018              , ULL(0x0006A018) );
+CONST_UINT64_T( OCC_ITP_EDGE_POLARITY0_0x0006A009     , ULL(0x0006A009) );
+CONST_UINT64_T( OCC_ITP_EDGE_POLARITY1_0x0006A019     , ULL(0x0006A019) );
+CONST_UINT64_T( OCC_ITP_CRITICAL_EN0_0x0006A00A       , ULL(0x0006A00A) );
+CONST_UINT64_T( OCC_ITP_CRITICAL_EN1_0x0006A01A       , ULL(0x0006A01A) );
+CONST_UINT64_T( OCC_ITP_DEBUG_HALT_EN0_0x0006A00E     , ULL(0x0006A00E) );
+CONST_UINT64_T( OCC_ITP_DEBUG_HALT_EN1_0x0006A01E     , ULL(0x0006A01E) );
+CONST_UINT64_T( OCC_ITP_UNCOND_DEBUG_EN0_0x0006A00C   , ULL(0x0006A00C) );
+CONST_UINT64_T( OCC_ITP_UNCOND_DEBUG_EN1_0x0006A01C   , ULL(0x0006A01C) );
+CONST_UINT64_T( OCC_ITP_TIMER0_0x0006A100             , ULL(0x0006A100) );
+CONST_UINT64_T( OCC_ITP_TIMER1_0x0006A101             , ULL(0x0006A101) );
+
 //------------------------------------------------------------------------------
 //      PMC
 //------------------------------------------------------------------------------
@@ -497,7 +525,7 @@ CONST_UINT64_T( PIBMEM_DATA_INC_0x00088003            , ULL(0x00088003) );
 CONST_UINT64_T( PIBMEM_DATA_DEC_0x00088004            , ULL(0x00088004) );
 CONST_UINT64_T( PIBMEM_STATUS_0x00088005              , ULL(0x00088005) );
 CONST_UINT64_T( PIBMEM_RESET_0x00088006               , ULL(0x00088006) );
-CONST_UINT64_T( PIBMEM_REPAIR_LOAD_0x00088007         , ULL(0x00088007) );
+CONST_UINT64_T( PIBMEM_REPAIR_0x00088007              , ULL(0x00088007) );
 
 //------------------------------------------------------------------------------
 //      I2C MASTER (MODE)
@@ -1017,24 +1045,32 @@ CONST_UINT64_T( NX_FAR_BAR_F0_0x0201309A              , ULL(0x0201309A) );
 CONST_UINT64_T( NX_NEAR_BAR_F1_0x0201309B             , ULL(0x0201309B) );
 CONST_UINT64_T( NX_FAR_BAR_F1_0x0201309C              , ULL(0x0201309C) );
 CONST_UINT64_T( NX_CQ_EPS_0x0201309D                  , ULL(0x0201309D) );
-
+CONST_UINT64_T( NX_AS_MMIO_BAR_0x0201309E             , ULL(0x0201309E) );
 
 CONST_UINT64_T( NX_CAPP_FIR_AND_0x02013001            , ULL(0x02013001) );
 CONST_UINT64_T( NX_DMA_ENG_FIR_AND_0x02013101         , ULL(0x02013101) );
 CONST_UINT64_T( NX_CQ_FIR_AND_0x02013081              , ULL(0x02013081) );
 CONST_UINT64_T( NX_AS_FIR_AND_0x020130C1              , ULL(0x020130C1) );
 
-CONST_UINT64_T( EH_PB_MCDCTL_FIR_AND_0x02013401       , ULL(0x02013401) );
-
-
 //------------------------------------------------------------------------------
 //      MCD
 //------------------------------------------------------------------------------
+CONST_UINT64_T( MCD_FIR_0x02013400                    , ULL(0x02013400) );
+CONST_UINT64_T( MCD_FIR_AND_0x02013401                , ULL(0x02013401) );
+CONST_UINT64_T( MCD_FIR_OR_0x02013402                 , ULL(0x02013402) );
+CONST_UINT64_T( MCD_FIR_MASK_0x02013403               , ULL(0x02013403) );
+CONST_UINT64_T( MCD_FIR_MASK_AND_0x02013404           , ULL(0x02013404) );
+CONST_UINT64_T( MCD_FIR_MASK_OR_0x02013405            , ULL(0x02013405) );
+CONST_UINT64_T( MCD_FIR_ACTION0_0x02013406            , ULL(0x02013406) );
+CONST_UINT64_T( MCD_FIR_ACTION1_0x02013407            , ULL(0x02013407) );
+
 CONST_UINT64_T( MCD_PRE_EPS_0x0201340B                , ULL(0x0201340B) );
 CONST_UINT64_T( MCD_CN00_0x0201340C                   , ULL(0x0201340C) );
 CONST_UINT64_T( MCD_CN01_0x0201340D                   , ULL(0x0201340D) );
 CONST_UINT64_T( MCD_CN10_0x0201340E                   , ULL(0x0201340E) );
 CONST_UINT64_T( MCD_CN11_0x0201340F                   , ULL(0x0201340F) );
+CONST_UINT64_T( MCD_REC_EVEN_0x02013410               , ULL(0x02013410) );
+CONST_UINT64_T( MCD_REC_ODD_0x02013411                , ULL(0x02013411) );
 
 
 /******************************************************************************/
@@ -1856,6 +1892,26 @@ This section is automatically updated by CVS when you check in this file.
 Be sure to create CVS comments when you commit so that they can be included here.
 
 $Log: p8_scom_addresses.H,v $
+Revision 1.149  2013/05/09 04:05:36  jmcgill
+add AS MMIO BAR
+
+Revision 1.148  2013/04/28 02:30:41  jmcgill
+add MCD recovery config register definitions
+
+Revision 1.147  2013/04/23 16:30:27  jimyac
+added additional OCC interrupt registers
+
+Revision 1.146  2013/04/17 16:16:32  jimyac
+added OCC registers - OUDER0/1 & OTR0/1
+
+Revision 1.145  2013/04/16 22:15:34  jeshua
+Moved in cfam addresses from common file
+Added in write protect cfam address
+Renamed PIBMEM_REPAIR_LOAD_0x00088007 to PIBMEM_REPAIR_0x00088007
+
+Revision 1.144  2013/04/15 19:28:23  jmcgill
+add MCD FIR entries
+
 Revision 1.143  2013/04/08 14:56:05  jmcgill
 add PCIE ETU reset registers
 

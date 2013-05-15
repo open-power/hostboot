@@ -1,8 +1,15 @@
-#-- $Id: p8.mcs.scom.initfile,v 1.4 2013/04/08 20:22:28 jmcgill Exp $
+#-- $Id: p8.mcs.scom.initfile,v 1.8 2013/05/02 16:32:15 jmcgill Exp $
 #-- CHANGE HISTORY:
 #--------------------------------------------------------------------------------
 #-- Version:|Author: | Date:  | Comment:
 #-- --------|--------|--------|--------------------------------------------------
+#--     1.70|baysah  |04/26/13|- Disabled MCMODE0Q_ENABLE_FAULT_LINE_FOR_GLOBAL_CHECKSTOP per firmware request for MPIPL.
+#--         |        |        |
+#--     1.60|baysah  |04/25/13|- Fix problem with incorrectly setting mcmode0 bit 1 which is marked as reserved, but its actually used to
+#--         |        |        |- reset MCS channel fail.
+#--         |        |        |
+#--     1.41|baysah  |04/23/13|- Disable MCS bypass for dd1 less than 2.0 for defect HW247907
+#--         |        |        |
 #--     1.30|baysah  |04/04/13|- Set MCI Replay timeout value to 2ms.
 #--         |        |        |- Disable MCS arbiter blocking after checkstop.
 #--         |        |        |
@@ -25,7 +32,7 @@ SyntaxVersion = 1
  scom 0x0000000002011807              {
      bits ,                    scom_data        ;
      0    ,                    0b1              ;              # MCMODE0Q_ENABLE_CMD_BYP_STUTTER
-     1    ,                    0b1              ;              # MCMODE0Q_RESERVED Reserved
+     1    ,                    0b0              ;              # MCMODE0Q_RESERVED Reserved
      2    ,                    0b1              ;              # MCMODE0Q_ENABLE_NS_RD_AO_SFU_FOR_DCBZ
      3    ,                    0b1              ;              # MCMODE0Q_ENABLE_CENTAUR_LOCAL_CHECKSTOP_COMMAND
      4:7  ,                    0xF              ;              # MCMODE0Q_L3_PREFETCH_RETRY_THRESHOLD
@@ -38,7 +45,7 @@ SyntaxVersion = 1
      32:35,                    0x0              ;              # MCMODE0Q_NUMBER_OF_CL_ENTRIES_RESERVED_FOR_HA_ASSIST
      36   ,                    0b1              ;              # MCMODE0Q_MCFGRP_19_IS_HO_BIT
      37   ,                    0b1              ;              # MCMODE0Q_CL_CHANNEL_TIMEOUT_FORCES_CHANNEL_FAIL
-     38   ,                    0b1              ;              # MCMODE0Q_ENABLE_FAULT_LINE_FOR_GLOBAL_CHECKSTOP
+     38   ,                    0b0              ;              # MCMODE0Q_ENABLE_FAULT_LINE_FOR_GLOBAL_CHECKSTOP
      39:43,                    0b00000          ;              # MCMODE0Q_RESERVED_39_43 Reserved
      44:52,                    0b001100010      ;              # MCMODE0Q_ADDRESS_COLLISION_MODES
      53   ,                    0b0              ;              # MCMODE0Q_INCLUDE_CP_IG_IN_CP_WRITE_FULLNESS_GROUP
@@ -53,6 +60,36 @@ SyntaxVersion = 1
      63   ,                    0b0              ;              # MCMODE0Q_WRITE_DATA_BUFFER_ECC_CORRECT_DISABLE
 
  }
+
+
+#--******************************************************************************
+#-- MCS Mode1 Register
+#--******************************************************************************
+ scom 0x0000000002011808              {
+     bits ,                    scom_data           ,     expr             ;
+     0    ,                    0b0                 ,     any              ;    # MCMODE1Q_DISABLE_ADDRESS_SELECT_LFSR_MODE
+     1    ,                    0b0                 ,     any              ;    # MCMODE1Q_NODAL_SCOPE_MCD_VALID
+     2:6  ,                    0b00000             ,     any              ;    # MCMODE1Q_DISABLE_HIGH_PRIORITY
+     7:9  ,                    0b000               , (TGT1.ATTR_CHIP_EC_FEATURE_MCS_ECC_BYPASS_DISABLE == 0x0)     ;    # MCMODE1Q_DISABLE_CRC_ECC_BYPASS
+     7:9  ,                    0b111               , (TGT1.ATTR_CHIP_EC_FEATURE_MCS_ECC_BYPASS_DISABLE != 0x0)     ;    # MCMODE1Q_DISABLE_CRC_ECC_BYPASS
+     10:15,                    0b000000            ,     any              ;    # MCMODE1Q_DISABLE_READ_ALLOCATION_TO_CACHE
+     16   ,                    0b0                 ,     any              ;    # MCMODE1Q_DISABLE_READ_ALLOCATION_TO_CACHE_FOR_FASTPATH_OP
+     17   ,                    0b0                 ,     any              ;    # MCMODE1Q_ENABLE_CRC_ECC_BYPASS_NODAL_SCOPE_ONLY
+     18:26,                    0b000000000         ,     any              ;    # MCMODE1Q_DISABLE_SPEC_OPS_BY_SOURCE_AND_OR_SCOPE
+     27:30,                    0b0000              ,     any              ;    # MCMODE1Q_DISABLE_PREFETCH
+     31   ,                    0b0                 ,     any              ;    # MCMODE1Q_DISABLE_ALL_SPEC_OPS
+     32:48,                    0b00000000000000000 ,     any              ;    # MCMODE1Q_DISABLE_SPEC_OPS
+     49   ,                    0b0                 ,     any              ;    # MCMODE1Q_DISABLE_OP_SOURCE_AND_SCOPE
+     50:51,                    0b00                ,     any              ;    # MCMODE1Q_DISABLE_CACHE_INHIBITED
+     52   ,                    0b0                 ,     any              ;    # MCMODE1Q_DISABLE_ALL_MCS_COMMAND_BYPASS
+     53:59,                    0b0000000           ,     any              ;    # MCMODE1Q_DISABLE_MCS_COMMAND_BYPASS
+     60   ,                    0b0                 ,     any              ;    # MCMODE1Q_ENABLE_DISABLE_SPEC_READ_FOR_NONDMA_GROUP_PUMP_LOCAL_READ
+     61   ,                    0b0                 ,     any              ;    # MCMODE1Q_ENABLE_DISABLE_SPEC_READ_FOR_NONDMA_SYSTEM_PUMP_LOCAL_READ
+     62   ,                    0b0                 ,     any              ;    # MCMODE1Q_DISABLE_FASTPATH_MCS_COMMAND_BYPASS
+     63   ,                    0b0                 ,     any              ;    # MCMODE1Q_DISABLE_FASTPATH_CRC_ECC_BYPASS
+
+ }
+
 
 
 #--******************************************************************************

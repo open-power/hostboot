@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_revert_sbe_mcs_setup.C,v 1.6 2013/01/20 15:55:42 jmcgill Exp $
+// $Id: proc_revert_sbe_mcs_setup.C,v 1.7 2013/04/27 17:23:41 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_revert_sbe_mcs_setup.C,v $
 //------------------------------------------------------------------------------
 // *|
@@ -140,7 +140,7 @@ fapi::ReturnCode proc_revert_sbe_mcs_setup_reset_mcfgp(
 
 
 //------------------------------------------------------------------------------
-// function: set MCI FIR Mask channel timeout bit, to restore register flush
+// function: set MCI FIR Mask channel timeout bits, to restore register flush
 //           state
 // parameters: i_target       => chip target
 //             i_mcs_unit_num => chip unit number
@@ -162,6 +162,8 @@ fapi::ReturnCode proc_revert_sbe_mcs_setup_reset_mcifirmask(
     {
         // set fields manipulated by SBE (to restore logic flush state)
         rc_ecmd |= mcifirmask_or_data.setBit(
+            MCIFIR_CL_TIMEOUT_BIT);
+       rc_ecmd |= mcifirmask_or_data.setBit(
             MCIFIR_CL_TIMEOUT_DUE_TO_CHANNEL_BIT);
 
         // check buffer manipulation return code

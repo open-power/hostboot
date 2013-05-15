@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_revert_sbe_mcs_setup.H,v 1.3 2013/01/20 15:55:45 jmcgill Exp $
+// $Id: proc_revert_sbe_mcs_setup.H,v 1.4 2013/04/27 17:23:43 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_revert_sbe_mcs_setup.H,v $
 //------------------------------------------------------------------------------
 // *|
@@ -73,7 +73,8 @@ const uint32_t MCFGP_GROUP_BASE_ADDR_START_BIT = 26;
 const uint32_t MCFGP_GROUP_BASE_ADDR_END_BIT = 43;
 
 // MCIFIR register constants
-const uint32_t MCIFIR_CL_TIMEOUT_DUE_TO_CHANNEL_BIT = 28;
+const uint32_t MCIFIR_CL_TIMEOUT_BIT = 27;
+const uint32_t MCIFIR_CL_TIMEOUT_DUE_TO_CHANNEL_BIT = 40;
 
 
 //------------------------------------------------------------------------------

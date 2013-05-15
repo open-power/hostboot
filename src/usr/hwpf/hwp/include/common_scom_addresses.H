@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: common_scom_addresses.H,v 1.44 2013/03/18 19:43:27 jeshua Exp $
+// $Id: common_scom_addresses.H,v 1.46 2013/05/06 21:03:10 jeshua Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/common_scom_addresses.H,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
@@ -175,6 +175,9 @@ CONST_UINT64_T( GENERIC_GP3_OR_0x000F0014             , ULL(0x000F0014) );
 // PM GP0 Register
 CONST_UINT64_T( GENERIC_PMGP0_OR_0x000F0102           , ULL(0x000F0102) );
 
+// PCB ERROR
+CONST_UINT64_T( GENERIC_PCB_ERR_0x000F001F            , ULL(0x000F001F) );
+
 //------------------------------------------------------------------------------
 //      GENERIC PLLLOCK REG
 //------------------------------------------------------------------------------
@@ -212,26 +215,10 @@ CONST_UINT32_T( CFAM_FSI_GP7_0x00001016               , ULL(0x00001016) );
 CONST_UINT32_T( CFAM_FSI_GP8_0x00001017               , ULL(0x00001017) );
 CONST_UINT32_T( CFAM_FSI_GP3_MIRROR_0x0000101B        , ULL(0x0000101B) );
 
-CONST_UINT32_T( CFAM_FSI_GP3_0x00002812               , ULL(0x00002812) );
-CONST_UINT32_T( CFAM_FSI_GP4_0x00002813               , ULL(0x00002813) );
-CONST_UINT32_T( CFAM_FSI_GP5_0x00002814               , ULL(0x00002814) );
-CONST_UINT32_T( CFAM_FSI_GP6_0x00002815               , ULL(0x00002815) );
-CONST_UINT32_T( CFAM_FSI_GP7_0x00002816               , ULL(0x00002816) );
-CONST_UINT32_T( CFAM_FSI_GP8_0x00002817               , ULL(0x00002817) );
-CONST_UINT32_T( CFAM_FSI_GP3_MIRROR_0x0000281B        , ULL(0x0000281B) );
-CONST_UINT32_T( CFAM_FSI_SBE_VITAL_0x0000281C         , ULL(0x0000281C) );
-
 //------------------------------------------------------------------------------
 //      OTPROM
 //------------------------------------------------------------------------------
 CONST_UINT64_T( OTPROM_0x00010000                     , ULL(0x00010000) );
-
-//------------------------------------------------------------------------------
-//      PIBMEM
-//------------------------------------------------------------------------------
-
-CONST_UINT64_T( PIBMEM_REPAIR_0x00088007              , ULL(0x00088007) );
-
 
 //------------------------------------------------------------------------------
 //      MFSI0
@@ -634,6 +621,12 @@ This section is automatically updated by CVS when you check in this file.
 Be sure to create CVS comments when you commit so that they can be included here.
 
 $Log: common_scom_addresses.H,v $
+Revision 1.46  2013/05/06 21:03:10  jeshua
+Added GENERIC_PCB_ERR_0x000F001F
+
+Revision 1.45  2013/04/16 22:16:16  jeshua
+Moved P8 cfam addresses and PIBMEM_REPAIR_0x00088007 to p8_scom_addresses.H
+
 Revision 1.44  2013/03/18 19:43:27  jeshua
 Removed OTPROM_SECURE_SWITCHES_0x00010005 because it's not common between P8 and Centaur. P8 code should use OTPC_M_SECURITY_SWITCH_0x00010005
 

@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_setup_bars.C,v 1.9 2013/03/17 22:56:03 jmcgill Exp $
+// $Id: proc_setup_bars.C,v 1.10 2013/04/27 21:48:59 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_setup_bars.C,v $
 //------------------------------------------------------------------------------
 // *|
@@ -3290,6 +3290,158 @@ proc_setup_bars_write_bars(
 
 
 //------------------------------------------------------------------------------
+// function: enable MCD probes/unmask FIRs
+// parameters: i_smp                        => structure encapsulating fully
+//                                             specified SMP topology
+//             i_init_local_chip_local_node => boolean qualifying application
+//                                             of local chip/local node range
+//                                             specific BAR resources
+// returns: FAPI_RC_SUCCESS if all register writes are successful,
+//          else failing return code from failing SCOM access
+//------------------------------------------------------------------------------
+fapi::ReturnCode proc_setup_bars_config_mcd(
+    proc_setup_bars_smp_system& i_smp,
+    const bool& i_init_local_chip_local_node)
+{
+    // return code
+    fapi::ReturnCode rc;
+    uint32_t rc_ecmd = 0;
+
+    ecmdDataBufferBase mcd_fir_mask_data(64);
+    ecmdDataBufferBase mcd_recov_data(64);
+    ecmdDataBufferBase mcd_recov_mask(64);
+    std::map<proc_fab_smp_node_id, proc_setup_bars_smp_node>::iterator n_iter;
+    std::map<proc_fab_smp_chip_id, proc_setup_bars_smp_chip>::iterator p_iter;
+
+    FAPI_DBG("proc_setup_bars_config_mcd: Start");
+
+    do
+    {
+        for (n_iter = i_smp.nodes.begin();
+             (n_iter != i_smp.nodes.end()) && (rc.ok());
+             n_iter++)
+        {
+            for (p_iter = n_iter->second.chips.begin();
+                 (p_iter != n_iter->second.chips.end()) && (rc.ok());
+                 p_iter++)
+            {
+                bool config_mcd = false;
+                bool cfg_enable[PROC_SETUP_BARS_NUM_MCD_CFG] =
+                    { false, false, false, false };
+
+                // ensure MCD probes are enabled and FIR is unmasked if:
+                //   initializing local chip resources and there is a
+                //     non-mirrored/mirrored range enabled OR
+                //   initializing foreign resources and there is a
+                //     near range enabled
+
+                if (i_init_local_chip_local_node &&
+                    (p_iter->second.non_mirrored_range.enabled ||
+                     p_iter->second.mirrored_range.enabled))
+                {
+                    config_mcd = true;
+                    cfg_enable[0] = p_iter->second.non_mirrored_range.enabled;
+                    cfg_enable[1] = p_iter->second.mirrored_range.enabled;
+                }
+
+                bool process_f_links[PROC_FAB_SMP_NUM_F_LINKS] =
+                {
+                    p_iter->second.chip->process_f0,
+                    p_iter->second.chip->process_f1
+                };
+
+                // process ranges
+                for (uint8_t r = 0;
+                     (r < PROC_FAB_SMP_NUM_F_LINKS);
+                     r++)
+                {
+                    if (process_f_links[r] &&
+                        p_iter->second.foreign_near_ranges[r].enabled)
+                    {
+                        config_mcd = true;
+                        cfg_enable[2+r] = true;
+                    }
+                }
+
+                if (config_mcd)
+                {
+                    // unmask MCD FIR
+                    rc_ecmd |= mcd_fir_mask_data.setDoubleWord(
+                        0,
+                        MCD_FIR_MASK_RUNTIME_VAL);
+
+                    // check buffer manipulation return codes
+                    if (rc_ecmd)
+                    {
+                        FAPI_ERR("proc_setup_bars_config_mcd: Error 0x%X setting up FIR mask data buffer",
+                                 rc_ecmd);
+                        rc.setEcmdError(rc_ecmd);
+                        break;
+                    }
+
+                    rc = fapiPutScom(p_iter->second.chip->this_chip,
+                                     MCD_FIR_MASK_0x02013403,
+                                     mcd_fir_mask_data);
+                    if (!rc.ok())
+                    {
+                        FAPI_ERR("proc_setup_bars_config_mcd: fapiPutScomUnderMask error (MCD_FIR_MASK_0x02013403)");
+                        break;
+                    }
+
+                    // enable MCD probes for selected config registers
+                    rc_ecmd |= mcd_recov_data.setBit(MCD_RECOVERY_ENABLE_BIT);
+                    rc_ecmd |= mcd_recov_mask.setBit(MCD_RECOVERY_ENABLE_BIT);
+                    for (uint8_t i = 0;
+                         i < PROC_SETUP_BARS_NUM_MCD_CFG;
+                         i++)
+                    {
+                        rc_ecmd |= mcd_recov_data.writeBit(
+                            MCD_RECOVERY_CFG_EN_BIT[i],
+                            cfg_enable[i]);
+                        rc_ecmd |= mcd_recov_mask.writeBit(
+                            MCD_RECOVERY_CFG_EN_BIT[i],
+                            cfg_enable[i]);
+                    }
+
+                    // check buffer manipulation return codes
+                    if (rc_ecmd)
+                    {
+                        FAPI_ERR("proc_setup_bars_config_mcd: Error 0x%X setting up recovery data buffer",
+                                 rc_ecmd);
+                        rc.setEcmdError(rc_ecmd);
+                        break;
+                    }
+
+                    rc = fapiPutScomUnderMask(p_iter->second.chip->this_chip,
+                                              MCD_REC_EVEN_0x02013410,
+                                              mcd_recov_data,
+                                              mcd_recov_mask);
+                    if (!rc.ok())
+                    {
+                        FAPI_ERR("proc_setup_bars_config_mcd: fapiPutScomUnderMask error (MCD_REC_EVEN_0x02013410)");
+                        break;
+                    }
+
+                    rc = fapiPutScomUnderMask(p_iter->second.chip->this_chip,
+                                              MCD_REC_ODD_0x02013411,
+                                              mcd_recov_data,
+                                              mcd_recov_mask);
+                    if (!rc.ok())
+                    {
+                        FAPI_ERR("proc_setup_bars_config_mcd: fapiPutScomUnderMask error (MCD_REC_ODD_0x02013411)");
+                        break;
+                    }
+                }
+            }
+        }
+    } while(0);
+
+    FAPI_DBG("proc_setup_bars_config_mcd: End");
+    return rc;
+}
+
+
+//------------------------------------------------------------------------------
 // function: proc_setup_bars HWP entry point
 //           NOTE: see comments above function prototype in header
 //------------------------------------------------------------------------------
@@ -3326,6 +3478,15 @@ fapi::ReturnCode proc_setup_bars(
         if (!rc.ok())
         {
             FAPI_ERR("proc_setup_bars: Error from proc_setup_bars_write_bars");
+            break;
+        }
+
+        // configure MCD resources
+        rc = proc_setup_bars_config_mcd(smp,
+                                         i_init_local_chip_local_node);
+        if (!rc.ok())
+        {
+            FAPI_ERR("proc_setup_bars: Error from proc_setup_bars_config_mcd");
             break;
         }
 

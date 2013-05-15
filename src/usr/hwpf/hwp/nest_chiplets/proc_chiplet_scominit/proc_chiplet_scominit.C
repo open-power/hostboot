@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_chiplet_scominit.C,v 1.12 2013/04/08 13:49:08 jmcgill Exp $
+// $Id: proc_chiplet_scominit.C,v 1.13 2013/05/02 16:33:30 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_chiplet_scominit.C,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2012
@@ -204,6 +204,7 @@ fapi::ReturnCode proc_chiplet_scominit(const fapi::Target & i_target)
                 // execute MCS SCOM initfile
                 initfile_targets.clear();
                 initfile_targets.push_back(*i);
+                initfile_targets.push_back(i_target);
                 FAPI_INF("proc_chiplet_scominit: Executing %s on %s",
                          PROC_CHIPLET_SCOMINIT_MCS_IF, i->toEcmdString());
                 FAPI_EXEC_HWP(
