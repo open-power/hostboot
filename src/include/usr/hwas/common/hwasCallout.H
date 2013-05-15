@@ -122,25 +122,6 @@ enum callOutPriority
     SRCI_PRIORITY_HIGH  = 6
 };
 
-#ifndef PARSER
-
-/**
- *  @brief processCallout process the userdetail for a callout, calling
- *              the deconfigure and/or GARD funcationality as appropriate
- *
- *  @param[in]  i_errl Error log handle
- *  @param[in]  i_pData  Pointer to the callout bundle
- *  @param[in]  i_Size  size of the data in the callout bundle
- *
- */
-void processCallout(errlHndl_t i_errl,
-        uint8_t *i_pData,
-        uint64_t i_Size);
-
-// typedef for function pointer that the errlog class will use.
-typedef bool (*processCalloutFn)(errlHndl_t, uint8_t *, uint64_t);
-#endif // not PARSER
-
 //
 const uint8_t HW_CALLOUT        = 0x01;
 const uint8_t PROCEDURE_CALLOUT = 0x02;
@@ -163,6 +144,24 @@ typedef struct callout_ud
         };
     };
 } callout_ud_t;
+
+#ifndef PARSER
+
+/**
+ *  @brief processCallout process the userdetail for a callout, calling
+ *              the deconfigure and/or GARD funcationality as appropriate
+ *
+ *  @param[in]  i_errl Error log handle
+ *  @param[in]  i_pData  Pointer to the callout bundle
+ *  @param[in]  i_Size  size of the data in the callout bundle
+ *
+ */
+void processCallout(errlHndl_t i_errl,
+        uint8_t *i_pData,
+        uint64_t i_Size);
+
+// typedef for function pointer that the errlog class will use.
+typedef bool (*processCalloutFn)(errlHndl_t, uint8_t *, uint64_t);
 
 /**
  * @brief platform specific code to handle a procedure callout that has been
@@ -199,6 +198,8 @@ errlHndl_t platHandleHWCallout(
         DeconfigEnum    i_deconfigState,
         errlHndl_t i_errl,
         GARD_ErrorType  i_gardErrorType);
+
+#endif // not PARSER
 
 };   // end namespace
 
