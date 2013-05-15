@@ -330,7 +330,10 @@ void HeapManager::_coalesce()
         chunk = NULL;
         while(NULL != (chunk = first_chunk[bucket].pop()))
         {
+            kassert(chunk->free);
+
             chunk->next = head;
+            chunk->coalesce = true;
             head = chunk;
         }
     }
@@ -351,7 +354,7 @@ void HeapManager::_coalesce()
             {
                 // This chunk might already be combined with a chunk earlier
                 // in the loop.
-                if(!chunk->free)
+                if((!chunk->coalesce) || (!chunk->free))
                 {
                     break;
                 }
@@ -370,7 +373,7 @@ void HeapManager::_coalesce()
                 }
 
                 // Cannot merge if buddy is not free.
-                if (!buddy->free)
+                if ((!buddy->free) || (!buddy->coalesce))
                 {
                     break;
                 }
@@ -387,7 +390,7 @@ void HeapManager::_coalesce()
                 }
 
                 // Do merge.
-                buddy->free = false;
+                buddy->free = buddy->coalesce = false;
                 chunk->bucket = newBucket;
                 incrementChunk = false;
                 mergedChunks = true;
@@ -407,7 +410,7 @@ void HeapManager::_coalesce()
         chunk = head;
         while (NULL != chunk)
         {
-            if (chunk->free)
+            if ((chunk->free) && (chunk->coalesce))
             {
                 chunk_t* temp = chunk->next;
                 chunk->next = newHead;
@@ -434,6 +437,7 @@ void HeapManager::_coalesce()
     {
         chunk_t * temp = chunk->next;
 
+        chunk->coalesce = false;
         push_bucket(chunk,chunk->bucket);
 
         ++cv_free_chunks;

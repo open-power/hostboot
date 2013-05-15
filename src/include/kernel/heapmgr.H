@@ -1,25 +1,25 @@
-//  IBM_PROLOG_BEGIN_TAG
-//  This is an automatically generated prolog.
-//
-//  $Source: src/include/kernel/heapmgr.H $
-//
-//  IBM CONFIDENTIAL
-//
-//  COPYRIGHT International Business Machines Corp. 2010 - 2011
-//
-//  p1
-//
-//  Object Code Only (OCO) source materials
-//  Licensed Internal Code Source Materials
-//  IBM HostBoot Licensed Internal Code
-//
-//  The source code for this program is not published or other-
-//  wise divested of its trade secrets, irrespective of what has
-//  been deposited with the U.S. Copyright Office.
-//
-//  Origin: 30
-//
-//  IBM_PROLOG_END
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/include/kernel/heapmgr.H $                                */
+/*                                                                        */
+/* IBM CONFIDENTIAL                                                       */
+/*                                                                        */
+/* COPYRIGHT International Business Machines Corp. 2010,2013              */
+/*                                                                        */
+/* p1                                                                     */
+/*                                                                        */
+/* Object Code Only (OCO) source materials                                */
+/* Licensed Internal Code Source Materials                                */
+/* IBM HostBoot Licensed Internal Code                                    */
+/*                                                                        */
+/* The source code for this program is not published or otherwise         */
+/* divested of its trade secrets, irrespective of what has been           */
+/* deposited with the U.S. Copyright Office.                              */
+/*                                                                        */
+/* Origin: 30                                                             */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
 #ifndef __KERNEL_HEAPMGR_H
 #define __KERNEL_HEAPMGR_H
 
@@ -40,7 +40,7 @@ void kernel_execute_decrementer();
  * The small heap increases one page at a time as allocations are needed.
  * A 4k pages is initially divided into buckes of size 3728,336, and 32.
  * Pages can't be recovered once assinged to the small heap.</p>
- * 
+ *
  * <p>Anthing larger than 3720 goes into the large allocation heap.
  * Memory in the large allocation heap are assigned as integral pages.
  * When memory is released from the large allocation heap, it is returned
@@ -134,10 +134,11 @@ class HeapManager
         {
             struct
             {
-                bool    free:1;         //!< Is chunck free
-                uint64_t bucket:63;     //!< Which bucket this chunk belongs to
+                bool    free:1;         //!< Is chunk free
+                bool    coalesce:1;     //!< Is chunk being coalesced
+                uint64_t bucket:62;     //!< Which bucket this chunk belongs to
             } PACKED;
-            
+
             chunk_t* next;      //!< Next chunk (for unallocated chunks only)
         };
 
@@ -150,7 +151,7 @@ class HeapManager
             size_t page_count;  //!< Number of pages used
             big_chunk_t * next; //!< Next allocation
 
-            big_chunk_t(void * i_ptr, size_t i_pages) 
+            big_chunk_t(void * i_ptr, size_t i_pages)
                 : addr(i_ptr), page_count(i_pages), next(NULL) {}
         };
 
