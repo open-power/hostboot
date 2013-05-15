@@ -1462,6 +1462,8 @@ sub writeTraitFileTraits {
 
     my $typedefs = "";
 
+    my %attrValHash;
+
     foreach my $attribute (@{$attributes->{attribute}})
     {
         # Build boolean traits
@@ -1477,7 +1479,7 @@ sub writeTraitFileTraits {
 
         # Mark the attribute as being a host boot mutex or non-host boot mutex
         if(   (exists $attribute->{simpleType})
-           && (exists $attribute->{simpleType}->{hbmutex}) )
+            && (exists $attribute->{simpleType}->{hbmutex}) )
         {
             $traits .= " hbMutex,";
         }
@@ -1501,7 +1503,7 @@ sub writeTraitFileTraits {
                 if(exists $simpleTypeProperties->{$typeName})
                 {
                     if(    $simpleTypeProperties->{$typeName}{typeName}
-                       eq "XMLTOHB_USE_PARENT_ATTR_ID")
+                        eq "XMLTOHB_USE_PARENT_ATTR_ID")
                     {
                         $type = $attribute->{id};
                     }
@@ -1511,13 +1513,13 @@ sub writeTraitFileTraits {
                     }
 
                     if(   (exists $simpleType->{array})
-                       && ($simpleTypeProperties->{$typeName}{supportsArray}) )
+                        && ($simpleTypeProperties->{$typeName}{supportsArray}) )
                     {
-                         my @bounds = split(/,/,$simpleType->{array});
-                         foreach my $bound (@bounds)
-                         {
-                             $dimensions .= "[$bound]";
-                         }
+                        my @bounds = split(/,/,$simpleType->{array});
+                        foreach my $bound (@bounds)
+                        {
+                            $dimensions .= "[$bound]";
+                        }
                     }
                     elsif(exists $simpleType->{string})
                     {
@@ -1525,7 +1527,7 @@ sub writeTraitFileTraits {
                         if(exists $simpleType->{string}->{sizeInclNull})
                         {
                             $dimensions .=
-                                "[$simpleType->{string}->{sizeInclNull}]";
+                            "[$simpleType->{string}->{sizeInclNull}]";
                         }
                     }
                     last;
@@ -1535,8 +1537,8 @@ sub writeTraitFileTraits {
             if($type eq "")
             {
                 fatal("Unsupported simpleType child element for "
-                 . "attribute $attribute->{id}.  Keys are ("
-                 . join(',',sort(keys %{$simpleType})) . ")");
+                    . "attribute $attribute->{id}.  Keys are ("
+                    . join(',',sort(keys %{$simpleType})) . ")");
             }
         }
         elsif(exists $attribute->{nativeType})
@@ -1553,37 +1555,44 @@ sub writeTraitFileTraits {
                 . "$attribute->{id}.");
         }
 
-        # Add traits definition to output
+        # if it already exists skip it
+        if( !exists($attrValHash{$attribute->{id}}))
+        {
+            # keep track of the ones we add to our file
+            $attrValHash{$attribute->{id}} = 1;
 
-        print $outFile "template<>\n";
-        print $outFile "class AttributeTraits<ATTR_",$attribute->{id},">\n";
-        print $outFile "{\n";
-        print $outFile "    public:\n";
-        print $outFile "        enum {",$traits," };\n";
-        print $outFile "        typedef ", $type, " Type$dimensions;\n";
-        print $outFile "};\n\n";
+            # Add traits definition to output
 
-        $typedefs .= "// Type aliases and/or sizes for ATTR_"
-                   . "$attribute->{id} attribute\n";
+            print $outFile "template<>\n";
+            print $outFile "class AttributeTraits<ATTR_",$attribute->{id},">\n";
+            print $outFile "{\n";
+            print $outFile "    public:\n";
+            print $outFile "        enum {",$traits," };\n";
+            print $outFile "        typedef ", $type, " Type$dimensions;\n";
+            print $outFile "};\n\n";
 
-        $typedefs .= "typedef " . $type .
+            $typedefs .= "// Type aliases and/or sizes for ATTR_"
+            . "$attribute->{id} attribute\n";
+
+            $typedefs .= "typedef " . $type .
             " $attribute->{id}" . "_ATTR" . $dimensions . ";\n";
 
-        # Append a more friendly type alias for attribute
-        $typedefs .= "typedef " . $type .
+            # Append a more friendly type alias for attribute
+            $typedefs .= "typedef " . $type .
             " ATTR_" . "$attribute->{id}" . "_type" . $dimensions . ";\n";
 
-        # If a string, append max # of characters for the string
-        if(   (exists $attribute->{simpleType})
-           && (exists $attribute->{simpleType}->{string}))
-        {
-            my $size = $attribute->{simpleType}->{string}->{sizeInclNull} - 1;
-            $typedefs .= "const size_t ATTR_"
-                      .  "$attribute->{id}" . "_max_chars = "
-                      .  "$size"
-                      . ";\n";
+            # If a string, append max # of characters for the string
+            if(   (exists $attribute->{simpleType})
+                && (exists $attribute->{simpleType}->{string}))
+            {
+                my $size = $attribute->{simpleType}->{string}->{sizeInclNull}-1;
+                $typedefs .= "const size_t ATTR_"
+                .  "$attribute->{id}" . "_max_chars = "
+                .  "$size"
+                . ";\n";
+            }
+            $typedefs .= "\n";
         }
-        $typedefs .= "\n";
     };
 
     print $outFile "/**\n";
@@ -2555,7 +2564,7 @@ sub UTILITY_FUNCTIONS { }
 sub getAttributeIdEnumeration {
   my($attributes) = @_;
 
-    my $attributeValue = 0;
+    my $attributeValue = 1;
     my $enumeration = { } ;
     my %attrValHash;
 
@@ -2567,20 +2576,31 @@ sub getAttributeIdEnumeration {
 
     foreach my $attribute (@{$attributes->{attribute}})
     {
-        $attributeValue++;
         my $attributeHexVal = md5_hex($attribute->{id});
         my $attributeHexVal28bit =substr($attributeHexVal,0,7);
+
         if(exists($attrValHash{$attributeHexVal28bit}))
         {
-             fatal(
-               "Error:Duplicate AttributeId hashvalue for $attribute->{id}");
+            # if the name is the same, skip it
+            if ( $attribute->{id} ne $attrValHash{$attributeHexVal28bit} )
+            {
+               fatal(
+                 "Error:Duplicate AttributeId hashvalue for $attribute->{id} "
+                     . "and $attrValHash{$attributeHexVal28bit}");
+            }
         }
-        $attrValHash{$attributeHexVal28bit}=1;
-        $enumeration->{enumerator}->[$attributeValue]->{name}
+        else
+        {
+            # add the name here so we can check for duplicate names
+            $attrValHash{$attributeHexVal28bit}= $attribute->{id};
+
+            $enumeration->{enumerator}->[$attributeValue]->{name}
             = $attribute->{id};
-        $enumeration->{enumerator}->[$attributeValue]->{value}
+            $enumeration->{enumerator}->[$attributeValue]->{value}
             = sprintf "0x%s",$attributeHexVal28bit;
-        $attribute->{value} = $attributeValue;
+            $attribute->{value} = $attributeValue;
+            $attributeValue++;
+        }
     }
 
     return $enumeration;
