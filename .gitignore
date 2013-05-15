@@ -1,5 +1,6 @@
 *.o
 *.list
+*.list.bz2
 *.dep
 *.o.hash
 *.gcno

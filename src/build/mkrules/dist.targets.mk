@@ -82,7 +82,7 @@ COPY_RENAME_FILES = \
     vbu_MURANO.pnor:img/vbu$(UNDERSCORE_TEST)_MURANO.pnor:vpo \
     vbu_VENICE.pnor:img/vbu$(UNDERSCORE_TEST)_VENICE.pnor:vpo \
     hbicore.syms:img/hbicore$(UNDERSCORE_TEST).syms:tools,vpo \
-    hbicore.list:img/hbicore$(UNDERSCORE_TEST).list:tools,vpo \
+    hbicore.list.bz2:img/hbicore$(UNDERSCORE_TEST).list.bz2:tools,vpo \
     hbicore.bin.modinfo:img/hbicore$(UNDERSCORE_TEST).bin.modinfo:tools,vpo \
     $(foreach file, $(call ROOTPATH_WILDCARD,src/build/debug/Hostboot/*.pm), \
 	Hostboot/$(notdir $(file)):$(file):tools,vpo)
@@ -144,7 +144,7 @@ simics.tar_CONTENTS = \
     $(addsuffix :Hostboot/, \
 	$(call ROOTPATH_WILDCARD,src/build/debug/Hostboot/*.pm)) \
     img/hbicore$(UNDERSCORE_TEST).syms \
-    img/hbicore$(UNDERSCORE_TEST).list \
+    img/hbicore$(UNDERSCORE_TEST).list.bz2 \
     img/hbicore$(UNDERSCORE_TEST).bin.modinfo \
     img/errlparser \
     img/isteplist.csv \

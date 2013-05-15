@@ -29,8 +29,8 @@ ifdef IMGS
 _IMGS = $(addprefix $(IMGDIR)/, $(IMGS))
 IMAGES += $(addsuffix .bin, $(_IMGS)) $(addsuffix .elf, $(_IMGS))
 
-IMAGE_PASS_BODY += $(addsuffix .list, $(_IMGS)) $(addsuffix .syms, $(_IMGS))
-CLEAN_TARGETS += $(addsuffix .list, $(_IMGS)) $(addsuffix .syms, $(_IMGS))
+IMAGE_PASS_BODY += $(addsuffix .list.bz2, $(_IMGS)) $(addsuffix .syms, $(_IMGS))
+CLEAN_TARGETS += $(addsuffix .list.bz2, $(_IMGS)) $(addsuffix .syms, $(_IMGS))
 
 define ELF_template
 $$(IMGDIR)/$(1).elf: $$(addprefix $$(OBJDIR)/, $$($(1)_OBJECTS)) \
@@ -54,11 +54,11 @@ $(IMGDIR)/%.bin: $(IMGDIR)/%.elf \
               | bzip2 -zc > $(IMGDIR)/.$*.lnkout
 	$(C1)$(ROOTPATH)/src/build/tools/addimgid $@ $<
 
-$(IMGDIR)/%.list $(IMGDIR)/%.syms: $(IMGDIR)/%.bin
+$(IMGDIR)/%.list.bz2 $(IMGDIR)/%.syms: $(IMGDIR)/%.bin
 	$(C2) "    GENLIST    $(notdir $*)"
 	$(C1)(cd $(ROOTPATH); \
               src/build/tools/gensyms $*.bin $*_extended.bin 0x40000000 \
                   > ./img/$*.syms ; \
-              src/build/tools/genlist $*.bin | bzip2 -zc > ./img/$*.list)
+              src/build/tools/genlist $*.bin | bzip2 -zc > ./img/$*.list.bz2)
 
 endif
