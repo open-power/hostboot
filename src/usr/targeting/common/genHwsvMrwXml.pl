@@ -422,91 +422,98 @@ our %pcie_list;
 
 foreach my $pcie_bus (@{$pcie_buses->{'pcie-bus'}})
 {
-    foreach my $lane_set (0,1)
+    if(!exists($pcie_bus->{'switch'}))
     {
-        $pcie_list{$pcie_bus->{source}->{'instance-path'}}->{$pcie_bus->
-                                        {source}->{iop}}->{$lane_set}->
-                                        {'lane-mask'} = 0;
-        $pcie_list{$pcie_bus->{source}->{'instance-path'}}->{$pcie_bus->
-                                        {source}->{iop}}->{$lane_set}->
-                                        {'dsmp-capable'} = 0;
-        $pcie_list{$pcie_bus->{source}->{'instance-path'}}->{$pcie_bus->
-                                        {source}->{iop}}->{$lane_set}->
-                                        {'lane-swap'} = 0;
-        $pcie_list{$pcie_bus->{source}->{'instance-path'}}->{$pcie_bus->
-                                        {source}->{iop}}->{$lane_set}->
-                                        {'lane-reversal'} = 0;
-        $pcie_list{$pcie_bus->{source}->{'instance-path'}}->{$pcie_bus->
-                                        {source}->{iop}}->{$lane_set}->
-                                        {'is-slot'} = 0;
+        foreach my $lane_set (0,1)
+        {
+            $pcie_list{$pcie_bus->{source}->{'instance-path'}}->{$pcie_bus->
+                                            {source}->{iop}}->{$lane_set}->
+                                            {'lane-mask'} = 0;
+            $pcie_list{$pcie_bus->{source}->{'instance-path'}}->{$pcie_bus->
+                                            {source}->{iop}}->{$lane_set}->
+                                            {'dsmp-capable'} = 0;
+            $pcie_list{$pcie_bus->{source}->{'instance-path'}}->{$pcie_bus->
+                                            {source}->{iop}}->{$lane_set}->
+                                            {'lane-swap'} = 0;
+            $pcie_list{$pcie_bus->{source}->{'instance-path'}}->{$pcie_bus->
+                                            {source}->{iop}}->{$lane_set}->
+                                            {'lane-reversal'} = 0;
+            $pcie_list{$pcie_bus->{source}->{'instance-path'}}->{$pcie_bus->
+                                            {source}->{iop}}->{$lane_set}->
+                                            {'is-slot'} = 0;
+        }
     }
 }
 
 foreach my $pcie_bus (@{$pcie_buses->{'pcie-bus'}})
 {
-
-    my $dsmp_capable = 0;
-    my $is_slot = 0;
-    if((exists($pcie_bus->{source}->{'dsmp-capable'}))&&
-      ($pcie_bus->{source}->{'dsmp-capable'} eq 'Yes'))
+    if(!exists($pcie_bus->{'switch'}))
     {
-
-        $dsmp_capable = 1;
-    }
-
-    if((exists($pcie_bus->{endpoint}->{'is-slot'}))&&
-      ($pcie_bus->{endpoint}->{'is-slot'} eq 'Yes'))
-    {
-
-        $is_slot = 1;
-    }
-    my $lane_set = 0;
-    if(($pcie_bus->{source}->{'lane-mask'} eq '0xFFFF')||
-       ($pcie_bus->{source}->{'lane-mask'} eq '0xFF00'))
-    {
-        $lane_set = 0;
-    }
-    else
-    {
-        if($pcie_bus->{source}->{'lane-mask'} eq '0x00FF')
+        my $dsmp_capable = 0;
+        my $is_slot = 0;
+        if((exists($pcie_bus->{source}->{'dsmp-capable'}))&&
+          ($pcie_bus->{source}->{'dsmp-capable'} eq 'Yes'))
         {
-            $lane_set = 1;
+    
+            $dsmp_capable = 1;
         }
-
+    
+        if((exists($pcie_bus->{endpoint}->{'is-slot'}))&&
+          ($pcie_bus->{endpoint}->{'is-slot'} eq 'Yes'))
+        {
+    
+            $is_slot = 1;
+        }
+        my $lane_set = 0;
+        if(($pcie_bus->{source}->{'lane-mask'} eq '0xFFFF')||
+           ($pcie_bus->{source}->{'lane-mask'} eq '0xFF00'))
+        {
+            $lane_set = 0;
+        }
+        else
+        {
+            if($pcie_bus->{source}->{'lane-mask'} eq '0x00FF')
+            {
+                $lane_set = 1;
+            }
+    
+        }
+        $pcie_list{$pcie_bus->{source}->{'instance-path'}}->
+            {$pcie_bus->{source}->{iop}}->{$lane_set}->{'lane-mask'} 
+                = $pcie_bus->{source}->{'lane-mask'};
+        $pcie_list{$pcie_bus->{source}->{'instance-path'}}->
+            {$pcie_bus->{source}->{iop}}->{$lane_set}->{'dsmp-capable'} 
+                = $dsmp_capable;
+        $pcie_list{$pcie_bus->{source}->{'instance-path'}}->
+            {$pcie_bus->{source}->{iop}}->{$lane_set}->{'lane-swap'} 
+                = oct($pcie_bus->{source}->{'lane-swap-bits'});
+        $pcie_list{$pcie_bus->{source}->{'instance-path'}}->
+            {$pcie_bus->{source}->{iop}}->{$lane_set}->{'lane-reversal'} 
+                = oct($pcie_bus->{source}->{'lane-reversal-bits'});
+        $pcie_list{$pcie_bus->{source}->{'instance-path'}}->
+            {$pcie_bus->{source}->{iop}}->{$lane_set}->{'is-slot'} = $is_slot;
     }
-    $pcie_list{$pcie_bus->{source}->{'instance-path'}}->{$pcie_bus->{source}->
-      {iop}}->{$lane_set}->{'lane-mask'} = $pcie_bus->{source}->{'lane-mask'};
-    $pcie_list{$pcie_bus->{source}->{'instance-path'}}->{$pcie_bus->{source}->
-      {iop}}->{$lane_set}->{'dsmp-capable'} = $dsmp_capable;
-    $pcie_list{$pcie_bus->{source}->{'instance-path'}}->{$pcie_bus->{source}->
-      {iop}}->{$lane_set}->{'lane-swap'} = oct($pcie_bus->{source}->
-      {'lane-swap-bits'});
-    $pcie_list{$pcie_bus->{source}->{'instance-path'}}->{$pcie_bus->{source}->
-      {iop}}->{$lane_set}->{'lane-reversal'} = oct($pcie_bus->{source}->
-      {'lane-reversal-bits'});
-    $pcie_list{$pcie_bus->{source}->{'instance-path'}}->{$pcie_bus->{source}->
-      {iop}}->{$lane_set}->{'is-slot'} = $is_slot;
-
 }
 our %bifurcation_list;
 foreach my $pcie_bus (@{$pcie_buses->{'pcie-bus'}})
 {
-    foreach my $lane_set (0,1)
+    if(!exists($pcie_bus->{'switch'}))
     {
-        $bifurcation_list{$pcie_bus->{source}->{'instance-path'}}->{$pcie_bus->
-                         {source}->{iop}}->{$lane_set}->{'lane-mask'}= 0;
-        $bifurcation_list{$pcie_bus->{source}->{'instance-path'}}->{$pcie_bus->
-                         {source}->{iop}}->{$lane_set}->{'lane-swap'}= 0;
-        $bifurcation_list{$pcie_bus->{source}->{'instance-path'}}->{$pcie_bus->
-                         {source}->{iop}}->{$lane_set}->{'lane-reversal'}= 0;
+        foreach my $lane_set (0,1)
+        {
+            $bifurcation_list{$pcie_bus->{source}->{'instance-path'}}->
+                {$pcie_bus->{source}->{iop}}->{$lane_set}->{'lane-mask'}= 0;
+            $bifurcation_list{$pcie_bus->{source}->{'instance-path'}}->
+                {$pcie_bus->{source}->{iop}}->{$lane_set}->{'lane-swap'}= 0;
+            $bifurcation_list{$pcie_bus->{source}->{'instance-path'}}->
+                {$pcie_bus->{source}->{iop}}->{$lane_set}->{'lane-reversal'}= 0;
+        }
     }
-
-
 }
 foreach my $pcie_bus (@{$pcie_buses->{'pcie-bus'}})
 {
-
-    if( exists($pcie_bus->{source}->{'bifurcation-settings'}))
+    if(   (!exists($pcie_bus->{'switch'}))
+       && (exists($pcie_bus->{source}->{'bifurcation-settings'})))
     {
         my $bi_cnt = 0;
         foreach my $bifurc (@{$pcie_bus->{source}->{'bifurcation-settings'}->
