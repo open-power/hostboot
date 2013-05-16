@@ -838,5 +838,74 @@ void*    call_proc_fab_iovalid( void    *io_pArgs )
     return l_StepError.getErrorHandle();
 }
 
+//
+//  function to unfence inter-enclosure abus links
+//
+errlHndl_t  smp_unfencing_inter_enclosure_abus_links()
+{
+    errlHndl_t l_errl = NULL;
+
+    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+               "smp_unfencing_inter_enclosure_abus_links entry" );
+
+    // Get all chip/chiplet targets
+    TARGETING::TargetHandleList l_cpuTargetList;
+    getAllChips(l_cpuTargetList, TYPE_PROC);
+
+    std::vector<proc_fab_iovalid_proc_chip> l_smp;
+
+    for (TargetHandleList::const_iterator l_cpu_iter = l_cpuTargetList.begin();
+         l_cpu_iter != l_cpuTargetList.end();
+         ++l_cpu_iter)
+    {
+        proc_fab_iovalid_proc_chip l_procEntry;
+
+        TARGETING::TargetHandle_t l_pTarget = *l_cpu_iter;
+        fapi::Target l_fapiproc_target(TARGET_TYPE_PROC_CHIP, l_pTarget);
+
+        l_procEntry.this_chip = l_fapiproc_target;
+        l_procEntry.a0 = false;
+        l_procEntry.a1 = false;
+        l_procEntry.a2 = false;
+        l_procEntry.x0 = false;
+        l_procEntry.x1 = false;
+        l_procEntry.x2 = false;
+        l_procEntry.x3 = false;
+
+        TARGETING::TargetHandleList l_abuses;
+        getChildChiplets( l_abuses, l_pTarget, TYPE_ABUS );
+
+        for (TargetHandleList::const_iterator l_abus_iter = l_abuses.begin();
+            l_abus_iter != l_abuses.end();
+            ++l_abus_iter)
+        {
+            TARGETING::TargetHandle_t l_pAbusTarget = *l_abus_iter;
+            ATTR_CHIP_UNIT_type l_srcID;
+            ATTR_IS_INTER_ENCLOSURE_BUS_type l_flag;
+            l_srcID = l_pAbusTarget->getAttr<ATTR_CHIP_UNIT>();
+            l_flag = l_pAbusTarget->getAttr<ATTR_IS_INTER_ENCLOSURE_BUS>();
+            switch (l_srcID)
+            {
+                case 0: l_procEntry.a0 = l_flag ? true : false; break;
+                case 1: l_procEntry.a1 = l_flag ? true : false; break;
+                case 2: l_procEntry.a2 = l_flag ? true : false; break;
+               default: break;
+            }
+        }
+
+        l_smp.push_back(l_procEntry);
+    }
+
+    FAPI_INVOKE_HWP( l_errl, proc_fab_iovalid, l_smp, true );
+
+    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                "%s : proc_fab_iovalid HWP.",
+                (l_errl ? "ERROR" : "SUCCESS"));
+
+    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+               "smp_unfencing_inter_enclosure_abus_links exit" );
+
+    return l_errl;
+}
 
 };   // end namespace

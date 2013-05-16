@@ -11964,4 +11964,28 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
     </hwpfToHbAttrMap>
 </attribute>
 
+<attribute>
+    <id>IS_INTER_ENCLOSURE_BUS</id>
+    <description>Indicate an inter-enclosure bus at this endpoint target.
+                 0 = No, 1 = Yes
+    </description>
+    <simpleType>
+        <uint8_t><default>0</default></uint8_t>
+    </simpleType>
+    <persistency>volatile</persistency>
+    <readable/>
+    <writeable/>
+</attribute>
+
+<attribute>
+    <id>PEER_PATH</id>
+    <description>Entity path of the peer target of an Abus
+    </description>
+    <nativeType>
+        <name>EntityPath</name>
+    </nativeType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+</attribute>
+
 </attributes>

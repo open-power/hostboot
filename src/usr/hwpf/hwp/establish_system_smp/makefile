@@ -37,6 +37,8 @@ EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/include
 
 ##  NOTE: add the base istep dir here.
 EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/establish_system_smp
+EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/edi_ei_initialization
+
 
 ##  Include sub dirs
 ##  NOTE: add a new EXTRAINCDIR when you add a new HWP

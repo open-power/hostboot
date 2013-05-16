@@ -224,6 +224,7 @@ const DepModInfo  g_istep18Dependancies = {
     {
         DEP_LIB(libestablish_system_smp.so),
         DEP_LIB(libtod_init.so),
+        DEP_LIB(libedi_ei_initialization.so),
         { 0 },
     }
 };

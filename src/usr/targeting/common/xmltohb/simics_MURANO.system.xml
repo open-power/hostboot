@@ -831,6 +831,10 @@
         <default>affinity:sys-0/node-0/proc-0/abus-0</default>
     </attribute>
     <attribute>
+        <id>PEER_PATH</id>
+        <default>physical:na</default>
+    </attribute>
+    <attribute>
         <id>CHIP_UNIT</id>
         <default>0</default>
     </attribute>
@@ -856,6 +860,10 @@
         <id>PEER_TARGET</id>
         <default>physical:sys-0/node-0/proc-2/abus-1</default>
     </attribute>
+    <attribute>
+        <id>PEER_PATH</id>
+        <default>physical:sys-0/node-0/proc-2/abus-1</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -876,6 +884,10 @@
     </attribute>
     <attribute>
         <id>PEER_TARGET</id>
+        <default>physical:sys-0/node-0/proc-2/abus-2</default>
+    </attribute>
+    <attribute>
+        <id>PEER_PATH</id>
         <default>physical:sys-0/node-0/proc-2/abus-2</default>
     </attribute>
 </targetInstance>
@@ -1526,6 +1538,10 @@
         <default>affinity:sys-0/node-0/proc-1/abus-0</default>
     </attribute>
     <attribute>
+        <id>PEER_PATH</id>
+        <default>physical:na</default>
+    </attribute>
+    <attribute>
         <id>CHIP_UNIT</id>
         <default>0</default>
     </attribute>
@@ -1551,6 +1567,10 @@
         <id>PEER_TARGET</id>
         <default>physical:sys-0/node-0/proc-3/abus-1</default>
     </attribute>
+    <attribute>
+        <id>PEER_PATH</id>
+        <default>physical:sys-0/node-0/proc-3/abus-1</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -1571,6 +1591,10 @@
     </attribute>
     <attribute>
         <id>PEER_TARGET</id>
+        <default>physical:sys-0/node-0/proc-3/abus-2</default>
+    </attribute>
+    <attribute>
+        <id>PEER_PATH</id>
         <default>physical:sys-0/node-0/proc-3/abus-2</default>
     </attribute>
 </targetInstance>
@@ -2220,6 +2244,10 @@
         <default>affinity:sys-0/node-0/proc-2/abus-0</default>
     </attribute>
     <attribute>
+        <id>PEER_PATH</id>
+        <default>physical:na</default>
+    </attribute>
+    <attribute>
         <id>CHIP_UNIT</id>
         <default>0</default>
     </attribute>
@@ -2245,6 +2273,10 @@
         <id>PEER_TARGET</id>
         <default>physical:sys-0/node-0/proc-0/abus-1</default>
     </attribute>
+    <attribute>
+        <id>PEER_PATH</id>
+        <default>physical:sys-0/node-0/proc-0/abus-1</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -2265,6 +2297,10 @@
     </attribute>
     <attribute>
         <id>PEER_TARGET</id>
+        <default>physical:sys-0/node-0/proc-0/abus-2</default>
+    </attribute>
+    <attribute>
+        <id>PEER_PATH</id>
         <default>physical:sys-0/node-0/proc-0/abus-2</default>
     </attribute>
 </targetInstance>
@@ -2915,6 +2951,10 @@
         <default>affinity:sys-0/node-0/proc-3/abus-0</default>
     </attribute>
     <attribute>
+        <id>PEER_PATH</id>
+        <default>physical:na</default>
+    </attribute>
+    <attribute>
         <id>CHIP_UNIT</id>
         <default>0</default>
     </attribute>
@@ -2940,6 +2980,10 @@
         <id>PEER_TARGET</id>
         <default>physical:sys-0/node-0/proc-1/abus-1</default>
     </attribute>
+    <attribute>
+        <id>PEER_PATH</id>
+        <default>physical:sys-0/node-0/proc-1/abus-1</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -2960,6 +3004,10 @@
     </attribute>
     <attribute>
         <id>PEER_TARGET</id>
+        <default>physical:sys-0/node-0/proc-1/abus-2</default>
+    </attribute>
+    <attribute>
+        <id>PEER_PATH</id>
         <default>physical:sys-0/node-0/proc-1/abus-2</default>
     </attribute>
 </targetInstance>

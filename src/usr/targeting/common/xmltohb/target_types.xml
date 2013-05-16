@@ -649,6 +649,8 @@
     <attribute><id>PEER_TARGET</id></attribute>
     <attribute><id>EI_BUS_TX_LANE_INVERT</id></attribute>
     <attribute><id>EI_BUS_TX_MSBSWAP</id></attribute>
+    <attribute><id>IS_INTER_ENCLOSURE_BUS</id></attribute>
+    <attribute><id>PEER_PATH</id></attribute>
 </targetType>
 
 <targetType>

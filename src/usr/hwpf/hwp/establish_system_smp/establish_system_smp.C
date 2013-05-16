@@ -51,6 +51,7 @@
 
 //  targeting support
 #include    <targeting/common/commontargeting.H>
+#include    <smp_unfencing_inter_enclosure_abus_links.H>
 
 //  fapi support
 #include    <fapi.H>
@@ -68,7 +69,7 @@ using   namespace   ISTEP;
 using   namespace   ISTEP_ERROR;
 using   namespace   TARGETING;
 using   namespace   fapi;
-
+using   namespace   EDI_EI_INITIALIZATION;
 
 //
 //  Wrapper function to call host_coalesce_host
@@ -165,10 +166,8 @@ void host_sys_fab_iovalid_processing( msg_t* io_pMsg )
         TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
                   "$TODO RTC:63128 - hb instances exchange and agree on cfg");
 
-        // $TODO RTC:63132 after agreement, open abuses as required
-        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                  "$TODO RTC:63132 - open the required A-busses "
-                  " after agreement is reached");
+        // after agreement, open abuses as required
+        l_errl = smp_unfencing_inter_enclosure_abus_links();
 
         // release the storage from the message
         free(io_pMsg->extra_data);

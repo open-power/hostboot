@@ -2227,6 +2227,27 @@ sub generate_ax_buses
         <id>PEER_TARGET</id>
         <default>physical:sys-$sys/node-$p_node/proc-$p_proc/"
             . "${type}bus-$p_port</default>
+    </attribute>
+    <attribute>
+        <id>PEER_PATH</id>
+        <default>physical:sys-$sys/node-$p_node/proc-$p_proc/"
+            . "${type}bus-$p_port</default>
+    </attribute>";
+            if (($node != $p_node) && ($type eq "A"))
+            {
+               print "
+    <attribute>
+        <id>IS_INTER_ENCLOSURE_BUS</id>
+        <default>1</default>
+    </attribute>";
+            }
+        }
+        else
+        {
+            print "
+    <attribute>
+        <id>PEER_PATH</id>
+        <default>physical:na</default>
     </attribute>";
         }
 

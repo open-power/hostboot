@@ -1180,13 +1180,17 @@
     <id>sys0node0proc0abus0</id>
     <type>unit-abus-venice</type>
     <attribute><id>HUID</id><default>0x000F0000</default></attribute>
-        <attribute>
+    <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/abus-0</default>
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/abus-0</default>
+    </attribute>
+    <attribute>
+        <id>PEER_PATH</id>
+        <default>physical:na</default>
     </attribute>
     <attribute>
         <id>CHIP_UNIT</id>
@@ -1206,13 +1210,17 @@
     <id>sys0node0proc0abus1</id>
     <type>unit-abus-venice</type>
     <attribute><id>HUID</id><default>0x000F0001</default></attribute>
-        <attribute>
+    <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/abus-1</default>
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/abus-1</default>
+    </attribute>
+    <attribute>
+        <id>PEER_PATH</id>
+        <default>physical:na</default>
     </attribute>
     <attribute>
         <id>CHIP_UNIT</id>
@@ -1232,13 +1240,17 @@
     <id>sys0node0proc0abus2</id>
     <type>unit-abus-venice</type>
     <attribute><id>HUID</id><default>0x000F0002</default></attribute>
-        <attribute>
+    <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/abus-2</default>
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/abus-2</default>
+    </attribute>
+    <attribute>
+        <id>PEER_PATH</id>
+        <default>physical:na</default>
     </attribute>
     <attribute>
         <id>CHIP_UNIT</id>
@@ -2281,13 +2293,17 @@
     <id>sys0node0proc1abus0</id>
     <type>unit-abus-venice</type>
     <attribute><id>HUID</id><default>0x000F0003</default></attribute>
-        <attribute>
+    <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-1/abus-0</default>
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-1/abus-0</default>
+    </attribute>
+    <attribute>
+        <id>PEER_PATH</id>
+        <default>physical:na</default>
     </attribute>
     <attribute>
         <id>CHIP_UNIT</id>
@@ -2299,7 +2315,7 @@
     <id>sys0node0proc1abus1</id>
     <type>unit-abus-venice</type>
     <attribute><id>HUID</id><default>0x000F0004</default></attribute>
-        <attribute>
+    <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-1/abus-1</default>
     </attribute>
@@ -2307,6 +2323,10 @@
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-1/abus-1</default>
     </attribute> 
+    <attribute>
+        <id>PEER_PATH</id>
+        <default>physical:na</default>
+    </attribute>
     <attribute>
         <id>CHIP_UNIT</id>
         <default>1</default>
@@ -2317,13 +2337,17 @@
     <id>sys0node0proc1abus2</id>
     <type>unit-abus-venice</type>
     <attribute><id>HUID</id><default>0x000F0005</default></attribute>
-        <attribute>
+    <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-1/abus-2</default>
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-1/abus-2</default>
+    </attribute>
+    <attribute>
+        <id>PEER_PATH</id>
+        <default>physical:na</default>
     </attribute>
     <attribute>
         <id>CHIP_UNIT</id>
