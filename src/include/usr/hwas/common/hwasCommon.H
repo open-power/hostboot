@@ -35,6 +35,7 @@
 #include <targeting/common/target.H>
 #include <targeting/common/targetservice.H>
 #include <hwas/common/hwasError.H>
+#include <hwas/common/hwasCallout.H>
 
 // platform specific headers
 
@@ -59,11 +60,11 @@ namespace HWAS
 bool platSystemIsAtRuntime();
 
 /**
- *@brief platform specific code to determine if the targets in the
- *  input list are present or not. If the target is NOT present,
- *  target should be erased from the list
+ * @brief platform specific code to determine if the targets in the
+ *  input list are present or not. If a target is NOT present, it is erased
+ *  from the list
  *
- *@param[in]  io_targets   TargetHandleList of targets to check for presence
+ * @param[in]  io_targets   TargetHandleList of targets to check for presence
  *
  * @return errlHndl_t       valid errlHndl_t handle if there was an error
  *                          NULL if no errors;
@@ -202,13 +203,57 @@ const uint32_t EMPTY_GARD_VALUE=0xFF;
 
 /**
  * @brief wrapper function to create new errlog in platform-specific manner.
+ *
+ * @param[in] i_sev        Severity
+ * @param[in] i_modId      Module ID   (from HwasModuleID enum)
+ * @param[in] i_reasonCode Reason Code (from HwasReasonCode enum)
+ * @param[in] i_user1      User Data 1 (defaults to zero)
+ * @param[in] i_user2      User Data 2 (defaults to zero)
+ *
+ * @return errlHndl_t handle pointing to newly created error log
  */
 errlHndl_t hwasError(const uint8_t i_sev,
-              const uint8_t i_modId,
-              const uint16_t i_reasonCode,
-              const uint64_t i_user1 = 0,
-              const uint64_t i_user2 = 0);
+                     const uint8_t i_modId,
+                     const uint16_t i_reasonCode,
+                     const uint64_t i_user1 = 0,
+                     const uint64_t i_user2 = 0);
 
+/**
+ * @brief wrapper function to add a procedure callout to an error log in a
+ *  platform-specific manner.
+ *
+ * @param[io] io_errl     Reference to error log handle. Updated with callout
+ * @param[in] i_procedure Procedure to callout
+ * @param[in] i_priority  Callout Priority
+ */
+void hwasErrorAddProcedureCallout(errlHndl_t & io_errl,
+                                  const HWAS::epubProcedureID i_procedure,
+                                  const HWAS::callOutPriority i_priority);
+
+/**
+ * @brief wrapper function to update the plid in a platform-specific manner.
+ *
+ * If io_plid is non-zero then io_errl is updated with io_plid
+ * Else io_plid is updated with the plid in io_errl
+ *
+ * @param[io] io_errl Reference to error log handle.
+ * @param[io] io_plid Reference to plid.
+ */
+void hwasErrorUpdatePlid(errlHndl_t & io_errl,
+                         uint32_t & io_plid);
+
+/**
+ * @brief Platform-specific checks for minimum hardware.
+ *  Verifies that the system has enough hardware to proceed through
+ *  the IPL. If it does not, error log(s) will be created and committed
+ *  for each problem.
+ *
+ * If io_plid is non-zero then any newly created Error Logs use io_plid
+ * Else io_plid is updated with the plid used in the newly created Error Logs
+ *
+ * @param[io] io_plid Reference to plid.
+ */
+void platCheckMinimumHardware(uint32_t & io_plid);
 
 } // namespace HWAS
 

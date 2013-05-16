@@ -31,6 +31,7 @@ namespace HWAS
         MOD_PROCESS_CALLOUT       = 0x02,
         MOD_HOST_DISCOVER_TARGETS = 0x03,
         MOD_HOST_GARD             = 0x04,
+        MOD_SYS_AVAIL_SVC         = 0x05,
     };
 
     enum HwasReasonCode
@@ -43,7 +44,21 @@ namespace HWAS
         RC_TARGET_NOT_FOUND_FOR_GARD_RECORD = 0x04,
         RC_INVALID_TARGET                   = 0x05,
         RC_TOP_LEVEL_TARGET_NULL            = 0x06,
-        // if more are added, modify each hwasPlatError.C file as appropriate.
+        //
+        //  System Availability Service codes
+        //  The first is a blanket error that will be returned to the caller,
+        //      further errors will be committed in the routine.
+        //
+        RC_SYSAVAIL_INSUFFICIENT_HW         = 0x10,
+        //  common with FSP
+        RC_SYSAVAIL_NO_CORES_FUNC           = 0x11,
+        RC_SYSAVAIL_NO_MEMORY_FUNC          = 0x12,
+        //  fsp only
+        RC_SYSAVAIL_NO_PROCS_FUNC           = 0x13,
+        RC_SYSAVAIL_NO_PROC_CLOCKS_FUNC     = 0x14,
+        RC_SYSAVAIL_NO_MEM_CLOCKS_FUNC      = 0x15,
+        RC_SYSAVAIL_NO_TOD_CLOCKS_FUNC      = 0x16,
+        // For each new reason code, update FSP's hwasPlatError.C file
     };
 };
 

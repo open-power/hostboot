@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012                   */
+/* COPYRIGHT International Business Machines Corp. 2012,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -47,5 +47,28 @@ errlHndl_t hwasError(const uint8_t i_sev,
                     i_user1, i_user2);
     return l_pErr;
 }
+
+void hwasErrorAddProcedureCallout(errlHndl_t                & io_errl,
+                                  const HWAS::epubProcedureID i_procedure,
+                                  const HWAS::callOutPriority i_priority)
+{
+    io_errl->addProcedureCallout(i_procedure,
+                                 i_priority);
+}
+
+void hwasErrorUpdatePlid(errlHndl_t & io_errl,
+                         uint32_t & io_plid)
+{
+
+    if (io_plid != 0)
+    {
+        io_errl->plid(io_plid) ;
+    }
+    else
+    {
+        io_plid = io_errl->plid();
+    }
+}
+
 
 } // namespace HWAS

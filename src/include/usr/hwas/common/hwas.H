@@ -105,6 +105,20 @@ errlHndl_t restrictEXunits(
     std::vector <procRestrict_t> &i_procRestrict,
     bool i_present);
 
+/**
+ * @brief Verifies that the system has enough hardware to proceed through
+ *  the IPL.
+ *  This function contains checks that are COMMON between HWSV and HB.
+ *  platform-specific checks will be called by platCheckMinimimHardware(),
+ *  see hwasCommon.H .
+ *  If it cannot find minimum hardware, an error will be created and returned.
+ *  Error logs will also be created for each hardware module that is not
+ *  running.
+ *
+ * @return error log handle
+ */
+errlHndl_t checkMinimumHardware();
+
 };   // end namespace
 
 #endif

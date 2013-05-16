@@ -40,6 +40,9 @@
 
 #include <pnor/pnorif.H>
 
+#include <hwas/common/hwas_reasoncodes.H>
+#include <targeting/common/utilFilter.H>
+
 namespace HWAS
 {
 
@@ -449,6 +452,17 @@ void GardAddress::flush()
 GardAddress::~GardAddress()
 {
     flush();
+}
+
+
+//******************************************************************************
+//  platCheckMinimumHardware()
+//      Don't forget to add a procedure callout and update the common plid
+//      if you add something here.
+//******************************************************************************
+void platCheckMinimumHardware(uint32_t & io_plid)
+{
+    //  nothing to do yet...
 }
 
 } // namespace HWAS

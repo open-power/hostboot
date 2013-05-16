@@ -34,6 +34,8 @@
 #include <hwas/common/hwas_reasoncodes.H>
 #include <targeting/common/utilFilter.H>
 
+#include <hwas/common/hwas.H>                   // checkMinimumHardware()
+
 // Trace definition
 #define __COMP_TD__ g_trac_deconf
 
@@ -308,6 +310,14 @@ errlHndl_t DeconfigGard::deconfigureTargetsFromGardRecordsForIpl(
             // Deconfigure other Targets by association
             _deconfigureByAssoc(*l_pTarget, (*l_itr).iv_errlogPlid);
         } // for
+
+        //  check and see if we still have enough hardware to continue
+        l_pErr  =   checkMinimumHardware();
+        if ( l_pErr )
+        {
+            HWAS_ERR("Error from checkMinimumHardware ");
+            break;
+        }
     }
     while (0);
 
@@ -419,7 +429,10 @@ errlHndl_t DeconfigGard::processFieldCoreOverride()
             HWAS_INF("FCO: calling restrictEXunits with %d entries",
                     l_procRestrictList.size());
             l_pErr = restrictEXunits(l_procRestrictList, true);
-            break;
+            if (l_pErr)
+            {
+                break;
+            }
         } // for pNode_it
     }
     while (0);
@@ -489,9 +502,18 @@ errlHndl_t DeconfigGard::deconfigureTarget(TARGETING::Target & i_target,
         _deconfigureByAssoc(i_target, i_errlPlid);
 
         HWAS_MUTEX_UNLOCK(iv_mutex);
-    }
 
+        //  check and see if we still have enough hardware to continue
+        l_pErr  =   checkMinimumHardware();
+        if ( l_pErr )
+        {
+            HWAS_ERR("Error from checkMinimumHardware ");
+            break;
+        }
+
+    }
     while (0);
+
     return l_pErr;
 }
 
