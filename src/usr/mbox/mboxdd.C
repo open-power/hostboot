@@ -1,26 +1,25 @@
-/*  IBM_PROLOG_BEGIN_TAG
- *  This is an automatically generated prolog.
- *
- *  $Source: src/usr/mbox/mboxdd.C $
- *
- *  IBM CONFIDENTIAL
- *
- *  COPYRIGHT International Business Machines Corp. 2012
- *
- *  p1
- *
- *  Object Code Only (OCO) source materials
- *  Licensed Internal Code Source Materials
- *  IBM HostBoot Licensed Internal Code
- *
- *  The source code for this program is not published or other-
- *  wise divested of its trade secrets, irrespective of what has
- *  been deposited with the U.S. Copyright Office.
- *
- *  Origin: 30
- *
- *  IBM_PROLOG_END_TAG
- */
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/usr/mbox/mboxdd.C $                                       */
+/*                                                                        */
+/* IBM CONFIDENTIAL                                                       */
+/*                                                                        */
+/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/*                                                                        */
+/* p1                                                                     */
+/*                                                                        */
+/* Object Code Only (OCO) source materials                                */
+/* Licensed Internal Code Source Materials                                */
+/* IBM HostBoot Licensed Internal Code                                    */
+/*                                                                        */
+/* The source code for this program is not published or otherwise         */
+/* divested of its trade secrets, irrespective of what has been           */
+/* deposited with the U.S. Copyright Office.                              */
+/*                                                                        */
+/* Origin: 30                                                             */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
 #include "mboxdd.H"
 #include <mbox/mboxif.H>
 #include <mbox/mbox_reasoncodes.H>
@@ -387,6 +386,10 @@ errlHndl_t mboxWrite(TARGETING::Target* i_target,void* i_buffer,
                                             MBOX::RC_INVALID_LENGTH,
                                             TARGETING::get_huid(i_target),
                                             TO_UINT64(i_buflen));
+
+            l_err->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
+                                       HWAS::SRCI_PRIORITY_HIGH);
+
             l_err->collectTrace("MBOX",1024);
 
             // Set the i_buflen to 0 to indicate no write occured
@@ -518,6 +521,12 @@ errlHndl_t mboxWrite(TARGETING::Target* i_target,void* i_buffer,
                                             MBOX::RC_MSG_PENDING,
                                             TARGETING::get_huid(i_target),
                                             reinterpret_cast<uint64_t>(l_64bitBuf));
+
+            l_err->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
+                                       HWAS::SRCI_PRIORITY_HIGH);
+
+            // Set the i_buflen to 0 to indicate no write occured
+            i_buflen = 0;
             l_err->collectTrace("MBOX",1024);
             break;
         }

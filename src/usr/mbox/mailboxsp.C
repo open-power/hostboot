@@ -129,6 +129,9 @@ errlHndl_t MailboxSp::_init()
              0
             );
 
+        err->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
+                                 HWAS::SRCI_PRIORITY_HIGH);
+
         return err;
     }
 
@@ -371,6 +374,9 @@ void MailboxSp::msgHandler()
                      0
                     );
 
+                err->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
+                                         HWAS::SRCI_PRIORITY_HIGH);
+
                 errlCommit(err,MBOX_COMP_ID);
                 err = NULL;
 
@@ -426,6 +432,9 @@ void MailboxSp::handleNewMessage(msg_t * i_msg)
                  i_msg->data[0],                   // queue id
                  payload->type                     // message type
                 );
+
+            err->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
+                                     HWAS::SRCI_PRIORITY_HIGH);
 
             i_msg->data[1] = reinterpret_cast<uint64_t>(err);
 
@@ -582,6 +591,9 @@ void MailboxSp::send_msg(mbox_msg_t * i_msg)
                          payload->data[1],                 // DMA data len
                          iv_msg_to_send.msg_queue_id       // MSG queueid
                         );
+
+                    err->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
+                                             HWAS::SRCI_PRIORITY_HIGH);
 
                     send_msg();  // drop this message, but send next message
                 }
@@ -753,6 +765,9 @@ void MailboxSp::recv_msg(mbox_msg_t & i_mbox_msg)
                          i_mbox_msg.msg_queue_id
                         );
 
+                    err->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
+                                             HWAS::SRCI_PRIORITY_HIGH);
+
                     UserDetailsMboxMsg
                         ffdc(reinterpret_cast<uint64_t*>(&i_mbox_msg),
                              sizeof(mbox_msg_t),
@@ -817,6 +832,9 @@ void MailboxSp::recv_msg(mbox_msg_t & i_mbox_msg)
                      i_mbox_msg.msg_queue_id,            // rc from msg_send
                      msg->type
                     );
+
+                err->addProcedureCallout(HWAS::EPUB_PRC_SP_CODE,
+                                         HWAS::SRCI_PRIORITY_HIGH);
 
                 UserDetailsMboxMsg
                     ffdc(reinterpret_cast<uint64_t*>(&i_mbox_msg),
@@ -908,6 +926,9 @@ void MailboxSp::handle_hbmbox_msg(mbox_msg_t & i_mbox_msg)
              bad_msg->type
             );
 
+        err->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
+                                 HWAS::SRCI_PRIORITY_HIGH);
+
         UserDetailsMboxMsg
             ffdc(reinterpret_cast<uint64_t*>(&i_mbox_msg),
                  sizeof(mbox_msg_t),
@@ -970,6 +991,8 @@ void MailboxSp::handle_hbmbox_msg(mbox_msg_t & i_mbox_msg)
              i_mbox_msg.msg_queue_id
             );
 
+        err->addProcedureCallout(HWAS::EPUB_PRC_SP_CODE,
+                                 HWAS::SRCI_PRIORITY_HIGH);
         UserDetailsMboxMsg
             ffdc(reinterpret_cast<uint64_t*>(&i_mbox_msg),
                  sizeof(mbox_msg_t),
@@ -1078,6 +1101,9 @@ errlHndl_t MailboxSp::send(queue_id_t i_q_id, msg_t * io_msg)
                  i_q_id                                  //  msg queue id
                 );
 
+            err->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
+                                     HWAS::SRCI_PRIORITY_HIGH);
+
             // This Trace has the msg
             err->collectTrace(MBOXMSG_TRACE_NAME);
         }
@@ -1102,6 +1128,9 @@ errlHndl_t MailboxSp::send(queue_id_t i_q_id, msg_t * io_msg)
              i_q_id,                                 //  queue id
              0                                       //
             );
+
+        err->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
+                                 HWAS::SRCI_PRIORITY_HIGH);
     }
 
     return err;
@@ -1163,6 +1192,9 @@ errlHndl_t MailboxSp::msgq_register(queue_id_t i_queue_id, msg_q_t i_msgQ)
                  i_queue_id,
                  0
                 );
+
+            err->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
+                                     HWAS::SRCI_PRIORITY_HIGH);
         }
     }
     return err;
@@ -1288,6 +1320,9 @@ errlHndl_t MailboxSp::handleInterrupt()
                      0
                     );
 
+                err->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
+                                         HWAS::SRCI_PRIORITY_HIGH);
+
                 err->collectTrace(MBOX_TRACE_NAME);
                 err->collectTrace(MBOXMSG_TRACE_NAME);
                 // return err
@@ -1315,6 +1350,11 @@ errlHndl_t MailboxSp::handleInterrupt()
                      0
                     );
 
+                err->addHwCallout(iv_trgt,
+                                  HWAS::SRCI_PRIORITY_HIGH,
+                                  HWAS::NO_DECONFIG,
+                                  HWAS::GARD_NULL);
+
                 err->collectTrace(MBOX_TRACE_NAME);
                 errlCommit(err,MBOX_COMP_ID);
             }
@@ -1340,6 +1380,18 @@ errlHndl_t MailboxSp::handleInterrupt()
                      mbox_status,            //  Status from DD
                      0
                     );
+
+                err->addProcedureCallout(HWAS::EPUB_PRC_SP_CODE,
+                                         HWAS::SRCI_PRIORITY_HIGH);
+
+                err->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
+                                         HWAS::SRCI_PRIORITY_HIGH);
+
+                err->addHwCallout(iv_trgt,
+                                  HWAS::SRCI_PRIORITY_LOW,
+                                  HWAS::NO_DECONFIG,
+                                  HWAS::GARD_NULL);
+
                 err->collectTrace(MBOX_TRACE_NAME);
                 errlCommit(err,MBOX_COMP_ID);
             }
@@ -1666,6 +1718,8 @@ errlHndl_t MBOX::send(queue_id_t i_q_id, msg_t * i_msg,int i_node)
                      q_handle                               //  msg queue id
                     );
 
+                err->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
+                                         HWAS::SRCI_PRIORITY_HIGH);
                 // This Trace has the msg
                 err->collectTrace(MBOXMSG_TRACE_NAME);
             }
@@ -1690,6 +1744,9 @@ errlHndl_t MBOX::send(queue_id_t i_q_id, msg_t * i_msg,int i_node)
                  i_q_id,                                 //  queue id
                  i_node                                  //
                 );
+
+            err->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
+                                     HWAS::SRCI_PRIORITY_HIGH);
         }
     }
     return err;
@@ -1755,6 +1812,9 @@ errlHndl_t MBOX::msgq_register(queue_id_t i_queue_id, msg_q_t i_msgQ)
              i_queue_id,
              0
             );
+
+        err->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
+                                 HWAS::SRCI_PRIORITY_HIGH);
     }
 
     return err;
@@ -1899,7 +1959,8 @@ errlHndl_t MBOX::makeErrlMsgQSendFail(uint64_t i_errno)
              0
             );
 
-        err->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,                                                                                               HWAS::SRCI_PRIORITY_HIGH);
+        err->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
+                                 HWAS::SRCI_PRIORITY_HIGH);
         
         return err;
 }
