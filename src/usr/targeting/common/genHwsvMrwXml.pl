@@ -165,7 +165,7 @@ foreach my $i (@{$SystemAttrs->{'required-policy-settings'}})
                        $i->{"a-erepair-threshold-mnfg"},
                        "DMI_EREPAIR_THRESHOLD_MNFG",
                        $i->{"dmi-erepair-threshold-mnfg"},
-                       "MRW_SAFEMODE_W_SAFEMODE_MEM_THROTTLE_NUMERATOR_PER_MBA",
+                       "MRW_SAFEMODE_MEM_THROTTLE_NUMERATOR_PER_MBA",
                        $i->{"safemode_mem_throttle_numerator_per_mba"},
                        "MRW_SAFEMODE_MEM_THROTTLE_DENOMINATOR",
                        $i->{"safemode_mem_throttle_denominator"},
