@@ -62,8 +62,20 @@ uint16_t MfgThresholdMgr::getThreshold(uint32_t i_thrName)
 ThresholdResolution::ThresholdPolicy*
     MfgThresholdMgr::getThresholdP(uint32_t i_thrName)
 {
-    ThresholdResolution::ThresholdPolicy
-        l_policy(getThreshold(i_thrName), 0xffffffff );
+    uint16_t threshold = getThreshold(i_thrName);
+    uint32_t interval = ThresholdResolution::NONE;
+
+    // FIXME - RTC: 72403 will address this issue
+    // if threshold >= 255 then set the interval to a very
+    // small number which will make it an infinite threshold
+    if( 255 <= threshold )
+    {
+        PRDF_TRAC("MfgThresholdMgr::getThresholdP: "
+                  "infinite threshold: 0x%x", i_thrName);
+        interval = ThresholdResolution::ONE_SEC;
+    }
+
+    ThresholdResolution::ThresholdPolicy l_policy( threshold, interval );
 
     return &(iv_thrs.get(l_policy));
 }
