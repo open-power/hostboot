@@ -22,7 +22,7 @@
 # IBM_PROLOG_END_TAG
 ROOTPATH = ../../..
 
-CODE_PASS_BODY += linker
+CODE_PASS_POST += linker
 CLEAN_TARGETS += linker
 
 include $(ROOTPATH)/config.mk

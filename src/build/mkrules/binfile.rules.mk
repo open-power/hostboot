@@ -41,7 +41,7 @@ ifdef BINARY_FILES
 #    files cache.
 #
 define __BINARY_CACHE_FILE
-GEN_PASS_BODY += $(1)
+GEN_PASS_POST += $(1)
 CLEAN_TARGETS += $(1)
 
 ifneq "$(wildcard $(addprefix $(BINFILE_CACHE_LOCALDIR),$(2)))" ""

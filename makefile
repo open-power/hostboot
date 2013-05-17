@@ -23,12 +23,12 @@
 SUBDIRS = src.d
 ROOTPATH = .
 
-IMAGE_PASS_BODY += $(GENDIR)/hwp_id.html
+IMAGE_PASS_POST += $(GENDIR)/hwp_id.html
 CLEAN_TARGETS   += $(GENDIR)/hwp_id.html
 ifndef BUILD_MINIMAL
-IMAGE_PASS_BODY += cscope ctags
+IMAGE_PASS_POST += cscope ctags
 endif
-IMAGE_PASS_BODY += check_istep_modules
+IMAGE_PASS_POST += check_istep_modules
 
 include ./config.mk
 

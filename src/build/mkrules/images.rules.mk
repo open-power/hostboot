@@ -29,7 +29,7 @@ ifdef IMGS
 _IMGS = $(addprefix $(IMGDIR)/, $(IMGS))
 IMAGES += $(addsuffix .bin, $(_IMGS)) $(addsuffix .elf, $(_IMGS))
 
-IMAGE_PASS_BODY += $(addsuffix .list.bz2, $(_IMGS)) $(addsuffix .syms, $(_IMGS))
+IMAGE_PASS_POST += $(addsuffix .list.bz2, $(_IMGS)) $(addsuffix .syms, $(_IMGS))
 CLEAN_TARGETS += $(addsuffix .list.bz2, $(_IMGS)) $(addsuffix .syms, $(_IMGS))
 
 define ELF_template

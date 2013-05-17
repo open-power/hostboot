@@ -95,9 +95,9 @@ hbicore_test_MODULES = ${hbicore_MODULES}
 hbicore_test_EXTENDED_MODULES = ${hbicore_EXTENDED_MODULES} ${TESTCASE_MODULES}
 hbicore_test_DATA_MODULES = ${hbicore_DATA_MODULES} testdata
 
-IMAGE_PASS_BODY += buildpnor imgsizecheck
+IMAGE_PASS_POST += buildpnor imgsizecheck
 
-IMAGE_PASS_BODY += $(IMGDIR)/hbotStringFile
+IMAGE_PASS_POST += $(IMGDIR)/hbotStringFile
 CLEAN_TARGETS += $(IMGDIR)/hbotStringFile
 
 include ${ROOTPATH}/config.mk
