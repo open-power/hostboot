@@ -117,6 +117,7 @@ fapi::ReturnCode MBvpdKeywordXlate(const fapi::MBvpdKeyword i_fapiKeyword,
         CVPD::LM,
         CVPD::MW,
         CVPD::MV,
+        CVPD::AM,
     };
     const uint8_t NUM_MBVPD_KEYWORDS =
      sizeof(mbvpdFapiKeywordToHbKeyword)/sizeof(mbvpdFapiKeywordToHbKeyword[0]);

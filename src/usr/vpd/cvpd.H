@@ -92,6 +92,7 @@ namespace CVPD
         { LM,  "LM" },
         { MW,  "MW" },
         { MV,  "MV" },
+        { AM,  "AM" },
         // -------------------------------------------------------------------
         // DO NOT USE!!  This is for test purposes ONLY!
         { CVPD_TEST_KEYWORD, "XX" },

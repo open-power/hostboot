@@ -34,6 +34,7 @@
 #include <hwpf/fapi/fapiTarget.H>
 #include <hwpf/fapi/fapiHwpExecutor.H>
 #include <targeting/common/targetservice.H>
+#include <targeting/common/predicates/predicatectm.H>
 #include <targeting/common/utilFilter.H>
 #include <errl/errlentry.H>
 #include <hwpf/plat/fapiPlatAttributeService.H>
@@ -42,6 +43,7 @@
 #include <devicefw/driverif.H>
 #include <hwpf/hwp/mvpd_accessors/getMvpdExL2SingleMemberEnable.H>
 #include <hwpf/hwp/mvpd_accessors/getMBvpdPhaseRotatorData.H>
+#include <hwpf/hwp/mvpd_accessors/getMBvpdAddrMirrorData.H>
 
 // The following file checks at compile time that all HWPF attributes are
 // handled by Hostboot. This is done to ensure that the HTML file listing
@@ -1214,6 +1216,78 @@ fapi::ReturnCode fapiPlatGetPhaseRotatorData (
     // Call a VPD Accessor HWP to get the data
     fapi::ReturnCode l_rc;
     FAPI_EXEC_HWP(l_rc, getMBvpdPhaseRotatorData, *i_pTarget, i_attr, o_val);
+    return l_rc;
+}
+
+fapi::ReturnCode fapiPlatGetAddrMirrorData (
+             const fapi::Target * i_pFapiTarget,
+             uint8_t    &o_val )
+{
+    fapi::ReturnCode l_rc;
+    TARGETING::Target * l_pTarget = NULL;
+    TARGETING::TargetHandleList l_mbaList;
+    uint8_t l_val[2][2] = {{0xFF,0xFF},{0xFF,0xFF}};
+
+    do {
+        // Get the Targeting Target
+        l_rc = getTargetingTarget(i_pFapiTarget, l_pTarget);
+        if (l_rc)
+        {
+            FAPI_ERR("fapiPlatGetAddrMirrorData:Error from getTargetingTarget");
+            break;
+        }
+
+        // Find the port and DIMM position
+        TARGETING::ATTR_MBA_PORT_type l_portPos =
+                          l_pTarget->getAttr<TARGETING::ATTR_MBA_PORT>();
+        TARGETING::ATTR_MBA_DIMM_type l_dimmPos =
+                          l_pTarget->getAttr<TARGETING::ATTR_MBA_DIMM>();
+
+        // Find MBA target from DIMM target
+        getParentAffinityTargets (l_mbaList, l_pTarget, TARGETING::CLASS_UNIT,
+                                  TARGETING::TYPE_MBA, false);
+
+        if (l_mbaList.size () != 1 )
+        {
+            FAPI_ERR("fapiPlatGetAddrMirrorData: expect 1 mba %d ",
+               l_mbaList.size());
+
+            /*@
+             * @errortype
+             * @moduleid     fapi::MOD_PLAT_ATTR_SVC_GET_TARG_ATTR
+             * @reasoncode   fapi::RC_NO_SINGLE_MBA
+             * @userdata1    Number of MBAs
+             * @devdesc      fapiPlatGetAddrMirrorData could not find the
+             *               expected 1 mba from the passed dimm target
+             */
+            errlHndl_t l_pError = new ERRORLOG::ErrlEntry(
+                ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                fapi::MOD_PLAT_ATTR_SVC_GET_TARG_ATTR,
+                fapi::RC_NO_SINGLE_MBA,
+                l_mbaList.size());
+
+            // Attach the error log to the fapi::ReturnCode
+            l_rc.setPlatError(reinterpret_cast<void *> (l_pError));
+            break;
+        }
+
+        // Get the Fapi Target
+        fapi::Target l_fapiTarget(TARGET_TYPE_MBA_CHIPLET,
+                    static_cast<void *>(l_mbaList[0]));
+
+        // Get the data using the HWP accessor
+        FAPI_EXEC_HWP(l_rc, getMBvpdAddrMirrorData, l_fapiTarget, l_val);
+        if (l_rc)
+        {
+            FAPI_ERR("fapiPlatGetAddrMirrorData:"
+                     " Error from getMBvpdAddrMirrorData");
+            break;
+        }
+
+        // return the address mirroring data for the passed DIMM
+        o_val = l_val[l_portPos][l_dimmPos];
+
+    } while (0);
     return l_rc;
 }
 

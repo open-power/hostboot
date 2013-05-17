@@ -59,6 +59,7 @@ namespace CVPD
         LM           = 0x06,
         MW           = 0x07,
         MV           = 0x08,
+        AM           = 0x09,
         // Last Keyword
         CVPD_LAST_KEYWORD,
         CVPD_TEST_KEYWORD,  // Test purposes ONLY!

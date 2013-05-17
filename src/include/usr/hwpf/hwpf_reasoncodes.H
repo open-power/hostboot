@@ -103,6 +103,8 @@ namespace fapi
         RC_VDDR_ERROR_MSG             = HWPF_COMP_ID | 0x26,
         RC_VDDR_POWR_ERR              = HWPF_COMP_ID | 0x27,
         RC_INCORRECT_MSG_TYPE         = HWPF_COMP_ID | 0x28,
+
+        RC_NO_SINGLE_MBA              = HWPF_COMP_ID | 0x29,
     };
 
     /**

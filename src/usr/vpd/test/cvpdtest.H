@@ -72,6 +72,7 @@ cvpdTestData cvpdData[] =
     { CVPD::VSPD, CVPD::LM },
     { CVPD::VSPD, CVPD::MW },
     { CVPD::VSPD, CVPD::MV },
+    { CVPD::VSPD, CVPD::AM },
 
 };
 

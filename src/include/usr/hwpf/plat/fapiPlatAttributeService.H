@@ -54,6 +54,7 @@
 #include <hwpf/fapi/fapiTarget.H>
 #include <hwpf/plat/fapiPlatAttrOverrideSync.H>
 #include <hwpf/hwp/mvpd_accessors/getMBvpdPhaseRotatorData.H>
+#include <hwpf/hwp/mvpd_accessors/getMBvpdAddrMirrorData.H>
 #include <vpd/spdenums.H>
 #include <dimmConsts.H>
 #include <util/singleton.H>
@@ -452,6 +453,19 @@ fapi::ReturnCode fapiPlatGetPhaseRotatorData (
                                     const fapi::Target * i_pTarget,
                                     const fapi::MBvpdPhaseRotatorData i_attr,
                                     uint8_t    (&o_val) [2] );
+/**
+ * @brief This function is called by the FAPI_ATTR_GET macro when getting
+ * the Address Mirroring Data attributes
+ * It should not be called directly.
+ *
+ *  @param[in]  i_pTarget   Target DIMM pointer
+ *  @param[out] o_val       Address Mirroring Data for DIMM
+ *  @return     ReturnCode. Zero on success, else platform specified error
+ */
+fapi::ReturnCode fapiPlatGetAddrMirrorData (
+                                    const fapi::Target * i_pTarget,
+                                    uint8_t    &o_val);
+
 
 } // namespace platAttrSvc
 
@@ -1064,4 +1078,12 @@ fapi::ReturnCode fapiPlatGetPhaseRotatorData (
 #define ATTR_EFF_CEN_PHASE_ROT_M1_CNTL_ODT1_SETMACRO(ID, PTARGET, VAL)\
     fapi::FAPI_RC_SUCCESS
 #endif
+//------------------------------------------------------------------------------
+//  MACROS to support MBVPD Address Mirror attributes
+//------------------------------------------------------------------------------
+#define ATTR_VPD_DRAM_ADDRESS_MIRRORING_GETMACRO(ID, PTARGET, VAL)\
+    fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ?\
+    fapi::FAPI_RC_SUCCESS : fapi::platAttrSvc::fapiPlatGetAddrMirrorData\
+        (PTARGET, VAL)
+
 #endif // FAPIPLATATTRIBUTESERVICE_H_

@@ -86,7 +86,16 @@
   <hwpError>
     <rc>RC_MBVPD_INSUFFICIENT_MR_KEYWORD</rc>
     <description>
-        MR keyword record returned is smaller than expected.
+        VPD read is smaller than expected.
     </description>
+  </hwpError>
+  <!-- ********************************************************************* -->
+  <hwpError>
+    <rc>RC_MBVPD_INSUFFICIENT_VPD_RETURNED</rc>
+    <description>
+        VPD keyword record returned is smaller than expected.
+    </description>
+    <ffdc>KEYWORD</ffdc>
+    <ffdc>RETURNED_SIZE</ffdc>
   </hwpError>
 </hwpErrors>

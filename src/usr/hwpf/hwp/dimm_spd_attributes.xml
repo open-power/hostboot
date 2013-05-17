@@ -618,4 +618,23 @@
     <writeable/>
 </attribute>
 
+<attribute>
+    <id>ATTR_VPD_DRAM_ADDRESS_MIRRORING</id>
+    <targetType>TARGET_TYPE_DIMM</targetType>
+    <description>
+        The C-DIMM ranks that have address mirroring.
+        This data is in the Record:VSPD, Keyword:AM field in C-DIMM VPD.
+        This attribute is only valid for C-DIMMs, an error should be returned if queried from IS-DIMMs.
+        Note: Muliple ranks can be mirrored.
+    </description>
+    <valueType>uint8</valueType>
+    <enum>
+        RANK0_MIRRORED = 0x08,
+        RANK1_MIRRORED = 0x04,
+        RANK2_MIRRORED = 0x02,
+        RANK3_MIRRORED = 0x01
+    </enum>
+    <platInit/>
+</attribute>
+
 </attributes>

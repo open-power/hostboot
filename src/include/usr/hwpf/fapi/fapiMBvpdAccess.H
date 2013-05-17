@@ -67,6 +67,7 @@ namespace fapi
         MBVPD_KEYWORD_LM  = 0x06,
         MBVPD_KEYWORD_MW  = 0x07,
         MBVPD_KEYWORD_MV  = 0x08,
+        MBVPD_KEYWORD_AM  = 0x09,
     };
 
 }
