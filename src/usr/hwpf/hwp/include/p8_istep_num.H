@@ -23,7 +23,7 @@
 #ifndef __P8_ISTEP_NUM_H
 #define __P8_ISTEP_NUM_H
 
-// $Id: p8_istep_num.H,v 1.24 2013/02/25 14:59:03 jeshua Exp $
+// $Id: p8_istep_num.H,v 1.25 2013/05/06 21:46:09 jeshua Exp $
 
 /// Istep number encoding for all SEEPROM and PNOR procedures.  Used to update
 /// the SBEVITAL register to record procedure progress and to create unique
@@ -32,25 +32,26 @@
 CONST_UINT64_T(proc_sbe_enable_seeprom_istep_num,           ULL(0x0101));
 
 CONST_UINT64_T(proc_sbe_security_setup_istep_num,           ULL(0x0201));
-CONST_UINT64_T(proc_sbe_tp_chiplet_init1_istep_num,         ULL(0x0202));
-CONST_UINT64_T(proc_sbe_tp_ld_image_istep_num,              ULL(0x0203));
-CONST_UINT64_T(proc_sbe_nest_skewadjust_istep_num,          ULL(0x0204));
-CONST_UINT64_T(proc_sbe_npll_initf_istep_num,               ULL(0x0205));
-CONST_UINT64_T(proc_sbe_npll_setup_istep_num,               ULL(0x0206));
-CONST_UINT64_T(proc_sbe_tp_switch_gears_istep_num,          ULL(0x0207));
-CONST_UINT64_T(proc_sbe_tp_chiplet_init2_istep_num,         ULL(0x0208));
-CONST_UINT64_T(proc_sbe_tp_arrayinit_istep_num,             ULL(0x0209));
-CONST_UINT64_T(proc_sbe_tp_chiplet_init3_istep_num,         ULL(0x020A));
-CONST_UINT64_T(proc_sbe_chiplet_init_istep_num,             ULL(0x020B));
-CONST_UINT64_T(proc_sbe_arrayinit_istep_num,                ULL(0x020C));
-CONST_UINT64_T(proc_sbe_setup_evid_istep_num,               ULL(0x020D));
-CONST_UINT64_T(proc_sbe_initf_istep_num,                    ULL(0x020E));
-CONST_UINT64_T(proc_sbe_pb_startclocks_istep_num,           ULL(0x020F));
-CONST_UINT64_T(proc_sbe_scominit_istep_num,                 ULL(0x0210));
-CONST_UINT64_T(proc_sbe_fabricinit_istep_num,               ULL(0x0211));
-CONST_UINT64_T(proc_sbe_check_master_istep_num,             ULL(0x0212));
-CONST_UINT64_T(proc_sbe_select_ex_istep_num,                ULL(0x0213));
-CONST_UINT64_T(proc_sbe_run_exinit_istep_num,               ULL(0x0214));
+CONST_UINT64_T(proc_sbe_standalone_setup_istep_num,         ULL(0x0202));
+CONST_UINT64_T(proc_sbe_tp_chiplet_init1_istep_num,         ULL(0x0203));
+CONST_UINT64_T(proc_sbe_tp_ld_image_istep_num,              ULL(0x0204));
+CONST_UINT64_T(proc_sbe_nest_skewadjust_istep_num,          ULL(0x0205));
+CONST_UINT64_T(proc_sbe_npll_initf_istep_num,               ULL(0x0206));
+CONST_UINT64_T(proc_sbe_npll_setup_istep_num,               ULL(0x0207));
+CONST_UINT64_T(proc_sbe_tp_switch_gears_istep_num,          ULL(0x0208));
+CONST_UINT64_T(proc_sbe_tp_chiplet_init2_istep_num,         ULL(0x0209));
+CONST_UINT64_T(proc_sbe_tp_arrayinit_istep_num,             ULL(0x020A));
+CONST_UINT64_T(proc_sbe_tp_chiplet_init3_istep_num,         ULL(0x020B));
+CONST_UINT64_T(proc_sbe_chiplet_init_istep_num,             ULL(0x020C));
+CONST_UINT64_T(proc_sbe_arrayinit_istep_num,                ULL(0x020D));
+CONST_UINT64_T(proc_sbe_setup_evid_istep_num,               ULL(0x020E));
+CONST_UINT64_T(proc_sbe_initf_istep_num,                    ULL(0x020F));
+CONST_UINT64_T(proc_sbe_pb_startclocks_istep_num,           ULL(0x0210));
+CONST_UINT64_T(proc_sbe_scominit_istep_num,                 ULL(0x0211));
+CONST_UINT64_T(proc_sbe_fabricinit_istep_num,               ULL(0x0212));
+CONST_UINT64_T(proc_sbe_check_master_istep_num,             ULL(0x0213));
+CONST_UINT64_T(proc_sbe_select_ex_istep_num,                ULL(0x0214));
+CONST_UINT64_T(proc_sbe_run_exinit_istep_num,               ULL(0x0215));
 
 CONST_UINT64_T(proc_sbe_pnor_setup_istep_num,               ULL(0x0301));
 
