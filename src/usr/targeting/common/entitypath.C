@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2012              */
+/* COPYRIGHT International Business Machines Corp. 2011,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -304,6 +304,8 @@ const char* EntityPath::pathElementTypeAsString(
             return "Proc";
         case TYPE_NODE:
             return "Node";
+        case TYPE_CONTROL_NODE:
+            return "Control Node";
         case TYPE_CORE:
             return "Core";
         case TYPE_L2:

@@ -151,6 +151,9 @@
         <name>TODCLK</name>
     </enumerator>
     <enumerator>
+        <name>CONTROL_NODE</name>
+    </enumerator>
+    <enumerator>
         <name>LAST_IN_RANGE</name>
     </enumerator>
     <default>NA</default>

@@ -1637,7 +1637,11 @@ sub generate_max_config
 
 sub generate_system_node
 {
-    print "
+    # Brazos node4 is the fsp node and we'll let the fsp
+    # MRW parser handle that.
+    if( !( ($sysname eq "brazos") && ($node == $MAXNODE) ) )
+    {
+        print "
 <!-- $SYSNAME System node $node -->
 
 <targetInstance>
@@ -1652,24 +1656,17 @@ sub generate_system_node
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-$sys/node-$node</default>
     </attribute>";
-
-    # TODO: move RID calculation to genHwsvMrwXml_fsp.pm
-    # call to do any fsp per-system_node attributes
-    my $rid = sprintf("0x80%X",${node});
-
-    # TODO: replace Brazos system check with something less dependent on name
-    #brazos is different then tuleta and orlena
-    #for 1 node systems the RID is 0x800 but for brazos, 
-    #the 800 is for the maxdale, and 801-804 for the processor nodes.  
-    if ($sysname eq "brazos")
-    {
-        $rid = sprintf("0x80%X",${node}+1);
-    }
-    do_plugin('fsp_system_node', $node, $rid );
-
-    print "
+        # add fsp extensions
+        do_plugin('fsp_node_add_extensions', $node);
+        print "
 </targetInstance>
 ";
+    }
+    else
+    {
+        # create fsp control node
+        do_plugin('fsp_control_node', $node);
+    }
 
     # call to do any fsp per-system_node targets
     do_plugin('fsp_system_node_targets', $node);
