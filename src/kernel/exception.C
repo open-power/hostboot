@@ -237,6 +237,7 @@ void kernel_execute_softpatch()
 const uint64_t EXCEPTION_MSR_PR_BIT_MASK       = 0x0000000000004000;
 const uint64_t EXCEPTION_SRR1_LOADSTORE_ERR    = 0x0000000000200000;
 const uint64_t EXCEPTION_DSISR_LD_UE_INTERRUPT = 0x0000000000008000;
+const uint64_t EXCEPTION_DSISR_SLB_ERRORS      = 0x00000000000000C0;
 
 extern "C"
 void kernel_execute_machine_check()
@@ -258,15 +259,46 @@ void kernel_execute_machine_check()
 
     bool handled = false;
 
-    // SUE on load instruction.
-    if ((getSRR1() & EXCEPTION_SRR1_LOADSTORE_ERR) &&
-        (getDSISR() & EXCEPTION_DSISR_LD_UE_INTERRUPT))
+    // Error in load/store.
+    if (getSRR1() & EXCEPTION_SRR1_LOADSTORE_ERR)
     {
-        handled = Kernel::MachineCheck::handleLoadUE(t);
+        // SUE on load instruction.
+        if (getDSISR() & EXCEPTION_DSISR_LD_UE_INTERRUPT)
+        {
+            handled = Kernel::MachineCheck::handleLoadUE(t);
+        }
+        // SLB parity or multi-hit.
+        else if (getDSISR() & EXCEPTION_DSISR_SLB_ERRORS)
+        {
+            handled = Kernel::MachineCheck::handleSLB(t);
+        }
     }
+    // Error in instruction fetch.
     else
     {
+        enum
+        {
+            SRR1_ERR_RESERVED = 0,              //< Reserved
+            SRR1_ERR_IFU_UE = 1,                //< UE on Instruction
+            SRR1_ERR_IFU_SLB_P = 2,             //< SLB Parity
+            SRR1_ERR_IFU_SLB_MH = 3,            //< SLB Multihit
+            SRR1_ERR_IFU_SLB_MHP = 4,           //< SLB Multihit & Parity
+            SRR1_ERR_IFU_TLB_MH = 5,            //< TLB Multihit
+            SRR1_ERR_IFU_TLB_MH_RELOAD = 6,     //< TLB Multihit on Reload
+            SRR1_ERR_IFU_UNKNOWN = 7            //< Unknown error.
+        };
 
+        // Extract bits 43:45.
+        uint64_t error = (getSRR1() >> 18) & 0x7;
+
+        switch (error)
+        {
+            case SRR1_ERR_IFU_SLB_P:
+            case SRR1_ERR_IFU_SLB_MH:
+            case SRR1_ERR_IFU_SLB_MHP:
+                handled = Kernel::MachineCheck::handleSLB(t);
+                break;
+        }
     }
 
     if (!handled)

@@ -113,6 +113,13 @@ bool handleLoadUE(task_t* t)
     return handled;
 }
 
+bool handleSLB(task_t* t)
+{
+    // Reinitialize the SLB.
+    VmmManager::init_slb();
+    return true;
+}
+
 
 }
 }

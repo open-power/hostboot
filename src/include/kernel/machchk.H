@@ -36,6 +36,13 @@ namespace Kernel
          *  @return bool - True if MC successfully handled, false otherwise.
          */
         bool handleLoadUE(task_t* t);
+
+        /** Handle SLB parity and multi-hit error machine checks.
+         *
+         *  @param[in] t - Task which took the machine check.
+         *  @return bool - True if MC successfully handled, false otherwise.
+         */
+        bool handleSLB(task_t* t);
     }
 }
 
