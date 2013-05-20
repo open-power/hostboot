@@ -27,7 +27,8 @@
 ##
 ##  find HostBoot files in $HBDIR (assume: $HB = src/usr/hwpf/hwp )
 ##  and compare "$Id $" version numbers against the like-named HWP files
-##  in $topdir ( assume: $EKB = /afs/awd/projects/eclipz/KnowledgeBase/eclipz/chips/p8/working/procedures ).
+##  in $topdir
+##  ( assume: $EKB = /afs/awd/projects/eclipz/KnowledgeBase/eclipz/chips/p8/working/procedures ).
 ##
 ##  Discussion of selected Options:
 ##      --verbose :  If the script cannot find a file in HB or a search directory,
@@ -195,9 +196,10 @@ use lib dirname (__FILE__);
 #----------------------------------------------------------------------
 #   Globals
 #----------------------------------------------------------------------
-my  @SearchDirs     =   (   "/afs/awd/projects/eclipz/KnowledgeBase/eclipz/chips/p8/working/procedures",
-                            "/afs/awd/projects/eclipz/KnowledgeBase/eclipz/chips/centaur/working/procedures",
-                        );
+my  @SearchDirs     =
+(   "/afs/awd/projects/eclipz/KnowledgeBase/eclipz/chips/p8/working/procedures",
+    "/afs/awd/projects/eclipz/KnowledgeBase/eclipz/chips/centaur/working/procedures",
+    );
 
 my  $HBDIR          =   "src/usr/hwpf/hwp";
 
@@ -209,6 +211,8 @@ my  $opt_infiles    =   "";
 my  $opt_long       =   0;
 my  $opt_verbose    =   0;
 my  $opt_lookuponly =   0;
+my  $opt_hbdir      =   "";
+my  $opt_showdate   =   0;
 
 
 ##  input filenames, just the base name
@@ -217,7 +221,8 @@ my  @InFiles    =   ();
 ##  use "find" to get the pathnames of the InFiles in HB and store here.
 my  @HBFiles    =   ();
 
-##  use "find" to get the pathnames of the InFiles (in EKB or whatever) and store here
+##  use "find" to get the pathnames of the InFiles (in EKB or whatever)
+##  and store here
 my  @HWPFiles   =   ();
 
 ##  output lines to print, columns separated by '|'
@@ -250,13 +255,24 @@ my  @SaveArgV   =   @ARGV;
 # Parse optional input arguments
 #------------------------------------------------------------------------------
 GetOptions( "help|?"                    =>  \$opt_help,
-            "topdir=s"                  =>  \$opt_topdir,       ##  top EKB directory to look in
-            "justdiffs"                 =>  \$opt_justdiffs,    ## just display different files
-            "long"                      =>  \$opt_long,         ## "long" format, prints path to HWP file
-            "infiles=s"                 =>  \$opt_infiles,      ##  list of files to look for
-            "verbose"                   =>  \$opt_verbose,      ##  print files that can't be found
-            "debug"                     =>  \$opt_debug,        ##  print debug info
-            "lookuponly"                =>  \$opt_lookuponly,   ##  lookup & display topdir files whether they are in HB or not
+            ##  top EKB directory to look in
+            "topdir=s"                  =>  \$opt_topdir,
+            ## just display different files
+            "justdiffs"                 =>  \$opt_justdiffs,
+            ## "long" format, prints path to HWP file
+            "long"                      =>  \$opt_long,
+            ##  list of files to look for
+            "infiles=s"                 =>  \$opt_infiles,
+            ##  print files that can't be found
+            "verbose"                   =>  \$opt_verbose,
+            ##  print debug info
+            "debug"                     =>  \$opt_debug,
+            ##  lookup & display topdir files whether they are in HB or not
+            "lookuponly"                =>  \$opt_lookuponly,
+            ##  point to different hbdir.
+            "hbdir=s"                   =>  \$opt_hbdir,
+            ##  show the date that the HWP file was committed
+            "showdate"                  =>  \$opt_showdate,
 
           );
 
@@ -278,7 +294,8 @@ if ( $opt_help )
 ##  read in a list of files if specified
 if ( ($opt_infiles ne "") )
 {
-    open( INFILE, $opt_infiles )    or die "ERROR: Cannot open --infile $opt_infiles: $!\n";
+    open( INFILE, $opt_infiles )
+        or die "ERROR: Cannot open --infile $opt_infiles: $!\n";
 
     print   STDOUT  "Reading files from $opt_infiles...\n";
     while ( <INFILE> )
@@ -299,8 +316,8 @@ if ( ($opt_infiles ne "") )
         if ( m/Procedure,Revision/ )            {   next;   }
 
 
-        ##  if the input is from "hwp_id.pl -s -m", strip off the versions and paths
-        ##  @todo save the versions rather than looking them up again.
+        ##  if the input is from "hwp_id.pl -s -m", strip off the versions
+        ##  and paths.
         my  ( $fn, $junk )   =   split( /[ ,]/ );
         $fn =   basename($fn);
 
@@ -322,6 +339,8 @@ if ( $opt_debug )
     print   STDERR  "infiles            =   $opt_infiles\n";
     print   STDERR  "verbose            =   $opt_verbose\n";
     print   STDERR  "lookuponly         =   $opt_lookuponly\n";
+    print   STDERR  "hbdir              =   $opt_hbdir\n";
+    print   STDERR  "showdate           =   $opt_showdate\n";
 
     ## dump files specified
     print   STDERR  "Files:\n";
@@ -338,6 +357,11 @@ if ( $opt_topdir ne "" )
 
     ##  push the new one on.
     push    @SearchDirs, $opt_topdir;
+}
+
+if ( $opt_hbdir eq "" )
+{
+    $opt_hbdir  =   $HBDIR;
 }
 
 
@@ -363,9 +387,10 @@ foreach my $infile ( @InFiles )
 
     ##  search for the file in HostBoot
     my  $hbfile     =   "";
-    if ( ! $opt_lookuponly )    ## skip finding HB file, we just want to list HWP versions
+    ## skip finding HB file, we just want to list HWP versions
+    if ( ! $opt_lookuponly )
     {
-        $hbfile         =   findFile( $HBDIR, $infile );
+        $hbfile         =   findFile( $opt_hbdir, $infile );
         if ( ! -f $hbfile )
         {
             next;
@@ -399,8 +424,8 @@ foreach my $infile ( @InFiles )
     }
 
     ##  find $Id from HWP tree
-    my  ( $fn2, $vn2 )  =   ( " ", " ");
-    ( $fn2, $vn2 )   =   findId( $hwpfile );
+    my  ( $fn2, $vn2, $dn2 )  =   ( " ", " ", " " );
+    ( $fn2, $vn2,$dn2 )   =   findId( $hwpfile );
 
     my  $diff   =   "";
     if ( $vn1 ne $vn2 )
@@ -412,7 +437,7 @@ foreach my $infile ( @InFiles )
         next;
     }
 
-    my $line   =   "$diff $infile|$vn1|$vn2|$hwpfile ";
+    my $line   =   "$diff $infile|$vn1|$vn2|$hwpfile|$dn2 ";
     push    @OutLines, $line;
 
     if  ( $opt_debug )  { print STDERR  __LINE__, "\t$line\n";  }
@@ -424,14 +449,15 @@ foreach my $infile ( @InFiles )
 ##  now print table
 print   STDOUT  "\nOutput file table...\n";
 
-print   STDOUT  "---------------------------------------------------------------\n";
+print   STDOUT  "-----------------------------------------------------------\n";
 print   STDOUT  "$fileCount files processed.\n";
-print   STDOUT  "HB Version from $HBDIR\n";
+## print   STDOUT  "HB Version from $HBDIR\n";
+print   STDOUT  "HB Version from $opt_hbdir\n";
 print   STDOUT  "HWP Version from dir(s):\n";
 foreach my $sd ( @SearchDirs ) {   print   STDOUT  "   $sd\n"; }
 print   STDOUT  "differing versions are marked with \'*\' .\n";
 print   STDOUT  "(none) means no version Id was found.\n";
-print   STDOUT  "---------------------------------------------------------------\n";
+print   STDOUT  "-----------------------------------------------------------\n";
 
 my  $col4Hdr    =   "";
 if ( $opt_long )
@@ -439,18 +465,25 @@ if ( $opt_long )
     $col4Hdr    =   "HWP path";
 }
 
-printf   STDOUT  "%-*s\t%-12s\t%-12s\t%s\n", $maxcol+2,  "File", "HB Version", "HWP Version", $col4Hdr ;
+printf   STDOUT  "%-*s\t%-12s\t%-12s\n", $maxcol+2,
+    "File", "HB Version", "HWP Version", $col4Hdr ;
 
 foreach ( @OutLines )
 {
-    my ( $c1, $c2, $c3, $c4 )    =   split( /\|/ );
+    my ( $c1, $c2, $c3, $c4, $c5 )    =   split( /\|/ );
 
     if ( !$opt_long )
     {
         $c4 =   "";
     }
 
-    printf   STDOUT  "%-*s\t%-12s\t%-12s\t%-12s\n", $maxcol+2, $c1, $c2, $c3, $c4 ;
+    if ( !$opt_showdate )
+    {
+        $c5 =   "";
+    }
+
+    printf   STDOUT  "%-*s\t%-12s\t%-12s\t%-12s\t%s\n",
+        $maxcol+2, $c1, $c2, $c3, $c4, $c5 ;
 }
 
 
@@ -467,13 +500,24 @@ sub usage()
     print   STDOUT  "$0 : Compare HB file versions against HWP file versions\n";
     print   STDOUT  "Usage:\n";
     print   STDOUT  "   $0  \n";
-    print   STDOUT  "       [ --topdir    <path> ]  ( top dir to look for HWP files )\n";
-    print   STDOUT  "       [ --justdiffs ]         ( just show files that differ )\n";
-    print   STDOUT  "       [ --long  ]             ( print path for HWP files )\n";
-    print   STDOUT  "       [ --infiles ]           ( file containing filenames to compare )\n";
-    print   STDOUT  "       [ --debug ]             ( print debug information )\n";
-    print   STDOUT  "       [ --verbose ]           ( print files that can't be found )\n";
-    print   STDOUT  "       [ --lookuponly ]        ( print HWP versions only, no compare )\n";
+    print   STDOUT  "       [ --topdir    <path> ]",
+        "( top dir to look for HWP files )\n";
+    print   STDOUT  "       [ --justdiffs ]",
+        "( just show files that differ )\n";
+    print   STDOUT  "       [ --long  ]",
+        "( print path for HWP files )\n";
+    print   STDOUT  "       [ --infiles <path>]",
+        "( file containing filenames to compare )\n";
+    print   STDOUT  "       [ --debug ]",
+        "( print debug information )\n";
+    print   STDOUT  "       [ --verbose ]",
+        "( print files that can't be found )\n";
+    print   STDOUT  "       [ --lookuponly ]",
+        "( print HWP versions only, no compare )\n";
+    print   STDOUT  "       [ --hbdir <path> ]",
+        "( point to a different HostBoot base dir. )\n";
+    print   STDOUT  "       [ --showdate ]",
+        "( date that the HWP file was committed. )\n";
     print   STDOUT  "       <files...>\n";
 }
 
@@ -518,15 +562,16 @@ sub findFile( $$ )
 
         if ( $opt_verbose )
         {
-            print   STDOUT  " Warning: $basefile was not found under $basedir.\n";
+            print   STDOUT  " Warning: $basefile not found under $basedir.\n";
         }
         return  "";
     }
 
     if ( @filepaths > 1 )
     {
-        print   STDOUT  "\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n";
-        print   STDOUT  "ERROR: Found multiple versions $#filepaths of $basefile under $basedir!!!\n";
+        print   STDOUT  "\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n";
+        print   STDOUT  "ERROR: Found multiple versions $#filepaths ",
+            "of $basefile under $basedir!!!\n";
 
         ##  print the filepaths and the $Ids here so the user can figure out
         ##  which one to get rid of.
@@ -536,7 +581,7 @@ sub findFile( $$ )
             chomp;  chomp   $vn;
             print   STDOUT  " $_  $vn\n";
         }
-        print   STDOUT  "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n";
+        print   STDOUT  "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n";
 
         return  "";
     }
@@ -547,7 +592,8 @@ sub findFile( $$ )
     if ( ! -f $filepath )
     {
         print   STDOUT  "\n";
-        print   STDOUT  __LINE__, " ERROR: Cannot find file $basefile under $basedir, \"$filepath\"\n";
+        print   STDOUT  __LINE__, " ERROR: Cannot find file $basefile ",
+            "under $basedir, \"$filepath\"\n";
         $filepath   =   "";
     }
 
@@ -568,6 +614,7 @@ sub findId( $ )
     my $data;
     my  $fn =   "";
     my  $vn =   "(none)";
+    my  $dn =   "";
 
     open( FH, $filename )   or die "cannot open $filename: $!";
 
@@ -575,15 +622,20 @@ sub findId( $ )
     close FH;
 
     ##  extract filename and version from $Id $ string
-    if ($data =~ /\$Id: (.*),v ([0-9.]*) .* \$/mgo )
+    if ($data =~ /\$Id: (.*),v ([0-9.]*) (\d{4}.\d{2}.\d{2}) .* \$/mgo )
     {
-        $fn = $1; # filename
-        $vn = $2; # version
+        $fn = $1;   # filename
+        $vn = $2;   # version
+        $dn = $3    # date
     }
 
-    if ( $opt_debug )   {   print   STDERR  __LINE__, " findId: file $filename: fn=$fn, vn=$vn\n";  }
+    if ( $opt_debug )
+    {
+        print   STDERR  __LINE__, " findId: file $filename:",
+            "fn=$fn, vn=$vn dn=$dn\n";
+    }
 
-    return  ( $fn, $vn );
+    return  ( $fn, $vn, $dn );
 }
 
 
