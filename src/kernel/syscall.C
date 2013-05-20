@@ -532,10 +532,18 @@ namespace Systemcalls
     void DevMap(task_t *t)
     {
         void *ra = (void*)TASK_GETARG0(t);
-        uint64_t devDataSize = TASK_GETARG1(t);
+        uint64_t devDataSize = ALIGN_PAGE(TASK_GETARG1(t));
+        bool cacheable = (0 != TASK_GETARG2(t));
 
-        kassert(TASK_SETRTN(t, (uint64_t)VmmManager::devMap(ra,devDataSize)) !=
-                NULL);
+        if (devDataSize > THIRTYTWO_GB)
+        {
+            TASK_SETRTN(t, NULL);
+        }
+        else
+        {
+            TASK_SETRTN(t,
+                        (uint64_t)VmmManager::devMap(ra,devDataSize,cacheable));
+        }
     }
 
     /**

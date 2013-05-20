@@ -897,6 +897,8 @@ sub printDeviceSegments
 
                     my $segmentSize =::read64($mmiostructptr + $curmmiodevice*16
                                               + MMIO_STRUCT_SEGSIZE_OFFSET, 8);
+                        # Segment size is a 63 bit quantity.
+                    $segmentSize = $segmentSize & 0x7FFFFFFFFFFFFFFF;
 
                     if ($segmentPhyAddr != 0)
                     {

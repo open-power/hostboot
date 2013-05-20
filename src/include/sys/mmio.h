@@ -48,7 +48,7 @@ enum SEG_DATA_SIZES
  * @param i_devDataSize[in] - Size of device segment block
  * @return void* - Pointer to beginning virtual address, NULL otherwise
  */
-void* mmio_dev_map(void *ra, SEG_DATA_SIZES i_devDataSize);
+void* mmio_dev_map(void *ra, uint64_t i_devDataSize);
 /**
  * @brief System call to unmap a device from the device segment(2TB)
  * @param ea[in] - Void pointer to effective address

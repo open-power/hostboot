@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2012              */
+/* COPYRIGHT International Business Machines Corp. 2011,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -69,9 +69,10 @@ class DeviceSegment : public Segment
          * @brief Map a device into the device segment.
          * @param ra[in] - Void pointer to real address to be mapped in
          * @param i_devDataSize[in] - Size of device segment block
+         * @param i_nonCI[in] - Device should be mapped cacheable instead of CI
          * @return void* - Pointer to beginning virtual address, NULL otherwise
          */
-        void* devMap(void* ra, uint64_t i_devDataSize);
+        void* devMap(void* ra, uint64_t i_devDataSize, bool i_nonCI);
 
         /**
          * @brief Unmap a device from the device segment.
@@ -86,7 +87,7 @@ class DeviceSegment : public Segment
          * @return the physical address bound to the virtual address, or
          *         -EFAULT if i_vaddr not found. @see errno.h
          */
-        uint64_t findPhysicalAddress(uint64_t i_vaddr) const; 
+        uint64_t findPhysicalAddress(uint64_t i_vaddr) const;
 
     private:
         /**
@@ -94,9 +95,9 @@ class DeviceSegment : public Segment
          */
         struct devSegData
         {
-            uint64_t addr; /* Real address assigned to device */
-            uint64_t size; /* A particular device's segment block size */
-            devSegData(): addr(0),size(THIRTYTWO_GB){};
+            uint64_t addr;    //< Real address assigned to device
+            uint64_t no_ci:1; //< Device should be mapped non-CI.
+            uint64_t size:63; //< A particular device's segment block size
         };
 
         /**
@@ -105,7 +106,7 @@ class DeviceSegment : public Segment
         enum
         {
             MMIO_MAP_DEVICES = 32
-        }; //TODO - Only necessary if a device uses a SCOM region other than 32GB
+        };
 
         devSegData iv_mmioMap[MMIO_MAP_DEVICES];
 

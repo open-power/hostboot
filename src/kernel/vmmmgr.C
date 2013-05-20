@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2010,2012              */
+/* COPYRIGHT International Business Machines Corp. 2010,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -86,9 +86,10 @@ void VmmManager::flushPageTable( void )
     Singleton<VmmManager>::instance()._flushPageTable();
 }
 
-void* VmmManager::devMap(void* ra, uint64_t i_devDataSize)
+void* VmmManager::devMap(void* ra, uint64_t i_devDataSize, bool i_nonCI)
 {
-    return Singleton<VmmManager>::instance()._devMap(ra, i_devDataSize);
+    return Singleton<VmmManager>::instance()._devMap(ra, i_devDataSize,
+                                                     i_nonCI);
 }
 
 int VmmManager::devUnmap(void* ea)
@@ -221,12 +222,12 @@ int VmmManager::_mmExtend(void)
     return rc;
 }
 
-void* VmmManager::_devMap(void* ra, uint64_t i_devDataSize)
+void* VmmManager::_devMap(void* ra, uint64_t i_devDataSize, bool i_nonCI)
 {
     void* ea = NULL;
 
     lock.lock();
-    ea = SegmentManager::devMap(ra, i_devDataSize);
+    ea = SegmentManager::devMap(ra, i_devDataSize, i_nonCI);
     lock.unlock();
 
     return ea;

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2010,2012              */
+/* COPYRIGHT International Business Machines Corp. 2010,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -103,9 +103,10 @@ class VmmManager
          * @brief Map a device into the device segment
          * @param ra[in] - Void pointer to real address to be mapped in
          * @param i_devDataSize[in] - Size of device segment block
+         * @param i_nonCI[in] - Device should be mapped cacheable instead of CI
          * @return void* - Pointer to beginning virtual address, NULL otherwise
          */
-        static void* devMap(void* ra, uint64_t i_devDataSize);
+        static void* devMap(void* ra, uint64_t i_devDataSize, bool i_nonCI);
 
         /**
          * @brief Unmap a device from the device segment
@@ -246,7 +247,7 @@ class VmmManager
         int _mmExtend( void );
 
         /** See devMap */
-        void* _devMap(void* ra, uint64_t i_devDataSize);
+        void* _devMap(void* ra, uint64_t i_devDataSize, bool i_nonCI);
         /** See devUnmap */
         int _devUnmap(void* ea);
 

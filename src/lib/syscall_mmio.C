@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2010,2012              */
+/* COPYRIGHT International Business Machines Corp. 2010,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -29,9 +29,9 @@
 
 using namespace Systemcalls;
 
-void* mmio_dev_map(void *ra, SEG_DATA_SIZES i_devDataSize)
+void* mmio_dev_map(void *ra, uint64_t i_devDataSize)
 {
-    return _syscall2(DEV_MAP, ra, (void*)i_devDataSize);
+    return _syscall3(DEV_MAP, ra, (void*)i_devDataSize, (void*)0);
 }
 
 int mmio_dev_unmap(void *ea)

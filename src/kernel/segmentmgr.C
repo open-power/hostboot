@@ -1,25 +1,25 @@
-//  IBM_PROLOG_BEGIN_TAG
-//  This is an automatically generated prolog.
-//
-//  $Source: src/kernel/segmentmgr.C $
-//
-//  IBM CONFIDENTIAL
-//
-//  COPYRIGHT International Business Machines Corp. 2011
-//
-//  p1
-//
-//  Object Code Only (OCO) source materials
-//  Licensed Internal Code Source Materials
-//  IBM HostBoot Licensed Internal Code
-//
-//  The source code for this program is not published or other-
-//  wise divested of its trade secrets, irrespective of what has
-//  been deposited with the U.S. Copyright Office.
-//
-//  Origin: 30
-//
-//  IBM_PROLOG_END
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/kernel/segmentmgr.C $                                     */
+/*                                                                        */
+/* IBM CONFIDENTIAL                                                       */
+/*                                                                        */
+/* COPYRIGHT International Business Machines Corp. 2011,2013              */
+/*                                                                        */
+/* p1                                                                     */
+/*                                                                        */
+/* Object Code Only (OCO) source materials                                */
+/* Licensed Internal Code Source Materials                                */
+/* IBM HostBoot Licensed Internal Code                                    */
+/*                                                                        */
+/* The source code for this program is not published or otherwise         */
+/* divested of its trade secrets, irrespective of what has been           */
+/* deposited with the U.S. Copyright Office.                              */
+/*                                                                        */
+/* Origin: 30                                                             */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
 #include <assert.h>
 #include <errno.h>
 #include <arch/ppc.H>
@@ -63,9 +63,10 @@ void SegmentManager::castOutPages(uint64_t i_type)
     Singleton<SegmentManager>::instance()._castOutPages(i_type);
 }
 
-void* SegmentManager::devMap(void* ra, uint64_t i_devDataSize)
+void* SegmentManager::devMap(void* ra, uint64_t i_devDataSize, bool i_nonCI)
 {
-    return Singleton<SegmentManager>::instance()._devMap(ra, i_devDataSize);
+    return Singleton<SegmentManager>::instance()._devMap(ra, i_devDataSize,
+                                                         i_nonCI);
 }
 
 int SegmentManager::devUnmap(void* ea)
@@ -161,7 +162,7 @@ void SegmentManager::_castOutPages(uint64_t i_type)
     }
 }
 
-void* SegmentManager::_devMap(void* ra, uint64_t i_devDataSize)
+void* SegmentManager::_devMap(void* ra, uint64_t i_devDataSize, bool i_nonCI)
 {
     void* ea = NULL;
     for (size_t i = MMIO_FIRST_SEGMENT_ID; i <= MMIO_LAST_SEGMENT_ID; i++)
@@ -169,7 +170,7 @@ void* SegmentManager::_devMap(void* ra, uint64_t i_devDataSize)
         if (NULL == iv_segments[i]) continue;
 
         ea = reinterpret_cast<DeviceSegment*>(iv_segments[i])->
-                devMap(ra, i_devDataSize);
+                devMap(ra, i_devDataSize, i_nonCI);
 
         if (ea != NULL) break;
     }

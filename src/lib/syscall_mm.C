@@ -128,5 +128,20 @@ void mm_tolerate_ue(uint64_t i_state)
     //       that all preceeding instructions have completed, so there
     //       are no visible effects of instruction reordering with respect
     //       to this state change.
+}
 
+/**
+ * System call to map an arbitrary physical address into the VMM.
+ */
+void* mm_block_map(void* i_paddr, uint64_t i_size)
+{
+    return _syscall3(DEV_MAP, i_paddr, (void*)i_size, (void*)1);
+}
+
+/**
+ * System call to unmap a previous mm_block_map.
+ */
+int mm_block_unmap(void* i_vaddr)
+{
+    return (int64_t) _syscall1(DEV_UNMAP, i_vaddr);
 }

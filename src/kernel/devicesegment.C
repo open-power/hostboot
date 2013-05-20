@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2012              */
+/* COPYRIGHT International Business Machines Corp. 2011,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -65,15 +65,17 @@ bool DeviceSegment::handlePageFault(task_t* i_task, uint64_t i_addr,
     uint64_t device_offset = segment_ea -
                                 (idx * (1ull << SLBE_s) / MMIO_MAP_DEVICES);
 
-    if (0 == iv_mmioMap[idx].addr ||
-        device_offset >= (uint64_t)iv_mmioMap[idx].size)
+    if (device_offset >= (uint64_t)iv_mmioMap[idx].size)
     {
         return false;
     }
 
     PageTableManager::addEntry((i_addr / PAGESIZE) * PAGESIZE,
                               (iv_mmioMap[idx].addr + device_offset) / PAGESIZE,
-			       SegmentManager::CI_ACCESS);
+                              (iv_mmioMap[idx].no_ci ?
+                                    (BYPASS_HRMOR | WRITABLE) :
+                                    SegmentManager::CI_ACCESS)
+                              );
     return true;
 }
 
@@ -82,21 +84,22 @@ bool DeviceSegment::handlePageFault(task_t* i_task, uint64_t i_addr,
  * @brief Map a device into the device segment.
  * @param ra[in] - Void pointer to real address to be mapped in
  * @param i_devDataSize[in] - Size of device segment block
+ * @param i_nonCI[in] - Device should be mapped cacheable instead of CI
  * @return void* - Pointer to beginning virtual address, NULL otherwise
  */
-void *DeviceSegment::devMap(void *ra, uint64_t i_devDataSize)
+void *DeviceSegment::devMap(void *ra, uint64_t i_devDataSize, bool i_nonCI)
 {
     void *segBlock = NULL;
     if (i_devDataSize <= THIRTYTWO_GB)
     {
-        //TODO - Use segment block size if/when new device size needed
         for (size_t i = 0; i < MMIO_MAP_DEVICES; i++)
         {
-            if (0 == iv_mmioMap[i].addr)
+            if ((0 == iv_mmioMap[i].addr) && (0 == iv_mmioMap[i].size))
             {
+                iv_mmioMap[i].no_ci = i_nonCI;
                 iv_mmioMap[i].size = i_devDataSize;
                 iv_mmioMap[i].addr = reinterpret_cast<uint64_t>(ra);
-                //TODO - Use segment block size if/when new device size needed
+
                 segBlock = reinterpret_cast<void*>(i *
                         ((1ull << SLBE_s) / MMIO_MAP_DEVICES) +
                         this->getBaseAddress());
@@ -124,15 +127,16 @@ int DeviceSegment::devUnmap(void *ea)
         return rc;
     }
     segment_ea = segment_ea - this->getBaseAddress();
-    //TODO - Calculate idx by segment block size if/when new device size needed
+
     size_t idx = segment_ea / ((1ull << SLBE_s) / MMIO_MAP_DEVICES);
-    if (0 != iv_mmioMap[idx].addr)
+    if ((0 != iv_mmioMap[idx].addr) || (0 != iv_mmioMap[idx].size))
     {
         //Remove all of the defined block's size (<= 32GB)
         PageTableManager::delRangePN(iv_mmioMap[idx].addr / PAGESIZE,
                 (iv_mmioMap[idx].addr + iv_mmioMap[idx].size) / PAGESIZE,
                  false);
         iv_mmioMap[idx].addr = 0;
+        iv_mmioMap[idx].size = 0;
         rc = 0;
     }
 
@@ -153,12 +157,13 @@ uint64_t DeviceSegment::findPhysicalAddress(uint64_t i_vaddr) const
         return rc;
     }
     segment_ea = segment_ea - this->getBaseAddress();
-    //TODO - Calculate idx by segment block size if/when new device size needed
+
     size_t idx = segment_ea / ((1ull << SLBE_s) / MMIO_MAP_DEVICES);
-    if (0 != iv_mmioMap[idx].addr)
+    if ((0 != iv_mmioMap[idx].addr) || (0 != iv_mmioMap[idx].size))
     {
         //memory offset within this device's window
-        uint64_t offset = segment_ea - idx*((1ull << SLBE_s) / MMIO_MAP_DEVICES);
+        uint64_t offset = segment_ea -
+                          idx*((1ull << SLBE_s) / MMIO_MAP_DEVICES);
         return (iv_mmioMap[idx].addr + offset);
     }
 

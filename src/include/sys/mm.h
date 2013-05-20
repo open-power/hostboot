@@ -122,6 +122,23 @@ int mm_extend(MM_EXTEND_SIZE i_size = MM_EXTEND_REAL_MEMORY);
  */
 int mm_linear_map(void *i_paddr, uint64_t i_size);
 
+/** @fn mm_block_map()
+ *  @brief   Allocate an arbitrary physical address into the VMM.
+ *  @param[in] i_paddr - Physical address of the memory to map.
+ *  @param[in] i_size - Size of memory to map (in bytes).
+ *
+ *  @return Virtual address or NULL.
+ */
+void* mm_block_map(void* i_paddr, uint64_t i_size);
+
+/** @fn mm_block_unmap()
+ *  @brief   Unallocate a block previously allocated with mm_block_map.
+ *  @param[in] i_vaddr - Virtual address of the mapped block.
+ *
+ *  @return int - 0 for successful unmap, non-zero otherwise.
+ */
+int mm_block_unmap(void* i_vaddr);
+
 /** @fs mm_icache_invalidate()
  *  @brief Invalidate the ICACHE for the given memory
  *
