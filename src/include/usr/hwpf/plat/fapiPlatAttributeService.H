@@ -70,23 +70,18 @@ namespace platAttrSvc
 {
 
 /**
- *  @brief Compile time check that a FAPI attribute is the same size as a
- *         TARGETING attribute when they are direct mapped
+ *  @brief Compile time check that a variable is the same type as a Targeting
+ *         attribute.
  *
- *  If the size is different then an undefined class is instantiated leading
- *  to a compile time failure else an empty inline function is optimized out
- *  by the compiler.
+ *  Used when mapping a FAPI Attribute to a Targeting attribute to ensure that
+ *  the type is correct, if not correct then this function will not be found
+ *  and a compile error will result
  *
- *  @param[in] result of size comparison
- *
- *  @return Pointer to Targeting Target
+ *  @param[in] T Type of Targeting attribute
+ *  @param[in]   Reference to user's FAPI Attribute variable that must be of
+ *               type T
  */
-class ErrorFapiTargSizeMismatch;
-template<const bool SIZE_MISMATCH> void failIfFapiTargAttrSizeMismatch()
-{
-    ErrorFapiTargSizeMismatch();
-}
-template <> inline void failIfFapiTargAttrSizeMismatch<false>() {}
+template<typename T> void failIfTargTypeMismatch(T &) { }
 
 /**
  *  @brief Gets a Targeting attribute, this is called by the macro that maps a
@@ -463,29 +458,30 @@ fapi::ReturnCode fapiPlatGetPhaseRotatorData (
 } // namespace fapi
 
 /**
- *  @brief Macro which directly maps a FAPI_ATTR_GET to a Targeting attr get
+ *  @brief Macro that directly maps a FAPI_ATTR_GET to a Targeting attr get
  *
- *  Firstly there is a compile time check that the FAPI Attribute has the same
- *  size as the correpsonding TARGETING attribute, this is optimized out, then
- *  there is a single function call
+ *  Firstly there is a compile time check that the user's VAL variable matches
+ *  the Targeting attribute type, this is optimized out, then there is a
+ *  single function call
  */
 #define FAPI_PLAT_ATTR_SVC_GETMACRO_DIRECT(ID, PTARGET, VAL) \
-    (fapi::platAttrSvc::failIfFapiTargAttrSizeMismatch<sizeof(VAL) != \
-         sizeof(TARGETING::AttributeTraits \
-             <FAPI_PLAT_ATTR_SVC_MACRO_DIRECT_FAPI_##ID>::Type)>(), \
+    (fapi::platAttrSvc::failIfTargTypeMismatch \
+        <TARGETING::AttributeTraits \
+            <FAPI_PLAT_ATTR_SVC_MACRO_DIRECT_FAPI_##ID>::Type>(VAL), \
      fapi::platAttrSvc::getTargetingAttr(PTARGET, \
          FAPI_PLAT_ATTR_SVC_MACRO_DIRECT_FAPI_##ID, sizeof(VAL), &(VAL)))
+
 /**
- *  @brief Macro which directly maps a FAPI_ATTR_SET to a Targeting attr set
+ *  @brief Macro that directly maps a FAPI_ATTR_SET to a Targeting attr set
  *
- *  Firstly there is a compile time check that the FAPI Attribute has the same
- *  size as the correpsonding TARGETING attribute, this is optimized out, then
- *  there is a single function call
+ *  Firstly there is a compile time check that the user's VAL variable matches
+ *  the Targeting attribute type, this is optimized out, then there is a
+ *  single function call
  */
 #define FAPI_PLAT_ATTR_SVC_SETMACRO_DIRECT(ID, PTARGET, VAL) \
-    (fapi::platAttrSvc::failIfFapiTargAttrSizeMismatch<sizeof(VAL) != \
-         sizeof(TARGETING::AttributeTraits \
-             <FAPI_PLAT_ATTR_SVC_MACRO_DIRECT_FAPI_##ID>::Type)>(), \
+    (fapi::platAttrSvc::failIfTargTypeMismatch \
+        <TARGETING::AttributeTraits \
+            <FAPI_PLAT_ATTR_SVC_MACRO_DIRECT_FAPI_##ID>::Type>(VAL), \
      fapi::platAttrSvc::setTargetingAttr(PTARGET, \
          FAPI_PLAT_ATTR_SVC_MACRO_DIRECT_FAPI_##ID, sizeof(VAL), &(VAL)))
 
