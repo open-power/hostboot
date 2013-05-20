@@ -78,8 +78,11 @@ errlHndl_t PbusLinkSvc::getPbusConnections( TargetPairs_t & o_PbusConnections,
         }
     }
 
-    o_PbusConnections.insert( (*l_PbusConnections).begin(),
-                                      (*l_PbusConnections).end() );
+    if (l_errl == NULL)
+    {
+        o_PbusConnections.insert( (*l_PbusConnections).begin(),
+                                              (*l_PbusConnections).end() );
+    }
 
     mutex_unlock(&iv_mutex);
 

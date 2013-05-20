@@ -310,7 +310,7 @@ errlHndl_t customizeChipRegions(TARGETING::Target* i_procTarget)
 
         //prepare the vector to be populated to ATTR_CHIP_REGIONS_TO_ENABLE
         TARGETING::ATTR_CHIP_REGIONS_TO_ENABLE_type l_chipRegionData;
-        memset(l_chipRegionData,sizeof(ATTR_CHIP_REGIONS_TO_ENABLE_type),0);
+        memset(&l_chipRegionData,0,sizeof(ATTR_CHIP_REGIONS_TO_ENABLE_type));
 
         //Skip the header
         uint16_t *l_partialGoodUint16=reinterpret_cast<uint16_t*>(

@@ -192,11 +192,8 @@ errlHndl_t getFuncNodeTargetsOnSystem(const TARGETING::Target*
             break;
         }
 
-        TARGETING::ATTR_CLASS_type l_class=
-            i_pInputTarget->getAttr<TARGETING::ATTR_CLASS>();
-
-        TARGETING::ATTR_TYPE_type l_type=
-            i_pInputTarget->getAttr<TARGETING::ATTR_TYPE>();
+        CLASS l_class = i_pInputTarget->getAttr<ATTR_CLASS>();
+        TYPE  l_type = i_pInputTarget->getAttr<ATTR_TYPE>();
 
         if((TARGETING::CLASS_SYS == l_class) &&
                 (TARGETING::TYPE_SYS ==  l_type))//System target

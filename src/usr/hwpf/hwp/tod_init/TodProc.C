@@ -404,6 +404,7 @@ errlHndl_t TodProc::getBusPort(
                 break;
             case 2:
                 o_busPort = ABUS2;
+                break;
             default:
                 TOD_ERR("Port 0x%.8X not supported for A bus",
                     i_busPort);
