@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2012              */
+/* COPYRIGHT International Business Machines Corp. 2011,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -24,7 +24,7 @@
 #include <sys/mm.h>
 #include <arch/ppc.H>
 #include <kernel/vmmmgr.H>
-
+#include <kernel/task.H>
 
 
 using namespace Systemcalls;
@@ -107,4 +107,26 @@ int mm_extend(MM_EXTEND_SIZE i_size)
 int mm_linear_map(void *i_paddr, uint64_t i_size)
 {
     return (int64_t)_syscall2(MM_LINEAR_MAP, i_paddr, (void*)i_size);
+}
+
+/**
+ * mm_tolerate_ue.  Update task state and do appropriate synchronization.
+ */
+void mm_tolerate_ue(uint64_t i_state)
+{
+    // Get task structure.
+    register task_t* task;
+    asm volatile("mr %0, 13" : "=r"(task));
+
+    // Update task state.
+    task->tolerate_ue = (i_state != 0);
+
+    // Note: We do not need any sort of synchronization instructions here
+    //       because the state is only used by the local HW thread which
+    //       might be handling the machine check due to memory UE.  Any
+    //       exception is a context synchronizing event which ensures
+    //       that all preceeding instructions have completed, so there
+    //       are no visible effects of instruction reordering with respect
+    //       to this state change.
+
 }

@@ -37,7 +37,7 @@
 #include <dump/dumpif.H>
 
 #include    <sys/msg.h>                     //  message Q's
-#include    <mbox/mbox_queues.H>            // 
+#include    <mbox/mbox_queues.H>            //
 
 // Trace definition
 trace_desc_t* g_trac_dump = NULL;
@@ -116,14 +116,14 @@ namespace DUMP
         // local src table info
         uint64_t *vaSrcTableAddr = 0;
         uint64_t *vaMapSrcTableAddr = 0;
-        uint64_t curSrcTableAddr = 0; 
+        uint64_t curSrcTableAddr = 0;
 
         // destination table info
         uint64_t *vaDestTableAddr = 0;
         uint64_t *vaMapDestTableAddr = 0;
         uint64_t curDestTableAddr = 0;
 
-        // Data sizes 
+        // Data sizes
         uint64_t sizeToCopy = 0;
         uint64_t bytesLeftInSrc = 0;
         uint64_t bytesLeftInDest = 0;
@@ -170,14 +170,14 @@ namespace DUMP
             curDestTableAddr = destTableEntry[curDestIndex].dataAddr;
             bytesLeftInDest = destTableEntry[curDestIndex].dataSize;
 
-            // Determine the src and destination offset. 
+            // Determine the src and destination offset.
             uint64_t destOffset =  curDestTableAddr - ALIGN_PAGE_DOWN(curDestTableAddr);
             uint64_t srcOffset = curSrcTableAddr - ALIGN_PAGE_DOWN(curSrcTableAddr);
 
             // If the data size is greater then 32GB after page alignment
             // create an error.  Current limitation on DevMap is 32GB in size.
             // Not sure yet if we will ever see a table entry > 3GB.
-            if (bytesLeftInSrc + srcOffset > THIRTYTWO_GB)  
+            if (bytesLeftInSrc + srcOffset > THIRTYTWO_GB)
             {
                 invalidSrcSize = true;
                 break;
@@ -205,10 +205,10 @@ namespace DUMP
 
             vaDestTableAddr += (destOffset/(sizeof (uint64_t)));
 
-            // Current Source physical and Va address 
+            // Current Source physical and Va address
             TRACFCOMP(g_trac_dump, "copySrcToDest SrcTableIndex = %d, srcTableAddr = %.16X, VA = %.16X",  curSourceIndex, curSrcTableAddr, vaSrcTableAddr);
 
-            // Current Destination physical and Va address 
+            // Current Destination physical and Va address
             TRACFCOMP(g_trac_dump, "HBDumpCopySrcToDest DestTableIndex = %d, DestTableAddr = %.16X, VA = %.16X", curDestIndex, curDestTableAddr, vaDestTableAddr);
 
 
@@ -257,14 +257,14 @@ namespace DUMP
                     bytesLeftInSrc = srcTableEntry[curSourceIndex].dataSize;
 
                     // If the current Src table Address is 0 we are done
-                    if (curSrcTableAddr == 0) 
+                    if (curSrcTableAddr == 0)
                     {
                         break;
                     }
 
                     srcOffset =  curSrcTableAddr - ALIGN_PAGE_DOWN(curSrcTableAddr);
 
-                    // If the data size is less then 32GB after page alignment 
+                    // If the data size is less then 32GB after page alignment
                     if (bytesLeftInSrc + srcOffset > THIRTYTWO_GB)
                     {
                         invalidSrcSize = true;
@@ -281,7 +281,7 @@ namespace DUMP
 
                     vaSrcTableAddr += (srcOffset/(sizeof (uint64_t)));
 
-                    // Current Source physical and Va address 
+                    // Current Source physical and Va address
                     TRACFCOMP(g_trac_dump, "copySrcToDest SrcTableIndex = %d, srcTableAddr = %.16X, VA = %.16X",  curSourceIndex, curSrcTableAddr, vaSrcTableAddr);
 
                 }
@@ -392,7 +392,7 @@ namespace DUMP
                             //  condition is such that we have a destination
                             //  entry that either has a zero address or zero
                             //  size.. Perhaps put the bad destination entry
-                            //  there as well       
+                            //  there as well
                         }
 
                         break;
@@ -400,7 +400,7 @@ namespace DUMP
 
                     destOffset =  curDestTableAddr - ALIGN_PAGE_DOWN(curDestTableAddr);
 
-                    // If the data size is less then 32GB after page alignment 
+                    // If the data size is less then 32GB after page alignment
                     if (bytesLeftInDest + destOffset > THIRTYTWO_GB)
                     {
                         invalidDestSize = true;
@@ -416,17 +416,19 @@ namespace DUMP
 
                     vaDestTableAddr += (destOffset/(sizeof(uint64_t)));
 
-                    // Current Destination physical and Va address 
+                    // Current Destination physical and Va address
                     TRACFCOMP(g_trac_dump, "HBDumpCopySrcToDest DestTableIndex = %d, DestTableAddr = %.16X, VA = %.16X", curDestIndex, curDestTableAddr, vaDestTableAddr);
 
                 }
 
 
-                // Determine how much to copy.. 
+                // Determine how much to copy..
                  sizeToCopy = std::min(bytesLeftInSrc, bytesLeftInDest);
 
                 // Do the copy of the data from the source to the destination
+                mm_tolerate_ue(1);
                 memcpy( vaDestTableAddr,vaSrcTableAddr, sizeToCopy);
+                mm_tolerate_ue(0);
 
                 if (curResultIndex < maxResultEntries)
                 {
@@ -455,7 +457,7 @@ namespace DUMP
                                                     curResultIndex,
                                                     maxResultEntries);
 
-                    // commit the error and continue. 
+                    // commit the error and continue.
                     errlCommit(l_err,DUMP_COMP_ID);
 
                     l_err = NULL;
@@ -470,7 +472,7 @@ namespace DUMP
                 // increment the current src and dest addresses in both the
                 // physical and virtual addresses.
                 curSrcTableAddr += sizeToCopy;
-                curDestTableAddr += sizeToCopy; 
+                curDestTableAddr += sizeToCopy;
                 vaSrcTableAddr += addrOffset;
                 vaDestTableAddr += addrOffset;
 
@@ -693,7 +695,7 @@ namespace DUMP
 
         do
         {
-            
+
             //Create a mailbox message to send to FSP
             msg = msg_allocate();
             msg->type = i_type;
@@ -747,14 +749,14 @@ namespace DUMP
 
                 }
 
-                // if no error then collect as expected. 
+                // if no error then collect as expected.
                 if (!l_err)
                 {
 
                     // TODO:  Issue RTC 67082 - fix sending the MDRT
                     // to FSP once we have a design that can send the
                     // entire table.. Max size is 512K - truncating to
-                    // 32K for the time being. 
+                    // 32K for the time being.
                     uint64_t l_resultsTableSize = resultsTableSize;
 
                     // If the results table is greater than 32K truncate it.
@@ -805,7 +807,7 @@ namespace DUMP
                     msg->data[1] = l_err->plid(); // plid
 
                     // just commit the log from failure on Read.. and
-                    // send an error msg to FSP.          
+                    // send an error msg to FSP.
                     errlCommit( l_err, DUMP_COMP_ID );
                     l_err = NULL;
 

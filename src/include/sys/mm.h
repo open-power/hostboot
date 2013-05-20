@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2012              */
+/* COPYRIGHT International Business Machines Corp. 2011,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -140,6 +140,26 @@ void mm_icache_invalidate(void * i_addr, size_t i_cpu_word_count);
  *      physical address otherwise
  */
 uint64_t mm_virt_to_phys( void* i_vaddr );
+
+/** @fn mm_tolerate_ue
+ *  @brief Allows a task to tolerate a memory UE without being killed.
+ *
+ *  This should be used when copying content from memory of unknown quality,
+ *  such as during a memory preserved IPL.  When a memory UE is consumed by
+ *  the task, instead of killing the task, the kernel will replace the
+ *  memory access by a special value of '0xdeadd47a'.
+ *
+ *  @param[in] i_state - Should the task tolerate memory UEs: 0 = no, 1 = yes.
+ *
+ *  Example usage:
+ *      mm_tolerate_ue(1);
+ *      memcpy(src, dest, size);
+ *      mm_tolerate_ue(0);
+ */
+void mm_tolerate_ue(uint64_t i_state);
+/** Value inserted into process when it encounters a UE, if mm_tolerate_ue is
+ *  enabled. */
+enum { MM_UE_MAGIC_VALUE = 0xdeadd47adeadd47aull };
 
 #ifdef __cplusplus
 }

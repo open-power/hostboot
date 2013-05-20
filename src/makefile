@@ -43,7 +43,7 @@ DIRECT_BOOT_OBJECTS = start.o kernel.o taskmgr.o cpumgr.o syscall.o \
                       ptmgr.o segmentmgr.o basesegment.o devicesegment.o \
                       block.o cxxtest_data.o cpuid.o misc.o msghandler.o \
                       blockmsghdlr.o stacksegment.o softpatch_p8.o \
-                      shutdown.o forceattn_p8.o terminate.o ipc.o
+                      shutdown.o forceattn_p8.o terminate.o ipc.o machchk.o
 
 BASE_MODULES = trace errl devicefw scom xscom initservice \
                pnor vfs 
