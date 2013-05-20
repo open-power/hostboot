@@ -26,8 +26,9 @@
 ##    to setup the sandbox
 ##
 
-### Update s1.act for new proc_a_x_pll procedure
-echo "+++ Updating s1.act for new proc_a_x_pll procedure"
-mkdir -p $sb/simu/data/cec-chip/
-cp $BACKING_BUILD/src/simu/data/cec-chip/s1.act $sb/simu/data/cec-chip
-patch -p0 $sb/simu/data/cec-chip/s1.act $HOSTBOOTROOT/src/build/citest/etc/patches/s1.act_proc_a_x_pll_patch
+### Example applying a patch to cec-chip files
+#echo "+++ Updating something wonderful in a simics file"
+#mkdir -p $sb/simu/data/cec-chip/
+#cp $BACKING_BUILD/src/simu/data/cec-chip/base_cec_chip_file $sb/simu/data/cec-chip
+#patch -p0 $sb/simu/data/cec-chip/base_cec_chip_file $HOSTBOOTROOT/src/build/citest/etc/patches/my_patch_File
+

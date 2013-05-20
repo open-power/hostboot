@@ -125,8 +125,12 @@ public:
           uint64_t length;
           uint64_t flag;  // used for header check..
       } test_data[] = {
-          { scan_targets[myPROC0],    {0x12121212, 0x12341234, 0x12341234, 0x12341234, 0x12341234, 0x12341234, 0x10000000, 0x00000000}, 0x15030803, 197, 0x0},
-          { scan_targets[memBuf0],    {0x34343434, 0xaaaaaaaa, 0xbbbbbbbb, 0xb0000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000}, 0x01034001, 100, 0x2},
+          { scan_targets[myPROC0],
+          {0x12121212, 0x12341234, 0x12341234, 0x12341234, 0x12341234,
+          0x12341234,0x12341234, 0x00000000}, 0x15030082, 223, 0x0},
+          { scan_targets[memBuf0],
+          {0x34343434, 0xaaaaaaaa, 0xbbbbbbbb, 0xb0000000, 0x00000000,
+          0x00000000, 0x00000000, 0x00000000}, 0x01034001, 100, 0x2},
       };
       const uint64_t NUM_ADDRS = sizeof(test_data)/sizeof(test_data[0]);
 
@@ -207,8 +211,7 @@ public:
 
                   if(read_data[y] != test_data[x].data[y])
                   {
-                      TRACFCOMP(g_trac_scandd,
-                                "scanTest::test_SCANreadWrite_proc> [%d] Read: EXPECTED Data miss-match : ring=0x%X, read_data=0x%.8x, write_data=0x%llx", x, test_data[x].ring, read_data[y], test_data[x].data[y]);
+                      TRACFCOMP(g_trac_scandd, "scanTest::test_SCANreadWrite_proc> [%d] Read: UNEXPECTED Data miss-match : ring=0x%X, read_data=0x%.8x, write_data=0x%llx", x, test_data[x].ring, read_data[y], test_data[x].data[y]);
                       TS_FAIL("scanTest::test_SCANreadWrite_proc> ERROR : Data miss-match between read and expected data" );
                       fails++;
                   }

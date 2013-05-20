@@ -331,6 +331,12 @@ hb_fipssetup()
     echo "Creating new sandbox."
     mksb -rc ${SANDBOXRC} -dir ${SANDBOXROOT} -back $DRIVER \
          -sb ${SANDBOXNAME} -m ppc
+
+    cp ${HOSTBOOTROOT}/src/build/citest/etc/workarounds.presimsetup \
+        ${SANDBOXBASE}/src
+    execute_in_sandbox "export BACKING_BUILD=\$bb && \
+        ./workarounds.presimsetup"  "ppc"
+    rm ${SANDBOXBASE}/src/workarounds.presimsetup
 }
 
 hb_simsetup()
