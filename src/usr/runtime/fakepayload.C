@@ -23,7 +23,6 @@
 #include "fakepayload.H"
 #include <string.h>
 #include <sys/mm.h>
-#include <sys/mmio.h>
 #include <util/align.H>
 #include <targeting/common/commontargeting.H>
 
@@ -63,7 +62,7 @@ void FakePayload::load()
     assert(ALIGN_PAGE(entry + size) < safeClearArea);
 
     // Map in the payload area.
-    void* memArea = mmio_dev_map(reinterpret_cast<void*>(base), THIRTYTWO_GB);
+    void* memArea = mm_block_map(reinterpret_cast<void*>(base), safeClearArea);
 
     // Clear out anything the FSP might have left around (for security).
     memset(memArea, '\0', safeClearArea);
@@ -82,7 +81,7 @@ void FakePayload::load()
     mm_icache_invalidate(memArea, ALIGN_8(safeClearArea) / sizeof(uint64_t));
 
     // Unmap the payload area.
-    mmio_dev_unmap(memArea);
+    assert(0 == mm_block_unmap(memArea));
 
 }
 

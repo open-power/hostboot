@@ -36,7 +36,7 @@
 #include <devicefw/userif.H>
 #include <targeting/common/util.H>
 #include <runtime/runtime.H>
-#include <sys/mmio.h>
+#include <sys/mm.h>
 #include <util/align.H>
 #include <sys/mm.h>
 #include <dump/dumpif.H>
@@ -155,7 +155,7 @@ class DumpTest: public CxxTest::TestSuite
                                  {0x3333333333333333, 0x3333333333333333,
                                   0x3333333333333333, 0x3333333333333333,
                                   0x3333333333333333, 0x3333333333333333,
-                                  0x3333333333333333,0x3333333333333333},
+                                  0x3333333333333333, 0x3333333333333333},
 
                                  {0x4444444444444444, 0x4444444444444444,
                                   0x4444444444444444, 0x4444444444444444,
@@ -181,9 +181,10 @@ class DumpTest: public CxxTest::TestSuite
         {
 
             // Get the Va for the page aligned Physical address
-            va_mapsrcTableAddr =
-              static_cast<uint64_t*>(mmio_dev_map(reinterpret_cast<void*>(ALIGN_PAGE_DOWN(src_data[index])),
-                                                  THIRTYTWO_GB));
+            va_mapsrcTableAddr = reinterpret_cast<uint64_t*>(
+                mm_block_map(reinterpret_cast<void*>(
+                                ALIGN_PAGE_DOWN(src_data[index])),
+                             PAGESIZE));
 
             // copy the mapped VA to a VA pointer we will
             va_srcTableAddr = va_mapsrcTableAddr;
@@ -198,12 +199,12 @@ class DumpTest: public CxxTest::TestSuite
 
             // unmap the previous src entry
             int rc =
-              mmio_dev_unmap(reinterpret_cast<void*>(va_mapsrcTableAddr));
+              mm_block_unmap(reinterpret_cast<void*>(va_mapsrcTableAddr));
 
             if (rc != 0)
             {
                TRACFCOMP(g_trac_dump, "DumpTest:test_DumpCollect> got an error back from unmap : RC=%X",rc);
-               TS_FAIL( "DumpTest::CollectDump ERROR : BAD Rc from mmio_dev_unmap" );
+               TS_FAIL( "DumpTest::CollectDump ERROR : BAD Rc from mm_block_unmap" );
                break;
             }
             index+=2;
@@ -236,9 +237,10 @@ class DumpTest: public CxxTest::TestSuite
         for (int i = 0; i<4; i++)
         {
             // Get the Va for the page aligned Physical address
-            va_mapdestTableAddr =
-              static_cast<uint64_t*>(mmio_dev_map(reinterpret_cast<void*>(ALIGN_PAGE_DOWN(dst_data[index])),
-                                                  THIRTYTWO_GB));
+            va_mapdestTableAddr = reinterpret_cast<uint64_t*>(
+                mm_block_map(reinterpret_cast<void*>(
+                                ALIGN_PAGE_DOWN(dst_data[index])),
+                             PAGESIZE));
 
             // copy the mapped VA to a VA pointer we will
             va_destTableAddr = va_mapdestTableAddr;
@@ -271,13 +273,13 @@ class DumpTest: public CxxTest::TestSuite
 
             // unmap the previous src entry
             int rc =
-              mmio_dev_unmap(reinterpret_cast<void*>(va_mapsrcTableAddr));
+              mm_block_unmap(reinterpret_cast<void*>(va_mapsrcTableAddr));
 
             if (rc != 0)
             {
                TRACFCOMP(g_trac_dump,
                          "DumpTest::DumpCollect got an error back from unmap : RC=%X",rc);
-               TS_FAIL( "DumpTest::DumpCollect ERROR : BAD Rc from mmio_dev_unmap" );
+               TS_FAIL( "DumpTest::DumpCollect ERROR : BAD Rc from mm_block_unmap" );
                break;
             }
             index+=2;
@@ -385,9 +387,10 @@ class DumpTest: public CxxTest::TestSuite
         for (int i = 0; i<4; i++)
         {
             // Get the Va for the page aligned Physical address
-            va_mapsrcTableAddr =
-              static_cast<uint64_t*>(mmio_dev_map(reinterpret_cast<void*>(ALIGN_PAGE_DOWN(src_data[index])),
-                                                  THIRTYTWO_GB));
+            va_mapsrcTableAddr = reinterpret_cast<uint64_t*>(
+                mm_block_map(reinterpret_cast<void*>(
+                                ALIGN_PAGE_DOWN(src_data[index])),
+                             PAGESIZE));
 
             // copy the mapped VA to a VA pointer
             va_srcTableAddr = va_mapsrcTableAddr;
@@ -402,13 +405,13 @@ class DumpTest: public CxxTest::TestSuite
 
             // unmap the previous src entry
             int rc =
-              mmio_dev_unmap(reinterpret_cast<void*>(va_mapsrcTableAddr));
+              mm_block_unmap(reinterpret_cast<void*>(va_mapsrcTableAddr));
 
             if (rc != 0)
             {
                TRACFCOMP(g_trac_dump,
                          "DumpTest::DumpCollectUnevenDest> got an error back from unmap : RC=%X",rc);
-               TS_FAIL( "DumpTest::CollectDumpUnevenDest ERROR : BAD Rc from mmio_dev_unmap" );
+               TS_FAIL( "DumpTest::CollectDumpUnevenDest ERROR : BAD Rc from mm_block_unmap" );
                break;
             }
             index+=2;
@@ -451,7 +454,10 @@ class DumpTest: public CxxTest::TestSuite
             {
 
                 // Get the Va for the page aligned Physical address
-                va_mapdestTableAddr = static_cast<uint64_t*>(mmio_dev_map(reinterpret_cast<void*>(ALIGN_PAGE_DOWN(dst_data[index])),THIRTYTWO_GB));
+                va_mapdestTableAddr = reinterpret_cast<uint64_t*>(
+                    mm_block_map(reinterpret_cast<void*>(
+                                    ALIGN_PAGE_DOWN(dst_data[index])),
+                                 PAGESIZE));
 
                 // copy the mapped VA to a VA pointer we will
                 va_destTableAddr = va_mapdestTableAddr;
@@ -493,13 +499,13 @@ class DumpTest: public CxxTest::TestSuite
 
                 // unmap the previous src entry
                 int rc =
-                  mmio_dev_unmap(reinterpret_cast<void*>(va_mapsrcTableAddr));
+                  mm_block_unmap(reinterpret_cast<void*>(va_mapsrcTableAddr));
 
                 if (rc != 0)
                 {
                     TRACFCOMP(g_trac_dump,
                               "DumpTest::DumpCollectUnevenDest got an error back from unmap : RC=%X",rc);
-                    TS_FAIL( "DumpTest::DumpCollectUnevenDest ERROR : BAD Rc from mmio_dev_unmap" );
+                    TS_FAIL( "DumpTest::DumpCollectUnevenDest ERROR : BAD Rc from mm_block_unmap" );
                     break;
                 }
                 index+=2;
@@ -509,7 +515,10 @@ class DumpTest: public CxxTest::TestSuite
             // checking the 4th entry as it crosses through 2 source entries
 
             // Get the Va for the page aligned Physical address
-            va_mapdestTableAddr = static_cast<uint64_t*>(mmio_dev_map(reinterpret_cast<void*>(ALIGN_PAGE_DOWN(dst_data[index])),THIRTYTWO_GB));
+            va_mapdestTableAddr = reinterpret_cast<uint64_t*>(
+                mm_block_map(reinterpret_cast<void*>(
+                                ALIGN_PAGE_DOWN(dst_data[index])),
+                             PAGESIZE));
 
             // copy the mapped VA to a VA pointer we will
             va_destTableAddr = va_mapdestTableAddr;
@@ -563,13 +572,13 @@ class DumpTest: public CxxTest::TestSuite
 
             // unmap the previous src entry
             int rc =
-              mmio_dev_unmap(reinterpret_cast<void*>(va_mapdestTableAddr));
+              mm_block_unmap(reinterpret_cast<void*>(va_mapdestTableAddr));
 
             if (rc != 0)
             {
                 TRACFCOMP(g_trac_dump,
                           "DumpTest::DumpCollectUnevenDest got an error back from unmap : RC=%X",rc);
-                TS_FAIL( "DumpTest::CollectDumpUnevenDest ERROR : BAD Rc from mmio_dev_unmap" );
+                TS_FAIL( "DumpTest::CollectDumpUnevenDest ERROR : BAD Rc from mm_block_unmap" );
                 break;
             }
             index+=2;
@@ -679,9 +688,10 @@ class DumpTest: public CxxTest::TestSuite
 
         do
         {
-            uint64_t *va_mapsrcTableAddr =
-              static_cast<uint64_t*>(mmio_dev_map(reinterpret_cast<void*>(ALIGN_PAGE_DOWN(src_data[0])),
-                                                  THIRTYTWO_GB));
+            uint64_t *va_mapsrcTableAddr = reinterpret_cast<uint64_t*>(
+                mm_block_map(reinterpret_cast<void*>(
+                                ALIGN_PAGE_DOWN(src_data[0])),
+                             PAGESIZE));
 
             uint64_t *va_srcTableAddr = va_mapsrcTableAddr;
 
@@ -693,20 +703,22 @@ class DumpTest: public CxxTest::TestSuite
             memcpy(va_srcTableAddr, src_data0, sizeof(src_data0));
 
             // unmap the previous src entry
-            int rc =  mmio_dev_unmap(reinterpret_cast<void*>(va_mapsrcTableAddr));
+            int rc = mm_block_unmap(
+                        reinterpret_cast<void*>(va_mapsrcTableAddr));
 
             if (rc != 0)
             {
                TRACFCOMP(g_trac_dump,
-                         "DumpTest::DumpCollectUnevenSrc mmio_dev_map (1) bad RC=%X for addr %llx",rc, va_mapsrcTableAddr);
-               TS_FAIL( "DumpTest::DumpCollectUnevenSrc ERROR : BAD Rc from mmio_dev_unmap" );
+                         "DumpTest::DumpCollectUnevenSrc mm_block_map (1) bad RC=%X for addr %llx",rc, va_mapsrcTableAddr);
+               TS_FAIL( "DumpTest::DumpCollectUnevenSrc ERROR : BAD Rc from mm_block_unmap" );
                break;
 
             }
 
-            va_mapsrcTableAddr =
-              static_cast<uint64_t*>(mmio_dev_map(reinterpret_cast<void*>(ALIGN_PAGE_DOWN(src_data[2])),
-                                                  THIRTYTWO_GB));
+            va_mapsrcTableAddr = reinterpret_cast<uint64_t*>(
+                mm_block_map(reinterpret_cast<void*>(
+                                ALIGN_PAGE_DOWN(src_data[2])),
+                             PAGESIZE));
 
             va_srcTableAddr = va_mapsrcTableAddr;
 
@@ -719,20 +731,21 @@ class DumpTest: public CxxTest::TestSuite
             memcpy(va_srcTableAddr, src_data1, sizeof(src_data1));
 
             // unmap the previous src entry
-            rc =  mmio_dev_unmap(reinterpret_cast<void*>(va_mapsrcTableAddr));
+            rc =  mm_block_unmap(reinterpret_cast<void*>(va_mapsrcTableAddr));
 
             if (rc != 0)
             {
                TRACFCOMP(g_trac_dump,
-                         "DumpTest::DumpCollectUnevenSrc mmio_dev_map (2) bad RC=%X for addr %llx",rc, va_mapsrcTableAddr);
-               TS_FAIL( "DumpTest::DumpCollectUnevenSrc ERROR : BAD Rc from mmio_dev_unmap" );
+                         "DumpTest::DumpCollectUnevenSrc mm_block_map (2) bad RC=%X for addr %llx",rc, va_mapsrcTableAddr);
+               TS_FAIL( "DumpTest::DumpCollectUnevenSrc ERROR : BAD Rc from mm_block_unmap" );
                break;
             }
 
 
-            va_mapsrcTableAddr =
-              static_cast<uint64_t*>(mmio_dev_map(reinterpret_cast<void*>(ALIGN_PAGE_DOWN(src_data[4])),
-                                                  THIRTYTWO_GB));
+            va_mapsrcTableAddr = reinterpret_cast<uint64_t*>(
+                mm_block_map(reinterpret_cast<void*>(
+                                ALIGN_PAGE_DOWN(src_data[4])),
+                             PAGESIZE));
 
             va_srcTableAddr = va_mapsrcTableAddr;
 
@@ -745,20 +758,21 @@ class DumpTest: public CxxTest::TestSuite
             memcpy(va_srcTableAddr, src_data2, sizeof(src_data2));
 
             // unmap the previous src entry
-            rc =  mmio_dev_unmap(reinterpret_cast<void*>(va_mapsrcTableAddr));
+            rc =  mm_block_unmap(reinterpret_cast<void*>(va_mapsrcTableAddr));
 
             if (rc != 0)
             {
                TRACFCOMP(g_trac_dump,
-                         "DumpTest::DumpCollectUnevenSrc mmio_dev_map (3) bad RC=%X for addr %llx",rc, va_mapsrcTableAddr);
-               TS_FAIL( "DumpTest::DumpCollectUnevenSrc ERROR : BAD Rc from mmio_dev_unmap" );
+                         "DumpTest::DumpCollectUnevenSrc mm_block_map (3) bad RC=%X for addr %llx",rc, va_mapsrcTableAddr);
+               TS_FAIL( "DumpTest::DumpCollectUnevenSrc ERROR : BAD Rc from mm_block_unmap" );
                break;
 
             }
 
-            va_mapsrcTableAddr =
-              static_cast<uint64_t*>(mmio_dev_map(reinterpret_cast<void*>(ALIGN_PAGE_DOWN(src_data[6])),
-                                                  THIRTYTWO_GB));
+            va_mapsrcTableAddr = reinterpret_cast<uint64_t*>(
+                mm_block_map(reinterpret_cast<void*>(
+                                ALIGN_PAGE_DOWN(src_data[6])),
+                             PAGESIZE));
 
             va_srcTableAddr = va_mapsrcTableAddr;
 
@@ -772,13 +786,13 @@ class DumpTest: public CxxTest::TestSuite
 
 
             // unmap the previous src entry
-            rc =  mmio_dev_unmap(reinterpret_cast<void*>(va_mapsrcTableAddr));
+            rc = mm_block_unmap(reinterpret_cast<void*>(va_mapsrcTableAddr));
 
             if (rc != 0)
             {
                TRACFCOMP(g_trac_dump,
-                         "DumpTest::DumpCollectUnevenSrc mmio_dev_map (4) bad RC=%X for addr %llx",rc, va_mapsrcTableAddr);
-               TS_FAIL( "DumpTest::DumpCollectUnevenSrc ERROR : BAD Rc from mmio_dev_unmap" );
+                         "DumpTest::DumpCollectUnevenSrc mm_block_map (4) bad RC=%X for addr %llx",rc, va_mapsrcTableAddr);
+               TS_FAIL( "DumpTest::DumpCollectUnevenSrc ERROR : BAD Rc from mm_block_unmap" );
                break;
             }
         }while(0);
@@ -819,9 +833,10 @@ class DumpTest: public CxxTest::TestSuite
 
             // FIRST Destination ENTRY source entires 0 and 1   !!!!
             // Get the Va for the page aligned Physical address
-            va_mapdestTableAddr =
-              static_cast<uint64_t*>(mmio_dev_map(reinterpret_cast<void*>(ALIGN_PAGE_DOWN(dst_data[index])),
-                                                  THIRTYTWO_GB));
+            va_mapdestTableAddr = reinterpret_cast<uint64_t*>(
+                mm_block_map(reinterpret_cast<void*>(
+                                ALIGN_PAGE_DOWN(dst_data[index])),
+                             PAGESIZE));
 
             // copy the mapped VA to a VA pointer we will
             va_destTableAddr = va_mapdestTableAddr;
@@ -880,13 +895,13 @@ class DumpTest: public CxxTest::TestSuite
 
             // unmap the previous src entry
             int rc =
-              mmio_dev_unmap(reinterpret_cast<void*>(va_mapdestTableAddr));
+              mm_block_unmap(reinterpret_cast<void*>(va_mapdestTableAddr));
 
             if (rc != 0)
             {
                 TRACFCOMP(g_trac_dump,
                           "DumpTest::DumpCollectUnevenSrc:5 got an error back from unmap : RC=%X",rc);
-                TS_FAIL( "DumpTest::DumpCollectUnevenSrc:5 ERROR : BAD Rc from mmio_dev_unmap" );
+                TS_FAIL( "DumpTest::DumpCollectUnevenSrc:5 ERROR : BAD Rc from mm_block_unmap" );
                 break;
             }
             index+=2;
@@ -895,9 +910,10 @@ class DumpTest: public CxxTest::TestSuite
             // SECOND DEStination ENTRY  third source entry!!!!
 
             // Get the Va for the page aligned Physical address
-            va_mapdestTableAddr =
-              static_cast<uint64_t*>(mmio_dev_map(reinterpret_cast<void*>(ALIGN_PAGE_DOWN(dst_data[index])),
-                                                  THIRTYTWO_GB));
+            va_mapdestTableAddr = reinterpret_cast<uint64_t*>(
+                mm_block_map(reinterpret_cast<void*>(
+                                ALIGN_PAGE_DOWN(dst_data[index])),
+                             PAGESIZE));
 
             // copy the mapped VA to a VA pointer we will
             va_destTableAddr = va_mapdestTableAddr;
@@ -931,14 +947,13 @@ class DumpTest: public CxxTest::TestSuite
             }
 
             // unmap the previous src entry
-            rc =
-              mmio_dev_unmap(reinterpret_cast<void*>(va_mapdestTableAddr));
+            rc = mm_block_unmap(reinterpret_cast<void*>(va_mapdestTableAddr));
 
             if (rc != 0)
             {
                 TRACFCOMP(g_trac_dump,
                           "DumpTest::DumpCollectUnevenSrc:6 got an error back from unmap : RC=%X",rc);
-                TS_FAIL( "DumpTest::DumpCollectUnevenSrc:6 ERROR : BAD Rc from mmio_dev_unmap" );
+                TS_FAIL( "DumpTest::DumpCollectUnevenSrc:6 ERROR : BAD Rc from mm_block_unmap" );
                 break;
             }
 
@@ -947,7 +962,10 @@ class DumpTest: public CxxTest::TestSuite
             // THIRD destination entry - part of last source!!!!
 
             // Get the Va for the page aligned Physical address
-            va_mapdestTableAddr = static_cast<uint64_t*>(mmio_dev_map(reinterpret_cast<void*>(ALIGN_PAGE_DOWN(dst_data[index])),THIRTYTWO_GB));
+            va_mapdestTableAddr = reinterpret_cast<uint64_t*>(
+                mm_block_map(reinterpret_cast<void*>(
+                                ALIGN_PAGE_DOWN(dst_data[index])),
+                             PAGESIZE));
 
             // copy the mapped VA to a VA pointer we will
             va_destTableAddr = va_mapdestTableAddr;
@@ -987,13 +1005,13 @@ class DumpTest: public CxxTest::TestSuite
 
             // unmap the previous src entry
             rc =
-              mmio_dev_unmap(reinterpret_cast<void*>(va_mapdestTableAddr));
+              mm_block_unmap(reinterpret_cast<void*>(va_mapdestTableAddr));
 
             if (rc != 0)
             {
                 TRACFCOMP(g_trac_dump,
                           "DumpTest::DumpCollectUnevenSrc:7  got an error back from unmap : RC=%X",rc);
-                TS_FAIL( "DumpTest::DumpCollectUnevenSrc:7 ERROR : BAD Rc from mmio_dev_unmap" );
+                TS_FAIL( "DumpTest::DumpCollectUnevenSrc:7 ERROR : BAD Rc from mm_block_unmap" );
                 break;
             }
             index+=2;
@@ -1002,9 +1020,10 @@ class DumpTest: public CxxTest::TestSuite
             // FOURTH SRC ENTRY !!!!
 
             // Get the Va for the page aligned Physical address
-            va_mapdestTableAddr =
-              static_cast<uint64_t*>(mmio_dev_map(reinterpret_cast<void*>(ALIGN_PAGE_DOWN(dst_data[index])),
-                                                  THIRTYTWO_GB));
+            va_mapdestTableAddr = reinterpret_cast<uint64_t*>(
+                mm_block_map(reinterpret_cast<void*>(
+                                ALIGN_PAGE_DOWN(dst_data[index])),
+                             PAGESIZE));
 
             // copy the mapped VA to a VA pointer we will
             va_destTableAddr = va_mapdestTableAddr;
@@ -1044,14 +1063,13 @@ class DumpTest: public CxxTest::TestSuite
             }
 
             // unmap the previous src entry
-            rc =
-              mmio_dev_unmap(reinterpret_cast<void*>(va_mapdestTableAddr));
+            rc = mm_block_unmap(reinterpret_cast<void*>(va_mapdestTableAddr));
 
             if (rc != 0)
             {
                 TRACFCOMP(g_trac_dump,
                           "DumpTest::DumpCollectUnevenSrc:8 got an error back from unmap : RC=%X",rc);
-                TS_FAIL( "DumpTest::DumpCollectUnevenSrc:8 ERROR : BAD Rc from mmio_dev_unmap" );
+                TS_FAIL( "DumpTest::DumpCollectUnevenSrc:8 ERROR : BAD Rc from mm_block_unmap" );
                 break;
             }
             index+=2;
@@ -1067,7 +1085,7 @@ class DumpTest: public CxxTest::TestSuite
             TRACFCOMP(g_trac_dump, "DumpTest::DumpCollectUnevenSRC:1 : Results Data mismatch rc = %d", result_rc);
             TS_FAIL( "DumpTest::DumpCollectUnevenSrc ERROR : Unexpected error data mismatch in results table" );
         }
-        
+
 
         TRACFCOMP( g_trac_dump, "dumpTest::test_dumpCollectUnevenSrc COMPLETE" );
     }
@@ -1077,7 +1095,7 @@ class DumpTest: public CxxTest::TestSuite
      * @brief Basic dump test that forces an error condition that does not have
      *     enough destination space to hold the src size.
      *     This testcase also verifies that we can send a mbox message with
-     *     dump status to the FSP. 
+     *     dump status to the FSP.
      *
      */
 
@@ -1166,7 +1184,10 @@ class DumpTest: public CxxTest::TestSuite
         {
 
             // Get the Va for the page aligned Physical address
-            va_mapsrcTableAddr = static_cast<uint64_t*>(mmio_dev_map(reinterpret_cast<void*>(ALIGN_PAGE_DOWN(src_data[index])),THIRTYTWO_GB));
+            va_mapsrcTableAddr = reinterpret_cast<uint64_t*>(
+                mm_block_map(reinterpret_cast<void*>(
+                                ALIGN_PAGE_DOWN(src_data[index])),
+                             PAGESIZE));
 
             // copy the mapped VA to a VA pointer we will
             va_srcTableAddr = va_mapsrcTableAddr;
@@ -1181,12 +1202,12 @@ class DumpTest: public CxxTest::TestSuite
 
             // unmap the previous src entry
             int rc =
-              mmio_dev_unmap(reinterpret_cast<void*>(va_mapsrcTableAddr));
+                mm_block_unmap(reinterpret_cast<void*>(va_mapsrcTableAddr));
 
             if (rc != 0)
             {
                 TRACFCOMP(g_trac_dump, "DumpTest::DumpCollectNotEnoughDest ERROR..got an error back from unmap : RC=%X",rc);
-                TS_FAIL( "DumpTest::DumpCollectNotEnoughDest ERROR : BAD Rc from mmio_dev_unmap" );
+                TS_FAIL( "DumpTest::DumpCollectNotEnoughDest ERROR : BAD Rc from mm_block_unmap" );
                 break;
             }
             index+=2;
@@ -1239,8 +1260,8 @@ class DumpTest: public CxxTest::TestSuite
 
         // This call is just to verify we can call MSG_END .. even though with
         // this flow we already sent a msg ERROR.
-                          
-      
+
+
         // Successful so send mbox message indicating the dump is complete and successful
         l_err = DUMP::sendMboxMsg(DUMP::DUMP_MSG_END_MSG_TYPE);
 
@@ -1250,7 +1271,7 @@ class DumpTest: public CxxTest::TestSuite
                       "DumpTest::DumpCollectNotEnoughDest ERROR : Got an errorlog back from sendMboxMsg-END");
             TS_FAIL( "DumpTest::DumpCollectNotEnoughDest ERROR : Got an errorlog back from sendMboxMsg-END" );
         }
-   
+
 
         TRACFCOMP( g_trac_dump, "dumpTest::test_dumpCollectNotEnoughDest COMPLETE" );
 

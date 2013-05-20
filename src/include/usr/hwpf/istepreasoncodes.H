@@ -167,7 +167,7 @@ enum istepReasonCode
     ISTEP_FABRIC_IO_DCCAL_ENDPOINT1_FAILED      = ISTEP_COMP_ID | 0x24,
     ISTEP_FABRIC_IO_DCCAL_ENDPOINT2_FAILED      = ISTEP_COMP_ID | 0x25,
     ISTEP_CUSTOMIZE_CHIP_REGIONS_FAILED         = ISTEP_COMP_ID | 0x26,
-    ISTEP_MMIO_UNMAP_ERR                        = ISTEP_COMP_ID | 0x27,
+    ISTEP_MM_UNMAP_ERR                          = ISTEP_COMP_ID | 0x27,
     /**  0x28 - available */
     ISTEP_CEN_REC_ATTN_FAILED                   = ISTEP_COMP_ID | 0x29,
     ISTEP_PROC_REC_ATTN_FAILED                  = ISTEP_COMP_ID | 0x2A,

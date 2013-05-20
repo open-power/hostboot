@@ -37,8 +37,8 @@
 
 #include    <sys/misc.h>            //  cpu_thread_count(), P8_MAX_PROCS
 #include    <vfs/vfs.H>             // PORE image
-#include    <sys/mmio.h>            // mmio_dev_map
-#include    <sys/mm.h>              // mm_linear_map
+#include    <sys/mm.h>            // mm_block_map
+#include    <sys/mmio.h>          // THIRTYTWO_GB
 
 #include    <trace/interface.H>
 #include    <initservice/taskargs.H>
@@ -322,10 +322,8 @@ void*    call_host_build_winkle( void    *io_pArgs )
     void        *l_pRealMemBase =
                         reinterpret_cast
                  <void * const>(VMM_HOMER_REGION_START_ADDR );
-#if 0
-    //TODO RTC 71081 - enabled when switching to dev_map
     void* l_pVirtMemBase = NULL;
-#endif
+
     ISTEP_ERROR::IStepError     l_StepError;
 
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
@@ -337,37 +335,17 @@ void*    call_host_build_winkle( void    *io_pArgs )
         //  Get a chunk of real memory big enough to store all the possible
         //  SLW images.
 
-        //Assert if anyone ever changes VMM_HOMER_REGION_SIZE to not
-        //equal 32MB because mmio_dev_map won't support it
-        assert(VMM_HOMER_REGION_SIZE == THIRTYTWO_MB,
+        assert(VMM_HOMER_REGION_SIZE <= THIRTYTWO_GB,
                "host_build_winkle: Unsupported HOMER Region size");
 
-#if 0
-        //TODO RTC: 71081 change to non-cache inhibited
-        //version of mmio_dev_map
         l_pVirtMemBase =
-              mmio_dev_map(l_pRealMemBase, THIRTYTWO_MB);
+              mm_block_map(l_pRealMemBase, VMM_HOMER_REGION_SIZE);
 
         TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                    "Got virtual mem  buffer for %d cpus = 0x%p",
                    P8_MAX_PROCS,
                    l_pVirtMemBase  );
-#else
-        const int l_getAddrRc = mm_linear_map (l_pRealMemBase,
-                                               THIRTYTWO_MB);
-        if(l_getAddrRc != 0)
-        {
-            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, ERR_MRK"host_build_winkle ERROR : could not get real mem");
-            assert(false);
-            // drop out of do block with errorlog.
-            break;
-        }
-        TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                   "Got virtual mem  buffer for %d cpus = 0x%p",
-                   P8_MAX_PROCS,
-                   l_pRealMemBase  );
 
-#endif
         //  Continue, build SLW images
 
 
@@ -418,17 +396,12 @@ void*    call_host_build_winkle( void    *io_pArgs )
                 uint64_t    l_procRealMemAddr  =
                   reinterpret_cast<uint64_t>(l_pRealMemBase)
                   + l_procOffsetAddr;
-#if 0
-                //TODO RTC: 71081 - change to use virtual offset
-                //when switched to mmio_dev_map type interface.
+
                 void *l_pImageOut =
                   reinterpret_cast<void * const>
                   (reinterpret_cast<uint64_t>(l_pVirtMemBase)
                    + l_procOffsetAddr) ;
-#else
-                 void *l_pImageOut =
-                   reinterpret_cast<void * const>(l_procRealMemAddr);
-#endif
+
                 uint32_t    l_sizeImageOut  =
                   (HOMER_MAX_SLW_IMG_SIZE_IN_MB*MEGABYTE);
 
@@ -531,36 +504,33 @@ void*    call_host_build_winkle( void    *io_pArgs )
     }  while (0);
     // @@@@@    END CUSTOM BLOCK:   @@@@@
 
-#if 0
-    //TODO RTC 71081 - enable when switching to dev_map
-    // interface
     if(l_pVirtMemBase)
     {
         int rc = 0;
-        rc =  mmio_dev_unmap(l_pVirtMemBase);
+        rc =  mm_block_unmap(l_pVirtMemBase);
         if (rc != 0)
         {
             /*@
              * @errortype
-             * @reasoncode   ISTEP::ISTEP_MMIO_UNMAP_ERR
+             * @reasoncode   ISTEP::ISTEP_MM_UNMAP_ERR
              * @moduleid     ISTEP::ISTEP_BUILD_WINKLE_IMAGES
              * @severity     ERRORLOG::ERRL_SEV_UNRECOVERABLE
              * @userdata1    Return Code
              * @userdata2    Unmap address
-             * @devdesc      mmio_dev_unmap() returns error
+             * @devdesc      mm_block_unmap() returns error
              */
             l_errl =
               new ERRORLOG::ErrlEntry(
                                       ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                       ISTEP::ISTEP_BUILD_WINKLE_IMAGES,
-                                      ISTEP::ISTEP_MMIO_UNMAP_ERR,
+                                      ISTEP::ISTEP_MM_UNMAP_ERR,
                                       rc,
                                       reinterpret_cast<uint64_t>
                                       (l_pVirtMemBase));
 
             /*@
              * @errortype
-             * @reasoncode  ISTEP_MMIO_UNMAP_ERR
+             * @reasoncode  ISTEP_MM_UNMAP_ERR
              * @severity    ERRORLOG::ERRL_SEV_UNRECOVERABLE
              * @moduleid    ISTEP_HOST_BUILD_WINKLE
              * @userdata1       bytes 0-1: plid identifying first error
@@ -572,13 +542,12 @@ void*    call_host_build_winkle( void    *io_pArgs )
              *
              */
             l_StepError.addErrorDetails(
-                                        ISTEP::ISTEP_MMIO_UNMAP_ERR,
+                                        ISTEP::ISTEP_MM_UNMAP_ERR,
                                         ISTEP::ISTEP_HOST_BUILD_WINKLE,
                                         l_errl );
             errlCommit( l_errl, HWPF_COMP_ID );
         }
     }
-#endif
 
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                "call_host_build_winkle exit" );
@@ -631,12 +600,7 @@ void*    call_proc_set_pore_bar( void    *io_pArgs )
 
         //  Note that the "i_mem_bar" input to p8_set_pore_bar is the physical
         //  address of the PORE image, this is the image that will get executed
-        //  at winkle.  The void * i_image parameter actually points to the same
-        //  place in HostBoot; in fsp or cronus these will be different.
-        //
-        //  @todo this may change for secure boot, need to make up an RTC
-        //      to handle this, or there may one already???
-        //
+        //  at winkle.
         uint64_t l_imageAddr =
         l_procChip->getAttr<TARGETING::ATTR_SLW_IMAGE_ADDR>();
 
@@ -660,7 +624,10 @@ void*    call_proc_set_pore_bar( void    *io_pArgs )
                    l_mem_type );
 
 
-        void * const l_pImage = reinterpret_cast<void * const>(l_imageAddr);
+        // Map image.
+        void * const l_pImage = reinterpret_cast<void* const>(
+                        mm_block_map(reinterpret_cast<void*>(l_imageAddr),
+                                     HOMER_MAX_SLW_IMG_SIZE_IN_MB*MEGABYTE));
 
         FAPI_INVOKE_HWP( l_errl,
                          p8_set_pore_bar,
@@ -670,6 +637,33 @@ void*    call_proc_set_pore_bar( void    *io_pArgs )
                          l_mem_size,
                          l_mem_type
                        );
+
+        // Unmap
+        int rc = mm_block_unmap(l_pImage);
+        if ((rc != 0) && (NULL == l_errl)) // The bad rc is lower priority
+                                           // than any other error, so just
+                                           // ignore it if something else
+                                           // happened.
+        {
+            /*@
+             * @errortype
+             * @reasoncode   ISTEP::ISTEP_MM_UNMAP_ERR
+             * @moduleid     ISTEP::ISTEP_PROC_SET_PORE_BAR
+             * @severity     ERRORLOG::ERRL_SEV_UNRECOVERABLE
+             * @userdata1    Return Code
+             * @userdata2    Unmap address
+             * @devdesc      mm_block_unmap() returns error
+             */
+            l_errl =
+              new ERRORLOG::ErrlEntry(
+                                      ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                      ISTEP::ISTEP_PROC_SET_PORE_BAR,
+                                      ISTEP::ISTEP_MM_UNMAP_ERR,
+                                      rc,
+                                      reinterpret_cast<uint64_t>
+                                      (l_pImage));
+        }
+
 
         if ( l_errl )
         {

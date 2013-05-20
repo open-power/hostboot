@@ -28,6 +28,7 @@
 
 #include    <devicefw/userif.H>
 #include    <sys/misc.h>
+#include    <sys/mm.h>
 #include    <sys/mmio.h>
 #include    <vmmconst.h>
 
@@ -42,7 +43,7 @@
 #include    <hwpf/plat/fapiPlatTrace.H>
 #include    <hwpf/hwpf_reasoncodes.H>
 
-#include    <vfs/vfs.H> 
+#include    <vfs/vfs.H>
 #include    <util/utillidmgr.H>
 
 // Procedures
@@ -521,15 +522,13 @@ namespace HBOCC
                 winkle_loaded = true;
             }
 
-            //Assert if anyone ever changes VMM_HOMER_REGION_SIZE to not
-            //equal 32MB because mmio_dev_map won't support it
-            assert(VMM_HOMER_REGION_SIZE == THIRTYTWO_MB,
+            assert(VMM_HOMER_REGION_SIZE <= THIRTYTWO_GB,
                    "loadnStartAllOccs: Unsupported HOMER Region size");
 
             //Map entire homer region into virtual memory
             homerVirtAddrBase =
-              mmio_dev_map(reinterpret_cast<void*>(VMM_HOMER_REGION_START_ADDR),
-                           THIRTYTWO_MB);
+              mm_block_map(reinterpret_cast<void*>(VMM_HOMER_REGION_START_ADDR),
+                           VMM_HOMER_REGION_SIZE);
 
             TargetHandleList procChips;
             getAllChips(procChips, TYPE_PROC, true);
@@ -630,22 +629,22 @@ namespace HBOCC
         if(homerVirtAddrBase)
         {
             int rc = 0;
-            rc =  mmio_dev_unmap(homerVirtAddrBase);
+            rc =  mm_block_unmap(homerVirtAddrBase);
             if (rc != 0)
             {
                 /*@
                  * @errortype
                  * @moduleid     fapi::MOD_OCC_LOAD_START_ALL_OCCS
-                 * @reasoncode   fapi::RC_MMIO_UNMAP_ERR
+                 * @reasoncode   fapi::RC_MM_UNMAP_ERR
                  * @userdata1    Return Code
                  * @userdata2    Unmap address
-                 * @devdesc      mmio_dev_unmap() returns error
+                 * @devdesc      mm_block_unmap() returns error
                  */
                 l_tmpErrl =
                   new ERRORLOG::ErrlEntry(
                                           ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                           fapi::MOD_OCC_LOAD_START_ALL_OCCS,
-                                          fapi::RC_MMIO_UNMAP_ERR,
+                                          fapi::RC_MM_UNMAP_ERR,
                                           rc,
                                           reinterpret_cast<uint64_t>
                                           (homerVirtAddrBase));

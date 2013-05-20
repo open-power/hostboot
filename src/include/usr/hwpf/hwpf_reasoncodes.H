@@ -96,7 +96,7 @@ namespace fapi
         RC_STATE_MISMATCH             = HWPF_COMP_ID | 0x23,
 
         // OCC Errors
-        RC_MMIO_UNMAP_ERR             = HWPF_COMP_ID | 0x24,
+        RC_MM_UNMAP_ERR               = HWPF_COMP_ID | 0x24,
 
         // VDDR Errors
         RC_VDDR_EMPTY_MSG             = HWPF_COMP_ID | 0x25,
