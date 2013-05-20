@@ -33,6 +33,7 @@
 #include "common/plat/pegasus/prdfCenMbaCaptureData.H"
 #include "common/plat/pegasus/prdfCalloutUtil.H"
 #include "common/plat/pegasus/prdfCenDqBitmap.H"
+#include "common/plat/pegasus/prdfCenMarkstore.H"
 #include "common/plat/pegasus/prdfCenSymbol.H"
 #include "common/plat/pegasus/prdfMemoryMru.H"
 #include "framework/service/prdfPlatServices.H"
@@ -166,63 +167,35 @@ bool processRepairedRanks( TargetHandle_t i_mba, uint8_t i_repairedRankMask )
     // check each rank for repairs
     // that violate RAS policy
 
-    for ( uint8_t rankNumber = 0;
-            rankNumber < DIMM_DQ_MAX_MBAPORT_DIMMS * DIMM_DQ_MAX_DIMM_RANKS;
-            ++rankNumber )
+    for ( uint8_t r = 0; r < MAX_RANKS_PER_MBA; ++r )
     {
-        if(0 == ((0x80 >> rankNumber) & i_repairedRankMask))
+        if ( 0 == (i_repairedRankMask & (1 << r)) )
         {
-            // this rank didn't have any repairs
-
-            continue;
+            continue; // this rank didn't have any repairs
         }
 
-        uint8_t sm = INVALID_SYMBOL,
-                cm = INVALID_SYMBOL;
+        CenRank rank ( r );
+        CenMark mark;
 
-        if(SUCCESS != PlatServices::mssGetMarkStore(
-                    i_mba, rankNumber, cm, sm))
+        if ( SUCCESS != PlatServices::mssGetMarkStore(i_mba, rank, mark) )
         {
-            // skip this rank
-
-            continue;
+            continue; // skip this rank
         }
 
-        uint8_t sp0 = INVALID_SYMBOL,
-                sp1 = INVALID_SYMBOL,
-                sp = INVALID_SYMBOL;
+        CenSymbol sp0, sp1, sp;
 
-        if(SUCCESS != PlatServices::mssGetSteerMux(
-                i_mba,
-                rankNumber,
-                sp0, sp1, sp))
+        if ( SUCCESS != PlatServices::mssGetSteerMux(i_mba, rank, sp0, sp1, sp))
         {
-            // skip this rank
-
-            continue;
+            continue; // skip this rank
         }
 
-        if ( (validSymbol(sp0) || validSymbol(sp1) || validSymbol(sp)) &&
-             validSymbol(cm) )
+        if ( (sp0.isValid() || sp1.isValid() || sp.isValid()) &&
+             mark.getCM().isValid() )
         {
             // This rank has both a steer and a chip mark. Call out the DIMM
             // with the chip mark.
 
-            CenRank rank ( rankNumber );
-
-            CenSymbol symbol;
-            int32_t rc = CenSymbol::fromSymbol( i_mba, rank, cm,
-                                                CenSymbol::BOTH_SYMBOL_DQS,
-                                                symbol );
-            if ( SUCCESS != rc )
-            {
-                PRDF_ERR( "[processRepairedRanks] CenSymbol::fromSymbol() "
-                          "failed: HUID=0x%08x rank=%d symbol=%d",
-                          PlatServices::getHuid(i_mba), rank.flatten(), cm );
-                continue;
-            }
-
-            MemoryMru  memoryMru( i_mba, rank, symbol );
+            MemoryMru memoryMru( i_mba, rank, mark.getCM() );
 
             commitRestoreCallout( &addMemMruCallout, &memoryMru, i_mba );
 
@@ -382,24 +355,20 @@ void deployDramSpares(TargetHandle_t i_mba)
 
     bool x4 = PlatServices::isDramWidthX4(i_mba);
 
-    for ( uint8_t rankNumber = 0;
-            rankNumber < DIMM_DQ_MAX_MBAPORT_DIMMS * DIMM_DQ_MAX_DIMM_RANKS;
-            ++rankNumber )
+    for ( uint32_t r = 0; r < MAX_RANKS_PER_MBA; r++ )
     {
+        CenRank rank ( r );
+        CenSymbol symbol = CenSymbol::fromSymbol( i_mba, rank, 0 );
+
         // ignore errors from putSteerMux
 
         static_cast<void>(
-                PlatServices::mssSetSteerMux(
-                    i_mba,
-                    rankNumber,
-                    0, false));
+                PlatServices::mssSetSteerMux(i_mba, rank, symbol, false) );
 
-        if( x4 ) {
+        if( x4 )
+        {
             static_cast<void>(
-                    PlatServices::mssSetSteerMux(
-                        i_mba,
-                        rankNumber,
-                        0, true));
+                    PlatServices::mssSetSteerMux(i_mba, rank, symbol, true) );
         }
     }
 }

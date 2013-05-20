@@ -122,12 +122,11 @@ MemoryMru::MemoryMru( uint32_t i_memMru ) :
                 break;
             }
 
-            int32_t rc = CenSymbol::fromSymbol( iv_mbaTarget, iv_rank,
-                                                iv_memMruMeld.s.symbol,
-                                                iv_memMruMeld.s.pins,
-                                                iv_symbol );
+            iv_symbol = CenSymbol::fromSymbol( iv_mbaTarget, iv_rank,
+                                               iv_memMruMeld.s.symbol,
+                                               iv_memMruMeld.s.pins );
 
-            if ( SUCCESS != rc)
+            if ( !iv_symbol.isValid() )
             {
                 PRDF_ERR( PRDF_FUNC"Can not create symbol from  symbol value"
                                     " :%u, pins:%u, rank:%u",

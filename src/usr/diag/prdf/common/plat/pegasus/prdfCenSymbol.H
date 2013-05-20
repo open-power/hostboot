@@ -72,7 +72,7 @@ class CenSymbol
      */
     CenSymbol() :
         iv_mbaTarget(NULL), iv_rank(), iv_wiringType(WIRING_INVALID),
-        iv_symbol(0), iv_pins(NO_SYMBOL_DQS)
+        iv_symbol(SYMBOLS_PER_RANK), iv_pins(NO_SYMBOL_DQS)
     {}
 
   private: // constructor
@@ -94,12 +94,12 @@ class CenSymbol
      * @param  i_rank   The rank this symbol is on.
      * @param  i_symbol The input symbol.
      * @param  i_pins   See enum DqMask.
-     * @param  o_symbol The returned symbol object.
-     * @return Non-SUCCESS if an internal function failed, SUCCESS otherwise.
+     * @return A CenSymbol. Must call isValid() to determine if the function was
+     *         successful in creating a valid object.
      */
-    static int32_t fromSymbol( TARGETING::TargetHandle_t i_mba,
-                               const CenRank & i_rank, uint8_t i_symbol,
-                               uint8_t i_pins, CenSymbol & o_symbol );
+    static CenSymbol fromSymbol( TARGETING::TargetHandle_t i_mba,
+                                 const CenRank & i_rank, uint8_t i_symbol,
+                                 uint8_t i_pins = NO_SYMBOL_DQS );
 
     /**
      * @brief  Creates a CenSymbol from a DIMM DQ.
@@ -112,11 +112,12 @@ class CenSymbol
      *         For IS DIMMs, the mapping between DIMM DQ and Centaur DQ is
      *         determined by card that the DIMM is plugged into. See enum
      *         WiringType for more details.
-     * @return Non-SUCCESS if an internal function failed, SUCCESS otherwise.
+     * @return A CenSymbol. Must call isValid() to determine if the function was
+     *         successful in creating a valid object.
      */
-    static int32_t fromDimmDq( TARGETING::TargetHandle_t i_mba,
-                               const CenRank & i_rank, uint8_t i_dimmDq,
-                               uint8_t i_portSlct, CenSymbol & o_symbol );
+    static CenSymbol fromDimmDq( TARGETING::TargetHandle_t i_mba,
+                                 const CenRank & i_rank, uint8_t i_dimmDq,
+                                 uint8_t i_portSlct );
 
     /**
      * @brief  Returns the dimm's wiring type.
@@ -128,6 +129,9 @@ class CenSymbol
     static int32_t getWiringType( TARGETING::TargetHandle_t i_mba,
                                   const CenRank & i_rank,
                                   WiringType & o_wiringType );
+
+    /** @return true if symbol is within the valid range, false otherwise. */
+    bool isValid() const { return iv_symbol < SYMBOLS_PER_RANK; }
 
     /** @return This symbol's wiring type. */
     WiringType getWiringType() const { return iv_wiringType; }

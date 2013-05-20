@@ -56,7 +56,9 @@ namespace PRDF
 {
 
 class CenDqBitmap;
+class CenMark;
 class CenRank;
+class CenSymbol;
 
 namespace PlatServices
 {
@@ -213,52 +215,60 @@ int32_t setBadDqBitmap( TARGETING::TargetHandle_t i_mba, const CenRank & i_rank,
 
 /**
  * @brief  Invokes the get mark store hardware procedure.
- * @param  i_mbaTarget  A MBA target.
- * @param  i_rank       Target rank (0-7).
- * @param  o_chipMark   A symbol associated with the returned chip mark.
- * @param  o_symbolMark A symbol associated with the returned symbol mark.
+ * @param  i_mba  Target MBA.
+ * @param  i_rank Target rank.
+ * @param  o_mark The returned mark.
  * @return Non-SUCCESS in internal function fails, SUCCESS otherwise.
  */
-int32_t mssGetMarkStore( TARGETING::TargetHandle_t i_mbaTarget, uint8_t i_rank,
-                         uint8_t & o_chipMark, uint8_t & o_symbolMark );
+int32_t mssGetMarkStore( TARGETING::TargetHandle_t i_mba,
+                         const CenRank & i_rank, CenMark & o_mark );
 
 /**
  * @brief  Invokes the set mark store hardware procedure.
- * @param  i_mbaTarget  A MBA target.
- * @param  i_rank       Target rank (0-7).
- * @param  i_chipMark   A symbol associated with the new chip mark.
- * @param  i_symbolMark A symbol associated with the new symbol mark.
+ * @param  i_mba               Target MBA.
+ * @param  i_rank              Target rank.
+ * @param  i_mark              The mark to write.
+ * @param  o_writeBlocked      TRUE if a blocke write is allowed and hardware
+ *                             blocked the write to markstore.
+ * @param  i_allowWriteBlocked TRUE if a blocked write is allowed. This means
+ *                             the user will need to read what hardware just
+ *                             placed in the markstore and retry. If FALSE and
+ *                             the write was blocked, this function will commit
+ *                             the FAPI error log and return a non-SUCCESS. The
+ *                             default value is FALSE.
  * @note   Both the chip mark and the symbol mark will be written at the same
- *         time, so do a RMW operation to avoid overwriting a previous mark.
+ *         time, so do a RMW operation to avoid overwritting a previous mark.
  * @return Non-SUCCESS in internal function fails, SUCCESS otherwise.
  */
-int32_t mssSetMarkStore( TARGETING::TargetHandle_t i_mbaTarget, uint8_t i_rank,
-                         uint8_t i_chipMark, uint8_t i_symbolMark );
+int32_t mssSetMarkStore( TARGETING::TargetHandle_t i_mba,
+                         const CenRank & i_rank, const CenMark & i_mark,
+                         bool & o_writeBlocked,
+                         bool i_allowWriteBlocked = false );
 
 /**
  * @brief  Invokes the get steer mux hardware procedure.
- * @param  i_mbaTarget  A MBA target.
- * @param  i_rank       Target rank (0-7).
+ * @param  i_mba        Target MBA.
+ * @param  i_rank       Target rank.
  * @param  o_port0Spare A symbol associated with the spare on port 0.
  * @param  o_port1Spare A symbol associated with the spare on port 1.
  * @param  o_eccSpare   A symbol associated with the ECC spare (x4 mode only).
  * @return Non-SUCCESS in internal function fails, SUCCESS otherwise.
  */
-int32_t mssGetSteerMux( TARGETING::TargetHandle_t i_mbaTarget, uint8_t i_rank,
-                        uint8_t & o_port0Spare, uint8_t & o_port1Spare,
-                        uint8_t & o_eccSpare );
+int32_t mssGetSteerMux( TARGETING::TargetHandle_t i_mba, const CenRank & i_rank,
+                        CenSymbol & o_port0Spare, CenSymbol & o_port1Spare,
+                        CenSymbol & o_eccSpare );
 
 /**
  * @brief  Invokes the set steer mux hardware procedure.
- * @param  i_mbaTarget  A MBA target.
- * @param  i_rank       Target rank (0-7).
+ * @param  i_mba        Target MBA.
+ * @param  i_rank       Target rank.
  * @param  i_symbol     A symbol associated with the DRAM to be spared.
  * @param  i_x4EccSpare If true, will set ECC spare instead (x4 mode only).
  * @note   The procedure will be able to derive the port from the given symbol.
  * @return Non-SUCCESS in internal function fails, SUCCESS otherwise.
  */
-int32_t mssSetSteerMux( TARGETING::TargetHandle_t i_mbaTarget, uint8_t i_rank,
-                        uint8_t i_symbol, bool i_x4EccSpare );
+int32_t mssSetSteerMux( TARGETING::TargetHandle_t i_mba, const CenRank & i_rank,
+                        const CenSymbol & i_symbol, bool i_x4EccSpare );
 
 /**
  * @brief   Returns the memory buffer raw card type (i.e. R/C A).

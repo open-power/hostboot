@@ -39,6 +39,7 @@
 
 #include <prdfCenAddress.H>
 #include <prdfCenDqBitmap.H>
+#include <prdfCenMarkstore.H>
 
 #include <dimmBadDqBitmapFuncs.H> // for dimm[S|G]etBadDqBitmap()
 
@@ -314,51 +315,28 @@ int32_t setBadDqBitmap( TargetHandle_t i_mba, const CenRank & i_rank,
 
 //------------------------------------------------------------------------------
 
-int32_t mssGetMarkStore( TargetHandle_t i_mbaTarget, uint8_t i_rank,
-                         uint8_t & o_chipMark, uint8_t & o_symbolMark )
+int32_t mssGetMarkStore( TargetHandle_t i_mba, const CenRank & i_rank,
+                         CenMark & o_mark )
 {
     int32_t o_rc = SUCCESS;
 
     errlHndl_t errl = NULL;
 
-    PRD_FAPI_TO_ERRL( errl, mss_get_mark_store, getFapiTarget(i_mbaTarget),
-                      i_rank, o_chipMark, o_symbolMark );
+    uint8_t symbolMark, chipMark;
+    PRD_FAPI_TO_ERRL( errl, mss_get_mark_store, getFapiTarget(i_mba),
+                      i_rank.flatten(), symbolMark, chipMark );
 
     if ( NULL != errl )
     {
         PRDF_ERR( "[PlatServices::mssGetMarkStore] mss_get_mark_store() "
                   "failed. HUID: 0x%08x rank: %d",
-                  getHuid(i_mbaTarget), i_rank );
+                  getHuid(i_mba), i_rank.flatten() );
         PRDF_COMMIT_ERRL( errl, ERRL_ACTION_REPORT );
         o_rc = FAIL;
     }
-
-    return o_rc;
-}
-
-//------------------------------------------------------------------------------
-
-int32_t mssSetMarkStore( TargetHandle_t i_mbaTarget, uint8_t i_rank,
-                         uint8_t i_chipMark, uint8_t i_symbolMark )
-{
-    int32_t o_rc = SUCCESS;
-
-    errlHndl_t errl = NULL;
-
-    // TODO: mss_put_mark_store() will give a certain return code if the write
-    //       to mark store was circumvented by hardware. Will need to check this
-    //       return code.
-
-    PRD_FAPI_TO_ERRL( errl, mss_put_mark_store, getFapiTarget(i_mbaTarget),
-                      i_rank, i_chipMark, i_symbolMark );
-
-    if ( NULL != errl )
+    else
     {
-        PRDF_ERR( "[PlatServices::mssSetMarkStore] mss_put_mark_store() "
-                  "failed. HUID: 0x%08x rank: %d cm: %d sm: %d",
-                  getHuid(i_mbaTarget), i_rank, i_chipMark, i_symbolMark );
-        PRDF_COMMIT_ERRL( errl, ERRL_ACTION_REPORT );
-        o_rc = FAIL;
+        o_mark = CenMark( i_mba, i_rank, symbolMark, chipMark );
     }
 
     return o_rc;
@@ -366,24 +344,75 @@ int32_t mssSetMarkStore( TargetHandle_t i_mbaTarget, uint8_t i_rank,
 
 //------------------------------------------------------------------------------
 
-int32_t mssGetSteerMux( TargetHandle_t i_mbaTarget, uint8_t i_rank,
-                        uint8_t & o_port0Spare, uint8_t & o_port1Spare,
-                        uint8_t & o_eccSpare )
+int32_t mssSetMarkStore( TargetHandle_t i_mba, const CenRank & i_rank,
+                         const CenMark & i_mark, bool & o_writeBlocked,
+                         bool i_allowWriteBlocked )
+{
+    #define PRDF_FUNC "[PlatServices::mssSetMarkStore] "
+
+    int32_t o_rc = SUCCESS;
+
+    errlHndl_t errl = NULL;
+
+    uint8_t symbolMark = i_mark.getSM().isValid() ? i_mark.getSM().getSymbol()
+                                                  : MSS_INVALID_SYMBOL;
+    uint8_t chipMark   = i_mark.getCM().isValid() ? i_mark.getCM().getSymbol()
+                                                  : MSS_INVALID_SYMBOL;
+
+    fapi::ReturnCode l_rc = mss_put_mark_store( getFapiTarget(i_mba),
+                                                i_rank.flatten(), symbolMark,
+                                                chipMark );
+
+    if ( i_allowWriteBlocked &&
+         fapi::RC_MSS_MAINT_MARKSTORE_WRITE_BLOCKED == l_rc )
+    {
+        o_writeBlocked = true;
+    }
+    else
+    {
+        errl = fapi::fapiRcToErrl(l_rc);
+        if ( NULL != errl )
+        {
+            PRDF_ERR( PRDF_FUNC"mss_put_mark_store() failed. HUID: 0x%08x "
+                      "rank: %d sm: %d cm: %d", getHuid(i_mba),
+                      i_rank.flatten(), symbolMark, chipMark );
+            PRDF_COMMIT_ERRL( errl, ERRL_ACTION_REPORT );
+            o_rc = FAIL;
+        }
+    }
+
+    return o_rc;
+
+    #undef PRDF_FUNC
+}
+
+//------------------------------------------------------------------------------
+
+int32_t mssGetSteerMux( TargetHandle_t i_mba, const CenRank & i_rank,
+                        CenSymbol & o_port0Spare, CenSymbol & o_port1Spare,
+                        CenSymbol & o_eccSpare )
 {
     int32_t o_rc = SUCCESS;
 
     errlHndl_t errl = NULL;
 
-    PRD_FAPI_TO_ERRL( errl, mss_check_steering, getFapiTarget(i_mbaTarget),
-                      i_rank, o_port0Spare, o_port1Spare, o_eccSpare );
+    uint8_t port0Spare, port1Spare, eccSpare;
+    PRD_FAPI_TO_ERRL( errl, mss_check_steering, getFapiTarget(i_mba),
+                      i_rank.flatten(), port0Spare, port1Spare, eccSpare );
 
     if ( NULL != errl )
     {
         PRDF_ERR( "[PlatServices::mssGetSteerMux] mss_check_steering() "
                   "failed. HUID: 0x%08x rank: %d",
-                  getHuid(i_mbaTarget), i_rank );
+                  getHuid(i_mba), i_rank.flatten() );
         PRDF_COMMIT_ERRL( errl, ERRL_ACTION_REPORT );
         o_rc = FAIL;
+    }
+    else
+    {
+        o_port0Spare = CenSymbol::fromSymbol( i_mba, i_rank, port0Spare );
+        o_port1Spare = CenSymbol::fromSymbol( i_mba, i_rank, port1Spare );
+        o_eccSpare   = CenSymbol::fromSymbol( i_mba, i_rank, eccSpare   );
     }
 
     return o_rc;
@@ -391,21 +420,21 @@ int32_t mssGetSteerMux( TargetHandle_t i_mbaTarget, uint8_t i_rank,
 
 //------------------------------------------------------------------------------
 
-int32_t mssSetSteerMux( TargetHandle_t i_mbaTarget, uint8_t i_rank,
-                        uint8_t i_symbol, bool i_x4EccSpare )
+int32_t mssSetSteerMux( TargetHandle_t i_mba, const CenRank & i_rank,
+                        const CenSymbol & i_symbol, bool i_x4EccSpare )
 {
     int32_t o_rc = SUCCESS;
 
     errlHndl_t errl = NULL;
 
-    PRD_FAPI_TO_ERRL( errl, mss_do_steering, getFapiTarget(i_mbaTarget),
-                      i_rank, i_symbol, i_x4EccSpare );
+    PRD_FAPI_TO_ERRL( errl, mss_do_steering, getFapiTarget(i_mba),
+                      i_rank.flatten(), i_symbol.getSymbol(), i_x4EccSpare );
 
     if ( NULL != errl )
     {
         PRDF_ERR( "[PlatServices::mssSetSteerMux] mss_do_steering "
                   "failed. HUID: 0x%08x rank: %d symbol: %d eccSpare: %c",
-                  getHuid(i_mbaTarget), i_rank, i_symbol,
+                  getHuid(i_mba), i_rank.flatten(), i_symbol.getSymbol(),
                   i_x4EccSpare ? 'T' : 'F' );
         PRDF_COMMIT_ERRL( errl, ERRL_ACTION_REPORT );
         o_rc = FAIL;

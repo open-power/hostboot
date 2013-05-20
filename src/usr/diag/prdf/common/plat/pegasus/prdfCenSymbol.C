@@ -37,25 +37,24 @@ using namespace PlatServices;
 //                           class CenSymbol
 //##############################################################################
 
-int32_t CenSymbol::fromSymbol( TargetHandle_t i_mba, const CenRank & i_rank,
-                               uint8_t i_symbol, uint8_t i_pins,
-                               CenSymbol & o_symbol )
+CenSymbol CenSymbol::fromSymbol( TargetHandle_t i_mba, const CenRank & i_rank,
+                                 uint8_t i_symbol, uint8_t i_pins )
 {
     #define PRDF_FUNC "[CenSymbol::fromSymbol] "
 
-    int32_t o_rc = SUCCESS;
+    CenSymbol o_symbol; // default contructor is invalid.
 
     do
     {
         if ( TYPE_MBA != getTargetType(i_mba) )
         {
             PRDF_ERR( PRDF_FUNC"i_mba is invalid" );
-            o_rc = FAIL; break;
+            break;
         }
 
         WiringType wiringType = WIRING_INVALID;
-        o_rc = getWiringType( i_mba, i_rank, wiringType );
-        if ( SUCCESS != o_rc )
+        int32_t l_rc = getWiringType( i_mba, i_rank, wiringType );
+        if ( SUCCESS != l_rc )
         {
             PRDF_ERR( PRDF_FUNC"getWiringType() failed" );
             break;
@@ -64,14 +63,12 @@ int32_t CenSymbol::fromSymbol( TargetHandle_t i_mba, const CenRank & i_rank,
         if ( SYMBOLS_PER_RANK <= i_symbol )
         {
             PRDF_ERR( PRDF_FUNC"i_symbol is invalid" );
-            o_rc = FAIL;
             break;
         }
 
         if ( BOTH_SYMBOL_DQS < i_pins )
         {
             PRDF_ERR( PRDF_FUNC"i_pins is invalid" );
-            o_rc = FAIL;
             break;
         }
 
@@ -79,47 +76,46 @@ int32_t CenSymbol::fromSymbol( TargetHandle_t i_mba, const CenRank & i_rank,
 
     } while (0);
 
-    if ( SUCCESS != o_rc )
+    if ( !o_symbol.isValid() )
     {
         PRDF_ERR( PRDF_FUNC"Failed: i_mba=0x%08x i_rank=%d i_symbol=%d "
                   "i_pins=%d", getHuid(i_mba), i_rank.flatten(), i_symbol,
                   i_pins );
     }
 
-    return o_rc;
+    return o_symbol;
 
     #undef PRDF_FUNC
 }
 
 //------------------------------------------------------------------------------
 
-int32_t CenSymbol::fromDimmDq( TargetHandle_t i_mba, const CenRank & i_rank,
-                               uint8_t i_dimmDq, uint8_t i_portSlct,
-                               CenSymbol & o_symbol )
+CenSymbol CenSymbol::fromDimmDq( TargetHandle_t i_mba, const CenRank & i_rank,
+                                 uint8_t i_dimmDq, uint8_t i_portSlct )
 {
     #define PRDF_FUNC "[CenSymbol::fromDimmDq] "
 
-    int32_t o_rc = SUCCESS;
+    CenSymbol o_symbol; // default contructor is invalid.
 
     do
     {
         if ( TYPE_MBA != getTargetType(i_mba) )
         {
             PRDF_ERR( PRDF_FUNC"i_mba is invalid" );
-            o_rc = FAIL; break;
+            break;
         }
 
         WiringType wiringType = WIRING_INVALID;
-        o_rc = getWiringType( i_mba, i_rank, wiringType );
-        if ( SUCCESS != o_rc )
+        int32_t l_rc = getWiringType( i_mba, i_rank, wiringType );
+        if ( SUCCESS != l_rc )
         {
             PRDF_ERR( PRDF_FUNC"getWiringType() failed" );
             break;
         }
 
         uint8_t symbol;
-        o_rc = getSymbol( i_rank, wiringType, i_dimmDq, i_portSlct, symbol );
-        if ( SUCCESS != o_rc )
+        l_rc = getSymbol( i_rank, wiringType, i_dimmDq, i_portSlct, symbol );
+        if ( SUCCESS != l_rc )
         {
             PRDF_ERR( PRDF_FUNC"getSymbol() failed" );
             break;
@@ -132,14 +128,14 @@ int32_t CenSymbol::fromDimmDq( TargetHandle_t i_mba, const CenRank & i_rank,
 
     } while (0);
 
-    if ( SUCCESS != o_rc )
+    if ( !o_symbol.isValid() )
     {
         PRDF_ERR( PRDF_FUNC"Failed: i_mba=0x%08x i_rank=%d i_dimmDq=%d "
                   "i_portSlct=%d", getHuid(i_mba), i_rank.flatten(), i_dimmDq,
                   i_portSlct );
     }
 
-    return o_rc;
+    return o_symbol;
 
     #undef PRDF_FUNC
 }

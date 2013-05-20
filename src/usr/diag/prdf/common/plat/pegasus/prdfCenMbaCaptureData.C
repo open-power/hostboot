@@ -33,6 +33,8 @@
 #include <iipServiceDataCollector.h>
 #include <prdf_ras_services.H>
 
+#include <prdfCenMarkstore.H>
+
 namespace PRDF
 {
 
@@ -67,35 +69,36 @@ void captureDramRepairsData( TARGETING::TargetHandle_t i_mbaTarget,
     DramRepairMbaData mbaData;
 
     // Iterate all ranks to get DRAM repair data
-    for(int rank = 0; rank < MAX_RANKS_PER_MBA ; rank++)
+    for ( uint32_t r = 0; r < MAX_RANKS_PER_MBA; r++ )
     {
-        DramRepairRankData rankData;
-        rankData.rank = rank;
+        CenRank rank ( r );
 
-        // Get DRAM Repair data
-
-        rc = PlatServices::mssGetMarkStore( i_mbaTarget, rankData.rank,
-                              rankData.chipMark, rankData.symbolMark );
-
-        if (SUCCESS != rc)
+        // Get chip/symbol marks
+        CenMark mark;
+        rc = PlatServices::mssGetMarkStore( i_mbaTarget, rank, mark );
+        if ( SUCCESS != rc )
         {
             PRDF_ERR("Failed to get markstore data");
             continue;
         }
 
-        rc = PlatServices::mssGetSteerMux( i_mbaTarget, rankData.rank,
-                                           rankData.port0Spare,
-                                           rankData.port1Spare,
-                                           rankData.eccSpare );
-
-        if (SUCCESS != rc)
+        // Get DRAM spares
+        CenSymbol sp0, sp1, ecc;
+        rc = PlatServices::mssGetSteerMux( i_mbaTarget, rank, sp0, sp1, ecc );
+        if ( SUCCESS != rc )
         {
             PRDF_ERR("Failed to get DRAM steer data");
             continue;
         }
 
-        // Check id rank had some DRAM repair data
-        if( rankData.valid() )
+        // Add data
+        DramRepairRankData rankData = { rank.flatten(),
+                                        mark.getCM().getSymbol(),
+                                        mark.getSM().getSymbol(),
+                                        sp0.getSymbol(),
+                                        sp1.getSymbol(),
+                                        ecc.getSymbol() };
+        if ( rankData.valid() )
         {
             mbaData.rankDataList.push_back(rankData);
         }
