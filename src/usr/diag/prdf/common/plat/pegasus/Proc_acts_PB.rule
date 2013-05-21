@@ -2787,6 +2787,7 @@ group gPciNestFir filter singlebit
 ################################################################################
 # PB Chiplet IOMCFIR_1
 ################################################################################
+# RAS spreadsheet: p8dd1_mss_FFDC_37_ reviewd.xls
 
 rule IomcFir_1
 {
@@ -2799,17 +2800,17 @@ group gIomcFir_1 filter singlebit
     /** IOMCFIR_1[0]
      *  FIR_RX_INVALID_STATE_OR_PARITY_ERROR
      */
-    (IomcFir_1, bit(0)) ? TBDDefaultCallout;
+    (IomcFir_1, bit(0)) ? SelfHighThr1;
 
     /** IOMCFIR_1[1]
      *  FIR_TX_INVALID_STATE_OR_PARITY_ERROR
      */
-    (IomcFir_1, bit(1)) ? TBDDefaultCallout;
+    (IomcFir_1, bit(1)) ? SelfHighThr1;
 
     /** IOMCFIR_1[2]
      *  FIR_GCR_HANG_ERROR
      */
-    (IomcFir_1, bit(2)) ? TBDDefaultCallout;
+    (IomcFir_1, bit(2)) ? SelfHighThr1;
 
     /** IOMCFIR_1[3|4|5|6|7]
      *  Reserved
@@ -2819,7 +2820,7 @@ group gIomcFir_1 filter singlebit
     /** IOMCFIR_1[8]
      *  FIR_RX_BUS0_TRAINING_ERROR
      */
-    (IomcFir_1, bit(8)) ? TBDDefaultCallout;
+    (IomcFir_1, bit(8)) ? defaultMaskedError;
 
     /** IOMCFIR_1[9]
      *  FIR_RX_BUS0_SPARE_DEPLOYED
@@ -2834,12 +2835,12 @@ group gIomcFir_1 filter singlebit
     /** IOMCFIR_1[11]
      *  FIR_RX_BUS0_RECAL_OR_DYN_REPAIR_ERROR
      */
-    (IomcFir_1, bit(11)) ? TBDDefaultCallout;
+    (IomcFir_1, bit(11)) ? calloutDmiBus4Thr1;
 
     /** IOMCFIR_1[12]
      *  FIR_RX_BUS0_TOO_MANY_BUS_ERRORS
      */
-    (IomcFir_1, bit(12)) ? dmiBus0TooManyBusErrors;
+    (IomcFir_1, bit(12)) ? defaultMaskedError;
 
     /** IOMCFIR_1[13|14|15]
      *  Reserved
@@ -2849,7 +2850,7 @@ group gIomcFir_1 filter singlebit
     /** IOMCFIR_1[16]
      *  FIR_RX_BUS1_TRAINING_ERROR
      */
-    (IomcFir_1, bit(16)) ? TBDDefaultCallout;
+    (IomcFir_1, bit(16)) ? defaultMaskedError;
 
     /** IOMCFIR_1[17]
      *  FIR_RX_BUS1_SPARE_DEPLOYED
@@ -2864,12 +2865,12 @@ group gIomcFir_1 filter singlebit
     /** IOMCFIR_1[19]
      *  FIR_RX_BUS1_RECAL_OR_DYN_REPAIR_ERROR
      */
-    (IomcFir_1, bit(19)) ? TBDDefaultCallout;
+    (IomcFir_1, bit(19)) ? calloutDmiBus5Thr1;
 
     /** IOMCFIR_1[20]
      *  FIR_RX_BUS1_TOO_MANY_BUS_ERRORS
      */
-    (IomcFir_1, bit(20)) ? dmiBus1TooManyBusErrors;
+    (IomcFir_1, bit(20)) ? defaultMaskedError;
 
     /** IOMCFIR_1[21|22|23]
      *  Reserved
@@ -2879,7 +2880,7 @@ group gIomcFir_1 filter singlebit
     /** IOMCFIR_1[24]
      *  FIR_RX_BUS2_TRAINING_ERROR
      */
-    (IomcFir_1, bit(24)) ? TBDDefaultCallout;
+    (IomcFir_1, bit(24)) ? defaultMaskedError;
 
     /** IOMCFIR_1[25]
      *  FIR_RX_BUS2_SPARE_DEPLOYED
@@ -2894,12 +2895,12 @@ group gIomcFir_1 filter singlebit
     /** IOMCFIR_1[27]
      *  FIR_RX_BUS2_RECAL_OR_DYN_REPAIR_ERROR
      */
-    (IomcFir_1, bit(27)) ? TBDDefaultCallout;
+    (IomcFir_1, bit(27)) ? calloutDmiBus6Thr1;
 
     /** IOMCFIR_1[28]
      *  FIR_RX_BUS2_TOO_MANY_BUS_ERRORS
      */
-    (IomcFir_1, bit(28)) ? dmiBus2TooManyBusErrors;
+    (IomcFir_1, bit(28)) ? defaultMaskedError;
 
     /** IOMCFIR_1[29|30|31]
      *  Reserved
@@ -2909,7 +2910,7 @@ group gIomcFir_1 filter singlebit
     /** IOMCFIR_1[32]
      *  FIR_RX_BUS3_TRAINING_ERROR
      */
-    (IomcFir_1, bit(32)) ? TBDDefaultCallout;
+    (IomcFir_1, bit(32)) ? defaultMaskedError;
 
     /** IOMCFIR_1[33]
      *  FIR_RX_BUS3_SPARE_DEPLOYED
@@ -2924,12 +2925,12 @@ group gIomcFir_1 filter singlebit
     /** IOMCFIR_1[35]
      *  FIR_RX_BUS3_RECAL_OR_DYN_REPAIR_ERROR
      */
-    (IomcFir_1, bit(35)) ? TBDDefaultCallout;
+    (IomcFir_1, bit(35)) ? calloutDmiBus7Thr1;
 
     /** IOMCFIR_1[36]
      *  FIR_RX_BUS3_TOO_MANY_BUS_ERRORS
      */
-    (IomcFir_1, bit(36)) ? dmiBus3TooManyBusErrors;
+    (IomcFir_1, bit(36)) ? defaultMaskedError;
 
     /** IOMCFIR_1[37|38|39]
      *  Reserved
@@ -2939,27 +2940,27 @@ group gIomcFir_1 filter singlebit
     /** IOMCFIR_1[40]
      *  FIR_RX_BUS4_TRAINING_ERROR
      */
-    (IomcFir_1, bit(40)) ? TBDDefaultCallout;
+    (IomcFir_1, bit(40)) ? defaultMaskedError;
 
     /** IOMCFIR_1[41]
      *  FIR_RX_BUS4_SPARE_DEPLOYED
      */
-    (IomcFir_1, bit(41)) ? TBDDefaultCallout;
+    (IomcFir_1, bit(41)) ? defaultMaskedError;
 
     /** IOMCFIR_1[42]
      *  FIR_RX_BUS4_MAX_SPARES_EXCEEDED
      */
-    (IomcFir_1, bit(42)) ? TBDDefaultCallout;
+    (IomcFir_1, bit(42)) ? defaultMaskedError;
 
     /** IOMCFIR_1[43]
      *  FIR_RX_BUS4_RECAL_OR_DYN_REPAIR_ERROR
      */
-    (IomcFir_1, bit(43)) ? TBDDefaultCallout;
+    (IomcFir_1, bit(43)) ? defaultMaskedError;
 
     /** IOMCFIR_1[44]
      *  FIR_RX_BUS4_TOO_MANY_BUS_ERRORS
      */
-    (IomcFir_1, bit(44)) ? TBDDefaultCallout;
+    (IomcFir_1, bit(44)) ? defaultMaskedError;
 
     /** IOMCFIR_1[45|46|47]
      *  Reserved
@@ -2968,12 +2969,12 @@ group gIomcFir_1 filter singlebit
     /** IOMCFIR_1[48]
      *  FIR_SCOMFIR_ERROR
      */
-    (IomcFir_1, bit(48)) ? TBDDefaultCallout;
+    (IomcFir_1, bit(48)) ? defaultMaskedError;
 
     /** IOMCFIR_1[49]
      *  FIR_SCOMFIR_ERROR_CLONE
      */
-    (IomcFir_1, bit(49)) ? TBDDefaultCallout;
+    (IomcFir_1, bit(49)) ? defaultMaskedError;
 };
 
 ################################################################################
@@ -3044,35 +3045,6 @@ actionclass dmiBus3MaxSparesExceeded
     threshold1;
 };
 
-# DMI Bus 0-3 Too Many bus errors
-actionclass dmiBus0TooManyBusErrors
-{
-    callout(procedure(MEMBUS_ERROR_ENUM), MRU_LOW);
-    funccall("dmiBus0TooManyErrors");
-    threshold1;
-};
-
-actionclass dmiBus1TooManyBusErrors
-{
-    callout(procedure(MEMBUS_ERROR_ENUM), MRU_LOW);
-    funccall("dmiBus1TooManyErrors");
-    threshold1;
-};
-
-actionclass dmiBus2TooManyBusErrors
-{
-    callout(procedure(MEMBUS_ERROR_ENUM), MRU_LOW);
-    funccall("dmiBus2TooManyErrors");
-    threshold1;
-};
-
-actionclass dmiBus3TooManyBusErrors
-{
-    callout(procedure(MEMBUS_ERROR_ENUM), MRU_LOW);
-    funccall("dmiBus3TooManyErrors");
-    threshold1;
-};
-
 /** Callout the connected PCI 0 controller. */
 actionclass calloutConnPci0 { callout(connected(TYPE_PCI,0), MRU_MED); };
 
@@ -3119,5 +3091,44 @@ actionclass calloutConnPci2AndIsolatePathTh1
 {
     #FIXME RTC 23127 Need to find right Procedure for PCI path isolation
     calloutConnPci2Th1;
+};
+
+/** Callout MEMBUS_ERROR_ENUM procedure , threshold 1 */
+actionclass calloutMemErrProceThr1
+{
+    callout(procedure(MEMBUS_ERROR_ENUM), MRU_LOW);
+    threshold1;
+};
+
+/** Callout the DMI bus4 (MEDA), threshold 1 */
+actionclass calloutDmiBus4Thr1
+{
+    callout(connected(TYPE_MCS, 4), MRU_MEDA);
+    callout(connected(TYPE_MEMBUF, 4), MRU_MEDA);
+    calloutMemErrProceThr1;
+};
+
+/** Callout the DMI bus5 (MEDA), threshold 1 */
+actionclass calloutDmiBus5Thr1
+{
+    callout(connected(TYPE_MCS, 5), MRU_MEDA);
+    callout(connected(TYPE_MEMBUF, 5), MRU_MEDA);
+    calloutMemErrProceThr1;
+};
+
+/** Callout the DMI bus6 (MEDA), threshold 1 */
+actionclass calloutDmiBus6Thr1
+{
+    callout(connected(TYPE_MCS, 6), MRU_MEDA);
+    callout(connected(TYPE_MEMBUF, 6), MRU_MEDA);
+    calloutMemErrProceThr1;
+};
+
+/** Callout the DMI bus7 (MEDA), threshold 1 */
+actionclass calloutDmiBus7Thr1
+{
+    callout(connected(TYPE_MCS, 7), MRU_MEDA);
+    callout(connected(TYPE_MEMBUF, 7), MRU_MEDA);
+    calloutMemErrProceThr1;
 };
 

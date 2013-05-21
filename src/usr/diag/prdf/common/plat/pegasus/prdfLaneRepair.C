@@ -30,6 +30,8 @@
 #include <iipServiceDataCollector.h>
 #include <prdfExtensibleChip.H>
 #include <UtilHash.H>
+#include <prdfCenMembufDataBundle.H>
+#include <prdfP8McsDataBundle.H>
 
 using namespace TARGETING;
 
@@ -246,8 +248,136 @@ int32_t handleLaneRepairEvent (ExtensibleChip * i_chip,
         l_rc |= clearIOFirs(rxBusTgt);
     }
 
+    if ( i_spareDeployed )
+    {
+        l_rc |= cleanupSecondaryFirBits( i_chip, i_busType, i_busPos );
+    }
     return l_rc;
 }
 
-} // end namespace MemUtil
+//-----------------------------------------------------------------------------
+
+bool isSpareBitOnDMIBus( ExtensibleChip * i_mcsChip, ExtensibleChip * i_mbChip )
+{
+    bool bitOn = false;
+
+    do
+    {
+        // If any of these object is NULL, spare bit should not be on.
+        if ( ( NULL == i_mcsChip ) || ( NULL == i_mbChip ))
+            break;
+
+        // check spare deployed bit on Centaur side
+        SCAN_COMM_REGISTER_CLASS * dmiFir = i_mbChip->getRegister( "DMIFIR" );
+        int32_t rc = dmiFir->Read();
+        if ( SUCCESS != rc )
+        {
+            PRDF_ERR("isSpareBitOnDMIBus() : Failed to read DMIFIR."
+                      "MEMBUF: 0x%08X", getHuid( i_mbChip->GetChipHandle()) );
+            break;
+        }
+        if ( dmiFir->IsBitSet( 9 ))
+        {
+            bitOn = true;
+            break;
+        }
+
+        // check spare deployed bit on Proc side
+        TargetHandle_t mcsTgt = i_mcsChip->GetChipHandle();
+        TargetHandle_t procTgt = getConnectedParent( mcsTgt, TYPE_PROC );
+        ExtensibleChip * procChip =
+                        ( ExtensibleChip * )systemPtr->GetChip( procTgt );
+
+        uint32_t mcsPos = getTargetPosition( mcsTgt );
+
+        const char * regStr = ( 4 > mcsPos) ? "IOMCFIR_0" : "IOMCFIR_1";
+        SCAN_COMM_REGISTER_CLASS * iomcFir = procChip->getRegister( regStr );
+        rc = iomcFir->Read();
+        if ( SUCCESS != rc )
+        {
+            PRDF_ERR("isSpareBitOnDMIBus() : Failed to read %s."
+                      "MCS: 0x%08X", regStr, getHuid(mcsTgt) );
+            break;
+        }
+        // Bit 9, 17, 25 and 33 are for spare deployed.
+        // Check bit corrosponding to MCS position
+        uint8_t bitPos = 9 + ( mcsPos % 4 ) *8;
+        if ( iomcFir->IsBitSet(bitPos))
+        {
+            bitOn = true;
+        }
+
+    }while(0);
+
+    return bitOn;
+}
+
+//-----------------------------------------------------------------------------
+
+int32_t cleanupSecondaryFirBits( ExtensibleChip * i_chip,
+                       TYPE i_busType,
+                       uint32_t i_busPos )
+{
+    int32_t l_rc = SUCCESS;
+    TargetHandle_t mcsTgt = NULL;
+    TargetHandle_t mbTgt = NULL;
+    ExtensibleChip * mcsChip = NULL;
+    ExtensibleChip * mbChip = NULL;
+
+    //In case of spare deployed attention for DMI bus, we need to clear
+    // secondary MBIFIR[10] and MCIFIR[10] bits.
+    if ( i_busType == TYPE_MCS )
+    {
+        mcsTgt = getConnectedChild( i_chip->GetChipHandle(),
+                                      TYPE_MCS,
+                                      i_busPos);
+        mcsChip = ( ExtensibleChip * )systemPtr->GetChip( mcsTgt );
+        mbChip =  getMcsDataBundle( mcsChip )->getMembChip();
+        mbTgt =   mbChip->GetChipHandle();
+
+    }
+    else if ( i_busType == TYPE_MEMBUF )
+    {
+        mbTgt = i_chip->GetChipHandle();
+        mcsChip = getMembufDataBundle( i_chip )->getMcsChip();
+        mcsTgt  = mcsChip->GetChipHandle();
+        mbChip = i_chip;
+    }
+
+    if ( ( NULL != mcsChip ) && ( NULL != mbChip ))
+    {
+        SCAN_COMM_REGISTER_CLASS * mciFir =
+                                    mcsChip->getRegister( "MCIFIR" );
+        int32_t rc = mciFir->Read();
+        if ( SUCCESS != rc )
+        {
+            PRDF_ERR("cleanupSecondaryFirBits() : Failed to read MCIFIR."
+                     "MCS: 0x%08X", getHuid(mcsTgt) );
+            l_rc |= rc;
+        }
+        else if ( mciFir->IsBitSet(10))
+        {
+            mciFir->ClearBit(10);
+            l_rc |= mciFir->Write();
+        }
+
+        SCAN_COMM_REGISTER_CLASS * mbiFir =
+                                    mbChip->getRegister( "MBIFIR" );
+        rc = mbiFir->Read();
+        if ( SUCCESS != rc )
+        {
+            PRDF_ERR("cleanupSecondaryFirBits() : Failed to read MBIFIR."
+                     "MEMBUF: 0x%08X", getHuid(mbTgt) );
+            l_rc |= rc;
+        }
+        else if ( mbiFir->IsBitSet(10))
+        {
+            mbiFir->ClearBit(10);
+            l_rc |= mbiFir->Write();
+        }
+    }
+    return l_rc;
+}
+
+} // end namespace LaneRepair
 } // end namespace PRDF

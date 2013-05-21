@@ -54,6 +54,33 @@ namespace LaneRepair
                                    STEP_CODE_DATA_STRUCT & i_sc,
                                    bool i_spareDeployed);
 
+    // Utility functions for secondary FIR bits
+
+    /**
+     * @brief clean up secondary FIR bits ( MBI/MCIFIR bit 10 )
+     * @param i_chip    Chip that detected the lane repair event
+     * @param i_busType Bus connection type (X,A, MEMBUF, or MCS)
+     * @param i_busPos  Bus position
+     * @note  This will only clear FIR bits if spare deploy attention is present
+     *        on DMI bus. It does not check for spare deployed  attention type
+     *        Calling fucntion should make ensure that.
+     * @return  Non-SUCCESS if an internal function fails, SUCCESS otherwise.
+     */
+    int32_t cleanupSecondaryFirBits(  ExtensibleChip * i_chip,
+                       TARGETING::TYPE i_busType,
+                       uint32_t i_busPos );
+
+    /**
+     * @brief Checks if spare bit is set for DMI Bus.
+     * @param i_mcsChip    MCS chip.
+     * @param i_mbChip    Membuf chip.
+     * @return  True if spare bit is set false otherwise.
+     * @note This function will check both ends of DMI bus to check
+     *       if spare deployed attention is raised on any side.
+     */
+    bool isSpareBitOnDMIBus( ExtensibleChip * i_mcsChip,
+                             ExtensibleChip * i_mbChip );
+
 } // end namespace LaneRepair
 } // end namespace PRDF
 

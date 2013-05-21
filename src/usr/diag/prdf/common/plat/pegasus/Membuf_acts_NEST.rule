@@ -162,6 +162,7 @@ group gNestLFir filter singlebit
 ################################################################################
 #  NEST Chiplet DMIFIR
 ################################################################################
+# RAS spreadsheet: p8dd1_mss_FFDC_37_ reviewd.xls
 
 rule DmiFir
 {
@@ -175,22 +176,22 @@ group gDmiFir filter singlebit
     /** DMIFIR[0]
      *  FIR_RX_INVALID_STATE_OR_PARITY_ERROR
      */
-    (DmiFir, bit(0)) ? TBDDefaultCallout;
+    (DmiFir, bit(0)) ? SelfHighThr1;
 
     /** DMIFIR[1]
      *  FIR_TX_INVALID_STATE_OR_PARITY_ERROR
      */
-    (DmiFir, bit(1)) ? TBDDefaultCallout;
+    (DmiFir, bit(1)) ? SelfHighThr1;
 
     /** DMIFIR[2]
      *  FIR_GCR_HANG_ERROR
      */
-    (DmiFir, bit(2)) ? TBDDefaultCallout;
+    (DmiFir, bit(2)) ? SelfHighThr1;
 
     /** DMIFIR[8]
      *  FIR_RX_BUS0_TRAINING_ERROR
      */
-    (DmiFir, bit(8)) ? TBDDefaultCallout;
+    (DmiFir, bit(8)) ? defaultMaskedError;
 
     /** DMIFIR[9]
      *  FIR_RX_BUS0_SPARE_DEPLOYED
@@ -205,122 +206,122 @@ group gDmiFir filter singlebit
     /** DMIFIR[11]
      *  FIR_RX_BUS0_RECAL_OR_DYN_REPAIR_ERROR
      */
-    (DmiFir, bit(11)) ? TBDDefaultCallout;
+    (DmiFir, bit(11)) ? calloutDmiBusTh1;
 
     /** DMIFIR[12]
      *  FIR_RX_BUS0_TOO_MANY_BUS_ERRORS
      */
-    (DmiFir, bit(12)) ? bus0TooManyBusErrors;
+    (DmiFir, bit(12)) ? defaultMaskedError;
 
     /** DMIFIR[16]
      *  FIR_RX_BUS1_TRAINING_ERROR
      */
-    (DmiFir, bit(16)) ? TBDDefaultCallout;
+    (DmiFir, bit(16)) ? defaultMaskedError;
 
     /** DMIFIR[17]
      *  FIR_RX_BUS1_SPARE_DEPLOYED
      */
-    (DmiFir, bit(17)) ? TBDDefaultCallout;
+    (DmiFir, bit(17)) ? defaultMaskedError;
 
     /** DMIFIR[18]
      *  FIR_RX_BUS1_MAX_SPARES_EXCEEDED
      */
-    (DmiFir, bit(18)) ? TBDDefaultCallout;
+    (DmiFir, bit(18)) ? defaultMaskedError;
 
     /** DMIFIR[19]
      *  FIR_RX_BUS1_RECAL_OR_DYN_REPAIR_ERROR
      */
-    (DmiFir, bit(19)) ? TBDDefaultCallout;
+    (DmiFir, bit(19)) ? defaultMaskedError;
 
     /** DMIFIR[20]
      *  FIR_RX_BUS1_TOO_MANY_BUS_ERRORS
      */
-    (DmiFir, bit(20)) ? TBDDefaultCallout;
+    (DmiFir, bit(20)) ? defaultMaskedError;
 
     /** DMIFIR[24]
      *  FIR_RX_BUS2_TRAINING_ERROR
      */
-    (DmiFir, bit(24)) ? TBDDefaultCallout;
+    (DmiFir, bit(24)) ? defaultMaskedError;
 
     /** DMIFIR[25]
      *  FIR_RX_BUS2_SPARE_DEPLOYED
      */
-    (DmiFir, bit(25)) ? TBDDefaultCallout;
+    (DmiFir, bit(25)) ? defaultMaskedError;
 
     /** DMIFIR[26]
      *  FIR_RX_BUS2_MAX_SPARES_EXCEEDED
      */
-    (DmiFir, bit(26)) ? TBDDefaultCallout;
+    (DmiFir, bit(26)) ? defaultMaskedError;
 
     /** DMIFIR[27]
      *  FIR_RX_BUS2_RECAL_OR_DYN_REPAIR_ERROR
      */
-    (DmiFir, bit(27)) ? TBDDefaultCallout;
+    (DmiFir, bit(27)) ? defaultMaskedError;
 
     /** DMIFIR[28]
      *  FIR_RX_BUS2_TOO_MANY_BUS_ERRORS
      */
-    (DmiFir, bit(28)) ? TBDDefaultCallout;
+    (DmiFir, bit(28)) ? defaultMaskedError;
 
     /** DMIFIR[32]
      *  FIR_RX_BUS3_TRAINING_ERROR
      */
-    (DmiFir, bit(32)) ? TBDDefaultCallout;
+    (DmiFir, bit(32)) ? defaultMaskedError;
 
     /** DMIFIR[33]
      *  FIR_RX_BUS3_SPARE_DEPLOYED
      */
-    (DmiFir, bit(33)) ? TBDDefaultCallout;
+    (DmiFir, bit(33)) ? defaultMaskedError;
 
     /** DMIFIR[34]
      *  FIR_RX_BUS3_MAX_SPARES_EXCEEDED
      */
-    (DmiFir, bit(34)) ? TBDDefaultCallout;
+    (DmiFir, bit(34)) ? defaultMaskedError;
 
     /** DMIFIR[35]
      *  FIR_RX_BUS3_RECAL_OR_DYN_REPAIR_ERROR
      */
-    (DmiFir, bit(35)) ? TBDDefaultCallout;
+    (DmiFir, bit(35)) ? defaultMaskedError;
 
     /** DMIFIR[36]
      *  FIR_RX_BUS3_TOO_MANY_BUS_ERRORS
      */
-    (DmiFir, bit(36)) ? TBDDefaultCallout;
+    (DmiFir, bit(36)) ? defaultMaskedError;
 
     /** DMIFIR[40]
      *  FIR_RX_BUS4_TRAINING_ERROR
      */
-    (DmiFir, bit(40)) ? TBDDefaultCallout;
+    (DmiFir, bit(40)) ? defaultMaskedError;
 
     /** DMIFIR[41]
      *  FIR_RX_BUS4_SPARE_DEPLOYED
      */
-    (DmiFir, bit(41)) ? TBDDefaultCallout;
+    (DmiFir, bit(41)) ? defaultMaskedError;
 
     /** DMIFIR[42]
      *  FIR_RX_BUS4_MAX_SPARES_EXCEEDED
      */
-    (DmiFir, bit(42)) ? TBDDefaultCallout;
+    (DmiFir, bit(42)) ? defaultMaskedError;
 
     /** DMIFIR[43]
      *  FIR_RX_BUS4_RECAL_OR_DYN_REPAIR_ERROR
      */
-    (DmiFir, bit(43)) ? TBDDefaultCallout;
+    (DmiFir, bit(43)) ? defaultMaskedError;
 
     /** DMIFIR[44]
      *  FIR_RX_BUS4_TOO_MANY_BUS_ERRORS
      */
-    (DmiFir, bit(44)) ? TBDDefaultCallout;
+    (DmiFir, bit(44)) ? defaultMaskedError;
 
     /** DMIFIR[48]
      *  FIR_SCOMFIR_ERROR
      */
-    (DmiFir, bit(48)) ? TBDDefaultCallout;
+    (DmiFir, bit(48)) ? defaultMaskedError;
 
     /** DMIFIR[49]
      *  FIR_SCOMFIR_ERROR_CLONE
      */
-    (DmiFir, bit(49)) ? TBDDefaultCallout;
+    (DmiFir, bit(49)) ? defaultMaskedError;
 };
 
 ################################################################################
@@ -544,8 +545,7 @@ group gMbiFir filter singlebit
     /** MBIFIR[10]
      *  MBIFIRQ_CRC_PERFORMANCE_DEGRADATION
      */
-    # TODO RTC 23125. In RAS spreadsheet, threshold value is not clear
-    (MbiFir, bit(10)) ? calloutDmiBus;
+    (MbiFir, bit(10)) ? analyzeSpareBitAndThr;
 
     /** MBIFIR[11]
      *  MBIFIRQ_HOST_MC_GLOBAL_CHECKSTOP
@@ -1201,13 +1201,6 @@ actionclass bus0MaxSparesExceeded
     threshold1;
 };
 
-actionclass bus0TooManyBusErrors
-{
-    callout(procedure(MEMBUS_ERROR_ENUM), MRU_LOW);
-    funccall("dmiBus0TooManyErrors");
-    threshold1;
-};
-
 /** Callout the DMI bus */
 actionclass calloutDmiBus
 {
@@ -1223,6 +1216,12 @@ actionclass calloutDmiBusTh1
     threshold1;
 };
 
+actionclass calloutDmiBusTh2pday
+{
+    calloutDmiBus;
+    threshold2pday;
+};
+
 /** Callout the DMI bus and 2nd Level (LOW), threhold 1 */
 actionclass calloutDmiBusLvl2Th1
 {
@@ -1235,3 +1234,9 @@ actionclass CalloutMcsHighAndThr1
     callout(connected(TYPE_MCS),MRU_HIGH);
     threshold1;
 };
+
+actionclass analyzeSpareBitAndThr
+{
+    try( funccall("checkSpareBit"), calloutDmiBusTh2pday );
+};
+

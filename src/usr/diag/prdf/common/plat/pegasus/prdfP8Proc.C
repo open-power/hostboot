@@ -599,41 +599,6 @@ int32_t dmiBus3SparesExceeded(  ExtensibleChip * i_chip,
 }
 PRDF_PLUGIN_DEFINE( Proc, dmiBus3SparesExceeded );
 
-
-/**
- * @brief Handle DMI Bus 0-3 too many bus errors
- * @param i_chip P8 chip
- * @param i_sc The step code data struct
- * @returns Failure or Success
- */
-int32_t dmiBus0TooManyErrors(  ExtensibleChip * i_chip,
-                               STEP_CODE_DATA_STRUCT & i_sc )
-{
-    return LaneRepair::handleLaneRepairEvent(i_chip, TYPE_MCS, 4, i_sc, false);
-}
-PRDF_PLUGIN_DEFINE( Proc, dmiBus0TooManyErrors );
-
-int32_t dmiBus1TooManyErrors(  ExtensibleChip * i_chip,
-                               STEP_CODE_DATA_STRUCT & i_sc )
-{
-    return LaneRepair::handleLaneRepairEvent(i_chip, TYPE_MCS, 5, i_sc, false);
-}
-PRDF_PLUGIN_DEFINE( Proc, dmiBus1TooManyErrors );
-
-int32_t dmiBus2TooManyErrors(  ExtensibleChip * i_chip,
-                               STEP_CODE_DATA_STRUCT & i_sc )
-{
-    return LaneRepair::handleLaneRepairEvent(i_chip, TYPE_MCS, 6, i_sc, false);
-}
-PRDF_PLUGIN_DEFINE( Proc, dmiBus2TooManyErrors );
-
-int32_t dmiBus3TooManyErrors(  ExtensibleChip * i_chip,
-                               STEP_CODE_DATA_STRUCT & i_sc )
-{
-    return LaneRepair::handleLaneRepairEvent(i_chip, TYPE_MCS, 7, i_sc, false);
-}
-PRDF_PLUGIN_DEFINE( Proc, dmiBus3TooManyErrors );
-
 /**
  * @brief Mask attentions from MCIFIR after Centaur Unit checkstop
  * @param  i_chip P8 chip

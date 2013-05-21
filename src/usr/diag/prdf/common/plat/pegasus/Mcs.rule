@@ -215,8 +215,7 @@ group gMciFir attntype CHECK_STOP, RECOVERABLE, SPECIAL, UNIT_CS
     /** MCIFIR[10]
      *  MCIFIRQ_CRC_PERFORMANCE_DEGRADATION
      */
-    # FIXME RTC 23127 To be updated in a separate activity along with MBIFIR[10]
-    (MciFir, bit(10)) ? defaultMaskedError;
+    (MciFir, bit(10)) ? analyzeSpareBitAndThr;
 
     /** MCIFIR[11]
      *  MCIFIRQ_CHANNEL_INTERLOCK_FAIL
@@ -451,12 +450,18 @@ actionclass calloutConnCenTh1
     threshold1;
 };
 
-/** Callout the DMI bus (MEDA), threshold 1 */
-actionclass calloutDmiBusTh1
+/** Callout the DMI bus (MEDA) */
+actionclass calloutDmiBus
 {
     calloutSelfMedA;
     callout(connected(TYPE_MEMBUF), MRU_MEDA);
     callout(procedure(MEMBUS_ERROR_ENUM), MRU_LOW);
+};
+
+/** Callout the DMI bus (MEDA), threshold 1 */
+actionclass calloutDmiBusTh1
+{
+    calloutDmiBus;
     threshold1;
 };
 
@@ -465,4 +470,15 @@ actionclass calloutDmiBusAndLvl2Th1
 {
    calloutDmiBusTh1;
    callout2ndLvlLow;
+};
+
+actionclass CalloutDmiBusAndThr2pd
+{
+    calloutDmiBus;
+    threshold2pday;
+};
+
+actionclass analyzeSpareBitAndThr
+{
+    try( funccall("checkSpareBit"), CalloutDmiBusAndThr2pd );
 };

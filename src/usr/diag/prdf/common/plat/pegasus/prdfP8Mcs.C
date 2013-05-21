@@ -33,6 +33,7 @@
 #include <iipSystem.h>
 #include <prdfP8McsDataBundle.H>
 #include <prdfCenMembufDataBundle.H>
+#include <prdfLaneRepair.H>
 
 //##############################################################################
 //
@@ -185,6 +186,29 @@ int32_t PostAnalysis( ExtensibleChip * i_mcsChip,
     return SUCCESS;
 }
 PRDF_PLUGIN_DEFINE( Mcs, PostAnalysis );
+
+/**
+ * @brief  Checks if spare deployed bit for DMI bus for this MCS is set.
+ * @param  i_mcsChip MCS chip
+ * @param  i_sc      The step code data struct.
+ * @return SUCCESS if bit is on, FAIL otherwise.
+ */
+int32_t checkSpareBit( ExtensibleChip * i_mcsChip,
+                       STEP_CODE_DATA_STRUCT & i_sc )
+{
+    using namespace LaneRepair;
+    int32_t l_rc = FAIL;
+
+    ExtensibleChip * mbChip = getMcsDataBundle( i_mcsChip )->getMembChip();
+
+    if ( true == isSpareBitOnDMIBus( i_mcsChip, mbChip ))
+    {
+        l_rc = SUCCESS;
+    }
+
+    return l_rc;
+}
+PRDF_PLUGIN_DEFINE( Mcs, checkSpareBit );
 
 } // end namespace Mcs
 } // end namespace PRDF

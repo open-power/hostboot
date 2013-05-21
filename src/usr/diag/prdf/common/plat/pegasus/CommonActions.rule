@@ -64,6 +64,12 @@ actionclass threshold1
     threshold( field(1) );
 };
 
+/** Threshold of 2 per day */
+actionclass threshold2pday
+{
+    threshold( field(2 / day) );
+};
+
 /** Threshold of 32 per day */
 actionclass threshold32pday
 {
@@ -105,6 +111,7 @@ actionclass SUEGenerationPoint
 # Callout self
 actionclass calloutSelfHigh { callout(MRU_HIGH); };
 actionclass calloutSelfMed  { callout(MRU_MED);  };
+actionclass calloutSelfHigh  { callout(MRU_HIGH);  };
 actionclass calloutSelfMedA { callout(MRU_MEDA); };
 actionclass calloutSelfLow  { callout(MRU_LOW);  };
 

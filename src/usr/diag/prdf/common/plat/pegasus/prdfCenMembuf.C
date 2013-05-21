@@ -364,26 +364,27 @@ int32_t dmiBus1SparesExceeded(  ExtensibleChip * i_chip,
 PRDF_PLUGIN_DEFINE( Membuf, dmiBus1SparesExceeded );
 
 /**
- * @brief Handle DMI Bus 0-1 Too Many Bus Errors
- * @param i_chip Mem Buf chip
- * @param i_sc   The step code data struct
- * @returns Failure or Success
+ * @brief  Checks if spare deployed bit for DMI bus is set.
+ * @param  i_mbChip  Membuf chip
+ * @param  i_sc      The step code data struct.
+ * @return SUCCESS if bit is on, FAIL otherwise.
  */
-int32_t dmiBus0TooManyErrors(  ExtensibleChip * i_chip,
-                               STEP_CODE_DATA_STRUCT & i_sc )
+int32_t checkSpareBit( ExtensibleChip * i_mbChip,
+                       STEP_CODE_DATA_STRUCT & i_sc )
 {
-    return LaneRepair::handleLaneRepairEvent(i_chip, TYPE_MEMBUF, 0, i_sc,
-                                             false);
-}
-PRDF_PLUGIN_DEFINE( Membuf, dmiBus0TooManyErrors );
+    using namespace LaneRepair;
+    int32_t l_rc = FAIL;
 
-int32_t dmiBus1TooManyErrors(  ExtensibleChip * i_chip,
-                               STEP_CODE_DATA_STRUCT & i_sc )
-{
-    return LaneRepair::handleLaneRepairEvent(i_chip, TYPE_MEMBUF, 1, i_sc,
-                                             false);
+    ExtensibleChip * mcsChip = getMembufDataBundle( i_mbChip )->getMcsChip();
+
+    if ( true == isSpareBitOnDMIBus( mcsChip, i_mbChip ))
+    {
+        l_rc = SUCCESS;
+    }
+
+    return l_rc;
 }
-PRDF_PLUGIN_DEFINE( Membuf, dmiBus1TooManyErrors );
+PRDF_PLUGIN_DEFINE( Membuf, checkSpareBit );
 
 } // end namespace Membuf
 } // end namespace PRDF
