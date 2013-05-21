@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012                   */
+/* COPYRIGHT International Business Machines Corp. 2012,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_pore_table_static_data.c,v 1.4 2012/09/13 19:42:59 cmolsen Exp $
+// $Id: p8_pore_table_static_data.c,v 1.6 2013/05/08 20:19:41 cmolsen Exp $
 /*------------------------------------------------------------------------------*/
 /* *! (C) Copyright International Business Machines Corp. 2012                  */
 /* *! All Rights Reserved -- Property of IBM                                    */
@@ -33,6 +33,7 @@
 /* *! COMMENTS :    This file is exclusively for PHYP environment.              */
 //
 /*------------------------------------------------------------------------------*/
+#include <HvPlicModule.H>
 #include <p8_pore_table_gen_api.H>
 
 const SlwSprRegs SLW_SPR_REGS[] = {  
@@ -46,10 +47,14 @@ const SlwSprRegs SLW_SPR_REGS[] = {
   { "P8_SPR_HID1",     P8_SPR_HID1,  ( P8_SPR_HID1  >>5 | ( P8_SPR_HID1  &0x1f)<<5 ) },
   { "P8_SPR_HID4",     P8_SPR_HID4,  ( P8_SPR_HID4  >>5 | ( P8_SPR_HID4  &0x1f)<<5 ) },
   { "P8_SPR_HID5",     P8_SPR_HID5,  ( P8_SPR_HID5  >>5 | ( P8_SPR_HID5  &0x1f)<<5 ) },
-  { "P8_MSR_MSR",      P8_MSR_MSR,   (            P8_MSR_MSR                       ) },
+  { "P8_CORE_XTRA8",   P8_CORE_XTRA8,(            P8_CORE_XTRA8                    ) },
+  { "P8_CORE_XTRA9",   P8_CORE_XTRA9,(            P8_CORE_XTRA9                    ) },
   // ...thread regs
   { "P8_SPR_HSPRG0",   P8_SPR_HSPRG0,( P8_SPR_HSPRG0>>5 | ( P8_SPR_HSPRG0&0x1f)<<5 ) },
   { "P8_SPR_LPCR",     P8_SPR_LPCR,  ( P8_SPR_LPCR  >>5 | ( P8_SPR_LPCR  &0x1f)<<5 ) },
+  { "P8_MSR_MSR",      P8_MSR_MSR,   (            P8_MSR_MSR                       ) },
+  { "P8_THRD_XTRA3",   P8_THRD_XTRA3,(            P8_THRD_XTRA3                    ) },
+  { "P8_THRD_XTRA4",   P8_THRD_XTRA4,(            P8_THRD_XTRA4                    ) },
 };
 
 const int SLW_SPR_REGS_SIZE = sizeof(SLW_SPR_REGS)/sizeof(SLW_SPR_REGS[0]);

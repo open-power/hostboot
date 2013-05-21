@@ -1,9 +1,14 @@
 
-#-- $Id: mba_def.initfile,v 1.39 2013/04/17 16:55:32 yctschan Exp $
+#-- $Id: mba_def.initfile,v 1.44 2013/05/06 15:28:35 yctschan Exp $
 #-- CHANGE HISTORY:
 #--------------------------------------------------------------------------------
 #-- Version:|Author: | Date:  | Comment:
 #-- --------|--------|--------|--------------------------------------------------
+#--     1.44|tschang | 5/06/13|added 2n_mode to timing parms equations
+#--     1.43|tschang | 5/01/13|def_refresh_interval optimized to avoid divide by 0 condition
+#--     1.42|tschang | 5/01/13|cfg_min_domain_reduction disabled as requested by performance team
+#--     1.41|tschang | 4/24/13|fixed typos for a couple type cfgs
+#--     1.40|tschang | 4/24/13|fixed 1d type cfg
 #--     1.39|tschang | 4/17/13|commented out maxall_min0 power controls until decision has been made for default value
 #--     1.38|tschang | 4/08/13|set cfg_min_domain_reduction_enable to 1 and maxall_min0 power controls
 #--     1.37|tschang | 4/04/13|ACT signal in CCS idle pattern set to 1 for DDR4 and 0 for non DDR4
@@ -276,34 +281,30 @@ define def_1b_2socket        = (((((ATTR_CHIP_UNIT_POS == 1 ) && (ATTR_EFF_IBM_T
 #define def_1b_cdimm          = ((((ATTR_CHIP_UNIT_POS == 1 ) && (ATTR_EFF_IBM_TYPE[1][0] == 2 )) || ((ATTR_CHIP_UNIT_POS == 0 ) && (ATTR_EFF_IBM_TYPE[0][0] == 2 ))) && (ATTR_EFF_NUM_DROPS_PER_PORT == 2) && (ATTR_EFF_DIMM_TYPE == 0));  # same as type1A 2 socket RDIMM cfg for DDR3/4
 
 ## 1C 1 and 2 sockets not supported
-#define def_1c_1socket   = 0;
-#define def_1c_2socket   = 0;
-define def_1c_1socket        = (CENTAUR.ATTR_MSS_FREQ == 1400) ;   # will evaluate to false
-define def_1c_2socket        = (CENTAUR.ATTR_MSS_FREQ == 1400) ;   # will evaluate to false
+define def_1c_1socket_nodt  = (((((ATTR_CHIP_UNIT_POS == 1 ) && (ATTR_EFF_IBM_TYPE[1][0] == 3 )) || ((ATTR_CHIP_UNIT_POS == 0 ) && (ATTR_EFF_IBM_TYPE[0][0] == 3 ))) && (ATTR_EFF_NUM_DROPS_PER_PORT == 1)) || def_1d_1socket);
+define def_1c_2socket_nodt  = (((((ATTR_CHIP_UNIT_POS == 1 ) && (ATTR_EFF_IBM_TYPE[1][0] == 3 )) || ((ATTR_CHIP_UNIT_POS == 0 ) && (ATTR_EFF_IBM_TYPE[0][0] == 3 ))) && (ATTR_EFF_NUM_DROPS_PER_PORT == 2)) || def_1d_2socket);
+define def_1c_1socket_odt   = ((((ATTR_CHIP_UNIT_POS == 1 ) && (ATTR_EFF_IBM_TYPE[1][0] == 3 )) || ((ATTR_CHIP_UNIT_POS == 0 ) && (ATTR_EFF_IBM_TYPE[0][0] == 3 ))) && (ATTR_EFF_NUM_DROPS_PER_PORT == 1));
+define def_1c_2socket_odt   = ((((ATTR_CHIP_UNIT_POS == 1 ) && (ATTR_EFF_IBM_TYPE[1][0] == 3 )) || ((ATTR_CHIP_UNIT_POS == 0 ) && (ATTR_EFF_IBM_TYPE[0][0] == 3 ))) && (ATTR_EFF_NUM_DROPS_PER_PORT == 2));
 define def_1c_cdimm          = ((((ATTR_CHIP_UNIT_POS == 1 ) && (ATTR_EFF_IBM_TYPE[1][0] == 3 )) || ((ATTR_CHIP_UNIT_POS == 0 ) && (ATTR_EFF_IBM_TYPE[0][0] == 3 ))) && (ATTR_EFF_NUM_DROPS_PER_PORT == 2) && (ATTR_EFF_DIMM_TYPE == 0));  # same as type1B 2 socket RDIMM cfg for DDR3/4
 
 ## Current they is no 1D IBM type in the attribute
-#define def_1d_1socket       = 0;
-#define def_1d_2socket       = 0;
-#define def_1d_1socket        = (CENTAUR.ATTR_MSS_FREQ == 1400) ;   # will evaluate to false
-#define def_1d_2socket        = (CENTAUR.ATTR_MSS_FREQ == 1400) ;   # will evaluate to false
-define def_1d_1socket       = ((((ATTR_CHIP_UNIT_POS == 1 ) && (ATTR_EFF_IBM_TYPE[1][0] == 4 )) || ((ATTR_CHIP_UNIT_POS == 0 ) && (ATTR_EFF_IBM_TYPE[0][0] == 1 ))) && (ATTR_EFF_NUM_DROPS_PER_PORT == 1));
-define def_1d_2socket       = ((((ATTR_CHIP_UNIT_POS == 1 ) && (ATTR_EFF_IBM_TYPE[1][0] == 4 )) || ((ATTR_CHIP_UNIT_POS == 0 ) && (ATTR_EFF_IBM_TYPE[0][0] == 1 ))) && (ATTR_EFF_NUM_DROPS_PER_PORT == 2));
+define def_1d_1socket       = ((((ATTR_CHIP_UNIT_POS == 1 ) && (ATTR_EFF_IBM_TYPE[1][0] == 4 )) || ((ATTR_CHIP_UNIT_POS == 0 ) && (ATTR_EFF_IBM_TYPE[0][0] == 4 ))) && (ATTR_EFF_NUM_DROPS_PER_PORT == 1));
+define def_1d_2socket       = ((((ATTR_CHIP_UNIT_POS == 1 ) && (ATTR_EFF_IBM_TYPE[1][0] == 4 )) || ((ATTR_CHIP_UNIT_POS == 0 ) && (ATTR_EFF_IBM_TYPE[0][0] == 4 ))) && (ATTR_EFF_NUM_DROPS_PER_PORT == 2));
 
 ## note the CDIMMs 2A-2C CDIMMs are wired just like the single slot ISDIMMs
-define def_2a_1socket        = (((((ATTR_CHIP_UNIT_POS == 1 ) && (ATTR_EFF_IBM_TYPE[1][0] == 5 )) || ((ATTR_CHIP_UNIT_POS == 0 ) && (ATTR_EFF_IBM_TYPE[0][0] == 4 ))) && (ATTR_EFF_NUM_DROPS_PER_PORT == 1)) || (def_2a_cdimm));
-define def_2a_2socket        = (((((ATTR_CHIP_UNIT_POS == 1 ) && (ATTR_EFF_IBM_TYPE[1][0] == 5 )) || ((ATTR_CHIP_UNIT_POS == 0 ) && (ATTR_EFF_IBM_TYPE[0][0] == 4 ))) && (ATTR_EFF_NUM_DROPS_PER_PORT == 2)) || (def_2c_cdimm) || (def_3a_cdimm));
-define def_2a_cdimm          = ((((ATTR_CHIP_UNIT_POS == 1 ) && (ATTR_EFF_IBM_TYPE[1][0] == 5 )) || ((ATTR_CHIP_UNIT_POS == 0 ) && (ATTR_EFF_IBM_TYPE[0][0] == 4 ))) && (ATTR_EFF_NUM_DROPS_PER_PORT == 1) && (ATTR_EFF_DIMM_TYPE == 0)); # same as type2A 1 socket cfg
-define def_2a_1socket_ddr4   = (((((ATTR_CHIP_UNIT_POS == 1 ) && (ATTR_EFF_IBM_TYPE[1][0] == 5 )) || ((ATTR_CHIP_UNIT_POS == 0 ) && (ATTR_EFF_IBM_TYPE[0][0] == 4 ))) && (ATTR_EFF_NUM_DROPS_PER_PORT == 1)) || (def_2a_ddr4_cdimm));
-define def_2a_2socket_ddr4   = (((((ATTR_CHIP_UNIT_POS == 1 ) && (ATTR_EFF_IBM_TYPE[1][0] == 5 )) || ((ATTR_CHIP_UNIT_POS == 0 ) && (ATTR_EFF_IBM_TYPE[0][0] == 4 ))) && (ATTR_EFF_NUM_DROPS_PER_PORT == 2)) || (def_3a_ddr4_cdimm));
-define def_2a_ddr4_cdimm     = ((((ATTR_CHIP_UNIT_POS == 1 ) && (ATTR_EFF_IBM_TYPE[1][0] == 5 )) || ((ATTR_CHIP_UNIT_POS == 0 ) && (ATTR_EFF_IBM_TYPE[0][0] == 4 ))) && (ATTR_EFF_NUM_DROPS_PER_PORT == 1) && (ATTR_EFF_DIMM_TYPE == 0)); # same as type2A 1 socket DDR4 cfg
+define def_2a_1socket        = (((((ATTR_CHIP_UNIT_POS == 1 ) && (ATTR_EFF_IBM_TYPE[1][0] == 5 )) || ((ATTR_CHIP_UNIT_POS == 0 ) && (ATTR_EFF_IBM_TYPE[0][0] == 5 ))) && (ATTR_EFF_NUM_DROPS_PER_PORT == 1)) || (def_2a_cdimm));
+define def_2a_2socket        = (((((ATTR_CHIP_UNIT_POS == 1 ) && (ATTR_EFF_IBM_TYPE[1][0] == 5 )) || ((ATTR_CHIP_UNIT_POS == 0 ) && (ATTR_EFF_IBM_TYPE[0][0] == 5 ))) && (ATTR_EFF_NUM_DROPS_PER_PORT == 2)) || (def_2c_cdimm) || (def_3a_cdimm));
+define def_2a_cdimm          = ((((ATTR_CHIP_UNIT_POS == 1 ) && (ATTR_EFF_IBM_TYPE[1][0] == 5 )) || ((ATTR_CHIP_UNIT_POS == 0 ) && (ATTR_EFF_IBM_TYPE[0][0] == 5 ))) && (ATTR_EFF_NUM_DROPS_PER_PORT == 1) && (ATTR_EFF_DIMM_TYPE == 0)); # same as type2A 1 socket cfg
+define def_2a_1socket_ddr4   = (((((ATTR_CHIP_UNIT_POS == 1 ) && (ATTR_EFF_IBM_TYPE[1][0] == 5 )) || ((ATTR_CHIP_UNIT_POS == 0 ) && (ATTR_EFF_IBM_TYPE[0][0] == 5 ))) && (ATTR_EFF_NUM_DROPS_PER_PORT == 1)) || (def_2a_ddr4_cdimm));
+define def_2a_2socket_ddr4   = (((((ATTR_CHIP_UNIT_POS == 1 ) && (ATTR_EFF_IBM_TYPE[1][0] == 5 )) || ((ATTR_CHIP_UNIT_POS == 0 ) && (ATTR_EFF_IBM_TYPE[0][0] == 5 ))) && (ATTR_EFF_NUM_DROPS_PER_PORT == 2)) || (def_3a_ddr4_cdimm));
+define def_2a_ddr4_cdimm     = ((((ATTR_CHIP_UNIT_POS == 1 ) && (ATTR_EFF_IBM_TYPE[1][0] == 5 )) || ((ATTR_CHIP_UNIT_POS == 0 ) && (ATTR_EFF_IBM_TYPE[0][0] == 5 ))) && (ATTR_EFF_NUM_DROPS_PER_PORT == 1) && (ATTR_EFF_DIMM_TYPE == 0)); # same as type2A 1 socket DDR4 cfg
 
-define def_2b_1socket        = (((((ATTR_CHIP_UNIT_POS == 1 ) && (ATTR_EFF_IBM_TYPE[1][0] == 6 )) || ((ATTR_CHIP_UNIT_POS == 0 ) && (ATTR_EFF_IBM_TYPE[0][0] == 5 ))) && (ATTR_EFF_NUM_DROPS_PER_PORT == 1)) || (def_2b_cdimm));
-define def_2b_2socket        = ((((ATTR_CHIP_UNIT_POS == 1 ) && (ATTR_EFF_IBM_TYPE[1][0] == 6 )) || ((ATTR_CHIP_UNIT_POS == 0 ) && (ATTR_EFF_IBM_TYPE[0][0] == 5 ))) && (ATTR_EFF_NUM_DROPS_PER_PORT == 2));
-define def_2b_cdimm          = ((((ATTR_CHIP_UNIT_POS == 1 ) && (ATTR_EFF_IBM_TYPE[1][0] == 6 )) || ((ATTR_CHIP_UNIT_POS == 0 ) && (ATTR_EFF_IBM_TYPE[0][0] == 5 ))) && (ATTR_EFF_NUM_DROPS_PER_PORT == 1) && (ATTR_EFF_DIMM_TYPE == 0));      # same as type2B 1 socket cfg
-define def_2b_1socket_ddr4   = (((((ATTR_CHIP_UNIT_POS == 1 ) && (ATTR_EFF_IBM_TYPE[1][0] == 6 )) || ((ATTR_CHIP_UNIT_POS == 0 ) && (ATTR_EFF_IBM_TYPE[0][0] == 5 ))) && (ATTR_EFF_NUM_DROPS_PER_PORT == 1)) || (def_2b_ddr4_cdimm));
-define def_2b_2socket_ddr4   = (((((ATTR_CHIP_UNIT_POS == 1 ) && (ATTR_EFF_IBM_TYPE[1][0] == 6 )) || ((ATTR_CHIP_UNIT_POS == 0 ) && (ATTR_EFF_IBM_TYPE[0][0] == 5 ))) && (ATTR_EFF_NUM_DROPS_PER_PORT == 2)) || (def_3b_ddr4_cdimm));
-define def_2b_ddr4_cdimm     = ((((ATTR_CHIP_UNIT_POS == 1 ) && (ATTR_EFF_IBM_TYPE[1][0] == 6 )) || ((ATTR_CHIP_UNIT_POS == 0 ) && (ATTR_EFF_IBM_TYPE[0][0] == 5 ))) && (ATTR_EFF_NUM_DROPS_PER_PORT == 1) && (ATTR_EFF_DIMM_TYPE == 0));  # same as type2B 1 socket DDR4 cfg
+define def_2b_1socket        = (((((ATTR_CHIP_UNIT_POS == 1 ) && (ATTR_EFF_IBM_TYPE[1][0] == 6 )) || ((ATTR_CHIP_UNIT_POS == 0 ) && (ATTR_EFF_IBM_TYPE[0][0] == 6 ))) && (ATTR_EFF_NUM_DROPS_PER_PORT == 1)) || (def_2b_cdimm));
+define def_2b_2socket        = ((((ATTR_CHIP_UNIT_POS == 1 ) && (ATTR_EFF_IBM_TYPE[1][0] == 6 )) || ((ATTR_CHIP_UNIT_POS == 0 ) && (ATTR_EFF_IBM_TYPE[0][0] == 6 ))) && (ATTR_EFF_NUM_DROPS_PER_PORT == 2));
+define def_2b_cdimm          = ((((ATTR_CHIP_UNIT_POS == 1 ) && (ATTR_EFF_IBM_TYPE[1][0] == 6 )) || ((ATTR_CHIP_UNIT_POS == 0 ) && (ATTR_EFF_IBM_TYPE[0][0] == 6 ))) && (ATTR_EFF_NUM_DROPS_PER_PORT == 1) && (ATTR_EFF_DIMM_TYPE == 0));      # same as type2B 1 socket cfg
+define def_2b_1socket_ddr4   = (((((ATTR_CHIP_UNIT_POS == 1 ) && (ATTR_EFF_IBM_TYPE[1][0] == 6 )) || ((ATTR_CHIP_UNIT_POS == 0 ) && (ATTR_EFF_IBM_TYPE[0][0] == 6 ))) && (ATTR_EFF_NUM_DROPS_PER_PORT == 1)) || (def_2b_ddr4_cdimm));
+define def_2b_2socket_ddr4   = (((((ATTR_CHIP_UNIT_POS == 1 ) && (ATTR_EFF_IBM_TYPE[1][0] == 6 )) || ((ATTR_CHIP_UNIT_POS == 0 ) && (ATTR_EFF_IBM_TYPE[0][0] == 6 ))) && (ATTR_EFF_NUM_DROPS_PER_PORT == 2)) || (def_3b_ddr4_cdimm));
+define def_2b_ddr4_cdimm     = ((((ATTR_CHIP_UNIT_POS == 1 ) && (ATTR_EFF_IBM_TYPE[1][0] == 6 )) || ((ATTR_CHIP_UNIT_POS == 0 ) && (ATTR_EFF_IBM_TYPE[0][0] == 6 ))) && (ATTR_EFF_NUM_DROPS_PER_PORT == 1) && (ATTR_EFF_DIMM_TYPE == 0));  # same as type2B 1 socket DDR4 cfg
 
 # centuar spec only has DDR4 for 2C cfg
 define def_2c_1socket        = (((((ATTR_CHIP_UNIT_POS == 1 ) && (ATTR_EFF_IBM_TYPE[1][0] == 7 )) || ((ATTR_CHIP_UNIT_POS == 0 ) && (ATTR_EFF_IBM_TYPE[0][0] == 7 ))) && (ATTR_EFF_NUM_DROPS_PER_PORT == 1)) || (def_2a_cdimm));
@@ -365,7 +366,7 @@ define def_7c_2socket_ddr4   = ((((ATTR_CHIP_UNIT_POS == 1 ) && (ATTR_EFF_IBM_TY
 
 define def_mtype_1a = ((def_1a_1socket     )||(def_1a_2socket     )); #||(def_1b_cdimm));
 define def_mtype_1b = ((def_1b_1socket     )||(def_1b_2socket     )||(def_1c_cdimm));
-define def_mtype_1c = ((def_1c_1socket     )||(def_1c_2socket));
+define def_mtype_1c = ((def_1c_1socket_nodt     )||(def_1c_2socket_nodt));
 define def_mtype_2a = ((def_2a_1socket     )||(def_2a_2socket     )||(def_2a_1socket_ddr4)||(def_2a_2socket_ddr4)||(def_3a_cdimm       )||(def_3a_ddr4_cdimm));
 define def_mtype_2b = ((def_2b_1socket     )||(def_2b_2socket     )||(def_2b_1socket_ddr4)||(def_2b_2socket_ddr4)||(def_3b_cdimm       )||(def_3b_ddr4_cdimm));
 define def_mtype_2c = ((def_2c_1socket     )||(def_2c_2socket     )||(def_2c_1socket_ddr4)||(def_2c_2socket_ddr4)||(def_3c_cdimm       )||(def_3c_ddr4_cdimm));
@@ -398,22 +399,20 @@ define def_prim_map_a = ((def_mtype_1a   )||(def_mtype_1b    )||(def_mtype_1c   
 #define def_prim_map_b  not used
 define def_prim_map_c = (def_mtype_5d);
 
-#define def_type1        =  ((def_1a_1socket )||( def_1a_2socket )||( def_1b_1socket )||( def_1b_2socket )||( def_1c_1socket )||( def_1c_2socket));
+#define def_type1        =  ((def_1a_1socket )||( def_1a_2socket )||( def_1b_1socket )||( def_1b_2socket )||( def_1c_1socket_nodt )||( def_1c_2socket_nodt));
 #define def_type2        =  ((def_2a_1socket )||( def_2a_2socket )||( def_2b_1socket )||( def_2b_2socket )||( def_2c_1socket )||( def_2c_2socket));
 #define def_type3        =  ((def_3a_1socket )||( def_3a_2socket )||( def_3b_1socket )||( def_3b_2socket )||( def_3c_1socket )||( def_3c_2socket));
 #define def_type4        =  ((def_4a_1socket )||( def_4a_2socket )||( def_4b_1socket )||( def_4b_2socket )||( def_4c_1socket )||( def_4c_2socket));
 
 #define def_subtypea     =  ((def_1a_1socket )||( def_1a_2socket )||( def_2a_1socket )||( def_2a_2socket )||( def_3a_1socket )||( def_3a_2socket )||( def_4a_1socket )||( def_4a_2socket));
 #define def_subtypeb     =  ((def_1b_1socket )||( def_1b_2socket )||( def_2b_1socket )||( def_2b_2socket )||( def_3b_1socket )||( def_3b_2socket )||( def_4b_1socket )||( def_4b_2socket));
-#define def_subtypec     =  ((def_1c_1socket )||( def_1c_2socket )||( def_2c_1socket )||( def_2c_2socket )||( def_3c_1socket )||( def_3c_2socket )||( def_4c_1socket )||( def_4c_2socket));
+#define def_subtypec     =  ((def_1c_1socket_nodt )||( def_1c_2socket_nodt )||( def_2c_1socket )||( def_2c_2socket )||( def_3c_1socket )||( def_3c_2socket )||( def_4c_1socket )||( def_4c_2socket));
 
-#define def_1socket      =  ((def_1a_1socket )||( def_1b_1socket )||( def_1c_1socket )||( def_2a_1socket )||( def_2b_1socket )||( def_2c_1socket )||( def_3a_1socket )||( def_3b_1socket )||( def_3c_1socket )||( def_4a_1socket )||( def_4b_1socket )||( def_4c_1socket));
-#define def_2socket      =  ((def_1a_2socket )||( def_1b_2socket )||( def_1c_2socket )||( def_2a_2socket )||( def_2b_2socket )||( def_2c_2socket )||( def_3a_2socket )||( def_3b_2socket )||( def_3c_2socket )||( def_4a_2socket )||( def_4b_2socket )||( def_4c_2socket));
+#define def_1socket      =  ((def_1a_1socket )||( def_1b_1socket )||( def_1c_1socket_nodt )||( def_2a_1socket )||( def_2b_1socket )||( def_2c_1socket )||( def_3a_1socket )||( def_3b_1socket )||( def_3c_1socket )||( def_4a_1socket )||( def_4b_1socket )||( def_4c_1socket));
+#define def_2socket      =  ((def_1a_2socket )||( def_1b_2socket )||( def_1c_2socket_nodt )||( def_2a_2socket )||( def_2b_2socket )||( def_2c_2socket )||( def_3a_2socket )||( def_3b_2socket )||( def_3c_2socket )||( def_4a_2socket )||( def_4b_2socket )||( def_4c_2socket));
 
 
-#define def_IS1A_IS1B_IS1D_C1A_C1B_C1C_C1D_C5C = ((def_1a_1socket     )||(def_1a_2socket     )||(def_1b_cdimm       )||(def_1b_1socket     )||(def_1b_2socket     )||(def_1c_cdimm       )||(def_1c_1socket     )||(def_1c_2socket     )||(def_5b_1socket     )||(def_5b_2socket     )||(def_5c_1socket     )||(def_5c_2socket));
-# removed  def_1b_cdimm
-define def_IS1A_IS1B_IS1D_C1A_C1B_C1C_C1D_C5C = ((def_1a_1socket     )||(def_1a_2socket     )||(def_1b_1socket     )||(def_1b_2socket     )||(def_1c_cdimm       )||(def_1c_1socket     )||(def_1c_2socket     )||(def_5b_1socket     )||(def_5b_2socket     )||(def_5c_1socket     )||(def_5c_2socket));
+define def_IS1A_IS1B_IS1D_C1A_C1B_C1C_C1D_C5C = ((def_1a_1socket     )||(def_1a_2socket     )||(def_1b_1socket     )||(def_1b_2socket     )||(def_1c_cdimm       )||(def_1c_1socket_nodt     )||(def_1c_2socket_nodt     )||(def_5b_1socket     )||(def_5b_2socket     )||(def_5c_1socket     )||(def_5c_2socket));
 define def_IS7a_C4a_C3a                       = ((def_3a_1socket     )||(def_3a_2socket     )||(def_4a_cdimm       )||(def_7a_1socket     )||(def_7a_2socket));
 define def_IS3b_IS7b                          = ((def_3b_1socket     )||(def_3b_2socket     )||(def_4b_ddr4_cdimm  )||(def_7b_1socket     )||(def_7b_2socket));
 define def_IS7C                               = ((def_7c_1socket     )||(def_7c_2socket));
@@ -484,100 +483,100 @@ define  def_2400_8gb_fast_exit_pd_ddr4 = ((CENTAUR.ATTR_MSS_FREQ == 2400 ) && ( 
 
 
 
-define  def_ddr3_1066_6_6_6       = ((ATTR_EFF_DRAM_GEN == 1 ) && ( CENTAUR.ATTR_MSS_FREQ == 1066 ) && ( ATTR_EFF_DRAM_CL == 6  ) && ( ATTR_EFF_DRAM_TRCD == 6  ) && ( ATTR_EFF_DRAM_TRP == 6  ) && ( def_ATTR_EFF_DRAM_2N_MODE == 0 ) && (ATTR_EFF_DIMM_TYPE == 0 || ATTR_EFF_DIMM_TYPE == 2));
-define  def_ddr3_1066_6_6_6R      = ((ATTR_EFF_DRAM_GEN == 1 ) && ( CENTAUR.ATTR_MSS_FREQ == 1066 ) && ( ATTR_EFF_DRAM_CL == 6  ) && ( ATTR_EFF_DRAM_TRCD == 6  ) && ( ATTR_EFF_DRAM_TRP == 6  ) && ( def_ATTR_EFF_DRAM_2N_MODE == 0 ) && (ATTR_EFF_DIMM_TYPE == 1 ));
-define  def_ddr3_1066_6_6_6_2N    = ((ATTR_EFF_DRAM_GEN == 1 ) && ( CENTAUR.ATTR_MSS_FREQ == 1066 ) && ( ATTR_EFF_DRAM_CL == 6  ) && ( ATTR_EFF_DRAM_TRCD == 6  ) && ( ATTR_EFF_DRAM_TRP == 6  ) && ( def_ATTR_EFF_DRAM_2N_MODE == 1 ) && (ATTR_EFF_DIMM_TYPE == 0 || ATTR_EFF_DIMM_TYPE == 2));
-define  def_ddr3_1066_6_6_6_L2    = ((ATTR_EFF_DRAM_GEN == 1 ) && ( CENTAUR.ATTR_MSS_FREQ == 1066 ) && ( ATTR_EFF_DRAM_CL == 6  ) && ( ATTR_EFF_DRAM_TRCD == 6  ) && ( ATTR_EFF_DRAM_TRP == 6  ) && ( def_ATTR_EFF_DRAM_2N_MODE == 1 ) && (ATTR_EFF_DIMM_TYPE == 3));
-define  def_ddr3_1066_6_6_6_LR    = ((ATTR_EFF_DRAM_GEN == 1 ) && ( CENTAUR.ATTR_MSS_FREQ == 1066 ) && ( ATTR_EFF_DRAM_CL == 6  ) && ( ATTR_EFF_DRAM_TRCD == 6  ) && ( ATTR_EFF_DRAM_TRP == 6  ) && ( def_ATTR_EFF_DRAM_2N_MODE == 0 ) && (ATTR_EFF_DIMM_TYPE == 3));
+define  def_ddr3_1066_6_6_6       = ((ATTR_EFF_DRAM_GEN == 1 ) && ( CENTAUR.ATTR_MSS_FREQ == 1066 ) && ( ATTR_EFF_DRAM_CL == 6  ) && ( ATTR_EFF_DRAM_TRCD == 6  ) && ( ATTR_EFF_DRAM_TRP == 6  ) && ( ATTR_EFF_DRAM_2N_MODE_ENABLED == 0 ) && (ATTR_EFF_DIMM_TYPE == 0 || ATTR_EFF_DIMM_TYPE == 2));
+define  def_ddr3_1066_6_6_6R      = ((ATTR_EFF_DRAM_GEN == 1 ) && ( CENTAUR.ATTR_MSS_FREQ == 1066 ) && ( ATTR_EFF_DRAM_CL == 6  ) && ( ATTR_EFF_DRAM_TRCD == 6  ) && ( ATTR_EFF_DRAM_TRP == 6  ) && ( ATTR_EFF_DRAM_2N_MODE_ENABLED == 0 ) && (ATTR_EFF_DIMM_TYPE == 1 ));
+define  def_ddr3_1066_6_6_6_2N    = ((ATTR_EFF_DRAM_GEN == 1 ) && ( CENTAUR.ATTR_MSS_FREQ == 1066 ) && ( ATTR_EFF_DRAM_CL == 6  ) && ( ATTR_EFF_DRAM_TRCD == 6  ) && ( ATTR_EFF_DRAM_TRP == 6  ) && ( ATTR_EFF_DRAM_2N_MODE_ENABLED == 1 ) && (ATTR_EFF_DIMM_TYPE == 0 || ATTR_EFF_DIMM_TYPE == 2));
+define  def_ddr3_1066_6_6_6_L2    = ((ATTR_EFF_DRAM_GEN == 1 ) && ( CENTAUR.ATTR_MSS_FREQ == 1066 ) && ( ATTR_EFF_DRAM_CL == 6  ) && ( ATTR_EFF_DRAM_TRCD == 6  ) && ( ATTR_EFF_DRAM_TRP == 6  ) && ( ATTR_EFF_DRAM_2N_MODE_ENABLED == 1 ) && (ATTR_EFF_DIMM_TYPE == 3));
+define  def_ddr3_1066_6_6_6_LR    = ((ATTR_EFF_DRAM_GEN == 1 ) && ( CENTAUR.ATTR_MSS_FREQ == 1066 ) && ( ATTR_EFF_DRAM_CL == 6  ) && ( ATTR_EFF_DRAM_TRCD == 6  ) && ( ATTR_EFF_DRAM_TRP == 6  ) && ( ATTR_EFF_DRAM_2N_MODE_ENABLED == 0 ) && (ATTR_EFF_DIMM_TYPE == 3));
 define  def_ddr3_1066_6_6_6_group = ((def_ddr3_1066_6_6_6      )||( def_ddr3_1066_6_6_6_2N    )||( def_ddr3_1066_6_6_6R      )||( def_ddr3_1066_6_6_6_LR    )||( def_ddr3_1066_6_6_6_L2));
-define  def_ddr3_1066_7_7_7       = ((ATTR_EFF_DRAM_GEN == 1 ) && ( CENTAUR.ATTR_MSS_FREQ == 1066 ) && ( ATTR_EFF_DRAM_CL == 7  ) && ( ATTR_EFF_DRAM_TRCD == 7  ) && ( ATTR_EFF_DRAM_TRP == 7  ) && ( def_ATTR_EFF_DRAM_2N_MODE == 0 ) && (ATTR_EFF_DIMM_TYPE == 0 || ATTR_EFF_DIMM_TYPE == 2));
-define  def_ddr3_1066_7_7_7R      = ((ATTR_EFF_DRAM_GEN == 1 ) && ( CENTAUR.ATTR_MSS_FREQ == 1066 ) && ( ATTR_EFF_DRAM_CL == 7  ) && ( ATTR_EFF_DRAM_TRCD == 7  ) && ( ATTR_EFF_DRAM_TRP == 7  ) && ( def_ATTR_EFF_DRAM_2N_MODE == 0 ) && (ATTR_EFF_DIMM_TYPE == 1 ));
-define  def_ddr3_1066_7_7_7_2N    = ((ATTR_EFF_DRAM_GEN == 1 ) && ( CENTAUR.ATTR_MSS_FREQ == 1066 ) && ( ATTR_EFF_DRAM_CL == 7  ) && ( ATTR_EFF_DRAM_TRCD == 7  ) && ( ATTR_EFF_DRAM_TRP == 7  ) && ( def_ATTR_EFF_DRAM_2N_MODE == 1 ) && (ATTR_EFF_DIMM_TYPE == 0 || ATTR_EFF_DIMM_TYPE == 2));
-define  def_ddr3_1066_7_7_7_L2    = ((ATTR_EFF_DRAM_GEN == 1 ) && ( CENTAUR.ATTR_MSS_FREQ == 1066 ) && ( ATTR_EFF_DRAM_CL == 7  ) && ( ATTR_EFF_DRAM_TRCD == 7  ) && ( ATTR_EFF_DRAM_TRP == 7  ) && ( def_ATTR_EFF_DRAM_2N_MODE == 1 ) && (ATTR_EFF_DIMM_TYPE == 3));
-define  def_ddr3_1066_7_7_7_LR    = ((ATTR_EFF_DRAM_GEN == 1 ) && ( CENTAUR.ATTR_MSS_FREQ == 1066 ) && ( ATTR_EFF_DRAM_CL == 7  ) && ( ATTR_EFF_DRAM_TRCD == 7  ) && ( ATTR_EFF_DRAM_TRP == 7  ) && ( def_ATTR_EFF_DRAM_2N_MODE == 0 ) && (ATTR_EFF_DIMM_TYPE == 3));
+define  def_ddr3_1066_7_7_7       = ((ATTR_EFF_DRAM_GEN == 1 ) && ( CENTAUR.ATTR_MSS_FREQ == 1066 ) && ( ATTR_EFF_DRAM_CL == 7  ) && ( ATTR_EFF_DRAM_TRCD == 7  ) && ( ATTR_EFF_DRAM_TRP == 7  ) && ( ATTR_EFF_DRAM_2N_MODE_ENABLED == 0 ) && (ATTR_EFF_DIMM_TYPE == 0 || ATTR_EFF_DIMM_TYPE == 2));
+define  def_ddr3_1066_7_7_7R      = ((ATTR_EFF_DRAM_GEN == 1 ) && ( CENTAUR.ATTR_MSS_FREQ == 1066 ) && ( ATTR_EFF_DRAM_CL == 7  ) && ( ATTR_EFF_DRAM_TRCD == 7  ) && ( ATTR_EFF_DRAM_TRP == 7  ) && ( ATTR_EFF_DRAM_2N_MODE_ENABLED == 0 ) && (ATTR_EFF_DIMM_TYPE == 1 ));
+define  def_ddr3_1066_7_7_7_2N    = ((ATTR_EFF_DRAM_GEN == 1 ) && ( CENTAUR.ATTR_MSS_FREQ == 1066 ) && ( ATTR_EFF_DRAM_CL == 7  ) && ( ATTR_EFF_DRAM_TRCD == 7  ) && ( ATTR_EFF_DRAM_TRP == 7  ) && ( ATTR_EFF_DRAM_2N_MODE_ENABLED == 1 ) && (ATTR_EFF_DIMM_TYPE == 0 || ATTR_EFF_DIMM_TYPE == 2));
+define  def_ddr3_1066_7_7_7_L2    = ((ATTR_EFF_DRAM_GEN == 1 ) && ( CENTAUR.ATTR_MSS_FREQ == 1066 ) && ( ATTR_EFF_DRAM_CL == 7  ) && ( ATTR_EFF_DRAM_TRCD == 7  ) && ( ATTR_EFF_DRAM_TRP == 7  ) && ( ATTR_EFF_DRAM_2N_MODE_ENABLED == 1 ) && (ATTR_EFF_DIMM_TYPE == 3));
+define  def_ddr3_1066_7_7_7_LR    = ((ATTR_EFF_DRAM_GEN == 1 ) && ( CENTAUR.ATTR_MSS_FREQ == 1066 ) && ( ATTR_EFF_DRAM_CL == 7  ) && ( ATTR_EFF_DRAM_TRCD == 7  ) && ( ATTR_EFF_DRAM_TRP == 7  ) && ( ATTR_EFF_DRAM_2N_MODE_ENABLED == 0 ) && (ATTR_EFF_DIMM_TYPE == 3));
 define  def_ddr3_1066_7_7_7_group = ((def_ddr3_1066_7_7_7      )||( def_ddr3_1066_7_7_7_2N    )||( def_ddr3_1066_7_7_7R      )||( def_ddr3_1066_7_7_7_LR    )||( def_ddr3_1066_7_7_7_L2));
-define  def_ddr3_1066_8_8_8       = ((ATTR_EFF_DRAM_GEN == 1 ) && ( CENTAUR.ATTR_MSS_FREQ == 1066 ) && ( ATTR_EFF_DRAM_CL == 8  ) && ( ATTR_EFF_DRAM_TRCD == 8  ) && ( ATTR_EFF_DRAM_TRP == 8  ) && ( def_ATTR_EFF_DRAM_2N_MODE == 0 ) && (ATTR_EFF_DIMM_TYPE == 0 || ATTR_EFF_DIMM_TYPE == 2));
-define  def_ddr3_1066_8_8_8R      = ((ATTR_EFF_DRAM_GEN == 1 ) && ( CENTAUR.ATTR_MSS_FREQ == 1066 ) && ( ATTR_EFF_DRAM_CL == 8  ) && ( ATTR_EFF_DRAM_TRCD == 8  ) && ( ATTR_EFF_DRAM_TRP == 8  ) && ( def_ATTR_EFF_DRAM_2N_MODE == 0 ) && (ATTR_EFF_DIMM_TYPE == 1 ));
-define  def_ddr3_1066_8_8_8_2N    = ((ATTR_EFF_DRAM_GEN == 1 ) && ( CENTAUR.ATTR_MSS_FREQ == 1066 ) && ( ATTR_EFF_DRAM_CL == 8  ) && ( ATTR_EFF_DRAM_TRCD == 8  ) && ( ATTR_EFF_DRAM_TRP == 8  ) && ( def_ATTR_EFF_DRAM_2N_MODE == 1 ) && (ATTR_EFF_DIMM_TYPE == 0 || ATTR_EFF_DIMM_TYPE == 2));
-define  def_ddr3_1066_8_8_8_L2    = ((ATTR_EFF_DRAM_GEN == 1 ) && ( CENTAUR.ATTR_MSS_FREQ == 1066 ) && ( ATTR_EFF_DRAM_CL == 8  ) && ( ATTR_EFF_DRAM_TRCD == 8  ) && ( ATTR_EFF_DRAM_TRP == 8  ) && ( def_ATTR_EFF_DRAM_2N_MODE == 1 ) && (ATTR_EFF_DIMM_TYPE == 3));
-define  def_ddr3_1066_8_8_8_LR    = ((ATTR_EFF_DRAM_GEN == 1 ) && ( CENTAUR.ATTR_MSS_FREQ == 1066 ) && ( ATTR_EFF_DRAM_CL == 8  ) && ( ATTR_EFF_DRAM_TRCD == 8  ) && ( ATTR_EFF_DRAM_TRP == 8  ) && ( def_ATTR_EFF_DRAM_2N_MODE == 0 ) && (ATTR_EFF_DIMM_TYPE == 3));
+define  def_ddr3_1066_8_8_8       = ((ATTR_EFF_DRAM_GEN == 1 ) && ( CENTAUR.ATTR_MSS_FREQ == 1066 ) && ( ATTR_EFF_DRAM_CL == 8  ) && ( ATTR_EFF_DRAM_TRCD == 8  ) && ( ATTR_EFF_DRAM_TRP == 8  ) && ( ATTR_EFF_DRAM_2N_MODE_ENABLED == 0 ) && (ATTR_EFF_DIMM_TYPE == 0 || ATTR_EFF_DIMM_TYPE == 2));
+define  def_ddr3_1066_8_8_8R      = ((ATTR_EFF_DRAM_GEN == 1 ) && ( CENTAUR.ATTR_MSS_FREQ == 1066 ) && ( ATTR_EFF_DRAM_CL == 8  ) && ( ATTR_EFF_DRAM_TRCD == 8  ) && ( ATTR_EFF_DRAM_TRP == 8  ) && ( ATTR_EFF_DRAM_2N_MODE_ENABLED == 0 ) && (ATTR_EFF_DIMM_TYPE == 1 ));
+define  def_ddr3_1066_8_8_8_2N    = ((ATTR_EFF_DRAM_GEN == 1 ) && ( CENTAUR.ATTR_MSS_FREQ == 1066 ) && ( ATTR_EFF_DRAM_CL == 8  ) && ( ATTR_EFF_DRAM_TRCD == 8  ) && ( ATTR_EFF_DRAM_TRP == 8  ) && ( ATTR_EFF_DRAM_2N_MODE_ENABLED == 1 ) && (ATTR_EFF_DIMM_TYPE == 0 || ATTR_EFF_DIMM_TYPE == 2));
+define  def_ddr3_1066_8_8_8_L2    = ((ATTR_EFF_DRAM_GEN == 1 ) && ( CENTAUR.ATTR_MSS_FREQ == 1066 ) && ( ATTR_EFF_DRAM_CL == 8  ) && ( ATTR_EFF_DRAM_TRCD == 8  ) && ( ATTR_EFF_DRAM_TRP == 8  ) && ( ATTR_EFF_DRAM_2N_MODE_ENABLED == 1 ) && (ATTR_EFF_DIMM_TYPE == 3));
+define  def_ddr3_1066_8_8_8_LR    = ((ATTR_EFF_DRAM_GEN == 1 ) && ( CENTAUR.ATTR_MSS_FREQ == 1066 ) && ( ATTR_EFF_DRAM_CL == 8  ) && ( ATTR_EFF_DRAM_TRCD == 8  ) && ( ATTR_EFF_DRAM_TRP == 8  ) && ( ATTR_EFF_DRAM_2N_MODE_ENABLED == 0 ) && (ATTR_EFF_DIMM_TYPE == 3));
 define  def_ddr3_1066_8_8_8_group = ((def_ddr3_1066_8_8_8      )||( def_ddr3_1066_8_8_8_2N    )||( def_ddr3_1066_8_8_8R      )||( def_ddr3_1066_8_8_8_LR    )||( def_ddr3_1066_8_8_8_L2));
-define  def_ddr3_1333_8_8_8       = ((ATTR_EFF_DRAM_GEN == 1 ) && ( CENTAUR.ATTR_MSS_FREQ == 1333 ) && ( ATTR_EFF_DRAM_CL == 8  ) && ( ATTR_EFF_DRAM_TRCD == 8  ) && ( ATTR_EFF_DRAM_TRP == 8  ) && ( def_ATTR_EFF_DRAM_2N_MODE == 0 ) && (ATTR_EFF_DIMM_TYPE == 0 || ATTR_EFF_DIMM_TYPE == 2));
-define  def_ddr3_1333_8_8_8R      = ((ATTR_EFF_DRAM_GEN == 1 ) && ( CENTAUR.ATTR_MSS_FREQ == 1333 ) && ( ATTR_EFF_DRAM_CL == 8  ) && ( ATTR_EFF_DRAM_TRCD == 8  ) && ( ATTR_EFF_DRAM_TRP == 8  ) && ( def_ATTR_EFF_DRAM_2N_MODE == 0 ) && (ATTR_EFF_DIMM_TYPE == 1 ));
-define  def_ddr3_1333_8_8_8_2N    = ((ATTR_EFF_DRAM_GEN == 1 ) && ( CENTAUR.ATTR_MSS_FREQ == 1333 ) && ( ATTR_EFF_DRAM_CL == 8  ) && ( ATTR_EFF_DRAM_TRCD == 8  ) && ( ATTR_EFF_DRAM_TRP == 8  ) && ( def_ATTR_EFF_DRAM_2N_MODE == 1 ) && (ATTR_EFF_DIMM_TYPE == 0 || ATTR_EFF_DIMM_TYPE == 2));
-define  def_ddr3_1333_8_8_8_L2    = ((ATTR_EFF_DRAM_GEN == 1 ) && ( CENTAUR.ATTR_MSS_FREQ == 1333 ) && ( ATTR_EFF_DRAM_CL == 8  ) && ( ATTR_EFF_DRAM_TRCD == 8  ) && ( ATTR_EFF_DRAM_TRP == 8  ) && ( def_ATTR_EFF_DRAM_2N_MODE == 1 ) && (ATTR_EFF_DIMM_TYPE == 3));
-define  def_ddr3_1333_8_8_8_LR    = ((ATTR_EFF_DRAM_GEN == 1 ) && ( CENTAUR.ATTR_MSS_FREQ == 1333 ) && ( ATTR_EFF_DRAM_CL == 8  ) && ( ATTR_EFF_DRAM_TRCD == 8  ) && ( ATTR_EFF_DRAM_TRP == 8  ) && ( def_ATTR_EFF_DRAM_2N_MODE == 0 ) && (ATTR_EFF_DIMM_TYPE == 3));
-define  def_ddr3_1333_9_9_9       = ((ATTR_EFF_DRAM_GEN == 1 ) && ( CENTAUR.ATTR_MSS_FREQ == 1333 ) && ( ATTR_EFF_DRAM_CL == 9  ) && ( ATTR_EFF_DRAM_TRCD == 9  ) && ( ATTR_EFF_DRAM_TRP == 9  ) && ( def_ATTR_EFF_DRAM_2N_MODE == 0 ) && (ATTR_EFF_DIMM_TYPE == 0 || ATTR_EFF_DIMM_TYPE == 2));
-define  def_ddr3_1333_9_9_9R      = ((ATTR_EFF_DRAM_GEN == 1 ) && ( CENTAUR.ATTR_MSS_FREQ == 1333 ) && ( ATTR_EFF_DRAM_CL == 9  ) && ( ATTR_EFF_DRAM_TRCD == 9  ) && ( ATTR_EFF_DRAM_TRP == 9  ) && ( def_ATTR_EFF_DRAM_2N_MODE == 0 ) && (ATTR_EFF_DIMM_TYPE == 1 ));
-define  def_ddr3_1333_9_9_9_2N    = ((ATTR_EFF_DRAM_GEN == 1 ) && ( CENTAUR.ATTR_MSS_FREQ == 1333 ) && ( ATTR_EFF_DRAM_CL == 9  ) && ( ATTR_EFF_DRAM_TRCD == 9  ) && ( ATTR_EFF_DRAM_TRP == 9  ) && ( def_ATTR_EFF_DRAM_2N_MODE == 1 ) && (ATTR_EFF_DIMM_TYPE == 0 || ATTR_EFF_DIMM_TYPE == 2));
-define  def_ddr3_1333_9_9_9_L2    = ((ATTR_EFF_DRAM_GEN == 1 ) && ( CENTAUR.ATTR_MSS_FREQ == 1333 ) && ( ATTR_EFF_DRAM_CL == 9  ) && ( ATTR_EFF_DRAM_TRCD == 9  ) && ( ATTR_EFF_DRAM_TRP == 9  ) && ( def_ATTR_EFF_DRAM_2N_MODE == 1 ) && (ATTR_EFF_DIMM_TYPE == 3));
-define  def_ddr3_1333_9_9_9_LR    = ((ATTR_EFF_DRAM_GEN == 1 ) && ( CENTAUR.ATTR_MSS_FREQ == 1333 ) && ( ATTR_EFF_DRAM_CL == 9  ) && ( ATTR_EFF_DRAM_TRCD == 9  ) && ( ATTR_EFF_DRAM_TRP == 9  ) && ( def_ATTR_EFF_DRAM_2N_MODE == 0 ) && (ATTR_EFF_DIMM_TYPE == 3));
-define  def_ddr3_1600_10_10_10    = ((ATTR_EFF_DRAM_GEN == 1 ) && ( CENTAUR.ATTR_MSS_FREQ == 1600 ) && ( ATTR_EFF_DRAM_CL == 10 ) && ( ATTR_EFF_DRAM_TRCD == 10 ) && ( ATTR_EFF_DRAM_TRP == 10 ) && ( def_ATTR_EFF_DRAM_2N_MODE == 0 ) && (ATTR_EFF_DIMM_TYPE == 0 || ATTR_EFF_DIMM_TYPE == 2));
-define  def_ddr3_1600_10_10_10R   = ((ATTR_EFF_DRAM_GEN == 1 ) && ( CENTAUR.ATTR_MSS_FREQ == 1600 ) && ( ATTR_EFF_DRAM_CL == 10 ) && ( ATTR_EFF_DRAM_TRCD == 10 ) && ( ATTR_EFF_DRAM_TRP == 10 ) && ( def_ATTR_EFF_DRAM_2N_MODE == 0 ) && (ATTR_EFF_DIMM_TYPE == 1 ));
-define  def_ddr3_1600_10_10_10_2N = ((ATTR_EFF_DRAM_GEN == 1 ) && ( CENTAUR.ATTR_MSS_FREQ == 1600 ) && ( ATTR_EFF_DRAM_CL == 10 ) && ( ATTR_EFF_DRAM_TRCD == 10 ) && ( ATTR_EFF_DRAM_TRP == 10 ) && ( def_ATTR_EFF_DRAM_2N_MODE == 1 ) && (ATTR_EFF_DIMM_TYPE == 0 || ATTR_EFF_DIMM_TYPE == 2));
-define  def_ddr3_1600_10_10_10_L2 = ((ATTR_EFF_DRAM_GEN == 1 ) && ( CENTAUR.ATTR_MSS_FREQ == 1600 ) && ( ATTR_EFF_DRAM_CL == 10 ) && ( ATTR_EFF_DRAM_TRCD == 10 ) && ( ATTR_EFF_DRAM_TRP == 10 ) && ( def_ATTR_EFF_DRAM_2N_MODE == 1 ) && (ATTR_EFF_DIMM_TYPE == 3));
-define  def_ddr3_1600_10_10_10_LR = ((ATTR_EFF_DRAM_GEN == 1 ) && ( CENTAUR.ATTR_MSS_FREQ == 1600 ) && ( ATTR_EFF_DRAM_CL == 10 ) && ( ATTR_EFF_DRAM_TRCD == 10 ) && ( ATTR_EFF_DRAM_TRP == 10 ) && ( def_ATTR_EFF_DRAM_2N_MODE == 0 ) && (ATTR_EFF_DIMM_TYPE == 3));
-define  def_ddr3_1600_11_11_11    = ((ATTR_EFF_DRAM_GEN == 1 ) && ( CENTAUR.ATTR_MSS_FREQ == 1600 ) && ( ATTR_EFF_DRAM_CL == 11 ) && ( ATTR_EFF_DRAM_TRCD == 11 ) && ( ATTR_EFF_DRAM_TRP == 11 ) && ( def_ATTR_EFF_DRAM_2N_MODE == 0 ) && (ATTR_EFF_DIMM_TYPE == 0 || ATTR_EFF_DIMM_TYPE == 2));
-define  def_ddr3_1600_11_11_11R   = ((ATTR_EFF_DRAM_GEN == 1 ) && ( CENTAUR.ATTR_MSS_FREQ == 1600 ) && ( ATTR_EFF_DRAM_CL == 11 ) && ( ATTR_EFF_DRAM_TRCD == 11 ) && ( ATTR_EFF_DRAM_TRP == 11 ) && ( def_ATTR_EFF_DRAM_2N_MODE == 0 ) && (ATTR_EFF_DIMM_TYPE == 1 ));
-define  def_ddr3_1600_11_11_11_2N = ((ATTR_EFF_DRAM_GEN == 1 ) && ( CENTAUR.ATTR_MSS_FREQ == 1600 ) && ( ATTR_EFF_DRAM_CL == 11 ) && ( ATTR_EFF_DRAM_TRCD == 11 ) && ( ATTR_EFF_DRAM_TRP == 11 ) && ( def_ATTR_EFF_DRAM_2N_MODE == 1 ) && (ATTR_EFF_DIMM_TYPE == 0 || ATTR_EFF_DIMM_TYPE == 2));
-define  def_ddr3_1600_11_11_11_L2 = ((ATTR_EFF_DRAM_GEN == 1 ) && ( CENTAUR.ATTR_MSS_FREQ == 1600 ) && ( ATTR_EFF_DRAM_CL == 11 ) && ( ATTR_EFF_DRAM_TRCD == 11 ) && ( ATTR_EFF_DRAM_TRP == 11 ) && ( def_ATTR_EFF_DRAM_2N_MODE == 1 ) && (ATTR_EFF_DIMM_TYPE == 3));
-define  def_ddr3_1600_11_11_11_LR = ((ATTR_EFF_DRAM_GEN == 1 ) && ( CENTAUR.ATTR_MSS_FREQ == 1600 ) && ( ATTR_EFF_DRAM_CL == 11 ) && ( ATTR_EFF_DRAM_TRCD == 11 ) && ( ATTR_EFF_DRAM_TRP == 11 ) && ( def_ATTR_EFF_DRAM_2N_MODE == 0 ) && (ATTR_EFF_DIMM_TYPE == 3));
-define  def_ddr3_1600_9_9_9       = ((ATTR_EFF_DRAM_GEN == 1 ) && ( CENTAUR.ATTR_MSS_FREQ == 1600 ) && ( ATTR_EFF_DRAM_CL == 9  ) && ( ATTR_EFF_DRAM_TRCD == 9  ) && ( ATTR_EFF_DRAM_TRP == 9  ) && ( def_ATTR_EFF_DRAM_2N_MODE == 0 ) && (ATTR_EFF_DIMM_TYPE == 0 || ATTR_EFF_DIMM_TYPE == 2));
-define  def_ddr3_1600_9_9_9R      = ((ATTR_EFF_DRAM_GEN == 1 ) && ( CENTAUR.ATTR_MSS_FREQ == 1600 ) && ( ATTR_EFF_DRAM_CL == 9  ) && ( ATTR_EFF_DRAM_TRCD == 9  ) && ( ATTR_EFF_DRAM_TRP == 9  ) && ( def_ATTR_EFF_DRAM_2N_MODE == 0 ) && (ATTR_EFF_DIMM_TYPE == 1 ));
-define  def_ddr3_1600_9_9_9_2N    = ((ATTR_EFF_DRAM_GEN == 1 ) && ( CENTAUR.ATTR_MSS_FREQ == 1600 ) && ( ATTR_EFF_DRAM_CL == 9  ) && ( ATTR_EFF_DRAM_TRCD == 9  ) && ( ATTR_EFF_DRAM_TRP == 9  ) && ( def_ATTR_EFF_DRAM_2N_MODE == 1 ) && (ATTR_EFF_DIMM_TYPE == 0 || ATTR_EFF_DIMM_TYPE == 2));
-define  def_ddr3_1600_9_9_9_L2    = ((ATTR_EFF_DRAM_GEN == 1 ) && ( CENTAUR.ATTR_MSS_FREQ == 1600 ) && ( ATTR_EFF_DRAM_CL == 9  ) && ( ATTR_EFF_DRAM_TRCD == 9  ) && ( ATTR_EFF_DRAM_TRP == 9  ) && ( def_ATTR_EFF_DRAM_2N_MODE == 1 ) && (ATTR_EFF_DIMM_TYPE == 3));
-define  def_ddr3_1600_9_9_9_LR    = ((ATTR_EFF_DRAM_GEN == 1 ) && ( CENTAUR.ATTR_MSS_FREQ == 1600 ) && ( ATTR_EFF_DRAM_CL == 9  ) && ( ATTR_EFF_DRAM_TRCD == 9  ) && ( ATTR_EFF_DRAM_TRP == 9  ) && ( def_ATTR_EFF_DRAM_2N_MODE == 0 ) && (ATTR_EFF_DIMM_TYPE == 3));
-define  def_ddr3_1866_11_11_11    = ((ATTR_EFF_DRAM_GEN == 1 ) && ( CENTAUR.ATTR_MSS_FREQ == 1866 ) && ( ATTR_EFF_DRAM_CL == 11 ) && ( ATTR_EFF_DRAM_TRCD == 11 ) && ( ATTR_EFF_DRAM_TRP == 11 ) && ( def_ATTR_EFF_DRAM_2N_MODE == 0 ) && (ATTR_EFF_DIMM_TYPE == 0 || ATTR_EFF_DIMM_TYPE == 2));
-define  def_ddr3_1866_11_11_11R   = ((ATTR_EFF_DRAM_GEN == 1 ) && ( CENTAUR.ATTR_MSS_FREQ == 1866 ) && ( ATTR_EFF_DRAM_CL == 11 ) && ( ATTR_EFF_DRAM_TRCD == 11 ) && ( ATTR_EFF_DRAM_TRP == 11 ) && ( def_ATTR_EFF_DRAM_2N_MODE == 0 ) && (ATTR_EFF_DIMM_TYPE == 1 ));
-define  def_ddr3_1866_11_11_11_2N = ((ATTR_EFF_DRAM_GEN == 1 ) && ( CENTAUR.ATTR_MSS_FREQ == 1866 ) && ( ATTR_EFF_DRAM_CL == 11 ) && ( ATTR_EFF_DRAM_TRCD == 11 ) && ( ATTR_EFF_DRAM_TRP == 11 ) && ( def_ATTR_EFF_DRAM_2N_MODE == 1 ) && (ATTR_EFF_DIMM_TYPE == 0 || ATTR_EFF_DIMM_TYPE == 2));
-define  def_ddr3_1866_11_11_11_L2 = ((ATTR_EFF_DRAM_GEN == 1 ) && ( CENTAUR.ATTR_MSS_FREQ == 1866 ) && ( ATTR_EFF_DRAM_CL == 11 ) && ( ATTR_EFF_DRAM_TRCD == 11 ) && ( ATTR_EFF_DRAM_TRP == 11 ) && ( def_ATTR_EFF_DRAM_2N_MODE == 1 ) && (ATTR_EFF_DIMM_TYPE == 3));
-define  def_ddr3_1866_11_11_11_LR = ((ATTR_EFF_DRAM_GEN == 1 ) && ( CENTAUR.ATTR_MSS_FREQ == 1866 ) && ( ATTR_EFF_DRAM_CL == 11 ) && ( ATTR_EFF_DRAM_TRCD == 11 ) && ( ATTR_EFF_DRAM_TRP == 11 ) && ( def_ATTR_EFF_DRAM_2N_MODE == 0 ) && (ATTR_EFF_DIMM_TYPE == 3));
-define  def_ddr3_1866_12_12_12    = ((ATTR_EFF_DRAM_GEN == 1 ) && ( CENTAUR.ATTR_MSS_FREQ == 1866 ) && ( ATTR_EFF_DRAM_CL == 12 ) && ( ATTR_EFF_DRAM_TRCD == 12 ) && ( ATTR_EFF_DRAM_TRP == 12 ) && ( def_ATTR_EFF_DRAM_2N_MODE == 0 ) && (ATTR_EFF_DIMM_TYPE == 0 || ATTR_EFF_DIMM_TYPE == 2));
-define  def_ddr3_1866_12_12_12R   = ((ATTR_EFF_DRAM_GEN == 1 ) && ( CENTAUR.ATTR_MSS_FREQ == 1866 ) && ( ATTR_EFF_DRAM_CL == 12 ) && ( ATTR_EFF_DRAM_TRCD == 12 ) && ( ATTR_EFF_DRAM_TRP == 12 ) && ( def_ATTR_EFF_DRAM_2N_MODE == 0 ) && (ATTR_EFF_DIMM_TYPE == 1 ));
-define  def_ddr3_1866_12_12_12_2N = ((ATTR_EFF_DRAM_GEN == 1 ) && ( CENTAUR.ATTR_MSS_FREQ == 1866 ) && ( ATTR_EFF_DRAM_CL == 12 ) && ( ATTR_EFF_DRAM_TRCD == 12 ) && ( ATTR_EFF_DRAM_TRP == 12 ) && ( def_ATTR_EFF_DRAM_2N_MODE == 1 ) && (ATTR_EFF_DIMM_TYPE == 0 || ATTR_EFF_DIMM_TYPE == 2));
-define  def_ddr3_1866_12_12_12_L2 = ((ATTR_EFF_DRAM_GEN == 1 ) && ( CENTAUR.ATTR_MSS_FREQ == 1866 ) && ( ATTR_EFF_DRAM_CL == 12 ) && ( ATTR_EFF_DRAM_TRCD == 12 ) && ( ATTR_EFF_DRAM_TRP == 12 ) && ( def_ATTR_EFF_DRAM_2N_MODE == 1 ) && (ATTR_EFF_DIMM_TYPE == 3));
-define  def_ddr3_1866_12_12_12_LR = ((ATTR_EFF_DRAM_GEN == 1 ) && ( CENTAUR.ATTR_MSS_FREQ == 1866 ) && ( ATTR_EFF_DRAM_CL == 12 ) && ( ATTR_EFF_DRAM_TRCD == 12 ) && ( ATTR_EFF_DRAM_TRP == 12 ) && ( def_ATTR_EFF_DRAM_2N_MODE == 0 ) && (ATTR_EFF_DIMM_TYPE == 3));
+define  def_ddr3_1333_8_8_8       = ((ATTR_EFF_DRAM_GEN == 1 ) && ( CENTAUR.ATTR_MSS_FREQ == 1333 ) && ( ATTR_EFF_DRAM_CL == 8  ) && ( ATTR_EFF_DRAM_TRCD == 8  ) && ( ATTR_EFF_DRAM_TRP == 8  ) && ( ATTR_EFF_DRAM_2N_MODE_ENABLED == 0 ) && (ATTR_EFF_DIMM_TYPE == 0 || ATTR_EFF_DIMM_TYPE == 2));
+define  def_ddr3_1333_8_8_8R      = ((ATTR_EFF_DRAM_GEN == 1 ) && ( CENTAUR.ATTR_MSS_FREQ == 1333 ) && ( ATTR_EFF_DRAM_CL == 8  ) && ( ATTR_EFF_DRAM_TRCD == 8  ) && ( ATTR_EFF_DRAM_TRP == 8  ) && ( ATTR_EFF_DRAM_2N_MODE_ENABLED == 0 ) && (ATTR_EFF_DIMM_TYPE == 1 ));
+define  def_ddr3_1333_8_8_8_2N    = ((ATTR_EFF_DRAM_GEN == 1 ) && ( CENTAUR.ATTR_MSS_FREQ == 1333 ) && ( ATTR_EFF_DRAM_CL == 8  ) && ( ATTR_EFF_DRAM_TRCD == 8  ) && ( ATTR_EFF_DRAM_TRP == 8  ) && ( ATTR_EFF_DRAM_2N_MODE_ENABLED == 1 ) && (ATTR_EFF_DIMM_TYPE == 0 || ATTR_EFF_DIMM_TYPE == 2));
+define  def_ddr3_1333_8_8_8_L2    = ((ATTR_EFF_DRAM_GEN == 1 ) && ( CENTAUR.ATTR_MSS_FREQ == 1333 ) && ( ATTR_EFF_DRAM_CL == 8  ) && ( ATTR_EFF_DRAM_TRCD == 8  ) && ( ATTR_EFF_DRAM_TRP == 8  ) && ( ATTR_EFF_DRAM_2N_MODE_ENABLED == 1 ) && (ATTR_EFF_DIMM_TYPE == 3));
+define  def_ddr3_1333_8_8_8_LR    = ((ATTR_EFF_DRAM_GEN == 1 ) && ( CENTAUR.ATTR_MSS_FREQ == 1333 ) && ( ATTR_EFF_DRAM_CL == 8  ) && ( ATTR_EFF_DRAM_TRCD == 8  ) && ( ATTR_EFF_DRAM_TRP == 8  ) && ( ATTR_EFF_DRAM_2N_MODE_ENABLED == 0 ) && (ATTR_EFF_DIMM_TYPE == 3));
+define  def_ddr3_1333_9_9_9       = ((ATTR_EFF_DRAM_GEN == 1 ) && ( CENTAUR.ATTR_MSS_FREQ == 1333 ) && ( ATTR_EFF_DRAM_CL == 9  ) && ( ATTR_EFF_DRAM_TRCD == 9  ) && ( ATTR_EFF_DRAM_TRP == 9  ) && ( ATTR_EFF_DRAM_2N_MODE_ENABLED == 0 ) && (ATTR_EFF_DIMM_TYPE == 0 || ATTR_EFF_DIMM_TYPE == 2));
+define  def_ddr3_1333_9_9_9R      = ((ATTR_EFF_DRAM_GEN == 1 ) && ( CENTAUR.ATTR_MSS_FREQ == 1333 ) && ( ATTR_EFF_DRAM_CL == 9  ) && ( ATTR_EFF_DRAM_TRCD == 9  ) && ( ATTR_EFF_DRAM_TRP == 9  ) && ( ATTR_EFF_DRAM_2N_MODE_ENABLED == 0 ) && (ATTR_EFF_DIMM_TYPE == 1 ));
+define  def_ddr3_1333_9_9_9_2N    = ((ATTR_EFF_DRAM_GEN == 1 ) && ( CENTAUR.ATTR_MSS_FREQ == 1333 ) && ( ATTR_EFF_DRAM_CL == 9  ) && ( ATTR_EFF_DRAM_TRCD == 9  ) && ( ATTR_EFF_DRAM_TRP == 9  ) && ( ATTR_EFF_DRAM_2N_MODE_ENABLED == 1 ) && (ATTR_EFF_DIMM_TYPE == 0 || ATTR_EFF_DIMM_TYPE == 2));
+define  def_ddr3_1333_9_9_9_L2    = ((ATTR_EFF_DRAM_GEN == 1 ) && ( CENTAUR.ATTR_MSS_FREQ == 1333 ) && ( ATTR_EFF_DRAM_CL == 9  ) && ( ATTR_EFF_DRAM_TRCD == 9  ) && ( ATTR_EFF_DRAM_TRP == 9  ) && ( ATTR_EFF_DRAM_2N_MODE_ENABLED == 1 ) && (ATTR_EFF_DIMM_TYPE == 3));
+define  def_ddr3_1333_9_9_9_LR    = ((ATTR_EFF_DRAM_GEN == 1 ) && ( CENTAUR.ATTR_MSS_FREQ == 1333 ) && ( ATTR_EFF_DRAM_CL == 9  ) && ( ATTR_EFF_DRAM_TRCD == 9  ) && ( ATTR_EFF_DRAM_TRP == 9  ) && ( ATTR_EFF_DRAM_2N_MODE_ENABLED == 0 ) && (ATTR_EFF_DIMM_TYPE == 3));
+define  def_ddr3_1600_10_10_10    = ((ATTR_EFF_DRAM_GEN == 1 ) && ( CENTAUR.ATTR_MSS_FREQ == 1600 ) && ( ATTR_EFF_DRAM_CL == 10 ) && ( ATTR_EFF_DRAM_TRCD == 10 ) && ( ATTR_EFF_DRAM_TRP == 10 ) && ( ATTR_EFF_DRAM_2N_MODE_ENABLED == 0 ) && (ATTR_EFF_DIMM_TYPE == 0 || ATTR_EFF_DIMM_TYPE == 2));
+define  def_ddr3_1600_10_10_10R   = ((ATTR_EFF_DRAM_GEN == 1 ) && ( CENTAUR.ATTR_MSS_FREQ == 1600 ) && ( ATTR_EFF_DRAM_CL == 10 ) && ( ATTR_EFF_DRAM_TRCD == 10 ) && ( ATTR_EFF_DRAM_TRP == 10 ) && ( ATTR_EFF_DRAM_2N_MODE_ENABLED == 0 ) && (ATTR_EFF_DIMM_TYPE == 1 ));
+define  def_ddr3_1600_10_10_10_2N = ((ATTR_EFF_DRAM_GEN == 1 ) && ( CENTAUR.ATTR_MSS_FREQ == 1600 ) && ( ATTR_EFF_DRAM_CL == 10 ) && ( ATTR_EFF_DRAM_TRCD == 10 ) && ( ATTR_EFF_DRAM_TRP == 10 ) && ( ATTR_EFF_DRAM_2N_MODE_ENABLED == 1 ) && (ATTR_EFF_DIMM_TYPE == 0 || ATTR_EFF_DIMM_TYPE == 2));
+define  def_ddr3_1600_10_10_10_L2 = ((ATTR_EFF_DRAM_GEN == 1 ) && ( CENTAUR.ATTR_MSS_FREQ == 1600 ) && ( ATTR_EFF_DRAM_CL == 10 ) && ( ATTR_EFF_DRAM_TRCD == 10 ) && ( ATTR_EFF_DRAM_TRP == 10 ) && ( ATTR_EFF_DRAM_2N_MODE_ENABLED == 1 ) && (ATTR_EFF_DIMM_TYPE == 3));
+define  def_ddr3_1600_10_10_10_LR = ((ATTR_EFF_DRAM_GEN == 1 ) && ( CENTAUR.ATTR_MSS_FREQ == 1600 ) && ( ATTR_EFF_DRAM_CL == 10 ) && ( ATTR_EFF_DRAM_TRCD == 10 ) && ( ATTR_EFF_DRAM_TRP == 10 ) && ( ATTR_EFF_DRAM_2N_MODE_ENABLED == 0 ) && (ATTR_EFF_DIMM_TYPE == 3));
+define  def_ddr3_1600_11_11_11    = ((ATTR_EFF_DRAM_GEN == 1 ) && ( CENTAUR.ATTR_MSS_FREQ == 1600 ) && ( ATTR_EFF_DRAM_CL == 11 ) && ( ATTR_EFF_DRAM_TRCD == 11 ) && ( ATTR_EFF_DRAM_TRP == 11 ) && ( ATTR_EFF_DRAM_2N_MODE_ENABLED == 0 ) && (ATTR_EFF_DIMM_TYPE == 0 || ATTR_EFF_DIMM_TYPE == 2));
+define  def_ddr3_1600_11_11_11R   = ((ATTR_EFF_DRAM_GEN == 1 ) && ( CENTAUR.ATTR_MSS_FREQ == 1600 ) && ( ATTR_EFF_DRAM_CL == 11 ) && ( ATTR_EFF_DRAM_TRCD == 11 ) && ( ATTR_EFF_DRAM_TRP == 11 ) && ( ATTR_EFF_DRAM_2N_MODE_ENABLED == 0 ) && (ATTR_EFF_DIMM_TYPE == 1 ));
+define  def_ddr3_1600_11_11_11_2N = ((ATTR_EFF_DRAM_GEN == 1 ) && ( CENTAUR.ATTR_MSS_FREQ == 1600 ) && ( ATTR_EFF_DRAM_CL == 11 ) && ( ATTR_EFF_DRAM_TRCD == 11 ) && ( ATTR_EFF_DRAM_TRP == 11 ) && ( ATTR_EFF_DRAM_2N_MODE_ENABLED == 1 ) && (ATTR_EFF_DIMM_TYPE == 0 || ATTR_EFF_DIMM_TYPE == 2));
+define  def_ddr3_1600_11_11_11_L2 = ((ATTR_EFF_DRAM_GEN == 1 ) && ( CENTAUR.ATTR_MSS_FREQ == 1600 ) && ( ATTR_EFF_DRAM_CL == 11 ) && ( ATTR_EFF_DRAM_TRCD == 11 ) && ( ATTR_EFF_DRAM_TRP == 11 ) && ( ATTR_EFF_DRAM_2N_MODE_ENABLED == 1 ) && (ATTR_EFF_DIMM_TYPE == 3));
+define  def_ddr3_1600_11_11_11_LR = ((ATTR_EFF_DRAM_GEN == 1 ) && ( CENTAUR.ATTR_MSS_FREQ == 1600 ) && ( ATTR_EFF_DRAM_CL == 11 ) && ( ATTR_EFF_DRAM_TRCD == 11 ) && ( ATTR_EFF_DRAM_TRP == 11 ) && ( ATTR_EFF_DRAM_2N_MODE_ENABLED == 0 ) && (ATTR_EFF_DIMM_TYPE == 3));
+define  def_ddr3_1600_9_9_9       = ((ATTR_EFF_DRAM_GEN == 1 ) && ( CENTAUR.ATTR_MSS_FREQ == 1600 ) && ( ATTR_EFF_DRAM_CL == 9  ) && ( ATTR_EFF_DRAM_TRCD == 9  ) && ( ATTR_EFF_DRAM_TRP == 9  ) && ( ATTR_EFF_DRAM_2N_MODE_ENABLED == 0 ) && (ATTR_EFF_DIMM_TYPE == 0 || ATTR_EFF_DIMM_TYPE == 2));
+define  def_ddr3_1600_9_9_9R      = ((ATTR_EFF_DRAM_GEN == 1 ) && ( CENTAUR.ATTR_MSS_FREQ == 1600 ) && ( ATTR_EFF_DRAM_CL == 9  ) && ( ATTR_EFF_DRAM_TRCD == 9  ) && ( ATTR_EFF_DRAM_TRP == 9  ) && ( ATTR_EFF_DRAM_2N_MODE_ENABLED == 0 ) && (ATTR_EFF_DIMM_TYPE == 1 ));
+define  def_ddr3_1600_9_9_9_2N    = ((ATTR_EFF_DRAM_GEN == 1 ) && ( CENTAUR.ATTR_MSS_FREQ == 1600 ) && ( ATTR_EFF_DRAM_CL == 9  ) && ( ATTR_EFF_DRAM_TRCD == 9  ) && ( ATTR_EFF_DRAM_TRP == 9  ) && ( ATTR_EFF_DRAM_2N_MODE_ENABLED == 1 ) && (ATTR_EFF_DIMM_TYPE == 0 || ATTR_EFF_DIMM_TYPE == 2));
+define  def_ddr3_1600_9_9_9_L2    = ((ATTR_EFF_DRAM_GEN == 1 ) && ( CENTAUR.ATTR_MSS_FREQ == 1600 ) && ( ATTR_EFF_DRAM_CL == 9  ) && ( ATTR_EFF_DRAM_TRCD == 9  ) && ( ATTR_EFF_DRAM_TRP == 9  ) && ( ATTR_EFF_DRAM_2N_MODE_ENABLED == 1 ) && (ATTR_EFF_DIMM_TYPE == 3));
+define  def_ddr3_1600_9_9_9_LR    = ((ATTR_EFF_DRAM_GEN == 1 ) && ( CENTAUR.ATTR_MSS_FREQ == 1600 ) && ( ATTR_EFF_DRAM_CL == 9  ) && ( ATTR_EFF_DRAM_TRCD == 9  ) && ( ATTR_EFF_DRAM_TRP == 9  ) && ( ATTR_EFF_DRAM_2N_MODE_ENABLED == 0 ) && (ATTR_EFF_DIMM_TYPE == 3));
+define  def_ddr3_1866_11_11_11    = ((ATTR_EFF_DRAM_GEN == 1 ) && ( CENTAUR.ATTR_MSS_FREQ == 1866 ) && ( ATTR_EFF_DRAM_CL == 11 ) && ( ATTR_EFF_DRAM_TRCD == 11 ) && ( ATTR_EFF_DRAM_TRP == 11 ) && ( ATTR_EFF_DRAM_2N_MODE_ENABLED == 0 ) && (ATTR_EFF_DIMM_TYPE == 0 || ATTR_EFF_DIMM_TYPE == 2));
+define  def_ddr3_1866_11_11_11R   = ((ATTR_EFF_DRAM_GEN == 1 ) && ( CENTAUR.ATTR_MSS_FREQ == 1866 ) && ( ATTR_EFF_DRAM_CL == 11 ) && ( ATTR_EFF_DRAM_TRCD == 11 ) && ( ATTR_EFF_DRAM_TRP == 11 ) && ( ATTR_EFF_DRAM_2N_MODE_ENABLED == 0 ) && (ATTR_EFF_DIMM_TYPE == 1 ));
+define  def_ddr3_1866_11_11_11_2N = ((ATTR_EFF_DRAM_GEN == 1 ) && ( CENTAUR.ATTR_MSS_FREQ == 1866 ) && ( ATTR_EFF_DRAM_CL == 11 ) && ( ATTR_EFF_DRAM_TRCD == 11 ) && ( ATTR_EFF_DRAM_TRP == 11 ) && ( ATTR_EFF_DRAM_2N_MODE_ENABLED == 1 ) && (ATTR_EFF_DIMM_TYPE == 0 || ATTR_EFF_DIMM_TYPE == 2));
+define  def_ddr3_1866_11_11_11_L2 = ((ATTR_EFF_DRAM_GEN == 1 ) && ( CENTAUR.ATTR_MSS_FREQ == 1866 ) && ( ATTR_EFF_DRAM_CL == 11 ) && ( ATTR_EFF_DRAM_TRCD == 11 ) && ( ATTR_EFF_DRAM_TRP == 11 ) && ( ATTR_EFF_DRAM_2N_MODE_ENABLED == 1 ) && (ATTR_EFF_DIMM_TYPE == 3));
+define  def_ddr3_1866_11_11_11_LR = ((ATTR_EFF_DRAM_GEN == 1 ) && ( CENTAUR.ATTR_MSS_FREQ == 1866 ) && ( ATTR_EFF_DRAM_CL == 11 ) && ( ATTR_EFF_DRAM_TRCD == 11 ) && ( ATTR_EFF_DRAM_TRP == 11 ) && ( ATTR_EFF_DRAM_2N_MODE_ENABLED == 0 ) && (ATTR_EFF_DIMM_TYPE == 3));
+define  def_ddr3_1866_12_12_12    = ((ATTR_EFF_DRAM_GEN == 1 ) && ( CENTAUR.ATTR_MSS_FREQ == 1866 ) && ( ATTR_EFF_DRAM_CL == 12 ) && ( ATTR_EFF_DRAM_TRCD == 12 ) && ( ATTR_EFF_DRAM_TRP == 12 ) && ( ATTR_EFF_DRAM_2N_MODE_ENABLED == 0 ) && (ATTR_EFF_DIMM_TYPE == 0 || ATTR_EFF_DIMM_TYPE == 2));
+define  def_ddr3_1866_12_12_12R   = ((ATTR_EFF_DRAM_GEN == 1 ) && ( CENTAUR.ATTR_MSS_FREQ == 1866 ) && ( ATTR_EFF_DRAM_CL == 12 ) && ( ATTR_EFF_DRAM_TRCD == 12 ) && ( ATTR_EFF_DRAM_TRP == 12 ) && ( ATTR_EFF_DRAM_2N_MODE_ENABLED == 0 ) && (ATTR_EFF_DIMM_TYPE == 1 ));
+define  def_ddr3_1866_12_12_12_2N = ((ATTR_EFF_DRAM_GEN == 1 ) && ( CENTAUR.ATTR_MSS_FREQ == 1866 ) && ( ATTR_EFF_DRAM_CL == 12 ) && ( ATTR_EFF_DRAM_TRCD == 12 ) && ( ATTR_EFF_DRAM_TRP == 12 ) && ( ATTR_EFF_DRAM_2N_MODE_ENABLED == 1 ) && (ATTR_EFF_DIMM_TYPE == 0 || ATTR_EFF_DIMM_TYPE == 2));
+define  def_ddr3_1866_12_12_12_L2 = ((ATTR_EFF_DRAM_GEN == 1 ) && ( CENTAUR.ATTR_MSS_FREQ == 1866 ) && ( ATTR_EFF_DRAM_CL == 12 ) && ( ATTR_EFF_DRAM_TRCD == 12 ) && ( ATTR_EFF_DRAM_TRP == 12 ) && ( ATTR_EFF_DRAM_2N_MODE_ENABLED == 1 ) && (ATTR_EFF_DIMM_TYPE == 3));
+define  def_ddr3_1866_12_12_12_LR = ((ATTR_EFF_DRAM_GEN == 1 ) && ( CENTAUR.ATTR_MSS_FREQ == 1866 ) && ( ATTR_EFF_DRAM_CL == 12 ) && ( ATTR_EFF_DRAM_TRCD == 12 ) && ( ATTR_EFF_DRAM_TRP == 12 ) && ( ATTR_EFF_DRAM_2N_MODE_ENABLED == 0 ) && (ATTR_EFF_DIMM_TYPE == 3));
 
 # DDR4 1600
-define  def_ddr4_1600_9_9_9       = ((ATTR_EFF_DRAM_GEN == 2 ) && ( CENTAUR.ATTR_MSS_FREQ == 1600 ) && ( ATTR_EFF_DRAM_CL == 9  ) && ( ATTR_EFF_DRAM_TRCD == 9  ) && ( ATTR_EFF_DRAM_TRP == 9  ) && ( def_ATTR_EFF_DRAM_2N_MODE == 0 ) && (ATTR_EFF_DIMM_TYPE == 0 || ATTR_EFF_DIMM_TYPE == 2));
-define  def_ddr4_1600_9_9_9R      = ((ATTR_EFF_DRAM_GEN == 2 ) && ( CENTAUR.ATTR_MSS_FREQ == 1600 ) && ( ATTR_EFF_DRAM_CL == 9  ) && ( ATTR_EFF_DRAM_TRCD == 9  ) && ( ATTR_EFF_DRAM_TRP == 9  ) && ( def_ATTR_EFF_DRAM_2N_MODE == 0 ) && (ATTR_EFF_DIMM_TYPE == 1 ));
-define  def_ddr4_1600_9_9_9_2N    = ((ATTR_EFF_DRAM_GEN == 2 ) && ( CENTAUR.ATTR_MSS_FREQ == 1600 ) && ( ATTR_EFF_DRAM_CL == 9  ) && ( ATTR_EFF_DRAM_TRCD == 9  ) && ( ATTR_EFF_DRAM_TRP == 9  ) && ( def_ATTR_EFF_DRAM_2N_MODE == 1 ) && (ATTR_EFF_DIMM_TYPE == 0 || ATTR_EFF_DIMM_TYPE == 2));
-define  def_ddr4_1600_9_9_9_L2    = ((ATTR_EFF_DRAM_GEN == 2 ) && ( CENTAUR.ATTR_MSS_FREQ == 1600 ) && ( ATTR_EFF_DRAM_CL == 9  ) && ( ATTR_EFF_DRAM_TRCD == 9  ) && ( ATTR_EFF_DRAM_TRP == 9  ) && ( def_ATTR_EFF_DRAM_2N_MODE == 1 ) && (ATTR_EFF_DIMM_TYPE == 3));
-define  def_ddr4_1600_9_9_9_LR    = ((ATTR_EFF_DRAM_GEN == 2 ) && ( CENTAUR.ATTR_MSS_FREQ == 1600 ) && ( ATTR_EFF_DRAM_CL == 9  ) && ( ATTR_EFF_DRAM_TRCD == 9  ) && ( ATTR_EFF_DRAM_TRP == 9  ) && ( def_ATTR_EFF_DRAM_2N_MODE == 0 ) && (ATTR_EFF_DIMM_TYPE == 3));
-define  def_ddr4_1600_10_10_10    = ((ATTR_EFF_DRAM_GEN == 2 ) && ( CENTAUR.ATTR_MSS_FREQ == 1600 ) && ( ATTR_EFF_DRAM_CL == 10 ) && ( ATTR_EFF_DRAM_TRCD == 10 ) && ( ATTR_EFF_DRAM_TRP == 10 ) && ( def_ATTR_EFF_DRAM_2N_MODE == 0 ) && (ATTR_EFF_DIMM_TYPE == 0 || ATTR_EFF_DIMM_TYPE == 2));
-define  def_ddr4_1600_10_10_10R   = ((ATTR_EFF_DRAM_GEN == 2 ) && ( CENTAUR.ATTR_MSS_FREQ == 1600 ) && ( ATTR_EFF_DRAM_CL == 10 ) && ( ATTR_EFF_DRAM_TRCD == 10 ) && ( ATTR_EFF_DRAM_TRP == 10 ) && ( def_ATTR_EFF_DRAM_2N_MODE == 0 ) && (ATTR_EFF_DIMM_TYPE == 1 ));
-define  def_ddr4_1600_10_10_10_2N = ((ATTR_EFF_DRAM_GEN == 2 ) && ( CENTAUR.ATTR_MSS_FREQ == 1600 ) && ( ATTR_EFF_DRAM_CL == 10 ) && ( ATTR_EFF_DRAM_TRCD == 10 ) && ( ATTR_EFF_DRAM_TRP == 10 ) && ( def_ATTR_EFF_DRAM_2N_MODE == 1 ) && (ATTR_EFF_DIMM_TYPE == 0 || ATTR_EFF_DIMM_TYPE == 2));
-define  def_ddr4_1600_10_10_10_L2 = ((ATTR_EFF_DRAM_GEN == 2 ) && ( CENTAUR.ATTR_MSS_FREQ == 1600 ) && ( ATTR_EFF_DRAM_CL == 10 ) && ( ATTR_EFF_DRAM_TRCD == 10 ) && ( ATTR_EFF_DRAM_TRP == 10 ) && ( def_ATTR_EFF_DRAM_2N_MODE == 1 ) && (ATTR_EFF_DIMM_TYPE == 3));
-define  def_ddr4_1600_10_10_10_LR = ((ATTR_EFF_DRAM_GEN == 2 ) && ( CENTAUR.ATTR_MSS_FREQ == 1600 ) && ( ATTR_EFF_DRAM_CL == 10 ) && ( ATTR_EFF_DRAM_TRCD == 10 ) && ( ATTR_EFF_DRAM_TRP == 10 ) && ( def_ATTR_EFF_DRAM_2N_MODE == 0 ) && (ATTR_EFF_DIMM_TYPE == 3));
-define  def_ddr4_1600_11_11_11    = ((ATTR_EFF_DRAM_GEN == 2 ) && ( CENTAUR.ATTR_MSS_FREQ == 1600 ) && ( ATTR_EFF_DRAM_CL == 11 ) && ( ATTR_EFF_DRAM_TRCD == 11 ) && ( ATTR_EFF_DRAM_TRP == 11 ) && ( def_ATTR_EFF_DRAM_2N_MODE == 0 ) && (ATTR_EFF_DIMM_TYPE == 0 || ATTR_EFF_DIMM_TYPE == 2));
-define  def_ddr4_1600_11_11_11R   = ((ATTR_EFF_DRAM_GEN == 2 ) && ( CENTAUR.ATTR_MSS_FREQ == 1600 ) && ( ATTR_EFF_DRAM_CL == 11 ) && ( ATTR_EFF_DRAM_TRCD == 11 ) && ( ATTR_EFF_DRAM_TRP == 11 ) && ( def_ATTR_EFF_DRAM_2N_MODE == 0 ) && (ATTR_EFF_DIMM_TYPE == 1 ));
-define  def_ddr4_1600_11_11_11_2N = ((ATTR_EFF_DRAM_GEN == 2 ) && ( CENTAUR.ATTR_MSS_FREQ == 1600 ) && ( ATTR_EFF_DRAM_CL == 11 ) && ( ATTR_EFF_DRAM_TRCD == 11 ) && ( ATTR_EFF_DRAM_TRP == 11 ) && ( def_ATTR_EFF_DRAM_2N_MODE == 1 ) && (ATTR_EFF_DIMM_TYPE == 0 || ATTR_EFF_DIMM_TYPE == 2));
-define  def_ddr4_1600_11_11_11_L2 = ((ATTR_EFF_DRAM_GEN == 2 ) && ( CENTAUR.ATTR_MSS_FREQ == 1600 ) && ( ATTR_EFF_DRAM_CL == 11 ) && ( ATTR_EFF_DRAM_TRCD == 11 ) && ( ATTR_EFF_DRAM_TRP == 11 ) && ( def_ATTR_EFF_DRAM_2N_MODE == 1 ) && (ATTR_EFF_DIMM_TYPE == 3));
-define  def_ddr4_1600_11_11_11_LR = ((ATTR_EFF_DRAM_GEN == 2 ) && ( CENTAUR.ATTR_MSS_FREQ == 1600 ) && ( ATTR_EFF_DRAM_CL == 11 ) && ( ATTR_EFF_DRAM_TRCD == 11 ) && ( ATTR_EFF_DRAM_TRP == 11 ) && ( def_ATTR_EFF_DRAM_2N_MODE == 0 ) && (ATTR_EFF_DIMM_TYPE == 3));
+define  def_ddr4_1600_9_9_9       = ((ATTR_EFF_DRAM_GEN == 2 ) && ( CENTAUR.ATTR_MSS_FREQ == 1600 ) && ( ATTR_EFF_DRAM_CL == 9  ) && ( ATTR_EFF_DRAM_TRCD == 9  ) && ( ATTR_EFF_DRAM_TRP == 9  ) && ( ATTR_EFF_DRAM_2N_MODE_ENABLED == 0 ) && (ATTR_EFF_DIMM_TYPE == 0 || ATTR_EFF_DIMM_TYPE == 2));
+define  def_ddr4_1600_9_9_9R      = ((ATTR_EFF_DRAM_GEN == 2 ) && ( CENTAUR.ATTR_MSS_FREQ == 1600 ) && ( ATTR_EFF_DRAM_CL == 9  ) && ( ATTR_EFF_DRAM_TRCD == 9  ) && ( ATTR_EFF_DRAM_TRP == 9  ) && ( ATTR_EFF_DRAM_2N_MODE_ENABLED == 0 ) && (ATTR_EFF_DIMM_TYPE == 1 ));
+define  def_ddr4_1600_9_9_9_2N    = ((ATTR_EFF_DRAM_GEN == 2 ) && ( CENTAUR.ATTR_MSS_FREQ == 1600 ) && ( ATTR_EFF_DRAM_CL == 9  ) && ( ATTR_EFF_DRAM_TRCD == 9  ) && ( ATTR_EFF_DRAM_TRP == 9  ) && ( ATTR_EFF_DRAM_2N_MODE_ENABLED == 1 ) && (ATTR_EFF_DIMM_TYPE == 0 || ATTR_EFF_DIMM_TYPE == 2));
+define  def_ddr4_1600_9_9_9_L2    = ((ATTR_EFF_DRAM_GEN == 2 ) && ( CENTAUR.ATTR_MSS_FREQ == 1600 ) && ( ATTR_EFF_DRAM_CL == 9  ) && ( ATTR_EFF_DRAM_TRCD == 9  ) && ( ATTR_EFF_DRAM_TRP == 9  ) && ( ATTR_EFF_DRAM_2N_MODE_ENABLED == 1 ) && (ATTR_EFF_DIMM_TYPE == 3));
+define  def_ddr4_1600_9_9_9_LR    = ((ATTR_EFF_DRAM_GEN == 2 ) && ( CENTAUR.ATTR_MSS_FREQ == 1600 ) && ( ATTR_EFF_DRAM_CL == 9  ) && ( ATTR_EFF_DRAM_TRCD == 9  ) && ( ATTR_EFF_DRAM_TRP == 9  ) && ( ATTR_EFF_DRAM_2N_MODE_ENABLED == 0 ) && (ATTR_EFF_DIMM_TYPE == 3));
+define  def_ddr4_1600_10_10_10    = ((ATTR_EFF_DRAM_GEN == 2 ) && ( CENTAUR.ATTR_MSS_FREQ == 1600 ) && ( ATTR_EFF_DRAM_CL == 10 ) && ( ATTR_EFF_DRAM_TRCD == 10 ) && ( ATTR_EFF_DRAM_TRP == 10 ) && ( ATTR_EFF_DRAM_2N_MODE_ENABLED == 0 ) && (ATTR_EFF_DIMM_TYPE == 0 || ATTR_EFF_DIMM_TYPE == 2));
+define  def_ddr4_1600_10_10_10R   = ((ATTR_EFF_DRAM_GEN == 2 ) && ( CENTAUR.ATTR_MSS_FREQ == 1600 ) && ( ATTR_EFF_DRAM_CL == 10 ) && ( ATTR_EFF_DRAM_TRCD == 10 ) && ( ATTR_EFF_DRAM_TRP == 10 ) && ( ATTR_EFF_DRAM_2N_MODE_ENABLED == 0 ) && (ATTR_EFF_DIMM_TYPE == 1 ));
+define  def_ddr4_1600_10_10_10_2N = ((ATTR_EFF_DRAM_GEN == 2 ) && ( CENTAUR.ATTR_MSS_FREQ == 1600 ) && ( ATTR_EFF_DRAM_CL == 10 ) && ( ATTR_EFF_DRAM_TRCD == 10 ) && ( ATTR_EFF_DRAM_TRP == 10 ) && ( ATTR_EFF_DRAM_2N_MODE_ENABLED == 1 ) && (ATTR_EFF_DIMM_TYPE == 0 || ATTR_EFF_DIMM_TYPE == 2));
+define  def_ddr4_1600_10_10_10_L2 = ((ATTR_EFF_DRAM_GEN == 2 ) && ( CENTAUR.ATTR_MSS_FREQ == 1600 ) && ( ATTR_EFF_DRAM_CL == 10 ) && ( ATTR_EFF_DRAM_TRCD == 10 ) && ( ATTR_EFF_DRAM_TRP == 10 ) && ( ATTR_EFF_DRAM_2N_MODE_ENABLED == 1 ) && (ATTR_EFF_DIMM_TYPE == 3));
+define  def_ddr4_1600_10_10_10_LR = ((ATTR_EFF_DRAM_GEN == 2 ) && ( CENTAUR.ATTR_MSS_FREQ == 1600 ) && ( ATTR_EFF_DRAM_CL == 10 ) && ( ATTR_EFF_DRAM_TRCD == 10 ) && ( ATTR_EFF_DRAM_TRP == 10 ) && ( ATTR_EFF_DRAM_2N_MODE_ENABLED == 0 ) && (ATTR_EFF_DIMM_TYPE == 3));
+define  def_ddr4_1600_11_11_11    = ((ATTR_EFF_DRAM_GEN == 2 ) && ( CENTAUR.ATTR_MSS_FREQ == 1600 ) && ( ATTR_EFF_DRAM_CL == 11 ) && ( ATTR_EFF_DRAM_TRCD == 11 ) && ( ATTR_EFF_DRAM_TRP == 11 ) && ( ATTR_EFF_DRAM_2N_MODE_ENABLED == 0 ) && (ATTR_EFF_DIMM_TYPE == 0 || ATTR_EFF_DIMM_TYPE == 2));
+define  def_ddr4_1600_11_11_11R   = ((ATTR_EFF_DRAM_GEN == 2 ) && ( CENTAUR.ATTR_MSS_FREQ == 1600 ) && ( ATTR_EFF_DRAM_CL == 11 ) && ( ATTR_EFF_DRAM_TRCD == 11 ) && ( ATTR_EFF_DRAM_TRP == 11 ) && ( ATTR_EFF_DRAM_2N_MODE_ENABLED == 0 ) && (ATTR_EFF_DIMM_TYPE == 1 ));
+define  def_ddr4_1600_11_11_11_2N = ((ATTR_EFF_DRAM_GEN == 2 ) && ( CENTAUR.ATTR_MSS_FREQ == 1600 ) && ( ATTR_EFF_DRAM_CL == 11 ) && ( ATTR_EFF_DRAM_TRCD == 11 ) && ( ATTR_EFF_DRAM_TRP == 11 ) && ( ATTR_EFF_DRAM_2N_MODE_ENABLED == 1 ) && (ATTR_EFF_DIMM_TYPE == 0 || ATTR_EFF_DIMM_TYPE == 2));
+define  def_ddr4_1600_11_11_11_L2 = ((ATTR_EFF_DRAM_GEN == 2 ) && ( CENTAUR.ATTR_MSS_FREQ == 1600 ) && ( ATTR_EFF_DRAM_CL == 11 ) && ( ATTR_EFF_DRAM_TRCD == 11 ) && ( ATTR_EFF_DRAM_TRP == 11 ) && ( ATTR_EFF_DRAM_2N_MODE_ENABLED == 1 ) && (ATTR_EFF_DIMM_TYPE == 3));
+define  def_ddr4_1600_11_11_11_LR = ((ATTR_EFF_DRAM_GEN == 2 ) && ( CENTAUR.ATTR_MSS_FREQ == 1600 ) && ( ATTR_EFF_DRAM_CL == 11 ) && ( ATTR_EFF_DRAM_TRCD == 11 ) && ( ATTR_EFF_DRAM_TRP == 11 ) && ( ATTR_EFF_DRAM_2N_MODE_ENABLED == 0 ) && (ATTR_EFF_DIMM_TYPE == 3));
 
-define  def_ddr4_1600_12_12_12    = ((ATTR_EFF_DRAM_GEN == 2 ) && ( CENTAUR.ATTR_MSS_FREQ == 1600 ) && ( ATTR_EFF_DRAM_CL == 12 ) && ( ATTR_EFF_DRAM_TRCD == 12 ) && ( ATTR_EFF_DRAM_TRP == 12 ) && ( def_ATTR_EFF_DRAM_2N_MODE == 0 ) && (ATTR_EFF_DIMM_TYPE == 0 || ATTR_EFF_DIMM_TYPE == 2));
-define  def_ddr4_1600_12_12_12R   = ((ATTR_EFF_DRAM_GEN == 2 ) && ( CENTAUR.ATTR_MSS_FREQ == 1600 ) && ( ATTR_EFF_DRAM_CL == 12 ) && ( ATTR_EFF_DRAM_TRCD == 12 ) && ( ATTR_EFF_DRAM_TRP == 12 ) && ( def_ATTR_EFF_DRAM_2N_MODE == 0 ) && (ATTR_EFF_DIMM_TYPE == 1 ));
-define  def_ddr4_1600_12_12_12_2N = ((ATTR_EFF_DRAM_GEN == 2 ) && ( CENTAUR.ATTR_MSS_FREQ == 1600 ) && ( ATTR_EFF_DRAM_CL == 12 ) && ( ATTR_EFF_DRAM_TRCD == 12 ) && ( ATTR_EFF_DRAM_TRP == 12 ) && ( def_ATTR_EFF_DRAM_2N_MODE == 1 ) && (ATTR_EFF_DIMM_TYPE == 0 || ATTR_EFF_DIMM_TYPE == 2));
-define  def_ddr4_1600_12_12_12_L2 = ((ATTR_EFF_DRAM_GEN == 2 ) && ( CENTAUR.ATTR_MSS_FREQ == 1600 ) && ( ATTR_EFF_DRAM_CL == 12 ) && ( ATTR_EFF_DRAM_TRCD == 12 ) && ( ATTR_EFF_DRAM_TRP == 12 ) && ( def_ATTR_EFF_DRAM_2N_MODE == 1 ) && (ATTR_EFF_DIMM_TYPE == 3));
-define  def_ddr4_1600_12_12_12_LR = ((ATTR_EFF_DRAM_GEN == 2 ) && ( CENTAUR.ATTR_MSS_FREQ == 1600 ) && ( ATTR_EFF_DRAM_CL == 12 ) && ( ATTR_EFF_DRAM_TRCD == 12 ) && ( ATTR_EFF_DRAM_TRP == 12 ) && ( def_ATTR_EFF_DRAM_2N_MODE == 0 ) && (ATTR_EFF_DIMM_TYPE == 3));
+define  def_ddr4_1600_12_12_12    = ((ATTR_EFF_DRAM_GEN == 2 ) && ( CENTAUR.ATTR_MSS_FREQ == 1600 ) && ( ATTR_EFF_DRAM_CL == 12 ) && ( ATTR_EFF_DRAM_TRCD == 12 ) && ( ATTR_EFF_DRAM_TRP == 12 ) && ( ATTR_EFF_DRAM_2N_MODE_ENABLED == 0 ) && (ATTR_EFF_DIMM_TYPE == 0 || ATTR_EFF_DIMM_TYPE == 2));
+define  def_ddr4_1600_12_12_12R   = ((ATTR_EFF_DRAM_GEN == 2 ) && ( CENTAUR.ATTR_MSS_FREQ == 1600 ) && ( ATTR_EFF_DRAM_CL == 12 ) && ( ATTR_EFF_DRAM_TRCD == 12 ) && ( ATTR_EFF_DRAM_TRP == 12 ) && ( ATTR_EFF_DRAM_2N_MODE_ENABLED == 0 ) && (ATTR_EFF_DIMM_TYPE == 1 ));
+define  def_ddr4_1600_12_12_12_2N = ((ATTR_EFF_DRAM_GEN == 2 ) && ( CENTAUR.ATTR_MSS_FREQ == 1600 ) && ( ATTR_EFF_DRAM_CL == 12 ) && ( ATTR_EFF_DRAM_TRCD == 12 ) && ( ATTR_EFF_DRAM_TRP == 12 ) && ( ATTR_EFF_DRAM_2N_MODE_ENABLED == 1 ) && (ATTR_EFF_DIMM_TYPE == 0 || ATTR_EFF_DIMM_TYPE == 2));
+define  def_ddr4_1600_12_12_12_L2 = ((ATTR_EFF_DRAM_GEN == 2 ) && ( CENTAUR.ATTR_MSS_FREQ == 1600 ) && ( ATTR_EFF_DRAM_CL == 12 ) && ( ATTR_EFF_DRAM_TRCD == 12 ) && ( ATTR_EFF_DRAM_TRP == 12 ) && ( ATTR_EFF_DRAM_2N_MODE_ENABLED == 1 ) && (ATTR_EFF_DIMM_TYPE == 3));
+define  def_ddr4_1600_12_12_12_LR = ((ATTR_EFF_DRAM_GEN == 2 ) && ( CENTAUR.ATTR_MSS_FREQ == 1600 ) && ( ATTR_EFF_DRAM_CL == 12 ) && ( ATTR_EFF_DRAM_TRCD == 12 ) && ( ATTR_EFF_DRAM_TRP == 12 ) && ( ATTR_EFF_DRAM_2N_MODE_ENABLED == 0 ) && (ATTR_EFF_DIMM_TYPE == 3));
 
 # DDR4 1866
-define  def_ddr4_1866_11_11_11    = ((ATTR_EFF_DRAM_GEN == 2 ) && ( CENTAUR.ATTR_MSS_FREQ == 1866 ) && ( ATTR_EFF_DRAM_CL == 11 ) && ( ATTR_EFF_DRAM_TRCD == 11 ) && ( ATTR_EFF_DRAM_TRP == 11 ) && ( def_ATTR_EFF_DRAM_2N_MODE == 0 ) && (ATTR_EFF_DIMM_TYPE == 0 || ATTR_EFF_DIMM_TYPE == 2));
-define  def_ddr4_1866_11_11_11R   = ((ATTR_EFF_DRAM_GEN == 2 ) && ( CENTAUR.ATTR_MSS_FREQ == 1866 ) && ( ATTR_EFF_DRAM_CL == 11 ) && ( ATTR_EFF_DRAM_TRCD == 11 ) && ( ATTR_EFF_DRAM_TRP == 11 ) && ( def_ATTR_EFF_DRAM_2N_MODE == 0 ) && (ATTR_EFF_DIMM_TYPE == 1 ));
-define  def_ddr4_1866_11_11_11_2N = ((ATTR_EFF_DRAM_GEN == 2 ) && ( CENTAUR.ATTR_MSS_FREQ == 1866 ) && ( ATTR_EFF_DRAM_CL == 11 ) && ( ATTR_EFF_DRAM_TRCD == 11 ) && ( ATTR_EFF_DRAM_TRP == 11 ) && ( def_ATTR_EFF_DRAM_2N_MODE == 1 ) && (ATTR_EFF_DIMM_TYPE == 0 || ATTR_EFF_DIMM_TYPE == 2));
-define  def_ddr4_1866_11_11_11_L2 = ((ATTR_EFF_DRAM_GEN == 2 ) && ( CENTAUR.ATTR_MSS_FREQ == 1866 ) && ( ATTR_EFF_DRAM_CL == 11 ) && ( ATTR_EFF_DRAM_TRCD == 11 ) && ( ATTR_EFF_DRAM_TRP == 11 ) && ( def_ATTR_EFF_DRAM_2N_MODE == 1 ) && (ATTR_EFF_DIMM_TYPE == 3));
-define  def_ddr4_1866_11_11_11_LR = ((ATTR_EFF_DRAM_GEN == 2 ) && ( CENTAUR.ATTR_MSS_FREQ == 1866 ) && ( ATTR_EFF_DRAM_CL == 11 ) && ( ATTR_EFF_DRAM_TRCD == 11 ) && ( ATTR_EFF_DRAM_TRP == 11 ) && ( def_ATTR_EFF_DRAM_2N_MODE == 0 ) && (ATTR_EFF_DIMM_TYPE == 3));
-define  def_ddr4_1866_12_12_12    = ((ATTR_EFF_DRAM_GEN == 2 ) && ( CENTAUR.ATTR_MSS_FREQ == 1866 ) && ( ATTR_EFF_DRAM_CL == 12 ) && ( ATTR_EFF_DRAM_TRCD == 12 ) && ( ATTR_EFF_DRAM_TRP == 12 ) && ( def_ATTR_EFF_DRAM_2N_MODE == 0 ) && (ATTR_EFF_DIMM_TYPE == 0 || ATTR_EFF_DIMM_TYPE == 2));
-define  def_ddr4_1866_12_12_12R   = ((ATTR_EFF_DRAM_GEN == 2 ) && ( CENTAUR.ATTR_MSS_FREQ == 1866 ) && ( ATTR_EFF_DRAM_CL == 12 ) && ( ATTR_EFF_DRAM_TRCD == 12 ) && ( ATTR_EFF_DRAM_TRP == 12 ) && ( def_ATTR_EFF_DRAM_2N_MODE == 0 ) && (ATTR_EFF_DIMM_TYPE == 1 ));
-define  def_ddr4_1866_12_12_12_2N = ((ATTR_EFF_DRAM_GEN == 2 ) && ( CENTAUR.ATTR_MSS_FREQ == 1866 ) && ( ATTR_EFF_DRAM_CL == 12 ) && ( ATTR_EFF_DRAM_TRCD == 12 ) && ( ATTR_EFF_DRAM_TRP == 12 ) && ( def_ATTR_EFF_DRAM_2N_MODE == 1 ) && (ATTR_EFF_DIMM_TYPE == 0 || ATTR_EFF_DIMM_TYPE == 2));
-define  def_ddr4_1866_12_12_12_L2 = ((ATTR_EFF_DRAM_GEN == 2 ) && ( CENTAUR.ATTR_MSS_FREQ == 1866 ) && ( ATTR_EFF_DRAM_CL == 12 ) && ( ATTR_EFF_DRAM_TRCD == 12 ) && ( ATTR_EFF_DRAM_TRP == 12 ) && ( def_ATTR_EFF_DRAM_2N_MODE == 1 ) && (ATTR_EFF_DIMM_TYPE == 3));
-define  def_ddr4_1866_12_12_12_LR = ((ATTR_EFF_DRAM_GEN == 2 ) && ( CENTAUR.ATTR_MSS_FREQ == 1866 ) && ( ATTR_EFF_DRAM_CL == 12 ) && ( ATTR_EFF_DRAM_TRCD == 12 ) && ( ATTR_EFF_DRAM_TRP == 12 ) && ( def_ATTR_EFF_DRAM_2N_MODE == 0 ) && (ATTR_EFF_DIMM_TYPE == 3));
+define  def_ddr4_1866_11_11_11    = ((ATTR_EFF_DRAM_GEN == 2 ) && ( CENTAUR.ATTR_MSS_FREQ == 1866 ) && ( ATTR_EFF_DRAM_CL == 11 ) && ( ATTR_EFF_DRAM_TRCD == 11 ) && ( ATTR_EFF_DRAM_TRP == 11 ) && ( ATTR_EFF_DRAM_2N_MODE_ENABLED == 0 ) && (ATTR_EFF_DIMM_TYPE == 0 || ATTR_EFF_DIMM_TYPE == 2));
+define  def_ddr4_1866_11_11_11R   = ((ATTR_EFF_DRAM_GEN == 2 ) && ( CENTAUR.ATTR_MSS_FREQ == 1866 ) && ( ATTR_EFF_DRAM_CL == 11 ) && ( ATTR_EFF_DRAM_TRCD == 11 ) && ( ATTR_EFF_DRAM_TRP == 11 ) && ( ATTR_EFF_DRAM_2N_MODE_ENABLED == 0 ) && (ATTR_EFF_DIMM_TYPE == 1 ));
+define  def_ddr4_1866_11_11_11_2N = ((ATTR_EFF_DRAM_GEN == 2 ) && ( CENTAUR.ATTR_MSS_FREQ == 1866 ) && ( ATTR_EFF_DRAM_CL == 11 ) && ( ATTR_EFF_DRAM_TRCD == 11 ) && ( ATTR_EFF_DRAM_TRP == 11 ) && ( ATTR_EFF_DRAM_2N_MODE_ENABLED == 1 ) && (ATTR_EFF_DIMM_TYPE == 0 || ATTR_EFF_DIMM_TYPE == 2));
+define  def_ddr4_1866_11_11_11_L2 = ((ATTR_EFF_DRAM_GEN == 2 ) && ( CENTAUR.ATTR_MSS_FREQ == 1866 ) && ( ATTR_EFF_DRAM_CL == 11 ) && ( ATTR_EFF_DRAM_TRCD == 11 ) && ( ATTR_EFF_DRAM_TRP == 11 ) && ( ATTR_EFF_DRAM_2N_MODE_ENABLED == 1 ) && (ATTR_EFF_DIMM_TYPE == 3));
+define  def_ddr4_1866_11_11_11_LR = ((ATTR_EFF_DRAM_GEN == 2 ) && ( CENTAUR.ATTR_MSS_FREQ == 1866 ) && ( ATTR_EFF_DRAM_CL == 11 ) && ( ATTR_EFF_DRAM_TRCD == 11 ) && ( ATTR_EFF_DRAM_TRP == 11 ) && ( ATTR_EFF_DRAM_2N_MODE_ENABLED == 0 ) && (ATTR_EFF_DIMM_TYPE == 3));
+define  def_ddr4_1866_12_12_12    = ((ATTR_EFF_DRAM_GEN == 2 ) && ( CENTAUR.ATTR_MSS_FREQ == 1866 ) && ( ATTR_EFF_DRAM_CL == 12 ) && ( ATTR_EFF_DRAM_TRCD == 12 ) && ( ATTR_EFF_DRAM_TRP == 12 ) && ( ATTR_EFF_DRAM_2N_MODE_ENABLED == 0 ) && (ATTR_EFF_DIMM_TYPE == 0 || ATTR_EFF_DIMM_TYPE == 2));
+define  def_ddr4_1866_12_12_12R   = ((ATTR_EFF_DRAM_GEN == 2 ) && ( CENTAUR.ATTR_MSS_FREQ == 1866 ) && ( ATTR_EFF_DRAM_CL == 12 ) && ( ATTR_EFF_DRAM_TRCD == 12 ) && ( ATTR_EFF_DRAM_TRP == 12 ) && ( ATTR_EFF_DRAM_2N_MODE_ENABLED == 0 ) && (ATTR_EFF_DIMM_TYPE == 1 ));
+define  def_ddr4_1866_12_12_12_2N = ((ATTR_EFF_DRAM_GEN == 2 ) && ( CENTAUR.ATTR_MSS_FREQ == 1866 ) && ( ATTR_EFF_DRAM_CL == 12 ) && ( ATTR_EFF_DRAM_TRCD == 12 ) && ( ATTR_EFF_DRAM_TRP == 12 ) && ( ATTR_EFF_DRAM_2N_MODE_ENABLED == 1 ) && (ATTR_EFF_DIMM_TYPE == 0 || ATTR_EFF_DIMM_TYPE == 2));
+define  def_ddr4_1866_12_12_12_L2 = ((ATTR_EFF_DRAM_GEN == 2 ) && ( CENTAUR.ATTR_MSS_FREQ == 1866 ) && ( ATTR_EFF_DRAM_CL == 12 ) && ( ATTR_EFF_DRAM_TRCD == 12 ) && ( ATTR_EFF_DRAM_TRP == 12 ) && ( ATTR_EFF_DRAM_2N_MODE_ENABLED == 1 ) && (ATTR_EFF_DIMM_TYPE == 3));
+define  def_ddr4_1866_12_12_12_LR = ((ATTR_EFF_DRAM_GEN == 2 ) && ( CENTAUR.ATTR_MSS_FREQ == 1866 ) && ( ATTR_EFF_DRAM_CL == 12 ) && ( ATTR_EFF_DRAM_TRCD == 12 ) && ( ATTR_EFF_DRAM_TRP == 12 ) && ( ATTR_EFF_DRAM_2N_MODE_ENABLED == 0 ) && (ATTR_EFF_DIMM_TYPE == 3));
 
-define  def_ddr4_1866_13_13_13    = ((ATTR_EFF_DRAM_GEN == 2 ) && ( CENTAUR.ATTR_MSS_FREQ == 1866 ) && ( ATTR_EFF_DRAM_CL == 13 ) && ( ATTR_EFF_DRAM_TRCD == 13 ) && ( ATTR_EFF_DRAM_TRP == 13 ) && ( def_ATTR_EFF_DRAM_2N_MODE == 0 ) && (ATTR_EFF_DIMM_TYPE == 0 || ATTR_EFF_DIMM_TYPE == 2));
-define  def_ddr4_1866_13_13_13R   = ((ATTR_EFF_DRAM_GEN == 2 ) && ( CENTAUR.ATTR_MSS_FREQ == 1866 ) && ( ATTR_EFF_DRAM_CL == 13 ) && ( ATTR_EFF_DRAM_TRCD == 13 ) && ( ATTR_EFF_DRAM_TRP == 13 ) && ( def_ATTR_EFF_DRAM_2N_MODE == 0 ) && (ATTR_EFF_DIMM_TYPE == 1 ));
-define  def_ddr4_1866_13_13_13_2N = ((ATTR_EFF_DRAM_GEN == 2 ) && ( CENTAUR.ATTR_MSS_FREQ == 1866 ) && ( ATTR_EFF_DRAM_CL == 13 ) && ( ATTR_EFF_DRAM_TRCD == 13 ) && ( ATTR_EFF_DRAM_TRP == 13 ) && ( def_ATTR_EFF_DRAM_2N_MODE == 1 ) && (ATTR_EFF_DIMM_TYPE == 0 || ATTR_EFF_DIMM_TYPE == 2));
-define  def_ddr4_1866_13_13_13_L2 = ((ATTR_EFF_DRAM_GEN == 2 ) && ( CENTAUR.ATTR_MSS_FREQ == 1866 ) && ( ATTR_EFF_DRAM_CL == 13 ) && ( ATTR_EFF_DRAM_TRCD == 13 ) && ( ATTR_EFF_DRAM_TRP == 13 ) && ( def_ATTR_EFF_DRAM_2N_MODE == 1 ) && (ATTR_EFF_DIMM_TYPE == 3));
-define  def_ddr4_1866_13_13_13_LR = ((ATTR_EFF_DRAM_GEN == 2 ) && ( CENTAUR.ATTR_MSS_FREQ == 1866 ) && ( ATTR_EFF_DRAM_CL == 13 ) && ( ATTR_EFF_DRAM_TRCD == 13 ) && ( ATTR_EFF_DRAM_TRP == 13 ) && ( def_ATTR_EFF_DRAM_2N_MODE == 0 ) && (ATTR_EFF_DIMM_TYPE == 3));
+define  def_ddr4_1866_13_13_13    = ((ATTR_EFF_DRAM_GEN == 2 ) && ( CENTAUR.ATTR_MSS_FREQ == 1866 ) && ( ATTR_EFF_DRAM_CL == 13 ) && ( ATTR_EFF_DRAM_TRCD == 13 ) && ( ATTR_EFF_DRAM_TRP == 13 ) && ( ATTR_EFF_DRAM_2N_MODE_ENABLED == 0 ) && (ATTR_EFF_DIMM_TYPE == 0 || ATTR_EFF_DIMM_TYPE == 2));
+define  def_ddr4_1866_13_13_13R   = ((ATTR_EFF_DRAM_GEN == 2 ) && ( CENTAUR.ATTR_MSS_FREQ == 1866 ) && ( ATTR_EFF_DRAM_CL == 13 ) && ( ATTR_EFF_DRAM_TRCD == 13 ) && ( ATTR_EFF_DRAM_TRP == 13 ) && ( ATTR_EFF_DRAM_2N_MODE_ENABLED == 0 ) && (ATTR_EFF_DIMM_TYPE == 1 ));
+define  def_ddr4_1866_13_13_13_2N = ((ATTR_EFF_DRAM_GEN == 2 ) && ( CENTAUR.ATTR_MSS_FREQ == 1866 ) && ( ATTR_EFF_DRAM_CL == 13 ) && ( ATTR_EFF_DRAM_TRCD == 13 ) && ( ATTR_EFF_DRAM_TRP == 13 ) && ( ATTR_EFF_DRAM_2N_MODE_ENABLED == 1 ) && (ATTR_EFF_DIMM_TYPE == 0 || ATTR_EFF_DIMM_TYPE == 2));
+define  def_ddr4_1866_13_13_13_L2 = ((ATTR_EFF_DRAM_GEN == 2 ) && ( CENTAUR.ATTR_MSS_FREQ == 1866 ) && ( ATTR_EFF_DRAM_CL == 13 ) && ( ATTR_EFF_DRAM_TRCD == 13 ) && ( ATTR_EFF_DRAM_TRP == 13 ) && ( ATTR_EFF_DRAM_2N_MODE_ENABLED == 1 ) && (ATTR_EFF_DIMM_TYPE == 3));
+define  def_ddr4_1866_13_13_13_LR = ((ATTR_EFF_DRAM_GEN == 2 ) && ( CENTAUR.ATTR_MSS_FREQ == 1866 ) && ( ATTR_EFF_DRAM_CL == 13 ) && ( ATTR_EFF_DRAM_TRCD == 13 ) && ( ATTR_EFF_DRAM_TRP == 13 ) && ( ATTR_EFF_DRAM_2N_MODE_ENABLED == 0 ) && (ATTR_EFF_DIMM_TYPE == 3));
 
 # DDR4 2133 12 -13  - not supported
 #define  def_ddr4_2133_12_12_12    = 0;
@@ -601,16 +600,16 @@ define  def_ddr4_2133_13_13_13_2N = (CENTAUR.ATTR_MSS_FREQ == 1400);
 define  def_ddr4_2133_13_13_13_L2 = (CENTAUR.ATTR_MSS_FREQ == 1400);
 define  def_ddr4_2133_13_13_13_LR = (CENTAUR.ATTR_MSS_FREQ == 1400);
 
-#define  def_ddr4_2133_12_12_12    = ((ATTR_EFF_DRAM_GEN == 2 ) && ( CENTAUR.ATTR_MSS_FREQ == 2133 ) && ( ATTR_EFF_DRAM_CL == 12 ) && ( ATTR_EFF_DRAM_TRCD == 12 ) && ( ATTR_EFF_DRAM_TRP == 12 ) && ( def_ATTR_EFF_DRAM_2N_MODE == 0 ) && (ATTR_EFF_DIMM_TYPE == 0 || ATTR_EFF_DIMM_TYPE == 2));
-#define  def_ddr4_2133_12_12_12R   = ((ATTR_EFF_DRAM_GEN == 2 ) && ( CENTAUR.ATTR_MSS_FREQ == 2133 ) && ( ATTR_EFF_DRAM_CL == 12 ) && ( ATTR_EFF_DRAM_TRCD == 12 ) && ( ATTR_EFF_DRAM_TRP == 12 ) && ( def_ATTR_EFF_DRAM_2N_MODE == 0 ) && (ATTR_EFF_DIMM_TYPE == 1 ));
-#define  def_ddr4_2133_12_12_12_2N = ((ATTR_EFF_DRAM_GEN == 2 ) && ( CENTAUR.ATTR_MSS_FREQ == 2133 ) && ( ATTR_EFF_DRAM_CL == 12 ) && ( ATTR_EFF_DRAM_TRCD == 12 ) && ( ATTR_EFF_DRAM_TRP == 12 ) && ( def_ATTR_EFF_DRAM_2N_MODE == 1 ) && (ATTR_EFF_DIMM_TYPE == 0 || ATTR_EFF_DIMM_TYPE == 2));
-#define  def_ddr4_2133_12_12_12_L2 = ((ATTR_EFF_DRAM_GEN == 2 ) && ( CENTAUR.ATTR_MSS_FREQ == 2133 ) && ( ATTR_EFF_DRAM_CL == 12 ) && ( ATTR_EFF_DRAM_TRCD == 12 ) && ( ATTR_EFF_DRAM_TRP == 12 ) && ( def_ATTR_EFF_DRAM_2N_MODE == 1 ) && (ATTR_EFF_DIMM_TYPE == 3));
-#define  def_ddr4_2133_12_12_12_LR = ((ATTR_EFF_DRAM_GEN == 2 ) && ( CENTAUR.ATTR_MSS_FREQ == 2133 ) && ( ATTR_EFF_DRAM_CL == 12 ) && ( ATTR_EFF_DRAM_TRCD == 12 ) && ( ATTR_EFF_DRAM_TRP == 12 ) && ( def_ATTR_EFF_DRAM_2N_MODE == 0 ) && (ATTR_EFF_DIMM_TYPE == 3));
-#define  def_ddr4_2133_13_13_13    = ((ATTR_EFF_DRAM_GEN == 2 ) && ( CENTAUR.ATTR_MSS_FREQ == 2133 ) && ( ATTR_EFF_DRAM_CL == 13 ) && ( ATTR_EFF_DRAM_TRCD == 13 ) && ( ATTR_EFF_DRAM_TRP == 13 ) && ( def_ATTR_EFF_DRAM_2N_MODE == 0 ) && (ATTR_EFF_DIMM_TYPE == 0 || ATTR_EFF_DIMM_TYPE == 2));
-#define  def_ddr4_2133_13_13_13R   = ((ATTR_EFF_DRAM_GEN == 2 ) && ( CENTAUR.ATTR_MSS_FREQ == 2133 ) && ( ATTR_EFF_DRAM_CL == 13 ) && ( ATTR_EFF_DRAM_TRCD == 13 ) && ( ATTR_EFF_DRAM_TRP == 13 ) && ( def_ATTR_EFF_DRAM_2N_MODE == 0 ) && (ATTR_EFF_DIMM_TYPE == 1 ));
-#define  def_ddr4_2133_13_13_13_2N = ((ATTR_EFF_DRAM_GEN == 2 ) && ( CENTAUR.ATTR_MSS_FREQ == 2133 ) && ( ATTR_EFF_DRAM_CL == 13 ) && ( ATTR_EFF_DRAM_TRCD == 13 ) && ( ATTR_EFF_DRAM_TRP == 13 ) && ( def_ATTR_EFF_DRAM_2N_MODE == 1 ) && (ATTR_EFF_DIMM_TYPE == 0 || ATTR_EFF_DIMM_TYPE == 2));
-#define  def_ddr4_2133_13_13_13_L2 = ((ATTR_EFF_DRAM_GEN == 2 ) && ( CENTAUR.ATTR_MSS_FREQ == 2133 ) && ( ATTR_EFF_DRAM_CL == 13 ) && ( ATTR_EFF_DRAM_TRCD == 13 ) && ( ATTR_EFF_DRAM_TRP == 13 ) && ( def_ATTR_EFF_DRAM_2N_MODE == 1 ) && (ATTR_EFF_DIMM_TYPE == 3));
-#define  def_ddr4_2133_13_13_13_LR = ((ATTR_EFF_DRAM_GEN == 2 ) && ( CENTAUR.ATTR_MSS_FREQ == 2133 ) && ( ATTR_EFF_DRAM_CL == 13 ) && ( ATTR_EFF_DRAM_TRCD == 13 ) && ( ATTR_EFF_DRAM_TRP == 13 ) && ( def_ATTR_EFF_DRAM_2N_MODE == 0 ) && (ATTR_EFF_DIMM_TYPE == 3));
+#define  def_ddr4_2133_12_12_12    = ((ATTR_EFF_DRAM_GEN == 2 ) && ( CENTAUR.ATTR_MSS_FREQ == 2133 ) && ( ATTR_EFF_DRAM_CL == 12 ) && ( ATTR_EFF_DRAM_TRCD == 12 ) && ( ATTR_EFF_DRAM_TRP == 12 ) && ( ATTR_EFF_DRAM_2N_MODE_ENABLED == 0 ) && (ATTR_EFF_DIMM_TYPE == 0 || ATTR_EFF_DIMM_TYPE == 2));
+#define  def_ddr4_2133_12_12_12R   = ((ATTR_EFF_DRAM_GEN == 2 ) && ( CENTAUR.ATTR_MSS_FREQ == 2133 ) && ( ATTR_EFF_DRAM_CL == 12 ) && ( ATTR_EFF_DRAM_TRCD == 12 ) && ( ATTR_EFF_DRAM_TRP == 12 ) && ( ATTR_EFF_DRAM_2N_MODE_ENABLED == 0 ) && (ATTR_EFF_DIMM_TYPE == 1 ));
+#define  def_ddr4_2133_12_12_12_2N = ((ATTR_EFF_DRAM_GEN == 2 ) && ( CENTAUR.ATTR_MSS_FREQ == 2133 ) && ( ATTR_EFF_DRAM_CL == 12 ) && ( ATTR_EFF_DRAM_TRCD == 12 ) && ( ATTR_EFF_DRAM_TRP == 12 ) && ( ATTR_EFF_DRAM_2N_MODE_ENABLED == 1 ) && (ATTR_EFF_DIMM_TYPE == 0 || ATTR_EFF_DIMM_TYPE == 2));
+#define  def_ddr4_2133_12_12_12_L2 = ((ATTR_EFF_DRAM_GEN == 2 ) && ( CENTAUR.ATTR_MSS_FREQ == 2133 ) && ( ATTR_EFF_DRAM_CL == 12 ) && ( ATTR_EFF_DRAM_TRCD == 12 ) && ( ATTR_EFF_DRAM_TRP == 12 ) && ( ATTR_EFF_DRAM_2N_MODE_ENABLED == 1 ) && (ATTR_EFF_DIMM_TYPE == 3));
+#define  def_ddr4_2133_12_12_12_LR = ((ATTR_EFF_DRAM_GEN == 2 ) && ( CENTAUR.ATTR_MSS_FREQ == 2133 ) && ( ATTR_EFF_DRAM_CL == 12 ) && ( ATTR_EFF_DRAM_TRCD == 12 ) && ( ATTR_EFF_DRAM_TRP == 12 ) && ( ATTR_EFF_DRAM_2N_MODE_ENABLED == 0 ) && (ATTR_EFF_DIMM_TYPE == 3));
+#define  def_ddr4_2133_13_13_13    = ((ATTR_EFF_DRAM_GEN == 2 ) && ( CENTAUR.ATTR_MSS_FREQ == 2133 ) && ( ATTR_EFF_DRAM_CL == 13 ) && ( ATTR_EFF_DRAM_TRCD == 13 ) && ( ATTR_EFF_DRAM_TRP == 13 ) && ( ATTR_EFF_DRAM_2N_MODE_ENABLED == 0 ) && (ATTR_EFF_DIMM_TYPE == 0 || ATTR_EFF_DIMM_TYPE == 2));
+#define  def_ddr4_2133_13_13_13R   = ((ATTR_EFF_DRAM_GEN == 2 ) && ( CENTAUR.ATTR_MSS_FREQ == 2133 ) && ( ATTR_EFF_DRAM_CL == 13 ) && ( ATTR_EFF_DRAM_TRCD == 13 ) && ( ATTR_EFF_DRAM_TRP == 13 ) && ( ATTR_EFF_DRAM_2N_MODE_ENABLED == 0 ) && (ATTR_EFF_DIMM_TYPE == 1 ));
+#define  def_ddr4_2133_13_13_13_2N = ((ATTR_EFF_DRAM_GEN == 2 ) && ( CENTAUR.ATTR_MSS_FREQ == 2133 ) && ( ATTR_EFF_DRAM_CL == 13 ) && ( ATTR_EFF_DRAM_TRCD == 13 ) && ( ATTR_EFF_DRAM_TRP == 13 ) && ( ATTR_EFF_DRAM_2N_MODE_ENABLED == 1 ) && (ATTR_EFF_DIMM_TYPE == 0 || ATTR_EFF_DIMM_TYPE == 2));
+#define  def_ddr4_2133_13_13_13_L2 = ((ATTR_EFF_DRAM_GEN == 2 ) && ( CENTAUR.ATTR_MSS_FREQ == 2133 ) && ( ATTR_EFF_DRAM_CL == 13 ) && ( ATTR_EFF_DRAM_TRCD == 13 ) && ( ATTR_EFF_DRAM_TRP == 13 ) && ( ATTR_EFF_DRAM_2N_MODE_ENABLED == 1 ) && (ATTR_EFF_DIMM_TYPE == 3));
+#define  def_ddr4_2133_13_13_13_LR = ((ATTR_EFF_DRAM_GEN == 2 ) && ( CENTAUR.ATTR_MSS_FREQ == 2133 ) && ( ATTR_EFF_DRAM_CL == 13 ) && ( ATTR_EFF_DRAM_TRCD == 13 ) && ( ATTR_EFF_DRAM_TRP == 13 ) && ( ATTR_EFF_DRAM_2N_MODE_ENABLED == 0 ) && (ATTR_EFF_DIMM_TYPE == 3));
 
 # DDR4 2400 13-14 not supported
 #define  def_ddr4_2400_13_13_13    = 0;
@@ -634,33 +633,33 @@ define  def_ddr4_2400_14_14_14_2N = (CENTAUR.ATTR_MSS_FREQ == 1400);
 define  def_ddr4_2400_14_14_14_L2 = (CENTAUR.ATTR_MSS_FREQ == 1400);
 define  def_ddr4_2400_14_14_14_LR = (CENTAUR.ATTR_MSS_FREQ == 1400);
 
-#define  def_ddr4_2400_13_13_13    = ((ATTR_EFF_DRAM_GEN == 2 ) && ( CENTAUR.ATTR_MSS_FREQ == 2400 ) && ( ATTR_EFF_DRAM_CL == 13 ) && ( ATTR_EFF_DRAM_TRCD == 13 ) && ( ATTR_EFF_DRAM_TRP == 13 ) && ( def_ATTR_EFF_DRAM_2N_MODE == 0 ) && (ATTR_EFF_DIMM_TYPE == 0 || ATTR_EFF_DIMM_TYPE == 2));
-#define  def_ddr4_2400_13_13_13R   = ((ATTR_EFF_DRAM_GEN == 2 ) && ( CENTAUR.ATTR_MSS_FREQ == 2400 ) && ( ATTR_EFF_DRAM_CL == 13 ) && ( ATTR_EFF_DRAM_TRCD == 13 ) && ( ATTR_EFF_DRAM_TRP == 13 ) && ( def_ATTR_EFF_DRAM_2N_MODE == 0 ) && (ATTR_EFF_DIMM_TYPE == 1 ));
-#define  def_ddr4_2400_13_13_13_2N = ((ATTR_EFF_DRAM_GEN == 2 ) && ( CENTAUR.ATTR_MSS_FREQ == 2400 ) && ( ATTR_EFF_DRAM_CL == 13 ) && ( ATTR_EFF_DRAM_TRCD == 13 ) && ( ATTR_EFF_DRAM_TRP == 13 ) && ( def_ATTR_EFF_DRAM_2N_MODE == 1 ) && (ATTR_EFF_DIMM_TYPE == 0 || ATTR_EFF_DIMM_TYPE == 2));
-#define  def_ddr4_2400_13_13_13_L2 = ((ATTR_EFF_DRAM_GEN == 2 ) && ( CENTAUR.ATTR_MSS_FREQ == 2400 ) && ( ATTR_EFF_DRAM_CL == 13 ) && ( ATTR_EFF_DRAM_TRCD == 13 ) && ( ATTR_EFF_DRAM_TRP == 13 ) && ( def_ATTR_EFF_DRAM_2N_MODE == 1 ) && (ATTR_EFF_DIMM_TYPE == 3));
-#define  def_ddr4_2400_13_13_13_LR = ((ATTR_EFF_DRAM_GEN == 2 ) && ( CENTAUR.ATTR_MSS_FREQ == 2400 ) && ( ATTR_EFF_DRAM_CL == 13 ) && ( ATTR_EFF_DRAM_TRCD == 13 ) && ( ATTR_EFF_DRAM_TRP == 13 ) && ( def_ATTR_EFF_DRAM_2N_MODE == 0 ) && (ATTR_EFF_DIMM_TYPE == 3));
-#define  def_ddr4_2400_14_14_14    = ((ATTR_EFF_DRAM_GEN == 2 ) && ( CENTAUR.ATTR_MSS_FREQ == 2400 ) && ( ATTR_EFF_DRAM_CL == 14 ) && ( ATTR_EFF_DRAM_TRCD == 14 ) && ( ATTR_EFF_DRAM_TRP == 14 ) && ( def_ATTR_EFF_DRAM_2N_MODE == 0 ) && (ATTR_EFF_DIMM_TYPE == 0 || ATTR_EFF_DIMM_TYPE == 2));
-#define  def_ddr4_2400_14_14_14R   = ((ATTR_EFF_DRAM_GEN == 2 ) && ( CENTAUR.ATTR_MSS_FREQ == 2400 ) && ( ATTR_EFF_DRAM_CL == 14 ) && ( ATTR_EFF_DRAM_TRCD == 14 ) && ( ATTR_EFF_DRAM_TRP == 14 ) && ( def_ATTR_EFF_DRAM_2N_MODE == 0 ) && (ATTR_EFF_DIMM_TYPE == 1 ));
-#define  def_ddr4_2400_14_14_14_2N = ((ATTR_EFF_DRAM_GEN == 2 ) && ( CENTAUR.ATTR_MSS_FREQ == 2400 ) && ( ATTR_EFF_DRAM_CL == 14 ) && ( ATTR_EFF_DRAM_TRCD == 14 ) && ( ATTR_EFF_DRAM_TRP == 14 ) && ( def_ATTR_EFF_DRAM_2N_MODE == 1 ) && (ATTR_EFF_DIMM_TYPE == 0 || ATTR_EFF_DIMM_TYPE == 2));
-#define  def_ddr4_2400_14_14_14_L2 = ((ATTR_EFF_DRAM_GEN == 2 ) && ( CENTAUR.ATTR_MSS_FREQ == 2400 ) && ( ATTR_EFF_DRAM_CL == 14 ) && ( ATTR_EFF_DRAM_TRCD == 14 ) && ( ATTR_EFF_DRAM_TRP == 14 ) && ( def_ATTR_EFF_DRAM_2N_MODE == 1 ) && (ATTR_EFF_DIMM_TYPE == 3));
-#define  def_ddr4_2400_14_14_14_LR = ((ATTR_EFF_DRAM_GEN == 2 ) && ( CENTAUR.ATTR_MSS_FREQ == 2400 ) && ( ATTR_EFF_DRAM_CL == 14 ) && ( ATTR_EFF_DRAM_TRCD == 14 ) && ( ATTR_EFF_DRAM_TRP == 14 ) && ( def_ATTR_EFF_DRAM_2N_MODE == 0 ) && (ATTR_EFF_DIMM_TYPE == 3));
+#define  def_ddr4_2400_13_13_13    = ((ATTR_EFF_DRAM_GEN == 2 ) && ( CENTAUR.ATTR_MSS_FREQ == 2400 ) && ( ATTR_EFF_DRAM_CL == 13 ) && ( ATTR_EFF_DRAM_TRCD == 13 ) && ( ATTR_EFF_DRAM_TRP == 13 ) && ( ATTR_EFF_DRAM_2N_MODE_ENABLED == 0 ) && (ATTR_EFF_DIMM_TYPE == 0 || ATTR_EFF_DIMM_TYPE == 2));
+#define  def_ddr4_2400_13_13_13R   = ((ATTR_EFF_DRAM_GEN == 2 ) && ( CENTAUR.ATTR_MSS_FREQ == 2400 ) && ( ATTR_EFF_DRAM_CL == 13 ) && ( ATTR_EFF_DRAM_TRCD == 13 ) && ( ATTR_EFF_DRAM_TRP == 13 ) && ( ATTR_EFF_DRAM_2N_MODE_ENABLED == 0 ) && (ATTR_EFF_DIMM_TYPE == 1 ));
+#define  def_ddr4_2400_13_13_13_2N = ((ATTR_EFF_DRAM_GEN == 2 ) && ( CENTAUR.ATTR_MSS_FREQ == 2400 ) && ( ATTR_EFF_DRAM_CL == 13 ) && ( ATTR_EFF_DRAM_TRCD == 13 ) && ( ATTR_EFF_DRAM_TRP == 13 ) && ( ATTR_EFF_DRAM_2N_MODE_ENABLED == 1 ) && (ATTR_EFF_DIMM_TYPE == 0 || ATTR_EFF_DIMM_TYPE == 2));
+#define  def_ddr4_2400_13_13_13_L2 = ((ATTR_EFF_DRAM_GEN == 2 ) && ( CENTAUR.ATTR_MSS_FREQ == 2400 ) && ( ATTR_EFF_DRAM_CL == 13 ) && ( ATTR_EFF_DRAM_TRCD == 13 ) && ( ATTR_EFF_DRAM_TRP == 13 ) && ( ATTR_EFF_DRAM_2N_MODE_ENABLED == 1 ) && (ATTR_EFF_DIMM_TYPE == 3));
+#define  def_ddr4_2400_13_13_13_LR = ((ATTR_EFF_DRAM_GEN == 2 ) && ( CENTAUR.ATTR_MSS_FREQ == 2400 ) && ( ATTR_EFF_DRAM_CL == 13 ) && ( ATTR_EFF_DRAM_TRCD == 13 ) && ( ATTR_EFF_DRAM_TRP == 13 ) && ( ATTR_EFF_DRAM_2N_MODE_ENABLED == 0 ) && (ATTR_EFF_DIMM_TYPE == 3));
+#define  def_ddr4_2400_14_14_14    = ((ATTR_EFF_DRAM_GEN == 2 ) && ( CENTAUR.ATTR_MSS_FREQ == 2400 ) && ( ATTR_EFF_DRAM_CL == 14 ) && ( ATTR_EFF_DRAM_TRCD == 14 ) && ( ATTR_EFF_DRAM_TRP == 14 ) && ( ATTR_EFF_DRAM_2N_MODE_ENABLED == 0 ) && (ATTR_EFF_DIMM_TYPE == 0 || ATTR_EFF_DIMM_TYPE == 2));
+#define  def_ddr4_2400_14_14_14R   = ((ATTR_EFF_DRAM_GEN == 2 ) && ( CENTAUR.ATTR_MSS_FREQ == 2400 ) && ( ATTR_EFF_DRAM_CL == 14 ) && ( ATTR_EFF_DRAM_TRCD == 14 ) && ( ATTR_EFF_DRAM_TRP == 14 ) && ( ATTR_EFF_DRAM_2N_MODE_ENABLED == 0 ) && (ATTR_EFF_DIMM_TYPE == 1 ));
+#define  def_ddr4_2400_14_14_14_2N = ((ATTR_EFF_DRAM_GEN == 2 ) && ( CENTAUR.ATTR_MSS_FREQ == 2400 ) && ( ATTR_EFF_DRAM_CL == 14 ) && ( ATTR_EFF_DRAM_TRCD == 14 ) && ( ATTR_EFF_DRAM_TRP == 14 ) && ( ATTR_EFF_DRAM_2N_MODE_ENABLED == 1 ) && (ATTR_EFF_DIMM_TYPE == 0 || ATTR_EFF_DIMM_TYPE == 2));
+#define  def_ddr4_2400_14_14_14_L2 = ((ATTR_EFF_DRAM_GEN == 2 ) && ( CENTAUR.ATTR_MSS_FREQ == 2400 ) && ( ATTR_EFF_DRAM_CL == 14 ) && ( ATTR_EFF_DRAM_TRCD == 14 ) && ( ATTR_EFF_DRAM_TRP == 14 ) && ( ATTR_EFF_DRAM_2N_MODE_ENABLED == 1 ) && (ATTR_EFF_DIMM_TYPE == 3));
+#define  def_ddr4_2400_14_14_14_LR = ((ATTR_EFF_DRAM_GEN == 2 ) && ( CENTAUR.ATTR_MSS_FREQ == 2400 ) && ( ATTR_EFF_DRAM_CL == 14 ) && ( ATTR_EFF_DRAM_TRCD == 14 ) && ( ATTR_EFF_DRAM_TRP == 14 ) && ( ATTR_EFF_DRAM_2N_MODE_ENABLED == 0 ) && (ATTR_EFF_DIMM_TYPE == 3));
 
-#define  def_ddr4_1600_10_10_10    = ((ATTR_EFF_DRAM_GEN == 2 ) && ( CENTAUR.ATTR_MSS_FREQ == 1600 ) && ( ATTR_EFF_DRAM_CL == 10 ) && ( ATTR_EFF_DRAM_TRCD == 10 ) && ( ATTR_EFF_DRAM_TRP == 10 ) && ( def_ATTR_EFF_DRAM_2N_MODE == 0 ) && (ATTR_EFF_DIMM_TYPE == 0 || ATTR_EFF_DIMM_TYPE == 2));
-#define  def_ddr3_1600_10_10_10R   = ((ATTR_EFF_DRAM_GEN == 2 ) && ( CENTAUR.ATTR_MSS_FREQ == 1600 ) && ( ATTR_EFF_DRAM_CL == 10 ) && ( ATTR_EFF_DRAM_TRCD == 10 ) && ( ATTR_EFF_DRAM_TRP == 10 ) && ( def_ATTR_EFF_DRAM_2N_MODE == 0 ) && (ATTR_EFF_DIMM_TYPE == 1 ));
-#define  def_ddr4_1600_10_10_10_2N = ((ATTR_EFF_DRAM_GEN == 2 ) && ( CENTAUR.ATTR_MSS_FREQ == 1600 ) && ( ATTR_EFF_DRAM_CL == 10 ) && ( ATTR_EFF_DRAM_TRCD == 10 ) && ( ATTR_EFF_DRAM_TRP == 10 ) && ( def_ATTR_EFF_DRAM_2N_MODE == 1 ) && (ATTR_EFF_DIMM_TYPE == 0 || ATTR_EFF_DIMM_TYPE == 2));
-#define  def_ddr4_1600_11_11_11    = ((ATTR_EFF_DRAM_GEN == 2 ) && ( CENTAUR.ATTR_MSS_FREQ == 1600 ) && ( ATTR_EFF_DRAM_CL == 11 ) && ( ATTR_EFF_DRAM_TRCD == 11 ) && ( ATTR_EFF_DRAM_TRP == 11 ) && ( def_ATTR_EFF_DRAM_2N_MODE == 0 ) && (ATTR_EFF_DIMM_TYPE == 0 || ATTR_EFF_DIMM_TYPE == 2));
-#define  def_ddr4_1600_11_11_11_2N = ((ATTR_EFF_DRAM_GEN == 2 ) && ( CENTAUR.ATTR_MSS_FREQ == 1600 ) && ( ATTR_EFF_DRAM_CL == 11 ) && ( ATTR_EFF_DRAM_TRCD == 11 ) && ( ATTR_EFF_DRAM_TRP == 11 ) && ( def_ATTR_EFF_DRAM_2N_MODE == 1 ) && (ATTR_EFF_DIMM_TYPE == 0 || ATTR_EFF_DIMM_TYPE == 2));
-#define  def_ddr4_1600_9_9_9       = ((ATTR_EFF_DRAM_GEN == 2 ) && ( CENTAUR.ATTR_MSS_FREQ == 1600 ) && ( ATTR_EFF_DRAM_CL == 9  ) && ( ATTR_EFF_DRAM_TRCD == 9  ) && ( ATTR_EFF_DRAM_TRP == 9  ) && ( def_ATTR_EFF_DRAM_2N_MODE == 0 ) && (ATTR_EFF_DIMM_TYPE == 0 || ATTR_EFF_DIMM_TYPE == 2));
-#define  def_ddr4_1600_9_9_9_2N    = ((ATTR_EFF_DRAM_GEN == 2 ) && ( CENTAUR.ATTR_MSS_FREQ == 1600 ) && ( ATTR_EFF_DRAM_CL == 9  ) && ( ATTR_EFF_DRAM_TRCD == 9  ) && ( ATTR_EFF_DRAM_TRP == 9  ) && ( def_ATTR_EFF_DRAM_2N_MODE == 1 ) && (ATTR_EFF_DIMM_TYPE == 0 || ATTR_EFF_DIMM_TYPE == 2));
-#define  def_ddr4_1866_11_11_11    = ((ATTR_EFF_DRAM_GEN == 2 ) && ( CENTAUR.ATTR_MSS_FREQ == 1866 ) && ( ATTR_EFF_DRAM_CL == 11 ) && ( ATTR_EFF_DRAM_TRCD == 11 ) && ( ATTR_EFF_DRAM_TRP == 11 ) && ( def_ATTR_EFF_DRAM_2N_MODE == 0 ) && (ATTR_EFF_DIMM_TYPE == 0 || ATTR_EFF_DIMM_TYPE == 2));
-#define  def_ddr4_1866_11_11_11_2N = ((ATTR_EFF_DRAM_GEN == 2 ) && ( CENTAUR.ATTR_MSS_FREQ == 1866 ) && ( ATTR_EFF_DRAM_CL == 11 ) && ( ATTR_EFF_DRAM_TRCD == 11 ) && ( ATTR_EFF_DRAM_TRP == 11 ) && ( def_ATTR_EFF_DRAM_2N_MODE == 1 ) && (ATTR_EFF_DIMM_TYPE == 0 || ATTR_EFF_DIMM_TYPE == 2));
-#define  def_ddr4_1866_12_12_12    = ((ATTR_EFF_DRAM_GEN == 2 ) && ( CENTAUR.ATTR_MSS_FREQ == 1866 ) && ( ATTR_EFF_DRAM_CL == 12 ) && ( ATTR_EFF_DRAM_TRCD == 12 ) && ( ATTR_EFF_DRAM_TRP == 12 ) && ( def_ATTR_EFF_DRAM_2N_MODE == 0 ) && (ATTR_EFF_DIMM_TYPE == 0 || ATTR_EFF_DIMM_TYPE == 2));
-#define  def_ddr4_1866_12_12_12_2N = ((ATTR_EFF_DRAM_GEN == 2 ) && ( CENTAUR.ATTR_MSS_FREQ == 1866 ) && ( ATTR_EFF_DRAM_CL == 12 ) && ( ATTR_EFF_DRAM_TRCD == 12 ) && ( ATTR_EFF_DRAM_TRP == 12 ) && ( def_ATTR_EFF_DRAM_2N_MODE == 1 ) && (ATTR_EFF_DIMM_TYPE == 0 || ATTR_EFF_DIMM_TYPE == 2));
-#define  def_ddr4_2133_12_12_12    = ((ATTR_EFF_DRAM_GEN == 2 ) && ( CENTAUR.ATTR_MSS_FREQ == 2133 ) && ( ATTR_EFF_DRAM_CL == 12 ) && ( ATTR_EFF_DRAM_TRCD == 12 ) && ( ATTR_EFF_DRAM_TRP == 12 ) && ( def_ATTR_EFF_DRAM_2N_MODE == 0 ) && (ATTR_EFF_DIMM_TYPE == 0 || ATTR_EFF_DIMM_TYPE == 2));
-#define  def_ddr4_2133_12_12_12_2N = ((ATTR_EFF_DRAM_GEN == 2 ) && ( CENTAUR.ATTR_MSS_FREQ == 2133 ) && ( ATTR_EFF_DRAM_CL == 12 ) && ( ATTR_EFF_DRAM_TRCD == 12 ) && ( ATTR_EFF_DRAM_TRP == 12 ) && ( def_ATTR_EFF_DRAM_2N_MODE == 1 ) && (ATTR_EFF_DIMM_TYPE == 0 || ATTR_EFF_DIMM_TYPE == 2));
-#define  def_ddr4_2133_13_13_13    = ((ATTR_EFF_DRAM_GEN == 2 ) && ( CENTAUR.ATTR_MSS_FREQ == 2133 ) && ( ATTR_EFF_DRAM_CL == 13 ) && ( ATTR_EFF_DRAM_TRCD == 13 ) && ( ATTR_EFF_DRAM_TRP == 13 ) && ( def_ATTR_EFF_DRAM_2N_MODE == 0 ) && (ATTR_EFF_DIMM_TYPE == 0 || ATTR_EFF_DIMM_TYPE == 2));
-#define  def_ddr4_2400_13_13_13    = ((ATTR_EFF_DRAM_GEN == 2 ) && ( CENTAUR.ATTR_MSS_FREQ == 2400 ) && ( ATTR_EFF_DRAM_CL == 13 ) && ( ATTR_EFF_DRAM_TRCD == 13 ) && ( ATTR_EFF_DRAM_TRP == 13 ) && ( def_ATTR_EFF_DRAM_2N_MODE == 0 ) && (ATTR_EFF_DIMM_TYPE == 0 || ATTR_EFF_DIMM_TYPE == 2));
-#define  def_ddr4_2400_14_14_14    = ((ATTR_EFF_DRAM_GEN == 2 ) && ( CENTAUR.ATTR_MSS_FREQ == 2400 ) && ( ATTR_EFF_DRAM_CL == 14 ) && ( ATTR_EFF_DRAM_TRCD == 14 ) && ( ATTR_EFF_DRAM_TRP == 14 ) && ( def_ATTR_EFF_DRAM_2N_MODE == 0 ) && (ATTR_EFF_DIMM_TYPE == 0 || ATTR_EFF_DIMM_TYPE == 2));
+#define  def_ddr4_1600_10_10_10    = ((ATTR_EFF_DRAM_GEN == 2 ) && ( CENTAUR.ATTR_MSS_FREQ == 1600 ) && ( ATTR_EFF_DRAM_CL == 10 ) && ( ATTR_EFF_DRAM_TRCD == 10 ) && ( ATTR_EFF_DRAM_TRP == 10 ) && ( ATTR_EFF_DRAM_2N_MODE_ENABLED == 0 ) && (ATTR_EFF_DIMM_TYPE == 0 || ATTR_EFF_DIMM_TYPE == 2));
+#define  def_ddr3_1600_10_10_10R   = ((ATTR_EFF_DRAM_GEN == 2 ) && ( CENTAUR.ATTR_MSS_FREQ == 1600 ) && ( ATTR_EFF_DRAM_CL == 10 ) && ( ATTR_EFF_DRAM_TRCD == 10 ) && ( ATTR_EFF_DRAM_TRP == 10 ) && ( ATTR_EFF_DRAM_2N_MODE_ENABLED == 0 ) && (ATTR_EFF_DIMM_TYPE == 1 ));
+#define  def_ddr4_1600_10_10_10_2N = ((ATTR_EFF_DRAM_GEN == 2 ) && ( CENTAUR.ATTR_MSS_FREQ == 1600 ) && ( ATTR_EFF_DRAM_CL == 10 ) && ( ATTR_EFF_DRAM_TRCD == 10 ) && ( ATTR_EFF_DRAM_TRP == 10 ) && ( ATTR_EFF_DRAM_2N_MODE_ENABLED == 1 ) && (ATTR_EFF_DIMM_TYPE == 0 || ATTR_EFF_DIMM_TYPE == 2));
+#define  def_ddr4_1600_11_11_11    = ((ATTR_EFF_DRAM_GEN == 2 ) && ( CENTAUR.ATTR_MSS_FREQ == 1600 ) && ( ATTR_EFF_DRAM_CL == 11 ) && ( ATTR_EFF_DRAM_TRCD == 11 ) && ( ATTR_EFF_DRAM_TRP == 11 ) && ( ATTR_EFF_DRAM_2N_MODE_ENABLED == 0 ) && (ATTR_EFF_DIMM_TYPE == 0 || ATTR_EFF_DIMM_TYPE == 2));
+#define  def_ddr4_1600_11_11_11_2N = ((ATTR_EFF_DRAM_GEN == 2 ) && ( CENTAUR.ATTR_MSS_FREQ == 1600 ) && ( ATTR_EFF_DRAM_CL == 11 ) && ( ATTR_EFF_DRAM_TRCD == 11 ) && ( ATTR_EFF_DRAM_TRP == 11 ) && ( ATTR_EFF_DRAM_2N_MODE_ENABLED == 1 ) && (ATTR_EFF_DIMM_TYPE == 0 || ATTR_EFF_DIMM_TYPE == 2));
+#define  def_ddr4_1600_9_9_9       = ((ATTR_EFF_DRAM_GEN == 2 ) && ( CENTAUR.ATTR_MSS_FREQ == 1600 ) && ( ATTR_EFF_DRAM_CL == 9  ) && ( ATTR_EFF_DRAM_TRCD == 9  ) && ( ATTR_EFF_DRAM_TRP == 9  ) && ( ATTR_EFF_DRAM_2N_MODE_ENABLED == 0 ) && (ATTR_EFF_DIMM_TYPE == 0 || ATTR_EFF_DIMM_TYPE == 2));
+#define  def_ddr4_1600_9_9_9_2N    = ((ATTR_EFF_DRAM_GEN == 2 ) && ( CENTAUR.ATTR_MSS_FREQ == 1600 ) && ( ATTR_EFF_DRAM_CL == 9  ) && ( ATTR_EFF_DRAM_TRCD == 9  ) && ( ATTR_EFF_DRAM_TRP == 9  ) && ( ATTR_EFF_DRAM_2N_MODE_ENABLED == 1 ) && (ATTR_EFF_DIMM_TYPE == 0 || ATTR_EFF_DIMM_TYPE == 2));
+#define  def_ddr4_1866_11_11_11    = ((ATTR_EFF_DRAM_GEN == 2 ) && ( CENTAUR.ATTR_MSS_FREQ == 1866 ) && ( ATTR_EFF_DRAM_CL == 11 ) && ( ATTR_EFF_DRAM_TRCD == 11 ) && ( ATTR_EFF_DRAM_TRP == 11 ) && ( ATTR_EFF_DRAM_2N_MODE_ENABLED == 0 ) && (ATTR_EFF_DIMM_TYPE == 0 || ATTR_EFF_DIMM_TYPE == 2));
+#define  def_ddr4_1866_11_11_11_2N = ((ATTR_EFF_DRAM_GEN == 2 ) && ( CENTAUR.ATTR_MSS_FREQ == 1866 ) && ( ATTR_EFF_DRAM_CL == 11 ) && ( ATTR_EFF_DRAM_TRCD == 11 ) && ( ATTR_EFF_DRAM_TRP == 11 ) && ( ATTR_EFF_DRAM_2N_MODE_ENABLED == 1 ) && (ATTR_EFF_DIMM_TYPE == 0 || ATTR_EFF_DIMM_TYPE == 2));
+#define  def_ddr4_1866_12_12_12    = ((ATTR_EFF_DRAM_GEN == 2 ) && ( CENTAUR.ATTR_MSS_FREQ == 1866 ) && ( ATTR_EFF_DRAM_CL == 12 ) && ( ATTR_EFF_DRAM_TRCD == 12 ) && ( ATTR_EFF_DRAM_TRP == 12 ) && ( ATTR_EFF_DRAM_2N_MODE_ENABLED == 0 ) && (ATTR_EFF_DIMM_TYPE == 0 || ATTR_EFF_DIMM_TYPE == 2));
+#define  def_ddr4_1866_12_12_12_2N = ((ATTR_EFF_DRAM_GEN == 2 ) && ( CENTAUR.ATTR_MSS_FREQ == 1866 ) && ( ATTR_EFF_DRAM_CL == 12 ) && ( ATTR_EFF_DRAM_TRCD == 12 ) && ( ATTR_EFF_DRAM_TRP == 12 ) && ( ATTR_EFF_DRAM_2N_MODE_ENABLED == 1 ) && (ATTR_EFF_DIMM_TYPE == 0 || ATTR_EFF_DIMM_TYPE == 2));
+#define  def_ddr4_2133_12_12_12    = ((ATTR_EFF_DRAM_GEN == 2 ) && ( CENTAUR.ATTR_MSS_FREQ == 2133 ) && ( ATTR_EFF_DRAM_CL == 12 ) && ( ATTR_EFF_DRAM_TRCD == 12 ) && ( ATTR_EFF_DRAM_TRP == 12 ) && ( ATTR_EFF_DRAM_2N_MODE_ENABLED == 0 ) && (ATTR_EFF_DIMM_TYPE == 0 || ATTR_EFF_DIMM_TYPE == 2));
+#define  def_ddr4_2133_12_12_12_2N = ((ATTR_EFF_DRAM_GEN == 2 ) && ( CENTAUR.ATTR_MSS_FREQ == 2133 ) && ( ATTR_EFF_DRAM_CL == 12 ) && ( ATTR_EFF_DRAM_TRCD == 12 ) && ( ATTR_EFF_DRAM_TRP == 12 ) && ( ATTR_EFF_DRAM_2N_MODE_ENABLED == 1 ) && (ATTR_EFF_DIMM_TYPE == 0 || ATTR_EFF_DIMM_TYPE == 2));
+#define  def_ddr4_2133_13_13_13    = ((ATTR_EFF_DRAM_GEN == 2 ) && ( CENTAUR.ATTR_MSS_FREQ == 2133 ) && ( ATTR_EFF_DRAM_CL == 13 ) && ( ATTR_EFF_DRAM_TRCD == 13 ) && ( ATTR_EFF_DRAM_TRP == 13 ) && ( ATTR_EFF_DRAM_2N_MODE_ENABLED == 0 ) && (ATTR_EFF_DIMM_TYPE == 0 || ATTR_EFF_DIMM_TYPE == 2));
+#define  def_ddr4_2400_13_13_13    = ((ATTR_EFF_DRAM_GEN == 2 ) && ( CENTAUR.ATTR_MSS_FREQ == 2400 ) && ( ATTR_EFF_DRAM_CL == 13 ) && ( ATTR_EFF_DRAM_TRCD == 13 ) && ( ATTR_EFF_DRAM_TRP == 13 ) && ( ATTR_EFF_DRAM_2N_MODE_ENABLED == 0 ) && (ATTR_EFF_DIMM_TYPE == 0 || ATTR_EFF_DIMM_TYPE == 2));
+#define  def_ddr4_2400_14_14_14    = ((ATTR_EFF_DRAM_GEN == 2 ) && ( CENTAUR.ATTR_MSS_FREQ == 2400 ) && ( ATTR_EFF_DRAM_CL == 14 ) && ( ATTR_EFF_DRAM_TRCD == 14 ) && ( ATTR_EFF_DRAM_TRP == 14 ) && ( ATTR_EFF_DRAM_2N_MODE_ENABLED == 0 ) && (ATTR_EFF_DIMM_TYPE == 0 || ATTR_EFF_DIMM_TYPE == 2));
 
 # new 7,8,9
 
@@ -952,8 +951,8 @@ define  def_odt_mapping_1b1dimm      = (def_1b_1socket      ||def_3a_1socket    
 define  def_odt_mapping_1b2dimm      = (def_3c_2socket_ddr4   ||def_1b_2socket        ||def_3a_2socket        ||def_3a_2socket_ddr4   ||def_3b_2socket);
 #define  def_odt_mapping_1bcdimm      = (def_1a_2socket        ||def_1b_cdimm        ||def_3a_cdimm        ||def_3a_ddr4_cdimm   ||def_3b_cdimm        ||def_3b_ddr4_cdimm   ||def_3c_cdimm        ||def_3c_ddr4_cdimm);
 define  def_odt_mapping_1bcdimm      = (def_1a_2socket        ||def_3a_cdimm        ||def_3a_ddr4_cdimm   ||def_3b_cdimm        ||def_3b_ddr4_cdimm   ||def_3c_cdimm        ||def_3c_ddr4_cdimm);
-define  def_odt_mapping_1c2dimm      = (def_1c_2socket);
-define  def_odt_mapping_1c1dimm      = (def_1c_1socket);
+define  def_odt_mapping_1c2dimm      = (def_1c_2socket_odt);
+define  def_odt_mapping_1c1dimm      = (def_1c_1socket_odt);
 define  def_odt_mapping_1ccdimm      = (def_1c_cdimm        ||def_4a_cdimm        ||def_4a_ddr4_cdimm   ||def_4b_ddr4_cdimm   ||def_4c_ddr4_cdimm);
 define  def_odt_mapping_1dx82dimm    = (def_1d_2socket);
 define  def_odt_mapping_1dx4         = (def_1d_1socket);
@@ -2007,10 +2006,6 @@ scom 0x0301040C     {
     0:6     ,   0b0101011    ,          1            ,   (def_mba_tmr1q_cfg_trap43 == 1); # cfg_trap     16
     0:6     ,   0b0101100    ,          1            ,   (def_mba_tmr1q_cfg_trap44 == 1); # cfg_trap     16
     0:6     ,   0b0101110    ,          1            ,   (def_mba_tmr1q_cfg_trap46 == 1); # cfg_trap     16
-#    0:6     ,   0b0110000    ,          1            ,   (def_mba_tmr1q_cfg_trap48 == 1); # cfg_trap ## 2133 and 2400 DRM not supported    16
-#    0:6     ,   0b0110001    ,          1            ,   (def_mba_tmr1q_cfg_trap49 == 1); # cfg_trap ## 2133 and 2400 DRM not supported     16
-#    0:6     ,   0b0110100    ,          1            ,   (def_mba_tmr1q_cfg_trap52 == 1); # cfg_trap ## 2133 and 2400 DRM not supported     16
-#    0:6     ,   0b0110101    ,          1            ,   (def_mba_tmr1q_cfg_trap53 == 1); # cfg_trap ## 2133 and 2400 DRM not supported     16
     7:13    ,   0b0011110    ,          1            ,   (def_mba_tmr1q_cfg_twap30 == 1); # cfg_twap     17
     7:13    ,   0b0100000    ,          1            ,   (def_mba_tmr1q_cfg_twap32 == 1); # cfg_twap     17
     7:13    ,   0b0100010    ,          1            ,   (def_mba_tmr1q_cfg_twap34 == 1); # cfg_twap     17
@@ -2023,10 +2018,6 @@ scom 0x0301040C     {
     7:13    ,   0b0110001    ,          1            ,   (def_mba_tmr1q_cfg_twap49 == 1); # cfg_twap     17
     7:13    ,   0b0110011    ,          1            ,   (def_mba_tmr1q_cfg_twap51 == 1); # cfg_twap     17
     7:13    ,   0b0110101    ,          1            ,   (def_mba_tmr1q_cfg_twap53 == 1); # cfg_twap     17
-#    7:13    ,   0b0110110    ,          1            ,   (def_mba_tmr1q_cfg_twap54 == 1); # cfg_twap  ## 2133 and 2400 DRM not supported    17
-#    7:13    ,   0b0111000    ,          1            ,   (def_mba_tmr1q_cfg_twap56 == 1); # cfg_twap  ## 2133 and 2400 DRM not supported    17
-#    7:13    ,   0b0111011    ,          1            ,   (def_mba_tmr1q_cfg_twap59 == 1); # cfg_twap  ## 2133 and 2400 DRM not supported    17
-#    7:13    ,   0b0111101    ,          1            ,   (def_mba_tmr1q_cfg_twap61 == 1); # cfg_twap  ## 2133 and 2400 DRM not supported    17
     14:19   ,   0b010100    ,          1             ,   (def_mba_tmr1q_cfg_tfaw_dly20 == 1); # cfg_tfaw     18
     14:19   ,   0b010110    ,          1             ,   (def_mba_tmr1q_cfg_tfaw_dly22 == 1); # cfg_tfaw     18
     14:19   ,   0b010111    ,          1             ,   (def_mba_tmr1q_cfg_tfaw_dly23 == 1); # cfg_tfaw     18
@@ -2109,13 +2100,6 @@ scom 0x0301040A     {
     36:41   ,   0b011011 + def_margin_rdtag   ,           1            ,    (def_mba_dsm0q_cfg_rdtag_dly27 == 1); # rdtag_dly		27
     36:41   ,   0b011100 + def_margin_rdtag   ,           1            ,    (def_mba_dsm0q_cfg_rdtag_dly28 == 1); # rdtag_dly		27
     36:41   ,   0b011101 + def_margin_rdtag   ,           1            ,    (def_mba_dsm0q_cfg_rdtag_dly29 == 1); # rdtag_dly		27
-#    36:41   ,   0b100100    ,           1            ,    any                                 ; # rdtag_dly		36  temporary fix for testfloor
-#    36:41   ,   0b011000    ,           1            ,    any                                 ; # rdtag_dly		24  temporary fix for testfloor
-#    36:41   ,   0b010111    ,           1            ,    any                                 ; # rdtag_dly		23  temporary fix for testfloor
-# setting 22 works for 1600 11-11-11
-#    36:41   ,   0b010110    ,           1            ,    any                                 ; # rdtag_dly		22  temporary fix for testfloor
-# setting 21 failed
-#    36:41   ,   0b010101    ,           1            ,    any                                 ; # rdtag_dly		21  temporary fix for testfloor
     43:48   ,   0b000101    ,           1            ,    (def_mba_dsm0q_CFG_RODT_BC4_END_DLY5 == 1); # CFG_RODT_BC4_END_DLY 28
     43:48   ,   0b000110    ,           1            ,    (def_mba_dsm0q_CFG_RODT_BC4_END_DLY6 == 1); # CFG_RODT_BC4_END_DLY 28
     43:48   ,   0b000111    ,           1            ,    (def_mba_dsm0q_CFG_RODT_BC4_END_DLY7 == 1); # CFG_RODT_BC4_END_DLY 28
@@ -2125,44 +2109,21 @@ scom 0x0301040A     {
 }
 
 ## Refresh Interval Calculuation
-define def_num_ranks = ((ATTR_EFF_NUM_RANKS_PER_DIMM[0][0] + ATTR_EFF_NUM_RANKS_PER_DIMM[0][1] + ATTR_EFF_NUM_RANKS_PER_DIMM[1][0] + ATTR_EFF_NUM_RANKS_PER_DIMM[1][1])/2);
-define def_refresh_interval = ((ATTR_EFF_DRAM_TRFI/def_num_ranks)/8);
+## refresh_interval = ((ATTR_EFF_DRAM_TRFI/(def_num_ranks/2))/8);
+define def_num_ranks = (ATTR_EFF_NUM_RANKS_PER_DIMM[0][0] + ATTR_EFF_NUM_RANKS_PER_DIMM[0][1] + ATTR_EFF_NUM_RANKS_PER_DIMM[1][0] + ATTR_EFF_NUM_RANKS_PER_DIMM[1][1]);
+define def_refresh_interval = ((2*ATTR_EFF_DRAM_TRFI)/(8*def_num_ranks));
 
 # MBAREF0Q   mba01 refresh settings
 #
 scom 0x03010432    {
     bits    ,   scom_data    ,      ATTR_FUNCTIONAL,    expr;
      4:7    ,   0b0111       ,           1            ,    any; # MBAREF0Q_refresh priority threshold is 0x7 for all cfgs      30     ?# refresh interval = tREFI(7.8) / # ranks per port / DRAM clk(ns) / 0.008
-#     8:18   ,   0b00010110000,           1            ,    any; # MBAREF0Q_refresh intveral set to 176 decimal                 31     ?		!!FIXME# reset check interval = tREFI(7.8) / DRAM clk(ns) / 0.008
      8:18   ,   def_refresh_interval,    1            ,    any; # MBAREF0Q_refresh intveral set to 176 decimal                 31     ?		!!FIXME# reset check interval = tREFI(7.8) / DRAM clk(ns) / 0.008
     19:29   ,   0b00011000010,           1            ,    any; # MBAREF0Q_refresh reset interval set to 194 decimal           32     ?		!!FIXME
     30:39   ,   ATTR_EFF_DRAM_TRFC,      1            ,    any; # MBAREF0Q_cfg_trfc   33
-#    30:39   ,   0b0001010110 ,           1            ,    (def_MBAREF0Q_cfg_trfc_dly86  == 1); # MBAREF0Q_cfg_trfc   33
-#    30:39   ,   0b0001101011 ,           1            ,    (def_MBAREF0Q_cfg_trfc_dly107 == 1); # MBAREF0Q_cfg_trfc   33
-#    30:39   ,   0b0010000000 ,           1            ,    (def_MBAREF0Q_cfg_trfc_dly128 == 1); # MBAREF0Q_cfg_trfc   33
-#    30:39   ,   0b0010010110 ,           1            ,    (def_MBAREF0Q_cfg_trfc_dly150 == 1); # MBAREF0Q_cfg_trfc   33
-#    30:39   ,   0b0010100000 ,           1            ,    (def_MBAREF0Q_cfg_trfc_dly160 == 1); # MBAREF0Q_cfg_trfc   33
-#    30:39   ,   0b0010101011 ,           1            ,    (def_MBAREF0Q_cfg_trfc_dly171 == 1); # MBAREF0Q_cfg_trfc   33
-#    30:39   ,   0b0010111011 ,           1            ,    (def_MBAREF0Q_cfg_trfc_dly187 == 1); # MBAREF0Q_cfg_trfc   33
-#    30:39   ,   0b0011000000 ,           1            ,    (def_MBAREF0Q_cfg_trfc_dly192 == 1); # MBAREF0Q_cfg_trfc   33
-#    30:39   ,   0b0011001000 ,           1            ,    (def_MBAREF0Q_cfg_trfc_dly200 == 1); # MBAREF0Q_cfg_trfc   33
-#    30:39   ,   0b0011010000 ,           1            ,    (def_MBAREF0Q_cfg_trfc_dly208 == 1); # MBAREF0Q_cfg_trfc   33
-#    30:39   ,   0b0011101010 ,           1            ,    (def_MBAREF0Q_cfg_trfc_dly234 == 1); # MBAREF0Q_cfg_trfc   33
-#    30:39   ,   0b0011110000 ,           1            ,    (def_MBAREF0Q_cfg_trfc_dly240 == 1); # MBAREF0Q_cfg_trfc   33
-#    30:39   ,   0b0011110011 ,           1            ,    (def_MBAREF0Q_cfg_trfc_dly243 == 1); # MBAREF0Q_cfg_trfc   33
-#    30:39   ,   0b0100010110 ,           1            ,    (def_MBAREF0Q_cfg_trfc_dly278 == 1); # MBAREF0Q_cfg_trfc   33
-#    30:39   ,   0b0100011000 ,           1            ,    (def_MBAREF0Q_cfg_trfc_dly280 == 1); # MBAREF0Q_cfg_trfc   33
-#    30:39   ,   0b0100011001 ,           1            ,    (def_MBAREF0Q_cfg_trfc_dly281 == 1); # MBAREF0Q_cfg_trfc   33
-#    30:39   ,   0b0100111000 ,           1            ,    (def_MBAREF0Q_cfg_trfc_dly312 == 1); # MBAREF0Q_cfg_trfc   33
-#    30:39   ,   0b0101000111 ,           1            ,    (def_MBAREF0Q_cfg_trfc_dly327 == 1); # MBAREF0Q_cfg_trfc   33
-#    30:39   ,   0b0101001000 ,           1            ,    (def_MBAREF0Q_cfg_trfc_dly328 == 1); # MBAREF0Q_cfg_trfc   33
-#    30:39   ,   0b0101110110 ,           1            ,    (def_MBAREF0Q_cfg_trfc_dly374 == 1); # MBAREF0Q_cfg_trfc   33
-#    30:39   ,   0b0110100100 ,           1            ,    (def_MBAREF0Q_cfg_trfc_dly420 == 1); # MBAREF0Q_cfg_trfc   33
-##    30:39   ,   0b0001101011 ,           1            ,    any; # MBAREF0Q_cfg_trfc set to 107 decimal
     40:49   ,   0b0000100000 ,           1            ,    (def_MBAREF0Q_cfg_refr_tsv_stack_dly32 == 1); # MBAREF0Q_cfg_refr_tsv_stack   33
     40:49   ,   0b0000110000 ,           1            ,    (def_MBAREF0Q_cfg_refr_tsv_stack_dly48 == 1); # MBAREF0Q_cfg_refr_tsv_stack   33
     40:49   ,   0b0001000000 ,           1            ,    (def_MBAREF0Q_cfg_refr_tsv_stack_dly64 == 1); # MBAREF0Q_cfg_refr_tsv_stack   33
-#    40:49   ,   0b0000011000 ,           1            ,    any; # MBAREF0Q_cfg_refr_tsv_stack is 24 for all cfgs               34      D
     50:60   ,   0b01100001100,           1            ,    any; # MBAREF0Q_refresh check intveral set to 780 decimal            35
 }
 
@@ -2190,7 +2151,7 @@ scom 0x03010434    {
     16:20   ,   0b00100     ,           1            ,   (def_MBARPC0Q_cfg_pup_pdn_dly4 == 1); # MBARPC0Q_cfg_pup_pdn       38
     16:20   ,   0b00101     ,           1            ,   (def_MBARPC0Q_cfg_pup_pdn_dly5 == 1); # MBARPC0Q_cfg_pup_pdn       38
     16:20   ,   0b00110     ,           1            ,   (def_MBARPC0Q_cfg_pup_pdn_dly6 == 1); # MBARPC0Q_cfg_pup_pdn       38
-    22      ,   0b1         ,           1            ,   any; # cfg_min_domain_reduction_enable set to 1 to enable power controls
+#    22      ,   0b1         ,           1            ,   any; # cfg_min_domain_reduction_enable set to 1 to enable power controls
 }
 
 # MBAPC1Q    power control settings reg 1

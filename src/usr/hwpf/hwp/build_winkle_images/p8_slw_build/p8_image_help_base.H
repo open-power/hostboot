@@ -20,12 +20,14 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_image_help_base.H,v 1.16 2013/03/27 18:31:57 cmolsen Exp $
+// $Id: p8_image_help_base.H,v 1.17 2013/05/01 15:49:00 dcrowell Exp $
 //------------------------------------------------------------------------------
 //  Title:  p8_image_help_base.H
 //  Description:  Contains the most basic structures and defines needed for 
 //                image building and interpretation.
 //------------------------------------------------------------------------------
+#ifndef _P8_IMAGE_HELP_BASE_H_
+#define _P8_IMAGE_HELP_BASE_H_
 
 #include <sbe_xip_image.h>
 
@@ -118,3 +120,4 @@ int over_write_ring_data_in_image(  void            *io_image,
 }
 #endif
 
+#endif //_P8_IMAGE_HELP_BASE_H_

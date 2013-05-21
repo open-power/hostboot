@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_mcbist_common.C,v 1.36 2013/04/09 09:02:14 ppcaelab Exp $
+// $Id: mss_mcbist_common.C,v 1.38 2013/04/30 08:53:46 ppcaelab Exp $
 // *!***************************************************************************
 // *! (C) Copyright International Business Machines Corp. 1997, 1998
 // *!           All Rights Reserved -- Property of IBM
@@ -38,6 +38,8 @@
 //------------------------------------------------------------------------------
 // Version:|Author: | Date:  | Comment:
 // --------|--------|--------|--------------------------------------------------
+//   1.38  |aditya  |05/30/13|Minor fix for firmware 
+//   1.37  |aditya  |04/22/13|Minor Fix
 //   1.36  |aditya  |04/09/13|Updated cfg_byte_mask and setup_mcbist functions
 //   1.35  |aditya  |03/18/13|Updated cfg_byte_mask and error map functions
 //   1.34  |aditya  |03/15/13|Added ISDIMM error map
@@ -146,6 +148,7 @@ fapi::ReturnCode  setup_mcbist(const fapi::Target & i_target_mba, uint8_t i_port
 	uint8_t l_index = 0;
 	uint8_t l_index1 = 0;
 	uint8_t l_flag = 0;
+	uint8_t l_new_addr = 1;
 	uint64_t scom_array[24] = {0x03010440,0x03010441,0x03010442,0x03010443,0x03010444,0x03010445,0x03010446,0x03010447,0x0201145E,0x0201145F,0x02011460,0x02011461,0x02011462,0x02011463,0x02011464,0x02011465,0x0201149E,0x0201149F,0x020114A0,0x020114A1,0x020114A2,0x020114A3,0x020114A4,0x020114A5};	
 	
 	
@@ -266,11 +269,13 @@ fapi::ReturnCode  setup_mcbist(const fapi::Target & i_target_mba, uint8_t i_port
     //preet
 	//FAPI_INF("DEBUG-----Print----Address Gen ");
 	
-	//if (new_address_map == 1)
-	//{
+	rc = FAPI_ATTR_GET(ATTR_MCBIST_ADDR_MODES, &i_target_mba, l_new_addr); if(rc) return rc;
+
+	if (l_new_addr != 0)
+	{
 		rc = address_generation(i_target_mba,i_port,SF,BANK_RANK,i_rank,io_start_address,io_end_address);
 		if(rc) {FAPI_INF("BAD - RC ADDR Generation\n");return rc;}
-	//}
+	}
 
 	
 	
@@ -1094,7 +1099,7 @@ fapi::ReturnCode  cfg_byte_mask(const fapi::Target & i_target_mba,uint8_t i_rank
 	
 	l_max_1 = num_ranks_per_dimm[1][0]+num_ranks_per_dimm[1][1];
     
-//SW198827    uint32_t __attribute__((unused)) rc_num = 0;
+   // uint32_t rc_num = 0;
      
     rc_num =  l_data_buffer3_64.flushTo0();if (rc_num){FAPI_ERR( "Error in function  cfg_byte_mask:");rc.setEcmdError(rc_num);return rc;}
     

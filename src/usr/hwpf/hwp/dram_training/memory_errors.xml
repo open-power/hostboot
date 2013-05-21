@@ -21,6 +21,7 @@
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
 <hwpErrors>
+<!-- $Id: memory_errors.xml,v 1.39 2013/05/20 16:51:14 gollub Exp $ -->
 <!-- EDIT THIS FILE DIRECTLY. THE ODS FILE METHOD IS NO LONGER VALID -->
 <!-- *********************************************************************** -->
 
@@ -211,6 +212,24 @@
 </hwpError>
 
   <hwpError>
+    <rc>RC_MSS_SETUP_BARS_MULTIPLE_GROUP_ERR</rc>
+    <description>MCS is listed as a member in multiple groups.</description>
+    <ffdc>MCS_POS</ffdc>
+    <ffdc>GROUP_INDEX_A</ffdc>
+    <ffdc>GROUP_INDEX_B</ffdc>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_SETUP_BARS_NM_ALT_BAR_ERR</rc>
+    <description>Invalid non-mirrored alternate BAR configuration.</description>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_SETUP_BARS_M_ALT_BAR_ERR</rc>
+    <description>Invalid mirrored alternate BAR configuration.</description>
+  </hwpError>
+
+  <hwpError>
     <rc>RC_MSS_MAINT_START_NOT_RESET</rc>
     <description>MBMCCQ[0]: maint_cmd_start not reset by hw.</description>
     <!-- FFDC: Capture register we are checking -->    
@@ -223,7 +242,7 @@
     <callout><target>MBA</target><priority>HIGH</priority></callout>
     <!-- Deconfigure MBA -->
     <deconfigure><target>MBA</target></deconfigure>
-    <!-- Create GARD record for MASTER_CHIP -->    
+    <!-- Create GARD record for MBA -->    
     <gard><target>MBA</target></gard>    
 </hwpError>
 
@@ -240,7 +259,7 @@
     <callout><target>MBA</target><priority>HIGH</priority></callout>
     <!-- Deconfigure MBA -->
     <deconfigure><target>MBA</target></deconfigure>
-    <!-- Create GARD record for MASTER_CHIP -->    
+    <!-- Create GARD record for MBA -->    
     <gard><target>MBA</target></gard>    
 </hwpError>
 
@@ -258,7 +277,7 @@
     <callout><target>MBA</target><priority>LOW</priority></callout>
     <!-- Deconfigure MBA -->
     <deconfigure><target>MBA</target></deconfigure>
-    <!-- Create GARD record for MASTER_CHIP -->    
+    <!-- Create GARD record for MBA -->    
     <gard><target>MBA</target></gard>        
 </hwpError>
 
@@ -357,7 +376,7 @@
     <callout><target>MBA</target><priority>LOW</priority></callout>
     <!-- Deconfigure MBA -->
     <deconfigure><target>MBA</target></deconfigure>
-    <!-- Create GARD record for MASTER_CHIP -->    
+    <!-- Create GARD record for MBA -->    
     <gard><target>MBA</target></gard>        
 </hwpError>
 
@@ -419,8 +438,6 @@
     <description>ATTR_MSS_FREQ set to zero so can't calculate scrub rate.</description>
     <!-- FFDC: MBA target -->    
     <ffdc>MBA</ffdc>
-    <!-- FFDC: DDR_FREQ -->    
-    <ffdc>DDR_FREQ</ffdc>
     <!-- FFDC: Capture command type we are trying to run -->        
     <ffdc>CMD_TYPE</ffdc>        
     <!-- TODO: Callout FW HIGH -->
@@ -433,6 +450,8 @@
     <ffdc>MBA</ffdc>
     <!-- FFDC: Capture register we are checking -->    
     <ffdc>MBAXCR</ffdc>
+    <!-- FFDC: DRAM width -->    
+    <ffdc>DRAM_WIDTH</ffdc>
     <!-- TODO: Callout FW HIGH -->
 </hwpError>
 
@@ -607,7 +626,7 @@
     <callout><target>MBA</target><priority>HIGH</priority></callout>
     <!-- Deconfigure MBA -->
     <deconfigure><target>MBA</target></deconfigure>
-    <!-- Create GARD record for MASTER_CHIP -->    
+    <!-- Create GARD record for MBA -->    
     <gard><target>MBA</target></gard>    
 </hwpError>
 
@@ -655,7 +674,7 @@
 
   <hwpError>
     <rc>RC_MSS_MAINT_PUT_STEER_MUX_BAD_INPUT</rc>
-    <description>i_rank or i_muxType or i_steerType or i_symbol input to mss_get_steer_mux out of range</description>
+    <description>i_rank or i_muxType or i_steerType or i_symbol input to mss_put_steer_mux out of range</description>
     <!-- FFDC: MBA target -->    
     <ffdc>MBA</ffdc>
     <!-- FFDC: RANK we are writing steer mux for -->    
@@ -696,7 +715,7 @@
     <callout><target>MBA</target><priority>HIGH</priority></callout>
     <!-- Deconfigure MBA -->
     <deconfigure><target>MBA</target></deconfigure>
-    <!-- Create GARD record for MASTER_CHIP -->    
+    <!-- Create GARD record for MBA -->    
     <gard><target>MBA</target></gard>    
 </hwpError>
 
@@ -872,11 +891,13 @@
 <hwpError>
     <rc>RC_MSS_NON_CHECKER_BOARD_MODE_GROUPING_NOT_POSSIBLE</rc>
     <description>FABRIC IS IN NON-CHECKER BOARD MODE.  SET ATTRIBUTE 'ATTR_MSS_INTERLEAVE_ENABLE' TO SUPPORT '2MCS/GROUP, 4MCS/GROUP  AND 8MCS/GROUP'. OR ENABLE CHECKER BOARD, TO SUPPORT '1MCS/GROUP'. MRW NEEDS TO BE UPDATED. </description>
+    <collectFfdc>hwpCollectMemGrouping, PROC_CHIP</collectFfdc>
 </hwpError>
 
 <hwpError>
     <rc>RC_MSS_CHECKER_BOARD_MODE_GROUPING_NOT_POSSIBLE</rc>
     <description>FABRIC IS IN CHECKER BOARD MODE BUT IT DOES NOT SUPPORT 1MCS/GROUP. SET ATTRIBUTE 'ATTR_MSS_INTERLEAVE_ENABLE' TO SUPPORT '1MCS/GROUP'. OR DISABLE CHECKER BOARD, TO SUPPORT '2MCS/GROUP, 4MCS/GROUP  AND 8MCS/GROUP'. MRW NEEDS TO BE UPDATED. </description>
+    <collectFfdc>hwpCollectMemGrouping, PROC_CHIP</collectFfdc>
 </hwpError>
 
 <hwpError>
@@ -887,6 +908,27 @@
 </hwpError>
 
 <hwpError>
+    <rc>RC_ERROR_MSS_GROUPING_ATTRS</rc>
+    <description>MEM grouping Attributes collection and printing function</description>
+    <ffdc>_ATTR_PROC_POS</ffdc>
+    <ffdc>_ATTR_CEN_POS</ffdc>
+    <ffdc>_ATTR_CHIP_UNIT_POS_MBA0</ffdc>
+    <ffdc>_ATTR_CHIP_UNIT_POS_MBA1</ffdc>
+    <ffdc>_ATTR_EFF_DIMM_SIZE0</ffdc>
+    <ffdc>_ATTR_EFF_DIMM_SIZE1</ffdc>
+    <ffdc>_ATTR_MSS_INTERLEAVE_ENABLE</ffdc>
+    <ffdc>_ATTR_ALL_MCS_IN_INTERLEAVING_GROUP</ffdc>
+    <ffdc>_ATTR_PROC_MEM_BASE</ffdc>
+    <ffdc>_ATTR_PROC_MIRROR_BASE</ffdc>
+    <ffdc>_ATTR_MSS_MEM_MC_IN_GROUP</ffdc>
+    <ffdc>_ATTR_PROC_MEM_BASES</ffdc>
+    <ffdc>_ATTR_PROC_MEM_SIZES</ffdc>
+    <ffdc>_ATTR_MSS_MCS_GROUP_32</ffdc>
+    <ffdc>_ATTR_PROC_MIRROR_BASES</ffdc>
+    <ffdc>_ATTR_PROC_MIRROR_SIZES</ffdc>
+</hwpError>
+
+<hwpError>
     <rc>RC_MSS_UNABLE_TO_GROUP_SUMMARY</rc>
     <description>MCS COULD NOT BE GROUPED.  SEE PREVIOUS ERROR MESSAGES FOR WHICH MCS HAS BEEN RC_MSS_UNABLE_TO_GROUP_MCS</description>
 </hwpError>
@@ -894,7 +936,153 @@
 <hwpError>
     <rc>RC_MSS_BASE_ADDRESS_OVERLAPS_MIRROR_ADDRESS</rc>
     <description>MIRROR BASE ADDRESS OVERLAPS WITH MEMORY BASE ADDRESS.</description>
+    <collectFfdc>hwpCollectMemGrouping, PROC_CHIP</collectFfdc>
 </hwpError>
+
+<hwpError>
+    <rc>RC_ERROR_MSS_FIRS</rc>
+    <description>MEM FIR REGISTERS</description>
+ 
+<!-- DMI_FIR -->
+    <collectRegisterFfdc>
+	<id>REG_FFDC_DMI_FIR_REGS</id>
+	<target>CENCHIP</target>
+    </collectRegisterFfdc>
+<!-- MBIFIRQ -->
+    <collectRegisterFfdc>
+       <id>REG_FFDC_MBI_FIR_REGS</id>
+       <target>CENCHIP</target>
+    </collectRegisterFfdc>
+ 
+<!-- MBSFIRQ -->
+    <collectRegisterFfdc>
+       <id>REG_FFDC_MBS_FIR_REGS</id>
+       <target>CENCHIP</target>
+    </collectRegisterFfdc>
+ 
+<!-- SCAC_LFIR -->
+    <collectRegisterFfdc>
+       <id>REG_FFDC_SCAC_FIR_REGS</id>
+       <target>CENCHIP</target>
+    </collectRegisterFfdc>
+ 
+</hwpError>
+
+<hwpError>
+    <rc>RC_ERROR_MBA_FIRS</rc>
+    <description>MEM MBA FIR REGISTERS</description>
+ 
+<!-- MBA01_MBACALFIR -->
+<!-- MBA01_MBAFIRQ -->
+<!-- MBA01_MBSPAQ -->
+    <collectRegisterFfdc>
+       <id>REG_FFDC_MBA_FIR_REGS</id>
+       <target>CENCHIP_MBA</target>
+    </collectRegisterFfdc>
+
+<!-- PHY01_DDRPHY_FIR_REG -->
+    <collectRegisterFfdc>
+       <id>REG_FFDC_DDR_PHY_FIR_REGS</id>
+       <target>CENCHIP_MBA</target>
+    </collectRegisterFfdc>
+
+
+ 
+</hwpError>
+
+
+<registerFfdc>
+  <id>REG_FFDC_MBA_FIR_REGS</id>
+
+  <!-- MBA Special Attention Registers -->    
+  <scomRegister>MBA01_MBSPAQ_0x03010611</scomRegister>
+  <scomRegister>MBA01_MBSPAMSKQ_0x03010614</scomRegister>
+
+  <!-- MBA Fault Isolation Registers -->  
+  <scomRegister>MBA01_MBAFIRQ_0x03010600</scomRegister>  
+  <scomRegister>MBA01_MBAFIRMASK_0x03010603</scomRegister>  
+  <scomRegister>MBA01_MBAFIRACT0_0x03010606</scomRegister>  
+  <scomRegister>MBA01_MBAFIRACT1_0x03010607</scomRegister>  
+  <!-- MBA Error Report Register -->  
+  <scomRegister>MBA01_MBA_MCBERRPTQ_0x030106e7</scomRegister>  
+
+  <!-- MBA CAL FIR Registers -->  
+  <scomRegister>MBA01_MBACALFIR_0x03010400</scomRegister>  
+  <scomRegister>MBA01_MBACALFIR_MASK_0x03010403</scomRegister>  
+  <scomRegister>MBA01_MBACALFIR_ACTION0_0x03010406</scomRegister>  
+  <scomRegister>MBA01_MBACALFIR_ACTION1_0x03010407</scomRegister>  
+  <!-- MBA Error report register -->  
+  <scomRegister>MBA01_MBA_ERR_REPORTQ_0x0301041A</scomRegister>  
+</registerFfdc>
+
+<registerFfdc>
+  <id>REG_FFDC_MBI_FIR_REGS</id>
+  <scomRegister>CEN_MBIFIRQ_0x02010800</scomRegister>
+  <scomRegister>CEN_MBIFIRMASK_0x02010803</scomRegister>
+  <scomRegister>CEN_MBIFIRACT0_0x02010806</scomRegister>
+  <scomRegister>CEN_MBIFIRACT1_0x02010807</scomRegister>
+</registerFfdc>
+
+<registerFfdc>
+  <id>REG_FFDC_MBS_FIR_REGS</id>
+  <scomRegister>MBS_FIR_REG_0x02011400</scomRegister>
+  <scomRegister>MBS_FIR_MASK_REG_0x02011403</scomRegister>
+  <scomRegister>MBS_FIR_ACTION0_REG_0x02011406</scomRegister>
+  <scomRegister>MBS_FIR_ACTION1_REG_0x02011407</scomRegister>
+  <scomRegister>MBS_FIR_WOF_REG_0x02011408</scomRegister>
+
+  <scomRegister>MBS_ECC0_MBECCFIR_0x02011440</scomRegister>
+  <scomRegister>MBS_ECC0_MBECCFIR_MASK_0x02011443</scomRegister>
+  <scomRegister>MBS_ECC0_MBECCFIR_ACTION0_0x02011446</scomRegister>
+  <scomRegister>MBS_ECC0_MBECCFIR_ACTION1_0x02011447</scomRegister>
+  <scomRegister>MBS_ECC0_MBECCFIR_WOF_0x02011448</scomRegister>
+
+  <scomRegister>MBS_ECC1_MBECCFIR_0x02011480</scomRegister>
+  <scomRegister>MBS_ECC1_MBECCFIR_MASK_0x02011483</scomRegister>
+  <scomRegister>MBS_ECC1_MBECCFIR_ACTION0_0x02011486</scomRegister>
+  <scomRegister>MBS_ECC1_MBECCFIR_ACTION1_0x02011487</scomRegister>
+  <scomRegister>MBS_ECC1_MBECCFIR_WOF_0x02011488</scomRegister>
+
+  <scomRegister>CEN_MBS01_MBSFIRQ_0x02011600</scomRegister>
+  <scomRegister>CEN_MBS01_MBSFIRMASK_0x02011603</scomRegister>
+  <scomRegister>CEN_MBS01_MBSFIRACT0_0x02011606</scomRegister>
+  <scomRegister>CEN_MBS01_MBSFIRACT1_0x02011607</scomRegister>
+  <scomRegister>CEN_MBS01_MBSFIRWOF_0x02011608</scomRegister>
+
+  <scomRegister>CEN_MBS23_MBSFIRQ_0x02011700</scomRegister>
+  <scomRegister>CEN_MBS23_MBSFIRMASK_0x02011703</scomRegister>
+  <scomRegister>CEN_MBS23_MBSFIRACT0_0x02011706</scomRegister>
+  <scomRegister>CEN_MBS23_MBSFIRACT1_0x02011707</scomRegister>
+  <scomRegister>CEN_MBS23_MBSFIRWOF_0x02011708</scomRegister>
+</registerFfdc>
+
+<registerFfdc>
+  <id>REG_FFDC_SCAC_FIR_REGS</id>
+  <scomRegister>CEN_SCAC_LFIR_0x020115c0</scomRegister>
+  <scomRegister>CEN_SCAC_FIRMASK_0x020115c3</scomRegister>
+  <scomRegister>CEN_SCAC_FIRACTION0_0x020115c6</scomRegister>
+  <scomRegister>CEN_SCAC_FIRACTION1_0x020115c7</scomRegister>
+  <scomRegister>CEN_SCAC_FIRWOF_0x020115c8</scomRegister>
+</registerFfdc>
+
+<registerFfdc>
+  <id>REG_FFDC_DDR_PHY_FIR_REGS</id>
+  <scomRegister>PHY01_DDRPHY_FIR_REG_0x800200900301143fULL</scomRegister>
+  <scomRegister>PHY01_DDRPHY_FIR_MASK_REG_0x800200930301143fULL</scomRegister>
+  <scomRegister>PHY01_DDRPHY_FIR_ACTION0_REG_0x800200960301143fULL</scomRegister>
+  <scomRegister>PHY01_DDRPHY_FIR_ACTION1_REG_0x800200970301143fULL</scomRegister>
+  <scomRegister>PHY01_DDRPHY_FIR_WOF_REG_0x800200980301143fULL</scomRegister>
+</registerFfdc>
+
+
+<registerFfdc>
+  <id>REG_FFDC_DMI_FIR_REGS</id>
+  <scomRegister>CEN_DMIFIR_0x02010400</scomRegister>
+  <scomRegister>CEN_DMIFIR_MASK_0x02010403</scomRegister>
+  <scomRegister>CEN_DMIFIR_ACT0_0x02010406</scomRegister>
+  <scomRegister>CEN_DMIFIR_ACT0_0x02010407</scomRegister>
+  <scomRegister>CEN_DMIFIR_ACT0_0x02010408</scomRegister>
+</registerFfdc>
 
 <!-- EDIT THIS FILE DIRECTLY. THE ODS FILE METHOD IS NO LONGER VALID -->
 </hwpErrors>

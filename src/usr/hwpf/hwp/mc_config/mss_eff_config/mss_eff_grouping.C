@@ -260,7 +260,7 @@ extern "C" {
            {
               FAPI_ERR("UNABLE TO GROUP");
               FAPI_ERR("FABRIC IS IN NON-CHECKER BOARD MODE.  SET ATTRIBUTE 'ATTR_MSS_INTERLEAVE_ENABLE' , TO SUPPORT 2MCS , 4MCS AND 8MCS GROUPING. OR ENABLE CHECKER BOARD. ");
-//@thi - hack              const fapi::Target & PROC_CHIP = i_target;
+              const fapi::Target & PROC_CHIP = i_target;
               FAPI_SET_HWP_ERROR(rc, RC_MSS_NON_CHECKER_BOARD_MODE_GROUPING_NOT_POSSIBLE);
               return rc;
            }
@@ -289,7 +289,7 @@ extern "C" {
             {
                FAPI_ERR("UNABLE TO GROUP");
                FAPI_ERR("FABRIC IS IN CHECKER BOARD MODE . SET ATTRIBUTE 'ATTR_MSS_INTERLEAVE_ENABLE' ");
-//@thi - hack               const fapi::Target & PROC_CHIP = i_target;
+               const fapi::Target & PROC_CHIP = i_target;
                FAPI_SET_HWP_ERROR(rc, RC_MSS_CHECKER_BOARD_MODE_GROUPING_NOT_POSSIBLE);
                return rc;
 
@@ -668,7 +668,7 @@ extern "C" {
        else
        {
           FAPI_ERR("Mirror Base address overlaps with memory base address. ");
-//@thi - hack          const fapi::Target & PROC_CHIP = i_target;
+          const fapi::Target & PROC_CHIP = i_target;
           FAPI_SET_HWP_ERROR(rc, RC_MSS_BASE_ADDRESS_OVERLAPS_MIRROR_ADDRESS);
           return rc;
        }

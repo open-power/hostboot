@@ -40,19 +40,20 @@ EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/mc_config/mss_eff_config
 EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/mc_config/mss_volt
 EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/mc_config/mss_freq
 
-OBJS =  mc_config.o			\
-        mss_volt.o 			\
-        mss_freq.o 			\
-        mss_eff_config.o                \
-        mss_eff_grouping.o              \
-        opt_memmap.o                    \
-        mss_eff_config_thermal.o        \
-        mss_eff_config_termination.o    \
-        mss_eff_config_rank_group.o     \
-        mss_eff_config_cke_map.o        \
-        mss_bulk_pwr_throttles.o        \
-        mss_throttle_to_power.o		\
-	mss_eff_config_shmoo.o
+OBJS =  mc_config.o                \
+        mss_volt.o                 \
+        mss_freq.o                 \
+        mss_eff_config.o           \
+        mss_eff_grouping.o         \
+        opt_memmap.o               \
+        mss_eff_config_thermal.o   \
+        mss_eff_config_termination.o \
+        mss_eff_config_rank_group.o  \
+        mss_eff_config_cke_map.o     \
+        mss_bulk_pwr_throttles.o     \
+        mss_throttle_to_power.o      \
+        mss_eff_config_shmoo.o       \
+        mss_error_support.o
 
 ##  NOTE: add a new directory onto the vpaths when you add a new HWP
 ##@ VPATH += ${ROOTPATH}/src/usr/hwpf/hwp/???

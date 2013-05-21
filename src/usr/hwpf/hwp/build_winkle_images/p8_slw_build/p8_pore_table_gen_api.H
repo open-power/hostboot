@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_pore_table_gen_api.H,v 1.19 2013/01/31 21:10:10 cmolsen Exp $
+// $Id: p8_pore_table_gen_api.H,v 1.20 2013/05/08 20:18:50 cmolsen Exp $
 /*------------------------------------------------------------------------------*/
 /* *! (C) Copyright International Business Machines Corp. 2012                  */
 /* *! All Rights Reserved -- Property of IBM                                    */
@@ -205,13 +205,14 @@ CONST_UINT64_T( SCRATCH0_RESET_VALUE,           (0xABBA99EBBA33DADA) );
 #define SCAN_MAX_ROTATE_38XXX_NAME           "scan_max_rotate_38xxx"
 #define SCAN_ROTATE_DEFAULT                  110 // Limit suggested by Tilman.
 #define SCAN_MAX_ROTATE                      0x00000FE0
-#define SCAN_MAX_ROTATE_LONG                 0x000FFFFF // BITS 12->31.
+//#define SCAN_MAX_ROTATE_LONG                 0x000FFFFF // BITS 12->31.
+#define SCAN_MAX_ROTATE_LONG                 0x000007C7 // Experimental max val
 
 // RAM table defines
 #define XIPSIZE_RAM_ENTRY       ( (sizeof(RamTableEntry)+7)/8*8 )
 #define SLW_MAX_CORES           16
-#define SLW_MAX_CPUREGS_CORE     9
-#define SLW_MAX_CPUREGS_THREADS  2
+#define SLW_MAX_CPUREGS_CORE    10
+#define SLW_MAX_CPUREGS_THREADS  5
 #define SLW_CORE_THREADS         8
 #define SLW_MAX_CPUREGS_OPS     ( SLW_MAX_CPUREGS_CORE + \
                                   SLW_CORE_THREADS*SLW_MAX_CPUREGS_THREADS )
@@ -228,9 +229,13 @@ enum  {
   P8_SPR_HID1   = 1009,
   P8_SPR_HID4   = 1012,
   P8_SPR_HID5   = 1014,
+	P8_CORE_XTRA8 =10008,
+	P8_CORE_XTRA9 =10009,
   P8_SPR_HSPRG0 =  304,
   P8_SPR_LPCR   =  318,
-  P8_MSR_MSR    = 2000
+  P8_MSR_MSR    = 2000,
+	P8_THRD_XTRA3 =20003,
+	P8_THRD_XTRA4 =20004
 };
 
 // SCOM table defines - Common
