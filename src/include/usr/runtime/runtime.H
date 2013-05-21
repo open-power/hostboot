@@ -39,6 +39,13 @@ namespace RUNTIME
 errlHndl_t populate_attributes( void );
 
 /**
+ * @brief Populate node attributes in mainstore for HostServices
+ *
+ * @return errlHndl_t NULL on Success
+ */
+errlHndl_t populate_node_attributes( uint64_t i_nodeNum );
+
+/**
  * @brief  Add the host data mainstore location to VMM
  *
  * @description  If running with the standard PHYP payload this function

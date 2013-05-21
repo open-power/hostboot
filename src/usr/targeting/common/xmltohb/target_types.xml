@@ -124,6 +124,7 @@
     <attribute><id>L3_W_EPS</id></attribute>
     <attribute><id>NOMINAL_FREQ_MHZ</id></attribute>
     <attribute><id>MNFG_FLAGS</id></attribute>
+    <attribute><id>FABRIC_TO_PHYSICAL_NODE_MAP</id></attribute>
     <!-- Start pm_plat_attributes.xml -->
     <attribute><id>FREQ_CORE_MAX</id></attribute>
     <attribute><id>PM_EXTERNAL_VRM_STEPDELAY</id></attribute>

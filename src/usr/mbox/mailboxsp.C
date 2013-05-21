@@ -27,6 +27,7 @@
 
 #include "mailboxsp.H"
 #include "mboxdd.H"
+#include "ipcSp.H"
 #include <sys/task.h>
 #include <initservice/taskargs.H>
 #include <initservice/initserviceif.H>
@@ -196,6 +197,8 @@ errlHndl_t MailboxSp::_init()
     }
     // else leave iv_disabled as true;
 
+    // Start the the interprocessor communications message handler
+    IPC::IpcSp::init(err);
 
     return err;
 }

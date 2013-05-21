@@ -52,6 +52,7 @@
 //  targeting support
 #include    <targeting/common/commontargeting.H>
 #include    <smp_unfencing_inter_enclosure_abus_links.H>
+#include    <targeting/common/attributes.H>
 
 //  fapi support
 #include    <fapi.H>
@@ -151,6 +152,19 @@ void host_sys_fab_iovalid_processing( msg_t* io_pMsg )
 
         count = drawerData->count;
 
+        // get FABRIC_TO_PHYSICAL_NODE_MAP
+        TARGETING::Target * sys = NULL;
+        TARGETING::targetService().getTopLevelTarget( sys );
+        assert(sys != NULL);
+
+        uint8_t node_map[8];
+
+        bool rc =
+        sys->tryGetAttr<TARGETING::ATTR_FABRIC_TO_PHYSICAL_NODE_MAP>(node_map);
+        assert(rc == true);
+
+        TARGETING::ATTR_HB_EXISTING_IMAGE_type hb_existing_image = 0;
+
         // create a vector with the present drawers
         for(uint8_t i = 0; i < count; i++)
         {
@@ -158,8 +172,24 @@ void host_sys_fab_iovalid_processing( msg_t* io_pMsg )
                     "list entry[%d] - %s", i, ptr->toString());
 
             present_drawers.push_back(*ptr);
+
+            TARGETING::EntityPath::PathElement pe = 
+                ptr->pathElementOfType(TARGETING::TYPE_NODE);
+
+            // pe.instance is the drawer number - convert to logical node
+            uint8_t logical_node = node_map[pe.instance];
+
+            // set mask to msb of bitmap
+            TARGETING::ATTR_HB_EXISTING_IMAGE_type mask = 0x1 <<
+                ((sizeof(TARGETING::ATTR_HB_EXISTING_IMAGE_type) * 8) -1);
+
+            // set bit for this logical node.
+            hb_existing_image |= (mask >> logical_node);
+
             ptr++;
         }
+
+        sys->setAttr<TARGETING::ATTR_HB_EXISTING_IMAGE>(hb_existing_image);
 
         // $TODO RTC:63128 - exchange between present drawers to agree
         // on valid endpoints

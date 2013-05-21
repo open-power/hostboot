@@ -216,7 +216,6 @@
     <writeable/>
     <hbOnly/>
 </attribute>
-
 <attribute>
     <id>IBSCOM_ENABLE_OVERRIDE</id>
     <description>Used to force IBSCOM enabled for lab testing</description>
@@ -227,6 +226,22 @@
     </simpleType>
     <persistency>volatile-zeroed</persistency>
     <readable/>
+    <hbOnly/>
+</attribute>
+<attribute>
+    <id>HB_EXISTING_IMAGE</id>
+    <description>Indicates which logical nodes have a hostboot image.</description>
+    <!-- Bit position [0-7] (left to right) represents logical node. 
+    '1' means the logical node has an active hostboot image.
+    -->
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
     <hbOnly/>
 </attribute>
 </attributes>

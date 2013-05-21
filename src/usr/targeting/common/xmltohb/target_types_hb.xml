@@ -34,6 +34,7 @@
     <attribute><id>IS_MPIPL_HB</id></attribute>
     <attribute><id>IBSCOM_ENABLE_OVERRIDE</id></attribute>
     <attribute><id>HB_MUTEX_TEST_LOCK</id></attribute>
+    <attribute><id>HB_EXISTING_IMAGE</id></attribute>
 </targetTypeExtension>
 
 <targetTypeExtension>

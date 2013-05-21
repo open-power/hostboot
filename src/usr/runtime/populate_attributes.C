@@ -38,7 +38,9 @@
 #include <runtime/runtime_reasoncodes.H>
 #include <runtime/runtime.H>
 #include "common/hsvc_attribute_structs.H"
-//#include <arch/ppc.H> //for MAGIC_INSTRUCTION
+#include <mbox/ipc_msg_types.H>
+#include <sys/task.h>
+#include <kernel/cpu.H> // for KERNEL_MAX_SUPPORTED_CPUS_PER_NODE
 
 trace_desc_t *g_trac_runtime = NULL;
 TRAC_INIT(&g_trac_runtime, "RUNTIME", KILOBYTE);
@@ -332,7 +334,7 @@ errlHndl_t populate_node_attributes( uint64_t i_nodeNum )
         size_t node_data_size = 0;
         errhdl = RUNTIME::get_host_data_section(
                                     RUNTIME::HSVC_NODE_DATA,
-                                    0,
+                                    i_nodeNum,
                                     node_data_addr,
                                     node_data_size );
         if( errhdl )
@@ -540,23 +542,110 @@ errlHndl_t populate_attributes( void )
         errhdl = populate_system_attributes();
         if( errhdl )
         {
+            TRACFCOMP( g_trac_runtime, "populate_attributes failed" );
             break;
         }
 
-        // Loop through all nodes
-        for( TARGETING::TargetService::iterator it = TARGETING::targetService().begin();
-             it != TARGETING::targetService().end(); ++it )
+        TARGETING::Target * sys = NULL;
+        TARGETING::targetService().getTopLevelTarget( sys );
+        assert(sys != NULL);
+
+        TARGETING::ATTR_HB_EXISTING_IMAGE_type hb_images =
+            sys->getAttr<TARGETING::ATTR_HB_EXISTING_IMAGE>();
+
+        // ATTR_HB_EXISTING_IMAGE only gets set on a multi-drawer system.
+        // Currently set up in host_sys_fab_iovalid_processing() which only
+        // gets called if there are multiple physical nodes.   It eventually
+        // needs to be setup by a hb routine that snoops for multiple nodes.
+        if(hb_images == 0)
         {
-            if( (*it)->getAttr<TARGETING::ATTR_TYPE>() == TARGETING::TYPE_NODE )
+            // Single node system
+            errhdl = populate_node_attributes(0);
+
+            if(errhdl != NULL)
             {
-                //@todo: RTC:50866 : Need an attribute for node position
-                errhdl = populate_node_attributes(0);
-                if( errhdl )
+                TRACFCOMP( g_trac_runtime, "populate_node_attributes failed" );
+            }
+            break;
+        }
+
+        // continue - multi-node
+
+        // This msgQ catches the reponses to populate the attributes
+        msg_q_t msgQ = msg_q_create();
+        errhdl = MBOX::msgq_register(MBOX::HB_POP_ATTR_MSGQ,msgQ);
+
+        if(errhdl)
+        {
+            TRACFCOMP( g_trac_runtime, "MBOX::msgq_register failed!" );
+            break;
+        }
+
+
+        uint8_t node_map[8];
+
+        sys->tryGetAttr<TARGETING::ATTR_FABRIC_TO_PHYSICAL_NODE_MAP>(node_map);
+
+        uint64_t msg_count = 0;
+
+        // This is a multi-drawer system.
+        // The assertion is that the hostboot instance must be equal to
+        // the logical node we are running on. The ideal would be to have
+        // a function call that would return the HB instance number.
+        uint64_t this_node =
+            task_getcpuid()/KERNEL_MAX_SUPPORTED_CPUS_PER_NODE;
+
+
+        //loop though all possible drawers whether they exist or not
+        // An invalid or non-existant logical node number in that drawer
+        // indicates that the drawer does not exist.
+        for(uint64_t drawer = 0; drawer < sizeof(node_map); ++drawer)
+        {
+            uint64_t node = node_map[drawer];
+
+            if(node < (sizeof(TARGETING::ATTR_HB_EXISTING_IMAGE_type) * 8))
+            {
+
+                // set mask to msb
+                TARGETING::ATTR_HB_EXISTING_IMAGE_type mask = 0x1 <<
+                    ((sizeof(TARGETING::ATTR_HB_EXISTING_IMAGE_type) * 8) -1);
+
+                if( 0 != ((mask >> node) & hb_images ) )
                 {
-                    break;
+                    TRACDCOMP( g_trac_runtime,
+                               "populate_attributes-sending msg for drawer %d",
+                               drawer );
+                    ++msg_count;
+                    msg_t * msg = msg_allocate();
+                    msg->type = IPC::IPC_POPULATE_ATTRIBUTES;
+                    msg->data[0] = drawer;     // offset in attribute table
+                    msg->data[1] = this_node;  // node to send a msg back to
+                    errhdl = MBOX::send(MBOX::HB_IPC_MSGQ, msg, node);
+                    if (errhdl)
+                    {
+                        TRACFCOMP( g_trac_runtime, "MBOX::send failed");
+                        break;
+                    }
                 }
+            } 
+        }
+
+        if(errhdl == NULL)
+        {
+            // wait for all hb images to respond
+            while(msg_count)
+            {
+                msg_t* msg = msg_wait(msgQ);
+                TRACFCOMP( g_trac_runtime,
+                           "populate node attributes. drawer %d completed.",
+                           msg->data[0]);
+                msg_free(msg);
+                --msg_count;
             }
         }
+
+        MBOX::msgq_unregister(MBOX::HB_POP_ATTR_MSGQ);
+        msg_q_destroy(msgQ);
 
     } while(0);
 

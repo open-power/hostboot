@@ -2070,6 +2070,35 @@
     </hwpfToHbAttrMap>
 </attribute>
 
+<attribute>
+    <id>FABRIC_TO_PHYSICAL_NODE_MAP</id>
+    <description>
+        Correlate HDAT node number (physical) to the logical node
+        (based on the PIR) that contains the host boot image.
+    </description>
+    <!-- 8 byte array.  The index is the physical node number. The value
+    at that index is the hb instance number, based on the processor PIR, that
+    contains or would contain the host boot image if the drawer exists or were
+    to exist. Host boot uses this value and HB_HRMOR_NODAL_BASE to calculate
+    the HRMOR of the hostboot image for each drawer.
+    If the drawer does NOT physically exist then enter a logical node that
+    does NOT physically exist.
+
+    It's conceivable that there could be more than one logical node contained
+    in a physical drawer, if that is ever the case then the FSP would need to
+    modify this attribute to indicate which logical node contains the hostboot
+    image for each drawer. -->
+    <simpleType>
+        <uint8_t>
+            <!-- Default is for single node system -->
+            <default>0,255,255,255,255,255,255,255</default>
+        </uint8_t>
+    <array>8</array>
+    </simpleType>
+    <persistency>volatile</persistency>
+    <readable/>
+    <writeable/>
+</attribute>
 
 <!--    TARGETING attributes to support mss_setup_bars and proc_setup_bars  -->
 

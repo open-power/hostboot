@@ -283,6 +283,14 @@ const compId_t SECURE_COMP_ID = 0x1E00;
 const char SECURE_COMP_NAME[] = "secure";
 //@}
 
+/** @name IPC
+ * IPC - Inter Processor Communication component
+ */
+//@{
+const compId_t IPC_COMP_ID = 0x1F00;
+const char IPC_COMP_NAME[] = "ipc";
+//@}
+
 
 /** @name HSVC
  * Host Services component

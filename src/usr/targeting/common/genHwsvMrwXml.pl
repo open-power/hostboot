@@ -1516,6 +1516,28 @@ sub generate_sys
         <default>0b11</default>
     </attribute>
 ";
+    # HDAT drawer number (physical node) to
+    # HostBoot Instance number (logical node) map
+    # Index is the hdat drawer number, value is the HB instance number
+    # Only the max drawer system needs to be represented.
+    if ($sysname eq "brazos")
+    {
+        print "
+    <!-- correlate HDAT drawer number to Hostboot Instance number -->
+    <attribute><id>FABRIC_TO_PHYSICAL_NODE_MAP</id>
+        <default>0,1,2,3,255,255,255,255</default>
+    </attribute>
+";
+    }
+    else # single drawer
+    {
+        print "
+    <!-- correlate HDAT drawer number to Hostboot Instance number -->
+    <attribute><id>FABRIC_TO_PHYSICAL_NODE_MAP</id>
+        <default>0,255,255,255,255,255,255,255</default>
+    </attribute>
+";
+    }
 
     # call to do any fsp per-sys attributes
     do_plugin('fsp_sys', $sys, $sysname, 0);
