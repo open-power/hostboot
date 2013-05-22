@@ -70,7 +70,7 @@
     </attribute>
     <attribute>
         <id>FREQ_CORE_FLOOR</id>
-        <default>0x2580</default>
+        <default>0x12C0</default>
     </attribute>
     <attribute>
         <id>FREQ_PB</id>
@@ -151,7 +151,7 @@
     </attribute>
     <attribute>
         <id>MSS_MBA_CACHELINE_INTERLEAVE_MODE</id>
-        <default>1</default>
+        <default>0</default>
     </attribute>
     <attribute>
         <id>MSS_PREFETCH_ENABLE</id>
@@ -159,7 +159,7 @@
     </attribute>
     <attribute>
         <id>MSS_CLEANER_ENABLE</id>
-        <default>1</default>
+        <default>0</default>
     </attribute>
     <!-- Start pm_plat_attributes.xml -->
     <attribute><id>PROC_R_LOADLINE</id>
@@ -311,6 +311,9 @@
     </attribute>
     <attribute><id>IBSCOM_PROC_BASE_ADDR</id>
         <default>0x0003E00000000000</default>
+    </attribute>
+    <attribute><id>MSS_INTERLEAVE_ENABLE</id>
+        <default>0xff</default>
     </attribute>
     <attribute><id>PROC_DCM_INSTALLED</id>
         <default>0</default>
@@ -1451,6 +1454,9 @@
     <attribute><id>IBSCOM_PROC_BASE_ADDR</id>
         <default>0x0003E10000000000</default>
     </attribute>
+    <attribute><id>MSS_INTERLEAVE_ENABLE</id>
+        <default>0xff</default>
+    </attribute>
     <attribute><id>PROC_DCM_INSTALLED</id>
         <default>0</default>
     </attribute>
@@ -2472,6 +2478,7 @@
         <default>0</default>
     </attribute>
     <attribute><id>VPD_REC_NUM</id><default>0</default></attribute>
+    <attribute><id>MSS_CACHE_ENABLE</id><default>1</default></attribute>
 </targetInstance>
 
 <!-- Centaur MBS affiliated with membuf0 -->
@@ -2570,6 +2577,7 @@
         <default>0</default>
     </attribute>
     <attribute><id>VPD_REC_NUM</id><default>1</default></attribute>
+    <attribute><id>MSS_CACHE_ENABLE</id><default>1</default></attribute>
 </targetInstance>
 
 <!-- Centaur MBS affiliated with membuf1 -->

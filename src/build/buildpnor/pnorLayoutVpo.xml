@@ -119,4 +119,14 @@
         <source>Blank</source>
         <sideless>no</sideless>
     </section>
+    <section>
+        <!-- NOTE: smaller than official layout  for fake-PNOR  -->
+        <description>Centaur SBE image (64K)</description>
+        <eyeCatch>SBEC</eyeCatch>
+        <physicalOffset>0x3E6000</physicalOffset>
+        <physicalRegionSize>0x10000</physicalRegionSize>
+        <ecc>no</ecc>
+        <source>Blank</source>
+        <sideless>no</sideless>
+   </section>
 </pnor>
