@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012                   */
+/* COPYRIGHT International Business Machines Corp. 2012,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_adu_utils.H,v 1.4 2012/08/21 05:16:30 jmcgill Exp $
+// $Id: proc_adu_utils.H,v 1.5 2013/04/15 18:31:39 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/utils/proc_adu_utils.H,v $
 //------------------------------------------------------------------------------
 // *|
@@ -194,7 +194,11 @@ enum proc_adu_utils_fbc_tsize
     ADU_FBC_OP_TSIZE_2B = 0x02,                   // two byte transfer size
     ADU_FBC_OP_TSIZE_3B = 0x03,                   // three byte transfer size
     ADU_FBC_OP_TSIZE_4B = 0x04,                   // four byte transfer size
-    ADU_FBC_OP_TSIZE_8B = 0x08                    // eight byte transfer size
+    ADU_FBC_OP_TSIZE_8B = 0x08,                   // eight byte transfer size
+    ADU_FBC_OP_TSIZE_CI_PR_W_1B = 0x01,           // one byte transfer size
+    ADU_FBC_OP_TSIZE_CI_PR_W_2B = 0x02,           // two byte transfer size
+    ADU_FBC_OP_TSIZE_CI_PR_W_4B = 0x03,           // four byte transfer size
+    ADU_FBC_OP_TSIZE_CI_PR_W_8B = 0x04            // eight byte transfer size
 };
 
 

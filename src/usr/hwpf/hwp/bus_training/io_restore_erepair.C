@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/* COPYRIGHT International Business Machines Corp. 2013                   */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: io_restore_erepair.C,v 1.10 2012/12/13 06:44:26 varkeykv Exp $
+// $Id: io_restore_erepair.C,v 1.12 2013/04/18 08:17:26 varkeykv Exp $
 // *!***************************************************************************
 // *! (C) Copyright International Business Machines Corp. 1997, 1998
 // *!           All Rights Reserved -- Property of IBM
@@ -53,21 +53,24 @@ extern "C" {
 using namespace fapi;
 
 
-//! Restores repair values from VPD into the HW
+//! Read repair values from VPD into the HW
 /*
  This function will perform erepair for one IO type target  -- eithe MCS or XBUS or ABUS
  * In Cronus the tx_lanes and rx_lanes vectors should be passed empty so we will use the accessor provided data instead 
  * This is due to a MFG FW requirement that needed to pass in bad lanes as args instead of via VPD
  * Note that power down of lanes is done by a seperate HWP called io_power_down_lanes
- * Its up to the caller to call that separately to power down a lane if required
+ * Its up to the caller to call that separately to power down a lane
 */
 ReturnCode io_restore_erepair(const Target& target,std::vector<uint8_t> &tx_lanes,std::vector<uint8_t> &rx_lanes)
 {
   ReturnCode rc;
   ecmdDataBufferBase data_one(16);
   ecmdDataBufferBase data_two(16);
+  ecmdDataBufferBase mode_reg(16);
   ecmdDataBufferBase mask(16);
-  uint8_t lane;
+  bool msbswap=false;
+  uint8_t lane=0;
+  uint8_t end_lane=0;
 
   io_interface_t interface=CP_IOMC0_P0; // Since G
   uint32_t rc_ecmd=0;
@@ -117,6 +120,7 @@ ReturnCode io_restore_erepair(const Target& target,std::vector<uint8_t> &tx_lane
   // This is specially for Cronus/Lab 
   if(tx_lanes.size()==0 && rx_lanes.size()==0){
     rc=erepairGetFailedLanesHwp(target,tx_lanes,rx_lanes);
+    //FAPI_EXEC_HWP(rc,erepairGetFailedLanesHwp,target,tx_lanes,rx_lanes);
     if(!rc.ok()){
       FAPI_ERR("Accessor HWP has returned a fail");
       return rc;
@@ -135,9 +139,55 @@ ReturnCode io_restore_erepair(const Target& target,std::vector<uint8_t> &tx_lane
           rc.setEcmdError(rc_ecmd);
           return(rc);
       }
+      rc = GCR_read( target, interface,tx_mode_pg, clock_group,  0,  mode_reg);
+      if(rc){return rc;}
+      
+      if(mode_reg.isBitSet(5)){
+        FAPI_DBG("TX MSB-LSB SWAP MODE ON on this target \n");
+        msbswap=true;
+      }
+      if(msbswap){
+        // We can read out tx_end_lane_id now for swap correction
+        rc = GCR_read( target, interface,tx_id3_pg, clock_group,  0,  mode_reg);
+        if(rc){return rc;}
+        rc_ecmd=mode_reg.extract(&end_lane,9,7);
+        if(rc_ecmd)
+        {
+            rc.setEcmdError(rc_ecmd);
+            return(rc);
+        }
+        end_lane=end_lane>>1;// move left aligned extract by 1
+        FAPI_DBG("END lane id is %d\n",end_lane);
+      }
       
       for(uint8_t i=0;i<tx_lanes.size();++i){
-        lane=tx_lanes[i];
+        if(msbswap){
+          //assume that MSB-LSB swap exists only on A or MC bus 
+                  lane=end_lane-tx_lanes[i];
+        }
+        else{
+          // Do lane number shifting for X bus
+        if(interface==CP_FABRIC_X0){
+              if(clock_group==0){
+                lane=0;
+              }
+              else if(clock_group==1){
+                lane=20;
+              }
+              else if(clock_group==2){
+                lane=40;
+              }
+              else if(clock_group==3){
+                lane=60;
+              }
+        }
+          if(interface==CP_FABRIC_X0){
+              lane-=tx_lanes[i];
+          }
+          else{
+            lane=tx_lanes[i];
+          }
+        }
           if (lane < 16) {
              data_one.setBit(lane);
           }
@@ -162,7 +212,25 @@ ReturnCode io_restore_erepair(const Target& target,std::vector<uint8_t> &tx_lane
       // RX lane records 
       // Set the RX bad lanes in the buffer 
       for(uint8_t i=0;i<rx_lanes.size();++i){
-        lane=rx_lanes[i];
+        
+        if(interface==CP_FABRIC_X0){
+              if(clock_group==0){
+                lane=0;
+              }
+              else if(clock_group==1){
+                lane=20;
+              }
+              else if(clock_group==2){
+                lane=40;
+              }
+              else if(clock_group==3){
+                lane=60;
+              }
+              lane-=rx_lanes[i];
+        }
+        else{
+          lane=rx_lanes[i];
+        }
           if (lane < 16) {
              data_one.setBit(lane);
           }
@@ -175,6 +243,12 @@ ReturnCode io_restore_erepair(const Target& target,std::vector<uint8_t> &tx_lane
       if(rc){return rc;}
       rc = GCR_write( target, interface, rx_lane_disabled_vec_16_31_pg, clock_group,  0,  data_two,mask);
       if(rc){return rc;}
+      //Now write the bad lanes in one shot on the slave side RX
+      rc = GCR_write( target, interface, rx_lane_bad_vec_0_15_pg, clock_group,  0,  data_one,mask );
+      if(rc){return rc;}
+      rc = GCR_write( target, interface, rx_lane_bad_vec_16_31_pg, clock_group,  0,  data_two,mask);
+      if(rc){return rc;}
+
 
     }
   return rc;
