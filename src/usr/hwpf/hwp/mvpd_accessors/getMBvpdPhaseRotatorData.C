@@ -20,7 +20,7 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: getMBvpdPhaseRotatorData.C,v 1.2 2013/04/29 16:44:00 whs Exp $
+// $Id: getMBvpdPhaseRotatorData.C,v 1.3 2013/05/28 10:52:53 whs Exp $
 /**
  *  @file getMBvpdPhaseRotatorData.C
  *
@@ -65,6 +65,7 @@ fapi::ReturnCode getMBvpdPhaseRotatorData(
     // The actual size of the MR keword is 255 bytes, which is one byte short
     // of the mr_keyword struct. One byte is used for the size in the vpd.
     // As long as there is at least one reserved attribute, then all will fit.
+    const uint32_t MR_KEYWORD_SIZE = 255;  // keyword size
 
     fapi::ReturnCode l_fapirc;
     fapi::Target l_mbTarget;
@@ -112,14 +113,14 @@ fapi::ReturnCode getMBvpdPhaseRotatorData(
         }
 
         // Check that sufficient MR was returned.
-        uint32_t l_sizeNeeded = l_pos*sizeof(mba_attributes)+
-                          sizeof(port_attributes)+i_attr;
-        if (l_MrBufsize < l_sizeNeeded )
+        if (l_MrBufsize < MR_KEYWORD_SIZE )
         {
             FAPI_ERR("getMBvpdPhaseRotatorData:"
                      " less MR keyword returned than expected %d < %d",
-                       l_MrBufsize, l_sizeNeeded);
-            FAPI_SET_HWP_ERROR(l_fapirc, RC_MBVPD_INSUFFICIENT_MR_KEYWORD );
+                       l_MrBufsize, MR_KEYWORD_SIZE);
+            const uint32_t & KEYWORD = fapi::MBVPD_KEYWORD_MR;
+            const uint32_t & RETURNED_SIZE = l_MrBufsize;
+            FAPI_SET_HWP_ERROR(l_fapirc, RC_MBVPD_INSUFFICIENT_VPD_RETURNED );
             break;  //  break out with fapirc
         }
 

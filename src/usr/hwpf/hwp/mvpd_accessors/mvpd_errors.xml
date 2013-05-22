@@ -20,7 +20,7 @@
 <!-- Origin: 30                                                             -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
-<!-- $Id: mvpd_errors.xml,v 1.4 2013/04/29 16:06:37 whs Exp $ -->
+<!-- $Id: mvpd_errors.xml,v 1.5 2013/05/28 10:49:31 whs Exp $ -->
 <hwpErrors>
   <!-- ********************************************************************* -->
   <hwpError>
@@ -84,10 +84,20 @@
   </hwpError>
   <!-- ********************************************************************* -->
   <hwpError>
-    <rc>RC_MBVPD_INSUFFICIENT_MR_KEYWORD</rc>
+    <rc>RC_MBVPD_INVALID_ATTRIBUTE_ID</rc>
     <description>
-        VPD read is smaller than expected.
+        Invalid attribute ID
     </description>
+    <ffdc>ATTR_ID</ffdc>
+  </hwpError>
+  <!-- ********************************************************************* -->
+  <hwpError>
+    <rc>RC_MBVPD_INVALID_OUTPUT_VARIABLE_SIZE</rc>
+    <description>
+        Output variable size must match size of expected output type.
+    </description>
+    <ffdc>EXPECTED_SIZE</ffdc>
+    <ffdc>PASSED_SIZE</ffdc>
   </hwpError>
   <!-- ********************************************************************* -->
   <hwpError>

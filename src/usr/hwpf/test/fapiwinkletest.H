@@ -26,9 +26,9 @@
 
 // set to 1 for doing unit tests, set to 0 for production
 #define UNITTESTfwt 0
-// TODO: RTC 69935 complete Phase Rotator Data
-// use the code in the 1 path until 69935 fully implements 59048.
-// Then the 1 path code can be removed and use the 0 path.
+// TODO: RTC 69935 complete Phase Rotator Data and Termination Data.
+// Use the code in the 1 path until CDIMM vpd has proper values.
+// Then the 1 path code can be removed and keep the 0 path code.
 #define RTC69935fwt 1
 /**
  *  @file fapiwinkletest.H
@@ -48,6 +48,7 @@
 #include    <setMvpdRing.H>
 #include    <mvpd_accessors/getMBvpdPhaseRotatorData.H>
 #include    <mvpd_accessors/getMBvpdAddrMirrorData.H>
+#include    <mvpd_accessors/getMBvpdTermData.H>
 
 #include <errl/errlmanager.H>
 #include <errl/errlentry.H>
@@ -397,6 +398,527 @@ public:
         }
 
         TS_TRACE( "testGetAddrMirrorData exit" );
+
+    }
+
+    /**
+     * @brief call getMBvpdTermData to fetch memory buffer MT attributes
+     *
+     */
+    void    testGetTermData()
+    {
+        fapi::ReturnCode    l_fapirc( fapi::FAPI_RC_SUCCESS );
+        uint8_t val1[2][2] = {{0xFF,0xFF},{0xFF,0xFF}};
+#if UNITTESTfwt
+        uint8_t val2[2][2][4]={
+                              {{0xFF,0xFF,0xFF,0xFF},{0xFF,0xFF,0xFF,0xFF}},
+                              {{0xFF,0xFF,0xFF,0xFF},{0xFF,0xFF,0xFF,0xFF}}};
+        uint32_t val3[2] = {0xFFFFFFFF,0xFFFFFFFF};
+        uint8_t val4[2] = {0xFF,0xFF};
+        uint8_t l_errorChk = 1; //do error checks just once
+#endif
+#if RTC69935fwt
+        getMBvpdTermData_FP_t (l_getMBvpdTermData)
+                              = &getMBvpdTermData;
+#endif
+
+        TS_TRACE( "testGetTermData entry" );
+
+        TARGETING::TargetHandleList l_memBufList;
+        getAllChips(l_memBufList, TYPE_MEMBUF);
+
+        TS_TRACE( "testGetTermData l_memBufList.size()=%d",
+                                      l_memBufList.size() );
+
+        // loop thru memory buffers
+#if UNITTESTfwt
+        uint8_t l_mbNum = 0;    // check them all in unit test
+#else
+        uint8_t l_mbNum = (l_memBufList.size() > 0) ? l_memBufList.size()-1 : 0;
+#endif
+        for (; l_mbNum < l_memBufList.size(); l_mbNum++ )
+        {
+            TARGETING::TargetHandleList l_mbaList;
+            getChildAffinityTargets(l_mbaList,l_memBufList[l_mbNum],
+                            CLASS_UNIT,TYPE_MBA,false);
+
+            TS_TRACE( "testGetTermData l_mbaBufList.size()=%d",
+                    l_mbaList.size());
+
+            // loop thru all the mbas (should be 2)
+#if UNITTESTfwt
+            uint8_t l_mbaNum = 0;  // check them all in unit test
+#else
+            uint8_t l_mbaNum = (l_mbaList.size() > 0) ? l_mbaList.size()-1:0 ;
+#endif
+            for (; l_mbaNum < l_mbaList.size(); l_mbaNum++ )
+            {
+                //  dump physical path to target
+                EntityPath l_path;
+                l_path  =   l_mbaList[l_mbaNum]->getAttr<ATTR_PHYS_PATH>();
+                l_path.dump();
+
+                // cast OUR type of target to a FAPI type of target.
+                fapi::Target l_fapi_mba_target(
+                                          TARGET_TYPE_MBA_CHIPLET,
+                   (const_cast<TARGETING::Target*>(l_mbaList[l_mbaNum])) );
+
+#if UNITTESTfwt
+            // check for interface errors being caught. Just once.
+            if (l_errorChk) {
+               // check size matches type for each of the 4 types
+               l_fapirc = (*l_getMBvpdTermData)(l_fapi_mba_target,
+                           fapi::TERM_DATA_DRAM_RON,
+                           &val1, sizeof(val1)+1); //invalid size
+               if (l_fapirc != fapi::RC_MBVPD_INVALID_OUTPUT_VARIABLE_SIZE)
+               {
+                  TS_FAIL("testGetTermData: expect invalid size RC:"
+                         " 0x%08x,0x%08x",
+                         fapi::RC_MBVPD_INVALID_OUTPUT_VARIABLE_SIZE,
+                         static_cast<uint32_t>(l_fapirc));
+               }
+               l_fapirc = (*l_getMBvpdTermData)(l_fapi_mba_target,
+                           fapi::TERM_DATA_DRAM_RTT_NOM,
+                           &val2, sizeof(val2)-1); //invalid size
+               if (l_fapirc != fapi::RC_MBVPD_INVALID_OUTPUT_VARIABLE_SIZE)
+               {
+                  TS_FAIL("testGetTermData: expect invalid size RC:"
+                         " 0x%08x,0x%08x",
+                         fapi::RC_MBVPD_INVALID_OUTPUT_VARIABLE_SIZE,
+                         static_cast<uint32_t>(l_fapirc));
+               }
+               l_fapirc = (*l_getMBvpdTermData)(l_fapi_mba_target,
+                           fapi::TERM_DATA_CEN_RD_VREF,
+                           &val3, sizeof(val3)+2); //invalid size
+               if (l_fapirc != fapi::RC_MBVPD_INVALID_OUTPUT_VARIABLE_SIZE)
+               {
+                  TS_FAIL("testGetTermData: expect invalid size RC:"
+                         " 0x%08x,0x%08x",
+                         fapi::RC_MBVPD_INVALID_OUTPUT_VARIABLE_SIZE,
+                         static_cast<uint32_t>(l_fapirc));
+               }
+               l_fapirc = (*l_getMBvpdTermData)(l_fapi_mba_target,
+                           fapi::TERM_DATA_DRAM_WRDDR4_VREF,
+                           &val4, 0); //invalid size
+               if (l_fapirc != fapi::RC_MBVPD_INVALID_OUTPUT_VARIABLE_SIZE)
+               {
+                  TS_FAIL("testGetTermData: expect invalid size RC:"
+                         " 0x%08x,0x%08x",
+                         fapi::RC_MBVPD_INVALID_OUTPUT_VARIABLE_SIZE,
+                         static_cast<uint32_t>(l_fapirc));
+               }
+               // check for catching an invalid ID
+               l_fapirc = (*l_getMBvpdTermData)(l_fapi_mba_target,
+                           (fapi::MBvpdTermData)99, //invalid ID
+                           &val1, sizeof(val1));
+               if (l_fapirc != fapi::RC_MBVPD_INVALID_ATTRIBUTE_ID)
+               {
+                  TS_FAIL("testGetTermData: expect invalid size RC:"
+                         " 0x%08x,0x%08x",
+                         fapi::RC_MBVPD_INVALID_ATTRIBUTE_ID,
+                         static_cast<uint32_t>(l_fapirc));
+               }
+               l_errorChk =0;
+           }
+#endif
+#if RTC69935fwt
+           // Verify fetching attributes by calling the HWP directly
+
+           // TERM_DATA_DRAM_RON
+               l_fapirc = (*l_getMBvpdTermData)(l_fapi_mba_target,
+                           fapi::TERM_DATA_DRAM_RON,
+                           &val1, sizeof(val1));
+               if (l_fapirc) break;
+               TS_TRACE( "testGetTermData accessor "
+                   "TERM_DATA_DRAM_RON=(0x%02x,0x%02x),(0x%02x,0x%02x)",
+                   val1[0][0], val1[0][1], val1[1][0], val1[1][1]);
+
+#if UNITTESTfwt
+           // TERM_DATA_DRAM_RTT_NOM
+               l_fapirc = (*l_getMBvpdTermData)(l_fapi_mba_target,
+                           fapi::TERM_DATA_DRAM_RTT_NOM,
+                           &val2, sizeof(val2));
+               if (l_fapirc) break;
+               TS_TRACE( "testGetTermData accessor "
+                   "TERM_DATA_DRAM_RTT_NOM");
+               TS_TRACE("testGetTermData[0][0]=0x%02x,0x%02x,0x%02x,0x%02x",
+                   val2[0][0][0], val2[0][0][1], val2[0][0][2], val2[0][0][3]);
+               TS_TRACE("testGetTermData[0][1]=0x%02x,0x%02x,0x%02x,0x%02x",
+                   val2[0][1][0], val2[0][1][1], val2[0][1][2], val2[0][1][3]);
+               TS_TRACE("testGetTermData[1][0]=0x%02x,0x%02x,0x%02x,0x%02x",
+                   val2[1][0][0], val2[1][0][1], val2[1][0][2], val2[1][0][3]);
+               TS_TRACE("testGetTermData[1][1]=0x%02x,0x%02x,0x%02x,0x%02x",
+                   val2[1][1][0], val2[1][1][1], val2[1][1][2], val2[1][1][3]);
+
+           // TERM_DATA_DRAM_RTT_WR
+               l_fapirc = (*l_getMBvpdTermData)(l_fapi_mba_target,
+                           fapi::TERM_DATA_DRAM_RTT_WR,
+                           &val2, sizeof(val2));
+               if (l_fapirc) break;
+               TS_TRACE( "testGetTermData accessor "
+                   "TERM_DATA_DRAM_RTT_WR");
+               TS_TRACE("testGetTermData[0][0]=0x%02x,0x%02x,0x%02x,0x%02x",
+                   val2[0][0][0], val2[0][0][1], val2[0][0][2], val2[0][0][3]);
+               TS_TRACE("testGetTermData[0][1]=0x%02x,0x%02x,0x%02x,0x%02x",
+                   val2[0][1][0], val2[0][1][1], val2[0][1][2], val2[0][1][3]);
+               TS_TRACE("testGetTermData[1][0]=0x%02x,0x%02x,0x%02x,0x%02x",
+                   val2[1][0][0], val2[1][0][1], val2[1][0][2], val2[1][0][3]);
+               TS_TRACE("testGetTermData[1][1]=0x%02x,0x%02x,0x%02x,0x%02x",
+                   val2[1][1][0], val2[1][1][1], val2[1][1][2], val2[1][1][3]);
+
+           // TERM_DATA_ODT_RD
+               l_fapirc = (*l_getMBvpdTermData)(l_fapi_mba_target,
+                           fapi::TERM_DATA_ODT_RD,
+                           &val2, sizeof(val2));
+               if (l_fapirc) break;
+               TS_TRACE( "testGetTermData accessor "
+                   "TERM_DATA_ODT_RD");
+               TS_TRACE("testGetTermData[0][0]=0x%02x,0x%02x,0x%02x,0x%02x",
+                   val2[0][0][0], val2[0][0][1], val2[0][0][2], val2[0][0][3]);
+               TS_TRACE("testGetTermData[0][1]=0x%02x,0x%02x,0x%02x,0x%02x",
+                   val2[0][1][0], val2[0][1][1], val2[0][1][2], val2[0][1][3]);
+               TS_TRACE("testGetTermData[1][0]=0x%02x,0x%02x,0x%02x,0x%02x",
+                   val2[1][0][0], val2[1][0][1], val2[1][0][2], val2[1][0][3]);
+               TS_TRACE("testGetTermData[1][1]=0x%02x,0x%02x,0x%02x,0x%02x",
+                   val2[1][1][0], val2[1][1][1], val2[1][1][2], val2[1][1][3]);
+
+           // TERM_DATA_ODT_WR
+               l_fapirc = (*l_getMBvpdTermData)(l_fapi_mba_target,
+                           fapi::TERM_DATA_ODT_WR,
+                           &val2, sizeof(val2));
+               if (l_fapirc) break;
+               TS_TRACE( "testGetTermData accessor "
+                   "TERM_DATA_ODT_WR");
+               TS_TRACE("testGetTermData[0][0]=0x%02x,0x%02x,0x%02x,0x%02x",
+                   val2[0][0][0], val2[0][0][1], val2[0][0][2], val2[0][0][3]);
+               TS_TRACE("testGetTermData[0][1]=0x%02x,0x%02x,0x%02x,0x%02x",
+                   val2[0][1][0], val2[0][1][1], val2[0][1][2], val2[0][1][3]);
+               TS_TRACE("testGetTermData[1][0]=0x%02x,0x%02x,0x%02x,0x%02x",
+                   val2[1][0][0], val2[1][0][1], val2[1][0][2], val2[1][0][3]);
+               TS_TRACE("testGetTermData[1][1]=0x%02x,0x%02x,0x%02x,0x%02x",
+                   val2[1][1][0], val2[1][1][1], val2[1][1][2], val2[1][1][3]);
+
+           // TERM_DATA_CEN_RD_VREF
+               l_fapirc = (*l_getMBvpdTermData)(l_fapi_mba_target,
+                           fapi::TERM_DATA_CEN_RD_VREF,
+                           &val3, sizeof(val3));
+               if (l_fapirc) break;
+               TS_TRACE( "testGetTermData accessor "
+                   "TERM_DATA_CEN_RD_VREF=0x%08x,0x%08x",
+                   val3[0], val3[1]);
+
+           // TERM_DATA_DRAM_WR_VREF
+               l_fapirc = (*l_getMBvpdTermData)(l_fapi_mba_target,
+                           fapi::TERM_DATA_DRAM_WR_VREF,
+                           &val3, sizeof(val3));
+               if (l_fapirc) break;
+               TS_TRACE( "testGetTermData accessor "
+                   "TERM_DATA_DRAM_WR_VREF=0x%08x,0x%08x",
+                   val3[0], val3[1]);
+
+           // TERM_DATA_DRAM_WRDDR4_VREF
+               l_fapirc = (*l_getMBvpdTermData)(l_fapi_mba_target,
+                           fapi::TERM_DATA_DRAM_WRDDR4_VREF,
+                           &val4, sizeof(val4));
+               if (l_fapirc) break;
+               TS_TRACE( "testGetTermData accessor "
+                   "TERM_DATA_DRAM_WRDDR4_VREF=0x%02x,0x%02x",
+                   val4[0], val4[1]);
+
+           // TERM_DATA_CEN_RCV_IMP_DQ_DQS
+               l_fapirc = (*l_getMBvpdTermData)(l_fapi_mba_target,
+                           fapi::TERM_DATA_CEN_RCV_IMP_DQ_DQS,
+                           &val4, sizeof(val4));
+               if (l_fapirc) break;
+               TS_TRACE( "testGetTermData accessor "
+                   "TERM_DATA_CEN_RCV_IMP_DQ_DQS=0x%02x,0x%02x",
+                   val4[0], val4[1]);
+
+           // TERM_DATA_CEN_DRV_IMP_DQ_DQS
+               l_fapirc = (*l_getMBvpdTermData)(l_fapi_mba_target,
+                           fapi::TERM_DATA_CEN_DRV_IMP_DQ_DQS,
+                           &val4, sizeof(val4));
+               if (l_fapirc) break;
+               TS_TRACE( "testGetTermData accessor "
+                   "TERM_DATA_CEN_DRV_IMP_DQ_DQS=0x%02x,0x%02x",
+                   val4[0], val4[1]);
+
+           // TERM_DATA_CEN_DRV_IMP_CNTL
+               l_fapirc = (*l_getMBvpdTermData)(l_fapi_mba_target,
+                           fapi::TERM_DATA_CEN_DRV_IMP_CNTL,
+                           &val4, sizeof(val4));
+               if (l_fapirc) break;
+               TS_TRACE( "testGetTermData accessor "
+                   "TERM_DATA_CEN_DRV_IMP_CNTL=0x%02x,0x%02x",
+                   val4[0], val4[1]);
+
+           // TERM_DATA_CEN_DRV_IMP_ADDR
+               l_fapirc = (*l_getMBvpdTermData)(l_fapi_mba_target,
+                           fapi::TERM_DATA_CEN_DRV_IMP_ADDR,
+                           &val4, sizeof(val4));
+               if (l_fapirc) break;
+               TS_TRACE( "testGetTermData accessor "
+                   "TERM_DATA_CEN_DRV_IMP_ADDR=0x%02x,0x%02x",
+                   val4[0], val4[1]);
+
+           // TERM_DATA_CEN_DRV_IMP_CLK
+               l_fapirc = (*l_getMBvpdTermData)(l_fapi_mba_target,
+                           fapi::TERM_DATA_CEN_DRV_IMP_CLK,
+                           &val4, sizeof(val4));
+               if (l_fapirc) break;
+               TS_TRACE( "testGetTermData accessor "
+                   "TERM_DATA_CEN_DRV_IMP_CLK=0x%02x,0x%02x",
+                   val4[0], val4[1]);
+
+           // TERM_DATA_CEN_DRV_IMP_SPCKE
+               l_fapirc = (*l_getMBvpdTermData)(l_fapi_mba_target,
+                           fapi::TERM_DATA_CEN_DRV_IMP_SPCKE,
+                           &val4, sizeof(val4));
+               if (l_fapirc) break;
+               TS_TRACE( "testGetTermData accessor "
+                   "TERM_DATA_CEN_DRV_IMP_SPCKE=0x%02x,0x%02x",
+                   val4[0], val4[1]);
+
+           // TERM_DATA_CEN_SLEW_RATE_DQ_DQS
+               l_fapirc = (*l_getMBvpdTermData)(l_fapi_mba_target,
+                           fapi::TERM_DATA_CEN_SLEW_RATE_DQ_DQS,
+                           &val4, sizeof(val4));
+               if (l_fapirc) break;
+               TS_TRACE( "testGetTermData accessor "
+                   "TERM_DATA_CEN_SLEW_RATE_DQ_DQS=0x%02x,0x%02x",
+                   val4[0], val4[1]);
+
+           // TERM_DATA_CEN_SLEW_RATE_CNTL
+               l_fapirc = (*l_getMBvpdTermData)(l_fapi_mba_target,
+                           fapi::TERM_DATA_CEN_SLEW_RATE_CNTL,
+                           &val4, sizeof(val4));
+               if (l_fapirc) break;
+               TS_TRACE( "testGetTermData accessor "
+                   "TERM_DATA_CEN_SLEW_RATE_CNTL=0x%02x,0x%02x",
+                   val4[0], val4[1]);
+
+           // TERM_DATA_CEN_SLEW_RATE_ADDR
+               l_fapirc = (*l_getMBvpdTermData)(l_fapi_mba_target,
+                           fapi::TERM_DATA_CEN_SLEW_RATE_ADDR,
+                           &val4, sizeof(val4));
+               if (l_fapirc) break;
+               TS_TRACE( "testGetTermData accessor "
+                   "TERM_DATA_CEN_SLEW_RATE_ADDR=0x%02x,0x%02x",
+                   val4[0], val4[1]);
+
+           // TERM_DATA_CEN_SLEW_RATE_CLK
+               l_fapirc = (*l_getMBvpdTermData)(l_fapi_mba_target,
+                           fapi::TERM_DATA_CEN_SLEW_RATE_CLK,
+                           &val4, sizeof(val4));
+               if (l_fapirc) break;
+               TS_TRACE( "testGetTermData accessor "
+                   "TERM_DATA_CEN_SLEW_RATE_CLK=0x%02x,0x%02x",
+                   val4[0], val4[1]);
+
+           // TERM_DATA_CEN_SLEW_RATE_SPCKE
+               l_fapirc = (*l_getMBvpdTermData)(l_fapi_mba_target,
+                           fapi::TERM_DATA_CEN_SLEW_RATE_SPCKE,
+                           &val4, sizeof(val4));
+               if (l_fapirc) break;
+               TS_TRACE( "testGetTermData accessor "
+                   "TERM_DATA_CEN_SLEW_RATE_SPCKE=0x%02x,0x%02x",
+                   val4[0], val4[1]);
+#endif
+#else
+           // Verify fetching attributes using FAPI_ATTR_GET
+           // TERM_DATA_DRAM_RON
+               l_fapirc = FAPI_ATTR_GET(ATTR_EFF_DRAM_RON,
+                   &l_fapi_mba_target, val1);
+               if (l_fapirc) break;
+               TS_TRACE( "testGetTermData attr "
+                   "TERM_DATA_DRAM_RON=(0x%02x,0x%02x),(0x%02x,0x%02x)",
+                   val1[0][0], val1[0][1], val1[1][0], val1[1][1]);
+
+#if UNITTESTfwt
+           // TERM_DATA_DRAM_RTT_NOM
+               l_fapirc = FAPI_ATTR_GET(ATTR_EFF_DRAM_RTT_NOM,
+                   &l_fapi_mba_target, val2);
+               if (l_fapirc) break;
+               TS_TRACE( "testGetTermData attr "
+                   "TERM_DATA_DRAM_RTT_NOM");
+               TS_TRACE("testGetTermData[0][0]=0x%02x,0x%02x,0x%02x,0x%02x",
+                   val2[0][0][0], val2[0][0][1], val2[0][0][2], val2[0][0][3]);
+               TS_TRACE("testGetTermData[0][1]=0x%02x,0x%02x,0x%02x,0x%02x",
+                   val2[0][1][0], val2[0][1][1], val2[0][1][2], val2[0][1][3]);
+               TS_TRACE("testGetTermData[1][0]=0x%02x,0x%02x,0x%02x,0x%02x",
+                   val2[1][0][0], val2[1][0][1], val2[1][0][2], val2[1][0][3]);
+               TS_TRACE("testGetTermData[1][1]=0x%02x,0x%02x,0x%02x,0x%02x",
+                   val2[1][1][0], val2[1][1][1], val2[1][1][2], val2[1][1][3]);
+
+           // TERM_DATA_DRAM_RTT_WR
+               l_fapirc = FAPI_ATTR_GET(ATTR_EFF_DRAM_RTT_WR,
+                   &l_fapi_mba_target, val2);
+               if (l_fapirc) break;
+               TS_TRACE( "testGetTermData attr "
+                   "TERM_DATA_DRAM_RTT_WR");
+               TS_TRACE("testGetTermData[0][0]=0x%02x,0x%02x,0x%02x,0x%02x",
+                   val2[0][0][0], val2[0][0][1], val2[0][0][2], val2[0][0][3]);
+               TS_TRACE("testGetTermData[0][1]=0x%02x,0x%02x,0x%02x,0x%02x",
+                   val2[0][1][0], val2[0][1][1], val2[0][1][2], val2[0][1][3]);
+               TS_TRACE("testGetTermData[1][0]=0x%02x,0x%02x,0x%02x,0x%02x",
+                   val2[1][0][0], val2[1][0][1], val2[1][0][2], val2[1][0][3]);
+               TS_TRACE("testGetTermData[1][1]=0x%02x,0x%02x,0x%02x,0x%02x",
+                   val2[1][1][0], val2[1][1][1], val2[1][1][2], val2[1][1][3]);
+
+           // TERM_DATA_ODT_RD
+               l_fapirc = FAPI_ATTR_GET(ATTR_EFF_ODT_RD,
+                   &l_fapi_mba_target, val2);
+               if (l_fapirc) break;
+               TS_TRACE( "testGetTermData attr "
+                   "TERM_DATA_ODT_RD");
+               TS_TRACE("testGetTermData[0][0]=0x%02x,0x%02x,0x%02x,0x%02x",
+                   val2[0][0][0], val2[0][0][1], val2[0][0][2], val2[0][0][3]);
+               TS_TRACE("testGetTermData[0][1]=0x%02x,0x%02x,0x%02x,0x%02x",
+                   val2[0][1][0], val2[0][1][1], val2[0][1][2], val2[0][1][3]);
+               TS_TRACE("testGetTermData[1][0]=0x%02x,0x%02x,0x%02x,0x%02x",
+                   val2[1][0][0], val2[1][0][1], val2[1][0][2], val2[1][0][3]);
+               TS_TRACE("testGetTermData[1][1]=0x%02x,0x%02x,0x%02x,0x%02x",
+                   val2[1][1][0], val2[1][1][1], val2[1][1][2], val2[1][1][3]);
+
+           // TERM_DATA_ODT_WR
+               l_fapirc = FAPI_ATTR_GET(ATTR_EFF_ODT_WR,
+                   &l_fapi_mba_target, val2);
+               if (l_fapirc) break;
+               TS_TRACE( "testGetTermData attr "
+                   "TERM_DATA_ODT_WR");
+               TS_TRACE("testGetTermData[0][0]=0x%02x,0x%02x,0x%02x,0x%02x",
+                   val2[0][0][0], val2[0][0][1], val2[0][0][2], val2[0][0][3]);
+               TS_TRACE("testGetTermData[0][1]=0x%02x,0x%02x,0x%02x,0x%02x",
+                   val2[0][1][0], val2[0][1][1], val2[0][1][2], val2[0][1][3]);
+               TS_TRACE("testGetTermData[1][0]=0x%02x,0x%02x,0x%02x,0x%02x",
+                   val2[1][0][0], val2[1][0][1], val2[1][0][2], val2[1][0][3]);
+               TS_TRACE("testGetTermData[1][1]=0x%02x,0x%02x,0x%02x,0x%02x",
+                   val2[1][1][0], val2[1][1][1], val2[1][1][2], val2[1][1][3]);
+
+           // TERM_DATA_CEN_RD_VREF
+               l_fapirc = FAPI_ATTR_GET(ATTR_EFF_CEN_RD_VREF,
+                   &l_fapi_mba_target, val3);
+               if (l_fapirc) break;
+               TS_TRACE( "testGetTermData attr "
+                   "TERM_DATA_CEN_RD_VREF=0x%08x,0x%08x",
+                   val3[0], val3[1]);
+
+           // TERM_DATA_DRAM_WR_VREF
+               l_fapirc = FAPI_ATTR_GET(ATTR_EFF_DRAM_WR_VREF,
+                   &l_fapi_mba_target, val3);
+               if (l_fapirc) break;
+               TS_TRACE( "testGetTermData attr "
+                   "TERM_DATA_DRAM_WR_VREF=0x%08x,0x%08x",
+                   val3[0], val3[1]);
+
+           // TERM_DATA_DRAM_WRDDR4_VREF
+               l_fapirc = FAPI_ATTR_GET(ATTR_EFF_DRAM_WRDDR4_VREF,
+                   &l_fapi_mba_target, val4);
+               if (l_fapirc) break;
+               TS_TRACE( "testGetTermData attr "
+                   "TERM_DATA_DRAM_WRDDR4_VREF=0x%02x,0x%02x",
+                   val4[0], val4[1]);
+
+           // TERM_DATA_CEN_RCV_IMP_DQ_DQS
+               l_fapirc = FAPI_ATTR_GET(ATTR_EFF_CEN_RCV_IMP_DQ_DQS,
+                   &l_fapi_mba_target, val4);
+               if (l_fapirc) break;
+               TS_TRACE( "testGetTermData attr "
+                   "TERM_DATA_CEN_RCV_IMP_DQ_DQS=0x%02x,0x%02x",
+                   val4[0], val4[1]);
+
+           // TERM_DATA_CEN_DRV_IMP_DQ_DQS
+               l_fapirc = FAPI_ATTR_GET(ATTR_EFF_CEN_DRV_IMP_DQ_DQS,
+                   &l_fapi_mba_target, val4);
+               if (l_fapirc) break;
+               TS_TRACE( "testGetTermData attr "
+                   "TERM_DATA_CEN_DRV_IMP_DQ_DQS=0x%02x,0x%02x",
+                   val4[0], val4[1]);
+
+           // TERM_DATA_CEN_DRV_IMP_CNTL
+               l_fapirc = FAPI_ATTR_GET(ATTR_EFF_CEN_DRV_IMP_CNTL,
+                   &l_fapi_mba_target, val4);
+               if (l_fapirc) break;
+               TS_TRACE( "testGetTermData attr "
+                   "TERM_DATA_CEN_DRV_IMP_CNTL=0x%02x,0x%02x",
+                   val4[0], val4[1]);
+
+           // TERM_DATA_CEN_DRV_IMP_ADDR
+               l_fapirc = FAPI_ATTR_GET(ATTR_EFF_CEN_DRV_IMP_ADDR,
+                   &l_fapi_mba_target, val4);
+               if (l_fapirc) break;
+               TS_TRACE( "testGetTermData attr "
+                   "TERM_DATA_CEN_DRV_IMP_ADDR=0x%02x,0x%02x",
+                   val4[0], val4[1]);
+
+           // TERM_DATA_CEN_DRV_IMP_CLK
+               l_fapirc = FAPI_ATTR_GET(ATTR_EFF_CEN_DRV_IMP_CLK,
+                   &l_fapi_mba_target, val4);
+               if (l_fapirc) break;
+               TS_TRACE( "testGetTermData attr "
+                   "TERM_DATA_CEN_DRV_IMP_CLK=0x%02x,0x%02x",
+                   val4[0], val4[1]);
+
+           // TERM_DATA_CEN_DRV_IMP_SPCKE
+               l_fapirc = FAPI_ATTR_GET(ATTR_EFF_CEN_DRV_IMP_SPCKE,
+                   &l_fapi_mba_target, val4);
+               if (l_fapirc) break;
+               TS_TRACE( "testGetTermData attr "
+                   "TERM_DATA_CEN_DRV_IMP_SPCKE=0x%02x,0x%02x",
+                   val4[0], val4[1]);
+
+           // TERM_DATA_CEN_SLEW_RATE_DQ_DQS
+               l_fapirc = FAPI_ATTR_GET(ATTR_EFF_CEN_SLEW_RATE_DQ_DQS,
+                   &l_fapi_mba_target, val4);
+               if (l_fapirc) break;
+               TS_TRACE( "testGetTermData attr "
+                   "TERM_DATA_CEN_SLEW_RATE_DQ_DQS=0x%02x,0x%02x",
+                   val4[0], val4[1]);
+
+           // TERM_DATA_CEN_SLEW_RATE_CNTL
+               l_fapirc = FAPI_ATTR_GET(ATTR_EFF_CEN_SLEW_RATE_CNTL,
+                   &l_fapi_mba_target, val4);
+               if (l_fapirc) break;
+               TS_TRACE( "testGetTermData attr "
+                   "TERM_DATA_CEN_SLEW_RATE_CNTL=0x%02x,0x%02x",
+                   val4[0], val4[1]);
+
+           // TERM_DATA_CEN_SLEW_RATE_ADDR
+               l_fapirc = FAPI_ATTR_GET(ATTR_EFF_CEN_SLEW_RATE_ADDR,
+                   &l_fapi_mba_target, val4);
+               if (l_fapirc) break;
+               TS_TRACE( "testGetTermData attr "
+                   "TERM_DATA_CEN_SLEW_RATE_ADDR=0x%02x,0x%02x",
+                   val4[0], val4[1]);
+
+           // TERM_DATA_CEN_SLEW_RATE_CLK
+               l_fapirc = FAPI_ATTR_GET(ATTR_EFF_CEN_SLEW_RATE_CLK,
+                   &l_fapi_mba_target, val4);
+               if (l_fapirc) break;
+               TS_TRACE( "testGetTermData attr "
+                   "TERM_DATA_CEN_SLEW_RATE_CLK=0x%02x,0x%02x",
+                   val4[0], val4[1]);
+
+           // TERM_DATA_CEN_SLEW_RATE_SPCKE
+               l_fapirc = FAPI_ATTR_GET(ATTR_EFF_CEN_SLEW_RATE_SPCKE,
+                   &l_fapi_mba_target, val4);
+               if (l_fapirc) break;
+               TS_TRACE( "testGetTermData attr "
+                   "TERM_DATA_CEN_SLEW_RATE_SPCKE=0x%02x,0x%02x",
+                   val4[0], val4[1]);
+#endif
+#endif
+            }
+            if (l_fapirc)
+            {
+               TS_FAIL( "fapiGetTermData: FAPI_ATTR_GET fail rc=0x%x",
+                         static_cast<uint32_t>(l_fapirc) );
+               fapiLogError(l_fapirc);
+            }
+        }
+
+
+        TS_TRACE( "testGetTermData exit" );
 
     }
 

@@ -6268,6 +6268,10 @@ firmware notes: Used as override attribute for pstate procedure
     </hwpfToHbAttrMap>
 </attribute>
 
+<!-- TODO RTC 69935. These termination data  attributes need to come from
+     CDIMM VPD.  For now, they are setup by the mss_eff_config_termination HWP.
+     Remove these when valid vpd is on the CDIMMs  -->
+
 <attribute>
     <id>EFF_ODT_RD</id>
     <description>Rank Read ODT. Initialized and used by HWPs.</description>
@@ -6395,42 +6399,6 @@ firmware notes: Used as override attribute for pstate procedure
 </attribute>
 
 <attribute>
-    <id>EFF_DRAM_WR_VREF_SCHMOO</id>
-    <description>Enables for which VREF to use on the WR Schmoo. Initialized and used by HWPs.</description>
-    <simpleType>
-        <uint32_t>
-            <default>0</default>
-        </uint32_t>
-        <array>2</array>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_EFF_DRAM_WR_VREF_SCHMOO</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
-    <id>EFF_DRAM_WRDDR4_VREF_SCHMOO</id>
-    <description>Enables for which VREF to use on the WR Schmoo for DDR4. Initialized and used by HWPs.</description>
-    <simpleType>
-        <uint32_t>
-            <default>0</default>
-        </uint32_t>
-        <array>2</array>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_EFF_DRAM_WRDDR4_VREF_SCHMOO</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
     <id>EFF_CEN_DRV_IMP_DQ_DQS</id>
     <description>Centaur DQ and DQS Drive Impedance. Initialized and used by HWPs.</description>
     <simpleType>
@@ -6521,78 +6489,6 @@ firmware notes: Used as override attribute for pstate procedure
 </attribute>
 
 <attribute>
-    <id>EFF_CEN_DRV_IMP_DQ_DQS_SCHMOO</id>
-    <description>Enables for which impedance values can be used and tested in a timing test. Initialized and used by HWPs.</description>
-    <simpleType>
-        <uint32_t>
-            <default>0</default>
-        </uint32_t>
-        <array>2</array>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_EFF_CEN_DRV_IMP_DQ_DQS_SCHMOO</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
-    <id>EFF_CEN_DRV_IMP_CLK_SCHMOO</id>
-    <description>Enables for which impedance values can be used and tested in a timing test. Initialized and used by HWPs.</description>
-    <simpleType>
-        <uint8_t>
-            <default>0</default>
-        </uint8_t>
-        <array>2</array>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_EFF_CEN_DRV_IMP_CLK_SCHMOO</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
-    <id>EFF_CEN_DRV_IMP_SPCKE_SCHMOO</id>
-    <description>Enables for which impedance values can be used and tested in a timing test. Initialized and used by HWPs.</description>
-    <simpleType>
-        <uint8_t>
-            <default>0</default>
-        </uint8_t>
-        <array>2</array>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_EFF_CEN_DRV_IMP_SPCKE_SCHMOO</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
-    <id>EFF_CEN_DRV_IMP_CNTL_SCHMOO</id>
-    <description>Enables for which impedance values can be used and tested in a timing test. Initialized and used by HWPs.</description>
-    <simpleType>
-        <uint8_t>
-            <default>0</default>
-        </uint8_t>
-        <array>2</array>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_EFF_CEN_DRV_IMP_CNTL_SCHMOO</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
     <id>EFF_CEN_RCV_IMP_DQ_DQS</id>
     <description>Centaur DQ and DQS Receiver Impedance. Initialized and used by HWPs.</description>
     <simpleType>
@@ -6606,24 +6502,6 @@ firmware notes: Used as override attribute for pstate procedure
     <writeable/>
     <hwpfToHbAttrMap>
         <id>ATTR_EFF_CEN_RCV_IMP_DQ_DQS</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
-    <id>EFF_CEN_RCV_IMP_DQ_DQS_SCHMOO</id>
-    <description>Enables for which impedance values can be used and tested in a timing test. Initialized and used by HWPs.</description>
-    <simpleType>
-        <uint32_t>
-            <default>0</default>
-        </uint32_t>
-        <array>2</array>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_EFF_CEN_RCV_IMP_DQ_DQS_SCHMOO</id>
         <macro>DIRECT</macro>
     </hwpfToHbAttrMap>
 </attribute>
@@ -6719,6 +6597,116 @@ firmware notes: Used as override attribute for pstate procedure
 </attribute>
 
 <attribute>
+    <id>EFF_CEN_RD_VREF</id>
+    <description>Centaur Read Vref. Initialized and used by HWPs.</description>
+    <simpleType>
+        <uint32_t>
+            <default>0</default>
+        </uint32_t>
+        <array>2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_CEN_RD_VREF</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<!-- TODO RTC 69935 down to here -->
+
+<attribute>
+    <id>EFF_CEN_DRV_IMP_DQ_DQS_SCHMOO</id>
+    <description>Enables for which impedance values can be used and tested in a timing test. Initialized and used by HWPs.</description>
+    <simpleType>
+        <uint32_t>
+            <default>0</default>
+        </uint32_t>
+        <array>2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_CEN_DRV_IMP_DQ_DQS_SCHMOO</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_CEN_DRV_IMP_CLK_SCHMOO</id>
+    <description>Enables for which impedance values can be used and tested in a timing test. Initialized and used by HWPs.</description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+        <array>2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_CEN_DRV_IMP_CLK_SCHMOO</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_CEN_DRV_IMP_SPCKE_SCHMOO</id>
+    <description>Enables for which impedance values can be used and tested in a timing test. Initialized and used by HWPs.</description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+        <array>2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_CEN_DRV_IMP_SPCKE_SCHMOO</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_CEN_DRV_IMP_CNTL_SCHMOO</id>
+    <description>Enables for which impedance values can be used and tested in a timing test. Initialized and used by HWPs.</description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+        <array>2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_CEN_DRV_IMP_CNTL_SCHMOO</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_CEN_RCV_IMP_DQ_DQS_SCHMOO</id>
+    <description>Enables for which impedance values can be used and tested in a timing test. Initialized and used by HWPs.</description>
+    <simpleType>
+        <uint32_t>
+            <default>0</default>
+        </uint32_t>
+        <array>2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_CEN_RCV_IMP_DQ_DQS_SCHMOO</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
     <id>EFF_CEN_SLEW_RATE_DQ_DQS_SCHMOO</id>
     <description>Slew Rates that can be selected during timing adjustments. Initialized and used by HWPs.</description>
     <simpleType>
@@ -6809,8 +6797,8 @@ firmware notes: Used as override attribute for pstate procedure
 </attribute>
 
 <attribute>
-    <id>EFF_CEN_RD_VREF</id>
-    <description>Centaur Read Vref. Initialized and used by HWPs.</description>
+    <id>EFF_DRAM_WR_VREF_SCHMOO</id>
+    <description>Enables for which VREF to use on the WR Schmoo. Initialized and used by HWPs.</description>
     <simpleType>
         <uint32_t>
             <default>0</default>
@@ -6821,7 +6809,25 @@ firmware notes: Used as override attribute for pstate procedure
     <readable/>
     <writeable/>
     <hwpfToHbAttrMap>
-        <id>ATTR_EFF_CEN_RD_VREF</id>
+        <id>ATTR_EFF_DRAM_WR_VREF_SCHMOO</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_DRAM_WRDDR4_VREF_SCHMOO</id>
+    <description>Enables for which VREF to use on the WR Schmoo for DDR4. Initialized and used by HWPs.</description>
+    <simpleType>
+        <uint32_t>
+            <default>0</default>
+        </uint32_t>
+        <array>2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_DRAM_WRDDR4_VREF_SCHMOO</id>
         <macro>DIRECT</macro>
     </hwpfToHbAttrMap>
 </attribute>

@@ -751,41 +751,45 @@
     <attribute><id>EFF_QUATERNARY_RANK_GROUP1</id></attribute>
     <attribute><id>EFF_QUATERNARY_RANK_GROUP2</id></attribute>
     <attribute><id>EFF_QUATERNARY_RANK_GROUP3</id></attribute>
-    <attribute><id>EFF_ODT_RD</id></attribute>
-    <attribute><id>EFF_ODT_WR</id></attribute>
     <attribute><id>EFF_CKE_MAP</id></attribute>
     <attribute><id>EFF_SPCKE_MAP</id></attribute>
     <attribute><id>EFF_DIMM_SPARE</id></attribute>
+<!-- TODO RTC 69935. These termination data attributes need to come from CDIMM
+     VPD. For now, they are setup by the mss_eff_config_termination HWP.
+     Remove these when valid vpd is on the CDIMMs  -->
     <attribute><id>EFF_DRAM_RON</id></attribute>
     <attribute><id>EFF_DRAM_RTT_NOM</id></attribute>
     <attribute><id>EFF_DRAM_RTT_WR</id></attribute>
+    <attribute><id>EFF_ODT_RD</id></attribute>
+    <attribute><id>EFF_ODT_WR</id></attribute>
     <attribute><id>EFF_DRAM_WR_VREF</id></attribute>
     <attribute><id>EFF_DRAM_WRDDR4_VREF</id></attribute>
-    <attribute><id>EFF_DRAM_WR_VREF_SCHMOO</id></attribute>
-    <attribute><id>EFF_DRAM_WRDDR4_VREF_SCHMOO</id></attribute>
+    <attribute><id>EFF_CEN_RCV_IMP_DQ_DQS</id></attribute>
     <attribute><id>EFF_CEN_DRV_IMP_DQ_DQS</id></attribute>
     <attribute><id>EFF_CEN_DRV_IMP_ADDR</id></attribute>
     <attribute><id>EFF_CEN_DRV_IMP_CNTL</id></attribute>
     <attribute><id>EFF_CEN_DRV_IMP_CLK</id></attribute>
     <attribute><id>EFF_CEN_DRV_IMP_SPCKE</id></attribute>
-    <attribute><id>EFF_CEN_DRV_IMP_DQ_DQS_SCHMOO</id></attribute>
-    <attribute><id>EFF_CEN_DRV_IMP_CLK_SCHMOO</id></attribute>
-    <attribute><id>EFF_CEN_DRV_IMP_SPCKE_SCHMOO</id></attribute>
-    <attribute><id>EFF_CEN_DRV_IMP_CNTL_SCHMOO</id></attribute>
-    <attribute><id>EFF_CEN_RCV_IMP_DQ_DQS</id></attribute>
-    <attribute><id>EFF_CEN_RCV_IMP_DQ_DQS_SCHMOO</id></attribute>
     <attribute><id>EFF_CEN_SLEW_RATE_DQ_DQS</id></attribute>
     <attribute><id>EFF_CEN_SLEW_RATE_ADDR</id></attribute>
     <attribute><id>EFF_CEN_SLEW_RATE_CLK</id></attribute>
     <attribute><id>EFF_CEN_SLEW_RATE_SPCKE</id></attribute>
     <attribute><id>EFF_CEN_SLEW_RATE_CNTL</id></attribute>
+    <attribute><id>EFF_CEN_RD_VREF</id></attribute>
+<!-- TODO RTC 69935. Down to here -->
+    <attribute><id>EFF_CEN_RD_VREF_SCHMOO</id></attribute>
+    <attribute><id>EFF_DRAM_WR_VREF_SCHMOO</id></attribute>
+    <attribute><id>EFF_DRAM_WRDDR4_VREF_SCHMOO</id></attribute>
+    <attribute><id>EFF_CEN_DRV_IMP_DQ_DQS_SCHMOO</id></attribute>
+    <attribute><id>EFF_CEN_DRV_IMP_CLK_SCHMOO</id></attribute>
+    <attribute><id>EFF_CEN_DRV_IMP_SPCKE_SCHMOO</id></attribute>
+    <attribute><id>EFF_CEN_DRV_IMP_CNTL_SCHMOO</id></attribute>
+    <attribute><id>EFF_CEN_RCV_IMP_DQ_DQS_SCHMOO</id></attribute>
     <attribute><id>EFF_CEN_SLEW_RATE_DQ_DQS_SCHMOO</id></attribute>
     <attribute><id>EFF_CEN_SLEW_RATE_CLK_SCHMOO</id></attribute>
     <attribute><id>EFF_CEN_SLEW_RATE_SPCKE_SCHMOO</id></attribute>
     <attribute><id>EFF_CEN_SLEW_RATE_ADDR_SCHMOO</id></attribute>
     <attribute><id>EFF_CEN_SLEW_RATE_CNTL_SCHMOO</id></attribute>
-    <attribute><id>EFF_CEN_RD_VREF</id></attribute>
-    <attribute><id>EFF_CEN_RD_VREF_SCHMOO</id></attribute>
     <attribute><id>EFF_DIMM_SIZE</id></attribute>
     <attribute><id>EFF_DRAM_BANKS</id></attribute>
     <attribute><id>EFF_DRAM_ROWS</id></attribute>

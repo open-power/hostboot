@@ -55,6 +55,7 @@
 #include <hwpf/plat/fapiPlatAttrOverrideSync.H>
 #include <hwpf/hwp/mvpd_accessors/getMBvpdPhaseRotatorData.H>
 #include <hwpf/hwp/mvpd_accessors/getMBvpdAddrMirrorData.H>
+#include <hwpf/hwp/mvpd_accessors/getMBvpdTermData.H>
 #include <vpd/spdenums.H>
 #include <dimmConsts.H>
 #include <util/singleton.H>
@@ -453,6 +454,7 @@ fapi::ReturnCode fapiPlatGetPhaseRotatorData (
                                     const fapi::Target * i_pTarget,
                                     const fapi::MBvpdPhaseRotatorData i_attr,
                                     uint8_t    (&o_val) [2] );
+
 /**
  * @brief This function is called by the FAPI_ATTR_GET macro when getting
  * the Address Mirroring Data attributes
@@ -466,7 +468,22 @@ fapi::ReturnCode fapiPlatGetAddrMirrorData (
                                     const fapi::Target * i_pTarget,
                                     uint8_t    &o_val);
 
-
+/**
+ * @brief This function is called by the FAPI_ATTR_GET macro when getting
+ * the Termination Data attributes
+ * It should not be called directly.
+ *
+ *  @param[in]  i_pTarget   Target pointer
+ *  @param i_attr           Termination Data attribute enumerator
+ *  @param o_pVal           Pointer to variable typed output values
+ *  @param i_valSize        Size of output variable
+ *  @return     ReturnCode. Zero on success, else platform specified error
+ */
+fapi::ReturnCode fapiPlatGetTermData (
+                              const fapi::Target * i_pTarget,
+                              const fapi::MBvpdTermData i_attr,
+                              void  * o_pVal,
+                              const uint32_t i_valSize);
 } // namespace platAttrSvc
 
 } // namespace fapi
@@ -774,6 +791,8 @@ fapi::ReturnCode fapiPlatGetAddrMirrorData (
 //  MACROS to support MVPD attributes
 //------------------------------------------------------------------------------
 #define ATTR_EX_L2_SINGLE_MEMBER_ENABLE_GETMACRO( ID, PTARGET, VAL )   \
+    fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ?\
+    fapi::FAPI_RC_SUCCESS :\
     fapi::platAttrSvc::fapiPlatGetSingleMemberEnableAttr ( PTARGET, VAL )
 
 // TODO: RTC 69935 complete Phase Rotator Data.
@@ -1085,5 +1104,171 @@ fapi::ReturnCode fapiPlatGetAddrMirrorData (
     fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ?\
     fapi::FAPI_RC_SUCCESS : fapi::platAttrSvc::fapiPlatGetAddrMirrorData\
         (PTARGET, VAL)
+
+//------------------------------------------------------------------------------
+//  MACROS to support MBVPD Termination Data attributes
+//------------------------------------------------------------------------------
+// TODO: RTC 69935 complete Termination Data.
+// Use this code to fully implements 50574.
+// Remove Termination Data attributes from attribute_types.xml
+// and target_types.xml then enable the following.
+// The "sets" are only needed to temporarily allow mss_eff_config_termination.C
+// to do FAPI_ATTR_SET, but need to be removed when fully complete.
+#if RTC69935
+#define ATTR_EFF_DRAM_RON_GETMACRO(ID, PTARGET, VAL)\
+    fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ?\
+        fapi::FAPI_RC_SUCCESS :\
+    (checkTermDataType<fapi::TERM_DATA_DRAM_RON>(VAL), \
+        fapi::platAttrSvc::fapiPlatGetTermData\
+           (PTARGET, fapi::TERM_DATA_DRAM_RON , VAL, sizeof(VAL)))
+#define ATTR_EFF_DRAM_RTT_NOM_GETMACRO(ID, PTARGET, VAL)\
+    fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ?\
+        fapi::FAPI_RC_SUCCESS :\
+    (checkTermDataType<fapi::TERM_DATA_DRAM_RTT_NOM>(VAL), \
+        fapi::platAttrSvc::fapiPlatGetTermData\
+           (PTARGET, fapi::TERM_DATA_DRAM_RTT_NOM , VAL, sizeof(VAL)))
+#define ATTR_EFF_DRAM_RTT_WR_GETMACRO(ID, PTARGET, VAL)\
+    fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ?\
+        fapi::FAPI_RC_SUCCESS :\
+    (checkTermDataType<fapi::TERM_DATA_DRAM_RTT_WR>(VAL), \
+        fapi::platAttrSvc::fapiPlatGetTermData\
+           (PTARGET, fapi::TERM_DATA_DRAM_RTT_WR , VAL, sizeof(VAL)))
+#define ATTR_EFF_ODT_RD_GETMACRO(ID, PTARGET, VAL)\
+    fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ?\
+        fapi::FAPI_RC_SUCCESS :\
+    (checkTermDataType<fapi::TERM_DATA_ODT_RD>(VAL), \
+        fapi::platAttrSvc::fapiPlatGetTermData\
+           (PTARGET, fapi::TERM_DATA_ODT_RD , VAL, sizeof(VAL)))
+#define ATTR_EFF_ODT_WR_GETMACRO(ID, PTARGET, VAL)\
+    fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ?\
+        fapi::FAPI_RC_SUCCESS :\
+    (checkTermDataType<fapi::TERM_DATA_ODT_WR>(VAL), \
+        fapi::platAttrSvc::fapiPlatGetTermData\
+           (PTARGET, fapi::TERM_DATA_ODT_WR , VAL, sizeof(VAL)))
+#define ATTR_EFF_CEN_RD_VREF_GETMACRO(ID, PTARGET, VAL)\
+    fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ?\
+        fapi::FAPI_RC_SUCCESS :\
+    (checkTermDataType<fapi::TERM_DATA_CEN_RD_VREF>(VAL), \
+        fapi::platAttrSvc::fapiPlatGetTermData\
+           (PTARGET, fapi::TERM_DATA_CEN_RD_VREF , VAL, sizeof(VAL)))
+#define ATTR_EFF_DRAM_WR_VREF_GETMACRO(ID, PTARGET, VAL)\
+    fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ?\
+        fapi::FAPI_RC_SUCCESS :\
+    (checkTermDataType<fapi::TERM_DATA_DRAM_WR_VREF>(VAL), \
+        fapi::platAttrSvc::fapiPlatGetTermData\
+           (PTARGET, fapi::TERM_DATA_DRAM_WR_VREF , VAL, sizeof(VAL)))
+#define ATTR_EFF_DRAM_WRDDR4_VREF_GETMACRO(ID, PTARGET, VAL)\
+    fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ?\
+        fapi::FAPI_RC_SUCCESS :\
+    (checkTermDataType<fapi::TERM_DATA_DRAM_WRDDR4_VREF>(VAL), \
+        fapi::platAttrSvc::fapiPlatGetTermData\
+           (PTARGET, fapi::TERM_DATA_DRAM_WRDDR4_VREF , VAL, sizeof(VAL)))
+#define ATTR_EFF_CEN_RCV_IMP_DQ_DQS_GETMACRO(ID, PTARGET, VAL)\
+    fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ?\
+        fapi::FAPI_RC_SUCCESS :\
+    (checkTermDataType<fapi::TERM_DATA_CEN_RCV_IMP_DQ_DQS>(VAL), \
+        fapi::platAttrSvc::fapiPlatGetTermData\
+           (PTARGET, fapi::TERM_DATA_CEN_RCV_IMP_DQ_DQS , VAL, sizeof(VAL)))
+#define ATTR_EFF_CEN_DRV_IMP_DQ_DQS_GETMACRO(ID, PTARGET, VAL)\
+    fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ?\
+        fapi::FAPI_RC_SUCCESS :\
+    (checkTermDataType<fapi::TERM_DATA_CEN_DRV_IMP_DQ_DQS>(VAL), \
+        fapi::platAttrSvc::fapiPlatGetTermData\
+           (PTARGET, fapi::TERM_DATA_CEN_DRV_IMP_DQ_DQS , VAL, sizeof(VAL)))
+#define ATTR_EFF_CEN_DRV_IMP_CNTL_GETMACRO(ID, PTARGET, VAL)\
+    fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ?\
+        fapi::FAPI_RC_SUCCESS :\
+    (checkTermDataType<fapi::TERM_DATA_CEN_DRV_IMP_CNTL>(VAL), \
+        fapi::platAttrSvc::fapiPlatGetTermData\
+           (PTARGET, fapi::TERM_DATA_CEN_DRV_IMP_CNTL , VAL, sizeof(VAL)))
+#define ATTR_EFF_CEN_DRV_IMP_ADDR_GETMACRO(ID, PTARGET, VAL)\
+    fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ?\
+        fapi::FAPI_RC_SUCCESS :\
+    (checkTermDataType<fapi::TERM_DATA_CEN_DRV_IMP_ADDR>(VAL), \
+        fapi::platAttrSvc::fapiPlatGetTermData\
+           (PTARGET, fapi::TERM_DATA_CEN_DRV_IMP_ADDR , VAL, sizeof(VAL)))
+#define ATTR_EFF_CEN_DRV_IMP_CLK_GETMACRO(ID, PTARGET, VAL)\
+    fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ?\
+        fapi::FAPI_RC_SUCCESS :\
+    (checkTermDataType<fapi::TERM_DATA_CEN_DRV_IMP_CLK>(VAL), \
+        fapi::platAttrSvc::fapiPlatGetTermData\
+           (PTARGET, fapi::TERM_DATA_CEN_DRV_IMP_CLK , VAL, sizeof(VAL)))
+#define ATTR_EFF_CEN_DRV_IMP_SPCKE_GETMACRO(ID, PTARGET, VAL)\
+    fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ?\
+        fapi::FAPI_RC_SUCCESS :\
+    (checkTermDataType<fapi::TERM_DATA_CEN_DRV_IMP_SPCKE>(VAL), \
+        fapi::platAttrSvc::fapiPlatGetTermData\
+           (PTARGET, fapi::TERM_DATA_CEN_DRV_IMP_SPCKE , VAL, sizeof(VAL)))
+#define ATTR_EFF_CEN_SLEW_RATE_DQ_DQS_GETMACRO(ID, PTARGET, VAL)\
+    fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ?\
+        fapi::FAPI_RC_SUCCESS :\
+    (checkTermDataType<fapi::TERM_DATA_CEN_SLEW_RATE_DQ_DQS>(VAL), \
+        fapi::platAttrSvc::fapiPlatGetTermData\
+           (PTARGET, fapi::TERM_DATA_CEN_SLEW_RATE_DQ_DQS , VAL, sizeof(VAL)))
+#define ATTR_EFF_CEN_SLEW_RATE_CNTL_GETMACRO(ID, PTARGET, VAL)\
+    fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ?\
+        fapi::FAPI_RC_SUCCESS :\
+    (checkTermDataType<fapi::TERM_DATA_CEN_SLEW_RATE_CNTL>(VAL), \
+        fapi::platAttrSvc::fapiPlatGetTermData\
+           (PTARGET, fapi::TERM_DATA_CEN_SLEW_RATE_CNTL , VAL, sizeof(VAL)))
+#define ATTR_EFF_CEN_SLEW_RATE_ADDR_GETMACRO(ID, PTARGET, VAL)\
+    fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ?\
+        fapi::FAPI_RC_SUCCESS :\
+    (checkTermDataType<fapi::TERM_DATA_CEN_SLEW_RATE_ADDR>(VAL), \
+        fapi::platAttrSvc::fapiPlatGetTermData\
+           (PTARGET, fapi::TERM_DATA_CEN_SLEW_RATE_ADDR , VAL, sizeof(VAL)))
+#define ATTR_EFF_CEN_SLEW_RATE_CLK_GETMACRO(ID, PTARGET, VAL)\
+    fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ?\
+        fapi::FAPI_RC_SUCCESS :\
+    (checkTermDataType<fapi::TERM_DATA_CEN_SLEW_RATE_CLK>(VAL), \
+        fapi::platAttrSvc::fapiPlatGetTermData\
+           (PTARGET, fapi::TERM_DATA_CEN_SLEW_RATE_CLK , VAL, sizeof(VAL)))
+#define ATTR_EFF_CEN_SLEW_RATE_SPCKE_GETMACRO(ID, PTARGET, VAL)\
+    fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ?\
+        fapi::FAPI_RC_SUCCESS :\
+    (checkTermDataType<fapi::TERM_DATA_CEN_SLEW_RATE_SPCKE>(VAL), \
+        fapi::platAttrSvc::fapiPlatGetTermData\
+           (PTARGET, fapi::TERM_DATA_CEN_SLEW_RATE_SPCKE , VAL, sizeof(VAL)))
+
+#define ATTR_EFF_DRAM_RON_SETMACRO(ID, PTARGET, VAL)\
+        fapi::FAPI_RC_SUCCESS
+#define ATTR_EFF_DRAM_RTT_NOM_SETMACRO(ID, PTARGET, VAL)\
+        fapi::FAPI_RC_SUCCESS
+#define ATTR_EFF_DRAM_RTT_WR_SETMACRO(ID, PTARGET, VAL)\
+        fapi::FAPI_RC_SUCCESS
+#define ATTR_EFF_ODT_RD_SETMACRO(ID, PTARGET, VAL)\
+        fapi::FAPI_RC_SUCCESS
+#define ATTR_EFF_ODT_WR_SETMACRO(ID, PTARGET, VAL)\
+        fapi::FAPI_RC_SUCCESS
+#define ATTR_EFF_CEN_RD_VREF_SETMACRO(ID, PTARGET, VAL)\
+        fapi::FAPI_RC_SUCCESS
+#define ATTR_EFF_DRAM_WR_VREF_SETMACRO(ID, PTARGET, VAL)\
+        fapi::FAPI_RC_SUCCESS
+#define ATTR_EFF_DRAM_WRDDR4_VREF_SETMACRO(ID, PTARGET, VAL)\
+        fapi::FAPI_RC_SUCCESS
+#define ATTR_EFF_CEN_RCV_IMP_DQ_DQS_SETMACRO(ID, PTARGET, VAL)\
+        fapi::FAPI_RC_SUCCESS
+#define ATTR_EFF_CEN_DRV_IMP_DQ_DQS_SETMACRO(ID, PTARGET, VAL)\
+        fapi::FAPI_RC_SUCCESS
+#define ATTR_EFF_CEN_DRV_IMP_CNTL_SETMACRO(ID, PTARGET, VAL)\
+        fapi::FAPI_RC_SUCCESS
+#define ATTR_EFF_CEN_DRV_IMP_ADDR_SETMACRO(ID, PTARGET, VAL)\
+        fapi::FAPI_RC_SUCCESS
+#define ATTR_EFF_CEN_DRV_IMP_CLK_SETMACRO(ID, PTARGET, VAL)\
+        fapi::FAPI_RC_SUCCESS
+#define ATTR_EFF_CEN_DRV_IMP_SPCKE_SETMACRO(ID, PTARGET, VAL)\
+        fapi::FAPI_RC_SUCCESS
+#define ATTR_EFF_CEN_SLEW_RATE_DQ_DQS_SETMACRO(ID, PTARGET, VAL)\
+        fapi::FAPI_RC_SUCCESS
+#define ATTR_EFF_CEN_SLEW_RATE_CNTL_SETMACRO(ID, PTARGET, VAL)\
+        fapi::FAPI_RC_SUCCESS
+#define ATTR_EFF_CEN_SLEW_RATE_ADDR_SETMACRO(ID, PTARGET, VAL)\
+        fapi::FAPI_RC_SUCCESS
+#define ATTR_EFF_CEN_SLEW_RATE_CLK_SETMACRO(ID, PTARGET, VAL)\
+        fapi::FAPI_RC_SUCCESS
+#define ATTR_EFF_CEN_SLEW_RATE_SPCKE_SETMACRO(ID, PTARGET, VAL)\
+        fapi::FAPI_RC_SUCCESS
+#endif
+
 
 #endif // FAPIPLATATTRIBUTESERVICE_H_
