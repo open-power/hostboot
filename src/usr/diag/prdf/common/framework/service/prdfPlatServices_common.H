@@ -177,6 +177,14 @@ int32_t setVpdFailedLanes(TARGETING::TargetHandle_t i_rxBusTgt,
                           std::vector<uint8_t> &i_rxFailLanes,
                           bool & o_thrExceeded);
 
+/**
+ * @brief   Calls io_fir_isolation HWP and commits FAPI errorlog containing
+ *          additional FFDC
+ * @param   i_rxBusTgt    Target of the receiving end of the bus
+ * @return  SUCCESS
+ */
+int32_t erepairFirIsolation(TARGETING::TargetHandle_t i_rxBusTgt);
+
 //##############################################################################
 //##                        Memory specific functions
 //##############################################################################

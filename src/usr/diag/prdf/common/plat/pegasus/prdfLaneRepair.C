@@ -239,11 +239,10 @@ int32_t handleLaneRepairEvent (ExtensibleChip * i_chip,
 
     } while (0);
 
-    //FIXME RTC:64173 - Add call to io_fir_isolation when available
-
     // Clear FIRs
     if (rxBusTgt)
     {
+        l_rc |= erepairFirIsolation(rxBusTgt);
         l_rc |= clearIOFirs(rxBusTgt);
     }
 
