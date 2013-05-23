@@ -71,6 +71,10 @@
     <default>NA</default>
 </enumerationType>
 
+<!-- The script genHwsvMrwXml.pl hardcodes the HUID type field to match
+     these values and should be kept in sync. Leave holes in in the range
+     if a type is deleted. Not changing the values keeps the values
+     consistent over builds making them easier to recognize.  -->
 <enumerationType>
     <id>TYPE</id>
     <description>Enumeration indicating the target's type</description>
@@ -80,81 +84,107 @@
     </enumerator>
     <enumerator>
         <name>SYS</name>
+        <value>1</value>
     </enumerator>
     <enumerator>
         <name>NODE</name>
+        <value>2</value>
     </enumerator>
     <enumerator>
         <name>DIMM</name>
+        <value>3</value>
     </enumerator>
     <enumerator>
         <name>MEMBUF</name>
+        <value>4</value>
     </enumerator>
     <enumerator>
         <name>PROC</name>
+        <value>5</value>
     </enumerator>
     <enumerator>
         <name>EX</name>
+        <value>6</value>
     </enumerator>
     <enumerator>
         <name>CORE</name>
+        <value>7</value>
     </enumerator>
     <enumerator>
         <name>L2</name>
+        <value>8</value>
     </enumerator>
     <enumerator>
         <name>L3</name>
+        <value>9</value>
     </enumerator>
     <enumerator>
         <name>L4</name>
+        <value>10</value>
     </enumerator>
     <enumerator>
         <name>MCS</name>
+        <value>11</value>
     </enumerator>
     <enumerator>
         <name>MBS</name>
+        <value>12</value>
     </enumerator>
     <enumerator>
         <name>MBA</name>
+        <value>13</value>
     </enumerator>
     <enumerator>
         <name>XBUS</name>
+        <value>14</value>
     </enumerator>
     <enumerator>
         <name>ABUS</name>
+        <value>15</value>
     </enumerator>
     <enumerator>
         <name>PCI</name>
+        <value>16</value>
     </enumerator>
     <enumerator>
         <name>DPSS</name>
+        <value>17</value>
     </enumerator>
     <enumerator>
         <name>APSS</name>
+        <value>18</value>
     </enumerator>
     <enumerator>
         <name>OCC</name>
+        <value>19</value>
     </enumerator>
     <enumerator>
         <name>PSI</name>
+        <value>20</value>
     </enumerator>
     <enumerator>
         <name>FSP</name>
+        <value>21</value>
     </enumerator>
     <enumerator>
         <name>PNOR</name>
+        <value>22</value>
     </enumerator>
     <enumerator>
         <name>OSC</name>
+        <value>23</value>
     </enumerator>
     <enumerator>
         <name>TODCLK</name>
+        <value>24</value>
     </enumerator>
     <enumerator>
         <name>CONTROL_NODE</name>
+        <value>25</value>
     </enumerator>
     <enumerator>
         <name>LAST_IN_RANGE</name>
+        <value>26</value>
     </enumerator>
     <default>NA</default>
 </enumerationType>
