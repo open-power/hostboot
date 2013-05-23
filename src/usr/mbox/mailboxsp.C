@@ -137,6 +137,11 @@ errlHndl_t MailboxSp::_init()
         spless = false;
     }
 
+    // create task before registering the msgQ so any waiting interrupts get
+    // handled as soon as the msgQ is registered with the interrupt service
+    // provider
+    task_create(MailboxSp::msg_handler, NULL);
+
     if(!spless)
     {
         // Initialize the mailbox hardware
@@ -160,8 +165,6 @@ errlHndl_t MailboxSp::_init()
     err = INTR::registerMsgQ(iv_msgQ,
                              MSG_IPC,
                              INTR::ISN_INTERPROC);
-
-    task_create(MailboxSp::msg_handler, NULL);
 
 
     if(!spless)
