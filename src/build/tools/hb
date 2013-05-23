@@ -332,6 +332,7 @@ hb_fipssetup()
     mksb -rc ${SANDBOXRC} -dir ${SANDBOXROOT} -back $DRIVER \
          -sb ${SANDBOXNAME} -m ppc
 
+    echo "Running workarounds (presimsetup)."
     cp ${HOSTBOOTROOT}/src/build/citest/etc/workarounds.presimsetup \
         ${SANDBOXBASE}/src
     execute_in_sandbox "export BACKING_BUILD=\$bb && \

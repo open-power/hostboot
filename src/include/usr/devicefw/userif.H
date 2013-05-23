@@ -53,6 +53,7 @@ namespace DeviceFW
         MVPD,
         CVPD,
         SCAN,
+        EEPROM,
 
         LAST_ACCESS_TYPE,
     };
@@ -136,6 +137,16 @@ namespace DeviceFW
         DeviceFW::SCAN, static_cast<uint64_t>(( i_ring )),\
             static_cast<uint64_t>(( i_ringlen )),\
             static_cast<uint64_t>(( i_flag ))
+
+    /**
+     * Construct the device addressing parameters for the EEPROM device ops.
+     * @param[in] i_eeprom_enum - The chip number of the EEPROM to access. See
+     *                            eeprom_chip_types_t in eepromif.H
+     * @param[in] i_offset - The internal offset of the EEPROM slave device.
+     */
+    #define DEVICE_EEPROM_ADDRESS( i_eeprom_enum, i_offset )\
+        DeviceFW::EEPROM, static_cast<uint64_t>(( i_eeprom_enum )),\
+            static_cast<uint64_t>(( i_offset ))
 
     /**
      *  @brief Perform a hardware read operation.

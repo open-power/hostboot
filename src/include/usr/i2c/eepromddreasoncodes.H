@@ -1,25 +1,25 @@
-//  IBM_PROLOG_BEGIN_TAG
-//  This is an automatically generated prolog.
-//
-//  $Source: src/include/usr/i2c/eepromddreasoncodes.H $
-//
-//  IBM CONFIDENTIAL
-//
-//  COPYRIGHT International Business Machines Corp. 2011
-//
-//  p1
-//
-//  Object Code Only (OCO) source materials
-//  Licensed Internal Code Source Materials
-//  IBM HostBoot Licensed Internal Code
-//
-//  The source code for this program is not published or other-
-//  wise divested of its trade secrets, irrespective of what has
-//  been deposited with the U.S. Copyright Office.
-//
-//  Origin: 30
-//
-//  IBM_PROLOG_END
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/include/usr/i2c/eepromddreasoncodes.H $                   */
+/*                                                                        */
+/* IBM CONFIDENTIAL                                                       */
+/*                                                                        */
+/* COPYRIGHT International Business Machines Corp. 2011,2013              */
+/*                                                                        */
+/* p1                                                                     */
+/*                                                                        */
+/* Object Code Only (OCO) source materials                                */
+/* Licensed Internal Code Source Materials                                */
+/* IBM HostBoot Licensed Internal Code                                    */
+/*                                                                        */
+/* The source code for this program is not published or otherwise         */
+/* divested of its trade secrets, irrespective of what has been           */
+/* deposited with the U.S. Copyright Office.                              */
+/*                                                                        */
+/* Origin: 30                                                             */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
 /**
  * @file eepromddreasoncodes.H
  *
@@ -65,11 +65,13 @@ enum eepromReasonCode
     EEPROM_INVALID_REASONCODE               = EEPROM_COMP_ID | 0x00,   // Invalid Reasoncode
     EEPROM_INVALID_OPERATION                = EEPROM_COMP_ID | 0x01,
     EEPROM_INVALID_DEVICE_TYPE              = EEPROM_COMP_ID | 0x02,
-    EEPROM_ADDR_INFO0_NOT_FOUND             = EEPROM_COMP_ID | 0x03,
-    EEPROM_ADDR_INFO1_NOT_FOUND             = EEPROM_COMP_ID | 0x04,
-    EEPROM_INVALID_CHIP                     = EEPROM_COMP_ID | 0x05,
-    EEPROM_DIMM_I2C_MASTER_PATH_ERROR       = EEPROM_COMP_ID | 0x06,
-    EEPROM_TARGET_NULL                      = EEPROM_COMP_ID | 0x07,
+    EEPROM_VPD_PRIMARY_INFO_NOT_FOUND       = EEPROM_COMP_ID | 0x03,
+    EEPROM_VPD_BACKUP_INFO_NOT_FOUND        = EEPROM_COMP_ID | 0x04,
+    EEPROM_SBE_PRIMARY_INFO_NOT_FOUND       = EEPROM_COMP_ID | 0x05,
+    EEPROM_SBE_BACKUP_INFO_NOT_FOUND        = EEPROM_COMP_ID | 0x06,
+    EEPROM_INVALID_CHIP                     = EEPROM_COMP_ID | 0x07,
+    EEPROM_DIMM_I2C_MASTER_PATH_ERROR       = EEPROM_COMP_ID | 0x08,
+    EEPROM_TARGET_NULL                      = EEPROM_COMP_ID | 0x09,
 };
 
 };  // end EEPROM

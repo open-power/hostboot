@@ -1,25 +1,25 @@
-//  IBM_PROLOG_BEGIN_TAG
-//  This is an automatically generated prolog.
-//
-//  $Source: src/usr/i2c/eepromdd.H $
-//
-//  IBM CONFIDENTIAL
-//
-//  COPYRIGHT International Business Machines Corp. 2011
-//
-//  p1
-//
-//  Object Code Only (OCO) source materials
-//  Licensed Internal Code Source Materials
-//  IBM HostBoot Licensed Internal Code
-//
-//  The source code for this program is not published or other-
-//  wise divested of its trade secrets, irrespective of what has
-//  been deposited with the U.S. Copyright Office.
-//
-//  Origin: 30
-//
-//  IBM_PROLOG_END
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/usr/i2c/eepromdd.H $                                      */
+/*                                                                        */
+/* IBM CONFIDENTIAL                                                       */
+/*                                                                        */
+/* COPYRIGHT International Business Machines Corp. 2011,2013              */
+/*                                                                        */
+/* p1                                                                     */
+/*                                                                        */
+/* Object Code Only (OCO) source materials                                */
+/* Licensed Internal Code Source Materials                                */
+/* IBM HostBoot Licensed Internal Code                                    */
+/*                                                                        */
+/* The source code for this program is not published or otherwise         */
+/* divested of its trade secrets, irrespective of what has been           */
+/* deposited with the U.S. Copyright Office.                              */
+/*                                                                        */
+/* Origin: 30                                                             */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
 #ifndef __EEPROM_H
 #define __EEPROM_H
 
@@ -33,6 +33,7 @@
 // ----------------------------------------------
 // Includes
 // ----------------------------------------------
+#include <i2c/eepromif.H>
 #include <errl/errlentry.H>
 
 namespace EEPROM
@@ -57,9 +58,12 @@ typedef struct
     uint64_t port;
     uint64_t engine;
     uint64_t devAddr;
-    uint64_t addr;
     int64_t  chip;
+    uint64_t offset;
     eeprom_device_t deviceType;
+    TARGETING::EntityPath i2cMasterPath;
+    uint64_t writePageSize;  // in bytes
+    eeprom_chip_types_t chipTypeEnum;
 } eeprom_addr_t;
 
 /**
@@ -85,9 +89,9 @@ typedef struct
 *       usrif.H
 *
 * @param [in] i_args - This is an argument list for the device driver
-*       framework.  This argument list consists of the address to use
-*       on the slave I2C device, and the chip number of the EEPROM to
-*       access from the given I2C Master target.
+*       framework.  This argument list consists of the chip number of
+*       the EEPROM to access from the given I2C Master target and the
+*       internal offset to use on the slave I2C device.
 *
 * @return errlHndl_t - NULL if successful, otherwise a pointer to the
 *       error log.
@@ -111,7 +115,7 @@ errlHndl_t eepromPerformOp( DeviceFW::OperationType i_opType,
  *
  * @param[in] i_buflen - Number of bytes to read from the EEPROM device.
  *
- * @param[in] i_i2cInfo - Structure of I2C parameters neede to execute
+ * @param[in] i_i2cInfo - Structure of I2C parameters needed to execute
  *      the command to the I2C device driver.
  *
  * @return errlHndl_t - NULL if successful, otherwise a pointer to the
@@ -136,7 +140,7 @@ errlHndl_t eepromRead ( TARGETING::Target * i_target,
 *       OUTPUT: Length of buffer that was written, or length of buffer
 *           to be read from target device.
  *
- * @param[in] i_i2cInfo - Structure of I2C parameters neede to execute
+ * @param[in] i_i2cInfo - Structure of I2C parameters needed to execute
  *      the command to the I2C device driver.
  *
  * @return errlHndl_t - NULL if successful, otherwise a pointer to the
@@ -157,7 +161,7 @@ errlHndl_t eepromWrite ( TARGETING::Target * i_target,
  *
  * @param[out] o_bufSize - The size of the buffer to be written.
  *
- * @param[in] i_i2cInfo - Structure of I2C parameters neede to execute
+ * @param[in] i_i2cInfo - Structure of I2C parameters needed to execute
  *      the command to the I2C device driver.
  *
  * @return errlHndl_t - NULL if successful, otherwise a pointer to the
@@ -192,6 +196,9 @@ errlHndl_t eepromReadAttributes ( TARGETING::Target * i_target,
  *
  * @param[in] i_target - The current Target.
  *
+ * @param[in] i_i2cInfo - Structure of I2C parameters needed to execute
+ *      the command to the I2C device driver.
+ *
  * @param[out] o_target - The "new" target that will be used for all operations
  *      from this point on.  It may be == to i_target, or a completely different
  *      target.  BUT, this target will contain the I2C Master engine that will
@@ -201,6 +208,7 @@ errlHndl_t eepromReadAttributes ( TARGETING::Target * i_target,
  *      error log.
  */
 errlHndl_t eepromGetI2CMasterTarget ( TARGETING::Target * i_target,
+                                      eeprom_addr_t i_i2cInfo,
                                       TARGETING::Target * &o_target );
 
 }; // end EEPROM namespace

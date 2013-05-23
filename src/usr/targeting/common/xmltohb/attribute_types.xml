@@ -998,32 +998,36 @@
 </attribute>
 
 <attribute>
-    <id>EEPROM_ADDR_INFO0</id>
+    <id>EEPROM_VPD_PRIMARY_INFO</id>
     <description>Information needed to address the EEPROM slaves</description>
     <complexType>
-        <description>Structure to define the addressing for an I2C slave device.</description>
+        <description>Structure to define the addressing for an I2C
+                     slave device.</description>
         <field>
             <name>i2cMasterPath</name>
-            <description>Entity path to the processor containing the I2C master (FOR DIMMS
-                ONLY)</description>
+            <description>Entity path to the chip that contains the I2C
+                         master</description>
             <type>EntityPath</type>
             <default>physical:sys-0</default>
         </field>
         <field>
             <name>port</name>
-            <description>Port from the I2C Master device.  This is a 6-bit value.</description>
+            <description>Port from the I2C Master device. This is a 6-bit
+                         value.</description>
             <type>uint8_t</type>
             <default>0x80</default>
         </field>
         <field>
             <name>devAddr</name>
-            <description>Device address on the I2C bus. This is a 7-bit value.</description>
+            <description>Device address on the I2C bus. This is a 7-bit value,
+                         but then shifted 1 bit left.</description>
             <type>uint8_t</type>
             <default>0x80</default>
         </field>
         <field>
             <name>engine</name>
-            <description>I2C master engine.  This is a 2-bit value.</description>
+            <description>I2C master engine. This is a 2-bit
+                         value.</description>
             <type>uint8_t</type>
             <default>0x80</default>
         </field>
@@ -1033,32 +1037,114 @@
 </attribute>
 
 <attribute>
-    <id>EEPROM_ADDR_INFO1</id>
+    <id>EEPROM_VPD_BACKUP_INFO</id>
     <description>Information needed to address the EERPROM slaves</description>
     <complexType>
-        <description>Structure to define the addressing for an I2C slave device.</description>
+        <description>Structure to define the addressing for an I2C
+                     slave device.</description>
         <field>
             <name>i2cMasterPath</name>
-            <description>Entity path to the processor containing the I2C master (FOR DIMMS
-                ONLY)</description>
+            <description>Entity path to the chip that contains the I2C
+                         master</description>
             <type>EntityPath</type>
             <default>physical:sys-0</default>
         </field>
         <field>
             <name>port</name>
-            <description>Port from the I2C Master device.  This is a 6-bit value.</description>
+            <description>Port from the I2C Master device. This is a 6-bit
+                         value.</description>
             <type>uint8_t</type>
             <default>0x80</default>
         </field>
         <field>
             <name>devAddr</name>
-            <description>Device address on the I2C bus. This is a 7-bit value.</description>
+            <description>Device address on the I2C bus. This is a 7-bit value,
+                         but then shifted 1 bit left.</description>
             <type>uint8_t</type>
             <default>0x80</default>
         </field>
         <field>
             <name>engine</name>
-            <description>I2C master engine.  This is a 2-bit value.</description>
+            <description>I2C master engine. This is a 2-bit
+                         value.</description>
+            <type>uint8_t</type>
+            <default>0x80</default>
+        </field>
+    </complexType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+</attribute>
+
+<attribute>
+    <id>EEPROM_SBE_PRIMARY_INFO</id>
+    <description>Information needed to address the EERPROM slaves</description>
+    <complexType>
+        <description>Structure to define the addressing for an I2C
+                     slave device.</description>
+        <field>
+            <name>i2cMasterPath</name>
+            <description>Entity path to the chip that contains the I2C
+                         master</description>
+            <type>EntityPath</type>
+            <default>physical:sys-0</default>
+        </field>
+        <field>
+            <name>port</name>
+            <description>Port from the I2C Master device. This is a 6-bit
+                         value.</description>
+            <type>uint8_t</type>
+            <default>0x80</default>
+        </field>
+        <field>
+            <name>devAddr</name>
+            <description>Device address on the I2C bus. This is a 7-bit value,
+                         but then shifted 1 bit left.</description>
+            <type>uint8_t</type>
+            <default>0x80</default>
+        </field>
+        <field>
+            <name>engine</name>
+            <description>I2C master engine. This is a 2-bit
+                         value.</description>
+            <type>uint8_t</type>
+            <default>0x80</default>
+        </field>
+    </complexType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+</attribute>
+
+<attribute>
+    <id>EEPROM_SBE_BACKUP_INFO</id>
+    <description>Information needed to address the EERPROM slaves</description>
+    <complexType>
+        <description>Structure to define the addressing for an I2C
+                     slave device.</description>
+        <field>
+            <name>i2cMasterPath</name>
+            <description>Entity path to the chip that contains the I2C
+                         master</description>
+            <type>EntityPath</type>
+            <default>physical:sys-0</default>
+        </field>
+        <field>
+            <name>port</name>
+            <description>Port from the I2C Master device. This is a 6-bit
+                         value.</description>
+            <type>uint8_t</type>
+            <default>0x80</default>
+        </field>
+        <field>
+            <name>devAddr</name>
+            <description>Device address on the I2C bus. This is a 7-bit value,
+                         but then shifted 1 bit left.</description>
+            <type>uint8_t</type>
+            <default>0x80</default>
+        </field>
+        <field>
+            <name>engine</name>
+            <description>I2C master engine. This is a 2-bit
+                         value.</description>
             <type>uint8_t</type>
             <default>0x80</default>
         </field>

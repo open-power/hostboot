@@ -441,6 +441,42 @@
         <id>PROC_PCIE_PHB_ACTIVE</id>
         <default>0xE0</default>
     </attribute>
+    <attribute>
+         <id>EEPROM_VPD_PRIMARY_INFO</id>
+         <default>
+             <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+             <field><id>port</id><value>1</value></field>
+             <field><id>devAddr</id><value>0xA4</value></field>
+             <field><id>engine</id><value>0</value></field>
+         </default>
+     </attribute>
+    <attribute>
+         <id>EEPROM_VPD_BACKUP_INFO</id>
+         <default>
+             <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+             <field><id>port</id><value>0xFF</value></field>
+             <field><id>devAddr</id><value>0xFF</value></field>
+             <field><id>engine</id><value>0xFF</value></field>
+         </default>
+     </attribute>
+    <attribute>
+         <id>EEPROM_SBE_PRIMARY_INFO</id>
+         <default>
+             <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+             <field><id>port</id><value>0</value></field>
+             <field><id>devAddr</id><value>0xAC</value></field>
+             <field><id>engine</id><value>0</value></field>
+         </default>
+     </attribute>
+    <attribute>
+         <id>EEPROM_SBE_BACKUP_INFO</id>
+         <default>
+             <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+             <field><id>port</id><value>0</value></field>
+             <field><id>devAddr</id><value>0xAE</value></field>
+             <field><id>engine</id><value>0</value></field>
+         </default>
+     </attribute>
 </targetInstance>
 
 <!-- Murano n0p0 EX units -->
@@ -1147,6 +1183,43 @@
         <id>PROC_PCIE_PHB_ACTIVE</id>
         <default>0xE0</default>
     </attribute>
+
+    <attribute>
+         <id>EEPROM_VPD_PRIMARY_INFO</id>
+         <default>
+             <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-1</value></field>
+             <field><id>port</id><value>1</value></field>
+             <field><id>devAddr</id><value>0xA6</value></field>
+             <field><id>engine</id><value>0</value></field>
+         </default>
+     </attribute>
+    <attribute>
+         <id>EEPROM_VPD_BACKUP_INFO</id>
+         <default>
+             <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-1</value></field>
+             <field><id>port</id><value>0xFF</value></field>
+             <field><id>devAddr</id><value>0xFF</value></field>
+             <field><id>engine</id><value>0xFF</value></field>
+         </default>
+     </attribute>
+    <attribute>
+         <id>EEPROM_SBE_PRIMARY_INFO</id>
+         <default>
+             <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-1</value></field>
+             <field><id>port</id><value>0</value></field>
+             <field><id>devAddr</id><value>0xAC</value></field>
+             <field><id>engine</id><value>0</value></field>
+         </default>
+     </attribute>
+    <attribute>
+         <id>EEPROM_SBE_BACKUP_INFO</id>
+         <default>
+             <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-1</value></field>
+             <field><id>port</id><value>0</value></field>
+             <field><id>devAddr</id><value>0xAE</value></field>
+             <field><id>engine</id><value>0</value></field>
+         </default>
+     </attribute>
 </targetInstance>
 
 <!-- Murano n0p1 EX units -->
@@ -1852,6 +1925,43 @@
         <id>PROC_PCIE_PHB_ACTIVE</id>
         <default>0xE0</default>
     </attribute>
+
+    <attribute>
+         <id>EEPROM_VPD_PRIMARY_INFO</id>
+         <default>
+             <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-2</value></field>
+             <field><id>port</id><value>1</value></field>
+             <field><id>devAddr</id><value>0xA4</value></field>
+             <field><id>engine</id><value>0</value></field>
+         </default>
+     </attribute>
+    <attribute>
+         <id>EEPROM_VPD_BACKUP_INFO</id>
+         <default>
+             <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-2</value></field>
+             <field><id>port</id><value>0xFF</value></field>
+             <field><id>devAddr</id><value>0xFF</value></field>
+             <field><id>engine</id><value>0xFF</value></field>
+         </default>
+     </attribute>
+    <attribute>
+         <id>EEPROM_SBE_PRIMARY_INFO</id>
+         <default>
+             <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-2</value></field>
+             <field><id>port</id><value>0</value></field>
+             <field><id>devAddr</id><value>0xAC</value></field>
+             <field><id>engine</id><value>0</value></field>
+         </default>
+     </attribute>
+    <attribute>
+         <id>EEPROM_SBE_BACKUP_INFO</id>
+         <default>
+             <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-2</value></field>
+             <field><id>port</id><value>0</value></field>
+             <field><id>devAddr</id><value>0xAE</value></field>
+             <field><id>engine</id><value>0</value></field>
+         </default>
+     </attribute>
 </targetInstance>
 
 <!-- Murano n0p2 EX units -->
@@ -2560,6 +2670,42 @@
         <id>PROC_PCIE_PHB_ACTIVE</id>
         <default>0xE0</default>
     </attribute>
+    <attribute>
+         <id>EEPROM_VPD_PRIMARY_INFO</id>
+         <default>
+             <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-3</value></field>
+             <field><id>port</id><value>1</value></field>
+             <field><id>devAddr</id><value>0xA6</value></field>
+             <field><id>engine</id><value>0</value></field>
+         </default>
+     </attribute>
+    <attribute>
+         <id>EEPROM_VPD_BACKUP_INFO</id>
+         <default>
+             <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-3</value></field>
+             <field><id>port</id><value>0xFF</value></field>
+             <field><id>devAddr</id><value>0xFF</value></field>
+             <field><id>engine</id><value>0xFF</value></field>
+         </default>
+     </attribute>
+    <attribute>
+         <id>EEPROM_SBE_PRIMARY_INFO</id>
+         <default>
+             <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-3</value></field>
+             <field><id>port</id><value>0</value></field>
+             <field><id>devAddr</id><value>0xAC</value></field>
+             <field><id>engine</id><value>0</value></field>
+         </default>
+     </attribute>
+    <attribute>
+         <id>EEPROM_SBE_BACKUP_INFO</id>
+         <default>
+             <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-3</value></field>
+             <field><id>port</id><value>0</value></field>
+             <field><id>devAddr</id><value>0xAE</value></field>
+             <field><id>engine</id><value>0</value></field>
+         </default>
+     </attribute>
 </targetInstance>
 
 <!-- Murano n0p3 EX units -->
@@ -3067,6 +3213,15 @@
         <default>0</default>
     </attribute>
     <attribute><id>VPD_REC_NUM</id><default>4</default></attribute>
+    <attribute>
+         <id>EEPROM_VPD_PRIMARY_INFO</id>
+         <default>
+             <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/membuf-4</value></field>
+             <field><id>port</id><value>0</value></field>
+             <field><id>devAddr</id><value>0xA0</value></field>
+             <field><id>engine</id><value>0</value></field>
+         </default>
+     </attribute>
 </targetInstance>
 
 <!-- Centaur L4 affiliated with membuf4 -->
@@ -3165,6 +3320,15 @@
         <default>0</default>
     </attribute>
     <attribute><id>VPD_REC_NUM</id><default>5</default></attribute>
+    <attribute>
+         <id>EEPROM_VPD_PRIMARY_INFO</id>
+         <default>
+             <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/membuf-5</value></field>
+             <field><id>port</id><value>0</value></field>
+             <field><id>devAddr</id><value>0xA0</value></field>
+             <field><id>engine</id><value>0</value></field>
+         </default>
+     </attribute>
 </targetInstance>
 
 <!-- Centaur L4 affiliated with membuf5 -->
@@ -3263,6 +3427,15 @@
         <default>0</default>
     </attribute>
     <attribute><id>VPD_REC_NUM</id><default>6</default></attribute>
+    <attribute>
+         <id>EEPROM_VPD_PRIMARY_INFO</id>
+         <default>
+             <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/membuf-6</value></field>
+             <field><id>port</id><value>0</value></field>
+             <field><id>devAddr</id><value>0xA0</value></field>
+             <field><id>engine</id><value>0</value></field>
+         </default>
+     </attribute>
 </targetInstance>
 
 <!-- Centaur L4 affiliated with membuf6 -->
@@ -3361,6 +3534,15 @@
         <default>0</default>
     </attribute>
     <attribute><id>VPD_REC_NUM</id><default>7</default></attribute>
+    <attribute>
+         <id>EEPROM_VPD_PRIMARY_INFO</id>
+         <default>
+             <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/membuf-7</value></field>
+             <field><id>port</id><value>0</value></field>
+             <field><id>devAddr</id><value>0xA0</value></field>
+             <field><id>engine</id><value>0</value></field>
+         </default>
+     </attribute>
 </targetInstance>
 
 <!-- Centaur L4 affiliated with membuf7 -->
@@ -3458,6 +3640,15 @@
         <default>0</default>
     </attribute>
     <attribute><id>VPD_REC_NUM</id><default>12</default></attribute>
+    <attribute>
+         <id>EEPROM_VPD_PRIMARY_INFO</id>
+         <default>
+             <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/membuf-12</value></field>
+             <field><id>port</id><value>0</value></field>
+             <field><id>devAddr</id><value>0xA0</value></field>
+             <field><id>engine</id><value>0</value></field>
+         </default>
+     </attribute>
 </targetInstance>
 
 <!-- Centaur L4 affiliated with membuf12 -->
@@ -3556,6 +3747,15 @@
         <default>0</default>
     </attribute>
     <attribute><id>VPD_REC_NUM</id><default>13</default></attribute>
+    <attribute>
+         <id>EEPROM_VPD_PRIMARY_INFO</id>
+         <default>
+             <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/membuf-13</value></field>
+             <field><id>port</id><value>0</value></field>
+             <field><id>devAddr</id><value>0xA0</value></field>
+             <field><id>engine</id><value>0</value></field>
+         </default>
+     </attribute>
 </targetInstance>
 
 <!-- Centaur L4 affiliated with membuf13 -->
@@ -3654,6 +3854,15 @@
         <default>0</default>
     </attribute>
     <attribute><id>VPD_REC_NUM</id><default>14</default></attribute>
+    <attribute>
+         <id>EEPROM_VPD_PRIMARY_INFO</id>
+         <default>
+             <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/membuf-14</value></field>
+             <field><id>port</id><value>0</value></field>
+             <field><id>devAddr</id><value>0xA0</value></field>
+             <field><id>engine</id><value>0</value></field>
+         </default>
+     </attribute>
 </targetInstance>
 
 <!-- Centaur L4 affiliated with membuf14 -->
@@ -3752,6 +3961,15 @@
         <default>0</default>
     </attribute>
     <attribute><id>VPD_REC_NUM</id><default>15</default></attribute>
+    <attribute>
+         <id>EEPROM_VPD_PRIMARY_INFO</id>
+         <default>
+             <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/membuf-15</value></field>
+             <field><id>port</id><value>0</value></field>
+             <field><id>devAddr</id><value>0xA0</value></field>
+             <field><id>engine</id><value>0</value></field>
+         </default>
+     </attribute>
 </targetInstance>
 
 <!-- Centaur L4 affiliated with membuf15 -->
@@ -3849,6 +4067,15 @@
         <default>0</default>
     </attribute>
     <attribute><id>VPD_REC_NUM</id><default>20</default></attribute>
+    <attribute>
+         <id>EEPROM_VPD_PRIMARY_INFO</id>
+         <default>
+             <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/membuf-20</value></field>
+             <field><id>port</id><value>0</value></field>
+             <field><id>devAddr</id><value>0xA0</value></field>
+             <field><id>engine</id><value>0</value></field>
+         </default>
+     </attribute>
 </targetInstance>
 
 <!-- Centaur L4 affiliated with membuf20 -->
@@ -3947,6 +4174,15 @@
         <default>0</default>
     </attribute>
     <attribute><id>VPD_REC_NUM</id><default>21</default></attribute>
+    <attribute>
+         <id>EEPROM_VPD_PRIMARY_INFO</id>
+         <default>
+             <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/membuf-21</value></field>
+             <field><id>port</id><value>0</value></field>
+             <field><id>devAddr</id><value>0xA0</value></field>
+             <field><id>engine</id><value>0</value></field>
+         </default>
+     </attribute>
 </targetInstance>
 
 <!-- Centaur L4 affiliated with membuf21 -->
@@ -4045,6 +4281,15 @@
         <default>0</default>
     </attribute>
     <attribute><id>VPD_REC_NUM</id><default>22</default></attribute>
+    <attribute>
+         <id>EEPROM_VPD_PRIMARY_INFO</id>
+         <default>
+             <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/membuf-22</value></field>
+             <field><id>port</id><value>0</value></field>
+             <field><id>devAddr</id><value>0xA0</value></field>
+             <field><id>engine</id><value>0</value></field>
+         </default>
+     </attribute>
 </targetInstance>
 
 <!-- Centaur L4 affiliated with membuf22 -->
@@ -4143,6 +4388,15 @@
         <default>0</default>
     </attribute>
     <attribute><id>VPD_REC_NUM</id><default>23</default></attribute>
+    <attribute>
+         <id>EEPROM_VPD_PRIMARY_INFO</id>
+         <default>
+             <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/membuf-23</value></field>
+             <field><id>port</id><value>0</value></field>
+             <field><id>devAddr</id><value>0xA0</value></field>
+             <field><id>engine</id><value>0</value></field>
+         </default>
+     </attribute>
 </targetInstance>
 
 <!-- Centaur L4 affiliated with membuf23 -->
@@ -4240,6 +4494,15 @@
         <default>0</default>
     </attribute>
     <attribute><id>VPD_REC_NUM</id><default>28</default></attribute>
+    <attribute>
+         <id>EEPROM_VPD_PRIMARY_INFO</id>
+         <default>
+             <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/membuf-28</value></field>
+             <field><id>port</id><value>0</value></field>
+             <field><id>devAddr</id><value>0xA0</value></field>
+             <field><id>engine</id><value>0</value></field>
+         </default>
+     </attribute>
 </targetInstance>
 
 <!-- Centaur L4 affiliated with membuf28 -->
@@ -4338,6 +4601,15 @@
         <default>0</default>
     </attribute>
     <attribute><id>VPD_REC_NUM</id><default>29</default></attribute>
+    <attribute>
+         <id>EEPROM_VPD_PRIMARY_INFO</id>
+         <default>
+             <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/membuf-29</value></field>
+             <field><id>port</id><value>0</value></field>
+             <field><id>devAddr</id><value>0xA0</value></field>
+             <field><id>engine</id><value>0</value></field>
+         </default>
+     </attribute>
 </targetInstance>
 
 <!-- Centaur L4 affiliated with membuf29 -->
@@ -4436,6 +4708,15 @@
         <default>0</default>
     </attribute>
     <attribute><id>VPD_REC_NUM</id><default>30</default></attribute>
+    <attribute>
+         <id>EEPROM_VPD_PRIMARY_INFO</id>
+         <default>
+             <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/membuf-30</value></field>
+             <field><id>port</id><value>0</value></field>
+             <field><id>devAddr</id><value>0xA0</value></field>
+             <field><id>engine</id><value>0</value></field>
+         </default>
+     </attribute>
 </targetInstance>
 
 <!-- Centaur L4 affiliated with membuf30 -->
@@ -4534,6 +4815,15 @@
         <default>0</default>
     </attribute>
     <attribute><id>VPD_REC_NUM</id><default>31</default></attribute>
+    <attribute>
+         <id>EEPROM_VPD_PRIMARY_INFO</id>
+         <default>
+             <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/membuf-31</value></field>
+             <field><id>port</id><value>0</value></field>
+             <field><id>devAddr</id><value>0xA0</value></field>
+             <field><id>engine</id><value>0</value></field>
+         </default>
+     </attribute>
 </targetInstance>
 
 <!-- Centaur L4 affiliated with membuf31 -->

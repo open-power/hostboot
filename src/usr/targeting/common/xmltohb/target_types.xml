@@ -387,6 +387,10 @@
     <attribute><id>DUMMY_RW</id></attribute>
     <attribute><id>DUMMY_HEAP_ZERO_DEFAULT</id></attribute>
     <attribute><id>MSS_MEM_MC_IN_GROUP</id></attribute>
+    <attribute><id>EEPROM_VPD_PRIMARY_INFO</id></attribute>
+    <attribute><id>EEPROM_VPD_BACKUP_INFO</id></attribute>
+    <attribute><id>EEPROM_SBE_PRIMARY_INFO</id></attribute>
+    <attribute><id>EEPROM_SBE_BACKUP_INFO</id></attribute>
 
     <!-- From PHYP Memory Map -->
     <attribute><id>FSP_BASE_ADDR</id></attribute>
@@ -477,8 +481,6 @@
     </attribute>
     <attribute><id>DUMMY_RW</id></attribute>
     <attribute><id>DUMMY_HEAP_ZERO_DEFAULT</id></attribute>
-    <attribute><id>EEPROM_ADDR_INFO0</id></attribute>
-    <attribute><id>EEPROM_ADDR_INFO1</id></attribute>
 </targetType>
 
 <targetType>
@@ -1069,8 +1071,7 @@
             <field><id>reserved</id><value>0</value></field>
         </default>
     </attribute>
-    <attribute><id>EEPROM_ADDR_INFO0</id></attribute>
-    <attribute><id>EEPROM_ADDR_INFO1</id></attribute>
+    <attribute><id>EEPROM_VPD_PRIMARY_INFO</id></attribute>
     <attribute><id>MSS_VOLT</id></attribute>
     <attribute><id>MSS_FREQ</id></attribute>
     <attribute><id>MSS_LAB_OVERRIDE_FOR_MEM_PLL</id></attribute>
@@ -1193,7 +1194,7 @@
     </attribute>
 
     <!-- Defaulting this info to the one Simics Dummy device that we have -->
-    <attribute><id>EEPROM_ADDR_INFO0</id></attribute>
+    <attribute><id>EEPROM_VPD_PRIMARY_INFO</id></attribute>
 
     <attribute><id>VPD_REC_NUM</id></attribute>
 

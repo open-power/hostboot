@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/include/usr/i2c/i2cif.H $                                 */
+/* $Source: src/include/usr/i2c/eepromif.H $                              */
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/* COPYRIGHT International Business Machines Corp. 2013                   */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -20,23 +20,27 @@
 /* Origin: 30                                                             */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-#ifndef __I2CIF_H
-#define __I2CIF_H
+#ifndef __EEPROMIF_H
+#define __EEPROMIF_H
 
-namespace I2C
+namespace EEPROM
 {
 
 /**
- * @brief This function will handle everything required to setup the master
- *      engines.
- *      Mainly, as of current code, this is being used to write the I2C Bus
- *      Divisor values to the master engines to be used by Phyp.
- *
- * @return errlHndl_t - Null if successful, otherwise a pointer to
- *      the error log.
- */
-errlHndl_t i2cSetupMasters ( void );
+ * @brief Enumerations to link EEPROM types to EEPROM's chip number behind
+ *        a device
+*/
+typedef enum
+{
+  VPD_PRIMARY   = 0,
+  VPD_BACKUP    = 1,
+  SBE_PRIMARY   = 2,
+  SBE_BACKUP    = 3,
+  LAST_CHIP_TYPE
+} eeprom_chip_types_t;
+
 
 };  // end namespace I2C
 
-#endif  // end __I2CIF_H
+#endif  // end __EEPROMIF_H
+

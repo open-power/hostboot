@@ -1,25 +1,25 @@
-//  IBM_PROLOG_BEGIN_TAG
-//  This is an automatically generated prolog.
-//
-//  $Source: src/usr/i2c/test/i2ctest.H $
-//
-//  IBM CONFIDENTIAL
-//
-//  COPYRIGHT International Business Machines Corp. 2011
-//
-//  p1
-//
-//  Object Code Only (OCO) source materials
-//  Licensed Internal Code Source Materials
-//  IBM HostBoot Licensed Internal Code
-//
-//  The source code for this program is not published or other-
-//  wise divested of its trade secrets, irrespective of what has
-//  been deposited with the U.S. Copyright Office.
-//
-//  Origin: 30
-//
-//  IBM_PROLOG_END
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/usr/i2c/test/i2ctest.H $                                  */
+/*                                                                        */
+/* IBM CONFIDENTIAL                                                       */
+/*                                                                        */
+/* COPYRIGHT International Business Machines Corp. 2011,2013              */
+/*                                                                        */
+/* p1                                                                     */
+/*                                                                        */
+/* Object Code Only (OCO) source materials                                */
+/* Licensed Internal Code Source Materials                                */
+/* IBM HostBoot Licensed Internal Code                                    */
+/*                                                                        */
+/* The source code for this program is not published or otherwise         */
+/* divested of its trade secrets, irrespective of what has been           */
+/* deposited with the U.S. Copyright Office.                              */
+/*                                                                        */
+/* Origin: 30                                                             */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
 #ifndef __I2CTEST_H
 #define __I2CTEST_H
 
@@ -42,12 +42,21 @@ extern trace_desc_t* g_trac_i2c;
 
 using namespace TARGETING;
 
+
+// Used to ignore comparing data on reads
+#define I2C_TEST_IGNORE_DATA_COMPARE 0xFFFFFFFFFFFFFFFF
+
+// @todo RTC:72715: Re-visit the use of this function when we have full
+// Attribute support
 bool isI2CAvailable( TARGETING::Target * i_target )
 {
     bool avail = true;
-    EepromAddrInfo0 eepromData;
-    if( i_target->tryGetAttr<ATTR_EEPROM_ADDR_INFO0>( eepromData ) )
+
+    // Rudimentary Check - Every I2C Master has VPD Primary Attribute
+    EepromVpdPrimaryInfo eepromData;
+    if( i_target->tryGetAttr<ATTR_EEPROM_VPD_PRIMARY_INFO>( eepromData ) )
     {
+
         if( ( 0x80 == eepromData.port ) &&
             ( 0x80 == eepromData.devAddr ) &&
             ( 0x80 == eepromData.engine ) )
@@ -74,10 +83,10 @@ class I2CTest: public CxxTest::TestSuite
          *      This test will test a variety of reads/writes and lengths
          *      across slave devices.
          *
-         *      TODO - Currently there is only 1 dummy I2C device that is
-         *      accessible via Simics.  Once another is added the structure
-         *      used to direct commands will be altered to use the new device
-         *      and also be changed to not be destructive as they are currently.
+         *      Currently only Processor targets are supported in simics.
+         *
+         *      Add other targets to this testcase when their support is
+         *      added.
          */
         void testI2CReadWrite ( void )
         {
@@ -99,28 +108,97 @@ class I2CTest: public CxxTest::TestSuite
                 uint64_t port;      // Master engine port
                 uint64_t engine;    // Master engine
                 uint64_t devAddr;   // Slave Device address
+
                 uint64_t data;      // Data to write or compare to
+                                    // if data = I2C_TEST_IGNORE_DATA_COMPARE
+                                    //  than ignore data compare
+
                 size_t   size;      // Number of Bytes to read/write
                 bool     rnw;       // Read (true), Write (false)
                 targetType_t type;  // Target Type
             } testData[] =
             {
-                // Dummy I2C Device in Simics
-                { 0x00, 0x00, 0x50, 0x1234BA9876543210,
-                    8, false, I2C_PROC_TARGET }, // Write data
-                { 0x00, 0x00, 0x50, 0x1234000000000000,
-                    2, false, I2C_PROC_TARGET }, // Write addr for read
-                { 0x00, 0x00, 0x50, 0xba98765432100000,
-                    6, true, I2C_PROC_TARGET  }, // Read data back
-                { 0x00, 0x00, 0x50, 0x1100556677880000,
-                    6, false, I2C_PROC_TARGET },
-                { 0x00, 0x00, 0x50, 0x1100000000000000,
-                    2, false, I2C_PROC_TARGET },
-                { 0x00, 0x00, 0x50, 0x5566778800000000,
-                    4, true, I2C_PROC_TARGET  },
 
-                // TODO - Once these commands are working with Simics, they
-                // can be enabled.  No target date.
+                // PROCESSOR TESTS
+                //  -- For Processor SEEPROM's, ONLY USE ENGINE 0
+
+                // READ All 3 at address 0 for 8 bytes first
+                // Ignore data compare as we're not sure what's
+                //  been writted there
+
+                // Read SBE Primary:  Murano-0, port-0
+                { 0x00, 0x00, 0xAC, I2C_TEST_IGNORE_DATA_COMPARE,
+                     8, true, I2C_PROC_TARGET }, // Read
+
+                // Read SBE Backup:  Murano-0, port-0
+                { 0x00, 0x00, 0xAE, I2C_TEST_IGNORE_DATA_COMPARE,
+                     8, true, I2C_PROC_TARGET }, // Read
+
+                // Read From MVPD: Murano-0, port 1
+                { 0x01, 0x00, 0xA4, I2C_TEST_IGNORE_DATA_COMPARE,
+                     8, true, I2C_PROC_TARGET  }, // Read data back
+
+
+                // Read/Write SBE Primary:  Murano-0, port-0
+                // Safe to write to first 1K: 0x-0x400
+
+                { 0x00, 0x00, 0xAC, 0x0000ababcdcdefef,
+                     8, false, I2C_PROC_TARGET }, // Write data to 0x0000
+
+                { 0x00, 0x00, 0xAC, 0x0000000000000000,
+                     2, false, I2C_PROC_TARGET }, // Write addr for read
+
+                { 0x00, 0x00, 0xAc, 0xababcdcdefef0000,
+                     6, true, I2C_PROC_TARGET  }, // Read data back
+
+                { 0x00, 0x00, 0xAC, 0x0003000000000000,
+                     2, false, I2C_PROC_TARGET }, // Write addr for read
+
+                { 0x00, 0x00, 0xAC, 0xcdefef0000000000,
+                     3, true, I2C_PROC_TARGET  }, // Read data back
+
+                { 0x00, 0x00, 0xAC, 0x0005ee1200000000,
+                     4, false, I2C_PROC_TARGET }, // Write data to 0x0005
+
+                { 0x00, 0x00, 0xAC, 0x0005000000000000,
+                     2, false, I2C_PROC_TARGET }, // Write addr for read
+
+                { 0x00, 0x00, 0xAC, 0xee12000000000000,
+                     2, true, I2C_PROC_TARGET  }, // Read data back
+
+
+
+                // Read/Write SBE Backup:  Murano-0, port-0
+                // Safe to write to first 1K: 0x-0x400
+
+                { 0x00, 0x00, 0xAE, 0x0000ababcdcdefef,
+                     8, false, I2C_PROC_TARGET }, // Write data to 0x0000
+
+                { 0x00, 0x00, 0xAE, 0x0000000000000000,
+                     2, false, I2C_PROC_TARGET }, // Write addr for read
+
+                { 0x00, 0x00, 0xAE, 0xababcdcdefef0000,
+                     6, true, I2C_PROC_TARGET  }, // Read data back
+
+                { 0x00, 0x00, 0xAE, 0x0003000000000000,
+                     2, false, I2C_PROC_TARGET }, // Write addr for read
+
+                { 0x00, 0x00, 0xAE, 0xcdefef0000000000,
+                     3, true, I2C_PROC_TARGET  }, // Read data back
+
+                { 0x00, 0x00, 0xAE, 0x0005ee1200000000,
+                     4, false, I2C_PROC_TARGET }, // Write data to 0x0005
+
+                { 0x00, 0x00, 0xAE, 0x0005000000000000,
+                     2, false, I2C_PROC_TARGET }, // Write addr for read
+
+                { 0x00, 0x00, 0xAE, 0xee12000000000000,
+                     2, true, I2C_PROC_TARGET  }, // Read data back
+
+
+                // MEMBUF TESTS
+                // Use the following commands when Centaur devices are
+                // supported in simics.  No target date.
                 // Real Centaur Devices
 //                { 0x00, 0x00, 0x51, 0x1111000000000000,
 //                    2, false, I2C_CENTAUR_TARGET }, // Write addr of 0x0000
@@ -134,10 +212,8 @@ class I2CTest: public CxxTest::TestSuite
 
             const uint32_t NUM_CMDS = sizeof(testData)/sizeof(testData[0]);
 
-            //@TODO
-            //@VBU workaround - Disable I2C test case on fake target
-            //Test case use fake targets, which will fail when running
-            //on VBU.  Need to fix this.
+
+            // Skipping I2C test altogether in VBU/VPO environment
             if( TARGETING::is_vpo() )
             {
                 return;
@@ -168,7 +244,18 @@ class I2CTest: public CxxTest::TestSuite
 
                 for( uint32_t i = 0; i < NUM_CMDS; i++ )
                 {
+
+                    // Make sure size is less than or = to 8 bytes
+                    //  to fit into data
                     uint64_t data;
+                    if (testData[i].size > 8)
+                    {
+                        TRACFCOMP( g_trac_i2c,
+                                   "testI2ReadWrite Size (%d) is greater than"
+                                   " 8 bytes. Skipping test %d",
+                                   testData[i].size, i );
+                        continue;
+                    }
 
                     // if a read, initialize data, else, set data to write
                     if( testData[i].rnw )
@@ -220,7 +307,7 @@ class I2CTest: public CxxTest::TestSuite
                     if( !isI2CAvailable( theTarget ) )
                     {
                         TRACFCOMP( g_trac_i2c,
-                               "testI2ReadWrite Operation - no i2c function" );
+                               "testI2CReadWrite Operation - no i2c function" );
 
 
                         continue;
@@ -259,8 +346,10 @@ class I2CTest: public CxxTest::TestSuite
                         continue;
                     }
 
-                    // compare data for the read
-                    if( testData[i].rnw )
+                    // compare data for the read, but ignore case where
+                    //  data = I2C_TEST_IGNORE_DATA_COMPARE
+                    if( ( testData[i].rnw ) &&
+                        ( testData[i].data != I2C_TEST_IGNORE_DATA_COMPARE ))
                     {
                         if( data != testData[i].data )
                         {

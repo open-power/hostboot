@@ -50,7 +50,6 @@ namespace DeviceFW
         XSCOM                   = LAST_ACCESS_TYPE,
         I2C,
         FSISCOM,
-        EEPROM,
         IBSCOM,
 
         LAST_DRIVER_ACCESS_TYPE
@@ -108,15 +107,6 @@ namespace DeviceFW
         DeviceFW::I2C, static_cast<uint64_t>(( i_port )),\
             static_cast<uint64_t>(( i_engine )),\
             static_cast<uint64_t>(( i_devAddr ))
-
-    /**
-     * Construct the device addressing parameters for the EEPROM device ops.
-     * @param[in] i_address - The address of the I2C slave device.
-     * @param[in] i_chip - The chip number of the EEPROM to access.
-     */
-    #define DEVICE_EEPROM_ADDRESS( i_address, i_chip )\
-        DeviceFW::EEPROM, static_cast<uint64_t>(( i_address )),\
-            static_cast<uint64_t>(( i_chip ))
 
     /** @class InvalidParameterType
      *  @brief Unused type to cause compiler fails for invalid template types.

@@ -332,6 +332,8 @@ public:
             eudlr.addData(DEVICE_MVPD_ADDRESS(3,0));
             // error:
             eudlr.addData(DEVICE_FSI_ADDRESS(0x01028));
+            eudlr.addData(DEVICE_I2C_ADDRESS(0,0,0xAC));
+            eudlr.addData(DEVICE_EEPROM_ADDRESS(0x0,0x0));
             eudlr.addToLog(errl);
         }
 
@@ -437,8 +439,6 @@ public:
             ErrlUserDetailsLogRegister eudlr(c_target);
             eudlr.addData(DEVICE_FSISCOM_ADDRESS(0x01028));
             eudlr.addData(DEVICE_XSCOM_ADDRESS(0x000F000Full));
-            eudlr.addData(DEVICE_I2C_ADDRESS(0,0,0x50));
-            eudlr.addData(DEVICE_EEPROM_ADDRESS(0x1111,0));
             eudlr.addToLog(errl);
         }
 

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2012              */
+/* COPYRIGHT International Business Machines Corp. 2011,2013              */
 /*                                                                        */
 /* p1                                                                     */
 /*                                                                        */
@@ -42,7 +42,9 @@
 #include <devicefw/driverif.H>
 #include <i2c/eepromddreasoncodes.H>
 
+#include <i2c/eepromif.H>
 #include "eepromdd.H"
+
 // ----------------------------------------------
 // Globals
 // ----------------------------------------------
@@ -60,6 +62,7 @@ TRAC_INIT( & g_trac_eepromr, "EEPROMR", KILOBYTE );
 // Easy macro replace for unit testing
 //#define TRACUCOMP(args...)  TRACFCOMP(args)
 #define TRACUCOMP(args...)
+
 // ----------------------------------------------
 // Defines
 // ----------------------------------------------
@@ -102,11 +105,16 @@ errlHndl_t eepromPerformOp( DeviceFW::OperationType i_opType,
     eeprom_addr_t i2cInfo;
     i2cInfo.deviceType = LAST_DEVICE_TYPE;
 
-    i2cInfo.addr = va_arg( i_args, uint64_t );
     i2cInfo.chip = va_arg( i_args, uint64_t );
+    i2cInfo.offset = va_arg( i_args, uint64_t );
 
     TRACDCOMP( g_trac_eeprom,
                ENTER_MRK"eepromPerformOp()" );
+
+    TRACUCOMP (g_trac_eeprom, ENTER_MRK"eepromPerformOp(): "
+               "i_opType=%d, chip=%d, offset=%d, len=%d",
+               (uint64_t) i_opType, i2cInfo.chip, i2cInfo.offset, io_buflen);
+
 
     do
     {
@@ -122,6 +130,7 @@ errlHndl_t eepromPerformOp( DeviceFW::OperationType i_opType,
         // Check to see if we need to find a new target for
         // the I2C Master
         err = eepromGetI2CMasterTarget( i_target,
+                                        i2cInfo,
                                         theTarget );
 
         if( err )
@@ -157,7 +166,7 @@ errlHndl_t eepromPerformOp( DeviceFW::OperationType i_opType,
         else
         {
             TRACFCOMP( g_trac_eeprom,
-                       ERR_MRK"Invalid EEPROM Operation!" );
+                       ERR_MRK"eepromPerformOp(): Invalid EEPROM Operation!");
 
             /*@
              * @errortype
@@ -205,8 +214,8 @@ errlHndl_t eepromRead ( TARGETING::Target * i_target,
     do
     {
         TRACSCOMP( g_trac_eepromr,
-                   "EEPROM READ  START : Chip: %02d : Addr %.2X : Len %d",
-                   i_i2cInfo.chip, i_i2cInfo.addr, i_buflen );
+                   "EEPROM READ  START : Chip: %02d : Offset %.2X : Len %d",
+                   i_i2cInfo.chip, i_i2cInfo.offset, i_buflen );
 
         err = eepromPrepareAddress( &byteAddr,
                                     byteAddrSize,
@@ -250,6 +259,9 @@ errlHndl_t eepromRead ( TARGETING::Target * i_target,
 
         if( err )
         {
+            TRACFCOMP( g_trac_eeprom,
+                       ERR_MRK"eepromRead(): I2C Read failed on %d/%d/0x%x",
+                       i_i2cInfo.port, i_i2cInfo.engine, i_i2cInfo.devAddr );
             break;
         }
 
@@ -257,8 +269,10 @@ errlHndl_t eepromRead ( TARGETING::Target * i_target,
         unlock = false;
 
         TRACSCOMP( g_trac_eepromr,
-                   "EEPROM READ  END   : Chip: %02d : Addr %.2X : Len %d : %016llx",
-                   i_i2cInfo.chip, i_i2cInfo.addr, i_buflen, *((uint64_t*)o_buffer) );
+                   "EEPROM READ  END   : Chip: %02d : Offset %.2X : Len %d : %016llx",
+                   i_i2cInfo.chip, i_i2cInfo.offset, i_buflen,
+                   *((uint64_t*)o_buffer) );
+
     } while( 0 );
 
     // Catch it if we break out early.
@@ -286,7 +300,9 @@ errlHndl_t eepromWrite ( TARGETING::Target * i_target,
     uint8_t byteAddr[MAX_BYTE_ADDR];
     size_t byteAddrSize = 0;
     uint8_t * newBuffer = NULL;
-    bool needFree = true;
+    bool needFree = false;
+    bool unlock = false;
+    eeprom_addr_t l_i2cInfo = i_i2cInfo;
 
     TRACDCOMP( g_trac_eeprom,
                ENTER_MRK"eepromWrite()" );
@@ -294,8 +310,9 @@ errlHndl_t eepromWrite ( TARGETING::Target * i_target,
     do
     {
         TRACSCOMP( g_trac_eepromr,
-                   "EEPROM WRITE START : Chip: %02d : Addr %.2X : Len %d : %016llx",
-                   i_i2cInfo.chip, i_i2cInfo.addr, io_buflen, *((uint64_t*)io_buffer) );
+                   "EEPROM WRITE START : Chip: %02d : Offset %.2X : Len %d : %016llx",
+                   i_i2cInfo.chip, i_i2cInfo.offset, io_buflen,
+                   *((uint64_t*)io_buffer) );
 
         err = eepromPrepareAddress( &byteAddr,
                                     byteAddrSize,
@@ -306,50 +323,134 @@ errlHndl_t eepromWrite ( TARGETING::Target * i_target,
             break;
         }
 
-        size_t newBufLen = byteAddrSize + io_buflen;
+
+        // EEPROM devices have write page boundaries, so when necessary
+        // need to split up command into multiple write operations
+
+        // Setup a max-size buffer of byteAddrSize + writePageSize
+        size_t newBufLen = byteAddrSize + i_i2cInfo.writePageSize;
         newBuffer = static_cast<uint8_t*>(malloc( newBufLen ));
         needFree = true;
 
-        // If we have an address to add to the buffer, do it now.
-        // Add the byte address to the buffer
-        memcpy( newBuffer, byteAddr, byteAddrSize );
-
-        // Now add the data the user wanted to write
-        memcpy( &newBuffer[byteAddrSize], io_buffer, io_buflen );
+        // Point a uint8_t ptr at io_buffer for array addressing below
+        uint8_t * l_data_ptr = reinterpret_cast<uint8_t*>(io_buffer);
 
         // Lock for operation sequencing
         mutex_lock( &g_eepromMutex );
+        unlock = true;
 
-        // Do the actual data write
-        err = deviceOp( DeviceFW::WRITE,
-                        i_target,
-                        newBuffer,
-                        newBufLen,
-                        DEVICE_I2C_ADDRESS( i_i2cInfo.port,
-                                            i_i2cInfo.engine,
-                                            i_i2cInfo.devAddr ) );
+        // variables to store different amount of data length
+        size_t loop_data_length = 0;
+        size_t loop_buffer_length = 0;
+        size_t total_bytes_written = 0;
 
+        for ( uint64_t i = 0 ;
+              (i * i_i2cInfo.writePageSize) < io_buflen ;
+              i++)
+        {
+
+            if ( (io_buflen - (i * i_i2cInfo.writePageSize) )
+                 >= i_i2cInfo.writePageSize)
+            {
+                // Data to write >= to writePageSize, so write
+                //  the maximum amount: writePageSize
+                loop_data_length = i_i2cInfo.writePageSize;
+            }
+            else
+            {
+                // Less than writePageSize to write
+                loop_data_length = io_buflen % i_i2cInfo.writePageSize;
+            }
+
+            // Update the offset for each loop
+            l_i2cInfo.offset += i * i_i2cInfo.writePageSize;
+
+            err = eepromPrepareAddress( &byteAddr,
+                                        byteAddrSize,
+                                        l_i2cInfo );
+
+            if (err)
+            {
+                break;
+            }
+
+            // Add the byte address to the buffer
+            memcpy( newBuffer,
+                    byteAddr,
+                    byteAddrSize );
+
+            // Now add the data the user wanted to write
+            memcpy( &newBuffer[byteAddrSize],
+                    &l_data_ptr[i * i_i2cInfo.writePageSize],
+                    loop_data_length);
+
+            // Calculate Total Length
+            loop_buffer_length = loop_data_length + byteAddrSize;
+
+            TRACUCOMP(g_trac_eeprom,"eepromWrite() Loop: %d/%d/0x%x "
+                "loop=%d, l_b_l=%d, l_d_l=%d, offset=0x%x",
+                i_i2cInfo.port, i_i2cInfo.engine,
+                i_i2cInfo.devAddr, i, loop_buffer_length, loop_data_length,
+                l_i2cInfo.offset);
+
+
+            // Do the actual data write
+            err = deviceOp( DeviceFW::WRITE,
+                            i_target,
+                            newBuffer,
+                            loop_buffer_length,
+                            DEVICE_I2C_ADDRESS( i_i2cInfo.port,
+                                                i_i2cInfo.engine,
+                                                i_i2cInfo.devAddr ) );
+
+            if( err )
+            {
+                TRACFCOMP(g_trac_eeprom,
+                    ERR_MRK"eepromWrite(): I2C Write failed on %d/%d/0x%x "
+                    "loop=%d, l_b_l=%d, offset=0x%x",
+                    i_i2cInfo.port, i_i2cInfo.engine,
+                    i_i2cInfo.devAddr, i, loop_buffer_length, l_i2cInfo.offset);
+
+
+                // Can't assume that anything was written if
+                // there was an error, so no update to total_bytes_written
+                // for this loop
+                break;
+            }
+
+            // Update how much data was written
+            total_bytes_written += loop_data_length;
+        }
+
+        // Release mutex lock
         mutex_unlock( &g_eepromMutex );
+        unlock = false;
+
+        // Set how much data was actually written
+        io_buflen = total_bytes_written;
 
         if( err )
         {
-            // Can't assume that anything was written if
-            // there was an error.
-            io_buflen = 0;
+            // Leave do-while loop
             break;
         }
 
-        io_buflen = newBufLen - byteAddrSize;
 
         TRACSCOMP( g_trac_eepromr,
-                   "EEPROM WRITE END   : Chip: %02d : Addr %.2X : Len %d",
-                   i_i2cInfo.chip, i_i2cInfo.addr, io_buflen );
+                   "EEPROM WRITE END   : Chip: %02d : Offset %.2X : Len %d",
+                   i_i2cInfo.chip, i_i2cInfo.offset, io_buflen );
     } while( 0 );
 
     // Free memory
     if( needFree )
     {
         free( newBuffer );
+    }
+
+    // Catch it if we break out early.
+    if( unlock )
+    {
+        mutex_unlock( & g_eepromMutex );
     }
 
     TRACDCOMP( g_trac_eeprom,
@@ -376,7 +477,7 @@ errlHndl_t eepromPrepareAddress ( void * o_buffer,
     do
     {
         // --------------------------------------------------------------------
-        // TODO - eventually there will be different I2C devices and the way
+        // @todo RTC:72715 - support different I2C devices and the way
         // they handle addressing.  A new attribute will need to be added to
         // EEPROM_ADDR_INFOx to indicate the device type so the addressing
         // here can be handled properly.
@@ -389,14 +490,14 @@ errlHndl_t eepromPrepareAddress ( void * o_buffer,
             case TWO_BYTE_ADDR:
                 o_bufSize = 2;
                 memset( o_buffer, 0x0, o_bufSize );
-                *((uint8_t*)o_buffer) = (i_i2cInfo.addr & 0xFF00ull) >> 8;
-                *((uint8_t*)o_buffer+1) = (i_i2cInfo.addr & 0x00FFull);
+                *((uint8_t*)o_buffer) = (i_i2cInfo.offset & 0xFF00ull) >> 8;
+                *((uint8_t*)o_buffer+1) = (i_i2cInfo.offset & 0x00FFull);
                 break;
 
             case ONE_BYTE_ADDR:
                 o_bufSize = 1;
                 memset( o_buffer, 0x0, o_bufSize );
-                *((uint8_t*)o_buffer) = (i_i2cInfo.addr & 0xFFull);
+                *((uint8_t*)o_buffer) = (i_i2cInfo.offset & 0xFFull);
                 break;
 
             default:
@@ -410,14 +511,14 @@ errlHndl_t eepromPrepareAddress ( void * o_buffer,
                  * @severity         ERRL_SEV_UNRECOVERABLE
                  * @moduleid         EEPROM_PREPAREADDRESS
                  * @userdata1        Device Type
-                 * @userdata2        <UNUSED>
+                 * @userdata2        EEPROM chip
                  * @devdesc          The Device type was not recognized as one supported.
                  */
                 err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                                EEPROM_PREPAREADDRESS,
                                                EEPROM_INVALID_DEVICE_TYPE,
                                                i_i2cInfo.deviceType,
-                                               0x0 );
+                                               i_i2cInfo.chip );
 
                 break;
         };
@@ -448,76 +549,191 @@ errlHndl_t eepromReadAttributes ( TARGETING::Target * i_target,
 
     do
     {
-        if( 0 == o_i2cInfo.chip )
+        if( VPD_PRIMARY == o_i2cInfo.chip )
         {
-            // Read Attributes from EEPROM_ADDR_INFO0
-            TARGETING::EepromAddrInfo0 eepromData;
-            if( i_target->tryGetAttr<TARGETING::ATTR_EEPROM_ADDR_INFO0>( eepromData ) )
+            // Read Attributes from EEPROM_VPD_PRIMARY_INFO
+            TARGETING::EepromVpdPrimaryInfo eepromData;
+            if( i_target->tryGetAttr<TARGETING::ATTR_EEPROM_VPD_PRIMARY_INFO>
+                                    ( eepromData ) )
             {
+                o_i2cInfo.chipTypeEnum = VPD_PRIMARY;
                 o_i2cInfo.port = eepromData.port;
                 o_i2cInfo.devAddr = eepromData.devAddr;
                 o_i2cInfo.engine = eepromData.engine;
-                // TODO - eventually read out the slave device type
+                o_i2cInfo.i2cMasterPath = eepromData.i2cMasterPath;
+
+                // @todo RTC:72715 - More attributes to be read
                 o_i2cInfo.deviceType = TWO_BYTE_ADDR;
+                o_i2cInfo.writePageSize = 128;
+
             }
             else
             {
                 TRACFCOMP( g_trac_eeprom,
-                           ERR_MRK"eepromReadAttributes() - ERROR reading attributes for "
-                           "chip %d!",
+                           ERR_MRK"eepromReadAttributes() - ERROR reading "
+                           "attributes for chip %d! (VPD_PRIMARY)",
                            o_i2cInfo.chip );
 
                 /*@
                  * @errortype
-                 * @reasoncode       EEPROM_ADDR_INFO0_NOT_FOUND
+                 * @reasoncode       EEPROM_VPD_PRIMARY_INFO_NOT_FOUND
                  * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE
                  * @moduleid         EEPROM_READATTRIBUTES
-                 * @userdata1        EEPROM chip
-                 * @userdata2        Attribute Enumeration
-                 * @devdesc          ATTR_EEPROM_ADDR_INFO0 Attribute was not found
+                 * @userdata1        HUID of target
+                 * @userdata2[0:31]  EEPROM chip
+                 * @userdata2[32:63] Attribute Enumeration
+                 * @devdesc          ATTR_EEPROM_VPD_PRIMARY_INFO Attribute
+                 *                   was not found
                  */
-                err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                               EEPROM_READATTRIBUTES,
-                                               EEPROM_ADDR_INFO0_NOT_FOUND,
-                                               o_i2cInfo.chip,
-                                               TARGETING::ATTR_EEPROM_ADDR_INFO0 );
+                err = new ERRORLOG::ErrlEntry(
+                                    ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                    EEPROM_READATTRIBUTES,
+                                    EEPROM_VPD_PRIMARY_INFO_NOT_FOUND,
+                                    TARGETING::get_huid(i_target),
+                                    TWO_UINT32_TO_UINT64(
+                                      o_i2cInfo.chip,
+                                      TARGETING::ATTR_EEPROM_VPD_PRIMARY_INFO));
 
                 break;
             }
         }
-        else if( 1 == o_i2cInfo.chip )
+        else if( VPD_BACKUP == o_i2cInfo.chip )
         {
-            // Read Attributes from EEPROM_ADDR_INFO1
-            TARGETING::EepromAddrInfo1 eepromData;
-            if( i_target->tryGetAttr<TARGETING::ATTR_EEPROM_ADDR_INFO1>( eepromData ) )
+            // Read Attributes from EEPROM_VPD_BACKUP_INFO
+            TARGETING::EepromVpdBackupInfo eepromData;
+            if( i_target->tryGetAttr<TARGETING::ATTR_EEPROM_VPD_BACKUP_INFO>
+                                    ( eepromData ) )
             {
+                o_i2cInfo.chipTypeEnum = VPD_BACKUP;
                 o_i2cInfo.port = eepromData.port;
                 o_i2cInfo.devAddr = eepromData.devAddr;
                 o_i2cInfo.engine = eepromData.engine;
-                // TODO - eventually read out the slave device type
+                o_i2cInfo.i2cMasterPath = eepromData.i2cMasterPath;
+
+                // @todo RTC:72715 - More attributes to be read
                 o_i2cInfo.deviceType = TWO_BYTE_ADDR;
+                o_i2cInfo.writePageSize = 128;
             }
             else
             {
                 TRACFCOMP( g_trac_eeprom,
-                           ERR_MRK"eepromReadAttributes() - ERROR reading attributes for "
-                           "chip %d!",
+                           ERR_MRK"eepromReadAttributes() - ERROR reading "
+                           "attributes for chip %d! (VPD_BACKUP)",
                            o_i2cInfo.chip );
 
                 /*@
                  * @errortype
-                 * @reasoncode       EEPROM_ADDR_INFO1_NOT_FOUND
+                 * @reasoncode       EEPROM_VPD_BACKUP_INFO_NOT_FOUND
                  * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE
                  * @moduleid         EEPROM_READATTRIBUTES
-                 * @userdata1        EEPROM Chip
-                 * @userdata2        Attribute Enum
-                 * @devdesc          ATTR_EEPROM_ADDR_INFO0 Attribute was not found
+                 * @userdata1        HUID of target
+                 * @userdata2[0:31]  EEPROM chip
+                 * @userdata2[32:63] Attribute Enumeration
+                 * @devdesc          ATTR_EEPROM_VPD_BACKUP_INFO Attribute
+                 *                   was not found
                  */
-                err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                               EEPROM_READATTRIBUTES,
-                                               EEPROM_ADDR_INFO1_NOT_FOUND,
-                                               o_i2cInfo.chip,
-                                               TARGETING::ATTR_EEPROM_ADDR_INFO1 );
+                err = new ERRORLOG::ErrlEntry(
+                                    ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                    EEPROM_READATTRIBUTES,
+                                    EEPROM_VPD_BACKUP_INFO_NOT_FOUND,
+                                    TARGETING::get_huid(i_target),
+                                    TWO_UINT32_TO_UINT64(
+                                      o_i2cInfo.chip,
+                                      TARGETING::ATTR_EEPROM_VPD_PRIMARY_INFO));
+
+                break;
+            }
+        }
+        else if( SBE_PRIMARY == o_i2cInfo.chip )
+        {
+            // Read Attributes from EEPROM_SBE_PRIMARY_INFO
+            TARGETING::EepromSbePrimaryInfo eepromData;
+            if( i_target->tryGetAttr<TARGETING::ATTR_EEPROM_SBE_PRIMARY_INFO>
+                                    ( eepromData ) )
+            {
+                o_i2cInfo.chipTypeEnum = SBE_PRIMARY;
+                o_i2cInfo.port = eepromData.port;
+                o_i2cInfo.devAddr = eepromData.devAddr;
+                o_i2cInfo.engine = eepromData.engine;
+                o_i2cInfo.i2cMasterPath = eepromData.i2cMasterPath;
+
+                // @todo RTC:72715 - More attributes to be read
+                o_i2cInfo.deviceType = TWO_BYTE_ADDR;
+                o_i2cInfo.writePageSize = 128;
+            }
+            else
+            {
+                TRACFCOMP( g_trac_eeprom,
+                           ERR_MRK"eepromReadAttributes() - ERROR reading "
+                           "attributes for chip %d! (SBE_PRIMARY)",
+                           o_i2cInfo.chip );
+
+                /*@
+                 * @errortype
+                 * @reasoncode       EEPROM_SBE_PRIMARY_INFO_NOT_FOUND
+                 * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE
+                 * @moduleid         EEPROM_READATTRIBUTES
+                 * @userdata1        HUID of target
+                 * @userdata2[0:31]  EEPROM chip
+                 * @userdata2[32:63] Attribute Enumeration
+                 * @devdesc          ATTR_EEPROM_SBE_PRIMARY_INFO Attribute
+                 *                   was not found
+                 */
+                err = new ERRORLOG::ErrlEntry(
+                                    ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                    EEPROM_READATTRIBUTES,
+                                    EEPROM_SBE_PRIMARY_INFO_NOT_FOUND,
+                                    TARGETING::get_huid(i_target),
+                                    TWO_UINT32_TO_UINT64(
+                                      o_i2cInfo.chip,
+                                      TARGETING::ATTR_EEPROM_VPD_PRIMARY_INFO));
+
+                break;
+            }
+        }
+        else if( SBE_BACKUP == o_i2cInfo.chip )
+        {
+            // Read Attributes from EEPROM_SBE_BACKUP_INFO
+            TARGETING::EepromSbeBackupInfo eepromData;
+            if( i_target->tryGetAttr<TARGETING::ATTR_EEPROM_SBE_BACKUP_INFO>
+                                    ( eepromData ) )
+            {
+                o_i2cInfo.chipTypeEnum = SBE_BACKUP;
+                o_i2cInfo.port = eepromData.port;
+                o_i2cInfo.devAddr = eepromData.devAddr;
+                o_i2cInfo.engine = eepromData.engine;
+                o_i2cInfo.i2cMasterPath = eepromData.i2cMasterPath;
+
+                // @todo RTC:72715 - More attributes to be read
+                o_i2cInfo.deviceType = TWO_BYTE_ADDR;
+                o_i2cInfo.writePageSize = 128;
+            }
+            else
+            {
+                TRACFCOMP( g_trac_eeprom,
+                           ERR_MRK"eepromReadAttributes() - ERROR reading "
+                           "attributes for chip %d! (SBE_BACKUP)",
+                           o_i2cInfo.chip );
+
+                /*@
+                 * @errortype
+                 * @reasoncode       EEPROM_SBE_BACKUP_INFO_NOT_FOUND
+                 * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE
+                 * @moduleid         EEPROM_READATTRIBUTES
+                 * @userdata1        HUID of target
+                 * @userdata2[0:31]  EEPROM chip
+                 * @userdata2[32:63] Attribute Enumeration
+                 * @devdesc          ATTR_EEPROM_SBE_BACKUP_INFO Attribute
+                 *                   was not found
+                 */
+                err = new ERRORLOG::ErrlEntry(
+                                    ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                    EEPROM_READATTRIBUTES,
+                                    EEPROM_SBE_BACKUP_INFO_NOT_FOUND,
+                                    TARGETING::get_huid(i_target),
+                                    TWO_UINT32_TO_UINT64(
+                                      o_i2cInfo.chip,
+                                      TARGETING::ATTR_EEPROM_VPD_PRIMARY_INFO));
 
                 break;
             }
@@ -535,14 +751,14 @@ errlHndl_t eepromReadAttributes ( TARGETING::Target * i_target,
              * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE
              * @moduleid         EEPROM_READATTRIBUTES
              * @userdata1        EEPROM Chip
-             * @userdata2        <UNUSED>
+             * @userdata2        HUID of target
              * @devdesc          Invalid EEPROM chip to access
              */
             err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                            EEPROM_READATTRIBUTES,
                                            EEPROM_INVALID_CHIP,
                                            o_i2cInfo.chip,
-                                           0x0 );
+                                           TARGETING::get_huid(i_target) );
 
             break;
         }
@@ -559,6 +775,7 @@ errlHndl_t eepromReadAttributes ( TARGETING::Target * i_target,
 // eepromGetI2CMasterTarget
 // ------------------------------------------------------------------
 errlHndl_t eepromGetI2CMasterTarget ( TARGETING::Target * i_target,
+                                      eeprom_addr_t i_i2cInfo,
                                       TARGETING::Target * &o_target )
 {
     errlHndl_t err = NULL;
@@ -574,14 +791,15 @@ errlHndl_t eepromGetI2CMasterTarget ( TARGETING::Target * i_target,
             TARGETING::TargetService& tS = TARGETING::targetService();
 
             // For DIMMs we need to get the parent that contains the
-            // I2C Master that talks to the DIMM EEPROM.  Read the path
-            // from the attributes
-            TARGETING::EepromAddrInfo0 eepromData;
-            eepromData = i_target->getAttr<TARGETING::ATTR_EEPROM_ADDR_INFO0>();
+            // I2C Master that talks to the DIMM EEPROM
+
+            // The path was read from the attribute via eepromReadAttributes()
+            // and passed to this function in i_i2cInfo
+
 
             // check that the path exists
             bool exists = false;
-            tS.exists( eepromData.i2cMasterPath,
+            tS.exists( i_i2cInfo.i2cMasterPath,
                        exists );
 
             if( !exists )
@@ -595,42 +813,43 @@ errlHndl_t eepromGetI2CMasterTarget ( TARGETING::Target * i_target,
                  * @reasoncode       EEPROM_DIMM_I2C_MASTER_PATH_ERROR
                  * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE
                  * @moduleid         EEPROM_GETI2CMASTERTARGET
-                 * @userdata1        Attribute Enum
-                 * @userdata2        <UNUSED>
+                 * @userdata1        Attribute Chip Type Enum
+                 * @userdata2        HUID of target
                  * @devdesc          DIMM I2C Master Entity path doesn't exist.
                  */
-                err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                               EEPROM_GETI2CMASTERTARGET,
-                                               EEPROM_DIMM_I2C_MASTER_PATH_ERROR,
-                                               TARGETING::ATTR_EEPROM_ADDR_INFO0,
-                                               0x0 );
+                err = new ERRORLOG::ErrlEntry(
+                                    ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                    EEPROM_GETI2CMASTERTARGET,
+                                    EEPROM_DIMM_I2C_MASTER_PATH_ERROR,
+                                    i_i2cInfo.chipTypeEnum,
+                                    TARGETING::get_huid(i_target) );
 
                 break;
             }
 
             // Since it exists, convert to a target
-            o_target = tS.toTarget( eepromData.i2cMasterPath );
+            o_target = tS.toTarget( i_i2cInfo.i2cMasterPath );
 
             if( NULL == o_target )
             {
                 TRACFCOMP( g_trac_eeprom,
-                           ERR_MRK"eepromGetI2CMasterTarget() - Parent Processor target "
-                           "was NULL!" );
+                           ERR_MRK"eepromGetI2CMasterTarget() - I2C Master "
+                                  "Path target was NULL!" );
 
                 /*@
                  * @errortype
                  * @reasoncode       EEPROM_TARGET_NULL
                  * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE
                  * @moduleid         EEPROM_GETI2CMASTERTARGET
-                 * @userdata1        <UNUSED>
-                 * @userdata2        <UNUSED>
-                 * @devdesc          Processor Target is NULL.
+                 * @userdata1        Attribute Chip Type Enum
+                 * @userdata2        HUID of target
+                 * @devdesc          I2C Master Path Target is NULL.
                  */
                 err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                                EEPROM_GETI2CMASTERTARGET,
                                                EEPROM_TARGET_NULL,
-                                               0x0,
-                                               0x0 );
+                                               i_i2cInfo.chipTypeEnum,
+                                               TARGETING::get_huid(i_target) );
 
                 break;
             }
