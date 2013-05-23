@@ -325,7 +325,7 @@ errlHndl_t PnorRP::getSectionInfo( PNOR::SectionId i_section,
         o_info.vaddr = iv_TOC[side][id].virtAddr;
         o_info.size = iv_TOC[side][id].size;
         o_info.eccProtected = (bool)(iv_TOC[side][id].miscFlags &
-                                     FFS_MISC_ECC_PROTECT);
+                                     FFS_INTEG_ECC_PROTECT);
     }
 
     return l_errhdl;
@@ -469,17 +469,9 @@ errlHndl_t PnorRP::readTOC()
             //virtAddr
             //The PNOR data is broken up into 3 blocks of Virtual Addresses, A, B, and Sideless.
             //For Sections found to be sideless, both PNOR sides will map to the same virtual address.
-            if(!(ffsUserData->miscFlags & FFS_MISC_SIDELESS))
-            {
-                iv_TOC[cur_side][secId].virtAddr = nextVAddr[cur_side];
-                nextVAddr[cur_side] += iv_TOC[cur_side][secId].size;
-            }
-            else
-            {
-                //TODO: Map both sides of PNOR to the same VADDR for Sideless (RTC: 34764)
-                iv_TOC[cur_side][secId].virtAddr = nextVAddr[SIDELESS_VADDR_INDEX];
-                nextVAddr[SIDELESS_VADDR_INDEX] += iv_TOC[cur_side][secId].size;
-            }
+            //TODO RTC: 34764, remove VADDR ranges for SIDE B & SIDELESS
+            iv_TOC[cur_side][secId].virtAddr = nextVAddr[cur_side];
+            nextVAddr[cur_side] += iv_TOC[cur_side][secId].size;
 
             //flashAddr
             iv_TOC[cur_side][secId].flashAddr = ((uint64_t)cur_entry->base)*PAGESIZE;
@@ -794,7 +786,7 @@ errlHndl_t PnorRP::computeDeviceAddr( void* i_vaddr,
 
     // pull out the information we need to return from our global copy
     o_chip = iv_TOC[side][id].chip;
-    o_ecc = (bool)(iv_TOC[side][id].miscFlags & FFS_MISC_ECC_PROTECT);
+    o_ecc = (bool)(iv_TOC[side][id].miscFlags & FFS_INTEG_ECC_PROTECT);
     o_offset = l_vaddr - iv_TOC[side][id].virtAddr; //offset into pnor
     o_offset += iv_TOC[side][id].flashAddr;
 

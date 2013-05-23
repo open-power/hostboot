@@ -42,6 +42,14 @@ Layout Description
     <testonly/> Indicates partition is used for internal
                 testing only.  Partition should be skipped 
                  in production environments.
+    <ecc/>  Indicates Partition should be ECC protected
+    <sha512Version/> Indicates Partition uses SHA512 for
+                     version information.
+    <sha512perEC/> Indicates SHA512 is used to indicate
+                   version for each EC-specific image
+                   within the Partition.
+    <preserved/>   Indicates Partition is preserved
+                   across code updates.
 -->
 
 <pnor>

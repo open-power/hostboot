@@ -1,26 +1,25 @@
-/*  IBM_PROLOG_BEGIN_TAG
- *  This is an automatically generated prolog.
- *
- *  $Source: src/usr/pnor/ffs.h $
- *
- *  IBM CONFIDENTIAL
- *
- *  COPYRIGHT International Business Machines Corp. 2012
- *
- *  p1
- *
- *  Object Code Only (OCO) source materials
- *  Licensed Internal Code Source Materials
- *  IBM HostBoot Licensed Internal Code
- *
- *  The source code for this program is not published or other-
- *  wise divested of its trade secrets, irrespective of what has
- *  been deposited with the U.S. Copyright Office.
- *
- *  Origin: 30
- *
- *  IBM_PROLOG_END_TAG
- */
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/usr/pnor/ffs.h $                                          */
+/*                                                                        */
+/* IBM CONFIDENTIAL                                                       */
+/*                                                                        */
+/* COPYRIGHT International Business Machines Corp. 2012,2013              */
+/*                                                                        */
+/* p1                                                                     */
+/*                                                                        */
+/* Object Code Only (OCO) source materials                                */
+/* Licensed Internal Code Source Materials                                */
+/* IBM HostBoot Licensed Internal Code                                    */
+/*                                                                        */
+/* The source code for this program is not published or otherwise         */
+/* divested of its trade secrets, irrespective of what has been           */
+/* deposited with the U.S. Copyright Office.                              */
+/*                                                                        */
+/* Origin: 30                                                             */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
 /*
  * Copyright (c) International Business Machines Corp., 2012
  *
@@ -32,7 +31,12 @@
 #ifndef __FFS_H__
 #define __FFS_H__
 
+/* Pull in the correct header depending on what is being built */
+#if defined(__KERNEL__)
+#include <linux/types.h>
+#else
 #include <stdint.h>
+#endif
 
 /* The version of this partition implementation */
 #define FFS_VERSION_1	1
@@ -71,6 +75,7 @@ enum type {
  * Flag bit definitions
  */
 #define FFS_FLAGS_PROTECTED	0x0001
+#define FFS_FLAGS_U_BOOT_ENV	0x0002
 
 /*
  * Number of user data words
@@ -87,6 +92,7 @@ enum type {
  * @id:		Partition entry ID [1..65536]
  * @type:	Describe type of partition
  * @flags:	Partition attributes (optional)
+ * @actual:	Actual partition size (in bytes)
  * @resvd:	Reserved words for future use
  * @user:	User data (optional)
  * @checksum:	Partition entry checksum (includes all above)
@@ -99,7 +105,8 @@ struct ffs_entry {
 	uint32_t id;
 	uint32_t type;
 	uint32_t flags;
-	uint32_t resvd[5];
+	uint32_t actual;
+	uint32_t resvd[4];
 	struct {
 		uint32_t data[FFS_USER_WORDS];
 	} user;
