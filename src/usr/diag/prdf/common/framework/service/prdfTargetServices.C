@@ -832,7 +832,9 @@ uint32_t getTargetPosition( TARGETING::TargetHandle_t i_target )
                 {
                     uint16_t tmpPos = 0;
                     if ( !i_target->tryGetAttr<ATTR_POSITION>(tmpPos) )
+                    {
                         PRDF_ERR( PRDF_FUNC"Failed to get ATTR_POSITION" );
+                    }
                     else
                         o_pos = (uint32_t)tmpPos;
                     break;
@@ -852,7 +854,9 @@ uint32_t getTargetPosition( TARGETING::TargetHandle_t i_target )
         {
             uint8_t tmpPos = 0;
             if ( !i_target->tryGetAttr<ATTR_CHIP_UNIT>(tmpPos) )
+            {
                 PRDF_ERR( PRDF_FUNC"Failed to get ATTR_CHIP_UNIT" );
+            }
             else
                 o_pos = (uint32_t)tmpPos;
             break;

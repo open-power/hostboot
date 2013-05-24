@@ -267,7 +267,7 @@ class CVPDTest: public CxxTest::TestSuite
 
                 // first figure out how big the keyword is
                 cmds++;
-                size_t theSize = 0;                
+                size_t theSize = 0;
                 err = deviceRead( theTarget,
                                   testData,
                                   theSize,
@@ -328,7 +328,7 @@ class CVPDTest: public CxxTest::TestSuite
                     errlCommit( err,
                                 VPD_COMP_ID );
                     continue;
-                } 
+                }
 
                 // verify the data got written
                 cmds++;
@@ -379,7 +379,7 @@ class CVPDTest: public CxxTest::TestSuite
                                 VPD_COMP_ID );
                     continue;
                 }
-                
+
             } while( 0 );
 
             if( NULL != testData )
@@ -402,7 +402,7 @@ class CVPDTest: public CxxTest::TestSuite
 
             if( cmds == 0 )
             {
-                TS_FAIL(x"testCvpdWrite - No tests ran, something is wrong...");
+                TS_FAIL("testCvpdWrite - No tests ran, something is wrong...");
             }
 
             TRACFCOMP( g_trac_vpd,

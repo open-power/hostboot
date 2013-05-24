@@ -61,6 +61,21 @@ namespace TRACE
 {
     class ComponentDesc; // Forward declaration.
 
+    struct traceCodeInfo
+    {
+        const char* format;
+        trace_hash_val hash;
+    } __attribute__((packed));
+
+    struct traceParseInfo
+    {
+        uint16_t len_string;
+        uint16_t len_file;
+        uint32_t __padding;
+        const char string[512];
+        const char file[256];
+        traceCodeInfo* code;
+    };
 
     /** @brief Buffer type that a component is directed to. */
     enum BUFFER_TYPES
@@ -97,16 +112,14 @@ namespace TRACE
      *  name of this function as is.
      *
      *  @param [in,out] io_td Trace descriptor of buffer to write to.
-     *  @param [in] i_hash Descriptive string hash value
-     *  @param [in] i_fmt Formatting string
+     *  @param [in] i_info Info struct for the hash and format string.
      *  @param [in] i_line Line number trace was done at
      *  @param [in] i_type Type of trace (TRACE_DEBUG, TRACE_FIELD)
      *
      *  @return void
      */
     void trace_adal_write_all(ComponentDesc *io_td,
-                              const trace_hash_val i_hash,
-                              const char * i_fmt,
+                              const traceCodeInfo* i_info,
                               const uint32_t i_line,
                               const uint32_t i_type, ...);
 

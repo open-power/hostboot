@@ -1,25 +1,25 @@
-//  IBM_PROLOG_BEGIN_TAG
-//  This is an automatically generated prolog.
-//
-//  $Source: src/include/assert.h $
-//
-//  IBM CONFIDENTIAL
-//
-//  COPYRIGHT International Business Machines Corp. 2011
-//
-//  p1
-//
-//  Object Code Only (OCO) source materials
-//  Licensed Internal Code Source Materials
-//  IBM HostBoot Licensed Internal Code
-//
-//  The source code for this program is not published or other-
-//  wise divested of its trade secrets, irrespective of what has
-//  been deposited with the U.S. Copyright Office.
-//
-//  Origin: 30
-//
-//  IBM_PROLOG_END
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/include/assert.h $                                        */
+/*                                                                        */
+/* IBM CONFIDENTIAL                                                       */
+/*                                                                        */
+/* COPYRIGHT International Business Machines Corp. 2011,2013              */
+/*                                                                        */
+/* p1                                                                     */
+/*                                                                        */
+/* Object Code Only (OCO) source materials                                */
+/* Licensed Internal Code Source Materials                                */
+/* IBM HostBoot Licensed Internal Code                                    */
+/*                                                                        */
+/* The source code for this program is not published or otherwise         */
+/* divested of its trade secrets, irrespective of what has been           */
+/* deposited with the U.S. Copyright Office.                              */
+/*                                                                        */
+/* Origin: 30                                                             */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
 /** @file assert.h
  *  @brief Define the interfaces for the standard 'assert' macros.
  *
@@ -62,7 +62,7 @@ extern "C"
 enum AssertBehavior
 {
         /** Standard assert, custom trace already done. */
-    ASSERT_TRACE_DONE, 
+    ASSERT_TRACE_DONE,
         /** Standard assert, no custom trace. */
     ASSERT_TRACE_NOTDONE,
         /** Critical / System library assert. */
@@ -80,8 +80,8 @@ enum AssertBehavior
  *
  *  Current Behaviors:
  *      User-space application - A trace is created, either a custom one
- *                               provided by the caller or a common one 
- *                               determined by the trace callback hook, and 
+ *                               provided by the caller or a common one
+ *                               determined by the trace callback hook, and
  *                               the asserting task is ended.
  *
  *      Critical library - A printk is performed, similar in structure to the
@@ -99,24 +99,25 @@ void __assert(AssertBehavior i_assertb, int i_line);
 #define __ASSERT_HAS_TRACE_(_1, _2, ...) _2
 #define __ASSERT_HAS_TRACE(...) __ASSERT_HAS_TRACE_(0, ##__VA_ARGS__, 0)
 
-/** 
- * @brief Macro to do the custom trace if one is provided. 
+/**
+ * @brief Macro to do the custom trace if one is provided.
  *
- * This results in larger code size of the caller to call the trace routines 
+ * This results in larger code size of the caller to call the trace routines
  * but may provide additional debug information.
  *
  * The "code" here will be compiled down to nothing or a single trace call by
  * the optimizer.  Search for "Constant Folding" for compiler background.
  */
-#define __ASSERT_DO_TRACE(expr, ...) { \
-            int __assert_unused_var = 0; \
-            __assert_unused_var += (__ASSERT_HAS_TRACE(__VA_ARGS__) ? \
+#define __ASSERT_DO_TRACE(expr, ...)  \
+        { \
+            if (__ASSERT_HAS_TRACE(__VA_ARGS__)) \
+            { \
                 TRACFCOMP(TRACE::g_assertTraceBuffer, \
-                          "Assertion [ " #expr " ] failed; " __VA_ARGS__),1 \
-                          : 0); \
-            }
+                          "Assertion [ " #expr " ] failed; " __VA_ARGS__); \
+            } \
+        }
 
-/** 
+/**
  * @brief Standard assert macro.
  *
  * Verfies condition, calls custom trace if provided, and calls internal
@@ -183,18 +184,18 @@ void __assert(AssertBehavior i_assertb, int i_line);
 /** @brief  Make an assertion at compile time. If Boolean expression exp
  *  is false, then the compile will stop with an error.  Example usage:
  *            CPPASSERT( 2 == sizeof(compId_t));
- *  which would be used in front of errl flattening code that assumes  
- *  compId_t is 2 bytes in size.  Also with the use of -f short-enums 
- *  compiler switch, one could assert 
+ *  which would be used in front of errl flattening code that assumes
+ *  compId_t is 2 bytes in size.  Also with the use of -f short-enums
+ *  compiler switch, one could assert
  *            CPPASSERT( 1 == sizeof(errlEventType_t));
- *  If the assertion fails, it will be a wakeup call that the errlEventType_t 
+ *  If the assertion fails, it will be a wakeup call that the errlEventType_t
  *  enum has grown larger than a byte in size.  The mechanism to abend the
  *  compile when the expression is false is to cause a typedef of a char array
  *  that is -1 bytes in size.
  *
  *  Similar:  #define CHECK_SIZE(DATA, EXPECTED_SIZE)\
  *       typedef char CHECKSIZEVAR[(EXPECTED_SIZE == sizeof(DATA)) -1]
- * 
+ *
  */
 #define CPPASSERT(exp) typedef char compile_time_assert_failed[2*((exp)!=0)-1]
 

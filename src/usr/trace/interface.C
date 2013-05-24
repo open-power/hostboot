@@ -69,15 +69,15 @@ namespace TRACE
     }
 
     void trace_adal_write_all(ComponentDesc * io_td,
-                              const trace_hash_val i_hash,
-                              const char * i_fmt,
+                              const traceCodeInfo* i_info,
                               const uint32_t i_line,
                               const uint32_t i_type, ...)
     {
         va_list args;
         va_start(args, i_type);
 
-        Singleton<Service>::instance().writeEntry(io_td, i_hash, i_fmt,
+        Singleton<Service>::instance().writeEntry(io_td,
+                                                  i_info->hash, i_info->format,
                                                   i_line, i_type, args);
 
         va_end(args);

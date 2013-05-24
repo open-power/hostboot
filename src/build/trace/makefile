@@ -1,11 +1,11 @@
 # IBM_PROLOG_BEGIN_TAG
 # This is an automatically generated prolog.
 #
-# $Source: src/build/makefile $
+# $Source: src/build/trace/makefile $
 #
 # IBM CONFIDENTIAL
 #
-# COPYRIGHT International Business Machines Corp. 2010,2013
+# COPYRIGHT International Business Machines Corp. 2013
 #
 # p1
 #
@@ -20,8 +20,12 @@
 # Origin: 30
 #
 # IBM_PROLOG_END_TAG
-ROOTPATH = ../..
+ROOTPATH = ../../..
 
-SUBDIRS = linker.d buildpnor.d trace.d
+GEN_PASS_BODY += tracehash
+CLEAN_TARGETS += tracehash
 
-include ${ROOTPATH}/config.mk
+include $(ROOTPATH)/config.mk
+
+tracehash: tracehash.c
+	$(HOST_PREFIX)gcc -std=c99 -O3 -g $< -o $@ -lbfd

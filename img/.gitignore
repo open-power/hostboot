@@ -8,7 +8,7 @@
 *.ruhx
 *.so
 *.syms
-.*.lnkout
+.*.lnkout.bz2
 hbotStringFile
 *.toc
 errlparser

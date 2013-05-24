@@ -1,25 +1,25 @@
-//  IBM_PROLOG_BEGIN_TAG
-//  This is an automatically generated prolog.
-//
-//  $Source: src/build/linker/linker.C $
-//
-//  IBM CONFIDENTIAL
-//
-//  COPYRIGHT International Business Machines Corp. 2011
-//
-//  p1
-//
-//  Object Code Only (OCO) source materials
-//  Licensed Internal Code Source Materials
-//  IBM HostBoot Licensed Internal Code
-//
-//  The source code for this program is not published or other-
-//  wise divested of its trade secrets, irrespective of what has
-//  been deposited with the U.S. Copyright Office.
-//
-//  Origin: 30
-//
-//  IBM_PROLOG_END
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/build/linker/linker.C $                                   */
+/*                                                                        */
+/* IBM CONFIDENTIAL                                                       */
+/*                                                                        */
+/* COPYRIGHT International Business Machines Corp. 2011,2013              */
+/*                                                                        */
+/* p1                                                                     */
+/*                                                                        */
+/* Object Code Only (OCO) source materials                                */
+/* Licensed Internal Code Source Materials                                */
+/* IBM HostBoot Licensed Internal Code                                    */
+/*                                                                        */
+/* The source code for this program is not published or otherwise         */
+/* divested of its trade secrets, irrespective of what has been           */
+/* deposited with the U.S. Copyright Office.                              */
+/*                                                                        */
+/* Origin: 30                                                             */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
 /**
  * @file linker.C   Linker to generate the host boot binary images
  */
@@ -662,7 +662,10 @@ bool Object::read_relocation()
             // Check weak symbol list for duplicate weak symbols.
             if (syms[i]->flags & (BSF_WEAK))
             {
-                if (weak_symbols[syms[i]->name]++)
+                // Need to ignore special trace symbols.
+                if ((string::npos ==
+                        string(syms[i]->name).find("traceData_codeInfo"))
+                    && (weak_symbols[syms[i]->name]++))
                 {
                     weak_symbols_to_check.insert(syms[i]->name);
                 }
@@ -711,6 +714,11 @@ bool Object::read_relocation()
     cout << "Relocs: " << std::dec << locs << endl;
     for (int i = 0; i < locs; i++)
     {
+        if (loc[i]->howto->name == string("R_PPC64_NONE"))
+        {
+            continue;
+        }
+
         Symbol s;
 
         s.name = loc[i]->sym_ptr_ptr[0]->name;

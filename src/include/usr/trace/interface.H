@@ -84,6 +84,17 @@ const uint32_t TRACE_FIELD   = 0;       //Indicates trace is field
 #define __ALL_HASH(printf_string,num) trace_adal_hash(printf_string,num),printf_string
 #endif
 
+#define __TRACE_HASH_STRUCTURES(str) \
+    static TRACE::traceCodeInfo __traceData_codeInfo \
+        __attribute((used)) = \
+            { NULL, 1 }; \
+    static TRACE::traceParseInfo __traceData_parseInfo \
+        __attribute((used)) = \
+            { sizeof(TRACE::traceParseInfo::string), \
+              sizeof(TRACE::traceParseInfo::file), 0, \
+              str, __FILE__, &__traceData_codeInfo }
+
+
 /******************************************************************************/
 // Macros
 /******************************************************************************/
@@ -123,11 +134,14 @@ const uint32_t TRACE_FIELD   = 0;       //Indicates trace is field
 
 /* a macro w/o the param number suffix. number is calculated from printf string */
 #define TRACDCOMP(des,printf_string,args...) \
+    { \
+        __TRACE_HASH_STRUCTURES(printf_string); \
         TRACE::trace_adal_write_all((des), \
-                                    __ALL_HASH(printf_string,-1), \
+                                    &__traceData_codeInfo, \
                                     __LINE__, \
                                     TRACE_DEBUG, \
-                                    ##args)
+                                    ##args); \
+    }
 
 
 /**
@@ -145,13 +159,17 @@ const uint32_t TRACE_FIELD   = 0;       //Indicates trace is field
  * @return void
 
 */
-#define TRACDBIN(des,printf_string,address,len)                    \
+#define TRACDBIN(des,printf_string,address,len) \
+    { \
+        __TRACE_HASH_STRUCTURES(printf_string); \
         TRACE::trace_adal_write_bin((des), \
-                                    __ALL_HASH(printf_string,0),      \
-                                    __LINE__,                             \
-                                    address,                              \
-                                    len,                                  \
-                                    TRACE_DEBUG)
+                                    __traceData_codeInfo.hash, \
+                                    __LINE__, \
+                                    address, \
+                                    len, \
+                                    TRACE_DEBUG); \
+    }
+
 #endif /* HOSTBOOT_DEBUG */
 #endif /* TRAC_DEBUG_OUT */
 
@@ -172,11 +190,14 @@ const uint32_t TRACE_FIELD   = 0;       //Indicates trace is field
 
 /* a macro w/o the param number suffix. number is calculated from printf string */
 #define TRACFCOMP(des,printf_string,args...) \
+    { \
+        __TRACE_HASH_STRUCTURES(printf_string); \
         TRACE::trace_adal_write_all((des), \
-                                    __ALL_HASH(printf_string,-1), \
+                                    &__traceData_codeInfo, \
                                     __LINE__, \
                                     TRACE_FIELD, \
-                                    ##args)
+                                    ##args); \
+    }
 
 
 /**
@@ -194,13 +215,15 @@ const uint32_t TRACE_FIELD   = 0;       //Indicates trace is field
  * @return void
 */
 #define TRACFBIN(des,printf_string,address,len) \
+    { \
+        __TRACE_HASH_STRUCTURES(printf_string); \
         TRACE::trace_adal_write_bin((des), \
-                                    __ALL_HASH(printf_string,0),      \
-                                    __LINE__,                             \
-                                    address,                              \
-                                    len,                                  \
-                                    TRACE_FIELD)
-
+                                    __traceData_codeInfo.hash, \
+                                    __LINE__, \
+                                    address, \
+                                    len, \
+                                    TRACE_FIELD); \
+    }
 
 /**
 @fn void TRACSCOMP(des, printf_string, args...)
@@ -223,11 +246,14 @@ tracepp replaces trace_adal_hash() with hash value and reduced format string
 
 /* a macro w/o the param number suffix. number is calculated from printf string */
 #define TRACSCOMP(des,printf_string,args...) \
-     TRACE::trace_adal_write_all((des), \
-                                 __ALL_HASH(printf_string,-1), \
-                                 __LINE__, \
-                                 TRACE_DEBUG, \
-                                 ##args)
+    { \
+        __TRACE_HASH_STRUCTURES(printf_string); \
+        TRACE::trace_adal_write_all((des), \
+                                    &__traceData_codeInfo, \
+                                    __LINE__, \
+                                    TRACE_DEBUG, \
+                                    ##args); \
+    }
 
 
 /**
@@ -368,6 +394,7 @@ class TracInit
     ~TracInit();
 
 };
+
 
 }
 

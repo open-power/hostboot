@@ -49,7 +49,7 @@ namespace Membuf
 #define PLUGIN_UNEXPECTED_ATTN( FUNC ) \
 int32_t FUNC( ExtensibleChip * i_membChip, STEP_CODE_DATA_STRUCT & i_sc ) \
 { \
-    PRDF_ERR( "["FUNC"] Unexpected attention in Hostboot: HUID=0x%08x", \
+    PRDF_ERR( "["#FUNC"] Unexpected attention in Hostboot: HUID=0x%08x", \
               i_membChip->GetId() ); \
     CalloutUtil::defaultError( i_sc ); \
     return SUCCESS; \

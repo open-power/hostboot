@@ -31,6 +31,7 @@ IMAGES += $(addsuffix .bin, $(_IMGS)) $(addsuffix .elf, $(_IMGS))
 
 IMAGE_PASS_POST += $(addsuffix .list.bz2, $(_IMGS)) $(addsuffix .syms, $(_IMGS))
 CLEAN_TARGETS += $(addsuffix .list.bz2, $(_IMGS)) $(addsuffix .syms, $(_IMGS))
+CLEAN_TARGETS += $(addsuffix .lnkout.bz2, $(addprefix $(IMGDIR)/., $(IMGS)))
 
 define ELF_template
 $$(IMGDIR)/$(1).elf: $$(addprefix $$(OBJDIR)/, $$($(1)_OBJECTS)) \
@@ -51,7 +52,7 @@ $(IMGDIR)/%.bin: $(IMGDIR)/%.elf \
                   --extended=0x40000 $(IMGDIR)/$*_extended.bin \
               $(addprefix $(IMGDIR)/lib, $(addsuffix .so, $($*_EXTENDED_MODULES))) \
               $(addprefix $(IMGDIR)/, $($*_DATA_MODULES)) \
-              | bzip2 -zc > $(IMGDIR)/.$*.lnkout
+              | bzip2 -zc > $(IMGDIR)/.$*.lnkout.bz2
 	$(C1)$(ROOTPATH)/src/build/tools/addimgid $@ $<
 
 $(IMGDIR)/%.list.bz2 $(IMGDIR)/%.syms: $(IMGDIR)/%.bin

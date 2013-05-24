@@ -33,13 +33,18 @@ $(OBJDIR)/%.o : %.C
 	@mkdir -p $(OBJDIR)
 	$(C2) "    CXX        $(notdir $<)"
 	$(C1)$(CXX) -c $(call FLAGS_FILTER, $(CXXFLAGS), $<) $< \
-	            -o $@ $(INCFLAGS) -iquote .
+	            -o $@.trace $(INCFLAGS) -iquote .
+	$(C1)$(TRACE_HASHER) $@
+	@rm $@.trace
 
 # Compiling *.cc files
 $(OBJDIR)/%.o : %.cc
 	@mkdir -p $(OBJDIR)
 	$(C2) "    CXX        $(notdir $<)"
-	$(C1)$(CXX) -c $(CXXFLAGS) $< -o $@ $(INCFLAGS) -iquote .
+	$(C1)$(CXX) -c $(CXXFLAGS) $< -o $@.trace $(INCFLAGS) -iquote .
+	$(C1)$(TRACE_HASHER) $@
+	@rm $@.trace
+
 
 $(OBJDIR)/%.o : %.c
 	@mkdir -p $(OBJDIR)
@@ -48,12 +53,14 @@ $(OBJDIR)/%.o : %.c
 ifndef CC_OVERRIDE
 	$(C2) "    CC         $(notdir $<)"
 	$(C1)$(CC) -c $(call FLAGS_FILTER, $(CFLAGS), $<) $< \
-	           -o $@ $(INCFLAGS) -iquote .
+	           -o $@.trace $(INCFLAGS) -iquote .
 else
 	$(C2) "    CXX        $(notdir $<)"
 	$(C1)$(CXX) -c $(call FLAGS_FILTER, $(CXXFLAGS), $<) $< \
-	            -o $@ $(INCFLAGS) -iquote .
+	            -o $@.trace $(INCFLAGS) -iquote .
 endif
+	$(C1)$(TRACE_HASHER) $@
+	@rm $@.trace
 
 $(OBJDIR)/%.o : %.S
 	@mkdir -p $(OBJDIR)
@@ -63,7 +70,7 @@ $(OBJDIR)/%.o : %.S
 ifdef MODULE
 $(IMGDIR)/lib$(MODULE).so : $(OBJECTS) $(ROOTPATH)/src/module.ld $(MODULE_INIT)
 	$(C2) "    LD         $(notdir $@)"
-	$(C1)$(LD) -shared -z now $(LDFLAGS) \
+	$(C1)$(LD) -shared -z now -x $(LDFLAGS) \
 		   $(OBJECTS) $(MODULE_INIT) \
 	           -T $(ROOTPATH)/src/module.ld -o $@
 endif
