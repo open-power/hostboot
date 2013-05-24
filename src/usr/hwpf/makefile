@@ -231,9 +231,10 @@ $(call GENTARGET, ${IF_CMP_COMPILER_TARGET}) : \
         ${GENDIR}/${IF_CMP_FLEX_TARGET} \
         ${IF_COMPILER_C_FILES} \
         ${IF_COMPILER_H_FILES}
-	g++ ${IF_COMPILER_C_FILES} ${GENDIR}/${IF_CMP_FLEX_TARGET} \
-        ${GENDIR}/${IF_CMP_YACC_C_TARGET} -I ifcompiler -I ${GENDIR} \
-        -I ${ROOTPATH}/src/include/usr/hwpf/hwp -o $@
+	$(CCACHE) $(HOST_PREFIX)g++ -O3 ${IF_COMPILER_C_FILES} \
+	    ${GENDIR}/${IF_CMP_FLEX_TARGET} \
+	    ${GENDIR}/${IF_CMP_YACC_C_TARGET} -I ifcompiler -I ${GENDIR} \
+	    -I ${ROOTPATH}/src/include/usr/hwpf/hwp -o $@
 
 #------------------------------------------------------------------------------
 # The FAPI return code and error info files generated from Error XML files
@@ -265,9 +266,10 @@ $${GENDIR}/$(basename $(notdir $1)).if :\
 	$${GENDIR}/$${IF_CMP_COMPILER_TARGET} \
 	$${GENDIR}/$${FAPI_ATTR_ID_TARGET} \
 	$${HWP_IF_DEFINE_DIR} $1
-	    $$< -init $1 -outdir $$(dir $$@) \
-            -attr $${GENDIR}/$${FAPI_ATTR_ID_TARGET} \
-            -I $${HWP_IF_DEFINE_DIR}
+	    $$(HOST_PREFIX)jail \
+	        $$< -init $1 -outdir $$(dir $$@) \
+                    -attr $${GENDIR}/$${FAPI_ATTR_ID_TARGET} \
+                    -I $${HWP_IF_DEFINE_DIR}
 	@bzip2 $${GENDIR}/$(basename $(notdir $1)).if.list
 
 $${GENDIR}/$(basename $(notdir $1)).if.list.bz2: \

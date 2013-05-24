@@ -98,20 +98,20 @@ ${PRDR_CMP_FLEX_C_PATH}: ${PRDR_CMP_FLEX}
 USERDEFINES = -D__HOSTBOOT_MODULE -O3 -pipe
 
 ${PRDR_CMP_YACC_o_PATH}: ${PRDR_CMP_YACC_C_PATH} ${PRDR_CMP_YACC_H_PATH}
-	$(HOST_PREFIX)g++ -c $(USERDEFINES) $< \
+	$(CCACHE) $(HOST_PREFIX)g++ -c $(USERDEFINES) $< \
 		-I ${PRD_USR_PATH}/common/framework/rule \
 		-I ${PRD_USR_PATH}/common/util -I ${RULEOBJDIR} \
 		-o $@
 
 ${PRDR_CMP_FLEX_o_PATH}: ${PRDR_CMP_FLEX_C_PATH} ${PRDR_CMP_YACC_H_PATH}
-	$(HOST_PREFIX)g++ -c $(USERDEFINES) $< \
+	$(CCACHE) $(HOST_PREFIX)g++ -c $(USERDEFINES) $< \
 		-I ${PRD_USR_PATH}/common/framework/rule \
 		-I ${PRD_USR_PATH}/common/util -I ${RULEOBJDIR} \
 		-o $@
 
 ${PRDR_CMP_o_PATH}: ${PRDR_CMP_C}
 	mkdir -p ${RULEOBJDIR}
-	$(HOST_PREFIX)g++ -c $(USERDEFINES) $< \
+	$(CCACHE) $(HOST_PREFIX)g++ -c $(USERDEFINES) $< \
 		-I ${PRD_USR_PATH}/common/framework/rule \
 		-I ${PRD_USR_PATH}/common \
 		-I ${PRD_USR_PATH}/common/util \

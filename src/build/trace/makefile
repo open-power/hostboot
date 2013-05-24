@@ -28,4 +28,5 @@ CLEAN_TARGETS += tracehash
 include $(ROOTPATH)/config.mk
 
 tracehash: tracehash.c
-	$(HOST_PREFIX)gcc -std=c99 -O3 -g $< -o $@ -lbfd
+	$(C2) "    CC         $(notdir $<)"
+	$(C1)$(CCACHE) $(HOST_PREFIX)gcc -std=c99 -O3 -g $< -o $@ -lbfd

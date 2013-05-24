@@ -30,8 +30,8 @@ HOST_PREFIX ?= x86_64-pc-linux-gnu-
 
 CC_RAW = $(CROSS_PREFIX)gcc -std=c99
 CXX_RAW = $(CROSS_PREFIX)g++
-CC = $(CC_RAW)
-CXX = $(CXX_RAW)
+CC = $(CCACHE) $(CC_RAW)
+CXX = $(CCACHE) $(CXX_RAW)
 
 LD = $(CROSS_PREFIX)ld
 OBJDUMP = $(CROSS_PREFIX)objdump

@@ -28,5 +28,7 @@ CLEAN_TARGETS += linker
 include $(ROOTPATH)/config.mk
 
 linker: linker.C
-	$(HOST_PREFIX)g++ -O3 -g linker.C -o linker -lbfd -liberty -lz
+	$(C2) "    CXX        $(notdir $<)"
+	$(C1)$(CCACHE) $(HOST_PREFIX)g++ -O3 -g linker.C -o linker \
+				         -lbfd -liberty -lz
 
