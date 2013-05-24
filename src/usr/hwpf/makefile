@@ -154,10 +154,30 @@ HWP_IF_DEFINE_DIR = hwp/initfiles
 #------------------------------------------------------------------------------
 
 # Initfile compiler files
-IF_CMP_YACC_C_TARGET = y.tab.c
-IF_CMP_YACC_H_TARGET = y.tab.h
-IF_CMP_FLEX_TARGET = lex.yy.c
+IF_CMP_SUBDIR = hwp_ifcompiler
+
+IF_CMP_YACC_C_TARGET = $(IF_CMP_SUBDIR)/ifcompiler.y.tab.c
+IF_CMP_YACC_H_TARGET = $(IF_CMP_SUBDIR)/ifcompiler.y.tab.h
+IF_CMP_FLEX_TARGET = $(IF_CMP_SUBDIR)/ifcompiler.lex.yy.c
 IF_CMP_COMPILER_TARGET = ifcompiler
+
+IF_COMPILER_C_FILES = ifcompiler/initCompiler.C \
+                      ifcompiler/initRpn.C \
+                      ifcompiler/initScom.C \
+                      ifcompiler/initSymbols.C
+
+IF_COMPILER_H_FILES = ifcompiler/initCompiler.H \
+                      ifcompiler/initRpn.H \
+                      ifcompiler/initScom.H \
+                      ifcompiler/initSymbols.H
+
+IF_COMPILER_O_FILES = $(addprefix $(GENDIR)/$(IF_CMP_SUBDIR)/, \
+			    $(call notdir, $(IF_COMPILER_C_FILES:.C=.host.o)) \
+			    $(call notdir, $(IF_CMP_YACC_C_TARGET:.c=.host.o)) \
+			    $(call notdir, $(IF_CMP_FLEX_TARGET:.c=.host.o)) \
+		      )
+
+CLEAN_TARGETS += $(IF_COMPILER_O_FILES)
 
 # The FAPI files generated from Error XML files
 FAPI_ERROR_TARGETS = fapiHwpReturnCodes.H fapiHwpErrorInfo.H \
@@ -201,40 +221,49 @@ GENFILES = ${IF_CMP_YACC_C_TARGET} \
 GENFILES_PLUGINS = ${PLAT_HWP_ERR_PARSER}
 
 EXTRA_PARTS = $(addprefix ${ROOTPATH}/img/,${HWP_IF_BIN_TARGETS})
+GEN_PASS_PRE += make_ifcompiler_dir
 
 include ${ROOTPATH}/config.mk
 
 #------------------------------------------------------------------------------
 # The Initfile compiler
 #------------------------------------------------------------------------------
+make_ifcompiler_dir:
+	@mkdir -p $(GENDIR)/$(IF_CMP_SUBDIR)
+
 $(call GENTARGET, ${IF_CMP_YACC_C_TARGET} ${IF_CMP_YACC_H_TARGET}) : \
         ifcompiler/initCompiler.y
-	yacc -d -o ${GENDIR}/${IF_CMP_YACC_C_TARGET} $^
+	$(C2) "    YACC       $(notdir $<)"
+	$(C1)yacc -d -o ${GENDIR}/${IF_CMP_YACC_C_TARGET} $^
 
 $(call GENTARGET, ${IF_CMP_FLEX_TARGET}) : \
         ifcompiler/initCompiler.lex
-	flex -o$@ $^
+	$(C2) "    FLEX       $(notdir $<)"
+	$(C1)flex -o$@ $^
 
-IF_COMPILER_C_FILES = ifcompiler/initCompiler.C \
-                      ifcompiler/initRpn.C \
-                      ifcompiler/initScom.C \
-                      ifcompiler/initSymbols.C
+$(GENDIR)/$(IF_CMP_SUBDIR)/%.host.o: ifcompiler/%.C $(IF_COMPILER_H_FILES)
+	$(C2) "    CXX        $(notdir $<)"
+	$(C1)$(CCACHE) $(HOST_PREFIX)g++ -O3 $< -I ifcompiler -I $(GENDIR) \
+			-I $(GENDIR)/$(IF_CMP_SUBDIR) \
+			-I $(ROOTPATH)/src/include/usr/hwpf/hwp -c -o $@
 
-IF_COMPILER_H_FILES = ifcompiler/initCompiler.H \
-                      ifcompiler/initRpn.H \
-                      ifcompiler/initScom.H \
-                      ifcompiler/initSymbols.H
+$(GENDIR)/$(IF_CMP_YACC_C_TARGET:.c=.host.o): \
+    $(GENDIR)/$(IF_CMP_YACC_C_TARGET) $(IF_COMPILER_H_FILES)
+	$(C2) "    CXX        $(notdir $<)"
+	$(C1)$(CCACHE) $(HOST_PREFIX)g++ -O3 $< -I ifcompiler -I $(GENDIR) \
+			-I $(GENDIR)/$(IF_CMP_SUBDIR) \
+			-I $(ROOTPATH)/src/include/usr/hwpf/hwp -c -o $@
 
-$(call GENTARGET, ${IF_CMP_COMPILER_TARGET}) : \
-        ${GENDIR}/${IF_CMP_YACC_C_TARGET} \
-        ${GENDIR}/${IF_CMP_YACC_H_TARGET} \
-        ${GENDIR}/${IF_CMP_FLEX_TARGET} \
-        ${IF_COMPILER_C_FILES} \
-        ${IF_COMPILER_H_FILES}
-	$(CCACHE) $(HOST_PREFIX)g++ -O3 ${IF_COMPILER_C_FILES} \
-	    ${GENDIR}/${IF_CMP_FLEX_TARGET} \
-	    ${GENDIR}/${IF_CMP_YACC_C_TARGET} -I ifcompiler -I ${GENDIR} \
-	    -I ${ROOTPATH}/src/include/usr/hwpf/hwp -o $@
+$(GENDIR)/$(IF_CMP_FLEX_TARGET:.c=.host.o): \
+    $(GENDIR)/$(IF_CMP_FLEX_TARGET) $(IF_COMPILER_H_FILES)
+	$(C2) "    CXX        $(notdir $<)"
+	$(C1)$(CCACHE) $(HOST_PREFIX)g++ -O3 $< -I ifcompiler -I $(GENDIR) \
+			-I $(GENDIR)/$(IF_CMP_SUBDIR) \
+			-I $(ROOTPATH)/src/include/usr/hwpf/hwp -c -o $@
+
+$(call GENTARGET, ${IF_CMP_COMPILER_TARGET}) : $(IF_COMPILER_O_FILES)
+	$(C2) "    CXX        $(notdir $<)"
+	$(C1)$(HOST_PREFIX)g++ -O3 $^ -o $@
 
 #------------------------------------------------------------------------------
 # The FAPI return code and error info files generated from Error XML files
@@ -270,6 +299,7 @@ $${GENDIR}/$(basename $(notdir $1)).if :\
 	        $$< -init $1 -outdir $$(dir $$@) \
                     -attr $${GENDIR}/$${FAPI_ATTR_ID_TARGET} \
                     -I $${HWP_IF_DEFINE_DIR}
+	@rm -f $${GENDIR}/$(basename $(notdir $1)).if.list.bz2
 	@bzip2 $${GENDIR}/$(basename $(notdir $1)).if.list
 
 $${GENDIR}/$(basename $(notdir $1)).if.list.bz2: \
